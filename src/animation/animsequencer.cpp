@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "animation/mdfarchive.h"
 #include "animation/animsequencer.h"
 
@@ -700,19 +701,6 @@ struct sSeq_00314418
     sSeq_00314418* next;            // 0xC8
 };
 
-struct sSeqState_314418
-{
-    int id;             // 0x00
-    float time;         // 0x04
-    int d;              // 0x08
-    float weight;       // 0x0C
-    long e;             // 0x10
-    char pad18[0x8];
-    sVec4_314418 a;     // 0x20
-    sVec4_314418 b;     // 0x30
-    int c;              // 0x40
-    char pad44[0xC];
-};
 
 /**
  * Collects the weighted animation frames of all playing sequences for blending.
@@ -725,7 +713,7 @@ struct sSeqState_314418
  * @return the number of frames written
  */
 // PORT: `long` field is 64-bit (ld/sd).
-extern "C" int cAnimSequencer_getAnimBlendFrames(cAnimSequencer* self, sSeqState_314418* out)
+extern "C" int cAnimSequencer_getAnimBlendFrames(cAnimSequencer* self, tAnimBlendFrame* out)
 {
     int count = 0;
     sSeq_00314418* n = (sSeq_00314418*)self->PlayList;
@@ -735,15 +723,15 @@ extern "C" int cAnimSequencer_getAnimBlendFrames(cAnimSequencer* self, sSeqState
         {
             if (n->tracks[j].flag != 0)
             {
-                sSeqState_314418* blendFrame = &out[count];
-                blendFrame->id = n->tracks[j].id;
-                blendFrame->time = n->tracks[j].time;
-                blendFrame->a = n->a;
-                blendFrame->b = n->b;
-                blendFrame->c = n->c;
-                blendFrame->d = n->d;
-                blendFrame->weight = cAnimSequence_getNetWeight_314418(n, j);
-                blendFrame->e = n->e;
+                tAnimBlendFrame* blendFrame = &out[count];
+                (*(int*)&blendFrame->SourceFrame) = n->tracks[j].id;
+                blendFrame->SourceFrame.Time = n->tracks[j].time;
+                (*(sVec4_314418*)&blendFrame->OrientationOffset) = n->a;
+                (*(sVec4_314418*)&blendFrame->OrientationOffset.Q) = n->b;
+                blendFrame->IsFlipped = n->c;
+                blendFrame->Priority = n->d;
+                blendFrame->Weight = cAnimSequence_getNetWeight_314418(n, j);
+                (*(long*)&blendFrame->Mask) = n->e;
                 count++;
             }
         }
@@ -1035,7 +1023,6 @@ extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" void cAnimSequence_readFromReplayFrame(void* node, void* stream);
 extern const char str_AnimSequence[];
 
-struct sStreamVE_314880 { short delta; short index; void (*fn)(void*, void*, int); };
 
 struct sSeqTrack_314880
 {
@@ -1063,7 +1050,7 @@ struct sSeqNode_314880
 extern "C" void cAnimSequencer_readFromReplayFrame(cAnimSequencer* self, void* stream)
 {
     int n;
-    sStreamVE_314880* vt = *(sStreamVE_314880**)stream;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
     vt[2].fn((char*)stream + vt[2].delta, &n, 4);
     *(int*)self = 0;
     for (int i = 0; i < n; i++)

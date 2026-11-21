@@ -1,4 +1,7 @@
+#include "vtable.h"
 #include "common.h"
+#include "animation/mdfarchive.h"
+#include "world/worldview.h"
 #include "sound/ssxaudio.h"
 #include "main/gameviewman.h"
 #include "main/sectionman.h"
@@ -549,12 +552,6 @@ extern "C" void func_0011BE88(cRider* self, void** list, int n)
 //100%
 INCLUDE_ASM("ai/rider", cRider_isSafeToDelete);
 #ifdef SKIP_ASM
-struct sRiderVE_0011C0E0
-{
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 /**
  * Tells whether the renderer is done with the rider, so that it can be deleted.
@@ -569,7 +566,7 @@ extern "C" int cRider_isSafeToDelete(cRider* self)
     if (self->mSafeRenderTick != -1)
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sRiderVE_0011C0E0* vt = (sRiderVE_0011C0E0*)ps2GraphicsMan->mVtbl;
+        sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)ps2GraphicsMan->mVtbl;
         return self->mSafeRenderTick < vt[114].fn((char*)ps2GraphicsMan + vt[114].delta);
     }
     return 0;
@@ -586,10 +583,6 @@ extern "C" void* cMdfArchive_getModelPart(void* self, const char* name);
 extern "C" int func_0011BBE8(void* self, char** list);
 extern "C" void cAnimModel_addModelPartLOD(void* model, int lod, void* part, int a3);
 
-struct sMdfArchive_11C138
-{
-    int a[4];
-};
 
 /**
  * Adds the rider's outfit model parts from an MDF archive buffer to its animation model.
@@ -603,7 +596,7 @@ struct sMdfArchive_11C138
  */
 extern "C" void cRider_parsePartsFromBuf(cRider* self, int pData)
 {
-    sMdfArchive_11C138 arc;
+    cMdfArchive arc;
     char* list[52];
     cMdfArchive_cMdfArchive(&arc);
     cMdfArchive_attachArchive(&arc, pData);
@@ -663,7 +656,6 @@ INCLUDE_ASM("ai/rider", cRider_loadRider);
 INCLUDE_ASM("ai/rider", cRider_initAlways);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-#include "vtable.h"
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bind the 2-arg form to that symbol.
 void* cBE_getInterface_11D390(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1256,18 +1248,14 @@ extern "C" void* cPathSys_getStartpoint(void*, int, int);
 extern char gPaths[];
 extern "C" float cRider_getStartGateHorizOffset(void* self);
 
-struct sVec4_0011DD98
-{
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // The unit declares cRider_putAt later with its own vector type; bind it by asm label.
-void cRider_putAt_11DD98(void* self, sVec4_0011DD98* a, sVec4_0011DD98* b, int n, float t) __asm__("cRider_putAt");
+void cRider_putAt_11DD98(void* self, t4Vector* a, t4Vector* b, int n, float t) __asm__("cRider_putAt");
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4_0011DD98 vu0Scale_11DD98(const sVec4_0011DD98& v, float s)
+static inline t4Vector vu0Scale_11DD98(const t4Vector& v, float s)
 {
-    sVec4_0011DD98 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1281,7 +1269,7 @@ static inline sVec4_0011DD98 vu0Scale_11DD98(const sVec4_0011DD98& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add-assign).
-static inline void vu0AddEq_11DD98(sVec4_0011DD98& dst, sVec4_0011DD98 b)
+static inline void vu0AddEq_11DD98(t4Vector& dst, t4Vector b)
 {
     __asm__(
         ".set push\n"
@@ -1305,8 +1293,8 @@ static inline void vu0AddEq_11DD98(sVec4_0011DD98& dst, sVec4_0011DD98 b)
 extern "C" void cRider_putAtDropOffBC(cRider* self)
 {
     float* startPoint = (float*)cPathSys_getStartpoint(gPaths, 2, self->mAIIndex);
-    sVec4_0011DD98 dir;
-    sVec4_0011DD98 pos;
+    t4Vector dir;
+    t4Vector pos;
     dir.x = startPoint[5];
     dir.y = startPoint[6];
     dir.z = startPoint[7];
@@ -1331,12 +1319,8 @@ extern "C" void cRiderMetrix_evReset(void* metrix, int flag);
 void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
-struct sVec4_0011DE60
-{
-    float x, y, z, w;
-};
 
-extern "C" void cRider_putAt(void* self, sVec4_0011DE60* a, sVec4_0011DE60* b, int n, float t);
+extern "C" void cRider_putAt(void* self, t4Vector* a, t4Vector* b, int n, float t);
 
 /**
  * Puts the rider on the ground at a path start point, facing the point's direction.
@@ -1352,8 +1336,8 @@ extern "C" void cRider_putAt(void* self, sVec4_0011DE60* a, sVec4_0011DE60* b, i
 extern "C" void cRider_putAtStartpoint(cRider* self, int StartpointID, int StartpointType)
 {
     float* startPoint = (float*)cPathSys_getStartpoint(gPaths, StartpointType, StartpointID);
-    sVec4_0011DE60 pos;
-    sVec4_0011DE60 dir;
+    t4Vector pos;
+    t4Vector dir;
     float px = startPoint[2];
     float py = startPoint[3];
     float pz = startPoint[4];
@@ -1384,8 +1368,6 @@ extern "C" void cWScriptMan_eventReset(void* self);
 extern void* cWScriptMan_TheWScriptMan;
 
 
-struct sVEntryA_0011DF18 { short delta; short index; int (*fn)(void*); };
-struct sVEntryB_0011DF18 { short delta; short index; void (*fn)(void*, int); };
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline t4Vector vu0Scale_11DF18(const t4Vector& v, float s)
@@ -1424,9 +1406,9 @@ extern "C" void cRider_cleanupAfterPutAt(cRider* self, int notify)
     if (notify != 0)
     {
         char* sub = (char*)&self->mVtbl;
-        sVEntryA_0011DF18* vtA = *(sVEntryA_0011DF18**)sub;
+        sVEntry<int(void*)>* vtA = *(sVEntry<int(void*)>**)sub;
         char* obj = *(char**)((char*)SSXApp->Game->ViewMan->PlayerCamera[0] + 0xA0);
-        sVEntryB_0011DF18* vtB = *(sVEntryB_0011DF18**)(obj + 0x14);
+        sVEntry<void(void*, int)>* vtB = *(sVEntry<void(void*, int)>**)(obj + 0x14);
         char* objB = obj + vtB[3].delta;
         vtB[3].fn(objB, vtA[kRiderVt_getAIIndex].fn(sub + vtA[kRiderVt_getAIIndex].delta));
     }
@@ -1624,10 +1606,6 @@ static inline sVec4 Sub_E150(const sVec4& a, const sVec4& b)
     return r;
 }
 
-struct sBox_E150 {
-    sVec4 min;
-    sVec4 max;
-};
 
 static inline void SetMin_E150(float& m, float v)
 {
@@ -1642,14 +1620,14 @@ static inline void SetMax_E150(float& m, float v)
 }
 
 // Grows the box to contain c.
-static inline void Grow_E150(sBox_E150& b, const sVec4& c)
+static inline void Grow_E150(tBoundBox& b, const sVec4& c)
 {
-    SetMin_E150(b.min.x, c.x);
-    SetMin_E150(b.min.y, c.y);
-    SetMin_E150(b.min.z, c.z);
-    SetMax_E150(b.max.x, c.x);
-    SetMax_E150(b.max.y, c.y);
-    SetMax_E150(b.max.z, c.z);
+    SetMin_E150((*(sVec4*)&b.MinPoint).x, c.x);
+    SetMin_E150((*(sVec4*)&b.MinPoint).y, c.y);
+    SetMin_E150((*(sVec4*)&b.MinPoint).z, c.z);
+    SetMax_E150((*(sVec4*)&b.MaxPoint).x, c.x);
+    SetMax_E150((*(sVec4*)&b.MaxPoint).y, c.y);
+    SetMax_E150((*(sVec4*)&b.MaxPoint).z, c.z);
 }
 
 extern "C" void cRider_updateBoundBox_impl(cRider* self, sVec4* pin) __asm__("cRider_updateBoundBox");
@@ -1668,14 +1646,14 @@ extern "C" void cRider_updateBoundBox_impl(cRider* self, sVec4* pin)
     sVec4 front = *(sVec4*)&self->mMatrix.row[1];
     sVec4* basePos = pin ? pin : (sVec4*)&self->mPosition;
     *(sVec4*)&self->mBoundsMin = *(sVec4*)&self->mBoundsMax = *basePos;
-    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Add_E150(Add_E150(Add_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 250.0f)));
-    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Sub_E150(Add_E150(Add_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 50.0f)));
-    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Add_E150(Sub_E150(Add_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 250.0f)));
-    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Sub_E150(Sub_E150(Add_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 50.0f)));
-    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Add_E150(Add_E150(Sub_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 250.0f)));
-    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Sub_E150(Add_E150(Sub_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 50.0f)));
-    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Add_E150(Sub_E150(Sub_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 250.0f)));
-    Grow_E150(*(sBox_E150*)&self->mBoundsMin, Sub_E150(Sub_E150(Sub_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 50.0f)));
+    Grow_E150(*(tBoundBox*)&self->mBoundsMin, Add_E150(Add_E150(Add_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 250.0f)));
+    Grow_E150(*(tBoundBox*)&self->mBoundsMin, Sub_E150(Add_E150(Add_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 50.0f)));
+    Grow_E150(*(tBoundBox*)&self->mBoundsMin, Add_E150(Sub_E150(Add_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 250.0f)));
+    Grow_E150(*(tBoundBox*)&self->mBoundsMin, Sub_E150(Sub_E150(Add_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 50.0f)));
+    Grow_E150(*(tBoundBox*)&self->mBoundsMin, Add_E150(Add_E150(Sub_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 250.0f)));
+    Grow_E150(*(tBoundBox*)&self->mBoundsMin, Sub_E150(Add_E150(Sub_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 50.0f)));
+    Grow_E150(*(tBoundBox*)&self->mBoundsMin, Add_E150(Sub_E150(Sub_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 250.0f)));
+    Grow_E150(*(tBoundBox*)&self->mBoundsMin, Sub_E150(Sub_E150(Sub_E150(*basePos, Scale_E150(front, 150.0f)), Scale_E150(side, 100.0f)), Scale_E150(up, 50.0f)));
     *(sVec4*)&self->mBoundSphere = *basePos;
     self->mBoundSphere.w = 250.0f;
 }
@@ -2552,11 +2530,6 @@ extern "C" void cRider_getControlStateName(cRider* rider) {
 //100%
 INCLUDE_ASM("ai/rider", cRider_getControlCmd);
 #ifdef SKIP_ASM
-struct sVEntry0011FF18 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
 
 /**
  * Fetches the rider's current control command from its rider handler (slot 1 of the handler's vtable at +0xDE8).
@@ -2567,7 +2540,7 @@ struct sVEntry0011FF18 {
 extern "C" void cRider_getControlCmd(cRider* self, void* out)
 {
     char* obj = (char*)self->mRiderHandler;
-    sVEntry0011FF18* vt = *(sVEntry0011FF18**)(obj + 0xDE8);
+    sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(obj + 0xDE8);
     vt[1].fn(obj + vt[1].delta, out);
 }
 #endif
@@ -3199,11 +3172,6 @@ skip:
 //100%
 INCLUDE_ASM("ai/rider", cRider_updateSplit2);
 #ifdef SKIP_ASM
-struct sVEntry00121068 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
 
 extern "C" void cRiderHandler_updateControl(void* obj, void* v);
 
@@ -3217,7 +3185,7 @@ extern "C" void cRider_updateSplit2(cRider* self)
 {
     int buf[4];
     char* obj = (char*)self->mRiderHandler;
-    sVEntry00121068* vt = *(sVEntry00121068**)(obj + 0xDE8);
+    sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(obj + 0xDE8);
     vt[1].fn(obj + vt[1].delta, buf);
     cRiderHandler_updateControl(self->mRiderHandler, buf);
 }
@@ -3499,12 +3467,6 @@ extern "C" int cSectionMan_getBESectionIDFromWorldSectionID(void* self, int a1);
 extern "C" void cRenderStateMan_update(void* obj, float a, float b, float c);
 extern "C" void cPlayerLights_Clear(void* p);
 
-struct sRiderVE_001218D0
-{
-    short delta;
-    short index;
-    void* (*fn)(void*);
-};
 
 /**
  * Updates the rider's ground section and lens FX position, and clears its handler lights.
@@ -3518,7 +3480,7 @@ extern "C" void cRider_updateSplit11(cRider* self)
     if (~self->mGroundPolyId != 0)
         self->mGroundMaterial = cSectionMan_getBESectionIDFromWorldSectionID(SSXApp->Game->SectionMan, (unsigned char)self->mGroundPolyId);
     char* obj = (char*)&self->mVtbl;
-    sRiderVE_001218D0* vt = *(sRiderVE_001218D0**)obj;
+    sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)obj;
     cRenderStateMan_update(vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta), self->mGroundContactPoint.x, self->mGroundContactPoint.y, -99999.0f);
     char* handler = (char*)self->mRiderHandler;
     cPlayerLights_Clear(handler ? handler + 0xD30 : 0);
@@ -4712,7 +4674,6 @@ INCLUDE_ASM("ai/rider", cRider_estimateFinishTick);
 #ifdef SKIP_ASM
 float cRider_getTotalPathDistance(void* self);
 
-struct sVEntry00122D78 { short delta; short index; int (*fn)(void*); };
 
 /**
  * Estimates the race-clock tick at which the rider will finish.
@@ -4727,10 +4688,10 @@ extern "C" int cRider_estimateFinishTick(cRider* self)
     char* sub = (char*)&self->mVtbl;
     int n = SSXApp->Game->AI->EventTimerTick;
     float rate = (cRider_getTotalPathDistance(self) - self->mDistToFinish) / (float)n;
-    sVEntry00122D78* vt = *(sVEntry00122D78**)sub;
+    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
     if (rate < 30.0f - (float)vt[kRiderVt_getAIIndex].fn(sub + vt[kRiderVt_getAIIndex].delta))
     {
-        sVEntry00122D78* vt2 = *(sVEntry00122D78**)sub;
+        sVEntry<int(void*)>* vt2 = *(sVEntry<int(void*)>**)sub;
         rate = 30.0f - (float)vt2[kRiderVt_getAIIndex].fn(sub + vt2[kRiderVt_getAIIndex].delta);
     }
     return n + (int)(self->mDistToFinish / rate);
@@ -5172,7 +5133,7 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
 int GetSSXActorHeader(void* self);
 extern "C" void GetSSXActorFrame(int, void*);
 struct sQuat_001241C0;
-extern "C" void cRider_EulerToQuat(cRider* self, sQuat_001241C0* out, float rx, float ry, float rz);
+extern "C" void cRider_EulerToQuat(cRider* self, tQuaternion* out, float rx, float ry, float rz);
 extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void cRider_updateOrientationImplicit(cRider* self);
 extern "C" void cRiderHandler_resetRiderFX(void* self);
@@ -5338,7 +5299,7 @@ extern "C" void cRider_OnStartObjectUse(cRider* self)
     *(sV_3640*)&self->mPosition = poseVec;
     float ry = self->unk_744;
     float rz = self->unk_740;
-    cRider_EulerToQuat(self, (sQuat_001241C0*)&poseVec, zeroF,
+    cRider_EulerToQuat(self, (tQuaternion*)&poseVec, zeroF,
                   self->unk_AF4 + ry,
                   self->unk_AF0 + rz);
     float rx = self->unk_748;
@@ -5817,10 +5778,6 @@ INCLUDE_ASM("ai/rider", cRider_EulerToQuat);
 #ifdef SKIP_ASM
 extern "C" void fSinCos(float* s, float* c, float angle);
 
-struct sQuat_001241C0
-{
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 /**
  * Builds a quaternion from three Euler angles.
@@ -5833,9 +5790,9 @@ struct sQuat_001241C0
  * @param ry  pitch in radians, about the Y axis
  * @param rz  roll in radians, about the X axis
  */
-extern "C" void cRider_EulerToQuat(cRider* self, sQuat_001241C0* out, float rx, float ry, float rz)
+extern "C" void cRider_EulerToQuat(cRider* self, tQuaternion* out, float rx, float ry, float rz)
 {
-    sQuat_001241C0 quat;
+    tQuaternion quat;
     float sz, cz, sy, cy, sx, cx;
     fSinCos(&sz, &cz, rz * 0.5f);
     fSinCos(&sy, &cy, ry * 0.5f);
@@ -6138,7 +6095,7 @@ extern "C" void cRiderAnimBase_playFromAnimID(void* anim, int id, tAnimID animId
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" void cAnimSequence_setSubAnimTime(void* p, int a1, float t);
 extern "C" void cRiderAnimBase_setupAnimation(void* anim, int a1);
-extern "C" void cRider_EulerToQuat(cRider* self, sQuat_001241C0* out, float rx, float ry, float rz);
+extern "C" void cRider_EulerToQuat(cRider* self, tQuaternion* out, float rx, float ry, float rz);
 extern "C" void cRider_updateAnimation(cRider* self, float value);
 extern "C" void cRider_updateSkeleton(void* self);
 extern "C" int tEventFlags_isSet1(void* self, int a1);
@@ -6450,7 +6407,7 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, sAnimEvent_124788* 
                  MatMulV_124788((char*)&self->mScriptMatrix, Sub_124788(*(sQ_124788*)&self->unk_AE0, oldStart)));
     sQ_124788 delta = Sub_124788(*(sQ_124788*)&self->mPosition, oldPos);
     *(sQ_124788*)&self->mVelocity = delta;
-    cRider_EulerToQuat(self, (sQuat_001241C0*)&delta, self->unk_AF8 - prevAngZ, self->unk_AF4 - prevAngY, self->unk_AF0 - prevAngX);
+    cRider_EulerToQuat(self, (tQuaternion*)&delta, self->unk_AF8 - prevAngZ, self->unk_AF4 - prevAngY, self->unk_AF0 - prevAngX);
     *(sQ_124788*)&self->mRotation = QuatMul_124788(delta, *(sQ_124788*)&self->mRotation);
     cRider_updateOrientationImplicit(self);
     sQ_124788* bone = (sQ_124788*)&self->mAnimModel->bones[self->mBoneBoardRoot].pos;
@@ -6663,11 +6620,6 @@ end:
 //100%
 INCLUDE_ASM("ai/rider", cRider_quitEvent);
 #ifdef SKIP_ASM
-struct sVEntry001253D0 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 extern int cGameModeMan_bGiveUp[];
 
@@ -6689,7 +6641,7 @@ extern "C" void cRider_quitEvent(cRider* self)
     {
         self->mDidNotFinish = 1;
         char* sub = (char*)&self->mVtbl;
-        sVEntry001253D0* vt = *(sVEntry001253D0**)sub;
+        sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
         cGameModeMan_bGiveUp[vt[kRiderVt_getAIIndex].fn(sub + vt[kRiderVt_getAIIndex].delta)] = 1;
     }
 }
@@ -6908,7 +6860,6 @@ extern "C" float cRenderStateMan_WindRotation(int rider);
 extern float cSinCosTable_gSinCosTable[];
 
 
-struct sVEntry_125970 { short delta; short index; void (*fn)(void*, t4Vector*); };
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float Dot_125970(const t4Vector& a, const t4Vector& b)
@@ -6977,7 +6928,7 @@ extern "C" void cRider_updateWind(cRider* self)
         {
             t4Vector imp = Scale_125970(Scale_125970(dir, speedDeficit), 0.015000000596046448f);
             char* obj = (char*)&self->mVtbl;
-            sVEntry_125970* vt = *(sVEntry_125970**)obj;
+            sVEntry<void(void*, t4Vector*)>* vt = *(sVEntry<void(void*, t4Vector*)>**)obj;
             vt[kRiderVt_applyBoost].fn(obj + vt[kRiderVt_applyBoost].delta, &imp);
         }
     }
@@ -7382,7 +7333,6 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getUseDualShock(void* iface, int id);
 extern "C" void func_00125B18(void* p, int a, int b);
 
-struct sVEntry001278E8 { short delta; short index; int (*fn)(void*); };
 
 static inline bool riderInRange_1278E8(int v)
 {
@@ -7403,7 +7353,7 @@ extern "C" void cPlayer_vibrationUpdate(void* self)
         int flag = 0;
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
         char* sub = *(char**)(player + 0x18) + 0x6C0;
-        sVEntry001278E8* vt = *(sVEntry001278E8**)sub;
+        sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
         if (cBENewPlayerInterface_getUseDualShock(iface, vt[7].fn(sub + vt[7].delta)) != 0)
         {
             flag = !riderInRange_1278E8(*(int*)SSXApp->Game->Replay);

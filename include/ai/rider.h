@@ -64,17 +64,33 @@ struct sRiderChannel {
 
 // One per rider in the race, indexed by the *other* rider's mAIIndex (cRider_checkOpponentCollisions: rider-vs-rider contact and shove
 // timing). 6 of them fill cRider 0x000-0x0D8 exactly: a fixed 6-rider table (notes/subsystems/riders-cap.md).
+// It is On Tour's struct tOpponentInfo (0x20: IsValid, IsHuman, XYDist, Theta, CollideTick, OverlapTick, PunchTick,
+// ShouldTaunt, LastTauntTick; its two leading bools are words in retail, so retail is 0x24 with the same order).
+// [Views group A: IsHuman added at 0x4; the other On Tour names are noted per field, not applied.]
 struct sRiderPair {
-    int mValid;         // [X] tested as "active" (cRider_checkOpponentCollisions)
-    char unk_04[0x4];
-    float mDistance;       // [X] distance to that rider, compared < 1000 (cRider_checkForProximityAction)
-    float mAngle;       // [X] bearing to that rider; minus the heading, wrapped to +-pi (cRider_checkForProximityAction)
-    int unk_10;         // a tick (cRider_checkOpponentCollisions)
-    int unk_14;         // a tick (cRider_checkOpponentCollisions)
-    int unk_18;         // a tick (cRider_checkOpponentCollisions)
-    int mAggressive;         // [X] tested nonzero (cRider_checkForProximityAction)
-    int unk_20;         // tick of the last glance, compared against now - 600 (cRider_checkForProximityAction)
+    int mValid;         // [X] tested as "active" (cRider_checkOpponentCollisions); On Tour IsValid
+    int IsHuman;        // 0x04 [O] tOpponentInfo::IsHuman (bool, a word in retail); [U] cAI_RefreshGroupAI fills it with
+                        //      that rider's isHuman(); cComputer_myOpponentIndex tests it with mValid (view
+                        //      sComputer_0010D8F8::b)
+    float mDistance;       // [X] distance to that rider, compared < 1000 (cRider_checkForProximityAction); On Tour XYDist
+    float mAngle;       // [X] bearing to that rider; minus the heading, wrapped to +-pi (cRider_checkForProximityAction); On Tour Theta
+    int unk_10;         // a tick (cRider_checkOpponentCollisions); On Tour CollideTick
+    int unk_14;         // a tick (cRider_checkOpponentCollisions); On Tour OverlapTick
+    int unk_18;         // a tick (cRider_checkOpponentCollisions); On Tour PunchTick
+    int mAggressive;         // [X] tested nonzero (cRider_checkForProximityAction); On Tour ShouldTaunt
+    int unk_20;         // tick of the last glance, compared against now - 600 (cRider_checkForProximityAction); On Tour LastTauntTick
 };
+
+CHECK_OFFSET(sRiderPair, mValid, 0x00);
+CHECK_OFFSET(sRiderPair, IsHuman, 0x04);
+CHECK_OFFSET(sRiderPair, mDistance, 0x08);
+CHECK_OFFSET(sRiderPair, mAngle, 0x0C);
+CHECK_OFFSET(sRiderPair, unk_10, 0x10);
+CHECK_OFFSET(sRiderPair, unk_14, 0x14);
+CHECK_OFFSET(sRiderPair, unk_18, 0x18);
+CHECK_OFFSET(sRiderPair, mAggressive, 0x1C);
+CHECK_OFFSET(sRiderPair, unk_20, 0x20);
+CHECK_SIZE(sRiderPair, 0x24);
 
 struct cTrackPath;
 struct cAIPath;
@@ -134,6 +150,93 @@ struct tCollideInfo {
     t4Vector Reflect;           // 0x20 [O] [U]
     float Vel;                  // 0x30 [O] [U]
 };
+
+// One snow surface's physics and effects settings (On Tour struct tSurfData, 0xB0). [Staged by views group A.]
+// cGroundMotion_getSlipForce (On Tour getSlipForce(const tSurfData* snow, float v, float gforce)) reads SlipFriction at
+// 0x90: four (x, y) points of a piecewise-linear curve (view sHpCfg_13CCF0 / sCurvePt_13CCF0 in
+// src/ai/control/handplantcontrol.cpp). Retail 0x90 is On Tour's 0x90 (On Tour's one bool, IsResetSurface, is padded
+// to a word there too), so the other members are placed at On Tour's offsets, [O] only until a retail use confirms them.
+struct tSurfData {
+    float Gravity;                  // 0x00 [O]
+    float TerminalVelocity;         // 0x04 [O]
+    float Dig;                      // 0x08 [O]
+    float MaxLeanAngle;             // 0x0C [O]
+    float AirHeight;                // 0x10 [O]
+    float PowderDepth1G;            // 0x14 [O]
+    float PowderDepth3G;            // 0x18 [O]
+    float PowderDamping;            // 0x1C [O]
+    float AutoBoostSpeed;           // 0x20 [O]
+    float AutoBoostFactor;          // 0x24 [O]
+    float SlopeFactorHeadMult;      // 0x28 [O]
+    float BackTurnHeadMult;         // 0x2C [O]
+    float TurnKickFlare;            // 0x30 [O]
+    float TurnHeadAdjustRate;       // 0x34 [O]
+    float TurnAdjustRate;           // 0x38 [O]
+    float LandingHardness;          // 0x3C [O]
+    float MaxLandingPenetrationVel; // 0x40 [O]
+    int IsResetSurface;             // 0x44 [O] bool
+    float WakeAlpha;                // 0x48 [O]
+    float WakeSpeed;                // 0x4C [O]
+    int CloudySprayActive;          // 0x50 [O]
+    float CloudySprayMaxHeight;     // 0x54 [O]
+    int ParticleSnowTrailActive;    // 0x58 [O]
+    float SnowBuildupAmount;        // 0x5C [O]
+    int ImpactActive;               // 0x60 [O]
+    int ImpactLarge;                // 0x64 [O]
+    float ImpactMultiplier;         // 0x68 [O]
+    float RockSprayChance;          // 0x6C [O]
+    float SmallChunkySprayChanceScale; // 0x70 [O]
+    float LargeChunkySprayChanceScale; // 0x74 [O]
+    int ChunksUseWakeVelocity;      // 0x78 [O]
+    float MinChunkWakeVelocityMult; // 0x7C [O]
+    float MaxChunkWakeVelocityMult; // 0x80 [O]
+    int HasVeryTightTurnWake;       // 0x84 [O]
+    int GrindingParticles;          // 0x88 [O]
+    int GrindingSparks;             // 0x8C [O]
+    float SlipFriction[4][2];       // 0x90 [O] t2Vector SlipFriction[4] (float[2] each, like fe/heartbeat.h, until a
+                                    //      shared header has t2Vector); [U] cGroundMotion_getSlipForce: [i][0] = the slip
+                                    //      input, [i][1] = the force; below [0] -> [0][1], above [3] -> [3][1], linear
+                                    //      in between
+};
+
+CHECK_OFFSET(tSurfData, Gravity, 0x00);
+CHECK_OFFSET(tSurfData, TerminalVelocity, 0x04);
+CHECK_OFFSET(tSurfData, Dig, 0x08);
+CHECK_OFFSET(tSurfData, MaxLeanAngle, 0x0C);
+CHECK_OFFSET(tSurfData, AirHeight, 0x10);
+CHECK_OFFSET(tSurfData, PowderDepth1G, 0x14);
+CHECK_OFFSET(tSurfData, PowderDepth3G, 0x18);
+CHECK_OFFSET(tSurfData, PowderDamping, 0x1C);
+CHECK_OFFSET(tSurfData, AutoBoostSpeed, 0x20);
+CHECK_OFFSET(tSurfData, AutoBoostFactor, 0x24);
+CHECK_OFFSET(tSurfData, SlopeFactorHeadMult, 0x28);
+CHECK_OFFSET(tSurfData, BackTurnHeadMult, 0x2C);
+CHECK_OFFSET(tSurfData, TurnKickFlare, 0x30);
+CHECK_OFFSET(tSurfData, TurnHeadAdjustRate, 0x34);
+CHECK_OFFSET(tSurfData, TurnAdjustRate, 0x38);
+CHECK_OFFSET(tSurfData, LandingHardness, 0x3C);
+CHECK_OFFSET(tSurfData, MaxLandingPenetrationVel, 0x40);
+CHECK_OFFSET(tSurfData, IsResetSurface, 0x44);
+CHECK_OFFSET(tSurfData, WakeAlpha, 0x48);
+CHECK_OFFSET(tSurfData, WakeSpeed, 0x4C);
+CHECK_OFFSET(tSurfData, CloudySprayActive, 0x50);
+CHECK_OFFSET(tSurfData, CloudySprayMaxHeight, 0x54);
+CHECK_OFFSET(tSurfData, ParticleSnowTrailActive, 0x58);
+CHECK_OFFSET(tSurfData, SnowBuildupAmount, 0x5C);
+CHECK_OFFSET(tSurfData, ImpactActive, 0x60);
+CHECK_OFFSET(tSurfData, ImpactLarge, 0x64);
+CHECK_OFFSET(tSurfData, ImpactMultiplier, 0x68);
+CHECK_OFFSET(tSurfData, RockSprayChance, 0x6C);
+CHECK_OFFSET(tSurfData, SmallChunkySprayChanceScale, 0x70);
+CHECK_OFFSET(tSurfData, LargeChunkySprayChanceScale, 0x74);
+CHECK_OFFSET(tSurfData, ChunksUseWakeVelocity, 0x78);
+CHECK_OFFSET(tSurfData, MinChunkWakeVelocityMult, 0x7C);
+CHECK_OFFSET(tSurfData, MaxChunkWakeVelocityMult, 0x80);
+CHECK_OFFSET(tSurfData, HasVeryTightTurnWake, 0x84);
+CHECK_OFFSET(tSurfData, GrindingParticles, 0x88);
+CHECK_OFFSET(tSurfData, GrindingSparks, 0x8C);
+CHECK_OFFSET(tSurfData, SlipFriction, 0x90);
+CHECK_SIZE(tSurfData, 0xB0);
 
 struct cRider {
     /* 0x000 */ sRiderPair mRelations[6]; // [X] [U] per other rider, by its mAIIndex (cRider_checkOpponentCollisions)

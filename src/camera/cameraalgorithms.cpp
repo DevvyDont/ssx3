@@ -1,4 +1,6 @@
 #include "common.h"
+#include "bx/math3d.h"
+#include "vtable.h"
 #include "camera/trigger/cameratriggerman.h"
 #include "camera/camera.h"
 #include "camera/race/racecontroller.h"
@@ -362,13 +364,7 @@ extern "C" float cSimpleCamera_getPitch(cSimpleCamera* self)
 //100%
 INCLUDE_ASM("camera/cameraalgorithms", cSimpleCamera_updateCamMat);
 #ifdef SKIP_ASM
-struct sV_D928 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-struct sM_D928 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 extern char CamAxisFlip[];
 
@@ -431,7 +427,7 @@ static inline void vu0MulMtx_D928(void* dst, void* a, void* b)
 }
 
 // PORT: PS2-only VU0 inline asm (unit quaternion -> rotation matrix, row 3 = identity).
-static inline void vu0QuatToMtx_D928(void* m, const sV_D928& q)
+static inline void vu0QuatToMtx_D928(void* m, const t4Vector& q)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -474,7 +470,7 @@ static inline void vu0QuatToMtx_D928(void* m, const sV_D928& q)
 }
 
 // PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
-static inline void vu0TransMtx_D928(void* m, const sV_D928& v)
+static inline void vu0TransMtx_D928(void* m, const t4Vector& v)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -503,12 +499,12 @@ extern "C" void cSimpleCamera_updateCamMat_impl(void* self)
 {
     char* view = (char*)self + 0x40;
     vu0CopyMtx_D928(view, CamAxisFlip);
-    sM_D928 rot;
-    vu0QuatToMtx_D928(&rot, *(sV_D928*)((char*)self + 0x30));
+    t4Matrix rot;
+    vu0QuatToMtx_D928(&rot, *(t4Vector*)((char*)self + 0x30));
     vu0MulMtx_D928(view, view, &rot);
-    sV_D928 invTranslation;
-    sV_D928 neg;
-    sV_D928 pos;
+    t4Vector invTranslation;
+    t4Vector neg;
+    t4Vector pos;
     pos.x = *(float*)((char*)self + 0x20);
     pos.y = *(float*)((char*)self + 0x24);
     pos.z = *(float*)((char*)self + 0x28);
@@ -576,11 +572,6 @@ extern "C" void cCameraTriggerMan_initOnRestart(void* self);
 void cCameraTriggerMan_setInGameTriggers(void* self);
 extern "C" void cChaseCameraController_switchCamera_Restart(void* cam);
 
-struct sCamVE_0015DB58 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Resets the cameras after a restart: re-arms the camera triggers and restarts each view's chase camera.
@@ -598,7 +589,7 @@ extern "C" void cCamera_onRestart(void)
     int n = *(int*)riders;
     cChaseCameraController_switchCamera_Restart(*(void**)(*(char**)(riders + 4) + 0xA8));
     char* cam = *(char**)(*(char**)(riders + 4) + 0xA8);
-    sCamVE_0015DB58* snapEntry = &(*(sCamVE_0015DB58**)(cam + 0x14))[4];
+    sVEntry<void(void*)>* snapEntry = &(*(sVEntry<void(void*)>**)(cam + 0x14))[4];
     snapEntry->fn(cam + snapEntry->delta);
     *(int*)(*(char**)(riders + 4) + 0x460) = 0;
     *(int*)(*(char**)(riders + 4) + 0x4A4) = 1;
@@ -606,7 +597,7 @@ extern "C" void cCamera_onRestart(void)
     {
         cChaseCameraController_switchCamera_Restart(*(void**)(*(char**)(riders + 8) + 0xA8));
         char* cam2 = *(char**)(*(char**)(riders + 8) + 0xA8);
-        sCamVE_0015DB58* snapEntry2 = &(*(sCamVE_0015DB58**)(cam2 + 0x14))[4];
+        sVEntry<void(void*)>* snapEntry2 = &(*(sVEntry<void(void*)>**)(cam2 + 0x14))[4];
         snapEntry2->fn(cam2 + snapEntry2->delta);
         *(int*)(*(char**)(riders + 8) + 0x460) = 0;
     }

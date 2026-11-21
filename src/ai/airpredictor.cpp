@@ -1,4 +1,7 @@
 #include "common.h"
+#include "ai/rider.h"
+#include "intersect/worldline.h"
+#include "vtable.h"
 #include "bx/math3d.h"
 #include "ai/airpredictor.h"
 #include "replay/frameptr.h"
@@ -43,29 +46,14 @@ extern "C" void cAirPredictor_reset(cAirPredictor* self)
 INCLUDE_ASM("ai/airpredictor", cAirPredictor_simStep);
 #ifdef SKIP_ASM
 
-struct sHit_3200 {
-    t4Vector pos;          // 0x00
-    t4Vector normal;       // 0x10
-    char pad20[0x4C - 0x20];
-    int surf;                // 0x4C
-    char pad50[4];
-    char* obj;               // 0x54
-    char pad58[0x6C - 0x58];
-    float u;                 // 0x6C
-    float v;                 // 0x70
-    char pad74[0x80 - 0x74];
-};
-struct sRay_3200 {
-    char pad[0xB0];
-};
 
 extern sQuadR t4vect_ZAxis;
 // cAirPredictor_simOneTick is defined later in the unit (with its own vector type).
 float cAirPredictor_simOneTick_3200(void* self, t4Vector* pos, t4Vector* vel, t4Vector* outPos, t4Vector* outVel) __asm__("cAirPredictor_simOneTick");
 // cWorldLine_cWorldLine (intersect/riderspheretree) builds the capsule and returns it.
-extern "C" sRay_3200* cWorldLine_cWorldLine(sRay_3200* ray, t4Vector* a, t4Vector* b, int c, float d);
-extern "C" float cBXNash_terrainIntersect1(void* world, sRay_3200* ray, sHit_3200* hit, int c);
-extern "C" float cBXNash_staticObjectIntersect1(void* world, sRay_3200* ray, sHit_3200* hit, int c);
+extern "C" cWorldLine* cWorldLine_cWorldLine(cWorldLine* ray, t4Vector* a, t4Vector* b, int c, float d);
+extern "C" float cBXNash_terrainIntersect1(void* world, cWorldLine* ray, tIntersectInfo* hit, int c);
+extern "C" float cBXNash_staticObjectIntersect1(void* world, cWorldLine* ray, tIntersectInfo* hit, int c);
 
 // PORT: PS2-only VU0 inline asm (normalize).
 static inline t4Vector vu0Normalize_3200(const t4Vector& v)
@@ -237,8 +225,8 @@ extern "C" void cAirPredictor_simStep(cAirPredictor* vself)
     vu0ScaleEq_3200(ray, 0.019999999552965164f);
     vu0SubEq_3200(segStart, ray);
     vu0AddEq_3200(segEnd, ray);
-    sHit_3200 ti;
-    sRay_3200 w1;
+    tIntersectInfo ti;
+    cWorldLine w1;
     cWorldLine_cWorldLine(&w1, &segEnd, &segStart, 1, 1.0f);
     float hitParam;
     if (self->SimState == 0) {
@@ -246,8 +234,8 @@ extern "C" void cAirPredictor_simStep(cAirPredictor* vself)
     } else {
         hitParam = cBXNash_staticObjectIntersect1(SSXApp->Game->BXNash, &w1, &ti, 0);
     }
-    if (hitParam >= 0.0f && vu0Dot_3200(ray, ti.normal) < 0.0f) {
-        *(&self->GuessLandPosition) = ti.pos;
+    if (hitParam >= 0.0f && vu0Dot_3200(ray, ti.Inorm) < 0.0f) {
+        *(&self->GuessLandPosition) = ti.Ipos;
         self->TotalAirTime = self->TotalAirTime - numSubStep * (hitParam * 0.01666666753590107f);
         *(&self->GuessLandVelocity) = vu0Add_3200(vu0Scale_3200(prevVel, hitParam), vu0Scale_3200(*(&self->CurSimVel), 1.0f - hitParam));
         if (self->SimState == 2) {
@@ -256,14 +244,14 @@ extern "C" void cAirPredictor_simStep(cAirPredictor* vself)
             self->GuessLandSurface = 13;
         } else if (self) { // FAKEMATCH: identical arms, see header
             self->SimState = 1;
-            *(&self->GuessLandNormal) = ti.normal;
-            self->GuessLandSurface = ti.surf;
+            *(&self->GuessLandNormal) = ti.Inorm;
+            self->GuessLandSurface = ti.Stype;
         } else {
             self->SimState = 1;
-            *(&self->GuessLandNormal) = ti.normal;
-            self->GuessLandSurface = ti.surf;
+            *(&self->GuessLandNormal) = ti.Inorm;
+            self->GuessLandSurface = ti.Stype;
         }
-        char* hitObj = ti.obj;
+        char* hitObj = ((char*)ti.Patch);
         if (hitObj != 0 && self->SimState == 1) {
             self->SurfaceFlags = *(short*)(hitObj + 0xA);
             self->GuessLandPatchRID = *(int*)(hitObj + 0x150);
@@ -574,11 +562,6 @@ extern "C" void func_00113A98(void) {
 //100%
 INCLUDE_ASM("ai/airpredictor", cAirPredictor_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry00113AA0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Writes the whole air predictor (0xB0 bytes) into a replay frame: calls @p obj's virtual slot 1 with (self, 176).
@@ -587,7 +570,7 @@ struct sVEntry00113AA0 {
  */
 extern "C" void cAirPredictor_writeToReplayFrame(cAirPredictor* self, cReplayFramePtr* obj)
 {
-    sVEntry00113AA0* vt = *(sVEntry00113AA0**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 176);
 }
 #endif
@@ -595,11 +578,6 @@ extern "C" void cAirPredictor_writeToReplayFrame(cAirPredictor* self, cReplayFra
 //100%
 INCLUDE_ASM("ai/airpredictor", cAirPredictor_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry00113AD8 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Reads the whole air predictor (0xB0 bytes) back from a replay frame: calls @p obj's virtual slot 2 with (self, 176).
@@ -608,7 +586,7 @@ struct sVEntry00113AD8 {
  */
 extern "C" void cAirPredictor_readFromReplayFrame(cAirPredictor* self, cReplayFramePtr* obj)
 {
-    sVEntry00113AD8* vt = *(sVEntry00113AD8**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 176);
 }
 #endif

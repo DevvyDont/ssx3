@@ -1,4 +1,5 @@
 #include "common.h"
+#include "intersect/bxnash.h"
 #include "camera/trigger/cameratriggerman.h"
 #include "ai/rider.h"
 #include "main/game.h"
@@ -743,44 +744,32 @@ struct sVEnt_D320 {
     int (*fn)(void*, ...);
 };
 
-struct sCtx_D320 {
-    void* list;
-    char* rider;
-};
 
-struct sQuad_D320 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sBox_D320 {
-    sQuad_D320 min;
-    sQuad_D320 max;
+    t4Vector min;
+    t4Vector max;
 };
 
-struct sRoot_D320 {
-    int level;
-    int x, y, z;
-    void* node;
-};
 
-static inline void walk_D320(void* node, sCtx_D320* ctx)
+static inline void walk_D320(void* node, CameraCollisionCallback* ctx)
 {
     char* e;
     for (e = *(char**)((char*)node + 0x28); e != 0; e = *(char**)e) {
         if (*(int*)(e + 8) == 4) {
             char* trig = *(char**)(e + 0xC);
-            char* sub = ctx->rider + 0x6C0;
+            char* sub = (char*)&ctx->rider->mVtbl;
             char* bound = *(char**)(trig + 8);
             sVEnt_D320* cvt = *(sVEnt_D320**)sub;
             sVEnt_D320* bvt = *(sVEnt_D320**)(bound + 0x24);
             char* bthis = bound + bvt[7].delta;
             int r = cvt[5].fn(sub + cvt[5].delta);
             if (bvt[7].fn(bthis, r)) {
-                void* f = cActiveTriggerList_find(ctx->list, trig);
+                void* f = cActiveTriggerList_find(((void*)ctx->ActiveTriggerList), trig);
                 if (f) {
                     *(int*)((char*)f + 0xC) = 1;
                 } else {
-                    cActiveTriggerList_add(ctx->list, trig);
+                    cActiveTriggerList_add(((void*)ctx->ActiveTriggerList), trig);
                 }
             }
         }
@@ -795,9 +784,9 @@ static inline void walk_D320(void* node, sCtx_D320* ctx)
     if (*(void**)((char*)node + 0x1C)) descend(*(void**)((char*)node + 0x1C), ctx);
 }
 
-static inline void collect_D320(sRoot_D320* r, char* hits, int k, sCtx_D320* ctx, sBox_D320* box)
+static inline void collect_D320(nash_Octant* r, char* hits, int k, CameraCollisionCallback* ctx, sBox_D320* box)
 {
-    void* node = r->node;
+    void* node = ((void*)r->rootcell);
     char* hit = hits + k;
     int c = nash_CellKey_proximitytest(r, box);
     if (c == 0) {
@@ -807,10 +796,10 @@ static inline void collect_D320(sRoot_D320* r, char* hits, int k, sCtx_D320* ctx
     }
 }
 
-static inline sQuad_D320* getPos_D320(char* sub)
+static inline t4Vector* getPos_D320(char* sub)
 {
     sVEnt_D320* vt = *(sVEnt_D320**)sub;
-    return (sQuad_D320*)vt[5].fn(sub + vt[5].delta);
+    return (t4Vector*)vt[5].fn(sub + vt[5].delta);
 }
 
 static inline int active_D320(char* rider)
@@ -842,35 +831,35 @@ extern "C" void cCameraTriggerMan_checkCollisions(cCameraTriggerMan* self, cRide
     if (active_D320(((char*)rider))) {
         int idx = rider->mViewIndex;
         cActiveTriggerList_clearFlags(&self->ActiveTriggerList[idx]);
-        sCtx_D320 ctx;
-        sRoot_D320* w = (sRoot_D320*)SSXApp->Game->BXNash;
-        ctx.list = (char*)(idx * 4 + (int)self) + 0x14;
-        ctx.rider = ((char*)rider);
+        CameraCollisionCallback ctx;
+        nash_Octant* w = (nash_Octant*)SSXApp->Game->BXNash;
+        (*(void**)&ctx.ActiveTriggerList) = (char*)(idx * 4 + (int)self) + 0x14;
+        (*(char**)&ctx.rider) = ((char*)rider);
         char* sub = (char*)&rider->mVtbl;
-        sQuad_D320* riderPosMin = getPos_D320(sub);
-        sQuad_D320* riderPosMax = getPos_D320(sub);
+        t4Vector* riderPosMin = getPos_D320(sub);
+        t4Vector* riderPosMax = getPos_D320(sub);
         sBox_D320 box;
         box.min = *riderPosMin;
         box.max = *riderPosMax;
         // PORT: eight 1-byte hit flags kept in one 8-byte slot (relies on sizeof(long) == 8).
         long hits;
-        sCtx_D320* pc = &ctx;
-        sRoot_D320* root0 = &w[0];
-        if (w[0].node) collect_D320(root0, (char*)&hits, 0, pc, &box);
-        sRoot_D320* root1 = &w[1];
-        if (w[1].node) collect_D320(root1, (char*)&hits, 1, pc, &box);
-        sRoot_D320* root2 = &w[2];
-        if (w[2].node) collect_D320(root2, (char*)&hits, 2, pc, &box);
-        sRoot_D320* root3 = &w[3];
-        if (w[3].node) collect_D320(root3, (char*)&hits, 3, pc, &box);
-        sRoot_D320* root4 = &w[4];
-        if (w[4].node) collect_D320(root4, (char*)&hits, 4, pc, &box);
-        sRoot_D320* root5 = &w[5];
-        if (w[5].node) collect_D320(root5, (char*)&hits, 5, pc, &box);
-        sRoot_D320* root6 = &w[6];
-        if (w[6].node) collect_D320(root6, (char*)&hits, 6, pc, &box);
-        sRoot_D320* root7 = &w[7];
-        if (w[7].node) collect_D320(root7, (char*)&hits, 7, pc, &box);
+        CameraCollisionCallback* pc = &ctx;
+        nash_Octant* root0 = &w[0];
+        if (((void*)w[0].rootcell)) collect_D320(root0, (char*)&hits, 0, pc, &box);
+        nash_Octant* root1 = &w[1];
+        if (((void*)w[1].rootcell)) collect_D320(root1, (char*)&hits, 1, pc, &box);
+        nash_Octant* root2 = &w[2];
+        if (((void*)w[2].rootcell)) collect_D320(root2, (char*)&hits, 2, pc, &box);
+        nash_Octant* root3 = &w[3];
+        if (((void*)w[3].rootcell)) collect_D320(root3, (char*)&hits, 3, pc, &box);
+        nash_Octant* root4 = &w[4];
+        if (((void*)w[4].rootcell)) collect_D320(root4, (char*)&hits, 4, pc, &box);
+        nash_Octant* root5 = &w[5];
+        if (((void*)w[5].rootcell)) collect_D320(root5, (char*)&hits, 5, pc, &box);
+        nash_Octant* root6 = &w[6];
+        if (((void*)w[6].rootcell)) collect_D320(root6, (char*)&hits, 6, pc, &box);
+        nash_Octant* root7 = &w[7];
+        if (((void*)w[7].rootcell)) collect_D320(root7, (char*)&hits, 7, pc, &box);
 
         int changed;
         int top;

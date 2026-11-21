@@ -22,6 +22,75 @@
 struct cRider;
 struct cHUDFX;
 
+// One step of a hold-bonus table (On Tour struct tHoldBonusDB, 0x8; [O] the globals kBigAirBonusDB, kLongGrabBonusDB,
+// kLongPressBonusDB, kLongPlantBonusDB, kLongRailBonusDB are `const tHoldBonusDB[]` in On Tour, and retail has the same
+// five tables). cRiderMetrix_updateBonusLevelAndCalcPoints (On Tour updateBonusLevelAndCalcPoints(int& curBonusLevel,
+// float curMeasure, const tHoldBonusDB* pBonusDB, eHUDFXID)) reads entry [curBonusLevel] (view sGradeStep_119210).
+// [Staged by views group A.]
+struct tHoldBonusDB {
+    float minTarget;                // 0x0 [O]; [U] a negative value ends the table; reached when the measure is >= it;
+                                    //      shown with the HUD effect
+    float points;                   // 0x4 [O]; [U] the step's points, times mPointsMultiplier, rounded
+};
+
+CHECK_OFFSET(tHoldBonusDB, minTarget, 0x0);
+CHECK_OFFSET(tHoldBonusDB, points, 0x4);
+CHECK_SIZE(tHoldBonusDB, 0x8);
+
+// A trick's name, packed (On Tour struct tTrickNameDef: 0xC bytes of unsigned bit-fields; retail's is 8 bytes, see
+// the header comment). Built by cRiderMetrix_buildTrickName (On Tour buildTrickName(tTrickNameDef& tn, ...)), kept in
+// TrickHistory / tRiderStats::BestTrick. Only the fields cRiderMetrix_checkForMonsterTrick compares are placed
+// (view sTrickBits_11B1A8): it tests them against tMonsterTrick's req* bytes in On Tour's member order, and on a match
+// clears the name and stores the entry's id in monster. Their widths equal On Tour's except orient (On Tour 3 bits).
+// The unnamed bits hold the rest of EA's fields (On Tour: rail, railSpin, takeoff before orient; special (6 bits)
+// before postSpin; uberGrind before grab; toLate (1 bit) between grab and lateGrab; handplant, press, land after
+// lateGrab), not yet placed by a retail use. [Staged by views group A.]
+struct tTrickNameDef {
+    unsigned int : 10;              // w0 bits 0-9: not placed yet
+    unsigned int orient : 2;        // w0 bits 10-11 [O]; [U] checkForMonsterTrick vs tMonsterTrick::reqOrient
+    unsigned int spin : 4;          // w0 bits 12-15 [O]; [U] vs reqSpin
+    unsigned int reps : 3;          // w0 bits 16-18 [O]; [U] vs reqReps
+    unsigned int flip : 3;          // w0 bits 19-21 [O]; [U] vs reqFlip
+    unsigned int : 6;               // w0 bits 22-27: not placed yet (On Tour's special is 6 bits)
+    unsigned int postSpin : 4;      // w0 bits 28-31 [O]; [U] vs reqPostSpin
+    unsigned int : 3;               // w1 bits 0-2: not placed yet
+    unsigned int grab : 7;          // w1 bits 3-9 [O]; [U] vs reqGrab
+    unsigned int : 1;               // w1 bit 10: not placed yet (On Tour's toLate is 1 bit)
+    unsigned int lateGrab : 7;      // w1 bits 11-17 [O]; [U] vs reqLateGrab
+    unsigned int : 9;               // w1 bits 18-26: not placed yet
+    unsigned int monster : 5;       // w1 bits 27-31 [O] (eTrickNameMonster, 5 bits as in On Tour); [U] checkForMonsterTrick
+                                    //      stores the matching entry's id after MEM_fill(tn, 0, 8)
+};
+
+CHECK_SIZE(tTrickNameDef, 0x8);
+
+// A named monster trick (On Tour struct tMonsterTrick, 0x10; [O] the global gMonsterComboTable is tMonsterTrick[48]
+// in On Tour; retail's has 24 entries, the loop bound of cRiderMetrix_checkForMonsterTrick; view sTrickBonus_11B1A8).
+// [Staged by views group A.]
+struct tMonsterTrick {
+    int id;                         // 0x0 [O] eTrickNameMonster; [U] stored into tTrickNameDef::monster on a match
+    int points;                     // 0x4 [O]; [U] checkForMonsterTrick returns it (the bonus)
+    unsigned char reqOrient;        // 0x8 [O]; [U] compared with tTrickNameDef::orient
+    unsigned char reqSpin;          // 0x9 [O]; [U] vs spin
+    unsigned char reqReps;          // 0xA [O]; [U] vs reps
+    unsigned char reqFlip;          // 0xB [O]; [U] vs flip
+    unsigned char reqPostSpin;      // 0xC [O]; [U] vs postSpin
+    unsigned char reqGrab;          // 0xD [O]; [U] vs grab
+    unsigned char reqLateGrab;      // 0xE [O]; [U] vs lateGrab
+    char unk_0F[0x1];               // 0xF padding
+};
+
+CHECK_OFFSET(tMonsterTrick, id, 0x0);
+CHECK_OFFSET(tMonsterTrick, points, 0x4);
+CHECK_OFFSET(tMonsterTrick, reqOrient, 0x8);
+CHECK_OFFSET(tMonsterTrick, reqSpin, 0x9);
+CHECK_OFFSET(tMonsterTrick, reqReps, 0xA);
+CHECK_OFFSET(tMonsterTrick, reqFlip, 0xB);
+CHECK_OFFSET(tMonsterTrick, reqPostSpin, 0xC);
+CHECK_OFFSET(tMonsterTrick, reqGrab, 0xD);
+CHECK_OFFSET(tMonsterTrick, reqLateGrab, 0xE);
+CHECK_SIZE(tMonsterTrick, 0x10);
+
 // A rider's run totals (On Tour tRiderStats, 0xB0 there: BestTrick is 8 bytes here).
 struct tRiderStats {
     int SpinDegs;                    // 0x00 [O]; [U] earnNameAndPoints adds the trick's spin

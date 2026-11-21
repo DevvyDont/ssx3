@@ -68,6 +68,23 @@ CHECK_OFFSET(cCameraTriggerMan, ActiveTriggerList, 0x14);
 CHECK_OFFSET(cCameraTriggerMan, CameraTriggerStack, 0x1C);
 CHECK_SIZE(cCameraTriggerMan, 0x5C);
 
+struct cRider;
+
+// The state cCameraTriggerMan_checkCollisions hands the Nash octree walk (On Tour struct CameraCollisionCallback, 0x8:
+// `cActiveTriggerList& ActiveTriggerList; cRider& rider;`, the callback type of the camera instantiation of
+// nash_privy::QueryHelper::helpX). EA's references are pointers here. [Staged by views group A.]
+// [U] checkCollisions builds it on the stack ({&ActiveTriggerList[view], rider}; view sCtx_D320) and the walk calls
+// cActiveTriggerList_find / _add on the list and the rider's +0x6C0 interface (slot 5, its position) for each
+// type-4 node.
+struct CameraCollisionCallback {
+    cActiveTriggerList* ActiveTriggerList; // 0x0 [O] (cActiveTriggerList&); [U] the walk's find / add list
+    cRider* rider;                  // 0x4 [O] (cRider&); [U] the walk reads its position through the +0x6C0 vtable
+};
+
+CHECK_OFFSET(CameraCollisionCallback, ActiveTriggerList, 0x0);
+CHECK_OFFSET(CameraCollisionCallback, rider, 0x4);
+CHECK_SIZE(CameraCollisionCallback, 0x8);
+
 // The one instance (D_004C5830; built by the static initialiser func_00175A20, destroyed by it with flags 2).
 extern cCameraTriggerMan gCamTriggerMan;
 

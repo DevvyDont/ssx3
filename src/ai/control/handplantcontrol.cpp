@@ -1,4 +1,6 @@
+#include "vtable.h"
 #include "common.h"
+#include "ui/uithing.h"
 #include "animation/animsequencer.h"
 #include "ai/dangerman.h"
 #include "ai/rideranim.h"
@@ -859,11 +861,6 @@ extern "C" int cHandplantMotion_calcExitVel_x(sHP_9548* handplant)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry00139970 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Writes the handplant state (its first 0xA0 bytes, cHandplantMotionState) to a replay frame.
@@ -874,7 +871,7 @@ struct sVEntry00139970 {
  */
 extern "C" void cHandplantMotion_writeToReplayFrame(cHandplantMotion* self, cReplayFramePtr* obj)
 {
-    sVEntry00139970* vt = *(sVEntry00139970**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 160);
 }
 #endif
@@ -882,11 +879,6 @@ extern "C" void cHandplantMotion_writeToReplayFrame(cHandplantMotion* self, cRep
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry001399A8 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Reads the handplant state (its first 0xA0 bytes, cHandplantMotionState) back from a replay frame.
@@ -897,7 +889,7 @@ struct sVEntry001399A8 {
  */
 extern "C" void cHandplantMotion_readFromReplayFrame(cHandplantMotion* self, cReplayFramePtr* obj)
 {
-    sVEntry001399A8* vt = *(sVEntry001399A8**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 160);
 }
 #endif
@@ -1797,11 +1789,6 @@ extern "C" int cAirMotion_checkTerrainCollisions(cAirMotion* self, t4Vector* out
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry0013ACB0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Writes the air-motion state (its first 4 bytes, IsLandVelAlign) to a replay frame.
@@ -1812,7 +1799,7 @@ struct sVEntry0013ACB0 {
  */
 extern "C" void cAirMotion_writeToReplayFrame(cAirMotion* self, cReplayFramePtr* obj)
 {
-    sVEntry0013ACB0* vt = *(sVEntry0013ACB0**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x4);
 }
 #endif
@@ -1820,11 +1807,6 @@ extern "C" void cAirMotion_writeToReplayFrame(cAirMotion* self, cReplayFramePtr*
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry0013ACE8 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Reads the air-motion state (its first 4 bytes, IsLandVelAlign) back from a replay frame.
@@ -1835,7 +1817,7 @@ struct sVEntry0013ACE8 {
  */
 extern "C" void cAirMotion_readFromReplayFrame(cAirMotion* self, cReplayFramePtr* obj)
 {
-    sVEntry0013ACE8* vt = *(sVEntry0013ACE8**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x4);
 }
 #endif
@@ -1982,7 +1964,6 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_step);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
-#include "vtable.h"
 extern "C" int cOverlapList_splineIntersect(void* world, t4Vector* from, void* hit, int flags, float radius);
 extern "C" int cRider_isRailBoardIntersect(void* rider, t4Vector* tgt, t4Vector* dir);
 extern "C" void* cBE_getBE();
@@ -2957,11 +2938,6 @@ extern "C" void cRailslideMotion_loseFocus(cRailslideMotion* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry0013C5E0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Writes the rail-slide state (its first 0x50 bytes, cRailslideMotionState) to a replay frame.
@@ -2972,7 +2948,7 @@ struct sVEntry0013C5E0 {
  */
 extern "C" void cRailslideMotion_writeToReplayFrame(cRailslideMotion* self, cReplayFramePtr* obj)
 {
-    sVEntry0013C5E0* vt = *(sVEntry0013C5E0**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 80);
 }
 #endif
@@ -2980,11 +2956,6 @@ extern "C" void cRailslideMotion_writeToReplayFrame(cRailslideMotion* self, cRep
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry0013C618 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Reads the rail-slide state (its first 0x50 bytes, cRailslideMotionState) back from a replay frame.
@@ -2995,7 +2966,7 @@ struct sVEntry0013C618 {
  */
 extern "C" void cRailslideMotion_readFromReplayFrame(cRailslideMotion* self, cReplayFramePtr* obj)
 {
-    sVEntry0013C618* vt = *(sVEntry0013C618**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 80);
 }
 #endif
@@ -3350,23 +3321,22 @@ static inline float hpLerp_13CCF0(const sCurvePt_13CCF0& a, const sCurvePt_13CCF
     return y0 + (b.y - y0) * x / (b.x - a.x);
 }
 
-struct sHpCfg_13CCF0 { char pad[0x90]; sCurvePt_13CCF0 p[4]; };
 
-static inline float hpCurve_13CCF0(const sHpCfg_13CCF0* c, float x)
+static inline float hpCurve_13CCF0(const tSurfData* c, float x)
 {
-    if (c->p[1].x < x)
+    if (((sCurvePt_13CCF0*)&c->SlipFriction[0][0])[1].x < x)
     {
-        if (c->p[2].x < x)
+        if (((sCurvePt_13CCF0*)&c->SlipFriction[0][0])[2].x < x)
         {
-            if (c->p[3].x < x)
-                return c->p[3].y;
-            return hpLerp_13CCF0(c->p[2], c->p[3], x);
+            if (((sCurvePt_13CCF0*)&c->SlipFriction[0][0])[3].x < x)
+                return ((sCurvePt_13CCF0*)&c->SlipFriction[0][0])[3].y;
+            return hpLerp_13CCF0(((sCurvePt_13CCF0*)&c->SlipFriction[0][0])[2], ((sCurvePt_13CCF0*)&c->SlipFriction[0][0])[3], x);
         }
-        return hpLerp_13CCF0(c->p[1], c->p[2], x);
+        return hpLerp_13CCF0(((sCurvePt_13CCF0*)&c->SlipFriction[0][0])[1], ((sCurvePt_13CCF0*)&c->SlipFriction[0][0])[2], x);
     }
-    if (x < c->p[0].x)
-        return c->p[0].y;
-    return hpLerp_13CCF0(c->p[0], c->p[1], x);
+    if (x < ((sCurvePt_13CCF0*)&c->SlipFriction[0][0])[0].x)
+        return ((sCurvePt_13CCF0*)&c->SlipFriction[0][0])[0].y;
+    return hpLerp_13CCF0(((sCurvePt_13CCF0*)&c->SlipFriction[0][0])[0], ((sCurvePt_13CCF0*)&c->SlipFriction[0][0])[1], x);
 }
 
 static inline float hpClamp_13CCF0(float v, float lo, float hi)
@@ -3404,7 +3374,7 @@ static inline float hpRamp_13CCF0(float v, float lo, float hi)
  * @param forwardVel  the forward velocity relative to the ground (On Tour v)
  * @return the force along mGroundForward (the friction opposes a; the brake drag is always negative)
  */
-extern "C" float cGroundMotion_getSlipForce(cGroundMotion* self, sHpCfg_13CCF0* cfg, float forwardVel)
+extern "C" float cGroundMotion_getSlipForce(cGroundMotion* self, tSurfData* cfg, float forwardVel)
 {
     float one = 1.0f;
     float spd = hpAbs_13CCF0(*(float*)(RIDER + 0x214));
@@ -4905,11 +4875,6 @@ extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry0013F848 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Writes the ground-motion state (its first 0x18 bytes, cGroundMotionState) to a replay frame.
@@ -4920,7 +4885,7 @@ struct sVEntry0013F848 {
  */
 extern "C" void cGroundMotion_writeToReplayFrame(cGroundMotion* self, cReplayFramePtr* obj)
 {
-    sVEntry0013F848* vt = *(sVEntry0013F848**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x18);
 }
 #endif
@@ -4928,11 +4893,6 @@ extern "C" void cGroundMotion_writeToReplayFrame(cGroundMotion* self, cReplayFra
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry0013F880 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Reads the ground-motion state (its first 0x18 bytes, cGroundMotionState) back from a replay frame.
@@ -4943,7 +4903,7 @@ struct sVEntry0013F880 {
  */
 extern "C" void cGroundMotion_readFromReplayFrame(cGroundMotion* self, cReplayFramePtr* obj)
 {
-    sVEntry0013F880* vt = *(sVEntry0013F880**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x18);
 }
 #endif
@@ -8379,28 +8339,15 @@ int cDangerMan_DeleteTrackedDangerElemRecord(void* vself, void* entry)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cDangerMan_CalcAppliedDangerLevel);
 #ifdef SKIP_ASM
-struct sHpVE_41B8 {
-    short delta;
-    short index;
-    float* (*fn)(void*);
-};
 
-struct sHpVec3_41B8 {
-    float x, y, z;
-};
 
-struct sHpGround_41B8 {
-    char pad_0x0[0x14];
-    float height;           // 0x14
-    char pad_0x18[0x8];
-};
 
 // Handplant zone: a sphere (type 2 = disabled).
 struct sHpZone_41B8 {
     float radius;           // 0x0
     int f4;
     int type;               // 0x8
-    sHpVec3_41B8 center;    // 0xC
+    t3Vector center;    // 0xC
     int f18;
 };
 
@@ -8411,7 +8358,7 @@ struct sHpGame_41B8 {
 };
 
 
-extern "C" void cAvalanche_getAvalancheDataByPosition(sHpGround_41B8* out, sHpVec3_41B8* pos);
+extern "C" void cAvalanche_getAvalancheDataByPosition(tAvalanchePositionalData* out, t3Vector* pos);
 
 /**
  * Works out the danger level that applies to rider @p pl: its base level raised by its height band or capped by the
@@ -8435,19 +8382,19 @@ extern "C" int cDangerMan_CalcAppliedDangerLevel(cDangerMan* self, int pl)
         return 0;
     }
     char* riderObj = rider + 0x6C0;
-    sHpVE_41B8* vt = *(sHpVE_41B8**)riderObj;
+    sVEntry<float*(void*)>* vt = *(sVEntry<float*(void*)>**)riderObj;
     float* pos = vt[5].fn(riderObj + vt[5].delta);
     if (self->mNumActiveAvalanche != 0) {
-        sHpGround_41B8 ground;
-        sHpVec3_41B8 probe;
+        tAvalanchePositionalData ground;
+        t3Vector probe;
         probe.x = pos[0];
         probe.y = pos[1];
         probe.z = pos[2];
         cAvalanche_getAvalancheDataByPosition(&ground, &probe);
         int band = 1;
-        if (ground.height < 1200.446f) {
+        if (ground.m_distance < 1200.446f) {
             band = 3;
-        } else if (ground.height < 2999.697f) {
+        } else if (ground.m_distance < 2999.697f) {
             band = 2;
         }
         if (lvl < band) {

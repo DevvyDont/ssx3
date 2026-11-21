@@ -24,6 +24,19 @@
 
 struct cAnimSequencer;
 struct cAnimModel;
+struct cAnimSequence;
+
+// One sequence to expire (On Tour struct tExpireInfo, 0x8: cAnimSequence* seq, cAnimSequencer* seqr).
+// cRiderAnimBase_expireAnimation collects up to 32 on the stack (each sequence whose end event, flag 0x3F, is set, with
+// its sequencer), then hands each pair to vtable slot 3 (view sSeqRef_00312490). [Staged by views group A.]
+struct tExpireInfo {
+    cAnimSequence* seq;             // 0x0 [O]; [U] expireAnimation stores the sequence, passes it as slot 3's 3rd argument
+    cAnimSequencer* seqr;           // 0x4 [O]; [U] expireAnimation stores &Sequencer[i], passes it as slot 3's 2nd argument
+};
+
+CHECK_OFFSET(tExpireInfo, seq, 0x0);
+CHECK_OFFSET(tExpireInfo, seqr, 0x4);
+CHECK_SIZE(tExpireInfo, 0x8);
 
 struct cRiderAnimBase {
     int CurrentAnimID[6];           // 0x000 [O] (cRiderAnimState::CurrentAnimID[6]); [R] reset stores 0x1B6 (no anim)

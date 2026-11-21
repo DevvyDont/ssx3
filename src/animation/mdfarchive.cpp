@@ -1,4 +1,5 @@
 #include "common.h"
+#include "animation/mdfarchive.h"
 #include "animation/gameanimmap.h"
 #include "animation/adfdatasource.h"
 
@@ -20,13 +21,6 @@ struct sMdfPart_00314CB0
     char pad_0x18[0x48];
 };
 
-struct sMdfArchive_00314CB0
-{
-    int f0;
-    int f4;
-    sMdfPart_00314CB0* parts;
-    char* data;
-};
 
 /**
  * Returns a new heap copy of one archive part: its 0x60-byte header followed by the unpacked data.
@@ -38,15 +32,15 @@ struct sMdfArchive_00314CB0
  * @param i  part index in the archive
  * @return the new block (On Tour: tMdfModelHeader*)
  */
-extern "C" void* cMdfArchive_getModelPartByIndex(sMdfArchive_00314CB0* self, int i)
+extern "C" void* cMdfArchive_getModelPartByIndex(cMdfArchive* self, int i)
 {
     char name[0x40];
-    sprintf(name, str_MdfModel_pct_s, &self->parts[i]);
-    char* model = (char*)operator_new_tag(self->parts[i].dataSize + 0x60, name, 0x3000000, 0);
-    MEM_copy(model, &self->parts[i], 0x60);
-    if (self->parts[i].dataSize)
+    sprintf(name, str_MdfModel_pct_s, &((sMdfPart_00314CB0*)self->ModelHeaders)[i]);
+    char* model = (char*)operator_new_tag(((sMdfPart_00314CB0*)self->ModelHeaders)[i].dataSize + 0x60, name, 0x3000000, 0);
+    MEM_copy(model, &((sMdfPart_00314CB0*)self->ModelHeaders)[i], 0x60);
+    if (((sMdfPart_00314CB0*)self->ModelHeaders)[i].dataSize)
     {
-        unpack(self->data + self->parts[i].dataOffset, model + 0x60);
+        unpack(self->Data + ((sMdfPart_00314CB0*)self->ModelHeaders)[i].dataOffset, model + 0x60);
     }
     return model;
 }
@@ -77,11 +71,6 @@ extern "C" int gameanimcmp(int* lhs, int* rhs)
 INCLUDE_ASM("animation/mdfarchive", cGameAnimMap_cGameAnimMap);
 #ifdef SKIP_ASM
 inline void* operator new[](unsigned int, void* p) { return p; }
-// 0x206-entry member array with an empty constructor (only the dead loop setup remains).
-struct sMdfEntry_314D98 {
-    int v;
-    sMdfEntry_314D98() {}
-};
 extern void* cGameAnimMap_TheGameAnimMap;
 
 /**
@@ -94,7 +83,7 @@ extern void* cGameAnimMap_TheGameAnimMap;
  */
 extern "C" void* cGameAnimMap_cGameAnimMap(cGameAnimMap* self)
 {
-    new (((void*)self)) sMdfEntry_314D98[518];
+    new (((void*)self)) tAnimID[518];
     cGameAnimMap_TheGameAnimMap = ((void*)self);
     return ((void*)self);
 }

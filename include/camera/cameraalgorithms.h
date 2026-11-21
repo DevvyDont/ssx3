@@ -57,6 +57,72 @@ CHECK_OFFSET(cPIDFilter, ErrorHistoryFactor, 0x44);
 CHECK_OFFSET(cPIDFilter, DerrivativeFactor, 0x48);
 CHECK_SIZE(cPIDFilter, 0x4C);
 
+// The per-frame chase input of the look-at chase cameras (On Tour struct cChaseSetup, size 0x60; retail 0x70: its four
+// bools are words, 0x58-0x67, and the t4Vector members make it 16-byte aligned). Each chase algorithm's update builds
+// one on the stack and fills it with cLookAtChaseAlgorithm_setupChaseData (On Tour setupChaseData(cChaseSetup&
+// chaseSetup_outArg, ...)), then hands it to setupHandplantBlend / setupHalfPipeCam / updateCamTarget /
+// setupCamDirection / updateFollowDistance (On Tour: const cChaseSetup& setup). [Staged by views group A.]
+// Tags: [O] On Tour's DWARF (member names, order and types); [U] retail cLookAtChaseAlgorithm_setupChaseData and the
+// setup steps (src/camera/camera.cpp: the views sCamInfo_001607E0 / sCamInfo_1728 / sCamInfo, the 0x68-byte
+// sCamInfo_* blobs in src/camera/trigger/cameratriggerfactory.cpp).
+struct cChaseSetup {
+    t4Vector SavedPos;              // 0x00 [O]; [U] setupChaseData stores Position (the algorithm's +0x40)
+    t4Vector TPos;                  // 0x10 [O]; [U] setupChaseData stores the target's position (Target slot 1)
+    t4Vector TVel;                  // 0x20 [O]; [U] setupChaseData stores the smoothed velocity; the updates read its
+                                    //      horizontal direction (sCamInfo_001607E0::dir)
+    t4Vector CameraDirection;       // 0x30 [O]; [U] cLookAtChaseAlgorithm_setupCamDirection writes it back
+    int MotionState;                // 0x40 [O] eMotionState; [U] setupChaseData stores cRider_getMotionState
+    float TargetSpeed;              // 0x44 [O]; [U] setupChaseData stores the length of TVel
+    float HandplantBlendOut;        // 0x48 [O]; [U] cLookAtChaseAlgorithm_setupHandplantBlend stores the blend-out weight
+    float Boost;                    // 0x4C [O]; [U] setupChaseData stores the boost (Target slot 17), copied to Setup_Boost
+    float VisualBoost;              // 0x50 [O]; [U] setupChaseData: (Boost + 1) / 2 when Boost > 0, else 0; copied to
+                                    //      Setup_VisualBoost
+    float Crouch;                   // 0x54 [O]; [U] setupChaseData stores the crouch (Target slot 18)
+    int WipedOut;                   // 0x58 [O] bool (a word in retail); [U] setupChaseData: MotionState == 2 (MS_Wipeout)
+    int Handplanting;               // 0x5C [O] bool; [U] setupChaseData: MotionState == 5 (MS_Handplant); copied to
+                                    //      Setup_IsTargetHandplanting; setupHandplantBlend tests it
+    int Airborne;                   // 0x60 [O] bool; [U] setupChaseData: MotionState == 1 (MS_Air)
+    int RailSliding;                // 0x64 [O] bool; [U] setupChaseData: MotionState == 4 (MS_Railslide)
+    char unk_068[0x8];              // 0x68 padding to the 16-byte alignment (the callers reserve 0x70)
+};
+
+CHECK_OFFSET(cChaseSetup, SavedPos, 0x00);
+CHECK_OFFSET(cChaseSetup, TPos, 0x10);
+CHECK_OFFSET(cChaseSetup, TVel, 0x20);
+CHECK_OFFSET(cChaseSetup, CameraDirection, 0x30);
+CHECK_OFFSET(cChaseSetup, MotionState, 0x40);
+CHECK_OFFSET(cChaseSetup, TargetSpeed, 0x44);
+CHECK_OFFSET(cChaseSetup, HandplantBlendOut, 0x48);
+CHECK_OFFSET(cChaseSetup, Boost, 0x4C);
+CHECK_OFFSET(cChaseSetup, VisualBoost, 0x50);
+CHECK_OFFSET(cChaseSetup, Crouch, 0x54);
+CHECK_OFFSET(cChaseSetup, WipedOut, 0x58);
+CHECK_OFFSET(cChaseSetup, Handplanting, 0x5C);
+CHECK_OFFSET(cChaseSetup, Airborne, 0x60);
+CHECK_OFFSET(cChaseSetup, RailSliding, 0x64);
+CHECK_SIZE(cChaseSetup, 0x70);
+
+// The pitch-blending settings a chase algorithm gives its final phase (On Tour struct cRaceCamFinalPhaseData, 0x14).
+// cLookAtChaseAlgorithm_doRaceCamFinalPhase fills one through vtable slot 7 (getRaceCamFinalPhaseData; On Tour
+// getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* data_outArg)) and, when DoPitchBlending is set, passes the four
+// floats to cLookAtChaseAlgorithm_updatePitchBlending. [Staged by views group A.]
+struct cRaceCamFinalPhaseData {
+    float PitchBlendingMaxAngleUp;      // 0x00 [O]; [U] doRaceCamFinalPhase: updatePitchBlending's 1st float
+    float PitchBlendingMaxAngleDown;    // 0x04 [O]; [U] 2nd float
+    float PitchBlendingSmoothnessUp;    // 0x08 [O]; [U] 3rd float
+    float PitchBlendingSmoothnessDown;  // 0x0C [O]; [U] 4th float
+    int DoPitchBlending;                // 0x10 [O] bool (a word in retail); [U] doRaceCamFinalPhase tests it (lw);
+                                        //      the field-less overrides (cMatrixChaseAlgorithm_getRaceCamFinalPhaseData ...)
+                                        //      store 0 there (sw 0x10)
+};
+
+CHECK_OFFSET(cRaceCamFinalPhaseData, PitchBlendingMaxAngleUp, 0x00);
+CHECK_OFFSET(cRaceCamFinalPhaseData, PitchBlendingMaxAngleDown, 0x04);
+CHECK_OFFSET(cRaceCamFinalPhaseData, PitchBlendingSmoothnessUp, 0x08);
+CHECK_OFFSET(cRaceCamFinalPhaseData, PitchBlendingSmoothnessDown, 0x0C);
+CHECK_OFFSET(cRaceCamFinalPhaseData, DoPitchBlending, 0x10);
+CHECK_SIZE(cRaceCamFinalPhaseData, 0x14);
+
 // cCameraAlgorithm (On Tour: 0x14). Abstract; its defaults are cCameraAlgorithm__cCameraAlgorithm (dtor) .. cCameraAlgorithm_shouldSnapOnUpdate.
 struct cCameraAlgorithm {
     float View;                 // 0x00 [O]; [R] = getDefaultView() (cCameraAlgorithm_getDefaultView) in every ctor

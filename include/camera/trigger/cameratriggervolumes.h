@@ -49,6 +49,31 @@ CHECK_OFFSET(cCTObject, Scale, 0x18);
 CHECK_OFFSET(cCTObject, mVtbl, 0x24);
 CHECK_SIZE(cCTObject, 0x28);
 
+// cCTVolume (retail and On Tour 0x2C): base cCTObject. The abstract trigger volume: a cCTObject plus its shape type.
+// Vtable D_0045C3A0 (slots 6 boundBox and 7 containsPoint __pure_virtual, slot 8 cCTVolume_getBoundaryPointClosestTo).
+// [R] cCTVolume_cCTVolume (uncalled ctor copy): the cCTObject defaults, cCTObject_vtbl then D_0045C3A0; it leaves Type
+// unset. [Staged by views group A.]
+struct cCTVolume {
+    // --- cCTObject (0x28)
+    t3Vector Pos;               // 0x00 [O]; [R] = t3vect_Zero
+    float Heading;              // 0x0C [O]; [R] 0
+    float Pitch;                // 0x10 [O]; [R] 0
+    float Roll;                 // 0x14 [O]; [R] 0
+    t3Vector Scale;             // 0x18 [O]; [R] (1, 1, 1)
+    void** mVtbl;               // 0x24 [R] cCTObject_vtbl, then D_0045C3A0 (cCTVolume_cCTVolume)
+    // --- cCTVolume
+    int Type;                   // 0x28 [O] eCTVolumeType; [R] the subclass ctors store it (ellipse 0, box 1)
+};
+
+CHECK_OFFSET(cCTVolume, Pos, 0x00);
+CHECK_OFFSET(cCTVolume, Heading, 0x0C);
+CHECK_OFFSET(cCTVolume, Pitch, 0x10);
+CHECK_OFFSET(cCTVolume, Roll, 0x14);
+CHECK_OFFSET(cCTVolume, Scale, 0x18);
+CHECK_OFFSET(cCTVolume, mVtbl, 0x24);
+CHECK_OFFSET(cCTVolume, Type, 0x28);
+CHECK_SIZE(cCTVolume, 0x2C);
+
 // cCTVolumeEllipse (retail and On Tour 0x2C): base cCTVolume <- cCTObject. An ellipsoid trigger volume: the unit
 // sphere scaled by Scale, turned by Heading/Roll/Pitch and moved to Pos. No members of its own.
 // [R] get_camvolume case 0: cMemMan_alloc(0x2C, "Camera Sphere Trigger"), the cCTObject defaults,

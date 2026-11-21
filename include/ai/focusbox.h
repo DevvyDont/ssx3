@@ -20,7 +20,16 @@
 #include "layout.h"
 #include "bx/math3d.h"   // t4Vector
 
-struct cFocusBox;          // a focus box; [U] its first 16 bytes are the position cFocusMan_addbox copies (lq)
+// A focus box (On Tour class cFocusBox, 0x10: t4Vector Position): a point around which the world streams instances in.
+// cRider owns one (cRider::mFocusBox, set by cRider_addFocusBox). [Staged by views group A.]
+struct cFocusBox {
+    t4Vector Position;              // 0x0 [O]; [U] cFocusMan_addbox copies it (lq); cRiderHandler_readFromReplayFrame
+                                    //      copies the rider's mPosition into it (view sQuad_00111D98)
+};
+
+CHECK_OFFSET(cFocusBox, Position, 0x0);
+CHECK_SIZE(cFocusBox, 0x10);
+
 struct tInstanceRecord;    // a world instance record; [U] +0x8 flags (0x100 in focus, 0x200 parity), +0x78 section id (byte)
 
 // One focus box slot. [O] struct FocusRecord (size 0x20: Box at 0x0, LastUpdatePos at 0x10).

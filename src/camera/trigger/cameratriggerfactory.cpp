@@ -1,4 +1,7 @@
 #include "common.h"
+#include "world/worldview.h"
+#include "intersect/bxnash.h"
+#include "bx/bxstring.h"
 #include "ai/rider.h"
 #include "camera/cameraalgorithms.h"
 #include "camera/script/scriptcontroller.h"
@@ -621,13 +624,10 @@ extern "C" int get_camspline(void* reader, cCTSplineK2** out)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTVolume_getBoundaryPointClosestTo);
 #ifdef SKIP_ASM
-struct sVec4_171FA8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sBox_171FA8 {
-    sVec4_171FA8 lo;
-    sVec4_171FA8 hi;
+    t4Vector lo;
+    t4Vector hi;
 };
 
 struct sVEbox_171FA8 {
@@ -639,15 +639,15 @@ struct sVEbox_171FA8 {
 struct sVEin_171FA8 {
     short delta;
     short index;
-    int (*fn)(void*, sVec4_171FA8*);
+    int (*fn)(void*, t4Vector*);
 };
 
 extern "C" float logf(float x);
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sVec4_171FA8 Add_171FA8(const sVec4_171FA8& a, const sVec4_171FA8& b)
+static inline t4Vector Add_171FA8(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_171FA8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -660,9 +660,9 @@ static inline sVec4_171FA8 Add_171FA8(const sVec4_171FA8& a, const sVec4_171FA8&
 }
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sVec4_171FA8 Sub_171FA8(const sVec4_171FA8& a, const sVec4_171FA8& b)
+static inline t4Vector Sub_171FA8(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_171FA8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -675,9 +675,9 @@ static inline sVec4_171FA8 Sub_171FA8(const sVec4_171FA8& a, const sVec4_171FA8&
 }
 
 // PORT: PS2-only VU0 inline asm (v * s).
-static inline sVec4_171FA8 Scale_171FA8(const sVec4_171FA8& v, float s)
+static inline t4Vector Scale_171FA8(const t4Vector& v, float s)
 {
-    sVec4_171FA8 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -692,7 +692,7 @@ static inline sVec4_171FA8 Scale_171FA8(const sVec4_171FA8& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float Length_171FA8(const sVec4_171FA8& v)
+static inline float Length_171FA8(const t4Vector& v)
 {
     float r;
     int t;
@@ -718,13 +718,13 @@ static inline sBox_171FA8 GetBox_171FA8(char* o)
     return e->fn(o + e->delta);
 }
 
-static inline int Inside_171FA8(char* o, sVec4_171FA8* p)
+static inline int Inside_171FA8(char* o, t4Vector* p)
 {
     sVEin_171FA8* e = &(*(sVEin_171FA8**)(o + 0x24))[7];
     return e->fn(o + e->delta, p);
 }
 
-static inline sVec4_171FA8 Center_171FA8(const sBox_171FA8& b)
+static inline t4Vector Center_171FA8(const sBox_171FA8& b)
 {
     return Scale_171FA8(Add_171FA8(b.lo, b.hi), 0.5f);
 }
@@ -747,24 +747,24 @@ static inline sVec4_171FA8 Center_171FA8(const sBox_171FA8& b)
  * @param step  the wanted accuracy in cm (On Tour tolerance_cm)
  * @return the boundary point (the last tested point outside the volume), returned by value
  */
-extern "C" sVec4_171FA8 cCTVolume_getBoundaryPointClosestTo(char* obj, sVec4_171FA8* pos, float step)
+extern "C" t4Vector cCTVolume_getBoundaryPointClosestTo(char* obj, t4Vector* pos, float step)
 {
-    sVec4_171FA8 center = Center_171FA8(GetBox_171FA8(obj));
-    sVec4_171FA8 dir = Sub_171FA8(*pos, center);
-    sVec4_171FA8 outsidePos = *pos;
-    sVec4_171FA8 lastInsidePos = center;
+    t4Vector center = Center_171FA8(GetBox_171FA8(obj));
+    t4Vector dir = Sub_171FA8(*pos, center);
+    t4Vector outsidePos = *pos;
+    t4Vector lastInsidePos = center;
     float k = 2.0f;
     sVEin_171FA8* containsEntry;
     while (containsEntry = &(*(sVEin_171FA8**)(obj + 0x24))[7], containsEntry->fn(obj + containsEntry->delta, &outsidePos)) {
         lastInsidePos = outsidePos;
-        sVec4_171FA8 off = Scale_171FA8(dir, k);
+        t4Vector off = Scale_171FA8(dir, k);
         outsidePos = Add_171FA8(center, off);
         k += k;
     }
     float len = Length_171FA8(Sub_171FA8(outsidePos, lastInsidePos));
     int n = (int)logf(len / step) + 1;
     for (int i = 0; i < n; i++) {
-        sVec4_171FA8 testPos = Scale_171FA8(Add_171FA8(outsidePos, lastInsidePos), 0.5f);
+        t4Vector testPos = Scale_171FA8(Add_171FA8(outsidePos, lastInsidePos), 0.5f);
         containsEntry = &(*(sVEin_171FA8**)(obj + 0x24))[7];
         if (containsEntry->fn(obj + containsEntry->delta, &testPos)) {
             lastInsidePos = testPos;
@@ -2728,17 +2728,7 @@ struct sOctNode_4848 {
     char* list;                     // 0x28 trigger entries
 };
 
-struct sCell_4848 {
-    int level;
-    int u;
-    int v;
-    int w;
-};
 
-struct sBox_4848 {
-    float minx, miny, minz, pad0;
-    float maxx, maxy, maxz, pad1;
-};
 
 extern "C" void* cActiveTriggerList_find(void*, void*);
 extern "C" void cActiveTriggerList_add(void*, void*);
@@ -2804,9 +2794,9 @@ static inline void Subtree_4848(sOctNode_4848* node, void* ctx)
  * @param node  the octree cell (On Tour Cell: children[2][2][2], node lists from +0x20)
  * @param cell  the cell's key: level and x, y, z cell coordinates (On Tour CellKey)
  */
-extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, sBox_4848* box, sOctNode_4848* node, sCell_4848* cell)
+extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, tBoundBox* box, sOctNode_4848* node, nash_CellKey* cell)
 {
-    sCell_4848 childCell;
+    nash_CellKey childCell;
     sOctNode_4848* ch;
 
     WalkList_4848(node->list, ctx1);
@@ -2816,52 +2806,52 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, sB
     int bits = (cell->level + 0x7E) << 23;
     float size = *(float*)&bits;
     childCell.level = cell->level - 1;
-    childCell.u = cell->u * 2;
-    childCell.v = cell->v * 2;
-    childCell.w = cell->w * 2;
+    childCell.x = cell->x * 2;
+    childCell.y = cell->y * 2;
+    childCell.z = cell->z * 2;
 
-    float ulo0 = ((float)childCell.u - 0.2f) * size;
-    float uhi0 = ((float)(childCell.u + 1) + 0.2f) * size;
+    float ulo0 = ((float)childCell.x - 0.2f) * size;
+    float uhi0 = ((float)(childCell.x + 1) + 0.2f) * size;
     int fu0 = 0;
-    if (box->minx < uhi0 && ulo0 < box->maxx) fu0 = 1;
-    float ulo1 = ((float)(childCell.u + 1) - 0.2f) * size;
-    float uhi1 = ((float)(childCell.u + 2) + 0.2f) * size;
+    if (box->MinPoint.x < uhi0 && ulo0 < box->MaxPoint.x) fu0 = 1;
+    float ulo1 = ((float)(childCell.x + 1) - 0.2f) * size;
+    float uhi1 = ((float)(childCell.x + 2) + 0.2f) * size;
     int fu1 = 0;
-    if (box->minx < uhi1 && ulo1 < box->maxx) fu1 = 1;
+    if (box->MinPoint.x < uhi1 && ulo1 < box->MaxPoint.x) fu1 = 1;
     if (!fu0 && !fu1) return;
 
-    float vlo0 = ((float)childCell.v - 0.2f) * size;
-    float vhi0 = ((float)(childCell.v + 1) + 0.2f) * size;
+    float vlo0 = ((float)childCell.y - 0.2f) * size;
+    float vhi0 = ((float)(childCell.y + 1) + 0.2f) * size;
     int fv0 = 0;
-    if (box->miny < vhi0 && vlo0 < box->maxy) fv0 = 1;
-    float vlo1 = ((float)(childCell.v + 1) - 0.2f) * size;
-    float vhi1 = ((float)(childCell.v + 2) + 0.2f) * size;
+    if (box->MinPoint.y < vhi0 && vlo0 < box->MaxPoint.y) fv0 = 1;
+    float vlo1 = ((float)(childCell.y + 1) - 0.2f) * size;
+    float vhi1 = ((float)(childCell.y + 2) + 0.2f) * size;
     int fv1 = 0;
-    if (box->miny < vhi1 && vlo1 < box->maxy) fv1 = 1;
+    if (box->MinPoint.y < vhi1 && vlo1 < box->MaxPoint.y) fv1 = 1;
     if (!fv0 && !fv1) return;
 
-    float wlo0 = ((float)childCell.w - 0.2f) * size;
-    float whi0 = ((float)(childCell.w + 1) + 0.2f) * size;
+    float wlo0 = ((float)childCell.z - 0.2f) * size;
+    float whi0 = ((float)(childCell.z + 1) + 0.2f) * size;
     int fw0 = 0;
-    if (box->minz < whi0 && wlo0 < box->maxz) fw0 = 1;
-    float wlo1 = ((float)(childCell.w + 1) - 0.2f) * size;
-    float whi1 = ((float)(childCell.w + 2) + 0.2f) * size;
+    if (box->MinPoint.z < whi0 && wlo0 < box->MaxPoint.z) fw0 = 1;
+    float wlo1 = ((float)(childCell.z + 1) - 0.2f) * size;
+    float whi1 = ((float)(childCell.z + 2) + 0.2f) * size;
     int fw1 = 0;
-    if (box->minz < whi1 && wlo1 < box->maxz) fw1 = 1;
+    if (box->MinPoint.z < whi1 && wlo1 < box->MaxPoint.z) fw1 = 1;
     if (!fw0 && !fw1) return;
 
     int iu0 = 0;
-    if (box->minx < ulo0 && uhi0 < box->maxx) iu0 = 1;
+    if (box->MinPoint.x < ulo0 && uhi0 < box->MaxPoint.x) iu0 = 1;
     int iu1 = 0;
-    if (box->minx < ulo1 && uhi1 < box->maxx) iu1 = 1;
+    if (box->MinPoint.x < ulo1 && uhi1 < box->MaxPoint.x) iu1 = 1;
     int iv0 = 0;
-    if (box->miny < vlo0 && vhi0 < box->maxy) iv0 = 1;
+    if (box->MinPoint.y < vlo0 && vhi0 < box->MaxPoint.y) iv0 = 1;
     int iv1 = 0;
-    if (box->miny < vlo1 && vhi1 < box->maxy) iv1 = 1;
+    if (box->MinPoint.y < vlo1 && vhi1 < box->MaxPoint.y) iv1 = 1;
     int iw0 = 0;
-    if (box->minz < wlo0 && whi0 < box->maxz) iw0 = 1;
+    if (box->MinPoint.z < wlo0 && whi0 < box->MaxPoint.z) iw0 = 1;
     int iw1 = 0;
-    if (box->minz < wlo1 && whi1 < box->maxz) iw1 = 1;
+    if (box->MinPoint.z < wlo1 && whi1 < box->MaxPoint.z) iw1 = 1;
 
     ch = node->child[0];
     if (ch != 0 && fu0 && fv0 && fw0) {
@@ -2871,7 +2861,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, sB
             nash_privy_QueryHelper_helpX(hit, ctx1, ctx2, box, ch, &childCell);
         }
     }
-    childCell.w++;
+    childCell.z++;
     ch = node->child[1];
     if (ch != 0 && fu0 && fv0 && fw1) {
         if (iu0 && iv0 && iw1) {
@@ -2880,7 +2870,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, sB
             nash_privy_QueryHelper_helpX(hit, ctx1, ctx2, box, ch, &childCell);
         }
     }
-    childCell.v++;
+    childCell.y++;
     ch = node->child[3];
     if (ch != 0 && fu0 && fv1 && fw1) {
         if (iu0 && iv1 && iw1) {
@@ -2889,7 +2879,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, sB
             nash_privy_QueryHelper_helpX(hit, ctx1, ctx2, box, ch, &childCell);
         }
     }
-    childCell.w--;
+    childCell.z--;
     ch = node->child[2];
     if (ch != 0 && fu0 && fv1 && fw0) {
         if (iu0 && iv1 && iw0) {
@@ -2898,7 +2888,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, sB
             nash_privy_QueryHelper_helpX(hit, ctx1, ctx2, box, ch, &childCell);
         }
     }
-    childCell.u++;
+    childCell.x++;
     ch = node->child[6];
     if (ch != 0 && fu1 && fv1 && fw0) {
         if (iu1 && iv1 && iw0) {
@@ -2907,7 +2897,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, sB
             nash_privy_QueryHelper_helpX(hit, ctx1, ctx2, box, ch, &childCell);
         }
     }
-    childCell.w++;
+    childCell.z++;
     ch = node->child[7];
     if (ch != 0 && fu1 && fv1 && fw1) {
         if (iu1 && iv1 && iw1) {
@@ -2916,7 +2906,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, sB
             nash_privy_QueryHelper_helpX(hit, ctx1, ctx2, box, ch, &childCell);
         }
     }
-    childCell.v--;
+    childCell.y--;
     ch = node->child[5];
     if (ch != 0 && fu1 && fv0 && fw1) {
         if (iu1 && iv0 && iw1) {
@@ -2925,7 +2915,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, sB
             nash_privy_QueryHelper_helpX(hit, ctx1, ctx2, box, ch, &childCell);
         }
     }
-    childCell.w--;
+    childCell.z--;
     ch = node->child[4];
     if (ch != 0 && fu1 && fv0 && fw0) {
         if (iu1 && iv0 && iw0) {
@@ -3835,9 +3825,6 @@ extern "C" int cCTBoundObjLine_point2(int boundLine) {
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTBoundObjPoint_limitPoint);
 #ifdef SKIP_ASM
-struct sVec4A16 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 /**
  * Limits a world point to a point shape, which means replacing it with the shape's position.
@@ -3846,9 +3833,9 @@ struct sVec4A16 {
  *
  * @param out  the world point to limit (On Tour t4Vector& worldP); overwritten
  */
-extern "C" void cCTBoundObjPoint_limitPoint(float* self, sVec4A16* out)
+extern "C" void cCTBoundObjPoint_limitPoint(float* self, t4Vector* out)
 {
-    sVec4A16 worldPoint;
+    t4Vector worldPoint;
     worldPoint.x = self[0];
     worldPoint.y = self[1];
     worldPoint.z = self[2];
@@ -4074,7 +4061,7 @@ extern "C" void cDEFAULT_2ChaseAlgorithm_getRaceCamFinalPhaseData(cDEFAULT_2Chas
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_2ChaseAlgorithm_update);
 #ifdef SKIP_ASM
 struct sCamInfo_00178BB0;
-extern "C" void cLookAtChaseAlgorithm_setupChaseData(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
+extern "C" void cLookAtChaseAlgorithm_setupChaseData(void* self, cChaseSetup* out, float a, float b, float c, float d,
                               float e, float f, float g, float h);
 extern "C" void cLookAtChaseAlgorithm_setupHandplantBlend(void* self, void* info);
 extern "C" void cLookAtChaseAlgorithm_setupHalfPipeCam(void* self, void* info);
@@ -4093,10 +4080,6 @@ extern "C" void cLookAtChaseAlgorithm_updateHandplant(void* self, void* info, fl
 extern "C" void cLookAtChaseAlgorithm_updateViewCam(void* self, void* info, float a, float b, float c, float d);
 extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(void* self, void* info, float a, float b, float c);
 
-struct sCamInfo_176B10
-{
-    char data[0x68];
-} __attribute__((aligned(16)));
 
 /**
  * Runs one frame of the DEFAULT_2 (near) chase camera through the full look-at chase pipeline.
@@ -4108,8 +4091,8 @@ struct sCamInfo_176B10
  */
 extern "C" void cDEFAULT_2ChaseAlgorithm_update(cDEFAULT_2ChaseAlgorithm* self)
 {
-    sCamInfo_176B10 info;
-    cLookAtChaseAlgorithm_setupChaseData(((char*)self), (sCamInfo_00178BB0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+    cChaseSetup info;
+    cLookAtChaseAlgorithm_setupChaseData(((char*)self), (cChaseSetup*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
     cLookAtChaseAlgorithm_setupHandplantBlend(((char*)self), &info);
@@ -4261,7 +4244,7 @@ extern "C" void cDEFAULT_3ChaseAlgorithm_getRaceCamFinalPhaseData(cDEFAULT_3Chas
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_3ChaseAlgorithm_update);
 #ifdef SKIP_ASM
 struct sCamInfo_00178BB0;
-extern "C" void cLookAtChaseAlgorithm_setupChaseData(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
+extern "C" void cLookAtChaseAlgorithm_setupChaseData(void* self, cChaseSetup* out, float a, float b, float c, float d,
                               float e, float f, float g, float h);
 extern "C" void cLookAtChaseAlgorithm_setupHandplantBlend(void* self, void* info);
 extern "C" void cLookAtChaseAlgorithm_setupHalfPipeCam(void* self, void* info);
@@ -4280,10 +4263,6 @@ extern "C" void cLookAtChaseAlgorithm_updateHandplant(void* self, void* info, fl
 extern "C" void cLookAtChaseAlgorithm_updateViewCam(void* self, void* info, float a, float b, float c, float d);
 extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(void* self, void* info, float a, float b, float c);
 
-struct sCamInfo_176E10
-{
-    char data[0x68];
-} __attribute__((aligned(16)));
 
 /**
  * Runs one frame of the DEFAULT_3 (default) chase camera through the full look-at chase pipeline.
@@ -4294,8 +4273,8 @@ struct sCamInfo_176E10
  */
 extern "C" void cDEFAULT_3ChaseAlgorithm_update(cDEFAULT_3ChaseAlgorithm* self)
 {
-    sCamInfo_176E10 info;
-    cLookAtChaseAlgorithm_setupChaseData(((char*)self), (sCamInfo_00178BB0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+    cChaseSetup info;
+    cLookAtChaseAlgorithm_setupChaseData(((char*)self), (cChaseSetup*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
     cLookAtChaseAlgorithm_setupHandplantBlend(((char*)self), &info);
@@ -4427,7 +4406,7 @@ extern "C" void cDEFAULT_4ChaseAlgorithm_getRaceCamFinalPhaseData(cDEFAULT_4Chas
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_4ChaseAlgorithm_update);
 #ifdef SKIP_ASM
 struct sCamInfo_00178BB0;
-extern "C" void cLookAtChaseAlgorithm_setupChaseData(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
+extern "C" void cLookAtChaseAlgorithm_setupChaseData(void* self, cChaseSetup* out, float a, float b, float c, float d,
                               float e, float f, float g, float h);
 extern "C" void cLookAtChaseAlgorithm_setupHandplantBlend(void* self, void* info);
 extern "C" void cLookAtChaseAlgorithm_setupHalfPipeCam(void* self, void* info);
@@ -4446,10 +4425,6 @@ extern "C" void cLookAtChaseAlgorithm_updateHandplant(void* self, void* info, fl
 extern "C" void cLookAtChaseAlgorithm_updateViewCam(void* self, void* info, float a, float b, float c, float d);
 extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(void* self, void* info, float a, float b, float c);
 
-struct sCamInfo_177110
-{
-    char data[0x68];
-} __attribute__((aligned(16)));
 
 /**
  * Runs one frame of the DEFAULT_4 (far) chase camera through the full look-at chase pipeline.
@@ -4460,8 +4435,8 @@ struct sCamInfo_177110
  */
 extern "C" void cDEFAULT_4ChaseAlgorithm_update(cDEFAULT_4ChaseAlgorithm* self)
 {
-    sCamInfo_177110 info;
-    cLookAtChaseAlgorithm_setupChaseData(((char*)self), (sCamInfo_00178BB0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+    cChaseSetup info;
+    cLookAtChaseAlgorithm_setupChaseData(((char*)self), (cChaseSetup*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
     cLookAtChaseAlgorithm_setupHandplantBlend(((char*)self), &info);
@@ -4513,7 +4488,7 @@ extern "C" void cDEFAULT_4ChaseAlgorithm_snap(cDEFAULT_4ChaseAlgorithm* self, in
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDirectionChaseAlgorithm_update);
 #ifdef SKIP_ASM
 struct sCamInfo_00178BB0;
-extern "C" void cLookAtChaseAlgorithm_setupChaseData(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
+extern "C" void cLookAtChaseAlgorithm_setupChaseData(void* self, cChaseSetup* out, float a, float b, float c, float d,
                               float e, float f, float g, float h);
 extern "C" void cLookAtChaseAlgorithm_setupHandplantBlend(void* self, void* info);
 extern "C" void cLookAtChaseAlgorithm_setupHalfPipeCam(void* self, void* info);
@@ -4528,10 +4503,6 @@ extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(void* self, void* info, 
 extern "C" void cLookAtChaseAlgorithm_updateRailCam(void* self, void* info, float a, float b);
 extern "C" void cLookAtChaseAlgorithm_updateRotation(void* self, float ang);
 
-struct sCamInfo_177368
-{
-    char data[0x68];
-} __attribute__((aligned(16)));
 
 /**
  * Runs one frame of a direction chase camera: a chase pose whose eye always looks along one compass heading.
@@ -4544,8 +4515,8 @@ struct sCamInfo_177368
  */
 extern "C" void cDirectionChaseAlgorithm_update(cDirectionChaseAlgorithm* self)
 {
-    sCamInfo_177368 info;
-    cLookAtChaseAlgorithm_setupChaseData(((char*)self), (sCamInfo_00178BB0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+    cChaseSetup info;
+    cLookAtChaseAlgorithm_setupChaseData(((char*)self), (cChaseSetup*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
     cLookAtChaseAlgorithm_setupHandplantBlend(((char*)self), &info);
@@ -4942,26 +4913,23 @@ extern "C" void cSPOKEChaseAlgorithm_getRaceCamFinalPhaseData(cSPOKEChaseAlgorit
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSPOKEChaseAlgorithm_getRiderPosition);
 #ifdef SKIP_ASM
-struct sVec_00177EF8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sVEa_00177EF8 {
     short delta;
     short index;
-    sVec_00177EF8* (*fn)(void*);
+    t4Vector* (*fn)(void*);
 };
 
 struct sVEb_00177EF8 {
     short delta;
     short index;
-    sVec_00177EF8 (*fn)(void*);
+    t4Vector (*fn)(void*);
 };
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec_00177EF8 ctScale_00177EF8(const sVec_00177EF8& v, float s)
+static inline t4Vector ctScale_00177EF8(const t4Vector& v, float s)
 {
-    sVec_00177EF8 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -4976,9 +4944,9 @@ static inline sVec_00177EF8 ctScale_00177EF8(const sVec_00177EF8& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sVec_00177EF8 ctAdd_00177EF8(const sVec_00177EF8& a, const sVec_00177EF8& b)
+static inline t4Vector ctAdd_00177EF8(const t4Vector& a, const t4Vector& b)
 {
-    sVec_00177EF8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -4990,7 +4958,7 @@ static inline sVec_00177EF8 ctAdd_00177EF8(const sVec_00177EF8& a, const sVec_00
     return r;
 }
 
-static inline sVec_00177EF8 ctGetB_00177EF8(void* self)
+static inline t4Vector ctGetB_00177EF8(void* self)
 {
     char* o2 = *(char**)((char*)self + 0x30);
     sVEb_00177EF8* e2 = &(*(sVEb_00177EF8**)o2)[1];
@@ -5005,11 +4973,11 @@ static inline sVec_00177EF8 ctGetB_00177EF8(void* self)
  *
  * @return the blended rider position
  */
-extern "C" sVec_00177EF8 cSPOKEChaseAlgorithm_getRiderPosition(cSPOKEChaseAlgorithm* self)
+extern "C" t4Vector cSPOKEChaseAlgorithm_getRiderPosition(cSPOKEChaseAlgorithm* self)
 {
     char* riderIface = (char*)&self->Target->Rider->mVtbl;
     sVEa_00177EF8* posEntry = &(*(sVEa_00177EF8**)riderIface)[5];
-    sVec_00177EF8* riderPos = posEntry->fn(riderIface + posEntry->delta);
+    t4Vector* riderPos = posEntry->fn(riderIface + posEntry->delta);
     return ctAdd_00177EF8(ctScale_00177EF8(*riderPos, 0.19999998807907104f), ctScale_00177EF8(ctGetB_00177EF8(self), 0.800000011920929f));
 }
 #endif
@@ -5566,18 +5534,14 @@ extern "C" void cSUPERPIPEChaseAlgorithm_getRaceCamFinalPhaseData(cSUPERPIPEChas
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSUPERPIPEChaseAlgorithm_getIdealPosition);
 #ifdef SKIP_ASM
-struct sVec4_1785F0
-{
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
-struct sVEntry_1785F0 { short delta; short index; sVec4_1785F0 (*fn)(void*); };
+struct sVEntry_1785F0 { short delta; short index; t4Vector (*fn)(void*); };
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sVec4_1785F0 Sub_1785F0(const sVec4_1785F0& a, const sVec4_1785F0& b)
+static inline t4Vector Sub_1785F0(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_1785F0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -5590,9 +5554,9 @@ static inline sVec4_1785F0 Sub_1785F0(const sVec4_1785F0& a, const sVec4_1785F0&
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sVec4_1785F0 Add_1785F0(const sVec4_1785F0& a, const sVec4_1785F0& b)
+static inline t4Vector Add_1785F0(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_1785F0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -5605,9 +5569,9 @@ static inline sVec4_1785F0 Add_1785F0(const sVec4_1785F0& a, const sVec4_1785F0&
 }
 
 // PORT: PS2-only VU0 inline asm (v * s).
-static inline sVec4_1785F0 Scale_1785F0(const sVec4_1785F0& v, float s)
+static inline t4Vector Scale_1785F0(const t4Vector& v, float s)
 {
-    sVec4_1785F0 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -5622,9 +5586,9 @@ static inline sVec4_1785F0 Scale_1785F0(const sVec4_1785F0& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt).
-static inline sVec4_1785F0 Normalize_1785F0(const sVec4_1785F0& v)
+static inline t4Vector Normalize_1785F0(const t4Vector& v)
 {
-    sVec4_1785F0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -5643,7 +5607,7 @@ static inline sVec4_1785F0 Normalize_1785F0(const sVec4_1785F0& v)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float Dot_1785F0(const sVec4_1785F0& a, const sVec4_1785F0& b)
+static inline float Dot_1785F0(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -5662,7 +5626,7 @@ static inline float Dot_1785F0(const sVec4_1785F0& a, const sVec4_1785F0& b)
     return r;
 }
 
-static inline sVec4_1785F0 GetPos_1785F0(char* self)
+static inline t4Vector GetPos_1785F0(char* self)
 {
     char* o = *(char**)(self + 0x30);
     sVEntry_1785F0* e = &(*(sVEntry_1785F0**)o)[1];
@@ -5670,7 +5634,7 @@ static inline sVec4_1785F0 GetPos_1785F0(char* self)
 }
 
 // The unit declares cSUPERPIPEChaseAlgorithm_getIdealPosition later with its own vector type; bind this body by asm label.
-extern "C" sVec4_1785F0 cSUPERPIPEChaseAlgorithm_getIdealPosition_impl(char* self) __asm__("cSUPERPIPEChaseAlgorithm_getIdealPosition");
+extern "C" t4Vector cSUPERPIPEChaseAlgorithm_getIdealPosition_impl(char* self) __asm__("cSUPERPIPEChaseAlgorithm_getIdealPosition");
 
 /**
  * Returns the SUPERPIPE camera's ideal eye: on the pipe's axis level with the rider, 1500 units back toward Point2.
@@ -5680,12 +5644,12 @@ extern "C" sVec4_1785F0 cSUPERPIPEChaseAlgorithm_getIdealPosition_impl(char* sel
  *
  * @return the ideal eye position
  */
-extern "C" sVec4_1785F0 cSUPERPIPEChaseAlgorithm_getIdealPosition_impl(char* self)
+extern "C" t4Vector cSUPERPIPEChaseAlgorithm_getIdealPosition_impl(char* self)
 {
-    sVec4_1785F0 dir = Normalize_1785F0(Sub_1785F0(*(sVec4_1785F0*)(self + 0x390), *(sVec4_1785F0*)(self + 0x3A0)));
-    sVec4_1785F0 rel = Sub_1785F0(GetPos_1785F0(self), *(sVec4_1785F0*)(self + 0x390));
-    sVec4_1785F0 off = Scale_1785F0(dir, Dot_1785F0(rel, dir) / Dot_1785F0(dir, dir));
-    sVec4_1785F0 res = Sub_1785F0(Add_1785F0(*(sVec4_1785F0*)(self + 0x390), off), Scale_1785F0(dir, 1500.0f));
+    t4Vector dir = Normalize_1785F0(Sub_1785F0(*(t4Vector*)(self + 0x390), *(t4Vector*)(self + 0x3A0)));
+    t4Vector rel = Sub_1785F0(GetPos_1785F0(self), *(t4Vector*)(self + 0x390));
+    t4Vector off = Scale_1785F0(dir, Dot_1785F0(rel, dir) / Dot_1785F0(dir, dir));
+    t4Vector res = Sub_1785F0(Add_1785F0(*(t4Vector*)(self + 0x390), off), Scale_1785F0(dir, 1500.0f));
     return res;
 }
 #endif
@@ -6147,12 +6111,9 @@ extern "C" float fCos(float x);
 extern "C" void fSinCos(float* s, float* c, float angle);
 
 
-struct sCamInfo_00178BB0 {
-    char data[0x68];
-} __attribute__((aligned(16)));
 
 extern t4Vector t4vect_ZAxis;
-extern "C" void cLookAtChaseAlgorithm_setupChaseData(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
+extern "C" void cLookAtChaseAlgorithm_setupChaseData(void* self, cChaseSetup* out, float a, float b, float c, float d,
                               float e, float f, float g, float h);
 
 struct sVEv_00178BB0 {
@@ -6277,7 +6238,7 @@ static inline t4Vector getPos_00178BB0(char* self)
  */
 extern "C" void cPOST_RACE_1ChaseAlgorithm_update(cPOST_RACE_1ChaseAlgorithm* self)
 {
-    sCamInfo_00178BB0 info;
+    cChaseSetup info;
     cLookAtChaseAlgorithm_setupChaseData(((char*)self), &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
@@ -6932,11 +6893,6 @@ extern "C" char* strcpy(char* d, const char* s);
 
 
 
-struct sStr_17A378 {
-    char* s;
-    sStr_17A378() {}
-    sStr_17A378(const sStr_17A378&);
-};
 
 /**
  * Adds the track files named in a text index file to the location table, skipping duplicates and files not on disc.
@@ -7007,11 +6963,11 @@ extern "C" void cTrackFileMan_scanTrackIndex(cTrackFileMan* selfp, const char* f
             cursor++;
         if (stop == start)
             continue;
-        sStr_17A378 str;
+        cBXString str;
         cBXString_cBXString3(&str, start, stop - start);
-        if (cTrackFileMan_checkLocation_17A378(self, str.s, str.s)) {
-            strcpy(((&self->LocationInfo[0]))[self->NumLocations].File, str.s);
-            strcpy(((&self->LocationInfo[0]))[self->NumLocations].BigFile, str.s);
+        if (cTrackFileMan_checkLocation_17A378(self, str.Str, str.Str)) {
+            strcpy(((&self->LocationInfo[0]))[self->NumLocations].File, str.Str);
+            strcpy(((&self->LocationInfo[0]))[self->NumLocations].BigFile, str.Str);
             ((&self->LocationInfo[0]))[self->NumLocations].locationID = 22;
             ((&self->LocationInfo[0]))[self->NumLocations].bIsBAM = 0;
             self->NumLocations++;
@@ -7134,12 +7090,6 @@ struct sCamName_A830 {
     int ok;
 };
 
-// Non-POD (user-declared copy ctor, never defined) so locals get the 16-byte slots g++ gives classes.
-struct sStr_A830 {
-    char* s;
-    sStr_A830() {}
-    sStr_A830(const sStr_A830&);
-};
 
 struct sBigFile_A830 {
     int f0;
@@ -7172,8 +7122,8 @@ extern "C" int cTrackFileMan_checkLocation(cTrackFileMan* self, char* name, char
             return 0;
         }
     }
-    sStr_A830 base;
-    sStr_A830 workStr;
+    cBXString base;
+    cBXString workStr;
     sBigFile_A830 bf;
     sCamName_A830 nm;
     char* pre = str_data_worlds;
@@ -7182,10 +7132,10 @@ extern "C" int cTrackFileMan_checkLocation(cTrackFileMan* self, char* name, char
     cBXString__cBXString(&workStr, 2);
     cBigFile* pbf = (cBigFile*)&bf;
     func_00318630((cBXString*)&workStr, (cBXString*)&base, str_big);
-    cBigFile_cBigFile1_A830(pbf, workStr.s, 0x100);
+    cBigFile_cBigFile1_A830(pbf, workStr.Str, 0x100);
     cBXString__cBXString(&workStr, 2);
     nm.name = name;
-    int anyFound = func_003A6948(base.s, 1, &nm);
+    int anyFound = func_003A6948(base.Str, 1, &nm);
     int result = anyFound == 0 ? 0 : nm.ok;
     cBigFile__cBigFile((cBigFile*)&bf, 2);
     cBXString__cBXString(&base, 2);
@@ -7217,10 +7167,6 @@ struct sCamEntry_17A978 {
 };
 
 
-struct sCamName_17A978 {
-    char* name;
-    int ok;
-};
 
 // Non-POD (user-declared copy ctor, never defined) so locals get the 16-byte slots g++ gives classes.
 struct sStr_17A978 {
@@ -7256,14 +7202,14 @@ struct sBigFile_17A978 {
 extern "C" int cTrackFileMan_checkLocation1(cTrackFileMan* selfp, int n, void* namesp, char* tag)
 {
     cTrackFileMan* self = selfp;
-    sCamName_17A978* names = (sCamName_17A978*)namesp;
+    tWorldSectionScan* names = (tWorldSectionScan*)namesp;
     int fail = 0;
     int i;
     int j;
     for (i = 0; i < n; i++) {
         int found = 0;
         for (j = 0; j < self->NumLocations; j++) {
-            if (strcasecmp(names[i].name, ((sCamEntry_17A978*)&self->LocationInfo[0])[j].name) == 0 &&
+            if (strcasecmp(((char*)names[i].sectionName), ((sCamEntry_17A978*)&self->LocationInfo[0])[j].name) == 0 &&
                 strcasecmp(tag, ((sCamEntry_17A978*)&self->LocationInfo[0])[j].tag) == 0) {
                 found = 1;
                 break;
@@ -7295,11 +7241,11 @@ extern "C" int cTrackFileMan_checkLocation1(cTrackFileMan* selfp, int n, void* n
         return 0;
     }
     for (int k = 0; k < n; k++) {
-        if (names[k].ok) {
+        if (names[k].bFound) {
             for (int entryIndex = 0; entryIndex < self->NumLocations; entryIndex++) {
-                if (strcasecmp(names[k].name, ((sCamEntry_17A978*)&self->LocationInfo[0])[entryIndex].name) == 0 &&
+                if (strcasecmp(((char*)names[k].sectionName), ((sCamEntry_17A978*)&self->LocationInfo[0])[entryIndex].name) == 0 &&
                     strcasecmp(tag, ((sCamEntry_17A978*)&self->LocationInfo[0])[entryIndex].tag) == 0) {
-                    names[k].ok = 0;
+                    names[k].bFound = 0;
                     break;
                 }
             }
@@ -7338,11 +7284,6 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBackgroundMan__cBackgroundMa
 void operator_delete(int* ptr);
 void cMemMan_free(void* p);
 
-struct sVE_0017ABE0 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 struct sIdList_0017ABE0 {
     int* ids;
@@ -7367,7 +7308,7 @@ extern "C" void cBackgroundMan__cBackgroundMan(cBackgroundMan* self, int flags)
             if (id >= 0)
             {
                 cPS2GraphicsMan* obj = GrMan;
-                sVE_0017ABE0* vt = (sVE_0017ABE0*)obj->mVtbl;
+                sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)obj->mVtbl;
                 vt[50].fn((char*)obj + vt[50].delta, id);
             }
         }

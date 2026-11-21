@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "animation/animmodel.h"
 #include "replay/frameptr.h"
 #include "ai/riderhandler.h"
@@ -1745,11 +1746,6 @@ extern "C" float cWipeoutMotion_intersectGround(cWipeoutMotion* self, char* hit,
 //100%
 INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry00138AD8 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Saves the wipeout motion's state to a replay frame.
@@ -1761,7 +1757,7 @@ struct sVEntry00138AD8 {
  */
 extern "C" void cWipeoutMotion_writeToReplayFrame(cWipeoutMotion* self, cReplayFramePtr* obj)
 {
-    sVEntry00138AD8* vt = *(sVEntry00138AD8**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x40);
 }
 #endif
@@ -1769,11 +1765,6 @@ extern "C" void cWipeoutMotion_writeToReplayFrame(cWipeoutMotion* self, cReplayF
 //100%
 INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry00138B10 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Restores the wipeout motion's state from a replay frame.
@@ -1785,7 +1776,7 @@ struct sVEntry00138B10 {
  */
 extern "C" void cWipeoutMotion_readFromReplayFrame(cWipeoutMotion* self, cReplayFramePtr* obj)
 {
-    sVEntry00138B10* vt = *(sVEntry00138B10**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x40);
 }
 #endif

@@ -25,6 +25,23 @@
 
 #include "layout.h"
 
+// EA's animation clip id (On Tour struct tAnimID, 0x4: unsigned int SourceID : 8, AnimID : 24): the low byte is the
+// bank / source, the upper 24 bits the clip index in it. kAnimIDInvalid (-1) is "no clip". [Staged by views group A.]
+// [U] cGameAnimMap_addSource builds one per bank clip (SourceID = the bank's kind, AnimID = i; view
+// sMdfHandle_00314F30) and passes it by value to cGameAnimMap_setMap; the readers split GameAnimMap[gad] the same way
+// (& 0xFF, >> 8). EA's class has a user-declared empty constructor: cGameAnimMap's ctor still emits the (dead) array
+// constructor loop over GameAnimMap (view sMdfEntry_314D98: `new (this) sMdfEntry_314D98[518]`), which only a
+// non-POD element type produces.
+struct tAnimID {
+    unsigned int SourceID : 8;      // bits 0-7 [O]; [U] addSource stores the bank kind; readers: GameAnimMap[gad] & 0xFF
+    unsigned int AnimID : 24;       // bits 8-31 [O]; [U] addSource stores the clip index; readers: GameAnimMap[gad] >> 8
+#ifdef __cplusplus
+    tAnimID() {}
+#endif
+};
+
+CHECK_SIZE(tAnimID, 0x4);
+
 struct cGameAnimMap {
     unsigned int GameAnimHashes[518]; // 0x000 [O]; [U] initMap stores GetHashValue32(GameAnimNames[i]) in [i];
                                     //       lookupGAD compares the hash against GameAnimHashes[GameAnimSort[mid]]; initMap

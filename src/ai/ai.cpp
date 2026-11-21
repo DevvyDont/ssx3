@@ -1,4 +1,7 @@
 #include "common.h"
+#include "ui/uithing.h"
+#include "visualfx/transitionobj.h"
+#include "vtable.h"
 #include "animation/animmodel.h"
 #include "ai/computer.h"
 #include "ai/player.h"
@@ -3134,11 +3137,6 @@ extern "C" void cGateControl_doGateLaunch(cGateControl* self, void* cmd)
 //100%
 INCLUDE_ASM("ai/ai", cGateControl_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sAiVEntry12C558 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Writes the gate control's state (its first 0x14 bytes, GateState to GateAnticipate) to a replay frame.
@@ -3147,7 +3145,7 @@ struct sAiVEntry12C558 {
  */
 extern "C" void cGateControl_writeToReplayFrame(cGateControl* self, cReplayFramePtr* obj)
 {
-    sAiVEntry12C558* vt = *(sAiVEntry12C558**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 20);
 }
 #endif
@@ -3155,11 +3153,6 @@ extern "C" void cGateControl_writeToReplayFrame(cGateControl* self, cReplayFrame
 //100%
 INCLUDE_ASM("ai/ai", cGateControl_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sAiVEntry12C590 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Reads the gate control's state (its first 0x14 bytes, GateState to GateAnticipate) from a replay frame.
@@ -3168,7 +3161,7 @@ struct sAiVEntry12C590 {
  */
 extern "C" void cGateControl_readFromReplayFrame(cGateControl* self, cReplayFramePtr* obj)
 {
-    sAiVEntry12C590* vt = *(sAiVEntry12C590**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 20);
 }
 #endif
@@ -3400,11 +3393,6 @@ extern "C" void cFinishLineControl_update(cFinishLineControl* self)
 //100%
 INCLUDE_ASM("ai/ai", cFinishLineControl_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry0012C9C0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Writes the finish-line control's state (FinishState, 4 bytes) to a replay frame.
@@ -3413,7 +3401,7 @@ struct sVEntry0012C9C0 {
  */
 extern "C" void cFinishLineControl_writeToReplayFrame(cFinishLineControl* self, cReplayFramePtr* obj)
 {
-    sVEntry0012C9C0* vt = *(sVEntry0012C9C0**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x4);
 }
 #endif
@@ -3421,11 +3409,6 @@ extern "C" void cFinishLineControl_writeToReplayFrame(cFinishLineControl* self, 
 //100%
 INCLUDE_ASM("ai/ai", cFinishLineControl_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry0012C9F8 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Reads the finish-line control's state (FinishState, 4 bytes) back from a replay frame.
@@ -3434,7 +3417,7 @@ struct sVEntry0012C9F8 {
  */
 extern "C" void cFinishLineControl_readFromReplayFrame(cFinishLineControl* self, cReplayFramePtr* obj)
 {
-    sVEntry0012C9F8* vt = *(sVEntry0012C9F8**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x4);
 }
 #endif
@@ -3450,16 +3433,12 @@ extern "C" void cWScriptMan_eventWipeout(void* self);
 extern void* cWScriptMan_TheWScriptMan;
 extern char t4vect_Zero[];
 
-struct sVec4_12CA30
-{
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
-extern "C" void cWipeoutMotion_throwItem(char* self, sVec4_12CA30* a, sVec4_12CA30* b, tPose* c);
+extern "C" void cWipeoutMotion_throwItem(char* self, t4Vector* a, t4Vector* b, tPose* c);
 
 // PORT: PS2-only VU0 inline asm (vector add-assign).
-static inline void vu0AddEq_12CA30(sVec4_12CA30& dst, const sVec4_12CA30& b)
+static inline void vu0AddEq_12CA30(t4Vector& dst, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -3504,12 +3483,12 @@ extern "C" void cWipeoutControl_gainFocus(cWipeoutControl* self)
     cRider* rider = self->mRider;
     (*(&self->RiderPrevPose)) = ((tPose*)rider->mAnimModel->bones)[rider->mBoneHips];
     (*(&self->BoardPrevPose)) = ((tPose*)rider->mAnimModel->bones)[rider->mBoneBoardChild];
-    vu0AddEq_12CA30(*(sVec4_12CA30*)&self->RiderPrevPose, *(sVec4_12CA30*)&self->mRider->mModelOffset);
-    vu0AddEq_12CA30(*(sVec4_12CA30*)&self->BoardPrevPose, *(sVec4_12CA30*)&self->mRider->mModelOffset);
+    vu0AddEq_12CA30(*(t4Vector*)&self->RiderPrevPose, *(&self->mRider->mModelOffset));
+    vu0AddEq_12CA30(*(t4Vector*)&self->BoardPrevPose, *(&self->mRider->mModelOffset));
     self->RiderState = 0;
     if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 22)
     {
-        cWipeoutMotion_throwItem((char*)&self->mRider->mRiderHandler->WipeoutMotion, (sVec4_12CA30*)(&self->mRider->mVelocity), (sVec4_12CA30*)t4vect_Zero, boardPrevPose);
+        cWipeoutMotion_throwItem((char*)&self->mRider->mRiderHandler->WipeoutMotion, ((&self->mRider->mVelocity)), (t4Vector*)t4vect_Zero, boardPrevPose);
         *(int*)&self->mRider->LegIK = 0;
     }
     cReplay_eventWipeout(SSXApp->Game->Replay, self->mRider->mAIIndex, (int)self->mRider->mMetrix + 0xFC);
@@ -3731,7 +3710,7 @@ extern "C" void cWipeoutControl_updateLaunch(cWipeoutControl* self)
             deltaQuat = Sub_12CD20(*(sV_12CD20*)&boardPose->Q, *(sV_12CD20*)&self->BoardPrevPose.Q);
             angVelQuat = QuatMul_12CD20(deltaQuat, Conj_12CD20(*boardPose));
             angvel = Scale_12CD20(sV_12CD20(angVelQuat.x, angVelQuat.y, angVelQuat.z, 0.0f), doubleInvDeltaTime);
-            cWipeoutMotion_throwItem((char*)&self->mRider->mRiderHandler->WipeoutMotion, (sVec4_12CA30*)&vel, (sVec4_12CA30*)&angvel, boardPose);
+            cWipeoutMotion_throwItem((char*)&self->mRider->mRiderHandler->WipeoutMotion, (t4Vector*)&vel, (t4Vector*)&angvel, boardPose);
         }
         if (self->mRider->mRiderHandler->WipeoutMotion.WipeoutMotionState == 1)
         {
@@ -3777,7 +3756,6 @@ extern "C" void cSSXAudio_PlayGrunt(void* mgr, void* rider, int a, int b);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
 
-struct sVEntry12D160 { short delta; short index; void (*fn)(void*, float); };
 
 static inline bool aiOk_12D160(void* self)
 {
@@ -3838,14 +3816,14 @@ extern "C" void cWipeoutControl_updateGround(cWipeoutControl* self)
     float k = cWipeoutControl_chooseTumbleAnimRate(self);
     {
         cRider* rider3 = self->mRider;
-        sVEntry12D160* vt = (sVEntry12D160*)rider3->mVtbl;
+        sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)rider3->mVtbl;
         vt[18].fn(((char*)rider3) + vt[18].delta, k * 0.5f);
     }
     if (self->IsNewImpact != 0)
     {
         self->IsNewImpact = 0;
         cRider* rider4 = self->mRider;
-        sVEntry12D160* vt = (sVEntry12D160*)rider4->mVtbl;
+        sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)rider4->mVtbl;
         vt[17].fn(((char*)rider4) + vt[17].delta, aiLength_12C5C8(*(&self->LatestImpact)));
         return;
     }
@@ -3961,7 +3939,6 @@ static inline t4Vector aiScale_12D4E8(const t4Vector& in, float s)
     return r;
 }
 
-struct sVEntry12D4E8 { short delta; short index; void (*fn)(void*, float); };
 
 static inline bool aiOk_12D4E8(void* self)
 {
@@ -4026,7 +4003,7 @@ extern "C" void cWipeoutControl_updateAir(cWipeoutControl* self)
         }
         self->IsNewImpact = 0;
         cRider* rider3 = self->mRider;
-        sVEntry12D4E8* vt = (sVEntry12D4E8*)rider3->mVtbl;
+        sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)rider3->mVtbl;
         vt[17].fn(((char*)rider3) + vt[17].delta, aiLength_12C5C8(*(&self->LatestImpact)));
         return;
     }
@@ -4070,7 +4047,6 @@ extern "C" void cSSXAudio_Land(void* mgr, void* rider, float v);
 extern "C" void cRiderMetrix_evTakeoff(void* p, int flip, int c);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 
-struct sVEntry12D848 { short delta; short index; void (*fn)(void*, float); };
 
 /**
  * Runs the get-up phase of a wipeout (RS_Recover) and hands the rider back to normal control when the
@@ -4088,14 +4064,14 @@ extern "C" void cWipeoutControl_updateRecover(cWipeoutControl* self)
     {
         self->IsNewImpact = 0;
         cRider* rider = self->mRider;
-        sVEntry12D848* vt = (sVEntry12D848*)rider->mVtbl;
+        sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)rider->mVtbl;
         vt[17].fn(((char*)rider) + vt[17].delta, aiLength_12C5C8(*(&self->LatestImpact)));
         cSSXAudio_Land(cAudioInterface_bxAudio(), self->mRider, 0.0f);
     }
     cRider* rider = self->mRider;
     if (rider->mRiderHandler->WipeoutMotion.WipeoutMotionState == 0)
     {
-        sVEntry12D848* vt = (sVEntry12D848*)rider->mVtbl;
+        sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)rider->mVtbl;
         char* thisp = ((char*)rider) + vt[18].delta;
         float percentLeft = 1.0f - cRiderAnimBase_getCurrentAnimFramePercent(rider->mRiderAnim, 2);
         vt[18].fn(thisp, percentLeft + percentLeft);
@@ -4750,11 +4726,6 @@ extern "C" float cWipeoutControl_chooseTumbleAnimRate(cWipeoutControl* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ai", cWipeoutControl_loseFocus);
 #ifdef SKIP_ASM
-struct sVEntry0012E690 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 extern "C" int AITick();
 extern "C" void cRider_flagEventReaction(void* self, int mode, float t);
@@ -4773,7 +4744,7 @@ extern "C" void cWipeoutControl_loseFocus(cWipeoutControl* self)
     if ((AITick() & 1) == 0)
     {
         char* sub = (char*)&self->mRider->mVtbl;
-        sVEntry0012E690* vt = *(sVEntry0012E690**)sub;
+        sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
         if (vt[8].fn(sub + vt[8].delta))
         {
             cRider_flagEventReaction(self->mRider, 4, 0.0f);
@@ -4786,11 +4757,6 @@ extern "C" void cWipeoutControl_loseFocus(cWipeoutControl* self)
 //100%
 INCLUDE_ASM("ai/ai", cWipeoutControl_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry0012E708 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Writes the wipeout control's 0x80-byte state to a replay frame.
@@ -4802,7 +4768,7 @@ struct sVEntry0012E708 {
  */
 extern "C" void cWipeoutControl_writeToReplayFrame(cWipeoutControl* self, cReplayFramePtr* obj)
 {
-    sVEntry0012E708* vt = *(sVEntry0012E708**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x80);
 }
 #endif
@@ -4810,11 +4776,6 @@ extern "C" void cWipeoutControl_writeToReplayFrame(cWipeoutControl* self, cRepla
 //100%
 INCLUDE_ASM("ai/ai", cWipeoutControl_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry0012E740 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Reads the wipeout control's 0x80-byte state back from a replay frame.
@@ -4826,7 +4787,7 @@ struct sVEntry0012E740 {
  */
 extern "C" void cWipeoutControl_readFromReplayFrame(cWipeoutControl* self, cReplayFramePtr* obj)
 {
-    sVEntry0012E740* vt = *(sVEntry0012E740**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x80);
 }
 #endif
@@ -4848,10 +4809,6 @@ extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
 extern "C" void cRailslideControl_playGainFocusAnim(cRailslideControl*, int);
 extern "C" void cRider_undoRailslideModeOrientation(void* rider);
 
-struct sAiVec4_12E778
-{
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sAiBitsA_12E778
 {
@@ -4866,7 +4823,7 @@ struct sAiBitsB_12E778
 };
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float aiDot_12E778(const sAiVec4_12E778& a, const sAiVec4_12E778& b)
+static inline float aiDot_12E778(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -4924,7 +4881,7 @@ extern "C" void cBumpControl_update(cBumpControl* self, void* in)
         {
             char* rider = *(char**)self;
             float turn = ((sAiBitsB_12E778*)in)->v * 0.032258063554763794f;
-            if (aiDot_12E778(*(sAiVec4_12E778*)(rider + 0x1E0), *(sAiVec4_12E778*)(rider + 0x3A0)) < 0.0f)
+            if (aiDot_12E778(*(t4Vector*)(rider + 0x1E0), *(t4Vector*)(rider + 0x3A0)) < 0.0f)
                 turn = -turn;
             cRider_setupLean(rider, turn);
         }
@@ -5309,27 +5266,16 @@ void* cTransitionObj_cTransitionObj(void* self);
 extern "C" void cTransitionMan_StartTransition(void* self, int a1, void* a2, void* a3, float f0, float f1, float f2, int a4, void* a5);
 extern void* cFade_TObj_vtbl[];
 
-struct sColor_12F230
-{
-    float r, g, b, a;
-    sColor_12F230() {}
-    sColor_12F230(float ar, float ag, float ab, float aa) { r = ar; g = ag; b = ab; a = aa; }
-};
 
-struct sFx_12F230
-{
-    void** vt;
-    sColor_12F230 c;
-};
 
 // PORT: the wake-fx pool allocator ignores its argument; callers pass the object size.
 extern "C" void* cTransitionObj_operator_new_sz(unsigned size) __asm__("cTransitionObj_operator_new");
 
-static inline sFx_12F230* initFx_12F230(sFx_12F230* p, const sColor_12F230& col)
+static inline cFade_TObj* initFx_12F230(cFade_TObj* p, const tARGB& col)
 {
     cTransitionObj_cTransitionObj(p);
-    p->vt = cFade_TObj_vtbl;
-    p->c = col;
+    p->mVtbl = cFade_TObj_vtbl;
+    (*(&p->mColour)) = col;
     return p;
 }
 
@@ -5352,19 +5298,19 @@ extern "C" void cResetControl_gainFocus(cResetControl* self)
         char* obj = (char*)cGame_getTransitionMan(SSXApp->Game, self->mRider->mViewIndex);
         if (*(int*)(obj + 0x44))
             cTransitionMan_EndTransition(obj);
-        sFx_12F230* firstFade = (sFx_12F230*)cTransitionObj_operator_new_sz(20);
-        sColor_12F230 ca;
-        ca.r = 1.0f;
-        ca.g = 1.0f;
-        ca.b = 1.0f;
-        ca.a = 1.0f;
+        cFade_TObj* firstFade = (cFade_TObj*)cTransitionObj_operator_new_sz(20);
+        tARGB ca;
+        ca.A = 1.0f;
+        ca.R = 1.0f;
+        ca.G = 1.0f;
+        ca.B = 1.0f;
         initFx_12F230(firstFade, ca);
-        sFx_12F230* secondFade = (sFx_12F230*)cTransitionObj_operator_new_sz(20);
-        sColor_12F230 cb;
-        cb.r = 1.0f;
-        cb.g = 1.0f;
-        cb.b = 1.0f;
-        cb.a = 1.0f;
+        cFade_TObj* secondFade = (cFade_TObj*)cTransitionObj_operator_new_sz(20);
+        tARGB cb;
+        cb.A = 1.0f;
+        cb.R = 1.0f;
+        cb.G = 1.0f;
+        cb.B = 1.0f;
         initFx_12F230(secondFade, cb);
         cTransitionMan_StartTransition(obj, 1, firstFade, secondFade, 0.5f, 0.0f, 0.5f, 0, flag);
     }
@@ -5388,13 +5334,9 @@ extern "C" void cRider_cleanupAfterPutAt(void* self, int notify);
 void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
-struct sVec4_12F398
-{
-    float x, y, z, w;
-};
 
-extern "C" sVec4_12F398 cPath_getPathHeading(void* self, float t);
-extern "C" void cRider_putAt_12F398(void* self, void* a, sVec4_12F398* b, int n, float t) __asm__("cRider_putAt");
+extern "C" t4Vector cPath_getPathHeading(void* self, float t);
+extern "C" void cRider_putAt_12F398(void* self, void* a, t4Vector* b, int n, float t) __asm__("cRider_putAt");
 
 /**
  * Advances the reset fade, moves the rider back onto the course halfway through, and hands over to natural
@@ -5425,10 +5367,10 @@ extern "C" void cResetControl_update(cResetControl* self)
         float range = 200.0f;
         cRider_switchToResetPath(self->mRider);
         cRider* rider = self->mRider;
-        const sVec4_12F398& dir = cPath_getPathHeading(rider->AIPath, rider->PathParam);
+        const t4Vector& dir = cPath_getPathHeading(rider->AIPath, rider->PathParam);
         if (cBE_getInterface_Fv(cBE_getBE(), 0) != 0 && cBENewRaceInterface_newRace.cGameEvent == 2)
             range = 1000.0f;
-        cRider_putAt_12F398(self->mRider, &self->mRider->PathPos, (sVec4_12F398*)&dir, 287, range);
+        cRider_putAt_12F398(self->mRider, &self->mRider->PathPos, (t4Vector*)&dir, 287, range);
         cRider_cleanupAfterPutAt(self->mRider, 1);
         if (*(int*)self != 0)
             cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReset(self->mRider->mMetrix, 0));
@@ -5465,11 +5407,6 @@ extern "C" int cResetControl_shouldTransition(cResetControl* self)
 //100%
 INCLUDE_ASM("ai/ai", cResetControl_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry0012F5B0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Writes the reset control's 8-byte state (IsAutoReset, FadePercent) to a replay frame.
@@ -5480,7 +5417,7 @@ struct sVEntry0012F5B0 {
  */
 extern "C" void cResetControl_writeToReplayFrame(cResetControl* self, cReplayFramePtr* obj)
 {
-    sVEntry0012F5B0* vt = *(sVEntry0012F5B0**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x8);
 }
 #endif
@@ -5488,11 +5425,6 @@ extern "C" void cResetControl_writeToReplayFrame(cResetControl* self, cReplayFra
 //100%
 INCLUDE_ASM("ai/ai", cResetControl_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry0012F5E8 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Reads the reset control's 8-byte state (IsAutoReset, FadePercent) back from a replay frame.
@@ -5503,7 +5435,7 @@ struct sVEntry0012F5E8 {
  */
 extern "C" void cResetControl_readFromReplayFrame(cResetControl* self, cReplayFramePtr* obj)
 {
-    sVEntry0012F5E8* vt = *(sVEntry0012F5E8**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x8);
 }
 #endif
@@ -5775,11 +5707,6 @@ extern "C" void cNaturalAirControl_loseFocus(cNaturalAirControl* self, int next)
 //100%
 INCLUDE_ASM("ai/ai", cNaturalAirControl_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry0012FBF0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Writes the natural air control's 0x14-byte state (LimitAng to InitGrabHeld) to a replay frame.
@@ -5790,7 +5717,7 @@ struct sVEntry0012FBF0 {
  */
 extern "C" void cNaturalAirControl_writeToReplayFrame(cNaturalAirControl* self, cReplayFramePtr* obj)
 {
-    sVEntry0012FBF0* vt = *(sVEntry0012FBF0**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 20);
 }
 #endif
@@ -5798,11 +5725,6 @@ extern "C" void cNaturalAirControl_writeToReplayFrame(cNaturalAirControl* self, 
 //100%
 INCLUDE_ASM("ai/ai", cNaturalAirControl_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry0012FC28 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Reads the natural air control's 0x14-byte state (LimitAng to InitGrabHeld) back from a replay frame.
@@ -5813,7 +5735,7 @@ struct sVEntry0012FC28 {
  */
 extern "C" void cNaturalAirControl_readFromReplayFrame(cNaturalAirControl* self, cReplayFramePtr* obj)
 {
-    sVEntry0012FC28* vt = *(sVEntry0012FC28**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 20);
 }
 #endif
@@ -6462,10 +6384,6 @@ extern "C" void cBoardPressControl_blendOutOfPivot(cBoardPressControl*);
 int cRiderAnimBase_getCurrentAnimID(void* self, int i);
 extern "C" float func_0031C228(float x);
 
-struct sAiVec4_08D8
-{
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sAiBits_08D8
 {
@@ -6474,7 +6392,7 @@ struct sAiBits_08D8
 };
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float aiDot_08D8(const sAiVec4_08D8& a, const sAiVec4_08D8& b)
+static inline float aiDot_08D8(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -6567,7 +6485,7 @@ extern "C" int cBoardPressControl_checkForPivot(cBoardPressControl* vself, void*
     float ab = aiAbs_08D8(stickX);
     float stickMag = aa < ab ? ab : aa;
     char* rider0;
-    if (stickMag < 0.1f || aiDot_08D8(*(sAiVec4_08D8*)((rider0 = ((char*)self->mRider)) + 0x1E0), *(sAiVec4_08D8*)(rider0 + 0x3A0)) < 0.0f || self->IsOllieHeld != 0)
+    if (stickMag < 0.1f || aiDot_08D8(*(t4Vector*)((rider0 = ((char*)self->mRider)) + 0x1E0), *(t4Vector*)(rider0 + 0x3A0)) < 0.0f || self->IsOllieHeld != 0)
     {
         cBoardPressControl_autoCompletePivot((cBoardPressControl*)self);
         float absPivot = aiAbs_08D8(self->mRider->mSlewed[12].cur);
@@ -6993,11 +6911,6 @@ extern "C" void cBoardPressControl_blendOutOfPivot(cBoardPressControl* self)
 //100%
 INCLUDE_ASM("ai/ai", cBoardPressControl_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry00131598 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Writes the board press state to a replay frame.
@@ -7008,7 +6921,7 @@ struct sVEntry00131598 {
  */
 extern "C" void cBoardPressControl_writeToReplayFrame(cBoardPressControl* self, cReplayFramePtr* obj)
 {
-    sVEntry00131598* vt = *(sVEntry00131598**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 20);
 }
 #endif
@@ -7016,11 +6929,6 @@ extern "C" void cBoardPressControl_writeToReplayFrame(cBoardPressControl* self, 
 //100%
 INCLUDE_ASM("ai/ai", cBoardPressControl_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry001315D0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Restores the board press state from a replay frame.
@@ -7031,7 +6939,7 @@ struct sVEntry001315D0 {
  */
 extern "C" void cBoardPressControl_readFromReplayFrame(cBoardPressControl* self, cReplayFramePtr* obj)
 {
-    sVEntry001315D0* vt = *(sVEntry001315D0**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 20);
 }
 #endif
@@ -7787,11 +7695,6 @@ extern "C" int cRailslideControl_checkAirMotion(cRailslideControl* self, void* c
 //100%
 INCLUDE_ASM("ai/ai", cRailslideControl_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry00132840 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Writes the rail slide state to a replay frame.
@@ -7802,7 +7705,7 @@ struct sVEntry00132840 {
  */
 extern "C" void cRailslideControl_writeToReplayFrame(cRailslideControl* self, cReplayFramePtr* obj)
 {
-    sVEntry00132840* vt = *(sVEntry00132840**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x8);
 }
 #endif
@@ -7810,11 +7713,6 @@ extern "C" void cRailslideControl_writeToReplayFrame(cRailslideControl* self, cR
 //100%
 INCLUDE_ASM("ai/ai", cRailslideControl_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry00132878 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Restores the rail slide state from a replay frame.
@@ -7825,7 +7723,7 @@ struct sVEntry00132878 {
  */
 extern "C" void cRailslideControl_readFromReplayFrame(cRailslideControl* self, cReplayFramePtr* obj)
 {
-    sVEntry00132878* vt = *(sVEntry00132878**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x8);
 }
 #endif
@@ -7908,19 +7806,7 @@ struct sFlags_29B0 {
     int flags;
 };
 
-struct sOwner_29B0 {
-    char pad[0x58];
-    sFlags_29B0* ctl;
-};
 
-struct sState_29B0 {
-    float t;            // 0x0
-    int f4;             // 0x4
-    int fast;           // 0x8
-    int ctl;            // 0xC
-    int flag;           // 0x10
-    sRider_29B0* rider; // 0x14
-};
 
 /**
  * Sets up a handplant from the intersection that started it: entry time, toeside, speed and a surface flag.
@@ -7934,17 +7820,17 @@ struct sState_29B0 {
  * @param flag  On Tour's isToeside: the hand goes down on the toe side
  * @param enterSec  On Tour's enterSec: the handplant's entry time
  */
-extern "C" void cHandplantControl_init(sState_29B0* self, sOwner_29B0* intersectInfo, int flag, float enterSec)
+extern "C" void cHandplantControl_init(cHandplantControl* self, tIntersectInfo* intersectInfo, int flag, float enterSec)
 {
     int on = 1;
-    self->t = enterSec;
-    self->flag = flag ? on : 0;
-    self->fast = Length_29B0(self->rider->vel) > 2222.2222f;
+    self->EnterSec = enterSec;
+    self->HandplantType = flag ? on : 0;
+    self->IsMissedHandplant = Length_29B0(((sRider_29B0*)self->mRider)->vel) > 2222.2222f;
     bool surfaceFlag = false;
-    sFlags_29B0* hitObj = intersectInfo->ctl;
+    sFlags_29B0* hitObj = ((sFlags_29B0*)intersectInfo->Spline);
     if (hitObj != 0)
         surfaceFlag = (hitObj->flags & 1) ? on : 0;
-    self->ctl = surfaceFlag;
+    self->IsRailSpline = surfaceFlag;
 }
 #endif
 
@@ -8226,11 +8112,6 @@ extern "C" void cHandplantControl_playHandplantAnim(cHandplantControl* self, int
 //100%
 INCLUDE_ASM("ai/ai", cHandplantControl_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry001330B8 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Writes the handplant state to a replay frame.
@@ -8241,7 +8122,7 @@ struct sVEntry001330B8 {
  */
 extern "C" void cHandplantControl_writeToReplayFrame(cHandplantControl* self, cReplayFramePtr* obj)
 {
-    sVEntry001330B8* vt = *(sVEntry001330B8**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 20);
 }
 #endif
@@ -8249,11 +8130,6 @@ extern "C" void cHandplantControl_writeToReplayFrame(cHandplantControl* self, cR
 //100%
 INCLUDE_ASM("ai/ai", cHandplantControl_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry001330F0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Restores the handplant state from a replay frame.
@@ -8264,7 +8140,7 @@ struct sVEntry001330F0 {
  */
 extern "C" void cHandplantControl_readFromReplayFrame(cHandplantControl* self, cReplayFramePtr* obj)
 {
-    sVEntry001330F0* vt = *(sVEntry001330F0**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 20);
 }
 #endif
@@ -9966,11 +9842,6 @@ extern "C" float cSpinControl_getOffAxisScale(cSpinControl* self)
 //100%
 INCLUDE_ASM("ai/ai", cSpinControl_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry001361F8 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Writes the spin control state to a replay frame.
@@ -9981,7 +9852,7 @@ struct sVEntry001361F8 {
  */
 extern "C" void cSpinControl_writeToReplayFrame(cSpinControl* self, cReplayFramePtr* obj)
 {
-    sVEntry001361F8* vt = *(sVEntry001361F8**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 88);
 }
 #endif
@@ -9989,11 +9860,6 @@ extern "C" void cSpinControl_writeToReplayFrame(cSpinControl* self, cReplayFrame
 //100%
 INCLUDE_ASM("ai/ai", cSpinControl_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry00136230 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Restores the spin control state from a replay frame.
@@ -10004,7 +9870,7 @@ struct sVEntry00136230 {
  */
 extern "C" void cSpinControl_readFromReplayFrame(cSpinControl* self, cReplayFramePtr* obj)
 {
-    sVEntry00136230* vt = *(sVEntry00136230**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 88);
 }
 #endif
@@ -10221,11 +10087,6 @@ extern "C" void cUberGrindControl_update(cUberGrindControl* self, void* in)
 //100%
 INCLUDE_ASM("ai/ai", cUberGrindControl_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry001368E8 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Writes the uber grind state to a replay frame.
@@ -10236,7 +10097,7 @@ struct sVEntry001368E8 {
  */
 extern "C" void cUberGrindControl_writeToReplayFrame(cUberGrindControl* self, cReplayFramePtr* obj)
 {
-    sVEntry001368E8* vt = *(sVEntry001368E8**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x8);
 }
 #endif
@@ -10244,11 +10105,6 @@ extern "C" void cUberGrindControl_writeToReplayFrame(cUberGrindControl* self, cR
 //100%
 INCLUDE_ASM("ai/ai", cUberGrindControl_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry00136920 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Restores the uber grind state from a replay frame.
@@ -10259,7 +10115,7 @@ struct sVEntry00136920 {
  */
 extern "C" void cUberGrindControl_readFromReplayFrame(cUberGrindControl* self, cReplayFramePtr* obj)
 {
-    sVEntry00136920* vt = *(sVEntry00136920**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x8);
 }
 #endif

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "sound/ssxaudio.h"
 #include "bx/math3d.h"
 #include "ai/rider.h"
@@ -117,11 +118,6 @@ extern "C" int cRiderMetrix_hasActiveHUDfx(cRiderMetrix* self, int type)
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry001174B0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Writes the rider metrix's first 428 bytes (0x1AC) into a replay frame through @p obj's virtual slot 1.
@@ -132,7 +128,7 @@ struct sVEntry001174B0 {
  */
 extern "C" void cRiderMetrix_writeToReplayFrame(cRiderMetrix* self, void* obj)
 {
-    sVEntry001174B0* vt = *(sVEntry001174B0**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 428);
 }
 #endif
@@ -140,11 +136,6 @@ extern "C" void cRiderMetrix_writeToReplayFrame(cRiderMetrix* self, void* obj)
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry001174E8 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Reads the rider metrix's first 428 bytes (0x1AC) back from a replay frame through @p obj's virtual slot 2.
@@ -155,7 +146,7 @@ struct sVEntry001174E8 {
  */
 extern "C" void cRiderMetrix_readFromReplayFrame(cRiderMetrix* self, void* obj)
 {
-    sVEntry001174E8* vt = *(sVEntry001174E8**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 428);
 }
 #endif
@@ -679,7 +670,7 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_update);
 extern "C" void cRiderMetrix_earnComboChain(cRiderMetrix*);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 struct sGradeStep_119210;
-extern "C" int cRiderMetrix_updateBonusLevelAndCalcPoints(cRiderMetrix* self, int* idx, sGradeStep_119210* tbl, int type, float x);
+extern "C" int cRiderMetrix_updateBonusLevelAndCalcPoints(cRiderMetrix* self, int* idx, tHoldBonusDB* tbl, int type, float x);
 extern "C" void cHUDFX_update(void* slot);
 extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* self);
 extern "C" void cSSXAudio_SetCurTrickPower(void* audio, void* rider, float mult);
@@ -687,11 +678,11 @@ extern "C" void* func_00416210(void* dst, int c, int n);
 int cRider_getMotionState(void* rider);
 int cRider_getControlState(void* rider);
 
-extern sGradeStep_119210 kBigAirBonusDB[];
-extern sGradeStep_119210 kLongGrabBonusDB[];
-extern sGradeStep_119210 kLongRailBonusDB[];
-extern sGradeStep_119210 kLongPressBonusDB[];
-extern sGradeStep_119210 kLongPlantBonusDB[];
+extern tHoldBonusDB kBigAirBonusDB[];
+extern tHoldBonusDB kLongGrabBonusDB[];
+extern tHoldBonusDB kLongRailBonusDB[];
+extern tHoldBonusDB kLongPressBonusDB[];
+extern tHoldBonusDB kLongPlantBonusDB[];
 
 
 
@@ -1315,11 +1306,6 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_updateBonusLevelAndCalcPoints);
 extern "C" void cRiderMetrix_removeHUDfx(cRiderMetrix* self, int type);
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
 
-struct sGradeStep_119210
-{
-    float threshold;
-    float mult;
-};
 
 /**
  * Steps a hold/air bonus up a level when its measure passes the next threshold, and returns the bonus points earned.
@@ -1334,16 +1320,16 @@ struct sGradeStep_119210
  * @param x  the current measure, e.g. air or hold seconds (On Tour curMeasure)
  * @return the bonus points earned, or 0
  */
-extern "C" int cRiderMetrix_updateBonusLevelAndCalcPoints(cRiderMetrix* self, int* idx, sGradeStep_119210* tbl, int type, float x)
+extern "C" int cRiderMetrix_updateBonusLevelAndCalcPoints(cRiderMetrix* self, int* idx, tHoldBonusDB* tbl, int type, float x)
 {
     // PORT: pointer arithmetic through int.
-    sGradeStep_119210* bonusStep = (sGradeStep_119210*)(*idx * 8 + (int)tbl);
-    float stepThreshold = bonusStep->threshold;
+    tHoldBonusDB* bonusStep = (tHoldBonusDB*)(*idx * 8 + (int)tbl);
+    float stepThreshold = bonusStep->minTarget;
     if (stepThreshold < 0.0f) return 0;
     if (stepThreshold <= x)
     {
         float pointsMult = self->mPointsMultiplier;
-        int pointsEarned = (int)(bonusStep->mult * pointsMult + 0.5f);
+        int pointsEarned = (int)(bonusStep->points * pointsMult + 0.5f);
         *idx = *idx + 1;
         cRiderMetrix_removeHUDfx(self, 0x1C);
         cRiderMetrix_removeHUDfx(self, 29);
@@ -1496,7 +1482,6 @@ extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg,
 extern "C" int cGameModeMan_riderCheckpointHit(void* mgr, int id, int a2);
 extern "C" void func_002A3CE8(void* snd, void* rider, int a2);
 
-struct sVEntry001194C0 { short delta; short index; int (*fn)(void*); };
 
 static inline bool rmRiderFlags_1194C0(char* r)
 {
@@ -1516,12 +1501,12 @@ static inline bool rmRiderFlags_1194C0(char* r)
 extern "C" float cRiderMetrix_evCheckpoint(cRiderMetrix* self, int timeBonusSec)
 {
     char* sub = (char*)&self->Rider->mVtbl;
-    sVEntry001194C0* vt = *(sVEntry001194C0**)sub;
+    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
     if (vt[8].fn(sub + vt[8].delta) != 0)
     {
         void* mgr = SSXApp->GameModeMan;
         char* sub2 = (char*)&self->Rider->mVtbl;
-        sVEntry001194C0* vt2 = *(sVEntry001194C0**)sub2;
+        sVEntry<int(void*)>* vt2 = *(sVEntry<int(void*)>**)sub2;
         if (cGameModeMan_riderCheckpointHit(mgr, vt2[7].fn(sub2 + vt2[7].delta), timeBonusSec) != 0)
         {
             cRiderMetrix_addHUDfx1(((char*)self), 41, timeBonusSec, 0, 2.5f);
@@ -2337,11 +2322,6 @@ extern "C" void cSSXAudio_LandedMonsterCombo(void* audio, int rider);
 extern "C" int cRiderMetrix_addToHistory(cRiderMetrix* self, sTrickId* id);
 extern "C" void cRiderMetrix_addTrick(cRiderMetrix* self, sTrickId* id, int repeat);
 
-// Same layout as sTrickId, which the unit defines after this function.
-struct sTrickIdA168 {
-    int w0;
-    int w1;
-};
 
 /**
  * Names the trick so far without banking its points, paying any monster-trick bonus into the trick power.
@@ -2357,7 +2337,7 @@ struct sTrickIdA168 {
  */
 extern "C" void cRiderMetrix_earnName(cRiderMetrix* self, int stance, int alternate, int style, int flag)
 {
-    sTrickIdA168 idv;
+    tTrickNameDef idv;
     sTrickId* id = (sTrickId*)&idv;
     if (cRiderMetrix_buildTrickName(self, id, stance, alternate, style, flag) != 0)
     {
@@ -2852,20 +2832,7 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_checkForMonsterTrick);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int value, int size);
 
-struct sTrickBonus_11B1A8
-{
-    int grade;              // 0x0
-    int points;             // 0x4
-    unsigned char a;        // 0x8
-    unsigned char b;        // 0x9
-    unsigned char c;        // 0xA
-    unsigned char d;        // 0xB
-    unsigned char e;        // 0xC
-    unsigned char f;        // 0xD
-    unsigned char g;        // 0xE
-    unsigned char pad;      // 0xF
-};
-extern sTrickBonus_11B1A8 gMonsterComboTable[];
+extern tMonsterTrick gMonsterComboTable[];
 
 struct sTrickBits_11B1A8
 {
@@ -2896,18 +2863,18 @@ struct sTrickBits_11B1A8
 extern "C" int cRiderMetrix_checkForMonsterTrick(cRiderMetrix* self, sTrickId* id)
 {
     sTrickBits_11B1A8* trick = (sTrickBits_11B1A8*)id;
-    sTrickBonus_11B1A8* comboEntry = gMonsterComboTable;
+    tMonsterTrick* comboEntry = gMonsterComboTable;
     for (int i = 0; i < 24; i++, comboEntry++)
     {
-        if (trick->a != comboEntry->a) continue;
-        if (trick->b != comboEntry->b) continue;
-        if (trick->c != comboEntry->c) continue;
-        if (trick->d != comboEntry->d) continue;
-        if (trick->e != comboEntry->e) continue;
-        if (trick->f != comboEntry->f) continue;
-        if (trick->g != comboEntry->g) continue;
+        if (trick->a != comboEntry->reqOrient) continue;
+        if (trick->b != comboEntry->reqSpin) continue;
+        if (trick->c != comboEntry->reqReps) continue;
+        if (trick->d != comboEntry->reqFlip) continue;
+        if (trick->e != comboEntry->reqPostSpin) continue;
+        if (trick->f != comboEntry->reqGrab) continue;
+        if (trick->g != comboEntry->reqLateGrab) continue;
         MEM_fill(id, 0, 8);
-        trick->grade = comboEntry->grade;
+        trick->grade = comboEntry->id;
         return comboEntry->points;
     }
     return 0;

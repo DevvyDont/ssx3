@@ -131,6 +131,51 @@ CHECK_OFFSET(cAnimSequence, Next, 0x0C8);
 CHECK_OFFSET(cAnimSequence, unk_0CC, 0x0CC);
 CHECK_SIZE(cAnimSequence, 0xD0);
 
+// One sub-animation's clip and time in a blend frame (On Tour struct tAnimSourceFrame, 0x8). [Staged by views group A.]
+struct tAnimSourceFrame {
+    unsigned int AnimID;            // 0x0 [O] tAnimID {SourceID : 8, AnimID : 24}; [U] getAnimBlendFrames copies
+                                    //       tSubAnim::AnimID
+    float Time;                     // 0x4 [O]; [U] getAnimBlendFrames copies tSubAnim::Time
+};
+
+CHECK_OFFSET(tAnimSourceFrame, AnimID, 0x0);
+CHECK_OFFSET(tAnimSourceFrame, Time, 0x4);
+CHECK_SIZE(tAnimSourceFrame, 0x8);
+
+// One weighted animation frame for the model blend (On Tour struct tAnimBlendFrame, 0x50; [O] getAnimBlendFrames(
+// tAnimBlendFrame* frames, int max), cRiderAnimBase::getAIAnimFrame returns one). cAnimSequencer_getAnimBlendFrames
+// writes one per active sub-animation of each playing sequence; cRiderAnimBase_setupAnimation gathers up to 64 from the
+// six sequencers on the stack and passes them to the model blend (func_0030F2B0, On Tour cAnimModel::blend).
+// Size 0x50 [U]: the 0x50 stride of those arrays (views sAnimState_00312598 / sAnimState_00312660 / sSeqState_314418);
+// 16-byte aligned (tPose; getAIAnimFrame returns it by value with lq/sq). [Staged by views group A.]
+struct tAnimBlendFrame {
+    tAnimSourceFrame SourceFrame;   // 0x00 [O]; [U] getAnimBlendFrames: the sub-animation's AnimID and Time
+    int Priority;                   // 0x08 [O]; [U] getAnimBlendFrames copies cAnimSequence::Priority
+    float Weight;                   // 0x0C [O]; [U] getAnimBlendFrames stores cAnimSequence_getNetWeight
+    unsigned long Mask;             // 0x10 [O] (unsigned long long; 64-bit on the EE); [U] getAnimBlendFrames copies
+                                    //       cAnimSequence::Mask (ld/sd)
+    char unk_018[0x8];              // 0x18 alignment of the 16-byte tPose (On Tour has the same gap)
+    tPose OrientationOffset;        // 0x20 [O]; [U] getAnimBlendFrames copies cAnimSequence::OrientationOffset (lq/sq)
+    int IsFlipped;                  // 0x40 [O] bool (a word in retail); [U] getAnimBlendFrames copies
+                                    //       cAnimSequence::IsFlipped
+    char unk_044[0xC];              // 0x44 tail padding to the 16-byte alignment
+#ifdef __cplusplus
+    // Not in On Tour's DWARF (it lists no member functions for these structs); retail's 0x40-element stack arrays in
+    // cRiderAnimBase_setupAnimation / cRiderAnimBase_getAIAnimFrame keep an (empty) array-constructor loop, which only
+    // a non-POD element type produces (the unit views carry the same empty constructor). Possibly implicit in EA's
+    // code (a constructor on tPose's members); keep it until that is known.
+    tAnimBlendFrame() {}
+#endif
+};
+
+CHECK_OFFSET(tAnimBlendFrame, SourceFrame, 0x00);
+CHECK_OFFSET(tAnimBlendFrame, Priority, 0x08);
+CHECK_OFFSET(tAnimBlendFrame, Weight, 0x0C);
+CHECK_OFFSET(tAnimBlendFrame, Mask, 0x10);
+CHECK_OFFSET(tAnimBlendFrame, OrientationOffset, 0x20);
+CHECK_OFFSET(tAnimBlendFrame, IsFlipped, 0x40);
+CHECK_SIZE(tAnimBlendFrame, 0x50);
+
 // cAnimSequencer (On Tour: 0x8, NumPlaying + PlayList, no base, no virtuals). cRiderAnimBase owns 6 of them in one
 // block: [R] its ctor allocates 0x30 bytes tagged "Sequencers" (6 x 8) and runs cAnimSequencer_init__FPv on each
 // (animation/rideranimbase.h: cRiderAnimBase::Sequencer, +0x50). Size 0x8 [R]: that allocation; init writes 0x0 and 0x4.
