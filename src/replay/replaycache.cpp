@@ -3014,7 +3014,7 @@ extern "C" int cScriptPlayerChannelBlock_Play(cScriptPlayerChannelBlock* self, u
     self->mpOwner = (cScriptPlayerEntity*)owner;
     self->mpHeader = (tInSeqBlockChannelHeader*)data;
     if (data[0] != 0) {
-        char* heap = *(char**)((char*)owner->mpOwner + 0x8);
+        char* heap = (char*)owner->mpOwner->mpManager;
         self->mpBlockArray = (tBlockEntry*)cScriptHeap_AllocMem(heap + 8, data[1] * 0x1C);
         self->mNextKeyIndex = 0;
         char* base = (char*)self->mpHeader;
@@ -3315,7 +3315,7 @@ extern "C" int cScriptPlayerChannelEvent_Play(cScriptPlayerChannelEvent* self, u
     self->mpOwner = (cScriptPlayerEntity*)owner;
     self->mpHeader = (tInSeqEventChannelHeader*)data;
     if (data[0] != 0) {
-        char* heap = *(char**)((char*)owner->mpOwner + 0x8);
+        char* heap = (char*)owner->mpOwner->mpManager;
         self->mpEventArray = (tEventEntry*)cScriptHeap_AllocMem(heap + 8, data[1] * 8);
         self->mNextKeyIndex = 0;
         char* base = (char*)self->mpHeader;
@@ -3549,7 +3549,7 @@ extern "C" int cScriptPlayerChannelObject_Play(cScriptPlayerChannelObject* self,
     self->mpOwner = (cScriptPlayerEntity*)owner;
     self->mpHeader = (tInSeqObjectChannelHeader*)data;
     if (data[0] != 0) {
-        char* heap = *(char**)((char*)owner->mpOwner + 0x8);
+        char* heap = (char*)owner->mpOwner->mpManager;
         self->mpObjectArray = (tObjectEntry*)cScriptHeap_AllocMem(heap + 8, data[1] * 36);
         for (int i = 0; i < ((unsigned short*)self->mpHeader)[1]; i++) {
         }
@@ -4183,7 +4183,7 @@ extern "C" void cScriptPlayerEntity_Stop(cScriptPlayerEntity* self)
             }
             }
         }
-        cScriptHeap_FreeMem((cScriptHeap*)((sRcHeap*)(*(char**)((char*)self->mpOwner + 0x8) + 8)), self->mpChannelPlayers);
+        cScriptHeap_FreeMem((cScriptHeap*)((sRcHeap*)(&self->mpOwner->mpManager->mHeap)), self->mpChannelPlayers);
         self->mpChannelPlayers = 0;
     }
     self->mIsPlaying = 0;
@@ -4513,7 +4513,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_GetProjectID);
  * @return the script's projectID
  */
 extern "C" int cScriptPlayerEntity_GetProjectID(cScriptPlayerEntity* scriptPlayerEntity) {
-    return (*(int *)((char*)((*(void **)((char*)((scriptPlayerEntity->mpOwner)) + (0x10)))) + (4)));
+    return ((int)scriptPlayerEntity->mpOwner->mpSystemHeader->projectID);
 }
 #endif
 //100%

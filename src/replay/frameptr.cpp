@@ -750,8 +750,8 @@ extern "C" void cReplay_reset(cReplay* self)
     if (!resettable) return;
     cReplay_frameSync(self);
     int i = 0;
-    char* frameList = ((char*)self) + 0x3B0;
-    char* freeList = ((char*)self) + 0x3BC;
+    char* frameList = (char*)&self->FrameList;
+    char* freeList = (char*)&self->FreeFrameList;
     int none = -1;
     self->SaveState = 15;
     cReplay_setReplayState(self, 10);
@@ -792,9 +792,9 @@ extern "C" void cReplay_reset(cReplay* self)
     self->WriteSaveSize = 0;
     self->WriteRemaining = 0;
     self->WriteFrameCount = 0;
-    sFpSlot_F228* highlight = (sFpSlot_F228*)(((char*)self) + 0x494);
+    sFpSlot_F228* highlight = (sFpSlot_F228*)(&self->Highlight[0]);
     char* highlightData = ((char*)self) + 0x498;
-    void** pp = (void**)(((char*)self) + 0x48C);
+    void** pp = (void**)(&self->InputCache[0]);
     do {
         if (*pp) cReplayCache_reset(*pp);
         highlight->fB0 = 0;
@@ -809,7 +809,7 @@ extern "C" void cReplay_reset(cReplay* self)
     cReplayFrameList_reset(frameList);
     cReplayFrameList_reset(freeList);
     for (i = 0; i < self->MaxFrames; i++) {
-        cReplayFrameList_addFrame(freeList, ((char*)self) + 0x2C + i * 0x38);
+        cReplayFrameList_addFrame(freeList, (char*)&self->Frames[0] + i * 0x38);
     }
     int three = 3;
     self->CurrentReplayCamIndex = 0;

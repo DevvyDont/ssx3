@@ -395,13 +395,13 @@ extern "C" void* cRailManNode_cRailManNode1(cRailManNode* self, void* bucket)
     int i;
     cSortObjNode_cSortObjNode1(self, bucket, 18);
     self->mVtbl = cRailManNode_vtbl;
-    unsigned int* railSlot = (unsigned int*)(((char*)self) + 0x18);
+    unsigned int* railSlot = (unsigned int*)(&self->RailInfo[0]);
     for (i = 0x7F; i != -1; i--, railSlot++) {
         *railSlot = 0xFFFFFFFF;
     }
     D_004A4040 = ((void*)self);
     for (i = 0; i < 0x80; i++) {
-        ((unsigned int*)(((char*)self) + 0x18))[i] = 0xFFFFFFFF;
+        ((unsigned int*)(&self->RailInfo[0]))[i] = 0xFFFFFFFF;
     }
     return ((void*)self);
 }
@@ -439,14 +439,14 @@ extern "C" void* cRailManNode_cRailManNode(cRailManNode* self, void* bucket, cRa
     int j;
     cSortObjNode_cSortObjNode(self, bucket, stream);
     self->mVtbl = cRailManNode_vtbl;
-    unsigned int* slot = (unsigned int*)(((char*)self) + 0x18);
+    unsigned int* slot = (unsigned int*)(&self->RailInfo[0]);
     for (j = 0x7F; j != -1; j--, slot++) {
         *slot = 0xFFFFFFFF;
     }
     D_004A4040 = ((void*)self);
-    stream->read(((char*)self) + 0x18, 0x200);
+    stream->read(&self->RailInfo[0], 0x200);
     for (i = 0; i < 0x80; i++) {
-        if (((unsigned int*)(((char*)self) + 0x18))[i] != 0xFFFFFFFF) {
+        if (((unsigned int*)(&self->RailInfo[0]))[i] != 0xFFFFFFFF) {
             cRailManNode_disableRail(self, i);
         }
     }
@@ -477,7 +477,7 @@ extern "C" void cRailManNode__cRailManNode(cRailManNode* self, int flags)
     int i;
     self->mVtbl = cRailManNode_vtbl;
     for (i = 0; i < 0x80; i++) {
-        if (((unsigned int*)(((char*)self) + 0x18))[i] != 0xFFFFFFFF) {
+        if (((unsigned int*)(&self->RailInfo[0]))[i] != 0xFFFFFFFF) {
             cRailManNode_enableRail(self, i);
         }
     }
@@ -997,8 +997,8 @@ struct sParticle_8DB0 {
  */
 extern "C" void* cAnimComboNode_cAnimComboNode(cAnimComboNode* self, void* bucket, void* stream)
 {
-    sParticle_8DB0** pp = (sParticle_8DB0**)(((char*)self) + 0x84);
-    cAnimObjectNode_cAnimObjectNode(((char*)self) + 0x18, bucket, stream);
+    sParticle_8DB0** pp = (sParticle_8DB0**)(&self->ComboXform);
+    cAnimObjectNode_cAnimObjectNode(&self->AnimType, bucket, stream);
     self->mVtbl = (void**)D_0048EC28;
     sStreamVE_8DB0* vt = *(sStreamVE_8DB0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, self, 0x18);
@@ -1079,13 +1079,13 @@ extern "C" int cAnimComboNode_updateNode(cAnimComboNode* self)
                         }
                         *(signed char*)&self->AnimActive2 = 0;
                     }
-                    if (func_0034EBA0(((char*)self) + 0x34) == 0) {
+                    if (func_0034EBA0(&self->CurrTime) == 0) {
                         return 0;
                     }
                 }
             }
         } else {
-            cAnimObjectNode_updateNode(((char*)self) + 0x18);
+            cAnimObjectNode_updateNode(&self->AnimType);
             return 1;
         }
         self->Flags |= 1;
@@ -1114,7 +1114,7 @@ extern "C" void cMoveNode_updateIntersectInfo(void* self, void* out);
  */
 extern "C" void cAnimComboNode_updateIntersectInfo(cAnimComboNode* self, void* out)
 {
-    cMoveNode_updateIntersectInfo((char*)self + 0x48, out);
+    cMoveNode_updateIntersectInfo(&self->unk_048, out);
     *(sMpQuad*)((char*)out + 0x20) = t4vect_Zero;
     *(sMpQuad*)((char*)out + 0x30) = t4vect_Zero;
 }
@@ -1253,7 +1253,7 @@ extern "C" void cInstanceNode_loseFocus(void*);
 extern "C" void cAnimComboNode_loseFocus(cAnimComboNode* self)
 {
     if (*(signed char*)&self->AnimComplete2 == 0) {
-        cInstanceNode_loseFocus((char*)self + 0x48);
+        cInstanceNode_loseFocus(&self->unk_048);
     }
 }
 #endif
@@ -1420,7 +1420,7 @@ extern "C" void* cAnimDeltaNode_cAnimDeltaNode(cAnimDeltaNode* self, void* bucke
     cAnimObjectNode_cAnimObjectNode(self, bucket, stream);
     self->mVtbl = cAnimDeltaNode_vtbl;
     sVEntry00359270* vt = *(sVEntry00359270**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x6C, 4);
+    vt[2].fn((char*)stream + vt[2].delta, (char*)&self->Delta, 4);
     return ((void*)self);
 }
 #endif
@@ -1478,7 +1478,7 @@ extern "C" int cAnimDeltaNode_updateNode(cAnimDeltaNode* self)
                 self->Delay = countdown - 1;
             }
             if (self->AnimComplete != 0) {
-                char* obj = ((char*)self) + 0x30;
+                char* obj = (char*)&self->unk_030;
                 sVEntry_3592D0* vtEntry = &((sVEntry_3592D0*)self->mVtbl)[34];
                 vtEntry->fn(obj + vtEntry->delta, 1);
                 return 0;
@@ -1532,7 +1532,7 @@ extern "C" void cAnimDeltaNode_writeToReplayFrame(cAnimDeltaNode* self, void* st
 {
     cAnimObjectNode_writeToReplayFrame(self, stream);
     sSerVEntry_00359410* vt = *(sSerVEntry_00359410**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x6C, 0x4);
+    vt[1].fn((char*)stream + vt[1].delta, (char*)&self->Delta, 0x4);
 }
 #endif
 
@@ -1571,7 +1571,7 @@ extern "C" void* cSplineModifier_cSplineModifier1(cSplineModifier* self, char* d
     self->HeadTweak = *(float*)(desc + 0x14) * 0.01745329424738884f;
     self->Force = *(float*)(desc + 0x24) * 100.0f;
     self->ForceTime = *(float*)(desc + 0x28);
-    cSpline_init(((char*)self) + 0xD8, *(int*)(desc + 0x4));
+    cSpline_init(&self->Spline, *(int*)(desc + 0x4));
     cSplineModifier_setSpeed(((char*)self), *(float*)(desc + 0x10));
     if (*(float*)(desc + 0x10) >= 0.0f) {
         self->OffsetDistance = 0.0f;

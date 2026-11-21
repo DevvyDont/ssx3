@@ -9496,7 +9496,7 @@ extern "C" void* cWScriptMission_cWScriptMission(cWScriptMission* self, void* ma
     self->Scope = *(int*)(data + 0x50);
     self->SortKey = key;
     for (int i = 0; i < 4; i++)
-        ((int*)((char*)self + 0x68))[i] = cWScriptMan_getScriptCode_7128((int)self->Manager, ((int*)(data + 0x40))[i]);
+        ((int*)(&self->MissionScriptCode[0]))[i] = cWScriptMan_getScriptCode_7128((int)self->Manager, ((int*)(data + 0x40))[i]);
     return ((void*)self);
 }
 #endif

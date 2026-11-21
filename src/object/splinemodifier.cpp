@@ -719,7 +719,7 @@ extern "C" void* cMultiSplineModifier_cMultiSplineModifier(cMultiSplineModifier*
     self->NumModels = *(int*)(desc + 0x2C);
     self->OrientType = *(int*)(desc + 0x8);
     self->HeadTweak = *(float*)(desc + 0x10) * 0.01745329424738884f;
-    cSpline_init(((char*)self) + 0x48, *(int*)(desc + 0x4));
+    cSpline_init(&self->Spline, *(int*)(desc + 0x4));
     cMultiSplineModifier_setSpeed(self, *(float*)(desc + 0xC));
     if (*(float*)(desc + 0xC) >= 0.0f) {
         self->OffsetDistance = 0.0f;
@@ -2287,7 +2287,7 @@ static inline void grow_B708(sSmBox_B708& box, float d)
  */
 extern "C" char* cRailModifier_cRailModifier(cRailModifier* self, sSmDesc_B708* desc, sSmModel_B708* model)
 {
-    sSmBox_B708* box = (sSmBox_B708*)(((char*)self) + 0x10);
+    sSmBox_B708* box = (sSmBox_B708*)(&self->BoundBox);
     self->SplineId = 0xFFFFFFFF;
     self->mVtbl = (void**)cRailModifier_vtbl;
     self->Next = 0;
@@ -2313,13 +2313,13 @@ extern "C" char* cRailModifier_cRailModifier(cRailModifier* self, sSmDesc_B708* 
         margin.y = 100.0f;
         margin.z = 100.0f;
         margin.w = 0.0f;
-        subEq_B708(((sSmBox_B708*)(((char*)self) + 0x10))->min, margin);
-        addEq_B708(((sSmBox_B708*)(((char*)self) + 0x10))->max, margin);
+        subEq_B708(((sSmBox_B708*)(&self->BoundBox))->min, margin);
+        addEq_B708(((sSmBox_B708*)(&self->BoundBox))->max, margin);
     }
     cRailModifier_buildXform(((char*)self));
     cRailModifier_updateBoundBox(self);
     insert_B708((char*)cObjectInterface_getNash(), self->Node, box);
-    sSmTrack_B708* track = ((sSmRef_B708*)(((char*)self) + 0x30))->get();
+    sSmTrack_B708* track = ((sSmRef_B708*)(&self->SplineId))->get();
     sSmSeg_B708* seg = track->first;
     for (int i = 0; i < track->count; i++) {
         sSmBox_B708 bounds;
@@ -2482,11 +2482,11 @@ extern "C" char* cRailModifier_cRailModifier1(cRailModifier* self, cSmStream_BA8
     self->mVtbl = (void**)cRailModifier_vtbl;
     self->Next = 0;
     self->Prev = 0;
-    src->read(((char*)self) + 0x10, 0x30);
+    src->read(&self->BoundBox, 0x30);
     self->Instance = (tInstanceRecord*)src->readReplayInstance();
     cRailModifier_buildXform(((char*)self));
-    insert_BA88((char*)cObjectInterface_getNash(), self->Node, (sSmBox_BA88*)(((char*)self) + 0x10));
-    sSmTrack_BA88* track = ((sSmRef_BA88*)(((char*)self) + 0x30))->get();
+    insert_BA88((char*)cObjectInterface_getNash(), self->Node, (sSmBox_BA88*)(&self->BoundBox));
+    sSmTrack_BA88* track = ((sSmRef_BA88*)(&self->SplineId))->get();
     sSmSeg_BA88* seg = track->first;
     for (int i = 0; i < track->count; i++) {
         sSmBox_BA88 segBox;
@@ -2639,9 +2639,9 @@ struct sSmRef_BD70 {
 extern "C" void cRailModifier__cRailModifier(cRailModifier* self, int flags)
 {
     self->mVtbl = (void**)cRailModifier_vtbl;
-    remove_BD70((char*)cObjectInterface_getNash(), self->Node, (sSmBox_BD70*)(((char*)self) + 0x10));
+    remove_BD70((char*)cObjectInterface_getNash(), self->Node, (sSmBox_BD70*)(&self->BoundBox));
     operator_delete((int*)self->Node);
-    sSmTrack_BD70* spline = ((sSmRef_BD70*)(((char*)self) + 0x30))->get();
+    sSmTrack_BD70* spline = ((sSmRef_BD70*)(&self->SplineId))->get();
     sSmSeg_BD70* seg = spline->first;
     for (int i = 0; i < spline->count; i++) {
         sSmBox_BD70 segBox;

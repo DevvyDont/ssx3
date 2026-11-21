@@ -312,7 +312,7 @@ extern "C" void cDeadFadeNode_update(cDeadFadeNode* self)
     if (fade > 0.0f) {
         self->Fade = fade - self->FadeRate;
     } else {
-        func_002D1CC0_2(self->Instance, (char*)self + 0x1C);
+        func_002D1CC0_2(self->Instance, &self->Data);
     }
 }
 #endif
@@ -334,7 +334,7 @@ void* func_002D1CC0_2(void*, void*) __asm__("func_002D1CC0__FPv");
  */
 extern "C" void cDeadFadeNode_loseFocus(cDeadFadeNode* self)
 {
-    func_002D1CC0_2(self->Instance, (char*)self + 0x1C);
+    func_002D1CC0_2(self->Instance, &self->Data);
 }
 #endif
 

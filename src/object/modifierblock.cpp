@@ -614,7 +614,7 @@ extern "C" void tModifierBlock_remPhysicsModifier(tModifierBlock* self)
 {
     cPhysicsModifier* obj = self->Physics;
     if (obj != 0) {
-        sMbVEntryDel2* vt = *(sMbVEntryDel2**)((char*)obj + 0x4);
+        sMbVEntryDel2* vt = (sMbVEntryDel2*)obj->mVtbl;
         vt[1].fn((char*)obj + vt[1].delta, 3);
         self->Physics = 0;
     }

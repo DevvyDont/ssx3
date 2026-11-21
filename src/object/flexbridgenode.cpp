@@ -1266,8 +1266,8 @@ extern "C" void cFlexBridgeNode_render(cFlexBridgeNode* self)
     {
         sVE93_7B80* vt = *(sVE93_7B80**)(ctx + 0x10D8);
         char* thisp = ctx + vt[93].delta;
-        char* lo = ((char*)self) + 0x90;
-        char* hi = ((char*)self) + 0xA0;
+        char* lo = (char*)&self->BoundBox;
+        char* hi = (char*)&self->BoundBox.MaxPoint;
         sVE43_7B80* vt43 = *(sVE43_7B80**)(ctx + 0x10D8);
         sPair_7B80 viewMatrix = vt43[43].fn(ctx + vt43[43].delta);
         if (vt[93].fn(thisp, lo, hi, &viewMatrix) == 1) {
@@ -1371,7 +1371,7 @@ extern "C" void* cFlexRailNode_cFlexRailNode(cFlexRailNode* self, void* nodeType
             self->NumNodes += 1;
         }
     }
-    sFlexSeg_347D90** segs = (sFlexSeg_347D90**)(((char*)self) + 0x50);
+    sFlexSeg_347D90** segs = (sFlexSeg_347D90**)(&self->Mats);
     *segs = new (str_FlexNodeMats, 0x20000000, 0) sFlexSeg_347D90[self->NumNodes - 1];
     self->Tube = (cSimpleTube*)cSimpleTube_cSimpleTube(cMemMan_alloc(0xC, str_Tube_b, 0x20000000, 0), self->NumNodes * 8 - 9);
     return ((char*)self);
@@ -1402,11 +1402,11 @@ extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a, void* stream);
  */
 extern "C" void* cFlexRailNode_cFlexRailNode1(cFlexRailNode* self, void* bucket, void* stream)
 {
-    sFlexSeg_347D90** segs = (sFlexSeg_347D90**)(((char*)self) + 0x50);
+    sFlexSeg_347D90** segs = (sFlexSeg_347D90**)(&self->Mats);
     cInstanceNode_cInstanceNode(((char*)self), bucket, stream);
     self->mVtbl = (void**)cFlexRailNode_vtbl;
     sSerVEntry_00347EA8* readSlot = &(*(sSerVEntry_00347EA8**)stream)[2];
-    readSlot->fn((char*)stream + readSlot->delta, ((char*)self) + 0x20, 0x30);
+    readSlot->fn((char*)stream + readSlot->delta, (char*)&self->NumNodes, 0x30);
     *segs = new (str_FlexNodeMats, 0x20000000, 0) sFlexSeg_347D90[self->NumNodes - 1];
     self->Tube = (cSimpleTube*)cSimpleTube_cSimpleTube(cMemMan_alloc(0xC, str_Tube_b, 0x20000000, 0), self->NumNodes * 8 - 9);
     return ((char*)self);

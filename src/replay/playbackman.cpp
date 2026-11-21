@@ -522,7 +522,7 @@ extern "C" void cPlaybackMan_saveFrame(cPlaybackMan* self)
         desc.type = one;
         desc.a = 0;
         desc.b = 0;
-        cReplay_saveFrame1((cReplay*)(*(void**)((char*)self->Game + 0x28)), (char*)&self->SaveFramePtr,
+        cReplay_saveFrame1((cReplay*)(self->Game->Replay), (char*)&self->SaveFramePtr,
                       (sPbBytes4*)&desc);
         self->SaveFrame = one;
     }
@@ -547,7 +547,7 @@ extern "C" void cReplay_restoreFrame1_2(void* replay, void* frame) __asm__("cRep
 extern "C" void* cPlaybackMan_restoreFrame(cPlaybackMan* self)
 {
     if (self->SaveFrame) {
-        cReplay_restoreFrame1_2(*(void**)((char*)self->Game + 0x28), (char*)&self->SaveFramePtr);
+        cReplay_restoreFrame1_2(self->Game->Replay, (char*)&self->SaveFramePtr);
     }
 }
 #endif
@@ -576,7 +576,7 @@ extern "C" void cPlaybackMan_startPreview(cPlaybackMan* self)
     if (self->State == 0 && *(int*)((char*)self->CurrentFrame + 0xC) > 0) {
         cAI_purgeMissionRiders(self->AI);
         cAI_reinitMissionRiders(self->AI);
-        void* replay = *(void**)((char*)self->Game + 0x28);
+        void* replay = self->Game->Replay;
         *(int*)((char*)replay + 0x4) = *(int*)replay;
         cReplay_setReplayState(replay, 14);
         cPlaybackMan_saveFrame(self);
@@ -586,7 +586,7 @@ extern "C" void cPlaybackMan_startPreview(cPlaybackMan* self)
         self->State = 1;
         char* x = *(char**)((char*)self->AI + 0x70);
         int targetRider = x ? *(int*)(x + 0x18) : 0;
-        cCamera_switchChaseControllerTargetRider(*(void**)(*(char**)((char*)self->Game + 0x84) + 0x4), targetRider);
+        cCamera_switchChaseControllerTargetRider(*(void**)((char*)self->Game->ViewMan + 0x4), targetRider);
     }
 }
 #endif
@@ -611,12 +611,12 @@ extern "C" void cPlaybackMan_stopPreview(cPlaybackMan* self)
     if (self->State == 1) {
         cAI_purgeMissionRiders(self->AI);
         cAI_reinitMissionRiders(self->AI);
-        void* replay = *(void**)((char*)self->Game + 0x28);
+        void* replay = self->Game->Replay;
         cReplay_setReplayState(replay, *(int*)((char*)replay + 0x4));
         cPlaybackMan_restoreFrame(self);
         self->State = 0;
         int targetRider = *(int*)((char*)self->AI + 0x28);
-        cCamera_switchChaseControllerTargetRider(*(void**)(*(char**)((char*)self->Game + 0x84) + 0x4), targetRider);
+        cCamera_switchChaseControllerTargetRider(*(void**)((char*)self->Game->ViewMan + 0x4), targetRider);
     }
 }
 #endif

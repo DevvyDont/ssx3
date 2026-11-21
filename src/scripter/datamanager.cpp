@@ -468,7 +468,7 @@ struct sDmCmd5DD8 {
  */
 extern "C" int tNISList_AddByVideoCategory(tNISList* self, int videoCategory, int controlBits)
 {
-    if (cCircularBuffer_IsFull(((char*)self) + 0xC) != 0) {
+    if (cCircularBuffer_IsFull(&self->mList) != 0) {
         return 0;
     }
     sDmCmd5DD8 cmd;
@@ -481,7 +481,7 @@ extern "C" int tNISList_AddByVideoCategory(tNISList* self, int videoCategory, in
     // 64-bit "none" value compared against the pending index below; needed for the target's branch layout
     long none = 0;
     cmd.a6 = -1;
-    void* list = ((char*)self) + 0xC;
+    void* list = (char*)&self->mList;
     cCircularBuffer_AddToTail(list, &cmd);
     if (self->mState == 0) {
         return 1;
@@ -544,7 +544,7 @@ struct sDmCmd5ED0 {
  */
 extern "C" int tNISList_AddByScriptCategory(tNISList* self, int scriptCategory, int controlBits, int lookup, int aiCharIndexMain, int aiCharIndexSupport0, int aiCharIndexSupport1)
 {
-    if (cCircularBuffer_IsFull(((char*)self) + 0xC) != 0) {
+    if (cCircularBuffer_IsFull(&self->mList) != 0) {
         return 0;
     }
     sDmCmd5ED0 cmd;
@@ -562,7 +562,7 @@ extern "C" int tNISList_AddByScriptCategory(tNISList* self, int scriptCategory, 
         }
         cmd.id = id;
     }
-    void* list = ((char*)self) + 0xC;
+    void* list = (char*)&self->mList;
     cCircularBuffer_AddToTail(list, &cmd);
     if (self->mState == 0) {
         return 1;
@@ -628,8 +628,8 @@ struct sDmCmd6048 {
  */
 extern "C" int tNISList_AddByScriptIndex(tNISList* self, int scriptIndex, int controlBits, int aiCharIndexMain, int aiCharIndexSupport0, int aiCharIndexSupport1)
 {
-    if (cCircularBuffer_IsFull(((char*)self) + 0xC) == 0) {
-        void* list = ((char*)self) + 0xC;
+    if (cCircularBuffer_IsFull(&self->mList) == 0) {
+        void* list = (char*)&self->mList;
         sDmCmd6048 cmd;
         cmd.type = 0x1C;
         cmd.id = -1;
@@ -736,7 +736,7 @@ extern "C" int tNISList_ReadyList(tNISList* self, int playOnReady)
         return self->mState;
     }
     self->mPlayOnReady = playOnReady;
-    void* list = ((char*)self) + 0xC;
+    void* list = (char*)&self->mList;
     if (cCircularBuffer_GetNumEntries(list) == 0) {
         return 0;
     }
@@ -1040,7 +1040,7 @@ extern "C" int tNISList_SkipForward(tNISList* self, int delta, int force)
         if (tNISList_IsVideo(self, it) == 0) {
             cBXScriptEngine_ReleaseRequest((char*)self->mpNISEngine, it->handle);
         } else if (it->handle != 0) {
-            cVidEngine_ResetVideoEngine((char*)self->mpNISEngine + 0x500);
+            cVidEngine_ResetVideoEngine(&self->mpNISEngine->mpPlayer);
         }
         it->handle = -1;
         self->mNextPendingScriptIndex = -1;
@@ -1374,7 +1374,7 @@ extern "C" void tNISList_Update(tNISList* self)
         return;
     }
     if (self->mInScriptTransition != 0) {
-        char* item = (char*)cCircularBuffer_operatorIndex(((char*)self) + 0xC, 0);
+        char* item = (char*)cCircularBuffer_operatorIndex(&self->mList, 0);
         char* obj = (char*)cGame_getTransitionMan(SSXApp->Game, 0);
         if (self->mTransitionWaitFrames != 0) {
             if (--self->mTransitionWaitFrames == 0) {
@@ -1395,7 +1395,7 @@ extern "C" void tNISList_Update(tNISList* self)
         }
     }
     if (self->mPausedOnNextScriptLoading != 0) {
-        void* list = ((char*)self) + 0xC;
+        void* list = (char*)&self->mList;
         char* item = (char*)cCircularBuffer_operatorIndex(list, self->mNextPendingScriptIndex);
         int ok;
         if (tNISList_IsVideo(self, item) == 0) {
@@ -1421,7 +1421,7 @@ extern "C" void tNISList_Update(tNISList* self)
             return;
         }
     }
-    char* item = (char*)cCircularBuffer_operatorIndex(((char*)self) + 0xC, 0);
+    char* item = (char*)cCircularBuffer_operatorIndex(&self->mList, 0);
     int done = 0;
     if (tNISList_IsVideo(self, item) == 0) {
         if (cBXScriptEngine_GetRequestState(*(void**)self, *(int*)(item + 0xC)) == 2 || cBXScriptEngine_IsRequestPlaybackEnding(*(void**)self, *(int*)(item + 0xC)) != 0) {
@@ -1466,7 +1466,7 @@ extern "C" void tNISList_DoSkip(tNISList* self)
     if (self->mDoSkip != 0) {
         return;
     }
-    void* list = ((char*)self) + 0xC;
+    void* list = (char*)&self->mList;
     char* entry = (char*)cCircularBuffer_operatorIndex(list, 0);
     if (!(*(int*)(entry + 0x8) & 1)) {
         return;
@@ -1632,7 +1632,7 @@ extern "C" int tNISList_IsPlayingVideo(tNISList* self)
     if (self->mState != 3) {
         return 0;
     }
-    return tNISList_IsVideo(self, cCircularBuffer_operatorIndex(((char*)self) + 0xC, 0));
+    return tNISList_IsVideo(self, cCircularBuffer_operatorIndex(&self->mList, 0));
 }
 #endif
 
@@ -1823,10 +1823,10 @@ struct sDmEnt7450 {
  */
 extern "C" int tNISList_SetupNextScript(tNISList* vself, int index, int skipFlagged)
 {
-    int count = cCircularBuffer_GetNumEntries_count(((char*)vself) + 0xC);
+    int count = cCircularBuffer_GetNumEntries_count(&vself->mList);
     int i = index;
     for (; i < count; i++) {
-        sDmEnt7450* currEntry = (sDmEnt7450*)cCircularBuffer_operatorIndex(((char*)vself) + 0xC, i);
+        sDmEnt7450* currEntry = (sDmEnt7450*)cCircularBuffer_operatorIndex(&vself->mList, i);
         if (skipFlagged && (currEntry->flags & 2))
             continue;
         if (currEntry->id >= 0)
@@ -1897,10 +1897,10 @@ struct sDmSndVEntry7598 {
 extern "C" void tNISList_RemoveFromHead(tNISList* selfp, int n)
 {
     while (n != 0) {
-        if (cCircularBuffer_IsEmpty(((char*)selfp) + 0xC) != 0) {
+        if (cCircularBuffer_IsEmpty(&selfp->mList) != 0) {
             return;
         }
-        sDmCmd7598 cmd = *(sDmCmd7598*)cCircularBuffer_operatorIndex(((char*)selfp) + 0xC, 0);
+        sDmCmd7598 cmd = *(sDmCmd7598*)cCircularBuffer_operatorIndex(&selfp->mList, 0);
         if (cmd.id >= 0) {
             if (tNISList_IsVideo(selfp, &cmd) == 0) {
                 cBXScriptEngine_ReleaseRequest(*(void**)selfp, cmd.id);
@@ -1923,7 +1923,7 @@ extern "C" void tNISList_RemoveFromHead(tNISList* selfp, int n)
                 cVidEngine_ResetVideoEngine(*(char**)selfp + 0x500);
             }
         }
-        cCircularBuffer_RemoveFromHead(((char*)selfp) + 0xC, 0);
+        cCircularBuffer_RemoveFromHead(&selfp->mList, 0);
         n--;
     }
 }
@@ -2056,7 +2056,7 @@ extern "C" void tNISList_PlayNextScript(tNISList* selfp)
         tNISList_RemoveFromHead(selfp, selfp->mNextPendingScriptIndex);
         selfp->mNumScriptsToSkipInProgress = 0;
         selfp->mNextPendingScriptIndex = -1;
-        sDmCmd7838* cmd = (sDmCmd7838*)cCircularBuffer_operatorIndex(((char*)selfp) + 0xC, 0);
+        sDmCmd7838* cmd = (sDmCmd7838*)cCircularBuffer_operatorIndex(&selfp->mList, 0);
         if (tNISList_IsVideo(selfp, cmd) == 0) {
             cSSXScriptEngine_PlayRequestScript(*(void**)selfp, selfp->mViewIndex, cmd->id, 0, (cmd->flags >> 3) & 1);
             char* eng = *(char**)selfp;
@@ -2532,8 +2532,8 @@ extern "C" void cSSXScriptEngine__cSSXScriptEngine(cSSXScriptEngine* self, int f
         cSSXScriptEngine_DeInitOnce(self);
     }
     D_004A34B0 = 0;
-    cScriptSoundBankManager__cScriptSoundBankManager(((char*)self) + 0xA38, 2);
-    cScriptAnimBankManager__cScriptAnimBankManager(((char*)self) + 0xA28, 2);
+    cScriptSoundBankManager__cScriptSoundBankManager(self->mSoundBankManager, 2);
+    cScriptAnimBankManager__cScriptAnimBankManager(self->mAnimationBankManager, 2);
     *(void***)(((char*)self) + 0x944) = D_00482298;
     *(void***)(((char*)self) + 0x92C) = cScriptObjEvent_vtbl;
     cScriptObject__cScriptObject(((char*)self) + 0x938, 0);
@@ -2541,7 +2541,7 @@ extern "C" void cSSXScriptEngine__cSSXScriptEngine(cSSXScriptEngine* self, int f
     *(void***)(((char*)self) + 0x910) = cScriptObjGS_vtbl;
     cScriptObject__cScriptObject(((char*)self) + 0x91C, 0);
     sSlot_780B8* cameraManager = (sSlot_780B8*)(((char*)self) + 0x910);
-    sSlot_780B8* begin = (sSlot_780B8*)(((char*)self) + 0x6D0);
+    sSlot_780B8* begin = (sSlot_780B8*)(&self->mObjectCameraManager[0]);
     if (begin != 0) {
         do {
             while (begin != cameraManager) {
@@ -2550,8 +2550,8 @@ extern "C" void cSSXScriptEngine__cSSXScriptEngine(cSSXScriptEngine* self, int f
             }
         } while (0);
     }
-    cDataManager__cDataManager((cDataManager*)(((char*)self) + 0x51C), 0);
-    cVidEngine__cVidEngine(((char*)self) + 0x500, 0);
+    cDataManager__cDataManager((cDataManager*)(&self->mMaxDataInstances), 0);
+    cVidEngine__cVidEngine(&self->mpPlayer, 0);
     cBXScriptEngine__cBXScriptEngine(((char*)self), flags);
 }
 #endif

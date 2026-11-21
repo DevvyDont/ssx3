@@ -33,9 +33,9 @@ struct sEmitState_0C60 {
  */
 extern "C" void cBaseClass_DynamicEmitter_Allocate(cBaseClass_DynamicEmitter* self)
 {
-    sEmitParticle_0C60** pp = (sEmitParticle_0C60**)(((char*)self) + 0x1A0);
+    sEmitParticle_0C60** pp = (sEmitParticle_0C60**)(&self->m_positions);
     *pp = new (str_DynEmitterData_Positions, 0, 0) sEmitParticle_0C60[self->m_numSubEmitters];
-    sEmitState_0C60** ps = (sEmitState_0C60**)(((char*)self) + 0x1A4);
+    sEmitState_0C60** ps = (sEmitState_0C60**)(&self->m_velocities);
     *ps = new (str_DynEmitterData_Velocities, 0, 0) sEmitState_0C60[self->m_numSubEmitters];
 }
 #endif
@@ -348,11 +348,11 @@ extern "C" void tParticleEmitter_setTime(void* p, float v);
 extern "C" void cBaseClass_DynamicEmitter_setTime(cBaseClass_DynamicEmitter* self, float duration)
 {
     if (duration == 0.0f) {
-        tParticleEmitter_setTime(((char*)self) + 0x20, 0.0f);
+        tParticleEmitter_setTime(&self->m_emitter, 0.0f);
         return;
     }
     *(float*)self = duration;
-    tParticleEmitter_setTime(((char*)self) + 0x20, duration);
+    tParticleEmitter_setTime(&self->m_emitter, duration);
 }
 #endif
 
@@ -543,7 +543,7 @@ struct sEmitColour_1548 {
  */
 extern "C" void cDynamicColourEmitter_Allocate(cDynamicColourEmitter* self)
 {
-    sEmitColour_1548** pc = (sEmitColour_1548**)(((char*)self) + 0x204);
+    sEmitColour_1548** pc = (sEmitColour_1548**)(&self->m_colours);
     cBaseClass_DynamicEmitter_Allocate((cBaseClass_DynamicEmitter*)self);
     *pc = new (str_DynEmitterData_Colours, 0, 0) sEmitColour_1548[self->m_numSubEmitters];
 }
@@ -7188,7 +7188,7 @@ void func_00366FE0(void* p, int a1);
  */
 extern "C" void cPS2GraphicsMan_InitTextures(cPS2GraphicsMan* self, int memtype)
 {
-    MEM_fill((char*)self + 0x3838, 0, 8000);
+    MEM_fill(&self->unk_3838[0], 0, 8000);
     func_00366FE0(self->mpTextureMan, memtype);
 }
 #endif
@@ -7228,7 +7228,7 @@ extern "C" void cPS2GraphicsMan_PlatformPurgeTextures(cPS2GraphicsMan* self)
 {
     int i;
     for (i = 0; i < 2000; i++) {
-        if (((int*)((char*)self + 0x18F8))[i] != 0) {
+        if (((int*)(&self->unk_18F8[0]))[i] != 0) {
             sVEntry0037C830* vt = (sVEntry0037C830*)self->mVtbl;
             vt[50].fn((char*)self + vt[50].delta, i);
         }
@@ -8363,17 +8363,17 @@ extern "C" void func_0037D968(cPS2GraphicsMan* selfp)
     selfp->mMatricesValid = 1;
     sMat_D968 copy;
     sMat_D968 product;
-    vu0MulMat_D968(&product, (sMat_D968*)(((char*)selfp) + 0x6AF0), (sMat_D968*)selfp->mCurrentView);
+    vu0MulMat_D968(&product, (sMat_D968*)(&selfp->mScreenMatrix), (sMat_D968*)selfp->mCurrentView);
     vu0CopyMat_D968(&copy, &product);
-    vu0CopyMat_D968((sMat_D968*)(((char*)selfp) + 0x6B30), &copy);
-    vu0CopyMat_D968((sMat_D968*)(((char*)selfp) + 0x5780), (sMat_D968*)selfp->mCurrentView);
-    vu0MulMat_D968(&product, (sMat_D968*)(((char*)selfp) + 0x57C0), (sMat_D968*)(((char*)selfp) + 0x5780));
+    vu0CopyMat_D968((sMat_D968*)(&selfp->mScreenWorld), &copy);
+    vu0CopyMat_D968((sMat_D968*)(&selfp->mWorld), (sMat_D968*)selfp->mCurrentView);
+    vu0MulMat_D968(&product, (sMat_D968*)(&selfp->mView), (sMat_D968*)(&selfp->mWorld));
     vu0CopyMat_D968(&copy, &product);
-    vu0CopyMat_D968((sMat_D968*)(((char*)selfp) + 0x5800), &copy);
-    vu0MulMat_D968(&product, (sMat_D968*)(((char*)selfp) + 0x5860), (sMat_D968*)(((char*)selfp) + 0x5780));
+    vu0CopyMat_D968((sMat_D968*)(&selfp->mGuardBandMatrix), &copy);
+    vu0MulMat_D968(&product, (sMat_D968*)(&selfp->mViewProj), (sMat_D968*)(&selfp->mWorld));
     vu0CopyMat_D968(&copy, &product);
-    vu0CopyMat_D968((sMat_D968*)(((char*)selfp) + 0x58A0), &copy);
-    func_003645B8(selfp->mpDeferMan, (sMat_D968*)(((char*)selfp) + 0x5780));
+    vu0CopyMat_D968((sMat_D968*)(&selfp->mNetMatrix), &copy);
+    func_003645B8(selfp->mpDeferMan, (sMat_D968*)(&selfp->mWorld));
 }
 #endif
 
@@ -9950,9 +9950,9 @@ extern "C" void cPS2GraphicsMan_RenderLineStrip(cPS2GraphicsMan* self, int n, sV
         func_0037D968(self);
     }
     prevCode = -1;
-    func_00384D98(&ctx, (unsigned int*)(((char*)self) + 0x5A00));
+    func_00384D98(&ctx, (unsigned int*)(&self->mVifCursor));
     for (i = 0; i < n; i++, vtx++) {
-        sPt1AD0 cur = MulMat1AD0((sMat1AD0*)(((char*)self) + 0x6B30), vtx->pos);
+        sPt1AD0 cur = MulMat1AD0((sMat1AD0*)(&self->mScreenWorld), vtx->pos);
         int code = 0;
         cur.w = 1.0f / cur.w;
         cur.x *= cur.w;
@@ -10559,7 +10559,7 @@ INCLUDE_ASM("render/particle", func_003826E0);
  */
 extern "C" int func_003826E0(cPS2GraphicsMan* self)
 {
-    volatile int* arr = (volatile int*)((char*)self + 0x5a90);
+    volatile int* arr = (volatile int*)(&self->mBufState[0]);
     volatile int* bufState = &arr[self->mBuildIndex];
     if (*bufState == 0 || *bufState == 1) {
         if (*bufState == 0) {
@@ -12480,7 +12480,7 @@ extern "C" void cPS2GraphicsMan_RenderFullScreenEffects(cPS2GraphicsMan* self, i
         :
         : "r"((char*)&self->mScreenMatrix), "r"((char*)((i << 6) + (int)self) + 0x5930)
         : "memory");
-    ((sPartPair*)((char*)self + 0x59B0))[i] = *(sPartPair*)&self->mScissor[0];
+    ((sPartPair*)(&self->unk_59B0[0]))[i] = *(sPartPair*)&self->mScissor[0];
     self->unk_59C0 = i + 1;
 }
 #endif
@@ -13674,7 +13674,7 @@ extern "C" void cPS2GraphicsMan_SetScreenClearColour(cPS2GraphicsMan* self, cons
     int packed = fptoui(col[0] * k);
     packed |= fptoui(col[1] * k) << 8;
     packed |= fptoui(col[2] * k) << 16;
-    *(int*)((char*)self + 0x6AE0) = packed;
+    self->mClearColour = packed;
 }
 #endif
 

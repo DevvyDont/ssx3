@@ -352,7 +352,7 @@ extern "C" void cSSXScriptEngine_UpdateLoad(cSSXScriptEngine* self)
     if (tableHandle != 0 && ASYNCFILE_getstatus(tableHandle) != 0) {
         cSSXScriptEngine_ProcessAsyncLoadTrackTableComplete(self, self->mFilterTableAsyncHandle);
     }
-    sScrSlot8918* slots = (sScrSlot8918*)((char*)self + 0x630);
+    sScrSlot8918* slots = (sScrSlot8918*)(&self->mScriptDataBanks[0].asyncHandle);
     for (int i = 0; i < 10; i++) {
         void* bankFile = slots[i].file;
         if (bankFile != 0 && ASYNCFILE_getstatus(bankFile) != 0) {
@@ -1469,11 +1469,11 @@ extern "C" void cSSXScriptEngine_OnAttachData(cSSXScriptEngine* self, const char
     } else if (func_00416B18(str_anm, ext, 3) == 0) {
         *kind = 1;
         *bank = self->mCurrAttachingBankNum;
-        cScriptAnimBankManager_LinkBank(((char*)self) + 0xA28, self->mCurrAttachingBankNum, data);
+        cScriptAnimBankManager_LinkBank(self->mAnimationBankManager, self->mCurrAttachingBankNum, data);
     } else if (func_00416B18(str_snd, ext, 3) == 0) {
         *kind = 2;
         *bank = self->mCurrAttachingBankNum;
-        cScriptSoundBankManager_LinkBank(((char*)self) + 0xA38, self->mCurrAttachingBankNum, data, dataSize);
+        cScriptSoundBankManager_LinkBank(self->mSoundBankManager, self->mCurrAttachingBankNum, data, dataSize);
     }
 }
 #endif
@@ -2767,7 +2767,7 @@ extern "C" void cSSXScriptEngine_SyncLoadScriptBank(cSSXScriptEngine* self, int 
         return;
     }
     self->mCurrAttachingBankNum = i;
-    bankInfo->handle = cDataManager_AttachData(((char*)self) + 0x51C, name, data, size);
+    bankInfo->handle = cDataManager_AttachData(&self->mMaxDataInstances, name, data, size);
     self->mCurrAttachingBankNum = 10;
     bankInfo->temp = 1;
     if (buf != 0) {
@@ -3091,7 +3091,7 @@ static inline float Atan2_27B750(float y, float x)
  */
 extern "C" void cSSXScriptEngine_FillOrientationFromStartPointInfo(cSSXScriptEngine* self, cRider* obj, sVec4_27B750* pos, int* roll, float* pitch, float* yaw)
 {
-    char* sub = ((char*)obj) + 0x6C0;
+    char* sub = (char*)&obj->mVtbl;
     sVEntry_27B750* vtEntry = &(*(sVEntry_27B750**)sub)[7];
     sNode_27B750* startPoint = (sNode_27B750*)cPathSys_getStartpoint(gPaths, 1, vtEntry->fn(sub + vtEntry->delta));
     *pos = sVec4_27B750(startPoint->px, startPoint->py, startPoint->pz, 1.0f);
@@ -3168,7 +3168,7 @@ static inline float Atan2_27B948(float y, float x)
  */
 extern "C" void cSSXScriptEngine_FillOrientationFromRiderOrientationInfo(cSSXScriptEngine* self, cRider* obj, sVec4_27B948* pos, int* roll, float* pitch, float* yaw)
 {
-    char* sub = ((char*)obj) + 0x6C0;
+    char* sub = (char*)&obj->mVtbl;
     sVEntry_27B948* vtEntry = &(*(sVEntry_27B948**)sub)[5];
     *pos = *vtEntry->fn(sub + vtEntry->delta);
     sVec4_27B948 dir = *(sVec4_27B948*)&obj->mMatrix.row[1];
@@ -4957,7 +4957,7 @@ extern "C" void cScriptObjCamera_SetCameraEntity(cScriptObjCamera* self, void* a
             "sqc2      $vf4, 0x30(%0)\n"
             ".set reorder\n"
             :
-            : "r"(((char*)self) + 0x30), "r"(t4mat_Identity)
+            : "r"((char*)&self->mBaseTransform), "r"(t4mat_Identity)
             : "memory");
         *(int*)&self->mBaseRotX = 0;
         *(int*)&self->mBaseRotY = 0;
@@ -5741,7 +5741,7 @@ extern char t4mat_Identity[];
 // the PC port needs a plain 64-byte copy.
 extern "C" void cScriptObjRider_OnEndObjectUse(cScriptObjRider* self)
 {
-    cScriptObject_OnEndObjectUse((char*)self + 0xC);
+    cScriptObject_OnEndObjectUse(&self->mObjType);
     __asm__ __volatile__(
         ".set noreorder\n"
         "lqc2      $vf1, 0x0(%1)\n"
@@ -5754,7 +5754,7 @@ extern "C" void cScriptObjRider_OnEndObjectUse(cScriptObjRider* self)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)self + 0x30), "r"(t4mat_Identity)
+        : "r"((char*)&self->mBaseTransform), "r"(t4mat_Identity)
         : "memory");
     *(int*)&self->mBaseRotX = 0;
     *(int*)&self->mBaseRotY = 0;
@@ -5912,7 +5912,7 @@ struct sScrObj05B8 {
 extern "C" void* cScriptObjEvent_cScriptObjEvent(cScriptObjEvent* self)
 {
     cScriptEntity_cScriptEntity(((sScrObj05B8*)self));
-    cScriptObject_cScriptObject((char*)self + 0xC, 5);
+    cScriptObject_cScriptObject(&self->mObjType, 5);
     self->mScriptObjectVtbl = D_00482298;
     *(void***)self = cScriptObjEvent_vtbl;
     self->mNumAbortWorldScripts = 0;
@@ -5998,15 +5998,15 @@ struct sScrTrig_0730 {
 extern "C" void cScriptObjEvent_OnStartObjectUse(cScriptObjEvent* self)
 {
     int i;
-    cScriptObject_OnStartObjectUse((char*)self + 0xC);
+    cScriptObject_OnStartObjectUse(&self->mObjType);
     self->mNumAbortWorldScripts = 0;
     self->mHasTriggeredSpeechEvents = 0;
     self->mCheckForStopOnSpeechEnd = 0;
     // PORT: GetSSXScriptHeader returns a pointer as int
-    char* info = (char*)GetSSXScriptHeader(*(void**)((char*)self->mpEntity + 0x8));
+    char* info = (char*)GetSSXScriptHeader(self->mpEntity->mpOwner);
     int key = *(int*)(info + 0x1C);
     self->mpSoundBankInfo = (tScriptSoundBankInfo*)cSSXScriptEngine_GetSoundBankInfo_2(ScriptEngine, key);
-    sScrTrig_0730* soundSlot = (sScrTrig_0730*)((char*)self + 0xBC);
+    sScrTrig_0730* soundSlot = (sScrTrig_0730*)(&self->mSounds[0]);
     for (i = 3; i >= 0; i--) {
         soundSlot->c = -1;
         soundSlot->a = -1;

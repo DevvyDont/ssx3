@@ -1862,7 +1862,7 @@ extern "C" void cGameComm_update(cGameComm* vs)
             cGameComm_setState_70D8(((char*)vs), 1);
             break;
         case 1:
-            cGameComm_asyncWrite_70D8(((char*)vs), (int)(((char*)vs) + 0xD4), 44);
+            cGameComm_asyncWrite_70D8(((char*)vs), (int)(&vs->mServerSettings), 44);
             cGameComm_setState_70D8(((char*)vs), 2);
             break;
         case 2:
@@ -1871,7 +1871,7 @@ extern "C" void cGameComm_update(cGameComm* vs)
             }
             break;
         case 3:
-            cGameComm_asyncRead_70D8(((char*)vs), (int)(((char*)vs) + 0x100), 20);
+            cGameComm_asyncRead_70D8(((char*)vs), (int)(&vs->unk_100), 20);
             cGameComm_setState_70D8(((char*)vs), 4);
             break;
         case 4:
@@ -1901,7 +1901,7 @@ extern "C" void cGameComm_update(cGameComm* vs)
             break;
         case 9:
             vs->mNetLatency[0] = cCommSystem_getLatency_70D8((int)cCommSystem_mCommSystem, vs->unk_06C);
-            cGameComm_asyncWrite_70D8(((char*)vs), (int)(((char*)vs) + 0x114), 4);
+            cGameComm_asyncWrite_70D8(((char*)vs), (int)(&vs->mNetLatency[0]), 4);
             cGameComm_setState_70D8(((char*)vs), 10);
             break;
         case 10:
@@ -1910,7 +1910,7 @@ extern "C" void cGameComm_update(cGameComm* vs)
             }
             break;
         case 11:
-            cGameComm_asyncRead_70D8(((char*)vs), (int)(((char*)vs) + 0x118), 4);
+            cGameComm_asyncRead_70D8(((char*)vs), (int)(&vs->mNetLatency[1]), 4);
             cGameComm_setState_70D8(((char*)vs), 12);
             break;
         case 12:
@@ -1933,7 +1933,7 @@ extern "C" void cGameComm_update(cGameComm* vs)
             cGameComm_setState_70D8(((char*)vs), 3);
             break;
         case 3:
-            cGameComm_asyncRead_70D8(((char*)vs), (int)(((char*)vs) + 0xD4), 44);
+            cGameComm_asyncRead_70D8(((char*)vs), (int)(&vs->mServerSettings), 44);
             cGameComm_setState_70D8(((char*)vs), 4);
             break;
         case 4:
@@ -1942,7 +1942,7 @@ extern "C" void cGameComm_update(cGameComm* vs)
             }
             break;
         case 1:
-            cGameComm_asyncWrite_70D8(((char*)vs), (int)(((char*)vs) + 0x100), 20);
+            cGameComm_asyncWrite_70D8(((char*)vs), (int)(&vs->unk_100), 20);
             cGameComm_setState_70D8(((char*)vs), 2);
             break;
         case 2:
@@ -1971,7 +1971,7 @@ extern "C" void cGameComm_update(cGameComm* vs)
             }
             break;
         case 11:
-            cGameComm_asyncRead_70D8(((char*)vs), (int)(((char*)vs) + 0x114), 4);
+            cGameComm_asyncRead_70D8(((char*)vs), (int)(&vs->mNetLatency[0]), 4);
             cGameComm_setState_70D8(((char*)vs), 12);
             break;
         case 12:
@@ -1981,7 +1981,7 @@ extern "C" void cGameComm_update(cGameComm* vs)
             break;
         case 9:
             vs->mNetLatency[1] = cCommSystem_getLatency_70D8((int)cCommSystem_mCommSystem, vs->unk_06C);
-            cGameComm_asyncWrite_70D8(((char*)vs), (int)(((char*)vs) + 0x118), 4);
+            cGameComm_asyncWrite_70D8(((char*)vs), (int)(&vs->mNetLatency[1]), 4);
             cGameComm_setState_70D8(((char*)vs), 10);
             break;
         case 10:
@@ -2040,7 +2040,7 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_setCommError);
 extern "C" void cGameComm_setCommError(cGameComm* self) {
     if (self->mCommError == 0) {
         self->mCommError = 1;
-        int *significant = (int *)(((char*)self) + 0x18);
+        int *significant = (int *)(&self->mCommErrorWasSignificant);
         int isSignificant = 0;
         if (self->mLocalFinishedRace == 0 || self->mRemoteFinishedRace == 0) {
             int lateState = self->mState >= 0xF;
@@ -2954,7 +2954,7 @@ extern "C" void cGameComm_syncGame(cGameComm* self)
         sVEnt_8448* vt = *(sVEnt_8448**)((char*)ui + 0xC);
         vt[1].fn((char*)ui + vt[1].delta);
     }
-    AIgetseed_8448(((char*)self) + 0xD4);
+    AIgetseed_8448(&self->mServerSettings);
     while (!ggSynced_8448(((char*)self)) && ggDropped_8448(((char*)self)) == 0) {
         cGameComm_update(self);
         THREAD_yieldticks(1);
@@ -2966,7 +2966,7 @@ extern "C" void cGameComm_syncGame(cGameComm* self)
     self->mBEBuffer = 0;
     if (self->mError == 0) {
         cBENetworkInterface_postInitBE(iface);
-        AIsetseed(((char*)self) + 0xD4);
+        AIsetseed(&self->mServerSettings);
         GMsrand(AIrand());
         ggSetTime_8448(((char*)&cBENetworkInterface_networkOpt), self->mLatency);
         if (self->mServerSettings.unk_18 != 0 && self->unk_100 != 0) {
@@ -3500,7 +3500,7 @@ extern "C" void cGameComm_updateSyncPacket(cGameComm* gameComm, int frame, int v
     if (gameComm->mError != 0) return;
     if (gameComm->mConnected == 0) return;
     if (gameComm->mDesync != 0) return;
-    RingAt_8F20((Ring_8F20*)(((char*)gameComm) + 0x410), frame) = value;
+    RingAt_8F20((Ring_8F20*)(&gameComm->mCheckSumBuffer[0]), frame) = value;
     gameComm->mAITick[0] = frame;
     if (gameComm->mCheckSumSent != 0) {
         if (gameComm->mCheckSumReceived != 0) {
@@ -3521,7 +3521,7 @@ extern "C" void cGameComm_updateSyncPacket(cGameComm* gameComm, int frame, int v
         int peerTick = gameComm->mAITick[1];
         if (peerTick < 0) return;
         int minTick = peerTick < localTick ? peerTick : localTick;
-        if (RingAt_8F20((Ring_8F20*)(((char*)gameComm) + 0x410), minTick) != RingAt_8F20((Ring_8F20*)(((char*)gameComm) + 0x500), minTick)) gameComm->mDesync = 1;
+        if (RingAt_8F20((Ring_8F20*)(&gameComm->mCheckSumBuffer[0]), minTick) != RingAt_8F20((Ring_8F20*)(&gameComm->mCheckSumBuffer[1]), minTick)) gameComm->mDesync = 1;
     }
 }
 #endif

@@ -301,7 +301,7 @@ extern "C" void* cConveyorNode_cConveyorNode1(cConveyorNode* self, void* bucket,
     cInstanceNode_cInstanceNode(self, bucket, stream);
     self->mVtbl = (void**)cConveyorNode_vtbl;
     sDebounceVEntry30D0* vt = *(sDebounceVEntry30D0**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x1C, 44);
+    vt[2].fn((char*)stream + vt[2].delta, (char*)&self->Vel, 44);
     return ((void*)self);
 }
 #endif
@@ -785,7 +785,7 @@ extern "C" void cConveyorNode_writeToReplayFrame(cConveyorNode* self, void* stre
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sDebounceVEntry* vt = *(sDebounceVEntry**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x1C, 44);
+    vt[1].fn((char*)stream + vt[1].delta, (char*)&self->Vel, 44);
 }
 #endif
 
@@ -843,7 +843,7 @@ extern "C" void* cCounterNode_cCounterNode(cCounterNode* self, void* bucket, voi
     cInstanceNode_cInstanceNode(self, bucket, stream);
     self->mVtbl = (void**)cCounterNode_vtbl;
     sDebounceVEntry37C0* vt = *(sDebounceVEntry37C0**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x1C, 0x8);
+    vt[2].fn((char*)stream + vt[2].delta, (char*)&self->Count, 0x8);
     return ((void*)self);
 }
 #endif
@@ -973,7 +973,7 @@ extern "C" void cCounterNode_writeToReplayFrame(cCounterNode* self, void* stream
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sDebounceVEntryA18* vt = *(sDebounceVEntryA18**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x1C, 0x8);
+    vt[1].fn((char*)stream + vt[1].delta, (char*)&self->Count, 0x8);
 }
 #endif
 

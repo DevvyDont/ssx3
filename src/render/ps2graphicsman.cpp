@@ -1567,7 +1567,7 @@ static inline void gfxSetTex_691F8(sRS_691F8* r, const sTexPair_691F8& t)
 extern "C" void* cGraphicsMan_cGraphicsMan(cGraphicsMan* self)
 {
     self->mVtbl = cGraphicsMan_vtbl;
-    new (((char*)self) + 0xE84) sGfxState_691F8;
+    new ((char*)&self->m_pCurrentDrawState) sGfxState_691F8;
     self->mSkipNextPageFlip = 0;
     cGraphicsMan_TheGraphicsMan = (cPS2GraphicsMan*)(self);
     for (unsigned int i = 0; i < 2; i++) D_004A5A10[0].s[i] = -1;
@@ -1592,12 +1592,12 @@ extern "C" void* cGraphicsMan_cGraphicsMan(cGraphicsMan* self)
     }
     gfxSetTex_691F8(&sDrawState_s_defaultDrawState, D_004A5A10[0]);
     for (int k = 0; k < 4; k++) {
-        ((sRS_691F8*)(((char*)self) + 0xE88))[k] = sDrawState_s_defaultDrawState;
+        ((sRS_691F8*)(&self->m_drawStateStack[0]))[k] = sDrawState_s_defaultDrawState;
     }
-    self->m_pCurrentDrawState = (sDrawState*)((sRS_691F8*)(((char*)self) + 0xE88));
+    self->m_pCurrentDrawState = (sDrawState*)((sRS_691F8*)(&self->m_drawStateStack[0]));
     *(sKey8_691F8*)self = D_004A5960[0];
     self->m_AIUpdatesPerRender = 0;
-    MEM_fill(((char*)self) + 0xF50, 0xFFFFFFFF, 344);
+    MEM_fill(&self->_EffectTexMap[0], 0xFFFFFFFF, 344);
     self->mNumViews = 1;
     *(int*)&self->mFarPlane = 0;
     self->mViewIndex = 0;
@@ -1652,7 +1652,7 @@ extern "C" void cGraphicsMan_ForceActiveDrawState(cGraphicsMan* self, int* mask)
         ((int*)&self->m_activeDrawState)[i] = ~mask[i];
     }
     for (j = 0; j < 2; j++) {
-        ((short*)((char*)self + 0xEE8))[j] = 0x7FFF;
+        ((short*)(&self->m_activeDrawState.m_textureState))[j] = 0x7FFF;
     }
     sVEntry00369610* vt = (sVEntry00369610*)self->mVtbl;
     vt[62].fn((char*)self + vt[62].delta, mask);

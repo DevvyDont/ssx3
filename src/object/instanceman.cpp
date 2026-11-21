@@ -143,7 +143,7 @@ extern "C" void* MEM_fill(void* dst, int value, int size);
 extern "C" void cAnimFrame_init(cAnimFrame* self)
 {
     MEM_fill(self, 0, 0x40);
-    MEM_fill((char*)self + 0x44, 0, 0x40);
+    MEM_fill(&self->Vals[0], 0, 0x40);
     self->AnimRecord = 0;
 }
 #endif
@@ -224,7 +224,7 @@ extern "C" void* cMeshAnimFrame_cMeshAnimFrame(cMeshAnimFrame* self, float* src,
 {
     cAnimFrame_cAnimFrame(self, src, time);
     self->mVtbl = cMeshAnimFrame_vtbl;
-    vu0CopyMat_351480((sImMat44_351480*)((char*)self + 0x90), &t4mat_Identity);
+    vu0CopyMat_351480((sImMat44_351480*)(&self->FrameMatrix), &t4mat_Identity);
     self->AnimRecord = (const tAnimRecord*)src;
     cMeshAnimFrame_update_vf(self, time);
     return ((void*)self);
@@ -513,7 +513,7 @@ static inline void vu0CopyMatIM(sImMat44* d, const sImMat44* s)
  */
 extern "C" void cMeshAnimFrame_transform(cMeshAnimFrame* self, sImMat44* xform)
 {
-    sImMat44* dst = (sImMat44*)((char*)self + 0x90);
+    sImMat44* dst = (sImMat44*)(&self->FrameMatrix);
     sImMat44 productCopy;
     sImMat44 product;
     vu0MulMatIM(&product, xform, dst);
@@ -960,12 +960,12 @@ extern "C" void* cMeshAnimNode_cMeshAnimNode(cMeshAnimNode* self, void* bucket, 
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
     self->mVtbl = cMeshAnimNode_vtbl;
-    new ((char*)self + 0x30) sInstElem2168[24];
-    new ((char*)self + 0x1B0) sInstElem2168[24];
-    new ((char*)self + 0x330) sInstElem2168[24];
-    new ((char*)self + 0x4B0) sInstElem2168[24];
+    new ((char*)&self->Qrot[0]) sInstElem2168[24];
+    new ((char*)&self->Axis[0]) sInstElem2168[24];
+    new ((char*)&self->Angle[0]) sInstElem2168[24];
+    new ((char*)&self->Pos[16]) sInstElem2168[24];
     sInstManVEntry2168* vtEntry = &(*(sInstManVEntry2168**)stream)[2];
-    vtEntry->fn((char*)stream + vtEntry->delta, (char*)self + 0x1C, 0xC);
+    vtEntry->fn((char*)stream + vtEntry->delta, (char*)&self->Life, 0xC);
     self->Life = -1.0f;
     return ((void*)self);
 }
@@ -1511,7 +1511,7 @@ extern "C" void cMeshAnimNode_writeToReplayFrame(cMeshAnimNode* self, void* stre
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sSerVEntry_00352A58* vt = *(sSerVEntry_00352A58**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x1C, 0xC);
+    vt[1].fn((char*)stream + vt[1].delta, (char*)&self->Life, 0xC);
 }
 #endif
 

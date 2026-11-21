@@ -1577,14 +1577,14 @@ static inline void SetBits_DA70(unsigned int* w, unsigned int mask, unsigned int
  */
 extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, char* rdata, char* ii, char* ci)
 {
-    float* timing = (float*)(((char*)self) + 0x4);
+    float* timing = (float*)(&self->mKineticEnergy);
     *(void***)self = cTransformModifier_vtbl;
-    cRigidBody_cRigidBody(((char*)self) + 0x30);
+    cRigidBody_cRigidBody(&self->Pose);
     *(void***)self = cRollerModifier_vtbl;
-    SphereTree_SphereTree(((char*)self) + 0xE0);
+    SphereTree_SphereTree(&self->SphTree);
     *(int*)&self->Life = 0;
     self->m_pInstance = (tInstanceRecord*)(*(int*)(ii + 0x50));
-    bxSphereTree_operatorE(((char*)self) + 0xE0, *(void**)(ii + 0x48));
+    bxSphereTree_operatorE(&self->SphTree, *(void**)(ii + 0x48));
     self->mMass = *(float*)(rdata + 0x4);
     char* info = (char*)self->SphTree.treeInfo;
     self->mElast = *(float*)(rdata + 0x8);
@@ -1596,15 +1596,15 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, char* rd
     offset.w = 0.0f;
     *(sRmVec4*)&self->COMOffset = offset;
     *(sRmMat33*)&self->InvBodyMOI[0] = *(sRmMat33*)(info + 0x5C);
-    ((sRmMat33*)(((char*)self) + 0x280))->m[0][0] *= 0.5f;
-    ((sRmMat33*)(((char*)self) + 0x280))->m[0][1] *= 0.5f;
-    ((sRmMat33*)(((char*)self) + 0x280))->m[0][2] *= 0.5f;
-    ((sRmMat33*)(((char*)self) + 0x280))->m[1][0] *= 0.5f;
-    ((sRmMat33*)(((char*)self) + 0x280))->m[1][1] *= 0.5f;
-    ((sRmMat33*)(((char*)self) + 0x280))->m[1][2] *= 0.5f;
-    ((sRmMat33*)(((char*)self) + 0x280))->m[2][0] *= 0.5f;
-    ((sRmMat33*)(((char*)self) + 0x280))->m[2][1] *= 0.5f;
-    ((sRmMat33*)(((char*)self) + 0x280))->m[2][2] *= 0.5f;
+    ((sRmMat33*)(&self->InvBodyMOI[0]))->m[0][0] *= 0.5f;
+    ((sRmMat33*)(&self->InvBodyMOI[0]))->m[0][1] *= 0.5f;
+    ((sRmMat33*)(&self->InvBodyMOI[0]))->m[0][2] *= 0.5f;
+    ((sRmMat33*)(&self->InvBodyMOI[0]))->m[1][0] *= 0.5f;
+    ((sRmMat33*)(&self->InvBodyMOI[0]))->m[1][1] *= 0.5f;
+    ((sRmMat33*)(&self->InvBodyMOI[0]))->m[1][2] *= 0.5f;
+    ((sRmMat33*)(&self->InvBodyMOI[0]))->m[2][0] *= 0.5f;
+    ((sRmMat33*)(&self->InvBodyMOI[0]))->m[2][1] *= 0.5f;
+    ((sRmMat33*)(&self->InvBodyMOI[0]))->m[2][2] *= 0.5f;
     tPose x = tPose_tPose((char*)self->m_pInstance + 0x10);
     {
         sRmVec4 rotated;
@@ -1618,9 +1618,9 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, char* rd
     }
     *(&self->Pose) = x;
     tPose y = cRollerModifier_getBodyPose_DA70(((char*)self));
-    QuatPosToMtx_DA70(((char*)self) + 0x240, (*(sRmVec4*)&y.Q), (*(sRmVec4*)&y.P));
+    QuatPosToMtx_DA70(&self->Transform, (*(sRmVec4*)&y.Q), (*(sRmVec4*)&y.P));
     cRollerModifier_updateMOI(((char*)self));
-    cRigidBody_updateImplicit((sRmBody*)(((char*)self) + 0x30));
+    cRigidBody_updateImplicit((sRmBody*)(&self->Pose));
     self->ContactElastic = 0.10000000149011612f;
     self->ContactFriction = 0.4000000059604645f;
     self->StopContactSpeed = 277.77777099609375f;
@@ -5580,7 +5580,7 @@ struct sRailVEntry1098 {
 extern "C" int cAnimNode_getAnimMats(cAnimNode* self)
 {
     if (self->Flags & 1) {
-        void* sub = (char*)self + 0x14;
+        void* sub = (char*)&self->unk_014;
         sRailVEntry1098* vt = (sRailVEntry1098*)self->mVtbl;
         vt[51].fn((char*)sub + vt[51].delta);
     }
@@ -5612,7 +5612,7 @@ struct sElem003610E0 {
  */
 extern "C" sElem003610E0* cAnimNode_getAnimMat(cAnimNode* self, int i)
 {
-    char* obj = (char*)self + 0x14;
+    char* obj = (char*)&self->unk_014;
     if (self->Flags & 1) {
         sVEntry003610E0* vt = (sVEntry003610E0*)self->mVtbl;
         vt[51].fn(obj + vt[51].delta);
@@ -5831,7 +5831,7 @@ extern "C" void cMeshAnimFrame_init(cMeshAnimFrame* self)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)self + 0x90), "r"(t4mat_Identity)
+        : "r"((char*)&self->FrameMatrix), "r"(t4mat_Identity)
         : "memory");
 }
 #endif
@@ -5978,7 +5978,7 @@ extern void* cAnimTeeterNode_vtbl[];
 extern "C" void cAnimTeeterNode__cAnimTeeterNode(cAnimTeeterNode* self, int flags)
 {
     self->mVtbl = cAnimTeeterNode_vtbl;
-    cAnimNode__cAnimNode((char*)self + 0x30, 0);
+    cAnimNode__cAnimNode(&self->CurrTime, 0);
     if (flags & 1) {
         operator_delete((int*)self);
     }

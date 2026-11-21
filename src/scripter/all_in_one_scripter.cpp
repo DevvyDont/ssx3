@@ -553,7 +553,7 @@ extern char D_00482298[];
 extern "C" void cScriptObjEvent__cScriptObjEvent(cScriptObjEvent* eventObject, int deleteFlags) {
     eventObject->mScriptObjectVtbl = (void**)D_00482298;
     eventObject->mVtbl = (void**)cScriptObjEvent_vtbl;
-    cScriptObject__cScriptObject_4950((char*)eventObject + 0xC, 0);
+    cScriptObject__cScriptObject_4950(&eventObject->mObjType, 0);
     if (deleteFlags & 1) {
         operator_delete((int *)eventObject);
     }
@@ -965,7 +965,7 @@ extern char D_00482018[];
 extern "C" void cScriptObjRider__cScriptObjRider(cScriptObjRider* riderObject, int deleteFlags) {
     riderObject->mScriptObjectVtbl = (void**)D_00482018;
     riderObject->mVtbl = (void**)cScriptObjRider_vtbl;
-    cScriptObject__cScriptObject_4AE8((char*)riderObject + 0xC, 0);
+    cScriptObject__cScriptObject_4AE8(&riderObject->mObjType, 0);
     if (deleteFlags & 1) {
         operator_delete((int *)riderObject);
     }

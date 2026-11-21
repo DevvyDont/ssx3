@@ -1408,7 +1408,7 @@ extern "C" void cFenceNode_makeNeighbour(cFenceNode* self, char* obj, int flag)
         }
     } else if (0.25f <= fabs_34CC80(force)) {
         void* fence = cMemMan_alloc(268, str_Fence_b, 0x20000000, 0);
-        cFenceNode_cFenceNode2(fence, 1, obj, ((char*)self) + 0x1C, flag, force);
+        cFenceNode_cFenceNode2(fence, 1, obj, &self->FenceData, flag, force);
     }
 }
 #endif
@@ -1482,7 +1482,7 @@ extern "C" void cFenceNode_update(cFenceNode* self)
             cFenceNode_makeNeighbour(self, (char*)self->PrevInstance, 0);
         }
     }
-    char* osc = ((char*)self) + 0x1C;
+    char* osc = (char*)&self->FenceData;
     self->Force += self->ForceStep;
     if (self->ForceMax < 0.01f && fabs_34CE48(*(float*)(osc + 0x10)) < 0.01f) {
         sFlagVE_34CE48* vt = (sFlagVE_34CE48*)self->mVtbl;
@@ -1946,10 +1946,10 @@ struct sFlagSlot_34D9B0 {
  */
 extern "C" void* cAnimNode_cAnimNode(cAnimNode* self, void* bucket, int nodeType, void* instRecord, int force)
 {
-    char* node = ((char*)self) + 0x14;
+    char* node = (char*)&self->unk_014;
     cMoveNode_cMoveNode1(node, bucket, nodeType, instRecord);
     self->mVtbl = D_00490CC8;
-    sFlagSlot_34D9B0** slot = (sFlagSlot_34D9B0**)(((char*)self) + 0x44);
+    sFlagSlot_34D9B0** slot = (sFlagSlot_34D9B0**)(&self->AnimMats);
     *slot = new (str_AnimMats, 0x20000000, 0) sFlagSlot_34D9B0[*(int*)(*(char**)(*(char**)(node + 0x18) + 0x80) + 4)];
     cAnimNode_setAnimMeshCache(((char*)self));
     float startTime = 0.0f;
@@ -1961,7 +1961,7 @@ extern "C" void* cAnimNode_cAnimNode(cAnimNode* self, void* bucket, int nodeType
     self->CacheTime = startTime;
     self->MeshVelocityDirty = 1;
     self->FrameEnd = 10000000000.0f;
-    char* sub = ((char*)self) + 0x14;
+    char* sub = (char*)&self->unk_014;
     if (force != 0 || (*(unsigned int*)(*(char**)(sub + 0x18) + 8) & 1)) {
         char* n = *(char**)(sub + 0x18);
         *(unsigned int*)(n + 8) = (*(unsigned int*)(n + 8) & ~2u) | 4;
@@ -2003,8 +2003,8 @@ struct sFlagSlot_34DAC8 {
 extern "C" void* cAnimNode_cAnimNode1(cAnimNode* self, void* bucket, void* stream)
 {
     int skippedWord;
-    char* node = ((char*)self) + 0x14;
-    sFlagSlot_34DAC8** slot = (sFlagSlot_34DAC8**)(((char*)self) + 0x44);
+    char* node = (char*)&self->unk_014;
+    sFlagSlot_34DAC8** slot = (sFlagSlot_34DAC8**)(&self->AnimMats);
     cMoveNode_cMoveNode_3(node, bucket, stream);
     self->mVtbl = D_00490CC8;
     *slot = new (str_AnimMats, 0x20000000, 0) sFlagSlot_34DAC8[*(int*)(*(char**)(*(char**)(node + 0x18) + 0x80) + 4)];
@@ -2115,7 +2115,7 @@ extern "C" void cAnimNode_updateRootTransform(cAnimNode* self)
 {
     sFlagSetVEntry_DC90a* vt = (sFlagSetVEntry_DC90a*)self->mVtbl;
     vt[52].fn((char*)self + vt[52].delta);
-    char* sub = (char*)self + 0x14;
+    char* sub = (char*)&self->unk_014;
     sFlagSetVEntry_DC90c* vt2 = (sFlagSetVEntry_DC90c*)self->mVtbl;
     void* objB = sub + vt2[33].delta;
     void* rootTransform = ((sFlagSetVEntry_DC90b*)vt2)[24].fn(sub + vt2[24].delta);
@@ -2375,7 +2375,7 @@ extern "C" void cMoveNode_writeToReplayFrame(void* self, void* stream);
 extern "C" void cAnimNode_writeToReplayFrame(cAnimNode* self, void* stream)
 {
     int dummy;
-    cMoveNode_writeToReplayFrame((char*)self + 0x14, stream);
+    cMoveNode_writeToReplayFrame(&self->unk_014, stream);
     sSerVEntry_0034E3D8* writeFn = &(*(sSerVEntry_0034E3D8**)stream)[1];
     writeFn->fn((char*)stream + writeFn->delta, self, 20);
     writeFn = &(*(sSerVEntry_0034E3D8**)stream)[1];

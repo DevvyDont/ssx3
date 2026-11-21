@@ -254,18 +254,18 @@ extern "C" void* cParticleModifier_cParticleModifier(cParticleModifier* self, in
 {
     cEffectModifier_cEffectModifier((cEffectModifier*)self, owner);
     self->mVtbl = cParticleModifier_vtbl;
-    cStaticEmitter_cStaticEmitter(((char*)self) + 0x50);
+    cStaticEmitter_cStaticEmitter(&self->Emitter);
     self->ParticleData = (tParticleData*)pdata;
     char* own = (char*)self->Instance;
     void* obj = *(void**)(own + 0xC);
     void* transform;
     if (obj != 0) {
         sVEntry003458C0* vt = *(sVEntry003458C0**)((char*)obj + 0xC);
-        transform = vu0CopyMatrix003458C0(((char*)self) + 0x10, vt[24].fn((char*)obj + vt[24].delta));
+        transform = vu0CopyMatrix003458C0(&self->Transform, vt[24].fn((char*)obj + vt[24].delta));
     } else {
-        transform = vu0CopyMatrix003458C0(((char*)self) + 0x10, own + 0x10);
+        transform = vu0CopyMatrix003458C0(&self->Transform, own + 0x10);
     }
-    cStaticEmitter_setupEmitter(((char*)self) + 0x50, transform, (int)self->ParticleData);
+    cStaticEmitter_setupEmitter(&self->Emitter, transform, (int)self->ParticleData);
     (self)->Complete = 0;
     D_004A3FF8++;
     return ((void*)self);
@@ -301,20 +301,20 @@ extern "C" void* cParticleModifier_cParticleModifier1(cParticleModifier* self, v
 {
     cEffectModifier_cEffectModifier1((cEffectModifier*)self, stream);
     self->mVtbl = cParticleModifier_vtbl;
-    cStaticEmitter_cStaticEmitter(((char*)self) + 0x50);
+    cStaticEmitter_cStaticEmitter(&self->Emitter);
     sEffectLinkVEntry_3459A8* readSlot = &(*(sEffectLinkVEntry_3459A8**)stream)[2];
-    readSlot->fn((char*)stream + readSlot->delta, ((char*)self) + 0x1E4, 4);
+    readSlot->fn((char*)stream + readSlot->delta, (char*)&self->Complete, 4);
     if (self->Complete == 0) {
         void* buf = operator_new1(216);
         self->ParticleData = (tParticleData*)buf;
         readSlot = &(*(sEffectLinkVEntry_3459A8**)stream)[2];
         readSlot->fn((char*)stream + readSlot->delta, buf, 216);
         readSlot = &(*(sEffectLinkVEntry_3459A8**)stream)[2];
-        readSlot->fn((char*)stream + readSlot->delta, ((char*)self) + 0x10, 0x40);
-        cStaticEmitter_setupEmitter(((char*)self) + 0x50, ((char*)self) + 0x10, (int)self->ParticleData);
-        cStaticEmitter_readFromReplayFrame(((char*)self) + 0x50, stream);
+        readSlot->fn((char*)stream + readSlot->delta, (char*)&self->Transform, 0x40);
+        cStaticEmitter_setupEmitter(&self->Emitter, &self->Transform, (int)self->ParticleData);
+        cStaticEmitter_readFromReplayFrame(&self->Emitter, stream);
     } else {
-        vu0CopyMatrix003458C0(((char*)self) + 0x10, t4mat_Identity);
+        vu0CopyMatrix003458C0(&self->Transform, t4mat_Identity);
         self->ParticleData = 0;
     }
     D_004A3FF8++;
@@ -345,7 +345,7 @@ extern "C" void cParticleModifier__cParticleModifier(cParticleModifier* self, in
         operator_delete(buf);
     }
     D_004A3FF8--;
-    cStaticEmitter__cStaticEmitter((int*)(((char*)self) + 0x50), 2);
+    cStaticEmitter__cStaticEmitter((int*)(&self->Emitter), 2);
     cEffectModifier__cEffectModifier((cEffectModifier*)self, flags);
 }
 #endif
@@ -364,7 +364,7 @@ extern "C" void cStaticEmitter_update(void* self, float dt);
 extern "C" void cParticleModifier_update(cParticleModifier* self)
 {
     if (self->Complete == 0) {
-        void* emitter = ((char*)self) + 0x50;
+        void* emitter = (char*)&self->Emitter;
         if (self->Emitter.Duration < 0.0f) {
             cStaticEmitter_update(emitter, 0.01666666753590107f);
         } else {
@@ -570,7 +570,7 @@ extern "C" void cDynamicParticleModifier__cDynamicParticleModifier(cDynamicParti
         operator_delete(buf);
     }
     D_004A3FFC--;
-    cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(((char*)self) + 0x60, 2);
+    cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(&self->Emitter, 2);
     cEffectModifier__cEffectModifier((cEffectModifier*)self, flags);
 }
 #endif
@@ -661,18 +661,18 @@ extern "C" void cDynamicParticleModifier_update(cDynamicParticleModifier* self)
     }
     cDynamicParticleModifier_updatePosition(self);
     if (self->Fade > 0) {
-        float* sub = (float*)(((char*)self) + 0x60);
+        float* sub = (float*)(&self->Emitter);
         if (self->Emitter.m_enabledCount > 0) {
-            cBaseClass_DynamicEmitter_updateBASE(sub, ((char*)self) + 0x30, ((char*)self) + 0x40, 0, 0.01666666753590107f);
+            cBaseClass_DynamicEmitter_updateBASE(sub, &self->Pos, &self->Vel, 0, 0.01666666753590107f);
             return;
         }
     } else {
-        float* sub = (float*)(((char*)self) + 0x60);
+        float* sub = (float*)(&self->Emitter);
         if (self->Emitter.Duration < 0.0f) {
-            cBaseClass_DynamicEmitter_updateBASE(sub, ((char*)self) + 0x30, ((char*)self) + 0x40, 1, 0.01666666753590107f);
+            cBaseClass_DynamicEmitter_updateBASE(sub, &self->Pos, &self->Vel, 1, 0.01666666753590107f);
             return;
         }
-        cBaseClass_DynamicEmitter_updateBASE(sub, ((char*)self) + 0x30, ((char*)self) + 0x40, 1, 0.01666666753590107f);
+        cBaseClass_DynamicEmitter_updateBASE(sub, &self->Pos, &self->Vel, 1, 0.01666666753590107f);
         if (!(self->Emitter.Duration <= 0.0f)) {
             return;
         }
@@ -836,7 +836,7 @@ extern "C" void* cHaloModifier_cHaloModifier1(cHaloModifier* self, void* stream)
     cEffectModifier_cEffectModifier1((cEffectModifier*)self, stream);
     self->mVtbl = cHaloModifier_vtbl;
     sEffVEntry61C0* vt = *(sEffVEntry61C0**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x10, 0x30);
+    vt[2].fn((char*)stream + vt[2].delta, (char*)&self->Color, 0x30);
     D_004A4000++;
     return ((void*)self);
 }
@@ -906,7 +906,7 @@ extern "C" void cObjectInterface_renderSimpleLightHalo(sEffVec4_62A0* pos, void*
 extern "C" void cHaloModifier_render(cHaloModifier* self)
 {
     sEffMtx_62A0 matrix;
-    void* colour = (char*)self + 0x10;
+    void* colour = (char*)&self->Color;
     cInstanceNode_buildMeshMat(self->Instance, self->Mesh, &matrix);
     sEffVec4_62A0 origin = matrix.r[3];
     cObjectInterface_renderSimpleLightHalo(&origin, colour, self->Type,
@@ -937,7 +937,7 @@ extern "C" void cHaloModifier_writeToReplayFrame(cHaloModifier* self, void* stre
 {
     cEffectModifier_writeToReplayFrame((cEffectModifier*)self, stream);
     sEffectLinkVEntry* vt = *(sEffectLinkVEntry**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x10, 0x30);
+    vt[1].fn((char*)stream + vt[1].delta, (char*)&self->Color, 0x30);
 }
 #endif
 
@@ -1125,7 +1125,7 @@ extern "C" void cFlexBridgeNode__cFlexBridgeNode(cFlexBridgeNode* self, int flag
     if (self->Verts != 0) {
         cMemMan_free(self->Verts);
     }
-    sBox_346568* box = (sBox_346568*)(((char*)self) + 0x90);
+    sBox_346568* box = (sBox_346568*)(&self->BoundBox);
     ((sRVEntry_346568*)cGraphicsMan_TheGraphicsMan->mVtbl)[77].fn((char*)cGraphicsMan_TheGraphicsMan + ((sRVEntry_346568*)cGraphicsMan_TheGraphicsMan->mVtbl)[77].delta, self->GridMesh);
     sBox_346568 old = *(sBox_346568*)&self->BoundBox;
     sInst_346568* inst = (sInst_346568*)self->Instance;
@@ -1141,7 +1141,7 @@ extern "C" void cFlexBridgeNode__cFlexBridgeNode(cFlexBridgeNode* self, int flag
     corner.w = 1.0f;
     *(sVec4_346568*)&self->BoundBox.MaxPoint = corner;
     nash_Nash_movenode(cObjectInterface_getNash(), 0, inst, box, &old);
-    cSpring__cSpring(((char*)self) + 0x50, 2);
+    cSpring__cSpring(&self->Mesh, 2);
     cInstanceNode__cInstanceNode(((char*)self), flags);
 }
 #endif

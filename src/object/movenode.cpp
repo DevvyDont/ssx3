@@ -2308,11 +2308,11 @@ extern "C" void cParentModifier_updateRootTransform(cParentModifier* self)
         sMnVEntryI_357108* vi = *(sMnVEntryI_357108**)(parentNode + 0xC);
         if (vi[26].fn(parentNode + vi[26].delta) != 0) {
             sMnVEntryM_357108* vm = *(sMnVEntryM_357108**)(parentNode + 0xC);
-            vu0CopyMtx_357108(((char*)self) + 0x50, vm[29].fn(parentNode + vm[29].delta, self->Mesh));
+            vu0CopyMtx_357108(&self->Transform, vm[29].fn(parentNode + vm[29].delta, self->Mesh));
         } else {
-            cInstanceNode_buildMeshMat(self->ParentInst, self->Mesh, (sMnMtx_357108*)(((char*)self) + 0x50));
+            cInstanceNode_buildMeshMat(self->ParentInst, self->Mesh, (sMnMtx_357108*)(&self->Transform));
         }
-        *(sMnVec4_357108*)&self->Transform.row[3] = vu0Add_357108(vel_357108(((char*)self)), vu0MtxApply_357108((sMnMtx_357108*)(((char*)self) + 0x50), (sMnVec4_357108*)(((char*)self) + 0x30)));
+        *(sMnVec4_357108*)&self->Transform.row[3] = vu0Add_357108(vel_357108(((char*)self)), vu0MtxApply_357108((sMnMtx_357108*)(&self->Transform), (sMnVec4_357108*)(&self->Offset)));
     }
     self->RootTransformDirty = 0;
 }
@@ -2424,7 +2424,7 @@ extern "C" void* cMagnetModifier_cMagnetModifier(cMagnetModifier* self, void* in
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"(((char*)self) + 0x60), "r"(mat)
+        : "r"((char*)&self->Transform), "r"(mat)
         : "memory");
     self->RootTransformDirty = 1;
     sMoveQuad translation = *(sMoveQuad*)&self->Transform.row[3];
@@ -2872,7 +2872,7 @@ extern "C" void cParticleNode_update(cParticleNode* self)
 {
     cMoveNode_update((cMoveNode*)self);
     tModifierBlock* mb = self->ModifierBlock;
-    if (mb != 0 && *(int*)((char*)mb + 0x10) != 0) {
+    if (mb != 0 && *(int*)&mb->Effect != 0) {
         return;
     }
     if (((void*)self) != 0) {
@@ -3299,7 +3299,7 @@ extern "C" void cMultiParticle__cMultiParticle(cMultiParticle* self, int flags)
     }
     cStaticEmitter* obj = self->Emitter;
     if (obj != 0) {
-        sMnDtorVEntry7FA0* vt = *(sMnDtorVEntry7FA0**)((char*)obj + 0x18C);
+        sMnDtorVEntry7FA0* vt = (sMnDtorVEntry7FA0*)obj->mVtbl;
         vt[1].fn((char*)obj + vt[1].delta, 3);
     }
     if (flags & 1) {

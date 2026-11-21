@@ -59,7 +59,7 @@ extern sUVTables_AF30 D_005049C0_AF30 __asm__("D_005049C0");
  */
 extern "C" void cPS2BezierMan_Init(cPS2BezierMan* self)
 {
-    func_00372B78(((char*)self) + 0x10, 900, 220, 140, 0, 146, 93);
+    func_00372B78(self->mPatchCache, 900, 220, 140, 0, 146, 93);
     self->mVifCache[0] = operator_new_tag_AF30(0x38400, str_4x4VifCache, 0, 0);
     self->mVifCache[1] = operator_new_tag_AF30(56320, str_6x6VifCache, 0, 0);
     self->mVifCache[2] = operator_new_tag_AF30(35840, str_8x8VifCache, 0, 0);

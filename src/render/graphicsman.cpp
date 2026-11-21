@@ -1532,7 +1532,7 @@ extern "C" void func_0036C790(cPS2GraphicsMan* vself, int idx, void* pkt2, int* 
     if (cLightGlow_m_OverrideWP != 0) {
         func_0036C740(((char*)vself), idx);
     }
-    sGmBloom_C790* glowParams = (sGmBloom_C790*)(((char*)vself) + 0x6CD4) + idx;
+    sGmBloom_C790* glowParams = (sGmBloom_C790*)(&vself->unk_6CD4[0]) + idx;
     int alpha[4] = {
         (int)(D_004A43E8 * 127.5f),
         (int)(D_004A43EC * 127.5f),
@@ -2708,8 +2708,8 @@ extern "C" void cStaticEmitter_setupEmitter(cStaticEmitter* self, t4Matrix* tran
     force.y = *(float*)(particleData + 0x7C);
     force.z = *(float*)(particleData + 0x80);
     force.w = 0.0f;
-    tParticleEmitter_init((tParticleEmitter*)(((char*)self) + 0x10), *(int*)(particleData + 0x0), *(int*)(particleData + 0x4), x, *(float*)(particleData + 0x20), *(float*)(particleData + 0xC), &force);
-    tParticleEmitter_setupEmitter((tParticleEmitter*)(((char*)self) + 0x10), transform, particleData, (tBoundBox*)(((char*)self) + 0x160), -1.0f);
+    tParticleEmitter_init((tParticleEmitter*)(&self->Emitter), *(int*)(particleData + 0x0), *(int*)(particleData + 0x4), x, *(float*)(particleData + 0x20), *(float*)(particleData + 0xC), &force);
+    tParticleEmitter_setupEmitter((tParticleEmitter*)(&self->Emitter), transform, particleData, (tBoundBox*)(&self->BoundBox), -1.0f);
 }
 #endif
 
@@ -2785,9 +2785,9 @@ extern "C" void cStaticEmitter_update(cStaticEmitter* self, float dt)
         return;
     }
     if (timer < 0.0f) {
-        tParticleEmitter_stepContinous(((char*)self) + 0x10, 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
+        tParticleEmitter_stepContinous(&self->Emitter, 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
     } else {
-        tParticleEmitter_step((tParticleEmitter*)(((char*)self) + 0x10), 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
+        tParticleEmitter_step((tParticleEmitter*)(&self->Emitter), 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
         self->Duration -= 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
         if (self->Duration < 0.0f) {
             self->Duration = 0.0f;
@@ -2883,7 +2883,7 @@ extern "C" void cStaticEmitter_render1(cStaticEmitter* selfp)
 {
     sGfxCtx_708C0* gfx = D_004A5B80_708C0;
     sGfxVEntry_708C0* vt = gfx->vtable;
-    if (((tCull_708C0)vt[93].fn)((char*)gfx + vt[93].delta, ((char*)selfp) + 0x160, ((char*)selfp) + 0x170,
+    if (((tCull_708C0)vt[93].fn)((char*)gfx + vt[93].delta, (char*)&selfp->BoundBox, (char*)&selfp->BoundBox.MaxPoint,
                                  ((tGetMat_708C0)vt[43].fn)((char*)gfx + vt[43].delta)) == 1) {
         return;
     }
@@ -2902,7 +2902,7 @@ extern "C" void cStaticEmitter_render1(cStaticEmitter* selfp)
     gfx->top->flagsA = (gfx->top->flagsA & ~0x7C) | ((layer << 2) & 0x7C);
     gfx->top->tex = GetTexId_708C0((selfp)->TextureId + (int)selfp->mCurrentFlipTexture);
     sGfxVEntry_708C0* vt2 = gfx->vtable;
-    ((tDraw_708C0)vt2[82].fn)((char*)gfx + vt2[82].delta, ((char*)selfp) + 0x10);
+    ((tDraw_708C0)vt2[82].fn)((char*)gfx + vt2[82].delta, (char*)&selfp->Emitter);
     gfx->top--;
 }
 #endif

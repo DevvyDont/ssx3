@@ -261,7 +261,7 @@ extern "C" void cFont_downloadTexture(cFont* self, sFontTexHdr* img)
         palEntry += 4;
     }
     sFontVEntryDL* vt = (sFontVEntryDL*)ps2GraphicsMan->mVtbl;
-    self->TextureID = vt[47].fn((char*)ps2GraphicsMan + vt[47].delta, pix, ((char*)self) + 0x64, img->w, newHeight, 0, 11, 1, pal, 0, 1, -1);
+    self->TextureID = vt[47].fn((char*)ps2GraphicsMan + vt[47].delta, pix, self->FontName, img->w, newHeight, 0, 11, 1, pal, 0, 1, -1);
     if (pix != 0)
         cMemMan_free(pix);
     if (pal != 0)
@@ -350,14 +350,14 @@ extern "C" void cFont_text(cFont* self, float x, float y, sMat00391C48* str)
         if (shadowLayer < 0) shadowLayer = 0;
         top->unk_00[2] = (((int)top->unk_00[2]) & ~0x3E0) | ((shadowLayer << 5) & 0x3E0);
         sFontVEntry1CB0* vt = (sFontVEntry1CB0*)ps2GraphicsMan->mVtbl;
-        vt[80].fn((char*)ps2GraphicsMan + vt[80].delta, self, str, ((char*)self) + 0x50,
+        vt[80].fn((char*)ps2GraphicsMan + vt[80].delta, self, str, (char*)&self->ShadowColor[0],
                   pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1],
                   self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
         sDrawState* top2 = ps2GraphicsMan->m_pCurrentDrawState;
         top2->unk_00[2] = (((int)top2->unk_00[2]) & ~0x3E0) | (saved << 5);
     }
     sFontVEntry1CB0* vt = (sFontVEntry1CB0*)ps2GraphicsMan->mVtbl;
-    vt[80].fn((char*)ps2GraphicsMan + vt[80].delta, self, str, ((char*)self) + 0x40, pos.x, pos.y,
+    vt[80].fn((char*)ps2GraphicsMan + vt[80].delta, self, str, (char*)&self->Color[0], pos.x, pos.y,
               self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
 }
 #endif
@@ -417,14 +417,14 @@ extern "C" void cFont_text1(cFont* self, float x, float y, void* unicodeStr)
         if (shadowLayer < 0) shadowLayer = 0;
         top->unk_00[2] = (((int)top->unk_00[2]) & ~0x3E0) | ((shadowLayer << 5) & 0x3E0);
         sFontVEntry1E30* vt = (sFontVEntry1E30*)ps2GraphicsMan->mVtbl;
-        vt[81].fn((char*)ps2GraphicsMan + vt[81].delta, self, unicodeStr, ((char*)self) + 0x50,
+        vt[81].fn((char*)ps2GraphicsMan + vt[81].delta, self, unicodeStr, (char*)&self->ShadowColor[0],
                   pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1],
                   self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
         sDrawState* top2 = ps2GraphicsMan->m_pCurrentDrawState;
         top2->unk_00[2] = (((int)top2->unk_00[2]) & ~0x3E0) | (saved << 5);
     }
     sFontVEntry1E30* vt = (sFontVEntry1E30*)ps2GraphicsMan->mVtbl;
-    vt[81].fn((char*)ps2GraphicsMan + vt[81].delta, self, unicodeStr, ((char*)self) + 0x40, pos.x, pos.y,
+    vt[81].fn((char*)ps2GraphicsMan + vt[81].delta, self, unicodeStr, (char*)&self->Color[0], pos.x, pos.y,
               self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
 }
 #endif
@@ -2318,7 +2318,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetDrawLayer);
  * @return the draw layer (0-31)
  */
 extern "C" unsigned int cGraphicsMan_GetDrawLayer(cGraphicsMan* graphicsMan) {
-    return (unsigned int) ((*(int *)((char*)((graphicsMan->m_pCurrentDrawState)) + (8))) & 0x3E0) >> 5;
+    return (unsigned int) (((int)graphicsMan->m_pCurrentDrawState->unk_00[2]) & 0x3E0) >> 5;
 }
 #endif
 //100%
@@ -2333,7 +2333,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetBlendMode);
  * @return the blend mode (0-31)
  */
 extern "C" unsigned int cGraphicsMan_GetBlendMode(cGraphicsMan* graphicsMan) {
-    return (unsigned int) ((*(int *)((char*)((graphicsMan->m_pCurrentDrawState)) + (4))) & 0x7C) >> 2;
+    return (unsigned int) (((int)graphicsMan->m_pCurrentDrawState->unk_00[1]) & 0x7C) >> 2;
 }
 #endif
 //100%
@@ -2348,7 +2348,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetAlphaSort);
  * @return the alpha sort mode (0-3)
  */
 extern "C" int cGraphicsMan_GetAlphaSort(cGraphicsMan* graphicsMan) {
-    return (*(int *)((char*)((graphicsMan->m_pCurrentDrawState)) + (4))) & 3;
+    return ((int)graphicsMan->m_pCurrentDrawState->unk_00[1]) & 3;
 }
 #endif
 //100%
@@ -2363,7 +2363,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetAlphaSortKey);
  * @return the sort key
  */
 extern "C" unsigned int cGraphicsMan_GetAlphaSortKey(cGraphicsMan* graphicsMan) {
-    return (unsigned int) ((*(int *)((char*)((graphicsMan->m_pCurrentDrawState)) + (8))) & 0x1FFFFC00) >> 10;
+    return (unsigned int) (((int)graphicsMan->m_pCurrentDrawState->unk_00[2]) & 0x1FFFFC00) >> 10;
 }
 #endif
 
@@ -2484,7 +2484,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetTexRef);
  */
 extern "C" char* cGraphicsMan_GetTexRef(cGraphicsMan* graphicsMan, int idx)
 {
-    return ((char*)graphicsMan) + 0x280 + idx * 0xC;
+    return (char*)&graphicsMan->mTexRefs[0] + idx * 0xC;
 }
 #endif
 
@@ -2837,11 +2837,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetPixelTest);
 extern "C" void cGraphicsMan_SetPixelTest(cGraphicsMan* self, int depthtestmode, int atestmode, int aref)
 {
     int sa = (depthtestmode << 23) & 0x01800000;
-    *(int*)((char*)self->m_pCurrentDrawState + 4) = (*(int*)((char*)self->m_pCurrentDrawState + 4) & ~0x01800000) | sa;
+    self->m_pCurrentDrawState->unk_00[1] = ((int)self->m_pCurrentDrawState->unk_00[1] & ~0x01800000) | sa;
     int sb = (atestmode << 20) & 0x00300000;
-    *(int*)((char*)self->m_pCurrentDrawState + 4) = (*(int*)((char*)self->m_pCurrentDrawState + 4) & ~0x00300000) | sb;
+    self->m_pCurrentDrawState->unk_00[1] = ((int)self->m_pCurrentDrawState->unk_00[1] & ~0x00300000) | sb;
     int sc = (aref << 12) & 0x000FF000;
-    *(int*)((char*)self->m_pCurrentDrawState + 4) = (*(int*)((char*)self->m_pCurrentDrawState + 4) & ~0x000FF000) | sc;
+    self->m_pCurrentDrawState->unk_00[1] = ((int)self->m_pCurrentDrawState->unk_00[1] & ~0x000FF000) | sc;
 }
 #endif
 //100%
@@ -3981,10 +3981,10 @@ extern "C" void* cPS2GraphicsMan_cPS2GraphicsMan(cPS2GraphicsMan* self)
     cGraphicsMan_cGraphicsMan(self);
     self->mVtbl = cPS2GraphicsMan_vtbl;
     new ((char*)&self->mViewStack) sRenderSlot5288[12];
-    new ((char*)self + 0x11A0) sRenderSlot5288[8];
-    new ((char*)self + 0x1220) sRenderSlot5288[2];
-    new ((char*)self + 0x1240) sRenderSlot5288[2];
-    new ((char*)self + 0x1260) sRenderSlot5288[4];
+    new ((char*)&self->mViewStack[3]) sRenderSlot5288[8];
+    new ((char*)&self->mViewStack[5]) sRenderSlot5288[2];
+    new ((char*)&self->mViewStack[5].row[2]) sRenderSlot5288[2];
+    new ((char*)&self->mViewStack[6]) sRenderSlot5288[4];
     return ((void*)self);
 }
 #endif
@@ -4204,7 +4204,7 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetProjTexInfo);
  */
 extern "C" char* cPS2GraphicsMan_GetProjTexInfo(cPS2GraphicsMan* base, int idx)
 {
-    return ((char*)base) + 0x13F0 + idx * 160;
+    return (char*)&base->mProjTextures[0] + idx * 160;
 }
 #endif
 //100%

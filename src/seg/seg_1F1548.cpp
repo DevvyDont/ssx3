@@ -2302,7 +2302,7 @@ extern "C" void* cSplashManager_cSplashManager(cSplashManager* splashManager, vo
     splashManager->mVtbl = (void**)cSplashManager_vtbl;
     splashManager->mNumActiveCrystals = 0;
     {
-        char* entry = ((char*)splashManager) + 0x1C;
+        char* entry = (char*)&splashManager->mDropList[0];
         int i = 29;
         do {
             tDrop_tDrop((int*)entry);
@@ -2311,7 +2311,7 @@ extern "C" void* cSplashManager_cSplashManager(cSplashManager* splashManager, vo
         } while (i != -1);
     }
     {
-        char* entry = ((char*)splashManager) + 0x724;
+        char* entry = (char*)&splashManager->mCrystalList[0];
         int i = 29;
         do {
             tCrystal_tCrystal((tCrystal*)entry);
@@ -3023,7 +3023,7 @@ struct Elem4380 { Elem4380() {} };
  */
 extern "C" void *cSunHalo_cSunHalo(cSunHalo* sunHalo) {
     cHalo_cHalo(sunHalo);
-    new ((char*)sunHalo + 0x40) Elem4380[16];
+    new ((char*)&sunHalo->mSunLens[0].mColor[1]) Elem4380[16];
     *(int*)&sunHalo->mfOcclude = 0;
     *(short*)&sunHalo->mbRequestZSample = 0;
     *(short*)&sunHalo->mbOnScreen = 0;

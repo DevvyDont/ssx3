@@ -131,7 +131,7 @@ struct sVEntry_E600b {
  */
 extern "C" void cAnimNode_calcPosition(cAnimNode* self, int id, int idx, sVec4_E600* out)
 {
-    void* obj = (char*)self + 0x14;
+    void* obj = (char*)&self->unk_014;
     if (id == (int)self->Instance) {
         sVEntry_E600a* vt = (sVEntry_E600a*)self->mVtbl;
         sVec4_E600 position = vt[29].fn((char*)obj + vt[29].delta, idx)->r[3];
@@ -249,7 +249,7 @@ static inline void vu0AddEq_E698(sVec4_E698& a, const sVec4_E698& b)
 // Applies the attached bone's motion delta to the body: vel += delta.pos + (body.pos - bonePos) x delta.rot; angVel += delta.rot.
 extern "C" void cAnimNode_updateIntersectInfo(cAnimNode* self, sBody_E698* body)
 {
-    cMoveNode_updateIntersectInfo(((char*)self) + 0x14, body);
+    cMoveNode_updateIntersectInfo(&self->unk_014, body);
     int bone = body->bone;
     if (bone < 0)
         return;
@@ -424,7 +424,7 @@ static inline sVec4_E798 boneE798Pos(char* self, int i)
  */
 extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
 {
-    char* obj = ((char*)self) + 0x14;
+    char* obj = (char*)&self->unk_014;
     if (self->Flags & 1) {
         sVE_E798* vt = (sVE_E798*)self->mVtbl;
         ((void (*)(void*))vt[51].fn)(obj + vt[51].delta);
@@ -630,7 +630,7 @@ extern "C" void* cFloatingNode_cFloatingNode(cFloatingNode* self, void* bucket, 
     self->Zo = rootPos.z;
     self->Z = rootPos.z;
     cFloatingNode_initInfo((cFloatingNode*)self);
-    sAnimFrame_EC58** pf = (sAnimFrame_EC58**)(((char*)self) + 0x74);
+    sAnimFrame_EC58** pf = (sAnimFrame_EC58**)(&self->AnimMats);
     *pf = new (str_FloatingMats, 0x20000000, 0) sAnimFrame_EC58[*(int*)(*(char**)((char*)self->Instance + 0x80) + 0x4)];
     self->Flags |= 1;
     char* record = (char*)self->Instance;
@@ -686,8 +686,8 @@ extern "C" void* cFloatingNode_cFloatingNode1(cFloatingNode* self, void* bucket,
         cFloatingNode_initInfo((cFloatingNode*)self);
     }
     sStreamVE_ED88* vt2 = *(sStreamVE_ED88**)stream;
-    vt2[2].fn((char*)stream + vt2[2].delta, ((char*)self) + 0x2C, 72);
-    sAnimFrame_ED88** pf = (sAnimFrame_ED88**)(((char*)self) + 0x74);
+    vt2[2].fn((char*)stream + vt2[2].delta, (char*)&self->ZSpring, 72);
+    sAnimFrame_ED88** pf = (sAnimFrame_ED88**)(&self->AnimMats);
     *pf = new (str_FloatingMats, 0x20000000, 0) sAnimFrame_ED88[*(int*)(*(char**)((char*)self->Instance + 0x80) + 0x4)];
     self->Flags |= 1;
     return ((void*)self);

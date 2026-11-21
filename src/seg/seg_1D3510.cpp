@@ -1532,7 +1532,7 @@ extern "C" int func_00416958_3D48(char*, int, int) __asm__("func_00416958");
  * @return what func_00416958 returns
  */
 extern "C" int cTextMenuItem_settext(cTextMenuItem* menuItem, int text) {
-    char *textBuf = ((char*)menuItem) + 0x18;
+    char *textBuf = menuItem->Text;
     *textBuf = 0;
     return func_00416958_3D48(textBuf, text, 0xF);
 }

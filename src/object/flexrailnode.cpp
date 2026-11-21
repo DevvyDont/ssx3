@@ -243,8 +243,8 @@ extern "C" void* cFloatRailNode_cFloatRailNode1(cFloatRailNode* self, void* buck
     cFlexRailNode_cFlexRailNode1(((char*)self), bucket, stream);
     self->mVtbl = (void**)cFloatRailNode_vtbl;
     sFrStreamVEntry_348FA0* vt = *(sFrStreamVEntry_348FA0**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, ((char*)self) + 0x60, 0xC);
-    sFlexRailElem_348FA0** elems = (sFlexRailElem_348FA0**)(((char*)self) + 0x70);
+    vt[2].fn((char*)stream + vt[2].delta, (char*)&self->LSpring, 0xC);
+    sFlexRailElem_348FA0** elems = (sFlexRailElem_348FA0**)(&self->Nodes);
     *elems = new (str_FloatRailNodes, 0x20000000, 0) sFlexRailElem_348FA0[self->NumNodes];
     sFrStreamVEntry_348FA0* vt2 = *(sFrStreamVEntry_348FA0**)stream;
     vt2[2].fn((char*)stream + vt2[2].delta, self->Nodes, self->NumNodes * 80);
@@ -752,7 +752,7 @@ extern "C" void cFloatRailNode_updateNodes(cFloatRailNode* self)
     for (int i = 0; i < self->NumNodes; i++, n++) {
         if (*(int*)((char*)n->model.get() + 0xC))
             cFloatRailNode_getPosition(self, (sFrNode9220*)n);
-        float* k = (float*)(((char*)self) + 0x60);
+        float* k = (float*)(&self->LSpring);
         float ks = -self->LSpring;
         sFrV_98E8 acc = vu0Add_98E8(vu0Scale_98E8(vu0Sub_98E8(n->posA, n->posB), ks),
                                     vu0Scale_98E8(n->force, k[2]));
@@ -933,8 +933,8 @@ extern "C" void* cSpringRailNode_cSpringRailNode1(cSpringRailNode* self, void* b
     cFlexRailNode_cFlexRailNode1(((char*)self), bucket, stream);
     self->mVtbl = (void**)cSpringRailNode_vtbl;
     sFrStreamVEntry_349DB0* vt = *(sFrStreamVEntry_349DB0**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, ((char*)self) + 0x60, 0xC);
-    sFlexRailElem_349DB0** elems = (sFlexRailElem_349DB0**)(((char*)self) + 0x70);
+    vt[2].fn((char*)stream + vt[2].delta, (char*)&self->ASpring, 0xC);
+    sFlexRailElem_349DB0** elems = (sFlexRailElem_349DB0**)(&self->Nodes);
     *elems = new (str_SpringRailNodes, 0x20000000, 0) sFlexRailElem_349DB0[self->NumNodes];
     sFrStreamVEntry_349DB0* vt2 = *(sFrStreamVEntry_349DB0**)stream;
     vt2[2].fn((char*)stream + vt2[2].delta, self->Nodes, self->NumNodes * 0x60);
