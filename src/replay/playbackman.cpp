@@ -39,7 +39,7 @@ extern char str_BigFile_b[];
  */
 extern "C" cPlaybackMan* cPlaybackMan_cPlaybackMan(cPlaybackMan* self, int maxPlaybackFiles)
 {
-    cReplayFrame_cReplayFrame((char*)self + 0x14);
+    cReplayFrame_cReplayFrame(self->SaveFramePtr);
     cGame* world = SSXApp->Game;
     *(char**)&self->Game = ((char*)world);
     char* level = (char*)world->AI;

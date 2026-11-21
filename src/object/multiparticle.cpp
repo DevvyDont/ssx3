@@ -1205,7 +1205,7 @@ extern "C" void cAnimComboNode_setComboXform(cAnimComboNode* vself)
     sMpPart_9030* part = model->parts;
     for (int i = 0; i < model->count; i++, part++) {
         if (part->info != 0) {
-            sMpNode_9030* node = (sMpNode_9030*)((char*)self + 0x34);
+            sMpNode_9030* node = (sMpNode_9030*)(&self->CurrTime);
             vu0CopyMatrix_9030(&(self->ComboXform)[n], node->items[n].mtx);
             n++;
         }
@@ -1304,7 +1304,7 @@ extern "C" void cMeshAnimFrame_transform(sMpItem_9140* item, sMpMtx_9140* mtx);
  */
 extern "C" void cAnimComboNode_cacheFrame(cAnimComboNode* self)
 {
-    cAnimNode_cacheFrame((char*)self + 0x34);
+    cAnimNode_cacheFrame(&self->CurrTime);
     if (((sMpItem_9140*)self->AnimFrames) == 0) {
         return;
     }

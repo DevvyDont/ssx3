@@ -58,11 +58,11 @@ void* cMoveNode_cMoveNode_3(void* vself, void* bucket, void* stream)
     self->ModifierBlock = 0;
     self->mVtbl = (void**)cMoveNode_vtbl;
     sSerVEntry_55298* readEntry = &(*(sSerVEntry_55298**)stream)[2];
-    readEntry->fn((char*)stream + readEntry->delta, (char*)self + 0x20, 4);
+    readEntry->fn((char*)stream + readEntry->delta, (char*)&self->Debounce, 4);
     readEntry = &(*(sSerVEntry_55298**)stream)[2];
-    readEntry->fn((char*)stream + readEntry->delta, (char*)self + 0x24, 4);
+    readEntry->fn((char*)stream + readEntry->delta, (char*)&self->Fade, 4);
     readEntry = &(*(sSerVEntry_55298**)stream)[2];
-    readEntry->fn((char*)stream + readEntry->delta, (char*)self + 0x28, 4);
+    readEntry->fn((char*)stream + readEntry->delta, (char*)&self->TransferHack, 4);
     readEntry = &(*(sSerVEntry_55298**)stream)[2];
     readEntry->fn((char*)stream + readEntry->delta, &flag, 4);
     if (flag) {
@@ -1754,11 +1754,11 @@ void cMoveNode_writeToReplayFrame_2(void* vself, void* stream)
     cMoveNode* self = (cMoveNode*)vself;
     cInstanceNode_writeToReplayFrame(self, stream);
     sSerVEntry_56B30* writeEntry = &(*(sSerVEntry_56B30**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x20, 4);
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->Debounce, 4);
     writeEntry = &(*(sSerVEntry_56B30**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x24, 4);
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->Fade, 4);
     writeEntry = &(*(sSerVEntry_56B30**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x28, 4);
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->TransferHack, 4);
     int flag = self->ModifierBlock != 0;
     writeEntry = &(*(sSerVEntry_56B30**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, &flag, 4);

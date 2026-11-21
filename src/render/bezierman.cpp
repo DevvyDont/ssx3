@@ -135,7 +135,7 @@ INCLUDE_ASM("render/bezierman", cPS2BezierMan_Reset__FPv);
 void* cPS2BezierMan_Reset(void* vself)
 {
     cPS2BezierMan* self = (cPS2BezierMan*)vself;
-    return func_003739D0((char*)self + 0x10);
+    return func_003739D0(self->mPatchCache);
 }
 #endif
 

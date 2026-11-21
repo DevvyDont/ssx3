@@ -2247,7 +2247,7 @@ extern "C" void tNISList_DoPause_impl(tNISList* self, int on, int hard)
                 cBXScriptEngine_PauseScript(((char*)self->mpNISEngine), it->handle);
             }
         } else {
-            cVidEngine_PauseVideo(((char*)self->mpNISEngine) + 0x500, 1);
+            cVidEngine_PauseVideo(&self->mpNISEngine->mpPlayer, 1);
         }
         if (self->mIsCutSceneHandler) {
             cCutSceneTransitionMan_Pause(SSXApp->Game->CutSceneTransitionMan, 1);
@@ -2263,7 +2263,7 @@ extern "C" void tNISList_DoPause_impl(tNISList* self, int on, int hard)
                 cBXScriptEngine_ResumeScript(((char*)self->mpNISEngine), it->handle);
             }
         } else {
-            cVidEngine_PauseVideo(((char*)self->mpNISEngine) + 0x500, 0);
+            cVidEngine_PauseVideo(&self->mpNISEngine->mpPlayer, 0);
         }
         if (self->mIsCutSceneHandler) {
             cCutSceneTransitionMan_Pause(SSXApp->Game->CutSceneTransitionMan, 0);

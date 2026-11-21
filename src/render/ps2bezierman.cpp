@@ -33,7 +33,7 @@ void* cPS2BezierMan_cPS2BezierMan(void* vself)
     cPS2BezierMan* self = (cPS2BezierMan*)vself;
     cBezierMan_cBezierMan_r(self);
     self->mVtbl = (void**)cPS2BezierMan_vtbl;
-    func_00372B30((char*)self + 0x10);
+    func_00372B30(self->mPatchCache);
     new ((char*)self + 0x8) sBezSlot_8AE0[2];
     cPS2BezierMan_Init(self);
     return ((void*)self);

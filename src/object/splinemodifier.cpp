@@ -356,7 +356,7 @@ extern "C" void cSplineModifier_updateRootTransform(cSplineModifier* self)
     (*(sSmM44_9830*)&self->Transform).m[3][1] = pos.y;
     (*(sSmM44_9830*)&self->Transform).m[3][2] = pos.z;
     (*(sSmM44_9830*)&self->Transform).m[3][3] = 1.0f;
-    char* sub = (char*)self + 0x10;
+    char* sub = (char*)&self->BoundBox;
     if (self->HeadTweak != 0.0f) {
         const sSmV3_9830* axis = &t4vect_ZAxis;
         fSinCos(&sc[3][0], &sc[3][1], *(float*)(sub + 0x28));
@@ -1922,7 +1922,7 @@ extern "C" void cMultiSplineModifier_render(cMultiSplineModifier* self)
         }
     }
     if (self->DrawPath != 0) {
-        cSpline_draw((char*)self + 0x48, (char*)self + 0x20);
+        cSpline_draw(&self->Spline, &self->Colour);
     }
 }
 #endif

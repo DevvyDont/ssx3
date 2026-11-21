@@ -6927,7 +6927,7 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_PlatformUploadTextures__FPv);
 void* cPS2GraphicsMan_PlatformUploadTextures(void* vself)
 {
     cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    return MEM_copy((char*)self + 0x18f8, (char*)self + 0x3838, 8000);
+    return MEM_copy(&self->unk_18F8[0], &self->unk_3838[0], 8000);
 }
 #endif
 

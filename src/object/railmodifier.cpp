@@ -6152,7 +6152,7 @@ INCLUDE_ASM("object/railmodifier", cConveyorNode_getNodeState__FPv);
 void* cConveyorNode_getNodeState(void* vself)
 {
     cConveyorNode* self = (cConveyorNode*)vself;
-    return (char*)self + 0x1C;
+    return (char*)&self->Vel;
 }
 #endif
 
@@ -6231,7 +6231,7 @@ INCLUDE_ASM("object/railmodifier", cFlexBridgeNode_getBoundBox__FPv);
 void* cFlexBridgeNode_getBoundBox(void* vself)
 {
     cFlexBridgeNode* self = (cFlexBridgeNode*)vself;
-    return (char*)self + 0x90;
+    return (char*)&self->BoundBox;
 }
 #endif
 

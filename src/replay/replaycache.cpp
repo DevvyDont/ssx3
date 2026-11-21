@@ -3958,7 +3958,7 @@ extern "C" int cScriptPlayerEntity_SetupPlay(cScriptPlayerEntity* self)
     self->mSetupScriptHasKeysLeft = 0;
     self->mSetupScriptInitialEventBits = 0;
     if ((self->mpSystemHeader)->numChannels) {
-        void* heap = *(char**)(((char*)self->mpOwner) + 8) + 8;
+        void* heap = (char*)&self->mpOwner->mpManager->mHeap;
         *(sRcObj_273AA8***)&self->mpChannelPlayers = (sRcObj_273AA8**)cScriptHeap_AllocMem(heap, (self->mpSystemHeader)->numChannels * 4);
         char* channelData = (char*)(self->mpSystemHeader) + (self->mpSystemHeader)->headerSize;
         for (int i = 0; i < (self->mpSystemHeader)->numChannels; i++) {
@@ -4681,7 +4681,7 @@ extern "C" int cScriptPlayerMain_Init_impl(cScriptPlayerMain* self, tInSeqScript
     self->mNumSteps = 0;
     self->mLoopScript = 0;
     if (data->headerSize >= 13) {
-        *(char**)&self->mpDataHeader = (char*)data + 0xC;
+        *(char**)&self->mpDataHeader = (char*)&data->nextSectionStart;
     }
     char* entityData = (char*)data + (self->mpSystemHeader)->headerSize;
     if ((self->mpSystemHeader)->numEntities != 0) {
