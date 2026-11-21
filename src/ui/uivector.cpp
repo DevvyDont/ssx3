@@ -103,22 +103,22 @@ extern "C" void cUIVector_setUIData(cUIVector* uiVector, void* pUIBase)
     (*(sUIVecFlags_34C0*)&self->mAttrVector).mLoop = pIYFVector->mFlags & 2;
     (*(sUIVecFlags_34C0*)&self->mAttrVector).mNumTriangles = pIYFVector->mNumTriangles;
     if ((*(sUIVecFlags_34C0*)&self->mAttrVector).mNumTriangles)
-        (*(void**)&self->mpTriangles) = (unsigned char*)(pIYFVector + 1);
+        *(void**)&self->mpTriangles = (unsigned char*)(pIYFVector + 1);
     (*(sUIVecFlags_34C0*)&self->mAttrVector).mNumVertices = pIYFVector->mNumVertices;
     if (pIYFVector->mNumVertices)
     {
-        sUIVec16_34C0** pa = &(*(sUIVec16_34C0**)&self->mpVertexColour);
+        sUIVec16_34C0** pa = (sUIVec16_34C0**)&self->mpVertexColour;
         *pa = new (str_UIVectorClr, 0x100, 0) sUIVec16_34C0[pIYFVector->mNumVertices];
-        sUIVec3_34C0** pb = &(*(sUIVec3_34C0**)&self->mpVertexPosition);
+        sUIVec3_34C0** pb = (sUIVec3_34C0**)&self->mpVertexPosition;
         *pb = new (str_UIVectorVtx, 0x100, 0) sUIVec3_34C0[pIYFVector->mNumVertices];
-        sUIVec3b_34C0** pc = &(*(sUIVec3b_34C0**)&self->mpVertexPositionRender);
+        sUIVec3b_34C0** pc = (sUIVec3b_34C0**)&self->mpVertexPositionRender;
         *pc = new (str_UIVectorVtxRdr, 0x100, 0) sUIVec3b_34C0[pIYFVector->mNumVertices];
         for (int i = 0; i < pIYFVector->mNumVertices; i++)
             ((sUIVec3_34C0*)self->mpVertexPosition)[i] = D_004FF0D8_34C0;
     }
     if (!(*(sUIVecFlags_34C0*)&self->mAttrVector).mFill)
     {
-        sUIVec48_34C0** pd = &(*(sUIVec48_34C0**)&self->mpVertices);
+        sUIVec48_34C0** pd = (sUIVec48_34C0**)&self->mpVertices;
         *pd = new (str_UIVectorLine, 0x100, 0) sUIVec48_34C0[(*(sUIVecFlags_34C0*)&self->mAttrVector).mNumVertices];
     }
 }
@@ -137,15 +137,6 @@ struct sCount_36D0 {
     unsigned int mode : 15;
     unsigned int count : 15;
 };
-struct cUIVector_36D0 {
-    char pad0[0x74];
-    sCount_36D0 cnt;    // 0x74
-    char pad78[0x4];
-    sCol_36D0* cols;    // 0x7C
-    sV3_36D0* verts;    // 0x80
-    char pad84[0x4];
-    sUV_36D0* uvs;      // 0x88
-};
 extern "C" void cUIThing_setChannelData(void* self, unsigned short key, float v);
 
 /**
@@ -158,27 +149,27 @@ extern "C" void cUIThing_setChannelData(void* self, unsigned short key, float v)
  * @param key  channel number (On Tour channel)
  * @param data    the channel's new value
  */
-extern "C" void cUIVector_setChannelData(cUIVector_36D0* self, unsigned short key, float data)
+extern "C" void cUIVector_setChannelData(cUIVector* self, unsigned short key, float data)
 {
-    if (self->verts == 0) {
+    if (((sV3_36D0*)self->mpVertexPosition) == 0) {
         return;
     }
     if (key >= 21) {
         key -= 21;
         unsigned short idx = key / 9;
-        if (idx >= self->cnt.count) {
+        if (idx >= (*(sCount_36D0*)&self->mAttrVector).count) {
             return;
         }
         switch ((unsigned short)(key % 9)) {
-        case 0: self->verts[idx].x = data; break;
-        case 1: self->verts[idx].y = data; break;
-        case 2: self->verts[idx].z = data; break;
-        case 3: self->uvs[idx].u = data; break;
-        case 4: self->uvs[idx].v = data; break;
-        case 5: self->cols[idx].r = data; break;
-        case 6: self->cols[idx].g = data; break;
-        case 7: self->cols[idx].b = data; break;
-        case 8: self->cols[idx].a = data; break;
+        case 0: ((sV3_36D0*)self->mpVertexPosition)[idx].x = data; break;
+        case 1: ((sV3_36D0*)self->mpVertexPosition)[idx].y = data; break;
+        case 2: ((sV3_36D0*)self->mpVertexPosition)[idx].z = data; break;
+        case 3: ((sUV_36D0*)self->mpUV)[idx].u = data; break;
+        case 4: ((sUV_36D0*)self->mpUV)[idx].v = data; break;
+        case 5: ((sCol_36D0*)self->mpVertexColour)[idx].r = data; break;
+        case 6: ((sCol_36D0*)self->mpVertexColour)[idx].g = data; break;
+        case 7: ((sCol_36D0*)self->mpVertexColour)[idx].b = data; break;
+        case 8: ((sCol_36D0*)self->mpVertexColour)[idx].a = data; break;
         }
     } else {
         cUIThing_setChannelData(self, key, data);
@@ -203,26 +194,6 @@ struct sBits_3808 {
     unsigned int layer : 6;
     unsigned int hi : 13;
 };
-struct cUIVector_3808 {
-    char pad0[0x14];
-    sBits_3808 bits;    // 0x14
-    char pad18[0x4];
-    float r, g, b, a;   // 0x1C
-    char pad2C[0x44 - 0x2C];
-    float x;            // 0x44
-    float y;            // 0x48
-    char pad4C[0x4];
-    float sx;           // 0x50
-    float sy;           // 0x54
-    char pad58[0x60 - 0x58];
-    float w;            // 0x60
-    float h;            // 0x64
-    char pad68[0x74 - 0x68];
-    sCount_3808 cnt;    // 0x74
-    char pad78[0x4];
-    sCol_3808* cols;    // 0x7C
-    sV3_3808* verts;    // 0x80
-};
 struct sKey_3808 {
     short key;
     short value;
@@ -239,9 +210,9 @@ struct sKey_3808 {
  * @param n     number of pairs (On Tour NumChannels)
  * @param keys  the pairs, two shorts each (channel, value)
  */
-extern "C" void cUIVector_setChannelDataKCP(cUIVector_3808* self, unsigned int n, sKey_3808* keys)
+extern "C" void cUIVector_setChannelDataKCP(cUIVector* self, unsigned int n, sKey_3808* keys)
 {
-    if (self->verts == 0) {
+    if (((sV3_3808*)self->mpVertexPosition) == 0) {
         return;
     }
     for (unsigned int i = 0; i < n; i++, keys++) {
@@ -250,31 +221,31 @@ extern "C" void cUIVector_setChannelDataKCP(cUIVector_3808* self, unsigned int n
         if (key >= 21) {
             key -= 21;
             unsigned short idx = key / 9;
-            if (idx >= self->cnt.count) {
+            if (idx >= (*(sCount_3808*)&self->mAttrVector).count) {
                 continue;
             }
             switch (key % 9) {
-            case 0: self->verts[idx].x = data; break;
-            case 1: self->verts[idx].y = data; break;
-            case 2: self->verts[idx].z = data; break;
-            case 5: self->cols[idx].r = data; break;
-            case 6: self->cols[idx].g = data; break;
-            case 7: self->cols[idx].b = data; break;
-            case 8: self->cols[idx].a = data; break;
+            case 0: ((sV3_3808*)self->mpVertexPosition)[idx].x = data; break;
+            case 1: ((sV3_3808*)self->mpVertexPosition)[idx].y = data; break;
+            case 2: ((sV3_3808*)self->mpVertexPosition)[idx].z = data; break;
+            case 5: ((sCol_3808*)self->mpVertexColour)[idx].r = data; break;
+            case 6: ((sCol_3808*)self->mpVertexColour)[idx].g = data; break;
+            case 7: ((sCol_3808*)self->mpVertexColour)[idx].b = data; break;
+            case 8: ((sCol_3808*)self->mpVertexColour)[idx].a = data; break;
             }
         } else {
             switch (key) {
-            case 0: self->x = data; break;
-            case 1: self->y = data; break;
-            case 9: self->sx = data * 0.01f; break;
-            case 10: self->sy = data * 0.01f; break;
-            case 12: self->bits.layer = (int)data; break;
-            case 13: self->r = data * (1.0f / 255.0f); break;
-            case 14: self->g = data * (1.0f / 255.0f); break;
-            case 15: self->b = data * (1.0f / 255.0f); break;
-            case 16: self->a = data * (1.0f / 255.0f); break;
-            case 6: self->w = data; break;
-            case 7: self->h = data; break;
+            case 0: self->mPosition.x = data; break;
+            case 1: self->mPosition.y = data; break;
+            case 9: self->mScale.x = data * 0.01f; break;
+            case 10: self->mScale.y = data * 0.01f; break;
+            case 12: (*(sBits_3808*)&self->mAttr).layer = (int)data; break;
+            case 13: self->mColour.A = data * (1.0f / 255.0f); break;
+            case 14: self->mColour.R = data * (1.0f / 255.0f); break;
+            case 15: self->mColour.G = data * (1.0f / 255.0f); break;
+            case 16: self->mColour.B = data * (1.0f / 255.0f); break;
+            case 6: self->mSize.x = data; break;
+            case 7: self->mSize.y = data; break;
             }
         }
     }
@@ -749,7 +720,7 @@ extern void* cListNode_vtbl[];
  */
 extern "C" void *cListNode_cListNode(cListNode* self) {
     ((void*)self->mpNext) = ((void*)self);
-    ((int*)self->mVtbl) = &(*(int*)&cListNode_vtbl);
+    ((int*)self->mVtbl) = (int*)&cListNode_vtbl;
     ((void*)self->mpPrev) = ((void*)self);
     return ((void*)self);
 }
@@ -1799,7 +1770,7 @@ INCLUDE_ASM("ui/uivector", cUIIcon_setTiled);
  * @param tiled  non-zero to draw the texture tiled
  */
 extern "C" void cUIIcon_setTiled(cUIIcon* uiIcon, int tiled) {
-    (*(int*)&uiIcon->mAttrIcon) = (int) (((*(int*)&uiIcon->mAttrIcon) & ~1) | (tiled != 0));
+    *(int*)&uiIcon->mAttrIcon = (int) (((*(int*)&uiIcon->mAttrIcon) & ~1) | (tiled != 0));
 }
 #endif
 //100%
@@ -2358,7 +2329,7 @@ INCLUDE_ASM("ui/uivector", cUIMenu_setCreateThread);
  * @param createThread  non-zero to set the flag
  */
 extern "C" void cUIMenu_setCreateThread(cUIMenu* uiMenu, int createThread) {
-    (*(int*)&uiMenu->mAttrMenu) = (int) (((*(int*)&uiMenu->mAttrMenu) & ~1) | (createThread != 0));
+    *(int*)&uiMenu->mAttrMenu = (int) (((*(int*)&uiMenu->mAttrMenu) & ~1) | (createThread != 0));
 }
 #endif
 //100%
@@ -2410,7 +2381,7 @@ INCLUDE_ASM("ui/uivector", cUIMenu_setScrollIndex);
  * @param scrollItemCurrent  the new index
  */
 extern "C" void cUIMenu_setScrollIndex(cUIMenu* uiMenu, signed char scrollItemCurrent) {
-    (*(signed char*)&uiMenu->mScrollItemCurrent) = scrollItemCurrent;
+    *(signed char*)&uiMenu->mScrollItemCurrent = scrollItemCurrent;
 }
 #endif
 //100%
@@ -2423,7 +2394,7 @@ INCLUDE_ASM("ui/uivector", cUIMenu_setScrollNum);
  * @param scrollItemNum  the new count
  */
 extern "C" void cUIMenu_setScrollNum(cUIMenu* uiMenu, signed char scrollItemNum) {
-    (*(signed char*)&uiMenu->mScrollItemNum) = scrollItemNum;
+    *(signed char*)&uiMenu->mScrollItemNum = scrollItemNum;
 }
 #endif
 //100%
@@ -2436,7 +2407,7 @@ INCLUDE_ASM("ui/uivector", cUIMenu_setScrollOffset);
  * @param scrollItemOffset  the new offset
  */
 extern "C" void cUIMenu_setScrollOffset(cUIMenu* uiMenu, signed char scrollItemOffset) {
-    (*(signed char*)&uiMenu->mScrollItemOffset) = scrollItemOffset;
+    *(signed char*)&uiMenu->mScrollItemOffset = scrollItemOffset;
 }
 #endif
 //100%
@@ -2726,7 +2697,7 @@ INCLUDE_ASM("ui/uivector", cUIListBox_setFontIndex);
  * @param font  the font index (0..3)
  */
 extern "C" void cUIListBox_setFontIndex(cUIListBox* uiListBox, int font) {
-    (*(int*)&uiListBox->mAttrListBox) = (int) (((*(int*)&uiListBox->mAttrListBox) & ~3) | (font & 3));
+    *(int*)&uiListBox->mAttrListBox = (int) (((*(int*)&uiListBox->mAttrListBox) & ~3) | (font & 3));
 }
 #endif
 //100%
@@ -2965,7 +2936,7 @@ INCLUDE_ASM("ui/uivector", cUIState_setAllCtrlBits);
  * @param ctrlBits  one bit per controller that may drive the state
  */
 extern "C" void cUIState_setAllCtrlBits(cUIState* uiState, signed char ctrlBits) {
-    (*(signed char*)&uiState->mCtrlBits) = ctrlBits;
+    *(signed char*)&uiState->mCtrlBits = ctrlBits;
 }
 #endif
 //100%
@@ -4580,7 +4551,7 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_setFontIndex);
  * @param font  the font index (0..3)
  */
 extern "C" void cUITextScroll_setFontIndex(cUITextScroll* uiTextScroll, int font) {
-    (*(int*)&uiTextScroll->mAttrTextScroll) = (int) (((*(int*)&uiTextScroll->mAttrTextScroll) & ~6) | ((font & 3) * 2));
+    *(int*)&uiTextScroll->mAttrTextScroll = (int) (((*(int*)&uiTextScroll->mAttrTextScroll) & ~6) | ((font & 3) * 2));
 }
 #endif
 //100%
@@ -4735,7 +4706,7 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_setChatWindowMode);
  * @param uiTextScroll  the cUITextScroll
  */
 extern "C" void cUITextScroll_setChatWindowMode(cUITextScroll* uiTextScroll) {
-    (*(int*)&uiTextScroll->mAttrTextScroll) = (int) ((*(int*)&uiTextScroll->mAttrTextScroll) | 1);
+    *(int*)&uiTextScroll->mAttrTextScroll = (int) ((*(int*)&uiTextScroll->mAttrTextScroll) | 1);
 }
 #endif
 //100%
@@ -4788,7 +4759,7 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_setLineOffset);
  * @param linesOffset  the line index
  */
 extern "C" void cUITextScroll_setLineOffset(cUITextScroll* uiTextScroll, short linesOffset) {
-    (*(short*)&uiTextScroll->mLinesOffset) = linesOffset;
+    *(short*)&uiTextScroll->mLinesOffset = linesOffset;
 }
 #endif
 //100%
@@ -4827,7 +4798,7 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_setSelectedIndex);
  * @param selectedIndex  the line index
  */
 extern "C" void cUITextScroll_setSelectedIndex(cUITextScroll* uiTextScroll, short selectedIndex) {
-    (*(short*)&uiTextScroll->mSelectedIndex) = selectedIndex;
+    *(short*)&uiTextScroll->mSelectedIndex = selectedIndex;
 }
 #endif
 //100%

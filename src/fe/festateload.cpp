@@ -324,23 +324,6 @@ extern "C" void func_00186D60();
 extern "C" void cFEStateMemCard_callbackAcknowledgeCardStatusChange();
 extern "C" void cFEStateMemCard_callbackConfirmNoFreeBlocks();
 
-struct sFEStateLoadK186A08 {
-    char pad_0x0[0x8];
-    void** vtbl;        // 0x8
-    int fC;             // 0xC
-    char pad_0x10[0x19C - 0x10];
-    int f19C;           // 0x19C
-    char pad_0x1A0[0x204 - 0x1A0];
-    int f204;           // 0x204
-    char pad_0x208[0x22C - 0x208];
-    int f22C;           // 0x22C
-    int f230;           // 0x230
-    int f234;           // 0x234
-    int f238;           // 0x238
-    int f23C;           // 0x23C
-    int f240;           // 0x240
-    int f244;           // 0x244
-};
 
 struct sMemCardK186A08 {
     char pad_0x0[0x38];
@@ -379,12 +362,12 @@ struct sMemCardK186A08 {
  * @param engine  the UI engine
  * @return @p self
  */
-extern "C" sFEStateLoadK186A08* func_00186A08(cFEStateMemCard* self, void* engine)
+extern "C" cFEStateMemCard* func_00186A08(cFEStateMemCard* self, void* engine)
 {
-    cFEMemCard_cFEMemCard2(((sFEStateLoadK186A08*)self), engine, 2);
+    cFEMemCard_cFEMemCard2((self), engine, 2);
     int one = 1;
     self->mVtbl = cFEStateMemCard_vtbl;
-    D_004A14B8_K186A08 = ((sFEStateLoadK186A08*)self);
+    D_004A14B8_K186A08 = (self);
     D_004A14B4 = 0;
     D_004A14BC = 0;
     self->mAutoLoadOn = one;
@@ -412,7 +395,7 @@ extern "C" sFEStateLoadK186A08* func_00186A08(cFEStateMemCard* self, void* engin
     mc->cb5C = (void*)cFEStateMemCard_callbackConfirmNoFreeBlocks;
     mc->f128 = 0;
     mc->f11C = 0;
-    return ((sFEStateLoadK186A08*)self);
+    return (self);
 }
 #endif
 

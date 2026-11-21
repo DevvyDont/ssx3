@@ -2861,9 +2861,6 @@ struct sVEntryP_001A7390 {
     int (*fn)(void*, float*);
 };
 
-struct sVec3_001A7390 {
-    float x, y, z;
-};
 
 struct sChar2_001A7390 {
     char c[2];
@@ -2919,7 +2916,7 @@ extern "C" void func_001A7390(cFEStateNet* self, const char* name, int mode)
         func_003EFA48(wide, 0x60, buf);
         sVEntryP_001A7390* vt = (sVEntryP_001A7390*)uiText->mVtbl;
         vt[20].fn((char*)uiText + vt[20].delta, size);
-        sVec3_001A7390 scale = *(sVec3_001A7390*)&uiText->mScale;
+        t3Vector scale = *(&uiText->mScale);
         unsigned short* rest = cFont_textSmartLimit1(cUIText_getFont(uiText), scale.x, size[0], wide, wrapped, 0x30);
         cUIText_setUnicodeString(uiText, (char*)wrapped);
         if (rest != 0) {
@@ -3084,13 +3081,6 @@ static inline void Dealloc1A7848(sObj1A7848** p, int n)
     }
 }
 
-struct sOwner1A7848 {
-    char pad0[0x8];
-    void* vt;
-    char padC[0x6C4];
-    char str[8];
-    sObjVec1A7848 mVec;
-};
 
 /**
  * Destroys the private-message popup: deletes every message, frees the vector and destroys mszSender.
@@ -3100,24 +3090,24 @@ struct sOwner1A7848 {
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object (handled by the base destructor)
  */
-extern "C" void cFEStateReadMessagePopup__cFEStateReadMessagePopup(sOwner1A7848* self, int flags)
+extern "C" void cFEStateReadMessagePopup__cFEStateReadMessagePopup(cFEStateReadMessagePopup* self, int flags)
 {
-    self->vt = cFEStateReadMessagePopup_vtbl;
+    *(void**)&self->mVtbl = cFEStateReadMessagePopup_vtbl;
     for (;;) {
-        if (self->mVec.mBegin == self->mVec.mEnd) break;
-        sObj1A7848* message = self->mVec.mEnd[-1];
-        self->mVec.mEnd--;
+        if ((*(sObjVec1A7848*)&self->mMessages).mBegin == (*(sObjVec1A7848*)&self->mMessages).mEnd) break;
+        sObj1A7848* message = (*(sObjVec1A7848*)&self->mMessages).mEnd[-1];
+        (*(sObjVec1A7848*)&self->mMessages).mEnd--;
         if (message) {
             message->vt[1].fn((char*)message + message->vt[1].delta, 3);
         }
     }
-    sObjVec1A7848* messages = &self->mVec;
-    sObj1A7848** first = self->mVec.mBegin;
-    sObj1A7848** last = self->mVec.mEnd;
+    sObjVec1A7848* messages = (sObjVec1A7848*)&self->mMessages;
+    sObj1A7848** first = (*(sObjVec1A7848*)&self->mMessages).mBegin;
+    sObj1A7848** last = (*(sObjVec1A7848*)&self->mMessages).mEnd;
     func_0041610C(first, last, (messages->mEnd - last) * sizeof(sObj1A7848*));
-    self->mVec.mEnd -= last - first;
-    Dealloc1A7848(messages->mBegin, self->mVec.mCap - self->mVec.mBegin);
-    cBXString__cBXString(self->str, 2);
+    (*(sObjVec1A7848*)&self->mMessages).mEnd -= last - first;
+    Dealloc1A7848(messages->mBegin, (*(sObjVec1A7848*)&self->mMessages).mCap - (*(sObjVec1A7848*)&self->mMessages).mBegin);
+    cBXString__cBXString(((char*)&self->mszSender), 2);
     cFEStateNet__cFEStateNet_dtor(self, flags);
 }
 #endif
@@ -9978,13 +9968,6 @@ struct sBXString1AFA60 {
     sBXString1AFA60(const sBXString1AFA60& o);
 };
 
-struct sStats1AFA60 {
-    int a;
-    int b;
-    int c;
-    int d;
-    int e;
-};
 
 /**
  * Shows the opponent's stats from a find-player event (type 227) and pings the opponent.
@@ -10002,9 +9985,9 @@ extern "C" void func_001AFA60(void* screen, char* msg)
 {
     sBXString1AFA60 nameStr;
     char buf[0x100];
-    sStats1AFA60* st = (sStats1AFA60*)(msg + 0x18);
+    tLobbyStats* st = (tLobbyStats*)(msg + 0x18);
     cBXString_cBXString1(&nameStr, &LobbyMan_mLobbyMan->mOpponent);
-    (*(sStats1AFA60*)&LobbyMan_mLobbyMan->mOpponentStats) = *(sStats1AFA60*)(msg + 0x18);
+    (*(&LobbyMan_mLobbyMan->mOpponentStats)) = *(tLobbyStats*)(msg + 0x18);
     func_0025DD08(LobbyMan_mLobbyMan, nameStr.str, *(int*)(msg + 0x14));
     cUIText* uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_TextPlayerName));
     if (uiText != 0) {
@@ -10033,13 +10016,13 @@ extern "C" void func_001AFA60(void* screen, char* msg)
             pct = 100.0f;
         }
         int name = Loc1AFA60(str_kT_CMNWinRatio);
-        usprintf_1AFA60(buf, str_pct_s_pct_d_pct_d_pct_02_2fpct_pct, name, st->b, st->c, fptodp(pct));
+        usprintf_1AFA60(buf, str_pct_s_pct_d_pct_d_pct_02_2fpct_pct, name, st->unk_04, st->unk_08, fptodp(pct));
         cUIText_setUnicodeString(uiText, buf);
     }
     uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_TextPlayerDisconnects));
     if (uiText != 0) {
         int name = Loc1AFA60(str_kT_CMNDisconnects);
-        usprintf_1AFA60(buf, str_pct_s_pct_d_b, name, st->d);
+        usprintf_1AFA60(buf, str_pct_s_pct_d_b, name, st->unk_0C);
         cUIText_setUnicodeString(uiText, buf);
     }
     cBXString__cBXString(&nameStr, 2);
@@ -10205,7 +10188,7 @@ extern "C" void cFEStateChallengeReceivedPopup_onCreateScreen(cFEStateChallengeR
     char* name = (char*)&self->mszChallenger;
     sRaceSetup_FE68* challenge = (sRaceSetup_FE68*)func_00263270(BuddyMan_mBuddyMan, *(int*)name);
     cBXString_operatorE(&LobbyMan_mLobbyMan->mOpponent, name);
-    (*(sInfo_FE68*)&LobbyMan_mLobbyMan->mOpponentStats) = *(sInfo_FE68*)challenge->info;
+    *(sInfo_FE68*)&LobbyMan_mLobbyMan->mOpponentStats = *(sInfo_FE68*)challenge->info;
     if (challenge == 0)
         return;
     cBXString_operatorE1(&LobbyMan_mLobbyMan->unk_08C, challenge->name);
@@ -18471,9 +18454,6 @@ extern "C" char* cUIText_getFont(void* text);
 extern "C" char* strcat(char*, const char*);
 extern char str_dot_dot_dot[];
 
-struct sVec3_1B9950 {
-    float x, y, z;
-};
 
 struct sVec2_1B9950 {
     float x, y;
@@ -18529,7 +18509,7 @@ static inline void Measure1B9950(cUIText* text, const char* s, sRect1B9950* out)
 extern "C" void func_001B9950(cFEStateCreateStep1* self, cUIText* text, char* str)
 {
     int cut = 0;
-    sVec3_1B9950 scale = *(sVec3_1B9950*)&text->mScale;
+    t3Vector scale = *(&text->mScale);
     sRect1B9950 box;
     ((cFEVObj_001B9950*)text)->getSize(&box);
     char* font = cUIText_getFont(text);
@@ -25912,9 +25892,6 @@ extern "C" char* cUIText_getFont(void* text);
 extern "C" char* strcat(char*, const char*);
 extern char str_dot_dot_dot[];
 
-struct sVec3_1C2578 {
-    float x, y, z;
-};
 
 struct sVec2_1C2578 {
     float x, y;
@@ -25973,7 +25950,7 @@ extern "C" void func_001C2578(cFEStateNetQuickMessages* self, void* vtext, char*
 {
     cUIText* text = (cUIText*)vtext;
     int cut = 0;
-    sVec3_1C2578 scale = *(sVec3_1C2578*)&text->mScale;
+    t3Vector scale = *(&text->mScale);
     sRect1C2578 box;
     ((cFEVObj_001C2578*)text)->getSize(&box);
     char* font = cUIText_getFont(text);

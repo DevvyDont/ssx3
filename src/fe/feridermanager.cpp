@@ -555,27 +555,6 @@ extern "C" void cRiderAnimBase_expireAnimation(void* anim);
 extern "C" void func_002F1A08(void* p);
 extern "C" void func_002ECF78(void* p);
 
-struct sFERiderF138 {
-    unsigned int state;     // 0x0
-    int f4;                 // 0x4
-    char pad_0x8[0x4];
-    void* anim;             // 0xC
-    char pad_0x10[0xC24 - 0x10];
-    int fC24;               // 0xC24
-    int fC28;               // 0xC28
-    char pad_0xC2C[0xC70 - 0xC2C];
-    void* fC70;             // 0xC70
-    void* fC74;             // 0xC74
-    char pad_0xC78[0xCB4 - 0xC78];
-    int fCB4;               // 0xCB4
-    int fCB8;               // 0xCB8
-    int fCBC;               // 0xCBC
-    int fCC0;               // 0xCC0
-    int fCC4;               // 0xCC4
-    int fCC8;               // 0xCC8
-    char pad_0xCCC[0xCD4 - 0xCCC];
-    int pending;            // 0xCD4
-};
 
 struct sVEF138 {
     short delta;
@@ -597,43 +576,43 @@ struct sVEF138 {
  */
 extern "C" void cFERider_update(cFERider* selfp)
 {
-    sFERiderF138* self = (sFERiderF138*)selfp;
-    if (self->pending >= 0) {
+    cFERider* self = selfp;
+    if (self->mSafeRenderCount >= 0) {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVEF138* vt = (sVEF138*)ps2GraphicsMan->mVtbl;
-        if (self->pending < vt[114].fn((char*)ps2GraphicsMan + vt[114].delta)) {
-            self->pending = -1;
-            cFERider_init(self, self->f4, self->fC24, self->fC28);
+        if (self->mSafeRenderCount < vt[114].fn((char*)ps2GraphicsMan + vt[114].delta)) {
+            self->mSafeRenderCount = -1;
+            cFERider_init(self, self->mProfileIndex, self->mNewCharID, self->mNewLoadAll);
         }
     } else {
-        if (self->state >= 10) {
+        if (((unsigned int)self->mCharID) >= 10) {
             return;
         }
-        if (self->fCBC == 0 && func_001A0100((int*)self)) {
-            self->fCBC = 1;
-        } else if (self->fCBC != 0) {
-            if (self->fCB8 == 0 && func_0019FD58((int*)self)) {
-                self->fCB8 = 1;
-                if (self->fCB4 == 0) {
+        if (self->mDoneLoadingModels == 0 && func_001A0100((int*)self)) {
+            self->mDoneLoadingModels = 1;
+        } else if (self->mDoneLoadingModels != 0) {
+            if (self->mDoneLoadingTextures == 0 && func_0019FD58((int*)self)) {
+                self->mDoneLoadingTextures = 1;
+                if (self->mCompiledModel == 0) {
                     cFERider_compileModel((cFERider*)((sFERiderED80*)self));
                 }
-            } else if (self->fCBC != 0 && self->fCB8 != 0 && self->fCB4 != 0 && self->fCC0 == 0) {
+            } else if (self->mDoneLoadingModels != 0 && self->mDoneLoadingTextures != 0 && self->mCompiledModel != 0 && self->mDoneUpdatingModelParts == 0) {
                 cFERider_updateAnimModelParts((int*)self);
-                self->fCC0 = 1;
-                int* pv = &self->fCC8;
-                *pv = self->fCC4 != 0 || *pv != 0;
-                self->fCC4 = 0;
+                self->mDoneUpdatingModelParts = 1;
+                int* pv = &self->mVisible;
+                *pv = self->mSetVisible != 0 || *pv != 0;
+                self->mSetVisible = 0;
             }
         }
     }
-    if (self->fCC8 != 0) {
-        if (self->anim != 0) {
-            cRiderAnimBase_updateAnimation(self->anim, 0, 1.0f);
-            cRiderAnimBase_expireAnimation(self->anim);
+    if (self->mVisible != 0) {
+        if (((void*)self->mpRiderAnim) != 0) {
+            cRiderAnimBase_updateAnimation(((void*)self->mpRiderAnim), 0, 1.0f);
+            cRiderAnimBase_expireAnimation(((void*)self->mpRiderAnim));
         }
         cFERider_updateModelPose((cFERider*)self);
-        func_002F1A08(self->fC70);
-        func_002ECF78(self->fC74);
+        func_002F1A08(self->mpAttachedEmitterFX);
+        func_002ECF78(self->mpBoltOnFX);
     }
 }
 #endif
@@ -1142,15 +1121,11 @@ INCLUDE_ASM("fe/feridermanager", func_0019F878);
 #ifdef SKIP_ASM
 extern "C" int func_004165A8(const void* a, const void* b);
 
-struct sRiderName_F878 {
-    int id;
-    char name[8];
-};
 
 struct sRiderTable_F878 {
     char pad_0x0[0x18];
     int count;
-    sRiderName_F878 entries[1];
+    tTextureRef entries[1];
 };
 
 /**
@@ -1163,8 +1138,8 @@ extern "C" int func_0019F878(cFERider* self, const char* name)
 {
     int i;
     for (i = 0; i < self->mNumTextureRefs; i++) {
-        if (func_004165A8(name, ((sRiderName_F878*)&self->mTextureRefs[0])[i].name) == 0) {
-            return ((sRiderName_F878*)&self->mTextureRefs[0])[i].id;
+        if (func_004165A8(name, ((&self->mTextureRefs[0]))[i].Name) == 0) {
+            return ((&self->mTextureRefs[0]))[i].TextureID;
         }
     }
     return -1;
@@ -1233,10 +1208,10 @@ extern "C" void func_0019F908(cFERider* self, sPkg_F908* pkg, int replace)
                 vt[48].fn((char*)ps2GraphicsMan + vt[48].delta, id, data, 1);
             }
         } else {
-            strcpy(((sRiderName_F878*)&self->mTextureRefs[0])[self->mNumTextureRefs].name, name);
+            strcpy(((&self->mTextureRefs[0]))[self->mNumTextureRefs].Name, name);
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             sVE_F908a* vt = (sVE_F908a*)ps2GraphicsMan->mVtbl;
-            ((sRiderName_F878*)&self->mTextureRefs[0])[self->mNumTextureRefs].id = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, data, str_charshp, 0, 1, -1);
+            ((&self->mTextureRefs[0]))[self->mNumTextureRefs].TextureID = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, data, str_charshp, 0, 1, -1);
             self->mNumTextureRefs++;
         }
     }

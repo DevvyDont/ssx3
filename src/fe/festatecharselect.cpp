@@ -430,21 +430,10 @@ public:
     virtual void* onBack(void* owner, int id);
 };
 
-struct sCharSel_17E8 {
-    char pad0[0x10];
-    char* engine;                   // 0x10
-    signed char player;             // 0x14
-    char pad15[0x2F];
-    signed char rider;              // 0x44
-    char pad45[0x7];
-    int board;                      // 0x4C
-    char pad50[0x30];
-    int dirty;                      // 0x80
-};
 
-static inline char* riderSlot_17E8(sCharSel_17E8* self)
+static inline char* riderSlot_17E8(cFEStateCharSelect* self)
 {
-    return (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->rider);
+    return (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum);
 }
 
 static inline void refresh_17E8(sIface_17E8* iface)
@@ -472,7 +461,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(cFEStateCharSelect* self, sObj_
     switch (event) {
     case 5: {
         int on = 1;
-        char* feRider = riderSlot_17E8(((sCharSel_17E8*)self));
+        char* feRider = riderSlot_17E8((self));
         *(int*)(feRider + 0xC20) = on;
         *(int*)(feRider + 0xC1C) = 0;
         int rider = self->mUserNum;
@@ -486,25 +475,25 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(cFEStateCharSelect* self, sObj_
         refresh_17E8(iface);
         unsigned char mask = on << self->mCurrentCtrl;
         cFECustom_setPlayerCtrlMask(*(void**)(char*)self->mpEngine, self->mUserNum, mask);
-        void* st = (*(cStateFactory_17E8**)(char*)self->mpEngine)->onSelect(((sCharSel_17E8*)self), widget->id);
+        void* st = (*(cStateFactory_17E8**)(char*)self->mpEngine)->onSelect((self), widget->id);
         if (st != 0)
             cUIStateStack_push(self->mpEngine->mStateStack, st);
-        cFERider_setVisible(riderSlot_17E8(((sCharSel_17E8*)self)), 0);
+        cFERider_setVisible(riderSlot_17E8((self)), 0);
         self->mbDraw3D = 0;
         break;
     }
     case 6: {
-        void* st = (*(cStateFactory_17E8**)(char*)self->mpEngine)->onBack(((sCharSel_17E8*)self), widget->id);
+        void* st = (*(cStateFactory_17E8**)(char*)self->mpEngine)->onBack((self), widget->id);
         if (st != 0) {
             cUIStateStack_push(self->mpEngine->mStateStack, st);
-            cFERider_setVisible(riderSlot_17E8(((sCharSel_17E8*)self)), 0);
+            cFERider_setVisible(riderSlot_17E8((self)), 0);
             self->mbDraw3D = 0;
         }
         break;
     }
     case 1: {
         widget->setVisible(1);
-        cFEStateCharSelect_updateWidget(((sCharSel_17E8*)self), self->mUserNum, D_00440F68[widget->id]);
+        cFEStateCharSelect_updateWidget((self), self->mUserNum, D_00440F68[widget->id]);
         int rider = self->mUserNum;
         int player = self->mCurrentCtrl;
         int ch = D_00440F68[widget->id];
@@ -529,7 +518,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(cFEStateCharSelect* self, sObj_
         char* st = (char*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), (char*)self->mpEngine, 1);
         *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
         cUIStateStack_pushSpecial(self->mpEngine->mStateStack, st, 0, 0);
-        cFERider_setVisible(riderSlot_17E8(((sCharSel_17E8*)self)), 0);
+        cFERider_setVisible(riderSlot_17E8((self)), 0);
         self->mbDraw3D = 0;
         break;
     }
@@ -542,7 +531,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(cFEStateCharSelect* self, sObj_
         char* top = *(char**)(char*)self->mpEngine;
         if (top != 0)
             *(int*)(top + 0xC) = 9;
-        cFERider_setVisible(riderSlot_17E8(((sCharSel_17E8*)self)), 0);
+        cFERider_setVisible(riderSlot_17E8((self)), 0);
         self->mbDraw3D = 0;
         break;
     }

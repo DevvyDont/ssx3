@@ -687,14 +687,10 @@ struct sVE_31C0 {
     int (*fn)(void*, void*, void*, int, int, int);
 };
 
-struct sWidget_31C0 {
-    char pad0[0x14];
-    int flags;      // 0x14
-};
 
-static inline int isActive_31C0(sWidget_31C0* w)
+static inline int isActive_31C0(cUIGroup* w)
 {
-    return w != 0 && ((w->flags >> 6) & 1);
+    return w != 0 && ((w->mAttr >> 6) & 1);
 }
 
 /**
@@ -727,13 +723,13 @@ extern "C" void cFEStateMountainRoom_updateTextureLoad(cFEStateMountainRoom* vse
     vself->mFrontTextureID = id;
     *(int*)(snd + 0x78) = id;
     *(int*)(snd + 0x7C) = 0;
-    sWidget_31C0* passGroup = (sWidget_31C0*)vself->mpPassGroup;
+    cUIGroup* passGroup = vself->mpPassGroup;
     if (isActive_31C0(passGroup)) {
         int both = 0;
         if (isActive_31C0(passGroup)) {
-            sWidget_31C0* passFrontGroup = (sWidget_31C0*)vself->mpPassFrontGroup;
+            cUIGroup* passFrontGroup = vself->mpPassFrontGroup;
             if (passFrontGroup != 0) {
-                both = (passFrontGroup->flags >> 6) & 1;
+                both = (passFrontGroup->mAttr >> 6) & 1;
             }
         }
         if (!both) {

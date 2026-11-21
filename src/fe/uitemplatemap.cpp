@@ -467,21 +467,6 @@ public:
     virtual void setColor(char* col);
 };
 
-// The MAP template as this function sees it.
-struct sMapTmpl_200DE8 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    int f10;
-    int f14;
-    int f18;
-    int f1C;
-    int available[3][3][8];     // 0x20  [peak][mode][event]
-    int f140[3][3][8];          // 0x140
-    char pad260[0x2E8 - 0x260];
-    void* screen;               // 0x2E8
-};
 
 // Location entries with track 0x17 have no event: no availability colour or text, the widget is made static.
 static inline int hasEvent(int track) { return track != 0x17; }
@@ -500,25 +485,25 @@ static inline int hasEvent(int track) { return track != 0x17; }
  */
 extern "C" void cUITemplate_MAP_setupMenus(cUITemplate_MAP* tmpl)
 {
-    sMapTmpl_200DE8* self = (sMapTmpl_200DE8*)tmpl;
+    cUITemplate_MAP* self = tmpl;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     cUIObj_Menus* menuObj;
-    menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_Peak3));
+    menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_Peak3));
     if (menuObj != 0) {
         menuObj->setIndex(2);
-        cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->fC);
+        cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->mbPeakUnlocked[2]);
     }
-    menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_Peak2));
+    menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_Peak2));
     if (menuObj != 0) {
         menuObj->setIndex(1);
-        cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->f8);
+        cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->mbPeakUnlocked[1]);
     }
-    menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_Peak1));
+    menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_Peak1));
     if (menuObj != 0) {
         menuObj->setIndex(0);
-        cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->f4);
+        cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->mbPeakUnlocked[0]);
     }
-    menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_Mountain));
+    menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_Mountain));
     if (menuObj != 0) {
         menuObj->setIndex(3);
         cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, 0);
@@ -526,25 +511,25 @@ extern "C" void cUITemplate_MAP_setupMenus(cUITemplate_MAP* tmpl)
     char buf[32];
     for (int i = 0; i < 3; i++) {
         sprintf(buf, str_Peakpct_dRaceGoal, i + 1);
-        menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(buf));
+        menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(buf));
         menuObj->setIndex(0);
-        cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->f10);
+        cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->mbEventUnlocked[0]);
         sprintf(buf, str_Peakpct_dFreestyleGoal, i + 1);
-        menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(buf));
+        menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(buf));
         menuObj->setIndex(1);
-        cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->f14);
+        cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->mbEventUnlocked[1]);
         sprintf(buf, str_Peakpct_dFreerideGoal, i + 1);
-        menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(buf));
+        menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(buf));
         menuObj->setIndex(2);
-        cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->f18);
+        cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->mbEventUnlocked[2]);
         if (cUITemplate_MAP_mMapStyle < 2) {
             menuObj->setStatic(1);
             menuObj->setVisible(0);
         }
         sprintf(buf, str_Peakpct_dEarningsGoal, i + 1);
-        menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(buf));
+        menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(buf));
         menuObj->setIndex(3);
-        cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->f1C);
+        cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->mbEventUnlocked[3]);
         if (cUITemplate_MAP_mMapStyle < 2) {
             menuObj->setStatic(1);
             menuObj->setVisible(0);
@@ -571,20 +556,20 @@ extern "C" void cUITemplate_MAP_setupMenus(cUITemplate_MAP* tmpl)
                 if (mode == 2)
                     goal = D_00478D38_enus[peak][j];
                 if (mode == 0 || mode == 1)
-                    self->f140[peak][mode][j] = cUITemplate_MAP_isMapEventCompleted(self, &goal, peak);
+                    self->mbLocationEventCompleted[peak][mode][j] = cUITemplate_MAP_isMapEventCompleted(self, &goal, peak);
                 sprintf(buf, fmt, peak + 1, j);
-                menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(buf));
+                menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(buf));
                 if (cUITemplate_MAP_mMapStyle < 2 && goal.f0C != 0) {
-                    self->available[peak][mode][j] = 0;
+                    self->mbLocationUnlocked[peak][mode][j] = 0;
                     if (menuObj != 0) {
                         menuObj->setVisible(0);
                         menuObj->setStatic(1);
                     }
                 } else {
-                    self->available[peak][mode][j] = cUITemplate_MAP_isMapEventLocked_enus(self, goal.kind, peak) ^ 1;
+                    self->mbLocationUnlocked[peak][mode][j] = cUITemplate_MAP_isMapEventLocked_enus(self, goal.kind, peak) ^ 1;
                 }
                 if (hasEvent(goal.track))
-                    cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->available[peak][mode][j]);
+                    cUITemplate_MAP_setWidgetUnHiliteColor_enus(self, menuObj, self->mbLocationUnlocked[peak][mode][j]);
                 if (hasEvent(goal.track)) {
                     if (goal.useTrackName == 1) {
                         cUIText_setAsciiString((cUIText*)menuObj, cBENewRaceInterface_getLocationName_enus(iface, goal.track));
@@ -606,12 +591,12 @@ extern "C" void cUITemplate_MAP_setupMenus(cUITemplate_MAP* tmpl)
             }
         }
     }
-    menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_ConfirmMenu_Yes));
+    menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_ConfirmMenu_Yes));
     if (menuObj != 0) {
         menuObj->setIndex(0);
         menuObj->setColor(kMAPCOLOR_REGULAR);
     }
-    menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_ConfirmMenu_No));
+    menuObj = (cUIObj_Menus*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_ConfirmMenu_No));
     if (menuObj != 0) {
         menuObj->setIndex(1);
         menuObj->setColor(kMAPCOLOR_REGULAR);

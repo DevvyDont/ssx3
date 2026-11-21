@@ -65,27 +65,6 @@ struct sHit_3200 {
 struct sRay_3200 {
     char pad[0xB0];
 };
-struct sAirP_3200 {
-    sVec4_3200 f00;          // 0x00
-    sVec4_3200 f10;          // 0x10
-    sVec4_3200 f20;          // 0x20
-    unsigned int f30;        // 0x30
-    float f34;               // 0x34
-    float f38;               // 0x38
-    char pad3C[4];
-    sVec4_3200 f40;          // 0x40
-    sVec4_3200 pos;          // 0x50
-    sVec4_3200 vel;          // 0x60
-    char pad70[0x90 - 0x70];
-    int f90;                 // 0x90
-    short f94;               // 0x94
-    char pad96[2];
-    float f98;               // 0x98
-    float f9C;               // 0x9C
-    char padA0[8];
-    float fA8;               // 0xA8
-    int state;               // 0xAC
-};
 
 extern sQuadR t4vect_ZAxis;
 // cAirPredictor_simOneTick is defined later in the unit (with its own vector type).
@@ -241,26 +220,26 @@ static inline void vu0AddEq_3200(sVec4_3200& a, const sVec4_3200& b)
 // cAirPredictor::simStep (On Tour names; the loop is a do-while in SSX 3).
 extern "C" void cAirPredictor_simStep(cAirPredictor* vself)
 {
-    sAirP_3200* self = (sAirP_3200*)vself;
-    sVec4_3200 prevPos = self->pos;
-    sVec4_3200 prevVel = self->vel;
-    sVec4_3200 uPrevVel = vu0Normalize_3200(self->vel);
+    cAirPredictor* self = vself;
+    sVec4_3200 prevPos = *(sVec4_3200*)&self->CurSimPos;
+    sVec4_3200 prevVel = *(sVec4_3200*)&self->CurSimVel;
+    sVec4_3200 uPrevVel = vu0Normalize_3200(*(sVec4_3200*)&self->CurSimVel);
     float numSubStep = 0.0f;
-    float maxResampleSteps = 270000.0f / self->fA8;
+    float maxResampleSteps = 270000.0f / self->TerminalVel;
     float speed;
     do {
-        self->f98 += 0.01666666753590107f;
+        self->TotalAirTime += 0.01666666753590107f;
         numSubStep += 1.0f;
-        float prevZ = self->pos.z;
-        speed = cAirPredictor_simOneTick_3200(self, &self->pos, &self->vel, &self->pos, &self->vel);
-        if (prevZ <= self->pos.z) {
-            self->f9C = self->f98;
-            self->f40 = self->pos;
+        float prevZ = (*(sVec4_3200*)&self->CurSimPos).z;
+        speed = cAirPredictor_simOneTick_3200(self, (sVec4_3200*)&self->CurSimPos, (sVec4_3200*)&self->CurSimVel, (sVec4_3200*)&self->CurSimPos, (sVec4_3200*)&self->CurSimVel);
+        if (prevZ <= (*(sVec4_3200*)&self->CurSimPos).z) {
+            self->ApexTime = self->TotalAirTime;
+            *(sVec4_3200*)&self->GuessApexPos = *(sVec4_3200*)&self->CurSimPos;
         }
         if (maxResampleSteps < numSubStep) break;
-    } while (!(speed * 0.9900000095367432f > vu0Dot_3200(uPrevVel, self->vel)));
+    } while (!(speed * 0.9900000095367432f > vu0Dot_3200(uPrevVel, *(sVec4_3200*)&self->CurSimVel)));
     sVec4_3200 segStart = prevPos;
-    sVec4_3200 segEnd = self->pos;
+    sVec4_3200 segEnd = *(sVec4_3200*)&self->CurSimPos;
     sVec4_3200 ray = vu0Sub_3200(segEnd, segStart);
     vu0ScaleEq_3200(ray, 0.019999999552965164f);
     vu0SubEq_3200(segStart, ray);
@@ -269,37 +248,37 @@ extern "C" void cAirPredictor_simStep(cAirPredictor* vself)
     sRay_3200 w1;
     cWorldLine_cWorldLine(&w1, &segEnd, &segStart, 1, 1.0f);
     float hitParam;
-    if (self->state == 0) {
+    if (self->SimState == 0) {
         hitParam = cBXNash_terrainIntersect1(SSXApp->Game->BXNash, &w1, &ti, 0);
     } else {
         hitParam = cBXNash_staticObjectIntersect1(SSXApp->Game->BXNash, &w1, &ti, 0);
     }
     if (hitParam >= 0.0f && vu0Dot_3200(ray, ti.normal) < 0.0f) {
-        self->f00 = ti.pos;
-        self->f98 = self->f98 - numSubStep * (hitParam * 0.01666666753590107f);
-        self->f10 = vu0Add_3200(vu0Scale_3200(prevVel, hitParam), vu0Scale_3200(self->vel, 1.0f - hitParam));
-        if (self->state == 2) {
-            self->state = 3;
-            *(sQuadR*)&self->f20 = t4vect_ZAxis;
-            self->f90 = 13;
+        *(sVec4_3200*)&self->GuessLandPosition = ti.pos;
+        self->TotalAirTime = self->TotalAirTime - numSubStep * (hitParam * 0.01666666753590107f);
+        *(sVec4_3200*)&self->GuessLandVelocity = vu0Add_3200(vu0Scale_3200(prevVel, hitParam), vu0Scale_3200(*(sVec4_3200*)&self->CurSimVel, 1.0f - hitParam));
+        if (self->SimState == 2) {
+            self->SimState = 3;
+            *(sQuadR*)(sVec4_3200*)&self->GuessLandNormal = t4vect_ZAxis;
+            self->GuessLandSurface = 13;
         } else if (self) { // FAKEMATCH: identical arms, see header
-            self->state = 1;
-            self->f20 = ti.normal;
-            self->f90 = ti.surf;
+            self->SimState = 1;
+            *(sVec4_3200*)&self->GuessLandNormal = ti.normal;
+            self->GuessLandSurface = ti.surf;
         } else {
-            self->state = 1;
-            self->f20 = ti.normal;
-            self->f90 = ti.surf;
+            self->SimState = 1;
+            *(sVec4_3200*)&self->GuessLandNormal = ti.normal;
+            self->GuessLandSurface = ti.surf;
         }
         char* hitObj = ti.obj;
-        if (hitObj != 0 && self->state == 1) {
-            self->f94 = *(short*)(hitObj + 0xA);
-            self->f30 = *(int*)(hitObj + 0x150);
-            self->f34 = ti.u;
-            self->f38 = ti.v;
+        if (hitObj != 0 && self->SimState == 1) {
+            self->SurfaceFlags = *(short*)(hitObj + 0xA);
+            self->GuessLandPatchRID = *(int*)(hitObj + 0x150);
+            self->GuessLandPatchUV[0] = ti.u;
+            self->GuessLandPatchUV[1] = ti.v;
         } else {
-            self->f94 = -1;
-            self->f30 = 0xFFFFFFFF;
+            self->SurfaceFlags = -1;
+            self->GuessLandPatchRID = 0xFFFFFFFF;
         }
     }
 }

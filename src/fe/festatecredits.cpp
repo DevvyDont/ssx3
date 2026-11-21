@@ -182,13 +182,7 @@ extern "C" void* cUIState_onRender2D(void* self);
 extern "C" char* cUITextScroll_getFont(void* self);
 extern "C" unsigned short* func_003A2068(void* self, int idx);
 
-struct sV3_185F40 {
-    float x, y, z;
-};
 
-struct sV4_185F40 {
-    float x, y, z, w;
-};
 
 struct sV2_185F40 {
     float x, y;
@@ -220,7 +214,7 @@ public:
     virtual void v17();
     virtual void v18();
     virtual void v19();
-    virtual void getSize(sV4_185F40* out);
+    virtual void getSize(tARGB* out);
 };
 
 struct sRS_185F40 {
@@ -251,23 +245,23 @@ extern "C" void cFEStateCredits_onRender2D(cFEStateCredits* self)
     cUITextScroll* textScroll = self->mpTextScroll;
     if (((char*)textScroll) != 0)
     {
-        sV3_185F40 pos = *(sV3_185F40*)&textScroll->mPosition;
-        sV3_185F40 size = *(sV3_185F40*)&textScroll->mScale;
-        sV4_185F40 box;
+        t3Vector pos = *(&textScroll->mPosition);
+        t3Vector size = *(&textScroll->mScale);
+        tARGB box;
         ((cUIObj185F40*)textScroll)->getSize(&box);
         char* font = cUITextScroll_getFont(self->mpTextScroll);
         if (font != 0)
         {
             float lineH = (float)*(int*)(font + 0x14) * *(float*)(font + 0x34);
             int any = 0;
-            sV4_185F40 white;
-            white.x = 1.0f;
-            white.y = 1.0f;
-            white.z = 1.0f;
-            white.w = 1.0f;
+            tARGB white;
+            white.A = 1.0f;
+            white.R = 1.0f;
+            white.G = 1.0f;
+            white.B = 1.0f;
             float scaledHeight = size.y * lineH;
-            float bh = box.y;
-            sV4_185F40 save = *(sV4_185F40*)&self->mpTextScroll->mColour;
+            float bh = box.R;
+            tARGB save = *(&self->mpTextScroll->mColour);
             ((sRS_185F40*)GrMan->m_pCurrentDrawState)->mode = 21;
             signed char rows = (int)scaledHeight + 3;
             int scroll = self->mPixelOffset;
@@ -285,18 +279,18 @@ extern "C" void cFEStateCredits_onRender2D(cFEStateCredits* self)
                     float frem = (float)rem;
                     while (*line == ' ')
                         line++;
-                    sV3_185F40 newPos = pos;
+                    t3Vector newPos = pos;
                     if (self->mPixelOffset > 0)
                         newPos.y -= frem;
                     else
                         newPos.y += frem;
                     if (*line == '~' && self->mpDolbyIcon != 0)
                     {
-                        sV4_185F40 iconSize;
+                        tARGB iconSize;
                         any = 1;
                         ((cUIObj185F40*)self->mpDolbyIcon)->getSize(&iconSize);
-                        newPos.x = (640.0f - iconSize.x) * 0.5f;
-                        *(sV3_185F40*)((char*)self->mpDolbyIcon + 0x44) = newPos;
+                        newPos.x = (640.0f - iconSize.A) * 0.5f;
+                        *(t3Vector*)((char*)self->mpDolbyIcon + 0x44) = newPos;
                         ((cUIObj185F40*)self->mpDolbyIcon)->setVisible(1);
                     }
                     else
@@ -306,12 +300,12 @@ extern "C" void cFEStateCredits_onRender2D(cFEStateCredits* self)
                         sz.y = size.y;
                         if (*line == '^')
                         {
-                            *(sV4_185F40*)(font + 0x40) = white;
+                            *(tARGB*)(font + 0x40) = white;
                             line++;
                         }
                         else
                         {
-                            *(sV4_185F40*)(font + 0x40) = save;
+                            *(tARGB*)(font + 0x40) = save;
                             sz.x -= 0.10000000149011612f;
                             sz.y -= 0.10000000149011612f;
                         }

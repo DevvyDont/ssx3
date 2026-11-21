@@ -107,12 +107,6 @@ struct sScriptSlot_2820B0 {
     int state;          // 0x20
 };
 
-struct sScriptEngine_2820B0 {
-    char pad0[0x2B8];
-    void* obj2B8;                       // 0x2B8
-    char pad2BC[4];
-    sScriptSlot_2820B0 slots[16];       // 0x2C0
-};
 
 // Retail builds compile the per-state debug hooks to nothing.
 static inline void slotNop_2820B0(void* self, void* slot) {}
@@ -134,12 +128,12 @@ extern "C" void cBXScriptEngine_Update(cBXScriptEngine* self)
         }
         if (request->state == 1) {
             switch (request->type) {
-            case 0: slotNop_2820B0(((sScriptEngine_2820B0*)self), request); break;
+            case 0: slotNop_2820B0((self), request); break;
             case 1: cBXScriptEngine_UpdatePendingRequestState(self, (tScriptRequestInfo*)request); break;
-            case 2: slotNop_2820B0(((sScriptEngine_2820B0*)self), request); break;
-            case 3: slotNop_2820B0(((sScriptEngine_2820B0*)self), request); break;
-            case 4: slotNop_2820B0(((sScriptEngine_2820B0*)self), request); break;
-            case 5: slotNop_2820B0(((sScriptEngine_2820B0*)self), request); break;
+            case 2: slotNop_2820B0((self), request); break;
+            case 3: slotNop_2820B0((self), request); break;
+            case 4: slotNop_2820B0((self), request); break;
+            case 5: slotNop_2820B0((self), request); break;
             }
         }
     }
@@ -212,10 +206,6 @@ struct sBxsVEntry21A0 {
     int (*fn)(void*, int);
 };
 
-struct sBXSlot21A0 {
-    void* data;
-    unsigned short uses;
-};
 
 struct sBXThread21A0 {
     void* owner;    // 0x0
@@ -247,9 +237,9 @@ struct sBXThread21A0 {
  */
 extern "C" int cBXScriptEngine_RequestAnimationScript(cBXScriptEngine* self, int idx, int userData)
 {
-    sBXSlot21A0* scriptState = &((sBXSlot21A0*)self->mpScriptDatabase)[idx];
+    tBXScriptState* scriptState = &(self->mpScriptDatabase)[idx];
     sBXThread21A0* request = (sBXThread21A0*)cBXScriptEngine_CreateNewRequest(self, 1);
-    if (scriptState->data == 0) {
+    if (((void*)scriptState->pScriptData) == 0) {
         int one = 1;
         request->pending = idx;
         request->state = one;
@@ -263,11 +253,11 @@ extern "C" int cBXScriptEngine_RequestAnimationScript(cBXScriptEngine* self, int
     } else {
         request->slot = idx;
         request->state = 2;
-        int id = cInSeq_ReadyPlayer(self->mpInSeq, scriptState->data);
+        int id = cInSeq_ReadyPlayer(self->mpInSeq, ((void*)scriptState->pScriptData));
         void* obj = cInSeq_GetPlayer_2(self->mpInSeq, id);
         request->owner = obj;
         cScriptPlayerMain_SetUserData(obj, (int)request);
-        scriptState->uses++;
+        scriptState->numLocks++;
     }
     request->arg = userData;
     return request->result;
@@ -854,10 +844,6 @@ void* cInSeq_GetPlayer_2(void* self, int id) __asm__("cInSeq_GetPlayer");
 int cScriptPlayerMain_SetUserData(void* self, int a1);
 void cScriptPlayerMain_SetPlaySpeed(void* self, float t);
 
-struct sBXSlot282908 {
-    void* data;
-    unsigned short uses;
-};
 
 struct sBXThread282908 {
     void* owner;    // 0x0
@@ -884,13 +870,13 @@ extern "C" void cBXScriptEngine_UpdatePendingRequestState(cBXScriptEngine* self,
 {
     sBXThread282908* request = (sBXThread282908*)script;
     int idx = request->pending;
-    sBXSlot282908* scriptState = &((sBXSlot282908*)self->mpScriptDatabase)[idx];
-    if (scriptState->data == 0) return;
+    tBXScriptState* scriptState = &(self->mpScriptDatabase)[idx];
+    if (((void*)scriptState->pScriptData) == 0) return;
     request->slot = idx;
     request->pending = -1;
     request->state = 2;
     request->f12 = 0;
-    int id = cInSeq_ReadyPlayer(self->mpInSeq, scriptState->data);
+    int id = cInSeq_ReadyPlayer(self->mpInSeq, ((void*)scriptState->pScriptData));
     void* obj = cInSeq_GetPlayer_2(self->mpInSeq, id);
     request->owner = obj;
     cScriptPlayerMain_SetUserData(obj, (int)request);
@@ -898,7 +884,7 @@ extern "C" void cBXScriptEngine_UpdatePendingRequestState(cBXScriptEngine* self,
         cScriptPlayerMain_SetPlaySpeed(request->owner, request->time);
         request->time = 0.0f;
     }
-    scriptState->uses++;
+    scriptState->numLocks++;
 }
 #endif
 

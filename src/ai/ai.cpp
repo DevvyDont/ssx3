@@ -1422,7 +1422,7 @@ extern "C" void cPathSys_isPathfileLoaded(int *);
  * 1 by cPathSys_loadPaths when the path pack loads. Nothing in the source calls it.
  */
 extern "C" void func_0012A4D0(void) {
-    cPathSys_isPathfileLoaded(&(*(int*)&gPaths));
+    cPathSys_isPathfileLoaded((int*)&gPaths);
 }
 #endif
 //100%
@@ -2360,11 +2360,6 @@ extern "C" void cRider_setUbersAllowed(void* self, int a1);
 extern "C" void cRiderMetrix_setInitialPointsTotal(void* self, int a1);
 extern "C" int cBERules_getPlayerStartDelaySecs(int i);
 
-struct sRider_12B498
-{
-    char pad[0xB30];
-    int fB30;
-};
 
 struct sOptEntry_12B498
 {
@@ -2421,7 +2416,7 @@ extern "C" void cAI_applyPlayerRulesCustom(cAI* self, cPlayer* obj, int i)
         cRider_setUbersAllowed(obj->mRider, 1);
     if (D_005308B8_12B498.e[i].f0 & 1)
         obj->mRider->unk_B20 = 2;
-    ((sRider_12B498*)obj->mRider)->fB30 = cBERules_getPlayerStartDelaySecs(i);
+    (obj->mRider)->mStartHandicap = cBERules_getPlayerStartDelaySecs(i);
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0)
     {
@@ -3520,8 +3515,8 @@ extern "C" void cWipeoutControl_gainFocus(cWipeoutControl* self)
     cRider* rider = self->mRider;
     (*(&self->RiderPrevPose)) = ((tPose*)rider->mAnimModel->bones)[rider->mBoneHips];
     (*(&self->BoardPrevPose)) = ((tPose*)rider->mAnimModel->bones)[rider->mBoneBoardChild];
-    vu0AddEq_12CA30((*(sVec4_12CA30*)&self->RiderPrevPose), *(sVec4_12CA30*)&self->mRider->mModelOffset);
-    vu0AddEq_12CA30((*(sVec4_12CA30*)&self->BoardPrevPose), *(sVec4_12CA30*)&self->mRider->mModelOffset);
+    vu0AddEq_12CA30(*(sVec4_12CA30*)&self->RiderPrevPose, *(sVec4_12CA30*)&self->mRider->mModelOffset);
+    vu0AddEq_12CA30(*(sVec4_12CA30*)&self->BoardPrevPose, *(sVec4_12CA30*)&self->mRider->mModelOffset);
     self->RiderState = 0;
     if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 22)
     {
@@ -3735,16 +3730,16 @@ extern "C" void cWipeoutControl_updateLaunch(cWipeoutControl* self)
         char* an = cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2);
         float rate = *(float*)(an + 0x90);
         float invDeltaTime = rate / ((framePercent - self->PrevFramePercent) * *(float*)(an + 0x10));
-        sV_12CD20 vel = Scale_12CD20(Scale_12CD20(Sub_12CD20((*(sV_12CD20*)&pose->P), (*(sV_12CD20*)&self->RiderPrevPose)), *(float*)((char*)self->mRider->mRiderAnim + 0x1C)), invDeltaTime);
+        sV_12CD20 vel = Scale_12CD20(Scale_12CD20(Sub_12CD20(*(sV_12CD20*)&pose->P, *(sV_12CD20*)&self->RiderPrevPose), *(float*)((char*)self->mRider->mRiderAnim + 0x1C)), invDeltaTime);
         float doubleInvDeltaTime = invDeltaTime + invDeltaTime;
-        sV_12CD20 deltaQuat = Sub_12CD20((*(sV_12CD20*)&pose->Q), (*(sV_12CD20*)&self->RiderPrevPose.Q));
+        sV_12CD20 deltaQuat = Sub_12CD20(*(sV_12CD20*)&pose->Q, *(sV_12CD20*)&self->RiderPrevPose.Q);
         sV_12CD20 angVelQuat = QuatMul_12CD20(deltaQuat, Conj_12CD20(*pose));
         sV_12CD20 angvel = Scale_12CD20(sV_12CD20(angVelQuat.x, angVelQuat.y, angVelQuat.z, 0.0f), doubleInvDeltaTime);
         cWipeoutMotion_throwRider((char*)&self->mRider->mRiderHandler->WipeoutMotion, &self->mRider->mVelocity, &angvel);
         if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 23)
         {
-            vel = Scale_12CD20(Scale_12CD20(Sub_12CD20((*(sV_12CD20*)&boardPose->P), (*(sV_12CD20*)&self->BoardPrevPose)), *(float*)((char*)self->mRider->mRiderAnim + 0x1C)), invDeltaTime);
-            deltaQuat = Sub_12CD20((*(sV_12CD20*)&boardPose->Q), (*(sV_12CD20*)&self->BoardPrevPose.Q));
+            vel = Scale_12CD20(Scale_12CD20(Sub_12CD20(*(sV_12CD20*)&boardPose->P, *(sV_12CD20*)&self->BoardPrevPose), *(float*)((char*)self->mRider->mRiderAnim + 0x1C)), invDeltaTime);
+            deltaQuat = Sub_12CD20(*(sV_12CD20*)&boardPose->Q, *(sV_12CD20*)&self->BoardPrevPose.Q);
             angVelQuat = QuatMul_12CD20(deltaQuat, Conj_12CD20(*boardPose));
             angvel = Scale_12CD20(sV_12CD20(angVelQuat.x, angVelQuat.y, angVelQuat.z, 0.0f), doubleInvDeltaTime);
             cWipeoutMotion_throwItem((char*)&self->mRider->mRiderHandler->WipeoutMotion, (sVec4_12CA30*)&vel, (sVec4_12CA30*)&angvel, boardPose);

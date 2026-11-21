@@ -75,18 +75,6 @@ struct sDfOther_0750 {
     sDfVE_0750* vt;         // 0xC
 };
 
-struct cDeadFadeNode_0750 {
-    char pad_0x00[0xC];
-    void* vt;                   // 0xC
-    char pad_0x10[0x8];
-    sDfInst_0750* inst;         // 0x18
-    sDfBlock_0750 block;        // 0x1C
-    float f28;                  // 0x28
-    float f2C;                  // 0x2C
-    float f30;                  // 0x30
-    float f34;                  // 0x34
-    sDfMatElem_0750* mats;      // 0x38
-};
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, d = b * a).
 static inline void vu0MulMat_0750(sDfMat_0750* d, const void* a, const sDfMat_0750* b)
@@ -192,29 +180,29 @@ typedef void (*DfSetFn_0750)(void*, int);
  * @param other   the instance's previous node, or 0 (On Tour pOldNode); it is deleted here
  * @return self
  */
-extern "C" cDeadFadeNode_0750* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode_0750* self, int bucket, void* obj, sDfDesc_0750* desc, sDfOther_0750* other)
+extern "C" cDeadFadeNode* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode* self, int bucket, void* obj, sDfDesc_0750* desc, sDfOther_0750* other)
 {
-    sDfMatElem_0750** pm = &self->mats;
+    sDfMatElem_0750** pm = (sDfMatElem_0750**)&self->AnimMats;
     cInstanceNode_cInstanceNode1(self, bucket, 22, obj);
-    self->vt = cDeadFadeNode_vtbl;
-    self->block.w[0] = 0xFFFFFFFF;
-    self->block = *(sDfBlock_0750*)desc;
-    self->f2C = cObjectInterface_getUpdateTime() / desc->f8;
-    self->f34 = desc->fC * cObjectInterface_getUpdateTime();
-    self->f30 = 0.0f;
-    self->f28 = 1.0f;
-    sDfModel_0750* model = self->inst->model;
+    *(void**)&self->mVtbl = cDeadFadeNode_vtbl;
+    (*(sDfBlock_0750*)&self->Data).w[0] = 0xFFFFFFFF;
+    *(sDfBlock_0750*)&self->Data = *(sDfBlock_0750*)desc;
+    self->FadeRate = cObjectInterface_getUpdateTime() / desc->f8;
+    self->DistRate = desc->fC * cObjectInterface_getUpdateTime();
+    self->Dist = 0.0f;
+    self->Fade = 1.0f;
+    sDfModel_0750* model = ((sDfInst_0750*)self->Instance)->model;
     *pm = new (str_DeadFadeAnimMats, 0x20000000, 0) sDfMatElem_0750[model->count];
     if (other != 0 && ((DfBoolFn_0750)other->vt[26].fn)((char*)other + other->vt[26].delta)) {
         sDfMat_0750* src = ((DfMatFn_0750)other->vt[27].fn)((char*)other + other->vt[27].delta);
-        MEM_copy(self->mats, src, model->count << 6);
+        MEM_copy(((sDfMatElem_0750*)self->AnimMats), src, model->count << 6);
     } else {
-        sDfMat_0750* base = &self->inst->world;
+        sDfMat_0750* base = &((sDfInst_0750*)self->Instance)->world;
         if (other != 0) {
             base = ((DfMatFn_0750)other->vt[24].fn)((char*)other + other->vt[24].delta);
         }
         sDfPart_0750* part = model->parts;
-        float k = self->inst->scale;
+        float k = ((sDfInst_0750*)self->Instance)->scale;
         sDfV4_0750 scaleVec;
         scaleVec.x = k;
         scaleVec.y = k;
@@ -224,19 +212,19 @@ extern "C" cDeadFadeNode_0750* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode_0750* s
         for (int i = 0; i < model->count; i++, part++) {
             int parent = part->parent;
             if (parent != -1) {
-                partMat_0750(&partMatrix, &self->mats[parent], part->mat, scaleVec);
-                vu0CopyMat_0750(&self->mats[i], &partMatrix);
+                partMat_0750(&partMatrix, &((sDfMatElem_0750*)self->AnimMats)[parent], part->mat, scaleVec);
+                vu0CopyMat_0750(&((sDfMatElem_0750*)self->AnimMats)[i], &partMatrix);
             } else {
                 partMat_0750(&partMatrix, base, part->mat, scaleVec);
-                vu0CopyMat_0750(&self->mats[i], &partMatrix);
+                vu0CopyMat_0750(&((sDfMatElem_0750*)self->AnimMats)[i], &partMatrix);
             }
         }
     }
     if (other != 0) {
         ((DfSetFn_0750)other->vt[1].fn)((char*)other + other->vt[1].delta, 3);
     }
-    self->inst->flags &= ~0x60;
-    self->inst->flags = (self->inst->flags & ~2) | 4;
+    ((sDfInst_0750*)self->Instance)->flags &= ~0x60;
+    ((sDfInst_0750*)self->Instance)->flags = (((sDfInst_0750*)self->Instance)->flags & ~2) | 4;
     return self;
 }
 #endif

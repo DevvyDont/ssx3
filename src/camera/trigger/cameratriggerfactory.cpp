@@ -6939,10 +6939,6 @@ struct sCamEntry_17A378 {
     int f88;            // 0x88
 };
 
-struct sCamMgr_17A378 {
-    int count;                          // 0x0000
-    sCamEntry_17A378 entries[0x100];    // 0x0004
-};
 
 struct sStr_17A378 {
     char* s;
@@ -6968,7 +6964,7 @@ struct sStr_17A378 {
  */
 extern "C" void cTrackFileMan_scanTrackIndex(cTrackFileMan* selfp, const char* file)
 {
-    sCamMgr_17A378* self = (sCamMgr_17A378*)selfp;
+    cTrackFileMan* self = selfp;
     int size;
     char* buf = (char*)FILE_loadsizez(file, &size, 0x100);
     if (buf == 0)
@@ -7022,11 +7018,11 @@ extern "C" void cTrackFileMan_scanTrackIndex(cTrackFileMan* selfp, const char* f
         sStr_17A378 str;
         cBXString_cBXString3(&str, start, stop - start);
         if (cTrackFileMan_checkLocation_17A378(self, str.s, str.s)) {
-            strcpy(self->entries[self->count].name, str.s);
-            strcpy(self->entries[self->count].tag, str.s);
-            self->entries[self->count].type = 22;
-            self->entries[self->count].f84 = 0;
-            self->count++;
+            strcpy(((sCamEntry_17A378*)&self->LocationInfo[0])[self->NumLocations].name, str.s);
+            strcpy(((sCamEntry_17A378*)&self->LocationInfo[0])[self->NumLocations].tag, str.s);
+            ((sCamEntry_17A378*)&self->LocationInfo[0])[self->NumLocations].type = 22;
+            ((sCamEntry_17A378*)&self->LocationInfo[0])[self->NumLocations].f84 = 0;
+            self->NumLocations++;
         }
         cBXString__cBXString(&str, 2);
     }
@@ -7228,10 +7224,6 @@ struct sCamEntry_17A978 {
     char pad_44[0x48];
 };
 
-struct sCamMgr_17A978 {
-    int count;                          // 0x0000
-    sCamEntry_17A978 entries[0x100];    // 0x0004
-};
 
 struct sCamName_17A978 {
     char* name;
@@ -7271,16 +7263,16 @@ struct sBigFile_17A978 {
  */
 extern "C" int cTrackFileMan_checkLocation1(cTrackFileMan* selfp, int n, void* namesp, char* tag)
 {
-    sCamMgr_17A978* self = (sCamMgr_17A978*)selfp;
+    cTrackFileMan* self = selfp;
     sCamName_17A978* names = (sCamName_17A978*)namesp;
     int fail = 0;
     int i;
     int j;
     for (i = 0; i < n; i++) {
         int found = 0;
-        for (j = 0; j < self->count; j++) {
-            if (strcasecmp(names[i].name, self->entries[j].name) == 0 &&
-                strcasecmp(tag, self->entries[j].tag) == 0) {
+        for (j = 0; j < self->NumLocations; j++) {
+            if (strcasecmp(names[i].name, ((sCamEntry_17A978*)&self->LocationInfo[0])[j].name) == 0 &&
+                strcasecmp(tag, ((sCamEntry_17A978*)&self->LocationInfo[0])[j].tag) == 0) {
                 found = 1;
                 break;
             }
@@ -7312,9 +7304,9 @@ extern "C" int cTrackFileMan_checkLocation1(cTrackFileMan* selfp, int n, void* n
     }
     for (int k = 0; k < n; k++) {
         if (names[k].ok) {
-            for (int entryIndex = 0; entryIndex < self->count; entryIndex++) {
-                if (strcasecmp(names[k].name, self->entries[entryIndex].name) == 0 &&
-                    strcasecmp(tag, self->entries[entryIndex].tag) == 0) {
+            for (int entryIndex = 0; entryIndex < self->NumLocations; entryIndex++) {
+                if (strcasecmp(names[k].name, ((sCamEntry_17A978*)&self->LocationInfo[0])[entryIndex].name) == 0 &&
+                    strcasecmp(tag, ((sCamEntry_17A978*)&self->LocationInfo[0])[entryIndex].tag) == 0) {
                     names[k].ok = 0;
                     break;
                 }

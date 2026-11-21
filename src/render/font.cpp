@@ -22,17 +22,6 @@ struct sFontTexHdr;
 extern "C" void cFont_downloadTexture(cFont* self, sFontTexHdr* img);
 extern char str_Glyphs[];
 
-struct sGlyph_1788 {
-    unsigned short code;    // 0x0
-    unsigned char w;        // 0x2
-    unsigned char h;        // 0x3
-    unsigned short u;       // 0x4
-    unsigned short v;       // 0x6
-    unsigned char adv;      // 0x8
-    unsigned char xoff;     // 0x9
-    signed char yoff;       // 0xA
-    char pad;
-};
 
 struct sPad_1788 {
     float x, y;
@@ -54,45 +43,45 @@ extern "C" void cFont_linkFont(cFont* vself, void* vdata, int flags)
 {
     cFont* self = vself;
     char* data = (char*)vdata;
-    sGlyph_1788* src = (sGlyph_1788*)(data + *(int*)(data + 0x14));
+    tGlyph* src = (tGlyph*)(data + *(int*)(data + 0x14));
     sPad_1788 offset;
     offset.x = (float)data[0x10];
     offset.y = (float)data[0x11];
-    (*(sPad_1788*)&self->Offset[0]) = offset;
+    *(sPad_1788*)&self->Offset[0] = offset;
     self->NumGlyphs = *(short*)(data + 0xA);
-    (*(sGlyph_1788**)&self->Glyphs) = (sGlyph_1788*)operator_new_tag(self->NumGlyphs * 12, str_Glyphs, flags, 0);
+    *(tGlyph**)&self->Glyphs = (tGlyph*)operator_new_tag(self->NumGlyphs * 12, str_Glyphs, flags, 0);
     int space = 0;
     self->MaxCharHeight = 0;
     self->LastLinearCode = self->FirstCode = src->code;
     for (int i = 0; i < self->NumGlyphs; i++) {
-        ((sGlyph_1788*)self->Glyphs)[i].code = src[i].code;
-        ((sGlyph_1788*)self->Glyphs)[i].w = src[i].w;
-        ((sGlyph_1788*)self->Glyphs)[i].h = src[i].h;
-        ((sGlyph_1788*)self->Glyphs)[i].u = src[i].u;
-        ((sGlyph_1788*)self->Glyphs)[i].v = src[i].v;
-        ((sGlyph_1788*)self->Glyphs)[i].adv = src[i].adv;
-        ((sGlyph_1788*)self->Glyphs)[i].xoff = src[i].xoff;
-        ((sGlyph_1788*)self->Glyphs)[i].yoff = src[i].yoff;
-        if (i != 0 && ((sGlyph_1788*)self->Glyphs)[i].code == self->LastLinearCode + 1) {
-            self->LastLinearCode = ((sGlyph_1788*)self->Glyphs)[i].code;
+        (self->Glyphs)[i].code = src[i].code;
+        (self->Glyphs)[i].width = src[i].width;
+        (self->Glyphs)[i].height = src[i].height;
+        (self->Glyphs)[i].u = src[i].u;
+        (self->Glyphs)[i].v = src[i].v;
+        (self->Glyphs)[i].advance = *(unsigned char*)&src[i].advance;
+        (self->Glyphs)[i].xoffset = *(unsigned char*)&src[i].xoffset;
+        (self->Glyphs)[i].yoffset = src[i].yoffset;
+        if (i != 0 && (self->Glyphs)[i].code == self->LastLinearCode + 1) {
+            self->LastLinearCode = (self->Glyphs)[i].code;
         }
-        if (((sGlyph_1788*)self->Glyphs)[i].code == ' ') {
+        if ((self->Glyphs)[i].code == ' ') {
             space = i;
         }
-        if (((sGlyph_1788*)self->Glyphs)[i].code == 172) {
-            (*(sGlyph_1788**)&self->MissingGlyph) = &((sGlyph_1788*)self->Glyphs)[i];
+        if ((self->Glyphs)[i].code == 172) {
+            *(tGlyph**)&self->MissingGlyph = &(self->Glyphs)[i];
         }
-        if (((sGlyph_1788*)self->Glyphs)[i].code == 160) {
-            ((sGlyph_1788*)self->Glyphs)[i].w = src[space].w;
-            ((sGlyph_1788*)self->Glyphs)[i].h = src[space].h;
-            ((sGlyph_1788*)self->Glyphs)[i].u = src[space].u;
-            ((sGlyph_1788*)self->Glyphs)[i].v = src[space].v;
-            ((sGlyph_1788*)self->Glyphs)[i].adv = src[space].adv;
-            ((sGlyph_1788*)self->Glyphs)[i].xoff = src[space].xoff;
-            ((sGlyph_1788*)self->Glyphs)[i].yoff = src[space].yoff;
+        if ((self->Glyphs)[i].code == 160) {
+            (self->Glyphs)[i].width = src[space].width;
+            (self->Glyphs)[i].height = src[space].height;
+            (self->Glyphs)[i].u = src[space].u;
+            (self->Glyphs)[i].v = src[space].v;
+            (self->Glyphs)[i].advance = *(unsigned char*)&src[space].advance;
+            (self->Glyphs)[i].xoffset = *(unsigned char*)&src[space].xoffset;
+            (self->Glyphs)[i].yoffset = src[space].yoffset;
         }
-        if (self->MaxCharHeight < ((sGlyph_1788*)self->Glyphs)[i].h + ((sGlyph_1788*)self->Glyphs)[i].yoff) {
-            self->MaxCharHeight = ((sGlyph_1788*)self->Glyphs)[i].h + ((sGlyph_1788*)self->Glyphs)[i].yoff;
+        if (self->MaxCharHeight < (self->Glyphs)[i].height + (self->Glyphs)[i].yoffset) {
+            self->MaxCharHeight = (self->Glyphs)[i].height + (self->Glyphs)[i].yoffset;
         }
     }
     cFont_downloadTexture((cFont*)((char*)self), (sFontTexHdr*)(data + *(int*)(data + 0x1C)));
@@ -2711,7 +2700,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_getGraphicsMan);
  * @return cGraphicsMan_TheGraphicsMan (as an int)
  */
 extern "C" int cGraphicsMan_getGraphicsMan(void) {
-    return (*(int*)&cGraphicsMan_TheGraphicsMan);
+    return *(int*)&cGraphicsMan_TheGraphicsMan;
 }
 #endif
 //100%
@@ -7605,12 +7594,6 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_InitCharMatrices);
 typedef int cQuad128_6B40 __attribute__((mode(TI)));
 extern char D_1150[];
 
-struct sRS_6B40 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-};
 
 /**
  * Starts a character-model batch: sends the lighting setup to VU1.
@@ -7622,11 +7605,11 @@ struct sRS_6B40 {
  */
 extern "C" void cPS2GraphicsMan_InitCharMatrices(cPS2GraphicsMan* self)
 {
-    sRS_6B40* rs = (sRS_6B40*)self->m_pCurrentDrawState;
+    sDrawState* rs = self->m_pCurrentDrawState;
     unsigned int addrMask = 0x3FFFFFFF;
-    rs->f0 = (rs->f0 & ~0x3C0) | 0x180;
-    sRS_6B40* rs2 = (sRS_6B40*)self->m_pCurrentDrawState;
-    rs2->fC = (rs2->fC & 0xC0000000) | (self->mVifCursor & addrMask);
+    rs->unk_00[0] = (((int)rs->unk_00[0]) & ~0x3C0) | 0x180;
+    sDrawState* rs2 = self->m_pCurrentDrawState;
+    rs2->unk_00[3] = (((int)rs2->unk_00[3]) & 0xC0000000) | (self->mVifCursor & addrMask);
     unsigned long* packet = (unsigned long*)(self->mVifCursor | 0x30000000);
     packet[0] = 0x6000000C;
     packet[2] = (unsigned long)0x8000 << 45;

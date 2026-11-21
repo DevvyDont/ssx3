@@ -54,17 +54,10 @@ public:
     virtual void show(int on);
 };
 
-struct sCharSetup_182928 {
-    char pad_0x0[0x10];
-    void* engine;               // 0x10
-    char pad_0x14[0x2C];
-    void* screen;               // 0x40
-    signed char player;         // 0x44
-};
 
-static inline void showIdx_182928(sCharSetup_182928* self, char* name, int idx)
+static inline void showIdx_182928(cFEStateCharSetup* self, char* name, int idx)
 {
-    cWidget_182928* o = (cWidget_182928*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
+    cWidget_182928* o = (cWidget_182928*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(name));
     if (o != 0) {
         o->show(1);
         *(int*)((char*)o + 0x18) = idx;
@@ -85,7 +78,7 @@ static inline void showIdx_182928(sCharSetup_182928* self, char* name, int idx)
 extern "C" void cFEStateCharSetup_onCreateScreen(cFEStateCharSetup* self)
 {
     void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, ((sCharSetup_182928*)self), GetHashValue32(str_09set_char), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, (self), GetHashValue32(str_09set_char), 0);
     self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -112,10 +105,10 @@ extern "C" void cFEStateCharSetup_onCreateScreen(cFEStateCharSetup* self)
             }
         }
     }
-    showIdx_182928(((sCharSetup_182928*)self), str_Option_Continue, 0);
-    showIdx_182928(((sCharSetup_182928*)self), str_Option_Equip, 1);
-    showIdx_182928(((sCharSetup_182928*)self), str_Option_Rider, 2);
-    showIdx_182928(((sCharSetup_182928*)self), str_Option_Radio, 3);
+    showIdx_182928((self), str_Option_Continue, 0);
+    showIdx_182928((self), str_Option_Equip, 1);
+    showIdx_182928((self), str_Option_Rider, 2);
+    showIdx_182928((self), str_Option_Radio, 3);
     cWidget_182928* gbaOption = (cWidget_182928*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Option_GBA));
     if (gbaOption != 0) {
         gbaOption->show(0);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/worldview.h"
 #include "object/flexbridgenode.h"
 #include "object/effectmodifier.h"
 #include "render/ps2graphicsman.h"
@@ -172,7 +173,7 @@ extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flag
     effectLink->mVtbl = cEffectModifier_vtbl;
     D_004A3FF4--;
     effectLink->mVtbl = cEffectLink_vtbl;
-    cEffectLink_unlink((cEffectLink*)&(*(sEffectLinkView*)&effectLink->Next));
+    cEffectLink_unlink((cEffectLink*)(sEffectLinkView*)&effectLink->Next);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -479,8 +480,8 @@ extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleMo
     self->Emitter.mVtbl = cDynamicEmitter_vtbl;
     self->ParticleData = (tParticleData*)particleDesc;
     self->Mesh = bone;
-    (*(sVec4_00345C90*)&self->Offset) = *pos;
-    (*(sVec4_00345C90*)&self->InitVel) = sVec4_00345C90(particleDesc->x, particleDesc->y, particleDesc->z, 0.0f);
+    *(sVec4_00345C90*)&self->Offset = *pos;
+    *(sVec4_00345C90*)&self->InitVel = sVec4_00345C90(particleDesc->x, particleDesc->y, particleDesc->z, 0.0f);
     self->Fade = 0;
     particleDesc->x = 0.0f;
     particleDesc->y = 0.0f;
@@ -538,7 +539,7 @@ extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleMo
         vt2[2].fn((char*)stream + vt2[2].delta, particleData, 216);
         cBaseClass_DynamicEmitter_setupEmitter(((char*)&self->Emitter), (sTarget00345C90*)self->ParticleData, -1.0f);
         cBaseClass_DynamicEmitter_readFromReplayFrame(((char*)&self->Emitter), (cStream00371318*)stream);
-        cBaseClass_DynamicEmitter_updateBASE(((char*)&self->Emitter), &(*(sVec4_00345C90*)&self->Pos), &(*(sVec4_00345C90*)&self->Vel), 1, 0.01666666753590107f);
+        cBaseClass_DynamicEmitter_updateBASE(((char*)&self->Emitter), (sVec4_00345C90*)&self->Pos, (sVec4_00345C90*)&self->Vel, 1, 0.01666666753590107f);
     } else {
         self->ParticleData = 0;
     }
@@ -634,8 +635,8 @@ extern "C" void cDynamicParticleModifier_updatePosition(cDynamicParticleModifier
 {
     sEffMtx_5EF8 meshMat;
     cInstanceNode_buildMeshMat(self->Instance, self->Mesh, (sEffMtx_62A0*)&meshMat);
-    (*(sEffVec4_5EF8*)&self->Pos) = effMtxApply5EF8(&meshMat, &(*(sEffVec4_5EF8*)&self->Offset));
-    (*(sEffVec4_5EF8*)&self->Vel) = effMtxApply5EF8(&meshMat, &(*(sEffVec4_5EF8*)&self->InitVel));
+    *(sEffVec4_5EF8*)&self->Pos = effMtxApply5EF8(&meshMat, (sEffVec4_5EF8*)&self->Offset);
+    *(sEffVec4_5EF8*)&self->Vel = effMtxApply5EF8(&meshMat, (sEffVec4_5EF8*)&self->InitVel);
 }
 #endif
 
@@ -850,10 +851,6 @@ extern int D_004A4000;
 extern void* cHaloModifier_vtbl[];
 extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flags);
 
-struct sEffectLinkObj_6228 {
-    sEffectLinkView link;  // 0x0
-    void** vt;         // 0x8
-};
 
 /**
  * Destroys a halo modifier: decrements the live count (D_004A4000), then runs the cEffectModifier destructor.
@@ -862,7 +859,7 @@ struct sEffectLinkObj_6228 {
  */
 extern "C" void cHaloModifier__cHaloModifier(cHaloModifier* self, int flags)
 {
-    ((sEffectLinkObj_6228*)self)->vt = cHaloModifier_vtbl;
+    (self)->mVtbl = cHaloModifier_vtbl;
     D_004A4000--;
     cEffectModifier__cEffectModifier((cEffectModifier*)self, flags);
 }
@@ -1082,10 +1079,6 @@ struct sVec4_346568 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct sBox_346568 {
-    sVec4_346568 min;
-    sVec4_346568 max;
-};
 
 struct sInst_346568 {
     char pad_0x00[0x60];
@@ -1093,7 +1086,7 @@ struct sInst_346568 {
     float max[3];
 };
 
-extern "C" void nash_Nash_movenode(void* world, int type, void* id, sBox_346568* box, sBox_346568* old);
+extern "C" void nash_Nash_movenode(void* world, int type, void* id, tBoundBox* box, tBoundBox* old);
 
 struct sRVEntry_346568 {
     short delta;
@@ -1126,9 +1119,9 @@ extern "C" void cFlexBridgeNode__cFlexBridgeNode(cFlexBridgeNode* self, int flag
     if (self->Verts != 0) {
         cMemMan_free(self->Verts);
     }
-    sBox_346568* box = (sBox_346568*)(&self->BoundBox);
+    tBoundBox* box = ((&self->BoundBox));
     ((sRVEntry_346568*)cGraphicsMan_TheGraphicsMan->mVtbl)[77].fn((char*)cGraphicsMan_TheGraphicsMan + ((sRVEntry_346568*)cGraphicsMan_TheGraphicsMan->mVtbl)[77].delta, self->GridMesh);
-    sBox_346568 old = *(sBox_346568*)&self->BoundBox;
+    tBoundBox old = *(&self->BoundBox);
     sInst_346568* inst = (sInst_346568*)self->Instance;
     sVec4_346568 corner;
     corner.x = inst->min[0];

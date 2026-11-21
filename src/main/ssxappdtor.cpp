@@ -2041,7 +2041,7 @@ extern char cGameModeHandler_vtbl[];
  * @return @p handler
  */
 extern "C" int **cGameModeHandler_cGameModeHandler(int **handler) {
-    *handler = &(*(int*)&cGameModeHandler_vtbl);
+    *handler = (int*)&cGameModeHandler_vtbl;
     return handler;
 }
 #endif
@@ -3056,19 +3056,6 @@ struct sUIEngine_4B48 {
     sStateStack_4B48 states;        // 0x18
 };
 
-struct sApp_4B48 {
-    char pad0[0x28];
-    int* state;                     // 0x28
-    char pad2C[0x30 - 0x2C];
-    sScript_4B48* script;           // 0x30
-    char* playback;                 // 0x34
-    char pad38[0x48 - 0x38];
-    sUIEngine_4B48* ui;             // 0x48
-    char pad4C[0xA4 - 0x4C];
-    void* fA4;                      // 0xA4
-    char padA8[0x228 - 0xA8];
-    unsigned char f228;             // 0x228
-};
 
 static inline bool racing_4B48(int s)
 {
@@ -3101,11 +3088,11 @@ static inline bool playing_4B48(char* pb)
  * @return true when the race should update this frame (no menu, no new pause, not just unpaused), else false
  */
 // Handles script messages and pause requests; returns true when the race should run this frame.
-extern "C" bool cGame_updateUI(sApp_4B48* self)
+extern "C" bool cGame_updateUI(cGame* self)
 {
     cOVStateManager_update();
-    if (cMenuSys_isActive(self->fA4) == 0) {
-        sScript_4B48* sm = self->script;
+    if (cMenuSys_isActive(((void*)self->MenuSys)) == 0) {
+        sScript_4B48* sm = ((sScript_4B48*)self->WScriptMan);
         sQueue_4B48* msgQueue = &sm->queue;
         if (sm->hasMessage()) {
             sMsg_4B48* msg = tMissionMenuQueue_getEntry(msgQueue);
@@ -3117,12 +3104,12 @@ extern "C" bool cGame_updateUI(sApp_4B48* self)
                 return false;
             }
             if (msg->type == 9) {
-                cWScriptMan_doMissionCmd(self->script, msg->a, 5, msg->c);
-                if (cUIStateStack_findState(&self->ui->states, GetHashValue32(str_90bc_fail_b)) == 0) {
+                cWScriptMan_doMissionCmd(((sScript_4B48*)self->WScriptMan), msg->a, 5, msg->c);
+                if (cUIStateStack_findState(&((sUIEngine_4B48*)self->UI)->states, GetHashValue32(str_90bc_fail_b)) == 0) {
                     cOVStateManager_triggerOverlay(0x1E);
                     D_005366E8[++D_004A2A54] = 3;
                     cPauseState_Flags = D_004428FC[0];
-                    cUIEngine_update(self->ui);
+                    cUIEngine_update(((sUIEngine_4B48*)self->UI));
                 } else {
                     ((sScript_4B48*)cWScriptMan_TheWScriptMan)->popMessage();
                 }
@@ -3138,29 +3125,29 @@ extern "C" bool cGame_updateUI(sApp_4B48* self)
         func_0029ED18(cAudioInterface_bxAudio());
         return false;
     }
-    if (cMenuSys_isActive(self->fA4) != 0) {
-        cUIEngine_update(self->ui);
-        cMenuSys_input(self->fA4);
+    if (cMenuSys_isActive(((void*)self->MenuSys)) != 0) {
+        cUIEngine_update(((sUIEngine_4B48*)self->UI));
+        cMenuSys_input(((void*)self->MenuSys));
         return false;
     }
-    if (cGame_activatePauseMenu((char*)self, 0) != 0 && !racing_4B48(*self->state) && !playing_4B48(self->playback) && cOVStateManager_allowPauseMenu() != 0) {
+    if (cGame_activatePauseMenu((char*)self, 0) != 0 && !racing_4B48(*((int*)self->Replay)) && !playing_4B48(((char*)self->PlaybackMan)) && cOVStateManager_allowPauseMenu() != 0) {
         cPadCache_clearAllVibrations(PadCache);
         func_0020CA10();
         D_005366E8[++D_004A2A54] = 2;
         cPauseState_Flags = D_004428F8[0];
-        sUIObj_4B48* uiObject = self->ui->fC;
-        uiObject->vt[44].fn((char*)uiObject + uiObject->vt[44].delta, self->f228);
+        sUIObj_4B48* uiObject = ((sUIEngine_4B48*)self->UI)->fC;
+        uiObject->vt[44].fn((char*)uiObject + uiObject->vt[44].delta, *(unsigned char*)&self->PauseOwner);
         cSSXAudio_PauseAudio(cAudioInterface_bxAudio());
         cSSXAudio_PlayPauseSound(cAudioInterface_bxAudio());
         return false;
     }
     int wasPaused = cPauseState_Flags & 1;
-    cUIEngine_update(self->ui);
+    cUIEngine_update(((sUIEngine_4B48*)self->UI));
     if (cOVStateManager_pauseOverlayActive() != 0) {
         return false;
     }
-    cPlaybackMan_update(self->playback);
-    if (cMenuSys_isActive(self->fA4) != 0) {
+    cPlaybackMan_update(((char*)self->PlaybackMan));
+    if (cMenuSys_isActive(((void*)self->MenuSys)) != 0) {
         return false;
     }
     if (wasPaused && (cPauseState_Flags & 1) == 0) {

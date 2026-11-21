@@ -74,18 +74,10 @@ static inline void SetVisible_1388(char* o, int on)
     vt[9].fn(o + vt[9].delta, on);
 }
 
-struct sRuleSel_1388 {
-    char pad0[0x40];
-    void* screen;                   // 0x40
-    char pad44[0x4];
-    signed char* rules;             // 0x48
-    char pad4C[0x4];
-    signed char count;              // 0x50
-};
 
-static inline void* find_1388(sRuleSel_1388* self, char* name)
+static inline void* find_1388(cFEStateRuleSelect* self, char* name)
 {
-    return cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
+    return cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(name));
 }
 
 /**
@@ -103,7 +95,7 @@ static inline void* find_1388(sRuleSel_1388* self, char* name)
 // Fills the 11 rule rows (name text plus the option list box) starting at the given scroll row.
 extern "C" void cFEStateRuleSelect_setupMenu(cFEStateRuleSelect* self_, signed char first)
 {
-    sRuleSel_1388* self = (sRuleSel_1388*)self_;
+    cFEStateRuleSelect* self = self_;
     signed char i = 0;
     sStr3_1388 name;
     sStr3_1388 label;
@@ -115,9 +107,9 @@ extern "C" void cFEStateRuleSelect_setupMenu(cFEStateRuleSelect* self_, signed c
         cUIText* txt = (cUIText*)find_1388(self, lp);
         if (lb != 0 && txt != 0) {
             signed char row = i + first;
-            if (row >= self->count)
+            if (row >= *(signed char*)&self->mcArraySize)
                 break;
-            int rule = self->rules[row];
+            int rule = ((signed char*)self->mpGameEventMapping)[row];
             int kind = D_00441008[rule];
             cUIText_setUnicodeStringByID(txt, GetHashValue32(D_00441018[rule]));
             cUIListBox_deleteAllEntries(lb);
@@ -183,7 +175,7 @@ extern "C" void cFEStateRuleSelect_setupMenu(cFEStateRuleSelect* self_, signed c
     if (menu != 0)
         sel = *(unsigned char*)(menu + 0x95);
     char frame[32];
-    if (self->rules[sel] == 0) {
+    if (((signed char*)self->mpGameEventMapping)[sel] == 0) {
         char* arrowLeft = (char*)find_1388(self, str_arrw_left);
         char* arrowRight = (char*)find_1388(self, str_arrw_right);
         if (arrowLeft) SetVisible_1388(arrowLeft, 0);
@@ -192,9 +184,9 @@ extern "C" void cFEStateRuleSelect_setupMenu(cFEStateRuleSelect* self_, signed c
     } else {
         __builtin_memcpy(frame, D_0045FAD8, 10);
     }
-    int frameIndex = cUIScreen_getFrameByLabel((cUIScreen*)self->screen, GetHashValue32(frame));
+    int frameIndex = cUIScreen_getFrameByLabel((cUIScreen*)((void*)self->mpScreen), GetHashValue32(frame));
     if (frameIndex != 0xFFFF)
-        cUIScreen_playFrame(self->screen, frameIndex, 1);
+        cUIScreen_playFrame(((void*)self->mpScreen), frameIndex, 1);
     cFEStateRuleSelect_updateMenuColor((cFEStateRuleSelect*)self);
 }
 #endif

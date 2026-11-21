@@ -151,7 +151,7 @@ extern "C" void cRiderAnimBase_reset(cRiderAnimBase* riderAnimBase)
     //START
     self->IsFlipped = 0;
     self->FrameRateFactor = 1.0f;
-    (*(sRabQuad32*)&self->OrientationOffset) = tPose_Identity;
+    *(sRabQuad32*)&self->OrientationOffset = tPose_Identity;
     self->GraftMask = -1;
     //END
 }
@@ -536,7 +536,7 @@ extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* vself, void* vseq, int ani
     }
     sSeqNode_1F00* nd = (sSeqNode_1F00*)node;
     nd->m80 = self->IsFlipped;
-    nd->xform = (*(sRabQuad32*)&self->OrientationOffset);
+    nd->xform = *(sRabQuad32*)&self->OrientationOffset;
     nd->m88 = ((long)self->GraftMask);
     nd->m90 = self->FrameRateFactor;
     nd->weight = nd->targetWeight = 1.0f;
@@ -1426,9 +1426,9 @@ INCLUDE_ASM("animation/rideranimbase", cAnimSequence_updateSubAnim);
 #ifdef SKIP_ASM
 struct sAnimEvents_00313868;
 struct sAnimEvents_00313938;
-extern "C" void cAnimSequence_checkTriggers(sAnimEvents_00313868* self, float from, float to);
-extern "C" void cAnimSequence_checkTriggersAtTime(sAnimEvents_00313938* self, float time);
-extern "C" void cAnimSequence_setEndTriggers(sAnimEvents_00313938* self);
+extern "C" void cAnimSequence_checkTriggers(cAnimSequence* self, float from, float to);
+extern "C" void cAnimSequence_checkTriggersAtTime(cAnimSequence* self, float time);
+extern "C" void cAnimSequence_setEndTriggers(cAnimSequence* self);
 
 struct sTrack_003135B0 {
     int field_0x0;
@@ -1465,7 +1465,7 @@ static inline float ffloor_003135B0(float x)
 
 static inline void fire_003135B0(sRab_003135B0* self, float from, float to)
 {
-    cAnimSequence_checkTriggers((sAnimEvents_00313868*)self, from, to);
+    cAnimSequence_checkTriggers((cAnimSequence*)self, from, to);
 }
 
 /**
@@ -1491,7 +1491,7 @@ extern "C" int cAnimSequence_updateSubAnim(sRab_003135B0* self, int i, float dt)
         self->triggered = 0;
         self->fC0 = 0;
         if (self->fC4 != 0) {
-            cAnimSequence_checkTriggersAtTime((sAnimEvents_00313938*)self, startTime);
+            cAnimSequence_checkTriggersAtTime((cAnimSequence*)self, startTime);
             self->fC4 = 0;
         }
     }
@@ -1499,12 +1499,12 @@ extern "C" int cAnimSequence_updateSubAnim(sRab_003135B0* self, int i, float dt)
         if (newTime <= 0.0f) {
             newTime = 0.0f;
             if (i == 0) {
-                cAnimSequence_setEndTriggers((sAnimEvents_00313938*)self);
+                cAnimSequence_setEndTriggers((cAnimSequence*)self);
             }
         } else if (len <= newTime) {
             newTime = len;
             if (i == 0) {
-                cAnimSequence_setEndTriggers((sAnimEvents_00313938*)self);
+                cAnimSequence_setEndTriggers((cAnimSequence*)self);
             }
         }
         if (i == 0) {
@@ -1514,7 +1514,7 @@ extern "C" int cAnimSequence_updateSubAnim(sRab_003135B0* self, int i, float dt)
         int n = (int)ffloor_003135B0(newTime / len);
         newTime -= len * (float)n;
         if (i == 0) {
-            cAnimSequence_setEndTriggers((sAnimEvents_00313938*)self);
+            cAnimSequence_setEndTriggers((cAnimSequence*)self);
             if (n >= 2) {
                 fire_003135B0(self, 0.0f, len);
             } else if (n < -1) {
@@ -1546,14 +1546,6 @@ extern "C" int cAnimSequence_updateSubAnim(sRab_003135B0* self, int i, float dt)
 //100%
 INCLUDE_ASM("animation/rideranimbase", cAnimSequence_updateWeight);
 #ifdef SKIP_ASM
-struct sBlend_00313800
-{
-    char pad0[0x94];
-    float value;     // 0x94
-    float target;    // 0x98
-    float remaining; // 0x9C
-    int notify;      // 0xA0
-};
 
 /**
  * Steps the sequence's weight fade by @p dt; returns 1 when the fade ends on a sequence marked to expire.
@@ -1568,25 +1560,25 @@ struct sBlend_00313800
  */
 // Moves value toward target over the remaining time; returns 1 when the blend
 // finishes and notify is set.
-extern "C" int cAnimSequence_updateWeight(sBlend_00313800* self, float dt)
+extern "C" int cAnimSequence_updateWeight(cAnimSequence* self, float dt)
 {
-    float timeLeft = self->remaining;
+    float timeLeft = self->WeightTimer;
     if (timeLeft != 0.0f)
     {
         if (timeLeft <= dt)
         {
-            self->value = self->target;
-            self->remaining = 0.0f;
-            if (self->notify != 0)
+            self->CurrentWeight = self->TargetWeight;
+            self->WeightTimer = 0.0f;
+            if (self->IsFadeOutExpire != 0)
             {
                 return 1;
             }
         }
         else
         {
-            float current = self->value;
-            self->remaining = timeLeft - dt;
-            self->value = current + (dt / timeLeft) * (self->target - current);
+            float current = self->CurrentWeight;
+            self->WeightTimer = timeLeft - dt;
+            self->CurrentWeight = current + (dt / timeLeft) * (self->TargetWeight - current);
         }
     }
     return 0;
@@ -1604,13 +1596,6 @@ struct sAnimEvent_00313868
     sAnimEvent_00313868* next;      // 0xC
 };
 
-struct sAnimEvents_00313868
-{
-    char pad0[0xAC];
-    sAnimEvent_00313868* head;      // 0xAC
-    ulong active;                   // 0xB0
-    ulong triggered;                // 0xB8
-};
 
 /**
  * Fires every timed trigger whose time lies in (@p from, @p to], or in [@p to, @p from) when playing backwards.
@@ -1624,14 +1609,14 @@ struct sAnimEvents_00313868
 // Fires every kind-0 event whose time lies in (from, to] (or [to, from) when
 // playing backwards).
 // PORT: ulong is 64-bit here
-extern "C" void cAnimSequence_checkTriggers(sAnimEvents_00313868* self, float from, float to)
+extern "C" void cAnimSequence_checkTriggers(cAnimSequence* self, float from, float to)
 {
     if (from == to)
     {
         return;
     }
     int forward = from <= to;
-    for (sAnimEvent_00313868* event = self->head; event != 0; event = event->next)
+    for (sAnimEvent_00313868* event = ((sAnimEvent_00313868*)self->Triggers); event != 0; event = event->next)
     {
         if (event->kind == 0)
         {
@@ -1647,9 +1632,9 @@ extern "C" void cAnimSequence_checkTriggers(sAnimEvents_00313868* self, float fr
                     continue;
             }
             ulong bit = (ulong)1 << event->bit;
-            ulong old = self->active;
-            self->active = old | bit;
-            self->triggered |= bit & ~old;
+            ulong old = self->Events.IsSet;
+            self->Events.IsSet = old | bit;
+            self->Events.IsJustChanged |= bit & ~old;
         }
     }
 }
@@ -1666,14 +1651,6 @@ struct sAnimEvent_00313938
     sAnimEvent_00313938* next;      // 0xC
 };
 
-struct sAnimEvents_00313938
-{
-    char pad0[0xAC];
-    sAnimEvent_00313938* head;      // 0xAC
-    ulong active;                   // 0xB0
-    ulong triggered;                // 0xB8
-    int dirty;                      // 0xC0
-};
 
 /**
  * Fires every timed trigger whose time equals @p time exactly (used after the playback time is set directly).
@@ -1683,16 +1660,16 @@ struct sAnimEvents_00313938
  * @param time  the time to check
  */
 // PORT: ulong is 64-bit here
-extern "C" void cAnimSequence_checkTriggersAtTime(sAnimEvents_00313938* self, float time)
+extern "C" void cAnimSequence_checkTriggersAtTime(cAnimSequence* self, float time)
 {
-    for (sAnimEvent_00313938* event = self->head; event != 0; event = event->next)
+    for (sAnimEvent_00313938* event = ((sAnimEvent_00313938*)self->Triggers); event != 0; event = event->next)
     {
         if (event->kind == 0 && event->time == time)
         {
             ulong bit = (ulong)1 << event->bit;
-            ulong old = self->active;
-            self->active = old | bit;
-            self->triggered |= bit & ~old;
+            ulong old = self->Events.IsSet;
+            self->Events.IsSet = old | bit;
+            self->Events.IsJustChanged |= bit & ~old;
         }
     }
 }
@@ -1707,17 +1684,17 @@ INCLUDE_ASM("animation/rideranimbase", cAnimSequence_setEndTriggers);
  * Each end trigger's id bit is set in the event flags (+0xB0) and, if newly set, in the just-changed flags (+0xB8).
  */
 // PORT: ulong is 64-bit here
-extern "C" void cAnimSequence_setEndTriggers(sAnimEvents_00313938* self)
+extern "C" void cAnimSequence_setEndTriggers(cAnimSequence* self)
 {
-    self->dirty = 1;
-    for (sAnimEvent_00313938* event = self->head; event != 0; event = event->next)
+    self->EndEvent = 1;
+    for (sAnimEvent_00313938* event = ((sAnimEvent_00313938*)self->Triggers); event != 0; event = event->next)
     {
         if (event->kind != 0)
         {
             ulong bit = (ulong)1 << event->bit;
-            ulong old = self->active;
-            self->active = old | bit;
-            self->triggered |= bit & ~old;
+            ulong old = self->Events.IsSet;
+            self->Events.IsSet = old | bit;
+            self->Events.IsJustChanged |= bit & ~old;
         }
     }
 }

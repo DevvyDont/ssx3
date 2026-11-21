@@ -116,11 +116,6 @@ INCLUDE_ASM("be/beprepoststate", cBEPostRaceState_onExit);
 #ifdef SKIP_ASM
 extern void* D_004A11C8;
 
-struct sBEIface_001564B0
-{
-    char pad_0x00[8];
-    int active;
-};
 
 /**
  * Leaves the post-race back-end state: marks its interfaces inactive.
@@ -136,11 +131,11 @@ extern "C" void cBEPostRaceState_onExit(void)
     cBEOptionInterface_instance->bIsActive = 0;
     cBESaveInterface_instance->bIsActive = 0;
     cBENetworkInterface_instance->bIsActive = 0;
-    ((sBEIface_001564B0*)D_004A11C8)->active = 0;
+    ((cBERewardInterface*)D_004A11C8)->bIsActive = 0;
     cBEBAGTInterface_instance->bIsActive = 0;
     cBEEconInterface_instance->bIsActive = 0;
     cBEAggressionInterface_instance->bIsActive = 0;
-    ((sBEIface_001564B0*)cBERewardInterface_instance)->active = 0;
+    (cBERewardInterface_instance)->bIsActive = 0;
 }
 #endif
 
@@ -149,11 +144,6 @@ INCLUDE_ASM("be/beprepoststate", cBEPostRaceState_onEnter);
 #ifdef SKIP_ASM
 extern void* D_004A11C8;
 
-struct sBEIface_00156510
-{
-    char pad_0x00[8];
-    int active;
-};
 
 /**
  * Enters the post-race back-end state: marks its interfaces active.
@@ -169,11 +159,11 @@ extern "C" void cBEPostRaceState_onEnter(void)
     cBEOptionInterface_instance->bIsActive = 1;
     cBESaveInterface_instance->bIsActive = 1;
     cBENetworkInterface_instance->bIsActive = 1;
-    ((sBEIface_00156510*)D_004A11C8)->active = 1;
+    ((cBERewardInterface*)D_004A11C8)->bIsActive = 1;
     cBEBAGTInterface_instance->bIsActive = 1;
     cBEEconInterface_instance->bIsActive = 1;
     cBEAggressionInterface_instance->bIsActive = 1;
-    ((sBEIface_00156510*)cBERewardInterface_instance)->active = 1;
+    (cBERewardInterface_instance)->bIsActive = 1;
 }
 #endif
 
@@ -272,11 +262,6 @@ INCLUDE_ASM("be/beprepoststate", cBEPreRaceState_onExit);
 #ifdef SKIP_ASM
 extern void* D_004A11C8;
 
-struct sBEIface_001566E8
-{
-    char pad_0x00[8];
-    int active;
-};
 
 /**
  * Leaves the pre-race back-end state: marks its interfaces inactive.
@@ -293,11 +278,11 @@ extern "C" void cBEPreRaceState_onExit(void)
     cBEOptionInterface_instance->bIsActive = 0;
     cBESaveInterface_instance->bIsActive = 0;
     cBENetworkInterface_instance->bIsActive = 0;
-    ((sBEIface_001566E8*)D_004A11C8)->active = 0;
+    ((cBERewardInterface*)D_004A11C8)->bIsActive = 0;
     cBEBAGTInterface_instance->bIsActive = 0;
     cBEEconInterface_instance->bIsActive = 0;
     cBEAggressionInterface_instance->bIsActive = 0;
-    ((sBEIface_001566E8*)cBERewardInterface_instance)->active = 0;
+    (cBERewardInterface_instance)->bIsActive = 0;
 }
 #endif
 
@@ -306,11 +291,6 @@ INCLUDE_ASM("be/beprepoststate", cBEPreRaceState_onEnter);
 #ifdef SKIP_ASM
 extern void* D_004A11C8;
 
-struct sBEIface_00156750
-{
-    char pad_0x00[8];
-    int active;
-};
 
 /**
  * Enters the pre-race back-end state: marks its interfaces active.
@@ -328,11 +308,11 @@ extern "C" void cBEPreRaceState_onEnter(void)
     cBEOptionInterface_instance->bIsActive = 1;
     cBESaveInterface_instance->bIsActive = 1;
     cBENetworkInterface_instance->bIsActive = 1;
-    ((sBEIface_00156750*)D_004A11C8)->active = 1;
+    ((cBERewardInterface*)D_004A11C8)->bIsActive = 1;
     cBEBAGTInterface_instance->bIsActive = 1;
     cBEEconInterface_instance->bIsActive = 1;
     cBEAggressionInterface_instance->bIsActive = 1;
-    ((sBEIface_00156750*)cBERewardInterface_instance)->active = 1;
+    (cBERewardInterface_instance)->bIsActive = 1;
 }
 #endif
 

@@ -816,7 +816,7 @@ extern "C" void tActiveAvalanche_buildArray(tActiveAvalanche* self)
     for (node = ((tActiveAvalanche_node*)self->m_activeNodeList); node != 0; node = node->next) {
         n++;
     }
-    (*(tActiveAvalanche_node***)&self->m_activeNodeArray) = (tActiveAvalanche_node**)operator_new_tag(n * 4, str_ActiveNodeArray, 0, 0);
+    *(tActiveAvalanche_node***)&self->m_activeNodeArray = (tActiveAvalanche_node**)operator_new_tag(n * 4, str_ActiveNodeArray, 0, 0);
     int i = 0;
     for (node = ((tActiveAvalanche_node*)self->m_activeNodeList); node != 0; node = node->next) {
         ((tActiveAvalanche_node**)self->m_activeNodeArray)[i++] = node;
@@ -1376,10 +1376,6 @@ struct sObj_8A00 {
     float count;                // 0x100
 };
 
-struct sNode_8A00 {
-    char pad[0x2E0];
-    sObj_8A00* obj;             // 0x2E0
-};
 
 struct sOut_8A00 {
     float x, y, z, w;
@@ -1540,8 +1536,8 @@ static inline void SetBits_8A00(int& w, int mask, int shift, int v)
  */
 extern "C" void tActiveAvalancheNode_renderLines(tActiveAvalancheNode* nodep)
 {
-    sNode_8A00* node = (sNode_8A00*)nodep;
-    if (node->obj == 0) {
+    tActiveAvalancheNode* node = nodep;
+    if (((sObj_8A00*)node->m_node) == 0) {
         return;
     }
     sMat_8A00 matrix;
@@ -1550,23 +1546,23 @@ extern "C" void tActiveAvalancheNode_renderLines(tActiveAvalancheNode* nodep)
     SetBits_8A00(((int)(GrMan->m_pCurrentDrawState)->unk_00[1]), 0x7C, 2, 1);
     if (D_004A3A58 != 0) {
         int i = 0;
-        sRow_8A00 pos = node->obj->pos;
-        for (; i < (int)node->obj->count; i++) {
-            sVec4_8A00 scratchVec(node->obj->recs[i].dx * 2.0f, node->obj->recs[i].dy * 2.0f, node->obj->recs[i].dz * 2.0f, 0.0f);
+        sRow_8A00 pos = ((sObj_8A00*)node->m_node)->pos;
+        for (; i < (int)((sObj_8A00*)node->m_node)->count; i++) {
+            sVec4_8A00 scratchVec(((sObj_8A00*)node->m_node)->recs[i].dx * 2.0f, ((sObj_8A00*)node->m_node)->recs[i].dy * 2.0f, ((sObj_8A00*)node->m_node)->recs[i].dz * 2.0f, 0.0f);
             AddTo_8A00(pos, scratchVec);
-            sVec3_8A00 n = Normalize_8A00(sVec3_8A00(node->obj->recs[i].ax * 0.007874015718698502f, node->obj->recs[i].ay * 0.007874015718698502f, node->obj->recs[i].az * 0.007874015718698502f));
+            sVec3_8A00 n = Normalize_8A00(sVec3_8A00(((sObj_8A00*)node->m_node)->recs[i].ax * 0.007874015718698502f, ((sObj_8A00*)node->m_node)->recs[i].ay * 0.007874015718698502f, ((sObj_8A00*)node->m_node)->recs[i].az * 0.007874015718698502f));
             scratchVec.x = n.x;
             scratchVec.y = n.y;
             scratchVec.z = n.z;
             scratchVec.w = 0.0f;
-            Rotate_8A00(matrix, scratchVec, node->obj->recs[i].angle * 0.008213315159082413f);
+            Rotate_8A00(matrix, scratchVec, ((sObj_8A00*)node->m_node)->recs[i].angle * 0.008213315159082413f);
             matrix.v[3] = pos;
-            D_004D5B70_8A00[i].r = node->obj->recs[i].r;
-            D_004D5B70_8A00[i].g = node->obj->recs[i].g;
-            D_004D5B70_8A00[i].b = node->obj->recs[i].b;
+            D_004D5B70_8A00[i].r = ((sObj_8A00*)node->m_node)->recs[i].r;
+            D_004D5B70_8A00[i].g = ((sObj_8A00*)node->m_node)->recs[i].g;
+            D_004D5B70_8A00[i].b = ((sObj_8A00*)node->m_node)->recs[i].b;
             D_004D5B70_8A00[i].pos = pos;
         }
-        ((sVE_8A00*)GrMan->mVtbl)[0x248 / 8].fn((char*)GrMan + ((sVE_8A00*)GrMan->mVtbl)[0x248 / 8].delta, (int)node->obj->count, D_004D5B70_8A00, 0);
+        ((sVE_8A00*)GrMan->mVtbl)[0x248 / 8].fn((char*)GrMan + ((sVE_8A00*)GrMan->mVtbl)[0x248 / 8].delta, (int)((sObj_8A00*)node->m_node)->count, D_004D5B70_8A00, 0);
     }
     (*(sDrawState**)&GrMan->m_pCurrentDrawState)--;
 }

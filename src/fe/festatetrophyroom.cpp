@@ -489,16 +489,6 @@ struct cGraphicsMan_4A20 {
     virtual int AddTexture(void* shape, char* name, int lockType, int copyMem, int bindId);  // slot 46
 };
 
-struct sSelf_4A20 {
-    char pad[0x50];
-    int bank;
-    char pad54[0x8];
-    int count;
-    int textureId[5];   // 0x60: GrMan texture ids
-    int fileSlot[5];    // 0x74: pending file-cache slots (-1 once loaded)
-    char pad88[0x14];
-    int f9C;
-};
 
 /**
  * Turns each finished trophy-room image load into a texture and redraws the big picture.
@@ -513,17 +503,17 @@ struct sSelf_4A20 {
  */
 extern "C" void cFEStateTrophyRoom_updateTexturesLoad(cFEStateTrophyRoom* trophyRoom)
 {
-    sSelf_4A20* self = (sSelf_4A20*)trophyRoom;
+    cFEStateTrophyRoom* self = trophyRoom;
     char* mgr = (char*)SSXApp->RealFE + 0x1A70;
     int i;
     for (i = 0; i < 5; i++) {
-        if (self->fileSlot[i] >= 0 && func_0019E238(mgr, self->bank, self->fileSlot[i]) != 0) {
-            char* fileData = func_0019E2B0(mgr, self->bank, self->fileSlot[i]);
-            self->textureId[i] = ((cGraphicsMan_4A20*)GrMan)->AddTexture(fileData + *(int*)(fileData + 0x14), str_trph, 0, 1, -1);
-            func_0019DC20(mgr, self->bank, self->fileSlot[i]);
-            self->fileSlot[i] = -1;
-            self->count--;
-            cFEStateTrophyRoom_updateBigArt((cFEStateTrophyRoom*)self, self->f9C);
+        if (self->mTextureFileIndex[i] >= 0 && func_0019E238(mgr, self->mCharID, self->mTextureFileIndex[i]) != 0) {
+            char* fileData = func_0019E2B0(mgr, self->mCharID, self->mTextureFileIndex[i]);
+            self->mTextureIDs[i] = ((cGraphicsMan_4A20*)GrMan)->AddTexture(fileData + *(int*)(fileData + 0x14), str_trph, 0, 1, -1);
+            func_0019DC20(mgr, self->mCharID, self->mTextureFileIndex[i]);
+            self->mTextureFileIndex[i] = -1;
+            self->mNumLoadingFiles--;
+            cFEStateTrophyRoom_updateBigArt((cFEStateTrophyRoom*)self, self->mCurSelection);
         }
     }
 }

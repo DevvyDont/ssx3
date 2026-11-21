@@ -124,20 +124,6 @@ public:
     virtual void playSound(int msg);
 };
 
-struct sOpt_188980 {
-    char pad0[0x10];
-    char* engine;           // 0x10
-    char pad14;
-    unsigned char port;     // 0x15
-    char pad16[0x1C - 0x16];
-    int flags;              // 0x1C
-    char pad20[0x40 - 0x20];
-    cUIScreen* screen;      // 0x40
-    int pad44;
-    int f48;                // 0x48
-    int pad4C;
-    void* popup;            // 0x50
-};
 
 static inline int Is_00188980(int id, char* s) { return id == GetHashValue32(s); }
 
@@ -164,7 +150,7 @@ extern "C" void cFEStateOptions_onWidgetEvent(cFEStateOptions* self, cUIThing* w
     case 5:
         if (Is_00188980(widget->mHashName, D_004A1520)) {
             void* mem = cMemMan_alloc(1092, str_cKeyboardPopup, 0x100, 0);
-            void* pop = cKeyboardPopup_cKeyboardPopup(mem, (char*)self->mpEngine, ((sOpt_188980*)self), 0, self->mCtrlBits);
+            void* pop = cKeyboardPopup_cKeyboardPopup(mem, (char*)self->mpEngine, (self), 0, self->mCtrlBits);
             self->mpKeyboard = (cKeyboardPopup*)pop;
             cKeyboardPopup_setInputText(pop, D_004A1408);
             cKeyboardPopup_setStatic2(self->mpKeyboard, D_004A1408);
@@ -190,7 +176,7 @@ extern "C" void cFEStateOptions_onWidgetEvent(cFEStateOptions* self, cUIThing* w
         {
             char* obj = *(char**)(char*)self->mpEngine;
             sVE_188980p* vt = *(sVE_188980p**)(obj + 4);
-            void* r = vt[4].fn(obj + vt[4].delta, ((sOpt_188980*)self), widget->mMiscData);
+            void* r = vt[4].fn(obj + vt[4].delta, (self), widget->mMiscData);
             if (r != 0)
                 cUIStateStack_push(self->mpEngine->mStateStack, r);
         }
@@ -500,21 +486,13 @@ public:
     virtual void setVisible(int v);
 };
 
-struct sOptGame_188F28 {
-    char pad0[0x10];
-    void* engine;                   // 0x10
-    char pad14[0x2C];
-    char* screen;                   // 0x40
-    char pad44[0x4];
-    signed char item[3];            // 0x48
-};
 
-static inline void* find_188F28(sOptGame_188F28* self, char** names, int i)
+static inline void* find_188F28(cFEStateOptionsGame* self, char** names, int i)
 {
-    return cUIScreen_getObjectByHashName(self->screen, GetHashValue32(names[self->item[i]]));
+    return cUIScreen_getObjectByHashName(((char*)self->mpScreen), GetHashValue32(names[((signed char*)&self->mLanguageSlot)[i]]));
 }
 
-static inline void setText_188F28(sOptGame_188F28* self, char** names, int i, char** ids)
+static inline void setText_188F28(cFEStateOptionsGame* self, char** names, int i, char** ids)
 {
     cUIText* t = (cUIText*)find_188F28(self, names, i);
     if (t != 0)
@@ -532,7 +510,7 @@ static inline void setText_188F28(sOptGame_188F28* self, char** names, int i, ch
 extern "C" void cFEStateOptionsGame_onCreateScreen(cFEStateOptionsGame* self)
 {
     void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, ((sOptGame_188F28*)self), GetHashValue32(str_19game_opt), 0);
+    void* screen = cUIEngine_addScreenByHashName(engine, (self), GetHashValue32(str_19game_opt), 0);
     self->mpScreen = (cUIScreen*)((char*)screen);
     if (screen != 0)
         cUIScreen_playFrame(screen, 0, 0);
@@ -548,7 +526,7 @@ extern "C" void cFEStateOptionsGame_onCreateScreen(cFEStateOptionsGame* self)
     if (menu != 0)
         cUIMenu_setSelectedByIndex(menu, 1);
     if (((signed char*)&self->mLanguageSlot)[0] >= 0) {
-        void* w = find_188F28(((sOptGame_188F28*)self), D_00440FD8, 0);
+        void* w = find_188F28((self), D_00440FD8, 0);
         if (w != 0) {
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_LANGAmerican), 0);
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_LANGFrench), 1);
@@ -559,36 +537,36 @@ extern "C" void cFEStateOptionsGame_onCreateScreen(cFEStateOptionsGame* self)
                 cUIListBox_setCurrentEntryByIndex(w, sel);
         }
         {
-            cUIText* label = (cUIText*)find_188F28(((sOptGame_188F28*)self), D_00440FB8, 0);
+            cUIText* label = (cUIText*)find_188F28((self), D_00440FB8, 0);
             if (label != 0)
                 cUIText_setUnicodeStringByID(label, GetHashValue32(D_00440FC8[0]));
         }
         {
-            cUIText* label = (cUIText*)find_188F28(((sOptGame_188F28*)self), D_00440FF8, 0);
+            cUIText* label = (cUIText*)find_188F28((self), D_00440FF8, 0);
             if (label != 0)
                 cUIText_setUnicodeStringByID(label, GetHashValue32(D_00440FE8[0]));
         }
     }
     if (((signed char*)&self->mLanguageSlot)[1] >= 0) {
-        void* w = find_188F28(((sOptGame_188F28*)self), D_00440FD8, 1);
+        void* w = find_188F28((self), D_00440FD8, 1);
         if (w != 0) {
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNMPH), 0);
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNKPH), 0);
             cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().iUseMetricUnits);
         }
         {
-            cUIText* label = (cUIText*)find_188F28(((sOptGame_188F28*)self), D_00440FB8, 1);
+            cUIText* label = (cUIText*)find_188F28((self), D_00440FB8, 1);
             if (label != 0)
                 cUIText_setUnicodeStringByID(label, GetHashValue32(D_00440FC8[1]));
         }
         {
-            cUIText* label = (cUIText*)find_188F28(((sOptGame_188F28*)self), D_00440FF8, 1);
+            cUIText* label = (cUIText*)find_188F28((self), D_00440FF8, 1);
             if (label != 0)
                 cUIText_setUnicodeStringByID(label, GetHashValue32(D_00440FE8[1]));
         }
     }
     if (((signed char*)&self->mLanguageSlot)[2] >= 0) {
-        void* w = find_188F28(((sOptGame_188F28*)self), D_00440FD8, 2);
+        void* w = find_188F28((self), D_00440FD8, 2);
         if (w != 0) {
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNOff), 0);
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_19Widescreen169), 0);
@@ -596,12 +574,12 @@ extern "C" void cFEStateOptionsGame_onCreateScreen(cFEStateOptionsGame* self)
             cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().iUseWidescreen);
         }
         {
-            cUIText* label = (cUIText*)find_188F28(((sOptGame_188F28*)self), D_00440FB8, 2);
+            cUIText* label = (cUIText*)find_188F28((self), D_00440FB8, 2);
             if (label != 0)
                 cUIText_setUnicodeStringByID(label, GetHashValue32(D_00440FC8[2]));
         }
         {
-            cUIText* label = (cUIText*)find_188F28(((sOptGame_188F28*)self), D_00440FF8, 2);
+            cUIText* label = (cUIText*)find_188F28((self), D_00440FF8, 2);
             if (label != 0)
                 cUIText_setUnicodeStringByID(label, GetHashValue32(D_00440FE8[2]));
         }
@@ -832,23 +810,15 @@ struct sVE_189980c {
     void* (*fn)(void*, void*, int);
 };
 
-struct sOptGame_189980 {
-    char pad0[0x10];
-    char* engine;           // 0x10
-    char pad14[0x40 - 0x14];
-    char* screen;           // 0x40
-    char pad44[0x48 - 0x44];
-    signed char item[3];    // 0x48
-};
 
 static inline int Is_189980(int id, char* s)
 {
     return id == GetHashValue32(s);
 }
 
-static inline void Refresh_189980(sOptGame_189980* self)
+static inline void Refresh_189980(cFEStateOptionsGame* self)
 {
-    char* scr = self->screen;
+    char* scr = ((char*)self->mpScreen);
     sVE_189980a* vt = *(sVE_189980a**)(scr + 0x48);
     char* sub = scr + 0x40;
     vt[16].fn(sub + vt[16].delta);
@@ -878,7 +848,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cUI
     switch (event) {
     case 7: {
         char* popup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
-        cUIState_cUIState1(popup, (char*)self->mpEngine, ((sOptGame_189980*)self));
+        cUIState_cUIState1(popup, (char*)self->mpEngine, (self));
         *(void***)(popup + 8) = cFEPopupOptionReset_vtbl;
         popup[0x48] = 0;
         cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
@@ -887,7 +857,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cUI
     case 5:
         if (Is_189980(widget->mHashName, D_004A1520)) {
             char* popup = (char*)operator new(84, str_cFEPopupScreenPos, 0x100, 0);
-            cUIState_cUIState1(popup, (char*)self->mpEngine, ((sOptGame_189980*)self));
+            cUIState_cUIState1(popup, (char*)self->mpEngine, (self));
             *(void***)(popup + 8) = cFEPopupScreenPos_vtbl;
             *(int*)(popup + 0x4C) = 0;
             *(int*)(popup + 0x48) = 0;
@@ -895,7 +865,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cUI
             cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
         } else if (Is_189980(widget->mHashName, D_004A1528)) {
             char* popup = (char*)operator new(76, str_cFEPopupVideoCalibration, 0x100, 0);
-            cUIState_cUIState1(popup, (char*)self->mpEngine, ((sOptGame_189980*)self));
+            cUIState_cUIState1(popup, (char*)self->mpEngine, (self));
             *(void***)(popup + 8) = cFEPopupVideoCalibration_vtbl;
             *(int*)(popup + 0xC) = 27;
             cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
@@ -912,10 +882,10 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cUI
             sVE_189980b* vt = *(sVE_189980b**)(locale + 4);
             vt[3].fn(locale + vt[3].delta, D_00535610_189980.iLanguage);
         }
-        Refresh_189980(((sOptGame_189980*)self));
+        Refresh_189980((self));
         char* eng = *(char**)(char*)self->mpEngine;
         sVE_189980c* vt = *(sVE_189980c**)(eng + 4);
-        void* nextState = vt[5].fn(eng + vt[5].delta, ((sOptGame_189980*)self), widget->mMiscData);
+        void* nextState = vt[5].fn(eng + vt[5].delta, (self), widget->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         }
@@ -928,7 +898,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cUI
             sVE_189980b* vt = *(sVE_189980b**)(locale + 4);
             char* thisp = locale + vt[3].delta;
             vt[3].fn(thisp, cUIListBox_getCurrentEntryData(((char*)widget)));
-            Refresh_189980(((sOptGame_189980*)self));
+            Refresh_189980((self));
             func_0029ED90(cAudioInterface_bxAudio(), 1);
         }
         if (((signed char*)&self->mLanguageSlot)[1] >= 0 && Is_189980(widget->mHashName, D_00440FD8[((signed char*)&self->mLanguageSlot)[1]])) {
@@ -992,16 +962,10 @@ struct sVE_189D60c {
     void (*fn)(void*, int, int);
 };
 
-struct sOptGame_189D60 {
-    char pad0[0x40];
-    char* screen;                   // 0x40
-    char pad44[0x4];
-    signed char item[3];            // 0x48
-};
 
-static inline void* find_189D60(sOptGame_189D60* self, int i)
+static inline void* find_189D60(cFEStateOptionsGame* self, int i)
 {
-    return cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00440FD8[self->item[i]]));
+    return cUIScreen_getObjectByHashName(((char*)self->mpScreen), GetHashValue32(D_00440FD8[((signed char*)&self->mLanguageSlot)[i]]));
 }
 
 /**
@@ -1021,27 +985,27 @@ static inline void* find_189D60(sOptGame_189D60* self, int i)
  */
 extern "C" void cFEStateOptionsGame_updateWidget(cFEStateOptionsGame* self_)
 {
-    sOptGame_189D60* self = (sOptGame_189D60*)self_;
+    cFEStateOptionsGame* self = self_;
     sOptionIface_189D60* iface = (sOptionIface_189D60*)cBE_getInterface_Fv(cBE_getBE(), 4);
-    if (self->item[0] >= 0) {
+    if (((signed char*)&self->mLanguageSlot)[0] >= 0) {
         void* w = find_189D60(self, 0);
         if (w != 0) {
             cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().iLanguage);
             char* locale = (char*)SSXApp->FELocale;
             sVE_189D60b* vt = *(sVE_189D60b**)(locale + 4);
             vt[3].fn(locale + vt[3].delta, cUIListBox_getCurrentEntryData(w));
-            char* scr = self->screen;
+            char* scr = ((char*)self->mpScreen);
             sVE_189D60a* vt2 = *(sVE_189D60a**)(scr + 0x48);
             char* sub = scr + 0x40;
             vt2[16].fn(sub + vt2[16].delta);
         }
     }
-    if (self->item[1] >= 0) {
+    if (((signed char*)&self->mLanguageSlot)[1] >= 0) {
         void* w = find_189D60(self, 1);
         if (w != 0)
             cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().iUseMetricUnits);
     }
-    if (self->item[2] >= 0) {
+    if (((signed char*)&self->mLanguageSlot)[2] >= 0) {
         void* w = find_189D60(self, 2);
         if (w != 0)
             cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().iUseWidescreen);
@@ -1520,14 +1484,10 @@ static inline sSndCfg_18B380 Cfg_18B380()
     return D_00535610_18B380;
 }
 
-struct sOptSound_18B380 {
-    char pad0[0x40];
-    char* screen;                   // 0x40
-};
 
-static inline void* Find_18B380(sOptSound_18B380* self, char* name)
+static inline void* Find_18B380(cFEStateOptionsSound* self, char* name)
 {
-    return cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
+    return cUIScreen_getObjectByHashName(((char*)self->mpScreen), GetHashValue32(name));
 }
 
 /**
@@ -1543,7 +1503,7 @@ static inline void* Find_18B380(sOptSound_18B380* self, char* name)
 // Sound options screen: fills the option widgets from the current sound settings.
 extern "C" void cFEStateOptionsSound_updateWidget(cFEStateOptionsSound* vself)
 {
-    sOptSound_18B380* self = (sOptSound_18B380*)vself;
+    cFEStateOptionsSound* self = vself;
     sOptionIface_18B380* iface = (sOptionIface_18B380*)cBE_getInterface_Fv(cBE_getBE(), 4);
     {
     char* w = (char*)Find_18B380(self, str_1lb);
@@ -3230,28 +3190,6 @@ struct sVE_18DEA0v {
     void (*fn)(void*, int);
 };
 
-struct sDevSel_18DEA0 {
-    char pad0[8];
-    sVE_18DEA0n* vt;        // 0x8
-    char padC[0x1A8 - 0xC];
-    int busy;               // 0x1A8
-    char pad1AC[0x1BC - 0x1AC];
-    int mode;               // 0x1BC
-    int state;              // 0x1C0
-    int slot;               // 0x1C4
-    char pad1C8[0x1DC - 0x1C8];
-    int f1DC;               // 0x1DC
-    int pad1E0;
-    int f1E4;               // 0x1E4
-    char pad1E8[0x214 - 0x1E8];
-    int f214;               // 0x214
-    char pad218[0x224 - 0x218];
-    int f224;               // 0x224
-    int pad228;
-    int f22C;               // 0x22C
-    char pad230[0x238 - 0x230];
-    int f238;               // 0x238
-};
 
 class cDev_18DEA0 {
 public:
@@ -3345,82 +3283,82 @@ public:
  * @param widget  the widget that sent the event (its +0x18 word is the slot index)
  * @param event  the widget event
  */
-extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(sDevSel_18DEA0* self, cUIThing* widget, unsigned int event)
+extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(cFEStateOptionsDeviceSelect* self, cUIThing* widget, unsigned int event)
 {
     char* app = (char*)cSSXApp_getMCManager(SSXApp);
     switch (event) {
     case 5: {
         if (((char*)widget) == 0)
             return;
-        if (self->busy != 0)
+        if (self->mIsProcessing != 0)
             return;
-        self->f238 = 1;
-        int st = self->f214;
+        self->mbChoseToSave = 1;
+        int st = self->mScreenStatus;
         if (st != 3)
             return;
-        if (self->f224 == 0)
+        if (self->mMainButtonActive == 0)
             return;
         int pickedSlot = widget->mMiscData;
-        self->slot = pickedSlot;
+        self->mSlot = pickedSlot;
         *(int*)(app + 0xF8) = pickedSlot;
-        if (self->mode == 2 && self->f22C != 0) {
+        if (self->mType == 2 && self->mIsSaveScreen != 0) {
             cMCOverlayManager_writeSetFileType(app, 2, -1);
-            self->f1DC = 1;
-            self->busy = 1;
-            self->state = st;
-            self->vt[47].fn((char*)self + self->vt[47].delta);
-        } else if (self->mode == 1) {
-            if ((*(cDev_18DEA0**)(app + 0x434))->HasFileName(self->slot)) {
+            self->mIsSavePressed = 1;
+            self->mIsProcessing = 1;
+            self->mState = st;
+            ((sVE_18DEA0n*)self->mVtbl)[47].fn((char*)self + ((sVE_18DEA0n*)self->mVtbl)[47].delta);
+        } else if (self->mType == 1) {
+            if ((*(cDev_18DEA0**)(app + 0x434))->HasFileName(self->mSlot)) {
                 cMCOverlayManager_readSetFileType(app, 0);
-                self->vt[44].fn((char*)self + self->vt[44].delta);
+                ((sVE_18DEA0n*)self->mVtbl)[44].fn((char*)self + ((sVE_18DEA0n*)self->mVtbl)[44].delta);
             } else {
-                self->vt[47].fn((char*)self + self->vt[47].delta);
+                ((sVE_18DEA0n*)self->mVtbl)[47].fn((char*)self + ((sVE_18DEA0n*)self->mVtbl)[47].delta);
             }
         } else {
-            if ((*(cDev_18DEA0**)(app + 0x434))->HasFileName(self->slot)) {
+            if ((*(cDev_18DEA0**)(app + 0x434))->HasFileName(self->mSlot)) {
                 cMCOverlayManager_readSetFileType(app, 2);
-                self->vt[44].fn((char*)self + self->vt[44].delta);
+                ((sVE_18DEA0n*)self->mVtbl)[44].fn((char*)self + ((sVE_18DEA0n*)self->mVtbl)[44].delta);
             } else {
-                self->vt[47].fn((char*)self + self->vt[47].delta);
+                ((sVE_18DEA0n*)self->mVtbl)[47].fn((char*)self + ((sVE_18DEA0n*)self->mVtbl)[47].delta);
             }
         }
         break;
     }
     case 6: {
-        self->f238 = 0;
+        self->mbChoseToSave = 0;
         char* mcManager = (char*)cSSXApp_getMCManager(SSXApp);
-        if (self->busy == 1)
+        if (self->mIsProcessing == 1)
             return;
-        int currentState = self->state;
+        int currentState = self->mState;
         if (currentState == 6)
             return;
-        self->f1E4 = 1;
+        self->mIsCancelPressed = 1;
         if (currentState == 0 || currentState == 2 || currentState == 1) {
             sVE_18DEA0v* vt = *(sVE_18DEA0v**)(mcManager + 0x748);
             vt[1].fn(mcManager + vt[1].delta, 0);
         }
-        self->state = 6;
+        self->mState = 6;
         break;
     }
     case 7: {
-        if (self->busy == 1)
+        if (self->mIsProcessing == 1)
             return;
-        if (self->state == 6)
+        if (self->mState == 6)
             return;
-        if (self->f22C == 0)
+        if (self->mIsSaveScreen == 0)
             return;
         char* mcManager = (char*)cSSXApp_getMCManager(SSXApp);
         if ((*(cDev_18DEA0**)(mcManager + 0x434))->v54(*(int*)(mcManager + 0x428)) == 0)
             return;
         int pickedSlot = widget->mMiscData;
-        self->slot = pickedSlot;
+        self->mSlot = pickedSlot;
         *(int*)(mcManager + 0xF8) = pickedSlot;
-        int currentState = self->state;
+        int currentState = self->mState;
         if (currentState != 1)
             return;
-        if ((*(cDev_18DEA0**)(mcManager + 0x434))->HasFileName(self->slot)) {
-            self->busy = currentState;
-            self->state = 4;
+        if ((*(cDev_18DEA0**)(mcManager + 0x434))->HasFileName(self->mSlot)) {
+            self->mIsProcessing = currentState;
+            self->mState = 4;
             cMCOverlayManager_SetAction(mcManager, 0);
             sVE_18DEA0v* vt = *(sVE_18DEA0v**)(mcManager + 0x748);
             vt[1].fn(mcManager + vt[1].delta, 0x18);

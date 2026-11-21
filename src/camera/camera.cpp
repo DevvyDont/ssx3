@@ -2345,11 +2345,11 @@ extern "C" void cManualCameraAlgorithm_update(cBasicCameraAlgorithm* self)
     sVec_0015FD50 fwd(fCos(pitch) * fCos(yaw), fCos(pitch) * fSin(yaw),
                       fSin(pitch), 0.0f);
     sVec_0015FD50 right(fSin(yaw), -fCos(yaw), 0.0f, 0.0f);
-    sVec_0015FD50 pos = fcAdd_0015FD50(sVec_0015FD50((*(sVec_0015FD50*)&self->Position)), fcScale_0015FD50(fwd, speed * (mf * 25.0f)));
+    sVec_0015FD50 pos = fcAdd_0015FD50(sVec_0015FD50(*(sVec_0015FD50*)&self->Position), fcScale_0015FD50(fwd, speed * (mf * 25.0f)));
     pos += fcScale_0015FD50(right, speed * (ms * -25.0f));
     self->Pitch = pitch;
     self->Heading = yaw;
-    (*(sVec_0015FD50*)&self->Position) = pos;
+    *(sVec_0015FD50*)&self->Position = pos;
 }
 #endif
 
@@ -4264,12 +4264,8 @@ struct sAlgoNode_161BB8 {
     sAlgoNode_161BB8* next;   // 0x14
 };
 
-struct sAlgoList_161BB8 {
-    sAlgoNode_161BB8* head;
-    int count;
-};
 
-extern "C" sAlgoNode_161BB8* cCameraAlgoList_remove(sAlgoList_161BB8* list, sAlgoNode_161BB8* n);
+extern "C" sAlgoNode_161BB8* cCameraAlgoList_remove(cCameraAlgoList* list, sAlgoNode_161BB8* n);
 
 static inline float Approach_161BB8(float cur, float target, float rate)
 {
@@ -4317,7 +4313,7 @@ extern "C" void cChaseCameraController_update(cChaseCameraController* self)
 {
     if ((cPauseState_Flags & 1) == 0) {
         cChaseCameraController_processInput(self);
-        sAlgoNode_161BB8* n = ((sAlgoList_161BB8*)self->AlgorithmList)->head;
+        sAlgoNode_161BB8* n = ((sAlgoNode_161BB8*)(self->AlgorithmList)->Head);
         n->algo->updateAlgorithm(0);
         float rate = n->rate;
         Smooth_161BB8(n, Approach_161BB8(n->weight, 1.0f, rate));
@@ -4327,7 +4323,7 @@ extern "C" void cChaseCameraController_update(cChaseCameraController* self)
             if (n->algo->type == 74)
                 n->weight = 0.0f;
             if (n->weight <= 0.0f || n->blend <= 0.0f) {
-                n = cCameraAlgoList_remove((sAlgoList_161BB8*)self->AlgorithmList, n);
+                n = cCameraAlgoList_remove(self->AlgorithmList, n);
             } else {
                 n->algo->updateAlgorithm(1);
                 n = n->next;
@@ -9614,7 +9610,7 @@ INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_setPosition);
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" void cBasicCameraAlgorithm_setPosition(cBasicCameraAlgorithm* basicCameraAlgorithm, long long *position) {
-    (*(long long*)&basicCameraAlgorithm->Position) = (long long) *position;
+    *(long long*)&basicCameraAlgorithm->Position = (long long) *position;
 }
 #endif
 //100%
@@ -10106,7 +10102,7 @@ INCLUDE_ASM("camera/camera", cSimpleCamera_setPosition);
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" void cSimpleCamera_setPosition(cSimpleCamera* simpleCamera, long long *position) {
-    (*(long long*)&simpleCamera->Pose) = (long long) *position;
+    *(long long*)&simpleCamera->Pose = (long long) *position;
 }
 #endif
 //100%
@@ -10120,7 +10116,7 @@ INCLUDE_ASM("camera/camera", cSimpleCamera_setOrientation);
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" void cSimpleCamera_setOrientation(cSimpleCamera* simpleCamera, long long *orientation) {
-    (*(long long*)&simpleCamera->Pose.Q) = (long long) *orientation;
+    *(long long*)&simpleCamera->Pose.Q = (long long) *orientation;
 }
 #endif
 //100%
@@ -10134,8 +10130,8 @@ INCLUDE_ASM("camera/camera", cSimpleCamera_setPose);
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" void cSimpleCamera_setPose(cSimpleCamera* simpleCamera, tPose* pose) {
-    (*(long long*)&simpleCamera->Pose) = (long long) (*(long long*)&pose->P);
-    (*(long long*)&simpleCamera->Pose.Q) = (long long) (*(long long*)&pose->Q);
+    *(long long*)&simpleCamera->Pose = (long long) *(long long*)&pose->P;
+    *(long long*)&simpleCamera->Pose.Q = (long long) *(long long*)&pose->Q;
 }
 #endif
 //100%

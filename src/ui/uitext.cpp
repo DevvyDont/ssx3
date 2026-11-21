@@ -63,32 +63,6 @@ struct sLayerBits_05E8 {
 
 struct sVE_05E8 { short delta; short index; void (*fn)(void*); };
 
-struct sText_05E8 {
-    char pad0[0x8];
-    sVE_05E8* vt;           // 0x08
-    char padC[0x8];
-    int flags14;            // 0x14
-    char pad18[0x4];
-    sCol_05E8 color;        // 0x1C
-    char pad2C[0x18];
-    float x;                // 0x44
-    float y;                // 0x48
-    char pad4C[0x4];
-    float sx;               // 0x50
-    float sy;               // 0x54
-    char pad58[0x4];
-    char* owner;            // 0x5C
-    float width;            // 0x60
-    char pad64[0x10];
-    int flags;              // 0x74
-    sCol_05E8 shadowColor;  // 0x78
-    sCol_05E8 hiColor;      // 0x88
-    sCol_05E8 offColor;     // 0x98
-    int numLines;           // 0xA8
-    unsigned short** lines; // 0xAC
-    char padB0[0x4];
-    unsigned short* str;    // 0xB4
-};
 
 /**
  * Draws a text object's lines at its position plus an offset.
@@ -103,18 +77,18 @@ struct sText_05E8 {
  * @param x  horizontal offset added to the object's position
  * @param y  vertical offset added to the object's position
  */
-extern "C" void cUIText_render2D(sText_05E8* self, float x, float y)
+extern "C" void cUIText_render2D(cUIText* self, float x, float y)
 {
-    if (self->str == 0 || ((self->flags14 >> 2) & 1) == 0) {
-        self->vt[16].fn((char*)self + self->vt[16].delta);
+    if (self->mpString == 0 || ((self->mAttr >> 2) & 1) == 0) {
+        ((sVE_05E8*)self->mVtbl)[16].fn((char*)self + ((sVE_05E8*)self->mVtbl)[16].delta);
     }
-    int* ov = *(int**)(*(char**)(*(char**)(self->owner + 0xD0) + 0x10) + 0x10);
+    int* ov = *(int**)(*(char**)(*(char**)(((char*)self->mpScreen) + 0xD0) + 0x10) + 0x10);
     if (ov != 0 && ((*ov >> 27) & 1)) {
         sFont_05E8* font = (sFont_05E8*)cUIText_getFont(self);
         if (font == 0) {
             return;
         }
-        int n = (int)(self->width / (cFont_charAdvance(font, 'W') * self->sx));
+        int n = (int)(self->mSize.x / (cFont_charAdvance(font, 'W') * self->mScale.x));
         int i = 0;
         if (n < 0x400) {
             for (i = 0; i < n; i++) {
@@ -123,51 +97,51 @@ extern "C" void cUIText_render2D(sText_05E8* self, float x, float y)
         }
         D_00508750[i] = 0;
     }
-    if (self->str == 0) {
+    if (self->mpString == 0) {
         return;
     }
     sFont_05E8* font = (sFont_05E8*)cUIText_getFont(self);
     if (font == 0) {
         return;
     }
-    sV2_05E8 textScale(self->sx, self->sy);
+    sV2_05E8 textScale(self->mScale.x, self->mScale.y);
     font->cur.x = font->scale.x * textScale.x;
     font->cur.y = font->scale.y * textScale.y;
-    if (((self->flags14 >> 5) & 1) && ((self->flags >> 4) & 1)) {
-        font->color = self->hiColor;
-    } else if (((self->flags14 >> 3) & 1) == 0 && ((self->flags >> 5) & 1)) {
-        font->color = self->offColor;
+    if (((self->mAttr >> 5) & 1) && ((self->mAttrText >> 4) & 1)) {
+        font->color = *(sCol_05E8*)&self->mStaticColour;
+    } else if (((self->mAttr >> 3) & 1) == 0 && ((self->mAttrText >> 5) & 1)) {
+        font->color = *(sCol_05E8*)&self->mDisabledColour;
     } else {
-        font->color = self->color;
+        font->color = *(sCol_05E8*)&self->mColour;
     }
-    if ((self->flags >> 2) & 1) {
-        sCol_05E8 shadowCol = self->shadowColor;
-        shadowCol.r = self->color.r;
+    if ((self->mAttrText >> 2) & 1) {
+        sCol_05E8 shadowCol = *(sCol_05E8*)&self->mShadowColour;
+        shadowCol.r = (*(sCol_05E8*)&self->mColour).r;
         font->shadowColor = shadowCol;
         font->shadowOfs = D_004A5A60;
     } else {
         font->shadowOfs = sV2_05E8(0.0f, 0.0f);
     }
     int* drawFlags = (int*)(&GrMan->m_pCurrentDrawState->unk_00[2]);
-    *drawFlags = (*drawFlags & ~0x3E0) | (((((sLayerBits_05E8*)&self->flags14)->layer + 9) << 5) & 0x3E0);
-    sV3_05E8 pos(self->x + x, self->y + y, 0.0f);
+    *drawFlags = (*drawFlags & ~0x3E0) | (((((sLayerBits_05E8*)&self->mAttr)->layer + 9) << 5) & 0x3E0);
+    sV3_05E8 pos(self->mPosition.x + x, self->mPosition.y + y, 0.0f);
     int i = 0;
-    if (self->numLines > 0) do {
+    if (self->mNumLines > 0) do {
         unsigned short* str;
         if (i != 0) {
-            str = self->lines[i];
+            str = self->mpLineOffset[i];
         } else {
-            str = self->str;
+            str = self->mpString;
         }
         if (ov != 0 && ((*ov >> 27) & 1)) {
             str = D_00508750;
         }
-        if (((self->flags >> 6) & 1) && self->numLines >= 2) {
+        if (((self->mAttrText >> 6) & 1) && self->mNumLines >= 2) {
             unsigned short* buf = (unsigned short*)operator_new_tag((USTR_length(str) + 5) * 2, str_UITEXTTEMP_b, 0x100, 0);
             usprintf(buf, D_004A47B0, str);
             sRect_05E8 textBounds;
             cFont_textExtent1_s(font, buf, &textBounds, 0, textScale.x, textScale.y);
-            sV3_05E8 size(textBounds.x1, self->sy * ((float)font->height * font->scale.y), 0.0f);
+            sV3_05E8 size(textBounds.x1, self->mScale.y * ((float)font->height * font->scale.y), 0.0f);
             sV3_05E8 drawPos = pos;
             cUIThing_applyPivot(self, &drawPos, &size);
             pos.y += (float)font->height * font->scale.y * textScale.y + 3.0f;
@@ -180,12 +154,12 @@ extern "C" void cUIText_render2D(sText_05E8* self, float x, float y)
         sRect_05E8 textBounds;
         cFont_textExtent1_s(font, str, &textBounds, 0, textScale.x, textScale.y);
         i++;
-        sV3_05E8 size(textBounds.x1, self->sy * ((float)font->height * font->scale.y), 0.0f);
+        sV3_05E8 size(textBounds.x1, self->mScale.y * ((float)font->height * font->scale.y), 0.0f);
         sV3_05E8 drawPos = pos;
         cUIThing_applyPivot(self, &drawPos, &size);
         pos.y += (float)font->height * font->scale.y * textScale.y + 3.0f;
         cFont_text1_s(font, drawPos.x, drawPos.y, str);
-    } while (i < self->numLines);
+    } while (i < self->mNumLines);
 }
 #endif
 

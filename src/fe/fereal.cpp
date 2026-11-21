@@ -914,10 +914,6 @@ struct sUI_1E80 {
     void* sound;                    // 0x14
 };
 
-struct sRealFE_1E80 {
-    char pad0[0xC];
-    sUI_1E80* ui;                   // 0xC
-};
 
 static inline void progress_1E80(float t)
 {
@@ -935,7 +931,7 @@ static inline void progress_1E80(float t)
  * fonts and locale; finally it loads the irradiance database and calls cSSXAudio_FrontEndLoad(cAudioInterface_bxAudio()).
  */
 // Front end: loads the UI files, rider data and sound for the front end.
-extern "C" void cRealFE_load(sRealFE_1E80* self)
+extern "C" void cRealFE_load(cRealFE* self)
 {
     cLoadTimer_startload(cAppMan_TheAppMan + 0x38, 3.5f);
     progress_1E80(20.0f);
@@ -949,7 +945,7 @@ extern "C" void cRealFE_load(sRealFE_1E80* self)
         sVE_1E80* vt = (sVE_1E80*)g->mVtbl;
         vt[44].fn((char*)g + vt[44].delta, 0);
     }
-    sUI_1E80* ui = self->ui;
+    sUI_1E80* ui = ((sUI_1E80*)self->mpUI);
     // Looks like a macro expansion: a local copy of the path plus the load call.
     do {
         sStr11_1E80 path = *(sStr11_1E80*)str_data_ui_fe;
@@ -978,7 +974,7 @@ extern "C" void cRealFE_load(sRealFE_1E80* self)
     ((cCamObj_1E80*)((char*)cam + 0x10))->update();
     progress_1E80(99.0f);
     char* in = (char*)cMemMan_alloc(0x1C, str_FEUIInput, 0, 0);
-    sUI_1E80* ui2 = self->ui;
+    sUI_1E80* ui2 = ((sUI_1E80*)self->mpUI);
     in[4] = 0;
     *(void***)(in + 8) = cFEInput_vtbl;
     *(int*)(in + 0x18) = 0;
@@ -986,13 +982,13 @@ extern "C" void cRealFE_load(sRealFE_1E80* self)
     *(int*)(in + 0x10) = 0;
     *(int*)(in + 0x14) = 0;
     ui2->input = in;
-    self->ui->custom = cFECustom_cFECustom((cFECustom*)cMemMan_alloc(20, str_FEUICustom, 0, 0), (cUIEngine*)self->ui);
-    self->ui->sound = cFESound_cFESound(cMemMan_alloc(8, str_FEUISound, 0, 0));
+    ((sUI_1E80*)self->mpUI)->custom = cFECustom_cFECustom((cFECustom*)cMemMan_alloc(20, str_FEUICustom, 0, 0), (cUIEngine*)((sUI_1E80*)self->mpUI));
+    ((sUI_1E80*)self->mpUI)->sound = cFESound_cFESound(cMemMan_alloc(8, str_FEUISound, 0, 0));
     char* g = (char*)SSXApp;
     void* feLocale = *(void**)(g + 0x8C);
-    self->ui->f10 = feLocale;
+    ((sUI_1E80*)self->mpUI)->f10 = feLocale;
     void* fontInterface = *(void**)(g + 0x88);
-    self->ui->f8 = fontInterface;
+    ((sUI_1E80*)self->mpUI)->f8 = fontInterface;
     cIrradianceDataBase_Load(D_005047F8);
     cSSXAudio_FrontEndLoad(cAudioInterface_bxAudio());
 }

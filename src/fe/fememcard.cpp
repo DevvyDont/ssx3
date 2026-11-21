@@ -1001,15 +1001,6 @@ extern int D_004A14B4;
 struct sVt0_87A38 { short delta; short index; int (*fn)(void*); };
 struct sVtV_87A38 { short delta; short index; void (*fn)(void*, int); };
 struct sMcFlags_87A38 { unsigned b0 : 1; unsigned b1 : 1; unsigned b2 : 1; unsigned rest : 29; };
-struct sMemCard_87A38 {
-    char pad0[0x1BC];
-    int f1BC;                   // 0x1BC
-    char pad1C0[0x22C - 0x1C0];
-    sMcFlags_87A38 flags;       // 0x22C
-    int f230;
-    int f234;                   // 0x234
-    sMcFlags_87A38 saved;       // 0x238
-};
 
 static inline int cardCall_87A38(char* o, int slot)
 {
@@ -1039,7 +1030,7 @@ static inline void mpNotify_87A38(char* mp, int msg)
  */
 extern "C" void cFEStateMemCard_updateFreeSpaceCheckState(cFEStateMemCard* memCardState)
 {
-    sMemCard_87A38* self = (sMemCard_87A38*)memCardState;
+    cFEStateMemCard* self = memCardState;
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     char* card = *(char**)(mp + 0x434);
     if (cMCOverlayManager_hasCardStatusCriticalError(mp))
@@ -1047,15 +1038,15 @@ extern "C" void cFEStateMemCard_updateFreeSpaceCheckState(cFEStateMemCard* memCa
     switch (D_004A14BC) {
     case 0:
         if (cardCall_87A38(card, 13))
-            self->flags.b1 = 0;
+            (*(sMcFlags_87A38*)&self->mMissingSavedFileTypeFlags).b1 = 0;
         cMCOverlayManager_readSetFileType(mp, 1);
         mpNotify_87A38(mp, 51);
         D_004A14BC++;
-        self->f1BC = 0;
+        self->mType = 0;
         break;
     case 1:
         if (cardCall_87A38(card, 13))
-            self->flags.b0 = 0;
+            (*(sMcFlags_87A38*)&self->mMissingSavedFileTypeFlags).b0 = 0;
         if (*(int*)(mp + 0x428) == 0) {
             int lastSavedFile = cardCall_87A38(*(char**)(mp + 0x434), 17);
             D_004A14B4 = lastSavedFile;
@@ -1065,16 +1056,16 @@ extern "C" void cFEStateMemCard_updateFreeSpaceCheckState(cFEStateMemCard* memCa
         cMCOverlayManager_readSetFileType(mp, 0);
         mpNotify_87A38(mp, 51);
         D_004A14BC++;
-        self->f1BC = 1;
+        self->mType = 1;
         break;
     case 2:
         if (cardCall_87A38(card, 13))
-            self->flags.b2 = 0;
+            (*(sMcFlags_87A38*)&self->mMissingSavedFileTypeFlags).b2 = 0;
         D_004A14BC++;
     case 3:
         if (*(int*)(mp + 0x428) == 0)
-            self->saved = self->flags;
-        self->f234 = 0;
+            *(sMcFlags_87A38*)&self->mCard1MissingSavedFileTypeFlags = *(sMcFlags_87A38*)&self->mMissingSavedFileTypeFlags;
+        self->mFreespaceCheckDone = 0;
         break;
     }
 }

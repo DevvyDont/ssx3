@@ -2477,14 +2477,6 @@ extern "C" void cFEPopupConfirm_initPopup(cFEPopupConfirm* self, int a1, int a2,
 extern char cFEPopupConfirm_vtbl[];
 extern int cFEPopupConfirm_mUsePreFE;
 
-struct sMemCardPopupK1D99C8 {
-    char pad_0x000[0x8];
-    void* vtbl;    // 0x8
-    char pad_0x00C[0x14C - 0xC];
-    int f14C;      // 0x14C
-    char pad_0x150[0x17C - 0x150];
-    int f17C;      // 0x17C
-};
 
 /**
  * Constructs a confirmation popup: builds the cScreenPopup base, picks its background, then runs initPopup().
@@ -2503,9 +2495,9 @@ struct sMemCardPopupK1D99C8 {
  * @param bSnowFlake  passed on to initPopup(), which ignores it
  * @return @p self
  */
-extern "C" sMemCardPopupK1D99C8* cFEPopupConfirm_cFEPopupConfirm(cFEPopupConfirm* self, cUIEngine* engine, cUIState* owner, int ustrDisplay, int bYesOnly, int bNoButtons, int layerOffset, int passUpdate, int bSnowFlake)
+extern "C" cFEPopupConfirm* cFEPopupConfirm_cFEPopupConfirm(cFEPopupConfirm* self, cUIEngine* engine, cUIState* owner, int ustrDisplay, int bYesOnly, int bNoButtons, int layerOffset, int passUpdate, int bSnowFlake)
 {
-    cScreenPopup_cScreenPopup(((sMemCardPopupK1D99C8*)self), engine, owner);
+    cScreenPopup_cScreenPopup((self), engine, owner);
     self->mVtbl = (void**)cFEPopupConfirm_vtbl;
     if (cFEPopupConfirm_mUsePreFE == 0) {
         self->info.meBackgroundType = 1;
@@ -2514,7 +2506,7 @@ extern "C" sMemCardPopupK1D99C8* cFEPopupConfirm_cFEPopupConfirm(cFEPopupConfirm
         self->info.miLayerOffset = 4;
     }
     cFEPopupConfirm_initPopup(self, ustrDisplay, bYesOnly, bNoButtons, layerOffset, passUpdate, bSnowFlake);
-    return ((sMemCardPopupK1D99C8*)self);
+    return (self);
 }
 #endif
 

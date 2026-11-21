@@ -18,12 +18,6 @@ struct sCacheEntry_7890 {
     sCacheEntry_7890* prev;
     char pad[0x1CD0 - 0xC];
 };
-struct sCache_7890 {
-    sCacheEntry_7890* entries;  // 0x0
-    sCacheEntry_7890* lru;      // 0x4
-    sCacheEntry_7890** buckets; // 0x8
-    int count;                  // 0xC
-};
 
 /**
  * Sets up the AI forward-difference cache: a ring of empty entries ("AIFwdDiffCache") and a hash table of
@@ -31,24 +25,24 @@ struct sCache_7890 {
  *
  * @param n  number of cache entries (On Tour num)
  */
-extern "C" void cAIFwdDiffCache_Init(sCache_7890* self, int n)
+extern "C" void cAIFwdDiffCache_Init(cAIFwdDiffCache* self, int n)
 {
     sCacheEntry_7890* mem = (sCacheEntry_7890*)operator_new_tag(n * sizeof(sCacheEntry_7890), str_AIFwdDiffCache, 0, 0);
     sCacheEntry_7890* entry = mem;
     for (int k = n - 1; k != -1; k--, entry++) {
         tAIFwdDiff_tAIFwdDiff(entry);
     }
-    self->entries = mem;
+    *(sCacheEntry_7890**)&self->mCache = mem;
     for (int i = 0; i < n; i++) {
-        self->entries[i].next = &self->entries[i] + 1;
-        self->entries[i].prev = &self->entries[i] - 1;
-        self->entries[i].key = 0xFFFFFFFF;
+        ((sCacheEntry_7890*)self->mCache)[i].next = &((sCacheEntry_7890*)self->mCache)[i] + 1;
+        ((sCacheEntry_7890*)self->mCache)[i].prev = &((sCacheEntry_7890*)self->mCache)[i] - 1;
+        ((sCacheEntry_7890*)self->mCache)[i].key = 0xFFFFFFFF;
     }
-    self->entries[0].prev = self->entries + n - 1;
-    self->entries[n - 1].next = self->entries;
-    self->count = n * 2 + 13;
-    self->lru = self->entries;
-    self->buckets = (sCacheEntry_7890**)operator_new_tag(self->count * 4, str_AIFwdDiffHash, 0x80000000, 0);
+    ((sCacheEntry_7890*)self->mCache)[0].prev = ((sCacheEntry_7890*)self->mCache) + n - 1;
+    ((sCacheEntry_7890*)self->mCache)[n - 1].next = ((sCacheEntry_7890*)self->mCache);
+    self->mHashSize = n * 2 + 13;
+    *(sCacheEntry_7890**)&self->mAgeQueue = ((sCacheEntry_7890*)self->mCache);
+    *(sCacheEntry_7890***)&self->mPatchHash = (sCacheEntry_7890**)operator_new_tag(((int)self->mHashSize) * 4, str_AIFwdDiffHash, 0x80000000, 0);
 }
 #endif
 

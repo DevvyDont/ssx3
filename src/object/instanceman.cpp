@@ -1006,20 +1006,6 @@ struct sV4_352230 {
     sV4_352230(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
-struct sDebris_352230 {
-    char pad0[0x18];
-    char* model;            // 0x18
-    float timer;            // 0x1C
-    float spinScale;        // 0x20
-    char pad24[0xC];
-    sV4_352230 rot[24];     // 0x30
-    sV4_352230 axis[24];    // 0x1B0
-    float spin[24];         // 0x330
-    float vmax[4];          // 0x390
-    sV4_352230 vbase;       // 0x3A0
-    sV4_352230 pos[24];     // 0x3B0
-    sV4_352230 vel[24];     // 0x530
-};
 
 static inline float randf_352230()
 {
@@ -1103,25 +1089,25 @@ static inline void AddEq_352230(sV4_352230& d, const sV4_352230& b)
  */
 extern "C" void cMeshAnimNode_init(cMeshAnimNode* debris)
 {
-    sDebris_352230* self = (sDebris_352230*)debris;
-    char* modelDef = *(char**)(self->model + 0x80);
+    cMeshAnimNode* self = debris;
+    char* modelDef = *(char**)(((char*)self->Instance) + 0x80);
     for (int i = 0; i < *(int*)(modelDef + 4); i++) {
-        self->spin[i] = self->spinScale * randRange_352230(0.5f, 1.0f);
-        self->axis[i] = sV4_352230(randRange_352230(-1.0f, 1.0f), randRange_352230(-1.0f, 1.0f), randRange_352230(-1.0f, 1.0f), 0.0f);
-        self->axis[i] = Normalize_352230(self->axis[i]);
+        self->Angle[i] = self->AngVel * randRange_352230(0.5f, 1.0f);
+        ((sV4_352230*)&self->Axis[0])[i] = sV4_352230(randRange_352230(-1.0f, 1.0f), randRange_352230(-1.0f, 1.0f), randRange_352230(-1.0f, 1.0f), 0.0f);
+        ((sV4_352230*)&self->Axis[0])[i] = Normalize_352230(((sV4_352230*)&self->Axis[0])[i]);
     }
     for (int j = 0; j < *(int*)(modelDef + 4); j++) {
-        float vx = randScale_352230(self->vmax[0]) * (1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
+        float vx = randScale_352230(((float*)&self->Disperse)[0]) * (1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
         if (BXrand() & 1) {
             vx = -vx;
         }
-        float vy = randScale_352230(self->vmax[1]) * (1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
+        float vy = randScale_352230(((float*)&self->Disperse)[1]) * (1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
         if (BXrand() & 1) {
             vy = -vy;
         }
-        float vz = randScale_352230(self->vmax[2]) * (1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
-        self->vel[j] = Scale_352230(self->vbase, *(float*)(cAppMan_TheAppMan + 0x14));
-        AddEq_352230(self->vel[j], sV4_352230(vx, vy, vz, 0.0f));
+        float vz = randScale_352230(((float*)&self->Disperse)[2]) * (1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
+        ((sV4_352230*)&self->Vel[0])[j] = Scale_352230(*(sV4_352230*)&self->InitVel, *(float*)(cAppMan_TheAppMan + 0x14));
+        AddEq_352230(((sV4_352230*)&self->Vel[0])[j], sV4_352230(vx, vy, vz, 0.0f));
     }
 }
 #endif

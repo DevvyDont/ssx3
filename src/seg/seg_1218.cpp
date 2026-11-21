@@ -1,4 +1,5 @@
 #include "common.h"
+#include "animation/animmodel.h"
 #include "ai/focusbox.h"
 #include "ai/dangerman.h"
 #include "ai/rideranim.h"
@@ -1203,19 +1204,9 @@ struct sRec_13A8 {
     int c;
 };
 
-struct sMgr_13A8 {
-    sRiders_13A8* riders;
-    sEnt_13A8 ents[64];
-    int count;
-    int pad708;
-    sRec_13A8 recs[6];
-    char pad[0xB58 - 0x70C - 6 * 0xC];
-    sNode_13A8* list;
-    int cur;
-};
 
 void cDangerMan_DeleteTrackedDangerElemRecord(void*, void*);
-extern "C" int cDangerMan_CalcAppliedDangerLevel(sMgr_13A8*, int);
+extern "C" int cDangerMan_CalcAppliedDangerLevel(cDangerMan*, int);
 
 static inline sObj_13A8* toPtr_13A8(unsigned int v)
 {
@@ -1246,16 +1237,16 @@ static inline sObj_13A8* lookup_13A8(unsigned int id)
  */
 // cDangerMan::Update(void) (SSX On Tour symbols; riders are cAI::getRider/getNumRiders, the zone lookup is
 // cWorld::getTheWorld()->getInstanceResource(id)).
-extern "C" void cDangerMan_Update(sMgr_13A8* self)
+extern "C" void cDangerMan_Update(cDangerMan* self)
 {
-    if (self->list) {
-        int zoneCheckAIIndex = self->cur;
-        if (!(zoneCheckAIIndex < self->riders->getNumRiders()))
+    if (((sNode_13A8*)self->mpActiveList)) {
+        int zoneCheckAIIndex = self->mRiderIndexDangerZoneCheck;
+        if (!(zoneCheckAIIndex < ((sRiders_13A8*)self->mpAI)->getNumRiders()))
             zoneCheckAIIndex = 0;
-        cRider* pRider = self->riders->getRider(zoneCheckAIIndex);
+        cRider* pRider = ((sRiders_13A8*)self->mpAI)->getRider(zoneCheckAIIndex);
         char* sub = (char*)&pRider->mVtbl;
-        sRec_13A8* pCurrentRiderTrack = &self->recs[zoneCheckAIIndex];
-        sNode_13A8* pCurrDangerZone = self->list;
+        sRec_13A8* pCurrentRiderTrack = &((sRec_13A8*)&self->mRiderDangerTrack[0])[zoneCheckAIIndex];
+        sNode_13A8* pCurrDangerZone = ((sNode_13A8*)self->mpActiveList);
         int baseDangerZoneLevel = 0;
         do {
             sVEi_13A8* vt = *(sVEi_13A8**)&pRider->mVtbl;
@@ -1274,7 +1265,7 @@ extern "C" void cDangerMan_Update(sMgr_13A8* self)
     }
     do { // FAKEMATCH: see header
     for (int i = 0; i < 6; i++) {
-        sRec_13A8* riderTrack = &self->recs[i];
+        sRec_13A8* riderTrack = &((sRec_13A8*)&self->mRiderDangerTrack[0])[i];
         if (riderTrack->a) {
             if (--riderTrack->c == 0) {
                 riderTrack->a = 0;
@@ -1283,12 +1274,12 @@ extern "C" void cDangerMan_Update(sMgr_13A8* self)
         }
     }
     } while (0);
-    if (self->count) {
-        int numTrackedProcessed = self->count;
+    if (self->mTrackedDangerElemNum) {
+        int numTrackedProcessed = self->mTrackedDangerElemNum;
         for (int currElem = 0; currElem < 64; currElem++) {
             if (!numTrackedProcessed)
                 break;
-            sEnt_13A8* pCurrElem = &self->ents[currElem];
+            sEnt_13A8* pCurrElem = &((sEnt_13A8*)&self->mTrackedDangerElems[0])[currElem];
             if (pCurrElem->state == 2)
                 continue;
             numTrackedProcessed--;
@@ -1310,7 +1301,7 @@ extern "C" void cDangerMan_Update(sMgr_13A8* self)
             }
         }
     }
-    for (int i = 0; i < self->riders->count; i++) {
+    for (int i = 0; i < ((sRiders_13A8*)self->mpAI)->count; i++) {
     }
 }
 #endif
@@ -1440,17 +1431,10 @@ struct sWorld_1728 {
     sBank_1728** banks;
 };
 
-struct sEnt_1728 {
-    float x;
-    float y;
-    int state;
-    float px, py, pz;
-    unsigned int id;
-};
 
 struct sMgr_1728 {
     int f0;
-    sEnt_1728 ents[64];
+    tDangerElemInfo ents[64];
     int count;
 };
 
@@ -1488,16 +1472,16 @@ extern "C" void cDangerMan_AddDangerElem(cDangerMan* self, unsigned int* idp, fl
         return;
     cDangerMan_RemoveDangerElem(self, idp);
     for (int i = 0; i < 64; i++) {
-        sEnt_1728* elemInfo = &((sEnt_1728*)&self->mTrackedDangerElems[0])[i];
+        tDangerElemInfo* elemInfo = &((&self->mTrackedDangerElems[0]))[i];
         if (elemInfo->state == 2) {
             elemInfo->state = 0;
-            elemInfo->id = *idp;
-            elemInfo->x = x;
-            elemInfo->y = y;
+            elemInfo->rID = *idp;
+            elemInfo->radius = x;
+            elemInfo->endDelaySecsLeft = y;
             sVec4_1728 instPos = instNode->GetXform()->pos;
-            elemInfo->px = instPos.x;
-            elemInfo->py = instPos.y;
-            elemInfo->pz = instPos.z;
+            elemInfo->pos[0] = instPos.x;
+            elemInfo->pos[1] = instPos.y;
+            elemInfo->pos[2] = instPos.z;
             self->mTrackedDangerElemNum++;
             return;
         }
@@ -1524,10 +1508,10 @@ extern "C" void cDangerMan_RemoveDangerElem(cDangerMan* self, unsigned int* idp)
     if (n != 0) {
         int remaining = n;
         for (int i = 0; i < 64 && remaining != 0; i++) {
-            sEnt_1728* elemInfo = &((sEnt_1728*)&self->mTrackedDangerElems[0])[i];
+            tDangerElemInfo* elemInfo = &((&self->mTrackedDangerElems[0]))[i];
             if (elemInfo->state != 2) {
                 remaining--;
-                if (elemInfo->id == *idp) {
+                if (elemInfo->rID == *idp) {
                     cDangerMan_DeleteTrackedDangerElemRecord(((sMgr_1728*)self), elemInfo);
                     return;
                 }
@@ -2368,10 +2352,6 @@ extern "C" int cRiderAnim_onExpireBLENDTO_GEAR_CYC_3918(void* self, void* ev, vo
 
 struct sEvent3918 { int a; int b; };
 
-struct sEventOwner3918 {
-    int results[20];        // 0x00
-    sEvent3918* events;     // 0x50
-};
 
 /**
  * Runs the expire rule of the animation that finished in a sequencer and records the animation to play next.
@@ -2392,37 +2372,37 @@ extern "C" void cRiderAnim_expireRule(cRiderAnim* self, sEvent3918* ev, int* dat
     char* info = cAIAnimEventMap_getAnimPlayAttr(*data);
     switch (*(int*)(info + 8)) {
     case 0:
-        self->CurrentAnimID[idx] = cRiderAnim_onExpireNOP_3918(((sEventOwner3918*)self), ev, data);
+        self->CurrentAnimID[idx] = cRiderAnim_onExpireNOP_3918((self), ev, data);
         break;
     case 1:
-        self->CurrentAnimID[idx] = cRiderAnim_onExpireINTO_AIR_3918(((sEventOwner3918*)self), ev, data);
+        self->CurrentAnimID[idx] = cRiderAnim_onExpireINTO_AIR_3918((self), ev, data);
         break;
     case 2:
-        self->CurrentAnimID[idx] = cRiderAnim_onExpireINTO_SPIN_CYC_3918(((sEventOwner3918*)self), ev, data);
+        self->CurrentAnimID[idx] = cRiderAnim_onExpireINTO_SPIN_CYC_3918((self), ev, data);
         break;
     case 3:
-        self->CurrentAnimID[idx] = cRiderAnim_onExpireINTO_CRUISE_3918(((sEventOwner3918*)self), ev, data);
+        self->CurrentAnimID[idx] = cRiderAnim_onExpireINTO_CRUISE_3918((self), ev, data);
         break;
     case 4:
-        self->CurrentAnimID[idx] = cRiderAnim_onExpireBLENDTO_CRUISE_3918(((sEventOwner3918*)self), ev, data);
+        self->CurrentAnimID[idx] = cRiderAnim_onExpireBLENDTO_CRUISE_3918((self), ev, data);
         break;
     case 5:
-        self->CurrentAnimID[idx] = cRiderAnim_onExpireBLENDTO_AIR_3918(((sEventOwner3918*)self), ev, data);
+        self->CurrentAnimID[idx] = cRiderAnim_onExpireBLENDTO_AIR_3918((self), ev, data);
         break;
     case 6:
-        self->CurrentAnimID[idx] = cRiderAnim_onExpireBLENDTO_RAIL_3918(((sEventOwner3918*)self), ev, data);
+        self->CurrentAnimID[idx] = cRiderAnim_onExpireBLENDTO_RAIL_3918((self), ev, data);
         break;
     case 7:
-        self->CurrentAnimID[idx] = cRiderAnim_onExpireINTO_FL_STAND_3918(((sEventOwner3918*)self), ev, data);
+        self->CurrentAnimID[idx] = cRiderAnim_onExpireINTO_FL_STAND_3918((self), ev, data);
         break;
     case 8:
-        self->CurrentAnimID[idx] = cRiderAnim_onExpireINTO_RSFS_3918(((sEventOwner3918*)self), ev, data);
+        self->CurrentAnimID[idx] = cRiderAnim_onExpireINTO_RSFS_3918((self), ev, data);
         break;
     case 9:
-        self->CurrentAnimID[idx] = cRiderAnim_onExpireINTO_PRESS_3918(((sEventOwner3918*)self), ev, data);
+        self->CurrentAnimID[idx] = cRiderAnim_onExpireINTO_PRESS_3918((self), ev, data);
         break;
     case 10:
-        self->CurrentAnimID[idx] = cRiderAnim_onExpireBLENDTO_GEAR_CYC_3918(((sEventOwner3918*)self), ev, data);
+        self->CurrentAnimID[idx] = cRiderAnim_onExpireBLENDTO_GEAR_CYC_3918((self), ev, data);
         break;
     }
 }
@@ -6811,10 +6791,6 @@ struct sNode_8A48 {
     char pad[0x10];
 };
 
-struct sPath_8A48 {
-    char pad[0x2C];
-    sNode_8A48* nodes;
-};
 
 // PORT: PS2-only VU0 inline asm (vector add).
 static inline sVec4_8A48 vAdd_8A48(const sVec4_8A48& a, const sVec4_8A48& b)
@@ -6909,7 +6885,7 @@ extern "C" int cRider_isRailLandSuccess(cRider* self, sVec4_8A48* tgt)
 {
     if (cRider_getMotionState((char*)self) != 0 && cRider_getMotionState((char*)self) != 1)
         return 0;
-    sVec4_8A48 boardCenter = vAdd_8A48(*(sVec4_8A48*)((char*)((sPath_8A48*)self->mAnimModel)->nodes + (self->mBoneBoardRoot << 5)),
+    sVec4_8A48 boardCenter = vAdd_8A48(*(sVec4_8A48*)((char*)((sNode_8A48*)(self->mAnimModel)->bones) + (self->mBoneBoardRoot << 5)),
                              *(sVec4_8A48*)&self->mModelOffset);
     if (!cOverlapList_splineIntersect(self->mOverlapList, &boardCenter, tgt, 1, 300.0f))
         return 0;

@@ -2264,11 +2264,11 @@ extern "C" void tCrystal_render(tCrystal* self, const sV2_3418* off)
         D_004A5524_3418 = 1.0f;
     }
     float fade = self->mAge / self->mDeath;
-    sV4_3418 col = (*(sV4_3418*)&self->mColour[0]);
+    sV4_3418 col = *(sV4_3418*)&self->mColour[0];
     fade = 1.0f - fade * fade;
     col.x *= fade;
     *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = ((sWorld_3418*)GrMan)->GetFB();
-    ((cGfx_3418*)cGraphicsMan_TheGraphicsMan)->DrawX((self->mRotation + self->mAge / self->mDeath * self->mRotationChangeOverLifetime) * 0.01745329424738884f, sPos_3418(self->mPosition[0] + off->x, self->mPosition[1] + off->y), (*(sV3_3418*)&self->mSize[0]), *(sV2_3418*)&D_004A5510_3418, *(sV2_3418*)&D_004A5520_3418, col, 1);
+    ((cGfx_3418*)cGraphicsMan_TheGraphicsMan)->DrawX((self->mRotation + self->mAge / self->mDeath * self->mRotationChangeOverLifetime) * 0.01745329424738884f, sPos_3418(self->mPosition[0] + off->x, self->mPosition[1] + off->y), *(sV3_3418*)&self->mSize[0], *(sV2_3418*)&D_004A5510_3418, *(sV2_3418*)&D_004A5520_3418, col, 1);
 }
 #endif
 
@@ -2356,22 +2356,19 @@ struct sVec2_3640 {
     float x, y;
 };
 
-struct sPart_3640 {
-    char d[0x4C];
-};
 
 struct sEmit_3640 {
     char pad[0x18];
     int count;
     char pad1C[0x724 - 0x1C];
-    sPart_3640 parts[1];
+    tCrystal parts[1];
 };
 
 extern int D_004A3AFC;
 extern int D_004A4258;
 extern float D_004A42D0;
 extern float D_004A42D4;
-extern "C" void tCrystal_init(sPart_3640*, sVec2_3640*, int);
+extern "C" void tCrystal_init(tCrystal*, sVec2_3640*, int);
 
 // PORT: float bit-pattern random number in [0,1) (seed reused as float storage).
 static inline float randf_3640()
@@ -2405,7 +2402,7 @@ extern "C" void cSplashManager_AddCrystal(cSplashManager* self, sVec2_3640* base
             sVec2_3640 pos;
             pos.x = basePos->x + off.x;
             pos.y = basePos->y + off.y;
-            tCrystal_init(&((sPart_3640*)&self->mCrystalList[0])[self->mNumActiveCrystals], &pos, i);
+            tCrystal_init(&((&self->mCrystalList[0]))[self->mNumActiveCrystals], &pos, i);
             self->mNumActiveCrystals++;
         }
     }
@@ -3057,14 +3054,8 @@ struct sLight_43E0 {
     sCol_43E0 col;
 };
 
-struct sLightSet_43E0 {
-    char pad[0x30];
-    sLight_43E0 lights[16];
-    char pad1F0[0x10];
-    int count;
-};
 
-extern "C" void cSunHalo_InitLens_43E0(sLightSet_43E0* self) __asm__("cSunHalo_InitLens");
+extern "C" void cSunHalo_InitLens_43E0(cSunHalo* self) __asm__("cSunHalo_InitLens");
 /**
  * Sets up the sun's default lens flare: nine lens elements with type, position, scale and colour.
  *
@@ -3072,54 +3063,54 @@ extern "C" void cSunHalo_InitLens_43E0(sLightSet_43E0* self) __asm__("cSunHalo_I
  * position along the flare axis, scale, colour from D_004FAB80..D_004FAC80, On Tour's kLensNColour) and counts each
  * one. Types 1, 3, 0, 2, 0, 0, 1, 3, 1; positions run from 1.3 down to -1.0.
  */
-extern "C" void cSunHalo_InitLens_43E0(sLightSet_43E0* self)
+extern "C" void cSunHalo_InitLens_43E0(cSunHalo* self)
 {
-    self->count = 0;
-    self->lights[0].type = 1;
-    self->lights[0].a = 1.2999999523162842f;
-    self->lights[0].b = 0.03999999910593033f;
-    self->lights[0].col = D_004FAB80;
-    self->count++;
-    self->lights[1].type = 3;
-    self->lights[1].a = 0.595413327217102f;
-    self->lights[1].b = 0.03453768044710159f;
-    self->lights[1].col = D_004FABA0;
-    self->count++;
-    self->lights[2].type = 0;
-    self->lights[2].a = 0.5f;
-    self->lights[2].b = 0.20000000298023224f;
-    self->lights[2].col = D_004FABC0;
-    self->count++;
-    self->lights[3].type = 2;
-    self->lights[3].a = 0.20000000298023224f;
-    self->lights[3].b = 0.025077050551772118f;
-    self->lights[3].col = D_004FABE0;
-    self->count++;
-    self->lights[4].type = 0;
-    self->lights[4].a = 0.0f;
-    self->lights[4].b = 0.03999999910593033f;
-    self->lights[4].col = D_004FAC00;
-    self->count++;
-    self->lights[5].type = 0;
-    self->lights[5].a = -0.5141515731811523f;
-    self->lights[5].b = 0.06998095661401749f;
-    self->lights[5].col = D_004FAC20;
-    self->count++;
-    self->lights[6].type = 1;
-    self->lights[6].a = -0.40145567059516907f;
-    self->lights[6].b = 0.030118949711322784f;
-    self->lights[6].col = D_004FAC40;
-    self->count++;
-    self->lights[7].type = 3;
-    self->lights[7].a = -0.6160849332809448f;
-    self->lights[7].b = 0.03999999910593033f;
-    self->lights[7].col = D_004FAC60;
-    self->count++;
-    self->lights[8].type = 1;
-    self->lights[8].a = -1.0f;
-    self->lights[8].b = 0.0206892192363739f;
-    self->lights[8].col = D_004FAC80;
-    self->count++;
+    self->mNumLens = 0;
+    ((sLight_43E0*)&self->mSunLens[0])[0].type = 1;
+    ((sLight_43E0*)&self->mSunLens[0])[0].a = 1.2999999523162842f;
+    ((sLight_43E0*)&self->mSunLens[0])[0].b = 0.03999999910593033f;
+    ((sLight_43E0*)&self->mSunLens[0])[0].col = D_004FAB80;
+    self->mNumLens++;
+    ((sLight_43E0*)&self->mSunLens[0])[1].type = 3;
+    ((sLight_43E0*)&self->mSunLens[0])[1].a = 0.595413327217102f;
+    ((sLight_43E0*)&self->mSunLens[0])[1].b = 0.03453768044710159f;
+    ((sLight_43E0*)&self->mSunLens[0])[1].col = D_004FABA0;
+    self->mNumLens++;
+    ((sLight_43E0*)&self->mSunLens[0])[2].type = 0;
+    ((sLight_43E0*)&self->mSunLens[0])[2].a = 0.5f;
+    ((sLight_43E0*)&self->mSunLens[0])[2].b = 0.20000000298023224f;
+    ((sLight_43E0*)&self->mSunLens[0])[2].col = D_004FABC0;
+    self->mNumLens++;
+    ((sLight_43E0*)&self->mSunLens[0])[3].type = 2;
+    ((sLight_43E0*)&self->mSunLens[0])[3].a = 0.20000000298023224f;
+    ((sLight_43E0*)&self->mSunLens[0])[3].b = 0.025077050551772118f;
+    ((sLight_43E0*)&self->mSunLens[0])[3].col = D_004FABE0;
+    self->mNumLens++;
+    ((sLight_43E0*)&self->mSunLens[0])[4].type = 0;
+    ((sLight_43E0*)&self->mSunLens[0])[4].a = 0.0f;
+    ((sLight_43E0*)&self->mSunLens[0])[4].b = 0.03999999910593033f;
+    ((sLight_43E0*)&self->mSunLens[0])[4].col = D_004FAC00;
+    self->mNumLens++;
+    ((sLight_43E0*)&self->mSunLens[0])[5].type = 0;
+    ((sLight_43E0*)&self->mSunLens[0])[5].a = -0.5141515731811523f;
+    ((sLight_43E0*)&self->mSunLens[0])[5].b = 0.06998095661401749f;
+    ((sLight_43E0*)&self->mSunLens[0])[5].col = D_004FAC20;
+    self->mNumLens++;
+    ((sLight_43E0*)&self->mSunLens[0])[6].type = 1;
+    ((sLight_43E0*)&self->mSunLens[0])[6].a = -0.40145567059516907f;
+    ((sLight_43E0*)&self->mSunLens[0])[6].b = 0.030118949711322784f;
+    ((sLight_43E0*)&self->mSunLens[0])[6].col = D_004FAC40;
+    self->mNumLens++;
+    ((sLight_43E0*)&self->mSunLens[0])[7].type = 3;
+    ((sLight_43E0*)&self->mSunLens[0])[7].a = -0.6160849332809448f;
+    ((sLight_43E0*)&self->mSunLens[0])[7].b = 0.03999999910593033f;
+    ((sLight_43E0*)&self->mSunLens[0])[7].col = D_004FAC60;
+    self->mNumLens++;
+    ((sLight_43E0*)&self->mSunLens[0])[8].type = 1;
+    ((sLight_43E0*)&self->mSunLens[0])[8].a = -1.0f;
+    ((sLight_43E0*)&self->mSunLens[0])[8].b = 0.0206892192363739f;
+    ((sLight_43E0*)&self->mSunLens[0])[8].col = D_004FAC80;
+    self->mNumLens++;
 }
 #endif
 
@@ -3351,15 +3342,6 @@ public:
 };
 
 
-struct sSun_4A08 {
-    char pad[0x2C];
-    unsigned short visible;
-    char pad2E[0x1F0 - 0x2E];
-    float sunX;
-    float sunY;
-    char pad1F8[0x204 - 0x1F8];
-    float intensity;
-};
 
 /**
  * Draws the sun sprite and its lens flare for one view, in a pushed orthographic viewport.
@@ -3410,7 +3392,7 @@ extern "C" void cSunHalo_Render(cSunHalo* self, sV4_4A08* vp, int flag)
     sV4_4A08 pos(self->mScreenPosition.x, self->mScreenPosition.y, 0.0f, 1.0f);
     ((cGfx_4A08*)gfx)->DrawSprite(pos, sV2_4A08(size, size),
                     sV2_4A08(0.0f, 0.0f), sV2_4A08(1.0f, 1.0f), col);
-    cSunHalo_RenderLens_4A08(((sSun_4A08*)self), vp);
+    cSunHalo_RenderLens_4A08((self), vp);
     ((cGfx_4A08*)gfx)->stateTop--;
     ((cGfx_4A08*)gfx)->PopView();
     ((cGfx_4A08*)gfx)->PopViewport();
@@ -3599,12 +3581,12 @@ extern "C" void cSunHalo_Process(cSunHalo* self, sCam_4DB8* cam, int flag)
     }
     self->mbOnScreen = 1;
     self->mbRequestZSample = 1;
-    (*(sV4_4DB8*)&self->mScreenPosition) = ((cGfx_4DB8*)ps2GraphicsMan)->Project(sun);
+    *(sV4_4DB8*)&self->mScreenPosition = ((cGfx_4DB8*)ps2GraphicsMan)->Project(sun);
     self->mZRect.X = self->mScreenPosition.x - 8.0f;
     self->mZRect.Y = self->mScreenPosition.y - 8.0f;
     self->mZRect.W = 16.0f;
     self->mZRect.H = 16.0f;
-    (*(sRect_4DB8*)&self->mZSRect) = (*(sRect_4DB8*)&self->mZRect);
+    *(sRect_4DB8*)&self->mZSRect = *(sRect_4DB8*)&self->mZRect;
     self->mZSRect.X = clamp_4DB8(self->mZSRect.X, 0.0f, cam->vp.x + cam->vp.w - 16.0f);
     self->mZSRect.Y = clamp_4DB8(self->mZSRect.Y, 0.0f, cam->vp.x + cam->vp.h - 16.0f);
     self->mZDist = self->mScreenPosition.z;

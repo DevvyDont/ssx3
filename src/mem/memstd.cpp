@@ -2039,16 +2039,6 @@ struct sVEntry002535F8 {
     void (*fn)(void*, int);
 };
 
-struct sStream002535F8 {
-    int f0;
-    int f4;
-    int f8;
-    void* fC;
-    char pad10[0x28];
-    char* f38;
-    void* f3C;
-    int f40;
-};
 
 /**
  * Releases the player's movie resources and resets its state.
@@ -2060,30 +2050,30 @@ struct sStream002535F8 {
  */
 extern "C" void cMoviePlayer_purge(cMoviePlayer* self)
 {
-    sStream002535F8* moviePlayer = (sStream002535F8*)self;
-    if (moviePlayer->f38 != 0 && moviePlayer->f3C != 0) {
+    cMoviePlayer* moviePlayer = self;
+    if (((char*)moviePlayer->m_pPlayer) != 0 && moviePlayer->m_pVd != 0) {
         ((cWorld002535F8*)cGraphicsMan_TheGraphicsMan)->FlushRenderer();
     }
-    if (moviePlayer->f40 != 0 && moviePlayer->fC != 0) {
-        RCMP_DECODER_ReleaseFrame(*(void**)(moviePlayer->f38 + 0x64), moviePlayer->fC);
+    if (moviePlayer->mbNewFrame != 0 && moviePlayer->mpCurrFrame != 0) {
+        RCMP_DECODER_ReleaseFrame(*(void**)(((char*)moviePlayer->m_pPlayer) + 0x64), moviePlayer->mpCurrFrame);
     }
-    void* videoDriver = moviePlayer->f3C;
+    void* videoDriver = moviePlayer->m_pVd;
     if (videoDriver != 0) {
         sVEntry002535F8* dtorEntry = &(*(sVEntry002535F8**)((char*)videoDriver + 4))[1];
         dtorEntry->fn((char*)videoDriver + dtorEntry->delta, 3);
-        moviePlayer->f3C = 0;
+        moviePlayer->m_pVd = 0;
         cMoviePlayer_m_isPlaying--;
     }
-    char* decoderObj = moviePlayer->f38;
+    char* decoderObj = ((char*)moviePlayer->m_pPlayer);
     if (decoderObj != 0) {
         func_003AE300(decoderObj, 3);
-        moviePlayer->f38 = 0;
+        *(char**)&moviePlayer->m_pPlayer = 0;
     }
-    moviePlayer->f0 = 0;
-    moviePlayer->f4 = 0;
-    moviePlayer->f8 = 0;
-    moviePlayer->fC = 0;
-    moviePlayer->f40 = 0;
+    moviePlayer->mbMovieFinished = 0;
+    moviePlayer->mbReDraw = 0;
+    moviePlayer->mbPaused = 0;
+    moviePlayer->mpCurrFrame = 0;
+    moviePlayer->mbNewFrame = 0;
 }
 #endif
 
@@ -2157,38 +2147,38 @@ struct sWorld_253748 {
  */
 extern "C" void cMoviePlayer_syncPlay(cMoviePlayer* self)
 {
-    sStream002535F8* moviePlayer = (sStream002535F8*)self;
-    if (moviePlayer->f38 != 0) {
+    cMoviePlayer* moviePlayer = self;
+    if (((char*)moviePlayer->m_pPlayer) != 0) {
         cMoviePlayer_startPlay((cMoviePlayer*)moviePlayer);
         do {
-            if (moviePlayer->f4 != 0) {
-                char* videoDriver = (char*)moviePlayer->f3C;
+            if (moviePlayer->mbReDraw != 0) {
+                char* videoDriver = (char*)moviePlayer->m_pVd;
                 sVE0_253748* slotEntry = &(*(sVE0_253748**)(videoDriver + 4))[5];
                 slotEntry->fn(videoDriver + slotEntry->delta);
             } else {
-                char* videoDriver = (char*)moviePlayer->f3C;
+                char* videoDriver = (char*)moviePlayer->m_pVd;
                 sVE1_253748* slotEntry = &(*(sVE1_253748**)(videoDriver + 4))[4];
-                slotEntry->fn(videoDriver + slotEntry->delta, moviePlayer->fC);
+                slotEntry->fn(videoDriver + slotEntry->delta, moviePlayer->mpCurrFrame);
             }
             sVE0_253748* w = &((sVE0_253748*)cGraphicsMan_TheGraphicsMan->mVtbl)[20];
             w->fn((char*)cGraphicsMan_TheGraphicsMan + w->delta);
             SYNCTASK_run(0);
             THREAD_yield(0);
-            if (func_003AE780(moviePlayer->f38) != 0) {
-                char* videoDriver = (char*)moviePlayer->f3C;
+            if (func_003AE780(((char*)moviePlayer->m_pPlayer)) != 0) {
+                char* videoDriver = (char*)moviePlayer->m_pVd;
                 sVE0_253748* slotEntry = &(*(sVE0_253748**)(videoDriver + 4))[6];
                 slotEntry->fn(videoDriver + slotEntry->delta);
-                moviePlayer->fC = (void*)func_003AE6C8(moviePlayer->f38, *(float*)(moviePlayer->f38 + 0x48));
-                moviePlayer->f4 = 0;
+                moviePlayer->mpCurrFrame = (void*)func_003AE6C8(((char*)moviePlayer->m_pPlayer), *(float*)(((char*)moviePlayer->m_pPlayer) + 0x48));
+                moviePlayer->mbReDraw = 0;
             } else {
-                moviePlayer->f4 = 1;
+                moviePlayer->mbReDraw = 1;
             }
-            if (moviePlayer->fC == 0) {
-                moviePlayer->f4 = 1;
-                moviePlayer->f0 = func_003AE860(moviePlayer->f38);
+            if (moviePlayer->mpCurrFrame == 0) {
+                moviePlayer->mbReDraw = 1;
+                moviePlayer->mbMovieFinished = func_003AE860(((char*)moviePlayer->m_pPlayer));
             }
-        } while (moviePlayer->f0 == 0);
-        moviePlayer->f40 = 0;
+        } while (moviePlayer->mbMovieFinished == 0);
+        moviePlayer->mbNewFrame = 0;
     }
 }
 #endif
@@ -3321,7 +3311,7 @@ INCLUDE_ASM("mem/memstd", func_00255670);
  * @param allocSize  bytes wanted
  */
 extern "C" void func_00255670(int allocSize) {
-    (*(int (**)(int *, int, int, int, int))((char*)(&(*(int*)&D_00509430)) + (0)))(&(*(int*)&D_004A2EA0), allocSize, 0, 0, (*(int *)((char*)(&(*(int*)&D_00509430)) + (8))));
+    (*(int (**)(int *, int, int, int, int))((char*)((int*)&D_00509430) + (0)))((int*)&D_004A2EA0, allocSize, 0, 0, (*(int *)((char*)((int*)&D_00509430) + (8))));
 }
 #endif
 //100%
@@ -3333,7 +3323,7 @@ INCLUDE_ASM("mem/memstd", func_002556B0);
  * @param allocSize  bytes wanted
  */
 extern "C" void func_002556B0(int allocSize) {
-    (*(int (**)(int *, int, int, int, int))((char*)(&(*(int*)&D_00509430)) + (0)))(&(*(int*)&D_004A2EA0), allocSize, 0, 0, (*(int *)((char*)(&(*(int*)&D_00509430)) + (8))));
+    (*(int (**)(int *, int, int, int, int))((char*)((int*)&D_00509430) + (0)))((int*)&D_004A2EA0, allocSize, 0, 0, (*(int *)((char*)((int*)&D_00509430) + (8))));
 }
 #endif
 //100%

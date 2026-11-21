@@ -299,33 +299,21 @@ struct sVEi_4C30 {
     int (*fn)(void*);
 };
 
-struct sBuyAttrib_4C30 {
-    char pad0[0x10];
-    char* owner;            // 0x10
-    char pad14[0x48 - 0x14];
-    void* screen;           // 0x48
-    int max4C[7];           // 0x4C
-    int level[7];           // 0x68
-    int bought[7];          // 0x84
-    int cost;               // 0xA0
-    int bank;               // 0xA4
-    int busy;               // 0xA8
-};
 
-static inline void defaultMsg_4C30(sBuyAttrib_4C30* s, int msg)
+static inline void defaultMsg_4C30(cFEStateBuyAttrib* s, int msg)
 {
-    sDefObj_4A90* p = *(sDefObj_4A90**)(s->owner + 0x14);
+    sDefObj_4A90* p = *(sDefObj_4A90**)(((char*)s->mpEngine) + 0x14);
     if (p == 0)
         p = &gUISoundNull;
     if (p != 0)
         p->vt[2].fn((char*)p + p->vt[2].delta, msg);
 }
 
-static inline void playFrame_4C30(sBuyAttrib_4C30* s, char* name)
+static inline void playFrame_4C30(cFEStateBuyAttrib* s, char* name)
 {
-    unsigned short frame = cUIScreen_getFrameByLabel((cUIScreen*)s->screen, GetHashValue32(name));
+    unsigned short frame = cUIScreen_getFrameByLabel((cUIScreen*)((void*)s->mpAttribScreen), GetHashValue32(name));
     if (frame != 0xFFFF)
-        cUIScreen_playFrame(s->screen, frame, 1);
+        cUIScreen_playFrame(((void*)s->mpAttribScreen), frame, 1);
     defaultMsg_4C30(s, 1);
 }
 
@@ -344,7 +332,7 @@ static inline void playFrame_4C30(sBuyAttrib_4C30* s, char* name)
 extern "C" void cFEStateBuyAttrib_onInputAlways(cFEStateBuyAttrib* self, cUIInput* w)
 {
     int changed = 0;
-    cUIState_onInputAlways_2(((sBuyAttrib_4C30*)self), ((char*)w));
+    cUIState_onInputAlways_2((self), ((char*)w));
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 11);
     unsigned char idx = *((unsigned char*)cUIScreen_getObjectByHashName(self->mpAttribScreen, GetHashValue32(str_AttribMenu)) + 0x95);
     if (self->mBuyPrompt == 0) {
@@ -357,9 +345,9 @@ extern "C" void cFEStateBuyAttrib_onInputAlways(cFEStateBuyAttrib* self, cUIInpu
                 (*cnt)--;
                 self->mTotalCost -= cBEEconInterface_getAttribCost(iface, self->mExperienceLevel[idx] - 1);
                 cFEStateBuyAttrib_updateTotalCost(self);
-                playFrame_4C30(((sBuyAttrib_4C30*)self), str_hl_left_b);
+                playFrame_4C30((self), str_hl_left_b);
             } else {
-                defaultMsg_4C30(((sBuyAttrib_4C30*)self), 4);
+                defaultMsg_4C30((self), 4);
             }
         } else {
             sVEi_4C30* vt2 = (sVEi_4C30*)w->mVtbl;
@@ -375,10 +363,10 @@ extern "C" void cFEStateBuyAttrib_onInputAlways(cFEStateBuyAttrib* self, cUIInpu
                         (*cnt)++;
                         self->mTotalCost += cBEEconInterface_getAttribCost(iface, *lvl - 1);
                         cFEStateBuyAttrib_updateTotalCost(self);
-                        playFrame_4C30(((sBuyAttrib_4C30*)self), str_hl_right_b);
+                        playFrame_4C30((self), str_hl_right_b);
                     }
                 } else {
-                    defaultMsg_4C30(((sBuyAttrib_4C30*)self), 4);
+                    defaultMsg_4C30((self), 4);
                 }
             }
         }
@@ -880,20 +868,6 @@ struct sVEi_56C8 {
     int (*fn)(void*);
 };
 
-struct sCareer_56C8 {
-    char pad0[0x10];
-    char* owner;                // 0x10
-    char pad14[0x2C];           // 0x14
-    void* screen;               // 0x40
-    char pad44[0x4];            // 0x44
-    int menu;                   // 0x48
-    int scrollA;                // 0x4C
-    int scrollB;                // 0x50
-    int scrollC;                // 0x54
-    int countB;                 // 0x58
-    char pad5C[0xC];            // 0x5C
-    int countC;                 // 0x68
-};
 
 static inline int wantCall_56C8(char* w, int slot)
 {
@@ -901,11 +875,11 @@ static inline int wantCall_56C8(char* w, int slot)
     return vt[slot].fn(w + vt[slot].delta);
 }
 
-static inline void playFrame_56C8(sCareer_56C8* s, char* name)
+static inline void playFrame_56C8(cFEStateCareerStats* s, char* name)
 {
-    unsigned short frame = cUIScreen_getFrameByLabel((cUIScreen*)s->screen, GetHashValue32(name));
+    unsigned short frame = cUIScreen_getFrameByLabel((cUIScreen*)((void*)s->mpScreen), GetHashValue32(name));
     if (frame != 0xFFFF)
-        cUIScreen_playFrame(s->screen, frame, 1);
+        cUIScreen_playFrame(((void*)s->mpScreen), frame, 1);
 }
 
 /**
@@ -925,14 +899,14 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
     int msg = 0;
     int handled = 0;
     if (wantCall_56C8(((char*)w), 19)) {
-        playFrame_56C8(((sCareer_56C8*)self), str_hll);
+        playFrame_56C8((self), str_hll);
         msg = 1;
         handled = 1;
         if (--self->mStatsState < 0) {
             self->mStatsState = 3;
         }
     } else if (wantCall_56C8(((char*)w), 20)) {
-        playFrame_56C8(((sCareer_56C8*)self), str_hlr);
+        playFrame_56C8((self), str_hlr);
         msg = 1;
         handled = 1;
         if (++self->mStatsState >= 4) {
@@ -949,7 +923,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
                 self->mTopHighlightNumber--;
                 cFEStateCareerStats_setupHighlightsList(self);
                 handled = 1;
-                playFrame_56C8(((sCareer_56C8*)self), str_high_up);
+                playFrame_56C8((self), str_high_up);
                 msg = 2;
             } else {
                 msg = 4;
@@ -959,7 +933,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
                 self->mTopHighlightNumber++;
                 cFEStateCareerStats_setupHighlightsList(self);
                 handled = 1;
-                playFrame_56C8(((sCareer_56C8*)self), str_high_down);
+                playFrame_56C8((self), str_high_down);
                 msg = 2;
             } else {
                 msg = 4;
@@ -971,7 +945,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
                 self->mTopRaceEvent--;
                 cFEStateCareerStats_setupRacePlatinumMedalsList(self);
                 handled = 1;
-                playFrame_56C8(((sCareer_56C8*)self), str_race_up);
+                playFrame_56C8((self), str_race_up);
                 msg = 2;
             } else {
                 msg = 4;
@@ -981,7 +955,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
                 handled = 1;
                 self->mTopRaceEvent++;
                 cFEStateCareerStats_setupRacePlatinumMedalsList(self);
-                playFrame_56C8(((sCareer_56C8*)self), str_race_down);
+                playFrame_56C8((self), str_race_down);
                 msg = 2;
             } else {
                 msg = 4;
@@ -993,7 +967,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
                 self->mTopFreestyleEvent--;
                 cFEStateCareerStats_setupFSPlatinumMedalsList(self);
                 handled = 1;
-                playFrame_56C8(((sCareer_56C8*)self), str_free_up);
+                playFrame_56C8((self), str_free_up);
                 msg = 2;
             } else {
                 msg = 4;
@@ -1003,7 +977,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
                 handled = 1;
                 self->mTopFreestyleEvent++;
                 cFEStateCareerStats_setupFSPlatinumMedalsList(self);
-                playFrame_56C8(((sCareer_56C8*)self), str_free_down);
+                playFrame_56C8((self), str_free_down);
                 msg = 2;
             } else {
                 msg = 4;

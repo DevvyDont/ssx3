@@ -22,7 +22,7 @@ void* cBEEconInterface_getThis()
     if (cBEEconInterface_instance == 0) {
         cBEEconInterface* mem = (cBEEconInterface*)cMemMan_alloc(0x10, str_BEEconInt, 0, 0);
         mem->bIsActive = 0;
-        (*(void**)&mem->mVtbl) = D_0045AC78;
+        *(void**)&mem->mVtbl = D_0045AC78;
         cBEEconInterface_instance = (cBEEconInterface*)(mem);
     }
     return cBEEconInterface_instance;
@@ -641,15 +641,6 @@ struct sEconItem_1513B8
     short flags;
 };
 
-struct sEconItems_1513B8
-{
-    char pad[0x288];
-    short* lookup;                  // 0x288
-    int count;                      // 0x28C
-    sEconItem_1513B8 items[0x20D];  // 0x290
-    char pad2[0xBC0 - 0x290 - 0x20D * 4];
-    signed char kind;               // 0xBC0
-};
 
 struct sEconGroup_1513B8
 {
@@ -667,11 +658,11 @@ struct sEconDef_1513B8
     char pad10[0x28];
 };
 
-static inline sEconItem_1513B8* Find_1513B8(sEconItems_1513B8* self, int id)
+static inline sEconItem_1513B8* Find_1513B8(cBECharProfileDB* self, int id)
 {
-    int idx = self->lookup[id];
+    int idx = self->mpBoltsMap[id];
     if (idx >= 0)
-        return &self->items[idx];
+        return &((sEconItem_1513B8*)&self->mBolts[0])[idx];
     return 0;
 }
 
@@ -696,23 +687,23 @@ static inline int Price_1513B8(sEconDef_1513B8* d)
  */
 extern "C" void func_001513B8(cBECharProfileDB* vself)
 {
-    sEconItems_1513B8* self = (sEconItems_1513B8*)vself;
+    cBECharProfileDB* self = vself;
     void* db = D_004A6750;
-    int n = func_0014DC40(db, self->kind);
-    sEconGroup_1513B8* prizeGroup = (sEconGroup_1513B8*)func_0014DC50(db, self->kind);
+    int n = func_0014DC40(db, self->unk_BC0);
+    sEconGroup_1513B8* prizeGroup = (sEconGroup_1513B8*)func_0014DC50(db, self->unk_BC0);
     for (int i = 0; i < n; i++, prizeGroup++)
     {
         func_00151C90((cBECharProfileDB*)self, prizeGroup->prize, 1);
     }
     int j;
-    for (j = 0; j < self->count; j++)
+    for (j = 0; j < self->mNumBolts; j++)
     {
-        sEconItem_1513B8* it = &self->items[j];
+        sEconItem_1513B8* it = &((sEconItem_1513B8*)&self->mBolts[0])[j];
         if (it->flags & 0x10)
             it->flags |= 0x26;
     }
-    int numDefs = func_0014D988(db, self->kind);
-    sEconDef_1513B8* itemDef = (sEconDef_1513B8*)func_0014D998(db, self->kind);
+    int numDefs = func_0014D988(db, self->unk_BC0);
+    sEconDef_1513B8* itemDef = (sEconDef_1513B8*)func_0014D998(db, self->unk_BC0);
     int changed = 0;
     for (int i = 0; i < numDefs; i++, itemDef++)
     {
@@ -730,9 +721,9 @@ extern "C" void func_001513B8(cBECharProfileDB* vself)
     if (changed)
     {
         int k;
-        for (k = 0; k < self->count; k++)
+        for (k = 0; k < self->mNumBolts; k++)
         {
-            sEconItem_1513B8* it = &self->items[k];
+            sEconItem_1513B8* it = &((sEconItem_1513B8*)&self->mBolts[0])[k];
             if (it->flags & 0x10)
                 it->flags |= 6;
             else
@@ -745,17 +736,12 @@ extern "C" void func_001513B8(cBECharProfileDB* vself)
 //100%
 INCLUDE_ASM("be/beintecon", func_001515B8);
 #ifdef SKIP_ASM
-struct sEconItem_001515B8
-{
-    short id;
-    short flags;
-};
 
 struct sEconItems_001515B8
 {
     char pad[0x28C];
     int count;
-    sEconItem_001515B8 items[1];
+    tBEProfileBolt items[1];
 };
 
 /**
@@ -766,13 +752,13 @@ struct sEconItems_001515B8
 extern "C" void func_001515B8(cBECharProfileDB* self)
 {
     int n = self->mNumBolts;
-    sEconItem_001515B8* item = ((sEconItem_001515B8*)&self->mBolts[0]);
+    tBEProfileBolt* item = ((&self->mBolts[0]));
     for (int i = 0; i < n; i++, item++)
     {
-        if (item->flags & 4)
-            item->flags |= 0x10;
+        if ((*(short*)&item->flags) & 4)
+            *(short*)&item->flags |= 0x10;
         else
-            item->flags &= ~0x10;
+            *(short*)&item->flags &= ~0x10;
     }
 }
 #endif
@@ -1054,18 +1040,13 @@ struct sEconDef_151A88
     char pad[0x32];
 };
 
-struct sEconItem_151A88
-{
-    short id;
-    short flags;
-};
 
 struct sEconItems_151A88
 {
     char pad[0x288];
     short* lookup;              // 0x288
     int count;                  // 0x28C
-    sEconItem_151A88 items[0x20D]; // 0x290
+    tBEProfileBolt items[0x20D]; // 0x290
     char pad2[0xBC0 - 0x290 - 0x20D * 4];
     signed char kind;           // 0xBC0
 };
@@ -1094,7 +1075,7 @@ extern "C" void func_00151A88(cBECharProfileDB* self, int k)
         self->mpBoltsMap[i] = -1;
     for (i = 0; i < n; i++, itemDef++)
     {
-        sEconItem_151A88* itemSlot = &((sEconItem_151A88*)&self->mBolts[0])[i];
+        tBEProfileBolt* itemSlot = &((&self->mBolts[0]))[i];
         itemSlot->flags = 0;
         int id = itemDef->id;
         itemSlot->id = id;
@@ -1102,7 +1083,7 @@ extern "C" void func_00151A88(cBECharProfileDB* self, int k)
     }
     for (i = n; i < 525; i++)
     {
-        sEconItem_151A88* emptySlot = &((sEconItem_151A88*)&self->mBolts[0])[i];
+        tBEProfileBolt* emptySlot = &((&self->mBolts[0]))[i];
         emptySlot->id = -1;
         emptySlot->flags = 0;
     }
@@ -1113,18 +1094,13 @@ extern "C" void func_00151A88(cBECharProfileDB* self, int k)
 //100%
 INCLUDE_ASM("be/beintecon", func_00151BD0);
 #ifdef SKIP_ASM
-struct sEconItem_151BD0
-{
-    short id;
-    unsigned short flags;
-};
 
 struct sEconItems_151BD0
 {
     char pad[0x288];
     short* lookup;                  // 0x288
     int count;                      // 0x28C
-    sEconItem_151BD0 items[0x20D];  // 0x290
+    tBEProfileBolt items[0x20D];  // 0x290
 };
 
 static inline unsigned int clearBits_151BD0(unsigned int f, unsigned int m)
@@ -1138,7 +1114,7 @@ static inline unsigned int clearBits_151BD0(unsigned int f, unsigned int m)
 extern "C" void func_00151BD0(cBECharProfileDB* self)
 {
     for (int i = 0; i < self->mNumBolts; i++) {
-        sEconItem_151BD0* item = &((sEconItem_151BD0*)&self->mBolts[0])[i];
+        tBEProfileBolt* item = &((&self->mBolts[0]))[i];
         unsigned int oldFlags = item->flags;
         item->flags = (oldFlags & 0x20) ? (oldFlags | 0x16) : clearBits_151BD0(clearBits_151BD0(oldFlags, 0x10), 4);
     }
@@ -1164,18 +1140,13 @@ extern "C" short func_00151C20(cBECharProfileDB* self, int i)
 //100%
 INCLUDE_ASM("be/beintecon", func_00151C48);
 #ifdef SKIP_ASM
-struct sEconItem_00151C48
-{
-    short id;
-    short flags;
-};
 
 struct sEconItems_00151C48
 {
     char pad[0x288];
     short* lookup;
     int count;
-    sEconItem_00151C48 items[1];
+    tBEProfileBolt items[1];
 };
 
 /**
@@ -1189,15 +1160,15 @@ struct sEconItems_00151C48
 extern "C" void func_00151C48(cBECharProfileDB* self, int id, int on)
 {
     int idx = self->mpBoltsMap[id];
-    sEconItem_00151C48* item;
+    tBEProfileBolt* item;
     if (idx >= 0)
-        item = &((sEconItem_00151C48*)&self->mBolts[0])[idx];
+        item = &((&self->mBolts[0]))[idx];
     else
         item = 0;
     if (on)
-        item->flags |= 2;
+        *(short*)&item->flags |= 2;
     else
-        item->flags &= ~2;
+        *(short*)&item->flags &= ~2;
 }
 #endif
 
@@ -1218,15 +1189,6 @@ struct sEconItem_151C90
     unsigned short flags;
 };
 
-struct sEconItems_151C90
-{
-    char pad[0x288];
-    short* lookup;                  // 0x288
-    int count;                      // 0x28C
-    sEconItem_151C90 items[0x20D];  // 0x290
-    char pad2[0xBC0 - 0x290 - 0x20D * 4];
-    signed char kind;               // 0xBC0
-};
 
 struct sEconRel_151C90
 {
@@ -1251,11 +1213,11 @@ struct sEconDefs_151C90
     sEconDef_151C90* defs;  // 0x4
 };
 
-static inline sEconItem_151C90* getItem_151C90(sEconItems_151C90* self, int id)
+static inline sEconItem_151C90* getItem_151C90(cBECharProfileDB* self, int id)
 {
-    int idx = self->lookup[id];
+    int idx = self->mpBoltsMap[id];
     if (idx >= 0)
-        return &self->items[idx];
+        return &((sEconItem_151C90*)&self->mBolts[0])[idx];
     return 0;
 }
 
@@ -1292,9 +1254,9 @@ static inline sEconDef_151C90* getDef_151C90(sEconDefs_151C90* db, int i)
 // cascades to dependent items (owned before or def flag 8). Then applies the item's links; 0 on failure.
 extern "C" int func_00151C90(cBECharProfileDB* selfp, int id, int on)
 {
-    sEconItems_151C90* self = (sEconItems_151C90*)selfp;
+    cBECharProfileDB* self = selfp;
     sEconDefs_151C90* db = (sEconDefs_151C90*)func_0014BDB8_1C90();
-    sEconDef_151C90* def = getDef_151C90(db, func_0014D448(db, self->kind, id));
+    sEconDef_151C90* def = getDef_151C90(db, func_0014D448(db, self->unk_BC0, id));
     sEconItem_151C90* item = getItem_151C90(self, id);
     int bit1 = hasFlag_151C90(def, 1) != 0;
     int bit8 = hasFlag_151C90(def, 8) != 0;
@@ -1308,15 +1270,15 @@ extern "C" int func_00151C90(cBECharProfileDB* selfp, int id, int on)
     if (on && bit1)
     {
         int rid = def->rel;
-        sEconRel_151C90* rel = (sEconRel_151C90*)func_0014D558(db, self->kind, rid);
-        int n = func_0014D4C8(db, self->kind, rid);
+        sEconRel_151C90* rel = (sEconRel_151C90*)func_0014D558(db, self->unk_BC0, rid);
+        int n = func_0014D4C8(db, self->unk_BC0, rid);
         for (int i = 0; i < n; i++, rel++)
         {
             int sid = rel->other;
             if (sid != id)
             {
-                int j = self->lookup[sid];
-                if (j >= 0 && (isOwned_151C90(&self->items[j]) || (rel->flags & 8)))
+                int j = self->mpBoltsMap[sid];
+                if (j >= 0 && (isOwned_151C90(&((sEconItem_151C90*)&self->mBolts[0])[j]) || (rel->flags & 8)))
                 {
                     if (func_00151C90((cBECharProfileDB*)self, sid, 0) == 0)
                         return 0;
@@ -1326,8 +1288,8 @@ extern "C" int func_00151C90(cBECharProfileDB* selfp, int id, int on)
     }
     else if (!on && (wasOn || bit8))
     {
-        sEconRel_151C90* rel = (sEconRel_151C90*)func_0014D558(db, self->kind, id);
-        int n = func_0014D4C8(db, self->kind, id);
+        sEconRel_151C90* rel = (sEconRel_151C90*)func_0014D558(db, self->unk_BC0, id);
+        int n = func_0014D4C8(db, self->unk_BC0, id);
         for (int i = 0; i < n; i++, rel++)
         {
             if (func_00151C90((cBECharProfileDB*)self, rel->other, 0) == 0)
@@ -1359,15 +1321,6 @@ struct sEconItem_151EF0
     unsigned short flags;
 };
 
-struct sEconItems_151EF0
-{
-    char pad[0x288];
-    short* lookup;                  // 0x288
-    int count;                      // 0x28C
-    sEconItem_151EF0 items[0x20D];  // 0x290
-    char pad2[0xBC0 - 0x290 - 0x20D * 4];
-    signed char kind;               // 0xBC0
-};
 
 // One dependency: when condId is set, applies only if its owned state equals cond.
 struct sEconLink_151EF0
@@ -1392,11 +1345,11 @@ struct sEconDefs_151EF0
     sEconDef_151EF0* defs;  // 0x4
 };
 
-static inline sEconItem_151EF0* getItem_151EF0(sEconItems_151EF0* self, int id)
+static inline sEconItem_151EF0* getItem_151EF0(cBECharProfileDB* self, int id)
 {
-    int idx = self->lookup[id];
+    int idx = self->mpBoltsMap[id];
     if (idx >= 0)
-        return &self->items[idx];
+        return &((sEconItem_151EF0*)&self->mBolts[0])[idx];
     return 0;
 }
 
@@ -1427,10 +1380,10 @@ static inline sEconDef_151EF0* getDef_151EF0(sEconDefs_151EF0* db, int i)
 // Sets item id owned/unowned and applies its dependency links (cascading through func_00151C90); 0 on failure.
 extern "C" int func_00151EF0(cBECharProfileDB* selfp, int id, int on)
 {
-    sEconItems_151EF0* self = (sEconItems_151EF0*)selfp;
+    cBECharProfileDB* self = selfp;
     sEconDefs_151EF0* db = (sEconDefs_151EF0*)func_0014BDB8_1EF0();
     int n = 0;
-    sEconLink_151EF0* link = func_0014DB40(db, self->kind, id, on, &n);
+    sEconLink_151EF0* link = func_0014DB40(db, self->unk_BC0, id, on, &n);
     sEconItem_151EF0* item = getItem_151EF0(self, id);
     for (int i = 0; i < n; i++, link++)
     {
@@ -1441,13 +1394,13 @@ extern "C" int func_00151EF0(cBECharProfileDB* selfp, int id, int on)
             if ((isOwned_151EF0(getItem_151EF0(self, link->condId)) != 0) != (link->cond != 0))
                 continue;
         }
-        sEconItem_151EF0* targetItem = &self->items[self->lookup[link->target]];
+        sEconItem_151EF0* targetItem = &((sEconItem_151EF0*)&self->mBolts[0])[self->mpBoltsMap[link->target]];
         int has = isOwned_151EF0(targetItem) != 0;
         if (has == (link->on != 0))
         {
             if (has)
                 continue;
-            if (!(getDef_151EF0(db, func_0014D448(db, self->kind, link->target))->flags & 8))
+            if (!(getDef_151EF0(db, func_0014D448(db, self->unk_BC0, link->target))->flags & 8))
                 continue;
         }
         if (targetItem->id == id)
@@ -1480,13 +1433,6 @@ struct sEconItem_001520E8
     unsigned short flags;
 };
 
-struct sEconItems_001520E8
-{
-    char pad[0x288];
-    short* lookup;              // 0x288
-    int count;                  // 0x28C
-    sEconItem_001520E8 items[1];    // 0x290
-};
 
 struct sEconDef_001520E8
 {
@@ -1496,11 +1442,11 @@ struct sEconDef_001520E8
     int flags;          // 0x34
 };
 
-static inline sEconItem_001520E8* getItem_001520E8(sEconItems_001520E8* self, int id)
+static inline sEconItem_001520E8* getItem_001520E8(cBECharProfileDB* self, int id)
 {
-    int idx = self->lookup[id];
+    int idx = self->mpBoltsMap[id];
     if (idx >= 0)
-        return &self->items[idx];
+        return &((sEconItem_001520E8*)&self->mBolts[0])[idx];
     return 0;
 }
 
@@ -1512,7 +1458,7 @@ static inline sEconItem_001520E8* getItem_001520E8(sEconItems_001520E8* self, in
  */
 extern "C" int func_001520E8(cBECharProfileDB* self, int* changed)
 {
-    void* db = func_0014BDB8(((sEconItems_001520E8*)self));
+    void* db = func_0014BDB8((self));
     int n = func_0014D988(db, *((char*)&self->unk_BC0));
     sEconDef_001520E8* def = (sEconDef_001520E8*)func_0014D998(db, *((char*)&self->unk_BC0));
     *changed = 0;
@@ -1520,7 +1466,7 @@ extern "C" int func_001520E8(cBECharProfileDB* self, int* changed)
     {
         if (def->flags & 0x1000)
         {
-            if (getItem_001520E8(((sEconItems_001520E8*)self), def->id)->flags & 0x10)
+            if (getItem_001520E8((self), def->id)->flags & 0x10)
             {
                 *changed = 1;
                 if (func_00151EF0(self, def->id, 1) == 0)
@@ -1548,15 +1494,6 @@ struct sEconItem_1521F0
     unsigned short flags;
 };
 
-struct sEconItems_1521F0
-{
-    char pad[0x288];
-    short* lookup;                  // 0x288
-    int count;                      // 0x28C
-    sEconItem_1521F0 items[0x20D];  // 0x290
-    char pad2[0xBC0 - 0x290 - 0x20D * 4];
-    signed char kind;               // 0xBC0
-};
 
 struct sEconGroup_1521F0
 {
@@ -1573,11 +1510,11 @@ struct sEconDef_1521F0
     int flags;      // 0x34
 };
 
-static inline sEconItem_1521F0* Find_1521F0(sEconItems_1521F0* self, int id)
+static inline sEconItem_1521F0* Find_1521F0(cBECharProfileDB* self, int id)
 {
-    int idx = self->lookup[id];
+    int idx = self->mpBoltsMap[id];
     if (idx >= 0)
-        return &self->items[idx];
+        return &((sEconItem_1521F0*)&self->mBolts[0])[idx];
     return 0;
 }
 
@@ -1603,7 +1540,7 @@ extern "C" int func_001521F0(cBECharProfileDB* self)
         int j;
         for (j = 0; j < cnt; j++)
         {
-            if (!(Find_1521F0(((sEconItems_1521F0*)self), list[j]->id)->flags & 0x10))
+            if (!(Find_1521F0((self), list[j]->id)->flags & 0x10))
                 continue;
             if (list[j]->flags & 0x10)
                 break;

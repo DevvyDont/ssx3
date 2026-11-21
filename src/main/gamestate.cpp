@@ -2571,15 +2571,6 @@ struct cInputPad_2373B8 {
     float getButtonValue(int k) { return k < numbuttons ? buttons[k].value : 0.0f; }
 };
 
-// cInputSync::SyncedPad (SSX 3 layout: no sendpos, size 0x18).
-struct SyncedPad_2373B8 {
-    PadSample_2373B8* samples;          // 0x00: ring of samples
-    int readpos;                        // 0x04
-    int writepos;                       // 0x08
-    cInputPad_2373B8* sourcepad;        // 0x0C: local pad (0 = remote)
-    void* destinationpad;               // 0x10
-    void* input;                        // 0x14
-};
 
 struct cInputSync_2373B8 {
     int sendlimit;                      // 0x00
@@ -2587,7 +2578,7 @@ struct cInputSync_2373B8 {
     int numsamples;                     // 0x08: copies per sample
     int tick;                           // 0x0C
     int numsyncedpads;                  // 0x10
-    SyncedPad_2373B8 syncedpads[1];     // 0x14
+    cInputSync_SyncedPad syncedpads[1];     // 0x14
 };
 
 /**
@@ -2607,9 +2598,9 @@ extern "C" void cInputSync_preupdate(cInputSync* self)
         return;
     }
     for (int i = 0; i < self->numsyncedpads; i++) {
-        SyncedPad_2373B8* psp = &((SyncedPad_2373B8*)&self->syncedpads[0])[i];
-        SyncedPad_2373B8& sp = *psp;
-        if (sp.sourcepad == 0) {
+        cInputSync_SyncedPad* psp = &((&self->syncedpads[0]))[i];
+        cInputSync_SyncedPad& sp = *psp;
+        if (((cInputPad_2373B8*)sp.sourcepad) == 0) {
             char* gc = GameComm();
             int net = *(int*)(gc + 0x40) != 0 && *(int*)(gc + 4) == 0 && *(int*)(gc + 0) != 0;
             if (net) {
@@ -2617,7 +2608,7 @@ extern "C" void cInputSync_preupdate(cInputSync* self)
                        cGameComm_readPacket(GameComm(), 0, &compsample, sizeof(compsample))) {
                     cInputSync_decompressinput(self, (sPackSrc_7B28*)&sample, (char*)&compsample);
                     for (int j = 0; j < self->numsamples; j++) {
-                        sp.samples[sp.writepos % self->latency] = sample;
+                        ((PadSample_2373B8*)sp.samples)[sp.writepos % self->latency] = sample;
                         sp.writepos++;
                     }
                 }
@@ -2627,7 +2618,7 @@ extern "C" void cInputSync_preupdate(cInputSync* self)
                 cInputSync_decompressinput(self, (sPackSrc_7B28*)&sample, (char*)&compsample);
                 while (sp.writepos - sp.readpos < self->latency - (self->numsamples - 1)) {
                     for (int j = 0; j < self->numsamples; j++) {
-                        sp.samples[sp.writepos % self->latency] = sample;
+                        ((PadSample_2373B8*)sp.samples)[sp.writepos % self->latency] = sample;
                         sp.writepos++;
                     }
                 }
@@ -2636,13 +2627,13 @@ extern "C" void cInputSync_preupdate(cInputSync* self)
             self->tick++;
             if (self->tick % self->numsamples == 0) {
                 PadSample_2373B8 localsample;
-                localsample.NumButtons = sp.sourcepad->getNumButtons();
+                localsample.NumButtons = ((cInputPad_2373B8*)sp.sourcepad)->getNumButtons();
                 for (int j = 0; j < localsample.NumButtons; j++) {
-                    localsample.Buttons[j] = sp.sourcepad->getButtonValue(j);
+                    localsample.Buttons[j] = ((cInputPad_2373B8*)sp.sourcepad)->getButtonValue(j);
                 }
                 cInputSync_sendClientInput(self, (sPackSrc_7B28*)&localsample);
                 for (int j = 0; j < self->numsamples; j++) {
-                    sp.samples[sp.writepos % self->latency] = localsample;
+                    ((PadSample_2373B8*)sp.samples)[sp.writepos % self->latency] = localsample;
                     sp.writepos++;
                 }
                 int n = (int)(cGameComm_getLatency(GameComm()) / *(float*)((char*)SSXApp + 0x14));

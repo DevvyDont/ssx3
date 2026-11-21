@@ -862,15 +862,6 @@ struct sGrid_331E90 {
     int unkA0;
 };
 
-struct sQuery_331E90 {
-    sGrid_331E90* grid;             // 0x0
-    int unk04;                      // 0x4
-    int count;                      // 0x8
-    sNode_3309D8* items[0x40];      // 0xC
-    int ntris;                      // 0x10C
-    sNode_3309D8* tris[0x40];       // 0x110
-    unsigned int nobjs;             // 0x210
-};
 
 struct sCtx2_331E90 {
     sCtx_3309D8 nodes;
@@ -941,22 +932,22 @@ static inline void queryCell_331E90(sGrid_331E90* grid, int i, sBox_3309D8* box,
  *
  * @param box  the query box: min at +0x0, max at +0x10
  */
-extern "C" void cOverlapList_getpatchesandinstances(sQuery_331E90* self, sBox_3309D8* box)
+extern "C" void cOverlapList_getpatchesandinstances(cOverlapList* self, sBox_3309D8* box)
 {
     sCtx2_331E90 ctx;
-    self->unk04 = self->grid->unkA0;
-    ctx.nodes.list = self->items;
-    ctx.nodes.count = &self->count;
+    self->deletecount = ((sGrid_331E90*)self->nash)->unkA0;
+    ctx.nodes.list = ((sNode_3309D8**)&self->instances[0]);
+    ctx.nodes.count = (int*)&self->numinstances;
     ctx.nodes.pad08 = 0x40;
     ctx.nodes.box = box;
-    ctx.objs.list = self->tris;
-    ctx.objs.count = &self->ntris;
+    ctx.objs.list = ((sNode_3309D8**)&self->patches[0]);
+    ctx.objs.count = (int*)&self->numpatches;
     ctx.objs.pad08 = 0x40;
     ctx.objs.box = box;
     sCtx_3309D8* objs = &ctx.objs;
-    self->count = 0;
+    self->numinstances = 0;
     *objs->count = 0;
-    sGrid_331E90* grid = self->grid;
+    sGrid_331E90* grid = ((sGrid_331E90*)self->nash);
     sCtx_3309D8* pctx = &ctx.nodes;
     queryCell_331E90(grid, 0, box, pctx);
     queryCell_331E90(grid, 1, box, pctx);
@@ -966,7 +957,7 @@ extern "C" void cOverlapList_getpatchesandinstances(sQuery_331E90* self, sBox_33
     queryCell_331E90(grid, 5, box, pctx);
     queryCell_331E90(grid, 6, box, pctx);
     queryCell_331E90(grid, 7, box, pctx);
-    self->nobjs = 0xFFFFFFFF;
+    self->numtyped = 0xFFFFFFFF;
 }
 #endif
 
@@ -1003,16 +994,6 @@ struct sGrid_332DB8 {
     int unkA0;
 };
 
-struct sQuery_332DB8 {
-    sGrid_332DB8* grid;             // 0x0
-    int unk04;                      // 0x4
-    int count;                      // 0x8
-    sNode_3309D8* items[0x40];      // 0xC
-    int ntris;                      // 0x10C
-    sNode_3309D8* tris[0x40];       // 0x110
-    int nobjs;                      // 0x210
-    sNode_3309D8* objs[0x200];      // 0x214
-};
 
 struct sCtx3_332DB8 {
     sCtx_3309D8 nodes;
@@ -1094,28 +1075,28 @@ static inline void queryCell_332DB8(sGrid_332DB8* grid, int i, sBox_3309D8* box,
  *
  * @param box  the query box: min at +0x0, max at +0x10
  */
-extern "C" void cOverlapList_geteverything(sQuery_332DB8* self, sBox_3309D8* box)
+extern "C" void cOverlapList_geteverything(cOverlapList* self, sBox_3309D8* box)
 {
     sCtx3_332DB8 ctx;
-    self->unk04 = self->grid->unkA0;
-    ctx.nodes.list = self->items;
-    ctx.nodes.count = &self->count;
+    self->deletecount = ((sGrid_332DB8*)self->nash)->unkA0;
+    ctx.nodes.list = ((sNode_3309D8**)&self->instances[0]);
+    ctx.nodes.count = (int*)&self->numinstances;
     ctx.nodes.pad08 = 0x40;
     ctx.nodes.box = box;
-    ctx.objs.list = self->tris;
-    ctx.objs.count = &self->ntris;
+    ctx.objs.list = ((sNode_3309D8**)&self->patches[0]);
+    ctx.objs.count = (int*)&self->numpatches;
     ctx.objs.pad08 = 0x40;
     ctx.objs.box = box;
     sCtx_3309D8* objs = &ctx.objs;
-    self->count = 0;
+    self->numinstances = 0;
     *objs->count = 0;
-    ctx.all.list = self->objs;
-    ctx.all.count = &self->nobjs;
+    ctx.all.list = ((sNode_3309D8**)&self->typed[0]);
+    ctx.all.count = (int*)&self->numtyped;
     ctx.all.pad08 = 0x200;
     ctx.all.box = box;
     sCtx_3309D8* all = &ctx.all;
     *all->count = 0;
-    sGrid_332DB8* grid = self->grid;
+    sGrid_332DB8* grid = ((sGrid_332DB8*)self->nash);
     sCtx3_332DB8* pctx = &ctx;
     queryCell_332DB8(grid, 0, box, pctx);
     queryCell_332DB8(grid, 1, box, pctx);
@@ -5609,19 +5590,19 @@ extern "C" sObj_341388* cBoostNode_cBoostNode1(cBoostNode* self, void* bucket, i
     self->BoostTime = (int)(def->time * (float)*(int*)(cAppMan_TheAppMan + 0x10));
     if (def->x == 0.0f && def->y == 0.0f && def->z == 0.0f) {
         if (type == 2) {
-            (*(sVec4_341388*)&self->Boost) = *D_004FF150_341388;
+            *(sVec4_341388*)&self->Boost = *D_004FF150_341388;
         } else {
-            (*(sVec4_341388*)&self->Boost) = *D_004FF120_341388;
+            *(sVec4_341388*)&self->Boost = *D_004FF120_341388;
         }
     } else {
-        (*(sVec4_341388*)&self->Boost) = vu0Normalize_341388(sVec4_341388(def->x, def->y, def->z, 0.0f));
+        *(sVec4_341388*)&self->Boost = vu0Normalize_341388(sVec4_341388(def->x, def->y, def->z, 0.0f));
     }
     self->MaxSpeed = def->f10 * 27.77777862548828f;
     self->Drag = def->f0C;
     self->Time = self->Type ? self->BoostTime : 0;
     if (self->Type == 2) {
         char* instMatrix = (char*)self->Instance + 0x10;
-        (*(sVec4_341388*)&self->Boost) = vu0Xform_341388(vu0Scale_341388((*(sVec4_341388*)&self->Boost), -1.0f), instMatrix);
+        *(sVec4_341388*)&self->Boost = vu0Xform_341388(vu0Scale_341388(*(sVec4_341388*)&self->Boost, -1.0f), instMatrix);
         self->MaxSpeed = -self->MaxSpeed;
     }
     return ((sObj_341388*)self);
@@ -5918,13 +5899,13 @@ static inline void push_341818(sParams_341818* p, cMover_341818* obj, const sVec
 extern "C" void cBoostNode_applyBoost(cBoostNode* self, cMover_341818* obj)
 {
     sVec4_341818 vel = *obj->getVelocity();
-    sVec4_341818 dir = (*(sVec4_341818*)&self->Boost);
+    sVec4_341818 dir = *(sVec4_341818*)&self->Boost;
     if (dir.x == 0.0f && dir.y == 0.0f && dir.z == 0.0f) {
         dir = vu0Normalize_341818(vel);
     }
     float alongSpeed = vu0Dot_341818(vel, dir);
     float diff = self->MaxSpeed - alongSpeed;
-    sParams_341818* boostParams = &(*(sParams_341818*)&self->Boost);
+    sParams_341818* boostParams = (sParams_341818*)&self->Boost;
     if (self->Type == 2) {
         if (alongSpeed >= 0.0f) {
             sVec4_341818 newVel = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, boostParams->speed), boostParams->scale), cObjectInterface_getUpdateTime());
@@ -7012,7 +6993,7 @@ extern "C" void* cBoostModifier_cBoostModifier(cBoostModifier* self, sSphDef_342
     boostDir.y = def->y;
     boostDir.z = def->z;
     boostDir.w = 0.0f;
-    (*(sVec4_342768*)&self->Boost) = boostDir;
+    *(sVec4_342768*)&self->Boost = boostDir;
     self->MaxSpeed = def->f10 * 100.0f;
     self->Drag = def->f0C;
     self->Time = type == 1 ? boostFrames : 0;
@@ -7246,7 +7227,7 @@ extern "C" void cBoostModifier_applyBoost(cBoostModifier* self, cWsMover* obj)
     float speedDeficit = self->MaxSpeed - vu0Dot(*obj->getVelocity(), self->Boost);
     if (speedDeficit > 0.0f) {
         // PORT: takes the address of a temporary (g++ 2.95 accepts it).
-        sPlane_342A88* pl = &(*(sPlane_342A88*)&self->Boost);
+        sPlane_342A88* pl = (sPlane_342A88*)&self->Boost;
         setVel_342A88(obj, &vu0Scale(vu0Scale(vu0Scale(pl->n, speedDeficit), pl->k), cObjectInterface_getUpdateTime()));
     }
 }

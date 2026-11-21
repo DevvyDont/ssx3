@@ -206,20 +206,16 @@ struct sDmEntry275B08 {
     int unk_0x14;
 };
 
-struct sDmTable275B08 {
-    int count;
-    sDmEntry275B08* entries;
-};
 
 /**
  * Detaches every data entry of the data manager that is in use, through cDataManager_DetachData().
  */
-extern "C" void cDataManager_DetachAll(sDmTable275B08* self)
+extern "C" void cDataManager_DetachAll(cDataManager* self)
 {
     int i;
-    for (i = 0; i < self->count; i++) {
-        if (self->entries[i].used != 0) {
-            cDataManager_DetachData(self, &self->entries[i]);
+    for (i = 0; i < self->mMaxDataInstances; i++) {
+        if (((sDmEntry275B08*)self->mpDataInstanceHeap)[i].used != 0) {
+            cDataManager_DetachData(self, &((sDmEntry275B08*)self->mpDataInstanceHeap)[i]);
         }
     }
 }
@@ -981,18 +977,6 @@ struct sSeqItem_66D0 {
     int handle;         // 0xC
 };
 
-struct sSeq_66D0 {
-    char* owner;        // 0x0
-    char pad_0x4[0x8];
-    char list[0x98];    // 0xC
-    int state;          // 0xA4
-    int fA8;            // 0xA8
-    char pad_0xAC[0x8];
-    int fB4;            // 0xB4
-    char pad_0xB8[0x4];
-    int cur;            // 0xBC
-    int pos;            // 0xC0
-};
 
 /**
  * Skips @p delta scripts of a NIS list and returns its state.
@@ -1047,12 +1031,12 @@ extern "C" int tNISList_SkipForward(tNISList* self, int delta, int force)
         it->handle = -1;
         self->mNextPendingScriptIndex = -1;
         if (self->mPausedOnNextScriptLoading) {
-            tNISList_DoPause(((sSeq_66D0*)self), 0, 1);
+            tNISList_DoPause((self), 0, 1);
         }
         self->mNextPendingScriptIndex = tNISList_SetupNextScript(self, pos, 0);
     }
     if (self->mPausedOnNextScriptLoading == 0) {
-        if (force == 0 || tNISList_DoTransitionToNext_r(((sSeq_66D0*)self)) == 0) {
+        if (force == 0 || tNISList_DoTransitionToNext_r((self)) == 0) {
             if (self->mNextPendingScriptIndex < 0) {
                 goto reset;
             }
@@ -2215,19 +2199,9 @@ struct sSeqItem_7C08 {
     int handle;         // 0xC
 };
 
-struct sSeq_7C08 {
-    char* owner;        // 0x0
-    int f4;             // 0x4
-    char pad_0x8[0x4];
-    char list[0x98];    // 0xC
-    int state;          // 0xA4
-    int paused;         // 0xA8
-    char pad_0xAC[0x18];
-    int pauseCount;     // 0xC4
-};
 
 // The unit declares tNISList_DoPause as returning void*; the body returns nothing. Bind by asm label.
-extern "C" void tNISList_DoPause_impl(sSeq_7C08* self, int on, int hard) __asm__("tNISList_DoPause");
+extern "C" void tNISList_DoPause_impl(tNISList* self, int on, int hard) __asm__("tNISList_DoPause");
 
 /**
  * Pauses or resumes a playing NIS list, through either the pause count or the pause-on-loading flag.
@@ -2242,15 +2216,15 @@ extern "C" void tNISList_DoPause_impl(sSeq_7C08* self, int on, int hard) __asm__
  * @param on  nonzero to pause, 0 to resume
  * @param hard  nonzero for the pause-on-loading flag, 0 for the pause count
  */
-extern "C" void tNISList_DoPause_impl(sSeq_7C08* self, int on, int hard)
+extern "C" void tNISList_DoPause_impl(tNISList* self, int on, int hard)
 {
-    if (self->state != 3) {
+    if (self->mState != 3) {
         return;
     }
     if (hard == 0) {
-        int prevPauses = self->pauseCount;
+        int prevPauses = self->mNumPause;
         if (on) {
-            self->pauseCount = prevPauses + 1;
+            self->mNumPause = prevPauses + 1;
             if (prevPauses != 0) {
                 return;
             }
@@ -2259,34 +2233,34 @@ extern "C" void tNISList_DoPause_impl(sSeq_7C08* self, int on, int hard)
                 return;
             }
             int remainingPauses = prevPauses - 1;
-            self->pauseCount = remainingPauses;
+            self->mNumPause = remainingPauses;
             if (remainingPauses != 0) {
                 return;
             }
         }
-        if (self->paused) {
+        if (self->mPausedOnNextScriptLoading) {
             return;
         }
     } else {
-        if (self->paused == on) {
+        if (self->mPausedOnNextScriptLoading == on) {
             return;
         }
-        self->paused = on;
-        if (self->pauseCount) {
+        self->mPausedOnNextScriptLoading = on;
+        if (self->mNumPause) {
             return;
         }
     }
     if (on) {
-        sSeqItem_7C08* it = (sSeqItem_7C08*)cCircularBuffer_operatorIndex(self->list, 0);
+        sSeqItem_7C08* it = (sSeqItem_7C08*)cCircularBuffer_operatorIndex(((char*)&self->mList), 0);
         if (tNISList_IsVideo((tNISList*)self, it) == 0) {
-            int st = cBXScriptEngine_GetRequestState(self->owner, it->handle);
+            int st = cBXScriptEngine_GetRequestState(((char*)self->mpNISEngine), it->handle);
             if (st >= 3 && st <= 5) {
-                cBXScriptEngine_PauseScript(self->owner, it->handle);
+                cBXScriptEngine_PauseScript(((char*)self->mpNISEngine), it->handle);
             }
         } else {
-            cVidEngine_PauseVideo(self->owner + 0x500, 1);
+            cVidEngine_PauseVideo(((char*)self->mpNISEngine) + 0x500, 1);
         }
-        if (self->f4) {
+        if (self->mIsCutSceneHandler) {
             cCutSceneTransitionMan_Pause(SSXApp->Game->CutSceneTransitionMan, 1);
             char* transitionMan = (char*)cGame_getTransitionMan(SSXApp->Game, 0);
             if (*(int*)(transitionMan + 0x44)) {
@@ -2294,15 +2268,15 @@ extern "C" void tNISList_DoPause_impl(sSeq_7C08* self, int on, int hard)
             }
         }
     } else {
-        sSeqItem_7C08* it = (sSeqItem_7C08*)cCircularBuffer_operatorIndex(self->list, 0);
+        sSeqItem_7C08* it = (sSeqItem_7C08*)cCircularBuffer_operatorIndex(((char*)&self->mList), 0);
         if (tNISList_IsVideo((tNISList*)self, it) == 0) {
-            if (cBXScriptEngine_GetRequestState(self->owner, it->handle) == 5) {
-                cBXScriptEngine_ResumeScript(self->owner, it->handle);
+            if (cBXScriptEngine_GetRequestState(((char*)self->mpNISEngine), it->handle) == 5) {
+                cBXScriptEngine_ResumeScript(((char*)self->mpNISEngine), it->handle);
             }
         } else {
-            cVidEngine_PauseVideo(self->owner + 0x500, 0);
+            cVidEngine_PauseVideo(((char*)self->mpNISEngine) + 0x500, 0);
         }
-        if (self->f4) {
+        if (self->mIsCutSceneHandler) {
             cCutSceneTransitionMan_Pause(SSXApp->Game->CutSceneTransitionMan, 0);
             char* transitionMan = (char*)cGame_getTransitionMan(SSXApp->Game, 0);
             if (*(int*)(transitionMan + 0x44)) {

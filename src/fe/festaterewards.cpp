@@ -59,8 +59,7 @@ extern "C" void cFEStateRewardGalleryBase_onCreateScreen(cFEStateRewardGalleryBa
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_onGainFocus);
 #ifdef SKIP_ASM
-struct sVec3_F168 { float x, y, z; };
-extern "C" void func_003A0290(void* thing, sVec3_F168* out);
+extern "C" void func_003A0290(void* thing, t3Vector* out);
 struct sVE_F168a {
     short delta;
     short index;
@@ -85,8 +84,8 @@ struct sVE_F168b {
  */
 extern "C" void cFEStateRewardGalleryBase_onGainFocus(cFEStateRewardGalleryBase* self)
 {
-    sVec3_F168 firstCellPos;
-    sVec3_F168 widgetPos;
+    t3Vector firstCellPos;
+    t3Vector widgetPos;
     void* widget = *(void**)&self->mpIcons[0];
     if (widget != 0) {
         func_003A0290(widget, &firstCellPos);
@@ -809,10 +808,6 @@ struct cGame001CFFF8 {
 };
 
 extern "C" void SHAPE_name(void* data, int i, void* entry);
-struct sEntry001CFFF8 {
-    char name[5];
-    int handle;
-};
 struct sDataEnt001CFFF8 {
     int off;
     int f4;
@@ -828,7 +823,7 @@ struct sData001CFFF8 {
 struct sSelf001CFFF8 {
     char pad[0x78];
     int count;
-    sEntry001CFFF8 entries[1];
+    tIconInfo entries[1];
 };
 
 /**
@@ -851,9 +846,9 @@ extern "C" void cFEStateRewardGalleryBase_allocIcons(cFEStateRewardGalleryBase* 
     self->mNumIcons = data->count;
     int i;
     for (i = 0; i < self->mNumIcons; i++) {
-        SHAPE_name(data, i, &((sEntry001CFFF8*)&self->mIcons[0])[i]);
-        ((sEntry001CFFF8*)&self->mIcons[0])[i].name[4] = 0;
-        ((sEntry001CFFF8*)&self->mIcons[0])[i].handle = ((cGame001CFFF8*)GrMan)->AddTexture((char*)data + data->tbl[i].off, &((sEntry001CFFF8*)&self->mIcons[0])[i], 0, 1, -1);
+        SHAPE_name(data, i, &((&self->mIcons[0]))[i]);
+        ((&self->mIcons[0]))[i].mName[4] = 0;
+        ((&self->mIcons[0]))[i].mID = ((cGame001CFFF8*)GrMan)->AddTexture((char*)data + data->tbl[i].off, &((&self->mIcons[0]))[i], 0, 1, -1);
     }
 }
 #endif
@@ -1704,13 +1699,13 @@ extern "C" void cFEStateRewardGalleryBase_updateHighlither(cFEStateRewardGallery
     cUIThing* icon = self->mpHilighter;
     if (((char*)icon) != 0) {
         if ((char*)self->mpSelected != 0) {
-            sVec3_F168 cellPos;
-            sVec3_F168 barPos;
+            t3Vector cellPos;
+            t3Vector barPos;
             func_003A0290((char*)self->mpSelected, &cellPos);
             func_003A0290((char*)self->mpHilighter, &barPos);
             barPos.y = cellPos.y + self->mVertHilighterOffset;
             barPos.x = cellPos.x + self->mHorizHilighterOffset;
-            *(sVec3_F168*)&self->mpHilighter->mPosition = barPos;
+            *(&self->mpHilighter->mPosition) = barPos;
             cUIThing* selectBar = self->mpHilighter;
             sVEK1D0F30a* vt = (sVEK1D0F30a*)selectBar->mVtbl;
             vt[9].fn(((char*)selectBar) + vt[9].delta, 1);
@@ -3032,9 +3027,9 @@ extern "C" void cFEStatePreviewReward_updateTextureLoad(cFEStatePreviewReward* s
         self->mOrientation = 2;
     else
         self->mOrientation = 0;
-    sEntry001CFFF8 ent;
+    tIconInfo ent;
     SHAPE_name(data, 0, &ent);
-    ent.name[4] = 0;
+    ent.mName[4] = 0;
     self->mTextureID = ((cGame001CFFF8*)GrMan)->AddTexture(shapeHeader, &ent, 0, 1, -1);
     func_0019DC20(mgr, self->mCharID, self->mTextureFileIndex);
     self->mTextureFileIndex = -1;

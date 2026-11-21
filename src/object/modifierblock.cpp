@@ -206,10 +206,6 @@ struct sMbVEntryI2C70 {
     int (*fn)(void*);
 };
 
-struct sMbChild2C70 {
-    int field_0x0;
-    sMbVEntryV2C70* vt;     // 0x4
-};
 
 extern "C" void cUVScrollModifier_update(cUVScrollModifier* modifier);
 extern "C" void cTexFlipModifier_update(cTexFlipModifier* modifier);
@@ -235,11 +231,11 @@ extern "C" void tModifierBlock_preUpdate(tModifierBlock* self)
     if (self->TexFlip != 0) {
         cTexFlipModifier_update(self->TexFlip);
     }
-    sMbChild2C70* physicsModifier = (sMbChild2C70*)self->Physics;
+    cPhysicsModifier* physicsModifier = self->Physics;
     if (physicsModifier != 0) {
-        physicsModifier->vt[2].fn((char*)physicsModifier + physicsModifier->vt[2].delta);
-        physicsModifier = (sMbChild2C70*)self->Physics;
-        sMbVEntryI2C70* vt2 = (sMbVEntryI2C70*)physicsModifier->vt;
+        ((sMbVEntryV2C70*)physicsModifier->mVtbl)[2].fn((char*)physicsModifier + ((sMbVEntryV2C70*)physicsModifier->mVtbl)[2].delta);
+        physicsModifier = self->Physics;
+        sMbVEntryI2C70* vt2 = (sMbVEntryI2C70*)((sMbVEntryV2C70*)physicsModifier->mVtbl);
         if (vt2[4].fn((char*)physicsModifier + vt2[4].delta) == 0) {
             tModifierBlock_remPhysicsModifier(self);
         }
@@ -427,10 +423,6 @@ struct sMbVEntryP2F40 {
     void (*fn)(void*, int, float);
 };
 
-struct sMbChild2F40 {
-    int field_0x0;
-    sMbVEntryP2F40* vt;     // 0x4
-};
 
 struct sMbLink2F40 {
     sMbLink2F40* next;      // 0x0
@@ -463,9 +455,9 @@ extern "C" void tModifierBlock_signal(tModifierBlock* self, int id, float value)
     if (self->TexFlip != 0) {
         cTexFlipModifier_signal(self->TexFlip, id, value);
     }
-    sMbChild2F40* physicsModifier = (sMbChild2F40*)self->Physics;
+    cPhysicsModifier* physicsModifier = self->Physics;
     if (physicsModifier != 0) {
-        physicsModifier->vt[3].fn((char*)physicsModifier + physicsModifier->vt[3].delta, id, value);
+        ((sMbVEntryP2F40*)physicsModifier->mVtbl)[3].fn((char*)physicsModifier + ((sMbVEntryP2F40*)physicsModifier->mVtbl)[3].delta, id, value);
     }
     sMbLink2F40* firstEffect = (sMbLink2F40*)self->Effect.Next;
     if (firstEffect != 0) {

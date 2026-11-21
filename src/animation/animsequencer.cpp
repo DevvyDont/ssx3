@@ -560,10 +560,6 @@ struct sSeqNode_003142F8 {
     sSeqNode_003142F8* next; // 0xC8
 };
 
-struct sSequencer_003142F8 {
-    int mCount;                        // 0x0
-    sSeqNode_003142F8* mFirstSequence; // 0x4
-};
 
 extern "C" void* cAnimSequence_cAnimSequence(void* mem, int arg);
 
@@ -579,11 +575,11 @@ extern "C" void* cAnimSequence_cAnimSequence(void* mem, int arg);
  */
 extern "C" void* cAnimSequencer_newSequence(cAnimSequencer* seq, int sequenceID)
 {
-    sSequencer_003142F8* self = (sSequencer_003142F8*)seq;
+    cAnimSequencer* self = seq;
     sSeqNode_003142F8* node = (sSeqNode_003142F8*)cAnimSequence_cAnimSequence(cMemMan_alloc(208, str_AnimSequence, 0x20000000, 0), sequenceID);
-    node->next = self->mFirstSequence;
-    self->mFirstSequence = node;
-    self->mCount++;
+    node->next = ((sSeqNode_003142F8*)self->PlayList);
+    *(sSeqNode_003142F8**)&self->PlayList = node;
+    self->NumPlaying++;
     return node;
 }
 #endif
@@ -1007,10 +1003,6 @@ struct sSeqNode_003147F0 {
     sSeqNode_003147F0* next; // 0xC8
 };
 
-struct sSequencer_003147F0 {
-    int mCount;                        // 0x0
-    sSeqNode_003147F0* mFirstSequence; // 0x4
-};
 
 extern "C" void cAnimSequence_writeToReplayFrame(void* node, cAsStream* s);
 
@@ -1024,7 +1016,7 @@ extern "C" void cAnimSequence_writeToReplayFrame(void* node, cAsStream* s);
  */
 extern "C" void cAnimSequencer_writeToReplayFrame(cAnimSequencer* self, cAsStream* stream)
 {
-    stream->serialize(((sSequencer_003147F0*)self), 4);
+    stream->serialize((self), 4);
     sSeqNode_003147F0* n = (sSeqNode_003147F0*)self->PlayList;
     for (int i = 0; i < self->NumPlaying; i++)
     {

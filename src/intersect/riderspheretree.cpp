@@ -2034,17 +2034,10 @@ extern "C" void SphereTree_TransformAbs(SphereTree* self, sSphereVec4* transMat,
 //100%
 INCLUDE_ASM("intersect/riderspheretree", SphereTree_TransformRel);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct sOct_C770 {
-    sSphereVec4 dirs[8];    // 0x00
-    sSphereVec4 center;     // 0x80
-    float radius;           // 0x90
-};
 
 struct sSc_C770 { float x, y, z, w; };
 
-extern "C" void SphereTree_TransformRel_i(sOct_C770* self, sSphereVec4* m, float scale) __asm__("SphereTree_TransformRel");
+extern "C" void SphereTree_TransformRel_i(SphereTree* self, sSphereVec4* m, float scale) __asm__("SphereTree_TransformRel");
 
 /**
  * Transforms a sphere tree's four axis directions (their opposites follow) and its centre, then scales them
@@ -2053,14 +2046,14 @@ extern "C" void SphereTree_TransformRel_i(sOct_C770* self, sSphereVec4* m, float
  * @param mat  the transform (On Tour const t4Matrix& transMat)
  * @param scale  uniform scale (On Tour s)
  */
-extern "C" void SphereTree_TransformRel_i(sOct_C770* self, sSphereVec4* mat, float scale)
+extern "C" void SphereTree_TransformRel_i(SphereTree* self, sSphereVec4* mat, float scale)
 {
     for (int i = 0; i < 4; i++) {
-        self->dirs[i] = Scale_B2B8(mtxMulVec_9B90(mat, &self->dirs[i]), scale);
-        self->dirs[7 - i] = Scale_B2B8(self->dirs[i], -1.0f);
+        ((sSphereVec4*)&self->axis[0])[i] = Scale_B2B8(mtxMulVec_9B90(mat, &((sSphereVec4*)&self->axis[0])[i]), scale);
+        ((sSphereVec4*)&self->axis[0])[7 - i] = Scale_B2B8(((sSphereVec4*)&self->axis[0])[i], -1.0f);
     }
     sSphereVec4 scaledCenter;
-    sSphereVec4 transformedCenter = mtxMulVec_9B90(mat, &self->center);
+    sSphereVec4 transformedCenter = mtxMulVec_9B90(mat, (sSphereVec4*)&self->transCenter);
     sSc_C770 sc;
     sc.w = 1.0f;
     sc.x = scale;
@@ -2070,8 +2063,8 @@ extern "C" void SphereTree_TransformRel_i(sOct_C770* self, sSphereVec4* mat, flo
     scaledCenter.y = transformedCenter.y * sc.y;
     scaledCenter.z = transformedCenter.z * sc.z;
     scaledCenter.w = transformedCenter.w * sc.w;
-    self->center = scaledCenter;
-    self->radius = self->radius * scale;
+    *(sSphereVec4*)&self->transCenter = scaledCenter;
+    self->scale = self->scale * scale;
 }
 #endif
 
@@ -2542,13 +2535,6 @@ struct sSphereTreeInfo_D028 {
     unsigned char* masks;           // 0x28
 };
 
-struct sSphereOct_D028 {
-    sSphereVec4 dirs[8];            // 0x00
-    char pad_0x80[0x10];
-    float scale;                    // 0x90
-    char pad_0x94[4];
-    sSphereTreeInfo_D028* tree;     // 0x98
-};
 
 // PORT: PS2-only VU0 inline asm (v * s).
 static inline sSphereVec4 Scale_D028(const sSphereVec4& v, float s)
@@ -2601,20 +2587,20 @@ static inline sSphereVec4 Add_D028(const sSphereVec4& a, const sSphereVec4& b)
  */
 extern "C" int SphereTree_isBoxCollision(SphereTree* selfp, t3Vector* boxMin, t3Vector* boxMax, t4Vector* pos, int depth, int base, t4Vector* outPos, t4Vector* outNormal)
 {
-    sSphereOct_D028* self = (sSphereOct_D028*)selfp;
+    SphereTree* self = selfp;
     sSphereVec4 normal;
     sSphereVec4 dir;
     float dist;
-    if (gIsBoxSphereInt(boxMin, boxMax, pos, &normal, &dir, &dist, self->tree->levels[depth].radius * self->scale) == 0) {
+    if (gIsBoxSphereInt(boxMin, boxMax, pos, &normal, &dir, &dist, ((sSphereTreeInfo_D028*)self->treeInfo)->levels[depth].radius * self->scale) == 0) {
         return 0;
     }
-    unsigned char mask = self->tree->masks[base];
-    if (depth < self->tree->depth && mask != 0) {
-        float off = self->tree->levels[depth + 1].offset;
+    unsigned char mask = ((sSphereTreeInfo_D028*)self->treeInfo)->masks[base];
+    if (depth < ((sSphereTreeInfo_D028*)self->treeInfo)->depth && mask != 0) {
+        float off = ((sSphereTreeInfo_D028*)self->treeInfo)->levels[depth + 1].offset;
         for (int i = 0; i < 8; i++) {
             if ((mask >> i) & 1) {
-                sSphereVec4 childPos = Add_D028(*(sSphereVec4*)pos, Scale_D028(self->dirs[i], off));
-                if (SphereTree_isBoxCollision((SphereTree*)self, boxMin, boxMax, (t4Vector*)(&childPos), depth + 1, (i + 1) * self->tree->levels[depth].stride + base, outPos, outNormal)) {
+                sSphereVec4 childPos = Add_D028(*(sSphereVec4*)pos, Scale_D028(((sSphereVec4*)&self->axis[0])[i], off));
+                if (SphereTree_isBoxCollision((SphereTree*)self, boxMin, boxMax, (t4Vector*)(&childPos), depth + 1, (i + 1) * ((sSphereTreeInfo_D028*)self->treeInfo)->levels[depth].stride + base, outPos, outNormal)) {
                     return 1;
                 }
             }
@@ -2645,14 +2631,6 @@ struct sSphereTreeInfo_D208 {
     unsigned char* masks;           // 0x28
 };
 
-struct sSphereOct_D208 {
-    sSphereVec4 dirs[8];            // 0x00
-    char pad_0x80[0x10];
-    float scale;                    // 0x90
-    float best;                     // 0x94: deepest penetration found so far
-    sSphereTreeInfo_D208* tree;     // 0x98
-    int order[8];                   // 0x9C: child visiting order
-};
 
 // PORT: PS2-only VU0 inline asm (v * s).
 static inline sSphereVec4 Scale_D208(const sSphereVec4& v, float s)
@@ -2747,30 +2725,30 @@ static inline sSphereVec4 ZeroW_D208(const sSphereVec4& in)
  */
 extern "C" void SphereTree_checkPlaneCollision(SphereTree* selfp, void* plane, t4Vector* pos, int depth, int base, t4Vector* outA, t4Vector* outB)
 {
-    sSphereOct_D208* self = (sSphereOct_D208*)selfp;
+    SphereTree* self = selfp;
     float planeDist = Dot_D208(*(sSphereVec4*)plane, *(sSphereVec4*)pos);
-    float nodeRadius = self->tree->levels[depth].radius * self->scale;
-    if (!(planeDist < nodeRadius + self->best))
+    float nodeRadius = ((sSphereTreeInfo_D208*)self->treeInfo)->levels[depth].radius * self->scale;
+    if (!(planeDist < nodeRadius + self->worstCase))
         return;
     float distance;
-    unsigned char mask = self->tree->masks[base];
-    if (depth < self->tree->depth && mask != 0) {
-        distance = self->tree->levels[depth + 1].offset;
+    unsigned char mask = ((sSphereTreeInfo_D208*)self->treeInfo)->masks[base];
+    if (depth < ((sSphereTreeInfo_D208*)self->treeInfo)->depth && mask != 0) {
+        distance = ((sSphereTreeInfo_D208*)self->treeInfo)->levels[depth + 1].offset;
         for (int i = 0; i < 8; i++) {
-            int k = self->order[i];
+            int k = self->sortAxis[i];
             if ((mask >> k) & 1) {
-                sSphereVec4 childPos = Add_D208(*(sSphereVec4*)pos, Scale_D208(self->dirs[k], distance));
-                SphereTree_checkPlaneCollision((SphereTree*)self, plane, (t4Vector*)(&childPos), depth + 1, (k + 1) * self->tree->levels[depth].stride + base, outA, outB);
+                sSphereVec4 childPos = Add_D208(*(sSphereVec4*)pos, Scale_D208(((sSphereVec4*)&self->axis[0])[k], distance));
+                SphereTree_checkPlaneCollision((SphereTree*)self, plane, (t4Vector*)(&childPos), depth + 1, (k + 1) * ((sSphereTreeInfo_D208*)self->treeInfo)->levels[depth].stride + base, outA, outB);
             }
         }
         return;
     }
     distance = planeDist - nodeRadius;
-    if (distance < self->best) {
+    if (distance < self->worstCase) {
         sSphereVec4 n = ZeroW_D208(*(sSphereVec4*)plane);
         *(sSphereVec4*)outA = Scale_D208(n, distance);
         *(sSphereVec4*)outB = Sub_D208(*(sSphereVec4*)pos, Scale_D208(n, planeDist));
-        self->best = distance;
+        self->worstCase = distance;
     }
 }
 #endif
@@ -3473,18 +3451,18 @@ extern "C" sRiderCapsule_E100* cWorldLine_cWorldLine(cWorldLine* self, sSphereVe
     self->mVtbl = (void**)cWorldLine_vtbl;
     self->useRejectNormal = 0;
     self->isTransformed = 0;
-    (*(sSphereVec4*)&self->origP0) = *startPoint;
-    (*(sSphereVec4*)&self->p0) = (*(sSphereVec4*)&self->origP0);
-    (*(sSphereVec4*)&self->origDp) = sphereCapsuleSub(endPoint, startPoint);
-    (*(sSphereVec4*)&self->dp) = (*(sSphereVec4*)&self->origDp);
+    *(sSphereVec4*)&self->origP0 = *startPoint;
+    *(sSphereVec4*)&self->p0 = *(sSphereVec4*)&self->origP0;
+    *(sSphereVec4*)&self->origDp = sphereCapsuleSub(endPoint, startPoint);
+    *(sSphereVec4*)&self->dp = *(sSphereVec4*)&self->origDp;
     self->idealParam = idealParam;
-    (*(sSphereVec4*)&self->boxMax) = sSphereV4_E100(startPoint->x > endPoint->x ? startPoint->x : endPoint->x,
+    *(sSphereVec4*)&self->boxMax = sSphereV4_E100(startPoint->x > endPoint->x ? startPoint->x : endPoint->x,
                                startPoint->y > endPoint->y ? startPoint->y : endPoint->y,
                                startPoint->z > endPoint->z ? startPoint->z : endPoint->z, 1.0f);
-    (*(sSphereVec4*)&self->boxMin) = sSphereV4_E100(startPoint->x < endPoint->x ? startPoint->x : endPoint->x,
+    *(sSphereVec4*)&self->boxMin = sSphereV4_E100(startPoint->x < endPoint->x ? startPoint->x : endPoint->x,
                                startPoint->y < endPoint->y ? startPoint->y : endPoint->y,
                                startPoint->z < endPoint->z ? startPoint->z : endPoint->z, 1.0f);
-    (*(sSphereVec4*)&self->boxCenter) = sphereCapsuleDiv(sphereCapsuleAdd(&(*(sSphereVec4*)&self->boxMin), &(*(sSphereVec4*)&self->boxMax)), 2.0f);
+    *(sSphereVec4*)&self->boxCenter = sphereCapsuleDiv(sphereCapsuleAdd((sSphereVec4*)&self->boxMin, (sSphereVec4*)&self->boxMax), 2.0f);
     return ((sRiderCapsule_E100*)self);
 }
 #endif
@@ -3505,7 +3483,7 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldLine_IsInBoxTransformed);
 // segment self->p0 .. p0+dir overlaps the box [mn, mx]?
 extern "C" int cWorldLine_IsInBoxTransformed(cWorldLine* self, sSphereVec4* mn, sSphereVec4* mx)
 {
-    sSphereVec4 endPoint = sphereCapsuleAdd(&(*(sSphereVec4*)&self->p0), &(*(sSphereVec4*)&self->dp));
+    sSphereVec4 endPoint = sphereCapsuleAdd((sSphereVec4*)&self->p0, (sSphereVec4*)&self->dp);
     if ((self->p0.x < mn->x && endPoint.x < mn->x) || (mx->x < self->p0.x && mx->x < endPoint.x) ||
         (self->p0.y < mn->y && endPoint.y < mn->y) || (mx->y < self->p0.y && mx->y < endPoint.y) ||
         (self->p0.z < mn->z && endPoint.z < mn->z) || (mx->z < self->p0.z && mx->z < endPoint.z)) {
@@ -3540,8 +3518,8 @@ struct sSphereProd_E398 : sSphereV4_E100 {
 extern "C" void cWorldLine_Transform(cWorldLine* self, sSphereVec4* mat, float scale)
 {
     sSphereV4_E100 sc(scale, scale, scale, 1.0f);
-    (*(sSphereVec4*)&self->p0) = sSphereProd_E398(mtxMulVec_9B90(mat, &(*(sSphereVec4*)&self->origP0)), sc);
-    (*(sSphereVec4*)&self->dp) = sSphereProd_E398(mtxMulVec_9B90(mat, &(*(sSphereVec4*)&self->origDp)), sc);
+    *(sSphereVec4*)&self->p0 = sSphereProd_E398(mtxMulVec_9B90(mat, (sSphereVec4*)&self->origP0), sc);
+    *(sSphereVec4*)&self->dp = sSphereProd_E398(mtxMulVec_9B90(mat, (sSphereVec4*)&self->origDp), sc);
     self->isTransformed = 1;
 }
 #endif
@@ -3708,7 +3686,7 @@ struct sCapsuleV_E5E8 {
  */
 extern "C" int cWorldLine_Is2SidedTriInt(cWorldLine* self, t4Vector* vertA, t4Vector* vertB, t4Vector* vertC, sSphereVec4* normal, t4Vector* ipos, t4Vector* inorm, void* hitParam)
 {
-    float dp = vu0Dot_E4D0((*(sSphereVec4*)&self->dp), *normal);
+    float dp = vu0Dot_E4D0(*(sSphereVec4*)&self->dp, *normal);
     sVE_E5E8* vt;
     if (dp < 0.0f) {
         vt = (sVE_E5E8*)self->mVtbl;
@@ -3869,14 +3847,14 @@ extern "C" int cWorldLine_IsBoxInt(cWorldLine* self, float* bmin, float* bmax, s
         sHit_E690* entryHit = &hits[0];
         reset_E690(entryHit);
         entryHit->nrm = D_004FF260[fmin];
-        entryHit->pos = vu0Add_E4D0((*(sSphereVec4*)&self->p0), vu0Scale_E4D0((*(sSphereVec4*)&self->dp), tmin));
+        entryHit->pos = vu0Add_E4D0(*(sSphereVec4*)&self->p0, vu0Scale_E4D0(*(sSphereVec4*)&self->dp, tmin));
         entryHit->dist = tmin;
         n = 1;
     }
     if (tmax < 1.0f) {
         reset_E690(&hits[n]);
         hits[n].nrm = D_004FF260[fmax];
-        hits[n].pos = vu0Add_E4D0((*(sSphereVec4*)&self->p0), vu0Scale_E4D0((*(sSphereVec4*)&self->dp), tmax));
+        hits[n].pos = vu0Add_E4D0(*(sSphereVec4*)&self->p0, vu0Scale_E4D0(*(sSphereVec4*)&self->dp, tmax));
         hits[n].dist = tmax;
         n++;
     }
@@ -4069,7 +4047,7 @@ extern "C" void cWorldLine_IntersectSubPatch(cWorldLine* line, sPatch_E9A0* patc
     float duy = vu0Dot_E4D0(vPowers, Column_E9A0(rowVecs, 1));
     float duz = vu0Dot_E4D0(vPowers, Column_E9A0(rowVecs, 2));
     for (int i = 0; i < 4; i++) {
-        sVec3_E9A0 originDelta(vu0Sub_E9A0((*(sSphereVec4*)&line->p0), surfPos));
+        sVec3_E9A0 originDelta(vu0Sub_E9A0(*(sSphereVec4*)&line->p0, surfPos));
         // Jacobian [dP/du dP/dv -dir], filled row by row
         sMat3_E9A0 jacobian;
         jacobian.m[0] = dux;
@@ -4218,8 +4196,8 @@ extern "C" sRiderSphere_2F650* cWorldRider_cWorldRider(cWorldRider* self, cRider
     self->origSt = (cRiderSphereTree*)((void*)tree);
     self->st = (cRiderSphereTree*)((void*)tree);
     self->mPrecision = flag == 0;
-    cRiderSphereTree_GetMaskBoundBox(tree, &(*(sVec4_2F650*)&self->boxMin), &(*(sVec4_2F650*)&self->boxMax));
-    (*(sVec4_2F650*)&self->boxCenter) = vecScale_2F650(vecAdd_2F650(&(*(sVec4_2F650*)&self->boxMin), &(*(sVec4_2F650*)&self->boxMax)), 0.5f);
+    cRiderSphereTree_GetMaskBoundBox(tree, (sVec4_2F650*)&self->boxMin, (sVec4_2F650*)&self->boxMax);
+    *(sVec4_2F650*)&self->boxCenter = vecScale_2F650(vecAdd_2F650((sVec4_2F650*)&self->boxMin, (sVec4_2F650*)&self->boxMax), 0.5f);
     return ((sRiderSphere_2F650*)self);
 }
 #endif
@@ -4672,20 +4650,20 @@ extern "C" sRiderSphere_FB48* cWorldSphere_cWorldSphere(cWorldSphere* self, sSph
     } else {
         self->mPrecision = 1;
     }
-    (*(sSphereVec4*)&self->origCen) = *sphereCenter;
-    (*(sSphereVec4*)&self->cen) = (*(sSphereVec4*)&self->origCen);
+    *(sSphereVec4*)&self->origCen = *sphereCenter;
+    *(sSphereVec4*)&self->cen = *(sSphereVec4*)&self->origCen;
     self->rad = sphereRadius;
     self->origRad = sphereRadius;
     boxCorner.x = sphereCenter->x + sphereRadius;
     boxCorner.y = sphereCenter->y + sphereRadius;
     boxCorner.z = sphereCenter->z + sphereRadius;
     boxCorner.w = 1.0f;
-    (*(sSphereVec4*)&self->boxMax) = boxCorner;
+    *(sSphereVec4*)&self->boxMax = boxCorner;
     boxCorner.x = sphereCenter->x - sphereRadius;
     boxCorner.y = sphereCenter->y - sphereRadius;
     boxCorner.z = sphereCenter->z - sphereRadius;
-    (*(sSphereVec4*)&self->boxMin) = boxCorner;
-    (*(sSphereVec4*)&self->boxCenter) = *sphereCenter;
+    *(sSphereVec4*)&self->boxMin = boxCorner;
+    *(sSphereVec4*)&self->boxCenter = *sphereCenter;
     return ((sRiderSphere_FB48*)self);
 }
 #endif

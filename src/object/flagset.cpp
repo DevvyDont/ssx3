@@ -213,22 +213,6 @@ struct sFlagMesh_B818 {
     sFlagVEntry_B818* vt;   // 0x4
 };
 
-struct sFlagElem_B818 {
-    char pad0[0x4];
-    float speed[4];         // 0x4
-    char pad14[0x38];
-    float blend;            // 0x4C
-    float scrollU;          // 0x50
-    float scrollV;          // 0x54
-    char pad58[0x4];
-    int active;             // 0x5C
-    sFlagMesh_B818* mesh;   // 0x60
-    char pad64[0x14];
-    float phase[4];         // 0x78
-    float u;                // 0x88
-    float v;                // 0x8C
-    int parity;             // 0x90
-};
 
 /**
  * Updates a flag set: advances its wave clocks, regenerates the cloth every other frame and scrolls its texture.
@@ -244,41 +228,41 @@ struct sFlagElem_B818 {
  */
 extern "C" void cFlagSet_update(cFlagSet* elem)
 {
-    sFlagElem_B818* self = (sFlagElem_B818*)elem;
+    cFlagSet* self = elem;
     if (D_004A4240 == 0) {
         return;
     }
-    if (self->active == 0) {
+    if (self->mCurrentNumInstances == 0) {
         return;
     }
-    if (self->mesh == 0) {
+    if (((sFlagMesh_B818*)self->mGridMesh) == 0) {
         return;
     }
     char* wind = (char*)cObjectInterface_getFlagManager();
-    float k = self->blend;
+    float k = self->mFlagData.mMinWindFactor;
     float windBlend = k + *(float*)(wind + 0x10) * (1.0f - k);
     int i;
     for (i = 0; i < 4; i++) {
-        self->phase[i] += self->speed[i] * windBlend;
-        if (1.0f <= self->phase[i]) {
-            self->phase[i] -= 1.0f;
+        self->mFlagTime[i] += self->mFlagData.mSpeed[i] * windBlend;
+        if (1.0f <= self->mFlagTime[i]) {
+            self->mFlagTime[i] -= 1.0f;
         }
     }
-    if (cObjectInterface_getAITick() % 2 == self->parity) {
+    if (cObjectInterface_getAITick() % 2 == self->mFrameToUpdateGrid) {
         sFlagVert_B818 verts[50];
         cFlagSet_updateGrid((cFlagSet*)self, (t3Vector*)verts);
-        sFlagMesh_B818* gridMesh = self->mesh;
+        sFlagMesh_B818* gridMesh = ((sFlagMesh_B818*)self->mGridMesh);
         sFlagVEntry_B818* setVertsSlot = &gridMesh->vt[3];
         setVertsSlot->fn((char*)gridMesh + setVertsSlot->delta, verts);
     }
-    if (0.001f < self->scrollU || 0.001f < self->scrollV) {
-        self->u += self->scrollU;
-        if (1.0f < self->u) {
-            self->u -= 1.0f;
+    if (0.001f < self->mFlagData.mUScrollRate || 0.001f < self->mFlagData.mVScrollRate) {
+        self->mScrollU += self->mFlagData.mUScrollRate;
+        if (1.0f < self->mScrollU) {
+            self->mScrollU -= 1.0f;
         }
-        self->v += self->scrollV;
-        if (1.0f < self->v) {
-            self->v -= 1.0f;
+        self->mScrollV += self->mFlagData.mVScrollRate;
+        if (1.0f < self->mScrollV) {
+            self->mScrollV -= 1.0f;
         }
     }
 }
@@ -684,9 +668,6 @@ extern "C" void* cObjNode_cObjNode1(void* self, void* a1);
 extern "C" void* cFlagSet_cFlagSet(void* self);
 extern void* cFlagManager_vtbl[];
 
-struct sFlagSetElem_C428 {
-    char data[0x188];
-};
 
 struct sFlagSet_C428 {
     char pad0[0xC];
@@ -695,7 +676,7 @@ struct sFlagSet_C428 {
     float field_0x14;               // 0x14
     float field_0x18;               // 0x18
     int field_0x1c;                 // 0x1C
-    sFlagSetElem_C428 elems[15];    // 0x20
+    cFlagSet elems[15];    // 0x20
 };
 
 /**
@@ -707,7 +688,7 @@ struct sFlagSet_C428 {
 extern "C" sFlagSet_C428* cFlagManager_cFlagManager(cFlagManager* self, void* bucket)
 {
     int i;
-    sFlagSetElem_C428* elem = ((sFlagSetElem_C428*)&self->mFlagSets[0]);
+    cFlagSet* elem = ((&self->mFlagSets[0]));
     cObjNode_cObjNode1(((sFlagSet_C428*)self), bucket);
     self->mVtbl = cFlagManager_vtbl;
     for (i = 14; i != -1; i--, elem++) {
@@ -767,15 +748,10 @@ extern "C" void cFlagManager__cFlagManager(cFlagManager* self, int flags)
 //100%
 INCLUDE_ASM("object/flagset", cFlagManager_AddFlag);
 #ifdef SKIP_ASM
-struct sFlagSetElem_C548 {
-    char pad0[0x5C];
-    int active; // 0x5C
-    char pad60[0x188 - 0x60];
-};
 
 struct sFlagSet_C548 {
     char pad0[0x20];
-    sFlagSetElem_C548 elems[15]; // 0x20
+    cFlagSet elems[15]; // 0x20
 };
 
 extern "C" int cFlagSet_SameKind(void* self, void* data, void* ctx);
@@ -794,16 +770,16 @@ extern "C" void cFlagSet_AddFlag(void* self, void* data, void* ctx);
 extern "C" void cFlagManager_AddFlag(cFlagManager* self, void* node, void* desc)
 {
     int i;
-    sFlagSetElem_C548* existing;
-    for (i = 0, existing = ((sFlagSetElem_C548*)&self->mFlagSets[0]); i < 15; i++, existing++) {
-        if (existing->active != 0 && cFlagSet_SameKind(existing, desc, node) != 0) {
+    cFlagSet* existing;
+    for (i = 0, existing = ((&self->mFlagSets[0])); i < 15; i++, existing++) {
+        if (existing->mCurrentNumInstances != 0 && cFlagSet_SameKind(existing, desc, node) != 0) {
             cFlagSet_AddFlag(existing, desc, node);
             return;
         }
     }
-    sFlagSetElem_C548* freeElem = ((sFlagSetElem_C548*)&self->mFlagSets[0]);
+    cFlagSet* freeElem = ((&self->mFlagSets[0]));
     for (int j = 0; j < 15; j++, freeElem++) {
-        if (freeElem->active == 0) {
+        if (freeElem->mCurrentNumInstances == 0) {
             cFlagSet_AddFlag(freeElem, desc, node);
             return;
         }
@@ -814,15 +790,10 @@ extern "C" void cFlagManager_AddFlag(cFlagManager* self, void* node, void* desc)
 //100%
 INCLUDE_ASM("object/flagset", cFlagManager_RemoveFlag);
 #ifdef SKIP_ASM
-struct sFlagSetElem_C600 {
-    char pad0[0x5C];
-    int active; // 0x5C
-    char pad60[0x188 - 0x60];
-};
 
 struct sFlagSet_C600 {
     char pad0[0x20];
-    sFlagSetElem_C600 elems[15]; // 0x20
+    cFlagSet elems[15]; // 0x20
 };
 
 extern "C" int cFlagSet_RemoveFlag(void* elem, void* arg);
@@ -837,9 +808,9 @@ extern "C" int cFlagSet_RemoveFlag(void* elem, void* arg);
 extern "C" void cFlagManager_RemoveFlag(cFlagManager* self, void* instRecord)
 {
     int i;
-    sFlagSetElem_C600* elem = ((sFlagSetElem_C600*)&self->mFlagSets[0]);
+    cFlagSet* elem = ((&self->mFlagSets[0]));
     for (i = 0; i < 15; i++, elem++) {
-        if (elem->active != 0 && cFlagSet_RemoveFlag(elem, instRecord) != 0) {
+        if (elem->mCurrentNumInstances != 0 && cFlagSet_RemoveFlag(elem, instRecord) != 0) {
             return;
         }
     }
@@ -849,11 +820,6 @@ extern "C" void cFlagManager_RemoveFlag(cFlagManager* self, void* instRecord)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/flagset", cFlagManager_update);
 #ifdef SKIP_ASM
-struct sFlagSetElem_C668 {
-    char pad0[0x5C];
-    int active; // 0x5C
-    char pad60[0x188 - 0x60];
-};
 
 struct sFlagSet_C668 {
     char pad0[0x10];
@@ -861,7 +827,7 @@ struct sFlagSet_C668 {
     float base;     // 0x14
     float delta;    // 0x18
     float t;        // 0x1C
-    sFlagSetElem_C668 elems[15]; // 0x20
+    cFlagSet elems[15]; // 0x20
 };
 
 extern "C" int cObjectInterface_getPeakNumber();
@@ -916,8 +882,8 @@ extern "C" void cFlagManager_update(cFlagManager* self)
     self->mCurrentWindFactor = self->mWindBase + self->mWindDelta * self->mWindTime;
     int i;
     for (i = 0; i < 15; i++) {
-        sFlagSetElem_C668* entry = &((sFlagSetElem_C668*)&self->mFlagSets[0])[i];
-        if (entry->active != 0) {
+        cFlagSet* entry = &((&self->mFlagSets[0]))[i];
+        if (entry->mCurrentNumInstances != 0) {
             cFlagSet_update((cFlagSet*)entry);
         }
     }
@@ -960,13 +926,10 @@ extern "C" void cFlagManager_render(cFlagManager* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/flagset", cFlagManager_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sFlagSetElem_C848 {
-    char data[0x188];
-};
 
 struct sFlagSet_C848 {
     char pad0[0x20];
-    sFlagSetElem_C848 elems[15]; // 0x20
+    cFlagSet elems[15]; // 0x20
 };
 
 extern "C" void cFlagSet_writeToReplayFrame(cFlagSet* elem, void* arg);
@@ -983,7 +946,7 @@ extern "C" void cFlagManager_writeToReplayFrame(cFlagManager* self, void* stream
 {
     int i;
     for (i = 0; i < 15; i++) {
-        cFlagSet_writeToReplayFrame((cFlagSet*)(&((sFlagSetElem_C848*)&self->mFlagSets[0])[i]), stream);
+        cFlagSet_writeToReplayFrame((cFlagSet*)(&((&self->mFlagSets[0]))[i]), stream);
     }
 }
 #endif
@@ -991,13 +954,10 @@ extern "C" void cFlagManager_writeToReplayFrame(cFlagManager* self, void* stream
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/flagset", cFlagManager_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sFlagSetElem_C898 {
-    char data[0x188];
-};
 
 struct sFlagSet_C898 {
     char pad0[0x20];
-    sFlagSetElem_C898 elems[15]; // 0x20
+    cFlagSet elems[15]; // 0x20
 };
 
 extern "C" void cFlagSet_readFromReplayFrame(cFlagSet* elem, void* arg);
@@ -1013,7 +973,7 @@ extern "C" void cFlagManager_readFromReplayFrame(cFlagManager* self, void* strea
 {
     int i;
     for (i = 0; i < 15; i++) {
-        cFlagSet_readFromReplayFrame((cFlagSet*)(&((sFlagSetElem_C898*)&self->mFlagSets[0])[i]), stream);
+        cFlagSet_readFromReplayFrame((cFlagSet*)(&((&self->mFlagSets[0]))[i]), stream);
     }
 }
 #endif
@@ -1158,7 +1118,7 @@ extern "C" cFenceNode_C8E8* cFenceNode_cFenceNode1(cFenceNode* self, int bucket,
     ((unsigned int*)&self->FenceData)[0] = 0xFFFFFFFF;
     self->mVtbl = cFenceNode_vtbl;
     new (((t3Vector_C8E8*)&self->Verts[0])) t3Vector_C8E8[16];
-    (*(tMakeFenceData_C8E8*)&self->FenceData) = *tdata;
+    *(tMakeFenceData_C8E8*)&self->FenceData = *tdata;
     *(int*)&self->ForceMax = 0;
     *(int*)&self->Force = 0;
     *(int*)&self->ForceStep = 0;
@@ -1796,11 +1756,6 @@ extern "C" void cFenceNode_onCollide(cFenceNode* self, void* obj)
 //100%
 INCLUDE_ASM("object/flagset", cFenceNode_setForce);
 #ifdef SKIP_ASM
-struct sFlag34D6F0 {
-    char pad0[0x30];
-    float wind;     // 0x30
-    float speed;    // 0x34
-};
 
 // PORT: SN abs.s asm helper (PS2 FPU).
 static inline float fabs_34D6F0(float x)
@@ -1821,21 +1776,21 @@ static inline float fabs_34D6F0(float x)
  */
 extern "C" void cFenceNode_setForce(cFenceNode* vself, float force)
 {
-    sFlag34D6F0* self = (sFlag34D6F0*)vself;
-    self->wind += fabs_34D6F0(force);
-    if (self->wind > 1.0f) {
-        self->wind = 1.0f;
+    cFenceNode* self = vself;
+    self->ForceMax += fabs_34D6F0(force);
+    if (self->ForceMax > 1.0f) {
+        self->ForceMax = 1.0f;
     }
-    if (self->speed == 0.0f) {
+    if (self->ForceStep == 0.0f) {
         if (force < 0.0f) {
-            self->speed = self->wind * -0.1f;
+            self->ForceStep = self->ForceMax * -0.1f;
         } else {
-            self->speed = self->wind * 0.1f;
+            self->ForceStep = self->ForceMax * 0.1f;
         }
-    } else if (self->speed < 0.0f) {
-        self->speed = self->wind * -0.1f;
+    } else if (self->ForceStep < 0.0f) {
+        self->ForceStep = self->ForceMax * -0.1f;
     } else {
-        self->speed = self->wind * 0.1f;
+        self->ForceStep = self->ForceMax * 0.1f;
     }
 }
 #endif

@@ -352,13 +352,6 @@ INCLUDE_ASM("ui/uianimation", cUIAnimation_updateThing);
 #ifdef SKIP_ASM
 struct sUIAnimVt75E0 { short delta; short index; void (*fn)(void*, int, float); };
 struct sUIAnimHdr75E0 { short f0; unsigned short nframes; unsigned int ntracks; };
-struct sUIAnim75E0 {
-    sUIAnimHdr75E0* hdr;        // 0x0
-    char* tracks;               // 0x4
-    short cur;                  // 0x8
-    short frame;                // 0xA
-    unsigned short start;       // 0xC
-};
 
 /**
  * Applies the animation's current frame to a UI object, once per new frame.
@@ -372,24 +365,24 @@ struct sUIAnim75E0 {
  * @param mode      playback mode; only the low 3 bits count
  * @param FrameNum  the external clock frame, used in mode 0
  */
-extern "C" void cUIAnimation_updateThing(sUIAnim75E0* self, cUIThing* obj, int mode, unsigned short FrameNum)
+extern "C" void cUIAnimation_updateThing(cUIAnimation* self, cUIThing* obj, int mode, unsigned short FrameNum)
 {
-    unsigned short frame = self->frame;
-    if ((mode & 7) == 0 && self->start != 0xFFFF) {
-        if (FrameNum < self->start) return;
-        frame = FrameNum - self->start;
-        if (self->frame == frame) return;
-        self->frame = frame;
+    unsigned short frame = self->mFrameNum;
+    if ((mode & 7) == 0 && self->mScreenStartFrame != 0xFFFF) {
+        if (FrameNum < self->mScreenStartFrame) return;
+        frame = FrameNum - self->mScreenStartFrame;
+        if (self->mFrameNum == frame) return;
+        self->mFrameNum = frame;
     }
-    if (self->cur == frame) return;
-    if (frame < self->hdr->nframes) {
-        for (unsigned int i = 0; i < self->hdr->ntracks; i++) {
-            float chanValue = cUIAnimationChannel_evalAtFrameFloat((cUIAnimationChannel_evalAtFrameFloat_sAnim**)(self->tracks + (i << 2)), frame);
+    if (self->mLastFrameEval == frame) return;
+    if (frame < ((sUIAnimHdr75E0*)self->mpAnimHeader)->nframes) {
+        for (unsigned int i = 0; i < ((sUIAnimHdr75E0*)self->mpAnimHeader)->ntracks; i++) {
+            float chanValue = cUIAnimationChannel_evalAtFrameFloat((cUIAnimationChannel_evalAtFrameFloat_sAnim**)(((char*)self->mpAnimChannels) + (i << 2)), frame);
             sUIAnimVt75E0* vt = (sUIAnimVt75E0*)obj->mVtbl;
-            vt[12].fn(((char*)obj) + vt[12].delta, cUIAnimationChannel_getAnimChanType(self->tracks + (i << 2)), chanValue);
+            vt[12].fn(((char*)obj) + vt[12].delta, cUIAnimationChannel_getAnimChanType(((char*)self->mpAnimChannels) + (i << 2)), chanValue);
         }
     }
-    self->cur = frame;
+    self->mLastFrameEval = frame;
 }
 #endif
 

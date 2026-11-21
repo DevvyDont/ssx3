@@ -324,8 +324,8 @@ extern "C" void nash_Nash_movenode(void* world, int type, int id, sBox0035C4E0* 
  */
 extern "C" void cRailModifier_update(cRailModifier* self)
 {
-    sBox0035C4E0* box = &(*(sBox0035C4E0*)&self->BoundBox);
-    sBox0035C4E0 old = (*(sBox0035C4E0*)&self->BoundBox);
+    sBox0035C4E0* box = (sBox0035C4E0*)&self->BoundBox;
+    sBox0035C4E0 old = *(sBox0035C4E0*)&self->BoundBox;
     cRailModifier_updateBoundBox((self));
     nash_Nash_movenode(cObjectInterface_getNash(), 2, (int)self->Node, box, &old);
 }
@@ -1617,17 +1617,17 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, char* rd
     tPose x = tPose_tPose((char*)self->m_pInstance + 0x10);
     {
         sRmVec4 rotated;
-        QuatRotTo_DA70(rotated, (*(sRmVec4*)&x.Q), *(sRmVec4*)&self->COMOffset);
+        QuatRotTo_DA70(rotated, *(sRmVec4*)&x.Q, *(sRmVec4*)&self->COMOffset);
         offset = rotated;
         sRmVec4 shift;
         sRmVec4 rotatedAgain;
-        QuatRotTo_DA70(rotatedAgain, (*(sRmVec4*)&x.Q), offset);
+        QuatRotTo_DA70(rotatedAgain, *(sRmVec4*)&x.Q, offset);
         shift = rotatedAgain;
-        AddTo_DA70((*(sRmVec4*)&x.P), shift);
+        AddTo_DA70(*(sRmVec4*)&x.P, shift);
     }
     *(&self->Pose) = x;
     tPose y = cRollerModifier_getBodyPose_DA70(((char*)self));
-    QuatPosToMtx_DA70(&self->Transform, (*(sRmVec4*)&y.Q), (*(sRmVec4*)&y.P));
+    QuatPosToMtx_DA70(&self->Transform, *(sRmVec4*)&y.Q, *(sRmVec4*)&y.P);
     cRollerModifier_updateMOI(((char*)self));
     cRigidBody_updateImplicit((sRmBody*)(&self->Pose));
     self->ContactElastic = 0.10000000149011612f;
@@ -1898,7 +1898,7 @@ extern "C" sRailDF70* cRollerModifier_cRollerModifier1(sRailDF70* self, cStreamD
     self->rot.m[7] *= 0.5f;
     self->rot.m[8] *= 0.5f;
     tPose x = cRollerModifier_getBodyPose_DA70(self);
-    QuatPosToMtx_DA70(&self->xf, (*(sRmVec4*)&x.Q), (*(sRmVec4*)&x.P));
+    QuatPosToMtx_DA70(&self->xf, *(sRmVec4*)&x.Q, *(sRmVec4*)&x.P);
     SphereTree_TransformAbs(self->mover, &self->xf, 1.0f);
     cRollerModifier_updateMOI(self);
     cRigidBody_updateImplicit((sRmBody*)self->body);
@@ -2365,7 +2365,7 @@ static inline void setPosEDC8(cRollerModifier* rollerModifier, const sRmVec4& v)
 
 static inline void setOutDirEDC8(cRollerModifier* rollerModifier, const sRmVec4& v)
 {
-    (*(sRmBody*)&rollerModifier->Pose).dir = toDirEDC8(&(*(sRmBody*)&rollerModifier->Pose), v);
+    (*(sRmBody*)&rollerModifier->Pose).dir = toDirEDC8((sRmBody*)&rollerModifier->Pose, v);
     (*(sRmBody*)&rollerModifier->Pose).outDir = v;
 }
 
@@ -2389,17 +2389,17 @@ extern "C" void cRollerModifier_collide(cRollerModifier* self)
         sRmVec4 push = vu0ScaleEDC8(hit.normal, overlap + 2.0f);
         cRollerModifier_translateMe((sRmBody*)self, &push);
         float k = 0.975f;
-        setPosEDC8((self), vu0ScaleEDC8((*(sRmVec4*)&self->L), k));
-        setOutDirEDC8((self), vu0ScaleEDC8((*(sRmVec4*)&self->V), k));
-        float dp = vu0DotEDC8(vu0AddEDC8((*(sRmVec4*)&self->V), vu0CrossEDC8((*(sRmVec4*)&self->W), vu0SubEDC8(hit.pos, *(sRmVec4*)&(*(sRmBody*)&self->Pose)))), hit.normal);
+        setPosEDC8((self), vu0ScaleEDC8(*(sRmVec4*)&self->L, k));
+        setOutDirEDC8((self), vu0ScaleEDC8(*(sRmVec4*)&self->V, k));
+        float dp = vu0DotEDC8(vu0AddEDC8(*(sRmVec4*)&self->V, vu0CrossEDC8(*(sRmVec4*)&self->W, vu0SubEDC8(hit.pos, *(sRmVec4*)(sRmBody*)&self->Pose))), hit.normal);
         if (dp < zeroF) {
             float lim = self->StopContactSpeed;
-            float len = vu0LengthEDC8((*(sRmVec4*)&self->V));
+            float len = vu0LengthEDC8(*(sRmVec4*)&self->V);
             float elastic = self->ContactElastic;
             float friction = self->ContactFriction;
             if (len < lim)
                 elastic = zeroF;
-            cRigidBody_rigidImpact_EDC8(&(*(sRmBody*)&self->Pose), &hit, &hit.normal, elastic, friction);
+            cRigidBody_rigidImpact_EDC8((sRmBody*)&self->Pose, &hit, &hit.normal, elastic, friction);
             self->HitFrequency += 0.016666668f;
             if (5.0f < self->Life)
                 self->Life = 10.0f;
@@ -2934,7 +2934,7 @@ extern "C" void cUVScrollModifier_update(cUVScrollModifier* self)
                     self->On = 0;
                 }
                 if (self->Type == 2 || self->Type == 6) {
-                    (*(sV2_F7D0*)&self->UVScroll[0]) = -(*(sV2_F7D0*)&self->UVScroll[0]);
+                    *(sV2_F7D0*)&self->UVScroll[0] = -*(sV2_F7D0*)&self->UVScroll[0];
                 }
             }
             if (self->On) {
@@ -4836,7 +4836,7 @@ extern void* cPhysicsModifier_vtbl[];
  * @return physicsModifier
  */
 extern "C" void *cPhysicsModifier_cPhysicsModifier1(cPhysicsModifier* physicsModifier) {
-    ((int*)physicsModifier->mVtbl) = &(*(int*)&cPhysicsModifier_vtbl);
+    ((int*)physicsModifier->mVtbl) = (int*)&cPhysicsModifier_vtbl;
     (physicsModifier->Active) = 1;
     return ((void*)physicsModifier);
 }
@@ -5614,9 +5614,6 @@ struct sVEntry003610E0 {
     void (*fn)(void*);
 };
 
-struct sElem003610E0 {
-    char data[0x40];
-};
 
 /**
  * Returns one animation matrix, first refreshing the root transform when it is dirty.
@@ -5627,14 +5624,14 @@ struct sElem003610E0 {
  * @param i  index of the matrix in the array at +0x44 (0x40-byte matrices)
  * @return the address of matrix @p i
  */
-extern "C" sElem003610E0* cAnimNode_getAnimMat(cAnimNode* self, int i)
+extern "C" t4Matrix* cAnimNode_getAnimMat(cAnimNode* self, int i)
 {
     char* obj = (char*)&self->unk_014;
     if (self->Flags & 1) {
         sVEntry003610E0* vt = (sVEntry003610E0*)self->mVtbl;
         vt[51].fn(obj + vt[51].delta);
     }
-    return &((sElem003610E0*)self->AnimMats)[i];
+    return &(self->AnimMats)[i];
 }
 #endif
 

@@ -1396,11 +1396,6 @@ struct cUIObj_0670 {
     virtual void setVisible(int on);
 };
 
-struct sProfile_0670 {
-    char pad[0x220];
-    int f220;
-    int f224;
-};
 
 /**
  * Sets up the profile screen as the load screen.
@@ -1414,8 +1409,8 @@ extern "C" void cFEStateProfileLoad_initLoadScreen(cFEStateProfileLoad* self)
     ((cUIObj_0670*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_load)))->setVisible(1);
     ((cUIObj_0670*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3a)))->setVisible(1);
     ((cUIObj_0670*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq)))->setVisible(0);
-    ((sProfile_0670*)self)->f220 = 0;
-    ((sProfile_0670*)self)->f224 = 1;
+    (self)->mDeleteButtonActive = 0;
+    (self)->mMainButtonActive = 1;
     *(int*)((char*)cSSXApp_getMCManager(SSXApp) + 0x11C) = 0;
 }
 #endif

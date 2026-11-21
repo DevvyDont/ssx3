@@ -19,12 +19,6 @@ struct sScSndBank3450 {
     int a;          // 0x8
 };
 
-struct cScriptSoundBankManager3450 {
-    int flags;                  // 0x0
-    int count;                  // 0x4
-    sScSndBank3450* banks;      // 0x8
-    void* vtable;               // 0xC
-};
 
 /**
  * Constructs the script sound bank manager with a table of free bank slots numbered from a start bank.
@@ -37,18 +31,18 @@ struct cScriptSoundBankManager3450 {
  * @param base  bank number of the first slot (On Tour startBankNum)
  * @return @p self
  */
-extern "C" cScriptSoundBankManager3450* cScriptSoundBankManager_cScriptSoundBankManager(
-    cScriptSoundBankManager3450* self, int flags, int count, int base)
+extern "C" cScriptSoundBankManager* cScriptSoundBankManager_cScriptSoundBankManager(
+    cScriptSoundBankManager* self, int flags, int count, int base)
 {
-    self->vtable = cScriptSoundBankManager_vtbl;
-    self->flags = flags;
-    self->count = count;
-    self->banks = (sScSndBank3450*)operator_new_tag(count * sizeof(sScSndBank3450), str_tScriptSoundBankInfo, flags, 0);
+    *(void**)&self->mVtbl = cScriptSoundBankManager_vtbl;
+    self->mMemFlags = flags;
+    self->mMaxBanks = count;
+    *(sScSndBank3450**)&self->mpBankInfo = (sScSndBank3450*)operator_new_tag(count * sizeof(sScSndBank3450), str_tScriptSoundBankInfo, flags, 0);
     int idx = base;
-    for (int i = 0; i < self->count; i++) {
-        self->banks[i].id = -1;
-        self->banks[i].index = idx++;
-        self->banks[i].a = 0;
+    for (int i = 0; i < self->mMaxBanks; i++) {
+        ((sScSndBank3450*)self->mpBankInfo)[i].id = -1;
+        ((sScSndBank3450*)self->mpBankInfo)[i].index = idx++;
+        ((sScSndBank3450*)self->mpBankInfo)[i].a = 0;
     }
     return self;
 }
@@ -163,12 +157,6 @@ struct sDmVEntry283658 {
     void (*fn)(void*, sDmEntry283658*);
 };
 
-struct sDmTable283658 {
-    int unk_0x0;
-    int count;
-    sDmEntry283658* entries;
-    sDmVEntry283658* vt;
-};
 
 /**
  * Unlinks every bank slot in use from the script sound bank manager.
@@ -180,11 +168,11 @@ struct sDmTable283658 {
  */
 extern "C" void cScriptSoundBankManager_UnlinkBanksAll(cScriptSoundBankManager* self_)
 {
-    sDmTable283658* self = (sDmTable283658*)self_;
+    cScriptSoundBankManager* self = self_;
     int i;
-    for (i = 0; i < self->count; i++) {
-        if (self->entries[i].used != 0) {
-            self->vt[2].fn((char*)self + self->vt[2].delta, &self->entries[i]);
+    for (i = 0; i < self->mMaxBanks; i++) {
+        if (((sDmEntry283658*)self->mpBankInfo)[i].used != 0) {
+            ((sDmVEntry283658*)self->mVtbl)[2].fn((char*)self + ((sDmVEntry283658*)self->mVtbl)[2].delta, &((sDmEntry283658*)self->mpBankInfo)[i]);
         }
     }
 }

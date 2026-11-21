@@ -52,7 +52,7 @@ struct sBucket_3549E0 {
  */
 extern "C" void cBucketMan_init(cBucketMan* self, int n)
 {
-    char** slot = &(*(char**)&self->Buckets);
+    char** slot = (char**)&self->Buckets;
     *slot = (char*)new (str_Buckets, 0, 0) sBucket_3549E0[n];
     *(int*)self = n;
     for (int i = 0; i < *(int*)self; i++) {
@@ -100,7 +100,7 @@ extern "C" void cBucketMan_purge(cBucketMan* self)
         }
         cMemMan_free(((char*)self->Buckets) - 0x10);
     }
-    (*(char**)&self->Buckets) = 0;
+    *(char**)&self->Buckets = 0;
     *(int*)self = 0;
 }
 #endif
@@ -180,13 +180,6 @@ struct sSortLink_4C98 {
     sSortNode_4C98* next;   // 0x8
 };
 
-struct sSortLists_4C98 {
-    int flags;              // 0x00
-    sSortLink_4C98 head0;   // 0x04
-    char pad_0x10[0x14];    // 0x10
-    sSortLink_4C98 head1;   // 0x24
-    char pad_0x30[0x14];    // 0x30
-};
 
 /**
  * Moves every node of a bucket's pending-add list into its main list, kept in decreasing sort-index order.
@@ -230,10 +223,10 @@ extern "C" void cBucketMan_mergeBucket(cBucketMan* self, int index)
             }
         }
         if (other == 0) {
-            n->prev = ((sSortLists_4C98*)((char*)self->Buckets))[index].head0.prev;
-            ((sSortLists_4C98*)((char*)self->Buckets))[index].head0.prev->next = n;
+            n->prev = (*(sSortLink_4C98*)&((tBucketHeader*)((char*)self->Buckets))[index].Head).prev;
+            (*(sSortLink_4C98*)&((tBucketHeader*)((char*)self->Buckets))[index].Head).prev->next = n;
             n->next = (sSortNode_4C98*)(((char*)self->Buckets) + index * 0x44 + 0x4);
-            ((sSortLists_4C98*)((char*)self->Buckets))[index].head0.prev = n;
+            (*(sSortLink_4C98*)&((tBucketHeader*)((char*)self->Buckets))[index].Head).prev = n;
         }
         n = nextN;
     }

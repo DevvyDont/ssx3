@@ -1733,7 +1733,7 @@ INCLUDE_ASM("render/graphicsman", tParticleEmitter_setEternal);
  * @param particleEmitter  the emitter
  */
 extern "C" void tParticleEmitter_setEternal(tParticleEmitter* particleEmitter) {
-    (*(int*)&particleEmitter->LifeR) = 0;
+    *(int*)&particleEmitter->LifeR = 0;
     (particleEmitter->Life0) = 1e20f;
 }
 #endif
@@ -1751,9 +1751,9 @@ INCLUDE_ASM("render/graphicsman", tParticleEmitter_setPoint);
 // PORT: `long long` is 128-bit on the EE (one lq/sq copy); off-PS2 the same C copies only 8 bytes, so use a
 // 16-byte type.
 extern "C" void tParticleEmitter_setPoint(tParticleEmitter* particleEmitter, long long *point) {
-    (*(long long*)&particleEmitter->X0) = (long long) *point;
-    (*(long long*)&particleEmitter->Xr0) = (long long) t4vect_Zero;
-    (*(long long*)&particleEmitter->Xr1) = (long long) t4vect_Zero;
+    *(long long*)&particleEmitter->X0 = (long long) *point;
+    *(long long*)&particleEmitter->Xr0 = (long long) t4vect_Zero;
+    *(long long*)&particleEmitter->Xr1 = (long long) t4vect_Zero;
 }
 #endif
 //100%
@@ -2072,14 +2072,14 @@ static inline sGmVec4_D020 gmNormalizeD020(const sGmVec4_D020& v)
  */
 extern "C" void tParticleEmitter_setVelocity(tParticleEmitter* self, const sGmVec4_D020* dir, float spread)
 {
-    (*(sGmVec4_D020*)&self->V0) = gmDivD020(*dir, self->Damp);
-    float len = gmLengthD020((*(sGmVec4_D020*)&self->V0));
+    *(sGmVec4_D020*)&self->V0 = gmDivD020(*dir, self->Damp);
+    float len = gmLengthD020(*(sGmVec4_D020*)&self->V0);
     const sGmVec4_D020* axis = (dir->x != 0.0f) ? &t4vect_YAxis : &t4vect_XAxis;
     sGmVec4_D020 norm = gmNormalizeD020(gmCrossD020(*dir, *axis));
-    (*(sGmVec4_D020*)&self->Vr0) = gmScaleD020(gmScaleD020(norm, spread), len);
-    (*(sGmVec4_D020*)&self->Vr1) = gmScaleD020(gmCrossD020((*(sGmVec4_D020*)&self->V0), norm), spread);
-    *(cQuad128*)&(*(sGmVec4_D020*)&self->Vr2) = t4vect_Zero;
-    gmSubFromD020((*(sGmVec4_D020*)&self->V0), gmScaleD020(gmAddD020(gmAddD020((*(sGmVec4_D020*)&self->Vr0), (*(sGmVec4_D020*)&self->Vr1)), (*(sGmVec4_D020*)&self->Vr2)), 1.5f));
+    *(sGmVec4_D020*)&self->Vr0 = gmScaleD020(gmScaleD020(norm, spread), len);
+    *(sGmVec4_D020*)&self->Vr1 = gmScaleD020(gmCrossD020(*(sGmVec4_D020*)&self->V0, norm), spread);
+    *(cQuad128*)(sGmVec4_D020*)&self->Vr2 = t4vect_Zero;
+    gmSubFromD020(*(sGmVec4_D020*)&self->V0, gmScaleD020(gmAddD020(gmAddD020(*(sGmVec4_D020*)&self->Vr0, *(sGmVec4_D020*)&self->Vr1), *(sGmVec4_D020*)&self->Vr2), 1.5f));
 }
 #endif
 
@@ -2177,10 +2177,10 @@ static inline sGmVec4 gmScaleD1F0(const sGmVec4& v, float s)
 extern "C" void tParticleEmitter_setVelocity1(tParticleEmitter* self, const sGmVec4* baseVel, const sGmVec4* randVel0,
                               const sGmVec4* randVel1, const sGmVec4* randVel2)
 {
-    (*(sGmVec4*)&self->Vr0) = gmDivD1F0(*randVel0, self->Damp);
-    (*(sGmVec4*)&self->Vr1) = gmDivD1F0(*randVel1, self->Damp);
-    (*(sGmVec4*)&self->Vr2) = gmDivD1F0(*randVel2, self->Damp);
-    (*(sGmVec4*)&self->V0) = gmSubD1F0(gmDivD1F0(*baseVel, self->Damp), gmScaleD1F0(gmAddD1F0(gmAddD1F0((*(sGmVec4*)&self->Vr0), (*(sGmVec4*)&self->Vr1)), (*(sGmVec4*)&self->Vr2)), 1.5f));
+    *(sGmVec4*)&self->Vr0 = gmDivD1F0(*randVel0, self->Damp);
+    *(sGmVec4*)&self->Vr1 = gmDivD1F0(*randVel1, self->Damp);
+    *(sGmVec4*)&self->Vr2 = gmDivD1F0(*randVel2, self->Damp);
+    *(sGmVec4*)&self->V0 = gmSubD1F0(gmDivD1F0(*baseVel, self->Damp), gmScaleD1F0(gmAddD1F0(gmAddD1F0(*(sGmVec4*)&self->Vr0, *(sGmVec4*)&self->Vr1), *(sGmVec4*)&self->Vr2), 1.5f));
 }
 #endif
 
@@ -2274,18 +2274,6 @@ struct sGmVec4_D428 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct sGmAnim_D428 {
-    int frames;             // 0x0
-    int field_0x4;          // 0x4
-    float time;             // 0x8
-    float step;             // 0xC
-    char pad_0x10[0x28];
-    float seeds[10];        // 0x38
-    char pad_0x60[0x50];
-    sGmVec4_D428 pos;       // 0xB0
-    char pad_0xc0[0x20];
-    sGmVec4_D428 vel;       // 0xE0
-};
 
 extern "C" void tParticleEmitter_step(tParticleEmitter* self, float val);
 // PORT: func_0036D400 returns the new seed in $f0 (float); the unit defines it as void, so the
@@ -2310,7 +2298,7 @@ static inline void gmVecAddEq_D428(sGmVec4_D428& a, const sGmVec4_D428& b)
         : "memory");
 }
 
-extern "C" void tParticleEmitter_stepContinous_impl(sGmAnim_D428* self, float dt) __asm__("tParticleEmitter_stepContinous");
+extern "C" void tParticleEmitter_stepContinous_impl(tParticleEmitter* self, float dt) __asm__("tParticleEmitter_stepContinous");
 /**
  * Steps a particle emitter by @p dt, then moves its emission point along its motion for each whole time step that has
  * passed.
@@ -2321,26 +2309,26 @@ extern "C" void tParticleEmitter_stepContinous_impl(sGmAnim_D428* self, float dt
  *
  * @param dt  the frame time
  */
-extern "C" void tParticleEmitter_stepContinous_impl(sGmAnim_D428* self, float dt)
+extern "C" void tParticleEmitter_stepContinous_impl(tParticleEmitter* self, float dt)
 {
     tParticleEmitter_step((tParticleEmitter*)self, dt);
     for (;;) {
-        float step = self->step;
-        float time = self->time;
-        if (!((float)self->frames * step < time)) {
+        float step = self->TimeStep;
+        float time = self->EndTime;
+        if (!((float)self->NumParticles * step < time)) {
             break;
         }
-        self->time = time - step;
-        gmVecAddEq_D428(self->pos, self->vel);
-        func_0036D400_f(&self->seeds[0]);
-        func_0036D400_f(&self->seeds[1]);
-        func_0036D400_f(&self->seeds[2]);
-        func_0036D400_f(&self->seeds[3]);
-        func_0036D400_f(&self->seeds[4]);
-        func_0036D400_f(&self->seeds[6]);
-        func_0036D400_f(&self->seeds[7]);
-        func_0036D400_f(&self->seeds[8]);
-        func_0036D400_f(&self->seeds[9]);
+        self->EndTime = time - step;
+        gmVecAddEq_D428(*(sGmVec4_D428*)&self->X0, *(sGmVec4_D428*)&self->Xi);
+        func_0036D400_f(&((float*)&self->SeedX0)[0]);
+        func_0036D400_f(&((float*)&self->SeedX0)[1]);
+        func_0036D400_f(&((float*)&self->SeedX0)[2]);
+        func_0036D400_f(&((float*)&self->SeedX0)[3]);
+        func_0036D400_f(&((float*)&self->SeedX0)[4]);
+        func_0036D400_f(&((float*)&self->SeedX0)[6]);
+        func_0036D400_f(&((float*)&self->SeedX0)[7]);
+        func_0036D400_f(&((float*)&self->SeedX0)[8]);
+        func_0036D400_f(&((float*)&self->SeedX0)[9]);
     }
 }
 #endif

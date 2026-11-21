@@ -148,7 +148,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_addModifierBlock__FP9cMoveNode);
 void cMoveNode_addModifierBlock(cMoveNode* self)
 {
     void* mem = cMemMan_alloc(40, str_ModifierBlock, 0x20000000, 0);
-    (*(void**)&self->ModifierBlock) = tModifierBlock_tModifierBlock((tModifierBlock*)mem);
+    *(void**)&self->ModifierBlock = tModifierBlock_tModifierBlock((tModifierBlock*)mem);
 }
 #endif
 
@@ -2218,11 +2218,8 @@ struct sMnVec4_357108 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct sMnMtx_357108 {
-    sMnVec4_357108 r[4];
-};
 
-extern "C" void cInstanceNode_buildMeshMat(void* model, int bone, sMnMtx_357108* out);
+extern "C" void cInstanceNode_buildMeshMat(void* model, int bone, t4Matrix* out);
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
 static inline void vu0CopyMtx_357108(void* dst, void* src)
@@ -2242,7 +2239,7 @@ static inline void vu0CopyMtx_357108(void* dst, void* src)
 }
 
 // PORT: PS2-only VU0 inline asm (matrix * vector).
-static inline sMnVec4_357108 vu0MtxApply_357108(sMnMtx_357108* m, sMnVec4_357108* v)
+static inline sMnVec4_357108 vu0MtxApply_357108(t4Matrix* m, sMnVec4_357108* v)
 {
     sMnVec4_357108 out;
     __asm__(
@@ -2293,7 +2290,7 @@ struct sMnVEntryI_357108 {
 struct sMnVEntryM_357108 {
     short delta;
     short index;
-    sMnMtx_357108* (*fn)(void*, int);
+    t4Matrix* (*fn)(void*, int);
 };
 
 /**
@@ -2313,9 +2310,9 @@ extern "C" void cParentModifier_updateRootTransform(cParentModifier* self)
             sMnVEntryM_357108* vm = *(sMnVEntryM_357108**)(parentNode + 0xC);
             vu0CopyMtx_357108(&self->Transform, vm[29].fn(parentNode + vm[29].delta, self->Mesh));
         } else {
-            cInstanceNode_buildMeshMat(self->ParentInst, self->Mesh, (sMnMtx_357108*)(&self->Transform));
+            cInstanceNode_buildMeshMat(self->ParentInst, self->Mesh, ((&self->Transform)));
         }
-        *(sMnVec4_357108*)&self->Transform.row[3] = vu0Add_357108(vel_357108(((char*)self)), vu0MtxApply_357108((sMnMtx_357108*)(&self->Transform), (sMnVec4_357108*)(&self->Offset)));
+        *(sMnVec4_357108*)&self->Transform.row[3] = vu0Add_357108(vel_357108(((char*)self)), vu0MtxApply_357108(((&self->Transform)), (sMnVec4_357108*)(&self->Offset)));
     }
     self->RootTransformDirty = 0;
 }
@@ -2574,7 +2571,7 @@ extern "C" void cMagnetModifier_update(cMagnetModifier* self)
         return;
     }
     self->Time += cObjectInterface_getUpdateTime();
-    sMnVec4_3573F8 delta = vu0Sub_3573F8(*(sMnVec4_3573F8*)cObjectInterface_getPosition(self->Being), (*(sMnVec4_3573F8*)&self->Offset));
+    sMnVec4_3573F8 delta = vu0Sub_3573F8(*(sMnVec4_3573F8*)cObjectInterface_getPosition(self->Being), *(sMnVec4_3573F8*)&self->Offset);
     float len = vu0Length_3573F8(delta);
     if (len < 50.0f) {
         self->AllowCollide = 1;
@@ -2584,7 +2581,7 @@ extern "C" void cMagnetModifier_update(cMagnetModifier* self)
             self->AllowCollide = 1;
             step = delta;
         }
-        vu0AddTo_3573F8((*(sMnVec4_3573F8*)&self->Offset), step);
+        vu0AddTo_3573F8(*(sMnVec4_3573F8*)&self->Offset, step);
     }
     self->RootTransformDirty = 1;
 }
@@ -3215,16 +3212,16 @@ extern "C" void cMultiParticle_setupMultiParticle(void* self);
 extern "C" void* cMultiParticle_cMultiParticle(cMultiParticle* mem, void* particleData, void* maxInst)
 {
     cMultiParticle* self = mem;
-    (*(void**)&self->MaxInst) = maxInst;
+    *(void**)&self->MaxInst = maxInst;
     self->NumInst = 0;
     void* buf = cMemMan_alloc(216, str_Particle_b, 0x20000000, 0);
-    (*(void**)&self->Particle) = buf;
+    *(void**)&self->Particle = buf;
     MEM_copy(buf, particleData, 216);
     cMultiParticle_setupMultiParticle(self);
     sPartDesc_7DD8* emitterDesc = ((sPartDesc_7DD8*)self->Emitter);
-    (*(sQuad_7DD8*)&self->BoundBox) = emitterDesc->a;
-    (*(sQuad_7DD8*)&self->BoundBox.MaxPoint) = emitterDesc->b;
-    (*(sQuad_7DD8*)&self->Offset) = sQuad_7DD8(emitterDesc->pos[0], emitterDesc->pos[1], emitterDesc->pos[2], 0.0f);
+    *(sQuad_7DD8*)&self->BoundBox = emitterDesc->a;
+    *(sQuad_7DD8*)&self->BoundBox.MaxPoint = emitterDesc->b;
+    *(sQuad_7DD8*)&self->Offset = sQuad_7DD8(emitterDesc->pos[0], emitterDesc->pos[1], emitterDesc->pos[2], 0.0f);
     return self;
 }
 #endif
@@ -3260,15 +3257,15 @@ static inline void read_357E80(void* stream, void* dst, int n)
 extern "C" void* cMultiParticle_cMultiParticle1(cMultiParticle* mem, void* stream)
 {
     cMultiParticle* self = mem;
-    sQuad_7DD8* ab = &(*(sQuad_7DD8*)&self->BoundBox);
+    sQuad_7DD8* ab = (sQuad_7DD8*)&self->BoundBox;
     read_357E80(stream, self, 4);
     read_357E80(stream, &self->NumInst, 4);
     void* buf = cMemMan_alloc(216, str_Particle_b, 0x20000000, 0);
-    (*(void**)&self->Particle) = buf;
+    *(void**)&self->Particle = buf;
     read_357E80(stream, buf, 216);
     cMultiParticle_setupMultiParticle(self);
     cStaticEmitter_readFromReplayFrame(((sPartDesc_7DD8*)self->Emitter), stream);
-    read_357E80(stream, &(*(sQuad_7DD8*)&self->Offset), 0x10);
+    read_357E80(stream, (sQuad_7DD8*)&self->Offset, 0x10);
     read_357E80(stream, ab, 0x20);
     if (self->NumInst > 0) {
         read_357E80(stream, (void*)((int)self->InstIds), self->NumInst * 4);

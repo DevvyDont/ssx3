@@ -2593,18 +2593,11 @@ struct sEnt_2CC8F0 {
     int value;
 };
 
-struct sList_2CC8F0 {
-    char* menu;
-    char pad04[0x14];
-    int count;
-    sEnt_2CC8F0* entries;
-    int* value;
-};
 
-static inline void notify_2CC8F0(sList_2CC8F0* self)
+static inline void notify_2CC8F0(cEnumMenuItem* self)
 {
-    sVEnt_2CC8F0* vt = *(sVEnt_2CC8F0**)(self->menu + 0x12C);
-    ((Notify_2CC8F0)vt[4].fn)(self->menu + vt[4].delta, self);
+    sVEnt_2CC8F0* vt = *(sVEnt_2CC8F0**)(((char*)self->Menu) + 0x12C);
+    ((Notify_2CC8F0)vt[4].fn)(((char*)self->Menu) + vt[4].delta, self);
 }
 
 /**
@@ -2622,7 +2615,7 @@ static inline void notify_2CC8F0(sList_2CC8F0* self)
  */
 extern "C" int cEnumMenuItem_input(cEnumMenuItem* vself)
 {
-    sList_2CC8F0* self = (sList_2CC8F0*)vself;
+    cEnumMenuItem* self = vself;
     int result = cMenuItem_input((cMenuItem*)self);
     if (cMenuItem_isLocked((cMenuItem*)self) != 0) {
         return result;
@@ -2631,28 +2624,28 @@ extern "C" int cEnumMenuItem_input(cEnumMenuItem* vself)
         return result;
     }
     if (cMenuItem_getKey((void**)self) == 6) {
-        sVEnt_2CC8F0* vt = *(sVEnt_2CC8F0**)(self->menu + 0x12C);
-        result = ((Pick_2CC8F0)vt[3].fn)(self->menu + vt[3].delta, self, 0);
+        sVEnt_2CC8F0* vt = *(sVEnt_2CC8F0**)(((char*)self->Menu) + 0x12C);
+        result = ((Pick_2CC8F0)vt[3].fn)(((char*)self->Menu) + vt[3].delta, self, 0);
     } else {
-    int n = self->count;
+    int n = self->NumTags;
     int i = 0;
     for (;;) {
         if (i == n) {
             if (cMenuItem_getKey((void**)self) == 2 || cMenuItem_getKey((void**)self) == 0) {
-                *self->value = self->entries[0].value;
+                *self->Enum = ((sEnt_2CC8F0*)self->Tags)[0].value;
                 notify_2CC8F0(self);
             } else if (cMenuItem_getKey((void**)self) == 3 || cMenuItem_getKey((void**)self) == 1) {
-                *self->value = self->entries[self->count - 1].value;
+                *self->Enum = ((sEnt_2CC8F0*)self->Tags)[self->NumTags - 1].value;
                 notify_2CC8F0(self);
             }
             goto done;
         }
-        if (*self->value == self->entries[i].value) {
+        if (*self->Enum == ((sEnt_2CC8F0*)self->Tags)[i].value) {
             if (cMenuItem_getKey((void**)self) == 2 || cMenuItem_getKey((void**)self) == 0) {
-                *self->value = self->entries[(i + self->count - 1) % self->count].value;
+                *self->Enum = ((sEnt_2CC8F0*)self->Tags)[(i + self->NumTags - 1) % self->NumTags].value;
                 notify_2CC8F0(self);
             } else if (cMenuItem_getKey((void**)self) == 3 || cMenuItem_getKey((void**)self) == 1) {
-                *self->value = self->entries[(i + 1) % self->count].value;
+                *self->Enum = ((sEnt_2CC8F0*)self->Tags)[(i + 1) % self->NumTags].value;
                 notify_2CC8F0(self);
             }
             goto done;
@@ -4498,12 +4491,6 @@ extern "C" int strlen(const char* s);
 int cMenuSys_getVKey(void* self);
 int cMenuSys_getAsciiKey(void* self);
 
-struct sTextItem_E488 {
-    char* menu;                 // 0x00
-    char pad4[0x14];            // 0x04
-    char name[0x10];            // 0x18
-    int cursor;                 // 0x28
-};
 
 static inline int validChar_E488(char c)
 {
@@ -4524,67 +4511,67 @@ static inline int validChar_E488(char c)
  *
  * @return the base input's result, or 3 on select
  */
-extern "C" int cTextMenuItem_input(sTextItem_E488* self)
+extern "C" int cTextMenuItem_input(cTextMenuItem* self)
 {
     int result = cMenuItem_input((cMenuItem*)self);
     if (result == 0) {
-    int len = strlen(self->name);
+    int len = strlen(self->Text);
     int mod = len + 1;
     if (mod >= 16) {
         mod = 15;
     }
     int key = cMenuItem_getKey((void**)self);
     if (key == 2) {
-        self->cursor = (self->cursor + mod - 1) % mod;
+        self->CursorPos = (self->CursorPos + mod - 1) % mod;
     } else if (key == 3) {
-        self->cursor = (self->cursor + 1) % mod;
+        self->CursorPos = (self->CursorPos + 1) % mod;
     } else if (key == 4) {
         // PORT: pointer in int (index-first address).
-        char* cursorChar = (char*)(self->cursor + (int)self);
+        char* cursorChar = (char*)(self->CursorPos + (int)self);
         cursorChar += 0x18;
         do {
             (*cursorChar)--;
         } while (!validChar_E488(*cursorChar));
     } else if (key == 5) {
         // PORT: pointer in int (index-first address).
-        char* cursorChar = (char*)(self->cursor + (int)self);
+        char* cursorChar = (char*)(self->CursorPos + (int)self);
         cursorChar += 0x18;
         do {
             (*cursorChar)++;
         } while (!validChar_E488(*cursorChar));
     } else if (key == 9) {
         if (len < 14) {
-            for (int i = self->cursor; i < len; i++) {
-                self->name[i + 1] = self->name[i];
+            for (int i = self->CursorPos; i < len; i++) {
+                self->Text[i + 1] = self->Text[i];
             }
-            self->name[self->cursor] = '_';
+            self->Text[self->CursorPos] = '_';
         }
     } else if (key == 10) {
-        if (len != 0 && self->cursor < len) {
-            for (int i = self->cursor; i < len - 1; i++) {
-                self->name[i] = self->name[i + 1];
+        if (len != 0 && self->CursorPos < len) {
+            for (int i = self->CursorPos; i < len - 1; i++) {
+                self->Text[i] = self->Text[i + 1];
             }
-            self->name[len - 1] = 0;
+            self->Text[len - 1] = 0;
         }
     } else if (key == 6) {
         result = 3;
     } else {
-        int code = cMenuSys_getVKey(*(void**)(self->menu + 0x124));
-        int ch = cMenuSys_getAsciiKey(*(void**)(self->menu + 0x124));
+        int code = cMenuSys_getVKey(*(void**)(((char*)self->Menu) + 0x124));
+        int ch = cMenuSys_getAsciiKey(*(void**)(((char*)self->Menu) + 0x124));
         if (code == 8) {
-            if (len != 0 && self->cursor > 0) {
-                for (int i = self->cursor; i < len - 1; i++) {
-                    self->name[i] = self->name[i + 1];
+            if (len != 0 && self->CursorPos > 0) {
+                for (int i = self->CursorPos; i < len - 1; i++) {
+                    self->Text[i] = self->Text[i + 1];
                 }
-                self->name[len - 1] = 0;
-                self->cursor--;
+                self->Text[len - 1] = 0;
+                self->CursorPos--;
             }
         } else if (validChar_E488(ch)) {
             if (len < 14) {
-                for (int i = self->cursor; i < len; i++) {
-                    self->name[i + 1] = self->name[i];
+                for (int i = self->CursorPos; i < len; i++) {
+                    self->Text[i + 1] = self->Text[i];
                 }
-                self->name[self->cursor++] = ch;
+                self->Text[self->CursorPos++] = ch;
             }
         }
     }
@@ -5895,7 +5882,6 @@ INCLUDE_ASM("util/menu", cRGBTitleMenuItem_render);
 // PORT: the unit's 4-arg declaration of cMenuItem_textRender1 is wrong: the body reads $8 (5th arg).
 void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_textRender1");
 
-struct sCol_2D0008 { float a, r, g, b; };
 
 struct sVtx_2D0008 {
     float u, v, q;
@@ -6022,42 +6008,42 @@ extern "C" void cRGBTitleMenuItem_render(cRGBTitleMenuItem* self, float* rect)
     rc.y = rect[1] + 6.0f + 2.0f;
     float x2 = rc.x + rc.w;
     float y2 = rc.y + rc.h;
-    sCol_2D0008* colour = (sCol_2D0008*)self->Color;
+    tARGB* colour = self->Color;
     float zeroF = 0.0f;
     float one = 1.0f;
-    verts[0].r = (int)(colour->r * 128.0f);
-    verts[0].g = (int)(colour->g * 128.0f);
-    verts[0].b = (int)(colour->b * 128.0f);
-    verts[0].a = (int)(colour->a * 128.0f);
+    verts[0].r = (int)(colour->R * 128.0f);
+    verts[0].g = (int)(colour->G * 128.0f);
+    verts[0].b = (int)(colour->B * 128.0f);
+    verts[0].a = (int)(colour->A * 128.0f);
     verts[0].v = zeroF;
     verts[0].u = zeroF;
     verts[0].q = one;
     *(sVec4_2D0008*)verts[0].pos = sVec4_2D0008(rc.x, rc.y, zeroF, one);
-    verts[1].r = (int)(colour->r * 128.0f);
-    verts[1].g = (int)(colour->g * 128.0f);
-    verts[1].b = (int)(colour->b * 128.0f);
-    verts[1].a = (int)(colour->a * 128.0f);
+    verts[1].r = (int)(colour->R * 128.0f);
+    verts[1].g = (int)(colour->G * 128.0f);
+    verts[1].b = (int)(colour->B * 128.0f);
+    verts[1].a = (int)(colour->A * 128.0f);
     verts[1].v = zeroF;
     verts[1].u = zeroF;
     verts[1].q = one;
     *(sVec4_2D0008*)verts[1].pos = sVec4_2D0008(rc.x, y2, zeroF, one);
-    verts[2].r = (int)(colour->r * 128.0f);
-    verts[2].g = (int)(colour->g * 128.0f);
-    verts[2].b = (int)(colour->b * 128.0f);
-    verts[2].a = (int)(colour->a * 128.0f);
+    verts[2].r = (int)(colour->R * 128.0f);
+    verts[2].g = (int)(colour->G * 128.0f);
+    verts[2].b = (int)(colour->B * 128.0f);
+    verts[2].a = (int)(colour->A * 128.0f);
     verts[2].v = zeroF;
     verts[2].u = zeroF;
     verts[2].q = one;
     *(sVec4_2D0008*)verts[2].pos = sVec4_2D0008(x2, rc.y, zeroF, one);
-    verts[3].r = (int)(colour->r * 128.0f);
-    verts[3].g = (int)(colour->g * 128.0f);
-    verts[3].b = (int)(colour->b * 128.0f);
-    verts[3].a = (int)(colour->a * 128.0f);
+    verts[3].r = (int)(colour->R * 128.0f);
+    verts[3].g = (int)(colour->G * 128.0f);
+    verts[3].b = (int)(colour->B * 128.0f);
+    verts[3].a = (int)(colour->A * 128.0f);
     verts[3].v = zeroF;
     verts[3].u = zeroF;
     verts[3].q = one;
     *(sVec4_2D0008*)verts[3].pos = sVec4_2D0008(x2, y2, zeroF, one);
-    if (colour->a != 1.0f) {
+    if (colour->A != 1.0f) {
         ((cCtx_2D0008*)GrMan)->top->f4_2 = 5;
     } else {
         ((cCtx_2D0008*)GrMan)->top->f4_2 = 1;
@@ -6422,21 +6408,6 @@ struct sVE_D0908 {
     void (*fn)(void*, void*);
 };
 
-struct sCurveItem_D0908 {
-    char* menu;                 // 0x00
-    char pad4[0x14];            // 0x04
-    int count;                  // 0x18
-    unsigned int lockX;         // 0x1C
-    unsigned int lockY;         // 0x20
-    int cur;                    // 0x24
-    sCurvePt_D0908* pts;        // 0x28
-    float minX;                 // 0x2C
-    float minY;                 // 0x30
-    float maxX;                 // 0x34
-    float maxY;                 // 0x38
-    int order;                  // 0x3C
-    int editing;                // 0x40
-};
 
 /**
  * Handles input for a graph item: select toggles edit mode; in edit mode keys pick a point and the stick moves it
@@ -6452,75 +6423,75 @@ struct sCurveItem_D0908 {
  *
  * @return the base input's result outside edit mode, else 0
  */
-extern "C" int cGraphMenuItem_input(sCurveItem_D0908* self)
+extern "C" int cGraphMenuItem_input(cGraphMenuItem* self)
 {
     int result = 0;
     if (cMenuItem_isLocked((cMenuItem*)self) == 0) {
     int changed = 0;
     if (cMenuItem_getKey((void**)self) == 6) {
-        self->editing ^= 1;
+        self->IsEditMode ^= 1;
     }
-    if (self->editing != 0) {
+    if (self->IsEditMode != 0) {
         if (cMenuItem_getKey((void**)self) == 8) {
-            self->editing = 0;
+            self->IsEditMode = 0;
         } else if (cMenuItem_getKey((void**)self) == 7) {
-            self->editing = 0;
-        } else if (self->editing != 0) {
+            self->IsEditMode = 0;
+        } else if (self->IsEditMode != 0) {
             if (cMenuItem_getKey((void**)self) == 4) {
-                if (self->cur > 0) {
-                    self->cur--;
+                if (self->OnPoint > 0) {
+                    self->OnPoint--;
                     changed = 1;
                 }
             } else if (cMenuItem_getKey((void**)self) == 5) {
-                if (self->cur < self->count - 1) {
-                    self->cur++;
+                if (self->OnPoint < self->NumPoints - 1) {
+                    self->OnPoint++;
                     changed = 1;
                 }
             }
-            float step = (self->maxX - self->minX) / (float)(self->count * 2 > 49 ? self->count * 2 : 50);
+            float step = (self->MaxPoint[0] - self->MinPoint[0]) / (float)(self->NumPoints * 2 > 49 ? self->NumPoints * 2 : 50);
             float dy = cMenuItem_getUp_f(self) - cMenuItem_getDown_f(self);
-            if (dy != 0.0f && (self->lockY & (1 << self->cur)) == 0) {
-                self->pts[self->cur].y += dy * (self->maxY - self->minY) * 0.008333333767950535f;
+            if (dy != 0.0f && (self->YLock & (1 << self->OnPoint)) == 0) {
+                ((sCurvePt_D0908*)self->Points)[self->OnPoint].y += dy * (self->MaxPoint[1] - self->MinPoint[1]) * 0.008333333767950535f;
                 changed = 1;
-                if (self->maxY < self->pts[self->cur].y) {
-                    self->pts[self->cur].y = self->maxY;
+                if (self->MaxPoint[1] < ((sCurvePt_D0908*)self->Points)[self->OnPoint].y) {
+                    ((sCurvePt_D0908*)self->Points)[self->OnPoint].y = self->MaxPoint[1];
                 }
-                if (self->pts[self->cur].y < self->minY) {
-                    self->pts[self->cur].y = self->minY;
+                if (((sCurvePt_D0908*)self->Points)[self->OnPoint].y < self->MinPoint[1]) {
+                    ((sCurvePt_D0908*)self->Points)[self->OnPoint].y = self->MinPoint[1];
                 }
-                if (self->cur < self->count - 1) {
-                    if (self->order > 0 && self->pts[self->cur + 1].y < self->pts[self->cur].y) {
-                        self->pts[self->cur].y = self->pts[self->cur + 1].y;
-                    } else if (self->order < 0 && self->pts[self->cur].y < self->pts[self->cur + 1].y) {
-                        self->pts[self->cur].y = self->pts[self->cur + 1].y;
+                if (self->OnPoint < self->NumPoints - 1) {
+                    if (self->Slope > 0 && ((sCurvePt_D0908*)self->Points)[self->OnPoint + 1].y < ((sCurvePt_D0908*)self->Points)[self->OnPoint].y) {
+                        ((sCurvePt_D0908*)self->Points)[self->OnPoint].y = ((sCurvePt_D0908*)self->Points)[self->OnPoint + 1].y;
+                    } else if (self->Slope < 0 && ((sCurvePt_D0908*)self->Points)[self->OnPoint].y < ((sCurvePt_D0908*)self->Points)[self->OnPoint + 1].y) {
+                        ((sCurvePt_D0908*)self->Points)[self->OnPoint].y = ((sCurvePt_D0908*)self->Points)[self->OnPoint + 1].y;
                     }
                 }
-                if (self->cur > 0) {
-                    if (self->order > 0 && self->pts[self->cur].y < self->pts[self->cur - 1].y) {
-                        self->pts[self->cur].y = self->pts[self->cur - 1].y;
-                    } else if (self->order < 0 && self->pts[self->cur - 1].y < self->pts[self->cur].y) {
-                        self->pts[self->cur].y = self->pts[self->cur - 1].y;
+                if (self->OnPoint > 0) {
+                    if (self->Slope > 0 && ((sCurvePt_D0908*)self->Points)[self->OnPoint].y < ((sCurvePt_D0908*)self->Points)[self->OnPoint - 1].y) {
+                        ((sCurvePt_D0908*)self->Points)[self->OnPoint].y = ((sCurvePt_D0908*)self->Points)[self->OnPoint - 1].y;
+                    } else if (self->Slope < 0 && ((sCurvePt_D0908*)self->Points)[self->OnPoint - 1].y < ((sCurvePt_D0908*)self->Points)[self->OnPoint].y) {
+                        ((sCurvePt_D0908*)self->Points)[self->OnPoint].y = ((sCurvePt_D0908*)self->Points)[self->OnPoint - 1].y;
                     }
                 }
             }
             float dx = cMenuItem_getRight_f(self) - cMenuItem_getLeft_f(self);
-            if (dx != 0.0f && (self->lockX & (1 << self->cur)) == 0) {
-                self->pts[self->cur].x += dx * (self->maxX - self->minX) * 0.008333333767950535f;
+            if (dx != 0.0f && (self->XLock & (1 << self->OnPoint)) == 0) {
+                ((sCurvePt_D0908*)self->Points)[self->OnPoint].x += dx * (self->MaxPoint[0] - self->MinPoint[0]) * 0.008333333767950535f;
                 changed = 1;
-                if (self->maxX < self->pts[self->cur].x) {
-                    self->pts[self->cur].x = self->maxX;
+                if (self->MaxPoint[0] < ((sCurvePt_D0908*)self->Points)[self->OnPoint].x) {
+                    ((sCurvePt_D0908*)self->Points)[self->OnPoint].x = self->MaxPoint[0];
                 }
-                if (self->pts[self->cur].x < self->minX) {
-                    self->pts[self->cur].x = self->minX;
+                if (((sCurvePt_D0908*)self->Points)[self->OnPoint].x < self->MinPoint[0]) {
+                    ((sCurvePt_D0908*)self->Points)[self->OnPoint].x = self->MinPoint[0];
                 }
-                if (self->cur < self->count - 1) {
-                    if (self->pts[self->cur + 1].x - step < self->pts[self->cur].x) {
-                        self->pts[self->cur].x = self->pts[self->cur + 1].x - step;
+                if (self->OnPoint < self->NumPoints - 1) {
+                    if (((sCurvePt_D0908*)self->Points)[self->OnPoint + 1].x - step < ((sCurvePt_D0908*)self->Points)[self->OnPoint].x) {
+                        ((sCurvePt_D0908*)self->Points)[self->OnPoint].x = ((sCurvePt_D0908*)self->Points)[self->OnPoint + 1].x - step;
                     }
                 }
-                if (self->cur > 0) {
-                    if (self->pts[self->cur].x < self->pts[self->cur - 1].x + step) {
-                        self->pts[self->cur].x = self->pts[self->cur - 1].x + step;
+                if (self->OnPoint > 0) {
+                    if (((sCurvePt_D0908*)self->Points)[self->OnPoint].x < ((sCurvePt_D0908*)self->Points)[self->OnPoint - 1].x + step) {
+                        ((sCurvePt_D0908*)self->Points)[self->OnPoint].x = ((sCurvePt_D0908*)self->Points)[self->OnPoint - 1].x + step;
                     }
                 }
             }
@@ -6531,8 +6502,8 @@ extern "C" int cGraphMenuItem_input(sCurveItem_D0908* self)
         result = cMenuItem_input((cMenuItem*)self);
     }
     if (changed) {
-        sVE_D0908* vt = *(sVE_D0908**)(self->menu + 0x12C);
-        vt[4].fn(self->menu + vt[4].delta, self);
+        sVE_D0908* vt = *(sVE_D0908**)(((char*)self->Menu) + 0x12C);
+        vt[4].fn(((char*)self->Menu) + vt[4].delta, self);
     }
     }
     return result;
@@ -7162,7 +7133,7 @@ extern "C" void cWScriptMan_doOnInitScript(int, int);
  * @param inst  the instance record
  */
 extern "C" void cObjectInterface_runInitScript(int inst) {
-    cWScriptMan_doOnInitScript((*(int*)&cWScriptMan_TheWScriptMan), inst);
+    cWScriptMan_doOnInitScript(*(int*)&cWScriptMan_TheWScriptMan, inst);
 }
 #endif
 //100%
@@ -7177,7 +7148,7 @@ extern "C" void cWScriptMan_runScript1(int, int, int);
  * @param inst  the instance record it runs for
  */
 extern "C" void cObjectInterface_runScript(int scriptId, int inst) {
-    cWScriptMan_runScript1((*(int*)&cWScriptMan_TheWScriptMan), scriptId, inst);
+    cWScriptMan_runScript1(*(int*)&cWScriptMan_TheWScriptMan, scriptId, inst);
 }
 #endif
 

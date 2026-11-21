@@ -29,7 +29,7 @@ void cAsyncSys_ASYNCSYS_Init(cAsyncSys* self, unsigned int x, int flags)
 {
     if (x != 0) {
         self->mBufferSize = x;
-        (*(void**)&self->mpBuffer) = operator_new_tag(x, str_AsyncSysBuffer, flags, 0);
+        *(void**)&self->mpBuffer = operator_new_tag(x, str_AsyncSysBuffer, flags, 0);
     }
 }
 #endif
@@ -56,7 +56,7 @@ extern "C" void cAsyncSys_ASYNCSYS_DeInit(cAsyncSys* self)
     }
     if (((void*)self->mpBuffer) != 0) {
         cMemMan_free(((void*)self->mpBuffer));
-        (*(void**)&self->mpBuffer) = 0;
+        *(void**)&self->mpBuffer = 0;
         self->mBufferSize = 0;
     }
 }
@@ -89,20 +89,6 @@ public:
     virtual void notify(int id);
 };
 
-struct sAsync_A298 {
-    int result;             // 0x0
-    int busy;               // 0x4
-    int slot;               // 0x8
-    char names[6][0x40];    // 0xC
-    char pad18C[0x18C - 0xC - 6 * 0x40];
-    sRing_A298 q18C;        // 0x18C
-    sRing_A298 q19C;        // 0x19C
-    sRing_A298 q1AC;        // 0x1AC
-    sRing_A298 q1BC;        // 0x1BC
-    void* buf;              // 0x1CC
-    int bufSize;            // 0x1D0
-    sVE_A298* vt;           // 0x1D4
-};
 
 /**
  * Starts the next queued sound-bank load when the async system is idle and something is queued.
@@ -121,20 +107,20 @@ struct sAsync_A298 {
  */
 extern "C" void cAsyncSys_ASYNCSYS_StartLoad(cAsyncSys* self)
 {
-    sAsync_A298* asyncSys = (sAsync_A298*)self;
-    if (asyncSys->busy != 0) {
+    cAsyncSys* asyncSys = self;
+    if (asyncSys->mBusy != 0) {
         return;
     }
-    sRing_A298* userHandleQueue = &asyncSys->q18C;
-    if (asyncSys->q18C.head == asyncSys->q18C.tail) {
+    sRing_A298* userHandleQueue = (sRing_A298*)&asyncSys->mUserHandle;
+    if ((*(sRing_A298*)&asyncSys->mUserHandle).head == (*(sRing_A298*)&asyncSys->mUserHandle).tail) {
         return;
     }
-    asyncSys->busy = 1;
+    asyncSys->mBusy = 1;
     ((cAsync_A298*)self)->notify(userHandleQueue->data[userHandleQueue->tail]);
     int kind;
     {
-        sRing_A298* peekQueue = &asyncSys->q1AC;
-        if (asyncSys->q1AC.head == asyncSys->q1AC.tail) {
+        sRing_A298* peekQueue = (sRing_A298*)&asyncSys->mMemType;
+        if ((*(sRing_A298*)&asyncSys->mMemType).head == (*(sRing_A298*)&asyncSys->mMemType).tail) {
             kind = -1;
         } else {
             kind = peekQueue->data[peekQueue->tail];
@@ -143,74 +129,74 @@ extern "C" void cAsyncSys_ASYNCSYS_StartLoad(cAsyncSys* self)
     switch (kind) {
     case 0: {
         int idx;
-        sRing_A298* peekQueue = &asyncSys->q19C;
-        if (asyncSys->q19C.head == asyncSys->q19C.tail) {
+        sRing_A298* peekQueue = (sRing_A298*)&asyncSys->mFilenameIndex;
+        if ((*(sRing_A298*)&asyncSys->mFilenameIndex).head == (*(sRing_A298*)&asyncSys->mFilenameIndex).tail) {
             idx = -1;
         } else {
             idx = peekQueue->data[peekQueue->tail];
         }
-        asyncSys->result = ASYNCFILE_loadat(asyncSys->names[idx], (int)asyncSys->buf, asyncSys->bufSize);
+        asyncSys->mHandle = ASYNCFILE_loadat(asyncSys->mFilename[idx], (int)((void*)asyncSys->mpBuffer), asyncSys->mBufferSize);
         break;
     }
     case 2: {
         int idx;
-        sRing_A298* peekQueue = &asyncSys->q19C;
-        if (asyncSys->q19C.head == asyncSys->q19C.tail) {
+        sRing_A298* peekQueue = (sRing_A298*)&asyncSys->mFilenameIndex;
+        if ((*(sRing_A298*)&asyncSys->mFilenameIndex).head == (*(sRing_A298*)&asyncSys->mFilenameIndex).tail) {
             idx = -1;
         } else {
             idx = peekQueue->data[peekQueue->tail];
         }
-        asyncSys->result = ASYNCFILE_loadat(asyncSys->names[idx], (int)asyncSys->buf, asyncSys->bufSize);
+        asyncSys->mHandle = ASYNCFILE_loadat(asyncSys->mFilename[idx], (int)((void*)asyncSys->mpBuffer), asyncSys->mBufferSize);
         break;
     }
     case 1: {
         int idx;
         {
-            sRing_A298* peekQueue = &asyncSys->q19C;
-            if (asyncSys->q19C.head == asyncSys->q19C.tail) {
+            sRing_A298* peekQueue = (sRing_A298*)&asyncSys->mFilenameIndex;
+            if ((*(sRing_A298*)&asyncSys->mFilenameIndex).head == (*(sRing_A298*)&asyncSys->mFilenameIndex).tail) {
                 idx = -1;
             } else {
                 idx = peekQueue->data[peekQueue->tail];
             }
         }
-        char* name = asyncSys->names[idx];
+        char* name = asyncSys->mFilename[idx];
         int allocHandle, allocFlags;
         // PORT: g++ 2.95 virtual calls (vptr at 0x1D4) written out by hand: delta + saved &pfn, args evaluated after.
-        sVE_A298* vt = asyncSys->vt;
+        sVE_A298* vt = ((sVE_A298*)asyncSys->mVtbl);
         char* thisp = (char*)asyncSys + vt[3].delta;
         int (**pf)(void*, int, int, int) = &vt[3].fn;
-        if (asyncSys->q18C.head == asyncSys->q18C.tail) {
+        if ((*(sRing_A298*)&asyncSys->mUserHandle).head == (*(sRing_A298*)&asyncSys->mUserHandle).tail) {
             allocHandle = -1;
         } else {
             allocHandle = userHandleQueue->data[userHandleQueue->tail];
         }
-        sRing_A298* flagQueue = &asyncSys->q1BC;
-        if (asyncSys->q1BC.head == asyncSys->q1BC.tail) {
+        sRing_A298* flagQueue = (sRing_A298*)&asyncSys->mMainMemFlags;
+        if ((*(sRing_A298*)&asyncSys->mMainMemFlags).head == (*(sRing_A298*)&asyncSys->mMainMemFlags).tail) {
             allocFlags = -1;
         } else {
             allocFlags = flagQueue->data[flagQueue->tail];
         }
         int allocBuffer = (*pf)(thisp, allocHandle, -1, allocFlags);
-        sVE_A298* vt2 = asyncSys->vt;
+        sVE_A298* vt2 = ((sVE_A298*)asyncSys->mVtbl);
         char* thisp2 = (char*)asyncSys + vt2[4].delta;
         int (**pf2)(void*, int, int, int) = &vt2[4].fn;
         int sizeHandle;
-        if (asyncSys->q18C.head == asyncSys->q18C.tail) {
+        if ((*(sRing_A298*)&asyncSys->mUserHandle).head == (*(sRing_A298*)&asyncSys->mUserHandle).tail) {
             sizeHandle = -1;
         } else {
             sizeHandle = userHandleQueue->data[userHandleQueue->tail];
         }
         int allocSize = ((int (*)(void*, int))*pf2)(thisp2, sizeHandle);
         if (allocBuffer != 0) {
-            asyncSys->result = ASYNCFILE_loadat(name, allocBuffer, allocSize);
+            asyncSys->mHandle = ASYNCFILE_loadat(name, allocBuffer, allocSize);
         } else {
             int loadFlags;
-            if (asyncSys->q1BC.head == asyncSys->q1BC.tail) {
+            if ((*(sRing_A298*)&asyncSys->mMainMemFlags).head == (*(sRing_A298*)&asyncSys->mMainMemFlags).tail) {
                 loadFlags = -1;
             } else {
                 loadFlags = flagQueue->data[flagQueue->tail];
             }
-            asyncSys->result = ASYNCFILE_load(name, loadFlags);
+            asyncSys->mHandle = ASYNCFILE_load(name, loadFlags);
         }
         break;
     }
@@ -810,18 +796,11 @@ INCLUDE_ASM("sound/asyncsys", cAsyncSys_ASYNCSYS_OnCurAsyncMainMemAlloc);
 #ifdef SKIP_ASM
 struct sVE_0028B0F0 { short delta; short index; void (*fn)(void*, int, int, int); };
 
-struct sRing_0028B0F0 {
-    int pad0;
-    int* data;  // 0x4
-    int tail;   // 0x8
-    int head;   // 0xC
-    char pad10[0x20];
-};
 
 struct sAsync_0028B0F0 {
     char pad0[0x18C];
-    sRing_0028B0F0 q1;       // 0x18C
-    sRing_0028B0F0 q2;       // 0x1BC
+    cCircBuffer q1;       // 0x18C
+    cCircBuffer q2;       // 0x1BC
     char pad1ec[0];
 };
 
@@ -840,18 +819,18 @@ extern "C" void cAsyncSys_ASYNCSYS_OnCurAsyncMainMemAlloc(cAsyncSys* self, int s
     sVE_0028B0F0* vtEntry = &((sVE_0028B0F0*)self->mVtbl)[3];
     void (**pf)(void*, int, int, int) = &vtEntry->fn;
     char* thisp = (char*)self + vtEntry->delta;
-    sRing_0028B0F0* handleQueue = &(*(sRing_0028B0F0*)&self->mUserHandle);
+    cCircBuffer* handleQueue = &(*(&self->mUserHandle));
     int userHandle;
     int memFlags;
     if (self->mUserHandle.Head == self->mUserHandle.Tail)
         userHandle = -1;
     else
-        userHandle = handleQueue->data[handleQueue->head];
-    sRing_0028B0F0* flagsQueue = &(*(sRing_0028B0F0*)&self->mMainMemFlags);
+        userHandle = handleQueue->Array[handleQueue->Tail];
+    cCircBuffer* flagsQueue = &(*(&self->mMainMemFlags));
     if (self->mMainMemFlags.Head == self->mMainMemFlags.Tail)
         memFlags = -1;
     else
-        memFlags = flagsQueue->data[flagsQueue->head];
+        memFlags = flagsQueue->Array[flagsQueue->Tail];
     (*pf)(thisp, userHandle, size, memFlags);
 }
 #endif

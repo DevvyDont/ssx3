@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "object/animnode.h"
 #include "object/floatingnode.h"
 
@@ -282,9 +283,6 @@ struct sRow_E798 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct sMat_E798 {
-    sRow_E798 r[4];
-};
 
 struct sDelta_E798 {
     sVec4_E798 pos;
@@ -325,7 +323,7 @@ static inline void vu0ScaleEq_E798(sVec4_E798& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix * vector).
-static inline sVec4_E798 vu0MulMat_E798(const sMat_E798* m, const sVec4_E798& v)
+static inline sVec4_E798 vu0MulMat_E798(const t4Matrix* m, const sVec4_E798& v)
 {
     sVec4_E798 r;
     __asm__(
@@ -407,7 +405,7 @@ static inline void vu0AddEq_E798(sVec4_E798& a, const sVec4_E798& b)
 
 static inline sVec4_E798 boneE798Pos(char* self, int i)
 {
-    return *(sVec4_E798*)&(*(sMat_E798**)(self + 0x44))[i].r[3];
+    return *(sVec4_E798*)&((sRow_E798*)&(*(t4Matrix**)(self + 0x44))[i].row[0])[3];
 }
 
 /**
@@ -448,7 +446,7 @@ extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
         rot = sVec4_E798(-*(float*)(node + 0x50), -*(float*)(node + 0x54), -*(float*)(node + 0x58), 0.0f);
         vu0ScaleEq_E798(pos, animSpeed * (float)*(int*)(cAppMan_TheAppMan + 0x10));
         vu0ScaleEq_E798(rotv, animSpeed * (float)*(int*)(cAppMan_TheAppMan + 0x10) * d2r);
-        sMat_E798 eulerMat;
+        t4Matrix eulerMat;
         {
             sVec3_E798 eulerAngles;
             eulerAngles.x = rot.x;
@@ -457,26 +455,26 @@ extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
             float sinY, cosY, sinZ, cosZ;
             fSinCos(&sinY, &cosY, eulerAngles.y);
             fSinCos(&sinZ, &cosZ, eulerAngles.z);
-            eulerMat.r[0].x = cosY * cosZ;
-            eulerMat.r[0].y = -cosY * sinZ;
-            eulerMat.r[0].z = sinY;
-            eulerMat.r[0].w = 0.0f;
-            eulerMat.r[1].x = sinZ;
-            eulerMat.r[1].y = cosZ;
-            eulerMat.r[1].z = 0.0f;
-            eulerMat.r[1].w = 0.0f;
-            eulerMat.r[2].x = 0.0f;
-            eulerMat.r[2].y = 0.0f;
-            eulerMat.r[2].z = 1.0f;
-            eulerMat.r[2].w = 0.0f;
-            eulerMat.r[3].x = 0.0f;
-            eulerMat.r[3].y = 0.0f;
-            eulerMat.r[3].z = 0.0f;
-            eulerMat.r[3].w = 1.0f;
+            ((sRow_E798*)&eulerMat.row[0])[0].x = cosY * cosZ;
+            ((sRow_E798*)&eulerMat.row[0])[0].y = -cosY * sinZ;
+            ((sRow_E798*)&eulerMat.row[0])[0].z = sinY;
+            ((sRow_E798*)&eulerMat.row[0])[0].w = 0.0f;
+            ((sRow_E798*)&eulerMat.row[0])[1].x = sinZ;
+            ((sRow_E798*)&eulerMat.row[0])[1].y = cosZ;
+            ((sRow_E798*)&eulerMat.row[0])[1].z = 0.0f;
+            ((sRow_E798*)&eulerMat.row[0])[1].w = 0.0f;
+            ((sRow_E798*)&eulerMat.row[0])[2].x = 0.0f;
+            ((sRow_E798*)&eulerMat.row[0])[2].y = 0.0f;
+            ((sRow_E798*)&eulerMat.row[0])[2].z = 1.0f;
+            ((sRow_E798*)&eulerMat.row[0])[2].w = 0.0f;
+            ((sRow_E798*)&eulerMat.row[0])[3].x = 0.0f;
+            ((sRow_E798*)&eulerMat.row[0])[3].y = 0.0f;
+            ((sRow_E798*)&eulerMat.row[0])[3].z = 0.0f;
+            ((sRow_E798*)&eulerMat.row[0])[3].w = 1.0f;
         }
         rotv = vu0MulMat_E798(&eulerMat, rotv);
-        pos = vu0MulMat_E798(&((sMat_E798*)self->AnimMats)[i], pos);
-        rotv = vu0MulMat_E798(&((sMat_E798*)self->AnimMats)[i], rotv);
+        pos = vu0MulMat_E798(&(self->AnimMats)[i], pos);
+        rotv = vu0MulMat_E798(&(self->AnimMats)[i], rotv);
         if (ent->parent >= 0) {
             sVec4_E798 parentOffset = vu0Sub_E798(boneE798Pos(((char*)self), i), boneE798Pos(((char*)self), ent->parent));
             vu0AddEq_E798(rotv, ((sDelta_E798*)(char*)self->MeshVelocity)[ent->parent].rot);
@@ -526,7 +524,7 @@ struct sAnimNode_EBA0 {
 // is this node's link at the head of its list, after cObjectInterface_runFrameUpdateScript?
 extern "C" int func_0034EBA0(cAnimNode* self)
 {
-    sAnimLink_EBA0* link = &(*(sAnimLink_EBA0*)&self->unk_014);
+    sAnimLink_EBA0* link = (sAnimLink_EBA0*)&self->unk_014;
     cObjectInterface_runFrameUpdateScript((sAnimLinkList_EBA0*)self->Instance);
     return link->list->head == link;
 }

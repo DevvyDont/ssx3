@@ -3281,27 +3281,21 @@ extern "C" int cScreenKeyboard_toggleShift(cScreenKeyboard* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cScreenKeyboard_getPasswordText);
 #ifdef SKIP_ASM
-// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct sStarsK1807D8 {
-    char pad_0x000[0xEC];
-    char name[0x40];    // 0xEC
-    char stars[0x40];   // 0x12C
-};
 
 /**
  * Returns the on-screen keyboard's input text masked as a password: one '*' per character, in the buffer at +0x12C.
  *
  * @return the masked text (+0x12C)
  */
-extern "C" char* cScreenKeyboard_getPasswordText(sStarsK1807D8* self)
+extern "C" char* cScreenKeyboard_getPasswordText(cScreenKeyboard* self)
 {
-    int n = strlen(self->name);
+    int n = strlen(self->mHiScoreName);
     int i;
     for (i = 0; i < n; i++) {
-        self->stars[i] = '*';
+        self->mPasswordText[i] = '*';
     }
-    self->stars[n] = 0;
-    return self->stars;
+    self->mPasswordText[n] = 0;
+    return self->mPasswordText;
 }
 #endif
 

@@ -1298,10 +1298,6 @@ extern int D_004A11D0;
 extern char str_kT_CMNBuyGear[];
 extern char str_kT_CMNEquipGear[];
 
-struct sEquipDetailK19A3D0 {
-    char pad_0x000[0x120];
-    int f120;      // 0x120
-};
 
 static inline int isDetailK19A3D0(void* self)
 {
@@ -1331,7 +1327,7 @@ extern "C" void cFEStateCharEquip_switchEquipMode(cFEStateCharEquip* self)
             cUIText_setUnicodeStringByID(self->mpButtonHelpText, GetHashValue32(str_kT_CMNEquipGear));
         }
     }
-    ((sEquipDetailK19A3D0*)self)->f120 = 0;
+    (self)->mCurrentStackPos = 0;
     MEM_fill(&self->mCategoryStack[0], D_004A11D0, 80);
     cFEStateCharEquip_updateHeading((cFEStateCharEquip*)self, D_004A11D0);
     func_0019B180(self, D_004A11D0);

@@ -327,14 +327,14 @@ static inline sQ_8BA0 up_8BA0(char* r) { return *(sQ_8BA0*)(r + 0x1C0); }
 extern "C" void cHandplantMotion_init(cHandplantMotion* self, sHit_8BA0* hit, float dur)
 {
     cRider* rider = self->mRider;
-    (*(sQ_8BA0*)&self->InitPos) = *(sQ_8BA0*)&rider->mPosition;
-    (*(sQ_8BA0*)&self->ExitVel) = (const sQ_8BA0&)D_004FF120_8BA0;
-    (*(sQ_8BA0*)&self->SplineDir) = hit->normal;
-    (*(sQ_8BA0*)&self->SplinePos) = hit->pos;
-    (*(sQ_8BA0*)&self->ApproachDir) = Normalize_8BA0(Sub_8BA0((*(sQ_8BA0*)&self->SplinePos), *(sQ_8BA0*)((char*)rider->mAnimModel->bones + (rider->mBoneHead << 5))));
+    *(sQ_8BA0*)&self->InitPos = *(sQ_8BA0*)&rider->mPosition;
+    *(sQ_8BA0*)&self->ExitVel = (const sQ_8BA0&)D_004FF120_8BA0;
+    *(sQ_8BA0*)&self->SplineDir = hit->normal;
+    *(sQ_8BA0*)&self->SplinePos = hit->pos;
+    *(sQ_8BA0*)&self->ApproachDir = Normalize_8BA0(Sub_8BA0(*(sQ_8BA0*)&self->SplinePos, *(sQ_8BA0*)((char*)rider->mAnimModel->bones + (rider->mBoneHead << 5))));
     self->EnterSec = dur;
     self->ElapsedSec = 0.0f;
-    self->InitTangentSpeed = Dot_8BA0(*(sQ_8BA0*)&self->mRider->mVelocity, (*(sQ_8BA0*)&self->SplineDir));
+    self->InitTangentSpeed = Dot_8BA0(*(sQ_8BA0*)&self->mRider->mVelocity, *(sQ_8BA0*)&self->SplineDir);
     int isRail = 0;
     if (hit->obj)
         isRail = hit->obj->flags & 1;
@@ -354,7 +354,7 @@ extern "C" void cHandplantMotion_init(cHandplantMotion* self, sHit_8BA0* hit, fl
     fwd.y = 2.0f * (idealOrientation.x * idealOrientation.y + idealOrientation.w * idealOrientation.z);
     fwd.z = 2.0f * (idealOrientation.x * idealOrientation.z - idealOrientation.w * idealOrientation.y);
     fwd.w = 0.0f;
-    sQ_8BA0 flatSplineDir = (*(sQ_8BA0*)&self->SplineDir);
+    sQ_8BA0 flatSplineDir = *(sQ_8BA0*)&self->SplineDir;
     flatSplineDir.z = 0.0f;
     sQ_8BA0 n = Normalize_8BA0(flatSplineDir);
     self->IsToeside = Dot_8BA0(n, fwd) < 0.0f;
@@ -375,16 +375,16 @@ extern "C" void cHandplantMotion_init(cHandplantMotion* self, sHit_8BA0* hit, fl
         ang = (1.5707963705062866f - func_0031C128(deltaRot.w <? 1.0f)) * 2.0f;
         self->SnapRotationRate = ang;
         if (ang >= 9.999999747378752e-06f)
-            (*(sQ_8BA0*)&self->SnapRotationAxis) = Div_8BA0(sV_8BA0(deltaRot.x, deltaRot.y, deltaRot.z, 0.0f), fSin(ang * 0.5f));
+            *(sQ_8BA0*)&self->SnapRotationAxis = Div_8BA0(sV_8BA0(deltaRot.x, deltaRot.y, deltaRot.z, 0.0f), fSin(ang * 0.5f));
         else
-            (*(sQ_8BA0*)&self->SnapRotationAxis) = (const sQ_8BA0&)t4vect_XAxis;
+            *(sQ_8BA0*)&self->SnapRotationAxis = (const sQ_8BA0&)t4vect_XAxis;
     } else {
         ang = (1.5707963705062866f - func_0031C128(-(deltaRot.w >? -1.0f))) * 2.0f;
         self->SnapRotationRate = ang;
         if (ang >= 9.999999747378752e-06f)
-            (*(sQ_8BA0*)&self->SnapRotationAxis) = Div_8BA0(sV_8BA0(deltaRot.x, deltaRot.y, deltaRot.z, 0.0f), fSin(ang * -0.5f));
+            *(sQ_8BA0*)&self->SnapRotationAxis = Div_8BA0(sV_8BA0(deltaRot.x, deltaRot.y, deltaRot.z, 0.0f), fSin(ang * -0.5f));
         else
-            (*(sQ_8BA0*)&self->SnapRotationAxis) = (const sQ_8BA0&)t4vect_XAxis;
+            *(sQ_8BA0*)&self->SnapRotationAxis = (const sQ_8BA0&)t4vect_XAxis;
     }
     self->SnapRotationRate = self->SnapRotationRate / self->EnterSec;
 }
@@ -581,7 +581,7 @@ extern "C" void cHandplantMotion_step(cHandplantMotion* self)
     if (self->ElapsedSec <= self->EnterSec) {
         float progress = self->ElapsedSec / self->EnterSec;
         *(sQ_91A8*)&self->mRider->mPosition =
-            vu0Add_91A8(vu0Scale_91A8(vu0Sub_91A8((*(sQ_91A8*)&self->InitPos), (*(sQ_91A8*)&self->SplinePos)), progress * (progress - 2.0f)), (*(sQ_91A8*)&self->InitPos));
+            vu0Add_91A8(vu0Scale_91A8(vu0Sub_91A8(*(sQ_91A8*)&self->InitPos, *(sQ_91A8*)&self->SplinePos), progress * (progress - 2.0f)), *(sQ_91A8*)&self->InitPos);
         self->mRider->mPosition.w = 1.0f;
         sQ_91A8 deltaRot;
         {
@@ -591,25 +591,25 @@ extern "C" void cHandplantMotion_step(cHandplantMotion* self)
         }
         *(sQ_91A8*)&self->mRider->mRotation = QuatMul_91A8(deltaRot, *(sQ_91A8*)&self->mRider->mRotation);
     } else {
-        *(sQ_91A8*)&self->mRider->mPosition = (*(sQ_91A8*)&self->SplinePos);
+        *(sQ_91A8*)&self->mRider->mPosition = *(sQ_91A8*)&self->SplinePos;
         *(sQ_91A8*)&self->mRider->mVelocity = (const sQ_91A8&)D_004FF120_91A8;
         if (eq_91A8((self), (const sQ_91A8&)D_004FF120_91A8)) {
             if (cHandplantMotion_calcExitVel((self))) {
-                (*(sQ_91A8*)&self->AirPredictorPos) = vu0Add_91A8((*(sQ_91A8*)&self->SplinePos), vu0ScaleP_91A8((const sQ_91A8*)&D_004FF160_91A8, 5.0f));
-                (*(sQ_91A8*)&self->AirPredictorVel) = (*(sQ_91A8*)&self->ExitVel);
-                cAirPredictor_startLaunchIntoAir(self->mRider->mAirPredictor, &(*(sQ_91A8*)&self->AirPredictorPos), &(*(sQ_91A8*)&self->AirPredictorVel),
+                *(sQ_91A8*)&self->AirPredictorPos = vu0Add_91A8(*(sQ_91A8*)&self->SplinePos, vu0ScaleP_91A8((const sQ_91A8*)&D_004FF160_91A8, 5.0f));
+                *(sQ_91A8*)&self->AirPredictorVel = *(sQ_91A8*)&self->ExitVel;
+                cAirPredictor_startLaunchIntoAir(self->mRider->mAirPredictor, (sQ_91A8*)&self->AirPredictorPos, (sQ_91A8*)&self->AirPredictorVel,
                                                  3333.33349609375f);
                 for (int i = 0; i < 8 || !landed_91A8((char*)self->mRider->mAirPredictor); i++)
-                    cAirPredictor_updateFlightPath(self->mRider->mAirPredictor, &(*(sQ_91A8*)&self->AirPredictorPos), &(*(sQ_91A8*)&self->AirPredictorVel), 0.01666666753590107f);
+                    cAirPredictor_updateFlightPath(self->mRider->mAirPredictor, (sQ_91A8*)&self->AirPredictorPos, (sQ_91A8*)&self->AirPredictorVel, 0.01666666753590107f);
             }
         } else {
             if (landed_91A8((char*)self->mRider->mAirPredictor)) {
                 char* ap = (char*)self->mRider->mAirPredictor;
-                if (0.0f < vu0Dot_91A8(*(sQ_91A8*)(ap + 0x20), (*(sQ_91A8*)&self->ExitVel)))
+                if (0.0f < vu0Dot_91A8(*(sQ_91A8*)(ap + 0x20), *(sQ_91A8*)&self->ExitVel))
                     cRider_alignRiderAxis((char*)self->mRider, ap + 0x20, ap + 0x10, self->mRider->mTimeScale + self->mRider->mTimeScale,
                                   self->mRider->mTimeScale * 6.632251739501953f);
             } else {
-                cAirPredictor_updateFlightPath(self->mRider->mAirPredictor, &(*(sQ_91A8*)&self->AirPredictorPos), &(*(sQ_91A8*)&self->AirPredictorVel), 0.01666666753590107f);
+                cAirPredictor_updateFlightPath(self->mRider->mAirPredictor, (sQ_91A8*)&self->AirPredictorPos, (sQ_91A8*)&self->AirPredictorVel, 0.01666666753590107f);
             }
         }
     }
@@ -5781,7 +5781,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getVerticalJump);
  * @return the float at +0x5A4
  */
 extern "C" float cRider_getVerticalJump(cRider* rider) {
-    return (*(float*)&rider->unk_5A4);
+    return *(float*)&rider->unk_5A4;
 }
 #endif
 //100%
@@ -6008,7 +6008,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setVelocity);
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" void cRider_setVelocity(cRider* rider, long long *velocity) {
-    (*(long long*)&rider->mVelocity) = (long long) *velocity;
+    *(long long*)&rider->mVelocity = (long long) *velocity;
 }
 #endif
 //100%
@@ -8418,13 +8418,6 @@ struct sHpGame_41B8 {
     char* riders[8];        // 0x28
 };
 
-struct sHpCtl_41B8 {
-    sHpGame_41B8* game;     // 0x0
-    sHpZone_41B8 zones[64]; // 0x4
-    int numZones;           // 0x704
-    int useHeight;          // 0x708
-    sHpLevel_41B8 levels[4];// 0x70C
-};
 
 extern "C" void cAvalanche_getAvalancheDataByPosition(sHpGround_41B8* out, sHpVec3_41B8* pos);
 
@@ -8442,17 +8435,17 @@ extern "C" void cAvalanche_getAvalancheDataByPosition(sHpGround_41B8* out, sHpVe
  */
 // Handplant difficulty level for player pl: at least the height band's level, and only above 1 when the rider is
 // inside one of the enabled zones.
-extern "C" int cDangerMan_CalcAppliedDangerLevel(sHpCtl_41B8* self, int pl)
+extern "C" int cDangerMan_CalcAppliedDangerLevel(cDangerMan* self, int pl)
 {
-    int lvl = self->levels[pl].level;
-    char* rider = self->game->riders[pl];
+    int lvl = ((sHpLevel_41B8*)&self->mRiderDangerTrack[0])[pl].level;
+    char* rider = ((sHpGame_41B8*)self->mpAI)->riders[pl];
     if (lvl == 0) {
         return 0;
     }
     char* riderObj = rider + 0x6C0;
     sHpVE_41B8* vt = *(sHpVE_41B8**)riderObj;
     float* pos = vt[5].fn(riderObj + vt[5].delta);
-    if (self->useHeight != 0) {
+    if (self->mNumActiveAvalanche != 0) {
         sHpGround_41B8 ground;
         sHpVec3_41B8 probe;
         probe.x = pos[0];
@@ -8472,11 +8465,11 @@ extern "C" int cDangerMan_CalcAppliedDangerLevel(sHpCtl_41B8* self, int pl)
     if (lvl < 2) {
         return 1;
     }
-    if (self->numZones == 0) {
+    if (self->mTrackedDangerElemNum == 0) {
         return 1;
     }
-    int n = self->numZones;
-    sHpZone_41B8* z = self->zones;
+    int n = self->mTrackedDangerElemNum;
+    sHpZone_41B8* z = ((sHpZone_41B8*)&self->mTrackedDangerElems[0]);
     for (int i = 0; i < 64 && n != 0; i++, z++) {
         if (z->type == 2) {
             continue;

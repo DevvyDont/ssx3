@@ -156,20 +156,6 @@ struct sMgr_20DF38 {
 // Typed view of the game manager (the unit declares SSXApp as void*).
 extern sMgr_20DF38* D_004A28A8_20DF38 __asm__("SSXApp");
 
-struct sReplay_20DF38 {
-    char pad_0x0[0x10];
-    char* owner;            // 0x10
-    char pad_0x14[0x2C];
-    void* screen;           // 0x40
-    char pad_0x44[0x58];
-    int paused;             // 0x9C
-    int hudHidden;          // 0xA0
-    int pos;                // 0xA4
-    int speed;              // 0xA8
-    int start;              // 0xAC
-    int end;                // 0xB0
-    int fB4;                // 0xB4
-};
 
 static inline char* replay_20DF38() { return *(char**)(D_004A28A8_20DF38->game + 0x28); }
 
@@ -265,13 +251,13 @@ extern "C" int cOVState_REPLAY_onInputBegin(cOVState_REPLAY* self, cPad_20DF38* 
         snd->play(6);
         self->mTimeLineHidden ^= 1;
         if (self->mTimeLineHidden != 0) {
-            cUIState_hideObjSafe(((sReplay_20DF38*)self), str_top);
-            cUIState_hideObjSafe(((sReplay_20DF38*)self), str_hidetimeline);
-            cUIState_showObjSafe(((sReplay_20DF38*)self), str_showtimeline);
+            cUIState_hideObjSafe((self), str_top);
+            cUIState_hideObjSafe((self), str_hidetimeline);
+            cUIState_showObjSafe((self), str_showtimeline);
         } else {
-            cUIState_showObjSafe(((sReplay_20DF38*)self), str_top);
-            cUIState_showObjSafe(((sReplay_20DF38*)self), str_hidetimeline);
-            cUIState_hideObjSafe(((sReplay_20DF38*)self), str_showtimeline);
+            cUIState_showObjSafe((self), str_top);
+            cUIState_showObjSafe((self), str_hidetimeline);
+            cUIState_hideObjSafe((self), str_showtimeline);
         }
         return 1;
     }

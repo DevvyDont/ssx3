@@ -3884,14 +3884,6 @@ struct sPart_2868 {
     float alpha[1];             // 0x40
 };
 
-struct sWake_2868 {
-    char pad0[0x20];
-    sPart_2868* part;           // 0x20
-    char pad24[4];
-    float rot;                  // 0x28
-    unsigned short on;          // 0x2C
-    unsigned short useAlpha;    // 0x2E
-};
 
 extern sRsCtx_2868* D_004A5B80_2868 __asm__("cGraphicsMan_TheGraphicsMan");
 
@@ -3931,13 +3923,13 @@ static inline void rsSetA_2868(sRsCtx_2868* ctx, int mask, int shift, int v)
  *
  * @param idx  the view index
  */
-extern "C" void cLightHalo_Render(sWake_2868* self, int idx)
+extern "C" void cLightHalo_Render(cLightHalo* self, int idx)
 {
-    if (self->on == 0) {
+    if (self->mbOnScreen == 0) {
         return;
     }
     sV3_2868 n;
-    sPart_2868* haloRecord = self->part;
+    sPart_2868* haloRecord = ((sPart_2868*)self->mpHalo);
     float x = haloRecord->vel.x;
     float y = haloRecord->vel.y;
     float z = haloRecord->vel.z;
@@ -3957,8 +3949,8 @@ extern "C" void cLightHalo_Render(sWake_2868* self, int idx)
     col.d.y = n.y;
     col.d.z = n.z;
     sRsCtx_2868* ctx = D_004A5B80_2868;
-    if (self->useAlpha != 0) {
-        col.a = self->part->alpha[idx];
+    if (self->mbRequestZSample != 0) {
+        col.a = ((sPart_2868*)self->mpHalo)->alpha[idx];
         rsSetA_2868(ctx, 0x1800000, 23, 2);
         rsSetA_2868(ctx, 0x300000, 20, 0);
         rsSetA_2868(ctx, 0xFF000, 12, 20);
@@ -3972,7 +3964,7 @@ extern "C" void cLightHalo_Render(sWake_2868* self, int idx)
         return;
     }
     float size = 0.0f;
-    switch ((unsigned int)(self->part->flags & 0x70)) {
+    switch ((unsigned int)(((sPart_2868*)self->mpHalo)->flags & 0x70)) {
     case 0x10:
         ctx->top->tex = rsTex1024_2868(ctx);
         size = 180.0f;
@@ -3986,8 +3978,8 @@ extern "C" void cLightHalo_Render(sWake_2868* self, int idx)
         size = 350.0f;
         break;
     }
-    sPart_2868* drawRecord = self->part;
-    ctx->Draw(sV4_2868(drawRecord->pos.x, drawRecord->pos.y, drawRecord->pos.z, 1.0f), sV2_2868(size, size), sV2_2868(), sV2_2868(1.0f, 1.0f), col, self->rot, 2);
+    sPart_2868* drawRecord = ((sPart_2868*)self->mpHalo);
+    ctx->Draw(sV4_2868(drawRecord->pos.x, drawRecord->pos.y, drawRecord->pos.z, 1.0f), sV2_2868(size, size), sV2_2868(), sV2_2868(1.0f, 1.0f), col, self->mAngle, 2);
 }
 #endif
 
@@ -4007,17 +3999,6 @@ struct sV4c_2B00 {
     sV4c_2B00(const sV3c_2B00& v, const float& d) { x = v.x; y = v.y; z = v.z; w = d; }
 } __attribute__((aligned(16)));
 
-// The wake record (the unit's sWake_2868, with the screen-rect fields this function writes).
-struct sWake_2B00 {
-    float x0, y0;               // 0x0
-    float w, h;                 // 0x8
-    float x1, y1;               // 0x10
-    float f18, f1C;             // 0x18
-    sPart_2868* part;           // 0x20
-    float f24, f28;             // 0x24
-    unsigned short on;          // 0x2C
-    unsigned short vis;         // 0x2E
-};
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline t4Vector Sub_2B00(const t4Vector& a, const sV4c_2B00& b)
@@ -4054,20 +4035,20 @@ static inline int clampI_2B00(int v, int lo, int hi)
  */
 extern "C" void cLightHalo_Process(cLightHalo* vself, void* vrect)
 {
-    sWake_2B00* self = (sWake_2B00*)vself;
+    cLightHalo* self = vself;
     float* rect = (float*)vrect;
     char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
     t4Vector pos;
-    pos.x = self->part->pos.x;
-    pos.y = self->part->pos.y;
-    pos.z = self->part->pos.z;
+    pos.x = ((sPart_2868*)self->mpHalo)->pos.x;
+    pos.y = ((sPart_2868*)self->mpHalo)->pos.y;
+    pos.z = ((sPart_2868*)self->mpHalo)->pos.z;
     pos.w = 1.0f;
     sVEntry<int(void*, t4Vector*)>* vEntry = &(*(sVEntry<int(void*, t4Vector*)>**)(obj + 0x10D8))[91];
     if (vEntry->fn(obj + vEntry->delta, &pos)) {
-        self->on = 0;
-        self->vis = 0;
+        self->mbOnScreen = 0;
+        self->mbRequestZSample = 0;
     } else {
-        self->on = 1;
+        self->mbOnScreen = 1;
         t4Vector scr;
         sVEntry<void(t4Vector*, void*, t4Vector*)>* projectSlot = &(*(sVEntry<void(t4Vector*, void*, t4Vector*)>**)(obj + 0x10D8))[92];
         projectSlot->fn(&scr, obj + projectSlot->delta, &pos);
@@ -4078,21 +4059,21 @@ extern "C" void cLightHalo_Process(cLightHalo* vself, void* vrect)
         {
             int w = (int)(depth * 800.0f);
             int pixelHeight = (int)(depth * 400.0f);
-            self->vis = 1;
+            self->mbRequestZSample = 1;
             int cw = clampI_2B00(w, 1, 16);
             pixelHeight = clampI_2B00(pixelHeight, 1, 8);
-            self->x0 = scr.x - (float)(cw >> 1);
-            self->y0 = scr.y - (float)(pixelHeight >> 1);
-            self->w = (float)cw;
-            self->h = (float)pixelHeight;
-            self->x1 = scr.x - 8.0f;
-            self->y1 = scr.y - 4.0f;
-            self->f18 = 16.0f;
-            self->f1C = 8.0f;
-            self->x1 = wakeClampD0B8(self->x1, 0.0f, (rect[0] + rect[2]) - self->f18);
-            self->y1 = wakeClampD0B8(self->y1, 0.0f, (rect[1] + rect[3]) - self->f1C);
+            self->mZRect.X = scr.x - (float)(cw >> 1);
+            self->mZRect.Y = scr.y - (float)(pixelHeight >> 1);
+            self->mZRect.W = (float)cw;
+            self->mZRect.H = (float)pixelHeight;
+            self->mZSRect.X = scr.x - 8.0f;
+            self->mZSRect.Y = scr.y - 4.0f;
+            self->mZSRect.W = 16.0f;
+            self->mZSRect.H = 8.0f;
+            self->mZSRect.X = wakeClampD0B8(self->mZSRect.X, 0.0f, (rect[0] + rect[2]) - self->mZSRect.W);
+            self->mZSRect.Y = wakeClampD0B8(self->mZSRect.Y, 0.0f, (rect[1] + rect[3]) - self->mZSRect.H);
             float pullBack = 0.0f;
-            switch ((unsigned int)(self->part->flags & 0x70)) {
+            switch ((unsigned int)(((sPart_2868*)self->mpHalo)->flags & 0x70)) {
             case 0x10:
                 pullBack = 100.0f;
                 break;
@@ -4111,11 +4092,11 @@ extern "C" void cLightHalo_Process(cLightHalo* vself, void* vrect)
             t4Vector sc;
             sVEntry<void(t4Vector*, void*, t4Vector*)>* projectSlot2 = &(*(sVEntry<void(t4Vector*, void*, t4Vector*)>**)(obj + 0x10D8))[92];
             projectSlot2->fn(&sc, obj + projectSlot2->delta, &lp);
-            self->f24 = sc.z;
+            self->mZDist = sc.z;
             // screen x mapped to -1..1, then to an angle
             float screenFrac = scr.x - rect[0];
             screenFrac = (screenFrac + screenFrac) / rect[2] - 1.0f;
-            self->f28 = screenFrac * 1.5707964f;
+            self->mAngle = screenFrac * 1.5707964f;
         }
     }
 }
@@ -4563,7 +4544,7 @@ struct sBW3478Blk { char d[0x210]; };
 struct sBW3478Data {
     char pad0[0x60];
     int cnt[1][2];                      // 0x60
-    sWake_2868 strip[1][2][0x100];      // 0x68
+    cLightHalo strip[1][2][0x100];      // 0x68
     char pad6068[0x6070 - 0x6068];
     sBW3478Blk blk[1][2];               // 0x6070
     char pad6490[0x649C - 0x6490];
@@ -4600,7 +4581,7 @@ extern "C" void cLensFxMan_DrawLens(cLensFxMan* selfv, int i)
     }
     self->vf10();
     for (int n = 0; n < self->cnt[bank][i]; n++) {
-        if (self->strip[bank][i][n].on != 0) {
+        if (self->strip[bank][i][n].mbOnScreen != 0) {
             cLightHalo_Render(&self->strip[bank][i][n], i);
         }
     }
@@ -5754,14 +5735,6 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_OnStartObjectUse);
 #ifdef SKIP_ASM
-struct sWakeParams_4B98 {
-    int mode;
-    float a;
-    float b;
-    float c;
-    int id;
-    float level;
-};
 
 void cScriptObject_OnStartObjectUse(void* self);
 extern "C" int cSSXScriptEngine_MakeTransitionObject(void* tbl, int mode, int id);
@@ -5778,7 +5751,7 @@ extern "C" void cTransitionMan_StartTransitionScreenGrab(cTransitionMan* self, i
  */
 extern "C" void cTransitionMan_OnStartObjectUse(cTransitionMan* self)
 {
-    sWakeParams_4B98* transitionInfo = (sWakeParams_4B98*)&self->mInfo;
+    tScriptObjTransitionInfo* transitionInfo = (&self->mInfo);
     cScriptObject_OnStartObjectUse((char*)&self->mObjType);
     if (self->mInfo.transition != 7) {
         int transitionIn = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, self->mInfo.transition, self->mInfo.transitionColour);
@@ -5787,7 +5760,7 @@ extern "C" void cTransitionMan_OnStartObjectUse(cTransitionMan* self)
     } else {
         cTransitionMan_StartTransitionScreenGrab(self, 2, cSSXScriptEngine_MakeTransitionObject(ScriptEngine, 7, self->mInfo.transitionColour), 0, self->mInfo.outTime);
     }
-    self->mfCurrentTime = transitionInfo->level;
+    self->mfCurrentTime = transitionInfo->currTime;
 }
 #endif
 
@@ -6100,26 +6073,6 @@ extern "C" void cSnowBox__cSnowBox(int* self, int flags)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cSnowBox_update);
 #ifdef SKIP_ASM
-// cSnowBox::update(const tWorldPainterSnowfallParameters&) (SSX On Tour symbols, all_in_one_visualfx.obj).
-struct cSnowBox_4F50 {
-    int i0;                         // 0x00
-    int mode;                       // 0x04
-    int numFlakes;                  // 0x08
-    float range;                    // 0x0C
-    float windScale;                // 0x10
-    float f14;                      // 0x14
-    float f18;                      // 0x18
-    float fallSpeed;                // 0x1C
-    sWakeVecE398 pos;               // 0x20
-    sWakeVecE398 wind;              // 0x30
-    sWakeVecE398 windPrev;          // 0x40
-    char pad50[0x40];               // 0x50
-    float windTimer;                // 0x90
-    float windTimeTotal;            // 0x94
-    char pad98[0xC];                // 0x98
-    float colour[3];                // 0xA4
-    int firstWind;                  // 0xB0
-};
 
 // tWorldPainterSnowfallParameters (filled by cSnowFall_update).
 struct tWorldPainterSnowfallParameters_4F50 {
@@ -6182,7 +6135,7 @@ static inline sWakeVecE398 Scale_4F50(float s, const sWakeVecE398& v)
 }
 
 // The unit declares cSnowBox_update(int*, sWakeRec_5DA0*) later; define it through a typed alias.
-extern "C" void cSnowBox_update_4F50(cSnowBox_4F50* self, const tWorldPainterSnowfallParameters_4F50* params) __asm__("cSnowBox_update");
+extern "C" void cSnowBox_update_4F50(cSnowBox* self, const tWorldPainterSnowfallParameters_4F50* params) __asm__("cSnowBox_update");
 /**
  * Updates a snow box for this frame: takes its flake settings from the snowfall parameters, varies the wind and moves
  * the box offset.
@@ -6196,25 +6149,25 @@ extern "C" void cSnowBox_update_4F50(cSnowBox_4F50* self, const tWorldPainterSno
  *
  * @param params  the snowfall parameters filled by cSnowFall_update
  */
-extern "C" void cSnowBox_update_4F50(cSnowBox_4F50* self, const tWorldPainterSnowfallParameters_4F50* params)
+extern "C" void cSnowBox_update_4F50(cSnowBox* self, const tWorldPainterSnowfallParameters_4F50* params)
 {
-    switch (self->mode) {
+    switch (self->mSnowBoxType) {
     case 0:
-        self->f18 = params->c0[0];
-        self->colour[0] = params->c0[1];
-        self->colour[1] = params->c0[2];
-        self->colour[2] = params->c0[3];
-        self->numFlakes = (int)(params->f[0] * 500.0f);
-        self->windScale = params->f[1] * 500.0f;
-        self->f14 = params->f[4];
+        self->mOpacity = params->c0[0];
+        ((float*)&self->mColourR)[0] = params->c0[1];
+        ((float*)&self->mColourR)[1] = params->c0[2];
+        ((float*)&self->mColourR)[2] = params->c0[3];
+        self->mNumFlakes = (int)(params->f[0] * 500.0f);
+        self->mWindScale = params->f[1] * 500.0f;
+        self->mFlakeSize = params->f[4];
         break;
     case 1:
-        self->f18 = params->c1[0];
-        self->colour[0] = params->c1[1];
-        self->colour[1] = params->c1[2];
-        self->colour[2] = params->c1[3];
-        self->numFlakes = (int)(params->f[2] * 6.0f);
-        self->windScale = params->f[3] * 250.0f;
+        self->mOpacity = params->c1[0];
+        ((float*)&self->mColourR)[0] = params->c1[1];
+        ((float*)&self->mColourR)[1] = params->c1[2];
+        ((float*)&self->mColourR)[2] = params->c1[3];
+        self->mNumFlakes = (int)(params->f[2] * 6.0f);
+        self->mWindScale = params->f[3] * 250.0f;
         break;
     }
     const float kTimeDiff = 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
@@ -6222,33 +6175,33 @@ extern "C" void cSnowBox_update_4F50(cSnowBox_4F50* self, const tWorldPainterSno
     float x;
     float y;
     float z;
-    self->windTimer -= kTimeDiff;
-    if (self->windTimer < 0.0f) {
-        self->windPrev = self->wind;
+    self->mCurrentTimeToWindChange -= kTimeDiff;
+    if (self->mCurrentTimeToWindChange < 0.0f) {
+        *(sWakeVecE398*)&self->mWindLast = *(sWakeVecE398*)&self->mWindNext;
         float windSin;
         float windCos;
         sincos_4F50(deg2rad_4F50(params->f[5]), windSin, windCos);
-        t4Vec_4F50 windBaseRotated(self->windScale * windCos, self->windScale * windSin, 0.0f, 0.0f);
-        t4Vec_4F50 windBaseFlurries(windBaseRotated.x * (1.0f - params->f[6]) + params->f[6] * FXRand_4F50(-self->windScale, self->windScale),
-                                    windBaseRotated.y * (1.0f - params->f[6]) + params->f[6] * FXRand_4F50(-self->windScale, self->windScale),
-                                    params->f[6] * FXRand_4F50(-self->windScale, self->windScale), 0.0f);
-        self->wind = windBaseFlurries;
-        self->windTimer = self->windTimeTotal = FXRand_4F50(1.0f, 5.0f);
-        if (self->firstWind) {
-            self->windPrev = self->wind;
-            self->firstWind = 0;
+        t4Vec_4F50 windBaseRotated(self->mWindScale * windCos, self->mWindScale * windSin, 0.0f, 0.0f);
+        t4Vec_4F50 windBaseFlurries(windBaseRotated.x * (1.0f - params->f[6]) + params->f[6] * FXRand_4F50(-self->mWindScale, self->mWindScale),
+                                    windBaseRotated.y * (1.0f - params->f[6]) + params->f[6] * FXRand_4F50(-self->mWindScale, self->mWindScale),
+                                    params->f[6] * FXRand_4F50(-self->mWindScale, self->mWindScale), 0.0f);
+        *(sWakeVecE398*)&self->mWindNext = windBaseFlurries;
+        self->mCurrentTimeToWindChange = self->mTotalTimeToWindChange = FXRand_4F50(1.0f, 5.0f);
+        if (self->mResetWind) {
+            *(sWakeVecE398*)&self->mWindLast = *(sWakeVecE398*)&self->mWindNext;
+            self->mResetWind = 0;
         }
     }
-    windBlend = self->windTimer / self->windTimeTotal;
-    wakeAddE398(self->pos, wakeScale0EE8(wakeAdd0EE8(wakeScale0EE8(self->wind, 1.0f - windBlend), wakeScale0EE8(self->windPrev, windBlend)), kTimeDiff));
-    wakeAddE398(self->pos, Scale_4F50(self->fallSpeed * params->f[7] * kTimeDiff, D_004FF160_4F50));
-    x = self->pos.x;
-    y = self->pos.y;
-    z = self->pos.z;
-    BringIntoRange_4F50(x, self->range);
-    BringIntoRange_4F50(y, self->range);
-    BringIntoRange_4F50(z, self->range);
-    self->pos = t4Vec_4F50(x, y, z, 1.0f);
+    windBlend = self->mCurrentTimeToWindChange / self->mTotalTimeToWindChange;
+    wakeAddE398(*(sWakeVecE398*)&self->mOffset, wakeScale0EE8(wakeAdd0EE8(wakeScale0EE8(*(sWakeVecE398*)&self->mWindNext, 1.0f - windBlend), wakeScale0EE8(*(sWakeVecE398*)&self->mWindLast, windBlend)), kTimeDiff));
+    wakeAddE398(*(sWakeVecE398*)&self->mOffset, Scale_4F50(self->mGravity * params->f[7] * kTimeDiff, D_004FF160_4F50));
+    x = (*(sWakeVecE398*)&self->mOffset).x;
+    y = (*(sWakeVecE398*)&self->mOffset).y;
+    z = (*(sWakeVecE398*)&self->mOffset).z;
+    BringIntoRange_4F50(x, self->mBoxScale);
+    BringIntoRange_4F50(y, self->mBoxScale);
+    BringIntoRange_4F50(z, self->mBoxScale);
+    *(sWakeVecE398*)&self->mOffset = t4Vec_4F50(x, y, z, 1.0f);
 }
 #endif
 
@@ -6302,7 +6255,7 @@ static inline void wakeWrap5430(float& r, float v, float s)
  */
 extern "C" void cSnowBox_updateForCameraPosition(cSnowBox* self, sWakeVec5430* delta)
 {
-    wakeSub5430((*(sWakeVec5430*)&self->mOffset), *delta);
+    wakeSub5430(*(sWakeVec5430*)&self->mOffset, *delta);
     float x = self->mOffset.x;
     float y = self->mOffset.y;
     float z = self->mOffset.z;
@@ -6312,7 +6265,7 @@ extern "C" void cSnowBox_updateForCameraPosition(cSnowBox* self, sWakeVec5430* d
     wakeWrap5430(x, px, self->mBoxScale);
     wakeWrap5430(y, py, self->mBoxScale);
     wakeWrap5430(z, pz, self->mBoxScale);
-    (*(sWakeVec5430*)&self->mOffset) = sWakeVec5430(x, y, z, 1.0f);
+    *(sWakeVec5430*)&self->mOffset = sWakeVec5430(x, y, z, 1.0f);
 }
 #endif
 

@@ -413,11 +413,6 @@ struct sAmQuat_0200
     sAmQuat_0200(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-struct sAmXform_0200
-{
-    sAmQuat_0200 pos;
-    sAmQuat_0200 rot;
-};
 
 extern t4Vector t4vect_Origin;
 
@@ -499,11 +494,11 @@ static inline sAmQuat_0200 amRot_0200(const sAmQuat_0200& q, const sAmQuat_0200&
 }
 
 // Child transform = parent transform a composed with local transform b.
-static inline sAmXform_0200 amCombine_0200(const sAmXform_0200& a, const sAmXform_0200& b)
+static inline sAnimModelBone amCombine_0200(const sAnimModelBone& a, const sAnimModelBone& b)
 {
-    sAmXform_0200 r;
-    r.rot = amQuatMul_0200(a.rot, b.rot);
-    r.pos = amAdd_0200(amRot_0200(a.rot, amSub_0200(b.pos, *(const sAmQuat_0200*)&t4vect_Origin)), a.pos);
+    sAnimModelBone r;
+    *(sAmQuat_0200*)&r.rot = amQuatMul_0200(*(sAmQuat_0200*)&a.rot, *(sAmQuat_0200*)&b.rot);
+    *(sAmQuat_0200*)&r.pos = amAdd_0200(amRot_0200(*(sAmQuat_0200*)&a.rot, amSub_0200(*(sAmQuat_0200*)&b.pos, *(const sAmQuat_0200*)&t4vect_Origin)), *(sAmQuat_0200*)&a.pos);
     return r;
 }
 
@@ -542,10 +537,10 @@ extern "C" void cAnimModel_transform(cAnimModel* self, sAnimModelBone* roots)
             else
                 parent = &self->bones[parentIndex];
             t4Vector* lp = (t4Vector*)((k << 4) + (int)self->localPos);
-            sAmXform_0200 local;
-            local.pos = sAmQuat_0200(lp->x * self->unk_140.x, lp->y * self->unk_140.y, lp->z * self->unk_140.z, lp->w * self->unk_140.w);
-            local.rot = *(sAmQuat_0200*)((k << 4) + (int)self->localRot);
-            *(sAmXform_0200*)((k << 5) + (int)self->bones) = amCombine_0200(*(sAmXform_0200*)parent, local);
+            sAnimModelBone local;
+            *(sAmQuat_0200*)&local.pos = sAmQuat_0200(lp->x * self->unk_140.x, lp->y * self->unk_140.y, lp->z * self->unk_140.z, lp->w * self->unk_140.w);
+            *(sAmQuat_0200*)&local.rot = *(sAmQuat_0200*)((k << 4) + (int)self->localRot);
+            *(sAnimModelBone*)((k << 5) + (int)self->bones) = amCombine_0200(*parent, local);
         }
     }
 }

@@ -463,13 +463,6 @@ struct sUITexData8138 {
     sUITexSrc8138 e[1];     // 0x04
 };
 
-struct sUITexBank8138 {
-    sUITexData8138* data;   // 0x00
-    int* texIds;            // 0x04
-    int texCount;           // 0x08
-    sUITexElem8138* elems;  // 0x0C
-    int elemCount;          // 0x10
-};
 
 struct sUIFshDir8138 {
     int offset;
@@ -513,38 +506,38 @@ void* operator new[](unsigned int size, const char* tag, unsigned int flags, int
  */
 extern "C" void cUITextureBank_setData(cUITextureBank* vbank, int id, void* vdata)
 {
-    sUITexBank8138* self = (sUITexBank8138*)vbank;
+    cUITextureBank* self = vbank;
     sUITexData8138* data = (sUITexData8138*)vdata;
     char name[0x70];
     int i = 0;
     sprintf(name, str_pct_s_1_ssh, id);
     sUIFsh8138* fsh = FILE_loadpack(name, 0x3000100);
-    self->texCount = fsh->count;
-    self->texIds = (int*)operator_new_tag(self->texCount * 4, str_UITextureIDs, 0, 0);
-    func_00416210(self->texIds, 0xFF, self->texCount * 4);
-    for (; i < self->texCount; i++) {
+    self->mNumTextureIDs = fsh->count;
+    self->mpTexturesIDs = (int*)operator_new_tag(self->mNumTextureIDs * 4, str_UITextureIDs, 0, 0);
+    func_00416210(self->mpTexturesIDs, 0xFF, self->mNumTextureIDs * 4);
+    for (; i < self->mNumTextureIDs; i++) {
         char* shape = (char*)fsh + fsh->dir[i].offset;
         if (shape != 0) {
             sUIVE_8138* vt = *(sUIVE_8138**)(D_004A289C_8138 + 0x10D8);
-            self->texIds[i] = vt[46].fn(D_004A289C_8138 + vt[46].delta, shape, str_UITPage, 0, 1, -1);
+            self->mpTexturesIDs[i] = vt[46].fn(D_004A289C_8138 + vt[46].delta, shape, str_UITPage, 0, 1, -1);
         }
     }
     MEM_free(fsh);
     sUITexSrc8138* src = data->e;
-    self->data = data;
+    *(sUITexData8138**)&self->mpTextureTableHeader = data;
     int n = data->count;
-    self->elemCount = n;
-    sUITexElem8138*& slot = self->elems;
+    self->mNumElements = n;
+    sUITexElem8138*& slot = ((sUITexElem8138*)self->mpElements);
     slot = new (str_UITextureELs, 0, 0) sUITexElem8138[n];
-    func_00416210(self->elems, 0xFF, self->elemCount * 4);
+    func_00416210(((sUITexElem8138*)self->mpElements), 0xFF, self->mNumElements * 4);
     int j;
-    for (j = 0; j < self->elemCount; j++, src++) {
-        self->elems[j].fC = src->fC;
-        self->elems[j].f10 = src->f8;
-        self->elems[j].f18 = src->f14;
-        self->elems[j].f14 = src->f10;
-        self->elems[j].id = src->id;
-        self->elems[j].tex = self->texIds[src->tex];
+    for (j = 0; j < self->mNumElements; j++, src++) {
+        ((sUITexElem8138*)self->mpElements)[j].fC = src->fC;
+        ((sUITexElem8138*)self->mpElements)[j].f10 = src->f8;
+        ((sUITexElem8138*)self->mpElements)[j].f18 = src->f14;
+        ((sUITexElem8138*)self->mpElements)[j].f14 = src->f10;
+        ((sUITexElem8138*)self->mpElements)[j].id = src->id;
+        ((sUITexElem8138*)self->mpElements)[j].tex = self->mpTexturesIDs[src->tex];
     }
 }
 #endif
@@ -1066,7 +1059,7 @@ extern "C" void cUIIcon_setUIData(cUIIcon* self, sUIData8998* data)
     ((sUIObj8998*)self)->clip = data->clip;
     ((sUIObj8998*)self)->align = data->align;
     self->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname((cUITextureBank*)((char*)self->mpScreen->mpState->mpEngine + 0x58), data->id);
-    (*(sUISize8998*)&self->mTileUV[0]) = sUISize8998(data->w * 0.01f, data->h * 0.01f);
+    *(sUISize8998*)&self->mTileUV[0] = sUISize8998(data->w * 0.01f, data->h * 0.01f);
 }
 #endif
 
@@ -1412,9 +1405,9 @@ extern "C" cUIListBox* cUIListBox_cUIListBox(cUIListBox* self)
     tListBoxEntry* listBoxEntry = ((&self->mpEntries[0]));
     for (int i = 31; i != -1; i--, listBoxEntry++) {
         listBoxEntry->mStringID = 0;
-        (*(int*)&listBoxEntry->mpString) = 0;
-        (*(int*)&listBoxEntry->mpAsciiString) = 0;
-        (*(int*)&listBoxEntry->mpData) = 0;
+        *(int*)&listBoxEntry->mpString = 0;
+        *(int*)&listBoxEntry->mpAsciiString = 0;
+        *(int*)&listBoxEntry->mpData = 0;
         listBoxEntry->mUnicodeBufferSize = 0;
     }
     *(char*)&self->mNumEntries = 0;
@@ -1877,7 +1870,7 @@ extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
         return;
     }
     if ((*(int*)loc >> 26) & 1) {
-        sV3_9F00 position = (*(sV3_9F00*)&self->mPosition);
+        sV3_9F00 position = *(sV3_9F00*)&self->mPosition;
         position.x += x;
         position.y += y;
         cUIThing_applyPivot((self), &position, box);

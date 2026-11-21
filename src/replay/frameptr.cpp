@@ -85,7 +85,7 @@ INCLUDE_ASM("replay/frameptr", cReplayFramePtr_readRewind__FP15cReplayFramePtr);
  */
 void cReplayFramePtr_readRewind(cReplayFramePtr* self)
 {
-    (*(int*)&self->ReadData) = ((int)self->Block);
+    *(int*)&self->ReadData = ((int)self->Block);
 }
 #endif
 
@@ -662,7 +662,7 @@ extern "C" void cReplay__cReplay(int* self, int flags)
         ok = ok < 10;
     }
     if (ok) {
-        cReplay_stopReplay((cReplay*)((cReplayFramePtr_F980*)self));
+        cReplay_stopReplay((cReplay*)((cReplay*)self));
     }
     cReplay_frameSync(self);
     cReplay_purge((cReplay*)((sFpOwner26F428*)self));
@@ -1182,16 +1182,6 @@ extern "C" void cReplay_cancelMarkInstantReplay(void* self);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F2C0(void* self);
 
-struct cReplayFramePtr_F980 {
-    int state;              // 0x0
-    char pad_0x4[0x604];
-    int field_0x608;        // 0x608
-    int field_0x60c;        // 0x60C
-    char pad_0x610[0xC];
-    int field_0x61c;        // 0x61C
-    int field_0x620;        // 0x620
-    int field_0x624;        // 0x624
-};
 
 /**
  * Stops playback, unless the replay is paused (14) or not set up (15).
@@ -1206,7 +1196,7 @@ extern "C" void cReplay_stopReplay(cReplay* self)
 {
     int ok = !(self->State == 14 || self->State == 15);
     if (ok) {
-        cReplay_cancelMarkInstantReplay(((cReplayFramePtr_F980*)self));
+        cReplay_cancelMarkInstantReplay((self));
         if (self->AutoReplay == 0 && self->InstantReplay == 0) {
             func_0028F2C0(cAudioInterface_bxAudio());
         }
@@ -1216,14 +1206,14 @@ extern "C" void cReplay_stopReplay(cReplay* self)
         if (self->Loaded == 0) {
             cReplay_popReplaySaveFrame(self);
             if (self->InstantReplay) {
-                cReplay_setupGameCamerasOnExitInstantReplay(((cReplayFramePtr_F980*)self));
+                cReplay_setupGameCamerasOnExitInstantReplay((self));
             } else {
                 cReplay_setupGameCamerasOnExitReplay(self);
             }
             if (self->EndReplay) {
-                cReplay_setReplayState(((cReplayFramePtr_F980*)self), 13);
+                cReplay_setReplayState((self), 13);
             } else {
-                cReplay_setReplayState(((cReplayFramePtr_F980*)self), 0);
+                cReplay_setReplayState((self), 0);
             }
         }
     }

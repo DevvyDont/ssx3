@@ -338,7 +338,7 @@ extern "C" void cFloatRailNode_updateBoundBox(cFloatRailNode* self)
 {
     sFrBoxElem* points = (sFrBoxElem*)self->Nodes;
     int n = self->NumNodes;
-    (*(sFrBoxVec4*)&self->BoundBox) = (*(sFrBoxVec4*)&self->BoundBox.MaxPoint) = points[0].pos;
+    *(sFrBoxVec4*)&self->BoundBox = *(sFrBoxVec4*)&self->BoundBox.MaxPoint = points[0].pos;
     for (int i = 1; i < n; i++) {
         sFrBoxVec4* point = &points[i].pos;
         if (point->x < self->BoundBox.MinPoint.x) {
@@ -365,8 +365,8 @@ extern "C" void cFloatRailNode_updateBoundBox(cFloatRailNode* self)
     margin.y = 200.0f;
     margin.z = 200.0f;
     margin.w = 0.0f;
-    vu0SubFRBox((*(sFrBoxVec4*)&self->BoundBox), margin);
-    vu0AddFRBox((*(sFrBoxVec4*)&self->BoundBox.MaxPoint), margin);
+    vu0SubFRBox(*(sFrBoxVec4*)&self->BoundBox, margin);
+    vu0AddFRBox(*(sFrBoxVec4*)&self->BoundBox.MaxPoint, margin);
 }
 #endif
 
@@ -460,14 +460,6 @@ struct sFrElem_92A8 {
     char pad_0x30[0x20];
 };
 
-struct sFrNode_92A8 {
-    char pad_0x00[0x20];
-    int count;              // 0x20
-    char pad_0x24[0x2C];
-    sFrM4_92A8* mats;       // 0x50
-    char pad_0x54[0x1C];
-    sFrElem_92A8* elems;    // 0x70
-};
 
 extern float D_004FFAC0[16];
 
@@ -557,13 +549,13 @@ static inline void updateMat_92A8(sFrM4_92A8& out, const sFrV4_92A8& a, const sF
 // plain C transpose and a C vector-matrix product.
 extern "C" void cFloatRailNode_updateMats(cFloatRailNode* selfv)
 {
-    sFrNode_92A8* self = (sFrNode_92A8*)selfv;
+    cFloatRailNode* self = selfv;
     int i = 1;
-    updateMat_92A8(self->mats[0], self->elems[0].pos, self->elems[0].pos, self->elems[1].pos, self->elems[2].pos);
-    for (; i < self->count - 2; i++) {
-        updateMat_92A8(self->mats[i], self->elems[i - 1].pos, self->elems[i].pos, self->elems[i + 1].pos, self->elems[i + 2].pos);
+    updateMat_92A8(((sFrM4_92A8*)self->Mats)[0], ((sFrElem_92A8*)self->Nodes)[0].pos, ((sFrElem_92A8*)self->Nodes)[0].pos, ((sFrElem_92A8*)self->Nodes)[1].pos, ((sFrElem_92A8*)self->Nodes)[2].pos);
+    for (; i < self->NumNodes - 2; i++) {
+        updateMat_92A8(((sFrM4_92A8*)self->Mats)[i], ((sFrElem_92A8*)self->Nodes)[i - 1].pos, ((sFrElem_92A8*)self->Nodes)[i].pos, ((sFrElem_92A8*)self->Nodes)[i + 1].pos, ((sFrElem_92A8*)self->Nodes)[i + 2].pos);
     }
-    updateMat_92A8(self->mats[i], self->elems[i - 1].pos, self->elems[i].pos, self->elems[i + 1].pos, self->elems[i + 1].pos);
+    updateMat_92A8(((sFrM4_92A8*)self->Mats)[i], ((sFrElem_92A8*)self->Nodes)[i - 1].pos, ((sFrElem_92A8*)self->Nodes)[i].pos, ((sFrElem_92A8*)self->Nodes)[i + 1].pos, ((sFrElem_92A8*)self->Nodes)[i + 1].pos);
 }
 #endif
 
@@ -1000,7 +992,7 @@ extern "C" void cSpringRailNode_updateBoundBox(cSpringRailNode* self)
 {
     sFrBoxElem60* points = (sFrBoxElem60*)self->Nodes;
     int n = self->NumNodes;
-    (*(sFrBoxVec4*)&self->BoundBox) = (*(sFrBoxVec4*)&self->BoundBox.MaxPoint) = points[0].pos;
+    *(sFrBoxVec4*)&self->BoundBox = *(sFrBoxVec4*)&self->BoundBox.MaxPoint = points[0].pos;
     for (int i = 1; i < n; i++) {
         sFrBoxVec4* point = &points[i].pos;
         if (point->x < self->BoundBox.MinPoint.x) {
@@ -1027,8 +1019,8 @@ extern "C" void cSpringRailNode_updateBoundBox(cSpringRailNode* self)
     margin.y = 200.0f;
     margin.z = 200.0f;
     margin.w = 0.0f;
-    vu0SubFRBox((*(sFrBoxVec4*)&self->BoundBox), margin);
-    vu0AddFRBox((*(sFrBoxVec4*)&self->BoundBox.MaxPoint), margin);
+    vu0SubFRBox(*(sFrBoxVec4*)&self->BoundBox, margin);
+    vu0AddFRBox(*(sFrBoxVec4*)&self->BoundBox.MaxPoint, margin);
 }
 #endif
 
@@ -1225,12 +1217,6 @@ struct sFrNodeA568 {
     int idx;                    // 0x64
 };
 
-struct sFrRailA568 {
-    char pad0[0x60];
-    float k[3];                 // 0x60
-    char pad6C[4];
-    sFrElem_A568* elems;        // 0x70
-};
 
 // PORT: PS2-only VU0 inline asm (vector length).
 static inline float vu0Len_A568(const sV4_A568& v)
@@ -1341,7 +1327,7 @@ static inline void vu0AddEq_A568(sV4_A568& dst, sV4_A568 b)
  * @param node  intersect info of the hit (position, segment +0x64)
  * @param dir  force to apply
  */
-extern "C" void cSpringRailNode_applyForce(sFrRailA568* self, sFrNodeA568* node, sV4_A568* dir)
+extern "C" void cSpringRailNode_applyForce(cSpringRailNode* self, sFrNodeA568* node, sV4_A568* dir)
 {
     float len = vu0Len_A568(*dir);
     sV4_A568 clamped;
@@ -1353,19 +1339,19 @@ extern "C" void cSpringRailNode_applyForce(sFrRailA568* self, sFrNodeA568* node,
     if (node->idx < 0) {
         return;
     }
-    sV4_A568 arm = vu0Sub_A568(node->pos, self->elems[0].pos);
+    sV4_A568 arm = vu0Sub_A568(node->pos, ((sFrElem_A568*)self->Nodes)[0].pos);
     sV4_A568 torque = vu0Cross_A568(clamped, arm);
     float alen = vu0Len_A568(arm);
     int i;
     for (i = 0; i < node->idx; i++) {
-        float* k = self->k;
+        float* k = ((float*)&self->ASpring);
         sV4_A568 scaled = arm;
-        float lv = vu0Len_A568(self->elems[i].vel);
+        float lv = vu0Len_A568(((sFrElem_A568*)self->Nodes)[i].vel);
         vu0ScaleEq_A568(scaled, lv / vu0Len_A568(scaled));
-        vu0AddEq_A568(self->elems[i].force, vu0Scale_A568(vu0Scale_A568(torque, vu0Len_A568(self->elems[i].vel) / alen), k[2]));
+        vu0AddEq_A568(((sFrElem_A568*)self->Nodes)[i].force, vu0Scale_A568(vu0Scale_A568(torque, vu0Len_A568(((sFrElem_A568*)self->Nodes)[i].vel) / alen), k[2]));
     }
-    float* k = self->k;
-    vu0AddEq_A568(self->elems[node->idx].force, vu0Scale_A568(vu0Scale_A568(torque, vu0Len_A568(vu0Sub_A568(node->pos, self->elems[node->idx].pos)) / alen), k[2]));
+    float* k = ((float*)&self->ASpring);
+    vu0AddEq_A568(((sFrElem_A568*)self->Nodes)[node->idx].force, vu0Scale_A568(vu0Scale_A568(torque, vu0Len_A568(vu0Sub_A568(node->pos, ((sFrElem_A568*)self->Nodes)[node->idx].pos)) / alen), k[2]));
 }
 #endif
 
@@ -1392,10 +1378,6 @@ struct sFrN_A838 {
     int idx;            // 0x64
 };
 
-struct sFrR_A838 {
-    char pad0[0x70];
-    sFrE_A838* elems;   // 0x70
-};
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline sFrV_A838 vu0Sub_A838(const sFrV_A838& a, const sFrV_A838& b)
@@ -1450,14 +1432,14 @@ static inline void vu0AddEq_A838(sFrV_A838& dst, const sFrV_A838& b)
  *
  * @param node  intersect info of the hit
  */
-extern "C" void cSpringRailNode_updateIntersectInfo(sFrR_A838* self, sFrN_A838* node)
+extern "C" void cSpringRailNode_updateIntersectInfo(cSpringRailNode* self, sFrN_A838* node)
 {
     if (node->idx < 0)
         return;
     for (int i = 0; i <= node->idx; i++) {
         sFrV_A838 cross;
-        sFrV_A838 arm = vu0Sub_A838(node->pos, self->elems[i].pos);
-        vu0CrossTo_A838(cross, arm, self->elems[i].axis);
+        sFrV_A838 arm = vu0Sub_A838(node->pos, ((sFrE_A838*)self->Nodes)[i].pos);
+        vu0CrossTo_A838(cross, arm, ((sFrE_A838*)self->Nodes)[i].axis);
         vu0AddEq_A838(node->acc, cross);
     }
 }

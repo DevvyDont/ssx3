@@ -1939,16 +1939,6 @@ struct sSaChan7700 {
     float out;      // +0xC
 };
 
-struct sSaMix7700 {
-    char pad0[0x62BC];
-    sSaChan7700 chan[11];   // 0x62BC
-    char pad636C[0x636C - 0x636C];
-    float mix[10];          // 0x636C
-    char pad6394[0x6394 - 0x6394];
-    float vol[11];          // 0x6394
-    char pad63C0[0x63E4 - 0x63C0];
-    float cur[11];          // 0x63E4
-};
 
 /**
  * Sets one volume control's level and applies it.
@@ -1966,9 +1956,9 @@ struct sSaMix7700 {
 // PORT: `<?`/`>?` are the g++ min/max operators (EE min.s/max.s).
 extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio* self_, float volume, int ch)
 {
-    sSaMix7700* self = (sSaMix7700*)self_;
+    cSSXAudio* self = self_;
     volume = (volume <? 1.0f) >? 0.0f;
-    sSaChan7700* currVolume = &self->chan[ch];
+    sSaChan7700* currVolume = &((sSaChan7700*)&self->mSoundVolume[0])[ch];
     switch (ch) {
     case 0:
         currVolume->user = volume;
@@ -2016,8 +2006,8 @@ extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio* self_, float volume, int ch)
         currVolume->base = volume * D_004A3528;
         break;
     }
-    currVolume->gain = currVolume->base * self->vol[ch];
-    currVolume->out = currVolume->gain * self->cur[ch];
+    currVolume->gain = currVolume->base * self->mDuckLevel[ch];
+    currVolume->out = currVolume->gain * self->mMixLevel[ch];
     switch (ch) {
     case 0:
         SNDmastervol((int)(currVolume->out * 127.0f));
@@ -2026,16 +2016,16 @@ extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio* self_, float volume, int ch)
         func_002B4388((char*)self + 0x118);
         break;
     case 4:
-        self->mix[0] = currVolume->out * D_004A352C;
-        self->mix[1] = currVolume->out * D_004A3530;
-        self->mix[2] = currVolume->out * D_004A3534;
-        self->mix[3] = currVolume->out * D_004A3538;
-        self->mix[4] = currVolume->out * D_004A353C;
-        self->mix[5] = currVolume->out * D_004A3540;
-        self->mix[6] = currVolume->out * D_004A3544;
-        self->mix[7] = currVolume->out * D_004A3548;
-        self->mix[8] = currVolume->out * D_004A354C;
-        self->mix[9] = currVolume->out * D_004A3550;
+        self->unk_636C[0] = currVolume->out * D_004A352C;
+        self->unk_636C[1] = currVolume->out * D_004A3530;
+        self->unk_636C[2] = currVolume->out * D_004A3534;
+        self->unk_636C[3] = currVolume->out * D_004A3538;
+        self->unk_636C[4] = currVolume->out * D_004A353C;
+        self->unk_636C[5] = currVolume->out * D_004A3540;
+        self->unk_636C[6] = currVolume->out * D_004A3544;
+        self->unk_636C[7] = currVolume->out * D_004A3548;
+        self->unk_636C[8] = currVolume->out * D_004A354C;
+        self->unk_636C[9] = currVolume->out * D_004A3550;
         break;
     }
 }
@@ -3314,7 +3304,7 @@ extern "C" void cWorldTriggerManager_MonitorTriggers(int, int, int);
  * @return 1
  */
 extern "C" int cSSXAudio_HandleDelayMonitorTriggers(void) {
-    cWorldTriggerManager_MonitorTriggers((*(int*)&gWorldTriggerManager), 1, 0);
+    cWorldTriggerManager_MonitorTriggers(*(int*)&gWorldTriggerManager, 1, 0);
     return 1;
 }
 #endif
@@ -3328,7 +3318,6 @@ extern "C" char* FileParser_FindNextSection(void* self);
 extern "C" void FileParser__FileParser(void* self, int flags);
 extern "C" char* strcpy(char* dst, const char* src);
 extern char* str_x_H;
-struct sAudio_9470 { char pad[0x60A4]; char names[20][0x14]; };
 
 /**
  * Reads the play-list names: up to 20 section names of data/config/playlist.inf into the table, counted in
@@ -3347,7 +3336,7 @@ extern "C" void func_00289470(cSSXAudio* self)
             if (section == 0) {
                 break;
             }
-            strcpy(((sAudio_9470*)self)->names[self->mNumPlayLists], section);
+            strcpy((self)->mPlayListName[self->mNumPlayLists], section);
             self->mNumPlayLists = self->mNumPlayLists + 1;
         }
         FileParser__FileParser(parser, 2);
@@ -3404,7 +3393,7 @@ extern "C" void func_00289520(cSSXAudio* self, const char* name)
     }
     self->mPlayListIndex = 20;
     for (int i = 0; i < 20; i++) {
-        if (func_004165A8(((sAudio_9470*)self)->names[i], name) == 0) {
+        if (func_004165A8((self)->mPlayListName[i], name) == 0) {
             self->mPlayListIndex = i;
             break;
         }
@@ -3452,19 +3441,6 @@ extern void* cAppMan_TheAppMan;
 extern "C" int func_0029F088(void* self, int a1);
 extern "C" void cSSXAudio_DuckByRMS(cSSXAudio* self, float v);
 
-struct sAud9688 {
-    char pad0[0x6864];
-    int f6864;
-    char pad6868[0x3E8];
-    int f6C50;
-    int f6C54;
-    int f6C58;
-    char pad6C5C[0x4];
-    int f6C60;
-    float f6C64;
-    float f6C68;
-    float f6C6C;
-};
 
 /**
  * Ducks the music to the loudness (RMS) data of the current stream, if it has valid RMS data.
@@ -3477,14 +3453,14 @@ struct sAud9688 {
  */
 extern "C" void cSSXAudio_ApplyRMSData(cSSXAudio* self_)
 {
-    sAud9688* audio = (sAud9688*)self_;
-    if (audio->f6C58 != 0) {
-        int frame = audio->f6864;
+    cSSXAudio* audio = self_;
+    if (audio->mValidRMSData != 0) {
+        int frame = audio->mRMSFrameTick;
         if (frame == (frame / 2) * 2) {
-            audio->f6C60 = 0;
-            audio->f6C68 = audio->f6C6C;
-            int idx = (int)((float)(frame * audio->f6C54) / *(float*)((char*)cAppMan_TheAppMan + 0x2C));
-            if (idx < audio->f6C50) {
+            audio->mRMSStepFrame = 0;
+            audio->mRMSCurValue = audio->mRMSFinalValue;
+            int idx = (int)((float)(frame * audio->mRMSDataFrameRate) / *(float*)((char*)cAppMan_TheAppMan + 0x2C));
+            if (idx < audio->mRMSSize) {
                 int val = *(signed char*)(((char*)self_) + idx + 0x6868);
                 if (val > 0) {
                     int lowThreshold, midThreshold, highThreshold;
@@ -3513,33 +3489,33 @@ extern "C" void cSSXAudio_ApplyRMSData(cSSXAudio* self_)
                         break;
                     }
                     if (val < lowThreshold)
-                        audio->f6C6C = 1.0f;
+                        audio->mRMSFinalValue = 1.0f;
                     else if (val < midThreshold)
-                        audio->f6C6C = vb;
+                        audio->mRMSFinalValue = vb;
                     else if (val < highThreshold)
-                        audio->f6C6C = vb;
+                        audio->mRMSFinalValue = vb;
                     else
-                        audio->f6C6C = va;
+                        audio->mRMSFinalValue = va;
                 } else {
-                    audio->f6C6C = 1.0f;
+                    audio->mRMSFinalValue = 1.0f;
                 }
             } else {
-                audio->f6C58 = 0;
-                audio->f6C6C = 1.0f;
+                audio->mValidRMSData = 0;
+                audio->mRMSFinalValue = 1.0f;
             }
-            audio->f6C64 = audio->f6C6C - audio->f6C68;
+            audio->mRMSStepValue = audio->mRMSFinalValue - audio->mRMSCurValue;
         }
-        (audio->f6864)++;
+        (audio->mRMSFrameTick)++;
     }
-    int stepFrame = audio->f6C60;
+    int stepFrame = audio->mRMSStepFrame;
     if (stepFrame <= 0) {
         if (stepFrame == 0) {
-            cSSXAudio_DuckByRMS((cSSXAudio*)(((char*)self_)), audio->f6C6C);
-            (audio->f6C60)++;
+            cSSXAudio_DuckByRMS((cSSXAudio*)(((char*)self_)), audio->mRMSFinalValue);
+            (audio->mRMSStepFrame)++;
         } else {
-            audio->f6C68 = audio->f6C68 + audio->f6C64;
-            cSSXAudio_DuckByRMS((cSSXAudio*)(((char*)self_)), audio->f6C68);
-            (audio->f6C60)++;
+            audio->mRMSCurValue = audio->mRMSCurValue + audio->mRMSStepValue;
+            cSSXAudio_DuckByRMS((cSSXAudio*)(((char*)self_)), audio->mRMSCurValue);
+            (audio->mRMSStepFrame)++;
         }
     }
 }
@@ -4154,18 +4130,6 @@ void operator_delete(int*);
 extern char cAsyncSys_vtbl[];
 extern void* gpAsyncSys;
 
-struct sAudioSys_A148 {
-    char pad0[0x190];
-    void* buf190;       // 0x190
-    char pad194[0xC];
-    void* buf1A0;       // 0x1A0
-    char pad1A4[0xC];
-    void* buf1B0;       // 0x1B0
-    char pad1B4[0xC];
-    void* buf1C0;       // 0x1C0
-    char pad1C4[0x10];
-    void* vtbl;         // 0x1D4
-};
 
 /**
  * Destroys the asynchronous sound-bank loader.
@@ -4178,7 +4142,7 @@ struct sAudioSys_A148 {
 extern "C" void cAsyncSys__cAsyncSys(cAsyncSys* self, int flags)
 {
     self->mVtbl = (void**)cAsyncSys_vtbl;
-    cAsyncSys_ASYNCSYS_DeInit(((sAudioSys_A148*)self));
+    cAsyncSys_ASYNCSYS_DeInit((self));
     gpAsyncSys = 0;
     if (self->mMainMemFlags.Array != 0) {
         cMemMan_free(self->mMainMemFlags.Array);

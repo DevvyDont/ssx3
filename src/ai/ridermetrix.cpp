@@ -57,23 +57,17 @@ struct sRiderMetrixEntry_001173B8
     char pad[0x98];
 };
 
-struct sRiderMetrix_001173B8
-{
-    char pad[0x1B0];
-    sRiderMetrixEntry_001173B8* entries;
-    int count;
-};
 
 /**
  * Frees every slot of the HUD message bank (type 0x34), when the score object has a bank.
  */
-extern "C" void cRiderMetrix_resetHUDfx(sRiderMetrix_001173B8* self)
+extern "C" void cRiderMetrix_resetHUDfx(cRiderMetrix* self)
 {
-    if (self->entries != 0)
+    if (((sRiderMetrixEntry_001173B8*)self->HUDfx) != 0)
     {
-        for (int i = 0; i < self->count; i++)
+        for (int i = 0; i < self->NumHUDfx; i++)
         {
-            self->entries[i].state = 52;
+            ((sRiderMetrixEntry_001173B8*)self->HUDfx)[i].state = 52;
         }
     }
 }
@@ -88,14 +82,6 @@ struct sRiderMetrixEntry_00117400
     char pad[0x98];
 };
 
-struct sRiderMetrix_00117400
-{
-    char pad[0x1B0];
-    sRiderMetrixEntry_00117400* entries;
-    int count;
-    int bits[2];
-    int dirty;
-};
 
 static inline bool rmBitTest00117400(int* bits, int i)
 {
@@ -114,25 +100,25 @@ static inline bool rmBitTest00117400(int* bits, int i)
  * @param type  the HUD effect id
  * @return 1 when the type's bit is set, else 0
  */
-extern "C" int cRiderMetrix_hasActiveHUDfx(sRiderMetrix_00117400* self, int type)
+extern "C" int cRiderMetrix_hasActiveHUDfx(cRiderMetrix* self, int type)
 {
-    if (self->entries == 0)
+    if (((sRiderMetrixEntry_00117400*)self->HUDfx) == 0)
         return 0;
-    if (self->dirty)
+    if (self->IsActiveFXListCacheInvalid)
     {
-        for (int i = 0; i < self->count; i++)
+        for (int i = 0; i < self->NumHUDfx; i++)
         {
-            int entryType = self->entries[i].type;
+            int entryType = ((sRiderMetrixEntry_00117400*)self->HUDfx)[i].type;
             if (entryType != 52)
             {
                 int off = (entryType & ~0x1F) >> 3;
-                int* bitArray = self->bits;
+                int* bitArray = ((int*)&self->ActiveFXListCache[0]);
                 *(int*)((char*)bitArray + off) |= 1 << entryType;
             }
         }
-        self->dirty = 0;
+        self->IsActiveFXListCacheInvalid = 0;
     }
-    return rmBitTest00117400(self->bits, type);
+    return rmBitTest00117400(((int*)&self->ActiveFXListCache[0]), type);
 }
 #endif
 
@@ -220,7 +206,7 @@ extern "C" void cRiderMetrix_resetComboChain(cRiderMetrix* self);
 extern "C" void cRiderMetrix_reset(cRiderMetrix* self)
 {
     cRiderMetrix_resetTotals(self);
-    cRiderMetrix_resetHUDfx((sRiderMetrix_001173B8*)self);
+    cRiderMetrix_resetHUDfx(self);
     MEM_fill(&self->TrickHistory[0], 0, 80);
     self->TrickHistoryPtr = 0;
     cRiderMetrix_resetCurTrick(self);
@@ -732,45 +718,6 @@ struct sMetrixSlot17C28 {
     char pad_0x00[0x9C];
 };
 
-struct sMetrix17C28 {
-    char pad_0x00[0x14];
-    float mult;          // 0x14
-    char pad_0x18[0x4];
-    float f1C;           // 0x1C
-    char pad_0x20[0x4];
-    float airTime;       // 0x24
-    char pad_0x28[0x4];
-    float t2C;           // 0x2C
-    float t30;           // 0x30
-    char pad_0x34[0x8];
-    float add3C;         // 0x3C
-    float t40;           // 0x40
-    char pad_0x44[0x28];
-    float t6C;           // 0x6C
-    char pad_0x70[0x8];
-    float t78;           // 0x78
-    char pad_0x7C[0x8];
-    int points;          // 0x84
-    int idx88;           // 0x88
-    int idx8C;           // 0x8C
-    int idx90;           // 0x90
-    int idx94;           // 0x94
-    int idx98;           // 0x98
-    char pad_0x9C[0x8];
-    float tA4;           // 0xA4
-    char pad_0xA8[0xB4];
-    float maxSpeed;      // 0x15C
-    float maxAvg;        // 0x160
-    float speedSum;      // 0x164
-    float frames;        // 0x168
-    char pad_0x16C[0x3C];
-    float avgSpeed;      // 0x1A8
-    sRider17C28* rider;  // 0x1AC
-    sMetrixSlot17C28* slots; // 0x1B0
-    int count;           // 0x1B4
-    char clear[8];       // 0x1B8
-    int dirty;           // 0x1C0
-};
 
 // PORT: PS2-only VU0 inline asm (vector length).
 static inline float len17C28(const sVec17C28& v)
@@ -804,69 +751,69 @@ static inline float len17C28(const sVec17C28& v)
  * Retail cRiderMetrix fields sit 8 bytes after On Tour's cRiderMetrixState ones up to the combo fields; the run totals
  * (On Tour tRiderStats) start at +0xFC.
  */
-extern "C" void cRiderMetrix_update(sMetrix17C28* self)
+extern "C" void cRiderMetrix_update(cRiderMetrix* self)
 {
-    float dt = self->rider->timeScale * 0.016666668f;
-    float speed = len17C28(self->rider->vel);
-    if (self->tA4 >= 0.0f) {
-        if (cRider_getMotionState(self->rider) == 0 && cRider_getControlState(self->rider) != 1) {
-            self->tA4 = self->tA4 - dt;
-            if (self->tA4 <= 0.0f) {
+    float dt = ((sRider17C28*)self->Rider)->timeScale * 0.016666668f;
+    float speed = len17C28(((sRider17C28*)self->Rider)->vel);
+    if (self->ComboResetDelay >= 0.0f) {
+        if (cRider_getMotionState(((sRider17C28*)self->Rider)) == 0 && cRider_getControlState(((sRider17C28*)self->Rider)) != 1) {
+            self->ComboResetDelay = self->ComboResetDelay - dt;
+            if (self->ComboResetDelay <= 0.0f) {
                 cRiderMetrix_earnComboChain((cRiderMetrix*)self);
             }
         }
     }
-    if (self->t30 >= 0.0f) {
-        self->t30 += dt;
-        self->points += cRiderMetrix_updateBonusLevelAndCalcPoints((cRiderMetrix*)self, &self->idx88, D_00459E00, 0x1C, self->t30);
+    if (self->CurTrickAirSec >= 0.0f) {
+        self->CurTrickAirSec += dt;
+        self->CurTrickBonusPoints += cRiderMetrix_updateBonusLevelAndCalcPoints((cRiderMetrix*)self, &self->CurTrickBigAirBonusLevel, D_00459E00, 0x1C, self->CurTrickAirSec);
     }
-    if (self->t40 >= 0.0f) {
-        self->t40 += dt;
-        self->mult += self->add3C;
-        self->points += cRiderMetrix_updateBonusLevelAndCalcPoints((cRiderMetrix*)self, &self->idx8C, D_00459E20, 0x20, self->t40);
+    if (self->CurGrabHoldSec >= 0.0f) {
+        self->CurGrabHoldSec += dt;
+        self->CurTrickPower += self->CurGrabPowerPerTick;
+        self->CurTrickBonusPoints += cRiderMetrix_updateBonusLevelAndCalcPoints((cRiderMetrix*)self, &self->CurTrickLongGrabBonusLevel, D_00459E20, 0x20, self->CurGrabHoldSec);
     }
-    if (self->airTime >= 0.0f) {
+    if (self->CurTrickRailslideDist >= 0.0f) {
         float stepDist = speed * dt;
-        self->airTime += stepDist;
-        self->mult += stepDist * 5e-05f;
-        sVec17C28 up = self->rider->up;
+        self->CurTrickRailslideDist += stepDist;
+        self->CurTrickPower += stepDist * 5e-05f;
+        sVec17C28 up = ((sRider17C28*)self->Rider)->up;
         if (up.z < 0.0f) {
-            self->f1C += stepDist * 0.0002f;
+            self->CurTrickStylePower += stepDist * 0.0002f;
         }
-        self->points += cRiderMetrix_updateBonusLevelAndCalcPoints((cRiderMetrix*)self, &self->idx98, D_00459F68, 29, self->airTime);
+        self->CurTrickBonusPoints += cRiderMetrix_updateBonusLevelAndCalcPoints((cRiderMetrix*)self, &self->CurTrickLongRailBonusLevel, D_00459F68, 29, self->CurTrickRailslideDist);
     }
-    if (self->t2C >= 0.0f) {
-        self->t2C += dt;
-        self->mult += dt * 0.01f;
-        self->points += cRiderMetrix_updateBonusLevelAndCalcPoints((cRiderMetrix*)self, &self->idx90, D_00459E40, 0x1E, self->t2C);
+    if (self->CurTrickPressSec >= 0.0f) {
+        self->CurTrickPressSec += dt;
+        self->CurTrickPower += dt * 0.01f;
+        self->CurTrickBonusPoints += cRiderMetrix_updateBonusLevelAndCalcPoints((cRiderMetrix*)self, &self->CurTrickLongPressBonusLevel, D_00459E40, 0x1E, self->CurTrickPressSec);
     }
-    if (self->t6C >= 0.0f) {
-        self->t6C += dt;
-        self->mult += dt * 0.04999999701976776f;
+    if (self->CurTrickUberGrindHoldSec >= 0.0f) {
+        self->CurTrickUberGrindHoldSec += dt;
+        self->CurTrickPower += dt * 0.04999999701976776f;
     }
-    if (self->t78 >= 0.0f) {
-        self->t78 += dt;
-        self->mult += dt * 0.04999999701976776f;
-        self->points += cRiderMetrix_updateBonusLevelAndCalcPoints((cRiderMetrix*)self, &self->idx94, D_00459F08, 0x1F, self->t78);
+    if (self->CurTrickHandplantHoldSec >= 0.0f) {
+        self->CurTrickHandplantHoldSec += dt;
+        self->CurTrickPower += dt * 0.04999999701976776f;
+        self->CurTrickBonusPoints += cRiderMetrix_updateBonusLevelAndCalcPoints((cRiderMetrix*)self, &self->CurTrickLongPlantBonusLevel, D_00459F08, 0x1F, self->CurTrickHandplantHoldSec);
     }
-    self->avgSpeed = self->avgSpeed * 0.9f + speed * 0.1f;
-    self->speedSum += speed;
-    self->frames += 1.0f;
-    if (self->maxAvg < self->avgSpeed) {
-        self->maxAvg = self->avgSpeed;
+    self->CurAvgSpeedCPS = self->CurAvgSpeedCPS * 0.9f + speed * 0.1f;
+    self->Totals.SumSpeedCPS += speed;
+    self->Totals.SumTick += 1.0f;
+    if (self->Totals.MaxAvgSpeedCPS < self->CurAvgSpeedCPS) {
+        self->Totals.MaxAvgSpeedCPS = self->CurAvgSpeedCPS;
     }
-    if (self->maxSpeed < speed) {
-        self->maxSpeed = speed;
+    if (self->Totals.MaxSpeedCPS < speed) {
+        self->Totals.MaxSpeedCPS = speed;
     }
     cRiderMetrix_updateStaticHUD((cRiderMetrix*)self);
-    if (self->slots != 0) {
-        for (int i = 0; i < self->count; i++) {
-            cHUDFX_update(&self->slots[i]);
+    if (((sMetrixSlot17C28*)self->HUDfx) != 0) {
+        for (int i = 0; i < self->NumHUDfx; i++) {
+            cHUDFX_update(&((sMetrixSlot17C28*)self->HUDfx)[i]);
         }
     }
-    func_00416210(self->clear, 0, 8);
-    self->dirty = 1;
-    cSSXAudio_SetCurTrickPower(cAudioInterface_bxAudio(), self->rider, self->mult);
+    func_00416210(((char*)&self->ActiveFXListCache[0]), 0, 8);
+    self->IsActiveFXListCacheInvalid = 1;
+    cSSXAudio_SetCurTrickPower(cAudioInterface_bxAudio(), ((sRider17C28*)self->Rider), self->CurTrickPower);
 }
 #endif
 

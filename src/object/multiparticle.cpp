@@ -1202,14 +1202,6 @@ struct sMtx_9030 {
     float m[16];
 };
 
-struct sMp_9030 {
-    char pad_0x0[0x60];
-    sMpInst_9030* inst;     // 0x60
-    char pad_0x64[0x10];
-    int count;              // 0x74
-    char pad_0x78[0xC];
-    sMtx_9030* mtx;         // 0x84
-};
 
 /**
  * Copies the current matrices of the instance's animated meshes into the ComboXform buffer (+0x84).
@@ -1222,17 +1214,17 @@ struct sMp_9030 {
 // Gathers the world matrices of the model's active parts into the matrix buffer at 0x84.
 extern "C" void cAnimComboNode_setComboXform(cAnimComboNode* vself)
 {
-    sMp_9030* self = (sMp_9030*)vself;
-    if (self->count <= 0) {
+    cAnimComboNode* self = vself;
+    if (self->NumAnimMeshes <= 0) {
         return;
     }
-    sMpModel_9030* model = self->inst->model;
+    sMpModel_9030* model = ((sMpInst_9030*)self->Instance)->model;
     int n = 0;
     sMpPart_9030* part = model->parts;
     for (int i = 0; i < model->count; i++, part++) {
         if (part->info != 0) {
             sMpNode_9030* node = (sMpNode_9030*)((char*)self + 0x34);
-            vu0CopyMatrix_9030(&self->mtx[n], node->items[n].mtx);
+            vu0CopyMatrix_9030(&((sMtx_9030*)self->ComboXform)[n], node->items[n].mtx);
             n++;
         }
     }

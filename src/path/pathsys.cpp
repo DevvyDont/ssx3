@@ -23,11 +23,6 @@ struct sPathB310 {
     sPathB310() { vtable = D_00481448; }
 };
 
-struct sPathSysB310 {
-    char pad_0x0[0x10];
-    int count;              // 0x10
-    sPathB310* paths;       // 0x14
-};
 
 /**
  * Loads the track paths ("TrackPaths") from the level's path data (On Tour's loadTrackPaths; this was once named
@@ -36,17 +31,17 @@ struct sPathSysB310 {
  * @param data  the serialized data: a count, then each path
  * @return number of bytes read
  */
-extern "C" int cPathSys_loadTrackPaths(sPathSysB310* self, char* data)
+extern "C" int cPathSys_loadTrackPaths(cPathSys* self, char* data)
 {
     int count;
-    sPathB310** slot = &self->paths;
+    sPathB310** slot = (sPathB310**)&self->TrackPaths;
     char* start = data;
     pathREAD_tInt32(&count, data);
     data += 4;
-    self->count = count;
+    self->NumTrackPaths = count;
     *slot = new (operator_new_tag(count * sizeof(sPathB310), str_TrackPaths, 0, 0)) sPathB310[count];
-    for (int i = 0; i < self->count; i++) {
-        data += cPath_initPath(&self->paths[i], data);
+    for (int i = 0; i < self->NumTrackPaths; i++) {
+        data += cPath_initPath(&((sPathB310*)self->TrackPaths)[i], data);
     }
     return data - start;
 }
@@ -71,11 +66,6 @@ struct sPathB410 {
     void* operator new[](unsigned int, void* p) { return p; }
 };
 
-struct sPathSysB410 {
-    char pad_0x0[0x8];
-    int count;              // 0x8
-    sPathB410* paths;       // 0xC
-};
 
 /**
  * Loads the AI paths ("AIPaths") from the level's path data.
@@ -83,17 +73,17 @@ struct sPathSysB410 {
  * @param data  the serialized data: a count, then each path
  * @return number of bytes read
  */
-extern "C" int cPathSys_loadAIPaths(sPathSysB410* self, char* data)
+extern "C" int cPathSys_loadAIPaths(cPathSys* self, char* data)
 {
     int count;
-    sPathB410** slot = &self->paths;
+    sPathB410** slot = (sPathB410**)&self->AIPaths;
     char* start = data;
     pathREAD_tInt32(&count, data);
     data += 4;
-    self->count = count;
+    self->NumAIPaths = count;
     *slot = new (operator_new_tag(count * sizeof(sPathB410), str_AIPaths, 0, 0)) sPathB410[count];
-    for (int i = 0; i < self->count; i++) {
-        data += cPath_initPath(&self->paths[i], data);
+    for (int i = 0; i < self->NumAIPaths; i++) {
+        data += cPath_initPath(&((sPathB410*)self->AIPaths)[i], data);
     }
     return data - start;
 }
@@ -403,14 +393,6 @@ struct sPathNode_B880 {
     char* f24;          // 0x24
 };
 
-struct sPathSys_B880 {
-    int count;                  // 0x0
-    sPathNode_B880* nodes;      // 0x4
-    int pad_0x8;                // 0x8
-    char* fC;                   // 0xC
-    int pad_0x10;               // 0x10
-    char* f14;                  // 0x14
-};
 
 /**
  * Reads the path file's startpoints in place: points the startpoint array (+0x4) into the file and fills each record.
@@ -424,7 +406,7 @@ struct sPathSys_B880 {
  * @param cursor  the file data at the startpoint count
  * @return the number of bytes consumed
  */
-extern "C" int cPathSys_loadStartpoints(sPathSys_B880* self, char* cursor)
+extern "C" int cPathSys_loadStartpoints(cPathSys* self, char* cursor)
 {
     int fileWord;
     int aiPathIndex;
@@ -432,30 +414,30 @@ extern "C" int cPathSys_loadStartpoints(sPathSys_B880* self, char* cursor)
     char* start = cursor;
     pathREAD_tInt32(&fileWord, cursor);
     cursor += 4;
-    self->nodes = (sPathNode_B880*)cursor;
-    self->count = fileWord;
-    for (int i = 0; i < self->count; i++) {
-        pathREAD_tInt32(&self->nodes[i].id, cursor);
+    *(sPathNode_B880**)&self->Startpoints = (sPathNode_B880*)cursor;
+    self->NumStartpoints = fileWord;
+    for (int i = 0; i < self->NumStartpoints; i++) {
+        pathREAD_tInt32(&((sPathNode_B880*)self->Startpoints)[i].id, cursor);
         cursor += 4;
         pathREAD_tInt32(&fileWord, cursor);
         cursor += 4;
-        pathREAD_t3Vector(self->nodes[i].pos, cursor);
+        pathREAD_t3Vector(((sPathNode_B880*)self->Startpoints)[i].pos, cursor);
         cursor += 0xC;
-        pathREAD_t3Vector(self->nodes[i].dir, cursor);
+        pathREAD_t3Vector(((sPathNode_B880*)self->Startpoints)[i].dir, cursor);
         cursor += 0xC;
         pathREAD_tInt32(&aiPathIndex, cursor);
         cursor += 4;
         pathREAD_tInt32(&trackPathIndex, cursor);
         cursor += 4;
-        self->nodes[i].type = 0;
+        ((sPathNode_B880*)self->Startpoints)[i].type = 0;
         for (int j = 0; j < 3; j++) {
             if (D_00445428[j] == fileWord) {
-                self->nodes[i].type = j;
+                ((sPathNode_B880*)self->Startpoints)[i].type = j;
                 break;
             }
         }
-        self->nodes[i].f24 = self->fC + aiPathIndex * 0x40;
-        self->nodes[i].f20 = self->f14 + trackPathIndex * 0x3C;
+        ((sPathNode_B880*)self->Startpoints)[i].f24 = ((char*)self->AIPaths) + aiPathIndex * 0x40;
+        ((sPathNode_B880*)self->Startpoints)[i].f20 = ((char*)self->TrackPaths) + trackPathIndex * 0x3C;
     }
     return cursor - start;
 }

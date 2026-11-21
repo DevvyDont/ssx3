@@ -2387,11 +2387,6 @@ extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
 void cInputPreProcessor_readFile_s(void* self, char* dir, char* file) __asm__("cInputPreProcessor_readFile");
 extern char str_PreProcBuf[];
 
-struct sParseBuf_5F48 {
-    int size;
-    int cap;
-    char* data;
-};
 
 /**
  * Loads an input-map file with its "#include"s expanded and returns the result in a new buffer.
@@ -2422,7 +2417,7 @@ extern "C" void* cInputPreProcessor_loadFileSize(cInputPreProcessor* self, char*
         dir[0] = 0;
         strcpy(file, path);
     }
-    cInputPreProcessor_readFile_s(((sParseBuf_5F48*)self), dir, file);
+    cInputPreProcessor_readFile_s((self), dir, file);
     void* out = operator_new_tag(self->OutputTop, path, 0x100, 0);
     func_0041605C(out, self->OutputBuf, self->OutputTop);
     if (self->OutputBuf != 0) {
@@ -2573,11 +2568,6 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
 extern char str_PreProcBuf[];
 
-struct sCharBuf_326360 {
-    int count;
-    int cap;
-    char* data;
-};
 
 /**
  * Appends a character to the output buffer, growing it by 1 KB or half its size, whichever is larger.
@@ -2586,22 +2576,22 @@ struct sCharBuf_326360 {
  */
 extern "C" void cInputPreProcessor_writeChar(cInputPreProcessor* self, char ch)
 {
-    sCharBuf_326360* outBuf = (sCharBuf_326360*)self;
-    if (outBuf->count == outBuf->cap) {
-        int newCap = outBuf->count + 0x400;
-        int grow = outBuf->count * 3 / 2;
+    cInputPreProcessor* outBuf = self;
+    if (outBuf->OutputTop == outBuf->OutputLen) {
+        int newCap = outBuf->OutputTop + 0x400;
+        int grow = outBuf->OutputTop * 3 / 2;
         if (newCap < grow) {
             newCap = grow;
         }
         char* newData = (char*)operator_new_tag(newCap, str_PreProcBuf, 0, 0);
-        func_0041605C(newData, outBuf->data, outBuf->cap);
-        if (outBuf->data) {
-            cMemMan_free(outBuf->data);
+        func_0041605C(newData, outBuf->OutputBuf, outBuf->OutputLen);
+        if (outBuf->OutputBuf) {
+            cMemMan_free(outBuf->OutputBuf);
         }
-        outBuf->data = newData;
-        outBuf->cap = newCap;
+        outBuf->OutputBuf = newData;
+        outBuf->OutputLen = newCap;
     }
-    outBuf->data[outBuf->count++] = ch;
+    outBuf->OutputBuf[outBuf->OutputTop++] = ch;
 }
 #endif
 

@@ -365,12 +365,11 @@ extern "C" void cSndPlayOpts_OPTS_LibDefault(cSndPlayOpts* opts) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_SetDefault);
 #ifdef SKIP_ASM
-struct S9368 { int a[6]; };
 /**
  * Copies the current level's SNDPLAYOPTS (mCurrent[mInst]) into mDefault, the record each push starts from.
  */
 extern "C" void cSndPlayOpts_OPTS_SetDefault(cSndPlayOpts* self) {
-    *(S9368*)&self->mDefault = *(S9368*)((char*)((int)self->mCurrent) + self->mInst * 0x18);
+    *(&self->mDefault) = *(SNDPLAYOPTS*)((char*)((int)self->mCurrent) + self->mInst * 0x18);
 }
 #endif
 
@@ -1080,8 +1079,6 @@ extern "C" int cAsyncSys_ASYNCSYS_Busy(cAsyncSys* asyncSys) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cAsyncSys_ASYNCSYS_GetCurrOperationUserHandle);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct Q_9E28 { int a; int *data; int tail; int head; };
 /**
  * Returns the user handle of the async loader's current operation, or -1.
  *
@@ -1093,9 +1090,9 @@ struct Q_9E28 { int a; int *data; int tail; int head; };
 extern "C" int cAsyncSys_ASYNCSYS_GetCurrOperationUserHandle(cAsyncSys* self) {
     int userHandle;
     if (self->mBusy != 0) {
-        Q_9E28 *handleQueue = (Q_9E28 *)(&self->mUserHandle);
+        cCircBuffer *handleQueue = ((&self->mUserHandle));
         if (self->mUserHandle.Head == self->mUserHandle.Tail) userHandle = -1;
-        else userHandle = handleQueue->data[handleQueue->head];
+        else userHandle = handleQueue->Array[handleQueue->Tail];
     } else userHandle = -1;
     return userHandle;
 }
@@ -1214,7 +1211,6 @@ extern "C" int cBankManager_BANK_InUse(cBankManager* self, int idx) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cBankManager_BANK_Handle);
 #ifdef SKIP_ASM
-struct S9F88 { int a; int b; char pad[0x58]; };
 /**
  * Returns bank @p bankId's library handle (the second word of its record) when the bank is loaded, else -1.
  *
@@ -1223,10 +1219,10 @@ struct S9F88 { int a; int b; char pad[0x58]; };
  * @return the bank handle, or -1 when its status is not 1 (used)
  */
 extern "C" int cBankManager_BANK_Handle(cBankManager* bankManager, int bankId) {
-    S9F88 *base = (S9F88*)bankManager->mBank;
-    bool ne = base[bankId].a != 1;
+    cBankInstance *base = bankManager->mBank;
+    bool ne = base[bankId].mBankStatus != 1;
     if (!ne) {
-        return base[bankId].b;
+        return base[bankId].mBankHandle;
     }
     return -1;
 }
@@ -2616,7 +2612,7 @@ extern "C" void cWorldPainterSection_resolve(cWorldPainterSection* vself)
             if (self->m_iStreamed == 0) {
                 cMemMan_free(((sReloc_B5F0*)self->m_pWPHeader));
             }
-            (*(sReloc_B5F0**)&self->m_pWPHeader) = 0;
+            *(sReloc_B5F0**)&self->m_pWPHeader = 0;
         }
         if (((sReloc_B5F0*)self->m_pWPHeader) != 0) {
             int* layerPtr = ((sReloc_B5F0*)self->m_pWPHeader)->offs;
@@ -5313,7 +5309,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_setDefaults);
  * @param mix  the in-game data
  */
 extern "C" void tWPInGameData_Mix_setDefaults(tWPInGameData_Mix* mix) {
-    (*(int*)&mix->m_wpTravelDistance) = 0;
+    *(int*)&mix->m_wpTravelDistance = 0;
     (mix->m_MixPreset) = -1;
 }
 #endif
@@ -5330,7 +5326,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_setDefaults);
  * @param ambience  the in-game data
  */
 extern "C" void tWPInGameData_Ambience_setDefaults(tWPInGameData_Ambience* ambience) {
-    (*(int*)&ambience->m_wpTravelDistance) = 0;
+    *(int*)&ambience->m_wpTravelDistance = 0;
     (ambience->m_BankID) = -1;
 }
 #endif
@@ -5347,7 +5343,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_setDefaults);
  * @param speech  the in-game data
  */
 extern "C" void tWPInGameData_Speech_setDefaults(tWPInGameData_Speech* speech) {
-    (*(int*)&speech->m_wpTravelDistance) = 0;
+    *(int*)&speech->m_wpTravelDistance = 0;
     (speech->m_SpeechID) = -1;
 }
 #endif
@@ -5365,7 +5361,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_setDefaults);
  * @param camera  the in-game data
  */
 extern "C" void tWPInGameData_Camera_setDefaults(tWPInGameData_Camera* camera) {
-    (*(int*)&camera->m_wpTravelDistance) = 0;
+    *(int*)&camera->m_wpTravelDistance = 0;
     (camera->m_DrawDistance) = 30000.0f;
 }
 #endif
@@ -5388,8 +5384,8 @@ extern "C" void tWPInGameData_Fog_setDefaults(tWPInGameData_Fog* fog) {
     (fog->m_FogColourR) = 0.43f;
     (fog->m_FogColourG) = 0.55f;
     (fog->m_FogColourB) = 0.71f;
-    (*(int*)&fog->m_FogDensity) = 0;
-    (*(int*)&fog->m_wpTravelDistance) = 0;
+    *(int*)&fog->m_FogDensity = 0;
+    *(int*)&fog->m_wpTravelDistance = 0;
 }
 #endif
 
@@ -5497,7 +5493,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_setDefaults);
  * @param surface  the in-game data
  */
 extern "C" void tWPInGameData_Surface_setDefaults(tWPInGameData_Surface* surface) {
-    (*(int*)&surface->m_wpTravelDistance) = 0;
+    *(int*)&surface->m_wpTravelDistance = 0;
     (surface->m_SnowSparkleDensity) = 1.0f;
 }
 #endif

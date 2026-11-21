@@ -2909,20 +2909,11 @@ struct sPopupVE_1CA298 {
     void (*fn)(void*, void*, int);
 };
 
-struct sPopupOwner_1CA298 {
-    char pad0[8];
-    sPopupVE_1CA298* vt;   // 0x8
-};
 
-struct sBtn_1CA298 {
-    int confirm;
-    int b;
-    int c;
-};
 
-static inline void Notify_1CA298(sPopupOwner_1CA298* o, int vi, void* self, int v)
+static inline void Notify_1CA298(cUIState* o, int vi, void* self, int v)
 {
-    o->vt[vi].fn((char*)o + o->vt[vi].delta, self, v);
+    ((sPopupVE_1CA298*)o->mVtbl)[vi].fn((char*)o + ((sPopupVE_1CA298*)o->mVtbl)[vi].delta, self, v);
 }
 
 /**
@@ -2947,10 +2938,10 @@ extern "C" void cScreenPopup_onWidgetEvent(cScreenPopup* self, int id, int ev)
             self->mbNoEntryOnNext = 0;
             for (i = 0; i < 5; i++) {
                 if (id == ((int*)(&self->mpOptions[0]))[i]) {
-                    if (((sBtn_1CA298*)(&self->mtConfirmation[0]))[i].confirm != 0) {
+                    if ((((&self->mtConfirmation[0])))[i].eType != 0) {
                         cScreenPopup_createConfirmationPopup(self, i);
                     } else {
-                        Notify_1CA298((sPopupOwner_1CA298*)self->mpParentState, 17, ((char*)self), i + 15);
+                        Notify_1CA298(self->mpParentState, 17, ((char*)self), i + 15);
                     }
                     handled = 1;
                     break;
@@ -2975,7 +2966,7 @@ extern "C" void cScreenPopup_onWidgetEvent(cScreenPopup* self, int id, int ev)
         break;
     case 6:
         if (self->mbReceivePrev != 0) {
-            Notify_1CA298((sPopupOwner_1CA298*)self->mpParentState, 17, ((char*)self), 20);
+            Notify_1CA298(self->mpParentState, 17, ((char*)self), 20);
         }
         break;
     case 7:
@@ -2989,8 +2980,8 @@ extern "C" void cScreenPopup_onWidgetEvent(cScreenPopup* self, int id, int ev)
         break;
     default:
         {
-            sPopupOwner_1CA298* parentState = (sPopupOwner_1CA298*)self->mpParentState;
-            ((void (*)(void*, int, int))parentState->vt[19].fn)((char*)parentState + parentState->vt[19].delta, id, ev);
+            cUIState* parentState = self->mpParentState;
+            ((void (*)(void*, int, int))((sPopupVE_1CA298*)parentState->mVtbl)[19].fn)((char*)parentState + ((sPopupVE_1CA298*)parentState->mVtbl)[19].delta, id, ev);
         }
         break;
     }

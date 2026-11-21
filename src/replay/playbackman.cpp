@@ -971,12 +971,6 @@ struct sPbChunk_D228 {
     int data;
 };
 
-struct sPbStream_D228 {
-    int count;              // 0x0
-    int index;              // 0x4
-    int offset;             // 0x8
-    sPbChunk_D228* chunks;  // 0xC
-};
 
 
 /**
@@ -990,17 +984,17 @@ struct sPbStream_D228 {
  */
 extern "C" void cReplayCache_addCmdFrame(cReplayCache* stream, sPbChunk_D2B0* chunkp)
 {
-    sPbStream_D228* self = (sPbStream_D228*)stream;
+    cReplayCache* self = stream;
     sPbChunk_D228* chunk = (sPbChunk_D228*)chunkp;
-    if (self->count >= 0x1000) {
+    if (self->RecordCursor >= 0x1000) {
         cReplay* replay = SSXApp->Game->Replay;
         replay->ReplayError = 1;
         replay->ShowError = 180;
         return;
     }
-    self->chunks[self->count] = *chunk;
-    self->chunks[self->count].n = 1;
-    self->count++;
+    ((sPbChunk_D228*)self->CmdFrame)[self->RecordCursor] = *chunk;
+    ((sPbChunk_D228*)self->CmdFrame)[self->RecordCursor].n = 1;
+    self->RecordCursor++;
 }
 #endif
 
@@ -1060,11 +1054,6 @@ struct sEntry_D390 {
     int data;
 };
 
-struct sOwner_D390 {
-    int count;                  // 0x0
-    char pad4[8];
-    sEntry_D390* entries;       // 0xC
-};
 
 /**
  * Cuts the cache's recorded commands at tick @p pos: the chunk that holds that tick becomes the last one.
@@ -1076,11 +1065,11 @@ struct sOwner_D390 {
  *
  * @param pos  the tick to cut at
  */
-extern "C" void cReplayCache_truncate(sOwner_D390* self, unsigned int pos)
+extern "C" void cReplayCache_truncate(cReplayCache* self, unsigned int pos)
 {
-    int n = self->count;
+    int n = self->RecordCursor;
     unsigned int sum = 0;
-    sEntry_D390* entry = self->entries;
+    sEntry_D390* entry = ((sEntry_D390*)self->CmdFrame);
     int i = 0;
     if (n > 0) {
         sum = entry->len;
@@ -1095,8 +1084,8 @@ extern "C" void cReplayCache_truncate(sOwner_D390* self, unsigned int pos)
             } while (pos >= sum);
         }
     }
-    self->entries[i].len = sum - pos + 1;
-    self->count = i + 1;
+    ((sEntry_D390*)self->CmdFrame)[i].len = sum - pos + 1;
+    self->RecordCursor = i + 1;
 }
 #endif
 
@@ -1109,12 +1098,6 @@ struct sPbChunk_D420 {
     int data;
 };
 
-struct sPbStream_D420 {
-    int count;              // 0x0
-    int index;              // 0x4
-    int offset;             // 0x8
-    sPbChunk_D420* chunks;  // 0xC
-};
 
 extern "C" void MEM_fill(void* dst, int c, int n);
 
@@ -1128,18 +1111,18 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  * @param out  receives the command
  * @return 1 when a command was read, 0 past the end
  */
-extern "C" int cReplayCache_getControlCmd(sPbStream_D420* self, sPbChunk_D420* out)
+extern "C" int cReplayCache_getControlCmd(cReplayCache* self, sPbChunk_D420* out)
 {
     MEM_fill(out, 0, 8);
-    if (self->index >= self->count) {
+    if (self->PlaybackCursor >= self->RecordCursor) {
         return 0;
     }
-    if (self->offset <= 0) {
-        self->offset = self->chunks[self->index].n;
+    if (self->PlaybackLeft <= 0) {
+        self->PlaybackLeft = ((sPbChunk_D420*)self->CmdFrame)[self->PlaybackCursor].n;
     }
-    *out = self->chunks[self->index];
-    if (--self->offset <= 0) {
-        self->index++;
+    *out = ((sPbChunk_D420*)self->CmdFrame)[self->PlaybackCursor];
+    if (--self->PlaybackLeft <= 0) {
+        self->PlaybackCursor++;
     }
     return 1;
 }

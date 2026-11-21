@@ -1649,16 +1649,6 @@ struct sFont_001F1840 {
     sColor_001F16C0 color; // 0x40
 };
 
-struct sHUD_001F1840 {
-    char pad0[0x16C];
-    float digitW;       // 0x16C
-    float f170;         // 0x170
-    float f174;         // 0x174
-    float oneW;         // 0x178
-    char pad17C[0x42C - 0x17C];
-    sFont_001F1840* font; // 0x42C
-    const char* sep;    // 0x430
-};
 
 static inline float oneAdj_001F1840(const char* s, float w)
 {
@@ -1693,43 +1683,43 @@ static inline float oneAdj_001F1840(const char* s, float w)
  */
 extern "C" void cOVStateHUD1P_renderTime(cOVStateHUD1P* self_, int hour, int minute, int sec, int secFrac, int timeRenderFlags, float* pos, float* scale, sColor_001F16C0* color, int align, int flags, int reflect)
 {
-    sHUD_001F1840* self = (sHUD_001F1840*)self_;
+    cOVStateHUD1P* self = self_;
     float size[2];
     float out[2];
     char bufs[3][4];
     float n = 3.0f;
     if (timeRenderFlags & 1) n = 4.0f;
-    size[1] = (float)self->font->count * self->font->f34;
-    size[0] = self->f170 * n + (self->digitW + 2.0f + 2.0f) * (n - 1.0f);
+    size[1] = (float)((sFont_001F1840*)self->mpHUDFont)->count * ((sFont_001F1840*)self->mpHUDFont)->f34;
+    size[0] = self->mTimeValueWidth * n + (self->mTimeSeparatorWidth + 2.0f + 2.0f) * (n - 1.0f);
     cOVStateHUD1P_calcElemPos((cOVStateHUD1P*)self, out, pos, size, scale, align, flags, reflect);
-    sFont_001F1840* font = self->font;
+    sFont_001F1840* font = ((sFont_001F1840*)self->mpHUDFont);
     font->f38 = font->f30 * scale[0];
     font->f3C = font->f34 * scale[1];
-    self->font->color = *color;
-    float sepW = (self->f170 + 2.0f) * scale[0];
-    float digW = (self->digitW + 2.0f) * scale[0];
-    float oneW = self->oneW * scale[0];
+    ((sFont_001F1840*)self->mpHUDFont)->color = *color;
+    float sepW = (self->mTimeValueWidth + 2.0f) * scale[0];
+    float digW = (self->mTimeSeparatorWidth + 2.0f) * scale[0];
+    float oneW = self->mDigitOneOffsetX * scale[0];
     if (timeRenderFlags & 6) {
         if (timeRenderFlags & 2)
-            cFont_text(self->font, out[0], out[1], str_dash);
+            cFont_text(((sFont_001F1840*)self->mpHUDFont), out[0], out[1], str_dash);
         else
-            cFont_text(self->font, out[0], out[1], str_plus);
-        out[0] += self->f174;
+            cFont_text(((sFont_001F1840*)self->mpHUDFont), out[0], out[1], str_plus);
+        out[0] += self->mTimePrefixWidth;
     }
     sprintf(bufs[0], str_pct_02d, hour);
     sprintf(bufs[1], str_pct_02d, minute);
     sprintf(bufs[2], str_pct_02d, sec);
-    cFont_text(self->font, out[0] + oneAdj_001F1840(bufs[0], oneW), out[1], bufs[0]);
+    cFont_text(((sFont_001F1840*)self->mpHUDFont), out[0] + oneAdj_001F1840(bufs[0], oneW), out[1], bufs[0]);
     out[0] += sepW;
     for (int i = 1; i < 3; i++) {
-        cFont_text(self->font, out[0], out[1], self->sep);
+        cFont_text(((sFont_001F1840*)self->mpHUDFont), out[0], out[1], ((const char*)self->unk_430));
         out[0] += digW;
         char* fieldText = bufs[i];
-        cFont_text(self->font, out[0] + oneAdj_001F1840(fieldText, oneW), out[1], fieldText);
+        cFont_text(((sFont_001F1840*)self->mpHUDFont), out[0] + oneAdj_001F1840(fieldText, oneW), out[1], fieldText);
         out[0] += sepW;
     }
     if (timeRenderFlags & 1)
-        cFont_textf(self->font, out[0], out[1], str_pct_02d_b, secFrac);
+        cFont_textf(((sFont_001F1840*)self->mpHUDFont), out[0], out[1], str_pct_02d_b, secFrac);
 }
 #endif
 
@@ -2757,12 +2747,6 @@ struct sFont_001F31E0 {
     void SetScale(float sx, float sy) { f38 = f30 * sx; f3C = f34 * sy; }
 };
 
-struct sHudTimer_001F31E0 {
-    const unsigned short* text; // 0x0
-    int active;                 // 0x4
-    float t;                    // 0x8
-    sFont_001F31E0* font;       // 0xC
-};
 
 /**
  * Draws the loading indicator, its "loading" text and a flipping icon in the bottom-right corner, while any reason to
@@ -2778,16 +2762,16 @@ struct sHudTimer_001F31E0 {
  * high and |mAnimFrame - 1| * 18 wide, so it flips as mAnimFrame runs from 0 to 2, and everything is popped again. The
  * font keeps the 0.7 Scale and a (2, 2) shadow offset afterwards. cGame_render and func_0022C830 call it.
  */
-extern "C" void cBXLoadIndicator_Render(sHudTimer_001F31E0* self)
+extern "C" void cBXLoadIndicator_Render(cBXLoadIndicator* self)
 {
-    if (self->active == 0) {
+    if (((int)self->mLoadIndicators) == 0) {
         return;
     }
     if (D_004A4EB0 == 0) {
         D_004A4EB0 = 1;
         D_004A4EA8.y = D_004A4EA8.x = 3.0f;
     }
-    float flipScale = self->t - 1.0f;
+    float flipScale = self->mAnimFrame - 1.0f;
     if (flipScale < 0.0f) {
         flipScale = -flipScale;
     }
@@ -2809,15 +2793,15 @@ extern "C" void cBXLoadIndicator_Render(sHudTimer_001F31E0* self)
         (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_31E0*)GrMan)->GetScreenWidth(), (float)((cGfx_31E0*)GrMan)->GetScreenHeight(), 1);
     }
     ((cGfx_31E0*)GrMan)->SetViewportOrthographic(0.0f, 0.0f, 640.0f, 480.0f, 1, 0, 0.0f, 1.0f);
-    self->font->color = sVec4_31E0(1.0f, 1.0f, 1.0f, 0.0f);
-    self->font->SetScale(0.7f, 0.7f);
-    self->font->color2 = sVec4_31E0(1.0f, 0.0f, 0.0f, 0.0f);
-    self->font->scale = D_004A4EA8;
-    float w = cFont_textExtent1(self->font, self->text, 0, 0, self->font->f38, self->font->f3C);
-    sVec4_31E0 pos(620.0f - w, 445.0f - (float)self->font->count * self->font->f34 * 0.35f, 0.0f, 1.0f);
+    ((sFont_001F31E0*)self->mpFont)->color = sVec4_31E0(1.0f, 1.0f, 1.0f, 0.0f);
+    ((sFont_001F31E0*)self->mpFont)->SetScale(0.7f, 0.7f);
+    ((sFont_001F31E0*)self->mpFont)->color2 = sVec4_31E0(1.0f, 0.0f, 0.0f, 0.0f);
+    ((sFont_001F31E0*)self->mpFont)->scale = D_004A4EA8;
+    float w = cFont_textExtent1(((sFont_001F31E0*)self->mpFont), ((const unsigned short*)self->mpLoadText), 0, 0, ((sFont_001F31E0*)self->mpFont)->f38, ((sFont_001F31E0*)self->mpFont)->f3C);
+    sVec4_31E0 pos(620.0f - w, 445.0f - (float)((sFont_001F31E0*)self->mpFont)->count * ((sFont_001F31E0*)self->mpFont)->f34 * 0.35f, 0.0f, 1.0f);
     ((cGfx_31E0*)GrMan)->stateTop->f8_5 = 0x1F;
-    cFont_text1(self->font, pos.x, pos.y, self->text);
-    self->font->scale = sV2_31E0(2.0f, 2.0f);
+    cFont_text1(((sFont_001F31E0*)self->mpFont), pos.x, pos.y, ((const unsigned short*)self->mpLoadText));
+    ((sFont_001F31E0*)self->mpFont)->scale = sV2_31E0(2.0f, 2.0f);
     pos.x = pos.x - 17.0f;
     pos.y = 445.0f;
     sV2_31E0 size;

@@ -805,15 +805,10 @@ struct sScore_238E20 {
     int t[3][10];
 };
 
-struct sRace_238E20 {
-    char pad00[0x20];
-    int f20;
-    int f24;
-};
 
-static inline sRace_238E20* race_238E20()
+static inline cAI* race_238E20()
 {
-    return (sRace_238E20*)SSXApp->Game->AI;
+    return SSXApp->Game->AI;
 }
 
 /**
@@ -900,8 +895,8 @@ extern "C" void func_00238E20(sScore_238E20* self)
         cGameModeMan_sortScores((char*)cGameModeHandler_pManager, cGameModeHandler_pManager->iNumberAI + 1);
         {
             cGameModeMan* pManager = cGameModeHandler_pManager;
-            race_238E20()->f20 = pManager->iCharacters[D_00536708[0]];
-            race_238E20()->f24 = pManager->iCharacters[D_00536708[1]];
+            race_238E20()->PodiumActorList[0] = pManager->iCharacters[D_00536708[0]];
+            race_238E20()->PodiumActorList[1] = pManager->iCharacters[D_00536708[1]];
             for (i = 1; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {
                 D_00536640[i] = firstHeatScores[i];
             }
@@ -967,22 +962,15 @@ struct sStats_239230 {
     int w[3];
 };
 
-// The race (*(SSXApp + 0x84) + 0xC): rider list at 0x28, player objects at 0x40, last index at 0x80.
-struct sRace_239230 {
-    char pad_0x0[0x28];
-    cRider* riders[6];  // 0x28
-    char* players[16];  // 0x40: each holds its cRider virtual-base pointer at +0x18
-    int f80;            // 0x80
-};
 
-static inline sRace_239230* Race_239230()
+static inline cAI* Race_239230()
 {
-    return (sRace_239230*)SSXApp->Game->AI;
+    return SSXApp->Game->AI;
 }
 
 static inline cRider* Rider_239230(int i)
 {
-    return Race_239230()->riders[i];
+    return Race_239230()->Riders[i];
 }
 
 /**
@@ -1056,7 +1044,7 @@ extern "C" void func_00239230(sScore_239230* self, int idx)
         break;
     case 3: {
         gm->bAreResultsLocked = 1;
-        int last = Race_239230()->f80;
+        int last = Race_239230()->NumberOfComputersAllocated;
         for (int i = 0; i < last + 1; i++) {
             cRider* rider = Rider_239230(i);
             int done = rider->mFinishTime >= 0.0f;
@@ -1089,11 +1077,11 @@ extern "C" void func_00239230(sScore_239230* self, int idx)
     }
     int place = D_00536730[n];
     if (place == 0)
-        (*(cRider**)(Race_239230()->players[0] + 0x18))->unk_2F8 = 0.699999988079071f;
+        (*(cRider**)(((char**)&Race_239230()->Players[0])[0] + 0x18))->unk_2F8 = 0.699999988079071f;
     else if (place == 1)
-        (*(cRider**)(Race_239230()->players[0] + 0x18))->unk_2F8 = 0.3499999940395355f;
+        (*(cRider**)(((char**)&Race_239230()->Players[0])[0] + 0x18))->unk_2F8 = 0.3499999940395355f;
     else
-        (*(cRider**)(Race_239230()->players[0] + 0x18))->unk_2F8 = 0.0f;
+        (*(cRider**)(((char**)&Race_239230()->Players[0])[0] + 0x18))->unk_2F8 = 0.0f;
 }
 #endif
 
@@ -1200,19 +1188,15 @@ extern "C" void cGameModeMan_sortScores(void* self, int n);
 extern unsigned int D_00536640[];
 extern int D_00536730[];
 
-struct sOpts_239AA0 {
-    char pad00[0x49];
-    signed char f49;
-};
 
 struct sScore_239AA0 {
     int f0;
     int t[3][10];
 };
 
-static inline int opt49_239AA0(sOpts_239AA0* o)
+static inline int opt49_239AA0(cBERaceDB* o)
 {
-    return o->f49;
+    return o->cGamePath;
 }
 
 /**
@@ -1240,7 +1224,7 @@ extern "C" void func_00239AA0(sScore_239AA0* self)
     int nA = numNonSimulated + 1;
     for (int simRider = 0; simRider < nB; simRider++) {
         for (int heat = 0; heat < 3; heat++) {
-            int repeatFirstHeat = opt49_239AA0((sOpts_239AA0*)((signed char*)&cBENewRaceInterface_newRace));
+            int repeatFirstHeat = opt49_239AA0((cBERaceDB*)((signed char*)&cBENewRaceInterface_newRace));
             int same = 0;
             if (heat != 0) same = 1;
             if (repeatFirstHeat == 0) same = 0;
@@ -1422,8 +1406,8 @@ INCLUDE_ASM("main/gamemode", func_00239EC8);
  */
 extern "C" void func_00239EC8(void* self, int idx)
 {
-    sRace_239230* race = Race_239230();
-    sStats_239230 st = *(sStats_239230*)((char*)race->riders[idx]->mMetrix + 0xFC);
+    cAI* race = Race_239230();
+    sStats_239230 st = *(sStats_239230*)((char*)race->Riders[idx]->mMetrix + 0xFC);
     bool dnf = Rider_239230(idx)->mDidNotFinish != 0;
     if (dnf) {
         D_00536640[idx] = 0;

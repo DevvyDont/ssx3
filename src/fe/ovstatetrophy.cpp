@@ -1982,18 +1982,6 @@ extern char cBENewRaceInterface_newRace[];
 extern char cOVState_PROFILE_vtbl[];
 extern "C" void cFEMemCard_cFEMemCard2(void* self, int a, int b);
 extern "C" int cBENewPlayerInterface_getPlayerCtrlID(void* iface, int i);
-struct sOVTrophy_1088 {
-    char pad_0x0[8];
-    void* vtable;           // 0x8
-    int f0C;                // 0xC
-    char pad_0x10[0x1CC - 0x10];
-    int f1CC;               // 0x1CC
-    char pad_0x1D0[0x22C - 0x1D0];
-    int f22C;               // 0x22C
-    int f230;               // 0x230
-    char pad_0x234[0x278 - 0x234];
-    int f278;               // 0x278
-};
 /**
  * Constructs the in-game profile (load/save) overlay for the controller that opened it.
  *
@@ -2010,10 +1998,10 @@ struct sOVTrophy_1088 {
  * @param parentOverlay  the overlay to return to (On Tour ov, kept in mParentOV)
  * @return @p self
  */
-extern "C" sOVTrophy_1088* cOVState_PROFILE_cOVState_PROFILE(cOVState_PROFILE* self, int pEngine, unsigned char ucActiveControl, int parentOverlay)
+extern "C" cOVState_PROFILE* cOVState_PROFILE_cOVState_PROFILE(cOVState_PROFILE* self, int pEngine, unsigned char ucActiveControl, int parentOverlay)
 {
     int idx = 0;
-    cFEMemCard_cFEMemCard2(((sOVTrophy_1088*)self), pEngine, 0);
+    cFEMemCard_cFEMemCard2((self), pEngine, 0);
     self->mHashName = 36;
     self->mVtbl = (void**)cOVState_PROFILE_vtbl;
     self->mParentOV = parentOverlay;
@@ -2038,7 +2026,7 @@ extern "C" sOVTrophy_1088* cOVState_PROFILE_cOVState_PROFILE(cOVState_PROFILE* s
             break;
         }
     }
-    return ((sOVTrophy_1088*)self);
+    return (self);
 }
 #endif
 

@@ -254,11 +254,6 @@ struct sSseObj8720 {
     char data[0xCC];
 };
 
-struct sLvl8720 {
-    char pad_0x0[0x40];
-    char* riders[15];               // 0x40
-    int count;                      // 0x7C
-};
 
 struct sSse8720 {
     char pad_0x0[0x500];
@@ -300,11 +295,11 @@ extern "C" void cSSXScriptEngine_Update(sSse8720* self)
         sSseObj8720* nisList = &self->objsA[self->state];
         if (tNISList_IsSkipAllowed((tNISList*)nisList))
         {
-            sLvl8720* lvl = (sLvl8720*)SSXApp->Game->AI;
-            int n = lvl->count;
+            cAI* lvl = SSXApp->Game->AI;
+            int n = lvl->NumberOfPlayersAllocated;
             for (int j = 0; j < n; j++)
             {
-                void* obj = *(void**)(lvl->riders[j] + 0xDF0);
+                void* obj = *(void**)(((char**)&lvl->Players[0])[j] + 0xDF0);
                 if (**(int**)obj != 0 && self->delay == 0 && cInput_getState(obj, 111))
                 {
                     tNISList_DoSkip(nisList);
@@ -2971,9 +2966,9 @@ extern "C" void cSSXScriptEngine_ProcessAsyncLoadScriptBankComplete(cSSXScriptEn
                 return;
             }
             sprintf(buf, str_asyncpct_08d, ssxScriptBankInfo->dataIdentifier);
-            (*(int*)&ssxScriptBankInfo->asyncHandle) = 0;
+            *(int*)&ssxScriptBankInfo->asyncHandle = 0;
             self->mCurrAttachingBankNum = i;
-            (*(int*)&ssxScriptBankInfo->dataBankHandle) = cDataManager_AttachData((char*)&self->mMaxDataInstances, buf, loaded.data, loaded.size);
+            *(int*)&ssxScriptBankInfo->dataBankHandle = cDataManager_AttachData((char*)&self->mMaxDataInstances, buf, loaded.data, loaded.size);
             self->mCurrAttachingBankNum = 10;
             return;
         }
@@ -3009,8 +3004,8 @@ extern "C" void cSSXScriptEngine_ProcessAsyncLoadTrackTableComplete(cSSXScriptEn
     ASYNCFILE_release_out(file, &loaded.data, &loaded.size);
     self->mNumAsyncs -= 1;
     if (loaded.size != 0) {
-        (*(int**)&self->mpFilterTableHeader) = loaded.data;
-        (*(sScrReloc6B0**)&self->mpCategoryFilterTable) = (sScrReloc6B0*)(loaded.data + 1);
+        *(int**)&self->mpFilterTableHeader = loaded.data;
+        *(sScrReloc6B0**)&self->mpCategoryFilterTable = (sScrReloc6B0*)(loaded.data + 1);
         for (int i = 0; i < *((int*)self->mpFilterTableHeader); i++) {
             if (((sScrReloc6B0*)self->mpCategoryFilterTable)[i].used != 0) {
                 // PORT: offset relocated to an absolute pointer held in int
@@ -4582,10 +4577,6 @@ struct sVar0050 {
     int e;
 };
 
-struct sScriptEng0050 {
-    char pad[0x50];
-    sVar0050 vars[1];
-};
 
 /**
  * Returns the player using a script entity: its record's player ID (+0x8) when the record's relation (+0xC) is 1
@@ -4946,7 +4937,7 @@ struct sSeVEntryD688 {
 extern "C" void cScriptObjCamera_SetCameraEntity(cScriptObjCamera* self, void* anim)
 {
     if (anim != 0) {
-        int id = cScriptDatabaseObject_GetPlayerIDByEntity((cScriptDatabaseObject*)((sScriptEng0050*)cScriptDatabaseObject_GetDatabaseObject()), anim);
+        int id = cScriptDatabaseObject_GetPlayerIDByEntity((cScriptDatabaseObject*)(cScriptDatabaseObject_GetDatabaseObject()), anim);
         if (self->mpCameraEntity != 0) {
             sSeVEntryD688* vt = (sSeVEntryD688*)self->mVtbl;
             vt[5].fn(((char*)self) + vt[5].delta, self->mPlayerID);
@@ -5901,15 +5892,10 @@ void* cScriptObject_cScriptObject(void*, int);
 extern void* D_00482298[];
 extern void* cScriptObjEvent_vtbl[];
 
-struct sScrTrig05B8 {
-    int id;         // 0x0
-    int count;      // 0x4
-    int target;     // 0x8
-};
 
 struct sScrObj05B8 {
     char pad_0x00[0xBC];
-    sScrTrig05B8 trig[4];   // 0xBC
+    tScriptObjEventSound trig[4];   // 0xBC
     int field_0xEC;
     int field_0xF0;
     int field_0xF4;
@@ -5934,10 +5920,10 @@ extern "C" void* cScriptObjEvent_cScriptObjEvent(cScriptObjEvent* self)
     self->mCheckForStopOnSpeechEnd = 0;
     self->mpSoundBankInfo = 0;
     for (int i = 0; i < 4; i++) {
-        sScrTrig05B8* trigger = &((sScrTrig05B8*)&self->mSounds[0])[i];
-        trigger->target = -1;
-        trigger->id = -1;
-        trigger->count = 0;
+        tScriptObjEventSound* trigger = &((&self->mSounds[0]))[i];
+        trigger->soundID = -1;
+        trigger->soundHandle = -1;
+        trigger->endSound = 0;
     }
     return ((sScrObj05B8*)self);
 }
@@ -5965,17 +5951,17 @@ extern "C" void cScriptObjEvent_Update(cScriptObjEvent* self)
 {
     char* snd = (char*)cAudioInterface_bxAudio();
     for (int i = 0; i < 4; i++) {
-        sScrTrig05B8* soundSlot = &((sScrTrig05B8*)&self->mSounds[0])[i];
-        if (soundSlot->id >= 0) {
-            if (soundSlot->count != 0) {
-                cBankMonitor_BANKMONITOR_StopHandle(**(char***)(snd + 0x118) + 0x1D8, soundSlot->id, 1, 0.0f);
-                soundSlot->target = -1;
-                soundSlot->id = -1;
-                soundSlot->count = 0;
-            } else if (cBankMonitor_BANKMONITOR_GetHandle(**(char***)(snd + 0x118) + 0x1D8, soundSlot->id, 1) == 0) {
-                soundSlot->target = -1;
-                soundSlot->id = -1;
-                soundSlot->count = 0;
+        tScriptObjEventSound* soundSlot = &((&self->mSounds[0]))[i];
+        if (soundSlot->soundHandle >= 0) {
+            if (soundSlot->endSound != 0) {
+                cBankMonitor_BANKMONITOR_StopHandle(**(char***)(snd + 0x118) + 0x1D8, soundSlot->soundHandle, 1, 0.0f);
+                soundSlot->soundID = -1;
+                soundSlot->soundHandle = -1;
+                soundSlot->endSound = 0;
+            } else if (cBankMonitor_BANKMONITOR_GetHandle(**(char***)(snd + 0x118) + 0x1D8, soundSlot->soundHandle, 1) == 0) {
+                soundSlot->soundID = -1;
+                soundSlot->soundHandle = -1;
+                soundSlot->endSound = 0;
             }
         }
     }
@@ -5995,11 +5981,6 @@ void cScriptObject_OnStartObjectUse(void* self);
 // PORT: cSSXScriptEngine_GetSoundBankInfo is declared (void*) but forwards a key in $5.
 void* cSSXScriptEngine_GetSoundBankInfo_2(void* self, int key) __asm__("cSSXScriptEngine_GetSoundBankInfo__FPv");
 
-struct sScrTrig_0730 {
-    int a;  // 0x0
-    int b;  // 0x4
-    int c;  // 0x8
-};
 
 /**
  * Takes the script event object into use: resets its event state and binds the script's sound bank.
@@ -6020,11 +6001,11 @@ extern "C" void cScriptObjEvent_OnStartObjectUse(cScriptObjEvent* self)
     char* info = (char*)GetSSXScriptHeader(self->mpEntity->mpOwner);
     int key = *(int*)(info + 0x1C);
     self->mpSoundBankInfo = (tScriptSoundBankInfo*)cSSXScriptEngine_GetSoundBankInfo_2(ScriptEngine, key);
-    sScrTrig_0730* soundSlot = (sScrTrig_0730*)(&self->mSounds[0]);
+    tScriptObjEventSound* soundSlot = ((&self->mSounds[0]));
     for (i = 3; i >= 0; i--) {
-        soundSlot->c = -1;
-        soundSlot->a = -1;
-        soundSlot->b = 0;
+        soundSlot->soundID = -1;
+        soundSlot->soundHandle = -1;
+        soundSlot->endSound = 0;
         soundSlot++;
     }
 }
@@ -7232,7 +7213,7 @@ extern "C" void cScriptObjCameraManager_DoCameraTransition(cScriptObjCameraManag
             self->mInTransition = 0;
             return;
         }
-        int id = cScriptDatabaseObject_GetPlayerIDByEntity((cScriptDatabaseObject*)((sScriptEng0050*)cScriptDatabaseObject_GetDatabaseObject()), (char*)&self->mEntityVtbl);
+        int id = cScriptDatabaseObject_GetPlayerIDByEntity((cScriptDatabaseObject*)(cScriptDatabaseObject_GetDatabaseObject()), (char*)&self->mEntityVtbl);
         cScriptObjTransition_SetTransition_f(*pf, id, node->kind->a, currFrame - (float)node->start, (float)node->len, 0.0f, 0.0f);
     }
     else if (k > 0)
@@ -7243,7 +7224,7 @@ extern "C" void cScriptObjCameraManager_DoCameraTransition(cScriptObjCameraManag
             self->mInTransition = 0;
             return;
         }
-        int id = cScriptDatabaseObject_GetPlayerIDByEntity((cScriptDatabaseObject*)((sScriptEng0050*)cScriptDatabaseObject_GetDatabaseObject()), (char*)&self->mEntityVtbl);
+        int id = cScriptDatabaseObject_GetPlayerIDByEntity((cScriptDatabaseObject*)(cScriptDatabaseObject_GetDatabaseObject()), (char*)&self->mEntityVtbl);
         cScriptObjTransition_SetTransition1(*pf, id, node->kind->a, node->kind->b, currFrame - (float)node->start, (float)node->kind->d, (float)node->len, (float)node->kind->c);
     }
 }

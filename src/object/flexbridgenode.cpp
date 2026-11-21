@@ -353,17 +353,6 @@ public:
     virtual sMat_6E38* GetMatrix();
 };
 
-struct sBridgeData_6E38 {
-    char pad_0x0[0x30];
-    sV4_6E38 axis;              // 0x30
-    char pad_0x40[0x24];
-    float kLin;                 // 0x64
-    float kAng;                 // 0x68
-    char pad_0x6C[0x8];
-    sSeg_6E38* segs;            // 0x74
-    char pad_0x78[0x8];
-    sV4_6E38* pts;              // 0x80
-};
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline sV4_6E38 vu0Sub_6E38(const sV4_6E38& a, const sV4_6E38& b)
@@ -504,19 +493,19 @@ static inline float Torque_6E38(float k, const sV4_6E38& a, const sV4_6E38& b)
  */
 extern "C" void cFlexBridgeNode_applyForce(cFlexBridgeNode* self, sNode_6E38* intInfo, sV4_6E38* force)
 {
-    sBridgeData_6E38* data = (sBridgeData_6E38*)self;
+    cFlexBridgeNode* data = self;
     if (intInfo->idx < 0) {
         return;
     }
     sMat_6E38* transform = ((cBridge_6E38*)self)->GetMatrix();
     sV4_6E38 relPos = vu0Sub_6E38(intInfo->pos, Pos_6E38(transform));
-    sV4_6E38 y = vu0MulMat_6E38(transform, vu0Norm_6E38(data->axis));
-    sV4_6E38 n = vu0MulMat_6E38(transform, data->pts[intInfo->idx]);
+    sV4_6E38 y = vu0MulMat_6E38(transform, vu0Norm_6E38(*(sV4_6E38*)&data->BottomRightOffset));
+    sV4_6E38 n = vu0MulMat_6E38(transform, ((sV4_6E38*)data->FaceNorms)[intInfo->idx]);
     float yoffset = vu0Dot_6E38(relPos, y);
     int seg = intInfo->idx / 2;
-    sSeg_6E38* pNode = data->segs;
-    vu0AddEq_6E38(pNode[seg].force, vu0Scale_6E38(data->kLin, ToLocal_6E38(transform, *force)));
-    pNode[seg].torque += Torque_6E38(data->kAng, n, *force) * yoffset;
+    sSeg_6E38* pNode = ((sSeg_6E38*)data->Mesh.Nodes);
+    vu0AddEq_6E38(pNode[seg].force, vu0Scale_6E38(data->Mesh.ForceScale, ToLocal_6E38(transform, *force)));
+    pNode[seg].torque += Torque_6E38(data->Mesh.TorqueScale, n, *force) * yoffset;
 }
 #endif
 
@@ -744,18 +733,6 @@ struct sFData_7268 {
     char* elems;        // 0x88
 };
 
-struct sFNode_7268 {
-    char pad0[0xC];
-    sFVE_7268* vt;      // 0xC
-    char pad10[0x8];
-    sFData_7268* data;  // 0x18
-    char pad1C[0x34];
-    int count;          // 0x50
-    char pad54[0x28];
-    sFV_7268* pts;      // 0x7C
-    sFV_7268* normals;  // 0x80
-    void* indices;      // 0x84
-};
 
 typedef sFM_7268* (*GetMtxFn_7268)(void*);
 typedef void (*SetXformFn_7268)(void*, sFM_7268*, float);
@@ -872,39 +849,39 @@ static inline void TransposeInverse_7268(sFM_7268* t)
  * @param flags   query flags; bit 1 must be set
  * @return the number of hits
  */
-extern "C" int cFlexBridgeNode_intersect(sFNode_7268* self, sFTester_7268* tester, sFHit_7268* out, int cap, int flags)
+extern "C" int cFlexBridgeNode_intersect(cFlexBridgeNode* self, sFTester_7268* tester, sFHit_7268* out, int cap, int flags)
 {
     if (!(flags & 2)) {
         return 0;
     }
     sFMesh_7268 mesh;
-    mesh.numTris = (self->count - 1) * 2;
-    mesh.numVerts = self->count * 2;
-    mesh.indices = self->indices;
-    mesh.verts = self->pts;
-    mesh.normals = self->normals;
-    sFM_7268* matrix = ((GetMtxFn_7268)self->vt[24].fn)((char*)self + self->vt[24].delta);
+    mesh.numTris = (self->Mesh.Width - 1) * 2;
+    mesh.numVerts = self->Mesh.Width * 2;
+    mesh.indices = ((void*)self->Faces);
+    mesh.verts = ((sFV_7268*)self->Verts);
+    mesh.normals = ((sFV_7268*)self->FaceNorms);
+    sFM_7268* matrix = ((GetMtxFn_7268)((sFVE_7268*)self->mVtbl)[24].fn)((char*)self + ((sFVE_7268*)self->mVtbl)[24].delta);
     sFM_7268 inv;
     Copy_7268(&inv, matrix);
     TransposeInverse_7268(&inv);
-    ((SetXformFn_7268)tester->vt[1].fn)((char*)tester + tester->vt[1].delta, &inv, 1.0f / self->data->scale);
+    ((SetXformFn_7268)tester->vt[1].fn)((char*)tester + tester->vt[1].delta, &inv, 1.0f / ((sFData_7268*)self->Instance)->scale);
     int n = cWorldIntersectType_IsMeshInt(tester, &mesh, 1, out, cap);
     ((VoidFn_7268)tester->vt[2].fn)((char*)tester + tester->vt[2].delta);
     for (int i = 0; i < n; i++) {
         sFHit_7268* hit = &out[i];
         Reset_7268(hit);
-        float dataScale = self->data->scale;
+        float dataScale = ((sFData_7268*)self->Instance)->scale;
         float one = 1.0f;
         hit->pos = MulVec_7268(matrix, Mul_7268(hit->pos, sFV_7268(dataScale, dataScale, dataScale, one)));
         hit->nrm = MulVec_7268(matrix, hit->nrm);
         hit->type = 1;
-        hit->owner = self->data;
-        int k = self->data->list->count - 1;
+        hit->owner = ((sFData_7268*)self->Instance);
+        int k = ((sFData_7268*)self->Instance)->list->count - 1;
         hit->f48 = 0;
         hit->f5C = k;
         hit->v20 = D_004FF120_v7268;
         hit->v30 = D_004FF120_v7268;
-        hit->f4C = *(short*)(self->data->elems + k * 12 + 0x1A);
+        hit->f4C = *(short*)(((sFData_7268*)self->Instance)->elems + k * 12 + 0x1A);
     }
     return n;
 }

@@ -627,14 +627,6 @@ struct sRider_0010D1A0 {
     sVec_0010D1A0 getVel() { return vel; }
 };
 
-struct sComputer_0010D1A0 {
-    char pad0[0x18];
-    sRider_0010D1A0* rider;  // 0x18
-    char pad1C[0xE70 - 0x1C];
-    int dir;                 // 0xE70
-    int stuckTime;           // 0xE74
-    int wrongTime;           // 0xE78
-};
 
 static inline float atan2_0010D1A0(float y, float x)
 {
@@ -686,37 +678,37 @@ static inline float wrap_0010D1A0(float x)
  *
  * @return 1 when the rider should reset, else 0
  */
-extern "C" int cComputer_checkForReset(sComputer_0010D1A0* self)
+extern "C" int cComputer_checkForReset(cComputer* self)
 {
-    float ang = atan2_0010D1A0(self->rider->getVel().y, self->rider->getVel().x);
-    float headingDiff = wrap_0010D1A0(self->rider->heading - ang);
-    if (self->dir < 0) {
+    float ang = atan2_0010D1A0(((sRider_0010D1A0*)self->mRider)->getVel().y, ((sRider_0010D1A0*)self->mRider)->getVel().x);
+    float headingDiff = wrap_0010D1A0(((sRider_0010D1A0*)self->mRider)->heading - ang);
+    if (self->mTargetID < 0) {
         if (__builtin_fabsf(headingDiff) > 1.047197699546814f) {
-            self->wrongTime++;
+            self->mBadHeadingTime++;
         } else {
-            self->wrongTime = 0;
+            self->mBadHeadingTime = 0;
         }
     } else {
-        self->wrongTime = 0;
+        self->mBadHeadingTime = 0;
     }
-    int wrong = self->wrongTime >= 61;
-    if (cRider_getMotionState(self->rider) == 2) {
+    int wrong = self->mBadHeadingTime >= 61;
+    if (cRider_getMotionState(((sRider_0010D1A0*)self->mRider)) == 2) {
         wrong = 0;
-        self->stuckTime++;
-    } else if (cRider_getMotionState(self->rider) == 4 && self->wrongTime > 0) {
+        self->mWanderTime++;
+    } else if (cRider_getMotionState(((sRider_0010D1A0*)self->mRider)) == 4 && self->mBadHeadingTime > 0) {
         return 1;
-    } else if (cRider_getMotionState(self->rider) == 1 || self->rider->speed < 1000.0f) {
-        self->stuckTime = 0;
+    } else if (cRider_getMotionState(((sRider_0010D1A0*)self->mRider)) == 1 || ((sRider_0010D1A0*)self->mRider)->speed < 1000.0f) {
+        self->mWanderTime = 0;
         wrong = 0;
-        if (cRider_getMotionState(self->rider) == 1 && *(float*)(self->rider->board + 0xA0) > 30.0f) {
+        if (cRider_getMotionState(((sRider_0010D1A0*)self->mRider)) == 1 && *(float*)(((sRider_0010D1A0*)self->mRider)->board + 0xA0) > 30.0f) {
             return 1;
         }
     } else {
-        self->stuckTime++;
+        self->mWanderTime++;
     }
-    int stuck = wrong || self->stuckTime >= 223;
-    if (cRider_getControlState(self->rider) != 8) {
-        stuck = stuck && self->dir < 0;
+    int stuck = wrong || self->mWanderTime >= 223;
+    if (cRider_getControlState(((sRider_0010D1A0*)self->mRider)) != 8) {
+        stuck = stuck && self->mTargetID < 0;
     }
     return stuck;
 }

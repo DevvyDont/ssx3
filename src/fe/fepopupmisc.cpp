@@ -316,18 +316,6 @@ struct sVEp_F050 {
     void (*fn)(void*, int, int);
 };
 
-struct sPopup_F050 {
-    char pad0[0x10];
-    char* owner;                // 0x10
-    char pad14[0x8];            // 0x14
-    int flags;                  // 0x1C
-    char pad20[0x20];           // 0x20
-    void* screen;               // 0x40
-    char pad44[0x4];            // 0x44
-    int x;                      // 0x48
-    int y;                      // 0x4C
-    signed char accepted;       // 0x50
-};
 
 static inline int padCall_F050(char* in, int slot)
 {
@@ -335,20 +323,20 @@ static inline int padCall_F050(char* in, int slot)
     return vt[slot].fn(in + vt[slot].delta);
 }
 
-static inline void sound_F050(sPopup_F050* s, int msg)
+static inline void sound_F050(cFEPopupScreenPos* s, int msg)
 {
-    sDefObj_F050* p = *(sDefObj_F050**)(s->owner + 0x14);
+    sDefObj_F050* p = *(sDefObj_F050**)(((char*)s->mpEngine) + 0x14);
     if (p == 0)
         p = &gUISoundNull;
     if (p != 0)
         p->vt[2].fn((char*)p + p->vt[2].delta, msg);
 }
 
-static inline void playFrame_F050(sPopup_F050* s, char* name)
+static inline void playFrame_F050(cFEPopupScreenPos* s, char* name)
 {
-    unsigned short frame = cUIScreen_getFrameByLabel_us((cUIScreen*)s->screen, GetHashValue32(name));
+    unsigned short frame = cUIScreen_getFrameByLabel_us((cUIScreen*)((void*)s->mpScreen), GetHashValue32(name));
     if (frame != 0xFFFF)
-        cUIScreen_playFrame(s->screen, frame, 1);
+        cUIScreen_playFrame(((void*)s->mpScreen), frame, 1);
 }
 
 static inline int clamp_F050(int v, int lo, int hi)
@@ -381,30 +369,30 @@ extern "C" void cFEPopupScreenPos_onUpdate(cFEPopupScreenPos* self)
             continue;
         }
         if (padCall_F050(in, 5)) {
-            sound_F050(((sPopup_F050*)self), 6);
+            sound_F050((self), 6);
             *(signed char*)&self->mAccept = 1;
             self->mAttrState |= 0x80;
             cUIStateStack_pop(self->mpEngine->mStateStack, 1);
         } else if (padCall_F050(in, 6)) {
-            sound_F050(((sPopup_F050*)self), 3);
+            sound_F050((self), 3);
             *(signed char*)&self->mAccept = 0;
             self->mAttrState |= 0x80;
             cUIStateStack_pop(self->mpEngine->mStateStack, 1);
         } else if (padCall_F050(in, 19)) {
             self->mX--;
-            playFrame_F050(((sPopup_F050*)self), str_hl_left);
+            playFrame_F050((self), str_hl_left);
         } else if (padCall_F050(in, 20)) {
             self->mX++;
-            playFrame_F050(((sPopup_F050*)self), str_hl_right);
+            playFrame_F050((self), str_hl_right);
         } else if (padCall_F050(in, 17)) {
             self->mY++;
-            playFrame_F050(((sPopup_F050*)self), str_hl_up);
+            playFrame_F050((self), str_hl_up);
         } else if (padCall_F050(in, 18)) {
             self->mY--;
-            playFrame_F050(((sPopup_F050*)self), str_hl_down);
+            playFrame_F050((self), str_hl_down);
         }
         if (self->mX < -20 || self->mX > 20 || self->mY < -20 || self->mY > 20) {
-            sound_F050(((sPopup_F050*)self), 4);
+            sound_F050((self), 4);
         }
         self->mX = clamp_F050(self->mX, -20, 20);
         self->mY = clamp_F050(self->mY, -20, 20);

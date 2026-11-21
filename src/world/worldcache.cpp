@@ -224,23 +224,16 @@ struct sWCBlock_7878 {
     sWCBlock_7878* next;
 };
 
-struct sWCPool_7878 {
-    void* alloc;
-    int f4;
-    unsigned int count;
-    sWCBlock_7878* head;
-    sWCBlock_7878* cur;
-};
 
-static inline void NewBlock_7878(sWCPool_7878* self)
+static inline void NewBlock_7878(cSectionBlockAllocator* self)
 {
-    sWCBlock_7878* b = (sWCBlock_7878*)cWorldBlockAllocator_getFreeBlock(self->alloc);
+    sWCBlock_7878* b = (sWCBlock_7878*)cWorldBlockAllocator_getFreeBlock(((void*)self->m_pBlockAllocator));
     b->pos = 0;
     b->pad = 0;
-    b->next = self->head;
-    self->head = b;
-    self->cur = b;
-    self->count++;
+    b->next = ((sWCBlock_7878*)self->m_pAllocBlocks);
+    *(sWCBlock_7878**)&self->m_pAllocBlocks = b;
+    *(sWCBlock_7878**)&self->m_pMRUBlock = b;
+    self->m_uiNumBlocks++;
 }
 
 /**
@@ -256,11 +249,11 @@ static inline void NewBlock_7878(sWCPool_7878* self)
  * @param flags  bits 24-27 select the alignment
  * @return the memory
  */
-extern "C" char* cSectionBlockAllocator_allocate(sWCPool_7878* self, int size, unsigned int flags)
+extern "C" char* cSectionBlockAllocator_allocate(cSectionBlockAllocator* self, int size, unsigned int flags)
 {
-    if (self->count == 0)
+    if (self->m_uiNumBlocks == 0)
         NewBlock_7878(self);
-    sWCBlock_7878* first = self->cur;
+    sWCBlock_7878* first = ((sWCBlock_7878*)self->m_pMRUBlock);
     int align = 4 << ((flags >> 24) & 0xF);
     int pos = first->pos;
     int rem = pos % align;
@@ -272,17 +265,17 @@ extern "C" char* cSectionBlockAllocator_allocate(sWCPool_7878* self, int size, u
         first->pos = pos + (alignPad + size);
         char* allocPtr = first->data + pos;
         allocPtr += alignPad;
-        self->cur->pad += alignPad;
+        ((sWCBlock_7878*)self->m_pMRUBlock)->pad += alignPad;
         return allocPtr;
     }
-    if (self->count >= 2)
+    if (self->m_uiNumBlocks >= 2)
     {
-        self->cur = self->head;
-        if (self->cur)
+        *(sWCBlock_7878**)&self->m_pMRUBlock = ((sWCBlock_7878*)self->m_pAllocBlocks);
+        if (((sWCBlock_7878*)self->m_pMRUBlock))
         {
             do
             {
-                sWCBlock_7878* block = self->cur;
+                sWCBlock_7878* block = ((sWCBlock_7878*)self->m_pMRUBlock);
                 if (block != first)
                 {
                     int bpos = block->pos;
@@ -295,17 +288,17 @@ extern "C" char* cSectionBlockAllocator_allocate(sWCPool_7878* self, int size, u
                         block->pos = bpos + (alignPad + size);
                         char* allocPtr = block->data + bpos;
                         allocPtr += alignPad;
-                        self->cur->pad += alignPad;
+                        ((sWCBlock_7878*)self->m_pMRUBlock)->pad += alignPad;
                         return allocPtr;
                     }
                 }
-                self->cur = self->cur->next;
-            } while (self->cur);
+                *(sWCBlock_7878**)&self->m_pMRUBlock = ((sWCBlock_7878*)self->m_pMRUBlock)->next;
+            } while (((sWCBlock_7878*)self->m_pMRUBlock));
         }
     }
     NewBlock_7878(self);
-    self->cur->pos += size;
-    return self->cur->data;
+    ((sWCBlock_7878*)self->m_pMRUBlock)->pos += size;
+    return ((sWCBlock_7878*)self->m_pMRUBlock)->data;
 }
 #endif
 
@@ -1345,7 +1338,7 @@ INCLUDE_ASM("world/worldcache", cWorldCache_addBxStreamDataTest);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sWCPool_7878;
-extern "C" char* cSectionBlockAllocator_allocate(sWCPool_7878* self, int size, unsigned int flags);
+extern "C" char* cSectionBlockAllocator_allocate(cSectionBlockAllocator* self, int size, unsigned int flags);
 // PORT: operator_new__FUi really takes (size, tag, flags, d), like cMemMan_alloc.
 void* operator_new_bx(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char D_00494D40[];
@@ -1380,7 +1373,7 @@ struct sBxSlot_8AA8 {
 };
 struct sBxPools_8AA8 {
     char pad0[0x3C];
-    sWCPool_7878* pools[1];         // 0x3C
+    cSectionBlockAllocator* pools[1];         // 0x3C
 };
 struct sWorldCache_8AA8 {
     int f0;

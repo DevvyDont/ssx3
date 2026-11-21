@@ -960,11 +960,6 @@ extern char str_cFEStateOnlineMainMenu[];
 extern char str_11[];
 extern char str_21[];
 
-struct sRadioPanel_41B0 {
-    void* menu;          // 0x0
-    char pad4[4];
-    void* items[11];     // 0x8
-};
 
 struct sRadioMsg_41B0 {
     char pad0[8];
@@ -991,16 +986,16 @@ extern "C" int func_001941B0(cFEStateBraggingRights* self, int msg, sRadioMsg_41
 {
     switch (msg) {
     case 251:
-        cUIMenu_setSelectedByIndex_41B0(((sRadioPanel_41B0*)(&self->mMenuCtrl[0]))[data->panel].menu, *(unsigned char*)&data->idx);
+        cUIMenu_setSelectedByIndex_41B0(((void*)(((&self->mMenuCtrl[0])))[data->panel].mpPlayerMenu), *(unsigned char*)&data->idx);
         break;
     case 252: {
         unsigned char out;
-        void* item = ((sRadioPanel_41B0*)(&self->mMenuCtrl[0]))[data->panel].items[data->idx];
+        void* item = ((void**)&(((&self->mMenuCtrl[0])))[data->panel].mpListBox[0])[data->idx];
         if (!cUIListBox_getEntryByData_41B0(item, data->key, &out)) {
             break;
         }
         cUIListBox_setCurrentEntryByIndex_41B0(item, out);
-        int slot = cBraggingRightsMenu_findListBoxP_41B0(&((sRadioPanel_41B0*)(&self->mMenuCtrl[0]))[data->panel], item);
+        int slot = cBraggingRightsMenu_findListBoxP_41B0(&(((&self->mMenuCtrl[0])))[data->panel], item);
         int which = ((signed char*)self->mpGameEventMapping)[slot];
         if (which == -1) {
             break;
@@ -1010,7 +1005,7 @@ extern "C" int func_001941B0(cFEStateBraggingRights* self, int msg, sRadioMsg_41
         break;
     }
     case 253:
-        cBraggingRightsMenu_setConfirmed_41B0(&((sRadioPanel_41B0*)(&self->mMenuCtrl[0]))[data->panel], 1);
+        cBraggingRightsMenu_setConfirmed_41B0(&(((&self->mMenuCtrl[0])))[data->panel], 1);
         cFEStateBraggingRights_updateConfirmedState(self);
         break;
     case 238: case 241: case 248: case 250: case 274: case 275:
@@ -1024,9 +1019,9 @@ extern "C" int func_001941B0(cFEStateBraggingRights* self, int msg, sRadioMsg_41
         }
         break;
     case 254: {
-        cBraggingRightsMenu_setConfirmed_41B0(&((sRadioPanel_41B0*)(&self->mMenuCtrl[0]))[data->panel], 0);
-        cBraggingRightsMenu_setEnableItem_41B0(&((sRadioPanel_41B0*)(&self->mMenuCtrl[0]))[data->panel], self->mpScreen);
-        cUIMenu_setSelectedByIndex_41B0(((sRadioPanel_41B0*)(&self->mMenuCtrl[0]))[data->panel].menu, 0);
+        cBraggingRightsMenu_setConfirmed_41B0(&(((&self->mMenuCtrl[0])))[data->panel], 0);
+        cBraggingRightsMenu_setEnableItem_41B0(&(((&self->mMenuCtrl[0])))[data->panel], self->mpScreen);
+        cUIMenu_setSelectedByIndex_41B0(((void*)(((&self->mMenuCtrl[0])))[data->panel].mpPlayerMenu), 0);
         int frame = data->panel == 0 ? cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_11)) : cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_21));
         if (frame == 0xFFFF) {
             break;

@@ -193,11 +193,6 @@ struct sSnd0018Mgr {
     char pad0[0x1D8];
     sSnd0018Sub sub;         // 0x1D8
 };
-struct sSnd0018Sys {
-    sSnd0018Mgr* mgr;
-    int* a4;                 // 0x4
-    int* a8;                 // 0x8
-};
 struct sSnd0018Req {
     char pad0[0x18];
     int f18;                 // 0x18
@@ -212,8 +207,8 @@ struct sSnd0018Req {
 
 static inline void snd0018AddVoice(void* vself, int a, int b)
 {
-    sSnd0018Sys* self = (sSnd0018Sys*)vself;
-    sSnd0018Mgr* m = self->mgr;
+    cBankSys* self = (cBankSys*)vself;
+    sSnd0018Mgr* m = ((sSnd0018Mgr*)self->mpVBankManager);
     sSnd0018Sub* s = &m->sub;
     m->sub.cur++;
     s->ch[m->sub.cur] = m->sub.def;
@@ -235,8 +230,8 @@ static inline void snd0018AddVoice(void* vself, int a, int b)
     s->p84[m->sub.cur] = 0;
     s->p78[m->sub.cur] = 0x7F;
     s->p7C[m->sub.cur] = 1;
-    self->a4[self->mgr->sub.cur] = a;
-    self->a8[self->mgr->sub.cur] = b;
+    self->mBank[((sSnd0018Mgr*)self->mpVBankManager)->sub.cur] = a;
+    self->mPatch[((sSnd0018Mgr*)self->mpVBankManager)->sub.cur] = b;
 }
 
 /**
@@ -251,7 +246,7 @@ static inline void snd0018AddVoice(void* vself, int a, int b)
  */
 extern "C" int cBankSys_Play2DCallback(cBankSys* self, sSnd0018Req* req)
 {
-    snd0018AddVoice((sSnd0018Sys*)gBankSys, req->f1C, req->f20);
+    snd0018AddVoice(gBankSys, req->f1C, req->f20);
     sSnd0018Mgr* bankMgr = (sSnd0018Mgr*)gBankSys->mpVBankManager;
     bankMgr->sub.p3C[bankMgr->sub.cur] = req->f18;
     sSnd0018Mgr* bankMgrVol = (sSnd0018Mgr*)gBankSys->mpVBankManager;
@@ -306,11 +301,6 @@ struct sSnd0358Mgr {
     char pad0[0x1D8];
     sSnd0358Sub sub;         // 0x1D8
 };
-struct sSnd0358Sys {
-    sSnd0358Mgr* mgr;
-    int* a4;                 // 0x4
-    int* a8;                 // 0x8
-};
 struct sSnd0358Req {
     char pad0[0x18];
     int f18;                 // 0x18
@@ -326,8 +316,8 @@ struct sSnd0358Req {
 
 static inline void snd0358AddVoice(void* vself, int a, int b)
 {
-    sSnd0358Sys* self = (sSnd0358Sys*)vself;
-    sSnd0358Mgr* m = self->mgr;
+    cBankSys* self = (cBankSys*)vself;
+    sSnd0358Mgr* m = ((sSnd0358Mgr*)self->mpVBankManager);
     sSnd0358Sub* s = &m->sub;
     m->sub.cur++;
     s->ch[m->sub.cur] = m->sub.def;
@@ -349,8 +339,8 @@ static inline void snd0358AddVoice(void* vself, int a, int b)
     s->p84[m->sub.cur] = 0;
     s->p78[m->sub.cur] = 0x7F;
     s->p7C[m->sub.cur] = 1;
-    self->a4[self->mgr->sub.cur] = a;
-    self->a8[self->mgr->sub.cur] = b;
+    self->mBank[((sSnd0358Mgr*)self->mpVBankManager)->sub.cur] = a;
+    self->mPatch[((sSnd0358Mgr*)self->mpVBankManager)->sub.cur] = b;
 }
 
 /**
@@ -366,7 +356,7 @@ static inline void snd0358AddVoice(void* vself, int a, int b)
  */
 extern "C" int cBankSys_Play2DCallbackWithPitchMult(cBankSys* self, sSnd0358Req* req)
 {
-    snd0358AddVoice((sSnd0358Sys*)gBankSys, req->f1C, req->f20);
+    snd0358AddVoice(gBankSys, req->f1C, req->f20);
     sSnd0358Mgr* bankMgr = (sSnd0358Mgr*)gBankSys->mpVBankManager;
     bankMgr->sub.p3C[bankMgr->sub.cur] = req->f18;
     sSnd0358Mgr* bankMgrVol = (sSnd0358Mgr*)gBankSys->mpVBankManager;
@@ -2732,11 +2722,6 @@ void* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFoc
 
 
 
-// Six rider slots at 0x59E8.
-struct sSnd4860 {
-    char pad[0x59E8];
-    int vals[6];
-};
 
 extern "C" void cSSXAudio_LiftWithAirTime(cSSXAudio* self, cRider* rider);
 
@@ -2745,16 +2730,16 @@ extern "C" void cSSXAudio_LiftWithAirTime(cSSXAudio* self, cRider* rider);
  */
 extern "C" void cSSXAudio_UpdateLift(cSSXAudio* self)
 {
-    sSnd4860* audio = (sSnd4860*)self;
+    cSSXAudio* audio = self;
     for (int i = 0; i < 6; i++) {
-        if (audio->vals[i] != 0 && i < ((cAI*)cAudioInterface_getAI())->NumberOfRidersAllocated) {
+        if (audio->mNeedLift[i] != 0 && i < ((cAI*)cAudioInterface_getAI())->NumberOfRidersAllocated) {
             char* rider = (char*)((cAI*)cAudioInterface_getAI())->Riders[i];
             if (rider != 0) {
                 cSSXAudio_LiftWithAirTime(self, (cRider*)rider);
                 continue;
             }
         }
-        audio->vals[i] = 0;
+        audio->mNeedLift[i] = 0;
     }
 }
 #endif

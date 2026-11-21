@@ -1481,7 +1481,6 @@ extern "C" int cWorldTriggerManager_ObjectRefFirstFrame(cWorldTriggerManager* se
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_DuckAmbientAudioTrigger);
 #ifdef SKIP_ASM
 struct sTrigObj_6A38 { char pad[0xC]; int state; };
-struct sTrigEnt_6A38 { int a; sTrigObj_6A38* obj; };
 
 /**
  * Returns whether trigger idx ducks ambient audio: its type data's +0xC is 1 (never for idx < 2).
@@ -1496,7 +1495,7 @@ extern "C" int cWorldTriggerManager_DuckAmbientAudioTrigger(cWorldTriggerManager
     if (idx < 2U) {
         return 0;
     }
-    return ((sTrigEnt_6A38*)self->m_aTriggerInfo)[idx].obj->state == 1;
+    return ((sTrigObj_6A38*)(self->m_aTriggerInfo)[idx].m_pTriggerTypeStruct)->state == 1;
 }
 #endif
 
@@ -2030,11 +2029,6 @@ struct sOctRoot_75D0 {
     void* node;     // 0x10
 };
 
-struct sWtm_75D0 {
-    int count;
-    char pad4[0x10C];
-    sV4_75D0 last;  // 0x110
-};
 
 struct sQH_75D0 {};
 
@@ -2089,13 +2083,13 @@ static inline float Length_75D0(const sV4_75D0& v)
  */
 extern "C" void cAudioOverlapList_update(cWorldSound* self, const sV4_75D0* pos)
 {
-    if (self->m_OverlapLists[0].lastposition.w == 0.0f || Length_75D0(Sub_75D0(*pos, (*(sV4_75D0*)&self->m_OverlapLists[0].lastposition))) > 10.0f) {
+    if (self->m_OverlapLists[0].lastposition.w == 0.0f || Length_75D0(Sub_75D0(*pos, *(sV4_75D0*)&self->m_OverlapLists[0].lastposition)) > 10.0f) {
         self->m_OverlapLists[0].numoverlaps = 0;
         sOctRoot_75D0* root = *(sOctRoot_75D0**)((char*)cAudioInterface_getGame() + 0x20);
-        sWtm_75D0* selfList[1];
-        selfList[0] = ((sWtm_75D0*)self);
+        cWorldSound* selfList[1];
+        selfList[0] = (self);
         const sV4_75D0* posPtr = pos;
-        sWtm_75D0** pl = selfList;
+        cWorldSound** pl = selfList;
         const sV4_75D0** pp = &posPtr;
         sQH_75D0 octantQuery0, octantQuery1, octantQuery2, octantQuery3, octantQuery4, octantQuery5, octantQuery6, octantQuery7;
         sOctRoot_75D0* k;
@@ -2114,7 +2108,7 @@ extern "C" void cAudioOverlapList_update(cWorldSound* self, const sV4_75D0* pos)
         if (root[6].node) wtq_75D0(&octantQuery6, pl, pl, pp, k->node, k);
         k = &root[7];
         if (root[7].node) wtq_75D0(&octantQuery7, pl, pl, pp, k->node, k);
-        (*(sV4_75D0*)&self->m_OverlapLists[0].lastposition) = *pos;
+        *(sV4_75D0*)&self->m_OverlapLists[0].lastposition = *pos;
     }
 }
 #endif
@@ -2170,7 +2164,7 @@ extern "C" void cWorldSound_TriggerGridAudioNode(void* self, const sV4_75D0* pos
  */
 extern "C" void cWorldSound_TriggerWorldAudio(cWorldSound* self, const sV4_75D0* pos, int k)
 {
-    cAudioOverlapList_update((cWorldSound*)((sWtm_75D0*)&((sTriggerIdSlot120*)self)[k]), pos);
+    cAudioOverlapList_update((cWorldSound*)((cWorldSound*)&((sTriggerIdSlot120*)self)[k]), pos);
     for (int i = 0; i < ((sTriggerIdSlot120*)self)[k].count; i++) {
         if (getTriggerId(&((sTriggerIdSlot120*)self)[k], i) != 0) {
             cWorldSound_TriggerGridAudioNode(((sTriggerIdSlot120*)self), pos, k, getTriggerId(&((sTriggerIdSlot120*)self)[k], i));

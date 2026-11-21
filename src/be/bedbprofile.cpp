@@ -88,19 +88,14 @@ extern "C" void cBECharProfileDB_setLocationVisited(cBECharProfileDB* self, int 
 //100%
 INCLUDE_ASM("be/bedbprofile", cBECharProfileDB_updateScoreStats);
 #ifdef SKIP_ASM
-struct sScoreStat_00152460
-{
-    int a;
-    unsigned int value;
-};
 
 struct sCharProfile_00152460
 {
     char pad0[0xAD0];
-    sScoreStat_00152460 stats[0x1A];  // 0xAD0
+    tBETrackScore stats[0x1A];  // 0xAD0
 };
 
-static inline int IsBetter_00152460(int stat, sScoreStat_00152460* s, unsigned int value)
+static inline int IsBetter_00152460(int stat, tBETrackScore* s, unsigned int value)
 {
     switch (stat)
     {
@@ -109,9 +104,9 @@ static inline int IsBetter_00152460(int stat, sScoreStat_00152460* s, unsigned i
     case 6:
     case 7:
     case 8:
-        return value < s->value;
+        return value < s->uiHighScore;
     default:
-        return s->value < value;
+        return s->uiHighScore < value;
     }
 }
 
@@ -134,10 +129,10 @@ extern "C" int cBECharProfileDB_updateScoreStats(cBECharProfileDB* self, int loc
         return 0;
     if (value == 0)
         return 0;
-    sScoreStat_00152460* scoreStat = &((sScoreStat_00152460*)&self->mScoreStats[0])[type];
-    if (scoreStat->value == 0 || IsBetter_00152460(stat, scoreStat, value))
+    tBETrackScore* scoreStat = &((&self->mScoreStats[0]))[type];
+    if (scoreStat->uiHighScore == 0 || IsBetter_00152460(stat, scoreStat, value))
     {
-        scoreStat->value = value;
+        scoreStat->uiHighScore = value;
         return 1;
     }
     return 0;

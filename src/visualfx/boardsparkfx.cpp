@@ -649,13 +649,6 @@ INCLUDE_ASM("visualfx/boardsparkfx", cBoardSparkFX_render);
 #ifdef SKIP_ASM
 extern "C" void cDynamicColourEmitter_render(void* self, int a1);
 
-struct sRS_B478 {
-    int v[5];
-};
-struct sRenderCtx_B478 {
-    char pad[0xE84];
-    sRS_B478* top;
-};
 
 struct sVec2_B478 {
     float x, y;
@@ -688,15 +681,15 @@ struct sVE_B478b {
     void (*fn)(void*, void*, sVec2_B478*, const sVec2_B478*, const sVec2_B478*, const sVec4_B478*);
 };
 
-static inline void push_B478(sRenderCtx_B478* ctx)
+static inline void push_B478(cPS2GraphicsMan* ctx)
 {
-    ctx->top[1] = ctx->top[0];
-    ctx->top++;
+    ctx->m_pCurrentDrawState[1] = ctx->m_pCurrentDrawState[0];
+    ctx->m_pCurrentDrawState++;
 }
 
-static inline void pop_B478(sRenderCtx_B478* ctx)
+static inline void pop_B478(cPS2GraphicsMan* ctx)
 {
-    ctx->top--;
+    ctx->m_pCurrentDrawState--;
 }
 
 /**
@@ -712,16 +705,16 @@ extern "C" void cBoardSparkFX_render(cBoardSparkFX* self)
         cDynamicColourEmitter_render(gfx, 7);
     }
     if (*(int*)(((char*)self) + 0x70) != 0) {
-        push_B478((sRenderCtx_B478*)GrMan);
-        *(sRS_B478*)GrMan->m_pCurrentDrawState = *(sRS_B478*)(((char*)self) + 0x7C);
+        push_B478(GrMan);
+        *GrMan->m_pCurrentDrawState = *(sDrawState*)(((char*)self) + 0x7C);
         cPS2GraphicsMan* ctx = GrMan;
         sVE_B478a* vt = (sVE_B478a*)ctx->mVtbl;
         vt[82].fn((char*)ctx + vt[82].delta, *(int*)(((char*)self) + 0x28));
-        pop_B478((sRenderCtx_B478*)GrMan);
+        pop_B478(GrMan);
     }
     if (*(int*)(((char*)self) + 0x74) != 0) {
-        push_B478((sRenderCtx_B478*)GrMan);
-        *(sRS_B478*)GrMan->m_pCurrentDrawState = *(sRS_B478*)(((char*)self) + 0x90);
+        push_B478(GrMan);
+        *GrMan->m_pCurrentDrawState = *(sDrawState*)(((char*)self) + 0x90);
         if (D_004A54D8 == 0) {
             D_004A54D8 = 1;
             D_004A54D0 = 0.0f;
@@ -747,7 +740,7 @@ extern "C" void cBoardSparkFX_render(cBoardSparkFX* self)
             sVE_B478b* vt = (sVE_B478b*)ctx->mVtbl;
             vt[78].fn((char*)ctx + vt[78].delta, ((char*)self) + 0x30 + i * 0x10, &size, uv0, uv1, &D_004D57A0);
         }
-        pop_B478((sRenderCtx_B478*)GrMan);
+        pop_B478(GrMan);
     }
 }
 #endif

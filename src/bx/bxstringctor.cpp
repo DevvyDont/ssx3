@@ -2540,17 +2540,6 @@ extern "C" void cPath_populateEvent(void* self, char* src, int* dst);
 struct sVE0_26A180 { short delta; short index; void (*fn)(void*); };
 struct sVE1_26A180 { short delta; short index; void (*fn)(void*, char*, int, int); };
 
-struct sBXStr_26A180
-{
-    int count2;         // 0x0
-    char* items2;       // 0x4
-    int count1;         // 0x8
-    char vecA[0xC];     // 0xC
-    char* items1;       // 0x18
-    char vecB[0xC];     // 0x1C
-    char vecC[0xC];     // 0x28
-    void* vt;           // 0x34
-};
 
 /**
  * Initialises a path from its serialized data and returns how many bytes it read.
@@ -2565,14 +2554,14 @@ struct sBXStr_26A180
  * @param src  the serialized path data
  * @return the number of bytes read
  */
-extern "C" int cPath_initPath(sBXStr_26A180* self, char* src)
+extern "C" int cPath_initPath(cPath* self, char* src)
 {
     char* start = src;
     int n;
     int chunkId;
     int itemSize;
     int itemCount;
-    sVE0_26A180* vt0 = (sVE0_26A180*)self->vt;
+    sVE0_26A180* vt0 = (sVE0_26A180*)((void*)self->mVtbl);
     vt0[3].fn((char*)self + vt0[3].delta);
     pathREAD_tInt32_A180(&n, src);
     src += 4;
@@ -2582,32 +2571,32 @@ extern "C" int cPath_initPath(sBXStr_26A180* self, char* src)
         src += 4;
         pathREAD_tInt32_A180(&itemSize, src);
         src += 4;
-        sVE1_26A180* vt1 = (sVE1_26A180*)self->vt;
+        sVE1_26A180* vt1 = (sVE1_26A180*)((void*)self->mVtbl);
         vt1[4].fn((char*)self + vt1[4].delta, src, chunkId, itemSize);
         src += itemSize;
     }
     pathREAD_tInt32_A180(&itemCount, src);
     src += 4;
-    self->count1 = itemCount;
+    self->NumNodes = itemCount;
     pathREAD_tInt32_A180(&itemCount, src);
     src += 4;
-    self->count2 = itemCount;
-    pathREAD_t3Vector(self->vecA, src);
+    self->NumEvents = itemCount;
+    pathREAD_t3Vector(((char*)&self->Start[0]), src);
     src += 0xC;
-    pathREAD_t3Vector(self->vecB, src);
+    pathREAD_t3Vector(((char*)&self->MinBound[0]), src);
     src += 0xC;
-    pathREAD_t3Vector(self->vecC, src);
+    pathREAD_t3Vector(((char*)&self->MaxBound[0]), src);
     src += 0xC;
-    self->items1 = src;
-    for (int i = 0; i < self->count1; i++)
+    *(char**)&self->Nodes = src;
+    for (int i = 0; i < self->NumNodes; i++)
     {
-        cPath_populateNode(self, src, self->items1 + i * 16);
+        cPath_populateNode(self, src, ((char*)self->Nodes) + i * 16);
         src += 16;
     }
-    self->items2 = src;
-    for (int i = 0; i < self->count2; i++)
+    *(char**)&self->Events = src;
+    for (int i = 0; i < self->NumEvents; i++)
     {
-        cPath_populateEvent(self, src, (int*)(self->items2 + i * 16));
+        cPath_populateEvent(self, src, (int*)(((char*)self->Events) + i * 16));
         src += 16;
     }
     return src - start;
@@ -2688,12 +2677,6 @@ struct sBXPathSeg_A428 {
     float len;       // 0xC
 };
 
-struct sBXPath_A428 {
-    char pad_0x00[8];
-    int count;            // 0x8
-    float x, y, z;        // 0xC start
-    sBXPathSeg_A428* segs; // 0x18
-};
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline sBXVec4_A428 bxVu0Sub_A428(const sBXVec4_A428& a, const sBXVec4_A428& b)
@@ -2802,21 +2785,21 @@ static inline float bxClamp_A428(float v, float lo, float hi)
  * @param flat  non-zero to measure in X and Y only
  * @return the position along the path of the nearest point
  */
-extern "C" float cPath_intersectPath(sBXPath_A428* self, const sBXVec4_A428& cursor, sBXVec4_A428* outPos,
+extern "C" float cPath_intersectPath(cPath* self, const sBXVec4_A428& cursor, sBXVec4_A428* outPos,
                                float* outDist, int flat)
 {
     float bestT = 0.0f;
     float bestDist = 0.0f;
     float along = 0.0f;
     float best = 1e37f;
-    sBXVec4_A428 pos(self->x, self->y, self->z, 1.0f);
-    for (int i = 0; i < self->count; i++) {
+    sBXVec4_A428 pos(self->Start[0], self->Start[1], self->Start[2], 1.0f);
+    for (int i = 0; i < self->NumNodes; i++) {
         sBXVec4_A428 dir;
-        dir.x = self->segs[i].x;
-        dir.y = self->segs[i].y;
-        dir.z = self->segs[i].z;
+        dir.x = ((sBXPathSeg_A428*)self->Nodes)[i].x;
+        dir.y = ((sBXPathSeg_A428*)self->Nodes)[i].y;
+        dir.z = ((sBXPathSeg_A428*)self->Nodes)[i].z;
         dir.w = 0.0f;
-        float len = self->segs[i].len;
+        float len = ((sBXPathSeg_A428*)self->Nodes)[i].len;
         sBXVec4_A428 delta = bxVu0Sub_A428(cursor, pos);
         float projLen;
         if (flat)
@@ -2863,12 +2846,6 @@ struct sBXPathSeg_A638 {
     float len;       // 0xC
 };
 
-struct sBXPath_A638 {
-    char pad_0x00[8];
-    int count;            // 0x8
-    float x, y, z;        // 0xC start
-    sBXPathSeg_A638* segs; // 0x18
-};
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline sBXVec4_A638 bxVu0Sub_A638(const sBXVec4_A638& a, const sBXVec4_A638& b)
@@ -2986,7 +2963,7 @@ struct sBXPathCache_A638 {
  * @param flat  non-zero to measure in X and Y only
  * @return the position along the path of the nearest point
  */
-extern "C" float cPath_intersectPath1(sBXPath_A638* self, const sBXVec4_A638& cursor, sBXVec4_A638* outPos,
+extern "C" float cPath_intersectPath1(cPath* self, const sBXVec4_A638& cursor, sBXVec4_A638* outPos,
                                float* outDist, sBXPathCache_A638* cache, int flat)
 {
     float bestT = 0.0f;
@@ -3006,15 +2983,15 @@ extern "C" float cPath_intersectPath1(sBXPath_A638* self, const sBXVec4_A638& cu
         i = 0;
         along = 0.0f;
         limit = best;
-        pos = sBXVec4_A638(self->x, self->y, self->z, 1.0f);
+        pos = sBXVec4_A638(self->Start[0], self->Start[1], self->Start[2], 1.0f);
     }
-    for (; i < self->count; i++) {
+    for (; i < self->NumNodes; i++) {
         sBXVec4_A638 dir;
-        dir.x = self->segs[i].x;
-        dir.y = self->segs[i].y;
-        dir.z = self->segs[i].z;
+        dir.x = ((sBXPathSeg_A638*)self->Nodes)[i].x;
+        dir.y = ((sBXPathSeg_A638*)self->Nodes)[i].y;
+        dir.z = ((sBXPathSeg_A638*)self->Nodes)[i].z;
         dir.w = 0.0f;
-        float len = self->segs[i].len;
+        float len = ((sBXPathSeg_A638*)self->Nodes)[i].len;
         sBXVec4_A638 delta = bxVu0Sub_A638(cursor, pos);
         float projLen;
         if (flat)
@@ -3763,11 +3740,6 @@ struct sPathItem_B178 {
     char pad[0x3C];
 };
 
-struct sPathList_B178 {
-    char pad_0x0[0x10];
-    int count;                  // 0x10
-    sPathItem_B178* items;      // 0x14
-};
 
 extern "C" float cPath_getProximity(sBXBox* self, float* p);
 
@@ -3788,17 +3760,17 @@ static inline int minB178(int a, int b)
  * @param max  the most paths to return
  * @return the number of paths written
  */
-extern "C" int cPathSys_getNearTrackPaths(sPathList_B178* self, float* pos, sPathItem_B178** out, int max)
+extern "C" int cPathSys_getNearTrackPaths(cPathSys* self, float* pos, sPathItem_B178** out, int max)
 {
     float dist[52];
     int n = 0;
-    int want = minB178(self->count, max);
+    int want = minB178(self->NumTrackPaths, max);
     int i;
-    for (i = 0; i < self->count; i++) {
-        dist[i] = cPath_getProximity((sBXBox*)&self->items[i], pos);
+    for (i = 0; i < self->NumTrackPaths; i++) {
+        dist[i] = cPath_getProximity((sBXBox*)&((sPathItem_B178*)self->TrackPaths)[i], pos);
         if (dist[i] == 0.0f) {
             dist[i] = 1e37f;
-            out[n++] = &self->items[i];
+            out[n++] = &((sPathItem_B178*)self->TrackPaths)[i];
             if (n == want) {
                 break;
             }
@@ -3807,14 +3779,14 @@ extern "C" int cPathSys_getNearTrackPaths(sPathList_B178* self, float* pos, sPat
     while (n < want) {
         float best = dist[0];
         int bi = 0;
-        for (i = 1; i < self->count; i++) {
+        for (i = 1; i < self->NumTrackPaths; i++) {
             if (dist[i] < best) {
                 best = dist[i];
                 bi = i;
             }
         }
         dist[bi] = 1e37f;
-        out[n] = &self->items[bi];
+        out[n] = &((sPathItem_B178*)self->TrackPaths)[bi];
         n++;
     }
     return n;
