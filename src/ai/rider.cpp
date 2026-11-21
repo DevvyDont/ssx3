@@ -1,4 +1,6 @@
 #include "common.h"
+#include "main/gameviewman.h"
+#include "main/sectionman.h"
 #include "ai/player.h"
 #include "bx/math3d.h"
 #include "render/ps2graphicsman.h"
@@ -1422,7 +1424,7 @@ extern "C" void cRider_cleanupAfterPutAt(cRider* self, int notify)
     {
         char* sub = (char*)&self->mVtbl;
         sVEntryA_0011DF18* vtA = *(sVEntryA_0011DF18**)sub;
-        char* obj = *(char**)(*(char**)((char*)SSXApp->Game->ViewMan + 0x4) + 0xA0);
+        char* obj = *(char**)((char*)SSXApp->Game->ViewMan->PlayerCamera[0] + 0xA0);
         sVEntryB_0011DF18* vtB = *(sVEntryB_0011DF18**)(obj + 0x14);
         char* objB = obj + vtB[3].delta;
         vtB[3].fn(objB, vtA[kRiderVt_getAIIndex].fn(sub + vtA[kRiderVt_getAIIndex].delta));
@@ -4190,7 +4192,7 @@ extern "C" void cRider_renderBody(cRider* self)
         sVEntryF_122448* vt3 = (sVEntryF_122448*)grManReset->mVtbl;
         vt3[27].fn((char*)grManReset + vt3[27].delta, 0.0f, &D_004FF120_v122448);
     }
-    if (*(int*)((char*)SSXApp->Game->ViewMan + 0x14) == 0 || self->unk_B1C)
+    if ((int)SSXApp->Game->ViewMan->m_uiCurrentView == 0 || self->unk_B1C)
     {
         int* lowDetailFlag = &self->unk_B1C;
         int lowDetail = 0;
@@ -5055,7 +5057,7 @@ extern "C" void cRider_transport_v(cRider* self, char* mat)
     cRider_cancelRiderTransitions(self);
     char* sub = (char*)&self->mVtbl;
     sVEntry<int(void*)>* vtA = *(sVEntry<int(void*)>**)sub;
-    char* obj = *(char**)(*(char**)((char*)SSXApp->Game->ViewMan + 0x4) + 0xA0);
+    char* obj = *(char**)((char*)SSXApp->Game->ViewMan->PlayerCamera[0] + 0xA0);
     sVEntry<void(void*, int)>* vtB = *(sVEntry<void(void*, int)>**)(obj + 0x14);
     char* objB = obj + vtB[3].delta;
     vtB[3].fn(objB, vtA[kRiderVt_getAIIndex].fn(sub + vtA[kRiderVt_getAIIndex].delta));
@@ -5745,7 +5747,7 @@ extern "C" t4Vector cRider_GetNISEndPosition(cRider* self)
         }
         break;
     case 3:
-        switch (*(int*)((char*)SSXApp->Game->SectionMan + 0x1BC)) {
+        switch (SSXApp->Game->SectionMan->mBELocationID) {
         case 17:
         case 18:
         case 19:

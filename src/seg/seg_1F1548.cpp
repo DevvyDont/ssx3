@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/gameviewman.h"
 #include "bx/math3d.h"
 #include "visualfx/visualeffectsman.h"
 #include "visualfx/worldlightman.h"
@@ -301,7 +302,7 @@ extern "C" void cPS2VisualEffectsMan_update(cPS2VisualEffectsMan* self)
     ((cObj_0A98**)&self->m_RenderToggles)[14]->Reset();
     ((cObj_0A98**)&self->m_RenderToggles)[15]->Reset();
     ((cObj_0A98**)&self->m_RenderToggles)[16]->Reset();
-    for (int i = 0; i < *(int*)((char*)SSXApp->Game->ViewMan + 0x10); i++) {
+    for (int i = 0; i < (int)SSXApp->Game->ViewMan->m_uiNumView; i++) {
         cVisualEffectsMan_commonUpdate(self, (&D_004A3BA8)[i]); // PORT: D_004A3BA8 is an int array ($gp-addressed)
         ((cWorld_0A98*)GrMan)->UpdateFullScreenEffects(i);
     }
@@ -2800,7 +2801,7 @@ extern "C" void cSplashManager_render(sEmitter_3E28* self)
         return;
     if (D_004A4250 == 0)
         return;
-    if (self->idx != *(int*)((char*)SSXApp->Game->ViewMan + 0x14))
+    if (self->idx != (int)SSXApp->Game->ViewMan->m_uiCurrentView)
         return;
     if (cRenderStateMan_m_indoor) {
         self->Reset();

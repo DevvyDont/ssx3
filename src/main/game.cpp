@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/gameviewman.h"
 #include "sound/icepick/worldtriggermanager.h"
 #include "visualfx/fog.h"
 #include "sound/ssxaudio.h"
@@ -360,7 +361,7 @@ extern "C" void cGame_renderPatches(cGame* self, void* world)
     for (int i = 0; i < n; i++) {
         func_0022C410(ctx, items[i], 1);
     }
-    if (*(int*)((char*)self->ViewMan + 0x14) == 0) {
+    if ((int)self->ViewMan->m_uiCurrentView == 0) {
         void* obj = cBezierMan_TheBezierMan;
         sVEntry0022C620* vt = *(sVEntry0022C620**)((char*)obj + 4);
         vt[5].fn((char*)obj + vt[5].delta);

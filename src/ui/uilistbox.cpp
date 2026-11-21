@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiscreen.h"
 #include "ui/uithing.h"
 #include "ui/uilistbox.h"
 #include "ui/uimenu.h"
@@ -84,7 +85,7 @@ struct sUIStrVtA568 { short delta; short index; unsigned short* (*fn)(void*, int
  */
 extern "C" unsigned char cUIListBox_addEntryByStringID(cUIListBox* self, int id, int data)
 {
-    char* tbl = *(char**)(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x10);
+    char* tbl = *(char**)(*(char**)((char*)self->mpScreen->mpState + 0x10) + 0x10);
     if (tbl != 0) {
         sUIStrVtA568* vt = *(sUIStrVtA568**)(tbl + 4);
         unsigned short* str = vt[4].fn(tbl + vt[4].delta, id);
@@ -305,7 +306,7 @@ extern "C" void cUIListBox_setCallbackListBox(cUIListBox* self, int count)
     *(char*)&self->mNumEntries = count;
     *(char*)&self->mCurrentEntry = 0;
     *(int*)&self->mAttrListBox |= 0x10;
-    void* obj = *(void**)((char*)self->mpScreen + 0xD0);
+    void* obj = self->mpScreen->mpState;
     sVEntry39A8D8* vt = *(sVEntry39A8D8**)((char*)obj + 8);
     vt[19].fn((char*)obj + vt[0x13].delta, self, 9);
 }
@@ -370,7 +371,7 @@ extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
             cUIThing* selected = self->mpSelected;
             sVEntry39A928a* va = (sVEntry39A928a*)selected->mVtbl;
             va[7].fn(((char*)selected) + va[7].delta, 1);
-            char* owner = *(char**)((char*)self->mpScreen + 0xD0);
+            char* owner = (char*)self->mpScreen->mpState;
             sVEntry39A928b* vb = *(sVEntry39A928b**)(owner + 8);
             vb[19].fn(owner + vb[19].delta, self->mpSelected, 1);
         }
@@ -387,7 +388,7 @@ extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
             cUIThing* selected = self->mpSelected;
             sVEntry39A928a* va = (sVEntry39A928a*)selected->mVtbl;
             va[7].fn(((char*)selected) + va[7].delta, 0);
-            char* owner = *(char**)((char*)self->mpScreen + 0xD0);
+            char* owner = (char*)self->mpScreen->mpState;
             sVEntry39A928b* vb = *(sVEntry39A928b**)(owner + 8);
             vb[19].fn(owner + vb[19].delta, self->mpSelected, 2);
         }
@@ -463,7 +464,7 @@ extern "C" unsigned char cUIMenu_getNext(cUIMenu* self)
     do {
         if (i < self->mScrollItemNum) {
             if (*(int*)&self->mAttrMenu & 4) {
-                char* owner = *(char**)((char*)self->mpScreen + 0xD0);
+                char* owner = (char*)self->mpScreen->mpState;
                 sUIVtAB50* vt = *(sUIVtAB50**)(owner + 8);
                 if (vt[20].fn(owner + vt[20].delta, self, 1, i) != 0) return i;
             } else {
@@ -509,7 +510,7 @@ extern "C" unsigned char cUIMenu_getPrev(cUIMenu* self)
     do {
         if (i != 0xFF) {
             if (*(int*)&self->mAttrMenu & 4) {
-                char* mgr = *(char**)((char*)self->mpScreen + 0xD0);
+                char* mgr = (char*)self->mpScreen->mpState;
                 cUIMenu_getPrev_sVEntry* vt = *(cUIMenu_getPrev_sVEntry**)(mgr + 8);
                 if (vt[20].fn(mgr + vt[20].delta, self, 1, i)) {
                     return i;

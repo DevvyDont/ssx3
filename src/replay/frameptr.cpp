@@ -1,4 +1,6 @@
 #include "common.h"
+#include "main/gameviewman.h"
+#include "ui/uiengine.h"
 #include "camera/trigger/cameratriggerman.h"
 #include "replay/frameptr.h"
 #include "replay/replay.h"
@@ -575,7 +577,7 @@ extern "C" void cCamera_setCurrentController(void* self, int mode);
 extern "C" void cReplay_setupGameCamerasOnExitInstantReplay()
 {
     cCameraTriggerMan_setInGameTriggers(((void**)&gCamTriggerMan));
-    cCamera_setCurrentController(*(void**)((char*)SSXApp->Game->ViewMan + 0x4), 2);
+    cCamera_setCurrentController(SSXApp->Game->ViewMan->PlayerCamera[0], 2);
 }
 #endif
 
@@ -1337,7 +1339,7 @@ extern "C" int cReplay_updateInput_impl(void* self, int debug)
     char* replay = (char*)self;
     cSSXApp* app = SSXApp;
     sFpView_FB88* uiSound = (sFpView_FB88*)&gUISoundNull;
-    sFpView_FB88* cur = *(sFpView_FB88**)((char*)app->Game->UI + 0x14);
+    sFpView_FB88* cur = (sFpView_FB88*)app->Game->UI->mpSound;
     if (cur != 0) uiSound = cur;
     if (*(int*)(replay + 0x618) != 0) return 0;
     int command = 0;

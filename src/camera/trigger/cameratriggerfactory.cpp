@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/rider.h"
 #include "camera/cameraalgorithms.h"
 #include "camera/script/scriptcontroller.h"
 #include "camera/trigger/cameratriggeractions.h"
@@ -1834,7 +1835,7 @@ struct sVE173678b {
 extern "C" void* cTriggerAlgorithm_snapCurrent(cTriggerAlgorithm* self)
 {
     sVE173678b* vt = (sVE173678b*)self->mVtbl;
-    char* riderIface = (char*)self->Target->Rider + 0x6C0;
+    char* riderIface = (char*)&self->Target->Rider->mVtbl;
     sVE173678a* vt2 = *(sVE173678a**)riderIface;
     return vt[3].fn((char*)self + vt[3].delta, vt2[7].fn(riderIface + vt2[7].delta));
 }
@@ -2617,7 +2618,7 @@ extern "C" void cTriggerAlgorithm_snap(void* self, long a1);
 extern "C" void cBoundedAlgorithm_snap(cBoundedAlgorithm* self, long subjectId)
 {
     {
-        char* calleeObj = (char*)self->Target->Rider + 0x6C0;
+        char* calleeObj = (char*)&self->Target->Rider->mVtbl;
         sVEntry<long(void*)>* vEntry = &(*(sVEntry<long(void*)>**)calleeObj)[7];
         if (vEntry->fn(calleeObj + vEntry->delta) != subjectId)
             return;
@@ -2686,7 +2687,7 @@ struct sVE1747A0b {
 extern "C" void* cBoundedAlgorithm_snapCurrent(cBoundedAlgorithm* self)
 {
     sVE1747A0b* vt = (sVE1747A0b*)self->mVtbl;
-    char* riderIface = (char*)self->Target->Rider + 0x6C0;
+    char* riderIface = (char*)&self->Target->Rider->mVtbl;
     sVE1747A0a* vt2 = *(sVE1747A0a**)riderIface;
     return vt[3].fn((char*)self + vt[3].delta, vt2[7].fn(riderIface + vt2[7].delta));
 }
@@ -5006,7 +5007,7 @@ static inline sVec_00177EF8 ctGetB_00177EF8(void* self)
  */
 extern "C" sVec_00177EF8 cSPOKEChaseAlgorithm_getRiderPosition(cSPOKEChaseAlgorithm* self)
 {
-    char* riderIface = (char*)self->Target->Rider + 0x6C0;
+    char* riderIface = (char*)&self->Target->Rider->mVtbl;
     sVEa_00177EF8* posEntry = &(*(sVEa_00177EF8**)riderIface)[5];
     sVec_00177EF8* riderPos = posEntry->fn(riderIface + posEntry->delta);
     return ctAdd_00177EF8(ctScale_00177EF8(*riderPos, 0.19999998807907104f), ctScale_00177EF8(ctGetB_00177EF8(self), 0.800000011920929f));
@@ -6330,7 +6331,7 @@ struct sCamVEntryVoidA {
  */
 extern "C" void cPOST_RACE_1ChaseAlgorithm_snap(cPOST_RACE_1ChaseAlgorithm* self, int id)
 {
-    char* obj = (char*)self->Target->Rider + 0x6C0;
+    char* obj = (char*)&self->Target->Rider->mVtbl;
     sCamVEntryIntA* vt = *(sCamVEntryIntA**)obj;
     if (id == vt[7].fn(obj + vt[7].delta))
     {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/fereal.h"
 #include "bx/appman.h"
 #include "visualfx/boltonfx.h"
 #include "visualfx/ps2lensfx.h"
@@ -373,7 +374,7 @@ extern "C" void func_002ECCB8(cBoltOnFXInterface* vself)
             id = cRider_getIdentity(self->rider);
         }
     } else if (self->charId != 0) {
-        char* st = (char*)cUIStateStack_getCurrentState(*(char**)((char*)SSXApp->RealFE + 0xC) + 0x18);
+        char* st = (char*)cUIStateStack_getCurrentState((char*)SSXApp->RealFE->mpUI + 0x18);
         tbl = (char*)func_0014AD28(lib, *(signed char*)(st + 0x44), *self->charId);
         id = *self->charId;
     }

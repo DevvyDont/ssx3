@@ -1,4 +1,6 @@
 #include "common.h"
+#include "main/gameviewman.h"
+#include "ui/uiengine.h"
 #include "main/loadscreens.h"
 #include "main/gamestate.h"
 #include "replay/frameptr.h"
@@ -129,7 +131,7 @@ extern "C" void cFELoadScreen_load(cFELoadScreen* self)
         *(void**)(screen + 0x48) = ((void*)self);
         func_00233640(self, 2);
     }
-    cUIStateStack_push((char*)self->mpUI + 0x18, screen);
+    cUIStateStack_push(&self->mpUI->mStateStack, screen);
     self->SplashTexID = -1;
 }
 #endif
@@ -799,7 +801,7 @@ extern "C" void cGFFinishlineState_update(cGFFinishlineState* self)
             if (!ok) {
                 cOVStateManager_triggerFinishOverlay();
                 if (self->mSubState != 2) {
-                    cFEVObj_233CD8* finishOverlay = (cFEVObj_233CD8*)cUIStateStack_findState((char*)SSXApp->Game->UI + 0x18, GetHashValue32(str_finishov_b));
+                    cFEVObj_233CD8* finishOverlay = (cFEVObj_233CD8*)cUIStateStack_findState(&SSXApp->Game->UI->mStateStack, GetHashValue32(str_finishov_b));
                     if (finishOverlay != 0) {
                         finishOverlay->handleEvent(0, 0);
                     }
@@ -847,7 +849,7 @@ extern "C" void cGFFinishlineState_update(cGFFinishlineState* self)
         if (cSSXScriptEngine_GetNISListState(ScriptEngine, 0) == 1) {
             break;
         }
-        cFEVObj_233CD8* finishOverlay = (cFEVObj_233CD8*)cUIStateStack_findState((char*)SSXApp->Game->UI + 0x18, GetHashValue32(str_finishov_b));
+        cFEVObj_233CD8* finishOverlay = (cFEVObj_233CD8*)cUIStateStack_findState(&SSXApp->Game->UI->mStateStack, GetHashValue32(str_finishov_b));
         if (finishOverlay != 0) {
             finishOverlay->handleEvent(1, 0);
         }
@@ -888,7 +890,7 @@ void cSSXScriptEngine_DisallowNISListSkip(void* self, int val);
  */
 extern "C" void cGFFinishlineState_loseFocus(cGFFinishlineState* self)
 {
-    int n = *(int*)((char*)SSXApp->Game->ViewMan + 0x10);
+    int n = (int)SSXApp->Game->ViewMan->m_uiNumView;
     int i;
     for (i = 0; i < n; i++) {
         char* list = (char*)SSXApp->Game->ViewMan;

@@ -1,4 +1,6 @@
 #include "common.h"
+#include "main/gameviewman.h"
+#include "ui/uiengine.h"
 #include "bx/appman.h"
 #include "main/gamestate.h"
 #include "sound/icepick/worldtriggermanager.h"
@@ -318,7 +320,7 @@ extern "C" void cGame_load(cGame* self)
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cBENetworkInterface_networkOpt.bIsHost == 0) {
         char* secondPlayer = (char*)self->AI->Players[1];
         void* cam = secondPlayer != 0 ? *(void**)(secondPlayer + 0x18) : 0;
-        cCamera_switchChaseControllerTargetRider(*(void**)((char*)self->ViewMan + 0x4), cam);
+        cCamera_switchChaseControllerTargetRider(self->ViewMan->PlayerCamera[0], cam);
     }
     char* hud = (char*)cMenuSys_cMenuSys(operator new(104, str_MenuSys, 0, 0));
     self->MenuSys = (cMenuSys*)hud;
@@ -941,7 +943,7 @@ extern "C" void cGame_partialRestart(cGame* self)
     func_00229498(self->CrowdMan2d);
     func_00343BC0(self->CrowdMan3d);
     cMultiParticleMan_reset(self->MultiParticleMan);
-    void* list = (char*)self->UI + 0x18;
+    void* list = (char*)&self->UI->mStateStack;
     char* hudState = (char*)cUIStateStack_findState(list, GetHashValue32(str_hud_c));
     if (hudState != 0) {
         sVEntry_230180b* vt2 = *(sVEntry_230180b**)(hudState + 8);
@@ -1450,7 +1452,7 @@ static inline int updateState_2306B8(cGame* self)
             }
             if (e[1] == 9) {
                 cWScriptMan_doMissionCmd(((char*)self->WScriptMan), e[0], 5, e[2]);
-                if (cUIStateStack_findState(((char*)self->UI) + 0x18, GetHashValue32(str_90bc_fail_b)) == 0) {
+                if (cUIStateStack_findState(&self->UI->mStateStack, GetHashValue32(str_90bc_fail_b)) == 0) {
                     cOVStateManager_triggerOverlay(0x1E);
                     pushState_2306B8(3);
                     cUIEngine_update(((char*)self->UI));
@@ -1515,7 +1517,7 @@ static inline int updateState_2306B8(cGame* self)
  */
 extern "C" void cGame_update(cGame* self)
 {
-    if (*(unsigned int*)((char*)self->ViewMan + 0x10) >= 2) {
+    if (self->ViewMan->m_uiNumView >= 2) {
         cAppMan_TheAppMan->mLock30Fps = 1;
     } else {
         cAppMan_TheAppMan->mLock30Fps = cRenderStateMan_SkyBoxRotation(6) > 0.9f;

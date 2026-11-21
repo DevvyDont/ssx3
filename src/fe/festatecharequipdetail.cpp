@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fe/fereal.h"
+#include "ui/uimenu.h"
 #include "fe/uistatebuypopup.h"
 #include "fe/ferider.h"
 #include "fe/festatecharequip.h"
@@ -207,7 +209,7 @@ extern "C" void* cFEStateCharEquip_cFEStateCharEquip(cFEStateCharEquip* mem, cUI
         self->fA9C = Find_8DB8(mgr, GetHashValue32(str_empty_box));
     }
     self->fAA0 = 0;
-    cFERiderManager_setHumanCharacter((char*)SSXApp->RealFE + 0xB0, self->team, self->slot, 1);
+    cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->team, self->slot, 1);
     self->fC0 = cBEEconInterface_getMoney(cBE_getInterface(cBE_getBE(), 11), self->team, self->slot);
     void* shop = cBE_getInterface(cBE_getBE(), 9);
     func_0014AEA8(shop, self->team, self->slot);
@@ -239,7 +241,7 @@ extern "C" void* cFEStateCharEquip_cFEStateCharEquip(cFEStateCharEquip* mem, cUI
     }
     func_0019B180(self, D_004A11D0_c);
     char* name = func_0014B700(shop, self->slot);
-    self->fA64 = func_0019DA10((char*)SSXApp->RealFE + 0x1A70, self->slot, name, 9, 1, 0);
+    self->fA64 = func_0019DA10(SSXApp->RealFE->mBoltFileManager, self->slot, name, 9, 1, 0);
     return self;
 }
 #endif
@@ -327,7 +329,7 @@ extern "C" void cFEStateCharEquip_onCreateScreen(cFEStateCharEquip* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    char* feRider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum);
+    char* feRider = (char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
     *(int*)(feRider + 0xC2C) = 17;
     *(int*)(feRider + 0xCCC) = 0;
     int ok = *(unsigned int*)feRider < 10 && *(int*)(feRider + 0xCB8) != 0 && *(int*)(feRider + 0xCB4) != 0;
@@ -417,7 +419,7 @@ extern "C" void cFERider_setVisible(cFERider* rider, int a1);
  */
 extern "C" void cFEStateCharEquip_onLoseFocus(cFEStateCharEquip* self)
 {
-    cFERider_setVisible((cFERider*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum), 0);
+    cFERider_setVisible((cFERider*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum), 0);
 }
 #endif
 
@@ -659,7 +661,7 @@ extern "C" void cFEStateCharEquip_onPopupEvent(cFEStateCharEquip* self, cUIState
         if (widget->mHashName == 7 && ((cUIStateBuyPopup*)widget)->mbAccept != 0) {
             func_0019BE80(self);
             cFEStateCharEquip_updateBankWidget(self);
-            if (func_0019B458((sEquipDetail*)self, *(unsigned char*)((char*)self->mpMenu + 0x95))) {
+            if (func_0019B458((sEquipDetail*)self, self->mpMenu->mScrollItemCurrent)) {
                 func_0019B618(self, 0, 1);
             }
         }
@@ -710,7 +712,7 @@ extern "C" void cFEStateCharEquip_onUpdate(cFEStateCharEquip* self)
     void* screen = cList_first((cList*)(&self->mScreens));
     char* obj = (char*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_loading_text));
     if (obj != 0) {
-        char* feRider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum);
+        char* feRider = (char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
         int on = 0;
         int mode1 = self->mEquipMode == 1;
         if (mode1) {
@@ -968,7 +970,7 @@ extern "C" void cFEStateCharEquip_onWidgetEvent(cFEStateCharEquip* selfv, cUIThi
             func_0019B180(self, *(int*)((char*)stack + ((self->depth - 1) << 2)));
             func_0019B618((cFEStateCharEquip*)self, 1, 1);
         } else {
-            char* feRider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->team);
+            char* feRider = (char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->team);
             *(int*)(feRider + 0xC20) = 0;
             *(int*)(feRider + 0xC1C) = 1;
             char* obj = *(char**)self->menu;
@@ -1237,7 +1239,7 @@ extern "C" void cFEStateCharEquip_initInventoryPreview(cFEStateCharEquip* self)
         sVEntry0019A238* vt = *(sVEntry0019A238**)(widget + 8);
         vt[9].fn(widget + vt[9].delta, 1);
     }
-    cFERider_setVisible((cFERider*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum), 1);
+    cFERider_setVisible((cFERider*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum), 1);
     self->mCameraState = 1;
 }
 #endif
@@ -1277,7 +1279,7 @@ extern "C" void cFEStateCharEquip_initStorePreview(cFEStateCharEquip* self)
         sVEntry0019A308* vt = *(sVEntry0019A308**)(widget + 8);
         vt[9].fn(widget + vt[9].delta, 0);
     }
-    cFERider_setVisible((cFERider*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum), 0);
+    cFERider_setVisible((cFERider*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum), 0);
     widget = (char*)self->mpMoneyGroup;
     if (widget != 0) {
         sVEntry0019A308* vt = *(sVEntry0019A308**)(widget + 8);
@@ -1397,7 +1399,7 @@ extern "C" void cFEStateCharEquip_startLargePreviewLoad(cFEStateCharEquip* self,
     releaseK199148(self->mOldPreviewTextureID);
     self->mOldPreviewTextureID = self->mPreviewTextureID;
     self->mPreviewTextureID = -1;
-    int idx = *(unsigned char*)((char*)self->mpMenu + 0x95);
+    int idx = self->mpMenu->mScrollItemCurrent;
     if (idx < 0)
         return;
     if (idx >= self->mNumItems)
@@ -1457,12 +1459,12 @@ extern "C" void cFEStateCharEquip_updatePreviewLoad(cFEStateCharEquip* self)
         return;
     if (self->mLargePreviewDelay > 0) {
         if (--self->mLargePreviewDelay == 0) {
-            self->mPreviewTextureFileIndex = func_0019DA10((char*)SSXApp->RealFE + 0x1A70,
+            self->mPreviewTextureFileIndex = func_0019DA10(SSXApp->RealFE->mBoltFileManager,
                                                          self->mCharID, self->mLargePreviewFileName, 9, 1, 0);
             self->mLargePreviewDelay = -1;
         }
     } else if (self->mPreviewTextureFileIndex >= 0) {
-        char* tbl = (char*)SSXApp->RealFE + 0x1A70;
+        char* tbl = SSXApp->RealFE->mBoltFileManager;
         if (func_0019E238((sEquipTable*)tbl, self->mCharID, self->mPreviewTextureFileIndex)) {
             char* entry = (char*)func_0019E2B0((sEquipTable*)tbl, self->mCharID, self->mPreviewTextureFileIndex);
             if (entry != 0) {
@@ -1695,7 +1697,7 @@ extern "C" void func_0019AA08(cFEStateCharEquip* self)
     widget = (char*)self->mpPointsCost;
     if (widget != 0)
         showK19AA08(widget, 0);
-    int idx = *(unsigned char*)((char*)self->mpMenu + 0x95);
+    int idx = self->mpMenu->mScrollItemCurrent;
     int rowValue = 0;
     if (idx < self->mNumItems) {
         char* item = *(char**)((char*)self + (idx << 2) + 0x124);
@@ -1703,7 +1705,7 @@ extern "C" void func_0019AA08(cFEStateCharEquip* self)
         if (flags & 4) {
             if (!(flags & 0x20)) {
                 showK19AA08((char*)self->mpPointsGroup, 1);
-                int topIndex = *(unsigned char*)((char*)self->mpMenu + 0x98);
+                int topIndex = self->mpMenu->mScrollItemOffset;
                 char* iconWidget = (char*)self->mpSmallBoltIcon;
                 rowValue = *(int*)((char*)self + ((idx - topIndex) << 2) + 0xA78);
                 if (iconWidget != 0 && *(char**)(item + 0x30) != 0 && self->mIconsLoaded != 0) {
@@ -1795,7 +1797,7 @@ extern "C" void func_0019FBE0(void* rider, void* item, int a2, int a3);
  */
 extern "C" void func_0019ACA0(cFEStateCharEquip* self)
 {
-    void* rider = cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum);
+    void* rider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
     func_0019FBE0(rider, func_0014AD28(cBE_getInterface_Fv(cBE_getBE(), 9), self->mUserNum, self->mCharID), 0, 1);
 }
 #endif
@@ -2228,7 +2230,7 @@ extern "C" void func_0019B7E0(cFEStateCharEquip* self, int idx);
  */
 extern "C" int func_0019B518(cFEStateCharEquip* self)
 {
-    int j = *(unsigned char*)((char*)self->mpMenu + 0x98);
+    int j = self->mpMenu->mScrollItemOffset;
     int i = 0;
     while (i < 6 && j < self->mNumItems) {
         func_0019B7E0(self, i);
@@ -2251,7 +2253,7 @@ extern "C" void func_0019BA60(cFEStateCharEquip* self, int idx);
  */
 extern "C" int func_0019B598(cFEStateCharEquip* self)
 {
-    int j = *(unsigned char*)((char*)self->mpMenu + 0x98);
+    int j = self->mpMenu->mScrollItemOffset;
     int i = 0;
     while (i < 6 && j < self->mNumItems) {
         func_0019BA60(self, i);
@@ -2746,7 +2748,7 @@ extern "C" void* func_0014B560(void* iface, int a1, int a2, int a3, int a4);
  */
 extern "C" void func_0019BE80(cFEStateCharEquip* self)
 {
-    int idx = *(unsigned char*)((char*)self->mpMenu + 0x95);
+    int idx = self->mpMenu->mScrollItemCurrent;
     char* item = *(char**)((char*)self + (idx << 2) + 0x124);
     self->mMoneyAvailable = (int)func_0014B560(cBE_getInterface_Fv(cBE_getBE(), 9),
         self->mUserNum, self->mCharID, *(short*)(item + 4), 1);
@@ -2794,7 +2796,7 @@ extern "C" int func_0019BEE8(cFEStateCharEquip* self)
 {
     if (self->mNumItems <= 0)
         return 0;
-    char* item = *(char**)((char*)self + (*(unsigned char*)((char*)self->mpMenu + 0x95) << 2) + 0x124);
+    char* item = *(char**)((char*)self + (self->mpMenu->mScrollItemCurrent << 2) + 0x124);
     if (!(*(int*)(item + 0x34) & 4))
         return 0;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
@@ -2958,7 +2960,7 @@ static inline float VecDot_BFE8(const sQuat_BFE8& a, const sQuat_BFE8& b)
  */
 extern "C" void cFEStateCharEquip_update3DPositions(cFEStateCharEquip* vself)
 {
-    char* rider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, vself->mUserNum);
+    char* rider = (char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, vself->mUserNum);
     int ok = 0;
     if (*(unsigned int*)rider < 10 && *(int*)(rider + 0xCB8) != 0) {
         ok = *(int*)(rider + 0xCB4) != 0;

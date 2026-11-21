@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/fereal.h"
 #include "fe/festatelogin.h"
 #include "fe/festatetrophyroom.h"
 #include "ui/uithing.h"
@@ -418,7 +419,7 @@ struct sTrophyRoom_4918 {
 extern "C" void cFEStateTrophyRoom_loadTextures(cFEStateTrophyRoom* self)
 {
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 13);
-    void* snd = (char*)SSXApp->RealFE + 0x1A70;
+    void* snd = SSXApp->RealFE->mBoltFileManager;
     self->mTextureFileIndex[0] = func_0019DA10(snd, self->mCharID, *(int*)(cBERewardInterface_getTrophy(pi, self->mPeakNum, self->mTrophyType) + 4), 10, 1, 0);
     self->mNumLoadingFiles = 1;
     for (int i = 0; i < 4; i++) {
@@ -505,7 +506,7 @@ struct cGraphicsMan_4A20 {
 extern "C" void cFEStateTrophyRoom_updateTexturesLoad(cFEStateTrophyRoom* trophyRoom)
 {
     cFEStateTrophyRoom* self = trophyRoom;
-    char* mgr = (char*)SSXApp->RealFE + 0x1A70;
+    char* mgr = SSXApp->RealFE->mBoltFileManager;
     int i;
     for (i = 0; i < 5; i++) {
         if (self->mTextureFileIndex[i] >= 0 && func_0019E238(mgr, self->mCharID, self->mTextureFileIndex[i]) != 0) {
@@ -595,7 +596,7 @@ struct sSelf001D4B20 {
  */
 extern "C" void cFEStateTrophyRoom_purgeTextures(cFEStateTrophyRoom* self)
 {
-    char* mgr = (char*)SSXApp->RealFE + 0x1A70;
+    char* mgr = SSXApp->RealFE->mBoltFileManager;
     int i;
     for (i = 0; i < 5; i++) {
         if (self->mTextureIDs[i] >= 0) {

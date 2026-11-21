@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/scriptentitycam.h"
 #include "bx/math3d.h"
 #include "camera/script/scriptalgorithms.h"
 #include "camera/script/scriptcontroller.h"
@@ -117,7 +118,7 @@ extern char str_Algorithmic_Script_Camera_Algo[];
 extern "C" void cScriptCameraController_addCamera(cScriptCameraController* self, cScriptObjCamera* cam)
 {
     void* ctl;
-    switch (cScriptPlayerEntity_GetType(*(void**)((char*)cam->mpCameraEntity + 8)))
+    switch (cScriptPlayerEntity_GetType(cam->mpCameraEntity->mpEntity))
     {
     case 0:
         ctl = cScriptManualAlgorithm_cScriptManualAlgorithm((cScriptManualAlgorithm*)cMemMan_alloc(176, str_Manual_Script_Camera_Algo, 0x20000000, 0));
@@ -543,7 +544,7 @@ struct sFrameInfo_169570 {
 extern "C" void cScriptManualAlgorithm_update(cScriptManualAlgorithm* algorithm)
 {
     cScriptManualAlgorithm* self = algorithm;
-    char* cam = *(char**)((char*)algorithm->ScriptObj->mpCameraEntity + 0x8);
+    char* cam = (char*)algorithm->ScriptObj->mpCameraEntity->mpEntity;
     float* header = GetSSXCameraManualHeader(cam);
     char* baseTransform = (char*)&algorithm->ScriptObj->mBaseTransform;
     self->Near = header[0];
@@ -907,7 +908,7 @@ struct sFrameInfo_169DB0 {
 extern "C" void cScriptPointAlgorithm_update(cScriptPointAlgorithm* algorithm)
 {
     cScriptPointAlgorithm* self = algorithm;
-    char* cam = *(char**)((char*)algorithm->ScriptObj->mpCameraEntity + 0x8);
+    char* cam = (char*)algorithm->ScriptObj->mpCameraEntity->mpEntity;
     float* header = GetSSXCameraTargetHeader(cam);
     char* baseTransform = (char*)&algorithm->ScriptObj->mBaseTransform;
     self->Near = header[0];
@@ -1337,7 +1338,7 @@ struct sVEp_16A510 {
 extern "C" void cScriptTargetAlgorithm_update(cScriptTargetAlgorithm* algorithm)
 {
     cScriptTargetAlgorithm* self = algorithm;
-    char* cam = *(char**)((char*)algorithm->ScriptObj->mpCameraEntity + 0x8);
+    char* cam = (char*)algorithm->ScriptObj->mpCameraEntity->mpEntity;
     float* header = GetSSXCameraSubjectHeader(cam);
     char* baseTransform = (char*)&algorithm->ScriptObj->mBaseTransform;
     char* rider = cSSXScriptEngine_GetSubjectRider(ScriptEngine, ((signed char*)header)[0x22], *(int*)(cam + 8));
@@ -1750,7 +1751,7 @@ struct sVEp_16AD98 {
 extern "C" void cScriptRelativeAlgorithm_snap(cScriptRelativeAlgorithm* algorithm)
 {
     cScriptRelativeAlgorithm* self = algorithm;
-    char* cam = *(char**)((char*)algorithm->ScriptObj->mpCameraEntity + 0x8);
+    char* cam = (char*)algorithm->ScriptObj->mpCameraEntity->mpEntity;
     float* header = GetSSXCameraAlgorithmicHeader(cam);
     GetSSXCameraAlgorithmicFrame(cam, &(*(sFrameInfo_16AD98*)&self->FrameInfo));
     self->Near = header[0];
@@ -2018,7 +2019,7 @@ static inline float Length4_B180(const sVec4_B180& v)
 extern "C" void cScriptRelativeAlgorithm_update(cScriptRelativeAlgorithm* algorithm)
 {
     cScriptRelativeAlgorithm* self = algorithm;
-    char* cam = *(char**)((char*)algorithm->ScriptObj->mpCameraEntity + 0x8);
+    char* cam = (char*)algorithm->ScriptObj->mpCameraEntity->mpEntity;
     float* header = GetSSXCameraAlgorithmicHeader(cam);
     char* rider = cSSXScriptEngine_GetSubjectRider(ScriptEngine, ((signed char*)header)[0x1D], *(int*)(cam + 8));
     if (rider == 0) {

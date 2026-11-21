@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/worldcache.h"
 #include "wscript/wscriptmission.h"
 #include "be/beintnewrace.h"
 #include "be/beintnetwork.h"
@@ -3975,7 +3976,7 @@ extern "C" V3_05E8 LoseFocusFunc(int n, Ent_05E8 *params) {
     if (~id == 0) {
         obj = *(char**)(*(char**)&D_004A3DD8_05E8 + 0x290);
     } else {
-        char *tb = *(char**)((char*)cWorld_m_pTheWorld->m_pWorldCache + 8);
+        char *tb = (char*)cWorld_m_pTheWorld->m_pWorldCache->m_pSectionCacheTable;
         char *section = *(char**)(tb + (id & 0xFF) * 4);
         unsigned i;
         if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
@@ -5840,7 +5841,7 @@ extern "C" R12_2968 SetCurrentInstanceFunc(int n, Ent_2968* params) {
     }
     char* scriptMan = D_004A3DD8_2968;
     unsigned x = vp[0];
-    char** tbl = *(char***)((char*)cWorld_m_pTheWorld->m_pWorldCache + 8);
+    char** tbl = (char**)cWorld_m_pTheWorld->m_pWorldCache->m_pSectionCacheTable;
     char* section = tbl[x & 0xFF];
     unsigned w;
     int inst;

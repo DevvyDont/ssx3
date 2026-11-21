@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/fereal.h"
 #include "fe/festatetrophyroom.h"
 #include "ui/uigroup.h"
 #include "ui/uimenu.h"
@@ -154,7 +155,7 @@ extern "C" void cFEStateMountainRoom__cFEStateMountainRoom(cFEStateMountainRoom*
     self->mVtbl = cFEStateMountainRoom_vtbl;
     int slot = self->mTextureFileIndex;
     if (slot >= 0) {
-        func_0019DC20((char*)SSXApp->RealFE + 0x1A70, self->mCharID, slot);
+        func_0019DC20(SSXApp->RealFE->mBoltFileManager, self->mCharID, slot);
         self->mTextureFileIndex = -1;
     }
     int id = self->mFrontTextureID;
@@ -667,7 +668,7 @@ extern "C" void cFEStateMountainRoom_loadPeakPass(cFEStateMountainRoom* self)
     if (self->mTextureFileIndex < 0) {
         void* item = self->mpPeakPassInfo;
         if (item != 0) {
-            self->mTextureFileIndex = func_0019DA10((char*)SSXApp->RealFE + 0x1A70, self->mCharID, *(int*)((char*)item + 4), 10, 1, 0);
+            self->mTextureFileIndex = func_0019DA10(SSXApp->RealFE->mBoltFileManager, self->mCharID, *(int*)((char*)item + 4), 10, 1, 0);
         }
     }
 }
@@ -708,7 +709,7 @@ static inline int isActive_31C0(cUIGroup* w)
  */
 extern "C" void cFEStateMountainRoom_updateTextureLoad(cFEStateMountainRoom* vself)
 {
-    char* mgr = (char*)SSXApp->RealFE + 0x1A70;
+    char* mgr = SSXApp->RealFE->mBoltFileManager;
     if (vself->mpPassIcon == 0) {
         return;
     }

@@ -1,4 +1,6 @@
 #include "common.h"
+#include "animation/animmodel.h"
+#include "fe/fereal.h"
 #include "fe/feridermanager.h"
 #include "fe/ferider.h"
 #include "render/ps2graphicsman.h"
@@ -99,7 +101,7 @@ static inline sItemE7F0* getItemK19E7F0(sItemListE7F0* list, int i)
  */
 extern "C" void cFERider_queueLoadExtraTextures(int* self)
 {
-    char* mgr = (char*)SSXApp->RealFE + 0x1A70;
+    char* mgr = SSXApp->RealFE->mBoltFileManager;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     void* db = func_0014BDB8_noarg();
     sItemListE7F0* list = (sItemListE7F0*)func_0014AD28(iface, self[1], self[0]);
@@ -305,7 +307,7 @@ extern "C" void cFERider_cancelAllFiles(cFERider* rider)
     if (self[0] < 0)
         return;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
-    char* mgr = (char*)SSXApp->RealFE + 0x1A70;
+    char* mgr = SSXApp->RealFE->mBoltFileManager;
     sItemListEC68* list = (sItemListEC68*)func_0014AD28(iface, self[1], self[0]);
     int n = list->count;
     int i;
@@ -645,10 +647,10 @@ extern "C" void cFERider_updateModelPose(cFERider* self)
     } else {
         poses[0] = *(sHalfF2D0*)&self->mPose;
         poses[1] = *(sHalfF2D0*)&self->mBoardPose;
-        (*(sQuadF2D0**)((char*)self->mpAnimModel + 0x24))[self->mBoneMap[12]] = t4vect_Origin;
-        (*(sQuadF2D0**)((char*)self->mpAnimModel + 0x28))[self->mBoneMap[12]] = tquat_Identity;
-        (*(sQuadF2D0**)((char*)self->mpAnimModel + 0x24))[self->mBoneMap[13]] = t4vect_Origin;
-        (*(sQuadF2D0**)((char*)self->mpAnimModel + 0x28))[self->mBoneMap[13]] = tquat_Identity;
+        ((sQuadF2D0*)self->mpAnimModel->localPos)[self->mBoneMap[12]] = t4vect_Origin;
+        ((sQuadF2D0*)self->mpAnimModel->localRot)[self->mBoneMap[12]] = tquat_Identity;
+        ((sQuadF2D0*)self->mpAnimModel->localPos)[self->mBoneMap[13]] = t4vect_Origin;
+        ((sQuadF2D0*)self->mpAnimModel->localRot)[self->mBoneMap[13]] = tquat_Identity;
         cAnimModel_transform(self->mpAnimModel, poses);
         cAnimModel_buildSkelMatrices(self->mpAnimModel);
     }
@@ -948,7 +950,7 @@ INCLUDE_ASM("fe/feridermanager", cFERider_getBonePosition);
  * @return the address of the bone's position (first quadword)
  */
 extern "C" int cFERider_getBonePosition(cFERider* riderSlot, int index) {
-    return (*(int *)((char*)((riderSlot->mpAnimModel)) + (0x2C))) + ((*(int *)(((char*)(riderSlot) + (index << 2)) + (0xC7C))) << 5);
+    return ((int)riderSlot->mpAnimModel->bones) + ((*(int *)(((char*)(riderSlot) + (index << 2)) + (0xC7C))) << 5);
 }
 #endif
 //100%
@@ -988,7 +990,7 @@ INCLUDE_ASM("fe/feridermanager", cFERider_getBoneQuaternion);
  * @return the address of the bone's quaternion
  */
 extern "C" int cFERider_getBoneQuaternion(cFERider* riderSlot, int index) {
-    return (*(int *)((char*)((riderSlot->mpAnimModel)) + (0x2C))) + ((*(int *)(((char*)(riderSlot) + (index << 2)) + (0xC7C))) << 5) + 0x10;
+    return ((int)riderSlot->mpAnimModel->bones) + ((*(int *)(((char*)(riderSlot) + (index << 2)) + (0xC7C))) << 5) + 0x10;
 }
 #endif
 //100%
@@ -1273,7 +1275,7 @@ extern "C" void func_0019FA78(int* self, sItemListFA78* list)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     void* db = func_0014BDB8_noarg();
-    char* mgr = (char*)SSXApp->RealFE + 0x1A70;
+    char* mgr = SSXApp->RealFE->mBoltFileManager;
     if (self[1] < 0)
         return;
     if (self[0] < 0)
@@ -1360,7 +1362,7 @@ extern "C" void func_0019FBE0(int* self, sItemListFBE0* list, int ignored, int k
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     void* db = func_0014BDB8_noarg();
-    char* mgr = (char*)SSXApp->RealFE + 0x1A70;
+    char* mgr = SSXApp->RealFE->mBoltFileManager;
     func_0019FA78(self, (sItemListFA78*)list);
     *(int*)((char*)self + 0xCB8) = 0;
     *(int*)((char*)self + 0xCC0) = 0;
@@ -1426,7 +1428,7 @@ extern "C" int func_0019FD58(int* self)
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     sItemListFD58* list = (sItemListFD58*)func_0014AD28(iface, self[1], self[0]);
     int n = list->count;
-    char* mgr = (char*)SSXApp->RealFE + 0x1A70;
+    char* mgr = SSXApp->RealFE->mBoltFileManager;
     for (int i = 0; i < n; i++) {
         sItemFD58* it = &list->items[i];
         int fileSlot = func_0019CCE8(D_004A1968, self[1], it->id);
@@ -1514,7 +1516,7 @@ extern "C" void func_0019FF00(int* self, sItemListFF00* list, sItemFF00* prev, i
 {
     int n = list->count;
     sBoneDbFF00* db = (sBoneDbFF00*)func_0014BDB8_noarg();
-    char* mgr = (char*)SSXApp->RealFE + 0x1A70;
+    char* mgr = SSXApp->RealFE->mBoltFileManager;
     for (int i = 0; i < n; i++) {
         sItemFF00* it = &list->items[i];
         if (force == 0 && (it->flags & 0x10) == 0) {
@@ -1629,7 +1631,7 @@ extern "C" int func_001A0100(int* self)
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     sItemList_A0100* list = (sItemList_A0100*)func_0014AD28(iface, self[1], self[0]);
     int n = list->count;
-    char* mgr = (char*)SSXApp->RealFE + 0x1A70;
+    char* mgr = SSXApp->RealFE->mBoltFileManager;
     for (int i = 0; i < n; i++) {
         sItem_A0100* it = &list->items[i];
         int fileSlot = func_0019CBE0(D_004A1968, self[1], it->id);

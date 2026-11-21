@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiscreen.h"
 #include "ui/uiinput.h"
 #include "ui/uithing.h"
 #include "ui/uiprogress.h"
@@ -49,12 +50,12 @@ extern "C" void cUIMenu_setSelected(cUIMenu* self, cUIThing* item, int play)
         cUIThing* oldSelected = self->mpSelected;
         cUIMenu_sVEntryA* va = (cUIMenu_sVEntryA*)oldSelected->mVtbl;
         va[7].fn(((char*)oldSelected) + va[7].delta, 0);
-        char* screenState = *(char**)((char*)self->mpScreen + 0xD0);
+        char* screenState = (char*)self->mpScreen->mpState;
         cUIMenu_sVEntryB* vb = *(cUIMenu_sVEntryB**)(screenState + 8);
         vb[19].fn(screenState + vb[19].delta, self->mpSelected, 2);
     }
     self->mpSelected = (cUIThing*)item;
-    char* selState = *(char**)((char*)self->mpScreen + 0xD0);
+    char* selState = (char*)self->mpScreen->mpState;
     cUIMenu_sVEntryB* vb2 = *(cUIMenu_sVEntryB**)(selState + 8);
     vb2[19].fn(selState + vb2[19].delta, ((char*)item), 1);
     cUIThing* newSelected = self->mpSelected;
@@ -435,7 +436,7 @@ extern "C" unsigned char cUIMenu_findFirstHighlightable(cUIMenu* self, unsigned 
     for (; i < self->mScrollItemNum; i++) {
         void* item = cList_getByIndex((char*)&self->mList, i);
         if (*(int*)&self->mAttrMenu & 4) {
-            char* mgr = *(char**)((char*)self->mpScreen + 0xD0);
+            char* mgr = (char*)self->mpScreen->mpState;
             cUIMenu_findFirstHighlightable_sVEntry* vt = *(cUIMenu_findFirstHighlightable_sVEntry**)(mgr + 8);
             if (vt[20].fn(mgr + vt[20].delta, self, 1, i)) {
                 return i;
@@ -481,7 +482,7 @@ extern "C" unsigned char cUIMenu_reverseFindFirstHighlightable(cUIMenu* self, un
     for (; i >= 0; i--) {
         item = (char*)cList_getByIndex_i(&self->mList, i);
         if (*(int*)&self->mAttrMenu & 4) {
-            obj = *(char**)((char*)self->mpScreen + 0xD0);
+            obj = (char*)self->mpScreen->mpState;
             vtbl = *(char**)(obj + 8);
             if ((*(int (**)(void*, void*, int, int))(vtbl + 0xA4))(obj + *(short*)(vtbl + 0xA0), ((char*)self), 1, i)) {
                 return i;
@@ -516,7 +517,7 @@ static inline void cUIMenu_notify(char* self, int ev, unsigned char v)
  */
 extern "C" void cUIMenu_setSelectedByIndex(cUIMenu* self, unsigned char idx)
 {
-    if (((self->mAttr >> 4) & 1) == 0 || ((*(int*)(*(char**)((char*)self->mpScreen + 0xD0) + 0x1C) >> 5) & 1) == 0) {
+    if (((self->mAttr >> 4) & 1) == 0 || ((*(int*)((char*)self->mpScreen->mpState + 0x1C) >> 5) & 1) == 0) {
         self->mStoredIndex = idx;
         return;
     }
@@ -683,7 +684,7 @@ extern "C" void cUIPair_setFocus(cUIPair* self, int on)
         cUIThing* widgetObj = self->mpWidget;
         cUIPair_setFocus_sVEntryA* vc = (cUIPair_setFocus_sVEntryA*)widgetObj->mVtbl;
         vc[7].fn(((char*)widgetObj) + vc[7].delta, 1);
-        char* screenState = *(char**)((char*)self->mpScreen + 0xD0);
+        char* screenState = (char*)self->mpScreen->mpState;
         cUIPair_setFocus_sVEntryB* vo = *(cUIPair_setFocus_sVEntryB**)(screenState + 8);
         vo[19].fn(screenState + vo[19].delta, self->mpWidget, 1);
     } else {
@@ -697,7 +698,7 @@ extern "C" void cUIPair_setFocus(cUIPair* self, int on)
         cUIThing* widgetObj = self->mpWidget;
         cUIPair_setFocus_sVEntryA* vc = (cUIPair_setFocus_sVEntryA*)widgetObj->mVtbl;
         vc[7].fn(((char*)widgetObj) + vc[7].delta, 0);
-        char* screenState = *(char**)((char*)self->mpScreen + 0xD0);
+        char* screenState = (char*)self->mpScreen->mpState;
         cUIPair_setFocus_sVEntryB* vo = *(cUIPair_setFocus_sVEntryB**)(screenState + 8);
         vo[19].fn(screenState + vo[19].delta, self->mpWidget, 2);
     }

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiengine.h"
 #include "scripter/datamanager.h"
 #include "scripter/nislist.h"
 #include "inseq/scriptplayermain.h"
@@ -854,7 +855,7 @@ int tNISList_Play_impl(char* self, int fade, int notify)
     }
     sDmItem_6388* item = (sDmItem_6388*)cCircularBuffer_operatorIndex(self + 0xC, 0);
     dm->state = 3;
-    char* table = (char*)SSXApp->Game->UI + 0x18;
+    char* table = (char*)&SSXApp->Game->UI->mStateStack;
     char* hudState = (char*)cUIStateStack_findState(table, GetHashValue32(str_hud_e));
     if (hudState != 0) {
         sDmVEntry_6388* vtEntry = &(*(sDmVEntry_6388**)(hudState + 0x8))[24];
@@ -1084,7 +1085,7 @@ extern "C" void tNISList_Reset(tNISList* nisList, int resetTransition)
                 cTransitionMan_EndTransition(cGame_getTransitionMan(SSXApp->Game, 0));
             }
         }
-        char* table = (char*)SSXApp->Game->UI + 0x18;
+        char* table = (char*)&SSXApp->Game->UI->mStateStack;
         char* hudState = (char*)cUIStateStack_findState(table, GetHashValue32(str_hud_e));
         if (hudState != 0) {
             sDmVEntry6868* vtEntry = &(*(sDmVEntry6868**)(hudState + 0x8))[24];

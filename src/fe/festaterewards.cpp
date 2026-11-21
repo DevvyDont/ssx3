@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/fereal.h"
 #include "fe/uistatebuypopup.h"
 #include "ui/uithing.h"
 #include "fe/festatevideoplayer.h"
@@ -693,7 +694,7 @@ struct sVE_FE60 {
  */
 extern "C" void cFEStateRewardGalleryBase_loadIcons(cFEStateRewardGalleryBase* self)
 {
-    char* mgr = (char*)SSXApp->RealFE + 0x1A70;
+    char* mgr = SSXApp->RealFE->mBoltFileManager;
     sVE_FE60* vt = (sVE_FE60*)self->mVtbl;
     if (vt[25].fn((char*)self + vt[25].delta) != 0) {
         sVE_FE60* fileNameEntry = &((sVE_FE60*)self->mVtbl)[25];
@@ -737,7 +738,7 @@ struct sVE_FF10i {
 extern "C" void cFEStateRewardGalleryBase_updateIconsLoad(cFEStateRewardGalleryBase* self)
 {
     if (((self->mLoadingState >> 3) & 1) == 0) {
-        char* mgr = (char*)SSXApp->RealFE + 0x1A70;
+        char* mgr = SSXApp->RealFE->mBoltFileManager;
         if (func_0019E238(mgr, self->mCharID, self->mIconsFileIndex) != 0) {
             cFEStateRewardGalleryBase_allocIcons(self, func_0019E2B0(mgr, self->mCharID, self->mIconsFileIndex));
             func_0019DC20(mgr, self->mCharID, self->mIconsFileIndex);
@@ -942,7 +943,7 @@ extern "C" void cFEStateRewardGalleryBase_purgeIcons(sSelf001D00C0* self)
     }
     int iconSlot = *(int*)((char*)self + 0x8EC);
     if (iconSlot >= 0) {
-        func_0019DC20((char*)SSXApp->RealFE + 0x1A70, *(int*)((char*)self + 0x50), iconSlot);
+        func_0019DC20(SSXApp->RealFE->mBoltFileManager, *(int*)((char*)self + 0x50), iconSlot);
         *(int*)((char*)self + 0x8EC) = -1;
     }
     *(int*)((char*)self + 0x48) &= ~8;
@@ -2620,7 +2621,7 @@ extern "C" void cFEStatePreviewReward__cFEStatePreviewReward(cFEStatePreviewRewa
     }
     int slot = self->mTextureFileIndex;
     if (slot >= 0) {
-        func_0019DC20((char*)SSXApp->RealFE + 0x1A70, self->mCharID, slot);
+        func_0019DC20(SSXApp->RealFE->mBoltFileManager, self->mCharID, slot);
     }
     self->mTextureFileIndex = -1;
     self->mTextureID = -1;
@@ -2974,7 +2975,7 @@ extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a
  */
 extern "C" void cFEStatePreviewReward_loadTexture(cFEStatePreviewReward* self, int id)
 {
-    self->mTextureFileIndex = func_0019DA10((char*)SSXApp->RealFE + 0x1A70, self->mCharID, id, 9, 1, 0);
+    self->mTextureFileIndex = func_0019DA10(SSXApp->RealFE->mBoltFileManager, self->mCharID, id, 9, 1, 0);
 }
 #endif
 
@@ -3015,7 +3016,7 @@ struct sVEK1D2198 {
  */
 extern "C" void cFEStatePreviewReward_updateTextureLoad(cFEStatePreviewReward* self)
 {
-    char* mgr = (char*)SSXApp->RealFE + 0x1A70;
+    char* mgr = SSXApp->RealFE->mBoltFileManager;
     if (func_0019E238(mgr, self->mCharID, self->mTextureFileIndex) == 0)
         return;
     sData001CFFF8* data = func_0019E2B0(mgr, self->mCharID, self->mTextureFileIndex);

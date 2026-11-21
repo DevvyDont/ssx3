@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/gameviewman.h"
 #include "bx/appman.h"
 #include "main/fadescreen.h"
 #include "main/gamemodehandler.h"
@@ -1838,7 +1839,7 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getNumGameView);
  * @return the view count
  */
 extern "C" int cGame_getNumGameView(cGame* game) {
-    return (*(int *)((char*)((game->ViewMan)) + (0x10)));
+    return ((int)game->ViewMan->m_uiNumView);
 }
 #endif
 //100%
@@ -1864,7 +1865,7 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getCurrentRenderViewNum);
  * @return the current render view number
  */
 extern "C" int cGame_getCurrentRenderViewNum(cGame* game) {
-    return (*(int *)((char*)((game->ViewMan)) + (0x14)));
+    return ((int)game->ViewMan->m_uiCurrentView);
 }
 #endif
 

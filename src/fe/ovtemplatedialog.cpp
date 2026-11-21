@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiengine.h"
 #include "ui/uithing.h"
 #include "be/beintnewrace.h"
 #include "fe/ovtemplatedialog.h"
@@ -1304,7 +1305,7 @@ extern char str_64replay[];
  */
 extern "C" int func_0020CB58(void)
 {
-    char* stack = (char*)SSXApp->Game->UI + 0x18;
+    char* stack = (char*)&SSXApp->Game->UI->mStateStack;
     return cUIStateStack_findState(stack, GetHashValue32(str_64replay)) != 0;
 }
 #endif
@@ -1326,7 +1327,7 @@ extern char str_cOVTemplate_PauseMenu[];
  */
 extern "C" int cOVStateManager_pauseOverlayActive(void)
 {
-    char* stack = (char*)SSXApp->Game->UI + 0x18;
+    char* stack = (char*)&SSXApp->Game->UI->mStateStack;
     return cUIStateStack_findState(stack, GetHashValue32(str_cOVTemplate_PauseMenu)) != 0;
 }
 #endif
@@ -1453,7 +1454,7 @@ extern int cOVStateManager_mIsPauseDialog;
 extern "C" void cOVStateManager_gotoNextOverlay(void)
 {
     cOVStateManager_mStatus = 0;
-    char* st = (char*)cUIStateStack_getCurrentState(((char*)((SSXApp)->Game)->UI) + 0x18);
+    char* st = (char*)cUIStateStack_getCurrentState(&((SSXApp)->Game)->UI->mStateStack);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int kind = cBENewRaceInterface_newRace.cGameEvent;
     int type = *(int*)SSXApp->GameModeMan;
@@ -1595,7 +1596,7 @@ extern "C" void cOVStateManager_update(void)
     case 3:
         cOVStateManager_mStatus = 0;
         cOVStateManager_removePDATemplate();
-        cUIStateStack_purgeNormalStates(((char*)((SSXApp)->Game)->UI) + 0x18);
+        cUIStateStack_purgeNormalStates(&((SSXApp)->Game)->UI->mStateStack);
         break;
     case 4:
         cOVStateManager_mStatus = 0;
@@ -2099,7 +2100,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUITh
             break;
         case 1:
             if (self->mDialogType != 6) {
-                cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
+                cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
             } else {
                 ((sSelf_D5A8*)self)->f54 = 1;
                 cGame_exit(SSXApp->Game, 0);
@@ -2110,7 +2111,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUITh
     case 6:
         if (self->mDialogType != ev) {
             Play_20D5A8(((char*)self));
-            cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
+            cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
         }
         break;
     }
@@ -2148,7 +2149,7 @@ extern "C" void cOVState_QUIT_onUpdate(cOVTemplate_Dialog* self)
             if (frame != 0xFFFF) {
                 cUIScreen_playFrame(self->mpScreen, frame, 1);
             }
-            cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
+            cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
         }
     }
 }

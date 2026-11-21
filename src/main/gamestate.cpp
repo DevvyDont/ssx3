@@ -1,4 +1,6 @@
 #include "common.h"
+#include "main/gameviewman.h"
+#include "main/sectionman.h"
 #include "main/inputsync.h"
 #include "main/gamestate.h"
 #include "replay/frameptr.h"
@@ -367,7 +369,7 @@ extern "C" void cGFTrackStartState_preloadInit(cGFTrackStartState* self)
     cAI_prepareToPurgeComputerRiders(*(void**)(cGameState_mpGame + 0xC));
     cAI_prepareToPurgeComputerActors(*(void**)(cGameState_mpGame + 0xC));
     if (gamePath == 0) {
-        int locationId = *(int*)((char*)SSXApp->Game->SectionMan + 0x1BC);
+        int locationId = SSXApp->Game->SectionMan->mBELocationID;
         if (locationId >= 14 && locationId <= 16) {
             void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
             char* sub = *(char**)(*(char**)(*(char**)(cGameState_mpGame + 0xC) + 0x40) + 0x18) + 0x6C0;
@@ -731,7 +733,7 @@ extern "C" void cGFTrackStartState_gainFocus(cGFTrackStartState* self)
     cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
     int flag = beRaceDB->cGamePath;
     int mode = beRaceDB->cGameMode;
-    if (flag == 0 && !inRange_2355C0(*(int*)((char*)SSXApp->Game->SectionMan + 0x1BC))) {
+    if (flag == 0 && !inRange_2355C0(SSXApp->Game->SectionMan->mBELocationID)) {
         self->mStartupFlag = 0;
         self->mNextState = 4;
     } else {
@@ -784,7 +786,7 @@ extern "C" void cGameState_gotoNextState(void* self);
 extern "C" void cGFTrackStartState_update(cGFTrackStartState* self)
 {
     if (self->mCheckTransportEnd != 0 && cSSXScriptEngine_IsInTransportSequence(ScriptEngine) == 0) {
-        *(int*)((char*)SSXApp->Game->SectionMan + 0x1A4) = 1;
+        SSXApp->Game->SectionMan->m_bTriggerSkySwap = 1;
         self->mCheckTransportEnd = 0;
     }
     if (cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 1) == 0) {
@@ -1075,7 +1077,7 @@ extern "C" void cGFNextHeatState_update(cGFNextHeatState* self)
     cGame* game = SSXApp->Game;
     int state = self->CurrentNextHeatState;
     char** cache = (char**)game->World;
-    int idx = *(int*)(*(char**)((char*)game->ViewMan + 4) + 0xB0) == 0;
+    int idx = *(int*)((char*)game->ViewMan->PlayerCamera[0] + 0xB0) == 0;
     switch (state) {
     case 0:
         if (cAI_isReadyToPurgeComputerRiders(game->AI)) {
@@ -1749,7 +1751,7 @@ extern "C" void cGFSectionLoadState_update(cGFSectionLoadState* self)
     }
     int state = self->mSubState;
     char** cache = (char**)appGame->World;
-    int idx = *(int*)(*(char**)((char*)appGame->ViewMan + 4) + 0xB0) == 0;
+    int idx = *(int*)((char*)appGame->ViewMan->PlayerCamera[0] + 0xB0) == 0;
     switch (state) {
     case 0:
         if (cSectionMan_isLoaded(sectionMan, *(int*)(sectionMan + 0x1BC)) != 0) {

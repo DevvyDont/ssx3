@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/fereal.h"
 #include "fe/festatecharsetup.h"
 #include "ui/uistate.h"
 #include "ui/uiinput.h"
@@ -49,7 +50,7 @@ extern "C" void cFEStateCharSelect_onCreateScreen(cFEStateCharSelect* self)
     lookAt.w = 1.0f;
     cSimpleCamera_setupCamWithPosAndTarget((char*)cam + 0x10, &pos, &lookAt);
     cam->fov = 0.4363323450088501f;
-    cFERider_setVisible(cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum), 0);
+    cFERider_setVisible(cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum), 0);
     self->mbDraw3D = 1;
     self->mPan = -1.0f;
     *(int*)&self->mZoom = 0;
@@ -150,8 +151,8 @@ extern "C" void cFEStateCharSelect_onGainFocus(cFEStateCharSelect* self, int pPr
             break;
         }
     }
-    cFERiderManager_setHumanCharacter((char*)SSXApp->RealFE + 0xB0, self->mUserNum, D_00440F68[0], 0);
-    char* feRider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum);
+    cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->mUserNum, D_00440F68[0], 0);
+    char* feRider = (char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
     *(int*)(feRider + 0xCCC) = 0;
     cFEStateCharSelect_updateCharacter3DPos(self);
     cUIState_onGainFocus(self, pPrevState);
@@ -433,7 +434,7 @@ public:
 
 static inline char* riderSlot_17E8(cFEStateCharSelect* self)
 {
-    return (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum);
+    return (char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
 }
 
 static inline void refresh_17E8(sIface_17E8* iface)
@@ -643,7 +644,7 @@ extern "C" void cFEStateCharSelect_updateWidget_impl(void* self, signed char rid
     char* ob = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(ovr));
     *(int*)(ob + 0x80) = 55;
     cUIProgress_setValue(ob, total / 7);
-    cFERiderManager_setHumanCharacter((char*)SSXApp->RealFE + 0xB0, rider, charID, 0);
+    cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, rider, charID, 0);
 }
 #endif
 
@@ -717,7 +718,7 @@ static inline sQuat_181EF0 AxisAngle_181EF0(const sQuat_181EF0& axis, float angl
  */
 extern "C" void cFEStateCharSelect_updateCharacter3DPos(cFEStateCharSelect* vself)
 {
-    char* rider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, vself->mUserNum);
+    char* rider = (char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, vself->mUserNum);
     int ok = 0;
     if (*(unsigned int*)rider < 10 && *(int*)(rider + 0xCB8) != 0) {
         ok = *(int*)(rider + 0xCB4) != 0;

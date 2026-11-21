@@ -1,4 +1,8 @@
 #include "common.h"
+#include "main/gameviewman.h"
+#include "scripter/scriptentitycam.h"
+#include "ui/uiengine.h"
+#include "world/worldcache.h"
 #include "scripter/scriptobjgs.h"
 #include "scripter/scriptobjevent.h"
 #include "scripter/scriptobjrider.h"
@@ -311,7 +315,7 @@ extern "C" void cSSXScriptEngine_Update(sSse8720* self)
     done:
         if (tNISList_GetState_i(nisList) != 3)
             cSSXScriptEngine_ClearNISPlayListState((cSSXScriptEngine*)self);
-        if (cUIStateStack_findState((char*)SSXApp->Game->UI + 0x18, GetHashValue32(str_hud_e)))
+        if (cUIStateStack_findState(&SSXApp->Game->UI->mStateStack, GetHashValue32(str_hud_e)))
         {
             if (tNISList_IsPausedPendingNextScript(nisList))
                 cBXLoadIndicator_Show(SSXApp->Game->LoadIndicator, 1);
@@ -2557,7 +2561,7 @@ extern "C" void cSSXScriptEngine_AppendEndEventSequence(cSSXScriptEngine* self)
         return;
     }
     cGame* x = SSXApp->Game;
-    if (*(int*)((char*)x->ViewMan + 0x10) != 1) {
+    if ((int)x->ViewMan->m_uiNumView != 1) {
         return;
     }
     int found = 0;
@@ -3316,7 +3320,7 @@ extern "C" void cSSXScriptEngine_FillOrientationFromObjectOrientationInfo(cSSXSc
     unsigned int code = tbl[slot];
     if (~code == 0)
         return;
-    char* model = ((char**)*(char**)((char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[code & 0xFF];
+    char* model = ((char**)(char*)cWorld_m_pTheWorld->m_pWorldCache->m_pSectionCacheTable)[code & 0xFF];
     char* bone = Bone_27BB08(model, code);
     *pos = sVec_27BB08(*(float*)(bone + 0x40), *(float*)(bone + 0x44), *(float*)(bone + 0x48), 1.0f);
     *yaw = Atan2_27BB08(*(float*)(bone + 0x14), *(float*)(bone + 0x10));
@@ -5006,7 +5010,7 @@ extern "C" int cScriptObjCamera_IsInUseByPlayer(cScriptObjCamera* self, int val)
     if (self->mpCameraEntity == 0) {
         return 0;
     }
-    return cScriptDatabaseObject_IsEntityInUseByPlayer(cScriptDatabaseObject_GetDatabaseObject(), *(int*)((char*)self->mpCameraEntity + 0x4), val);
+    return cScriptDatabaseObject_IsEntityInUseByPlayer(cScriptDatabaseObject_GetDatabaseObject(), self->mpCameraEntity->mDBID, val);
 }
 #endif
 

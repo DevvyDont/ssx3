@@ -1,4 +1,6 @@
 #include "common.h"
+#include "main/gameviewman.h"
+#include "main/sectionman.h"
 #include "bx/appman.h"
 #include "visualfx/boardwakefx.h"
 #include "visualfx/snowfall.h"
@@ -5033,7 +5035,7 @@ static inline int ShouldDraw_3AF8(sWake_3AF8* self)
     } else if (!IsHuman_3AF8(self->rider)) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         if ((unsigned int)(cBENewRaceInterface_newRace.cGameEvent - 4) < 2) {
-            int mode = *(int*)((char*)SSXApp->Game->SectionMan + 0x1BC);
+            int mode = SSXApp->Game->SectionMan->mBELocationID;
             if ((unsigned int)(mode - 14) < 3) vis = 1;
         }
     }
@@ -5669,7 +5671,7 @@ static inline int fadeTex47E8(sFade47E8* self)
  */
 extern "C" void cTransitionMan_render(cTransitionMan* self)
 {
-    if (self->mViewIndex != *(int*)((char*)SSXApp->Game->ViewMan + 0x14)) {
+    if (self->mViewIndex != (int)SSXApp->Game->ViewMan->m_uiCurrentView) {
         return;
     }
     FigureOutTransitionUVs();
@@ -6686,7 +6688,7 @@ extern "C" void cSnowFall_update(cSnowFall* self)
 {
     sWakeRec_5DA0 recs[2];
     unsigned int i;
-    for (i = 0; i < *(unsigned int*)((char*)SSXApp->Game->ViewMan + 0x10); i++) {
+    for (i = 0; i < SSXApp->Game->ViewMan->m_uiNumView; i++) {
         if (cSnowfallToggles_m_EnableTest != 0) {
             recs[i].f[0] = cSnowfallToggles_m_TestSnowIntensity;
             recs[i].f[1] = cSnowfallToggles_m_TestWindIntensity;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiengine.h"
 #include "fe/textpictline.h"
 #include "fe/ovstatehud.h"
 #include "ui/uithing.h"
@@ -114,7 +115,7 @@ extern "C" void cOVStateHiScoreList_onWidgetEvent(cOVStateHiScoreList* self, cUI
             sObj001E9130* factory = *(sObj001E9130**)self->mpEngine;
             nextState = factory->vt[4].fn((char*)factory + factory->vt[4].delta, self, 1);
         }
-        cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+        cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
     }
 }
 #endif
@@ -2583,7 +2584,7 @@ extern "C" void cBXLoadIndicator_Init(cBXLoadIndicator* vself)
     char* adj = locale + vt[4].delta;
     int loadingHash = GetHashValue32(str_kT_ovrcmnloading_b);
     self->a = vt[4].fn(adj, loadingHash);
-    void* tbl = *(void**)((char*)SSXApp->Game->UI + 8);
+    void* tbl = SSXApp->Game->UI->mpFontInterface;
     self->d = cUIFontInterface_getFontByHashName(tbl, GetHashValue32(str_fefont));
     self->b = 0;
     self->c = 0;

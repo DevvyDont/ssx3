@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/fereal.h"
 #include "fe/festateprofile.h"
 #include "fe/festateoptions.h"
 #include "ui/uimenu.h"
@@ -2768,10 +2769,10 @@ extern "C" void cFEStateOptionsSaveLoad_onPopupEvent(cFEStateOptionsSaveLoad* se
         sVE_18D460n* vt = *(sVE_18D460n**)(iface + 0xC);
         vt[1].fn(iface + vt[1].delta);
         cBE_newProfile(cBE_getBE(), sel);
-        void* feRider = cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, 0);
+        void* feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, 0);
         cFERider_purge(feRider);
         cFERider_init(feRider, 0, 4, 0);
-        feRider = cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, 1);
+        feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, 1);
         cFERider_purge(feRider);
         cFERider_init(feRider, 1, 0, 0);
         char* obj = *(char**)self->mpEngine;

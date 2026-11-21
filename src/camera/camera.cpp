@@ -1,4 +1,6 @@
 #include "common.h"
+#include "main/gameviewman.h"
+#include "world/worldcache.h"
 #include "camera/cameracontroller.h"
 #include "camera/cameraalgolist.h"
 #include "ai/rider.h"
@@ -1112,7 +1114,7 @@ static inline float clamp_15EC98(float v, float lo, float hi)
 extern "C" void cCamera_updateStreamFocus(cCamera* self)
 {
     float viewDist;
-    if (*(int*)((char*)SSXApp->Game->ViewMan + 0x10) == 1)
+    if ((int)SSXApp->Game->ViewMan->m_uiNumView == 1)
         viewDist = self->Far;
     else
         viewDist = clamp_15EC98(self->Far, 0.0f, 15000.0f);
@@ -1120,11 +1122,11 @@ extern "C" void cCamera_updateStreamFocus(cCamera* self)
     float far = clamp_15EC98(viewDist * 0.6666666865348816f, 15000.0f, 30000.0f);
     cWorld* sys = cWorld_m_pTheWorld;
     ((sWorld_15EC98*)(char*)sys->m_pWorldCache)->slots[self->StreamFocusID].active = 1;
-    cWorldView_setFocus((char*)sys->m_pWorldCache + 0x10, self->StreamFocusID, (sVec4_15EC98*)(&self->Pose), streamRadius);
+    cWorldView_setFocus(&sys->m_pWorldCache->m_WorldView, self->StreamFocusID, (sVec4_15EC98*)(&self->Pose), streamRadius);
     self->bStreamIsReady = 0;
     sVec4_15EC98 pos;
     float focusDist;
-    if (cWorldView_getFocus((char*)sys->m_pWorldCache + 0x10, self->StreamFocusID, &pos, &focusDist)) {
+    if (cWorldView_getFocus(&sys->m_pWorldCache->m_WorldView, self->StreamFocusID, &pos, &focusDist)) {
         if (far <= focusDist || viewDist <= focusDist)
             self->bStreamIsReady = 1;
     }
@@ -2331,7 +2333,7 @@ static inline float ffloor_0015FD50(float x)
 // PORT: g++ `>?` / `<?` (max/min) operators.
 extern "C" void cManualCameraAlgorithm_update(cBasicCameraAlgorithm* self)
 {
-    int input = *(int*)(*(char**)(*(char**)((char*)SSXApp->Game->ViewMan + 0x4) + 0xA4) + 0xC);
+    int input = (int)SSXApp->Game->ViewMan->PlayerCamera[0]->ManualController->Input;
     float speed = cInput_getValue(input, 52);
     float ry = cInput_getValue(input, 49);
     float rx = cInput_getValue(input, 0x30);

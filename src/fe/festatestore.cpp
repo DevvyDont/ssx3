@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/fereal.h"
 #include "fe/uistatebuypopup.h"
 #include "ui/uistate.h"
 #include "ui/uithing.h"
@@ -220,8 +221,8 @@ extern "C" void cFEStateUberTrick_onCreateScreen(cFEStateUberTrick* self)
         sVE_1849B0* vt = *(sVE_1849B0**)(player + 0xC);
         vt[2].fn(player + vt[2].delta);
     }
-    cFERiderManager_setHumanCharacter((char*)SSXApp->RealFE + 0xB0, self->mUserNum, charID, 0);
-    cFERiderManager_setHumanVisible((char*)SSXApp->RealFE + 0xB0, self->mUserNum, 0);
+    cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->mUserNum, charID, 0);
+    cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, self->mUserNum, 0);
     char* realFe = (char*)SSXApp->RealFE;
     sVec4_1849B0 camPos;
     sVec4_1849B0 lookAt;
@@ -413,7 +414,7 @@ static inline sQuat_184C60 AxisAngle_184C60(const sQuat_184C60& axis, float angl
 extern "C" void cFEStateUberTrick_onUpdate(cFEStateUberTrick* self)
 {
     if (self->mbModelVisible == 0) {
-        char* rider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum);
+        char* rider = (char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
         int ok = 0;
         if (*(unsigned int*)rider < 10 && *(int*)(rider + 0xCB8) != 0) {
             ok = *(int*)(rider + 0xCB4) != 0;
@@ -445,7 +446,7 @@ extern "C" void cFEStateUberTrick_onUpdate(cFEStateUberTrick* self)
             xf.rot = QuatMul_184C60(xf.rot, AxisAngle_184C60(t4vect_YAxis, 0.0f));
             xf.rot = QuatMul_184C60(xf.rot, AxisAngle_184C60(t4vect_ZAxis, 1.082104206085205f));
             cFERider_setPose(rider, &xf);
-            cFERiderManager_setHumanVisible((char*)SSXApp->RealFE + 0xB0, self->mUserNum, 1);
+            cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, self->mUserNum, 1);
         }
     }
     cUIState_onUpdate(((char*)self));
@@ -820,14 +821,14 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
                 int n = 0;
                 sTrick_185268* tbl = func_0014FF90(pi, self->mUserNum, ai, &n);
                 if (self->mbModelVisible != 0) {
-                    char* feRider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum);
+                    char* feRider = (char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
                     cRiderAnimBase_play(*(void**)(feRider + 0xC), tbl[bi].anim, 0, -1.0f);
                 }
             }
         }
         break;
     case 1:
-        *(int*)((char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum) + 0xCD0) = 1;
+        *(int*)((char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum) + 0xCD0) = 1;
         if ((char*)item->mpParent == (char*)self->mpMainMenu) {
             if (self->mpTrickMenu != 0 && item->mMiscData != -1) {
                 cFEStateUberTrick_trickVisible(self, 1);
@@ -876,7 +877,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
         }
         break;
     case 2:
-        *(int*)((char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum) + 0xCD0) = 0;
+        *(int*)((char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum) + 0xCD0) = 0;
         break;
     }
 }

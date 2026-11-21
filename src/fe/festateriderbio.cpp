@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/fereal.h"
 #include "fe/keyboardpopup.h"
 #include "fe/festatecharselect.h"
 #include "fe/festateriderdetail.h"
@@ -51,8 +52,8 @@ extern "C" void cFEStateRiderDetail_onCreateScreen(cFEStateRiderDetail* self)
     int charID = cBENewPlayerInterface_getPlayerCharID(pi, self->mUserNum);
     sVE_32A8* vt = *(sVE_32A8**)((char*)pi + 0xC);
     vt[2].fn((char*)pi + vt[2].delta);
-    cFERiderManager_setHumanVisible((char*)SSXApp->RealFE + 0xB0, self->mUserNum, 0);
-    cFERiderManager_setHumanCharacter((char*)SSXApp->RealFE + 0xB0, self->mUserNum, charID, 0);
+    cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, self->mUserNum, 0);
+    cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->mUserNum, charID, 0);
     func_0028F140(cAudioInterface_bxAudio(), 1);
     self->mbCheatCharEnable = 1;
     if (cBERewardInterface_getNumOwnedCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum, charID) == 0) {

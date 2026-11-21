@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/fereal.h"
 #include "be/bestate.h"
 #include "camera/cameraalgolist.h"
 #include "be/beintaggression.h"
@@ -45,7 +46,7 @@ extern "C" void cBERewardDB_init(int* self, int async)
     }
     else
     {
-        *self = func_0019DA10((char*)SSXApp->RealFE + 0x1A70, 0, gRewardsFileName, 10, async, 0);
+        *self = func_0019DA10(SSXApp->RealFE->mBoltFileManager, 0, gRewardsFileName, 10, async, 0);
     }
 }
 #endif
@@ -92,7 +93,7 @@ extern "C" void cBERewardDB_purge(cBERewardDB* self)
 {
     if (self->mRewardFileIndex >= 0)
     {
-        char* snd = (char*)SSXApp->RealFE + 0x1A70;
+        char* snd = SSXApp->RealFE->mBoltFileManager;
         func_0019DC20(snd, 0, self->mRewardFileIndex);
         func_0019D4B8(snd, 0, self->mRewardFileIndex);
     }
@@ -139,7 +140,7 @@ extern "C" void cBERewardDB_initRewards(int* self, int v);
 extern "C" void cBERewardDB_update(int* self)
 {
     if (*self >= 0) {
-        char* snd = (char*)SSXApp->RealFE + 0x1A70;
+        char* snd = SSXApp->RealFE->mBoltFileManager;
         if (func_0019E238(snd, 0, *self) != 0) {
             cBERewardDB_initRewards(self, func_0019E330(snd, 0, *self));
             func_0019DC20(snd, 0, *self);

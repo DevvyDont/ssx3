@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/fereal.h"
 #include "fe/festateriderdetail.h"
 #include "fe/festatecharsetup.h"
 #include "ui/uiengine.h"
@@ -88,8 +89,8 @@ extern "C" void cFEStateCharSetup_onCreateScreen(cFEStateCharSetup* self)
     int charId = cBENewPlayerInterface_getPlayerCharID(iface, self->mUserNum);
     sVEntry_182928* vt = *(sVEntry_182928**)(iface + 0xC);
     vt[2].fn(iface + vt[2].delta);
-    cFERiderManager_setHumanVisible((char*)SSXApp->RealFE + 0xB0, self->mUserNum, 0);
-    cFERiderManager_setHumanCharacter((char*)SSXApp->RealFE + 0xB0, self->mUserNum, charId, 0);
+    cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, self->mUserNum, 0);
+    cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->mUserNum, charId, 0);
     func_0028F140(cAudioInterface_bxAudio(), 1);
     cUIText* txt = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title));
     if (txt != 0) {
@@ -365,7 +366,7 @@ static inline sQuat_182EC0 AxisAngle_182EC0(const sQuat_182EC0& axis, float angl
  */
 extern "C" void cFEStateCharSetup_updateCharacter3DPos(cFEStateCharSetup* self_)
 {
-    char* rider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self_->mUserNum);
+    char* rider = (char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self_->mUserNum);
     int ok = 0;
     if (*(unsigned int*)rider < 10 && *(int*)(rider + 0xCB8) != 0) {
         ok = *(int*)(rider + 0xCB4) != 0;

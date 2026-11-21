@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/sectionman.h"
 #include "path/trackpath.h"
 #include "path/aipath.h"
 #include "path/basepath.h"
@@ -321,7 +322,7 @@ extern "C" int cPathSys_getNearestSessionPoint(sPathNearList* list, sPathVec3* p
     for (i = 0; i < list->count; i++) {
         if (list->entries[i].type == 2 && list->entries[i].id != 0) {
             if (cBEMissionInterface_isSessionPoint(cBE_getInterface_Fv(cBE_getBE(), 10), list->entries[i].id,
-                              *(int*)((char*)SSXApp->Game->SectionMan + 0x1BC)) != 0) {
+                              SSXApp->Game->SectionMan->mBELocationID) != 0) {
                 sPathVec3 difference = list->entries[i].pos - *pos;
                 float dist = pathLen(difference);
                 if (dist < best) {

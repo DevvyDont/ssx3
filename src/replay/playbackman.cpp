@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/gameviewman.h"
 #include "replay/frame.h"
 #include "replay/replaycache.h"
 #include "replay/playbackman.h"
@@ -549,7 +550,7 @@ extern "C" void cPlaybackMan_startPreview(cPlaybackMan* self)
         self->State = 1;
         char* x = *(char**)((char*)self->AI + 0x70);
         int targetRider = x ? *(int*)(x + 0x18) : 0;
-        cCamera_switchChaseControllerTargetRider(*(void**)((char*)self->Game->ViewMan + 0x4), targetRider);
+        cCamera_switchChaseControllerTargetRider(self->Game->ViewMan->PlayerCamera[0], targetRider);
     }
 }
 #endif
@@ -579,7 +580,7 @@ extern "C" void cPlaybackMan_stopPreview(cPlaybackMan* self)
         cPlaybackMan_restoreFrame(self);
         self->State = 0;
         int targetRider = *(int*)((char*)self->AI + 0x28);
-        cCamera_switchChaseControllerTargetRider(*(void**)((char*)self->Game->ViewMan + 0x4), targetRider);
+        cCamera_switchChaseControllerTargetRider(self->Game->ViewMan->PlayerCamera[0], targetRider);
     }
 }
 #endif
