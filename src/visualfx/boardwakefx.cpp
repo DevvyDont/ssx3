@@ -1,4 +1,6 @@
 #include "common.h"
+#include "visualfx/boardwakefx.h"
+#include "visualfx/snowfall.h"
 #include "visualfx/lensfx.h"
 #include "visualfx/transitionman.h"
 #include "be/beintnewrace.h"
@@ -168,7 +170,7 @@ struct sWakeDCF28 {
     float fBC;                    // 0xBC
 };
 
-extern "C" void cWakeParams_Clear(void* self);
+extern "C" void cWakeParams_Clear(cWakeParams* self);
 
 /**
  * Resets a board wake effect; despite the name it reads no replay data (it takes no frame, like On Tour's
@@ -204,7 +206,7 @@ extern "C" void cBoardWakeFX_reset(sWakeDCF28* self)
     self->f8 = 0;
     self->f3C = 0;
     self->f40 = 0;
-    cWakeParams_Clear(self->sub60);
+    cWakeParams_Clear((cWakeParams*)self->sub60);
     if (old != self->count) {
         for (i = 0; i < 5; i++) {
             float heightFactor = 0.9900000095367432f - (float)i * (0.9800000190734863f / (float)(self->count - 1));
@@ -1056,13 +1058,13 @@ extern sVec4 t4vect_Zero;
  *
  * cBoardWakeFX_reset (the wake reset) calls it on cBoardWakeFX + 0x60.
  */
-extern "C" void cWakeParams_Clear(void* self)
+extern "C" void cWakeParams_Clear(cWakeParams* self)
 {
-    *(int*)((char*)self + 0x34) = 0;
-    *(int*)((char*)self + 0x30) = 0;
-    *(sVec4*)((char*)self + 0x0) = t4vect_Zero;
-    *(sVec4*)((char*)self + 0x20) = t4vect_Zero;
-    *(sVec4*)((char*)self + 0x10) = t4vect_Zero;
+    *(int*)&self->mAlpha = 0;
+    *(int*)&self->mSpeed = 0;
+    *(sVec4*)&self->mUp = t4vect_Zero;
+    *(sVec4*)&self->mForward = t4vect_Zero;
+    *(sVec4*)&self->mSide = t4vect_Zero;
 }
 #endif
 
@@ -6577,34 +6579,34 @@ struct sWake5920 {
  * @param bucket  update bucket (On Tour const int bucket)
  * @return self
  */
-extern "C" void* cSnowFall_cSnowFall(sWake5920* self, void* bucket)
+extern "C" void* cSnowFall_cSnowFall(cSnowFall* self, void* bucket)
 {
     cObjNode_cObjNode1(self, bucket);
-    self->vtbl = cSnowFall_vtbl;
-    new (self->v) sVec5920[2];
+    self->mVtbl = cSnowFall_vtbl;
+    new (((sVec5920*)&self->mLastCameraPosition[0])) sVec5920[2];
     cMemMan_validate();
     for (int i = 11; i >= 0; i--) {
-        self->fx[i] = 0;
+        ((void**)&self->mSnowBoxes[0])[i] = 0;
     }
     for (int j = 0; j < 2; j++) {
-        self->v[j] = sVec5920(0.0f, 0.0f, 0.0f, 1.0f);
+        ((sVec5920*)&self->mLastCameraPosition[0])[j] = sVec5920(0.0f, 0.0f, 0.0f, 1.0f);
     }
-    self->fx[0] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-    self->fx[1] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-    self->fx[2] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 0, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
-    self->fx[3] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 0, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
-    self->fx[4] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
-    self->fx[5] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
+    ((void**)&self->mSnowBoxes[0])[0] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
+    ((void**)&self->mSnowBoxes[0])[1] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
+    ((void**)&self->mSnowBoxes[0])[2] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 0, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
+    ((void**)&self->mSnowBoxes[0])[3] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 0, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
+    ((void**)&self->mSnowBoxes[0])[4] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
+    ((void**)&self->mSnowBoxes[0])[5] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
     if (SSXApp->Game->AI->NumberOfPlayersAllocated >= 2) {
-        self->fx[6] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-        self->fx[7] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-        self->fx[8] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 1, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
-        self->fx[9] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 1, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
-        self->fx[10] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 1, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
-        self->fx[11] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 1, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
+        ((void**)&self->mSnowBoxes[0])[6] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
+        ((void**)&self->mSnowBoxes[0])[7] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
+        ((void**)&self->mSnowBoxes[0])[8] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 1, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
+        ((void**)&self->mSnowBoxes[0])[9] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 1, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
+        ((void**)&self->mSnowBoxes[0])[10] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 1, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
+        ((void**)&self->mSnowBoxes[0])[11] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 1, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
     }
     cMemMan_validate();
-    return self;
+    return ((sWake5920*)self);
 }
 #endif
 
@@ -6622,13 +6624,13 @@ extern "C" void cObjNode__cObjNode(void* self, int flags);
  * @param self   the snowfall node
  * @param flags  g++ destructor flags, passed on (bit 0 frees the object)
  */
-extern "C" void cSnowFall__cSnowFall(void* self, int flags)
+extern "C" void cSnowFall__cSnowFall(cSnowFall* self, int flags)
 {
-    *(void***)((char*)self + 0xC) = cSnowFall_vtbl;
+    self->mVtbl = cSnowFall_vtbl;
     cMemMan_validate();
     int i;
     for (i = 0; i < 12; i++) {
-        int* snowBox = ((int**)((char*)self + 0x10))[i];
+        int* snowBox = ((int**)(&self->mSnowBoxes[0]))[i];
         if (snowBox != 0) {
             cSnowBox__cSnowBox(snowBox, 3);
         }
@@ -6690,7 +6692,7 @@ extern "C" void cSnowBox_update(int* elem, sWakeRec_5DA0* rec);
  *
  * @param self  the snowfall node
  */
-extern "C" void cSnowFall_update(void* self)
+extern "C" void cSnowFall_update(cSnowFall* self)
 {
     sWakeRec_5DA0 recs[2];
     unsigned int i;
@@ -6729,7 +6731,7 @@ extern "C" void cSnowFall_update(void* self)
     }
     int j;
     for (j = 0; j < 12; j++) {
-        int* snowBox = ((int**)((char*)self + 0x10))[j];
+        int* snowBox = ((int**)(&self->mSnowBoxes[0]))[j];
         if (snowBox != 0) {
             cSnowBox_update(snowBox, &recs[*snowBox]);
         }
@@ -6906,10 +6908,10 @@ void cSnowBox_resetWind(void*);
  *
  * @param self  the snowfall node
  */
-extern "C" void cSnowFall_readFromReplayFrame(void* self)
+extern "C" void cSnowFall_readFromReplayFrame(cSnowFall* self)
 {
     int i;
-    void** snowBoxes = (void**)((char*)self + 0x10);
+    void** snowBoxes = (void**)(&self->mSnowBoxes[0]);
     for (i = 0; i < 12; i++) {
         if (snowBoxes[i] != 0) {
             cSnowBox_resetWind(snowBoxes[i]);

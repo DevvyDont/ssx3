@@ -1,4 +1,6 @@
 #include "common.h"
+#include "visualfx/visualeffectsman.h"
+#include "visualfx/aivisualeffectsman.h"
 #include "ai/riderhandler.h"
 #include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
@@ -1764,7 +1766,7 @@ extern sRsCtx_F00A0* D_ctx_F00A0 __asm__("cGraphicsMan_TheGraphicsMan");
  *
  * @param i  which camera's render state to use (On Tour cameraId)
  */
-extern "C" void cVisualEffectsMan_commonUpdate(void* self, int i)
+extern "C" void cVisualEffectsMan_commonUpdate(cVisualEffectsMan* self, int i)
 {
     sRsCtx_F00A0* ctx = D_ctx_F00A0;
     if (cDepthFog_m_OverrideWP == 0) {
@@ -1849,12 +1851,12 @@ extern void* D_004A3B80;
  *
  * @return this
  */
-extern "C" void* cAIVisualEffectsMan_cAIVisualEffectsMan(void* self)
+extern "C" void* cAIVisualEffectsMan_cAIVisualEffectsMan(cAIVisualEffectsMan* self)
 {
     *(int*)self = 0;
-    *(void***)((char*)self + 0x4) = cAIVisualEffectsMan_vtbl;
-    D_004A3B80 = self;
-    return self;
+    self->mVtbl = cAIVisualEffectsMan_vtbl;
+    D_004A3B80 = ((void*)self);
+    return ((void*)self);
 }
 #endif
 
@@ -1876,7 +1878,7 @@ extern "C" void func_002F0388(void) {
 INCLUDE_ASM("visualfx/renderstateman", cAIVisualEffectsMan_construct);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cPS2AIVisualEffectsMan_cPS2AIVisualEffectsMan(void* self);
+extern "C" void* cPS2AIVisualEffectsMan_cPS2AIVisualEffectsMan(cPS2AIVisualEffectsMan* self);
 extern char str_PS2AIVisualEffectsMan[];
 
 /**
@@ -1888,7 +1890,7 @@ extern char str_PS2AIVisualEffectsMan[];
  */
 extern "C" void* cAIVisualEffectsMan_construct(void)
 {
-    return cPS2AIVisualEffectsMan_cPS2AIVisualEffectsMan(cMemMan_alloc(8, str_PS2AIVisualEffectsMan, 0, 0));
+    return cPS2AIVisualEffectsMan_cPS2AIVisualEffectsMan((cPS2AIVisualEffectsMan*)cMemMan_alloc(8, str_PS2AIVisualEffectsMan, 0, 0));
 }
 #endif
 
@@ -1896,7 +1898,7 @@ extern "C" void* cAIVisualEffectsMan_construct(void)
 INCLUDE_ASM("visualfx/renderstateman", cPS2AIVisualEffectsMan_cPS2AIVisualEffectsMan);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cAIVisualEffectsMan_cAIVisualEffectsMan(void* self);
+extern "C" void* cAIVisualEffectsMan_cAIVisualEffectsMan(cAIVisualEffectsMan* self);
 extern "C" void cAvalanche_init(void* self);
 extern char str_Avalanche[];
 extern void* cPS2AIVisualEffectsMan_vtbl[];
@@ -1910,15 +1912,15 @@ extern void* cAvalanche_vtbl[];
  *
  * @return this
  */
-extern "C" void* cPS2AIVisualEffectsMan_cPS2AIVisualEffectsMan(void* self)
+extern "C" void* cPS2AIVisualEffectsMan_cPS2AIVisualEffectsMan(cPS2AIVisualEffectsMan* self)
 {
-    cAIVisualEffectsMan_cAIVisualEffectsMan(self);
-    *(void***)((char*)self + 0x4) = cPS2AIVisualEffectsMan_vtbl;
+    cAIVisualEffectsMan_cAIVisualEffectsMan((cAIVisualEffectsMan*)self);
+    self->mVtbl = cPS2AIVisualEffectsMan_vtbl;
     void** avalanche = (void**)cMemMan_alloc(4, str_Avalanche, 0, 0);
     *avalanche = cAvalanche_vtbl;
     cAvalanche_init(avalanche);
     *(void***)self = avalanche;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -1943,14 +1945,14 @@ public:
  *
  * @param flags  g++ in-charge flags; bit 0 deletes the object
  */
-extern "C" void cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan(void* self, int flags)
+extern "C" void cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan(cPS2AIVisualEffectsMan* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = cPS2AIVisualEffectsMan_vtbl;
+    self->mVtbl = cPS2AIVisualEffectsMan_vtbl;
     cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan_cVirt* avalanche = *(cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan_cVirt**)self;
     if (avalanche != 0) {
         avalanche->v01(3);
     }
-    *(void***)((char*)self + 0x4) = cAIVisualEffectsMan_vtbl;
+    self->mVtbl = cAIVisualEffectsMan_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/simpletube.h"
 #include "bx/math3d.h"
 #include "render/ps2gridmesh.h"
 #include "render/particle.h"
@@ -3129,8 +3130,9 @@ INCLUDE_ASM("render/font", cBezierMan_Reset__FPv);
  *
  * cPS2BezierMan overrides the slot with cPS2BezierMan_Reset__FPv.
  */
-void cBezierMan_Reset(void* self)
+void cBezierMan_Reset(void* vself)
 {
+    cPS2BezierMan* self = (cPS2BezierMan*)vself;
 }
 #endif
 
@@ -3142,8 +3144,9 @@ INCLUDE_ASM("render/font", cBezierMan_UpdatePatchesCache__FPv);
  *
  * cPS2BezierMan keeps it.
  */
-void cBezierMan_UpdatePatchesCache(void* self)
+void cBezierMan_UpdatePatchesCache(void* vself)
 {
+    cPS2BezierMan* self = (cPS2BezierMan*)vself;
 }
 #endif
 
@@ -3157,9 +3160,10 @@ INCLUDE_ASM("render/font", cBezierMan_SetPatchDist__FPvf);
  *
  * @param val  the patch distance
  */
-void cBezierMan_SetPatchDist(void* self, float val)
+void cBezierMan_SetPatchDist(void* vself, float val)
 {
-    *(float*)((char*)self + 0x0) = val;
+    cPS2BezierMan* self = (cPS2BezierMan*)vself;
+    self->m_currPatchDist = val;
 }
 #endif
 
@@ -3173,9 +3177,10 @@ INCLUDE_ASM("render/font", cBezierMan_GetPatchDist__FPv);
  *
  * @return m_currPatchDist
  */
-float cBezierMan_GetPatchDist(void* self)
+float cBezierMan_GetPatchDist(void* vself)
 {
-    return *(float*)((char*)self + 0x0);
+    cPS2BezierMan* self = (cPS2BezierMan*)vself;
+    return self->m_currPatchDist;
 }
 #endif
 
@@ -6997,9 +7002,9 @@ INCLUDE_ASM("render/font", func_003968D0);
  * @param index  the entry
  * @param src  the vector to store
  */
-extern "C" void func_003968D0(void* self, int index, void* src)
+extern "C" void func_003968D0(cSimpleTube* self, int index, void* src)
 {
-    cQuad128* quads = *(cQuad128**)((char*)self + 0x8);
+    cQuad128* quads = (cQuad128*)self->m_positions;
     quads[index] = *(cQuad128*)src;
 }
 #endif

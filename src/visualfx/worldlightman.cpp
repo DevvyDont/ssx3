@@ -1,4 +1,8 @@
 #include "common.h"
+#include "visualfx/snowfall.h"
+#include "visualfx/visualeffectsman.h"
+#include "visualfx/transitionobj.h"
+#include "visualfx/aivisualeffectsman.h"
 #include "visualfx/lensfx.h"
 #include "visualfx/cutscenetransitionman.h"
 #include "visualfx/avalanche.h"
@@ -3268,7 +3272,7 @@ extern "C" void cTransitionObj_operator_delete(void* p);
  *
  * @param flags  g++ destructor flags; bit 0 set releases the object
  */
-extern "C" void cFade_TObj__cFade_TObj(void* self, int flags)
+extern "C" void cFade_TObj__cFade_TObj(cFade_TObj* self, int flags)
 {
     *(void***)self = cTransitionObj_vtbl;
     if (flags & 1) {
@@ -3294,12 +3298,12 @@ void cTransitionObj_cTransitionObj(void* self);
  * @param colour  the fade colour
  * @return @p self
  */
-extern "C" void* cFade_TObj_cFade_TObj(void* self, sLightVec_002F8060 colour)
+extern "C" void* cFade_TObj_cFade_TObj(cFade_TObj* self, sLightVec_002F8060 colour)
 {
     cTransitionObj_cTransitionObj(self);
     *(void***)self = cFade_TObj_vtbl;
-    *(sLightVec_002F8060*)((char*)self + 4) = colour;
-    return self;
+    *(sLightVec_002F8060*)&self->mColour = colour;
+    return ((void*)self);
 }
 #endif
 
@@ -3317,7 +3321,7 @@ extern "C" void cTransitionObj_operator_delete(void* p);
  *
  * @param flags  g++ destructor flags; bit 0 set releases the object
  */
-extern "C" void cWipe_TObj__cWipe_TObj(void* self, int flags)
+extern "C" void cWipe_TObj__cWipe_TObj(cWipe_TObj* self, int flags)
 {
     *(void***)self = cTransitionObj_vtbl;
     if (flags & 1) {
@@ -3341,7 +3345,7 @@ extern "C" void cTransitionObj_operator_delete(void* p);
  *
  * @param flags  g++ destructor flags; bit 0 set releases the object
  */
-extern "C" void cCircle_TObj__cCircle_TObj(void* self, int flags)
+extern "C" void cCircle_TObj__cCircle_TObj(cCircle_TObj* self, int flags)
 {
     *(void***)self = cTransitionObj_vtbl;
     if (flags & 1) {
@@ -3380,8 +3384,9 @@ INCLUDE_ASM("visualfx/worldlightman", cSnowFall_writeToReplayFrame__FPv);
 /**
  * Writes nothing to the replay frame: cSnowFall's writeToReplayFrame has an empty body.
  */
-void cSnowFall_writeToReplayFrame(void* self)
+void cSnowFall_writeToReplayFrame(void* vself)
 {
+    cSnowFall* self = (cSnowFall*)vself;
 }
 #endif
 
@@ -3636,9 +3641,9 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cVisualEffectsMan__cVisualEffectsMan(void* self, int flags)
+extern "C" void cVisualEffectsMan__cVisualEffectsMan(cVisualEffectsMan* self, int flags)
 {
-    *(void***)((char*)self + 0x44) = cVisualEffectsMan_vtbl;
+    self->mVtbl = cVisualEffectsMan_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3658,9 +3663,9 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cAIVisualEffectsMan__cAIVisualEffectsMan(void* self, int flags)
+extern "C" void cAIVisualEffectsMan__cAIVisualEffectsMan(cAIVisualEffectsMan* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = cAIVisualEffectsMan_vtbl;
+    self->mVtbl = cAIVisualEffectsMan_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

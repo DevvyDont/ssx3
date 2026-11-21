@@ -19,15 +19,15 @@ void* cCameraAlgoList_cCameraAlgoList(void* self);
  * @param camera  the owning cCamera
  * @return @p self
  */
-extern "C" void* cCameraController_cCameraController(void* self, int camera)
+extern "C" void* cCameraController_cCameraController(cCameraController* self, int camera)
 {
-    *(void***)((char*)self + 0x14) = cCameraController_vtbl;
-    *(void**)((char*)self + 0x8) = cCameraAlgoList_cCameraAlgoList(cMemMan_alloc(8, str_Algorithm_List, 0x20000000, 0));
-    *(int*)((char*)self + 0x10) = camera;
-    *(int*)((char*)self + 0xC) = 0;
-    *(int*)((char*)self + 0x0) = 0;
-    *(int*)((char*)self + 0x4) = 0;
-    return self;
+    self->mVtbl = cCameraController_vtbl;
+    self->AlgorithmList = (cCameraAlgoList*)cCameraAlgoList_cCameraAlgoList(cMemMan_alloc(8, str_Algorithm_List, 0x20000000, 0));
+    self->Camera = (cCamera*)camera;
+    self->Input = 0;
+    self->Type = 0;
+    self->BlendType = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -45,10 +45,10 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cCameraController__cCameraController(void* self, int flags)
+extern "C" void cCameraController__cCameraController(cCameraController* self, int flags)
 {
-    *(void***)((char*)self + 0x14) = cCameraController_vtbl;
-    void* algoList = *(void**)((char*)self + 0x8);
+    self->mVtbl = cCameraController_vtbl;
+    void* algoList = self->AlgorithmList;
     if (algoList != 0) {
         cCameraAlgoList__cCameraAlgoList(algoList, 3);
     }
@@ -88,16 +88,17 @@ void cCameraController_snap_impl(void* self, int a) __asm__("cCameraController_s
  *
  * @param subjectID  the subject (rider index) to snap to
  */
-void cCameraController_snap_impl(void* self, int subjectID)
+void cCameraController_snap_impl(void* vself, int subjectID)
 {
-    for (sCamCtrlNode* n = **(sCamCtrlNode***)((char*)self + 0x8); n != 0; n = n->next)
+    cCameraController* self = (cCameraController*)vself;
+    for (sCamCtrlNode* n = *(sCamCtrlNode**)self->AlgorithmList; n != 0; n = n->next)
     {
         void* obj = n->obj;
         sCamCtrlVE* vt = *(sCamCtrlVE**)((char*)obj + 0x10);
         vt[3].fn((char*)obj + vt[3].delta, subjectID);
     }
-    cCamera_snapResultAlgorithm(*(void**)((char*)self + 0x10));
-    cSplashManager_CameraSnapped(*(void**)((char*)self + 0x10));
+    cCamera_snapResultAlgorithm(self->Camera);
+    cSplashManager_CameraSnapped(self->Camera);
 }
 #endif
 
@@ -125,16 +126,16 @@ extern "C" void cSplashManager_CameraSnapped(void* p);
  * Calls each algorithm's snapCurrent virtual (slot 4), walking AlgorithmList (+0x8), then cCamera_snapResultAlgorithm__FPv
  * (On Tour cCamera::snapResultAlgorithm) and cSplashManager_CameraSnapped (On Tour cSplashManager::CameraSnapped) on Camera (+0x10).
  */
-extern "C" void cCameraController_snapCurrent(void* self)
+extern "C" void cCameraController_snapCurrent(cCameraController* self)
 {
-    for (sCamCtrlNodeB* n = **(sCamCtrlNodeB***)((char*)self + 0x8); n != 0; n = n->next)
+    for (sCamCtrlNodeB* n = *(sCamCtrlNodeB**)self->AlgorithmList; n != 0; n = n->next)
     {
         void* obj = n->obj;
         sCamCtrlVE0* vt = *(sCamCtrlVE0**)((char*)obj + 0x10);
         vt[4].fn((char*)obj + vt[4].delta);
     }
-    cCamera_snapResultAlgorithm(*(void**)((char*)self + 0x10));
-    cSplashManager_CameraSnapped(*(void**)((char*)self + 0x10));
+    cCamera_snapResultAlgorithm(self->Camera);
+    cSplashManager_CameraSnapped(self->Camera);
 }
 #endif
 
@@ -150,9 +151,10 @@ INCLUDE_ASM("camera/cameracontroller", cCameraController_clearAlgorithms__FPv);
  *
  * @return no meaningful value (cCameraAlgoList_removeAll returns nothing)
  */
-void* cCameraController_clearAlgorithms(void* self)
+void* cCameraController_clearAlgorithms(void* vself)
 {
-    return cCameraAlgoList_removeAll(*(int*)((char*)self + 0x8));
+    cCameraController* self = (cCameraController*)vself;
+    return cCameraAlgoList_removeAll((int)self->AlgorithmList);
 }
 #endif
 
@@ -163,7 +165,7 @@ extern void* cManualCameraController_vtbl[];
 extern char str_Manual_Cam_Algo[];
 extern char str_Editor_Cam_Algo[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cCameraController_cCameraController(void* self, int a1);
+extern "C" void* cCameraController_cCameraController(cCameraController* self, int a1);
 extern "C" void* cManualCameraAlgorithm_cManualCameraAlgorithm(void* self);
 extern "C" void* cEditorCameraAlgorithm_cEditorCameraAlgorithm(void* self);
 extern "C" void cManualCameraController_setCurrentAlgorithmType(cManualCameraController* self, int msg);
@@ -181,7 +183,7 @@ extern "C" void cManualCameraController_setCurrentAlgorithmType(cManualCameraCon
  */
 extern "C" void* cManualCameraController_cManualCameraController(cManualCameraController* self, int camera)
 {
-    cCameraController_cCameraController(self, camera);
+    cCameraController_cCameraController((cCameraController*)self, camera);
     self->mVtbl = cManualCameraController_vtbl;
     self->Type = 1;
     self->ManualAlgo = (cManualCameraAlgorithm*)cManualCameraAlgorithm_cManualCameraAlgorithm(cMemMan_alloc(0x40, str_Manual_Cam_Algo, 0x20000000, 0));
@@ -195,7 +197,7 @@ extern "C" void* cManualCameraController_cManualCameraController(cManualCameraCo
 INCLUDE_ASM("camera/cameracontroller", cManualCameraController__cManualCameraController);
 #ifdef SKIP_ASM
 extern void* cManualCameraController_vtbl[];
-extern "C" void cCameraController__cCameraController(void* self, int flags);
+extern "C" void cCameraController__cCameraController(cCameraController* self, int flags);
 
 struct sCamCtrlVEDtor {
     short delta;
@@ -224,7 +226,7 @@ extern "C" void cManualCameraController__cManualCameraController(cManualCameraCo
         sCamCtrlVEDtor* vt = *(sCamCtrlVEDtor**)(editorAlgo + 0x10);
         vt[1].fn(editorAlgo + vt[1].delta, 3);
     }
-    cCameraController__cCameraController(self, flags);
+    cCameraController__cCameraController((cCameraController*)self, flags);
 }
 #endif
 
@@ -270,7 +272,7 @@ public:
     virtual void update();
 };
 
-extern "C" void cCameraController_snapCurrent(void* self);
+extern "C" void cCameraController_snapCurrent(cCameraController* self);
 
 /**
  * Snaps the camera to its current subject: the base controller's snapCurrent, then the manual algorithm's.
@@ -280,7 +282,7 @@ extern "C" void cCameraController_snapCurrent(void* self);
  */
 extern "C" void cManualCameraController_snapCurrent(cManualCameraController* self)
 {
-    cCameraController_snapCurrent(self);
+    cCameraController_snapCurrent((cCameraController*)self);
     ((cCamCtrlVObj*)self->ManualAlgo)->snapCurrent();
 }
 #endif

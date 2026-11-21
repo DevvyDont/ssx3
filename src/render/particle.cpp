@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/simpletube.h"
 #include "render/ps2gridmesh.h"
 #include "render/irradiance.h"
 #include "render/playershadow.h"
@@ -1340,12 +1341,12 @@ struct sPtObj_2520 {
  * @param owner  the number of segments (misnamed: an int count, not an owner pointer)
  * @return @p self
  */
-extern "C" void* cSimpleTube_cSimpleTube(sPtObj_2520* self, void* owner)
+extern "C" void* cSimpleTube_cSimpleTube(cSimpleTube* self, void* owner)
 {
     int i;
-    self->owner = owner;
-    self->vt = cSimpleTube_vtbl;
-    self->f8 = 0;
+    self->m_numSegments = (int)owner;
+    self->mVtbl = cSimpleTube_vtbl;
+    self->m_positions = 0;
     if (D_004A422C == 0) {
         sPtVert_2520* vertex = D_00501440;
         for (i = 0; i < 262; i++, vertex++) {
@@ -1364,7 +1365,7 @@ extern "C" void* cSimpleTube_cSimpleTube(sPtObj_2520* self, void* owner)
         }
         D_004A422C = 1;
     }
-    return self;
+    return ((sPtObj_2520*)self);
 }
 #endif
 
@@ -1417,11 +1418,11 @@ extern void* D_00488680[];
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void cSimpleTube__cSimpleTube(void* self, int flags)
+extern "C" void cSimpleTube__cSimpleTube(cSimpleTube* self, int flags)
 {
     *(void***)self = cSimpleTube_vtbl;
-    if (*(void**)((char*)self + 0x8) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0x8));
+    if (self->m_positions != 0) {
+        cMemMan_free(self->m_positions);
     }
     *(void***)self = D_00488680;
     if (flags & 1) {

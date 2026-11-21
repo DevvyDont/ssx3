@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/scanimmgr.h"
 
 //100%
 INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_cScriptAnimBankManager);
@@ -60,7 +61,7 @@ INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager__cScriptAnimBankManager
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
-extern "C" void cScriptAnimBankManager_UnlinkBanksAll(void* self);
+extern "C" void cScriptAnimBankManager_UnlinkBanksAll(cScriptAnimBankManager* self);
 extern char cScriptAnimBankManager_vtbl[];
 
 /**
@@ -69,11 +70,11 @@ extern char cScriptAnimBankManager_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cScriptAnimBankManager__cScriptAnimBankManager(void* self, int flags)
+extern "C" void cScriptAnimBankManager__cScriptAnimBankManager(cScriptAnimBankManager* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cScriptAnimBankManager_vtbl;
+    self->mVtbl = (void**)cScriptAnimBankManager_vtbl;
     cScriptAnimBankManager_UnlinkBanksAll(self);
-    void* banks = *(void**)((char*)self + 0x8);
+    void* banks = self->mpBankInfo;
     if (banks != 0) {
         cMemMan_free(banks);
     }
@@ -140,14 +141,14 @@ extern "C" void* cScriptAnimBankManager_GetEmptyBankInfo_v(void* self) __asm__("
  * @param data  the attached animation bank data
  * @return the entry's slot (set by the constructor to the base slot plus the entry index)
  */
-extern "C" int cScriptAnimBankManager_LinkBank(sScLinkList* self, int id, void* data)
+extern "C" int cScriptAnimBankManager_LinkBank(cScriptAnimBankManager* self, int id, void* data)
 {
     sScLinkEntry* bankInfo = (sScLinkEntry*)cScriptAnimBankManager_GetBankInfo((sAnimList*)self, id);
     if (bankInfo == 0) {
         bankInfo = (sScLinkEntry*)cScriptAnimBankManager_GetEmptyBankInfo_v(self);
         bankInfo->id = id;
         bankInfo->data = data;
-        sScBank* bank = (sScBank*)cAdfDataSource_cAdfDataSource1(cMemMan_alloc(0x18, str_cAdfDataSource, self->flags, 0), bankInfo->data);
+        sScBank* bank = (sScBank*)cAdfDataSource_cAdfDataSource1(cMemMan_alloc(0x18, str_cAdfDataSource, self->mMemFlags, 0), bankInfo->data);
         int n = bank->hdr->count;
         bankInfo->used = 0;
         for (int i = 0; i < n; i++) {
@@ -156,7 +157,7 @@ extern "C" int cScriptAnimBankManager_LinkBank(sScLinkList* self, int id, void* 
             }
         }
         if (bankInfo->used != 0) {
-            bankInfo->map = (int*)operator_new_tag(bankInfo->used * 4, str_pTableAnimID, self->flags, 0);
+            bankInfo->map = (int*)operator_new_tag(bankInfo->used * 4, str_pTableAnimID, self->mMemFlags, 0);
             int k = 0;
             for (int i = 0; i < n; i++) {
                 if (bank->items[i].ptr != 0) {
@@ -192,11 +193,11 @@ extern "C" void* cScriptAnimBankManager_GetBankInfo(sAnimList* self, int id);
  *
  * @param id  the bank's user ID
  */
-extern "C" void cScriptAnimBankManager_UnlinkBank(sAnimList* self, int id)
+extern "C" void cScriptAnimBankManager_UnlinkBank(cScriptAnimBankManager* self, int id)
 {
-    void* bankInfo = cScriptAnimBankManager_GetBankInfo(self, id);
+    void* bankInfo = cScriptAnimBankManager_GetBankInfo(((sAnimList*)self), id);
     if (bankInfo != 0) {
-        sScAnimVEntry* vt = *(sScAnimVEntry**)((char*)self + 0xC);
+        sScAnimVEntry* vt = (sScAnimVEntry*)self->mVtbl;
         vt[2].fn((char*)self + vt[2].delta, bankInfo);
     }
 }
@@ -233,7 +234,7 @@ struct sDmTable275698 {
  *
  * @param self_  the cScriptAnimBankManager, untyped
  */
-extern "C" void cScriptAnimBankManager_UnlinkBanksAll(void* self_)
+extern "C" void cScriptAnimBankManager_UnlinkBanksAll(cScriptAnimBankManager* self_)
 {
     sDmTable275698* self = (sDmTable275698*)self_;
     int i;
@@ -299,7 +300,7 @@ extern void** cAnimDataBase_TheAnimDataBase;
  *
  * @param bankInfo  the bank record
  */
-extern "C" void cScriptAnimBankManager_UnlinkBank1(void* self, sAnimEntry* bankInfo)
+extern "C" void cScriptAnimBankManager_UnlinkBank1(cScriptAnimBankManager* self, sAnimEntry* bankInfo)
 {
     void** tbl = cAnimDataBase_TheAnimDataBase;
     void** slot = &tbl[*(unsigned char*)&bankInfo->unk4];

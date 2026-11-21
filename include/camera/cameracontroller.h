@@ -30,6 +30,42 @@ struct cCamera;
 struct cManualCameraAlgorithm;
 struct cEditorCameraAlgorithm;
 
+// cCameraController: the base of a cCamera's three camera controllers (cManualCameraController below,
+// cChaseCameraController in camera/race/racecontroller.h, cScriptCameraController in camera/script/scriptcontroller.h),
+// which write it out inline. It owns the controller's algorithm list and knows its camera. EA's source:
+// d:/ssx/code/source/camera/cameracontroller.cpp (preview assert strings).
+// Size 0x18: [O] On Tour's cCameraController is 0x18 (Type, BlendType, AlgorithmList, Input, Camera; vptr after them);
+// [R] the subclasses' own fields start at 0x18 (cManualCameraController ManualAlgo, cScriptCameraController IsActive);
+// never allocated on its own. No base class. Retail vtable cCameraController_vtbl (0x0045B938, 4 slots: 1 deleting dtor
+// cCameraController__cCameraController, 2 update cCameraController_update__FPv (empty), 3 cCameraController_snap,
+// 4 cCameraController_snapCurrent); cChaseCameraController_vtbl and cScriptCameraController_vtbl keep slots 3-4.
+// Methods: ctor cCameraController_cCameraController (camera/cameracontroller.cpp 0x15CBA0) .. clearAlgorithms 0x15CD60;
+// update and the getType / getBlendType / getAlgorithmList accessors in camera/camera.cpp (0x167FB8, 0x167FD0-0x167FE0).
+// Tags: [R] the ctor / dtor; [P] the preview's inline accessors via tools/layout_xlate.py (getAlgorithmList seen at 0x8,
+// getInput/setInput bracketed 0x8..0x14 at 0xC, the dtor's vptr store at 0x14 unchanged); [U] retail use; [O] On Tour.
+struct cCameraController {
+    int Type;                       // 0x00 [O] eCamControllerType; [P] getType (lw); [R] ctor 0 (subclass ctors then
+                                    //      store 1 manual / 2 chase / 3 script); [U] cCameraController_getType (lw)
+    int BlendType;                  // 0x04 [O] eCamBlendType; [P] getBlendType (lw); [R] ctor 0; [U]
+                                    //      cCameraController_getBlendType (lw)
+    cCameraAlgoList* AlgorithmList; // 0x08 [O]; [P] getAlgorithmList (lw, seen); [R] ctor: cMemMan_alloc(8, "Algorithm
+                                    //      List") + cCameraAlgoList_cCameraAlgoList; [U] the dtor destroys it (flags 3),
+                                    //      snap / snapCurrent walk its nodes (lw 0x8, then the head), clearAlgorithms
+                                    //      passes it to cCameraAlgoList_removeAll, getAlgorithmList (lw)
+    cInput* Input;                  // 0x0C [O]; [P] getInput (lw) / setInput (sw), bracketed; [R] ctor 0
+    cCamera* Camera;                // 0x10 [O]; [R] the ctor's camera argument (sw); [U] snap / snapCurrent pass it to
+                                    //      cCamera_snapResultAlgorithm and cSplashManager_CameraSnapped (lw)
+    void** mVtbl;                   // 0x14 [R] cCameraController_vtbl (ctor and dtor); [P] vptr at 0x14 in both builds
+};
+
+CHECK_OFFSET(cCameraController, Type, 0x00);
+CHECK_OFFSET(cCameraController, BlendType, 0x04);
+CHECK_OFFSET(cCameraController, AlgorithmList, 0x08);
+CHECK_OFFSET(cCameraController, Input, 0x0C);
+CHECK_OFFSET(cCameraController, Camera, 0x10);
+CHECK_OFFSET(cCameraController, mVtbl, 0x14);
+CHECK_SIZE(cCameraController, 0x18);
+
 struct cManualCameraController {
     // --- cCameraController (On Tour: 0x18)
     int Type;                       // 0x00 [O] eCamControllerType; [R] base ctor 0, then 1 (manual)

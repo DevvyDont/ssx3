@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/gameobjnodes.h"
 #include "input/input.h"
 #include "main/gamestate.h"
 #include "main/sectionman.h"
@@ -1976,10 +1977,10 @@ struct sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode {
  *
  * @param flags  destructor flags, passed on to cObjNode__cObjNode
  */
-extern "C" void cVisualEffectsObjNode__cVisualEffectsObjNode(void* self, int flags)
+extern "C" void cVisualEffectsObjNode__cVisualEffectsObjNode(cVisualEffectsObjNode* self, int flags)
 {
-    *(void***)((char*)self + 0xC) = cVisualEffectsObjNode_vtbl;
-    void* obj = *(void**)((char*)self + 0x10);
+    self->mVtbl = cVisualEffectsObjNode_vtbl;
+    void* obj = self->VisualEffectsMan;
     if (obj != 0) {
         sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode* vt = *(sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode**)((char*)obj + 0x44);
         vt[1].fn((char*)obj + vt[1].delta, 3);
@@ -2006,9 +2007,9 @@ public:
  *
  * Slot +0x14 (update) of cVisualEffectsObjNode_vtbl.
  */
-extern "C" void cVisualEffectsObjNode_update(void* self)
+extern "C" void cVisualEffectsObjNode_update(cVisualEffectsObjNode* self)
 {
-    (*(cAppDtorVirt44**)((char*)self + 0x10))->update();
+    ((cAppDtorVirt44*)self->VisualEffectsMan)->update();
 }
 #endif
 
@@ -2020,9 +2021,9 @@ INCLUDE_ASM("main/ssxappdtor", cVisualEffectsObjNode_render);
  *
  * Slot +0x24 (render) of cVisualEffectsObjNode_vtbl.
  */
-extern "C" void cVisualEffectsObjNode_render(void* self)
+extern "C" void cVisualEffectsObjNode_render(cVisualEffectsObjNode* self)
 {
-    (*(cAppDtorVirt44**)((char*)self + 0x10))->render();
+    ((cAppDtorVirt44*)self->VisualEffectsMan)->render();
 }
 #endif
 
@@ -2804,10 +2805,10 @@ struct sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode {
  *
  * @param flags  destructor flags, passed on to cObjNode__cObjNode
  */
-extern "C" void cAIVisualEffectsObjNode__cAIVisualEffectsObjNode(void* self, int flags)
+extern "C" void cAIVisualEffectsObjNode__cAIVisualEffectsObjNode(cAIVisualEffectsObjNode* self, int flags)
 {
-    *(void***)((char*)self + 0xC) = cAIVisualEffectsObjNode_vtbl;
-    void* obj = *(void**)((char*)self + 0x10);
+    self->mVtbl = cAIVisualEffectsObjNode_vtbl;
+    void* obj = self->AIVisualEffectsMan;
     if (obj != 0) {
         sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode* vt = *(sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode**)((char*)obj + 0x4);
         vt[1].fn((char*)obj + vt[1].delta, 3);
@@ -2835,9 +2836,9 @@ public:
  *
  * Slot +0x14 (update) of cAIVisualEffectsObjNode_vtbl.
  */
-extern "C" void cAIVisualEffectsObjNode_update(void* self)
+extern "C" void cAIVisualEffectsObjNode_update(cAIVisualEffectsObjNode* self)
 {
-    (*(cAppDtorVirt04**)((char*)self + 0x10))->update();
+    ((cAppDtorVirt04*)self->AIVisualEffectsMan)->update();
 }
 #endif
 
@@ -2850,9 +2851,9 @@ INCLUDE_ASM("main/ssxappdtor", cAIVisualEffectsObjNode_render);
  *
  * Slot +0x24 (render) of cAIVisualEffectsObjNode_vtbl.
  */
-extern "C" void cAIVisualEffectsObjNode_render(void* self)
+extern "C" void cAIVisualEffectsObjNode_render(cAIVisualEffectsObjNode* self)
 {
-    (*(cAppDtorVirt04**)((char*)self + 0x10))->render();
+    ((cAppDtorVirt04*)self->AIVisualEffectsMan)->render();
 }
 #endif
 
@@ -2870,10 +2871,10 @@ extern void* cSSXStatsObjNode_vtbl[];
  *
  * @param flags  g++ destructor flags, passed to cObjNode__cObjNode(); bit 0 set frees the object's memory
  */
-extern "C" void cSSXStatsObjNode__cSSXStatsObjNode(void* self, int flags)
+extern "C" void cSSXStatsObjNode__cSSXStatsObjNode(cSSXStatsObjNode* self, int flags)
 {
-    *(void***)((char*)self + 0xC) = cSSXStatsObjNode_vtbl;
-    operator_delete(*(int**)((char*)self + 0x10));
+    self->mVtbl = cSSXStatsObjNode_vtbl;
+    operator_delete((int*)self->SSXStatsMan);
     cObjNode__cObjNode(self, flags);
 }
 #endif
@@ -2886,9 +2887,9 @@ INCLUDE_ASM("main/ssxappdtor", cSSXStatsObjNode_update);
 /**
  * Updates the stats node by calling cSSXStatsMan_update() on the object it holds (+0x10); that function is empty.
  */
-extern "C" void cSSXStatsObjNode_update(void* self)
+extern "C" void cSSXStatsObjNode_update(cSSXStatsObjNode* self)
 {
-    cSSXStatsMan_update(*(void**)((char*)self + 0x10));
+    cSSXStatsMan_update(self->SSXStatsMan);
 }
 #endif
 
@@ -2900,9 +2901,9 @@ INCLUDE_ASM("main/ssxappdtor", cSSXStatsObjNode_render);
 /**
  * Renders the stats node by calling cSSXStatsMan_render() on the object it holds (+0x10); that function is empty.
  */
-extern "C" void cSSXStatsObjNode_render(void* self)
+extern "C" void cSSXStatsObjNode_render(cSSXStatsObjNode* self)
 {
-    cSSXStatsMan_render(*(void**)((char*)self + 0x10));
+    cSSXStatsMan_render(self->SSXStatsMan);
 }
 #endif
 

@@ -9784,8 +9784,9 @@ INCLUDE_ASM("camera/camera", cCameraController_update__FPv);
 /**
  * Does nothing: the camera controller's update has an empty body.
  */
-void cCameraController_update(void* self)
+void cCameraController_update(void* vself)
 {
+    cCameraController* self = (cCameraController*)vself;
 }
 #endif
 
@@ -9839,7 +9840,7 @@ INCLUDE_ASM("camera/camera", cCameraController_getBlendType);
  * @param chaseCameraController  the controller
  * @return BlendType (an eCamBlendType)
  */
-extern "C" int cCameraController_getBlendType(cChaseCameraController* chaseCameraController) {
+extern "C" int cCameraController_getBlendType(cCameraController* chaseCameraController) {
     return (chaseCameraController->BlendType);
 }
 #endif
@@ -9854,7 +9855,7 @@ INCLUDE_ASM("camera/camera", cCameraController_getAlgorithmList);
  * @param chaseCameraController  the controller
  * @return AlgorithmList (a cCameraAlgoList pointer, returned as int)
  */
-extern "C" int cCameraController_getAlgorithmList(cChaseCameraController* chaseCameraController) {
+extern "C" int cCameraController_getAlgorithmList(cCameraController* chaseCameraController) {
     return ((int)chaseCameraController->AlgorithmList);
 }
 #endif

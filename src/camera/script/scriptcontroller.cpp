@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camera/script/scriptalgorithms.h"
 #include "camera/script/scriptcontroller.h"
 #include "camera/camera.h"
 #include "scripter/scriptobjcamera.h"
@@ -92,10 +93,10 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptCameraController_addCamera)
 #ifdef SKIP_ASM
 int cScriptPlayerEntity_GetType(void* self);
 void cScriptAlgorithm_setScriptObj(void* self, int val);
-extern "C" void* cScriptManualAlgorithm_cScriptManualAlgorithm(void* self);
-extern "C" void* cScriptPointAlgorithm_cScriptPointAlgorithm(void* self);
-extern "C" void* cScriptTargetAlgorithm_cScriptTargetAlgorithm(void* self);
-extern "C" void* cScriptRelativeAlgorithm_cScriptRelativeAlgorithm(void* self);
+extern "C" void* cScriptManualAlgorithm_cScriptManualAlgorithm(cScriptManualAlgorithm* self);
+extern "C" void* cScriptPointAlgorithm_cScriptPointAlgorithm(cScriptPointAlgorithm* self);
+extern "C" void* cScriptTargetAlgorithm_cScriptTargetAlgorithm(cScriptTargetAlgorithm* self);
+extern "C" void* cScriptRelativeAlgorithm_cScriptRelativeAlgorithm(cScriptRelativeAlgorithm* self);
 // PORT: cScriptCameraController_addAlgorithm is defined with (self, algo); this caller passes a third int argument.
 extern "C" void cScriptCameraController_addAlgorithm_3(void* self, void* algo, int a) __asm__("cScriptCameraController_addAlgorithm");
 extern char str_Manual_Script_Camera_Algo[];
@@ -118,16 +119,16 @@ extern "C" void cScriptCameraController_addCamera(cScriptCameraController* self,
     switch (cScriptPlayerEntity_GetType(*(void**)((char*)cam->mpCameraEntity + 8)))
     {
     case 0:
-        ctl = cScriptManualAlgorithm_cScriptManualAlgorithm(cMemMan_alloc(176, str_Manual_Script_Camera_Algo, 0x20000000, 0));
+        ctl = cScriptManualAlgorithm_cScriptManualAlgorithm((cScriptManualAlgorithm*)cMemMan_alloc(176, str_Manual_Script_Camera_Algo, 0x20000000, 0));
         break;
     case 1:
-        ctl = cScriptPointAlgorithm_cScriptPointAlgorithm(cMemMan_alloc(176, str_Target_Script_Camera_Algo, 0x20000000, 0));
+        ctl = cScriptPointAlgorithm_cScriptPointAlgorithm((cScriptPointAlgorithm*)cMemMan_alloc(176, str_Target_Script_Camera_Algo, 0x20000000, 0));
         break;
     case 2:
-        ctl = cScriptTargetAlgorithm_cScriptTargetAlgorithm(cMemMan_alloc(160, str_Subject_Script_Camera_Algo, 0x20000000, 0));
+        ctl = cScriptTargetAlgorithm_cScriptTargetAlgorithm((cScriptTargetAlgorithm*)cMemMan_alloc(160, str_Subject_Script_Camera_Algo, 0x20000000, 0));
         break;
     case 3:
-        ctl = cScriptRelativeAlgorithm_cScriptRelativeAlgorithm(cMemMan_alloc(160, str_Algorithmic_Script_Camera_Algo, 0x20000000, 0));
+        ctl = cScriptRelativeAlgorithm_cScriptRelativeAlgorithm((cScriptRelativeAlgorithm*)cMemMan_alloc(160, str_Algorithmic_Script_Camera_Algo, 0x20000000, 0));
         break;
     default:
         return;
@@ -285,7 +286,7 @@ struct sCamCtlK9418 {
  * @param object  the object being constructed (this)
  * @return the object
  */
-extern "C" void* cScriptAlgorithm_cScriptAlgorithm(void* object)
+extern "C" void* cScriptAlgorithm_cScriptAlgorithm(cScriptAlgorithm* object)
 {
     sCamCtlK9418* self = (sCamCtlK9418*)object;
     self->vtbl = D_0045BDE0;
@@ -315,9 +316,10 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptAlgorithm_setScriptObj__FPv
  *
  * @param val  the script camera object (On Tour cScriptObjCamera*)
  */
-void cScriptAlgorithm_setScriptObj(void* self, int val)
+void cScriptAlgorithm_setScriptObj(void* vself, int val)
 {
-    *(int*)((char*)self + 0x14) = val;
+    cScriptAlgorithm* self = (cScriptAlgorithm*)vself;
+    self->ScriptObj = (cScriptObjCamera*)val;
 }
 #endif
 
@@ -329,9 +331,10 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptAlgorithm_getScriptObj__FPv
  *
  * @return the script object (On Tour's cScriptObjCamera*); cScriptCameraController_update reads its time at +0x18
  */
-int cScriptAlgorithm_getScriptObj(void* self)
+int cScriptAlgorithm_getScriptObj(void* vself)
 {
-    return *(int*)((char*)self + 0x14);
+    cScriptAlgorithm* self = (cScriptAlgorithm*)vself;
+    return (int)self->ScriptObj;
 }
 #endif
 
@@ -342,7 +345,7 @@ struct cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4 { float x, y, z, w; }
 
 extern void* cScriptManualAlgorithm_vtbl[];
 extern cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4 t4vect_Origin;
-extern "C" void* cScriptAlgorithm_cScriptAlgorithm(void* self);
+extern "C" void* cScriptAlgorithm_cScriptAlgorithm(cScriptAlgorithm* self);
 extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 
 /**
@@ -354,17 +357,17 @@ extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
  *
  * @return @p self
  */
-extern "C" void* cScriptManualAlgorithm_cScriptManualAlgorithm(void* self)
+extern "C" void* cScriptManualAlgorithm_cScriptManualAlgorithm(cScriptManualAlgorithm* self)
 {
-    cScriptAlgorithm_cScriptAlgorithm(self);
-    *(void***)((char*)self + 0x10) = cScriptManualAlgorithm_vtbl;
-    cCameraJitterer_cCameraJitterer((char*)self + 0x74);
-    *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)((char*)self + 0x30) = t4vect_Origin;
-    *(int*)((char*)self + 0xC) = 86;
-    *(int*)((char*)self + 0x44) = 0;
-    *(int*)((char*)self + 0x48) = 0;
-    *(int*)((char*)self + 0x40) = 0;
-    return self;
+    cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
+    self->mVtbl = cScriptManualAlgorithm_vtbl;
+    cCameraJitterer_cCameraJitterer(&self->Jitterer);
+    *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)&self->Position = t4vect_Origin;
+    self->AlgorithmType = 86;
+    *(int*)&self->Heading = 0;
+    *(int*)&self->Pitch = 0;
+    *(int*)&self->Roll = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -388,9 +391,9 @@ public:
  *
  * Calls the object's virtual update() (vtable slot 5, cScriptManualAlgorithm_update).
  */
-extern "C" void cScriptManualAlgorithm_snap(cScriptCtlVirt* self)
+extern "C" void cScriptManualAlgorithm_snap(cScriptManualAlgorithm* self)
 {
-    self->update();
+    ((cScriptCtlVirt*)self)->update();
 }
 #endif
 
@@ -412,9 +415,9 @@ public:
  * Calls vtable slot 3 (cScriptManualAlgorithm_snap) with 0 as the subject id (cCameraAlgorithm::snap's argument in On
  * Tour), which the script algorithm's snap ignores.
  */
-extern "C" void cScriptManualAlgorithm_snapCurrent(cScriptCtlVirt2* self)
+extern "C" void cScriptManualAlgorithm_snapCurrent(cScriptManualAlgorithm* self)
 {
-    self->snap(0);
+    ((cScriptCtlVirt2*)self)->snap(0);
 }
 #endif
 
@@ -548,26 +551,26 @@ struct sScrCam_169570 {
  *
  * @param algorithm  the cScriptManualAlgorithm (this)
  */
-extern "C" void cScriptManualAlgorithm_update(char* algorithm)
+extern "C" void cScriptManualAlgorithm_update(cScriptManualAlgorithm* algorithm)
 {
     sScrCam_169570* self = (sScrCam_169570*)algorithm;
-    char* cam = *(char**)(*(char**)(*(char**)(algorithm + 0x14) + 0x14) + 0x8);
+    char* cam = *(char**)((char*)algorithm->ScriptObj->mpCameraEntity + 0x8);
     float* header = GetSSXCameraManualHeader(cam);
-    char* baseTransform = *(char**)(algorithm + 0x14) + 0x30;
+    char* baseTransform = (char*)&algorithm->ScriptObj->mBaseTransform;
     self->Near = header[0];
     self->Far = header[1];
     GetSSXCameraManualFrame(cam, &self->FrameInfo);
     self->View = self->FrameInfo.fov * 0.01745329424738884f;
     self->Position = sVec4_169570(self->FrameInfo.posX, self->FrameInfo.posY, self->FrameInfo.posZ, 1.0f);
     self->Position = mtxMulVec_169570(baseTransform, self->Position);
-    self->Roll = self->FrameInfo.roll * 0.01745329424738884f + *(float*)(*(char**)(algorithm + 0x14) + 0x70);
+    self->Roll = self->FrameInfo.roll * 0.01745329424738884f + algorithm->ScriptObj->mBaseRotX;
     self->Target = mtxMulVec_169570(baseTransform, sVec4_169570(self->FrameInfo.targetX, self->FrameInfo.targetY, self->FrameInfo.targetZ, 1.0f));
     sVec4_169570 delta = Sub_169570(self->Target, self->Position);
     self->Heading = Atan2_169570(delta.y, delta.x);
     float horizontalLen = Length_169570(sVec2_169570(delta.x, delta.y));
     self->Pitch = Atan2_169570(delta.z, horizontalLen);
-    cCameraJitterer_updatePositionalJitter(algorithm + 0x74, self->FrameInfo.jitterFocus);
-    cCameraJitterer_updateRollJitter(algorithm + 0x74, self->FrameInfo.jitterRoll);
+    cCameraJitterer_updatePositionalJitter(&algorithm->Jitterer, self->FrameInfo.jitterFocus);
+    cCameraJitterer_updateRollJitter(&algorithm->Jitterer, self->FrameInfo.jitterRoll);
 }
 #endif
 
@@ -743,14 +746,14 @@ static inline void RotAxis_9828(sM_9828* m, const sV_9828& axis, float angle)
  * @param algorithm  the cScriptManualAlgorithm (this)
  * @return the pose: position and rotation quaternion (On Tour tPose), returned by value
  */
-extern "C" sPair_9828 cScriptManualAlgorithm_getPose(char* algorithm)
+extern "C" sPair_9828 cScriptManualAlgorithm_getPose(cScriptManualAlgorithm* algorithm)
 {
     sM_9828 mat;
     vu0CopyMtx_9828(&mat, &D_004FF1A0_9828);
-    vu0TransMtx_9828(&mat, Add_9828(*(sV_9828*)(algorithm + 0x30), cCameraJitterer_getPositionalJitter_9828(algorithm + 0x74, *(float*)(algorithm + 0x44), *(float*)(algorithm + 0x48))));
-    RotAxis_9828(&mat, D_004FF140_9828, *(float*)(algorithm + 0x40) + cCameraJitterer_getRollJitter(algorithm + 0x74));
-    RotAxis_9828(&mat, D_004FF150_9828, -*(float*)(algorithm + 0x48));
-    RotAxis_9828(&mat, D_004FF160_9828, *(float*)(algorithm + 0x44));
+    vu0TransMtx_9828(&mat, Add_9828(*(sV_9828*)&algorithm->Position, cCameraJitterer_getPositionalJitter_9828((char*)&algorithm->Jitterer, algorithm->Heading, algorithm->Pitch)));
+    RotAxis_9828(&mat, D_004FF140_9828, algorithm->Roll + cCameraJitterer_getRollJitter(&algorithm->Jitterer));
+    RotAxis_9828(&mat, D_004FF150_9828, -algorithm->Pitch);
+    RotAxis_9828(&mat, D_004FF160_9828, algorithm->Heading);
     return tPose_tPose_9828(&mat);
 }
 #endif
@@ -760,7 +763,7 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptPointAlgorithm_cScriptPoint
 #ifdef SKIP_ASM
 extern void* cScriptPointAlgorithm_vtbl[];
 extern cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4 t4vect_Origin;
-extern "C" void* cScriptAlgorithm_cScriptAlgorithm(void* self);
+extern "C" void* cScriptAlgorithm_cScriptAlgorithm(cScriptAlgorithm* self);
 extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 
 /**
@@ -771,17 +774,17 @@ extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
  *
  * @return @p self
  */
-extern "C" void* cScriptPointAlgorithm_cScriptPointAlgorithm(void* self)
+extern "C" void* cScriptPointAlgorithm_cScriptPointAlgorithm(cScriptPointAlgorithm* self)
 {
-    cScriptAlgorithm_cScriptAlgorithm(self);
-    *(void***)((char*)self + 0x10) = cScriptPointAlgorithm_vtbl;
-    cCameraJitterer_cCameraJitterer((char*)self + 0x74);
-    *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)((char*)self + 0x30) = t4vect_Origin;
-    *(int*)((char*)self + 0xC) = 87;
-    *(int*)((char*)self + 0x40) = 0;
-    *(int*)((char*)self + 0x44) = 0;
-    *(int*)((char*)self + 0x48) = 0;
-    return self;
+    cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
+    self->mVtbl = cScriptPointAlgorithm_vtbl;
+    cCameraJitterer_cCameraJitterer(&self->Jitterer);
+    *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)&self->Position = t4vect_Origin;
+    self->AlgorithmType = 87;
+    *(int*)&self->Roll = 0;
+    *(int*)&self->Heading = 0;
+    *(int*)&self->Pitch = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -793,9 +796,9 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptPointAlgorithm_snap);
  *
  * Calls the object's virtual update() (vtable slot 5, cScriptPointAlgorithm_update).
  */
-extern "C" void cScriptPointAlgorithm_snap(cScriptCtlVirt* self)
+extern "C" void cScriptPointAlgorithm_snap(cScriptPointAlgorithm* self)
 {
-    self->update();
+    ((cScriptCtlVirt*)self)->update();
 }
 #endif
 
@@ -808,9 +811,9 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptPointAlgorithm_snapCurrent)
  * Calls vtable slot 3 (cScriptPointAlgorithm_snap) with 0 as the subject id (cCameraAlgorithm::snap's argument in On
  * Tour), which the script algorithm's snap ignores.
  */
-extern "C" void cScriptPointAlgorithm_snapCurrent(cScriptCtlVirt2* self)
+extern "C" void cScriptPointAlgorithm_snapCurrent(cScriptPointAlgorithm* self)
 {
-    self->snap(0);
+    ((cScriptCtlVirt2*)self)->snap(0);
 }
 #endif
 
@@ -927,19 +930,19 @@ struct sScrCam_169DB0 {
  *
  * @param algorithm  the cScriptPointAlgorithm (this)
  */
-extern "C" void cScriptPointAlgorithm_update(char* algorithm)
+extern "C" void cScriptPointAlgorithm_update(cScriptPointAlgorithm* algorithm)
 {
     sScrCam_169DB0* self = (sScrCam_169DB0*)algorithm;
-    char* cam = *(char**)(*(char**)(*(char**)(algorithm + 0x14) + 0x14) + 0x8);
+    char* cam = *(char**)((char*)algorithm->ScriptObj->mpCameraEntity + 0x8);
     float* header = GetSSXCameraTargetHeader(cam);
-    char* baseTransform = *(char**)(algorithm + 0x14) + 0x30;
+    char* baseTransform = (char*)&algorithm->ScriptObj->mBaseTransform;
     self->Near = header[0];
     self->Far = header[1];
     GetSSXCameraTargetFrame(cam, &self->FrameInfo);
     self->Near = header[0];
     self->Far = header[1];
     self->View = self->FrameInfo.fov * 0.01745329424738884f;
-    char* scriptObj = *(char**)(algorithm + 0x14);
+    char* scriptObj = (char*)algorithm->ScriptObj;
     self->Heading = self->FrameInfo.heading * 0.01745329424738884f + *(float*)(scriptObj + 0x78);
     self->Pitch = self->FrameInfo.pitch * 0.01745329424738884f + *(float*)(scriptObj + 0x74);
     self->Roll = self->FrameInfo.roll * 0.01745329424738884f + *(float*)(scriptObj + 0x70);
@@ -949,8 +952,8 @@ extern "C" void cScriptPointAlgorithm_update(char* algorithm)
     fSinCos(&sinPitch, &cosPitch, self->Pitch);
     sVec4_169DB0 look(cosPitch * cosHead, cosPitch * sinHead, sinPitch, 0.0f);
     self->Position = Sub_169DB0(self->Target, Scale_169DB0(look, self->FrameInfo.targetDistance));
-    cCameraJitterer_updatePositionalJitter(algorithm + 0x74, self->FrameInfo.jitterFocus);
-    cCameraJitterer_updateRollJitter(algorithm + 0x74, self->FrameInfo.jitterRoll);
+    cCameraJitterer_updatePositionalJitter(&algorithm->Jitterer, self->FrameInfo.jitterFocus);
+    cCameraJitterer_updateRollJitter(&algorithm->Jitterer, self->FrameInfo.jitterRoll);
 }
 #endif
 
@@ -1126,14 +1129,14 @@ static inline void RotAxis_9F88(sM_9F88* m, const sV_9F88& axis, float angle)
  * @param algorithm  the cScriptPointAlgorithm (this)
  * @return the pose: position and rotation quaternion (On Tour tPose), returned by value
  */
-extern "C" sPair_9F88 cScriptPointAlgorithm_getPose(char* algorithm)
+extern "C" sPair_9F88 cScriptPointAlgorithm_getPose(cScriptPointAlgorithm* algorithm)
 {
     sM_9F88 mat;
     vu0CopyMtx_9F88(&mat, &D_004FF1A0_9F88);
-    vu0TransMtx_9F88(&mat, Add_9F88(*(sV_9F88*)(algorithm + 0x30), cCameraJitterer_getPositionalJitter_9F88(algorithm + 0x74, *(float*)(algorithm + 0x44), *(float*)(algorithm + 0x48))));
-    RotAxis_9F88(&mat, D_004FF140_9F88, *(float*)(algorithm + 0x40) + cCameraJitterer_getRollJitter(algorithm + 0x74));
-    RotAxis_9F88(&mat, D_004FF150_9F88, -*(float*)(algorithm + 0x48));
-    RotAxis_9F88(&mat, D_004FF160_9F88, *(float*)(algorithm + 0x44));
+    vu0TransMtx_9F88(&mat, Add_9F88(*(sV_9F88*)&algorithm->Position, cCameraJitterer_getPositionalJitter_9F88((char*)&algorithm->Jitterer, algorithm->Heading, algorithm->Pitch)));
+    RotAxis_9F88(&mat, D_004FF140_9F88, algorithm->Roll + cCameraJitterer_getRollJitter(&algorithm->Jitterer));
+    RotAxis_9F88(&mat, D_004FF150_9F88, -algorithm->Pitch);
+    RotAxis_9F88(&mat, D_004FF160_9F88, algorithm->Heading);
     return tPose_tPose_9F88(&mat);
 }
 #endif
@@ -1143,7 +1146,7 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptTargetAlgorithm_cScriptTarg
 #ifdef SKIP_ASM
 extern void* cScriptTargetAlgorithm_vtbl[];
 extern cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4 t4vect_Origin;
-extern "C" void* cScriptAlgorithm_cScriptAlgorithm(void* self);
+extern "C" void* cScriptAlgorithm_cScriptAlgorithm(cScriptAlgorithm* self);
 extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 
 /**
@@ -1154,17 +1157,17 @@ extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
  *
  * @return @p self
  */
-extern "C" void* cScriptTargetAlgorithm_cScriptTargetAlgorithm(void* self)
+extern "C" void* cScriptTargetAlgorithm_cScriptTargetAlgorithm(cScriptTargetAlgorithm* self)
 {
-    cScriptAlgorithm_cScriptAlgorithm(self);
-    *(void***)((char*)self + 0x10) = cScriptTargetAlgorithm_vtbl;
-    cCameraJitterer_cCameraJitterer((char*)self + 0x70);
-    *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)((char*)self + 0x30) = t4vect_Origin;
-    *(int*)((char*)self + 0xC) = 88;
-    *(int*)((char*)self + 0x40) = 0;
-    *(int*)((char*)self + 0x44) = 0;
-    *(int*)((char*)self + 0x48) = 0;
-    return self;
+    cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
+    self->mVtbl = cScriptTargetAlgorithm_vtbl;
+    cCameraJitterer_cCameraJitterer(&self->Jitterer);
+    *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)&self->Position = t4vect_Origin;
+    self->AlgorithmType = 88;
+    *(int*)&self->Roll = 0;
+    *(int*)&self->Heading = 0;
+    *(int*)&self->Pitch = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -1176,9 +1179,9 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptTargetAlgorithm_snap);
  *
  * Calls the object's virtual update() (vtable slot 5, cScriptTargetAlgorithm_update).
  */
-extern "C" void cScriptTargetAlgorithm_snap(cScriptCtlVirt* self)
+extern "C" void cScriptTargetAlgorithm_snap(cScriptTargetAlgorithm* self)
 {
-    self->update();
+    ((cScriptCtlVirt*)self)->update();
 }
 #endif
 
@@ -1191,9 +1194,9 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptTargetAlgorithm_snapCurrent
  * Calls vtable slot 3 (cScriptTargetAlgorithm_snap) with 0 as the subject id (cCameraAlgorithm::snap's argument in On
  * Tour), which the script algorithm's snap ignores.
  */
-extern "C" void cScriptTargetAlgorithm_snapCurrent(cScriptCtlVirt2* self)
+extern "C" void cScriptTargetAlgorithm_snapCurrent(cScriptTargetAlgorithm* self)
 {
-    self->snap(0);
+    ((cScriptCtlVirt2*)self)->snap(0);
 }
 #endif
 
@@ -1372,12 +1375,12 @@ struct sVEp_16A510 {
  *
  * @param algorithm  the cScriptTargetAlgorithm (this)
  */
-extern "C" void cScriptTargetAlgorithm_update(char* algorithm)
+extern "C" void cScriptTargetAlgorithm_update(cScriptTargetAlgorithm* algorithm)
 {
     sScrCam_16A510* self = (sScrCam_16A510*)algorithm;
-    char* cam = *(char**)(*(char**)(*(char**)(algorithm + 0x14) + 0x14) + 0x8);
+    char* cam = *(char**)((char*)algorithm->ScriptObj->mpCameraEntity + 0x8);
     float* header = GetSSXCameraSubjectHeader(cam);
-    char* baseTransform = *(char**)(algorithm + 0x14) + 0x30;
+    char* baseTransform = (char*)&algorithm->ScriptObj->mBaseTransform;
     char* rider = cSSXScriptEngine_GetSubjectRider(ScriptEngine, ((signed char*)header)[0x22], *(int*)(cam + 8));
     if (rider == 0) {
         rider = (char*)SSXApp->Game->AI->Riders[0];
@@ -1388,7 +1391,7 @@ extern "C" void cScriptTargetAlgorithm_update(char* algorithm)
     char* obj = rider + 0x6C0;
     sVec4_16A510 rot = *(sVec4_16A510*)(*(char**)(rider + 0x780) + 0x140);
     self->View = self->FrameInfo.fov * 0.01745329424738884f;
-    self->Roll = self->FrameInfo.roll * 0.01745329424738884f + *(float*)(*(char**)(algorithm + 0x14) + 0x70);
+    self->Roll = self->FrameInfo.roll * 0.01745329424738884f + algorithm->ScriptObj->mBaseRotX;
     self->Position = sVec4_16A510(self->FrameInfo.posX, self->FrameInfo.posY, self->FrameInfo.posZ, self->Position.w);
     self->Position = mtxMulVec_16A510(baseTransform, self->Position);
     sVEp_16A510* vt = *(sVEp_16A510**)obj;
@@ -1399,8 +1402,8 @@ extern "C" void cScriptTargetAlgorithm_update(char* algorithm)
     self->Heading = Atan2_16A510(look.y, look.x);
     float horizontalLen = Length_16A510(sVec2_16A510(look.x, look.y));
     self->Pitch = Atan2_16A510(look.z, horizontalLen);
-    cCameraJitterer_updatePositionalJitter(algorithm + 0x70, self->FrameInfo.jitterFocus);
-    cCameraJitterer_updateRollJitter(algorithm + 0x70, self->FrameInfo.jitterRoll);
+    cCameraJitterer_updatePositionalJitter(&algorithm->Jitterer, self->FrameInfo.jitterFocus);
+    cCameraJitterer_updateRollJitter(&algorithm->Jitterer, self->FrameInfo.jitterRoll);
 }
 #endif
 
@@ -1576,14 +1579,14 @@ static inline void RotAxis_A868(sM_A868* m, const sV_A868& axis, float angle)
  * @param algorithm  the cScriptTargetAlgorithm (this)
  * @return the pose: position and rotation quaternion (On Tour tPose), returned by value
  */
-extern "C" sPair_A868 cScriptTargetAlgorithm_getPose(char* algorithm)
+extern "C" sPair_A868 cScriptTargetAlgorithm_getPose(cScriptTargetAlgorithm* algorithm)
 {
     sM_A868 mat;
     vu0CopyMtx_A868(&mat, &D_004FF1A0_A868);
-    vu0TransMtx_A868(&mat, Add_A868(*(sV_A868*)(algorithm + 0x30), cCameraJitterer_getPositionalJitter_A868(algorithm + 0x70, *(float*)(algorithm + 0x44), *(float*)(algorithm + 0x48))));
-    RotAxis_A868(&mat, D_004FF140_A868, *(float*)(algorithm + 0x40) + cCameraJitterer_getRollJitter(algorithm + 0x70));
-    RotAxis_A868(&mat, D_004FF150_A868, -*(float*)(algorithm + 0x48));
-    RotAxis_A868(&mat, D_004FF160_A868, *(float*)(algorithm + 0x44));
+    vu0TransMtx_A868(&mat, Add_A868(*(sV_A868*)&algorithm->Position, cCameraJitterer_getPositionalJitter_A868((char*)&algorithm->Jitterer, algorithm->Heading, algorithm->Pitch)));
+    RotAxis_A868(&mat, D_004FF140_A868, algorithm->Roll + cCameraJitterer_getRollJitter(&algorithm->Jitterer));
+    RotAxis_A868(&mat, D_004FF150_A868, -algorithm->Pitch);
+    RotAxis_A868(&mat, D_004FF160_A868, algorithm->Heading);
     return tPose_tPose_A868(&mat);
 }
 #endif
@@ -1593,7 +1596,7 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptRelativeAlgorithm_cScriptRe
 #ifdef SKIP_ASM
 extern void* cScriptRelativeAlgorithm_vtbl[];
 extern cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4 t4vect_Origin;
-extern "C" void* cScriptAlgorithm_cScriptAlgorithm(void* self);
+extern "C" void* cScriptAlgorithm_cScriptAlgorithm(cScriptAlgorithm* self);
 extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
 
 /**
@@ -1604,17 +1607,17 @@ extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
  *
  * @return @p self
  */
-extern "C" void* cScriptRelativeAlgorithm_cScriptRelativeAlgorithm(void* self)
+extern "C" void* cScriptRelativeAlgorithm_cScriptRelativeAlgorithm(cScriptRelativeAlgorithm* self)
 {
-    cScriptAlgorithm_cScriptAlgorithm(self);
-    *(void***)((char*)self + 0x10) = cScriptRelativeAlgorithm_vtbl;
-    cCameraJitterer_cCameraJitterer((char*)self + 0x70);
-    *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)((char*)self + 0x30) = t4vect_Origin;
-    *(int*)((char*)self + 0xC) = 89;
-    *(int*)((char*)self + 0x40) = 0;
-    *(int*)((char*)self + 0x44) = 0;
-    *(int*)((char*)self + 0x48) = 0;
-    return self;
+    cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
+    self->mVtbl = cScriptRelativeAlgorithm_vtbl;
+    cCameraJitterer_cCameraJitterer(&self->Jitterer);
+    *(cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4*)&self->Position = t4vect_Origin;
+    self->AlgorithmType = 89;
+    *(int*)&self->Roll = 0;
+    *(int*)&self->Heading = 0;
+    *(int*)&self->Pitch = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -1800,16 +1803,16 @@ struct sVEp_16AD98 {
  *
  * @param algorithm  the cScriptRelativeAlgorithm (this)
  */
-extern "C" void cScriptRelativeAlgorithm_snap(char* algorithm)
+extern "C" void cScriptRelativeAlgorithm_snap(cScriptRelativeAlgorithm* algorithm)
 {
     sScrCam_16AD98* self = (sScrCam_16AD98*)algorithm;
-    char* cam = *(char**)(*(char**)(*(char**)(algorithm + 0x14) + 0x14) + 0x8);
+    char* cam = *(char**)((char*)algorithm->ScriptObj->mpCameraEntity + 0x8);
     float* header = GetSSXCameraAlgorithmicHeader(cam);
     GetSSXCameraAlgorithmicFrame(cam, &self->FrameInfo);
     self->Near = header[0];
     self->Far = header[1];
     self->View = self->FrameInfo.fov * 0.01745329424738884f;
-    self->Roll = self->FrameInfo.roll * 0.01745329424738884f + *(float*)(*(char**)(algorithm + 0x14) + 0x70);
+    self->Roll = self->FrameInfo.roll * 0.01745329424738884f + algorithm->ScriptObj->mBaseRotX;
     char* rider = cSSXScriptEngine_GetSubjectRider(ScriptEngine, ((signed char*)header)[0x1D], *(int*)(cam + 8));
     if (rider == 0) {
         rider = (char*)SSXApp->Game->AI->Riders[0];
@@ -1837,15 +1840,15 @@ extern "C" void cScriptRelativeAlgorithm_snap(char* algorithm)
         k = self->FrameInfo.optimalTargetDistance;
     }
     float sinHead, cosHead, sinPitch, cosPitch;
-    char* scriptObj = *(char**)(algorithm + 0x14);
+    char* scriptObj = (char*)algorithm->ScriptObj;
     headingAngle += *(float*)(scriptObj + 0x78);
     pitchAngle += *(float*)(scriptObj + 0x74);
     fSinCos(&sinHead, &cosHead, headingAngle);
     fSinCos(&sinPitch, &cosPitch, pitchAngle);
     sVec4_16AD98 look(cosPitch * cosHead, cosPitch * sinHead, -sinPitch, 0.0f);
     self->Position = Sub_16AD98(self->Target, Scale_16AD98(look, k));
-    cCameraJitterer_updatePositionalJitter(algorithm + 0x70, self->FrameInfo.jitterFocus);
-    cCameraJitterer_updateRollJitter(algorithm + 0x70, self->FrameInfo.jitterRoll);
+    cCameraJitterer_updatePositionalJitter(&algorithm->Jitterer, self->FrameInfo.jitterFocus);
+    cCameraJitterer_updateRollJitter(&algorithm->Jitterer, self->FrameInfo.jitterRoll);
 }
 #endif
 
@@ -1858,9 +1861,9 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptRelativeAlgorithm_snapCurre
  * Calls vtable slot 3 (cScriptRelativeAlgorithm_snap) with 0 as the subject id (cCameraAlgorithm::snap's argument in On
  * Tour), which the script algorithm's snap ignores.
  */
-extern "C" void cScriptRelativeAlgorithm_snapCurrent(cScriptCtlVirt2* self)
+extern "C" void cScriptRelativeAlgorithm_snapCurrent(cScriptRelativeAlgorithm* self)
 {
-    self->snap(0);
+    ((cScriptCtlVirt2*)self)->snap(0);
 }
 #endif
 
@@ -2080,10 +2083,10 @@ static inline float Length4_B180(const sVec4_B180& v)
  *
  * @param algorithm  the cScriptRelativeAlgorithm (this)
  */
-extern "C" void cScriptRelativeAlgorithm_update(char* algorithm)
+extern "C" void cScriptRelativeAlgorithm_update(cScriptRelativeAlgorithm* algorithm)
 {
     sScrCam_B180* self = (sScrCam_B180*)algorithm;
-    char* cam = *(char**)(*(char**)(*(char**)(algorithm + 0x14) + 0x14) + 0x8);
+    char* cam = *(char**)((char*)algorithm->ScriptObj->mpCameraEntity + 0x8);
     float* header = GetSSXCameraAlgorithmicHeader(cam);
     char* rider = cSSXScriptEngine_GetSubjectRider(ScriptEngine, ((signed char*)header)[0x1D], *(int*)(cam + 8));
     if (rider == 0) {
@@ -2093,7 +2096,7 @@ extern "C" void cScriptRelativeAlgorithm_update(char* algorithm)
     self->Far = header[1];
     GetSSXCameraAlgorithmicFrame(cam, &self->FrameInfo);
     self->View = self->FrameInfo.fov * 0.01745329424738884f;
-    self->Roll = self->FrameInfo.roll * 0.01745329424738884f + *(float*)(*(char**)(algorithm + 0x14) + 0x70);
+    self->Roll = self->FrameInfo.roll * 0.01745329424738884f + algorithm->ScriptObj->mBaseRotX;
     float pitchAngle;
     float headingAngle;
     float k;
@@ -2111,7 +2114,7 @@ extern "C" void cScriptRelativeAlgorithm_update(char* algorithm)
         k = self->FrameInfo.optimalTargetDistance;
     }
     char* obj = rider + 0x6C0;
-    char* scriptObj = *(char**)(algorithm + 0x14);
+    char* scriptObj = (char*)algorithm->ScriptObj;
     pitchAngle += *(float*)(scriptObj + 0x74);
     headingAngle += *(float*)(scriptObj + 0x78);
     sVec4_B180 rot = *(sVec4_B180*)(*(char**)(rider + 0x780) + 0x140);
@@ -2138,8 +2141,8 @@ extern "C" void cScriptRelativeAlgorithm_update(char* algorithm)
     self->Heading = Atan2_B180(toTarget.y, toTarget.x);
     float horizontalLen = Length_B180(sVec2_B180(toTarget.x, toTarget.y));
     self->Pitch = Atan2_B180(toTarget.z, horizontalLen);
-    cCameraJitterer_updatePositionalJitter(algorithm + 0x70, self->FrameInfo.jitterFocus);
-    cCameraJitterer_updateRollJitter(algorithm + 0x70, self->FrameInfo.jitterRoll);
+    cCameraJitterer_updatePositionalJitter(&algorithm->Jitterer, self->FrameInfo.jitterFocus);
+    cCameraJitterer_updateRollJitter(&algorithm->Jitterer, self->FrameInfo.jitterRoll);
 }
 #endif
 
@@ -2315,14 +2318,14 @@ static inline void RotAxis_B7B8(sM_B7B8* m, const sV_B7B8& axis, float angle)
  * @param algorithm  the cScriptRelativeAlgorithm (this)
  * @return the pose: position and rotation quaternion (On Tour tPose), returned by value
  */
-extern "C" sPair_B7B8 cScriptRelativeAlgorithm_getPose(char* algorithm)
+extern "C" sPair_B7B8 cScriptRelativeAlgorithm_getPose(cScriptRelativeAlgorithm* algorithm)
 {
     sM_B7B8 mat;
     vu0CopyMtx_B7B8(&mat, &D_004FF1A0_B7B8);
-    vu0TransMtx_B7B8(&mat, Add_B7B8(*(sV_B7B8*)(algorithm + 0x30), cCameraJitterer_getPositionalJitter_B7B8(algorithm + 0x70, *(float*)(algorithm + 0x44), *(float*)(algorithm + 0x48))));
-    RotAxis_B7B8(&mat, D_004FF140_B7B8, *(float*)(algorithm + 0x40) + cCameraJitterer_getRollJitter(algorithm + 0x70));
-    RotAxis_B7B8(&mat, D_004FF150_B7B8, -*(float*)(algorithm + 0x48));
-    RotAxis_B7B8(&mat, D_004FF160_B7B8, *(float*)(algorithm + 0x44));
+    vu0TransMtx_B7B8(&mat, Add_B7B8(*(sV_B7B8*)&algorithm->Position, cCameraJitterer_getPositionalJitter_B7B8((char*)&algorithm->Jitterer, algorithm->Heading, algorithm->Pitch)));
+    RotAxis_B7B8(&mat, D_004FF140_B7B8, algorithm->Roll + cCameraJitterer_getRollJitter(&algorithm->Jitterer));
+    RotAxis_B7B8(&mat, D_004FF150_B7B8, -algorithm->Pitch);
+    RotAxis_B7B8(&mat, D_004FF160_B7B8, algorithm->Heading);
     return tPose_tPose_B7B8(&mat);
 }
 #endif

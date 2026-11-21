@@ -1,4 +1,5 @@
 #include "common.h"
+#include "visualfx/transitionobj.h"
 #include "visualfx/cutscenetransitionman.h"
 #include "ai/riderhandler.h"
 #include "render/ps2graphicsman.h"
@@ -1774,10 +1775,10 @@ extern "C" void func_002EB938(sBTRect4* pos, sBTRect4* rect, sBTRect4* color, fl
  *
  * @param amount  how far the fade has covered the screen, 0..1 (On Tour d)
  */
-extern "C" void cFade_TObj_Draw(void* self, float amount)
+extern "C" void cFade_TObj_Draw(cFade_TObj* self, float amount)
 {
-    sBTRect4 color = *(sBTRect4*)((char*)self + 4);
-    color.x = ((sBTRect4*)((char*)self + 4))->x * amount;
+    sBTRect4 color = *(sBTRect4*)&self->mColour;
+    color.x = ((sBTRect4*)(&self->mColour))->x * amount;
     sBTRect4 pos;
     pos.x = 0.0f;
     pos.y = 0.0f;
@@ -1821,15 +1822,15 @@ struct cWipe_TObj_cWipe_TObj_sObj {
  * @param verticalDir  vertical direction: -1, 0 or 1
  * @return @p self
  */
-extern "C" cWipe_TObj_cWipe_TObj_sObj* cWipe_TObj_cWipe_TObj(cWipe_TObj_cWipe_TObj_sObj* self, const cWipe_TObj_cWipe_TObj_sVec4& colour, int horizontalDir, int verticalDir)
+extern "C" cWipe_TObj_cWipe_TObj_sObj* cWipe_TObj_cWipe_TObj(cWipe_TObj* self, const cWipe_TObj_cWipe_TObj_sVec4& colour, int horizontalDir, int verticalDir)
 {
     cWipe_TObj_cWipe_TObj_sVec4 vecCopy = colour;
     cTransitionObj_cTransitionObj(self);
-    self->vtable = cWipe_TObj_vtbl;
-    self->v = vecCopy;
-    self->a = horizontalDir;
-    self->b = verticalDir;
-    return self;
+    self->mVtbl = cWipe_TObj_vtbl;
+    (*(cWipe_TObj_cWipe_TObj_sVec4*)&self->mColour) = vecCopy;
+    self->mHDir = horizontalDir;
+    self->mVDir = verticalDir;
+    return ((cWipe_TObj_cWipe_TObj_sObj*)self);
 }
 #endif
 
@@ -1852,11 +1853,11 @@ extern "C" void func_002EB938(sBTRect4* pos, sBTRect4* rect, sBTRect4* color, fl
  *
  * @param amount  how far the wipe has covered the screen, 0..1 (On Tour d)
  */
-extern "C" void cWipe_TObj_Draw(char* self, float amount)
+extern "C" void cWipe_TObj_Draw(cWipe_TObj* self, float amount)
 {
     float k = 1.0f - amount;
-    float dx = (float)*(int*)(self + 0x14) * k * 640.0f;
-    float dy = (float)*(int*)(self + 0x18) * k * -480.0f;
+    float dx = (float)self->mHDir * k * 640.0f;
+    float dy = (float)self->mVDir * k * -480.0f;
     float w = 640.0f;
     float uStart, uEnd;
     if (dx < 0.0f) {
@@ -1893,7 +1894,7 @@ extern "C" void cWipe_TObj_Draw(char* self, float amount)
     rect.y = vStart;
     rect.z = uw;
     rect.w = vh;
-    func_002EB938(&pos, &rect, (sBTRect4*)(self + 4), 0.0f);
+    func_002EB938(&pos, &rect, (sBTRect4*)(&self->mColour), 0.0f);
 }
 #endif
 
@@ -1916,14 +1917,14 @@ extern void* cCircle_TObj_vtbl[];
  * @param posY  centre y in screen units (0..480)
  * @return @p self
  */
-extern "C" void* func_002EBD88(void* self, sTrailVec_002EBD88 rect, float posX, float posY)
+extern "C" void* func_002EBD88(cCircle_TObj* self, sTrailVec_002EBD88 rect, float posX, float posY)
 {
     cTransitionObj_cTransitionObj(self);
     *(void***)self = cCircle_TObj_vtbl;
-    *(sTrailVec_002EBD88*)((char*)self + 4) = rect;
-    *(float*)((char*)self + 0x14) = posX;
-    *(float*)((char*)self + 0x18) = posY;
-    return self;
+    *(sTrailVec_002EBD88*)&self->mScreenColour = rect;
+    self->mOriginX = posX;
+    self->mOriginY = posY;
+    return ((void*)self);
 }
 #endif
 
@@ -1948,18 +1949,18 @@ struct sBtRectBE20 { float x, y, w, h; };
  * @param rect  the colour (alpha first)
  * @return @p self
  */
-extern "C" void* cCircle_TObj_cCircle_TObj(void* self, sBtRectBE20 rect)
+extern "C" void* cCircle_TObj_cCircle_TObj(cCircle_TObj* self, sBtRectBE20 rect)
 {
     cTransitionObj_cTransitionObj_r(self);
     *(void***)self = cCircle_TObj_vtbl;
-    *(sBtRectBE20*)((char*)self + 0x4) = rect;
+    *(sBtRectBE20*)&self->mScreenColour = rect;
     unsigned int randX = BXrand() % 1000;
-    float* outX = (float*)((char*)self + 0x14);
+    float* outX = (float*)(&self->mOriginX);
     *outX = (float)randX * 0.64000004529953f;
     unsigned int randY = BXrand() % 1000;
-    float* outY = (float*)((char*)self + 0x18);
+    float* outY = (float*)(&self->mOriginY);
     *outY = (float)randY * 0.48000001907348633f;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2080,11 +2081,11 @@ static inline void BuildArc_C060(float* ys, float* xs, const float& cx, float r,
  *
  * @param amount  how far the circle has closed, 0..1 (On Tour delta)
  */
-extern "C" void cCircle_TObj_Draw(char* self, float amount)
+extern "C" void cCircle_TObj_Draw(cCircle_TObj* self, float amount)
 {
     float radius = (1.0f - amount) * 800.0f;
-    float x1 = *(float*)(self + 0x14) + radius;
-    float x0 = *(float*)(self + 0x14) - radius;
+    float x1 = self->mOriginX + radius;
+    float x0 = self->mOriginX - radius;
     sBTRect4 pos;
     sBTRect4 rect;
     pos.x = 0.0f;
@@ -2095,7 +2096,7 @@ extern "C" void cCircle_TObj_Draw(char* self, float amount)
     rect.x = D_004A3B30;
     rect.y = D_004A3B3C;
     rect.w = D_004A3B44;
-    func_002EB938(&pos, &rect, (sBTRect4*)(self + 4), 0.0f);
+    func_002EB938(&pos, &rect, (sBTRect4*)(&self->mScreenColour), 0.0f);
     float w = 640.0f - x1;
     pos.x = x1;
     pos.y = 0.0f;
@@ -2105,25 +2106,25 @@ extern "C" void cCircle_TObj_Draw(char* self, float amount)
     rect.y = D_004A3B3C;
     rect.z = D_004A3B30 + D_004A3B38 * w * 0.0015625000232830644f;
     rect.w = D_004A3B44;
-    func_002EB938(&pos, &rect, (sBTRect4*)(self + 4), 0.0f);
+    func_002EB938(&pos, &rect, (sBTRect4*)(&self->mScreenColour), 0.0f);
 
     float ys[40];
     float xs[40];
-    BuildArc_C060(ys, xs, *(float*)(self + 0x14), radius, 0.08055365830659866f); // pi / 39
+    BuildArc_C060(ys, xs, self->mOriginX, radius, 0.08055365830659866f); // pi / 39
 
     sBTVert_C060 top[80];
     sBTVert_C060 bot[80];
     for (int i = 0; i < 40; i++) {
         sBTVert_C060* topVert = top + i * 2;
-        InitVertex_C060(topVert->f, (float*)(self + 4), xs[i], 0.0f);
+        InitVertex_C060(topVert->f, (float*)(&self->mScreenColour), xs[i], 0.0f);
         sBTVert_C060* topArcVert = top + i * 2 + 1;
-        float y0 = clampBT(*(float*)(self + 0x18) - ys[i], 0.0f, 480.0f);
-        InitVertex_C060(topArcVert->f, (float*)(self + 4), xs[i], y0);
-        float y1 = clampBT(*(float*)(self + 0x18) + ys[i], 0.0f, 480.0f);
+        float y0 = clampBT(self->mOriginY - ys[i], 0.0f, 480.0f);
+        InitVertex_C060(topArcVert->f, (float*)(&self->mScreenColour), xs[i], y0);
+        float y1 = clampBT(self->mOriginY + ys[i], 0.0f, 480.0f);
         sBTVert_C060* botArcVert = bot + i * 2;
-        InitVertex_C060(botArcVert->f, (float*)(self + 4), xs[i], y1);
+        InitVertex_C060(botArcVert->f, (float*)(&self->mScreenColour), xs[i], y1);
         sBTVert_C060* botBaseVert = bot + i * 2 + 1;
-        InitVertex_C060(botBaseVert->f, (float*)(self + 4), xs[i], 480.0f);
+        InitVertex_C060(botBaseVert->f, (float*)(&self->mScreenColour), xs[i], 480.0f);
     }
 
     char* obj = (char*)cGraphicsMan_TheGraphicsMan;

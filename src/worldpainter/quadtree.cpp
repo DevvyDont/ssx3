@@ -1,4 +1,5 @@
 #include "common.h"
+#include "util/localefile.h"
 #include "util/bxps2memcard.h"
 #include "worldpainter/quadtree.h"
 #include "main/ssxapp.h"
@@ -4632,9 +4633,9 @@ extern "C" void MEM_free(void* p);
  *
  * @param flags  bit 0 set: also free the object
  */
-extern "C" void cLocaleFile__cLocaleFile(void* self, int flags)
+extern "C" void cLocaleFile__cLocaleFile(cLocaleFile* self, int flags)
 {
-    void* buffer = *(void**)((char*)self + 0x4);
+    void* buffer = self->mpStringTableData;
     if (buffer != 0) {
         MEM_free(buffer);
     }
@@ -4655,9 +4656,10 @@ INCLUDE_ASM("worldpainter/quadtree", cLocaleFile_getStringByIndex__FPv);
  *
  * @return LOCALE_getstr's result (the string, or 0)
  */
-void* cLocaleFile_getStringByIndex(void* self)
+void* cLocaleFile_getStringByIndex(void* vself)
 {
-    return LOCALE_getstr(*(int*)((char*)self + 0x4));
+    cLocaleFile* self = (cLocaleFile*)vself;
+    return LOCALE_getstr((int)self->mpStringTableData);
 }
 #endif
 

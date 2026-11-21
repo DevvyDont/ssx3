@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/scriptobjgs.h"
 #include "scripter/scriptobjevent.h"
 #include "scripter/scriptobjrider.h"
 #include "scripter/scriptobjcammgr.h"
@@ -3529,13 +3530,13 @@ extern void* cScriptObjGS_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cScriptObjGS_cScriptObjGS(void* self)
+extern "C" void* cScriptObjGS_cScriptObjGS(cScriptObjGS* self)
 {
     cScriptEntity_cScriptEntity(self);
-    cScriptObject_cScriptObject((char*)self + 0xC, 4);
-    *(void***)((char*)self + 0x18) = D_00482318;
+    cScriptObject_cScriptObject(&self->mObjType, 4);
+    self->mScriptObjectVtbl = D_00482318;
     *(void***)self = cScriptObjGS_vtbl;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -3548,9 +3549,9 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjGS_OnEndObjectUse);
  * Drops the game-state script object's use count: cScriptObject_OnEndObjectUse on its cScriptObject part (+0xC). The player ID
  * argument is not declared.
  */
-extern "C" void cScriptObjGS_OnEndObjectUse(void* self)
+extern "C" void cScriptObjGS_OnEndObjectUse(cScriptObjGS* self)
 {
-    cScriptObject_OnEndObjectUse((char*)self + 0xc);
+    cScriptObject_OnEndObjectUse(&self->mObjType);
 }
 #endif
 
@@ -3564,7 +3565,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjGS_IsMatchingEntity);
  * @param type  the entity type
  * @return 1 for type 6, else 0
  */
-extern "C" int cScriptObjGS_IsMatchingEntity(void* self, cScriptPlayerEntity* entity, int type)
+extern "C" int cScriptObjGS_IsMatchingEntity(cScriptObjGS* self, cScriptPlayerEntity* entity, int type)
 {
     return type == 6;
 }
@@ -3586,7 +3587,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjGS_OnInSeqKeyEvent);
  *
  * @param entity  the script player entity the event is for (On Tour cScriptPlayerEntity* pEntity)
  */
-extern "C" void cScriptObjGS_OnInSeqKeyEvent(void* self, void* entity)
+extern "C" void cScriptObjGS_OnInSeqKeyEvent(cScriptObjGS* self, void* entity)
 {
     char buf[16];
     GetSSXGameStateManagerFrame(entity, buf);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/scriptobjgs.h"
 #include "scripter/scriptentitycam.h"
 #include "scripter/scriptobjevent.h"
 #include "scripter/scriptobjtransition.h"
@@ -490,10 +491,10 @@ extern char D_00482318[];
  * @param gsObject  the object (cSSXScriptEngine::mObjectGameState)
  * @param deleteFlags  destructor flags; bit 0 frees the memory
  */
-extern "C" void cScriptObjGS__cScriptObjGS(void *gsObject, int deleteFlags) {
-    *(char **)((char*)gsObject + 0x18) = D_00482318;
-    *(char **)((char*)gsObject + 0x0) = cScriptObjGS_vtbl;
-    cScriptObject__cScriptObject_48D8((char*)gsObject + 0xC, 0);
+extern "C" void cScriptObjGS__cScriptObjGS(cScriptObjGS* gsObject, int deleteFlags) {
+    gsObject->mScriptObjectVtbl = (void**)D_00482318;
+    gsObject->mVtbl = (void**)cScriptObjGS_vtbl;
+    cScriptObject__cScriptObject_48D8(&gsObject->mObjType, 0);
     if (deleteFlags & 1) {
         operator_delete((int *)gsObject);
     }

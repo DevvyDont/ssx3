@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/skybox.h"
 #include "object/flexbridgenode.h"
 #include "object/physicsmodifier.h"
 #include "object/effectlink.h"
@@ -1085,14 +1086,15 @@ INCLUDE_ASM("object/modifierblock", cSkyBox_cSkyBox__FPv);
  *
  * @return the constructed sky box (self)
  */
-void* cSkyBox_cSkyBox(void* self)
+void* cSkyBox_cSkyBox(void* vself)
 {
-    *(void***)((char*)self + 0xc) = cSkyBox_vtbl;
-    *(int*)((char*)self + 0x10) = -1;
-    *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x8) = 0;
-    *(int*)((char*)self + 0x14) = 0;
-    return self;
+    cSkyBox* self = (cSkyBox*)vself;
+    self->mVtbl = cSkyBox_vtbl;
+    self->m_iSectionID = -1;
+    self->Next = 0;
+    self->Prev = 0;
+    self->m_pInstanceSky = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -1110,9 +1112,10 @@ INCLUDE_ASM("object/modifierblock", cSkyBox__cSkyBox__FPv);
  *
  * @return cObjNode__cObjNode()'s result (it returns nothing meaningful)
  */
-void* cSkyBox__cSkyBox(void* self)
+void* cSkyBox__cSkyBox(void* vself)
 {
-    *(int*)((char*)self + 0xc) = (int)(void*)cSkyBox_vtbl;
+    cSkyBox* self = (cSkyBox*)vself;
+    self->mVtbl = (void**)((int)(void*)cSkyBox_vtbl);
     return cObjNode__cObjNode(self);
 }
 #endif
@@ -1190,12 +1193,12 @@ static inline void SetAlpha_53B10(sRS_53B10* r, int v) { r->alpha = v; }
  * through the graphics manager's slot 95 with an identity matrix moved to the current view's position
  * (cObjectInterface_getCameraPosition) and flags 0x5420. Then pops the state and writes the saved blend bits back.
  */
-extern "C" void cSkyBox_render(void* self)
+extern "C" void cSkyBox_render(cSkyBox* self)
 {
     if (cRenderToggles_m_DisableSkyBox != 0)
         return;
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
-    if (*(void**)((char*)self + 0x14) == 0)
+    if (self->m_pInstanceSky == 0)
         return;
     sMat_53B10 skyMatrix;
     vu0CopyMatrix_53B10(&skyMatrix, t4mat_Identity);
@@ -1212,11 +1215,11 @@ extern "C" void cSkyBox_render(void* self)
     SetBlendM_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 2);
     SetZMode_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 0);
     SetAlpha_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 20);
-    char* skyInstance = *(char**)((char*)self + 0x14);
+    char* skyInstance = (char*)self->m_pInstanceSky;
     if (skyInstance != 0)
     {
         *(unsigned int*)(skyInstance + 8) = (*(unsigned int*)(skyInstance + 8) & ~2u) | 4;
-        char* instToDraw = *(char**)((char*)self + 0x14);
+        char* instToDraw = (char*)self->m_pInstanceSky;
         sVE_53B10* vt = (sVE_53B10*)ctx->mVtbl;
         vt[95].fn((char*)ctx + vt[95].delta, instToDraw, 1.0f, *(void**)(*(char**)(instToDraw + 0x80) + 0xC), &skyMatrix, 0, 0, 21536);
     }
@@ -1291,9 +1294,9 @@ struct sMbTrackRef3CF0 {
  *
  * @param id  world section id, or negative for none
  */
-extern "C" void cSkyBox_setSection(sMbTrackRef3CF0* self, int id)
+extern "C" void cSkyBox_setSection(cSkyBox* self, int id)
 {
-    self->id = id;
+    self->m_iSectionID = id;
     if (id < 0) {
         cSkyBox_reset(self);
         return;
@@ -1302,7 +1305,7 @@ extern "C" void cSkyBox_setSection(sMbTrackRef3CF0* self, int id)
     if (w->table->entries[id].count > 0) {
         sMbModelRef3CF0 ref;
         ref.id = id & 0xFF;
-        self->model = ref.get(w);
+        self->m_pInstanceSky = (tInstanceRecord*)ref.get(w);
     }
 }
 #endif
@@ -1315,11 +1318,12 @@ INCLUDE_ASM("object/modifierblock", cSkyBox_reset__FPv);
  *
  * @return -1 (left over from the store; callers ignore it)
  */
-int cSkyBox_reset(void* self)
+int cSkyBox_reset(void* vself)
 {
+    cSkyBox* self = (cSkyBox*)vself;
     int invalid = -1;
-    *(int*)((char*)self + 0x14) = 0;
-    *(int*)((char*)self + 0x10) = invalid;
+    self->m_pInstanceSky = 0;
+    self->m_iSectionID = invalid;
     return invalid;
 }
 #endif

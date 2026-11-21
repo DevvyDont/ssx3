@@ -1,4 +1,7 @@
 #include "common.h"
+#include "camera/trigger/cameratriggeractions.h"
+#include "camera/trigger/cameratriggervolumes.h"
+#include "camera/script/scriptalgorithms.h"
 #include "fe/debugfe.h"
 #include "camera/trigger/triggeralgorithms.h"
 #include "camera/trigger/cameratriggerman.h"
@@ -814,9 +817,9 @@ struct sCTBoxK2 {
  * @return the bounding box (min, max), returned by value
  */
 // Bounding box of a trigger volume: centre +- the largest half-extent.
-extern "C" sCTBoxK2 cCTVolumeEllipse_boundBox(char* obj)
+extern "C" sCTBoxK2 cCTVolumeEllipse_boundBox(cCTVolumeEllipse* obj)
 {
-    float maxDist = GetMaxElement((float*)(obj + 0x18));
+    float maxDist = GetMaxElement((float*)(&obj->Scale));
     sCTVec3K2 rv(maxDist, maxDist, maxDist);
     const sCTVec3K2& center = *(sCTVec3K2*)obj;
     return sCTBoxK2(sCTVec4K2(center - maxDist, 1.0f), sCTVec4K2(center + maxDist, 1.0f));
@@ -1039,14 +1042,14 @@ static inline void RotAxis_172278(sM_172278* m, const sV_172278& axis, float ang
  * @return 1 when the point is inside (or on) the ellipsoid, else 0
  */
 // Ellipsoid volume test: is p inside the unit sphere after the inverse transform?
-extern "C" int cCTVolumeEllipse_containsPoint(char* self, sV_172278* point)
+extern "C" int cCTVolumeEllipse_containsPoint(cCTVolumeEllipse* self, sV_172278* point)
 {
     sM_172278 toLocal(D_004FF1A0_v172278);
     float one = 1.0f;
-    toLocal = vu0ScaleMtx_172278(toLocal, sV_172278(one / *(float*)(self + 0x18), one / *(float*)(self + 0x1C), one / *(float*)(self + 0x20), one));
-    RotAxis_172278(&toLocal, D_004FF160_v172278, -*(float*)(self + 0xC));
-    RotAxis_172278(&toLocal, D_004FF150_v172278, -*(float*)(self + 0x14));
-    RotAxis_172278(&toLocal, D_004FF140_v172278, -*(float*)(self + 0x10));
+    toLocal = vu0ScaleMtx_172278(toLocal, sV_172278(one / self->Scale.x, one / self->Scale.y, one / self->Scale.z, one));
+    RotAxis_172278(&toLocal, D_004FF160_v172278, -self->Heading);
+    RotAxis_172278(&toLocal, D_004FF150_v172278, -self->Roll);
+    RotAxis_172278(&toLocal, D_004FF140_v172278, -self->Pitch);
     vu0TransMtx_172278(&toLocal, sV_172278(-*(sV3_172278*)self, one));
     sV_172278 localPt = vu0MulVec_172278(toLocal, *point);
     return localPt.x * localPt.x + localPt.y * localPt.y + localPt.z * localPt.z <= one;
@@ -2454,7 +2457,7 @@ extern "C" void cBoundedAlgorithm_update(cBoundedAlgorithm* self)
     }
     self->CamTargetPos = lookTarget;
     {
-        char* calleeObj = *(char**)((char*)self->BoundAction + 8);
+        char* calleeObj = (char*)self->BoundAction->BoundObj;
         sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)(calleeObj + 0x24))[6];
         ((void (*)(void*, void*))vEntry->fn)(calleeObj + vEntry->delta, (char*)&self->Position);
     }
@@ -2647,7 +2650,7 @@ extern "C" void cBoundedAlgorithm_snap(cBoundedAlgorithm* self, long subjectId)
     self->LeadDistance = *(float*)(act2 + 0x20);
     cTriggerAlgorithm_snap(((char*)self), subjectId);
     {
-        char* calleeObj = *(char**)((char*)self->BoundAction + 8);
+        char* calleeObj = (char*)self->BoundAction->BoundObj;
         sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)(calleeObj + 0x24))[6];
         ((void (*)(void*, void*))vEntry->fn)(calleeObj + vEntry->delta, (char*)&self->Position);
     }
@@ -3414,9 +3417,9 @@ void operator_delete(int* ptr);
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void cScriptAlgorithm__cScriptAlgorithm(void* self, int flags)
+extern "C" void cScriptAlgorithm__cScriptAlgorithm(cScriptAlgorithm* self, int flags)
 {
-    *(void***)((char*)self + 0x10) = D_0045BDE0;
+    self->mVtbl = D_0045BDE0;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3461,9 +3464,9 @@ void operator_delete(int* ptr);
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void cScriptManualAlgorithm__cScriptManualAlgorithm(void* self, int flags)
+extern "C" void cScriptManualAlgorithm__cScriptManualAlgorithm(cScriptManualAlgorithm* self, int flags)
 {
-    *(void***)((char*)self + 0x10) = D_0045BDE0;
+    self->mVtbl = D_0045BDE0;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3485,9 +3488,9 @@ void operator_delete(int* ptr);
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void cScriptPointAlgorithm__cScriptPointAlgorithm(void* self, int flags)
+extern "C" void cScriptPointAlgorithm__cScriptPointAlgorithm(cScriptPointAlgorithm* self, int flags)
 {
-    *(void***)((char*)self + 0x10) = D_0045BDE0;
+    self->mVtbl = D_0045BDE0;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3509,9 +3512,9 @@ void operator_delete(int* ptr);
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void cScriptTargetAlgorithm__cScriptTargetAlgorithm(void* self, int flags)
+extern "C" void cScriptTargetAlgorithm__cScriptTargetAlgorithm(cScriptTargetAlgorithm* self, int flags)
 {
-    *(void***)((char*)self + 0x10) = D_0045BDE0;
+    self->mVtbl = D_0045BDE0;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3533,9 +3536,9 @@ void operator_delete(int* ptr);
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void cScriptRelativeAlgorithm__cScriptRelativeAlgorithm(void* self, int flags)
+extern "C" void cScriptRelativeAlgorithm__cScriptRelativeAlgorithm(cScriptRelativeAlgorithm* self, int flags)
 {
-    *(void***)((char*)self + 0x10) = D_0045BDE0;
+    self->mVtbl = D_0045BDE0;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3597,9 +3600,10 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTObject_pos__FPv);
  *
  * @return self
  */
-void* cCTObject_pos(void* self)
+void* cCTObject_pos(void* vself)
 {
-    return self;
+    cCTObject* self = (cCTObject*)vself;
+    return ((void*)self);
 }
 #endif
 
@@ -3611,9 +3615,10 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTObject_heading__FPv);
  *
  * @return a pointer to the heading, the float at +0x0C
  */
-void* cCTObject_heading(void* self)
+void* cCTObject_heading(void* vself)
 {
-    return (char*)self + 0xC;
+    cCTObject* self = (cCTObject*)vself;
+    return (char*)&self->Heading;
 }
 #endif
 
@@ -3625,9 +3630,10 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTObject_pitch__FPv);
  *
  * @return a pointer to the pitch, the float at +0x10
  */
-void* cCTObject_pitch(void* self)
+void* cCTObject_pitch(void* vself)
 {
-    return (char*)self + 0x10;
+    cCTObject* self = (cCTObject*)vself;
+    return (char*)&self->Pitch;
 }
 #endif
 
@@ -3639,9 +3645,10 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTObject_roll__FPv);
  *
  * @return a pointer to the roll, the float at +0x14
  */
-void* cCTObject_roll(void* self)
+void* cCTObject_roll(void* vself)
 {
-    return (char*)self + 0x14;
+    cCTObject* self = (cCTObject*)vself;
+    return (char*)&self->Roll;
 }
 #endif
 
@@ -3653,9 +3660,10 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTObject_scale__FPv);
  *
  * @return a pointer to the scale, the vector at +0x18 (the factory constructors set it to 1, 1, 1)
  */
-void* cCTObject_scale(void* self)
+void* cCTObject_scale(void* vself)
 {
-    return (char*)self + 0x18;
+    cCTObject* self = (cCTObject*)vself;
+    return (char*)&self->Scale;
 }
 #endif
 
@@ -3695,9 +3703,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTVolumeEllipse_cCTVolumeEll
  *
  * @return @p self
  */
-extern "C" void* cCTVolumeEllipse_cCTVolumeEllipse(void* self)
+extern "C" void* cCTVolumeEllipse_cCTVolumeEllipse(cCTVolumeEllipse* self)
 {
-    return new (self) sCTVolEllG;
+    return new (((void*)self)) sCTVolEllG;
 }
 #endif
 //100%
@@ -3857,9 +3865,9 @@ void operator_delete(int* ptr);
  * Calls operator_delete on the pointer at +0x8 (On Tour cCTActionBoundedCam::BoundObj) when it is set; the pointer
  * itself is not cleared. Slot 1 of the bounded action vtable D_0045C1D0.
  */
-extern "C" void cCTActionBoundedCam_purge(void* self)
+extern "C" void cCTActionBoundedCam_purge(cCTActionBoundedCam* self)
 {
-    int* buffer = *(int**)((char*)self + 0x8);
+    int* buffer = (int*)self->BoundObj;
     if (buffer != 0) {
         operator_delete(buffer);
     }
@@ -3877,9 +3885,9 @@ void operator_delete(int* ptr);
  * Calls operator_delete on the pointer at +0x8 (On Tour cCTActionSpline::Spline) when it is set; the pointer itself is
  * not cleared. Slot 1 of the spline action vtable D_0045C1B8.
  */
-extern "C" void cCTActionSpline_purge(void* self)
+extern "C" void cCTActionSpline_purge(cCTActionSpline* self)
 {
-    int* buffer = *(int**)((char*)self + 0x8);
+    int* buffer = (int*)self->Spline;
     if (buffer != 0) {
         operator_delete(buffer);
     }
@@ -4016,9 +4024,10 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_2ChaseAlgorithm__cDE
  *
  * @return the base destructor's result (declared void*)
  */
-void* cDEFAULT_2ChaseAlgorithm__cDEFAULT_2ChaseAlgorithm(void* self)
+void* cDEFAULT_2ChaseAlgorithm__cDEFAULT_2ChaseAlgorithm(void* vself)
 {
-    *(int*)((char*)self + 0x10) = (int)(void*)cDEFAULT_2ChaseAlgorithm_vtbl;
+    cDEFAULT_2ChaseAlgorithm* self = (cDEFAULT_2ChaseAlgorithm*)vself;
+    self->mVtbl = (void**)((int)(void*)cDEFAULT_2ChaseAlgorithm_vtbl);
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -4202,9 +4211,10 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_3ChaseAlgorithm__cDE
  *
  * @return the base destructor's result (declared void*)
  */
-void* cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm(void* self)
+void* cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm(void* vself)
 {
-    *(int*)((char*)self + 0x10) = (int)(void*)cDEFAULT_3ChaseAlgorithm_vtbl;
+    cDEFAULT_3ChaseAlgorithm* self = (cDEFAULT_3ChaseAlgorithm*)vself;
+    self->mVtbl = (void**)((int)(void*)cDEFAULT_3ChaseAlgorithm_vtbl);
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -4367,9 +4377,10 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_4ChaseAlgorithm__cDE
  *
  * @return the base destructor's result (declared void*)
  */
-void* cDEFAULT_4ChaseAlgorithm__cDEFAULT_4ChaseAlgorithm(void* self)
+void* cDEFAULT_4ChaseAlgorithm__cDEFAULT_4ChaseAlgorithm(void* vself)
 {
-    *(int*)((char*)self + 0x10) = (int)(void*)cDEFAULT_4ChaseAlgorithm_vtbl;
+    cDEFAULT_4ChaseAlgorithm* self = (cDEFAULT_4ChaseAlgorithm*)vself;
+    self->mVtbl = (void**)((int)(void*)cDEFAULT_4ChaseAlgorithm_vtbl);
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -6100,9 +6111,10 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cPOST_RACE_1ChaseAlgorithm__c
  *
  * @return the base destructor's result (declared void*)
  */
-void* cPOST_RACE_1ChaseAlgorithm__cPOST_RACE_1ChaseAlgorithm(void* self)
+void* cPOST_RACE_1ChaseAlgorithm__cPOST_RACE_1ChaseAlgorithm(void* vself)
 {
-    *(int*)((char*)self + 0x10) = (int)(void*)cPOST_RACE_1ChaseAlgorithm_vtbl;
+    cPOST_RACE_1ChaseAlgorithm* self = (cPOST_RACE_1ChaseAlgorithm*)vself;
+    self->mVtbl = (void**)((int)(void*)cPOST_RACE_1ChaseAlgorithm_vtbl);
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
