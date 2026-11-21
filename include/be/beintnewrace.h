@@ -75,7 +75,7 @@ extern cBERaceDB cBENewRaceInterface_newRace;
 // (assignPlayer, setNumberHumans / Mission / AI, setGameMode / Path / Event, the location) and answers questions about
 // locations, events, goals, time limits and rivals from the library tables. The object holds no race data: like every
 // BE interface it is a cBEInterface (three word bools + vptr, 0x10 bytes), and its methods ignore `this` and work on
-// newRace and the other statics (mNextLocation D_004A11BC, commandLineTrack D_004A4CB8; On Tour also has
+// newRace and the other statics (mNextLocation D_004A11BC, commandLineTrack cBENewRaceInterface_commandLineTrack; On Tour also has
 // bIsBamLocation). One instance, created on demand by cBENewRaceInterface_getThis (`cMemMan_alloc(0x10,
 // "BENewRaceInt", 0, 0)`, bIsActive = 0, vtable cBENewRaceInterface_vtbl) into cBENewRaceInterface::instance (retail
 // cBENewRaceInterface_instance, D_004A11B4); the rest of the game reaches it as cBE_getInterface(cBE_getBE(), 0).

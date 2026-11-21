@@ -5808,18 +5808,18 @@ extern "C" int cTransitionMan_IsTransitionPending(cTransitionMan* self)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cTransitionObj_InitializeBuffers);
 #ifdef SKIP_ASM
-extern int D_00538850[];
+extern int cTransitionObj_mbBufferUsed[];
 
 /**
  * Marks every transition object buffer as free.
  *
- * Clears the four in-use flags at D_00538850.
+ * Clears the four in-use flags at cTransitionObj_mbBufferUsed.
  */
 extern "C" void cTransitionObj_InitializeBuffers(void)
 {
     int i;
     for (i = 0; i < 4; i++) {
-        D_00538850[i] = 0;
+        cTransitionObj_mbBufferUsed[i] = 0;
     }
 }
 #endif
@@ -5832,15 +5832,15 @@ struct sWakePoolEntry {
     char data[0x64];
 };
 
-extern int D_00538850[];
-// same object as the unit's later `extern sWakeSlot D_005382C0[]` (0x64-byte slots)
-extern sWakePoolEntry D_wakePool[] __asm__("D_005382C0");
+extern int cTransitionObj_mbBufferUsed[];
+// same object as the unit's later `extern sWakeSlot cTransitionObj_mBuffer[]` (0x64-byte slots)
+extern sWakePoolEntry D_wakePool[] __asm__("cTransitionObj_mBuffer");
 extern sWakePoolEntry* D_004A3B1C;
 
 /**
  * Allocates a transition object from the fixed pool of four buffers.
  *
- * Returns the first buffer of D_005382C0 whose in-use flag in D_00538850 is clear, marking it used, or the pointer in
+ * Returns the first buffer of cTransitionObj_mBuffer whose in-use flag in cTransitionObj_mbBufferUsed is clear, marking it used, or the pointer in
  * D_004A3B1C when all four are taken.
  *
  * @return the buffer for the new object
@@ -5848,8 +5848,8 @@ extern sWakePoolEntry* D_004A3B1C;
 extern "C" sWakePoolEntry* cTransitionObj_operator_new(void)
 {
     for (int i = 0; i < 4; i++) {
-        if (D_00538850[i] == 0) {
-            D_00538850[i] = 1;
+        if (cTransitionObj_mbBufferUsed[i] == 0) {
+            cTransitionObj_mbBufferUsed[i] = 1;
             return &D_wakePool[i];
         }
     }
@@ -5864,13 +5864,13 @@ struct sWakeSlot {
     char pad[0x64];
 };
 
-extern sWakeSlot D_005382C0[];
-extern int D_00538850[];
+extern sWakeSlot cTransitionObj_mBuffer[];
+extern int cTransitionObj_mbBufferUsed[];
 
 /**
  * Returns a transition object's buffer to the fixed pool.
  *
- * Ignores null. Otherwise finds which of the four D_005382C0 buffers @p memory is and clears its in-use flag; any other
+ * Ignores null. Otherwise finds which of the four cTransitionObj_mBuffer buffers @p memory is and clears its in-use flag; any other
  * pointer is ignored.
  *
  * @param memory  the object's memory (On Tour memory)
@@ -5882,8 +5882,8 @@ extern "C" void cTransitionObj_operator_delete(void* memory)
         return;
     }
     for (i = 0; i < 4; i++) {
-        if (&D_005382C0[i] == memory) {
-            D_00538850[i] = 0;
+        if (&cTransitionObj_mBuffer[i] == memory) {
+            cTransitionObj_mbBufferUsed[i] = 0;
             return;
         }
     }
@@ -6085,7 +6085,7 @@ struct t4Vec_4F50 : sWakeVecE398 {
 };
 
 extern sWakeVecE398 D_004FF160_4F50 __asm__("t4vect_ZAxis");     // t4vect::ZAxis
-extern float D_00504FB8[];                                      // cSinCosTable::gSinCosTable
+extern float cSinCosTable_gSinCosTable[];                                      // cSinCosTable::gSinCosTable
 
 static inline float FXRand_4F50(float lo, float hi)
 {
@@ -6100,8 +6100,8 @@ static inline float deg2rad_4F50(float d)
 static inline void sincos_4F50(float a, float& s, float& c)
 {
     int i = (int)(a * 81.4873275756836f) & 0x1FF;
-    s = D_00504FB8[i];
-    c = D_00504FB8[i + 0x80];
+    s = cSinCosTable_gSinCosTable[i];
+    c = cSinCosTable_gSinCosTable[i + 0x80];
 }
 
 static inline void BringIntoRange_4F50(float& v, float range)

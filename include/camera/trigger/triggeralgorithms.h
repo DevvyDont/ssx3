@@ -41,7 +41,7 @@ struct cTriggerAlgorithm {
     float Near;                 // 0x04 [O]; [R] 10.0f (base ctor)
     float Far;                  // 0x08 [O]; [R] 30000.0f (base ctor)
     int AlgorithmType;          // 0x0C [O] eCamAlgoType; [R] cTriggerAlgorithm_cTriggerAlgorithm stores 90
-    void** mVtbl;               // 0x10 [R] cTriggerAlgorithm_vtbl (ctor); the dtor puts back cCameraAlgorithm's D_0045BDE0;
+    void** mVtbl;               // 0x10 [R] cTriggerAlgorithm_vtbl (ctor); the dtor puts back cCameraAlgorithm's cCameraAlgorithm_vtbl;
                                 //      [U] snap calls slot 5 (update), snapCurrent calls slot 3 (snap)
     char unk_14[0xC];           // 0x14 alignment gap before the 16-byte-aligned t4Vector
     // --- cChaseAlgorithm (0x40)

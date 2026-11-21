@@ -22,7 +22,7 @@ struct sStateSingleton {
 
 extern const char str_BEPreRace[];
 extern void* cBEPostRaceState_vtbl[16];
-extern void* D_004A1254;
+extern void* cBEPostRaceState_instance;
 
 //99.86%
 INCLUDE_ASM("be/beprepoststate", cBEPostRaceState_getState__FPv);
@@ -31,20 +31,20 @@ INCLUDE_ASM("be/beprepoststate", cBEPostRaceState_getState__FPv);
  * Returns the cBEPostRaceState singleton, creating it on first use.
  *
  * The first call allocates 8 bytes tagged "BEPreRace" (the post-race state reuses the pre-race tag), stores
- * @p self in the first word and the cBEPostRaceState vtable in the second, and keeps the object in D_004A1254.
+ * @p self in the first word and the cBEPostRaceState vtable in the second, and keeps the object in cBEPostRaceState_instance.
  * cBE_getBE() passes the state index (2) as @p self.
  *
  * @return the cBEPostRaceState object
  */
 void* cBEPostRaceState_getState(void* self)
 {
-    if (D_004A1254 == 0) {
+    if (cBEPostRaceState_instance == 0) {
         sStateSingleton* mem = (sStateSingleton*)cMemMan_alloc(8, str_BEPreRace, 0, 0);
         mem->field_0x0 = self;
         mem->vtable = cBEPostRaceState_vtbl;
-        D_004A1254 = mem;
+        cBEPostRaceState_instance = mem;
     }
-    return D_004A1254;
+    return cBEPostRaceState_instance;
 }
 #endif
 
@@ -70,7 +70,7 @@ void* cBERewardInterface_getThis();
  * Returns the back-end interface singleton for an interface kind while in the post-race state.
  *
  * Kinds: 0 new race, 1 new player, 2 character, 3 stat, 4 option, 5 save, 6 BAGT, 7 network, 8 score, 9
- * func_0014ABE0's singleton (D_004A11C8), 10 mission, 11 econ, 12 aggression, 13 reward. Retail's 9..13 are one off
+ * func_0014ABE0's singleton (cBEBoltInterface_instance), 10 mission, 11 econ, 12 aggression, 13 reward. Retail's 9..13 are one off
  * from On Tour's eBE_Interface (kInt_Mission = 9 .. kInt_Reward = 12).
  *
  * @param kind  the interface kind (On Tour eBE_Interface interfaceType)
@@ -116,13 +116,13 @@ extern "C" void* cBEPostRaceState_getInterface(cBEPostRaceState* self, int kind)
 //100%
 INCLUDE_ASM("be/beprepoststate", cBEPostRaceState_onExit);
 #ifdef SKIP_ASM
-extern void* D_004A11C8;
+extern void* cBEBoltInterface_instance;
 
 
 /**
  * Leaves the post-race back-end state: marks its interfaces inactive.
  *
- * Clears the active flag of the new player, character, stat, option, save, network, D_004A11C8 (func_0014ABE0's
+ * Clears the active flag of the new player, character, stat, option, save, network, cBEBoltInterface_instance (func_0014ABE0's
  * singleton), BAGT, econ, aggression and reward interfaces; new race, score and mission are not touched.
  */
 extern "C" void cBEPostRaceState_onExit(void)
@@ -133,7 +133,7 @@ extern "C" void cBEPostRaceState_onExit(void)
     cBEOptionInterface_instance->bIsActive = 0;
     cBESaveInterface_instance->bIsActive = 0;
     cBENetworkInterface_instance->bIsActive = 0;
-    ((cBERewardInterface*)D_004A11C8)->bIsActive = 0;
+    ((cBERewardInterface*)cBEBoltInterface_instance)->bIsActive = 0;
     cBEBAGTInterface_instance->bIsActive = 0;
     cBEEconInterface_instance->bIsActive = 0;
     cBEAggressionInterface_instance->bIsActive = 0;
@@ -144,13 +144,13 @@ extern "C" void cBEPostRaceState_onExit(void)
 //100%
 INCLUDE_ASM("be/beprepoststate", cBEPostRaceState_onEnter);
 #ifdef SKIP_ASM
-extern void* D_004A11C8;
+extern void* cBEBoltInterface_instance;
 
 
 /**
  * Enters the post-race back-end state: marks its interfaces active.
  *
- * Sets the active flag of the new player, character, stat, option, save, network, D_004A11C8 (func_0014ABE0's
+ * Sets the active flag of the new player, character, stat, option, save, network, cBEBoltInterface_instance (func_0014ABE0's
  * singleton), BAGT, econ, aggression and reward interfaces (the same set cBEPostRaceState_onExit clears).
  */
 extern "C" void cBEPostRaceState_onEnter(void)
@@ -161,7 +161,7 @@ extern "C" void cBEPostRaceState_onEnter(void)
     cBEOptionInterface_instance->bIsActive = 1;
     cBESaveInterface_instance->bIsActive = 1;
     cBENetworkInterface_instance->bIsActive = 1;
-    ((cBERewardInterface*)D_004A11C8)->bIsActive = 1;
+    ((cBERewardInterface*)cBEBoltInterface_instance)->bIsActive = 1;
     cBEBAGTInterface_instance->bIsActive = 1;
     cBEEconInterface_instance->bIsActive = 1;
     cBEAggressionInterface_instance->bIsActive = 1;
@@ -170,7 +170,7 @@ extern "C" void cBEPostRaceState_onEnter(void)
 #endif
 
 extern void* cBEPreRaceState_vtbl[16];
-extern void* D_004A1258;
+extern void* cBEPreRaceState_instance;
 
 //99.86%
 INCLUDE_ASM("be/beprepoststate", cBEPreRaceState_getState__FPv);
@@ -179,19 +179,19 @@ INCLUDE_ASM("be/beprepoststate", cBEPreRaceState_getState__FPv);
  * Returns the cBEPreRaceState singleton, creating it on first use.
  *
  * The first call allocates 8 bytes tagged "BEPreRace", stores @p self in the first word and the cBEPreRaceState
- * vtable in the second, and keeps the object in D_004A1258. cBE_getBE() passes the state index (0) as @p self.
+ * vtable in the second, and keeps the object in cBEPreRaceState_instance. cBE_getBE() passes the state index (0) as @p self.
  *
  * @return the cBEPreRaceState object
  */
 void* cBEPreRaceState_getState(void* self)
 {
-    if (D_004A1258 == 0) {
+    if (cBEPreRaceState_instance == 0) {
         sStateSingleton* mem = (sStateSingleton*)cMemMan_alloc(8, str_BEPreRace, 0, 0);
         mem->field_0x0 = self;
         mem->vtable = cBEPreRaceState_vtbl;
-        D_004A1258 = mem;
+        cBEPreRaceState_instance = mem;
     }
-    return D_004A1258;
+    return cBEPreRaceState_instance;
 }
 #endif
 
@@ -262,13 +262,13 @@ extern "C" void* cBEPreRaceState_getInterface(cBEPreRaceState* self, int kind)
 //100%
 INCLUDE_ASM("be/beprepoststate", cBEPreRaceState_onExit);
 #ifdef SKIP_ASM
-extern void* D_004A11C8;
+extern void* cBEBoltInterface_instance;
 
 
 /**
  * Leaves the pre-race back-end state: marks its interfaces inactive.
  *
- * Clears the active flag of the new race, new player, character, stat, option, save, network, D_004A11C8
+ * Clears the active flag of the new race, new player, character, stat, option, save, network, cBEBoltInterface_instance
  * (func_0014ABE0's singleton), BAGT, econ, aggression and reward interfaces; score and mission are not touched.
  */
 extern "C" void cBEPreRaceState_onExit(void)
@@ -280,7 +280,7 @@ extern "C" void cBEPreRaceState_onExit(void)
     cBEOptionInterface_instance->bIsActive = 0;
     cBESaveInterface_instance->bIsActive = 0;
     cBENetworkInterface_instance->bIsActive = 0;
-    ((cBERewardInterface*)D_004A11C8)->bIsActive = 0;
+    ((cBERewardInterface*)cBEBoltInterface_instance)->bIsActive = 0;
     cBEBAGTInterface_instance->bIsActive = 0;
     cBEEconInterface_instance->bIsActive = 0;
     cBEAggressionInterface_instance->bIsActive = 0;
@@ -291,13 +291,13 @@ extern "C" void cBEPreRaceState_onExit(void)
 //100%
 INCLUDE_ASM("be/beprepoststate", cBEPreRaceState_onEnter);
 #ifdef SKIP_ASM
-extern void* D_004A11C8;
+extern void* cBEBoltInterface_instance;
 
 
 /**
  * Enters the pre-race back-end state: marks its interfaces active.
  *
- * Sets the active flag of the new race, new player, character, stat, option, save, network, D_004A11C8
+ * Sets the active flag of the new race, new player, character, stat, option, save, network, cBEBoltInterface_instance
  * (func_0014ABE0's singleton), BAGT, econ, aggression and reward interfaces (the set cBEPreRaceState_onExit
  * clears).
  */
@@ -310,7 +310,7 @@ extern "C" void cBEPreRaceState_onEnter(void)
     cBEOptionInterface_instance->bIsActive = 1;
     cBESaveInterface_instance->bIsActive = 1;
     cBENetworkInterface_instance->bIsActive = 1;
-    ((cBERewardInterface*)D_004A11C8)->bIsActive = 1;
+    ((cBERewardInterface*)cBEBoltInterface_instance)->bIsActive = 1;
     cBEBAGTInterface_instance->bIsActive = 1;
     cBEEconInterface_instance->bIsActive = 1;
     cBEAggressionInterface_instance->bIsActive = 1;
@@ -414,10 +414,10 @@ INCLUDE_ASM("be/beprepoststate", cBEProfileLib_backupCharProfile);
 #ifdef SKIP_ASM
 extern "C" void MEM_copy(void* dst, void* src, int n);
 extern signed char D_004A125C;
-extern char D_004C4090[];
+extern char cBEProfileLib_BackupCharProfile[];
 
 /**
- * Saves one character record of a profile into the backup buffer D_004C4090 and remembers its character index in
+ * Saves one character record of a profile into the backup buffer cBEProfileLib_BackupCharProfile and remembers its character index in
  * D_004A125C.
  *
  * @param base  the profile (10 character records)
@@ -426,7 +426,7 @@ extern char D_004C4090[];
 extern "C" void cBEProfileLib_backupCharProfile(cBEProfileLib* base, int idx)
 {
     D_004A125C = idx;
-    MEM_copy(D_004C4090, ((char*)base) + idx * 3976, 3976);
+    MEM_copy(cBEProfileLib_BackupCharProfile, ((char*)base) + idx * 3976, 3976);
 }
 #endif
 
@@ -435,17 +435,17 @@ INCLUDE_ASM("be/beprepoststate", cBEProfileLib_restoreCharProfile);
 #ifdef SKIP_ASM
 extern "C" void MEM_copy(void* dst, void* src, int n);
 extern signed char D_004A125C;
-extern char D_004C4090[];
+extern char cBEProfileLib_BackupCharProfile[];
 
 /**
- * Copies the backup buffer D_004C4090 back into the profile's character record that cBEProfileLib_backupCharProfile saved (index
+ * Copies the backup buffer cBEProfileLib_BackupCharProfile back into the profile's character record that cBEProfileLib_backupCharProfile saved (index
  * D_004A125C).
  *
  * @param base  the profile (10 character records)
  */
 extern "C" void cBEProfileLib_restoreCharProfile(cBEProfileLib* base)
 {
-    MEM_copy(((char*)base) + D_004A125C * 3976, D_004C4090, 3976);
+    MEM_copy(((char*)base) + D_004A125C * 3976, cBEProfileLib_BackupCharProfile, 3976);
 }
 #endif
 

@@ -484,7 +484,7 @@ struct sColor_3A3F48 {
 };
 
 void* cUISoundInterface_cUISoundInterface(void* self);
-extern void* D_0046DD60[];
+extern void* cUISoundInterface_vtbl[];
 extern void* gUISoundNull;
 
 struct sV2_3A3F48 {
@@ -559,7 +559,7 @@ extern "C" void func_003A3F48_impl(int initialize, int priority) __asm__("func_0
  * Only when @p priority is 0xFFFF: with @p initialize set it constructs 59 colour constants (D_005083D0 .. D_00508740,
  * each four floats, many 1/1/1/1 or 1/0/0/0), constructs the null UI sound interface gUISoundNull with cUISoundInterface_cUISoundInterface
  * and sets D_004A5A60, the default text shadow offset that uitext copies into each font, to (2, 2). With @p initialize
- * clear it only puts the base sound-interface vtable D_0046DD60 back into gUISoundNull (its destructor). The static
+ * clear it only puts the base sound-interface vtable cUISoundInterface_vtbl back into gUISoundNull (its destructor). The static
  * initialiser func_003A6648 calls it with (1, 0xFFFF), the static destructor func_003A6668 with (0, 0xFFFF).
  *
  * @param initialize  non-zero to construct, zero to destroy
@@ -628,7 +628,7 @@ extern "C" void func_003A3F48_impl(int initialize, int priority)
             cUISoundInterface_cUISoundInterface(&gUISoundNull);
             new (&D_004A5A60) sV2_3A3F48(2.0f, 2.0f);
         } else {
-            gUISoundNull = D_0046DD60;
+            gUISoundNull = cUISoundInterface_vtbl;
         }
     }
 }
@@ -1590,20 +1590,20 @@ INCLUDE_ASM("ui/uivector", cUISoundInterface__cUISoundInterface1);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern void* D_0046DD60[];
+extern void* cUISoundInterface_vtbl[];
 
 /**
- * Destroys a UI sound interface: puts back the base sound-interface vtable D_0046DD60 and frees the object with
+ * Destroys a UI sound interface: puts back the base sound-interface vtable cUISoundInterface_vtbl and frees the object with
  * operator_delete when bit 0 of @p flags is set.
  *
- * The same code as cUISoundInterface__cUISoundInterface (fe/fepopupmisc), which D_0046DD60's slot points to; nothing in
+ * The same code as cUISoundInterface__cUISoundInterface (fe/fepopupmisc), which cUISoundInterface_vtbl's slot points to; nothing in
  * retail references this copy.
  *
  * @param flags  bit 0 set to free the memory
  */
 extern "C" void cUISoundInterface__cUISoundInterface1(int* self, int flags)
 {
-    *(void***)self = D_0046DD60;
+    *(void***)self = cUISoundInterface_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }

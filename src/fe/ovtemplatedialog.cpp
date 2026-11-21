@@ -231,7 +231,7 @@ extern char cOVState_REWARDS_vtbl[];
 extern char D_004725C8[];
 extern char D_004726A0[];
 extern char D_00472778[];
-extern char D_00472850[];
+extern char cOVState_HEAT_PREEVENT_vtbl[];
 extern char cOVState_PAUSE_ONLINE_ERROR_vtbl[];
 extern char cOVState_PAUSE_OPTIONS_vtbl[];
 extern char cOVState_PAUSE_ONLINE_vtbl[];
@@ -248,11 +248,11 @@ extern char D_004735B0[];
 extern char cOVState_BIGCHALLENGE_START_vtbl[];
 extern char cOVState_ENTERLODGE_vtbl[];
 extern char D_00473C50[];
-extern char D_00473D28[];
-extern char D_00473E00[];
+extern char cOVState_BASSSP_QUAL_FINISHOV_vtbl[];
+extern char cOVState_RACE_FINISHOV_vtbl[];
 extern char D_00473ED8[];
-extern char D_00473FB0[];
-extern char D_00474088[];
+extern char cOVState_FINAL_STANDINGS_vtbl[];
+extern char cOVState_HEAT_STANDINGS_vtbl[];
 extern char D_004744C0[];
 extern char D_00474598[];
 extern char D_00474670[];
@@ -363,7 +363,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x8) {
         char* overlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = D_00472850;
+        *(void**)(overlay + 0x8) = cOVState_HEAT_PREEVENT_vtbl;
         *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
         *(int*)(overlay + 0x98) = type;
         *(int*)(overlay + 0x48) = 0;
@@ -385,7 +385,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 10) {
         char* overlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = D_00474088;
+        *(void**)(overlay + 0x8) = cOVState_HEAT_STANDINGS_vtbl;
         *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
         *(int*)(overlay + 0x98) = type;
         *(int*)(overlay + 0x48) = 0;
@@ -396,7 +396,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 11) {
         char* overlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = D_00473FB0;
+        *(void**)(overlay + 0x8) = cOVState_FINAL_STANDINGS_vtbl;
         *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
         *(int*)(overlay + 0x98) = type;
         *(int*)(overlay + 0x48) = 0;
@@ -408,7 +408,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         char* overlay = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
         cUIState_cUIState(overlay, mgr);
         *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(void**)(overlay + 0x8) = D_00473E00;
+        *(void**)(overlay + 0x8) = cOVState_RACE_FINISHOV_vtbl;
         *(int*)(overlay + 0xA0) = 0x1;
         *(int*)(overlay + 0x98) = type;
         *(int*)(overlay + 0x48) = 0;
@@ -421,7 +421,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
         char* overlay = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
         cUIState_cUIState(overlay, mgr);
         *(unsigned short*)(overlay + 0x58) = str_sp_b[0];
-        *(void**)(overlay + 0x8) = D_00473D28;
+        *(void**)(overlay + 0x8) = cOVState_BASSSP_QUAL_FINISHOV_vtbl;
         *(int*)(overlay + 0xA0) = 0x1;
         *(int*)(overlay + 0x98) = type;
         *(int*)(overlay + 0x48) = 0;
@@ -737,7 +737,7 @@ extern char cOVState_REWARDS_vtbl[];
 extern char D_004725C8[];
 extern char D_004726A0[];
 extern char D_00472778[];
-extern char D_00472850[];
+extern char cOVState_HEAT_PREEVENT_vtbl[];
 extern char cOVState_PAUSE_ONLINE_ERROR_vtbl[];
 extern char cOVState_PAUSE_OPTIONS_vtbl[];
 extern char cOVState_PAUSE_ONLINE_vtbl[];
@@ -754,11 +754,11 @@ extern char D_004735B0[];
 extern char cOVState_BIGCHALLENGE_START_vtbl[];
 extern char cOVState_ENTERLODGE_vtbl[];
 extern char D_00473C50[];
-extern char D_00473D28[];
-extern char D_00473E00[];
+extern char cOVState_BASSSP_QUAL_FINISHOV_vtbl[];
+extern char cOVState_RACE_FINISHOV_vtbl[];
 extern char D_00473ED8[];
-extern char D_00473FB0[];
-extern char D_00474088[];
+extern char cOVState_FINAL_STANDINGS_vtbl[];
+extern char cOVState_HEAT_STANDINGS_vtbl[];
 extern char D_004744C0[];
 extern char D_00474598[];
 extern char D_00474670[];
@@ -877,7 +877,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 0x8) {
         char* newOverlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = D_00472850;
+        *(void**)(newOverlay + 0x8) = cOVState_HEAT_PREEVENT_vtbl;
         *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
         *(int*)(newOverlay + 0x98) = type;
         *(int*)(newOverlay + 0x48) = 0;
@@ -899,7 +899,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 10) {
         char* newOverlay = (char*)operator new(156, str_cOVStateOverlay, 0, 0);
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = D_00474088;
+        *(void**)(newOverlay + 0x8) = cOVState_HEAT_STANDINGS_vtbl;
         *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
         *(int*)(newOverlay + 0x98) = type;
         *(int*)(newOverlay + 0x48) = 0;
@@ -910,7 +910,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 11) {
         char* newOverlay = (char*)operator new(160, str_cOVStateOverlay, 0, 0);
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = D_00473FB0;
+        *(void**)(newOverlay + 0x8) = cOVState_FINAL_STANDINGS_vtbl;
         *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
         *(int*)(newOverlay + 0x98) = type;
         *(int*)(newOverlay + 0x48) = 0;
@@ -922,7 +922,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         char* newOverlay = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
         cUIState_cUIState(newOverlay, mgr);
         *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(void**)(newOverlay + 0x8) = D_00473E00;
+        *(void**)(newOverlay + 0x8) = cOVState_RACE_FINISHOV_vtbl;
         *(int*)(newOverlay + 0xA0) = 0x1;
         *(int*)(newOverlay + 0x98) = type;
         *(int*)(newOverlay + 0x48) = 0;
@@ -935,7 +935,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
         char* newOverlay = (char*)operator new(164, str_cOVStateOverlay, 0, 0);
         cUIState_cUIState(newOverlay, mgr);
         *(unsigned short*)(newOverlay + 0x58) = str_sp_b[0];
-        *(void**)(newOverlay + 0x8) = D_00473D28;
+        *(void**)(newOverlay + 0x8) = cOVState_BASSSP_QUAL_FINISHOV_vtbl;
         *(int*)(newOverlay + 0xA0) = 0x1;
         *(int*)(newOverlay + 0x98) = type;
         *(int*)(newOverlay + 0x48) = 0;
@@ -1231,7 +1231,7 @@ extern "C" void cGameComm_sendUnplugCmd(void* net);
 extern "C" void cGameComm_sendPauseCmd(void* net, int a1);
 extern "C" int cWScriptMan_isLocalMissionActive(void* self);
 extern void* cWScriptMan_TheWScriptMan;
-extern char D_004A2468;
+extern char cOVTemplate_PauseMenu_mSelectedMenuIndex;
 
 static inline bool notMode4_0020CA10(signed char* g)
 {
@@ -1247,7 +1247,7 @@ static inline bool notMode4_0020CA10(signed char* g)
  * Offline: overlay 2 while a local mission is active (cWScriptMan_isLocalMissionActive), else overlay 1 on game path 0
  * outside cGameMode 4, overlay 4 in game state 11 (mCurrentStateID), overlay 3 in cGameMode 4 and overlay 5 otherwise
  * (cGameMode and cGamePath of cBENewRaceInterface_newRace; the overlays through cOVStateManager_triggerOverlay).
- * Finally clears D_004A2468, the pause menu's remembered selection. The results of the two cBE_getInterface__Fv calls
+ * Finally clears cOVTemplate_PauseMenu_mSelectedMenuIndex, the pause menu's remembered selection. The results of the two cBE_getInterface__Fv calls
  * (interfaces 0 and 7) are not used.
  *
  * cGame_update and cGame_updateUI call it after cOVStateManager_allowPauseMenu allows the pause menu.
@@ -1286,7 +1286,7 @@ extern "C" void func_0020CA10(void)
             }
         }
     }
-    D_004A2468 = 0;
+    cOVTemplate_PauseMenu_mSelectedMenuIndex = 0;
 }
 #endif
 
@@ -1437,7 +1437,7 @@ extern "C" void cGameComm_localDisconnected(void* self, int a1);
 extern "C" void cGame_exit(void* game, int a);
 extern "C" void cReplay_startReplay(void* self, void* a1, int a2, int a3);
 extern unsigned int cUITemplate_MAP_mMapStyle;
-extern int D_004A2708;
+extern int cOVStateManager_mIsPauseDialog;
 
 
 
@@ -1478,7 +1478,7 @@ extern "C" void cOVStateManager_gotoNextOverlay(void)
             cOVStateManager_triggerOverlay(35);
             break;
         case 5:
-            D_004A2708 = 0;
+            cOVStateManager_mIsPauseDialog = 0;
             cOVStateManager_triggerOverlay(23);
             break;
         case 6:
@@ -1531,7 +1531,7 @@ extern "C" void cOVStateManager_gotoNextOverlay(void)
             cOVStateManager_mStatus = 4;
             break;
         case 5:
-            D_004A2708 = 0;
+            cOVStateManager_mIsPauseDialog = 0;
             cOVStateManager_triggerOverlay(23);
             break;
         case 8:
@@ -1726,7 +1726,7 @@ INCLUDE_ASM("fe/ovtemplatedialog", cOVTemplate_Simple_onWidgetMenu);
  * Simple overlay's menu-event filter: event 6 gets 0x101, every other event 0.
  *
  * It fills the onWidgetMenu slot (+0xA4) of D_00474D30 and of the overlay vtables built on it (D_004726A0, D_00472778,
- * D_00472850).
+ * cOVState_HEAT_PREEVENT_vtbl).
  *
  * @param menu  the menu (unused)
  * @param event  the menu event
@@ -1748,7 +1748,7 @@ extern int cOVStateManager_mStatus;
  * cOVStateManager_update moves on to the next overlay.
  *
  * It fills the onWidgetEvent slot (+0x9C) of D_00474D30 and of the overlay vtables built on it (D_004726A0, D_00472778,
- * D_00472850).
+ * cOVState_HEAT_PREEVENT_vtbl).
  *
  * @param widget  the widget; nothing happens when it is null
  * @param key  the widget event
@@ -1927,13 +1927,13 @@ void cGameModeMan_restorePreviousHeat(void* self);
 extern "C" void cGameComm_localDisconnected(void* self, int a1);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* st, int a2, int a3);
-extern int D_004A2708;
-extern int D_004A2A54;
+extern int cOVStateManager_mIsPauseDialog;
+extern int cPauseState_StackIdx;
 extern int cPauseState_Flags;
-extern int D_005366E8[];
-extern int D_004428F0[];
+extern int cPauseState_Stack[];
+extern int cPauseState_FlagsTable[];
 extern int cBENewRaceInterface_mNextLocation;
-extern int D_004A11B8;
+extern int cBENewRaceInterface_bIsBamLocation;
 extern char str_TransitionOut_b[];
 extern char str_Save_Profile[];
 
@@ -1960,7 +1960,7 @@ static inline void Play_20D5A8(char* self)
 static inline void Pop_20D5A8()
 {
     cOVStateManager_mStatus = 3;
-    cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
+    cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
 }
 
 /**
@@ -1992,7 +1992,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUITh
             case 0: {
                 int kind = cBENewRaceInterface_newRace.cGameEvent;
                 if (kind >= 6 && kind <= 11) {
-                    if (D_004A2708) {
+                    if (cOVStateManager_mIsPauseDialog) {
                         Pop_20D5A8();
                     } else {
                         cReplay_stopAutoReplay(SSXApp->Game->Replay);
@@ -2012,11 +2012,11 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUITh
                     cBENewRaceInterface_mNextLocation = mode;
                     cBENewRaceInterface_newRace.iLocationIdx = mode;
                     sVV_D5A8* vt = *(sVV_D5A8**)(iface + 0xC);
-                    D_004A11B8 = 1;
+                    cBENewRaceInterface_bIsBamLocation = 1;
                     vt[1].fn(iface + vt[1].delta);
                     cGameModeMan_initGameMode(gm, cBENewRaceInterface_newRace.cGameEvent);
                     cGame_exit(SSXApp->Game, 1);
-                } else if (D_004A2708) {
+                } else if (cOVStateManager_mIsPauseDialog) {
                     Pop_20D5A8();
                     cGame_restart(Game_D5A8());
                 } else {

@@ -5962,7 +5962,7 @@ extern "C" void cBoostNode_writeToReplayFrame(cBoostNode* self, void* stream)
 INCLUDE_ASM("intersect/worldsphtree", cAnimObjectNode_cAnimObjectNode1);
 #ifdef SKIP_ASM
 extern char* cAppMan_TheAppMan;
-extern void* D_00490B10[];
+extern void* cAnimObjectNode_vtbl[];
 extern "C" void cAnimNode_cAnimNode(void* p, int a1, int a2, void* obj, int a4);
 extern "C" float cAnimFrame_getStartTime(void* inst);
 float AIrandf(float lo, float hi);
@@ -6032,7 +6032,7 @@ static inline void setRateMax_1AA0(sFloat_1AA0* dst, float v, char* info)
  * cAnimObjectNode_cAnimObjectNode).
  *
  * Builds the animation-node base at +0x1C with cAnimNode_cAnimNode(base, @p bucket, @p nodeType, @p obj, ForceVisible != 0) and stores
- * the vtable D_00490B10 at +0x3C. From @p def (On Tour tMakeAnimObjectData, times in 30 fps frames converted to
+ * the vtable cAnimObjectNode_vtbl at +0x3C. From @p def (On Tour tMakeAnimObjectData, times in 30 fps frames converted to
  * seconds) it sets the play type (+0x0) from +0x4; min (+0x14) from FromTime (+0xC), or the animation's start time
  * (cAnimFrame_getStartTime on the animation at +0x64) when negative; max (+0x18) from ToTime (+0x10), or the animation
  * length (the instance's info at +0x80, its +0x14) when negative; and the frame (+0x1C) from StartTime (+0x1C; negative
@@ -6053,7 +6053,7 @@ static inline void setRateMax_1AA0(sFloat_1AA0* dst, float v, char* info)
 extern "C" void* cAnimObjectNode_cAnimObjectNode1(cAnimObjectNode* self, int bucket, int nodeType, char* obj, sSphFloatDef_1AA0* def)
 {
     cAnimNode_cAnimNode((char*)&self->CurrTime, bucket, nodeType, obj, def->f24 != 0);
-    self->mVtbl = D_00490B10;
+    self->mVtbl = cAnimObjectNode_vtbl;
     float frameTime = 0.0f;
     char* info = *(char**)(obj + 0x80);
     if (self->AnimFrames != 0) {
@@ -6105,13 +6105,13 @@ struct sVEntry00341C80 {
 };
 
 extern "C" void* cAnimNode_cAnimNode1(void* p, int a1, void* stream);
-extern void* D_00490B10[];
+extern void* cAnimObjectNode_vtbl[];
 
 /**
  * Constructs an animated object node from a replay frame.
  *
  * Builds the animation node base at +0x1C with cAnimNode_cAnimNode1 (its cMoveNode part at +0x30), stores this
- * class's vtable D_00490B10 at +0x3C, reads the 0x1C-byte object state into +0x0 from @p stream (read
+ * class's vtable cAnimObjectNode_vtbl at +0x3C, reads the 0x1C-byte object state into +0x0 from @p stream (read
  * virtual, slot 2) and sets the root-transform-dirty flag (bit 0 of Flags, +0x42).
  *
  * @param bucket  bucket list the node joins, passed on to the base constructor
@@ -6121,7 +6121,7 @@ extern void* D_00490B10[];
 extern "C" void* cAnimObjectNode_cAnimObjectNode(cAnimObjectNode* self, int bucket, sVEntry00341C80** stream)
 {
     cAnimNode_cAnimNode1((char*)&self->CurrTime, bucket, stream);
-    self->mVtbl = D_00490B10;
+    self->mVtbl = cAnimObjectNode_vtbl;
     (*stream)[2].fn((char*)stream + (*stream)[2].delta, self, 0x1C);
     self->Flags |= 1;
     return ((void*)self);
@@ -6133,19 +6133,19 @@ INCLUDE_ASM("intersect/worldsphtree", cAnimObjectNode__cAnimObjectNode);
 #ifdef SKIP_ASM
 extern "C" void cAnimNode__cAnimNode(void* p, int flags);
 void operator_delete(int* ptr);
-extern void* D_00490B10[];
+extern void* cAnimObjectNode_vtbl[];
 
 /**
  * Destroys an animated object node: restores its vtable and runs the animation-node destructor.
  *
- * Stores D_00490B10 at +0x3C, calls cAnimNode__cAnimNode on the base at +0x1C (with flags 0) and frees the object with
- * operator_delete when bit 0 of @p flags is set. Slot 1 of D_00490B10.
+ * Stores cAnimObjectNode_vtbl at +0x3C, calls cAnimNode__cAnimNode on the base at +0x1C (with flags 0) and frees the object with
+ * operator_delete when bit 0 of @p flags is set. Slot 1 of cAnimObjectNode_vtbl.
  *
  * @param flags  destructor flags; bit 0 frees the memory
  */
 extern "C" void cAnimObjectNode__cAnimObjectNode(cAnimObjectNode* self, int flags)
 {
-    self->mVtbl = D_00490B10;
+    self->mVtbl = cAnimObjectNode_vtbl;
     cAnimNode__cAnimNode((char*)&self->CurrTime, 0);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -6179,7 +6179,7 @@ struct sVEntry_00341D48 {
  * cAnimObjectNode_updateCycle (wrap), otherwise cAnimObjectNode_updateOnce (clamp), returning 0 if func_0034EBA0 on the animation part fails.
  *
  * It then sets the dirty flag (bit 0 of +0x42) and copies the frame to +0x20. When the step set atLimit it calls the
- * node's slot 34 (cAnimObjectNode_expire) with 1 and returns 0; otherwise it returns 1. Slot 15 of D_00490B10.
+ * node's slot 34 (cAnimObjectNode_expire) with 1 and returns 0; otherwise it returns 1. Slot 15 of cAnimObjectNode_vtbl.
  *
  * @return 0 after a failed frame update or once the node expired, else 1
  */
@@ -6384,7 +6384,7 @@ extern "C" void cMoveNode_signal(void* p);
  * frame rate; 101 sets the frame (+0x1C) when the new value lies within [min, max]; 102 sets the per-frame speed
  * (+0x10, divided by the frame rate); 103 sets max (+0x18) and 104 min (+0x14), each limited to [0, the animation
  * length] (the instance at +0x48, its info at +0x80, +0x14) and pulling the frame inside; 105 sets the play type (+0x0)
- * to 0 (play once). Any other signal goes to cMoveNode_signal on the move-node part (+0x30). Slot 36 of D_00490B10,
+ * to 0 (play once). Any other signal goes to cMoveNode_signal on the move-node part (+0x30). Slot 36 of cAnimObjectNode_vtbl,
  * where the teeter vtable has cMoveNode_signal.
  *
  * @param msg  the signal number
@@ -6450,7 +6450,7 @@ struct sVEntry_cAnimObjectNode_writeToReplayFrame {
  * Writes an animated object node to a replay frame.
  *
  * Writes the animation-node part (+0x1C) with cAnimNode_writeToReplayFrame, then the 0x1C-byte object state at +0x0 (play type, flags,
- * delay, speed, range, frame) with the frame's write virtual (slot 1). Slot 12 of D_00490B10.
+ * delay, speed, range, frame) with the frame's write virtual (slot 1). Slot 12 of cAnimObjectNode_vtbl.
  *
  * @param stream  the replay frame to write to (On Tour cBxReplayFrame* data)
  */
@@ -6706,7 +6706,7 @@ INCLUDE_ASM("intersect/worldsphtree", cAnimTeeterNode_getAnimSpeed);
  * Returns the teeter's animation speed: its current step, or 0 while it rests against an end of its range.
  *
  * Returns 0 when the frame (+0x30) is at or below min (+0x10) with a negative step (+0x4), or at or above max (+0x14)
- * with a positive one. Last slot of cAnimTeeterNode_vtbl, where D_00490B10 has cAnimObjectNode_getAnimSpeed.
+ * with a positive one. Last slot of cAnimTeeterNode_vtbl, where cAnimObjectNode_vtbl has cAnimObjectNode_getAnimSpeed.
  *
  * @return the step per update, or 0
  */
@@ -6870,7 +6870,7 @@ static inline float vu0Dot_342538(const sVec4_342538& a, const sVec4_342538& b)
  * the hit position (@p intInfo +0x0), negates it when TorqueScale (+0x8) is negative and again when the mesh's bit in
  * AnimSign (+0x2C) is set, and adds dot(matrix * Y axis, cross(arm, force)) to the torque (+0x0).
  *
- * cAnimTeeterNode's update (cAnimTeeterNode_updateNode) consumes the torque. Slot of cAnimTeeterNode_vtbl where D_00490B10 has
+ * cAnimTeeterNode's update (cAnimTeeterNode_updateNode) consumes the torque. Slot of cAnimTeeterNode_vtbl where cAnimObjectNode_vtbl has
  * cMoveNode_applyForce.
  *
  * @param intInfo  the hit (On Tour tIntersectInfo: position at +0x0, mesh index at +0x5C)

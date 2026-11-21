@@ -24,7 +24,7 @@
 //       sh 0xEE8 + PMF 0xEF4, isAboutToRail lw ...), +0x50 in retail for cComputer's block;
 //   [R] retail's constructor/Init and the out-of-line accessors in ai/control/handplantcontrol: cComputer_setInput
 //       setInput (sw 0xF40), cComputer_getCurrentTarget getCurrentTarget (lw 0xE70), cComputer_isAboutToRail isAboutToRail (lw 0xE20),
-//       cComputer_setCruiseLogic setCruiseLogic (PMF D_0043CF20[i] -> 0xF44, i -> 0xF38);
+//       cComputer_setCruiseLogic setCruiseLogic (PMF cComputer_mCruiseLogic[i] -> 0xF44, i -> 0xF38);
 //   [U] how retail code uses the field (setIndividualRiderDifficulty, updateRiderDifficulty, the four
 //       shouldRider* tests, chooseRandom*Grab, scorePath, checkForBlock ...);
 //   [O] On Tour's member order alone, where the fields on both sides are placed by [P], [R] or [U].
@@ -37,11 +37,11 @@
 struct cInput;
 
 // g++ 2.95 pointer to member function (8 bytes): {delta, index, pfn | delta2}. The static cComputer::mCruiseLogic[4]
-// ([O]; retail D_0043CF20) holds four non-virtual ones (index -1): cComputer_jumpSetupCruise, cComputer_followPathCruise, cComputer_avoidTargetCruise
+// ([O]; retail cComputer_mCruiseLogic) holds four non-virtual ones (index -1): cComputer_jumpSetupCruise, cComputer_followPathCruise, cComputer_avoidTargetCruise
 // ([O] avoidTargetCruise) and cComputer_attackTargetCruise, each of which also switches the logic (writes cruiseLogic/mCruiseLogicID).
 struct tComputerCruiseLogic {
     short delta;      // 0x0 [U] cComputer_getCruiseCmd (the call through it)
-    short index;      // 0x2 [U] cComputer_getCruiseCmd tests it (-1 in every D_0043CF20 entry: non-virtual)
+    short index;      // 0x2 [U] cComputer_getCruiseCmd tests it (-1 in every cComputer_mCruiseLogic entry: non-virtual)
     union {
         void* pfn;    // 0x4 [U] cComputer_getCruiseCmd (non-virtual)
         short delta2; // 0x4 [U] cComputer_getCruiseCmd (virtual: offset of the vptr)

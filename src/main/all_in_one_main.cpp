@@ -798,7 +798,7 @@ extern sE D_004A4E60;
 extern sE D_004A4E68;
 extern sE D_004A4E70;
 extern sE D_004A4E78;
-extern char D_004A4E80;
+extern char gFlowState;
 extern int D_004A4E84;
 extern int D_004A4E88_v[2] __asm__("D_004A4E88"); // {int, int} pair (feasyncfile names it the same way)
 extern "C" void cFEFlowState_purge(void*);
@@ -860,7 +860,7 @@ extern float D_004C6688[4];
 extern float D_004C6698[4];
 extern float D_004C66A8[3];
 extern float D_004C66B8[3];
-extern float D_004C66C8[4];
+extern float gStaticColour[4];
 extern float gDisableColour[4];
 extern float D_004C66E8[4];
 extern float D_004C66F8[4];
@@ -892,7 +892,7 @@ void sti_001DBC98(int init, int prio) __asm__("func_001DBC98");
  * constants (D_004C6328 .. D_004C6838, including gDisableColour = {1, 0.6, 0.6, 0.6}, gPopupWhite = {1, 1, 1, 1} and
  * gPopupBlack = {1, 0, 0, 0}), two three-float vectors (D_004C66A8 = {100, 128, 0}, D_004C66B8 = {130, 166, 0}),
  * fifteen packed id/value pairs D_004A4E08 .. D_004A4E78 (0 to 13, then -1), and zeroes D_004A4E00, D_004A4E04 and the
- * front-end flow state words D_004A4E80 .. D_004A4E8C. On the destroy pass it calls cFEFlowState_purge on D_004A4E80. The
+ * front-end flow state words gFlowState .. D_004A4E8C. On the destroy pass it calls cFEFlowState_purge on gFlowState. The
  * first colour values are the same as the ones func_003AD290 writes in world/wscriptcache, so they come from a shared
  * header.
  *
@@ -1150,10 +1150,10 @@ void sti_001DBC98(int init, int prio)
             D_004C66B8[0] = 130.0f;
             D_004C66B8[1] = 166.0f;
             D_004C66B8[2] = 0.0f;
-            D_004C66C8[0] = 0.5f;
-            D_004C66C8[1] = D_004C6338[3];
-            D_004C66C8[2] = D_004C6338[3];
-            D_004C66C8[3] = D_004C6338[3];
+            gStaticColour[0] = 0.5f;
+            gStaticColour[1] = D_004C6338[3];
+            gStaticColour[2] = D_004C6338[3];
+            gStaticColour[3] = D_004C6338[3];
             gDisableColour[0] = 1.0f;
             gDisableColour[1] = 0.600000024f;
             gDisableColour[2] = 0.600000024f;
@@ -1194,7 +1194,7 @@ void sti_001DBC98(int init, int prio)
             D_004C6768[1] = 0.5f;
             D_004C6768[2] = 1.0f;
             D_004C6768[3] = 1.0f;
-            D_004A4E80 = 0;
+            gFlowState = 0;
             D_004A4E84 = 0;
             D_004A4E88_v[0] = 0;
             D_004A4E88_v[1] = 0;
@@ -1251,7 +1251,7 @@ void sti_001DBC98(int init, int prio)
             D_004C6838[2] = 1.0f;
             D_004C6838[3] = 1.0f;
         } else {
-            cFEFlowState_purge(&D_004A4E80);
+            cFEFlowState_purge(&gFlowState);
         }
     }
 }
@@ -1261,18 +1261,18 @@ void sti_001DBC98(int init, int prio)
 INCLUDE_ASM("main/all_in_one_main", cAppModule__cAppModule);
 #ifdef SKIP_ASM
 void operator_delete(int*);
-extern void* D_0046D970[];
+extern void* cAppModule_vtbl[];
 
 /**
- * Destroys an app module base: stores the root module vtable D_0046D970 at +0x0, then frees the object when asked to.
+ * Destroys an app module base: stores the root module vtable cAppModule_vtbl at +0x0, then frees the object when asked to.
  *
- * D_0046D970 is the vtable every screen and module (cPreStartScreen, cInitLoadScreen, the front end, cSSXApp's
+ * cAppModule_vtbl is the vtable every screen and module (cPreStartScreen, cInitLoadScreen, the front end, cSSXApp's
  * secondary vtable) falls back to; its slots are the destructor, load, purge, loseFocus, gainFocus, update and render.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cAppModule__cAppModule(void *self, int flags) {
-    *(void***)((char*)self + 0) = D_0046D970;
+    *(void***)((char*)self + 0) = cAppModule_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

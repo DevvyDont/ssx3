@@ -294,10 +294,10 @@ struct cFEStateNetAccountMem {
     int miState;                    // 0x6DC [U] func_001B70D0(self, state) stores it and sets up the state's popup text; onUpdate
                                     //       cFEStateNetAccountMem_onUpdate and onPopupEvent cFEStateNetAccountMem_onPopupEvent switch on it
     char mszUserName[0x11];         // 0x6E0 [R] strcpy of the constructor's 5th argument (LobbyMan mUserName / tLobbyAccount mName at
-                                    //       the call sites), D_00536760 in mode 3; [U] func_001B7778 hands it to the card code (func_00265F18),
-                                    //       func_001B7A98 compares it with D_00536760
-    char mszPassword[0x11];         // 0x6F1 [R] strcpy of the 6th argument (mPassword), D_00536760 + 0x11 in mode 3; [U] func_00265F68,
-                                    //       func_001B7A98 compares it with D_00536760 + 0x11
+                                    //       the call sites), AccountData in mode 3; [U] func_001B7778 hands it to the card code (func_00265F18),
+                                    //       func_001B7A98 compares it with AccountData
+    char mszPassword[0x11];         // 0x6F1 [R] strcpy of the 6th argument (mPassword), AccountData + 0x11 in mode 3; [U] func_00265F68,
+                                    //       func_001B7A98 compares it with AccountData + 0x11
     unsigned short mustrText[0x201]; // 0x702 [U] func_001B70D0: sprintf1 / strcpy1 (unicode) target of the state's message,
                                     //       passed to the popup (func_001B7650); func_001B7E40 / func_001B8238 / func_001B83C0; extent: up to 0xB04
     int mbCardBusy;                 // 0xB04 [R] 0; [U] func_001B70D0: 1 while a card operation runs (states 8/14/16/22), 0 otherwise;

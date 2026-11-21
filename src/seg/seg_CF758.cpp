@@ -22,7 +22,7 @@ struct sReq_CE758
     signed char type;
     signed char track;
 };
-extern sReq_CE758 D_0045AAD8_CE758[][4][5] __asm__("D_0045AAD8");
+extern sReq_CE758 D_0045AAD8_CE758[][4][5] __asm__("gMedalsInfo");
 
 extern char str_kT_OVRCMNEarnings[];
 extern char str_kT_OVRCMNCollectibles[];
@@ -55,7 +55,7 @@ static inline int Loc_CE758(char* key)
 }
 
 /**
- * Sets a text widget to the name of one entry of a peak's challenge table (D_0045AAD8).
+ * Sets a text widget to the name of one entry of a peak's challenge table (gMedalsInfo).
  *
  * Kind 3 gives "kT_OVRCMNEarnings"; kind 2 gives "kT_OVRCMNCollectibles" for entry 0 and
  * "kT_TITLEBigChallenges" otherwise. Other kinds look up the entry's type: 4 is the peak's
@@ -241,7 +241,7 @@ struct sReq_ED90
     signed char track;
     signed char kind;
 };
-extern sReq_ED90 D_0045AAD8_ED90[][4][5] __asm__("D_0045AAD8");
+extern sReq_ED90 D_0045AAD8_ED90[][4][5] __asm__("gMedalsInfo");
 
 /**
  * Returns the medal a profile's character has earned in one challenge of a peak's trophy list.
@@ -249,7 +249,7 @@ extern sReq_ED90 D_0045AAD8_ED90[][4][5] __asm__("D_0045AAD8");
  * Asks reward interface 13 (cBE_getInterface): trophy type 2 gives the collectibles medal for entry 0
  * (cBERewardInterface_getCollectiblesMedal) and the big-challenges medal otherwise
  * (cBERewardInterface_getBigChallengesMedal); type 3 gives the earnings medal (cBERewardInterface_getEarningsMedal);
- * types 0 and 1 look up the entry in D_0045AAD8[peak][type][entry] and return cBERewardInterface_getTrackMedal for its
+ * types 0 and 1 look up the entry in gMedalsInfo[peak][type][entry] and return cBERewardInterface_getTrackMedal for its
  * track and kind. Declared void here, but every path ends in the getter's call, whose result the callers read
  * (cFEStateTrophyRoom_updateBigArt, cFEStatePeakRoom_updateMedalsList, cFEStateMountainRoom_updateMarkers).
  *

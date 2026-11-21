@@ -49,7 +49,7 @@ CHECK_SIZE(cObjNode, 0x10);
 // ---- cTypeObjNode ----
 
 // cTypeObjNode: a scene node that knows its node type (tObjNodeType: 1 anim object, 3 anim combo, 6 unsorted, 9 fence,
-// 20/21 float/spring rail, ...) and keeps a per-type live count (static ObjNodeCount[23] = D_0044AFF0), plus a
+// 20/21 float/spring rail, ...) and keeps a per-type live count (static ObjNodeCount[23] = cTypeObjNode_ObjNodeCount), plus a
 // flags word whose bit 0 is RootTransformDirty. Base of cSortObjNode (-> cInstanceNode, cRailManNode). EA's source:
 // d:/ssx/code/source/object/objnode.cpp (preview assert path; EA declares it in objnode.h with cObjNode/cSortObjNode -
 // all three are in this file). Retail methods: object/objnode (ctors, dtor,

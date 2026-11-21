@@ -17,7 +17,7 @@
 // Base: cAppModule (On Tour size 0x4: no data, only the vptr at 0x0). Vtable cFadeScreen_vtbl (0x0047D980, 7 slots, On
 // Tour cAppModule order: 1 dtor, 2 load (pure), 3 purge cAppModule_purge, 4 loseFocus, 5 gainFocus
 // cAppModule_gainFocus,
-// 6 update, 7 render (pure)); the destructor stores cAppModule's vtable D_0046D970 back.
+// 6 update, 7 render (pure)); the destructor stores cAppModule's vtable cAppModule_vtbl back.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet.
 // Evidence tags:
@@ -30,7 +30,7 @@
 
 struct cFadeScreen {
     // --- cAppModule (On Tour: size 0x4, the vptr only)
-    void** mVtbl;                   // 0x000 [R] cFadeScreen_vtbl (ctor); the dtor stores cAppModule's D_0046D970;
+    void** mVtbl;                   // 0x000 [R] cFadeScreen_vtbl (ctor); the dtor stores cAppModule's cAppModule_vtbl;
                                     //       derived ctors overwrite it with their own
     // --- cFadeScreen
     float FadeTimer;                // 0x004 [O][P] (preview 0xC); [R] ctor 0.2; [U] update adds / subtracts 1/60

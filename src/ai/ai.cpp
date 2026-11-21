@@ -1215,12 +1215,12 @@ extern "C" int cAI_isAILoadedAndReady(cAI* self)
 //100%
 INCLUDE_ASM("ai/ai", func_0012A1F0);
 #ifdef SKIP_ASM
-extern int D_00536708[];
+extern int cGameModeMan_iCharRank[];
 
 /**
- * Returns whether rider @p idx's character is one of the first six entries of D_00536708.
+ * Returns whether rider @p idx's character is one of the first six entries of cGameModeMan_iCharRank.
  *
- * Reads SSXApp->GameModeMan->iCharacters[idx] and compares it with D_00536708[0..5] (one of cGameModeMan's sorted score
+ * Reads SSXApp->GameModeMan->iCharacters[idx] and compares it with cGameModeMan_iCharRank[0..5] (one of cGameModeMan's sorted score
  * / rank tables, fe/ovstatepause uses it as a list of rider indices). Used by func_0012A998 and func_0012AA78 with each
  * computer rider's getAIIndex.
  *
@@ -1233,7 +1233,7 @@ extern "C" int func_0012A1F0(cAI* self, int idx)
     int characterId = *(int*)((char*)tbl + (idx << 2) + 0x18);
     int found = 0;
     for (int i = 0; i < 6; i++) {
-        if (characterId == D_00536708[i]) found = 1;
+        if (characterId == cGameModeMan_iCharRank[i]) found = 1;
     }
     return found;
 }
@@ -2375,8 +2375,8 @@ struct sOptView_12B498
     int f18;
 };
 
-// The unit declares D_005308B8 later with its own type; bind this view by asm label.
-extern sOptView_12B498 D_005308B8_12B498 __asm__("D_005308B8");
+// The unit declares cBERules_mRules later with its own type; bind this view by asm label.
+extern sOptView_12B498 D_005308B8_12B498 __asm__("cBERules_mRules");
 
 static inline int OptBit_12B498(sOptView_12B498* o, int b)
 {
@@ -2384,7 +2384,7 @@ static inline int OptBit_12B498(sOptView_12B498* o, int b)
 }
 
 /**
- * Applies the custom game rules (D_005308B8) to a newly created human player's rider.
+ * Applies the custom game rules (cBERules_mRules) to a newly created human player's rider.
  *
  * mBoostMode is 3 with global bit 3, 0 with global bit 0, 2 with the player's bit 5, else 1; then
  * cRider_initBoost(). Player bits: 3 full boost meter, 4 no Ubers (else global bit 1 allows them), 0 unk_B20
@@ -2446,7 +2446,7 @@ struct sOptFlags_0012B698
     char pad4[0x14];
     int f18;
 };
-extern sOptFlags_0012B698 D_005308B8;
+extern sOptFlags_0012B698 cBERules_mRules;
 
 static inline int OptBit_0012B698(sOptFlags_0012B698* o, int b)
 {
@@ -2454,7 +2454,7 @@ static inline int OptBit_0012B698(sOptFlags_0012B698* o, int b)
 }
 
 /**
- * Applies the custom game rules (D_005308B8) to a newly created computer rider.
+ * Applies the custom game rules (cBERules_mRules) to a newly created computer rider.
  *
  * Same boost-mode choice as for players, then cRider_initBoost(); global bit 4 sets mBoostSourceMask 2,
  * global bit 1 allows Ubers, and mStartHandicap = cBERules_getAIStartDelaySecs(). The per-player bits it reads (5: boost
@@ -2465,20 +2465,20 @@ static inline int OptBit_0012B698(sOptFlags_0012B698* o, int b)
 extern "C" void cAI_applyComputerRulesCustom(cAI* self, cComputer* rider)
 {
     int boostMode = 1;
-    if (OptBit_0012B698(&D_005308B8, 3))
+    if (OptBit_0012B698(&cBERules_mRules, 3))
         boostMode = 3;
-    else if (OptBit_0012B698(&D_005308B8, 0))
+    else if (OptBit_0012B698(&cBERules_mRules, 0))
         boostMode = 0;
     else
-        if ((D_005308B8.f0 >> 5) & 1) boostMode = 2;
+        if ((cBERules_mRules.f0 >> 5) & 1) boostMode = 2;
     cRider* computerRider = rider->mRider;
     computerRider->mBoostMode = boostMode;
     cRider_initBoost(computerRider);
-    if ((D_005308B8.f0 >> 3) & 1)
+    if ((cBERules_mRules.f0 >> 3) & 1)
         rider->mRider->mBoostMeterStart = 1.0f;
-    if (OptBit_0012B698(&D_005308B8, 4))
+    if (OptBit_0012B698(&cBERules_mRules, 4))
         rider->mRider->mBoostSourceMask = 2;
-    if (OptBit_0012B698(&D_005308B8, 1))
+    if (OptBit_0012B698(&cBERules_mRules, 1))
         cRider_setUbersAllowed(rider->mRider, 1);
     rider->mRider->mStartHandicap = cBERules_getAIStartDelaySecs();
 }
@@ -4972,21 +4972,21 @@ extern "C" void cBumpControl_update(cBumpControl* self, void* in)
 INCLUDE_ASM("ai/ai", cPrewindControl_gainFocus);
 #ifdef SKIP_ASM
 extern "C" void cPrewindControl_playFromTable(cPrewindControl*, void*);
-extern char D_0043D788[];
+extern char kAnimPrewindTable[];
 
 /**
  * Enters the prewind control: resets the animation-turn target and plays the prewind clip for the current
  * input.
  *
  * Sets the animation-turn channel (rider + 0x1FC) to target 0 at rate 1/30, then calls
- * cPrewindControl_playFromTable() with the prewind table D_0043D788 (semantics 245-267).
+ * cPrewindControl_playFromTable() with the prewind table kAnimPrewindTable (semantics 245-267).
  */
 extern "C" void cPrewindControl_gainFocus(cPrewindControl* self)
 {
     char* rider = *(char**)self;
     *(float*)(rider + 0x200) = 0.03333333507180214f;
     *(int*)(rider + 0x204) = 0;
-    cPrewindControl_playFromTable(self, D_0043D788);
+    cPrewindControl_playFromTable(self, kAnimPrewindTable);
 }
 #endif
 
@@ -5023,8 +5023,8 @@ extern "C" void cPrewindControl_playFromTable(cPrewindControl*, void*);
 extern "C" void cSSXAudio_Lift(void* self, void* rider);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 int cRiderAnimBase_getCurrentAnimID(void* self, int i);
-extern char D_0043D840[];
-extern char D_0043D788[];
+extern char kAnimIntoAirTable[];
+extern char kAnimPrewindTable[];
 
 struct sAiBits0_12E9B8 { int v : 6; };
 struct sAiBits6_12E9B8 { int pad : 6; int v : 6; };
@@ -5059,7 +5059,7 @@ static inline float aiAbs_12E9B8(float x)
  *
  * The finish, reset (ResetPath) and rail-attach checks may end the tick. On release (JumpHeld, bit 13, clear)
  * it snaps the prewind pair to pi/4 steps (cRider_snapAxisIncrement), resets the orientation offset for rail styles 3/4,
- * plays the release clip from D_0043D840, clears the rail style, takes off unless airborne (cRider_applyJumpPop
+ * plays the release clip from kAnimIntoAirTable, clears the rail style, takes off unless airborne (cRider_applyJumpPop
  * with the crouch value, MS_Air, cSSXAudio_Lift), zeroes the turn, crouch and brake targets and requests
  * CS_Spin.
  *
@@ -5068,7 +5068,7 @@ static inline float aiAbs_12E9B8(float x)
  * zeroes the turn and prewind targets. Else, with no rail style and no spin, cRider_isChangeFakieGround may start a
  * reverse turn (semantic 0x15). Otherwise PrewindSpin and PrewindFlip (bits 15-20, 21-26), snapped to -1, 0
  * or 1, become the targets of the prewind channels (rider + 0x2A4, + 0x2B0), the turn or rail balance is set,
- * and the prewind clip is picked from D_0043D788.
+ * and the prewind clip is picked from kAnimPrewindTable.
  *
  * @param in  the command words (On Tour tPrewindCmd)
  */
@@ -5093,7 +5093,7 @@ extern "C" void cPrewindControl_update(cPrewindControl* self, void* in)
             *(sQuat_12BE20*)(anim + 0x30) = D_004FF130_12BE20;
             *(sQuat_12BE20*)(anim + 0x40) = AxisAngle_12BE20(D_004FF160_12BE20, -fakieAngle);
         }
-        cPrewindControl_playFromTable(self, D_0043D840);
+        cPrewindControl_playFromTable(self, kAnimIntoAirTable);
         *(int*)(*(char**)self + 0x328) = 0;
         cRider_verifyRailslideModeDEBUG(*(void**)self);
         if (cRider_getMotionState(*(void**)self) != 1)
@@ -5176,7 +5176,7 @@ extern "C" void cPrewindControl_update(cPrewindControl* self, void* in)
         cRider_setupLean(rider5, sx);
     else
         cRider_setupRailBalance(rider5, sy);
-    cPrewindControl_playFromTable(self, D_0043D788);
+    cPrewindControl_playFromTable(self, kAnimPrewindTable);
 }
 #endif
 
@@ -5220,7 +5220,7 @@ static inline float aiAbs_12EE30(float x)
  * is the rail style (rider + 0x328). The clip plays on the main channel (blend -1) only if it is not already
  * playing.
  *
- * @param tbl_  semantic table of 9 rows of 5 (D_0043D788 prewinds or D_0043D840 releases)
+ * @param tbl_  semantic table of 9 rows of 5 (kAnimPrewindTable prewinds or kAnimIntoAirTable releases)
  */
 extern "C" void cPrewindControl_playFromTable(cPrewindControl* self, void* tbl_)
 {
@@ -10039,18 +10039,18 @@ struct sAnimSet_00136268 {
     char pad10[0x10];
     int x20;            // 0x20
 };
-extern sAnimSet_00136268 D_0045A038[];
+extern sAnimSet_00136268 kUberGrindAnim[];
 
 /**
  * Starts an uber grind: plays the entry anim of grind CurrentGrind for the rail stance and scores the trick.
  *
- * Picks the entry anim from D_0045A038[CurrentGrind] (0x24 bytes each) by RailslideMode (4, 3, 2, other), turns
+ * Picks the entry anim from kUberGrindAnim[CurrentGrind] (0x24 bytes each) by RailslideMode (4, 3, 2, other), turns
  * the anim heading offset a quarter turn (not from stance 3; stance 2 also clears the switch flag), reports
  * the grind (cRiderMetrix_evUberGrindStart) for boost, then sets RailslideMode 3, GrindState 0 and fades anim layers 1 and 0.
  */
 extern "C" void cUberGrindControl_gainFocus(cUberGrindControl* self)
 {
-    sAnimSet_00136268* grind = &D_0045A038[self->CurrentGrind];
+    sAnimSet_00136268* grind = &kUberGrindAnim[self->CurrentGrind];
     cRider* rider = self->mRider;
     int railStyle = rider->RailslideMode;
     if (railStyle == 4) {
@@ -10147,7 +10147,7 @@ extern "C" void cUberGrindControl_update(cUberGrindControl* self, void* in)
 {
     if (cRider_checkForReset_i((char*)self->mRider, (*(int*)in >> 12) & 1, 0))
         return;
-    char* tbl = (char*)D_0045A038 + self->CurrentGrind * 0x24;
+    char* tbl = (char*)kUberGrindAnim + self->CurrentGrind * 0x24;
     if (cRider_checkRailBoardCollisions((char*)self->mRider))
     {
         if (self->GrindState == 1)

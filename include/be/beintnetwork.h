@@ -19,8 +19,8 @@
 //   cBENetworkInterface::networkOpt     cBENetworkInterface_networkOpt  tBENetworkDB (0x4B0; read by ~20 units; size:0x4B0 in
 //                                                   config/symbol_addrs.txt, so splat writes its fields as
 //                                                   networkOpt + off, no longer as D_00534B34 ... D_00534FD8)
-//   cBELibrary::networkDB               D_00535088  tBENetworkDB (submit/discard's other side; On Tour has both)
-//   cBENetworkInterface::BackupPlayerDB D_00534A88  6 player records of 0x1C (backupCharProfile cBENetworkInterface_backupCharProfile /
+//   cBELibrary::networkDB               cBELibrary_networkDB  tBENetworkDB (submit/discard's other side; On Tour has both)
+//   cBENetworkInterface::BackupPlayerDB cBENetworkInterface_BackupPlayerDB  6 player records of 0x1C (backupCharProfile cBENetworkInterface_backupCharProfile /
 //                                                   restoreCharProfile cBENetworkInterface_restoreCharProfile; On Tour: cBEPlayerDB[4])
 //
 // Evidence tags:

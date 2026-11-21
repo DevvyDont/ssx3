@@ -9,7 +9,7 @@
 // draws them as sprites (func_00229BA8), drops the quads of an unloading world section (func_00229408) and saves /
 // restores the quad ids in replays (func_00229E20 / func_00229E58).
 // EA's source: d:/ssx/code/source/main/crowdman2d.cpp (the July 2003 preview's assert strings, with "!TheCrowdMan2d":
-// a static singleton, retail D_004A2A00, set by the ctor and cleared by the dtor). The class name follows the
+// a static singleton, retail TheCrowdMan2d, set by the ctor and cleared by the dtor). The class name follows the
 // allocation tag "CrowdMan2d", the preview's cGame accessor getCrowdMan2d__C5cGame and the file name; main/game.h
 // already declares cGame::CrowdMan2d as cCrowdMan2d* (no mangled symbol spells the class itself). Retail code:
 // main/ssxapp 0x00229180..0x00229E58. No On Tour class (On Tour keeps only cCrowdAnim2D / cCrowdRender2D).

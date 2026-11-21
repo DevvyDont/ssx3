@@ -2846,7 +2846,7 @@ struct sGfxCtx_708C0 {
 };
 
 extern sGfxCtx_708C0* D_004A5B80_708C0 __asm__("cGraphicsMan_TheGraphicsMan");
-extern int D_0044B420[];
+extern int gBlendTable[];
 
 typedef sGfxMat_708C0 (*tGetMat_708C0)(void*);
 typedef int (*tCull_708C0)(void*, void*, void*, const sGfxMat_708C0&);
@@ -2861,7 +2861,7 @@ static inline int GetTexId_708C0(int i)
 /**
  * Draws a static emitter's particles with its texture-animation frame, unless it is culled or hidden.
  *
- * Pushes a render state with the layer for its kind (D_0044B420) and blend flags, draws through GrMan slot 82
+ * Pushes a render state with the layer for its kind (gBlendTable) and blend flags, draws through GrMan slot 82
  * and
  * pops the state.
  *
@@ -2878,7 +2878,7 @@ extern "C" void cStaticEmitter_render1(cStaticEmitter* selfp)
     if ((selfp)->m_initialized == 0) {
         return;
     }
-    int layer = D_0044B420[(selfp)->BlendMode];
+    int layer = gBlendTable[(selfp)->BlendMode];
     gfx->top[1] = gfx->top[0];
     sGfxRS_708C0* prev = gfx->top;
     gfx->top = prev + 1;

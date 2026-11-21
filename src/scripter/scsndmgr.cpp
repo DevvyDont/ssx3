@@ -297,10 +297,10 @@ extern "C" void cMoviePlayer__cMoviePlayer(void* p, int flags);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_ResumeSFX(void* p);
 extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(void* p);
-extern int D_004A2A54;
+extern int cPauseState_StackIdx;
 extern int cPauseState_Flags;
-extern int D_005366E8[];
-extern int D_004428F0[];
+extern int cPauseState_Stack[];
+extern int cPauseState_FlagsTable[];
 
 class cWorld_3818 {
 public:
@@ -352,7 +352,7 @@ public:
  * Stops and deletes the video player and undoes the game-state changes made when playback started.
  *
  * When a player exists it is destroyed (cMoviePlayer__cMoviePlayer, flags 3). If it was playing (+0x4), the pause-mode
- * stack (D_005366E8, top D_004A2A54) is popped and cPauseState_Flags reloaded from D_004428F0, sound effects resume,
+ * stack (cPauseState_Stack, top cPauseState_StackIdx) is popped and cPauseState_Flags reloaded from cPauseState_FlagsTable, sound effects resume,
  * the graphics manager's virtual slot 40 gets the value saved at +0x10, and when +0x14 is set it is cleared
  * and cCutSceneTransitionMan_ForceToCutSceneMode() is called on the cutscene transition manager. The first four words are then cleared.
  */
@@ -361,7 +361,7 @@ extern "C" void cVidEngine_ResetVideoEngine(cVidEngine* self)
     if (self->mpPlayer != 0) {
         cMoviePlayer__cMoviePlayer(self->mpPlayer, 3);
         if (self->mIsPlaying != 0) {
-            cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
+            cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
             cSSXAudio_ResumeSFX(cAudioInterface_bxAudio());
             ((cWorld_3818*)GrMan)->SetTVDisplayFormat(self->mSavedDisplayFormat);
             if (self->mRestoreCutSceneMode != 0) {

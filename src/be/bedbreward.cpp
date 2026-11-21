@@ -223,7 +223,7 @@ INCLUDE_ASM("be/bedbreward", __sti__all_in_one_be_cpp);
 INCLUDE_ASM("be/bedbreward", cBEInterface_submit__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the base back-end interface's submit (vtable slot 1 of cBEInterface's vtable D_0045AE88).
+ * Does nothing: the base back-end interface's submit (vtable slot 1 of cBEInterface's vtable cBEInterface_vtbl).
  */
 void cBEInterface_submit(void* self)
 {
@@ -234,7 +234,7 @@ void cBEInterface_submit(void* self)
 INCLUDE_ASM("be/bedbreward", cBEInterface_discard__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the base back-end interface's discard (vtable slot 2 of cBEInterface's vtable D_0045AE88).
+ * Does nothing: the base back-end interface's discard (vtable slot 2 of cBEInterface's vtable cBEInterface_vtbl).
  */
 void cBEInterface_discard(void* self)
 {
@@ -400,12 +400,12 @@ extern "C" int cBENewRaceInterface_getGamePath(void) {
 //100%
 INCLUDE_ASM("be/bedbreward", cBENewRaceInterface_setLocationID);
 #ifdef SKIP_ASM
-extern int D_004A11B8;
+extern int cBENewRaceInterface_bIsBamLocation;
 
 /**
- * Sets the race's location: cBENewRaceInterface_newRace.iLocationIdx = @p locationIndex, and sets the flag D_004A11B8 to 1.
+ * Sets the race's location: cBENewRaceInterface_newRace.iLocationIdx = @p locationIndex, and sets the flag cBENewRaceInterface_bIsBamLocation to 1.
  *
- * D_004A11B8 is read by cBENewRaceInterface_isDebugBAMLocation and cleared by cBENewRaceInterface_setDebugNonBAMLocation (it sits where On Tour keeps
+ * cBENewRaceInterface_bIsBamLocation is read by cBENewRaceInterface_isDebugBAMLocation and cleared by cBENewRaceInterface_setDebugNonBAMLocation (it sits where On Tour keeps
  * cBENewRaceInterface::bIsBamLocation). @p self is unused.
  *
  * @param locationIndex  the location index
@@ -413,7 +413,7 @@ extern int D_004A11B8;
 extern "C" void cBENewRaceInterface_setLocationID(cBENewRaceInterface* self, int locationIndex)
 {
     cBENewRaceInterface_newRace.iLocationIdx = locationIndex;
-    D_004A11B8 = 1;
+    cBENewRaceInterface_bIsBamLocation = 1;
 }
 #endif
 //100%
@@ -447,43 +447,43 @@ extern "C" int cBENewRaceInterface_getNextLocationID(void) {
 //100%
 INCLUDE_ASM("be/bedbreward", cBENewRaceInterface_isDebugBAMLocation);
 #ifdef SKIP_ASM
-extern int D_004A11B8;
+extern int cBENewRaceInterface_bIsBamLocation;
 
 /**
- * Returns the flag D_004A11B8: set by cBENewRaceInterface_setLocationID when a location is chosen, cleared by cBENewRaceInterface_setDebugNonBAMLocation.
+ * Returns the flag cBENewRaceInterface_bIsBamLocation: set by cBENewRaceInterface_setLocationID when a location is chosen, cleared by cBENewRaceInterface_setDebugNonBAMLocation.
  *
  * @return the flag
  */
 extern "C" int cBENewRaceInterface_isDebugBAMLocation(void) {
-    return D_004A11B8;
+    return cBENewRaceInterface_bIsBamLocation;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENewRaceInterface_setDebugNonBAMLocation);
 #ifdef SKIP_ASM
-extern int D_004A11B8;
+extern int cBENewRaceInterface_bIsBamLocation;
 
 /**
- * Clears the flag D_004A11B8 (see cBENewRaceInterface_setLocationID and cBENewRaceInterface_isDebugBAMLocation).
+ * Clears the flag cBENewRaceInterface_bIsBamLocation (see cBENewRaceInterface_setLocationID and cBENewRaceInterface_isDebugBAMLocation).
  */
 extern "C" void cBENewRaceInterface_setDebugNonBAMLocation(void) {
-    D_004A11B8 = 0;
+    cBENewRaceInterface_bIsBamLocation = 0;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENewRaceInterface_setCmdLineTrack);
 #ifdef SKIP_ASM
 extern "C" void cBXString_operatorE1(int *);
-extern int D_004A4CB8;
+extern int cBENewRaceInterface_commandLineTrack;
 
 /**
- * Re-initialises the static string D_004A4CB8 from the C string the caller passes as its second argument.
+ * Re-initialises the static string cBENewRaceInterface_commandLineTrack from the C string the caller passes as its second argument.
  *
- * Calls cBXString_operatorE1(&D_004A4CB8, str), with str left in the second argument register by the caller (the
+ * Calls cBXString_operatorE1(&cBENewRaceInterface_commandLineTrack, str), with str left in the second argument register by the caller (the
  * matched body declares no parameters). The string's previous buffer is not released. cBENewRaceInterface_getCmdLineTrack returns a copy.
  */
 extern "C" void cBENewRaceInterface_setCmdLineTrack(void) {
-    cBXString_operatorE1(&D_004A4CB8);
+    cBXString_operatorE1(&cBENewRaceInterface_commandLineTrack);
 }
 #endif
 //100%
@@ -492,13 +492,13 @@ INCLUDE_ASM("be/bedbreward", cBENewRaceInterface_getCmdLineTrack);
 extern "C" void cBXString_cBXString1(void*, int*);
 
 /**
- * Returns a copy of the static string D_004A4CB8 (set by cBENewRaceInterface_setCmdLineTrack): copy-constructs @p self from it.
+ * Returns a copy of the static string cBENewRaceInterface_commandLineTrack (set by cBENewRaceInterface_setCmdLineTrack): copy-constructs @p self from it.
  *
  * @return @p self, the returned cBXString
  */
 extern "C" void* cBENewRaceInterface_getCmdLineTrack(void* self)
 {
-    cBXString_cBXString1(self, &D_004A4CB8);
+    cBXString_cBXString1(self, &cBENewRaceInterface_commandLineTrack);
     return self;
 }
 #endif
@@ -1143,10 +1143,10 @@ INCLUDE_ASM("be/bedbreward", cBERules_reset);
 #ifdef SKIP_ASM
 // MEM_fill looks like memset(dst, value, size).
 extern "C" void* MEM_fill(void* dst, int value, int size);
-extern char D_005308B8[];
+extern char cBERules_mRules[];
 
 /**
- * Clears the 0x20-byte rules block D_005308B8 (MEM_fill with 0).
+ * Clears the 0x20-byte rules block cBERules_mRules (MEM_fill with 0).
  *
  * The block holds two 12-byte bragging-rights records {flags, starting points, head-start seconds} and the "my rules"
  * pair {flags, AI head-start seconds} (On Tour tBERuleOptionDB, which has four records); be/beintoption's cBERules_getPlayerStartDelaySecs
@@ -1154,7 +1154,7 @@ extern char D_005308B8[];
  */
 extern "C" void cBERules_reset()
 {
-    MEM_fill(D_005308B8, 0, 0x20);
+    MEM_fill(cBERules_mRules, 0, 0x20);
 }
 #endif
 
@@ -1933,19 +1933,19 @@ extern "C" void* cBEAggressionInterface_cBEAggressionInterface(cBEAggressionInte
 //100%
 INCLUDE_ASM("be/bedbreward", cBEPreRaceState_purgeState);
 #ifdef SKIP_ASM
-extern int* D_004A1258;
+extern int* cBEPreRaceState_instance;
 void operator_delete(int* ptr);
 
 /**
  * Frees the cBEPreRaceState singleton and clears its pointer.
  *
- * The object goes to operator delete without a destructor call; D_004A1258 is set to 0 so the next
+ * The object goes to operator delete without a destructor call; cBEPreRaceState_instance is set to 0 so the next
  * cBEPreRaceState_getState() creates a new one.
  */
 extern "C" void cBEPreRaceState_purgeState(void)
 {
-    operator_delete(D_004A1258);
-    D_004A1258 = 0;
+    operator_delete(cBEPreRaceState_instance);
+    cBEPreRaceState_instance = 0;
 }
 #endif
 
@@ -2005,19 +2005,19 @@ extern "C" void* cBERaceState_cBERaceState(cBERaceState* self)
 //100%
 INCLUDE_ASM("be/bedbreward", cBEPostRaceState_purgeState);
 #ifdef SKIP_ASM
-extern int* D_004A1254;
+extern int* cBEPostRaceState_instance;
 void operator_delete(int* ptr);
 
 /**
  * Frees the cBEPostRaceState singleton and clears its pointer.
  *
- * The object goes to operator delete without a destructor call; D_004A1254 is set to 0 so the next
+ * The object goes to operator delete without a destructor call; cBEPostRaceState_instance is set to 0 so the next
  * cBEPostRaceState_getState() creates a new one.
  */
 extern "C" void cBEPostRaceState_purgeState(void)
 {
-    operator_delete(D_004A1254);
-    D_004A1254 = 0;
+    operator_delete(cBEPostRaceState_instance);
+    cBEPostRaceState_instance = 0;
 }
 #endif
 

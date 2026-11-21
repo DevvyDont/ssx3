@@ -1447,8 +1447,8 @@ extern int cSortObjNode_ObjNodeSortIndex;
 extern int cSortObjNode_ObjNodeNoSortIndex;
 extern sPbApp* D_004A28A8_D818 __asm__("SSXApp");
 extern void* cWScriptMan_TheWScriptMan;
-extern void* D_004A2A00_D818 __asm__("D_004A2A00");
-extern void* D_004A3FF0;
+extern void* D_004A2A00_D818 __asm__("TheCrowdMan2d");
+extern void* TheCrowdMan3d;
 extern void* cMultiParticleMan_TheMultiParticleMan;
 
 static inline cPbWorld* pbWorld(cPbObjSys* o)
@@ -1461,7 +1461,7 @@ static inline cPbWorld* pbWorld(cPbObjSys* o)
  *
  * In order: the frame start (cReplayFramePtr_writeRewind), a 0x18-byte time block (AIgetseed), the object-id counters
  * cSortObjNode_ObjNodeSortIndex and cSortObjNode_ObjNodeNoSortIndex, the BE state, the game and its AI (their save virtuals), cAvalanche_writeToReplayFrame (where
- * the restore reads the avalanche), the world-script manager, D_004A2A00, D_004A3FF0, the multi-particle
+ * the restore reads the avalanche), the world-script manager, TheCrowdMan2d, TheCrowdMan3d, the multi-particle
  * manager, the object buckets (cReplay_saveBucket with 1, cReplay_saveDeadBucket) and the AI's focus manager.
  * cReplay_restoreFrame() reads them back in the same order.
  *
@@ -1485,7 +1485,7 @@ extern "C" void cReplay_saveFrame(cReplay* self, void* stream)
     cAvalanche_writeToReplayFrame(out);
     cWScriptMan_writeToReplayFrame(cWScriptMan_TheWScriptMan, out);
     func_00229E20(D_004A2A00_D818, out);
-    func_003441A8(D_004A3FF0, out);
+    func_003441A8(TheCrowdMan3d, out);
     cMultiParticleMan_writeToReplayFrame(cMultiParticleMan_TheMultiParticleMan, out);
     cReplay_saveBucket(self, out, 1);
     cReplay_saveDeadBucket(self, out);

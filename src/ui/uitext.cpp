@@ -1414,7 +1414,7 @@ struct sSprite_20A0 {
     float v1;               // 0x18
 };
 // The unit declares GrMan as char*; typed view by asm label.
-extern int D_004A28AC_20A0 __asm__("D_004A28AC");
+extern int D_004A28AC_20A0 __asm__("G2D");
 extern "C" void c2DRender_drawRect(int ctx, sQuadVtx_20A0* v, sRect_20A0* r);
 extern "C" void c2DRender_drawRotRect(int ctx, sQuadVtx_20A0* v, sRect_20A0* r);
 
@@ -1504,7 +1504,7 @@ struct sSprite_2220 {
     float v1;               // 0x18
 };
 // The unit declares GrMan as char*; typed views by asm label.
-extern int D_004A28AC_2220 __asm__("D_004A28AC");
+extern int D_004A28AC_2220 __asm__("G2D");
 extern void c2DRender_drawRect_2220(int ctx, sQuadVtx_2220* v, sRect_2220* r) __asm__("c2DRender_drawRect");
 extern void c2DRender_drawRotRect_2220(int ctx, sQuadVtx_2220* v, sRect_2220* r) __asm__("c2DRender_drawRotRect");
 
@@ -1589,7 +1589,7 @@ struct sSprite_23B8 {
     float u1;               // 0x14
     float v1;               // 0x18
 };
-extern int D_004A28AC_23B8 __asm__("D_004A28AC");
+extern int D_004A28AC_23B8 __asm__("G2D");
 extern "C" void c2DRender_drawRect2(int ctx, sQuadVtx_23B8* v, sRect_23B8* dst, sRect_23B8* uv);
 extern "C" void c2DRender_drawRotRect2(int ctx, sQuadVtx_23B8* v, sRect_23B8* dst, sRect_23B8* uv);
 
@@ -1600,7 +1600,7 @@ extern "C" void c2DRender_drawRotRect2(int ctx, sQuadVtx_23B8* v, sRect_23B8* ds
  * Selects the element's texture (tex) as texture 0 of GrMan's current draw state, then returns at once if @p tx or
  * @p ty is not positive. Each tile is r.w / tx by r.h / ty. For floor(ty) rows it draws floor(tx) full tiles plus, when
  * @p tx has a fraction, a last tile cut to the rectangle's right edge with its texture range cut to the same fraction;
- * when @p ty has a fraction a last row cut to the bottom edge follows. Every quad goes to the 2D renderer D_004A28AC
+ * when @p ty has a fraction a last row cut to the bottom edge follows. Every quad goes to the 2D renderer G2D
  * through c2DRender_drawRect2, or c2DRender_drawRotRect2 (texture turned 90 degrees, so the fractions crop the other axis) when flag
  * bit 2 is set. Flag bit 0 swaps the left and right texture coordinates (u0/u1), bit 1 the top and bottom ones (v0/v1).
  *
@@ -1754,7 +1754,7 @@ struct sSprite_2A00 {
     float v1;               // 0x18
 };
 // The unit declares GrMan as char*; typed views by asm label.
-extern int D_004A28AC_2A00 __asm__("D_004A28AC");
+extern int D_004A28AC_2A00 __asm__("G2D");
 extern "C" void c2DRender_drawRect1(int ctx, sQuadVtx_2A00* v, sRect_2A00* r, sMat3_2A00* m);
 extern "C" void c2DRender_drawRotRect1(int ctx, sQuadVtx_2A00* v, sRect_2A00* r, sMat3_2A00* m);
 
@@ -1764,7 +1764,7 @@ extern "C" void c2DRender_drawRotRect1(int ctx, sQuadVtx_2A00* v, sRect_2A00* r,
  * Selects the element's texture (tex) as texture 0 of GrMan's current draw state, sets the four vertices' texture
  * coordinates to the element's rectangle (u0/u1 swapped when flag bit 0 is set, v0/v1 when bit 1 is set) and their
  * colour to alpha = c.a * 128, red/green/blue = c * 255 (func_003A20A0 scales all four by 128), then hands the quad to
- * the 2D renderer D_004A28AC through c2DRender_drawRect1, or c2DRender_drawRotRect1 (corners in the order that turns the texture 90
+ * the 2D renderer G2D through c2DRender_drawRect1, or c2DRender_drawRotRect1 (corners in the order that turns the texture 90
  * degrees) when bit 2 is set; both transform each corner by @p transform (func_0038E0A8) before submitting. No caller in retail
  * references it.
  *
@@ -1849,7 +1849,7 @@ struct sSprite_2BC8 {
     float u1;               // 0x14
     float v1;               // 0x18
 };
-extern int D_004A28AC_2BC8 __asm__("D_004A28AC");
+extern int D_004A28AC_2BC8 __asm__("G2D");
 extern "C" void c2DRender_drawRect3(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* dst, sRect_2BC8* uv, sMat3_2BC8* m);
 extern "C" void c2DRender_drawRotRect3(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* dst, sRect_2BC8* uv, sMat3_2BC8* m);
 
@@ -1860,7 +1860,7 @@ extern "C" void c2DRender_drawRotRect3(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* ds
  * Selects the element's texture (tex) as texture 0 of GrMan's current draw state and returns if @p tx or @p ty is not
  * positive. Tiles are r.w / tx by r.h / ty: floor(ty) rows of floor(tx) full tiles, a cropped last tile per row when @p
  * tx has a fraction and a cropped last row when @p ty has one (texture ranges cut by the same fractions). Each quad
- * goes to the 2D renderer D_004A28AC through c2DRender_drawRect3, or c2DRender_drawRotRect3 (texture turned 90 degrees) when flag bit
+ * goes to the 2D renderer G2D through c2DRender_drawRect3, or c2DRender_drawRotRect3 (texture turned 90 degrees) when flag bit
  * 2 is set; both transform the corners by @p transform. Flag bit 0 swaps the left and right texture coordinates, bit 1 the top
  * and bottom ones. Vertex colour: alpha = c.a * 128, red/green/blue = c * 255 (func_003A20A0 uses 128 for all four). No
  * caller in retail references it.

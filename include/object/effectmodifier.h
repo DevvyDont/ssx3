@@ -6,16 +6,16 @@
 // 0x345798-0x3460A0, plus the one-line virtuals in object/railmodifier 0x360D00-0x360D28). Chain:
 //   cEffectLink (object/effectlink.h: Next, Prev, vptr) -> cEffectModifier (+ Instance; 0x10, On Tour 0x10; ctors
 //   cEffectModifier_cEffectModifier(inst) / cEffectModifier_cEffectModifier1(replay), dtor cEffectModifier__cEffectModifier, vtable cEffectModifier_vtbl;
-//   live count cEffectModifier::EffectCount = D_004A3FF4)
+//   live count cEffectModifier::EffectCount = cEffectModifier_EffectCount)
 //     -> cParticleModifier (0x1F0: cMemMan_alloc(0x1F0, "ParticleModifier") in cMoveNode_addParticle; ctors
-//        cParticleModifier_cParticleModifier(pdata, inst) / cParticleModifier_cParticleModifier1(replay); vtable cParticleModifier_vtbl; ParticleCount D_004A3FF8)
+//        cParticleModifier_cParticleModifier(pdata, inst) / cParticleModifier_cParticleModifier1(replay); vtable cParticleModifier_vtbl; ParticleCount cParticleModifier_ParticleCount)
 //     -> cDynamicParticleModifier (0x270: cMemMan_alloc(0x270, "DynamicParticleModifier") in
 //        cMoveNode_addDynamicParticle; ctors cDynamicParticleModifier_cDynamicParticleModifier1(pdata, inst, mesh, offset) / cDynamicParticleModifier_cDynamicParticleModifier(replay); vtable
-//        cDynamicParticleModifier_vtbl; DynamicParticleCount D_004A3FFC). Its second base cDynamicParticleModifierState
+//        cDynamicParticleModifier_vtbl; DynamicParticleCount cDynamicParticleModifier_DynamicParticleCount). Its second base cDynamicParticleModifierState
 //        (On Tour, 0x50) occupies 0x10-0x60: the replay record writes/reads it as one 0x50 block at +0x10.
 //     -> cHaloModifier (0x40: cMemMan_alloc(0x40, "HaloModifier") in cMoveNode_addHalo; ctors
 //        cHaloModifier_cHaloModifier(hdata, inst) / cHaloModifier_cHaloModifier1(replay); vtable cHaloModifier_vtbl;
-//        HaloCount D_004A4000). Its second base cHaloModifierState (On Tour, 0x30) occupies 0x10-0x40: the replay record
+//        HaloCount cHaloModifier_HaloCount). Its second base cHaloModifierState (On Tour, 0x30) occupies 0x10-0x40: the replay record
 //        writes/reads it as one 0x30 block at +0x10.
 // Vtables (7 slots): 1 dtor, 2 getType, 3 fadeEffect, 4 writeToReplayFrame, 5 update, 6 render, 7 signal.
 //

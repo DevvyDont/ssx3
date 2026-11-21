@@ -10,7 +10,7 @@
 //   cMusicSys : virtual cStreamSys (: virtual cBankManager : cAsyncSys, cBankMonitor, virtual cSoundSys)
 // Non-virtual part 0x5448 [R]: in a complete cMusicSys the ctor (inchrg != 0) puts cSoundSys at +0x5448, cBankManager
 // at +0x5450 and cStreamSys at +0x5F20 (and the vptr at +0x5440 is the last non-virtual field); in cSSXAudio the next
-// base (cSpeechSys) starts at 0x118 + 0x5448 = 0x5560. Vtable D_004838F8 (cMusicSys / cController),
+// base (cSpeechSys) starts at 0x118 + 0x5448 = 0x5560. Vtable cMusicSys_vtbl (cMusicSys / cController),
 // D_00483688 (cSSXAudio). The struct below is the NON-VIRTUAL part, so it can be embedded where the object lives.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance. Evidence tags:
@@ -54,7 +54,7 @@ struct cMusicSys {
     char* mMPFFile;                           // 0x5434 [R] operator new[](0x6400, "MPF data file"), freed by the dtor; preview assert "gMusicSys->GetMPFFile() != NULL"; [U] cMusicSys_GetMPFFile__FPv returns it, func_002B4A20 loads into it
     void* unk_5438;                           // 0x5438 [R] ctor 0; [U] func_002B4A20: async file handle of the MPF load (ASYNCFILE_cancel/release), func_002B4AA0 polls it
     int mShortcut;                            // 0x543C [R] ctor 0; [P] SetShortcut / GetOnShortcut (preview 0x5540, bracketed 0x5434..0x5440)
-    void** mVtbl;                             // 0x5440 [R] cMusicSys vptr: D_004838F8 (cMusicSys ctor/dtor), D_00483688 in cSSXAudio; [U] func_002B3BC0/func_002B4540/func_002B4978 call through it
+    void** mVtbl;                             // 0x5440 [R] cMusicSys vptr: cMusicSys_vtbl (cMusicSys ctor/dtor), D_00483688 in cSSXAudio; [U] func_002B3BC0/func_002B4540/func_002B4978 call through it
     char unk_5444[0x4];                       // 0x5444 padding (the class is 8-aligned: unsigned long members)
 };
 

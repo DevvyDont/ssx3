@@ -716,13 +716,13 @@ void NetConnSleep(int n) {
 INCLUDE_ASM("seg/seg_2F41F8", NetConnIdleAdd);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_0051F030: the periodic callbacks run by NetConnIdle (fn 0 = free slot). */
+/* _NETidle: the periodic callbacks run by NetConnIdle (fn 0 = free slot). */
 struct sTick { void (*fn)(int, int); int arg; };
 
-extern struct sTick D_0051F030[16];
+extern struct sTick _NETidle[16];
 
 /**
- * Registers an idle callback for NetConnIdle in the first free of the 16 slots of D_0051F030.
+ * Registers an idle callback for NetConnIdle in the first free of the 16 slots of _NETidle.
  *
  * NetConnIdle calls each registered function with its argument and the current tick.
  *
@@ -732,7 +732,7 @@ extern struct sTick D_0051F030[16];
  */
 int NetConnIdleAdd(void (*fn)(int, int), int procData) {
     int i;
-    struct sTick *idleSlot = D_0051F030;
+    struct sTick *idleSlot = _NETidle;
     for (i = 0; i < 16; i++) {
         if (idleSlot->fn == 0) {
             idleSlot->fn = fn;
@@ -749,8 +749,8 @@ int NetConnIdleAdd(void (*fn)(int, int), int procData) {
 INCLUDE_ASM("seg/seg_2F41F8", NetConnIdleDel);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_0051F030: the periodic callbacks run by NetConnIdle (fn 0 = free slot). */
-extern struct sTick D_0051F030[16];
+/* _NETidle: the periodic callbacks run by NetConnIdle (fn 0 = free slot). */
+extern struct sTick _NETidle[16];
 
 /**
  * Removes an idle callback registered with NetConnIdleAdd (the slot whose function and argument both match).
@@ -761,7 +761,7 @@ extern struct sTick D_0051F030[16];
  */
 int NetConnIdleDel(void (*fn)(int, int), int procData) {
     int i;
-    struct sTick *idleSlot = D_0051F030;
+    struct sTick *idleSlot = _NETidle;
     for (i = 0; i < 16; i++) {
         if (idleSlot->fn == fn && idleSlot->arg == procData) {
             idleSlot->fn = 0;
@@ -778,8 +778,8 @@ int NetConnIdleDel(void (*fn)(int, int), int procData) {
 INCLUDE_ASM("seg/seg_2F41F8", NetConnIdle);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_0051F030: the periodic callbacks run by NetConnIdle (fn 0 = free slot). */
-extern struct sTick D_0051F030[16];
+/* _NETidle: the periodic callbacks run by NetConnIdle (fn 0 = free slot). */
+extern struct sTick _NETidle[16];
 
 extern int D_004A4BA0;
 
@@ -791,7 +791,7 @@ extern int func_003F4A78(void);
  * Runs DirtySock's idle processing, at most every 5 ticks while the network connection is up.
  *
  * When D_004A4BA0 is set it returns early until func_003F4DE8 (the tick) reaches D_004A4BAC and then sets that to tick
- * + 5. Then func_003F4A78 runs and each of the 16 idle callbacks in D_0051F030 with a function is called with its
+ * + 5. Then func_003F4A78 runs and each of the 16 idle callbacks in _NETidle with a function is called with its
  * argument and the current tick. On Tour checks NetConnStatus('open') instead of the flag and runs the callbacks in
  * NetConnIdleProcs.
  */
@@ -803,7 +803,7 @@ void NetConnIdle(void) {
         D_004A4BAC = func_003F4DE8() + 5;
     }
     func_003F4A78();
-    idleProc = D_0051F030;
+    idleProc = _NETidle;
     for (i = 0xF; i >= 0; i--) {
         if (idleProc->fn) idleProc->fn(idleProc->arg, func_003F4DE8());
         idleProc++;

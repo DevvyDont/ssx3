@@ -18,7 +18,7 @@
 // PspSonyFrame (an RCMP::FRAME, an RCON::DLNode at +0x8, mReferenceCount at +0x10); retail gives the class no name, so
 // it has no struct here (func_003B07F8 / func_003B08E0 are its ctor / dtor).
 //
-// Vtable D_00456850 (_vt$23PS2_SONY_CODEC_INTERNAL): slot 1 PS2_SONY_CODEC_INTERNAL__PS2_SONY_CODEC_INTERNAL, 2 _Init,
+// Vtable PS2_SONY_CODEC_INTERNAL_vtbl (_vt$23PS2_SONY_CODEC_INTERNAL): slot 1 PS2_SONY_CODEC_INTERNAL__PS2_SONY_CODEC_INTERNAL, 2 _Init,
 // 3 _GetFrame, 4 _GetCurrentFrameNumber__FPv, 5 _GetFrameRate, 6 _ReleaseFrame (RCMP::CODEC's virtual order).
 //
 // FLAT layouts. Evidence tags: [R] constructors PS2_SONY_CODEC_INTERNAL_PS2_SONY_CODEC_INTERNAL / func_003B07F8 and the
@@ -41,7 +41,7 @@ struct RCON_DLList {
 // PS2_SONY_CODEC_INTERNAL. 0x80 [R] func_003B11A0 allocates 0x80.
 struct PS2_SONY_CODEC_INTERNAL {
     // --- RCMP::CODEC
-    void** mVtbl;                       // 0x00 [R] ctor D_00456850; the dtor ends with RCMP::CODEC's D_00456810
+    void** mVtbl;                       // 0x00 [R] ctor PS2_SONY_CODEC_INTERNAL_vtbl; the dtor ends with RCMP::CODEC's RCMP_CODEC_vtbl
     // --- PS2_SONY_CODEC_INTERNAL
     int unk_04;                         // 0x04 [U] Init sets 1; no other access seen
     int mWidth;                         // 0x08 [O] (PspSonyCodec); [U] Init: macroblock columns * 16; DecodeFrame /

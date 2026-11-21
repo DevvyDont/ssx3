@@ -462,12 +462,12 @@ struct sFlowState_865A8 {
     signed char count;
     char* states;
 };
-extern sFlowState_865A8 D_004A4E80;
+extern sFlowState_865A8 gFlowState;
 
 /**
  * Gives an FE state focus and restores the selection of its first screen's "Menu" from the FE flow state.
  *
- * The index saved for the state's id (mHashName, 0xC) is read from the flow state (D_004A4E80, cFEFlowState_getValue)
+ * The index saved for the state's id (mHashName, 0xC) is read from the flow state (gFlowState, cFEFlowState_getValue)
  * and set with cUIMenu_setSelectedByIndex(); then cUIState_onGainFocus() runs.
  *
  * @param pPrevState  the state that had focus before, passed on to cUIState_onGainFocus()
@@ -478,7 +478,7 @@ extern "C" void cFEState_onGainFocus(cFEState* self, cUIState* pPrevState)
     if (screen != 0) {
         void* menu = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_Menu));
         if (menu != 0) {
-            cUIMenu_setSelectedByIndex(menu, cFEFlowState_getValue(&D_004A4E80, *(signed char*)&self->mHashName));
+            cUIMenu_setSelectedByIndex(menu, cFEFlowState_getValue(&gFlowState, *(signed char*)&self->mHashName));
         }
     }
     cUIState_onGainFocus(self, pPrevState);
@@ -495,13 +495,13 @@ extern char str_Menu[];
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cFEFlowState_setValue(void* self, int a1, int a2);
 // NOTE: placeholder for the object at $gp+0x1D90 (no symbol in the target)
-extern sFlowState_865A8 D_004A4E80;
+extern sFlowState_865A8 gFlowState;
 
 /**
  * Front-end state losing focus: remembers which menu entry was selected, so it can be restored later.
  *
  * Finds the "Menu" object on the state's first screen and calls cFEFlowState_setValue (On Tour cFEFlowState::setValue)
- * on the flow state D_004A4E80 with this state's id (+0xC) and the menu's selected index (+0x95).
+ * on the flow state gFlowState with this state's id (+0xC) and the menu's selected index (+0x95).
  */
 extern "C" void cFEState_onLoseFocus(cFEState* self)
 {
@@ -509,7 +509,7 @@ extern "C" void cFEState_onLoseFocus(cFEState* self)
     if (screen != 0) {
         void* obj = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_Menu));
         if (obj != 0) {
-            cFEFlowState_setValue(&D_004A4E80, *(signed char*)&self->mHashName, *(signed char*)((char*)obj + 0x95));
+            cFEFlowState_setValue(&gFlowState, *(signed char*)&self->mHashName, *(signed char*)((char*)obj + 0x95));
         }
     }
 }

@@ -20,7 +20,7 @@ INCLUDE_ASM("fe/debugfe", cDebugMenuScreen_draw);
 // load after the 12 colour stores); plain form 97.65%. Byte-identical and behaves like the plain form; landed marked
 // under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
-extern int D_004A11B8;
+extern int cBENewRaceInterface_bIsBamLocation;
 extern char str_pct_d_b[];
 extern char str_pct_s_pct_s_b[];
 extern char str_Track[];
@@ -163,7 +163,7 @@ extern "C" void cDebugMenuScreen_draw(cDebugMenuScreen* self)
     cFont_text(font, 60.0f, y, str_1st_Time_WC_Flag);
     cFont_righttextf(font, 580.0f, y, str_pct_d_b, cBENewPlayerInterface_isFirstTimeWC(intPlayer, 0));
     y += lineheight;
-    if (D_004A11B8 != 0)
+    if (cBENewRaceInterface_bIsBamLocation != 0)
         sprintf(buf, str_pct_s_pct_s_pct_s, cBENewRaceInterface_getLocation(newRace) + 4, cBENewRaceInterface_getLocation(newRace) + 0x44, cBENewRaceInterface_getLocation(newRace) + 0x34);
     else
         sprintf(buf, str_pct_s_pct_s_b, cBENewRaceInterface_getLocation(newRace) + 0x34, cBENewRaceInterface_getLocation(newRace) + 0x34);
@@ -295,7 +295,7 @@ extern "C" void THREAD_yieldticks(int n);
 extern "C" void cGameComm_construct(int ch, int host);
 extern "C" void func_00266D58(void* p, int ip);
 extern "C" void func_00266E30(void* p);
-extern void* D_004A33F4;
+extern void* VoipMan;
 extern char D_0045D018[] __attribute__((aligned(8)));
 extern char D_0045D028[] __attribute__((aligned(8)));
 
@@ -316,7 +316,7 @@ extern sNetCfg_D0A8 D_00534B30_D0A8 __asm__("cBENetworkInterface_networkOpt");
  * DirtySock channel with cCommSystem_openDSockChannel on networkOpt.iPort, as host or client by bIsHost, and spins
  * until the channel reports connected (cCommSystem_isChannelConnected), running the comm update cCommSystem_update, SYNCTASK_run(0) and
  * THREAD_yieldticks(1) on each pass. Then creates the game comm (cGameComm_construct with the channel and bIsHost) and
- * connects and enables voice chat on D_004A33F4 (func_00266D58, func_00266E30). cDebugMenuScreen_update calls it when
+ * connects and enables voice chat on VoipMan (func_00266D58, func_00266E30). cDebugMenuScreen_update calls it when
  * the debug start menu starts a game.
  *
  * Likely bug: voice chat is given this console's own address (from cCommSystem_netConnLocalAddr), not the partner's; func_002639E0
@@ -348,8 +348,8 @@ extern "C" void func_0017D0A8(void)
         THREAD_yieldticks(1);
     }
     cGameComm_construct(ch, D_00534B30_D0A8.host);
-    func_00266D58(D_004A33F4, info[0]);
-    func_00266E30(D_004A33F4);
+    func_00266D58(VoipMan, info[0]);
+    func_00266E30(VoipMan);
 }
 #endif
 
@@ -937,7 +937,7 @@ extern "C" void func_0017DA30(cDebugLobbyScreen* self, int errorCode)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017DB18);
 #ifdef SKIP_ASM
-extern void* D_004A33F4;
+extern void* VoipMan;
 extern char str_cPreGameLoadScreen[];
 struct cAppMan;
 extern "C" void cMenuSys_pushMenu(void* menu, void* items);
@@ -986,7 +986,7 @@ struct sDebugFE17DB18 {
  *   22 to a refilled Select Persona (state 6), 23 to Select Room (state 10), 18 and 19 to state 0.
  * - 16: once the game channel (+0x1C10) reports connected (cCommSystem_isChannelConnected) it creates the game comm (cGameComm_construct
  *   with LobbyMan's mIsHost), queues a new cPreGameLoadScreen as the next module and connects voice chat
- *   (func_00266D58, func_00266E30 on D_004A33F4).
+ *   (func_00266D58, func_00266E30 on VoipMan).
  *
  * Likely bugs: in state 1 the loop runs again at once after state 0, when mNetConnState is still 2 (connect requested),
  * so the lobby connect starts before the network is up (a failed connection, 6, does not stop it either); voice chat in
@@ -1116,8 +1116,8 @@ extern "C" void func_0017DB18(cDebugLobbyScreen* vself)
                 cGameComm_construct(self->channel, LobbyMan_mLobbyMan->mIsHost);
                 cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
                 cCommSystem_netConnLocalAddr(cCommSystem_mCommSystem, info);
-                func_00266D58(D_004A33F4, info[0]);
-                func_00266E30(D_004A33F4);
+                func_00266D58(VoipMan, info[0]);
+                func_00266E30(VoipMan);
             }
             break;
         }
@@ -1139,7 +1139,7 @@ extern "C" void cBENewPlayerInterface_setRiderCharID(void* iface, int rider, int
 extern "C" void cBENewPlayerInterface_setPlayerCtrlID(void* iface, int a1, int a2);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int cCommSystem_openDSockChannel(void* comm, const char* addr, int port, int host);
-extern int D_004A11B8;
+extern int cBENewRaceInterface_bIsBamLocation;
 extern char str_pct_d_pct_d_pct_d_pct_d[];
 
 struct sNetCfg_17DE70 {
@@ -1162,7 +1162,7 @@ static inline void vcall1_17DE70(void* obj)
  * Sets up the debug lobby's two-player online race and opens the game channel to the opponent.
  *
  * The new-race interface (cBE_getInterface__Fv kind 0) gets game path 1, game mode 4 and no AI riders, sets
- * cBENewRaceInterface_newRace.iLocationIdx (newRace.iLocationIdx) to 0 and D_004A11B8 to 1, then applies them through the
+ * cBENewRaceInterface_newRace.iLocationIdx (newRace.iLocationIdx) to 0 and cBENewRaceInterface_bIsBamLocation to 1, then applies them through the
  * interface's virtual slot 1. The player interface (kind 1) gets controller -1 and character 0 for riders 2..5,
  * controller 0 for player 0 and -1 for player 1, and is applied the same way. cBENetworkInterface_networkOpt gets
  * bIsNetworkGame 1 and bIsHost from LobbyMan's mIsHost (network interface, kind 7, applied). The address to dial is
@@ -1177,7 +1177,7 @@ extern "C" void func_0017DE70(cDebugLobbyScreen* self)
     cBENewRaceInterface_setGameMode(race, 4);
     cBENewRaceInterface_setNumberAI(race, 0);
     cBENewRaceInterface_newRace.iLocationIdx = 0;
-    D_004A11B8 = 1;
+    cBENewRaceInterface_bIsBamLocation = 1;
     vcall1_17DE70(race);
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     for (int i = 2; i < 6; i++) {
@@ -1961,7 +1961,7 @@ extern "C" void cHeartBeat_update(cHeartBeat* heartBeat)
 INCLUDE_ASM("fe/debugfe", cHeartBeat_draw);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void* D_004A28AC;
+extern void* G2D;
 extern "C" void c2DRender_drawRect4(void* self, float* p0, float* p1, float* col, float z);
 
 
@@ -1998,7 +1998,7 @@ static inline void set1_17F500(char* m, unsigned int mask, int shift, unsigned i
  *
  * Sets the same draw-state bits on GrMan's current draw state (+0xE84) as cDebugFE_render does and makes @p tex its
  * texture 0. For i = 1..63 it takes trail point (head + i) mod 64 (the History array at +0x10, head index at +0x210),
- * so the oldest point comes first, and with f = i/64 draws a 6x6 quad centred on it through the 2D renderer D_004A28AC
+ * so the oldest point comes first, and with f = i/64 draws a 6x6 quad centred on it through the 2D renderer G2D
  * (c2DRender_drawRect4, z 0) in colour (0.15 f^2, 0.5, 0.3 + 0.2 f, 0.5 f^2) in the code's a, r, g, b order. The head point
  * gets a 12x12 quad in (0.5, 0.25, 0.25, 0.5). cDebugFE_render calls it on the heartbeat at +0x24 with the particle
  * texture (+0x1C).
@@ -2020,12 +2020,12 @@ extern "C" void cHeartBeat_draw(cHeartBeat* p_, int tex)
     for (int i = 1; i < 64; i++) {
         sVec2_17F2D0& pt = self->trail[(self->head + i) % 64];
         float recency = (float)i * 0.015625f;
-        c2DRender_drawRect4_r(D_004A28AC, pt - size * 0.5f, pt + size * 0.5f, sCol_17F500(recency * recency * 0.15f, 0.5f, recency * 0.2f + 0.3f, recency * (recency * 0.5f)), 0.0f);
+        c2DRender_drawRect4_r(G2D, pt - size * 0.5f, pt + size * 0.5f, sCol_17F500(recency * recency * 0.15f, 0.5f, recency * 0.2f + 0.3f, recency * (recency * 0.5f)), 0.0f);
     }
     // Head marker colour; named locals (not literals) so the inlined ctor stores sp-relative (CHEATSHEET).
     float hi = 0.5f;
     float lo = 0.25f;
-    c2DRender_drawRect4_r(D_004A28AC, self->trail[self->head] - size, self->trail[self->head] + size, sCol_17F500(hi, lo, lo, hi), 0.0f);
+    c2DRender_drawRect4_r(G2D, self->trail[self->head] - size, self->trail[self->head] + size, sCol_17F500(hi, lo, lo, hi), 0.0f);
 }
 #endif
 
@@ -2082,10 +2082,10 @@ extern "C" void* cDebugFE_cDebugFE(cDebugFE* self)
 INCLUDE_ASM("fe/debugfe", cDebugFE__cDebugFE);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern char D_0046D970[];
+extern char cAppModule_vtbl[];
 
 /**
- * Destroys the debug front end: stores the base vtable D_0046D970 at +0x0 and, if asked, frees the object.
+ * Destroys the debug front end: stores the base vtable cAppModule_vtbl at +0x0 and, if asked, frees the object.
  *
  * It does not free the screens, font or textures; cDebugFE_purge does that.
  *
@@ -2093,7 +2093,7 @@ extern char D_0046D970[];
  */
 extern "C" void cDebugFE__cDebugFE(cDebugFE* self, int flags)
 {
-    *(void**)self = D_0046D970;
+    *(void**)self = cAppModule_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3052,7 +3052,7 @@ extern "C" int cFEInput_isActive(cFEInput* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_update);
 #ifdef SKIP_ASM
-extern void* D_004A33F0;
+extern void* Keyboard;
 extern "C" int func_00266BA8(void* mgr, int a1, int* out0, int* out1);
 
 struct sDebugFE1804B8 {
@@ -3065,7 +3065,7 @@ struct sDebugFE1804B8 {
 /**
  * Polls the USB keyboard for the front-end input, once per update.
  *
- * Clears the key-ready word (+0xC, On Tour mbKeyReady). When a keyboard is connected (D_004A33F0), zeroes the virtual
+ * Clears the key-ready word (+0xC, On Tour mbKeyReady). When a keyboard is connected (Keyboard), zeroes the virtual
  * key (+0x10, miVKey) and the ASCII key (+0x14, miAsciiKey) and asks func_00266BA8(keyboard, 0, &vkey, &ascii) for a
  * key press; when it returns one, key-ready becomes 1. cFEInput_getKeyReady, cFEInput_getVKey and cFEInput_getAsciiKey
  * return the results. The last virtual of cFEInput; On Tour's PSP version is empty.
@@ -3073,10 +3073,10 @@ struct sDebugFE1804B8 {
 extern "C" void cFEInput_update(cFEInput* self)
 {
     self->mbKeyReady = 0;
-    if (D_004A33F0 != 0) {
+    if (Keyboard != 0) {
         self->miAsciiKey = 0;
         self->miVKey = 0;
-        if (func_00266BA8(D_004A33F0, 0, &self->miVKey, &self->miAsciiKey) != 0)
+        if (func_00266BA8(Keyboard, 0, &self->miVKey, &self->miAsciiKey) != 0)
             self->mbKeyReady = 1;
     }
 }

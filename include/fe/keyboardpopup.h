@@ -60,7 +60,7 @@ struct cKeyboardPopup {
                                     //       (cKeyboardPopup_setMaxCharacters) clamps to 0..0x3F
     int miMinCharacters;            // 0x064 [O]; [R] ctor zeroes; [U] setMinCharacters (cKeyboardPopup_setMinCharacters); the accept key is
                                     //       disabled while the text is shorter
-    int mbCapsOn;                   // 0x068 [O]; [R] ctor 1 (or bit 1 of D_004A33F0 + 0x88); [U] key 42 toggles it
+    int mbCapsOn;                   // 0x068 [O]; [R] ctor 1 (or bit 1 of Keyboard + 0x88); [U] key 42 toggles it
     int mbShiftOn;                  // 0x06C [O]; [R] ctor zeroes; [U] key 56 toggles it, other keys clear it
     int mbPassword;                 // 0x070 [O]; [R] the ctor's Password argument; [U] updateEdit shows mszPasswordString
     char mszEditString[64];         // 0x074 [O]; [R] ctor stores 0 in byte 0; [U] setInputText strcpy, key 70 clears 0x40

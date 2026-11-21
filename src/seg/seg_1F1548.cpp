@@ -740,17 +740,17 @@ extern "C" void func_002F9838();
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 extern "C" void* operator_new__FUi_17D0(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_AttachedEmitterTypeData[];
-extern int D_004A3BB0;
+extern int cAttachedEmitterFX_mEmitterDataArray;
 
 /**
- * Allocates and fills the shared attached-emitter type table D_004A3BB0.
+ * Allocates and fills the shared attached-emitter type table cAttachedEmitterFX_mEmitterDataArray.
  *
  * Takes 5440 bytes (20 records of 0x110) through operator new[] tagged "AttachedEmitterTypeData", then fills types 0 to
  * 9 (func_002F83B0) and 10 to 19 (func_002F9838). func_002F18D8 calls it when the first attached-emitter FX object is
  * set up.
  */
 extern "C" void func_002F17D0(void) {
-    D_004A3BB0 = (int)operator_new__FUi_17D0(5440, str_AttachedEmitterTypeData, 0, 0);
+    cAttachedEmitterFX_mEmitterDataArray = (int)operator_new__FUi_17D0(5440, str_AttachedEmitterTypeData, 0, 0);
     func_002F83B0();
     func_002F9838();
 }
@@ -762,10 +762,10 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F1810);
 extern "C" void cMemMan_free__FPv(int);
 extern "C" void func_002F8FF8__FPv();
 extern "C" void func_002FA5F8__FPv();
-extern int D_004A3BB0;
+extern int cAttachedEmitterFX_mEmitterDataArray;
 
 /**
- * Frees the shared attached-emitter type table D_004A3BB0 and clears the pointer.
+ * Frees the shared attached-emitter type table cAttachedEmitterFX_mEmitterDataArray and clears the pointer.
  *
  * Calls the two empty hooks func_002F8FF8__FPv and func_002FA5F8__FPv first and frees only a non-null table.
  * func_002F1940 calls it when the last attached-emitter FX object is destroyed.
@@ -773,10 +773,10 @@ extern int D_004A3BB0;
 extern "C" void func_002F1810(void) {
     func_002F8FF8__FPv();
     func_002FA5F8__FPv();
-    if (D_004A3BB0 != 0) {
-        cMemMan_free__FPv(D_004A3BB0);
+    if (cAttachedEmitterFX_mEmitterDataArray != 0) {
+        cMemMan_free__FPv(cAttachedEmitterFX_mEmitterDataArray);
     }
-    D_004A3BB0 = 0;
+    cAttachedEmitterFX_mEmitterDataArray = 0;
 }
 #endif
 
@@ -784,13 +784,13 @@ extern "C" void func_002F1810(void) {
 INCLUDE_ASM("seg/seg_1F1548", func_002F1850);
 #ifdef SKIP_ASM
 extern "C" void func_002F18D8(void *);
-extern char D_004881D0[];
+extern char cAttachedEmitterFX_vtbl[];
 
 /**
  * Constructs an attached-emitter FX object for an in-game rider and returns it.
  *
  * The attached-emitter FX object (0xA8 bytes, "AttachedEmitterFX"): +0x0 bones-looked-up flag, +0x4 26 bone indices,
- * +0x6C 10 emitter slots, +0x94 model, +0x98 cRider, +0x9C front-end rider, +0xA0 spread flag, +0xA4 vtable D_004881D0.
+ * +0x6C 10 emitter slots, +0x94 model, +0x98 cRider, +0x9C front-end rider, +0xA0 spread flag, +0xA4 vtable cAttachedEmitterFX_vtbl.
  *
  * Clears the model and the front-end rider, stores @p rider as the rider (+0x98) and the vtable, then sets the object up
  * with func_002F18D8. The cRider constructor builds one into mAttachedEmitterFX.
@@ -802,7 +802,7 @@ extern char D_004881D0[];
 extern "C" void *func_002F1850(void *emitterFx, int rider) {
     *(int *)((char*)emitterFx + 0x94) = 0;
     *(int *)((char*)emitterFx + 0x9C) = 0;
-    *(char **)((char*)emitterFx + 0xA4) = D_004881D0;
+    *(char **)((char*)emitterFx + 0xA4) = cAttachedEmitterFX_vtbl;
     *(int *)((char*)emitterFx + 0x98) = rider;
     func_002F18D8(emitterFx);
     return emitterFx;
@@ -814,7 +814,7 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F1890);
 #ifdef SKIP_ASM
 extern "C" void func_002F18D8(void *);
 extern "C" void func_002F1A00(void *);
-extern char D_004881D0[];
+extern char cAttachedEmitterFX_vtbl[];
 
 /**
  * Constructs an attached-emitter FX object for a front-end rider and returns it.
@@ -830,7 +830,7 @@ extern "C" void *func_002F1890(void *emitterFx, int feRider) {
     *(int *)((char*)emitterFx + 0x94) = 0;
     *(int *)((char*)emitterFx + 0x98) = 0;
     *(int *)((char*)emitterFx + 0x9C) = feRider;
-    *(char **)((char*)emitterFx + 0xA4) = D_004881D0;
+    *(char **)((char*)emitterFx + 0xA4) = cAttachedEmitterFX_vtbl;
     func_002F18D8(emitterFx);
     func_002F1A00(emitterFx);
     return emitterFx;
@@ -866,7 +866,7 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F1940);
 #ifdef SKIP_ASM
 extern "C" void func_002F1810();
 void operator_delete(int *);
-extern char D_004881D0[];
+extern char cAttachedEmitterFX_vtbl[];
 extern int D_004A3BB4;
 struct Base1940 { char pad[0x1F8]; };
 struct Obj1940 : Base1940 {
@@ -879,7 +879,7 @@ struct Obj1940 : Base1940 {
 /**
  * Destroys an attached-emitter FX object: deletes its emitters and, with the last instance, the type table.
  *
- * Slot 1 of the vtable D_004881D0 (restored at +0xA4 first). Drops the instance count D_004A3BB4 and calls
+ * Slot 1 of the vtable cAttachedEmitterFX_vtbl (restored at +0xA4 first). Drops the instance count D_004A3BB4 and calls
  * func_002F1810 when it reaches 0, then deletes every emitter in the 10 slots (+0x6C) through its virtual destructor
  * and clears the slot. Frees the object when bit 0 of @p flags is set.
  *
@@ -888,7 +888,7 @@ struct Obj1940 : Base1940 {
  */
 extern "C" void func_002F1940(void *emitterFx, int flags) {
     int remaining = D_004A3BB4 - 1;
-    *(char **)((char*)emitterFx + 0xA4) = D_004881D0;
+    *(char **)((char*)emitterFx + 0xA4) = cAttachedEmitterFX_vtbl;
     D_004A3BB4 = remaining;
     if (remaining == 0) {
         func_002F1810();
@@ -1265,18 +1265,18 @@ struct Obj2130 : Base2130 {
 extern "C" void *cMemMan_alloc(int, const char *, int, int);
 extern "C" void *func_002F1768(void *);
 extern char str_cAttachedDynamicEmitter[];
-extern int D_004A3BB0;
+extern int cAttachedEmitterFX_mEmitterDataArray;
 
 /**
  * Creates an attached dynamic emitter of a type on a bone in the first free emitter slot.
  *
  * Builds it with cMemMan_alloc(528, "cAttachedDynamicEmitter") and func_002F1768, stores @p boneIndex as its bone (+0x200),
- * clears its stopped flag (+0x204) and points it (+0x20C) at type record @p typeIndex of D_004A3BB0 (0x110 bytes each), then
+ * clears its stopped flag (+0x204) and points it (+0x20C) at type record @p typeIndex of cAttachedEmitterFX_mEmitterDataArray (0x110 bytes each), then
  * calls its virtual setupEmitter (slot 3) with that record and the emitter's current seed (m_emitter.SeedX0) and its
  * virtual reset (slot 2). The bolt-on FX code (func_002ECC28) calls it.
  *
  * @param emitterFx  the attached-emitter FX object
- * @param typeIndex  the emitter type (record index in D_004A3BB0)
+ * @param typeIndex  the emitter type (record index in cAttachedEmitterFX_mEmitterDataArray)
  * @param boneIndex  the attach point (index into the 26 bone indices)
  * @return the slot index (0-9), or -1 when all 10 slots are used
  */
@@ -1286,7 +1286,7 @@ extern "C" int func_002F2130(void *emitterFx, int typeIndex, int boneIndex) {
     for (i = 0; i < 10; i++, slot++) {
         if (*slot == 0) {
             Obj2130 *n = (Obj2130 *)func_002F1768(cMemMan_alloc(528, str_cAttachedDynamicEmitter, 0, 0));
-            int typeData = D_004A3BB0 + typeIndex * 272;
+            int typeData = cAttachedEmitterFX_mEmitterDataArray + typeIndex * 272;
             *slot = n;
             *(int *)((char*)*slot + 0x200) = boneIndex;
             *(int *)((char*)*slot + 0x204) = 0;
@@ -1518,7 +1518,7 @@ struct sV4_2598 {
 
 extern sV4_2598 D_005046E0;
 extern sV4_2598 D_005046F0;
-extern sV2_2598 D_004A5960[]; // PORT: 8-byte object, declared unsized so it is not $gp-addressed
+extern sV2_2598 t2vect_Zero[]; // PORT: 8-byte object, declared unsized so it is not $gp-addressed
 
 struct sPart_2598 {
     int active;
@@ -1560,7 +1560,7 @@ extern "C" void tDrop_init_2598(sPart_2598* p, const sV2_2598& pos, sV2_2598* ra
  *
  * The width is random between "Drop Min Size" (D_004A4294) and @p range x; the height is the width plus a random amount
  * within "Drop Max Width Height Difference" (D_004A429C), clamped to the minimum size and @p range y. The life is
- * random between "Drop Min/Max Life Span" (D_004A428C, D_004A4290); the velocity starts at D_004A5960, the rotation at
+ * random between "Drop Min/Max Life Span" (D_004A428C, D_004A4290); the velocity starts at t2vect_Zero, the rotation at
  * a random 0-360 degrees and its change over the life within +/- D_004A42CC (the menu labels this one "Crystal Max
  * Rotation Overall Change"); the tint is a random blend of "Drop Tint Min" (D_005046E0) and "Drop Tint Max"
  * (D_005046F0). Sets the drop active and its age to 0.
@@ -1581,7 +1581,7 @@ extern "C" void tDrop_init_2598(sPart_2598* drop, const sV2_2598& pos, sV2_2598*
     drop->active = 1;
     drop->size = sV2_2598(x, y);
     drop->pos = pos;
-    drop->vel = D_004A5960[0];
+    drop->vel = t2vect_Zero[0];
     drop->angle = randf_2598() * 360.0f;
     drop->spin = randRange_2598(-D_004A42CC_2598.v, D_004A42CC_2598.v);
     float tintMix = randf_2598();
@@ -1928,7 +1928,7 @@ struct sV4_2D70 {
 
 extern sV4_2D70 D_00504700;
 extern sV4_2D70 D_00504710;
-extern sV2_2D70 D_004A5960_2D70[] __asm__("D_004A5960"); // PORT: 8-byte object, declared unsized so it is not $gp-addressed
+extern sV2_2D70 D_004A5960_2D70[] __asm__("t2vect_Zero"); // PORT: 8-byte object, declared unsized so it is not $gp-addressed
 
 struct sPart_2D70 {
     int dead;
@@ -1985,7 +1985,7 @@ extern "C" void tCrystal_init_2D70(sPart_2D70* p, const sV2_2D70& pos, int n) __
  * The width is random between "Crystal Min/Max Size" (D_004A42E0, D_004A42E4); the height is the width plus a random
  * amount within "Crystal Max Width Height Difference", clamped to the same range; both shrink by 0.7 per crystal
  * already placed in the group (@p n). The life is random between "Crystal Min/Max Life Span"; the velocity starts at
- * D_004A5960, the tint is a random blend of "Crystal Tint Min/Max" (D_00504700, D_00504710), the rotation a random
+ * t2vect_Zero, the tint is a random blend of "Crystal Tint Min/Max" (D_00504700, D_00504710), the rotation a random
  * 0-360 degrees and its change within +/- D_004A4318. Clears the jiggle timer and direction (+0x40..+0x48) and +0x0 (On
  * Tour mNumSpawned), and sets the crystal active.
  *
@@ -2363,7 +2363,7 @@ struct sEmit_3640 {
 };
 
 extern int D_004A3AFC;
-extern int D_004A4258;
+extern int cSplashToggles_m_NumIceCrystals;
 extern float D_004A42D0;
 extern float D_004A42D4;
 extern "C" void tCrystal_init(tCrystal*, sVec2_3640*, int);
@@ -2383,7 +2383,7 @@ static inline float randRange_3640(float lo, float hi)
 /**
  * Adds a group of @p n ice crystals around a screen position to the splash manager.
  *
- * Each crystal, while fewer than "Max Crystals" (D_004A4258) are active (+0x18), goes to @p basePos plus a random offset
+ * Each crystal, while fewer than "Max Crystals" (cSplashToggles_m_NumIceCrystals) are active (+0x18), goes to @p basePos plus a random offset
  * within +/- "Crystal Group Spacing X/Y" (D_004A42D0, D_004A42D4) and is started by tCrystal_init with its number in
  * the group; the active count then grows.
  *
@@ -2393,7 +2393,7 @@ static inline float randRange_3640(float lo, float hi)
 extern "C" void cSplashManager_AddCrystal(cSplashManager* self, sVec2_3640* basePos, int n)
 {
     for (int i = 0; i < n; i++) {
-        if (self->mNumActiveCrystals < D_004A4258) {
+        if (self->mNumActiveCrystals < cSplashToggles_m_NumIceCrystals) {
             sVec2_3640 off;
             off.x = randRange_3640(-D_004A42D0, D_004A42D0);
             off.y = randRange_3640(-D_004A42D4, D_004A42D4);
@@ -2523,8 +2523,8 @@ extern "C" void cSplashManager_reset(cSplashManager* splashManager) {
 //100%
 INCLUDE_ASM("seg/seg_1F1548", cSplashManager_update);
 #ifdef SKIP_ASM
-extern int D_004A424C;
-extern int D_004A4258;
+extern int cSplashToggles_m_Enable;
+extern int cSplashToggles_m_NumIceCrystals;
 extern float D_004A4260;
 extern int D_004A426C;
 // NOTE: tunable float member of a global record; splat names the field separately.
@@ -2626,7 +2626,7 @@ static inline float Length_39E0(const sV4_39E0& v)
 /**
  * Updates this view's screen splashes: tracks the camera speed, spawns ice crystals and lets them shed drops.
  *
- * Needs SplashToggles "Enable" (D_004A424C) and an existing view. The speed is the view position's change per
+ * Needs SplashToggles "Enable" (cSplashToggles_m_Enable) and an existing view. The speed is the view position's change per
  * frame times 60 * 0.036 (probably km/h); above 1000 (a camera cut) everything resets. cSplashManager_AddSplashes spawns
  * crystals, every drop and crystal is updated with the speed and dead ones are replaced by the last. With a
  * chance set by "Percentage Ice Crystal Spawn", one random crystal sheds a drop of 0.6 x its size, at most
@@ -2634,7 +2634,7 @@ static inline float Length_39E0(const sV4_39E0& v)
  */
 extern "C" void cSplashManager_update(sEmitter_39E0* self)
 {
-    if (D_004A424C == 0)
+    if (cSplashToggles_m_Enable == 0)
         return;
     char* w = (char*)SSXApp->Game->ViewMan;
     if (self->idx >= *(unsigned int*)(w + 0x10))
@@ -2673,7 +2673,7 @@ extern "C" void cSplashManager_update(sEmitter_39E0* self)
         float f;
     } rnd;
     rnd.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
-    if ((rnd.f - 1.0f) * (float)self->nParts / (float)D_004A4258 < D_004A4260 && self->nParts > 0)
+    if ((rnd.f - 1.0f) * (float)self->nParts / (float)cSplashToggles_m_NumIceCrystals < D_004A4260 && self->nParts > 0)
         pick = BXrand() % self->nParts;
 
     i = 0;
@@ -2700,9 +2700,9 @@ extern "C" void cSplashManager_update(sEmitter_39E0* self)
 INCLUDE_ASM("seg/seg_1F1548", cSplashManager_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_004A424C;
+extern int cSplashToggles_m_Enable;
 extern int D_004A4250;
-extern int D_004A3B60;
+extern int cRenderStateMan_m_indoor;
 extern char t4mat_Identity[];
 
 struct sV2_3E28 {
@@ -2790,19 +2790,19 @@ extern void tCrystal_render_3E28(void*, sV2_3E28*) __asm__("tCrystal_render");
 /**
  * Draws this view's splash drops and ice crystals as 2D sprites over the 640x480 screen.
  *
- * Needs SplashToggles "Enable" and "Render" and this view being the one rendered. When D_004A3B60 (a
+ * Needs SplashToggles "Enable" and "Render" and this view being the one rendered. When cRenderStateMan_m_indoor (a
  * script-controlled flag that also gates other lens effects) is set, it resets the splashes instead. Draws in
  * its own 2D scene with a pushed copy of the default draw state (sDrawState_s_defaultDrawState) and the current screen size.
  */
 extern "C" void cSplashManager_render(sEmitter_3E28* self)
 {
-    if (D_004A424C == 0)
+    if (cSplashToggles_m_Enable == 0)
         return;
     if (D_004A4250 == 0)
         return;
     if (self->idx != *(int*)((char*)SSXApp->Game->ViewMan + 0x14))
         return;
-    if (D_004A3B60) {
+    if (cRenderStateMan_m_indoor) {
         self->Reset();
         return;
     }

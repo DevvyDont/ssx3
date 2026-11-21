@@ -1384,7 +1384,7 @@ extern "C" void* cUIThing_cUIThing(void* self);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern void* cUIListBox_vtbl[];
 
-extern tARGB D_004C66C8;
+extern tARGB gStaticColour;
 
 
 
@@ -1393,7 +1393,7 @@ extern tARGB D_004C66C8;
  *
  * Runs the cUIThing constructor (cUIThing_cUIThing; the screen and parent, On Tour pState / pParent, are not declared
  * here and stay in $a1/$a2), stores cUIListBox_vtbl, sets mShadow and clears mUnicode and mCallback, clears the 32
- * entries (and memsets them), mNumEntries and mCurrentEntry, and sets mStaticColour from D_004C66C8.
+ * entries (and memsets them), mNumEntries and mCurrentEntry, and sets mStaticColour from gStaticColour.
  *
  * @return @p self
  */
@@ -1413,7 +1413,7 @@ extern "C" cUIListBox* cUIListBox_cUIListBox(cUIListBox* self)
     *(char*)&self->mNumEntries = 0;
     *(char*)&self->mCurrentEntry = 0;
     func_00416210(((&self->mpEntries[0])), 0, 640);
-    (*(&self->mStaticColour)) = D_004C66C8;
+    (*(&self->mStaticColour)) = gStaticColour;
     return (self);
 }
 #endif

@@ -13,7 +13,7 @@
 // there) and the size of the other BE interfaces in retail. Retail adds the last-event pair at 0x10; On Tour has the
 // same two members first in the class (at 0x8 after its 8-byte base), followed by the mEventUnlockables /
 // mEventAccomplishments arrays that retail does not have (On Tour size 0x298).
-// cBERewardInterface overrides no virtual: its getThis stores the same vtable (D_0045AE88) as BEBoltInt's
+// cBERewardInterface overrides no virtual: its getThis stores the same vtable (cBEInterface_vtbl) as BEBoltInt's
 // (func_0014ABE0), whose slots are cBEInterface's own.
 //
 // Evidence tags:
@@ -25,7 +25,7 @@
 
 #include "layout.h"
 
-// Virtual slots of cBEInterface's vtable (retail D_0045AE88: entry 0 is the empty RTTI entry, then
+// Virtual slots of cBEInterface's vtable (retail cBEInterface_vtbl: entry 0 is the empty RTTI entry, then
 // 0x15BB00, 0x15BB08, cBEInterface_writeToReplayFrame, cBEInterface_readFromReplayFrame). Names and order from the
 // preview's out-of-line cBEInterface methods and On Tour's cBEInterface function list.
 enum {
@@ -42,7 +42,7 @@ struct cBERewardInterface {
     int bIsActive;                   // 0x008 [O] cBEInterface::bIsActive (On Tour: a bool at 0x2); [R] getThis sets 0;
                                      //       [U] set 0/1 on every BE interface together (cBERaceState_onExit/cBERaceState_onEnter,
                                      //       cBEPostRaceState_onExit/cBEPostRaceState_onEnter/cBEPreRaceState_onExit/cBEPreRaceState_onEnter)
-    void** mVtbl;                    // 0x00C [R] getThis stores D_0045AE88 (cBEInterface's vtable, shared with BEBoltInt)
+    void** mVtbl;                    // 0x00C [R] getThis stores cBEInterface_vtbl (cBEInterface's vtable, shared with BEBoltInt)
     // cBERewardInterface
     unsigned int mLastEventCashReward; // 0x010 [O] (On Tour 0x008, first own member); [U] cBERewardInterface_calculateUserTrackMedalRewards stores the cash
                                      //       from cBEEconInterface_getCashReward (halved when the medal isn't better); clearUserAwards

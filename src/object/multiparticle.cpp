@@ -362,7 +362,7 @@ extern "C" void cPhysicsModifier_writeToReplayFrame(cPhysicsModifier* self, cPhy
 //100%
 INCLUDE_ASM("object/multiparticle", cRailManNode_cRailManNode1);
 #ifdef SKIP_ASM
-extern void* D_004A4040;
+extern void* cRailManNode_ActiveNode;
 extern void* cRailManNode_vtbl[];
 extern "C" void* cSortObjNode_cSortObjNode1(void* self, void* a1, int type);
 
@@ -370,7 +370,7 @@ extern "C" void* cSortObjNode_cSortObjNode1(void* self, void* a1, int type);
  * Constructs the rail manager node (node type 18) and makes it the active one.
  *
  * Runs the sort-node constructor cSortObjNode_cSortObjNode1, installs cRailManNode_vtbl, sets all 128 rail slots (+0x18) to -1,
- * stores itself in D_004A4040 (the active rail manager) and clears the slots again.
+ * stores itself in cRailManNode_ActiveNode (the active rail manager) and clears the slots again.
  *
  * @param bucket  update bucket
  * @return self
@@ -384,7 +384,7 @@ extern "C" void* cRailManNode_cRailManNode1(cRailManNode* self, void* bucket)
     for (i = 0x7F; i != -1; i--, railSlot++) {
         *railSlot = 0xFFFFFFFF;
     }
-    D_004A4040 = ((void*)self);
+    cRailManNode_ActiveNode = ((void*)self);
     for (i = 0; i < 0x80; i++) {
         ((unsigned int*)(&self->RailInfo[0]))[i] = 0xFFFFFFFF;
     }
@@ -395,7 +395,7 @@ extern "C" void* cRailManNode_cRailManNode1(cRailManNode* self, void* bucket)
 //100%
 INCLUDE_ASM("object/multiparticle", cRailManNode_cRailManNode);
 #ifdef SKIP_ASM
-extern void* D_004A4040;
+extern void* cRailManNode_ActiveNode;
 extern void* cRailManNode_vtbl[];
 extern "C" void* cSortObjNode_cSortObjNode(void* self, void* a1, void* stream);
 extern "C" void cRailManNode_disableRail(cRailManNode* self, int idx);
@@ -410,7 +410,7 @@ public:
  * Rebuilds the rail manager node from a replay frame and disables again every rail it had disabled.
  *
  * After the cSortObjNode replay constructor and its vtable, the 128 rail slots (+0x18, On Tour RailInfo) are
- * set to -1, the node becomes the active one (D_004A4040, On Tour ActiveNode) and the 0x200 bytes of slots
+ * set to -1, the node becomes the active one (cRailManNode_ActiveNode, On Tour ActiveNode) and the 0x200 bytes of slots
  * are read from the frame. cRailManNode_disableRail (On Tour disableRail) takes each used slot's spline segments out of
  * the Nash rail-space octree.
  *
@@ -428,7 +428,7 @@ extern "C" void* cRailManNode_cRailManNode(cRailManNode* self, void* bucket, cRa
     for (j = 0x7F; j != -1; j--, slot++) {
         *slot = 0xFFFFFFFF;
     }
-    D_004A4040 = ((void*)self);
+    cRailManNode_ActiveNode = ((void*)self);
     stream->read(&self->RailInfo[0], 0x200);
     for (i = 0; i < 0x80; i++) {
         if (((unsigned int*)(&self->RailInfo[0]))[i] != 0xFFFFFFFF) {
@@ -442,7 +442,7 @@ extern "C" void* cRailManNode_cRailManNode(cRailManNode* self, void* bucket, cRa
 //100%
 INCLUDE_ASM("object/multiparticle", cRailManNode__cRailManNode);
 #ifdef SKIP_ASM
-extern void* D_004A4040;
+extern void* cRailManNode_ActiveNode;
 extern void* cRailManNode_vtbl[];
 extern "C" void cRailManNode_enableRail(cRailManNode* self, int idx);
 // PORT: cSortObjNode__cSortObjNode__FPv is the ObjNode deleting dtor; it takes (self, flags).
@@ -452,7 +452,7 @@ extern void* cSortObjNode__cSortObjNode_dtor(void* self, int flags) __asm__("cSo
  * Destroys the rail manager node: re-enables every rail it disabled and clears the active-node pointer.
  *
  * cRailManNode_enableRail (On Tour enableRail) puts each used slot's spline segments back into the Nash rail-space
- * octree and frees the slot; then D_004A4040 (On Tour ActiveNode) is cleared and the cSortObjNode destructor
+ * octree and frees the slot; then cRailManNode_ActiveNode (On Tour ActiveNode) is cleared and the cSortObjNode destructor
  * runs.
  *
  * @param flags  g++ destructor flags, passed on to the cSortObjNode destructor (bit 0 frees the memory)
@@ -466,7 +466,7 @@ extern "C" void cRailManNode__cRailManNode(cRailManNode* self, int flags)
             cRailManNode_enableRail(self, i);
         }
     }
-    D_004A4040 = 0;
+    cRailManNode_ActiveNode = 0;
     cSortObjNode__cSortObjNode_dtor(self, flags);
 }
 #endif
@@ -474,7 +474,7 @@ extern "C" void cRailManNode__cRailManNode(cRailManNode* self, int flags)
 //100%
 INCLUDE_ASM("object/multiparticle", func_00358700);
 #ifdef SKIP_ASM
-extern void* D_004A4040;
+extern void* cRailManNode_ActiveNode;
 extern "C" void cRailManNode_enableRail(cRailManNode* self, int idx);
 
 struct sMpSlot_8700 {
@@ -490,7 +490,7 @@ struct sMpMgr_8700 {
 /**
  * Re-enables every disabled rail of a world section and frees its slot.
  *
- * With an active rail manager (D_004A4040), each used slot whose id has this section calls cRailManNode_enableRail.
+ * With an active rail manager (cRailManNode_ActiveNode), each used slot whose id has this section calls cRailManNode_enableRail.
  * cGame_sectionUnloading calls it with the unloading section.
  *
  * @param kind  world section id
@@ -498,9 +498,9 @@ struct sMpMgr_8700 {
 extern "C" void func_00358700(int kind)
 {
     int i;
-    if (D_004A4040 != 0) {
+    if (cRailManNode_ActiveNode != 0) {
         for (i = 0; i < 0x80; i++) {
-            sMpMgr_8700* railMan = (sMpMgr_8700*)D_004A4040;
+            sMpMgr_8700* railMan = (sMpMgr_8700*)cRailManNode_ActiveNode;
             if (((unsigned int*)((char*)railMan + 0x18))[i] != 0xFFFFFFFF && railMan->slots[i].kind == kind) {
                 cRailManNode_enableRail((cRailManNode*)railMan, i);
             }
@@ -769,8 +769,8 @@ struct sMPMgr8B28 {
     sMPRef8B28 slots[128];          // 0x18
 };
 
-extern void* D_004A4040;
-extern sMPMgr8B28* D_004A4040_mgr8B28 __asm__("D_004A4040");
+extern void* cRailManNode_ActiveNode;
+extern sMPMgr8B28* D_004A4040_mgr8B28 __asm__("cRailManNode_ActiveNode");
 extern char str_RailMan_b[];
 extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
 extern "C" void* cRailManNode_cRailManNode1(cRailManNode* self, void* a1);
@@ -780,7 +780,7 @@ extern "C" void cRailManNode_enableRail(cRailManNode* self, int idx);
 /**
  * Switches a rail (spline) off or back on, creating the rail manager on first use.
  *
- * Creates the manager if D_004A4040 is 0 (536 bytes "RailMan", bucket 1). Finds the slot holding key, or else the first
+ * Creates the manager if cRailManNode_ActiveNode is 0 (536 bytes "RailMan", bucket 1). Finds the slot holding key, or else the first
  * free one. Switching off a rail that is already off, or on a rail that is not off, does nothing; otherwise the slot
  * takes key and cRailManNode_enableRail (on) or cRailManNode_disableRail (off) runs. Nothing happens when all 128 slots are used.
  *
@@ -789,7 +789,7 @@ extern "C" void cRailManNode_enableRail(cRailManNode* self, int idx);
  */
 extern "C" void func_00358B28(sMPRef8B28 key, int add)
 {
-    if (D_004A4040 == 0) {
+    if (cRailManNode_ActiveNode == 0) {
         cRailManNode_cRailManNode1((cRailManNode*)cMemMan_alloc(536, str_RailMan_b, 0x20000000, 0), (void*)1);
     }
     sMPRef8B28 kFree;
@@ -858,7 +858,7 @@ INCLUDE_ASM("object/multiparticle", cAnimComboNode_cAnimComboNode1);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 // PORT: same symbol as the unit's cAnimObjectNode_cAnimObjectNode1(void*, int, int, int, int); pointer-typed view.
 extern "C" void cAnimObjectNode_cAnimObjectNode1_8C80(void* self, int a, int type, void* b, const void* c) __asm__("cAnimObjectNode_cAnimObjectNode1");
-extern char D_0048EC28[];
+extern char cAnimComboNode_vtbl[];
 extern char str_ComboXform[];
 extern char* cAppMan_TheAppMan;
 
@@ -908,7 +908,7 @@ struct sMP8C80 {
 /**
  * Constructs an anim combo node: an animated object that can switch to a second time range on a signal.
  *
- * Builds the cAnimObjectNode part at +0x18 (cAnimObjectNode_cAnimObjectNode1, node type 3) and installs D_0048EC28. From adata: the second
+ * Builds the cAnimObjectNode part at +0x18 (cAnimObjectNode_cAnimObjectNode1, node type 3) and installs cAnimComboNode_vtbl. From adata: the second
  * range's start (+0x8) = FromTime2, or ToTime when FromTime2 is negative, in seconds/30; its end (+0xC) = ToTime2 / 30,
  * or the animation length when negative; step (+0x0) = Speed2 / 30 / frame rate; Stop flags (+0x16 Stop != 0, +0x17
  * Stop < 0). Allocates the "ComboXform" matrices (+0x84, one per animated mesh) and clears the active/stopped bytes and
@@ -928,7 +928,7 @@ struct sMP8C80 {
 extern "C" void* cAnimComboNode_cAnimComboNode1(cAnimComboNode* self, int bucket, sMPOwner8C80* pInstance, const sMPDesc8C80* adata)
 {
     cAnimObjectNode_cAnimObjectNode1_8C80((char*)&self->AnimType, bucket, 3, pInstance, adata);
-    self->mVtbl = (void**)D_0048EC28;
+    self->mVtbl = (void**)cAnimComboNode_vtbl;
     float* rate = &self->FromTime2;
     char* pModel = pInstance->p80;
     *rate = (adata->f28 < 0.0f ? adata->f10 : adata->f28) * 0.03333333507180214f;
@@ -953,7 +953,7 @@ INCLUDE_ASM("object/multiparticle", cAnimComboNode_cAnimComboNode);
 #ifdef SKIP_ASM
 extern "C" void* cAnimObjectNode_cAnimObjectNode(void* self, void* a, void* stream);
 extern "C" void cAnimComboNode_setComboXform(cAnimComboNode* self);
-extern char D_0048EC28[];
+extern char cAnimComboNode_vtbl[];
 extern char str_ComboXform[];
 
 struct sStreamVE_8DB0 {
@@ -972,7 +972,7 @@ struct sParticle_8DB0 {
  * Rebuilds an animation combo node from a replay frame: its embedded animated-object node, combo state and
  * combo matrices.
  *
- * Runs the cAnimObjectNode replay constructor on +0x18, stores the cAnimComboNode vtable (D_0048EC28) at
+ * Runs the cAnimObjectNode replay constructor on +0x18, stores the cAnimComboNode vtable (cAnimComboNode_vtbl) at
  * +0x54 and reads the 0x18-byte cAnimComboNodeState into +0x0. ComboXform (+0x84) gets one 0x40-byte matrix
  * per animated mesh (+0x74) ("ComboXform"), filled by cAnimComboNode_setComboXform (probably On Tour setComboXform).
  *
@@ -984,7 +984,7 @@ extern "C" void* cAnimComboNode_cAnimComboNode(cAnimComboNode* self, void* bucke
 {
     sParticle_8DB0** pp = (sParticle_8DB0**)(&self->ComboXform);
     cAnimObjectNode_cAnimObjectNode(&self->AnimType, bucket, stream);
-    self->mVtbl = (void**)D_0048EC28;
+    self->mVtbl = (void**)cAnimComboNode_vtbl;
     sStreamVE_8DB0* vt = *(sStreamVE_8DB0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, self, 0x18);
     *pp = new (str_ComboXform, 0x20000000, 0) sParticle_8DB0[self->NumAnimMeshes];
@@ -999,19 +999,19 @@ INCLUDE_ASM("object/multiparticle", cAnimComboNode__cAnimComboNode);
 void operator_delete(int* ptr);
 void cMemMan_free(void*);
 extern "C" void cAnimObjectNode__cAnimObjectNode(void* p, int flags);
-extern char D_0048EC28[];
+extern char cAnimComboNode_vtbl[];
 
 /**
  * Destroys an anim combo node.
  *
- * Reinstalls D_0048EC28, frees ComboXform (+0x84), destroys the cAnimObjectNode part (cAnimObjectNode__cAnimObjectNode on +0x18) and
+ * Reinstalls cAnimComboNode_vtbl, frees ComboXform (+0x84), destroys the cAnimObjectNode part (cAnimObjectNode__cAnimObjectNode on +0x18) and
  * deletes the node when bit 0 of flags is set.
  *
  * @param flags  destructor flags
  */
 extern "C" void cAnimComboNode__cAnimComboNode(cAnimComboNode* self, int flags)
 {
-    self->mVtbl = (void**)D_0048EC28;
+    self->mVtbl = (void**)cAnimComboNode_vtbl;
     void* buf = self->ComboXform;
     if (buf != 0) {
         cMemMan_free(buf);

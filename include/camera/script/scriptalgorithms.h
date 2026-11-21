@@ -149,7 +149,7 @@ struct cScriptAlgorithm {
     float Near;                 // 0x04 [O]; [R] 10.0f; [U] the updates copy the camera header's near (swc1)
     float Far;                  // 0x08 [O]; [R] 30000.0f; [U] ditto (far)
     int AlgorithmType;          // 0x0C [O] eCamAlgoType; [R] 85 (0x55); each subclass ctor stores its own (sw)
-    void** mVtbl;               // 0x10 [R] D_0045BDE0, then cScriptAlgorithm_vtbl (ctor); every dtor stores D_0045BDE0;
+    void** mVtbl;               // 0x10 [R] cCameraAlgorithm_vtbl, then cScriptAlgorithm_vtbl (ctor); every dtor stores cCameraAlgorithm_vtbl;
                                 //      [U] snap calls slot 5 (update), snapCurrent slot 3 (snap) (lw)
     // --- cScriptAlgorithm
     cScriptObjCamera* ScriptObj; // 0x14 [O]; [R] 0; [U] cScriptAlgorithm_setScriptObj (sw) / cScriptAlgorithm_getScriptObj
@@ -181,7 +181,7 @@ struct cScriptManualAlgorithm {
     float Near;                 // 0x04 [O]; [R] base ctor; [U] update (swc1)
     float Far;                  // 0x08 [O]; [R] base ctor; [U] update (swc1)
     int AlgorithmType;          // 0x0C [O]; [R] 86 (0x56)
-    void** mVtbl;               // 0x10 [R] cScriptManualAlgorithm_vtbl (ctor); the dtor stores D_0045BDE0
+    void** mVtbl;               // 0x10 [R] cScriptManualAlgorithm_vtbl (ctor); the dtor stores cCameraAlgorithm_vtbl
     // --- cScriptAlgorithm (0x30)
     cScriptObjCamera* ScriptObj; // 0x14 [O]; [U] update (lw)
     cScriptCameraController* Controller; // 0x18 [O]; [R] base ctor
@@ -225,7 +225,7 @@ struct cScriptPointAlgorithm {
     float Near;                 // 0x04 [O]; [U] update stores it twice (swc1)
     float Far;                  // 0x08 [O]; [U] ditto
     int AlgorithmType;          // 0x0C [O]; [R] 87 (0x57)
-    void** mVtbl;               // 0x10 [R] cScriptPointAlgorithm_vtbl (ctor); the dtor stores D_0045BDE0
+    void** mVtbl;               // 0x10 [R] cScriptPointAlgorithm_vtbl (ctor); the dtor stores cCameraAlgorithm_vtbl
     // --- cScriptAlgorithm (0x30)
     cScriptObjCamera* ScriptObj; // 0x14 [O]; [U] update (lw)
     cScriptCameraController* Controller; // 0x18 [O]; [R] base ctor
@@ -268,7 +268,7 @@ struct cScriptTargetAlgorithm {
     float Near;                 // 0x04 [O]; [U] update (swc1)
     float Far;                  // 0x08 [O]; [U] update (swc1)
     int AlgorithmType;          // 0x0C [O]; [R] 88 (0x58)
-    void** mVtbl;               // 0x10 [R] cScriptTargetAlgorithm_vtbl (ctor); the dtor stores D_0045BDE0
+    void** mVtbl;               // 0x10 [R] cScriptTargetAlgorithm_vtbl (ctor); the dtor stores cCameraAlgorithm_vtbl
     // --- cScriptAlgorithm (0x30)
     cScriptObjCamera* ScriptObj; // 0x14 [O]; [U] update (lw)
     cScriptCameraController* Controller; // 0x18 [O]; [R] base ctor
@@ -310,7 +310,7 @@ struct cScriptRelativeAlgorithm {
     float Near;                 // 0x04 [O]; [U] snap / update (swc1)
     float Far;                  // 0x08 [O]; [U] snap / update (swc1)
     int AlgorithmType;          // 0x0C [O]; [R] 89 (0x59)
-    void** mVtbl;               // 0x10 [R] cScriptRelativeAlgorithm_vtbl (ctor); the dtor stores D_0045BDE0
+    void** mVtbl;               // 0x10 [R] cScriptRelativeAlgorithm_vtbl (ctor); the dtor stores cCameraAlgorithm_vtbl
     // --- cScriptAlgorithm (0x30)
     cScriptObjCamera* ScriptObj; // 0x14 [O]; [U] snap / update (lw)
     cScriptCameraController* Controller; // 0x18 [O]; [R] base ctor

@@ -867,7 +867,7 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_play);
 #ifdef SKIP_ASM
 extern "C" int* cAIAnimEventMap_getAnimPlayAttr(int anim);
 extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* self, void* seq, int anim, int a3, int a4, int a5, float blend);
-extern int D_0048D808[];
+extern int kSequencerPriority[];
 extern char* cGameAnimMap_TheGameAnimMap;
 
 struct sVEntry003128E8 {
@@ -885,7 +885,7 @@ int cRiderAnimBase_play_impl(char* self, int anim, int flags, float blend) __asm
  *
  * Maps @p anim through vtable slot 4; the result 0x207 means it has no animation. A negative @p blend takes
  * the anim's default blend-in time from its event-map record (cAIAnimEventMap_getAnimPlayAttr()[4]), whose [3]
- * also gives the sequencer slot; cRiderAnimBase_onInput starts the clip there with the slot's constant from D_0048D808
+ * also gives the sequencer slot; cRiderAnimBase_onInput starts the clip there with the slot's constant from kSequencerPriority
  * (3, 2, 1, 0, 0, 0).
  *
  * @param anim   the AI anim to play (On Tour tAIAnimID anid)
@@ -906,7 +906,7 @@ int cRiderAnimBase_play_impl(char* self, int anim, int flags, float blend)
     }
     int animId = *(int*)(id * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
     int slot = cAIAnimEventMap_getAnimPlayAttr(anim)[3];
-    return *(int*)(self + (slot << 2)) = cRiderAnimBase_onInput((cRiderAnimBase*)self, *(char**)(self + 0x50) + (slot << 3), anim, animId, flags, D_0048D808[slot], blend);
+    return *(int*)(self + (slot << 2)) = cRiderAnimBase_onInput((cRiderAnimBase*)self, *(char**)(self + 0x50) + (slot << 3), anim, animId, flags, kSequencerPriority[slot], blend);
 }
 #endif
 
@@ -915,13 +915,13 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_playFromAnimID);
 #ifdef SKIP_ASM
 extern "C" int* cAIAnimEventMap_getAnimPlayAttr(int anim);
 extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* self, void* seq, int anim, int a3, int a4, int a5, float blend);
-extern int D_0048D808[];
+extern int kSequencerPriority[];
 
 /**
  * Plays a specific animation clip under an AI animation id, on that animation's sequencer.
  *
  * The sequencer is attribute word 3; a negative @p blend takes attribute word 4. Calls cRiderAnimBase_onInput with
- * duplicates allowed and the sequencer's priority from D_0048D808, and stores the result as the sequencer's current AI
+ * duplicates allowed and the sequencer's priority from kSequencerPriority, and stores the result as the sequencer's current AI
  * anim (+slot * 4). cAIAnimEventMap_getAnimPlayAttr returns the anim's whole attribute record (On Tour release:
  * cAIAnimEventMap::getAnimPlayAttr): word 0 is the category, 1 the update rule, 3 the sequencer and 4 the default
  * blend-in time (On Tour debug: getCategory, getUpdateRule, getSequencerID, getBlendInTime).
@@ -937,7 +937,7 @@ extern "C" void cRiderAnimBase_playFromAnimID(cRiderAnimBase* self, int anim, in
     {
         blend = *(float*)&cAIAnimEventMap_getAnimPlayAttr(anim)[4];
     }
-    *(int*)(((char*)self) + (slot << 2)) = cRiderAnimBase_onInput(self, (char*)self->Sequencer + (slot << 3), anim, animid, 1, D_0048D808[slot], blend);
+    *(int*)(((char*)self) + (slot << 2)) = cRiderAnimBase_onInput(self, (char*)self->Sequencer + (slot << 3), anim, animid, 1, kSequencerPriority[slot], blend);
 }
 #endif
 

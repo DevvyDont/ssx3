@@ -4,7 +4,7 @@
 // cUIListBox: a list of up to 32 text entries (ASCII, Unicode or string-table id, each with a user data pointer), one of
 // them current (record type 0x12). Size 0x31C: cUIScreen_createObjectByStruct does operator new(0x31C, "UIListBox"...)
 // + the ctor cUIListBox_cUIListBox (cUIThing ctor cUIThing_cUIThing, vtable cUIListBox_vtbl, clears the entries, mNumEntries,
-// mCurrentEntry, mStaticColour = D_004C66C8); default ctor cUIListBox_cUIListBox1 (ui/uivector). Base: cUIThing (ui/uithing.h,
+// mCurrentEntry, mStaticColour = gStaticColour); default ctor cUIListBox_cUIListBox1 (ui/uivector). Base: cUIThing (ui/uithing.h,
 // 0x74) <- cListNode, written out flat below. EA source: d:/ssx/code/source/ui/uilistbox.cpp (preview assert path);
 // retail keeps its methods in ui/uiengine (0x399768-0x3993F8), ui/uilistbox (0x39A3F8-0x39A928) and its inline
 // accessors in ui/uivector (0x3A5658-0x3A57B8).
@@ -88,7 +88,7 @@ struct cUIListBox {
                                      //       cUIListBox_setUIData (lw/sw), accessors cUIListBox_setFontIndex..cUIListBox_setUseStaticColour (lw/sw)
     tARGB mShadowColour;             // 0x078 [O]; [U] setUIData cUIListBox_setUIData copies it from the record; cUIListBox_setShadowColour
                                      //       setShadowColour (ldl/ldr); render2D
-    tARGB mStaticColour;             // 0x088 [O]; [R] = D_004C66C8 (the ctor); [U] setUIData; cUIListBox_setStaticColour setStaticColour
+    tARGB mStaticColour;             // 0x088 [O]; [R] = gStaticColour (the ctor); [U] setUIData; cUIListBox_setStaticColour setStaticColour
     tListBoxEntry mpEntries[32];     // 0x098 [O]; [R] the ctor clears all 32 (sw/sb loop + memset(this + 0x98, 0, 640));
                                      //       [U] cUIListBox_addEntryBy*, cUIListBox_setEntryByAsciiString, cUIListBox_deleteAllEntries (clear),
                                      //       cUIListBox_getCurrentAsciiText..cUIListBox_setEntryDataByIndex, updateLocale cUIListBox_updateLocale, render2D

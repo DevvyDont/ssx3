@@ -474,16 +474,16 @@ extern "C" void cMenuItem_textRender_impl(char* item, sRect_2CA768* rect, const 
 INCLUDE_ASM("util/menu", cMenuItem_textRender1);
 #ifdef SKIP_ASM
 extern "C" void* cMenu_getFocusItem(cMenu* self);
-extern char D_004D5380[];
-extern char D_004D5390[];
+extern char kBoxSelectedColor[];
+extern char kBoxUnselectedColor[];
 
 struct cMenuItem_textRender1_sVec3 {
     float x;
     float y;
     float z;
 };
-extern cMenuItem_textRender1_sVec3 D_004D53A0;
-extern cMenuItem_textRender1_sVec3 D_004D53B0;
+extern cMenuItem_textRender1_sVec3 kTextSelectedColor;
+extern cMenuItem_textRender1_sVec3 kTextUnselectedColor;
 
 struct cMenuItem_textRender1_sColor {
     float a;
@@ -500,8 +500,8 @@ void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_te
 /**
  * Draws a menu row in the focused or normal colours, through cMenuItem_textRender.
  *
- * When the item is its menu's focus item (cMenu_getFocusItem) it uses box colour D_004D5380 and text colour D_004D53A0;
- * otherwise D_004D5390 and D_004D53B0. The text colour is built with alpha 1 and the stored r, g, b. The unit's other
+ * When the item is its menu's focus item (cMenu_getFocusItem) it uses box colour kBoxSelectedColor and text colour kTextSelectedColor;
+ * otherwise kBoxUnselectedColor and kTextUnselectedColor. The text colour is built with alpha 1 and the stored r, g, b. The unit's other
  * declarations give it four arguments; the body reads the fifth.
  *
  * @param rect  the row's rect
@@ -513,8 +513,8 @@ void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_te
 void* cMenuItem_textRender1_5(void* self, int rect, int leftText, int centerText, void* rightText)
 {
     int focused = self == cMenu_getFocusItem((cMenu*)(*(void**)self));
-    char* style = focused ? D_004D5380 : D_004D5390;
-    cMenuItem_textRender1_sVec3* textRgb = focused ? &D_004D53A0 : &D_004D53B0;
+    char* style = focused ? kBoxSelectedColor : kBoxUnselectedColor;
+    cMenuItem_textRender1_sVec3* textRgb = focused ? &kTextSelectedColor : &kTextUnselectedColor;
     cMenuItem_textRender1_sColor textColor;
     textColor.a = 1.0f;
     textColor.r = textRgb->x;
@@ -1262,8 +1262,8 @@ extern "C" void cMenu_drawBox(cMenu* self, float* rect, cMenuItem_textRender1_sC
 //100%
 INCLUDE_ASM("util/menu", cMenu_drawBox1);
 #ifdef SKIP_ASM
-extern char D_004D5380[];
-extern char D_004D5390[];
+extern char kBoxSelectedColor[];
+extern char kBoxUnselectedColor[];
 
 typedef void (*fn2CB880)(void*, void*, char*);
 
@@ -1275,7 +1275,7 @@ struct sVEntry2CB880 {
 
 /**
  * Draws a menu box in the selected or normal colour: calls the menu's vtable slot 8 (cMenu_drawBox for cMenu) with
- * @p rect and D_004D5380 when @p on is nonzero, else D_004D5390.
+ * @p rect and kBoxSelectedColor when @p on is nonzero, else kBoxUnselectedColor.
  *
  * cMenu's vtable slot 9.
  *
@@ -1286,7 +1286,7 @@ extern "C" void cMenu_drawBox1(cMenu* self, void* rect, int on)
 {
     sVEntry2CB880* vt = (sVEntry2CB880*)self->mVtbl;
     fn2CB880* drawBoxFn = &vt[8].fn;
-    (*drawBoxFn)((char*)self + vt[8].delta, rect, on ? D_004D5380 : D_004D5390);
+    (*drawBoxFn)((char*)self + vt[8].delta, rect, on ? kBoxSelectedColor : kBoxUnselectedColor);
 }
 #endif
 
@@ -1400,8 +1400,8 @@ public:
 /**
  * Draws the menu's "more above" arrow: a box in the selected colour with an upward chevron in it.
  *
- * Draws the box through the menu's vtable slot 8 with colour D_004D5380, sets the current draw state's texture id
- * (+0x10) to -1 (untextured) and word +0x4 bits 2-6 to 1, and draws a 6-vertex strip in colour D_004D53A0 (alpha 0x80):
+ * Draws the box through the menu's vtable slot 8 with colour kBoxSelectedColor, sets the current draw state's texture id
+ * (+0x10) to -1 (untextured) and word +0x4 bits 2-6 to 1, and draws a 6-vertex strip in colour kTextSelectedColor (alpha 0x80):
  * a 3-unit-thick chevron from the bottom corners (rect inset 6 at the sides, 4 at the bottom) up to the middle of the
  * top (inset 3), via GrMan's vtable slot 71 (cPS2GraphicsMan_RenderTriStrip). cMenu_render calls it when TopItem is not
  * 0.
@@ -1411,16 +1411,16 @@ public:
 extern "C" void cMenu_renderUpArrow(cMenu* self, float* rect)
 {
     sVEntry2CB880* vt = (sVEntry2CB880*)self->mVtbl;
-    vt[8].fn((char*)self + vt[8].delta, rect, D_004D5380);
+    vt[8].fn((char*)self + vt[8].delta, rect, kBoxSelectedColor);
     *(short*)((char*)((cCtx_2CB8C8*)GrMan)->top + 0x10) = -1;
     ((cCtx_2CB8C8*)GrMan)->top->f4_2 = 1;
     sVtx_2CB8C8 arrowVerts[6];
     int i;
     for (i = 0; i < 6; i++) {
         arrowVerts[i].a = 0x80;
-        arrowVerts[i].r = (int)(D_004D53A0.x * 128.0f);
-        arrowVerts[i].g = (int)(D_004D53A0.y * 128.0f);
-        arrowVerts[i].b = (int)(D_004D53A0.z * 128.0f);
+        arrowVerts[i].r = (int)(kTextSelectedColor.x * 128.0f);
+        arrowVerts[i].g = (int)(kTextSelectedColor.y * 128.0f);
+        arrowVerts[i].b = (int)(kTextSelectedColor.z * 128.0f);
         arrowVerts[i].u = 0;
         arrowVerts[i].v = 0;
         arrowVerts[i].q = 1.0f;
@@ -1557,8 +1557,8 @@ public:
 /**
  * Draws the menu's "more below" arrow: a box in the selected colour with a downward chevron in it.
  *
- * The mirror of cMenu_renderUpArrow: the box through the menu's vtable slot 8 with colour D_004D5380, then an untextured
- * 6-vertex strip in colour D_004D53A0 from the top corners (rect inset 6 at the sides, 3 at the top) down to the middle
+ * The mirror of cMenu_renderUpArrow: the box through the menu's vtable slot 8 with colour kBoxSelectedColor, then an untextured
+ * 6-vertex strip in colour kTextSelectedColor from the top corners (rect inset 6 at the sides, 3 at the top) down to the middle
  * of the bottom (inset 4), via GrMan's vtable slot 71. cMenu_render calls it when items are hidden below.
  *
  * @param rect  the arrow's rect (x, y, w, h)
@@ -1566,16 +1566,16 @@ public:
 extern "C" void cMenu_renderDownArrow(cMenu* self, float* rect)
 {
     sVEntry2CB880* vt = (sVEntry2CB880*)self->mVtbl;
-    vt[8].fn((char*)self + vt[8].delta, rect, D_004D5380);
+    vt[8].fn((char*)self + vt[8].delta, rect, kBoxSelectedColor);
     *(short*)((char*)((cCtx_2CBAC8*)GrMan)->top + 0x10) = -1;
     ((cCtx_2CBAC8*)GrMan)->top->f4_2 = 1;
     sVtx_2CBAC8 arrowVerts[6];
     int i;
     for (i = 0; i < 6; i++) {
         arrowVerts[i].a = 0x80;
-        arrowVerts[i].r = (int)(D_004D53A0.x * 128.0f);
-        arrowVerts[i].g = (int)(D_004D53A0.y * 128.0f);
-        arrowVerts[i].b = (int)(D_004D53A0.z * 128.0f);
+        arrowVerts[i].r = (int)(kTextSelectedColor.x * 128.0f);
+        arrowVerts[i].g = (int)(kTextSelectedColor.y * 128.0f);
+        arrowVerts[i].b = (int)(kTextSelectedColor.z * 128.0f);
         arrowVerts[i].u = 0;
         arrowVerts[i].v = 0;
         arrowVerts[i].q = 1.0f;
@@ -1979,7 +1979,7 @@ INCLUDE_ASM("util/menu", cMenuSys_input);
 float cInput_getValue_f(void* pad, int axis) __asm__("cInput_getValue");
 extern "C" int func_00266BA8(void* kb, int a1, int* key, int* chr);
 extern "C" void cMenuSys_popMenu(cMenuSys* p);
-extern void* D_004A33F0;
+extern void* Keyboard;
 
 struct sVE2CC0C0 {
     short delta;
@@ -2007,7 +2007,7 @@ static inline int PadValid2CC0C0(int** pad)
  *
  * Does nothing with no menu open (MenuDepth +0x0 is 0) or no pad (the cInput at +0x5C, or its first word, is 0). Stores
  * the pad's menu key (cInput_getValue 61) in Key (+0x48) and sets VKey (+0x4C) and AsciiKey (+0x50) to -1. When the pad
- * has no key (-1) and a USB keyboard exists (D_004A33F0), func_00266BA8 reads its key into VKey and AsciiKey: an ASCII
+ * has no key (-1) and a USB keyboard exists (Keyboard), func_00266BA8 reads its key into VKey and AsciiKey: an ASCII
  * value below 0x20 becomes -1, and the virtual keys up (38), down (40), left (37), right (39), insert (45), delete
  * (46), enter (13) and escape (27) become menu keys 0, 1, 2, 3, 9, 10, 6 and 7. Then calls the top menu's vtable slot 2
  * (input): result 1 pops one menu (cMenuSys_popMenu), 2 pops until none is left.
@@ -2026,7 +2026,7 @@ extern "C" void cMenuSys_input(sMenu2CC0C0* self)
     *key = -1;
     *chr = -1;
     self->input = input;
-    if (input == -1 && D_004A33F0 != 0 && func_00266BA8(D_004A33F0, 0, key, chr) != 0) {
+    if (input == -1 && Keyboard != 0 && func_00266BA8(Keyboard, 0, key, chr) != 0) {
         if (self->chr < 0x20) {
             self->chr = input;
         }
@@ -4734,8 +4734,8 @@ public:
  * Draws a text-entry item: box, caption, the text right-aligned and, when it has the focus, an underline cursor.
  *
  * Builds the text as cTextMenuItem_preRender does (a trailing "_" when the focused cursor is at the end), draws the box through
- * the menu's vtable slot 8 in D_004D5380 (focused) or D_004D5390, sets the menu font's Color to D_004D53A0 or
- * D_004D53B0 (alpha 1) and ShadowOffset to (2, 2), and draws the caption at rect.x + 16 and the text ending 16 before
+ * the menu's vtable slot 8 in kBoxSelectedColor (focused) or kBoxUnselectedColor, sets the menu font's Color to kTextSelectedColor or
+ * kTextUnselectedColor (alpha 1) and ShadowOffset to (2, 2), and draws the caption at rect.x + 16 and the text ending 16 before
  * the right edge (cFont_text, y = rect.y + 5). When focused it draws an untextured quad (draw state bits 2-6 = 1,
  * texture -1) under the character at the cursor: from the right-aligned x of the text from the cursor on to that of the
  * text from the cursor + 1 on, 3 units high, 4 to 7 units above the bottom (rect.y + rect.h - 6), in the text colour (*
@@ -4757,9 +4757,9 @@ extern "C" void cTextMenuItem_render(cTextMenuItem* self, float* rect)
         char* menu = *(char**)self;
         sVEntry2CB880* vt = *(sVEntry2CB880**)(menu + 0x12C);
         fn2CB880* drawBoxFn = &vt[8].fn;
-        (*drawBoxFn)(menu + vt[8].delta, rect, focused ? D_004D5380 : D_004D5390);
+        (*drawBoxFn)(menu + vt[8].delta, rect, focused ? kBoxSelectedColor : kBoxUnselectedColor);
     }
-    cMenuItem_textRender1_sVec3* col = ((void*)self) == cMenu_getFocusItem((cMenu*)(*(void**)self)) ? &D_004D53A0 : &D_004D53B0;
+    cMenuItem_textRender1_sVec3* col = ((void*)self) == cMenu_getFocusItem((cMenu*)(*(void**)self)) ? &kTextSelectedColor : &kTextUnselectedColor;
     cMenuItem_textRender1_sColor textColor;
     textColor.a = 1.0f;
     textColor.r = col->x;
@@ -5137,7 +5137,7 @@ extern "C" void cColorMenuItem_render(cColorMenuItem* self, float* rect)
     }
     float barX = rect[0] + rect[2] - 16.0f - 80.0f;
     float textX = barX - 16.0f;
-    cMenuItem_textRender1_sVec3* col = ((void*)self) == cMenu_getFocusItem((cMenu*)(*(void**)self)) ? &D_004D53A0 : &D_004D53B0;
+    cMenuItem_textRender1_sVec3* col = ((void*)self) == cMenu_getFocusItem((cMenu*)(*(void**)self)) ? &kTextSelectedColor : &kTextUnselectedColor;
     cMenuItem_textRender1_sColor textClr;
     textClr.a = 1.0f;
     textClr.r = col->x;
@@ -6695,9 +6695,9 @@ struct sVtxF {
 
 extern "C" void cFont_text(void* self, float x, float y, const char* str);
 
-extern cMenuItem_textRender1_sVec3 D_004D53A0;
+extern cMenuItem_textRender1_sVec3 kTextSelectedColor;
 
-extern cMenuItem_textRender1_sVec3 D_004D53B0;
+extern cMenuItem_textRender1_sVec3 kTextUnselectedColor;
 
 // (prototype from their definition at line 858)
 extern "C" void func_002CB350_0EF8(func_002CB350_sVtx* v, float* r, float* t) __asm__("func_002CB350");
@@ -6742,7 +6742,7 @@ extern sColor D_004D53C0;
 extern sColor D_004D53D0;
 extern sColor D_004D53E0;
 // The focused-row style passed to the menu's frame draw is the line colour of the graph's axis.
-extern sColor D_004D5380_c __asm__("D_004D5380");
+extern sColor D_004D5380_c __asm__("kBoxSelectedColor");
 
 // The font scale (font + 0x28), built from references like sVec4_2D0008: with the unit's by-value sVec2 the
 // second store keeps the temporary's address in a register (the target stores both straight to the frame).
@@ -6779,12 +6779,12 @@ static inline void SetDepth_D0EF8(sRenderState* rs, int base, int layer)
  * Draws a graph item: its box and caption, the selected point's "x,y" readout while edited, and a 100-wide plot of the
  * points at the right of the row.
  *
- * Draws the box through the menu's vtable slot 9 (selected when focused), sets the font colour (D_004D53A0 or
- * D_004D53B0, alpha 1) and ShadowOffset (2, 2), and draws the caption at rect.x + 16. With edit mode (+0x40) and the
+ * Draws the box through the menu's vtable slot 9 (selected when focused), sets the font colour (kTextSelectedColor or
+ * kTextUnselectedColor, alpha 1) and ShadowOffset (2, 2), and draws the caption at rect.x + 16. With edit mode (+0x40) and the
  * focus it prints prettyFloat(x) + "," + prettyFloat(y) of the current point (+0x24) one line lower at rect.x + 32. The
  * plot box (100 wide, rect.h - 12 high, or - 24 when edited) is centred vertically, 16 from the right edge, and filled
  * in D_004D53C0 with texture -1 (func_002CB350); the y axis is flipped (MaxPoint.y +0x38 at the top). Each further
- * layer is drawn one step higher in the draw state's 5-bit field at word +0x8 bits 5-9: the y = 0 line in D_004D5380
+ * layer is drawn one step higher in the draw state's 5-bit field at word +0x8 bits 5-9: the y = 0 line in kBoxSelectedColor
  * when the y range spans 0, the polyline through the points in D_004D53D0 (GrMan's vtable slot 73, 2-vertex lines), and
  * in edit mode a 5x5 marker on the current point in D_004D53E0. Restores the field at the end.
  *
@@ -6800,7 +6800,7 @@ extern "C" void cGraphMenuItem_render(cGraphMenuItem_D0EF8* self, float* rect)
     }
     char* font = *(char**)(*(char**)(*(char**)self + 0x124) + 0x58);
     float lineH = (float)*(int*)(font + 0x14) * *(float*)(font + 0x34);
-    cMenuItem_textRender1_sVec3* col = self == cMenu_getFocusItem((cMenu*)self->owner) ? &D_004D53A0 : &D_004D53B0;
+    cMenuItem_textRender1_sVec3* col = self == cMenu_getFocusItem((cMenu*)self->owner) ? &kTextSelectedColor : &kTextUnselectedColor;
     sColor textColor;
     textColor.a = 1.0f;
     textColor.r = col->x;

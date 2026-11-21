@@ -51,14 +51,14 @@ extern "C" void cObjNode__cObjNode(cObjNode* self, int flags)
 INCLUDE_ASM("object/objnode", cTypeObjNode_cTypeObjNode1);
 #ifdef SKIP_ASM
 extern void* cTypeObjNode_vtbl[];
-extern int D_0044AFF0[];
+extern int cTypeObjNode_ObjNodeCount[];
 extern "C" void* cObjNode_cObjNode1(void* self, void* a1);
 
 /**
  * Constructs the typed object-node base of a node.
  *
  * Runs cObjNode_cObjNode1 with the bucket, installs cTypeObjNode_vtbl, stores type at +0x10, clears the flags (+0x12)
- * and increments the live count for that type (D_0044AFF0[type]).
+ * and increments the live count for that type (cTypeObjNode_ObjNodeCount[type]).
  *
  * @param bucket  update bucket
  * @param type  node type (tObjNodeType)
@@ -70,7 +70,7 @@ extern "C" void* cTypeObjNode_cTypeObjNode1(cTypeObjNode* self, void* bucket, in
     self->mVtbl = cTypeObjNode_vtbl;
     self->ObjNodeType = type;
     *(short*)&self->Flags = 0;
-    D_0044AFF0[self->ObjNodeType]++;
+    cTypeObjNode_ObjNodeCount[self->ObjNodeType]++;
     return ((void*)self);
 }
 #endif
@@ -85,12 +85,12 @@ struct sObjNodeVEntry4788 {
 };
 
 extern void* cTypeObjNode_vtbl[];
-extern int D_0044AFF0[];
+extern int cTypeObjNode_ObjNodeCount[];
 // PORT: cObjNode_cObjNode takes (self, param2); this caller also leaves the stream in $6.
 cObjNode* cObjNode_cObjNode_3(cObjNode* self, void* param2, void* stream) __asm__("cObjNode_cObjNode__FP8cObjNodePv");
 
 /**
- * Recreates a typed object node from a replay frame and counts it in the per-type live counts (D_0044AFF0).
+ * Recreates a typed object node from a replay frame and counts it in the per-type live counts (cTypeObjNode_ObjNodeCount).
  *
  * @param bucket  the bucket the node belongs to (On Tour const int bucket)
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
@@ -102,7 +102,7 @@ extern "C" void* cTypeObjNode_cTypeObjNode(cTypeObjNode* self, void* bucket, voi
     self->mVtbl = cTypeObjNode_vtbl;
     sObjNodeVEntry4788* vt = *(sObjNodeVEntry4788**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)&self->ObjNodeType, 4);
-    D_0044AFF0[self->ObjNodeType]++;
+    cTypeObjNode_ObjNodeCount[self->ObjNodeType]++;
     return ((void*)self);
 }
 #endif
@@ -112,7 +112,7 @@ INCLUDE_ASM("object/objnode", cTypeObjNode__cTypeObjNode);
 #ifdef SKIP_ASM
 extern "C" void cObjNode__cObjNode(cObjNode* self, int flags);
 extern void* cTypeObjNode_vtbl[];
-extern int D_0044AFF0[];
+extern int cTypeObjNode_ObjNodeCount[];
 
 // PORT: the unit declares cTypeObjNode__cTypeObjNode(void*), but this is a deleting
 // destructor taking (self, flags); the real body is bound by asm label.
@@ -127,7 +127,7 @@ void cTypeObjNode__cTypeObjNode_impl(void* vself, int flags)
 {
     cTypeObjNode* self = (cTypeObjNode*)vself;
     self->mVtbl = cTypeObjNode_vtbl;
-    D_0044AFF0[self->ObjNodeType]--;
+    cTypeObjNode_ObjNodeCount[self->ObjNodeType]--;
     cObjNode__cObjNode((cObjNode*)self, flags);
 }
 #endif

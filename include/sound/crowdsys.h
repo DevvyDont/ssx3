@@ -11,8 +11,8 @@
 //   cCrowdSys : cMidiSys (0x0) : cBankSys, virtual cBankManager
 // cCrowdSys non-virtual part 0x118 [R]: its ctor cCrowdSys_cCrowdSys (inchrg != 0) puts cSoundSys at this + 0x118 and
 // cBankManager at this + 0x120 (vtables D_00483818 / D_00483838 have deltas -0x118 / -0x120), stores vtable
-// D_004837F8 at 0xC (_vt$9cCrowdSys: slot 1 cBankSys's cBankSys_SFX_Play2D, slot 2 pure virtual) and itself in
-// D_004A36F8 (EA name gpCrowdSys). In cSSXAudio the next base, cMusicSys, starts at 0x118 (sound/ssxaudio.h). The struct
+// cCrowdSys_vtbl at 0xC (_vt$9cCrowdSys: slot 1 cBankSys's cBankSys_SFX_Play2D, slot 2 pure virtual) and itself in
+// gpCrowdSys (EA name gpCrowdSys). In cSSXAudio the next base, cMusicSys, starts at 0x118 (sound/ssxaudio.h). The struct
 // below is the NON-VIRTUAL part. The preview's cCrowdSys / cCrowdInstance offsets agree with retail (asserts checked
 // at preview 0x275AF8..0x278E0C).
 //
@@ -94,7 +94,7 @@ struct cCrowdSys {
     cBankManager* mpVBankManager;      // 0x000 [R] virtual-base pointer (this + 0x120 in a complete cCrowdSys; cSSXAudio + 0x6C98)
     int* mBank;                        // 0x004 [O] cBankSys::mBank; [R] cBankSys ctor "mBank"
     int* mPatch;                       // 0x008 [O] cBankSys::mPatch; [R] cBankSys ctor "mPath"
-    void** mVtbl;                      // 0x00C [R] D_004837F8 (cCrowdSys ctor/dtor); cSSXAudio_vtbl in cSSXAudio
+    void** mVtbl;                      // 0x00C [R] cCrowdSys_vtbl (cCrowdSys ctor/dtor); cSSXAudio_vtbl in cSSXAudio
     // --- cMidiSys (sound/midisys.h)
     tMidiBank* mMidiBanks;             // 0x010 [R] cMidiSys ctor operator new(0x20, "MIDIBANKS")
     // --- cCrowdSys
@@ -153,7 +153,7 @@ CHECK_OFFSET(cCrowdSys, mCrowdData, 0x01C);
 CHECK_SIZE(cCrowdSys, 0x118);
 
 // The crowd system: cCrowdSys_cCrowdSys stores itself here, cCrowdSys__cCrowdSys clears it. EA name gpCrowdSys (preview assert
-// "gpCrowdSys" on the same gp-relative global; candidate for a symbol_addrs rename D_004A36F8 -> gpCrowdSys).
-extern cCrowdSys* D_004A36F8;       // [R] the cCrowdSys ctor cCrowdSys_cCrowdSys stores self, its dtor clears it
+// "gpCrowdSys" on the same gp-relative global; candidate for a symbol_addrs rename gpCrowdSys -> gpCrowdSys).
+extern cCrowdSys* gpCrowdSys;       // [R] the cCrowdSys ctor cCrowdSys_cCrowdSys stores self, its dtor clears it
 
 #endif /* SOUND_CROWDSYS_H */

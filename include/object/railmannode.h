@@ -1,7 +1,7 @@
 #ifndef OBJECT_RAILMANNODE_H
 #define OBJECT_RAILMANNODE_H
 
-// cRailManNode: the rail manager scene node - one live instance (static ActiveNode = D_004A4040) keeping up to 128
+// cRailManNode: the rail manager scene node - one live instance (static ActiveNode = cRailManNode_ActiveNode) keeping up to 128
 // switched-off rails: the world script's RailFunc calls addRail(rid, add) (func_00358B28), which creates the node on
 // first use, records the rail's resource id in a free RailInfo slot and takes every particle node of that rail out of
 // the world's Nash space hash (disableRail) or puts it back (enableRail; the slot goes back to -1).

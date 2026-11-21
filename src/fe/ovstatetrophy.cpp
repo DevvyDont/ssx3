@@ -270,20 +270,20 @@ struct sTrophySlot20ED20 {
 };
 struct sPad16;
 extern sPad16 D_004C8BC8;
-extern char* D_004A2750;
+extern char* cHUDRadar_mpRadarHeader;
 extern int D_004A2760;
 extern "C" void func_00210618(int i);
 
 /**
  * Updates every rider's course progress for the trackers.
  *
- * When course data is loaded (D_004A2750) it runs func_00210618 for each rider of the race (SSXApp->Game->AI, count at
+ * When course data is loaded (cHUDRadar_mpRadarHeader) it runs func_00210618 for each rider of the race (SSXApp->Game->AI, count at
  * +0x78), clears that rider's reset flag in D_004C8BC8 and finally clears D_004A2760 so the trackers may draw.
  * cOVStateHUD1P_onUpdate calls it.
  */
 extern "C" void func_0020ED20(void)
 {
-    if (D_004A2750 != 0) {
+    if (cHUDRadar_mpRadarHeader != 0) {
         char* race = (char*)SSXApp->Game->AI;
         int i;
         for (i = 0; i < *(int*)(race + 0x78); i++) {
@@ -493,7 +493,7 @@ static inline float limitStep_EDA0(float v, float prev, float lim)
  * is smoothed into the slot (+0x10), moving at most 46.3 per frame unless the slot is invalid, and all slots are
  * invalidated when the viewer changed since the last draw (+0x34). The drawing runs inside cPS2GraphicsMan_PushView and
  * a pushed draw state reset to sDrawState_s_defaultDrawState with an identity view (cPS2GraphicsMan_SetView1):
- * - "%d%%" of the course done (distance / course length, D_004A2750 + 0x10), centred at the text position
+ * - "%d%%" of the course done (distance / course length, cHUDRadar_mpRadarHeader + 0x10), centred at the text position
  *   (cFont_centertext) in the shared font at 0.6667 scale, white with a black shadow offset by (2, 2);
  * - an arrow (icon 4) at the top for each racer ahead of the window and at the bottom for each one behind it, shifted
  *   sideways by -offset * 0.005;
@@ -519,7 +519,7 @@ extern "C" void func_0020EDA0(cHUDRadar* self, char* rider)
     if (rider == 0)
         return;
     sMarker_EDA0* markers = (sMarker_EDA0*)D_004A2758;
-    char* course = D_004A2750;
+    char* course = cHUDRadar_mpRadarHeader;
     if (course == 0)
         return;
     int me = ((cBeing_EDA0*)(rider + 0x6C0))->getAIIndex();
@@ -1040,7 +1040,7 @@ extern "C" void func_0020FB40(cHUDRadar* self, char* rider, int right)
     if (rider == 0)
         return;
     sMarker_FB40* markers = (sMarker_FB40*)D_004A2758;
-    char* course = D_004A2750;
+    char* course = cHUDRadar_mpRadarHeader;
     if (course == 0)
         return;
     int me = ((cBeing_FB40*)(rider + 0x6C0))->getAIIndex();
@@ -1354,7 +1354,7 @@ extern "C" void func_002105B0(int riderIndex)
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", func_002105D0);
 #ifdef SKIP_ASM
-extern char* D_004A2750;
+extern char* cHUDRadar_mpRadarHeader;
 extern char* D_004A2754;
 extern char* D_004A2758;
 extern "C" void func_002108F8(void);
@@ -1362,7 +1362,7 @@ extern "C" void func_002108F8(void);
 /**
  * Installs the course-progress data of a resolved world chunk (kind 21 in cPS2ChunkResolve_resolve).
  *
- * Stores @p data in D_004A2750, its segment table (data + the offset at +0x4) in D_004A2754 and its marker table (data
+ * Stores @p data in cHUDRadar_mpRadarHeader, its segment table (data + the offset at +0x4) in D_004A2754 and its marker table (data
  * + the offset at +0xC) in D_004A2758, then resets every rider slot (func_002108F8). The data also holds the segment
  * count (+0x0), the marker count (+0x8) and the course length (+0x10).
  *
@@ -1372,7 +1372,7 @@ extern "C" void func_002105D0(char* data)
 {
     char* segments = data + *(int*)(data + 4);
     char* markers = data + *(int*)(data + 0xC);
-    D_004A2750 = data;
+    cHUDRadar_mpRadarHeader = data;
     D_004A2754 = segments;
     D_004A2758 = markers;
     func_002108F8();
@@ -1382,16 +1382,16 @@ extern "C" void func_002105D0(char* data)
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", func_00210608);
 #ifdef SKIP_ASM
-extern char* D_004A2750;
+extern char* cHUDRadar_mpRadarHeader;
 extern char* D_004A2754;
 extern char* D_004A2758;
 
 /**
- * Forgets the course-progress data: clears D_004A2750, D_004A2754 and D_004A2758 (cPS2ChunkResolve_unresolve calls it).
+ * Forgets the course-progress data: clears cHUDRadar_mpRadarHeader, D_004A2754 and D_004A2758 (cPS2ChunkResolve_unresolve calls it).
  */
 extern "C" void func_00210608(void)
 {
-    D_004A2750 = 0;
+    cHUDRadar_mpRadarHeader = 0;
     D_004A2754 = 0;
     D_004A2758 = 0;
 }
@@ -1401,7 +1401,7 @@ extern "C" void func_00210608(void)
 INCLUDE_ASM("fe/ovstatetrophy", func_00210618);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char* D_004A2750;
+extern char* cHUDRadar_mpRadarHeader;
 extern char* D_004A2754;
 float cRider_getDistanceLeft(void* rider);
 extern "C" float func_00210820(int i);
@@ -1435,7 +1435,7 @@ extern sTrophyEntry_210618 D_004C8BC8_210618[] __asm__("D_004C8BC8");
  */
 extern "C" void func_00210618(int i)
 {
-    char* course = D_004A2750;
+    char* course = cHUDRadar_mpRadarHeader;
     sTrophySeg_210618* segs = (sTrophySeg_210618*)D_004A2754;
     if (course == 0)
         return;

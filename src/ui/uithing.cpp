@@ -310,7 +310,7 @@ extern void* cUIText_vtbl[];
 struct cUIText_cUIText_sQuad {
     int a, b, c, d;
 };
-extern cUIText_cUIText_sQuad D_004C66C8;
+extern cUIText_cUIText_sQuad gStaticColour;
 
 struct cUIText_cUIText_sObj {
     char base[0x74];
@@ -332,7 +332,7 @@ struct cUIText_cUIText_sObj {
  * Runs the cUIThing constructor (cUIThing_cUIThing; the screen and parent the caller passes in a1/a2 go straight
  * through), stores cUIText_vtbl, sets tAttrText's shadow bit (bit 2) and clears bits 3-6 (unicode, static colour,
  * disabled colour, ellipses), zeroes mNumLines, mpLineOffset, mStringID, mpString, mStringSize and mLineSize, and
- * copies the default colour D_004C66C8 into mStaticColour and mDisabledColour. cUIScreen_createObjectByStruct calls it
+ * copies the default colour gStaticColour into mStaticColour and mDisabledColour. cUIScreen_createObjectByStruct calls it
  * on a 0xBC-byte "UIText" allocation; cUIText_cUIText1 is the default constructor.
  *
  * @return the object
@@ -348,8 +348,8 @@ extern "C" cUIText_cUIText_sObj* cUIText_cUIText(cUIText_cUIText_sObj* self)
     self->fB4 = 0;
     self->fB8 = 0;
     self->fBA = 0;
-    self->q88 = D_004C66C8;
-    self->q98 = D_004C66C8;
+    self->q88 = gStaticColour;
+    self->q98 = gStaticColour;
     return self;
 }
 #endif

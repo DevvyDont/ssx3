@@ -13,7 +13,7 @@
 // matches cBoltOnFXInterface__cBoltOnFXInterface).
 //
 // Size 0xC8 [R] (cMemMan_alloc(200, ...)). No base class; the class declares a virtual destructor, so g++ 2.95 puts
-// the vptr after its data, at +0xC4. Vtable D_00487EE8 (1 slot: the destructor cBoltOnFXInterface__cBoltOnFXInterface), stored by both
+// the vptr after its data, at +0xC4. Vtable cBoltOnFXInterface_vtbl (1 slot: the destructor cBoltOnFXInterface__cBoltOnFXInterface), stored by both
 // constructors and the destructor.
 // Owners: cRider::mBoltOnFX (+0x890, ai/rider.h; built with the rider's mAttachedEmitterFX), cFERider::mpBoltOnFX
 // (+0xC74, fe/ferider.h). Each frame cRider_updateSplitMiscFX / cFERider_update call func_002ECF78 (rebuild when dirty).
@@ -53,7 +53,7 @@ struct cBoltOnFXInterface {
     tBoltOnFXEntry mEntries[15];            // 0x10 (our name) [R] ctors construct 15 (func_002EC9D0) and free them
                                             //      (func_002ECAF0); [U] func_002ECBC0 / func_002ECC28 / func_002ECCB8 /
                                             //      cBoltOnFXInterface__cBoltOnFXInterface walk 15; [P] "Ran out of bolt on emitters"
-    void** mVtbl;                           // 0xC4 [R] D_00487EE8 (_vt$18cBoltOnFXInterface), stored by the ctors / dtor
+    void** mVtbl;                           // 0xC4 [R] cBoltOnFXInterface_vtbl (_vt$18cBoltOnFXInterface), stored by the ctors / dtor
 };
 
 CHECK_OFFSET(tBoltOnFXEntry, mEmitter, 0x0);

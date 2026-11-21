@@ -21,7 +21,7 @@
 // RandomStart, AnimSpeed from Speed/SpeedRange (data +0x14/+0x18) / 30 / frame rate (negated for Dir == 1), CacheTime =
 // CurrTime, AnimActive = 1, Delay = AnimComplete = 0, Flags |= RootTransformDirty) and cAnimObjectNode_cAnimObjectNode
 // (bucket, cBxReplayFrame*: cAnimNode_cAnimNode1 on +0x1C, then the 0x1C-byte state). Destructor
-// cAnimObjectNode__cAnimObjectNode. Vtable D_00490B10 (53 slots): delta -0x30 (whole object) on
+// cAnimObjectNode__cAnimObjectNode. Vtable cAnimObjectNode_vtbl (53 slots): delta -0x30 (whole object) on
 // 1 dtor, 12 writeToReplayFrame, 15 updateNode, 17 isComplete, 19 getNodeState, 31 getAnimDir, 34 expire, 36 signal and
 // on 53 getAnimSpeed (delta -0x1C from the cAnimNode part); delta -0x14 on the inherited cAnimNode slots (this =
 // +0x1C); the rest are cMoveNode's (this = +0x30).
@@ -67,7 +67,7 @@ struct cAnimObjectNode {
     int unk_030;                    // 0x30 cObjNode's leading word (unk_00 in object/objnode.h); no ctor writes it
     cObjNode* Next;                 // 0x34 [O] cObjNode::Next; [U] bucket list
     cObjNode* Prev;                 // 0x38 [O] cObjNode::Prev; [U] bucket list
-    void** mVtbl;                   // 0x3C [R] D_00490B10 (both ctors, the dtor); [U] updateNode calls slot 34 (expire)
+    void** mVtbl;                   // 0x3C [R] cAnimObjectNode_vtbl (both ctors, the dtor); [U] updateNode calls slot 34 (expire)
     short ObjNodeType;              // 0x40 [O] cTypeObjNodeState; [R] the type arg passed to cAnimNode_cAnimNode (1; 3
                                     //      from cAnimComboNode)
     unsigned short Flags;           // 0x42 [O]; [P] bit 0 = RootTransformDirty; [R] ctor1 sets bit 0 (lhu/sh); [U]

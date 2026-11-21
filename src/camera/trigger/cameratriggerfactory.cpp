@@ -1622,7 +1622,7 @@ extern "C" void* cTriggerAlgorithm_cTriggerAlgorithm(cTriggerAlgorithm* self)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTriggerAlgorithm__cTriggerAlgorithm);
 #ifdef SKIP_ASM
-extern void* D_0045BDE0[];
+extern void* cCameraAlgorithm_vtbl[];
 void operator_delete(int* ptr);
 
 // PORT: the unit declares cTriggerAlgorithm__cTriggerAlgorithm as `void* (void*)` (callers pass the
@@ -1632,7 +1632,7 @@ void cTriggerAlgorithm__cTriggerAlgorithm_impl(void* self, int flags) __asm__("c
 /**
  * Destroys a trigger camera algorithm: puts back the base camera-algorithm vtable and frees the object when asked.
  *
- * Stores cCameraAlgorithm's vtable D_0045BDE0 at +0x10 and calls operator_delete when bit 0 of @p flags is set. Slot 1
+ * Stores cCameraAlgorithm's vtable cCameraAlgorithm_vtbl at +0x10 and calls operator_delete when bit 0 of @p flags is set. Slot 1
  * of the trigger algorithm vtable cTriggerAlgorithm_vtbl; the bounded algorithm's destructor cBoundedAlgorithm__cBoundedAlgorithm chains to it.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
@@ -1641,7 +1641,7 @@ void cTriggerAlgorithm__cTriggerAlgorithm_impl(void* self, int flags) __asm__("c
 void cTriggerAlgorithm__cTriggerAlgorithm_impl(void* vself, int flags)
 {
     cTriggerAlgorithm* self = (cTriggerAlgorithm*)vself;
-    self->mVtbl = D_0045BDE0;
+    self->mVtbl = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3255,19 +3255,19 @@ void sti_00175A20(int init, int prio)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCameraAlgorithm__cCameraAlgorithm1);
 #ifdef SKIP_ASM
-extern void* D_0045BDE0[];
+extern void* cCameraAlgorithm_vtbl[];
 
 /**
  * Destroys a camera algorithm base object: an unreferenced copy of cCameraAlgorithm__cCameraAlgorithm.
  *
- * Restores cCameraAlgorithm's vtable D_0045BDE0 at +0x10 and frees the object when bit 0 of @p flags is set. Nothing
+ * Restores cCameraAlgorithm's vtable cCameraAlgorithm_vtbl at +0x10 and frees the object when bit 0 of @p flags is set. Nothing
  * calls it or stores its address; g++ emitted this unit's copy of the inline destructor.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
 extern "C" void cCameraAlgorithm__cCameraAlgorithm1(cCameraAlgorithm* self, int flags)
 {
-    self->mVtbl = D_0045BDE0;
+    self->mVtbl = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3407,13 +3407,13 @@ extern "C" int func_00176320(void) {
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptAlgorithm__cScriptAlgorithm);
 #ifdef SKIP_ASM
-extern void* D_0045BDE0[];
+extern void* cCameraAlgorithm_vtbl[];
 void operator_delete(int* ptr);
 
 /**
  * Destroys a script camera algorithm base: restores cCameraAlgorithm's vtable and frees the object when asked.
  *
- * Stores D_0045BDE0 at +0x10 and calls operator_delete when bit 0 of @p flags is set. Slot 1 of the cScriptAlgorithm
+ * Stores cCameraAlgorithm_vtbl at +0x10 and calls operator_delete when bit 0 of @p flags is set. Slot 1 of the cScriptAlgorithm
  * vtable cScriptAlgorithm_vtbl.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
@@ -3421,7 +3421,7 @@ void operator_delete(int* ptr);
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cScriptAlgorithm__cScriptAlgorithm(cScriptAlgorithm* self, int flags)
 {
-    self->mVtbl = D_0045BDE0;
+    self->mVtbl = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3454,13 +3454,13 @@ extern "C" void* cScriptAlgorithm_getTargetPos(void* self, void* scriptAlgo)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptManualAlgorithm__cScriptManualAlgorithm);
 #ifdef SKIP_ASM
-extern void* D_0045BDE0[];
+extern void* cCameraAlgorithm_vtbl[];
 void operator_delete(int* ptr);
 
 /**
  * Destroys a manual script camera algorithm, freeing it when asked to.
  *
- * Stores the cCameraAlgorithm vtable D_0045BDE0 at +0x10 (the last vtable store of the inlined destructor chain; no
+ * Stores the cCameraAlgorithm vtable cCameraAlgorithm_vtbl at +0x10 (the last vtable store of the inlined destructor chain; no
  * level tears anything else down), then calls operator_delete when bit 0 of @p flags is set.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
@@ -3468,7 +3468,7 @@ void operator_delete(int* ptr);
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cScriptManualAlgorithm__cScriptManualAlgorithm(cScriptManualAlgorithm* self, int flags)
 {
-    self->mVtbl = D_0045BDE0;
+    self->mVtbl = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3478,13 +3478,13 @@ extern "C" void cScriptManualAlgorithm__cScriptManualAlgorithm(cScriptManualAlgo
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptPointAlgorithm__cScriptPointAlgorithm);
 #ifdef SKIP_ASM
-extern void* D_0045BDE0[];
+extern void* cCameraAlgorithm_vtbl[];
 void operator_delete(int* ptr);
 
 /**
  * Destroys a point script camera algorithm, freeing it when asked to.
  *
- * Stores the cCameraAlgorithm vtable D_0045BDE0 at +0x10 (the last vtable store of the inlined destructor chain; no
+ * Stores the cCameraAlgorithm vtable cCameraAlgorithm_vtbl at +0x10 (the last vtable store of the inlined destructor chain; no
  * level tears anything else down), then calls operator_delete when bit 0 of @p flags is set.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
@@ -3492,7 +3492,7 @@ void operator_delete(int* ptr);
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cScriptPointAlgorithm__cScriptPointAlgorithm(cScriptPointAlgorithm* self, int flags)
 {
-    self->mVtbl = D_0045BDE0;
+    self->mVtbl = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3502,13 +3502,13 @@ extern "C" void cScriptPointAlgorithm__cScriptPointAlgorithm(cScriptPointAlgorit
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptTargetAlgorithm__cScriptTargetAlgorithm);
 #ifdef SKIP_ASM
-extern void* D_0045BDE0[];
+extern void* cCameraAlgorithm_vtbl[];
 void operator_delete(int* ptr);
 
 /**
  * Destroys a target script camera algorithm, freeing it when asked to.
  *
- * Stores the cCameraAlgorithm vtable D_0045BDE0 at +0x10 (the last vtable store of the inlined destructor chain; no
+ * Stores the cCameraAlgorithm vtable cCameraAlgorithm_vtbl at +0x10 (the last vtable store of the inlined destructor chain; no
  * level tears anything else down), then calls operator_delete when bit 0 of @p flags is set.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
@@ -3516,7 +3516,7 @@ void operator_delete(int* ptr);
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cScriptTargetAlgorithm__cScriptTargetAlgorithm(cScriptTargetAlgorithm* self, int flags)
 {
-    self->mVtbl = D_0045BDE0;
+    self->mVtbl = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3526,13 +3526,13 @@ extern "C" void cScriptTargetAlgorithm__cScriptTargetAlgorithm(cScriptTargetAlgo
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptRelativeAlgorithm__cScriptRelativeAlgorithm);
 #ifdef SKIP_ASM
-extern void* D_0045BDE0[];
+extern void* cCameraAlgorithm_vtbl[];
 void operator_delete(int* ptr);
 
 /**
  * Destroys a relative script camera algorithm, freeing it when asked to.
  *
- * Stores the cCameraAlgorithm vtable D_0045BDE0 at +0x10 (the last vtable store of the inlined destructor chain; no
+ * Stores the cCameraAlgorithm vtable cCameraAlgorithm_vtbl at +0x10 (the last vtable store of the inlined destructor chain; no
  * level tears anything else down), then calls operator_delete when bit 0 of @p flags is set.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
@@ -3540,7 +3540,7 @@ void operator_delete(int* ptr);
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cScriptRelativeAlgorithm__cScriptRelativeAlgorithm(cScriptRelativeAlgorithm* self, int flags)
 {
-    self->mVtbl = D_0045BDE0;
+    self->mVtbl = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

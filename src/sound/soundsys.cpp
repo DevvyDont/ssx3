@@ -32,7 +32,7 @@ struct sSndBsVt7 {
     sSndBsVtEnt e[7];
 } __attribute__((aligned(8)));
 
-extern char D_00483A48[];
+extern char cBankSys_vtbl[];
 extern char cBankMonitor_vtbl[];
 extern const char str_mBank[];
 extern const char str_mPath[];
@@ -78,7 +78,7 @@ extern "C" char* cBankSys_cBankSys(cBankSys* self, int embedded, int count, int 
         int adj2 = ((char*)self) - base2;
         vtbl2.e[1].delta = D_00483A80_bs.e[1].delta + adj2;
     }
-    self->mVtbl = (void**)D_00483A48;
+    self->mVtbl = (void**)cBankSys_vtbl;
     gBankSys = (cBankSys*)((int)self);
     self->mBank = (int*)(new (str_mBank, 0, 0) char[0x10]);
     self->mPatch = (int*)(new (str_mPath, 0, 0) char[0x10]);
@@ -106,7 +106,7 @@ struct sSndDtVt7 {
     sSndDtVtEnt e[7];
 } __attribute__((aligned(8)));
 
-extern char D_00483A48[];
+extern char cBankSys_vtbl[];
 extern const sSndDtVt4 D_00483A60;
 extern const sSndDtVt7 D_00483A80;
 extern char cBankMonitor_vtbl[];
@@ -114,7 +114,7 @@ extern char cBankMonitor_vtbl[];
 /**
  * Destroys the bank SFX system (g++ 2.95 destructor with virtual bases cSoundSys and cBankManager).
  *
- * Restores the class's vtables (D_00483A48, D_00483A60, cBankMonitor_vtbl, D_00483A80); when called from a derived
+ * Restores the class's vtables (cBankSys_vtbl, D_00483A60, cBankMonitor_vtbl, D_00483A80); when called from a derived
  * class (@p flags 0) it fixes up stack copies of the virtual-base tables for the offsets. Frees mBank and mPatch and
  * clears gBankSys. Flags bit 1 also destroys the virtual bases (cBankManager__cBankManager, cBankManager::~cBankManager, then
  * cSoundSys__cSoundSys); bit 0 frees the object.
@@ -124,7 +124,7 @@ extern char cBankMonitor_vtbl[];
 // PORT: hand-expanded g++ 2.95 virtual-base dtor (vtable upcast-offset fixup on stack copies).
 extern "C" void cBankSys__cBankSys(cBankSys* self, int flags)
 {
-    self->mVtbl = (void**)D_00483A48;
+    self->mVtbl = (void**)cBankSys_vtbl;
     *(void**)(*(char**)(*(char**)self + 0x1D8) + 4) = (void*)&D_00483A60;
     *(void**)(*(char**)self + 0xAB0) = cBankMonitor_vtbl;
     *(void**)(*(char**)self + 0x1D4) = (void*)&D_00483A80;
@@ -10462,14 +10462,14 @@ extern "C" int func_002A1E20(void* self, unsigned int x)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A1E68);
 #ifdef SKIP_ASM
-extern int D_00536730[];
+extern int cGameModeMan_iRanking[];
 
 /**
  * Returns a rider's place in the race as a bit (1 first, 2 second, ...), for the place speech.
  *
  * In the multiplayer game path (newRace.cGamePath == 2): when func_002A4078 is nonzero, the rider's unk_0EC (its place) 0..4
  * gives 1, 2, 4, 8, 0x10 and anything else 0x200; otherwise 1 for place 0 and 2 for the rest. In the other paths rider
- * 0's rank D_00536730[0] gives 0: 1, 1: 2, 2: 4, 3: 8, 4: 0x10, 5: 0x200, 6: 0x40, 7: 0x80, 8: 0x100, 9: 0x200, else 0
+ * 0's rank cGameModeMan_iRanking[0] gives 0: 1, 1: 2, 2: 4, 3: 8, 4: 0x10, 5: 0x200, 6: 0x40, 7: 0x80, 8: 0x100, 9: 0x200, else 0
  * (the @p obj rider is not used there).
  *
  * @param obj  the rider (cRider)
@@ -10504,7 +10504,7 @@ extern "C" int func_002A1E68(void *self, cRider* obj)
         // Retail selects on a condition the compiler had folded to 1 (`li 1; movn` in case 5): a local flag that is
         // constant here, e.g. a feature toggle. Evaluating `mode != 2` instead gives a run-time xori (99.00).
         int notTwo = 1;
-        switch (D_00536730[0]) {
+        switch (cGameModeMan_iRanking[0]) {
         case 0:
             placeBit = 1;
             break;
@@ -11690,7 +11690,7 @@ extern "C" int func_0029F128(void* self);
 extern "C" int func_0029F198(void* self);
 // PORT: D_004A482C is called with 5 args here (the unit's later declaration has 3).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
-extern int D_00536730[];
+extern int cGameModeMan_iRanking[];
 
 struct sSndRiderList3860 {
     void* r[8];
@@ -11700,7 +11700,7 @@ struct sSndRiderList3860 {
  * Requests PA speech line 8391 announcing a result: the leading human rider's character and its place.
  *
  * Needs PA speech audible and no replay. In the multiplayer game path the second human is used when it ranks ahead
- * (D_00536730[1] < D_00536730[0]), else rider 0. When request 8391 (identity 11) is queued, the speech hook D_004A482C
+ * (cGameModeMan_iRanking[1] < cGameModeMan_iRanking[0]), else rider 0. When request 8391 (identity 11) is queued, the speech hook D_004A482C
  * gets its packed id, the language bit, that rider's character bit (func_002A1D48, from the cAI's rider list at +0x28)
  * and a place value: 8 outside the multiplayer path when the reward interface's +0x14 is 0, else 1, 2 or 4 for rank 0,
  * 1 or 2 and 0 for any other rank. func_002A19D8 calls it (event 7).
@@ -11716,7 +11716,7 @@ extern "C" void func_002A3860(cSSXAudio* self)
     cBE_getInterface_Fv(cBE_getBE(), 0);
     signed char* newRaceBytes = (signed char*)((char*)&cBENewRaceInterface_newRace);
     if (newRaceBytes[0x49] == 2) {
-        n = D_00536730[1] < D_00536730[0];
+        n = cGameModeMan_iRanking[1] < cGameModeMan_iRanking[0];
     }
     if (func_002B1458((char*)&self->SpeechSys, 0, 8391, 0, 11, 0, 0, 0.0f) == 0) return;
     int languageBit = func_0029F198(self);
@@ -11727,7 +11727,7 @@ extern "C" void func_002A3860(cSSXAudio* self)
     if (newRaceBytes[0x49] != 2 && *(int*)(iface + 0x14) == 0) {
         n = 8;
     } else {
-        n = D_00536730[n];
+        n = cGameModeMan_iRanking[n];
         if (n == 0) {
             n = 1;
         } else if (n == 1) {
@@ -12496,13 +12496,13 @@ extern "C" void func_002A4590(cSSXAudio* self, int flag);
 extern "C" void* cAudioInterface_getAI();
 extern "C" int func_002A4078(void* self);
 extern "C" void func_002A4660(cSSXAudio* self, int id, int a, int b, int c);
-extern int D_00536730[];
+extern int cGameModeMan_iRanking[];
 
 /**
  * Records rider 0's result of the heat for the DJ's event-result lines (func_002A4660).
  *
  * In heat 1 (cGameModeMan iHeatNum) it first resets the tracking (func_002A4590(self, 0)). Passes rider 0's rank
- * D_00536730[0], its frags (the metrix Totals.NumFrags, only when func_002A4078 holds, else 0), its uber tricks
+ * cGameModeMan_iRanking[0], its frags (the metrix Totals.NumFrags, only when func_002A4078 holds, else 0), its uber tricks
  * (Totals.NumUberTricks) and whether it finished (mDidNotFinish == 0). cSSXAudio_OnFinishEvent calls it.
  */
 extern "C" void func_002A45C0(cSSXAudio* self)
@@ -12510,7 +12510,7 @@ extern "C" void func_002A45C0(cSSXAudio* self)
     if (*(int*)SSXApp->GameModeMan == 1) {
         func_002A4590(self, 0);
     }
-    int id = D_00536730[0];
+    int id = cGameModeMan_iRanking[0];
     cRider* rider = ((cAI*)cAudioInterface_getAI())->Riders[0];
     int fragCount;
     if (func_002A4078(self) != 0) {
@@ -13220,41 +13220,41 @@ void func_002A4E88_c(sCrowd4E88* self)
         if (pCurrAmbientInfo->handle >= 0) {
             sCrowdVec* pos = &pCurrAmbientInfo->vec;
             pCurrAmbientInfo->vec = mean;
-            sCrowdVoice* voiceInst = (sCrowdVoice*)cBankMonitor_BANKMONITOR_GetHandle(&D_004A36F8->mpVBankManager->sub, pCurrAmbientInfo->handle, 1);
+            sCrowdVoice* voiceInst = (sCrowdVoice*)cBankMonitor_BANKMONITOR_GetHandle(&gpCrowdSys->mpVBankManager->sub, pCurrAmbientInfo->handle, 1);
             if (voiceInst == 0) {
-                crowdBegin((sSndSys69A0*)D_004A36F8, self->fD8, pCurrAmbientInfo->key, 1);
+                crowdBegin((sSndSys69A0*)gpCrowdSys, self->fD8, pCurrAmbientInfo->key, 1);
                 {
-                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                     bankMgr->sub.tgt[bankMgr->sub.cur] = pos;
                 }
                 {
-                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                     sSndPlayOptsView* ss = &bankMgr->sub;
                     ss->vals[bankMgr->sub.cur] = best;
                     ss->ch[bankMgr->sub.cur].vol = SND_MAX(0, SND_MIN(ss->vals[ss->cur], 0x7F));
                 }
                 {
-                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                     bankMgr->sub.p3C[bankMgr->sub.cur] = self->f17C;
                 }
                 {
-                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                     bankMgr->sub.p74[bankMgr->sub.cur] = 1;
                 }
-                OPTS_Callback(D_004A36F8->mpVBankManager, D_004A3700_cb[0]);
+                OPTS_Callback(gpCrowdSys->mpVBankManager, D_004A3700_cb[0]);
                 {
-                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                     bankMgr->sub.p60[bankMgr->sub.cur] = (int)self;
                 }
                 {
-                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                     bankMgr->sub.p7C[bankMgr->sub.cur] = 0;
                 }
                 {
-                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                     bankMgr->sub.p64[bankMgr->sub.cur] = self->mViewPort;
                 }
-                pCurrAmbientInfo->handle = cBankSys_SFX_End((cBankSys*)D_004A36F8);
+                pCurrAmbientInfo->handle = cBankSys_SFX_End((cBankSys*)gpCrowdSys);
             } else {
                 voiceInst->vol = best;
             }
@@ -13265,41 +13265,41 @@ void func_002A4E88_c(sCrowd4E88* self)
             if (pCurrAmbientInfo->cnt != 0 && pCurrAmbientInfo->handle >= 0) {
                 sCrowdVec* pos = &pCurrAmbientInfo->vec;
                 pCurrAmbientInfo->vec = chanPos[pCurrAmbientInfo->idx];
-                sCrowdVoice* voiceInst = (sCrowdVoice*)cBankMonitor_BANKMONITOR_GetHandle(&D_004A36F8->mpVBankManager->sub, pCurrAmbientInfo->handle, 1);
+                sCrowdVoice* voiceInst = (sCrowdVoice*)cBankMonitor_BANKMONITOR_GetHandle(&gpCrowdSys->mpVBankManager->sub, pCurrAmbientInfo->handle, 1);
                 if (voiceInst == 0) {
-                    crowdBegin((sSndSys69A0*)D_004A36F8, self->fD8, pCurrAmbientInfo->key, 1);
+                    crowdBegin((sSndSys69A0*)gpCrowdSys, self->fD8, pCurrAmbientInfo->key, 1);
                     {
-                        cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                        cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                         bankMgr->sub.tgt[bankMgr->sub.cur] = pos;
                     }
                     {
-                        cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                        cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                         sSndPlayOptsView* ss = &bankMgr->sub;
                         ss->vals[bankMgr->sub.cur] = chanDist[pCurrAmbientInfo->idx] + chanSum[pCurrAmbientInfo->idx];
                         ss->ch[bankMgr->sub.cur].vol = SND_MAX(0, SND_MIN(ss->vals[ss->cur], 0x7F));
                     }
                     {
-                        cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                        cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                         bankMgr->sub.p3C[bankMgr->sub.cur] = self->f17C;
                     }
                     {
-                        cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                        cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                         bankMgr->sub.p74[bankMgr->sub.cur] = 1;
                     }
                     {
-                        cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                        cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                         bankMgr->sub.p64[bankMgr->sub.cur] = self->mViewPort;
                     }
-                    OPTS_Callback(D_004A36F8->mpVBankManager, D_004A3700_cb[0]);
+                    OPTS_Callback(gpCrowdSys->mpVBankManager, D_004A3700_cb[0]);
                     {
-                        cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                        cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                         bankMgr->sub.p60[bankMgr->sub.cur] = (int)self;
                     }
                     {
-                        cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                        cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                         bankMgr->sub.p7C[bankMgr->sub.cur] = 0;
                     }
-                    pCurrAmbientInfo->handle = cBankSys_SFX_End((cBankSys*)D_004A36F8);
+                    pCurrAmbientInfo->handle = cBankSys_SFX_End((cBankSys*)gpCrowdSys);
                 } else {
                     voiceInst->vol = chanDist[pCurrAmbientInfo->idx] + chanSum[pCurrAmbientInfo->idx];
                 }
@@ -13309,7 +13309,7 @@ void func_002A4E88_c(sCrowd4E88* self)
     int outA = 0x1000;
     int outB = 0x1000;
     if (self->state != 0) {
-        cCrowdSys* sys = D_004A36F8;
+        cCrowdSys* sys = gpCrowdSys;
         sCrowdVt4E88* vt = (sCrowdVt4E88*)((void*)sys->mVtbl);
         int anticipateLevel = vt[2].fn((char*)sys + vt[2].delta, self->mViewPort, &outA, &outB);
         if (anticipateLevel == 1 || anticipateLevel == 2) {
@@ -13317,32 +13317,32 @@ void func_002A4E88_c(sCrowd4E88* self)
         }
         if (self->state == 1 && anticipateLevel != 3) {
             func_002A6848((cCrowdInstance*)self);
-            int cheerSample = func_002A4CA0((sSndRandList*)&((sSndSys69A0*)D_004A36F8)->ent[anticipateLevel].c);
+            int cheerSample = func_002A4CA0((sSndRandList*)&((sSndSys69A0*)gpCrowdSys)->ent[anticipateLevel].c);
             if (cheerSample != 0) {
-                func_002A8450_c((sSndSys69A0*)D_004A36F8, self->fD8, cheerSample);
+                func_002A8450_c((sSndSys69A0*)gpCrowdSys, self->fD8, cheerSample);
                 {
-                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                     bankMgr->sub.tgt[bankMgr->sub.cur] = &self->vec10;
                 }
                 {
-                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                     sSndPlayOptsView* ss = &bankMgr->sub;
                     ss->vals[bankMgr->sub.cur] = best * outB >> 12;
                     ss->ch[bankMgr->sub.cur].vol = SND_MAX(0, SND_MIN(ss->vals[ss->cur], 0x7F));
                 }
                 {
-                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                     bankMgr->sub.p3C[bankMgr->sub.cur] = self->f17C;
                 }
                 {
-                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                     bankMgr->sub.p74[bankMgr->sub.cur] = 1;
                 }
                 {
-                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    cBankManager* bankMgr = gpCrowdSys->mpVBankManager;
                     bankMgr->sub.p64[bankMgr->sub.cur] = self->mViewPort;
                 }
-                self->handle = func_002A86B8_c((sSndSys69A0*)D_004A36F8);
+                self->handle = func_002A86B8_c((sSndSys69A0*)gpCrowdSys);
                 if (self->handle >= 0) {
                     self->state = 2;
                 }
@@ -13350,7 +13350,7 @@ void func_002A4E88_c(sCrowd4E88* self)
         }
     }
     if (self->handle >= 0) {
-        sCrowdVoice* voiceInst = (sCrowdVoice*)cBankMonitor_BANKMONITOR_GetHandle(&D_004A36F8->mpVBankManager->sub, self->handle, 2);
+        sCrowdVoice* voiceInst = (sCrowdVoice*)cBankMonitor_BANKMONITOR_GetHandle(&gpCrowdSys->mpVBankManager->sub, self->handle, 2);
         if (voiceInst == 0) {
             func_002A6848((cCrowdInstance*)self);
             self->f18C = 0;
@@ -13545,7 +13545,7 @@ int func_002A5D08_5D08(sPool5D08* self, sSnd5D08Sub* objectOpts, int key)
             groupIndex++;
         } while (groupIndex < 3);
         found->grp->vec = *found->p;
-        cCrowdSys* sys = D_004A36F8;
+        cCrowdSys* sys = gpCrowdSys;
         sSnd5D08Mgr* bankMgr = (sSnd5D08Mgr*)sys->mpVBankManager;
         int crowdBank = self->fD8;
         sSnd5D08Sub* playOpts = &bankMgr->sub;
@@ -13572,7 +13572,7 @@ int func_002A5D08_5D08(sPool5D08* self, sSnd5D08Sub* objectOpts, int key)
         sys->mBank[((sSnd5D08Mgr*)sys->mpVBankManager)->sub.cur] = crowdBank;
         sys->mPatch[((sSnd5D08Mgr*)sys->mpVBankManager)->sub.cur] = key;
         {
-            cCrowdSys* crowdSys = D_004A36F8;
+            cCrowdSys* crowdSys = gpCrowdSys;
             ((sSnd5D08Mgr*)crowdSys->mpVBankManager)->sub.tgt[((sSnd5D08Mgr*)crowdSys->mpVBankManager)->sub.cur] = &found->grp->vec;
             sSnd5D08Mgr* curBankMgr = (sSnd5D08Mgr*)crowdSys->mpVBankManager;
             sSnd5D08Sub* ss = &curBankMgr->sub;
@@ -13580,32 +13580,32 @@ int func_002A5D08_5D08(sPool5D08* self, sSnd5D08Sub* objectOpts, int key)
             ss->ch[curBankMgr->sub.cur].vol = SND_5D08_MAX(0, SND_5D08_MIN(ss->vals[ss->cur], 0x7F));
         }
         {
-            sSnd5D08Mgr* curBankMgr = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
+            sSnd5D08Mgr* curBankMgr = (sSnd5D08Mgr*)gpCrowdSys->mpVBankManager;
             curBankMgr->sub.p3C[curBankMgr->sub.cur] = self->f17C;
         }
         {
-            sSnd5D08Mgr* curBankMgr = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
+            sSnd5D08Mgr* curBankMgr = (sSnd5D08Mgr*)gpCrowdSys->mpVBankManager;
             curBankMgr->sub.p74[curBankMgr->sub.cur] = 1;
         }
         {
-            sSnd5D08Mgr* curBankMgr = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
+            sSnd5D08Mgr* curBankMgr = (sSnd5D08Mgr*)gpCrowdSys->mpVBankManager;
             curBankMgr->sub.p64[curBankMgr->sub.cur] = self->f0;
         }
         {
-            sSnd5D08Mgr* curBankMgr = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
+            sSnd5D08Mgr* curBankMgr = (sSnd5D08Mgr*)gpCrowdSys->mpVBankManager;
             sSndKey8_5D08 k = D_004A3700_5D08[0];
             sSnd5D08Sub* callbackOpts = &curBankMgr->sub;
             *(sSndKey8_5D08*)((char*)callbackOpts + (curBankMgr->sub.cur << 3) + 0x40) = k;
         }
         {
-            sSnd5D08Mgr* curBankMgr = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
+            sSnd5D08Mgr* curBankMgr = (sSnd5D08Mgr*)gpCrowdSys->mpVBankManager;
             curBankMgr->sub.p60[curBankMgr->sub.cur] = (int)self;
         }
         {
-            sSnd5D08Mgr* curBankMgr = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
+            sSnd5D08Mgr* curBankMgr = (sSnd5D08Mgr*)gpCrowdSys->mpVBankManager;
             curBankMgr->sub.p7C[curBankMgr->sub.cur] = 0;
         }
-        found->grp->handle = cBankSys_SFX_End((cBankSys*)D_004A36F8);
+        found->grp->handle = cBankSys_SFX_End((cBankSys*)gpCrowdSys);
     }
     return idx;
 }
@@ -13657,7 +13657,7 @@ extern "C" void func_002A62F0(cCrowdInstance* vself, int idx, float fade)
     self->ent[idx].v = 0;
     if (--ambientInfo->refs == 0) {
         if (ambientInfo->id >= 0) {
-            cBankMonitor_BANKMONITOR_StopHandle((char*)D_004A36F8->mpVBankManager + 0x1D8, ambientInfo->id, 1, fade);
+            cBankMonitor_BANKMONITOR_StopHandle((char*)gpCrowdSys->mpVBankManager + 0x1D8, ambientInfo->id, 1, fade);
         }
         ambientInfo->id = -1;
         ambientInfo->f0 = -1;
@@ -13668,7 +13668,7 @@ extern "C" void func_002A62F0(cCrowdInstance* vself, int idx, float fade)
     if (self->vol > 0.25f) self->vol = 0.25f;
     if (self->id >= 0) {
         if (fade == 0.0f) {
-            cBankMonitor_BANKMONITOR_StopHandle((char*)D_004A36F8->mpVBankManager + 0x1D8, self->id, 2, fade);
+            cBankMonitor_BANKMONITOR_StopHandle((char*)gpCrowdSys->mpVBankManager + 0x1D8, self->id, 2, fade);
         }
         self->id = -1;
         if (self->state == 2) self->state = 1;
@@ -13757,24 +13757,24 @@ extern "C" void func_002A64A0(cCrowdInstance* vself, int idx)
 {
     func_002A6848(vself);
     if (vself->mNumCrowdObjects == 0) return;
-    tCrowdData* crowdData = &((&D_004A36F8->mCrowdData[0]))[idx];
+    tCrowdData* crowdData = &((&gpCrowdSys->mCrowdData[0]))[idx];
     vself->mAmbientCheerIntensity = idx;
     vself->unk_188 = crowdData->mAttack + crowdData->mDecay;
     int cheerSample = func_002A4CA0((sSndRandList*)crowdData);
     if (cheerSample == 0) return;
-    func_002A8450((char**)D_004A36F8, vself->unk_0D8, cheerSample);
-    sSnd64A0Mgr* posMgr = (sSnd64A0Mgr*)D_004A36F8->mpVBankManager;
+    func_002A8450((char**)gpCrowdSys, vself->unk_0D8, cheerSample);
+    sSnd64A0Mgr* posMgr = (sSnd64A0Mgr*)gpCrowdSys->mpVBankManager;
     posMgr->sub.tgt[posMgr->sub.cur] = (char*)&vself->unk_010;
-    sSnd64A0Mgr* volMgr = (sSnd64A0Mgr*)D_004A36F8->mpVBankManager;
+    sSnd64A0Mgr* volMgr = (sSnd64A0Mgr*)gpCrowdSys->mpVBankManager;
     volMgr->sub.setVal(volMgr->sub.cur, vself->unk_178);
     volMgr->sub.update(volMgr->sub.cur);
-    sSnd64A0Mgr* ctlMgr = (sSnd64A0Mgr*)D_004A36F8->mpVBankManager;
+    sSnd64A0Mgr* ctlMgr = (sSnd64A0Mgr*)gpCrowdSys->mpVBankManager;
     ctlMgr->sub.p3C[ctlMgr->sub.cur] = (int)vself->unk_17C;
-    sSnd64A0Mgr* extMgr = (sSnd64A0Mgr*)D_004A36F8->mpVBankManager;
+    sSnd64A0Mgr* extMgr = (sSnd64A0Mgr*)gpCrowdSys->mpVBankManager;
     extMgr->sub.p74[extMgr->sub.cur] = 1;
-    sSnd64A0Mgr* viewMgr = (sSnd64A0Mgr*)D_004A36F8->mpVBankManager;
+    sSnd64A0Mgr* viewMgr = (sSnd64A0Mgr*)gpCrowdSys->mpVBankManager;
     viewMgr->sub.p64[viewMgr->sub.cur] = *(int*)vself;
-    vself->unk_174 = func_002A86B8((char**)D_004A36F8);
+    vself->unk_174 = func_002A86B8((char**)gpCrowdSys);
     vself->unk_18C = idx + 1;
 }
 #endif
@@ -13835,24 +13835,24 @@ extern "C" void func_002A6648(cCrowdInstance* vself, int idx)
 {
     func_002A6848(vself);
     if (vself->mNumCrowdObjects == 0) return;
-    tCrowdData* crowdData = &((&D_004A36F8->mCrowdData[0]))[idx];
+    tCrowdData* crowdData = &((&gpCrowdSys->mCrowdData[0]))[idx];
     vself->mAmbientCheerIntensity = idx;
     vself->unk_188 = crowdData->mAttack + crowdData->mDecay;
     int cheerSample = func_002A4CA0((sSndRandList*)&crowdData->mFall);
     if (cheerSample == 0) return;
-    func_002A8450((char**)D_004A36F8, vself->unk_0D8, cheerSample);
-    sSnd6648Mgr* posMgr = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;
+    func_002A8450((char**)gpCrowdSys, vself->unk_0D8, cheerSample);
+    sSnd6648Mgr* posMgr = (sSnd6648Mgr*)gpCrowdSys->mpVBankManager;
     posMgr->sub.tgt[posMgr->sub.cur] = (char*)&vself->unk_010;
-    sSnd6648Mgr* volMgr = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;
+    sSnd6648Mgr* volMgr = (sSnd6648Mgr*)gpCrowdSys->mpVBankManager;
     volMgr->sub.setVal(volMgr->sub.cur, vself->unk_178);
     volMgr->sub.update(volMgr->sub.cur);
-    sSnd6648Mgr* ctlMgr = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;
+    sSnd6648Mgr* ctlMgr = (sSnd6648Mgr*)gpCrowdSys->mpVBankManager;
     ctlMgr->sub.p3C[ctlMgr->sub.cur] = (int)vself->unk_17C;
-    sSnd6648Mgr* extMgr = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;
+    sSnd6648Mgr* extMgr = (sSnd6648Mgr*)gpCrowdSys->mpVBankManager;
     extMgr->sub.p74[extMgr->sub.cur] = 1;
-    sSnd6648Mgr* viewMgr = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;
+    sSnd6648Mgr* viewMgr = (sSnd6648Mgr*)gpCrowdSys->mpVBankManager;
     viewMgr->sub.p64[viewMgr->sub.cur] = *(int*)vself;
-    vself->unk_174 = func_002A86B8((char**)D_004A36F8);
+    vself->unk_174 = func_002A86B8((char**)gpCrowdSys);
     vself->unk_18C = ~idx;
 }
 #endif
@@ -13906,7 +13906,7 @@ extern "C" void func_002A6848(cCrowdInstance* self)
     }
     self->unk_180 = 0;
     if (self->unk_174 >= 0) {
-        cBankMonitor_BANKMONITOR_StopHandle((char*)D_004A36F8->mpVBankManager + 0x1D8, self->unk_174, 2, 0.0f);
+        cBankMonitor_BANKMONITOR_StopHandle((char*)gpCrowdSys->mpVBankManager + 0x1D8, self->unk_174, 2, 0.0f);
         self->unk_174 = -1;
     }
 }
@@ -13938,7 +13938,7 @@ extern "C" void func_002A68B0(cCrowdInstance* self, char* obj, float dt) {
     float timeLeft = self->unk_188;
     if (!(timeLeft <= 0.0f)) {
         int idx = self->mAmbientCheerIntensity;
-        cCrowdSys* base = D_004A36F8;
+        cCrowdSys* base = gpCrowdSys;
         float rem = timeLeft - dt;
         self->unk_188 = rem;
         char* crowdData = (char*)base + (idx * 0x54 + 0x1C);
@@ -13992,7 +13992,7 @@ struct sSnd69Ent {
     void* operator new[](unsigned int, void* p) { return p; }
 };
 
-extern char D_004837F8[];
+extern char cCrowdSys_vtbl[];
 extern char cBankMonitor_vtbl[];
 extern const sSnd69Vt4 D_00483818_69 __asm__("D_00483818");
 extern const sSnd69Vt7 D_00483838_69 __asm__("D_00483838");
@@ -14002,9 +14002,9 @@ extern const sSnd69Vt7 D_00483838_69 __asm__("D_00483838");
  * Constructs the crowd sound system.
  *
  * When @p embedded is set (a complete object) it builds the virtual bases first: cSoundSys at +0x118 and cBankManager
- * at +0x120. Then constructs the cMidiSys base (cMidiSys_cMidiSys), installs the cCrowdSys vtables (D_004837F8 at
+ * at +0x120. Then constructs the cMidiSys base (cMidiSys_cMidiSys), installs the cCrowdSys vtables (cCrowdSys_vtbl at
  * mVtbl, D_00483818 / D_00483838 in the virtual bases, adjusted on the stack when not in charge), clears mNumInstances
- * and mpCrowdInstances, constructs the three tCrowdData sample lists (mCrowdData) and stores itself in D_004A36F8.
+ * and mpCrowdInstances, constructs the three tCrowdData sample lists (mCrowdData) and stores itself in gpCrowdSys.
  *
  * @param embedded  g++ in-charge flag: nonzero when the virtual bases are built here (the complete object)
  * @param count  maximum number of banks (On Tour MaxBanks of the base constructors)
@@ -14038,11 +14038,11 @@ extern "C" char* cCrowdSys_cCrowdSys(cCrowdSys* self, int embedded, int count, i
         int adj2 = ((char*)self) - bankMgrBase;
         bankMgrVtbl.e[1].delta = D_00483838_69.e[1].delta + adj2;
     }
-    self->mVtbl = (void**)D_004837F8;
+    self->mVtbl = (void**)cCrowdSys_vtbl;
     self->mNumInstances = 0;
     self->mpCrowdInstances = 0;
     new ((char*)&self->mCrowdData[0]) sSnd69Ent[3];
-    D_004A36F8 = (cCrowdSys*)((char**)self);
+    gpCrowdSys = (cCrowdSys*)((char**)self);
     return ((char*)self);
 }
 #endif
@@ -14070,7 +14070,7 @@ struct sSnd6BVt7 {
     sSnd6BVtEnt e[7];
 } __attribute__((aligned(8)));
 
-extern char D_004837F8[];
+extern char cCrowdSys_vtbl[];
 extern char cBankMonitor_vtbl[];
 extern const sSnd6BVt4 D_00483818_6B __asm__("D_00483818");
 extern const sSnd6BVt7 D_00483838_6B __asm__("D_00483838");
@@ -14078,7 +14078,7 @@ extern const sSnd6BVt7 D_00483838_6B __asm__("D_00483838");
 /**
  * Destroys the crowd sound system.
  *
- * Re-installs the cCrowdSys vtables, releases the crowd instances and sample banks (func_002A6F38), clears D_004A36F8,
+ * Re-installs the cCrowdSys vtables, releases the crowd instances and sample banks (func_002A6F38), clears gpCrowdSys,
  * destroys the three tCrowdData sample lists in reverse order (func_002A4BE0), runs the cMidiSys base destructor
  * cMidiSys__cMidiSys, destroys the virtual bases (cBankManager, cSoundSys) when bit 1 of @p flags is set and frees the
  * object when bit 0 is set.
@@ -14088,7 +14088,7 @@ extern const sSnd6BVt7 D_00483838_6B __asm__("D_00483838");
 // PORT: hand-expanded g++ 2.95 virtual-base dtor (vtable upcast-offset fixup on stack copies).
 extern "C" void cCrowdSys__cCrowdSys(cCrowdSys* self, int flags)
 {
-    self->mVtbl = (void**)D_004837F8;
+    self->mVtbl = (void**)cCrowdSys_vtbl;
     *(const void**)(*(char**)(*(char**)self + 0x1D8) + 4) = &D_00483818_6B;
     *(void**)(*(char**)self + 0xAB0) = cBankMonitor_vtbl;
     *(const void**)(*(char**)self + 0x1D4) = &D_00483838_6B;
@@ -14105,7 +14105,7 @@ extern "C" void cCrowdSys__cCrowdSys(cCrowdSys* self, int flags)
         bankMgrVtbl.e[1].delta = D_00483838_6B.e[1].delta + adj2;
     }
     func_002A6F38((sSsMgr6F38*)self);
-    D_004A36F8 = 0;
+    gpCrowdSys = 0;
     if ((char*)&self->mCrowdData[0] != 0) {
         char* crowdEntry = (char*)&self->mCrowdData[0] + 3 * 84;
         while ((char*)&self->mCrowdData[0] != crowdEntry) {
@@ -15236,7 +15236,7 @@ struct sSndCtVt7 {
     sSndCtVtEnt e[7];
 } __attribute__((aligned(8)));
 
-extern char D_00483A48[];
+extern char cBankSys_vtbl[];
 extern char cBankMonitor_vtbl[];
 extern const char str_MIDIBANKS[];
 extern const sSndCtVt4 D_004839F0_ct __asm__("D_004839F0");
@@ -15279,7 +15279,7 @@ extern "C" char* cMidiSys_cMidiSys(cMidiSys* self, int embedded, int count, int 
         int adj2 = ((char*)self) - base2;
         vtbl2.e[1].delta = D_00483A10_ct.e[1].delta + adj2;
     }
-    self->mVtbl = (void**)D_00483A48;
+    self->mVtbl = (void**)cBankSys_vtbl;
     SNDmidiinit();
     self->mMidiBanks = (tMidiBank*)(new (str_MIDIBANKS, 0, 0) char[0x20]) ;
     D_004A3744 = (cMidiSys*)((int)self);
@@ -15309,7 +15309,7 @@ struct sSndDtBVt7 {
     sSndDtBVtEnt e[7];
 } __attribute__((aligned(8)));
 
-extern char D_00483A48[];
+extern char cBankSys_vtbl[];
 extern const sSndDtBVt4 D_004839F0;
 extern const sSndDtBVt7 D_00483A10;
 extern char cBankMonitor_vtbl[];
@@ -15317,7 +15317,7 @@ extern char cBankMonitor_vtbl[];
 /**
  * Destroys the MIDI sound system.
  *
- * Re-installs the cMidiSys vtables (D_00483A48 at mVtbl, D_004839F0 / D_00483A10 in the virtual bases, adjusted on the
+ * Re-installs the cMidiSys vtables (cBankSys_vtbl at mVtbl, D_004839F0 / D_00483A10 in the virtual bases, adjusted on the
  * stack when not in charge), frees mMidiBanks, clears D_004A3744 (the instance the ctor stored), calls SNDmidirestore,
  * runs the cBankSys base destructor, destroys the virtual bases when bit 1 of @p flags is set and frees the object when
  * bit 0 is set. The matching constructor is cMidiSys_cMidiSys.
@@ -15327,7 +15327,7 @@ extern char cBankMonitor_vtbl[];
 // PORT: hand-expanded g++ 2.95 virtual-base dtor (vtable upcast-offset fixup on stack copies).
 extern "C" void cMidiSys__cMidiSys(cMidiSys* self, int flags)
 {
-    self->mVtbl = (void**)D_00483A48;
+    self->mVtbl = (void**)cBankSys_vtbl;
     *(void**)(*(char**)(*(char**)self + 0x1D8) + 4) = (void*)&D_004839F0;
     *(void**)(*(char**)self + 0xAB0) = cBankMonitor_vtbl;
     *(void**)(*(char**)self + 0x1D4) = (void*)&D_00483A10;

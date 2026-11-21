@@ -5,7 +5,7 @@
 // (speed, acceleration, trick, edging, spin, toughness, stability, the stat level) and the physics values derived from
 // them (getBrakingAttrib ... getTrickAttrib, shouldCelebrateTrick). The object holds no stats: like every BE interface
 // it is a cBEInterface (three word bools + vptr, 0x10 bytes), and its methods ignore `this` and work on the static
-// attribute table D_00535538 (probably On Tour's cBEStatInterface::currentStat; 7-byte rows per profile and character,
+// attribute table cBEStatInterface_currentStat (probably On Tour's cBEStatInterface::currentStat; 7-byte rows per profile and character,
 // which submit / discard copy to and from the profile library) and the profile library. One instance, created on demand
 // by cBEStatInterface_getThis (`cMemMan_alloc(0x10, "BECharInt", 0, 0)` - EA reused cBECharacterInterface's tag -
 // bIsActive = 0, vtable cBEStatInterface_vtbl, then a virtual call of slot 2, discard) into cBEStatInterface::instance

@@ -106,7 +106,7 @@ extern int cBESaveInterface_bDoReplay;
 extern int D_004A3484;
 extern void* cGameState_mpGame;
 extern char D_004A5988_gl __asm__("gBucketMan");
-extern char D_005047F8[];
+extern char cIrradianceDataBase_TheDataBase[];
 extern char str_Nash[];
 extern char str_DebugFont_b[];
 extern char str_data_fonts_debugfnt_sfn_b[];
@@ -257,7 +257,7 @@ extern "C" void cGame_load(cGame* self)
     self->CrowdMan3d = (cCrowdMan3d*)func_00343A68(operator new(2500, str_CrowdMan3d, 0x20000000, 0));
     self->MultiParticleMan = (cMultiParticleMan*)cMultiParticleMan_cMultiParticleMan(operator new(0x10, str_MultiParticleMan, 0x20000000, 0));
     self->InstanceMan = (cInstanceMan*)cInstanceMan_cInstanceMan(operator new(0x10, str_InstancesMan, 0x20000000, 0), 0x80, 0x40);
-    cIrradianceDataBase_Load(D_005047F8);
+    cIrradianceDataBase_Load(cIrradianceDataBase_TheDataBase);
     self->LoadIndicator = (cBXLoadIndicator*)cBXLoadIndicator_cBXLoadIndicator(operator new(0x10, str_LoadIndicator, 0x20000000, 0));
     self->mpTrackBigFile = (cBigFile*)cBigFile_cBigFile((cBigFile*)operator new(8, str_BigFile, 0, 0));
     cGame_loadTrack(self);
@@ -425,7 +425,7 @@ struct sBXStr_F6B0 {
 };
 
 extern char* cBXString_EmptyString;
-extern int D_004A11B8;
+extern int cBENewRaceInterface_bIsBamLocation;
 extern char str_data_worlds_c[];
 extern char str_big_b[];
 extern char str_SkyBox[];
@@ -490,7 +490,7 @@ struct sElemFF_F6B0 {
 /**
  * Loads the race's track: opens its big file, loads the world and streams in the start section.
  *
- * Opens "data/worlds/" + name + ".big", where the name is the location's +0x44 string when D_004A11B8 is set,
+ * Opens "data/worlds/" + name + ".big", where the name is the location's +0x44 string when cBENewRaceInterface_bIsBamLocation is set,
  * otherwise its +0x34 string. It creates the sky box, the section manager, the surface property cache and the
  * world sound. It then activates the location's start section and updates the section manager until that
  * section is in. It also passes the track's ".cam" file to cCameraTriggerMan_loadTriggersIfNotStreaming, and creates the fog particle
@@ -501,7 +501,7 @@ extern "C" void cGame_loadTrack(cGame* self)
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     sBXStr_F6B0 name;
     name.p = cBXString_EmptyString;
-    if (D_004A11B8 != 0) {
+    if (cBENewRaceInterface_bIsBamLocation != 0) {
         sBXStr_F6B0 worldPath;
         sBXStr_F6B0 locName;
         func_003186D0(&worldPath, str_data_worlds_c, (cBXString_cBXString2(&locName, cBENewRaceInterface_getLocation(iface) + 0x44), &locName));
@@ -614,10 +614,10 @@ extern "C" void cSSXAudio_InGamePurge(void* p);
 extern "C" void cSSXScriptEngine_Purge(void* p);
 extern "C" void cGarbageMan_Purge(void);
 
-extern int D_004A2A54;
+extern int cPauseState_StackIdx;
 extern char* cAppMan_TheAppMan;
 extern char gPaths[];
-extern char D_005047F8[];
+extern char cIrradianceDataBase_TheDataBase[];
 // The unit declares gBucketMan later as sGp2898 (8 bytes); bind a small-data alias here.
 extern char D_004A5988_gl __asm__("gBucketMan");
 
@@ -697,7 +697,7 @@ struct sObj20_FA98 {
  * AI, Replay, StreamPause, SectionMan, FXLoader, WorldLightMan, World, OcclusionMan, the track BigFile,
  * LoadIndicator (freed only), DebugFont and BXNash. Finally GrMan slots 113 and 50 (the box texture mBoxTextureID),
  * cGraphicsMan_PurgeTextures and cIrradianceDataBase_Purge, SSXApp->Game = 0, WorldSound deleted, the world triggers reset, the in-game
- * audio de-initialised and purged, the script engine purged, and D_004A2A54 and the word at cAppMan_TheAppMan + 0x34
+ * audio de-initialised and purged, the script engine purged, and cPauseState_StackIdx and the word at cAppMan_TheAppMan + 0x34
  * cleared.
  */
 extern "C" void cGame_purge(char* self)
@@ -772,7 +772,7 @@ extern "C" void cGame_purge(char* self)
         vtEntry->fn((char*)be + vtEntry->delta, *(void**)(self + 0x220));
     }
     cGraphicsMan_PurgeTextures(GrMan);
-    cIrradianceDataBase_Purge(D_005047F8);
+    cIrradianceDataBase_Purge(cIrradianceDataBase_TheDataBase);
     *(void**)&SSXApp->Game = 0;
     if (*(void**)(self + 0x4C) != 0) cWorldSound__cWorldSound(*(void**)(self + 0x4C), 3);
     cWorldTriggerManager_Reset(gWorldTriggerManager);
@@ -780,7 +780,7 @@ extern "C" void cGame_purge(char* self)
     cSSXAudio_InGamePurge(gSSXAudio);
     cSSXScriptEngine_Purge(ScriptEngine);
     cGarbageMan_Purge();
-    D_004A2A54 = 0;
+    cPauseState_StackIdx = 0;
     *(int*)(cAppMan_TheAppMan + 0x34) = 0;
 }
 #endif
@@ -1024,8 +1024,8 @@ extern "C" void cMultiParticleMan_unloadSection(void* self, int arg);
 extern "C" void cBucketMan_purgeBucket1(void* self, int index, int key);
 extern "C" void cFocusMan_purgesection(void* p, int arg);
 extern "C" void cWScriptMan_unloadSection(void* self, int i);
-extern void* D_004A2A00;
-extern void* D_004A3FF0;
+extern void* TheCrowdMan2d;
+extern void* TheCrowdMan3d;
 extern void* cMultiParticleMan_TheMultiParticleMan;
 
 /**
@@ -1040,8 +1040,8 @@ extern "C" void cGame_sectionUnloading(cGame* self, int id)
 {
     void* bm = &D_004A5988_bm;
     func_00358700(id);
-    func_00229408(D_004A2A00, id);
-    func_00343C08(D_004A3FF0, id);
+    func_00229408(TheCrowdMan2d, id);
+    func_00343C08(TheCrowdMan3d, id);
     cMultiParticleMan_unloadSection(cMultiParticleMan_TheMultiParticleMan, id);
     cBucketMan_mergeBucket(bm, 1);
     cBucketMan_purgeBucket1(bm, 1, id);
@@ -1117,7 +1117,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 void* cPreGameLoadScreen_cPreGameLoadScreen(void* self);
 void* cPreFELoadScreen_cPreFELoadScreen(void* self);
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
-extern void* D_004A33F4;
+extern void* VoipMan;
 extern char str_PreGameLoadScreen[];
 extern char str_PreFELoad[];
 
@@ -1125,7 +1125,7 @@ extern char str_PreFELoad[];
  * Leaves the in-game module and queues the next app module.
  *
  * Stops the auto replay, sets game state 6, shuts down the online game-comm object (cGameComm_gameExit) and the
- * DirtySock object in D_004A33F4 when they exist. Despite the parameter name, a nonzero @p toFrontEnd queues a
+ * DirtySock object in VoipMan when they exist. Despite the parameter name, a nonzero @p toFrontEnd queues a
  * cPreGameLoadScreen (used after choosing a new event in-game), and 0 queues the "PreFELoad" module, which
  * probably loads the front end.
  *
@@ -1138,8 +1138,8 @@ extern "C" void cGame_exit(cGame* self, int toFrontEnd)
     if (cGameComm_mGameComm != 0) {
         cGameComm_gameExit(cGameComm_mGameComm);
     }
-    if (D_004A33F4 != 0) {
-        func_00266DF8(D_004A33F4);
+    if (VoipMan != 0) {
+        func_00266DF8(VoipMan);
     }
     if (toFrontEnd != 0) {
         cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_PreGameLoadScreen, 0x100, 0)));
@@ -1155,9 +1155,9 @@ INCLUDE_ASM("main/gameload", func_00230558);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cReplay_startReplay(void* a, int b, int c, int d);
 void cMenuSys_activate(void* a, int b);
-extern int D_004A2A54;
+extern int cPauseState_StackIdx;
 extern int cPauseState_Flags;
-extern int D_005366E8[];
+extern int cPauseState_Stack[];
 extern int D_00442910[];
 
 struct sGameLoad_0558 {
@@ -1170,13 +1170,13 @@ struct sGameLoad_0558 {
 /**
  * Starts replay playback, the mirror of cGame_stopReplay.
  *
- * Pushes pause state 8 (D_005366E8[++D_004A2A54] = 8) and sets cPauseState_Flags to that state's flags (D_00442910,
- * entry 8 of the table D_004428F0), starts the replay (+0x28) with cReplay_startReplay(replay, 0, 0, 0) and calls
+ * Pushes pause state 8 (cPauseState_Stack[++cPauseState_StackIdx] = 8) and sets cPauseState_Flags to that state's flags (D_00442910,
+ * entry 8 of the table cPauseState_FlagsTable), starts the replay (+0x28) with cReplay_startReplay(replay, 0, 0, 0) and calls
  * cMenuSys_activate (On Tour cMenuSys::activate) with 0 on the menu system (+0xA4). The pause stack index is not checked.
  */
 extern "C" void func_00230558(sGameLoad_0558* self)
 {
-    D_005366E8[++D_004A2A54] = 8;
+    cPauseState_Stack[++cPauseState_StackIdx] = 8;
     cPauseState_Flags = D_00442910[0];
     cReplay_startReplay(self->field_0x28, 0, 0, 0);
     cMenuSys_activate(self->field_0xA4, 0);
@@ -1189,24 +1189,24 @@ INCLUDE_ASM("main/gameload", cGame_stopReplay);
 extern "C" void cReplay_stopReplay(void* a);
 void cMenuSys_activate(void* a, int b);
 extern "C" void cMenuSys_popMenu(void* a);
-extern int D_004A2A54;
+extern int cPauseState_StackIdx;
 extern int cPauseState_Flags;
-extern int D_005366E8[];
-extern int D_004428F0[];
+extern int cPauseState_Stack[];
+extern int cPauseState_FlagsTable[];
 
 /**
  * Ends replay playback and returns to the pause menu state that was active before it.
  *
  * Stops the replay (+0x28), calls cMenuSys_activate (On Tour cMenuSys::activate) with 1 and cMenuSys_popMenu
- * (cMenuSys::popMenu) on the menu system (+0xA4), then pops the pause stack (D_004A2A54 index into D_005366E8)
- * and restores cPauseState_Flags from D_004428F0. The stack index is not checked (On Tour asserts it is > 0).
+ * (cMenuSys::popMenu) on the menu system (+0xA4), then pops the pause stack (cPauseState_StackIdx index into cPauseState_Stack)
+ * and restores cPauseState_Flags from cPauseState_FlagsTable. The stack index is not checked (On Tour asserts it is > 0).
  */
 extern "C" void cGame_stopReplay(cGame* self)
 {
     cReplay_stopReplay(self->Replay);
     cMenuSys_activate(self->MenuSys, 1);
     cMenuSys_popMenu(self->MenuSys);
-    cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
+    cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
 }
 #endif
 
@@ -1346,8 +1346,8 @@ struct sObj48_2306B8 {
 
 static inline void pushState_2306B8(int state)
 {
-    D_005366E8[++D_004A2A54] = state;
-    cPauseState_Flags = D_004428F0[state];
+    cPauseState_Stack[++cPauseState_StackIdx] = state;
+    cPauseState_Flags = cPauseState_FlagsTable[state];
 }
 
 static inline int inRace_2306B8(int s)
@@ -2594,7 +2594,7 @@ extern "C" void* cFadeScreen_update(cFadeScreen* self)
 INCLUDE_ASM("main/gameload", cFadeScreen_drawFade);
 #ifdef SKIP_ASM
 extern "C" void c2DRender_drawRect4(void* self, float* p0, float* p1, float* col, float z);
-extern int D_004A28AC;
+extern int G2D;
 extern char t4mat_Identity[];
 
 struct sRS231D60 {
@@ -2673,7 +2673,7 @@ static inline float Clamp231D60(float v, float lo, float hi)
  *
  * Does nothing and returns 0 while the timer (+0x4) is 0 or less. Otherwise pushes a copy of the draw state, resets it
  * to sDrawState_s_defaultDrawState, sets the full-screen viewport and the identity matrix and the blend bits, draws a
- * quad from (-1, -1) to (1, 1) with colour {alpha, 0, 0, 0} through c2DRender_drawRect4 (D_004A28AC), and pops the draw
+ * quad from (-1, -1) to (1, 1) with colour {alpha, 0, 0, 0} through c2DRender_drawRect4 (G2D), and pops the draw
  * state. cGame_render, cRealFE_render, cDebugFE_render and cFELoadScreen_render call it.
  *
  * @return 1 once the fade is fully opaque (alpha >= 1), otherwise 0
@@ -2703,7 +2703,7 @@ extern "C" int cFadeScreen_drawFade(cFadeScreen* self)
     col[1] = 0.0f;
     col[2] = 0.0f;
     col[3] = 0.0f;
-    c2DRender_drawRect4((void*)D_004A28AC, minCorner, maxCorner, col, 0.0f);
+    c2DRender_drawRect4((void*)G2D, minCorner, maxCorner, col, 0.0f);
     *(int*)&GrMan->m_pCurrentDrawState -= 20;
     return alpha >= 1.0f;
     }

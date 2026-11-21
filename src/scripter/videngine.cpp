@@ -66,9 +66,9 @@ extern "C" int cMoviePlayer_asyncPlay(void*);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PauseSFX(void*);
 extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void*);
-extern int D_004A2A54;
+extern int cPauseState_StackIdx;
 extern int cPauseState_Flags;
-extern int D_005366E8[];
+extern int cPauseState_Stack[];
 extern int D_00442918[];
 
 struct sVidObj { char pad0[0x10]; int state; };
@@ -82,7 +82,7 @@ struct sVtEnt { short delta; short index; void* fn; };
  *
  * Returns 0 without a movie player (+0x0, On Tour mpPlayer) and 1 when already playing (+0x4, mIsPlaying). Otherwise
  * starts the player with cMoviePlayer_asyncPlay (On Tour cMoviePlayer::asyncPlay), marks it playing and pushes pause state 10:
- * D_005366E8[++D_004A2A54] = 10 and cPauseState_Flags = D_00442918 (the flags table's entry 10). On Tour asserts the
+ * cPauseState_Stack[++cPauseState_StackIdx] = 10 and cPauseState_Flags = D_00442918 (the flags table's entry 10). On Tour asserts the
  * pause stack has room; retail does not. It then records in +0x14 whether the state (+0x10) of the game's +0x64 object
  * is neither 0 nor 2, calls cCutSceneTransitionMan_ForceToRegularMode on that object, saves GrMan's virtual slot 42 result in +0x10, calls GrMan's
  * slot 40 with 0, and pauses the sound effects (cSSXAudio_PauseSFX on cAudioInterface_bxAudio()).
@@ -95,11 +95,11 @@ extern "C" int cVidEngine_PlayVideo(cVidEngine* self)
     if (player == 0) return 0;
     if (self->mIsPlaying != 0) return 1;
     cMoviePlayer_asyncPlay(player);
-    int n = D_004A2A54 + 1;
+    int n = cPauseState_StackIdx + 1;
     self->mIsPlaying = 1;
-    D_005366E8[n] = 10;
+    cPauseState_Stack[n] = 10;
     cPauseState_Flags = D_00442918[0];
-    D_004A2A54 = n;
+    cPauseState_StackIdx = n;
     sVidObj* cutSceneMan = ((sVidOwner*)SSXApp->Game)->obj;
     self->mRestoreCutSceneMode = 0;
     int cutSceneState = cutSceneMan->state;

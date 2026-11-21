@@ -312,10 +312,10 @@ extern "C" void cWScriptMan_restartLocalMission(void* self);
 extern "C" int cWScriptMan_isLocalMissionActive(void* self);
 extern void* cWScriptMan_TheWScriptMan;
 extern int cOVStateManager_mStatus;
-extern int D_004A2A54;
+extern int cPauseState_StackIdx;
 extern int cPauseState_Flags;
-extern int D_005366E8[];
-extern int D_004428F0[];
+extern int cPauseState_Stack[];
+extern int cPauseState_FlagsTable[];
 
 struct sMgr_75A0 {
     char pad[0x2A0];
@@ -330,7 +330,7 @@ struct sMgr_75A0 {
  * already runs (cWScriptMan_isLocalMissionActive), else stores the offer's mission id (+0x9C) in cWScriptMan_TheWScriptMan +0x2A0 and queues
  * operation 1 (start, cWScriptMan_startLocalMission); it also sets the audio's mBigChallengeStarting (cSSXAudio_SetBigChallengeStarting). No
  * falls through to Triangle: store the id, queue operation 3 (decline, cWScriptMan_cancelLocalMission).
- * Both set the pending overlay action cOVStateManager_mStatus to 3 (close) and pop the pause-mode stack D_005366E8,
+ * Both set the pending overlay action cOVStateManager_mStatus to 3 (close) and pop the pause-mode stack cPauseState_Stack,
  * restoring the pause mask cPauseState_Flags.
  *
  * @param item  the selected item; ignored when null
@@ -351,7 +351,7 @@ extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(cOVState_BIGCHALLENGE_
                 cWScriptMan_startLocalMission(cWScriptMan_TheWScriptMan);
             }
             cOVStateManager_mStatus = 3;
-            cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
+            cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
             cSSXAudio_SetBigChallengeStarting(cAudioInterface_bxAudio());
             break;
         }
@@ -359,7 +359,7 @@ extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(cOVState_BIGCHALLENGE_
         ((sMgr_75A0*)cWScriptMan_TheWScriptMan)->f2A0 = self->mMissionId;
         cWScriptMan_cancelLocalMission(cWScriptMan_TheWScriptMan);
         cOVStateManager_mStatus = 3;
-        cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
+        cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
         break;
     }
 }
@@ -482,7 +482,7 @@ extern char str_TransitionOut_b[];
  *
  * Ignored for a null @p item. Event 5 (select) on "yes_b" (misc data 0) puts the mission id (+0x9C) into
  * cWScriptMan_TheWScriptMan + 0x2A0, restarts it (cWScriptMan_restartLocalMission), pops this state from mpEngine's
- * state stack (cUIStateStack_pop), pops the pause-mode stack (D_005366E8 / D_004A2A54) into cPauseState_Flags and calls
+ * state stack (cUIStateStack_pop), pops the pause-mode stack (cPauseState_Stack / cPauseState_StackIdx) into cPauseState_Flags and calls
  * cSSXAudio_SetBigChallengeStarting on the audio object. On "info" (misc data 2) it opens overlay 29 (cOVStateManager_triggerOverlay) and
  * stays. Event 6 (back) first plays mpScreen's "TransitionOut_b" frame when it has one. Event 6, and event 5 on any
  * other widget, then cancel the challenge (cWScriptMan_cancelLocalMission), pop the state and restore cPauseState_Flags
@@ -503,7 +503,7 @@ extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetEvent(cOVState_BIGCHALLENGE_F
             ((sMgr_75A0*)cWScriptMan_TheWScriptMan)->f2A0 = self->mMissionId;
             cWScriptMan_restartLocalMission(cWScriptMan_TheWScriptMan);
             cUIStateStack_pop_r((char*)self->mpEngine + 0x18, 1);
-            cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
+            cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
             cSSXAudio_SetBigChallengeStarting(cAudioInterface_bxAudio());
             return;
         }
@@ -525,7 +525,7 @@ extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetEvent(cOVState_BIGCHALLENGE_F
     }
     cWScriptMan_cancelLocalMission(cWScriptMan_TheWScriptMan);
     cUIStateStack_pop_r((char*)self->mpEngine + 0x18, 1);
-    cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
+    cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
 }
 #endif
 

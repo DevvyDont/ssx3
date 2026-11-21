@@ -858,14 +858,14 @@ extern int FILESYS_initadr_CBD8(int, int, int, int) __asm__("FILESYS_initadr");
 extern int FILESYS_overhead_CBD8(int, int, int) __asm__("FILESYS_overhead");
 extern int (*D_00450C10_CBD8[])(char *, int, int) __asm__("gFileSysOpts");
 extern char D_00495D28_CBD8[] __asm__("D_00495D28");
-extern int D_00519AB0_CBD8[] __asm__("D_00519AB0");
-extern int D_00519AE8_CBD8[] __asm__("D_00519AE8");
+extern int D_00519AB0_CBD8[] __asm__("gFileDevice");
+extern int D_00519AE8_CBD8[] __asm__("pFileDeviceMem");
 
 /**
  * Sets up the EA file system once: allocates its work memory and builds the command manager.
  *
- * Only acts while the command manager (D_00519AB0) is unset. It allocates FILESYS_overhead()'s size through the
- * file-system allocator hook (tag "File Sys"), keeps the block in D_00519AE8 and hands it to FILESYS_initadr().
+ * Only acts while the command manager (gFileDevice) is unset. It allocates FILESYS_overhead()'s size through the
+ * file-system allocator hook (tag "File Sys"), keeps the block in pFileDeviceMem and hands it to FILESYS_initadr().
  * Zero arguments take FILESYS_initadr's defaults: 16 file handles of 0x110 bytes, 1000 disc-directory entries
  * and 32 command slots of 0x30 bytes.
  *
@@ -890,7 +890,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_initadr);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern int D_00519AB0_CC88[] __asm__("D_00519AB0");
+extern int D_00519AB0_CC88[] __asm__("gFileDevice");
 extern int D_00450C60_CC88 __asm__("D_00450C60");
 extern void MUTEX_create_CC88(void *) __asm__("MUTEX_create");
 extern int FILESYS_overhead_CC88(int, int, int) __asm__("FILESYS_overhead");
@@ -974,11 +974,11 @@ extern void (*D_00450C10_CDE0[])(int) __asm__("gFileSysOpts");
 extern void (*D_00450C18_CDE0[])(int) __asm__("D_00450C18");
 extern char D_00519AC4_CDE0[] __asm__("D_00519AC4");
 extern int *D_00519AE4_CDE0[] __asm__("D_00519AE4");
-extern int D_00519AE8_CDE0[] __asm__("D_00519AE8");
+extern int D_00519AE8_CDE0[] __asm__("pFileDeviceMem");
 
 /**
  * Shuts the file system down: calls func_003E44B0, frees and closes every added archive (FILESYS_closesync on its
- * file), releases the mutex (MUTEX_destroy), clears the command manager's state and frees its memory block (D_00519AE8)
+ * file), releases the mutex (MUTEX_destroy), clears the command manager's state and frees its memory block (pFileDeviceMem)
  * through the free callback.
  */
 void FILESYS_restore(void) {
@@ -1112,7 +1112,7 @@ typedef struct Sys_CFC0 {
     int f2C;
     Ent_CFC0 *head;
 } Sys_CFC0;
-extern Sys_CFC0 D_00519AB0_CFC0 __asm__("D_00519AB0");
+extern Sys_CFC0 D_00519AB0_CFC0 __asm__("gFileDevice");
 extern char D_00519AC4_CFC0[] __asm__("D_00519AC4");
 extern void MUTEX_lock_CFC0(void *) __asm__("MUTEX_lock");
 extern void MUTEX_unlock_CFC0(void *) __asm__("MUTEX_unlock");
@@ -1195,10 +1195,10 @@ void FILESYS_cancelop(struct H_D148 ophandle) {
 
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_00519AB0: the file system's command manager (FILESYS_initadr sets it up). Layout from every use in this unit;
+/* gFileDevice: the file system's command manager (FILESYS_initadr sets it up). Layout from every use in this unit;
    field names are their offsets. Several fields are also reached through their own splat symbols (declared
    below), which the functions that address them directly must keep using. */
-struct sFsHd {                      /* 0x110: an open file (D_00519AB0.f2C[], reservehandle hands one out) */
+struct sFsHd {                      /* 0x110: an open file (gFileDevice.f2C[], reservehandle hands one out) */
     int f00;                        /* handle, or the archive's sFsNode */
     int f04;                        /* size */
     int f08;                        /* offset in the archive */
@@ -1208,9 +1208,9 @@ struct sFsHd {                      /* 0x110: an open file (D_00519AB0.f2C[], re
 struct sFsCmdId {
     unsigned int id : 20;
     unsigned int type : 4;
-    unsigned int idx : 8;           /* index in D_00519AB0.f28 */
+    unsigned int idx : 8;           /* index in gFileDevice.f28 */
 };
-struct sFsCmd {                     /* 0x30: a command (D_00519AB0.f28[], reserveop hands one out) */
+struct sFsCmd {                     /* 0x30: a command (gFileDevice.f28[], reserveop hands one out) */
     union {
         unsigned int w;
         struct sFsCmdId b;
@@ -1227,7 +1227,7 @@ struct sFsCmd {                     /* 0x30: a command (D_00519AB0.f28[], reserv
     void (*f28)(int, int, int);     /* completion callback */
     struct sFsCmd *f2C;             /* next in the queue */
 };
-struct sFsNode {                    /* 0x18: an open archive (D_00519AB0.f34 list) */
+struct sFsNode {                    /* 0x18: an open archive (gFileDevice.f34 list) */
     int f00;                        /* data */
     int f04;                        /* size */
     int f08;
@@ -1247,21 +1247,21 @@ struct sAB0 {
     struct sFsHd *f2C;              /* open files */
     struct sFsCmd *f30;             /* queue */
     struct sFsNode *f34;            /* archives (also D_00519AE4) */
-    int f38;                        /* (also D_00519AE8) */
+    int f38;                        /* (also pFileDeviceMem) */
 };
-extern struct sAB0 D_00519AB0;
-extern int D_00519AB8;                          /* D_00519AB0.f08 */
-struct sAB0Lock {                   /* D_00519AB0 from the mutex on (D_00519AC4) */
+extern struct sAB0 gFileDevice;
+extern int D_00519AB8;                          /* gFileDevice.f08 */
+struct sAB0Lock {                   /* gFileDevice from the mutex on (D_00519AC4) */
     int f00[4];                     /* the mutex */
     struct sFsCmd *f10;
     struct sFsCmd *f14;
     struct sFsHd *f18;
-    struct sFsCmd *f1C;             /* the queue (D_00519AB0.f30) */
+    struct sFsCmd *f1C;             /* the queue (gFileDevice.f30) */
     struct sFsNode *f20;
     int f24;
 };
 extern struct sAB0Lock D_00519AC4;
-extern struct sFsNode *D_00519AE4;              /* D_00519AB0.f34 */
+extern struct sFsNode *D_00519AE4;              /* gFileDevice.f34 */
 #endif
 
 //100%
@@ -1273,7 +1273,7 @@ extern void THREAD_yield(int);
 extern int SYNCTASK_run(int);
 
 static inline int hValid_D1D8(int h) {
-    return h != 0 && ((h & 0xFFFFF) == (D_00519AB0.f28[((unsigned char *)&h)[3]].f00.w & 0xFFFFF));
+    return h != 0 && ((h & 0xFFFFF) == (gFileDevice.f28[((unsigned char *)&h)[3]].f00.w & 0xFFFFF));
 }
 
 /**
@@ -1286,7 +1286,7 @@ static inline int hValid_D1D8(int h) {
  * @return the operation's result, or -3 for an invalid handle
  */
 int FILESYS_waitop(int ophandle) {
-    struct sFsCmd *fop = &D_00519AB0.f28[((unsigned char *)&ophandle)[3]];
+    struct sFsCmd *fop = &gFileDevice.f28[((unsigned char *)&ophandle)[3]];
     if (!hValid_D1D8(ophandle)) {
         return -3;
     }
@@ -1678,11 +1678,11 @@ struct sC10 {
 extern struct sC10 gFileSysOpts;
 extern void *(*D_00450C14)(char *, int, int);   /* gFileSysOpts.f04 */
 extern int (*D_00450C18)(void *);               /* gFileSysOpts.f08 */
-/* D_00519AB0: the file system's command manager (FILESYS_initadr sets it up). Layout from every use in this unit;
+/* gFileDevice: the file system's command manager (FILESYS_initadr sets it up). Layout from every use in this unit;
    field names are their offsets. Several fields are also reached through their own splat symbols (declared
    below), which the functions that address them directly must keep using. */
-extern struct sAB0 D_00519AB0;
-extern int D_00519AB8;                          /* D_00519AB0.f08 */
+extern struct sAB0 gFileDevice;
+extern int D_00519AB8;                          /* gFileDevice.f08 */
 extern struct sAB0Lock D_00519AC4;
 extern int FILESYS_completeop_D8E8(int) __asm__("FILESYS_completeop");
 extern int BIG_typeofheader_D8E8(int) __asm__("BIG_typeofheader");
@@ -1693,7 +1693,7 @@ extern char iFILE_addbigreadcallback_D8E8[] __asm__("iFILE_addbigreadcallback");
 
 /**
  * Read callback of adding an archive: completes the read and checks the BIG header; reads the whole header when it is
- * larger than the buffer, else links the archive (D_00519AB0 +0x34) and runs the add operation.
+ * larger than the buffer, else links the archive (gFileDevice +0x34) and runs the add operation.
  *
  * A buffer that does not hold a BIG header (BIG_typeofheader 0) is freed. A larger header gets a new buffer of
  * BIG_sizeofheader bytes and another FILESYS_read with this callback.
@@ -1706,7 +1706,7 @@ void iFILE_addbigreadcallback(int opHandle, int opStatus, struct sFsNode *bigNod
     int n, k;
     struct sFsHd *fileHd;
     struct sC10 *fs;
-    struct sFsCmd *fileCmd = &D_00519AB0.f28[((unsigned char *)&opHandle)[3]];
+    struct sFsCmd *fileCmd = &gFileDevice.f28[((unsigned char *)&opHandle)[3]];
     fileHd = fileCmd->f24;
     k = fileCmd->f10;
     bigNode->f0C = fileHd;
@@ -1724,8 +1724,8 @@ void iFILE_addbigreadcallback(int opHandle, int opStatus, struct sFsNode *bigNod
         opHandle = FILESYS_read(bigNode->f0C, 0, bigNode->f00, n, k, bigNode);
         FILESYS_callbackop(opHandle, iFILE_addbigreadcallback_D8E8);
     } else {
-        bigNode->f14 = D_00519AB0.f34;
-        D_00519AB0.f34 = bigNode;
+        bigNode->f14 = gFileDevice.f34;
+        gFileDevice.f34 = bigNode;
         iFILESYS_ExecCommand_D8E8(bigNode->f10);
     }
 }
@@ -1851,7 +1851,7 @@ extern R_DC30 *reserveop_DC30(void) __asm__("reserveop");
 extern int FILESYS_close_DC30(char *, int, R_DC30 *) __asm__("FILESYS_close");
 extern void FILESYS_callbackop_DC30(int, void *) __asm__("FILESYS_callbackop");
 extern void iFILE_delbigclosecallback_DC30(int, int, int) __asm__("iFILE_delbigclosecallback");
-extern G_DC30 D_00519AB0_DC30 __asm__("D_00519AB0");
+extern G_DC30 D_00519AB0_DC30 __asm__("gFileDevice");
 extern int (*D_00450C10_DC30[])(void *) __asm__("gFileSysOpts");
 
 /**
@@ -1914,13 +1914,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_atomic);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void iFILESYS_ExecCommand(int);
-extern int D_00519AB0_9AB0[] __asm__("D_00519AB0");
+extern int D_00519AB0_9AB0[] __asm__("gFileDevice");
 
 int FILESYS_atomic_DDF0(int (*arg0)(int, int), int arg1, int arg2, int arg3) __asm__("FILESYS_atomic");
 /**
  * Runs a file-system callback with the command queue's priority limit set to a given priority.
  *
- * Saves the limit (D_00519AB0 word 2; only queued commands at or below it may start), sets it to @p priority, calls
+ * Saves the limit (gFileDevice word 2; only queued commands at or below it may start), sets it to @p priority, calls
  * arg0(arg2, arg3), restores the old limit and then restarts the queue with iFILESYS_ExecCommand(0). The
  * FILE_load family uses it to load synchronously at sync_priority.
  *
@@ -1950,7 +1950,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_setminpriority);
 extern int D_00519AB8_DE50[] __asm__("D_00519AB8");
 void iFILESYS_ExecCommand_DE50(int) __asm__("iFILESYS_ExecCommand");
 /**
- * Sets the file system's run limit (D_00519AB0 +0x8: queued operations run only while their priority is at most this)
+ * Sets the file system's run limit (gFileDevice +0x8: queued operations run only while their priority is at most this)
  * and restarts the queue (iFILESYS_ExecCommand(0)).
  *
  * @param priorityLimit  the priority limit
@@ -2029,11 +2029,11 @@ INCLUDE_ASM("ealib/seg_2DCAE8", iFILESYS_ExecCommand);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-/* D_00519AB0: the file system's command manager (FILESYS_initadr sets it up). Layout from every use in this unit;
+/* gFileDevice: the file system's command manager (FILESYS_initadr sets it up). Layout from every use in this unit;
    field names are their offsets. Several fields are also reached through their own splat symbols (declared
    below), which the functions that address them directly must keep using. */
-extern struct sAB0 D_00519AB0;
-extern int D_00519AB8;                          /* D_00519AB0.f08 */
+extern struct sAB0 gFileDevice;
+extern int D_00519AB8;                          /* gFileDevice.f08 */
 extern struct sAB0Lock D_00519AC4;
 extern void MUTEX_lock_FX(void *) __asm__("MUTEX_lock");
 extern void MUTEX_unlock_FX(void *) __asm__("MUTEX_unlock");
@@ -2082,23 +2082,23 @@ void iFILESYS_ExecCommand_impl(struct sFsCmd *fileOp) {
         if (prev != 0) {
             prev->f2C = fileOp;
         } else {
-            D_00519AB0.f30 = fileOp;
+            gFileDevice.f30 = fileOp;
         }
-        D_00519AB0.f0C++;
+        gFileDevice.f0C++;
     }
-    if (D_00519AB0.f24 != 0 || D_00519AB0.f10 != 0) {
-        MUTEX_unlock_FX(D_00519AB0.f14);
+    if (gFileDevice.f24 != 0 || gFileDevice.f10 != 0) {
+        MUTEX_unlock_FX(gFileDevice.f14);
         return;
     }
-    fileOp = D_00519AB0.f30;
-    if (fileOp != 0 && fileOp->f10 <= D_00519AB0.f08) {
-        D_00519AB0.f30 = fileOp->f2C;
-        D_00519AB0.f0C--;
+    fileOp = gFileDevice.f30;
+    if (fileOp != 0 && fileOp->f10 <= gFileDevice.f08) {
+        gFileDevice.f30 = fileOp->f2C;
+        gFileDevice.f0C--;
     } else {
         fileOp = 0;
     }
-    D_00519AB0.f24 = fileOp;
-    MUTEX_unlock_FX(D_00519AB0.f14);
+    gFileDevice.f24 = fileOp;
+    MUTEX_unlock_FX(gFileDevice.f14);
     if (fileOp == 0) return;
     if (fileOp->f04 != 0) {
         iFILESYS_CommandCompleteCallback_FX(0);
@@ -2139,7 +2139,7 @@ void iFILESYS_ExecCommand_impl(struct sFsCmd *fileOp) {
             }
         }
         if (!found && (mode & 6)) {
-            for (n = D_00519AB0.f34; n != 0 && !found; n = n->f14) {
+            for (n = gFileDevice.f34; n != 0 && !found; n = n->f14) {
                 if ((mode & 4) && func_004165A8_FX(n->f0C->f10, path)) continue;
                 if (BIG_locateentryz_FX(n->f00, file, 0, &x, &off)) {
                     found = 1;
@@ -2203,7 +2203,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", iFILESYS_CommandCompleteCallback);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Cmd_IFS { int f0; int abort; volatile int status; char pad[8]; int f14; char pad2[0x10]; void (*cb)(int, int, int); };
 struct G_IFS { char pad[0x10]; volatile int busy; char pad2[0x10]; struct Cmd_IFS *cur; };
-extern struct G_IFS D_00519AB0_IFS __asm__("D_00519AB0");
+extern struct G_IFS D_00519AB0_IFS __asm__("gFileDevice");
 extern void iFILESYS_ExecCommand_IFS(int) __asm__("iFILESYS_ExecCommand");
 
 void iFILESYS_CommandCompleteCallback_impl(int ok) __asm__("iFILESYS_CommandCompleteCallback");
@@ -2333,7 +2333,7 @@ extern void MUTEX_unlock_E670(void *) __asm__("MUTEX_unlock");
 
 struct sFsCmd *reserveop_impl(void) __asm__("reserveop");
 /**
- * Takes a free file operation (D_00519AB0 +0x28, 0x30 bytes each) under the mutex: marks it in use and stamps its index
+ * Takes a free file operation (gFileDevice +0x28, 0x30 bytes each) under the mutex: marks it in use and stamps its index
  * and a new 20-bit id (D_00450C0C, wrapping to 1). Spins forever when none is free.
  *
  * @return the operation
@@ -2341,13 +2341,13 @@ struct sFsCmd *reserveop_impl(void) __asm__("reserveop");
 struct sFsCmd *reserveop_impl(void) {
     int i = 0;
     int nextId;
-    MUTEX_lock(D_00519AB0.f14);
-    for (; i < D_00519AB0.f00; i++) {
-        if (D_00519AB0.f28[i].f00.b.type == 0) {
-            D_00519AB0.f28[i].f00.b.type = 1;
-            D_00519AB0.f28[i].f00.b.idx = i;
+    MUTEX_lock(gFileDevice.f14);
+    for (; i < gFileDevice.f00; i++) {
+        if (gFileDevice.f28[i].f00.b.type == 0) {
+            gFileDevice.f28[i].f00.b.type = 1;
+            gFileDevice.f28[i].f00.b.idx = i;
             nextId = D_00450C0C_E670;
-            D_00519AB0.f28[i].f00.b.id = nextId;
+            gFileDevice.f28[i].f00.b.id = nextId;
             D_00450C0C_E670 = nextId + 1;
             if (nextId + 1 > 0xFFFFF) {
                 D_00450C0C_E670 = 1;
@@ -2355,12 +2355,12 @@ struct sFsCmd *reserveop_impl(void) {
             break;
         }
     }
-    MUTEX_unlock_E670(D_00519AB0.f14);
-    if (i == D_00519AB0.f00) {
+    MUTEX_unlock_E670(gFileDevice.f14);
+    if (i == gFileDevice.f00) {
         while (1) {
         }
     }
-    return &D_00519AB0.f28[i];
+    return &gFileDevice.f28[i];
 }
 #endif
 
@@ -2393,11 +2393,11 @@ extern void MUTEX_unlock_E800(void *) __asm__("MUTEX_unlock");
 extern char D_00519AC4_E800[] __asm__("D_00519AC4");
 struct Slot_E800 { int used; char pad[0x10C]; };
 struct G_E800 { int f0; int count; char pad[0xC]; char mutex[0x18]; struct Slot_E800 *slots; };
-extern struct G_E800 D_00519AB0_E800 __asm__("D_00519AB0");
+extern struct G_E800 D_00519AB0_E800 __asm__("gFileDevice");
 
 struct Slot_E800 *reservehandle_impl(void) __asm__("reservehandle");
 /**
- * Takes a free file handle slot (D_00519AB0 +0x2C, 0x110 bytes each) under the mutex. Spins forever when none is free.
+ * Takes a free file handle slot (gFileDevice +0x2C, 0x110 bytes each) under the mutex. Spins forever when none is free.
  *
  * @return the handle slot
  */
@@ -7895,7 +7895,7 @@ extern void tmrint_4AF0(void) __asm__("tmrint");
 extern void TIMER_restore_4AF0(void) __asm__("TIMER_restore");
 
 extern int D_00450DA0;
-extern int D_00450DC8;
+extern int TIMERhz;
 /* tick counter, incremented by the timer interrupt handler (tmrint) */
 extern volatile int D_00450DCC;
 extern int D_00450DDC;
@@ -7910,9 +7910,9 @@ extern unsigned short D_00450DE0;
 /**
  * Starts the library tick timer at a requested rate and returns the rate it actually runs at.
  *
- * When the interrupt handler is already installed (D_00450DDC) it only returns D_00450DC8. A @p hz of 0 means 100. It
+ * When the interrupt handler is already installed (D_00450DDC) it only returns TIMERhz. A @p hz of 0 means 100. It
  * picks EE timer 1's clock for the rate (bus clock / 256 below 196 Hz, / 16 below 3150 Hz, / 1 above: 0x8CA00, 0x8CA000
- * or 0x8CA0000 counts a second), stores the compare period in D_00450DE0 and the resulting rate in D_00450DC8, programs
+ * or 0x8CA0000 counts a second), stores the compare period in D_00450DE0 and the resulting rate in TIMERhz, programs
  * T1 (count 0, the compare value, the clock mode | 0x180: compare interrupt and count enable), installs tmrint
  * as the INTC 10 (timer 1) handler (func_00423A80) and enables it (EnableIntc). While the H-blank rate D_00450DA0 is
  * still 0 it calibrates the video mode: it counts H-blanks on timer 0 (mode 0x83) over one second of ticks and passes 1
@@ -7923,7 +7923,7 @@ extern unsigned short D_00450DE0;
  * (0x10000000), so timer 0's mode stays 0x83.
  *
  * @param hz  the wanted tick rate in Hz (0 means 100)
- * @return the tick rate in effect (D_00450DC8)
+ * @return the tick rate in effect (TIMERhz)
  */
 int TIMER_init(int hz) {
     int mode;
@@ -7933,7 +7933,7 @@ int TIMER_init(int hz) {
     int hblankCount;
 
     if (D_00450DDC != 0) {
-        return D_00450DC8;
+        return TIMERhz;
     }
     if (hz == 0) {
         hz = 100;
@@ -7941,16 +7941,16 @@ int TIMER_init(int hz) {
     if (hz < 3150) {
         if (hz < 196) {
             D_00450DE0 = (hz / 2 + 0x8CA00) / hz;
-            D_00450DC8 = 0x8CA00 / D_00450DE0;
+            TIMERhz = 0x8CA00 / D_00450DE0;
             mode = 2;
         } else {
             D_00450DE0 = (hz / 2 + 0x8CA000) / hz;
-            D_00450DC8 = 0x8CA000 / D_00450DE0;
+            TIMERhz = 0x8CA000 / D_00450DE0;
             mode = 1;
         }
     } else {
         D_00450DE0 = (hz / 2 + 0x8CA0000) / hz;
-        D_00450DC8 = 0x8CA0000 / D_00450DE0;
+        TIMERhz = 0x8CA0000 / D_00450DE0;
         mode = 0;
     }
     T1_COUNT_4AF0 = 0;
@@ -7962,7 +7962,7 @@ int TIMER_init(int hz) {
         count = T0_COUNT_4AF0;
         tmode = T0_MODE_4AF0;
         T0_MODE_4AF0 = 131;
-        end = D_00450DCC + D_00450DC8;
+        end = D_00450DCC + TIMERhz;
         if (D_00450DCC < end) {
             do {
             } while (D_00450DCC < end);
@@ -7982,7 +7982,7 @@ int TIMER_init(int hz) {
         }
     }
     REAL_addexit_4AF0(TIMER_restore_4AF0);
-    return D_00450DC8;
+    return TIMERhz;
 }
 #endif
 
@@ -8020,9 +8020,9 @@ INCLUDE_ASM("ealib/seg_2DCAE8", tmrint);
 /* tmrint: the EE timer 1 compare interrupt (inittmr.c; On Tour's PSP tmrint has the same tick/callback body). */
 extern unsigned short D_00450DE0;               /* compare period */
 extern volatile int D_00450DCC;                 /* ticks */
-extern volatile int D_00450DD0;                 /* libticks */
+extern volatile int libticks;                 /* libticks */
 extern int D_00450DE4;                          /* bInTimerSubroutine */
-extern void (*D_00450DA8[8])(void);             /* tmrsub */
+extern void (*tmrsub[8])(void);             /* tmrsub */
 
 #define T1_COUNT (*(volatile int *)0x10000800)
 #define T1_MODE (*(volatile int *)0x10000810)
@@ -8032,8 +8032,8 @@ extern void (*D_00450DA8[8])(void);             /* tmrsub */
  * Handles the EE timer 1 compare interrupt: one library tick.
  *
  * Moves the compare value on by one period (D_00450DE0) from where the count stands, resets T1_COUNT and acknowledges
- * the interrupt (T1_MODE | 0x400), increments the tick counters D_00450DCC and D_00450DD0, then calls each of the 8
- * timer routines in D_00450DA8 that is set, with D_00450DE4 set to 1 around the call (the thread and mutex code checks
+ * the interrupt (T1_MODE | 0x400), increments the tick counters D_00450DCC and libticks, then calls each of the 8
+ * timer routines in tmrsub that is set, with D_00450DE4 set to 1 around the call (the thread and mutex code checks
  * it to pick the interrupt-safe kernel calls). Re-enables interrupts (sync.l, ei) before returning. Installed by
  * TIMER_init.
  *
@@ -8046,11 +8046,11 @@ int tmrint(void) {
     T1_COUNT = 0;
     T1_MODE |= 0x400;
     D_00450DCC++;
-    D_00450DD0++;
+    libticks++;
     for (i = 0; i < 8; i++) {
-        if (D_00450DA8[i]) {
+        if (tmrsub[i]) {
             D_00450DE4 = 1;
-            D_00450DA8[i]();
+            tmrsub[i]();
             D_00450DE4 = 0;
         }
     }
@@ -8213,12 +8213,12 @@ void TIMER_waitticks(int ticks) {
 INCLUDE_ASM("ealib/seg_2DCAE8", TIMER_getfrequency);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00450DC8_5008[4] __asm__("D_00450DC8");
+extern int D_00450DC8_5008[4] __asm__("TIMERhz");
 
 /**
  * Returns the library tick rate in ticks per second.
  *
- * D_00450DC8, as set by TIMER_init. THREAD_yieldticks and the millisecond timers in seg_2AEDC0 divide by it to
+ * TIMERhz, as set by TIMER_init. THREAD_yieldticks and the millisecond timers in seg_2AEDC0 divide by it to
  * convert ticks.
  *
  * @return ticks per second
@@ -8517,7 +8517,7 @@ void THREAD_yieldticks(int numTicks) {
 INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_yield);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00450DC8_5398 __asm__("D_00450DC8");
+extern int D_00450DC8_5398 __asm__("TIMERhz");
 extern int D_00450DE4_5398 __asm__("D_00450DE4");
 extern void THREAD_yieldticks_5398(int) __asm__("THREAD_yieldticks");
 extern int GetThreadId_5398(void) __asm__("GetThreadId");
@@ -8530,7 +8530,7 @@ void THREAD_yield_impl(int ms) __asm__("THREAD_yield");
 /**
  * Yields the calling thread, for a number of milliseconds or just once.
  *
- * With @p ms nonzero it converts the milliseconds to ticks (ms * D_00450DC8 / 1000, at least 1) and sleeps with
+ * With @p ms nonzero it converts the milliseconds to ticks (ms * TIMERhz / 1000, at least 1) and sleeps with
  * THREAD_yieldticks. With 0 it rotates the ready queue at the thread's current priority (inside the timer interrupt,
  * flag D_00450DE4, with iReferThreadStatus and iRotateThreadReadyQueue; else ReferThreadStatus and RotateThreadReadyQueue),
  * letting other threads of that priority run. Loading and streaming loops call it with 0 while they wait.
@@ -8864,7 +8864,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", SYNCTASK_add);
 struct T_STA { int fn; int mode; int due; int fC; };
 extern struct T_STA D_0051ED98_STA[16] __asm__("D_0051ED98");
 extern int D_00450E00_STA __asm__("D_00450E00");
-extern volatile int D_00450DD0_STA __asm__("D_00450DD0");
+extern volatile int D_00450DD0_STA __asm__("libticks");
 
 void SYNCTASK_add_impl(int fn, int mode, int delay) __asm__("SYNCTASK_add");
 /**
@@ -8941,7 +8941,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", SYNCTASK_run);
 struct sSyncTask {                  /* 16 bytes, D_0051ED98[16]: a task SYNCTASK_run calls when it is due */
     int (*f00)(int, int);
     int f04;                        /* period */
-    int f08;                        /* due time (D_00450DD0) */
+    int f08;                        /* due time (libticks) */
     int f0C;                        /* running */
 };
 extern struct sSyncTask D_0051ED98[16];

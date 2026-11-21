@@ -14,7 +14,7 @@
 //                                           Algorithm. Bigger ones add fields after 0x390: Matrix/Direction/SPOKE
 //                                           (0x3A0), SUPERPIPE/POST_RACE_1 (0x3B0), Relative (0x3C0), Spline (0x3D0).
 //                                           cCamera embeds a cDEFAULT_3ChaseAlgorithm (0x390) at 0xC0.
-// Retail vtables: cCameraAlgorithm D_0045BDE0, cBasicCameraAlgorithm cBasicCameraAlgorithm_vtbl, cChaseAlgorithm cChaseAlgorithm_vtbl,
+// Retail vtables: cCameraAlgorithm cCameraAlgorithm_vtbl, cBasicCameraAlgorithm cBasicCameraAlgorithm_vtbl, cChaseAlgorithm cChaseAlgorithm_vtbl,
 // cLookAtChaseAlgorithm cLookAtChaseAlgorithm_vtbl (stored by its ctor cLookAtChaseAlgorithm_cLookAtChaseAlgorithm and dtor cLookAtChaseAlgorithm__cLookAtChaseAlgorithm).
 //
 // FLAT layouts, like main/game.h: every field at its retail offset, bases written out inline, no C++ inheritance.
@@ -64,7 +64,7 @@ struct cCameraAlgorithm {
     int AlgorithmType;          // 0x0C [O] eCamAlgoType; [R] 0x4E, then each ctor stores its own (cBasic 0x4F,
                                 //      cChase 0x53, cLookAtChase 0x54); [U] cCameraAlgorithm_setAlgorithmType setAlgorithmType (sw),
                                 //      cCameraAlgorithm_getType getType (lw)
-    void** mVtbl;               // 0x10 [R] D_0045BDE0, then each ctor's own vtable
+    void** mVtbl;               // 0x10 [R] cCameraAlgorithm_vtbl, then each ctor's own vtable
 };
 
 CHECK_OFFSET(cCameraAlgorithm, View, 0x00);

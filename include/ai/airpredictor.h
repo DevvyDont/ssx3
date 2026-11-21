@@ -30,7 +30,7 @@ struct cAirPredictor {
     t4Vector GuessLandVelocity;     // 0x10 [O]; [R] reset: t4vect_Zero; [U] simStep (sq); handplantcontrol reads it
     t4Vector GuessLandNormal;       // 0x20 [O]; [R] reset: t4vect_ZAxis; [U] simStep (sq); handplantcontrol aligns the rider to it
     unsigned int GuessLandPatchRID; // 0x30 [O] tResourceID; [R] ctor and reset store -1; [U] simStep stores the hit patch
-    float GuessLandPatchUV[2];      // 0x34 [O] t2Vector; [R] reset copies 8 bytes from D_004A5960 (sdl/sdr); [U] simStep
+    float GuessLandPatchUV[2];      // 0x34 [O] t2Vector; [R] reset copies 8 bytes from t2vect_Zero (sdl/sdr); [U] simStep
                                     //      stores the hit u/v (swc1 0x34, 0x38)
     char unk_3C[0x4];               // 0x3C alignment gap before the 16-byte-aligned t4Vector
     t4Vector GuessApexPos;          // 0x40 [O]; [U] simStep stores the sim position while the height keeps rising

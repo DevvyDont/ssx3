@@ -4,7 +4,7 @@
 // cBECharProfileDB: one character's career record in a player profile - collectibles per location, mission flags,
 // peak locks, difficulty, the character's bolt-ons ("Profile Bolts Map"), money, visited locations, best scores and
 // medals, attributes, rider stats, messages, rewards and radio mode. The back end keeps them in the static array
-// cBELibrary_profileLib (0x004A6CA8): [3 profiles][10 characters]; D_004C4090 is one more (destroyed separately);
+// cBELibrary_profileLib (0x004A6CA8): [3 profiles][10 characters]; cBEProfileLib_BackupCharProfile is one more (destroyed separately);
 // belibrary.cpp copies records to / from D_004B07F8. EA's source: d:/ssx/code/source/be/bedbprofile.cpp / .h (preview assert paths). Retail code: the decomp's
 // units be/beintecon.cpp (destructor, init, the bolt-on helpers func_001513B8 .. func_00152368) and be/bedbprofile.cpp
 // (getScoreStats .. updateMedalStats); most readers index cBELibrary_profileLib directly (be/beint*.cpp, belibrary.cpp).

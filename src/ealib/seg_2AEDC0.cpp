@@ -129,8 +129,8 @@ struct sAlloc_ADEC8 {
     void* (*free)(void* p);
     int flags;
 };
-// PORT: the unit declares D_00509430 as char[] later; view bound by asm label
-extern sAlloc_ADEC8 D_00509430_ADEC8 __asm__("D_00509430");
+// PORT: the unit declares RCMP_rcmp_sys as char[] later; view bound by asm label
+extern sAlloc_ADEC8 D_00509430_ADEC8 __asm__("RCMP_rcmp_sys");
 extern char str_AV_VideoStreamBuffer[];
 extern char str_AV_AudioStreamBuffer[];
 extern "C" signed char func_003B5440();
@@ -153,7 +153,7 @@ static inline bool wsCanAlloc_ADEC8(sAlloc_ADEC8* a)
  * Initialises a movie player: clears it, allocates its stream buffers and opens its sources.
  *
  * Forces no-audio when func_003B5440 returns 0, clears the 0x78-byte object, stores the source type (+0x18), no-audio
- * flag (+0x1C) and the two sources (+0xC, +0x10). Without RCMP allocator functions in D_00509430 it calls func_003E62B0
+ * flag (+0x1C) and the two sources (+0xC, +0x10). Without RCMP allocator functions in RCMP_rcmp_sys it calls func_003E62B0
  * (a debug break) and stops.
  *
  * With an audio source it sets the separate-audio flag (+0x14), allocates "AV_VideoStreamBuffer" and
@@ -365,8 +365,8 @@ struct sAlloc_AE450 {
     void* free;
     int flags;
 };
-// PORT: the unit declares D_00509430 as char[] later; view bound by asm label
-extern sAlloc_AE450 D_00509430_AE450 __asm__("D_00509430");
+// PORT: the unit declares RCMP_rcmp_sys as char[] later; view bound by asm label
+extern sAlloc_AE450 D_00509430_AE450 __asm__("RCMP_rcmp_sys");
 extern char D_00495210[];
 
 struct sTimer_AE450 {
@@ -777,8 +777,8 @@ struct sAlloc_AEAD0 {
     void* free;
     int flags;
 };
-// PORT: the unit declares D_00509430 as char[] later; view bound by asm label
-extern sAlloc_AEAD0 D_00509430_AEAD0 __asm__("D_00509430");
+// PORT: the unit declares RCMP_rcmp_sys as char[] later; view bound by asm label
+extern sAlloc_AEAD0 D_00509430_AEAD0 __asm__("RCMP_rcmp_sys");
 extern char D_00495210[];
 
 extern "C" unsigned char* STREAM_get(void* q);
@@ -941,8 +941,8 @@ struct func_003AED40_sAlloc {
     void* free;
     int flags;
 };
-// PORT: the unit declares D_00509430 as char[] later; view bound by asm label
-extern func_003AED40_sAlloc D_00509430_v __asm__("D_00509430");
+// PORT: the unit declares RCMP_rcmp_sys as char[] later; view bound by asm label
+extern func_003AED40_sAlloc D_00509430_v __asm__("RCMP_rcmp_sys");
 extern char str_AV_audiobuff[];
 
 extern "C" signed char func_003B5440();
@@ -1133,7 +1133,7 @@ extern "C" int func_003AEFA8(void* self)
 }
 #endif
 
-extern void* D_00456890[];
+extern void* RCMP_RCMP_SYSTEM_vtbl[];
 
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_ARRAY_AV_SUBTITLE_ARRAY);
@@ -1170,7 +1170,7 @@ struct sElem_AF020 {
 /**
  * Destroys a subtitle array: deletes its entries and clears the count.
  *
- * Runs delete[] on the entries (0x34-byte elements, freed through D_00509430's free function) and nulls the pointer;
+ * Runs delete[] on the entries (0x34-byte elements, freed through RCMP_rcmp_sys's free function) and nulls the pointer;
  * with flags bit 0 frees the array itself. Nothing in the code or data calls it.
  *
  * @param flags  bit 0 frees the array itself
@@ -1201,8 +1201,8 @@ struct sAlloc_F0C8 {
     void (*free)(void* p);
     int flags;
 };
-// PORT: the unit declares D_00509430 as char[] later; view bound by asm label
-extern sAlloc_F0C8 D_00509430_F0C8 __asm__("D_00509430");
+// PORT: the unit declares RCMP_rcmp_sys as char[] later; view bound by asm label
+extern sAlloc_F0C8 D_00509430_F0C8 __asm__("RCMP_rcmp_sys");
 
 struct sElem_F0C8 { char pad[0x34]; };
 struct sSelf_F0C8 { sElem_F0C8* arr; unsigned int count; };
@@ -1779,8 +1779,8 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_RCMP_SYSTEM_RCMP_SYSTEM__FPv);
 /**
  * Constructs the RCMP system object with no allocator functions.
  *
- * Clears the alloc and free function pointers (+0x0, +0x4) and installs the vtable D_00456890 at +0xC. The static
- * initialiser func_003B0770 builds the global D_00509430 with it; that global's alloc (+0x0), free (+0x4, D_00509434)
+ * Clears the alloc and free function pointers (+0x0, +0x4) and installs the vtable RCMP_RCMP_SYSTEM_vtbl at +0xC. The static
+ * initialiser func_003B0770 builds the global RCMP_rcmp_sys with it; that global's alloc (+0x0), free (+0x4, D_00509434)
  * and memory flags (+0x8) are what the movie player and decoder allocate with.
  *
  * @return self
@@ -1790,7 +1790,7 @@ void* RCMP_RCMP_SYSTEM_RCMP_SYSTEM(void* vself)
     RCMP_RCMP_SYSTEM* self = (RCMP_RCMP_SYSTEM*)vself;
     int zero = 0;
     *(int*)self = zero;
-    self->mVtbl = (void**)((int)(void*)D_00456890);
+    self->mVtbl = (void**)((int)(void*)RCMP_RCMP_SYSTEM_vtbl);
     self->FreeMemFunc = (void*(*)(void*))zero;
     return ((void*)self);
 }
@@ -1800,7 +1800,7 @@ void* RCMP_RCMP_SYSTEM_RCMP_SYSTEM(void* vself)
 INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_DECODER_DECODER);
 #ifdef SKIP_ASM
 void* RCMP_CODEC_IDATA_CODEC_IDATA(void* self);
-extern void* D_004568A8[];
+extern void* RCMP_DECODER_vtbl[];
 
 struct RCMP_DECODER_DECODER_sKey {
     int v[4];
@@ -1816,18 +1816,18 @@ struct RCMP_DECODER_DECODER_sObj {
 /**
  * Constructs an RCMP DECODER from its input description.
  *
- * Installs the vtable D_004568A8, constructs and then copies the 16-byte CODEC_IDATA at +0x4 (RCMP_CODEC_IDATA_CODEC_IDATA), and
+ * Installs the vtable RCMP_DECODER_vtbl, constructs and then copies the 16-byte CODEC_IDATA at +0x4 (RCMP_CODEC_IDATA_CODEC_IDATA), and
  * clears the codec (+0x14) and first chunk (+0x0). func_003AE450 allocates it for the movie player.
  *
  * The DECODER is 0x1C bytes: +0x0 first CHUNK, +0x4 CODEC_IDATA (streamer, get-data function, release function, frame
- * count), +0x14 the chosen codec, +0x18 vptr (D_004568A8).
+ * count), +0x14 the chosen codec, +0x18 vptr (RCMP_DECODER_vtbl).
  *
  * @param key  the CODEC_IDATA to copy
  * @return self
  */
 extern "C" RCMP_DECODER_DECODER_sObj* RCMP_DECODER_DECODER(RCMP_DECODER_DECODER_sObj* self, RCMP_DECODER_DECODER_sKey* key)
 {
-    self->vtable = D_004568A8;
+    self->vtable = RCMP_DECODER_vtbl;
     RCMP_CODEC_IDATA_CODEC_IDATA(&self->key);
     self->key = *key;
     self->field_0x14 = 0;
@@ -1841,19 +1841,19 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_DECODER__DECODER);
 #ifdef SKIP_ASM
 extern "C" void RCMP_DECODER_FreeChosenCodec(RCMP_DECODER* self);
 extern void* (*D_00509434[])(void*);
-extern void* D_004568A8[];
+extern void* RCMP_DECODER_vtbl[];
 
 /**
  * Destroys an RCMP DECODER, freeing its chosen codec.
  *
- * Reinstalls D_004568A8, calls RCMP_DECODER_FreeChosenCodec, and frees the object (D_00509434) when flags bit 0 is set. Slot 1 of the
+ * Reinstalls RCMP_DECODER_vtbl, calls RCMP_DECODER_FreeChosenCodec, and frees the object (D_00509434) when flags bit 0 is set. Slot 1 of the
  * DECODER vtable; func_003AE300 deletes the player's decoder through it.
  *
  * @param flags  bit 0 frees the object itself
  */
 extern "C" void RCMP_DECODER__DECODER(RCMP_DECODER* self, int flags)
 {
-    self->mVtbl = D_004568A8;
+    self->mVtbl = RCMP_DECODER_vtbl;
     RCMP_DECODER_FreeChosenCodec(self);
     if (flags & 1) {
         D_00509434[0](self);
@@ -2160,14 +2160,14 @@ extern "C" void* RCMP_CODEC_IDATA_CODEC_IDATA1(void* self, int context, int fetc
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B0770);
 #ifdef SKIP_ASM
-extern char D_00509430[];
+extern char RCMP_rcmp_sys[];
 extern void* D_0050943C[];
 
 /**
- * Constructs or tears down the global RCMP system object D_00509430 (static initialiser).
+ * Constructs or tears down the global RCMP system object RCMP_rcmp_sys (static initialiser).
  *
- * For priority 0xFFFF: on init it runs RCMP_RCMP_SYSTEM_RCMP_SYSTEM__FPv on D_00509430; on exit it only resets the vtable word
- * (D_0050943C) to D_00456890. Called by func_003B07B8__FPv and func_003B07D8__FPv.
+ * For priority 0xFFFF: on init it runs RCMP_RCMP_SYSTEM_RCMP_SYSTEM__FPv on RCMP_rcmp_sys; on exit it only resets the vtable word
+ * (D_0050943C) to RCMP_RCMP_SYSTEM_vtbl. Called by func_003B07B8__FPv and func_003B07D8__FPv.
  *
  * @param init  nonzero to construct, 0 to destroy
  * @param prio  the initialisation priority; only 0xFFFF acts
@@ -2177,9 +2177,9 @@ extern "C" void* func_003B0770(int init, int prio)
 {
     if (prio == 0xFFFF) {
         if (init != 0) {
-            RCMP_RCMP_SYSTEM_RCMP_SYSTEM(D_00509430);
+            RCMP_RCMP_SYSTEM_RCMP_SYSTEM(RCMP_rcmp_sys);
         } else {
-            D_0050943C[0] = (void*)D_00456890;
+            D_0050943C[0] = (void*)RCMP_RCMP_SYSTEM_vtbl;
         }
     }
 }
@@ -2299,7 +2299,7 @@ extern "C" void func_003B08E0(void* self, int flags)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", PS2_SONY_CODEC_INTERNAL_PS2_SONY_CODEC_INTERNAL);
 #ifdef SKIP_ASM
-extern void* D_00456850[];
+extern void* PS2_SONY_CODEC_INTERNAL_vtbl[];
 
 struct sWSNode2 {
     sWSNode2* next;
@@ -2319,7 +2319,7 @@ static inline void wsListInit(sWSNode2* h)
 /**
  * Constructs the Sony MPEG codec object with empty frame lists.
  *
- * Installs the vtable D_00456850, makes the used (+0x18) and free (+0x20) frame lists empty and clears the work area
+ * Installs the vtable PS2_SONY_CODEC_INTERNAL_vtbl, makes the used (+0x18) and free (+0x20) frame lists empty and clears the work area
  * (+0x2C) and chunk buffer (+0x78). func_003B11A0 allocates it.
  *
  * The Sony codec object is 0x80 bytes: +0x0 vptr, +0x4 state, +0x8/+0xC coded width/height, +0x10 current frame number,
@@ -2330,7 +2330,7 @@ static inline void wsListInit(sWSNode2* h)
  */
 extern "C" void* PS2_SONY_CODEC_INTERNAL_PS2_SONY_CODEC_INTERNAL(PS2_SONY_CODEC_INTERNAL* self)
 {
-    *(void***)self = D_00456850;
+    *(void***)self = PS2_SONY_CODEC_INTERNAL_vtbl;
     wsListInit((sWSNode2*)(&self->mUsedFrames));
     wsListInit((sWSNode2*)(&self->mFreeFrames));
     self->mpWorkBuffer = 0;
@@ -2343,7 +2343,7 @@ extern "C" void* PS2_SONY_CODEC_INTERNAL_PS2_SONY_CODEC_INTERNAL(PS2_SONY_CODEC_
 INCLUDE_ASM("ealib/seg_2AEDC0", PS2_SONY_CODEC_INTERNAL__PS2_SONY_CODEC_INTERNAL);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern void* D_00456810[];
+extern void* RCMP_CODEC_vtbl[];
 
 struct sWSList_09A0 {
     sWSNode2* next;
@@ -2370,14 +2370,14 @@ static inline void wsUnlink_09A0(sWSNode2* n)
  * Destroys the Sony MPEG codec object: buffers, frames and lists.
  *
  * Frees the work area (+0x2C) and chunk buffer (+0x78), unlinks and destroys every frame on the used (+0x18) and free
- * (+0x20) lists with func_003B08E0, marks the list heads with 7, ends with the base CODEC vtable D_00456810 and frees
- * the object when flags bit 0 is set. Slot 1 of D_00456850.
+ * (+0x20) lists with func_003B08E0, marks the list heads with 7, ends with the base CODEC vtable RCMP_CODEC_vtbl and frees
+ * the object when flags bit 0 is set. Slot 1 of PS2_SONY_CODEC_INTERNAL_vtbl.
  *
  * @param flags  bit 0 frees the object itself
  */
 extern "C" void PS2_SONY_CODEC_INTERNAL__PS2_SONY_CODEC_INTERNAL(PS2_SONY_CODEC_INTERNAL* self, int flags)
 {
-    self->mVtbl = D_00456850;
+    self->mVtbl = PS2_SONY_CODEC_INTERNAL_vtbl;
     if (self->mpWorkBuffer != 0) {
         D_00509434[0](self->mpWorkBuffer);
         self->mpWorkBuffer = 0;
@@ -2390,7 +2390,7 @@ extern "C" void PS2_SONY_CODEC_INTERNAL__PS2_SONY_CODEC_INTERNAL(PS2_SONY_CODEC_
     while (!(*(sWSList_09A0*)&self->mFreeFrames).empty()) wsUnlink_09A0((*(sWSList_09A0*)&self->mFreeFrames).front());
     (*(sWSList_09A0*)&self->mFreeFrames).kill();
     (*(sWSList_09A0*)&self->mUsedFrames).kill();
-    self->mVtbl = D_00456810;
+    self->mVtbl = RCMP_CODEC_vtbl;
     if (flags & 1) D_00509434[0](self);
 }
 #endif
@@ -2493,8 +2493,8 @@ struct sAlloc_B0C58 {
     void* (*free)(void* p);
     int flags;
 };
-// PORT: the unit declares D_00509430 as char[] later; view bound by asm label
-extern sAlloc_B0C58 D_00509430_B0C58 __asm__("D_00509430");
+// PORT: the unit declares RCMP_rcmp_sys as char[] later; view bound by asm label
+extern sAlloc_B0C58 D_00509430_B0C58 __asm__("RCMP_rcmp_sys");
 // mpeg2decode: struct layer_data *ld (current layer), outside small data like the other MPEG globals
 struct layer_data;
 extern layer_data* ld __asm__("D_0050A088") __attribute__((section(".bss")));
@@ -2552,7 +2552,7 @@ struct sData_B0C58 {
  * It allocates as many frames as the DECODER's frame count (+0x10) with func_003B07F8 onto the free list (+0x20), an
  * "RCMP::mpegbuff" work area of w * h * 9 / 2 + 5996 bytes (+0x2C) and a 0x32000-byte "RCMP::chunkbuff" (+0x78,
  * uncached alias at +0x7C), both with flag 0x400, then sets the MPEG decoder up with sceMpegInit, sceMpegCreate and
- * registers func_003B0B10 with sceMpegAddCallback. Slot 2 of D_00456850.
+ * registers func_003B0B10 with sceMpegAddCallback. Slot 2 of PS2_SONY_CODEC_INTERNAL_vtbl.
  *
  * @param script  the DECODER
  * @param firstChunk  the first CHUNK
@@ -2623,7 +2623,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", PS2_SONY_CODEC_INTERNAL_GetCurrentFrameNumber__F
 /**
  * Returns the Sony codec's current frame number (+0x10).
  *
- * Slot 4 of D_00456850; PS2_SONY_CODEC_INTERNAL_DecodeFrame increments the counter for every decoded picture.
+ * Slot 4 of PS2_SONY_CODEC_INTERNAL_vtbl; PS2_SONY_CODEC_INTERNAL_DecodeFrame increments the counter for every decoded picture.
  *
  * @return the number of pictures decoded since Init
  */
@@ -2645,7 +2645,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", PS2_SONY_CODEC_INTERNAL_GetFrameRate);
 /**
  * Returns the frame rate the last MPEG sequence extension set (D_00509508).
  *
- * Slot 5 of D_00456850. The value is global, not per codec object, and only the sequence-extension parser sequence_extension
+ * Slot 5 of PS2_SONY_CODEC_INTERNAL_vtbl. The value is global, not per codec object, and only the sequence-extension parser sequence_extension
  * writes it, so an MPEG-1 stream keeps whatever was there before.
  *
  * @return frames per second
@@ -2711,7 +2711,7 @@ public:
  * Decodes pictures until the frame number reaches the goal and returns the last one.
  *
  * Each pass first releases the previously decoded frame through the codec's slot 6, stops with 0 when sceMpegIsEnd
- * reports the MPEG decoder (+0x30) finished, and decodes with PS2_SONY_CODEC_INTERNAL_DecodeFrame. Slot 3 of D_00456850.
+ * reports the MPEG decoder (+0x30) finished, and decodes with PS2_SONY_CODEC_INTERNAL_DecodeFrame. Slot 3 of PS2_SONY_CODEC_INTERNAL_vtbl.
  *
  * @param limit  the goal frame number
  * @return the frame for the goal, or 0 at the end of the stream
@@ -2805,7 +2805,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", PS2_SONY_CODEC_INTERNAL_ReleaseFrame);
 /**
  * Drops one reference to a frame; at zero moves it from the used list back to the free list.
  *
- * Slot 6 of D_00456850, reached through DECODER forwarder RCMP_DECODER_ReleaseFrame and from PS2_SONY_CODEC_INTERNAL_GetFrame.
+ * Slot 6 of PS2_SONY_CODEC_INTERNAL_vtbl, reached through DECODER forwarder RCMP_DECODER_ReleaseFrame and from PS2_SONY_CODEC_INTERNAL_GetFrame.
  *
  * @param item  the frame
  */
@@ -2827,12 +2827,12 @@ struct sAlloc_11A0 {
     void* (*free)(void* p);
     int flags;
 };
-// PORT: the unit declares D_00509430 as char[] later; view bound by asm label
-extern sAlloc_11A0 D_00509430_11A0 __asm__("D_00509430");
+// PORT: the unit declares RCMP_rcmp_sys as char[] later; view bound by asm label
+extern sAlloc_11A0 D_00509430_11A0 __asm__("RCMP_rcmp_sys");
 /**
  * Allocates and constructs a Sony MPEG codec object (0x80 bytes).
  *
- * Allocates through D_00509430 with an empty tag (D_004953E8) and runs PS2_SONY_CODEC_INTERNAL_PS2_SONY_CODEC_INTERNAL. func_003AEAD0 offers the result
+ * Allocates through RCMP_rcmp_sys with an empty tag (D_004953E8) and runs PS2_SONY_CODEC_INTERNAL_PS2_SONY_CODEC_INTERNAL. func_003AEAD0 offers the result
  * to the DECODER with RCMP_DECODER_ChooseCodec.
  *
  * @return the new codec
@@ -4243,12 +4243,12 @@ extern "C" void* SHAPE_create(unsigned int w, int height, int fmt, int clut, int
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", SHAPE_destroy);
 #ifdef SKIP_ASM
-extern void (*D_0044C458[])(char* buf);
+extern void (*SHAPE_memfree[])(char* buf);
 
 /**
  * Destroys a SHAPE: clears its type byte and frees it.
  *
- * Frees through the SHAPE library's free callback D_0044C458. Called by the video frame destructor func_003B08E0 on the
+ * Frees through the SHAPE library's free callback SHAPE_memfree. Called by the video frame destructor func_003B08E0 on the
  * image its constructor made with SHAPE_create.
  *
  * @param buf  the SHAPE
@@ -4256,7 +4256,7 @@ extern void (*D_0044C458[])(char* buf);
 extern "C" void SHAPE_destroy(char* buf)
 {
     buf[0] = 0;
-    D_0044C458[0](buf);
+    SHAPE_memfree[0](buf);
 }
 #endif
 

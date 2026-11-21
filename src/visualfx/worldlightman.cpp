@@ -136,9 +136,9 @@ extern "C" void cWorldLightMan_purgeLightCache(cWorldLightMan_purgeLightCache_sM
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_getRealTimeLights);
 #ifdef SKIP_ASM
-extern char D_005047F8[];
-extern int D_004A43C4;
-extern int D_004A3B64;
+extern char cIrradianceDataBase_TheDataBase[];
+extern int cIrradianceDataBase_mDefaultId;
+extern int cRenderStateMan_m_hasCustomIrradiance;
 extern char* cAppMan_TheAppMan;
 
 struct sVec_5400 {
@@ -288,10 +288,10 @@ static inline sVec_5400 ObjPos_5400(char* obj)
 static inline sLightSet_5400* Resolve_5400(sLightRef_5400* ref)
 {
     if (ref->magic != 0x123400) {
-        ref->handle = cIrradianceDataBase_GetIDByName(D_005047F8, ref);
+        ref->handle = cIrradianceDataBase_GetIDByName(cIrradianceDataBase_TheDataBase, ref);
         ref->magic = 0x123400;
     }
-    return cIrradianceDataBase_Get(D_005047F8, ref->handle);
+    return cIrradianceDataBase_Get(cIrradianceDataBase_TheDataBase, ref->handle);
 }
 
 // Pushes node onto the front of hash chain heads[slot].
@@ -325,9 +325,9 @@ static inline sLightRef_5400* GetRef_5400(char* o, int slot)
  *
  * On a relight the entry's overlap node (+0xC0, taken from cWorldLightMan_evictOverlapNode unless it still belongs to this entry) gets a
  * 2000-unit box around the position, rebuilt with cOverlapList_gettyped when new or left. A reload sets the target
- * irradiance (+0xD0) to cRenderStateMan_getCustomIrradiance's custom one while D_004A3B64 is set; otherwise it queries the world painter
+ * irradiance (+0xD0) to cRenderStateMan_getCustomIrradiance's custom one while cRenderStateMan_m_hasCustomIrradiance is set; otherwise it queries the world painter
  * (+0x4) at the position and uses the object irradiance name (accessor 40), else the light irradiance name (37), else
- * the default D_004A43C4. The current set (+0x10) is then the target plus the 4 strongest lights of the overlap list
+ * the default cIrradianceDataBase_mDefaultId. The current set (+0x10) is then the target plus the 4 strongest lights of the overlap list
  * (cWorldLightMan_IntersectLights1). func_002F5148 calls it with bit 12 of the instance's +0x8 as @p force.
  *
  * @param obj  the instance record
@@ -407,7 +407,7 @@ extern "C" sLightSet_5400* cWorldLightMan_getRealTimeLights(sMan_5400* self, cha
             cOverlapList_gettyped(node->box->cell, &node->box->bounds);
         }
         if (reload) {
-            if (D_004A3B64 != 0) {
+            if (cRenderStateMan_m_hasCustomIrradiance != 0) {
                 node->target = *cRenderStateMan_getCustomIrradiance();
             } else {
                 char* world = self->world;
@@ -421,7 +421,7 @@ extern "C" sLightSet_5400* cWorldLightMan_getRealTimeLights(sMan_5400* self, cha
                     if (*(signed char*)ref != 0) {
                         node->target = *Resolve_5400(ref);
                     } else {
-                        node->target = *cIrradianceDataBase_Get(D_005047F8, D_004A43C4);
+                        node->target = *cIrradianceDataBase_Get(cIrradianceDataBase_TheDataBase, cIrradianceDataBase_mDefaultId);
                     }
                 }
             }
@@ -1521,7 +1521,7 @@ extern int kWPR_Lighting[2];
 extern int kWPR_Weather[2];
 extern int kWPR_Danger[2];
 extern float D_004A55AC;
-extern int D_004A55B0;
+extern int cRenderStateMan_m_customIrradiance;
 extern int D_004A55B4;
 extern float D_004A55B8;
 extern float D_004A55BC;
@@ -1574,7 +1574,7 @@ void sti_002F6B88(int init, int prio) __asm__("func_002F6B88");
  * Acts only for @p prio 0xFFFF. Construction fills the colour preset table D_004D57B0..D_004D5B60 (a, r, g, b), sets
  * the region type constants kWPR_MusicTrigger..kWPR_Danger to 0..13, constructs vertlist (2048), collisionvertlist (64)
  * and cAvalanche_m_activeNodes (64, each with a cDynamicColourEmitter at +0xD0), sets D_004A55AC to 2 pi, constructs
- * the 8 cRenderStateMan_m_state rows, clears the custom irradiance name D_004A55B0, copies presets into the colours
+ * the 8 cRenderStateMan_m_state rows, clears the custom irradiance name cRenderStateMan_m_customIrradiance, copies presets into the colours
  * D_004FAAF0..D_004FAC80 and sets D_004A55B8, D_004A55BC to 320, 240. Destruction runs
  * tActiveAvalancheNode__tActiveAvalancheNode on the 64 active avalanche nodes, last first. func_002F8370 and
  * func_002F8390 call it.
@@ -1850,7 +1850,7 @@ void sti_002F6B88(int init, int prio)
             D_004A55AC = 6.283186f;
             new (cRenderStateMan_m_state) sWlRsm[8];
             D_004A55B4 = 0;
-            D_004A55B0 = 0;
+            cRenderStateMan_m_customIrradiance = 0;
             D_004FAAF0[0] = 1.0f;
             D_004FAAF0[1] = 0.55f;
             D_004FAAF0[2] = 0.535f;
@@ -2273,20 +2273,20 @@ extern "C" int func_002F7BE0(void* self)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cVisualEffect__cVisualEffect);
 #ifdef SKIP_ASM
-extern void* D_00488680[];
+extern void* cVisualEffect_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys a visual effect: re-installs the base vtable D_00488680 and frees the object when bit 0 of @p flags is set.
+ * Destroys a visual effect: re-installs the base vtable cVisualEffect_vtbl and frees the object when bit 0 of @p flags is set.
  *
- * It is the destructor slot of D_00488680, whose next slots are cVisualEffect_update__FPv, cVisualEffect_render__FPv and
+ * It is the destructor slot of cVisualEffect_vtbl, whose next slots are cVisualEffect_update__FPv, cVisualEffect_render__FPv and
  * cVisualEffect_deferredRender__FPv.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
 extern "C" void cVisualEffect__cVisualEffect(void* self, int flags)
 {
-    *(void***)self = D_00488680;
+    *(void***)self = cVisualEffect_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -2299,7 +2299,7 @@ INCLUDE_ASM("visualfx/worldlightman", cVisualEffect_update__FPv);
 /**
  * Does nothing: the base visual effect's per-frame update.
  *
- * It is the slot after the destructor in D_00488680 and in the effect vtables built on it (D_00487EB8 and others).
+ * It is the slot after the destructor in cVisualEffect_vtbl and in the effect vtables built on it (D_00487EB8 and others).
  */
 void cVisualEffect_update(void* self)
 {
@@ -2312,7 +2312,7 @@ INCLUDE_ASM("visualfx/worldlightman", cVisualEffect_render__FPv);
 /**
  * Does nothing: the base visual effect's render.
  *
- * It is the slot after cVisualEffect_update__FPv in D_00488680 and in the effect vtables built on it.
+ * It is the slot after cVisualEffect_update__FPv in cVisualEffect_vtbl and in the effect vtables built on it.
  */
 void cVisualEffect_render(void* self)
 {
@@ -2387,18 +2387,18 @@ extern "C" int *cAvalanche_Recalc(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cAvalanche_Brightness);
 #ifdef SKIP_ASM
-extern int D_004A3A38;
+extern int cAvalanche_m_Brightness;
 
 /**
- * Returns the address of the avalanche setting D_004A3A38 (the word after cAvalanche_m_Recalc).
+ * Returns the address of the avalanche setting cAvalanche_m_Brightness (the word after cAvalanche_m_Recalc).
  *
  * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
  * it.
  *
- * @return pointer to D_004A3A38
+ * @return pointer to cAvalanche_m_Brightness
  */
 extern "C" int *cAvalanche_Brightness(void) {
-    return &D_004A3A38;
+    return &cAvalanche_m_Brightness;
 }
 #endif
 //100%
@@ -2455,35 +2455,35 @@ extern "C" int *cAvalanche_SquareLerp(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cAvalanche_Save);
 #ifdef SKIP_ASM
-extern int D_004A3A48;
+extern int cAvalanche_m_Save;
 
 /**
- * Returns the address of the avalanche setting D_004A3A48.
+ * Returns the address of the avalanche setting cAvalanche_m_Save.
  *
  * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
  * it.
  *
- * @return pointer to D_004A3A48
+ * @return pointer to cAvalanche_m_Save
  */
 extern "C" int *cAvalanche_Save(void) {
-    return &D_004A3A48;
+    return &cAvalanche_m_Save;
 }
 #endif
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cAvalanche_Load);
 #ifdef SKIP_ASM
-extern int D_004A3A4C;
+extern int cAvalanche_m_Load;
 
 /**
- * Returns the address of the avalanche setting D_004A3A4C.
+ * Returns the address of the avalanche setting cAvalanche_m_Load.
  *
  * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
  * it.
  *
- * @return pointer to D_004A3A4C
+ * @return pointer to cAvalanche_m_Load
  */
 extern "C" int *cAvalanche_Load(void) {
-    return &D_004A3A4C;
+    return &cAvalanche_m_Load;
 }
 #endif
 //100%
@@ -2523,18 +2523,18 @@ extern "C" int *cAvalanche_RenderEmitters(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cAvalanche_RenderLines);
 #ifdef SKIP_ASM
-extern int D_004A3A58;
+extern int cAvalanche_m_RenderLines;
 
 /**
- * Returns the address of the avalanche setting D_004A3A58 (the word before cAvalanche_m_Trigger).
+ * Returns the address of the avalanche setting cAvalanche_m_RenderLines (the word before cAvalanche_m_Trigger).
  *
  * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
  * it.
  *
- * @return pointer to D_004A3A58
+ * @return pointer to cAvalanche_m_RenderLines
  */
 extern "C" int *cAvalanche_RenderLines(void) {
-    return &D_004A3A58;
+    return &cAvalanche_m_RenderLines;
 }
 #endif
 //100%
@@ -2864,18 +2864,18 @@ extern "C" int *cAvalanche_PatchColourScale(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cAvalanche_PatchColourScale2);
 #ifdef SKIP_ASM
-extern int D_004A3AA8;
+extern int cAvalanche_m_PatchColourScale2;
 
 /**
- * Returns the address of the avalanche setting D_004A3AA8.
+ * Returns the address of the avalanche setting cAvalanche_m_PatchColourScale2.
  *
  * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
  * it.
  *
- * @return pointer to D_004A3AA8
+ * @return pointer to cAvalanche_m_PatchColourScale2
  */
 extern "C" int *cAvalanche_PatchColourScale2(void) {
-    return &D_004A3AA8;
+    return &cAvalanche_m_PatchColourScale2;
 }
 #endif
 //100%
@@ -3025,11 +3025,11 @@ extern "C" void func_002F7EF8(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cPowerUpFXToggles__cPowerUpFXToggles);
 #ifdef SKIP_ASM
-extern void* D_00488680[];
+extern void* cVisualEffect_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys the "PowerUpFXToggles" visual effect: falls back to the base vtable D_00488680 and frees the object when bit
+ * Destroys the "PowerUpFXToggles" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit
  * 0 of @p flags is set.
  *
  * It is the destructor slot of D_00488330, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
@@ -3039,7 +3039,7 @@ void operator_delete(int*);
  */
 extern "C" void cPowerUpFXToggles__cPowerUpFXToggles(void* self, int flags)
 {
-    *(void***)self = D_00488680;
+    *(void***)self = cVisualEffect_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3094,11 +3094,11 @@ extern "C" void cPS2FogParticleMan__cPS2FogParticleMan(cPS2FogParticleMan* self,
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cSplashToggles__cSplashToggles);
 #ifdef SKIP_ASM
-extern void* D_00488680[];
+extern void* cVisualEffect_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys the "SplashToggles" visual effect: falls back to the base vtable D_00488680 and frees the object when bit 0
+ * Destroys the "SplashToggles" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0
  * of @p flags is set.
  *
  * It is the destructor slot of D_004882B0, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
@@ -3108,7 +3108,7 @@ void operator_delete(int*);
  */
 extern "C" void cSplashToggles__cSplashToggles(void* self, int flags)
 {
-    *(void***)self = D_00488680;
+    *(void***)self = cVisualEffect_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3269,7 +3269,7 @@ extern "C" void cTransitionObj_operator_delete(void* p);
  * Destroys a fade transition object: stores the base vtable (cTransitionObj_vtbl), then releases its slot when asked to.
  *
  * Release goes through cTransitionObj_operator_delete(), which clears the in-use flag of the matching slot in a 4-entry static
- * pool (D_005382C0) instead of freeing heap memory.
+ * pool (cTransitionObj_mBuffer) instead of freeing heap memory.
  *
  * @param flags  g++ destructor flags; bit 0 set releases the object
  */
@@ -3317,7 +3317,7 @@ extern "C" void cTransitionObj_operator_delete(void* p);
  * Destroys a wipe transition object: stores the base vtable (cTransitionObj_vtbl), then releases its slot when asked to.
  *
  * Release goes through cTransitionObj_operator_delete(), which clears the in-use flag of the matching slot in a 4-entry static
- * pool (D_005382C0) instead of freeing heap memory.
+ * pool (cTransitionObj_mBuffer) instead of freeing heap memory.
  *
  * @param flags  g++ destructor flags; bit 0 set releases the object
  */
@@ -3341,7 +3341,7 @@ extern "C" void cTransitionObj_operator_delete(void* p);
  * to.
  *
  * Release goes through cTransitionObj_operator_delete(), which clears the in-use flag of the matching slot in a 4-entry static
- * pool (D_005382C0) instead of freeing heap memory.
+ * pool (cTransitionObj_mBuffer) instead of freeing heap memory.
  *
  * @param flags  g++ destructor flags; bit 0 set releases the object
  */
@@ -3357,11 +3357,11 @@ extern "C" void cCircle_TObj__cCircle_TObj(cCircle_TObj* self, int flags)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cSnowfallToggles__cSnowfallToggles);
 #ifdef SKIP_ASM
-extern void* D_00488680[];
+extern void* cVisualEffect_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys the "SnowfallToggles" visual effect: falls back to the base vtable D_00488680 and frees the object when bit
+ * Destroys the "SnowfallToggles" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit
  * 0 of @p flags is set.
  *
  * It is the destructor slot of D_00488050, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
@@ -3371,7 +3371,7 @@ void operator_delete(int*);
  */
 extern "C" void cSnowfallToggles__cSnowfallToggles(void* self, int flags)
 {
-    *(void***)self = D_00488680;
+    *(void***)self = cVisualEffect_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3413,11 +3413,11 @@ extern "C" int func_002F8170(unsigned long* bits, int n)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cBoardTrail__cBoardTrail);
 #ifdef SKIP_ASM
-extern void* D_00488680[];
+extern void* cVisualEffect_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys the "BoardTrail" visual effect: falls back to the base vtable D_00488680 and frees the object when bit 0 of
+ * Destroys the "BoardTrail" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0 of
  * @p flags is set.
  *
  * It is the destructor slot of D_00487FA8, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
@@ -3427,7 +3427,7 @@ void operator_delete(int*);
  */
 extern "C" void cBoardTrail__cBoardTrail(void* self, int flags)
 {
-    *(void***)self = D_00488680;
+    *(void***)self = cVisualEffect_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3487,11 +3487,11 @@ extern "C" void func_002F81E0(int *arg0) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cLightGlow__cLightGlow);
 #ifdef SKIP_ASM
-extern void* D_00488680[];
+extern void* cVisualEffect_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys the "LightGlow" visual effect: falls back to the base vtable D_00488680 and frees the object when bit 0 of
+ * Destroys the "LightGlow" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0 of
  * @p flags is set.
  *
  * It is the destructor slot of D_00487EB8, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
@@ -3501,7 +3501,7 @@ void operator_delete(int*);
  */
 extern "C" void cLightGlow__cLightGlow(void* self, int flags)
 {
-    *(void***)self = D_00488680;
+    *(void***)self = cVisualEffect_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3511,11 +3511,11 @@ extern "C" void cLightGlow__cLightGlow(void* self, int flags)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cDepthFog__cDepthFog);
 #ifdef SKIP_ASM
-extern void* D_00488680[];
+extern void* cVisualEffect_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys the "DepthFog" visual effect: falls back to the base vtable D_00488680 and frees the object when bit 0 of @p
+ * Destroys the "DepthFog" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0 of @p
  * flags is set.
  *
  * It is the destructor slot of D_00487E88, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
@@ -3525,7 +3525,7 @@ void operator_delete(int*);
  */
 extern "C" void cDepthFog__cDepthFog(void* self, int flags)
 {
-    *(void***)self = D_00488680;
+    *(void***)self = cVisualEffect_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3535,11 +3535,11 @@ extern "C" void cDepthFog__cDepthFog(void* self, int flags)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cHeightFog__cHeightFog);
 #ifdef SKIP_ASM
-extern void* D_00488680[];
+extern void* cVisualEffect_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys the "HeightFog" visual effect: falls back to the base vtable D_00488680 and frees the object when bit 0 of
+ * Destroys the "HeightFog" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0 of
  * @p flags is set.
  *
  * It is the destructor slot of D_00487E58, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
@@ -3549,7 +3549,7 @@ void operator_delete(int*);
  */
 extern "C" void cHeightFog__cHeightFog(void* self, int flags)
 {
-    *(void***)self = D_00488680;
+    *(void***)self = cVisualEffect_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3559,11 +3559,11 @@ extern "C" void cHeightFog__cHeightFog(void* self, int flags)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cShadow__cShadow);
 #ifdef SKIP_ASM
-extern void* D_00488680[];
+extern void* cVisualEffect_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys the "Shadow" visual effect: falls back to the base vtable D_00488680 and frees the object when bit 0 of @p
+ * Destroys the "Shadow" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0 of @p
  * flags is set.
  *
  * It is the destructor slot of D_00487E28, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
@@ -3573,7 +3573,7 @@ void operator_delete(int*);
  */
 extern "C" void cShadow__cShadow(void* self, int flags)
 {
-    *(void***)self = D_00488680;
+    *(void***)self = cVisualEffect_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3583,11 +3583,11 @@ extern "C" void cShadow__cShadow(void* self, int flags)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cSnowSurface__cSnowSurface);
 #ifdef SKIP_ASM
-extern void* D_00488680[];
+extern void* cVisualEffect_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys the "SnowSurface" visual effect: falls back to the base vtable D_00488680 and frees the object when bit 0 of
+ * Destroys the "SnowSurface" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0 of
  * @p flags is set.
  *
  * It is the destructor slot of D_00487DF8, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
@@ -3597,7 +3597,7 @@ void operator_delete(int*);
  */
 extern "C" void cSnowSurface__cSnowSurface(void* self, int flags)
 {
-    *(void***)self = D_00488680;
+    *(void***)self = cVisualEffect_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3607,11 +3607,11 @@ extern "C" void cSnowSurface__cSnowSurface(void* self, int flags)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cFlags__cFlags);
 #ifdef SKIP_ASM
-extern void* D_00488680[];
+extern void* cVisualEffect_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys the "Flags" visual effect: falls back to the base vtable D_00488680 and frees the object when bit 0 of @p
+ * Destroys the "Flags" visual effect: falls back to the base vtable cVisualEffect_vtbl and frees the object when bit 0 of @p
  * flags is set.
  *
  * It is the destructor slot of D_00487DC8, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
@@ -3621,7 +3621,7 @@ void operator_delete(int*);
  */
 extern "C" void cFlags__cFlags(void* self, int flags)
 {
-    *(void***)self = D_00488680;
+    *(void***)self = cVisualEffect_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3782,17 +3782,17 @@ struct sAttachedEmitterType_83B0 {
     float unk_10C;
 };
 
-extern sAttachedEmitterType_83B0* D_004A3BB0;
+extern sAttachedEmitterType_83B0* cAttachedEmitterFX_mEmitterDataArray;
 
 /**
- * Fills attached-emitter types 0 to 9 of the table D_004A3BB0 (0x110-byte particle data records).
+ * Fills attached-emitter types 0 to 9 of the table cAttachedEmitterFX_mEmitterDataArray (0x110-byte particle data records).
  *
  * func_002F17D0 allocates the 20-record table (5440 bytes, "AttachedEmitterTypeData") and then calls this and
  * func_002F9838 (types 10 to 19). func_002F2130 creates attached emitters from it by kind.
  */
 extern "C" void func_002F83B0(void)
 {
-    sAttachedEmitterType_83B0* emitterTypes = D_004A3BB0;
+    sAttachedEmitterType_83B0* emitterTypes = cAttachedEmitterFX_mEmitterDataArray;
     emitterTypes[0].unk_0 = 1;
     emitterTypes[0].unk_4 = 0;
     emitterTypes[0].unk_8 = -1.0f;
@@ -4482,7 +4482,7 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F8FF8__FPv);
 /**
  * Does nothing.
  *
- * func_002F1810 calls it, with func_002FA5F8__FPv, before freeing the attached-emitter type table D_004A3BB0.
+ * func_002F1810 calls it, with func_002FA5F8__FPv, before freeing the attached-emitter type table cAttachedEmitterFX_mEmitterDataArray.
  */
 void func_002F8FF8(void* self)
 {
@@ -4739,10 +4739,10 @@ struct sAttachedEmitterType_9838 {
     float unk_10C;
 };
 
-extern sAttachedEmitterType_9838* D_004A3BB0_9838 __asm__("D_004A3BB0");
+extern sAttachedEmitterType_9838* D_004A3BB0_9838 __asm__("cAttachedEmitterFX_mEmitterDataArray");
 
 /**
- * Fills attached-emitter types 10 to 19 of the table D_004A3BB0 (0x110-byte particle data records).
+ * Fills attached-emitter types 10 to 19 of the table cAttachedEmitterFX_mEmitterDataArray (0x110-byte particle data records).
  *
  * func_002F17D0 calls it right after func_002F83B0 (types 0 to 9).
  */
@@ -5438,7 +5438,7 @@ INCLUDE_ASM("visualfx/worldlightman", func_002FA5F8__FPv);
 /**
  * Does nothing.
  *
- * func_002F1810 calls it after func_002F8FF8__FPv, before freeing the attached-emitter type table D_004A3BB0.
+ * func_002F1810 calls it after func_002F8FF8__FPv, before freeing the attached-emitter type table cAttachedEmitterFX_mEmitterDataArray.
  */
 void func_002FA5F8(void* self)
 {

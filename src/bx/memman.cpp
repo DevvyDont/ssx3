@@ -1,6 +1,6 @@
 #include "common.h"
 
-extern unsigned int D_004A3E84;
+extern unsigned int newmbdefault;
 extern const char str_default[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
@@ -10,7 +10,7 @@ INCLUDE_ASM("bx/memman", operator_new1__Fi);
 /**
  * Allocates memory with the default allocation name and type.
  *
- * Calls cMemMan_alloc() with the name "default" (str_default), the type in D_004A3E84 (0 in the image) and no
+ * Calls cMemMan_alloc() with the name "default" (str_default), the type in newmbdefault (0 in the image) and no
  * header size. operator_new2() has the same body.
  *
  * @param size  bytes to allocate
@@ -18,7 +18,7 @@ INCLUDE_ASM("bx/memman", operator_new1__Fi);
  */
 void* operator_new1(int size)
 {
-    return cMemMan_alloc(size, str_default, D_004A3E84, 0);
+    return cMemMan_alloc(size, str_default, newmbdefault, 0);
 }
 #endif
 
@@ -28,7 +28,7 @@ INCLUDE_ASM("bx/memman", operator_new2__Fi);
 /**
  * Allocates memory with the default allocation name and type; same body as operator_new1().
  *
- * Calls cMemMan_alloc() with the name "default" (str_default), the type in D_004A3E84 (0 in the image) and no
+ * Calls cMemMan_alloc() with the name "default" (str_default), the type in newmbdefault (0 in the image) and no
  * header size.
  *
  * @param size  bytes to allocate
@@ -36,7 +36,7 @@ INCLUDE_ASM("bx/memman", operator_new2__Fi);
  */
 void* operator_new2(int size)
 {
-    return cMemMan_alloc(size, str_default, D_004A3E84, 0);
+    return cMemMan_alloc(size, str_default, newmbdefault, 0);
 }
 #endif
 

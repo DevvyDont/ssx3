@@ -524,11 +524,11 @@ struct sCamLag_15E2A8 {
     } group[3];             // 0x10
     float f40, f44, f48, f4C;
 };
-extern sCamLag_15E2A8 D_004C53E0;
-extern int D_004C5430[5];
+extern sCamLag_15E2A8 kCamShakeValues;
+extern int kCamShakeDependsOnDistance[5];
 
 /**
- * Fills the camera-shake table: five 16-byte entries at D_004C53E0, one per shake type, and their flags D_004C5430.
+ * Fills the camera-shake table: five 16-byte entries at kCamShakeValues, one per shake type, and their flags kCamShakeDependsOnDistance.
  *
  * An entry holds the minimum time step and the time variance (passed to cLookAtChaseAlgorithm_setupCameraShake and
  * cLookAtChaseAlgorithm_updateCameraShake), the weight cCamera_shakeCamera scales a request by, and the distance at
@@ -539,31 +539,31 @@ extern int D_004C5430[5];
  */
 extern "C" void func_0015E2A8(void)
 {
-    D_004C53E0.f0 = 0.05f;
-    D_004C53E0.f4 = 0.01f;
-    D_004C53E0.f8 = 0.4f;
-    D_004C53E0.fC = 20000.0f;
-    D_004C5430[0] = 0;
-    D_004C53E0.group[0].a = 0.02f;
-    D_004C53E0.group[0].b = 0.01366f;
-    D_004C53E0.group[0].c = 0.07f;
-    D_004C53E0.group[0].d = -1.0f;
-    D_004C5430[1] = 1;
-    D_004C53E0.group[1].a = 0.02f;
-    D_004C53E0.group[1].b = 0.01366f;
-    D_004C53E0.group[1].c = 0.08f;
-    D_004C53E0.group[1].d = -1.0f;
-    D_004C5430[2] = 1;
-    D_004C53E0.group[2].a = 0.02f;
-    D_004C53E0.group[2].b = 0.01366f;
-    D_004C53E0.group[2].c = 0.09f;
-    D_004C53E0.group[2].d = -1.0f;
-    D_004C5430[3] = 1;
-    D_004C53E0.f40 = 0.1f;
-    D_004C53E0.f44 = 0.03f;
-    D_004C53E0.f48 = 1.4f;
-    D_004C53E0.f4C = -1.0f;
-    D_004C5430[4] = 1;
+    kCamShakeValues.f0 = 0.05f;
+    kCamShakeValues.f4 = 0.01f;
+    kCamShakeValues.f8 = 0.4f;
+    kCamShakeValues.fC = 20000.0f;
+    kCamShakeDependsOnDistance[0] = 0;
+    kCamShakeValues.group[0].a = 0.02f;
+    kCamShakeValues.group[0].b = 0.01366f;
+    kCamShakeValues.group[0].c = 0.07f;
+    kCamShakeValues.group[0].d = -1.0f;
+    kCamShakeDependsOnDistance[1] = 1;
+    kCamShakeValues.group[1].a = 0.02f;
+    kCamShakeValues.group[1].b = 0.01366f;
+    kCamShakeValues.group[1].c = 0.08f;
+    kCamShakeValues.group[1].d = -1.0f;
+    kCamShakeDependsOnDistance[2] = 1;
+    kCamShakeValues.group[2].a = 0.02f;
+    kCamShakeValues.group[2].b = 0.01366f;
+    kCamShakeValues.group[2].c = 0.09f;
+    kCamShakeValues.group[2].d = -1.0f;
+    kCamShakeDependsOnDistance[3] = 1;
+    kCamShakeValues.f40 = 0.1f;
+    kCamShakeValues.f44 = 0.03f;
+    kCamShakeValues.f48 = 1.4f;
+    kCamShakeValues.f4C = -1.0f;
+    kCamShakeDependsOnDistance[4] = 1;
 }
 #endif
 
@@ -578,7 +578,7 @@ struct sCamShake_E360 {
     float range;    // 0xC
 };
 // View of the tuning block initialised by func_0015E2A8 as one entry per shake type.
-extern sCamShake_E360 D_004C53E0_E360[] __asm__("D_004C53E0");
+extern sCamShake_E360 D_004C53E0_E360[] __asm__("kCamShakeValues");
 
 #define MIN_E360(a, b) ((a) <= (b) ? (a) : (b))
 #define MAX_E360(a, b) ((b) <= (a) ? (a) : (b))
@@ -589,7 +589,7 @@ extern sCamShake_E360 D_004C53E0_E360[] __asm__("D_004C53E0");
  * The amount is scaled by the type's weight and by distance: full strength up to half the type's range,
  * fading to 0 at the range (no fade when either is 0). Types 1-4 are ignored during a replay.
  *
- * @param type  shake type, index into the shake table D_004C53E0
+ * @param type  shake type, index into the shake table kCamShakeValues
  * @param amount  requested strength
  * @param dist  distance from the shake source
  */
@@ -628,7 +628,7 @@ INCLUDE_ASM("camera/camera", cCamera_applyCameraShake);
 #include "vtable.h"
 
 // The camera base matrix (set up by func_001673F8), followed by the camera-shake tuning
-// table: one entry per shake type, reset by func_0015E2A8, plus each type's selector in D_004C5430.
+// table: one entry per shake type, reset by func_0015E2A8, plus each type's selector in kCamShakeDependsOnDistance.
 struct sCamShake {
     float base;     // passed to cLookAtChaseAlgorithm_setupCameraShake_E460 / cLookAtChaseAlgorithm_updateCameraShake
     float spread;
@@ -636,9 +636,9 @@ struct sCamShake {
     float range;    // distance at which the shake fades out
 };
 
-extern sCamShake D_004C53E0_E460[5] __asm__("D_004C53E0");
+extern sCamShake D_004C53E0_E460[5] __asm__("kCamShakeValues");
 
-extern int D_004C5430[5];
+extern int kCamShakeDependsOnDistance[5];
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float Length_15E460(const t4Vector& v)
@@ -704,7 +704,7 @@ extern "C" void cCamera_applyCameraShake(cCamera* self)
     int idx = self->DominantCamShakeType;
     float shakeBase = D_004C53E0_E460[idx].base;
     float timeVariance = D_004C53E0_E460[idx].spread;
-    int sel = D_004C5430[idx];
+    int sel = kCamShakeDependsOnDistance[idx];
     char* resultAlgorithm = (char*)&self->ResultAlgorithm;
     float spatialVariance = self->MaxShakeVariance;
     if (self->DoingCamShake != 0 && self->DoingCamShakeLastFrame == 0)
@@ -731,7 +731,7 @@ extern "C" float cRenderStateMan_DrawDistance(int);                             
 extern t4Vector D_004FF120_E668 __asm__("t4vect_Zero");                  // t4vect::Zero
 extern t4Vector D_004FF130_E668 __asm__("t4vect_Origin");                  // t4vect::Origin
 extern t4Matrix D_004C53A0_E668 __asm__("D_004C53A0");                  // CamAxisFlip
-extern float D_004A3B68;                                                // cRenderStateMan::m_farPlane
+extern float cRenderStateMan_m_farPlane;                                                // cRenderStateMan::m_farPlane
 
 // EA's quaternion: the ctor takes w first.
 struct tQuaternion_E668 {
@@ -992,7 +992,7 @@ extern "C" void cCamera_updateCamMat_E668(cCamera_E668* self) __asm__("cCamera_u
  * flip D_004C53A0 times the rotation of Pose's quaternion, translated by minus Pose's position; Direction its z column.
  * View, Near and Far are blended from the algorithms by lens weight (list node +0x4). Last, cRenderStateMan_update runs
  * for view ViewIndex + 6 at the camera's x/y, Far is capped by that view's draw distance (cRenderStateMan_DrawDistance) with MinNear
- * as the floor and stored in D_004A3B68 (the render far plane), and View is clamped to [0, MaxView] and Near and Far to
+ * as the floor and stored in cRenderStateMan_m_farPlane (the render far plane), and View is clamped to [0, MaxView] and Near and Far to
  * [MinNear, MaxFar].
  */
 extern "C" void cCamera_updateCamMat_E668(cCamera_E668* self)
@@ -1061,7 +1061,7 @@ extern "C" void cCamera_updateCamMat_E668(cCamera_E668* self)
     }
     cRenderStateMan_update(self->id + 6, self->pose.pos.x, self->pose.pos.y, -99999.0f);
     self->farZ = bracket_E668(self->minClip, self->farZ, cRenderStateMan_DrawDistance(self->id + 6));
-    D_004A3B68 = self->farZ;
+    cRenderStateMan_m_farPlane = self->farZ;
     self->fov = bracket_E668(0.0f, self->fov, self->maxFov);
     self->nearZ = bracket_E668(self->minClip, self->nearZ, self->maxClip);
     self->farZ = bracket_E668(self->minClip, self->farZ, self->maxClip);
@@ -2009,7 +2009,7 @@ void* cRiderCameraTarget_getLandingVelocity(void* vself)
 //100%
 INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_cBasicCameraAlgorithm);
 #ifdef SKIP_ASM
-extern void* D_0045BDE0[];
+extern void* cCameraAlgorithm_vtbl[];
 extern void* cBasicCameraAlgorithm_vtbl[];
 // PORT: cQuad128 (the unit's 128-bit TImode typedef) is a 16-byte register copy.
 extern cQuad128 t4vect_Origin;
@@ -2024,7 +2024,7 @@ extern "C" float cCameraAlgorithm_getDefaultView(cCameraAlgorithm* self);
  */
 extern "C" void* cBasicCameraAlgorithm_cBasicCameraAlgorithm(cBasicCameraAlgorithm* self)
 {
-    self->mVtbl = D_0045BDE0;
+    self->mVtbl = cCameraAlgorithm_vtbl;
     *(float*)self = cCameraAlgorithm_getDefaultView((cCameraAlgorithm*)self);
     self->AlgorithmType = 78;
     self->Near = 10.0f;
@@ -4677,21 +4677,21 @@ void* cChaseCameraController_switchCamera_EndPostRace(void* vself)
 //100%
 INCLUDE_ASM("camera/camera", cChaseAlgorithm_cChaseAlgorithm);
 #ifdef SKIP_ASM
-extern void* D_0045BDE0[];
+extern void* cCameraAlgorithm_vtbl[];
 extern void* cChaseAlgorithm_vtbl[];
 extern "C" float cCameraAlgorithm_getDefaultView(cCameraAlgorithm* self);
 
 /**
  * Constructs a chase camera algorithm on top of the base camera algorithm.
  *
- * Stores the base vtable D_0045BDE0, View = cCameraAlgorithm_getDefaultView (the default field of view), AlgorithmType 0x4E, Near 10
+ * Stores the base vtable cCameraAlgorithm_vtbl, View = cCameraAlgorithm_getDefaultView (the default field of view), AlgorithmType 0x4E, Near 10
  * and Far 30000, then cChaseAlgorithm_vtbl and AlgorithmType 0x53.
  *
  * @return @p self
  */
 extern "C" void* cChaseAlgorithm_cChaseAlgorithm(cChaseAlgorithm* self)
 {
-    self->mVtbl = D_0045BDE0;
+    self->mVtbl = cCameraAlgorithm_vtbl;
     *(float*)self = cCameraAlgorithm_getDefaultView((cCameraAlgorithm*)self);
     self->AlgorithmType = 78;
     self->Near = 10.0f;
@@ -4788,13 +4788,13 @@ extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(cLookAtChaseAlgorit
 INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm__cLookAtChaseAlgorithm);
 #ifdef SKIP_ASM
 extern void* cLookAtChaseAlgorithm_vtbl[];
-extern void* D_0045BDE0[];
+extern void* cCameraAlgorithm_vtbl[];
 
 /**
  * Destroys a chase camera algorithm: its five splines, then the base camera algorithm part.
  *
  * Restores cLookAtChaseAlgorithm_vtbl, runs cCubicSplineInterpolant__cCubicSplineInterpolant (flags 2) on the splines at +0x334 down to +0x304 and
- * restores the base vtable D_0045BDE0.
+ * restores the base vtable cCameraAlgorithm_vtbl.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object (operator delete)
  */
@@ -4809,7 +4809,7 @@ void cLookAtChaseAlgorithm__cLookAtChaseAlgorithm_dtor(void* vself, int flags)
     cCubicSplineInterpolant__cCubicSplineInterpolant(self->FullAirTargetSpline, 2);
     cCubicSplineInterpolant__cCubicSplineInterpolant(self->AirPositionSpline, 2);
     cCubicSplineInterpolant__cCubicSplineInterpolant(self->AirTargetSpline, 2);
-    self->mVtbl = D_0045BDE0;
+    self->mVtbl = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -9419,11 +9419,11 @@ extern "C" void cPIDFilter_reset(cPIDFilter* self, float value)
 //100%
 INCLUDE_ASM("camera/camera", cCameraAlgorithm__cCameraAlgorithm);
 #ifdef SKIP_ASM
-extern void* D_0045BDE0[];
+extern void* cCameraAlgorithm_vtbl[];
 void operator_delete(int* ptr);
 
 /**
- * Destroys a camera algorithm base: restores cCameraAlgorithm's vtable (D_0045BDE0) and frees the object when bit 0
+ * Destroys a camera algorithm base: restores cCameraAlgorithm's vtable (cCameraAlgorithm_vtbl) and frees the object when bit 0
  * of @p flags is set (operator delete).
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
@@ -9431,7 +9431,7 @@ void operator_delete(int* ptr);
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cCameraAlgorithm__cCameraAlgorithm(cCameraAlgorithm* self, int flags)
 {
-    self->mVtbl = D_0045BDE0;
+    self->mVtbl = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -9581,18 +9581,18 @@ int cCameraAlgorithm_shouldSnapOnUpdate(void* self)
 //100%
 INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm__cBasicCameraAlgorithm);
 #ifdef SKIP_ASM
-extern void* D_0045BDE0[];
+extern void* cCameraAlgorithm_vtbl[];
 void operator_delete(int* ptr);
 
 /**
- * Destroys a basic camera algorithm: restores the base vtable D_0045BDE0.
+ * Destroys a basic camera algorithm: restores the base vtable cCameraAlgorithm_vtbl.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object (operator delete)
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cBasicCameraAlgorithm__cBasicCameraAlgorithm(cBasicCameraAlgorithm* self, int flags)
 {
-    self->mVtbl = D_0045BDE0;
+    self->mVtbl = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -9685,18 +9685,18 @@ extern "C" float cBasicCameraAlgorithm_getHeading(cBasicCameraAlgorithm* basicCa
 //100%
 INCLUDE_ASM("camera/camera", cManualCameraAlgorithm__cManualCameraAlgorithm);
 #ifdef SKIP_ASM
-extern void* D_0045BDE0[];
+extern void* cCameraAlgorithm_vtbl[];
 void operator_delete(int* ptr);
 
 /**
- * Destroys a manual camera algorithm: restores the base vtable D_0045BDE0 (the class adds no fields).
+ * Destroys a manual camera algorithm: restores the base vtable cCameraAlgorithm_vtbl (the class adds no fields).
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object (operator delete)
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cManualCameraAlgorithm__cManualCameraAlgorithm(cBasicCameraAlgorithm* self, int flags)
 {
-    self->mVtbl = D_0045BDE0;
+    self->mVtbl = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -9706,18 +9706,18 @@ extern "C" void cManualCameraAlgorithm__cManualCameraAlgorithm(cBasicCameraAlgor
 //100%
 INCLUDE_ASM("camera/camera", cEditorCameraAlgorithm__cEditorCameraAlgorithm);
 #ifdef SKIP_ASM
-extern void* D_0045BDE0[];
+extern void* cCameraAlgorithm_vtbl[];
 void operator_delete(int* ptr);
 
 /**
- * Destroys an editor camera algorithm: restores the base vtable D_0045BDE0 (the class adds no fields).
+ * Destroys an editor camera algorithm: restores the base vtable cCameraAlgorithm_vtbl (the class adds no fields).
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object (operator delete)
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cEditorCameraAlgorithm__cEditorCameraAlgorithm(cBasicCameraAlgorithm* self, int flags)
 {
-    self->mVtbl = D_0045BDE0;
+    self->mVtbl = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -9727,18 +9727,18 @@ extern "C" void cEditorCameraAlgorithm__cEditorCameraAlgorithm(cBasicCameraAlgor
 //100%
 INCLUDE_ASM("camera/camera", cChaseAlgorithm__cChaseAlgorithm);
 #ifdef SKIP_ASM
-extern void* D_0045BDE0[];
+extern void* cCameraAlgorithm_vtbl[];
 void operator_delete(int* ptr);
 
 /**
- * Destroys a chase camera algorithm: restores the base vtable D_0045BDE0.
+ * Destroys a chase camera algorithm: restores the base vtable cCameraAlgorithm_vtbl.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object (operator delete)
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void cChaseAlgorithm__cChaseAlgorithm(cChaseAlgorithm* self, int flags)
 {
-    self->mVtbl = D_0045BDE0;
+    self->mVtbl = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

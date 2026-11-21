@@ -210,7 +210,7 @@ extern "C" void MEM_fill(void* dst, int c, int n);
 extern char str_11my_rules[];
 extern char str_rule_help[];
 extern char str_Menu[];
-extern char D_005308B8[];
+extern char cBERules_mRules[];
 extern signed char D_00441098[11];
 extern signed char D_004410A8[10];
 extern signed char D_004410B8[11];
@@ -258,7 +258,7 @@ static inline void* find_19188(sRuleSel_19188* self, char* name)
  * Builds the custom rules screen ("11my_rules"): picks the rule list for the game event and fills the rows.
  *
  * The list and its length (8-11 rules) depend on the new-race game event (newRace.cGameEvent). Clears the
- * per-rule disable counters and the rule settings (D_005308B8), makes the menu scrollable, shows rule 0's
+ * per-rule disable counters and the rule settings (cBERules_mRules), makes the menu scrollable, shows rule 0's
  * help
  * and hides the rows past the list.
  */
@@ -307,7 +307,7 @@ extern "C" void cFEStateRuleSelect_onCreateScreen(sRuleSel_19188* self)
     for (; n >= 0; n--)
         *disableCounter-- = 0;
     self->count = count;
-    MEM_fill(D_005308B8, 0, 0x20);
+    MEM_fill(cBERules_mRules, 0, 0x20);
     cFEStateRuleSelect_setupMenu((cFEStateRuleSelect*)self, 0);
     sUIObj_19188* menu = (sUIObj_19188*)find_19188(self, str_Menu);
     if (menu != 0) {
@@ -368,7 +368,7 @@ extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void cUIStateStack_push(void* stack, void* state);
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern char str_FEOptions[];
-extern char D_005308B8[];
+extern char cBERules_mRules[];
 
 struct sVE_1C68 {
     short delta;
@@ -419,7 +419,7 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(cFEStateRuleSelect* self, sMsg_
         if (st) {
             cUIStateStack_push(self->mpEngine->mStateStack, st);
         }
-        MEM_fill(D_005308B8, 0, 0x20);
+        MEM_fill(cBERules_mRules, 0, 0x20);
         break;
     }
     case 9: {
@@ -551,14 +551,14 @@ INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_updateBE);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern int D_005308B8_2088[] __asm__("D_005308B8");
+extern int D_005308B8_2088[] __asm__("cBERules_mRules");
 extern int D_005308D4_2088[] __asm__("D_005308D4");
 
 /**
- * Stores a custom race rule's new setting in the rule settings D_005308B8.
+ * Stores a custom race rule's new setting in the rule settings cBERules_mRules.
  *
  * Rule 2 stores @p ruleValue whole in D_005308D4. The others store bit 0 of @p ruleValue as one flag: rules 3, 7 and 14 in word 0 of
- * D_005308B8 (bits 3, 4 and 5); rules 4, 8, 1, 5, 6 and 9-13 in word 6 (D_005308D0; bits 0, 1, 2, 3, 4 and 5-9).
+ * cBERules_mRules (bits 3, 4 and 5); rules 4, 8, 1, 5, 6 and 9-13 in word 6 (D_005308D0; bits 0, 1, 2, 3, 4 and 5-9).
  * Unknown rules change nothing and @p self is not used. cFEStateRuleSelect_getBEData reads the same bits back.
  *
  * @param idx  the rule id (1-14)
@@ -618,14 +618,14 @@ INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_getBEData);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern unsigned int D_005308B8_192240[] __asm__("D_005308B8");
+extern unsigned int D_005308B8_192240[] __asm__("cBERules_mRules");
 extern int D_005308D0[];
 extern int D_005308D4[];
 
 /**
- * Returns the current setting of a custom race rule from the rule settings D_005308B8.
+ * Returns the current setting of a custom race rule from the rule settings cBERules_mRules.
  *
- * Rule 2 returns D_005308D4 whole. Rules 3, 7 and 14 return bits 3, 4 and 5 of D_005308B8's word 0; rules 4, 8, 1, 5, 6
+ * Rule 2 returns D_005308D4 whole. Rules 3, 7 and 14 return bits 3, 4 and 5 of cBERules_mRules's word 0; rules 4, 8, 1, 5, 6
  * and 9-13 return bits 0, 1, 2, 3, 4 and 5-9 of D_005308D0 (word 6): the bits cFEStateRuleSelect_updateBE writes. @p self is not
  * used.
  *
@@ -736,7 +736,7 @@ struct sVE_2488 {
 struct sQuad_2488 {
     int a, b, c, d;
 };
-extern sQuad_2488 D_004C66C8;
+extern sQuad_2488 gStaticColour;
 
 struct sObj_2488 {
     char pad0[0x8];
@@ -770,10 +770,10 @@ extern "C" void cFEStateRuleSelect_updateMenuColor(cFEStateRuleSelect* selfp)
         if (listBox && textBox) {
             if (*(signed char*)(((char*)selfp) + listBox->idx + 0x51) > 0) {
                 textBox->vt[25].fn((char*)textBox + textBox->vt[25].delta, 1);
-                textBox->q88 = D_004C66C8;
+                textBox->q88 = gStaticColour;
                 textBox->vt[8].fn((char*)textBox + textBox->vt[8].delta, 1);
                 listBox->vt[24].fn((char*)listBox + listBox->vt[24].delta, 1);
-                listBox->q88 = D_004C66C8;
+                listBox->q88 = gStaticColour;
                 listBox->vt[8].fn((char*)listBox + listBox->vt[8].delta, 1);
             } else {
                 textBox->vt[25].fn((char*)textBox + textBox->vt[25].delta, 0);

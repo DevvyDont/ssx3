@@ -32,7 +32,7 @@ void cSSXAudio_RiderCreated_impl(void* mgr, void* rider) __asm__("cSSXAudio_Ride
 extern "C" void* MEM_fill(void* dst, int value, int size);
 // PORT: memset-like; called as void here.
 extern "C" void MEM_fill_v(void* dst, int value, int size) __asm__("MEM_fill");
-extern void* D_00459C18[];
+extern void* cRider_vtbl[];
 extern char D_00459B90[];
 extern void* D_00459BD0[];
 extern void* cBeing_vtbl[];
@@ -48,7 +48,7 @@ extern const char str_BoaderShadow[];
 struct sKey8_B698 {
     int a, b;
 };
-extern sKey8_B698 D_004A5960[];
+extern sKey8_B698 t2vect_Zero[];
 
 struct sRiderAux_B698 {
     int f0;                     // 0x000
@@ -90,7 +90,7 @@ extern "C" void* cRider_cRider_impl(cRider* self)
     self->mViewIndex = -1;
     self->mSafeRenderTick = -1;
     self->mScriptObjRiderVtbl = D_00459B90;
-    self->mVtbl = D_00459C18;
+    self->mVtbl = cRider_vtbl;
     self->mGroundMaterial = 49;
     self->mLoadStep = 0;
     self->mRenderFlag = one;
@@ -102,7 +102,7 @@ extern "C" void* cRider_cRider_impl(cRider* self)
     self->mSphereTree = 0;
     self->InTunnel = 0;
     self->mGroundPolyId = none;
-    *(sKey8_B698*)&self->unk_AAC = D_004A5960[0];
+    *(sKey8_B698*)&self->unk_AAC = t2vect_Zero[0];
     self->mTrackPathHint = (int*)cMemMan_alloc(0x20, str_Track_path_intersect_info, 0, 0);
     self->mAIPathHint = (int*)cMemMan_alloc(0x20, str_AI_path_intersect_info, 0, 0);
     sRiderAux_B698* aux = new (str_OverlapList, 0, 0) sRiderAux_B698;
@@ -179,7 +179,7 @@ extern "C" void cFocusMan_removebox(void* a, void* p);
 extern "C" void cRiderMetrix__cRiderMetrix(void* p, int flags);
 extern "C" void cPlayerShadow__cPlayerShadow(void* p, int flags);
 void operator_delete(int* p);
-extern void* D_00459C18[];
+extern void* cRider_vtbl[];
 extern char D_00459B90[];
 extern void* D_00459BD0[];
 extern void* D_00482018[];
@@ -207,7 +207,7 @@ extern "C" void cRider__cRider(cRider* self, int flags)
 {
     self->mScriptObjectVtbl = D_00459BD0;
     self->mScriptObjRiderVtbl = D_00459B90;
-    self->mVtbl = D_00459C18;
+    self->mVtbl = cRider_vtbl;
     cSSXAudio_RiderDeleted_impl(cAudioInterface_bxAudio(), self);
     cScriptObject_DeInitScriptObject(self->unk_6DC);
     char* polyMember = (char*)self->mRiderAnim;
@@ -1722,7 +1722,7 @@ struct sVec4W : t4Vector {
 } __attribute__((aligned(16)));
 extern t4Vector t4vect_Origin;
 extern t4Vector t4vect_ZAxis;
-extern t4Vector D_004FF220;
+extern t4Vector tquat_Identity;
 extern "C" void cSpinControl_applyFlipSpinAngle(void* self, void* xf);
 extern "C" void cRider_doLeanPoseAdjust(void* self, void* xf);
 extern "C" void cAnimModel_transform(cAnimModel* self, void* roots);
@@ -2059,9 +2059,9 @@ extern "C" void cRider_updateSkeleton_impl(cRider* self)
     if (self->mUseRootPoseOverride != 0)
     {
         self->mAnimModel->localPos[self->mBoneBoardRoot] = t4vect_Origin;
-        self->mAnimModel->localRot[self->mBoneBoardRoot] = D_004FF220;
+        self->mAnimModel->localRot[self->mBoneBoardRoot] = tquat_Identity;
         self->mAnimModel->localPos[self->mBoneBoardChild] = t4vect_Origin;
-        self->mAnimModel->localRot[self->mBoneBoardChild] = D_004FF220;
+        self->mAnimModel->localRot[self->mBoneBoardChild] = tquat_Identity;
         ab[1].pos = *(sVec4W*)&self->mRootPoseOverridePos;
         ab[1].rot = *(sVec4W*)&self->unk_140[0];
     }
@@ -6905,7 +6905,7 @@ INCLUDE_ASM("ai/rider", cRider_updateWind);
 #ifdef SKIP_ASM
 extern "C" float cRenderStateMan_PlayerWindIntensity(int rider);
 extern "C" float cRenderStateMan_WindRotation(int rider);
-extern float D_00504FB8[];
+extern float cSinCosTable_gSinCosTable[];
 
 
 struct sVEntry_125970 { short delta; short index; void (*fn)(void*, t4Vector*); };
@@ -6970,8 +6970,8 @@ extern "C" void cRider_updateWind(cRider* self)
         dir.z = 0.0f;
         dir.w = 0.0f;
         int idx = (int)(ang * 81.4873275756836f) & 0x1FF;
-        dir.y = D_00504FB8[idx];
-        dir.x = D_00504FB8[idx + 0x80];
+        dir.y = cSinCosTable_gSinCosTable[idx];
+        dir.x = cSinCosTable_gSinCosTable[idx + 0x80];
         float speedDeficit = speed - Dot_125970(*(&self->mVelocity), dir);
         if (speedDeficit > dir.z)
         {

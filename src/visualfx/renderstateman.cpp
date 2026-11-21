@@ -334,13 +334,13 @@ extern "C" float cRenderStateMan_FogColourB(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_ScreenTintScaleR);
 #ifdef SKIP_ASM
-extern int D_004A3B60;
+extern int cRenderStateMan_m_indoor;
 
 /**
- * Returns the screen tint scale's red for render state @p i (1 while D_004A3B60 is set).
+ * Returns the screen tint scale's red for render state @p i (1 while cRenderStateMan_m_indoor is set).
  *
  * Calls virtual slot 20 of the state's world-painter query object m_query[3] (+0xC) (cRenderStateMan_m_state[@p i],
- * 0xF0-byte rows) and returns the value it points to. It returns 1 instead while the flag D_004A3B60 is set
+ * 0xF0-byte rows) and returns the value it points to. It returns 1 instead while the flag cRenderStateMan_m_indoor is set
  * (world-script events set it with bit 4 and clear it with bit 8). cVisualEffectsMan_commonUpdate stores it in
  * cScreenTint_m_ColourR and in its per-state table.
  *
@@ -349,7 +349,7 @@ extern int D_004A3B60;
  */
 extern "C" float cRenderStateMan_ScreenTintScaleR(int i)
 {
-    if (D_004A3B60 == 0) {
+    if (cRenderStateMan_m_indoor == 0) {
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
         sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
         sRSMVEntry* vt = stateQuery->vt;
@@ -362,13 +362,13 @@ extern "C" float cRenderStateMan_ScreenTintScaleR(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_ScreenTintScaleG);
 #ifdef SKIP_ASM
-extern int D_004A3B60;
+extern int cRenderStateMan_m_indoor;
 
 /**
- * Returns the screen tint scale's green for render state @p i (1 while D_004A3B60 is set).
+ * Returns the screen tint scale's green for render state @p i (1 while cRenderStateMan_m_indoor is set).
  *
  * Calls virtual slot 21 of the state's world-painter query object m_query[3] (+0xC) (cRenderStateMan_m_state[@p i],
- * 0xF0-byte rows) and returns the value it points to. It returns 1 instead while the flag D_004A3B60 is set
+ * 0xF0-byte rows) and returns the value it points to. It returns 1 instead while the flag cRenderStateMan_m_indoor is set
  * (world-script events set it with bit 4 and clear it with bit 8). cVisualEffectsMan_commonUpdate stores it in
  * cScreenTint_m_ColourG and in its per-state table.
  *
@@ -377,7 +377,7 @@ extern int D_004A3B60;
  */
 extern "C" float cRenderStateMan_ScreenTintScaleG(int i)
 {
-    if (D_004A3B60 == 0) {
+    if (cRenderStateMan_m_indoor == 0) {
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
         sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
         sRSMVEntry* vt = stateQuery->vt;
@@ -390,13 +390,13 @@ extern "C" float cRenderStateMan_ScreenTintScaleG(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_ScreenTintScaleB);
 #ifdef SKIP_ASM
-extern int D_004A3B60;
+extern int cRenderStateMan_m_indoor;
 
 /**
- * Returns the screen tint scale's blue for render state @p i (1 while D_004A3B60 is set).
+ * Returns the screen tint scale's blue for render state @p i (1 while cRenderStateMan_m_indoor is set).
  *
  * Calls virtual slot 22 of the state's world-painter query object m_query[3] (+0xC) (cRenderStateMan_m_state[@p i],
- * 0xF0-byte rows) and returns the value it points to. It returns 1 instead while the flag D_004A3B60 is set
+ * 0xF0-byte rows) and returns the value it points to. It returns 1 instead while the flag cRenderStateMan_m_indoor is set
  * (world-script events set it with bit 4 and clear it with bit 8). cVisualEffectsMan_commonUpdate stores it in
  * cScreenTint_m_ColourB and in its per-state table.
  *
@@ -405,7 +405,7 @@ extern int D_004A3B60;
  */
 extern "C" float cRenderStateMan_ScreenTintScaleB(int i)
 {
-    if (D_004A3B60 == 0) {
+    if (cRenderStateMan_m_indoor == 0) {
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
         sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
         sRSMVEntry* vt = stateQuery->vt;
@@ -418,13 +418,13 @@ extern "C" float cRenderStateMan_ScreenTintScaleB(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_ScreenTintOffsetR);
 #ifdef SKIP_ASM
-extern int D_004A3B60;
+extern int cRenderStateMan_m_indoor;
 
 /**
- * Returns the screen tint offset's red for render state @p i (0 while D_004A3B60 is set).
+ * Returns the screen tint offset's red for render state @p i (0 while cRenderStateMan_m_indoor is set).
  *
  * Calls virtual slot 23 of the state's world-painter query object m_query[3] (+0xC) (cRenderStateMan_m_state[@p i],
- * 0xF0-byte rows) and returns the value it points to. It returns 0 instead while the flag D_004A3B60 is set
+ * 0xF0-byte rows) and returns the value it points to. It returns 0 instead while the flag cRenderStateMan_m_indoor is set
  * (world-script events set it with bit 4 and clear it with bit 8). cVisualEffectsMan_commonUpdate stores it in
  * cScreenTint_m_FillR and in its per-state table.
  *
@@ -433,7 +433,7 @@ extern int D_004A3B60;
  */
 extern "C" float cRenderStateMan_ScreenTintOffsetR(int i)
 {
-    if (D_004A3B60 == 0) {
+    if (cRenderStateMan_m_indoor == 0) {
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
         sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
         sRSMVEntry* vt = stateQuery->vt;
@@ -446,13 +446,13 @@ extern "C" float cRenderStateMan_ScreenTintOffsetR(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_ScreenTintOffsetG);
 #ifdef SKIP_ASM
-extern int D_004A3B60;
+extern int cRenderStateMan_m_indoor;
 
 /**
- * Returns the screen tint offset's green for render state @p i (0 while D_004A3B60 is set).
+ * Returns the screen tint offset's green for render state @p i (0 while cRenderStateMan_m_indoor is set).
  *
  * Calls virtual slot 24 of the state's world-painter query object m_query[3] (+0xC) (cRenderStateMan_m_state[@p i],
- * 0xF0-byte rows) and returns the value it points to. It returns 0 instead while the flag D_004A3B60 is set
+ * 0xF0-byte rows) and returns the value it points to. It returns 0 instead while the flag cRenderStateMan_m_indoor is set
  * (world-script events set it with bit 4 and clear it with bit 8). cVisualEffectsMan_commonUpdate stores it in
  * cScreenTint_m_FillG and in its per-state table.
  *
@@ -461,7 +461,7 @@ extern int D_004A3B60;
  */
 extern "C" float cRenderStateMan_ScreenTintOffsetG(int i)
 {
-    if (D_004A3B60 == 0) {
+    if (cRenderStateMan_m_indoor == 0) {
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
         sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
         sRSMVEntry* vt = stateQuery->vt;
@@ -474,13 +474,13 @@ extern "C" float cRenderStateMan_ScreenTintOffsetG(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_ScreenTintOffsetB);
 #ifdef SKIP_ASM
-extern int D_004A3B60;
+extern int cRenderStateMan_m_indoor;
 
 /**
- * Returns the screen tint offset's blue for render state @p i (0 while D_004A3B60 is set).
+ * Returns the screen tint offset's blue for render state @p i (0 while cRenderStateMan_m_indoor is set).
  *
  * Calls virtual slot 25 of the state's world-painter query object m_query[3] (+0xC) (cRenderStateMan_m_state[@p i],
- * 0xF0-byte rows) and returns the value it points to. It returns 0 instead while the flag D_004A3B60 is set
+ * 0xF0-byte rows) and returns the value it points to. It returns 0 instead while the flag cRenderStateMan_m_indoor is set
  * (world-script events set it with bit 4 and clear it with bit 8). cVisualEffectsMan_commonUpdate stores it in
  * cScreenTint_m_FillB and in its per-state table.
  *
@@ -489,7 +489,7 @@ extern int D_004A3B60;
  */
 extern "C" float cRenderStateMan_ScreenTintOffsetB(int i)
 {
-    if (D_004A3B60 == 0) {
+    if (cRenderStateMan_m_indoor == 0) {
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
         sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
         sRSMVEntry* vt = stateQuery->vt;
@@ -764,13 +764,13 @@ extern "C" float cRenderStateMan_PlayerWindIntensity(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_LightIrradianceName);
 #ifdef SKIP_ASM
-extern int D_004A3B64;
-extern int D_004A55B0;
+extern int cRenderStateMan_m_hasCustomIrradiance;
+extern int cRenderStateMan_m_customIrradiance;
 
 /**
  * Returns the light irradiance name field for render state @p i, or the custom one while a custom irradiance is set.
  *
- * While D_004A3B64 is set (cRenderStateMan_setCustomIrradiance) it returns the custom name field D_004A55B0; otherwise
+ * While cRenderStateMan_m_hasCustomIrradiance is set (cRenderStateMan_setCustomIrradiance) it returns the custom name field cRenderStateMan_m_customIrradiance; otherwise
  * it calls virtual slot 37 of the state's world-painter query object m_query[7] (+0x1C) of cRenderStateMan_m_state[@p
  * i] and returns the pointer it gives. cRenderStateMan_LightIrradiance calls it.
  *
@@ -779,8 +779,8 @@ extern int D_004A55B0;
  */
 extern "C" void* cRenderStateMan_LightIrradianceName(int i)
 {
-    if (D_004A3B64 != 0) {
-        return &D_004A55B0;
+    if (cRenderStateMan_m_hasCustomIrradiance != 0) {
+        return &cRenderStateMan_m_customIrradiance;
     }
     {
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
@@ -794,13 +794,13 @@ extern "C" void* cRenderStateMan_LightIrradianceName(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_ShadowIrradianceName);
 #ifdef SKIP_ASM
-extern int D_004A3B64;
-extern int D_004A55B0;
+extern int cRenderStateMan_m_hasCustomIrradiance;
+extern int cRenderStateMan_m_customIrradiance;
 
 /**
  * Returns the shadow irradiance name field for render state @p i, or the custom one while a custom irradiance is set.
  *
- * While D_004A3B64 is set (cRenderStateMan_setCustomIrradiance) it returns the custom name field D_004A55B0; otherwise
+ * While cRenderStateMan_m_hasCustomIrradiance is set (cRenderStateMan_setCustomIrradiance) it returns the custom name field cRenderStateMan_m_customIrradiance; otherwise
  * it calls virtual slot 38 of the state's world-painter query object m_query[7] (+0x1C) of cRenderStateMan_m_state[@p
  * i] and returns the pointer it gives. cRenderStateMan_ShadowIrradiance calls it.
  *
@@ -809,8 +809,8 @@ extern int D_004A55B0;
  */
 extern "C" void* cRenderStateMan_ShadowIrradianceName(int i)
 {
-    if (D_004A3B64 != 0) {
-        return &D_004A55B0;
+    if (cRenderStateMan_m_hasCustomIrradiance != 0) {
+        return &cRenderStateMan_m_customIrradiance;
     }
     {
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
@@ -824,13 +824,13 @@ extern "C" void* cRenderStateMan_ShadowIrradianceName(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_TunnelIrradianceName);
 #ifdef SKIP_ASM
-extern int D_004A3B64;
-extern int D_004A55B0;
+extern int cRenderStateMan_m_hasCustomIrradiance;
+extern int cRenderStateMan_m_customIrradiance;
 
 /**
  * Returns the tunnel irradiance name field for render state @p i, or the custom one while a custom irradiance is set.
  *
- * While D_004A3B64 is set (cRenderStateMan_setCustomIrradiance) it returns the custom name field D_004A55B0; otherwise
+ * While cRenderStateMan_m_hasCustomIrradiance is set (cRenderStateMan_setCustomIrradiance) it returns the custom name field cRenderStateMan_m_customIrradiance; otherwise
  * it calls virtual slot 39 of the state's world-painter query object m_query[7] (+0x1C) of cRenderStateMan_m_state[@p
  * i] and returns the pointer it gives. cRenderStateMan_TunnelIrradiance calls it.
  *
@@ -839,8 +839,8 @@ extern int D_004A55B0;
  */
 extern "C" void* cRenderStateMan_TunnelIrradianceName(int i)
 {
-    if (D_004A3B64 != 0) {
-        return &D_004A55B0;
+    if (cRenderStateMan_m_hasCustomIrradiance != 0) {
+        return &cRenderStateMan_m_customIrradiance;
     }
     {
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
@@ -854,13 +854,13 @@ extern "C" void* cRenderStateMan_TunnelIrradianceName(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_ObjectIrradianceName);
 #ifdef SKIP_ASM
-extern int D_004A3B64;
-extern int D_004A55B0;
+extern int cRenderStateMan_m_hasCustomIrradiance;
+extern int cRenderStateMan_m_customIrradiance;
 
 /**
  * Returns the object irradiance name field for render state @p i, or the custom one while a custom irradiance is set.
  *
- * While D_004A3B64 is set (cRenderStateMan_setCustomIrradiance) it returns the custom name field D_004A55B0; otherwise
+ * While cRenderStateMan_m_hasCustomIrradiance is set (cRenderStateMan_setCustomIrradiance) it returns the custom name field cRenderStateMan_m_customIrradiance; otherwise
  * it calls virtual slot 40 of the state's world-painter query object m_query[7] (+0x1C) of cRenderStateMan_m_state[@p
  * i] and returns the pointer it gives. cRenderStateMan_ObjectIrradiance calls it.
  *
@@ -869,8 +869,8 @@ extern int D_004A55B0;
  */
 extern "C" void* cRenderStateMan_ObjectIrradianceName(int i)
 {
-    if (D_004A3B64 != 0) {
-        return &D_004A55B0;
+    if (cRenderStateMan_m_hasCustomIrradiance != 0) {
+        return &cRenderStateMan_m_customIrradiance;
     }
     {
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
@@ -1090,23 +1090,23 @@ extern "C" void cRenderStateMan_setInNIS(void* innis)
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_setCustomIrradiance);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char* dst, const char* src);
-extern int D_004A3B64;
-extern int D_004A55B0;
+extern int cRenderStateMan_m_hasCustomIrradiance;
+extern int cRenderStateMan_m_customIrradiance;
 
 /**
  * Selects a named custom irradiance for cut scenes, or turns it off.
  *
- * A null @p name clears the flag D_004A3B64; otherwise the name is copied to D_004A55B0 and the flag is set.
+ * A null @p name clears the flag cRenderStateMan_m_hasCustomIrradiance; otherwise the name is copied to cRenderStateMan_m_customIrradiance and the flag is set.
  *
  * @param name  irradiance name (under 8 characters), or 0 for none (On Tour pName)
  */
 extern "C" void cRenderStateMan_setCustomIrradiance(const char* name)
 {
     if (name == 0) {
-        D_004A3B64 = 0;
+        cRenderStateMan_m_hasCustomIrradiance = 0;
     } else {
-        strcpy((char*)&D_004A55B0, name);
-        D_004A3B64 = 1;
+        strcpy((char*)&cRenderStateMan_m_customIrradiance, name);
+        cRenderStateMan_m_hasCustomIrradiance = 1;
     }
 }
 #endif

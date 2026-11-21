@@ -8,7 +8,7 @@
 //   cConnMan: the network (ISP / DNAS) connection: func_002636A8 starts cCommSystem::netConnConnect with a timeout,
 //     func_00263828 watches mNetConnState (posts online event 261 on success), func_002636F0 logs out and disconnects.
 //   cGameConnMan: the peer-to-peer race connection to the opponent: func_002639E0 opens the DirtySock channel,
-//     func_00263CF0 waits for it, runs the setup manager (cSetupMan, D_004A33CC) and starts the race, func_00263BA8
+//     func_00263CF0 waits for it, runs the setup manager (cSetupMan, cSetupMan_mSetupMan) and starts the race, func_00263BA8
 //     shuts it down and posts the reason event.
 // No EA source path in the preview (only the class strings _vt$8cConnMan, _vt$12cGameConnMan and the accessors
 // getState__8cConnMan / getState__12cGameConnMan); retail code is in unit dirtysock/tagsunk (0x00263660..0x00264030)

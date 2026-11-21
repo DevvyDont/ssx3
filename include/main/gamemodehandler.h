@@ -2,7 +2,7 @@
 #define MAIN_GAMEMODEHANDLER_H
 
 // The game-mode handlers: the subclasses of cGameModeHandler that cGameModeMan::getGM (cGameModeMan_getGM) creates into
-// the static table aHandler[10] (D_00536668, "GM Handler" allocations) and cGameModeMan dispatches to by
+// the static table aHandler[10] (cGameModeMan_aHandler, "GM Handler" allocations) and cGameModeMan dispatches to by
 // iCurrModeHandler (main/gamemode.h). Each one runs the rules of one kind of event through the base's 11 virtuals:
 // 1 dtor, 2 init, 3 purge, 4 cleanRiderRanksPoints, 5 cleanRiderRanksTime, 6 riderCheckpointHit, 7 riderGateHit,
 // 8 raceFinish, 9 getHeatScore, 10 writeToReplayFrame, 11 readFromReplayFrame (base names: cGameModeHandler_*).

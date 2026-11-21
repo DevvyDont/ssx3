@@ -1784,7 +1784,7 @@ extern void* cFEStateRewardGalleryPosters_vtbl[];
  *
  * @param engine  the UI engine
  * @param idx     user number
- * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); cFEStateRewardGalleryBase_cFEStateRewardGalleryBase then sets
+ * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes gInLodge); cFEStateRewardGalleryBase_cFEStateRewardGalleryBase then sets
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
@@ -1915,7 +1915,7 @@ extern void* cFEStateRewardGalleryTradingCards_vtbl[];
  *
  * @param engine  the UI engine
  * @param idx     user number
- * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); cFEStateRewardGalleryBase_cFEStateRewardGalleryBase then sets
+ * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes gInLodge); cFEStateRewardGalleryBase_cFEStateRewardGalleryBase then sets
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
@@ -2045,7 +2045,7 @@ extern void* cFEStateRewardGalleryConceptArts_vtbl[];
  *
  * @param engine  the UI engine
  * @param idx     user number
- * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); cFEStateRewardGalleryBase_cFEStateRewardGalleryBase then sets
+ * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes gInLodge); cFEStateRewardGalleryBase_cFEStateRewardGalleryBase then sets
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
@@ -2175,7 +2175,7 @@ extern void* cFEStateRewardGalleryVideos_vtbl[];
  *
  * @param engine  the UI engine
  * @param idx     user number
- * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); cFEStateRewardGalleryBase_cFEStateRewardGalleryBase then sets
+ * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes gInLodge); cFEStateRewardGalleryBase_cFEStateRewardGalleryBase then sets
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
@@ -2305,7 +2305,7 @@ extern void* cFEStateRewardGalleryToys_vtbl[];
  *
  * @param engine  the UI engine
  * @param idx     user number
- * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); cFEStateRewardGalleryBase_cFEStateRewardGalleryBase then sets
+ * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes gInLodge); cFEStateRewardGalleryBase_cFEStateRewardGalleryBase then sets
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
@@ -2436,7 +2436,7 @@ extern void* cFEStateRewardGalleryCheatChars_vtbl[];
  *
  * @param engine  the UI engine
  * @param idx     user number
- * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); cFEStateRewardGalleryBase_cFEStateRewardGalleryBase then sets
+ * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes gInLodge); cFEStateRewardGalleryBase_cFEStateRewardGalleryBase then sets
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */

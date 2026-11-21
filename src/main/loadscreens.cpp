@@ -250,8 +250,8 @@ INCLUDE_ASM("main/loadscreens", cDebugMenuScreen_cDebugMenuScreen);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char cDebugMenuScreen_vtbl[];
 extern char str_mc0[];
-extern int D_004A29EC;
-extern int D_004A11B8;
+extern int EnableOnline;
+extern int cBENewRaceInterface_bIsBamLocation;
 extern float D_0049D5D0;
 void* cBE_getInterface_B1B0(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
@@ -344,7 +344,7 @@ struct sLS_B1B0 {
  * Constructs the debug front-end menu screen and sets up a default single-player race for it.
  *
  * Loads the background images, sets one human, game mode 4 and event 12, clears the network flag (and, with
- * D_004A29EC set, brings up the comm system using "mc0:"), selects the first active track entry as the race
+ * EnableOnline set, brings up the comm system using "mc0:"), selects the first active track entry as the race
  * location, sets the network defaults (port 3658, latency 1/60 s, not host), picks default riders for both
  * players
  * and starts the menu sound.
@@ -372,7 +372,7 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
     cBENewRaceInterface_setGameEvent(iface0, 0xC);
     self->f8C20 = 0;
     cBENetworkInterface_networkOpt.bIsNetworkGame = 0;
-    if (D_004A29EC != 0) {
+    if (EnableOnline != 0) {
         func_00266CD8();
         func_00261008();
         func_0025B688();
@@ -392,10 +392,10 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
     }
     int idx = self->f8C20;
     int kind = self->sub.e[idx].kind;
-    D_004A11B8 = 1;
+    cBENewRaceInterface_bIsBamLocation = 1;
     cBENewRaceInterface_newRace.iLocationIdx = kind;
     if (self->sub.e[self->f8C20].f84 == 0) {
-        D_004A11B8 = 0;
+        cBENewRaceInterface_bIsBamLocation = 0;
     }
     if (kind == 22) {
         cBENewRaceInterface_setDebugLocationFile(iface0, lsEntryName_B1B0(&self->sub, self->f8C20));
@@ -430,7 +430,7 @@ INCLUDE_ASM("main/loadscreens", cDebugMenuScreen_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_004A11B8;
+extern int cBENewRaceInterface_bIsBamLocation;
 
 void* cBE_getInterface_B1B0(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
@@ -617,7 +617,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
                         self->f8C20 = cTrackFileMan_getNextWCBAMStartLocation_b4(&self->sub, self->f8C20);
                     }
                     int kind = self->sub.e[self->f8C20].kind;
-                    D_004A11B8 = 1;
+                    cBENewRaceInterface_bIsBamLocation = 1;
                     beRaceDB->iLocationIdx = kind;
                 } else {
                     quick = (quick + 1) % 3;
@@ -632,7 +632,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
                         self->f8C20 = cTrackFileMan_getNextWCBAMStartLocation_b4(&self->sub, self->f8C20);
                     }
                     int kind = self->sub.e[self->f8C20].kind;
-                    D_004A11B8 = 1;
+                    cBENewRaceInterface_bIsBamLocation = 1;
                     beRaceDB->iLocationIdx = kind;
                 } else {
                     quick = (quick + 2) % 3;
@@ -653,10 +653,10 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         } while (self->f8C20 < 0);
         if (changed) {
             int kind = self->sub.e[self->f8C20].kind;
-            D_004A11B8 = 1;
+            cBENewRaceInterface_bIsBamLocation = 1;
             cBENewRaceInterface_newRace.iLocationIdx = kind;
             if (self->sub.e[self->f8C20].f84 == 0) {
-                D_004A11B8 = 0;
+                cBENewRaceInterface_bIsBamLocation = 0;
             }
             if (kind == 22) {
                 cBENewRaceInterface_setDebugLocationFile(race, lsEntryName_B1B0(&self->sub, self->f8C20));
@@ -708,10 +708,10 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         } while (self->f8C20 < 0);
         if (changed) {
             int kind = self->sub.e[self->f8C20].kind;
-            D_004A11B8 = 1;
+            cBENewRaceInterface_bIsBamLocation = 1;
             cBENewRaceInterface_newRace.iLocationIdx = kind;
             if (self->sub.e[self->f8C20].f84 == 0) {
-                D_004A11B8 = 0;
+                cBENewRaceInterface_bIsBamLocation = 0;
             }
             if (kind == 22) {
                 cBENewRaceInterface_setDebugLocationFile(race, lsEntryName_B1B0(&self->sub, self->f8C20));
@@ -809,10 +809,10 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         }
         sLSSub_B1B0* sub = &self->sub;
         int kind = sub->e[self->f8C20].kind;
-        D_004A11B8 = 1;
+        cBENewRaceInterface_bIsBamLocation = 1;
         cBENewRaceInterface_newRace.iLocationIdx = kind;
         if (sub->e[self->f8C20].f84 == 0) {
-            D_004A11B8 = 0;
+            cBENewRaceInterface_bIsBamLocation = 0;
         }
         if (kind == 22) {
             cBENewRaceInterface_setDebugLocationFile(race, lsEntryName_B1B0(sub, self->f8C20));

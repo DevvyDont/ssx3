@@ -2150,13 +2150,13 @@ struct sPlayerSlot_00147FD8
 };
 
 struct sPlayerStatRow;
-extern sPlayerStatRow D_00535538[];
+extern sPlayerStatRow cBEStatInterface_currentStat[];
 extern sPlayerSlot_00147FD8 D_004A7887[];
 extern sPlayerSlot_00147FD8 D_004B13D7[];
 extern sPlayerSlot_00147FD8 D_004BAF27[];
 
 /**
- * Commits the working character stats D_00535538 to the profiles.
+ * Commits the working character stats cBEStatInterface_currentStat to the profiles.
  *
  * Copies the 7 stat bytes of each of 10 characters in 3 profiles into +0xBDF of the character records.
  */
@@ -2164,9 +2164,9 @@ extern "C" void cBEStatInterface_submit(void)
 {
     for (int i = 0; i < 10; i++)
     {
-        D_004A7887[i].ctrl = ((sCtrl7_00147FD8 (*)[10])D_00535538)[0][i];
-        D_004B13D7[i].ctrl = ((sCtrl7_00147FD8 (*)[10])D_00535538)[1][i];
-        D_004BAF27[i].ctrl = ((sCtrl7_00147FD8 (*)[10])D_00535538)[2][i];
+        D_004A7887[i].ctrl = ((sCtrl7_00147FD8 (*)[10])cBEStatInterface_currentStat)[0][i];
+        D_004B13D7[i].ctrl = ((sCtrl7_00147FD8 (*)[10])cBEStatInterface_currentStat)[1][i];
+        D_004BAF27[i].ctrl = ((sCtrl7_00147FD8 (*)[10])cBEStatInterface_currentStat)[2][i];
     }
 }
 #endif
@@ -2175,21 +2175,21 @@ extern "C" void cBEStatInterface_submit(void)
 INCLUDE_ASM("be/beintplayer", cBEStatInterface_discard);
 #ifdef SKIP_ASM
 struct sPlayerStatRow;
-extern sPlayerStatRow D_00535538[];
+extern sPlayerStatRow cBEStatInterface_currentStat[];
 extern sPlayerSlot_00147FD8 D_004A7887[];
 extern sPlayerSlot_00147FD8 D_004B13D7[];
 extern sPlayerSlot_00147FD8 D_004BAF27[];
 
 /**
- * Reloads the working character stats D_00535538 from the profiles (the reverse of submit).
+ * Reloads the working character stats cBEStatInterface_currentStat from the profiles (the reverse of submit).
  */
 extern "C" void cBEStatInterface_discard(void)
 {
     for (int i = 0; i < 10; i++)
     {
-        ((sCtrl7_00147FD8 (*)[10])D_00535538)[0][i] = D_004A7887[i].ctrl;
-        ((sCtrl7_00147FD8 (*)[10])D_00535538)[1][i] = D_004B13D7[i].ctrl;
-        ((sCtrl7_00147FD8 (*)[10])D_00535538)[2][i] = D_004BAF27[i].ctrl;
+        ((sCtrl7_00147FD8 (*)[10])cBEStatInterface_currentStat)[0][i] = D_004A7887[i].ctrl;
+        ((sCtrl7_00147FD8 (*)[10])cBEStatInterface_currentStat)[1][i] = D_004B13D7[i].ctrl;
+        ((sCtrl7_00147FD8 (*)[10])cBEStatInterface_currentStat)[2][i] = D_004BAF27[i].ctrl;
     }
 }
 #endif
@@ -2263,10 +2263,10 @@ INCLUDE_ASM("be/beintplayer", func_001482D0);
 struct sCharStat_001482D0 {
     signed char v[15];
 };
-extern sCharStat_001482D0 D_005308D8_001482D0[] __asm__("D_005308D8");
+extern sCharStat_001482D0 D_005308D8_001482D0[] __asm__("cBELibrary_statDefault");
 
 /**
- * Copies record @p character of D_005308D8, the 15-byte per-character default-stat table, into @p dst.
+ * Copies record @p character of cBELibrary_statDefault, the 15-byte per-character default-stat table, into @p dst.
  *
  * The struct is returned by value: @p dst is the caller's buffer (g++ passes it first) and @p iface the stat
  * interface. The record has the size of On Tour's tBEStatDefault (character id, start stats, maximum stats).
@@ -2291,10 +2291,10 @@ int cBELibrary_getCharacterID(int);
 struct sCharStat_00148328 {
     signed char v[15];
 };
-extern sCharStat_00148328 D_005308D8_00148328[] __asm__("D_005308D8");
+extern sCharStat_00148328 D_005308D8_00148328[] __asm__("cBELibrary_statDefault");
 
 /**
- * Copies a rider's record of D_005308D8, the 15-byte per-character default-stat table, into @p dst.
+ * Copies a rider's record of cBELibrary_statDefault, the 15-byte per-character default-stat table, into @p dst.
  *
  * The record is the one of character cBELibrary_getCharacterID(@p rider). The struct is returned by value: @p dst is
  * the caller's buffer (g++ passes it first) and @p iface the stat interface.
@@ -2326,10 +2326,10 @@ struct sPlayerStat7View_001483A0 {
 struct sPlayerStatRowView_001483A0 {
     sPlayerStat7View_001483A0 e[10];
 };
-extern sPlayerStatRowView_001483A0 D_00535538_view001483A0[] __asm__("D_00535538");
+extern sPlayerStatRowView_001483A0 D_00535538_view001483A0[] __asm__("cBEStatInterface_currentStat");
 
 /**
- * Sets a rider's speed stat: byte 0 of its 7-byte record in D_00535538.
+ * Sets a rider's speed stat: byte 0 of its 7-byte record in cBEStatInterface_currentStat.
  *
  * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
  * profile); byte 0 is On Tour's tBEStatDB::cSpeed. cBEStatInterface_setStatLevel stores level x 5 here.
@@ -2358,10 +2358,10 @@ struct sPlayerStat7View_00148410 {
 struct sPlayerStatRowView_00148410 {
     sPlayerStat7View_00148410 e[10];
 };
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
+extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
- * Returns a rider's speed stat: byte 0 of its 7-byte record in D_00535538.
+ * Returns a rider's speed stat: byte 0 of its 7-byte record in cBEStatInterface_currentStat.
  *
  * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
  * profile); byte 0 is On Tour's tBEStatDB::cSpeed.
@@ -2384,10 +2384,10 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setAccel);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
+extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
- * Sets a rider's acceleration stat: byte 1 of its 7-byte record in D_00535538.
+ * Sets a rider's acceleration stat: byte 1 of its 7-byte record in cBEStatInterface_currentStat.
  *
  * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
  * profile); byte 1 is On Tour's tBEStatDB::cAccel. cBEStatInterface_setStatLevel stores level x 5 here.
@@ -2410,10 +2410,10 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getAccel);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
+extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
- * Returns a rider's acceleration stat: byte 1 of its 7-byte record in D_00535538.
+ * Returns a rider's acceleration stat: byte 1 of its 7-byte record in cBEStatInterface_currentStat.
  *
  * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
  * profile); byte 1 is On Tour's tBEStatDB::cAccel.
@@ -2436,10 +2436,10 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setTrick);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
+extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
- * Sets a rider's trick stat: byte 2 of its 7-byte record in D_00535538.
+ * Sets a rider's trick stat: byte 2 of its 7-byte record in cBEStatInterface_currentStat.
  *
  * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
  * profile); byte 2 is On Tour's tBEStatDB::cTrick. cBEStatInterface_setStatLevel stores level x 5 here.
@@ -2462,10 +2462,10 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getTrick);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
+extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
- * Returns a rider's trick stat: byte 2 of its 7-byte record in D_00535538.
+ * Returns a rider's trick stat: byte 2 of its 7-byte record in cBEStatInterface_currentStat.
  *
  * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
  * profile); byte 2 is On Tour's tBEStatDB::cTrick.
@@ -2488,10 +2488,10 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setEdging);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
+extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
- * Sets a rider's edging stat: byte 3 of its 7-byte record in D_00535538.
+ * Sets a rider's edging stat: byte 3 of its 7-byte record in cBEStatInterface_currentStat.
  *
  * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
  * profile); byte 3 is On Tour's tBEStatDB::cEdging. cBEStatInterface_setStatLevel stores level x 5 here.
@@ -2514,10 +2514,10 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getEdging);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
+extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
- * Returns a rider's edging stat: byte 3 of its 7-byte record in D_00535538.
+ * Returns a rider's edging stat: byte 3 of its 7-byte record in cBEStatInterface_currentStat.
  *
  * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
  * profile); byte 3 is On Tour's tBEStatDB::cEdging.
@@ -2540,10 +2540,10 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setSpin);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
+extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
- * Sets a rider's spin stat: byte 4 of its 7-byte record in D_00535538.
+ * Sets a rider's spin stat: byte 4 of its 7-byte record in cBEStatInterface_currentStat.
  *
  * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
  * profile); byte 4 is On Tour's tBEStatDB::cSpin. cBEStatInterface_setStatLevel stores level x 5 here.
@@ -2566,10 +2566,10 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getSpin);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
+extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
- * Returns a rider's spin stat: byte 4 of its 7-byte record in D_00535538.
+ * Returns a rider's spin stat: byte 4 of its 7-byte record in cBEStatInterface_currentStat.
  *
  * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
  * profile); byte 4 is On Tour's tBEStatDB::cSpin.
@@ -2592,10 +2592,10 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setToughness);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
+extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
- * Sets a rider's toughness stat: byte 5 of its 7-byte record in D_00535538.
+ * Sets a rider's toughness stat: byte 5 of its 7-byte record in cBEStatInterface_currentStat.
  *
  * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
  * profile); byte 5 is On Tour's tBEStatDB::cToughness. cBEStatInterface_setStatLevel stores level x 5 here.
@@ -2618,10 +2618,10 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getToughness);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
+extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
- * Returns a rider's toughness stat: byte 5 of its 7-byte record in D_00535538.
+ * Returns a rider's toughness stat: byte 5 of its 7-byte record in cBEStatInterface_currentStat.
  *
  * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
  * profile); byte 5 is On Tour's tBEStatDB::cToughness.
@@ -2644,13 +2644,13 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setStability);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
+extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
  * Sets a rider's stability stat (the seventh entry of its character's stat record) in the current-stat table.
  *
  * Looks up the rider's profile with cBELibrary_getProfileIndex() and character with cBELibrary_getCharacterID(), then
- * stores @p value as a byte in D_00535538[profile][character][6] (On Tour tBEStatDB.cStability).
+ * stores @p value as a byte in cBEStatInterface_currentStat[profile][character][6] (On Tour tBEStatDB.cStability).
  * cBEStatInterface_setStatLevel() calls it with level * 5.
  *
  * @param rider  race rider slot (On Tour iRider)
@@ -2671,12 +2671,12 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getStability);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
+extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
  * Returns a rider's stability stat (the seventh entry of its character's stat record) from the current-stat table.
  *
- * Reads D_00535538[profile][character][6] (On Tour tBEStatDB.cStability), with the profile from
+ * Reads cBEStatInterface_currentStat[profile][character][6] (On Tour tBEStatDB.cStability), with the profile from
  * cBELibrary_getProfileIndex() and the character from cBELibrary_getCharacterID().
  *
  * @param rider  race rider slot (On Tour iRider)
@@ -2773,12 +2773,12 @@ struct sPlayerStat7View_00148B50 {
 struct sPlayerStatRowView_00148B50 {
     sPlayerStat7View_00148B50 e[10];
 };
-extern sPlayerStatRowView_00148B50 D_00535538_view00148B50[] __asm__("D_00535538");
+extern sPlayerStatRowView_00148B50 D_00535538_view00148B50[] __asm__("cBEStatInterface_currentStat");
 
 /**
  * Stores a profile's speed stat for one character (byte 0 of the character's stat record) in the current-stat table.
  *
- * Writes @p value to D_00535538[@p humanIndex][@p charType][0] (On Tour tBEStatDB.cSpeed). Unlike the rider-slot setters, it takes
+ * Writes @p value to cBEStatInterface_currentStat[@p humanIndex][@p charType][0] (On Tour tBEStatDB.cSpeed). Unlike the rider-slot setters, it takes
  * the profile and the character directly.
  *
  * @param humanIndex  profile index (On Tour iHuman)
@@ -2800,12 +2800,12 @@ struct sPlayerStat7 {
 struct sPlayerStatRow {
     sPlayerStat7 e[10]; // 0x46 bytes
 };
-extern sPlayerStatRow D_00535538[];
+extern sPlayerStatRow cBEStatInterface_currentStat[];
 
 /**
  * Returns a profile's speed stat for one character (byte 0 of the character's stat record) from the current-stat table.
  *
- * Reads D_00535538[@p humanIndex][@p charType][0] (On Tour tBEStatDB.cSpeed).
+ * Reads cBEStatInterface_currentStat[@p humanIndex][@p charType][0] (On Tour tBEStatDB.cSpeed).
  *
  * @param humanIndex  profile index (On Tour iHuman)
  * @param charType  character ID (On Tour charType)
@@ -2813,7 +2813,7 @@ extern sPlayerStatRow D_00535538[];
  */
 extern "C" signed char cBEStatInterface_getHumanSpeed(cBEStatInterface* self, int humanIndex, int charType)
 {
-    return D_00535538[humanIndex].e[charType].v[0];
+    return cBEStatInterface_currentStat[humanIndex].e[charType].v[0];
 }
 #endif
 
@@ -2824,7 +2824,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanAccel);
  * Stores a profile's acceleration stat for one character (byte 1 of the character's stat record) in the current-stat
  * table.
  *
- * Writes @p value to D_00535538[@p humanIndex][@p charType][1] (On Tour tBEStatDB.cAccel). Unlike the rider-slot setters, it takes
+ * Writes @p value to cBEStatInterface_currentStat[@p humanIndex][@p charType][1] (On Tour tBEStatDB.cAccel). Unlike the rider-slot setters, it takes
  * the profile and the character directly.
  *
  * @param humanIndex  profile index (On Tour iHuman)
@@ -2833,7 +2833,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanAccel);
  */
 extern "C" void cBEStatInterface_setHumanAccel(cBEStatInterface* self, int humanIndex, int value, int charType)
 {
-    D_00535538[humanIndex].e[charType].v[1] = value;
+    cBEStatInterface_currentStat[humanIndex].e[charType].v[1] = value;
 }
 #endif
 
@@ -2844,7 +2844,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanAccel);
  * Returns a profile's acceleration stat for one character (byte 1 of the character's stat record) from the current-stat
  * table.
  *
- * Reads D_00535538[@p humanIndex][@p charType][1] (On Tour tBEStatDB.cAccel).
+ * Reads cBEStatInterface_currentStat[@p humanIndex][@p charType][1] (On Tour tBEStatDB.cAccel).
  *
  * @param humanIndex  profile index (On Tour iHuman)
  * @param charType  character ID (On Tour charType)
@@ -2852,7 +2852,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanAccel);
  */
 extern "C" signed char cBEStatInterface_getHumanAccel(cBEStatInterface* self, int humanIndex, int charType)
 {
-    return D_00535538[humanIndex].e[charType].v[1];
+    return cBEStatInterface_currentStat[humanIndex].e[charType].v[1];
 }
 #endif
 
@@ -2862,7 +2862,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanTrick);
 /**
  * Stores a profile's trick stat for one character (byte 2 of the character's stat record) in the current-stat table.
  *
- * Writes @p value to D_00535538[@p humanIndex][@p charType][2] (On Tour tBEStatDB.cTrick). Unlike the rider-slot setters, it takes
+ * Writes @p value to cBEStatInterface_currentStat[@p humanIndex][@p charType][2] (On Tour tBEStatDB.cTrick). Unlike the rider-slot setters, it takes
  * the profile and the character directly.
  *
  * @param humanIndex  profile index (On Tour iHuman)
@@ -2871,7 +2871,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanTrick);
  */
 extern "C" void cBEStatInterface_setHumanTrick(cBEStatInterface* self, int humanIndex, int value, int charType)
 {
-    D_00535538[humanIndex].e[charType].v[2] = value;
+    cBEStatInterface_currentStat[humanIndex].e[charType].v[2] = value;
 }
 #endif
 
@@ -2881,7 +2881,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanTrick);
 /**
  * Returns a profile's trick stat for one character (byte 2 of the character's stat record) from the current-stat table.
  *
- * Reads D_00535538[@p humanIndex][@p charType][2] (On Tour tBEStatDB.cTrick).
+ * Reads cBEStatInterface_currentStat[@p humanIndex][@p charType][2] (On Tour tBEStatDB.cTrick).
  *
  * @param humanIndex  profile index (On Tour iHuman)
  * @param charType  character ID (On Tour charType)
@@ -2889,7 +2889,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanTrick);
  */
 extern "C" signed char cBEStatInterface_getHumanTrick(cBEStatInterface* self, int humanIndex, int charType)
 {
-    return D_00535538[humanIndex].e[charType].v[2];
+    return cBEStatInterface_currentStat[humanIndex].e[charType].v[2];
 }
 #endif
 
@@ -2899,7 +2899,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanEdging);
 /**
  * Stores a profile's edging stat for one character (byte 3 of the character's stat record) in the current-stat table.
  *
- * Writes @p value to D_00535538[@p humanIndex][@p charType][3] (On Tour tBEStatDB.cEdging). Unlike the rider-slot setters, it takes
+ * Writes @p value to cBEStatInterface_currentStat[@p humanIndex][@p charType][3] (On Tour tBEStatDB.cEdging). Unlike the rider-slot setters, it takes
  * the profile and the character directly.
  *
  * @param humanIndex  profile index (On Tour iHuman)
@@ -2908,7 +2908,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanEdging);
  */
 extern "C" void cBEStatInterface_setHumanEdging(cBEStatInterface* self, int humanIndex, int value, int charType)
 {
-    D_00535538[humanIndex].e[charType].v[3] = value;
+    cBEStatInterface_currentStat[humanIndex].e[charType].v[3] = value;
 }
 #endif
 
@@ -2919,7 +2919,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanEdging);
  * Returns a profile's edging stat for one character (byte 3 of the character's stat record) from the current-stat
  * table.
  *
- * Reads D_00535538[@p humanIndex][@p charType][3] (On Tour tBEStatDB.cEdging).
+ * Reads cBEStatInterface_currentStat[@p humanIndex][@p charType][3] (On Tour tBEStatDB.cEdging).
  *
  * @param humanIndex  profile index (On Tour iHuman)
  * @param charType  character ID (On Tour charType)
@@ -2927,7 +2927,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanEdging);
  */
 extern "C" signed char cBEStatInterface_getHumanEdging(cBEStatInterface* self, int humanIndex, int charType)
 {
-    return D_00535538[humanIndex].e[charType].v[3];
+    return cBEStatInterface_currentStat[humanIndex].e[charType].v[3];
 }
 #endif
 
@@ -2937,7 +2937,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanSpin);
 /**
  * Stores a profile's spin stat for one character (byte 4 of the character's stat record) in the current-stat table.
  *
- * Writes @p value to D_00535538[@p humanIndex][@p charType][4] (On Tour tBEStatDB.cSpin). Unlike the rider-slot setters, it takes the
+ * Writes @p value to cBEStatInterface_currentStat[@p humanIndex][@p charType][4] (On Tour tBEStatDB.cSpin). Unlike the rider-slot setters, it takes the
  * profile and the character directly.
  *
  * @param humanIndex  profile index (On Tour iHuman)
@@ -2946,7 +2946,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanSpin);
  */
 extern "C" void cBEStatInterface_setHumanSpin(cBEStatInterface* self, int humanIndex, int value, int charType)
 {
-    D_00535538[humanIndex].e[charType].v[4] = value;
+    cBEStatInterface_currentStat[humanIndex].e[charType].v[4] = value;
 }
 #endif
 
@@ -2956,7 +2956,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanSpin);
 /**
  * Returns a profile's spin stat for one character (byte 4 of the character's stat record) from the current-stat table.
  *
- * Reads D_00535538[@p humanIndex][@p charType][4] (On Tour tBEStatDB.cSpin).
+ * Reads cBEStatInterface_currentStat[@p humanIndex][@p charType][4] (On Tour tBEStatDB.cSpin).
  *
  * @param humanIndex  profile index (On Tour iHuman)
  * @param charType  character ID (On Tour charType)
@@ -2964,7 +2964,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanSpin);
  */
 extern "C" signed char cBEStatInterface_getHumanSpin(cBEStatInterface* self, int humanIndex, int charType)
 {
-    return D_00535538[humanIndex].e[charType].v[4];
+    return cBEStatInterface_currentStat[humanIndex].e[charType].v[4];
 }
 #endif
 
@@ -2975,7 +2975,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanToughness);
  * Stores a profile's toughness stat for one character (byte 5 of the character's stat record) in the current-stat
  * table.
  *
- * Writes @p value to D_00535538[@p humanIndex][@p charType][5] (On Tour tBEStatDB.cToughness). Unlike the rider-slot setters, it
+ * Writes @p value to cBEStatInterface_currentStat[@p humanIndex][@p charType][5] (On Tour tBEStatDB.cToughness). Unlike the rider-slot setters, it
  * takes the profile and the character directly.
  *
  * @param humanIndex  profile index (On Tour iHuman)
@@ -2984,7 +2984,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanToughness);
  */
 extern "C" void cBEStatInterface_setHumanToughness(cBEStatInterface* self, int humanIndex, int value, int charType)
 {
-    D_00535538[humanIndex].e[charType].v[5] = value;
+    cBEStatInterface_currentStat[humanIndex].e[charType].v[5] = value;
 }
 #endif
 
@@ -2995,7 +2995,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanToughness);
  * Returns a profile's toughness stat for one character (byte 5 of the character's stat record) from the current-stat
  * table.
  *
- * Reads D_00535538[@p humanIndex][@p charType][5] (On Tour tBEStatDB.cToughness).
+ * Reads cBEStatInterface_currentStat[@p humanIndex][@p charType][5] (On Tour tBEStatDB.cToughness).
  *
  * @param humanIndex  profile index (On Tour iHuman)
  * @param charType  character ID (On Tour charType)
@@ -3003,7 +3003,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanToughness);
  */
 extern "C" signed char cBEStatInterface_getHumanToughness(cBEStatInterface* self, int humanIndex, int charType)
 {
-    return D_00535538[humanIndex].e[charType].v[5];
+    return cBEStatInterface_currentStat[humanIndex].e[charType].v[5];
 }
 #endif
 
@@ -3014,7 +3014,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanStability);
  * Stores a profile's stability stat for one character (byte 6 of the character's stat record) in the current-stat
  * table.
  *
- * Writes @p value to D_00535538[@p humanIndex][@p charType][6] (On Tour tBEStatDB.cStability). Unlike the rider-slot setters, it
+ * Writes @p value to cBEStatInterface_currentStat[@p humanIndex][@p charType][6] (On Tour tBEStatDB.cStability). Unlike the rider-slot setters, it
  * takes the profile and the character directly.
  *
  * @param humanIndex  profile index (On Tour iHuman)
@@ -3023,7 +3023,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanStability);
  */
 extern "C" void cBEStatInterface_setHumanStability(cBEStatInterface* self, int humanIndex, int value, int charType)
 {
-    D_00535538[humanIndex].e[charType].v[6] = value;
+    cBEStatInterface_currentStat[humanIndex].e[charType].v[6] = value;
 }
 #endif
 
@@ -3034,7 +3034,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanStability);
  * Returns a profile's stability stat for one character (byte 6 of the character's stat record) from the current-stat
  * table.
  *
- * Reads D_00535538[@p humanIndex][@p charType][6] (On Tour tBEStatDB.cStability).
+ * Reads cBEStatInterface_currentStat[@p humanIndex][@p charType][6] (On Tour tBEStatDB.cStability).
  *
  * @param humanIndex  profile index (On Tour iHuman)
  * @param charType  character ID (On Tour charType)
@@ -3042,7 +3042,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanStability);
  */
 extern "C" signed char cBEStatInterface_getHumanStability(cBEStatInterface* self, int humanIndex, int charType)
 {
-    return D_00535538[humanIndex].e[charType].v[6];
+    return cBEStatInterface_currentStat[humanIndex].e[charType].v[6];
 }
 #endif
 
@@ -3055,14 +3055,14 @@ struct sCharStat_005308D8
 {
     signed char v[15];
 };
-extern sCharStat_005308D8 D_005308D8[];
+extern sCharStat_005308D8 cBELibrary_statDefault[];
 
 /**
  * Returns a rider's braking attribute as a fraction of the character's maximum edging level.
  *
  * Mission riders (cBENewPlayerInterface_isMissionMan()) get 0.5. The level is @p value when positive, else the
- * profile's edging stat for the character (D_00535538[profile][character][3], On Tour cEdging) divided by 5; the result
- * is that level over the character's cMaxEdging (byte 0xB of its D_005308D8 default-stat record). cBEStatInterface_getBrakingAttrib and
+ * profile's edging stat for the character (cBEStatInterface_currentStat[profile][character][3], On Tour cEdging) divided by 5; the result
+ * is that level over the character's cMaxEdging (byte 0xB of its cBELibrary_statDefault default-stat record). cBEStatInterface_getBrakingAttrib and
  * cBEStatInterface_getEdgingAttrib have identical bodies.
  *
  * @param rider  race rider slot (On Tour iRider)
@@ -3079,8 +3079,8 @@ extern "C" float cBEStatInterface_getBrakingAttrib(cBEStatInterface* self, int r
     if (value > 0)
         attribLevel = value;
     else
-        attribLevel = D_00535538[profile].e[charID].v[3] / 5;
-    return (float)attribLevel / (float)D_005308D8[charID].v[0xB];
+        attribLevel = cBEStatInterface_currentStat[profile].e[charID].v[3] / 5;
+    return (float)attribLevel / (float)cBELibrary_statDefault[charID].v[0xB];
 }
 #endif
 
@@ -3094,14 +3094,14 @@ struct sCharStat_00148E68
 {
     signed char v[15];
 };
-extern sCharStat_00148E68 D_005308D8_00148E68[] __asm__("D_005308D8");
+extern sCharStat_00148E68 D_005308D8_00148E68[] __asm__("cBELibrary_statDefault");
 
 /**
  * Returns a rider's edging attribute as a fraction of the character's maximum edging level.
  *
  * Mission riders (cBENewPlayerInterface_isMissionMan()) get 0.5. The level is @p value when positive, else the
- * profile's edging stat for the character (D_00535538[profile][character][3], On Tour cEdging) divided by 5; the result
- * is that level over the character's cMaxEdging (byte 0xB of its D_005308D8 default-stat record). cBEStatInterface_getBrakingAttrib and
+ * profile's edging stat for the character (cBEStatInterface_currentStat[profile][character][3], On Tour cEdging) divided by 5; the result
+ * is that level over the character's cMaxEdging (byte 0xB of its cBELibrary_statDefault default-stat record). cBEStatInterface_getBrakingAttrib and
  * cBEStatInterface_getEdgingAttrib have identical bodies.
  *
  * @param rider  race rider slot (On Tour iRider)
@@ -3118,7 +3118,7 @@ extern "C" float cBEStatInterface_getEdgingAttrib(cBEStatInterface* self, int ri
     if (value > 0)
         attribLevel = value;
     else
-        attribLevel = D_00535538[profile].e[charID].v[3] / 5;
+        attribLevel = cBEStatInterface_currentStat[profile].e[charID].v[3] / 5;
     return (float)attribLevel / (float)D_005308D8_00148E68[charID].v[0xB];
 }
 #endif

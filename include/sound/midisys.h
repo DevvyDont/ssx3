@@ -8,7 +8,7 @@
 //   cMidiSys : cBankSys (0x0), virtual cBankManager
 // Non-virtual part 0x14 [R]: the ctor (cMidiSys_cMidiSys, 0x2A8140; the
 // preview names its dtor cMidiSys__cMidiSys cMidiSys::<virtual slot 1>) puts cSoundSys at this + 0x14 and cBankManager at
-// this + 0x1C in a complete cMidiSys, calls cBankSys_cBankSys(this, 0, ...) and stores D_00483A48 at 0xC (cBankSys's
+// this + 0x1C in a complete cMidiSys, calls cBankSys_cBankSys(this, 0, ...) and stores cBankSys_vtbl at 0xC (cBankSys's
 // vtable; cMidiSys's own dtor sits in its virtual-base tables D_004839F0 / D_00483A10). The struct below is the
 // NON-VIRTUAL part: cCrowdSys (sound/crowdsys.h) and so cSSXAudio start with it. The ctor stores the instance in
 // D_004A3744 (EA name unknown).
@@ -34,7 +34,7 @@ struct cMidiSys {
     cBankManager* mpVBankManager; // 0x000 [R] virtual-base pointer (this + 0x1C in a complete cMidiSys); [U] MIDI_Begin/MIDI_End reach the play options at mpVBankManager + 0x1D8
     int* mBank;                   // 0x004 [O] cBankSys::mBank; [R] cBankSys ctor "mBank"
     int* mPatch;                  // 0x008 [O] cBankSys::mPatch; [R] cBankSys ctor "mPath"
-    void** mVtbl;                 // 0x00C [R] D_00483A48 (cMidiSys ctor/dtor; cBankSys's primary vtable)
+    void** mVtbl;                 // 0x00C [R] cBankSys_vtbl (cMidiSys ctor/dtor; cBankSys's primary vtable)
     // --- cMidiSys
     tMidiBank* mMidiBanks;        // 0x010 [R] operator new(0x20, "MIDIBANKS") (4 play-option levels); dtor cMemMan_free()s it; [U] func_002A8450 / func_002A86B8
 };

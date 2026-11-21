@@ -2153,12 +2153,12 @@ void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm
 extern "C" void cScreenPopup_getStringSize2(cScreenPopup* self, void* text, const char* str, void* out);
 extern "C" void cScreenPopup_increaseBoxSize(cScreenPopup* self, float* size, float* item);
 extern char str_getTextBoxSize[];
-extern char D_004A1C38;
+extern char gUSTRBackSlash1;
 
 /**
  * Grows a text-box size to fit a unicode string, line by line.
  *
- * Splits a copy of @p str (allocated "getTextBoxSize") at each pair of backslashes (D_004A1C38 is a backslash) and each
+ * Splits a copy of @p str (allocated "getTextBoxSize") at each pair of backslashes (gUSTRBackSlash1 is a backslash) and each
  * '\r'; each line is measured with cScreenPopup_getStringSize2(), added to @p size with cScreenPopup_increaseBoxSize() and followed
  * by 3 units of height. The copy is freed at the end.
  *
@@ -2177,7 +2177,7 @@ extern "C" void cScreenPopup_getTextBoxSize1(cScreenPopup* self, void* text, uns
     while (i < n) {
         unsigned short curChar = str[i];
         unsigned short next = str[i + 1];
-        if (curChar == D_004A1C38 && next == D_004A1C38) {
+        if (curChar == gUSTRBackSlash1 && next == gUSTRBackSlash1) {
             buf[j] = 0;
             cScreenPopup_getStringSize2(self, text, (const char*)buf, item);
             i += 2;
@@ -2345,13 +2345,13 @@ extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
 void cMemMan_free(void* ptr);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_UITEXTTEMP[];
-extern char D_004A1C38;
+extern char gUSTRBackSlash1;
 
 /**
  * Measures how wide the first line of a unicode string gets before it would overflow the text widget.
  *
  * Sets bit 7 of the widget's mAttr, then walks a copy of @p strp (allocated "UITEXTTEMP") adding each character's width
- * (cFont_charAdvance1 times mScale.x); a pair of backslashes (D_004A1C38) restarts the width at 0. Stops at the first
+ * (cFont_charAdvance1 times mScale.x); a pair of backslashes (gUSTRBackSlash1) restarts the width at 0. Stops at the first
  * character that makes the width exceed the widget's width (getSize, vtable slot 20) and stores the width before it in
  * @p outp; otherwise stores the full width. Returns early, without writing, when the widget has no font.
  *
@@ -2379,7 +2379,7 @@ extern "C" void cScreenPopup_getMessageLineWrapSize2(cScreenPopup* self, void* t
     vt[20].fn((char*)text + vt[20].delta, &size);
     textScale = *(sVec3_94B0*)((char*)text + 0x50);
     while (i < n) {
-        if (buf[i] == D_004A1C38 && buf[i + 1] == D_004A1C38) {
+        if (buf[i] == gUSTRBackSlash1 && buf[i + 1] == gUSTRBackSlash1) {
             w = 0.0f;
             i += 2;
         } else {
@@ -2567,7 +2567,7 @@ extern "C" void cScreenPopup_getTextBoxSize1(cScreenPopup* self, void* text, uns
 void cMemMan_free(void* ptr);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_UITEXTTEMP[];
-extern char D_004A1C38;
+extern char gUSTRBackSlash1;
 
 /**
  * Word-wraps a unicode string to a text widget's width, grows a box size to fit it, and puts it in the widget.
@@ -2600,7 +2600,7 @@ extern "C" void cScreenPopup_getTextBoxWrapSize1(cScreenPopup* self, cUIText* te
     vt[20].fn((char*)text + vt[20].delta, &size);
     textScale = *(sVec3_9938*)((char*)text + 0x50);
     while (i < n) {
-        if (buf[i] == D_004A1C38 && buf[i + 1] == D_004A1C38) {
+        if (buf[i] == gUSTRBackSlash1 && buf[i + 1] == gUSTRBackSlash1) {
             last = -1;
             w = 0.0f;
             i += 2;
@@ -3729,7 +3729,7 @@ extern "C" void* cUIState_cUIState1(void* self, void* engine, void* owner);
 extern "C" void cBXString_Reset(void* self);
 extern "C" void cKeyboardPopup_fillSelectableKeys(cKeyboardPopup* self);
 extern int cBXString_EmptyString;
-extern void* D_004A33F0;
+extern void* Keyboard;
 extern void* cKeyboardPopup_vtbl[];
 
 /**
@@ -3738,7 +3738,7 @@ extern void* cKeyboardPopup_vtbl[];
  * Runs the cUIState constructor (cUIState_cUIState1), stores @p CtrlBits in mCtrlBits and @p Password in mbPassword, clears the edit
  * string (+0x74), cursor, view range and flags (mbPopOnEnd 1, mbCapsOn 1), stores cKeyboardPopup_vtbl, miCurrentKey
  * 0x1D, mszStatic = the empty string, miMaxCharacters 63, meSkipState 2 (both), miLastKey 0x2B and meType 1
- * (compact); resets the cBXString at +0x424 and clears the static texts and the three backgrounds. When D_004A33F0
+ * (compact); resets the cBXString at +0x424 and clears the static texts and the three backgrounds. When Keyboard
  * is set, mbCapsOn comes from bit 1 of its word +0x88. Ends with cKeyboardPopup_fillSelectableKeys().
  *
  * @param engine  the UI engine (On Tour pEngine)
@@ -3770,7 +3770,7 @@ extern "C" void* cKeyboardPopup_cKeyboardPopup(cKeyboardPopup* self, cUIEngine* 
     self->mszStatic = (char*)defaultStr;
     self->miMaxCharacters = 0x3F;
     cBXString_Reset((char*)&self->mszStatic);
-    void* bx = D_004A33F0;
+    void* bx = Keyboard;
     self->meSkipState = 2;
     self->miLastKey = 43;
     self->meType = 1;
@@ -4036,14 +4036,14 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_kbMoveLeft);
 #ifdef SKIP_ASM
 // PORT: cKeyboardPopup_allowSelection's third parameter is an int* out-param; the unit declares it (void*, int, int).
 int cKeyboardPopup_allowSelection_out(void* self, int idx, int* out) __asm__("cKeyboardPopup_allowSelection");
-extern signed char D_00441390[];
+extern signed char cKeyboardPopup_m_KeyValues[];
 
 /**
  * Moves the keyboard cursor one key left, wrapping within the 14-key row and skipping blank and disabled keys.
  *
  * The case (caps XOR shift; keys 15-26 use !shift) decides which key set a refused key falls back to. With @p bControllerInput
  * set it saves miCurrentKey in miLastKey and sets meLastDirection to left (2); if the previous move was right (3)
- * it simply returns to miLastKey's old value. Otherwise column 0 wraps to 13, '*' (blank) keys of D_00441390 are
+ * it simply returns to miLastKey's old value. Otherwise column 0 wraps to 13, '*' (blank) keys of cKeyboardPopup_m_KeyValues are
  * skipped leftwards, and a key cKeyboardPopup_allowSelection refuses is passed over by moving again (with @p bControllerInput 0),
  * setting meSkipState to the other case when the key exists in it.
  *
@@ -4079,7 +4079,7 @@ extern "C" void cKeyboardPopup_kbMoveLeft(cKeyboardPopup* self, int bControllerI
         self->miCurrentKey += 13;
     else
         self->miCurrentKey = curKey - 1;
-    while (D_00441390[self->miCurrentKey] == 42)
+    while (cKeyboardPopup_m_KeyValues[self->miCurrentKey] == 42)
         self->miCurrentKey -= 1;
     int val;
     if (cKeyboardPopup_allowSelection_out(self, self->miCurrentKey, &val)) {
@@ -4097,7 +4097,7 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_kbMoveRight);
 #ifdef SKIP_ASM
 // PORT: cKeyboardPopup_allowSelection's third parameter is an int* out-param; the unit declares it (void*, int, int).
 int cKeyboardPopup_allowSelection_out(void* self, int idx, int* out) __asm__("cKeyboardPopup_allowSelection");
-extern signed char D_00441390[];
+extern signed char cKeyboardPopup_m_KeyValues[];
 
 /**
  * Moves the keyboard cursor one key right, wrapping within the 14-key row and skipping blank and disabled keys.
@@ -4147,7 +4147,7 @@ extern "C" void cKeyboardPopup_kbMoveRight(cKeyboardPopup* self, int bController
         self->miCurrentKey -= 13;
     else
         self->miCurrentKey = curKey + 1;
-    while (D_00441390[self->miCurrentKey] == 42)
+    while (cKeyboardPopup_m_KeyValues[self->miCurrentKey] == 42)
         self->miCurrentKey += 1;
     int val;
     if (cKeyboardPopup_allowSelection_out(self, self->miCurrentKey, &val)) {
@@ -4165,7 +4165,7 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_kbMoveUp);
 #ifdef SKIP_ASM
 // PORT: cKeyboardPopup_allowSelection's third parameter is an int* out-param; the unit declares it (void*, int, int).
 int cKeyboardPopup_allowSelection_out(void* self, int idx, int* out) __asm__("cKeyboardPopup_allowSelection");
-extern signed char D_00441390[];
+extern signed char cKeyboardPopup_m_KeyValues[];
 extern "C" int cKeyboardPopup_handleMovementUpFromQuickKeyRow(cKeyboardPopup* self, int a1);
 extern "C" int cKeyboardPopup_handleMovementUpFromNumberRow(cKeyboardPopup* self, int a1);
 extern "C" int cKeyboardPopup_handleMovementUpFromLast(cKeyboardPopup* self, int a1);
@@ -4228,7 +4228,7 @@ extern "C" void cKeyboardPopup_kbMoveUp(cKeyboardPopup* self, int bControllerInp
         self->miCurrentKey = curKey + 70;
     else
         self->miCurrentKey -= 14;
-    while (D_00441390[self->miCurrentKey] == 42)
+    while (cKeyboardPopup_m_KeyValues[self->miCurrentKey] == 42)
         self->miCurrentKey -= 1;
     int val;
     if (cKeyboardPopup_allowSelection_out(self, self->miCurrentKey, &val)) {
@@ -4246,7 +4246,7 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_kbMoveDown);
 #ifdef SKIP_ASM
 // PORT: cKeyboardPopup_allowSelection's third parameter is an int* out-param; the unit declares it (void*, int, int).
 int cKeyboardPopup_allowSelection_out(void* self, int idx, int* out) __asm__("cKeyboardPopup_allowSelection");
-extern signed char D_00441390[];
+extern signed char cKeyboardPopup_m_KeyValues[];
 extern "C" int cKeyboardPopup_handleMovementDownFromQuickKeyRow(cKeyboardPopup* self, int a1);
 extern "C" int cKeyboardPopup_handleMovementDownFromLast(cKeyboardPopup* self, int a1);
 extern "C" int cKeyboardPopup_handleMovementDownToLast(cKeyboardPopup* self, int a1);
@@ -4257,7 +4257,7 @@ extern "C" int cKeyboardPopup_handleMovementDownToLast(cKeyboardPopup* self, int
  * With controller input it first remembers the key and direction, and returns to the key it came from when
  * the previous direction was 0 (probably up), meSkipState allows it and that key is selectable. The quick-key
  * row, the shift row (56-69) and the last row (70-83) have their own handlers; other keys move 14 down (the
- * last row wraps to the top) past gaps in D_00441390. When the new key is not selectable it moves on
+ * last row wraps to the top) past gaps in cKeyboardPopup_m_KeyValues. When the new key is not selectable it moves on
  * recursively and updates meSkipState.
  *
  * @param bControllerInput  nonzero for a move from the pad (not a recursive skip)
@@ -4308,7 +4308,7 @@ extern "C" void cKeyboardPopup_kbMoveDown(cKeyboardPopup* self, int bControllerI
         self->miCurrentKey = updatedKey - 70;
     else
         self->miCurrentKey = updatedKey + 14;
-    while (D_00441390[self->miCurrentKey] == 42)
+    while (cKeyboardPopup_m_KeyValues[self->miCurrentKey] == 42)
         self->miCurrentKey += 1;
     int val;
     if (cKeyboardPopup_allowSelection_out(self, self->miCurrentKey, &val)) {
@@ -4989,13 +4989,13 @@ extern "C" void cKeyboardPopup_AddAsciiEdit(cKeyboardPopup* self, int value)
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_updateToAscii);
 #ifdef SKIP_ASM
 extern "C" int cKeyboardPopup_allowSelection(cKeyboardPopup*, int, int);
-extern signed char D_00441390[];
-extern signed char D_004413E8[];
+extern signed char cKeyboardPopup_m_KeyValues[];
+extern signed char cKeyboardPopup_m_AltValues[];
 
 /**
  * Moves the on-screen keyboard's cursor to the key that types a given character.
  *
- * '`' selects key 0xE. Otherwise the first of the 0x54 keys whose upper (D_00441390) or lower (D_004413E8) character
+ * '`' selects key 0xE. Otherwise the first of the 0x54 keys whose upper (cKeyboardPopup_m_KeyValues) or lower (cKeyboardPopup_m_AltValues) character
  * matches is taken, skipping '*' keys and keys that are '@' in both tables; it becomes miCurrentKey when
  * cKeyboardPopup_allowSelection allows it.
  *
@@ -5011,8 +5011,8 @@ extern "C" int cKeyboardPopup_updateToAscii(cKeyboardPopup* self, int value)
         return 1;
     }
     for (i = 0; i < 84; i++) {
-        if ((D_00441390[i] == asciiChar || D_004413E8[i] == asciiChar) && D_00441390[i] != '*'
-            && (D_00441390[i] != '@' || D_004413E8[i] != D_00441390[i])) {
+        if ((cKeyboardPopup_m_KeyValues[i] == asciiChar || cKeyboardPopup_m_AltValues[i] == asciiChar) && cKeyboardPopup_m_KeyValues[i] != '*'
+            && (cKeyboardPopup_m_KeyValues[i] != '@' || cKeyboardPopup_m_AltValues[i] != cKeyboardPopup_m_KeyValues[i])) {
             if (cKeyboardPopup_allowSelection((cKeyboardPopup*)self, i, 0)) {
                 self->miCurrentKey = i;
                 return 1;
@@ -5028,13 +5028,13 @@ extern "C" int cKeyboardPopup_updateToAscii(cKeyboardPopup* self, int value)
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_AddCharacterEdit);
 #ifdef SKIP_ASM
 extern "C" void cKeyboardPopup_AddAsciiEdit(cKeyboardPopup* self, int value);
-extern signed char D_00441390[];
-extern signed char D_004413E8[];
+extern signed char cKeyboardPopup_m_KeyValues[];
+extern signed char cKeyboardPopup_m_AltValues[];
 
 /**
  * Types the current key's character into the edit string (cKeyboardPopup_AddAsciiEdit).
  *
- * Uses the first table (D_00441390: digits, upper case) when shift and caps lock differ, else the second (D_004413E8:
+ * Uses the first table (cKeyboardPopup_m_KeyValues: digits, upper case) when shift and caps lock differ, else the second (cKeyboardPopup_m_AltValues:
  * symbols, lower case); keys 15-26 (the number row) follow shift alone.
  */
 extern "C" void cKeyboardPopup_AddCharacterEdit(cKeyboardPopup* self)
@@ -5052,9 +5052,9 @@ extern "C" void cKeyboardPopup_AddCharacterEdit(cKeyboardPopup* self)
         flag = !*(bool*)&self->mbShiftOn;
     }
     if (flag) {
-        cKeyboardPopup_AddAsciiEdit(self, D_00441390[idx]);
+        cKeyboardPopup_AddAsciiEdit(self, cKeyboardPopup_m_KeyValues[idx]);
     } else {
-        cKeyboardPopup_AddAsciiEdit(self, D_004413E8[idx]);
+        cKeyboardPopup_AddAsciiEdit(self, cKeyboardPopup_m_AltValues[idx]);
     }
 }
 #endif
@@ -5488,7 +5488,7 @@ extern char str_Qpct_d_b[];
  *
  * The name is "keyboard_" or "cursor_" plus the key's name: "back", "caps", "Lshift", "clear", "arrLeft",
  * "arrRight", "tab", "enter", "arrUp", "arrDown", "space" and "ESC" for the special keys, "Q1" to "Q10" for
- * keys 4-13, otherwise the key's character from D_00441390.
+ * keys 4-13, otherwise the key's character from cKeyboardPopup_m_KeyValues.
  *
  * @param key  the key index, 0-83
  * @param out  receives the name
@@ -5523,10 +5523,10 @@ extern "C" int cKeyboardPopup_getObjName(cKeyboardPopup* self, int key, char* ou
         strcat(out, num);
         break;
     default:
-        if (D_00441390[key] == '*') {
+        if (cKeyboardPopup_m_KeyValues[key] == '*') {
             return 0;
         }
-        ch[0] = D_00441390[key];
+        ch[0] = cKeyboardPopup_m_KeyValues[key];
         ch[1] = 0;
         strcat(out, ch);
         break;
@@ -5576,7 +5576,7 @@ extern "C" void cKeyboardPopup_updateCursor(cKeyboardPopup* self);
 extern "C" void cBXString_Reset(void* self);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 void cMemMan_free(void* ptr);
-extern void* D_004A33F0;
+extern void* Keyboard;
 extern char str_regular[];
 extern char str_compact[];
 extern char str_expanded[];
@@ -5611,7 +5611,7 @@ static inline void SetVis_D348(char* o, int on)
 /**
  * Prepares the keyboard the first time it is shown: layout, measurements and the initial texts.
  *
- * Sets mbTransistionDone, turns caps on (or takes bit 1 of D_004A33F0 + 0x88 when that exists) and shift off,
+ * Sets mbTransistionDone, turns caps on (or takes bit 1 of Keyboard + 0x88 when that exists) and shift off,
  * clears the text unless one was set, shows the background for meType (0 "regular", 2 "expanded", else
  * "compact") and plays that label's frame. It measures "CharacterCursor" and "EnterValue" (offset by "Name
  * bar"), hides the extend arrows, re-applies a pending input text and the pending static text (string id,
@@ -5626,8 +5626,8 @@ extern "C" int cKeyboardPopup_onGainTransition(cKeyboardPopup* self, int first)
         char buf[16];
         (self)->mbTransistionDone = 1;
         (self)->mbCapsOn = 1;
-        if (D_004A33F0 != 0) {
-            (self)->mbCapsOn = (*(unsigned int*)((char*)D_004A33F0 + 0x88) >> 1) & 1;
+        if (Keyboard != 0) {
+            (self)->mbCapsOn = (*(unsigned int*)((char*)Keyboard + 0x88) >> 1) & 1;
         }
         self->mbShiftOn = 0;
         if (self->mbSetInputText == 0) {
@@ -5740,8 +5740,8 @@ struct sVEntry_D708 {
 extern "C" int cKeyboardPopup_getObjName(cKeyboardPopup* self, int i, char* out, int mode);
 extern "C" void cKeyboardPopup_SetNameForKey(cKeyboardPopup* self, cUIText* text, int i);
 extern "C" void cKeyboardPopup_checkAndFixConflict(cKeyboardPopup* self);
-extern signed char D_00441390[];
-extern signed char D_004413E8[];
+extern signed char cKeyboardPopup_m_KeyValues[];
+extern signed char cKeyboardPopup_m_AltValues[];
 extern char D_004C67B8[];
 extern char D_004C67C8[];
 extern char D_004C67E8[];
@@ -5768,7 +5768,7 @@ extern "C" void cKeyboardPopup_redrawScreen(cKeyboardPopup* self)
             continue;
         }
         cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
-        if (D_00441390[i] == '@' || D_00441390[i] == ' ') {
+        if (cKeyboardPopup_m_KeyValues[i] == '@' || cKeyboardPopup_m_KeyValues[i] == ' ') {
             cKeyboardPopup_SetNameForKey(self, text, i);
         } else {
             int caps = self->mbCapsOn != 0;
@@ -5783,9 +5783,9 @@ extern "C" void cKeyboardPopup_redrawScreen(cKeyboardPopup* self)
             }
             cKeyboardPopup_checkAndFixConflict(self);
             if (upper) {
-                ch[0] = D_00441390[i];
+                ch[0] = cKeyboardPopup_m_KeyValues[i];
             } else {
-                ch[0] = D_004413E8[i];
+                ch[0] = cKeyboardPopup_m_AltValues[i];
             }
             if (text != 0) {
                 cUIText_setAsciiString(text, ch);
@@ -6182,12 +6182,12 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_fillSelectableKeys);
 extern "C" void cKeyboardPopup_setIncludeKey(cKeyboardPopup* self, int i, int v, int mode);
 extern "C" void cKeyboardPopup_setIncludeQuickKeyRow(cKeyboardPopup* self, int a1);
 extern "C" int strlen(const char* s);
-extern signed char D_00441390[];
+extern signed char cKeyboardPopup_m_KeyValues[];
 
 /**
  * Sets which of the 84 keyboard keys can be selected in both key sets, then refreshes the key display.
  *
- * Excludes the blank keys ('*' in D_00441390) and keys 0x1C, 0x29, 0x45 and 0x4F; key 0x4B (space) is included only
+ * Excludes the blank keys ('*' in cKeyboardPopup_m_KeyValues) and keys 0x1C, 0x29, 0x45 and 0x4F; key 0x4B (space) is included only
  * when the edit string is not empty and mbDisableForFirst is set; every other key is included
  * (cKeyboardPopup_setIncludeKey(key, on, 2)). Ends with cKeyboardPopup_setIncludeQuickKeyRow(self, 0).
  */
@@ -6195,7 +6195,7 @@ extern "C" void cKeyboardPopup_fillSelectableKeys(cKeyboardPopup* self)
 {
     int i;
     for (i = 0; i < 84; i++) {
-        if (D_00441390[i] == '*' || i == 0x1C) {
+        if (cKeyboardPopup_m_KeyValues[i] == '*' || i == 0x1C) {
             cKeyboardPopup_setIncludeKey((cKeyboardPopup*)self, i, 0, 2);
         } else if (i == 69 || i == 79 || i == 41) {
             cKeyboardPopup_setIncludeKey((cKeyboardPopup*)self, i, 0, 2);
@@ -6419,12 +6419,12 @@ struct sPopupSlot_E6F0 {
     signed char pad;
 };
 
-extern sPopupSlot_E6F0 D_0045AAD8[][4][5];
+extern sPopupSlot_E6F0 gMedalsInfo[][4][5];
 
 /**
- * Counts the events listed for one peak of one mountain in the event table D_0045AAD8.
+ * Counts the events listed for one peak of one mountain in the event table gMedalsInfo.
  *
- * Looks at the five entries D_0045AAD8[@p mountain][@p peak][0..4] and counts them up to the first whose first byte (the event's
+ * Looks at the five entries gMedalsInfo[@p mountain][@p peak][0..4] and counts them up to the first whose first byte (the event's
  * track/kind selector) is negative. Used by the trophy room (cFEStateTrophyRoom_onWidgetCreate) and the lodge
  * (cFEStatePeakRoom_updateMedalsList) to size their event rows.
  *
@@ -6436,7 +6436,7 @@ extern "C" int func_001CE6F0(int mountain, int peak)
 {
     int n = 0;
     for (int i = 0; i < 5; i++) {
-        if (D_0045AAD8[mountain][peak][i].id >= 0) {
+        if (gMedalsInfo[mountain][peak][i].id >= 0) {
             n++;
         } else {
             break;

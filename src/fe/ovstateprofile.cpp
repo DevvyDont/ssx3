@@ -422,7 +422,7 @@ struct sCol_1380 {
     float r, g, b, a;
 };
 
-extern sCol_1380 D_004C66C8_1380 __asm__("D_004C66C8");
+extern sCol_1380 D_004C66C8_1380 __asm__("gStaticColour");
 
 static inline cUIObj_1380* getObj_1380(cState_1380* self, char* name)
 {
@@ -438,7 +438,7 @@ static inline cUIObj_1380* getObj_1380(cState_1380* self, char* name)
  * callbackDisplayNoCards) and falls back to cOVState_PROFILE_displayOff; otherwise it switches to display state 3
  * (cFEMemCard_triggerDisplayState, virtual slot 35) if not there yet. Then, still allowed: writes the device name of
  * mSelectedDevice (cMCOverlayManager_GetDeviceDisplayString) into "Memory card text", stores mSelectedDevice at +0x21C
- * (On Tour mLastSelectedDevice), runs cFEMemCard_setMenuHighlight (slot 43), colours "1percentage" with D_004C66C8,
+ * (On Tour mLastSelectedDevice), runs cFEMemCard_setMenuHighlight (slot 43), colours "1percentage" with gStaticColour,
  * fills it from card slot 64 and hides it (slot 9). Each "player%d" button 1-6 gets the name of card file i - 1 (card
  * slot 14, through the 16-bit buffer at +0x234), and its state from the card: when slots 67 and 66 both say no for that
  * file and slot 55 says yes, the first such button is made selectable (setStatic(0), slot 8) and later ones static
@@ -1247,7 +1247,7 @@ extern "C" void cOVState_AUTOSAVE_updateDone(cOVState_AUTOSAVE* self)
 //100%
 INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_onDestroyScreen);
 #ifdef SKIP_ASM
-extern int D_004A11B8;
+extern int cBENewRaceInterface_bIsBamLocation;
 extern char str_cFEStateTitle_b[];
 extern char str_cFEStateLodge_b[];
 extern char str_cPreGameLoadScreen_b[];
@@ -1273,7 +1273,7 @@ struct sVEnt_00212508 { short delta; short index; void (*fn)(void*); };
  *
  * After cFEMemCard_onDestroyScreen (the shared memory card teardown) it switches on +0x22C (the constructor's parent
  * code): 1 exits the game, 6 pushes cFEStateTitle, 7 pushes cFEStateLodge, 0 sets up a new race (game mode 4,
- * event 0xC, the last hub into newRace.iLocationIdx, D_004A11B8 = 1) and makes cPreGameLoadScreen the next module.
+ * event 0xC, the last hub into newRace.iLocationIdx, cBENewRaceInterface_bIsBamLocation = 1) and makes cPreGameLoadScreen the next module.
  */
 extern "C" void cOVState_AUTOSAVE_onDestroyScreen(cOVState_AUTOSAVE* self)
 {
@@ -1293,7 +1293,7 @@ extern "C" void cOVState_AUTOSAVE_onDestroyScreen(cOVState_AUTOSAVE* self)
         cBENewRaceInterface_setGameMode(race, 4);
         cBENewRaceInterface_setGameEvent(race, 0xC);
         cBENewRaceInterface_newRace.iLocationIdx = cBENewPlayerInterface_getLastHub(player, 0);
-        D_004A11B8 = 1;
+        cBENewRaceInterface_bIsBamLocation = 1;
         sVEnt_00212508* vt = *(sVEnt_00212508**)((char*)race + 0xC);
         vt[1].fn((char*)race + vt[1].delta);
         cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen_b, 0x100, 0)));

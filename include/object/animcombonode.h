@@ -17,7 +17,7 @@
 // [R] the ctors build cAnimObjectNode on +0x18 (cAnimObjectNode_cAnimObjectNode1 / _cAnimObjectNode), store the vtable
 // at
 // +0x54, the replay ctor and writeToReplayFrame move 0x18 bytes at +0x0, cacheFrame calls cAnimNode_cacheFrame(+0x34),
-// updateIntersectInfo/loseFocus call cMoveNode/cInstanceNode methods on +0x48; the vtable D_0048EC28 (52 slots) gives
+// updateIntersectInfo/loseFocus call cMoveNode/cInstanceNode methods on +0x48; the vtable cAnimComboNode_vtbl (52 slots) gives
 // cAnimComboNode's slots delta -0x48, cAnimObjectNode's -0x30 and cAnimNode's -0x14 (from the cMoveNode part).
 // getNodeState returns this (the state block). Retail bools are words except cAnimComboNodeState's chars, so
 // cAnimObjectNodeState is 0x1C (On Tour 0x14) and cObjNode has its extra leading word: cAnimNode starts at 0x34 (On
@@ -88,7 +88,7 @@ struct cAnimComboNode {
                                     //       node ctor
     cObjNode* Next;                 // 0x4C [O] cObjNode::Next; [U] bucket list
     cObjNode* Prev;                 // 0x50 [O] cObjNode::Prev; [U] bucket list
-    void** mVtbl;                   // 0x54 [R] D_0048EC28 (both ctors and the dtor)
+    void** mVtbl;                   // 0x54 [R] cAnimComboNode_vtbl (both ctors and the dtor)
     short ObjNodeType;              // 0x58 [P] getType (lh); [O] cTypeObjNodeState; [R] node type 3 (passed to
                                     //       cAnimObjectNode)
     unsigned short Flags;           // 0x5A [O]; [P] bit 0 = RootTransformDirty; [U] updateNode sets bit 0 (lhu/sh)

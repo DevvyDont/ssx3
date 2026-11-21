@@ -1947,7 +1947,7 @@ struct sMemAllocFuncs_2534A8 {
     int field_0x8;
 };
 // Typed view of the allocator table (the unit defines sMemAllocFuncs later).
-extern sMemAllocFuncs_2534A8 D_00509430_2534A8 __asm__("D_00509430");
+extern sMemAllocFuncs_2534A8 D_00509430_2534A8 __asm__("RCMP_rcmp_sys");
 extern char D_004A2E98[];
 extern "C" void* func_003ADE08(void* mem, int a1, int a2, char* name, int a4, int a5, int a6);
 extern "C" void* func_003ADDC0(void* mem, int a1, int a2, int a3, int a4);
@@ -1970,7 +1970,7 @@ extern "C" int cMoviePlayer_init_impl(void* self, sMemCfg_2534A8* cfg) __asm__("
  * REAL decoder (+0x38).
  *
  * Copies the options' play speed (+0x34) to the speed (+0x10). The decoder memory (0x78 bytes) comes from the movie
- * allocator table D_00509430. With an audio file name (+0x18, non-empty) it builds the decoder with func_003ADE08
+ * allocator table RCMP_rcmp_sys. With an audio file name (+0x18, non-empty) it builds the decoder with func_003ADE08
  * (video +0x14, 0x60000, audio file, 0x20000), else with func_003ADDC0 (video, 0x80000); both also get whether the
  * options word +0x24 is set and whether the word +0x1C is clear. Callers then start it with cMoviePlayer_asyncPlay.
  *
@@ -2344,18 +2344,18 @@ struct sMemAllocFuncs {
     void* (*free)(void*);   // 0x4
     int field_0x8;          // 0x8
 };
-extern sMemAllocFuncs D_00509430;
+extern sMemAllocFuncs RCMP_rcmp_sys;
 
 /**
- * Installs the movie memory callbacks in D_00509430: allocate cMoviePlayer_SSXAllocMemFunc, free cMoviePlayer_SSXFreeMemFunc, memory type 0x400.
+ * Installs the movie memory callbacks in RCMP_rcmp_sys: allocate cMoviePlayer_SSXAllocMemFunc, free cMoviePlayer_SSXFreeMemFunc, memory type 0x400.
  *
  * The decoder and video driver code allocate through this table.
  */
 extern "C" void cMoviePlayer_SetSSXREALDefaults()
 {
-    D_00509430.alloc = cMoviePlayer_SSXAllocMemFunc;
-    D_00509430.free = cMoviePlayer_SSXFreeMemFunc;
-    D_00509430.field_0x8 = 0x400;
+    RCMP_rcmp_sys.alloc = cMoviePlayer_SSXAllocMemFunc;
+    RCMP_rcmp_sys.free = cMoviePlayer_SSXFreeMemFunc;
+    RCMP_rcmp_sys.field_0x8 = 0x400;
 }
 #endif
 
@@ -2550,7 +2550,7 @@ extern "C" void* func_00254410(void* self, void* a0, int a1, int a2, int a3);
 typedef void* (*tMemAlloc5_00254368)(void*, int, int, int, int);
 
 /**
- * Creates the movie's video driver: allocates 84 bytes from the movie allocator table D_00509430 and constructs the
+ * Creates the movie's video driver: allocates 84 bytes from the movie allocator table RCMP_rcmp_sys and constructs the
  * tiled-texture driver in it (func_00254410).
  *
  * @param framesDecoder  the decoder (handed to RCMP_DECODER_ReleaseFrame later)
@@ -2561,7 +2561,7 @@ typedef void* (*tMemAlloc5_00254368)(void*, int, int, int, int);
  */
 extern "C" void* SSX_VD_create(void* framesDecoder, int firstFrame, int graphicsMan, int drawLayer)
 {
-    void* driverMem = ((tMemAlloc5_00254368)D_00509430.alloc)(D_004A2EA0, 84, 0, 0, D_00509430.field_0x8);
+    void* driverMem = ((tMemAlloc5_00254368)RCMP_rcmp_sys.alloc)(D_004A2EA0, 84, 0, 0, RCMP_rcmp_sys.field_0x8);
     return func_00254410(driverMem, framesDecoder, firstFrame, graphicsMan, drawLayer);
 }
 #endif
@@ -2611,7 +2611,7 @@ struct sMemAlloc_4410 {
     void* (*free)(void* p);
     int flags;
 };
-extern sMemAlloc_4410 D_00509430_4410 __asm__("D_00509430");
+extern sMemAlloc_4410 D_00509430_4410 __asm__("RCMP_rcmp_sys");
 extern void* D_00480270[];
 extern char str_VD_VD_TEXTURE_POINTER[];
 extern char D_004A2EA0[];
@@ -2781,7 +2781,7 @@ struct sTexCache_2547B8 {
 
 /**
  * Destroys the tiled-texture video driver: removes each tile's texture (graphics manager slot 50,
- * cPS2GraphicsMan_RemoveTexture), marks it -1 and frees the tile through D_00509430, frees the tile table
+ * cPS2GraphicsMan_RemoveTexture), marks it -1 and frees the tile through RCMP_rcmp_sys, frees the tile table
  * (cMemMan_free), returns a held frame (+0xC) to the decoder (RCMP_DECODER_ReleaseFrame), installs the base vtable
  * D_004802B0 and, when @p flags bit 0 is set, frees the object through the movie free hook.
  *
@@ -2797,7 +2797,7 @@ extern "C" void func_002547B8(sTexCache_2547B8* self, int flags)
         if (tileEntry != 0) {
             ((sRVEntry_2547B8*)cGraphicsMan_TheGraphicsMan->mVtbl)[50].fn((char*)cGraphicsMan_TheGraphicsMan + ((sRVEntry_2547B8*)cGraphicsMan_TheGraphicsMan->mVtbl)[50].delta, *tileEntry);
             *tileEntry = -1;
-            D_00509430.free(tileEntry);
+            RCMP_rcmp_sys.free(tileEntry);
         }
     }
     if (self->texs != 0) {
@@ -3305,7 +3305,7 @@ extern "C" void* func_00254E60(int, int);
 INCLUDE_ASM("mem/memstd", func_00255670);
 #ifdef SKIP_ASM
 /**
- * Allocates @p allocSize bytes through the movie allocator table (D_00509430's allocate with name D_004A2EA0 and memory type
+ * Allocates @p allocSize bytes through the movie allocator table (RCMP_rcmp_sys's allocate with name D_004A2EA0 and memory type
  * +0x8); the video driver's class operator new.
  *
  * The result is left in the return register.
@@ -3313,7 +3313,7 @@ INCLUDE_ASM("mem/memstd", func_00255670);
  * @param allocSize  bytes wanted
  */
 extern "C" void func_00255670(int allocSize) {
-    (*(int (**)(int *, int, int, int, int))((char*)((int*)&D_00509430) + (0)))((int*)&D_004A2EA0, allocSize, 0, 0, (*(int *)((char*)((int*)&D_00509430) + (8))));
+    (*(int (**)(int *, int, int, int, int))((char*)((int*)&RCMP_rcmp_sys) + (0)))((int*)&D_004A2EA0, allocSize, 0, 0, (*(int *)((char*)((int*)&RCMP_rcmp_sys) + (8))));
 }
 #endif
 //100%
@@ -3325,7 +3325,7 @@ INCLUDE_ASM("mem/memstd", func_002556B0);
  * @param allocSize  bytes wanted
  */
 extern "C" void func_002556B0(int allocSize) {
-    (*(int (**)(int *, int, int, int, int))((char*)((int*)&D_00509430) + (0)))((int*)&D_004A2EA0, allocSize, 0, 0, (*(int *)((char*)((int*)&D_00509430) + (8))));
+    (*(int (**)(int *, int, int, int, int))((char*)((int*)&RCMP_rcmp_sys) + (0)))((int*)&D_004A2EA0, allocSize, 0, 0, (*(int *)((char*)((int*)&RCMP_rcmp_sys) + (8))));
 }
 #endif
 //100%
@@ -3343,7 +3343,7 @@ INCLUDE_ASM("mem/memstd", func_002556F0);
  */
 extern "C" void func_002556F0(int size, void* tag, int align, int hdrSize, int flags)
 {
-    ((tMemAlloc5_00254368)D_00509430.alloc)(tag, size, align, hdrSize, flags);
+    ((tMemAlloc5_00254368)RCMP_rcmp_sys.alloc)(tag, size, align, hdrSize, flags);
 }
 #endif
 //100%
@@ -3361,7 +3361,7 @@ INCLUDE_ASM("mem/memstd", func_00255720);
  */
 extern "C" void func_00255720(int size, void* tag, int align, int hdrSize, int flags)
 {
-    ((tMemAlloc5_00254368)D_00509430.alloc)(tag, size, align, hdrSize, flags);
+    ((tMemAlloc5_00254368)RCMP_rcmp_sys.alloc)(tag, size, align, hdrSize, flags);
 }
 #endif
 //100%

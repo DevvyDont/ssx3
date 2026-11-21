@@ -846,10 +846,10 @@ struct sLmCtx_EE78 {
 extern sLmMat_EE78 D_00504D80_EE78[] __asm__("D_00504D80");
 extern sLmMat_EE78 t4mat_Identity;
 extern float t4vect_ZAxis[3];
-extern int D_004A445C;
-extern float D_004A4448;
-extern float D_004A444C;
-extern float D_004A4450;
+extern int cPlants_m_SwayFrequency;
+extern float cPlants_m_SwayAmplitude;
+extern float cPlants_m_SwayOffset;
+extern float cPlants_m_BranchAmplitude;
 extern float D_004A4454;
 extern float D_004A4460;
 extern float D_004A4464;
@@ -958,8 +958,8 @@ static inline void lmMulIn_EE78(void* m, const void* b)
 /**
  * Rebuilds the eight plant sway matrices D_00504D80[0..7] from the cPlants tweak values and the frame count.
  *
- * With t = vtable slot 114 (getCurrentFrameCount) and f = i / 8 for matrix i: sway = D_004A4448 ("Sway Amplitude") *
- * sin(f + t * D_004A445C / 600) + D_004A444C; branch = D_004A4450 * sin(f * D_004A4468 / 600 + sin(f + t * D_004A4464 /
+ * With t = vtable slot 114 (getCurrentFrameCount) and f = i / 8 for matrix i: sway = cPlants_m_SwayAmplitude ("Sway Amplitude") *
+ * sin(f + t * cPlants_m_SwayFrequency / 600) + cPlants_m_SwayOffset; branch = cPlants_m_BranchAmplitude * sin(f * D_004A4468 / 600 + sin(f + t * D_004A4464 /
  * 600)); angle = D_004A4454 * sin(f + t * D_004A4460 / 600).
  *
  * Each matrix is S * R (row vectors): S is an identity whose z row adds sway * (sin, cos) of D_004A446C ("Sway
@@ -982,9 +982,9 @@ extern "C" void cPlants_update(void)
     for (i = 0; i < 8; i++) {
         sLmMat_EE78* pm = &branchMat;
         float fi = (float)i * 0.125f;
-        float amp = D_004A4448 * fSin(fi + frameClock * (float)D_004A445C * 0.0016666667f) + D_004A444C;
+        float amp = cPlants_m_SwayAmplitude * fSin(fi + frameClock * (float)cPlants_m_SwayFrequency * 0.0016666667f) + cPlants_m_SwayOffset;
         float branchPhase = fSin(fi + frameClock * D_004A4464 * 0.0016666667f);
-        float amp2 = D_004A4450 * fSin(fi * D_004A4468 * 0.0016666667f + branchPhase);
+        float amp2 = cPlants_m_BranchAmplitude * fSin(fi * D_004A4468 * 0.0016666667f + branchPhase);
         float angle = D_004A4454 * fSin(fi + frameClock * D_004A4460 * 0.0016666667f);
         lmCopy_EE78(&branchMat, &t4mat_Identity);
         fSinCos(&sinAngle, &cosAngle, angle);
@@ -1031,7 +1031,7 @@ extern "C" void cPlants_update(void)
 //100%
 INCLUDE_ASM("render/lightman", cPlants_getDeformationMatrix);
 #ifdef SKIP_ASM
-extern float D_004A4458;
+extern float cPlants_m_PositionScale;
 
 struct sLmCell_F2A8 {
     char data[0x40];
@@ -1039,9 +1039,9 @@ struct sLmCell_F2A8 {
 extern sLmCell_F2A8 D_00504D80[];
 
 /**
- * Picks the plant sway matrix for a position: D_00504D80[(int)(D_004A4458 * sqrt(x * x + y * y)) % 8].
+ * Picks the plant sway matrix for a position: D_00504D80[(int)(cPlants_m_PositionScale * sqrt(x * x + y * y)) % 8].
  *
- * D_004A4458 is the "Position Scale" tweak. Caller: cGraphicsMan_DeformMeshMatrix.
+ * cPlants_m_PositionScale is the "Position Scale" tweak. Caller: cGraphicsMan_DeformMeshMatrix.
  *
  * @param pos  the position (x and y are used)
  * @return the address of one of the eight matrices cPlants_update builds
@@ -1052,7 +1052,7 @@ extern "C" sLmCell_F2A8* cPlants_getDeformationMatrix(float* pos)
     float dist;
     // PORT: sqrt.s (sqrtf without errno check)
     __asm__("sqrt.s %0, %1" : "=f"(dist) : "f"(distSq));
-    int i = (int)(D_004A4458 * dist);
+    int i = (int)(cPlants_m_PositionScale * dist);
     return &D_00504D80[i % 8];
 }
 #endif
@@ -1968,8 +1968,8 @@ INCLUDE_ASM("render/lightman", func_003905E8);
 //100%
 INCLUDE_ASM("render/lightman", cRenderToggles_update);
 #ifdef SKIP_ASM
-extern int D_004A44C0;
-extern int D_004A44C8;
+extern int cRenderToggles_m_AIUpdatesPerRender;
+extern int cRenderToggles_m_ResetStats;
 
 struct sLmVEntry_0C20 {
     short delta;
@@ -1978,7 +1978,7 @@ struct sLmVEntry_0C20 {
 };
 
 /**
- * Passes D_004A44C0 (menu "AI Frames per Render Frame") to vtable slot 16 (func_00394008) and clears D_004A44C8 (menu
+ * Passes cRenderToggles_m_AIUpdatesPerRender (menu "AI Frames per Render Frame") to vtable slot 16 (func_00394008) and clears cRenderToggles_m_ResetStats (menu
  * "Reset Stats") when it is set.
  *
  * Slot 2 of vtable cRenderToggles_vtbl (the object allocated as "RenderToggles").
@@ -1987,9 +1987,9 @@ extern "C" void cRenderToggles_update()
 {
     cPS2GraphicsMan* mgr = cGraphicsMan_TheGraphicsMan;
     sLmVEntry_0C20* vt = (sLmVEntry_0C20*)mgr->mVtbl;
-    vt[16].fn((char*)mgr + vt[16].delta, D_004A44C0);
-    if (D_004A44C8 != 0) {
-        D_004A44C8 = 0;
+    vt[16].fn((char*)mgr + vt[16].delta, cRenderToggles_m_AIUpdatesPerRender);
+    if (cRenderToggles_m_ResetStats != 0) {
+        cRenderToggles_m_ResetStats = 0;
     }
 }
 #endif
@@ -1998,14 +1998,14 @@ extern "C" void cRenderToggles_update()
 INCLUDE_ASM("render/lightman", cScreenTint_update);
 #ifdef SKIP_ASM
 extern int cScreenTint_m_LightningEnable;
-extern int D_004A46B4;
-extern int D_004A4698;
-extern int D_004A469C;
-extern int D_004A4610;
+extern int cScreenTint_m_timeTillThunder;
+extern int cScreenTint_m_lightningFrame;
+extern int cScreenTint_m_lightningBrightness;
+extern int cScreenTint_m_FrameId;
 extern float cScreenTint_m_LightningChance;
-extern int D_004A4618;
-extern int D_004A461C;
-extern int D_004A4620;
+extern int cScreenTint_m_LightningFadeIn;
+extern int cScreenTint_m_LightningFadeOut;
+extern int cScreenTint_m_LightningFadeIn2;
 extern int D_004A4624;
 extern float D_004A4628;
 extern float D_004A462C;
@@ -2022,10 +2022,10 @@ extern float D_004A4654;
 extern float cScreenTint_m_ColourR;
 extern float cScreenTint_m_ColourG;
 extern float cScreenTint_m_ColourB;
-extern float D_004A46A0;
-extern float D_004A46A4;
-extern float D_004A46A8;
-extern int D_004A46AC;
+extern float cScreenTint_m_redColour;
+extern float cScreenTint_m_greenColour;
+extern float cScreenTint_m_blueColour;
+extern int cScreenTint_m_blendMode;
 int BXrand();
 extern "C" void func_00390EC8(float t);
 
@@ -2048,71 +2048,71 @@ static inline float RandRange_0C60(float lo, float hi)
  * Runs the lightning flash: counts down to thunder, may start a new flash, and sets the flash brightness and colour for
  * the current frame.
  *
- * Does nothing unless cScreenTint_m_LightningEnable. D_004A46B4 (frames until thunder) counts down to 0. While no flash
- * runs (D_004A4698 < 0) a random draw below cScreenTint_m_LightningChance squared starts one through func_00390EC8 with
- * a random distance of 2000 to 200000. Otherwise the frame advances (or holds at D_004A4610 when that is a valid frame)
- * and picks the phase: fade in over D_004A4618 frames to brightness D_004A4628 (colour D_004A4634..3C), hold for
- * D_004A461C, an inverse phase of D_004A4620 at D_004A462C (colour D_004A4640..48), and fade out over D_004A4624 from
+ * Does nothing unless cScreenTint_m_LightningEnable. cScreenTint_m_timeTillThunder (frames until thunder) counts down to 0. While no flash
+ * runs (cScreenTint_m_lightningFrame < 0) a random draw below cScreenTint_m_LightningChance squared starts one through func_00390EC8 with
+ * a random distance of 2000 to 200000. Otherwise the frame advances (or holds at cScreenTint_m_FrameId when that is a valid frame)
+ * and picks the phase: fade in over cScreenTint_m_LightningFadeIn frames to brightness D_004A4628 (colour D_004A4634..3C), hold for
+ * cScreenTint_m_LightningFadeOut, an inverse phase of cScreenTint_m_LightningFadeIn2 at D_004A462C (colour D_004A4640..48), and fade out over D_004A4624 from
  * D_004A4630 (colour D_004A464C..54); after that the frame returns to -1 with the tint colour cScreenTint_m_ColourR/G/B
- * and brightness 0. Each step sets blend mode D_004A46AC = 5.
+ * and brightness 0. Each step sets blend mode cScreenTint_m_blendMode = 5.
  *
  * Slot 2 of vtable cScreenTint_vtbl (the object allocated as "ScreenTint").
  */
-// PORT: D_004A469C holds a float (declared int elsewhere in the unit).
+// PORT: cScreenTint_m_lightningBrightness holds a float (declared int elsewhere in the unit).
 extern "C" void cScreenTint_update()
 {
     if (cScreenTint_m_LightningEnable == 0) {
         return;
     }
-    if (D_004A46B4 > 0) {
-        D_004A46B4--;
+    if (cScreenTint_m_timeTillThunder > 0) {
+        cScreenTint_m_timeTillThunder--;
     }
-    int lightFrame = D_004A4698;
-    int trig = D_004A4610;
+    int lightFrame = cScreenTint_m_lightningFrame;
+    int trig = cScreenTint_m_FrameId;
     if (lightFrame < 0) {
         if (RandF_0C60() < cScreenTint_m_LightningChance * cScreenTint_m_LightningChance) {
             func_00390EC8(RandRange_0C60(0.019999999552965164f, 2.0f) * 100000.0f);
         }
         return;
     }
-    if (trig < 0 || D_004A4618 + D_004A461C + D_004A4620 + D_004A4624 < trig) {
-        D_004A4698 = lightFrame + 1;
+    if (trig < 0 || cScreenTint_m_LightningFadeIn + cScreenTint_m_LightningFadeOut + cScreenTint_m_LightningFadeIn2 + D_004A4624 < trig) {
+        cScreenTint_m_lightningFrame = lightFrame + 1;
     } else {
-        D_004A4698 = trig;
+        cScreenTint_m_lightningFrame = trig;
     }
-    int cur = D_004A4698;
-    int fadeInFrames = D_004A4618;
+    int cur = cScreenTint_m_lightningFrame;
+    int fadeInFrames = cScreenTint_m_LightningFadeIn;
     if (cur <= fadeInFrames) {
-        *(float*)&D_004A469C = ((float)cur / (float)fadeInFrames) * D_004A4628;
-        D_004A46A0 = D_004A4634;
-        D_004A46A4 = D_004A4638;
-        D_004A46A8 = D_004A463C;
-        D_004A46AC = 5;
-    } else if (cur <= fadeInFrames + D_004A461C) {
-        *(float*)&D_004A469C = D_004A4628;
-        D_004A46A0 = D_004A4634;
-        D_004A46A4 = D_004A4638;
-        D_004A46A8 = D_004A463C;
-        D_004A46AC = 5;
-    } else if (cur <= fadeInFrames + D_004A461C + D_004A4620) {
-        *(float*)&D_004A469C = D_004A462C;
-        D_004A46A0 = D_004A4640;
-        D_004A46A4 = D_004A4644;
-        D_004A46A8 = D_004A4648;
-        D_004A46AC = 5;
-    } else if (cur <= fadeInFrames + D_004A461C + D_004A4620 + D_004A4624) {
-        *(float*)&D_004A469C = (1.0f - ((float)cur - (float)fadeInFrames - (float)D_004A461C - (float)D_004A4620) / (float)D_004A4624) * D_004A4630;
-        D_004A46A0 = D_004A464C;
-        D_004A46A4 = D_004A4650;
-        D_004A46A8 = D_004A4654;
-        D_004A46AC = 5;
+        *(float*)&cScreenTint_m_lightningBrightness = ((float)cur / (float)fadeInFrames) * D_004A4628;
+        cScreenTint_m_redColour = D_004A4634;
+        cScreenTint_m_greenColour = D_004A4638;
+        cScreenTint_m_blueColour = D_004A463C;
+        cScreenTint_m_blendMode = 5;
+    } else if (cur <= fadeInFrames + cScreenTint_m_LightningFadeOut) {
+        *(float*)&cScreenTint_m_lightningBrightness = D_004A4628;
+        cScreenTint_m_redColour = D_004A4634;
+        cScreenTint_m_greenColour = D_004A4638;
+        cScreenTint_m_blueColour = D_004A463C;
+        cScreenTint_m_blendMode = 5;
+    } else if (cur <= fadeInFrames + cScreenTint_m_LightningFadeOut + cScreenTint_m_LightningFadeIn2) {
+        *(float*)&cScreenTint_m_lightningBrightness = D_004A462C;
+        cScreenTint_m_redColour = D_004A4640;
+        cScreenTint_m_greenColour = D_004A4644;
+        cScreenTint_m_blueColour = D_004A4648;
+        cScreenTint_m_blendMode = 5;
+    } else if (cur <= fadeInFrames + cScreenTint_m_LightningFadeOut + cScreenTint_m_LightningFadeIn2 + D_004A4624) {
+        *(float*)&cScreenTint_m_lightningBrightness = (1.0f - ((float)cur - (float)fadeInFrames - (float)cScreenTint_m_LightningFadeOut - (float)cScreenTint_m_LightningFadeIn2) / (float)D_004A4624) * D_004A4630;
+        cScreenTint_m_redColour = D_004A464C;
+        cScreenTint_m_greenColour = D_004A4650;
+        cScreenTint_m_blueColour = D_004A4654;
+        cScreenTint_m_blendMode = 5;
     } else {
-        D_004A4698 = -1;
-        D_004A46A0 = cScreenTint_m_ColourR;
-        D_004A46A4 = cScreenTint_m_ColourG;
-        D_004A46A8 = cScreenTint_m_ColourB;
-        D_004A46AC = 5;
-        *(float*)&D_004A469C = 0.0f;
+        cScreenTint_m_lightningFrame = -1;
+        cScreenTint_m_redColour = cScreenTint_m_ColourR;
+        cScreenTint_m_greenColour = cScreenTint_m_ColourG;
+        cScreenTint_m_blueColour = cScreenTint_m_ColourB;
+        cScreenTint_m_blendMode = 5;
+        *(float*)&cScreenTint_m_lightningBrightness = 0.0f;
     }
 }
 #endif
@@ -2121,26 +2121,26 @@ extern "C" void cScreenTint_update()
 INCLUDE_ASM("render/lightman", func_00390EC8);
 #ifdef SKIP_ASM
 extern int cScreenTint_m_LightningEnable;
-extern int D_004A4698;
-extern int D_004A469C;
-extern float D_004A46B0;
-extern int D_004A46B4;
+extern int cScreenTint_m_lightningFrame;
+extern int cScreenTint_m_lightningBrightness;
+extern float cScreenTint_m_flashDistance;
+extern int cScreenTint_m_timeTillThunder;
 
 /**
  * Starts a lightning flash at distance @p flashDistance when lightning is enabled.
  *
- * Sets the flash frame D_004A4698 and brightness D_004A469C to 0, stores @p flashDistance in D_004A46B0 and sets the thunder
- * countdown D_004A46B4 to (int)(@p flashDistance * 0.0018072289). Callers: cScreenTint_update and LightningFunc.
+ * Sets the flash frame cScreenTint_m_lightningFrame and brightness cScreenTint_m_lightningBrightness to 0, stores @p flashDistance in cScreenTint_m_flashDistance and sets the thunder
+ * countdown cScreenTint_m_timeTillThunder to (int)(@p flashDistance * 0.0018072289). Callers: cScreenTint_update and LightningFunc.
  *
  * @param flashDistance  the flash distance; larger values delay the thunder
  */
 extern "C" void func_00390EC8(float flashDistance)
 {
     if (cScreenTint_m_LightningEnable != 0) {
-        D_004A4698 = 0;
-        D_004A469C = 0;
-        D_004A46B0 = flashDistance;
-        D_004A46B4 = (int)(flashDistance * 0.0018072288949042559f);
+        cScreenTint_m_lightningFrame = 0;
+        cScreenTint_m_lightningBrightness = 0;
+        cScreenTint_m_flashDistance = flashDistance;
+        cScreenTint_m_timeTillThunder = (int)(flashDistance * 0.0018072288949042559f);
     }
 }
 #endif
@@ -2149,20 +2149,20 @@ extern "C" void func_00390EC8(float flashDistance)
 INCLUDE_ASM("render/lightman", func_00390EF8);
 #ifdef SKIP_ASM
 extern int cScreenTint_m_LightningEnable;
-extern int D_004A46B4;
+extern int cScreenTint_m_timeTillThunder;
 
 /**
  * Reports once that the thunder of the last lightning flash is due.
  *
- * When cScreenTint_m_LightningEnable is set and the countdown D_004A46B4 has reached 0, sets it to -1 and returns 1.
+ * When cScreenTint_m_LightningEnable is set and the countdown cScreenTint_m_timeTillThunder has reached 0, sets it to -1 and returns 1.
  * Caller: cSSXAudio_Update (audio).
  *
  * @return 1 on the frame the thunder is due, else 0
  */
 extern "C" int func_00390EF8()
 {
-    if (cScreenTint_m_LightningEnable != 0 && D_004A46B4 == 0) {
-        D_004A46B4 = -1;
+    if (cScreenTint_m_LightningEnable != 0 && cScreenTint_m_timeTillThunder == 0) {
+        cScreenTint_m_timeTillThunder = -1;
         return 1;
     }
     return 0;
@@ -2208,11 +2208,11 @@ struct sHudVert_0F20 {
 
 extern sGs_0F20 D_00501420_0F20 __asm__("sDrawState_s_defaultDrawState");
 extern int D_004A460C_i __asm__("cScreenTint_m_LightningEnable");
-extern float D_004A469C_f __asm__("D_004A469C");
-extern float D_004A46A0_f __asm__("D_004A46A0");
-extern float D_004A46A4_f __asm__("D_004A46A4");
-extern float D_004A46A8_f __asm__("D_004A46A8");
-extern int D_004A46AC_i __asm__("D_004A46AC");
+extern float D_004A469C_f __asm__("cScreenTint_m_lightningBrightness");
+extern float D_004A46A0_f __asm__("cScreenTint_m_redColour");
+extern float D_004A46A4_f __asm__("cScreenTint_m_greenColour");
+extern float D_004A46A8_f __asm__("cScreenTint_m_blueColour");
+extern int D_004A46AC_i __asm__("cScreenTint_m_blendMode");
 
 class cGfx_0F20 {
 public:
@@ -2247,10 +2247,10 @@ public:
 /**
  * Draws the lightning flash as a full-screen quad when lightning is enabled and the flash brightness is non-zero.
  *
- * Pushes a draw state copied from sDrawState_s_defaultDrawState with blend mode D_004A46AC and no texture, then
+ * Pushes a draw state copied from sDrawState_s_defaultDrawState with blend mode cScreenTint_m_blendMode and no texture, then
  * PushViewport, PushView and IdentityView, and an orthographic viewport through slot 26
  * (cPS2GraphicsMan_SetViewportOrthographic). The quad is 640 x 480, or the left or right 320-pixel half when mNumViews
- * is not 1 (mViewIndex picks the half). Its colour is brightness * D_004A46A0/A4/A8 * 255 with alpha brightness * 255,
+ * is not 1 (mViewIndex picks the half). Its colour is brightness * cScreenTint_m_redColour/A4/A8 * 255 with alpha brightness * 255,
  * drawn with slot 71 (cPS2GraphicsMan_RenderTriStrip); then PopView, PopViewport and the draw state is popped. Slot 3
  * of vtable cScreenTint_vtbl (the object allocated as "ScreenTint").
  */

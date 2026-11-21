@@ -511,7 +511,7 @@ extern char str_timepct_d[];
 struct sColor_F2B8 {
     int c[4];
 };
-extern sColor_F2B8 D_004C66C8;
+extern sColor_F2B8 gStaticColour;
 
 #define V_F2B8(n) virtual void v##n();
 class cMCSub_F2B8 {
@@ -603,7 +603,7 @@ extern "C" void cFEStateProfileLoad_displayOn(cFEStateProfileLoad* vself)
         for (int i = 1; i < 7; i++) {
             sprintf(name, str_playerpct_d, i);
             widget = getObj_F2B8(self, name);
-            *(sColor_F2B8*)((char*)widget + 0x88) = D_004C66C8;
+            *(sColor_F2B8*)((char*)widget + 0x88) = gStaticColour;
             if (!(*(cMCSub_F2B8**)(mp + 0x434))->HasFileName(i - 1) && !(*(cMCSub_F2B8**)(mp + 0x434))->IsFileSlotDisabled(i - 1)
                 && (*(cMCSub_F2B8**)(mp + 0x434))->IsFormatted1()) {
                 (*(cMCSub_F2B8**)(mp + 0x434))->GetTitleString(i - 1, (char*)self + 0x238);
@@ -856,8 +856,8 @@ void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern "C" void* cFEStateTitle_cFEStateTitle1(void* self, void* engine);
 extern "C" void cUIStateStack_push(void* self, void* state);
 extern "C" void cUIStateStack_pushCheck(void* self, void* state);
-extern int D_004A11B8;
-extern int D_004A19D8;
+extern int cBENewRaceInterface_bIsBamLocation;
+extern int gInLodge;
 extern char str_cPreGameLoadScreen[];
 extern char str_cFEStateTitle[];
 
@@ -878,9 +878,9 @@ struct sVEK18FAF0b {
  * Runs once: unless +0x1AC is already set it switches on +0x27C (On Tour mTypeOfQuit). 0 asks the engine owner (the
  * first word of the engine at +0x10) for the next state through its vtable slot 5 (cFECustom_getPrevState in cFECustom_vtbl)
  * with this state and the mode (+0x1BC), and pushes it with cUIStateStack_pushCheck. 1 sets up a race on the new-race
- * interface (game mode 4, event 0xC), sets D_004A11B8 to 1 and the location (cBENewRaceInterface_newRace.iLocationIdx) to the player's last hub
+ * interface (game mode 4, event 0xC), sets cBENewRaceInterface_bIsBamLocation to 1 and the location (cBENewRaceInterface_newRace.iLocationIdx) to the player's last hub
  * (cBENewPlayerInterface_getLastHub), submits it (the interface's vtable slot 1, cBENewRaceInterface_submit) and makes a new
- * cPreGameLoadScreen the next app module. 2 clears D_004A19D8 and pushes a new title state (cFEStateTitle_cFEStateTitle1,
+ * cPreGameLoadScreen the next app module. 2 clears gInLodge and pushes a new title state (cFEStateTitle_cFEStateTitle1,
  * "cFEStateTitle"). Sets +0x1AC afterwards. Fills slot +0x10C of cFEStateProfileLoad_vtbl (cFEMemCard_updateDone's
  * slot).
  */
@@ -900,13 +900,13 @@ extern "C" void cFEStateProfileLoad_updateDone(cFEStateProfileLoad* self)
             cBENewRaceInterface_setGameMode(race, 4);
             cBENewRaceInterface_setGameEvent(race, 0xC);
             int x = cBENewPlayerInterface_getLastHub(pl, 0);
-            D_004A11B8 = 1;
+            cBENewRaceInterface_bIsBamLocation = 1;
             cBENewRaceInterface_newRace.iLocationIdx = x;
             sVEK18FAF0b* vt = *(sVEK18FAF0b**)(race + 0xC);
             vt[1].fn(race + vt[1].delta);
             cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
         } else if (sel == 2) {
-            D_004A19D8 = 0;
+            gInLodge = 0;
             void* st = cFEStateTitle_cFEStateTitle1(cMemMan_alloc(76, str_cFEStateTitle, 0, 0), self->mpEngine);
             cUIStateStack_push((char*)self->mpEngine + 0x18, st);
         }

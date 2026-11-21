@@ -2525,8 +2525,8 @@ struct sScBlk_AC60 {
     int w2[(0x64 - 0x58) / 4];
 };
 
-extern int D_00536730[];
-extern int D_00536708[];
+extern int cGameModeMan_iRanking[];
+extern int cGameModeMan_iCharRank[];
 extern sScTbl_AC60 D_00481E90;
 
 static inline int Call_AC60(sScRider_AC60* r, int slot)
@@ -2564,7 +2564,7 @@ extern "C" void cSSXScriptEngine_AppendEndEventSequence(cSSXScriptEngine* self)
     sScList_AC60* list = (sScList_AC60*)x->AI;
     if (beRaceDB->cGamePath == 0) {
         for (int i = 0; i < list->nslots; i++) {
-            if (D_00536730[Call_AC60(list->slots[i]->rider, 7)] < 3) {
+            if (cGameModeMan_iRanking[Call_AC60(list->slots[i]->rider, 7)] < 3) {
                 found = 1;
                 goto done;
             }
@@ -2575,7 +2575,7 @@ done:
         int ids[3];
         int best = 3;
         for (int j = 0; j < 3; j++) {
-            int aiIndex = D_00536708[j];
+            int aiIndex = cGameModeMan_iCharRank[j];
             ids[j] = aiIndex;
             if (aiIndex >= list->nriders) {
                 ids[j] = -1;
@@ -6014,7 +6014,7 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, f
 extern "C" void cWScriptMan_runFunc(void* mgr, int a, int b);
 extern "C" void GetSSXGameEventFrame(void* self, void* out);
 extern void* cWScriptMan_TheWScriptMan;
-extern int D_004A3B60;
+extern int cRenderStateMan_m_indoor;
 
 struct sSePair07B0 {
     int a;
@@ -6053,7 +6053,7 @@ struct sSeEngine07B0 {
  * was triggered (+0xF0, mHasTriggeredSpeechEvents) calls func_002A1BD0 on the audio interface; stops each of the 4
  * sound slots (+0xBC, mSounds) holding a handle (cBankMonitor_BANKMONITOR_StopHandle on the audio system's bank
  * monitor) and resets all four (handle -1, end flag 0, sound ID -1). When the entity's game-event frame (GetSSXGameEventFrame)
- * has an enviro-state list (+0x24), the render-state flag D_004A3B60 is cleared. Finally clears +0xEC, +0xF0, +0xF4
+ * has an enviro-state list (+0x24), the render-state flag cRenderStateMan_m_indoor is cleared. Finally clears +0xEC, +0xF0, +0xF4
  * (mCheckForStopOnSpeechEnd) and the sound bank info (+0xF8).
  */
 extern "C" void cScriptObjEvent_OnEndObjectUse(sSeEngine07B0* self)
@@ -6078,7 +6078,7 @@ extern "C" void cScriptObjEvent_OnEndObjectUse(sSeEngine07B0* self)
     }
     GetSSXGameEventFrame(self->owner, &info);
     if (info.active != 0) {
-        D_004A3B60 = 0;
+        cRenderStateMan_m_indoor = 0;
     }
     self->pairCount = 0;
     self->field_0xF0 = 0;
@@ -6126,7 +6126,7 @@ extern "C" int cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(void* self);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern void* cWScriptMan_TheWScriptMan;
-extern int D_004A3B60;
+extern int cRenderStateMan_m_indoor;
 // The "no link" hash: a const global with a dynamic initializer (set by the scripter's static init).
 extern const int D_004A525C; // const with a dynamic initializer: set once by __sti__all_in_one_scripter_cpp (=
                              //       GetHashValue32(str_NoScript))
@@ -6251,7 +6251,7 @@ struct sSeEngine_08E8 {
  * section of the BE new-race location (cSectionMan_getWorldSectionIDFromBELocationID). Then: - each world script event
  * runs with cWScriptMan_runFunc(section, event ID); its abort-script hash, unless D_004A525C (no script), is recorded
  * once per (hash, section) in the abort list (+0x1C, count +0xEC); - event bit 8 clears and bit 4 sets the render-state
- * flag D_004A3B60; - each music event (ID 0xFF skipped) goes to func_0028E8C0 on the audio interface; each speech event
+ * flag cRenderStateMan_m_indoor; - each music event (ID 0xFF skipped) goes to func_0028E8C0 on the audio interface; each speech event
  * goes to func_002A19D8 and sets +0xF0, except ID 17 (skipped) and ID 16, which sets +0xF4 (stop on speech end); - bit
  * 2: every sound slot holding a handle gets its end flag set, then the slots of the frame's sounds clear it; - bit 1:
  * walks the frame's sound list until a sound whose start frame is before @p when; a sound whose slot (track index) is
@@ -6300,10 +6300,10 @@ extern "C" void cScriptObjEvent_OnInSeqKeyEvent(sSeEngine_08E8* self, cScriptPla
         }
     }
     if (flags & 8) {
-        D_004A3B60 = 0;
+        cRenderStateMan_m_indoor = 0;
     }
     if (flags & 4) {
-        D_004A3B60 = 1;
+        cRenderStateMan_m_indoor = 1;
     }
     sWtSnd_08E8* snd = (sWtSnd_08E8*)cAudioInterface_bxAudio();
     for (i = 0; i < info.nStops; i++) {
@@ -7230,7 +7230,7 @@ extern "C" void* cScriptDatabaseObject_cScriptDatabaseObject(cScriptDatabaseObje
 extern "C" void cBXScriptEngine_ResetInstVars(void* self);
 extern char D_00482450[];
 extern char cBXScriptEngine_vtbl[];
-extern void* D_004A34E8;
+extern void* cBXScriptEngine_mpScriptEngine;
 
 /**
  * Constructs the base script engine: database part, vtables, global instance pointer, empty script database.
@@ -7242,7 +7242,7 @@ extern "C" void* cBXScriptEngine_cBXScriptEngine(cBXScriptEngine* self)
     cScriptDatabaseObject_cScriptDatabaseObject((cScriptDatabaseObject*)self);
     self->mInSeqCommVtbl = (void**)D_00482450;
     self->mVtbl = (void**)cBXScriptEngine_vtbl;
-    D_004A34E8 = ((void*)self);
+    cBXScriptEngine_mpScriptEngine = ((void*)self);
     self->mpScriptDatabase = 0;
     self->mScriptDatabaseSize = 0;
     cBXScriptEngine_ResetInstVars(self);
@@ -7257,7 +7257,7 @@ extern "C" void cScriptDatabaseObject__cScriptDatabaseObject(cScriptDatabaseObje
 extern "C" void cBXScriptEngine_PurgeBXEngine(void* self);
 extern char D_00482450[];
 extern char cBXScriptEngine_vtbl[];
-extern void* D_004A34E8;
+extern void* cBXScriptEngine_mpScriptEngine;
 
 /**
  * Destroys the base script engine: restores its vtables, purges it and clears the global instance pointer.
@@ -7271,7 +7271,7 @@ extern "C" void cBXScriptEngine__cBXScriptEngine(cBXScriptEngine* self, int flag
     self->mInSeqCommVtbl = (void**)D_00482450;
     self->mVtbl = (void**)cBXScriptEngine_vtbl;
     cBXScriptEngine_PurgeBXEngine(self);
-    D_004A34E8 = 0;
+    cBXScriptEngine_mpScriptEngine = 0;
     cScriptDatabaseObject__cScriptDatabaseObject((cScriptDatabaseObject*)self, flags);
 }
 #endif

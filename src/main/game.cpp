@@ -1519,7 +1519,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cGame_setState(void* gm, int state, int a, int b);
 void cGame_setPreloadState(void* gm, int state);
-extern int D_004A11B8;
+extern int cBENewRaceInterface_bIsBamLocation;
 
 /**
  * Starts preloading the next event: stores the location in the race setup and notifies the game flow (0xB,
@@ -1530,7 +1530,7 @@ extern "C" void cSectionMan_preLoadMode(cSectionMan* self)
     cGame_setState(self->mpGame, 11, 0, 1);
     cBEIface22DF50* iface = (cBEIface22DF50*)cBE_getInterface_Fv(cBE_getBE(), 0);
     cBENewRaceInterface_newRace.iLocationIdx = self->mBELocationID;
-    D_004A11B8 = 1;
+    cBENewRaceInterface_bIsBamLocation = 1;
     iface->submit();
     cGame_setPreloadState(self->mpGame, 10);
 }

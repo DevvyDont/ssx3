@@ -65,7 +65,7 @@ extern "C" void cFXLoader__cFXLoader(void* p, int flags);
 extern "C" void func_0019CE20(void* p, int flags);
 extern "C" void cFERiderManager__cFERiderManager(void* p, int flags);
 extern void* cFE_vtbl[];
-extern void* D_0046D970[];
+extern void* cAppModule_vtbl[];
 extern void* cSimpleCamera_vtbl[];
 
 /**
@@ -74,7 +74,7 @@ extern void* cSimpleCamera_vtbl[];
  * Stores the vtable cFE_vtbl, destroys the UI engine (+0xC, cUIEngine__cUIEngine with 3), purges the graphics manager's
  * textures, destroys the FX loader (+0xB5AA0) when present, then the file manager (+0x1A70, func_0019CE20) and the
  * rider manager (+0xB0, cFERiderManager__cFERiderManager), resets the camera's (+0x10) vtable word (+0xA0) to cSimpleCamera_vtbl and
- * stores the base vtable D_0046D970. Calls operator_delete when bit 0 of @p flags is set. cRealFE__cRealFE calls it as
+ * stores the base vtable cAppModule_vtbl. Calls operator_delete when bit 0 of @p flags is set. cRealFE__cRealFE calls it as
  * its base destructor.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
@@ -92,7 +92,7 @@ extern "C" void cFE__cFE(cFE* self, int flags)
     func_0019CE20(self->mBoltFileManager, 2);
     cFERiderManager__cFERiderManager(self->mRiderManager, 2);
     *(void***)((char*)self + 0xA0) = cSimpleCamera_vtbl;
-    self->mVtbl = D_0046D970;
+    self->mVtbl = cAppModule_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

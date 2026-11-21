@@ -7,7 +7,7 @@
 // time (func_00266BA8).
 // EA's source: d:/ssx/code/source/online/usbkeyboard.cpp and ../source/online/usbkeyboard.h (the July 2003 preview's
 // assert strings: "!Keyboard", "(device >= 0) && (device < kMaxKeyboard)", "device >= 0", and the allocation tag
-// "cUsbKeyboard"). Retail code: dirtysock/tagsunk 0x00266788..0x00266BA8. One instance, D_004A33F0: func_00266788
+// "cUsbKeyboard"). Retail code: dirtysock/tagsunk 0x00266788..0x00266BA8. One instance, Keyboard: func_00266788
 // creates it, func_002667C0 destroys it. No On Tour counterpart.
 //
 // Size 0x464: [R] func_00266788: cMemMan_alloc(1124, "cUsbKeyboard", 0x20000000) + the constructor func_002667E8, which

@@ -23,12 +23,12 @@
 // sRSMEntry[], sLensRow_*[], char[] for m_state; int / void* for the flags):
 //   cRenderStateMan::m_state[8]          = cRenderStateMan_m_state (0x004FA370, tRenderState[8]) [O][U]
 //   cRenderStateMan::m_initialized       = cRenderStateMan_m_initialized (0x004A3B54, int) [O]; [U] init sets, purge tests
-//   cRenderStateMan::m_doColourReset     = D_004A3B58 (int) [O] order; [U] update passes it as blendToColour's resetcolour
+//   cRenderStateMan::m_doColourReset     = cRenderStateMan_m_doColourReset (int) [O] order; [U] update passes it as blendToColour's resetcolour
 //   cRenderStateMan::m_inNIS             = cRenderStateMan_m_inNIS (0x004A3B5C, int) [O]; [U] setInNIS
-//   cRenderStateMan::m_indoor            = D_004A3B60 (int) [O] order; [U] the snow / screen-tint getters test it
-//   cRenderStateMan::m_hasCustomIrradiance = D_004A3B64 (int) [O]; [U] setCustomIrradiance, the *IrradianceName getters
-//   cRenderStateMan::m_customIrradiance  = D_004A55B0 (tWPNameField, 8 bytes) [O]; [U] setCustomIrradiance strcpy's into it
-//   cRenderStateMan::m_sectionId         = D_004A3B6C (unsigned int) [O]; [U] update stores the section id (also into
+//   cRenderStateMan::m_indoor            = cRenderStateMan_m_indoor (int) [O] order; [U] the snow / screen-tint getters test it
+//   cRenderStateMan::m_hasCustomIrradiance = cRenderStateMan_m_hasCustomIrradiance (int) [O]; [U] setCustomIrradiance, the *IrradianceName getters
+//   cRenderStateMan::m_customIrradiance  = cRenderStateMan_m_customIrradiance (tWPNameField, 8 bytes) [O]; [U] setCustomIrradiance strcpy's into it
+//   cRenderStateMan::m_sectionId         = cRenderStateMan_m_sectionId (unsigned int) [O]; [U] update stores the section id (also into
 //                                          cWorldPainterMan_m_iCurrSection)
 //   cRenderStateMan::m_farPlane          = D_004A3B70 (float) [O]; [U] update reads it (lwc1)
 //

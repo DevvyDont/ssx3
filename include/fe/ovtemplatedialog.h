@@ -154,7 +154,7 @@ CHECK_SIZE(cPDATemplate, 0x48);
 // cOVTemplate_Simple: the simple one-option overlay template: cOVState's screen plus an "overlayMenu" with one visible
 // option ("overlayOpt0", the localised name of D_00441D10[D_004A2860[0]]); picking it (event 5) sets
 // cOVStateManager_mStatus to 1. Its onCreateScreen / onWidgetMenu / onWidgetEvent fill the slots of the overlay vtables
-// built on it (D_004726A0, D_00472778, D_00472850 cOVState_HEAT_PREEVENT, ...; those classes have their own headers).
+// built on it (D_004726A0, D_00472778, cOVState_HEAT_PREEVENT_vtbl cOVState_HEAT_PREEVENT, ...; those classes have their own headers).
 // (There is no class "cOVTemplate": the cOVTemplate_* prefix covers cOVTemplate_Simple, cOVTemplate_Dialog (above) and
 // cOVTemplate_PauseMenu (fe/ovstatepause.h).)
 // EA's source file is not known. Retail code: onCreateScreen / onWidgetMenu / onWidgetEvent in fe/ovtemplatedialog

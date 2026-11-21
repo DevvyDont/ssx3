@@ -6,7 +6,7 @@
 // and the online quick-chat messages, with their defaults (defaultSound/Game/HUD/Ctrl). The object holds no options:
 // like every BE interface it is a cBEInterface (three word bools + vptr, 0x10 bytes), and its methods ignore `this` and
 // work on the static cBEOptionInterface::mOption (retail cBEOptionInterface_mOption, D_00535610, a 0x288-byte
-// tBEOptionDB: getOptions / setOptions copy it whole; not modelled here); submit copies it to the saved copy D_00535898
+// tBEOptionDB: getOptions / setOptions copy it whole; not modelled here); submit copies it to the saved copy cBELibrary_optionDB
 // (On Tour: cBELibrary::optionDB), discard copies it back, revert resets the defaults. One instance, created on demand
 // by cBEOptionInterface_getThis
 // (`cMemMan_alloc(0x10, "BEOptionInt", 0, 0)`, vtable cBEOptionInterface_vtbl, then cBEOptionInterface_revert, then

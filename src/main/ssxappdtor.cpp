@@ -330,10 +330,10 @@ extern "C" int cSSXApp_GetFEAsyncManager(cSSXApp* ssxApp) {
 INCLUDE_ASM("main/ssxappdtor", cFadeScreen__cFadeScreen);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern char D_0046D970[];
+extern char cAppModule_vtbl[];
 
 /**
- * Destroys a screen fade: resets the vtable to the root module vtable D_0046D970 and frees the object when asked.
+ * Destroys a screen fade: resets the vtable to the root module vtable cAppModule_vtbl and frees the object when asked.
  *
  * It is the destructor slot (+0xC) of cFadeScreen_vtbl, the vtable cFadeScreen_cFadeScreen (the fade constructor) installs
  * and whose loseFocus and update slots are cFadeScreen_loseFocus and cFadeScreen_update.
@@ -342,7 +342,7 @@ extern char D_0046D970[];
  */
 extern "C" void cFadeScreen__cFadeScreen(int* self, int flags)
 {
-    *(void**)self = D_0046D970;
+    *(void**)self = cAppModule_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -368,19 +368,19 @@ extern "C" void func_00243A70(void *fadeScreen) {
 INCLUDE_ASM("main/ssxappdtor", cPreStartScreen__cPreStartScreen);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern char D_0046D970[];
+extern char cAppModule_vtbl[];
 
 /**
  * Destroys the pre-start screen.
  *
- * Only resets the vtable to the root module vtable D_0046D970 (the base destructors have nothing else to do) and
+ * Only resets the vtable to the root module vtable cAppModule_vtbl (the base destructors have nothing else to do) and
  * frees the object with operator_delete() when bit 0 of @p flags is set.
  *
  * @param flags  the destructor flags (bit 0: free the memory)
  */
 extern "C" void cPreStartScreen__cPreStartScreen(int* self, int flags)
 {
-    *(void**)self = D_0046D970;
+    *(void**)self = cAppModule_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -434,10 +434,10 @@ extern "C" void cInitLoadScreen_activateProgressiveMode(cInitLoadScreen* initLoa
 INCLUDE_ASM("main/ssxappdtor", cLoadScreen__cLoadScreen);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern char D_0046D970[];
+extern char cAppModule_vtbl[];
 
 /**
- * Destroys a plain load screen: resets the vtable to the root module vtable D_0046D970 and frees the object when asked.
+ * Destroys a plain load screen: resets the vtable to the root module vtable cAppModule_vtbl and frees the object when asked.
  *
  * It is the destructor slot (+0xC) of cLoadScreen_vtbl, the vtable cLoadScreen_cLoadScreen installs (loseFocus is
  * cLoadScreen_loseFocus).
@@ -446,7 +446,7 @@ extern char D_0046D970[];
  */
 extern "C" void cLoadScreen__cLoadScreen(int* self, int flags)
 {
-    *(void**)self = D_0046D970;
+    *(void**)self = cAppModule_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -479,10 +479,10 @@ extern "C" void *cLoadScreen_cLoadScreen(cLoadScreen* self) {
 INCLUDE_ASM("main/ssxappdtor", cStartScreen__cStartScreen);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern char D_0046D970[];
+extern char cAppModule_vtbl[];
 
 /**
- * Destroys the start screen: resets the vtable to the root module vtable D_0046D970 and frees the object when asked.
+ * Destroys the start screen: resets the vtable to the root module vtable cAppModule_vtbl and frees the object when asked.
  *
  * It is the destructor slot (+0xC) of cStartScreen_vtbl, whose load slot is cStartScreen_load (loads the "data/ui/su"
  * start screen).
@@ -491,7 +491,7 @@ extern char D_0046D970[];
  */
 extern "C" void cStartScreen__cStartScreen(int* self, int flags)
 {
-    *(void**)self = D_0046D970;
+    *(void**)self = cAppModule_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -502,10 +502,10 @@ extern "C" void cStartScreen__cStartScreen(int* self, int flags)
 INCLUDE_ASM("main/ssxappdtor", cGameLoadScreen__cGameLoadScreen);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern char D_0046D970[];
+extern char cAppModule_vtbl[];
 
 /**
- * Destroys the game load screen: resets the vtable to the root module vtable D_0046D970 and frees the object when
+ * Destroys the game load screen: resets the vtable to the root module vtable cAppModule_vtbl and frees the object when
  * asked.
  *
  * It is the destructor slot (+0xC) of cGameLoadScreen_vtbl, whose load slot is cGameLoadScreen_load (loads the
@@ -515,7 +515,7 @@ extern char D_0046D970[];
  */
 extern "C" void cGameLoadScreen__cGameLoadScreen(int* self, int flags)
 {
-    *(void**)self = D_0046D970;
+    *(void**)self = cAppModule_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -562,19 +562,19 @@ INCLUDE_ASM("main/ssxappdtor", cFELoadScreen__cFELoadScreen);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0046D970[];
+extern char cAppModule_vtbl[];
 
 /**
  * Destroys a front-end load screen.
  *
- * Only resets the vtable to the root module vtable D_0046D970 (the base destructors have nothing else to do) and
+ * Only resets the vtable to the root module vtable cAppModule_vtbl (the base destructors have nothing else to do) and
  * frees the object with operator_delete() when bit 0 of @p flags is set.
  *
  * @param flags  the destructor flags (bit 0: free the memory)
  */
 extern "C" void cFELoadScreen__cFELoadScreen(int* self, int flags)
 {
-    *(void**)self = D_0046D970;
+    *(void**)self = cAppModule_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -1390,23 +1390,23 @@ extern "C" void func_00244238(void) {
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00244240);
 #ifdef SKIP_ASM
-extern int D_004428F0[];
-extern int D_005366E8[];
+extern int cPauseState_FlagsTable[];
+extern int cPauseState_Stack[];
 extern int cPauseState_Flags;
-extern int D_004A2A54;
+extern int cPauseState_StackIdx;
 
 /**
  * Makes @p id the current pause owner: loads its pause flags and records it on top of the pause stack.
  *
- * Sets cPauseState_Flags to D_004428F0[@p id] (one flag word per owner) and stores @p id at D_005366E8[D_004A2A54] (the
+ * Sets cPauseState_Flags to cPauseState_FlagsTable[@p id] (one flag word per owner) and stores @p id at cPauseState_Stack[cPauseState_StackIdx] (the
  * stack entry at the current depth, which it does not change). cGame_cGame calls it three times.
  *
  * @param id  the pause owner (index into the flag table)
  */
 extern "C" void func_00244240(int id)
 {
-    cPauseState_Flags = D_004428F0[id];
-    D_005366E8[D_004A2A54] = id;
+    cPauseState_Flags = cPauseState_FlagsTable[id];
+    cPauseState_Stack[cPauseState_StackIdx] = id;
 }
 #endif
 
@@ -3086,7 +3086,7 @@ static inline bool playing_4B48(char* pb)
  * with pause owner 0xC and clears the request. An active MenuSys is updated (cMenuSys_input). When
  * cGame_activatePauseMenu allows it, no replay mode 1..9 is set and no playback is running, cOVStateManager_allowPauseMenu opens the
  * pause menu: pause owner 2, the UI's virtual slot 44 with PauseOwner (+0x228), audio paused. Otherwise
- * cUIEngine_update(UI), cOVStateManager_pauseOverlayActive and cPlaybackMan_update run. Each pause push writes D_005366E8[++D_004A2A54] and
+ * cUIEngine_update(UI), cOVStateManager_pauseOverlayActive and cPlaybackMan_update run. Each pause push writes cPauseState_Stack[++cPauseState_StackIdx] and
  * cPauseState_Flags.
  *
  * @return true when the race should update this frame (no menu, no new pause, not just unpaused), else false
@@ -3102,7 +3102,7 @@ extern "C" bool cGame_updateUI(cGame* self)
             sMsg_4B48* msg = tMissionMenuQueue_getEntry(msgQueue);
             if (msg->type == 8) {
                 cOVStateManager_triggerOverlay(29);
-                D_005366E8[++D_004A2A54] = 3;
+                cPauseState_Stack[++cPauseState_StackIdx] = 3;
                 cPauseState_Flags = D_004428FC[0];
                 cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 4, 0, 1.0f);
                 return false;
@@ -3111,7 +3111,7 @@ extern "C" bool cGame_updateUI(cGame* self)
                 cWScriptMan_doMissionCmd(((sScript_4B48*)self->WScriptMan), msg->a, 5, msg->c);
                 if (cUIStateStack_findState(&((sUIEngine_4B48*)self->UI)->states, GetHashValue32(str_90bc_fail_b)) == 0) {
                     cOVStateManager_triggerOverlay(0x1E);
-                    D_005366E8[++D_004A2A54] = 3;
+                    cPauseState_Stack[++cPauseState_StackIdx] = 3;
                     cPauseState_Flags = D_004428FC[0];
                     cUIEngine_update(((sUIEngine_4B48*)self->UI));
                 } else {
@@ -3123,7 +3123,7 @@ extern "C" bool cGame_updateUI(cGame* self)
     }
     if (pending_4B48()) {
         cOVStateManager_triggerOverlay(34);
-        D_005366E8[++D_004A2A54] = 0xC;
+        cPauseState_Stack[++cPauseState_StackIdx] = 0xC;
         cPauseState_Flags = D_00442920[0];
         D_004A20CC_4B48 = 0xFFFFFFFF;
         func_0029ED18(cAudioInterface_bxAudio());
@@ -3137,7 +3137,7 @@ extern "C" bool cGame_updateUI(cGame* self)
     if (cGame_activatePauseMenu((char*)self, 0) != 0 && !racing_4B48(*((int*)self->Replay)) && !playing_4B48(((char*)self->PlaybackMan)) && cOVStateManager_allowPauseMenu() != 0) {
         cPadCache_clearAllVibrations(PadCache);
         func_0020CA10();
-        D_005366E8[++D_004A2A54] = 2;
+        cPauseState_Stack[++cPauseState_StackIdx] = 2;
         cPauseState_Flags = D_004428F8[0];
         sUIObj_4B48* uiObject = ((sUIEngine_4B48*)self->UI)->fC;
         uiObject->vt[44].fn((char*)uiObject + uiObject->vt[44].delta, *(unsigned char*)&self->PauseOwner);

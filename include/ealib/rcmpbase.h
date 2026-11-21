@@ -25,8 +25,8 @@ struct RCMP_DECODER;
 struct RCMP_CHUNK;
 struct SHAPE;
 
-// RCMP::RCMP_SYSTEM (0x10 [O]; [R] RCMP_RCMP_SYSTEM_RCMP_SYSTEM clears +0x0 / +0x4 and stores the vtable D_00456890 at
-// +0xC). The one instance is the global D_00509430 (constructed by the static initialiser func_003B0770 at priority
+// RCMP::RCMP_SYSTEM (0x10 [O]; [R] RCMP_RCMP_SYSTEM_RCMP_SYSTEM clears +0x0 / +0x4 and stores the vtable RCMP_RCMP_SYSTEM_vtbl at
+// +0xC). The one instance is the global RCMP_rcmp_sys (constructed by the static initialiser func_003B0770 at priority
 // 0xFFFF; cMoviePlayer_SetSSXREALDefaults installs cMoviePlayer_SSXAllocMemFunc / SSXFreeMemFunc). Every RCMP and AV
 // allocation goes through it: AllocMemFunc(tag, size, 0, 0, m_DefaultMemDir), FreeMemFunc(p).
 struct RCMP_RCMP_SYSTEM {
@@ -37,7 +37,7 @@ struct RCMP_RCMP_SYSTEM {
                                         //     D_00509434 (this field's address)
     int m_DefaultMemDir;                // 0x8 [O]; [U] passed as the last allocator argument (| 0x400 for the codec's
                                         //     uncached buffers)
-    void** mVtbl;                       // 0xC [R] ctor D_00456890 (_vt$Q24RCMP11RCMP_SYSTEM: slot 1 the destructor
+    void** mVtbl;                       // 0xC [R] ctor RCMP_RCMP_SYSTEM_vtbl (_vt$Q24RCMP11RCMP_SYSTEM: slot 1 the destructor
                                         //     _$_Q24RCMP11RCMP_SYSTEM); func_003B0770 restores it at exit (D_0050943C)
 };
 
@@ -71,11 +71,11 @@ struct RCMP_CODEC_IDATA {
                                         //     allocates that many frames (reads DECODER + 0x10)
 };
 
-// RCMP::CODEC (0x4 [O]: no data, only a vptr; abstract). Vtable _vt$Q24RCMP5CODEC = D_00456810: slot 1 the destructor
+// RCMP::CODEC (0x4 [O]: no data, only a vptr; abstract). Vtable _vt$Q24RCMP5CODEC = RCMP_CODEC_vtbl: slot 1 the destructor
 // _$_Q24RCMP5CODEC (0x42E278), slots 2-6 pure virtual (func_00411530) = Init, GetFrame, GetCurrentFrameNumber,
 // GetFrameRate, ReleaseFrame ([O] method order; the DECODER forwarders call slots 2 / 3 / 4 / 5 / 6 for them).
 struct RCMP_CODEC {
-    void** mVtbl;                       // 0x0 [R] derived destructors end with D_00456810
+    void** mVtbl;                       // 0x0 [R] derived destructors end with RCMP_CODEC_vtbl
 };
 
 // RCMP::FRAME, the base of a decoded picture (PS2: 0x8, no vptr; On Tour's 0xC adds one at +0x8). The PS2 Sony
@@ -88,7 +88,7 @@ struct RCMP_FRAME {
                                         //     func_00254410 (video driver) reads its header
 };
 
-// RCMP::DECODER (0x1C [R] func_003AE450 allocates 0x1C for it; [O] 0x1C). Vtable _vt$Q24RCMP7DECODER = D_004568A8
+// RCMP::DECODER (0x1C [R] func_003AE450 allocates 0x1C for it; [O] 0x1C). Vtable _vt$Q24RCMP7DECODER = RCMP_DECODER_vtbl
 // (slot 1 RCMP_DECODER__DECODER).
 struct RCMP_DECODER {
     RCMP_CHUNK* m_FirstChunk;           // 0x00 [O]; [R] ctor 0; [U] ChooseCodec stores it, GetFrame fills it through
@@ -99,7 +99,7 @@ struct RCMP_DECODER {
     RCMP_CODEC* m_codec;                // 0x14 [O]; [R] ctor 0; [U] ChooseCodec stores it, FreeChosenCodec deletes it
                                         //     (slot 1, flags 3); GetFrame / GetCurrentFrameNumber / GetFrameRate /
                                         //     ReleaseFrame call its slots 3 / 4 / 5 / 6; func_003AEAD0 tests it
-    void** mVtbl;                       // 0x18 [R] ctor and dtor D_004568A8; func_003AE300 deletes the decoder through
+    void** mVtbl;                       // 0x18 [R] ctor and dtor RCMP_DECODER_vtbl; func_003AE300 deletes the decoder through
                                         //     slot 1
 };
 

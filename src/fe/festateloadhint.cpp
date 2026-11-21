@@ -324,7 +324,7 @@ extern unsigned int D_00536640[];
 /**
  * Compares two rider indices by their scores in D_00536640, higher score first (qsort comparator).
  *
- * cGameModeMan_sortScores() passes it to qsort() to sort D_00536708. The scores are compared unsigned.
+ * cGameModeMan_sortScores() passes it to qsort() to sort cGameModeMan_iCharRank. The scores are compared unsigned.
  *
  * @param firstRider  the first rider index
  * @param secondRider  the second rider index
@@ -349,7 +349,7 @@ extern unsigned int D_00536640[];
 /**
  * Compares two rider indices by their values in D_00536640, lower value first (qsort comparator).
  *
- * cGameModeMan_sortTimes() passes it to qsort() to sort D_00536708. The values are compared unsigned.
+ * cGameModeMan_sortTimes() passes it to qsort() to sort cGameModeMan_iCharRank. The values are compared unsigned.
  *
  * @param firstRider  the first rider index
  * @param secondRider  the second rider index
@@ -369,14 +369,14 @@ extern "C" int func_00245E78(int* firstRider, int* secondRider)
 //100%
 INCLUDE_ASM("fe/festateloadhint", func_00245EC0);
 #ifdef SKIP_ASM
-extern int D_00536708[];
+extern int cGameModeMan_iCharRank[];
 
 /**
- * Compares two rider indices by their entries in D_00536708 (qsort comparator), giving each rider's position in the
+ * Compares two rider indices by their entries in cGameModeMan_iCharRank (qsort comparator), giving each rider's position in the
  * sorted order.
  *
- * cGameModeMan_sortScores() and cGameModeMan_sortTimes() use it to sort D_00536730 after D_00536708 holds the ranked
- * riders. It never returns 0, which is harmless here because the entries of D_00536708 are distinct.
+ * cGameModeMan_sortScores() and cGameModeMan_sortTimes() use it to sort cGameModeMan_iRanking after cGameModeMan_iCharRank holds the ranked
+ * riders. It never returns 0, which is harmless here because the entries of cGameModeMan_iCharRank are distinct.
  *
  * @param firstRider  the first rider index
  * @param secondRider  the second rider index
@@ -384,8 +384,8 @@ extern int D_00536708[];
  */
 extern "C" int func_00245EC0(int* firstRider, int* secondRider)
 {
-    int va = D_00536708[*firstRider];
-    int vb = D_00536708[*secondRider];
+    int va = cGameModeMan_iCharRank[*firstRider];
+    int vb = cGameModeMan_iCharRank[*secondRider];
     if (vb < va) {
         return 1;
     }
@@ -769,7 +769,7 @@ struct sOptTriple_2464E8 {
     int b;
     int c;
 };
-extern sOptTriple_2464E8 D_005308B8[];
+extern sOptTriple_2464E8 cBERules_mRules[];
 
 struct sVEnt_2464E8 {
     short delta;
@@ -819,7 +819,7 @@ static inline void Fmt_2464E8(char* buf, char* fmt, char* key, void* iface)
  * "vert_drop_percent" and "cou_leng_percent" get "kT_OVRCMNNumberOfFeet" with the location's entry in the 17-entry
  * tables D_0047BB28 and D_0047BAE0. "rider_name" gets the first human rider's short name
  * (cBECharacterInterface_getShortName()), "player_rank_num" gets "kT_OVRCMNLevelNum" with the rider's level
- * (cBEStatInterface_getStatLevel(), or 1 when bit 1 of the rule record D_005308B8[rider] is set), and "map box" takes the portrait
+ * (cBEStatInterface_getStatLevel(), or 1 when bit 1 of the rule record cBERules_mRules[rider] is set), and "map box" takes the portrait
  * texture (into +0x78, clearing +0x7C) that func_00233640() loaded into the load screen at +0x48 (its +0x10), when
  * there is one.
  *
@@ -924,7 +924,7 @@ extern "C" void cGameLoadState_widgetCreateQP(cGameLoadState* self, char* obj)
         strcpy1(fmtA, Loc_2464E8(str_kT_OVRCMNLevelNum));
         int v = cBEStatInterface_getStatLevel(iface3, cBENewPlayerInterface_getHumanRider(iface1, 0));
         int idx = cBENewPlayerInterface_getHumanRider(iface1, 0);
-        sprintf1((unsigned short*)buf, fmtA, D_005308B8[idx].b1 ? 1 : v);
+        sprintf1((unsigned short*)buf, fmtA, cBERules_mRules[idx].b1 ? 1 : v);
         cUIText_setUnicodeString(obj, buf);
     } else if (IsId_2464E8(obj, str_map_box)) {
         cGameLoadScreen* loadScreen = self->mpParentModule;
@@ -974,7 +974,7 @@ extern "C" int cBEStatInterface_getStatLevel(void* iface, int id);
 
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 
-extern sOptTriple_2464E8 D_005308B8[];
+extern sOptTriple_2464E8 cBERules_mRules[];
 
 extern "C" signed char cBEStatInterface_getSpeed(void* self, int rider);
 extern "C" signed char cBEStatInterface_getAccel(void* self, int rider);
@@ -1014,7 +1014,7 @@ struct sName5_6CF8 { char c[5]; };
  * Shows one player's level and seven attribute bars on the online load screen.
  *
  * Does nothing unless the game path (newRace.cGamePath) is 2 (online). The level is cBEStatInterface_getStatLevel() for the
- * player's human rider (1 when bit 1 of the rule record D_005308B8[rider] is set) and the stats are the rider's seven
+ * player's human rider (1 when bit 1 of the rule record cBERules_mRules[rider] is set) and the stats are the rider's seven
  * attributes (cBEStatInterface_getAccel, cBEStatInterface_getEdging, cBEStatInterface_getSpeed, cBEStatInterface_getSpin, cBEStatInterface_getStability, cBEStatInterface_getToughness, cBEStatInterface_getTrick).
  * With a comm system (cCommSystem_mCommSystem) and either player 1 or a ranked game
  * (cBENetworkInterface_networkOpt.bIsRankedGame): a ranked game shows level 8 and all stats 40, the rule bit shows all
@@ -1042,7 +1042,7 @@ extern "C" void func_00246CF8(cGameLoadState* self, char player)
         int idx = cBENewPlayerInterface_getHumanRider(iface1, player != 0);
         void* iface3 = cBE_getInterface_Fv(cBE_getBE(), 3);
         int rank = cBEStatInterface_getStatLevel(iface3, cBENewPlayerInterface_getHumanRider(iface1, player != 0));
-        if (D_005308B8[cBENewPlayerInterface_getHumanRider(iface1, player != 0)].b1) {
+        if (cBERules_mRules[cBENewPlayerInterface_getHumanRider(iface1, player != 0)].b1) {
             rank = 1;
         }
         cBE_getInterface_Fv(SSXApp->BE, 7);
@@ -1052,7 +1052,7 @@ extern "C" void func_00246CF8(cGameLoadState* self, char player)
                 for (int i = 0; i < 7; i++) {
                     stats[i] = 40;
                 }
-            } else if (D_005308B8[idx].b1) {
+            } else if (cBERules_mRules[idx].b1) {
                 for (int i = 0; i < 7; i++) {
                     stats[i] = 5;
                 }
@@ -1068,7 +1068,7 @@ extern "C" void func_00246CF8(cGameLoadState* self, char player)
                 }
             }
         } else {
-            if (D_005308B8[idx].b1) {
+            if (cBERules_mRules[idx].b1) {
                 for (int i = 0; i < 7; i++) {
                     stats[i] = 5;
                 }
@@ -1186,7 +1186,7 @@ extern char D_004A2C18[];
 extern char str_pct_d_g[] __attribute__((aligned(8)));
 extern char str_Time[];
 extern char str_Score[];
-extern int D_00536730[];
+extern int cGameModeMan_iRanking[];
 extern "C" void* cGameModeMan_getGM();
 extern "C" char* cBEScoreInterface_getPlayerLastCompletedEventStats(void* iface, int a1);
 extern "C" unsigned int fptoui(float f);
@@ -1257,7 +1257,7 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(rankNumName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, str_pct_d_g, sizeof("%d"));
-        sprintf(buf, fmt, D_00536730[player] + 1);
+        sprintf(buf, fmt, cGameModeMan_iRanking[player] + 1);
         cUIText_setAsciiString((cUIText*)obj, buf);
     }
     obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(rankName.c));

@@ -259,7 +259,7 @@ INCLUDE_ASM("main/streampause", cGame__cGame);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern void* cGameState_vtbl[];
-extern void* D_0046D970[];
+extern void* cAppModule_vtbl[];
 
 /**
  * Destroys the game object: restores its vtable and resets the 16 embedded game-flow states to the cGameState
@@ -270,7 +270,7 @@ extern void* D_0046D970[];
 extern "C" void cGame__cGame(cGame* self, int flags)
 {
     void** gameStateVtbl = cGameState_vtbl;
-    self->mVtbl = D_0046D970;
+    self->mVtbl = cAppModule_vtbl;
     self->mReplayStartState.mVtbl = gameStateVtbl;
     self->mSessionTeleportState.mVtbl = gameStateVtbl;
     self->mUserSelectState.mVtbl = gameStateVtbl;
@@ -298,17 +298,17 @@ extern "C" void cGame__cGame(cGame* self, int flags)
 INCLUDE_ASM("main/streampause", func_002438B0);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern void* D_0046D970[];
+extern void* cAppModule_vtbl[];
 
 /**
- * Destroys an object of a cAppModule-derived class: resets the vtable to the cAppModule vtable D_0046D970 and frees the
+ * Destroys an object of a cAppModule-derived class: resets the vtable to the cAppModule vtable cAppModule_vtbl and frees the
  * object when asked (unreferenced copy).
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
 extern "C" void func_002438B0(void* self, int flags)
 {
-    *(void***)((char*)self + 0x0) = D_0046D970;
+    *(void***)((char*)self + 0x0) = cAppModule_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

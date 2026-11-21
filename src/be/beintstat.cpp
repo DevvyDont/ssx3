@@ -29,8 +29,8 @@ struct sCharStat_getCollisionAttrib
 {
     signed char v[15];
 };
-extern sPlayerStatRow_getCollisionAttrib D_00535538_getCollisionAttrib[] __asm__("D_00535538");
-extern sCharStat_getCollisionAttrib D_005308D8_getCollisionAttrib[] __asm__("D_005308D8");
+extern sPlayerStatRow_getCollisionAttrib D_00535538_getCollisionAttrib[] __asm__("cBEStatInterface_currentStat");
+extern sCharStat_getCollisionAttrib D_005308D8_getCollisionAttrib[] __asm__("cBELibrary_statDefault");
 
 /**
  * Returns a rider's collision attribute as a fraction of the character's maximum.
@@ -74,15 +74,15 @@ struct sCharStat_cBEStatInterface_getStrikingAttrib
 {
     signed char v[15];
 };
-extern sPlayerStatRow_cBEStatInterface_getStrikingAttrib D_00535538_cBEStatInterface_getStrikingAttrib[] __asm__("D_00535538");
-extern sCharStat_cBEStatInterface_getStrikingAttrib D_005308D8_cBEStatInterface_getStrikingAttrib[] __asm__("D_005308D8");
+extern sPlayerStatRow_cBEStatInterface_getStrikingAttrib D_00535538_cBEStatInterface_getStrikingAttrib[] __asm__("cBEStatInterface_currentStat");
+extern sCharStat_cBEStatInterface_getStrikingAttrib D_005308D8_cBEStatInterface_getStrikingAttrib[] __asm__("cBELibrary_statDefault");
 
 /**
  * Returns how hard a rider hits, as a fraction of the character's best.
  *
  * A mission man (cBENewPlayerInterface_isMissionMan) gets 0.5. Otherwise the level is @p value when positive, else
- * attribute 5 of the rider's profile/character stats (D_00535538) / 5, divided by the character's entry 0xD in
- * D_005308D8.
+ * attribute 5 of the rider's profile/character stats (cBEStatInterface_currentStat) / 5, divided by the character's entry 0xD in
+ * cBELibrary_statDefault.
  *
  * @param rider  the rider (On Tour iRider)
  * @param value  a level that overrides the rider's own when positive (On Tour overrideAttribLevel)
@@ -119,14 +119,14 @@ struct sCharStat_cBEStatInterface_getLandingAttrib
 {
     signed char v[15];
 };
-extern sPlayerStatRow_cBEStatInterface_getLandingAttrib D_00535538_cBEStatInterface_getLandingAttrib[] __asm__("D_00535538");
-extern sCharStat_cBEStatInterface_getLandingAttrib D_005308D8_cBEStatInterface_getLandingAttrib[] __asm__("D_005308D8");
+extern sPlayerStatRow_cBEStatInterface_getLandingAttrib D_00535538_cBEStatInterface_getLandingAttrib[] __asm__("cBEStatInterface_currentStat");
+extern sCharStat_cBEStatInterface_getLandingAttrib D_005308D8_cBEStatInterface_getLandingAttrib[] __asm__("cBELibrary_statDefault");
 
 /**
  * Returns how well a rider lands, as a fraction of the character's best.
  *
  * A mission man gets 0.5. Otherwise the level is @p value when positive, else attribute 6 of the rider's
- * profile/character stats (D_00535538) / 5, divided by the character's entry 0xE in D_005308D8.
+ * profile/character stats (cBEStatInterface_currentStat) / 5, divided by the character's entry 0xE in cBELibrary_statDefault.
  *
  * @param rider  the rider (On Tour iRider)
  * @param value  a level that overrides the rider's own when positive (On Tour overrideAttribLevel)
@@ -163,15 +163,15 @@ struct sCharStat_cBEStatInterface_getBalanceAttrib
 {
     signed char v[15];
 };
-extern sPlayerStatRow_cBEStatInterface_getBalanceAttrib D_00535538_cBEStatInterface_getBalanceAttrib[] __asm__("D_00535538");
-extern sCharStat_cBEStatInterface_getBalanceAttrib D_005308D8_cBEStatInterface_getBalanceAttrib[] __asm__("D_005308D8");
+extern sPlayerStatRow_cBEStatInterface_getBalanceAttrib D_00535538_cBEStatInterface_getBalanceAttrib[] __asm__("cBEStatInterface_currentStat");
+extern sCharStat_cBEStatInterface_getBalanceAttrib D_005308D8_cBEStatInterface_getBalanceAttrib[] __asm__("cBELibrary_statDefault");
 
 /**
  * Returns a rider's balance attribute as a fraction of the character's maximum stability level.
  *
  * Mission riders (cBENewPlayerInterface_isMissionMan()) get 0.5. The level is @p value when positive, else the
- * profile's stability stat for the character (D_00535538[profile][character][6]) divided by 5; the result is that level
- * over the character's cMaxStability (byte 0xE of its D_005308D8 default-stat record). cBEStatInterface_getBalanceAttrib and cBEStatInterface_getRecoveryAttrib
+ * profile's stability stat for the character (cBEStatInterface_currentStat[profile][character][6]) divided by 5; the result is that level
+ * over the character's cMaxStability (byte 0xE of its cBELibrary_statDefault default-stat record). cBEStatInterface_getBalanceAttrib and cBEStatInterface_getRecoveryAttrib
  * have identical bodies.
  *
  * @param rider  race rider slot (On Tour iRider)
@@ -200,8 +200,8 @@ INCLUDE_ASM("be/beintstat", cBEStatInterface_getRecoveryAttrib);
  * Returns a rider's recovery attribute as a fraction of the character's maximum stability level.
  *
  * Mission riders (cBENewPlayerInterface_isMissionMan()) get 0.5. The level is @p value when positive, else the
- * profile's stability stat for the character (D_00535538[profile][character][6]) divided by 5; the result is that level
- * over the character's cMaxStability (byte 0xE of its D_005308D8 default-stat record). cBEStatInterface_getBalanceAttrib and cBEStatInterface_getRecoveryAttrib
+ * profile's stability stat for the character (cBEStatInterface_currentStat[profile][character][6]) divided by 5; the result is that level
+ * over the character's cMaxStability (byte 0xE of its cBELibrary_statDefault default-stat record). cBEStatInterface_getBalanceAttrib and cBEStatInterface_getRecoveryAttrib
  * have identical bodies.
  *
  * @param rider  race rider slot (On Tour iRider)
@@ -239,15 +239,15 @@ struct sCharStat_cBEStatInterface_getAccelerationAttrib
 {
     signed char v[15];
 };
-extern sPlayerStatRow_cBEStatInterface_getAccelerationAttrib D_00535538_cBEStatInterface_getAccelerationAttrib[] __asm__("D_00535538");
-extern sCharStat_cBEStatInterface_getAccelerationAttrib D_005308D8_cBEStatInterface_getAccelerationAttrib[] __asm__("D_005308D8");
+extern sPlayerStatRow_cBEStatInterface_getAccelerationAttrib D_00535538_cBEStatInterface_getAccelerationAttrib[] __asm__("cBEStatInterface_currentStat");
+extern sCharStat_cBEStatInterface_getAccelerationAttrib D_005308D8_cBEStatInterface_getAccelerationAttrib[] __asm__("cBELibrary_statDefault");
 
 /**
  * Returns a rider's acceleration attribute as a fraction of the character's maximum acceleration level.
  *
  * Mission riders (cBENewPlayerInterface_isMissionMan()) get 0.5. The level is @p value when positive, else the
- * profile's acceleration stat for the character (D_00535538[profile][character][1]) divided by 5; the result is that
- * level over the character's cMaxAccel (byte 0x9 of its D_005308D8 default-stat record).
+ * profile's acceleration stat for the character (cBEStatInterface_currentStat[profile][character][1]) divided by 5; the result is that
+ * level over the character's cMaxAccel (byte 0x9 of its cBELibrary_statDefault default-stat record).
  *
  * @param rider  race rider slot (On Tour iRider)
  * @param value  attribute level to use instead of the stored one, when positive (On Tour overrideAttribLevel)
@@ -284,15 +284,15 @@ struct sCharStat_cBEStatInterface_getSpeedAttrib
 {
     signed char v[15];
 };
-extern sPlayerStatRow_cBEStatInterface_getSpeedAttrib D_00535538_cBEStatInterface_getSpeedAttrib[] __asm__("D_00535538");
-extern sCharStat_cBEStatInterface_getSpeedAttrib D_005308D8_cBEStatInterface_getSpeedAttrib[] __asm__("D_005308D8");
+extern sPlayerStatRow_cBEStatInterface_getSpeedAttrib D_00535538_cBEStatInterface_getSpeedAttrib[] __asm__("cBEStatInterface_currentStat");
+extern sCharStat_cBEStatInterface_getSpeedAttrib D_005308D8_cBEStatInterface_getSpeedAttrib[] __asm__("cBELibrary_statDefault");
 
 /**
  * Returns a rider's speed attribute as a fraction of the character's maximum speed level.
  *
  * Mission riders (cBENewPlayerInterface_isMissionMan()) get 0.5. The level is @p value when positive, else the
- * profile's speed stat for the character (D_00535538[profile][character][0]) divided by 5; the result is that level
- * over the character's cMaxSpeed (byte 0x8 of its D_005308D8 default-stat record).
+ * profile's speed stat for the character (cBEStatInterface_currentStat[profile][character][0]) divided by 5; the result is that level
+ * over the character's cMaxSpeed (byte 0x8 of its cBELibrary_statDefault default-stat record).
  *
  * @param rider  race rider slot (On Tour iRider)
  * @param value  attribute level to use instead of the stored one, when positive (On Tour overrideAttribLevel)
@@ -329,14 +329,14 @@ struct sCharStat_cBEStatInterface_getSpinAttrib
 {
     signed char v[15];
 };
-extern sPlayerStatRow_cBEStatInterface_getSpinAttrib D_00535538_cBEStatInterface_getSpinAttrib[] __asm__("D_00535538");
-extern sCharStat_cBEStatInterface_getSpinAttrib D_005308D8_cBEStatInterface_getSpinAttrib[] __asm__("D_005308D8");
+extern sPlayerStatRow_cBEStatInterface_getSpinAttrib D_00535538_cBEStatInterface_getSpinAttrib[] __asm__("cBEStatInterface_currentStat");
+extern sCharStat_cBEStatInterface_getSpinAttrib D_005308D8_cBEStatInterface_getSpinAttrib[] __asm__("cBELibrary_statDefault");
 
 /**
  * Returns how fast a rider spins, as a fraction of the character's best.
  *
  * A mission man gets 0.5. Otherwise the level is @p value when positive, else attribute 4 of the rider's
- * profile/character stats (D_00535538) / 5, divided by the character's entry 0xC in D_005308D8.
+ * profile/character stats (cBEStatInterface_currentStat) / 5, divided by the character's entry 0xC in cBELibrary_statDefault.
  *
  * @param rider  the rider (On Tour iRider)
  * @param value  a level that overrides the rider's own when positive (On Tour overrideAttribLevel)
@@ -373,14 +373,14 @@ struct sCharStat_cBEStatInterface_getTrickAttrib
 {
     signed char v[15];
 };
-extern sPlayerStatRow_cBEStatInterface_getTrickAttrib D_00535538_cBEStatInterface_getTrickAttrib[] __asm__("D_00535538");
-extern sCharStat_cBEStatInterface_getTrickAttrib D_005308D8_cBEStatInterface_getTrickAttrib[] __asm__("D_005308D8");
+extern sPlayerStatRow_cBEStatInterface_getTrickAttrib D_00535538_cBEStatInterface_getTrickAttrib[] __asm__("cBEStatInterface_currentStat");
+extern sCharStat_cBEStatInterface_getTrickAttrib D_005308D8_cBEStatInterface_getTrickAttrib[] __asm__("cBELibrary_statDefault");
 
 /**
  * Returns a rider's trick skill, as a fraction of the character's best.
  *
  * A mission man gets 0.5. Otherwise the level is @p value when positive, else attribute 2 of the rider's
- * profile/character stats (D_00535538) / 5, divided by the character's entry 0xA in D_005308D8.
+ * profile/character stats (cBEStatInterface_currentStat) / 5, divided by the character's entry 0xA in cBELibrary_statDefault.
  *
  * @param rider  the rider (On Tour iRider)
  * @param value  a level that overrides the rider's own when positive (On Tour overrideAttribLevel)
@@ -468,14 +468,14 @@ struct sStatDefaults_149860
 {
     int v[0xA28 / 4];
 };
-extern sStatDefaults_149860 D_00535C18;
-extern sStatDefaults_149860 D_0043FB28;
+extern sStatDefaults_149860 cBELibrary_highScores;
+extern sStatDefaults_149860 kHighScoresDefault;
 
 /**
  * Constructs the BE library: resets its data tables and creates every BE interface singleton.
  *
  * Calls cBELibrary_loadData() (resets the character, player and profile tables), copies the default score tables (26
- * entries of 0x64 bytes, D_0043FB28) into D_00535C18, then calls each interface's getThis(): new race, new
+ * entries of 0x64 bytes, kHighScoresDefault) into cBELibrary_highScores, then calls each interface's getThis(): new race, new
  * player, character, stat, option, save, BAGT, network, score, bolt (func_0014ABE0), mission, econ, aggression
  * and reward.
  *
@@ -484,7 +484,7 @@ extern sStatDefaults_149860 D_0043FB28;
 extern "C" void* cBELibrary_cBELibrary(void* self)
 {
     cBELibrary_loadData();
-    D_00535C18 = D_0043FB28;
+    cBELibrary_highScores = kHighScoresDefault;
     cBENewRaceInterface_getThis();
     cBENewPlayerInterface_getThis();
     cBECharacterInterface_getThis();
@@ -508,7 +508,7 @@ INCLUDE_ASM("be/beintstat", cBELibrary__cBELibrary);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 extern "C" void cBESaveInterface_purgeInterface(void);
-extern int* D_004A11C8;
+extern int* cBEBoltInterface_instance;
 
 /**
  * Destroys the BE library: frees every BE interface singleton, then the object itself when asked to.
@@ -537,8 +537,8 @@ extern "C" void cBELibrary__cBELibrary(void* self, int flags)
     cBENetworkInterface_instance = 0;
     operator_delete((int*)cBEScoreInterface_instance);
     cBEScoreInterface_instance = 0;
-    operator_delete(D_004A11C8);
-    D_004A11C8 = 0;
+    operator_delete(cBEBoltInterface_instance);
+    cBEBoltInterface_instance = 0;
     operator_delete((int*)cBEMissionInterface_instance);
     cBEMissionInterface_instance = 0;
     operator_delete((int*)cBEEconInterface_instance);
@@ -663,10 +663,10 @@ extern char cBELibrary_rewardDB[];
 extern sCharSlot_149BB8 cBELibrary_raceDB;
 extern sRiderEntry_149BB8 D_00535B20_149BB8[6] __asm__("cBELibrary_playerDB");
 extern const char str_data_be_charDB_dbl[];
-extern char D_00530970[];
-extern sCharStat_149BB8 D_005308D8[10];
+extern char cBELibrary_characterDB[];
+extern sCharStat_149BB8 cBELibrary_statDefault[10];
 extern sCharSrc_149BB8 D_00440F00[10];
-extern char D_00535898[];
+extern char cBELibrary_optionDB[];
 
 extern int cBELibrary_grabPointsDB[0x2A8 / 4];
 
@@ -674,8 +674,8 @@ extern int cBELibrary_grabPointsDB[0x2A8 / 4];
  * Sets up the career databases at boot: rewards, race and player setup, character data, profiles and grab points.
  *
  * func_0014C6A0 and cBERewardDB_init first; the race DB gets riders 0-5 in order and the 6 player entries are cleared
- * (character slot flag set, byte +0x11 = 4). The character file is copied into D_00530970 (0x550 bytes) and freed;
- * D_005308D8 gets each character's id, its 7 base stats from D_00440F00 plus 5, and 11 for the maxima. D_00535898 is
+ * (character slot flag set, byte +0x11 = 4). The character file is copied into cBELibrary_characterDB (0x550 bytes) and freed;
+ * cBELibrary_statDefault gets each character's id, its 7 base stats from D_00440F00 plus 5, and 11 for the maxima. cBELibrary_optionDB is
  * cleared, the profiles of the 3 profile slots are initialised (cBEProfileLib_init with reload), and cBELibrary_grabPointsDB
  * is filled with the {points, points per second} pairs.
  */
@@ -699,28 +699,28 @@ extern "C" void cBELibrary_loadData(void)
         D_00535B20_149BB8[i].c11 = 4;
     }
     buf = FILE_load(str_data_be_charDB_dbl, 0x100);
-    func_0041605C(D_00530970, buf, 1360);
+    func_0041605C(cBELibrary_characterDB, buf, 1360);
     if (buf != 0) {
         cMemMan_free(buf);
     }
     for (i = 0; i < 10; i++) {
-        D_005308D8[i].v[0] = i;
-        D_005308D8[i].v[1] = D_00440F00[i].v[0] + 5;
-        D_005308D8[i].v[2] = D_00440F00[i].v[1] + 5;
-        D_005308D8[i].v[3] = D_00440F00[i].v[2] + 5;
-        D_005308D8[i].v[4] = D_00440F00[i].v[3] + 5;
-        D_005308D8[i].v[5] = D_00440F00[i].v[4] + 5;
-        D_005308D8[i].v[6] = D_00440F00[i].v[5] + 5;
-        D_005308D8[i].v[7] = D_00440F00[i].v[6] + 5;
-        D_005308D8[i].v[9] = 11;
-        D_005308D8[i].v[11] = 11;
-        D_005308D8[i].v[8] = 11;
-        D_005308D8[i].v[12] = 11;
-        D_005308D8[i].v[14] = 11;
-        D_005308D8[i].v[13] = 11;
-        D_005308D8[i].v[10] = 11;
+        cBELibrary_statDefault[i].v[0] = i;
+        cBELibrary_statDefault[i].v[1] = D_00440F00[i].v[0] + 5;
+        cBELibrary_statDefault[i].v[2] = D_00440F00[i].v[1] + 5;
+        cBELibrary_statDefault[i].v[3] = D_00440F00[i].v[2] + 5;
+        cBELibrary_statDefault[i].v[4] = D_00440F00[i].v[3] + 5;
+        cBELibrary_statDefault[i].v[5] = D_00440F00[i].v[4] + 5;
+        cBELibrary_statDefault[i].v[6] = D_00440F00[i].v[5] + 5;
+        cBELibrary_statDefault[i].v[7] = D_00440F00[i].v[6] + 5;
+        cBELibrary_statDefault[i].v[9] = 11;
+        cBELibrary_statDefault[i].v[11] = 11;
+        cBELibrary_statDefault[i].v[8] = 11;
+        cBELibrary_statDefault[i].v[12] = 11;
+        cBELibrary_statDefault[i].v[14] = 11;
+        cBELibrary_statDefault[i].v[13] = 11;
+        cBELibrary_statDefault[i].v[10] = 11;
     }
-    func_00416210(D_00535898, 0, 648);
+    func_00416210(cBELibrary_optionDB, 0, 648);
     for (i = 0; i < 3; i++) {
         cBEProfileLib_init(cBELibrary_profileLib + i * 39760, 1);
     }

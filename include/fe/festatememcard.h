@@ -3,10 +3,10 @@
 
 // cFEStateMemCard: the front end's start-up memory-card screen ("06cAutoload"): it checks the cards for the settings
 // and profile files, checks the free space for missing ones and auto-loads them (a cFEMemCard with mType 2, settings).
-// The live screen is the class static cFEStateMemCard::mInstance (D_004A14B8: the ctor sets it, the dtor clears it);
+// The live screen is the class static cFEStateMemCard::mInstance (cFEStateMemCard_mInstance: the ctor sets it, the dtor clears it);
 // the manager callbacks it installs (cFEStateMemCard_callback*, func_00186C98, func_00186D60, startProfileRead,
-// startSettingsRead, displayStatus) are static and work through it; the start-up stage is the static D_004A14BC
-// (On Tour mStage), D_004A14B4 is cleared next to it (On Tour mProfileFile, by order).
+// startSettingsRead, displayStatus) are static and work through it; the start-up stage is the static cFEStateMemCard_mStage
+// (On Tour mStage), cFEStateMemCard_mProfileFile is cleared next to it (On Tour mProfileFile, by order).
 // EA's source file is not known: the preview keeps the inline ctor / dtor / onWidgetEvent as linkonce copies
 // (__15cFEStateMemCard, _$_15cFEStateMemCard, onWidgetEvent__15cFEStateMemCardP8cUIThingUi), so the class is declared
 // in a header; this one is named after the class. Retail code: the ctor func_00186A08, the dtor and onWidgetMenu in

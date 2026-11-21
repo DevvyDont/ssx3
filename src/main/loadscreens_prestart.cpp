@@ -137,19 +137,19 @@ extern "C" int cPreStartScreen_loseFocus(cPreStartScreen* self)
 INCLUDE_ASM("main/loadscreens_prestart", cInitLoadScreen__cInitLoadScreen);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern void* D_0046D970[];
+extern void* cAppModule_vtbl[];
 
 /**
  * Destroys the start-up load screen.
  *
- * Only resets the vtable to the root module vtable D_0046D970 (the base destructors have nothing else to do) and
+ * Only resets the vtable to the root module vtable cAppModule_vtbl (the base destructors have nothing else to do) and
  * frees the object with operator_delete() when bit 0 of @p flags is set.
  *
  * @param flags  the destructor flags (bit 0: free the memory)
  */
 extern "C" void cInitLoadScreen__cInitLoadScreen(cInitLoadScreen* self, int flags)
 {
-    *(void***)self = D_0046D970;
+    *(void***)self = cAppModule_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -355,19 +355,19 @@ void* cPreFELoadScreen_cPreFELoadScreen(void* vself)
 INCLUDE_ASM("main/loadscreens_prestart", cPreGameLoadScreen__cPreGameLoadScreen);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern void* D_0046D970[];
+extern void* cAppModule_vtbl[];
 
 /**
  * Destroys the pre-game load screen.
  *
- * Only resets the vtable to the root module vtable D_0046D970 (the base destructors have nothing else to do) and
+ * Only resets the vtable to the root module vtable cAppModule_vtbl (the base destructors have nothing else to do) and
  * frees the object with operator_delete() when bit 0 of @p flags is set.
  *
  * @param flags  the destructor flags (bit 0: free the memory)
  */
 extern "C" void cPreGameLoadScreen__cPreGameLoadScreen(cPreGameLoadScreen* self, int flags)
 {
-    *(void***)self = D_0046D970;
+    *(void***)self = cAppModule_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -378,10 +378,10 @@ extern "C" void cPreGameLoadScreen__cPreGameLoadScreen(cPreGameLoadScreen* self,
 INCLUDE_ASM("main/loadscreens_prestart", cPreFELoadScreen__cPreFELoadScreen);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern void* D_0046D970[];
+extern void* cAppModule_vtbl[];
 
 /**
- * Destroys the pre-front-end load screen: restores the base module vtable D_0046D970 and frees the object when bit 0
+ * Destroys the pre-front-end load screen: restores the base module vtable cAppModule_vtbl and frees the object when bit 0
  * of @p flags is set.
  *
  * Destructor slot (+0xC) of cPreFELoadScreen_vtbl.
@@ -390,7 +390,7 @@ extern void* D_0046D970[];
  */
 extern "C" void cPreFELoadScreen__cPreFELoadScreen(cPreFELoadScreen* self, int flags)
 {
-    *(void***)self = D_0046D970;
+    *(void***)self = cAppModule_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1027,7 +1027,7 @@ extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern "C" void cUIStateStack_push(void* list, void* item);
 // PORT: cGameLoadScreen_loadTexture takes (self) but this caller passes (self, 0).
 extern "C" void cGameLoadScreen_loadTexture_2E20(void* self, int a1) __asm__("cGameLoadScreen_loadTexture");
-extern int D_004A19D8;
+extern int gInLodge;
 extern int D_004A19DC;
 extern char str_UIEngine_b[];
 extern char str_data_ui_gl[];
@@ -1072,7 +1072,7 @@ struct cLoadItemA_2E20 {
     {
         cUIState_cUIState(this, ui);
         *(void**)(pad + 8) = D_0047C878;
-        D_004A19D8 = 0;
+        gInLodge = 0;
     }
 };
 
@@ -1103,7 +1103,7 @@ struct cLoadItemC_2E20 {
  * Calls GrMan's InitTextures (slot 44) with 0x100 and cBE_getInterface (result unused), builds a 0x70-byte UI engine
  * (tag "UIEngine", cUIEngine_cUIEngine) into +0xC, loads "data/ui/gl", gives it SSXApp's Fonts and FELocale and a 0x1C-byte
  * "GLUIInput" input. Then pushes one 0x48-byte state built on cUIState_cUIState:
- * - "cGameLoadStateOutLodge" (vtable D_0047C878, clears D_004A19D8) when D_004A19D8 is set, or on the career path
+ * - "cGameLoadStateOutLodge" (vtable D_0047C878, clears gInLodge) when gInLodge is set, or on the career path
  *   (cGamePath 0) in game mode 5 or 6;
  * - "cGameLoadStateConquer" (D_0047C7A8, clears D_004A19DC) on the career path in any other mode;
  * - otherwise "cGameLoadState" (D_0047C948) with this screen as its owner (+0x48), after
@@ -1131,7 +1131,7 @@ extern "C" void cGameLoadScreen_load(cGameLoadScreen* self)
     n->f14 = 0;
     ((sUI_2E20*)self->mpUI)->fC = n;
     void* item;
-    if (D_004A19D8 == 0) {
+    if (gInLodge == 0) {
         signed char* newRaceBytes = (signed char*)((char*)&cBENewRaceInterface_newRace);
         if (newRaceBytes[0x49] != 0)
             goto other;

@@ -1421,10 +1421,10 @@ extern "C" int cSSXScriptEngine_GetNISListScriptCategory(void* self, int a, int 
 extern "C" int cSSXScriptEngine_GetNISListPlayState(void* a, int b);
 extern "C" void cSSXScriptEngine_PlayTransportSequence(void* a, int b, int c);
 extern int cUITemplate_MAP_mMapStyle;
-extern int D_004A2A54;
+extern int cPauseState_StackIdx;
 extern int cPauseState_Flags;
-extern int D_005366E8[];
-extern int D_004428F0[];
+extern int cPauseState_Stack[];
+extern int cPauseState_FlagsTable[];
 extern int D_004428F8[];
 
 struct sIface_6418 {
@@ -1450,7 +1450,7 @@ struct sGS_6418 {
 
 static inline void push2_6418()
 {
-    D_005366E8[++D_004A2A54] = 2;
+    cPauseState_Stack[++cPauseState_StackIdx] = 2;
     cPauseState_Flags = D_004428F8[0];
 }
 
@@ -1466,7 +1466,7 @@ static inline int isOne_6418(int m)
 
 static inline void pop_6418()
 {
-    cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
+    cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
 }
 
 /**
@@ -1911,8 +1911,8 @@ struct sApp_6BB0 {
 };
 extern sApp_6BB0* D_004A28A8_s __asm__("SSXApp");
 extern int cPauseState_Flags;
-extern int D_004A2A54;
-extern int D_005366E8[];
+extern int cPauseState_StackIdx;
+extern int cPauseState_Stack[];
 extern int D_004428F4[];
 
 struct sGameState_6BB0 {
@@ -1925,7 +1925,7 @@ struct sGameState_6BB0 {
  *
  * Clears the overlay-done flag (+0x8). When cGameComm_mGameComm reports an error it only forces the cut-scene
  * transition to regular mode and calls cBE_setState(0); otherwise it also calls cOVStateManager_gotoOverlay(2) and
- * pushes pause state 1 (D_005366E8[++D_004A2A54] = 1, cPauseState_Flags = D_004428F4). Slot +0x2C (gainFocus) of
+ * pushes pause state 1 (cPauseState_Stack[++cPauseState_StackIdx] = 1, cPauseState_Flags = D_004428F4). Slot +0x2C (gainFocus) of
  * cGFPreEventState_vtbl.
  */
 extern "C" void cGFPreEventState_gainFocus(cGFPreEventState* self)
@@ -1937,7 +1937,7 @@ extern "C" void cGFPreEventState_gainFocus(cGFPreEventState* self)
         return;
     }
     cOVStateManager_gotoOverlay(2);
-    D_005366E8[++D_004A2A54] = 1;
+    cPauseState_Stack[++cPauseState_StackIdx] = 1;
     cPauseState_Flags = D_004428F4[0];
     cCutSceneTransitionMan_ForceToRegularMode(D_004A28A8_s->mgr->world);
     cBE_setState(0);
@@ -1969,10 +1969,10 @@ extern "C" void cGFPreEventState_update(cGFPreEventState* self)
 INCLUDE_ASM("main/gamestate", cGFPreEventState_loseFocus);
 #ifdef SKIP_ASM
 extern "C" void cGFPreEventState_ResetGameState(cGFPreEventState* self);
-extern int D_004A2A54;
+extern int cPauseState_StackIdx;
 extern int cPauseState_Flags;
-extern int D_005366E8[];
-extern int D_004428F0[];
+extern int cPauseState_Stack[];
+extern int cPauseState_FlagsTable[];
 
 /**
  * Ends the pre-event game state: pops the pause stack (restoring cPauseState_Flags) and resets the game state with
@@ -1982,7 +1982,7 @@ extern int D_004428F0[];
  */
 extern "C" void cGFPreEventState_loseFocus(cGFPreEventState* self)
 {
-    cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
+    cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
     cGFPreEventState_ResetGameState(self);
 }
 #endif

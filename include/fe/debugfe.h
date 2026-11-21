@@ -12,7 +12,7 @@
 // after Screens sits 4 bytes later in retail.
 // Base: cFadeScreen (main/fadescreen.h, 0xC: vptr, FadeTimer, IsEnding) : cAppModule (vptr only). The ctor runs
 // cFadeScreen_cFadeScreen and stores cDebugFE_vtbl (0x0046D900, 7 slots: 1 dtor, 2 load, 3 purge, 4 loseFocus,
-// 5 gainFocus, 6 update, 7 render); the dtor stores cAppModule's vtable D_0046D970.
+// 5 gainFocus, 6 update, 7 render); the dtor stores cAppModule's vtable cAppModule_vtbl.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet.
 // Evidence tags:
@@ -32,7 +32,7 @@ struct cFont;
 
 struct cDebugFE {
     // --- cAppModule / cFadeScreen (0xC; main/fadescreen.h)
-    void** mVtbl;                   // 0x000 [R] cFadeScreen_vtbl, then cDebugFE_vtbl (ctor); D_0046D970 (dtor);
+    void** mVtbl;                   // 0x000 [R] cFadeScreen_vtbl, then cDebugFE_vtbl (ctor); cAppModule_vtbl (dtor);
                                     //       [P] same offset (slot 1)
     float FadeTimer;                // 0x004 [O] cFadeScreen::FadeTimer; [R] cFadeScreen_cFadeScreen 0.2
     int IsEnding;                   // 0x008 [O] cFadeScreen::IsEnding (bool, a word in retail)

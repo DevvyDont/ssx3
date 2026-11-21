@@ -200,7 +200,7 @@ struct tFrameData_5778 {
 };
 
 extern float cAvalanche_m_UpdateTimeStep;
-extern float D_004A3AA8;
+extern float cAvalanche_m_PatchColourScale2;
 extern sV4_5778 D_004FF120_5778 __asm__("t4vect_Zero");
 extern sV4_5778 D_004FF130_5778 __asm__("t4vect_Origin");
 extern sMat_5778 D_004FF1A0_5778 __asm__("t4mat_Identity");
@@ -322,7 +322,7 @@ extern "C" tFrameData_5778 tActiveAvalancheNode_getFrameData(sAvAct_5778* self, 
                                                             ((unsigned char)self->data->frames[i * kAvFrameSize_5778 + kAvCol_5778 + 2] * invBlend +
                                                              (unsigned char)self->data->frames[(i + 1) * kAvFrameSize_5778 + kAvCol_5778 + 2] * blend) * (1.0f / 128.0f),
                                                             self->fB4),
-                                                   D_004A3AA8);
+                                                   cAvalanche_m_PatchColourScale2);
                         self->f1FC = self->fB4;
                         cDynamicColourEmitter_update_Data(1.0f / 60.0f, self->emitter, &pos, &D_004FF120_5778, &col, ft < self->data->length);
                     }
@@ -352,7 +352,7 @@ extern "C" tFrameData_5778 tActiveAvalancheNode_getFrameData(sAvAct_5778* self, 
                                      ((unsigned char)self->data->frames[frame * kAvFrameSize_5778 + kAvCol_5778 + 2] * ifrac +
                                       (unsigned char)self->data->frames[(frame + 1) * kAvFrameSize_5778 + kAvCol_5778 + 2] * frac) * (1.0f / 128.0f),
                                      self->fB4),
-                            D_004A3AA8);
+                            cAvalanche_m_PatchColourScale2);
     fd.mat = self->mat;
     sV4_5778 axis(Normalize_5778(sV3_5778(self->data->frames[frame * kAvFrameSize_5778 + kAvAxis_5778] * (1.0f / 127.0f),
                                           self->data->frames[frame * kAvFrameSize_5778 + kAvAxis_5778 + 1] * (1.0f / 127.0f),
@@ -370,7 +370,7 @@ struct sVec4_6290 {
     sVec4_6290() {}
     sVec4_6290(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
-extern float D_004A3AA8;
+extern float cAvalanche_m_PatchColourScale2;
 extern sVec4_6290 t4vect_Origin;
 extern char cAvalanche_m_nodeList[];
 
@@ -396,7 +396,7 @@ static inline sVec4_6290 vScale_6290(const sVec4_6290& v, float s)
  * The node is cAvalanche_m_nodeList[high byte of the instance's ushort at +0x92]. When the node has an active node
  * (+0x114) it returns that active node's colour (+0xC0..+0xCF) reordered as (w, x, y, z). Otherwise, when it has a
  * packed history (+0xFC), it returns (1, r, g, b) from the first record's colour bytes 3..5 divided by 128 (then scaled
- * by D_004A3AA8, 1.0). With neither it returns t4vect_Origin. Nothing in the retail code references it.
+ * by cAvalanche_m_PatchColourScale2, 1.0). With neither it returns t4vect_Origin. Nothing in the retail code references it.
  *
  * @return the colour as (alpha, red, green, blue)
  */
@@ -409,7 +409,7 @@ extern "C" sVec4_6290 cAvalanche_getColour(void* self)
     }
     unsigned char* history = *(unsigned char**)(node + 0xFC);
     if (history != 0) {
-        return vScale_6290(sVec4_6290(1.0f, (float)history[3] * 0.0078125f, (float)history[4] * 0.0078125f, (float)history[5] * 0.0078125f), D_004A3AA8);
+        return vScale_6290(sVec4_6290(1.0f, (float)history[3] * 0.0078125f, (float)history[4] * 0.0078125f, (float)history[5] * 0.0078125f), cAvalanche_m_PatchColourScale2);
     }
     return t4vect_Origin;
 }
@@ -419,7 +419,7 @@ extern "C" sVec4_6290 cAvalanche_getColour(void* self)
 INCLUDE_ASM("visualfx/avalanche", cAvalanche__cAvalanche);
 #ifdef SKIP_ASM
 extern void* cAvalanche_vtbl[];
-extern void* D_00488680[];
+extern void* cVisualEffect_vtbl[];
 struct cAvalanche__cAvalanche_sElem {
     char pad[0x2F0];
 };
@@ -430,7 +430,7 @@ void operator_delete(int* ptr);
 
 /**
  * Destroys the avalanche effect: resets it, purges its 64 dynamic colour emitters (D_004EE840), restores the base
- * vtable (D_00488680) and frees the object when bit 0 of @p flags is set.
+ * vtable (cVisualEffect_vtbl) and frees the object when bit 0 of @p flags is set.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
@@ -442,7 +442,7 @@ extern "C" void cAvalanche__cAvalanche(int* self, int flags)
     for (i = 0; i < 64; i++) {
         cDynamicColourEmitter_purge(&D_004EE840[i], 1);
     }
-    *(void***)self = D_00488680;
+    *(void***)self = cVisualEffect_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -1082,7 +1082,7 @@ extern "C" int cAvalanche_writeData(int direct, void* handle, void* offset, char
 INCLUDE_ASM("visualfx/avalanche", cAvalanche_SaveData1);
 #ifdef SKIP_ASM
 extern void* cAvalanche_m_avalancheList;
-extern int D_004A3A48;
+extern int cAvalanche_m_Save;
 extern char str_pct_s_pct_s_j[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1130,7 +1130,7 @@ struct sAvGroup_83B8 {
  * File layout: magic 0x2BEEF00 and the data size, then per avalanche, for each node 0xBEEF, the record size,
  * the start position and life x 10-byte packed frames, followed by the collision and ground-collision counts
  * and records (a collision stores its time and its instance's word at +0x78). Clears the save request
- * D_004A3A48 (On Tour m_Save).
+ * cAvalanche_m_Save (On Tour m_Save).
  *
  * @param direct  byte-order flag for the writer cAvalanche_writeData (On Tour: littleEndian); the packed frames
  *                always pass 1
@@ -1192,7 +1192,7 @@ extern "C" void cAvalanche_SaveData1(int direct, char* name)
         }
         FILESYS_closesync(fd, 100);
     }
-    D_004A3A48 = 0;
+    cAvalanche_m_Save = 0;
 }
 #endif
 
@@ -1203,7 +1203,7 @@ extern void* cAvalanche_m_filedata;
 extern int cAvalanche_m_fileDataDeleteable;
 extern int cAvalanche_m_resolved;
 extern int cAvalanche_m_badCookie;
-extern int D_004A3A4C;
+extern int cAvalanche_m_Load;
 extern char str_sav[];
 // PORT: the read call returns syncblockio's result (bytes read); the ealib unit declares it void.
 extern "C" int FILESYS_readsync_i(int fd, int off, void* data, int size, int prio) __asm__("FILESYS_readsync");
@@ -1215,7 +1215,7 @@ extern "C" void cAvalanche_resolveDataPointers(void);
  *
  * On a good magic (0x2BEEF00) the whole file is read into a buffer of the stored data size, but size + 8
  * bytes are read into it (header included), so the read runs 8 bytes past the allocation. With a bad magic
- * the file is not closed. Clears D_004A3A4C (On Tour m_Load) and resolves the data pointers.
+ * the file is not closed. Clears cAvalanche_m_Load (On Tour m_Load) and resolves the data pointers.
  */
 extern "C" void cAvalanche_LoadData(void)
 {
@@ -1251,7 +1251,7 @@ extern "C" void cAvalanche_LoadData(void)
             cAvalanche_m_badCookie = 0;
         }
     }
-    D_004A3A4C = 0;
+    cAvalanche_m_Load = 0;
     cAvalanche_resolveDataPointers();
 }
 #endif
@@ -1381,7 +1381,7 @@ struct sVE_8A00 {
 };
 
 
-extern int D_004A3A58;
+extern int cAvalanche_m_RenderLines;
 extern sOut_8A00 D_004D5B70_8A00[] __asm__("vertlist");
 extern sMat_8A00 D_004FF1A0_8A00 __asm__("t4mat_Identity");
 extern sRow_8A00 D_004FF130_8A00 __asm__("t4vect_Origin");
@@ -1513,7 +1513,7 @@ static inline void SetBits_8A00(int& w, int mask, int shift, int v)
 }
 
 /**
- * Debug-draws an active node's recorded path when D_004A3A58 (On Tour m_RenderLines) is set.
+ * Debug-draws an active node's recorded path when cAvalanche_m_RenderLines (On Tour m_RenderLines) is set.
  *
  * Walks the avalanche node's packed frames from its start (position deltas x 2, frame colours) into the
  * vertex array vertlist and draws them with the graphics manager's virtual at vtable offset 0x248. The
@@ -1531,7 +1531,7 @@ extern "C" void tActiveAvalancheNode_renderLines(tActiveAvalancheNode* nodep)
     CopyMat_8A00(&matrix, &D_004FF1A0_8A00);
     PushRS_8A00(GrMan);
     SetBits_8A00(((int)(GrMan->m_pCurrentDrawState)->unk_00[1]), 0x7C, 2, 1);
-    if (D_004A3A58 != 0) {
+    if (cAvalanche_m_RenderLines != 0) {
         int i = 0;
         sRow_8A00 pos = (*(sRow_8A00*)&(node->m_node)->m_start);
         for (; i < (int)(node->m_node)->m_life; i++) {
@@ -1562,7 +1562,7 @@ INCLUDE_ASM("visualfx/avalanche", tActiveAvalanche_render);
 extern "C" void tActiveAvalancheNode_renderLines(tActiveAvalancheNode* node);
 extern "C" void cDynamicColourEmitter_render(void* p, int a);
 extern int D_004A3A54;
-extern int D_004A3A58;
+extern int cAvalanche_m_RenderLines;
 
 struct sAvVec4_D8EA8 {
     float x, y, z, w;
@@ -1696,8 +1696,8 @@ public:
 /**
  * Renders one active avalanche: its emitters and, in debug mode, its paths and collision lines.
  *
- * For each active node: path lines for the first D_004A3A58 nodes, and cDynamicColourEmitter_render(emitter, 7) when
- * D_004A3A54 (On Tour m_RenderEmitters, default 1) is set and the node has an emitter. With D_004A3A58 set it
+ * For each active node: path lines for the first cAvalanche_m_RenderLines nodes, and cDynamicColourEmitter_render(emitter, 7) when
+ * D_004A3A54 (On Tour m_RenderEmitters, default 1) is set and the node has an emitter. With cAvalanche_m_RenderLines set it
  * also draws a line from each collision instance to the player's rider, red once the collision time has
  * passed and green before.
  *
@@ -1712,13 +1712,13 @@ extern "C" void tActiveAvalanche_render(tActiveAvalanche* slotv)
     int i = 0;
     for (sAvActive_D8EA8* n = slot->active; n != 0; n = n->next, i++) {
         if (n->data) {
-            if (i < D_004A3A58)
+            if (i < cAvalanche_m_RenderLines)
                 tActiveAvalancheNode_renderLines((tActiveAvalancheNode*)n);
             if (D_004A3A54 && ((unsigned char*)n->data)[0xF2])
                 cDynamicColourEmitter_render(n->fx, 7);
         }
     }
-    if (D_004A3A58 == 0)
+    if (cAvalanche_m_RenderLines == 0)
         return;
     for (int j = 0; j < slot->group->nPairs; j++) {
         sAvVec4_D8EA8 nodePos = *(sAvVec4_D8EA8*)(slot->group->pairs[j].node + 0x40);

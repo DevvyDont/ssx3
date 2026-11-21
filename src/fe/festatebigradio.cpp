@@ -274,7 +274,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern int D_004A1A70;
 
 
-extern void* D_004A33CC;
+extern void* cSetupMan_mSetupMan;
 
 // PORT: several callees are declared with other parameter types elsewhere; bind local views by asm label
 extern "C" void cBraggingRightsMenu_setConfirmed(void* panel, int on);
@@ -340,7 +340,7 @@ extern "C" void cFEStateBraggingRights_onUpdate(cFEStateBraggingRights* self)
                 if (frame != 0xFFFF)
                     cUIScreen_playFrame(self->mpScreen, frame, 1);
                 if (isNet_2DB0())
-                    func_00265700(D_004A33CC);
+                    func_00265700(cSetupMan_mSetupMan);
             }
         }
     }
@@ -516,7 +516,7 @@ INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onWidgetEvent);
 // From peak3project's fork (github.com/peak3project/ssx3).
 int GetHashValue32(char* str);
 extern int D_004A1A70;
-extern void* D_004A33CC;
+extern void* cSetupMan_mSetupMan;
 extern "C" void cBraggingRightsMenu_setMenuItemColor(void* p);
 extern "C" void cFEStateBraggingRights_updateConfirmedState(cFEStateBraggingRights* self);
 extern "C" void cFEStateBraggingRights_updateBE(cFEStateBraggingRights* self, int player, int which, int value);
@@ -534,7 +534,7 @@ extern "C" void MEM_fill(void* dst, int c, int n);
 extern char str_kT_POPUPCMNCancelChallenge[];
 extern char str_kT_CMNYes[];
 extern char str_kT_CMNNo[];
-extern char D_005308B8[];
+extern char cBERules_mRules[];
 
 struct sVE_38F8 {
     short delta;
@@ -568,7 +568,7 @@ static inline void* vcall_38F8(char* self, int slot, sWidget_38F8* w)
  *
  * Event 5 on a row locks its panel (cBraggingRightsMenu_setConfirmed) and plays the wait labels; offline, once both panels are
  * locked, the custom interface's next state is pushed. Event 6 online asks "kT_POPUPCMNCancelChallenge"
- * (popup id 0x838), offline pushes the previous state and clears the rule records D_005308B8. Events 1 and 2
+ * (popup id 0x838), offline pushes the previous state and clears the rule records cBERules_mRules. Events 1 and 2
  * recolour the panel; event 9 stores the new value with cFEStateBraggingRights_updateBE (online it is sent to the peer
  * instead).
  *
@@ -585,7 +585,7 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(cFEStateBraggingRights* sel
         do {
             if (cBraggingRightsMenu_findListBoxP_38F8((char*)&self->mMenuCtrl[0] + i * 52, w) != -1) {
                 if (isOn_38F8() && i == 0)
-                    func_00265688(D_004A33CC);
+                    func_00265688(cSetupMan_mSetupMan);
                 cBraggingRightsMenu_setConfirmed_38F8((char*)&self->mMenuCtrl[0] + i * 52, 1);
                 cFEStateBraggingRights_updateConfirmedState(self);
                 break;
@@ -619,7 +619,7 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(cFEStateBraggingRights* sel
             void* nextState = vcall_38F8(((char*)self), 5, w);
             if (nextState != 0)
                 cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
-            MEM_fill(D_005308B8, 0, 0x20);
+            MEM_fill(cBERules_mRules, 0, 0x20);
         }
         break;
     case 1:
@@ -633,7 +633,7 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(cFEStateBraggingRights* sel
         break;
     case 9:
         if (isOn_38F8()) {
-            void* snd = D_004A33CC;
+            void* snd = cSetupMan_mSetupMan;
             int slot = cBraggingRightsMenu_findListBoxP_38F8(&self->mMenuCtrl[0], w);
             func_00265568(snd, slot, cUIListBox_getCurrentEntryData_38F8(w));
         } else {
@@ -690,7 +690,7 @@ INCLUDE_ASM("fe/festatebigradio", cFEStateBraggingRights_onWidgetMenu);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_004A1A70;
-extern void* D_004A33CC;
+extern void* cSetupMan_mSetupMan;
 extern "C" void cBraggingRightsMenu_setMenuItemColor(void* p);
 extern "C" void func_00265458(void* snd, int id);
 static inline int isOn00193CF8()
@@ -725,7 +725,7 @@ extern "C" int cFEStateBraggingRights_onWidgetMenu(cFEStateBraggingRights* self,
         return 0x100;
     case 5:
         if (isOn00193CF8() && found) {
-            func_00265458(D_004A33CC, *((unsigned char*)ctrl + 0x95));
+            func_00265458(cSetupMan_mSetupMan, *((unsigned char*)ctrl + 0x95));
         }
         cBraggingRightsMenu_setMenuItemColor(item);
         return 257;
@@ -756,7 +756,7 @@ struct sPlayerOpts_193DE0 {
     int f4;     // 0x4
     int f8;     // 0x8
 };
-extern sPlayerOpts_193DE0 D_005308B8_193DE0[] __asm__("D_005308B8");
+extern sPlayerOpts_193DE0 D_005308B8_193DE0[] __asm__("cBERules_mRules");
 
 static inline int other_193DE0(int p)
 {
@@ -764,7 +764,7 @@ static inline int other_193DE0(int p)
 }
 
 /**
- * Stores the value of one bragging-rights rule for a player in the rule records D_005308B8 (0xC bytes per player).
+ * Stores the value of one bragging-rights rule for a player in the rule records cBERules_mRules (0xC bytes per player).
  *
  * Rules 0 (word +0x8), 1 (bit 3), 2 (bit 0) and 7 (word +0x4) go into the other player's record; rules 3 (bit 4), 4
  * (bit 5), 5 (bit 1) and 6 (bit 2) into the player's own. Other rules are ignored. The bragging-rights widget handler
@@ -805,10 +805,10 @@ struct sRadioChan_3F38 {
     int f4;
     int f8;
 };
-extern sRadioChan_3F38 D_005308B8_a[] __asm__("D_005308B8");
+extern sRadioChan_3F38 D_005308B8_a[] __asm__("cBERules_mRules");
 
 /**
- * Returns the value of one bragging-rights rule for a player from the rule records D_005308B8.
+ * Returns the value of one bragging-rights rule for a player from the rule records cBERules_mRules.
  *
  * Reads the same fields cFEStateBraggingRights_updateBE writes: rules 0, 1, 2 and 7 from the other player's record, 3-6 from the player's
  * own.
@@ -1039,7 +1039,7 @@ extern "C" int func_001941B0(cFEStateBraggingRights* self, int msg, sRadioMsg_41
 //100%
 INCLUDE_ASM("fe/festatebigradio", func_00194440);
 #ifdef SKIP_ASM
-extern void* D_004A33CC;
+extern void* cSetupMan_mSetupMan;
 extern "C" void func_00265768(void* snd, int id);
 void func_001A94D8(void* self);
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
@@ -1047,7 +1047,7 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 /**
  * Handles an event of the bragging-rights screen's cancel-challenge popup (id 2104).
  *
- * Event 0xF (confirmed) cancels the online race setup (func_00265768(D_004A33CC, 249) when D_004A33CC is set) and calls
+ * Event 0xF (confirmed) cancels the online race setup (func_00265768(cSetupMan_mSetupMan, 249) when cSetupMan_mSetupMan is set) and calls
  * the empty func_001A94D8; other events go to cFEStateNet_onPopupEvent. cFEStateBraggingRights_onPopupEvent calls it
  * online for that popup.
  *
@@ -1057,8 +1057,8 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 extern "C" void func_00194440(void* self, void* popup, int popupEvent)
 {
     if (popupEvent == 0xF) {
-        if (D_004A33CC != 0) {
-            func_00265768(D_004A33CC, 249);
+        if (cSetupMan_mSetupMan != 0) {
+            func_00265768(cSetupMan_mSetupMan, 249);
         }
         func_001A94D8(self);
     } else {

@@ -6668,7 +6668,7 @@ INCLUDE_ASM("seg/seg_1FBE38", Crowd3dFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_39F0 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_39F0 __asm__("SSXApp");
-extern int D_004A3FF0_39F0 __asm__("D_004A3FF0");
+extern int D_004A3FF0_39F0 __asm__("TheCrowdMan3d");
 extern "C" void func_00343C60_39F0(int, int) __asm__("func_00343C60");
 extern "C" void func_00343F38_39F0(int, int) __asm__("func_00343F38");
 struct V3_39F0 { float x, y, z; };
@@ -6689,7 +6689,7 @@ struct Ent_39F0 { int idx; int val; int pad; int type; };
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance is found, Cmd 0 passes its id (+0x78) to
  * func_00343C60 (joins the crowd block for its model) and Cmd 1 to func_00343F38 (leaves it), both on the 3D crowd
- * manager D_004A3FF0; other values do nothing.
+ * manager TheCrowdMan3d; other values do nothing.
  *
  * @param n  the number of script arguments
  * @param params  the script arguments (each: field index, value, value type)
@@ -6745,7 +6745,7 @@ INCLUDE_ASM("seg/seg_1FBE38", Crowd2dFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_3BA0 __asm__("cWScriptMan_TheWScriptMan");
-extern int D_004A2A00_3BA0 __asm__("D_004A2A00");
+extern int D_004A2A00_3BA0 __asm__("TheCrowdMan2d");
 struct V3_3BA0 { float x, y, z; };
 extern V3_3BA0 D_004C9098_3BA0 __asm__("luno_gLunoNil");
 struct Tag_3BA0 { char c; Tag_3BA0() {} Tag_3BA0(const Tag_3BA0 &o) : c(o.c) {} };
@@ -6767,7 +6767,7 @@ struct Ent_3BA0 { int idx; int val; int pad; int type; };
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance is found, its id (+0x78) goes to the 2D crowd
- * manager D_004A2A00: Cmd 0 calls func_00229820 (points bone Context of part Mesh at the shared crowd record), Cmd 2
+ * manager TheCrowdMan2d: Cmd 0 calls func_00229820 (points bone Context of part Mesh at the shared crowd record), Cmd 2
  * func_00229788 (takes a crowd quad slot for the instance) and Cmd 3 func_002297D8 (releases it); Cmd 1 and others do
  * nothing.
  *

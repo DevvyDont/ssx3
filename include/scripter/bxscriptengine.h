@@ -18,7 +18,7 @@
 //   cScriptDatabaseObject (0x000, size 0x2AC: 0x2A8 of data, vptr at 0x2A8), cInSeqComm (0x2AC, a vptr only).
 // The ctor stores _vt$15cBXScriptEngine = cBXScriptEngine_vtbl (0x004824B8, 12 slots) at 0x2A8 and
 // _vt$15cBXScriptEngine$10cInSeqComm (D_00482450, 11 slots, delta -0x2AC) at 0x2AC; the cSSXScriptEngine ctor then
-// overwrites both. The class static cBXScriptEngine::mpScriptEngine is D_004A34E8 (ctor sets it, dtor clears it,
+// overwrites both. The class static cBXScriptEngine::mpScriptEngine is cBXScriptEngine_mpScriptEngine (ctor sets it, dtor clears it,
 // cBXScriptEngine_GetScriptEngine returns it; still unnamed in config/symbol_addrs.txt).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet.

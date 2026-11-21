@@ -36,7 +36,7 @@ void cMemMan_free(void* ptr);
  * Frees the flow state's value array (+0x4, cMemMan_free) when there is one and sets the state count (+0x0) to 0.
  *
  * cFEFlowState_setNumStates calls it before allocating a new array; cRealFE_loseFocus calls it on the front-end flow
- * state D_004A4E80.
+ * state gFlowState.
  */
 extern "C" void cFEFlowState_purge(cFEFlowState* self)
 {

@@ -7982,10 +7982,10 @@ extern "C" int cComputer_isAboutToRail(cComputer* computer, float fparg0) {
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cComputer_setCruiseLogic);
 #ifdef SKIP_ASM
-extern tComputerCruiseLogic D_0043CF20[];
+extern tComputerCruiseLogic cComputer_mCruiseLogic[];
 
 /**
- * Selects a computer rider's cruise logic: copies entry @p idx of the cruise-logic table (D_0043CF20) into
+ * Selects a computer rider's cruise logic: copies entry @p idx of the cruise-logic table (cComputer_mCruiseLogic) into
  * cruiseLogic.
  *
  * Also records the index in mCruiseLogicID.
@@ -7994,7 +7994,7 @@ extern tComputerCruiseLogic D_0043CF20[];
  */
 extern "C" void cComputer_setCruiseLogic(cComputer* self, int idx)
 {
-    *(&self->cruiseLogic) = D_0043CF20[idx];
+    *(&self->cruiseLogic) = cComputer_mCruiseLogic[idx];
     self->mCruiseLogicID = idx;
 }
 #endif

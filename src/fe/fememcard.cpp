@@ -147,7 +147,7 @@ public:
     virtual void v35();
     virtual void v36(void* buf, int a, int b, int c, int d, int e);
 };
-extern cFEMemCardStateK186C98* D_004A14B8_K186C98 __asm__("D_004A14B8");
+extern cFEMemCardStateK186C98* D_004A14B8_K186C98 __asm__("cFEStateMemCard_mInstance");
 
 struct sVtEntK186C98 {
     short delta;
@@ -165,7 +165,7 @@ struct sLocalK186C98 {
  * Callback that the cFEStateMemCard constructor func_00186A08 plugs into the memory-card manager's
  * callbackConfirmFormat slot (0x48). It writes the selected device's number (cMCOverlayManager_getDeviceNumberString
  * with mSelectedDevice) into the localized kT_MEMOVNotFormattedPS2 text (FELocale slot 4, then sprintf1 into an
- * 800-char buffer), sets the popup id (+0x19C) of the memory-card state D_004A14B8 to 4 and opens it through the
+ * 800-char buffer), sets the popup id (+0x19C) of the memory-card state cFEStateMemCard_mInstance to 4 and opens it through the
  * state's getPopup (vtable slot 36, cFEMemCard_getPopup) with yes-only and no-buttons set. Popup 4 makes cFEStateMemCard_onPopupEvent leave
  * the screen (cFEStateMemCard_exitScreen).
  */
@@ -197,8 +197,8 @@ extern char str_kT_CMNYes[];
 extern char str_kT_MEMOVRetry[];
 extern "C" void cMCOverlayManager_getDeviceNumberString(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
-// Typed view of D_004A14B8 (other functions in this unit declare it as void*).
-extern char* D_004A14B8_86D60 __asm__("D_004A14B8");
+// Typed view of cFEStateMemCard_mInstance (other functions in this unit declare it as void*).
+extern char* D_004A14B8_86D60 __asm__("cFEStateMemCard_mInstance");
 
 struct sVtI_86D60 { short delta; short index; int (*fn)(void*, int); };
 struct sVtS_86D60 { short delta; short index; unsigned short* (*fn)(void*, int); };
@@ -213,7 +213,7 @@ struct sLocal_86D60 { int v[8]; };
  * Callback that the cFEStateMemCard constructor func_00186A08 plugs into the manager's callbackConfirmNoCards slot
  * (0x3C). The localized kT_MEMFENotDetectedStartUpPS2 text gets the selected device's number and the card space a
  * profile needs (the card's SpaceRequired, slot 22, of cBESaveInterface_getSaveProfileSize()); the
- * cBE_getInterface(cBE_getBE(), 5) result is discarded. Sets popup id 9 (+0x19C of D_004A14B8) and opens a two-button
+ * cBE_getInterface(cBE_getBE(), 5) result is discarded. Sets popup id 9 (+0x19C of cFEStateMemCard_mInstance) and opens a two-button
  * popup through getPopup (slot 36); the popup's setButtonText (slot 26) labels button 0 "kT_CMNYes" and button 1
  * "kT_MEMOVRetry", and setDefaultButton (slot 25) picks button 1. In cFEMemCard_onPopupEvent, button 0 cancels and button 1 sets
  * the retry flag (+0x1EC).
@@ -267,7 +267,7 @@ extern "C" void func_00186D60(void)
 //100%
 INCLUDE_ASM("fe/fememcard", cFEStateMemCard_callbackAcknowledgeCardStatusChange);
 #ifdef SKIP_ASM
-extern int D_004A14BC;
+extern int cFEStateMemCard_mStage;
 extern "C" void* cSSXApp_getMCManager(void* p);
 extern "C" int cMCOverlayManager_hasCardStatusCriticalError(void* game);
 
@@ -275,7 +275,7 @@ extern "C" int cMCOverlayManager_hasCardStatusCriticalError(void* game);
  * Tells the memory-card manager whether a card status change needs acknowledging during the start-up reads.
  *
  * Callback for the manager's callbackAcknowledgeCardStatusChange slot (0xB0), installed by func_00186A08. True only
- * when the stage D_004A14BC is 4 or more (reading the settings file or the profile) and
+ * when the stage cFEStateMemCard_mStage is 4 or more (reading the settings file or the profile) and
  * cMCOverlayManager_hasCardStatusCriticalError reports a critical error.
  *
  * @return true when the stage is at least 4 and the card has a critical error, else false
@@ -283,7 +283,7 @@ extern "C" int cMCOverlayManager_hasCardStatusCriticalError(void* game);
 extern "C" bool cFEStateMemCard_callbackAcknowledgeCardStatusChange(void)
 {
     void* game = cSSXApp_getMCManager(SSXApp);
-    if (D_004A14BC >= 4) {
+    if (cFEStateMemCard_mStage >= 4) {
         if (cMCOverlayManager_hasCardStatusCriticalError(game)) {
             return true;
         }
@@ -304,9 +304,9 @@ extern "C" void cFEStateMemCard_terminateFreeSpaceCheck(cFEStateMemCard* self);
 extern "C" void* cSSXApp_getMCManager(void* p);
 extern "C" int cMCOverlayManager_hasCardStatusCriticalError(void* mp);
 extern "C" int cMCOverlayManager_GetFreeSpace(void* mp, int card);
-// Typed view of D_004A14B8 (other functions in this unit declare it as void*).
-extern char* D_004A14B8_86F90 __asm__("D_004A14B8");
-extern int D_004A14BC;
+// Typed view of cFEStateMemCard_mInstance (other functions in this unit declare it as void*).
+extern char* D_004A14B8_86F90 __asm__("cFEStateMemCard_mInstance");
+extern int cFEStateMemCard_mStage;
 
 struct sVtA_86F90 { short delta; short index; void (*fn)(void*, int, void*); };
 struct sVtI_86F90 { short delta; short index; int (*fn)(void*, int); };
@@ -317,7 +317,7 @@ struct sVt0_86F90 { short delta; short index; int (*fn)(void*); };
  * Checks that the selected card has room for the missing profile, or ends the free-space check and starts the reads.
  *
  * Callback for the manager's callbackLoadReady slot (0xA4), installed by func_00186A08; works on the memory-card state
- * D_004A14B8. When the free-space check is already done (+0x234 set) it only acts from stage 4 on (D_004A14BC >= 4):
+ * cFEStateMemCard_mInstance. When the free-space check is already done (+0x234 set) it only acts from stage 4 on (cFEStateMemCard_mStage >= 4):
  * the card's GetTitleString (slot 14) writes the title of the file at mFileCursor into the screen's name buffer
  * (+0x9C). Otherwise, unless cMCOverlayManager_hasCardStatusCriticalError reports an error, it totals the space needed
  * into +0x230: when the profile is missing (bit 0 of the missing-file flags +0x22C) that is the card's SpaceRequired
@@ -331,7 +331,7 @@ struct sVt0_86F90 { short delta; short index; int (*fn)(void*); };
 extern "C" void cFEStateMemCard_callbackLoadReady(void)
 {
     if (*(int*)(D_004A14B8_86F90 + 0x234) != 0) {
-        if (D_004A14BC < 4)
+        if (cFEStateMemCard_mStage < 4)
             return;
         char* mp = (char*)cSSXApp_getMCManager(SSXApp);
         char* memCard = *(char**)(mp + 0x434);
@@ -421,14 +421,14 @@ public:
     virtual void v40();
     virtual void v41();
 };
-// Typed view of D_004A14B8 (other functions in this unit declare it as void*).
-extern cFEMemCardStateK187148* D_004A14B8_K187148 __asm__("D_004A14B8");
+// Typed view of cFEStateMemCard_mInstance (other functions in this unit declare it as void*).
+extern cFEMemCardStateK187148* D_004A14B8_K187148 __asm__("cFEStateMemCard_mInstance");
 
 /**
  * Handles a missing file on the memory-card state: cancels the card operation and marks the screen done.
  *
  * Callback for the manager's callbackFileNotFound slot (0x38), installed by func_00186A08. Calls the state's cancel
- * (vtable slot 41, cFEMemCard_cancel, which leaves screen state 2) and then sets the screen state (+0x1C0 of D_004A14B8) to
+ * (vtable slot 41, cFEMemCard_cancel, which leaves screen state 2) and then sets the screen state (+0x1C0 of cFEStateMemCard_mInstance) to
  * 6.
  */
 extern "C" void cFEStateMemCard_callbackFileNotFound(void)
@@ -441,7 +441,7 @@ extern "C" void cFEStateMemCard_callbackFileNotFound(void)
 //100%
 INCLUDE_ASM("fe/fememcard", cFEStateMemCard_callbackFileChecked);
 #ifdef SKIP_ASM
-extern void* D_004A14B8;
+extern void* cFEStateMemCard_mInstance;
 extern "C" void cFEMemCard_callbackFileChecked(void);
 extern "C" void cFEStateMemCard_updateFreeSpaceCheckState(cFEStateMemCard* self);
 
@@ -449,12 +449,12 @@ extern "C" void cFEStateMemCard_updateFreeSpaceCheckState(cFEStateMemCard* self)
  * Handles a finished file check on the memory-card state: runs the base handler, then advances the free-space check.
  *
  * Callback for the manager's callbackFileChecked slot (0x94), installed by func_00186A08. Calls cFEMemCard's
- * file-checked handler cFEMemCard_callbackFileChecked, then cFEStateMemCard_updateFreeSpaceCheckState on the memory-card state D_004A14B8.
+ * file-checked handler cFEMemCard_callbackFileChecked, then cFEStateMemCard_updateFreeSpaceCheckState on the memory-card state cFEStateMemCard_mInstance.
  */
 extern "C" void cFEStateMemCard_callbackFileChecked(void)
 {
     cFEMemCard_callbackFileChecked();
-    cFEStateMemCard_updateFreeSpaceCheckState((cFEStateMemCard*)D_004A14B8);
+    cFEStateMemCard_updateFreeSpaceCheckState((cFEStateMemCard*)cFEStateMemCard_mInstance);
 }
 #endif
 
@@ -470,9 +470,9 @@ struct sFEMemCardK1871A8 {
     int pad_0x230;
     int f234;      // 0x234
 };
-// Typed view of D_004A14B8 (other functions in this unit declare it as void*).
-extern sFEMemCardK1871A8* D_004A14B8_K1871A8 __asm__("D_004A14B8");
-extern int D_004A14BC;
+// Typed view of cFEStateMemCard_mInstance (other functions in this unit declare it as void*).
+extern sFEMemCardK1871A8* D_004A14B8_K1871A8 __asm__("cFEStateMemCard_mInstance");
+extern int cFEStateMemCard_mStage;
 extern "C" void* cSSXApp_getMCManager(void* p);
 void cMCOverlayManager_selectDevice(void* mp, int a);
 extern "C" void cMCOverlayManager_setSelectedDevice(void* mp);
@@ -489,8 +489,8 @@ public:
  *
  * Callback for the manager's callbackCardsChecked slot (0x90), installed by func_00186A08. Selects device 0
  * (cMCOverlayManager_selectDevice, then cMCOverlayManager_setSelectedDevice) and moves the manager to InitFileCheckDevice (54, SetState
- * through vtable slot 1). Then restarts the check: stage D_004A14BC = 0, every file marked missing (+0x22C of
- * D_004A14B8 = -1), +0x234 cleared, the manager's file type set to 2 (cMCOverlayManager_readSetFileType) and the screen's file type
+ * through vtable slot 1). Then restarts the check: stage cFEStateMemCard_mStage = 0, every file marked missing (+0x22C of
+ * cFEStateMemCard_mInstance = -1), +0x234 cleared, the manager's file type set to 2 (cMCOverlayManager_readSetFileType) and the screen's file type
  * (+0x1BC) to 2.
  */
 extern "C" void cFEStateMemCard_callbackCardsChecked(void)
@@ -499,7 +499,7 @@ extern "C" void cFEStateMemCard_callbackCardsChecked(void)
     cMCOverlayManager_selectDevice(mp, 0);
     cMCOverlayManager_setSelectedDevice(mp);
     mp->SetState(54);
-    D_004A14BC = 0;
+    cFEStateMemCard_mStage = 0;
     D_004A14B8_K1871A8->f22C = -1;
     D_004A14B8_K1871A8->f234 = 0;
     cMCOverlayManager_readSetFileType(mp, 2);
@@ -511,15 +511,15 @@ extern "C" void cFEStateMemCard_callbackCardsChecked(void)
 INCLUDE_ASM("fe/fememcard", cFEStateMemCard_callbackSysRecheckFile);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_004A14BC;
+extern int cFEStateMemCard_mStage;
 struct sFEMemCardK187230 {
     char pad_0x000[0x22C];
     int f22C;      // 0x22C
     int pad_0x230;
     int f234;      // 0x234
 };
-// Typed view of D_004A14B8 (other functions in this unit declare it as void*).
-extern sFEMemCardK187230* D_004A14B8_K187230 __asm__("D_004A14B8");
+// Typed view of cFEStateMemCard_mInstance (other functions in this unit declare it as void*).
+extern sFEMemCardK187230* D_004A14B8_K187230 __asm__("cFEStateMemCard_mInstance");
 extern "C" void* cSSXApp_getMCManager(void* p);
 extern "C" void cMCOverlayManager_readSetFileType(void* mp, int mode);
 
@@ -527,13 +527,13 @@ extern "C" void cMCOverlayManager_readSetFileType(void* mp, int mode);
  * Restarts the memory-card state's free-space check when the manager rechecks the files.
  *
  * Callback for the manager's callbackSysRecheckFile slot (0xAC; cMCOverlayManager_InitiateFileCheck calls it),
- * installed by func_00186A08. Resets the stage D_004A14BC to 0, marks every file missing (+0x22C of D_004A14B8 = -1),
+ * installed by func_00186A08. Resets the stage cFEStateMemCard_mStage to 0, marks every file missing (+0x22C of cFEStateMemCard_mInstance = -1),
  * clears +0x234 and sets the manager's file type to 2 (cMCOverlayManager_readSetFileType).
  */
 extern "C" void cFEStateMemCard_callbackSysRecheckFile(void)
 {
     void* mp = cSSXApp_getMCManager(SSXApp);
-    D_004A14BC = 0;
+    cFEStateMemCard_mStage = 0;
     D_004A14B8_K187230->f22C = -1;
     D_004A14B8_K187230->f234 = 0;
     cMCOverlayManager_readSetFileType(mp, 2);
@@ -602,7 +602,7 @@ extern "C" void cFEStateMemCard_exitScreen(cFEStateMemCard* self)
 //100%
 INCLUDE_ASM("fe/fememcard", cFEStateMemCard_callbackConfirmNoFreeBlocks);
 #ifdef SKIP_ASM
-extern void* D_004A14B8;
+extern void* cFEStateMemCard_mInstance;
 extern char str_kT_MEMNoSpaceStartPS2[];
 extern char str_kT_MEMOVRetry[];
 extern "C" void* cBE_getBE();
@@ -645,7 +645,7 @@ struct sLocal_00187360 {
  * Shows the memory-card state's "not enough space" popup, with a Retry button.
  *
  * Callback for the manager's callbackConfirmNoFreeBlocks slot (0x5C), installed by func_00186A08. Sets popup id 20
- * (+0x19C of D_004A14B8) and writes the selected device's number and the profile's needed space (the card's
+ * (+0x19C of cFEStateMemCard_mInstance) and writes the selected device's number and the profile's needed space (the card's
  * SpaceRequired, slot 22, of cBESaveInterface_getSaveProfileSize()) into the localized kT_MEMNoSpaceStartPS2 text; the
  * cBE_getInterface(cBE_getBE(), 5) result is discarded. Opens a two-button popup through getPopup (slot 36), labels
  * button 1 "kT_MEMOVRetry" (setButtonText, slot 26; button 0 keeps its default label) and makes it the default (slot
@@ -657,7 +657,7 @@ extern "C" void cFEStateMemCard_callbackConfirmNoFreeBlocks(void)
     sLocal_00187360 loc;
     void* mp = cSSXApp_getMCManager(SSXApp);
     cBE_getInterface_Fv(cBE_getBE(), 5);
-    *(int*)((char*)D_004A14B8 + 0x19C) = 20;
+    *(int*)((char*)cFEStateMemCard_mInstance + 0x19C) = 20;
     char* sf = *(char**)((char*)mp + 0x434);
     sVtI_00187360* sfvt = *(sVtI_00187360**)sf;
     int size = sfvt[22].fn(sf + sfvt[22].delta, cBESaveInterface_getSaveProfileSize());
@@ -667,7 +667,7 @@ extern "C" void cFEStateMemCard_callbackConfirmNoFreeBlocks(void)
     unsigned short* fmt = vt[4].fn(locale + vt[4].delta, GetHashValue32(str_kT_MEMNoSpaceStartPS2));
     sprintf1(buf, fmt, &loc, size);
     D_004A14B8_K186C98->v36(buf, 0, 0, 0, 0, 0);
-    char* box = *(char**)((char*)D_004A14B8 + 0x218);
+    char* box = *(char**)((char*)cFEStateMemCard_mInstance + 0x218);
     sVtB_00187360* bvt = *(sVtB_00187360**)(box + 8);
     char* bthis = box + bvt[26].delta;
     char* buttonLocale = (char*)SSXApp->FELocale;
@@ -675,7 +675,7 @@ extern "C" void cFEStateMemCard_callbackConfirmNoFreeBlocks(void)
     char* o2this = buttonLocale + vt2[4].delta;
     int id = vt2[4].fn(o2this, GetHashValue32(str_kT_MEMOVRetry));
     bvt[26].fn(bthis, id, 1);
-    char* box2 = *(char**)((char*)D_004A14B8 + 0x218);
+    char* box2 = *(char**)((char*)cFEStateMemCard_mInstance + 0x218);
     sVtV_00187360* bvt2 = *(sVtV_00187360**)(box2 + 8);
     bvt2[25].fn(box2 + bvt2[25].delta, 1);
 }
@@ -684,7 +684,7 @@ extern "C" void cFEStateMemCard_callbackConfirmNoFreeBlocks(void)
 //100%
 INCLUDE_ASM("fe/fememcard", cFEStateMemCard_updateDone);
 #ifdef SKIP_ASM
-extern int D_004A14BC;
+extern int cFEStateMemCard_mStage;
 extern "C" void* cSSXApp_getMCManager(void* p);
 extern "C" void cMCOverlayManager_ReturnToDevSelectScreen(void* mp);
 extern "C" void cFEStateMemCard_startProfileRead(void);
@@ -703,7 +703,7 @@ static inline int moviePlaying_K1874E8(void* mp)
  *
  * The memory-card state's override of vtable slot +0x10C (cFEMemCard_updateDone in the base vtable cFEMemCard_vtbl). Does
  * nothing once the done flag (+0x1AC) is set or while the manager has an unacknowledged card state change
- * (mCurrDeviceStateAck clear and mCurrDeviceStateLast set). When the stage D_004A14BC is 4 (settings file read) and the
+ * (mCurrDeviceStateAck clear and mCurrDeviceStateLast set). When the stage cFEStateMemCard_mStage is 4 (settings file read) and the
  * first card has a profile (bit 0 of +0x238 clear), it returns the manager to device selection
  * (cMCOverlayManager_ReturnToDevSelectScreen) and starts the profile read (cFEStateMemCard_startProfileRead); otherwise cFEStateMemCard_exitScreen
  * leaves the screen.
@@ -715,7 +715,7 @@ extern "C" void cFEStateMemCard_updateDone(cFEStateMemCard* self)
     void* mp = cSSXApp_getMCManager(SSXApp);
     if (moviePlaying_K1874E8(mp))
         return;
-    if (D_004A14BC == 4 && ((self->mCard1MissingSavedFileTypeFlags ^ 1) & 1)) {
+    if (cFEStateMemCard_mStage == 4 && ((self->mCard1MissingSavedFileTypeFlags ^ 1) & 1)) {
         cMCOverlayManager_ReturnToDevSelectScreen(mp);
         cFEStateMemCard_startProfileRead();
         return;
@@ -814,7 +814,7 @@ extern "C" void cFEStateMemCard_onPopupEvent(cFEStateMemCard* self, cUIState* po
 //100%
 INCLUDE_ASM("fe/fememcard", cFEStateMemCard_displayStatus);
 #ifdef SKIP_ASM
-extern void* D_004A14B8;
+extern void* cFEStateMemCard_mInstance;
 extern "C" void cMCOverlayManager_GetMessage(void*, unsigned short*, int);
 extern "C" void cUIText_setUnicodeStringWrap(void* self, unsigned short* str);
 
@@ -835,7 +835,7 @@ struct sVtEntK1876A8 {
  */
 extern "C" void cFEStateMemCard_displayStatus(void)
 {
-    void* st = D_004A14B8;
+    void* st = cFEStateMemCard_mInstance;
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)st + 0x40), GetHashValue32(str_mc_messages));
     void* mp = cSSXApp_getMCManager(SSXApp);
     int managerState = *(int*)((char*)mp + 0x130);
@@ -856,9 +856,9 @@ extern "C" void cFEStateMemCard_displayStatus(void)
 //100%
 INCLUDE_ASM("fe/fememcard", cFEStateMemCard_startProfileRead);
 #ifdef SKIP_ASM
-extern void* D_004A14B8;
-extern int D_004A14BC;
-extern int D_004A14B4;
+extern void* cFEStateMemCard_mInstance;
+extern int cFEStateMemCard_mStage;
+extern int cFEStateMemCard_mProfileFile;
 extern char str_exclam[];
 extern char str_pct_s_pct_s_c[];
 extern char str_at_loadanim[];
@@ -888,9 +888,9 @@ struct sVtEnt_001877B0 {
 /**
  * Starts reading the profile from the memory card (stage 5).
  *
- * Sets the stage D_004A14BC to 5 and the screen state (+0x1C0 of D_004A14B8) to 5 (loading), the screen's file type
+ * Sets the stage cFEStateMemCard_mStage to 5 and the screen state (+0x1C0 of cFEStateMemCard_mInstance) to 5 (loading), the screen's file type
  * (+0x1BC) to 0, the manager's read size to cBESaveInterface_getSaveProfileSize() (cMCOverlayManager_readSetSize) and its file type to
- * 1 (cMCOverlayManager_readSetFileType). The profile file slot D_004A14B4 goes into the manager's mFileCursor and the screen's slot
+ * 1 (cMCOverlayManager_readSetFileType). The profile file slot cFEStateMemCard_mProfileFile goes into the manager's mFileCursor and the screen's slot
  * (+0x1C4), and the manager moves to InitFileCheckWait (53). The 16-bit string at +0x11C becomes the wildcard "%s-%s*"
  * of the product code (func_00241AA0) and the profile file name (cMCOverlayManager_getFileName with type 1). Then
  * cFEMemCard_SetLoadPressed(state, 1), +0x1A8 = 1, and "@loadanim" plays on the "exclam" object when both exist. The
@@ -902,16 +902,16 @@ extern "C" void cFEStateMemCard_startProfileRead(void)
     unsigned short desc[0x10];
     unsigned short fmt[8];
     int five = 5;
-    D_004A14BC = five;
-    *(int*)((char*)D_004A14B8 + 0x1C0) = five;
+    cFEStateMemCard_mStage = five;
+    *(int*)((char*)cFEStateMemCard_mInstance + 0x1C0) = five;
     cBE_getInterface_Fv(cBE_getBE(), 5);
     void* mp = cSSXApp_getMCManager(SSXApp);
-    *(int*)((char*)D_004A14B8 + 0x1BC) = 0;
-    D_004A14BC = five;
+    *(int*)((char*)cFEStateMemCard_mInstance + 0x1BC) = 0;
+    cFEStateMemCard_mStage = five;
     cMCOverlayManager_readSetSize(mp, cBESaveInterface_getSaveProfileSize());
     cMCOverlayManager_readSetFileType(mp, 1);
-    void* memCardState = D_004A14B8;
-    int profileFile = D_004A14B4;
+    void* memCardState = cFEStateMemCard_mInstance;
+    int profileFile = cFEStateMemCard_mProfileFile;
     *(int*)((char*)mp + 0xF8) = profileFile;
     *(int*)((char*)memCardState + 0x1C4) = profileFile;
     *(int*)((char*)memCardState + 0x1BC) = 0;
@@ -920,13 +920,13 @@ extern "C" void cFEStateMemCard_startProfileRead(void)
     cMCOverlayManager_getFileName_r(mp, 1, name, 20);
     func_002C2540(fmt, str_pct_s_pct_s_c);
     func_00241AA0_r(desc, 0x10);
-    sprintf1((unsigned short*)((char*)D_004A14B8 + 0x11C), fmt, desc, name);
-    cFEMemCard_SetLoadPressed(D_004A14B8, 1);
-    void* st = D_004A14B8;
+    sprintf1((unsigned short*)((char*)cFEStateMemCard_mInstance + 0x11C), fmt, desc, name);
+    cFEMemCard_SetLoadPressed(cFEStateMemCard_mInstance, 1);
+    void* st = cFEStateMemCard_mInstance;
     *(int*)((char*)st + 0x1A8) = 1;
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)st + 0x40), GetHashValue32(str_exclam));
     if (obj) {
-        void* bank = (char*)*(void**)((char*)D_004A14B8 + 0x10) + 0x50;
+        void* bank = (char*)*(void**)((char*)cFEStateMemCard_mInstance + 0x10) + 0x50;
         void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(str_at_loadanim));
         if (anim)
             cUIThing_playAnimation(obj, anim, 9, 0, 0);
@@ -956,7 +956,7 @@ struct sVtEntK187920 {
 /**
  * Starts reading the settings file from the memory card (stage 4).
  *
- * Sets the stage D_004A14BC to 4, the screen state (+0x1C0 of D_004A14B8) to 5 (loading), the screen's file type
+ * Sets the stage cFEStateMemCard_mStage to 4, the screen state (+0x1C0 of cFEStateMemCard_mInstance) to 5 (loading), the screen's file type
  * (+0x1BC) to 2 and its slot (+0x1C4) to 0, the manager's read size to the save-game size
  * (cBESaveInterface_getSaveGameSize, cMCOverlayManager_readSetSize) and its file type to 2 (cMCOverlayManager_readSetFileType), and moves the manager to
  * InitFileCheckWait (53). Plays "@loadanim" on the "exclam" object when both exist, then
@@ -965,28 +965,28 @@ struct sVtEntK187920 {
 extern "C" void cFEStateMemCard_startSettingsRead(void)
 {
     int two = 2;
-    D_004A14BC = 4;
-    *(int*)((char*)D_004A14B8 + 0x1C0) = 5;
+    cFEStateMemCard_mStage = 4;
+    *(int*)((char*)cFEStateMemCard_mInstance + 0x1C0) = 5;
     cBE_getInterface_Fv(cBE_getBE(), 5);
     void* mp = cSSXApp_getMCManager(SSXApp);
-    void* memCardState = D_004A14B8;
+    void* memCardState = cFEStateMemCard_mInstance;
     *(int*)((char*)memCardState + 0x1BC) = two;
     *(int*)((char*)memCardState + 0x1C4) = 0;
     cMCOverlayManager_readSetSize(mp, cBESaveInterface_getSaveGameSize_K187920());
     cMCOverlayManager_readSetFileType(mp, 2);
     sVtEntK187920* vt = *(sVtEntK187920**)((char*)mp + 0x748);
     vt[1].fn((char*)mp + vt[1].delta, 53);
-    void* st = D_004A14B8;
+    void* st = cFEStateMemCard_mInstance;
     *(int*)((char*)st + 0x1BC) = two;
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)st + 0x40), GetHashValue32(str_exclam));
     if (obj) {
-        void* bank = (char*)*(void**)((char*)D_004A14B8 + 0x10) + 0x50;
+        void* bank = (char*)*(void**)((char*)cFEStateMemCard_mInstance + 0x10) + 0x50;
         void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(str_at_loadanim));
         if (anim)
             cUIThing_playAnimation(obj, anim, 9, 0, 0);
     }
-    cFEMemCard_SetLoadPressed(D_004A14B8, 1);
-    *(int*)((char*)D_004A14B8 + 0x1A8) = 1;
+    cFEMemCard_SetLoadPressed(cFEStateMemCard_mInstance, 1);
+    *(int*)((char*)cFEStateMemCard_mInstance + 0x1A8) = 1;
 }
 #endif
 
@@ -996,8 +996,8 @@ INCLUDE_ASM("fe/fememcard", cFEStateMemCard_updateFreeSpaceCheckState);
 extern "C" void* cSSXApp_getMCManager(void* p);
 extern "C" int cMCOverlayManager_hasCardStatusCriticalError(void* mp);
 extern "C" void cMCOverlayManager_readSetFileType(void* mp, int mode);
-extern int D_004A14BC;
-extern int D_004A14B4;
+extern int cFEStateMemCard_mStage;
+extern int cFEStateMemCard_mProfileFile;
 
 struct sVt0_87A38 { short delta; short index; int (*fn)(void*); };
 struct sVtV_87A38 { short delta; short index; void (*fn)(void*, int); };
@@ -1018,16 +1018,16 @@ static inline void mpNotify_87A38(char* mp, int msg)
 /**
  * Advances the memory-card state's free-space check by one file type.
  *
- * Sets the stage D_004A14BC to 3 when cMCOverlayManager_hasCardStatusCriticalError reports an error, then switches on
+ * Sets the stage cFEStateMemCard_mStage to 3 when cMCOverlayManager_hasCardStatusCriticalError reports an error, then switches on
  * it; "present" means the card's GetNumFiles (slot 13) is not 0:
  * - 0: settings file present clears bit 1 of the missing-file flags (+0x22C); file type 1 is next (cMCOverlayManager_readSetFileType), the
  *   manager goes to InitFileCheck (51), stage 1, screen file type (+0x1BC) 0.
- * - 1: profile present clears bit 0; on device 0 the profile file slot D_004A14B4 becomes the card's GetLastSavedFile
+ * - 1: profile present clears bit 0; on device 0 the profile file slot cFEStateMemCard_mProfileFile becomes the card's GetLastSavedFile
  *   (slot 17; 0 when it returns -1); file type 0 is next, InitFileCheck (51), stage 2, screen file type 1.
  * - 2: file type 0 present clears bit 2; stage 3, then as 3.
  * - 3: on device 0 the flags are copied into +0x238 (the first card's flags); +0x234 is cleared.
  *
- * @param memCardState  the memory-card state (D_004A14B8)
+ * @param memCardState  the memory-card state (cFEStateMemCard_mInstance)
  */
 extern "C" void cFEStateMemCard_updateFreeSpaceCheckState(cFEStateMemCard* memCardState)
 {
@@ -1035,14 +1035,14 @@ extern "C" void cFEStateMemCard_updateFreeSpaceCheckState(cFEStateMemCard* memCa
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     char* card = *(char**)(mp + 0x434);
     if (cMCOverlayManager_hasCardStatusCriticalError(mp))
-        D_004A14BC = 3;
-    switch (D_004A14BC) {
+        cFEStateMemCard_mStage = 3;
+    switch (cFEStateMemCard_mStage) {
     case 0:
         if (cardCall_87A38(card, 13))
             (*(sMcFlags_87A38*)&self->mMissingSavedFileTypeFlags).b1 = 0;
         cMCOverlayManager_readSetFileType(mp, 1);
         mpNotify_87A38(mp, 51);
-        D_004A14BC++;
+        cFEStateMemCard_mStage++;
         self->mType = 0;
         break;
     case 1:
@@ -1050,19 +1050,19 @@ extern "C" void cFEStateMemCard_updateFreeSpaceCheckState(cFEStateMemCard* memCa
             (*(sMcFlags_87A38*)&self->mMissingSavedFileTypeFlags).b0 = 0;
         if (*(int*)(mp + 0x428) == 0) {
             int lastSavedFile = cardCall_87A38(*(char**)(mp + 0x434), 17);
-            D_004A14B4 = lastSavedFile;
+            cFEStateMemCard_mProfileFile = lastSavedFile;
             if (lastSavedFile == -1)
-                D_004A14B4 = 0;
+                cFEStateMemCard_mProfileFile = 0;
         }
         cMCOverlayManager_readSetFileType(mp, 0);
         mpNotify_87A38(mp, 51);
-        D_004A14BC++;
+        cFEStateMemCard_mStage++;
         self->mType = 1;
         break;
     case 2:
         if (cardCall_87A38(card, 13))
             (*(sMcFlags_87A38*)&self->mMissingSavedFileTypeFlags).b2 = 0;
-        D_004A14BC++;
+        cFEStateMemCard_mStage++;
     case 3:
         if (*(int*)(mp + 0x428) == 0)
             *(sMcFlags_87A38*)&self->mCard1MissingSavedFileTypeFlags = *(sMcFlags_87A38*)&self->mMissingSavedFileTypeFlags;

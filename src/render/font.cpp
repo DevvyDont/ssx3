@@ -5388,10 +5388,10 @@ INCLUDE_ASM("render/font", func_00396160);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_00488680[];
+extern char cVisualEffect_vtbl[];
 
 /**
- * Destructor body: stores the cVisualEffect base vtable D_00488680 and frees the object when bit 0 of @p flags is set.
+ * Destructor body: stores the cVisualEffect base vtable cVisualEffect_vtbl and frees the object when bit 0 of @p flags is set.
  *
  * Same body as the visual-effect destructors after it; nothing references this copy (no vtable, no call).
  *
@@ -5399,7 +5399,7 @@ extern char D_00488680[];
  */
 extern "C" void func_00396160(int* self, int flags)
 {
-    *(void**)self = D_00488680;
+    *(void**)self = cVisualEffect_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -5447,10 +5447,10 @@ INCLUDE_ASM("render/font", cRenderToggles__cRenderToggles);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_00488680[];
+extern char cVisualEffect_vtbl[];
 
 /**
- * Destructor body for the visual effect allocated as "RenderToggles": stores the cVisualEffect base vtable D_00488680
+ * Destructor body for the visual effect allocated as "RenderToggles": stores the cVisualEffect base vtable cVisualEffect_vtbl
  * and frees the object when bit 0 of @p flags is set.
  *
  * Slot 1 of vtable cRenderToggles_vtbl (slot 2 is cRenderToggles_update), which cPS2VisualEffectsMan_cPS2VisualEffectsMan installs.
@@ -5459,7 +5459,7 @@ extern char D_00488680[];
  */
 extern "C" void cRenderToggles__cRenderToggles(int* self, int flags)
 {
-    *(void**)self = D_00488680;
+    *(void**)self = cVisualEffect_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -5469,18 +5469,18 @@ extern "C" void cRenderToggles__cRenderToggles(int* self, int flags)
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_AIUpdatesPerRender);
 #ifdef SKIP_ASM
-extern int D_004A44C0;
+extern int cRenderToggles_m_AIUpdatesPerRender;
 
 /**
- * Returns &D_004A44C0, the int that item 0 of cRenderTogglesMenu_cRenderTogglesMenu edits as "AI Frames per Render
+ * Returns &cRenderToggles_m_AIUpdatesPerRender, the int that item 0 of cRenderTogglesMenu_cRenderTogglesMenu edits as "AI Frames per Render
  * Frame" (0 to 60).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A44C0
+ * @return &cRenderToggles_m_AIUpdatesPerRender
  */
 extern "C" int *cRenderToggles_AIUpdatesPerRender(void) {
-    return &D_004A44C0;
+    return &cRenderToggles_m_AIUpdatesPerRender;
 }
 #endif
 //100%
@@ -5503,17 +5503,17 @@ extern "C" int *cRenderToggles_DisplayRenderStats(void) {
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_ResetStats);
 #ifdef SKIP_ASM
-extern int D_004A44C8;
+extern int cRenderToggles_m_ResetStats;
 
 /**
- * Returns &D_004A44C8, the int that item 2 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Reset Stats" (0 to 1).
+ * Returns &cRenderToggles_m_ResetStats, the int that item 2 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Reset Stats" (0 to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A44C8
+ * @return &cRenderToggles_m_ResetStats
  */
 extern "C" int *cRenderToggles_ResetStats(void) {
-    return &D_004A44C8;
+    return &cRenderToggles_m_ResetStats;
 }
 #endif
 //100%
@@ -5553,52 +5553,52 @@ extern "C" int *cRenderToggles_UseSmallTexture1(void) {
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_DisablePatches);
 #ifdef SKIP_ASM
-extern int D_004A44D4;
+extern int cRenderToggles_m_DisablePatches;
 
 /**
- * Returns &D_004A44D4, the int that item 5 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Patches" (0 to
+ * Returns &cRenderToggles_m_DisablePatches, the int that item 5 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Patches" (0 to
  * 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A44D4
+ * @return &cRenderToggles_m_DisablePatches
  */
 extern "C" int *cRenderToggles_DisablePatches(void) {
-    return &D_004A44D4;
+    return &cRenderToggles_m_DisablePatches;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_DisablePatchReflection);
 #ifdef SKIP_ASM
-extern int D_004A44D8;
+extern int cRenderToggles_m_DisablePatchReflection;
 
 /**
- * Returns &D_004A44D8, the int that item 6 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Patch Reflection"
+ * Returns &cRenderToggles_m_DisablePatchReflection, the int that item 6 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Patch Reflection"
  * (0 to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A44D8
+ * @return &cRenderToggles_m_DisablePatchReflection
  */
 extern "C" int *cRenderToggles_DisablePatchReflection(void) {
-    return &D_004A44D8;
+    return &cRenderToggles_m_DisablePatchReflection;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_DisablePatchShadow);
 #ifdef SKIP_ASM
-extern int D_004A44DC;
+extern int cRenderToggles_m_DisablePatchShadow;
 
 /**
- * Returns &D_004A44DC, the int that item 7 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Patch Shadows" (0
+ * Returns &cRenderToggles_m_DisablePatchShadow, the int that item 7 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Patch Shadows" (0
  * to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A44DC
+ * @return &cRenderToggles_m_DisablePatchShadow
  */
 extern "C" int *cRenderToggles_DisablePatchShadow(void) {
-    return &D_004A44DC;
+    return &cRenderToggles_m_DisablePatchShadow;
 }
 #endif
 //100%
@@ -5723,18 +5723,18 @@ extern "C" int *cRenderToggles_DisableStaticEmitters(void) {
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_DisableDynamicEmitters);
 #ifdef SKIP_ASM
-extern int D_004A44FC;
+extern int cRenderToggles_m_DisableDynamicEmitters;
 
 /**
- * Returns &D_004A44FC, the int that item 15 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Dynamic
+ * Returns &cRenderToggles_m_DisableDynamicEmitters, the int that item 15 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Dynamic
  * Emitters" (0 to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A44FC
+ * @return &cRenderToggles_m_DisableDynamicEmitters
  */
 extern "C" int *cRenderToggles_DisableDynamicEmitters(void) {
-    return &D_004A44FC;
+    return &cRenderToggles_m_DisableDynamicEmitters;
 }
 #endif
 //100%
@@ -6269,10 +6269,10 @@ INCLUDE_ASM("render/font", cPlants__cPlants);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_00488680[];
+extern char cVisualEffect_vtbl[];
 
 /**
- * Destructor body for the visual effect allocated as "Plants": stores the cVisualEffect base vtable D_00488680 and
+ * Destructor body for the visual effect allocated as "Plants": stores the cVisualEffect base vtable cVisualEffect_vtbl and
  * frees the object when bit 0 of @p flags is set.
  *
  * Slot 1 of vtable cPlants_vtbl (slot 2 is cPlants_update), which cPS2VisualEffectsMan_cPS2VisualEffectsMan installs in
@@ -6282,7 +6282,7 @@ extern char D_00488680[];
  */
 extern "C" void cPlants__cPlants(int* self, int flags)
 {
-    *(void**)self = D_00488680;
+    *(void**)self = cVisualEffect_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -6308,52 +6308,52 @@ extern "C" int *cPlants_Enable(void) {
 //100%
 INCLUDE_ASM("render/font", cPlants_SwayAmplitude);
 #ifdef SKIP_ASM
-extern int D_004A4448;
+extern int cPlants_m_SwayAmplitude;
 
 /**
- * Returns &D_004A4448, the float that item 1 of cPlantsMenu_cPlantsMenu edits as "Sway Amplitude" (0 to 2).
+ * Returns &cPlants_m_SwayAmplitude, the float that item 1 of cPlantsMenu_cPlantsMenu edits as "Sway Amplitude" (0 to 2).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4448
+ * @return &cPlants_m_SwayAmplitude
  */
 extern "C" int *cPlants_SwayAmplitude(void) {
-    return &D_004A4448;
+    return &cPlants_m_SwayAmplitude;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cPlants_SwayOffset);
 #ifdef SKIP_ASM
-extern int D_004A444C;
+extern int cPlants_m_SwayOffset;
 
 /**
- * Returns &D_004A444C, the float that item 2 of cPlantsMenu_cPlantsMenu edits as "Sway Offset" (-5 to 5).
+ * Returns &cPlants_m_SwayOffset, the float that item 2 of cPlantsMenu_cPlantsMenu edits as "Sway Offset" (-5 to 5).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A444C
+ * @return &cPlants_m_SwayOffset
  */
 extern "C" int *cPlants_SwayOffset(void) {
-    return &D_004A444C;
+    return &cPlants_m_SwayOffset;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cPlants_BranchAmplitude);
 #ifdef SKIP_ASM
-extern int D_004A4450;
+extern int cPlants_m_BranchAmplitude;
 
 /**
- * Returns &D_004A4450, the float that item 3 of cPlantsMenu_cPlantsMenu edits as "Branch Amplitude" (0 to 2).
+ * Returns &cPlants_m_BranchAmplitude, the float that item 3 of cPlantsMenu_cPlantsMenu edits as "Branch Amplitude" (0 to 2).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4450
+ * @return &cPlants_m_BranchAmplitude
  */
 extern "C" int *cPlants_BranchAmplitude(void) {
-    return &D_004A4450;
+    return &cPlants_m_BranchAmplitude;
 }
 #endif
 //100%
@@ -6376,34 +6376,34 @@ extern "C" int *cPlants_RotationAmplitude(void) {
 //100%
 INCLUDE_ASM("render/font", cPlants_PositionScale);
 #ifdef SKIP_ASM
-extern int D_004A4458;
+extern int cPlants_m_PositionScale;
 
 /**
- * Returns &D_004A4458, the float that item 5 of cPlantsMenu_cPlantsMenu edits as "Position Scale" (0 to 1000).
+ * Returns &cPlants_m_PositionScale, the float that item 5 of cPlantsMenu_cPlantsMenu edits as "Position Scale" (0 to 1000).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4458
+ * @return &cPlants_m_PositionScale
  */
 extern "C" int *cPlants_PositionScale(void) {
-    return &D_004A4458;
+    return &cPlants_m_PositionScale;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cPlants_SwayFrequency);
 #ifdef SKIP_ASM
-extern int D_004A445C;
+extern int cPlants_m_SwayFrequency;
 
 /**
- * Returns &D_004A445C, the int that item 6 of cPlantsMenu_cPlantsMenu edits as "Sway Frequency (x/600)Hz" (0 to 6000).
+ * Returns &cPlants_m_SwayFrequency, the int that item 6 of cPlantsMenu_cPlantsMenu edits as "Sway Frequency (x/600)Hz" (0 to 6000).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A445C
+ * @return &cPlants_m_SwayFrequency
  */
 extern "C" int *cPlants_SwayFrequency(void) {
-    return &D_004A445C;
+    return &cPlants_m_SwayFrequency;
 }
 #endif
 //100%
@@ -6860,10 +6860,10 @@ INCLUDE_ASM("render/font", cTube__cTube);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_00488680[];
+extern char cVisualEffect_vtbl[];
 
 /**
- * Destructor body for the visual effect allocated as "Tube": stores the cVisualEffect base vtable D_00488680 and frees
+ * Destructor body for the visual effect allocated as "Tube": stores the cVisualEffect base vtable cVisualEffect_vtbl and frees
  * the object when bit 0 of @p flags is set.
  *
  * Slot 1 of vtable cTube_vtbl (slot 2 cTube_update, slot 3 the empty cTube_render).
@@ -6872,7 +6872,7 @@ extern char D_00488680[];
  */
 extern "C" void cTube__cTube(int* self, int flags)
 {
-    *(void**)self = D_00488680;
+    *(void**)self = cVisualEffect_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -6882,99 +6882,99 @@ extern "C" void cTube__cTube(int* self, int flags)
 //100%
 INCLUDE_ASM("render/font", cTube_Enable);
 #ifdef SKIP_ASM
-extern int D_004A41D4;
+extern int cTube_m_Enable;
 
 /**
- * Returns &D_004A41D4, the int that item 0 of cTubeMenu_cTubeMenu edits as "Enable" (0 to 1).
+ * Returns &cTube_m_Enable, the int that item 0 of cTubeMenu_cTubeMenu edits as "Enable" (0 to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A41D4
+ * @return &cTube_m_Enable
  */
 extern "C" int *cTube_Enable(void) {
-    return &D_004A41D4;
+    return &cTube_m_Enable;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cTube_ScaleWidth);
 #ifdef SKIP_ASM
-extern int D_004A41D8;
+extern int cTube_m_ScaleWidth;
 
 /**
- * Returns &D_004A41D8, the float that item 1 of cTubeMenu_cTubeMenu edits as "Scale Width" (0 to 1000).
+ * Returns &cTube_m_ScaleWidth, the float that item 1 of cTubeMenu_cTubeMenu edits as "Scale Width" (0 to 1000).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A41D8
+ * @return &cTube_m_ScaleWidth
  */
 extern "C" int *cTube_ScaleWidth(void) {
-    return &D_004A41D8;
+    return &cTube_m_ScaleWidth;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cTube_ScaleHeight);
 #ifdef SKIP_ASM
-extern int D_004A41DC;
+extern int cTube_m_ScaleHeight;
 
 /**
- * Returns &D_004A41DC, the float that item 2 of cTubeMenu_cTubeMenu edits as "Scale Height" (0 to 1000).
+ * Returns &cTube_m_ScaleHeight, the float that item 2 of cTubeMenu_cTubeMenu edits as "Scale Height" (0 to 1000).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A41DC
+ * @return &cTube_m_ScaleHeight
  */
 extern "C" int *cTube_ScaleHeight(void) {
-    return &D_004A41DC;
+    return &cTube_m_ScaleHeight;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cTube_R);
 #ifdef SKIP_ASM
-extern int D_004A41E0;
+extern int cTube_m_R;
 
 /**
- * Returns &D_004A41E0, the int that item 3 of cTubeMenu_cTubeMenu edits as "R" (0 to 255).
+ * Returns &cTube_m_R, the int that item 3 of cTubeMenu_cTubeMenu edits as "R" (0 to 255).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A41E0
+ * @return &cTube_m_R
  */
 extern "C" int *cTube_R(void) {
-    return &D_004A41E0;
+    return &cTube_m_R;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cTube_G);
 #ifdef SKIP_ASM
-extern int D_004A41E4;
+extern int cTube_m_G;
 
 /**
- * Returns &D_004A41E4, the int that item 4 of cTubeMenu_cTubeMenu edits as "G" (0 to 255).
+ * Returns &cTube_m_G, the int that item 4 of cTubeMenu_cTubeMenu edits as "G" (0 to 255).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A41E4
+ * @return &cTube_m_G
  */
 extern "C" int *cTube_G(void) {
-    return &D_004A41E4;
+    return &cTube_m_G;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cTube_B);
 #ifdef SKIP_ASM
-extern int D_004A41E8;
+extern int cTube_m_B;
 
 /**
- * Returns &D_004A41E8, the int that item 5 of cTubeMenu_cTubeMenu edits as "B" (0 to 255).
+ * Returns &cTube_m_B, the int that item 5 of cTubeMenu_cTubeMenu edits as "B" (0 to 255).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A41E8
+ * @return &cTube_m_B
  */
 extern "C" int *cTube_B(void) {
-    return &D_004A41E8;
+    return &cTube_m_B;
 }
 #endif
 
@@ -7016,10 +7016,10 @@ INCLUDE_ASM("render/font", cPathArrow__cPathArrow);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_00488680[];
+extern char cVisualEffect_vtbl[];
 
 /**
- * Destructor body for the visual effect allocated as "PathArrow": stores the cVisualEffect base vtable D_00488680 and
+ * Destructor body for the visual effect allocated as "PathArrow": stores the cVisualEffect base vtable cVisualEffect_vtbl and
  * frees the object when bit 0 of @p flags is set.
  *
  * Slot 1 of vtable cPathArrow_vtbl, which cPathArrow_cPathArrow installs (slots 2 and 3 are the empty cPathArrow_update and
@@ -7029,7 +7029,7 @@ extern char D_00488680[];
  */
 extern "C" void cPathArrow__cPathArrow(int* self, int flags)
 {
-    *(void**)self = D_00488680;
+    *(void**)self = cVisualEffect_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -7067,10 +7067,10 @@ INCLUDE_ASM("render/font", cDetailSystem__cDetailSystem);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_00488680[];
+extern char cVisualEffect_vtbl[];
 
 /**
- * Destructor body for the visual effect allocated as "DetailSystem": stores the cVisualEffect base vtable D_00488680
+ * Destructor body for the visual effect allocated as "DetailSystem": stores the cVisualEffect base vtable cVisualEffect_vtbl
  * and frees the object when bit 0 of @p flags is set.
  *
  * Slot 1 of vtable cDetailSystem_vtbl, which cDetailSystem_cDetailSystem installs (slot 2 cDetailSystem_update, slot 5 the empty cDetailSystem_addPatch).
@@ -7079,7 +7079,7 @@ extern char D_00488680[];
  */
 extern "C" void cDetailSystem__cDetailSystem(int* self, int flags)
 {
-    *(void**)self = D_00488680;
+    *(void**)self = cVisualEffect_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -7136,19 +7136,19 @@ extern "C" int *cDetailSystem_SpinScale(void) {
 //100%
 INCLUDE_ASM("render/font", cDetailSystem_PS2SparkleCount);
 #ifdef SKIP_ASM
-extern int D_004A4348;
+extern int cDetailSystem_m_PS2SparkleCount;
 
 /**
- * Returns &D_004A4348, the float that item 2 of cDetailSystemMenu_cDetailSystemMenu edits as "PS2 Sparkle Count" (0 to
+ * Returns &cDetailSystem_m_PS2SparkleCount, the float that item 2 of cDetailSystemMenu_cDetailSystemMenu edits as "PS2 Sparkle Count" (0 to
  * 20).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4348
+ * @return &cDetailSystem_m_PS2SparkleCount
  */
 extern "C" int *cDetailSystem_PS2SparkleCount(void) {
-    return &D_004A4348;
+    return &cDetailSystem_m_PS2SparkleCount;
 }
 #endif
 //100%
@@ -7283,12 +7283,12 @@ INCLUDE_ASM("render/font", cVisualEffectsTest__cVisualEffectsTest);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_00488680[];
+extern char cVisualEffect_vtbl[];
 
 /**
  * Destroys the visual-effects test object: restores the base vtable and frees it if asked.
  *
- * Stores the cVisualEffect base vtable (D_00488680; the derived vtable store is dead and dropped) and calls
+ * Stores the cVisualEffect base vtable (cVisualEffect_vtbl; the derived vtable store is dead and dropped) and calls
  * operator_delete on @p flags bit 0. Slot 1 of vt_00492FD0, the cVisualEffectsTest vtable whose slots 2/3 are
  * cVisualEffectsTest_update and cVisualEffectsTest_render.
  *
@@ -7296,7 +7296,7 @@ extern char D_00488680[];
  */
 extern "C" void cVisualEffectsTest__cVisualEffectsTest(int* self, int flags)
 {
-    *(void**)self = D_00488680;
+    *(void**)self = cVisualEffect_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -7706,10 +7706,10 @@ INCLUDE_ASM("render/font", cScreenTint__cScreenTint);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_00488680[];
+extern char cVisualEffect_vtbl[];
 
 /**
- * Destructor body for the visual effect allocated as "ScreenTint": stores the cVisualEffect base vtable D_00488680 and
+ * Destructor body for the visual effect allocated as "ScreenTint": stores the cVisualEffect base vtable cVisualEffect_vtbl and
  * frees the object when bit 0 of @p flags is set.
  *
  * Slot 1 of vtable cScreenTint_vtbl (slot 2 cScreenTint_update, slot 3 cScreenTint_render), which
@@ -7719,7 +7719,7 @@ extern char D_00488680[];
  */
 extern "C" void cScreenTint__cScreenTint(int* self, int flags)
 {
-    *(void**)self = D_00488680;
+    *(void**)self = cVisualEffect_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -7975,17 +7975,17 @@ extern "C" int *cScreenTint_LightningEnable(void) {
 //100%
 INCLUDE_ASM("render/font", cScreenTint_FrameId);
 #ifdef SKIP_ASM
-extern int D_004A4610;
+extern int cScreenTint_m_FrameId;
 
 /**
- * Returns &D_004A4610, the int that item 14 of cScreenTintMenu_cScreenTintMenu edits as "Frame Id" (-1 to 1000).
+ * Returns &cScreenTint_m_FrameId, the int that item 14 of cScreenTintMenu_cScreenTintMenu edits as "Frame Id" (-1 to 1000).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4610
+ * @return &cScreenTint_m_FrameId
  */
 extern "C" int *cScreenTint_FrameId(void) {
-    return &D_004A4610;
+    return &cScreenTint_m_FrameId;
 }
 #endif
 //100%
@@ -8009,49 +8009,49 @@ extern "C" int *cScreenTint_LightningChance(void) {
 //100%
 INCLUDE_ASM("render/font", cScreenTint_LightningFadeIn);
 #ifdef SKIP_ASM
-extern int D_004A4618;
+extern int cScreenTint_m_LightningFadeIn;
 
 /**
- * Returns &D_004A4618, the int that item 16 of cScreenTintMenu_cScreenTintMenu edits as "Flash Fade In" (0 to 600).
+ * Returns &cScreenTint_m_LightningFadeIn, the int that item 16 of cScreenTintMenu_cScreenTintMenu edits as "Flash Fade In" (0 to 600).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4618
+ * @return &cScreenTint_m_LightningFadeIn
  */
 extern "C" int *cScreenTint_LightningFadeIn(void) {
-    return &D_004A4618;
+    return &cScreenTint_m_LightningFadeIn;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_LightningFadeOut);
 #ifdef SKIP_ASM
-extern int D_004A461C;
+extern int cScreenTint_m_LightningFadeOut;
 
 /**
- * Returns &D_004A461C, the int that item 17 of cScreenTintMenu_cScreenTintMenu edits as "Flash Sustain" (0 to 600).
+ * Returns &cScreenTint_m_LightningFadeOut, the int that item 17 of cScreenTintMenu_cScreenTintMenu edits as "Flash Sustain" (0 to 600).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A461C
+ * @return &cScreenTint_m_LightningFadeOut
  */
 extern "C" int *cScreenTint_LightningFadeOut(void) {
-    return &D_004A461C;
+    return &cScreenTint_m_LightningFadeOut;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_LightningFadeIn2);
 #ifdef SKIP_ASM
-extern int D_004A4620;
+extern int cScreenTint_m_LightningFadeIn2;
 
 /**
- * Returns &D_004A4620, the int that item 18 of cScreenTintMenu_cScreenTintMenu edits as "Inverse Duration" (0 to 600).
+ * Returns &cScreenTint_m_LightningFadeIn2, the int that item 18 of cScreenTintMenu_cScreenTintMenu edits as "Inverse Duration" (0 to 600).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4620
+ * @return &cScreenTint_m_LightningFadeIn2
  */
 extern "C" int *cScreenTint_LightningFadeIn2(void) {
-    return &D_004A4620;
+    return &cScreenTint_m_LightningFadeIn2;
 }
 #endif
 //100%
@@ -8439,11 +8439,11 @@ extern "C" int cScreenTint_Colour(void)
 //100%
 INCLUDE_ASM("render/font", cScreenTint_LightningRedColour);
 #ifdef SKIP_ASM
-extern float D_004A469C;
-extern float D_004A46A0;
+extern float cScreenTint_m_lightningBrightness;
+extern float cScreenTint_m_redColour;
 
 /**
- * Returns D_004A469C * D_004A46A0.
+ * Returns cScreenTint_m_lightningBrightness * cScreenTint_m_redColour.
  *
  * cScreenTint_update and cScreenTint_render use these globals; On Tour's cScreenTint statics m_lightningBrightness, m_redColour,
  * m_greenColour, m_blueColour fit this layout. No caller.
@@ -8451,17 +8451,17 @@ extern float D_004A46A0;
  * @return the product (a float)
  */
 extern "C" float cScreenTint_LightningRedColour(void) {
-    return D_004A469C * D_004A46A0;
+    return cScreenTint_m_lightningBrightness * cScreenTint_m_redColour;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_LightningGreenColour);
 #ifdef SKIP_ASM
-extern float D_004A469C;
-extern float D_004A46A4;
+extern float cScreenTint_m_lightningBrightness;
+extern float cScreenTint_m_greenColour;
 
 /**
- * Returns D_004A469C * D_004A46A4.
+ * Returns cScreenTint_m_lightningBrightness * cScreenTint_m_greenColour.
  *
  * cScreenTint_update and cScreenTint_render use these globals; On Tour's cScreenTint statics m_lightningBrightness, m_redColour,
  * m_greenColour, m_blueColour fit this layout. No caller.
@@ -8469,17 +8469,17 @@ extern float D_004A46A4;
  * @return the product (a float)
  */
 extern "C" float cScreenTint_LightningGreenColour(void) {
-    return D_004A469C * D_004A46A4;
+    return cScreenTint_m_lightningBrightness * cScreenTint_m_greenColour;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_LightningBlueColour);
 #ifdef SKIP_ASM
-extern float D_004A469C;
-extern float D_004A46A8;
+extern float cScreenTint_m_lightningBrightness;
+extern float cScreenTint_m_blueColour;
 
 /**
- * Returns D_004A469C * D_004A46A8.
+ * Returns cScreenTint_m_lightningBrightness * cScreenTint_m_blueColour.
  *
  * cScreenTint_update and cScreenTint_render use these globals; On Tour's cScreenTint statics m_lightningBrightness, m_redColour,
  * m_greenColour, m_blueColour fit this layout. No caller.
@@ -8487,7 +8487,7 @@ extern float D_004A46A8;
  * @return the product (a float)
  */
 extern "C" float cScreenTint_LightningBlueColour(void) {
-    return D_004A469C * D_004A46A8;
+    return cScreenTint_m_lightningBrightness * cScreenTint_m_blueColour;
 }
 #endif
 //100%

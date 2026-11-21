@@ -391,7 +391,7 @@ struct sPad_0680 {
 
 class cObj_0680;
 typedef void (cObj_0680::*Fn_0680)();
-extern "C" Fn_0680 D_0043CF20_0680[4] __asm__("D_0043CF20");
+extern "C" Fn_0680 D_0043CF20_0680[4] __asm__("cComputer_mCruiseLogic");
 
 class cAI_0680 {
 public:
@@ -465,7 +465,7 @@ static inline float Len_0680(const sV4_0680& v)
  * (cComputer_checkForJumpEvent) clears the target index +0xE70 and selects cruise entry 0; a target found by
  * cComputer_checkForTargets selects entry 3 when attacking, or entry 2 when that rider's AI (its +0x6C0 object, virtual
  * 7) returns 0. The entry's pointer-to-member goes to +0xF44 and its index to +0xF38. This function is entry 1 of the
- * table D_0043CF20.
+ * table cComputer_mCruiseLogic.
  *
  * @param cruiseCmd  the cruise command to fill
  */
@@ -549,7 +549,7 @@ struct sPad_09E0 {
 
 class cObj_8E88;
 typedef void (cObj_8E88::*Fn_8E88)();
-extern "C" Fn_8E88 D_0043CF20[4];
+extern "C" Fn_8E88 cComputer_mCruiseLogic[4];
 
 extern "C" int cComputer_checkForJumpEvent(cComputer* self, float* speed, int* below, int* o3, int* o4, int* o5, int* o6);
 extern "C" void cComputer_setupPrewindState_09E0(char*, int, int, int, int) __asm__("cComputer_setupPrewindState");
@@ -603,7 +603,7 @@ extern "C" void cComputer_jumpSetupCruise(cComputer* self, sPad_09E0* cmd)
 {
     int below, toPipe, toRail, isSpin, isFlip;
     if (!cComputer_checkForJumpEvent(self, (float*)(&self->mDesiredSpeed), &below, &toPipe, &toRail, &isSpin, &isFlip)) {
-        *(Fn_8E88*)&self->cruiseLogic = D_0043CF20[1];
+        *(Fn_8E88*)&self->cruiseLogic = cComputer_mCruiseLogic[1];
         self->mCruiseLogicID = 1;
         cComputer_followPathCruise(((char*)self), cmd);
         return;
@@ -653,7 +653,7 @@ struct sRec_0B90 {
 
 class cObj_0B90;
 typedef void (cObj_0B90::*Fn_0B90)();
-extern "C" Fn_0B90 D_0043CF20_0B90[4] __asm__("D_0043CF20");
+extern "C" Fn_0B90 D_0043CF20_0B90[4] __asm__("cComputer_mCruiseLogic");
 
 class cAI_0B90 {
 public:
@@ -894,7 +894,7 @@ struct sRec_0F88 {
 
 class cObj_0F88;
 typedef void (cObj_0F88::*Fn_0F88)();
-extern "C" Fn_0F88 D_0043CF20_0F88[4] __asm__("D_0043CF20");
+extern "C" Fn_0F88 D_0043CF20_0F88[4] __asm__("cComputer_mCruiseLogic");
 
 class cAI_0F88 {
 public:
@@ -7013,7 +7013,7 @@ INCLUDE_ASM("seg/seg_1218", cComputer_Init);
 #ifdef SKIP_ASM
 class cObj_8E88b;
 typedef void (cObj_8E88b::*Fn_8E88b)();
-extern "C" Fn_8E88b D_0043CF20_8E88b[4] __asm__("D_0043CF20");
+extern "C" Fn_8E88b D_0043CF20_8E88b[4] __asm__("cComputer_mCruiseLogic");
 struct sQ_8E88 {
     int v[4];
 } __attribute__((aligned(16)));
@@ -7030,7 +7030,7 @@ void cComputer_Init_self(char* self) __asm__("cComputer_Init");
  *
  * Clears its counters and flags (+0xDF0, +0xE10 .. +0xE3C, +0xE40, +0xE74, +0xE78, +0xF30, +0xF34; +0xE0C and later
  * +0xE70 = -1), zeroes the vectors at +0xE50 and +0xE60, runs cComputer_initRiderDifficulty, sets +0xDF4 = 1.0,
- * installs the cruise logic member-function pointer (+0xF44 = D_0043CF20[1]; On Tour cComputer::mCruiseLogic) with
+ * installs the cruise logic member-function pointer (+0xF44 = cComputer_mCruiseLogic[1]; On Tour cComputer::mCruiseLogic) with
  * +0xF38 = 1, clears the three 0x3C-byte tables at +0xE7C, +0xEB8 and +0xEF4 (MEM_fill) and runs
  * cComputer_resetCounters. Called at the end of cComputer_cComputer and by func_00108F88.
  */
@@ -7274,7 +7274,7 @@ INCLUDE_ASM("seg/seg_1218", cComputer_readFromReplayFrame);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 class cObj_A8E8;
 typedef void (cObj_A8E8::*Fn_A8E8)();
-extern "C" Fn_A8E8 D_0043CF20_A8E8[4] __asm__("D_0043CF20");
+extern "C" Fn_A8E8 D_0043CF20_A8E8[4] __asm__("cComputer_mCruiseLogic");
 extern "C" void cRiderHandler_readFromReplayFrame(void* self, void* src);
 
 class cStream_A8E8 {
@@ -7287,7 +7287,7 @@ public:
  * Reads the AI rider back from a replay frame: the rider handler state, then the computer state.
  *
  * Calls cRiderHandler_readFromReplayFrame, then the stream's second virtual (read) into the cComputerState block at
- * +0xDF0 (336 bytes), and rebuilds the cruise-logic member-function pointer (+0xF44) from D_0043CF20[mCruiseLogicID]
+ * +0xDF0 (336 bytes), and rebuilds the cruise-logic member-function pointer (+0xF44) from cComputer_mCruiseLogic[mCruiseLogicID]
  * (the short at +0xF38), as cComputer_setCruiseLogic does, since the saved pointer is not portable between runs.
  *
  * @param data  the replay frame stream read from (On Tour cReplayFramePtr* data)
@@ -7334,7 +7334,7 @@ extern "C" int cComputer_checkForPunching(void*, int*);
  *
  * Sets bit 12 of the command from cComputer_checkForReset and clears +0xE20. When cComputer_checkForPunching finds a
  * punch it sets bit 19 (its flag set) or bit 18 (flag clear); otherwise when cComputer_checkForBlock is true it sets
- * both. Then it calls the current cruise logic, the pointer-to-member at +0xF44 (set from D_0043CF20), with the
+ * both. Then it calls the current cruise logic, the pointer-to-member at +0xF44 (set from cComputer_mCruiseLogic), with the
  * command. cComputer_getControlCmd calls it.
  *
  * @param cruiseCmd  the cruise command

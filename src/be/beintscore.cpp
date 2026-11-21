@@ -849,7 +849,7 @@ extern "C" bool cBERules_hasModifiedRules(int i);
 /**
  * Returns whether a profile may enter the high-score tables.
  *
- * False for profile 2 and up, and while cBERules_hasModifiedRules(0) reports any of player 0's option flags in D_005308B8 set.
+ * False for profile 2 and up, and while cBERules_hasModifiedRules(0) reports any of player 0's option flags in cBERules_mRules set.
  * Likely bug: with two or more humans (cBENewRaceInterface_newRace +0x34) it tests cBERules_hasModifiedRules(0) again instead of
  * player 1, so that branch always returns true.
  *

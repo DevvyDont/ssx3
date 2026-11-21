@@ -2161,14 +2161,14 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_displayError);
 extern "C" void cGameComm_updateDisplayError_78F8(void *) __asm__("cGameComm_updateDisplayError");
 extern "C" void cGameComm_updateMessageDisplay_78F8(void *) __asm__("cGameComm_updateMessageDisplay");
 extern "C" void func_00266DF8_78F8(int) __asm__("func_00266DF8");
-extern int D_004A33F4;
+extern int VoipMan;
 
 /**
  * Ends the online session on an error: stops input syncing and brings up the online-error overlay.
  *
  * Always clears the waiting message, the peer's pause and the unpause flag and timer. On the first error
  * only, it sets mCheating[0] to 4 if this machine's controller is unplugged mid-race with no other error,
- * closes the voice link (func_00266DF8 on D_004A33F4, probably cVoipMan), lets the connection popup close,
+ * closes the voice link (func_00266DF8 on VoipMan, probably cVoipMan), lets the connection popup close,
  * clears mSyncInput and mConnected, sets mError and mDisplayError and runs updateDisplayError.
  */
 extern "C" void cGameComm_displayError(cGameComm* self) {
@@ -2184,8 +2184,8 @@ extern "C" void cGameComm_displayError(cGameComm* self) {
                 }
             }
         }
-        if (D_004A33F4 != 0) {
-            func_00266DF8_78F8(D_004A33F4);
+        if (VoipMan != 0) {
+            func_00266DF8_78F8(VoipMan);
         }
         cGameComm_updateMessageDisplay_78F8(((char*)self));
         self->mSyncInput = 0;
@@ -2204,16 +2204,16 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_updateDisplayError);
 extern "C" char *cUIStateStack_getCurrentState_79C8(char *) __asm__("cUIStateStack_getCurrentState");
 extern "C" void cOVStateManager_triggerOverlay_79C8(int) __asm__("cOVStateManager_triggerOverlay");
 extern int cPauseState_Flags;
-extern int D_004A2A54;
+extern int cPauseState_StackIdx;
 extern int D_00442924[];
-extern int D_005366E8[];
+extern int cPauseState_Stack[];
 
 /**
  * Counts down a pending error display and then raises the online-error overlay.
  *
  * Waits while mLoading is set and until the UI stack's current state is empty or of kind 5. When
  * mDisplayError reaches 0 it triggers overlay 0x27 (cOVState_PAUSE_ONLINE_ERROR) and pushes 13 onto the stack
- * at D_005366E8 (cPauseState_Flags = D_004428F0[13]), which the overlays pop.
+ * at cPauseState_Stack (cPauseState_Flags = cPauseState_FlagsTable[13]), which the overlays pop.
  */
 extern "C" void cGameComm_updateDisplayError(cGameComm* self) {
     if (self->mLoading == 0 && self->mDisplayError > 0) {
@@ -2224,10 +2224,10 @@ extern "C" void cGameComm_updateDisplayError(cGameComm* self) {
             self->mDisplayError = n;
             if (n <= 0) {
                 cOVStateManager_triggerOverlay_79C8(39);
-                int idx = D_004A2A54 + 1;
-                D_005366E8[idx] = 13;
+                int idx = cPauseState_StackIdx + 1;
+                cPauseState_Stack[idx] = 13;
                 cPauseState_Flags = D_00442924[0];
-                D_004A2A54 = idx;
+                cPauseState_StackIdx = idx;
             }
         }
     }

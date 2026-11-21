@@ -1005,7 +1005,7 @@ static inline sMsgListIter_00269008 sMsgList_00269008_insert(sMsgListIter_002690
  *
  * Stores @p hostState as the setup state (+0x0), applies @p riderId as this player's character (func_00264CF0) and pushes an 8-byte
  * online event of kind 243 (vtable online_Event_vtbl, tag "NetEvent") onto LobbyMan's mEventList. func_002642B8 calls
- * it on the client's setup manager (D_004A33CC) for a type-1 message while the state is below 7.
+ * it on the client's setup manager (cSetupMan_mSetupMan) for a type-1 message while the state is below 7.
  *
  * @param riderId  the character id from the message
  * @param hostState  the host's setup state from the message
@@ -1067,7 +1067,7 @@ static inline sMsgListIter_002690C8 sMsgList_002690C8_insert(sMsgListIter_002690
  *
  * Stores @p hostState as the setup state (+0x0), applies @p riderId as this player's character (func_00264CF0) and pushes an 8-byte
  * online event of kind 244 (vtable online_Event_vtbl, tag "NetEvent") onto LobbyMan's mEventList. func_002642B8 calls
- * it on the client's setup manager (D_004A33CC) for a type-3 message while the state is below 7.
+ * it on the client's setup manager (cSetupMan_mSetupMan) for a type-3 message while the state is below 7.
  *
  * @param riderId  the character id from the message
  * @param hostState  the host's setup state from the message
@@ -1128,7 +1128,7 @@ static inline sMsgListIter_00269188 sMsgList_00269188_insert(sMsgListIter_002691
  * Handles the host echoing the client's withdrawn confirmation: takes the host's state and posts an event.
  *
  * Stores @p hostState as the setup state (+0x0) and pushes an 8-byte online event of kind 247 (vtable online_Event_vtbl, tag
- * "NetEvent") onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup manager (D_004A33CC) for a
+ * "NetEvent") onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup manager (cSetupMan_mSetupMan) for a
  * type-5 message while the state is below 7.
  *
  * @param hostState  the host's setup state (the message's second word)
@@ -1189,7 +1189,7 @@ static inline sMsgListIter_00269240 sMsgList_00269240_insert(sMsgListIter_002692
  *
  * Stores @p hostState as the setup state (+0x0), applies @p riderId and the attribute bytes @p riderStats as the opponent's character
  * (func_00264D80) and pushes an 8-byte online event of kind 243 (vtable online_Event_vtbl, tag "NetEvent") onto
- * LobbyMan's mEventList. func_002642B8 calls it on the client's setup manager (D_004A33CC) for a type-0 message while
+ * LobbyMan's mEventList. func_002642B8 calls it on the client's setup manager (cSetupMan_mSetupMan) for a type-0 message while
  * the state is below 7.
  *
  * @param riderId  the host's character id
@@ -1253,7 +1253,7 @@ static inline sMsgListIter_00269300 sMsgList_00269300_insert(sMsgListIter_002693
  *
  * Stores @p hostState as the setup state (+0x0), applies @p riderId as the opponent's character without attribute bytes
  * (func_00264D80) and pushes an 8-byte online event of kind 245 (vtable online_Event_vtbl, tag "NetEvent") onto
- * LobbyMan's mEventList. func_002642B8 calls it on the client's setup manager (D_004A33CC) for a type-2 message while
+ * LobbyMan's mEventList. func_002642B8 calls it on the client's setup manager (cSetupMan_mSetupMan) for a type-2 message while
  * the state is below 7.
  *
  * @param riderId  the host's character id
@@ -1315,7 +1315,7 @@ static inline sMsgListIter_002693C0 sMsgList_002693C0_insert(sMsgListIter_002693
  * Handles the host withdrawing its confirmation on the client: takes the host's state and posts an event.
  *
  * Stores @p hostState as the setup state (+0x0) and pushes an 8-byte online event of kind 247 (vtable online_Event_vtbl, tag
- * "NetEvent") onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup manager (D_004A33CC) for a
+ * "NetEvent") onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup manager (cSetupMan_mSetupMan) for a
  * type-4 message while the state is below 7.
  *
  * @param hostState  the host's setup state (the message's second word)
@@ -1381,7 +1381,7 @@ struct sMsg_00269478 {
  *
  * Pushes a 0x10-byte event of kind 251 (vtable D_00481150, tag "cSetupMan::Update"), the row at +0xC, with flag +0x8 =
  * 1 onto LobbyMan's mEventList. The local senders (func_00265458, func_00265568) post the same event with flag 0.
- * func_002642B8 calls it on the host's setup manager (D_004A33CC) for a type-7 message in the bragging-rights phase
+ * func_002642B8 calls it on the host's setup manager (cSetupMan_mSetupMan) for a type-7 message in the bragging-rights phase
  * (state 7 or more).
  *
  * @param rowIndex  the highlighted row from the message
@@ -1447,7 +1447,7 @@ struct sMsg_00269538 {
  *
  * Pushes a 0x14-byte event of kind 252 (vtable D_00481130, tag "cSetupMan::Update"), the rule slot at +0xC and the
  * value at +0x10, with flag +0x8 = 1 onto LobbyMan's mEventList. The local senders (func_00265458, func_00265568) post
- * the same event with flag 0. func_002642B8 calls it on the host's setup manager (D_004A33CC) for a type-9 message in
+ * the same event with flag 0. func_002642B8 calls it on the host's setup manager (cSetupMan_mSetupMan) for a type-9 message in
  * the bragging-rights phase (state 7 or more).
  *
  * @param ruleSlot  the rule slot
@@ -1514,7 +1514,7 @@ struct sMsg_00269608 {
  *
  * Moves the state word from 6 or 7 to 8, or from 9 to 10, sends a type-11 message carrying the new state
  * (func_00264E50) and pushes a 0xC-byte event of kind 253 (vtable D_004813E0, tag "cSetupMan::Update") with flag +0x8 =
- * 1 onto LobbyMan's mEventList. func_002642B8 calls it on the host's setup manager (D_004A33CC) for a type-11 message
+ * 1 onto LobbyMan's mEventList. func_002642B8 calls it on the host's setup manager (cSetupMan_mSetupMan) for a type-11 message
  * in the bragging-rights phase (state 7 or more).
  */
 extern "C" void func_00269608(cSetupMan* self)
@@ -1587,7 +1587,7 @@ struct sMsg_002696F8 {
  *
  * Moves the state word from 8 back to 7, sends a type-12 message carrying the state (func_00264E50) and pushes a
  * 0xC-byte event of kind 254 (vtable D_004813C0, tag "cSetupMan::Update") with flag +0x8 = 1 onto LobbyMan's
- * mEventList. func_002642B8 calls it on the host's setup manager (D_004A33CC) for a type-13 message in the
+ * mEventList. func_002642B8 calls it on the host's setup manager (cSetupMan_mSetupMan) for a type-13 message in the
  * bragging-rights phase (state 7 or more).
  */
 extern "C" void func_002696F8(cSetupMan* self)
@@ -1652,7 +1652,7 @@ struct sMsg_002697D0 {
  *
  * Pushes a 0x10-byte event of kind 251 (vtable D_00481150, tag "cSetupMan::Update"), the row at +0xC, with flag +0x8 =
  * 1 onto LobbyMan's mEventList. The local senders (func_00265458, func_00265568) post the same event with flag 0.
- * func_002642B8 calls it on the client's setup manager (D_004A33CC) for a type-6 message in the bragging-rights phase
+ * func_002642B8 calls it on the client's setup manager (cSetupMan_mSetupMan) for a type-6 message in the bragging-rights phase
  * (state 7 or more).
  *
  * @param rowIndex  the highlighted row from the message
@@ -1717,7 +1717,7 @@ struct sMsg_00269890 {
  *
  * Pushes a 0x10-byte event of kind 251 (vtable D_00481150, tag "cSetupMan::Update"), the row at +0xC, with flag +0x8 =
  * 0 onto LobbyMan's mEventList, like the local sender func_00265458. func_002642B8 calls it on the client's setup
- * manager (D_004A33CC) for a type-7 message in the bragging-rights phase (state 7 or more).
+ * manager (cSetupMan_mSetupMan) for a type-7 message in the bragging-rights phase (state 7 or more).
  *
  * @param rowIndex  the highlighted row from the message
  */
@@ -1782,7 +1782,7 @@ struct sMsg_00269948 {
  *
  * Pushes a 0x14-byte event of kind 252 (vtable D_00481130, tag "cSetupMan::Update"), the rule slot at +0xC and the
  * value at +0x10, with flag +0x8 = 1 onto LobbyMan's mEventList. The local senders (func_00265458, func_00265568) post
- * the same event with flag 0. func_002642B8 calls it on the client's setup manager (D_004A33CC) for a type-8 message in
+ * the same event with flag 0. func_002642B8 calls it on the client's setup manager (cSetupMan_mSetupMan) for a type-8 message in
  * the bragging-rights phase (state 7 or more).
  *
  * @param ruleSlot  the rule slot
@@ -1850,7 +1850,7 @@ struct sMsg_00269A18 {
  *
  * Pushes a 0x14-byte event of kind 252 (vtable D_00481130, tag "cSetupMan::Update"), the rule slot at +0xC and the
  * value at +0x10, with flag +0x8 = 0 onto LobbyMan's mEventList, like the local sender func_00265568. func_002642B8
- * calls it on the client's setup manager (D_004A33CC) for a type-9 message in the bragging-rights phase (state 7 or
+ * calls it on the client's setup manager (cSetupMan_mSetupMan) for a type-9 message in the bragging-rights phase (state 7 or
  * more).
  *
  * @param ruleSlot  the rule slot
@@ -1916,7 +1916,7 @@ struct sMsg_00269AE0 {
  *
  * Stores @p hostState as the setup state (+0x0) and pushes a 0xC-byte event of kind 253 (vtable D_004813E0, tag
  * "cSetupMan::Update") with flag +0x8 = 1 onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup
- * manager (D_004A33CC) for a type-10 message in the bragging-rights phase (state 7 or more).
+ * manager (cSetupMan_mSetupMan) for a type-10 message in the bragging-rights phase (state 7 or more).
  *
  * @param hostState  the host's setup state from the message
  */
@@ -1980,7 +1980,7 @@ struct sMsg_00269B90 {
  *
  * Stores @p hostState as the setup state (+0x0) and pushes a 0xC-byte event of kind 253 (vtable D_004813E0, tag
  * "cSetupMan::Update") with flag +0x8 = 0 onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup
- * manager (D_004A33CC) for a type-11 message in the bragging-rights phase (state 7 or more).
+ * manager (cSetupMan_mSetupMan) for a type-11 message in the bragging-rights phase (state 7 or more).
  *
  * @param hostState  the host's setup state from the message
  */
@@ -2044,7 +2044,7 @@ struct sMsg_00269C40 {
  * Type 12 comes from the host unlocking its own panel (func_00265700) or answering the client's unlock (func_002696F8).
  * Stores @p hostState as the setup state (+0x0) and pushes a 0xC-byte event of kind 254 (vtable D_004813C0, tag
  * "cSetupMan::Update") with flag +0x8 = 1 onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup
- * manager (D_004A33CC) for a type-12 message in the bragging-rights phase (state 7 or more).
+ * manager (cSetupMan_mSetupMan) for a type-12 message in the bragging-rights phase (state 7 or more).
  *
  * @param hostState  the host's setup state from the message
  */
@@ -2107,7 +2107,7 @@ struct sMsg_00269CF0 {
  *
  * Stores @p hostState as the setup state (+0x0) and pushes a 0xC-byte event of kind 254 (vtable D_004813C0, tag
  * "cSetupMan::Update") with flag +0x8 = 0 onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup
- * manager (D_004A33CC) for a type-13 message in the bragging-rights phase (state 7 or more).
+ * manager (cSetupMan_mSetupMan) for a type-13 message in the bragging-rights phase (state 7 or more).
  *
  * @param hostState  the setup state from the message
  */

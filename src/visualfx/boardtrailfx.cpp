@@ -1727,15 +1727,15 @@ struct sBTVEntryR {
     float* (*fn)(void*);
 };
 
-extern float D_004A3B3C;
-extern float D_004A3B40;
-extern float D_004A3B44;
+extern float gVStart;
+extern float gVEnd;
+extern float gVHeight;
 
 /**
  * Reads the screen rectangle from the graphics manager and stores the transition texture coordinates derived from it.
  *
- * Calls cGraphicsMan_TheGraphicsMan's virtual slot 42, which returns a float array r, and sets D_004A3B3C = r[1],
- * D_004A3B40 = r[1] + r[2] and D_004A3B44 = r[2]. cFade_TObj_Draw, cWipe_TObj_Draw and cCircle_TObj_Draw use these as
+ * Calls cGraphicsMan_TheGraphicsMan's virtual slot 42, which returns a float array r, and sets gVStart = r[1],
+ * gVEnd = r[1] + r[2] and gVHeight = r[2]. cFade_TObj_Draw, cWipe_TObj_Draw and cCircle_TObj_Draw use these as
  * the texture rectangle; cTransitionMan_render calls it before drawing.
  */
 extern "C" void FigureOutTransitionUVs(void)
@@ -1745,10 +1745,10 @@ extern "C" void FigureOutTransitionUVs(void)
     float* screenRect = vtEntry->fn((char*)obj + vtEntry->delta);
     float top = screenRect[1];
     float w = screenRect[2];
-    D_004A3B3C = top;
+    gVStart = top;
     float bottom = w + top;
-    D_004A3B40 = bottom;
-    D_004A3B44 = bottom - top;
+    gVEnd = bottom;
+    gVHeight = bottom - top;
 }
 #endif
 
@@ -1761,17 +1761,17 @@ struct sBTRect4 {
     float x, y, z, w;
 };
 
-extern float D_004A3B30;
-extern float D_004A3B38;
-extern float D_004A3B3C;
-extern float D_004A3B44;
+extern float gUStart;
+extern float gUWidth;
+extern float gVStart;
+extern float gVHeight;
 
 extern "C" void func_002EB938(sBTRect4* pos, sBTRect4* rect, sBTRect4* color, float f);
 
 /**
  * Draws the fade transition: a full-screen (640x480) rectangle in the fade colour with its alpha scaled by @p amount.
  *
- * The texture rectangle is the screen's UV rectangle (D_004A3B30, D_004A3B3C, D_004A3B38, D_004A3B44); drawn with
+ * The texture rectangle is the screen's UV rectangle (gUStart, gVStart, gUWidth, gVHeight); drawn with
  * func_002EB938 (On Tour drawRect).
  *
  * @param amount  how far the fade has covered the screen, 0..1 (On Tour d)
@@ -1786,10 +1786,10 @@ extern "C" void cFade_TObj_Draw(cFade_TObj* self, float amount)
     pos.z = 640.0f;
     pos.w = 480.0f;
     sBTRect4 rect;
-    rect.x = D_004A3B30;
-    rect.y = D_004A3B3C;
-    rect.z = D_004A3B38;
-    rect.w = D_004A3B44;
+    rect.x = gUStart;
+    rect.y = gVStart;
+    rect.z = gUWidth;
+    rect.w = gVHeight;
     func_002EB938(&pos, &rect, &color, pos.x);
 }
 #endif
@@ -1838,12 +1838,12 @@ extern "C" cWipe_TObj_cWipe_TObj_sObj* cWipe_TObj_cWipe_TObj(cWipe_TObj* self, c
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/boardtrailfx", cWipe_TObj_Draw);
 #ifdef SKIP_ASM
-extern float D_004A3B30;
-extern float D_004A3B34;
-extern float D_004A3B38;
-extern float D_004A3B3C;
-extern float D_004A3B40;
-extern float D_004A3B44;
+extern float gUStart;
+extern float gUEnd;
+extern float gUWidth;
+extern float gVStart;
+extern float gVEnd;
+extern float gVHeight;
 extern "C" void func_002EB938(sBTRect4* pos, sBTRect4* rect, sBTRect4* color, float f);
 
 /**
@@ -1863,25 +1863,25 @@ extern "C" void cWipe_TObj_Draw(cWipe_TObj* self, float amount)
     float uStart, uEnd;
     if (dx < 0.0f) {
         w = dx + w;
-        uStart = D_004A3B30 + D_004A3B38 * 0.0015625000232830644f * dx;
-        uEnd = D_004A3B34;
+        uStart = gUStart + gUWidth * 0.0015625000232830644f * dx;
+        uEnd = gUEnd;
         dx = 0.0f;
     } else {
         w = w - dx;
-        uStart = D_004A3B30;
-        uEnd = uStart + D_004A3B38 * 0.0015625000232830644f * w;
+        uStart = gUStart;
+        uEnd = uStart + gUWidth * 0.0015625000232830644f * w;
     }
     float height;
     float vStart, vEnd;
     if (dy < 0.0f) {
         height = dy + 480.0f;
-        vStart = D_004A3B3C + D_004A3B44 * 0.0020833334419876337f * dy;
-        vEnd = D_004A3B40;
+        vStart = gVStart + gVHeight * 0.0020833334419876337f * dy;
+        vEnd = gVEnd;
         dy = 0.0f;
     } else {
         height = 480.0f - dy;
-        vStart = D_004A3B3C;
-        vEnd = vStart + D_004A3B44 * 0.0020833334419876337f * height;
+        vStart = gVStart;
+        vEnd = vStart + gVHeight * 0.0020833334419876337f * height;
     }
     float uw = uEnd - uStart;
     float vh = vEnd - vStart;
@@ -1983,7 +1983,7 @@ struct sBTVtx_BF48 {
  *
  * Colour channels come from @p colour as (a, r, g, b) floats, scaled by 128 when the current draw state has a texture (its
  * +0x10 is not -1) and by 255 otherwise (alpha always by 128). z is 1, the texture coordinates are (x, y, 0, 1) and the
- * position maps @p x over 640 and @p y over 480 into the screen rectangle at D_004A3B30..D_004A3B44.
+ * position maps @p x over 640 and @p y over 480 into the screen rectangle at gUStart..gVHeight.
  *
  * @param vertex  the vertex to fill (On Tour v)
  * @param colour  the colour, as a, r, g, b floats (On Tour colour)
@@ -2010,8 +2010,8 @@ extern "C" void InitVertex(sBTVtx_BF48* vertex, float* colour, float x, float y)
     texCoord.y = y;
     texCoord.z = 0.0f;
     vertex->st = texCoord;
-    vertex->x = D_004A3B30 + D_004A3B38 * 0.0015625f * x;
-    vertex->y = D_004A3B3C + D_004A3B44 * 0.0020833334f * y;
+    vertex->x = gUStart + gUWidth * 0.0015625f * x;
+    vertex->y = gVStart + gVHeight * 0.0020833334f * y;
 }
 #endif
 
@@ -2024,19 +2024,19 @@ INCLUDE_ASM("visualfx/boardtrailfx", cCircle_TObj_Draw);
 
 extern "C" void func_002EB938(sBTRect4* pos, sBTRect4* rect, sBTRect4* color, float f);
 
-extern float D_004A3B30;
+extern float gUStart;
 
-extern float D_004A3B38;
+extern float gUWidth;
 
-extern float D_004A3B3C;
+extern float gVStart;
 
-extern float D_004A3B44;
+extern float gVHeight;
 
 // InitVertex = On Tour InitVertex(tBxVertex&, float x, float y, const tARGB&); float view of its vertex, same
 // parameter order as its definition in this unit (EABI gives the same registers for any interleaving).
 extern "C" void InitVertex_C060(float* out, float* col, float x, float y) __asm__("InitVertex");
 
-extern float D_00504FB8[];
+extern float cSinCosTable_gSinCosTable[];
 
 struct sBTVert_C060 {
     float f[12];
@@ -2060,14 +2060,14 @@ static inline float clampBT(float v, float lo, float hi)
 }
 
 // Points of a half circle of radius r around x = cx, one every `step` radians: ys gets the sine part, xs the
-// x position clamped to the screen. D_00504FB8 is a 512-entry sine table (index = angle * 256/pi, +0x80 = cosine).
+// x position clamped to the screen. cSinCosTable_gSinCosTable is a 512-entry sine table (index = angle * 256/pi, +0x80 = cosine).
 static inline void BuildArc_C060(float* ys, float* xs, const float& cx, float r, float step)
 {
     float ang = 0.0f;
     for (int i = 0; i < 40; i++, ang += step) {
         int idx = (int)(ang * 81.4873275756836f) & 0x1FF;
-        ys[i] = r * D_00504FB8[idx];
-        float x = cx + r * D_00504FB8[idx + 0x80];
+        ys[i] = r * cSinCosTable_gSinCosTable[idx];
+        float x = cx + r * cSinCosTable_gSinCosTable[idx + 0x80];
         xs[i] = clampBT(x, 0.0f, 640.0f);
     }
 }
@@ -2092,20 +2092,20 @@ extern "C" void cCircle_TObj_Draw(cCircle_TObj* self, float amount)
     pos.y = 0.0f;
     pos.z = x0;
     pos.w = 480.0f;
-    rect.z = D_004A3B30 + D_004A3B38 * 0.0015625000232830644f * x0;
-    rect.x = D_004A3B30;
-    rect.y = D_004A3B3C;
-    rect.w = D_004A3B44;
+    rect.z = gUStart + gUWidth * 0.0015625000232830644f * x0;
+    rect.x = gUStart;
+    rect.y = gVStart;
+    rect.w = gVHeight;
     func_002EB938(&pos, &rect, (sBTRect4*)(&self->mScreenColour), 0.0f);
     float w = 640.0f - x1;
     pos.x = x1;
     pos.y = 0.0f;
     pos.z = w;
     pos.w = 480.0f;
-    rect.x = D_004A3B30 + D_004A3B38 * 0.0015625000232830644f * x1;
-    rect.y = D_004A3B3C;
-    rect.z = D_004A3B30 + D_004A3B38 * w * 0.0015625000232830644f;
-    rect.w = D_004A3B44;
+    rect.x = gUStart + gUWidth * 0.0015625000232830644f * x1;
+    rect.y = gVStart;
+    rect.z = gUStart + gUWidth * w * 0.0015625000232830644f;
+    rect.w = gVHeight;
     func_002EB938(&pos, &rect, (sBTRect4*)(&self->mScreenColour), 0.0f);
 
     float ys[40];

@@ -10,7 +10,7 @@
 //   cCircle_TObj  an iris: everything outside a circle of radius (1 - amount) * 800 around (mOriginX, mOriginY); the
 //                 one-colour ctor picks a random origin on the 640x480 screen, func_002EBD88 takes it explicitly.
 // Base cTransitionObj (On Tour 0x4, vptr only; vtable cTransitionObj_vtbl 0x004880E0: 1 dtor, 2 Draw = pure virtual):
-// its operator new / delete hand out one of four static 0x64-byte buffers (D_005382C0, in-use flags D_00538850;
+// its operator new / delete hand out one of four static 0x64-byte buffers (cTransitionObj_mBuffer, in-use flags cTransitionObj_mbBufferUsed;
 // cTransitionObj_operator_new ignores the size its callers pass), so the objects are never heap-allocated.
 // EA's source file is unknown (the preview names none of these classes in asserts); cTransitionObj's ctor and
 // buffer functions sit right after cTransitionMan's methods in splat unit visualfx/boardwakefx (0x002E4CB0 ..

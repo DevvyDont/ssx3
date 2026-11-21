@@ -249,7 +249,7 @@ extern "C" void func_0038B190(cPS2BezierMan* bezierMan, sBezObj_B190* patchRec, 
 //100%
 INCLUDE_ASM("render/bezierman", cPS2BezierMan_AddPatch);
 #ifdef SKIP_ASM
-extern int D_004A44D4;
+extern int cRenderToggles_m_DisablePatches;
 
 struct sBezVEntry_B338 {
     short delta;
@@ -258,7 +258,7 @@ struct sBezVEntry_B338 {
 };
 
 /**
- * Queues a Bezier patch for drawing unless patch drawing is disabled (D_004A44D4 non-zero).
+ * Queues a Bezier patch for drawing unless patch drawing is disabled (cRenderToggles_m_DisablePatches non-zero).
  *
  * Forwards to virtual slot 22 with the same arguments and a trailing 0.
  *
@@ -269,7 +269,7 @@ struct sBezVEntry_B338 {
  */
 extern "C" void cPS2BezierMan_AddPatch(cPS2BezierMan* self, void* pPatch, void* edges, void* texid, void* clip)
 {
-    if (D_004A44D4 == 0) {
+    if (cRenderToggles_m_DisablePatches == 0) {
         sBezVEntry_B338* vt = (sBezVEntry_B338*)self->mVtbl;
         vt[22].fn((char*)self + vt[22].delta, pPatch, edges, texid, clip, 0);
     }
@@ -1129,8 +1129,8 @@ struct sBezMan_CA70 {
     sDefer_CA70 defer[1];           // 0x5368
 };
 extern sGfx_CA70* D_004A5B80_CA70 __asm__("cGraphicsMan_TheGraphicsMan");
-extern int D_004A44D8;
-extern int D_004A44DC;
+extern int cRenderToggles_m_DisablePatchReflection;
+extern int cRenderToggles_m_DisablePatchShadow;
 extern char* str_at_HP[];
 extern "C" int func_0038CA08_i(void* self, void* obj) __asm__("func_0038CA08");
 extern "C" void* func_0038F708(void* obj, int a1, int a2);
@@ -1141,8 +1141,8 @@ extern "C" void func_0038D448(void* self, int kind, void* tbl, void* patch, int 
  * Emits one cached uniform-LOD patch into the frame's packet stream, or defers it to be drawn grouped by texture.
  *
  * Copies the 432-byte patch record to the scratchpad (func_0038F708). The shine pass runs when the record's flags at
- * +0xC have 0x600000 set and the debug switch D_004A44D8 is clear; for the 8x8 list (@p kind 2) the projector pass runs
- * when func_0038CA08 finds projective textures and D_004A44DC is clear. Flag bits 0x180000 select bits 2-3 of the
+ * +0xC have 0x600000 set and the debug switch cRenderToggles_m_DisablePatchReflection is clear; for the 8x8 list (@p kind 2) the projector pass runs
+ * when func_0038CA08 finds projective textures and cRenderToggles_m_DisablePatchShadow is clear. Flag bits 0x180000 select bits 2-3 of the
  * current draw state's word 0 (0x80000 = 8, 0x100000 = 4, both = 0xC; none clears them). If any of these apply the
  * patch is drawn now: the texture ids from +0x1A0/+0x1A2 go into the draw state, a DMA call to the cached packet
  * (mVifCachePos[kind] + sub * 256) and an MSCAL of the program from str_at_HP[kind] are written at *@p handle, the
@@ -1167,7 +1167,7 @@ extern "C" void func_0038CA70(sBezMan_CA70* self, int kind, int sub, sPatch_CA70
     unsigned int n = kind * 2 + 4;
     int doA = (*(int*)(patchCopy + 0xC) & 0x600000) && n;
     if (doA) {
-        if (D_004A44D8 != 0)
+        if (cRenderToggles_m_DisablePatchReflection != 0)
             doA = 0;
         else
             draw = doA != 0;
@@ -1177,7 +1177,7 @@ extern "C" void func_0038CA70(sBezMan_CA70* self, int kind, int sub, sPatch_CA70
         res = func_0038CA08_i(self, patchCopy);
     int doB = res != 0;
     if (doB) {
-        if (D_004A44DC != 0)
+        if (cRenderToggles_m_DisablePatchShadow != 0)
             doB = 0;
         else
             draw |= doB;
@@ -1285,8 +1285,8 @@ struct sBezMan_CE20 {
     unsigned int base44C[(0x5364 - 0x44C) / 4]; // 0x44C
 };
 extern sGfx_CE20* D_004A5B80_CE20 __asm__("cGraphicsMan_TheGraphicsMan");
-extern int D_004A44D8;
-extern int D_004A44DC;
+extern int cRenderToggles_m_DisablePatchReflection;
+extern int cRenderToggles_m_DisablePatchShadow;
 struct sTex_CE20 {
     int addr;
     int pad;
@@ -1303,7 +1303,7 @@ extern "C" void func_0038D448(void* self, int kind, void* tbl, void* patch, int 
  *
  * Works like func_0038CA70 with the 8x8 programs (D_00504960): copies the patch record to the scratchpad, sets the
  * texture ids from +0x1A0/+0x1A2 and the draw-state bits from flags 0x180000, and decides the shine pass (flags
- * 0x600000, debug switch D_004A44D8) and the projector pass (func_0038CA08, debug switch D_004A44DC). When @p ext is
+ * 0x600000, debug switch cRenderToggles_m_DisablePatchReflection) and the projector pass (func_0038CA08, debug switch cRenderToggles_m_DisablePatchShadow). When @p ext is
  * not null it first uploads the four bytes at @p ext as one V4-8 element to VU address 0xD0 and the 16 control-point
  * quadwords at +0x40 of the patch record (by DMA reference) to 0xC0. Then it writes the call to the cached packet
  * (mVifCachePos[2] + sub * 256) and an MSCAL, registers the packet in the draw ring (fewer than 2600 records) and runs
@@ -1323,12 +1323,12 @@ extern "C" void func_0038CE20(sBezMan_CE20* self, int sub, sPatch_CE20* patch, i
     unsigned int addr = self->base44C[2] + (sub << 8);
     int doA = (*(int*)(patchCopy + 0xC) & 0x600000) != 0;
     if (doA) {
-        if (D_004A44D8 != 0)
+        if (cRenderToggles_m_DisablePatchReflection != 0)
             doA = 0;
     }
     int res = func_0038CA08_i(self, patchCopy);
     int doB = res != 0;
-    if (D_004A44DC != 0)
+    if (cRenderToggles_m_DisablePatchShadow != 0)
         doB = 0;
     int tex = *(short*)(patchCopy + 0x1A0);
     gfx->top->tex = tex;
@@ -1799,7 +1799,7 @@ struct sGfx_D690 {
     char pad_0xE88[0x18F0 - 0xE88];
     sRing_D690* ring;               // 0x18F0
 };
-extern float D_004A4348;
+extern float cDetailSystem_m_PS2SparkleCount;
 extern void* D_004A4474;
 extern sGfx_D690* D_004A5B80_D690 __asm__("cGraphicsMan_TheGraphicsMan");
 extern char D_1460[];
@@ -1819,7 +1819,7 @@ static inline void CopyQuads_D690(char** pp, sQuad_D690* src, int n)
 /**
  * Adds the snow-sparkle pass for one patch whose record has flag 0x800000, with a sparkle count from its size.
  *
- * The count is the squared diagonal of the patch's bounding box (+0x158..+0x16C) times D_004A4348 * 3.333e-7 times
+ * The count is the squared diagonal of the patch's bounding box (+0x158..+0x16C) times cDetailSystem_m_PS2SparkleCount * 3.333e-7 times
  * m_SnowSparkleDensity[6] of the graphics manager, halved when the entry's level at +8 is below 2 (never the case from
  * func_0038D968, which only passes LOD-2 entries); nothing is drawn when it is not positive. The count goes into the
  * word at +0x43C. The packet (opened and closed with func_0038F460 / func_0038F668 on D_004A4474) unpacks 22 V4-32
@@ -1845,7 +1845,7 @@ extern "C" void func_0038D690(void* self, void* obj, void* patch, unsigned int* 
     sGfx_D690* gfx = D_004A5B80_D690;
     boxDiagonal.x = *(float*)(patchRec + 0x158) - *(float*)(patchRec + 0x164);
     boxDiagonal.y = *(float*)(patchRec + 0x15C) - *(float*)(patchRec + 0x168);
-    int n = (int)((boxDiagonal.x * boxDiagonal.x + boxDiagonal.y * boxDiagonal.y + boxDiagonal.z * boxDiagonal.z) * (D_004A4348 * 3.3333333249174757e-07f) * gfx->detailScale);
+    int n = (int)((boxDiagonal.x * boxDiagonal.x + boxDiagonal.y * boxDiagonal.y + boxDiagonal.z * boxDiagonal.z) * (cDetailSystem_m_PS2SparkleCount * 3.3333333249174757e-07f) * gfx->detailScale);
     if (*(int*)((char*)patch + 8) < 2) {
         n /= 2;
     }

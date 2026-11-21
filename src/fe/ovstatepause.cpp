@@ -39,7 +39,7 @@ extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
 extern "C" void func_00266F90(void* self, int* a, int* b);
 extern "C" void func_00266E88(void* self);
 extern "C" void func_00266E30(void* self);
-extern void* D_004A33F4;
+extern void* VoipMan;
 extern char str_37beoptions[];
 extern char str_kT_CMNHUDFull[];
 extern char str_kT_CMNHUDMinimal[];
@@ -111,7 +111,7 @@ struct sSlider_PO {
 struct sColor_PO {
     float r, g, b, a;
 };
-extern sColor_PO D_004C66C8_PO __asm__("D_004C66C8");
+extern sColor_PO D_004C66C8_PO __asm__("gStaticColour");
 
 class cUIObj_PO {
 public:
@@ -316,12 +316,12 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(cOVState_PAUSE_OPTIONS* se
             ((sSlider_PO*)talkSlider)->max = 10;
             int level;
             int max;
-            func_00266F90(D_004A33F4, &level, &max);
+            func_00266F90(VoipMan, &level, &max);
             ((sSlider_PO*)talkSlider)->value = level / 10;
             if (level < 10) {
-                func_00266E88(D_004A33F4);
+                func_00266E88(VoipMan);
             } else {
-                func_00266E30(D_004A33F4);
+                func_00266E30(VoipMan);
             }
         }
     } else {
@@ -426,7 +426,7 @@ extern "C" void func_00266F90(void* self, int* a, int* b);
 extern "C" void func_00266F58(void* self, int a, int b);
 extern "C" void func_00266E88(void* self);
 extern "C" void func_00266E30(void* self);
-extern void* D_004A33F4;
+extern void* VoipMan;
 extern char str_EATalksl[];
 extern char str_Save_Profile[];
 extern char str_0lb[];
@@ -547,13 +547,13 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(cOVState_PAUSE_OPTIONS* sel
         if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && IsId_A238(obj, str_EATalksl)) {
             int level;
             int max;
-            func_00266F90(D_004A33F4, &level, &max);
+            func_00266F90(VoipMan, &level, &max);
             level = *(int*)(obj + 0x74) * 10;
-            func_00266F58(D_004A33F4, level, max);
+            func_00266F58(VoipMan, level, max);
             if (level < 10) {
-                func_00266E88(D_004A33F4);
+                func_00266E88(VoipMan);
             } else {
-                func_00266E30(D_004A33F4);
+                func_00266E30(VoipMan);
             }
         }
         iface->vtbl[1].fn((char*)iface + iface->vtbl[1].delta);
@@ -1068,9 +1068,9 @@ extern "C" void cAI_finishRemotePlayer(void* p);
 // cUIStateStack_pop returns its last list node in $v0; the unit declares it void.
 void* cUIStateStack_pop_r(void* self, int a1) __asm__("cUIStateStack_pop");
 extern int cPauseState_Flags;
-extern int D_004A2A54;
-extern int D_005366E8[];
-extern int D_004428F0[];
+extern int cPauseState_StackIdx;
+extern int cPauseState_Stack[];
+extern int cPauseState_FlagsTable[];
 
 /**
  * Online pause error overlay: continues the race without the lost player, or quits it.
@@ -1089,7 +1089,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_doContinueCancel(cOVState_PAUSE_ONLI
     switch (*(int*)((char*)item + 0x18)) {
     case 4:
         cAI_finishRemotePlayer(SSXApp->Game->AI);
-        cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
+        cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
         break;
     case 0:
     default:
@@ -1273,7 +1273,7 @@ extern char str_at_TextPulseWhiteOrange[];
  * Runs cUIState_onGainFocus, then plays "@TextPulseWhiteOrange" (cOVState_triggerTextFade) on "rider<n>" for the first
  * human rider (cBENewPlayerInterface_getHumanRider(.., 0) + 1) and, in an online race (cBENewRaceInterface_newRace's
  * cGamePath == 2), for the second. With a cGameComm_mGameComm link it sets mOverlayTimeout to 1200 frames, after which
- * cOVState_HEAT_PREEVENT_onUpdate closes the overlay. The overlay factory builds this state (vtable D_00472850, screen "40race_pre") for
+ * cOVState_HEAT_PREEVENT_onUpdate closes the overlay. The overlay factory builds this state (vtable cOVState_HEAT_PREEVENT_vtbl, screen "40race_pre") for
  * overlay type 8. BE interface 0 is fetched and unused.
  */
 extern "C" void cOVState_HEAT_PREEVENT_onGainFocus(cOVState_HEAT_PREEVENT* self)
@@ -1421,7 +1421,7 @@ extern "C" void cUIState_showObjSafe(void* self, char* name);
 signed char cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex);
 extern "C" signed char cBENewPlayerInterface_getRiderCheatCharID(void* self, int index);
 extern "C" void* func_00155130(void* iface, int idx);
-extern int D_00536708[];
+extern int cGameModeMan_iCharRank[];
 // The "%d" format D_004A2138, reached gp-relative here: a sized declaration of the same string.
 extern char D_004A2138_n[3] __asm__("D_004A2138");
 extern unsigned short D_004A2140[];
@@ -1496,7 +1496,7 @@ static inline void* getObj_1FBD20(void* self, char* name)
  *
  * The table: column "heat1" reads kT_OVRCMNHeat1, or kT_OVRCMNScoreColon in the final heat and outside career, where
  * "column_secondrun" and "column_total" are hidden too (also in heat 1). Rows "rider1".."rider3" list the first three
- * riders of the standings order D_00536708 other than the human player: name (cBECharacterInterface_getShortNameByCharacter with GameModeMan's
+ * riders of the standings order cGameModeMan_iCharRank other than the human player: name (cBECharacterInterface_getShortNameByCharacter with GameModeMan's
  * iCharacters / iCheatCharacters), heat score (cGameModeMan_getHeatScore heat 0, or 2 in the final), and in career heat
  * 2 the second-run and total scores; "- - -" otherwise. "p0rider" gets the player's name and "p0run1" the player's
  * heat-1 score in career heat 2 ("- - -" otherwise); "p1rider" gets the second player online, else it and "p1dashes"
@@ -1546,7 +1546,7 @@ extern "C" void func_001FBD20(void* self)
             cUIText_setUnicodeStringByID((cUIText*)text, GetHashValue32(str_kT_FSOBJ2HeatsQF));
             cUIText_setUnicodeStringByID((cUIText*)sub, GetHashValue32(str_kT_FSOBJHeatsGrandTtl));
         } else if (mode == 2) {
-            int total = cGameModeMan_getHeatScore(stats, D_00536708[2], 0) + cGameModeMan_getHeatScore(stats, D_00536708[2], 1);
+            int total = cGameModeMan_getHeatScore(stats, cGameModeMan_iCharRank[2], 0) + cGameModeMan_getHeatScore(stats, cGameModeMan_iCharRank[2], 1);
             int n = total - cGameModeMan_getHeatScore(stats, cBENewPlayerInterface_getHumanRider(iface1, 0), 0);
             if (n > 0) {
                 unsigned short buf[800];
@@ -1615,10 +1615,10 @@ extern "C" void func_001FBD20(void* self)
         for (int i = 1; i < 4; i++, k++) {
             char name[0x20];
             char num[0x10];
-            int id = D_00536708[k];
+            int id = cGameModeMan_iCharRank[k];
             if (id == cBENewPlayerInterface_getHumanRider(iface1, 0)) {
                 k++;
-                id = D_00536708[k];
+                id = cGameModeMan_iCharRank[k];
             }
             sprintf(name, str_rider_pct_d, i);
             void* cell = getObj_1FBD20(self, name);
@@ -2430,9 +2430,9 @@ extern "C" void* cUIScreen_playFrame_DC30(void* self, unsigned short frame, int 
 extern "C" void* cUIScreen_getObjectByHashName_DC30(void* self, int hash) __asm__("cUIScreen_getObjectByHashName");
 extern "C" void cOVState_onCreateScreen_DC30(void* self) __asm__("cOVState_onCreateScreen");
 extern int cPauseState_Flags;
-extern int D_004A2A54;
-extern int D_005366E8[];
-extern int D_004428F0[];
+extern int cPauseState_StackIdx;
+extern int cPauseState_Stack[];
+extern int cPauseState_FlagsTable[];
 extern char D_004A2560[];
 extern char str_119Save_Replay[];
 extern char str_1percentage_b[];
@@ -2467,7 +2467,7 @@ static inline cUIObj_DC30* getObj_DC30(char* self, char* name)
  * Adds the "119Save_Replay" screen (kept in mpScreen); when it exists, plays frame 0, clears "1percentage_b" and
  * "Memory_card_info", shows "title_Save_Replay", hides "title_Save_Records" and "helptext01", and stores 0..3 in the
  * miMiscData (+0x18) of "1memory_card_b".."4memory_card_b". Adds the "OV_darkblue" backdrop, pushes pause state 2
- * (D_005366E8[++D_004A2A54] = 2, cPauseState_Flags = D_004428F0[2]) and runs cOVState_onCreateScreen. The `//` note
+ * (cPauseState_Stack[++cPauseState_StackIdx] = 2, cPauseState_Flags = cPauseState_FlagsTable[2]) and runs cOVState_onCreateScreen. The `//` note
  * above calls this a device-select overlay that pushes its menu state; it pushes the pause state.
  */
 extern "C" void cOVState_SAVEREPLAY_onCreateScreen(cOVState_SAVEREPLAY* self)
@@ -2500,8 +2500,8 @@ extern "C" void cOVState_SAVEREPLAY_onCreateScreen(cOVState_SAVEREPLAY* self)
     if (screen != 0) {
         cUIScreen_playFrame_DC30(screen, 0, 0);
     }
-    D_005366E8[++D_004A2A54] = 2;
-    cPauseState_Flags = D_004428F0[2];
+    cPauseState_Stack[++cPauseState_StackIdx] = 2;
+    cPauseState_Flags = cPauseState_FlagsTable[2];
     cOVState_onCreateScreen_DC30(((char*)self));
 }
 #endif
@@ -2509,10 +2509,10 @@ extern "C" void cOVState_SAVEREPLAY_onCreateScreen(cOVState_SAVEREPLAY* self)
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEREPLAY_onDestroyScreen);
 #ifdef SKIP_ASM
-extern int D_004A2A54;
+extern int cPauseState_StackIdx;
 extern int cPauseState_Flags;
-extern int D_005366E8[];
-extern int D_004428F0[];
+extern int cPauseState_Stack[];
+extern int cPauseState_FlagsTable[];
 void cReplay_purgeSave(void* self);
 extern "C" void* cFEMemCard_onDestroyScreen(void* self);
 extern "C" void cReplay_startReplay(void* self, void* a1, int a2, int a3);
@@ -2522,7 +2522,7 @@ extern "C" void cReplay_startReplay(void* self, void* a1, int a2, int a3);
  *
  * When a replay save buffer is still held (+0x1C8, On Tour mIsReplayAlloc) it releases it (cReplay_purgeSave on
  * SSXApp->Game->Replay, On Tour cReplay::purgeSave) and clears the flag. Pops the pause state (cPauseState_Flags =
- * D_004428F0[D_005366E8[--D_004A2A54]]), runs cFEMemCard_onDestroyScreen and restarts playback with
+ * cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]]), runs cFEMemCard_onDestroyScreen and restarts playback with
  * cReplay_startReplay(Replay, 0, 0, 0).
  */
 extern "C" void cOVState_SAVEREPLAY_onDestroyScreen(cOVState_SAVEREPLAY* self)
@@ -2531,7 +2531,7 @@ extern "C" void cOVState_SAVEREPLAY_onDestroyScreen(cOVState_SAVEREPLAY* self)
         cReplay_purgeSave(SSXApp->Game->Replay);
         self->mIsReplayAlloc = 0;
     }
-    cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
+    cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
     cFEMemCard_onDestroyScreen(self);
     cReplay_startReplay(SSXApp->Game->Replay, 0, 0, 0);
 }

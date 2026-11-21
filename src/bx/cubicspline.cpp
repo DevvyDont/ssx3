@@ -2869,10 +2869,10 @@ extern char AIrandom[];
 extern char D_004FF048[], D_004FF058[], D_004FF068[], D_004FF078[], D_004FF088[], D_004FF098[], D_004FF0A8[], D_004FF0B8[], D_004FF0C8[];
 extern char D_004A5958;
 extern void* D_004A3E94;
-extern char D_004A5960[], D_004A5968[], D_004A5970[];
-extern char t3vect_Zero[], D_004FF0E8[], D_004FF0F8[], D_004FF108[];
+extern char t2vect_Zero[], t2vect_XAxis[], t2vect_YAxis[];
+extern char t3vect_Zero[], t3vect_XAxis[], t3vect_YAxis[], t3vect_ZAxis[];
 extern char t4vect_Zero[], t4vect_Origin[], t4vect_XAxis[], t4vect_YAxis[], t4vect_ZAxis[];
-extern char t3mat_Identity[], t4mat_Identity[], D_004FF1E0[], D_004FF220[], tPose_Identity[], TheDynamicMemMan[];
+extern char t3mat_Identity[], t4mat_Identity[], t4mat_Zero[], tquat_Identity[], tPose_Identity[], TheDynamicMemMan[];
 
 /**
  * Static initialisation and destruction of the bx library's globals.
@@ -2901,13 +2901,13 @@ extern "C" void __sti__all_in_one_bx_cpp(int init, int prio)
             new (D_004FF0B8) sV3_0550(1.0f, 1.0f, 1.0f);
             new (D_004FF0C8) sV3_0550(0.25f, 0.25f, 0.25f);
             D_004A3E94 = &D_004A5958;
-            new (D_004A5960) sV2_0550(0.0f, 0.0f);
-            new (D_004A5968) sV2_0550(1.0f, 0.0f);
-            new (D_004A5970) sV2_0550(0.0f, 1.0f);
+            new (t2vect_Zero) sV2_0550(0.0f, 0.0f);
+            new (t2vect_XAxis) sV2_0550(1.0f, 0.0f);
+            new (t2vect_YAxis) sV2_0550(0.0f, 1.0f);
             new (t3vect_Zero) sV3_0550(0.0f, 0.0f, 0.0f);
-            new (D_004FF0E8) sV3_0550(1.0f, 0.0f, 0.0f);
-            new (D_004FF0F8) sV3_0550(0.0f, 1.0f, 0.0f);
-            new (D_004FF108) sV3_0550(0.0f, 0.0f, 1.0f);
+            new (t3vect_XAxis) sV3_0550(1.0f, 0.0f, 0.0f);
+            new (t3vect_YAxis) sV3_0550(0.0f, 1.0f, 0.0f);
+            new (t3vect_ZAxis) sV3_0550(0.0f, 0.0f, 1.0f);
             new (t4vect_Zero) sV4_0550(0.0f, 0.0f, 0.0f, 0.0f);
             new (t4vect_Origin) sV4_0550(0.0f, 0.0f, 0.0f, 1.0f);
             new (t4vect_XAxis) sV4_0550(1.0f, 0.0f, 0.0f, 0.0f);
@@ -2915,9 +2915,9 @@ extern "C" void __sti__all_in_one_bx_cpp(int init, int prio)
             new (t4vect_ZAxis) sV4_0550(0.0f, 0.0f, 1.0f, 0.0f);
             new (t3mat_Identity) sM33_0550();
             new (t4mat_Identity) sM44_0550(1.0f);
-            new (D_004FF1E0) sM44_0550(0.0f);
-            new (D_004FF220) sQ_0550(0.0f, 0.0f, 0.0f, 1.0f);
-            new (tPose_Identity) sXf_0550(*(sV4_0550*)t4vect_Origin, *(sQ_0550*)D_004FF220);
+            new (t4mat_Zero) sM44_0550(0.0f);
+            new (tquat_Identity) sQ_0550(0.0f, 0.0f, 0.0f, 1.0f);
+            new (tPose_Identity) sXf_0550(*(sV4_0550*)t4vect_Origin, *(sQ_0550*)tquat_Identity);
             cDynamicMemMan_cDynamicMemMan(TheDynamicMemMan);
         } else {
             cDynamicMemMan__cDynamicMemMan(TheDynamicMemMan, 2);

@@ -124,7 +124,7 @@ extern "C" void cGameAnimMap__cGameAnimMap(int* self, int flags)
 INCLUDE_ASM("animation/mdfarchive", cGameAnimMap_initMap);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char* D_0048CFC0[];
+extern char* cGameAnimMap_GameAnimNames[];
 extern unsigned int* gameanimcmphack;
 extern "C" int gameanimcmp(int* a, int* b);
 extern "C" void qsort(void* base, int n, int size, int (*cmp)(int*, int*));
@@ -140,7 +140,7 @@ struct sMdfHashTable_00314DD8
 /**
  * Builds the game-animation hash index and marks every game animation as unmapped.
  *
- * Hashes the 518 names of D_0048CFC0 ("G_GATEROCK", "G_SIT_CYC", ...) with GetHashValue32() into hash[],
+ * Hashes the 518 names of cGameAnimMap_GameAnimNames ("G_GATEROCK", "G_SIT_CYC", ...) with GetHashValue32() into hash[],
  * sorts order[] by hash with qsort (qsort; the comparator gameanimcmp reads the hashes through
  * gameanimcmphack, set only during the sort) and fills the 518-entry map with -1 (func_00416210). cGameAnimMap_lookupGAD
  * (On Tour lookupGAD) binary-searches this index.
@@ -149,7 +149,7 @@ extern "C" void cGameAnimMap_initMap(sMdfHashTable_00314DD8* self)
 {
     for (int i = 0; i < 518; i++)
     {
-        int hashValue = GetHashValue32(D_0048CFC0[i]);
+        int hashValue = GetHashValue32(cGameAnimMap_GameAnimNames[i]);
         self->order[i] = i;
         self->hash[i] = hashValue;
     }
@@ -174,7 +174,7 @@ struct sMdfIndex_00314E88
  *
  * Binary search over the 518 hashes (+0x0) in the order (+0x818) that cGameAnimMap_initMap sorted them into.
  *
- * @param hash  the name hash (GetHashValue32 of a D_0048CFC0 name such as "G_GATEROCK")
+ * @param hash  the name hash (GetHashValue32 of a cGameAnimMap_GameAnimNames name such as "G_GATEROCK")
  * @return the game-animation index 0-517, or -1
  */
 // Binary search for `hash`; returns its entry index, or -1.
@@ -291,7 +291,7 @@ extern char str_error[];
 /**
  * Returns the name of the first game animation mapped to @p value, or str_error when none is.
  *
- * Linear search of the 518-entry map at +0x1030; the name comes from D_0048CFC0 (e.g. "G_GATEROCK").
+ * Linear search of the 518-entry map at +0x1030; the name comes from cGameAnimMap_GameAnimNames (e.g. "G_GATEROCK").
  *
  * @param value  the animation id to look for
  * @return the game animation's name, or str_error
@@ -302,7 +302,7 @@ extern "C" char* cGameAnimMap_getAnimName(cGameAnimMap* self, void* value)
     {
         if (value == ((void**)(&self->GameAnimMap[0]))[i])
         {
-            return D_0048CFC0[i];
+            return cGameAnimMap_GameAnimNames[i];
         }
     }
     return str_error;

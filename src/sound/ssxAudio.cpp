@@ -1909,26 +1909,26 @@ extern "C" int func_002876D0(void* self)
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_SetCurrVolume);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern float D_004A3504;
-extern float D_004A3508;
-extern float D_004A350C;
-extern float D_004A3510;
-extern float D_004A3514;
-extern float D_004A3518;
-extern float D_004A351C;
-extern float D_004A3520;
-extern float D_004A3524;
-extern float D_004A3528;
-extern float D_004A352C;
-extern float D_004A3530;
-extern float D_004A3534;
-extern float D_004A3538;
-extern float D_004A353C;
-extern float D_004A3540;
-extern float D_004A3544;
-extern float D_004A3548;
-extern float D_004A354C;
-extern float D_004A3550;
+extern float gSFXScaling;
+extern float gMusicScaling;
+extern float gCharSpchScaling;
+extern float gDJSpchScaling;
+extern float gPASpchScaling;
+extern float gBoardScaling;
+extern float gCollisionScaling;
+extern float gAmbientScaling;
+extern float gArcadeSFXScaling;
+extern float gArcadeSpeechScaling;
+extern float gMobyScaling;
+extern float gKaoriScaling;
+extern float gAerielScaling;
+extern float gMacScaling;
+extern float gZoeScaling;
+extern float gGrommetScaling;
+extern float gEliseScaling;
+extern float gRocoScaling;
+extern float gPsymonScaling;
+extern float gDeiterScaling;
 extern "C" void func_002B4388(void* mon);
 extern "C" void SNDmastervol(signed char vol);
 
@@ -1938,7 +1938,7 @@ extern "C" void SNDmastervol(signed char vol);
  * Sets one volume control's level and applies it.
  *
  * @p volume is clamped to 0..1 and stored as the control's user level; its base level is the level itself for control 0 and
- * the level times a per-control constant (D_004A3504 .. D_004A3528) for the others. The gain is base * the control's
+ * the level times a per-control constant (gSFXScaling .. gArcadeSpeechScaling) for the others. The gain is base * the control's
  * volume (+0x6394) and the output gain * the current factor (+0x63E4). Control 0 then sets the library master volume
  * (SNDmastervol, out * 127), control 1 updates the music monitor (func_002B4388) and control 4 rescales the ten mix
  * levels at +0x636C. Quirk: control 1 calls func_002B4388 twice, the first time before the new gain is computed.
@@ -1960,44 +1960,44 @@ extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio* self_, float volume, int ch)
         break;
     case 1:
         currVolume->setVolume = volume;
-        currVolume->curVolume = volume * D_004A3508;
+        currVolume->curVolume = volume * gMusicScaling;
         func_002B4388(&self->MusicSys);
         break;
     case 2:
         currVolume->setVolume = volume;
-        currVolume->curVolume = volume * D_004A3510;
+        currVolume->curVolume = volume * gDJSpchScaling;
         break;
     case 3:
         currVolume->setVolume = volume;
-        currVolume->curVolume = volume * D_004A3514;
+        currVolume->curVolume = volume * gPASpchScaling;
         break;
     case 4:
         currVolume->setVolume = volume;
-        currVolume->curVolume = volume * D_004A350C;
+        currVolume->curVolume = volume * gCharSpchScaling;
         break;
     case 5:
         currVolume->setVolume = volume;
-        currVolume->curVolume = volume * D_004A3504;
+        currVolume->curVolume = volume * gSFXScaling;
         break;
     case 6:
         currVolume->setVolume = volume;
-        currVolume->curVolume = volume * D_004A3518;
+        currVolume->curVolume = volume * gBoardScaling;
         break;
     case 7:
         currVolume->setVolume = volume;
-        currVolume->curVolume = volume * D_004A351C;
+        currVolume->curVolume = volume * gCollisionScaling;
         break;
     case 8:
         currVolume->setVolume = volume;
-        currVolume->curVolume = volume * D_004A3520;
+        currVolume->curVolume = volume * gAmbientScaling;
         break;
     case 9:
         currVolume->setVolume = volume;
-        currVolume->curVolume = volume * D_004A3524;
+        currVolume->curVolume = volume * gArcadeSFXScaling;
         break;
     case 10:
         currVolume->setVolume = volume;
-        currVolume->curVolume = volume * D_004A3528;
+        currVolume->curVolume = volume * gArcadeSpeechScaling;
         break;
     }
     currVolume->duckedVolume = currVolume->curVolume * self->mDuckLevel[ch];
@@ -2010,16 +2010,16 @@ extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio* self_, float volume, int ch)
         func_002B4388(&self->MusicSys);
         break;
     case 4:
-        self->unk_636C[0] = currVolume->appliedVolume * D_004A352C;
-        self->unk_636C[1] = currVolume->appliedVolume * D_004A3530;
-        self->unk_636C[2] = currVolume->appliedVolume * D_004A3534;
-        self->unk_636C[3] = currVolume->appliedVolume * D_004A3538;
-        self->unk_636C[4] = currVolume->appliedVolume * D_004A353C;
-        self->unk_636C[5] = currVolume->appliedVolume * D_004A3540;
-        self->unk_636C[6] = currVolume->appliedVolume * D_004A3544;
-        self->unk_636C[7] = currVolume->appliedVolume * D_004A3548;
-        self->unk_636C[8] = currVolume->appliedVolume * D_004A354C;
-        self->unk_636C[9] = currVolume->appliedVolume * D_004A3550;
+        self->unk_636C[0] = currVolume->appliedVolume * gMobyScaling;
+        self->unk_636C[1] = currVolume->appliedVolume * gKaoriScaling;
+        self->unk_636C[2] = currVolume->appliedVolume * gAerielScaling;
+        self->unk_636C[3] = currVolume->appliedVolume * gMacScaling;
+        self->unk_636C[4] = currVolume->appliedVolume * gZoeScaling;
+        self->unk_636C[5] = currVolume->appliedVolume * gGrommetScaling;
+        self->unk_636C[6] = currVolume->appliedVolume * gEliseScaling;
+        self->unk_636C[7] = currVolume->appliedVolume * gRocoScaling;
+        self->unk_636C[8] = currVolume->appliedVolume * gPsymonScaling;
+        self->unk_636C[9] = currVolume->appliedVolume * gDeiterScaling;
         break;
     }
 }
@@ -2136,16 +2136,16 @@ extern "C" void cSSXAudio_DecCurrVolume(cSSXAudio* self, int idx)
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_DuckVolume);
 #ifdef SKIP_ASM
-extern float D_004A352C;
-extern float D_004A3530;
-extern float D_004A3534;
-extern float D_004A3538;
-extern float D_004A353C;
-extern float D_004A3540;
-extern float D_004A3544;
-extern float D_004A3548;
-extern float D_004A354C;
-extern float D_004A3550;
+extern float gMobyScaling;
+extern float gKaoriScaling;
+extern float gAerielScaling;
+extern float gMacScaling;
+extern float gZoeScaling;
+extern float gGrommetScaling;
+extern float gEliseScaling;
+extern float gRocoScaling;
+extern float gPsymonScaling;
+extern float gDeiterScaling;
 
 struct sSaChan7A10 {
     float base;     // +0x0
@@ -2205,16 +2205,16 @@ extern "C" void cSSXAudio_DuckVolume(cSSXAudio* self_, int mask, float finalLeve
             sSaMix7A10_set(self, 4, finalLevel);
             float level = self->chan[4].out;
             sSaMixOut7A10* mixOut = (sSaMixOut7A10*)self;
-            mixOut->mix[0] = level * D_004A352C;
-            mixOut->mix[1] = level * D_004A3530;
-            mixOut->mix[2] = level * D_004A3534;
-            mixOut->mix[3] = level * D_004A3538;
-            mixOut->mix[4] = level * D_004A353C;
-            mixOut->mix[5] = level * D_004A3540;
-            mixOut->mix[6] = level * D_004A3544;
-            mixOut->mix[7] = level * D_004A3548;
-            mixOut->mix[8] = level * D_004A354C;
-            mixOut->mix[9] = level * D_004A3550;
+            mixOut->mix[0] = level * gMobyScaling;
+            mixOut->mix[1] = level * gKaoriScaling;
+            mixOut->mix[2] = level * gAerielScaling;
+            mixOut->mix[3] = level * gMacScaling;
+            mixOut->mix[4] = level * gZoeScaling;
+            mixOut->mix[5] = level * gGrommetScaling;
+            mixOut->mix[6] = level * gEliseScaling;
+            mixOut->mix[7] = level * gRocoScaling;
+            mixOut->mix[8] = level * gPsymonScaling;
+            mixOut->mix[9] = level * gDeiterScaling;
         }
         if (mask & 8)
             sSaMix7A10_set(self, 2, finalLevel);
@@ -2243,16 +2243,16 @@ extern "C" void cSSXAudio_DuckVolume(cSSXAudio* self_, int mask, float finalLeve
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_UpdateDuck);
 #ifdef SKIP_ASM
-extern float D_004A352C;
-extern float D_004A3530;
-extern float D_004A3534;
-extern float D_004A3538;
-extern float D_004A353C;
-extern float D_004A3540;
-extern float D_004A3544;
-extern float D_004A3548;
-extern float D_004A354C;
-extern float D_004A3550;
+extern float gMobyScaling;
+extern float gKaoriScaling;
+extern float gAerielScaling;
+extern float gMacScaling;
+extern float gZoeScaling;
+extern float gGrommetScaling;
+extern float gEliseScaling;
+extern float gRocoScaling;
+extern float gPsymonScaling;
+extern float gDeiterScaling;
 
 struct sSaChan7C48 {
     float base;     // +0x0
@@ -2316,16 +2316,16 @@ extern "C" void cSSXAudio_UpdateDuck(cSSXAudio* self_)
             sSaMix7C48_set(self, 4, self->fadeCur);
             float level = self->chan[4].out;
             sSaMixOut7C48* mixOut = (sSaMixOut7C48*)self;
-            mixOut->mix[0] = level * D_004A352C;
-            mixOut->mix[1] = level * D_004A3530;
-            mixOut->mix[2] = level * D_004A3534;
-            mixOut->mix[3] = level * D_004A3538;
-            mixOut->mix[4] = level * D_004A353C;
-            mixOut->mix[5] = level * D_004A3540;
-            mixOut->mix[6] = level * D_004A3544;
-            mixOut->mix[7] = level * D_004A3548;
-            mixOut->mix[8] = level * D_004A354C;
-            mixOut->mix[9] = level * D_004A3550;
+            mixOut->mix[0] = level * gMobyScaling;
+            mixOut->mix[1] = level * gKaoriScaling;
+            mixOut->mix[2] = level * gAerielScaling;
+            mixOut->mix[3] = level * gMacScaling;
+            mixOut->mix[4] = level * gZoeScaling;
+            mixOut->mix[5] = level * gGrommetScaling;
+            mixOut->mix[6] = level * gEliseScaling;
+            mixOut->mix[7] = level * gRocoScaling;
+            mixOut->mix[8] = level * gPsymonScaling;
+            mixOut->mix[9] = level * gDeiterScaling;
         }
         if (self->fadeMask & 8)
             sSaMix7C48_set(self, 2, self->fadeCur);
@@ -2527,16 +2527,16 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_MixVolume);
 extern "C" float cSSXAudio_MixIntToFloat(cSSXAudio* self, int i, int pct);
 struct sAudioFade_87A8;
 extern "C" void cSSXAudio_ChangeMixFinalAndStepValues(sAudioFade_87A8* self, int i, int smooth, float target, float time);
-extern float D_004A352C;
-extern float D_004A3530;
-extern float D_004A3534;
-extern float D_004A3538;
-extern float D_004A353C;
-extern float D_004A3540;
-extern float D_004A3544;
-extern float D_004A3548;
-extern float D_004A354C;
-extern float D_004A3550;
+extern float gMobyScaling;
+extern float gKaoriScaling;
+extern float gAerielScaling;
+extern float gMacScaling;
+extern float gZoeScaling;
+extern float gGrommetScaling;
+extern float gEliseScaling;
+extern float gRocoScaling;
+extern float gPsymonScaling;
+extern float gDeiterScaling;
 
 struct sSaChan83B0 {
     float base;     // +0x0
@@ -2620,16 +2620,16 @@ extern "C" void cSSXAudio_MixVolume(cSSXAudio* vself, int id)
         }
         float characterOut = self->chan[4].out;
         sSaMixOut83B0* mixOut = (sSaMixOut83B0*)self;
-        mixOut->mix[0] = characterOut * D_004A352C;
-        mixOut->mix[1] = characterOut * D_004A3530;
-        mixOut->mix[2] = characterOut * D_004A3534;
-        mixOut->mix[3] = characterOut * D_004A3538;
-        mixOut->mix[4] = characterOut * D_004A353C;
-        mixOut->mix[5] = characterOut * D_004A3540;
-        mixOut->mix[6] = characterOut * D_004A3544;
-        mixOut->mix[7] = characterOut * D_004A3548;
-        mixOut->mix[8] = characterOut * D_004A354C;
-        mixOut->mix[9] = characterOut * D_004A3550;
+        mixOut->mix[0] = characterOut * gMobyScaling;
+        mixOut->mix[1] = characterOut * gKaoriScaling;
+        mixOut->mix[2] = characterOut * gAerielScaling;
+        mixOut->mix[3] = characterOut * gMacScaling;
+        mixOut->mix[4] = characterOut * gZoeScaling;
+        mixOut->mix[5] = characterOut * gGrommetScaling;
+        mixOut->mix[6] = characterOut * gEliseScaling;
+        mixOut->mix[7] = characterOut * gRocoScaling;
+        mixOut->mix[8] = characterOut * gPsymonScaling;
+        mixOut->mix[9] = characterOut * gDeiterScaling;
     } else {
         sAudioFade_87A8* fader = (sAudioFade_87A8*)self;
         cSSXAudio_ChangeMixFinalAndStepValues(fader, 1, self->entries[id].f0 != -1, musicVol, fadeTime);
@@ -2683,16 +2683,16 @@ extern "C" void cSSXAudio_ChangeMixFinalAndStepValues(sAudioFade_87A8* self, int
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_UpdateMix);
 #ifdef SKIP_ASM
-extern float D_004A352C;
-extern float D_004A3530;
-extern float D_004A3534;
-extern float D_004A3538;
-extern float D_004A353C;
-extern float D_004A3540;
-extern float D_004A3544;
-extern float D_004A3548;
-extern float D_004A354C;
-extern float D_004A3550;
+extern float gMobyScaling;
+extern float gKaoriScaling;
+extern float gAerielScaling;
+extern float gMacScaling;
+extern float gZoeScaling;
+extern float gGrommetScaling;
+extern float gEliseScaling;
+extern float gRocoScaling;
+extern float gPsymonScaling;
+extern float gDeiterScaling;
 
 struct sSaMix87F8 {
     char pad0[0x62C4];
@@ -2716,8 +2716,8 @@ struct sSaMixOut87F8 {
  *
  * Only while mMixing is set (cleared first, set again while a control still moves). Each of the 11 controls with a step
  * moves mMixLevel by mMixStep, stopping at mMixFinalValue, and gets appliedVolume = duckedVolume * mMixLevel. Then the
- * ten character levels unk_636C are the Character control's applied volume times the constants D_004A352C ..
- * D_004A3550.
+ * ten character levels unk_636C are the Character control's applied volume times the constants gMobyScaling ..
+ * gDeiterScaling.
  */
 extern "C" void cSSXAudio_UpdateMix(sSaMix87F8* self)
 {
@@ -2746,16 +2746,16 @@ extern "C" void cSSXAudio_UpdateMix(sSaMix87F8* self)
     }
     sSaMixOut87F8* mixOut = (sSaMixOut87F8*)self;
     float charLevel = mixOut->master;
-    mixOut->out[0] = charLevel * D_004A352C;
-    mixOut->out[1] = charLevel * D_004A3530;
-    mixOut->out[2] = charLevel * D_004A3534;
-    mixOut->out[3] = charLevel * D_004A3538;
-    mixOut->out[4] = charLevel * D_004A353C;
-    mixOut->out[5] = charLevel * D_004A3540;
-    mixOut->out[6] = charLevel * D_004A3544;
-    mixOut->out[7] = charLevel * D_004A3548;
-    mixOut->out[8] = charLevel * D_004A354C;
-    mixOut->out[9] = charLevel * D_004A3550;
+    mixOut->out[0] = charLevel * gMobyScaling;
+    mixOut->out[1] = charLevel * gKaoriScaling;
+    mixOut->out[2] = charLevel * gAerielScaling;
+    mixOut->out[3] = charLevel * gMacScaling;
+    mixOut->out[4] = charLevel * gZoeScaling;
+    mixOut->out[5] = charLevel * gGrommetScaling;
+    mixOut->out[6] = charLevel * gEliseScaling;
+    mixOut->out[7] = charLevel * gRocoScaling;
+    mixOut->out[8] = charLevel * gPsymonScaling;
+    mixOut->out[9] = charLevel * gDeiterScaling;
 }
 #endif
 
@@ -3037,26 +3037,26 @@ extern "C" int cSSXAudio_GetNumViews()
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_InitSoundLevels);
 #ifdef SKIP_ASM
-extern float D_004A3504;
-extern float D_004A3508;
-extern float D_004A350C;
-extern float D_004A3510;
-extern float D_004A3514;
-extern float D_004A3518;
-extern float D_004A351C;
-extern float D_004A3520;
-extern float D_004A3524;
-extern float D_004A3528;
-extern float D_004A352C;
-extern float D_004A3530;
-extern float D_004A3534;
-extern float D_004A3538;
-extern float D_004A353C;
-extern float D_004A3540;
-extern float D_004A3544;
-extern float D_004A3548;
-extern float D_004A354C;
-extern float D_004A3550;
+extern float gSFXScaling;
+extern float gMusicScaling;
+extern float gCharSpchScaling;
+extern float gDJSpchScaling;
+extern float gPASpchScaling;
+extern float gBoardScaling;
+extern float gCollisionScaling;
+extern float gAmbientScaling;
+extern float gArcadeSFXScaling;
+extern float gArcadeSpeechScaling;
+extern float gMobyScaling;
+extern float gKaoriScaling;
+extern float gAerielScaling;
+extern float gMacScaling;
+extern float gZoeScaling;
+extern float gGrommetScaling;
+extern float gEliseScaling;
+extern float gRocoScaling;
+extern float gPsymonScaling;
+extern float gDeiterScaling;
 extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio*, float, int);
 extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int a1);
 
@@ -3071,47 +3071,47 @@ extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int a1);
 extern "C" void cSSXAudio_InitSoundLevels(cSSXAudio* self, int mode)
 {
     if (mode == 0) {
-        D_004A3504 = 1.0f;
-        D_004A3508 = 1.0f;
-        D_004A350C = 0.5999999642372131f;
-        D_004A3510 = 1.0f;
-        D_004A3514 = 1.0f;
-        D_004A3518 = 1.0f;
-        D_004A351C = 1.0f;
-        D_004A3520 = 1.0f;
-        D_004A3524 = 1.0f;
-        D_004A3528 = 1.0f;
-        D_004A352C = 1.0f;
-        D_004A3530 = 1.0f;
-        D_004A3534 = 1.0f;
-        D_004A3538 = 1.0f;
-        D_004A353C = 1.0f;
-        D_004A3540 = 1.0f;
-        D_004A3544 = 1.0f;
-        D_004A3548 = 1.0f;
-        D_004A354C = 1.0f;
-        D_004A3550 = 1.0f;
+        gSFXScaling = 1.0f;
+        gMusicScaling = 1.0f;
+        gCharSpchScaling = 0.5999999642372131f;
+        gDJSpchScaling = 1.0f;
+        gPASpchScaling = 1.0f;
+        gBoardScaling = 1.0f;
+        gCollisionScaling = 1.0f;
+        gAmbientScaling = 1.0f;
+        gArcadeSFXScaling = 1.0f;
+        gArcadeSpeechScaling = 1.0f;
+        gMobyScaling = 1.0f;
+        gKaoriScaling = 1.0f;
+        gAerielScaling = 1.0f;
+        gMacScaling = 1.0f;
+        gZoeScaling = 1.0f;
+        gGrommetScaling = 1.0f;
+        gEliseScaling = 1.0f;
+        gRocoScaling = 1.0f;
+        gPsymonScaling = 1.0f;
+        gDeiterScaling = 1.0f;
     } else if (mode == 1) {
-        D_004A3504 = 0.7999999523162842f;
-        D_004A3508 = 1.0f;
-        D_004A350C = 0.7999999523162842f;
-        D_004A3510 = 0.550000011920929f;
-        D_004A3514 = 0.429999977350235f;
-        D_004A3518 = 0.75f;
-        D_004A351C = 0.7999999523162842f;
-        D_004A3520 = 0.5f;
-        D_004A3524 = 0.75f;
-        D_004A3528 = 0.75f;
-        D_004A352C = 0.8999999761581421f;
-        D_004A3530 = 0.8999999761581421f;
-        D_004A3534 = 0.8999999761581421f;
-        D_004A3538 = 0.8999999761581421f;
-        D_004A353C = 0.7999999523162842f;
-        D_004A3540 = 0.8499999642372131f;
-        D_004A3544 = 0.8999999761581421f;
-        D_004A3548 = 1.0f;
-        D_004A354C = 1.0f;
-        D_004A3550 = 0.949999988079071f;
+        gSFXScaling = 0.7999999523162842f;
+        gMusicScaling = 1.0f;
+        gCharSpchScaling = 0.7999999523162842f;
+        gDJSpchScaling = 0.550000011920929f;
+        gPASpchScaling = 0.429999977350235f;
+        gBoardScaling = 0.75f;
+        gCollisionScaling = 0.7999999523162842f;
+        gAmbientScaling = 0.5f;
+        gArcadeSFXScaling = 0.75f;
+        gArcadeSpeechScaling = 0.75f;
+        gMobyScaling = 0.8999999761581421f;
+        gKaoriScaling = 0.8999999761581421f;
+        gAerielScaling = 0.8999999761581421f;
+        gMacScaling = 0.8999999761581421f;
+        gZoeScaling = 0.7999999523162842f;
+        gGrommetScaling = 0.8499999642372131f;
+        gEliseScaling = 0.8999999761581421f;
+        gRocoScaling = 1.0f;
+        gPsymonScaling = 1.0f;
+        gDeiterScaling = 0.949999988079071f;
     }
     cSSXAudio_SetCurrVolume(self, cSSXAudio_GetCurrSetVolume(self, 0), 0);
     cSSXAudio_SetCurrVolume(self, cSSXAudio_GetCurrSetVolume(self, 1), 1);

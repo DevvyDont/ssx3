@@ -1,7 +1,7 @@
 #ifndef ANIMATION_GAMEANIMMAP_H
 #define ANIMATION_GAMEANIMMAP_H
 
-// cGameAnimMap: the game's table from its 518 named game animations (GameAnimNames, D_0048CFC0: one string per
+// cGameAnimMap: the game's table from its 518 named game animations (GameAnimNames, cGameAnimMap_GameAnimNames: one string per
 // "gad" index) to the loaded animation clips (tAnimID: bank/source id + clip index). initMap hashes the names
 // (GetHashValue32) and sorts an index by hash; addSource / remSource register or clear every clip of a loaded ADF bank
 // (cAdfDataSource) by its name hash (lookupGAD = binary search, setMap); the rider animation code then reads

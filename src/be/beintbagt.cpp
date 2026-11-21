@@ -192,13 +192,13 @@ int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 extern char D_00530EC0_raw[] __asm__("D_00530EC0");
 struct sPad20;
-extern sPad20 D_0045AEB8;
+extern sPad20 kGrabDB;
 
 /**
  * Returns the uber variant chosen for grab @p idx by @p rider: the second variant byte of the staged record when
  * @p second is set, else the first; -1 when the grab has no uber variants.
  *
- * The grab's 0x14-byte record in D_0045AEB8 holds the variant count at +0xC. The staged record is D_00530EC0 for the
+ * The grab's 0x14-byte record in kGrabDB holds the variant count at +0xC. The staged record is D_00530EC0 for the
  * rider's profile and character. The uber anim, cycle anim and name getters (cBEBAGTInterface_getUberAnim, cBEBAGTInterface_getUberCycleAnim,
  * cBEBAGTInterface_getUberName) pass @p second = uber level >= 5.
  *
@@ -209,7 +209,7 @@ extern sPad20 D_0045AEB8;
  */
 extern "C" int func_0014FEA8(cBEBAGTInterface* self, int rider, int idx, int second)
 {
-    char* grabInfo = (char*)&D_0045AEB8 + idx * 0x14;
+    char* grabInfo = (char*)&kGrabDB + idx * 0x14;
     if (*(unsigned short*)(grabInfo + 0xC) == 0)
         return -1;
     int profile = cBELibrary_getProfileIndex(rider);
@@ -239,7 +239,7 @@ struct sBagInfo_FF90 {
     short pad2;
     int value;             // 0x10
 };
-extern sBagInfo_FF90 D_0045AEB8_FF90[] __asm__("D_0045AEB8");
+extern sBagInfo_FF90 D_0045AEB8_FF90[] __asm__("kGrabDB");
 
 // Release-build assert: expands to an empty do { } while (0); its loop notes keep the target's register choice.
 #define ASSERT_FF90(cond) do { } while (0)
@@ -247,7 +247,7 @@ extern sBagInfo_FF90 D_0045AEB8_FF90[] __asm__("D_0045AEB8");
 /**
  * Returns grab @p idx's uber variant table and stores its length in @p count.
  *
- * Reads the grab's 0x14-byte record in D_0045AEB8: the table pointer at +0x10 and the count at +0xC. Each table
+ * Reads the grab's 0x14-byte record in kGrabDB: the table pointer at +0x10 and the count at +0xC. Each table
  * entry is {anim, cycle anim, name/trick id, pad} (4 halfwords); the uber-trick store lists them. @p rider is unused.
  *
  * @param rider  unused
@@ -323,13 +323,13 @@ extern "C" int func_00150048(cBEBAGTInterface* self, int rider, int idx, int bit
 #endif
 
 struct sPad20 { char x; int pad[4]; };
-extern sPad20 D_0045AEB8;
+extern sPad20 kGrabDB;
 
 //100%
 INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getGrabAnim);
 #ifdef SKIP_ASM
 /**
- * Returns the start animation of grab @p grabIndex: the halfword at +0x0 of its 0x14-byte record in D_0045AEB8.
+ * Returns the start animation of grab @p grabIndex: the halfword at +0x0 of its 0x14-byte record in kGrabDB.
  *
  * cSpinControl_isGrabPlaying plays it when a grab begins. @p rider is unused.
  *
@@ -339,7 +339,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getGrabAnim);
  */
 extern "C" unsigned short cBEBAGTInterface_getGrabAnim(cBEBAGTInterface* self, int rider, int grabIndex)
 {
-    return *(unsigned short*)((char*)&D_0045AEB8 + grabIndex * 0x14);
+    return *(unsigned short*)((char*)&kGrabDB + grabIndex * 0x14);
 }
 #endif
 
@@ -347,7 +347,7 @@ extern "C" unsigned short cBEBAGTInterface_getGrabAnim(cBEBAGTInterface* self, i
 INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getGrabCycleAnim);
 #ifdef SKIP_ASM
 /**
- * Returns the held (looping) animation of grab @p grabIndex: the halfword at +0x2 of its record in D_0045AEB8.
+ * Returns the held (looping) animation of grab @p grabIndex: the halfword at +0x2 of its record in kGrabDB.
  *
  * 438 means none. @p rider is unused.
  *
@@ -357,7 +357,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getGrabCycleAnim);
  */
 extern "C" unsigned short cBEBAGTInterface_getGrabCycleAnim(cBEBAGTInterface* self, int rider, int grabIndex)
 {
-    char* grabInfo = (char*)&D_0045AEB8 + grabIndex * 0x14;
+    char* grabInfo = (char*)&kGrabDB + grabIndex * 0x14;
     return *(unsigned short*)(grabInfo + 0x2);
 }
 #endif
@@ -366,7 +366,7 @@ extern "C" unsigned short cBEBAGTInterface_getGrabCycleAnim(cBEBAGTInterface* se
 INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getGrabName);
 #ifdef SKIP_ASM
 /**
- * Returns the trick id of grab @p grabIndex: the halfword at +0x4 of its record in D_0045AEB8, scored when the grab is held
+ * Returns the trick id of grab @p grabIndex: the halfword at +0x4 of its record in kGrabDB, scored when the grab is held
  * and released. @p rider is unused.
  *
  * @param rider  the rider (unused)
@@ -375,7 +375,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getGrabName);
  */
 extern "C" unsigned short cBEBAGTInterface_getGrabName(cBEBAGTInterface* self, int rider, int grabIndex)
 {
-    char* grabInfo = (char*)&D_0045AEB8 + grabIndex * 0x14;
+    char* grabInfo = (char*)&kGrabDB + grabIndex * 0x14;
     return *(unsigned short*)(grabInfo + 0x4);
 }
 #endif
@@ -384,7 +384,7 @@ extern "C" unsigned short cBEBAGTInterface_getGrabName(cBEBAGTInterface* self, i
 INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getTweakAnim);
 #ifdef SKIP_ASM
 /**
- * Returns the tweak animation of grab @p grabIndex: the halfword at +0x6 of its record in D_0045AEB8. @p rider is unused.
+ * Returns the tweak animation of grab @p grabIndex: the halfword at +0x6 of its record in kGrabDB. @p rider is unused.
  *
  * @param rider  the rider (unused)
  * @param grabIndex  the grab
@@ -392,7 +392,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getTweakAnim);
  */
 extern "C" unsigned short cBEBAGTInterface_getTweakAnim(cBEBAGTInterface* self, int rider, int grabIndex)
 {
-    char* grabInfo = (char*)&D_0045AEB8 + grabIndex * 0x14;
+    char* grabInfo = (char*)&kGrabDB + grabIndex * 0x14;
     return *(unsigned short*)(grabInfo + 0x6);
 }
 #endif
@@ -401,7 +401,7 @@ extern "C" unsigned short cBEBAGTInterface_getTweakAnim(cBEBAGTInterface* self, 
 INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getTweakCycleAnim);
 #ifdef SKIP_ASM
 /**
- * Returns the held tweak animation of grab @p grabIndex: the halfword at +0x8 of its record in D_0045AEB8 (438 = none).
+ * Returns the held tweak animation of grab @p grabIndex: the halfword at +0x8 of its record in kGrabDB (438 = none).
  * @p rider is unused.
  *
  * @param rider  the rider (unused)
@@ -410,7 +410,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getTweakCycleAnim);
  */
 extern "C" unsigned short cBEBAGTInterface_getTweakCycleAnim(cBEBAGTInterface* self, int rider, int grabIndex)
 {
-    char* grabInfo = (char*)&D_0045AEB8 + grabIndex * 0x14;
+    char* grabInfo = (char*)&kGrabDB + grabIndex * 0x14;
     return *(unsigned short*)(grabInfo + 0x8);
 }
 #endif
@@ -419,7 +419,7 @@ extern "C" unsigned short cBEBAGTInterface_getTweakCycleAnim(cBEBAGTInterface* s
 INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getTweakName);
 #ifdef SKIP_ASM
 /**
- * Returns the trick id of grab @p grabIndex's tweak: the halfword at +0xA of its record in D_0045AEB8. @p rider is unused.
+ * Returns the trick id of grab @p grabIndex's tweak: the halfword at +0xA of its record in kGrabDB. @p rider is unused.
  *
  * @param rider  the rider (unused)
  * @param grabIndex  the grab
@@ -427,7 +427,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getTweakName);
  */
 extern "C" unsigned short cBEBAGTInterface_getTweakName(cBEBAGTInterface* self, int rider, int grabIndex)
 {
-    char* grabInfo = (char*)&D_0045AEB8 + grabIndex * 0x14;
+    char* grabInfo = (char*)&kGrabDB + grabIndex * 0x14;
     return *(unsigned short*)(grabInfo + 0xa);
 }
 #endif
@@ -437,7 +437,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getUberAnim);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sPad20;
-extern sPad20 D_0045AEB8;
+extern sPad20 kGrabDB;
 extern "C" int cBELibrary_getCheatCharacterID(int rider);
 extern "C" int func_0014FEA8(cBEBAGTInterface* self, int rider, int idx, int second);
 
@@ -454,12 +454,12 @@ struct sBagtCat_150198
     char pad0[0x10];
     sBagtAnim_150198* anims;    // 0x10
 };
-// Typed view of D_0045AEB8 (declared as sPad20 in this unit).
-extern sBagtCat_150198 D_0045AEB8_150198[] __asm__("D_0045AEB8");
+// Typed view of kGrabDB (declared as sPad20 in this unit).
+extern sBagtCat_150198 D_0045AEB8_150198[] __asm__("kGrabDB");
 
 /**
  * Returns the uber animation of grab @p idx for @p rider: the anim of the chosen variant (func_0014FEA8) in the grab's
- * variant table (D_0045AEB8 record +0x10), or 438 when the grab has none.
+ * variant table (kGrabDB record +0x10), or 438 when the grab has none.
  *
  * Some cheat characters (cBELibrary_getCheatCharacterID 20, 24, 25, 28) get a fixed anim (159-162) for one grab.
  *
@@ -498,7 +498,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getUberCycleAnim);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sPad20;
-extern sPad20 D_0045AEB8;
+extern sPad20 kGrabDB;
 extern "C" int cBELibrary_getCheatCharacterID(int rider);
 extern "C" int func_0014FEA8(cBEBAGTInterface* self, int rider, int idx, int second);
 
@@ -515,8 +515,8 @@ struct sBagtCat_1502C8
     char pad0[0x10];
     sBagtAnim_1502C8* anims;    // 0x10
 };
-// Typed view of D_0045AEB8 (declared as sPad20 in this unit).
-extern sBagtCat_1502C8 D_0045AEB8_1502C8[] __asm__("D_0045AEB8");
+// Typed view of kGrabDB (declared as sPad20 in this unit).
+extern sBagtCat_1502C8 D_0045AEB8_1502C8[] __asm__("kGrabDB");
 
 /**
  * Returns the held uber animation of grab @p idx for @p rider: the cycle anim of the chosen variant
@@ -559,7 +559,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getUberName);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sPad20;
-extern sPad20 D_0045AEB8;
+extern sPad20 kGrabDB;
 extern "C" int cBELibrary_getCheatCharacterID(int rider);
 extern "C" int func_0014FEA8(cBEBAGTInterface* self, int rider, int idx, int second);
 
@@ -576,8 +576,8 @@ struct sBagtCat_1503F8
     char pad0[0x10];
     sBagtAnim_1503F8* anims;    // 0x10
 };
-// Typed view of D_0045AEB8 (declared as sPad20 in this unit).
-extern sBagtCat_1503F8 D_0045AEB8_1503F8[] __asm__("D_0045AEB8");
+// Typed view of kGrabDB (declared as sPad20 in this unit).
+extern sBagtCat_1503F8 D_0045AEB8_1503F8[] __asm__("kGrabDB");
 
 /**
  * Returns the trick id of grab @p idx's chosen uber variant for @p rider (func_0014FEA8), or 0 when the grab has none.
@@ -676,7 +676,7 @@ struct sBagtDef0558 {
     unsigned short pad_0x0E;
     int pad_0x10;
 };
-extern const sBagtDef0558 D_0045AEB8_bagt[] __asm__("D_0045AEB8");
+extern const sBagtDef0558 D_0045AEB8_bagt[] __asm__("kGrabDB");
 extern "C" void MEM_fill(void*, int, int);
 
 /**
@@ -684,7 +684,7 @@ extern "C" void MEM_fill(void*, int, int);
  * the variant masks of the first 15 grabs.
  *
  * Clears 90 bytes, then sets each grab's two variant bytes from a per-character table (@p mode 0-8, else a default).
- * For grabs 0-14 both masks get one bit per variant in D_0045AEB8 (+0xC count) minus bits 0-1; the first mask (for
+ * For grabs 0-14 both masks get one bit per variant in kGrabDB (+0xC count) minus bits 0-1; the first mask (for
  * sale) also drops the second chosen variant. cBECharProfileDB_init calls it.
  *
  * @param mode  the character (selects the starting choices)

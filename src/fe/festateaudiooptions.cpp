@@ -430,7 +430,7 @@ static inline int Find_196B90(char* mgr, int hash)
  * @param requestLine    the state's memory (528 bytes)
  * @param uiEngine   the UI engine (not read here; see above)
  * @param idx  the user
- * @param inStore   nonzero when opened from the store (cFECustom_getNextState passes D_004A19D8)
+ * @param inStore   nonzero when opened from the store (cFECustom_getNextState passes gInLodge)
  * @return @p requestLine
  */
 extern "C" void* cFEStateRequestLine_cFEStateRequestLine(cFEStateRequestLine* requestLine, int uiEngine, signed char idx, int inStore)

@@ -35,7 +35,7 @@ struct cAirPredictor;
 class cRiderMetrix;
 class cRiderHandler;
 
-// Virtual slots of cRider's primary vtable (_vt$6cRider, retail D_00459C18), as used by
+// Virtual slots of cRider's primary vtable (_vt$6cRider, retail cRider_vtbl), as used by
 // `vt[k].fn(sub + vt[k].delta)` with sub = &self->mVtbl. Names from the preview vtable.
 enum {
     kRiderVt_delete = 1,          // deleting destructor (cRider__cRider)
@@ -246,7 +246,7 @@ struct cRider {
     /* 0xAA0 */ void* mSphereTree; // [P] getSphereTree (seen)
     /* 0xAA4 */ int unk_AA4; // shadow drawn this frame (cRider_RenderShadow)
     /* 0xAA8 */ void* mShadow; // [P] getShadow (seen); drawn by cRider_RenderShadow
-    /* 0xAAC */ float unk_AAC; // hit f6C (cRider_SetNISGroundVectors); the ctor copies 8 bytes here from D_004A5960
+    /* 0xAAC */ float unk_AAC; // hit f6C (cRider_SetNISGroundVectors); the ctor copies 8 bytes here from t2vect_Zero
     /* 0xAB0 */ float unk_AB0; // hit f70 (cRider_SetNISGroundVectors)
     /* 0xAB4 */ cTrackPath* TrackPath; // [R] cRider_getTrackPath returns it; [O] cRider::TrackPath (On Tour: TrackPath,
                                      //     AIPath, then the two intersect infos, as here); [U] the lowest track path wins

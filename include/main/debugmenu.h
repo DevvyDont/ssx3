@@ -64,18 +64,18 @@ struct cRenderTogglesMenu {
     cNullMenuItem TitleItem;                         // 0x130 [O]; [R] ctor ("Render Toggles Menu")
     cSpaceMenuItem SpaceItem;                        // 0x14C [O]; [R] ctor (space 40)
     cIntMenuItem AIUpdatesPerRenderItem;             // 0x164 [O]; [R] ctor (0, "AI Frames per Render Frame",
-                                                     //       &D_004A44C0, 0..60)
+                                                     //       &cRenderToggles_m_AIUpdatesPerRender, 0..60)
     cIntMenuItem DisplayRenderStatsItem;             // 0x194 [O]; [R] ctor (1, "Display Render Stats", &D_004A44C4,
                                                      //       0..1)
-    cIntMenuItem ResetStatsItem;                     // 0x1C4 [O]; [R] ctor (2, "Reset Stats", &D_004A44C8, 0..1)
+    cIntMenuItem ResetStatsItem;                     // 0x1C4 [O]; [R] ctor (2, "Reset Stats", &cRenderToggles_m_ResetStats, 0..1)
     cIntMenuItem UseSmallTexture0Item;               // 0x1F4 [O]; [R] ctor (3, "Use Small Texture 0", &D_004A44CC,
                                                      //       0..1)
     cIntMenuItem UseSmallTexture1Item;               // 0x224 [O]; [R] ctor (4, "Use Small Texture 1", &D_004A44D0,
                                                      //       0..1)
-    cIntMenuItem DisablePatchesItem;                 // 0x254 [O]; [R] ctor (5, "Disable Patches", &D_004A44D4, 0..1)
-    cIntMenuItem DisablePatchReflectionItem;         // 0x284 [O]; [R] ctor (6, "Disable Patch Reflection", &D_004A44D8,
+    cIntMenuItem DisablePatchesItem;                 // 0x254 [O]; [R] ctor (5, "Disable Patches", &cRenderToggles_m_DisablePatches, 0..1)
+    cIntMenuItem DisablePatchReflectionItem;         // 0x284 [O]; [R] ctor (6, "Disable Patch Reflection", &cRenderToggles_m_DisablePatchReflection,
                                                      //       0..1)
-    cIntMenuItem DisablePatchShadowItem;             // 0x2B4 [O]; [R] ctor (7, "Disable Patch Shadows", &D_004A44DC,
+    cIntMenuItem DisablePatchShadowItem;             // 0x2B4 [O]; [R] ctor (7, "Disable Patch Shadows", &cRenderToggles_m_DisablePatchShadow,
                                                      //       0..1)
     cIntMenuItem DisableSparklesItem;                // 0x2E4 [O]; [R] ctor (8, "Disable Sparkles", &D_004A44E0, 0..1)
     cIntMenuItem DisableLineStripsItem;              // 0x314 [O]; [R] ctor (9, "Disable Line Strips", &D_004A44E4,
@@ -90,7 +90,7 @@ struct cRenderTogglesMenu {
     cIntMenuItem DisableStaticEmittersItem;          // 0x404 [O]; [R] ctor (14, "Disable Static Emitters", &D_004A44F8,
                                                      //       0..1)
     cIntMenuItem DisableDynamicEmittersItem;         // 0x434 [O]; [R] ctor (15, "Disable Dynamic Emitters",
-                                                     //       &D_004A44FC, 0..1)
+                                                     //       &cRenderToggles_m_DisableDynamicEmitters, 0..1)
     cIntMenuItem DisableDynamicColourEmittersItem;   // 0x464 [O]; [R] ctor (16, "Disable Dynamic Colour Emitters",
                                                      //       &D_004A4500, 0..1)
     cIntMenuItem DisableSpritesItem;                 // 0x494 [O]; [R] ctor (17, "Disable Sprites", &D_004A4504, 0..1)
@@ -291,12 +291,12 @@ struct cPlantsMenu {
     cNullMenuItem TitleItem;              // 0x130 [O]; [R] ctor ("Plants Menu")
     cSpaceMenuItem SpaceItem;             // 0x14C [O]; [R] ctor (space 40)
     cIntMenuItem EnableItem;              // 0x164 [O]; [R] ctor (0, "Enable", &cPlants_m_Enable, 0..2)
-    cFloatMenuItem SwayAmplitudeItem;     // 0x194 [O]; [R] ctor (1, "Sway Amplitude", &D_004A4448, 0..2)
-    cFloatMenuItem SwayOffsetItem;        // 0x1C8 [O]; [R] ctor (2, "Sway Offset", &D_004A444C, -5..5)
-    cFloatMenuItem BranchAmplitudeItem;   // 0x1FC [O]; [R] ctor (3, "Branch Amplitude", &D_004A4450, 0..2)
+    cFloatMenuItem SwayAmplitudeItem;     // 0x194 [O]; [R] ctor (1, "Sway Amplitude", &cPlants_m_SwayAmplitude, 0..2)
+    cFloatMenuItem SwayOffsetItem;        // 0x1C8 [O]; [R] ctor (2, "Sway Offset", &cPlants_m_SwayOffset, -5..5)
+    cFloatMenuItem BranchAmplitudeItem;   // 0x1FC [O]; [R] ctor (3, "Branch Amplitude", &cPlants_m_BranchAmplitude, 0..2)
     cFloatMenuItem RotationAmplitudeItem; // 0x230 [O]; [R] ctor (4, "Rotation Amplitude", &D_004A4454, 0..2)
-    cFloatMenuItem PositionScaleItem;     // 0x264 [O]; [R] ctor (5, "Position Scale", &D_004A4458, 0..1000)
-    cIntMenuItem SwayFrequencyItem;       // 0x298 [O]; [R] ctor (6, "Sway Frequency (x/600)Hz", &D_004A445C, 0..6000)
+    cFloatMenuItem PositionScaleItem;     // 0x264 [O]; [R] ctor (5, "Position Scale", &cPlants_m_PositionScale, 0..1000)
+    cIntMenuItem SwayFrequencyItem;       // 0x298 [O]; [R] ctor (6, "Sway Frequency (x/600)Hz", &cPlants_m_SwayFrequency, 0..6000)
     cFloatMenuItem RotationFrequencyItem; // 0x2C8 [O]; [R] ctor (7, "Rotation Frequency", &D_004A4460, 0..6000)
     cFloatMenuItem BranchFrequencyItem;   // 0x2FC [O]; [R] ctor (8, "Branch Frequency (x/600)Hz", &D_004A4464, 0..6000)
     cFloatMenuItem BranchFrequency2Item;  // 0x330 [O]; [R] ctor (9, "Branch Frequency 2 (x/600)Hz", &D_004A4468,
@@ -537,7 +537,7 @@ struct cDetailSystemMenu {
     cSpaceMenuItem SpaceItem;             // 0x14C [O]; [R] ctor (space 40)
     cIntMenuItem EnableItem;              // 0x164 [O]; [R] ctor (0, "Enable", &D_004A4340, 0..1)
     cFloatMenuItem SpinScaleItem;         // 0x194 [O]; [R] ctor (1, "Sparkle Spin Scale", &D_004A4344, -1..1)
-    cFloatMenuItem PS2SparkleCountItem;   // 0x1C8 [O]; [R] ctor (2, "PS2 Sparkle Count", &D_004A4348, 0..20)
+    cFloatMenuItem PS2SparkleCountItem;   // 0x1C8 [O]; [R] ctor (2, "PS2 Sparkle Count", &cDetailSystem_m_PS2SparkleCount, 0..20)
     cFloatMenuItem PS2SparkleSizeItem;    // 0x1FC [O]; [R] ctor (3, "PS2 Sparkle World Size", &D_004A434C, 0..500)
     cFloatMenuItem PS2MinSparkleSizeItem; // 0x230 [O]; [R] ctor (4, "PS2 Min Sparkle Screen Size", &D_004A4350, 0..100)
     cFloatMenuItem PS2MaxSparkleSizeItem; // 0x264 [O]; [R] ctor (5, "PS2 Max Sparkle Screen Size", &D_004A4354, 0..100)
@@ -653,12 +653,12 @@ struct cScreenTintMenu {
     cFloatMenuItem XNLerpItem;            // 0x3C8 [O]; [R] ctor (12, "XN Lerp", &D_004A4608, 0..2)
     cIntMenuItem LightningEnableItem;     // 0x3FC [O]; [R] ctor (13, "Enable Lightning",
                                           //       &cScreenTint_m_LightningEnable, 0..1)
-    cIntMenuItem FrameIdItem;             // 0x42C [O]; [R] ctor (14, "Frame Id", &D_004A4610, -1..1000)
+    cIntMenuItem FrameIdItem;             // 0x42C [O]; [R] ctor (14, "Frame Id", &cScreenTint_m_FrameId, -1..1000)
     cFloatMenuItem LightningChanceItem;   // 0x45C [O]; [R] ctor (15, "Lightning Chance",
                                           //       &cScreenTint_m_LightningChance, 0..1)
-    cIntMenuItem LightningFadeInItem;     // 0x490 [O]; [R] ctor (16, "Flash Fade In", &D_004A4618, 0..600)
-    cIntMenuItem LightningFadeOutItem;    // 0x4C0 [O]; [R] ctor (17, "Flash Sustain", &D_004A461C, 0..600)
-    cIntMenuItem LightningFadeIn2Item;    // 0x4F0 [O]; [R] ctor (18, "Inverse Duration", &D_004A4620, 0..600)
+    cIntMenuItem LightningFadeInItem;     // 0x490 [O]; [R] ctor (16, "Flash Fade In", &cScreenTint_m_LightningFadeIn, 0..600)
+    cIntMenuItem LightningFadeOutItem;    // 0x4C0 [O]; [R] ctor (17, "Flash Sustain", &cScreenTint_m_LightningFadeOut, 0..600)
+    cIntMenuItem LightningFadeIn2Item;    // 0x4F0 [O]; [R] ctor (18, "Inverse Duration", &cScreenTint_m_LightningFadeIn2, 0..600)
     cIntMenuItem LightningFadeIn3Item;    // 0x520 [O]; [R] ctor (19, "Recover Fade In", &D_004A4624, 0..600)
     cFloatMenuItem LightningScaleItem;    // 0x550 [O]; [R] ctor (20, "Flash Scale", &D_004A4628, 0..2)
     cFloatMenuItem LightningScale2Item;   // 0x584 [O]; [R] ctor (21, "Inverse Scale", &D_004A462C, 0..2)
@@ -1140,10 +1140,10 @@ struct cSplashTogglesMenu {
     // cSplashTogglesMenu's rows (0x130-0x2547)
     cNullMenuItem TitleItem;                            // 0x130 [O]; [R] ctor ("Camera Splash Menu")
     cSpaceMenuItem SpaceItem;                           // 0x14C [O]; [R] ctor (space 40)
-    cIntMenuItem EnableItem;                            // 0x164 [O]; [R] ctor (0, "Enable", &D_004A424C, 0..1)
+    cIntMenuItem EnableItem;                            // 0x164 [O]; [R] ctor (0, "Enable", &cSplashToggles_m_Enable, 0..1)
     cIntMenuItem RenderItem;                            // 0x194 [O]; [R] ctor (1, "Render", &D_004A4250, 0..1)
     cIntMenuItem NumDropsItem;                          // 0x1C4 [O]; [R] ctor (2, "Max Drops", &D_004A4254, 1..30)
-    cIntMenuItem NumIceCrystalsItem;                    // 0x1F4 [O]; [R] ctor (3, "Max Crystals", &D_004A4258, 1..30)
+    cIntMenuItem NumIceCrystalsItem;                    // 0x1F4 [O]; [R] ctor (3, "Max Crystals", &cSplashToggles_m_NumIceCrystals, 1..30)
     cFloatMenuItem PercentageIceCrystalItem;            // 0x224 [O]; [R] ctor (4, "Percentage Ice Crystals",
                                                         //       &D_004A425C, 0..1)
     cFloatMenuItem PercentageIceCrystalSpawnChanceItem; // 0x258 [O]; [R] ctor (5, "Percentage Ice Crystal Spawn",
@@ -1333,12 +1333,12 @@ struct cTubeMenu {
     // cTubeMenu's rows (0x130-0x28B)
     cNullMenuItem TitleItem;         // 0x130 [O]; [R] ctor ("Tube Menu")
     cSpaceMenuItem SpaceItem;        // 0x14C [O]; [R] ctor (space 40)
-    cIntMenuItem EnableItem;         // 0x164 [O]; [R] ctor (0, "Enable", &D_004A41D4, 0..1)
-    cFloatMenuItem ScaleWidthItem;   // 0x194 [O]; [R] ctor (1, "Scale Width", &D_004A41D8, 0..1000)
-    cFloatMenuItem ScaleHeightItem;  // 0x1C8 [O]; [R] ctor (2, "Scale Height", &D_004A41DC, 0..1000)
-    cIntMenuItem RItem;              // 0x1FC [O]; [R] ctor (3, "R", &D_004A41E0, 0..255)
-    cIntMenuItem GItem;              // 0x22C [O]; [R] ctor (4, "G", &D_004A41E4, 0..255)
-    cIntMenuItem BItem;              // 0x25C [O]; [R] ctor (5, "B", &D_004A41E8, 0..255)
+    cIntMenuItem EnableItem;         // 0x164 [O]; [R] ctor (0, "Enable", &cTube_m_Enable, 0..1)
+    cFloatMenuItem ScaleWidthItem;   // 0x194 [O]; [R] ctor (1, "Scale Width", &cTube_m_ScaleWidth, 0..1000)
+    cFloatMenuItem ScaleHeightItem;  // 0x1C8 [O]; [R] ctor (2, "Scale Height", &cTube_m_ScaleHeight, 0..1000)
+    cIntMenuItem RItem;              // 0x1FC [O]; [R] ctor (3, "R", &cTube_m_R, 0..255)
+    cIntMenuItem GItem;              // 0x22C [O]; [R] ctor (4, "G", &cTube_m_G, 0..255)
+    cIntMenuItem BItem;              // 0x25C [O]; [R] ctor (5, "B", &cTube_m_B, 0..255)
 };
 
 CHECK_OFFSET(cTubeMenu, NumItems, 0x000);
@@ -1524,17 +1524,17 @@ struct cAvalancheMenu {
     cSpaceMenuItem SpaceItem;                       // 0x14C [O]; [R] ctor (space 40)
     cIntMenuItem EnableItem;                        // 0x164 [O]; [R] ctor (0, "Enable", &cAvalanche_m_Enable, 0..1)
     cIntMenuItem RecalcItem;                        // 0x194 [O]; [R] ctor (1, "Recalc", &cAvalanche_m_Recalc, -1..1)
-    cFloatMenuItem BrightnessItem;                  // 0x1C4 [O]; [R] ctor (2, "Brightness", &D_004A3A38, 0..4)
+    cFloatMenuItem BrightnessItem;                  // 0x1C4 [O]; [R] ctor (2, "Brightness", &cAvalanche_m_Brightness, 0..4)
     cIntMenuItem UseLightMapColourItem;             // 0x1F8 [O]; [R] ctor (3, "Use Light Map Colour", &D_004A3A3C,
                                                     //       0..1)
     cIntMenuItem UseEndColourItem;                  // 0x228 [O]; [R] ctor (4, "Use End Colour", &D_004A3A40, 0..1)
     cIntMenuItem SquareLerpItem;                    // 0x258 [O]; [R] ctor (5, "Square Lerp Value", &D_004A3A44, 0..1)
-    cIntMenuItem SaveItem;                          // 0x288 [O]; [R] ctor (6, "Save", &D_004A3A48, 0..1)
-    cIntMenuItem LoadItem;                          // 0x2B8 [O]; [R] ctor (7, "Load", &D_004A3A4C, 0..1)
+    cIntMenuItem SaveItem;                          // 0x288 [O]; [R] ctor (6, "Save", &cAvalanche_m_Save, 0..1)
+    cIntMenuItem LoadItem;                          // 0x2B8 [O]; [R] ctor (7, "Load", &cAvalanche_m_Load, 0..1)
     cFloatMenuItem MinImpactVelocityItem;           // 0x2E8 [O]; [R] ctor (8, "Min Impact Velocity", &D_004A3A50,
                                                     //       0..120)
     cIntMenuItem RenderEmittersItem;                // 0x31C [O]; [R] ctor (9, "Render Emitters", &D_004A3A54, 0..1)
-    cIntMenuItem RenderLinesItem;                   // 0x34C [O]; [R] ctor (10, "Render N Lines", &D_004A3A58, 0..63)
+    cIntMenuItem RenderLinesItem;                   // 0x34C [O]; [R] ctor (10, "Render N Lines", &cAvalanche_m_RenderLines, 0..63)
     cIntMenuItem TriggerItem;                       // 0x37C [O]; [R] ctor (11, "Trigger Avalanche",
                                                     //       &cAvalanche_m_Trigger, -1..1)
     cIntMenuItem UpdateItem;                        // 0x3AC [O]; [R] ctor (12, "Update", &cAvalanche_m_Update, -1..1)
@@ -1567,7 +1567,7 @@ struct cAvalancheMenu {
     cFloatMenuItem DefaultSizeItem;                 // 0x6E0 [O]; [R] ctor (28, "Default Size", &D_004A3AA0, 1..1000)
     cFloatMenuItem PatchColourScaleItem;            // 0x714 [O]; [R] ctor (29, "Patch Colour Scale", &D_004A3AA4,
                                                     //       0..10)
-    cFloatMenuItem PatchColourScale2Item;           // 0x748 [O]; [R] ctor (30, "Patch Colour Scale 2", &D_004A3AA8,
+    cFloatMenuItem PatchColourScale2Item;           // 0x748 [O]; [R] ctor (30, "Patch Colour Scale 2", &cAvalanche_m_PatchColourScale2,
                                                     //       0..10)
     cFloatMenuItem SeedItem;                        // 0x77C [O]; [R] ctor (31, "Seed", &D_004A3AAC, -1..1000)
 };

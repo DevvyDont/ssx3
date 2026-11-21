@@ -134,7 +134,7 @@ struct sProfileBlk_A188 {
 extern int cBELibrary_profileLib[];
 extern sBlkF88_A188 D_004B07F8_A188[] __asm__("D_004B07F8");
 extern sBlk9B50_A188 D_004BA348_A188 __asm__("D_004BA348");
-extern sBlk20_A188 D_005308B8_A188 __asm__("D_005308B8");
+extern sBlk20_A188 D_005308B8_A188 __asm__("cBERules_mRules");
 
 #define PROFILE_A188 ((sProfileBlk_A188*)cBELibrary_playerDB)
 
@@ -144,7 +144,7 @@ extern sBlk20_A188 D_005308B8_A188 __asm__("D_005308B8");
  * Copies, in order: the 0x4C-byte race DB (cBELibrary_raceDB), the 0xA8-byte player DB (cBELibrary_playerDB), player
  * 0's character record from profile 0 of cBELibrary_profileLib, player 1's character record from profile 1 (D_004B07F8)
  * when player 1 has a character (mCharID >= 0), the 0x9B50-byte profile D_004BA348 (profile 2) and the 0x20 bytes at
- * D_005308B8. cBE_writeToData calls it and appends the CRC.
+ * cBERules_mRules. cBE_writeToData calls it and appends the CRC.
  *
  * @param data  the save buffer to fill
  */
@@ -195,14 +195,14 @@ struct sBlk20_14A5E0 { char d[0x20]; };
 extern sBlkF88_14A5E0 D_004A6CA8_14A5E0[] __asm__("cBELibrary_profileLib");
 extern sBlkF88_14A5E0 D_004B07F8[];
 extern sBlk9B50_14A5E0 D_004BA348;
-extern sBlk20_14A5E0 D_005308B8;
+extern sBlk20_14A5E0 cBERules_mRules;
 
 /**
  * Restores the career data from a loaded save buffer.
  *
  * Reads, in order: the 0x4C-byte race DB (then cBENewRaceInterface's virtual slot 2), the 0xA8-byte player DB (then
  * cBENewPlayerInterface's), player 0's character profile into cBELibrary_profileLib, player 1's into the next profile
- * slot when player 1 has a character, a 0x9B50-byte profile slot into D_004BA348 and 0x20 bytes into D_005308B8, then
+ * slot when player 1 has a character, a 0x9B50-byte profile slot into D_004BA348 and 0x20 bytes into cBERules_mRules, then
  * calls slot 2 of the BAGT, mission, score and stat interfaces.
  *
  * @param data  the save buffer (On Tour data)
@@ -228,7 +228,7 @@ extern "C" void cBELibrary_readFromData(char* data)
     }
     D_004BA348 = *(sBlk9B50_14A5E0*)data;
     data += 0x9B50;
-    D_005308B8 = *(sBlk20_14A5E0*)data;
+    cBERules_mRules = *(sBlk20_14A5E0*)data;
     beInterface = cBEBAGTInterface_getThis();
     beInterface->onLoad();
     beInterface = cBEMissionInterface_getThis();
@@ -246,13 +246,13 @@ INCLUDE_ASM("be/belibrary", func_0014AB20);
 struct sScoreTable_0014AB20 {
     char data[0x64];
 };
-extern sScoreTable_0014AB20 D_00535C18[];
+extern sScoreTable_0014AB20 cBELibrary_highScores[];
 extern "C" int cBELibrary_getScoreType(int a, int b);
 
 /**
  * Returns the 5-entry high-score table for a location and event, or null when the pair has none.
  *
- * The index is cBELibrary_getScoreType(@p locationId, @p gameEvent); 26 means none. The tables are D_00535C18, 0x64 bytes each (five
+ * The index is cBELibrary_getScoreType(@p locationId, @p gameEvent); 26 means none. The tables are cBELibrary_highScores, 0x64 bytes each (five
  * 0x14-byte entries: score, character ID, 12-byte name).
  *
  * @param locationId  the location (On Tour eBELocationID)
@@ -265,7 +265,7 @@ extern "C" void* func_0014AB20(int locationId, int gameEvent)
     if (type == 26) {
         return 0;
     }
-    return &D_00535C18[type];
+    return &cBELibrary_highScores[type];
 }
 #endif
 
@@ -283,7 +283,7 @@ extern sScoreTypeMap D_0045A2F8[][2];
  *
  * Kinds 6 to 11 map to 0 to 5 at any location. Otherwise the location's row of D_0045A2F8 (two key/type pairs)
  * gives the index: kind 0 to 3 at locations 0 to 13 gives 12 to 25, kinds 4 and 5 at locations 14 to 16 give 6
- * to 11. Callers use it to pick a score stats record in the character profile and in D_00535C18.
+ * to 11. Callers use it to pick a score stats record in the character profile and in cBELibrary_highScores.
  *
  * @param locationId  the location (On Tour eBELocationID); above 16 gives 26
  * @param gameEvent  the event or stat kind
@@ -316,8 +316,8 @@ INCLUDE_ASM("be/belibrary", func_0014ABE0);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BEBoltInt[];
-extern void* D_0045AE88[16];
-extern void* D_004A11C8;
+extern void* cBEInterface_vtbl[16];
+extern void* cBEBoltInterface_instance;
 
 struct cBELibraryInterface_0014ABE0 {
     char pad_0x00[8];
@@ -329,20 +329,20 @@ struct cBELibraryInterface_0014ABE0 {
  * Returns the bolt (equipment) interface singleton, creating it on first use.
  *
  * The first call allocates 0x10 bytes tagged "BEBoltInt" (cMemMan_alloc), clears the word at +0x8, stores
- * cBEInterface's vtable D_0045AE88 and keeps the object in D_004A11C8. It is BE interface 9 (cBE_getInterface(.., 9));
+ * cBEInterface's vtable cBEInterface_vtbl and keeps the object in cBEBoltInterface_instance. It is BE interface 9 (cBE_getInterface(.., 9));
  * cBELibrary_cBELibrary creates it with the other interfaces.
  *
  * @return the interface
  */
 extern "C" void* func_0014ABE0(void)
 {
-    if (D_004A11C8 == 0) {
+    if (cBEBoltInterface_instance == 0) {
         cBELibraryInterface_0014ABE0* mem = (cBELibraryInterface_0014ABE0*)cMemMan_alloc(0x10, str_BEBoltInt, 0, 0);
         mem->field_0x8 = 0;
-        mem->vtable = D_0045AE88;
-        D_004A11C8 = mem;
+        mem->vtable = cBEInterface_vtbl;
+        cBEBoltInterface_instance = mem;
     }
-    return D_004A11C8;
+    return cBEBoltInterface_instance;
 }
 #endif
 

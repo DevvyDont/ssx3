@@ -10,8 +10,8 @@
 //   cController : cCrowdSys (0x0), cMusicSys (0x118), cSpeechSys (0x5560)
 //   cCrowdSys : cMidiSys : cBankSys, virtual cBankManager; cMusicSys, cSpeechSys : virtual cStreamSys
 //   (cStreamSys : virtual cBankManager; cBankManager : cAsyncSys, cBankMonitor, virtual cSoundSys)
-// Primary vptr at 0xC: the ctor and dtor store _vt$9cCrowdSys (D_004837F8; slot 2 stays pure, so cController is
-// abstract; cSSXAudio_vtbl replaces it). The secondary vptrs are the bases' own: cMusicSys's at 0x5558 (D_004838F8) and
+// Primary vptr at 0xC: the ctor and dtor store _vt$9cCrowdSys (cCrowdSys_vtbl; slot 2 stays pure, so cController is
+// abstract; cSSXAudio_vtbl replaces it). The secondary vptrs are the bases' own: cMusicSys's at 0x5558 (cMusicSys_vtbl) and
 // cSpeechSys's at 0x571C (cSpeechSys_vtbl). The ctor also installs _vt$11cController$9cSoundSys / $12cBankMonitor /
 // $12cBankManager (D_004837D8 / D_00483760 / D_004837A0) inside the shared virtual bases.
 //
@@ -41,7 +41,7 @@ struct cController {
                                     //        ctor's in-charge branch stores this + 0x5730
     int* mBank;                     // 0x0004 [R] cBankSys ctor (see sound/banksys.h)
     int* mPatch;                    // 0x0008 [R] cBankSys ctor
-    void** mVtbl;                   // 0x000C [R] ctor / dtor store _vt$9cCrowdSys (D_004837F8); cSSXAudio_vtbl in cSSXAudio
+    void** mVtbl;                   // 0x000C [R] ctor / dtor store _vt$9cCrowdSys (cCrowdSys_vtbl); cSSXAudio_vtbl in cSSXAudio
     tMidiBank* mMidiBanks;          // 0x0010 [R] cMidiSys ctor (see sound/midisys.h)
     int mNumInstances;              // 0x0014 [R] cCrowdSys ctor 0 (sound/crowdsys.h)
     cCrowdInstance* mpCrowdInstances; // 0x0018 [R] cCrowdSys ctor 0 (sound/crowdsys.h)
@@ -49,7 +49,7 @@ struct cController {
     // --- cMusicSys (sound/musicsys.h, non-virtual 0x5448; ctor cMusicSys_cMusicSys(this + 0x118))
     cMusicSys MusicSys;             // 0x0118 [R] ctor cMusicSys_cMusicSys(this + 0x118, 0, ...); [U] every cController method reaches
                                     //        cBankManager as **(this + 0x118) (MusicSys.mpVStreamSys, then the cStreamSys's own
-                                    //        vbase pointer); the ctor / dtor store MusicSys.mVtbl (0x5558) = D_004838F8
+                                    //        vbase pointer); the ctor / dtor store MusicSys.mVtbl (0x5558) = cMusicSys_vtbl
     // --- cSpeechSys (sound/speechsys.h, non-virtual 0x1C0)
     cSpeechSys SpeechSys;           // 0x5560 [R] ctor cSpeechSys_cSpeechSys(this + 0x5560, 0, ...); the ctor / dtor store
                                     //        SpeechSys.mVtbl (0x571C) = cSpeechSys_vtbl; [U] cController_Update passes

@@ -984,7 +984,7 @@ INCLUDE_ASM("object/debouncenode", func_00343A68);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sDebounceState;
 extern "C" void func_003442E0(sDebounceState* self);
-extern void* D_004A3FF0_p __asm__("D_004A3FF0");
+extern void* D_004A3FF0_p __asm__("TheCrowdMan3d");
 
 struct sSlot00343A68 {
     unsigned int id;
@@ -1002,7 +1002,7 @@ struct sState00343A68 {
  * Constructs the 3D crowd manager: five crowd blocks of 0x1F4 bytes, all empty.
  *
  * For each block it sets the crowd model id (+0x4) and all 32 member ids (+0xC, 8-byte entries) to -1 and resets the
- * block with func_003442E0, stores the manager in D_004A3FF0 (the global the world scripts and replay code use), then
+ * block with func_003442E0, stores the manager in TheCrowdMan3d (the global the world scripts and replay code use), then
  * resets all five blocks again. cGame's loader allocates it (2500 bytes, "CrowdMan3d").
  *
  * @return self
@@ -1034,7 +1034,7 @@ extern "C" sState00343A68* func_00343A68(sState00343A68* self)
 //100%
 INCLUDE_ASM("object/debouncenode", func_00343B28);
 #ifdef SKIP_ASM
-extern int D_004A3FF0;
+extern int TheCrowdMan3d;
 void operator_delete(int*);
 void* func_00344348(void* self);
 
@@ -1049,7 +1049,7 @@ struct sDebounce_343B28 {
 /**
  * Destroys the 3D crowd manager.
  *
- * Frees each block's animation data (func_00344348), clears the global D_004A3FF0, then runs the block destructor
+ * Frees each block's animation data (func_00344348), clears the global TheCrowdMan3d, then runs the block destructor
  * (func_00344348 again) over the five blocks in reverse and deletes the manager when bit 0 of flags is set. The second
  * pass is harmless because func_00344800 nulls the pointers it frees.
  *
@@ -1062,7 +1062,7 @@ extern "C" void func_00343B28(void* self, int flags)
     for (i = 0; i < 5; i++) {
         func_00344348(&crowdMan->elems[i]);
     }
-    D_004A3FF0 = 0;
+    TheCrowdMan3d = 0;
     if (crowdMan->elems != 0) {
         sDebounceElem_343B28* blockIter = crowdMan->elems + 5;
         while (crowdMan->elems != blockIter) {

@@ -14,7 +14,7 @@
 // _$_29cFEStateOnlineCharacterSelect). Retail vtable cFEStateOnlineCharacterSelect_vtbl (32 slots: 4 onCreateScreen cFEStateOnlineCharacterSelect_onCreateScreen, 7
 // cFEStateOnlineCharacterSelect_onGainTransition, 8 cFEStateOnlineCharacterSelect_onInputBegin (input filter), 12 onUpdate cFEStateOnlineCharacterSelect_onUpdate, 17 onPopupEvent cFEStateOnlineCharacterSelect_onPopupEvent,
 // 18 onWidgetCreate cFEStateOnlineCharacterSelect_onWidgetCreate, 19 onWidgetEvent cFEStateOnlineCharacterSelect_onWidgetEvent, 25 func_001B14D8 (help), 31 func_001B15D8 (net
-// events)). Methods: fe/feasyncfile 0x1B0F60-0x1B1F18. The online game object D_004A33CC (func_00264F88 /
+// events)). Methods: fe/feasyncfile 0x1B0F60-0x1B1F18. The online game object cSetupMan_mSetupMan (func_00264F88 /
 // func_00265018 / func_00265140) receives the picks.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and

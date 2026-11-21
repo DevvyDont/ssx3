@@ -4,7 +4,7 @@
 // cOVState_HEAT_PREEVENT: the pre-event overlay of a heat event (its strings: "title", "track_event",
 // "rider%d", the Multi Play / Quick Play state text). Retail code in the decomp's unit fe/ovstatepause.cpp
 // (onCreateScreen still asm), destructor and constructor in fe/all_in_one_fe.cpp. No members of its own:
-// cMemMan_alloc(0x9C, "cOVStateOverlay") for overlay id 8; On Tour size 0x90. Its vtable D_00472850 reuses
+// cMemMan_alloc(0x9C, "cOVStateOverlay") for overlay id 8; On Tour size 0x90. Its vtable cOVState_HEAT_PREEVENT_vtbl reuses
 // cOVTemplate_Simple_onWidgetEvent / onWidgetMenu (slots 18/19), so it derives from cOVTemplate_Simple (vtable
 // 0x474D30), which adds no members either (On Tour 0x90; its constructor func_0021C730 stores nothing past 0x98).
 // Constructor func_00221E18, destructor cOVState_HEAT_PREEVENT__cOVState_HEAT_PREEVENT. On Tour's other heat
@@ -33,7 +33,7 @@ struct cOVState_HEAT_PREEVENT {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_00472850, stored after cOVState_vtbl by the constructor
+    void** mVtbl;                   // 0x008 [R] cOVState_HEAT_PREEVENT_vtbl, stored after cOVState_vtbl by the constructor
     // --- cUIState (On Tour: size 0x48, same offsets; see ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U]

@@ -105,9 +105,9 @@ extern "C" void cOVStateManager_triggerOverlay(int state);
 extern "C" void cGame_exit(void* game, int a1);
 extern "C" int cReplay_updateInput(void* replay, int a1);
 extern int cPauseState_Flags;
-extern int D_004A2A54;
-extern int D_005366E8[];
-extern int D_004428F0[];
+extern int cPauseState_StackIdx;
+extern int cPauseState_Stack[];
+extern int cPauseState_FlagsTable[];
 extern int D_004428F8[];
 extern char str_top[];
 extern char str_hidetimeline[];
@@ -198,10 +198,10 @@ extern "C" int cOVState_REPLAY_onInputBegin(cOVState_REPLAY* self, cPad_20DF38* 
     }
     if (pInput->isStart() && self->mShowPopupMenu == 0) {
         snd->play(6);
-        int n = D_004A2A54 + 1;
-        D_005366E8[n] = 2;
+        int n = cPauseState_StackIdx + 1;
+        cPauseState_Stack[n] = 2;
         cPauseState_Flags = D_004428F8[0];
-        D_004A2A54 = n;
+        cPauseState_StackIdx = n;
         self->mShowPopupMenu = 1;
         char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
         *(int*)(obj + 0x90) &= ~8;
@@ -214,7 +214,7 @@ extern "C" int cOVState_REPLAY_onInputBegin(cOVState_REPLAY* self, cPad_20DF38* 
         case 0:
             cReplay_stopReplay(replay_20DF38());
             cOVStateManager_triggerOverlay(18);
-            cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
+            cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
             break;
         case 1: {
             cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
@@ -229,19 +229,19 @@ extern "C" int cOVState_REPLAY_onInputBegin(cOVState_REPLAY* self, cPad_20DF38* 
             if (*(int*)(replay_20DF38() + 0x608) != 0) {
                 cGame_exit(D_004A28A8_20DF38->game, 0);
             }
-            cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
+            cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
             break;
         }
         case 2:
             self->mShowPopupMenu = 0;
-            cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
+            cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
             break;
         }
         return 1;
     }
     if (self->mShowPopupMenu != 0 && pInput->isPrevious()) {
         snd->play(3);
-        cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
+        cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
         self->mShowPopupMenu = 0;
         char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
         *(int*)(obj + 0x90) |= 8;

@@ -6,7 +6,7 @@
 // animation, name and points each grab input gives a rider, and each rider's uber-trick assignments (the uber-trick
 // screen, cFEStateUberTrick_*, edits them through func_0014FD80 ... func_00150048). The object holds no trick data:
 // like every BE interface it is a cBEInterface (three word bools + vptr, 0x10 bytes), and its methods ignore `this`
-// and work on the grab table D_0045AEB8 (0x14-byte records) and the riders' staged trick records D_00530EC0. One
+// and work on the grab table kGrabDB (0x14-byte records) and the riders' staged trick records D_00530EC0. One
 // instance, created on demand by cBEBAGTInterface_getThis
 // (`cMemMan_alloc(0x10, "BEBAGTInt", 0, 0)`, vtable cBEBAGTInterface_vtbl, a virtual call of slot 2 (discard), then
 // bIsActive = 0) into cBEBAGTInterface::instance (retail cBEBAGTInterface_instance, D_004A1210); the rest of the game

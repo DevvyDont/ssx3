@@ -101,14 +101,14 @@ void* func_002EC9D0(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/lensfx", cBoltOnFXInterface_cBoltOnFXInterface);
 #ifdef SKIP_ASM
-extern void* D_00487EE8[];
+extern void* cBoltOnFXInterface_vtbl[];
 struct sLensFx;
 extern "C" void func_002ECAF0(cBoltOnFXInterface* self);
 
 /**
  * Constructs a rider's bolt-on effect set ("cBoltOnFXInterface"): the attached particle emitters its equipment carries.
  *
- * Installs the vtable D_00487EE8 at +0xC4, marks the set dirty (+0x0 = 1), stores the rider (+0x4) and the
+ * Installs the vtable cBoltOnFXInterface_vtbl at +0xC4, marks the set dirty (+0x0 = 1), stores the rider (+0x4) and the
  * attached-emitter owner (+0xC), clears the character pointer (+0x8) and empties the 15 entries (+0x10, 0xC bytes each:
  * emitter index, item, kind) through func_002EC9D0 and func_002ECAF0. cRider_cRider builds it on 200 bytes with the
  * rider's mAttachedEmitterFX and stores it as mBoltOnFX.
@@ -119,7 +119,7 @@ extern "C" void func_002ECAF0(cBoltOnFXInterface* self);
  */
 extern "C" void* cBoltOnFXInterface_cBoltOnFXInterface(cBoltOnFXInterface* self, int rider, int emitterOwner)
 {
-    self->mVtbl = D_00487EE8;
+    self->mVtbl = cBoltOnFXInterface_vtbl;
     self->mDirty = 1;
     self->mpRider = (cRider*)rider;
     self->mAttachedEmitterFX = (cAttachedEmitterFX*)emitterOwner;
@@ -137,7 +137,7 @@ extern "C" void* cBoltOnFXInterface_cBoltOnFXInterface(cBoltOnFXInterface* self,
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/lensfx", cBoltOnFXInterface_cBoltOnFXInterface1);
 #ifdef SKIP_ASM
-extern void* D_00487EE8[];
+extern void* cBoltOnFXInterface_vtbl[];
 struct sLensFx;
 extern "C" void func_002ECAF0(cBoltOnFXInterface* self);
 
@@ -154,7 +154,7 @@ extern "C" void func_002ECAF0(cBoltOnFXInterface* self);
  */
 extern "C" void* cBoltOnFXInterface_cBoltOnFXInterface1(cBoltOnFXInterface* self, int charIdPtr, int emitterOwner)
 {
-    self->mVtbl = D_00487EE8;
+    self->mVtbl = cBoltOnFXInterface_vtbl;
     self->mDirty = 1;
     self->mpCharId = (int*)charIdPtr;
     self->mAttachedEmitterFX = (cAttachedEmitterFX*)emitterOwner;
@@ -200,22 +200,22 @@ extern "C" void func_002ECAF0(cBoltOnFXInterface* self)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cBoltOnFXInterface__cBoltOnFXInterface);
 #ifdef SKIP_ASM
-extern void* D_00487EE8[];
+extern void* cBoltOnFXInterface_vtbl[];
 extern "C" void func_002F2218(int a, int id);
 void operator_delete(int* ptr);
 
 /**
  * Destroys a bolt-on effect set: releases every attached emitter it still holds, then frees the object when asked.
  *
- * Re-installs the vtable D_00487EE8, releases each used entry's emitter from the owner (+0xC) with func_002F2218 and
+ * Re-installs the vtable cBoltOnFXInterface_vtbl, releases each used entry's emitter from the owner (+0xC) with func_002F2218 and
  * marks it free, then frees the object with operator_delete when bit 0 of @p flags is set. It is the destructor slot of
- * D_00487EE8.
+ * cBoltOnFXInterface_vtbl.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
 extern "C" void cBoltOnFXInterface__cBoltOnFXInterface(sLensFx* self, int flags)
 {
-    *(void***)((char*)self + 0xC4) = D_00487EE8;
+    *(void***)((char*)self + 0xC4) = cBoltOnFXInterface_vtbl;
     int i;
     for (i = 0; i < 15; i++) {
         if (self->entries[i].id != -1) {
@@ -844,19 +844,19 @@ extern "C" void* cRenderStateMan_getIrradiance(int index)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_resolveIrradianceName);
 #ifdef SKIP_ASM
-extern char D_005047F8[];
+extern char cIrradianceDataBase_TheDataBase[];
 extern "C" int cIrradianceDataBase_GetIDByName(void*, void*);
 
 /**
  * Resolves an irradiance name field in place: replaces its first word with the name's id and sets +0x4 to 0x123400 to
  * mark it resolved.
  *
- * Looks the name up with cIrradianceDataBase_GetIDByName in the irradiance database D_005047F8. cRenderStateMan_Irradiance calls it
+ * Looks the name up with cIrradianceDataBase_GetIDByName in the irradiance database cIrradianceDataBase_TheDataBase. cRenderStateMan_Irradiance calls it
  * on first use.
  */
 extern "C" void cRenderStateMan_resolveIrradianceName(void* self)
 {
-    *(int*)self = cIrradianceDataBase_GetIDByName(D_005047F8, self);
+    *(int*)self = cIrradianceDataBase_GetIDByName(cIrradianceDataBase_TheDataBase, self);
     *(int*)((char*)self + 4) = 0x123400;
 }
 #endif
@@ -866,14 +866,14 @@ INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_Irradiance);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cIrradianceDataBase_Get(void* self, int i);
-extern int D_004A43C4;
+extern int cIrradianceDataBase_mDefaultId;
 
 extern "C" void* cRenderStateMan_Irradiance_r(void* self) __asm__("cRenderStateMan_Irradiance");
 /**
  * Returns the irradiance record for an irradiance name field, resolving the name on first use.
  *
  * A field not yet tagged 0x123400 at +0x4 is resolved with cRenderStateMan_resolveIrradianceName, or, when its name is empty, gives the default
- * id D_004A43C4. The record comes from cIrradianceDataBase_Get on the irradiance database D_005047F8. cRenderStateMan_getCustomIrradiance,
+ * id cIrradianceDataBase_mDefaultId. The record comes from cIrradianceDataBase_Get on the irradiance database cIrradianceDataBase_TheDataBase. cRenderStateMan_getCustomIrradiance,
  * cRenderStateMan_LightIrradiance, cRenderStateMan_ShadowIrradiance, cRenderStateMan_TunnelIrradiance and cRenderStateMan_ObjectIrradiance call it.
  *
  * @return the irradiance record
@@ -882,12 +882,12 @@ extern "C" void* cRenderStateMan_Irradiance_r(void* self)
 {
     if (*(int*)((char*)self + 4) != 0x123400) {
         if (*(signed char*)self == 0) {
-            return cIrradianceDataBase_Get(D_005047F8, D_004A43C4);
+            return cIrradianceDataBase_Get(cIrradianceDataBase_TheDataBase, cIrradianceDataBase_mDefaultId);
         }
         cRenderStateMan_resolveIrradianceName(self);
-        return cIrradianceDataBase_Get(D_005047F8, *(int*)self);
+        return cIrradianceDataBase_Get(cIrradianceDataBase_TheDataBase, *(int*)self);
     }
-    return cIrradianceDataBase_Get(D_005047F8, *(int*)self);
+    return cIrradianceDataBase_Get(cIrradianceDataBase_TheDataBase, *(int*)self);
 }
 #endif
 
@@ -1117,10 +1117,10 @@ INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_getCustomIrradiance);
 extern "C" void cRenderStateMan_Irradiance(void* p);
 
 // $gp-relative object at gp+0x24C0 (no symbol in the target)
-extern int D_004A55B0;
+extern int cRenderStateMan_m_customIrradiance;
 
 /**
- * Returns the irradiance record for the custom irradiance name (the name field D_004A55B0), through cRenderStateMan_Irradiance.
+ * Returns the irradiance record for the custom irradiance name (the name field cRenderStateMan_m_customIrradiance), through cRenderStateMan_Irradiance.
  *
  * The name is the one cRenderStateMan_setCustomIrradiance sets. The world light code (cWorldLightMan_getRealTimeLights) uses the result as
  * a light target. The C declaration says void; the record is passed through in the return register.
@@ -1129,7 +1129,7 @@ extern int D_004A55B0;
  */
 extern "C" void cRenderStateMan_getCustomIrradiance(void)
 {
-    cRenderStateMan_Irradiance(&D_004A55B0);
+    cRenderStateMan_Irradiance(&cRenderStateMan_m_customIrradiance);
 }
 #endif
 
@@ -1144,7 +1144,7 @@ extern "C" void* cRenderStateMan_LightIrradianceName(void);
  * cRenderStateMan_Irradiance.
  *
  * cRenderStateMan_LightIrradianceName reads query accessor slot 37 (the light irradiance name in On Tour's accessor order), or gives the
- * custom name D_004A55B0 while D_004A3B64 is set. The C definition declares no parameters and a void result: the render
+ * custom name cRenderStateMan_m_customIrradiance while cRenderStateMan_m_hasCustomIrradiance is set. The C definition declares no parameters and a void result: the render
  * state index in a0 reaches cRenderStateMan_LightIrradianceName untouched and the record comes back in v0. cRenderStateMan_update calls it.
  *
  * @return the irradiance record
@@ -1166,7 +1166,7 @@ extern "C" void* cRenderStateMan_ShadowIrradianceName(void);
  * cRenderStateMan_Irradiance.
  *
  * cRenderStateMan_ShadowIrradianceName reads query accessor slot 38 (the shadow irradiance name in On Tour's accessor order), or gives the
- * custom name D_004A55B0 while D_004A3B64 is set. The C definition declares no parameters and a void result: the render
+ * custom name cRenderStateMan_m_customIrradiance while cRenderStateMan_m_hasCustomIrradiance is set. The C definition declares no parameters and a void result: the render
  * state index in a0 reaches cRenderStateMan_ShadowIrradianceName untouched and the record comes back in v0. cRenderStateMan_update calls it.
  *
  * @return the irradiance record
@@ -1188,7 +1188,7 @@ extern "C" void* cRenderStateMan_TunnelIrradianceName(void);
  * cRenderStateMan_Irradiance.
  *
  * cRenderStateMan_TunnelIrradianceName reads query accessor slot 39 (the tunnel irradiance name in On Tour's accessor order), or gives the
- * custom name D_004A55B0 while D_004A3B64 is set. The C definition declares no parameters and a void result: the render
+ * custom name cRenderStateMan_m_customIrradiance while cRenderStateMan_m_hasCustomIrradiance is set. The C definition declares no parameters and a void result: the render
  * state index in a0 reaches cRenderStateMan_TunnelIrradianceName untouched and the record comes back in v0. cRenderStateMan_update calls it.
  *
  * @return the irradiance record
@@ -1209,7 +1209,7 @@ extern "C" void* cRenderStateMan_ObjectIrradianceName();
  * cRenderStateMan_Irradiance.
  *
  * cRenderStateMan_ObjectIrradianceName reads query accessor slot 40 (the object irradiance name in On Tour's accessor order), or gives the
- * custom name D_004A55B0 while D_004A3B64 is set. The C definition declares no parameters and a void result: the render
+ * custom name cRenderStateMan_m_customIrradiance while cRenderStateMan_m_hasCustomIrradiance is set. The C definition declares no parameters and a void result: the render
  * state index in a0 reaches cRenderStateMan_ObjectIrradianceName untouched and the record comes back in v0. Nothing in the retail code
  * references it.
  *
@@ -1270,21 +1270,21 @@ extern "C" float cRenderStateMan_SkyBoxRotation(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SnowIntensity);
 #ifdef SKIP_ASM
-extern int D_004A3B60;
+extern int cRenderStateMan_m_indoor;
 
 /**
  * Returns the snow intensity for render state @p i, reduced inside tunnels.
  *
  * Calls virtual slot 43 of the state's world-painter query object m_query[8] (+0x20) (cRenderStateMan_m_state[@p i],
  * 0xF0-byte rows) and returns the value it points to. The value is scaled by (1 - the row's +0x24, On Tour m_inTunnel),
- * and is 0 while D_004A3B60 is set. cSnowFall_update uses it as snow parameter 0.
+ * and is 0 while cRenderStateMan_m_indoor is set. cSnowFall_update uses it as snow parameter 0.
  *
  * @param i  the render state (view) index
  * @return the value
  */
 extern "C" float cRenderStateMan_SnowIntensity(int i)
 {
-    if (D_004A3B60 == 0) {
+    if (cRenderStateMan_m_indoor == 0) {
         sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
         sLensFxObj* obj = *renderState->p20;
         return *obj->vt[43].fn((char*)obj + obj->vt[43].delta) * (1.0f - *(float*)((char*)renderState + 0x24));
@@ -1387,13 +1387,13 @@ extern "C" float cRenderStateMan_SnowFlurries(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SnowFluffItensity);
 #ifdef SKIP_ASM
-extern int D_004A3B60;
+extern int cRenderStateMan_m_indoor;
 
 /**
  * Returns the snow fluff intensity for render state @p i.
  *
  * Calls virtual slot 51 of the state's world-painter query object m_query[8] (+0x20) (cRenderStateMan_m_state[@p i],
- * 0xF0-byte rows) and returns the value it points to. It is 0 while D_004A3B60 is set. cSnowFall_update uses it as snow
+ * 0xF0-byte rows) and returns the value it points to. It is 0 while cRenderStateMan_m_indoor is set. cSnowFall_update uses it as snow
  * parameter 2, the flake count of mode-1 (fluff) boxes.
  *
  * @param i  the render state (view) index
@@ -1401,7 +1401,7 @@ extern int D_004A3B60;
  */
 extern "C" float cRenderStateMan_SnowFluffItensity(int i)
 {
-    if (D_004A3B60 == 0) {
+    if (cRenderStateMan_m_indoor == 0) {
         sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
         sLensFxObj* obj = *renderState->p20;
         return *obj->vt[51].fn((char*)obj + obj->vt[51].delta);

@@ -8,10 +8,10 @@
 // slot functions in fe/fepopupmisc, the out-of-line constructors / destructors in fe/all_in_one_fe.
 //
 //   type  class                          size  vtable      screen                      ctor          dtor (slot 1)
-//   10    cOVState_HEAT_STANDINGS        0x9C  D_00474088  "42freestyle_standings"     cOVState_HEAT_STANDINGS_cOVState_HEAT_STANDINGS cOVState_HEAT_STANDINGS__cOVState_HEAT_STANDINGS
-//   11    cOVState_FINAL_STANDINGS       0xA0  D_00473FB0  "43final_standings"         cOVState_FINAL_STANDINGS_cOVState_FINAL_STANDINGS cOVState_FINAL_STANDINGS__cOVState_FINAL_STANDINGS
-//   12    cOVState_RACE_FINISHOV         0xA4  D_00473E00  "finishov" (mHashName)      cOVState_RACE_FINISHOV_cOVState_RACE_FINISHOV cOVState_RACE_FINISHOV__cOVState_RACE_FINISHOV
-//   13    cOVState_BASSSP_QUAL_FINISHOV  0xA4  D_00473D28  "finishov" (mHashName)      cOVState_BASSSP_QUAL_FINISHOV_cOVState_BASSSP_QUAL_FINISHOV cOVState_BASSSP_QUAL_FINISHOV__cOVState_BASSSP_QUAL_FINISHOV
+//   10    cOVState_HEAT_STANDINGS        0x9C  cOVState_HEAT_STANDINGS_vtbl  "42freestyle_standings"     cOVState_HEAT_STANDINGS_cOVState_HEAT_STANDINGS cOVState_HEAT_STANDINGS__cOVState_HEAT_STANDINGS
+//   11    cOVState_FINAL_STANDINGS       0xA0  cOVState_FINAL_STANDINGS_vtbl  "43final_standings"         cOVState_FINAL_STANDINGS_cOVState_FINAL_STANDINGS cOVState_FINAL_STANDINGS__cOVState_FINAL_STANDINGS
+//   12    cOVState_RACE_FINISHOV         0xA4  cOVState_RACE_FINISHOV_vtbl  "finishov" (mHashName)      cOVState_RACE_FINISHOV_cOVState_RACE_FINISHOV cOVState_RACE_FINISHOV__cOVState_RACE_FINISHOV
+//   13    cOVState_BASSSP_QUAL_FINISHOV  0xA4  cOVState_BASSSP_QUAL_FINISHOV_vtbl  "finishov" (mHashName)      cOVState_BASSSP_QUAL_FINISHOV_cOVState_BASSSP_QUAL_FINISHOV cOVState_BASSSP_QUAL_FINISHOV__cOVState_BASSSP_QUAL_FINISHOV
 //   35    cOVState_TOURNAMENT_STANDINGS  0x9C  D_00473C50  "109MultiplayerStandings"   cOVState_TOURNAMENT_STANDINGS_cOVState_TOURNAMENT_STANDINGS cOVState_TOURNAMENT_STANDINGS__cOVState_TOURNAMENT_STANDINGS
 //
 // Names (two signals each): HEAT_STANDINGS and FINAL_STANDINGS - On Tour's DWARF has both classes with exactly the
@@ -42,7 +42,7 @@ struct cOVState_HEAT_STANDINGS {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                    // 0x008 [R] cOVState_HEAT_STANDINGS_cOVState_HEAT_STANDINGS stores D_00474088 after cOVState_vtbl
+    void** mVtbl;                    // 0x008 [R] cOVState_HEAT_STANDINGS_cOVState_HEAT_STANDINGS stores cOVState_HEAT_STANDINGS_vtbl after cOVState_vtbl
     // --- cUIState (ui/uistate.h, 0x48; same member names)
     int mHashName;                   // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor
     cUIEngine* mpEngine;             // 0x010 [O]; [R] the ctor's engine argument
@@ -97,7 +97,7 @@ struct cOVState_FINAL_STANDINGS {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                    // 0x008 [R] cOVState_FINAL_STANDINGS_cOVState_FINAL_STANDINGS stores D_00473FB0 after cOVState_vtbl
+    void** mVtbl;                    // 0x008 [R] cOVState_FINAL_STANDINGS_cOVState_FINAL_STANDINGS stores cOVState_FINAL_STANDINGS_vtbl after cOVState_vtbl
     // --- cUIState (ui/uistate.h, 0x48; same member names)
     int mHashName;                   // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor
     cUIEngine* mpEngine;             // 0x010 [O]; [R] the ctor's engine argument
@@ -157,7 +157,7 @@ struct cOVState_RACE_FINISHOV {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                    // 0x008 [R] cOVState_RACE_FINISHOV_cOVState_RACE_FINISHOV stores D_00473E00 after cOVState_vtbl
+    void** mVtbl;                    // 0x008 [R] cOVState_RACE_FINISHOV_cOVState_RACE_FINISHOV stores cOVState_RACE_FINISHOV_vtbl after cOVState_vtbl
     // --- cUIState (ui/uistate.h, 0x48; same member names)
     int mHashName;                   // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor
     cUIEngine* mpEngine;             // 0x010 [O]; [R] the ctor's engine argument
@@ -220,7 +220,7 @@ struct cOVState_BASSSP_QUAL_FINISHOV {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                    // 0x008 [R] cOVState_BASSSP_QUAL_FINISHOV_cOVState_BASSSP_QUAL_FINISHOV stores D_00473D28 after cOVState_vtbl
+    void** mVtbl;                    // 0x008 [R] cOVState_BASSSP_QUAL_FINISHOV_cOVState_BASSSP_QUAL_FINISHOV stores cOVState_BASSSP_QUAL_FINISHOV_vtbl after cOVState_vtbl
     // --- cUIState (ui/uistate.h, 0x48; same member names)
     int mHashName;                   // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor
     cUIEngine* mpEngine;             // 0x010 [O]; [R] the ctor's engine argument

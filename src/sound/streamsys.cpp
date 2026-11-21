@@ -1457,8 +1457,8 @@ extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, 
 extern "C" void* cCrowdSys_cCrowdSys(void* self, int embedded, int a2, int a3, int heap);
 extern "C" void* cMusicSys_cMusicSys(void* self, int embedded, int a2, int a3, int heap);
 extern "C" void* cSpeechSys_cSpeechSys(void* self, int embedded, int a2, int a3, int heap);
-extern void* D_004838F8[];
-extern void* D_004837F8[];
+extern void* cMusicSys_vtbl[];
+extern void* cCrowdSys_vtbl[];
 extern void* cSpeechSys_vtbl[];
 
 struct sSsVEntryB200 {
@@ -1487,7 +1487,7 @@ extern const sSsVtblCB200 D_004837A0_B200 __asm__("D_004837A0");
  * cBankManager (+0x5730) and cStreamSys (+0x6200). Then cCrowdSys_cCrowdSys, the music system (cMusicSys_cMusicSys at +0x118)
  * and cSpeechSys_cSpeechSys (+0x5560) run, and the cController vtables D_004837D8, D_00483760 and D_004837A0 are
  * installed on the bases (temporary copies with adjusted deltas when not complete). Finally the primary vtables
- * D_004838F8, cSpeechSys_vtbl and D_004837F8 are stored and +0x5720 is cleared.
+ * cMusicSys_vtbl, cSpeechSys_vtbl and cCrowdSys_vtbl are stored and +0x5720 is cleared.
  *
  * @param embedded  nonzero to also construct the virtual bases (the in-charge flag)
  * @param maxBanks  the maximum number of banks
@@ -1530,9 +1530,9 @@ extern "C" char* cController_cController(cController* self, int embedded, int ma
         *(sSsVtblCB200**)(**(char***)&self->MusicSys + 0x1D4) = &bankMgrVtbl;
         bankMgrVtbl.e[1].delta = D_004837A0_B200.e[1].delta + bankMgrDelta;
     }
-    self->MusicSys.mVtbl = D_004838F8;
+    self->MusicSys.mVtbl = cMusicSys_vtbl;
     self->SpeechSys.mVtbl = cSpeechSys_vtbl;
-    self->mVtbl = D_004837F8;
+    self->mVtbl = cCrowdSys_vtbl;
     self->execFlag = 0;
     return ((char*)self);
 }
@@ -1548,8 +1548,8 @@ extern "C" void cStreamSys__cStreamSys(cStreamSys* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern "C" void cSpeechSys__cSpeechSys(char* self, int flags);
 extern "C" void func_002B3398(char* self, int flags);
-extern void* D_004838F8[];
-extern void* D_004837F8[];
+extern void* cMusicSys_vtbl[];
+extern void* cCrowdSys_vtbl[];
 extern void* cSpeechSys_vtbl[];
 
 struct sSsVEntryB478 {
@@ -1585,9 +1585,9 @@ extern "C" void cController__cController(cController* self, int flags)
 {
     char* mon = (char*)&self->MusicSys;
     char* bank = (char*)&self->SpeechSys;
-    self->MusicSys.mVtbl = D_004838F8;
+    self->MusicSys.mVtbl = cMusicSys_vtbl;
     self->SpeechSys.mVtbl = cSpeechSys_vtbl;
-    self->mVtbl = D_004837F8;
+    self->mVtbl = cCrowdSys_vtbl;
     *(const sSsVtblAB478**)(*(char**)(**(char***)&self->MusicSys + 0x1D8) + 4) = &D_004837D8;
     *(const sSsVtblBB478**)(**(char***)&self->MusicSys + 0xAB0) = &D_00483760;
     *(const sSsVtblCB478**)(**(char***)&self->MusicSys + 0x1D4) = &D_004837A0;

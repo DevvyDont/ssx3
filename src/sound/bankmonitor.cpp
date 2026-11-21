@@ -2593,17 +2593,17 @@ INCLUDE_ASM("sound/bankmonitor", func_002AF370);
 #ifdef SKIP_ASM
 extern "C" int TIMER_gettick();
 extern "C" void fptoui(float);
-extern int D_00450DC8[];
+extern int TIMERhz[];
 
 /**
- * Returns the current time in ms: TIMER_gettick() / D_00450DC8[0] * 1000, converted to unsigned int.
+ * Returns the current time in ms: TIMER_gettick() / TIMERhz[0] * 1000, converted to unsigned int.
  *
  * Declared void, but the __fixunssfsi result (fptoui) is returned in v0; callers use it (func_002AE7A8 stamps
  * bank play times with it, and the Pathfinder library).
  */
 extern "C" void func_002AF370(void)
 {
-    fptoui((float)TIMER_gettick() / (float)D_00450DC8[0] * 1000.0f);
+    fptoui((float)TIMER_gettick() / (float)TIMERhz[0] * 1000.0f);
 }
 #endif
 
@@ -5181,7 +5181,7 @@ extern "C" void func_003B7E70(int h, int v);
 extern "C" void func_003D2350(int a);
 extern "C" int func_003D25F0(int id, char* name, int a2, void* a3, int a4, int a5, void* buf, int size);
 extern char str_pct_spct_s_c[];
-extern float D_004A3508;
+extern float gMusicScaling;
 
 
 /**
@@ -5195,7 +5195,7 @@ extern float D_004A3508;
  *
  * Once open it applies the song's mLowPass (func_002B2160) and, unless fading out (unk_48) or unk_54 is 0, sets the
  * stream volume (func_003B7E70) to base volume (unk_40) x mPathlevel / 100 x the volume control (unk_3C, when set) x
- * D_004A3508, clamped to 0..127. Called by the constructor with force and by func_002B4388.
+ * gMusicScaling, clamped to 0..127. Called by the constructor with force and by func_002B4388.
  *
  * @param mon  the cSongInstance
  * @param force  nonzero to open the streams without waiting for the async MPF load
@@ -5235,7 +5235,7 @@ extern "C" void func_002B21E0(cSongInstance* mon, int force)
         volume = (float)mon->unk_40 * 0.009999999776482582f * (float)*(int*)(*(char**)mon + 0x88) * *volumeControl;
     else
         volume = (float)mon->unk_40 * 0.009999999776482582f * (float)*(int*)(*(char**)mon + 0x88);
-    volume *= D_004A3508;
+    volume *= gMusicScaling;
     SNDSYS_entercritical();
     int streamHandle = func_002B2488(mon);
     if (streamHandle >= 0)
@@ -5657,7 +5657,7 @@ struct sSndVtbl7 {
 } __attribute__((aligned(8)));
 
 // Virtual-base vtable images patched by the ctors / dtors below.
-extern void* D_004838F8[] __asm__("D_004838F8");
+extern void* cMusicSys_vtbl[] __asm__("cMusicSys_vtbl");
 extern const sSndVtbl4 D_00483928_v __asm__("D_00483928");
 extern const sSndVtbl7 D_00483948_v __asm__("D_00483948");
 // One entry of cSndPlayOpts' option stack (mCurrent[], 0x18 bytes); byte 0 seeds mBaseVol.
@@ -5763,7 +5763,7 @@ static inline int* Row_28C0(int (*g)[5], int i)
  * When in charge it constructs the virtual bases (cSoundSys at +0x5448, cBankManager, cStreamSys) with the bank and
  * stream counts; it installs the cSoundSys and cBankManager vtables (D_00483928, cBankMonitor_vtbl, D_00483948), and
  * when not in charge points the objects at stack copies with adjusted this deltas. Clears the counts, sets the vptr
- * D_004838F8 and gMusicSys = self, allocates the 25600-byte "MPF data file" buffer (mMPFFile), clears mCategory /
+ * cMusicSys_vtbl and gMusicSys = self, allocates the 25600-byte "MPF data file" buffer (mMPFFile), clears mCategory /
  * mCategoryCount and empties every title, artist and album.
  *
  * Parses music.inf (D_004A37E8): GLOBAL's BASEPATH goes to mBasePath; every other section (up to 64) becomes a song:
@@ -5809,7 +5809,7 @@ extern "C" char* cMusicSys_cMusicSys(char* self, int inchrg, int maxBanks, int m
     }
     *(int*)(self + 0x3E4) = 0;
     *(int*)(self + 0x3E8) = 0;
-    *(void***)(self + 0x5440) = D_004838F8;
+    *(void***)(self + 0x5440) = cMusicSys_vtbl;
     *(int*)(self + 0x3EC) = 0;
     *(int*)(self + 0x3F0) = 0;
     *(long*)(self + 0x3F8) = 0;
@@ -5957,7 +5957,7 @@ extern "C" void cBankManager__cBankManager(void* self, int flags);
 extern "C" void cStreamSys__cStreamSys(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(cSoundSys* self, int flags);
 extern "C" void func_002B1F78(cSongInstance* self, int flags);
-extern void* D_004838F8[];
+extern void* cMusicSys_vtbl[];
 extern void* cBankMonitor_vtbl[];
 
 struct sBmonVEntry3398 {
@@ -5988,7 +5988,7 @@ struct sBmonVcall3398 { short delta; short index; void (*fn)(void*, int); };
 // PORT: g++ 2.95 virtual-base destruction with stack vtable this-adjust fix-ups, written out by hand.
 extern "C" void func_002B3398(cMusicSys* self, int flags)
 {
-    self->mVtbl = D_004838F8;
+    self->mVtbl = cMusicSys_vtbl;
     *(const sBmonVtblA3398**)(*(char**)(**(char***)self + 0x1D8) + 4) = &D_00483928;
     *(void***)(**(char***)self + 0xAB0) = cBankMonitor_vtbl;
     *(const sBmonVtblB3398**)(**(char***)self + 0x1D4) = &D_00483948;

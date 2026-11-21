@@ -130,7 +130,7 @@ struct cChallenger {
     int miGameEvent;                // 0x10 [R] 3rd number; [U] the popup's setGameEvent (view event)
     int mbRanked;                   // 0x14 [R] 4th number as 0/1; [U] the popup: cBENetworkInterface_networkOpt
                                     //      .bIsRankedGame (view f14)
-    int mbMultipliers;              // 0x18 [R] 5th number as 0/1; [U] the popup: race-option bit 6 of D_005308B8 (the
+    int mbMultipliers;              // 0x18 [R] 5th number as 0/1; [U] the popup: race-option bit 6 of cBERules_mRules (the
                                     //      multipliers bit, festatenetchallenge mpLBMultipliers) (view f18)
     int mbPowerUps;                 // 0x1C [R] 6th number as 0/1; [U] the popup: race-option bit 8 (power-ups) (view f1C)
     int miNumberAI;                 // 0x20 [R] 7th number; [U] the popup's cBENewRaceInterface_setNumberAI (view numAI)

@@ -6,7 +6,7 @@
 // allocates 8 bytes "BEPreRace" / "BERace" / "BEPreRace" - the post-race state reuses the pre-race tag - with the cBEState
 // ctor inlined: the argument goes to nextState, the vtable to 0x4) and freed by the virtual purgeState (operator delete,
 // no destructor). Their virtuals hand out the BE interfaces by kind (getInterface) and run the state's enter/exit work.
-// Instances: D_004A1258 (pre-race), cBERaceState_instance (0x004A122C), D_004A1254 (post-race) - On Tour's static
+// Instances: cBEPreRaceState_instance (pre-race), cBERaceState_instance (0x004A122C), cBEPostRaceState_instance (post-race) - On Tour's static
 // `instance` members.
 // EA's source: d:/ssx/code/source/be/bestate.cpp (preview assert path; its asserts name nextState and cBE's aBEState[]).
 // Retail code: getState / getInterface / onExit / onEnter in units be/bestate (cBERaceState) and be/beprepoststate

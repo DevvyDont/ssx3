@@ -6,7 +6,7 @@
 // show the map embed one and forward their virtuals to it with its address: cFEStateEventSelect (fe/festateload.h,
 // at 0x48) and cOVState_TRANSPORT (fe/ovstatetransport.h, at 0x9C). Its class statics are globals:
 // cUITemplate_MAP::mMapStyle (cUITemplate_MAP_mMapStyle, D_004A2594), mMapState (D_004A259C), mSelectedEvent
-// (D_004A25A0), mPeak (D_004A25A4) and On Tour's mMapFEStart (by position D_004A2598, which the FE state factories
+// (D_004A25A0), mPeak (D_004A25A4) and On Tour's mMapFEStart (by position cUITemplate_MAP_mMapFEStart, which the FE state factories
 // set next to mMapStyle).
 // EA's source file is not known (no assert of its own); retail code: fe/uitemplatemap (0x00200700 ... 0x00208438) and
 // cUITemplate_MAP_init in fe/ovstaterewardslist (0x002006B8, statics only).

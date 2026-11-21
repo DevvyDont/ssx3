@@ -53,9 +53,9 @@ struct cUIText {
                                      //       [U] font index in cUIText_getFont, bit 3 in cUIText_getAsciiString/getUnicodeString
     tARGB mShadowColour;             // 0x078 [P] setShadowColour (preview 0x70; retail cUIText_setShadowColour); [U] cUIText_setUIData
                                      //       sets it from the record when the shadow bit is on; cUIText_render2D uses it for the shadow
-    tARGB mStaticColour;             // 0x088 [P] setStaticColour (preview 0x80; retail cUIText_setStaticColour); [R] = D_004C66C8;
+    tARGB mStaticColour;             // 0x088 [P] setStaticColour (preview 0x80; retail cUIText_setStaticColour); [R] = gStaticColour;
                                      //       [U] cUIText_render2D: the colour when the thing is static and bit 4 is set
-    tARGB mDisabledColour;           // 0x098 [O]; [R] = D_004C66C8; [U] cUIText_render2D: the colour when the thing is not enabled
+    tARGB mDisabledColour;           // 0x098 [O]; [R] = gStaticColour; [U] cUIText_render2D: the colour when the thing is not enabled
                                      //       and bit 5 is set
     int mNumLines;                   // 0x0A8 [O]; [R] = 0; [U] line count from cUIText_getNumTextLines (cUIText_setUnicodeStringPrivate);
                                      //       cUIText_render2D loops over it; func_003A10F0 returns it

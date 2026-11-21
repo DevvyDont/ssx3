@@ -1646,13 +1646,13 @@ extern "C" void cUISlider_render2D(cUISlider* self, float dx, float dy)
 }
 #endif
 
-extern void* D_0046DD60[];
+extern void* cUISoundInterface_vtbl[];
 
 //100%
 INCLUDE_ASM("ui/uiscreen", cUISoundInterface_cUISoundInterface__FPv);
 #ifdef SKIP_ASM
 /**
- * Constructs a UI sound interface: installs the base sound-interface vtable D_0046DD60.
+ * Constructs a UI sound interface: installs the base sound-interface vtable cUISoundInterface_vtbl.
  *
  * cFESound_cFESound runs it as its base constructor, and the static gUISoundNull is built with it.
  *
@@ -1660,7 +1660,7 @@ INCLUDE_ASM("ui/uiscreen", cUISoundInterface_cUISoundInterface__FPv);
  */
 void* cUISoundInterface_cUISoundInterface(void* self)
 {
-    *(int*)self = (int)(void*)D_0046DD60;
+    *(int*)self = (int)(void*)cUISoundInterface_vtbl;
     return self;
 }
 #endif

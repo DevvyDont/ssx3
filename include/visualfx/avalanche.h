@@ -22,7 +22,7 @@
 //                               stepping 0x2F0 (0xBC00 bytes); [O] 0x2F0.
 //   tAvalanchePackedFrameData 0xA [U] cAvalanche_resolveDataPointers advances its file cursor by m_life * 10 per node;
 //                               the three setters in visualfx/angerfx write bytes 0..9; [O] 0xA.
-// Base: cAvalanche derives from cVisualEffect (vptr only; its vtable D_00488680 is restored by cAvalanche__cAvalanche);
+// Base: cAvalanche derives from cVisualEffect (vptr only; its vtable cVisualEffect_vtbl is restored by cAvalanche__cAvalanche);
 // the t* structs have no bases and no vtables.
 // Vtable cAvalanche_vtbl (D_00488648, 5 slots): 1 dtor cAvalanche__cAvalanche, 2 cAvalanche_update, 3 cAvalanche_render,
 // 4 cVisualEffect_deferredRender, 5 cAvalanche_init.
@@ -48,7 +48,7 @@ struct tActiveAvalancheNode;
 struct cAvalanche {
     // --- cVisualEffect (vptr only)
     void** mVtbl;                   // 0x000 [R] cAvalanche_vtbl (cAvalanche_cAvalanche, the allocation above);
-                                    //       cAvalanche__cAvalanche stores it, then cVisualEffect's D_00488680
+                                    //       cAvalanche__cAvalanche stores it, then cVisualEffect's cVisualEffect_vtbl
 };
 
 CHECK_OFFSET(cAvalanche, mVtbl, 0x000);

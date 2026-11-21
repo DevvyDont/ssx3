@@ -676,16 +676,16 @@ extern "C" void cBXScriptEngine_ResumeScript(cBXScriptEngine* self, int requestH
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetScriptEngine);
 #ifdef SKIP_ASM
-extern int D_004A34E8;
+extern int cBXScriptEngine_mpScriptEngine;
 
 /**
- * Returns the base script engine instance, D_004A34E8 (set by cBXScriptEngine_cBXScriptEngine, cleared by its
+ * Returns the base script engine instance, cBXScriptEngine_mpScriptEngine (set by cBXScriptEngine_cBXScriptEngine, cleared by its
  * destructor).
  *
  * @return the engine, or 0 when none exists
  */
 extern "C" int cBXScriptEngine_GetScriptEngine(void) {
-    return D_004A34E8;
+    return cBXScriptEngine_mpScriptEngine;
 }
 #endif
 

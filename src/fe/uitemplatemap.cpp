@@ -22,7 +22,7 @@ extern "C" void cUITemplate_MAP_setupMapPic(cUITemplate_MAP* self);
 extern "C" void cUITemplate_MAP_setupPopup(cUITemplate_MAP* self);
 extern "C" void cUITemplate_MAP_setupPeakInfo(cUITemplate_MAP* self);
 extern unsigned int cUITemplate_MAP_mMapStyle;
-extern int D_004A2598;
+extern int cUITemplate_MAP_mMapFEStart;
 extern int cUITemplate_MAP_mMapState;
 extern char str_MapPic[];
 extern char str_maptab[];
@@ -102,7 +102,7 @@ extern "C" void cUITemplate_MAP_onCreateScreen(cUITemplate_MAP* tmpl, void* scre
     self->screen = screen;
     if (cUITemplate_MAP_mMapStyle == 1 || cUITemplate_MAP_mMapStyle == 3 || cUITemplate_MAP_mMapStyle == 4)
         cOVStateManager_addPDATemplate();
-    if (cUITemplate_MAP_mMapStyle != 0 || D_004A2598 == 0)
+    if (cUITemplate_MAP_mMapStyle != 0 || cUITemplate_MAP_mMapFEStart == 0)
         cUITemplate_MAP_mMapState = 0;
     cUITemplate_MAP_setShowInfo((cUITemplate_MAP*)self, 0);
     self->popup = 0;

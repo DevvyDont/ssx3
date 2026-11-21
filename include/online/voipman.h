@@ -5,7 +5,7 @@
 // (func_00266D58, from cGameConnMan's func_002639E0), turns the voice on / off / toggles it, and sets the voice level
 // from the options (D_004A33F8, cOVState_PAUSE_OPTIONS).
 // EA's source: d:/ssx/code/source/online/voipman.cpp (the July 2003 preview's assert strings, with "!VoipMan" and the
-// allocation tag "cVoipMan"). Retail code: dirtysock/tagsunk 0x00266CA0..0x00266F90. One instance, D_004A33F4:
+// allocation tag "cVoipMan"). Retail code: dirtysock/tagsunk 0x00266CA0..0x00266F90. One instance, VoipMan:
 // func_00266CA0 creates it, func_00266CD8 destroys it. No On Tour counterpart.
 //
 // Size 8: [R] func_00266CA0: cMemMan_alloc(8, "cVoipMan", 0x20000000) + the constructor func_00266D00 (clears both

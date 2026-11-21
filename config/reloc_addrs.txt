@@ -17,8 +17,8 @@ rom:0x51D1C reloc:MIPS_LO16 symbol:cBELibrary_profileLib
 rom:0x51D40 reloc:MIPS_LO16 symbol:cBELibrary_profileLib
 rom:0x51D64 reloc:MIPS_LO16 symbol:cBELibrary_profileLib
 rom:0x51D88 reloc:MIPS_LO16 symbol:cBELibrary_profileLib
-// ealib/seg_2DCAE8 iFILESYS_ExecCommand: `addiu $2, $20, %lo(D_00519AB0)` (siblings at rom 0x2DF028, 0x2DF0A4 are paired).
-rom:0x2DF24C reloc:MIPS_LO16 symbol:D_00519AB0
+// ealib/seg_2DCAE8 iFILESYS_ExecCommand: `addiu $2, $20, %lo(gFileDevice)` (siblings at rom 0x2DF028, 0x2DF0A4 are paired).
+rom:0x2DF24C reloc:MIPS_LO16 symbol:gFileDevice
 // main/game cSectionMan_update: `addiu $2/$4, $19, %lo(cSectionMan_mSectionMap)` (sibling at rom 0x12E9D4 is paired).
 rom:0x12EA04 reloc:MIPS_LO16 symbol:cSectionMan_mSectionMap
 rom:0x12EA48 reloc:MIPS_LO16 symbol:cSectionMan_mSectionMap
@@ -49,11 +49,11 @@ rom:0x24917C reloc:MIPS_LO16 symbol:D_004FF6C0
 rom:0x24FC84 reloc:MIPS_HI16 symbol:cFloatingNode_vtbl
 rom:0x24FC8C reloc:MIPS_LO16 symbol:cFloatingNode_vtbl
 // camera/camera func_0015E2A8 (tools/gen/reloc_from_diff.py)
-rom:0x5F30C reloc:MIPS_LO16 symbol:D_004C5430
+rom:0x5F30C reloc:MIPS_LO16 symbol:kCamShakeDependsOnDistance
 // be/belibrary func_0014A188 (tools/gen/reloc_from_diff.py)
 rom:0x4B1B0 reloc:MIPS_HI16 symbol:cBELibrary_profileLib
 rom:0x4B1B4 reloc:MIPS_HI16 symbol:D_004BA348
-rom:0x4B1B8 reloc:MIPS_HI16 symbol:D_005308B8
+rom:0x4B1B8 reloc:MIPS_HI16 symbol:cBERules_mRules
 // main/game cSectionMan_loadSection (tools/gen/reloc_from_diff.py)
 rom:0x12E444 reloc:MIPS_LO16 symbol:cSectionMan_mSectionMap
 // render/lightman cPlants_update (tools/gen/reloc_from_diff.py)
@@ -72,7 +72,7 @@ rom:0xFCFC reloc:MIPS_LO16 symbol:t4vect_Origin
 // func_0014A188's at rom 0x4B1B0 / 0x4B1B8.
 rom:0x4B624 reloc:MIPS_HI16 symbol:cBELibrary_profileLib
 rom:0x4B628 reloc:MIPS_HI16 symbol:D_004BA348
-rom:0x4B62C reloc:MIPS_HI16 symbol:D_005308B8
+rom:0x4B62C reloc:MIPS_HI16 symbol:cBERules_mRules
 
 // camera/trigger/cameratriggerfactory static-init functions (func_00175A20, func_00177650, func_00178F58, func_00179798):
 // splat left the %hi/%lo halves of their D_004C5xxx-D_004C62xx colour-table stores unpaired (raw 0x4C0000 >> 16 / 0x5xxx).
@@ -357,16 +357,16 @@ rom:0x1D5844 reloc:MIPS_LO16 symbol:D_004D5720
 rom:0x1D5860 reloc:MIPS_LO16 symbol:D_004D5730
 rom:0x1D5874 reloc:MIPS_LO16 symbol:D_004D5740
 rom:0x1D5880 reloc:MIPS_LO16 symbol:D_004D5750
-// main/gameload cGame_update: the int[14] flag table D_004428F0 indexed by constant (the target's asm names the
+// main/gameload cGame_update: the int[14] flag table cPauseState_FlagsTable indexed by constant (the target's asm names the
 // inner addresses D_004428FC / D_00442920 / D_004428F8, which other functions also use); checked against the asm.
-rom:0x1318B8 reloc:MIPS_HI16 symbol:D_004428F0 addend:0xC
-rom:0x1318BC reloc:MIPS_LO16 symbol:D_004428F0 addend:0xC
-rom:0x131960 reloc:MIPS_HI16 symbol:D_004428F0 addend:0xC
-rom:0x131968 reloc:MIPS_LO16 symbol:D_004428F0 addend:0xC
-rom:0x1319C0 reloc:MIPS_HI16 symbol:D_004428F0 addend:0x30
-rom:0x1319C8 reloc:MIPS_LO16 symbol:D_004428F0 addend:0x30
-rom:0x131AA0 reloc:MIPS_HI16 symbol:D_004428F0 addend:0x8
-rom:0x131AB0 reloc:MIPS_LO16 symbol:D_004428F0 addend:0x8
+rom:0x1318B8 reloc:MIPS_HI16 symbol:cPauseState_FlagsTable addend:0xC
+rom:0x1318BC reloc:MIPS_LO16 symbol:cPauseState_FlagsTable addend:0xC
+rom:0x131960 reloc:MIPS_HI16 symbol:cPauseState_FlagsTable addend:0xC
+rom:0x131968 reloc:MIPS_LO16 symbol:cPauseState_FlagsTable addend:0xC
+rom:0x1319C0 reloc:MIPS_HI16 symbol:cPauseState_FlagsTable addend:0x30
+rom:0x1319C8 reloc:MIPS_LO16 symbol:cPauseState_FlagsTable addend:0x30
+rom:0x131AA0 reloc:MIPS_HI16 symbol:cPauseState_FlagsTable addend:0x8
+rom:0x131AB0 reloc:MIPS_LO16 symbol:cPauseState_FlagsTable addend:0x8
 
 // Unpaired %hi/%lo uses found by diffing near-miss candidates (same text, value-checked).
 // dirtysock/tagsunk func_00267468 (tools/gen/reloc_from_diff.py)
@@ -582,11 +582,11 @@ rom:0x271E8 reloc:MIPS_LO16 symbol:D_00458738
 rom:0x271EC reloc:MIPS_LO16 symbol:D_00458780
 rom:0x27250 reloc:MIPS_LO16 symbol:D_00458780
 
-// ealib/seg_2DCAE8 reserveop: the command manager's mutex is D_00519AB0+0x14, built with its own lui (as our C
-// does for &D_00519AB0.f14); splat named those halves D_00519AC4 (a symbol other functions address directly).
-rom:0x2DF67C reloc:MIPS_HI16 symbol:D_00519AB0 addend:0x14
-rom:0x2DF680 reloc:MIPS_LO16 symbol:D_00519AB0 addend:0x14
-rom:0x2DF750 reloc:MIPS_LO16 symbol:D_00519AB0 addend:0x14
+// ealib/seg_2DCAE8 reserveop: the command manager's mutex is gFileDevice+0x14, built with its own lui (as our C
+// does for &gFileDevice.f14); splat named those halves D_00519AC4 (a symbol other functions address directly).
+rom:0x2DF67C reloc:MIPS_HI16 symbol:gFileDevice addend:0x14
+rom:0x2DF680 reloc:MIPS_LO16 symbol:gFileDevice addend:0x14
+rom:0x2DF750 reloc:MIPS_LO16 symbol:gFileDevice addend:0x14
 
 // Unpaired %hi/%lo uses found by diffing near-miss candidates (same text, value-checked).
 // ealib/seg_2DCAE8 func_003E95C8 (tools/gen/reloc_from_diff.py)

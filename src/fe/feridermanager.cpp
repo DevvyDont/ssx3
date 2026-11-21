@@ -393,7 +393,7 @@ extern "C" void cFERider_compileModel(cFERider* self)
 //100%
 INCLUDE_ASM("fe/feridermanager", cFERider_render);
 #ifdef SKIP_ASM
-extern char D_005047F8[];
+extern char cIrradianceDataBase_TheDataBase[];
 extern char D_00504810[];
 extern char str_moby[];
 extern char str_kaori[];
@@ -452,7 +452,7 @@ struct sVE_EE88 {
  * Renders the front-end rider at its character's spot on the front-end map.
  *
  * Skipped while an init is deferred, without a model or before a pose was built (+0x14). The world matrix comes from
- * the character's locator in D_005047F8 ("moby" .. "viggo", "fe_map" for others; characters 7 and 8, and 0 when +0xCD0
+ * the character's locator in cIrradianceDataBase_TheDataBase ("moby" .. "viggo", "fe_map" for others; characters 7 and 8, and 0 when +0xCD0
  * is set, use "elise", so the "nate" and "psymon" cases are never reached), moved by the model's hips bone; it is set
  * on the graphics manager (vtable entry 69). The draw state's layer bits (5-9) take the rider's draw layer when it is
  * not negative while the model (cAnimModel_render) and the attached-emitter FX (func_002F2088) render, then are put
@@ -490,37 +490,37 @@ extern "C" void cFERider_render(cFERider* selfp)
     }
     switch (type) {
     case 0:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(D_005047F8, str_moby), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_moby), D_00504810, 1.0f);
         break;
     case 1:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(D_005047F8, str_kaori), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_kaori), D_00504810, 1.0f);
         break;
     case 2:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(D_005047F8, str_allegra), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_allegra), D_00504810, 1.0f);
         break;
     case 3:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(D_005047F8, str_mac), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_mac), D_00504810, 1.0f);
         break;
     case 4:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(D_005047F8, str_zoe), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_zoe), D_00504810, 1.0f);
         break;
     case 5:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(D_005047F8, str_griff), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_griff), D_00504810, 1.0f);
         break;
     case 6:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(D_005047F8, str_elise), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_elise), D_00504810, 1.0f);
         break;
     case 7:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(D_005047F8, str_nate), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_nate), D_00504810, 1.0f);
         break;
     case 8:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(D_005047F8, str_psymon), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_psymon), D_00504810, 1.0f);
         break;
     case 9:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(D_005047F8, str_viggo), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_viggo), D_00504810, 1.0f);
         break;
     default:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(D_005047F8, str_fe_map), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_fe_map), D_00504810, 1.0f);
         break;
     }
     int idx = cAnimModel_getBoneSkelIndex(self->model, 0, str_hips);
@@ -623,7 +623,7 @@ INCLUDE_ASM("fe/feridermanager", cFERider_updateModelPose);
 struct sQuadF2D0 { int x[4]; } __attribute__((aligned(16)));
 struct sHalfF2D0 { sQuadF2D0 a, b; };
 extern sQuadF2D0 t4vect_Origin;
-extern sQuadF2D0 D_004FF220;
+extern sQuadF2D0 tquat_Identity;
 extern "C" void cAnimModel_transform(void* model, void* pose);
 extern "C" void cAnimModel_buildSkelMatrices(void* model);
 
@@ -631,7 +631,7 @@ extern "C" void cAnimModel_buildSkelMatrices(void* model);
  * Rebuilds the front-end rider's skeleton from its rider and board transforms and marks the pose built (+0x14).
  *
  * With +0xCCC set uses the rider transform (+0xC30) for both; otherwise the rider (+0xC30) and board (+0xC50)
- * transforms, first resetting the two board bones (+0xCAC, +0xCB0) to the origin and D_004FF220. Then
+ * transforms, first resetting the two board bones (+0xCAC, +0xCB0) to the origin and tquat_Identity. Then
  * cAnimModel_transform and cAnimModel_buildSkelMatrices.
  */
 extern "C" void cFERider_updateModelPose(cFERider* self)
@@ -646,9 +646,9 @@ extern "C" void cFERider_updateModelPose(cFERider* self)
         poses[0] = *(sHalfF2D0*)&self->mPose;
         poses[1] = *(sHalfF2D0*)&self->mBoardPose;
         (*(sQuadF2D0**)((char*)self->mpAnimModel + 0x24))[self->mBoneMap[12]] = t4vect_Origin;
-        (*(sQuadF2D0**)((char*)self->mpAnimModel + 0x28))[self->mBoneMap[12]] = D_004FF220;
+        (*(sQuadF2D0**)((char*)self->mpAnimModel + 0x28))[self->mBoneMap[12]] = tquat_Identity;
         (*(sQuadF2D0**)((char*)self->mpAnimModel + 0x24))[self->mBoneMap[13]] = t4vect_Origin;
-        (*(sQuadF2D0**)((char*)self->mpAnimModel + 0x28))[self->mBoneMap[13]] = D_004FF220;
+        (*(sQuadF2D0**)((char*)self->mpAnimModel + 0x28))[self->mBoneMap[13]] = tquat_Identity;
         cAnimModel_transform(self->mpAnimModel, poses);
         cAnimModel_buildSkelMatrices(self->mpAnimModel);
     }

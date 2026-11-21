@@ -444,7 +444,7 @@ struct sPtCtx1380 {
 
 extern char* cGraphicsMan_TheGraphicsMan_particle __asm__("cGraphicsMan_TheGraphicsMan");
 extern sPtCtx1380* D_004A5B80_ctx __asm__("cGraphicsMan_TheGraphicsMan");
-extern int D_0044B420[];
+extern int gBlendTable[];
 
 
 /**
@@ -452,7 +452,7 @@ extern int D_0044B420[];
  *
  * Returns unless the words at +0x174 and +0x1E0 are set and the graphics manager's effect texture
  * _EffectTexMap[base (+0x4) + (int)frame (+0x10)] is valid. Sets bits 2-6 of the emitter's draw state
- * (+0x1E4) word 1 from its kind (+0x8) through D_0044B420 {7, 5, 9, 0}, bits 5-9 of word 2 from @p blend, and
+ * (+0x1E4) word 1 from its kind (+0x8) through gBlendTable {7, 5, 9, 0}, bits 5-9 of word 2 from @p blend, and
  * the texture id; pushes that state on the graphics manager's draw-state stack, draws through its virtual
  * slot 83 (cPS2GraphicsMan_RenderDynamicParticleEmitter) and pops the state.
  *
@@ -471,7 +471,7 @@ extern "C" void cDynamicEmitter_render(cDynamicEmitter* self, int blend)
     if (tex < 0) {
         return;
     }
-    self->mDrawState.unk_00[1] = (unsigned int)(((int)self->mDrawState.unk_00[1] & ~0x7C) | ((D_0044B420[self->BlendMode] << 2) & 0x7C));
+    self->mDrawState.unk_00[1] = (unsigned int)(((int)self->mDrawState.unk_00[1] & ~0x7C) | ((gBlendTable[self->BlendMode] << 2) & 0x7C));
     self->mDrawState.unk_00[2] = (unsigned int)(((int)self->mDrawState.unk_00[2] & ~0x3E0) | ((blend << 5) & 0x3E0));
     self->mDrawState.m_textureState.m_texid[0] = tex;
     ctx->top[1] = ctx->top[0];
@@ -632,14 +632,14 @@ struct sPtCtx1688 {
 
 extern char* cGraphicsMan_TheGraphicsMan_particle __asm__("cGraphicsMan_TheGraphicsMan");
 extern sPtCtx1688* D_004A5B80_ctx1688 __asm__("cGraphicsMan_TheGraphicsMan");
-extern int D_0044B420[];
+extern int gBlendTable[];
 
 
 /**
  * Draws the colour emitter's sub-emitters.
  *
  * Returns when the emitter is disabled, has no enabled sub-emitters, or its texture (TextureId + mCurrentFlipTexture)
- * is not loaded. Otherwise it writes the blend mode (D_0044B420[BlendMode]) and @p blend (bits 5-9 of draw-state word
+ * is not loaded. Otherwise it writes the blend mode (gBlendTable[BlendMode]) and @p blend (bits 5-9 of draw-state word
  * 2) into mDrawState, sets its texture, pushes it on the graphics manager's draw-state stack, calls GrMan slot 84 with
  * the emitter and pops the state.
  *
@@ -658,7 +658,7 @@ extern "C" void cDynamicColourEmitter_render(cDynamicColourEmitter* self, int bl
     if (tex < 0) {
         return;
     }
-    self->mDrawState.unk_00[1] = (unsigned int)(((int)self->mDrawState.unk_00[1] & ~0x7C) | ((D_0044B420[self->BlendMode] << 2) & 0x7C));
+    self->mDrawState.unk_00[1] = (unsigned int)(((int)self->mDrawState.unk_00[1] & ~0x7C) | ((gBlendTable[self->BlendMode] << 2) & 0x7C));
     self->mDrawState.unk_00[2] = (unsigned int)(((int)self->mDrawState.unk_00[2] & ~0x3E0) | ((blend << 5) & 0x3E0));
     self->mDrawState.m_textureState.m_texid[0] = tex;
     ctx->top[1] = ctx->top[0];
@@ -1303,9 +1303,9 @@ void* cTube_update(void* self)
 INCLUDE_ASM("render/particle", cSimpleTube_cSimpleTube);
 #ifdef SKIP_ASM
 extern int D_004A422C;
-extern int D_004A41E0;
-extern int D_004A41E4;
-extern int D_004A41E8;
+extern int cTube_m_R;
+extern int cTube_m_G;
+extern int cTube_m_B;
 extern void* cSimpleTube_vtbl[];
 
 struct sPtVert_2520 {
@@ -1326,8 +1326,8 @@ extern sPtVert_2520 D_00501440[];
  * Constructs a segmented tube effect with @p owner segments and, the first time, fills the shared tube vertex array.
  *
  * Stores @p owner at +0x4, the tube vtable cSimpleTube_vtbl and a null point array at +0x8. While the flag D_004A422C is
- * clear it sets up all 262 shared vertices of D_00501440: alpha 0xFF, red/green/blue from the tube colour D_004A41E0,
- * D_004A41E4 and D_004A41E8, position x 0, z 1 and w 0, and y alternating 0 (even) and 1 (odd); then sets the flag.
+ * clear it sets up all 262 shared vertices of D_00501440: alpha 0xFF, red/green/blue from the tube colour cTube_m_R,
+ * cTube_m_G and cTube_m_B, position x 0, z 1 and w 0, and y alternating 0 (even) and 1 (odd); then sets the flag.
  * cFlexBridgeNode's constructors build one (0xC bytes, "Tube") with NumNodes * 8 - 9 segments.
  *
  * @param owner  the number of segments (misnamed: an int count, not an owner pointer)
@@ -1343,9 +1343,9 @@ extern "C" void* cSimpleTube_cSimpleTube(cSimpleTube* self, void* owner)
         sPtVert_2520* vertex = D_00501440;
         for (i = 0; i < 262; i++, vertex++) {
             vertex->a = 0xFF;
-            vertex->r = D_004A41E0;
-            vertex->g = D_004A41E4;
-            vertex->b = D_004A41E8;
+            vertex->r = cTube_m_R;
+            vertex->g = cTube_m_G;
+            vertex->b = cTube_m_B;
             vertex->z = 1.0f;
             vertex->w = 0;
             vertex->x = 0.0f;
@@ -1371,25 +1371,25 @@ extern float D_004A4238;
 /**
  * Refreshes the colour of the 262 shared tube vertices (D_00501440) when the tube colour has changed.
  *
- * Compares the cached floats D_004A4230, D_004A4234 and D_004A4238 with the tube colour ints D_004A41E0, D_004A41E4 and
- * D_004A41E8; if any differs, it writes the three ints into every vertex's r, g and b and caches the new values as
+ * Compares the cached floats D_004A4230, D_004A4234 and D_004A4238 with the tube colour ints cTube_m_R, cTube_m_G and
+ * cTube_m_B; if any differs, it writes the three ints into every vertex's r, g and b and caches the new values as
  * floats. @p self is not used. Called by cTube_update.
  *
  * @return nothing meaningful: declared as returning void* but falls off the end without a return value
  */
 extern "C" void* cSimpleTube_updateColours(void* self)
 {
-    if (D_004A4230 != (float)D_004A41E0 || D_004A4234 != (float)D_004A41E4 || D_004A4238 != (float)D_004A41E8) {
+    if (D_004A4230 != (float)cTube_m_R || D_004A4234 != (float)cTube_m_G || D_004A4238 != (float)cTube_m_B) {
         int i;
         for (i = 0; i < 262; i++) {
             sPtVert_2520* vertex = &D_00501440[i];
-            vertex->r = D_004A41E0;
-            vertex->g = D_004A41E4;
-            vertex->b = D_004A41E8;
+            vertex->r = cTube_m_R;
+            vertex->g = cTube_m_G;
+            vertex->b = cTube_m_B;
         }
-        D_004A4230 = (float)D_004A41E0;
-        D_004A4234 = (float)D_004A41E4;
-        D_004A4238 = (float)D_004A41E8;
+        D_004A4230 = (float)cTube_m_R;
+        D_004A4234 = (float)cTube_m_G;
+        D_004A4238 = (float)cTube_m_B;
     }
 }
 #endif
@@ -1400,13 +1400,13 @@ INCLUDE_ASM("render/particle", cSimpleTube__cSimpleTube);
 void cMemMan_free(void* p);
 void operator_delete(int* ptr);
 extern void* cSimpleTube_vtbl[];
-extern void* D_00488680[];
+extern void* cVisualEffect_vtbl[];
 
 /**
  * Destroys a segmented tube effect: frees its point array and the object itself when asked.
  *
  * Re-installs the tube vtable cSimpleTube_vtbl, frees the array at +0x8 with cMemMan_free when it is set, installs the base
- * visual-effect vtable D_00488680 and calls operator_delete when bit 0 of @p flags is set. Slot 1 of cSimpleTube_vtbl.
+ * visual-effect vtable cVisualEffect_vtbl and calls operator_delete when bit 0 of @p flags is set. Slot 1 of cSimpleTube_vtbl.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
@@ -1416,7 +1416,7 @@ extern "C" void cSimpleTube__cSimpleTube(cSimpleTube* self, int flags)
     if (self->m_positions != 0) {
         cMemMan_free(self->m_positions);
     }
-    *(void***)self = D_00488680;
+    *(void***)self = cVisualEffect_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1459,9 +1459,9 @@ struct sPtCtx_26C8 {
 };
 
 
-extern int D_004A41D4;
-extern float D_004A41D8;
-extern float D_004A41DC;
+extern int cTube_m_Enable;
+extern float cTube_m_ScaleWidth;
+extern float cTube_m_ScaleHeight;
 extern sPtV4_26C8 t4vect_ZAxis;
 extern sPtVtx_26C8 D_00501440_v26C8[] __asm__("D_00501440");
 extern sPtRS_26C8 D_00501420_rs26C8 __asm__("sDrawState_s_defaultDrawState");
@@ -1568,10 +1568,10 @@ static inline sPtV4_26C8 Scale_26C8(const sPtV4_26C8& v, float s)
 /**
  * Draws a segmented tube effect: a ribbon of two tilted sides along its points, then a line strip along the points.
  *
- * Does nothing while the tube enable flag D_004A41D4 is 0. The direction is the normalised vector from point 0 to point
+ * Does nothing while the tube enable flag cTube_m_Enable is 0. The direction is the normalised vector from point 0 to point
  * n (n = +0x4, the points at +0x8 are t4Vectors); the side vector is the normalised cross product of it with
- * t4vect_ZAxis scaled by the width D_004A41D8, and both it and its negation are lowered along Z by the height
- * D_004A41DC. For each of the n + 1 points it fills four of the shared vertices D_00501440: point + negated side and
+ * t4vect_ZAxis scaled by the width cTube_m_ScaleWidth, and both it and its negation are lowered along Z by the height
+ * cTube_m_ScaleHeight. For each of the n + 1 points it fills four of the shared vertices D_00501440: point + negated side and
  * the point for the first strip, the point and point + side for the second; two extra vertices copy their neighbours so
  * the two strips join in one degenerate tri strip.
  *
@@ -1582,14 +1582,14 @@ static inline sPtV4_26C8 Scale_26C8(const sPtV4_26C8& v, float s)
  */
 extern "C" void cSimpleTube_render(cSimpleTube* self)
 {
-    if (D_004A41D4 == 0) {
+    if (cTube_m_Enable == 0) {
         return;
     }
     sPtV4_26C8 dir = Norm_26C8(Sub_26C8(((sPtV4_26C8*)self->m_positions)[self->m_numSegments], ((sPtV4_26C8*)self->m_positions)[0]));
-    sPtV4_26C8 sideOffset = Scale_26C8(Norm_26C8(Cross_26C8(dir, t4vect_ZAxis)), D_004A41D8);
+    sPtV4_26C8 sideOffset = Scale_26C8(Norm_26C8(Cross_26C8(dir, t4vect_ZAxis)), cTube_m_ScaleWidth);
     sPtV4_26C8 otherSideOffset = Scale_26C8(sideOffset, -1.0f);
-    SubEq_26C8(sideOffset, Scale_26C8(t4vect_ZAxis, D_004A41DC));
-    SubEq_26C8(otherSideOffset, Scale_26C8(t4vect_ZAxis, D_004A41DC));
+    SubEq_26C8(sideOffset, Scale_26C8(t4vect_ZAxis, cTube_m_ScaleHeight));
+    SubEq_26C8(otherSideOffset, Scale_26C8(t4vect_ZAxis, cTube_m_ScaleHeight));
     for (int i = 0; i < self->m_numSegments + 1; i++) {
         D_00501440_v26C8[2 * i].pos = Add_26C8(((sPtV4_26C8*)self->m_positions)[i], otherSideOffset);
         D_00501440_v26C8[2 * i + 1].pos = ((sPtV4_26C8*)self->m_positions)[i];
@@ -8715,7 +8715,7 @@ struct sHdr_07A0 {
     float v;
 } __attribute__((aligned(16)));
 
-extern int D_004A44FC;
+extern int cRenderToggles_m_DisableDynamicEmitters;
 extern int D_004A4474;
 extern char D_510[];
 extern "C" unsigned long* func_0038F460(int dma, unsigned int buf, int a2, int a3);
@@ -8741,7 +8741,7 @@ static inline void CopyQuads_07A0(unsigned long** pp, const void* srcp, int n)
 /**
  * Uploads a dynamic emitter's sub-emitter trail to VU1 in blocks of 64 and queues each block for drawing.
  *
- * Returns at once when D_004A44FC (menu "Disable Dynamic Emitters") is set. Sets bits 6-9 of the draw state's first
+ * Returns at once when cRenderToggles_m_DisableDynamicEmitters (menu "Disable Dynamic Emitters") is set. Sets bits 6-9 of the draw state's first
  * word to 4 and keeps only the top two bits of its fourth, rebuilding the matrices first (func_0037D968) when
  * mMatricesValid is 0. For each block of up to 64 of the m_numSubEmitters entries (n / 64 + 1 blocks) it claims a
  * scratchpad ring buffer (func_0038F460 at mVifCursor) and writes a DMA/VIF header, the 21 quadwords of m_emitter, a
@@ -8760,7 +8760,7 @@ static inline void CopyQuads_07A0(unsigned long** pp, const void* srcp, int n)
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit GS words are `ulong`.
 extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter(cPS2GraphicsMan* self, sTrail_07A0* obj)
 {
-    if (D_004A44FC != 0)
+    if (cRenderToggles_m_DisableDynamicEmitters != 0)
         return;
     (self->m_pCurrentDrawState)->unk_00[0] = (((int)(self->m_pCurrentDrawState)->unk_00[0]) & ~0x3C0) | 0x100;
     (*(int*)&(self->m_pCurrentDrawState)->unk_00[3]) &= 0xC0000000;
@@ -8897,7 +8897,7 @@ extern "C" unsigned long* func_0038F460(int dma, unsigned int buf, int a2, int a
 extern "C" unsigned int func_0038F668(int dma, unsigned long* p, int a2);
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern int D_004A4474;
-extern int D_004A44FC;
+extern int cRenderToggles_m_DisableDynamicEmitters;
 struct sPS2GfxView_0CE0 {  // PORT: a view of cPS2GraphicsMan (render/ps2graphicsman.h); the typed members schedule cPS2GraphicsMan_RenderDynamicParticleEmitter1 differently
     char pad_0x0[0xE84];
     sPtRenderState* top;            // 0xE84
@@ -8985,7 +8985,7 @@ extern char D_F10[];
 /**
  * Uploads a coloured dynamic emitter's sub-emitter trail to VU1 in blocks of 43 and queues each block for drawing.
  *
- * Returns at once when D_004A44FC (menu "Disable Dynamic Emitters") is set. Sets bits 6-9 of the draw state's first
+ * Returns at once when cRenderToggles_m_DisableDynamicEmitters (menu "Disable Dynamic Emitters") is set. Sets bits 6-9 of the draw state's first
  * word to 4 and keeps only the top two bits of its fourth, rebuilding the matrices first (func_0037D968) when
  * mMatricesValid is 0. Works like cPS2GraphicsMan_RenderDynamicParticleEmitter with blocks of 43 entries (n / 43 + 1
  * blocks) and, after the positions and velocities, a VIF code and the block's 4-byte m_colours entries (wrapping, plus
@@ -9001,7 +9001,7 @@ extern char D_F10[];
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit GS words are `ulong`.
 extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter1(sPS2GfxView_0CE0* self, sTrail_0CE0* obj)
 {
-    if (D_004A44FC != 0)
+    if (cRenderToggles_m_DisableDynamicEmitters != 0)
         return;
     self->top->f0 = (self->top->f0 & ~0x3C0) | 0x100;
     self->top->fC &= 0xC0000000;
@@ -13613,21 +13613,21 @@ INCLUDE_ASM("render/particle", func_00389C38);
 struct sParticleEntryA0;
 extern "C" sParticleEntryA0* cIrradianceDataBase_Get(cIrradianceDataBase* self, int i);
 extern "C" void func_00389CB8(sPartVec4* self, void* p, float s);
-extern int D_004A43C4;
+extern int cIrradianceDataBase_mDefaultId;
 
 struct sPartLib_9C38 {
     int f0;
     int count;      // 0x4
     void* items;    // 0x8
 };
-extern sPartLib_9C38 D_005047F8;
+extern sPartLib_9C38 cIrradianceDataBase_TheDataBase;
 extern sPartVec4 D_00504810;
 
 /**
  * Builds the default irradiance set in @p self: clears it, adds the irradiance database's default entry and, when
  * @p sunPos is given, a sun term.
  *
- * Clears the set (cIrradiance_Clear); when the database D_005047F8 has entries, adds entry D_004A43C4 (cIrradianceDataBase_Get)
+ * Clears the set (cIrradiance_Clear); when the database cIrradianceDataBase_TheDataBase has entries, adds entry cIrradianceDataBase_mDefaultId (cIrradianceDataBase_Get)
  * tinted by D_00504810 (func_00389590, scale 1); when @p sunPos is not 0 adds the sun term for that position with
  * func_00389CB8 (scale 1). func_00122048 in ai/rider calls it with @p sunPos = 0.
  *
@@ -13636,9 +13636,9 @@ extern sPartVec4 D_00504810;
 extern "C" void func_00389C38(sPartVec4* self, void* sunPos)
 {
     cIrradiance_Clear(self);
-    sPartLib_9C38* lib = &D_005047F8;
+    sPartLib_9C38* lib = &cIrradianceDataBase_TheDataBase;
     if (lib->count > 0) {
-        func_00389590(self, (sPartVec4*)cIrradianceDataBase_Get((cIrradianceDataBase*)lib, D_004A43C4), &D_00504810, 1.0f);
+        func_00389590(self, (sPartVec4*)cIrradianceDataBase_Get((cIrradianceDataBase*)lib, cIrradianceDataBase_mDefaultId), &D_00504810, 1.0f);
     }
     if (sunPos != 0) {
         func_00389CB8(self, sunPos, 1.0f);

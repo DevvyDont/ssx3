@@ -5,13 +5,13 @@ INCLUDE_ASM("seg/seg_32F020", PS2_SONY_CODEC_INTERNAL_CreateFrame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
+extern int (*RCMP_rcmp_sys)(int a0, int a1, int a2, int a3, int a4);
 extern char D_004953E8[];
 extern int *func_003B07F8_x(int a0, int a1, int a2) __asm__("func_003B07F8");
 /**
  * Creates a video frame for the Sony codec and links it at the front of the codec's frame list.
  *
- * Allocates 20 bytes from the movie allocator (D_00509430 with an empty name and the memory type at D_00509438), builds
+ * Allocates 20 bytes from the movie allocator (RCMP_rcmp_sys with an empty name and the memory type at D_00509438), builds
  * the frame with func_003B07F8 (a cleared 32-bit SHAPE of the given size) and links the frame's list node (+8) after
  * the list head at @p sonyCodec + 0x20 (word 8). Likely bug: when the allocation fails the null node is still linked.
  *
@@ -20,7 +20,7 @@ extern int *func_003B07F8_x(int a0, int a1, int a2) __asm__("func_003B07F8");
  * @param frameHeight  frame height in pixels
  */
 void PS2_SONY_CODEC_INTERNAL_CreateFrame(int *sonyCodec, int frameWidth, int frameHeight) {
-    int *n = func_003B07F8_x(D_00509430((int)D_004953E8, 20, 0, 0, ((int *)&D_00509430)[2]), frameWidth, frameHeight);
+    int *n = func_003B07F8_x(RCMP_rcmp_sys((int)D_004953E8, 20, 0, 0, ((int *)&RCMP_rcmp_sys)[2]), frameWidth, frameHeight);
     int *node = n ? n + 2 : 0;
     int *head = (int *)sonyCodec[8];
     sonyCodec[8] = (int)node;
@@ -112,11 +112,11 @@ int PS2_SONY_CODEC_INTERNAL_operator_delete1(void) {
 INCLUDE_ASM("seg/seg_32F020", PS2_SONY_CODEC_INTERNAL_operator_new_array1);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
+extern int (*RCMP_rcmp_sys)(int a0, int a1, int a2, int a3, int a4);
 /**
  * Allocates a Sony codec array with the movie allocator, naming the block.
  *
- * Calls the allocation function D_00509430 with (@p blockName, @p allocSize, @p alignment, @p hdrSize, @p memType), i.e. name first and size second
+ * Calls the allocation function RCMP_rcmp_sys with (@p blockName, @p allocSize, @p alignment, @p hdrSize, @p memType), i.e. name first and size second
  * (cMoviePlayer_SSXAllocMemFunc in this game).
  *
  * @param allocSize  bytes requested
@@ -126,7 +126,7 @@ extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
  * @param memType  memory type and flags
  */
 void PS2_SONY_CODEC_INTERNAL_operator_new_array1(int allocSize, int blockName, int alignment, int hdrSize, int memType) {
-    D_00509430(blockName, allocSize, alignment, hdrSize, memType);
+    RCMP_rcmp_sys(blockName, allocSize, alignment, hdrSize, memType);
 }
 #endif
 
@@ -134,11 +134,11 @@ void PS2_SONY_CODEC_INTERNAL_operator_new_array1(int allocSize, int blockName, i
 INCLUDE_ASM("seg/seg_32F020", PS2_SONY_CODEC_INTERNAL_operator_new1);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
+extern int (*RCMP_rcmp_sys)(int a0, int a1, int a2, int a3, int a4);
 /**
  * Allocates a Sony codec object with the movie allocator, naming the block.
  *
- * Calls the allocation function D_00509430 with (@p blockName, @p allocSize, @p alignment, @p hdrSize, @p memType), i.e. name first and size second.
+ * Calls the allocation function RCMP_rcmp_sys with (@p blockName, @p allocSize, @p alignment, @p hdrSize, @p memType), i.e. name first and size second.
  *
  * @param allocSize  bytes requested
  * @param blockName  block name
@@ -147,7 +147,7 @@ extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
  * @param memType  memory type and flags
  */
 void PS2_SONY_CODEC_INTERNAL_operator_new1(int allocSize, int blockName, int alignment, int hdrSize, int memType) {
-    D_00509430(blockName, allocSize, alignment, hdrSize, memType);
+    RCMP_rcmp_sys(blockName, allocSize, alignment, hdrSize, memType);
 }
 #endif
 
@@ -155,16 +155,16 @@ void PS2_SONY_CODEC_INTERNAL_operator_new1(int allocSize, int blockName, int ali
 INCLUDE_ASM("seg/seg_32F020", PS2_SONY_CODEC_INTERNAL_operator_new_array2);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
+extern int (*RCMP_rcmp_sys)(int a0, int a1, int a2, int a3, int a4);
 extern char D_004953E8[];
 /**
- * Allocates a Sony codec array with the movie allocator: D_00509430 with an empty name (D_004953E8), @p allocSize, alignment
+ * Allocates a Sony codec array with the movie allocator: RCMP_rcmp_sys with an empty name (D_004953E8), @p allocSize, alignment
  * 0, header 0 and the memory type at D_00509438.
  *
  * @param allocSize  bytes requested
  */
 void PS2_SONY_CODEC_INTERNAL_operator_new_array2(int allocSize) {
-    D_00509430((int)D_004953E8, allocSize, 0, 0, ((int *)&D_00509430)[2]);
+    RCMP_rcmp_sys((int)D_004953E8, allocSize, 0, 0, ((int *)&RCMP_rcmp_sys)[2]);
 }
 #endif
 
@@ -172,16 +172,16 @@ void PS2_SONY_CODEC_INTERNAL_operator_new_array2(int allocSize) {
 INCLUDE_ASM("seg/seg_32F020", PS2_SONY_CODEC_INTERNAL_operator_new2);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
+extern int (*RCMP_rcmp_sys)(int a0, int a1, int a2, int a3, int a4);
 extern char D_004953E8[];
 /**
- * Allocates a Sony codec object with the movie allocator: D_00509430 with an empty name (D_004953E8), @p allocSize, alignment
+ * Allocates a Sony codec object with the movie allocator: RCMP_rcmp_sys with an empty name (D_004953E8), @p allocSize, alignment
  * 0, header 0 and the memory type at D_00509438.
  *
  * @param allocSize  bytes requested
  */
 void PS2_SONY_CODEC_INTERNAL_operator_new2(int allocSize) {
-    D_00509430((int)D_004953E8, allocSize, 0, 0, ((int *)&D_00509430)[2]);
+    RCMP_rcmp_sys((int)D_004953E8, allocSize, 0, 0, ((int *)&RCMP_rcmp_sys)[2]);
 }
 #endif
 
@@ -218,17 +218,17 @@ int *__tf23PS2_SONY_CODEC_INTERNAL(void) {
 INCLUDE_ASM("seg/seg_32F020", RCMP_CODEC__CODEC);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_00456810[];
+extern int RCMP_CODEC_vtbl[];
 extern int (*D_00509434[])(void);
 /**
- * Destroys an RCMP::CODEC: restores its vtable (D_00456810, _vt$Q24RCMP5CODEC) and, when bit 0 of @p dtorFlags is set, frees
+ * Destroys an RCMP::CODEC: restores its vtable (RCMP_CODEC_vtbl, _vt$Q24RCMP5CODEC) and, when bit 0 of @p dtorFlags is set, frees
  * it through the movie allocator's free function (D_00509434).
  *
  * @param codecObj  the codec object
  * @param dtorFlags  destructor flags (bit 0: free the object)
  */
 void RCMP_CODEC__CODEC(int *codecObj, int dtorFlags) {
-    *codecObj = (int)D_00456810;
+    *codecObj = (int)RCMP_CODEC_vtbl;
     if (dtorFlags & 1) {
         D_00509434[0]();
     }
@@ -368,11 +368,11 @@ int RCMP_DECODER_operator_delete1(void) {
 INCLUDE_ASM("seg/seg_32F020", RCMP_DECODER_operator_new_array1);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
+extern int (*RCMP_rcmp_sys)(int a0, int a1, int a2, int a3, int a4);
 /**
  * Allocates an RCMP::DECODER array with the movie allocator, naming the block.
  *
- * Calls the allocation function D_00509430 with (@p blockName, @p allocSize, @p alignment, @p hdrSize, @p memType), i.e. name first and size second.
+ * Calls the allocation function RCMP_rcmp_sys with (@p blockName, @p allocSize, @p alignment, @p hdrSize, @p memType), i.e. name first and size second.
  *
  * @param allocSize  bytes requested
  * @param blockName  block name
@@ -381,7 +381,7 @@ extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
  * @param memType  memory type and flags
  */
 void RCMP_DECODER_operator_new_array1(int allocSize, int blockName, int alignment, int hdrSize, int memType) {
-    D_00509430(blockName, allocSize, alignment, hdrSize, memType);
+    RCMP_rcmp_sys(blockName, allocSize, alignment, hdrSize, memType);
 }
 #endif
 
@@ -389,11 +389,11 @@ void RCMP_DECODER_operator_new_array1(int allocSize, int blockName, int alignmen
 INCLUDE_ASM("seg/seg_32F020", RCMP_DECODER_operator_new1);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
+extern int (*RCMP_rcmp_sys)(int a0, int a1, int a2, int a3, int a4);
 /**
  * Allocates an RCMP::DECODER with the movie allocator, naming the block.
  *
- * Calls the allocation function D_00509430 with (@p blockName, @p allocSize, @p alignment, @p hdrSize, @p memType), i.e. name first and size second.
+ * Calls the allocation function RCMP_rcmp_sys with (@p blockName, @p allocSize, @p alignment, @p hdrSize, @p memType), i.e. name first and size second.
  *
  * @param allocSize  bytes requested
  * @param blockName  block name
@@ -402,7 +402,7 @@ extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
  * @param memType  memory type and flags
  */
 void RCMP_DECODER_operator_new1(int allocSize, int blockName, int alignment, int hdrSize, int memType) {
-    D_00509430(blockName, allocSize, alignment, hdrSize, memType);
+    RCMP_rcmp_sys(blockName, allocSize, alignment, hdrSize, memType);
 }
 #endif
 
@@ -410,16 +410,16 @@ void RCMP_DECODER_operator_new1(int allocSize, int blockName, int alignment, int
 INCLUDE_ASM("seg/seg_32F020", RCMP_DECODER_operator_new_array2);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
+extern int (*RCMP_rcmp_sys)(int a0, int a1, int a2, int a3, int a4);
 extern char D_004953B8[];
 /**
- * Allocates an RCMP::DECODER array with the movie allocator: D_00509430 with an empty name (D_004953B8), @p allocSize,
+ * Allocates an RCMP::DECODER array with the movie allocator: RCMP_rcmp_sys with an empty name (D_004953B8), @p allocSize,
  * alignment 0, header 0 and the memory type at D_00509438.
  *
  * @param allocSize  bytes requested
  */
 void RCMP_DECODER_operator_new_array2(int allocSize) {
-    D_00509430((int)D_004953B8, allocSize, 0, 0, ((int *)&D_00509430)[2]);
+    RCMP_rcmp_sys((int)D_004953B8, allocSize, 0, 0, ((int *)&RCMP_rcmp_sys)[2]);
 }
 #endif
 
@@ -427,16 +427,16 @@ void RCMP_DECODER_operator_new_array2(int allocSize) {
 INCLUDE_ASM("seg/seg_32F020", RCMP_DECODER_operator_new2);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
+extern int (*RCMP_rcmp_sys)(int a0, int a1, int a2, int a3, int a4);
 extern char D_004953B8[];
 /**
- * Allocates an RCMP::DECODER with the movie allocator: D_00509430 with an empty name (D_004953B8), @p allocSize, alignment 0,
+ * Allocates an RCMP::DECODER with the movie allocator: RCMP_rcmp_sys with an empty name (D_004953B8), @p allocSize, alignment 0,
  * header 0 and the memory type at D_00509438.
  *
  * @param allocSize  bytes requested
  */
 void RCMP_DECODER_operator_new2(int allocSize) {
-    D_00509430((int)D_004953B8, allocSize, 0, 0, ((int *)&D_00509430)[2]);
+    RCMP_rcmp_sys((int)D_004953B8, allocSize, 0, 0, ((int *)&RCMP_rcmp_sys)[2]);
 }
 #endif
 
@@ -465,17 +465,17 @@ int *__tfQ24RCMP7DECODER(void) {
 INCLUDE_ASM("seg/seg_32F020", RCMP_RCMP_SYSTEM__RCMP_SYSTEM);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_00456890[];
+extern int RCMP_RCMP_SYSTEM_vtbl[];
 extern void operator_delete__FPi(int *a0);
 /**
- * Destroys an RCMP::RCMP_SYSTEM: restores its vtable pointer (word 3, D_00456890, _vt$Q24RCMP11RCMP_SYSTEM) and, when
+ * Destroys an RCMP::RCMP_SYSTEM: restores its vtable pointer (word 3, RCMP_RCMP_SYSTEM_vtbl, _vt$Q24RCMP11RCMP_SYSTEM) and, when
  * bit 0 of @p dtorFlags is set, frees it with the global operator delete (operator_delete__FPi).
  *
  * @param rcmpSystem  the RCMP_SYSTEM object
  * @param dtorFlags  destructor flags (bit 0: free the object)
  */
 void RCMP_RCMP_SYSTEM__RCMP_SYSTEM(int *rcmpSystem, int dtorFlags) {
-    rcmpSystem[3] = (int)D_00456890;
+    rcmpSystem[3] = (int)RCMP_RCMP_SYSTEM_vtbl;
     if (dtorFlags & 1) {
         operator_delete__FPi(rcmpSystem);
     }

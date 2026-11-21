@@ -34,7 +34,7 @@ struct cInstanceNode {
     void** mVtbl;                // 0x00C [R] each ctor's vtable (cInstanceNode_vtbl in cInstanceNode_cInstanceNode1/cInstanceNode_cInstanceNode)
     // --- cTypeObjNode (cTypeObjNodeState) ---
     short ObjNodeType;           // 0x010 [P] getType/isType (lh 0x10); [O] cTypeObjNodeState::ObjNodeType; [R] cTypeObjNode_cTypeObjNode1
-                                 //       stores the tObjNodeType arg and counts it in D_0044AFF0 (cTypeObjNode::ObjNodeCount)
+                                 //       stores the tObjNodeType arg and counts it in cTypeObjNode_ObjNodeCount (cTypeObjNode::ObjNodeCount)
     unsigned short Flags;        // 0x012 [O] cTypeObjNodeState::Flags; [P] RootTransformDirty = bit 0 (lhu/sh);
                                  //       [R] cTypeObjNode_cTypeObjNode1 zeroes it; [U] cMoveNode_cMoveNode sets bit 0
     // --- cSortObjNode (cSortObjNodeState) ---

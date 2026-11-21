@@ -9,7 +9,7 @@ struct sCharWeightEntry {
     int mWeight;
     char pad_0x44[0x88 - 0x40 - 4];
 };
-extern sCharWeightEntry D_00530970[];
+extern sCharWeightEntry cBELibrary_characterDB[];
 
 //100%
 INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getWeight__FPvi);
@@ -18,14 +18,14 @@ INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getWeight__FPvi);
  * Returns the weight of a rider's character.
  *
  * Looks up the rider's character id with cBELibrary_getCharacterID() and reads that character's mWeight from the
- * character table D_00530970.
+ * character table cBELibrary_characterDB.
  *
  * @param riderIndex  rider whose character is looked up
  * @return the character's weight
  */
 int cBECharacterInterface_getWeight(void* self, int riderIndex)
 {
-    return D_00530970[cBELibrary_getCharacterID(riderIndex)].mWeight;
+    return cBELibrary_characterDB[cBELibrary_getCharacterID(riderIndex)].mWeight;
 }
 #endif
 
@@ -34,19 +34,19 @@ INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getIsGoofyFoot);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // sCharWeightEntry (declared above in the unit) has no field at 0x44 yet;
-// this view of the same table binds to D_00530970.
+// this view of the same table binds to cBELibrary_characterDB.
 struct sCharWeightEntryView {
     char pad_0x00[0x40];
     int mWeight;        // 0x40
     int field_0x44;     // 0x44
     char pad_0x48[0x88 - 0x48];
 };
-extern sCharWeightEntryView D_00530970_view[] __asm__("D_00530970");
+extern sCharWeightEntryView D_00530970_view[] __asm__("cBELibrary_characterDB");
 
 /**
  * Tells whether a rider's character rides goofy (right foot forward).
  *
- * Looks up the character of @p riderIndex (cBELibrary_getCharacterID) in the 0x88-byte entries of D_00530970 and tests
+ * Looks up the character of @p riderIndex (cBELibrary_getCharacterID) in the 0x88-byte entries of cBELibrary_characterDB and tests
  * the word at +0x44 (field_0x44 in the C view).
  *
  * @param riderIndex  the rider (On Tour iRiderID)
@@ -75,14 +75,14 @@ struct sCharScaleEntry_EFA8 {
     int mScale;         // 0x48, percent
     char pad_0x4C[0x88 - 0x4C];
 };
-extern sCharScaleEntry_EFA8 D_00530970_EFA8[] __asm__("D_00530970");
+extern sCharScaleEntry_EFA8 D_00530970_EFA8[] __asm__("cBELibrary_characterDB");
 
 /**
  * Returns the size a rider's model is drawn at.
  *
  * A cheat character (cBELibrary_getCheatCharacterID, used for rider 0 only when newRace.cGamePath is set) gets a fixed scale
  * from 0.7 to 2.0 by id (default 0.9); a mission man (cBENewPlayerInterface_isMissionMan) 0.8; otherwise the character
- * entry's +0x48 percentage / 100 from D_00530970.
+ * entry's +0x48 percentage / 100 from cBELibrary_characterDB.
  *
  * @param riderIndex  the rider (On Tour iRiderID)
  * @return the scale factor, 1.0 = normal size
@@ -150,7 +150,7 @@ INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getBloodType);
 extern char D_005309BC[];
 
 /**
- * Returns the 16-byte text at +0x4C of @p riderIndex's character record (D_00530970, 0x88-byte entries; D_005309BC =
+ * Returns the 16-byte text at +0x4C of @p riderIndex's character record (cBELibrary_characterDB, 0x88-byte entries; D_005309BC =
  * +0x4C).
  *
  * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
@@ -165,7 +165,7 @@ extern "C" void* cBECharacterInterface_getBloodType(cBECharacterInterface* self,
 INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getIsFemale);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// View of the character table D_00530970 (0x88-byte entries) for fields at 0x5C/0x60/0x84.
+// View of the character table cBELibrary_characterDB (0x88-byte entries) for fields at 0x5C/0x60/0x84.
 struct sCharEntryView {
     char pad_0x00[0x5C];
     int field_0x5C;
@@ -173,10 +173,10 @@ struct sCharEntryView {
     char pad_0x64[0x84 - 0x64];
     int field_0x84;
 };
-extern sCharEntryView D_00530970_flags[] __asm__("D_00530970");
+extern sCharEntryView D_00530970_flags[] __asm__("cBELibrary_characterDB");
 
 /**
- * Tests the word at +0x5C of @p riderIndex's character record (D_00530970, 0x88-byte entries).
+ * Tests the word at +0x5C of @p riderIndex's character record (cBELibrary_characterDB, 0x88-byte entries).
  *
  * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
  * @return true when the word is nonzero
@@ -190,10 +190,10 @@ extern "C" bool cBECharacterInterface_getIsFemale(cBECharacterInterface* self, i
 INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getAge);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern sCharEntryView D_00530970_flags[] __asm__("D_00530970");
+extern sCharEntryView D_00530970_flags[] __asm__("cBELibrary_characterDB");
 
 /**
- * Returns the word at +0x60 of @p riderIndex's character record (D_00530970, 0x88-byte entries).
+ * Returns the word at +0x60 of @p riderIndex's character record (cBELibrary_characterDB, 0x88-byte entries).
  *
  * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
  * @return the value
@@ -209,7 +209,7 @@ INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getHeight);
 extern char D_005309D4[];
 
 /**
- * Returns the 16-byte text at +0x64 of @p riderIndex's character record (D_00530970, 0x88-byte entries; D_005309D4 =
+ * Returns the 16-byte text at +0x64 of @p riderIndex's character record (cBELibrary_characterDB, 0x88-byte entries; D_005309D4 =
  * +0x64).
  *
  * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
@@ -226,7 +226,7 @@ INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getNationality);
 extern char D_005309E4[];
 
 /**
- * Returns the 16-byte text at +0x74 of @p riderIndex's character record (D_00530970, 0x88-byte entries; D_005309E4 =
+ * Returns the 16-byte text at +0x74 of @p riderIndex's character record (cBELibrary_characterDB, 0x88-byte entries; D_005309E4 =
  * +0x74).
  *
  * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
@@ -241,10 +241,10 @@ extern "C" void* cBECharacterInterface_getNationality(cBECharacterInterface* sel
 INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getVoiceID);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern sCharEntryView D_00530970_flags[] __asm__("D_00530970");
+extern sCharEntryView D_00530970_flags[] __asm__("cBELibrary_characterDB");
 
 /**
- * Returns the word at +0x84 (the last) of @p riderIndex's character record (D_00530970, 0x88-byte entries).
+ * Returns the word at +0x84 (the last) of @p riderIndex's character record (cBELibrary_characterDB, 0x88-byte entries).
  *
  * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
  * @return the value

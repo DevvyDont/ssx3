@@ -46,7 +46,7 @@ extern "C" void* cAudioInterface_bxAudio();
 
 extern char str_Menu_b[];
 
-extern unsigned char D_004A2468;
+extern unsigned char cOVTemplate_PauseMenu_mSelectedMenuIndex;
 
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cOVStateManager_addPDATemplate();
@@ -133,7 +133,7 @@ extern "C" void cOVTemplate_PauseMenu_onCreateScreen(cOVTemplate_PauseMenu* stat
     }
     void* menu = cUIScreen_getObjectByHashName(((void*)self->mpPauseScreen), GetHashValue32(str_Menu_b));
     if (menu != 0) {
-        cUIMenu_setSelectedByIndex(menu, D_004A2468);
+        cUIMenu_setSelectedByIndex(menu, cOVTemplate_PauseMenu_mSelectedMenuIndex);
     }
     cSSXAudio_PauseAudio(cAudioInterface_bxAudio());
 }
@@ -199,7 +199,7 @@ int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cUIState_onGainFocus(void* self, int a1);
-extern unsigned char D_004A2468;
+extern unsigned char cOVTemplate_PauseMenu_mSelectedMenuIndex;
 extern char D_004A2138[];
 extern char D_004C8AE8[];
 extern char D_004C8AF8[];
@@ -230,7 +230,7 @@ extern "C" void cOVTemplate_PauseMenu_onGainFocus(cOVTemplate_PauseMenu* self, i
                      obj = (char*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(buf)),
                      i < self->mPauseMenuNumOptions)) {
         if (obj != 0) {
-            if (i == D_004A2468) {
+            if (i == cOVTemplate_PauseMenu_mSelectedMenuIndex) {
                 if (*(int*)(flags + (*sel << 2)) != 0) {
                     setColor_001F85C0(obj, D_004C8AF8);
                 } else {
@@ -278,9 +278,9 @@ extern "C" void cOVStateManager_removePDATemplate(void);
 // cUIStateStack_pop returns its last list node in $v0; the unit declares it void.
 void* cUIStateStack_pop_r(void* self, int a1) __asm__("cUIStateStack_pop");
 extern int cPauseState_Flags;
-extern int D_004A2A54;
-extern int D_005366E8[];
-extern int D_004428F0[];
+extern int cPauseState_StackIdx;
+extern int cPauseState_Stack[];
+extern int cPauseState_FlagsTable[];
 extern char str_NewMail[];
 extern char str_trans_out[];
 
@@ -339,7 +339,7 @@ extern "C" void cOVTemplate_PauseMenu_onUpdate(cOVTemplate_PauseMenu* self)
     self->mScreenExiting = 1;
     cOVStateManager_removePDATemplate();
     cUIStateStack_pop_r((char*)self->mpEngine + 0x18, 1);
-    cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
+    cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
 }
 #endif
 
@@ -411,12 +411,12 @@ extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_ResumeAudio(void* audio);
 extern "C" void cOVTemplate_PauseMenu_setPDAIconColor(cOVTemplate_PauseMenu* self, int idx, int on);
 extern int cPauseState_Flags;
-extern int D_004A2A54;
-extern int D_005366E8[];
-extern int D_004428F0[];
-extern unsigned char D_004A2468;
+extern int cPauseState_StackIdx;
+extern int cPauseState_Stack[];
+extern int cPauseState_FlagsTable[];
+extern unsigned char cOVTemplate_PauseMenu_mSelectedMenuIndex;
 extern int cUITemplate_MAP_mMapStyle;
-extern int D_004A2708;
+extern int cOVStateManager_mIsPauseDialog;
 extern char str_Menu_b[];
 extern char str_help0[];
 extern char str_trans_out[];
@@ -499,7 +499,7 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(cOVTemplate_PauseMenu* self,
             return;
         }
         snd->vt[2].fn((char*)snd + snd->vt[2].delta, 6);
-        D_004A2468 = *((unsigned char*)text + 0x95);
+        cOVTemplate_PauseMenu_mSelectedMenuIndex = *((unsigned char*)text + 0x95);
         int frame = cUIScreen_getFrameByLabel((cUIScreen*)self->mpPauseScreen, GetHashValue32(str_trans_out));
         cUIScreen_playFrame(self->mpPauseScreen, frame, 1);
         self->mScreenExiting = 1;
@@ -508,11 +508,11 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(cOVTemplate_PauseMenu* self,
             stopReplay_PMWE();
             cOVStateManager_removePDATemplate();
             cUIStateStack_pop_r((char*)self->mpEngine + 0x18, 1);
-            cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
+            cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
             cSSXAudio_ResumeAudio(cAudioInterface_bxAudio());
             break;
         case 2:
-            D_004A2708 = 1;
+            cOVStateManager_mIsPauseDialog = 1;
             cOVStateManager_triggerOverlay(23);
             break;
         case 3:
@@ -557,7 +557,7 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(cOVTemplate_PauseMenu* self,
     case 6:
         stopReplay_PMWE();
         cOVStateManager_removePDATemplate();
-        cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
+        cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
         cUIStateStack_pop_r((char*)self->mpEngine + 0x18, 1);
         cSSXAudio_ResumeAudio(cAudioInterface_bxAudio());
         break;

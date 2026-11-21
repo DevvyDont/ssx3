@@ -31,11 +31,11 @@ void* cBEMissionInterface_getThis()
 //100%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getTotalCollectForMnt);
 #ifdef SKIP_ASM
-extern signed char D_0043FA70[];
+extern signed char cBELibrary_secCollectibles[];
 
 /**
- * Returns the number of collectibles in 17 consecutive sections starting at @p start: the sum of D_0043FA70[@p start]
- * .. D_0043FA70[@p start + 16] (the per-section totals).
+ * Returns the number of collectibles in 17 consecutive sections starting at @p start: the sum of cBELibrary_secCollectibles[@p start]
+ * .. cBELibrary_secCollectibles[@p start + 16] (the per-section totals).
  *
  * @param start  the first section
  * @return the total
@@ -45,7 +45,7 @@ extern "C" int cBEMissionInterface_getTotalCollectForMnt(cBEMissionInterface* se
     int sum = 0;
     for (int i = 0; i < 17; i++)
     {
-        sum += D_0043FA70[start + i];
+        sum += cBELibrary_secCollectibles[start + i];
     }
     return sum;
 }
@@ -53,29 +53,29 @@ extern "C" int cBEMissionInterface_getTotalCollectForMnt(cBEMissionInterface* se
 //100%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getTotalCollectByType);
 #ifdef SKIP_ASM
-extern signed char D_0043FA70[];
+extern signed char cBELibrary_secCollectibles[];
 extern int D_005305F0[];
 
 /**
  * Returns the collectible total of section @p start + the race's location (cBELibrary_raceDB +0x40, D_005305F0):
- * D_0043FA70[@p start + location].
+ * cBELibrary_secCollectibles[@p start + location].
  *
  * @param start  the offset from the race's location
  * @return the total
  */
 extern "C" int cBEMissionInterface_getTotalCollectByType(cBEMissionInterface* self, int start)
 {
-    return D_0043FA70[start + D_005305F0[0]];
+    return cBELibrary_secCollectibles[start + D_005305F0[0]];
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getTotalCollectForSection);
 #ifdef SKIP_ASM
-extern signed char D_0043FA70[];
+extern signed char cBELibrary_secCollectibles[];
 
 /**
- * Returns the number of collectibles in location @p start: D_0043FA70[@p start] (a one-iteration sum).
+ * Returns the number of collectibles in location @p start: cBELibrary_secCollectibles[@p start] (a one-iteration sum).
  *
  * @param start  the location
  * @return the total
@@ -85,7 +85,7 @@ extern "C" int cBEMissionInterface_getTotalCollectForSection(cBEMissionInterface
     int sum = 0;
     for (int i = 0; i < 1; i++)
     {
-        sum += D_0043FA70[start + i];
+        sum += cBELibrary_secCollectibles[start + i];
     }
     return sum;
 }
@@ -102,12 +102,12 @@ struct sMissionEntry_0043D950
 };
 
 extern sMissionEntry_0043D950 cBELibrary_locationDB[];
-extern signed char D_0043FA70[];
+extern signed char cBELibrary_secCollectibles[];
 
 /**
  * Counts the collectibles that exist across all locations of one peak.
  *
- * Sums the per-location collectible counts (D_0043FA70, On Tour cBELibrary::secCollectibles) over the 22
+ * Sums the per-location collectible counts (cBELibrary_secCollectibles, On Tour cBELibrary::secCollectibles) over the 22
  * entries of the location table (cBELibrary_locationDB) whose peak is @p owner.
  *
  * @param owner  the peak (On Tour eBEPeakID)
@@ -122,7 +122,7 @@ extern "C" int cBEMissionInterface_getTotalCollectForPeak(cBEMissionInterface* s
         {
             if (cBELibrary_locationDB[j].owner == owner)
             {
-                sum += D_0043FA70[i + j];
+                sum += cBELibrary_secCollectibles[i + j];
             }
         }
     }

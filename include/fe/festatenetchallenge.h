@@ -180,11 +180,11 @@ struct cFEStateChallengePopup {
                                     //       the new-race interface's number of AI riders
                                     //       (cBENewRaceInterface_setNumberAI); func_001AF728 reads its slot 8
     cUIListBox* mpLBPowerUps;       // 0x6E4 [U] onWidgetCreate: widget "ListBoxPowerUps"; its value is race-option
-                                    //       bit 8 of D_005308B8 (func_001AE680, onWidgetEvent)
+                                    //       bit 8 of cBERules_mRules (func_001AE680, onWidgetEvent)
     cUIListBox* mpLBMultipliers;    // 0x6E8 [U] onWidgetCreate: widget "ListBoxMultipliers"; race-option bit 6 of
-                                    //       D_005308B8
+                                    //       cBERules_mRules
     cUIListBox* mpLBPointIcons;     // 0x6EC [U] onWidgetCreate: widget "ListBoxPointicons"; race-option bit 7 of
-                                    //       D_005308B8
+                                    //       cBERules_mRules
 };
 
 CHECK_OFFSET(cFEStateChallengePopup, mpPrev, 0x000);

@@ -148,7 +148,7 @@ struct cStaticEmitter {
                                     //       record; cParticleModifier_update watches it
     int TextureId;                  // 0x004 [O]; [R] setupEmitter (particle data +0xC4); [U] render: the effect texture
                                     //       is TheGraphicsMan->texIds[TextureId + (int)mCurrentFlipTexture]
-    int BlendMode;                  // 0x008 [O]; [R] setupEmitter (data +0xC8); [U] render maps it through D_0044B420
+    int BlendMode;                  // 0x008 [O]; [R] setupEmitter (data +0xC8); [U] render maps it through gBlendTable
                                     //       to the draw layer
     int m_initialized;              // 0x00C [O] bool (retail 4 bytes); [R] ctor cStaticEmitter_cStaticEmitter zeroes it; [U] update
                                     //       sets 1, render returns while 0, replay record
@@ -183,7 +183,7 @@ struct cBaseClass_DynamicEmitter {
                                     //       record; cDynamicParticleModifier_update tests it (its +0x60)
     int TextureId;                  // 0x004 [O]; [U] setupEmitter (particle data +0xC4); render: texIds[TextureId +
                                     //       (int)mCurrentFlipTexture]
-    int BlendMode;                  // 0x008 [O]; [U] setupEmitter (data +0xC8); render maps it through D_0044B420
+    int BlendMode;                  // 0x008 [O]; [U] setupEmitter (data +0xC8); render maps it through gBlendTable
     int mNumFlipTextures;           // 0x00C [O]; [R] ctor cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter zeroes it; [U] setupEmitter (data +0xD0),
                                     //       updateBASE wraps the frame at it
     float mCurrentFlipTexture;      // 0x010 [O]; [R] ctor (sw 0); [U] setupEmitter (random start frame), updateBASE,
@@ -256,7 +256,7 @@ struct cDynamicEmitter {
                                     //       record; cDynamicParticleModifier_update tests it (its +0x60)
     int TextureId;                  // 0x004 [O]; [U] setupEmitter (particle data +0xC4); render: texIds[TextureId +
                                     //       (int)mCurrentFlipTexture]
-    int BlendMode;                  // 0x008 [O]; [U] setupEmitter (data +0xC8); render maps it through D_0044B420
+    int BlendMode;                  // 0x008 [O]; [U] setupEmitter (data +0xC8); render maps it through gBlendTable
     int mNumFlipTextures;           // 0x00C [O]; [R] ctor cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter zeroes it; [U] setupEmitter (data +0xD0),
                                     //       updateBASE wraps the frame at it
     float mCurrentFlipTexture;      // 0x010 [O]; [R] ctor (sw 0); [U] setupEmitter (random start frame), updateBASE,
@@ -329,7 +329,7 @@ struct cDynamicColourEmitter {
                                     //       record; cDynamicParticleModifier_update tests it (its +0x60)
     int TextureId;                  // 0x004 [O]; [U] setupEmitter (particle data +0xC4); render: texIds[TextureId +
                                     //       (int)mCurrentFlipTexture]
-    int BlendMode;                  // 0x008 [O]; [U] setupEmitter (data +0xC8); render maps it through D_0044B420
+    int BlendMode;                  // 0x008 [O]; [U] setupEmitter (data +0xC8); render maps it through gBlendTable
     int mNumFlipTextures;           // 0x00C [O]; [R] ctor cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter zeroes it; [U] setupEmitter (data +0xD0),
                                     //       updateBASE wraps the frame at it
     float mCurrentFlipTexture;      // 0x010 [O]; [R] ctor (sw 0); [U] setupEmitter (random start frame), updateBASE,

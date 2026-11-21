@@ -104,7 +104,7 @@ CHECK_SIZE(cGameLoadScreen, 0x18);
 //   [O] On Tour's class is 0x1C: cLoadScreen (0x10) + int mTexID[2] + int SplashTexID.
 // Base: cLoadScreen (above, 0x10: mpUI at 0xC) : cFadeScreen (main/fadescreen.h, 0xC) : cAppModule (the vptr). Vtable
 // cFELoadScreen_vtbl (0x0047D740, 7 slots: 1 dtor, 2 load, 3 purge, 4 cLoadScreen_loseFocus, 5 gainFocus, 6 update,
-// 7 render); the dtor stores cAppModule's D_0046D970.
+// 7 render); the dtor stores cAppModule's cAppModule_vtbl.
 // A FLAT layout, like main/game.h. Evidence tags: [R] retail's ctor / dtor / allocation; [U] how retail code uses the
 // field (src/fe/festateloadscreen.cpp, src/main/ssxappdtor.cpp, the asm); [O] SSX On Tour's DWARF (class cFELoadScreen,
 // cLoadScreen, cFadeScreen): names, types and order.
@@ -116,7 +116,7 @@ struct cFELoadScreen;
 
 struct cFELoadScreen {
     // --- cAppModule / cFadeScreen (main/fadescreen.h, 0xC)
-    void** mVtbl;                   // 0x000 [R] cFadeScreen_vtbl, then cFELoadScreen_vtbl (ctor); D_0046D970 (dtor)
+    void** mVtbl;                   // 0x000 [R] cFadeScreen_vtbl, then cFELoadScreen_vtbl (ctor); cAppModule_vtbl (dtor)
     float FadeTimer;                // 0x004 [O] cFadeScreen::FadeTimer; [R] cFadeScreen_cFadeScreen 0.2; [U] render:
                                     //       cFadeScreen_drawFade(this)
     int IsEnding;                   // 0x008 [O] cFadeScreen::IsEnding (bool, a word); [R] 0; [U] cLoadScreen_update /
@@ -382,7 +382,7 @@ CHECK_SIZE(cGameLoadState, 0x4C);
 
 // ---------------------------------------------------------------------------------------------------------------------
 // cGameLoadStateOutLodge: cGameLoadScreen's load state when the game leaves the lodge (no race pending:
-// D_004A19D8 set, or game modes 5 / 6 off the online path): "118loadoutlodge" and the load percentage. The class name:
+// gInLodge set, or game modes 5 / 6 off the online path): "118loadoutlodge" and the load percentage. The class name:
 // the allocation tag "cGameLoadStateOutLodge" in cGameLoadScreen_load and the preview's _vt$22cGameLoadStateOutLodge
 // with linkonce _$_22cGameLoadStateOutLodge, onCreateScreen__22cGameLoadStateOutLodge and onWidgetCreate__22...P8cUIThing.
 // Retail code: the dtor, onCreateScreen, onWidgetCreate (empty) and onGainTransition in main/ssxappdtor (0x00245600 ...

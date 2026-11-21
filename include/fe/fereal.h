@@ -107,14 +107,14 @@ CHECK_SIZE(cRealFE, 0xB5AE0);
 //   [O] On Tour's class is 0x33C0 (a smaller cFERiderManager and no bolt file manager).
 // Base: cFadeScreen (main/fadescreen.h, 0xC) : cAppModule (the vptr). cFE_cFE runs cFadeScreen_cFadeScreen and stores
 // cFE_vtbl (0x0046D878, 7 slots: 1 dtor cFE__cFE, 2 / 7 func_00411530, 3 cAppModule_purge, 4 cFadeScreen_loseFocus,
-// 5 cAppModule_gainFocus, 6 cFadeScreen_update); cFE__cFE stores it again and ends with cAppModule's D_0046D970.
+// 5 cAppModule_gainFocus, 6 cFadeScreen_update); cFE__cFE stores it again and ends with cAppModule's cAppModule_vtbl.
 // A FLAT layout, like main/game.h; the embedded objects are raw regions (as in cRealFE above). Evidence tags: [R]
 // cFE_cFE / cFE__cFE; [P] the July 2003 preview's inline getters (see cRealFE); [U] how retail code uses the field; [O]
 // SSX On Tour's DWARF (class cFE, cFadeScreen): names, types and order.
 
 struct cFE {
     // --- cAppModule / cFadeScreen (main/fadescreen.h, 0xC)
-    void** mVtbl;                   // 0x000 [R] cFadeScreen_vtbl, then cFE_vtbl (cFE_cFE); cFE_vtbl, then D_0046D970
+    void** mVtbl;                   // 0x000 [R] cFadeScreen_vtbl, then cFE_vtbl (cFE_cFE); cFE_vtbl, then cAppModule_vtbl
                                     //       (cFE__cFE)
     float FadeTimer;                // 0x004 [O]; [R] cFadeScreen_cFadeScreen 0.2
     int IsEnding;                   // 0x008 [O] (bool, a word); [R] 0

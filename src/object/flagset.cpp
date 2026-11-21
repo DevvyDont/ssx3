@@ -421,7 +421,7 @@ extern "C" void cFlagSet_render(cFlagSet* flagSet)
 //100%
 INCLUDE_ASM("object/flagset", cFlagSet_updateGrid);
 #ifdef SKIP_ASM
-extern float D_00504FB8[];
+extern float cSinCosTable_gSinCosTable[];
 
 // Element i of v (x, y, z).
 inline float& elem_BCA0(sFsV3_CM& v, int i) { return (&v.x)[i]; }
@@ -466,7 +466,7 @@ struct sFlagElem_BCA0 {
  * flag depends on which sides are held (mBaseSideHeld +0x0, mOppositeSideHeld +0x1: both, neither, or one, which
  * mirrors the columns). Per vertex it adds the column offset to the rest vertex (mVerts +0x74; the top row stays put
  * when mPerpSideHeld +0x2 is set) and two ripple waves (+0x2C, +0x30) when their amplitude exceeds 0.01. Sines and
- * cosines come from the 512-entry table D_00504FB8. Grid size: mFlagVertsHorizontal/Vertical (+0x64, +0x68).
+ * cosines come from the 512-entry table cSinCosTable_gSinCosTable. Grid size: mFlagVertsHorizontal/Vertical (+0x64, +0x68).
  *
  * Likely bug: vertexIndex only advances in the moving branch, so when the top row is held its rest vertices are copied
  * but the index does not move past them, and the next row overwrites them.
@@ -508,15 +508,15 @@ extern "C" void cFlagSet_updateGrid(cFlagSet* vself, t3Vector* vout)
         }
         float colAngle = iRatio * 6.2831854820251465f;
         int n = (int)((aTime[0] + colAngle * self->freqX) * 81.4873275756836f) & 0x1FF;
-        float waveSin = D_00504FB8[n];
-        float waveCos = D_00504FB8[n + 0x80];
+        float waveSin = cSinCosTable_gSinCosTable[n];
+        float waveCos = cSinCosTable_gSinCosTable[n + 0x80];
         if (!bothHeld) {
             accX += mag[0] * iRatioMultiplier * waveCos;
         }
         horizontalOffset[idx] = sFsV3_CM(mag[0] * iRatioMultiplier * waveSin, accX, 0.0f);
         n = (int)((aTime[1] + colAngle * self->freqY) * 81.4873275756836f) & 0x1FF;
-        waveSin = D_00504FB8[n];
-        waveCos = D_00504FB8[n + 0x80];
+        waveSin = cSinCosTable_gSinCosTable[n];
+        waveCos = cSinCosTable_gSinCosTable[n + 0x80];
         if (!bothHeld) {
             accY += mag[1] * iRatioMultiplier * waveCos;
         }
@@ -554,16 +554,16 @@ extern "C" void cFlagSet_updateGrid(cFlagSet* vself, t3Vector* vout)
                     float tRatio = (iRatio + jRatio) * 0.5f;
                     float tRatioMultiplier = (iRatioMultiplier + jRatio) * 0.5f;
                     int n = (int)((aTime[2] + tRatio * (self->freqZ0 * 6.2831854820251465f)) * 81.4873275756836f) & 0x1FF;
-                    float waveSin = D_00504FB8[n];
-                    float waveCos = D_00504FB8[n + 0x80];
+                    float waveSin = cSinCosTable_gSinCosTable[n];
+                    float waveCos = cSinCosTable_gSinCosTable[n + 0x80];
                     out[vertexIndex] += sFsV3_CM(mag[2] * iRatioMultiplier * waveSin, mag[2] * tRatioMultiplier * waveCos, mag[2] * jRatio * waveSin);
                 }
                 if (iRatio > 0.0f && mag[3] > 0.01f) {
                     float tRatio = (iRatio + jRatio) * 0.5f;
                     float tRatioMultiplier = (iRatioMultiplier + jRatio) * 0.5f;
                     int n = (int)((aTime[3] + tRatio * (self->freqZ1 * 6.2831854820251465f)) * 81.4873275756836f) & 0x1FF;
-                    float waveSin = D_00504FB8[n];
-                    float waveCos = D_00504FB8[n + 0x80];
+                    float waveSin = cSinCosTable_gSinCosTable[n];
+                    float waveCos = cSinCosTable_gSinCosTable[n + 0x80];
                     out[vertexIndex] += sFsV3_CM(mag[3] * iRatioMultiplier * waveSin, mag[3] * tRatioMultiplier * waveCos, mag[3] * (1.0f - jRatio) * waveSin);
                 }
                 vertexIndex++;
@@ -1875,7 +1875,7 @@ struct sFlagOwner_E348;
 extern "C" void cAnimNode_cacheFrame(cAnimNode* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
-extern void* D_00490CC8[];
+extern void* cAnimNode_vtbl[];
 extern char str_AnimMats[];
 
 struct sFlagSlot_34D9B0 {
@@ -1886,7 +1886,7 @@ struct sFlagSlot_34D9B0 {
 /**
  * Constructs the animation-node base of an animated object for a placed instance.
  *
- * Builds the cMoveNode part at +0x14 (cMoveNode_cMoveNode1) and installs D_00490CC8 as its vtable. Allocates one 64-byte
+ * Builds the cMoveNode part at +0x14 (cMoveNode_cMoveNode1) and installs cAnimNode_vtbl as its vtable. Allocates one 64-byte
  * matrix per mesh of the instance's model (model def +0x80, count +0x4) into AnimMats (+0x44, "AnimMats") and builds
  * the mesh cache (cAnimNode_setAnimMeshCache). The frame block at +0x0 starts at the first frame's start time
  * (cAnimFrame_getStartTime of +0x48, else 0) in +0x0 and +0x4, frame events at 1e10 (+0x8, +0xC) and +0x10 = 1. When
@@ -1903,7 +1903,7 @@ extern "C" void* cAnimNode_cAnimNode(cAnimNode* self, void* bucket, int nodeType
 {
     char* node = (char*)&self->unk_014;
     cMoveNode_cMoveNode1(node, bucket, nodeType, instRecord);
-    self->mVtbl = D_00490CC8;
+    self->mVtbl = cAnimNode_vtbl;
     sFlagSlot_34D9B0** slot = (sFlagSlot_34D9B0**)(&self->AnimMats);
     *slot = new (str_AnimMats, 0x20000000, 0) sFlagSlot_34D9B0[*(int*)(*(char**)(*(char**)(node + 0x18) + 0x80) + 4)];
     cAnimNode_setAnimMeshCache(((char*)self));
@@ -1947,7 +1947,7 @@ struct sFlagSlot_34DAC8 {
 /**
  * Constructs the animation-node base of an animated object from a replay frame.
  *
- * Runs the cMoveNode replay constructor on +0x14, installs D_00490CC8, allocates AnimMats like cAnimNode_cAnimNode, builds
+ * Runs the cMoveNode replay constructor on +0x14, installs cAnimNode_vtbl, allocates AnimMats like cAnimNode_cAnimNode, builds
  * the mesh cache, reads the 20-byte frame block at +0x0 and one more 4-byte word that it discards, then
  * cAnimNode_cacheFrame.
  *
@@ -1961,7 +1961,7 @@ extern "C" void* cAnimNode_cAnimNode1(cAnimNode* self, void* bucket, void* strea
     char* node = (char*)&self->unk_014;
     sFlagSlot_34DAC8** slot = (sFlagSlot_34DAC8**)(&self->AnimMats);
     cMoveNode_cMoveNode_3(node, bucket, stream);
-    self->mVtbl = D_00490CC8;
+    self->mVtbl = cAnimNode_vtbl;
     *slot = new (str_AnimMats, 0x20000000, 0) sFlagSlot_34DAC8[*(int*)(*(char**)(*(char**)(node + 0x18) + 0x80) + 4)];
     cAnimNode_setAnimMeshCache(((char*)self));
     sStreamVE_DAC8* vt = *(sStreamVE_DAC8**)stream;
@@ -2001,12 +2001,12 @@ struct sFlagOwner_DBA8 {
 void cMemMan_free(void*);
 void operator_delete(int*);
 extern "C" void cMoveNode__cMoveNode(void* self, int flags);
-extern void* D_00490CC8[];
+extern void* cAnimNode_vtbl[];
 
 /**
  * Destroys the animation-node base of an animated object.
  *
- * Reinstalls D_00490CC8, frees AnimMats (+0x44), runs each AnimFrames element's destructor (+0x48, vtable entry 1, in
+ * Reinstalls cAnimNode_vtbl, frees AnimMats (+0x44), runs each AnimFrames element's destructor (+0x48, vtable entry 1, in
  * reverse) and frees the array, frees +0x4C, destroys the cMoveNode part (cMoveNode__cMoveNode) and deletes the object
  * when bit 0 of flags is set.
  *
@@ -2014,7 +2014,7 @@ extern void* D_00490CC8[];
  */
 extern "C" void cAnimNode__cAnimNode(cAnimNode* self, int flags)
 {
-    self->mVtbl = D_00490CC8;
+    self->mVtbl = cAnimNode_vtbl;
     if (self->AnimMats != 0) {
         cMemMan_free(self->AnimMats);
     }

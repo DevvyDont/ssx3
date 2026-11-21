@@ -269,7 +269,7 @@ extern "C" void func_0025B688();
 extern "C" void cGameComm_destroy();
 extern "C" void cCommSystem_destroy();
 extern char str_07main_men[];
-extern char D_005308B8[];
+extern char cBERules_mRules[];
 
 struct sVEnt0_00194AA8 { short delta; short index; void (*fn)(void*); };
 struct sVEnt1_00194AA8 { short delta; short index; void (*fn)(void*, unsigned char); };
@@ -278,7 +278,7 @@ struct sVEnt2_00194AA8 { short delta; short index; int (*fn)(void*); };
 /**
  * Builds the main menu ("07main_men"), shuts the online layer down and counts the connected controllers.
  *
- * Clears the option block D_005308B8, the choice flag (+0x48) and the Circle counter (+0x54); destroys the
+ * Clears the option block cBERules_mRules, the choice flag (+0x48) and the Circle counter (+0x54); destroys the
  * voice object, BuddyMan, LobbyMan, cGameComm and cCommSystem (func_00266CD8, func_00261008, func_0025B688,
  * cGameComm_destroy, cCommSystem_destroy); clears bIsNetworkGame and calls the network interface's slot 1; sets the FE
  * music state 1; stores the number of active pads (UI input slots 44 / 45) in +0x55.
@@ -291,7 +291,7 @@ extern "C" void cFEStateMainMenu_onCreateScreen(cFEStateMainMenu* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    MEM_fill(D_005308B8, 0, 0x20);
+    MEM_fill(cBERules_mRules, 0, 0x20);
     self->mGoToNextState = 0;
     self->mHackCheatTotal = 0;
     func_00266CD8();
@@ -323,7 +323,7 @@ INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onPreRender2D);
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void DisableTextWidget(void* obj);
-extern int D_004A29EC;
+extern int EnableOnline;
 extern char str_3multi_play[];
 extern char str_5online[];
 
@@ -365,7 +365,7 @@ public:
  * Greys out Multi Play without two controllers and Online without online support, every frame.
  *
  * "3multi play" is greyed out (DisableTextWidget) with fewer than two active pads (+0x55); otherwise, while the
- * state's mode is 5, it is restored: slot 25 (cUIText_setUseStaticColour) and slot 8 (cUIThing_setStatic) cleared, alpha 1. "5online" is greyed out while D_004A29EC (set by initOnline) is 0.
+ * state's mode is 5, it is restored: slot 25 (cUIText_setUseStaticColour) and slot 8 (cUIThing_setStatic) cleared, alpha 1. "5online" is greyed out while EnableOnline (set by initOnline) is 0.
  */
 extern "C" void cFEStateMainMenu_onPreRender2D(cFEStateMainMenu* self)
 {
@@ -381,7 +381,7 @@ extern "C" void cFEStateMainMenu_onPreRender2D(cFEStateMainMenu* self)
             obj->setColor(color);
         }
     }
-    if (D_004A29EC == 0) {
+    if (EnableOnline == 0) {
         void* uiObj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_5online));
         if (uiObj != 0) {
             DisableTextWidget(uiObj);

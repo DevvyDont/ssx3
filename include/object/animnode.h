@@ -18,7 +18,7 @@
 // AnimMats = new t4Matrix[model mesh count] ("AnimMats"), setAnimMeshCache, CurrTime = CacheTime = start time,
 // FrameStart = FrameEnd = 1e10, MeshVelocityDirty = 1, cacheFrame) and cAnimNode_cAnimNode1 (bucket, cBxReplayFrame*:
 // cMoveNode_cMoveNode on +0x14, reads the 0x14-byte state into +0x0 and skips one word). Destructor
-// cAnimNode__cAnimNode. Vtable D_00490CC8 (53 slots; delta -0x14 on the overrides: 1 dtor, 12
+// cAnimNode__cAnimNode. Vtable cAnimNode_vtbl (53 slots; delta -0x14 on the overrides: 1 dtor, 12
 // writeToReplayFrame, 15 updateNode, 26 hasAnimMats, 27 getAnimMats, 29 getAnimMat, 30 getAnimFrame, 32
 // frameUpdateEvent, 33 makeAnimMats, 42 updateIntersectInfo, 51 updateRootTransform; the new virtuals 52 cacheFrame and
 // 53 getAnimSpeed carry delta 0, relative to the cAnimNode subobject - cAnimObjectNode's table gives slot 53 delta
@@ -54,7 +54,7 @@ struct cAnimNode {
     int unk_014;                    // 0x14 cObjNode's leading word (unk_00 in object/objnode.h); no ctor writes it
     cObjNode* Next;                 // 0x18 [O] cObjNode::Next; [U] bucket list
     cObjNode* Prev;                 // 0x1C [O] cObjNode::Prev; [U] bucket list
-    void** mVtbl;                   // 0x20 [R] D_00490CC8 (both ctors, the dtor); [U] getAnimMats/getAnimMat/
+    void** mVtbl;                   // 0x20 [R] cAnimNode_vtbl (both ctors, the dtor); [U] getAnimMats/getAnimMat/
                                     //      updateRootTransform/updateMeshVelocity call slots 33 / 53 through it
     short ObjNodeType;              // 0x24 [O] cTypeObjNodeState; [R] the type arg passed to cMoveNode_cMoveNode1
     unsigned short Flags;           // 0x26 [O]; [P] bit 0 = RootTransformDirty; [U] getAnimMats/getAnimMat/

@@ -6861,7 +6861,7 @@ extern "C" void* cBXString_cBXString2(void* self, const char* str);
 extern "C" void* cBXString_operatorE(void* self, void* other);
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern int D_004A4E88_v[2] __asm__("D_004A4E88");
-extern char D_005308B8[];
+extern char cBERules_mRules[];
 extern char str_cFEStateChallengeReceivedPopup[];
 extern char str_cFEStateChallengePopup[];
 
@@ -6869,7 +6869,7 @@ extern char str_cFEStateChallengePopup[];
  * Challenges a player: answers a pending challenge from him, or opens the challenge setup popup.
  *
  * Clears unk_6C4 and closes the popup (cFEStateNet_onPopupEvent). With a pending challenge from @p playerName (func_00263128) it pushes a
- * cFEStateChallengeReceivedPopup for him; otherwise it clears D_005308B8 (0x20 bytes), sets D_004A4E88[1] to 4, stores
+ * cFEStateChallengeReceivedPopup for him; otherwise it clears cBERules_mRules (0x20 bytes), sets D_004A4E88[1] to 4, stores
  * the name in LobbyMan_mLobbyMan->mOpponent and pushes a cFEStateChallengePopup. The pushed popup's id is 2100 when @p
  * a4 is set, else 2049 (received) or 2048 (setup).
  *
@@ -6900,7 +6900,7 @@ extern "C" void func_001ABCD0(cFEStateNet* self, int playerName, void* popup, in
         }
         cUIStateStack_pushPopup(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, newPopup);
     } else {
-        MEM_fill(D_005308B8, 0, 0x20);
+        MEM_fill(cBERules_mRules, 0, 0x20);
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         D_004A4E88_v[1] = 4;
         char opponentName[4];
@@ -8570,7 +8570,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_setGameMode_DDD0(void* iface, int mode) __asm__("cBENewRaceInterface_setGameMode");
 extern "C" int cBENewRaceInterface_setGameEvent_DDD0(void* iface, int ev) __asm__("cBENewRaceInterface_setGameEvent");
 extern int D_004A4E88;
-extern int D_004A11B8;
+extern int cBENewRaceInterface_bIsBamLocation;
 extern char D_00441268[];
 extern void* cFEStateChallengePopup_vtbl[];
 
@@ -8585,7 +8585,7 @@ public:
  *
  * Runs the cFEStateNet constructor (cFEStateNet_cFEStateNet) with @p engine and @p owner, stores cFEStateChallengePopup_vtbl,
  * points mpEventOptions at D_00441268, sets mHashName 0x3F, clears mbChallengeSent, mpLBRankedGame and D_004A4E88. On
- * the new-race interface (cBE interface 0) it sets D_004A11B8 to 1, clears cBENewRaceInterface_newRace.iLocationIdx, sets game mode 0 and event
+ * the new-race interface (cBE interface 0) it sets cBENewRaceInterface_bIsBamLocation to 1, clears cBENewRaceInterface_newRace.iLocationIdx, sets game mode 0 and event
  * 0 and resets it; finally sets mbFirstCreate.
  *
  * @param engine  the UI engine (On Tour cUIState's pEngine)
@@ -8602,7 +8602,7 @@ extern "C" void* cFEStateChallengePopup_cFEStateChallengePopup(cFEStateChallenge
     self->mpLBRankedGame = 0;
     D_004A4E88 = 0;
     cRace_DDD0* race = (cRace_DDD0*)cBE_getInterface_Fv(cBE_getBE(), 0);
-    D_004A11B8 = 1;
+    cBENewRaceInterface_bIsBamLocation = 1;
     cBENewRaceInterface_newRace.iLocationIdx = 0;
     cBENewRaceInterface_setGameMode_DDD0(race, 0);
     cBENewRaceInterface_setGameEvent_DDD0(race, 0);
@@ -9004,7 +9004,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
 extern "C" int cUIListBox_getCurrentEntryData(void* a);
-extern char D_005308B8[];
+extern char cBERules_mRules[];
 
 struct sVE1AE680 {
     short delta;
@@ -9031,7 +9031,7 @@ struct sOpts1AE680 {
  *
  * Only with a screen. mpLBRankedGame's value (non-zero) goes to the network interface's ranked flag (cBENetworkInterface_networkOpt.bIsRankedGame,
  * bIsRankedGame), followed by that interface's vtable entry 1. mpLBMultipliers, mpLBPointIcons and mpLBPowerUps go to
- * bits 6, 7 and 8 of the race-option word at D_005308B8 + 0x18; mpLBCPURiders becomes the new-race interface's AI count
+ * bits 6, 7 and 8 of the race-option word at cBERules_mRules + 0x18; mpLBCPURiders becomes the new-race interface's AI count
  * (cBENewRaceInterface_setNumberAI), followed by its vtable entry 1. Called from cFEStateChallengePopup_onWidgetEvent.
  */
 extern "C" void func_001AE680(cFEStateChallengePopup* self)
@@ -9042,7 +9042,7 @@ extern "C" void func_001AE680(cFEStateChallengePopup* self)
         sVE1AE680* vt = *(sVE1AE680**)(iface + 0xC);
         vt[1].fn(iface + vt[1].delta);
         int multipliers = cUIListBox_getCurrentEntryData(self->mpLBMultipliers);
-        sOpts1AE680* raceOptions = (sOpts1AE680*)D_005308B8;
+        sOpts1AE680* raceOptions = (sOpts1AE680*)cBERules_mRules;
         raceOptions->b6 = multipliers;
         raceOptions->b8 = cUIListBox_getCurrentEntryData(self->mpLBPowerUps);
         raceOptions->b7 = cUIListBox_getCurrentEntryData(self->mpLBPointIcons);
@@ -9073,7 +9073,7 @@ extern "C" void func_001AEC60_E7A0(void* self, int v) __asm__("func_001AEC60");
 extern "C" void func_001AF208_E7A0(void* self, void* item, int on) __asm__("func_001AF208");
 extern int cUITemplate_MAP_mPeak;
 extern int cUITemplate_MAP_mMapStyle;
-extern int D_004A2598;
+extern int cUITemplate_MAP_mMapFEStart;
 extern char str_cFEStateEventSelect[];
 
 struct sRaceOpts_E7A0 {
@@ -9084,7 +9084,7 @@ struct sRaceOpts_E7A0 {
     unsigned int bit8 : 1;
     unsigned int high : 23;
 };
-extern sRaceOpts_E7A0 D_005308B8_E7A0 __asm__("D_005308B8");
+extern sRaceOpts_E7A0 D_005308B8_E7A0 __asm__("cBERules_mRules");
 
 struct sIVE_E7A0 {
     short delta;
@@ -9103,7 +9103,7 @@ static inline void commit_E7A0(char* iface)
  * Handles the challenge popup's widgets: event selection, sending or cancelling the challenge and the option boxes.
  *
  * A null widget is ignored. Event 5 by id: 7 saves the options (func_001AE680), sets cUITemplate_MAP_mPeak, clears
- * cUITemplate_MAP_mMapStyle / D_004A2598 and pushes a cFEStateEventSelect (mode 1); 9 (submit), unless mbChallengeSent, saves the
+ * cUITemplate_MAP_mMapStyle / cUITemplate_MAP_mMapFEStart and pushes a cFEStateEventSelect (mode 1); 9 (submit), unless mbChallengeSent, saves the
  * options, marks the challenge sent (func_001AF568), stores the ranked flag in the network options, sets the race
  * options (all on with no AI riders when ranked, else from the multiplier, power-up, point-icon and CPU-rider boxes)
  * and sends the challenge to mOpponent (func_0025F4C0); 10 cancels a sent challenge (func_0025F628(0, 1)) and pops
@@ -9126,7 +9126,7 @@ extern "C" void cFEStateChallengePopup_onWidgetEvent(cFEStateChallengePopup* sel
             func_001AE680_E7A0((self));
             cUITemplate_MAP_mPeak = 1;
             cUITemplate_MAP_mMapStyle = 0;
-            D_004A2598 = 0;
+            cUITemplate_MAP_mMapFEStart = 0;
             char* popup = (char*)cFEStateEventSelect_cFEStateEventSelect1_E7A0(cMemMan_alloc(828, str_cFEStateEventSelect, 0x100, 0), *(int*)(char**)&self->mpEngine, 1);
             *(int*)(popup + 0x1C) = (*(int*)(popup + 0x1C) & ~0x3F00) | 0x100;
             cUIStateStack_pushSpecial_E7A0((char*)self->mpEngine + 0x18, popup, 0, 0);
@@ -10092,7 +10092,7 @@ extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
 extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface, void* screen);
 extern "C" void func_0025E6D0(void* self, const char* str);
 extern "C" void func_001AF930(void* screen);
-extern int D_004A11B8;
+extern int cBENewRaceInterface_bIsBamLocation;
 extern char str_241challenge_received_popup[];
 
 struct sVE_FE68 {
@@ -10124,7 +10124,7 @@ struct sRaceFlags_FE68 {
     unsigned int b9 : 23;
     char pad1C[0x4];
 };
-extern sRaceFlags_FE68 D_005308B8_FE68 __asm__("D_005308B8");
+extern sRaceFlags_FE68 D_005308B8_FE68 __asm__("cBERules_mRules");
 
 struct sInfo_FE68 {
     int v[5];
@@ -10142,7 +10142,7 @@ static inline void vcall_FE68(void* p)
  * Calls its slot 32, adds and plays the screen (returns if none), makes sure BuddyMan exists and is connected and
  * looks the challenge up by mszChallenger (func_00263270). Copies the name to LobbyMan (+0x98) and the record's stats
  * to LobbyMan's mOpponentStats before checking the record for null, so a missing challenge is read through a null
- * pointer. Then copies the record's name to LobbyMan (+0x8C), rebuilds the race-option bits (D_005308B8, cleared
+ * pointer. Then copies the record's name to LobbyMan (+0x8C), rebuilds the race-option bits (cBERules_mRules, cleared
  * first), the race flag cBENewRaceInterface_newRace.iLocationIdx, game mode, event and AI count on the new-race interface and the ranked flag on
  * the network interface (committing both), and fills the screen (func_001B0850, func_0025E6D0, func_001AF930). The
  * comment above it ("race-setup screen") is loose.
@@ -10176,7 +10176,7 @@ extern "C" void cFEStateChallengeReceivedPopup_onCreateScreen(cFEStateChallengeR
     D_005308B8_FE68.b8 = challenge->f1C;
     void* be = cBE_getInterface_Fv_FE68(cBE_getBE(), 0);
     cBENewRaceInterface_newRace.iLocationIdx = challenge->f8;
-    D_004A11B8 = 1;
+    cBENewRaceInterface_bIsBamLocation = 1;
     cBENewRaceInterface_setGameMode_FE68(be, challenge->mode);
     cBENewRaceInterface_setGameEvent_FE68(be, challenge->event);
     cBENewRaceInterface_setNumberAI(be, challenge->numAI);
@@ -11190,7 +11190,7 @@ extern "C" void func_00264F88(void* self, int a1);
 extern "C" void func_00265018(void* self, int a1);
 extern "C" void func_00265140(void* self);
 extern "C" int cUIListBox_getCurrentEntryData(void* a);
-extern void* D_004A33CC;
+extern void* cSetupMan_mSetupMan;
 extern char str_LBChallengerSelect[];
 extern char str_kT_POPUPCMNCancelChallenge[];
 extern char str_kT_CMNYes[];
@@ -11221,7 +11221,7 @@ static inline int IsHash1B1280(int id, char* name) { return id == GetHashValue32
 /**
  * Handles the rider-select widgets: confirm the pick, back out or cancel, and preview a changed pick.
  *
- * A null widget is ignored. Event 5, unless already confirmed or without the online game D_004A33CC: resets the
+ * A null widget is ignored. Event 5, unless already confirmed or without the online game cSetupMan_mSetupMan: resets the
  * player interface (cBENewPlayerInterface_setPlayerCheatCharID, then its slot 1) when the pick differs from miCharID, sends the pick
  * (func_00265018), records mCurrentCtrl in miConfirmCtrl, makes the widget static, locks the screen (func_001B1A08(1,
  * 0)) and sets mbConfirmed. Event 6 asks "kT_POPUPCMNCancelChallenge" (yes / no, id 0x838) before a pick is
@@ -11244,7 +11244,7 @@ extern "C" void cFEStateOnlineCharacterSelect_onWidgetEvent(cFEStateOnlineCharac
         if (self->mbConfirmed != 0) {
             return;
         }
-        if (D_004A33CC == 0) {
+        if (cSetupMan_mSetupMan == 0) {
             return;
         }
         if (self->miCharID != cUIListBox_getCurrentEntryData(self->mpLBChallengerSelect)) {
@@ -11254,7 +11254,7 @@ extern "C" void cFEStateOnlineCharacterSelect_onWidgetEvent(cFEStateOnlineCharac
             vt[1].fn(iface + vt[1].delta);
         }
         {
-            void* mgr = D_004A33CC;
+            void* mgr = cSetupMan_mSetupMan;
             func_00265018(mgr, cUIListBox_getCurrentEntryData(self->mpLBChallengerSelect));
         }
         self->miConfirmCtrl = self->mCurrentCtrl;
@@ -11275,7 +11275,7 @@ extern "C" void cFEStateOnlineCharacterSelect_onWidgetEvent(cFEStateOnlineCharac
             popup->info.miDefaultOption = 1;
             func_001A9BC0((cFEStateNet*)self, popup);
         } else {
-            func_00265140(D_004A33CC);
+            func_00265140(cSetupMan_mSetupMan);
             ((cFEVObj_001B1280*)obj)->setStatic(0);
             func_001B1A08(self, 0, 0);
             self->mbConfirmed = 0;
@@ -11283,7 +11283,7 @@ extern "C" void cFEStateOnlineCharacterSelect_onWidgetEvent(cFEStateOnlineCharac
         break;
     case 9:
         if (IsHash1B1280(*(int*)(obj + 0x38), str_LBChallengerSelect)) {
-            void* mgr = D_004A33CC;
+            void* mgr = cSetupMan_mSetupMan;
             func_00264F88(mgr, cUIListBox_getCurrentEntryData(self->mpLBChallengerSelect));
             func_001B1B10(self, cUIListBox_getCurrentEntryData(self->mpLBChallengerSelect), 0);
         }
@@ -11341,18 +11341,18 @@ public:
     virtual bool isPrevious();
 };
 
-extern void* D_004A33CC;
+extern void* cSetupMan_mSetupMan;
 
 /**
  * Filters input on the rider-select screen: once the pick is confirmed (or with no online game) only "previous"
  * passes.
  *
  * @param obj  the input (On Tour cUIInput* pInput)
- * @return 1 to swallow the input (confirmed or no D_004A33CC, and not isPrevious, slot 6), else 0
+ * @return 1 to swallow the input (confirmed or no cSetupMan_mSetupMan, and not isPrevious, slot 6), else 0
  */
 extern "C" bool cFEStateOnlineCharacterSelect_onInputBegin(cFEStateOnlineCharacterSelect* self, cFEVObj_001B1590* obj)
 {
-    if (self->mbConfirmed != 0 || D_004A33CC == 0) {
+    if (self->mbConfirmed != 0 || cSetupMan_mSetupMan == 0) {
         return !obj->isPrevious();
     }
     return 0;
@@ -11830,14 +11830,14 @@ extern "C" void cFEStateOnlineCharacterSelect_onPopupEvent(cFEStateOnlineCharact
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B1F18);
 #ifdef SKIP_ASM
-extern void* D_004A33CC;
+extern void* cSetupMan_mSetupMan;
 extern "C" void func_00265768(void* self, int a1);
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 
 /**
  * Handles the "kT_POPUPCMNCancelChallenge" popup (id 2104): Yes quits the online game.
  *
- * On 15 tells the online game object D_004A33CC (when there is one) to quit with func_00265768(.., 249), which posts
+ * On 15 tells the online game object cSetupMan_mSetupMan (when there is one) to quit with func_00265768(.., 249), which posts
  * event 268 to LobbyMan; every event then goes to cFEStateNet_onPopupEvent.
  *
  * @param popup  the popup state
@@ -11846,8 +11846,8 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 extern "C" void func_001B1F18(cFEStateOnlineCharacterSelect* self, void* popup, int event)
 {
     if (event == 0xF) {
-        if (D_004A33CC != 0) {
-            func_00265768(D_004A33CC, 249);
+        if (cSetupMan_mSetupMan != 0) {
+            func_00265768(cSetupMan_mSetupMan, 249);
         }
         cFEStateNet_onPopupEvent(self, popup, 0xF);
     } else {
@@ -14360,7 +14360,7 @@ extern "C" void cUIListBox_deleteAllEntries(void* self);
 struct sCol1B5068 {
     float r, g, b, a;
 };
-extern sCol1B5068 D_004C66C8;
+extern sCol1B5068 gStaticColour;
 
 class cFEVObj_001B5068 {
 public:
@@ -14383,7 +14383,7 @@ public:
  * Switches the network-configuration screen between the configuration lists and "NoConfiguration".
  *
  * @p configCount <= 0: clears both list boxes (cUIListBox_deleteAllEntries), makes mpLBSettings, mpLBAdapters and mpPairSettings static, hides
- * the lists and mpConfigRectangle, shows mpNoConfiguration (colour D_004C66C8) and selects row 0 of mpMenuConfig.
+ * the lists and mpConfigRectangle, shows mpNoConfiguration (colour gStaticColour) and selects row 0 of mpMenuConfig.
  * Otherwise the reverse, selecting row 1.
  *
  * @param configCount  number of configurations
@@ -14400,7 +14400,7 @@ extern "C" void func_001B5068(cFEStateNetConfig* self, int configCount)
         ((cFEVObj_001B5068*)self->mpLBAdapters)->setVisible(0);
         ((cFEVObj_001B5068*)self->mpConfigRectangle)->setVisible(0);
         ((cFEVObj_001B5068*)self->mpNoConfiguration)->setVisible(1);
-        ((cFEVObj_001B5068*)self->mpNoConfiguration)->setColour(D_004C66C8);
+        ((cFEVObj_001B5068*)self->mpNoConfiguration)->setColour(gStaticColour);
         cUIMenu_setSelectedByIndex(self->mpMenuConfig, 0);
     } else {
         ((cFEVObj_001B5068*)self->mpPairSettings)->setStatic(0);
@@ -16128,7 +16128,7 @@ extern "C" void func_001B70D0_v(void* self, int state) __asm__("func_001B70D0");
 extern "C" void func_00265880();
 extern "C" char* strcpy(char* dst, const char* src);
 extern void* cFEStateNetAccountMem_vtbl[];
-extern char D_00536760[];
+extern char AccountData[];
 
 static inline void SetNames_001B6ED0(char* buf1, char* buf2, const char* a, const char* b)
 {
@@ -16146,8 +16146,8 @@ static inline void SetNames_001B6ED0(char* buf1, char* buf2, const char* a, cons
  * Runs the cFEBlankPopup constructor (cFEBlankPopup_cFEBlankPopup; the C call passes only self, so @p pEngine and @p owner reach it
  * untouched in $a1/$a2 and a port must pass them), stores cFEStateNetAccountMem_vtbl, clears the name, password,
  * errors and flags, copies @p name and @p name2 into mszUserName / mszPassword, and starts func_001B70D0 at the
- * mode's step: 0 -> 0, 1 -> 5, 2 -> 0xB, 3 -> 0x13 (mode 3 copies the names from D_00536760 instead), stored in
- * miStartState. Finally creates the card object D_004A33D0 (func_00265880).
+ * mode's step: 0 -> 0, 1 -> 5, 2 -> 0xB, 3 -> 0x13 (mode 3 copies the names from AccountData instead), stored in
+ * miStartState. Finally creates the card object SharedLoginMan (func_00265880).
  *
  * @param pEngine  the UI engine (On Tour cUIState ctor pEngine), for the base constructor
  * @param owner  the parent state told of the result (mpParentState), for the base constructor
@@ -16184,7 +16184,7 @@ extern "C" void* cFEStateNetAccountMem_cFEStateNetAccountMem(cFEStateNetAccountM
         self->miStartState = 11;
         break;
     case 3:
-        SetNames_001B6ED0(buf1, buf2, D_00536760, D_00536760 + 0x11);
+        SetNames_001B6ED0(buf1, buf2, AccountData, AccountData + 0x11);
         func_001B70D0_v(self, 19);
         self->miStartState = 19;
         break;
@@ -16206,7 +16206,7 @@ extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cF
 /**
  * Destroys the online-account memory-card popup: deletes the card object, then runs the base destructors.
  *
- * Restores cFEStateNetAccountMem_vtbl, deletes D_004A33D0 (func_002658B8), stores cFEBlankPopup's vtable cFEBlankPopup_vtbl
+ * Restores cFEStateNetAccountMem_vtbl, deletes SharedLoginMan (func_002658B8), stores cFEBlankPopup's vtable cFEBlankPopup_vtbl
  * and runs the cFEStateNet destructor (cFEStateNet__cFEStateNet) with @p flags.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory (handled by the base destructor)
@@ -16278,7 +16278,7 @@ extern "C" void strcpy1(void* str, int a1);
 extern "C" void sprintf1_1B70D0(void* str, int fmt, ...) __asm__("sprintf1");
 extern "C" void usprintf(char* buf, const char* fmt, int a2);
 extern "C" void cUIStateStack_pop(void* self, int a1);
-extern int* D_004A33D0;
+extern int* SharedLoginMan;
 extern char str_pct_d_b[];
 extern char str_kT_CMNYes[];
 extern char str_kT_CMNNo[];
@@ -16323,7 +16323,7 @@ extern "C" void func_001B70D0_v(void* self, int state) __asm__("func_001B70D0");
 /**
  * Moves the account memory-card popup to a new step (miState) and starts that step's card request and popup.
  *
- * Card requests go to the shared-login manager D_004A33D0 (its state word, driven by func_00265A68); texts are
+ * Card requests go to the shared-login manager SharedLoginMan (its state word, driven by func_00265A68); texts are
  * formatted into mustrText and shown with func_001B7650 (slot "1"). 1, 6, 12, 20: "kT_MEMFECheckingCardPS2" and a read
  * (func_00265DF0). 7: "kT_MEMOVOverWriteFile" Yes/No (popup id 8). 8: copies the names (func_001B7778) and saves
  * (func_00265E00, "kT_MEMOVSaveSavingPS2NGC"). 13: "kT_MEMFormatCardPS2" Yes/No (id 14). 14: formats (func_00265E30).
@@ -16348,16 +16348,16 @@ extern "C" void func_001B70D0_v(void* vself, int state)
     switch ((unsigned int)state) {
     case 1: {
         char* text = self->text;
-        func_00265D08(D_004A33D0);
-        func_00265DF0(D_004A33D0);
+        func_00265D08(SharedLoginMan);
+        func_00265DF0(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMFECheckingCardPS2), buf);
         func_001B7650((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, (int)text);
         break;
     }
     case 6: {
         char* text = self->text;
-        func_00265D08(D_004A33D0);
-        func_00265DF0(D_004A33D0);
+        func_00265D08(SharedLoginMan);
+        func_00265DF0(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMFECheckingCardPS2), buf);
         func_001B7650((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, (int)text);
         break;
@@ -16366,7 +16366,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         char* text = self->text;
         self->f6D8 = 0;
         self->fB04 = 0;
-        func_00265D08(D_004A33D0);
+        func_00265D08(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMOVOverWriteFile), str);
         int yesId = GetHashValue32(str_kT_CMNYes);
         int noId = GetHashValue32(str_kT_CMNNo);
@@ -16381,15 +16381,15 @@ extern "C" void func_001B70D0_v(void* vself, int state)
             break;
         }
         char* text = self->text;
-        func_00265E00(D_004A33D0);
+        func_00265E00(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMOVSaveSavingPS2NGC), buf);
         func_001B7650((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, (int)text);
         break;
     }
     case 12: {
         char* text = self->text;
-        func_00265D08(D_004A33D0);
-        func_00265DF0(D_004A33D0);
+        func_00265D08(SharedLoginMan);
+        func_00265DF0(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMFECheckingCardPS2), buf);
         func_001B7650((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, (int)text);
         break;
@@ -16398,7 +16398,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         char* text = self->text;
         self->fB04 = 0;
         self->f6D8 = 0;
-        func_00265D08(D_004A33D0);
+        func_00265D08(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMFormatCardPS2), buf);
         int yesId = GetHashValue32(str_kT_CMNYes);
         int noId = GetHashValue32(str_kT_CMNNo);
@@ -16408,14 +16408,14 @@ extern "C" void func_001B70D0_v(void* vself, int state)
     case 14: {
         self->fB04 = 1;
         char* text = self->text;
-        func_00265E30(D_004A33D0);
+        func_00265E30(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMFormattingPS2), buf);
         func_001B7650((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, (int)text);
         break;
     }
     case 16: {
         self->fB04 = 0;
-        if (func_00265A38(D_004A33D0) < 17) {
+        if (func_00265A38(SharedLoginMan) < 17) {
             self->f6D4 = 3;
             func_001B70D0_v(self, 17);
             break;
@@ -16423,7 +16423,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         self->fB04 = 1;
         char* text = self->text;
         func_001B7778_v(self);
-        func_00265E10(D_004A33D0);
+        func_00265E10(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMOVSaveSavingPS2NGC), buf);
         func_001B7650((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, (int)text);
         break;
@@ -16438,8 +16438,8 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         break;
     case 20: {
         char* text = self->text;
-        func_00265D08(D_004A33D0);
-        func_00265DF0(D_004A33D0);
+        func_00265D08(SharedLoginMan);
+        func_00265DF0(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMFECheckingCardPS2), buf);
         func_001B7650((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, (int)text);
         break;
@@ -16448,7 +16448,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         char* text = self->text;
         self->fB04 = 0;
         self->f6D8 = 0;
-        func_00265D08(D_004A33D0);
+        func_00265D08(SharedLoginMan);
         strcpy1(text, Loc1B70D0(str_kT_POPUPTITLEDeleteAccount));
         int yesId = GetHashValue32(str_kT_CMNYes);
         int noId = GetHashValue32(str_kT_CMNNo);
@@ -16462,7 +16462,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
             break;
         }
         char* text = self->text;
-        func_00265E20(D_004A33D0);
+        func_00265E20(SharedLoginMan);
         strcpy1(text, Loc1B70D0(str_kT_MEMDeletingPS2));
         func_001B7650((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, (int)text);
         break;
@@ -16479,7 +16479,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         char* text = self->text;
         self->fB04 = 0;
         self->f6D8 = 0;
-        func_00265D08(D_004A33D0);
+        func_00265D08(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMOVDamagedDataPS2), buf);
         int yesId = GetHashValue32(str_kT_CMNYes);
         int noId = GetHashValue32(str_kT_CMNNo);
@@ -16493,7 +16493,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
             break;
         }
         char* text = self->text;
-        func_00265E20(D_004A33D0);
+        func_00265E20(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMOVSaveSavingPS2NGC), buf);
         func_001B7650((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, (int)text);
         break;
@@ -16502,7 +16502,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         self->fB04 = 1;
         char* text = self->text;
         func_001B7778_v(self);
-        func_00265E10(D_004A33D0);
+        func_00265E10(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMOVSaveSavingPS2NGC), buf);
         func_001B7650((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, (int)text);
         break;
@@ -16584,7 +16584,7 @@ extern "C" void func_00265F18(void*);
 extern "C" void* func_00265F68(void*);
 
 /**
- * Copies mszUserName and mszPassword into the saved-account buffer D_00536760 (func_00265F18, func_00265F68).
+ * Copies mszUserName and mszPassword into the saved-account buffer AccountData (func_00265F18, func_00265F68).
  *
  * @return the value left by func_00265F68, which returns nothing (strcpy's result there: the password field)
  */
@@ -16614,12 +16614,12 @@ void* func_001B77A8(void* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B77C8);
 #ifdef SKIP_ASM
-extern int* D_004A33D0;
+extern int* SharedLoginMan;
 extern "C" void* func_001B70D0(void*, int);
 
 static inline bool IsMode_001B77C8(int m)
 {
-    return *D_004A33D0 == m;
+    return *SharedLoginMan == m;
 }
 
 /**
@@ -16645,13 +16645,13 @@ extern "C" void func_001B77C8(cFEStateNetAccountMem* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B7820);
 #ifdef SKIP_ASM
-extern int* D_004A33D0;
+extern int* SharedLoginMan;
 extern "C" void* func_001B70D0(void*, int);
 extern "C" int func_00265CB0(void* p);
 
 static inline bool IsMode_001B7820(int m)
 {
-    return *D_004A33D0 == m;
+    return *SharedLoginMan == m;
 }
 
 /**
@@ -16666,7 +16666,7 @@ extern "C" void func_001B7820(cFEStateNetAccountMem* self)
     if (IsMode_001B7820(4)) {
         func_001B70D0(self, 7);
     } else if (IsMode_001B7820(5)) {
-        if (self->miError == 2 && func_00265CB0(D_004A33D0) != 0) {
+        if (self->miError == 2 && func_00265CB0(SharedLoginMan) != 0) {
             func_001B70D0(self, 13);
         } else if (self->miError == 1) {
             func_001B70D0(self, 0x10);
@@ -16684,12 +16684,12 @@ extern "C" void func_001B7820(cFEStateNetAccountMem* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B78F0);
 #ifdef SKIP_ASM
-extern int* D_004A33D0;
+extern int* SharedLoginMan;
 extern "C" void* func_001B70D0(void*, int);
 
 static inline bool IsMode_001B78F0(int m)
 {
-    return *D_004A33D0 == m;
+    return *SharedLoginMan == m;
 }
 
 /**
@@ -16708,13 +16708,13 @@ extern "C" void func_001B78F0(cFEStateNetAccountMem* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B7938);
 #ifdef SKIP_ASM
-extern int* D_004A33D0;
+extern int* SharedLoginMan;
 extern "C" void* func_001B70D0(void*, int);
 extern "C" int func_00265CB0(void* p);
 
 static inline bool IsMode_001B7938(int m)
 {
-    return *D_004A33D0 == m;
+    return *SharedLoginMan == m;
 }
 
 /**
@@ -16728,7 +16728,7 @@ extern "C" void func_001B7938(cFEStateNetAccountMem* self)
     if (IsMode_001B7938(4)) {
         func_001B70D0(self, 7);
     } else if (IsMode_001B7938(5)) {
-        if (self->miError == 2 && func_00265CB0(D_004A33D0) != 0) {
+        if (self->miError == 2 && func_00265CB0(SharedLoginMan) != 0) {
             func_001B70D0(self, 13);
         } else if (self->miError == 1) {
             func_001B70D0(self, 0x10);
@@ -16746,12 +16746,12 @@ extern "C" void func_001B7938(cFEStateNetAccountMem* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B7A08);
 #ifdef SKIP_ASM
-extern int* D_004A33D0;
+extern int* SharedLoginMan;
 extern "C" void* func_001B70D0(void*, int);
 
 static inline bool IsMode_001B7A08(int m)
 {
-    return *D_004A33D0 == m;
+    return *SharedLoginMan == m;
 }
 
 /**
@@ -16771,12 +16771,12 @@ extern "C" void func_001B7A08(cFEStateNetAccountMem* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B7A50);
 #ifdef SKIP_ASM
-extern int* D_004A33D0;
+extern int* SharedLoginMan;
 extern "C" void* func_001B70D0(void*, int);
 
 static inline bool IsMode_001B7A50(int m)
 {
-    return *D_004A33D0 == m;
+    return *SharedLoginMan == m;
 }
 
 /**
@@ -16798,18 +16798,18 @@ INCLUDE_ASM("fe/feasyncfile", func_001B7A98);
 extern "C" void* func_001B70D0(void*, int);
 extern "C" int func_00265CB0(void* p);
 extern "C" int func_004165A8(const char* a, const char* b);
-extern int* D_004A33D0;
-extern char D_00536760[];
+extern int* SharedLoginMan;
+extern char AccountData[];
 
 static inline bool IsMode_001B7A98(int m)
 {
-    return *D_004A33D0 == m;
+    return *SharedLoginMan == m;
 }
 
 /**
  * Runs step 20 of the account memory-card popup (delete): checks the saved account before asking to delete it.
  *
- * Read succeeded: when the card's account (D_00536760 name / D_00536760 + 0x11 password) differs from mszUserName /
+ * Read succeeded: when the card's account (AccountData name / AccountData + 0x11 password) differs from mszUserName /
  * mszPassword it sets miError 24, unk_B08 and unk_6D8 and goes to 23 (error popup), else to 21 (ask to delete). Read
  * failed: miError 1 is treated like a mismatch; 5 or 6 go to 21; 2 sets miError 24 and unk_B08 when the card is
  * available but unformatted, then calls func_001B70D0(self, 23) twice (the branch falls into the default one; likely
@@ -16818,7 +16818,7 @@ static inline bool IsMode_001B7A98(int m)
 extern "C" void func_001B7A98(cFEStateNetAccountMem* self)
 {
     if (IsMode_001B7A98(4)) {
-        if (func_004165A8(D_00536760, (char*)&self->mszUserName) != 0 || func_004165A8(D_00536760 + 0x11, (char*)&self->mszPassword) != 0) {
+        if (func_004165A8(AccountData, (char*)&self->mszUserName) != 0 || func_004165A8(AccountData + 0x11, (char*)&self->mszPassword) != 0) {
             self->miError = 0x18;
             self->unk_B08 = 1;
             self->unk_6D8 = 1;
@@ -16838,7 +16838,7 @@ extern "C" void func_001B7A98(cFEStateNetAccountMem* self)
         } else if (error == 6) {
             func_001B70D0(self, 21);
         } else if (error == 2) {
-            if (func_00265CB0(D_004A33D0) != 0) {
+            if (func_00265CB0(SharedLoginMan) != 0) {
                 self->unk_B08 = 1;
                 self->miError = 0x18;
             }
@@ -16855,13 +16855,13 @@ extern "C" void func_001B7A98(cFEStateNetAccountMem* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B7BC0);
 #ifdef SKIP_ASM
-extern int* D_004A33D0;
+extern int* SharedLoginMan;
 extern "C" void* func_001B70D0(void*, int);
 void* func_001B70A8(void* self);
 
 static inline bool IsMode_001B7BC0(int m)
 {
-    return *D_004A33D0 == m;
+    return *SharedLoginMan == m;
 }
 
 /**
@@ -16884,12 +16884,12 @@ extern "C" void func_001B7BC0(cFEStateNetAccountMem* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B7C28);
 #ifdef SKIP_ASM
-extern int* D_004A33D0;
+extern int* SharedLoginMan;
 extern "C" void* func_001B70D0(void*, int);
 
 static inline bool IsMode_001B7C28(int m)
 {
-    return *D_004A33D0 == m;
+    return *SharedLoginMan == m;
 }
 
 /**
@@ -16911,12 +16911,12 @@ extern "C" void func_001B7C28(cFEStateNetAccountMem* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B7C70);
 #ifdef SKIP_ASM
-extern int* D_004A33D0;
+extern int* SharedLoginMan;
 extern "C" void* func_001B70D0(void*, int);
 
 static inline bool IsMode_001B7C70(int m)
 {
-    return *D_004A33D0 == m;
+    return *SharedLoginMan == m;
 }
 
 /**
@@ -16936,7 +16936,7 @@ extern "C" void func_001B7C70(cFEStateNetAccountMem* self)
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetAccountMem_onUpdate);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int* D_004A33D0;
+extern int* SharedLoginMan;
 extern "C" void func_00265A68(void* self);
 extern "C" int func_00265D38(void* self);
 extern "C" void func_002659E8(void* self);
@@ -16956,7 +16956,7 @@ extern "C" void func_001B7C70(cFEStateNetAccountMem* self);
 /**
  * Runs one frame of the account memory-card popup: polls the card and steps the current card state.
  *
- * Updates the card object D_004A33D0 (func_00265A68) and copies its status word into miError; when func_00265D38
+ * Updates the card object SharedLoginMan (func_00265A68) and copies its status word into miError; when func_00265D38
  * reports a card change it sets unk_6D8 (and error 2 if none). Then by miState: the start steps 0, 5, 11 and 19
  * advance to 1, 6, 12 and 20 with func_001B70D0; 1, 2, 6, 8, 12, 14, 16, 20, 22, 26 and 27 run their step helpers
  * (func_001B77A8 .. func_001B7C70); the popup-wait states 7, 13, 21 and 25 call func_002659E8 on the card; 28 and
@@ -16964,8 +16964,8 @@ extern "C" void func_001B7C70(cFEStateNetAccountMem* self);
  */
 extern "C" void cFEStateNetAccountMem_onUpdate(cFEStateNetAccountMem* self)
 {
-    func_00265A68(D_004A33D0);
-    int* mc = D_004A33D0;
+    func_00265A68(SharedLoginMan);
+    int* mc = SharedLoginMan;
     self->miError = mc[1];
     if (func_00265D38(mc) != 0) {
         self->unk_6D8 = 1;
@@ -16987,7 +16987,7 @@ extern "C" void cFEStateNetAccountMem_onUpdate(cFEStateNetAccountMem* self)
     case 19: func_001B70D0(self, 20); break;
     case 20: func_001B7A98(self); break;
     case 22: func_001B7BC0(self); break;
-    case 7: case 13: case 21: case 25: func_002659E8(D_004A33D0); break;
+    case 7: case 13: case 21: case 25: func_002659E8(SharedLoginMan); break;
     case 26: func_001B7C28(self); break;
     case 27: func_001B7C70(self); break;
     case 28: case 29: break;
@@ -17015,7 +17015,7 @@ extern char str_kT_MEMOVNotFormattedPS2[];
 
 extern char str_kT_MEMOVRetry[];
 
-extern int* D_004A33D0;
+extern int* SharedLoginMan;
 
 extern char str_kT_POPUPCMNEABigLogin[];
 
@@ -17048,7 +17048,7 @@ static inline int Loc_B7E40(char* name)
 
 static inline bool IsMode_001B7E40(int m)
 {
-    return *D_004A33D0 == m;
+    return *SharedLoginMan == m;
 }
 
 struct sFEState_001B7E40 {
@@ -17086,7 +17086,7 @@ extern "C" void func_001B7E40_s(sFEState_001B7E40* self, unsigned int mode)
     switch (mode) {
     case 2:
         if (self->fB04 == 0) {
-            if (func_00265CB0(D_004A33D0)) {
+            if (func_00265CB0(SharedLoginMan)) {
                 sprintf1_v(self->text, Loc_B7E40(str_kT_MEMOVNotFormattedPS2), buf);
             } else {
                 func_001B8238_7E40((char*)self);
@@ -17147,7 +17147,7 @@ extern "C" void func_001B7E40_s(sFEState_001B7E40* self, unsigned int mode)
         break;
     case 0:
         if (IsMode_001B7E40(22)) {
-            if (func_00265D68(D_004A33D0)) {
+            if (func_00265D68(SharedLoginMan)) {
                 sprintf1_v(self->text, Loc_B7E40(str_kT_MEMOVNotDetectedPS2), buf);
             } else {
                 sprintf1_v(self->text, Loc_B7E40(str_kT_MEMFEFormatFailed), buf);
@@ -17302,7 +17302,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetAccountMem_onPopupEvent);
 extern "C" void cFEStateNet_onPopupEvent_v(void* self, void* a1, int a2) __asm__("cFEStateNet_onPopupEvent");
 extern "C" int func_001B8890(cFEStateNetAccountMem* self, int state);
 extern "C" int func_00265D68(void* p);
-extern int* D_004A33D0;
+extern int* SharedLoginMan;
 
 class cListener_001B84D8 {
 public:
@@ -17352,7 +17352,7 @@ extern "C" void cFEStateNetAccountMem_onPopupEvent(cFEStateNetAccountMem* self, 
         switch (msg) {
         case 15:
             cFEStateNet_onPopupEvent_v(self, w, 15);
-            if (func_00265D68(D_004A33D0) != 0) {
+            if (func_00265D68(SharedLoginMan) != 0) {
                 self->miError = 2;
                 func_001B70D0(self, func_001B8890(self, self->miState));
             } else if (self->unk_6D8 != 0) {
@@ -23072,7 +23072,7 @@ extern char str_TextCreateAccount[];
 extern char str_TextExistingAccount[];
 extern char str_TextDelectAccount[];
 extern char str_kT_BTNDelete[];
-extern char D_00536760[];
+extern char AccountData[];
 
 struct sVEntry_001BEF60 {
     short delta;
@@ -23127,7 +23127,7 @@ public:
 };
 
 /**
- * Sets up the login-type widgets from the account saved on the memory card (D_00536760).
+ * Sets up the login-type widgets from the account saved on the memory card (AccountData).
  *
  * Ids (+0x18): "TextUseAccount" 0, "TextExistingAccount" 1, "TextCreateAccount" 2, "TextDelectAccount" 3 (sic).
  * "TextUseAccount" and "TextDelectAccount" read "kT_CMNUse" / "kT_BTNDelete" followed by the saved account name ("%s
@@ -23143,22 +23143,22 @@ extern "C" void cFEStateLogin_onWidgetCreate(cFEStateLogin* self, cFEVObj_001BEF
     if (IsHash_001BEF60(widget->mId, str_TextUseAccount)) {
         widget->mState = 0;
         int locStr = Loc_001BEF60(str_kT_CMNUse);
-        usprintf_1BEF60(buf, str_pct_s_pct_S, locStr, D_00536760);
+        usprintf_1BEF60(buf, str_pct_s_pct_S, locStr, AccountData);
         cUIText_setUnicodeString((cUIText*)pWidget, (char*)buf);
         pWidget->setVisible(1);
-        if (strlen(D_00536760) == 0) {
+        if (strlen(AccountData) == 0) {
             pWidget->setUseStaticColour(1);
             pWidget->setStatic(1);
             pWidget->setVisible(0);
         }
     } else if (IsHash_001BEF60(widget->mId, str_1rectangle)) {
-        if (strlen(D_00536760) == 0) {
+        if (strlen(AccountData) == 0) {
             pWidget->setVisible(0);
         } else {
             pWidget->setVisible(1);
         }
     } else if (IsHash_001BEF60(widget->mId, str_4rectangle)) {
-        if (strlen(D_00536760) == 0) {
+        if (strlen(AccountData) == 0) {
             pWidget->setVisible(0);
         } else {
             pWidget->setVisible(1);
@@ -23172,10 +23172,10 @@ extern "C" void cFEStateLogin_onWidgetCreate(cFEStateLogin* self, cFEVObj_001BEF
     } else if (IsHash_001BEF60(widget->mId, str_TextDelectAccount)) {
         widget->mState = 3;
         int locStr = Loc_001BEF60(str_kT_BTNDelete);
-        usprintf_1BEF60(buf, str_pct_s_pct_S, locStr, D_00536760);
+        usprintf_1BEF60(buf, str_pct_s_pct_S, locStr, AccountData);
         cUIText_setUnicodeString((cUIText*)pWidget, (char*)buf);
         pWidget->setVisible(1);
-        if (strlen(D_00536760) == 0) {
+        if (strlen(AccountData) == 0) {
             pWidget->setUseStaticColour(1);
             pWidget->setStatic(1);
             pWidget->setVisible(0);
@@ -23201,13 +23201,13 @@ extern "C" int func_001A8E40_3i(void* self, int a1, int a2) __asm__("func_001A8E
 extern const char str_cFEStateSelectPersona[];
 extern char str_kT_POPUP201Verify[];
 extern char str_kT_BTNCancel[];
-extern char D_00536760[];
+extern char AccountData[];
 
 /**
  * Handles the lobby events of the login screen (cFEStateLogin's vtable slot 31).
  *
  * 200 shows the "kT_POPUP201Verify" popup with a "kT_BTNCancel" option (miMiscData 0x80E). 201 (lobby connected) copies
- * the account loaded from the memory card (D_00536760: name, then the password at +0x11) into LobbyMan + 0x48 / 0x4C
+ * the account loaded from the memory card (AccountData: name, then the password at +0x11) into LobbyMan + 0x48 / 0x4C
  * and sends the login request func_0025C610. 212 (logged in) switches to a new cFEStateSelectPersona (cMemMan_alloc
  * 0x6D8, func_001A8A40). Other ids return func_001A8E40's result.
  *
@@ -23230,7 +23230,7 @@ extern "C" int func_001BF228(cFEStateLogin* self, int id, int eventData)
         break;
     }
     case 201: {
-        char* names = D_00536760;
+        char* names = AccountData;
         cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, names);
         cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, names + 0x11);
         func_0025C610(LobbyMan_mLobbyMan);
@@ -24690,10 +24690,10 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern char str_233QuickPlayPopup[];
-extern char D_005308B8[];
+extern char cBERules_mRules[];
 
 /**
- * Creates the "233QuickPlayPopup" screen; when it exists, plays it and clears the 32 race-option bytes D_005308B8.
+ * Creates the "233QuickPlayPopup" screen; when it exists, plays it and clears the 32 race-option bytes cBERules_mRules.
  */
 extern "C" void cFEStateNetQuickPlayPopup_onCreateScreen(cFEStateNetQuickPlayPopup* self)
 {
@@ -24702,7 +24702,7 @@ extern "C" void cFEStateNetQuickPlayPopup_onCreateScreen(cFEStateNetQuickPlayPop
     self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
-        MEM_fill(D_005308B8, 0, 0x20);
+        MEM_fill(cBERules_mRules, 0, 0x20);
     }
 }
 #endif

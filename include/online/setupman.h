@@ -9,7 +9,7 @@
 // EA's source: d:/ssx/code/source/online/setupman.cpp (the July 2003 preview's assert strings, with "!mSetupMan" and
 // the allocation tag "cSetupMan" in the same function). Retail code: dirtysock/tagsunk 0x00264030..0x00265768, plus
 // the per-message handlers func_00269008 .. func_00269CF0 in bx/bxstringctor (see the methods file).
-// One instance, D_004A33CC (EA: the static cSetupMan::mSetupMan, preview assert "!mSetupMan"): func_00264030 creates
+// One instance, cSetupMan_mSetupMan (EA: the static cSetupMan::mSetupMan, preview assert "!mSetupMan"): func_00264030 creates
 // it, func_00264098 destroys it. No On Tour counterpart (On Tour has no online code).
 //
 // Size 0x12C: [R] func_00264030: cMemMan_alloc(300, "cSetupMan", 0x20000000) + the constructor func_002640C0, which
@@ -32,7 +32,7 @@
 
 struct cSetupMan {
     int mState;                     // 0x000 [R] ctor 1, dtor 1; [U] values above; cGameConnMan's func_00263CF0 reads
-                                    //       it through D_004A33CC (12 / 13: start the race)
+                                    //       it through cSetupMan_mSetupMan (12 / 13: start the race)
     tGameCommPacket* mPacketCache;  // 0x004 [R] ctor 0; [U] the buffer being read into (func_00264A58 allocates it,
                                     //       cCommSystem_readPacket fills it, queued or freed); the dtor frees it
                                     //       (cGameComm::mPacketCache's role)

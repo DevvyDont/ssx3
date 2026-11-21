@@ -310,10 +310,10 @@ INCLUDE_ASM("fe/festateload", func_00186A08);
 extern "C" void* cFEMemCard_cFEMemCard2(void* self, void* a1, int a2);
 extern "C" void* cSSXApp_getMCManager(void* p);
 extern void* cFEStateMemCard_vtbl[];
-// D_004A14B8 holds the active load state (the unit declares it as int elsewhere).
-extern void* D_004A14B8_K186A08 __asm__("D_004A14B8");
-extern int D_004A14B4;
-extern int D_004A14BC;
+// cFEStateMemCard_mInstance holds the active load state (the unit declares it as int elsewhere).
+extern void* D_004A14B8_K186A08 __asm__("cFEStateMemCard_mInstance");
+extern int cFEStateMemCard_mProfileFile;
+extern int cFEStateMemCard_mStage;
 extern "C" void cFEStateMemCard_callbackLoadReady();
 extern "C" void cFEStateMemCard_callbackFileNotFound();
 extern "C" void cFEStateMemCard_callbackFileChecked();
@@ -353,7 +353,7 @@ struct sMemCardK186A08 {
  * Constructs the memory-card load state and points the memory-card manager's callbacks at the load handlers.
  *
  * Runs cFEMemCard_cFEMemCard2() with type 2, stores cFEStateMemCard_vtbl, makes itself the active load state
- * (D_004A14B8) and clears D_004A14B4 and D_004A14BC. Sets mHashName (+0xC), +0x204 and +0x23C to 1, +0x230, +0x234,
+ * (cFEStateMemCard_mInstance) and clears cFEStateMemCard_mProfileFile and cFEStateMemCard_mStage. Sets mHashName (+0xC), +0x204 and +0x23C to 1, +0x230, +0x234,
  * +0x240 and +0x244 to 0, +0x19C to 26 and +0x22C and +0x238 to -1. On cSSXApp_getMCManager()'s manager it sets +0x120,
  * +0x124 and +0x12C to 1, +0x11C and +0x128 to 0, and installs nine callbacks from fememcard (cFEStateMemCard_callbackLoadReady,
  * cFEStateMemCard_callbackFileNotFound, cFEStateMemCard_callbackFileChecked, cFEStateMemCard_callbackSysRecheckFile, cFEStateMemCard_callbackCardsChecked, func_00186C98, func_00186D60, cFEStateMemCard_callbackAcknowledgeCardStatusChange,
@@ -368,8 +368,8 @@ extern "C" cFEStateMemCard* func_00186A08(cFEStateMemCard* self, void* engine)
     int one = 1;
     self->mVtbl = cFEStateMemCard_vtbl;
     D_004A14B8_K186A08 = (self);
-    D_004A14B4 = 0;
-    D_004A14BC = 0;
+    cFEStateMemCard_mProfileFile = 0;
+    cFEStateMemCard_mStage = 0;
     self->mAutoLoadOn = one;
     self->mHashName = one;
     self->mCard1Available = one;
@@ -403,18 +403,18 @@ extern "C" cFEStateMemCard* func_00186A08(cFEStateMemCard* self, void* engine)
 INCLUDE_ASM("fe/festateload", cFEStateMemCard__cFEStateMemCard);
 #ifdef SKIP_ASM
 extern void* cFEStateMemCard_vtbl[];
-extern int D_004A14B8;
+extern int cFEStateMemCard_mInstance;
 extern "C" void cFEMemCard__cFEMemCard(void* self, int flags);
 
 /**
- * Destroys a memory-card state: clears D_004A14B8 and runs the base destructor cFEMemCard__cFEMemCard.
+ * Destroys a memory-card state: clears cFEStateMemCard_mInstance and runs the base destructor cFEMemCard__cFEMemCard.
  *
  * @param flags  destructor flags, passed on
  */
 extern "C" void cFEStateMemCard__cFEStateMemCard(cFEStateMemCard* self, int flags)
 {
     self->mVtbl = cFEStateMemCard_vtbl;
-    D_004A14B8 = 0;
+    cFEStateMemCard_mInstance = 0;
     cFEMemCard__cFEMemCard(self, flags);
 }
 #endif

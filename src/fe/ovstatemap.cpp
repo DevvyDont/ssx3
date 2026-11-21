@@ -378,11 +378,11 @@ extern "C" void cOVState_MAP_setWidgetUnHiliteColor(cOVState_MAP* self, cUIText*
 void* cUIStateStack_pop_8C28(void* self, int a1) __asm__("cUIStateStack_pop");
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
-extern int D_004A2A54;
+extern int cPauseState_StackIdx;
 extern int cPauseState_Flags;
 extern int cOVStateManager_mStatus;
-extern int D_005366E8[];
-extern int D_004428F0[];
+extern int cPauseState_Stack[];
+extern int cPauseState_FlagsTable[];
 extern char str_ConfirmMenu_Yes_x[];
 extern char str_ConfirmMenu_No_x[];
 extern char str_ConfirmMenu_Yes_a[];
@@ -408,7 +408,7 @@ public:
  *
  * Event 5 with the popup closed opens it for the picked session (misc data into +0xD8). With it open, "No"
  * closes it; "Yes" stores the session in mission interface (10) + 0x10, sets cOVStateManager_mStatus = 3, pops the
- * pause-mode stack (D_005366E8/D_004A2A54 into cPauseState_Flags), calls cGame_setState(game, 0xF, 0, 0) and closes
+ * pause-mode stack (cPauseState_Stack/cPauseState_StackIdx into cPauseState_Flags), calls cGame_setState(game, 0xF, 0, 0) and closes
  * the overlay (cOVState_MAP_cleanupIndicators, cOVState_MAP_setupScreenExit).
  *
  * Event 6 closes the popup, or else closes the overlay, pops the state stack and marks this state pending
@@ -437,7 +437,7 @@ extern "C" void cOVState_MAP_onWidgetEvent(cOVState_MAP* selfp, cUIThing* pWidge
             func_0028FAE0(cAudioInterface_bxAudio());
             void* game = SSXApp->Game;
             cOVStateManager_mStatus = 3;
-            cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
+            cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
             cGame_setState(game, 0xF, 0, 0);
             cOVState_MAP_cleanupIndicators(selfp);
             cOVState_MAP_setupScreenExit(selfp);

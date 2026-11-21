@@ -118,19 +118,19 @@ struct sStateObj153200 {
     int f4;
     int f8;
 };
-extern sStateObj153200* D_004A11C8;
+extern sStateObj153200* cBEBoltInterface_instance;
 
 /**
  * Leaves the race back-end state: marks its interfaces inactive.
  *
- * Clears the active word (+0x8) of the option, score, D_004A11C8 (func_0014ABE0's singleton), new player, new race,
+ * Clears the active word (+0x8) of the option, score, cBEBoltInterface_instance (func_0014ABE0's singleton), new player, new race,
  * mission, econ, aggression, reward and save interfaces. New player and new race are cleared here although
  * cBERaceState_onEnter never sets them.
  */
 extern "C" void cBERaceState_onExit(void) {
     cBEOptionInterface_instance->bIsActive = 0;
     cBEScoreInterface_instance->bIsActive = 0;
-    D_004A11C8->f8 = 0;
+    cBEBoltInterface_instance->f8 = 0;
     cBENewPlayerInterface_instance->bIsActive = 0;
     cBENewRaceInterface_instance->bIsActive = 0;
     cBEMissionInterface_instance->bIsActive = 0;
@@ -144,18 +144,18 @@ extern "C" void cBERaceState_onExit(void) {
 //100%
 INCLUDE_ASM("be/bestate", cBERaceState_onEnter);
 #ifdef SKIP_ASM
-extern sStateObj153200* D_004A11C8;
+extern sStateObj153200* cBEBoltInterface_instance;
 
 /**
  * Enters the race back-end state: marks its interfaces active.
  *
- * Sets the active word (+0x8) of the option, score, D_004A11C8 (func_0014ABE0's singleton), mission, econ,
+ * Sets the active word (+0x8) of the option, score, cBEBoltInterface_instance (func_0014ABE0's singleton), mission, econ,
  * aggression, reward and save interfaces; the network, player and character interfaces stay as they were.
  */
 extern "C" void cBERaceState_onEnter(void) {
     cBEOptionInterface_instance->bIsActive = 1;
     cBEScoreInterface_instance->bIsActive = 1;
-    D_004A11C8->f8 = 1;
+    cBEBoltInterface_instance->f8 = 1;
     cBEMissionInterface_instance->bIsActive = 1;
     cBEEconInterface_instance->bIsActive = 1;
     cBEAggressionInterface_instance->bIsActive = 1;

@@ -5,7 +5,7 @@
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BERewardInt[];
-extern void* D_0045AE88[16];
+extern void* cBEInterface_vtbl[16];
 
 
 //99.84%
@@ -15,7 +15,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getThis__Fv);
  * Returns the reward interface singleton, creating it on first use.
  *
  * The first call allocates 0x18 bytes tagged "BERewardInt", clears bIsActive, stores cBEInterface's vtable
- * D_0045AE88 and keeps the object in cBERewardInterface_instance.
+ * cBEInterface_vtbl and keeps the object in cBERewardInterface_instance.
  *
  * @return the reward interface
  */
@@ -24,7 +24,7 @@ void* cBERewardInterface_getThis()
     if (cBERewardInterface_instance == 0) {
         cBERewardInterface* mem = (cBERewardInterface*)cMemMan_alloc(0x18, str_BERewardInt, 0, 0);
         mem->bIsActive = 0;
-        mem->mVtbl = D_0045AE88;
+        mem->mVtbl = cBEInterface_vtbl;
         cBERewardInterface_instance = mem;
     }
     return cBERewardInterface_instance;
@@ -1054,12 +1054,12 @@ struct sRewardReq_157920
     signed char track;
     signed char kind;
 };
-extern sRewardReq_157920 D_0045AAD8_v157920[][4][5] __asm__("D_0045AAD8");
+extern sRewardReq_157920 D_0045AAD8_v157920[][4][5] __asm__("gMedalsInfo");
 
 /**
  * Tells whether a character has conquered a peak: top medals in all of its events.
  *
- * Walks the peak's event table D_0045AAD8 for trophies 0-2 (trophy 3, earnings, is skipped). Events on tracks
+ * Walks the peak's event table gMedalsInfo for trophies 0-2 (trophy 3, earnings, is skipped). Events on tracks
  * 4-11 need any medal, other events medal 0 or 1; trophy 2 needs the best medal (0) for both collectibles and
  * big challenges.
  *
@@ -1206,12 +1206,12 @@ struct sRewardReq_157BF0
     signed char track;
     signed char kind;
 };
-extern sRewardReq_157BF0 D_0045AAD8_v157BF0[][4][5] __asm__("D_0045AAD8");
+extern sRewardReq_157BF0 D_0045AAD8_v157BF0[][4][5] __asm__("gMedalsInfo");
 
 /**
  * Tells whether a character owns one of a peak's four trophies.
  *
- * Trophies 0 and 1 need a medal in every event listed for them in D_0045AAD8; trophy 2 needs a collectibles
+ * Trophies 0 and 1 need a medal in every event listed for them in gMedalsInfo; trophy 2 needs a collectibles
  * medal and a big-challenges medal; trophy 3 needs the peak's earnings target reached (any medal from
  * cBERewardInterface_getEarningsMedal()).
  *
@@ -1974,13 +1974,13 @@ extern "C" void cBERewardInterface_setPlayList(cBERewardInterface* self, int pro
 }
 #endif
 
-extern int D_0045AFE8[];
+extern int gCollectiblesMedalLevel[];
 
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getCollectibleMedalTarget);
 #ifdef SKIP_ASM
 /**
- * Returns the collectibles count a peak needs for a medal (D_0045AFE8, four targets per peak).
+ * Returns the collectibles count a peak needs for a medal (gCollectiblesMedalLevel, four targets per peak).
  *
  * @param peakID  the peak id
  * @param medal  the medal, 0 (best) to 3
@@ -1988,17 +1988,17 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getCollectibleMedalTarget);
  */
 extern "C" int cBERewardInterface_getCollectibleMedalTarget(cBERewardInterface* self, int peakID, int medal)
 {
-    return *(int*)((char*)D_0045AFE8 + ((medal << 2) + (peakID << 4)));
+    return *(int*)((char*)gCollectiblesMedalLevel + ((medal << 2) + (peakID << 4)));
 }
 #endif
 
-extern int D_0045B018[];
+extern int gBigChallengesMedalLevel[];
 
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getChallengesMedalTarget);
 #ifdef SKIP_ASM
 /**
- * Returns the completed big-challenge count a peak needs for a medal (D_0045B018, four per peak).
+ * Returns the completed big-challenge count a peak needs for a medal (gBigChallengesMedalLevel, four per peak).
  *
  * @param peakID  the peak id
  * @param medal  the medal, 0 (best) to 3
@@ -2006,24 +2006,24 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getChallengesMedalTarget);
  */
 extern "C" int cBERewardInterface_getChallengesMedalTarget(cBERewardInterface* self, int peakID, int medal)
 {
-    return *(int*)((char*)D_0045B018 + ((medal << 2) + (peakID << 4)));
+    return *(int*)((char*)gBigChallengesMedalLevel + ((medal << 2) + (peakID << 4)));
 }
 #endif
 
-extern void* D_0045B048[];
+extern void* gEarningsMedalLevel[];
 
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getEarningsTarget__FPvi);
 #ifdef SKIP_ASM
 /**
- * Returns a peak's earnings target from D_0045B048.
+ * Returns a peak's earnings target from gEarningsMedalLevel.
  *
  * @param peakID  the peak id
  * @return the target amount
  */
 int cBERewardInterface_getEarningsTarget(void* self, int peakID)
 {
-    return *(int*)((char*)(void*)D_0045B048 + peakID * 4);
+    return *(int*)((char*)(void*)gEarningsMedalLevel + peakID * 4);
 }
 #endif
 
@@ -2036,7 +2036,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateCollectibleMedal);
 /**
  * Returns the best collectibles medal a count reaches on a peak.
  *
- * Compares @p numCollected with the peak's four targets in D_0045AFE8 (the table cBERewardInterface_getCollectibleMedalTarget
+ * Compares @p numCollected with the peak's four targets in gCollectiblesMedalLevel (the table cBERewardInterface_getCollectibleMedalTarget
  * reads), best medal first.
  *
  * @param idx  the peak (On Tour peakID)
@@ -2045,7 +2045,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateCollectibleMedal);
  */
 extern "C" int cBERewardInterface_calculateCollectibleMedal(cBERewardInterface* self, int idx, int numCollected)
 {
-    int* row = D_0045AFE8 + idx * 4;
+    int* row = gCollectiblesMedalLevel + idx * 4;
     for (int i = 0; i < 4; i++) {
         if (numCollected >= row[i]) return i;
     }
@@ -2119,7 +2119,7 @@ extern "C" int cBEMissionInterface_getCurrentCollectForPeakByChar(void* iface, i
 /**
  * Returns the collectibles medal a character has on a peak.
  *
- * Compares the mission interface's collectibles count for the peak with the peak's four targets (D_0045AFE8).
+ * Compares the mission interface's collectibles count for the peak with the peak's four targets (gCollectiblesMedalLevel).
  *
  * @param iProfileIndex  profile index (On Tour: iProfileIndex)
  * @param iCharacterID  character id (On Tour: iCharacterID)
@@ -2129,7 +2129,7 @@ extern "C" int cBEMissionInterface_getCurrentCollectForPeakByChar(void* iface, i
 extern "C" int cBERewardInterface_getCollectiblesMedal(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int kind)
 {
     int collected = cBEMissionInterface_getCurrentCollectForPeakByChar(cBE_getInterface_Fv(cBE_getBE(), 10), iProfileIndex, iCharacterID, kind);
-    int* thresholds = D_0045AFE8 + kind * 4;
+    int* thresholds = gCollectiblesMedalLevel + kind * 4;
     for (int i = 0; i < 4; i++)
     {
         if (collected >= thresholds[i])
@@ -2150,7 +2150,7 @@ extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(void* 
 /**
  * Returns the big-challenges medal a character has on a peak.
  *
- * Compares the mission interface's completed-mission count on the peak with its four targets (D_0045B018).
+ * Compares the mission interface's completed-mission count on the peak with its four targets (gBigChallengesMedalLevel).
  *
  * @param iProfileIndex  profile index (On Tour: iProfileIndex)
  * @param iCharacterID  character id (On Tour: iCharacterID)
@@ -2160,7 +2160,7 @@ extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(void* 
 extern "C" int cBERewardInterface_getBigChallengesMedal(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int kind)
 {
     int completed = cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(cBE_getInterface_Fv(cBE_getBE(), 10), iProfileIndex, iCharacterID, kind);
-    int* thresholds = D_0045B018 + kind * 4;
+    int* thresholds = gBigChallengesMedalLevel + kind * 4;
     for (int i = 0; i < 4; i++)
     {
         if (completed >= thresholds[i])
@@ -2183,13 +2183,13 @@ int cBEEconInterface_getTotalMoneyEarned(void* self, int a, int b);
  *
  * @param iProfileIndex  profile index (On Tour: iProfileIndex)
  * @param iCharacterID  character id (On Tour: iCharacterID)
- * @param medal  the peak id (an index into D_0045B048), despite the parameter's name
+ * @param medal  the peak id (an index into gEarningsMedalLevel), despite the parameter's name
  * @return 1 (a medal) when the target is reached, else -1
  */
 extern "C" int cBERewardInterface_getEarningsMedal(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int medal)
 {
     unsigned int earned = cBEEconInterface_getTotalMoneyEarned(cBE_getInterface_Fv(cBE_getBE(), 11), iProfileIndex, iCharacterID);
-    if (earned >= *(unsigned int*)((char*)(void*)D_0045B048 + medal * 4))
+    if (earned >= *(unsigned int*)((char*)(void*)gEarningsMedalLevel + medal * 4))
         return 1;
     return -1;
 }
@@ -2201,7 +2201,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateBigChallengeMedal);
 /**
  * Returns the best big-challenges medal a completed-challenge count reaches on a peak.
  *
- * Compares @p numCompleted with the peak's four targets in D_0045B018 (the table cBERewardInterface_getChallengesMedalTarget
+ * Compares @p numCompleted with the peak's four targets in gBigChallengesMedalLevel (the table cBERewardInterface_getChallengesMedalTarget
  * reads), best medal first.
  *
  * @param idx  the peak (On Tour peakID)
@@ -2210,7 +2210,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateBigChallengeMedal);
  */
 extern "C" int cBERewardInterface_calculateBigChallengeMedal(cBERewardInterface* self, int idx, int numCompleted)
 {
-    int* row = D_0045B018 + idx * 4;
+    int* row = gBigChallengesMedalLevel + idx * 4;
     for (int i = 0; i < 4; i++) {
         if (numCompleted >= row[i]) return i;
     }
@@ -2223,7 +2223,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateEarningMedal);
 /**
  * Returns the earnings medal for a cash total on a peak: 1 when it reaches the peak's target, else -1.
  *
- * The target is D_0045B048[@p idx] (what cBERewardInterface_getEarningsTarget returns), compared unsigned.
+ * The target is gEarningsMedalLevel[@p idx] (what cBERewardInterface_getEarningsTarget returns), compared unsigned.
  *
  * @param idx  the peak (On Tour peakID)
  * @param totalCash  total cash earned (On Tour totalCashEarned)
@@ -2231,7 +2231,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateEarningMedal);
  */
 extern "C" int cBERewardInterface_calculateEarningMedal(cBERewardInterface* self, int idx, unsigned int totalCash)
 {
-    return (totalCash < (unsigned int)D_0045B048[idx]) ? -1 : 1;
+    return (totalCash < (unsigned int)gEarningsMedalLevel[idx]) ? -1 : 1;
 }
 #endif
 
@@ -2243,7 +2243,7 @@ int cBERewardInterface_isBetterMedal(void* self, int a, int b);
 /**
  * Returns the next earnings target the character has not reached yet.
  *
- * Checks the per-peak earnings targets D_0045B048 (100,000, 250,000 and 1,000,000) in order against the econ
+ * Checks the per-peak earnings targets gEarningsMedalLevel (100,000, 250,000 and 1,000,000) in order against the econ
  * interface's total money earned.
  *
  * @param iProfileIndex  profile index (On Tour: iProfileIndex)
@@ -2255,7 +2255,7 @@ extern "C" void* cBERewardInterface_calculateNextEarningsLevel(cBERewardInterfac
     for (int i = 0; i < 3; i++)
     {
         if (!cBERewardInterface_isBetterMedal(self, -1, cBERewardInterface_getEarningsMedal(self, iProfileIndex, iCharacterID, i)))
-            return D_0045B048[i];
+            return gEarningsMedalLevel[i];
     }
     return 0;
 }
@@ -2266,12 +2266,12 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateNextCollectiblesLevel)
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cBERewardInterface_getCollectiblesMedal(cBERewardInterface* self, int a, int b, int kind);
-extern int D_0045AFE8_2d[][4] __asm__("D_0045AFE8");
+extern int D_0045AFE8_2d[][4] __asm__("gCollectiblesMedalLevel");
 
 /**
  * Returns the collectibles count needed for the next better medal on a peak.
  *
- * Takes the smallest target in the peak's row of D_0045AFE8 among the medals better than the current
+ * Takes the smallest target in the peak's row of gCollectiblesMedalLevel among the medals better than the current
  * collectibles medal.
  *
  * @param iProfileIndex     profile index (On Tour: iProfileIndex)
@@ -2300,12 +2300,12 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateNextBigChallengesLevel
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cBERewardInterface_getBigChallengesMedal(cBERewardInterface* self, int a, int b, int kind);
-extern int D_0045B018_2d[][4] __asm__("D_0045B018");
+extern int D_0045B018_2d[][4] __asm__("gBigChallengesMedalLevel");
 
 /**
  * Returns the completed big-challenge count needed for the next better medal on a peak.
  *
- * Takes the smallest target in the peak's row of D_0045B018 among the medals better than the current
+ * Takes the smallest target in the peak's row of gBigChallengesMedalLevel among the medals better than the current
  * big-challenges medal.
  *
  * @param iProfileIndex     profile index (On Tour: iProfileIndex)
@@ -2589,7 +2589,7 @@ struct sRewardReq_1591E8
     signed char track;
     signed char kind;
 };
-extern sRewardReq_1591E8 D_0045AAD8_1591E8[][4][5] __asm__("D_0045AAD8");
+extern sRewardReq_1591E8 D_0045AAD8_1591E8[][4][5] __asm__("gMedalsInfo");
 
 struct sRaceSettings_1591E8 {
     char pad_0x00[0x49];
@@ -2614,7 +2614,7 @@ extern signed char D_005305F9[];
  * records the medal and pays half. A conquered mountain gets award 0 once. Stores the medal and cash in mLastEventMedal
  * and mLastEventCashReward of cBERewardInterface_instance.
  *
- * With any medal it then walks the trophy's five requirements in D_0045AAD8[peak][trophy] (event byte, location byte;
+ * With any medal it then walks the trophy's five requirements in gMedalsInfo[peak][trophy] (event byte, location byte;
  * event -1 ends) and checks each for a medal with cBERewardInterface_getTrackMedal. If they hold, it clears a lock bit
  * in the character's flags (+0x278: 0x40/0x80/0x100 for trophy 0, 0x200/0x400/0x800 otherwise, by peak) and calls
  * func_001E2370; the requirements on events 4 and 5 gate a second set of bits (0x4000-0x80000). Events 12 and 13 leave
@@ -2853,7 +2853,7 @@ extern "C" void cBERewardInterface_awardUserTrophy(cBERewardInterface* self, int
 extern "C" int cBERewardInterface_isAwardReceived(cBERewardInterface* self, int a1, int a2, int bit);
 extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int a1, int a2, int bit);
 extern int gNextCollectiblesLimit[];
-extern int D_0045AFE8_2d[][4] __asm__("D_0045AFE8");
+extern int D_0045AFE8_2d[][4] __asm__("gCollectiblesMedalLevel");
 
 /**
  * Checks a rider's collectibles count on a peak against the next target and awards what it unlocks.
@@ -2903,7 +2903,7 @@ extern "C" void cBERewardInterface_awardUserTrophy(cBERewardInterface* self, int
 extern "C" int cBERewardInterface_isAwardReceived(cBERewardInterface* self, int a1, int a2, int bit);
 extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int a1, int a2, int bit);
 extern int gNextBigChallengesLimit[];
-extern int D_0045B018_2d[][4] __asm__("D_0045B018");
+extern int D_0045B018_2d[][4] __asm__("gBigChallengesMedalLevel");
 
 /**
  * Checks a peak's completed big challenges after a mission and hands out the trophy and awards they earn.
@@ -2911,7 +2911,7 @@ extern int D_0045B018_2d[][4] __asm__("D_0045B018");
  * Does nothing until the missions completed on peak @p k (cBEMissionInterface_getNumberCompletedMissionsOnPeak) reach
  * the positive limit gNextBigChallengesLimit[@p k]. Then the limit moves on
  * (cBERewardInterface_calculateNextBigChallengesLevel) and, if the trophy-2 check passed before and the count equals
- * D_0045B018[@p k][3], awards trophy 2 for the peak; a conquered mountain (cBERewardInterface_isMountainConquered) also
+ * gBigChallengesMedalLevel[@p k][3], awards trophy 2 for the peak; a conquered mountain (cBERewardInterface_isMountainConquered) also
  * grants award 0 if not yet received (cBERewardInterface_isAwardReceived). Note that the trophy is given when isTrophyOwned was already true
  * before the update, the opposite of cBERewardInterface_awardUserCash1's 'newly owned' test; likely a bug or an inverted name.
  *
@@ -3234,12 +3234,12 @@ struct sRewardPair_0015A3B8
     signed char b;
 };
 
-extern sRewardPair_0015A3B8 D_0045AAD8[3][4][5];
+extern sRewardPair_0015A3B8 gMedalsInfo[3][4][5];
 
 /**
  * Returns which trophy of its peak an event at a location counts toward.
  *
- * Searches the requirement table D_0045AAD8[3 peaks][4 trophies][5] (event byte, location byte) for an entry with event
+ * Searches the requirement table gMedalsInfo[3 peaks][4 trophies][5] (event byte, location byte) for an entry with event
  * @p eventID and location @p locationID; for events 6 to 11 the event alone matches. Returns the trophy index of the first hit.
  *
  * @param eventID  the game event (On Tour eventID)
@@ -3254,9 +3254,9 @@ extern "C" int cBERewardInterface_getTrackTrophyID(cBERewardInterface* self, int
         {
             for (int k = 0; k < 5; k++)
             {
-                if (D_0045AAD8[i][j][k].a == eventID)
+                if (gMedalsInfo[i][j][k].a == eventID)
                 {
-                    if (D_0045AAD8[i][j][k].b == locationID || eventID == 6 || eventID == 7 || eventID == 8 || eventID == 9 || eventID == 10 || eventID == 11)
+                    if (gMedalsInfo[i][j][k].b == locationID || eventID == 6 || eventID == 7 || eventID == 8 || eventID == 9 || eventID == 10 || eventID == 11)
                         return j;
                 }
             }

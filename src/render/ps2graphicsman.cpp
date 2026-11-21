@@ -1529,7 +1529,7 @@ struct sKey8_691F8 {
 
 extern sRS_691F8 sDrawState_s_defaultDrawState;
 extern sTexPair_691F8 D_004A5A10[];
-extern sKey8_691F8 D_004A5960[];
+extern sKey8_691F8 t2vect_Zero[];
 
 static inline void gfxSet0_691F8(sRS_691F8* r, int v, int mask, int shift)
 {
@@ -1596,7 +1596,7 @@ extern "C" void* cGraphicsMan_cGraphicsMan(cGraphicsMan* self)
         ((sRS_691F8*)(&self->m_drawStateStack[0]))[k] = sDrawState_s_defaultDrawState;
     }
     self->m_pCurrentDrawState = (sDrawState*)((sRS_691F8*)(&self->m_drawStateStack[0]));
-    *(sKey8_691F8*)self = D_004A5960[0];
+    *(sKey8_691F8*)self = t2vect_Zero[0];
     self->m_AIUpdatesPerRender = 0;
     MEM_fill(&self->_EffectTexMap[0], 0xFFFFFFFF, 344);
     self->mNumViews = 1;

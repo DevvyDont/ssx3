@@ -780,7 +780,7 @@ struct sPeakEvent_3340 {
     signed char track;          // widget list selector; < 0 ends the peak's list
     signed char kind;
 };
-extern sPeakEvent_3340 D_0045AAD8[][4][5];
+extern sPeakEvent_3340 gMedalsInfo[][4][5];
 
 class cWidget_3340 {
 public:
@@ -832,7 +832,7 @@ static inline void wColour_3340(cWidget_3340* w, int col)
  * showing a done or not-done picture.
  *
  * For peaks 0-2 and challenge groups 0 and 1 (groups 2 and 3, collectibles / big challenges and earnings, are skipped)
- * it walks the peak's challenge table D_0045AAD8 until an entry's list selector is negative. getChallengeMedal gives the
+ * it walks the peak's challenge table gMedalsInfo until an entry's list selector is negative. getChallengeMedal gives the
  * entry's medal for the player (+0x44) and character (+0xB0); a value below 4 picks the done element (+0xA8), anything
  * else the not-done element (+0xAC). The selector picks the next free marker of one list: 0 -> +0x58 (5 markers), 1 ->
  * +0x6C, 2 -> +0x90, 3 -> +0x9C, 4 -> +0x78, 5 -> +0x84 (3 each). The marker gets the element (+0x7C, texture id +0x78
@@ -854,7 +854,7 @@ extern "C" void cFEStateMountainRoom_updateMarkers(cFEStateMountainRoom* mountai
             if (peak == 2 || peak == 3)
                 continue;
             for (int i = 0; i < 5; i++) {
-                int track = D_0045AAD8[mountain][peak][i].track;
+                int track = gMedalsInfo[mountain][peak][i].track;
                 if (track < 0)
                     break;
                 unsigned int st = getChallengeMedal(self->player, self->charId, mountain, peak, i);

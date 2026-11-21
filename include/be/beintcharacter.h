@@ -4,7 +4,7 @@
 // cBECharacterInterface: the back end's character-bio interface - a rider's character name, short name, nickname,
 // weight, stance (goofy), scale, blood type, sex, age, height, nationality and voice. The object holds no character
 // data: like every BE interface it is a cBEInterface (three word bools + vptr, 0x10 bytes), and its methods ignore
-// `this` and read the character table D_00530970 (0x88-byte records; On Tour: cBELibrary::characterDB) through the
+// `this` and read the character table cBELibrary_characterDB (0x88-byte records; On Tour: cBELibrary::characterDB) through the
 // rider's character ID. One instance,
 // created on demand by cBECharacterInterface_getThis (`cMemMan_alloc(0x10, "BECharInt", 0, 0)`, bIsActive = 0,
 // vtable D_0045AD38) into cBECharacterInterface::instance (retail cBECharacterInterface_instance, D_004A1208); the

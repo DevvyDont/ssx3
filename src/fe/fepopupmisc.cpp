@@ -3109,19 +3109,19 @@ extern "C" int cFEStateRequestLine_getNumOwnedSongs(cFEStateRequestLine* request
 INCLUDE_ASM("fe/fepopupmisc", cFESound__cFESound);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern void* D_0046DD60[];
+extern void* cUISoundInterface_vtbl[];
 
 /**
  * Destroys the front end's sound interface (vtable cFESound_vtbl), freeing it when asked.
  *
- * Puts back the base sound-interface vtable D_0046DD60 and calls operator_delete when bit 0 of @p flags is set. The
+ * Puts back the base sound-interface vtable cUISoundInterface_vtbl and calls operator_delete when bit 0 of @p flags is set. The
  * object is built by cFESound_cFESound (fe/fereal); its play routine is cFESound_playSound.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
 extern "C" void cFESound__cFESound(cFESound* self, int flags)
 {
-    *(void***)self = D_0046DD60;
+    *(void***)self = cUISoundInterface_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3156,12 +3156,12 @@ void cFESound_soundShutdown(void* vself)
 INCLUDE_ASM("fe/fepopupmisc", cOVSound__cOVSound);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern void* D_0046DD60[];
+extern void* cUISoundInterface_vtbl[];
 
 /**
  * Destroys the overlay sound interface, freeing it when asked.
  *
- * Puts back D_0046DD60, the base sound-interface vtable (On Tour cUISoundInterface; its own destructor cUISoundInterface__cUISoundInterface
+ * Puts back cUISoundInterface_vtbl, the base sound-interface vtable (On Tour cUISoundInterface; its own destructor cUISoundInterface__cUISoundInterface
  * stores the same table), and calls operator_delete when bit 0 of flags is set. cOVSound owns nothing to release
  * (On Tour: only mDummyVar at +0x4).
  *
@@ -3169,7 +3169,7 @@ extern void* D_0046DD60[];
  */
 extern "C" void cOVSound__cOVSound(cOVSound* self, int flags)
 {
-    *(void***)self = D_0046DD60;
+    *(void***)self = cUISoundInterface_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -4355,19 +4355,19 @@ int cFEStateReadMessagePopup_onLoseTransition(void* self)
 INCLUDE_ASM("fe/fepopupmisc", cUISoundInterface__cUISoundInterface);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern void* D_0046DD60[];
+extern void* cUISoundInterface_vtbl[];
 
 /**
  * Destroys a base UI sound interface, freeing it when asked.
  *
- * Stores the base sound-interface vtable D_0046DD60 at +0x0 and calls operator_delete when bit 0 of @p flags is set.
- * D_0046DD60 is also the vtable of the null sound object gUISoundNull.
+ * Stores the base sound-interface vtable cUISoundInterface_vtbl at +0x0 and calls operator_delete when bit 0 of @p flags is set.
+ * cUISoundInterface_vtbl is also the vtable of the null sound object gUISoundNull.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
 extern "C" void cUISoundInterface__cUISoundInterface(void* self, int flags)
 {
-    *(void***)self = D_0046DD60;
+    *(void***)self = cUISoundInterface_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -4378,7 +4378,7 @@ extern "C" void cUISoundInterface__cUISoundInterface(void* self, int flags)
 INCLUDE_ASM("fe/fepopupmisc", cUISoundInterface_playSound__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the base UI sound interface plays no sound (entry 2 of D_0046DD60).
+ * Does nothing: the base UI sound interface plays no sound (entry 2 of cUISoundInterface_vtbl).
  */
 void cUISoundInterface_playSound(void* self)
 {
@@ -4389,7 +4389,7 @@ void cUISoundInterface_playSound(void* self)
 INCLUDE_ASM("fe/fepopupmisc", cUISoundInterface_soundInitialize__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the base UI sound interface needs no set-up (entry 3 of D_0046DD60).
+ * Does nothing: the base UI sound interface needs no set-up (entry 3 of cUISoundInterface_vtbl).
  */
 void cUISoundInterface_soundInitialize(void* self)
 {
@@ -4400,7 +4400,7 @@ void cUISoundInterface_soundInitialize(void* self)
 INCLUDE_ASM("fe/fepopupmisc", cUISoundInterface_soundShutdown__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the base UI sound interface has nothing to shut down (entry 4 of D_0046DD60).
+ * Does nothing: the base UI sound interface has nothing to shut down (entry 4 of cUISoundInterface_vtbl).
  */
 void cUISoundInterface_soundShutdown(void* self)
 {
@@ -7516,16 +7516,16 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_onDestroyScreen);
 extern "C" void func_001E3A78(int a, int b);
 extern "C" void cOVStateManager_removePDATemplate(void);
 extern "C" void cOVState_onDestroyScreen(void* self);
-extern int D_004A2A54;
+extern int cPauseState_StackIdx;
 extern int cPauseState_Flags;
-extern int D_005366E8[];
-extern int D_004428F0[];
+extern int cPauseState_Stack[];
+extern int cPauseState_FlagsTable[];
 
 /**
  * Closes the message center's screen (vtable entry 5, onDestroyScreen).
  *
  * In opening modes 0 and 1 (miMiscData) sets message flag 7 (mode 0) or clears it (mode 1), removes the PDA template
- * and restores cPauseState_Flags from the saved pause-state stack (D_005366E8, D_004A2A54, D_004428F0); then runs
+ * and restores cPauseState_Flags from the saved pause-state stack (cPauseState_Stack, cPauseState_StackIdx, cPauseState_FlagsTable); then runs
  * cOVState_onDestroyScreen.
  */
 extern "C" void cOVState_MESSAGECENTER_onDestroyScreen(cOVState_MESSAGECENTER* self)
@@ -7534,11 +7534,11 @@ extern "C" void cOVState_MESSAGECENTER_onDestroyScreen(cOVState_MESSAGECENTER* s
     if (openMode == 1) {
         func_001E3A78(7, 0);
         cOVStateManager_removePDATemplate();
-        cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
+        cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
     } else if (openMode == 0) {
         func_001E3A78(7, 1);
         cOVStateManager_removePDATemplate();
-        cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
+        cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
     }
     cOVState_onDestroyScreen(self);
 }
@@ -9135,9 +9135,9 @@ extern void func_002C2540_5B80(unsigned short* dst, const char* src) __asm__("fu
 extern void sprintf2_5B80(unsigned short* dst, const unsigned short* fmt, ...) __asm__("sprintf2");
 extern "C" char* cBECharacterInterface_getShortNameByCharacter(void* iface, int a1, int a2);
 extern "C" int cGameModeMan_getHeatScore(sInfo5B80* info, int idx, int which);
-extern int D_00536730[];
+extern int cGameModeMan_iRanking[];
 extern int cGameModeMan_bGiveUp[];
-extern int D_00536708[];
+extern int cGameModeMan_iCharRank[];
 extern char* D_00441D10[];
 extern unsigned short D_004A2140_5B80[] __asm__("D_004A2140");
 extern char str_42freestyle_standings[];
@@ -9192,12 +9192,12 @@ public:
 };
 
 /**
- * Builds the freestyle heat standings overlay (overlay 10, vtable D_00474088, entry 4 onCreateScreen).
+ * Builds the freestyle heat standings overlay (overlay 10, vtable cOVState_HEAT_STANDINGS_vtbl, entry 4 onCreateScreen).
  *
  * Adds the "42freestyle_standings" screen (kept at +0x40) over "OV_darkblue", runs cOVState_onCreateScreen and fills
  * it: "track_event" reads "<location> - <Slope|Big Air|Pipe>" by the new race's cGameMode; the title is
  * kT_OVRCMNQFHeat1Stand (hiding "total") or kT_OVRCMNQFHeat2Stand by the game mode manager's heat; "heat1" reads
- * kT_OVRCMNScoreColon off the career path. Each standing row (D_00536708 order) gets the rider's name (cBECharacterInterface_getShortNameByCharacter),
+ * kT_OVRCMNScoreColon off the career path. Each standing row (cGameModeMan_iCharRank order) gets the rider's name (cBECharacterInterface_getShortNameByCharacter),
  * run 1 and run 2 scores and the total (cGameModeMan_getHeatScore) or DNF for a human rider who gave up
  * (cGameModeMan_bGiveUp); the player's help_current0N marker shows in heat 1 (kT_CMNHELPEarnedEnoughPoints in a final
  * qualifying round), help_advance or help_sorry in heat 2, and the five overlayOpt buttons take their option ids from
@@ -9279,13 +9279,13 @@ extern "C" void cOVState_HEAT_STANDINGS_onCreateScreen(cOVState_HEAT_STANDINGS* 
         char num2[32];
         int i;
         for (i = 1; i < info->count + 2; i++) {
-            int idx = D_00536708[i - 1];
+            int idx = cGameModeMan_iCharRank[i - 1];
             sprintf(name, str_rider_pct_d, i);
             int hl = 0;
             uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
-            if (i - 1 == D_00536730[pl0]) {
+            if (i - 1 == cGameModeMan_iRanking[pl0]) {
                 if (cGameModeMan_bGiveUp[pl0]) hl = 1; else hl = 0;
-            } else if (cBENewRaceInterface_newRace.cGamePath == 2 && i - 1 == D_00536730[pl1]) {
+            } else if (cBENewRaceInterface_newRace.cGamePath == 2 && i - 1 == cGameModeMan_iRanking[pl1]) {
                 if (cGameModeMan_bGiveUp[pl1]) hl = 1; else hl = 0;
             }
             cUIText_setAsciiString(uiText, cBECharacterInterface_getShortNameByCharacter(iface2, info->a18[idx], info->a40[idx]));
@@ -9313,7 +9313,7 @@ extern "C" void cOVState_HEAT_STANDINGS_onCreateScreen(cOVState_HEAT_STANDINGS* 
                     int total = cGameModeMan_getHeatScore(info, idx, 0) + cGameModeMan_getHeatScore(info, idx, 1);
                     sprintf(num2, "%d", total);
                     cUIText_setAsciiString((cUIText*)totalText, num2);
-                    if (i - 1 == D_00536730[pl0] && flag) {
+                    if (i - 1 == cGameModeMan_iRanking[pl0] && flag) {
                         cUIText_setAsciiString(uiText, str_dash_sp_dash_sp_dash);
                     }
                 }
@@ -9326,7 +9326,7 @@ extern "C" void cOVState_HEAT_STANDINGS_onCreateScreen(cOVState_HEAT_STANDINGS* 
         int k;
         for (k = 1; k < 7; k++) {
             sprintf(name, str_help_current0pct_d, k);
-            int playerPlace = D_00536730[cBENewPlayerInterface_getHumanRider(iface1, 0)];
+            int playerPlace = cGameModeMan_iRanking[cBENewPlayerInterface_getHumanRider(iface1, 0)];
             int placeMarker = playerPlace < 6 ? playerPlace : 5;
             if (kind == 1 && placeMarker + 1 == k && !any) {
                 last = k;
@@ -9350,7 +9350,7 @@ extern "C" void cOVState_HEAT_STANDINGS_onCreateScreen(cOVState_HEAT_STANDINGS* 
         if (any) {
             ids.v[0] = 2;
         } else if (kind == 2) {
-            if (D_00536730[cBENewPlayerInterface_getHumanRider(iface1, 0)] < 3) {
+            if (cGameModeMan_iRanking[cBENewPlayerInterface_getHumanRider(iface1, 0)] < 3) {
                 cUIState_showObjSafe(self, str_help_advance);
             } else {
                 cUIState_showObjSafe(self, str_help_sorry);
@@ -9407,7 +9407,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void cOVState_triggerTextFade(void* self, char* text, char* name);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern int D_00536730[];
+extern int cGameModeMan_iRanking[];
 extern char str_rider_pct_d[];
 extern char str_at_TextPulseWhiteOrange[];
 extern char str_run_pct_d_pct_d[];
@@ -9426,7 +9426,7 @@ extern "C" void cOVState_HEAT_STANDINGS_onGainFocus(cOVState_HEAT_STANDINGS* sel
     int* heatData = (int*)SSXApp->GameModeMan;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     int x = *heatData;
-    int n = D_00536730[cBENewPlayerInterface_getHumanRider(iface, 0)] + 1;
+    int n = cGameModeMan_iRanking[cBENewPlayerInterface_getHumanRider(iface, 0)] + 1;
     if (n >= 7) {
         n = 6;
     }
@@ -9519,7 +9519,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void cOVState_onCreateScreen(void* self);
 
 /**
- * Creates the final standings overlay's screens (overlay 11, vtable D_00473FB0, entry 4 onCreateScreen).
+ * Creates the final standings overlay's screens (overlay 11, vtable cOVState_FINAL_STANDINGS_vtbl, entry 4 onCreateScreen).
  *
  * Adds "43final_standings" (kept at +0x40) over "OV_darkblue", runs cOVState_onCreateScreen and sets +0x9C so the next
  * onGainTransition fills the screen.
@@ -9576,7 +9576,7 @@ void cUIText_setAsciiString(cUIText* text, const char* str);
 
 extern char D_004A2138[];
 
-extern int D_00536730[];
+extern int cGameModeMan_iRanking[];
 
 
 extern char str_helptext_b[];
@@ -9598,7 +9598,7 @@ extern "C" char* func_00146F88(void* iface, int idx);
 extern "C" char* cBECharacterInterface_getShortNameByCharacter(void* iface, int id, int a2);
 extern "C" void cUIText_setUnicodeStringWrap(void* text, unsigned short* str);
 extern "C" void cUIIcon_setTextureByHashValue(void* obj, int hash);
-extern int D_00536708[];
+extern int cGameModeMan_iCharRank[];
 extern int D_005366A8[];
 extern char* D_00441D10[];
 extern int D_004A213C;
@@ -9774,23 +9774,23 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
         char buf[48];
         char text[0x70];
         for (int i = 0; i < 6; i++) {
-            int idx = D_00536708[i];
+            int idx = cGameModeMan_iCharRank[i];
             if (i < count) {
                 sprintf(buf, str_riderpct_d, i + 1);
                 int finished = 0;
                 uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
-                if (i == D_00536730[pl0]) {
+                if (i == cGameModeMan_iRanking[pl0]) {
                     if (D_005366A8[pl0] != 0) {
                         finished = 1;
                     }
-                } else if (cBENewRaceInterface_newRace.cGamePath == 2 && i == D_00536730[pl1]) {
+                } else if (cBENewRaceInterface_newRace.cGamePath == 2 && i == cGameModeMan_iRanking[pl1]) {
                     if (D_005366A8[pl1] != 0) {
                         finished = 1;
                     }
                 }
-                if (cBENewRaceInterface_newRace.cGamePath == 2 && i == D_00536730[pl0]) {
+                if (cBENewRaceInterface_newRace.cGamePath == 2 && i == cGameModeMan_iRanking[pl0]) {
                     cUIText_setAsciiString(uiText, func_00146F88(player, pl0));
-                } else if (cBENewRaceInterface_newRace.cGamePath == 2 && i == D_00536730[pl1]) {
+                } else if (cBENewRaceInterface_newRace.cGamePath == 2 && i == cGameModeMan_iRanking[pl1]) {
                     cUIText_setAsciiString(uiText, func_00146F88(player, pl1));
                 } else {
                     int rider = raceSetup->rider[idx];
@@ -9826,13 +9826,13 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
         uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_b));
         if (players != 2) {
             if (track == 5 || track == 6) {
-                if (D_00536730[pl0] == 0) {
+                if (cGameModeMan_iRanking[pl0] == 0) {
                     cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_HELPCongratWonChal));
                 } else {
                     cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRHELPSorryLose));
                 }
             } else if (track == 0 && mode < 3) {
-                if (D_00536730[pl0] < 3) {
+                if (cGameModeMan_iRanking[pl0] < 3) {
                     ids.v[0] = 1;
                     if (mode == 1) {
                         cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRCongratGoToSemi));
@@ -9846,11 +9846,11 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
                 }
             } else if (D_004A213C != 0) {
                 cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRCongratulationsPlatinum));
-            } else if (D_00536730[pl0] == 0) {
+            } else if (cGameModeMan_iRanking[pl0] == 0) {
                 cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRCongratulationsGold));
-            } else if (D_00536730[pl0] == 1) {
+            } else if (cGameModeMan_iRanking[pl0] == 1) {
                 cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRCongratulationsSilver));
-            } else if (D_00536730[pl0] == 2) {
+            } else if (cGameModeMan_iRanking[pl0] == 2) {
                 cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRCongratulationsBronze));
             } else {
                 cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRHELPSorryLose));
@@ -9863,7 +9863,7 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
             if (SSXApp->Game->AI->NumberOfRidersAllocated != players || same) {
                 ((cUIThing*)uiText)->setVisible(0);
             } else {
-                if (D_00536730[pl0] < D_00536730[pl1]) {
+                if (cGameModeMan_iRanking[pl0] < cGameModeMan_iRanking[pl1]) {
                     func_002C2540(text, func_00146F88(player, pl0));
                 } else {
                     func_002C2540(text, func_00146F88(player, pl1));
@@ -9882,13 +9882,13 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
         cUIState_hideObjSafe(self, str_silver);
         cUIState_hideObjSafe(self, str_bronze);
         int show1 = 1;
-        if (cBENewRaceInterface_newRace.cGamePath != 2 && (track == 5 || track == 6) && D_00536730[pl0] != 0) {
+        if (cBENewRaceInterface_newRace.cGamePath != 2 && (track == 5 || track == 6) && cGameModeMan_iRanking[pl0] != 0) {
             show1 = 0;
         }
         if (pl1 != -1 && cBENewRaceInterface_newRace.cGamePath == 2) {
             show2 = 1;
             if ((track >= 1 && track <= 3) || track == 5 || track == 6) {
-                if (D_00536730[pl0] < D_00536730[pl1]) {
+                if (cGameModeMan_iRanking[pl0] < cGameModeMan_iRanking[pl1]) {
                     show2 = 0;
                 } else {
                     show1 = 0;
@@ -9901,11 +9901,11 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
         }
         if (mode == 3 || track == 5 || track == 6) {
             if (show1) {
-                if (D_00536730[pl0] == 0) {
+                if (cGameModeMan_iRanking[pl0] == 0) {
                     cUIState_showObjSafe(self, str_gold);
-                } else if (D_00536730[pl0] == 1) {
+                } else if (cGameModeMan_iRanking[pl0] == 1) {
                     cUIState_showObjSafe(self, str_silver);
-                } else if (D_00536730[pl0] == 2) {
+                } else if (cGameModeMan_iRanking[pl0] == 2) {
                     cUIState_showObjSafe(self, str_bronze);
                 }
                 if (cBENewRaceInterface_newRace.cGamePath == 0 && D_004A213C != 0) {
@@ -9914,11 +9914,11 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
                 }
             }
             if (show2) {
-                if (D_00536730[pl1] == 0) {
+                if (cGameModeMan_iRanking[pl1] == 0) {
                     cUIState_showObjSafe(self, str_gold);
-                } else if (D_00536730[pl1] == 1) {
+                } else if (cGameModeMan_iRanking[pl1] == 1) {
                     cUIState_showObjSafe(self, str_silver);
-                } else if (D_00536730[pl1] == 2) {
+                } else if (cGameModeMan_iRanking[pl1] == 2) {
                     cUIState_showObjSafe(self, str_bronze);
                 }
             }
@@ -10001,7 +10001,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void cUITextScroll_setInputMap(void* self, int a1);
-extern int D_00536730[];
+extern int cGameModeMan_iRanking[];
 extern char str_riderpct_d[];
 extern char str_at_TextPulseWhiteOrange[];
 extern char str_timePointspct_d[];
@@ -10042,15 +10042,15 @@ extern "C" void cOVState_FINAL_STANDINGS_onGainFocus(cOVState_FINAL_STANDINGS* s
         }
     }
     if (first) {
-        sprintf(buf, str_riderpct_d, D_00536730[cBENewPlayerInterface_getHumanRider(player, 0)] + 1);
+        sprintf(buf, str_riderpct_d, cGameModeMan_iRanking[cBENewPlayerInterface_getHumanRider(player, 0)] + 1);
         cOVState_triggerTextFade(self, buf, str_at_TextPulseWhiteOrange);
-        sprintf(buf, str_timePointspct_d, D_00536730[cBENewPlayerInterface_getHumanRider(player, 0)] + 1);
+        sprintf(buf, str_timePointspct_d, cGameModeMan_iRanking[cBENewPlayerInterface_getHumanRider(player, 0)] + 1);
         cOVState_triggerTextFade(self, buf, str_at_TextPulseWhiteOrange);
     }
     if (second) {
-        sprintf(buf, str_riderpct_d, D_00536730[cBENewPlayerInterface_getHumanRider(player, 1)] + 1);
+        sprintf(buf, str_riderpct_d, cGameModeMan_iRanking[cBENewPlayerInterface_getHumanRider(player, 1)] + 1);
         cOVState_triggerTextFade(self, buf, str_at_TextPulseWhiteOrange);
-        sprintf(buf, str_timePointspct_d, D_00536730[cBENewPlayerInterface_getHumanRider(player, 1)] + 1);
+        sprintf(buf, str_timePointspct_d, cGameModeMan_iRanking[cBENewPlayerInterface_getHumanRider(player, 1)] + 1);
         cOVState_triggerTextFade(self, buf, str_at_TextPulseWhiteOrange);
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
@@ -10245,7 +10245,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 extern int D_004A213C;
-extern int D_00536730[];
+extern int cGameModeMan_iRanking[];
 extern unsigned int D_00536640[];
 extern char str_finishov[];
 extern char str_Menu0000_b[];
@@ -10278,7 +10278,7 @@ public:
 };
 
 /**
- * Builds the race finish overlay (overlay 12, vtable D_00473E00, entry 4 onCreateScreen).
+ * Builds the race finish overlay (overlay 12, vtable cOVState_RACE_FINISHOV_vtbl, entry 4 onCreateScreen).
  *
  * Adds the "finishov" screen (kept at +0x40), runs cOVState_onCreateScreen, zeroes the timer (+0x9C), sets flag 8 in
  * "Menu0000"'s +0x90, hides the run labels, shows the human rider's time in "pointstotal" (frames / 60) and only their
@@ -10309,7 +10309,7 @@ extern "C" void cOVState_RACE_FINISHOV_onCreateScreen(cOVState_RACE_FINISHOV* se
     char* ifaceD = (char*)cBE_getInterface_Fv(cBE_getBE(), 13);
     int pl = cBENewPlayerInterface_getHumanRider(iface1, 0);
     int mode = *modeData;
-    int sel = D_00536730[pl];
+    int sel = cGameModeMan_iRanking[pl];
     cUIState_hideObjSafe(self, str_firstrun);
     cUIState_hideObjSafe(self, str_secondrun);
     cUIState_hideObjSafe(self, str_thirdrun);
@@ -10510,7 +10510,7 @@ struct sVEntry8200 {
 };
 
 /**
- * Builds the event finish overlay for scored runs (overlay 13, vtable D_00473D28, entry 4 onCreateScreen).
+ * Builds the event finish overlay for scored runs (overlay 13, vtable cOVState_BASSSP_QUAL_FINISHOV_vtbl, entry 4 onCreateScreen).
  *
  * Like the race finish overlay: "finishov" screen, timer reset, "Menu0000" flag 8. Shows firstrun / secondrun /
  * finalrun by the game mode manager's heat (not for game mode 6), the medal icon by the reward interface's word +0x14
@@ -10562,7 +10562,7 @@ extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen(cOVState_BASSSP_QUA
         }
     }
     int pl = cBENewPlayerInterface_getHumanRider(iface1, 0);
-    int sel = D_00536730[pl];
+    int sel = cGameModeMan_iRanking[pl];
     if (*(int*)(ifaceD + 0x14) == 0 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 4 || cBENewRaceInterface_newRace.cGameEvent == 5)) {
         D_004A213C = 1;
         cUIState_showObjSafe(self, str_platinum);
@@ -10754,7 +10754,7 @@ extern "C" void* func_001FD190(int v);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern int D_005366A8[];
-extern int D_00536730[];
+extern int cGameModeMan_iRanking[];
 extern int cGameModeMan_bGiveUp[];
 extern unsigned int D_00536640[];
 extern char* D_00441D10[];
@@ -10861,7 +10861,7 @@ extern "C" void func_001E8920(void* self)
         }
     }
     cUIObj_8920* screenWidget = (cUIObj_8920*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_b));
-    int playerPlace = D_00536730[pl];
+    int playerPlace = cGameModeMan_iRanking[pl];
     if (playerPlace == 0) goto yes;
     if (playerPlace == 1) goto yes;
     if (playerPlace == 2) goto yes;

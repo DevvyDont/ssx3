@@ -10,8 +10,8 @@
 // render/lightman splat unit (0x38E118..0x38EE78).
 // Size 0x1 (an empty class): [R] cSSXApp_init allocates the only instance with cMemMan_alloc(1, "2DRender") and stores
 // it
-// in D_004A28AC (On Tour's global G2D, c2DRender*); [O] On Tour's c2DRender is 0x1 with no members. Every caller loads
-// D_004A28AC into a0, and no method reads or writes through it (retail asm: 0 accesses through a0).
+// in G2D (On Tour's global G2D, c2DRender*); [O] On Tour's c2DRender is 0x1 with no members. Every caller loads
+// G2D into a0, and no method reads or writes through it (retail asm: 0 accesses through a0).
 //
 // Its methods' arguments are what carry the raw offsets, so the two argument types are laid out here too:
 //   tBxVertex (0x30): stride 0x30 in every method (u/v stores at +0x0/+0x4, sqc2 of p at +0x20 per vertex);

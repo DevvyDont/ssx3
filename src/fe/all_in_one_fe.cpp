@@ -800,11 +800,11 @@ extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
 extern char cOVState_vtbl[];
 
 /**
- * Destroys the overlay with vtable D_00474088 (overlay id 10).
+ * Destroys the overlay with vtable cOVState_HEAT_STANDINGS_vtbl (overlay id 10).
  *
  * Stores the cOVState vtable cOVState_vtbl and runs the cUIState destructor cUIState__cUIState, which frees the object when the
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
- * own. It is the destructor slot (+0xC) of D_00474088.
+ * own. It is the destructor slot (+0xC) of cOVState_HEAT_STANDINGS_vtbl.
  *
  * @param ovState  the object being destroyed
  */
@@ -818,12 +818,12 @@ extern "C" void cOVState_HEAT_STANDINGS__cOVState_HEAT_STANDINGS(cOVState_HEAT_S
 INCLUDE_ASM("fe/all_in_one_fe", cOVState_HEAT_STANDINGS_cOVState_HEAT_STANDINGS);
 #ifdef SKIP_ASM
 extern "C" void *cUIState_cUIState(void*, ...);
-extern char D_00474088[];
+extern char cOVState_HEAT_STANDINGS_vtbl[];
 extern char cOVState_vtbl[];
 extern unsigned short str_sp_b[];
 
 /**
- * Constructs the overlay with vtable D_00474088 for engine @p engine and overlay id @p overlayId.
+ * Constructs the overlay with vtable cOVState_HEAT_STANDINGS_vtbl for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -844,7 +844,7 @@ extern "C" void *cOVState_HEAT_STANDINGS_cOVState_HEAT_STANDINGS(cOVState_HEAT_S
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = D_00474088;
+    ((char*)ovState->mVtbl) = cOVState_HEAT_STANDINGS_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -858,11 +858,11 @@ extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
 extern char cOVState_vtbl[];
 
 /**
- * Destroys the overlay with vtable D_00473FB0 (overlay id 11).
+ * Destroys the overlay with vtable cOVState_FINAL_STANDINGS_vtbl (overlay id 11).
  *
  * Stores the cOVState vtable cOVState_vtbl and runs the cUIState destructor cUIState__cUIState, which frees the object when the
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
- * own. It is the destructor slot (+0xC) of D_00473FB0.
+ * own. It is the destructor slot (+0xC) of cOVState_FINAL_STANDINGS_vtbl.
  *
  * @param ovState  the object being destroyed
  */
@@ -876,12 +876,12 @@ extern "C" void cOVState_FINAL_STANDINGS__cOVState_FINAL_STANDINGS(cOVState_FINA
 INCLUDE_ASM("fe/all_in_one_fe", cOVState_FINAL_STANDINGS_cOVState_FINAL_STANDINGS);
 #ifdef SKIP_ASM
 extern "C" void *cUIState_cUIState(void*, ...);
-extern char D_00473FB0[];
+extern char cOVState_FINAL_STANDINGS_vtbl[];
 extern char cOVState_vtbl[];
 extern unsigned short str_sp_b[];
 
 /**
- * Constructs the overlay with vtable D_00473FB0 for engine @p engine and overlay id @p overlayId.
+ * Constructs the overlay with vtable cOVState_FINAL_STANDINGS_vtbl for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -902,7 +902,7 @@ extern "C" void *cOVState_FINAL_STANDINGS_cOVState_FINAL_STANDINGS(cOVState_FINA
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = D_00473FB0;
+    ((char*)ovState->mVtbl) = cOVState_FINAL_STANDINGS_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -975,11 +975,11 @@ extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
 extern char cOVState_vtbl[];
 
 /**
- * Destroys the finish overlay with vtable D_00473E00 (overlay id 12).
+ * Destroys the finish overlay with vtable cOVState_RACE_FINISHOV_vtbl (overlay id 12).
  *
  * Stores the cOVState vtable cOVState_vtbl and runs the cUIState destructor cUIState__cUIState, which frees the object when the
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
- * own. It is the destructor slot (+0xC) of D_00473E00.
+ * own. It is the destructor slot (+0xC) of cOVState_RACE_FINISHOV_vtbl.
  *
  * @param ovState  the object being destroyed
  */
@@ -995,13 +995,13 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_RACE_FINISHOV_cOVState_RACE_FINISHOV);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_CEB8(void*) __asm__("cUIState_cUIState");
 int GetHashValue32(char*);
-extern char D_00473E00[];
+extern char cOVState_RACE_FINISHOV_vtbl[];
 extern char cOVState_vtbl[];
 extern char str_finishov[];
 extern unsigned short str_sp_b[];
 
 /**
- * Constructs the finish overlay with vtable D_00473E00 for engine @p engine and overlay id @p overlayId, sets the word at 0xA0
+ * Constructs the finish overlay with vtable cOVState_RACE_FINISHOV_vtbl for engine @p engine and overlay id @p overlayId, sets the word at 0xA0
  * to 1 and names the state "finishov" (mHashName, 0xC, = GetHashValue32).
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
@@ -1025,7 +1025,7 @@ extern "C" void *cOVState_RACE_FINISHOV_cOVState_RACE_FINISHOV(cOVState_RACE_FIN
     unsigned short chatInit = str_sp_b[0];
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (ovState->unk_0A0) = 1;
-    ((char*)ovState->mVtbl) = D_00473E00;
+    ((char*)ovState->mVtbl) = cOVState_RACE_FINISHOV_vtbl;
     (ovState->mHashName) = GetHashValue32(str_finishov);
     return ((void*)ovState);
 }
@@ -1039,11 +1039,11 @@ extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
 extern char cOVState_vtbl[];
 
 /**
- * Destroys the finish overlay with vtable D_00473D28 (overlay id 13).
+ * Destroys the finish overlay with vtable cOVState_BASSSP_QUAL_FINISHOV_vtbl (overlay id 13).
  *
  * Stores the cOVState vtable cOVState_vtbl and runs the cUIState destructor cUIState__cUIState, which frees the object when the
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
- * own. It is the destructor slot (+0xC) of D_00473D28.
+ * own. It is the destructor slot (+0xC) of cOVState_BASSSP_QUAL_FINISHOV_vtbl.
  *
  * @param ovState  the object being destroyed
  */
@@ -1059,13 +1059,13 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_BASSSP_QUAL_FINISHOV_cOVState_BASSSP_QU
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_CF60(void*) __asm__("cUIState_cUIState");
 int GetHashValue32(char*);
-extern char D_00473D28[];
+extern char cOVState_BASSSP_QUAL_FINISHOV_vtbl[];
 extern char cOVState_vtbl[];
 extern char str_finishov[];
 extern unsigned short str_sp_b[];
 
 /**
- * Constructs the finish overlay with vtable D_00473D28 for engine @p engine and overlay id @p overlayId, sets the word at 0xA0
+ * Constructs the finish overlay with vtable cOVState_BASSSP_QUAL_FINISHOV_vtbl for engine @p engine and overlay id @p overlayId, sets the word at 0xA0
  * to 1 and names the state "finishov" (mHashName, 0xC, = GetHashValue32).
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
@@ -1089,7 +1089,7 @@ extern "C" void *cOVState_BASSSP_QUAL_FINISHOV_cOVState_BASSSP_QUAL_FINISHOV(cOV
     unsigned short chatInit = str_sp_b[0];
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (ovState->unk_0A0) = 1;
-    ((char*)ovState->mVtbl) = D_00473D28;
+    ((char*)ovState->mVtbl) = cOVState_BASSSP_QUAL_FINISHOV_vtbl;
     (ovState->mHashName) = GetHashValue32(str_finishov);
     return ((void*)ovState);
 }
@@ -1829,7 +1829,7 @@ struct sFloat4 {
 };
 
 
-extern float D_00504FB8[];
+extern float cSinCosTable_gSinCosTable[];
 
 extern "C" void tHUDDef_getPos(void*, void*);
 
@@ -1865,7 +1865,7 @@ extern "C" void func_0021E7E0_E1B0(char* self, sColour* colp, t2Vector* pos, t2V
  * colour. The result of the back-end interface 0 lookup is discarded.
  *
  * Animation from the panel: while its f48 (+0x48; On Tour rankAnimFrame) is >= 0, first place scales the digit and
- * suffix by 1 + 0.2 * sin(4 pi f48) * (1 - f48^2) (sine table D_00504FB8) and the other places multiply the colour's
+ * suffix by 1 + 0.2 * sin(4 pi f48) * (1 - f48^2) (sine table cSinCosTable_gSinCosTable) and the other places multiply the colour's
  * alpha by 0.5 + f48 / 2. While f4C (+0x4C; On Tour rankGlowFrame) is >= 0, func_0021E7E0 draws the glow over the digit
  * and over the suffix, one layer below, with phase f4C, grown 1.81 times and alpha 0.5 to 1.
  *
@@ -1898,7 +1898,7 @@ extern "C" void cOVStateHUD1P_renderRank(cOVStateHUD1P* self, char* obj, int* ri
     float rankAnimFrame = ((float*)rider)[0x12];
     if (rankAnimFrame >= 0.0f) {
         if (panelRider->unk_0EC == 0) {
-            k = D_00504FB8[(int)(rankAnimFrame * 12.566370964050293f * 81.4873275756836f) & 0x1FF] * 0.199636310338974f * (1.0f - rankAnimFrame * rankAnimFrame) + k;
+            k = cSinCosTable_gSinCosTable[(int)(rankAnimFrame * 12.566370964050293f * 81.4873275756836f) & 0x1FF] * 0.199636310338974f * (1.0f - rankAnimFrame * rankAnimFrame) + k;
         } else {
             col.a = col.a * (rankAnimFrame * 0.5f + 0.5f);
         }
@@ -2536,7 +2536,7 @@ struct Obj_F9B0 {
     virtual void v06();
     virtual int getAIIndex();
 };
-extern float D_00504FB8[];
+extern float cSinCosTable_gSinCosTable[];
 extern V4_F9B0 D_004C8648;
 extern char str_pct_d_pct_d_b[];
 extern "C" void* cBE_getBE();
@@ -2559,7 +2559,7 @@ extern "C" void cFont_text(void*, float, float, char*);
  *
  * Draws only while cSectionMan_isActive says the SectionMan's location (mBELocationID, +0x1BC) is loaded and active.
  * With @p animFrame < 0.44 the icon and the text scale by 1 + 0.2 * sin(4 pi k) * (1 - k^2), k being @p animFrame / 0.44 (sine table
- * D_00504FB8). Element 57 of @p obj (+0x804) gives position, size (fallback: the texture icons[5], +0x4A8) and scale;
+ * cSinCosTable_gSinCosTable). Element 57 of @p obj (+0x804) gives position, size (fallback: the texture icons[5], +0x4A8) and scale;
  * cOVStateHUD1P_calcElemPos places the icon with the element's alignment and @p x, and it is drawn white at the element's size
  * (times the pulse) on the element's layer; the element's scale applies to the text only. The text goes right of the
  * icon, centred on it vertically, in the HUD font (+0x42C), coloured D_004C8648 while @p animFrame <= 0.44 and in the element's
@@ -2589,7 +2589,7 @@ extern "C" void func_0021F9B0(cOVStateHUD1P* self, char* obj, char* rider, int x
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 10);
         if (animFrame < 0.4399542808532715f) {
             float pulsePhase = animFrame * 2.272963523864746f;
-            pulseScale = D_00504FB8[(int)(pulsePhase * 12.566370964050293f * 81.4873275756836f) & 0x1FF] * 0.19996199011802673f * (1.0f - pulsePhase * pulsePhase) + 1.0f;
+            pulseScale = cSinCosTable_gSinCosTable[(int)(pulsePhase * 12.566370964050293f * 81.4873275756836f) & 0x1FF] * 0.19996199011802673f * (1.0f - pulsePhase * pulsePhase) + 1.0f;
         }
         tHUDDef_getPos(obj + 0x804, &elemPos);
         tHUDDef_getSize(obj + 0x804, &size, (int)self->mpGenTexElem[5]);
@@ -4630,11 +4630,11 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_HEAT_PREEVENT__cOVState_HEAT_PREEVENT);
 extern "C" void* cUIState__cUIState_x(void*) __asm__("cUIState__cUIState");
 extern char cOVState_vtbl[];
 /**
- * Destroys the overlay with vtable D_00472850 (overlay id 8).
+ * Destroys the overlay with vtable cOVState_HEAT_PREEVENT_vtbl (overlay id 8).
  *
  * Stores the cOVState vtable cOVState_vtbl and runs the cUIState destructor cUIState__cUIState, which frees the object when the
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
- * own. It is the destructor slot (+0xC) of D_00472850.
+ * own. It is the destructor slot (+0xC) of cOVState_HEAT_PREEVENT_vtbl.
  *
  * @return whatever cUIState__cUIState returns
  */
@@ -4649,12 +4649,12 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00221E18);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_1E18(void*) __asm__("cUIState_cUIState");
-extern char D_00472850[];
+extern char cOVState_HEAT_PREEVENT_vtbl[];
 extern char cOVState_vtbl[];
 extern unsigned short str_sp_b[];
 
 /**
- * Constructs the overlay with vtable D_00472850 for engine @p engine and overlay id @p overlayId.
+ * Constructs the overlay with vtable cOVState_HEAT_PREEVENT_vtbl for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
@@ -4675,7 +4675,7 @@ extern "C" void *func_00221E18(cOVState_HEAT_PREEVENT* ovState, int engine, int 
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = D_00472850;
+    ((char*)ovState->mVtbl) = cOVState_HEAT_PREEVENT_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }

@@ -18,7 +18,7 @@ struct sPair8 {
 
 extern sQuadR t4vect_ZAxis;
 extern sQuadR t4vect_Zero;
-extern sPair8 D_004A5960[];
+extern sPair8 t2vect_Zero[];
 
 /**
  * Clears the air predictor's flight: no landing found yet (patch -1), zero times, zero vectors and default
@@ -35,7 +35,7 @@ extern "C" void cAirPredictor_reset(cAirPredictor* self)
     *(sQuadR*)&self->GuessLandVelocity = t4vect_Zero;
     self->GuessLandSurface = -1;
     self->GuessLandPatchRID = 0xFFFFFFFF;
-    *(sPair8*)&self->GuessLandPatchUV[0] = D_004A5960[0];
+    *(sPair8*)&self->GuessLandPatchUV[0] = t2vect_Zero[0];
 }
 #endif
 

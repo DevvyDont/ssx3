@@ -127,8 +127,8 @@ extern "C" void* func_0041605C(void* dst, const void* src, int n);
 extern "C" int MEM_crc16(void* buf, int n, int seed);
 extern void* cBESaveInterface_buffer;
 struct sSaveHdr_2758 { int w[0x288 / 4]; };
-extern sSaveHdr_2758 D_00535898;
-extern char D_00535C18[];
+extern sSaveHdr_2758 cBELibrary_optionDB;
+extern char cBELibrary_highScores[];
 struct sCharTbl_2758 { char pad[0x10]; unsigned b0 : 1; unsigned b1 : 1; unsigned b2 : 22; unsigned char f13; char pad14[8]; };
 extern sCharTbl_2758 cBELibrary_playerDB[];
 struct sSaveBits_2758 { unsigned a : 1; unsigned b : 8; unsigned rest : 23; };
@@ -138,8 +138,8 @@ struct sSaveBits6_2758 { sSaveBits_2758 e[6]; };
  * Builds the game save (settings and high scores) in a fresh buffer and returns it.
  *
  * Releases any previous buffer (cBESaveInterface_releaseBuffer) and allocates cBESaveInterface_getSaveGameSize() bytes
- * tagged "save file buffer" into cBESaveInterface_buffer. Writes the 0x288-byte block D_00535898, the 26 high-score
- * tables D_00535C18 (2600 bytes, the ones func_0014AB20 returns), then two bits per player of cBELibrary_playerDB (bit
+ * tagged "save file buffer" into cBESaveInterface_buffer. Writes the 0x288-byte block cBELibrary_optionDB, the 26 high-score
+ * tables cBELibrary_highScores (2600 bytes, the ones func_0014AB20 returns), then two bits per player of cBELibrary_playerDB (bit
  * 1 of the word at +0x10 and the byte at +0x13, six players), and ends with a CRC of everything before it
  * (MEM_crc16, seed 64490). cBESaveInterface_loadSaveGame reads this layout back.
  *
@@ -151,9 +151,9 @@ extern "C" void* cBESaveInterface_generateSaveGame(cBESaveInterface* self)
     cBESaveInterface_releaseBuffer_s(self);
     cBESaveInterface_buffer = operator_new_tag(size, str_save_file_buffer, 0x100, 0);
     char* cursor = (char*)cBESaveInterface_buffer;
-    *(sSaveHdr_2758*)cursor = D_00535898;
+    *(sSaveHdr_2758*)cursor = cBELibrary_optionDB;
     cursor += sizeof(sSaveHdr_2758);
-    func_0041605C(cursor, D_00535C18, 2600);
+    func_0041605C(cursor, cBELibrary_highScores, 2600);
     cursor += 0xA28;
     sSaveBits6_2758 bits;
     for (int i = 0; i < 6; i++) {
@@ -294,8 +294,8 @@ extern "C" void cSSXApp_activateBEOptions(void* app);
  * Loads a game save written by cBESaveInterface_generateSaveGame, after checking its CRC.
  *
  * Compares the CRC of the first cBESaveInterface_getSaveGameSize() - 4 bytes (MEM_crc16, seed 64490) with the
- * stored one and returns 0 on a mismatch. Otherwise restores D_00535898 and calls the option interface's onLoad,
- * restores the high-score tables D_00535C18 (2600 bytes) and calls the score interface's onLoad, restores the two
+ * stored one and returns 0 on a mismatch. Otherwise restores cBELibrary_optionDB and calls the option interface's onLoad,
+ * restores the high-score tables cBELibrary_highScores (2600 bytes) and calls the score interface's onLoad, restores the two
  * player bits of cBELibrary_playerDB and calls the player interface's onLoad, then re-applies the locale and options
  * (cSSXApp_initLocale, cSSXApp_activateBEOptions).
  *
@@ -313,11 +313,11 @@ extern "C" int cBESaveInterface_loadSaveGame(cBESaveInterface* self, char* buf)
     }
     char* cursor = buf;
     cBEIface_2BB0* iface;
-    D_00535898 = *(sSaveHdr_2758*)cursor;
+    cBELibrary_optionDB = *(sSaveHdr_2758*)cursor;
     iface = cBEOptionInterface_getThis();
     cursor += sizeof(sSaveHdr_2758);
     iface->onLoad();
-    func_0041605C(D_00535C18, cursor, 2600);
+    func_0041605C(cBELibrary_highScores, cursor, 2600);
     cursor += 0xA28;
     iface = cBEScoreInterface_getThis();
     iface->onLoad();

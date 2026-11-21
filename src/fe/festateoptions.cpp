@@ -2649,18 +2649,18 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSaveLoad_onPreRender2D);
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void DisableTextWidget(void* obj);
-extern int D_004A19D8;
+extern int gInLodge;
 extern char str_3loadreplay[];
 extern char str_4new_game[];
 
 /**
- * Applies DisableTextWidget to the load-replay and new-game entries while D_004A19D8 is set.
+ * Applies DisableTextWidget to the load-replay and new-game entries while gInLodge is set.
  *
- * DisableTextWidget and D_004A19D8 are not identified (probably greys the two entries out).
+ * DisableTextWidget and gInLodge are not identified (probably greys the two entries out).
  */
 extern "C" void cFEStateOptionsSaveLoad_onPreRender2D(cFEStateOptionsSaveLoad* self)
 {
-    if (D_004A19D8 != 0) {
+    if (gInLodge != 0) {
         void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_3loadreplay));
         if (obj != 0) {
             DisableTextWidget(obj);
@@ -2949,7 +2949,7 @@ extern char D_004A1408[];
 struct sColor_DD60 {
     float r, g, b, a;
 };
-extern sColor_DD60 D_004C66C8;
+extern sColor_DD60 gStaticColour;
 
 class cUIObj_DD60 {
 public:
@@ -3058,7 +3058,7 @@ extern "C" void cFEStateOptionsDeviceSelect_onCreateScreen(void* self)
         uiObj = getObj_DD60(self, buf);
         *(int*)((char*)uiObj + 0x18) = i - 1;
         cUIText_setUnicodeString(uiObj, slot);
-        *(sColor_DD60*)((char*)uiObj + 0x88) = D_004C66C8;
+        *(sColor_DD60*)((char*)uiObj + 0x88) = gStaticColour;
         uiObj->setUseStaticColour(1);
         if (*(int*)((char*)self + 0x1BC) != 1 && i >= 2) {
             uiObj->setStatic(1);

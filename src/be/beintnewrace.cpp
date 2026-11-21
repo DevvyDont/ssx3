@@ -33,7 +33,7 @@ struct sRaceEntry18 {
 };
 extern sRaceEntry18 D_0043E250[];
 
-extern sPad16 D_0043E7D0;
+extern sPad16 cBELibrary_gameModeDB;
 
 //99.58%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getThis__Fv);
@@ -664,13 +664,13 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getModeName);
 #ifdef SKIP_ASM
 
 /**
- * Returns the record (name first) of the race's game mode: D_0043E7D0 + newRace.cGameMode * 0x3C.
+ * Returns the record (name first) of the race's game mode: cBELibrary_gameModeDB + newRace.cGameMode * 0x3C.
  *
  * @return the mode name
  */
 extern "C" void* cBENewRaceInterface_getModeName()
 {
-    return (char*)&D_0043E7D0 + cBENewRaceInterface_newRace.cGameMode * 0x3c;
+    return (char*)&cBELibrary_gameModeDB + cBENewRaceInterface_newRace.cGameMode * 0x3c;
 }
 #endif
 
@@ -678,14 +678,14 @@ extern "C" void* cBENewRaceInterface_getModeName()
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getModeName1);
 #ifdef SKIP_ASM
 /**
- * Returns the record (name first) of game mode @p gameMode: D_0043E7D0 + @p gameMode * 0x3C.
+ * Returns the record (name first) of game mode @p gameMode: cBELibrary_gameModeDB + @p gameMode * 0x3C.
  *
  * @param gameMode  the game mode
  * @return the mode name
  */
 extern "C" void* cBENewRaceInterface_getModeName1(cBENewRaceInterface* self, int gameMode)
 {
-    return (char*)&D_0043E7D0 + gameMode * 0x3c;
+    return (char*)&cBELibrary_gameModeDB + gameMode * 0x3c;
 }
 #endif
 
@@ -807,10 +807,10 @@ struct sRaceTableEntry_00440D18
     unsigned short field_0x12;
 };
 
-extern sRaceTableEntry_00440D18 D_00440D18[];
+extern sRaceTableEntry_00440D18 cBELibrary_peakDB[];
 
 /**
- * Returns the goal of peak event @p gameEvent at tier @p tier: the halfword at +0x4 of D_00440D18[(@p gameEvent - 6) * 3 + @p tier].
+ * Returns the goal of peak event @p gameEvent at tier @p tier: the halfword at +0x4 of cBELibrary_peakDB[(@p gameEvent - 6) * 3 + @p tier].
  *
  * @param gameEvent  the game event, 6-11
  * @param tier  the tier, 0-2
@@ -818,18 +818,18 @@ extern sRaceTableEntry_00440D18 D_00440D18[];
  */
 extern "C" int cBENewRaceInterface_getPeakGoal(cBENewRaceInterface* self, int gameEvent, int tier)
 {
-    return D_00440D18[tier + (gameEvent - 6) * 3].field_0x4;
+    return cBELibrary_peakDB[tier + (gameEvent - 6) * 3].field_0x4;
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getPeakTimeLimit);
 #ifdef SKIP_ASM
-extern sRaceTableEntry_00440D18 D_00440D18[];
+extern sRaceTableEntry_00440D18 cBELibrary_peakDB[];
 
 /**
  * Returns the time limit of peak event @p gameEvent at tier @p tier: the halfword at +0x6 of
- * D_00440D18[(@p gameEvent - 6) * 3 + @p tier].
+ * cBELibrary_peakDB[(@p gameEvent - 6) * 3 + @p tier].
  *
  * @param gameEvent  the game event, 6-11
  * @param tier  the tier, 0-2
@@ -837,17 +837,17 @@ extern sRaceTableEntry_00440D18 D_00440D18[];
  */
 extern "C" int cBENewRaceInterface_getPeakTimeLimit(cBENewRaceInterface* self, int gameEvent, int tier)
 {
-    return D_00440D18[tier + (gameEvent - 6) * 3].field_0x6;
+    return cBELibrary_peakDB[tier + (gameEvent - 6) * 3].field_0x6;
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getPeakRewardAmount);
 #ifdef SKIP_ASM
-extern sRaceTableEntry_00440D18 D_00440D18[];
+extern sRaceTableEntry_00440D18 cBELibrary_peakDB[];
 
 /**
- * Returns the reward of peak event @p gameEvent at tier @p tier: the halfword at +0x12 of D_00440D18[(@p gameEvent - 6) * 3 + @p tier],
+ * Returns the reward of peak event @p gameEvent at tier @p tier: the halfword at +0x12 of cBELibrary_peakDB[(@p gameEvent - 6) * 3 + @p tier],
  * times 100.
  *
  * @param gameEvent  the game event, 6-11
@@ -856,18 +856,18 @@ extern sRaceTableEntry_00440D18 D_00440D18[];
  */
 extern "C" int cBENewRaceInterface_getPeakRewardAmount(cBENewRaceInterface* self, int gameEvent, int tier)
 {
-    return D_00440D18[tier + (gameEvent - 6) * 3].field_0x12 * 100;
+    return cBELibrary_peakDB[tier + (gameEvent - 6) * 3].field_0x12 * 100;
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getPeakSplitTimePoints);
 #ifdef SKIP_ASM
-extern sRaceTableEntry_00440D18 D_00440D18[];
+extern sRaceTableEntry_00440D18 cBELibrary_peakDB[];
 
 /**
  * Returns the bonus of checkpoint @p checkpoint in peak event @p gameEvent at tier @p tier: halfword @p checkpoint of the five at +0x8 of
- * D_00440D18[(@p gameEvent - 6) * 3 + @p tier].
+ * cBELibrary_peakDB[(@p gameEvent - 6) * 3 + @p tier].
  *
  * @param gameEvent  the game event, 6-11
  * @param tier  the tier, 0-2
@@ -876,7 +876,7 @@ extern sRaceTableEntry_00440D18 D_00440D18[];
  */
 extern "C" int cBENewRaceInterface_getPeakSplitTimePoints(cBENewRaceInterface* self, int gameEvent, int tier, int checkpoint)
 {
-    return D_00440D18[tier + (gameEvent - 6) * 3].field_0x8[checkpoint];
+    return cBELibrary_peakDB[tier + (gameEvent - 6) * 3].field_0x8[checkpoint];
 }
 #endif
 

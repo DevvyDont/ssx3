@@ -841,8 +841,8 @@ extern char str_P2[];
 extern char str_FROM[];
 extern char str_ADDR[];
 extern char str_SEED[];
-extern int D_004A11B8;
-extern char D_005308B8[];
+extern int cBENewRaceInterface_bIsBamLocation;
+extern char cBERules_mRules[];
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
@@ -890,8 +890,8 @@ struct sVEntryA1D0 { short delta; short index; int (*fn)(void*); };
  * that is not us). Unless mState is 24 or 20 (waits that expect this message) it just sets mState 25 and shuts the game
  * connection down (func_00263BA8(..., 0)). Otherwise it sets mState 25 and, when P1 is present, configures
  * cBENewRaceInterface: P2 0 or 1 selects game mode 0 or 1 (5 or 6, with event 4 or 5, when P1 is 14..16), 2 selects
- * mode 3 and 3 mode 2; sets cBENewRaceInterface_newRace.iLocationIdx = P1 and D_004A11B8 = 1, and when cBENetworkInterface_networkOpt.bIsRankedGame[0] is set ORs 0x1C0 into the
- * word at D_005308B8 + 0x18, sets no AI riders and calls the interface's virtual slot 1. Finally it starts the game
+ * mode 3 and 3 mode 2; sets cBENewRaceInterface_newRace.iLocationIdx = P1 and cBENewRaceInterface_bIsBamLocation = 1, and when cBENetworkInterface_networkOpt.bIsRankedGame[0] is set ORs 0x1C0 into the
+ * word at cBERules_mRules + 0x18, sets no AI riders and calls the interface's virtual slot 1. Finally it starts the game
  * connection with func_00259098(..., mMatchType, 0) and posts a type-239 event. Called through the functor thunk
  * func_00268B80 (LobbyApi callback 4).
  *
@@ -965,11 +965,11 @@ extern "C" void LobbyMan_onplaymsg(LobbyMan* self, char* msg)
         cBENewRaceInterface_setGameMode(ri, mode);
         cBENewRaceInterface_setGameEvent(ri, kind);
         cBENewRaceInterface_newRace.iLocationIdx = ev;
-        D_004A11B8 = 1;
+        cBENewRaceInterface_bIsBamLocation = 1;
         cBE_getInterface_Fv(((void*)(SSXApp)->BE), 7);
         if (cBENetworkInterface_networkOpt.bIsRankedGame != 0)
         {
-            char* cfg = D_005308B8;
+            char* cfg = cBERules_mRules;
             *(int*)(cfg + 0x18) |= 0x1C0;
             cBENewRaceInterface_setNumberAI(ri, 0);
             sVEntryA1D0* vt = *(sVEntryA1D0**)(ri + 0xC);
@@ -2511,8 +2511,8 @@ extern char str_MID[];
 extern char str_PID[];
 extern char str_HWFLAG[];
 extern char str_HWMASK[];
-extern void* D_004A33F0;
-extern void* D_004A33F4;
+extern void* Keyboard;
+extern void* VoipMan;
 extern "C" void func_00268C70();
 extern "C" int cDirtysock_tag_TagFieldSetNumber(char* buf, int size, const char* key, int value);
 extern "C" const char* NetConnMAC();
@@ -2561,8 +2561,8 @@ struct sDsSlotC610 {
  * the 'macx' query), PID = "SSX-PS2-2004", then HWFLAG and HWMASK. When cCommSystem_mCommSystem->mInterfaceType is not
  * 1, HWFLAG gets its bit 0x4, 0x10000 for bit 0x10 and 0x20 for bit 0x8, and HWMASK starts at 0x10024; HWMASK always
  * adds 0x800 and 0x100. HWFLAG adds 0x800 when bit 0 of the word at +0x88 is set in any of 8 0x8C-byte records of the
- * USB keyboard object D_004A33F0 (read with no null check, unlike the other D_004A33F0 users), and 0x100 when the
- * voice-chat manager D_004A33F4's status (func_00266F38) has bit 0x10. func_0025B608() then sends it (mState 8, 20 s
+ * USB keyboard object Keyboard (read with no null check, unlike the other Keyboard users), and 0x100 when the
+ * voice-chat manager VoipMan's status (func_00266F38) has bit 0x10. func_0025B608() then sends it (mState 8, 20 s
  * timeout, reply through func_00268C70 to LobbyMan_onauthentication()), and an Event of type 211 (vtable online_Event_vtbl) is pushed onto
  * mEventList.
  */
@@ -2588,10 +2588,10 @@ extern "C" void func_0025C610(LobbyMan* self)
     }
     caps |= 0x800;
     int i = 0;
-    void* conn = D_004A33F4;
+    void* conn = VoipMan;
 
     for (; i < 8; i++) {
-        if (((sDsSlotC610*)D_004A33F0)[i].flags & 1) {
+        if (((sDsSlotC610*)Keyboard)[i].flags & 1) {
             flags |= 0x800;
             break;
         }
@@ -8962,7 +8962,7 @@ extern "C" void cBENewPlayerInterface_setPlayerCtrlID(void* self, int a1, int a2
 extern "C" int cCommSystem_openDSockChannel(void* comm, const char* addr, unsigned short port, int a3);
 extern "C" void func_00266D58(cVoipMan* self, void* ip);
 extern "C" void func_00266E30(cVoipMan* self);
-extern void* D_004A33F4;
+extern void* VoipMan;
 extern float D_004A2F14;
 extern int cBEOptionInterface_mOption[];
 extern char str_pct_d_pct_d_pct_d_pct_d_b[];
@@ -8994,7 +8994,7 @@ struct sNetCfg_002639E0 {
  * virtual applies it), and writes the network options: bIsNetworkGame 1, fLatency 1/60, iPort 3658, bIsHost @p isHost
  * (the network interface's slot-1 virtual runs twice). Formats @p ip as dotted decimal and opens a DirtySock channel to
  * it with cCommSystem_openDSockChannel(), keeping the channel at +0x4. When bit 18 of cBEOptionInterface_mOption is set
- * it also passes @p ip to the voice manager D_004A33F4 (tag "cVoipMan"): func_00266D58, then func_00266E30. Finally
+ * it also passes @p ip to the voice manager VoipMan (tag "cVoipMan"): func_00266D58, then func_00266E30. Finally
  * sets the timeout at +0x10 to 60.0 and the state at +0x0 to 1 for func_00263CF0(). func_00259098 calls it with the
  * opponent's lobby address once LobbyMan has a game.
  *
@@ -9028,8 +9028,8 @@ extern "C" void func_002639E0(int* self, unsigned int ip, int isHost, int ctrlId
     self[1] = cCommSystem_openDSockChannel(cCommSystem_mCommSystem, buf, cBENetworkInterface_networkOpt.iPort, isHost);
     cBE_getInterface_Fv(cBE_getBE(), 4);
     if ((cBEOptionInterface_mOption[0] >> 18) & 1) {
-        func_00266D58((cVoipMan*)D_004A33F4, (void*)ip);
-        func_00266E30((cVoipMan*)D_004A33F4);
+        func_00266D58((cVoipMan*)VoipMan, (void*)ip);
+        func_00266E30((cVoipMan*)VoipMan);
     }
     *(float*)&self[4] = D_004A2F14;
     self[0] = one;
@@ -9045,8 +9045,8 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
-extern void* D_004A33CC;
-extern void* D_004A33F4;
+extern void* cSetupMan_mSetupMan;
+extern void* VoipMan;
 extern "C" int cCommSystem_isChannelOpen(void* comm, int chan);
 extern "C" void cCommSystem_closeChannel(void* comm, int chan);
 extern "C" void func_00264098(void);
@@ -9091,7 +9091,7 @@ static inline void post_3BA8(char* self, void* msg)
  * Shuts the game-connection manager down and tells the front end why.
  *
  * When it is active and its channel is open (cCommSystem_isChannelOpen) it closes the channel (cCommSystem_closeChannel) and calls
- * func_00266E88 and func_00266DF8 on the voice manager D_004A33F4. It destroys the setup manager if there is one
+ * func_00266E88 and func_00266DF8 on the voice manager VoipMan. It destroys the setup manager if there is one
  * (func_00264098()), calls func_0025F740(LobbyMan, 0), clears the state and posts an online::Event to LobbyMan's
  * mEventList: type 268 for @p reason 1, type 274 for @p reason 0, none otherwise (callers pass 2).
  *
@@ -9104,10 +9104,10 @@ extern "C" void func_00263BA8(cGameConnMan* gameConn, int reason)
     if (self[0] != 0 && cCommSystem_isChannelOpen(cCommSystem_mCommSystem, self[1]) != 0)
     {
         cCommSystem_closeChannel(cCommSystem_mCommSystem, self[1]);
-        func_00266E88((cVoipMan*)D_004A33F4);
-        func_00266DF8((cVoipMan*)D_004A33F4);
+        func_00266E88((cVoipMan*)VoipMan);
+        func_00266DF8((cVoipMan*)VoipMan);
     }
-    if (D_004A33CC != 0)
+    if (cSetupMan_mSetupMan != 0)
         func_00264098();
     func_0025F740(LobbyMan_mLobbyMan, 0);
     self[0] = 0;
@@ -9152,7 +9152,7 @@ extern "C" void func_002642B8(cSetupMan* self);
 // PORT: func_00264CB8 is defined with one parameter; this caller passes a second in $a1.
 extern "C" void func_00264CB8_2(void* self, int a) __asm__("func_00264CB8");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern void* D_004A33CC;
+extern void* cSetupMan_mSetupMan;
 extern int cRealFE_mStartState;
 extern char str_cPreGameLoadScreen_c[];
 
@@ -9165,7 +9165,7 @@ static inline bool tsTimedOut_263CF0(int* self)
 
 static inline bool tsIsState_263CF0(int st)
 {
-    return *(int*)D_004A33CC == st;
+    return *(int*)cSetupMan_mSetupMan == st;
 }
 
 static inline void* Mgr_263CF0()
@@ -9210,7 +9210,7 @@ extern "C" void func_00263CF0(int* self)
             }
             cBE_getInterface_Fv(SSXApp->BE, 7);
             func_00264030(self[1], self[2], cBENetworkInterface_networkOpt.bIsRankedGame);
-            func_00264CB8_2(D_004A33CC, ((int)LobbyMan_mLobbyMan->unk_08C));
+            func_00264CB8_2(cSetupMan_mSetupMan, ((int)LobbyMan_mLobbyMan->unk_08C));
             self[0] = 2;
             return;
         }
@@ -9236,9 +9236,9 @@ extern "C" void func_00263CF0(int* self)
             return;
         }
         {
-            func_002642B8((cSetupMan*)D_004A33CC);
+            func_002642B8((cSetupMan*)cSetupMan_mSetupMan);
             int go = 0;
-            int st = *(int*)D_004A33CC;
+            int st = *(int*)cSetupMan_mSetupMan;
             if (st == 13)
                 go = 1;
             else if (st == 11)
@@ -9270,12 +9270,12 @@ extern "C" void func_00263CF0(int* self)
 INCLUDE_ASM("dirtysock/tagsunk", func_00264030);
 #ifdef SKIP_ASM
 extern char str_cSetupMan[];
-extern void* D_004A33CC;
+extern void* cSetupMan_mSetupMan;
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_002640C0(cSetupMan* self, int a1, int a2, int a3);
 
 /**
- * Creates the online setup manager D_004A33CC: allocates 300 bytes (tag "cSetupMan") and constructs it with
+ * Creates the online setup manager cSetupMan_mSetupMan: allocates 300 bytes (tag "cSetupMan") and constructs it with
  * func_002640C0().
  *
  * @param channel  comm channel index (from the game-connection manager)
@@ -9284,24 +9284,24 @@ extern "C" void* func_002640C0(cSetupMan* self, int a1, int a2, int a3);
  */
 extern "C" void func_00264030(int channel, int isHost, int ranked)
 {
-    D_004A33CC = func_002640C0((cSetupMan*)cMemMan_alloc(300, str_cSetupMan, 0x20000000, 0), channel, isHost, ranked);
+    cSetupMan_mSetupMan = func_002640C0((cSetupMan*)cMemMan_alloc(300, str_cSetupMan, 0x20000000, 0), channel, isHost, ranked);
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00264098);
 #ifdef SKIP_ASM
-extern void* D_004A33CC;
+extern void* cSetupMan_mSetupMan;
 extern "C" void func_00264138(cSetupMan* self, int flags);
 
 /**
- * Destroys the online setup manager D_004A33CC, if any (func_00264138() with flags 3), and clears the pointer.
+ * Destroys the online setup manager cSetupMan_mSetupMan, if any (func_00264138() with flags 3), and clears the pointer.
  */
 extern "C" void func_00264098(void)
 {
-    if (D_004A33CC != 0) {
-        func_00264138((cSetupMan*)D_004A33CC, 3);
-        D_004A33CC = 0;
+    if (cSetupMan_mSetupMan != 0) {
+        func_00264138((cSetupMan*)cSetupMan_mSetupMan, 3);
+        cSetupMan_mSetupMan = 0;
     }
 }
 #endif
@@ -9387,7 +9387,7 @@ static inline int* PopB_264138(cSetupMan* o)
  *
  * Each packet goes to func_00264990(); the state is then set to 1 and the object freed when bit 0 of @p flags is set.
  *
- * @param self_  the setup manager (D_004A33CC)
+ * @param self_  the setup manager (cSetupMan_mSetupMan)
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void func_00264138(cSetupMan* self_, int flags)
@@ -9503,7 +9503,7 @@ static inline void post_42B8(char* g, void* msg)
 
 
 /**
- * Updates the online setup manager (D_004A33CC): pumps its packet queues and handles one message from the peer.
+ * Updates the online setup manager (cSetupMan_mSetupMan): pumps its packet queues and handles one message from the peer.
  *
  * Pumps both queues (func_00264A58(), func_00264B20()). In state 5 or 10: when the game is ranked (+0x128) or the state
  * is 10, the host moves to state 12 and sends message 0xF; an unranked state 5 moves to 7 and posts an online::Event of
@@ -10217,7 +10217,7 @@ static inline sMsgListIter5190 sMsgList5190_insert(sMsgListIter5190 pos, void* c
 /**
  * Handles the opponent's character choice on the host's setup manager: records it, echoes it back and posts an event.
  *
- * The setup manager (D_004A33CC, built by func_002640C0) moves its state word (+0x0) from 1 to 2, stores the opponent's
+ * The setup manager (cSetupMan_mSetupMan, built by func_002640C0) moves its state word (+0x0) from 1 to 2, stores the opponent's
  * character and name in the back end (func_00264D80), sends a type-1 message with that character and the new state
  * (func_00264E50) and pushes an 8-byte online event of kind 243 (vtable online_Event_vtbl, tag "NetEvent") onto LobbyMan's
  * mEventList. func_002642B8 calls it for a type-1 message while the host is in a state below 7.
@@ -10682,38 +10682,38 @@ extern "C" void func_00265768(int* self, int ev)
 INCLUDE_ASM("dirtysock/tagsunk", func_00265880);
 #ifdef SKIP_ASM
 extern char str_cSharedLoginMan[];
-extern void* D_004A33D0;
+extern void* SharedLoginMan;
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_002658E0(cSharedLoginMan* self);
 
 /**
- * Creates the shared-login manager singleton D_004A33D0.
+ * Creates the shared-login manager singleton SharedLoginMan.
  *
  * Allocates 8 bytes tagged "cSharedLoginMan" and runs the constructor func_002658E0 on them.
  * cFEStateNetAccountMem_cFEStateNetAccountMem calls it.
  */
 extern "C" void func_00265880(void)
 {
-    D_004A33D0 = func_002658E0((cSharedLoginMan*)cMemMan_alloc(8, str_cSharedLoginMan, 0x20000000, 0));
+    SharedLoginMan = func_002658E0((cSharedLoginMan*)cMemMan_alloc(8, str_cSharedLoginMan, 0x20000000, 0));
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002658B8);
 #ifdef SKIP_ASM
-extern void* D_004A33D0;
+extern void* SharedLoginMan;
 extern "C" void func_00265908(cSharedLoginMan* self, int flags);
 
 /**
- * Destroys the shared-login manager singleton D_004A33D0, if there is one, and clears the pointer.
+ * Destroys the shared-login manager singleton SharedLoginMan, if there is one, and clears the pointer.
  *
  * Calls the deleting destructor func_00265908 with flags 3. cFEStateNetAccountMem__cFEStateNetAccountMem calls it.
  */
 extern "C" void func_002658B8(void)
 {
-    if (D_004A33D0 != 0) {
-        func_00265908((cSharedLoginMan*)D_004A33D0, 3);
-        D_004A33D0 = 0;
+    if (SharedLoginMan != 0) {
+        func_00265908((cSharedLoginMan*)SharedLoginMan, 3);
+        SharedLoginMan = 0;
     }
 }
 #endif
@@ -10762,7 +10762,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00265950);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern void* D_004A33D8;
 extern int D_004A33D4;
-extern int D_004A33DC;
+extern int MemCardDevice;
 extern int D_004A33E0;
 extern int D_004A33E4;
 struct sDsInit265950 { void* buf; int len; };
@@ -10777,7 +10777,7 @@ extern "C" void* cMemCard_CreateInstance();
  * Initializes the shared-login manager and the network-account library it serves.
  *
  * Sets the state word (+0x0) to 1 and the result word (+0x4) to 0, clears the card globals D_004A33D4 (current card
- * operation), D_004A33DC (port), D_004A33E0 (card-checked flag) and D_004A33E4 (retry count), hands the 17-entry
+ * operation), MemCardDevice (port), D_004A33E0 (card-checked flag) and D_004A33E4 (retry count), hands the 17-entry
  * memory-card callback table D_00442A18 (func_00265FB8 .. func_00266550) to the library through func_003F7EE0
  * (D_004A5B48 = {table, 0}), clears the 0x40-byte name buffer D_00537190 and creates the memory-card object D_004A33D8
  * with cMemCard_CreateInstance (a cPS2MemCard).
@@ -10793,7 +10793,7 @@ extern "C" void func_00265950(cSharedLoginMan* vself)
     self[1] = 0;
     D_004A5B48_s.buf = D_00442A18;
     D_004A33E0 = 0;
-    D_004A33DC = 0;
+    MemCardDevice = 0;
     D_004A33E4 = 0;
     D_004A5B48_s.len = 0;
     func_003F7EE0(&D_004A5B48_s);
@@ -10840,19 +10840,19 @@ struct cDsObj2659E8 {
 };
 
 extern void* D_004A33D8;
-extern int D_004A33DC;
+extern int MemCardDevice;
 
 /**
  * Restarts the card check on the account's port once the memory card is idle.
  *
  * When the card D_004A33D8 is not busy (virtual slot 11, cPS2MemCard_IsBusy) it calls slot 5 (cPS2MemCard_CheckDevice)
- * with the port D_004A33DC that func_00266060 recorded. cFEStateNetAccountMem_onUpdate calls it in its popup-wait
+ * with the port MemCardDevice that func_00266060 recorded. cFEStateNetAccountMem_onUpdate calls it in its popup-wait
  * states 7, 13, 21 and 25.
  */
 extern "C" void func_002659E8(cSharedLoginMan* self)
 {
     if (((cDsObj2659E8*)D_004A33D8)->IsBusy() == 0) {
-        ((cDsObj2659E8*)D_004A33D8)->CheckDevice(D_004A33DC);
+        ((cDsObj2659E8*)D_004A33D8)->CheckDevice(MemCardDevice);
     }
 }
 #endif
@@ -11320,7 +11320,7 @@ extern "C" int func_00265D68(cSharedLoginMan* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00265D98);
 #ifdef SKIP_ASM
-extern char D_00536760[0x11];
+extern char AccountData[0x11];
 extern int D_004A33E0;
 extern "C" void* MEM_fill(void* dst, int value, int size);
 extern "C" int func_003F8000(void* p);
@@ -11328,16 +11328,16 @@ extern "C" int func_003F8000(void* p);
 /**
  * Starts reading the saved account from the card: the shared-login manager's step for state 2.
  *
- * Clears the result word (+0x4) and D_004A33E0, zeroes the 36-byte account buffer D_00536760 (user name at +0, password
- * at +0x11), starts func_003F8000(D_00536760) and sets the state word to 3. func_001B7A98 later compares the buffer
+ * Clears the result word (+0x4) and D_004A33E0, zeroes the 36-byte account buffer AccountData (user name at +0, password
+ * at +0x11), starts func_003F8000(AccountData) and sets the state word to 3. func_001B7A98 later compares the buffer
  * with the typed user name and password.
  */
 extern "C" void func_00265D98(cSharedLoginMan* self)
 {
     self->mError = 0;
     D_004A33E0 = 0;
-    MEM_fill(D_00536760, 0, 36);
-    func_003F8000(D_00536760);
+    MEM_fill(AccountData, 0, 36);
+    func_003F8000(AccountData);
     *(int*)self = 3;
 }
 #endif
@@ -11420,21 +11420,21 @@ void func_00265E30(void* vself)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00265E40);
 #ifdef SKIP_ASM
-extern char D_00536760[0x11];
+extern char AccountData[0x11];
 extern int D_004A33E0;
 extern "C" int func_003F8048(void* p);
 
 /**
  * Starts saving the account to the card: the shared-login manager's step for state 6.
  *
- * Clears the result word (+0x4) and D_004A33E0, starts func_003F8048(D_00536760) (which copies the user name and
+ * Clears the result word (+0x4) and D_004A33E0, starts func_003F8048(AccountData) (which copies the user name and
  * password from the buffer into the library session) and sets the state word to 7.
  */
 extern "C" void func_00265E40(cSharedLoginMan* self)
 {
     self->mError = 0;
     D_004A33E0 = 0;
-    func_003F8048(D_00536760);
+    func_003F8048(AccountData);
     *(int*)self = 7;
 }
 #endif
@@ -11442,7 +11442,7 @@ extern "C" void func_00265E40(cSharedLoginMan* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00265E80);
 #ifdef SKIP_ASM
-extern char D_00536760[0x11];
+extern char AccountData[0x11];
 extern char D_00442A60[];
 extern int D_004A33E0;
 extern "C" int func_003F7F48(void* a, void* b);
@@ -11450,14 +11450,14 @@ extern "C" int func_003F7F48(void* a, void* b);
 /**
  * Starts creating the account save: the shared-login manager's step for state 10.
  *
- * Clears the result word (+0x4) and D_004A33E0, starts func_003F7F48(D_00442A60, D_00536760) (which also copies the
+ * Clears the result word (+0x4) and D_004A33E0, starts func_003F7F48(D_00442A60, AccountData) (which also copies the
  * user name and password from the buffer) and sets the state word to 11.
  */
 extern "C" void func_00265E80(cSharedLoginMan* self)
 {
     self->mError = 0;
     D_004A33E0 = 0;
-    func_003F7F48(D_00442A60, D_00536760);
+    func_003F7F48(D_00442A60, AccountData);
     *(int*)self = 11;
 }
 #endif
@@ -11503,12 +11503,12 @@ extern "C" void func_00265F00(cSharedLoginMan* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00265F18);
 #ifdef SKIP_ASM
-extern char D_00536760[0x11];
+extern char AccountData[0x11];
 extern "C" void* MEM_fill(void* dst, int value, int size);
 extern "C" char* strcpy(char* dst, const char* src);
 
 /**
- * Copies a user name into the account buffer D_00536760 (17 bytes, cleared first; no length check on the copy).
+ * Copies a user name into the account buffer AccountData (17 bytes, cleared first; no length check on the copy).
  *
  * func_001B7778 passes the account screen's mszUserName.
  *
@@ -11516,8 +11516,8 @@ extern "C" char* strcpy(char* dst, const char* src);
  */
 extern "C" void func_00265F18(const char* name)
 {
-    MEM_fill(D_00536760, 0, 17);
-    strcpy(D_00536760, name);
+    MEM_fill(AccountData, 0, 17);
+    strcpy(AccountData, name);
 }
 #endif
 
@@ -11635,7 +11635,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00266060);
 #ifdef SKIP_ASM
 extern void* D_004A33D8;
 extern int D_004A33D4;
-extern int D_004A33DC;
+extern int MemCardDevice;
 extern int D_004A33E4;
 extern "C" int func_003FA1D0(int code, void* out);
 void func_002C67E8(void* self, int a1);
@@ -11648,7 +11648,7 @@ struct sDsErr266060 {
 /**
  * Memory-card callback 3 of the network-account library: starts checking the card in a port.
  *
- * Decodes @p code into a port/slot pair (func_003FA1D0), stores the port in D_004A33DC, sets the retry count D_004A33E4
+ * Decodes @p code into a port/slot pair (func_003FA1D0), stores the port in MemCardDevice, sets the retry count D_004A33E4
  * to 9, starts a card check on that port (func_002C67E8: sceMcGetInfo) and sets the card operation D_004A33D4 to 1.
  * func_00266358 repeats the check until the retries run out. Entry 3 of D_00442A18.
  *
@@ -11658,9 +11658,9 @@ extern "C" void func_00266060(int code)
 {
     sDsErr266060 err;
     func_003FA1D0(code, &err);
-    D_004A33DC = err.a;
+    MemCardDevice = err.a;
     D_004A33E4 = 9;
-    func_002C67E8(D_004A33D8, D_004A33DC);
+    func_002C67E8(D_004A33D8, MemCardDevice);
     D_004A33D4 = 1;
 }
 #endif
@@ -12044,7 +12044,7 @@ extern "C" int func_00266358(int* status, int* out)
         if (D_004A33E4 > 0) {
             *status = 1;
             D_004A33E4--;
-            func_002C67E8(D_004A33D8, D_004A33DC);
+            func_002C67E8(D_004A33D8, MemCardDevice);
             return 0;
         }
         D_004A33E0 = 1;
@@ -12254,18 +12254,18 @@ extern "C" void func_00266760(void* self, void* ptr)
 INCLUDE_ASM("dirtysock/tagsunk", func_00266788);
 #ifdef SKIP_ASM
 extern char str_cUsbKeyboard[];
-extern void* D_004A33F0;
+extern void* Keyboard;
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_002667E8(cUsbKeyboard* self);
 
 /**
- * Creates the USB keyboard reader singleton D_004A33F0.
+ * Creates the USB keyboard reader singleton Keyboard.
  *
  * Allocates 1124 bytes tagged "cUsbKeyboard" and runs the constructor func_002667E8 on them. initOnline calls it.
  */
 extern "C" void func_00266788(void)
 {
-    D_004A33F0 = func_002667E8((cUsbKeyboard*)cMemMan_alloc(1124, str_cUsbKeyboard, 0x20000000, 0));
+    Keyboard = func_002667E8((cUsbKeyboard*)cMemMan_alloc(1124, str_cUsbKeyboard, 0x20000000, 0));
 }
 #endif
 
@@ -12275,14 +12275,14 @@ INCLUDE_ASM("dirtysock/tagsunk", func_002667C0);
 extern "C" void func_00266850(int, int);
 
 /**
- * Destroys the USB keyboard reader singleton D_004A33F0, if there is one, and clears the pointer.
+ * Destroys the USB keyboard reader singleton Keyboard, if there is one, and clears the pointer.
  *
  * Calls the deleting destructor func_00266850 with flags 3.
  */
 extern "C" void func_002667C0(void) {
-    if ((*(int*)&D_004A33F0) != 0) {
-        func_00266850((*(int*)&D_004A33F0), 3);
-        (*(int*)&D_004A33F0) = 0;
+    if ((*(int*)&Keyboard) != 0) {
+        func_00266850((*(int*)&Keyboard), 3);
+        (*(int*)&Keyboard) = 0;
     }
 }
 #endif
@@ -12536,38 +12536,38 @@ extern "C" int func_00266BA8(sChanSet_266BA8* self, int ch, int* firstOut, int* 
 INCLUDE_ASM("dirtysock/tagsunk", func_00266CA0);
 #ifdef SKIP_ASM
 extern char str_cVoipMan[];
-extern void* D_004A33F4;
+extern void* VoipMan;
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* func_00266D00(void* self);
 
 /**
- * Creates the voice-chat manager singleton D_004A33F4.
+ * Creates the voice-chat manager singleton VoipMan.
  *
  * Allocates 8 bytes tagged "cVoipMan" and runs the constructor func_00266D00 on them. cFEStateMainMenu_onWidgetEvent
  * and cDebugMenuScreen_cDebugMenuScreen call it.
  */
 extern "C" void func_00266CA0(void)
 {
-    D_004A33F4 = func_00266D00(cMemMan_alloc(8, str_cVoipMan, 0x20000000, 0));
+    VoipMan = func_00266D00(cMemMan_alloc(8, str_cVoipMan, 0x20000000, 0));
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00266CD8);
 #ifdef SKIP_ASM
-extern void* D_004A33F4;
+extern void* VoipMan;
 extern "C" void func_00266D10(cVoipMan* self, int flags);
 
 /**
- * Destroys the voice-chat manager singleton D_004A33F4, if there is one, and clears the pointer.
+ * Destroys the voice-chat manager singleton VoipMan, if there is one, and clears the pointer.
  *
  * Calls the deleting destructor func_00266D10 with flags 3.
  */
 extern "C" void func_00266CD8(void)
 {
-    if (D_004A33F4 != 0) {
-        func_00266D10((cVoipMan*)D_004A33F4, 3);
-        D_004A33F4 = 0;
+    if (VoipMan != 0) {
+        func_00266D10((cVoipMan*)VoipMan, 3);
+        VoipMan = 0;
     }
 }
 #endif

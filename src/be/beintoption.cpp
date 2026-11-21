@@ -41,14 +41,14 @@ struct sOptions_0014F2A8
 };
 
 extern sOptions_0014F2A8 cBEOptionInterface_mOption;
-extern sOptions_0014F2A8 D_00535898;
+extern sOptions_0014F2A8 cBELibrary_optionDB;
 
 /**
- * Commits the options: copies cBEOptionInterface_mOption (0x288 bytes) into the saved copy D_00535898.
+ * Commits the options: copies cBEOptionInterface_mOption (0x288 bytes) into the saved copy cBELibrary_optionDB.
  */
 extern "C" void cBEOptionInterface_submit(void)
 {
-    D_00535898 = cBEOptionInterface_mOption;
+    cBELibrary_optionDB = cBEOptionInterface_mOption;
 }
 #endif
 
@@ -56,14 +56,14 @@ extern "C" void cBEOptionInterface_submit(void)
 INCLUDE_ASM("be/beintoption", cBEOptionInterface_discard);
 #ifdef SKIP_ASM
 extern sOptions_0014F2A8 cBEOptionInterface_mOption;
-extern sOptions_0014F2A8 D_00535898;
+extern sOptions_0014F2A8 cBELibrary_optionDB;
 
 /**
- * Drops option changes: copies the saved copy D_00535898 back into cBEOptionInterface_mOption (0x288 bytes).
+ * Drops option changes: copies the saved copy cBELibrary_optionDB back into cBEOptionInterface_mOption (0x288 bytes).
  */
 extern "C" void cBEOptionInterface_discard(void)
 {
-    cBEOptionInterface_mOption = D_00535898;
+    cBEOptionInterface_mOption = cBELibrary_optionDB;
 }
 #endif
 
@@ -352,19 +352,19 @@ struct sOptionTriplesView_0014F7A8 {
 };
 
 struct sOptionGlobal_005308B8;
-extern sOptionGlobal_005308B8 D_005308B8;
+extern sOptionGlobal_005308B8 cBERules_mRules;
 extern "C" int cBERules_getMaxDelaySecs();
 
 /**
  * Returns how long player @p i is held at the start: the largest head start (cBERules_getMaxDelaySecs) minus the player's own
- * (word +8 of record @p i of the rules block D_005308B8).
+ * (word +8 of record @p i of the rules block cBERules_mRules).
  *
  * @param i  the player, 0 or 1
  * @return the delay in seconds
  */
 extern "C" int cBERules_getPlayerStartDelaySecs(int i)
 {
-    int headStart = ((sOptionTriplesView_0014F7A8*)&D_005308B8)->triples[i].c;
+    int headStart = ((sOptionTriplesView_0014F7A8*)&cBERules_mRules)->triples[i].c;
     return cBERules_getMaxDelaySecs() - headStart;
 }
 #endif
@@ -373,7 +373,7 @@ extern "C" int cBERules_getPlayerStartDelaySecs(int i)
 INCLUDE_ASM("be/beintoption", cBERules_getAIStartDelaySecs);
 #ifdef SKIP_ASM
 extern "C" int cBERules_getMaxDelaySecs();
-extern int D_005308D4[]; // D_005308B8 + 0x1C, addressed through its own symbol
+extern int D_005308D4[]; // cBERules_mRules + 0x1C, addressed through its own symbol
 
 /**
  * Returns how long the AI riders are held at the start: the largest head start (cBERules_getMaxDelaySecs) minus the AI head start
@@ -390,7 +390,7 @@ extern "C" int cBERules_getAIStartDelaySecs(void* self)
 //100%
 INCLUDE_ASM("be/beintoption", cBERules_hasModifiedRules);
 #ifdef SKIP_ASM
-// View of D_005308B8 (the unit defines sOptionGlobal_005308B8 further down).
+// View of cBERules_mRules (the unit defines sOptionGlobal_005308B8 further down).
 struct sOptionTriple_005308B8 {
     int a;
     int b;
@@ -404,10 +404,10 @@ struct sOptionView_005308B8 {
 };
 
 struct sOptionGlobal_005308B8;
-extern sOptionGlobal_005308B8 D_005308B8;
+extern sOptionGlobal_005308B8 cBERules_mRules;
 
 /**
- * Tells whether any rule is set for player @p i: a nonzero word in record @p i of the rules block D_005308B8 or in the
+ * Tells whether any rule is set for player @p i: a nonzero word in record @p i of the rules block cBERules_mRules or in the
  * "my rules" pair (+0x18, +0x1C).
  *
  * @param i  the player, 0 or 1
@@ -415,7 +415,7 @@ extern sOptionGlobal_005308B8 D_005308B8;
  */
 extern "C" int cBERules_hasModifiedRules(int i)
 {
-    sOptionView_005308B8* rules = (sOptionView_005308B8*)&D_005308B8;
+    sOptionView_005308B8* rules = (sOptionView_005308B8*)&cBERules_mRules;
     if (rules->triples[i].a != 0 || rules->triples[i].b != 0 || rules->triples[i].c != 0 || rules->field_0x18 != 0 || rules->field_0x1C != 0)
     {
         return 1;
@@ -435,21 +435,21 @@ struct sOptionGlobal_005308B8 {
     char pad_0x18[0x4];
     int field_0x1C;
 };
-extern sOptionGlobal_005308B8 D_005308B8;
+extern sOptionGlobal_005308B8 cBERules_mRules;
 
 /**
- * Returns the largest head start in the rules block D_005308B8: the maximum of the AI head start (+0x1C) and the two
+ * Returns the largest head start in the rules block cBERules_mRules: the maximum of the AI head start (+0x1C) and the two
  * records' head starts (+0x8, +0x14).
  *
  * @return the largest head start, in seconds
  */
 extern "C" int cBERules_getMaxDelaySecs()
 {
-    int maxHeadStart = D_005308B8.field_0x1C;
-    if (maxHeadStart < D_005308B8.field_0x8)
-        maxHeadStart = D_005308B8.field_0x8;
-    if (maxHeadStart < D_005308B8.field_0x14)
-        maxHeadStart = D_005308B8.field_0x14;
+    int maxHeadStart = cBERules_mRules.field_0x1C;
+    if (maxHeadStart < cBERules_mRules.field_0x8)
+        maxHeadStart = cBERules_mRules.field_0x8;
+    if (maxHeadStart < cBERules_mRules.field_0x14)
+        maxHeadStart = cBERules_mRules.field_0x14;
     return maxHeadStart;
 }
 #endif
@@ -464,12 +464,12 @@ struct sOptionTriple_0014F898 {
 };
 
 /**
- * Swaps the two 12-byte bragging-rights records at the start of the rules block D_005308B8 (all three words of each).
+ * Swaps the two 12-byte bragging-rights records at the start of the rules block cBERules_mRules (all three words of each).
  */
-// Swaps the two 12-byte triples at the start of D_005308B8.
+// Swaps the two 12-byte triples at the start of cBERules_mRules.
 extern "C" void cBERules_swap()
 {
-    sOptionTriple_0014F898* records = (sOptionTriple_0014F898*)&D_005308B8;
+    sOptionTriple_0014F898* records = (sOptionTriple_0014F898*)&cBERules_mRules;
     sOptionTriple_0014F898 firstRecord = records[0];
     records[0] = records[1];
     records[1] = firstRecord;

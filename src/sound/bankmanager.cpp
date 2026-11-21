@@ -1382,8 +1382,8 @@ INCLUDE_ASM("sound/bankmanager", func_0028CDF8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_002B4A08(void* self, int a1);
-extern int D_00536730[];
-extern int D_00536708[];
+extern int cGameModeMan_iRanking[];
+extern int cGameModeMan_iCharRank[];
 extern char str_chartune[];
 
 struct sRace_28CDF8 {
@@ -1396,8 +1396,8 @@ struct sRace_28CDF8 {
  * Starts the character tune for the podium (cGFPodiumState_gainFocus).
  *
  * Does nothing in a replay (cSSXAudio_ReplayMode), in radio mode 2 (unk_608C), unless SSXApp's GameModeMan is in heat 3
- * (iHeatNum), or when the first entry of the rank table D_00536730 is 3 or more. The character
- * iCharacters[D_00536708[0]] (0-9) selects music event 10, 2, 8, 1, 5, 9, 3, 7, 4 or 6; other values do nothing. It
+ * (iHeatNum), or when the first entry of the rank table cGameModeMan_iRanking is 3 or more. The character
+ * iCharacters[cGameModeMan_iCharRank[0]] (0-9) selects music event 10, 2, 8, 1, 5, 9, 3, 7, 4 or 6; other values do nothing. It
  * stores MusicSys.mCurrentSongNum in unk_62AC, starts the song "chartune" through MusicSys.mVtbl slot 2 (12, the music
  * volume control, 0), tags it 201 (func_002B49C0), sends the event through slot 4, sets the song's unk_5C
  * (func_002B4A08) so that only forced events apply, and starts it with func_002B3C28.
@@ -1414,11 +1414,11 @@ extern "C" void func_0028CDF8(cSSXAudio* self)
     if (race->mode != 3) {
         return;
     }
-    if (D_00536730[0] >= 3) {
+    if (cGameModeMan_iRanking[0] >= 3) {
         return;
     }
     int track = -1;
-    switch (race->tracks[D_00536708[0]]) {
+    switch (race->tracks[cGameModeMan_iCharRank[0]]) {
     case 0: track = 10; break;
     case 1: track = 2; break;
     case 2: track = 8; break;

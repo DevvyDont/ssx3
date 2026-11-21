@@ -24,7 +24,7 @@ struct cFESound {
     // --- cUISoundInterface (On Tour: size 0x4, the vptr only)
     void** mVtbl;                    // 0x000 [R] cFESound_cFESound stores cFESound_vtbl (0x00469348) after
                                      //       cUISoundInterface_cUISoundInterface; the dtor stores cUISoundInterface's
-                                     //       table D_0046DD60 back; [P] _vt$8cFESound
+                                     //       table cUISoundInterface_vtbl back; [P] _vt$8cFESound
     // --- cFESound
     int mDummyVar;                   // 0x004 [O] (0x4 in On Tour too); [R] cFESound_cFESound zeroes it (sw $0, 0x4); no
                                      //       other access
@@ -38,7 +38,7 @@ struct cOVSound {
     // --- cUISoundInterface (On Tour: size 0x4, the vptr only)
     void** mVtbl;                    // 0x000 [R] cOVSound_cOVSound stores cOVSound_vtbl (0x00469318) after
                                      //       cUISoundInterface_cUISoundInterface; the dtor stores cUISoundInterface's
-                                     //       table D_0046DD60 back; [P] _vt$8cOVSound
+                                     //       table cUISoundInterface_vtbl back; [P] _vt$8cOVSound
     // --- cOVSound
     int mDummyVar;                   // 0x004 [O] (0x4 in On Tour too); [R] cOVSound_cOVSound zeroes it (sw $0, 0x4); no
                                      //       other access

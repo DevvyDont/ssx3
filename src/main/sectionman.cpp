@@ -5,21 +5,21 @@
 INCLUDE_ASM("main/sectionman", cSectionMan_setSky);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char D_005047F8[];
+extern char cIrradianceDataBase_TheDataBase[];
 extern char str_APBR1[]; // "APBR1"
 extern char str_BPBR1[]; // "BPBR1"
 extern char str_CPBR1[]; // "CPBR1"
 extern char str_DPBR1[]; // "DPBR1"
 extern char str_EPBR1[]; // "EPBR1"
-extern int D_004A43C4;
+extern int cIrradianceDataBase_mDefaultId;
 extern "C" int cIrradianceDataBase_GetIDByName(void* self, const char* name);
 
 /**
  * Selects the particle-library lighting entry for a location.
  *
  * Maps @p sky to one of the entries "APBR1" to "EPBR1" (A: 0, 5, 8, 14, 17 and any other value; B: 1, 11, 18;
- * C: 2, 9, 12, 19; D: 3, 6, 15, 20; E: 4, 7, 10, 13, 16, 21) and stores its index in D_005047F8 (0 if absent)
- * in D_004A43C4, which func_00389C38() applies. The source's note calls it the default rider irradiance bank.
+ * C: 2, 9, 12, 19; D: 3, 6, 15, 20; E: 4, 7, 10, 13, 16, 21) and stores its index in cIrradianceDataBase_TheDataBase (0 if absent)
+ * in cIrradianceDataBase_mDefaultId, which func_00389C38() applies. The source's note calls it the default rider irradiance bank.
  *
  * @param sky  BE location ID (callers pass the section manager's or the new race's location)
  */
@@ -30,19 +30,19 @@ extern "C" void cSectionMan_setSky(cSectionMan* self, int sky)
     case 1:
     case 11:
     case 18:
-        D_004A43C4 = cIrradianceDataBase_GetIDByName(D_005047F8, str_BPBR1);
+        cIrradianceDataBase_mDefaultId = cIrradianceDataBase_GetIDByName(cIrradianceDataBase_TheDataBase, str_BPBR1);
         break;
     case 2:
     case 9:
     case 12:
     case 19:
-        D_004A43C4 = cIrradianceDataBase_GetIDByName(D_005047F8, str_CPBR1);
+        cIrradianceDataBase_mDefaultId = cIrradianceDataBase_GetIDByName(cIrradianceDataBase_TheDataBase, str_CPBR1);
         break;
     case 3:
     case 6:
     case 15:
     case 20:
-        D_004A43C4 = cIrradianceDataBase_GetIDByName(D_005047F8, str_DPBR1);
+        cIrradianceDataBase_mDefaultId = cIrradianceDataBase_GetIDByName(cIrradianceDataBase_TheDataBase, str_DPBR1);
         break;
     case 4:
     case 7:
@@ -50,7 +50,7 @@ extern "C" void cSectionMan_setSky(cSectionMan* self, int sky)
     case 13:
     case 16:
     case 21:
-        D_004A43C4 = cIrradianceDataBase_GetIDByName(D_005047F8, str_EPBR1);
+        cIrradianceDataBase_mDefaultId = cIrradianceDataBase_GetIDByName(cIrradianceDataBase_TheDataBase, str_EPBR1);
         break;
     case 0:
     case 5:
@@ -58,7 +58,7 @@ extern "C" void cSectionMan_setSky(cSectionMan* self, int sky)
     case 14:
     case 17:
     default:
-        D_004A43C4 = cIrradianceDataBase_GetIDByName(D_005047F8, str_APBR1);
+        cIrradianceDataBase_mDefaultId = cIrradianceDataBase_GetIDByName(cIrradianceDataBase_TheDataBase, str_APBR1);
         break;
     }
 }

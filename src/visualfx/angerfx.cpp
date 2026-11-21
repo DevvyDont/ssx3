@@ -505,12 +505,12 @@ extern "C" void tAvalanchePackedFrameData_setPositionOffset(tAvalanchePackedFram
 //100%
 INCLUDE_ASM("visualfx/angerfx", tAvalanchePackedFrameData_setColour);
 #ifdef SKIP_ASM
-extern float D_004A3A38;
+extern float cAvalanche_m_Brightness;
 
 /**
  * Writes a brightened, clamped colour into bytes 3..5 of a 10-byte packed avalanche frame record.
  *
- * Scales each channel by 1.3 (D_004A3A38), clamps it to 0..1 and stores it times 255. tAvalancheNode_calculate is its
+ * Scales each channel by 1.3 (cAvalanche_m_Brightness), clamps it to 0..1 and stores it times 255. tAvalancheNode_calculate is its
  * only caller.
  *
  * @param record  the record
@@ -523,9 +523,9 @@ extern "C" void tAvalanchePackedFrameData_setColour(tAvalanchePackedFrameData* r
 {
     float zero = 0.0f;
     float one = 1.0f;
-    red *= D_004A3A38;
-    green *= D_004A3A38;
-    blue *= D_004A3A38;
+    red *= cAvalanche_m_Brightness;
+    green *= cAvalanche_m_Brightness;
+    blue *= cAvalanche_m_Brightness;
     float cr, cg, cb;
     if (red >= zero) cr = red <? one; else cr = zero;
     if (green >= zero) cg = green <? one; else cg = zero;

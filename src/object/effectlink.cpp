@@ -80,7 +80,7 @@ extern "C" void cEffectLink_unlink(cEffectLink* link)
 //100%
 INCLUDE_ASM("object/effectlink", cEffectModifier_cEffectModifier);
 #ifdef SKIP_ASM
-extern int D_004A3FF4;
+extern int cEffectModifier_EffectCount;
 extern void* cEffectModifier_vtbl[];
 
 struct sEffectLinkObj_5798 {
@@ -93,7 +93,7 @@ struct sEffectLinkObj_5798 {
  * Constructs a cEffectModifier for an instance (On Tour cEffectModifier(tInstanceRecord* inst)).
  *
  * Clears the effect-link Next/Prev, stores cEffectModifier_vtbl and the instance (Instance, +0xC), and increments the
- * live effect count D_004A3FF4 (On Tour cEffectModifier::EffectCount).
+ * live effect count cEffectModifier_EffectCount (On Tour cEffectModifier::EffectCount).
  *
  * @param inst  the tInstanceRecord the effect is attached to (declared int)
  * @return @p self
@@ -105,7 +105,7 @@ extern "C" void* cEffectModifier_cEffectModifier(cEffectModifier* self, int inst
     modifier->link.prev = 0;
     modifier->vt = cEffectModifier_vtbl;
     modifier->value = inst;
-    D_004A3FF4++;
+    cEffectModifier_EffectCount++;
     return ((void*)self);
 }
 #endif
@@ -113,7 +113,7 @@ extern "C" void* cEffectModifier_cEffectModifier(cEffectModifier* self, int inst
 //100%
 INCLUDE_ASM("object/effectlink", cEffectModifier_cEffectModifier1);
 #ifdef SKIP_ASM
-extern int D_004A3FF4;
+extern int cEffectModifier_EffectCount;
 extern void* cEffectModifier_vtbl[];
 
 struct sEffectLinkObj_57C8 {
@@ -132,7 +132,7 @@ struct sEffVEntry57C8 {
  * Constructs an effect modifier from a replay frame.
  *
  * Clears the effect-link Next/Prev, installs cEffectModifier_vtbl, reads Instance through the stream's vtable entry 3
- * (instance-pointer read) and increments the live effect count D_004A3FF4 (read by cEffectModifier_getEffectCount). The particle and
+ * (instance-pointer read) and increments the live effect count cEffectModifier_EffectCount (read by cEffectModifier_getEffectCount). The particle and
  * halo replay constructors (cParticleModifier_cParticleModifier1, cHaloModifier_cHaloModifier1) start with it.
  *
  * @param effectModifier  the modifier being constructed
@@ -147,7 +147,7 @@ extern "C" void* cEffectModifier_cEffectModifier1(cEffectModifier* effectModifie
     self->vt = cEffectModifier_vtbl;
     sEffVEntry57C8* vt = *(sEffVEntry57C8**)obj;
     self->value = vt[3].fn((char*)obj + vt[3].delta);
-    D_004A3FF4++;
+    cEffectModifier_EffectCount++;
     return ((void*)effectModifier);
 }
 #endif
@@ -155,14 +155,14 @@ extern "C" void* cEffectModifier_cEffectModifier1(cEffectModifier* effectModifie
 //100%
 INCLUDE_ASM("object/effectlink", cEffectModifier__cEffectModifier);
 #ifdef SKIP_ASM
-extern int D_004A3FF4;
+extern int cEffectModifier_EffectCount;
 extern void* cEffectModifier_vtbl[];
 extern void* cEffectLink_vtbl[];
 void operator_delete(int*);
 
 
 /**
- * Destroys an effect modifier: decrements the live count (D_004A3FF4), unlinks it from its effect chain, then
+ * Destroys an effect modifier: decrements the live count (cEffectModifier_EffectCount), unlinks it from its effect chain, then
  * frees it when asked to.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
@@ -171,7 +171,7 @@ extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flag
 {
     cEffectModifier* effectLink = self;
     effectLink->mVtbl = cEffectModifier_vtbl;
-    D_004A3FF4--;
+    cEffectModifier_EffectCount--;
     effectLink->mVtbl = cEffectLink_vtbl;
     cEffectLink_unlink((cEffectLink*)(sEffectLinkView*)&effectLink->Next);
     if (flags & 1) {
@@ -209,7 +209,7 @@ INCLUDE_ASM("object/effectlink", cParticleModifier_cParticleModifier);
 extern "C" void* cEffectModifier_cEffectModifier(cEffectModifier* self, int a1);
 extern "C" void* cStaticEmitter_cStaticEmitter(void* self);
 extern "C" void cStaticEmitter_setupEmitter(void* self, void* mat, int a2);
-extern int D_004A3FF8;
+extern int cParticleModifier_ParticleCount;
 extern void* cParticleModifier_vtbl[];
 
 struct sVEntry003458C0 {
@@ -244,7 +244,7 @@ static inline void* vu0CopyMatrix003458C0(void* dst, void* src)
  * Runs the cEffectModifier constructor with @p owner, stores cParticleModifier_vtbl, constructs the cStaticEmitter at
  * +0x50 and keeps the particle data. The transform (+0x10) is copied from the instance node's (Instance + 0xC)
  * virtual slot 24 matrix, or from the instance record's own matrix (Instance + 0x10) when there is no node. Then
- * cStaticEmitter_setupEmitter(+0x50, transform, @p pdata), Complete (+0x1E4) = 0 and the particle count D_004A3FF8 is
+ * cStaticEmitter_setupEmitter(+0x50, transform, @p pdata), Complete (+0x1E4) = 0 and the particle count cParticleModifier_ParticleCount is
  * incremented.
  *
  * @param pdata  the tParticleData describing the emitter (declared int)
@@ -268,7 +268,7 @@ extern "C" void* cParticleModifier_cParticleModifier(cParticleModifier* self, in
     }
     cStaticEmitter_setupEmitter(&self->Emitter, transform, (int)self->ParticleData);
     (self)->Complete = 0;
-    D_004A3FF8++;
+    cParticleModifier_ParticleCount++;
     return ((void*)self);
 }
 #endif
@@ -293,7 +293,7 @@ struct sEffectLinkVEntry_3459A8 {
  * (cStaticEmitter_cStaticEmitter) and reads Complete (+0x1E4). While not complete it allocates and reads the 0xD8-byte
  * ParticleData, reads Transform (0x40 bytes), sets the emitter up (cStaticEmitter_setupEmitter) and lets it read its
  * own state (cStaticEmitter_readFromReplayFrame); a completed modifier gets the identity Transform and no ParticleData.
- * Increments the particle-modifier count D_004A3FF8.
+ * Increments the particle-modifier count cParticleModifier_ParticleCount.
  *
  * @param stream  replay stream to read from
  * @return self
@@ -318,7 +318,7 @@ extern "C" void* cParticleModifier_cParticleModifier1(cParticleModifier* self, v
         vu0CopyMatrix003458C0(&self->Transform, t4mat_Identity);
         self->ParticleData = 0;
     }
-    D_004A3FF8++;
+    cParticleModifier_ParticleCount++;
     return ((void*)self);
 }
 #endif
@@ -326,14 +326,14 @@ extern "C" void* cParticleModifier_cParticleModifier1(cParticleModifier* self, v
 //100%
 INCLUDE_ASM("object/effectlink", cParticleModifier__cParticleModifier);
 #ifdef SKIP_ASM
-extern int D_004A3FF8;
+extern int cParticleModifier_ParticleCount;
 extern void* cParticleModifier_vtbl[];
 void operator_delete(int*);
 extern "C" void cStaticEmitter__cStaticEmitter(int* self, int flags);
 extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flags);
 
 /**
- * Destroys a particle modifier: frees its 0xD8-byte buffer (+0x1E0), decrements the live count (D_004A3FF8),
+ * Destroys a particle modifier: frees its 0xD8-byte buffer (+0x1E0), decrements the live count (cParticleModifier_ParticleCount),
  * destroys the embedded static emitter (+0x50), then the cEffectModifier part.
  *
  * @param flags  g++ destructor flags, passed on (bit 0 frees the object)
@@ -345,7 +345,7 @@ extern "C" void cParticleModifier__cParticleModifier(cParticleModifier* self, in
     if (buf != 0) {
         operator_delete(buf);
     }
-    D_004A3FF8--;
+    cParticleModifier_ParticleCount--;
     cStaticEmitter__cStaticEmitter((int*)(&self->Emitter), 2);
     cEffectModifier__cEffectModifier((cEffectModifier*)self, flags);
 }
@@ -439,7 +439,7 @@ extern "C" void* cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(void* self)
 extern "C" void cBaseClass_DynamicEmitter_setupEmitter(void* self, void* target, float t);
 struct sEffectLink5EF8;
 extern "C" void cDynamicParticleModifier_updatePosition(cDynamicParticleModifier* self);
-extern int D_004A3FFC;
+extern int cDynamicParticleModifier_DynamicParticleCount;
 extern void* cDynamicParticleModifier_vtbl[];
 extern void* cDynamicEmitter_vtbl[];
 
@@ -463,7 +463,7 @@ struct sTarget00345C90 {
  * Emitter (cDynamicEmitter_vtbl), stores ParticleData = @p particleDesc, Mesh = @p bone and Offset = *@p pos, copies the data's
  * velocity (+0x48..+0x50) into InitVel and then zeroes it in @p particleDesc itself, clears Fade, sets up the emitter
  * (cBaseClass_DynamicEmitter_setupEmitter with -1), places it (cDynamicParticleModifier_updatePosition), counts it in
- * D_004A3FFC and clears Complete. cMoveNode_addEffectModifier's caller allocates it (624 bytes,
+ * cDynamicParticleModifier_DynamicParticleCount and clears Complete. cMoveNode_addEffectModifier's caller allocates it (624 bytes,
  * "DynamicParticleModifier").
  *
  * @param particleDesc  the particle data record (its velocity is consumed)
@@ -488,7 +488,7 @@ extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleMo
     particleDesc->z = 0.0f;
     cBaseClass_DynamicEmitter_setupEmitter(((char*)&self->Emitter), (sTarget00345C90*)self->ParticleData, -1.0f);
     cDynamicParticleModifier_updatePosition(self);
-    D_004A3FFC++;
+    cDynamicParticleModifier_DynamicParticleCount++;
     self->Complete = 0;
     return (self);
 }
@@ -517,7 +517,7 @@ struct sEffectLinkVEntry_345D80 {
  * block starting at Mesh through the stream's read (slot 2). If the effect is not Complete it allocates a 0xD8-byte
  * tParticleData with operator_new1, reads it from the stream, sets the emitter up from it with a random seed
  * (cBaseClass_DynamicEmitter_setupEmitter, cBaseClass_DynamicEmitter::setupEmitter, seed -1), restores the emitter's own replay state and
- * steps it once at Pos/Vel for 1/60 s (cBaseClass_DynamicEmitter_updateBASE). A Complete effect gets no ParticleData. Increments D_004A3FFC
+ * steps it once at Pos/Vel for 1/60 s (cBaseClass_DynamicEmitter_updateBASE). A Complete effect gets no ParticleData. Increments cDynamicParticleModifier_DynamicParticleCount
  * (the dynamic particle count).
  *
  * @param stream  the replay frame to read from (On Tour data)
@@ -543,7 +543,7 @@ extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleMo
     } else {
         self->ParticleData = 0;
     }
-    D_004A3FFC++;
+    cDynamicParticleModifier_DynamicParticleCount++;
     return (self);
 }
 #endif
@@ -551,7 +551,7 @@ extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleMo
 //100%
 INCLUDE_ASM("object/effectlink", cDynamicParticleModifier__cDynamicParticleModifier);
 #ifdef SKIP_ASM
-extern int D_004A3FFC;
+extern int cDynamicParticleModifier_DynamicParticleCount;
 extern void* cDynamicParticleModifier_vtbl[];
 void operator_delete(int*);
 extern "C" void cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(void* self, int flags);
@@ -559,7 +559,7 @@ extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flag
 
 /**
  * Destroys a dynamic particle modifier: frees its 0xD8-byte buffer (+0x260), decrements the live count
- * (D_004A3FFC), destroys the embedded dynamic emitter (+0x60), then the cEffectModifier part.
+ * (cDynamicParticleModifier_DynamicParticleCount), destroys the embedded dynamic emitter (+0x60), then the cEffectModifier part.
  *
  * @param flags  g++ destructor flags, passed on (bit 0 frees the object)
  */
@@ -570,7 +570,7 @@ extern "C" void cDynamicParticleModifier__cDynamicParticleModifier(cDynamicParti
     if (buf != 0) {
         operator_delete(buf);
     }
-    D_004A3FFC--;
+    cDynamicParticleModifier_DynamicParticleCount--;
     cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(&self->Emitter, 2);
     cEffectModifier__cEffectModifier((cEffectModifier*)self, flags);
 }
@@ -752,7 +752,7 @@ extern "C" void cDynamicParticleModifier_writeToReplayFrame(cDynamicParticleModi
 //100%
 INCLUDE_ASM("object/effectlink", cHaloModifier_cHaloModifier);
 #ifdef SKIP_ASM
-extern int D_004A4000;
+extern int cHaloModifier_HaloCount;
 extern void* cHaloModifier_vtbl[];
 extern "C" void* cEffectModifier_cEffectModifier(cEffectModifier* self, int a1);
 
@@ -790,7 +790,7 @@ struct sEffSrc_6120 {
  *
  * Runs cEffectModifier_cEffectModifier, installs cHaloModifier_vtbl and copies from src: Type (+0x4) to +0x24, Mesh
  * (+0x8) to +0x28, the colour (ColourR/G/B/A at +0x10..+0x18 and +0xC) to +0x10 as (R, G, B, A), Radius (+0x1C) to
- * +0x20 and Speed (+0x20) to +0x2C; zeroes +0x30 and increments the halo count D_004A4000.
+ * +0x20 and Speed (+0x20) to +0x2C; zeroes +0x30 and increments the halo count cHaloModifier_HaloCount.
  *
  * @param src  halo make-data (tAddHaloData layout)
  * @param instRecord  instance record the halo belongs to
@@ -806,7 +806,7 @@ extern "C" void* cHaloModifier_cHaloModifier(sEffObj_6120* self, sEffSrc_6120* s
     self->f20 = src->f1C;
     self->f2C = src->f20;
     self->f30 = 0;
-    D_004A4000++;
+    cHaloModifier_HaloCount++;
     return self;
 }
 #endif
@@ -814,7 +814,7 @@ extern "C" void* cHaloModifier_cHaloModifier(sEffObj_6120* self, sEffSrc_6120* s
 //100%
 INCLUDE_ASM("object/effectlink", cHaloModifier_cHaloModifier1);
 #ifdef SKIP_ASM
-extern int D_004A4000;
+extern int cHaloModifier_HaloCount;
 extern void* cHaloModifier_vtbl[];
 extern "C" void* cEffectModifier_cEffectModifier1(cEffectModifier* p, void* obj);
 
@@ -828,7 +828,7 @@ struct sEffVEntry61C0 {
  * Constructs a halo modifier from a replay frame.
  *
  * Runs the effect-modifier replay constructor cEffectModifier_cEffectModifier1, installs cHaloModifier_vtbl, reads the 0x30-byte halo
- * state at +0x10 through the stream's read slot (vtable entry 2) and increments the halo count D_004A4000.
+ * state at +0x10 through the stream's read slot (vtable entry 2) and increments the halo count cHaloModifier_HaloCount.
  *
  * @param stream  replay stream to read from
  * @return self
@@ -839,7 +839,7 @@ extern "C" void* cHaloModifier_cHaloModifier1(cHaloModifier* self, void* stream)
     self->mVtbl = cHaloModifier_vtbl;
     sEffVEntry61C0* vt = *(sEffVEntry61C0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)&self->Color, 0x30);
-    D_004A4000++;
+    cHaloModifier_HaloCount++;
     return ((void*)self);
 }
 #endif
@@ -847,20 +847,20 @@ extern "C" void* cHaloModifier_cHaloModifier1(cHaloModifier* self, void* stream)
 //100%
 INCLUDE_ASM("object/effectlink", cHaloModifier__cHaloModifier);
 #ifdef SKIP_ASM
-extern int D_004A4000;
+extern int cHaloModifier_HaloCount;
 extern void* cHaloModifier_vtbl[];
 extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flags);
 
 
 /**
- * Destroys a halo modifier: decrements the live count (D_004A4000), then runs the cEffectModifier destructor.
+ * Destroys a halo modifier: decrements the live count (cHaloModifier_HaloCount), then runs the cEffectModifier destructor.
  *
  * @param flags  g++ destructor flags, passed on (bit 0 frees the object)
  */
 extern "C" void cHaloModifier__cHaloModifier(cHaloModifier* self, int flags)
 {
     (self)->mVtbl = cHaloModifier_vtbl;
-    D_004A4000--;
+    cHaloModifier_HaloCount--;
     cEffectModifier__cEffectModifier((cEffectModifier*)self, flags);
 }
 #endif

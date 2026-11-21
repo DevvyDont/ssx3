@@ -3604,12 +3604,12 @@ extern "C" void cTypeObjNode_resetRootTransformDirty(cTypeObjNode* node) {
 //100%
 INCLUDE_ASM("object/railmodifier", cTypeObjNode_getObjNodeCount);
 #ifdef SKIP_ASM
-extern int D_0044AFF0[];
+extern int cTypeObjNode_ObjNodeCount[];
 
 /**
- * Returns how many object nodes of a type are alive (D_0044AFF0[idx]).
+ * Returns how many object nodes of a type are alive (cTypeObjNode_ObjNodeCount[idx]).
  *
- * D_0044AFF0 is the per-type count the cTypeObjNode constructors increment and its destructor decrements
+ * cTypeObjNode_ObjNodeCount is the per-type count the cTypeObjNode constructors increment and its destructor decrements
  * (src/object/objnode.cpp); On Tour has 23 types (kNumObjNodeType).
  *
  * @param idx  node type (tObjNodeType)
@@ -3617,7 +3617,7 @@ extern int D_0044AFF0[];
  */
 extern "C" int cTypeObjNode_getObjNodeCount(int idx)
 {
-    return D_0044AFF0[idx];
+    return cTypeObjNode_ObjNodeCount[idx];
 }
 #endif
 
@@ -5029,17 +5029,17 @@ void cEffectModifier_signal(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cEffectModifier_getEffectCount);
 #ifdef SKIP_ASM
-extern int D_004A3FF4;
+extern int cEffectModifier_EffectCount;
 
 /**
- * Returns the number of live effect modifiers, D_004A3FF4.
+ * Returns the number of live effect modifiers, cEffectModifier_EffectCount.
  *
- * src/object/effectlink.cpp's cEffectModifier constructors increment D_004A3FF4 and its destructor decrements it.
+ * src/object/effectlink.cpp's cEffectModifier constructors increment cEffectModifier_EffectCount and its destructor decrements it.
  *
- * @return D_004A3FF4
+ * @return cEffectModifier_EffectCount
  */
 extern "C" int cEffectModifier_getEffectCount(void) {
-    return D_004A3FF4;
+    return cEffectModifier_EffectCount;
 }
 #endif
 
@@ -5074,17 +5074,17 @@ int cDynamicParticleModifier_getType(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cDynamicParticleModifier_getDynamicParticleCount);
 #ifdef SKIP_ASM
-extern int D_004A3FFC;
+extern int cDynamicParticleModifier_DynamicParticleCount;
 
 /**
- * Returns the number of live dynamic particle modifiers, D_004A3FFC.
+ * Returns the number of live dynamic particle modifiers, cDynamicParticleModifier_DynamicParticleCount.
  *
- * src/object/effectlink.cpp's dynamic-particle constructors increment D_004A3FFC and the destructor decrements it.
+ * src/object/effectlink.cpp's dynamic-particle constructors increment cDynamicParticleModifier_DynamicParticleCount and the destructor decrements it.
  *
- * @return D_004A3FFC
+ * @return cDynamicParticleModifier_DynamicParticleCount
  */
 extern "C" int cDynamicParticleModifier_getDynamicParticleCount(void) {
-    return D_004A3FFC;
+    return cDynamicParticleModifier_DynamicParticleCount;
 }
 #endif
 

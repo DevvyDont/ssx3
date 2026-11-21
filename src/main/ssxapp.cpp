@@ -100,7 +100,7 @@ struct sTint_6900 {
 };
 
 extern void* PadCache;
-extern void* D_004A28AC;
+extern void* G2D;
 extern char str_PadCache[];
 extern char str_2DRender[];
 extern char str_InputPad[];
@@ -153,7 +153,7 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     ((V0Fn_6900)vt[2].fn)(graphicsMan + vt[2].delta);
     cLightMan_construct();
     cBezierMan_construct();
-    D_004A28AC = cMemMan_alloc(1, str_2DRender, 0, 0);
+    G2D = cMemMan_alloc(1, str_2DRender, 0, 0);
     int i;
     for (i = 0; i < 2; i++) {
         int* inputPad = (int*)cMemMan_alloc(676, str_InputPad, 0, 0);
@@ -760,14 +760,14 @@ extern "C" int cPadCache_numButtons(void* self, int i);
 extern "C" void* cPadCache_buttonValues(void* self, int i);
 extern "C" void cInputPad_update(void* target, int a, void* data);
 extern void* PadCache;
-extern void* D_004A33F0;
+extern void* Keyboard;
 
 /**
  * Starts a frame's input: when the pad cache has a new sample, updates the network and keyboard and feeds the
  * pads.
  *
  * Advances the pad cache's read position (cPadCache_nextInput); on success it updates cCommSystem_mCommSystem and
- * the keyboard object D_004A33F0 when they exist, and passes each of the two sample slots (value count and
+ * the keyboard object Keyboard when they exist, and passes each of the two sample slots (value count and
  * values) to InputPads[i] through cInputPad_update().
  *
  * @return 1 when a new input sample was taken, 0 when none was ready
@@ -778,8 +778,8 @@ extern "C" int cSSXApp_preUpdate(cSSXApp* self)
         if (cCommSystem_mCommSystem != 0) {
             cCommSystem_update(cCommSystem_mCommSystem);
         }
-        if (D_004A33F0 != 0) {
-            func_002668E8(D_004A33F0);
+        if (Keyboard != 0) {
+            func_002668E8(Keyboard);
         }
         int i;
         for (i = 0; i < 2; i++) {
@@ -1078,7 +1078,7 @@ extern char str_data_fonts_hudfont_sfn[];
 extern char str_GameAnimMap[];
 extern char str_AnimDataBase[];
 extern char D_004A29E8[];
-extern int D_004A4CB8;
+extern int cBENewRaceInterface_commandLineTrack;
 
 struct sSndCfg_82D0 {
     unsigned int sfxVol : 4;        // bits 0-3
@@ -1156,7 +1156,7 @@ struct sSSXApp_82D0 {
  *
  * Then applies the BE options and the locale, builds GameAnimMap and AnimDataBase, starts audio with the
  * saved volumes, inits the world triggers, and copies a non-empty CommandLineTrack into the string
- * D_004A4CB8.
+ * cBENewRaceInterface_commandLineTrack.
  */
 extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
 {
@@ -1203,7 +1203,7 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
     WORLDTRIGGERMANAGER_Init();
     if (func_004165A8(self->fCC, D_004A29E8)) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        cBXString_operatorE1(&D_004A4CB8, self->fCC);
+        cBXString_operatorE1(&cBENewRaceInterface_commandLineTrack, self->fCC);
     }
 }
 #endif
@@ -1403,7 +1403,7 @@ extern "C" void cSSXApp_activateBEOptions()
 INCLUDE_ASM("main/ssxapp", initOnline);
 #ifdef SKIP_ASM
 extern int D_004A3E94;
-extern int D_004A29EC;
+extern int EnableOnline;
 extern char str_cdrom0[];
 extern char str_1[];
 extern char str_PPP_IRX[];
@@ -1441,7 +1441,7 @@ extern "C" void func_00266788();
  * Loads the IOP modules for USB, the keyboard, the network adapter, the modem and voice chat.
  *
  * Loads USBD, USBKB, DEV9, INET, NETCNF (with icon paths), INETCTL, SMAP and PPP through func_00319718.
- * D_004A29EC (network hardware present) is set when SMAP (network adapter) or SPDUART (modem) loads, and
+ * EnableOnline (network hardware present) is set when SMAP (network adapter) or SPDUART (modem) loads, and
  * PPPOE is loaded only after SMAP.
  *
  * With network hardware it then loads MSIFRPC, LIBNET, DRTYSCKF (DirtySock) and LGAUD; when VOIPF loads it
@@ -1459,21 +1459,21 @@ extern "C" void initOnline()
     int n = sprintf(buf, str_icon_pct_sCNF_SYS_NET_ICOpct_spct_cicons, str_cdrom0, str_1, 0, str_cdrom0, str_1);
     func_00319718(D_004A3E94, str_NETCNF_IRX, 1, n + 1, buf);
     func_00319718(D_004A3E94, str_INETCTL_IRX, 1, 20, str_no_auto);
-    D_004A29EC = 0;
+    EnableOnline = 0;
     if (func_00319718(D_004A3E94, str_SMAP_IRX, 0, 0, 0) >= 0) {
-        D_004A29EC = 1;
+        EnableOnline = 1;
         ok = 1;
     }
     func_00319718(D_004A3E94, str_PPP_IRX, 1, 0, 0);
     n = sprintf(buf, str_dial_pct_sCNF_DIAL_SPD_CNFpct_spct_c_nog, str_cdrom0, str_1, 0);
     if (func_00319718(D_004A3E94, str_SPDUART_IRX, 0, n + 1, buf) >= 0) {
-        D_004A29EC = 1;
+        EnableOnline = 1;
     }
-    if (D_004A29EC && ok) {
+    if (EnableOnline && ok) {
         func_00319718(D_004A3E94, str_PPPOE_IRX, 1, 0, 0);
     }
     THREAD_yieldticks(10);
-    if (D_004A29EC) {
+    if (EnableOnline) {
         func_003197D0(D_004A3E94);
         func_00319718(D_004A3E94, str_LIBNET_IRX, 1, 0, 0);
         func_0040B130(0);
@@ -1497,7 +1497,7 @@ extern "C" void func_002292E0(cCrowdMan2d* self);
 void* cCrowdRender2D_cCrowdRender2D(int mem);
 void* cCrowdRender2D_constructCrowdAnim2D(void* r);
 extern char str_cCrowdRender2D[];
-extern int D_004A2A00;
+extern int TheCrowdMan2d;
 
 inline void* operator new[](unsigned int, void* p) { return p; }
 
@@ -1537,7 +1537,7 @@ static inline int AnimCount_229180(char* anim)
  * Constructs the 2D crowd manager: empty quad slots, its crowd renderer and animation, and the shared crowd record.
  *
  * Builds 128 resource ids (+0x8) set to 0xFFFFFFFF, 128 0x40-byte quad slots (+0x210) and the 40 0x20-byte marker ring
- * entries (+0x2220); makes itself the singleton D_004A2A00. Creates a cCrowdRender2D (0x10 bytes, tag "cCrowdRender2D")
+ * entries (+0x2220); makes itself the singleton TheCrowdMan2d. Creates a cCrowdRender2D (0x10 bytes, tag "cCrowdRender2D")
  * at +0x0 and its animation (cCrowdRender2D_constructCrowdAnim2D) at +0x4. Fills the shared record D_00536690: the
  * first short takes the animation's current frame texture id (+0x10), +0xC 0x20000, the shorts at +0x2, +0x4 and +0x6
  * -1, +0x8 and +0x10 0. Then resets the slots (func_002292E0). cGame_load builds it as CrowdMan2d (10016 bytes).
@@ -1550,7 +1550,7 @@ extern "C" void* func_00229180(cCrowdMan2d* self)
     new ((char*)&self->mQuad[0]) sCrowdSlot_229180[128];
     new ((char*)&self->mMarker[0]) sCrowdRest_229180[40];
     // PORT: the singleton pointer is held in an int global
-    D_004A2A00 = (int)self;
+    TheCrowdMan2d = (int)self;
     self->mpRender = (cCrowdRender2D*)cCrowdRender2D_cCrowdRender2D((int)cMemMan_alloc(0x10, str_cCrowdRender2D, 0x20000000, 0));
     char* anim = (char*)cCrowdRender2D_constructCrowdAnim2D(self->mpRender);
     self->mpAnim = (cCrowdAnim2D*)anim;
@@ -1570,12 +1570,12 @@ extern "C" void* func_00229180(cCrowdMan2d* self)
 INCLUDE_ASM("main/ssxapp", func_00229278);
 #ifdef SKIP_ASM
 extern "C" void func_00229398(cCrowdMan2d* self);
-extern int D_004A2A00;
+extern int TheCrowdMan2d;
 void operator_delete(int* p);
 void cCrowdRender2D__cCrowdRender2D(int* self, int flags);
 
 /**
- * Destroys the 2D crowd manager: releases every slot, clears the singleton D_004A2A00, frees the animation (+0x4),
+ * Destroys the 2D crowd manager: releases every slot, clears the singleton TheCrowdMan2d, frees the animation (+0x4),
  * destroys the renderer (+0x0) and frees the object when bit 0 of @p flags is set.
  *
  * Uses func_00229398, operator_delete and cCrowdRender2D__cCrowdRender2D(renderer, 3). cGame_purge calls it.
@@ -1586,7 +1586,7 @@ extern "C" void func_00229278(cCrowdMan2d* self, int flags)
 {
     func_00229398(self);
     int* crowdAnim = (int*)self->mpAnim;
-    D_004A2A00 = 0;
+    TheCrowdMan2d = 0;
     operator_delete(crowdAnim);
     int* renderer = *(int**)self;
     if (renderer != 0) {
@@ -1664,7 +1664,7 @@ extern "C" void func_00229B90(cCrowdMan2d* self, int a1);
  * Releases the 2D crowd manager's quad slots in one world section: each used slot whose resource id has @p id as its
  * low (section) byte.
  *
- * cGame_sectionUnloading calls it through the singleton D_004A2A00.
+ * cGame_sectionUnloading calls it through the singleton TheCrowdMan2d.
  *
  * @param id  the world section id
  */
