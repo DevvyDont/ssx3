@@ -404,9 +404,9 @@ extern "C" void cSectionBlockAllocator__cSectionBlockAllocator(void* self, int f
  *
  * @param i  the section id
  */
-extern "C" void cWorldMemoryMan_deactivateSectionMem(void* self, int i)
+extern "C" void cWorldMemoryMan_deactivateSectionMem(cWorldMemoryMan* self, int i)
 {
-    char* base = (char*)self + 0x3C;
+    char* base = (char*)&self->m_pSectionAllocator[0];
     void** slot = (void**)(base + (i << 2));
     if (*slot != 0) {
         cSectionBlockAllocator__cSectionBlockAllocator(*slot, 3);
@@ -778,7 +778,7 @@ extern "C" void cWorldCache_activateSectionMem(cWorldCache* self, int i, int sec
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldcache", cWorldCache_deactivateSectionMem);
 #ifdef SKIP_ASM
-extern "C" void cWorldMemoryMan_deactivateSectionMem(void* self, int i);
+extern "C" void cWorldMemoryMan_deactivateSectionMem(cWorldMemoryMan* self, int i);
 extern "C" void cWorldCacheTable__cWorldCacheTable(int* self, int flags);
 
 /**

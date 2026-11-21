@@ -19018,7 +19018,7 @@ int GetHashValue32(char* str);
 extern "C" void func_001BB520(cFEStateCreateStep2* self, void* box, int flag);
 extern "C" void func_001BB5D0(cFEStateCreateStep2* self, void* box, int a2);
 extern "C" void func_001BB798(cFEStateCreateStep2* self, void* box, int value);
-extern "C" void func_001BB840(cFEStateCreateStep2* self, void* box, int a2, int a3, int a4);
+extern "C" void func_001BB840(cFEStateCreateStep2* self, cUIText* box, int a2, int a3, int a4);
 extern char str_LBLegalYesNo[];
 extern char str_LBMonth[];
 extern char str_LBDay[];
@@ -19043,7 +19043,7 @@ extern "C" void cFEStateCreateStep2_onWidgetCreate(cFEStateCreateStep2* self, vo
     } else if (IsHash1BA500(*(int*)((char*)box + 0x38), str_LBMonth)) {
         func_001BB5D0(self, box, 1);
     } else if (IsHash1BA500(*(int*)((char*)box + 0x38), str_LBDay)) {
-        func_001BB840(self, box, 1, 1985, 1);
+        func_001BB840(self, (cUIText*)box, 1, 1985, 1);
     } else if (IsHash1BA500(*(int*)((char*)box + 0x38), str_LBYear)) {
         func_001BB798(self, box, 1985);
     } else if (IsHash1BA500(*(int*)((char*)box + 0x38), str_LBGender)) {
@@ -19066,7 +19066,7 @@ extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void* cFEStateCreateStep1_cFEStateCreateStep1(cFEStateCreateStep1* self, int a1, int a2);
 extern "C" void func_001BA9F8(cFEStateCreateStep2* self, int a1);
-extern "C" void func_001BB840(cFEStateCreateStep2* self, void* box, int a2, int a3, int a4);
+extern "C" void func_001BB840(cFEStateCreateStep2* self, cUIText* box, int a2, int a3, int a4);
 int func_001BBAA8(void* self);
 extern "C" void* cFEStateOnlineAgreement_cFEStateOnlineAgreement(cFEStateOnlineAgreement* self, int a1);
 extern "C" int cUIListBox_getCurrentEntryData(void* a);
@@ -19990,13 +19990,13 @@ public:
  * @param year  the year (for February's length)
  * @param sel  the day to select
  */
-extern "C" void func_001BB840(cFEStateCreateStep2* self, void* box, int month, int year, int sel)
+extern "C" void func_001BB840(cFEStateCreateStep2* self, cUIText* box, int month, int year, int sel)
 {
     char buf[16];
     unsigned char idx;
     int n = func_001BB9B0(self, month, year);
     cUIListBox_deleteAllEntries(box);
-    *(int*)((char*)box + 0x14) = (*(int*)((char*)box + 0x14) & ~1) | 0x80;
+    box->mAttr = (box->mAttr & ~1) | 0x80;
     int i;
     for (i = 1; i < n + 1; i++) {
         sprintf(buf, str_pct_d_b, i);

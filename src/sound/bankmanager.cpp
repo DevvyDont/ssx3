@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "sound/bankmanager.h"
 #include "be/beintnewrace.h"
 #include "main/ssxapp.h"
@@ -818,7 +819,7 @@ INCLUDE_ASM("sound/bankmanager", func_0028BF78);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int cAudioInterface_isInGame(void);
-extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
+extern "C" void func_0028CF98(cSSXAudio* self, int a1, int a2, int a3, int a4);
 extern "C" void func_0028D488(void* self);
 extern "C" int func_002B49E0(void* monitor);
 extern "C" int func_002B4AF0(void* monitor);
@@ -851,22 +852,22 @@ extern sCfg_BF78 D_00535610_BF78 __asm__("cBEOptionInterface_mOption");
  *
  * @param state  the new radio mode
  */
-extern "C" void func_0028BF78(char* self, int state)
+extern "C" void func_0028BF78(cSSXAudio* self, int state)
 {
-    if (*(int*)(self + 0x608C) == state)
+    if (self->unk_608C == state)
         return;
-    *(int*)(self + 0x608C) = state;
+    self->unk_608C = state;
     switch (state) {
     case 0: {
-        func_002B4070_BF78(self + 0x118, *(long*)(self + 0x518));
+        func_002B4070_BF78(&self->MusicSys, *(long*)&self->MusicSys.mDefaultActiveMap);
         cBE_getInterface_Fv(cBE_getBE(), 4);
         sCfg_BF78 cfg = D_00535610_BF78;
         cSSXAudio_SetDJSpeech(self, (cfg.flags >> 17) & 1);
         if (cAudioInterface_isInGame() == 0)
             return;
-        if (*(int*)(self + 0x530) == 0)
+        if (self->MusicSys.mSongPlaying == 0)
             return;
-        if ((unsigned int)(func_002B49E0(self + 0x118) - 101) >= 3)
+        if ((unsigned int)(func_002B49E0(&self->MusicSys) - 101) >= 3)
             return;
         func_0028D488(self);
         func_0028CF98(self, 0, 0, -1, 0);
@@ -874,20 +875,20 @@ extern "C" void func_0028BF78(char* self, int state)
     }
     case 1:
     case 3: {
-        func_002B4070_BF78(self + 0x118, *(long*)(self + 0x6098));
+        func_002B4070_BF78(&self->MusicSys, *(long*)&self->mRadioPlayList);
         cBE_getInterface_Fv(cBE_getBE(), 4);
         sCfg_BF78 cfg = D_00535610_BF78;
         cSSXAudio_SetDJSpeech(self, (cfg.flags >> 17) & 1);
-        if (*(long*)(self + 0x6098) == 0)
+        if (*(long*)&self->mRadioPlayList == 0)
             return;
         if (cAudioInterface_isInGame() == 0)
             return;
-        if (*(int*)(self + 0x530) == 0)
+        if (self->MusicSys.mSongPlaying == 0)
             return;
-        int st = func_002B49E0(self + 0x118);
+        int st = func_002B49E0(&self->MusicSys);
         if ((unsigned int)(st - 1) < 3)
             return;
-        if (func_002B4AF0(self + 0x118) != 0 && st != 301)
+        if (func_002B4AF0(&self->MusicSys) != 0 && st != 301)
             return;
         func_0028D488(self);
         func_0028CF98(self, 0, 0, -1, 0);
@@ -897,11 +898,11 @@ extern "C" void func_0028BF78(char* self, int state)
         cSSXAudio_SetDJSpeech(self, 0);
         if (cAudioInterface_isInGame() == 0)
             return;
-        if ((unsigned int)(func_002B49E0(self + 0x118) - 101) < 3)
+        if ((unsigned int)(func_002B49E0(&self->MusicSys) - 101) < 3)
             return;
         func_0028CF98(self, 0, 0, -1, 0);
-        *(int*)(self + 0x5FD4) = 0;
-        *(int*)(self + 0x5FD0) = 0;
+        self->mInBigChallenge = 0;
+        self->mCurBigChallengeType = 0;
         break;
     }
 }
@@ -911,7 +912,7 @@ extern "C" void func_0028BF78(char* self, int state)
 INCLUDE_ASM("sound/bankmanager", func_0028C2D0);
 #ifdef SKIP_ASM
 extern "C" int cAudioInterface_isInGame(void);
-extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
+extern "C" void func_0028CF98(cSSXAudio* self, int a1, int a2, int a3, int a4);
 extern "C" void func_0028D488(void* self);
 extern "C" void func_002B4070(void* monitor);
 extern "C" int func_002B49E0(void* monitor);
@@ -934,7 +935,7 @@ static inline void bmRestartC2D0(char* self)
         return;
     }
     func_0028D488(self);
-    func_0028CF98(self, 0, 0, -1, 0);
+    func_0028CF98((cSSXAudio*)self, 0, 0, -1, 0);
 }
 
 /**
@@ -950,19 +951,19 @@ static inline void bmRestartC2D0(char* self)
  * @param key  the new playlist mask, one bit per song (64-bit)
  */
 // PORT: 64-bit `long` key.
-extern "C" void func_0028C2D0(char* self, long key)
+extern "C" void func_0028C2D0(cSSXAudio* self, long key)
 {
-    if (*(long*)(self + 0x6098) != key) {
-        *(long*)(self + 0x6098) = key;
-        int state = *(int*)(self + 0x608C);
+    if (*(long*)&self->mRadioPlayList != key) {
+        *(long*)&self->mRadioPlayList = key;
+        int state = self->unk_608C;
         if (state == 1 || state == 3) {
-            func_002B4070(self + 0x118);
-            bmRestartC2D0(self);
+            func_002B4070(&self->MusicSys);
+            bmRestartC2D0(((char*)self));
         }
     } else {
-        int state = *(int*)(self + 0x608C);
+        int state = self->unk_608C;
         if (state == 1 || state == 3) {
-            bmRestartC2D0(self);
+            bmRestartC2D0(((char*)self));
         }
     }
 }
@@ -1146,7 +1147,7 @@ int cRider_getMotionState(void* rider);
 int func_0028D898(void* self);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cSSXAudio_ReplayMode(void* self);
-extern "C" int func_0028D960(void* self);
+extern "C" int func_0028D960(cSSXAudio* self);
 extern "C" void cSSXAudio_BeginWind(void* self);
 extern "C" void cSSXAudio_EndWind(void* self);
 extern "C" int func_002A4168(void* self);
@@ -1318,7 +1319,7 @@ have:
                 cSSXAudio_BeginWind(self);
                 if (play) {
                     char* mon = self->mon;
-                    if (func_002B4620(mon) && func_0028D960(self))
+                    if (func_002B4620(mon) && func_0028D960((cSSXAudio*)self))
                         self->monVt[3].fn(mon + self->monVt[3].delta, 7);
                 }
             }
@@ -1329,7 +1330,7 @@ have:
     if (D_004A3620 == 1) {
         cSSXAudio_EndWind(self);
         if (func_002B46E8(mon)) {
-            if (func_0028D960(self))
+            if (func_0028D960((cSSXAudio*)self))
                 self->monVt[3].fn(mon + self->monVt[3].delta, 8);
             func_002B4708(mon);
         }
@@ -1499,16 +1500,16 @@ static inline void bmLoad_CF98(void* self, char* name, int bank, int id)
  * @param type  peak for radio mode 2 (1, 2, else 3), or -1 to take it from the location
  * @param requestLine  non-zero skips the peak theme and selects event 36 on the peaks; cFEStateRequestLine_onWidgetMenu passes 1
  */
-extern "C" void func_0028CF98(void* self, int startEvent, int skipPeakTheme, int type, int requestLine)
+extern "C" void func_0028CF98(cSSXAudio* self, int startEvent, int skipPeakTheme, int type, int requestLine)
 {
-    if (cSSXAudio_ReplayMode(self) != 0 && *(int*)((char*)self + 0x6294) == 0) {
+    if (cSSXAudio_ReplayMode(self) != 0 && self->unk_6294 == 0) {
         return;
     }
-    *(int*)((char*)self + 0x6280) = 0;
+    self->unk_6280 = 0;
     *(int*)((char*)self + 0x62A0) = -1;
-    *(int*)((char*)self + 0x623C) = 0;
-    *(int*)((char*)self + 0x6240) = 0;
-    if (*(int*)((char*)self + 0x608C) == 2) {
+    self->unk_623C = 0;
+    self->unk_6240 = 0;
+    if (self->unk_608C == 2) {
         int peakNumber = type == -1 ? func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0))) : type;
         if (peakNumber == 1) {
             bmLoad_CF98(self, str_Peak1Amb, 8, 101);
@@ -1517,15 +1518,15 @@ extern "C" void func_0028CF98(void* self, int startEvent, int skipPeakTheme, int
         } else {
             bmLoad_CF98(self, str_Peak3Amb, 8, 103);
         }
-        char* mon = (char*)self + 0x118;
+        char* mon = (char*)&self->MusicSys;
         func_002B46D0(mon);
-        *(int*)((char*)self + 0x6280) = 1;
+        self->unk_6280 = 1;
         func_002B3CC0(mon, 0);
         func_002B3C28(mon, 0x7F);
         return;
     }
     sBmInfo_CF98 info = *(sBmInfo_CF98*)cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
-    char* mon = (char*)self + 0x118;
+    char* mon = (char*)&self->MusicSys;
     if (info.f0 >= 17 && skipPeakTheme == 0 && requestLine == 0 && func_002A42C8(self) == 0) {
         int peakNumber = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
         if (peakNumber == 1) {
@@ -1536,20 +1537,20 @@ extern "C" void func_0028CF98(void* self, int startEvent, int skipPeakTheme, int
             bmLoad_CF98(self, str_Peak3_b, 1, 3);
         }
         func_002B3CC0(mon, 1);
-        sBmVtCD48* vt2 = *(sBmVtCD48**)((char*)self + 0x5558);
+        sBmVtCD48* vt2 = (sBmVtCD48*)self->MusicSys.mVtbl;
         ((tBmSetCD48)vt2[4].fn)(mon + vt2[4].delta, 0xC);
         func_002B3C28(mon, 0x7F);
         return;
     }
-    sBmVtCD48* vt = *(sBmVtCD48**)((char*)self + 0x5558);
+    sBmVtCD48* vt = (sBmVtCD48*)self->MusicSys.mVtbl;
     ((tBmLoadCD48)vt[2].fn)(mon + vt[2].delta, 0, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0), 0);
-    *(int*)((char*)self + 0x62A4) = *(int*)((char*)self + 0x508);
-    *(int*)((char*)self + 0x5778) = func_002B4908(mon);
+    self->unk_62A4 = self->MusicSys.mCurrentSongNum;
+    self->unk_5778 = func_002B4908(mon);
     func_002B3CC0(mon, 1);
     if (requestLine != 0 && info.f0 >= 17) {
         startEvent = 36;
     }
-    sBmVtCD48* vt2 = *(sBmVtCD48**)((char*)self + 0x5558);
+    sBmVtCD48* vt2 = (sBmVtCD48*)self->MusicSys.mVtbl;
     ((tBmSetCD48)vt2[4].fn)(mon + vt2[4].delta, startEvent);
     func_0028F108(self, cSSXAudio_GetFocusRider(self, -1));
 }
@@ -1595,7 +1596,7 @@ INCLUDE_ASM("sound/bankmanager", func_0028D5A0);
 #ifdef SKIP_ASM
 extern "C" int func_002B49E0(void* monitor);
 extern "C" int func_002A1E20(void* self, int id);
-extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
+extern "C" void func_0028CF98(cSSXAudio* self, int a1, int a2, int a3, int a4);
 
 /**
  * Restarts the music when the playing peak ambience does not belong to location @p id.
@@ -1624,7 +1625,7 @@ extern "C" void func_0028D5A0(void* self, int id)
         want = 103;
     }
     if (want != cur) {
-        func_0028CF98(self, 0, 0, type, 0);
+        func_0028CF98((cSSXAudio*)self, 0, 0, type, 0);
     }
 }
 #endif
@@ -1847,9 +1848,9 @@ INCLUDE_ASM("sound/bankmanager", func_0028D960);
  *
  * @return 1 or 0
  */
-extern "C" int func_0028D960(void* self)
+extern "C" int func_0028D960(cSSXAudio* self)
 {
-    unsigned int state = *(unsigned int*)((char*)self + 0x608c);
+    unsigned int state = (unsigned int)self->unk_608C;
     if (state < 2 || state == 3) {
         return 1;
     }
@@ -1870,7 +1871,7 @@ INCLUDE_ASM("sound/bankmanager", func_0028DEF0);
  * @param newValue  the new value
  * @return 1 when the value changed, else 0
  */
-extern "C" int func_0028DEF0(void* self, int newValue)
+extern "C" int func_0028DEF0(cSSXAudio* self, int newValue)
 {
     int old = *(int*)((char*)self + 0x629c);
     *(int*)((char*)self + 0x629c) = newValue;
@@ -2007,9 +2008,9 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" void* cAudioInterface_getBE();
-extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
+extern "C" void func_0028CF98(cSSXAudio* self, int a1, int a2, int a3, int a4);
 extern "C" void func_0028D488(void* self);
-extern "C" int func_0028D960(void* self);
+extern "C" int func_0028D960(cSSXAudio* self);
 extern "C" int func_002A1E20(void* self, int id);
 extern "C" int func_002A4030(void* self);
 extern "C" void func_002B3C28(void* self, int a1);
@@ -2062,49 +2063,49 @@ static inline void bmLoadBank_E100(char* self, int t)
  * unk_6284; unk_6284 is reset to 23. Request 4: func_0028CF98(self, 0, 0, -1, 0). Other requests: when the radio plays
  * music, func_0028CF98 with event 36 for request 3, else 0.
  */
-extern "C" void func_0028E100(char* self)
+extern "C" void func_0028E100(cSSXAudio* self)
 {
-    if (*(int*)(self + 0x6274) == 0)
+    if (self->unk_6274 == 0)
         return;
-    int st = *(int*)(self + 0x6278);
+    int st = *(int*)(((char*)self) + 0x6278);
     int id;
     if (st == 0) {
         if (func_0028D960(self)) {
             int locGroup;
-            id = *(int*)(self + 0x6284);
+            id = self->unk_6284;
             if (id == 23) {
                 locGroup = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             } else {
                 locGroup = func_002A1E20(self, id);
-                *(int*)(self + 0x6284) = 23;
+                self->unk_6284 = 23;
             }
-            bmLoadBank_E100(self, locGroup);
+            bmLoadBank_E100(((char*)self), locGroup);
         }
     } else if (st == 2) {
         if (func_0028D960(self)) {
-            id = *(int*)(self + 0x6284);
+            id = self->unk_6284;
             if (id != 23) {
                 if (func_002A4030(self)) {
                     func_0028D488(self);
                     func_0028CF98(self, 36, 1, -1, 0);
                 } else {
-                    id = *(int*)(self + 0x6284);
-                    bmLoadBank_E100(self, func_002A1E20(self, id));
+                    id = self->unk_6284;
+                    bmLoadBank_E100(((char*)self), func_002A1E20(self, id));
                 }
-                *(int*)(self + 0x6284) = 23;
+                self->unk_6284 = 23;
             }
         }
     } else if (st == 4) {
         func_0028CF98(self, 0, 0, -1, 0);
     } else {
         if (func_0028D960(self)) {
-            if (*(int*)(self + 0x6278) == 3)
+            if (*(int*)(((char*)self) + 0x6278) == 3)
                 func_0028CF98(self, 36, 0, -1, 0);
             else
                 func_0028CF98(self, 0, 0, -1, 0);
         }
     }
-    *(int*)(self + 0x6274) = 0;
+    self->unk_6274 = 0;
 }
 #endif
 
@@ -2325,7 +2326,7 @@ extern "C" void func_0028E8C0(void* vself, int id, int transportCall)
     char* self = (char*)vself;
     if (id == 19 && transportCall != 0 && *(int*)(self + 0x627C) != 0) {
         if (func_002A3FE8(self) != 0 && *(int*)(self + 0x578C) == 0) {
-            if (func_0028D960(self)) {
+            if (func_0028D960((cSSXAudio*)self)) {
                 cBE_getInterface_Fv(cBE_getBE(), 0);
                 int mode = cBENewRaceInterface_newRace.cGameMode;
                 if (mode != 5 && mode != 6) {
@@ -2346,7 +2347,7 @@ extern "C" void func_0028E8C0(void* vself, int id, int transportCall)
                 }
             }
         } else if (*(int*)(self + 0x578C) != 0) {
-            if (func_0028D960(self)) {
+            if (func_0028D960((cSSXAudio*)self)) {
                 // NOTE: the target keeps this 1 in $s1 across five calls (a named local, not a literal).
                 int wantType = 1;
                 int locationGroup = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
@@ -2354,7 +2355,7 @@ extern "C" void func_0028E8C0(void* vself, int id, int transportCall)
                     func_002B3D48(self + 0x118, 2.0f);
                 }
                 if (locationGroup == wantType) {
-                    if (func_0028DEF0(self, 11)) {
+                    if (func_0028DEF0((cSSXAudio*)self, 11)) {
                         cMonitor_MONITOR_Create(**(char***)(self + 0x118) + 0x1D8, 3000, D_004A3648_E8C0->v, 0, 0, 1, 0, 0);
                         cMonitor_MONITOR_Create(**(char***)(self + 0x118) + 0x1D8, 2500, D_004A3650_E8C0->v, 0, 0, 0, 0, 0);
                     }
@@ -2391,7 +2392,7 @@ extern "C" void func_0028E8C0(void* vself, int id, int transportCall)
             cSSXAudio_WipeoutSlideEnd(self, (int)((cAI*)cAudioInterface_getAI())->Riders[0]);
             cSSXAudio_WipeoutTumbleEnd(self, (int)((cAI*)cAudioInterface_getAI())->Riders[0]);
             cSSXAudio_EndUberSpin(self, 0);
-            if (func_0028D960(self)) {
+            if (func_0028D960((cSSXAudio*)self)) {
                 int flag = 1;
                 if (func_002A4040(self) == 0) {
                     if (func_002A4078(self) || func_002A40E8(self)) {
@@ -2440,7 +2441,7 @@ extern "C" void func_0028E8C0(void* vself, int id, int transportCall)
             *(int*)(self + 0x627C) = 1;
         }
     } else if (id >= 21 && id <= 25) {
-        if (func_0028D960(self)) {
+        if (func_0028D960((cSSXAudio*)self)) {
             func_0028D488(self);
             func_002B3D48(self + 0x118, 1.0f);
             cMonitor_MONITOR_Create(**(char***)(self + 0x118) + 0x1D8, 3000, D_004A3648_E8C0->v, 0, 3, 1, 0, 0);
@@ -2495,16 +2496,16 @@ extern "C" int cSSXAudio_GetCharacterLevel(void* self, int rider);
  * new ramp when unk_6288 is not 2 (unk_6288 = 2, counter unk_628C = 0), advances the counter up to the tier's maximum
  * and sets the volume to 127 x counter / maximum, clamped to 0..1. Called by cSSXAudio_Update.
  */
-extern "C" void func_0028F000(void* self)
+extern "C" void func_0028F000(cSSXAudio* self)
 {
-    char* mon = (char*)self + 0x118;
+    char* mon = (char*)&self->MusicSys;
     int st = func_002B49E0(mon);
     if (st >= 1 && st <= 3) {
         func_002B3C28(mon, 0x7F);
         return;
     }
-    if (*(int*)((char*)self + 0x6288) != 2) {
-        *(int*)((char*)self + 0x6288) = 2;
+    if (self->unk_6288 != 2) {
+        self->unk_6288 = 2;
         *(int*)((char*)self + 0x628C) = 0;
     }
     int max = 800;
@@ -2523,7 +2524,7 @@ extern "C" void func_0028F000(void* self)
     }
     ratio = ratio <? 1.0f;
     ratio = ratio >? 0.0f;
-    func_002B3C28((char*)self + 0x118, (int)(ratio * 127.0f));
+    func_002B3C28(&self->MusicSys, (int)(ratio * 127.0f));
 }
 #endif
 
@@ -2582,7 +2583,7 @@ extern "C" void func_0028F140(void* self, int mode)
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028F200);
 #ifdef SKIP_ASM
-extern "C" int func_0028D960(void* self);
+extern "C" int func_0028D960(cSSXAudio* self);
 extern "C" int func_002B49E0(void* monitor);
 extern "C" void cMonitor_MONITOR_Create(void*, int, long, int, int, int, int, int);
 
@@ -2606,7 +2607,7 @@ extern "C" void func_0028F200(void* self)
     *(int*)((char*)self + 0x6294) = 0;
     *(int*)((char*)self + 0x6298) = 0;
     if (*(int*)((char*)self + 0x530) == 0 || func_002B49E0(mon) == 201) {
-        if (func_0028D960(self)) {
+        if (func_0028D960((cSSXAudio*)self)) {
             if (func_002B49E0(mon) == 201) {
                 *(int*)((char*)self + 0x508) = *(int*)((char*)self + 0x62AC);
             }
@@ -2786,7 +2787,7 @@ extern "C" void func_0028F478(void* self)
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028F520);
 #ifdef SKIP_ASM
-extern "C" int func_0028D960(void* self);
+extern "C" int func_0028D960(cSSXAudio* self);
 extern "C" void* func_002B3AC0(void*);
 
 /**
@@ -2794,7 +2795,7 @@ extern "C" void* func_002B3AC0(void*);
  */
 extern "C" void func_0028F520(void* self)
 {
-    if (func_0028D960(self) != 0) {
+    if (func_0028D960((cSSXAudio*)self) != 0) {
         func_002B3AC0((char*)self + 0x118);
     }
 }
@@ -2878,7 +2879,7 @@ INCLUDE_ASM("sound/bankmanager", func_0028F678);
 #ifdef SKIP_ASM
 extern "C" void cSSXAudio_ResumeSFX(void* self);
 extern "C" int func_002A3F90(void* self);
-extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
+extern "C" void func_0028CF98(cSSXAudio* self, int a1, int a2, int a3, int a4);
 extern "C" void func_0028FA98(void* self, float v);
 
 /**
@@ -2899,7 +2900,7 @@ extern "C" void func_0028F678(void* self, int restartMusic)
     if (*(int*)((char*)self + 0x62A8) >= 0) {
         func_0028FA98(self, 1.0f);
         if (restartMusic != 0 && func_002A3F90(self) != 0) {
-            func_0028CF98(self, 0, 0, -1, 0);
+            func_0028CF98((cSSXAudio*)self, 0, 0, -1, 0);
         }
     }
 }
@@ -2916,9 +2917,9 @@ extern void* D_004A3624;
  *
  * Synchronous (cBankManager_BANK_SyncLoad on the cBankManager). Called by the audio system's initialisation.
  */
-extern "C" void func_0028F700(void* self)
+extern "C" void func_0028F700(cSSXAudio* self)
 {
-    cBankManager_BANK_SyncLoad((cBankManager*)(**(void***)((char*)self + 0x118)), 13, D_004A3624, 0);
+    cBankManager_BANK_SyncLoad((cBankManager*)(**(void***)&self->MusicSys), 13, D_004A3624, 0);
 }
 #endif
 
@@ -2933,10 +2934,10 @@ extern "C" void cBankManager_BANK_UnLoad(cBankManager* self, int i);
  *
  * Called by the audio system's shutdown.
  */
-extern "C" void func_0028F730(void* self)
+extern "C" void func_0028F730(cSSXAudio* self)
 {
     func_0028FA98(self, 0.0f);
-    cBankManager_BANK_UnLoad((cBankManager*)(**(void***)((char*)self + 0x118)), 0);
+    cBankManager_BANK_UnLoad((cBankManager*)(**(void***)&self->MusicSys), 0);
 }
 #endif
 
@@ -3062,10 +3063,10 @@ extern "C" void func_0028FA98(void* self, float fadeTime)
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028FAE0);
 #ifdef SKIP_ASM
-extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
+extern "C" void func_0028CF98(cSSXAudio* self, int a1, int a2, int a3, int a4);
 extern "C" void func_0028D488(void* self);
-extern "C" int func_0028D960(void* self);
-extern "C" int func_0028DEF0(void* self, int a1);
+extern "C" int func_0028D960(cSSXAudio* self);
+extern "C" int func_0028DEF0(cSSXAudio* self, int a1);
 extern int cMonitor_MONITOR_Create_FAE0(void*, int, long, int, int, int, int, int) __asm__("cMonitor_MONITOR_Create");
 extern "C" void cMonitor_MONITOR_DestroyAll1(void* mon, long key);
 extern "C" void* func_002B3AC0(void*);
@@ -3090,7 +3091,7 @@ extern const sBmKeyFAE0 D_004A3658_FAE0[] __asm__("D_004A3658");
 // PORT: 64-bit long sound keys.
 extern "C" void func_0028FAE0(char* self)
 {
-    if (func_0028D960(self) == 0) {
+    if (func_0028D960((cSSXAudio*)self) == 0) {
         return;
     }
     cMonitor_MONITOR_DestroyAll1(**(char***)(self + 0x118) + 0x1D8, D_004A3648_FAE0[0].v);
@@ -3098,11 +3099,11 @@ extern "C" void func_0028FAE0(char* self)
     cMonitor_MONITOR_DestroyAll1(**(char***)(self + 0x118) + 0x1D8, D_004A3658_FAE0[0].v);
     int st = func_002B49E0(self + 0x118);
     if ((unsigned int)(st - 1) < 3 || st == 401 || *(int*)(self + 0x530) == 0) {
-        func_0028DEF0(self, 18);
+        func_0028DEF0((cSSXAudio*)self, 18);
         *(int*)(self + 0x5828) = 1;
         func_002B3AC0(self + 0x118);
         func_0028D488(self);
-        func_0028CF98(self, 0, 0, -1, 0);
+        func_0028CF98((cSSXAudio*)self, 0, 0, -1, 0);
         char* bankMonitor = **(char***)(self + 0x118) + 0x1D8;
         const sBmKeyFAE0* key = D_004A3650_FAE0;
         int sedValue = func_002B4908(self + 0x118);

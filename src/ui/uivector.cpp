@@ -2434,7 +2434,7 @@ extern "C" unsigned char cUIMenu_getSelectedIndex(cUIMenu* uiMenu) {
 INCLUDE_ASM("ui/uivector", cUIPair_cUIPair1);
 #ifdef SKIP_ASM
 extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
-extern "C" void* tAttrPair_tAttrPair(void* p);
+extern "C" void* tAttrPair_tAttrPair(tAttrPair* p);
 extern void* cUIPair_vtbl[];
 
 /**
@@ -2458,7 +2458,7 @@ INCLUDE_ASM("ui/uivector", cUIPair_cUIPair);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cUIThing_cUIThing_self(void* self) __asm__("cUIThing_cUIThing");
-extern "C" void* tAttrPair_tAttrPair(void* self);
+extern "C" void* tAttrPair_tAttrPair(tAttrPair* self);
 extern void* cUIPair_vtbl[];
 
 /**
@@ -2526,11 +2526,11 @@ INCLUDE_ASM("ui/uivector", tAttrPair_tAttrPair);
  *
  * @return the tAttrPair
  */
-extern "C" void* tAttrPair_tAttrPair(void* self)
+extern "C" void* tAttrPair_tAttrPair(tAttrPair* self)
 {
     *(unsigned char*)((char*)self + 0x1) &= 0xc0;
     *(unsigned char*)((char*)self + 0x0) &= 0xc0;
-    return self;
+    return ((void*)self);
 }
 #endif
 

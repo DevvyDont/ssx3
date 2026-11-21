@@ -1373,10 +1373,10 @@ INCLUDE_ASM("ui/uitext", func_003A2068);
  * @param i  the line index
  * @return the line, or 0
  */
-extern "C" int func_003A2068(void* self, int i)
+extern "C" int func_003A2068(cUITextScroll* self, int i)
 {
-    int* arr = *(int**)((char*)self + 0xBC);
-    if (arr != 0 && i >= 0 && i < *(unsigned short*)((char*)self + 0xC8)) {
+    int* arr = (int*)self->mpLineOffset;
+    if (arr != 0 && i >= 0 && i < self->mLineSize) {
         return arr[i];
     }
     return 0;

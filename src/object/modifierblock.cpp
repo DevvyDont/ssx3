@@ -1356,9 +1356,9 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cSpring__cSpring(void* self, int flags)
+extern "C" void cSpring__cSpring(cSpring* self, int flags)
 {
-    void* nodes = *(void**)((char*)self + 0x24);
+    void* nodes = self->Nodes;
     if (nodes != 0) {
         cMemMan_free(nodes);
     }
@@ -1431,14 +1431,14 @@ extern "C" void cSpring_setupNodes(void* self);
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cSpring_cSpring1(void* self, void* stream)
+extern "C" void* cSpring_cSpring1(cSpring* self, void* stream)
 {
     sMbVEntrySer3E80* readSlot = &(*(sMbVEntrySer3E80**)stream)[2];
     readSlot->fn((char*)stream + readSlot->delta, self, 36);
     cSpring_setupNodes(self);
     readSlot = &(*(sMbVEntrySer3E80**)stream)[2];
-    readSlot->fn((char*)stream + readSlot->delta, *(void**)((char*)self + 0x24), *(int*)self * 80);
-    return self;
+    readSlot->fn((char*)stream + readSlot->delta, self->Nodes, *(int*)self * 80);
+    return ((void*)self);
 }
 #endif
 

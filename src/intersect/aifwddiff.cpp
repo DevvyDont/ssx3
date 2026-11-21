@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/rollermodifier.h"
 #include "bx/math3d.h"
 #include "intersect/aifwddiff.h"
 #include "render/ps2graphicsman.h"
@@ -522,11 +523,11 @@ static inline sVec4_28030 vu0Scale_28030(const sVec4_28030& v, float s)
  * @param loc   out: the contact point (On Tour loc)
  * @return 1 on contact
  */
-extern "C" int bxSphereTree_Is2SidedTriCollision(void* self, sVec4_28030* point1, t4Vector* point2, t4Vector* point3, sVec4_28030* dir, t4Vector* overlap, t4Vector* loc)
+extern "C" int bxSphereTree_Is2SidedTriCollision(bxSphereTree* self, sVec4_28030* point1, t4Vector* point2, t4Vector* point3, sVec4_28030* dir, t4Vector* overlap, t4Vector* loc)
 {
     float dot;
     {
-        sVec4_28030 toCentre = vu0Sub_28030(*(sVec4_28030*)((char*)self + 0x80), *point1);
+        sVec4_28030 toCentre = vu0Sub_28030(*(sVec4_28030*)&self->transCenter, *point1);
         dot = vu0Dot_28030(*dir, toCentre);
     }
     if (SphereTree_GetRadius(self) < __builtin_fabsf(dot)) {

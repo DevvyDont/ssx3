@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/spline3d.h"
 #include "object/conveyornode.h"
 #include "object/counternode.h"
 #include "object/debouncenode.h"
@@ -2625,10 +2626,10 @@ struct sCtl00345430 {
  *
  * @param lineColour  address of the colour to draw with (cSplineModifier passes its +0x20)
  */
-extern "C" void cSpline_draw(void* self, int lineColour)
+extern "C" void cSpline_draw(cSpline* self, int lineColour)
 {
     cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
-    char* list = *(char**)(*(char**)((char*)self + 8) + 0x68);
+    char* list = *(char**)((char*)self->Seg + 0x68);
     int n = *(int*)(list + 0x20);
     char* node = *(char**)(list + 0x24);
     (((sCtl00345430*)w->m_pCurrentDrawState))->f10 = -1;

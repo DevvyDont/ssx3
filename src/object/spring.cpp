@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/flexbridgenode.h"
 #include "object/objnode.h"
 
 //100%
@@ -291,12 +292,12 @@ struct sSpringVEntry45D8 {
  *
  * @param stream  the replay frame to write to (On Tour data)
  */
-extern "C" void cSpring_writeToReplayFrame(void* self, void* stream)
+extern "C" void cSpring_writeToReplayFrame(cSpring* self, void* stream)
 {
     sSpringVEntry45D8* writeSlot = &(*(sSpringVEntry45D8**)stream)[1];
     writeSlot->fn((char*)stream + writeSlot->delta, self, 36);
     writeSlot = &(*(sSpringVEntry45D8**)stream)[1];
-    writeSlot->fn((char*)stream + writeSlot->delta, *(void**)((char*)self + 0x24), *(int*)self * 80);
+    writeSlot->fn((char*)stream + writeSlot->delta, self->Nodes, *(int*)self * 80);
 }
 #endif
 

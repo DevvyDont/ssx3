@@ -395,9 +395,9 @@ extern void* D_00536668[];
  * @param iRider  the rider
  * @param iSecsAdded  the seconds the checkpoint adds
  */
-extern "C" void cGameModeMan_riderCheckpointHit(void* self, int iRider, int iSecsAdded)
+extern "C" void cGameModeMan_riderCheckpointHit(cGameModeMan* self, int iRider, int iSecsAdded)
 {
-    void* obj = D_00536668[*(int*)((char*)self + 0x4)];
+    void* obj = D_00536668[self->iCurrModeHandler];
     sVEntry_00238510* vt = *(sVEntry_00238510**)obj;
     vt[6].fn((char*)obj + vt[6].delta, iRider, iSecsAdded);
 }

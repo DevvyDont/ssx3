@@ -2847,19 +2847,19 @@ struct sAudVtEnt { short delta; short index; int (*fn)(void*); };
  * @param obj  the rider (cRider)
  * @return the view index
  */
-extern "C" int cSSXAudio_GetClosestCamera1(cSSXAudio* self, void* obj)
+extern "C" int cSSXAudio_GetClosestCamera1(cSSXAudio* self, cRider* obj)
 {
     if (cAudioInterface_isInGame() == 0) {
         return 0;
     }
-    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    bool ok = obj->mIsHuman && obj->mIsLocal;
     if (ok) {
-        return *(int*)((char*)obj + 0x870);
+        return obj->mViewIndex;
     }
     if (cSSXAudio_GetNumViews_self(self) == 1) {
         return 0;
     }
-    char* being = (char*)obj + 0x6C0;
+    char* being = (char*)&obj->mVtbl;
     sAudVtEnt* entry = &(*(sAudVtEnt**)being)[5];
     return cSSXAudio_GetClosestCamera(self, entry->fn(being + entry->delta));
 }

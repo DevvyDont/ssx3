@@ -1937,21 +1937,21 @@ static inline sMsgListIterB9C8 sMsgListB9C8_insert(sMsgListIterB9C8 pos, void* c
  *
  * @param msg  the account form (a tLobbyAccount)
  */
-extern "C" void func_0025B9C8(LobbyMan* self, char* msg)
+extern "C" void func_0025B9C8(LobbyMan* self, tLobbyAccount* msg)
 {
     char buf[0x200];
     char yn[16];
     char mf[16];
     char ver[16];
-    sprintf(yn, str_pct_cpct_c, *(int*)(msg + 0x38) ? 'Y' : 'N', *(int*)(msg + 0x3C) ? 'Y' : 'N');
-    sprintf(mf, str_pct_c, *(int*)(msg + 0x34) ? 'F' : 'M');
-    sprintf(ver, str_pct_4dpct_02dpct_02d, *(int*)(msg + 0x30), *(int*)(msg + 0x28), *(int*)(msg + 0x2C));
+    sprintf(yn, str_pct_cpct_c, msg->mSpam[0] ? 'Y' : 'N', msg->mSpam[1] ? 'Y' : 'N');
+    sprintf(mf, str_pct_c, msg->mGender ? 'F' : 'M');
+    sprintf(ver, str_pct_4dpct_02dpct_02d, msg->mBornYear, msg->mBornMonth, msg->mBornDay);
     buf[0] = 0;
-    cDirtysock_tag_TagFieldSetString(buf, 0x200, str_NAME, *(const char**)(msg + 0x0));
-    cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PASS, *(const char**)(msg + 0x4));
+    cDirtysock_tag_TagFieldSetString(buf, 0x200, str_NAME, (const char*)msg->mName);
+    cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PASS, (const char*)msg->mPassword);
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_SPAM, yn);
-    cDirtysock_tag_TagFieldSetString(buf, 0x200, str_MAIL, *(const char**)(msg + 0xC));
-    const char* email = *(const char**)(msg + 0x10);
+    cDirtysock_tag_TagFieldSetString(buf, 0x200, str_MAIL, (const char*)msg->mMail);
+    const char* email = (const char*)msg->mParentMail;
     // PORT: string length read from the header before the characters.
     if (*(int*)((int)email - 8) != 0)
         cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PMAIL, email);
@@ -2150,22 +2150,22 @@ static inline sMsgListIterBF18 sMsgListBF18_insert(sMsgListIterBF18 pos, void* c
  *
  * @param msg  the account form (a tLobbyAccount)
  */
-extern "C" void func_0025BF18(LobbyMan* self, char* msg)
+extern "C" void func_0025BF18(LobbyMan* self, tLobbyAccount* msg)
 {
     char buf[0x200];
     char spamText[16];
     buf[0] = 0;
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_NAME, (const char*)self->mUserName);
-    if (*(int*)(msg + 0x44) != 0) {
+    if (msg->mChangePassword != 0) {
         cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PASS, (const char*)self->mPassword);
-        cDirtysock_tag_TagFieldSetString(buf, 0x200, str_CHNG, *(const char**)(msg + 0x4));
+        cDirtysock_tag_TagFieldSetString(buf, 0x200, str_CHNG, (const char*)msg->mPassword);
     }
-    if (*(int*)(msg + 0x48) != 0) {
-        sprintf(spamText, str_pct_cpct_c, *(int*)(msg + 0x38) ? 'Y' : 'N', *(int*)(msg + 0x3C) ? 'Y' : 'N');
+    if (msg->mChangeSpam != 0) {
+        sprintf(spamText, str_pct_cpct_c, msg->mSpam[0] ? 'Y' : 'N', msg->mSpam[1] ? 'Y' : 'N');
         cDirtysock_tag_TagFieldSetString(buf, 0x200, str_SPAM, spamText);
     }
-    if (*(int*)(msg + 0x4C) != 0) {
-        cDirtysock_tag_TagFieldSetString(buf, 0x200, str_MAIL, *(const char**)(msg + 0xC));
+    if (msg->mChangeMail != 0) {
+        cDirtysock_tag_TagFieldSetString(buf, 0x200, str_MAIL, (const char*)msg->mMail);
     }
     // PORT: function pointer passed through func_0025B608's int parameter.
     func_0025B608(self, 5, 0x65646974, buf, (int)func_00268BF8, 20.0f);

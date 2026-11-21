@@ -1926,7 +1926,7 @@ __asm__("_vt$15cVbDtor002DF1C8$13cRiderVbC_bwf = D_00488360\n"
 INCLUDE_ASM("visualfx/boardwakefx", func_002DF3B0);
 #ifdef SKIP_ASM
 extern "C" void func_002E26B8(void* self);
-extern "C" void func_002E2550(void* self);
+extern "C" void func_002E2550(cDynamicSprayFX* self);
 
 /**
  * Resets a rider's snow spray effect.
@@ -2304,7 +2304,7 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     }
     self->f74 = self->fB8;
     if (self->i128 != *(int*)(self->obj + 0x898)) {
-        func_002E2550(self);
+        func_002E2550((cDynamicSprayFX*)self);
     }
     char* sub2 = self->obj + 0x6C0;
     sWakeVtIF920* vt2 = *(sWakeVtIF920**)sub2;
@@ -3622,7 +3622,7 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E2550);
  * player, 4 and 9 off. Other levels: 5 on, 6 for a player, the rest off. func_002DF3B0 and func_002DF920 (when mLOD
  * changes) call it.
  */
-extern "C" void func_002E2550(void* self)
+extern "C" void func_002E2550(cDynamicSprayFX* self)
 {
     int mode = *(int*)((char*)*(void**)self + 0x898);
     *(int*)((char*)self + 0x128) = mode;

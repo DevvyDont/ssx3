@@ -2550,14 +2550,14 @@ extern char str_pct_d[];
  * @param fxData  the effect's data
  */
 // Variant of func_00117138 that names the entry from a number (formatted into a shared buffer).
-extern "C" void cHUDFX_setAsync(char *hudFx, int fxId, int displayInt, float fparg0, int fxData) {
+extern "C" void cHUDFX_setAsync(cHUDFX* hudFx, int fxId, int displayInt, float fparg0, int fxData) {
     sprintf((char*)D_004A5E20, str_pct_d, displayInt);
     cHUDFX_copyDispStr((cHUDFX*)hudFx, D_004A5E20);
-    *(int *)(hudFx + 0x14) = displayInt;
-    *(int *)(hudFx + 0) = fxId;
-    *(float *)(hudFx + 8) = -fparg0;
-    *(int *)(hudFx + 0xC) = fxData;
-    *(float *)(hudFx + 4) = -1.0f;
+    hudFx->DisplayInt = displayInt;
+    hudFx->ID = fxId;
+    hudFx->CurDecay = -fparg0;
+    hudFx->Data = fxData;
+    hudFx->MaxDecay = -1.0f;
 }
 #endif
 

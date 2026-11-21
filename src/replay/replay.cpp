@@ -746,12 +746,12 @@ INCLUDE_ASM("replay/replay", cReplayHighlight_cancel);
  *
  * Does nothing when no frame is marked (Frame, +0xB0, is null).
  */
-extern "C" void cReplayHighlight_cancel(void* self)
+extern "C" void cReplayHighlight_cancel(cReplayHighlight* self)
 {
-    unsigned char* cache = *(unsigned char**)((char*)self + 0xb0);
+    unsigned char* cache = (unsigned char*)self->Frame;
     if (cache) {
         cache[0x1e] &= ~(1 << *(int*)self);
-        *(int*)((char*)self + 0xb0) = 0;
+        self->Frame = 0;
     }
 }
 #endif

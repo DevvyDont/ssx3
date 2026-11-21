@@ -667,15 +667,15 @@ int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_Get
  * @param other  the source NIS list
  * @return 1, or 0 when @p other is playing
  */
-extern "C" int tNISList_TransferFromNISList(tNISList* self, void* other)
+extern "C" int tNISList_TransferFromNISList(tNISList* self, tNISList* other)
 {
     int cmd[8];
     int n = cCircularBuffer_GetNumEntries_count((char*)&self->mList);
-    if (*(int*)((char*)other + 0xA4) == 3) {
+    if (other->mState == 3) {
         return 0;
     }
-    if (cCircularBuffer_GetNumEntries_count((char*)other + 0xC) != 0) {
-        while (cCircularBuffer_RemoveFromHead((char*)other + 0xC, cmd) != 0) {
+    if (cCircularBuffer_GetNumEntries_count(&other->mList) != 0) {
+        while (cCircularBuffer_RemoveFromHead(&other->mList, cmd) != 0) {
             cCircularBuffer_AddToTail((char*)&self->mList, cmd);
         }
         tNISList_Reset((tNISList*)other, 1);
@@ -1695,10 +1695,10 @@ extern "C" void tNISList_DoTransitionToNext(void* self);
  * @param requestHandle  the request handle (unused)
  * @param obj  the cScriptPlayerMain being updated
  */
-extern "C" void tNISList_OnScriptUpdate(tNISList* self, int requestHandle, void* obj)
+extern "C" void tNISList_OnScriptUpdate(tNISList* self, int requestHandle, cScriptPlayerMain* obj)
 {
     if (tNISList_IsPlayingScriptOwner(self, (cScriptPlayerMain*)obj) != 0 && self->mIsCutSceneHandler != 0 &&
-        *(int*)((char*)obj + 0x1C) == 0) {
+        obj->mLoopScript == 0) {
         char* name = GetSSXScriptHeader(obj);
         if (cScriptPlayerMain_GetNumUpdatesToEndLeft(obj) + 1 <= *(short*)(name + 0x12)) {
             tNISList_DoTransitionToNext(self);
@@ -2502,10 +2502,10 @@ extern "C" void cSSXScriptEngine__cSSXScriptEngine(cSSXScriptEngine* self, int f
     *(void***)(((char*)self) + 0x944) = D_00482298;
     *(void***)(((char*)self) + 0x92C) = cScriptObjEvent_vtbl;
     cScriptObject__cScriptObject(((char*)self) + 0x938, 0);
-    *(void***)(((char*)self) + 0x928) = D_00482318;
-    *(void***)(((char*)self) + 0x910) = cScriptObjGS_vtbl;
-    cScriptObject__cScriptObject(((char*)self) + 0x91C, 0);
-    sSlot_780B8* cameraManager = (sSlot_780B8*)(((char*)self) + 0x910);
+    self->mObjectGameState.mScriptObjectVtbl = D_00482318;
+    self->mObjectGameState.mVtbl = cScriptObjGS_vtbl;
+    cScriptObject__cScriptObject(&self->mObjectGameState.mObjType, 0);
+    sSlot_780B8* cameraManager = (sSlot_780B8*)(&self->mObjectGameState);
     sSlot_780B8* begin = (sSlot_780B8*)(&self->mObjectCameraManager[0]);
     if (begin != 0) {
         do {

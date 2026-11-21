@@ -1442,7 +1442,7 @@ extern void* cRollerModifier_vtbl[];
 void* cRigidBody_cRigidBody(void* self);
 extern "C" void SphereTree_SphereTree(void* p);
 extern "C" void* bxSphereTree_operatorE(void* self, void* src);
-extern "C" void cRollerModifier_updateMOI(void* self);
+extern "C" void cRollerModifier_updateMOI(cRollerModifier* self);
 
 extern "C" void* cRollerModifier_Collision_DA70(void* self, void* a1, void* a2) __asm__("cRollerModifier_Collision");
 
@@ -1629,7 +1629,7 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, char* rd
     *(&self->Pose) = x;
     tPose y = cRollerModifier_getBodyPose_DA70(((char*)self));
     QuatPosToMtx_DA70(&self->Transform, *(sRmVec4*)&y.Q, *(sRmVec4*)&y.P);
-    cRollerModifier_updateMOI(((char*)self));
+    cRollerModifier_updateMOI((cRollerModifier*)(((char*)self)));
     cRigidBody_updateImplicit((sRmBody*)(&self->Pose));
     self->ContactElastic = 0.10000000149011612f;
     self->ContactFriction = 0.4000000059604645f;
@@ -1816,7 +1816,7 @@ extern void* cObjectInterface_getWorld_DF70() __asm__("cObjectInterface_getWorld
 void* cWorld_getPolyModelInfo(void* a, void* b);
 extern "C" void* tSphTreeList_getMeshTree(void* a, int b);
 extern "C" void SphereTree_TransformAbs(void* self, void* m, float scale);
-extern "C" void cRollerModifier_updateMOI(void* self);
+extern "C" void cRollerModifier_updateMOI(cRollerModifier* self);
 
 
 
@@ -1901,7 +1901,7 @@ extern "C" sRailDF70* cRollerModifier_cRollerModifier1(sRailDF70* self, cStreamD
     tPose x = cRollerModifier_getBodyPose_DA70(self);
     QuatPosToMtx_DA70(&self->xf, *(sRmVec4*)&x.Q, *(sRmVec4*)&x.P);
     SphereTree_TransformAbs(self->mover, &self->xf, 1.0f);
-    cRollerModifier_updateMOI(self);
+    cRollerModifier_updateMOI((cRollerModifier*)self);
     cRigidBody_updateImplicit((sRmBody*)self->body);
     return self;
 }
@@ -2052,16 +2052,16 @@ static inline sRmMat33 MulI_E248(const sRmMat33& a, const sRmInertiaOwner_E248* 
  * Turns the body's orientation quaternion (+0x40) into a rotation R and stores R * InvBodyMOI * R^T (InvBodyMOI at
  * +0x280) as the rigid body's InvMOI (+0x80), ready for cRigidBody_updateImplicit.
  */
-extern "C" void cRollerModifier_updateMOI(void* self)
+extern "C" void cRollerModifier_updateMOI(cRollerModifier* self)
 {
     sM44_E248 rotMat4;
-    QuatToMtx_E248(rotMat4, *(sRmVec4*)((char*)self + 0x40));
+    QuatToMtx_E248(rotMat4, *(sRmVec4*)&self->Pose.Q);
     sRmMat33 rot;
     sRmMat33 rotT;
     rotT = Get33_E248(rotMat4);
     rot = rotT;
     Transpose33_E248(rotT);
-    *(sRmMat33*)((char*)self + 0x80) = Mul33_E248(MulI_E248(rot, (sRmInertiaOwner_E248*)self), rotT);
+    *(sRmMat33*)&self->InvMOI[0] = Mul33_E248(MulI_E248(rot, (sRmInertiaOwner_E248*)self), rotT);
 }
 #endif
 
