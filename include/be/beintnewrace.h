@@ -114,4 +114,33 @@ CHECK_SIZE(cBENewRaceInterface, 0x10);
 // The one new-race interface (On Tour: cBENewRaceInterface::instance), created by cBENewRaceInterface_getThis.
 extern cBENewRaceInterface* cBENewRaceInterface_instance;
 
+// ---- The game-path and game-event tables (views group D) ----
+//
+// tBEPathDB: one game path (World Circuit, Quick Play, Multiplayer) and the race modes it allows.
+// [O] On Tour struct tBEPathDB {char cModes[8]; char strPathName[60];} (0x44) and the static cBELibrary::gamePathDB
+// (tBEPathDB[3]); [R] retail's cBELibrary_gamePathDB (0x0043E700) holds three records 0x43 apart ("World Circuit",
+// "Quick Play", "Multiplayer" at +0x7 of each), so retail has seven mode flags; [U] cBENewRaceInterface_setGameMode copies
+// the current path's record and refuses a mode whose flag is not 1.
+struct tBEPathDB {
+    signed char cModes[7];          // 0x00 [O] (On Tour [8]); [U] setGameMode: cModes[mode] == 1 allows the mode
+    char strPathName[60];           // 0x07 [O]; [R] the path's name ("World Circuit", ...)
+};
+
+CHECK_OFFSET(tBEPathDB, cModes, 0x00);
+CHECK_OFFSET(tBEPathDB, strPathName, 0x07);
+CHECK_SIZE(tBEPathDB, 0x43);
+
+// tBEEventDB: one game event. [O] On Tour struct tBEEventDB {int iValidMode; char strEventName[80];} (0x54) and the
+// static cBELibrary::gameEventDB; [R] retail's cBELibrary_gameEventDB (0x0043E978) has 0x54-byte records;
+// [U] cBENewRaceInterface_setGameEvent copies record [event] and reads iValidMode.
+struct tBEEventDB {
+    int iValidMode;                 // 0x00 [O]; [U] setGameEvent
+    char strEventName[80];          // 0x04 [O]
+};
+
+CHECK_OFFSET(tBEEventDB, iValidMode, 0x00);
+CHECK_OFFSET(tBEEventDB, strEventName, 0x04);
+CHECK_SIZE(tBEEventDB, 0x54);
+
+
 #endif /* BE_BEINTNEWRACE_H */

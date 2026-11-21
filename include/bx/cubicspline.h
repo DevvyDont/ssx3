@@ -26,7 +26,25 @@
 
 #include "layout.h"
 
-struct cCSICubicSpline;             // one segment: 5 floats (0x14; seg/seg_21E5A8 cCSICubicSpline_evaluate)
+// cCSICubicSpline: one segment of the interpolant, y = A t^3 + B t^2 + C t + D with t = x - X0 (0x14).
+// [O] On Tour struct cCSICubicSpline {float A, B, C, D, X0} (0x14) with evaluate(float x); [R] the retail array is
+// NumSplines * 0x14 bytes ("cCSICubicSpline", initCommon); [U] cCSICubicSpline_evaluate (seg/seg_21E5A8) reads X0 at
+// 0x10 and the coefficients at 0x0..0xC; cCubicSplineInterpolant_addPoint / calcCoeffs fill them.
+struct cCSICubicSpline {
+    float A;                        // 0x00 [O]; [U] evaluate: the t^3 coefficient
+    float B;                        // 0x04 [O]; [U] the t^2 coefficient
+    float C;                        // 0x08 [O]; [U] the t coefficient
+    float D;                        // 0x0C [O]; [U] the constant
+    float X0;                       // 0x10 [O]; [U] evaluate subtracts it from x
+};
+
+CHECK_OFFSET(cCSICubicSpline, A, 0x00);
+CHECK_OFFSET(cCSICubicSpline, B, 0x04);
+CHECK_OFFSET(cCSICubicSpline, C, 0x08);
+CHECK_OFFSET(cCSICubicSpline, D, 0x0C);
+CHECK_OFFSET(cCSICubicSpline, X0, 0x10);
+CHECK_SIZE(cCSICubicSpline, 0x14);
+
 
 struct cCubicSplineInterpolant {
     unsigned int Type : 1;          // 0x000 bit 0 [O]; [U] initAsNatural clears it (& -2), initAsClamped sets it (| 1);

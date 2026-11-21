@@ -10,7 +10,33 @@
 
 #include "layout.h"
 
-struct tBlockGroup;
+// tMemBlock: the header of a block in a group (views group D). [O] On Tour struct tMemBlock {tMemBlock* Next;
+// tMemBlock* Prev; const char* Name; const char* File; int Line; int AllocSize;} (0x18, the PSP debug build's
+// tracking fields); [U] retail only links free blocks through the first word (cBlockMan_alloc pops FreeBlocks->Next,
+// cBlockMan_free pushes), so only Next is placed; the rest of the debug header is not in the retail build.
+struct tMemBlock {
+    tMemBlock* Next;                // 0x000 [O]; [U] the free-list link
+};
+
+CHECK_OFFSET(tMemBlock, Next, 0x000);
+
+// tBlockGroup: one pool of equal-size blocks (views group D: sPool_6C00 / sPool_6C60). [O] On Tour struct tBlockGroup
+// {char* MemBlock; int MemBlockSize; unsigned int Size; tMemBlock* FreeBlocks; int Num; tMemBlock* AllocBlocks;} (0x18,
+// the debug build); [R] retail's Groups stride is 0x10 (sll 4 in cBlockMan_init / alloc / free) and init stores only
+// the first four words, so the debug-only Num / AllocBlocks are not in the retail record.
+struct tBlockGroup {
+    char* MemBlock;                 // 0x000 [O]; [U] free finds the group whose [MemBlock, MemBlock + MemBlockSize)
+                                    //       holds the block
+    int MemBlockSize;               // 0x004 [O]
+    unsigned int Size;              // 0x008 [O]; [U] alloc takes the first group with Size >= the request
+    tMemBlock* FreeBlocks;          // 0x00C [O]; [U] alloc pops, free pushes
+};
+
+CHECK_OFFSET(tBlockGroup, MemBlock, 0x000);
+CHECK_OFFSET(tBlockGroup, MemBlockSize, 0x004);
+CHECK_OFFSET(tBlockGroup, Size, 0x008);
+CHECK_OFFSET(tBlockGroup, FreeBlocks, 0x00C);
+CHECK_SIZE(tBlockGroup, 0x10);
 
 struct cBlockMan {
     char* Memory;                   // 0x000 [O]

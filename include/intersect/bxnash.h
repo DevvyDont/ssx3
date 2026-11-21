@@ -185,4 +185,15 @@ struct VerticalLineProximityTest {
 CHECK_OFFSET(VerticalLineProximityTest, position, 0x00);
 CHECK_SIZE(VerticalLineProximityTest, 0x4);
 
+// nash::privy::QueryHelper<callback, callback, query> (views group D: sQH_75D0). [P] the preview's linkonce instances
+// helpX__Q34nash5privyt11QueryHelper3Z..Z..Z9tBoundBox (const callback&, const callback&, const tBoundBox&,
+// const nash::Cell*, const nash::CellKey&): a template class with no data whose member helpX walks a cell for a box
+// query; [R] retail keeps the instances' code under nash_privy_QueryHelper_helpX* (camera/trigger
+// cameratriggerfactory) and calls them with the address of an empty helper as `this` (func_002B83F8 in
+// sound/icepick/worldtriggermanager). Flat stand-in for every instance: an empty struct (size 1 in g++).
+struct nash_privy_QueryHelper {
+};
+
+CHECK_SIZE(nash_privy_QueryHelper, 0x1);
+
 #endif /* INTERSECT_BXNASH_H */

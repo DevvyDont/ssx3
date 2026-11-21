@@ -64,4 +64,21 @@ CHECK_SIZE(cBERewardInterface, 0x18);
 // The one instance (On Tour: cBERewardInterface::instance), created by cBERewardInterface_getThis.
 extern cBERewardInterface* cBERewardInterface_instance;
 
+// cBEInterface: the base every BE interface writes out inline (views group D), for code that calls an interface's
+// virtuals without knowing its class (cBEState::getInterface's result; the view sBEIface0014EA90). [O] On Tour class
+// cBEInterface: bCanSubmit, bDataChanged, bIsActive (bools; words in retail), then the vptr; [R] every BE interface
+// getThis allocates 0x10 and stores its vtable at 0xC; slots in the enum above.
+struct cBEInterface {
+    int bCanSubmit;                  // 0x000 [O] (On Tour bool at 0x0)
+    int bDataChanged;                // 0x004 [O] (On Tour bool at 0x1)
+    int bIsActive;                   // 0x008 [O] (On Tour bool at 0x2); [R] the getThis functions set 0
+    void** mVtbl;                    // 0x00C [R] the interface's vtable (kBEInterfaceVt_* slots)
+};
+
+CHECK_OFFSET(cBEInterface, bCanSubmit, 0x000);
+CHECK_OFFSET(cBEInterface, bDataChanged, 0x004);
+CHECK_OFFSET(cBEInterface, bIsActive, 0x008);
+CHECK_OFFSET(cBEInterface, mVtbl, 0x00C);
+CHECK_SIZE(cBEInterface, 0x10);
+
 #endif /* BE_BEINTREWARD_H */

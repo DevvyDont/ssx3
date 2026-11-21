@@ -944,7 +944,7 @@ extern "C" int func_001D5138(cFEStateLogin* self, int msg)
     case 273: {
         cBE_getInterface_Fv(SSXApp->BE, 7);
         tBENetworkDB* netOpt = &cBENetworkInterface_networkOpt;
-        func_0025FD50(LobbyMan_mLobbyMan, netOpt->bIsRankedGame, netOpt->bIsHost == 0, netOpt->bIsHost != 0, netOpt->MyStats, netOpt->OpponentStats);
+        func_0025FD50(LobbyMan_mLobbyMan, netOpt->bIsRankedGame, netOpt->bIsHost == 0, netOpt->bIsHost != 0, (char*)&netOpt->MyStats, (char*)&netOpt->OpponentStats);
         break;
     }
     default:

@@ -57,4 +57,44 @@ CHECK_SIZE(cBENewPlayerInterface, 0x10);
 
 // The one player interface (On Tour: cBENewPlayerInterface::instance), created by cBENewPlayerInterface_getThis.
 
+// ---- cBEPlayerDB, one player's record (views group D) ----
+//
+// cBEPlayerDB (retail 0x1C): the six records of cBENewPlayerInterface::tempPlayers (retail
+// cBENewPlayerInterface_tempPlayers, D_00534FE0) and of cBELibrary::playerDB (cBELibrary_playerDB, D_00535B20); submit /
+// discard copy all six (6 * 0x1C). [O] On Tour class cBEPlayerDB (0x3C) has the same members in the same order with a
+// longer name, a full-word iHumanID and the board / skin fields between cCharacterID and cCheatCharacterID; retail keeps
+// strUserName[12], packs iHumanID into the flag word and has no board fields. Tags: [O] On Tour's member order and names;
+// [R] the retail accessors of cBENewPlayerInterface (offsets in the comments); [U] how they use the field.
+struct cBEPlayerDB {
+    char strUserName[12];           // 0x00 [O] ([24] in On Tour); [R] setPlayerName strncpy's 0xC bytes, getPlayerName
+                                    //      returns the record's address
+    int iControllerID;              // 0x0C [O]; [R] setRiderCtrlID / setPlayerCtrlID store the pad, getRiderCtrlID /
+                                    //      getPlayerCtrlID return it
+    unsigned int iHumanID : 1;      // 0x10 bit 0 [O] (a full word in On Tour); [R] setPlayerCtrlID / setRiderCtrlID store
+                                    //      the low bit of the player index
+    unsigned int iUseDualShock : 1; // 0x10 bit 1 [O]; [R] get/setUseDualShock; reset sets it
+    unsigned int iIsMissionMan : 1; // 0x10 bit 2 [O]; [R] isMissionMan / setToMissionMan; setPlayerCharID /
+                                    //      setRiderCharID copy player 0's character into a mission-man record;
+                                    //      setPlayerCtrlID clears it
+    unsigned int iIsHelpDone : 1;   // 0x10 bit 3 [O]; [R] getHelpDone / setHelpDone
+    unsigned int : 4;               // 0x10 bits 4-7 unused
+    signed char cCharacterID;       // 0x11 [O]; [R] setPlayerCharID / setRiderCharID store it (sb), getPlayerCharID reads it
+    signed char cCheatCharacterID;  // 0x12 [O]; [R] set/getPlayerCheatCharID, set/getRiderCheatCharID
+    signed char cControlMap;        // 0x13 [O] (On Tour's member after cCheatCharacterID); [R] get/setControllerMapping;
+                                    //      the reset clears it
+    int unk_014;                    // 0x14 [R] func_00147698 / func_001476D8 get / set it per player (no On Tour
+                                    //      counterpart at this position)
+    int unk_018;                    // 0x18 [R] func_00147718 / func_00147758 get / set it per player
+};
+
+CHECK_OFFSET(cBEPlayerDB, strUserName, 0x00);
+CHECK_OFFSET(cBEPlayerDB, iControllerID, 0x0C);
+CHECK_OFFSET(cBEPlayerDB, cCharacterID, 0x11);
+CHECK_OFFSET(cBEPlayerDB, cCheatCharacterID, 0x12);
+CHECK_OFFSET(cBEPlayerDB, cControlMap, 0x13);
+CHECK_OFFSET(cBEPlayerDB, unk_014, 0x14);
+CHECK_OFFSET(cBEPlayerDB, unk_018, 0x18);
+CHECK_SIZE(cBEPlayerDB, 0x1C);
+
+
 #endif /* BE_BEINTPLAYER_H */

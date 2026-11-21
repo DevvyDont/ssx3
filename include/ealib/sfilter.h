@@ -22,6 +22,22 @@
 
 #include "layout.h"
 
+// C units (ealib/seg_2B4578.c, ealib/seg_2DCAE8.c) name these types without the struct keyword (views group D).
+// CMTBLKDecf's typedef is in ealib/mtdecf.h (pDecoder spells `struct CMTBLKDecf`), so both headers can be included.
+#ifndef __cplusplus
+typedef struct SFILTERNODE SFILTERNODE;
+typedef struct UNPACKFSTATE UNPACKFSTATE;
+typedef struct UNPACKLFSTATE UNPACKLFSTATE;
+typedef struct UNPACKMTPFSTATE UNPACKMTPFSTATE;
+typedef struct SNDFIRSTATE SNDFIRSTATE;
+typedef struct LPFSTATE LPFSTATE;
+typedef struct HPFSTATE HPFSTATE;
+typedef struct BPFSTATE BPFSTATE;
+typedef struct TIMESTRETCHSTATE TIMESTRETCHSTATE;
+typedef struct SPLITSTATE SPLITSTATE;
+typedef struct SRCSTATE SRCSTATE;
+#endif
+
 // SFILTERNODE (0x1C [O]).
 struct SFILTERNODE {
     int (*filterfn)(void* pstate, int frames, void* psrc, void* pdst, int req);
@@ -36,6 +52,43 @@ struct SFILTERNODE {
     unsigned char requester;            // 0x1A [O]; [U] passed on as the requester argument
     unsigned char clean;                // 0x1B [O]; [R] create 0
 };
+
+// UNPACKFSTATE (0x2C [O], views group D: R_9A00): the plain PCM unpack filter (supf.c). [O] SFILTER_unpackf is its
+// process function; [U] retail SFILTER_unpackf reads the samples from psample, steps curframe up to totalframes and picks
+// 8- or 16-bit samples by bits16.
+struct UNPACKFSTATE {
+    SFILTERNODE sfn;                    // 0x00 [O]
+    char* psample;                      // 0x1C [O]; [U] the sample data
+    unsigned int curframe;              // 0x20 [O]; [U] the next frame
+    unsigned int totalframes;           // 0x24 [O]; [U] curframe < totalframes
+    int bits16;                         // 0x28 [O]; [U] 16-bit samples when set
+};
+
+CHECK_OFFSET(UNPACKFSTATE, sfn, 0x00);
+CHECK_OFFSET(UNPACKFSTATE, psample, 0x1C);
+CHECK_OFFSET(UNPACKFSTATE, curframe, 0x20);
+CHECK_OFFSET(UNPACKFSTATE, totalframes, 0x24);
+CHECK_OFFSET(UNPACKFSTATE, bits16, 0x28);
+CHECK_SIZE(UNPACKFSTATE, 0x2C);
+
+// UNPACKLFSTATE (0x30 [O], views group D: R_9B10): the looping PCM unpack filter (suplf.c). [U] retail SFILTER_unpacklf
+// loops curframe back to sustainstart when it reaches sustainend.
+struct UNPACKLFSTATE {
+    SFILTERNODE sfn;                    // 0x00 [O]
+    char* psample;                      // 0x1C [O]; [U] the sample data
+    unsigned int curframe;              // 0x20 [O]; [U] the next frame
+    unsigned int sustainstart;          // 0x24 [O]; [U] the loop start
+    unsigned int sustainend;            // 0x28 [O]; [U] the loop end
+    int bits16;                         // 0x2C [O]; [U] 16-bit samples when set
+};
+
+CHECK_OFFSET(UNPACKLFSTATE, sfn, 0x00);
+CHECK_OFFSET(UNPACKLFSTATE, psample, 0x1C);
+CHECK_OFFSET(UNPACKLFSTATE, curframe, 0x20);
+CHECK_OFFSET(UNPACKLFSTATE, sustainstart, 0x24);
+CHECK_OFFSET(UNPACKLFSTATE, sustainend, 0x28);
+CHECK_OFFSET(UNPACKLFSTATE, bits16, 0x2C);
+CHECK_SIZE(UNPACKLFSTATE, 0x30);
 
 // UNPACKMTPFSTATE (0x3C [O]): MicroTalk decoder fed by the packet player (supmutpf.c). SFILTER_unpackmtpfinit /
 // SFILTER_unpackmtpf / SFILTER_unpackmtpfrestore.
@@ -52,7 +105,7 @@ struct UNPACKMTPFSTATE {
     unsigned short unk_2E;              // 0x2E padding
     int platformver;                    // 0x30 [O]; [R] init: the codec version (init block + 0x24); [U] < 3 picks the old
                                         //      codec (CMTBLKDecf_SetCodecVersion 0 / 1)
-    CMTBLKDecf* pDecoder;               // 0x34 [O]; [R] init: a new 3432-byte CMTBLKDecf; [U] Decode / GetState /
+    struct CMTBLKDecf* pDecoder;               // 0x34 [O]; [R] init: a new 3432-byte CMTBLKDecf; [U] Decode / GetState /
                                         //      SetState / Feed; restore destroys it
     unsigned char samplechan;           // 0x38 [O]; [R] init SNDDRV_getsamplechan(voice) (sb); [U] lbu
     char pad[3];                        // 0x39 [O]

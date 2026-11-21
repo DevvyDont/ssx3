@@ -68,4 +68,79 @@ CHECK_OFFSET(cBERewardDB, mNumVideos, 0x04C);
 CHECK_OFFSET(cBERewardDB, mNumCheatChars, 0x050);
 CHECK_SIZE(cBERewardDB, 0x54);
 
+// ---- The store-item records behind mpPosters / mpTradingCards / mpConceptArts / mpToys (views group D) ----
+//
+// Each is 0x10: [O] On Tour's tPosterInfo, tTradingCardInfo, tConceptArtInfo and tToyInfo are four identical structs
+// {char* mNameStringID; char* mpTextureFileName; char* mpIconName; short mCost; char mStoreNum; char _mPad;} with
+// getName / getTextureFileName / getIconName; [R] retail's buy functions (cBERewardInterface buy* /
+// give*, be/beintreward) index the tables with a 0x10 stride and read the signed short at +0xC (the price).
+
+struct tPosterInfo {
+    char* mNameStringID;            // 0x0 [O]
+    char* mpTextureFileName;        // 0x4 [O]
+    char* mpIconName;               // 0x8 [O]
+    short mCost;                    // 0xC [O]; [U] the buy / give function charges it (the posters (sRewardDef_157FD0))
+    char mStoreNum;                 // 0xE [O]
+    char _mPad;                     // 0xF [O]
+};
+
+CHECK_OFFSET(tPosterInfo, mNameStringID, 0x0);
+CHECK_OFFSET(tPosterInfo, mpTextureFileName, 0x4);
+CHECK_OFFSET(tPosterInfo, mpIconName, 0x8);
+CHECK_OFFSET(tPosterInfo, mCost, 0xC);
+CHECK_OFFSET(tPosterInfo, mStoreNum, 0xE);
+CHECK_OFFSET(tPosterInfo, _mPad, 0xF);
+CHECK_SIZE(tPosterInfo, 0x10);
+
+struct tTradingCardInfo {
+    char* mNameStringID;            // 0x0 [O]
+    char* mpTextureFileName;        // 0x4 [O]
+    char* mpIconName;               // 0x8 [O]
+    short mCost;                    // 0xC [O]; [U] the buy / give function charges it (the trading cards (sRewardDef_1580F8))
+    char mStoreNum;                 // 0xE [O]
+    char _mPad;                     // 0xF [O]
+};
+
+CHECK_OFFSET(tTradingCardInfo, mNameStringID, 0x0);
+CHECK_OFFSET(tTradingCardInfo, mpTextureFileName, 0x4);
+CHECK_OFFSET(tTradingCardInfo, mpIconName, 0x8);
+CHECK_OFFSET(tTradingCardInfo, mCost, 0xC);
+CHECK_OFFSET(tTradingCardInfo, mStoreNum, 0xE);
+CHECK_OFFSET(tTradingCardInfo, _mPad, 0xF);
+CHECK_SIZE(tTradingCardInfo, 0x10);
+
+struct tConceptArtInfo {
+    char* mNameStringID;            // 0x0 [O]
+    char* mpTextureFileName;        // 0x4 [O]
+    char* mpIconName;               // 0x8 [O]
+    short mCost;                    // 0xC [O]; [U] the buy / give function charges it (the concept art (sRewardDef_158220))
+    char mStoreNum;                 // 0xE [O]
+    char _mPad;                     // 0xF [O]
+};
+
+CHECK_OFFSET(tConceptArtInfo, mNameStringID, 0x0);
+CHECK_OFFSET(tConceptArtInfo, mpTextureFileName, 0x4);
+CHECK_OFFSET(tConceptArtInfo, mpIconName, 0x8);
+CHECK_OFFSET(tConceptArtInfo, mCost, 0xC);
+CHECK_OFFSET(tConceptArtInfo, mStoreNum, 0xE);
+CHECK_OFFSET(tConceptArtInfo, _mPad, 0xF);
+CHECK_SIZE(tConceptArtInfo, 0x10);
+
+struct tToyInfo {
+    char* mNameStringID;            // 0x0 [O]
+    char* mpTextureFileName;        // 0x4 [O]
+    char* mpIconName;               // 0x8 [O]
+    short mCost;                    // 0xC [O]; [U] the buy / give function charges it (the character toys (sRewardDef_158348))
+    char mStoreNum;                 // 0xE [O]
+    char _mPad;                     // 0xF [O]
+};
+
+CHECK_OFFSET(tToyInfo, mNameStringID, 0x0);
+CHECK_OFFSET(tToyInfo, mpTextureFileName, 0x4);
+CHECK_OFFSET(tToyInfo, mpIconName, 0x8);
+CHECK_OFFSET(tToyInfo, mCost, 0xC);
+CHECK_OFFSET(tToyInfo, mStoreNum, 0xE);
+CHECK_OFFSET(tToyInfo, _mPad, 0xF);
+CHECK_SIZE(tToyInfo, 0x10);
+
 #endif

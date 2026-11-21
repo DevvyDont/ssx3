@@ -98,7 +98,37 @@ CHECK_SIZE(tLobbyStats, 0x14);
 
 // LobbyMan::mEventList, a g++ 2.95 std::list<online::Event*, BXAllocator>: the allocator (one word: BXAllocator is
 // stateful) and the pointer to the list's head node (a 0xC-byte node: next, prev, value; the list is circular through
-// it, so the head's next is the first event). The node layout is each unit's own sMsgListNode view for now.
+// it, so the head's next is the first event). The node is the library's _List_node<online::Event*> (below).
+// The list node, from the library itself (views group D: sMsgListNode_00261970 / sMsgListNode_002618C0 in
+// dirtysock/tagsunk). [L] gcc-2.95.3 libstdc++/stl/stl_list.h, verbatim:
+//
+//   Copyright (c) 1994 Hewlett-Packard Company
+//   Copyright (c) 1996,1997 Silicon Graphics Computer Systems, Inc.
+//   Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose is
+//   hereby granted without fee, provided that the above copyright notice appear in all copies and that both that
+//   copyright notice and this permission notice appear in supporting documentation. Hewlett-Packard Company and
+//   Silicon Graphics make no representations about the suitability of this software for any purpose. It is provided
+//   "as is" without express or implied warranty.
+//
+// [R] the event-list code allocates each node as operator new(0xC, "StlBlock") and links it exactly as
+// _List_base / list::insert do (next, prev, then the value at 0x8). The links are void* in the library, so a walk
+// casts them back to the node type. Use _List_node<online_Event*> (online/onlineevent.h); a unit that also includes
+// the real <list> must not include this definition.
+struct online_Event;
+
+template <class _Tp>
+struct _List_node {
+    void* _M_next;                  // 0x0 [L]; [R] the next node (the head's next is the first event)
+    void* _M_prev;                  // 0x4 [L]; [R] the previous node
+    _Tp _M_data;                    // 0x8 [L]; [R] the online::Event*
+};
+
+// CHECK_SIZE / CHECK_OFFSET cannot paste a template-id, so the checks are spelled out.
+#ifndef DECOMP_NO_LAYOUT_CHECKS
+typedef char check_List_node_online_Event_size[(sizeof(_List_node<online_Event*>) == 0xC) ? 1 : -1];
+typedef char check_List_node_online_Event_M_data[(DECOMP_OFFSETOF(_List_node<online_Event*>, _M_data) == 0x8) ? 1 : -1];
+#endif
+
 struct tLobbyEventList {
     int mAllocator;                 // 0x0 [R] BXAllocator (the ctor stores it before allocating the head node)
     void* mpHead;                   // 0x4 [R] the head node ("StlBlock", 0xC bytes); [U] new events are linked in

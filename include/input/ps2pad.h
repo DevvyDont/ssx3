@@ -29,9 +29,27 @@
 
 #include "layout.h"
 
-// cPadDevice (the base) is not defined here: fe/fepopupmisc.cpp and fe/festateoptions.cpp each define a local
-// `class cPadDevice` with real virtuals (numActuators / setActuator calls), and input/padcache.h forward-declares it.
-struct cPadDevice;
+// cPadDevice: the pad interface (views group D: sObj00326A68). [O] On Tour class cPadDevice (0x4, the vptr only)
+// declaring ~cPadDevice, sampleButtons (pure), numActuators, setActuator(int, float); [R] cPadDevice_vtbl 0x0048E4B8
+// has those four slots (above); [U] cPadCache_purge deletes each device through slot 1, the pad cache's actuator code
+// calls slots 3 / 4 (views CountFn00326CF0 / SetFn00326CF0 are those entries: sVEntry<int(void*)> and
+// sVEntry<void(void*, int, float)>, include/vtable.h). input/padcache.h forward-declares it (cPadCache::PadDevices).
+// fe/fepopupmisc.cpp and fe/festateoptions.cpp each define a local `class cPadDevice` with real virtuals and do not
+// include this header; a unit that includes both would have to drop its local class.
+struct cPadDevice {
+    void** mVtbl;                   // 0x000 [R] cPadDevice_vtbl / the derived device's vtable
+};
+
+CHECK_OFFSET(cPadDevice, mVtbl, 0x000);
+CHECK_SIZE(cPadDevice, 0x4);
+
+// cPadDevice's vtable slots ([O] On Tour's virtual order; [R] cPadDevice_vtbl, cPS2PadDevice_vtbl).
+enum {
+    kPadDeviceVt_dtor = 1,          // ~cPadDevice (deleting)
+    kPadDeviceVt_sampleButtons = 2, // int sampleButtons(float* values, int max) ([O] cPSPPadDevice; pure in cPadDevice)
+    kPadDeviceVt_numActuators = 3,  // int numActuators() (0 in cPadDevice)
+    kPadDeviceVt_setActuator = 4    // void setActuator(int act, float level) (empty in cPadDevice)
+};
 
 struct cPS2PadDevice {
     // --- cPadDevice (vptr only)

@@ -54,4 +54,45 @@ CHECK_SIZE(cBEOptionInterface, 0x10);
 
 // The one options interface (On Tour: cBEOptionInterface::instance), created by cBEOptionInterface_getThis.
 
+// ---- The race rules block cBERules::mRules (views group D) ----
+//
+// tBEBraggingRights: one human player's bragging-rights handicap. [O] On Tour struct tBEBraggingRights (0xC): an
+// anonymous union of rule flags at 0x0 (its members are not in the dump), StartingPoints, HeadStartSecs;
+// [U] cBERules_getPlayerStartDelaySecs(i) reads HeadStartSecs of record i (+0x8, 0xC stride), the option setters /
+// getters (cBEOptionInterface_*) read and write the three words.
+struct tBEBraggingRights {
+    unsigned int unk_00;            // 0x0 [O] an anonymous union (the rule flags; member names not in On Tour's dump)
+    int StartingPoints;             // 0x4 [O]
+    int HeadStartSecs;              // 0x8 [O]; [U] cBERules_getPlayerStartDelaySecs
+};
+
+CHECK_OFFSET(tBEBraggingRights, unk_00, 0x0);
+CHECK_OFFSET(tBEBraggingRights, StartingPoints, 0x4);
+CHECK_OFFSET(tBEBraggingRights, HeadStartSecs, 0x8);
+CHECK_SIZE(tBEBraggingRights, 0xC);
+
+// tBEMyRules: the rules that are not per player. [O] On Tour struct tBEMyRules (0x8): an anonymous union, then
+// AIHeadStartSecs; [U] cBERules_getAIStartDelaySecs reads AIHeadStartSecs (retail D_005308D4 = cBERules_mRules + 0x1C).
+struct tBEMyRules {
+    unsigned int unk_00;            // 0x0 [O] an anonymous union (member names not in On Tour's dump)
+    int AIHeadStartSecs;            // 0x4 [O]; [U] cBERules_getAIStartDelaySecs
+};
+
+CHECK_OFFSET(tBEMyRules, unk_00, 0x0);
+CHECK_OFFSET(tBEMyRules, AIHeadStartSecs, 0x4);
+CHECK_SIZE(tBEMyRules, 0x8);
+
+// tBERuleOptionDB: [O] On Tour's static cBERules::mRules is a tBERuleOptionDB {tBEBraggingRights Bragging[4];
+// tBEMyRules MyRules;} (0x38, four players). Retail has two players: [U] the getters index Bragging[0..1] (0xC stride
+// from cBERules_mRules) and MyRules.AIHeadStartSecs is at +0x1C, so MyRules is at 0x18 and the block is 0x20.
+struct tBERuleOptionDB {
+    tBEBraggingRights Bragging[2];  // 0x00 [O] ([4] in On Tour); [U] cBERules_getPlayerStartDelaySecs(i)
+    tBEMyRules MyRules;             // 0x18 [O]; [U] + 0x1C read by cBERules_getAIStartDelaySecs
+};
+
+CHECK_OFFSET(tBERuleOptionDB, Bragging, 0x00);
+CHECK_OFFSET(tBERuleOptionDB, MyRules, 0x18);
+CHECK_SIZE(tBERuleOptionDB, 0x20);
+
+
 #endif /* BE_BEINTOPTION_H */

@@ -97,4 +97,32 @@ CHECK_OFFSET(cDynamicMemMan, CoreTop, 0x008);
 CHECK_OFFSET(cDynamicMemMan, HeapSize, 0x00C);
 CHECK_SIZE(cDynamicMemMan, 0x10);
 
+// struct mallinfo (0x28 [O] On Tour's dlmalloc 2.7 struct mallinfo, the same ten ints as dlmalloc's own): the result
+// of cDynamicMemMan_dlmallinfo (returned by value, [R] retail's dlmallinfo fills ten words). cMemMan_totalUnused /
+// cMemMan_totalUsed read it.
+struct mallinfo {
+    int arena;                      // 0x000 [O]; [U] dlmallinfo: non-mmapped space allocated from the system
+    int ordblks;                    // 0x004 [O]; [U] number of free chunks
+    int smblks;                     // 0x008 [O]; [U] number of fastbin blocks
+    int hblks;                      // 0x00C [O]; [U] number of mmapped regions
+    int hblkhd;                     // 0x010 [O]; [U] space in mmapped regions
+    int usmblks;                    // 0x014 [O]; [U] maximum total allocated space
+    int fsmblks;                    // 0x018 [O]; [U] space in freed fastbin blocks
+    int uordblks;                   // 0x01C [O]; [U] total allocated space
+    int fordblks;                   // 0x020 [O]; [U] total free space (cMemMan_totalUnused)
+    int keepcost;                   // 0x024 [O]; [U] releasable (top) space
+};
+
+CHECK_OFFSET(mallinfo, arena, 0x000);
+CHECK_OFFSET(mallinfo, ordblks, 0x004);
+CHECK_OFFSET(mallinfo, smblks, 0x008);
+CHECK_OFFSET(mallinfo, hblks, 0x00C);
+CHECK_OFFSET(mallinfo, hblkhd, 0x010);
+CHECK_OFFSET(mallinfo, usmblks, 0x014);
+CHECK_OFFSET(mallinfo, fsmblks, 0x018);
+CHECK_OFFSET(mallinfo, uordblks, 0x01C);
+CHECK_OFFSET(mallinfo, fordblks, 0x020);
+CHECK_OFFSET(mallinfo, keepcost, 0x024);
+CHECK_SIZE(mallinfo, 0x28);
+
 #endif

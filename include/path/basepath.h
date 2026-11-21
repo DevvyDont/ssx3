@@ -28,6 +28,7 @@
 // t3Vector members are float[3] (ui/uithing.h has EA's t3Vector; not pulled in here).
 
 #include "layout.h"
+#include "bx/math3d.h"                // t4Vector (tPathIntersectInfo)
 
 struct tPathEventNode;
 struct tPathNode;
@@ -61,5 +62,34 @@ CHECK_OFFSET(cPath, MinBound, 0x01C);
 CHECK_OFFSET(cPath, MaxBound, 0x028);
 CHECK_OFFSET(cPath, mVtbl, 0x034);
 CHECK_SIZE(cPath, 0x38);
+
+// ---- The path records (views group D) ----
+
+// tPathEventNode (On Tour 0x10) is defined in ai/rider.h (cRider::PathEventsCur); the forward declaration above stays.
+
+// tPathNode: one segment of the polyline. [O] On Tour struct tPathNode {t3Vector Dir; float Len;} (0x10);
+// [U] cPath_getLength sums Len (+0xC), getPathPos / getPathHeading step along Dir * Len from Start.
+struct tPathNode {
+    float Dir[3];                   // 0x0 [O] t3Vector; [U] the unit direction of the segment
+    float Len;                      // 0xC [O]; [U] getLength
+};
+
+CHECK_OFFSET(tPathNode, Dir, 0x0);
+CHECK_OFFSET(tPathNode, Len, 0xC);
+CHECK_SIZE(tPathNode, 0x10);
+
+// tPathIntersectInfo: where a position meets a path. [O] On Tour struct tPathIntersectInfo {t4Vector Pos; float
+// Param; int NodeID;} (0x20, 16-aligned); [U] the path-position cache in bx/bxstringctor (view sBXPathCache_A638): pos,
+// the distance along the path, the node index.
+struct tPathIntersectInfo {
+    t4Vector Pos;                   // 0x00 [O]
+    float Param;                    // 0x10 [O]; the distance along the path
+    int NodeID;                     // 0x14 [O]; the node (segment) index
+};
+
+CHECK_OFFSET(tPathIntersectInfo, Pos, 0x00);
+CHECK_OFFSET(tPathIntersectInfo, Param, 0x10);
+CHECK_OFFSET(tPathIntersectInfo, NodeID, 0x14);
+CHECK_SIZE(tPathIntersectInfo, 0x20);
 
 #endif /* PATH_BASEPATH_H */

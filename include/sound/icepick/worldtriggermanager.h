@@ -21,7 +21,22 @@
 #include "layout.h"
 #include "bx/math3d.h"
 
-struct tTriggerType;
+// The fixed head of every trigger record in the trigger file (views group D: sTrigObj_6A38). [O] On Tour struct
+// tTriggerType (0x10): m_TriggerType, m_HitObjectTrigger, m_SyncToAnimation, m_DuckAmbientAudio; the specific trigger
+// structs derive from it. [U] tTriggerTypePointer::m_pTriggerTypeStruct points at one; cWorldTriggerManager's
+// DuckAmbientAudioTrigger(int trigger) ([O] the paired function) tests m_DuckAmbientAudio == 1 (+0xC).
+struct tTriggerType {
+    int m_TriggerType;              // 0x0 [O] eTriggerType
+    int m_HitObjectTrigger;         // 0x4 [O] int
+    int m_SyncToAnimation;          // 0x8 [O] int
+    int m_DuckAmbientAudio;         // 0xC [O] int; [U] DuckAmbientAudioTrigger
+};
+
+CHECK_OFFSET(tTriggerType, m_TriggerType, 0x0);
+CHECK_OFFSET(tTriggerType, m_HitObjectTrigger, 0x4);
+CHECK_OFFSET(tTriggerType, m_SyncToAnimation, 0x8);
+CHECK_OFFSET(tTriggerType, m_DuckAmbientAudio, 0xC);
+CHECK_SIZE(tTriggerType, 0x10);
 
 // cWorldTriggerInstance: one playing world trigger (On Tour class cWorldTriggerInstance, 0x70): which object volume
 // and view port it is for, its trigger number, volume and position, and the sound it plays (bank-monitor handle, or a

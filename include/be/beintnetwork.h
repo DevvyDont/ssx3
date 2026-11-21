@@ -37,6 +37,7 @@
 // Unnamed fields are unk_XXX; rename only with evidence.
 
 #include "layout.h"
+#include "ai/ridermetrix.h"             // tRiderStats (0xAC)
 
 // tBENetworkDB: the network-game options (cBENetworkInterface::networkOpt / cBELibrary::networkDB), 0x4B0 bytes
 // ([R] submit/discard copy 0x4B0 bytes).
@@ -66,9 +67,10 @@ struct tBENetworkDB {
     int MyCharacterID;               // 0x328 [P] get/setMyCharacterID (field name from the accessor; not in On Tour);
                                      //       [R] cBENetworkInterface_setMyCharacterID / cBENetworkInterface_getMyCharacterID (D_00534E58); "CHARACTER0" in the report
     int OpponentCharacterID;         // 0x32C [P] get/setOpponentCharacterID; [R] cBENetworkInterface_setOpponentCharacterID / cBENetworkInterface_getOpponentCharacterID (D_00534E5C)
-    char MyStats[0xAC];              // 0x330 [P] get/setMyStats(tRiderStats const&); [R] setter cBENetworkInterface_setMyStats copies 0xAC
-                                     //       bytes, getter cBENetworkInterface_getMyStats (D_00534E60); a tRiderStats (not modelled here)
-    char OpponentStats[0xAC];        // 0x3DC [P] get/setOpponentStats; [R] cBENetworkInterface_setOpponentStats / cBENetworkInterface_getOpponentStats (D_00534F0C)
+    tRiderStats MyStats;             // 0x330 [P] get/setMyStats(tRiderStats const&); [R] setter cBENetworkInterface_setMyStats copies 0xAC
+                                     //       bytes, getter cBENetworkInterface_getMyStats (D_00534E60); tRiderStats is 0xAC
+                                     //       (ai/ridermetrix.h; views group D: sBEBlk_C418 is this record)
+    tRiderStats OpponentStats;       // 0x3DC [P] get/setOpponentStats; [R] cBENetworkInterface_setOpponentStats / cBENetworkInterface_getOpponentStats (D_00534F0C)
     char unk_488[0x10];              // 0x488 [R] func_0014EBD8 (strcpy) / func_0015C5B8 (D_00534FB8); [U] this player's
                                      //       name (from the lobby session +0x80, func_00259098); prefixes our own chat
                                      //       lines (ovstatetrophy func_00210BD8)

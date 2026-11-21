@@ -58,4 +58,25 @@ CHECK_OFFSET(cBEPostRaceState, nextState, 0x0);
 CHECK_OFFSET(cBEPostRaceState, mVtbl, 0x4);
 CHECK_SIZE(cBEPostRaceState, 0x8);
 
+// cBEState: the base of the three race states (views group D), for code that holds "some state" (cBE's aBEState[],
+// [P] the preview's asserts). [O] On Tour class cBEState {int nextState; vptr} (0x8) declaring getInterface,
+// purgeState, onExit, onEnter; [R] every derived state stores its vtable at 0x4 and the four slots below.
+// Calls through mVtbl: the slot's {short delta; short index; fn} entry (include/vtable.h sVEntry<F>).
+struct cBEState {
+    int nextState;                  // 0x0 [O]; [P] assert "nextState < kBESTATE_NULL"
+    void** mVtbl;                   // 0x4 [R] the derived state's vtable
+};
+
+CHECK_OFFSET(cBEState, nextState, 0x0);
+CHECK_OFFSET(cBEState, mVtbl, 0x4);
+CHECK_SIZE(cBEState, 0x8);
+
+// cBEState's vtable slots ([O] On Tour's virtual order; [R] the three retail vtables above).
+enum {
+    kBEStateVt_getInterface = 1,    // cBEInterface* getInterface(eBE_Interface)
+    kBEStateVt_purgeState = 2,      // operator delete of the singleton
+    kBEStateVt_onExit = 3,
+    kBEStateVt_onEnter = 4
+};
+
 #endif /* BE_BESTATE_H */

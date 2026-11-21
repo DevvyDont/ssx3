@@ -207,4 +207,71 @@ CHECK_OFFSET(cInputExec, Temp, 0x008);
 CHECK_OFFSET(cInputExec, Config, 0x108);
 CHECK_SIZE(cInputExec, 0x188);
 
+// ---- tInputOpCode: one word of a compiled input-map program (views group D) ----
+//
+// [O] On Tour union tInputOpCode (0x4) of six views of the word: Base {opcode:6}, Unary {opcode, dest:6, operand:10},
+// Binary {opcode, dest, operand1:10, operand2:10}, Branch {opcode, operand:10, offset:16}, Load {opcode, dest} and Float
+// {float value} (a constant that follows a load); [O] cInputMapParser::compileParseNode writes them into
+// cInputMap::OpCodeBuf (input/inputmap.h, a tInputOpCode*) and cInputExec::execute(.., const tInputOpCode*) runs them;
+// [U] the retail executor (view sInsn_324678) extracts the same bit fields (r = Binary, j = Branch, f = Float.value).
+// The six struct names are On Tour's.
+
+struct tInputOpCodeBase {
+    unsigned int opcode : 6;        // bits 0..5 [O]
+    unsigned int pad : 26;          // bits 6..31 [O]
+};
+
+CHECK_SIZE(tInputOpCodeBase, 0x4);
+
+struct tInputOpCodeUnary {
+    unsigned int opcode : 6;        // bits 0..5 [O]
+    unsigned int dest : 6;          // bits 6..11 [O]
+    unsigned int operand : 10;      // bits 12..21 [O]
+    unsigned int pad : 10;          // bits 22..31 [O]
+};
+
+CHECK_SIZE(tInputOpCodeUnary, 0x4);
+
+struct tInputOpCodeBinary {
+    unsigned int opcode : 6;        // bits 0..5 [O]
+    unsigned int dest : 6;          // bits 6..11 [O]
+    unsigned int operand1 : 10;     // bits 12..21 [O]
+    unsigned int operand2 : 10;     // bits 22..31 [O]
+};
+
+CHECK_SIZE(tInputOpCodeBinary, 0x4);
+
+struct tInputOpCodeBranch {
+    unsigned int opcode : 6;        // bits 0..5 [O]
+    unsigned int operand : 10;      // bits 6..15 [O]
+    unsigned int offset : 16;       // bits 16..31 [O]
+};
+
+CHECK_SIZE(tInputOpCodeBranch, 0x4);
+
+struct tInputOpCodeLoad {
+    unsigned int opcode : 6;        // bits 0..5 [O]
+    unsigned int dest : 6;          // bits 6..11 [O]
+    unsigned int pad : 20;          // bits 12..31 [O]
+};
+
+CHECK_SIZE(tInputOpCodeLoad, 0x4);
+
+struct tInputOpCodeFloat {
+    float value;                    // 0x0 [O]
+};
+
+CHECK_SIZE(tInputOpCodeFloat, 0x4);
+
+union tInputOpCode {
+    tInputOpCodeBase Base;          // 0x0 [O]
+    tInputOpCodeUnary Unary;        // 0x0 [O]
+    tInputOpCodeBinary Binary;      // 0x0 [O]
+    tInputOpCodeBranch Branch;      // 0x0 [O]
+    tInputOpCodeLoad Load;          // 0x0 [O]
+    tInputOpCodeFloat Float;        // 0x0 [O]
+};
+
+CHECK_SIZE(tInputOpCode, 0x4);
+
 #endif /* INPUT_INPUTPARSE_H */

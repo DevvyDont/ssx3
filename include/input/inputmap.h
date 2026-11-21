@@ -11,7 +11,7 @@
 #include "layout.h"
 
 struct cInputMapParser;
-struct tInputOpCode;
+union tInputOpCode;                 // a union (input/inputparse.h, [O]); views group D
 
 struct cInputMap {
     int MaxMaps;                    // 0x000 [O]
