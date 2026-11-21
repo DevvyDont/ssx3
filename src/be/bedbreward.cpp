@@ -1694,7 +1694,7 @@ extern "C" void* cBEStatInterface_cBEStatInterface(cBEStatInterface* self)
 INCLUDE_ASM("be/bedbreward", cBECharacterInterface_submit__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the character interface's submit (slot 1 of its vtable D_0045AD38).
+ * Does nothing: the character interface's submit (slot 1 of its vtable cBECharacterInterface_vtbl).
  */
 void cBECharacterInterface_submit(void* self)
 {
@@ -1705,7 +1705,7 @@ void cBECharacterInterface_submit(void* self)
 INCLUDE_ASM("be/bedbreward", cBECharacterInterface_discard__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the character interface's discard (slot 2 of its vtable D_0045AD38).
+ * Does nothing: the character interface's discard (slot 2 of its vtable cBECharacterInterface_vtbl).
  */
 void cBECharacterInterface_discard(void* self)
 {
@@ -1868,7 +1868,7 @@ extern "C" void cBEScoreInterface_setScoreActive(int isActive) {
 INCLUDE_ASM("be/bedbreward", cBEEconInterface_submit__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the economy interface's submit (slot 1 of its vtable D_0045AC78).
+ * Does nothing: the economy interface's submit (slot 1 of its vtable cBEEconInterface_vtbl).
  */
 void cBEEconInterface_submit(void* self)
 {
@@ -1879,7 +1879,7 @@ void cBEEconInterface_submit(void* self)
 INCLUDE_ASM("be/bedbreward", cBEEconInterface_discard__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the economy interface's discard (slot 2 of its vtable D_0045AC78).
+ * Does nothing: the economy interface's discard (slot 2 of its vtable cBEEconInterface_vtbl).
  */
 void cBEEconInterface_discard(void* self)
 {

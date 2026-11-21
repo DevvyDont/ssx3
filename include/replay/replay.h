@@ -166,7 +166,7 @@ struct cReplay {
                                          //       access seen)
     int PauseRecordTick;                 // 0x62C [O]; [U] cReplay_reset clears it (no other retail access seen)
     int CurrentReplayCamIndex;           // 0x630 [O]; [U] cReplay_cycleReplayCameraAlgorithm steps it % 9;
-                                         //       cReplay_setCurrentReplayCamera indexes D_00445438 with it
+                                         //       cReplay_setCurrentReplayCamera indexes camSubset with it
     int CurrentInstantReplayCamIndex;    // 0x634 [O]; [U] cReplay_setupInstantReplayCameras steps it % 9
     int WriteState;                      // 0x638 [O]; [U] the save writer's state (0..11): cReplay_getSaveData switches on
                                          //       it, every step ++ it

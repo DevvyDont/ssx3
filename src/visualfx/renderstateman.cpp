@@ -1584,17 +1584,17 @@ extern "C" void cAirStreamerFX_render(sTrail_EF950* self)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", visualEffectsMan);
 #ifdef SKIP_ASM
-extern void* D_004A3B78;
+extern void* gVisualEffectsMan;
 
 /**
- * Returns the visual effects manager (D_004A3B78), which cVisualEffectsMan_cVisualEffectsMan records.
+ * Returns the visual effects manager (gVisualEffectsMan), which cVisualEffectsMan_cVisualEffectsMan records.
  *
  * Nothing in the retail code references it.
  *
  * @return the manager
  */
 extern "C" int visualEffectsMan(void) {
-    return (*(int*)&D_004A3B78);
+    return (*(int*)&gVisualEffectsMan);
 }
 #endif
 
@@ -1618,13 +1618,13 @@ struct sShadowCfg_002EFF98 {
 };
 extern sShadowCfg_002EFF98 D_004A45D4;
 extern int D_004A443C;
-extern void* D_004A3B78;
+extern void* gVisualEffectsMan;
 
 /**
  * Constructs the visual-effects manager base: empty effect slots, default effect textures, global pointer.
  *
  * Sets the vtable (+0x44), clears the 17 effect-object slots, stores 0x37 in D_004A45D4 and 0x30 in
- * D_004A443C and makes itself the manager D_004A3B78. On the graphics manager it sets view 6's specular,
+ * D_004A443C and makes itself the manager gVisualEffectsMan. On the graphics manager it sets view 6's specular,
  * patch specular, snow sparkle and rim texture ids (0x2E, 0x31, 0x44, 0x2F) and zeroes views 6 and 7 of the
  * per-view arrays m_isInNIS through m_ScreenTintOffsetB.
  *
@@ -1652,7 +1652,7 @@ extern "C" void* cVisualEffectsMan_cVisualEffectsMan(sRSMan_002EFF98* self)
     self->f[16] = 0;
     D_004A45D4.texIndex = 55;
     D_004A443C = 0x30;
-    D_004A3B78 = self;
+    gVisualEffectsMan = self;
     sRSEntry_002EFF98* rsEntries = cGraphicsMan_TheGraphicsMan_renderstateman;
     rsEntries[1].f4 = 46;
     rsEntries[2].f4 = 49;
@@ -1824,17 +1824,17 @@ extern "C" void cVisualEffectsMan_commonUpdate(cVisualEffectsMan* self, int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", aivisualEffectsMan);
 #ifdef SKIP_ASM
-extern void* D_004A3B80;
+extern void* gAIVisualEffectsMan;
 
 /**
- * Returns the AI visual effects manager (D_004A3B80), which cAIVisualEffectsMan_cAIVisualEffectsMan records.
+ * Returns the AI visual effects manager (gAIVisualEffectsMan), which cAIVisualEffectsMan_cAIVisualEffectsMan records.
  *
  * Nothing in the retail code references it.
  *
  * @return the manager
  */
 extern "C" int aivisualEffectsMan(void) {
-    return (*(int*)&D_004A3B80);
+    return (*(int*)&gAIVisualEffectsMan);
 }
 #endif
 
@@ -1842,12 +1842,12 @@ extern "C" int aivisualEffectsMan(void) {
 INCLUDE_ASM("visualfx/renderstateman", cAIVisualEffectsMan_cAIVisualEffectsMan);
 #ifdef SKIP_ASM
 extern void* cAIVisualEffectsMan_vtbl[];
-extern void* D_004A3B80;
+extern void* gAIVisualEffectsMan;
 
 /**
  * Constructs the base AI visual effects manager and makes it the current one.
  *
- * Clears +0x0, sets the vtable cAIVisualEffectsMan_vtbl at +0x4 and stores this in D_004A3B80.
+ * Clears +0x0, sets the vtable cAIVisualEffectsMan_vtbl at +0x4 and stores this in gAIVisualEffectsMan.
  *
  * @return this
  */
@@ -1855,7 +1855,7 @@ extern "C" void* cAIVisualEffectsMan_cAIVisualEffectsMan(cAIVisualEffectsMan* se
 {
     *(int*)self = 0;
     self->mVtbl = cAIVisualEffectsMan_vtbl;
-    D_004A3B80 = ((void*)self);
+    gAIVisualEffectsMan = ((void*)self);
     return ((void*)self);
 }
 #endif
@@ -2006,7 +2006,7 @@ extern char str_PS2VisualEffectsMan[];
  * Creates the visual-effects manager: allocates 0x48 bytes tagged "PS2VisualEffectsMan" and constructs a
  * cPS2VisualEffectsMan there.
  *
- * The base constructor records it in D_004A3B78; this function stores it nowhere itself.
+ * The base constructor records it in gVisualEffectsMan; this function stores it nowhere itself.
  *
  * @return the new manager
  */

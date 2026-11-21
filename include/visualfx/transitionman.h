@@ -12,7 +12,7 @@
 // Bases: cObjNode (0x00-0x10, see object/instancenode.h) and cScriptObjTransition at +0x10 (0x30 bytes: cScriptObject
 // 0x10 = mObjType/mObjID/mInUse + vptr, then cScriptObjTransition's own members); both written out inline.
 // Vtables: cTransitionMan_vtbl (0x00488158, 13 cObjNode slots; slot 1 dtor, 2 update, 4 render) at 0x0C and
-// D_00488100 (the cScriptObjTransition-in-cTransitionMan vtable; slots dtor, OnStartObjectUse, OnEndObjectUse,
+// cTransitionMan_cScriptObjTransition_vtbl (the cScriptObjTransition-in-cTransitionMan vtable; slots dtor, OnStartObjectUse, OnEndObjectUse,
 // IsTransitionPending, GetViewIndex carry delta -0x10, so those methods get the whole object) at 0x1C.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. Evidence tags:
@@ -77,7 +77,7 @@ struct cTransitionMan {
     int mObjID;                     // 0x14 [O] cScriptObject::mObjID; [R] cScriptObject ctor -1
     int mInUse;                     // 0x18 [O] cScriptObject::mInUse; [R] cScriptObject ctor 0; [U] update: > 0 -> the
                                     //       script drives the time (lw 0x18)
-    void** mScriptVtbl;             // 0x1C [R] cScriptObject's vptr: cTransitionMan's ctor/dtor store D_00488100
+    void** mScriptVtbl;             // 0x1C [R] cScriptObject's vptr: cTransitionMan's ctor/dtor store cTransitionMan_cScriptObjTransition_vtbl
                                     //       (cScriptObjTransition_vtbl from the base ctor)
     cScriptObjCameraManager* mpCameraManager; // 0x20 [O] cScriptObjTransition; [R] base ctor 0
     int mPlayerID;                  // 0x24 [O] cScriptObjTransition; [R] base ctor -1

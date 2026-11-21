@@ -1820,17 +1820,17 @@ extern "C" void* SphereTree_SphereTree(SphereTree* self)
 //100%
 INCLUDE_ASM("intersect/riderspheretree", SphereTree_init);
 #ifdef SKIP_ASM
-extern sSphereVec4 D_004FF640[8];
+extern sSphereVec4 gSphTreeAlignAxis[8];
 extern sSphereVec4 t4vect_Origin;
 
 /**
- * Resets a sphere tree's placement: default axes (D_004FF640), centre at the origin (+0x80) and scale 1 (+0x90).
+ * Resets a sphere tree's placement: default axes (gSphTreeAlignAxis), centre at the origin (+0x80) and scale 1 (+0x90).
  */
 extern "C" void SphereTree_init(SphereTree* self)
 {
     sSphereVec4* dst = (sSphereVec4*)self;
     for (int i = 0; i < 8; i++) {
-        dst[i] = D_004FF640[i];
+        dst[i] = gSphTreeAlignAxis[i];
     }
     *(sSphereVec4*)&self->transCenter = t4vect_Origin;
     self->scale = 1.0f;
@@ -1998,12 +1998,12 @@ struct sVec4_C648 : sSphereVec4 {
     sVec4_C648(const sVec3_C648& v, const float& ww) { x = v.x; y = v.y; z = v.z; w = ww; }
 };
 
-extern sSphereVec4 D_004FF640[8];
+extern sSphereVec4 gSphTreeAlignAxis[8];
 
 /**
  * Places the sphere tree with an absolute transform and scale.
  *
- * Transforms each of the four scaled default axes (D_004FF640) by @p transMat, storing it and its negative, sets the
+ * Transforms each of the four scaled default axes (gSphTreeAlignAxis) by @p transMat, storing it and its negative, sets the
  * centre (+0x80) to the tree info's scaled centre transformed by @p transMat, and the scale (+0x90) to @p scale.
  *
  * @param transMat      the transform (On Tour transMat)
@@ -2014,7 +2014,7 @@ extern "C" void SphereTree_TransformAbs(SphereTree* self, sSphereVec4* transMat,
     sSphereVec4* pos = (sSphereVec4*)self;
     sSphereVec4* neg = (sSphereVec4*)(&self->axis[7]);
     for (int i = 0; i < 4; i++) {
-        pos[i] = mtxMulVec_C648(transMat, scale_C648(D_004FF640[i], scale));
+        pos[i] = mtxMulVec_C648(transMat, scale_C648(gSphTreeAlignAxis[i], scale));
         neg[-i] = scale_C648(pos[i], -1.0f);
     }
     float* n = (float*)self->treeInfo;

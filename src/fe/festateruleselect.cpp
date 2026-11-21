@@ -795,12 +795,12 @@ extern "C" void cFEStateRuleSelect_updateMenuColor(cFEStateRuleSelect* selfp)
 //100%
 INCLUDE_ASM("fe/festateruleselect", cBraggingRightsMenu_cBraggingRightsMenu);
 #ifdef SKIP_ASM
-extern void* D_0046B078[];
+extern void* cBraggingRightsMenu_vtbl[];
 
 /**
  * Constructs one bragging-rights choice panel (0x34 bytes; the bragging-rights state holds two at +0x6D0).
  *
- * Stores the vtable D_0046B078 at +0x30 and clears the eight list-box pointers (+0x8), the menu (+0x0), the group
+ * Stores the vtable cBraggingRightsMenu_vtbl at +0x30 and clears the eight list-box pointers (+0x8), the menu (+0x0), the group
  * (+0x4), the confirmed flag (+0x28) and the row enable mask (+0x2C) (On Tour mpListBox, mpPlayerMenu, mpGroup,
  * mbConfirmed, mcItemEnableFlag).
  *
@@ -809,7 +809,7 @@ extern void* D_0046B078[];
 extern "C" void* cBraggingRightsMenu_cBraggingRightsMenu(cBraggingRightsMenu* self)
 {
     int i;
-    self->mVtbl = D_0046B078;
+    self->mVtbl = cBraggingRightsMenu_vtbl;
     for (i = 7; i >= 0; i--) {
         ((int*)(&self->mpListBox[0]))[i] = 0;
     }

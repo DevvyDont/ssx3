@@ -2624,12 +2624,12 @@ INCLUDE_ASM("bx/bxstringctor", cPath_populateEvent);
 #ifdef SKIP_ASM
 // PORT: pathREAD_tInt32 takes (dst, src); the unit declares it with one arg
 void pathREAD_tInt32_K2(void* dst, void* src) __asm__("pathREAD_tInt32");
-extern int D_004453D0[];
+extern int kEventTypeToUID[];
 
 /**
  * Reads one 16-byte path event: its type code, argument and start and end positions.
  *
- * The type code is looked up in the 21 codes of D_004453D0 and stored as its index (0 when not found); then the
+ * The type code is looked up in the 21 codes of kEventTypeToUID and stored as its index (0 when not found); then the
  * argument (+0x4) and the two floats (+0x8, +0xC, pathREAD_float) follow. cPath_initPath converts the events in place
  * with it.
  *
@@ -2644,7 +2644,7 @@ extern "C" void cPath_populateEvent(void* self, char* src, int* dst)
     src += 4;
     *dst = 0;
     for (i = 0; i < 21; i++) {
-        if (D_004453D0[i] == key) {
+        if (kEventTypeToUID[i] == key) {
             *dst = i;
             break;
         }

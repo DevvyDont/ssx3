@@ -4,7 +4,7 @@
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BEEconInt[];
-extern void* D_0045AC78[16];
+extern void* cBEEconInterface_vtbl[16];
 
 
 //99.58%
@@ -22,7 +22,7 @@ void* cBEEconInterface_getThis()
     if (cBEEconInterface_instance == 0) {
         cBEEconInterface* mem = (cBEEconInterface*)cMemMan_alloc(0x10, str_BEEconInt, 0, 0);
         mem->bIsActive = 0;
-        *(void**)&mem->mVtbl = D_0045AC78;
+        *(void**)&mem->mVtbl = cBEEconInterface_vtbl;
         cBEEconInterface_instance = (cBEEconInterface*)(mem);
     }
     return cBEEconInterface_instance;
@@ -352,7 +352,7 @@ extern "C" int cBEEconInterface_buyAttribute(cBEEconInterface* self, int humanIn
 }
 #endif
 
-extern void* D_00440550[];
+extern void* cBELibrary_attribCost[];
 
 //100%
 INCLUDE_ASM("be/beintecon", cBEEconInterface_getAttribCost__FPvi);
@@ -367,14 +367,14 @@ struct sEconTable {
 };
 
 /**
- * Returns the price of an attribute point at level @p levelIndex: the second word of entry @p levelIndex of D_00440550.
+ * Returns the price of an attribute point at level @p levelIndex: the second word of entry @p levelIndex of cBELibrary_attribCost.
  *
  * @param levelIndex  the level index (callers pass level - 1)
  * @return the price
  */
 int cBEEconInterface_getAttribCost(void* self, int levelIndex)
 {
-    return ((sEconTable*)D_00440550)->entries[levelIndex].value;
+    return ((sEconTable*)cBELibrary_attribCost)->entries[levelIndex].value;
 }
 #endif
 
@@ -385,12 +385,12 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_sellAttribute);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct sProf0E68 { char s[0xF88]; };
 struct sEcon0E68 { int a; int b; };
-extern sEcon0E68 D_00440550_0E68[] __asm__("D_00440550");
+extern sEcon0E68 D_00440550_0E68[] __asm__("cBELibrary_attribCost");
 
 /**
  * Refunds one point of attribute @p kind for character @p characterId of slot @p profile, unless the attribute is at 5.
  *
- * Adds the price D_00440550[(points - 1) / 5] to the money (+0xAC4), then increments the attribute byte (+0xBDF +
+ * Adds the price cBELibrary_attribCost[(points - 1) / 5] to the money (+0xAC4), then increments the attribute byte (+0xBDF +
  * @p kind) instead of decrementing it (likely a bug; nothing calls this function).
  *
  * @param profile  the profile slot (2 and up return 0)
@@ -554,9 +554,9 @@ struct sEconRec {
 };
 /**
  * Returns the attribute-cost table price for the next point of attribute @p attribute of character @p characterId in slot @p humanIndex:
- * D_00440550[(points + 1) / 5].
+ * cBELibrary_attribCost[(points + 1) / 5].
  *
- * Note cBEEconInterface_buyAttribute charges D_00440550[points / 5 - 1] instead.
+ * Note cBEEconInterface_buyAttribute charges cBELibrary_attribCost[points / 5 - 1] instead.
  *
  * @param humanIndex  the profile slot (2 and up return 0)
  * @param characterId  the character
@@ -593,7 +593,7 @@ extern "C" int cBEEconInterface_getCostForNextIncrement(cBEEconInterface* self, 
             attribLevel = &((sEconRec(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[6];
             break;
         }
-        return ((sEconTable*)D_00440550)->entries[(*attribLevel + 1) / 5].value;
+        return ((sEconTable*)cBELibrary_attribCost)->entries[(*attribLevel + 1) / 5].value;
     }
 }
 #endif

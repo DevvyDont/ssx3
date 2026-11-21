@@ -37,7 +37,7 @@ struct tSphTreeInfo;
 // (radius), SphereTree_MoveOffset (translate), SphereTree_TransformAbs (set transform); bxSphereTree_operatorE is operator=.
 struct bxSphereTree {
     // --- SphereTree (On Tour 0xC0)
-    t4Vector axis[8];      // 0x000 [O]; [U] SphereTree_init fills 8 qwords from D_004FF640, operator= copies them
+    t4Vector axis[8];      // 0x000 [O]; [U] SphereTree_init fills 8 qwords from gSphTreeAlignAxis, operator= copies them
     t4Vector transCenter;  // 0x080 [O]; [U] SphereTree_MoveOffset adds the offset (lqc2/sqc2 0x80); reset stores t4vect_Origin
     float scale;           // 0x090 [O]; [U] SphereTree_init stores 1.0f, SphereTree_GetResolution multiplies the radius by it
     float worstCase;       // 0x094 [O]; [U] the riderspheretree.cpp queries keep the deepest penetration here

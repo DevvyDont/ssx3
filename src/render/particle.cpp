@@ -1302,7 +1302,7 @@ void* cTube_update(void* self)
 //100%
 INCLUDE_ASM("render/particle", cSimpleTube_cSimpleTube);
 #ifdef SKIP_ASM
-extern int D_004A422C;
+extern int cSimpleTube_m_initialized;
 extern int cTube_m_R;
 extern int cTube_m_G;
 extern int cTube_m_B;
@@ -1319,14 +1319,14 @@ struct sPtVert_2520 {
     int a;          // 0x1C
     char pad[0x10];
 };
-extern sPtVert_2520 D_00501440[];
+extern sPtVert_2520 cSimpleTube_m_vertices[];
 
 
 /**
  * Constructs a segmented tube effect with @p owner segments and, the first time, fills the shared tube vertex array.
  *
- * Stores @p owner at +0x4, the tube vtable cSimpleTube_vtbl and a null point array at +0x8. While the flag D_004A422C is
- * clear it sets up all 262 shared vertices of D_00501440: alpha 0xFF, red/green/blue from the tube colour cTube_m_R,
+ * Stores @p owner at +0x4, the tube vtable cSimpleTube_vtbl and a null point array at +0x8. While the flag cSimpleTube_m_initialized is
+ * clear it sets up all 262 shared vertices of cSimpleTube_m_vertices: alpha 0xFF, red/green/blue from the tube colour cTube_m_R,
  * cTube_m_G and cTube_m_B, position x 0, z 1 and w 0, and y alternating 0 (even) and 1 (odd); then sets the flag.
  * cFlexBridgeNode's constructors build one (0xC bytes, "Tube") with NumNodes * 8 - 9 segments.
  *
@@ -1339,8 +1339,8 @@ extern "C" void* cSimpleTube_cSimpleTube(cSimpleTube* self, void* owner)
     self->m_numSegments = (int)owner;
     self->mVtbl = cSimpleTube_vtbl;
     self->m_positions = 0;
-    if (D_004A422C == 0) {
-        sPtVert_2520* vertex = D_00501440;
+    if (cSimpleTube_m_initialized == 0) {
+        sPtVert_2520* vertex = cSimpleTube_m_vertices;
         for (i = 0; i < 262; i++, vertex++) {
             vertex->a = 0xFF;
             vertex->r = cTube_m_R;
@@ -1355,7 +1355,7 @@ extern "C" void* cSimpleTube_cSimpleTube(cSimpleTube* self, void* owner)
                 vertex->y = 0.0f;
             }
         }
-        D_004A422C = 1;
+        cSimpleTube_m_initialized = 1;
     }
     return (self);
 }
@@ -1369,7 +1369,7 @@ extern float D_004A4234;
 extern float D_004A4238;
 
 /**
- * Refreshes the colour of the 262 shared tube vertices (D_00501440) when the tube colour has changed.
+ * Refreshes the colour of the 262 shared tube vertices (cSimpleTube_m_vertices) when the tube colour has changed.
  *
  * Compares the cached floats D_004A4230, D_004A4234 and D_004A4238 with the tube colour ints cTube_m_R, cTube_m_G and
  * cTube_m_B; if any differs, it writes the three ints into every vertex's r, g and b and caches the new values as
@@ -1382,7 +1382,7 @@ extern "C" void* cSimpleTube_updateColours(void* self)
     if (D_004A4230 != (float)cTube_m_R || D_004A4234 != (float)cTube_m_G || D_004A4238 != (float)cTube_m_B) {
         int i;
         for (i = 0; i < 262; i++) {
-            sPtVert_2520* vertex = &D_00501440[i];
+            sPtVert_2520* vertex = &cSimpleTube_m_vertices[i];
             vertex->r = cTube_m_R;
             vertex->g = cTube_m_G;
             vertex->b = cTube_m_B;
@@ -1463,7 +1463,7 @@ extern int cTube_m_Enable;
 extern float cTube_m_ScaleWidth;
 extern float cTube_m_ScaleHeight;
 extern sPtV4_26C8 t4vect_ZAxis;
-extern sPtVtx_26C8 D_00501440_v26C8[] __asm__("D_00501440");
+extern sPtVtx_26C8 D_00501440_v26C8[] __asm__("cSimpleTube_m_vertices");
 extern sPtRS_26C8 D_00501420_rs26C8 __asm__("sDrawState_s_defaultDrawState");
 extern sPtCtx_26C8* D_004A5B80_ctx26C8 __asm__("cGraphicsMan_TheGraphicsMan");
 
@@ -1571,7 +1571,7 @@ static inline sPtV4_26C8 Scale_26C8(const sPtV4_26C8& v, float s)
  * Does nothing while the tube enable flag cTube_m_Enable is 0. The direction is the normalised vector from point 0 to point
  * n (n = +0x4, the points at +0x8 are t4Vectors); the side vector is the normalised cross product of it with
  * t4vect_ZAxis scaled by the width cTube_m_ScaleWidth, and both it and its negation are lowered along Z by the height
- * cTube_m_ScaleHeight. For each of the n + 1 points it fills four of the shared vertices D_00501440: point + negated side and
+ * cTube_m_ScaleHeight. For each of the n + 1 points it fills four of the shared vertices cSimpleTube_m_vertices: point + negated side and
  * the point for the first strip, the point and point + side for the second; two extra vertices copy their neighbours so
  * the two strips join in one degenerate tri strip.
  *
@@ -5830,7 +5830,7 @@ struct sPtQuadF {
 extern char D_80[];
 extern char D_70[];
 extern char D_398[];
-extern int D_004A4510;
+extern int cRenderToggles_m_DisablePlayerStrips;
 extern int cRenderToggles_m_DisableCharacterSpecular;
 
 
@@ -5981,7 +5981,7 @@ static inline void SetTex2_A610(cPS2GraphicsMan* self, int t)
 /**
  * Draws a skinned character model.
  *
- * Unless D_004A4510 is set: pushes the draw state, starts the batch with slot 124 (cPS2GraphicsMan_InitCharMatrices, InitCharMatrices) and
+ * Unless cRenderToggles_m_DisablePlayerStrips is set: pushes the draw state, starts the batch with slot 124 (cPS2GraphicsMan_InitCharMatrices, InitCharMatrices) and
  * walks the model's chunks, binding each chunk's texture and emitting its geometry with the bone matrices. With @p
  * shadow set it changes the draw state for the shadow pass (alpha and Z-test fields) and skips the per-chunk material
  * flags.
@@ -5993,7 +5993,7 @@ static inline void SetTex2_A610(cPS2GraphicsMan* self, int t)
 // PORT: PS2-only DMA/VIF packet build; uncached (0x30000000) pointers held in int.
 extern "C" void cPS2GraphicsMan_DrawCharModel(cPS2GraphicsMan* self, sMdl_A610* mdl, char* base, int shadow)
 {
-    if (D_004A4510 == 0) {
+    if (cRenderToggles_m_DisablePlayerStrips == 0) {
         (self->m_pCurrentDrawState)[1] = *(self->m_pCurrentDrawState);
         (*(sDrawState**)&self->m_pCurrentDrawState)++;
         ((sPtVtVF_A610*)self->mVtbl)[124].fn((char*)self + ((sPtVtVF_A610*)self->mVtbl)[124].delta, 1.0f);
@@ -8601,7 +8601,7 @@ struct sPtGfx_0518 {
     int texReady;                   // 0x6B90
 };
 
-extern int D_004A44F8;
+extern int cRenderToggles_m_DisableStaticEmitters;
 extern int D_004A4474;
 extern char D_0[];
 extern "C" unsigned long* func_0038F460(int dma, unsigned int buf, int a2, int a3);
@@ -8622,7 +8622,7 @@ static inline void CopyQuads_0518(unsigned long** pp, const void* srcp, int n)
 /**
  * Draws a static particle system.
  *
- * Does nothing while D_004A44F8 is set. Pushes the render state with the particle mode, copies 21 qwords of @p obj (the
+ * Does nothing while cRenderToggles_m_DisableStaticEmitters is set. Pushes the render state with the particle mode, copies 21 qwords of @p obj (the
  * tParticleEmitter) into a packet followed by a VIF call of the microprogram, queues it on the render ring and pops the
  * state.
  *
@@ -8630,7 +8630,7 @@ static inline void CopyQuads_0518(unsigned long** pp, const void* srcp, int n)
  */
 extern "C" void cPS2GraphicsMan_RenderParticleEmitter(sPtGfx_0518* self, sQuad_0518* obj)
 {
-    if (D_004A44F8 != 0)
+    if (cRenderToggles_m_DisableStaticEmitters != 0)
         return;
     self->top[1] = *self->top;
     self->top++;
@@ -11185,10 +11185,10 @@ INCLUDE_ASM("render/particle", cGridMesh__cGridMesh);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_00493938[];
+extern char cGarbageMan_vtbl[];
 
 /**
- * Destroys a grid mesh's base part: stores the base vtable D_00493938 (+0x4) and frees the object when bit 0 of
+ * Destroys a grid mesh's base part: stores the base vtable cGarbageMan_vtbl (+0x4) and frees the object when bit 0 of
  * @p flags is set.
  *
  * Slot 1 of the abstract grid-mesh vtable (whose other slots are pure virtual, apart from cGridMesh_SetScale__FPv);
@@ -11198,7 +11198,7 @@ extern char D_00493938[];
  */
 extern "C" void cGridMesh__cGridMesh(int* self, int flags)
 {
-    *(void**)((char*)self + 0x4) = D_00493938;
+    *(void**)((char*)self + 0x4) = cGarbageMan_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -13396,7 +13396,7 @@ INCLUDE_ASM("render/particle", func_00389590);
  * by @p weights' y, y by its z, z by its w and w by its x (the tint is a, r, g, b).
  *
  * func_00389C38 adds the irradiance database's default entry with it, and the front-end rider lighting
- * (cFERider_render) adds the entry for the rider's name, both tinted by D_00504810.
+ * (cFERider_render) adds the entry for the rider's name, both tinted by cIrradiance_kv4White.
  *
  * @param dst  the set to add to
  * @param src  the set to add
@@ -13621,14 +13621,14 @@ struct sPartLib_9C38 {
     void* items;    // 0x8
 };
 extern sPartLib_9C38 cIrradianceDataBase_TheDataBase;
-extern sPartVec4 D_00504810;
+extern sPartVec4 cIrradiance_kv4White;
 
 /**
  * Builds the default irradiance set in @p self: clears it, adds the irradiance database's default entry and, when
  * @p sunPos is given, a sun term.
  *
  * Clears the set (cIrradiance_Clear); when the database cIrradianceDataBase_TheDataBase has entries, adds entry cIrradianceDataBase_mDefaultId (cIrradianceDataBase_Get)
- * tinted by D_00504810 (func_00389590, scale 1); when @p sunPos is not 0 adds the sun term for that position with
+ * tinted by cIrradiance_kv4White (func_00389590, scale 1); when @p sunPos is not 0 adds the sun term for that position with
  * func_00389CB8 (scale 1). func_00122048 in ai/rider calls it with @p sunPos = 0.
  *
  * @param sunPos  the sun position passed to func_00389CB8, or 0 for none
@@ -13638,7 +13638,7 @@ extern "C" void func_00389C38(sPartVec4* self, void* sunPos)
     cIrradiance_Clear(self);
     sPartLib_9C38* lib = &cIrradianceDataBase_TheDataBase;
     if (lib->count > 0) {
-        func_00389590(self, (sPartVec4*)cIrradianceDataBase_Get((cIrradianceDataBase*)lib, cIrradianceDataBase_mDefaultId), &D_00504810, 1.0f);
+        func_00389590(self, (sPartVec4*)cIrradianceDataBase_Get((cIrradianceDataBase*)lib, cIrradianceDataBase_mDefaultId), &cIrradiance_kv4White, 1.0f);
     }
     if (sunPos != 0) {
         func_00389CB8(self, sunPos, 1.0f);

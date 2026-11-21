@@ -37,13 +37,13 @@ struct cScriptCameraController;
 struct cRider;
 
 // cRiderCameraTarget (0x8): what the chase algorithms follow: a cCameraTarget (On Tour: 0x4, only the vptr) bound to a
-// rider. Created by cCamera_init: operator new(8, "RiderCameraTarget") + vtable D_0045B7A8 (26 slots, all in
+// rider. Created by cCamera_init: operator new(8, "RiderCameraTarget") + vtable cRiderCameraTarget_vtbl (26 slots, all in
 // camera/camera.cpp 0x15F568-0x15F938: getPosition, getRotation, getVelocity ... each reads Rider), then handed to
 // the chase controller (cChaseCameraController_setTarget) and the result algorithm (cChaseAlgorithm_setTarget).
 // NOTE: its t4Vector-returning slots (cRiderCameraTarget_getPosition .. cRiderCameraTarget_getLastGroundNormal, except cRiderCameraTarget_getLean) take the hidden return
 // slot in a0 and `this` in a1.
 struct cRiderCameraTarget {
-    void** mVtbl;               // 0x0 [R] D_0045B7A8 (cCamera_init); cCameraTarget declares the virtuals
+    void** mVtbl;               // 0x0 [R] cRiderCameraTarget_vtbl (cCamera_init); cCameraTarget declares the virtuals
     cRider* Rider;              // 0x4 [O]; [P] getRider (lw) / setRider (sw); [R] cCamera_init stores the view's rider;
                                 //     [U] all 26 slots lw 0x4; cRiderCameraTarget_setRider setRider, cRiderCameraTarget_getRider getRider
 };

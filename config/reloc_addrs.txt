@@ -508,11 +508,11 @@ rom:0x216740 reloc:MIPS_LO16 symbol:D_004FE6C0
 rom:0x21678C reloc:MIPS_LO16 symbol:D_004FE720
 // animation/gameanimmap func_00315A20 (tools/gen/reloc_from_diff.py)
 rom:0x216B28 reloc:MIPS_HI16 symbol:D_004FEB50
-rom:0x216B64 reloc:MIPS_LO16 symbol:D_004FE980
-rom:0x216B8C reloc:MIPS_LO16 symbol:D_004FE9A0
+rom:0x216B64 reloc:MIPS_LO16 symbol:cfm_sav_Physics_Turn_kDigMult
+rom:0x216B8C reloc:MIPS_LO16 symbol:cfm_sav_Physics_Turn_kMaxTurnKickAngle
 rom:0x216BD0 reloc:MIPS_LO16 symbol:D_004FEB50
-rom:0x216C58 reloc:MIPS_LO16 symbol:D_004FE9C0
-rom:0x216C9C reloc:MIPS_LO16 symbol:D_004FEA00
+rom:0x216C58 reloc:MIPS_LO16 symbol:cfm_sav_Physics_Turn_kKickAngleSpeed
+rom:0x216C9C reloc:MIPS_LO16 symbol:cfm_sav_Physics_Turn_kSteerTuneMaxAttribEffect
 rom:0x217034 reloc:MIPS_HI16 symbol:D_004FEB10
 rom:0x21703C reloc:MIPS_LO16 symbol:D_004FEB10
 rom:0x2170DC reloc:MIPS_HI16 symbol:D_004FEBF0
@@ -565,10 +565,10 @@ rom:0xDD348 reloc:MIPS_LO16 symbol:D_004C6638
 rom:0xDD35C reloc:MIPS_LO16 symbol:D_004C6648
 rom:0xDD478 reloc:MIPS_LO16 symbol:D_004C6698
 rom:0xDD670 reloc:MIPS_LO16 symbol:D_004C6708
-rom:0xDD72C reloc:MIPS_HI16 symbol:D_004C67F8
+rom:0xDD72C reloc:MIPS_HI16 symbol:gtNonSelectedKey
 rom:0xDD738 reloc:MIPS_HI16 symbol:D_004C6818
-rom:0xDD7A4 reloc:MIPS_LO16 symbol:D_004C67F8
-rom:0xDD814 reloc:MIPS_LO16 symbol:D_004C67F8
+rom:0xDD7A4 reloc:MIPS_LO16 symbol:gtNonSelectedKey
+rom:0xDD814 reloc:MIPS_LO16 symbol:gtNonSelectedKey
 rom:0xDD828 reloc:MIPS_LO16 symbol:D_004C6818
 rom:0xDD83C reloc:MIPS_LO16 symbol:D_004C6818
 

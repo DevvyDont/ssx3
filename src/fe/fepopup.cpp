@@ -550,7 +550,7 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_setupBackgroundType);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cScreenPopup_hideWidgetSafe(cScreenPopup* self, void* obj);
 extern "C" void cScreenPopup_showWidgetSafe(cScreenPopup* self, void* obj);
-extern sQuad_58E8 D_004C67A8;
+extern sQuad_58E8 gPopupBlue;
 
 struct sVEp_C66E8 {
     short delta;
@@ -698,7 +698,7 @@ extern "C" void cScreenPopup_setupBackgroundType_impl(char* self)
                 vt[11].fn(frameWidget + vt[11].delta, &gPopupWhite);
             }
         }
-        *(sQuad_58E8*)(self + 0x32C) = D_004C67A8;
+        *(sQuad_58E8*)(self + 0x32C) = gPopupBlue;
         *(sQuad_58E8*)(self + 0x33C) = gPopupWhite;
         break;
     }
@@ -5742,10 +5742,10 @@ extern "C" void cKeyboardPopup_SetNameForKey(cKeyboardPopup* self, cUIText* text
 extern "C" void cKeyboardPopup_checkAndFixConflict(cKeyboardPopup* self);
 extern signed char cKeyboardPopup_m_KeyValues[];
 extern signed char cKeyboardPopup_m_AltValues[];
-extern char D_004C67B8[];
-extern char D_004C67C8[];
-extern char D_004C67E8[];
-extern char D_004C67F8[];
+extern char gtStaticColor[];
+extern char gtNotStatic[];
+extern char gtSelectedKey[];
+extern char gtNonSelectedKey[];
 
 /**
  * Redraws every key of the keyboard: labels, availability colours, cursor objects and the highlight.
@@ -5753,7 +5753,7 @@ extern char D_004C67F8[];
  * Special keys get their labels from cKeyboardPopup_SetNameForKey(); character keys show the upper or lower
  * character (caps xor shift; keys 15-26 follow shift alone) and are coloured by
  * cKeyboardPopup_allowSelection(). Cursor objects of keys 0-13 are hidden in the compact layout (meType 1).
- * The current key's cursor gets the highlight colour D_004C67E8. Does nothing without a screen.
+ * The current key's cursor gets the highlight colour gtSelectedKey. Does nothing without a screen.
  */
 extern "C" void cKeyboardPopup_redrawScreen(cKeyboardPopup* self)
 {
@@ -5791,10 +5791,10 @@ extern "C" void cKeyboardPopup_redrawScreen(cKeyboardPopup* self)
                 cUIText_setAsciiString(text, ch);
                 if (cKeyboardPopup_allowSelection(self, i, 0) == 0) {
                     sVEntry_D708* vt = *(sVEntry_D708**)((char*)text + 8);
-                    vt[11].fn((char*)text + vt[11].delta, D_004C67B8);
+                    vt[11].fn((char*)text + vt[11].delta, gtStaticColor);
                 } else {
                     sVEntry_D708* vt = *(sVEntry_D708**)((char*)text + 8);
-                    vt[11].fn((char*)text + vt[11].delta, D_004C67C8);
+                    vt[11].fn((char*)text + vt[11].delta, gtNotStatic);
                 }
             }
         }
@@ -5812,7 +5812,7 @@ extern "C" void cKeyboardPopup_redrawScreen(cKeyboardPopup* self)
             } else {
                 {
                     sVEntry_D708* vt = *(sVEntry_D708**)(uiObj + 8);
-                    vt[11].fn(uiObj + vt[11].delta, D_004C67F8);
+                    vt[11].fn(uiObj + vt[11].delta, gtNonSelectedKey);
                 }
                 {
                     sVEntry_D708* vt = *(sVEntry_D708**)(uiObj + 8);
@@ -5825,7 +5825,7 @@ extern "C" void cKeyboardPopup_redrawScreen(cKeyboardPopup* self)
     char* uiObj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
     if (uiObj != 0) {
         sVEntry_D708* vt = *(sVEntry_D708**)(uiObj + 8);
-        vt[11].fn(uiObj + vt[11].delta, D_004C67E8);
+        vt[11].fn(uiObj + vt[11].delta, gtSelectedKey);
     }
 }
 #endif
@@ -5835,8 +5835,8 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_SetNameForKey);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int cKeyboardPopup_allowSelection(cKeyboardPopup* self, int key, int a2);
-extern char D_004C67B8[];
-extern char D_004C67C8[];
+extern char gtStaticColor[];
+extern char gtNotStatic[];
 extern char str_Qpct_d_b[];
 extern char str_kT_POPUPKeyboardBackspace[];
 extern char str_kT_POPUPKeyboardCapsLock[];
@@ -5884,9 +5884,9 @@ extern "C" void cKeyboardPopup_SetNameForKey(cKeyboardPopup* vself, cUIText* tex
         return;
     }
     if (cKeyboardPopup_allowSelection(vself, key, 0) == 0) {
-        SetColor_1CD9B8(text, D_004C67B8);
+        SetColor_1CD9B8(text, gtStaticColor);
     } else {
-        SetColor_1CD9B8(text, D_004C67C8);
+        SetColor_1CD9B8(text, gtNotStatic);
     }
     switch (key) {
     case 27:
@@ -5894,11 +5894,11 @@ extern "C" void cKeyboardPopup_SetNameForKey(cKeyboardPopup* vself, cUIText* tex
         break;
     case 42:
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_POPUPKeyboardCapsLock));
-        SetColor_1CD9B8(text, D_004C67C8);
+        SetColor_1CD9B8(text, gtNotStatic);
         break;
     case 56:
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_POPUPKeyboardShift));
-        SetColor_1CD9B8(text, D_004C67C8);
+        SetColor_1CD9B8(text, gtNotStatic);
         break;
     case 70:
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_POPUPKeyboardClear));

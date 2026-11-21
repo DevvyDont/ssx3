@@ -370,7 +370,7 @@ struct sM_D928 {
     float m[4][4];
 } __attribute__((aligned(16)));
 
-extern char D_004C53A0[];
+extern char CamAxisFlip[];
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
 static inline void vu0CopyMtx_D928(void* dst, void* src)
@@ -496,13 +496,13 @@ static inline void vu0TransMtx_D928(void* m, const sV_D928& v)
 
 extern "C" void cSimpleCamera_updateCamMat_impl(void* self) __asm__("cSimpleCamera_updateCamMat");
 /**
- * Rebuilds CamMat from Pose: the axis-flip matrix D_004C53A0 times the rotation of Pose's quaternion, translated by
+ * Rebuilds CamMat from Pose: the axis-flip matrix CamAxisFlip times the rotation of Pose's quaternion, translated by
  * minus Pose's position (w = 1). Direction is not updated.
  */
 extern "C" void cSimpleCamera_updateCamMat_impl(void* self)
 {
     char* view = (char*)self + 0x40;
-    vu0CopyMtx_D928(view, D_004C53A0);
+    vu0CopyMtx_D928(view, CamAxisFlip);
     sM_D928 rot;
     vu0QuatToMtx_D928(&rot, *(sV_D928*)((char*)self + 0x30));
     vu0MulMtx_D928(view, view, &rot);

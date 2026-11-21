@@ -7,7 +7,7 @@
 // `this` and read the character table cBELibrary_characterDB (0x88-byte records; On Tour: cBELibrary::characterDB) through the
 // rider's character ID. One instance,
 // created on demand by cBECharacterInterface_getThis (`cMemMan_alloc(0x10, "BECharInt", 0, 0)`, bIsActive = 0,
-// vtable D_0045AD38) into cBECharacterInterface::instance (retail cBECharacterInterface_instance, D_004A1208); the
+// vtable cBECharacterInterface_vtbl) into cBECharacterInterface::instance (retail cBECharacterInterface_instance, D_004A1208); the
 // rest of the game reaches it as cBE_getInterface(cBE_getBE(), 2). EA's source:
 // d:/ssx/code/source/be/beintcharacter.cpp
 // (preview assert string); in retail getThis and the name getters sit at the end of the be/beintnetwork unit, the rest
@@ -17,7 +17,7 @@
 // Size 0x10 [R] (the allocation; the July 2003 preview's getThis allocates 0x10 too). [O] On Tour's
 // cBECharacterInterface has no data members of its own (size 0x8 = its cBEInterface), and neither does retail's.
 // Base cBEInterface, written out inline as in be/beintreward.h, whose kBEInterfaceVt_* slot enum applies: vtable
-// D_0045AD38 (0x45AD38, unnamed in symbol_addrs), slot 1 submit = cBECharacterInterface_submit (empty), slot 2 discard
+// cBECharacterInterface_vtbl (0x45AD38, unnamed in symbol_addrs), slot 1 submit = cBECharacterInterface_submit (empty), slot 2 discard
 // =
 // cBECharacterInterface_discard (empty), slots 3/4 cBEInterface_writeToReplayFrame / cBEInterface_readFromReplayFrame.
 //
@@ -39,7 +39,7 @@ struct cBECharacterInterface {
     int bDataChanged;                // 0x004 [O] cBEInterface::bDataChanged; no retail access seen
     int bIsActive;                   // 0x008 [O] cBEInterface::bIsActive; [R] getThis sets 0; [U]
                                      //       cBEPreRaceState_onEnter/onExit, cBEPostRaceState_onEnter/onExit set 0/1
-    void** mVtbl;                    // 0x00C [R] getThis stores D_0045AD38; no virtual call through it seen
+    void** mVtbl;                    // 0x00C [R] getThis stores cBECharacterInterface_vtbl; no virtual call through it seen
 };
 
 extern cBECharacterInterface* cBECharacterInterface_instance;

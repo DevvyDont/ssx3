@@ -1083,7 +1083,7 @@ extern "C" void func_0031A3C0(void* buf);
 /**
  * Restores the VU0 state saved at +0x14080 (func_0031A3C0) when a loader job is pending (+0x14048).
  *
- * Slot 11 of the PS2 execution manager vtable D_0048DB68 (cExecutionMan_prepause in the base vtable); cPS2ExecutionMan_wait
+ * Slot 11 of the PS2 execution manager vtable cPS2ExecutionMan_vtbl (cExecutionMan_prepause in the base vtable); cPS2ExecutionMan_wait
  * calls it before it blocks on the sync semaphore.
  */
 extern "C" void cPS2ExecutionMan_prepause(cPS2ExecutionMan* self)
@@ -1100,7 +1100,7 @@ INCLUDE_ASM("bx/memblockman", cPS2ExecutionMan_postpause);
 /**
  * Saves the VU0 state into the buffer at +0x14080 (func_0031A308) when a loader job is pending (+0x14048).
  *
- * Slot 12 of the PS2 execution manager vtable D_0048DB68 (cExecutionMan_postpause in the base vtable); cPS2ExecutionMan_wait
+ * Slot 12 of the PS2 execution manager vtable cPS2ExecutionMan_vtbl (cExecutionMan_postpause in the base vtable); cPS2ExecutionMan_wait
  * calls it after its wait on the sync semaphore ends.
  */
 extern "C" void cPS2ExecutionMan_postpause(cPS2ExecutionMan* self)
@@ -1189,7 +1189,7 @@ INCLUDE_ASM("bx/memblockman", cPS2ExecutionMan_signalHalt);
 /**
  * Signals the halt semaphore (+0xC), releasing a thread blocked in cPS2ExecutionMan_waitHalt, then sleeps forever.
  *
- * Slot 14 of the PS2 execution manager vtable D_0048DB68; cExecutionMan_checkHalt calls it after running the halt
+ * Slot 14 of the PS2 execution manager vtable cPS2ExecutionMan_vtbl; cExecutionMan_checkHalt calls it after running the halt
  * callback when its flag is set (cAppMan_checkHalt passes 1). Never returns.
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -1224,7 +1224,7 @@ struct sMbOwner_AB30 {
 /**
  * Halts the PS2 execution manager: stops the timer wake-ups and the loader thread, then runs or waits for the halt.
  *
- * Slot 13 of the PS2 execution manager vtable D_0048DB68, called by cExecutionMan_halt once it has stored the halt
+ * Slot 13 of the PS2 execution manager vtable cPS2ExecutionMan_vtbl, called by cExecutionMan_halt once it has stored the halt
  * callback. Sets the halt-request flag (+0x4038, which stops func_0031ABD0 waking the timer thread) and, unless it
  * runs on the loader thread (+0x14040), suspends that thread. On the main thread (+0x10) it runs
  * cExecutionMan_checkHalt(self, 0) directly; on any other thread it calls vtable slot 5 (cPS2ExecutionMan_sync, which wakes
@@ -1253,7 +1253,7 @@ extern "C" void cPS2ExecutionMan_halt(void* self)
 INCLUDE_ASM("bx/memblockman", cPS2ExecutionMan_setTimerHz__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing (slot 7 of the PS2 execution manager vtable D_0048DB68).
+ * Does nothing (slot 7 of the PS2 execution manager vtable cPS2ExecutionMan_vtbl).
  */
 void cPS2ExecutionMan_setTimerHz(void* self)
 {
@@ -1264,7 +1264,7 @@ void cPS2ExecutionMan_setTimerHz(void* self)
 INCLUDE_ASM("bx/memblockman", cPS2ExecutionMan_getTimerHz__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns 60 (slot 8 of the PS2 execution manager vtable D_0048DB68).
+ * Returns 60 (slot 8 of the PS2 execution manager vtable cPS2ExecutionMan_vtbl).
  *
  * @return 60
  */

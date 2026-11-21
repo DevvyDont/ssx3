@@ -128,14 +128,14 @@ void* AIsetseed(void* self)
 }
 #endif
 
-extern void* D_0048DCB0[];
+extern void* InitSeed[];
 extern "C" void* MEM_copy(void*, void*, int);
 
 //100%
 INCLUDE_ASM("bx/bxrandom", cRandom_init__FPv);
 #ifdef SKIP_ASM
 /**
- * Resets a random generator's six-word state to the fixed default state D_0048DCB0 (MEM_copy of 0x18 bytes).
+ * Resets a random generator's six-word state to the fixed default state InitSeed (MEM_copy of 0x18 bytes).
  *
  * Static initialisation runs it on BXrandom, AIrandom and GMrandom.
  *
@@ -143,7 +143,7 @@ INCLUDE_ASM("bx/bxrandom", cRandom_init__FPv);
  */
 void* cRandom_init(void* self)
 {
-    return MEM_copy(self, (void*)D_0048DCB0, 0x18);
+    return MEM_copy(self, (void*)InitSeed, 0x18);
 }
 #endif
 

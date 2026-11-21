@@ -5,7 +5,7 @@
 // effect system (render toggles, light glow, plants, depth and height fog, detail textures, screen tint, shadow, snow
 // surface, board trail, flags, power-up / snowfall / splash toggles, tube, path arrow); most of their state is static.
 // An abstract base (update and render are pure virtuals, func_00411530) whose ctor clears the 17 slots, sets default
-// effect texture ids on the graphics manager and makes the object the current manager (D_004A3B78, returned by
+// effect texture ids on the graphics manager and makes the object the current manager (gVisualEffectsMan, returned by
 // visualEffectsMan()); commonUpdate copies one camera's render-state values into the effect statics and the graphics
 // manager's per-view arrays. cVisualEffectsMan_construct builds the platform class cPS2VisualEffectsMan, whose ctor
 // allocates the 17 objects (4 bytes each) and whose update / render call each one's slots 2 / 3 (then commonUpdate per

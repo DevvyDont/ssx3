@@ -4924,7 +4924,7 @@ extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n,
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int fptodp(float f);
 extern char str_pct_3f_999[];
-extern char* D_00487470[];
+extern char* ColorNames[];
 
 struct sRect_2CEEE8 { float x, y, w, h; };
 
@@ -4980,8 +4980,8 @@ extern "C" sRect_2CEEE8* cColorMenuItem_preRender(sRect_2CEEE8* ret, sMenuValueI
     rect.x = z;
     sFont_2CEEE8* font = font_2CEEE8(item);
     rect.h = (float)font->lineHeight * font->scaleY + 12.0f;
-    rect.w = MAX_2CEEE8(MAX_2CEEE8(textWidth_2CEEE8(item, D_00487470[0]), textWidth_2CEEE8(item, D_00487470[1])),
-                     textWidth_2CEEE8(item, D_00487470[2]));
+    rect.w = MAX_2CEEE8(MAX_2CEEE8(textWidth_2CEEE8(item, ColorNames[0]), textWidth_2CEEE8(item, ColorNames[1])),
+                     textWidth_2CEEE8(item, ColorNames[2]));
     rect.w = rect.w + textWidth_2CEEE8(item, buf) + 144.0f;
     *ret = rect;
     return ret;
@@ -4996,7 +4996,7 @@ extern "C" void cFont_text(void* self, float x, float y, const char* str);
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 extern "C" int fptodp(float f);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char* D_00487470[];
+extern char* ColorNames[];
 extern char str_pct_3f_pct_03d[];
 
 struct sVEntry_2CF1C8 {
@@ -5146,7 +5146,7 @@ extern "C" void cColorMenuItem_render(cColorMenuItem* self, float* rect)
     *(cMenuItem_textRender1_sColor*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x40) = textClr;
     *(sVec2_2CF1C8*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x28) = sVec2_2CF1C8(2.0f, 2.0f);
     cFont_text(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + 16.0f, rect[1] + 6.0f - 1.0f,
-                  D_00487470[self->Adjust]);
+                  ColorNames[self->Adjust]);
     char buf[0x10];
     sprintf(buf, str_pct_3f_pct_03d,
             fptodp(*(float*)((char*)self->Color + (self->Adjust << 2))),

@@ -314,10 +314,10 @@ int cRider_getMotionState(void* self);
 int cRiderAnimBase_getCurrentAnimID(void* self, int a1);
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void* self, int a1);
 extern "C" int tEventFlags_isSet1(void* self, int a1);
-extern float D_004A4590;
-extern float D_004A4594;
-extern float D_004A4598;
-extern float D_004A459C;
+extern float cBoardTrail_m_PackedDepthScale;
+extern float cBoardTrail_m_LooseDepthScale;
+extern float cBoardTrail_m_PowderDepthScale;
+extern float cBoardTrail_m_DeepPowderDepthScale;
 
 static inline int boardTrailCanDraw(char* r)
 {
@@ -333,8 +333,8 @@ static inline int boardTrailCanDraw(char* r)
  * animation (cRiderAnimBase_getCurrentAnimID on mRiderAnim) is 22 and tEventFlags_isSet1 on its sequence (+0xB0) is true for
  * 0 but false for 1, there is no trail either.
  *
- * Then by mSurfaceType: 1 sets D_004A4594 (0); 0, 5, 6 and 12 set D_004A4590 (5); 2 and 13 set D_004A4598 (-20); 3 sets
- * D_004A459C (-40). Any other surface gives no trail. cBoardTrailFX_update closes the trail when it returns 0.
+ * Then by mSurfaceType: 1 sets cBoardTrail_m_LooseDepthScale (0); 0, 5, 6 and 12 set cBoardTrail_m_PackedDepthScale (5); 2 and 13 set cBoardTrail_m_PowderDepthScale (-20); 3 sets
+ * cBoardTrail_m_DeepPowderDepthScale (-40). Any other surface gives no trail. cBoardTrailFX_update closes the trail when it returns 0.
  *
  * @return 1 when a trail is laid, otherwise 0
  */
@@ -357,20 +357,20 @@ extern "C" int cBoardTrailFX_shouldPlow(char** self)
     }
     switch (*(int*)(self[0] + 0x438)) {
     case 1:
-        *(float*)((char*)self + 0x9C) = D_004A4594;
+        *(float*)((char*)self + 0x9C) = cBoardTrail_m_LooseDepthScale;
         return 1;
     case 0:
     case 5:
     case 6:
     case 12:
-        *(float*)((char*)self + 0x9C) = D_004A4590;
+        *(float*)((char*)self + 0x9C) = cBoardTrail_m_PackedDepthScale;
         return 1;
     case 2:
     case 13:
-        *(float*)((char*)self + 0x9C) = D_004A4598;
+        *(float*)((char*)self + 0x9C) = cBoardTrail_m_PowderDepthScale;
         return 1;
     case 3:
-        *(float*)((char*)self + 0x9C) = D_004A459C;
+        *(float*)((char*)self + 0x9C) = cBoardTrail_m_DeepPowderDepthScale;
         return 1;
     }
     return 0;
@@ -935,8 +935,8 @@ INCLUDE_ASM("visualfx/boardtrailfx", cBoardTrailFX_render);
 struct sMtxEntry_A480 {
     int v[5];
 };
-extern int D_004A4518;
-extern int D_004A451C;
+extern int cRenderToggles_m_DisableBoardTrail;
+extern int cRenderToggles_m_DisableAIBoardTrail;
 struct sRenderCtx_A480 {
     char pad[0xE84];
     sMtxEntry_A480* top;
@@ -969,15 +969,15 @@ static inline void pop_A480(sRenderCtx_A480* ctx)
 /**
  * Board trail render stub: pushes and pops a draw state but draws nothing.
  *
- * Returns early when D_004A4518 is set, when D_004A451C is set and the rider part's virtual slot 9 is true,
+ * Returns early when cRenderToggles_m_DisableBoardTrail is set, when cRenderToggles_m_DisableAIBoardTrail is set and the rider part's virtual slot 9 is true,
  * or with fewer than 2 segments (+0x90).
  */
 extern "C" void cBoardTrailFX_render(cBoardTrailFX* self)
 {
-    if (D_004A4518 != 0) {
+    if (cRenderToggles_m_DisableBoardTrail != 0) {
         return;
     }
-    if (D_004A451C != 0) {
+    if (cRenderToggles_m_DisableAIBoardTrail != 0) {
         cBoardTrailFX_render_cObj* being = (cBoardTrailFX_render_cObj*)(*(char**)self + 0x6C0);
         if (being->isComputer() != 0) {
             return;

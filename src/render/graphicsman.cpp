@@ -495,11 +495,11 @@ int cGraphicsMan_CreateScreenGrabTexture(void* self, void* screenGrabHandle)
 //100%
 INCLUDE_ASM("render/graphicsman", cGarbageMan_Trash);
 #ifdef SKIP_ASM
-extern int D_004A5B88;
-extern void* D_0053AB40[];
+extern int cGarbageMan_mCurCan;
+extern void* cGarbageMan_mCan[];
 
 /**
- * Pushes node @p n onto the current deferred-delete list D_0053AB40[D_004A5B88].
+ * Pushes node @p n onto the current deferred-delete list cGarbageMan_mCan[cGarbageMan_mCurCan].
  *
  * Stores the old list head in the node's first word and makes the node the head. The node's second word is its vtable:
  * cGarbageMan_Update later deletes it through the virtual destructor. No return statement although declared to return void*.
@@ -511,7 +511,7 @@ extern void* D_0053AB40[];
 extern "C" void* cGarbageMan_Trash(int n)
 {
     void** node = (void**)n;
-    void** head = &D_0053AB40[D_004A5B88];
+    void** head = &cGarbageMan_mCan[cGarbageMan_mCurCan];
     *node = *head;
     *head = node;
 }
@@ -520,8 +520,8 @@ extern "C" void* cGarbageMan_Trash(int n)
 //100%
 INCLUDE_ASM("render/graphicsman", cGarbageMan_Update);
 #ifdef SKIP_ASM
-extern int D_004A5B88;
-extern void* D_0053AB40[];
+extern int cGarbageMan_mCurCan;
+extern void* cGarbageMan_mCan[];
 
 class cGmNode_A1E8 {
 public:
@@ -532,20 +532,20 @@ public:
 /**
  * Advances to the next of the four deferred-delete lists and deletes every object on it.
  *
- * D_004A5B88 = (D_004A5B88 + 1) % 4; each node of D_0053AB40[D_004A5B88] is deleted through its virtual destructor
+ * cGarbageMan_mCurCan = (cGarbageMan_mCurCan + 1) % 4; each node of cGarbageMan_mCan[cGarbageMan_mCurCan] is deleted through its virtual destructor
  * (next pointer at +0, vtable at +4), then the list is cleared. An object queued by cGarbageMan_Trash is therefore deleted
  * on the fourth call after it was queued. cGame_render calls it once per frame.
  */
 extern "C" void cGarbageMan_Update()
 {
-    D_004A5B88 = (D_004A5B88 + 1) % 4;
-    cGmNode_A1E8* n = (cGmNode_A1E8*)D_0053AB40[D_004A5B88];
+    cGarbageMan_mCurCan = (cGarbageMan_mCurCan + 1) % 4;
+    cGmNode_A1E8* n = (cGmNode_A1E8*)cGarbageMan_mCan[cGarbageMan_mCurCan];
     while (n != 0) {
         cGmNode_A1E8* next = n->next;
         delete n;
         n = next;
     }
-    D_0053AB40[D_004A5B88] = 0;
+    cGarbageMan_mCan[cGarbageMan_mCurCan] = 0;
 }
 #endif
 
@@ -1284,7 +1284,7 @@ INCLUDE_ASM("render/graphicsman", func_0036C188);
  * FRAME_1 is @p x >> 5, width @p w / 64 (at least 1), PSMCT24 with alpha masked; XYOFFSET 0; ALPHA 0xA1 ((Cd - Cs) *
  * FIX) with FIX = @p alpha; PRIM 0x146 (untextured sprites with blending) in colour @p grey. It draws @p w / 32 sprites
  * covering @p w x @p y. Likely bug: a width below 32 makes the strip count 0 and the step computation divides by zero;
- * func_0036C790 passes 1 << D_004A43D0, which its menu lets drop to 16. Caller: func_0036C790.
+ * func_0036C790 passes 1 << cLightGlow_m_PS2CaptureSize, which its menu lets drop to 16. Caller: func_0036C790.
  *
  * @param x  the frame-buffer address of the area (>> 5 gives FBP)
  * @param w  the area width
@@ -1478,11 +1478,11 @@ INCLUDE_ASM("render/graphicsman", func_0036C790);
 #ifdef SKIP_ASM
 extern int cLightGlow_m_Enable;
 extern int cLightGlow_m_OverrideWP;
-extern int D_004A43D0;
+extern int cLightGlow_m_PS2CaptureSize;
 extern float cLightGlow_m_PS2ModIntensity;
-extern float D_004A43E8;
-extern float D_004A43EC;
-extern float D_004A43F8;
+extern float cLightGlow_m_PS2IntensityTex0;
+extern float cLightGlow_m_PS2IntensityTex1;
+extern float cLightGlow_m_PS2JitterTex;
 
 // Per-view bloom parameters (7 floats at gm+0x6CD4, see func_0036C740).
 struct sGmBloom_C790 {
@@ -1507,15 +1507,15 @@ struct sGmViews_C790 {
  * then blurs and composites it back at three levels.
  *
  * Returns at once unless cLightGlow_m_Enable; when cLightGlow_m_OverrideWP is set it first refreshes the view's entry
- * (func_0036C740). The four composite strengths are D_004A43E8 and D_004A43EC (menu "PS2 Blend Texture 0" and "1") and
+ * (func_0036C740). The four composite strengths are cLightGlow_m_PS2IntensityTex0 and cLightGlow_m_PS2IntensityTex1 (menu "PS2 Blend Texture 0" and "1") and
  * the entry's IntensityTex2/IntensityTex3 values, each times 127.5; when all are 0 it does nothing. The buffers are at
- * mCurrentZBufferPage << 5 and 0x400 above it, 1 << D_004A43D0 ("PS2 Capture Size (2^x)") texels square.
+ * mCurrentZBufferPage << 5 and 0x400 above it, 1 << cLightGlow_m_PS2CaptureSize ("PS2 Capture Size (2^x)") texels square.
  *
  * func_0036B9D8 downsamples the view (unk_59B0[@p idx]) from mCurrentFrameBufferPage with the FrameSrcScale value;
  * func_0036C188 subtracts the MinIntensity value and scales by cLightGlow_m_PS2ModIntensity (the global, not the
  * entry). For three levels it composites the current buffer with func_0036C398 when that level's strength is set
  * (FrameDstScale as the scale), then blurs it into the other buffer at half size with four passes of func_0036B9D8
- * (CopyIntensity, offset D_004A43F8 "PS2 Texture Jitter" * 16). The fourth strength composites the last level. It then
+ * (CopyIntensity, offset cLightGlow_m_PS2JitterTex "PS2 Texture Jitter" * 16). The fourth strength composites the last level. It then
  * restores FRAME and XYOFFSET for the screen and calls func_00368138(mpTextureMan, @p pkt2). Caller: func_00363490.
  *
  * @param vself  the graphics manager (cPS2GraphicsMan)
@@ -1534,8 +1534,8 @@ extern "C" void func_0036C790(cPS2GraphicsMan* vself, int idx, void* pkt2, int* 
     }
     sGmBloom_C790* glowParams = (sGmBloom_C790*)(&vself->unk_6CD4[0]) + idx;
     int alpha[4] = {
-        (int)(D_004A43E8 * 127.5f),
-        (int)(D_004A43EC * 127.5f),
+        (int)(cLightGlow_m_PS2IntensityTex0 * 127.5f),
+        (int)(cLightGlow_m_PS2IntensityTex1 * 127.5f),
         (int)(glowParams->v[5] * 127.5f),
         (int)(glowParams->v[6] * 127.5f),
     };
@@ -1546,9 +1546,9 @@ extern "C" void func_0036C790(cPS2GraphicsMan* vself, int idx, void* pkt2, int* 
     int bufs[2];
     bufs[0] = buf0;
     bufs[1] = buf0 + 0x400;
-    int offset = (int)(D_004A43F8 * 16.0f);
+    int offset = (int)(cLightGlow_m_PS2JitterTex * 16.0f);
     int src = buf0;
-    int th = 1 << D_004A43D0;
+    int th = 1 << cLightGlow_m_PS2CaptureSize;
     int tw = th;
     int x0 = ((sGmViews_C790*)vself)->views[idx].x;
     int y0 = ((sGmViews_C790*)vself)->views[idx].y;

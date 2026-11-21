@@ -1138,14 +1138,14 @@ struct sAnimNode_310F18
 };
 
 // Typed views of the pool tables (declared as int[] later in this unit).
-extern sAnimNode_310F18* D_004FE7A0_310F18[] __asm__("D_004FE7A0");
-extern sAnimNode_310F18* D_004FE860_310F18[] __asm__("D_004FE860");
+extern sAnimNode_310F18* D_004FE7A0_310F18[] __asm__("gChanCache");
+extern sAnimNode_310F18* D_004FE860_310F18[] __asm__("gChanCacheLRU");
 
 /**
  * Allocates one channel-cache bucket: 20 nodes in a circular list, each with room for n channels.
  *
  * The 0x24-byte nodes and their n x 0x14-byte element buffers are tagged "AnimChanCache"; every node starts
- * unowned. The ring is stored in D_004FE7A0[bank] and its head (the next node to reuse) in D_004FE860[bank].
+ * unowned. The ring is stored in gChanCache[bank] and its head (the next node to reuse) in gChanCacheLRU[bank].
  *
  * @param bank  bucket number (On Tour: partID; cAdfDataSource_getFramePartData passes a block's kind byte)
  * @param n  number of channels per node (On Tour: numChan)
@@ -1223,21 +1223,21 @@ extern "C" void cAnimDataBase__cAnimDataBase(void* self, int flags)
 //100%
 INCLUDE_ASM("animation/animmodel", cAnimDataBase_initChanCache);
 #ifdef SKIP_ASM
-extern int D_004FE7A0[];
-extern int D_004FE860[];
+extern int gChanCache[];
+extern int gChanCacheLRU[];
 
 /**
  * Clears the 48 bucket pointers in both tables of the animation channel cache.
  *
- * Zeroes D_004FE7A0[i] and D_004FE860[i] for i 0-47: the bucket node rings gGenCacheBucket() allocates and their
+ * Zeroes gChanCache[i] and gChanCacheLRU[i] for i 0-47: the bucket node rings gGenCacheBucket() allocates and their
  * current nodes. It takes no parameters here, though On Tour declares it as a cAnimDataBase method.
  */
 extern "C" void cAnimDataBase_initChanCache(void)
 {
     for (int i = 0; i < 48; i++)
     {
-        D_004FE7A0[i] = 0;
-        D_004FE860[i] = 0;
+        gChanCache[i] = 0;
+        gChanCacheLRU[i] = 0;
     }
 }
 #endif
@@ -1258,15 +1258,15 @@ struct sAnimNode_311110
 };
 
 // Typed views of the pool tables (declared as int[] in this unit).
-extern sAnimNode_311110* D_004FE7A0_311110[] __asm__("D_004FE7A0");
-extern sAnimNode_311110* D_004FE860_311110[] __asm__("D_004FE860");
+extern sAnimNode_311110* D_004FE7A0_311110[] __asm__("gChanCache");
+extern sAnimNode_311110* D_004FE860_311110[] __asm__("gChanCacheLRU");
 
 /**
- * Frees the animation channel cache: every allocated bucket of D_004FE7A0, its nodes' data and the bucket itself.
+ * Frees the animation channel cache: every allocated bucket of gChanCache, its nodes' data and the bucket itself.
  *
  * For each of the 48 buckets that is non-null, each of its 20 nodes (0x24 bytes) gets its owner's byte at +0x5 set to
- * 0xFF (no cached node) and its data freed with cMemMan_free; then the bucket array is freed and D_004FE7A0[bank] and
- * D_004FE860[bank] (the bucket's current node) are zeroed. Called by cAnimDataBase__cAnimDataBase and before animation data is
+ * 0xFF (no cached node) and its data freed with cMemMan_free; then the bucket array is freed and gChanCache[bank] and
+ * gChanCacheLRU[bank] (the bucket's current node) are zeroed. Called by cAnimDataBase__cAnimDataBase and before animation data is
  * unloaded (scripter/scanimmgr, fe/fereal, ai/ai).
  */
 extern "C" void cAnimDataBase_purgeChanCache(void)
@@ -1425,8 +1425,8 @@ struct sModelAM {
     char pad_0x10[4];
     char* data;                     // 0x14
 };
-extern sNodeAM* D_pool_AM[] __asm__("D_004FE7A0");
-extern sNodeAM* D_head_AM[] __asm__("D_004FE860");
+extern sNodeAM* D_pool_AM[] __asm__("gChanCache");
+extern sNodeAM* D_head_AM[] __asm__("gChanCacheLRU");
 sNodeAM* gGenCacheBucket_AM(int kind, long n) __asm__("gGenCacheBucket");
 extern "C" void dcmpInitFrameAccessor(void* dst, void* src, int len);
 extern "C" void dcmpGetFrame(void* node, float t, void* a, long b, void* c);

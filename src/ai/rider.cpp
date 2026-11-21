@@ -4442,7 +4442,7 @@ struct sVE3_2898 { short delta; short index; void (*fn)(void*, void*, void*); };
 struct sVE4_2898 { short delta; short index; void (*fn)(void*, void*, void*, void*); };
 
 extern int D_004A4C00;
-extern sV3_2898 D_004A5E40;
+extern sV3_2898 cRider_RenderShadow_lnorm;
 
 extern "C" void func_00374D00(void* obj, sV3_2898* a, sV3_2898* b, sV3_2898* dir, sMat_2898* bones, int f);
 extern "C" void cAnimModel_rendershadow(void* model, int lod, sV4_2898* a, sV4_2898* b);
@@ -4538,7 +4538,7 @@ extern "C" void cRider_RenderShadow(cRider* self)
             center.z = midpoint.z;
         }
         if (D_004A4C00 == 0) {
-            Set3_2898(D_004A5E40, 0.0f, 0.0f, -1.0f);
+            Set3_2898(cRider_RenderShadow_lnorm, 0.0f, 0.0f, -1.0f);
             D_004A4C00 = 1;
         }
         sV3_2898 objUp;
@@ -4549,7 +4549,7 @@ extern "C" void cRider_RenderShadow(cRider* self)
             objUp.z = upRow.z;
         }
         float k = 0.3f;
-        func_00374D00(Shadow_2898(self), &center, &objUp, &D_004A5E40, (sMat_2898*)Model_2898(self)->unk_030, 0);
+        func_00374D00(Shadow_2898(self), &center, &objUp, &cRider_RenderShadow_lnorm, (sMat_2898*)Model_2898(self)->unk_030, 0);
         cPS2GraphicsMan* grManPushView = GrMan;
         top_2898(grManPushView)->f8 = (top_2898(grManPushView)->f8 & ~0x3E0) | 0x20;
         top_2898(grManPushView)->f4 = (top_2898(grManPushView)->f4 & 0xFE7FFFFF) | 0x1000000;

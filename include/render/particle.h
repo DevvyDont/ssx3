@@ -20,7 +20,7 @@
 //                             "mEmitter") + ctor cDynamicColourEmitter_cDynamicColourEmitter in cBoardSparkFX's ctor. Vtable
 //                             cDynamicColourEmitter_vtbl.
 // (cDynamicParticleModifier/cParticleModifier are in object/effectmodifier.h; another 0x210-byte subclass with vtable
-// D_004881E8 is built by func_002F1768 in seg/seg_1F1548.)
+// cAttachedDynamicEmitter_vtbl is built by func_002F1768 in seg/seg_1F1548.)
 //
 // Methods: tParticleEmitter and cStaticEmitter are in src/render/graphicsman.cpp (0x36CBF8-0x370AF8; EA's particle.cpp
 // starts there: the preview pairs cStaticEmitter::render with particle.cpp line 410), the dynamic emitters in

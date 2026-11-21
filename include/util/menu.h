@@ -490,7 +490,7 @@ struct cColorMenuItem {
     void* Arg;                       // 0x0C [O] cMenuItem::Arg; [R] = 0
     void** mVtbl;                    // 0x10 [R] cColorMenuItem_vtbl (ctor)
     tARGB* Color;                    // 0x14 [O]; [R] ctor; [U] input/preRender/render read and write channel Adjust of it
-    int Adjust;                      // 0x18 [O] (tCMIColor); [R] ctor; [U] channel index (<< 2) and name index (D_00487470)
+    int Adjust;                      // 0x18 [O] (tCMIColor); [R] ctor; [U] channel index (<< 2) and name index (ColorNames)
     int AccelCount;                  // 0x1C [O]; [U] input: frames the direction is held (the ctor leaves it unset)
     int AccelDir;                    // 0x20 [O]; [U] input: -1, 0, 1 (the ctor leaves it unset)
 };

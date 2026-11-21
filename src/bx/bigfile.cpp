@@ -127,7 +127,7 @@ INCLUDE_ASM("bx/bigfile", cBlockMan_cBlockMan__FPv);
 /**
  * Constructs an empty block manager: no memory, size or groups, and an alignment (+0x10) of 16.
  *
- * Called on D_004FF000 during static initialisation.
+ * Called on gBlockMan during static initialisation.
  *
  * @return @p self
  */

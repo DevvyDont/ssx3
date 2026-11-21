@@ -686,11 +686,11 @@ extern "C" void* func_00416210(void* dst, int c, int n);
 int cRider_getMotionState(void* rider);
 int cRider_getControlState(void* rider);
 
-extern sGradeStep_119210 D_00459E00[];
-extern sGradeStep_119210 D_00459E20[];
-extern sGradeStep_119210 D_00459F68[];
-extern sGradeStep_119210 D_00459E40[];
-extern sGradeStep_119210 D_00459F08[];
+extern sGradeStep_119210 kBigAirBonusDB[];
+extern sGradeStep_119210 kLongGrabBonusDB[];
+extern sGradeStep_119210 kLongRailBonusDB[];
+extern sGradeStep_119210 kLongPressBonusDB[];
+extern sGradeStep_119210 kLongPlantBonusDB[];
 
 
 
@@ -742,12 +742,12 @@ extern "C" void cRiderMetrix_update(cRiderMetrix* self)
     }
     if (self->CurTrickAirSec >= 0.0f) {
         self->CurTrickAirSec += dt;
-        self->CurTrickBonusPoints += cRiderMetrix_updateBonusLevelAndCalcPoints((cRiderMetrix*)self, &self->CurTrickBigAirBonusLevel, D_00459E00, 0x1C, self->CurTrickAirSec);
+        self->CurTrickBonusPoints += cRiderMetrix_updateBonusLevelAndCalcPoints((cRiderMetrix*)self, &self->CurTrickBigAirBonusLevel, kBigAirBonusDB, 0x1C, self->CurTrickAirSec);
     }
     if (self->CurGrabHoldSec >= 0.0f) {
         self->CurGrabHoldSec += dt;
         self->CurTrickPower += self->CurGrabPowerPerTick;
-        self->CurTrickBonusPoints += cRiderMetrix_updateBonusLevelAndCalcPoints((cRiderMetrix*)self, &self->CurTrickLongGrabBonusLevel, D_00459E20, 0x20, self->CurGrabHoldSec);
+        self->CurTrickBonusPoints += cRiderMetrix_updateBonusLevelAndCalcPoints((cRiderMetrix*)self, &self->CurTrickLongGrabBonusLevel, kLongGrabBonusDB, 0x20, self->CurGrabHoldSec);
     }
     if (self->CurTrickRailslideDist >= 0.0f) {
         float stepDist = speed * dt;
@@ -757,12 +757,12 @@ extern "C" void cRiderMetrix_update(cRiderMetrix* self)
         if (up.z < 0.0f) {
             self->CurTrickStylePower += stepDist * 0.0002f;
         }
-        self->CurTrickBonusPoints += cRiderMetrix_updateBonusLevelAndCalcPoints((cRiderMetrix*)self, &self->CurTrickLongRailBonusLevel, D_00459F68, 29, self->CurTrickRailslideDist);
+        self->CurTrickBonusPoints += cRiderMetrix_updateBonusLevelAndCalcPoints((cRiderMetrix*)self, &self->CurTrickLongRailBonusLevel, kLongRailBonusDB, 29, self->CurTrickRailslideDist);
     }
     if (self->CurTrickPressSec >= 0.0f) {
         self->CurTrickPressSec += dt;
         self->CurTrickPower += dt * 0.01f;
-        self->CurTrickBonusPoints += cRiderMetrix_updateBonusLevelAndCalcPoints((cRiderMetrix*)self, &self->CurTrickLongPressBonusLevel, D_00459E40, 0x1E, self->CurTrickPressSec);
+        self->CurTrickBonusPoints += cRiderMetrix_updateBonusLevelAndCalcPoints((cRiderMetrix*)self, &self->CurTrickLongPressBonusLevel, kLongPressBonusDB, 0x1E, self->CurTrickPressSec);
     }
     if (self->CurTrickUberGrindHoldSec >= 0.0f) {
         self->CurTrickUberGrindHoldSec += dt;
@@ -771,7 +771,7 @@ extern "C" void cRiderMetrix_update(cRiderMetrix* self)
     if (self->CurTrickHandplantHoldSec >= 0.0f) {
         self->CurTrickHandplantHoldSec += dt;
         self->CurTrickPower += dt * 0.04999999701976776f;
-        self->CurTrickBonusPoints += cRiderMetrix_updateBonusLevelAndCalcPoints((cRiderMetrix*)self, &self->CurTrickLongPlantBonusLevel, D_00459F08, 0x1F, self->CurTrickHandplantHoldSec);
+        self->CurTrickBonusPoints += cRiderMetrix_updateBonusLevelAndCalcPoints((cRiderMetrix*)self, &self->CurTrickLongPlantBonusLevel, kLongPlantBonusDB, 0x1F, self->CurTrickHandplantHoldSec);
     }
     self->CurAvgSpeedCPS = self->CurAvgSpeedCPS * 0.9f + speed * 0.1f;
     self->Totals.SumSpeedCPS += speed;
@@ -2618,8 +2618,8 @@ extern "C" int cRiderMetrix_losePoints(cRiderMetrix* self)
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_buildTrickName);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int value, int size);
-extern unsigned char D_0043D388[][11];
-extern unsigned char D_0043D4C8[][11];
+extern unsigned char gKickerSpecial[][11];
+extern unsigned char gWallSpecial[][11];
 
 // Bit layout of the 8-byte trick identity (same fields cRiderMetrix_checkForMonsterTrick compares).
 struct sTrickBits_A8C8 {
@@ -2648,7 +2648,7 @@ struct sTrickBits_A8C8 {
  *
  * Zeroes the 8-byte name (On Tour tTrickNameDef) and packs its bit fields from the trick state: uber grind and rail
  * mode, takeoff and landing stance and pipe flags, spin and flip counts rounded from the angles (+0x34, +0x38), up to 3
- * grabs (+0x60), handplant (+0x7C) and press, using the tables D_0043D388 / D_0043D4C8.
+ * grabs (+0x60), handplant (+0x7C) and press, using the tables gKickerSpecial / gWallSpecial.
  *
  * @param vself  the score object (this)
  * @param vid  receives the trick name (On Tour tTrickNameDef &tn)
@@ -2775,9 +2775,9 @@ extern "C" int cRiderMetrix_buildTrickName(cRiderMetrix* vself, sTrickId* vid, i
     }
     if (idx < 29 && fidx < 11) {
         if (self->InitTrickIsPipe != 0 && alternate != 0) {
-            id->tbl = D_0043D4C8[idx][fidx];
+            id->tbl = gWallSpecial[idx][fidx];
         } else {
-            id->tbl = D_0043D388[idx][fidx];
+            id->tbl = gKickerSpecial[idx][fidx];
         }
     } else {
         MEM_fill(id, 0, 8);

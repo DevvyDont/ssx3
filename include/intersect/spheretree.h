@@ -72,7 +72,7 @@ CHECK_OFFSET(tSphTreeInfo, invMomentOfInertia, 0x5C);
 CHECK_SIZE(tSphTreeInfo, 0x80);
 
 struct SphereTree {
-    t4Vector axis[8];               // 0x000 [O]; [R] SphereTree_init copies the 8 default axes D_004FF640;
+    t4Vector axis[8];               // 0x000 [O]; [R] SphereTree_init copies the 8 default axes gSphTreeAlignAxis;
                                     //       [U] TransformAbs/TransformRel write axis[i] and axis[7 - i] = -axis[i];
                                     //       populateSortAxis dots axis[0..3]; the tests step to children along axis[i]
     t4Vector transCenter;           // 0x080 [O]; [R] init stores t4vect_Origin; [U] MoveOffset adds to it (lqc2/sqc2),

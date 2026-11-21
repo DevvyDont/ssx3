@@ -276,12 +276,12 @@ struct sScoreTypeMap {
     int key;
     int type;
 };
-extern sScoreTypeMap D_0045A2F8[][2];
+extern sScoreTypeMap cBELibrary_getScoreType_kScoreTypeMap[][2];
 
 /**
  * Maps a location and an event or stat kind to an index into the 26-entry score tables (0x1A means none).
  *
- * Kinds 6 to 11 map to 0 to 5 at any location. Otherwise the location's row of D_0045A2F8 (two key/type pairs)
+ * Kinds 6 to 11 map to 0 to 5 at any location. Otherwise the location's row of cBELibrary_getScoreType_kScoreTypeMap (two key/type pairs)
  * gives the index: kind 0 to 3 at locations 0 to 13 gives 12 to 25, kinds 4 and 5 at locations 14 to 16 give 6
  * to 11. Callers use it to pick a score stats record in the character profile and in cBELibrary_highScores.
  *
@@ -301,7 +301,7 @@ extern "C" int cBELibrary_getScoreType(int locationId, int gameEvent)
     if ((unsigned)(gameEvent - 9) < 3) {
         return gameEvent - 6;
     }
-    sScoreTypeMap* row = D_0045A2F8[locationId];
+    sScoreTypeMap* row = cBELibrary_getScoreType_kScoreTypeMap[locationId];
     for (i = 0; i < 2; i++) {
         if (row[i].key == gameEvent) {
             return row[i].type;

@@ -31,7 +31,7 @@ struct sRaceEntry18 {
     char pad_0x00[0x14];
     int field_0x14;
 };
-extern sRaceEntry18 D_0043E250[];
+extern sRaceEntry18 cBELibrary_sectionDB[];
 
 extern sPad16 cBELibrary_gameModeDB;
 
@@ -365,7 +365,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getSectionFile);
 /**
  * Returns the file name of a world section.
  *
- * D_0043E254 + @p iSection * 0x18: the name in the section table, whose records start 4 bytes earlier at D_0043E250.
+ * D_0043E254 + @p iSection * 0x18: the name in the section table, whose records start 4 bytes earlier at cBELibrary_sectionDB.
  *
  * @param iSection  the section index (On Tour iSection)
  * @return the section's file name
@@ -382,14 +382,14 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getSectionType);
 /**
  * Returns the type of a world section.
  *
- * D_0043E250[@p iSection].field_0x14.
+ * cBELibrary_sectionDB[@p iSection].field_0x14.
  *
  * @param iSection  the section index (On Tour iSection)
  * @return the section type (On Tour eBESectionType)
  */
 extern "C" int cBENewRaceInterface_getSectionType(cBENewRaceInterface* self, int iSection)
 {
-    return D_0043E250[iSection].field_0x14;
+    return cBELibrary_sectionDB[iSection].field_0x14;
 }
 #endif
 
@@ -415,13 +415,13 @@ void* cBENewRaceInterface_assignPlayer(void* self, int iGate, int iPlayer)
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setNumberAI);
 #ifdef SKIP_ASM
 // Max AI riders per [gameType][eventKind] (7 event kinds per row).
-extern unsigned int D_0043D8F8[][7];
+extern unsigned int uiAI[][7];
 
 /**
  * Sets the number of AI riders in the new race and checks it against the limit for the race type.
  *
  * Stores @p count and recomputes iNumberRiders (humans + AI + mission riders) even when the count is over the
- * limit. The limit comes from the table D_0043D8F8, indexed by cGamePath and cGameMode.
+ * limit. The limit comes from the table uiAI, indexed by cGamePath and cGameMode.
  *
  * @param count  number of AI riders
  * @return 1 when @p count is within the limit (compared unsigned, so a negative count fails), else 0
@@ -432,7 +432,7 @@ extern "C" int cBENewRaceInterface_setNumberAI(cBENewRaceInterface* self, int co
     cBENewRaceInterface_newRace.iNumberRiders = cBENewRaceInterface_newRace.iNumberHumans + count + cBENewRaceInterface_newRace.iNumberMissionRiders;
     signed char eventKind = cBENewRaceInterface_newRace.cGameMode;
     signed char gameType = cBENewRaceInterface_newRace.cGamePath;
-    return (unsigned int)count <= D_0043D8F8[gameType][eventKind];
+    return (unsigned int)count <= uiAI[gameType][eventKind];
 }
 #endif
 
@@ -450,7 +450,7 @@ void* cBENewPlayerInterface_getThis();
 struct sModeRow_144DF0 {
     signed char allowed[0x43];
 };
-extern sModeRow_144DF0 D_0043E700[];
+extern sModeRow_144DF0 cBELibrary_gamePathDB[];
 
 struct sVE_144DF0 {
     short delta;
@@ -466,7 +466,7 @@ static inline char* Race_144DF0()
 /**
  * Sets the race's game mode and the matching numbers of human, AI and mission riders.
  *
- * Refused when the mode is not allowed on the current game path (D_0043E700). Mode 4 gets 1 human and 1
+ * Refused when the mode is not allowed on the current game path (cBELibrary_gamePathDB). Mode 4 gets 1 human and 1
  * mission rider and makes player 1 the mission man with player 0's character (cBENewPlayerInterface_setToMissionMan), then submits;
  * leaving mode 4 restores the humans (2 on path 2) and resets player 1. Modes 0 (5 AI, 4 on path 2), 1 (1 AI)
  * and 3, 5, 6 (1 AI for events 4-5 off path 2) set the counts; mode 5 also sets event 4.
@@ -476,7 +476,7 @@ static inline char* Race_144DF0()
  */
 extern "C" int cBENewRaceInterface_setGameMode(cBENewRaceInterface* self, int mode)
 {
-    sModeRow_144DF0 row = D_0043E700[*((signed char*)Race_144DF0() + 0x49)];
+    sModeRow_144DF0 row = cBELibrary_gamePathDB[*((signed char*)Race_144DF0() + 0x49)];
     int humans = 1;
     int ai = 5;
     if (*((signed char*)Race_144DF0() + 0x49) == 2) {
@@ -701,11 +701,11 @@ struct sPrizeRow_1453D0
     short kind;
     short prize[6];
 };
-// Typed view of D_00440B38 (declared later in this unit with another layout).
-extern sPrizeRow_1453D0 D_00440B38_1453D0[] __asm__("D_00440B38");
+// Typed view of cBELibrary_simDB (declared later in this unit with another layout).
+extern sPrizeRow_1453D0 D_00440B38_1453D0[] __asm__("cBELibrary_simDB");
 
 /**
- * Returns a simulated rider's score for round @p kind: the D_00440B38 row of the race's location and that round,
+ * Returns a simulated rider's score for round @p kind: the cBELibrary_simDB row of the race's location and that round,
  * column @p place, times 100, randomised by up to +-5% and rounded down to a multiple of 20.
  *
  * Difficulty 0 scales by 0.9 and 2 by 1.2, except for column 0. Round 0 counts as 1. -1 when no row matches.
@@ -752,13 +752,13 @@ struct sRaceLookup_00440B38
     char pad_0x04[0xA];
     short value;
 };
-extern sRaceLookup_00440B38 D_00440B38[];
+extern sRaceLookup_00440B38 cBELibrary_simDB[];
 
 /**
  * Returns the time limit of round @p kind, in the units the game mode multiplies by 60.
  *
  * For game events 6-11 (newRace +0x4A) it is cBENewRaceInterface_getPeakTimeLimit(event, @p kind). Otherwise the halfword at +0x10 of the
- * D_00440B38 row for the race's location and the round (round 0 counts as 1), falling back to
+ * cBELibrary_simDB row for the race's location and the round (round 0 counts as 1), falling back to
  * cBENewRaceInterface_mNextLocation's row; -1 when neither exists.
  *
  * @param kind  the round
@@ -779,16 +779,16 @@ extern "C" int cBENewRaceInterface_getTimeLimit(cBENewRaceInterface* self, int k
     int key = newRaceDb->iLocationIdx;
     for (int i = 0; i < 30; i++)
     {
-        if (D_00440B38[i].key == key && D_00440B38[i].kind == kind)
+        if (cBELibrary_simDB[i].key == key && cBELibrary_simDB[i].kind == kind)
         {
-            return D_00440B38[i].value;
+            return cBELibrary_simDB[i].value;
         }
     }
     for (int i = 0; i < 30; i++)
     {
-        if (D_00440B38[i].key == cBENewRaceInterface_mNextLocation && D_00440B38[i].kind == kind)
+        if (cBELibrary_simDB[i].key == cBENewRaceInterface_mNextLocation && cBELibrary_simDB[i].kind == kind)
         {
-            return D_00440B38[i].value;
+            return cBELibrary_simDB[i].value;
         }
     }
     return -1;
@@ -889,10 +889,10 @@ struct sRacePair_001456A0
     short b;
 };
 
-extern sRacePair_001456A0 D_00440E80[];
+extern sRacePair_001456A0 cBELibrary_platinumDB[];
 
 /**
- * Returns the target for location @p idx and event @p mode from D_00440E80, or -1.
+ * Returns the target for location @p idx and event @p mode from cBELibrary_platinumDB, or -1.
  *
  * Events 6-11 give -1. Below location 14 it is entry @p idx's second halfword (times 100 unless @p mode is 0); from
  * 14 on, @p mode 4 gives entry @p idx's value, @p mode 5 entry @p idx + 3's times 100, others -1.
@@ -908,13 +908,13 @@ extern "C" int cBENewRaceInterface_getPlatinumGoal(cBENewRaceInterface* self, in
     if (idx < 14)
     {
         if (mode == 0)
-            return D_00440E80[(short)idx].b;
-        return D_00440E80[(short)idx].b * 100;
+            return cBELibrary_platinumDB[(short)idx].b;
+        return cBELibrary_platinumDB[(short)idx].b * 100;
     }
     if (mode == 4)
-        return D_00440E80[(short)idx].b;
+        return cBELibrary_platinumDB[(short)idx].b;
     if (mode == 5)
-        return D_00440E80[(short)idx + 3].b * 100;
+        return cBELibrary_platinumDB[(short)idx + 3].b * 100;
     return -1;
 }
 #endif

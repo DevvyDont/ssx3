@@ -850,12 +850,12 @@ extern int cPlants_m_SwayFrequency;
 extern float cPlants_m_SwayAmplitude;
 extern float cPlants_m_SwayOffset;
 extern float cPlants_m_BranchAmplitude;
-extern float D_004A4454;
-extern float D_004A4460;
-extern float D_004A4464;
-extern float D_004A4468;
-extern float D_004A446C;
-extern float D_004A4470;
+extern float cPlants_m_RotationAmplitude;
+extern float cPlants_m_RotationFrequency;
+extern float cPlants_m_BranchFrequency;
+extern float cPlants_m_BranchFrequency2;
+extern float cPlants_m_SwayDirection;
+extern float cPlants_m_BranchDirection;
 
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
 static inline void lmCopy_EE78(void* dst, const void* src)
@@ -959,12 +959,12 @@ static inline void lmMulIn_EE78(void* m, const void* b)
  * Rebuilds the eight plant sway matrices D_00504D80[0..7] from the cPlants tweak values and the frame count.
  *
  * With t = vtable slot 114 (getCurrentFrameCount) and f = i / 8 for matrix i: sway = cPlants_m_SwayAmplitude ("Sway Amplitude") *
- * sin(f + t * cPlants_m_SwayFrequency / 600) + cPlants_m_SwayOffset; branch = cPlants_m_BranchAmplitude * sin(f * D_004A4468 / 600 + sin(f + t * D_004A4464 /
- * 600)); angle = D_004A4454 * sin(f + t * D_004A4460 / 600).
+ * sin(f + t * cPlants_m_SwayFrequency / 600) + cPlants_m_SwayOffset; branch = cPlants_m_BranchAmplitude * sin(f * cPlants_m_BranchFrequency2 / 600 + sin(f + t * cPlants_m_BranchFrequency /
+ * 600)); angle = cPlants_m_RotationAmplitude * sin(f + t * cPlants_m_RotationFrequency / 600).
  *
- * Each matrix is S * R (row vectors): S is an identity whose z row adds sway * (sin, cos) of D_004A446C ("Sway
+ * Each matrix is S * R (row vectors): S is an identity whose z row adds sway * (sin, cos) of cPlants_m_SwayDirection ("Sway
  * Direction", degrees) to x and y, so a point moves in proportion to its height; R is a rotation by angle about
- * t4vect_ZAxis whose z column adds branch * (x sin + y cos) of D_004A4470 ("Branch Direction"). Note: D_004A4468
+ * t4vect_ZAxis whose z column adds branch * (x sin + y cos) of cPlants_m_BranchDirection ("Branch Direction"). Note: cPlants_m_BranchFrequency2
  * multiplies f rather than the time, so the outer branch sine moves only through its inner sine. Slot 2 of vtable
  * cPlants_vtbl (the object allocated as "Plants").
  */
@@ -983,9 +983,9 @@ extern "C" void cPlants_update(void)
         sLmMat_EE78* pm = &branchMat;
         float fi = (float)i * 0.125f;
         float amp = cPlants_m_SwayAmplitude * fSin(fi + frameClock * (float)cPlants_m_SwayFrequency * 0.0016666667f) + cPlants_m_SwayOffset;
-        float branchPhase = fSin(fi + frameClock * D_004A4464 * 0.0016666667f);
-        float amp2 = cPlants_m_BranchAmplitude * fSin(fi * D_004A4468 * 0.0016666667f + branchPhase);
-        float angle = D_004A4454 * fSin(fi + frameClock * D_004A4460 * 0.0016666667f);
+        float branchPhase = fSin(fi + frameClock * cPlants_m_BranchFrequency * 0.0016666667f);
+        float amp2 = cPlants_m_BranchAmplitude * fSin(fi * cPlants_m_BranchFrequency2 * 0.0016666667f + branchPhase);
+        float angle = cPlants_m_RotationAmplitude * fSin(fi + frameClock * cPlants_m_RotationFrequency * 0.0016666667f);
         lmCopy_EE78(&branchMat, &t4mat_Identity);
         fSinCos(&sinAngle, &cosAngle, angle);
         float tc = 1.0f - cosAngle;
@@ -1017,10 +1017,10 @@ extern "C" void cPlants_update(void)
         lmMulIn_EE78(pm, &rotMat);
         sLmMat_EE78* cell = &D_00504D80_EE78[i];
         lmCopy_EE78(cell, &t4mat_Identity);
-        cell->m[2][0] += fSin(D_004A446C * 0.017453294f) * amp;
-        cell->m[2][1] += fCos(D_004A446C * 0.017453294f) * amp;
-        branchMat.m[0][2] += amp2 * fSin(D_004A4470 * 0.017453294f);
-        branchMat.m[1][2] += amp2 * fCos(D_004A4470 * 0.017453294f);
+        cell->m[2][0] += fSin(cPlants_m_SwayDirection * 0.017453294f) * amp;
+        cell->m[2][1] += fCos(cPlants_m_SwayDirection * 0.017453294f) * amp;
+        branchMat.m[0][2] += amp2 * fSin(cPlants_m_BranchDirection * 0.017453294f);
+        branchMat.m[1][2] += amp2 * fCos(cPlants_m_BranchDirection * 0.017453294f);
         lmMul_EE78(&product, cell, &branchMat);
         lmCopy_EE78(&rotMat, &product);
         lmCopy_EE78(cell, &rotMat);
@@ -2006,19 +2006,19 @@ extern float cScreenTint_m_LightningChance;
 extern int cScreenTint_m_LightningFadeIn;
 extern int cScreenTint_m_LightningFadeOut;
 extern int cScreenTint_m_LightningFadeIn2;
-extern int D_004A4624;
-extern float D_004A4628;
-extern float D_004A462C;
-extern float D_004A4630;
-extern float D_004A4634;
-extern float D_004A4638;
-extern float D_004A463C;
-extern float D_004A4640;
-extern float D_004A4644;
-extern float D_004A4648;
-extern float D_004A464C;
-extern float D_004A4650;
-extern float D_004A4654;
+extern int cScreenTint_m_LightningFadeIn3;
+extern float cScreenTint_m_LightningScale;
+extern float cScreenTint_m_LightningScale2;
+extern float cScreenTint_m_LightningScale3;
+extern float cScreenTint_m_LightningColourR;
+extern float cScreenTint_m_LightningColourG;
+extern float cScreenTint_m_LightningColourB;
+extern float cScreenTint_m_LightningColour2R;
+extern float cScreenTint_m_LightningColour2G;
+extern float cScreenTint_m_LightningColour2B;
+extern float cScreenTint_m_LightningColour3R;
+extern float cScreenTint_m_LightningColour3G;
+extern float cScreenTint_m_LightningColour3B;
 extern float cScreenTint_m_ColourR;
 extern float cScreenTint_m_ColourG;
 extern float cScreenTint_m_ColourB;
@@ -2051,9 +2051,9 @@ static inline float RandRange_0C60(float lo, float hi)
  * Does nothing unless cScreenTint_m_LightningEnable. cScreenTint_m_timeTillThunder (frames until thunder) counts down to 0. While no flash
  * runs (cScreenTint_m_lightningFrame < 0) a random draw below cScreenTint_m_LightningChance squared starts one through func_00390EC8 with
  * a random distance of 2000 to 200000. Otherwise the frame advances (or holds at cScreenTint_m_FrameId when that is a valid frame)
- * and picks the phase: fade in over cScreenTint_m_LightningFadeIn frames to brightness D_004A4628 (colour D_004A4634..3C), hold for
- * cScreenTint_m_LightningFadeOut, an inverse phase of cScreenTint_m_LightningFadeIn2 at D_004A462C (colour D_004A4640..48), and fade out over D_004A4624 from
- * D_004A4630 (colour D_004A464C..54); after that the frame returns to -1 with the tint colour cScreenTint_m_ColourR/G/B
+ * and picks the phase: fade in over cScreenTint_m_LightningFadeIn frames to brightness cScreenTint_m_LightningScale (colour cScreenTint_m_LightningColourR..3C), hold for
+ * cScreenTint_m_LightningFadeOut, an inverse phase of cScreenTint_m_LightningFadeIn2 at cScreenTint_m_LightningScale2 (colour cScreenTint_m_LightningColour2R..48), and fade out over cScreenTint_m_LightningFadeIn3 from
+ * cScreenTint_m_LightningScale3 (colour cScreenTint_m_LightningColour3R..54); after that the frame returns to -1 with the tint colour cScreenTint_m_ColourR/G/B
  * and brightness 0. Each step sets blend mode cScreenTint_m_blendMode = 5.
  *
  * Slot 2 of vtable cScreenTint_vtbl (the object allocated as "ScreenTint").
@@ -2075,7 +2075,7 @@ extern "C" void cScreenTint_update()
         }
         return;
     }
-    if (trig < 0 || cScreenTint_m_LightningFadeIn + cScreenTint_m_LightningFadeOut + cScreenTint_m_LightningFadeIn2 + D_004A4624 < trig) {
+    if (trig < 0 || cScreenTint_m_LightningFadeIn + cScreenTint_m_LightningFadeOut + cScreenTint_m_LightningFadeIn2 + cScreenTint_m_LightningFadeIn3 < trig) {
         cScreenTint_m_lightningFrame = lightFrame + 1;
     } else {
         cScreenTint_m_lightningFrame = trig;
@@ -2083,28 +2083,28 @@ extern "C" void cScreenTint_update()
     int cur = cScreenTint_m_lightningFrame;
     int fadeInFrames = cScreenTint_m_LightningFadeIn;
     if (cur <= fadeInFrames) {
-        *(float*)&cScreenTint_m_lightningBrightness = ((float)cur / (float)fadeInFrames) * D_004A4628;
-        cScreenTint_m_redColour = D_004A4634;
-        cScreenTint_m_greenColour = D_004A4638;
-        cScreenTint_m_blueColour = D_004A463C;
+        *(float*)&cScreenTint_m_lightningBrightness = ((float)cur / (float)fadeInFrames) * cScreenTint_m_LightningScale;
+        cScreenTint_m_redColour = cScreenTint_m_LightningColourR;
+        cScreenTint_m_greenColour = cScreenTint_m_LightningColourG;
+        cScreenTint_m_blueColour = cScreenTint_m_LightningColourB;
         cScreenTint_m_blendMode = 5;
     } else if (cur <= fadeInFrames + cScreenTint_m_LightningFadeOut) {
-        *(float*)&cScreenTint_m_lightningBrightness = D_004A4628;
-        cScreenTint_m_redColour = D_004A4634;
-        cScreenTint_m_greenColour = D_004A4638;
-        cScreenTint_m_blueColour = D_004A463C;
+        *(float*)&cScreenTint_m_lightningBrightness = cScreenTint_m_LightningScale;
+        cScreenTint_m_redColour = cScreenTint_m_LightningColourR;
+        cScreenTint_m_greenColour = cScreenTint_m_LightningColourG;
+        cScreenTint_m_blueColour = cScreenTint_m_LightningColourB;
         cScreenTint_m_blendMode = 5;
     } else if (cur <= fadeInFrames + cScreenTint_m_LightningFadeOut + cScreenTint_m_LightningFadeIn2) {
-        *(float*)&cScreenTint_m_lightningBrightness = D_004A462C;
-        cScreenTint_m_redColour = D_004A4640;
-        cScreenTint_m_greenColour = D_004A4644;
-        cScreenTint_m_blueColour = D_004A4648;
+        *(float*)&cScreenTint_m_lightningBrightness = cScreenTint_m_LightningScale2;
+        cScreenTint_m_redColour = cScreenTint_m_LightningColour2R;
+        cScreenTint_m_greenColour = cScreenTint_m_LightningColour2G;
+        cScreenTint_m_blueColour = cScreenTint_m_LightningColour2B;
         cScreenTint_m_blendMode = 5;
-    } else if (cur <= fadeInFrames + cScreenTint_m_LightningFadeOut + cScreenTint_m_LightningFadeIn2 + D_004A4624) {
-        *(float*)&cScreenTint_m_lightningBrightness = (1.0f - ((float)cur - (float)fadeInFrames - (float)cScreenTint_m_LightningFadeOut - (float)cScreenTint_m_LightningFadeIn2) / (float)D_004A4624) * D_004A4630;
-        cScreenTint_m_redColour = D_004A464C;
-        cScreenTint_m_greenColour = D_004A4650;
-        cScreenTint_m_blueColour = D_004A4654;
+    } else if (cur <= fadeInFrames + cScreenTint_m_LightningFadeOut + cScreenTint_m_LightningFadeIn2 + cScreenTint_m_LightningFadeIn3) {
+        *(float*)&cScreenTint_m_lightningBrightness = (1.0f - ((float)cur - (float)fadeInFrames - (float)cScreenTint_m_LightningFadeOut - (float)cScreenTint_m_LightningFadeIn2) / (float)cScreenTint_m_LightningFadeIn3) * cScreenTint_m_LightningScale3;
+        cScreenTint_m_redColour = cScreenTint_m_LightningColour3R;
+        cScreenTint_m_greenColour = cScreenTint_m_LightningColour3G;
+        cScreenTint_m_blueColour = cScreenTint_m_LightningColour3B;
         cScreenTint_m_blendMode = 5;
     } else {
         cScreenTint_m_lightningFrame = -1;

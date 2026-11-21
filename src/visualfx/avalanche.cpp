@@ -515,7 +515,7 @@ struct sVec4_64D8 {
     sVec4_64D8() {}
     sVec4_64D8(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
-extern float D_004A3A94;
+extern float cAvalanche_m_MaxVelocity;
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float vLen_64D8(const sVec4_64D8& v)
@@ -587,7 +587,7 @@ static inline int isBad_64D8(const float* f)
 /**
  * Limits an avalanche node's velocity to 70 units and replaces a non-finite velocity with (10, 10, 10, 0).
  *
- * When the 4-component length of @p velocity exceeds D_004A3A94 (70), the vector is normalised and scaled to 70. Then, if any
+ * When the 4-component length of @p velocity exceeds cAvalanche_m_MaxVelocity (70), the vector is normalised and scaled to 70. Then, if any
  * component is +-infinity or a quiet NaN (bit patterns 0x7F800000, 0x7FC00000, 0xFF800000, 0xFFC00000), the whole
  * vector is reset. tAvalancheNode_calculate calls it.
  *
@@ -595,8 +595,8 @@ static inline int isBad_64D8(const float* f)
  */
 extern "C" void tAvalancheNode_fixVelocity(tAvalancheNode* self, sVec4_64D8* velocity)
 {
-    if (D_004A3A94 < vLen_64D8(*velocity))
-        *velocity = vScale_64D8(vNorm_64D8(*velocity), D_004A3A94);
+    if (cAvalanche_m_MaxVelocity < vLen_64D8(*velocity))
+        *velocity = vScale_64D8(vNorm_64D8(*velocity), cAvalanche_m_MaxVelocity);
     int bad = isBad_64D8(&velocity->x) || isBad_64D8(&velocity->y) || isBad_64D8(&velocity->z) || isBad_64D8(&velocity->w);
     if (bad)
         *velocity = sVec4_64D8(10.0f, 10.0f, 10.0f, 0.0f);
@@ -1561,7 +1561,7 @@ INCLUDE_ASM("visualfx/avalanche", tActiveAvalanche_render);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void tActiveAvalancheNode_renderLines(tActiveAvalancheNode* node);
 extern "C" void cDynamicColourEmitter_render(void* p, int a);
-extern int D_004A3A54;
+extern int cAvalanche_m_RenderEmitters;
 extern int cAvalanche_m_RenderLines;
 
 struct sAvVec4_D8EA8 {
@@ -1697,7 +1697,7 @@ public:
  * Renders one active avalanche: its emitters and, in debug mode, its paths and collision lines.
  *
  * For each active node: path lines for the first cAvalanche_m_RenderLines nodes, and cDynamicColourEmitter_render(emitter, 7) when
- * D_004A3A54 (On Tour m_RenderEmitters, default 1) is set and the node has an emitter. With cAvalanche_m_RenderLines set it
+ * cAvalanche_m_RenderEmitters (On Tour m_RenderEmitters, default 1) is set and the node has an emitter. With cAvalanche_m_RenderLines set it
  * also draws a line from each collision instance to the player's rider, red once the collision time has
  * passed and green before.
  *
@@ -1714,7 +1714,7 @@ extern "C" void tActiveAvalanche_render(tActiveAvalanche* slotv)
         if (n->data) {
             if (i < cAvalanche_m_RenderLines)
                 tActiveAvalancheNode_renderLines((tActiveAvalancheNode*)n);
-            if (D_004A3A54 && ((unsigned char*)n->data)[0xF2])
+            if (cAvalanche_m_RenderEmitters && ((unsigned char*)n->data)[0xF2])
                 cDynamicColourEmitter_render(n->fx, 7);
         }
     }
@@ -1797,7 +1797,7 @@ struct sCam_9130 {
     int cur;                    // 0x14
     float mats[4][4];           // 0x18
 };
-extern int D_004A41EC;
+extern int cPathArrow_m_Enable;
 extern sRState_9130 sDrawState_s_defaultDrawState;
 extern "C" void tActiveAvalanche_render(tActiveAvalanche* slot);
 
@@ -1808,12 +1808,12 @@ static inline void setB5_9130(sRCtx_9130* c, int v) { c->top->b5 = v; }
 /**
  * Renders all active avalanches with the current camera's view.
  *
- * Runs when the system is enabled (cAvalanche_m_Enable) and resolved, or when D_004A41EC is set: pushes a draw state
+ * Runs when the system is enabled (cAvalanche_m_Enable) and resolved, or when cPathArrow_m_Enable is set: pushes a draw state
  * set up for the camera's matrix, position and rotation and, if enabled, renders the 16 active slots.
  */
 extern "C" void cAvalanche_render(void)
 {
-    if ((cAvalanche_m_Enable != 0 && cAvalanche_m_resolved != 0) || D_004A41EC != 0)
+    if ((cAvalanche_m_Enable != 0 && cAvalanche_m_resolved != 0) || cPathArrow_m_Enable != 0)
     {
         cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
         float* view = getCam_9130()->views[getCam_9130()->cur];

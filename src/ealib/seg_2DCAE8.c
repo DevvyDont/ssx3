@@ -6795,12 +6795,12 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILEDEV_readreq);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct S_3350 { int a, b, c, d, e; };
-extern volatile struct S_3350 D_00519C20_3350 __asm__("D_00519C20");
+extern volatile struct S_3350 D_00519C20_3350 __asm__("gHarddriveReadRequest");
 extern int func_003E4648(int);
 
 /**
  * Starts a read on a device handle. A disc read goes to func_003E4648 (the other arguments pass through in their
- * registers) and its result is returned. A host read is only recorded (D_00519C20) for the sync task FILEDEV_readexec,
+ * registers) and its result is returned. A host read is only recorded (gHarddriveReadRequest) for the sync task FILEDEV_readexec,
  * which does it and completes the command; returns 1.
  *
  * @param fsHandle  the device handle

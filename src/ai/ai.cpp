@@ -20,13 +20,13 @@ INCLUDE_ASM("ai/ai", cAI_cAI);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc is the game's tagged operator new(size, tag, flags, d); bound by asm label.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern char D_004585A0[];
-extern char D_00458550[];
-extern char D_004585C8[];
-extern char D_00458578[];
+extern char cFreerideHandler_vtbl[];
+extern char cPreRaceHandler_vtbl[];
+extern char cGameInitHandler_vtbl[];
+extern char cCountdownHandler_vtbl[];
 extern char cAI_vtbl[];
 extern char cAIStateHandler_vtbl[];
-extern char D_00458500[];
+extern char cEndRaceHandler_vtbl[];
 extern char cShutdownHandler_vtbl[];
 extern char str_FocusMan[];
 extern char str_DangerMan[];
@@ -65,12 +65,12 @@ struct sAIObj_1286A0 {
 extern "C" void* cAI_cAI(cAI* self)
 {
     self->mVtbl = (void**)cAI_vtbl;
-    *(void**)&self->mGameInitHandler = D_004585C8;
-    *(void**)&self->mFreerideHandler = D_004585A0;
-    *(void**)&self->mPreRaceHandler = D_00458550;
-    *(void**)&self->mCountdownHandler = D_00458578;
+    *(void**)&self->mGameInitHandler = cGameInitHandler_vtbl;
+    *(void**)&self->mFreerideHandler = cFreerideHandler_vtbl;
+    *(void**)&self->mPreRaceHandler = cPreRaceHandler_vtbl;
+    *(void**)&self->mCountdownHandler = cCountdownHandler_vtbl;
     *(void**)&self->mRaceHandler = cAIStateHandler_vtbl;
-    *(void**)&self->mEndRaceHandler = D_00458500;
+    *(void**)&self->mEndRaceHandler = cEndRaceHandler_vtbl;
     *(void**)&self->mShutdownHandler = cShutdownHandler_vtbl;
     sAIState_1286A0** slot = (sAIState_1286A0**)&self->FocusMan;
     *slot = new (str_FocusMan, 0, 0) sAIState_1286A0;
@@ -6686,8 +6686,8 @@ struct sCurve_130DD0
     sCurvePt_130DD0 p[4];
 };
 
-extern sCurve_130DD0* D_004A1114;
-extern sCurve_130DD0* D_004A111C;
+extern sCurve_130DD0* kBPEasyBalanceRate;
+extern sCurve_130DD0* kBPHardBalanceRate;
 
 struct sInfo_130DD0
 {
@@ -6770,7 +6770,7 @@ static inline float Curve_130DD0(const sCurve_130DD0* c, float x)
  * BalanceSec counts the time in the press and OffBalanceSec the time at full depth (rider + 0x274 == 1). The
  * target is the press (word 1 bits 0-5, negated for a tail press, at least 0), capped at 0.5 + BalanceSec / 2
  * in the first second and then snapped to 0 or 1 (1 when it or |BoardPivot| exceeds 0.5). The rate is 1 when
- * crossing 0.5, else a blend over 5 s of the curves D_004A1114 and D_004A111C, with the Whooh speech
+ * crossing 0.5, else a blend over 5 s of the curves kBPEasyBalanceRate and kBPHardBalanceRate, with the Whooh speech
  * (func_002A1560) above depth 0.8. After 1 s at full depth it calls the hard crash cRider_flagEventWipeout with
  * semantic 0x167 (tail) or 0x166 (nose).
  *
@@ -6810,8 +6810,8 @@ extern "C" int cBoardPressControl_checkForWipeout(cBoardPressControl* self, void
     }
     else
     {
-        float easyRate = Curve_130DD0(D_004A1114, self->mRider->mSlewed[11].cur);
-        float hardRate = Curve_130DD0(D_004A111C, self->mRider->mSlewed[11].cur);
+        float easyRate = Curve_130DD0(kBPEasyBalanceRate, self->mRider->mSlewed[11].cur);
+        float hardRate = Curve_130DD0(kBPHardBalanceRate, self->mRider->mSlewed[11].cur);
         float mix = self->BalanceSec * 0.20000895857810974f <? 1.0f;
         desRate = easyRate * (1.0f - mix) + hardRate * mix;
         if (self->mRider->mSlewed[11].cur > 0.800000011920929f)
@@ -7854,13 +7854,13 @@ extern "C" void cSSXAudio_HandPlantSound(void* self, void* rider);
 extern "C" float cRiderAnimBase_getAIAnimDuration(char* self, int a1);
 extern "C" void cHandplantControl_playHandplantAnim(cHandplantControl* self, int a1, int a2);
 extern "C" void cRiderAnimBase_blendOutAll(void*, int, float);
-extern char D_00459FC8[];
+extern char kHandplantAnim[];
 
 /**
  * Starts a handplant: resets the steering channels, plays the sound and an entry anim timed to EnterSec.
  *
  * Sets the rider's handplant mode (HandplantMode) to 1 and scales the anim speed (+0x1C) so that mode's anim from
- * D_00459FC8[mode][HandplantType] lasts EnterSec seconds while playHandplantAnim() starts it. Then clears
+ * kHandplantAnim[mode][HandplantType] lasts EnterSec seconds while playHandplantAnim() starts it. Then clears
  * CurBalance and fades out anim layers 1 and 0 over 0.33 s.
  */
 extern "C" void cHandplantControl_gainFocus(cHandplantControl* self)
@@ -7876,7 +7876,7 @@ extern "C" void cHandplantControl_gainFocus(cHandplantControl* self)
     self->mRider->HandplantMode = 1;
     cSSXAudio_HandPlantSound(cAudioInterface_bxAudio(), self->mRider);
     cRider* rider3 = self->mRider;
-    float enterAnimSec = cRiderAnimBase_getAIAnimDuration((char*)rider3->mRiderAnim, *(int*)(D_00459FC8 + self->HandplantType * 8 + rider3->HandplantMode * 16));
+    float enterAnimSec = cRiderAnimBase_getAIAnimDuration((char*)rider3->mRiderAnim, *(int*)(kHandplantAnim + self->HandplantType * 8 + rider3->HandplantMode * 16));
     *(float*)((char*)self->mRider->mRiderAnim + 0x1C) = enterAnimSec / *(float*)self;
     cHandplantControl_playHandplantAnim(self, self->mRider->HandplantMode, self->HandplantType);
     *(float*)((char*)self->mRider->mRiderAnim + 0x1C) = 1.0f;
@@ -8176,8 +8176,8 @@ struct sAnimEntry_132FB8
     int anim;
     int flip;
 };
-// Typed view of D_00459FC8 (cHandplantControl_gainFocus reads it as raw bytes); bound by asm label.
-extern sAnimEntry_132FB8 D_00459FC8_tbl[][2] __asm__("D_00459FC8");
+// Typed view of kHandplantAnim (cHandplantControl_gainFocus reads it as raw bytes); bound by asm label.
+extern sAnimEntry_132FB8 D_00459FC8_tbl[][2] __asm__("kHandplantAnim");
 
 struct sVec4_132FB8
 {
@@ -8221,7 +8221,7 @@ static inline sQuat_132FB8 QuatMul_132FB8(const sQuat_132FB8& a, const sQuat_132
 }
 
 /**
- * Plays the handplant anim for a mode and type from D_00459FC8, first turning the rider round if asked.
+ * Plays the handplant anim for a mode and type from kHandplantAnim, first turning the rider round if asked.
  *
  * When the entry's flip word is set it rotates the rider 180 degrees about its up axis (mMatrix row 2),
  * refreshes the orientation and adds pi to the anim heading offset.
@@ -8400,16 +8400,16 @@ extern "C" float cRiderMetrix_evFlip(void* self, float x);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
 extern "C" float cRiderAnimBase_getAIAnimDuration(char* self, int a1);
-extern float D_004A4C90;
-extern float D_004A4C94;
+extern float kSpinOutOfAng;
+extern float kIntoSpinAbortAng;
 // Max spin/flip rates: computed once by the static initialiser (__sti__all_in_one_ai_cpp) and read as
 // unchanging memory here (the reciprocal loads float above the channel stores).
-extern const float D_004A4C98;
-extern const float D_004A4C9C;
-extern float D_004A4CA0;
-extern float D_004A4CA4;
-extern float D_004A4CA8;
-extern float D_004A4CAC;
+extern const float kMaxAdjSpinAng;
+extern const float kMaxAdjFlipAng;
+extern float kMaxPressFlipAng;
+extern float kSpinNoDecayThresh;
+extern float kFlipNoDecayThresh;
+extern float kAirAdjFwdMaxAng;
 
 struct sSpinCtl_133308
 {
@@ -8469,7 +8469,7 @@ static inline float aiAtan2_133308(float y, float x)
 // How far the current angle may trail the target turn before a new turn can be queued.
 static inline float aiTurnLimit_133308(float turn)
 {
-    return turn - D_004A4C94;
+    return turn - kIntoSpinAbortAng;
 }
 
 static inline float aiTarget_133308(float in, const float& max, const float& cur)
@@ -8613,7 +8613,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
         self->mode = 0;
 
     self->rider->PressMode = 0;
-    float maxFlip = D_004A4C9C;
+    float maxFlip = kMaxAdjFlipAng;
     int dir = (input[1] << 12) >> 30;
     float flipInput;
     switch (dir)
@@ -8631,7 +8631,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
     if (flipInput != 0.0f)
     {
         flipAdj = flipInput;
-        maxFlip = D_004A4CA0;
+        maxFlip = kMaxPressFlipAng;
         if (self->flipVel < 0.0f || (self->flipVel == 0.0f && flipAdj < 0.0f))
             self->rider->PressMode = 2;
         else
@@ -8711,7 +8711,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
             {
                 self->desSpin = ds;
                 self->desFlip = df;
-                tol = D_004A4C90;
+                tol = kSpinOutOfAng;
             }
             if (aiAbs_133308(ds - self->curSpin) <= tol && aiAbs_133308(df - self->curFlip) <= tol)
                 self->state = 2;
@@ -8730,7 +8730,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
 
             {
                 float& des = self->desSpin;
-                if (aiAbs_133308(self->curSpin - des) <= D_004A4C90)
+                if (aiAbs_133308(self->curSpin - des) <= kSpinOutOfAng)
                 {
                     float th = (des == 0.0f) ? 0.20000000298023224f : 0.0f;
                     if (self->spinHold > th)
@@ -8744,14 +8744,14 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
                         else
                             n = (des < 0.0f) ? des - 3.1415929794311523f : des + 3.1415929794311523f;
                         des = n;
-                        if (aiAbs_133308(self->desSpin) > D_004A4CA4)
+                        if (aiAbs_133308(self->desSpin) > kSpinNoDecayThresh)
                             self->spinSpeed = (self->spinSpeed * 0.7999517321586609f) >? 2.9995594024658203f;
                     }
                 }
             }
             {
                 float& des = self->desFlip;
-                if (aiAbs_133308(self->curFlip - des) <= D_004A4C90)
+                if (aiAbs_133308(self->curFlip - des) <= kSpinOutOfAng)
                 {
                     float th = (des == 0.0f) ? 0.20000000298023224f : 0.0f;
                     if (self->flipHold > th)
@@ -8765,7 +8765,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
                         else
                             n = (des < 0.0f) ? des - 6.283185958862305f : des + 6.283185958862305f;
                         des = n;
-                        if (aiAbs_133308(self->desFlip) > D_004A4CA8)
+                        if (aiAbs_133308(self->desFlip) > kFlipNoDecayThresh)
                             self->flipSpeed = (self->flipSpeed * 0.6399227976799011f) >? 2.9995594024658203f;
                     }
                 }
@@ -8828,7 +8828,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
             float sp = self->spinSpeed;
             if (flip == 0.0f)
                 sp = aiSpeed_133308(aiAbs_133308(diff), sp);
-            float ratio = aiAbs_133308(diff) / D_004A4C90;
+            float ratio = aiAbs_133308(diff) / kSpinOutOfAng;
             aiSetFalloff_133308(SPINRATE_133308(self->rider), ratio, sp);
         }
         SPINRATE_133308(self->rider) *= spinAttribScale;
@@ -8856,7 +8856,7 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
             float sp = self->flipSpeed;
             if (spin == 0.0f)
                 sp = aiSpeed_133308(aiAbs_133308(diff), sp);
-            float ratio = aiAbs_133308(diff) / D_004A4C90;
+            float ratio = aiAbs_133308(diff) / kSpinOutOfAng;
             aiSetFalloff_133308(FLIPRATE_133308(self->rider), ratio, sp);
         }
         FLIPRATE_133308(self->rider) *= spinAttribScale;
@@ -8873,10 +8873,10 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
     float flip0 = self->curFlip;
 
     {
-        float tgt = aiTarget_133308(spinAdj, D_004A4C98, self->spinVel);
+        float tgt = aiTarget_133308(spinAdj, kMaxAdjSpinAng, self->spinVel);
         float vel = self->spinVel;
         self->spinVel = aiApproach_133308(vel, tgt, (aiAbs_133308(spinAdj) * 0.5f + 0.5f) *
-                                                    (aiTurnScale_133308(aiAbs_133308(tgt - vel), D_004A4C98) * 0.04999711737036705f));
+                                                    (aiTurnScale_133308(aiAbs_133308(tgt - vel), kMaxAdjSpinAng) * 0.04999711737036705f));
         float cs = self->curSpin;
         float ds = self->desSpin;
         if (cs < ds)
@@ -8891,10 +8891,10 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
     {
         float tgt = aiTarget_133308(flipAdj, maxFlip, self->flipVel);
         if (tgt > 0.0f)
-            tgt = D_004A4CAC <? tgt;
+            tgt = kAirAdjFwdMaxAng <? tgt;
         float vel = self->flipVel;
         self->flipVel = aiApproach_133308(vel, tgt, (aiAbs_133308(flipAdj) * 0.5f + 0.5f) *
-                                                    (aiTurnScale_133308(aiAbs_133308(tgt - vel), D_004A4C9C) * 0.05000609531998634f));
+                                                    (aiTurnScale_133308(aiAbs_133308(tgt - vel), kMaxAdjFlipAng) * 0.05000609531998634f));
         float cf = self->curFlip;
         float df = self->desFlip;
         if (cf < df)
@@ -8917,8 +8917,8 @@ extern "C" void cSpinControl_update(sSpinCtl_133308* self, int* input)
 
     int cur = cRiderAnimBase_getCurrentAnimID(self->rider->mRiderAnim, 2);
     int anim = cur;
-    aiSetChannel_133308(self->rider, 14, 0.1666666716337204f, self->spinVel * (1.0f / D_004A4C98));
-    aiSetChannel_133308(self->rider, 13, 0.1666666716337204f, self->flipVel * (1.0f / D_004A4C9C));
+    aiSetChannel_133308(self->rider, 14, 0.1666666716337204f, self->spinVel * (1.0f / kMaxAdjSpinAng));
+    aiSetChannel_133308(self->rider, 13, 0.1666666716337204f, self->flipVel * (1.0f / kMaxAdjFlipAng));
 
     if (!busy && cur != 288)
     {

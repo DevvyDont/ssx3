@@ -396,7 +396,7 @@ extern "C" void cFERider_compileModel(cFERider* self)
 INCLUDE_ASM("fe/feridermanager", cFERider_render);
 #ifdef SKIP_ASM
 extern char cIrradianceDataBase_TheDataBase[];
-extern char D_00504810[];
+extern char cIrradiance_kv4White[];
 extern char str_moby[];
 extern char str_kaori[];
 extern char str_allegra[];
@@ -492,37 +492,37 @@ extern "C" void cFERider_render(cFERider* selfp)
     }
     switch (type) {
     case 0:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_moby), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_moby), cIrradiance_kv4White, 1.0f);
         break;
     case 1:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_kaori), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_kaori), cIrradiance_kv4White, 1.0f);
         break;
     case 2:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_allegra), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_allegra), cIrradiance_kv4White, 1.0f);
         break;
     case 3:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_mac), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_mac), cIrradiance_kv4White, 1.0f);
         break;
     case 4:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_zoe), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_zoe), cIrradiance_kv4White, 1.0f);
         break;
     case 5:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_griff), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_griff), cIrradiance_kv4White, 1.0f);
         break;
     case 6:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_elise), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_elise), cIrradiance_kv4White, 1.0f);
         break;
     case 7:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_nate), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_nate), cIrradiance_kv4White, 1.0f);
         break;
     case 8:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_psymon), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_psymon), cIrradiance_kv4White, 1.0f);
         break;
     case 9:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_viggo), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_viggo), cIrradiance_kv4White, 1.0f);
         break;
     default:
-        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_fe_map), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_fe_map), cIrradiance_kv4White, 1.0f);
         break;
     }
     int idx = cAnimModel_getBoneSkelIndex(self->model, 0, str_hips);

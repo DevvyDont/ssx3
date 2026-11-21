@@ -19,8 +19,8 @@ void cInput_setPad(void* self, int buf);
 void cInput_setMap(void* self, int n);
 extern "C" void* cReplayFrame_cReplayFrame(cReplayFrame* self);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char* D_004A3418;
-extern int D_004A3410;
+extern char* kPlaybackBigFmt;
+extern int kPlaybackPath;
 extern char str_cInputPad[];
 extern char str_cInput[];
 extern char str_BigFile_b[];
@@ -65,7 +65,7 @@ extern "C" cPlaybackMan* cPlaybackMan_cPlaybackMan(cPlaybackMan* self, int maxPl
     cInput_setMap(replayStream, n);
     *(void**)&self->Input = replayStream;
     char name[0x100];
-    sprintf(name, D_004A3418, D_004A3410);
+    sprintf(name, kPlaybackBigFmt, kPlaybackPath);
     cBigFile* bf = cBigFile_cBigFile((cBigFile*)cMemMan_alloc(8, str_BigFile_b, 0, 0));
     self->BigFile = bf;
     cBigFile_open(bf, name, 0);
@@ -323,7 +323,7 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan_load);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 
-extern int D_004A3410;
+extern int kPlaybackPath;
 
 struct sPbMan_26CFE8;
 
@@ -348,7 +348,7 @@ struct sPb_26C9F0 {
  *
  * Looks the id up with cPlaybackMan_findFileById. A listed file whose data pointer (entry +0x4) is set needs nothing. Otherwise the
  * entry index becomes the current async file (+0x74), the path is built with sprintf from the format at D_004A3414,
- * str_bar_c, D_004A3410, the location name (+0x8) and the file id, and ASYNCFILE_load(path, 0x100) is started; its
+ * str_bar_c, kPlaybackPath, the location name (+0x8) and the file id, and ASYNCFILE_load(path, 0x100) is started; its
  * handle is kept at +0x78 (-1 on failure). cPlaybackMan_update copies the finished file into the entry.
  *
  * @param self_  the playback manager
@@ -366,7 +366,7 @@ extern "C" int cPlaybackMan_load(cPlaybackMan* self_, int key)
             return 1;
         self->cur = idx;
         self->handle = -1;
-        int num = D_004A3410;
+        int num = kPlaybackPath;
         sprintf(path, D_004A3414, str_bar_c, num, self->name, entry->id);
         int asyncHandle = ASYNCFILE_load(path, 0x100);
         self->handle = asyncHandle;

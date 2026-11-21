@@ -472,7 +472,7 @@ extern "C" void cReplay_cycleReplayCameraAlgorithm(cReplay* self)
 //100%
 INCLUDE_ASM("replay/frameptr", cReplay_setCurrentReplayCamera);
 #ifdef SKIP_ASM
-extern int D_00445438[];
+extern int camSubset[];
 extern "C" void cChaseCameraController_switchCamera_ReplayToggle(void* self, int mode);
 
 struct sRiderList_EDD8 {
@@ -481,7 +481,7 @@ struct sRiderList_EDD8 {
 };
 
 /**
- * Switches every view's chase camera (rider + 0xA8) to replay camera D_00445438[CurrentReplayCamIndex].
+ * Switches every view's chase camera (rider + 0xA8) to replay camera camSubset[CurrentReplayCamIndex].
  *
  * The views are the game's ViewMan list; each switch is cChaseCameraController_switchCamera_ReplayToggle.
  */
@@ -491,7 +491,7 @@ extern "C" void cReplay_setCurrentReplayCamera(cReplay* self)
     int n = list->count;
     int i;
     for (i = 0; i < n; i++) {
-        cChaseCameraController_switchCamera_ReplayToggle(*(void**)(list->riders[i] + 0xA8), D_00445438[self->CurrentReplayCamIndex]);
+        cChaseCameraController_switchCamera_ReplayToggle(*(void**)(list->riders[i] + 0xA8), camSubset[self->CurrentReplayCamIndex]);
     }
 }
 #endif
@@ -1237,7 +1237,7 @@ extern "C" void cReplay_endReplay(cReplay* self)
 //100%
 INCLUDE_ASM("replay/frameptr", cReplay_updateCameraSelect);
 #ifdef SKIP_ASM
-extern int D_00445438[];
+extern int camSubset[];
 int cInput_getState(void* pad, int button);
 // PORT: cInput_getValue returns the input axis value as a float ($f0).
 extern "C" float cInput_getValue(void* pad, int axis);
@@ -1252,7 +1252,7 @@ static inline bool isStateFA78(int* self, int s)
  * Lets the replay viewer change the camera while a replay plays.
  *
  * Only in state 3. Reads the replay pad (SSXApp's input at +0xB0 + PadNum * 4): input state 0x6C refreshes every game
- * view (cGameViewMan_updateAll). When the current replay camera's algorithm (D_00445438[CurrentReplayCamIndex], On Tour
+ * view (cGameViewMan_updateAll). When the current replay camera's algorithm (camSubset[CurrentReplayCamIndex], On Tour
  * camSubset) is 0xB, any movement on axes 0x30..0x33 (cInput_getValue) refreshes the views too.
  */
 extern "C" void cReplay_updateCameraSelect(int* self)
@@ -1264,7 +1264,7 @@ extern "C" void cReplay_updateCameraSelect(int* self)
     if (cInput_getState(input, 108) != 0) {
         cGameViewMan_updateAll(SSXApp->Game->ViewMan);
     }
-    if (D_00445438[self[1584 / 4]] != 11) {
+    if (camSubset[self[1584 / 4]] != 11) {
         return;
     }
     if (cInput_getValue(input, 49) != 0.0f || cInput_getValue(input, 0x30) != 0.0f ||

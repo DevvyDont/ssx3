@@ -199,15 +199,15 @@ extern "C" int cObjectInterface_isSphereOccluded(sQ128* box)
 //100%
 INCLUDE_ASM("util/objectinterface", func_002D20F8);
 #ifdef SKIP_ASM
-extern void* D_004A3A00;
+extern void* gSSXStatsMan;
 
 /**
- * Returns the stats manager, D_004A3A00 (set by cSSXStatsMan_cSSXStatsMan).
+ * Returns the stats manager, gSSXStatsMan (set by cSSXStatsMan_cSSXStatsMan).
  *
  * @return the stats manager (On Tour's global gSSXStatsMan)
  */
 extern "C" int func_002D20F8(void) {
-    return (*(int*)&D_004A3A00);
+    return (*(int*)&gSSXStatsMan);
 }
 #endif
 
@@ -220,7 +220,7 @@ extern "C" void* cSSXStatsMan_cSSXStatsMan(void* p);
 
 /**
  * Creates the stats manager: allocates its one byte with cMemMan_alloc (tag "SSXStatsMan") and constructs it
- * (cSSXStatsMan_cSSXStatsMan, which stores it in D_004A3A00).
+ * (cSSXStatsMan_cSSXStatsMan, which stores it in gSSXStatsMan).
  *
  * The game load calls it.
  *
@@ -355,17 +355,17 @@ void cSSXStatsMan_render(void* self)
 //100%
 INCLUDE_ASM("util/objectinterface", cSSXStatsMan_cSSXStatsMan);
 #ifdef SKIP_ASM
-extern void* D_004A3A00;
+extern void* gSSXStatsMan;
 
 /**
- * Constructs the stats manager: stores @p statsMan in D_004A3A00, the global func_002D20F8 returns.
+ * Constructs the stats manager: stores @p statsMan in gSSXStatsMan, the global func_002D20F8 returns.
  *
  * @param statsMan  the object being constructed
  * @return @p statsMan
  */
 extern "C" void* cSSXStatsMan_cSSXStatsMan(void* statsMan)
 {
-    D_004A3A00 = statsMan;
+    gSSXStatsMan = statsMan;
     return statsMan;
 }
 #endif

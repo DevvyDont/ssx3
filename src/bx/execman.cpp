@@ -259,7 +259,7 @@ INCLUDE_ASM("bx/execman", cAppMan_getCurrentThreadId);
 /**
  * Returns the current thread id from the execution manager (+0x8, virtual entry 6), or -1 without one.
  *
- * Entry 6 of the PS2 execution manager's vtable D_0048DB68 is func_00320B08, which returns GetThreadId(). Nothing in
+ * Entry 6 of the PS2 execution manager's vtable cPS2ExecutionMan_vtbl is func_00320B08, which returns GetThreadId(). Nothing in
  * the C calls it.
  *
  * @return the thread id, or 0xFFFFFFFF
@@ -348,7 +348,7 @@ INCLUDE_ASM("bx/execman", cPS2ExecutionMan__cPS2ExecutionMan);
  * Destroys the PS2 execution manager: restores cExecutionMan_vtbl at +0x8 and frees the object when bit 0 of @p flags
  * is set.
  *
- * Entry 1 (the destructor) of the PS2 execution manager's vtable D_0048DB68; same body as cExecutionMan__cExecutionMan.
+ * Entry 1 (the destructor) of the PS2 execution manager's vtable cPS2ExecutionMan_vtbl; same body as cExecutionMan__cExecutionMan.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
@@ -369,7 +369,7 @@ INCLUDE_ASM("bx/execman", func_00320B08__FPv);
 /**
  * Returns the current thread's id (GetThreadId).
  *
- * Entry 6 of the PS2 execution manager's vtable D_0048DB68, the entry cAppMan_getCurrentThreadId calls.
+ * Entry 6 of the PS2 execution manager's vtable cPS2ExecutionMan_vtbl, the entry cAppMan_getCurrentThreadId calls.
  *
  * @return GetThreadId's result
  */

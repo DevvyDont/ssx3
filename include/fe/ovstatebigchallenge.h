@@ -13,7 +13,7 @@
 // cOVState_BIGCHALLENGE_START__cOVState_BIGCHALLENGE_START. On Tour: size 0x94, one member.
 //
 // cOVState_BIGCHALLENGE_FAIL: the challenge-failed screen (overlay id 30). Allocated 0xA4 (+ getChallengeData).
-// Vtable D_004735B0; constructors func_002210A0 (engine, id; calls getChallengeData) and func_00221040 (no engine);
+// Vtable cOVState_BIGCHALLENGE_FAIL_vtbl; constructors func_002210A0 (engine, id; calls getChallengeData) and func_00221040 (no engine);
 // destructor cOVState_BIGCHALLENGE_FAIL__cOVState_BIGCHALLENGE_FAIL. On Tour: size 0x98, mMissionId + mRider.
 //
 // cOVState_BIGCHALLENGE_PASS is On Tour only: retail has no vtable, constructor or overlay id for it (the preview
@@ -98,7 +98,7 @@ struct cOVState_BIGCHALLENGE_FAIL {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_004735B0, stored after cOVState_vtbl by the constructors
+    void** mVtbl;                   // 0x008 [R] cOVState_BIGCHALLENGE_FAIL_vtbl, stored after cOVState_vtbl by the constructors
     // --- cUIState (On Tour: size 0x48, same offsets; see ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor; [U]
                                     //       onCreateScreen stores the screen's hash

@@ -3078,10 +3078,10 @@ INCLUDE_ASM("render/font", cGarbageMan__cGarbageMan);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_00493938[];
+extern char cGarbageMan_vtbl[];
 
 /**
- * Destructor body: stores the vtable D_00493938 at +4 and frees the object when bit 0 of @p flags is set.
+ * Destructor body: stores the vtable cGarbageMan_vtbl at +4 and frees the object when bit 0 of @p flags is set.
  *
  * It is the only slot (slot 1) of that one-entry vtable.
  *
@@ -3089,7 +3089,7 @@ extern char D_00493938[];
  */
 extern "C" void cGarbageMan__cGarbageMan(int* self, int flags)
 {
-    *(void**)((char*)self + 0x4) = D_00493938;
+    *(void**)((char*)self + 0x4) = cGarbageMan_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -5486,18 +5486,18 @@ extern "C" int *cRenderToggles_AIUpdatesPerRender(void) {
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_DisplayRenderStats);
 #ifdef SKIP_ASM
-extern int D_004A44C4;
+extern int cRenderToggles_m_DisplayRenderStats;
 
 /**
- * Returns &D_004A44C4, the int that item 1 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Display Render Stats" (0
+ * Returns &cRenderToggles_m_DisplayRenderStats, the int that item 1 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Display Render Stats" (0
  * to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A44C4
+ * @return &cRenderToggles_m_DisplayRenderStats
  */
 extern "C" int *cRenderToggles_DisplayRenderStats(void) {
-    return &D_004A44C4;
+    return &cRenderToggles_m_DisplayRenderStats;
 }
 #endif
 //100%
@@ -5519,35 +5519,35 @@ extern "C" int *cRenderToggles_ResetStats(void) {
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_UseSmallTexture0);
 #ifdef SKIP_ASM
-extern int D_004A44CC;
+extern int cRenderToggles_m_UseSmallTexture0;
 
 /**
- * Returns &D_004A44CC, the int that item 3 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Use Small Texture 0" (0
+ * Returns &cRenderToggles_m_UseSmallTexture0, the int that item 3 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Use Small Texture 0" (0
  * to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A44CC
+ * @return &cRenderToggles_m_UseSmallTexture0
  */
 extern "C" int *cRenderToggles_UseSmallTexture0(void) {
-    return &D_004A44CC;
+    return &cRenderToggles_m_UseSmallTexture0;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_UseSmallTexture1);
 #ifdef SKIP_ASM
-extern int D_004A44D0;
+extern int cRenderToggles_m_UseSmallTexture1;
 
 /**
- * Returns &D_004A44D0, the int that item 4 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Use Small Texture 1" (0
+ * Returns &cRenderToggles_m_UseSmallTexture1, the int that item 4 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Use Small Texture 1" (0
  * to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A44D0
+ * @return &cRenderToggles_m_UseSmallTexture1
  */
 extern "C" int *cRenderToggles_UseSmallTexture1(void) {
-    return &D_004A44D0;
+    return &cRenderToggles_m_UseSmallTexture1;
 }
 #endif
 //100%
@@ -5604,120 +5604,120 @@ extern "C" int *cRenderToggles_DisablePatchShadow(void) {
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_DisableSparkles);
 #ifdef SKIP_ASM
-extern int D_004A44E0;
+extern int cRenderToggles_m_DisableSparkles;
 
 /**
- * Returns &D_004A44E0, the int that item 8 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Sparkles" (0 to
+ * Returns &cRenderToggles_m_DisableSparkles, the int that item 8 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Sparkles" (0 to
  * 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A44E0
+ * @return &cRenderToggles_m_DisableSparkles
  */
 extern "C" int *cRenderToggles_DisableSparkles(void) {
-    return &D_004A44E0;
+    return &cRenderToggles_m_DisableSparkles;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_DisableLineStrips);
 #ifdef SKIP_ASM
-extern int D_004A44E4;
+extern int cRenderToggles_m_DisableLineStrips;
 
 /**
- * Returns &D_004A44E4, the int that item 9 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Line Strips" (0
+ * Returns &cRenderToggles_m_DisableLineStrips, the int that item 9 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Line Strips" (0
  * to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A44E4
+ * @return &cRenderToggles_m_DisableLineStrips
  */
 extern "C" int *cRenderToggles_DisableLineStrips(void) {
-    return &D_004A44E4;
+    return &cRenderToggles_m_DisableLineStrips;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_DisableTriStrips);
 #ifdef SKIP_ASM
-extern int D_004A44E8;
+extern int cRenderToggles_m_DisableTriStrips;
 
 /**
- * Returns &D_004A44E8, the int that item 10 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Tri Strips" (0
+ * Returns &cRenderToggles_m_DisableTriStrips, the int that item 10 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Tri Strips" (0
  * to 3).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A44E8
+ * @return &cRenderToggles_m_DisableTriStrips
  */
 extern "C" int *cRenderToggles_DisableTriStrips(void) {
-    return &D_004A44E8;
+    return &cRenderToggles_m_DisableTriStrips;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_DisableTransformStrips);
 #ifdef SKIP_ASM
-extern int D_004A44EC;
+extern int cRenderToggles_m_DisableTransformStrips;
 
 /**
- * Returns &D_004A44EC, the int that item 11 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Transform
+ * Returns &cRenderToggles_m_DisableTransformStrips, the int that item 11 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Transform
  * Strips" (0 to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A44EC
+ * @return &cRenderToggles_m_DisableTransformStrips
  */
 extern "C" int *cRenderToggles_DisableTransformStrips(void) {
-    return &D_004A44EC;
+    return &cRenderToggles_m_DisableTransformStrips;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_DisableMeshes);
 #ifdef SKIP_ASM
-extern int D_004A44F0;
+extern int cRenderToggles_m_DisableMeshes;
 
 /**
- * Returns &D_004A44F0, the int that item 12 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Meshes" (0 to
+ * Returns &cRenderToggles_m_DisableMeshes, the int that item 12 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Meshes" (0 to
  * 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A44F0
+ * @return &cRenderToggles_m_DisableMeshes
  */
 extern "C" int *cRenderToggles_DisableMeshes(void) {
-    return &D_004A44F0;
+    return &cRenderToggles_m_DisableMeshes;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_DisableMeshReflection);
 #ifdef SKIP_ASM
-extern int D_004A44F4;
+extern int cRenderToggles_m_DisableMeshReflection;
 
 /**
- * Returns &D_004A44F4, the int that item 13 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Mesh Reflection"
+ * Returns &cRenderToggles_m_DisableMeshReflection, the int that item 13 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Mesh Reflection"
  * (0 to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A44F4
+ * @return &cRenderToggles_m_DisableMeshReflection
  */
 extern "C" int *cRenderToggles_DisableMeshReflection(void) {
-    return &D_004A44F4;
+    return &cRenderToggles_m_DisableMeshReflection;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_DisableStaticEmitters);
 #ifdef SKIP_ASM
-extern int D_004A44F8;
+extern int cRenderToggles_m_DisableStaticEmitters;
 
 /**
- * Returns &D_004A44F8, the int that item 14 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Static Emitters"
+ * Returns &cRenderToggles_m_DisableStaticEmitters, the int that item 14 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Static Emitters"
  * (0 to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A44F8
+ * @return &cRenderToggles_m_DisableStaticEmitters
  */
 extern "C" int *cRenderToggles_DisableStaticEmitters(void) {
-    return &D_004A44F8;
+    return &cRenderToggles_m_DisableStaticEmitters;
 }
 #endif
 //100%
@@ -5740,154 +5740,154 @@ extern "C" int *cRenderToggles_DisableDynamicEmitters(void) {
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_DisableDynamicColourEmitters);
 #ifdef SKIP_ASM
-extern int D_004A4500;
+extern int cRenderToggles_m_DisableDynamicColourEmitters;
 
 /**
- * Returns &D_004A4500, the int that item 16 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Dynamic Colour
+ * Returns &cRenderToggles_m_DisableDynamicColourEmitters, the int that item 16 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Dynamic Colour
  * Emitters" (0 to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4500
+ * @return &cRenderToggles_m_DisableDynamicColourEmitters
  */
 extern "C" int *cRenderToggles_DisableDynamicColourEmitters(void) {
-    return &D_004A4500;
+    return &cRenderToggles_m_DisableDynamicColourEmitters;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_DisableSprites);
 #ifdef SKIP_ASM
-extern int D_004A4504;
+extern int cRenderToggles_m_DisableSprites;
 
 /**
- * Returns &D_004A4504, the int that item 17 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Sprites" (0 to
+ * Returns &cRenderToggles_m_DisableSprites, the int that item 17 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Sprites" (0 to
  * 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4504
+ * @return &cRenderToggles_m_DisableSprites
  */
 extern "C" int *cRenderToggles_DisableSprites(void) {
-    return &D_004A4504;
+    return &cRenderToggles_m_DisableSprites;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_Disable3DSprites);
 #ifdef SKIP_ASM
-extern int D_004A4508;
+extern int cRenderToggles_m_Disable3DSprites;
 
 /**
- * Returns &D_004A4508, the int that item 18 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable 3D Sprites" (0
+ * Returns &cRenderToggles_m_Disable3DSprites, the int that item 18 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable 3D Sprites" (0
  * to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4508
+ * @return &cRenderToggles_m_Disable3DSprites
  */
 extern "C" int *cRenderToggles_Disable3DSprites(void) {
-    return &D_004A4508;
+    return &cRenderToggles_m_Disable3DSprites;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_DisableTextureRects);
 #ifdef SKIP_ASM
-extern int D_004A450C;
+extern int cRenderToggles_m_DisableTextureRects;
 
 /**
- * Returns &D_004A450C, the int that item 19 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Texture Rects"
+ * Returns &cRenderToggles_m_DisableTextureRects, the int that item 19 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Texture Rects"
  * (0 to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A450C
+ * @return &cRenderToggles_m_DisableTextureRects
  */
 extern "C" int *cRenderToggles_DisableTextureRects(void) {
-    return &D_004A450C;
+    return &cRenderToggles_m_DisableTextureRects;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_DisablePlayerStrips);
 #ifdef SKIP_ASM
-extern int D_004A4510;
+extern int cRenderToggles_m_DisablePlayerStrips;
 
 /**
- * Returns &D_004A4510, the int that item 20 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Player Strips"
+ * Returns &cRenderToggles_m_DisablePlayerStrips, the int that item 20 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Player Strips"
  * (0 to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4510
+ * @return &cRenderToggles_m_DisablePlayerStrips
  */
 extern "C" int *cRenderToggles_DisablePlayerStrips(void) {
-    return &D_004A4510;
+    return &cRenderToggles_m_DisablePlayerStrips;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_DisableShadows);
 #ifdef SKIP_ASM
-extern int D_004A4514;
+extern int cRenderToggles_m_DisableShadows;
 
 /**
- * Returns &D_004A4514, the int that item 21 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Shadows" (0 to
+ * Returns &cRenderToggles_m_DisableShadows, the int that item 21 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Shadows" (0 to
  * 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4514
+ * @return &cRenderToggles_m_DisableShadows
  */
 extern "C" int *cRenderToggles_DisableShadows(void) {
-    return &D_004A4514;
+    return &cRenderToggles_m_DisableShadows;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_DisableBoardTrail);
 #ifdef SKIP_ASM
-extern int D_004A4518;
+extern int cRenderToggles_m_DisableBoardTrail;
 
 /**
- * Returns &D_004A4518, the int that item 22 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Board Trail" (0
+ * Returns &cRenderToggles_m_DisableBoardTrail, the int that item 22 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Board Trail" (0
  * to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4518
+ * @return &cRenderToggles_m_DisableBoardTrail
  */
 extern "C" int *cRenderToggles_DisableBoardTrail(void) {
-    return &D_004A4518;
+    return &cRenderToggles_m_DisableBoardTrail;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_DisableAIBoardTrail);
 #ifdef SKIP_ASM
-extern int D_004A451C;
+extern int cRenderToggles_m_DisableAIBoardTrail;
 
 /**
- * Returns &D_004A451C, the int that item 23 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable AI Board Trail"
+ * Returns &cRenderToggles_m_DisableAIBoardTrail, the int that item 23 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable AI Board Trail"
  * (0 to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A451C
+ * @return &cRenderToggles_m_DisableAIBoardTrail
  */
 extern "C" int *cRenderToggles_DisableAIBoardTrail(void) {
-    return &D_004A451C;
+    return &cRenderToggles_m_DisableAIBoardTrail;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_DisableVisibilityRects);
 #ifdef SKIP_ASM
-extern int D_004A4520;
+extern int cRenderToggles_m_DisableVisibilityRects;
 
 /**
- * Returns &D_004A4520, the int that item 24 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Visibility
+ * Returns &cRenderToggles_m_DisableVisibilityRects, the int that item 24 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Visibility
  * Rects" (0 to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4520
+ * @return &cRenderToggles_m_DisableVisibilityRects
  */
 extern "C" int *cRenderToggles_DisableVisibilityRects(void) {
-    return &D_004A4520;
+    return &cRenderToggles_m_DisableVisibilityRects;
 }
 #endif
 //100%
@@ -6029,221 +6029,221 @@ extern "C" int *cRenderToggles_DisableHUD(void) {
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_TestTunnel);
 #ifdef SKIP_ASM
-extern int D_004A4544;
+extern int cRenderToggles_m_TestTunnel;
 
 /**
- * Returns &D_004A4544, the int that item 33 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Test Tunnel" (0 to 1).
+ * Returns &cRenderToggles_m_TestTunnel, the int that item 33 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Test Tunnel" (0 to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4544
+ * @return &cRenderToggles_m_TestTunnel
  */
 extern "C" int *cRenderToggles_TestTunnel(void) {
-    return &D_004A4544;
+    return &cRenderToggles_m_TestTunnel;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_ParticleSizeScale);
 #ifdef SKIP_ASM
-extern int D_004A4548;
+extern int cRenderToggles_m_ParticleSizeScale;
 
 /**
- * Returns &D_004A4548, the float that item 34 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Particle Size Scale"
+ * Returns &cRenderToggles_m_ParticleSizeScale, the float that item 34 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Particle Size Scale"
  * (1 to 2000).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4548
+ * @return &cRenderToggles_m_ParticleSizeScale
  */
 extern "C" int *cRenderToggles_ParticleSizeScale(void) {
-    return &D_004A4548;
+    return &cRenderToggles_m_ParticleSizeScale;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_TestSurfaceTypes);
 #ifdef SKIP_ASM
-extern int D_004A454C;
+extern int cRenderToggles_m_TestSurfaceTypes;
 
 /**
- * Returns &D_004A454C, the int that item 35 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Test Surface Types" (0
+ * Returns &cRenderToggles_m_TestSurfaceTypes, the int that item 35 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Test Surface Types" (0
  * to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A454C
+ * @return &cRenderToggles_m_TestSurfaceTypes
  */
 extern "C" int *cRenderToggles_TestSurfaceTypes(void) {
-    return &D_004A454C;
+    return &cRenderToggles_m_TestSurfaceTypes;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_SoftwareDynamicParticleSystems);
 #ifdef SKIP_ASM
-extern int D_004A4550;
+extern int cRenderToggles_m_SoftwareDynamicParticleSystems;
 
 /**
- * Returns &D_004A4550, the int that item 36 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Software Based Dynamic
+ * Returns &cRenderToggles_m_SoftwareDynamicParticleSystems, the int that item 36 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Software Based Dynamic
  * Systems" (0 to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4550
+ * @return &cRenderToggles_m_SoftwareDynamicParticleSystems
  */
 extern "C" int *cRenderToggles_SoftwareDynamicParticleSystems(void) {
-    return &D_004A4550;
+    return &cRenderToggles_m_SoftwareDynamicParticleSystems;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_TempInt);
 #ifdef SKIP_ASM
-extern int D_004A4554;
+extern int cRenderToggles_m_TempInt;
 
 /**
- * Returns &D_004A4554, the int that item 37 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Temp Int" (0 to 20).
+ * Returns &cRenderToggles_m_TempInt, the int that item 37 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Temp Int" (0 to 20).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4554
+ * @return &cRenderToggles_m_TempInt
  */
 extern "C" int *cRenderToggles_TempInt(void) {
-    return &D_004A4554;
+    return &cRenderToggles_m_TempInt;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_Prog2x);
 #ifdef SKIP_ASM
-extern int D_004A4558;
+extern int cRenderToggles_m_Prog2x;
 
 /**
- * Returns &D_004A4558, the float that item 38 of cRenderTogglesMenu_cRenderTogglesMenu edits as "PROG2 x" (-10 to 10).
+ * Returns &cRenderToggles_m_Prog2x, the float that item 38 of cRenderTogglesMenu_cRenderTogglesMenu edits as "PROG2 x" (-10 to 10).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4558
+ * @return &cRenderToggles_m_Prog2x
  */
 extern "C" int *cRenderToggles_Prog2x(void) {
-    return &D_004A4558;
+    return &cRenderToggles_m_Prog2x;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_Prog2y);
 #ifdef SKIP_ASM
-extern int D_004A455C;
+extern int cRenderToggles_m_Prog2y;
 
 /**
- * Returns &D_004A455C, the float that item 39 of cRenderTogglesMenu_cRenderTogglesMenu edits as "PROG2 y" (-10 to 10).
+ * Returns &cRenderToggles_m_Prog2y, the float that item 39 of cRenderTogglesMenu_cRenderTogglesMenu edits as "PROG2 y" (-10 to 10).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A455C
+ * @return &cRenderToggles_m_Prog2y
  */
 extern "C" int *cRenderToggles_Prog2y(void) {
-    return &D_004A455C;
+    return &cRenderToggles_m_Prog2y;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_Prog2z);
 #ifdef SKIP_ASM
-extern int D_004A4560;
+extern int cRenderToggles_m_Prog2z;
 
 /**
- * Returns &D_004A4560, the float that item 40 of cRenderTogglesMenu_cRenderTogglesMenu edits as "PROG2 z" (-10 to 10).
+ * Returns &cRenderToggles_m_Prog2z, the float that item 40 of cRenderTogglesMenu_cRenderTogglesMenu edits as "PROG2 z" (-10 to 10).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4560
+ * @return &cRenderToggles_m_Prog2z
  */
 extern "C" int *cRenderToggles_Prog2z(void) {
-    return &D_004A4560;
+    return &cRenderToggles_m_Prog2z;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_Prog2w);
 #ifdef SKIP_ASM
-extern int D_004A4564;
+extern int cRenderToggles_m_Prog2w;
 
 /**
- * Returns &D_004A4564, the float that item 41 of cRenderTogglesMenu_cRenderTogglesMenu edits as "PROG2 w" (-10 to 10).
+ * Returns &cRenderToggles_m_Prog2w, the float that item 41 of cRenderTogglesMenu_cRenderTogglesMenu edits as "PROG2 w" (-10 to 10).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4564
+ * @return &cRenderToggles_m_Prog2w
  */
 extern "C" int *cRenderToggles_Prog2w(void) {
-    return &D_004A4564;
+    return &cRenderToggles_m_Prog2w;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_DebugInfo);
 #ifdef SKIP_ASM
-extern int D_004A4568;
+extern int cRenderToggles_m_DebugInfo;
 
 /**
- * Returns &D_004A4568, the int that item 42 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Enable Build Info" (0 to
+ * Returns &cRenderToggles_m_DebugInfo, the int that item 42 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Enable Build Info" (0 to
  * 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4568
+ * @return &cRenderToggles_m_DebugInfo
  */
 extern "C" int *cRenderToggles_DebugInfo(void) {
-    return &D_004A4568;
+    return &cRenderToggles_m_DebugInfo;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_DebugNISMemInfo);
 #ifdef SKIP_ASM
-extern int D_004A456C;
+extern int cRenderToggles_m_DebugNISMemInfo;
 
 /**
- * Returns &D_004A456C, the int that item 43 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Enable NIS Mem Usage
+ * Returns &cRenderToggles_m_DebugNISMemInfo, the int that item 43 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Enable NIS Mem Usage
  * Info" (0 to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A456C
+ * @return &cRenderToggles_m_DebugNISMemInfo
  */
 extern "C" int *cRenderToggles_DebugNISMemInfo(void) {
-    return &D_004A456C;
+    return &cRenderToggles_m_DebugNISMemInfo;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_DebugGameModeInfo);
 #ifdef SKIP_ASM
-extern int D_004A4570;
+extern int cRenderToggles_m_DebugGameModeInfo;
 
 /**
- * Returns &D_004A4570, the int that item 44 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Enable Gameflow Info" (0
+ * Returns &cRenderToggles_m_DebugGameModeInfo, the int that item 44 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Enable Gameflow Info" (0
  * to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4570
+ * @return &cRenderToggles_m_DebugGameModeInfo
  */
 extern "C" int *cRenderToggles_DebugGameModeInfo(void) {
-    return &D_004A4570;
+    return &cRenderToggles_m_DebugGameModeInfo;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_ProfileIndividualFX);
 #ifdef SKIP_ASM
-extern int D_004A4574;
+extern int cRenderToggles_m_ProfileIndividualFX;
 
 /**
- * Returns &D_004A4574, the int that item 45 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Profile Individual
+ * Returns &cRenderToggles_m_ProfileIndividualFX, the int that item 45 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Profile Individual
  * Effects" (0 to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4574
+ * @return &cRenderToggles_m_ProfileIndividualFX
  */
 extern "C" int *cRenderToggles_ProfileIndividualFX(void) {
-    return &D_004A4574;
+    return &cRenderToggles_m_ProfileIndividualFX;
 }
 #endif
 //100%
@@ -6359,18 +6359,18 @@ extern "C" int *cPlants_BranchAmplitude(void) {
 //100%
 INCLUDE_ASM("render/font", cPlants_RotationAmplitude);
 #ifdef SKIP_ASM
-extern int D_004A4454;
+extern int cPlants_m_RotationAmplitude;
 
 /**
- * Returns &D_004A4454, the float that item 4 of cPlantsMenu_cPlantsMenu edits as "Rotation Amplitude" (0 to 2).
+ * Returns &cPlants_m_RotationAmplitude, the float that item 4 of cPlantsMenu_cPlantsMenu edits as "Rotation Amplitude" (0 to 2).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4454
+ * @return &cPlants_m_RotationAmplitude
  */
 extern "C" int *cPlants_RotationAmplitude(void) {
-    return &D_004A4454;
+    return &cPlants_m_RotationAmplitude;
 }
 #endif
 //100%
@@ -6409,88 +6409,88 @@ extern "C" int *cPlants_SwayFrequency(void) {
 //100%
 INCLUDE_ASM("render/font", cPlants_RotationFrequency);
 #ifdef SKIP_ASM
-extern int D_004A4460;
+extern int cPlants_m_RotationFrequency;
 
 /**
- * Returns &D_004A4460, the float that item 7 of cPlantsMenu_cPlantsMenu edits as "Rotation Frequency" (0 to 6000).
+ * Returns &cPlants_m_RotationFrequency, the float that item 7 of cPlantsMenu_cPlantsMenu edits as "Rotation Frequency" (0 to 6000).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4460
+ * @return &cPlants_m_RotationFrequency
  */
 extern "C" int *cPlants_RotationFrequency(void) {
-    return &D_004A4460;
+    return &cPlants_m_RotationFrequency;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cPlants_BranchFrequency);
 #ifdef SKIP_ASM
-extern int D_004A4464;
+extern int cPlants_m_BranchFrequency;
 
 /**
- * Returns &D_004A4464, the float that item 8 of cPlantsMenu_cPlantsMenu edits as "Branch Frequency (x/600)Hz" (0 to
+ * Returns &cPlants_m_BranchFrequency, the float that item 8 of cPlantsMenu_cPlantsMenu edits as "Branch Frequency (x/600)Hz" (0 to
  * 6000).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4464
+ * @return &cPlants_m_BranchFrequency
  */
 extern "C" int *cPlants_BranchFrequency(void) {
-    return &D_004A4464;
+    return &cPlants_m_BranchFrequency;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cPlants_BranchFrequency2);
 #ifdef SKIP_ASM
-extern int D_004A4468;
+extern int cPlants_m_BranchFrequency2;
 
 /**
- * Returns &D_004A4468, the float that item 9 of cPlantsMenu_cPlantsMenu edits as "Branch Frequency 2 (x/600)Hz" (0 to
+ * Returns &cPlants_m_BranchFrequency2, the float that item 9 of cPlantsMenu_cPlantsMenu edits as "Branch Frequency 2 (x/600)Hz" (0 to
  * 6000).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4468
+ * @return &cPlants_m_BranchFrequency2
  */
 extern "C" int *cPlants_BranchFrequency2(void) {
-    return &D_004A4468;
+    return &cPlants_m_BranchFrequency2;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cPlants_SwayDirection);
 #ifdef SKIP_ASM
-extern int D_004A446C;
+extern int cPlants_m_SwayDirection;
 
 /**
- * Returns &D_004A446C, the float that item 10 of cPlantsMenu_cPlantsMenu edits as "Sway Direction" (0 to 360).
+ * Returns &cPlants_m_SwayDirection, the float that item 10 of cPlantsMenu_cPlantsMenu edits as "Sway Direction" (0 to 360).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A446C
+ * @return &cPlants_m_SwayDirection
  */
 extern "C" int *cPlants_SwayDirection(void) {
-    return &D_004A446C;
+    return &cPlants_m_SwayDirection;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cPlants_BranchDirection);
 #ifdef SKIP_ASM
-extern int D_004A4470;
+extern int cPlants_m_BranchDirection;
 
 /**
- * Returns &D_004A4470, the float that item 11 of cPlantsMenu_cPlantsMenu edits as "Branch Direction" (0 to 360).
+ * Returns &cPlants_m_BranchDirection, the float that item 11 of cPlantsMenu_cPlantsMenu edits as "Branch Direction" (0 to 360).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4470
+ * @return &cPlants_m_BranchDirection
  */
 extern "C" int *cPlants_BranchDirection(void) {
-    return &D_004A4470;
+    return &cPlants_m_BranchDirection;
 }
 #endif
 //100%
@@ -7102,35 +7102,35 @@ void cDetailSystem_addPatch(void* self)
 //100%
 INCLUDE_ASM("render/font", cDetailSystem_Enable);
 #ifdef SKIP_ASM
-extern int D_004A4340;
+extern int cDetailSystem_m_Enable;
 
 /**
- * Returns &D_004A4340, the int that item 0 of cDetailSystemMenu_cDetailSystemMenu edits as "Enable" (0 to 1).
+ * Returns &cDetailSystem_m_Enable, the int that item 0 of cDetailSystemMenu_cDetailSystemMenu edits as "Enable" (0 to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4340
+ * @return &cDetailSystem_m_Enable
  */
 extern "C" int *cDetailSystem_Enable(void) {
-    return &D_004A4340;
+    return &cDetailSystem_m_Enable;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cDetailSystem_SpinScale);
 #ifdef SKIP_ASM
-extern int D_004A4344;
+extern int cDetailSystem_m_SpinScale;
 
 /**
- * Returns &D_004A4344, the float that item 1 of cDetailSystemMenu_cDetailSystemMenu edits as "Sparkle Spin Scale" (-1
+ * Returns &cDetailSystem_m_SpinScale, the float that item 1 of cDetailSystemMenu_cDetailSystemMenu edits as "Sparkle Spin Scale" (-1
  * to 1).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4344
+ * @return &cDetailSystem_m_SpinScale
  */
 extern "C" int *cDetailSystem_SpinScale(void) {
-    return &D_004A4344;
+    return &cDetailSystem_m_SpinScale;
 }
 #endif
 //100%
@@ -7154,127 +7154,127 @@ extern "C" int *cDetailSystem_PS2SparkleCount(void) {
 //100%
 INCLUDE_ASM("render/font", cDetailSystem_PS2SparkleSize);
 #ifdef SKIP_ASM
-extern int D_004A434C;
+extern int cDetailSystem_m_PS2SparkleSize;
 
 /**
- * Returns &D_004A434C, the float that item 3 of cDetailSystemMenu_cDetailSystemMenu edits as "PS2 Sparkle World Size"
+ * Returns &cDetailSystem_m_PS2SparkleSize, the float that item 3 of cDetailSystemMenu_cDetailSystemMenu edits as "PS2 Sparkle World Size"
  * (0 to 500).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A434C
+ * @return &cDetailSystem_m_PS2SparkleSize
  */
 extern "C" int *cDetailSystem_PS2SparkleSize(void) {
-    return &D_004A434C;
+    return &cDetailSystem_m_PS2SparkleSize;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cDetailSystem_PS2MinSparkleSize);
 #ifdef SKIP_ASM
-extern int D_004A4350;
+extern int cDetailSystem_m_PS2MinSparkleSize;
 
 /**
- * Returns &D_004A4350, the float that item 4 of cDetailSystemMenu_cDetailSystemMenu edits as "PS2 Min Sparkle Screen
+ * Returns &cDetailSystem_m_PS2MinSparkleSize, the float that item 4 of cDetailSystemMenu_cDetailSystemMenu edits as "PS2 Min Sparkle Screen
  * Size" (0 to 100).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4350
+ * @return &cDetailSystem_m_PS2MinSparkleSize
  */
 extern "C" int *cDetailSystem_PS2MinSparkleSize(void) {
-    return &D_004A4350;
+    return &cDetailSystem_m_PS2MinSparkleSize;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cDetailSystem_PS2MaxSparkleSize);
 #ifdef SKIP_ASM
-extern int D_004A4354;
+extern int cDetailSystem_m_PS2MaxSparkleSize;
 
 /**
- * Returns &D_004A4354, the float that item 5 of cDetailSystemMenu_cDetailSystemMenu edits as "PS2 Max Sparkle Screen
+ * Returns &cDetailSystem_m_PS2MaxSparkleSize, the float that item 5 of cDetailSystemMenu_cDetailSystemMenu edits as "PS2 Max Sparkle Screen
  * Size" (0 to 100).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4354
+ * @return &cDetailSystem_m_PS2MaxSparkleSize
  */
 extern "C" int *cDetailSystem_PS2MaxSparkleSize(void) {
-    return &D_004A4354;
+    return &cDetailSystem_m_PS2MaxSparkleSize;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cDetailSystem_XBoxNumSparkles);
 #ifdef SKIP_ASM
-extern int D_004A4358;
+extern int cDetailSystem_m_XBoxNumSparkles;
 
 /**
- * Returns &D_004A4358, the float that item 6 of cDetailSystemMenu_cDetailSystemMenu edits as "XBox Sparkle Count" (1 to
+ * Returns &cDetailSystem_m_XBoxNumSparkles, the float that item 6 of cDetailSystemMenu_cDetailSystemMenu edits as "XBox Sparkle Count" (1 to
  * 300).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4358
+ * @return &cDetailSystem_m_XBoxNumSparkles
  */
 extern "C" int *cDetailSystem_XBoxNumSparkles(void) {
-    return &D_004A4358;
+    return &cDetailSystem_m_XBoxNumSparkles;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cDetailSystem_XBoxSize);
 #ifdef SKIP_ASM
-extern int D_004A435C;
+extern int cDetailSystem_m_XBoxSize;
 
 /**
- * Returns &D_004A435C, the float that item 7 of cDetailSystemMenu_cDetailSystemMenu edits as "XBox - World Size" (0 to
+ * Returns &cDetailSystem_m_XBoxSize, the float that item 7 of cDetailSystemMenu_cDetailSystemMenu edits as "XBox - World Size" (0 to
  * 500).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A435C
+ * @return &cDetailSystem_m_XBoxSize
  */
 extern "C" int *cDetailSystem_XBoxSize(void) {
-    return &D_004A435C;
+    return &cDetailSystem_m_XBoxSize;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cDetailSystem_XBoxMinSize);
 #ifdef SKIP_ASM
-extern int D_004A4360;
+extern int cDetailSystem_m_XBoxMinSize;
 
 /**
- * Returns &D_004A4360, the float that item 8 of cDetailSystemMenu_cDetailSystemMenu edits as "XBox - Min Screen Size"
+ * Returns &cDetailSystem_m_XBoxMinSize, the float that item 8 of cDetailSystemMenu_cDetailSystemMenu edits as "XBox - Min Screen Size"
  * (0 to 100).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4360
+ * @return &cDetailSystem_m_XBoxMinSize
  */
 extern "C" int *cDetailSystem_XBoxMinSize(void) {
-    return &D_004A4360;
+    return &cDetailSystem_m_XBoxMinSize;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cDetailSystem_XBoxMaxSize);
 #ifdef SKIP_ASM
-extern int D_004A4364;
+extern int cDetailSystem_m_XBoxMaxSize;
 
 /**
- * Returns &D_004A4364, the float that item 9 of cDetailSystemMenu_cDetailSystemMenu edits as "XBox - Max Screen Size"
+ * Returns &cDetailSystem_m_XBoxMaxSize, the float that item 9 of cDetailSystemMenu_cDetailSystemMenu edits as "XBox - Max Screen Size"
  * (0 to 100).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4364
+ * @return &cDetailSystem_m_XBoxMaxSize
  */
 extern "C" int *cDetailSystem_XBoxMaxSize(void) {
-    return &D_004A4364;
+    return &cDetailSystem_m_XBoxMaxSize;
 }
 #endif
 
@@ -7306,256 +7306,256 @@ extern "C" void cVisualEffectsTest__cVisualEffectsTest(int* self, int flags)
 //100%
 INCLUDE_ASM("render/font", cVisualEffectsTest_HUDEnable);
 #ifdef SKIP_ASM
-extern int D_004A4478;
+extern int cVisualEffectsTest_m_HUDEnable;
 
 /**
- * Returns &D_004A4478, the int that item 0 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Show All HUD
+ * Returns &cVisualEffectsTest_m_HUDEnable, the int that item 0 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Show All HUD
  * Graphics" (0 to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4478
+ * @return &cVisualEffectsTest_m_HUDEnable
  */
 extern "C" int *cVisualEffectsTest_HUDEnable(void) {
-    return &D_004A4478;
+    return &cVisualEffectsTest_m_HUDEnable;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cVisualEffectsTest_ShowCurrentElement);
 #ifdef SKIP_ASM
-extern int D_004A447C;
+extern int cVisualEffectsTest_m_ShowCurrentElement;
 
 /**
- * Returns &D_004A447C, the int that item 1 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Show Current
+ * Returns &cVisualEffectsTest_m_ShowCurrentElement, the int that item 1 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Show Current
  * Element" (0 to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A447C
+ * @return &cVisualEffectsTest_m_ShowCurrentElement
  */
 extern "C" int *cVisualEffectsTest_ShowCurrentElement(void) {
-    return &D_004A447C;
+    return &cVisualEffectsTest_m_ShowCurrentElement;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cVisualEffectsTest_HUDPrint);
 #ifdef SKIP_ASM
-extern int D_004A4480;
+extern int cVisualEffectsTest_m_HUDPrint;
 
 /**
- * Returns &D_004A4480, the int that item 2 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Output HUD Data"
+ * Returns &cVisualEffectsTest_m_HUDPrint, the int that item 2 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Output HUD Data"
  * (0 to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4480
+ * @return &cVisualEffectsTest_m_HUDPrint
  */
 extern "C" int *cVisualEffectsTest_HUDPrint(void) {
-    return &D_004A4480;
+    return &cVisualEffectsTest_m_HUDPrint;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cVisualEffectsTest_CurrElement);
 #ifdef SKIP_ASM
-extern int D_004A4484;
+extern int cVisualEffectsTest_m_CurrElement;
 
 /**
- * Returns &D_004A4484, the int that item 3 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Current Element
+ * Returns &cVisualEffectsTest_m_CurrElement, the int that item 3 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Current Element
  * Id" (0 to 1000).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4484
+ * @return &cVisualEffectsTest_m_CurrElement
  */
 extern "C" int *cVisualEffectsTest_CurrElement(void) {
-    return &D_004A4484;
+    return &cVisualEffectsTest_m_CurrElement;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cVisualEffectsTest_PositionX);
 #ifdef SKIP_ASM
-extern int D_004A4488;
+extern int cVisualEffectsTest_m_PositionX;
 
 /**
- * Returns &D_004A4488, the int that item 4 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Position X" (-640
+ * Returns &cVisualEffectsTest_m_PositionX, the int that item 4 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Position X" (-640
  * to 640).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4488
+ * @return &cVisualEffectsTest_m_PositionX
  */
 extern "C" int *cVisualEffectsTest_PositionX(void) {
-    return &D_004A4488;
+    return &cVisualEffectsTest_m_PositionX;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cVisualEffectsTest_PositionY);
 #ifdef SKIP_ASM
-extern int D_004A448C;
+extern int cVisualEffectsTest_m_PositionY;
 
 /**
- * Returns &D_004A448C, the int that item 5 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Position Y" (-480
+ * Returns &cVisualEffectsTest_m_PositionY, the int that item 5 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Position Y" (-480
  * to 480).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A448C
+ * @return &cVisualEffectsTest_m_PositionY
  */
 extern "C" int *cVisualEffectsTest_PositionY(void) {
-    return &D_004A448C;
+    return &cVisualEffectsTest_m_PositionY;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cVisualEffectsTest_SizeX);
 #ifdef SKIP_ASM
-extern int D_004A4490;
+extern int cVisualEffectsTest_m_SizeX;
 
 /**
- * Returns &D_004A4490, the int that item 6 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Size X" (-640 to
+ * Returns &cVisualEffectsTest_m_SizeX, the int that item 6 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Size X" (-640 to
  * 640).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4490
+ * @return &cVisualEffectsTest_m_SizeX
  */
 extern "C" int *cVisualEffectsTest_SizeX(void) {
-    return &D_004A4490;
+    return &cVisualEffectsTest_m_SizeX;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cVisualEffectsTest_SizeY);
 #ifdef SKIP_ASM
-extern int D_004A4494;
+extern int cVisualEffectsTest_m_SizeY;
 
 /**
- * Returns &D_004A4494, the int that item 7 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Size Y" (-640 to
+ * Returns &cVisualEffectsTest_m_SizeY, the int that item 7 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Size Y" (-640 to
  * 640).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4494
+ * @return &cVisualEffectsTest_m_SizeY
  */
 extern "C" int *cVisualEffectsTest_SizeY(void) {
-    return &D_004A4494;
+    return &cVisualEffectsTest_m_SizeY;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cVisualEffectsTest_ScaleX);
 #ifdef SKIP_ASM
-extern int D_004A4498;
+extern int cVisualEffectsTest_m_ScaleX;
 
 /**
- * Returns &D_004A4498, the int that item 8 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Scale X" (-1 to
+ * Returns &cVisualEffectsTest_m_ScaleX, the int that item 8 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Scale X" (-1 to
  * 1000).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4498
+ * @return &cVisualEffectsTest_m_ScaleX
  */
 extern "C" int *cVisualEffectsTest_ScaleX(void) {
-    return &D_004A4498;
+    return &cVisualEffectsTest_m_ScaleX;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cVisualEffectsTest_ScaleY);
 #ifdef SKIP_ASM
-extern int D_004A449C;
+extern int cVisualEffectsTest_m_ScaleY;
 
 /**
- * Returns &D_004A449C, the int that item 9 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Scale Y" (-1 to
+ * Returns &cVisualEffectsTest_m_ScaleY, the int that item 9 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Scale Y" (-1 to
  * 1000).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A449C
+ * @return &cVisualEffectsTest_m_ScaleY
  */
 extern "C" int *cVisualEffectsTest_ScaleY(void) {
-    return &D_004A449C;
+    return &cVisualEffectsTest_m_ScaleY;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cVisualEffectsTest_Alpha);
 #ifdef SKIP_ASM
-extern int D_004A44A0;
+extern int cVisualEffectsTest_m_Alpha;
 
 /**
- * Returns &D_004A44A0, the int that item 10 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Alpha" (-255 to
+ * Returns &cVisualEffectsTest_m_Alpha, the int that item 10 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Alpha" (-255 to
  * 0x).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A44A0
+ * @return &cVisualEffectsTest_m_Alpha
  */
 extern "C" int *cVisualEffectsTest_Alpha(void) {
-    return &D_004A44A0;
+    return &cVisualEffectsTest_m_Alpha;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cVisualEffectsTest_Red);
 #ifdef SKIP_ASM
-extern int D_004A44A4;
+extern int cVisualEffectsTest_m_Red;
 
 /**
- * Returns &D_004A44A4, the int that item 11 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Red" (-255 to
+ * Returns &cVisualEffectsTest_m_Red, the int that item 11 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Red" (-255 to
  * 0x).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A44A4
+ * @return &cVisualEffectsTest_m_Red
  */
 extern "C" int *cVisualEffectsTest_Red(void) {
-    return &D_004A44A4;
+    return &cVisualEffectsTest_m_Red;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cVisualEffectsTest_Green);
 #ifdef SKIP_ASM
-extern int D_004A44A8;
+extern int cVisualEffectsTest_m_Green;
 
 /**
- * Returns &D_004A44A8, the int that item 12 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Green" (-255 to
+ * Returns &cVisualEffectsTest_m_Green, the int that item 12 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Green" (-255 to
  * 0x).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A44A8
+ * @return &cVisualEffectsTest_m_Green
  */
 extern "C" int *cVisualEffectsTest_Green(void) {
-    return &D_004A44A8;
+    return &cVisualEffectsTest_m_Green;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cVisualEffectsTest_Blue);
 #ifdef SKIP_ASM
-extern int D_004A44AC;
+extern int cVisualEffectsTest_m_Blue;
 
 /**
- * Returns &D_004A44AC, the int that item 13 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Blue" (-255 to
+ * Returns &cVisualEffectsTest_m_Blue, the int that item 13 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Blue" (-255 to
  * 0x).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A44AC
+ * @return &cVisualEffectsTest_m_Blue
  */
 extern "C" int *cVisualEffectsTest_Blue(void) {
-    return &D_004A44AC;
+    return &cVisualEffectsTest_m_Blue;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cVisualEffectsTest_LayerOffset);
 #ifdef SKIP_ASM
-extern int D_004A44B0;
+extern int cVisualEffectsTest_m_LayerOffset;
 
 /**
- * Returns &D_004A44B0, the int that item 14 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Layer Offset"
+ * Returns &cVisualEffectsTest_m_LayerOffset, the int that item 14 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Layer Offset"
  * (-16 to 16).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A44B0
+ * @return &cVisualEffectsTest_m_LayerOffset
  */
 extern "C" int *cVisualEffectsTest_LayerOffset(void) {
-    return &D_004A44B0;
+    return &cVisualEffectsTest_m_LayerOffset;
 }
 #endif
 //100%
@@ -7941,18 +7941,18 @@ extern "C" int *cScreenTint_XNColourB(void) {
 //100%
 INCLUDE_ASM("render/font", cScreenTint_XNLerp);
 #ifdef SKIP_ASM
-extern int D_004A4608;
+extern int cScreenTint_m_XNLerp;
 
 /**
- * Returns &D_004A4608, the float that item 12 of cScreenTintMenu_cScreenTintMenu edits as "XN Lerp" (0 to 2).
+ * Returns &cScreenTint_m_XNLerp, the float that item 12 of cScreenTintMenu_cScreenTintMenu edits as "XN Lerp" (0 to 2).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4608
+ * @return &cScreenTint_m_XNLerp
  */
 extern "C" int *cScreenTint_XNLerp(void) {
-    return &D_004A4608;
+    return &cScreenTint_m_XNLerp;
 }
 #endif
 //100%
@@ -8057,358 +8057,358 @@ extern "C" int *cScreenTint_LightningFadeIn2(void) {
 //100%
 INCLUDE_ASM("render/font", cScreenTint_LightningFadeIn3);
 #ifdef SKIP_ASM
-extern int D_004A4624;
+extern int cScreenTint_m_LightningFadeIn3;
 
 /**
- * Returns &D_004A4624, the int that item 19 of cScreenTintMenu_cScreenTintMenu edits as "Recover Fade In" (0 to 600).
+ * Returns &cScreenTint_m_LightningFadeIn3, the int that item 19 of cScreenTintMenu_cScreenTintMenu edits as "Recover Fade In" (0 to 600).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4624
+ * @return &cScreenTint_m_LightningFadeIn3
  */
 extern "C" int *cScreenTint_LightningFadeIn3(void) {
-    return &D_004A4624;
+    return &cScreenTint_m_LightningFadeIn3;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_LightningScale);
 #ifdef SKIP_ASM
-extern int D_004A4628;
+extern int cScreenTint_m_LightningScale;
 
 /**
- * Returns &D_004A4628, the float that item 20 of cScreenTintMenu_cScreenTintMenu edits as "Flash Scale" (0 to 2).
+ * Returns &cScreenTint_m_LightningScale, the float that item 20 of cScreenTintMenu_cScreenTintMenu edits as "Flash Scale" (0 to 2).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4628
+ * @return &cScreenTint_m_LightningScale
  */
 extern "C" int *cScreenTint_LightningScale(void) {
-    return &D_004A4628;
+    return &cScreenTint_m_LightningScale;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_LightningScale2);
 #ifdef SKIP_ASM
-extern int D_004A462C;
+extern int cScreenTint_m_LightningScale2;
 
 /**
- * Returns &D_004A462C, the float that item 21 of cScreenTintMenu_cScreenTintMenu edits as "Inverse Scale" (0 to 2).
+ * Returns &cScreenTint_m_LightningScale2, the float that item 21 of cScreenTintMenu_cScreenTintMenu edits as "Inverse Scale" (0 to 2).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A462C
+ * @return &cScreenTint_m_LightningScale2
  */
 extern "C" int *cScreenTint_LightningScale2(void) {
-    return &D_004A462C;
+    return &cScreenTint_m_LightningScale2;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_LightningScale3);
 #ifdef SKIP_ASM
-extern int D_004A4630;
+extern int cScreenTint_m_LightningScale3;
 
 /**
- * Returns &D_004A4630, the float that item 22 of cScreenTintMenu_cScreenTintMenu edits as "Recover Scale" (0 to 2).
+ * Returns &cScreenTint_m_LightningScale3, the float that item 22 of cScreenTintMenu_cScreenTintMenu edits as "Recover Scale" (0 to 2).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4630
+ * @return &cScreenTint_m_LightningScale3
  */
 extern "C" int *cScreenTint_LightningScale3(void) {
-    return &D_004A4630;
+    return &cScreenTint_m_LightningScale3;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_LightningColourR);
 #ifdef SKIP_ASM
-extern int D_004A4634;
+extern int cScreenTint_m_LightningColourR;
 
 /**
- * Returns &D_004A4634, the float that item 23 of cScreenTintMenu_cScreenTintMenu edits as "Flash Tint Red" (0 to 2).
+ * Returns &cScreenTint_m_LightningColourR, the float that item 23 of cScreenTintMenu_cScreenTintMenu edits as "Flash Tint Red" (0 to 2).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4634
+ * @return &cScreenTint_m_LightningColourR
  */
 extern "C" int *cScreenTint_LightningColourR(void) {
-    return &D_004A4634;
+    return &cScreenTint_m_LightningColourR;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_LightningColourG);
 #ifdef SKIP_ASM
-extern int D_004A4638;
+extern int cScreenTint_m_LightningColourG;
 
 /**
- * Returns &D_004A4638, the float that item 24 of cScreenTintMenu_cScreenTintMenu edits as "Flash Tint Green" (0 to 2).
+ * Returns &cScreenTint_m_LightningColourG, the float that item 24 of cScreenTintMenu_cScreenTintMenu edits as "Flash Tint Green" (0 to 2).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4638
+ * @return &cScreenTint_m_LightningColourG
  */
 extern "C" int *cScreenTint_LightningColourG(void) {
-    return &D_004A4638;
+    return &cScreenTint_m_LightningColourG;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_LightningColourB);
 #ifdef SKIP_ASM
-extern int D_004A463C;
+extern int cScreenTint_m_LightningColourB;
 
 /**
- * Returns &D_004A463C, the float that item 25 of cScreenTintMenu_cScreenTintMenu edits as "Flash Tint Blue" (0 to 2).
+ * Returns &cScreenTint_m_LightningColourB, the float that item 25 of cScreenTintMenu_cScreenTintMenu edits as "Flash Tint Blue" (0 to 2).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A463C
+ * @return &cScreenTint_m_LightningColourB
  */
 extern "C" int *cScreenTint_LightningColourB(void) {
-    return &D_004A463C;
+    return &cScreenTint_m_LightningColourB;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_LightningColour2R);
 #ifdef SKIP_ASM
-extern int D_004A4640;
+extern int cScreenTint_m_LightningColour2R;
 
 /**
- * Returns &D_004A4640, the float that item 26 of cScreenTintMenu_cScreenTintMenu edits as "Inverse Tint Red" (0 to 2).
+ * Returns &cScreenTint_m_LightningColour2R, the float that item 26 of cScreenTintMenu_cScreenTintMenu edits as "Inverse Tint Red" (0 to 2).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4640
+ * @return &cScreenTint_m_LightningColour2R
  */
 extern "C" int *cScreenTint_LightningColour2R(void) {
-    return &D_004A4640;
+    return &cScreenTint_m_LightningColour2R;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_LightningColour2G);
 #ifdef SKIP_ASM
-extern int D_004A4644;
+extern int cScreenTint_m_LightningColour2G;
 
 /**
- * Returns &D_004A4644, the float that item 27 of cScreenTintMenu_cScreenTintMenu edits as "Inverse Tint Green" (0 to
+ * Returns &cScreenTint_m_LightningColour2G, the float that item 27 of cScreenTintMenu_cScreenTintMenu edits as "Inverse Tint Green" (0 to
  * 2).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4644
+ * @return &cScreenTint_m_LightningColour2G
  */
 extern "C" int *cScreenTint_LightningColour2G(void) {
-    return &D_004A4644;
+    return &cScreenTint_m_LightningColour2G;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_LightningColour2B);
 #ifdef SKIP_ASM
-extern int D_004A4648;
+extern int cScreenTint_m_LightningColour2B;
 
 /**
- * Returns &D_004A4648, the float that item 28 of cScreenTintMenu_cScreenTintMenu edits as "Inverse Tint Blue" (0 to 2).
+ * Returns &cScreenTint_m_LightningColour2B, the float that item 28 of cScreenTintMenu_cScreenTintMenu edits as "Inverse Tint Blue" (0 to 2).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4648
+ * @return &cScreenTint_m_LightningColour2B
  */
 extern "C" int *cScreenTint_LightningColour2B(void) {
-    return &D_004A4648;
+    return &cScreenTint_m_LightningColour2B;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_LightningColour3R);
 #ifdef SKIP_ASM
-extern int D_004A464C;
+extern int cScreenTint_m_LightningColour3R;
 
 /**
- * Returns &D_004A464C, the float that item 29 of cScreenTintMenu_cScreenTintMenu edits as "Recover Tint Red" (0 to 2).
+ * Returns &cScreenTint_m_LightningColour3R, the float that item 29 of cScreenTintMenu_cScreenTintMenu edits as "Recover Tint Red" (0 to 2).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A464C
+ * @return &cScreenTint_m_LightningColour3R
  */
 extern "C" int *cScreenTint_LightningColour3R(void) {
-    return &D_004A464C;
+    return &cScreenTint_m_LightningColour3R;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_LightningColour3G);
 #ifdef SKIP_ASM
-extern int D_004A4650;
+extern int cScreenTint_m_LightningColour3G;
 
 /**
- * Returns &D_004A4650, the float that item 30 of cScreenTintMenu_cScreenTintMenu edits as "Recover Tint Green" (0 to
+ * Returns &cScreenTint_m_LightningColour3G, the float that item 30 of cScreenTintMenu_cScreenTintMenu edits as "Recover Tint Green" (0 to
  * 2).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4650
+ * @return &cScreenTint_m_LightningColour3G
  */
 extern "C" int *cScreenTint_LightningColour3G(void) {
-    return &D_004A4650;
+    return &cScreenTint_m_LightningColour3G;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_LightningColour3B);
 #ifdef SKIP_ASM
-extern int D_004A4654;
+extern int cScreenTint_m_LightningColour3B;
 
 /**
- * Returns &D_004A4654, the float that item 31 of cScreenTintMenu_cScreenTintMenu edits as "Recover Tint Blue" (0 to 2).
+ * Returns &cScreenTint_m_LightningColour3B, the float that item 31 of cScreenTintMenu_cScreenTintMenu edits as "Recover Tint Blue" (0 to 2).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4654
+ * @return &cScreenTint_m_LightningColour3B
  */
 extern "C" int *cScreenTint_LightningColour3B(void) {
-    return &D_004A4654;
+    return &cScreenTint_m_LightningColour3B;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_GammaEnable);
 #ifdef SKIP_ASM
-extern int D_004A4658;
+extern int cScreenTint_m_GammaEnable;
 
 /**
- * Returns &D_004A4658, the int that item 32 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Enable" (0 to 1).
+ * Returns &cScreenTint_m_GammaEnable, the int that item 32 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Enable" (0 to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4658
+ * @return &cScreenTint_m_GammaEnable
  */
 extern "C" int *cScreenTint_GammaEnable(void) {
-    return &D_004A4658;
+    return &cScreenTint_m_GammaEnable;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_GammaPower);
 #ifdef SKIP_ASM
-extern int D_004A465C;
+extern int cScreenTint_m_GammaPower;
 
 /**
- * Returns &D_004A465C, the float that item 33 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Power" (0 to 2).
+ * Returns &cScreenTint_m_GammaPower, the float that item 33 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Power" (0 to 2).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A465C
+ * @return &cScreenTint_m_GammaPower
  */
 extern "C" int *cScreenTint_GammaPower(void) {
-    return &D_004A465C;
+    return &cScreenTint_m_GammaPower;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_GammaColourR);
 #ifdef SKIP_ASM
-extern int D_004A4660;
+extern int cScreenTint_m_GammaColourR;
 
 /**
- * Returns &D_004A4660, the float that item 34 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Tint Red" (0 to 2).
+ * Returns &cScreenTint_m_GammaColourR, the float that item 34 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Tint Red" (0 to 2).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4660
+ * @return &cScreenTint_m_GammaColourR
  */
 extern "C" int *cScreenTint_GammaColourR(void) {
-    return &D_004A4660;
+    return &cScreenTint_m_GammaColourR;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_GammaColourG);
 #ifdef SKIP_ASM
-extern int D_004A4664;
+extern int cScreenTint_m_GammaColourG;
 
 /**
- * Returns &D_004A4664, the float that item 35 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Tint Green" (0 to 2).
+ * Returns &cScreenTint_m_GammaColourG, the float that item 35 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Tint Green" (0 to 2).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4664
+ * @return &cScreenTint_m_GammaColourG
  */
 extern "C" int *cScreenTint_GammaColourG(void) {
-    return &D_004A4664;
+    return &cScreenTint_m_GammaColourG;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_GammaColourB);
 #ifdef SKIP_ASM
-extern int D_004A4668;
+extern int cScreenTint_m_GammaColourB;
 
 /**
- * Returns &D_004A4668, the float that item 36 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Tint Blue" (0 to 2).
+ * Returns &cScreenTint_m_GammaColourB, the float that item 36 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Tint Blue" (0 to 2).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4668
+ * @return &cScreenTint_m_GammaColourB
  */
 extern "C" int *cScreenTint_GammaColourB(void) {
-    return &D_004A4668;
+    return &cScreenTint_m_GammaColourB;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_GammaFillR);
 #ifdef SKIP_ASM
-extern int D_004A466C;
+extern int cScreenTint_m_GammaFillR;
 
 /**
- * Returns &D_004A466C, the float that item 37 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Fill Red" (0 to 1).
+ * Returns &cScreenTint_m_GammaFillR, the float that item 37 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Fill Red" (0 to 1).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A466C
+ * @return &cScreenTint_m_GammaFillR
  */
 extern "C" int *cScreenTint_GammaFillR(void) {
-    return &D_004A466C;
+    return &cScreenTint_m_GammaFillR;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_GammaFillG);
 #ifdef SKIP_ASM
-extern int D_004A4670;
+extern int cScreenTint_m_GammaFillG;
 
 /**
- * Returns &D_004A4670, the float that item 38 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Fill Green" (0 to 1).
+ * Returns &cScreenTint_m_GammaFillG, the float that item 38 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Fill Green" (0 to 1).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4670
+ * @return &cScreenTint_m_GammaFillG
  */
 extern "C" int *cScreenTint_GammaFillG(void) {
-    return &D_004A4670;
+    return &cScreenTint_m_GammaFillG;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_GammaFillB);
 #ifdef SKIP_ASM
-extern int D_004A4674;
+extern int cScreenTint_m_GammaFillB;
 
 /**
- * Returns &D_004A4674, the float that item 39 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Fill Blue" (0 to 1).
+ * Returns &cScreenTint_m_GammaFillB, the float that item 39 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Fill Blue" (0 to 1).
  *
  * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
  * value as a float.
  *
- * @return &D_004A4674
+ * @return &cScreenTint_m_GammaFillB
  */
 extern "C" int *cScreenTint_GammaFillB(void) {
-    return &D_004A4674;
+    return &cScreenTint_m_GammaFillB;
 }
 #endif
 //100%

@@ -165,33 +165,33 @@ extern "C" int tSemiSpace_isSimilar(char *planeA, char *planeB) {
 //100%
 INCLUDE_ASM("seg/seg_218AE8", bxSetOutputChannels);
 #ifdef SKIP_ASM
-extern int D_004A3E80;
+extern int OutputChannelMask;
 
 /**
- * Stores the bx output-channel mask D_004A3E80 (initially 1).
+ * Stores the bx output-channel mask OutputChannelMask (initially 1).
  *
  * bxGetOutputChannels reads it back; no retail code calls either.
  *
  * @param mask  the new mask
  */
 extern "C" void bxSetOutputChannels(int mask) {
-    D_004A3E80 = mask;
+    OutputChannelMask = mask;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_218AE8", bxGetOutputChannels);
 #ifdef SKIP_ASM
-extern int D_004A3E80;
+extern int OutputChannelMask;
 
 /**
- * Returns the bx output-channel mask D_004A3E80 (initially 1).
+ * Returns the bx output-channel mask OutputChannelMask (initially 1).
  *
  * bxSetOutputChannels sets it; no retail code calls either.
  *
  * @return the mask
  */
 extern "C" int bxGetOutputChannels(void) {
-    return D_004A3E80;
+    return OutputChannelMask;
 }
 #endif

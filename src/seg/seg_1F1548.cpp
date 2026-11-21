@@ -692,12 +692,12 @@ extern "C" void cPunchFX_render(sFx_1150* self)
 INCLUDE_ASM("seg/seg_1F1548", func_002F1768);
 #ifdef SKIP_ASM
 extern "C" void cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter();
-extern char D_004881E8[];
+extern char cAttachedDynamicEmitter_vtbl[];
 
 /**
  * Constructs an attached dynamic emitter (0x210 bytes, "cAttachedDynamicEmitter") on @p emitter and returns it.
  *
- * Runs the cBaseClass_DynamicEmitter constructor, then installs the subclass vtable D_004881E8 (+0x1F8) and zeroes the
+ * Runs the cBaseClass_DynamicEmitter constructor, then installs the subclass vtable cAttachedDynamicEmitter_vtbl (+0x1F8) and zeroes the
  * attach-bone index (+0x200), the stopped flag (+0x204) and the pulse phase (+0x208). func_002F2130 is its only caller.
  *
  * @param emitter  the memory to construct in
@@ -706,7 +706,7 @@ extern char D_004881E8[];
 extern "C" void *func_002F1768(void *emitter) {
     cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter();
     *(int *)((char*)emitter + 0x200) = 0;
-    *(char **)((char*)emitter + 0x1F8) = D_004881E8;
+    *(char **)((char*)emitter + 0x1F8) = cAttachedDynamicEmitter_vtbl;
     *(int *)((char*)emitter + 0x204) = 0;
     *(int *)((char*)emitter + 0x208) = 0;
     return emitter;
@@ -717,18 +717,18 @@ extern "C" void *func_002F1768(void *emitter) {
 INCLUDE_ASM("seg/seg_1F1548", func_002F17A8);
 #ifdef SKIP_ASM
 extern "C" void cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(void *);
-extern char D_004881E8[];
+extern char cAttachedDynamicEmitter_vtbl[];
 
 /**
- * Destroys an attached dynamic emitter: restores its vtable D_004881E8 (+0x1F8), then runs the base destructor.
+ * Destroys an attached dynamic emitter: restores its vtable cAttachedDynamicEmitter_vtbl (+0x1F8), then runs the base destructor.
  *
- * Slot 4 of D_004881E8. The g++ delete flags arrive in the second argument register, which this body leaves alone, so
+ * Slot 4 of cAttachedDynamicEmitter_vtbl. The g++ delete flags arrive in the second argument register, which this body leaves alone, so
  * cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter receives them and frees the object when bit 0 is set.
  *
  * @param emitter  the emitter
  */
 extern "C" void func_002F17A8(void *emitter) {
-    *(char **)((char*)emitter + 0x1F8) = D_004881E8;
+    *(char **)((char*)emitter + 0x1F8) = cAttachedDynamicEmitter_vtbl;
     cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(emitter);
 }
 #endif
@@ -1501,7 +1501,7 @@ struct sTun_2598 {
 };
 extern sTun_2598 D_004A428C_2598 __asm__("D_004A428C");
 extern sTun_2598 D_004A4290_2598 __asm__("D_004A4290");
-extern sTun_2598 D_004A4294_2598 __asm__("D_004A4294");
+extern sTun_2598 D_004A4294_2598 __asm__("cSplashToggles_m_DropMinSize");
 extern sTun_2598 D_004A429C_2598 __asm__("D_004A429C");
 extern sTun_2598 D_004A42CC_2598 __asm__("D_004A42CC");
 
@@ -1559,7 +1559,7 @@ extern "C" void tDrop_init_2598(sPart_2598* p, const sV2_2598& pos, sV2_2598* ra
 /**
  * Starts a screen-splash drop at a position with a random size, life, spin and tint.
  *
- * The width is random between "Drop Min Size" (D_004A4294) and @p range x; the height is the width plus a random amount
+ * The width is random between "Drop Min Size" (cSplashToggles_m_DropMinSize) and @p range x; the height is the width plus a random amount
  * within "Drop Max Width Height Difference" (D_004A429C), clamped to the minimum size and @p range y. The life is
  * random between "Drop Min/Max Life Span" (D_004A428C, D_004A4290); the velocity starts at t2vect_Zero, the rotation at
  * a random 0-360 degrees and its change over the life within +/- D_004A42CC (the menu labels this one "Crystal Max
@@ -2414,11 +2414,11 @@ INCLUDE_ASM("seg/seg_1F1548", cSplashManager_AddDrop);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S37A8 { int a, b; S37A8() {} S37A8(const S37A8 &o) { *this = o; } };
 extern "C" void tDrop_init(void *, S37A8, void *);
-extern int D_004A4254;
+extern int cSplashToggles_m_NumDrops;
 
 extern "C" void cSplashManager_AddDrop_37A8(void *arg0, S37A8 *arg1, void *arg2) __asm__("cSplashManager_AddDrop");
 /**
- * Adds one drop to the splash manager when fewer than "Max Drops" (D_004A4254) are active.
+ * Adds one drop to the splash manager when fewer than "Max Drops" (cSplashToggles_m_NumDrops) are active.
  *
  * Starts the next free drop (0x3C bytes from +0x1C) with tDrop_init and bumps the active drop count (+0x14).
  * cSplashManager_update (a crystal shedding a drop) and cSplashManager_AddSplashes call it.
@@ -2429,7 +2429,7 @@ extern "C" void cSplashManager_AddDrop_37A8(void *arg0, S37A8 *arg1, void *arg2)
  */
 extern "C" void cSplashManager_AddDrop_37A8(void *splashManager, S37A8 *basePos, void *maxSize) {
     int n = *(int *)((char*)splashManager + 0x14);
-    if (n < D_004A4254) {
+    if (n < cSplashToggles_m_NumDrops) {
         tDrop_init((char*)splashManager + (n * 0x3C + 0x1C), *basePos, maxSize);
         *(int *)((char*)splashManager + 0x14) = *(int *)((char*)splashManager + 0x14) + 1;
     }
@@ -2444,10 +2444,10 @@ struct sVec2_3810 {
 };
 
 extern int D_004A3AFC;
-extern float D_004A425C;
-extern int D_004A4264;
-extern int D_004A4268;
-extern float D_004A4298;
+extern float cSplashToggles_m_PercentageIceCrystal;
+extern int cSplashToggles_m_IceCrystalMinGrouping;
+extern int cSplashToggles_m_IceCrystalMaxGrouping;
+extern float cSplashToggles_m_DropMaxSize;
 unsigned int BXrand();
 extern "C" void cSplashManager_AddCrystal_3810(void*, sVec2_3810*, int) __asm__("cSplashManager_AddCrystal");
 extern "C" void cSplashManager_AddDrop(void*, sVec2_3810*, sVec2_3810*);
@@ -2468,9 +2468,9 @@ static inline float randScaled_3810(float s)
  * Spawns the splashes owed this frame at random screen positions.
  *
  * Takes the whole part of the splash counter (+0x1024, On Tour mNumSplashesToAdd) and keeps the fraction. Each splash
- * goes to a random point of the 640x480 screen; with the chance "Percentage Ice Crystals" (D_004A425C) it is a group of
+ * goes to a random point of the 640x480 screen; with the chance "Percentage Ice Crystals" (cSplashToggles_m_PercentageIceCrystal) it is a group of
  * "Ice Crystal Minimum in Group" to "Maximum in Group" crystals (BXrand, at least 1, all counted) added by
- * cSplashManager_AddCrystal, otherwise one drop of "Drop Max Size" (D_004A4298) square added by cSplashManager_AddDrop. Quirk: the group
+ * cSplashManager_AddCrystal, otherwise one drop of "Drop Max Size" (cSplashToggles_m_DropMaxSize) square added by cSplashManager_AddDrop. Quirk: the group
  * size is BXrand() % (maximum - minimum), a division by zero when the two settings are equal. cSplashManager_update
  * calls it.
  */
@@ -2483,16 +2483,16 @@ extern "C" void cSplashManager_AddSplashes(cSplashManager* self)
         sVec2_3810 pos;
         pos.x = randScaled_3810(640.0f);
         pos.y = randScaled_3810(480.0f);
-        if (randf_3810() < D_004A425C) {
-            int k = D_004A4264 + BXrand() % (unsigned int)(D_004A4268 - D_004A4264);
+        if (randf_3810() < cSplashToggles_m_PercentageIceCrystal) {
+            int k = cSplashToggles_m_IceCrystalMinGrouping + BXrand() % (unsigned int)(cSplashToggles_m_IceCrystalMaxGrouping - cSplashToggles_m_IceCrystalMinGrouping);
             if (k <= 0)
                 k = 1;
             n -= k;
             cSplashManager_AddCrystal_3810(((char*)self), &pos, k);
         } else {
             sVec2_3810 dropSize;
-            dropSize.x = D_004A4298;
-            dropSize.y = D_004A4298;
+            dropSize.x = cSplashToggles_m_DropMaxSize;
+            dropSize.y = cSplashToggles_m_DropMaxSize;
             cSplashManager_AddDrop(((char*)self), &pos, &dropSize);
             n--;
         }
@@ -2526,13 +2526,13 @@ INCLUDE_ASM("seg/seg_1F1548", cSplashManager_update);
 #ifdef SKIP_ASM
 extern int cSplashToggles_m_Enable;
 extern int cSplashToggles_m_NumIceCrystals;
-extern float D_004A4260;
-extern int D_004A426C;
+extern float cSplashToggles_m_PercentageIceCrystalSpawnChance;
+extern int cSplashToggles_m_MaxSpawnPerCrystal;
 // NOTE: tunable float member of a global record; splat names the field separately.
 struct sTun_39E0 {
     float v;
 };
-extern sTun_39E0 D_004A4294_39E0 __asm__("D_004A4294");
+extern sTun_39E0 D_004A4294_39E0 __asm__("cSplashToggles_m_DropMinSize");
 unsigned int BXrand();
 
 struct sV4_39E0 {
@@ -2674,7 +2674,7 @@ extern "C" void cSplashManager_update(sEmitter_39E0* self)
         float f;
     } rnd;
     rnd.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
-    if ((rnd.f - 1.0f) * (float)self->nParts / (float)cSplashToggles_m_NumIceCrystals < D_004A4260 && self->nParts > 0)
+    if ((rnd.f - 1.0f) * (float)self->nParts / (float)cSplashToggles_m_NumIceCrystals < cSplashToggles_m_PercentageIceCrystalSpawnChance && self->nParts > 0)
         pick = BXrand() % self->nParts;
 
     i = 0;
@@ -2682,7 +2682,7 @@ extern "C" void cSplashManager_update(sEmitter_39E0* self)
         sPart_39E0* part = &self->parts[i];
         tCrystal_update_39E0(part, self->speed);
         if (part->active) {
-            if (pick == i && self->parts[i].bursts < D_004A426C) {
+            if (pick == i && self->parts[i].bursts < cSplashToggles_m_MaxSpawnPerCrystal) {
                 self->parts[i].bursts++;
                 sV2_39E0 sz = part->size * 0.6000000238418579f;
                 if (sz.X() > D_004A4294_39E0.v && sz.Y() > D_004A4294_39E0.v)
@@ -2702,7 +2702,7 @@ INCLUDE_ASM("seg/seg_1F1548", cSplashManager_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int cSplashToggles_m_Enable;
-extern int D_004A4250;
+extern int cSplashToggles_m_Render;
 extern int cRenderStateMan_m_indoor;
 extern char t4mat_Identity[];
 
@@ -2799,7 +2799,7 @@ extern "C" void cSplashManager_render(sEmitter_3E28* self)
 {
     if (cSplashToggles_m_Enable == 0)
         return;
-    if (D_004A4250 == 0)
+    if (cSplashToggles_m_Render == 0)
         return;
     if (self->idx != (int)SSXApp->Game->ViewMan->m_uiCurrentView)
         return;

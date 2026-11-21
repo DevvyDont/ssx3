@@ -3,7 +3,7 @@
 
 // cSimpleTube: a segmented tube (a ribbon strip with sides) drawn through a chain of points - the flex rails' and flex
 // bridges' "Tube" (cFlexRailNode::Tube, object/flexrailnode.h +0x58; cFlexBridgeNode's ctors build one with
-// NumNodes * 8 - 9 segments). The 262 vertices it draws are static and shared by every tube (D_00501440, filled once
+// NumNodes * 8 - 9 segments). The 262 vertices it draws are static and shared by every tube (cSimpleTube_m_vertices, filled once
 // by the first ctor; updateColours refreshes their colour from the tube colour statics cTube_m_R..E8, On Tour
 // cTube::m_R/G/B); render rebuilds them from the points and draws two strips through graphics slots 71 and 73.
 // EA's source file is unknown (the preview's assert strings do not name it); On Tour compiles it in

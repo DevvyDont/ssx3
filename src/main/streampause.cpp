@@ -3,7 +3,7 @@
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_GenericStreamPause[];
-extern void* D_0047D0E8[16];
+extern void* cGenericStreamPause_vtbl[16];
 
 struct cStreamPause {
     void* vtable;
@@ -15,7 +15,7 @@ INCLUDE_ASM("main/streampause", cStreamPause_construct__Fv);
 /**
  * Allocates and constructs the game's stream-pause object.
  *
- * Allocates 4 bytes named "GenericStreamPause" (type 0x20000000) and stores the vtable D_0047D0E8; there is no
+ * Allocates 4 bytes named "GenericStreamPause" (type 0x20000000) and stores the vtable cGenericStreamPause_vtbl; there is no
  * null check. cGame_load keeps the result in StreamPause.
  *
  * @return the new cStreamPause
@@ -23,7 +23,7 @@ INCLUDE_ASM("main/streampause", cStreamPause_construct__Fv);
 cStreamPause* cStreamPause_construct()
 {
     cStreamPause* self = (cStreamPause*)cMemMan_alloc(4, str_GenericStreamPause, 0x20000000, 0);
-    self->vtable = D_0047D0E8;
+    self->vtable = cGenericStreamPause_vtbl;
     return self;
 }
 #endif

@@ -149,7 +149,7 @@ extern "C" void cChaseCameraController_switchCamera_Volume(cChaseCameraControlle
 void cChaseAlgorithm_setTarget(void* self, int val);
 void* cCamera_snapResultAlgorithm(void* self);
 extern const char str_RiderCameraTarget[];
-extern void* D_0045B7A8[];
+extern void* cRiderCameraTarget_vtbl[];
 
 struct sCamCtrl_15DE60
 {
@@ -225,7 +225,7 @@ extern "C" void cCamera_init(sCamera_15DE60* self, int riderIndex, float view, f
     cManualCameraController_setCurrentAlgorithmType(self->manual, 81);
     self->chase->viewport = ((sApp_15DE60*)SSXApp)->viewports[riderIndex];
     sRiderRef_15DE60* riderRef = (sRiderRef_15DE60*)operator new(8, str_RiderCameraTarget, 0, 0);
-    riderRef->vt = D_0045B7A8;
+    riderRef->vt = cRiderCameraTarget_vtbl;
     riderRef->rider = *(int*)(((sApp_15DE60*)SSXApp)->world->riders + (riderIndex << 2) + 0x28);
     cChaseCameraController_setTarget((cChaseCameraController*)self->chase, (int*)riderRef);
     cChaseCameraController_switchCamera_Volume((cChaseCameraController*)((sCam162060*)self->chase), 76, 0, 1.0f);
@@ -329,7 +329,7 @@ struct sXf {
     t4Vector rot;
 };
 
-extern t4Matrix D_004C53A0_E050 __asm__("D_004C53A0");
+extern t4Matrix D_004C53A0_E050 __asm__("CamAxisFlip");
 
 struct sObj_E050 {
     char pad[0x390];
@@ -469,7 +469,7 @@ extern "C" void cSimpleCamera_setupCamWithPosAndTarget_impl(char* self, char* a1
  *
  * Constructs a temporary cDEFAULT_3ChaseAlgorithm on the stack, sets its Position to @p camPos and its CamTargetPos to
  * @p camTargetPos (both with w = 1), computes its pitch and heading (cLookAtChaseAlgorithm_calcPitchHeading with 1) and pose (cLookAtChaseAlgorithm_calcPose), and stores
- * cLookAtChaseAlgorithm_getPose's result in Pose. CamMat becomes the axis-flip matrix D_004C53A0 times the rotation of
+ * cLookAtChaseAlgorithm_getPose's result in Pose. CamMat becomes the axis-flip matrix CamAxisFlip times the rotation of
  * Pose's quaternion, translated by minus Pose's position; Direction becomes the z column of its rotation rows (w = 0).
  * The temporary is destroyed with cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm.
  *
@@ -732,7 +732,7 @@ extern "C" void cRenderStateMan_update(int, float, float, float);               
 extern "C" float cRenderStateMan_DrawDistance(int);                                    // cRenderStateMan::DrawDistance
 extern t4Vector D_004FF120_E668 __asm__("t4vect_Zero");                  // t4vect::Zero
 extern t4Vector D_004FF130_E668 __asm__("t4vect_Origin");                  // t4vect::Origin
-extern t4Matrix D_004C53A0_E668 __asm__("D_004C53A0");                  // CamAxisFlip
+extern t4Matrix D_004C53A0_E668 __asm__("CamAxisFlip");                  // CamAxisFlip
 extern float cRenderStateMan_m_farPlane;                                                // cRenderStateMan::m_farPlane
 
 // EA's quaternion: the ctor takes w first.
@@ -991,7 +991,7 @@ extern "C" void cCamera_updateCamMat_E668(cCamera_E668* self) __asm__("cCamera_u
  *
  * For the chase controller it then keeps the eye out of the ground (cCamera_avoidGround), applies the camera shake
  * (cCamera_applyCameraShake) and recomputes Pose from ResultAlgorithm (cLookAtChaseAlgorithm_calcPitchHeading with 0). CamMat becomes the axis
- * flip D_004C53A0 times the rotation of Pose's quaternion, translated by minus Pose's position; Direction its z column.
+ * flip CamAxisFlip times the rotation of Pose's quaternion, translated by minus Pose's position; Direction its z column.
  * View, Near and Far are blended from the algorithms by lens weight (list node +0x4). Last, cRenderStateMan_update runs
  * for view ViewIndex + 6 at the camera's x/y, Far is capped by that view's draw distance (cRenderStateMan_DrawDistance) with MinNear
  * as the floor and stored in cRenderStateMan_m_farPlane (the render far plane), and View is clamped to [0, MaxView] and Near and Far to
@@ -9237,7 +9237,7 @@ extern sFlags_1673F8 D_004A4D98;
 extern sFlags_1673F8 D_004A4DA0;
 extern sFlags_1673F8 D_004A4DA8;
 extern sFlags_1673F8 D_004A4DB0;
-extern sMatrix_1673F8 D_004C53A0;
+extern sMatrix_1673F8 CamAxisFlip;
 extern sFlags_1673F8 D_004A4DC0;
 extern int persistentPlayerChoiceType[2];
 
@@ -9251,7 +9251,7 @@ extern "C" void func_001673F8_impl(int initialize, int priority) __asm__("func_0
  *
  * Runs only when @p initialize is set and @p priority is 0xFFFF. Zeroes the 8-byte name field D_004A4D40, builds the
  * fourteen region-type keys D_004A4D48..D_004A4DB0 with ids 0-13 and 56 float4 colour constants D_004C5020..D_004C5390
- * (the same per-unit copies the world-painter unit's func_002BBC38 builds), sets the axis-flip matrix D_004C53A0 (rows
+ * (the same per-unit copies the world-painter unit's func_002BBC38 builds), sets the axis-flip matrix CamAxisFlip (rows
  * (0, 0, 1, 0), (-1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 0, 1)) that CamMat is built from, fills the camera-shake table
  * (func_0015E2A8), builds the key D_004A4DC0 with id -1, and sets both views' persistentPlayerChoiceType to 61 (0x3D,
  * no choice). func_00168298 calls it from the constructor table.
@@ -9334,7 +9334,7 @@ extern "C" void func_001673F8_impl(int initialize, int priority)
         new (&D_004A4DA0) sFlags_1673F8(11, 11);
         new (&D_004A4DA8) sFlags_1673F8(12, 12);
         new (&D_004A4DB0) sFlags_1673F8(13, 13);
-        new (&D_004C53A0) sMatrix_1673F8(0.0f, 0.0f, 1.0f, 0.0f,
+        new (&CamAxisFlip) sMatrix_1673F8(0.0f, 0.0f, 1.0f, 0.0f,
                                          -1.0f, 0.0f, 0.0f, 0.0f,
                                          0.0f, 1.0f, 0.0f, 0.0f,
                                          0.0f, 0.0f, 0.0f, 1.0f);

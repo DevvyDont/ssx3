@@ -2863,10 +2863,10 @@ struct sXf_0550 {
     sXf_0550(const sV4_0550& aa, const sQ_0550& ab) : a(aa), b(ab) {}
 };
 
-extern char D_004FF000[];
+extern char gBlockMan[];
 extern char BXrandom[];
 extern char AIrandom[];
-extern char D_004FF048[], D_004FF058[], D_004FF068[], D_004FF078[], D_004FF088[], D_004FF098[], D_004FF0A8[], D_004FF0B8[], D_004FF0C8[];
+extern char tRGB_kRed[], tRGB_kBlue[], tRGB_kYellow[], tRGB_kPurple[], tRGB_kGreen[], tRGB_kOrange[], tRGB_kBlack[], tRGB_kWhite[], tRGB_kGray[];
 extern char D_004A5958;
 extern void* D_004A3E94;
 extern char t2vect_Zero[], t2vect_XAxis[], t2vect_YAxis[];
@@ -2877,7 +2877,7 @@ extern char t3mat_Identity[], t4mat_Identity[], t4mat_Zero[], tquat_Identity[], 
 /**
  * Static initialisation and destruction of the bx library's globals.
  *
- * Only for priority 0xFFFF. With @p init: cBlockMan_cBlockMan on D_004FF000, cRandom_init (cRandom constructor) on BXrandom
+ * Only for priority 0xFFFF. With @p init: cBlockMan_cBlockMan on gBlockMan, cRandom_init (cRandom constructor) on BXrandom
  * and AIrandom, then the colour/vector/matrix constants and tPose_Identity, and cDynamicMemMan_cDynamicMemMan constructs
  * TheDynamicMemMan. Without: cDynamicMemMan__cDynamicMemMan destroys TheDynamicMemMan.
  *
@@ -2888,18 +2888,18 @@ extern "C" void __sti__all_in_one_bx_cpp(int init, int prio)
 {
     if (prio == 0xFFFF) {
         if (init != 0) {
-            cBlockMan_cBlockMan(D_004FF000);
+            cBlockMan_cBlockMan(gBlockMan);
             cRandom_init(BXrandom);
             cRandom_init(AIrandom);
-            new (D_004FF048) sV3_0550(1.0f, 0.0f, 0.0f);
-            new (D_004FF058) sV3_0550(0.0f, 0.0f, 1.0f);
-            new (D_004FF068) sV3_0550(1.0f, 1.0f, 0.0f);
-            new (D_004FF078) sV3_0550(1.0f, 0.0f, 1.0f);
-            new (D_004FF088) sV3_0550(0.0f, 1.0f, 0.0f);
-            new (D_004FF098) sV3_0550(1.0f, 0.5f, 0.0f);
-            new (D_004FF0A8) sV3_0550(0.0f, 0.0f, 0.0f);
-            new (D_004FF0B8) sV3_0550(1.0f, 1.0f, 1.0f);
-            new (D_004FF0C8) sV3_0550(0.25f, 0.25f, 0.25f);
+            new (tRGB_kRed) sV3_0550(1.0f, 0.0f, 0.0f);
+            new (tRGB_kBlue) sV3_0550(0.0f, 0.0f, 1.0f);
+            new (tRGB_kYellow) sV3_0550(1.0f, 1.0f, 0.0f);
+            new (tRGB_kPurple) sV3_0550(1.0f, 0.0f, 1.0f);
+            new (tRGB_kGreen) sV3_0550(0.0f, 1.0f, 0.0f);
+            new (tRGB_kOrange) sV3_0550(1.0f, 0.5f, 0.0f);
+            new (tRGB_kBlack) sV3_0550(0.0f, 0.0f, 0.0f);
+            new (tRGB_kWhite) sV3_0550(1.0f, 1.0f, 1.0f);
+            new (tRGB_kGray) sV3_0550(0.25f, 0.25f, 0.25f);
             D_004A3E94 = &D_004A5958;
             new (t2vect_Zero) sV2_0550(0.0f, 0.0f);
             new (t2vect_XAxis) sV2_0550(1.0f, 0.0f);

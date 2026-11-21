@@ -1782,17 +1782,17 @@ extern "C" void cErrorMenu__cErrorMenu(int menu, int flags) {
 INCLUDE_ASM("seg/seg_1D3510", cPS2ConsoleConfig__cPS2ConsoleConfig);
 #ifdef SKIP_ASM
 void operator_delete(int *);
-extern void* D_00487480[];
+extern void* cConsoleConfig_vtbl[];
 /**
  * Destroys the PS2 console configuration object.
  *
- * Nothing of its own to release: stores the cConsoleConfig vtable D_00487480 back at +0x34 (where the vptr sits) and
+ * Nothing of its own to release: stores the cConsoleConfig vtable cConsoleConfig_vtbl back at +0x34 (where the vptr sits) and
  * frees the object when bit 0 of @p flags is set.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cPS2ConsoleConfig__cPS2ConsoleConfig(cPS2ConsoleConfig* self, int flags) {
-    self->mVtbl = D_00487480;
+    self->mVtbl = cConsoleConfig_vtbl;
     if (flags & 1) operator_delete((int*)self);
 }
 #endif
@@ -1820,17 +1820,17 @@ extern "C" void func_002D4008(int *lhsItem, int *rhsItem) {
 INCLUDE_ASM("seg/seg_1D3510", cConsoleConfig__cConsoleConfig);
 #ifdef SKIP_ASM
 void operator_delete(int *);
-extern void* D_00487480[];
+extern void* cConsoleConfig_vtbl[];
 /**
- * Destroys a console configuration object: stores the vtable D_00487480 at +0x34 and frees the object when bit 0 of
+ * Destroys a console configuration object: stores the vtable cConsoleConfig_vtbl at +0x34 and frees the object when bit 0 of
  * @p flags is set.
  *
- * It is word 3 (slot 1) of D_00487480. Its code is the same as cPS2ConsoleConfig__cPS2ConsoleConfig.
+ * It is word 3 (slot 1) of cConsoleConfig_vtbl. Its code is the same as cPS2ConsoleConfig__cPS2ConsoleConfig.
  *
  * @param flags  bit 0: free the memory
  */
 extern "C" void cConsoleConfig__cConsoleConfig(cConsoleConfig* self, int flags) {
-    self->mVtbl = D_00487480;
+    self->mVtbl = cConsoleConfig_vtbl;
     if (flags & 1) operator_delete((int*)self);
 }
 #endif

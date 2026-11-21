@@ -2002,7 +2002,7 @@ int cRider_getControlState(void* rider);
 // Function-local static `gravity(0, 0, -980, 0)` and its init guard, spelled out as globals. The guard
 // is a separate scalar at 0x004A4C04 (splat only names D_004A4C00; a D_004A4C00[] view schedules differently).
 extern int D_004A4C04;
-extern t4Vector D_004A5E50;
+extern t4Vector cRailslideMotion_step_kRailGravity;
 
 // The surface record a world hit points at (id at 0, flags at 0x1C).
 struct sSurf_AF28 {
@@ -2338,13 +2338,13 @@ extern "C" void cRailslideMotion_step(char* self)
                 ScaleEq_AF28(relVel, vl / nl);
             *(t4Vector*)(RIDER_AF28 + 0x1E0) = Add_AF28(relVel, *(t4Vector*)(RIDER_AF28 + 0x3D0));
             if (D_004A4C04 == 0) {
-                D_004A5E50.x = 0.0f;
-                D_004A5E50.y = 0.0f;
-                D_004A5E50.z = -980.0f;
-                D_004A5E50.w = 0.0f;
+                cRailslideMotion_step_kRailGravity.x = 0.0f;
+                cRailslideMotion_step_kRailGravity.y = 0.0f;
+                cRailslideMotion_step_kRailGravity.z = -980.0f;
+                cRailslideMotion_step_kRailGravity.w = 0.0f;
                 D_004A4C04 = 1;
             }
-            t4Vector acc = Sub_AF28(Scale_AF28(hit.nrm, Dot_AF28(D_004A5E50, hit.nrm)), Scale_AF28(nv, 0.0f));
+            t4Vector acc = Sub_AF28(Scale_AF28(hit.nrm, Dot_AF28(cRailslideMotion_step_kRailGravity, hit.nrm)), Scale_AF28(nv, 0.0f));
             float boostStrength = *(float*)(RIDER_AF28 + 0x2FC);
             if (boostStrength > 0.0f)
                 AddEq_AF28(acc, Scale_AF28(hit.nrm, boostStrength * (dn > 0.0f ? 2450.0f : -2450.0f)));
@@ -2352,7 +2352,7 @@ extern "C" void cRailslideMotion_step(char* self)
                 char* handler = *(char**)(hit.obj + 0xC);
                 if (handler) {
                     sVE43_AF28* vt = *(sVE43_AF28**)(handler + 0xC);
-                    vt[43].fn(handler + vt[43].delta, &hit, Sub_AF28(D_004A5E50, Scale_AF28(nv, 0.0f)));
+                    vt[43].fn(handler + vt[43].delta, &hit, Sub_AF28(cRailslideMotion_step_kRailGravity, Scale_AF28(nv, 0.0f)));
                 }
             }
             AddEq_AF28(*(t4Vector*)(RIDER_AF28 + 0x1E0), Scale_AF28(acc, dt));
@@ -3447,7 +3447,7 @@ extern "C" void* cBE_getBE();
 extern "C" void cBEStatInterface_getEdgingAttrib(void* iface, int rider, int b);
 
 struct sCurvePt_13D028 { float x, y; };
-extern sCurvePt_13D028* D_004A1140;
+extern sCurvePt_13D028* kDigMult;
 
 // PORT: PS2-only inline asm (float absolute value), as an SDK math-header fabsf would.
 static inline float hpAbs_13D028(float x)
@@ -3485,7 +3485,7 @@ static inline float hpCurve_13D028(const sCurvePt_13D028* p, float x)
  * Computes the edge (dig) force across the board when the rider leans against a sideways slide.
  *
  * Zero unless the lean and the sideways velocity have opposite signs. Otherwise it is the sideways velocity
- * times |lean|, times the curve D_004A1140 at the forward speed in km/h (|b| * 0.036), times -(snow +0x8) so
+ * times |lean|, times the curve kDigMult at the forward speed in km/h (|b| * 0.036), times -(snow +0x8) so
  * a positive factor opposes the slide, divided by (1 + 4.0 * mBoostStrength) while boosting. The stat
  * cBEStatInterface_getEdgingAttrib() is read but unused.
  *
@@ -3509,7 +3509,7 @@ extern "C" float cGroundMotion_getDigForce(cGroundMotion* self, float* snow, flo
     {
         return 0.0f;
     }
-    dv = dv * hpCurve_13D028(D_004A1140, hpAbs_13D028(sv) * 0.035999998450279236f);
+    dv = dv * hpCurve_13D028(kDigMult, hpAbs_13D028(sv) * 0.035999998450279236f);
     dv = dv * -snow[2];
     cBEStatInterface_getEdgingAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), self->mRider->mAIIndex, self->mRider->mStatsIndex);
     float boostStrength = self->mRider->mBoostStrength;
@@ -3851,11 +3851,11 @@ struct sSurf_13D818 {
 };
 
 struct sCurvePt_13D818 { float x, y; };
-extern sCurvePt_13D818* D_004A1128;
-extern sCurvePt_13D818* D_004A1130;
-extern sCurvePt_13D818* D_004A1138;
-extern sCurvePt_13D818* D_004A1148;
-extern sCurvePt_13D818* D_004A1150;
+extern sCurvePt_13D818* kPowderTiltBwd;
+extern sCurvePt_13D818* kMaxTurnKickAngle;
+extern sCurvePt_13D818* kKickAngleSpeed;
+extern sCurvePt_13D818* kSteerTuneMinAttribEffect;
+extern sCurvePt_13D818* kSteerTuneMaxAttribEffect;
 extern sCurvePt_13D818* D_004A1158;
 
 extern "C" float cGroundMotion_getSnowForce_13D818(void* self, sSurf_13D818* e, float h, float vn, float dt) __asm__("cGroundMotion_getSnowForce");
@@ -4155,7 +4155,7 @@ static inline float lerpB_13D818(float x0, float y0, float x1, float y1, float x
     return y0 + (y1 - y0) * (x - x0) / (x1 - x0);
 }
 
-// Piecewise-linear 4-point curve, scalar-endpoint lerp (the D_004A1138 table).
+// Piecewise-linear 4-point curve, scalar-endpoint lerp (the kKickAngleSpeed table).
 static inline float curveB_13D818(const sCurvePt_13D818* p, float x)
 {
     if (p[1].x < x)
@@ -4235,8 +4235,8 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
         push = 0.0f;
     ((cGroundMotion*)self->mRider->unk_3F8)->ChatterTime = steer;
 
-    float lo = curve_13D818(D_004A1148, spd * 0.035999998450279236f);
-    float hi = curve_13D818(D_004A1150, spd * 0.035999998450279236f);
+    float lo = curve_13D818(kSteerTuneMinAttribEffect, spd * 0.035999998450279236f);
+    float hi = curve_13D818(kSteerTuneMaxAttribEffect, spd * 0.035999998450279236f);
     float k = cBEStatInterface_getEdgingAttrib_f(cBE_getInterface_Fv(cBE_getBE(), 3), self->mRider->mAIIndex, self->mRider->mStatsIndex);
     float curveRange = hi - lo;
     float sinBank, c;
@@ -4309,9 +4309,9 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
         float yaw = -func_0031C128(clamp_13D818(vu0Dot_13D818(ax, self->mRider->mGroundNormal), -1.0f, 1.0f));
         float turnKickFlare = snow->m30;
         float turn = (turnKickFlare * ((1.0f - lean * lean) * 0.4000000059604645f) + 1.100000023841858f) * lean *
-                     (curve_13D818(D_004A1130, relSpeed * 0.035999998450279236f) * 0.01745329424738884f);
+                     (curve_13D818(kMaxTurnKickAngle, relSpeed * 0.035999998450279236f) * 0.01745329424738884f);
         turn /= self->mRider->mSlewed[4].cur * 0.9955680966377258f + 1.0f;
-        turn *= curveB_13D818(D_004A1138, relSpeed * 0.035999998450279236f);
+        turn *= curveB_13D818(kKickAngleSpeed, relSpeed * 0.035999998450279236f);
         yaw += turn;
         if (vu0Dot_13D818(rel, self->mRider->mGroundForward) < 0.0f)
             yaw = -yaw;
@@ -4436,7 +4436,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
         int onSlope = cRider_getControlState(self->mRider) != 1 && (self->mRider->mSurfaceType == 2 || self->mRider->mSurfaceType == 3);
         int brace = !onSlope && layer != 10 && layer != 5 && anim != 22 && anim != 2;
         if (onSlope) {
-            float tgt = curve_13D818(D_004A1128, vu0Len_13D818(rel) * 0.035999998450279236f);
+            float tgt = curve_13D818(kPowderTiltBwd, vu0Len_13D818(rel) * 0.035999998450279236f);
             cRider* rider2 = self->mRider;
             rider2->mSlewed[2].target = tgt;
             rider2->mSlewed[2].rate = absf_13D818(rider2->mSlewed[2].cur - tgt) * (dt * 3.0f);
@@ -5071,16 +5071,16 @@ static inline void InitIdx(sIdx* e, int n) { e->id = n; e->val = n; }
 extern sIdx D_004A4C08;
 extern int D_004A4C10;
 extern int D_004A4C14;
-extern float D_004A4C84;
+extern float kHighSpeedCollideThresh;
 extern float nFinishLineControl_kFinishStopThreshCPS;
-extern float D_004A4C90;
-extern float D_004A4C94;
-extern float D_004A4C98;
-extern float D_004A4C9C;
-extern float D_004A4CA0;
-extern float D_004A4CA4;
-extern float D_004A4CA8;
-extern float D_004A4CAC;
+extern float kSpinOutOfAng;
+extern float kIntoSpinAbortAng;
+extern float kMaxAdjSpinAng;
+extern float kMaxAdjFlipAng;
+extern float kMaxPressFlipAng;
+extern float kSpinNoDecayThresh;
+extern float kFlipNoDecayThresh;
+extern float kAirAdjFwdMaxAng;
 extern "C" void InitTerminalVelocityTable(void);
 extern sIdx D_004A4C18;
 extern sIdx D_004A4C20;
@@ -5168,7 +5168,7 @@ void sti_0013FB20(int init, int prio) __asm__("__sti__all_in_one_ai_cpp");
  * table.
  *
  * Runs only when @p init is set and @p prio is 0xFFFF. It writes dozens of 4-float colour/curve constants (D_004A5E60
- * ... D_004A61E0), the packed anim-id words D_004A4C08 (-1) and D_004A4C18 ... D_004A4C80 (0 ... 13), D_004A4C84 =
+ * ... D_004A61E0), the packed anim-id words D_004A4C08 (-1) and D_004A4C18 ... D_004A4C80 (0 ... 13), kHighSpeedCollideThresh =
  * 2222.22 (80 kph in cm/s), nFinishLineControl_kFinishStopThreshCPS = 277.78 (10 kph), angle limits in radians (45, 5,
  * 100, 20 and 360 degrees) and seven 4-key (x, y) curves, and calls InitTerminalVelocityTable (On Tour InitTerminalVelocityTable).
  *
@@ -5422,19 +5422,19 @@ void sti_0013FB20(int init, int prio)
         InitIdx(&D_004A4C70, 11);
         InitIdx(&D_004A4C78, 12);
         InitIdx(&D_004A4C80, 13);
-        D_004A4C84 = 2222.22217f;
+        kHighSpeedCollideThresh = 2222.22217f;
         InitTerminalVelocityTable();
         nFinishLineControl_kFinishStopThreshCPS = 277.777771f;
         SetKeys8(D_004A61F0, 0.0f, 0.200000003f, 0.400000006f, 0.400000006f, 0.600000024f, 0.400000006f, 1.0f, 0.200000003f);
         SetKeys8(D_004A6210, 0.0f, 0.300000012f, 0.400000006f, 1.20000005f, 0.600000024f, 1.20000005f, 1.0f, 0.300000012f);
-        D_004A4C90 = 0.785398245f;
-        D_004A4C94 = 0.0872664750f;
-        D_004A4C98 = 1.74532938f;
-        D_004A4C9C = 1.74532938f;
-        D_004A4CA0 = 0.349065900f;
-        D_004A4CA4 = 6.28318596f;
-        D_004A4CA8 = 6.28318596f;
-        D_004A4CAC = 0.785398245f;
+        kSpinOutOfAng = 0.785398245f;
+        kIntoSpinAbortAng = 0.0872664750f;
+        kMaxAdjSpinAng = 1.74532938f;
+        kMaxAdjFlipAng = 1.74532938f;
+        kMaxPressFlipAng = 0.349065900f;
+        kSpinNoDecayThresh = 6.28318596f;
+        kFlipNoDecayThresh = 6.28318596f;
+        kAirAdjFwdMaxAng = 0.785398245f;
         SetKeys8(D_004A6230, 0.0f, 0.200000003f, 16.0f, 0.200000003f, 80.0f, 1.0f, 120.0f, 1.0f);
         SetKeys8(D_004A6250, 0.0f, 30.4979992f, 20.0f, 30.4979992f, 50.0f, 30.4979992f, 120.0f, 30.4979992f);
         SetKeys8(D_004A6270, 0.0f, 1.0f, 20.0f, 1.0f, 50.0f, 1.0f, 120.0f, 1.0f);

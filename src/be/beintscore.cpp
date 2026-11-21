@@ -631,12 +631,12 @@ void cBEScoreInterface_readFromReplayFrame(void* self)
 //100%
 INCLUDE_ASM("be/beintscore", func_00155390);
 #ifdef SKIP_ASM
-extern short D_00440ED0[][3];
+extern short cBELibrary_highlightLevel[][3];
 
 /**
  * Raises a character's level in one career highlight to the level a value reaches.
  *
- * The level is 1, 2 or 3 for the highest of the highlight's three thresholds D_00440ED0[@p idx][0..2] that @p score
+ * The level is 1, 2 or 3 for the highest of the highlight's three thresholds cBELibrary_highlightLevel[@p idx][0..2] that @p score
  * reaches (0 for none). The stored level, the signed byte at +0xBB8 + @p idx of the character record (what
  * cBEScoreInterface_getCurrentHighlightLevel reads), only goes up. func_00155420 calls it for highlights 0 to 7.
  *
@@ -649,7 +649,7 @@ extern "C" void func_00155390(char* self, int idx, int score)
     int level = 0;
     int i;
     for (i = 2; i >= 0; i--) {
-        if (score >= D_00440ED0[idx][i]) {
+        if (score >= cBELibrary_highlightLevel[idx][i]) {
             level = i + 1;
             break;
         }

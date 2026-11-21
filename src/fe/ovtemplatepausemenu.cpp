@@ -145,7 +145,7 @@ INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onGainTransition);
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char* D_00441C30[];
+extern char* gMenuItemIcons[];
 extern char str_pct_s_group[];
 
 struct sVec3_001F8448 {
@@ -165,7 +165,7 @@ extern "C" int cOVTemplate_PauseMenu_onGainTransition(cOVTemplate_PauseMenu* sel
     if (self->mMoveIcons != 0) {
         self->mMoveIcons = 0;
         for (int i = 0; i < 14; i++) {
-            sprintf(buf, str_pct_s_group, D_00441C30[i]);
+            sprintf(buf, str_pct_s_group, gMenuItemIcons[i]);
             char* obj = (char*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(buf));
             if (obj != 0) {
                 sVEnt_001F8448* vt = *(sVEnt_001F8448**)(obj + 8);
@@ -174,7 +174,7 @@ extern "C" int cOVTemplate_PauseMenu_onGainTransition(cOVTemplate_PauseMenu* sel
         }
         for (int i = 0; i < 8; i++) {
             if (i < self->mPauseMenuNumOptions) {
-                sprintf(buf, str_pct_s_group, D_00441C30[((int*)&self->mPauseMenuOptions)[i]]);
+                sprintf(buf, str_pct_s_group, gMenuItemIcons[((int*)&self->mPauseMenuOptions)[i]]);
                 char* obj = (char*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(buf));
                 if (obj != 0) {
                     sVEnt_001F8448* vt = *(sVEnt_001F8448**)(obj + 8);
@@ -616,7 +616,7 @@ int GetHashValue32(char* str);
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char* D_00441C30[];
+extern char* gMenuItemIcons[];
 extern char str_pct_s_S[];
 extern char str_pct_s_R[];
 
@@ -631,13 +631,13 @@ extern "C" void cOVTemplate_PauseMenu_setPDAIconColor(cOVTemplate_PauseMenu* sel
 {
     char buf[64];
     if (on) {
-        sprintf(buf, str_pct_s_S, D_00441C30[idx]);
+        sprintf(buf, str_pct_s_S, gMenuItemIcons[idx]);
         unsigned short frame = cUIScreen_getFrameByLabel(self->mpPauseScreen, GetHashValue32(buf));
         if (frame != 0xFFFF && self->mpThread == 0) {
             self->mpThread = (cUIThread*)cUIScreen_playFrame(self->mpPauseScreen, frame, 1);
         }
     } else {
-        sprintf(buf, str_pct_s_R, D_00441C30[idx]);
+        sprintf(buf, str_pct_s_R, gMenuItemIcons[idx]);
         unsigned short frame = cUIScreen_getFrameByLabel(self->mpPauseScreen, GetHashValue32(buf));
         if (frame != 0xFFFF) {
             *(unsigned short*)((char*)self->mpThread + 0xC) = frame;

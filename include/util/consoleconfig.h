@@ -12,7 +12,7 @@
 // (0x002C6F78..0x002C7478) and the destructors in seg/seg_1D3510, so the header goes under util/.
 //
 // Size 0x38: [R] cConsoleConfig_construct allocates 0x38; [O] On Tour cConsoleConfig and cPSPConsoleConfig are 0x38.
-// Base classes: none. cConsoleConfig declares the first virtual (its destructor: vtable D_00487480, 1 slot =
+// Base classes: none. cConsoleConfig declares the first virtual (its destructor: vtable cConsoleConfig_vtbl, 1 slot =
 // cConsoleConfig__cConsoleConfig), so its vptr follows its data (g++ 2.95): 0x34.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Evidence tags:
@@ -44,7 +44,7 @@ struct cConsoleConfig {
     int m_bDigitalOut;              // 0x28 [O] bool (a word); [R] ctor: 1 when sceScfGetSpdif returns 0, else 0
     int m_SoundMode;                // 0x2C [O] eConsoleSoundMode; [R] ctor 1
     int mLanguage;                  // 0x30 [O] eConsoleLanguage; [R] ctor: sceScfGetLanguage 0..7, else 1
-    void** mVtbl;                   // 0x34 [R] cPS2ConsoleConfig_vtbl (ctor, dtor), D_00487480 (cConsoleConfig's, stored
+    void** mVtbl;                   // 0x34 [R] cPS2ConsoleConfig_vtbl (ctor, dtor), cConsoleConfig_vtbl (cConsoleConfig's, stored
                                     //      by both destructors); slot 1 = destructor
 };
 
@@ -83,7 +83,7 @@ struct cPS2ConsoleConfig {
     int m_bDigitalOut;              // 0x28 [O] bool; [R] ctor
     int m_SoundMode;                // 0x2C [O]; [R] ctor 1
     int mLanguage;                  // 0x30 [O]; [R] ctor
-    void** mVtbl;                   // 0x34 [R] cPS2ConsoleConfig_vtbl (ctor), D_00487480 (dtor, then the base's)
+    void** mVtbl;                   // 0x34 [R] cPS2ConsoleConfig_vtbl (ctor), cConsoleConfig_vtbl (dtor, then the base's)
 };
 
 CHECK_OFFSET(cPS2ConsoleConfig, mDateFormat, 0x00);

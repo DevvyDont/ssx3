@@ -122,7 +122,7 @@ INCLUDE_ASM("worldpainter/worldpainterqueryctor", cWorldPainterQuery__cWorldPain
 #ifdef SKIP_ASM
 void operator_delete(int* p);
 extern char cWorldPainterQuery_vtbl[];
-extern char D_00485D30[];
+extern char tWorldPainterQuery_vtbl[];
 
 struct sWPQuery_06C0 {
     int* buf;
@@ -137,7 +137,7 @@ extern sWPQuery_06C0* cWorldPainterQuery_m_queryListStart;
  * Destroys a world painter query: frees its data and unlinks it from the global query list (cWorldPainterQuery_m_queryListStart).
  *
  * When the query is not the list's head the list is walked until the entry before it; the null test after that walk
- * is useless (the walk dereferences each entry first). Restores the base vtable (D_00485D30) and frees the object
+ * is useless (the walk dereferences each entry first). Restores the base vtable (tWorldPainterQuery_vtbl) and frees the object
  * when bit 0 of @p flags is set.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
@@ -157,7 +157,7 @@ extern "C" void cWorldPainterQuery__cWorldPainterQuery(cWorldPainterQuery* self,
             query->next = (sWPQuery_06C0*)self->m_next;
         }
     }
-    self->mVtbl = (void**)D_00485D30;
+    self->mVtbl = (void**)tWorldPainterQuery_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

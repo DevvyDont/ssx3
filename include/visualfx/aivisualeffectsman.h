@@ -3,7 +3,7 @@
 
 // cAIVisualEffectsMan: the manager of the AI-driven visual effects, i.e. the avalanche (cAvalanche,
 // visualfx/avalanche.h). An abstract base (update and render are pure virtuals, func_00411530) whose ctor makes the
-// object the current manager (D_004A3B80, returned by aivisualEffectsMan()); cAIVisualEffectsMan_construct builds the
+// object the current manager (gAIVisualEffectsMan, returned by aivisualEffectsMan()); cAIVisualEffectsMan_construct builds the
 // platform class cPS2AIVisualEffectsMan, which allocates the cAvalanche and forwards update / render to it.
 // cGame_load wraps the result in a cAIVisualEffectsObjNode (main/gameobjnodes.h). On Tour also declares
 // commonUpdate(eRenderStateQueryId); retail's empty func_002F0388 sits where cVisualEffectsMan's commonUpdate sits

@@ -35,7 +35,7 @@ struct cOVState_TRANSPORT {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] the cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_004733F8 (no symbol yet; vtables.tsv: cOVState_TRANSPORT, slot 0
+    void** mVtbl;                   // 0x008 [R] cOVState_TRANSPORT_vtbl (no symbol yet; vtables.tsv: cOVState_TRANSPORT, slot 0
                                     //       cOVState_TRANSPORT__cOVState_TRANSPORT), stored after cOVState_vtbl by
                                     //       func_00221228 / func_002211C8 / the inlined ctor in
                                     //       cOVStateManager_triggerOverlay

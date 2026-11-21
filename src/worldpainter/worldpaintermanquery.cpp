@@ -103,7 +103,7 @@ struct sFlags_2C0B70 {
     sFlags_2C0B70(unsigned char aa, unsigned int ab) : a(aa), b(ab) {}
 };
 
-extern int D_004A53D0_w[2] __asm__("D_004A53D0");
+extern int D_004A53D0_w[2] __asm__("kNullNameField");
 extern sFlags_2C0B70 D_004A53D8;
 extern sFlags_2C0B70 D_004A53E0;
 extern sFlags_2C0B70 D_004A53E8;
@@ -183,7 +183,7 @@ extern "C" void func_002C0B70_impl(int initialize, int priority) __asm__("func_0
  * Runs the static constructors of the world-painter query unit (g++'s static initialisation and destruction function).
  *
  * Only when @p initialize is nonzero and @p priority is 0xFFFF: constructs the 56 four-float colour constants
- * D_004D4638 .. D_004D49A8, zeroes this unit's kNullNameField copy (D_004A53D0) and builds its 14 region-type constants
+ * D_004D4638 .. D_004D49A8, zeroes this unit's kNullNameField copy (kNullNameField) and builds its 14 region-type constants
  * kWPR_MusicTrigger .. kWPR_Danger (D_004A53D8 .. D_004A5440, each tWorldPainterRegionType(n, n), n = 0 .. 13). The
  * destruction pass does nothing. func_002C1688__FPv calls it with (1, 0xFFFF).
  *
@@ -283,7 +283,7 @@ void tWPInGameData_debugBlend(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", tWorldPainterQuery__tWorldPainterQuery);
 #ifdef SKIP_ASM
-extern void* D_00485D30[];
+extern void* tWorldPainterQuery_vtbl[];
 void operator_delete(int* ptr);
 
 /**
@@ -293,7 +293,7 @@ void operator_delete(int* ptr);
  */
 extern "C" void tWorldPainterQuery__tWorldPainterQuery(tWorldPainterQuery* self, int flags)
 {
-    self->mVtbl = D_00485D30;
+    self->mVtbl = tWorldPainterQuery_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

@@ -3967,9 +3967,9 @@ extern "C" int tWPInGameData_PointRate(void) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MusicTrigger_tWPInGameData_MusicTrigger);
 #ifdef SKIP_ASM
-extern char D_00485AF8[];
+extern char tWPInGameData_MusicTrigger_vtbl[];
 /**
- * Constructs a tWPInGameData_MusicTrigger: vtable D_00485AF8, m_wpTravelDistance -99999.0f (no position yet), and
+ * Constructs a tWPInGameData_MusicTrigger: vtable tWPInGameData_MusicTrigger_vtbl, m_wpTravelDistance -99999.0f (no position yet), and
  * m_Type, m_lastType, m_Value and m_lastValue -1.
  *
  * @param musicTrigger  the object (0x18 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag
@@ -3977,7 +3977,7 @@ extern char D_00485AF8[];
  * @return @p musicTrigger
  */
 extern "C" void *tWPInGameData_MusicTrigger_tWPInGameData_MusicTrigger(tWPInGameData_MusicTrigger* musicTrigger) {
-    musicTrigger->mVtbl = (void**)D_00485AF8;
+    musicTrigger->mVtbl = (void**)tWPInGameData_MusicTrigger_vtbl;
     musicTrigger->m_wpTravelDistance = -99999.0f;
     musicTrigger->m_lastType = -1;
     musicTrigger->m_Type = -1;
@@ -3990,16 +3990,16 @@ extern "C" void *tWPInGameData_MusicTrigger_tWPInGameData_MusicTrigger(tWPInGame
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_tWPInGameData_Mix);
 #ifdef SKIP_ASM
-extern char D_004858C0[];
+extern char tWPInGameData_Mix_vtbl[];
 /**
- * Constructs a tWPInGameData_Mix: vtable D_004858C0, m_wpTravelDistance -99999.0f (no position yet), and m_MixPreset
+ * Constructs a tWPInGameData_Mix: vtable tWPInGameData_Mix_vtbl, m_wpTravelDistance -99999.0f (no position yet), and m_MixPreset
  * and m_lastMixPreset -1.
  *
  * @param mix  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Mix")
  * @return @p mix
  */
 extern "C" void *tWPInGameData_Mix_tWPInGameData_Mix(tWPInGameData_Mix* mix) {
-    mix->mVtbl = (void**)D_004858C0;
+    mix->mVtbl = (void**)tWPInGameData_Mix_vtbl;
     mix->m_wpTravelDistance = -99999.0f;
     mix->m_lastMixPreset = -1;
     mix->m_MixPreset = -1;
@@ -4010,16 +4010,16 @@ extern "C" void *tWPInGameData_Mix_tWPInGameData_Mix(tWPInGameData_Mix* mix) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_tWPInGameData_Ambience);
 #ifdef SKIP_ASM
-extern char D_00485688[];
+extern char tWPInGameData_Ambience_vtbl[];
 /**
- * Constructs a tWPInGameData_Ambience: vtable D_00485688, m_wpTravelDistance -99999.0f (no position yet), and m_BankID
+ * Constructs a tWPInGameData_Ambience: vtable tWPInGameData_Ambience_vtbl, m_wpTravelDistance -99999.0f (no position yet), and m_BankID
  * and m_lastBankID -1.
  *
  * @param ambience  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Ambience")
  * @return @p ambience
  */
 extern "C" void *tWPInGameData_Ambience_tWPInGameData_Ambience(tWPInGameData_Ambience* ambience) {
-    ambience->mVtbl = (void**)D_00485688;
+    ambience->mVtbl = (void**)tWPInGameData_Ambience_vtbl;
     ambience->m_wpTravelDistance = -99999.0f;
     ambience->m_lastBankID = -1;
     ambience->m_BankID = -1;
@@ -4030,16 +4030,16 @@ extern "C" void *tWPInGameData_Ambience_tWPInGameData_Ambience(tWPInGameData_Amb
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_tWPInGameData_Speech);
 #ifdef SKIP_ASM
-extern char D_00485450[];
+extern char tWPInGameData_Speech_vtbl[];
 /**
- * Constructs a tWPInGameData_Speech: vtable D_00485450, m_wpTravelDistance -99999.0f (no position yet), and m_SpeechID
+ * Constructs a tWPInGameData_Speech: vtable tWPInGameData_Speech_vtbl, m_wpTravelDistance -99999.0f (no position yet), and m_SpeechID
  * and m_lastSpeechID -1.
  *
  * @param speech  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Speech")
  * @return @p speech
  */
 extern "C" void *tWPInGameData_Speech_tWPInGameData_Speech(tWPInGameData_Speech* speech) {
-    speech->mVtbl = (void**)D_00485450;
+    speech->mVtbl = (void**)tWPInGameData_Speech_vtbl;
     speech->m_wpTravelDistance = -99999.0f;
     speech->m_lastSpeechID = -1;
     speech->m_SpeechID = -1;
@@ -4050,16 +4050,16 @@ extern "C" void *tWPInGameData_Speech_tWPInGameData_Speech(tWPInGameData_Speech*
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_tWPInGameData_Camera);
 #ifdef SKIP_ASM
-extern char D_00485218[];
+extern char tWPInGameData_Camera_vtbl[];
 /**
- * Constructs a tWPInGameData_Camera: vtable D_00485218, m_wpTravelDistance -99999.0f (no position yet), and
+ * Constructs a tWPInGameData_Camera: vtable tWPInGameData_Camera_vtbl, m_wpTravelDistance -99999.0f (no position yet), and
  * m_DrawDistance and m_lastDrawDistance 30000.0f.
  *
  * @param camera  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Camera")
  * @return @p camera
  */
 extern "C" void *tWPInGameData_Camera_tWPInGameData_Camera(tWPInGameData_Camera* camera) {
-    camera->mVtbl = (void**)D_00485218;
+    camera->mVtbl = (void**)tWPInGameData_Camera_vtbl;
     camera->m_lastDrawDistance = 30000.0f;
     camera->m_wpTravelDistance = -99999.0f;
     camera->m_DrawDistance = 30000.0f;
@@ -4070,9 +4070,9 @@ extern "C" void *tWPInGameData_Camera_tWPInGameData_Camera(tWPInGameData_Camera*
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Fog_tWPInGameData_Fog);
 #ifdef SKIP_ASM
-extern char D_00484FE0[];
+extern char tWPInGameData_Fog_vtbl[];
 /**
- * Constructs a tWPInGameData_Fog: vtable D_00484FE0, m_wpTravelDistance -99999.0f (no position yet), and both the
+ * Constructs a tWPInGameData_Fog: vtable tWPInGameData_Fog_vtbl, m_wpTravelDistance -99999.0f (no position yet), and both the
  * current and the last values of m_FogDensity (0), m_FogNear (3000), m_FogFar (30000) and the fog colour (0.43, 0.55,
  * 0.71).
  *
@@ -4082,7 +4082,7 @@ extern char D_00484FE0[];
 extern "C" void *tWPInGameData_Fog_tWPInGameData_Fog(tWPInGameData_Fog* fog) {
     float zero = 0.0f;
     float fogNear = 3000.0f, fogFar = 30000.0f, fogRed = 0.43f, fogGreen = 0.55f, fogBlue = 0.71f;
-    fog->mVtbl = (void**)((int*)D_00484FE0);
+    fog->mVtbl = (void**)((int*)tWPInGameData_Fog_vtbl);
     fog->m_wpTravelDistance = -99999.0f;
     fog->m_lastFogDensity = zero;
     fog->m_lastFogNear = fogNear;
@@ -4103,11 +4103,11 @@ extern "C" void *tWPInGameData_Fog_tWPInGameData_Fog(tWPInGameData_Fog* fog) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_tWPInGameData_LightGlow);
 #ifdef SKIP_ASM
-extern char D_00484DA8[];
+extern char tWPInGameData_LightGlow_vtbl[];
 /**
  * Constructs the blended light-glow values with their defaults.
  *
- * Stores the vtable D_00484DA8 and -99999 in m_wpTravelDistance; sets the cutoff, cutoff scale, copy, source and
+ * Stores the vtable tWPInGameData_LightGlow_vtbl and -99999 in m_wpTravelDistance; sets the cutoff, cutoff scale, copy, source and
  * frame intensities (and their m_last copies) to 1, and m_LightGlowBlend2 / m_LightGlowBlend3 (and lasts) to 0.
  *
  * @return @p self
@@ -4116,7 +4116,7 @@ extern "C" void *tWPInGameData_LightGlow_tWPInGameData_LightGlow(tWPInGameData_L
     float one = 1.0f, zeroF = 0.0f;
     float *floats = (float*)self;
     floats[0] = -99999.0f;
-    self->mVtbl = (void**)D_00484DA8;
+    self->mVtbl = (void**)tWPInGameData_LightGlow_vtbl;
     floats[3] = one;
     floats[2] = one;
     floats[5] = one;
@@ -4138,11 +4138,11 @@ extern "C" void *tWPInGameData_LightGlow_tWPInGameData_LightGlow(tWPInGameData_L
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTint_tWPInGameData_ScreenTint);
 #ifdef SKIP_ASM
-extern char D_00484B70[];
+extern char tWPInGameData_ScreenTint_vtbl[];
 /**
  * Constructs the blended screen-tint values with their defaults: scale RGB 1, offset RGB 0.
  *
- * Stores the vtable D_00484B70 and -99999 in m_wpTravelDistance; each m_last copy gets the same default.
+ * Stores the vtable tWPInGameData_ScreenTint_vtbl and -99999 in m_wpTravelDistance; each m_last copy gets the same default.
  *
  * @return @p self
  */
@@ -4150,7 +4150,7 @@ extern "C" void *tWPInGameData_ScreenTint_tWPInGameData_ScreenTint(tWPInGameData
     float one = 1.0f, zeroF = 0.0f;
     float *floats = (float*)self;
     floats[0] = -99999.0f;
-    self->mVtbl = (void**)D_00484B70;
+    self->mVtbl = (void**)tWPInGameData_ScreenTint_vtbl;
     floats[3] = one;
     floats[2] = one;
     floats[5] = one;
@@ -4170,9 +4170,9 @@ extern "C" void *tWPInGameData_ScreenTint_tWPInGameData_ScreenTint(tWPInGameData
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBox_tWPInGameData_SkyBox);
 #ifdef SKIP_ASM
-extern char D_00484938[];
+extern char tWPInGameData_SkyBox_vtbl[];
 /**
- * Constructs a tWPInGameData_SkyBox: vtable D_00484938, m_wpTravelDistance -99999.0f (no position yet), and
+ * Constructs a tWPInGameData_SkyBox: vtable tWPInGameData_SkyBox_vtbl, m_wpTravelDistance -99999.0f (no position yet), and
  * m_SkyBoxRotation and m_lastSkyBoxRotation 0.
  *
  * @param skyBox  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_SkyBox")
@@ -4180,7 +4180,7 @@ extern char D_00484938[];
  */
 extern "C" void *tWPInGameData_SkyBox_tWPInGameData_SkyBox(tWPInGameData_SkyBox* skyBox) {
     float zero = 0.0f;
-    skyBox->mVtbl = (void**)D_00484938;
+    skyBox->mVtbl = (void**)tWPInGameData_SkyBox_vtbl;
     skyBox->m_lastSkyBoxRotation = zero;
     skyBox->m_wpTravelDistance = -99999.0f;
     skyBox->m_SkyBoxRotation = zero;
@@ -4191,11 +4191,11 @@ extern "C" void *tWPInGameData_SkyBox_tWPInGameData_SkyBox(tWPInGameData_SkyBox*
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Sun_tWPInGameData_Sun);
 #ifdef SKIP_ASM
-extern char D_00484700[];
+extern char tWPInGameData_Sun_vtbl[];
 /**
  * Constructs the blended sun values with their defaults.
  *
- * Stores the vtable D_00484700 and -99999 in m_wpTravelDistance; pitch and yaw offsets 0, colour RGB and intensity 1,
+ * Stores the vtable tWPInGameData_Sun_vtbl and -99999 in m_wpTravelDistance; pitch and yaw offsets 0, colour RGB and intensity 1,
  * m_SunType 0, lens intensity and radius 1, each m_last copy the same.
  *
  * @return @p self
@@ -4204,7 +4204,7 @@ extern "C" void *tWPInGameData_Sun_tWPInGameData_Sun(tWPInGameData_Sun* self) {
     float one = 1.0f, zeroF = 0.0f;
     float *floats = (float*)self;
     floats[0] = -99999.0f;
-    self->mVtbl = (void**)D_00484700;
+    self->mVtbl = (void**)tWPInGameData_Sun_vtbl;
     floats[3] = zeroF;
     floats[2] = zeroF;
     floats[5] = zeroF;
@@ -4230,9 +4230,9 @@ extern "C" void *tWPInGameData_Sun_tWPInGameData_Sun(tWPInGameData_Sun* self) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_tWPInGameData_Surface);
 #ifdef SKIP_ASM
-extern char D_004844C8[];
+extern char tWPInGameData_Surface_vtbl[];
 /**
- * Constructs a tWPInGameData_Surface: vtable D_004844C8, m_wpTravelDistance -99999.0f (no position yet), and
+ * Constructs a tWPInGameData_Surface: vtable tWPInGameData_Surface_vtbl, m_wpTravelDistance -99999.0f (no position yet), and
  * m_SnowSparkleDensity and m_lastSnowSparkleDensity 1.0f.
  *
  * @param surface  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Surface")
@@ -4240,7 +4240,7 @@ extern char D_004844C8[];
  */
 extern "C" void *tWPInGameData_Surface_tWPInGameData_Surface(tWPInGameData_Surface* surface) {
     float one = 1.0f;
-    surface->mVtbl = (void**)D_004844C8;
+    surface->mVtbl = (void**)tWPInGameData_Surface_vtbl;
     surface->m_lastSnowSparkleDensity = one;
     surface->m_wpTravelDistance = -99999.0f;
     surface->m_SnowSparkleDensity = one;
@@ -4251,12 +4251,12 @@ extern "C" void *tWPInGameData_Surface_tWPInGameData_Surface(tWPInGameData_Surfa
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Lighting_tWPInGameData_Lighting);
 #ifdef SKIP_ASM
-extern tWPNameField D_004A53D0_2BC9B0 __asm__("D_004A53D0");
-extern char D_00484290[];
+extern tWPNameField D_004A53D0_2BC9B0 __asm__("kNullNameField");
+extern char tWPInGameData_Lighting_vtbl[];
 /**
- * Constructs a tWPInGameData_Lighting: vtable D_00484290, m_wpTravelDistance -99999.0f (no position yet), the four
+ * Constructs a tWPInGameData_Lighting: vtable tWPInGameData_Lighting_vtbl, m_wpTravelDistance -99999.0f (no position yet), the four
  * irradiance names and their m_last copies (eight tWPNameFields from m_LightIrradianceName on) zeroed word by word and
- * then set to the null name D_004A53D0 (which the worldpainterquery static initializer func_002C0B70 zeroes), and
+ * then set to the null name kNullNameField (which the worldpainterquery static initializer func_002C0B70 zeroes), and
  * m_AmbientLightIntensityOffset 1.0f and m_RimLightIntensityOffset 0.75f (current and last).
  *
  * @param lighting  the object (0x58 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Lighting")
@@ -4264,7 +4264,7 @@ extern char D_00484290[];
  */
 extern "C" void* tWPInGameData_Lighting_tWPInGameData_Lighting(tWPInGameData_Lighting* lighting)
 {
-    lighting->mVtbl = (void**)D_00484290;
+    lighting->mVtbl = (void**)tWPInGameData_Lighting_vtbl;
     lighting->m_wpTravelDistance = -99999.0f;
     ((&lighting->m_LightIrradianceName))[0].m_nameId[0] = ((&lighting->m_LightIrradianceName))[0].m_nameId[1] = 0;
     ((&lighting->m_LightIrradianceName))[1].m_nameId[0] = ((&lighting->m_LightIrradianceName))[1].m_nameId[1] = 0;
@@ -4289,10 +4289,10 @@ extern "C" void* tWPInGameData_Lighting_tWPInGameData_Lighting(tWPInGameData_Lig
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Weather_tWPInGameData_Weather);
 #ifdef SKIP_ASM
-extern char D_00484058[];
+extern char tWPInGameData_Weather_vtbl[];
 #define F_CAF8(o) (*(float*)(self + (o)))
 /**
- * Constructs a tWPInGameData_Weather: vtable D_00484058, m_wpTravelDistance -99999.0f (no position yet), and both the
+ * Constructs a tWPInGameData_Weather: vtable tWPInGameData_Weather_vtbl, m_wpTravelDistance -99999.0f (no position yet), and both the
  * current and the last value of each weather field: m_SnowIntensity 0, m_FlakeSize 6, m_WindIntensity, m_WindRotation
  * and m_PlayerWindIntensity 0, m_Temperature 10, m_SnowFlurries and m_SnowGravityMultiplier 1, m_SnowFluffItensity,
  * m_SnowFluffWindIntensity and m_LightningChance 0, the snow-flake colour (A, R, G, B) all 1, and the snow-fluff colour
@@ -4301,7 +4301,7 @@ extern char D_00484058[];
  * @return @p self (0xA0 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Weather")
  */
 extern "C" void* tWPInGameData_Weather_tWPInGameData_Weather(char *self) {
-    *(char**)(self + 4) = D_00484058;
+    *(char**)(self + 4) = tWPInGameData_Weather_vtbl;
     F_CAF8(0) = -99999.0f;
     F_CAF8(0x8) = F_CAF8(0xC) = 0.0f;
     F_CAF8(0x10) = F_CAF8(20) = 6.0f;
@@ -4330,9 +4330,9 @@ extern "C" void* tWPInGameData_Weather_tWPInGameData_Weather(char *self) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Danger_tWPInGameData_Danger);
 #ifdef SKIP_ASM
-extern char D_00483E20[];
+extern char tWPInGameData_Danger_vtbl[];
 /**
- * Constructs a tWPInGameData_Danger: vtable D_00483E20, m_wpTravelDistance -99999.0f (no position yet), and m_Level,
+ * Constructs a tWPInGameData_Danger: vtable tWPInGameData_Danger_vtbl, m_wpTravelDistance -99999.0f (no position yet), and m_Level,
  * m_lastLevel, m_PointRate and m_lastPointRate 0.
  *
  * @param danger  the object (0x18 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Danger")
@@ -4340,7 +4340,7 @@ extern char D_00483E20[];
  */
 extern "C" void *tWPInGameData_Danger_tWPInGameData_Danger(tWPInGameData_Danger* danger) {
     float zero = 0.0f;
-    danger->mVtbl = (void**)D_00483E20;
+    danger->mVtbl = (void**)tWPInGameData_Danger_vtbl;
     danger->m_lastLevel = 0;
     danger->m_Level = 0;
     danger->m_wpTravelDistance = -99999.0f;
@@ -4812,98 +4812,98 @@ extern "C" void tWPInGameData_Danger_blend(tWPInGameData_Danger* self, tWPData_D
 #endif
 
 /**
- * Does nothing: slot 67 of tWPInGameData_MusicTrigger's vtable D_00485AF8, the slot the class's blend
+ * Does nothing: slot 67 of tWPInGameData_MusicTrigger's vtable tWPInGameData_MusicTrigger_vtbl, the slot the class's blend
  * (tWPInGameData_MusicTrigger_blend) calls before and after blending.
  */
 extern "C" void tWPInGameData_MusicTrigger_debugBlend(void) {
 }
 
 /**
- * Does nothing: slot 67 of tWPInGameData_Ambience's vtable D_00485688, the slot the class's blend
+ * Does nothing: slot 67 of tWPInGameData_Ambience's vtable tWPInGameData_Ambience_vtbl, the slot the class's blend
  * (tWPInGameData_Ambience_blend) calls before and after blending.
  */
 extern "C" void tWPInGameData_Ambience_debugBlend(void) {
 }
 
 /**
- * Does nothing: slot 67 of tWPInGameData_Camera's vtable D_00485218, the slot the class's blend
+ * Does nothing: slot 67 of tWPInGameData_Camera's vtable tWPInGameData_Camera_vtbl, the slot the class's blend
  * (tWPInGameData_Camera_blend) calls before and after blending.
  */
 extern "C" void tWPInGameData_Camera_debugBlend(void) {
 }
 
 /**
- * Does nothing: slot 67 of tWPInGameData_Danger's vtable D_00483E20, the slot the class's blend
+ * Does nothing: slot 67 of tWPInGameData_Danger's vtable tWPInGameData_Danger_vtbl, the slot the class's blend
  * (tWPInGameData_Danger_blend) calls before and after blending.
  */
 extern "C" void tWPInGameData_Danger_debugBlend(void) {
 }
 
 /**
- * Does nothing: slot 67 of tWPInGameData_Fog's vtable D_00484FE0, the slot the class's blend (tWPInGameData_Fog_blend)
+ * Does nothing: slot 67 of tWPInGameData_Fog's vtable tWPInGameData_Fog_vtbl, the slot the class's blend (tWPInGameData_Fog_blend)
  * calls before and after blending.
  */
 extern "C" void tWPInGameData_Fog_debugBlend(void) {
 }
 
 /**
- * Does nothing: slot 67 of tWPInGameData_LightGlow's vtable D_00484DA8, the slot the class's blend
+ * Does nothing: slot 67 of tWPInGameData_LightGlow's vtable tWPInGameData_LightGlow_vtbl, the slot the class's blend
  * (tWPInGameData_LightGlow_blend) calls before and after blending.
  */
 extern "C" void tWPInGameData_LightGlow_debugBlend(void) {
 }
 
 /**
- * Does nothing: slot 67 of tWPInGameData_Lighting's vtable D_00484290, the slot the class's blend
+ * Does nothing: slot 67 of tWPInGameData_Lighting's vtable tWPInGameData_Lighting_vtbl, the slot the class's blend
  * (tWPInGameData_Lighting_blend) calls before and after blending.
  */
 extern "C" void tWPInGameData_Lighting_debugBlend(void) {
 }
 
 /**
- * Does nothing: slot 67 of tWPInGameData_Mix's vtable D_004858C0, the slot the class's blend (tWPInGameData_Mix_blend)
+ * Does nothing: slot 67 of tWPInGameData_Mix's vtable tWPInGameData_Mix_vtbl, the slot the class's blend (tWPInGameData_Mix_blend)
  * calls before and after blending.
  */
 extern "C" void tWPInGameData_Mix_debugBlend(void) {
 }
 
 /**
- * Does nothing: slot 67 of tWPInGameData_ScreenTint's vtable D_00484B70, the slot the class's blend
+ * Does nothing: slot 67 of tWPInGameData_ScreenTint's vtable tWPInGameData_ScreenTint_vtbl, the slot the class's blend
  * (tWPInGameData_ScreenTint_blend) calls before and after blending.
  */
 extern "C" void tWPInGameData_ScreenTint_debugBlend(void) {
 }
 
 /**
- * Does nothing: slot 67 of tWPInGameData_SkyBox's vtable D_00484938, the slot the class's blend
+ * Does nothing: slot 67 of tWPInGameData_SkyBox's vtable tWPInGameData_SkyBox_vtbl, the slot the class's blend
  * (tWPInGameData_SkyBox_blend) calls before and after blending.
  */
 extern "C" void tWPInGameData_SkyBox_debugBlend(void) {
 }
 
 /**
- * Does nothing: slot 67 of tWPInGameData_Speech's vtable D_00485450, the slot the class's blend
+ * Does nothing: slot 67 of tWPInGameData_Speech's vtable tWPInGameData_Speech_vtbl, the slot the class's blend
  * (tWPInGameData_Speech_blend) calls before and after blending.
  */
 extern "C" void tWPInGameData_Speech_debugBlend(void) {
 }
 
 /**
- * Does nothing: slot 67 of tWPInGameData_Sun's vtable D_00484700, the slot the class's blend (tWPInGameData_Sun_blend)
+ * Does nothing: slot 67 of tWPInGameData_Sun's vtable tWPInGameData_Sun_vtbl, the slot the class's blend (tWPInGameData_Sun_blend)
  * calls before and after blending.
  */
 extern "C" void tWPInGameData_Sun_debugBlend(void) {
 }
 
 /**
- * Does nothing: slot 67 of tWPInGameData_Surface's vtable D_004844C8, the slot the class's blend
+ * Does nothing: slot 67 of tWPInGameData_Surface's vtable tWPInGameData_Surface_vtbl, the slot the class's blend
  * (tWPInGameData_Surface_blend) calls before and after blending.
  */
 extern "C" void tWPInGameData_Surface_debugBlend(void) {
 }
 
 /**
- * Does nothing: slot 67 of tWPInGameData_Weather's vtable D_00484058, the slot the class's blend
+ * Does nothing: slot 67 of tWPInGameData_Weather's vtable tWPInGameData_Weather_vtbl, the slot the class's blend
  * (tWPInGameData_Weather_blend) calls before and after blending.
  */
 extern "C" void tWPInGameData_Weather_debugBlend(void) {
@@ -4916,7 +4916,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MusicTrigger_isEqual);
  * Returns whether m_Type and m_Value (ints) equal the region data's two values (at +4 and +8); the m_last copies are
  * not compared.
  *
- * Slot 68 of tWPInGameData_MusicTrigger's vtable D_00485AF8; the world-painter query calls it with the region's data.
+ * Slot 68 of tWPInGameData_MusicTrigger's vtable tWPInGameData_MusicTrigger_vtbl; the world-painter query calls it with the region's data.
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_MusicTrigger (its values start at +4, after tWPData's own word)
@@ -4936,7 +4936,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_isEqual);
 /**
  * Returns whether m_MixPreset equals the region data's preset (at +4); the m_last copies are not compared.
  *
- * Slot 68 of tWPInGameData_Mix's vtable D_004858C0; the world-painter query calls it with the region's data.
+ * Slot 68 of tWPInGameData_Mix's vtable tWPInGameData_Mix_vtbl; the world-painter query calls it with the region's data.
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_Mix (its values start at +4, after tWPData's own word)
@@ -4953,7 +4953,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_isEqual);
 /**
  * Returns whether m_BankID equals the region data's bank id (at +4); the m_last copies are not compared.
  *
- * Slot 68 of tWPInGameData_Ambience's vtable D_00485688; the world-painter query calls it with the region's data.
+ * Slot 68 of tWPInGameData_Ambience's vtable tWPInGameData_Ambience_vtbl; the world-painter query calls it with the region's data.
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_Ambience (its values start at +4, after tWPData's own word)
@@ -4970,7 +4970,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_isEqual);
 /**
  * Returns whether m_SpeechID equals the region data's speech id (at +4); the m_last copies are not compared.
  *
- * Slot 68 of tWPInGameData_Speech's vtable D_00485450; the world-painter query calls it with the region's data.
+ * Slot 68 of tWPInGameData_Speech's vtable tWPInGameData_Speech_vtbl; the world-painter query calls it with the region's data.
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_Speech (its values start at +4, after tWPData's own word)
@@ -4987,7 +4987,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_isEqual);
 /**
  * Returns whether m_DrawDistance equals the region data's draw distance (at +4); the m_last copies are not compared.
  *
- * Slot 68 of tWPInGameData_Camera's vtable D_00485218; the world-painter query calls it with the region's data.
+ * Slot 68 of tWPInGameData_Camera's vtable tWPInGameData_Camera_vtbl; the world-painter query calls it with the region's data.
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_Camera (its values start at +4, after tWPData's own word)
@@ -5011,7 +5011,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Fog_isEqual);
  * Returns whether m_FogDensity, m_FogNear, m_FogFar and m_FogColourR/G/B all equal the region data's six floats (from
  * +4); the m_last copies are not compared.
  *
- * Slot 68 of tWPInGameData_Fog's vtable D_00484FE0; the world-painter query calls it with the region's data.
+ * Slot 68 of tWPInGameData_Fog's vtable tWPInGameData_Fog_vtbl; the world-painter query calls it with the region's data.
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_Fog (its values start at +4, after tWPData's own word)
@@ -5035,7 +5035,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_isEqual);
  * Returns whether the seven current light-glow values (m_LightGlowCutoff .. m_LightGlowBlend3) all equal the region
  * data's (from +4); the m_last copies are not compared.
  *
- * Slot 68 of tWPInGameData_LightGlow's vtable D_00484DA8; the world-painter query calls it with the region's data.
+ * Slot 68 of tWPInGameData_LightGlow's vtable tWPInGameData_LightGlow_vtbl; the world-painter query calls it with the region's data.
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_LightGlow (its values start at +4, after tWPData's own word)
@@ -5060,7 +5060,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTint_isEqual);
  * Returns whether m_ScreenTintScaleR/G/B and m_ScreenTintOffsetR/G/B all equal the region data's six floats (from +4);
  * the m_last copies are not compared.
  *
- * Slot 68 of tWPInGameData_ScreenTint's vtable D_00484B70; the world-painter query calls it with the region's data.
+ * Slot 68 of tWPInGameData_ScreenTint's vtable tWPInGameData_ScreenTint_vtbl; the world-painter query calls it with the region's data.
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_ScreenTint (its values start at +4, after tWPData's own word)
@@ -5083,7 +5083,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBox_isEqual);
 /**
  * Returns whether m_SkyBoxRotation equals the region data's rotation (at +4); the m_last copies are not compared.
  *
- * Slot 68 of tWPInGameData_SkyBox's vtable D_00484938; the world-painter query calls it with the region's data.
+ * Slot 68 of tWPInGameData_SkyBox's vtable tWPInGameData_SkyBox_vtbl; the world-painter query calls it with the region's data.
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_SkyBox (its values start at +4, after tWPData's own word)
@@ -5107,7 +5107,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Sun_isEqual);
  * Returns whether the nine current sun values (m_SunPitchOffset .. m_SunRadius; m_SunType compared as an int) all equal
  * the region data's (from +4); the m_last copies are not compared.
  *
- * Slot 68 of tWPInGameData_Sun's vtable D_00484700; the world-painter query calls it with the region's data.
+ * Slot 68 of tWPInGameData_Sun's vtable tWPInGameData_Sun_vtbl; the world-painter query calls it with the region's data.
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_Sun (its values start at +4, after tWPData's own word)
@@ -5134,7 +5134,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_isEqual);
  * Returns whether m_SnowSparkleDensity equals the region data's sparkle density (at +4); the m_last copies are not
  * compared.
  *
- * Slot 68 of tWPInGameData_Surface's vtable D_004844C8; the world-painter query calls it with the region's data.
+ * Slot 68 of tWPInGameData_Surface's vtable tWPInGameData_Surface_vtbl; the world-painter query calls it with the region's data.
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_Surface (its values start at +4, after tWPData's own word)
@@ -5161,7 +5161,7 @@ extern "C" int func_002BB100_DE30(char *, char *) __asm__("func_002BB100");
  * against the region data's names at +4, +0xC, +0x14 and +0x1C) and m_AmbientLightIntensityOffset and
  * m_RimLightIntensityOffset (against +0x24 and +0x28) all match; the m_last copies are not compared.
  *
- * Slot 68 of tWPInGameData_Lighting's vtable D_00484290; the world-painter query calls it with the region's data.
+ * Slot 68 of tWPInGameData_Lighting's vtable tWPInGameData_Lighting_vtbl; the world-painter query calls it with the region's data.
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_Lighting (its values start at +4, after tWPData's own word)
@@ -5185,7 +5185,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Weather_isEqual);
  * Returns whether all nineteen current weather values (m_SnowIntensity .. m_SnowFluffColourB) equal the region data's
  * (from +4); the m_last copies are not compared.
  *
- * Slot 68 of tWPInGameData_Weather's vtable D_00484058; the world-painter query calls it with the region's data.
+ * Slot 68 of tWPInGameData_Weather's vtable tWPInGameData_Weather_vtbl; the world-painter query calls it with the region's data.
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_Weather (its values start at +4, after tWPData's own word)
@@ -5261,7 +5261,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Danger_isEqual);
  * Returns whether m_Level (an int) and m_PointRate equal the region data's (at +4 and +8); the m_last copies are not
  * compared.
  *
- * Slot 68 of tWPInGameData_Danger's vtable D_00483E20; the world-painter query calls it with the region's data.
+ * Slot 68 of tWPInGameData_Danger's vtable tWPInGameData_Danger_vtbl; the world-painter query calls it with the region's data.
  *
  * @param lhs  the in-game data
  * @param rhs  the region's tWPData_Danger (its values start at +4, after tWPData's own word)
@@ -5285,7 +5285,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MusicTrigger_setDefaults);
  * Resets the current values to the constructor's defaults: m_Type and m_Value to -1; the m_last copies are left alone.
  *
  * Also sets m_wpTravelDistance to 0 (the constructor and cWorldPainterQuery_reset use -99999.0f). Slot 69 of
- * tWPInGameData_MusicTrigger's vtable D_00485AF8.
+ * tWPInGameData_MusicTrigger's vtable tWPInGameData_MusicTrigger_vtbl.
  *
  * @param musicTrigger  the in-game data
  */
@@ -5303,7 +5303,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_setDefaults);
  * Resets the current values to the constructor's defaults: m_MixPreset to -1; the m_last copies are left alone.
  *
  * Also sets m_wpTravelDistance to 0 (the constructor and cWorldPainterQuery_reset use -99999.0f). Slot 69 of
- * tWPInGameData_Mix's vtable D_004858C0.
+ * tWPInGameData_Mix's vtable tWPInGameData_Mix_vtbl.
  *
  * @param mix  the in-game data
  */
@@ -5320,7 +5320,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_setDefaults);
  * Resets the current values to the constructor's defaults: m_BankID to -1; the m_last copies are left alone.
  *
  * Also sets m_wpTravelDistance to 0 (the constructor and cWorldPainterQuery_reset use -99999.0f). Slot 69 of
- * tWPInGameData_Ambience's vtable D_00485688.
+ * tWPInGameData_Ambience's vtable tWPInGameData_Ambience_vtbl.
  *
  * @param ambience  the in-game data
  */
@@ -5337,7 +5337,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_setDefaults);
  * Resets the current values to the constructor's defaults: m_SpeechID to -1; the m_last copies are left alone.
  *
  * Also sets m_wpTravelDistance to 0 (the constructor and cWorldPainterQuery_reset use -99999.0f). Slot 69 of
- * tWPInGameData_Speech's vtable D_00485450.
+ * tWPInGameData_Speech's vtable tWPInGameData_Speech_vtbl.
  *
  * @param speech  the in-game data
  */
@@ -5355,7 +5355,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_setDefaults);
  * alone.
  *
  * Also sets m_wpTravelDistance to 0 (the constructor and cWorldPainterQuery_reset use -99999.0f). Slot 69 of
- * tWPInGameData_Camera's vtable D_00485218.
+ * tWPInGameData_Camera's vtable tWPInGameData_Camera_vtbl.
  *
  * @param camera  the in-game data
  */
@@ -5373,7 +5373,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Fog_setDefaults);
  * the fog colour to (0.43, 0.55, 0.71); the m_last copies are left alone.
  *
  * Also sets m_wpTravelDistance to 0 (the constructor and cWorldPainterQuery_reset use -99999.0f). Slot 69 of
- * tWPInGameData_Fog's vtable D_00484FE0.
+ * tWPInGameData_Fog's vtable tWPInGameData_Fog_vtbl.
  *
  * @param fog  the in-game data
  */
@@ -5397,7 +5397,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_setDefaults);
  * m_LightGlowBlend3 to 0; the m_last copies are left alone.
  *
  * Also sets m_wpTravelDistance to 0 (the constructor and cWorldPainterQuery_reset use -99999.0f). Slot 69 of
- * tWPInGameData_LightGlow's vtable D_00484DA8.
+ * tWPInGameData_LightGlow's vtable tWPInGameData_LightGlow_vtbl.
  *
  * @param lightGlow  the in-game data
  */
@@ -5421,7 +5421,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTint_setDefaults);
  * B) to 0; the m_last copies are left alone.
  *
  * Also sets m_wpTravelDistance to 0 (the constructor and cWorldPainterQuery_reset use -99999.0f). Slot 69 of
- * tWPInGameData_ScreenTint's vtable D_00484B70.
+ * tWPInGameData_ScreenTint's vtable tWPInGameData_ScreenTint_vtbl.
  *
  * @param screenTint  the in-game data
  */
@@ -5443,7 +5443,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBox_setDefaults);
  * Resets the current values to the constructor's defaults: m_SkyBoxRotation to 0; the m_last copies are left alone.
  *
  * Also sets m_wpTravelDistance to 0 (the constructor and cWorldPainterQuery_reset use -99999.0f). Slot 69 of
- * tWPInGameData_SkyBox's vtable D_00484938.
+ * tWPInGameData_SkyBox's vtable tWPInGameData_SkyBox_vtbl.
  *
  * @param skyBox  the in-game data
  */
@@ -5461,7 +5461,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Sun_setDefaults);
  * G, B), m_SunIntensity, m_LensIntensity and m_SunRadius to 1.0f, and m_SunType to 0; the m_last copies are left alone.
  *
  * Also sets m_wpTravelDistance to 0 (the constructor and cWorldPainterQuery_reset use -99999.0f). Slot 69 of
- * tWPInGameData_Sun's vtable D_00484700.
+ * tWPInGameData_Sun's vtable tWPInGameData_Sun_vtbl.
  *
  * @param sun  the in-game data
  */
@@ -5487,7 +5487,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_setDefaults);
  * alone.
  *
  * Also sets m_wpTravelDistance to 0 (the constructor and cWorldPainterQuery_reset use -99999.0f). Slot 69 of
- * tWPInGameData_Surface's vtable D_004844C8.
+ * tWPInGameData_Surface's vtable tWPInGameData_Surface_vtbl.
  *
  * @param surface  the in-game data
  */
@@ -5500,7 +5500,7 @@ extern "C" void tWPInGameData_Surface_setDefaults(tWPInGameData_Surface* surface
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Lighting_setDefaults);
 #ifdef SKIP_ASM
-extern tWPNameField D_004A53D0;
+extern tWPNameField kNullNameField;
 struct sPairSet_002BE1F8
 {
     int flags;              // 0x00
@@ -5519,20 +5519,20 @@ struct sPairSet_002BE1F8
 };
 
 /**
- * Resets the current values to the constructor's defaults: the four irradiance names to the null name D_004A53D0,
+ * Resets the current values to the constructor's defaults: the four irradiance names to the null name kNullNameField,
  * m_AmbientLightIntensityOffset to 1.0f and m_RimLightIntensityOffset to 0.75f; the m_last copies are left alone.
  *
  * Also sets m_wpTravelDistance to 0 (the constructor and cWorldPainterQuery_reset use -99999.0f). Slot 69 of
- * tWPInGameData_Lighting's vtable D_00484290.
+ * tWPInGameData_Lighting's vtable tWPInGameData_Lighting_vtbl.
  *
  * @param lighting  the in-game data
  */
 extern "C" void tWPInGameData_Lighting_setDefaults(tWPInGameData_Lighting* lighting)
 {
-    (*(&lighting->m_LightIrradianceName)) = D_004A53D0;
-    (*(&lighting->m_ShadowIrradianceName)) = D_004A53D0;
-    (*(&lighting->m_TunnelIrradianceName)) = D_004A53D0;
-    (*(&lighting->m_ObjectIrradianceName)) = D_004A53D0;
+    (*(&lighting->m_LightIrradianceName)) = kNullNameField;
+    (*(&lighting->m_ShadowIrradianceName)) = kNullNameField;
+    (*(&lighting->m_TunnelIrradianceName)) = kNullNameField;
+    (*(&lighting->m_ObjectIrradianceName)) = kNullNameField;
     lighting->m_AmbientLightIntensityOffset = 1.0f;
     lighting->m_RimLightIntensityOffset = 0.75f;
     *(int*)&lighting->m_wpTravelDistance = 0;
@@ -5548,7 +5548,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Weather_setDefaults);
  * weather values 0; the m_last copies are left alone.
  *
  * Also sets m_wpTravelDistance to 0 (the constructor and cWorldPainterQuery_reset use -99999.0f). Slot 69 of
- * tWPInGameData_Weather's vtable D_00484058.
+ * tWPInGameData_Weather's vtable tWPInGameData_Weather_vtbl.
  *
  * @param weather  the in-game data
  */
@@ -5584,7 +5584,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Danger_setDefaults);
  * alone.
  *
  * Also sets m_wpTravelDistance to 0 (the constructor and cWorldPainterQuery_reset use -99999.0f). Slot 69 of
- * tWPInGameData_Danger's vtable D_00483E20.
+ * tWPInGameData_Danger's vtable tWPInGameData_Danger_vtbl.
  *
  * @param danger  the in-game data
  */
@@ -5627,7 +5627,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_readFromReplayFrame);
  * Reads m_MixPreset and then m_wpTravelDistance (4 bytes each) back from a replay frame through the frame's virtual
  * read (slot 2 of its vtable, cReplayFramePtr_read for a cReplayFramePtr).
  *
- * Slot 65 of tWPInGameData_Mix's vtable D_004858C0; the order matches the class's writeToReplayFrame (tWPInGameData_Mix_writeToReplayFrame).
+ * Slot 65 of tWPInGameData_Mix's vtable tWPInGameData_Mix_vtbl; the order matches the class's writeToReplayFrame (tWPInGameData_Mix_writeToReplayFrame).
  *
  * @param mix  the in-game data (passed as an address)
  * @param frame  the replay frame (a cReplayFramePtr)
@@ -5650,7 +5650,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_readFromReplayFrame);
  * Reads m_BankID and then m_wpTravelDistance (4 bytes each) back from a replay frame through the frame's virtual read
  * (slot 2 of its vtable, cReplayFramePtr_read for a cReplayFramePtr).
  *
- * Slot 65 of tWPInGameData_Ambience's vtable D_00485688; the order matches the class's writeToReplayFrame
+ * Slot 65 of tWPInGameData_Ambience's vtable tWPInGameData_Ambience_vtbl; the order matches the class's writeToReplayFrame
  * (tWPInGameData_Ambience_writeToReplayFrame).
  *
  * @param ambience  the in-game data (passed as an address)
@@ -5674,7 +5674,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_readFromReplayFrame);
  * Reads m_SpeechID and then m_wpTravelDistance (4 bytes each) back from a replay frame through the frame's virtual read
  * (slot 2 of its vtable, cReplayFramePtr_read for a cReplayFramePtr).
  *
- * Slot 65 of tWPInGameData_Speech's vtable D_00485450; the order matches the class's writeToReplayFrame
+ * Slot 65 of tWPInGameData_Speech's vtable tWPInGameData_Speech_vtbl; the order matches the class's writeToReplayFrame
  * (tWPInGameData_Speech_writeToReplayFrame).
  *
  * @param speech  the in-game data (passed as an address)
@@ -5698,7 +5698,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_readFromReplayFrame);
  * Reads m_DrawDistance and then m_wpTravelDistance (4 bytes each) back from a replay frame through the frame's virtual
  * read (slot 2 of its vtable, cReplayFramePtr_read for a cReplayFramePtr).
  *
- * Slot 65 of tWPInGameData_Camera's vtable D_00485218; the order matches the class's writeToReplayFrame
+ * Slot 65 of tWPInGameData_Camera's vtable tWPInGameData_Camera_vtbl; the order matches the class's writeToReplayFrame
  * (tWPInGameData_Camera_writeToReplayFrame).
  *
  * @param camera  the in-game data (passed as an address)
@@ -5829,7 +5829,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBox_readFromReplayFrame);
  * Reads m_SkyBoxRotation and then m_wpTravelDistance (4 bytes each) back from a replay frame through the frame's
  * virtual read (slot 2 of its vtable, cReplayFramePtr_read for a cReplayFramePtr).
  *
- * Slot 65 of tWPInGameData_SkyBox's vtable D_00484938; the order matches the class's writeToReplayFrame
+ * Slot 65 of tWPInGameData_SkyBox's vtable tWPInGameData_SkyBox_vtbl; the order matches the class's writeToReplayFrame
  * (tWPInGameData_SkyBox_writeToReplayFrame).
  *
  * @param skyBox  the in-game data (passed as an address)
@@ -5894,7 +5894,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_readFromReplayFrame);
  * Reads m_SnowSparkleDensity and then m_wpTravelDistance (4 bytes each) back from a replay frame through the frame's
  * virtual read (slot 2 of its vtable, cReplayFramePtr_read for a cReplayFramePtr).
  *
- * Slot 65 of tWPInGameData_Surface's vtable D_004844C8; the order matches the class's writeToReplayFrame
+ * Slot 65 of tWPInGameData_Surface's vtable tWPInGameData_Surface_vtbl; the order matches the class's writeToReplayFrame
  * (tWPInGameData_Surface_writeToReplayFrame).
  *
  * @param surface  the in-game data (passed as an address)
@@ -6063,7 +6063,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_writeToReplayFrame);
  * Writes m_MixPreset and then m_wpTravelDistance (4 bytes each) to a replay frame through the frame's virtual write
  * (slot 1 of its vtable, cReplayFramePtr_write for a cReplayFramePtr).
  *
- * Slot 64 of tWPInGameData_Mix's vtable D_004858C0; tWPInGameData_Mix_readFromReplayFrame reads them back in the same order.
+ * Slot 64 of tWPInGameData_Mix's vtable tWPInGameData_Mix_vtbl; tWPInGameData_Mix_readFromReplayFrame reads them back in the same order.
  *
  * @param mix  the in-game data (passed as an address)
  * @param frame  the replay frame (a cReplayFramePtr)
@@ -6086,7 +6086,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_writeToReplayFrame);
  * Writes m_BankID and then m_wpTravelDistance (4 bytes each) to a replay frame through the frame's virtual write (slot
  * 1 of its vtable, cReplayFramePtr_write for a cReplayFramePtr).
  *
- * Slot 64 of tWPInGameData_Ambience's vtable D_00485688; tWPInGameData_Ambience_readFromReplayFrame reads them back in the same order.
+ * Slot 64 of tWPInGameData_Ambience's vtable tWPInGameData_Ambience_vtbl; tWPInGameData_Ambience_readFromReplayFrame reads them back in the same order.
  *
  * @param ambience  the in-game data (passed as an address)
  * @param frame  the replay frame (a cReplayFramePtr)
@@ -6109,7 +6109,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_writeToReplayFrame);
  * Writes m_SpeechID and then m_wpTravelDistance (4 bytes each) to a replay frame through the frame's virtual write
  * (slot 1 of its vtable, cReplayFramePtr_write for a cReplayFramePtr).
  *
- * Slot 64 of tWPInGameData_Speech's vtable D_00485450; tWPInGameData_Speech_readFromReplayFrame reads them back in the same order.
+ * Slot 64 of tWPInGameData_Speech's vtable tWPInGameData_Speech_vtbl; tWPInGameData_Speech_readFromReplayFrame reads them back in the same order.
  *
  * @param speech  the in-game data (passed as an address)
  * @param frame  the replay frame (a cReplayFramePtr)
@@ -6132,7 +6132,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_writeToReplayFrame);
  * Writes m_DrawDistance and then m_wpTravelDistance (4 bytes each) to a replay frame through the frame's virtual write
  * (slot 1 of its vtable, cReplayFramePtr_write for a cReplayFramePtr).
  *
- * Slot 64 of tWPInGameData_Camera's vtable D_00485218; tWPInGameData_Camera_readFromReplayFrame reads them back in the same order.
+ * Slot 64 of tWPInGameData_Camera's vtable tWPInGameData_Camera_vtbl; tWPInGameData_Camera_readFromReplayFrame reads them back in the same order.
  *
  * @param camera  the in-game data (passed as an address)
  * @param frame  the replay frame (a cReplayFramePtr)
@@ -6262,7 +6262,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBox_writeToReplayFrame);
  * Writes m_SkyBoxRotation and then m_wpTravelDistance (4 bytes each) to a replay frame through the frame's virtual
  * write (slot 1 of its vtable, cReplayFramePtr_write for a cReplayFramePtr).
  *
- * Slot 64 of tWPInGameData_SkyBox's vtable D_00484938; tWPInGameData_SkyBox_readFromReplayFrame reads them back in the same order.
+ * Slot 64 of tWPInGameData_SkyBox's vtable tWPInGameData_SkyBox_vtbl; tWPInGameData_SkyBox_readFromReplayFrame reads them back in the same order.
  *
  * @param skyBox  the in-game data (passed as an address)
  * @param frame  the replay frame (a cReplayFramePtr)
@@ -6326,7 +6326,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_writeToReplayFrame);
  * Writes m_SnowSparkleDensity and then m_wpTravelDistance (4 bytes each) to a replay frame through the frame's virtual
  * write (slot 1 of its vtable, cReplayFramePtr_write for a cReplayFramePtr).
  *
- * Slot 64 of tWPInGameData_Surface's vtable D_004844C8; tWPInGameData_Surface_readFromReplayFrame reads them back in the same order.
+ * Slot 64 of tWPInGameData_Surface's vtable tWPInGameData_Surface_vtbl; tWPInGameData_Surface_readFromReplayFrame reads them back in the same order.
  *
  * @param surface  the in-game data (passed as an address)
  * @param frame  the replay frame (a cReplayFramePtr)

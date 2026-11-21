@@ -4908,7 +4908,7 @@ extern sV4_3400D8 D_004FF600_v __asm__("D_004FF600");
 extern sV4_3400D8 D_004FF610_v __asm__("D_004FF610");
 extern sV4_3400D8 D_004FF620_v __asm__("D_004FF620");
 extern sV4_3400D8 D_004FF630_v __asm__("D_004FF630");
-// D_004FF640: the eight corners (+-1, +-1, +-1, 0), written as one 32-float block.
+// gSphTreeAlignAxis: the eight corners (+-1, +-1, +-1, 0), written as one 32-float block.
 struct sCorners_3400D8 {
     float v[32];
     void init()
@@ -4947,10 +4947,10 @@ struct sCorners_3400D8 {
         v[31] = 0.0f;
     }
 };
-extern sCorners_3400D8 D_004FF640_c __asm__("D_004FF640");
+extern sCorners_3400D8 D_004FF640_c __asm__("gSphTreeAlignAxis");
 
 
-// Static initialisation of the unit's vector globals D_004FF2C0..D_004FF630 and the corner table D_004FF640
+// Static initialisation of the unit's vector globals D_004FF2C0..D_004FF630 and the corner table gSphTreeAlignAxis
 // (g++ __static_initialization_and_destruction_0).
 // The unit declares func_003400D8 returning void*; bind this definition by asm label.
 extern "C" void func_003400D8_init(int initialize, int priority) __asm__("func_003400D8");
@@ -4959,7 +4959,7 @@ extern "C" void func_003400D8_init(int initialize, int priority) __asm__("func_0
  *
  * Runs only for @p initialize non-zero and @p priority 0xFFFF (func_00341368 passes 1, 0xFFFF). The colours
  * (D_004FF2C0..D_004FF630, four floats each) are the table also built in pathsys, memstd and all_in_one_scripter;
- * D_004FF640 gets the corners (+-1, +-1, +-1, 0) in x-major order, the default axes riderspheretree's sphere-tree code
+ * gSphTreeAlignAxis gets the corners (+-1, +-1, +-1, 0) in x-major order, the default axes riderspheretree's sphere-tree code
  * copies (g++ __static_initialization_and_destruction_0).
  *
  * @param initialize  non-zero to construct

@@ -7,7 +7,7 @@
 // load step (load / isLoadDone), the VU0 state kept across a pause, and halting (halt / signalHalt / waitHalt).
 // main() (unit bx/ps2main) builds the one instance:
 // cExecutionMan_cExecutionMan__FP13cExecutionMan(cMemMan_alloc(0x142C0,
-// "PS2ExecutionMan", 0, 0)), stores the PS2 vtable D_0048DB68 at +0x8 and passes it to cAppMan_run;
+// "PS2ExecutionMan", 0, 0)), stores the PS2 vtable cPS2ExecutionMan_vtbl at +0x8 and passes it to cAppMan_run;
 // cAppMan::ExecutionMan
 // (bx/appman.h, 0x008) keeps it and getTheExecutionMan__Fv returns it.
 //
@@ -23,7 +23,7 @@
 // members are named from retail use only ([U]: the EE kernel call each value goes to or comes from); no [P] accessor
 // exists (the preview's getCurrentThreadId__16cPS2ExecutionMan only calls GetThreadId). Bools are words.
 //
-// PS2 vtable D_0048DB68 (14 slots, the cExecutionMan_vtbl order): 1 cPS2ExecutionMan__cPS2ExecutionMan, 2 init, 3
+// PS2 vtable cPS2ExecutionMan_vtbl (14 slots, the cExecutionMan_vtbl order): 1 cPS2ExecutionMan__cPS2ExecutionMan, 2 init, 3
 // purge,
 // 4 wait, 5 sync, 6 func_00320B08__FPv (getCurrentThreadId: GetThreadId), 7 setTimerHz__FPv, 8 getTimerHz__FPv (60),
 // 9 load, 10 isLoadDone, 11 prepause, 12 postpause, 13 halt, 14 signalHalt. Not in it: cPS2ExecutionMan_waitHalt__FPv.
@@ -38,7 +38,7 @@ struct cExecutionMan {
     void (*HaltCallback)(void*);    // 0x0 [O]; [R] the ctor zeroes it; [U] cExecutionMan_halt stores its callback,
                                     //     cExecutionMan_checkHalt calls it with HaltData
     void* HaltData;                 // 0x4 [O]; [R] ctor 0; [U] cExecutionMan_halt stores it, checkHalt passes it
-    void** mVtbl;                   // 0x8 [R] the ctor and dtor store cExecutionMan_vtbl; main() stores D_0048DB68
+    void** mVtbl;                   // 0x8 [R] the ctor and dtor store cExecutionMan_vtbl; main() stores cPS2ExecutionMan_vtbl
 };
 
 CHECK_OFFSET(cExecutionMan, HaltCallback, 0x0);
@@ -50,7 +50,7 @@ struct cPS2ExecutionMan {
     // --- cExecutionMan
     void (*HaltCallback)(void*);    // 0x00000 [O] cExecutionMan; see above
     void* HaltData;                 // 0x00004 [O] cExecutionMan
-    void** mVtbl;                   // 0x00008 [R] main() stores D_0048DB68, the dtor cPS2ExecutionMan__cPS2ExecutionMan
+    void** mVtbl;                   // 0x00008 [R] main() stores cPS2ExecutionMan_vtbl, the dtor cPS2ExecutionMan__cPS2ExecutionMan
                                     //         cExecutionMan_vtbl; [U] wait / halt call slots 11 / 12 / 5 through it
     // --- cPS2ExecutionMan
     int mHaltSema;                  // 0x0000C [U] init: CreateSema; waitHalt__FPv WaitSema, signalHalt SignalSema,

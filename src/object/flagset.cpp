@@ -193,7 +193,7 @@ extern "C" void cFlagSet_PurgeMesh(cFlagSet* self)
 //100%
 INCLUDE_ASM("object/flagset", cFlagSet_update);
 #ifdef SKIP_ASM
-extern int D_004A4240;
+extern int cFlags_m_EnableUpdate;
 extern "C" void* cObjectInterface_getFlagManager();
 extern "C" int cObjectInterface_getAITick();
 extern "C" void cFlagSet_updateGrid(cFlagSet* self, t3Vector* verts);
@@ -218,7 +218,7 @@ struct sFlagMesh_B818 {
 /**
  * Updates a flag set: advances its wave clocks, regenerates the cloth every other frame and scrolls its texture.
  *
- * Returns when flag updates are off (D_004A4240), the set is empty (+0x5C) or has no grid mesh (+0x60). The wind blend
+ * Returns when flag updates are off (cFlags_m_EnableUpdate), the set is empty (+0x5C) or has no grid mesh (+0x60). The wind blend
  * is mMinWindFactor (+0x4C) + the flag manager's wind factor (cObjectInterface_getFlagManager() +0x10) * (1 - mMinWindFactor); each of
  * the 4 clocks mFlagTime (+0x78) advances by mSpeed[i] (+0x4) times that and wraps at 1. On frames whose parity
  * (cObjectInterface_getAITick() % 2) equals mFrameToUpdateGrid (+0x90) it builds up to 50 vertices with cFlagSet_updateGrid and hands them
@@ -230,7 +230,7 @@ struct sFlagMesh_B818 {
 extern "C" void cFlagSet_update(cFlagSet* elem)
 {
     cFlagSet* self = elem;
-    if (D_004A4240 == 0) {
+    if (cFlags_m_EnableUpdate == 0) {
         return;
     }
     if (self->mCurrentNumInstances == 0) {
@@ -273,7 +273,7 @@ extern "C" void cFlagSet_update(cFlagSet* elem)
 INCLUDE_ASM("object/flagset", cFlagSet_render);
 #ifdef SKIP_ASM
 extern char* cGraphicsMan_TheGraphicsMan;
-extern int D_004A4244;
+extern int cFlags_m_EnableRender;
 // PORT: 128-bit integer mode for VU0 asm memory operands
 typedef int cQuad128_34B9B0 __attribute__((mode(TI)));
 extern char t4mat_Identity[];
@@ -358,7 +358,7 @@ struct sFSE_34B9B0 {
 /**
  * Draws every instance of a flag set with its cloth mesh and scrolled texture.
  *
- * Returns when flag rendering is off (D_004A4244). Pushes a copy of the default draw state; with mOverSaturate (+0x3)
+ * Returns when flag rendering is off (cFlags_m_EnableRender). Pushes a copy of the default draw state; with mOverSaturate (+0x3)
  * set it forces the alpha field to 0xFF and blend mode 11, otherwise blend mode 5. For each instance in mInstances
  * (+0x94, count +0x5C) whose world-cache page is loaded and whose bounding box (+0x60..+0x74) survives the cull
  * (graphics-manager slot 93 against slot 43's view), it builds an identity texture matrix translated by mScrollU/V
@@ -369,7 +369,7 @@ struct sFSE_34B9B0 {
  */
 extern "C" void cFlagSet_render(cFlagSet* flagSet)
 {
-    if (D_004A4244 == 0) {
+    if (cFlags_m_EnableRender == 0) {
         return;
     }
     char* ctx = cGraphicsMan_TheGraphicsMan;

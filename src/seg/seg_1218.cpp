@@ -4531,7 +4531,7 @@ struct sGame_5D98 {
     sMatList_5D98* matList; // 0x84
 };
 extern sGame_5D98* D_004A28A8_5D98 __asm__("SSXApp");
-extern float D_004A4C84;
+extern float kHighSpeedCollideThresh;
 
 struct sInfo_5D98 {
     t4Vector pos;       // 0x00
@@ -4699,11 +4699,11 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
                 if (minSpeed < info->vn) {
                     if (frontDot < 0.0f) {
                         float len = Len_5D98(self->mVelocity);
-                        if (h < 60.0f && len > D_004A4C84) {
+                        if (h < 60.0f && len > kHighSpeedCollideThresh) {
                             anim = 342;
                         } else {
                             unsigned int k;
-                            if (len > D_004A4C84)
+                            if (len > kHighSpeedCollideThresh)
                                 k = (unsigned int)AIrand() % 6;
                             else
                                 k = (unsigned int)AIrand() % 3;
@@ -4741,11 +4741,11 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
                 if (info->vn > k * 1388.880859375f) {
                     if (frontDot < 0.0f) {
                         float len = Len_5D98(self->mVelocity);
-                        if (h < 60.0f && len > D_004A4C84) {
+                        if (h < 60.0f && len > kHighSpeedCollideThresh) {
                             anim = 332;
                         } else {
                             unsigned int n;
-                            if (len > D_004A4C84)
+                            if (len > kHighSpeedCollideThresh)
                                 n = (unsigned int)AIrand() % 6;
                             else
                                 n = (unsigned int)AIrand() % 3;
@@ -6201,7 +6201,7 @@ extern "C" void cRider_flagEventPunchKnockdown(void*, void*);
 extern "C" void cRider_flagEventBumpKnockdown(void*, void*);
 extern "C" void cRider_flagEventPunch(void*, void*);
 extern "C" void cRider_flagEventBump(void*, void*);
-extern float D_004A4C84_7E70 __asm__("D_004A4C84");
+extern float D_004A4C84_7E70 __asm__("kHighSpeedCollideThresh");
 extern int D_005308D0_7E70[] __asm__("D_005308D0");
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).

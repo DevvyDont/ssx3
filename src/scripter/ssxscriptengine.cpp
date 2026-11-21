@@ -3383,7 +3383,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_BuildCharacterBitRoleAr
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int cRider_getIdentity(void* self);
-extern int D_00481BB0[];
+extern int kCharacterMappingTable[];
 
 struct sRiderObj_BDB8 {
     char pad_0x0[0x18];
@@ -3409,7 +3409,7 @@ extern "C" void cSSXScriptEngine_BuildCharacterBitRoleArray_def(void* self, int*
 /**
  * Fills @p flags[0..20] with the character bit of the rider in each script role slot, 0 for an empty slot.
  *
- * Riders come from the game's AI rider set (SSXApp->Game->AI); a rider's bit is D_00481BB0[cRider_getIdentity(rider)].
+ * Riders come from the game's AI rider set (SSXApp->Game->AI); a rider's bit is kCharacterMappingTable[cRider_getIdentity(rider)].
  * Slots 0-2 take the riders at @p mainCharAIIndex, @p supportChar0AIIndex and @p supportChar1AIIndex of the list at +0x28 (skipped when negative); slots 3-4 the first
  * two of the list at +0x40 (count +0x7C); 5-9 the list at +0x48 (count +0x80); 10-14 the list at +0x5C (count +0x84);
  * 15-20 the list at +0x28 in order (count +0x78). The last three lists hold objects whose rider is at +0x18.
@@ -3431,20 +3431,20 @@ extern "C" void cSSXScriptEngine_BuildCharacterBitRoleArray_def(void* self, int*
         switch (i) {
         case 0:
             if (mainCharAIIndex >= 0)
-                flags[i] = D_00481BB0[cRider_getIdentity(set->players[mainCharAIIndex])];
+                flags[i] = kCharacterMappingTable[cRider_getIdentity(set->players[mainCharAIIndex])];
             break;
         case 1:
             if (supportChar0AIIndex >= 0)
-                flags[i] = D_00481BB0[cRider_getIdentity(set->players[supportChar0AIIndex])];
+                flags[i] = kCharacterMappingTable[cRider_getIdentity(set->players[supportChar0AIIndex])];
             break;
         case 2:
             if (supportChar1AIIndex >= 0)
-                flags[i] = D_00481BB0[cRider_getIdentity(set->players[supportChar1AIIndex])];
+                flags[i] = kCharacterMappingTable[cRider_getIdentity(set->players[supportChar1AIIndex])];
             break;
         case 3:
         case 4:
             if (i - 3 < numA)
-                flags[i] = D_00481BB0[cRider_getIdentity(set->groupA[i - 3]->rider)];
+                flags[i] = kCharacterMappingTable[cRider_getIdentity(set->groupA[i - 3]->rider)];
             break;
         case 5:
         case 6:
@@ -3452,7 +3452,7 @@ extern "C" void cSSXScriptEngine_BuildCharacterBitRoleArray_def(void* self, int*
         case 8:
         case 9:
             if (i - 5 < numB)
-                flags[i] = D_00481BB0[cRider_getIdentity(set->groupB[i - 5]->rider)];
+                flags[i] = kCharacterMappingTable[cRider_getIdentity(set->groupB[i - 5]->rider)];
             break;
         case 10:
         case 11:
@@ -3460,7 +3460,7 @@ extern "C" void cSSXScriptEngine_BuildCharacterBitRoleArray_def(void* self, int*
         case 13:
         case 14:
             if (i - 10 < set->numC)
-                flags[i] = D_00481BB0[cRider_getIdentity(set->groupC[i - 10]->rider)];
+                flags[i] = kCharacterMappingTable[cRider_getIdentity(set->groupC[i - 10]->rider)];
             break;
         case 15:
         case 16:
@@ -3469,7 +3469,7 @@ extern "C" void cSSXScriptEngine_BuildCharacterBitRoleArray_def(void* self, int*
         case 19:
         case 20:
             if (i - 15 < set->numPlayers)
-                flags[i] = D_00481BB0[cRider_getIdentity(set->players[i - 15])];
+                flags[i] = kCharacterMappingTable[cRider_getIdentity(set->players[i - 15])];
             break;
         default:
             break;
@@ -5778,7 +5778,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjRider_IsMatchingEntity);
 extern "C" int cRider_isLoaded(void* self);
 extern "C" int cRider_getIdentity(void* self);
 extern "C" int cScriptObjRider_IsSuitableRole(cScriptObjRider* self, cRider* rider, int id, int a3);
-extern int D_00481BB0[];
+extern int kCharacterMappingTable[];
 
 class cScriptCtx0458 {
 public:
@@ -5795,7 +5795,7 @@ public:
  * Tests whether a script player entity can be played by this rider script object.
  *
  * Only entity type 5 matches. Gets the attached rider (virtual slot 6), which must be loaded (cRider_isLoaded), and its
- * identity bit from D_00481BB0[cRider_getIdentity(rider)]. The entity's actor header (GetSSXActorHeader) holds a role byte
+ * identity bit from kCharacterMappingTable[cRider_getIdentity(rider)]. The entity's actor header (GetSSXActorHeader) holds a role byte
  * and a short character mask at +2: a zero mask or one containing the rider's bit passes, and the final answer comes
  * from cScriptObjRider_IsSuitableRole(self, rider, role, the entity's +0x8 word) (On Tour IsSuitableRole(pRider, role, pPlayerMain)).
  *
@@ -5809,7 +5809,7 @@ extern "C" int cScriptObjRider_IsMatchingEntity(cScriptObjRider* self, cScriptPl
     void* rider = ((cScriptCtx0458*)self)->v06();
     if (cRider_isLoaded(rider) == 0) return 0;
     int team = cRider_getIdentity(rider);
-    int mask = D_00481BB0[team];
+    int mask = kCharacterMappingTable[team];
     // PORT: GetSSXActorHeader returns a record pointer as int
     char* info = (char*)GetSSXActorHeader(msg);
     short charMask = *(short*)(info + 2);

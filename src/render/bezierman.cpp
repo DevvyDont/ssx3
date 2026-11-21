@@ -617,10 +617,10 @@ struct sDefer2_B370 {
 };
 
 extern sGfx_B370* D_004A5B80_B370 __asm__("cGraphicsMan_TheGraphicsMan");
-extern float D_004A4344;
-extern float D_004A434C;
-extern float D_004A4350;
-extern float D_004A4354;
+extern float cDetailSystem_m_SpinScale;
+extern float cDetailSystem_m_PS2SparkleSize;
+extern float cDetailSystem_m_PS2MinSparkleSize;
+extern float cDetailSystem_m_PS2MaxSparkleSize;
 extern float D_004A4440;
 extern float t4vect_XAxis[4];
 extern float t4vect_YAxis[4];
@@ -711,9 +711,9 @@ static inline void Render_B370(sBezMan_B370* self)
     self->shine = shine;
     }
 
-    float ry = cam.y * D_004A4344;
-    float rx = cam.x * D_004A4344;
-    float rz = cam.z * D_004A4344;
+    float ry = cam.y * cDetailSystem_m_SpinScale;
+    float rx = cam.x * cDetailSystem_m_SpinScale;
+    float rz = cam.z * cDetailSystem_m_SpinScale;
     ry = Frac_B370(ry * 0.15915494f) * 6.2831855f;
     rx = Frac_B370(rx * 0.15915494f) * 6.2831855f;
     rz = Frac_B370(rz * 0.15915494f) * 6.2831855f;
@@ -735,9 +735,9 @@ static inline void Render_B370(sBezMan_B370* self)
     col.z = 128.0f;
     col.w = 128.0f;
     *(cQuad_B370*)((char*)self + 0x420) = *(cQuad_B370*)&col;
-    *(float*)((char*)self + 0x430) = D_004A434C;
-    *(float*)((char*)self + 0x434) = D_004A4350;
-    *(float*)((char*)self + 0x438) = D_004A4354;
+    *(float*)((char*)self + 0x430) = cDetailSystem_m_PS2SparkleSize;
+    *(float*)((char*)self + 0x434) = cDetailSystem_m_PS2MinSparkleSize;
+    *(float*)((char*)self + 0x438) = cDetailSystem_m_PS2MaxSparkleSize;
 
     gm->top[1] = gm->top[0];
     sRS_B370* st = gm->top;
@@ -859,7 +859,7 @@ static inline void Render_B370(sBezMan_B370* self)
 /**
  * Draws all queued Bezier patches: uploads the 4x4, 6x6, 8x8 and mixed patch lists and emits or defers each patch.
  *
- * Builds the shine matrix from the camera position (D_004A4440) and D_005049C0, and the effect rotation (D_004A4344)
+ * Builds the shine matrix from the camera position (D_004A4440) and D_005049C0, and the effect rotation (cDetailSystem_m_SpinScale)
  * about the X, Y and Z axes; sets colour 128 and pushes the draw state. The patch lists go to the VIF cache
  * (func_00374A88 / func_00374AE0, func_00374B38 for view 0); new patches are cached (func_003747A0) and emitted
  * (func_0038C788, func_0038CA70, func_0038CE20 for the mixed list). Deferred patches are flushed into DeferMan
@@ -1824,7 +1824,7 @@ static inline void CopyQuads_D690(char** pp, sQuad_D690* src, int n)
  * func_0038D968, which only passes LOD-2 entries); nothing is drawn when it is not positive. The count goes into the
  * word at +0x43C. The packet (opened and closed with func_0038F460 / func_0038F668 on D_004A4474) unpacks 22 V4-32
  * quadwords to VU address 0: the 16 control points at +0x40 of the record, the effect matrix at +0x3E0 and the two
- * quadwords at +0x420 that cPS2BezierMan_DrawPatches fills (colour 128 and D_004A434C..D_004A4354, then the count),
+ * quadwords at +0x420 that cPS2BezierMan_DrawPatches fills (colour 128 and cDetailSystem_m_PS2SparkleSize..cDetailSystem_m_PS2MaxSparkleSize, then the count),
  * then MSCALs the program at D_1460 and flushes. It is registered in the draw ring with flag 0 (fewer than 2600
  * records).
  *
@@ -1927,7 +1927,7 @@ struct sBezMan_D968 {
     int nMix;                       // 0x4D84
     sBezMixPatch_D968 mix[75];      // 0x4D88
 };
-extern int D_004A44E0;
+extern int cRenderToggles_m_DisableSparkles;
 extern sCtx_D968* D_004A5B80_D968 __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" void func_0037D968(sCtx_D968* ctx);
 extern "C" void* func_0038F708(void* obj, int a1, int a2);
@@ -1936,7 +1936,7 @@ extern "C" void func_0038D690(void* self, void* obj, void* patch, unsigned int* 
 /**
  * Runs the snow-sparkle pass (func_0038D690) over the 8x8 patches and the mixed patches with an LOD-8 edge.
  *
- * Returns at once when the debug switch D_004A44E0 is set. Otherwise pushes a copy of the draw state, binds
+ * Returns at once when the debug switch cRenderToggles_m_DisableSparkles is set. Otherwise pushes a copy of the draw state, binds
  * _EffectTexMap[m_SnowSparkleTextureId[6]] as its texture, sets the sparkle blend and state bits, refreshes the
  * matrices with func_0037D968 when mMatricesValid is 0, then copies each patch record to the scratchpad (func_0038F708)
  * and adds its pass; finally pops the draw state. Called at the end of cPS2BezierMan_DrawPatches.
@@ -1945,7 +1945,7 @@ extern "C" void func_0038D690(void* self, void* obj, void* patch, unsigned int* 
  */
 extern "C" void func_0038D968(sBezMan_D968* self, unsigned int* packetHandle)
 {
-    if (D_004A44E0 != 0) {
+    if (cRenderToggles_m_DisableSparkles != 0) {
         return;
     }
     sCtx_D968* ctx = D_004A5B80_D968;

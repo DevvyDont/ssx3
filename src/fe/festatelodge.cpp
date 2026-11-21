@@ -28,7 +28,7 @@ extern "C" void func_0028F140(void* self, int a1);
  * Opens the lodge screen ("28lodge"), reads the user's cheat character and disables lodge option 7.
  *
  * Keeps the screen at 0x40, stores the user's cheat character id (cBENewPlayerInterface_getPlayerCheatCharID; On Tour mCheatCharID) at
- * 0x48, clears entry 7 of the option-enabled table D_00441AF8 (written as D_00441B14[0]), switches the
+ * 0x48, clears entry 7 of the option-enabled table gLodgeOptionUnlocked (written as D_00441B14[0]), switches the
  * front-end sound-bank mode to 1, clears bToNextState (0x4C) and mbIsYesOrNo (0x54) and sets
  * mPathToSaveProfile (0x50) to 0x12.
  */
@@ -139,7 +139,7 @@ extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 struct cUIScreen;
 int cUIScreen_getFrameByLabel(cUIScreen* screen, int hash);
-extern int D_00441AF8[];
+extern int gLodgeOptionUnlocked[];
 extern char str_kT_CMNSaveProgress[];
 extern char str_cFEPopupConfirm_b[];
 extern char str_kT_OVRCMNQuitTitlePrompt[];
@@ -161,7 +161,7 @@ struct sVE_1F3A38p {
 /**
  * Acts on an accepted lodge option: asks to save or quit, opens the profile state, or moves on.
  *
- * Only event 5, and only for options enabled in D_00441AF8. Until bToNextState (0x4C) is set, option 0 and
+ * Only event 5, and only for options enabled in gLodgeOptionUnlocked. Until bToNextState (0x4C) is set, option 0 and
  * option 6 push a cFEPopupConfirm asking kT_CMNSaveProgress or kT_OVRCMNQuitTitlePrompt (path 0x10 or 6 at
  * 0x50). Option 8 sets the custom interface's +0xC to 0x27 and pushes a cFEStateProfileLoad (cFEStateProfileLoad_cFEStateProfileLoad,
  * mode 3); any other plays "TransitionOut" and pushes the custom interface's getNextState for the option. BE
@@ -178,7 +178,7 @@ extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, cUIThing* w, in
     if (event != 5) {
         return;
     }
-    if (D_00441AF8[w->mMiscData] == 0) {
+    if (gLodgeOptionUnlocked[w->mMiscData] == 0) {
         return;
     }
     cBE_getInterface_Fv(cBE_getBE(), 4);
@@ -627,7 +627,7 @@ extern "C" int cBERewardInterface_getNumOwnedCheatChars(void* self, int a1, int 
 int cBENewPlayerInterface_getPlayerCharID(void* self, int player);
 struct cUIScreen;
 int cUIScreen_getFrameByLabel(cUIScreen* screen, int hash);
-extern int D_00441AF8[];
+extern int gLodgeOptionUnlocked[];
 extern char str_cKeyboardPopup_b[];
 extern char str_cFEStateCheatCharSelect_b[];
 extern char str_TransitionOut_b[];
@@ -641,7 +641,7 @@ struct sVE_1F4400 {
 /**
  * Acts on the rider-details options: renames the rider, picks a cheat character, opens a screen, or leaves.
  *
- * Event 5 (accept), for options enabled in D_00441AF8 (read at 9-15, past its 7 entries): option 14
+ * Event 5 (accept), for options enabled in gLodgeOptionUnlocked (read at 9-15, past its 7 entries): option 14
  * ("Option_6") opens a "cKeyboardPopup" (cKeyboardPopup_cKeyboardPopup) limited to 8 characters, with some keys left out and
  * the player's name as its text; option 11 ("Option_3") opens a "cFEStateCheatCharSelect" popup
  * (cFEStateCheatCharSelect_cFEStateCheatCharSelect) when a cheat character is unlocked; any other plays "TransitionOut" and pushes
@@ -658,7 +658,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail*
     switch (event) {
     case 5: {
         int k = w->mMiscData;
-        if (D_00441AF8[k] == 0) {
+        if (gLodgeOptionUnlocked[k] == 0) {
             return;
         }
         if (k == 14) {

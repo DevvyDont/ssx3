@@ -480,7 +480,7 @@ extern "C" void cBENetworkInterface_restoreCharProfile(cBENetworkInterface* self
 INCLUDE_ASM("be/beintnetwork", cBECharacterInterface_getThis);
 #ifdef SKIP_ASM
 extern const char str_BECharInt[];
-extern void* D_0045AD38[16];
+extern void* cBECharacterInterface_vtbl[16];
 
 
 /**
@@ -495,7 +495,7 @@ extern "C" void* cBECharacterInterface_getThis(void)
     if (cBECharacterInterface_instance == 0) {
         cBECharacterInterface* mem = (cBECharacterInterface*)cMemMan_alloc(0x10, str_BECharInt, 0, 0);
         mem->bIsActive = 0;
-        mem->mVtbl = D_0045AD38;
+        mem->mVtbl = cBECharacterInterface_vtbl;
         cBECharacterInterface_instance = (cBECharacterInterface*)(mem);
     }
     return cBECharacterInterface_instance;

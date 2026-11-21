@@ -516,19 +516,19 @@ void* cFEStateRuleSelect__cFEStateRuleSelect(void* vself)
 INCLUDE_ASM("fe/fepopupmisc", func_001DF440);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern void* D_0046B078[];
+extern void* cBraggingRightsMenu_vtbl[];
 
 /**
  * Destroys a rule-select element (the 0x34-byte objects whose vptr is at +0x30), freeing it when asked.
  *
- * Stores the element's vtable D_0046B078 at +0x30 and calls operator_delete when bit 0 of @p flags is set. The elements
+ * Stores the element's vtable cBraggingRightsMenu_vtbl at +0x30 and calls operator_delete when bit 0 of @p flags is set. The elements
  * are built by cBraggingRightsMenu_cBraggingRightsMenu; cFEStateBraggingRights holds two of them at +0x6D0.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
 extern "C" void func_001DF440(cBraggingRightsMenu* self, int flags)
 {
-    self->mVtbl = D_0046B078;
+    self->mVtbl = cBraggingRightsMenu_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

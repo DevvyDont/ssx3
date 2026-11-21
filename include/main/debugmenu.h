@@ -65,48 +65,48 @@ struct cRenderTogglesMenu {
     cSpaceMenuItem SpaceItem;                        // 0x14C [O]; [R] ctor (space 40)
     cIntMenuItem AIUpdatesPerRenderItem;             // 0x164 [O]; [R] ctor (0, "AI Frames per Render Frame",
                                                      //       &cRenderToggles_m_AIUpdatesPerRender, 0..60)
-    cIntMenuItem DisplayRenderStatsItem;             // 0x194 [O]; [R] ctor (1, "Display Render Stats", &D_004A44C4,
+    cIntMenuItem DisplayRenderStatsItem;             // 0x194 [O]; [R] ctor (1, "Display Render Stats", &cRenderToggles_m_DisplayRenderStats,
                                                      //       0..1)
     cIntMenuItem ResetStatsItem;                     // 0x1C4 [O]; [R] ctor (2, "Reset Stats", &cRenderToggles_m_ResetStats, 0..1)
-    cIntMenuItem UseSmallTexture0Item;               // 0x1F4 [O]; [R] ctor (3, "Use Small Texture 0", &D_004A44CC,
+    cIntMenuItem UseSmallTexture0Item;               // 0x1F4 [O]; [R] ctor (3, "Use Small Texture 0", &cRenderToggles_m_UseSmallTexture0,
                                                      //       0..1)
-    cIntMenuItem UseSmallTexture1Item;               // 0x224 [O]; [R] ctor (4, "Use Small Texture 1", &D_004A44D0,
+    cIntMenuItem UseSmallTexture1Item;               // 0x224 [O]; [R] ctor (4, "Use Small Texture 1", &cRenderToggles_m_UseSmallTexture1,
                                                      //       0..1)
     cIntMenuItem DisablePatchesItem;                 // 0x254 [O]; [R] ctor (5, "Disable Patches", &cRenderToggles_m_DisablePatches, 0..1)
     cIntMenuItem DisablePatchReflectionItem;         // 0x284 [O]; [R] ctor (6, "Disable Patch Reflection", &cRenderToggles_m_DisablePatchReflection,
                                                      //       0..1)
     cIntMenuItem DisablePatchShadowItem;             // 0x2B4 [O]; [R] ctor (7, "Disable Patch Shadows", &cRenderToggles_m_DisablePatchShadow,
                                                      //       0..1)
-    cIntMenuItem DisableSparklesItem;                // 0x2E4 [O]; [R] ctor (8, "Disable Sparkles", &D_004A44E0, 0..1)
-    cIntMenuItem DisableLineStripsItem;              // 0x314 [O]; [R] ctor (9, "Disable Line Strips", &D_004A44E4,
+    cIntMenuItem DisableSparklesItem;                // 0x2E4 [O]; [R] ctor (8, "Disable Sparkles", &cRenderToggles_m_DisableSparkles, 0..1)
+    cIntMenuItem DisableLineStripsItem;              // 0x314 [O]; [R] ctor (9, "Disable Line Strips", &cRenderToggles_m_DisableLineStrips,
                                                      //       0..1)
-    cIntMenuItem DisableTriStripsItem;               // 0x344 [O]; [R] ctor (10, "Disable Tri Strips", &D_004A44E8,
+    cIntMenuItem DisableTriStripsItem;               // 0x344 [O]; [R] ctor (10, "Disable Tri Strips", &cRenderToggles_m_DisableTriStrips,
                                                      //       0..3)
     cIntMenuItem DisableTransformStripsItem;         // 0x374 [O]; [R] ctor (11, "Disable Transform Strips",
-                                                     //       &D_004A44EC, 0..1)
-    cIntMenuItem DisableMeshesItem;                  // 0x3A4 [O]; [R] ctor (12, "Disable Meshes", &D_004A44F0, 0..1)
-    cIntMenuItem DisableMeshReflectionItem;          // 0x3D4 [O]; [R] ctor (13, "Disable Mesh Reflection", &D_004A44F4,
+                                                     //       &cRenderToggles_m_DisableTransformStrips, 0..1)
+    cIntMenuItem DisableMeshesItem;                  // 0x3A4 [O]; [R] ctor (12, "Disable Meshes", &cRenderToggles_m_DisableMeshes, 0..1)
+    cIntMenuItem DisableMeshReflectionItem;          // 0x3D4 [O]; [R] ctor (13, "Disable Mesh Reflection", &cRenderToggles_m_DisableMeshReflection,
                                                      //       0..1)
-    cIntMenuItem DisableStaticEmittersItem;          // 0x404 [O]; [R] ctor (14, "Disable Static Emitters", &D_004A44F8,
+    cIntMenuItem DisableStaticEmittersItem;          // 0x404 [O]; [R] ctor (14, "Disable Static Emitters", &cRenderToggles_m_DisableStaticEmitters,
                                                      //       0..1)
     cIntMenuItem DisableDynamicEmittersItem;         // 0x434 [O]; [R] ctor (15, "Disable Dynamic Emitters",
                                                      //       &cRenderToggles_m_DisableDynamicEmitters, 0..1)
     cIntMenuItem DisableDynamicColourEmittersItem;   // 0x464 [O]; [R] ctor (16, "Disable Dynamic Colour Emitters",
-                                                     //       &D_004A4500, 0..1)
-    cIntMenuItem DisableSpritesItem;                 // 0x494 [O]; [R] ctor (17, "Disable Sprites", &D_004A4504, 0..1)
-    cIntMenuItem Disable3DSpritesItem;               // 0x4C4 [O]; [R] ctor (18, "Disable 3D Sprites", &D_004A4508,
+                                                     //       &cRenderToggles_m_DisableDynamicColourEmitters, 0..1)
+    cIntMenuItem DisableSpritesItem;                 // 0x494 [O]; [R] ctor (17, "Disable Sprites", &cRenderToggles_m_DisableSprites, 0..1)
+    cIntMenuItem Disable3DSpritesItem;               // 0x4C4 [O]; [R] ctor (18, "Disable 3D Sprites", &cRenderToggles_m_Disable3DSprites,
                                                      //       0..1)
-    cIntMenuItem DisableTextureRectsItem;            // 0x4F4 [O]; [R] ctor (19, "Disable Texture Rects", &D_004A450C,
+    cIntMenuItem DisableTextureRectsItem;            // 0x4F4 [O]; [R] ctor (19, "Disable Texture Rects", &cRenderToggles_m_DisableTextureRects,
                                                      //       0..1)
-    cIntMenuItem DisablePlayerStripsItem;            // 0x524 [O]; [R] ctor (20, "Disable Player Strips", &D_004A4510,
+    cIntMenuItem DisablePlayerStripsItem;            // 0x524 [O]; [R] ctor (20, "Disable Player Strips", &cRenderToggles_m_DisablePlayerStrips,
                                                      //       0..1)
-    cIntMenuItem DisableShadowsItem;                 // 0x554 [O]; [R] ctor (21, "Disable Shadows", &D_004A4514, 0..1)
-    cIntMenuItem DisableBoardTrailItem;              // 0x584 [O]; [R] ctor (22, "Disable Board Trail", &D_004A4518,
+    cIntMenuItem DisableShadowsItem;                 // 0x554 [O]; [R] ctor (21, "Disable Shadows", &cRenderToggles_m_DisableShadows, 0..1)
+    cIntMenuItem DisableBoardTrailItem;              // 0x584 [O]; [R] ctor (22, "Disable Board Trail", &cRenderToggles_m_DisableBoardTrail,
                                                      //       0..1)
-    cIntMenuItem DisableAIBoardTrailItem;            // 0x5B4 [O]; [R] ctor (23, "Disable AI Board Trail", &D_004A451C,
+    cIntMenuItem DisableAIBoardTrailItem;            // 0x5B4 [O]; [R] ctor (23, "Disable AI Board Trail", &cRenderToggles_m_DisableAIBoardTrail,
                                                      //       0..1)
     cIntMenuItem DisableVisibilityRectsItem;         // 0x5E4 [O]; [R] ctor (24, "Disable Visibility Rects",
-                                                     //       &D_004A4520, 0..1)
+                                                     //       &cRenderToggles_m_DisableVisibilityRects, 0..1)
     cIntMenuItem DisableSnowFallItem;                // 0x614 [O]; [R] ctor (25, "Disable Snowfall",
                                                      //       &cRenderToggles_m_DisableSnowFall, 0..1)
     cIntMenuItem DisableBoardWakeItem;               // 0x644 [O]; [R] ctor (26, "Disable Board Wake",
@@ -123,25 +123,25 @@ struct cRenderTogglesMenu {
                                                      //       &cRenderToggles_m_UseReflectionVector, 0..1)
     cIntMenuItem DisableHUDItem;                     // 0x764 [O]; [R] ctor (32, "Disable HUD elements",
                                                      //       &cRenderToggles_m_DisableHUD, 0..1)
-    cIntMenuItem TestTunnelItem;                     // 0x794 [O]; [R] ctor (33, "Test Tunnel", &D_004A4544, 0..1)
-    cFloatMenuItem ParticleSizeScaleItem;            // 0x7C4 [O]; [R] ctor (34, "Particle Size Scale", &D_004A4548,
+    cIntMenuItem TestTunnelItem;                     // 0x794 [O]; [R] ctor (33, "Test Tunnel", &cRenderToggles_m_TestTunnel, 0..1)
+    cFloatMenuItem ParticleSizeScaleItem;            // 0x7C4 [O]; [R] ctor (34, "Particle Size Scale", &cRenderToggles_m_ParticleSizeScale,
                                                      //       1..2000)
-    cIntMenuItem TestSurfaceTypesItem;               // 0x7F8 [O]; [R] ctor (35, "Test Surface Types", &D_004A454C,
+    cIntMenuItem TestSurfaceTypesItem;               // 0x7F8 [O]; [R] ctor (35, "Test Surface Types", &cRenderToggles_m_TestSurfaceTypes,
                                                      //       0..1)
     cIntMenuItem SoftwareDynamicParticleSystemsItem; // 0x828 [O]; [R] ctor (36, "Software Based Dynamic Systems",
-                                                     //       &D_004A4550, 0..1)
-    cIntMenuItem TempIntItem;                        // 0x858 [O]; [R] ctor (37, "Temp Int", &D_004A4554, 0..20)
-    cFloatMenuItem Prog2xItem;                       // 0x888 [O]; [R] ctor (38, "PROG2 x", &D_004A4558, -10..10)
-    cFloatMenuItem Prog2yItem;                       // 0x8BC [O]; [R] ctor (39, "PROG2 y", &D_004A455C, -10..10)
-    cFloatMenuItem Prog2zItem;                       // 0x8F0 [O]; [R] ctor (40, "PROG2 z", &D_004A4560, -10..10)
-    cFloatMenuItem Prog2wItem;                       // 0x924 [O]; [R] ctor (41, "PROG2 w", &D_004A4564, -10..10)
-    cIntMenuItem DebugInfoItem;                      // 0x958 [O]; [R] ctor (42, "Enable Build Info", &D_004A4568, 0..1)
+                                                     //       &cRenderToggles_m_SoftwareDynamicParticleSystems, 0..1)
+    cIntMenuItem TempIntItem;                        // 0x858 [O]; [R] ctor (37, "Temp Int", &cRenderToggles_m_TempInt, 0..20)
+    cFloatMenuItem Prog2xItem;                       // 0x888 [O]; [R] ctor (38, "PROG2 x", &cRenderToggles_m_Prog2x, -10..10)
+    cFloatMenuItem Prog2yItem;                       // 0x8BC [O]; [R] ctor (39, "PROG2 y", &cRenderToggles_m_Prog2y, -10..10)
+    cFloatMenuItem Prog2zItem;                       // 0x8F0 [O]; [R] ctor (40, "PROG2 z", &cRenderToggles_m_Prog2z, -10..10)
+    cFloatMenuItem Prog2wItem;                       // 0x924 [O]; [R] ctor (41, "PROG2 w", &cRenderToggles_m_Prog2w, -10..10)
+    cIntMenuItem DebugInfoItem;                      // 0x958 [O]; [R] ctor (42, "Enable Build Info", &cRenderToggles_m_DebugInfo, 0..1)
     cIntMenuItem DebugNISMemInfoItem;                // 0x988 [O]; [R] ctor (43, "Enable NIS Mem Usage Info",
-                                                     //       &D_004A456C, 0..1)
-    cIntMenuItem DebugGameModeInfoItem;              // 0x9B8 [O]; [R] ctor (44, "Enable Gameflow Info", &D_004A4570,
+                                                     //       &cRenderToggles_m_DebugNISMemInfo, 0..1)
+    cIntMenuItem DebugGameModeInfoItem;              // 0x9B8 [O]; [R] ctor (44, "Enable Gameflow Info", &cRenderToggles_m_DebugGameModeInfo,
                                                      //       0..1)
     cIntMenuItem ProfileIndividualFXItem;            // 0x9E8 [O]; [R] ctor (45, "Profile Individual Effects",
-                                                     //       &D_004A4574, 0..1)
+                                                     //       &cRenderToggles_m_ProfileIndividualFX, 0..1)
     cIntMenuItem ShowSurfaceTypesItem;               // 0xA18 [O]; [R] ctor (46, "Show Surface Types", &D_004A4578,
                                                      //       0..1)
 };
@@ -222,21 +222,21 @@ struct cVisualEffectsTestMenu {
     // cVisualEffectsTestMenu's rows (0x130-0x493)
     cNullMenuItem TitleItem;             // 0x130 [O]; [R] ctor ("Visual Effects Test Menu")
     cSpaceMenuItem SpaceItem;            // 0x14C [O]; [R] ctor (space 40)
-    cIntMenuItem HUDEnableItem;          // 0x164 [O]; [R] ctor (0, "Show All HUD Graphics", &D_004A4478, 0..1)
-    cIntMenuItem ShowCurrentElementItem; // 0x194 [O]; [R] ctor (1, "Show Current Element", &D_004A447C, 0..1)
-    cIntMenuItem HUDPrintItem;           // 0x1C4 [O]; [R] ctor (2, "Output HUD Data", &D_004A4480, 0..1)
-    cIntMenuItem CurrElementItem;        // 0x1F4 [O]; [R] ctor (3, "Current Element Id", &D_004A4484, 0..1000)
-    cIntMenuItem PositionXItem;          // 0x224 [O]; [R] ctor (4, "Position X", &D_004A4488, -640..640)
-    cIntMenuItem PositionYItem;          // 0x254 [O]; [R] ctor (5, "Position Y", &D_004A448C, -480..480)
-    cIntMenuItem SizeXItem;              // 0x284 [O]; [R] ctor (6, "Size X", &D_004A4490, -640..640)
-    cIntMenuItem SizeYItem;              // 0x2B4 [O]; [R] ctor (7, "Size Y", &D_004A4494, -640..640)
-    cIntMenuItem ScaleXItem;             // 0x2E4 [O]; [R] ctor (8, "Scale X", &D_004A4498, -1..1000)
-    cIntMenuItem ScaleYItem;             // 0x314 [O]; [R] ctor (9, "Scale Y", &D_004A449C, -1..1000)
-    cIntMenuItem AlphaItem;              // 0x344 [O]; [R] ctor (10, "Alpha", &D_004A44A0, -255..255)
-    cIntMenuItem RedItem;                // 0x374 [O]; [R] ctor (11, "Red", &D_004A44A4, -255..255)
-    cIntMenuItem GreenItem;              // 0x3A4 [O]; [R] ctor (12, "Green", &D_004A44A8, -255..255)
-    cIntMenuItem BlueItem;               // 0x3D4 [O]; [R] ctor (13, "Blue", &D_004A44AC, -255..255)
-    cIntMenuItem LayerOffsetItem;        // 0x404 [O]; [R] ctor (14, "Layer Offset", &D_004A44B0, -16..16)
+    cIntMenuItem HUDEnableItem;          // 0x164 [O]; [R] ctor (0, "Show All HUD Graphics", &cVisualEffectsTest_m_HUDEnable, 0..1)
+    cIntMenuItem ShowCurrentElementItem; // 0x194 [O]; [R] ctor (1, "Show Current Element", &cVisualEffectsTest_m_ShowCurrentElement, 0..1)
+    cIntMenuItem HUDPrintItem;           // 0x1C4 [O]; [R] ctor (2, "Output HUD Data", &cVisualEffectsTest_m_HUDPrint, 0..1)
+    cIntMenuItem CurrElementItem;        // 0x1F4 [O]; [R] ctor (3, "Current Element Id", &cVisualEffectsTest_m_CurrElement, 0..1000)
+    cIntMenuItem PositionXItem;          // 0x224 [O]; [R] ctor (4, "Position X", &cVisualEffectsTest_m_PositionX, -640..640)
+    cIntMenuItem PositionYItem;          // 0x254 [O]; [R] ctor (5, "Position Y", &cVisualEffectsTest_m_PositionY, -480..480)
+    cIntMenuItem SizeXItem;              // 0x284 [O]; [R] ctor (6, "Size X", &cVisualEffectsTest_m_SizeX, -640..640)
+    cIntMenuItem SizeYItem;              // 0x2B4 [O]; [R] ctor (7, "Size Y", &cVisualEffectsTest_m_SizeY, -640..640)
+    cIntMenuItem ScaleXItem;             // 0x2E4 [O]; [R] ctor (8, "Scale X", &cVisualEffectsTest_m_ScaleX, -1..1000)
+    cIntMenuItem ScaleYItem;             // 0x314 [O]; [R] ctor (9, "Scale Y", &cVisualEffectsTest_m_ScaleY, -1..1000)
+    cIntMenuItem AlphaItem;              // 0x344 [O]; [R] ctor (10, "Alpha", &cVisualEffectsTest_m_Alpha, -255..255)
+    cIntMenuItem RedItem;                // 0x374 [O]; [R] ctor (11, "Red", &cVisualEffectsTest_m_Red, -255..255)
+    cIntMenuItem GreenItem;              // 0x3A4 [O]; [R] ctor (12, "Green", &cVisualEffectsTest_m_Green, -255..255)
+    cIntMenuItem BlueItem;               // 0x3D4 [O]; [R] ctor (13, "Blue", &cVisualEffectsTest_m_Blue, -255..255)
+    cIntMenuItem LayerOffsetItem;        // 0x404 [O]; [R] ctor (14, "Layer Offset", &cVisualEffectsTest_m_LayerOffset, -16..16)
     cIntMenuItem EnableItem;             // 0x434 [O]; [R] ctor (15, "World Painter Display Enable",
                                          //       &cVisualEffectsTest_m_Enable, 0..1)
     cIntMenuItem LayerIdItem;            // 0x464 [O]; [R] ctor (16, "World Painter LayerId",
@@ -294,15 +294,15 @@ struct cPlantsMenu {
     cFloatMenuItem SwayAmplitudeItem;     // 0x194 [O]; [R] ctor (1, "Sway Amplitude", &cPlants_m_SwayAmplitude, 0..2)
     cFloatMenuItem SwayOffsetItem;        // 0x1C8 [O]; [R] ctor (2, "Sway Offset", &cPlants_m_SwayOffset, -5..5)
     cFloatMenuItem BranchAmplitudeItem;   // 0x1FC [O]; [R] ctor (3, "Branch Amplitude", &cPlants_m_BranchAmplitude, 0..2)
-    cFloatMenuItem RotationAmplitudeItem; // 0x230 [O]; [R] ctor (4, "Rotation Amplitude", &D_004A4454, 0..2)
+    cFloatMenuItem RotationAmplitudeItem; // 0x230 [O]; [R] ctor (4, "Rotation Amplitude", &cPlants_m_RotationAmplitude, 0..2)
     cFloatMenuItem PositionScaleItem;     // 0x264 [O]; [R] ctor (5, "Position Scale", &cPlants_m_PositionScale, 0..1000)
     cIntMenuItem SwayFrequencyItem;       // 0x298 [O]; [R] ctor (6, "Sway Frequency (x/600)Hz", &cPlants_m_SwayFrequency, 0..6000)
-    cFloatMenuItem RotationFrequencyItem; // 0x2C8 [O]; [R] ctor (7, "Rotation Frequency", &D_004A4460, 0..6000)
-    cFloatMenuItem BranchFrequencyItem;   // 0x2FC [O]; [R] ctor (8, "Branch Frequency (x/600)Hz", &D_004A4464, 0..6000)
-    cFloatMenuItem BranchFrequency2Item;  // 0x330 [O]; [R] ctor (9, "Branch Frequency 2 (x/600)Hz", &D_004A4468,
+    cFloatMenuItem RotationFrequencyItem; // 0x2C8 [O]; [R] ctor (7, "Rotation Frequency", &cPlants_m_RotationFrequency, 0..6000)
+    cFloatMenuItem BranchFrequencyItem;   // 0x2FC [O]; [R] ctor (8, "Branch Frequency (x/600)Hz", &cPlants_m_BranchFrequency, 0..6000)
+    cFloatMenuItem BranchFrequency2Item;  // 0x330 [O]; [R] ctor (9, "Branch Frequency 2 (x/600)Hz", &cPlants_m_BranchFrequency2,
                                           //       0..6000)
-    cFloatMenuItem SwayDirectionItem;     // 0x364 [O]; [R] ctor (10, "Sway Direction", &D_004A446C, 0..360)
-    cFloatMenuItem BranchDirectionItem;   // 0x398 [O]; [R] ctor (11, "Branch Direction", &D_004A4470, 0..360)
+    cFloatMenuItem SwayDirectionItem;     // 0x364 [O]; [R] ctor (10, "Sway Direction", &cPlants_m_SwayDirection, 0..360)
+    cFloatMenuItem BranchDirectionItem;   // 0x398 [O]; [R] ctor (11, "Branch Direction", &cPlants_m_BranchDirection, 0..360)
 };
 
 CHECK_OFFSET(cPlantsMenu, NumItems, 0x000);
@@ -350,7 +350,7 @@ struct cLightGlowMenu {
     cIntMenuItem EnableItem;             // 0x164 [O]; [R] ctor (0, "Enable", &cLightGlow_m_Enable, 0..1)
     cIntMenuItem OverrideWPItem;         // 0x194 [O]; [R] ctor (1, "Override World Painter", &cLightGlow_m_OverrideWP,
                                          //       0..1)
-    cIntMenuItem PS2CaptureSizeItem;     // 0x1C4 [O]; [R] ctor (2, "PS2 Capture Size (2^x)", &D_004A43D0, 4..8)
+    cIntMenuItem PS2CaptureSizeItem;     // 0x1C4 [O]; [R] ctor (2, "PS2 Capture Size (2^x)", &cLightGlow_m_PS2CaptureSize, 4..8)
     cFloatMenuItem PS2MinIntensityItem;  // 0x1F4 [O]; [R] ctor (3, "PS2 Minimum Intensity Cutoff",
                                          //       &cLightGlow_m_PS2MinIntensity, 0..2)
     cFloatMenuItem PS2ModIntensityItem;  // 0x228 [O]; [R] ctor (4, "PS2 Post-Cutoff Scale",
@@ -361,13 +361,13 @@ struct cLightGlowMenu {
                                          //       &cLightGlow_m_PS2FrameSrcScale, 0..2)
     cFloatMenuItem PS2FrameDstScaleItem; // 0x2C4 [O]; [R] ctor (7, "PS2 Frame Blend Intensity",
                                          //       &cLightGlow_m_PS2FrameDstScale, 0..2)
-    cFloatMenuItem PS2IntensityTex0Item; // 0x2F8 [O]; [R] ctor (8, "PS2 Blend Texture 0", &D_004A43E8, 0..2)
-    cFloatMenuItem PS2IntensityTex1Item; // 0x32C [O]; [R] ctor (9, "PS2 Blend Texture 1", &D_004A43EC, 0..2)
+    cFloatMenuItem PS2IntensityTex0Item; // 0x2F8 [O]; [R] ctor (8, "PS2 Blend Texture 0", &cLightGlow_m_PS2IntensityTex0, 0..2)
+    cFloatMenuItem PS2IntensityTex1Item; // 0x32C [O]; [R] ctor (9, "PS2 Blend Texture 1", &cLightGlow_m_PS2IntensityTex1, 0..2)
     cFloatMenuItem PS2IntensityTex2Item; // 0x360 [O]; [R] ctor (10, "PS2 Blend Texture 2",
                                          //       &cLightGlow_m_PS2IntensityTex2, 0..2)
     cFloatMenuItem PS2IntensityTex3Item; // 0x394 [O]; [R] ctor (11, "PS2 Blend Texture 3",
                                          //       &cLightGlow_m_PS2IntensityTex3, 0..2)
-    cFloatMenuItem PS2JitterTexItem;     // 0x3C8 [O]; [R] ctor (12, "PS2 Texture Jitter", &D_004A43F8, 0..8)
+    cFloatMenuItem PS2JitterTexItem;     // 0x3C8 [O]; [R] ctor (12, "PS2 Texture Jitter", &cLightGlow_m_PS2JitterTex, 0..8)
     cIntMenuItem PS2ShowTexturesItem;    // 0x3FC [O]; [R] ctor (13, "PS2 Show Textures", &D_004A43FC, 0..1)
     cFloatMenuItem SizeItem;             // 0x42C [O]; [R] ctor (14, "Size", &D_004A4400, 0..64)
     cFloatMenuItem CutoffItem;           // 0x460 [O]; [R] ctor (15, "Cutoff", &D_004A4404, 0..1)
@@ -535,16 +535,16 @@ struct cDetailSystemMenu {
     // cDetailSystemMenu's rows (0x130-0x367)
     cNullMenuItem TitleItem;              // 0x130 [O]; [R] ctor ("Detail System Menu")
     cSpaceMenuItem SpaceItem;             // 0x14C [O]; [R] ctor (space 40)
-    cIntMenuItem EnableItem;              // 0x164 [O]; [R] ctor (0, "Enable", &D_004A4340, 0..1)
-    cFloatMenuItem SpinScaleItem;         // 0x194 [O]; [R] ctor (1, "Sparkle Spin Scale", &D_004A4344, -1..1)
+    cIntMenuItem EnableItem;              // 0x164 [O]; [R] ctor (0, "Enable", &cDetailSystem_m_Enable, 0..1)
+    cFloatMenuItem SpinScaleItem;         // 0x194 [O]; [R] ctor (1, "Sparkle Spin Scale", &cDetailSystem_m_SpinScale, -1..1)
     cFloatMenuItem PS2SparkleCountItem;   // 0x1C8 [O]; [R] ctor (2, "PS2 Sparkle Count", &cDetailSystem_m_PS2SparkleCount, 0..20)
-    cFloatMenuItem PS2SparkleSizeItem;    // 0x1FC [O]; [R] ctor (3, "PS2 Sparkle World Size", &D_004A434C, 0..500)
-    cFloatMenuItem PS2MinSparkleSizeItem; // 0x230 [O]; [R] ctor (4, "PS2 Min Sparkle Screen Size", &D_004A4350, 0..100)
-    cFloatMenuItem PS2MaxSparkleSizeItem; // 0x264 [O]; [R] ctor (5, "PS2 Max Sparkle Screen Size", &D_004A4354, 0..100)
-    cFloatMenuItem XBoxNumSparklesItem;   // 0x298 [O]; [R] ctor (6, "XBox Sparkle Count", &D_004A4358, 1..300)
-    cFloatMenuItem XBoxSizeItem;          // 0x2CC [O]; [R] ctor (7, "XBox - World Size", &D_004A435C, 0..500)
-    cFloatMenuItem XBoxMinSizeItem;       // 0x300 [O]; [R] ctor (8, "XBox - Min Screen Size", &D_004A4360, 0..100)
-    cFloatMenuItem XBoxMaxSizeItem;       // 0x334 [O]; [R] ctor (9, "XBox - Max Screen Size", &D_004A4364, 0..100)
+    cFloatMenuItem PS2SparkleSizeItem;    // 0x1FC [O]; [R] ctor (3, "PS2 Sparkle World Size", &cDetailSystem_m_PS2SparkleSize, 0..500)
+    cFloatMenuItem PS2MinSparkleSizeItem; // 0x230 [O]; [R] ctor (4, "PS2 Min Sparkle Screen Size", &cDetailSystem_m_PS2MinSparkleSize, 0..100)
+    cFloatMenuItem PS2MaxSparkleSizeItem; // 0x264 [O]; [R] ctor (5, "PS2 Max Sparkle Screen Size", &cDetailSystem_m_PS2MaxSparkleSize, 0..100)
+    cFloatMenuItem XBoxNumSparklesItem;   // 0x298 [O]; [R] ctor (6, "XBox Sparkle Count", &cDetailSystem_m_XBoxNumSparkles, 1..300)
+    cFloatMenuItem XBoxSizeItem;          // 0x2CC [O]; [R] ctor (7, "XBox - World Size", &cDetailSystem_m_XBoxSize, 0..500)
+    cFloatMenuItem XBoxMinSizeItem;       // 0x300 [O]; [R] ctor (8, "XBox - Min Screen Size", &cDetailSystem_m_XBoxMinSize, 0..100)
+    cFloatMenuItem XBoxMaxSizeItem;       // 0x334 [O]; [R] ctor (9, "XBox - Max Screen Size", &cDetailSystem_m_XBoxMaxSize, 0..100)
 };
 
 CHECK_OFFSET(cDetailSystemMenu, NumItems, 0x000);
@@ -650,7 +650,7 @@ struct cScreenTintMenu {
     cFloatMenuItem XNColourRItem;         // 0x32C [O]; [R] ctor (9, "XN Tint Red", &cScreenTint_m_XNColourR, 0..2)
     cFloatMenuItem XNColourGItem;         // 0x360 [O]; [R] ctor (10, "XN Tint Green", &cScreenTint_m_XNColourG, 0..2)
     cFloatMenuItem XNColourBItem;         // 0x394 [O]; [R] ctor (11, "XN Tint Blue", &cScreenTint_m_XNColourB, 0..2)
-    cFloatMenuItem XNLerpItem;            // 0x3C8 [O]; [R] ctor (12, "XN Lerp", &D_004A4608, 0..2)
+    cFloatMenuItem XNLerpItem;            // 0x3C8 [O]; [R] ctor (12, "XN Lerp", &cScreenTint_m_XNLerp, 0..2)
     cIntMenuItem LightningEnableItem;     // 0x3FC [O]; [R] ctor (13, "Enable Lightning",
                                           //       &cScreenTint_m_LightningEnable, 0..1)
     cIntMenuItem FrameIdItem;             // 0x42C [O]; [R] ctor (14, "Frame Id", &cScreenTint_m_FrameId, -1..1000)
@@ -659,27 +659,27 @@ struct cScreenTintMenu {
     cIntMenuItem LightningFadeInItem;     // 0x490 [O]; [R] ctor (16, "Flash Fade In", &cScreenTint_m_LightningFadeIn, 0..600)
     cIntMenuItem LightningFadeOutItem;    // 0x4C0 [O]; [R] ctor (17, "Flash Sustain", &cScreenTint_m_LightningFadeOut, 0..600)
     cIntMenuItem LightningFadeIn2Item;    // 0x4F0 [O]; [R] ctor (18, "Inverse Duration", &cScreenTint_m_LightningFadeIn2, 0..600)
-    cIntMenuItem LightningFadeIn3Item;    // 0x520 [O]; [R] ctor (19, "Recover Fade In", &D_004A4624, 0..600)
-    cFloatMenuItem LightningScaleItem;    // 0x550 [O]; [R] ctor (20, "Flash Scale", &D_004A4628, 0..2)
-    cFloatMenuItem LightningScale2Item;   // 0x584 [O]; [R] ctor (21, "Inverse Scale", &D_004A462C, 0..2)
-    cFloatMenuItem LightningScale3Item;   // 0x5B8 [O]; [R] ctor (22, "Recover Scale", &D_004A4630, 0..2)
-    cFloatMenuItem LightningColourRItem;  // 0x5EC [O]; [R] ctor (23, "Flash Tint Red", &D_004A4634, 0..2)
-    cFloatMenuItem LightningColourGItem;  // 0x620 [O]; [R] ctor (24, "Flash Tint Green", &D_004A4638, 0..2)
-    cFloatMenuItem LightningColourBItem;  // 0x654 [O]; [R] ctor (25, "Flash Tint Blue", &D_004A463C, 0..2)
-    cFloatMenuItem LightningColour2RItem; // 0x688 [O]; [R] ctor (26, "Inverse Tint Red", &D_004A4640, 0..2)
-    cFloatMenuItem LightningColour2GItem; // 0x6BC [O]; [R] ctor (27, "Inverse Tint Green", &D_004A4644, 0..2)
-    cFloatMenuItem LightningColour2BItem; // 0x6F0 [O]; [R] ctor (28, "Inverse Tint Blue", &D_004A4648, 0..2)
-    cFloatMenuItem LightningColour3RItem; // 0x724 [O]; [R] ctor (29, "Recover Tint Red", &D_004A464C, 0..2)
-    cFloatMenuItem LightningColour3GItem; // 0x758 [O]; [R] ctor (30, "Recover Tint Green", &D_004A4650, 0..2)
-    cFloatMenuItem LightningColour3BItem; // 0x78C [O]; [R] ctor (31, "Recover Tint Blue", &D_004A4654, 0..2)
-    cIntMenuItem GammaEnableItem;         // 0x7C0 [O]; [R] ctor (32, "Gamma Enable", &D_004A4658, 0..1)
-    cFloatMenuItem GammaPowerItem;        // 0x7F0 [O]; [R] ctor (33, "Gamma Power", &D_004A465C, 0..2)
-    cFloatMenuItem GammaColourRItem;      // 0x824 [O]; [R] ctor (34, "Gamma Tint Red", &D_004A4660, 0..2)
-    cFloatMenuItem GammaColourGItem;      // 0x858 [O]; [R] ctor (35, "Gamma Tint Green", &D_004A4664, 0..2)
-    cFloatMenuItem GammaColourBItem;      // 0x88C [O]; [R] ctor (36, "Gamma Tint Blue", &D_004A4668, 0..2)
-    cFloatMenuItem GammaFillRItem;        // 0x8C0 [O]; [R] ctor (37, "Gamma Fill Red", &D_004A466C, 0..1)
-    cFloatMenuItem GammaFillGItem;        // 0x8F4 [O]; [R] ctor (38, "Gamma Fill Green", &D_004A4670, 0..1)
-    cFloatMenuItem GammaFillBItem;        // 0x928 [O]; [R] ctor (39, "Gamma Fill Blue", &D_004A4674, 0..1)
+    cIntMenuItem LightningFadeIn3Item;    // 0x520 [O]; [R] ctor (19, "Recover Fade In", &cScreenTint_m_LightningFadeIn3, 0..600)
+    cFloatMenuItem LightningScaleItem;    // 0x550 [O]; [R] ctor (20, "Flash Scale", &cScreenTint_m_LightningScale, 0..2)
+    cFloatMenuItem LightningScale2Item;   // 0x584 [O]; [R] ctor (21, "Inverse Scale", &cScreenTint_m_LightningScale2, 0..2)
+    cFloatMenuItem LightningScale3Item;   // 0x5B8 [O]; [R] ctor (22, "Recover Scale", &cScreenTint_m_LightningScale3, 0..2)
+    cFloatMenuItem LightningColourRItem;  // 0x5EC [O]; [R] ctor (23, "Flash Tint Red", &cScreenTint_m_LightningColourR, 0..2)
+    cFloatMenuItem LightningColourGItem;  // 0x620 [O]; [R] ctor (24, "Flash Tint Green", &cScreenTint_m_LightningColourG, 0..2)
+    cFloatMenuItem LightningColourBItem;  // 0x654 [O]; [R] ctor (25, "Flash Tint Blue", &cScreenTint_m_LightningColourB, 0..2)
+    cFloatMenuItem LightningColour2RItem; // 0x688 [O]; [R] ctor (26, "Inverse Tint Red", &cScreenTint_m_LightningColour2R, 0..2)
+    cFloatMenuItem LightningColour2GItem; // 0x6BC [O]; [R] ctor (27, "Inverse Tint Green", &cScreenTint_m_LightningColour2G, 0..2)
+    cFloatMenuItem LightningColour2BItem; // 0x6F0 [O]; [R] ctor (28, "Inverse Tint Blue", &cScreenTint_m_LightningColour2B, 0..2)
+    cFloatMenuItem LightningColour3RItem; // 0x724 [O]; [R] ctor (29, "Recover Tint Red", &cScreenTint_m_LightningColour3R, 0..2)
+    cFloatMenuItem LightningColour3GItem; // 0x758 [O]; [R] ctor (30, "Recover Tint Green", &cScreenTint_m_LightningColour3G, 0..2)
+    cFloatMenuItem LightningColour3BItem; // 0x78C [O]; [R] ctor (31, "Recover Tint Blue", &cScreenTint_m_LightningColour3B, 0..2)
+    cIntMenuItem GammaEnableItem;         // 0x7C0 [O]; [R] ctor (32, "Gamma Enable", &cScreenTint_m_GammaEnable, 0..1)
+    cFloatMenuItem GammaPowerItem;        // 0x7F0 [O]; [R] ctor (33, "Gamma Power", &cScreenTint_m_GammaPower, 0..2)
+    cFloatMenuItem GammaColourRItem;      // 0x824 [O]; [R] ctor (34, "Gamma Tint Red", &cScreenTint_m_GammaColourR, 0..2)
+    cFloatMenuItem GammaColourGItem;      // 0x858 [O]; [R] ctor (35, "Gamma Tint Green", &cScreenTint_m_GammaColourG, 0..2)
+    cFloatMenuItem GammaColourBItem;      // 0x88C [O]; [R] ctor (36, "Gamma Tint Blue", &cScreenTint_m_GammaColourB, 0..2)
+    cFloatMenuItem GammaFillRItem;        // 0x8C0 [O]; [R] ctor (37, "Gamma Fill Red", &cScreenTint_m_GammaFillR, 0..1)
+    cFloatMenuItem GammaFillGItem;        // 0x8F4 [O]; [R] ctor (38, "Gamma Fill Green", &cScreenTint_m_GammaFillG, 0..1)
+    cFloatMenuItem GammaFillBItem;        // 0x928 [O]; [R] ctor (39, "Gamma Fill Blue", &cScreenTint_m_GammaFillB, 0..1)
 };
 
 CHECK_OFFSET(cScreenTintMenu, NumItems, 0x000);
@@ -855,13 +855,13 @@ struct cBoardTrailMenu {
     cFloatMenuItem HeightScaleItem;          // 0x1FC [O]; [R] ctor (3, "Height Scale", &D_004A4588, -20..20)
     cFloatMenuItem Depth2HeightScaleItem;    // 0x230 [O]; [R] ctor (4, "Depth to Height Scale", &D_004A458C, 0..1)
     cFloatMenuItem PackedDepthScaleItem;     // 0x264 [O] (On Tour 0x39C; placed by the caption and On Tour's order);
-                                             //       [R] ctor (5, "Packed Depth Scale", &D_004A4590, -100..100)
+                                             //       [R] ctor (5, "Packed Depth Scale", &cBoardTrail_m_PackedDepthScale, -100..100)
     cFloatMenuItem LooseDepthScaleItem;      // 0x298 [O] (On Tour 0x3D0; placed by the caption and On Tour's order);
-                                             //       [R] ctor (6, "Loose Depth Scale", &D_004A4594, -100..100)
+                                             //       [R] ctor (6, "Loose Depth Scale", &cBoardTrail_m_LooseDepthScale, -100..100)
     cFloatMenuItem PowderDepthScaleItem;     // 0x2CC [O] (On Tour 0x404; placed by the caption and On Tour's order);
-                                             //       [R] ctor (7, "Powder Depth Scale", &D_004A4598, -1000..1000)
+                                             //       [R] ctor (7, "Powder Depth Scale", &cBoardTrail_m_PowderDepthScale, -1000..1000)
     cFloatMenuItem DeepPowderDepthScaleItem; // 0x300 [O] (On Tour 0x438; placed by the caption and On Tour's order);
-                                             //       [R] ctor (8, "Deep Powder Depth Scale", &D_004A459C, -1000..1000)
+                                             //       [R] ctor (8, "Deep Powder Depth Scale", &cBoardTrail_m_DeepPowderDepthScale, -1000..1000)
     cFloatMenuItem TopBiasFrontItem;         // 0x334 [O] (On Tour 0x46C; placed by the caption and On Tour's order);
                                              //       [R] ctor (9, "Top Bias Front", &D_004A45A0, -1000..1000)
     cFloatMenuItem TopBiasBehindItem;        // 0x368 [O] (On Tour 0x4A0; placed by the caption and On Tour's order);
@@ -942,8 +942,8 @@ struct cFlagsMenu {
     // cFlagsMenu's rows (0x130-0x1C3)
     cNullMenuItem TitleItem;         // 0x130 [O]; [R] ctor ("Flags Menu")
     cSpaceMenuItem SpaceItem;        // 0x14C [O]; [R] ctor (space 40)
-    cIntMenuItem EnableUpdateItem;   // 0x164 [O]; [R] ctor (0, "EnableUpdate", &D_004A4240, 0..1)
-    cIntMenuItem EnableRenderItem;   // 0x194 [O]; [R] ctor (1, "EnableRender", &D_004A4244, 0..1)
+    cIntMenuItem EnableUpdateItem;   // 0x164 [O]; [R] ctor (0, "EnableUpdate", &cFlags_m_EnableUpdate, 0..1)
+    cIntMenuItem EnableRenderItem;   // 0x194 [O]; [R] ctor (1, "EnableRender", &cFlags_m_EnableRender, 0..1)
 };
 
 CHECK_OFFSET(cFlagsMenu, NumItems, 0x000);
@@ -1141,18 +1141,18 @@ struct cSplashTogglesMenu {
     cNullMenuItem TitleItem;                            // 0x130 [O]; [R] ctor ("Camera Splash Menu")
     cSpaceMenuItem SpaceItem;                           // 0x14C [O]; [R] ctor (space 40)
     cIntMenuItem EnableItem;                            // 0x164 [O]; [R] ctor (0, "Enable", &cSplashToggles_m_Enable, 0..1)
-    cIntMenuItem RenderItem;                            // 0x194 [O]; [R] ctor (1, "Render", &D_004A4250, 0..1)
-    cIntMenuItem NumDropsItem;                          // 0x1C4 [O]; [R] ctor (2, "Max Drops", &D_004A4254, 1..30)
+    cIntMenuItem RenderItem;                            // 0x194 [O]; [R] ctor (1, "Render", &cSplashToggles_m_Render, 0..1)
+    cIntMenuItem NumDropsItem;                          // 0x1C4 [O]; [R] ctor (2, "Max Drops", &cSplashToggles_m_NumDrops, 1..30)
     cIntMenuItem NumIceCrystalsItem;                    // 0x1F4 [O]; [R] ctor (3, "Max Crystals", &cSplashToggles_m_NumIceCrystals, 1..30)
     cFloatMenuItem PercentageIceCrystalItem;            // 0x224 [O]; [R] ctor (4, "Percentage Ice Crystals",
-                                                        //       &D_004A425C, 0..1)
+                                                        //       &cSplashToggles_m_PercentageIceCrystal, 0..1)
     cFloatMenuItem PercentageIceCrystalSpawnChanceItem; // 0x258 [O]; [R] ctor (5, "Percentage Ice Crystal Spawn",
-                                                        //       &D_004A4260, 0..1)
+                                                        //       &cSplashToggles_m_PercentageIceCrystalSpawnChance, 0..1)
     cIntMenuItem IceCrystalMinGroupingItem;             // 0x28C [O]; [R] ctor (6, "Ice Crystal Minimum in Group",
-                                                        //       &D_004A4264, 1..10)
+                                                        //       &cSplashToggles_m_IceCrystalMinGrouping, 1..10)
     cIntMenuItem IceCrystalMaxGroupingItem;             // 0x2BC [O]; [R] ctor (7, "Ice Crystal Maximum in Group",
-                                                        //       &D_004A4268, 1..10)
-    cIntMenuItem MaxSpawnPerCrystalItem;                // 0x2EC [O]; [R] ctor (8, "Max Spawn Per Crystal", &D_004A426C,
+                                                        //       &cSplashToggles_m_IceCrystalMaxGrouping, 1..10)
+    cIntMenuItem MaxSpawnPerCrystalItem;                // 0x2EC [O]; [R] ctor (8, "Max Spawn Per Crystal", &cSplashToggles_m_MaxSpawnPerCrystal,
                                                         //       1..10)
     cFloatMenuItem FarthestImpactDistanceItem;          // 0x31C [O]; [R] ctor (9, "Farthest Impact Distance",
                                                         //       &D_004A4270, 0..2000)
@@ -1172,8 +1172,8 @@ struct cSplashTogglesMenu {
                                                         //       0..100)
     cFloatMenuItem DropMaxLifeSpanItem;                 // 0x4BC [O]; [R] ctor (17, "Drop Max Life Span", &D_004A4290,
                                                         //       0..100)
-    cFloatMenuItem DropMinSizeItem;                     // 0x4F0 [O]; [R] ctor (18, "Drop Min Size", &D_004A4294, 0..40)
-    cFloatMenuItem DropMaxSizeItem;                     // 0x524 [O]; [R] ctor (19, "Drop Max Size", &D_004A4298, 0..40)
+    cFloatMenuItem DropMinSizeItem;                     // 0x4F0 [O]; [R] ctor (18, "Drop Min Size", &cSplashToggles_m_DropMinSize, 0..40)
+    cFloatMenuItem DropMaxSizeItem;                     // 0x524 [O]; [R] ctor (19, "Drop Max Size", &cSplashToggles_m_DropMaxSize, 0..40)
     cFloatMenuItem DropMaxWidthHeightDifferenceItem;    // 0x558 [O]; [R] ctor (20, "Drop Max Width Height Difference",
                                                         //       &D_004A429C, 0..10)
     cFloatMenuItem DropMinVelocityJiggleXItem;          // 0x58C [O]; [R] ctor (21, "Drop Min Velocity Jiggle X",
@@ -1376,7 +1376,7 @@ struct cPathArrowMenu {
     // cPathArrowMenu's rows (0x130-0x487)
     cNullMenuItem TitleItem;              // 0x130 [O]; [R] ctor ("PathArrow Menu")
     cSpaceMenuItem SpaceItem;             // 0x14C [O]; [R] ctor (space 40)
-    cIntMenuItem EnableItem;              // 0x164 [O]; [R] ctor (0, "Enable", &D_004A41EC, 0..1)
+    cIntMenuItem EnableItem;              // 0x164 [O]; [R] ctor (0, "Enable", &cPathArrow_m_Enable, 0..1)
     cFloatMenuItem ScaleForwardWidthItem; // 0x194 [O]; [R] ctor (1, "Forward Width", &D_004A41F0, 0..1000)
     cFloatMenuItem ScaleMiddleWidthItem;  // 0x1C8 [O]; [R] ctor (2, "Middle Width", &D_004A41F4, 0..1000)
     cFloatMenuItem ScaleRearWidthItem;    // 0x1FC [O]; [R] ctor (3, "Rear Width", &D_004A41F8, 0..1000)
@@ -1525,15 +1525,15 @@ struct cAvalancheMenu {
     cIntMenuItem EnableItem;                        // 0x164 [O]; [R] ctor (0, "Enable", &cAvalanche_m_Enable, 0..1)
     cIntMenuItem RecalcItem;                        // 0x194 [O]; [R] ctor (1, "Recalc", &cAvalanche_m_Recalc, -1..1)
     cFloatMenuItem BrightnessItem;                  // 0x1C4 [O]; [R] ctor (2, "Brightness", &cAvalanche_m_Brightness, 0..4)
-    cIntMenuItem UseLightMapColourItem;             // 0x1F8 [O]; [R] ctor (3, "Use Light Map Colour", &D_004A3A3C,
+    cIntMenuItem UseLightMapColourItem;             // 0x1F8 [O]; [R] ctor (3, "Use Light Map Colour", &cAvalanche_m_UseLightMapColour,
                                                     //       0..1)
-    cIntMenuItem UseEndColourItem;                  // 0x228 [O]; [R] ctor (4, "Use End Colour", &D_004A3A40, 0..1)
-    cIntMenuItem SquareLerpItem;                    // 0x258 [O]; [R] ctor (5, "Square Lerp Value", &D_004A3A44, 0..1)
+    cIntMenuItem UseEndColourItem;                  // 0x228 [O]; [R] ctor (4, "Use End Colour", &cAvalanche_m_UseEndColour, 0..1)
+    cIntMenuItem SquareLerpItem;                    // 0x258 [O]; [R] ctor (5, "Square Lerp Value", &cAvalanche_m_SquareLerp, 0..1)
     cIntMenuItem SaveItem;                          // 0x288 [O]; [R] ctor (6, "Save", &cAvalanche_m_Save, 0..1)
     cIntMenuItem LoadItem;                          // 0x2B8 [O]; [R] ctor (7, "Load", &cAvalanche_m_Load, 0..1)
-    cFloatMenuItem MinImpactVelocityItem;           // 0x2E8 [O]; [R] ctor (8, "Min Impact Velocity", &D_004A3A50,
+    cFloatMenuItem MinImpactVelocityItem;           // 0x2E8 [O]; [R] ctor (8, "Min Impact Velocity", &cAvalanche_m_MinImpactVelocity,
                                                     //       0..120)
-    cIntMenuItem RenderEmittersItem;                // 0x31C [O]; [R] ctor (9, "Render Emitters", &D_004A3A54, 0..1)
+    cIntMenuItem RenderEmittersItem;                // 0x31C [O]; [R] ctor (9, "Render Emitters", &cAvalanche_m_RenderEmitters, 0..1)
     cIntMenuItem RenderLinesItem;                   // 0x34C [O]; [R] ctor (10, "Render N Lines", &cAvalanche_m_RenderLines, 0..63)
     cIntMenuItem TriggerItem;                       // 0x37C [O]; [R] ctor (11, "Trigger Avalanche",
                                                     //       &cAvalanche_m_Trigger, -1..1)
@@ -1554,22 +1554,22 @@ struct cAvalancheMenu {
                                                     //       &cAvalanche_m_AvalancheId, 0..1000)
     cFloatMenuItem GravityItem;                     // 0x544 [O]; [R] ctor (20, "Gravity", &cAvalanche_m_Gravity,
                                                     //       0..127)
-    cFloatMenuItem VelocityDampingItem;             // 0x578 [O]; [R] ctor (21, "Velocity Damping", &D_004A3A84, 0..1)
+    cFloatMenuItem VelocityDampingItem;             // 0x578 [O]; [R] ctor (21, "Velocity Damping", &cAvalanche_m_VelocityDamping, 0..1)
     cFloatMenuItem NormalVelocityScaleItem;         // 0x5AC [O]; [R] ctor (22, "Normal Velocity Scale",
                                                     //       &cAvalanche_m_NormalVelocityScale, 0..1)
-    cFloatMenuItem ForwardVelocityScaleItem;        // 0x5E0 [O]; [R] ctor (23, "Forward Velocity Scale", &D_004A3A8C,
+    cFloatMenuItem ForwardVelocityScaleItem;        // 0x5E0 [O]; [R] ctor (23, "Forward Velocity Scale", &cAvalanche_m_ForwardVelocityScale,
                                                     //       0..1)
-    cFloatMenuItem NormalToForwardScaleItem;        // 0x614 [O]; [R] ctor (24, "Normal To Forward Scale", &D_004A3A90,
+    cFloatMenuItem NormalToForwardScaleItem;        // 0x614 [O]; [R] ctor (24, "Normal To Forward Scale", &cAvalanche_m_NormalToForwardScale,
                                                     //       0..1)
-    cFloatMenuItem MaxVelocityItem;                 // 0x648 [O]; [R] ctor (25, "Max Velocity", &D_004A3A94, 1..119)
-    cFloatMenuItem DampingItem;                     // 0x67C [O]; [R] ctor (26, "Damping", &D_004A3A98, 0..1)
-    cIntMenuItem NumParticlesItem;                  // 0x6B0 [O]; [R] ctor (27, "Num Particles", &D_004A3A9C, 1..1024)
-    cFloatMenuItem DefaultSizeItem;                 // 0x6E0 [O]; [R] ctor (28, "Default Size", &D_004A3AA0, 1..1000)
-    cFloatMenuItem PatchColourScaleItem;            // 0x714 [O]; [R] ctor (29, "Patch Colour Scale", &D_004A3AA4,
+    cFloatMenuItem MaxVelocityItem;                 // 0x648 [O]; [R] ctor (25, "Max Velocity", &cAvalanche_m_MaxVelocity, 1..119)
+    cFloatMenuItem DampingItem;                     // 0x67C [O]; [R] ctor (26, "Damping", &cAvalanche_m_Damping, 0..1)
+    cIntMenuItem NumParticlesItem;                  // 0x6B0 [O]; [R] ctor (27, "Num Particles", &cAvalanche_m_NumParticles, 1..1024)
+    cFloatMenuItem DefaultSizeItem;                 // 0x6E0 [O]; [R] ctor (28, "Default Size", &cAvalanche_m_DefaultSize, 1..1000)
+    cFloatMenuItem PatchColourScaleItem;            // 0x714 [O]; [R] ctor (29, "Patch Colour Scale", &cAvalanche_m_PatchColourScale,
                                                     //       0..10)
     cFloatMenuItem PatchColourScale2Item;           // 0x748 [O]; [R] ctor (30, "Patch Colour Scale 2", &cAvalanche_m_PatchColourScale2,
                                                     //       0..10)
-    cFloatMenuItem SeedItem;                        // 0x77C [O]; [R] ctor (31, "Seed", &D_004A3AAC, -1..1000)
+    cFloatMenuItem SeedItem;                        // 0x77C [O]; [R] ctor (31, "Seed", &cAvalanche_m_Seed, -1..1000)
 };
 
 CHECK_OFFSET(cAvalancheMenu, NumItems, 0x000);

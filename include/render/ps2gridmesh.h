@@ -17,7 +17,7 @@
 // On Tour class cGarbageMan { cGarbageMan* mNext; }), written out inline. Vtables: cPS2GridMesh_vtbl (D_00493208, 9
 // slots: 1 dtor, 2 IsOk, 3 Update(t3Vector*), 4 Update(t2Vector*), 5 Update(t3Vector*, tARGB*), 6 Update(vert, rgb, uv),
 // 7 Render(BMat, material, TexMat), 8 Render(BMat, texid, TexMat), 9 SetScale); cGridMesh's D_004938E0 (dtor, 7 x
-// __pure_virtual, SetScale) and cGarbageMan's D_00493938 (dtor) are restored by the base destructor.
+// __pure_virtual, SetScale) and cGarbageMan's cGarbageMan_vtbl (dtor) are restored by the base destructor.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Tags:
 //   [R] retail's constructor cPS2GridMesh_cPS2GridMesh, destructors cPS2GridMesh__cPS2GridMesh / cGridMesh__cGridMesh;
@@ -37,7 +37,7 @@ struct cPS2GraphicsMan;
 struct cGridMesh {
     // --- cGarbageMan
     cGridMesh* mNext;               // 0x000 [O] cGarbageMan::mNext (no retail access seen; no ctor writes it)
-    void** mVtbl;                   // 0x004 [R] cGridMesh__cGridMesh stores cGarbageMan's vtable D_00493938 before delete
+    void** mVtbl;                   // 0x004 [R] cGridMesh__cGridMesh stores cGarbageMan's vtable cGarbageMan_vtbl before delete
 };
 
 CHECK_OFFSET(cGridMesh, mNext, 0x000);

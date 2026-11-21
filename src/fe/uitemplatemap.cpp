@@ -3008,7 +3008,7 @@ extern char str_Map_b[];
  *
  * Adds the screen with cUIEngine_addScreenByHashName on mpEngine and keeps it in mpScreen, plays frame 0 when it
  * exists, calls cOVState_onCreateScreen and then cUITemplate_MAP_onCreateScreen for the template embedded at +0x9C with
- * mpScreen and this state. It is the onCreateScreen slot (+0x24) of D_004733F8, the vtable of overlay 33
+ * mpScreen and this state. It is the onCreateScreen slot (+0x24) of cOVState_TRANSPORT_vtbl, the vtable of overlay 33
  * (cOVStateManager_triggerOverlay), whose template cUITemplate_MAP_init initialises.
  */
 extern "C" void cOVState_TRANSPORT_onCreateScreen(cOVState_TRANSPORT* self)

@@ -5189,14 +5189,14 @@ extern "C" void* cObjNode_cObjNode1(void* self, void* a1);
 extern "C" void* cScriptObjTransition_cScriptObjTransition(void* self);
 extern "C" void cScriptObject_InitScriptObject(void* self);
 extern "C" void cTransitionObj_InitializeBuffers(void);
-extern void* D_00488100[];
+extern void* cTransitionMan_cScriptObjTransition_vtbl[];
 extern void* cTransitionMan_vtbl[];
 
 /**
  * Constructs the screen transition manager for one view.
  *
  * Runs cObjNode_cObjNode1 with the bucket and the script-object constructor (cScriptObjTransition_cScriptObjTransition) on +0x10, stores the view
- * index at +0x74, zeroes the transition fields, sets the vtables (D_00488100 at +0x1C, cTransitionMan_vtbl at +0xC) and
+ * index at +0x74, zeroes the transition fields, sets the vtables (cTransitionMan_cScriptObjTransition_vtbl at +0x1C, cTransitionMan_vtbl at +0xC) and
  * the screen-grab handle at +0x6C to -1, then calls cTransitionObj_InitializeBuffers and cScriptObject_InitScriptObject on the script object.
  *
  * @param bucket  object bucket for the node (On Tour bucket)
@@ -5219,7 +5219,7 @@ extern "C" void* cTransitionMan_cTransitionMan(cTransitionMan* self, void* bucke
     self->mCurrentInitiator = 0;
     self->mRequestingDelete = 0;
     self->mRequestDeleteFrame = 0;
-    self->mScriptVtbl = D_00488100;
+    self->mScriptVtbl = cTransitionMan_cScriptObjTransition_vtbl;
     self->mVtbl = cTransitionMan_vtbl;
     self->mScreenGrabHandle.mTextureId = -1;
     cTransitionObj_InitializeBuffers();
@@ -5254,7 +5254,7 @@ extern "C" void cObjNode__cObjNode(void* self, int flags);
  */
 extern "C" void cTransitionMan__cTransitionMan(cTransitionMan* self, int flags)
 {
-    self->mScriptVtbl = D_00488100;
+    self->mScriptVtbl = cTransitionMan_cScriptObjTransition_vtbl;
     self->mVtbl = cTransitionMan_vtbl;
     char* scriptObj = (char*)&self->mObjType;
     cTransitionMan_EndTransition(self);
@@ -5777,7 +5777,7 @@ extern "C" void cTransitionMan_EndTransition(cTransitionMan* self);
  * Ends the transition when a player stops using the transition script object.
  *
  * Runs cScriptObject_OnEndObjectUse on the script object at +0x10, then cTransitionMan_EndTransition. It sits in the
- * cScriptObjTransition part's vtable (D_00488100) right after cTransitionMan_OnStartObjectUse.
+ * cScriptObjTransition part's vtable (cTransitionMan_cScriptObjTransition_vtbl) right after cTransitionMan_OnStartObjectUse.
  */
 extern "C" void cTransitionMan_OnEndObjectUse(cTransitionMan* self)
 {
@@ -5793,7 +5793,7 @@ INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_IsTransitionPending);
  * Returns whether both screen-grab flags (+0x60 and +0x64) are set.
  *
  * It fills a slot that the base cScriptObjTransition vtable leaves pure (__pure_virtual), in the transition manager's
- * vtable D_00488100.
+ * vtable cTransitionMan_cScriptObjTransition_vtbl.
  *
  * @return 1 when both flags are set, otherwise 0
  */

@@ -15,7 +15,7 @@
 // constructors with their in-charge vbase offsets, and the part vtables' offset-to-top), [R] the state dispatchers
 // (cRiderHandler_loseMotionState / cRiderHandler_gainMotionState / cRiderHandler_stepMotion / cRiderHandler_resolveMotion call part N at this + offset for
 // MotionState N; cRiderHandler_loseControlState / cRiderHandler_gainControlState / cRiderHandler_updateControl likewise for ControlState) and [R] the state name
-// tables D_00459D70 ("Ground" .. "Handplant") and D_00459DC8 ("Cruise" .. "Void"). The class names are EA's: the
+// tables D_00459D70 ("Ground" .. "Handplant") and ControlStateNames ("Cruise" .. "Void"). The class names are EA's: the
 // preview's _vt$<n><Class>$6cRider vtables and On Tour's base list `class cRiderHandler : cRider, cAirMotion,
 // cWipeoutMotion, ... cCheatFX` (same order). NOTE builds/x/v2/vtables_v2.tsv mislabels several retail part vtables
 // (e.g. D_00458A68 is cResetControl's, not cHandplantMotion's); src/ai/computer.cpp's equates are right.
@@ -63,7 +63,7 @@ CHECK_OFFSET(tCheatState, m_count, 0x2);
 CHECK_OFFSET(tCheatState, m_misc, 0x3);
 CHECK_SIZE(tCheatState, 0x4);
 
-// eMotionState / eControlState ([O] enum names; [R] D_00459D70 / D_00459DC8 name tables; the ctor stores 6 / 14).
+// eMotionState / eControlState ([O] enum names; [R] D_00459D70 / ControlStateNames name tables; the ctor stores 6 / 14).
 enum eMotionState {
     MS_Ground = 0, MS_Air = 1, MS_Wipeout = 2, MS_Static = 3, MS_Railslide = 4, MS_Handplant = 5, MS_Num = 6
 };

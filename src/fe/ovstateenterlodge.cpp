@@ -379,7 +379,7 @@ extern char str_90bc_fail[];
  *
  * Sets mHashName to the hash of "90bc_fail", adds that screen to mpEngine for this state
  * (cUIEngine_addScreenByHashName) into mpScreen, plays it from frame 0 when it exists, then runs
- * cOVState_onCreateScreen. It is the onCreateScreen slot of this overlay's vtable D_004735B0.
+ * cOVState_onCreateScreen. It is the onCreateScreen slot of this overlay's vtable cOVState_BIGCHALLENGE_FAIL_vtbl.
  */
 extern "C" void cOVState_BIGCHALLENGE_FAIL_onCreateScreen(cOVState_BIGCHALLENGE_FAIL* self)
 {

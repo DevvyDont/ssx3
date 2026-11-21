@@ -189,8 +189,8 @@ void PS2_SONY_CODEC_INTERNAL_operator_new2(int allocSize) {
 INCLUDE_ASM("seg/seg_32F020", __tf23PS2_SONY_CODEC_INTERNAL);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_0053EA00;
-extern int D_004A5BA0;
+extern int __ti23PS2_SONY_CODEC_INTERNAL;
+extern int __tiQ24RCMP5CODEC;
 extern char str_Q24RCMP5CODEC[];
 extern char str_23PS2_SONY_CODEC_INTERNAL[];
 extern void __rtti_user(void *a0, void *a1);
@@ -198,19 +198,19 @@ extern void __rtti_si(void *a0, void *a1, void *a2);
 /**
  * Returns the run-time type descriptor of PS2_SONY_CODEC_INTERNAL, building it on first use.
  *
- * When D_0053EA00 is still empty it first builds the base class descriptor D_004A5BA0 ("Q24RCMP5CODEC", __rtti_user)
- * if needed, then D_0053EA00 itself as a single-base descriptor named "23PS2_SONY_CODEC_INTERNAL" (__rtti_si).
+ * When __ti23PS2_SONY_CODEC_INTERNAL is still empty it first builds the base class descriptor __tiQ24RCMP5CODEC ("Q24RCMP5CODEC", __rtti_user)
+ * if needed, then __ti23PS2_SONY_CODEC_INTERNAL itself as a single-base descriptor named "23PS2_SONY_CODEC_INTERNAL" (__rtti_si).
  *
- * @return &D_0053EA00
+ * @return &__ti23PS2_SONY_CODEC_INTERNAL
  */
 int *__tf23PS2_SONY_CODEC_INTERNAL(void) {
-    if (D_0053EA00 == 0) {
-        if (D_004A5BA0 == 0) {
-            __rtti_user(&D_004A5BA0, str_Q24RCMP5CODEC);
+    if (__ti23PS2_SONY_CODEC_INTERNAL == 0) {
+        if (__tiQ24RCMP5CODEC == 0) {
+            __rtti_user(&__tiQ24RCMP5CODEC, str_Q24RCMP5CODEC);
         }
-        __rtti_si(&D_0053EA00, str_23PS2_SONY_CODEC_INTERNAL, &D_004A5BA0);
+        __rtti_si(&__ti23PS2_SONY_CODEC_INTERNAL, str_23PS2_SONY_CODEC_INTERNAL, &__tiQ24RCMP5CODEC);
     }
-    return &D_0053EA00;
+    return &__ti23PS2_SONY_CODEC_INTERNAL;
 }
 #endif
 
@@ -239,20 +239,20 @@ void RCMP_CODEC__CODEC(int *codecObj, int dtorFlags) {
 INCLUDE_ASM("seg/seg_32F020", __tfQ24RCMP5CODEC);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_004A5BA0;
+extern int __tiQ24RCMP5CODEC;
 extern char str_Q24RCMP5CODEC[];
 extern void __rtti_user(void *a0, void *a1);
 /**
- * Returns the run-time type descriptor of RCMP::CODEC (D_004A5BA0, named "Q24RCMP5CODEC"), building it on first use
+ * Returns the run-time type descriptor of RCMP::CODEC (__tiQ24RCMP5CODEC, named "Q24RCMP5CODEC"), building it on first use
  * with __rtti_user.
  *
- * @return &D_004A5BA0
+ * @return &__tiQ24RCMP5CODEC
  */
 int *__tfQ24RCMP5CODEC(void) {
-    if (D_004A5BA0 == 0) {
-        __rtti_user(&D_004A5BA0, str_Q24RCMP5CODEC);
+    if (__tiQ24RCMP5CODEC == 0) {
+        __rtti_user(&__tiQ24RCMP5CODEC, str_Q24RCMP5CODEC);
     }
-    return &D_004A5BA0;
+    return &__tiQ24RCMP5CODEC;
 }
 #endif
 

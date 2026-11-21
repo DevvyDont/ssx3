@@ -14,7 +14,7 @@
 // Classes here (sizes [R] from the allocations; On Tour: the same sizes and members):
 //   tWorldPainterRegionType 0x4, tWPNameField 0x8, tWPData 0x4 + tWPData_<X> (the file's region data),
 //   tWPInGameData 0x8 + 14 tWPInGameData_<X> (vptr at 0x4, after tWPInGameData's one data member), tWorldPainterQuery
-//   0x8 (m_data + vptr; vtable D_00485D30 {dtor, pure queryPosition}), cWorldPainterQuery 0x18 (derives from
+//   0x8 (m_data + vptr; vtable tWorldPainterQuery_vtbl {dtor, pure queryPosition}), cWorldPainterQuery 0x18 (derives from
 //   tWorldPainterQuery; vtable cWorldPainterQuery_vtbl = D_00483E00 {dtor cWorldPainterQuery__cWorldPainterQuery, queryPosition cWorldPainterQuery_queryPosition}).
 // tWPInGameData's vtable (base D_00485D50, 69 slots): 1-63 the getters in On Tour's order (Type, Value, MixPreset,
 // BankID, SpeechID, DrawDistance, FogDensity ... PointRate; each subclass overrides its own and they return
@@ -31,7 +31,7 @@
 // Statics (not declared here: the .cpp files declare these D_ symbols with differing types):
 //   cWorldPainterQuery::m_queryListStart = cWorldPainterQuery_m_queryListStart ([O] static member; [U] ctor, dtor, reset);
 //   kNullNameField (static const tWPNameField, a copy per translation unit: D_004A52E0 worldpainterlayer,
-//   D_004A5358 worldpainterman, D_004A53D0 worldpainterquery; [O] On Tour globals; [R] the static initializers zero
+//   D_004A5358 worldpainterman, kNullNameField worldpainterquery; [O] On Tour globals; [R] the static initializers zero
 //   it, the Lighting ctor/setDefaults copy it into the names);
 //   kWPR_MusicTrigger..kWPR_Danger (static const tWorldPainterRegionType(n, n), n = 0..13, a copy per translation
 //   unit, 8 bytes apart: D_004A52E8.. worldpainterlayer, D_004A5360.. worldpainterman, D_004A53D8.. worldpainterquery,
@@ -324,7 +324,7 @@ CHECK_SIZE(tWPData_Danger, 0x0C);
 struct tWPInGameData_MusicTrigger {
     // --- tWPInGameData
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_MusicTrigger_tWPInGameData_MusicTrigger stores -99999.0f
-    void** mVtbl;                    // 0x04 [R] tWPInGameData_MusicTrigger_tWPInGameData_MusicTrigger stores the vtable D_00485AF8
+    void** mVtbl;                    // 0x04 [R] tWPInGameData_MusicTrigger_tWPInGameData_MusicTrigger stores the vtable tWPInGameData_MusicTrigger_vtbl
     // --- tWPInGameData_MusicTrigger (alloc tag "tWPIGD_MusicTrigger", 0x18 bytes)
     int m_Type;                      // 0x08 [O]; [R] ctor default; [U] getter vtable slot 1 (tWPInGameData_MusicTrigger_Type) returns this + 0x8
     int m_lastType;                  // 0x0C [O]; [R] ctor default; [U] blend stores the target
@@ -343,7 +343,7 @@ CHECK_SIZE(tWPInGameData_MusicTrigger, 0x18);
 struct tWPInGameData_Mix {
     // --- tWPInGameData
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_Mix_tWPInGameData_Mix stores -99999.0f
-    void** mVtbl;                    // 0x04 [R] tWPInGameData_Mix_tWPInGameData_Mix stores the vtable D_004858C0
+    void** mVtbl;                    // 0x04 [R] tWPInGameData_Mix_tWPInGameData_Mix stores the vtable tWPInGameData_Mix_vtbl
     // --- tWPInGameData_Mix (alloc tag "tWPIGD_Mix", 0x10 bytes)
     int m_MixPreset;                 // 0x08 [O]; [R] ctor default; [U] getter vtable slot 3 (tWPInGameData_Mix_MixPreset) returns this + 0x8
     int m_lastMixPreset;             // 0x0C [O]; [R] ctor default; [U] blend stores the target
@@ -358,7 +358,7 @@ CHECK_SIZE(tWPInGameData_Mix, 0x10);
 struct tWPInGameData_Ambience {
     // --- tWPInGameData
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_Ambience_tWPInGameData_Ambience stores -99999.0f
-    void** mVtbl;                    // 0x04 [R] tWPInGameData_Ambience_tWPInGameData_Ambience stores the vtable D_00485688
+    void** mVtbl;                    // 0x04 [R] tWPInGameData_Ambience_tWPInGameData_Ambience stores the vtable tWPInGameData_Ambience_vtbl
     // --- tWPInGameData_Ambience (alloc tag "tWPIGD_Ambience", 0x10 bytes)
     int m_BankID;                    // 0x08 [O]; [R] ctor default; [U] getter vtable slot 4 (tWPInGameData_Ambience_BankID) returns this + 0x8
     int m_lastBankID;                // 0x0C [O]; [R] ctor default; [U] blend stores the target
@@ -373,7 +373,7 @@ CHECK_SIZE(tWPInGameData_Ambience, 0x10);
 struct tWPInGameData_Speech {
     // --- tWPInGameData
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_Speech_tWPInGameData_Speech stores -99999.0f
-    void** mVtbl;                    // 0x04 [R] tWPInGameData_Speech_tWPInGameData_Speech stores the vtable D_00485450
+    void** mVtbl;                    // 0x04 [R] tWPInGameData_Speech_tWPInGameData_Speech stores the vtable tWPInGameData_Speech_vtbl
     // --- tWPInGameData_Speech (alloc tag "tWPIGD_Speech", 0x10 bytes)
     int m_SpeechID;                  // 0x08 [O]; [R] ctor default; [U] getter vtable slot 5 (tWPInGameData_Speech_SpeechID) returns this + 0x8
     int m_lastSpeechID;              // 0x0C [O]; [R] ctor default; [U] blend stores the target
@@ -388,7 +388,7 @@ CHECK_SIZE(tWPInGameData_Speech, 0x10);
 struct tWPInGameData_Camera {
     // --- tWPInGameData
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_Camera_tWPInGameData_Camera stores -99999.0f
-    void** mVtbl;                    // 0x04 [R] tWPInGameData_Camera_tWPInGameData_Camera stores the vtable D_00485218
+    void** mVtbl;                    // 0x04 [R] tWPInGameData_Camera_tWPInGameData_Camera stores the vtable tWPInGameData_Camera_vtbl
     // --- tWPInGameData_Camera (alloc tag "tWPIGD_Camera", 0x10 bytes)
     float m_DrawDistance;            // 0x08 [O]; [R] ctor default; [U] getter vtable slot 6 (tWPInGameData_Camera_DrawDistance) returns this + 0x8
     float m_lastDrawDistance;        // 0x0C [O]; [R] ctor default; [U] blend stores the target
@@ -403,7 +403,7 @@ CHECK_SIZE(tWPInGameData_Camera, 0x10);
 struct tWPInGameData_Fog {
     // --- tWPInGameData
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_Fog_tWPInGameData_Fog stores -99999.0f
-    void** mVtbl;                    // 0x04 [R] tWPInGameData_Fog_tWPInGameData_Fog stores the vtable D_00484FE0
+    void** mVtbl;                    // 0x04 [R] tWPInGameData_Fog_tWPInGameData_Fog stores the vtable tWPInGameData_Fog_vtbl
     // --- tWPInGameData_Fog (alloc tag "tWPIGD_Fog", 0x38 bytes)
     float m_FogDensity;              // 0x08 [O]; [R] ctor default; [U] getter vtable slot 7 (tWPInGameData_Fog_FogDensity) returns this + 0x8
     float m_lastFogDensity;          // 0x0C [O]; [R] ctor default; [U] blend stores the target
@@ -438,7 +438,7 @@ CHECK_SIZE(tWPInGameData_Fog, 0x38);
 struct tWPInGameData_LightGlow {
     // --- tWPInGameData
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_LightGlow_tWPInGameData_LightGlow stores -99999.0f
-    void** mVtbl;                    // 0x04 [R] tWPInGameData_LightGlow_tWPInGameData_LightGlow stores the vtable D_00484DA8
+    void** mVtbl;                    // 0x04 [R] tWPInGameData_LightGlow_tWPInGameData_LightGlow stores the vtable tWPInGameData_LightGlow_vtbl
     // --- tWPInGameData_LightGlow (alloc tag "tWPIGD_LightGlow", 0x40 bytes)
     float m_LightGlowCutoff;         // 0x08 [O]; [R] ctor default; [U] getter vtable slot 13 (tWPInGameData_LightGlow_LightGlowCutoff) returns this + 0x8
     float m_lastLightGlowCutoff;     // 0x0C [O]; [R] ctor default; [U] blend stores the target
@@ -477,7 +477,7 @@ CHECK_SIZE(tWPInGameData_LightGlow, 0x40);
 struct tWPInGameData_ScreenTint {
     // --- tWPInGameData
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_ScreenTint_tWPInGameData_ScreenTint stores -99999.0f
-    void** mVtbl;                    // 0x04 [R] tWPInGameData_ScreenTint_tWPInGameData_ScreenTint stores the vtable D_00484B70
+    void** mVtbl;                    // 0x04 [R] tWPInGameData_ScreenTint_tWPInGameData_ScreenTint stores the vtable tWPInGameData_ScreenTint_vtbl
     // --- tWPInGameData_ScreenTint (alloc tag "tWPIGD_ScreenTint", 0x38 bytes)
     float m_ScreenTintScaleR;        // 0x08 [O]; [R] ctor default; [U] getter vtable slot 20 (tWPInGameData_ScreenTint_ScreenTintScaleR) returns this + 0x8
     float m_lastScreenTintScaleR;    // 0x0C [O]; [R] ctor default; [U] blend stores the target
@@ -512,7 +512,7 @@ CHECK_SIZE(tWPInGameData_ScreenTint, 0x38);
 struct tWPInGameData_SkyBox {
     // --- tWPInGameData
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_SkyBox_tWPInGameData_SkyBox stores -99999.0f
-    void** mVtbl;                    // 0x04 [R] tWPInGameData_SkyBox_tWPInGameData_SkyBox stores the vtable D_00484938
+    void** mVtbl;                    // 0x04 [R] tWPInGameData_SkyBox_tWPInGameData_SkyBox stores the vtable tWPInGameData_SkyBox_vtbl
     // --- tWPInGameData_SkyBox (alloc tag "tWPIGD_SkyBox", 0x10 bytes)
     float m_SkyBoxRotation;          // 0x08 [O]; [R] ctor default; [U] getter vtable slot 26 (tWPInGameData_SkyBox_SkyBoxRotation) returns this + 0x8
     float m_lastSkyBoxRotation;      // 0x0C [O]; [R] ctor default; [U] blend stores the target
@@ -527,7 +527,7 @@ CHECK_SIZE(tWPInGameData_SkyBox, 0x10);
 struct tWPInGameData_Sun {
     // --- tWPInGameData
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_Sun_tWPInGameData_Sun stores -99999.0f
-    void** mVtbl;                    // 0x04 [R] tWPInGameData_Sun_tWPInGameData_Sun stores the vtable D_00484700
+    void** mVtbl;                    // 0x04 [R] tWPInGameData_Sun_tWPInGameData_Sun stores the vtable tWPInGameData_Sun_vtbl
     // --- tWPInGameData_Sun (alloc tag "tWPIGD_Sun", 0x50 bytes)
     float m_SunPitchOffset;          // 0x08 [O]; [R] ctor default; [U] getter vtable slot 27 (tWPInGameData_Sun_SunPitchOffset) returns this + 0x8
     float m_lastSunPitchOffset;      // 0x0C [O]; [R] ctor default; [U] blend stores the target
@@ -574,7 +574,7 @@ CHECK_SIZE(tWPInGameData_Sun, 0x50);
 struct tWPInGameData_Surface {
     // --- tWPInGameData
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_Surface_tWPInGameData_Surface stores -99999.0f
-    void** mVtbl;                    // 0x04 [R] tWPInGameData_Surface_tWPInGameData_Surface stores the vtable D_004844C8
+    void** mVtbl;                    // 0x04 [R] tWPInGameData_Surface_tWPInGameData_Surface stores the vtable tWPInGameData_Surface_vtbl
     // --- tWPInGameData_Surface (alloc tag "tWPIGD_Surface", 0x10 bytes)
     float m_SnowSparkleDensity;      // 0x08 [O]; [R] ctor default; [U] getter vtable slot 36 (tWPInGameData_Surface_SnowSparkleDensity) returns this + 0x8
     float m_lastSnowSparkleDensity;  // 0x0C [O]; [R] ctor default; [U] blend stores the target
@@ -589,7 +589,7 @@ CHECK_SIZE(tWPInGameData_Surface, 0x10);
 struct tWPInGameData_Lighting {
     // --- tWPInGameData
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_Lighting_tWPInGameData_Lighting stores -99999.0f
-    void** mVtbl;                    // 0x04 [R] tWPInGameData_Lighting_tWPInGameData_Lighting stores the vtable D_00484290
+    void** mVtbl;                    // 0x04 [R] tWPInGameData_Lighting_tWPInGameData_Lighting stores the vtable tWPInGameData_Lighting_vtbl
     // --- tWPInGameData_Lighting (alloc tag "tWPIGD_Lighting", 0x58 bytes)
     tWPNameField m_LightIrradianceName; // 0x08 [O]; [R] ctor default; [U] getter vtable slot 37 (tWPInGameData_Lighting_LightIrradianceName) returns this + 0x8
     tWPNameField m_lastLightIrradianceName; // 0x10 [O]; [R] ctor default; [U] blend stores the target
@@ -624,7 +624,7 @@ CHECK_SIZE(tWPInGameData_Lighting, 0x58);
 struct tWPInGameData_Weather {
     // --- tWPInGameData
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_Weather_tWPInGameData_Weather stores -99999.0f
-    void** mVtbl;                    // 0x04 [R] tWPInGameData_Weather_tWPInGameData_Weather stores the vtable D_00484058
+    void** mVtbl;                    // 0x04 [R] tWPInGameData_Weather_tWPInGameData_Weather stores the vtable tWPInGameData_Weather_vtbl
     // --- tWPInGameData_Weather (alloc tag "tWPIGD_Weather", 0xA0 bytes)
     float m_SnowIntensity;           // 0x08 [O]; [R] ctor default; [U] getter vtable slot 43 (tWPInGameData_Weather_SnowIntensity) returns this + 0x8
     float m_lastSnowIntensity;       // 0x0C [O]; [R] ctor default; [U] blend stores the target
@@ -711,7 +711,7 @@ CHECK_SIZE(tWPInGameData_Weather, 0xA0);
 struct tWPInGameData_Danger {
     // --- tWPInGameData
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_Danger_tWPInGameData_Danger stores -99999.0f
-    void** mVtbl;                    // 0x04 [R] tWPInGameData_Danger_tWPInGameData_Danger stores the vtable D_00483E20
+    void** mVtbl;                    // 0x04 [R] tWPInGameData_Danger_tWPInGameData_Danger stores the vtable tWPInGameData_Danger_vtbl
     // --- tWPInGameData_Danger (alloc tag "tWPIGD_Danger", 0x18 bytes)
     int m_Level;                     // 0x08 [O]; [R] ctor default; [U] getter vtable slot 62 (tWPInGameData_Danger_Level) returns this + 0x8
     int m_lastLevel;                 // 0x0C [O]; [R] ctor default; [U] blend stores the target
@@ -731,7 +731,7 @@ CHECK_SIZE(tWPInGameData_Danger, 0x18);
 // On Tour: tWorldPainterQuery, 8 bytes (m_data, then the vptr of its virtual dtor / queryPosition).
 struct tWorldPainterQuery {
     tWPInGameData* m_data;          // 0x0 [O]
-    void** mVtbl;                   // 0x4 [R] tWorldPainterQuery__tWorldPainterQuery (dtor) stores D_00485D30
+    void** mVtbl;                   // 0x4 [R] tWorldPainterQuery__tWorldPainterQuery (dtor) stores tWorldPainterQuery_vtbl
 };
 
 CHECK_OFFSET(tWorldPainterQuery, m_data, 0x0);
@@ -744,7 +744,7 @@ struct cWorldPainterQuery {
                                     //       [U] queryPosition blends into it and returns it; reset writes its
                                     //       m_wpTravelDistance
     void** mVtbl;                   // 0x04 [R] ctor and dtor store cWorldPainterQuery_vtbl (D_00483E00); the dtor then
-                                    //       the base's D_00485D30
+                                    //       the base's tWorldPainterQuery_vtbl
     // --- cWorldPainterQuery
     float m_x;                      // 0x08 [O]; [R] ctor stores a sentinel; [U] queryPosition: the last fx (distance
                                     //       moved), then stores fx

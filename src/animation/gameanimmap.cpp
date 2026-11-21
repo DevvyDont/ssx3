@@ -551,15 +551,15 @@ INCLUDE_ASM("animation/gameanimmap", func_00315A20);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern float D_004FE920[8];
-extern float D_004FE940[8];
-extern float D_004FE960[8];
-extern float D_004FE980[8];
-extern float D_004FE9A0[8];
-extern float D_004FE9C0[8];
-extern float D_004FE9E0[8];
-extern float D_004FEA00[8];
-extern float D_004FEA20[8];
+extern float cfm_sav_Physics_BoardPress_kBPEasyBalanceRate[8];
+extern float cfm_sav_Physics_BoardPress_kBPHardBalanceRate[8];
+extern float cfm_sav_Physics_Cruise_kPowderTiltBwd[8];
+extern float cfm_sav_Physics_Turn_kDigMult[8];
+extern float cfm_sav_Physics_Turn_kMaxTurnKickAngle[8];
+extern float cfm_sav_Physics_Turn_kKickAngleSpeed[8];
+extern float cfm_sav_Physics_Turn_kLowSpeedRotation[8];
+extern float cfm_sav_Physics_Turn_kSteerTuneMaxAttribEffect[8];
+extern float cfm_sav_Physics_Turn_kSteerTuneMinAttribEffect[8];
 extern float D_004FEA40[4];
 extern float D_004FEA50[4];
 extern float D_004FEA60[4];
@@ -636,12 +636,12 @@ extern float D_004FEFE0[4];
 extern float D_004FEFF0[4];
 void sti_00315A20(int init, int prio) __asm__("func_00315A20");
 /**
- * Static initializer of this unit's second group of globals: fills 83 float tables (D_004FE920 .. ) with constants.
+ * Static initializer of this unit's second group of globals: fills 83 float tables (cfm_sav_Physics_BoardPress_kBPEasyBalanceRate .. ) with constants.
  *
  * Runs only for @p init nonzero and @p prio 0xFFFF (called by func_00316878 with 1, 0xFFFF). The tables are four or
- * eight floats; the eight-float ones read as four (x, y) points of a piecewise curve (e.g. D_004FE920 = (0, 0.2),
- * (0.4, 0.4), (0.6, 0.4), (1, 0.2)), and the AI code reaches several through pointers in .sdata (D_004A1114 ->
- * D_004FE920, D_004A111C -> D_004FE940).
+ * eight floats; the eight-float ones read as four (x, y) points of a piecewise curve (e.g. cfm_sav_Physics_BoardPress_kBPEasyBalanceRate = (0, 0.2),
+ * (0.4, 0.4), (0.6, 0.4), (1, 0.2)), and the AI code reaches several through pointers in .sdata (kBPEasyBalanceRate ->
+ * cfm_sav_Physics_BoardPress_kBPEasyBalanceRate, kBPHardBalanceRate -> cfm_sav_Physics_BoardPress_kBPHardBalanceRate).
  *
  * @param init  nonzero to initialize (0 would be destruction; nothing is done then)
  * @param prio  the initialization priority; only 0xFFFF (the default) does anything
@@ -649,78 +649,78 @@ void sti_00315A20(int init, int prio) __asm__("func_00315A20");
 void sti_00315A20(int init, int prio)
 {
     if (prio == 0xFFFF && init) {
-        D_004FE920[0] = 0.0f;
-        D_004FE920[1] = 0.20000000298023224f;
-        D_004FE920[2] = 0.4000000059604645f;
-        D_004FE920[3] = 0.4000000059604645f;
-        D_004FE920[4] = 0.6000000238418579f;
-        D_004FE920[5] = 0.4000000059604645f;
-        D_004FE920[6] = 1.0f;
-        D_004FE920[7] = 0.20000000298023224f;
-        D_004FE940[0] = 0.0f;
-        D_004FE940[1] = 0.30000001192092896f;
-        D_004FE940[2] = 0.4000000059604645f;
-        D_004FE940[3] = 1.2000000476837158f;
-        D_004FE940[4] = 0.6000000238418579f;
-        D_004FE940[5] = 1.2000000476837158f;
-        D_004FE940[6] = 1.0f;
-        D_004FE940[7] = 0.30000001192092896f;
-        D_004FE960[0] = 0.0f;
-        D_004FE960[1] = 0.20000000298023224f;
-        D_004FE960[2] = 40.517601013183594f;
-        D_004FE960[3] = 0.8055530190467834f;
-        D_004FE960[4] = 50.945098876953125f;
-        D_004FE960[5] = 0.35607799887657166f;
-        D_004FE960[6] = 120.0f;
-        D_004FE960[7] = 0.2501629889011383f;
-        D_004FE980[0] = 0.0f;
-        D_004FE980[1] = 1.750789999961853f;
-        D_004FE980[2] = 49.37540054321289f;
-        D_004FE980[3] = 1.7348599433898926f;
-        D_004FE980[4] = 79.97119903564453f;
-        D_004FE980[5] = 1.7510600090026855f;
-        D_004FE980[6] = 120.0f;
-        D_004FE980[7] = 0.885142982006073f;
-        D_004FE9A0[0] = 0.0f;
-        D_004FE9A0[1] = 40.959598541259766f;
-        D_004FE9A0[2] = 20.827800750732422f;
-        D_004FE9A0[3] = 10.0f;
-        D_004FE9A0[4] = 50.08369827270508f;
-        D_004FE9A0[5] = 10.0f;
-        D_004FE9A0[6] = 120.0f;
-        D_004FE9A0[7] = 10.0f;
-        D_004FE9C0[0] = 0.0f;
-        D_004FE9C0[1] = 1.0614099502563477f;
-        D_004FE9C0[2] = 20.654800415039062f;
-        D_004FE9C0[3] = 1.1025999784469604f;
-        D_004FE9C0[4] = 68.0f;
-        D_004FE9C0[5] = 1.022879958152771f;
-        D_004FE9C0[6] = 120.0f;
-        D_004FE9C0[7] = 1.0f;
-        D_004FE9E0[0] = 0.0f;
-        D_004FE9E0[1] = 0.0f;
-        D_004FE9E0[2] = 22.6156005859375f;
-        D_004FE9E0[3] = 0.0f;
-        D_004FE9E0[4] = 41.7135009765625f;
-        D_004FE9E0[5] = 0.0f;
-        D_004FE9E0[6] = 120.0f;
-        D_004FE9E0[7] = 0.0f;
-        D_004FEA00[0] = 0.0f;
-        D_004FEA00[1] = 0.9511110186576843f;
-        D_004FEA00[2] = 45.61130142211914f;
-        D_004FEA00[3] = 0.952904999256134f;
-        D_004FEA00[4] = 100.22699737548828f;
-        D_004FEA00[5] = 0.9505529999732971f;
-        D_004FEA00[6] = 120.0f;
-        D_004FEA00[7] = 0.9033470153808594f;
-        D_004FEA20[0] = 0.0f;
-        D_004FEA20[1] = 0.8039699792861938f;
-        D_004FEA20[2] = 40.09749984741211f;
-        D_004FEA20[3] = 0.7641159892082214f;
-        D_004FEA20[4] = 90.90560150146484f;
-        D_004FEA20[5] = 0.7656030058860779f;
-        D_004FEA20[6] = 120.0f;
-        D_004FEA20[7] = 0.7000259757041931f;
+        cfm_sav_Physics_BoardPress_kBPEasyBalanceRate[0] = 0.0f;
+        cfm_sav_Physics_BoardPress_kBPEasyBalanceRate[1] = 0.20000000298023224f;
+        cfm_sav_Physics_BoardPress_kBPEasyBalanceRate[2] = 0.4000000059604645f;
+        cfm_sav_Physics_BoardPress_kBPEasyBalanceRate[3] = 0.4000000059604645f;
+        cfm_sav_Physics_BoardPress_kBPEasyBalanceRate[4] = 0.6000000238418579f;
+        cfm_sav_Physics_BoardPress_kBPEasyBalanceRate[5] = 0.4000000059604645f;
+        cfm_sav_Physics_BoardPress_kBPEasyBalanceRate[6] = 1.0f;
+        cfm_sav_Physics_BoardPress_kBPEasyBalanceRate[7] = 0.20000000298023224f;
+        cfm_sav_Physics_BoardPress_kBPHardBalanceRate[0] = 0.0f;
+        cfm_sav_Physics_BoardPress_kBPHardBalanceRate[1] = 0.30000001192092896f;
+        cfm_sav_Physics_BoardPress_kBPHardBalanceRate[2] = 0.4000000059604645f;
+        cfm_sav_Physics_BoardPress_kBPHardBalanceRate[3] = 1.2000000476837158f;
+        cfm_sav_Physics_BoardPress_kBPHardBalanceRate[4] = 0.6000000238418579f;
+        cfm_sav_Physics_BoardPress_kBPHardBalanceRate[5] = 1.2000000476837158f;
+        cfm_sav_Physics_BoardPress_kBPHardBalanceRate[6] = 1.0f;
+        cfm_sav_Physics_BoardPress_kBPHardBalanceRate[7] = 0.30000001192092896f;
+        cfm_sav_Physics_Cruise_kPowderTiltBwd[0] = 0.0f;
+        cfm_sav_Physics_Cruise_kPowderTiltBwd[1] = 0.20000000298023224f;
+        cfm_sav_Physics_Cruise_kPowderTiltBwd[2] = 40.517601013183594f;
+        cfm_sav_Physics_Cruise_kPowderTiltBwd[3] = 0.8055530190467834f;
+        cfm_sav_Physics_Cruise_kPowderTiltBwd[4] = 50.945098876953125f;
+        cfm_sav_Physics_Cruise_kPowderTiltBwd[5] = 0.35607799887657166f;
+        cfm_sav_Physics_Cruise_kPowderTiltBwd[6] = 120.0f;
+        cfm_sav_Physics_Cruise_kPowderTiltBwd[7] = 0.2501629889011383f;
+        cfm_sav_Physics_Turn_kDigMult[0] = 0.0f;
+        cfm_sav_Physics_Turn_kDigMult[1] = 1.750789999961853f;
+        cfm_sav_Physics_Turn_kDigMult[2] = 49.37540054321289f;
+        cfm_sav_Physics_Turn_kDigMult[3] = 1.7348599433898926f;
+        cfm_sav_Physics_Turn_kDigMult[4] = 79.97119903564453f;
+        cfm_sav_Physics_Turn_kDigMult[5] = 1.7510600090026855f;
+        cfm_sav_Physics_Turn_kDigMult[6] = 120.0f;
+        cfm_sav_Physics_Turn_kDigMult[7] = 0.885142982006073f;
+        cfm_sav_Physics_Turn_kMaxTurnKickAngle[0] = 0.0f;
+        cfm_sav_Physics_Turn_kMaxTurnKickAngle[1] = 40.959598541259766f;
+        cfm_sav_Physics_Turn_kMaxTurnKickAngle[2] = 20.827800750732422f;
+        cfm_sav_Physics_Turn_kMaxTurnKickAngle[3] = 10.0f;
+        cfm_sav_Physics_Turn_kMaxTurnKickAngle[4] = 50.08369827270508f;
+        cfm_sav_Physics_Turn_kMaxTurnKickAngle[5] = 10.0f;
+        cfm_sav_Physics_Turn_kMaxTurnKickAngle[6] = 120.0f;
+        cfm_sav_Physics_Turn_kMaxTurnKickAngle[7] = 10.0f;
+        cfm_sav_Physics_Turn_kKickAngleSpeed[0] = 0.0f;
+        cfm_sav_Physics_Turn_kKickAngleSpeed[1] = 1.0614099502563477f;
+        cfm_sav_Physics_Turn_kKickAngleSpeed[2] = 20.654800415039062f;
+        cfm_sav_Physics_Turn_kKickAngleSpeed[3] = 1.1025999784469604f;
+        cfm_sav_Physics_Turn_kKickAngleSpeed[4] = 68.0f;
+        cfm_sav_Physics_Turn_kKickAngleSpeed[5] = 1.022879958152771f;
+        cfm_sav_Physics_Turn_kKickAngleSpeed[6] = 120.0f;
+        cfm_sav_Physics_Turn_kKickAngleSpeed[7] = 1.0f;
+        cfm_sav_Physics_Turn_kLowSpeedRotation[0] = 0.0f;
+        cfm_sav_Physics_Turn_kLowSpeedRotation[1] = 0.0f;
+        cfm_sav_Physics_Turn_kLowSpeedRotation[2] = 22.6156005859375f;
+        cfm_sav_Physics_Turn_kLowSpeedRotation[3] = 0.0f;
+        cfm_sav_Physics_Turn_kLowSpeedRotation[4] = 41.7135009765625f;
+        cfm_sav_Physics_Turn_kLowSpeedRotation[5] = 0.0f;
+        cfm_sav_Physics_Turn_kLowSpeedRotation[6] = 120.0f;
+        cfm_sav_Physics_Turn_kLowSpeedRotation[7] = 0.0f;
+        cfm_sav_Physics_Turn_kSteerTuneMaxAttribEffect[0] = 0.0f;
+        cfm_sav_Physics_Turn_kSteerTuneMaxAttribEffect[1] = 0.9511110186576843f;
+        cfm_sav_Physics_Turn_kSteerTuneMaxAttribEffect[2] = 45.61130142211914f;
+        cfm_sav_Physics_Turn_kSteerTuneMaxAttribEffect[3] = 0.952904999256134f;
+        cfm_sav_Physics_Turn_kSteerTuneMaxAttribEffect[4] = 100.22699737548828f;
+        cfm_sav_Physics_Turn_kSteerTuneMaxAttribEffect[5] = 0.9505529999732971f;
+        cfm_sav_Physics_Turn_kSteerTuneMaxAttribEffect[6] = 120.0f;
+        cfm_sav_Physics_Turn_kSteerTuneMaxAttribEffect[7] = 0.9033470153808594f;
+        cfm_sav_Physics_Turn_kSteerTuneMinAttribEffect[0] = 0.0f;
+        cfm_sav_Physics_Turn_kSteerTuneMinAttribEffect[1] = 0.8039699792861938f;
+        cfm_sav_Physics_Turn_kSteerTuneMinAttribEffect[2] = 40.09749984741211f;
+        cfm_sav_Physics_Turn_kSteerTuneMinAttribEffect[3] = 0.7641159892082214f;
+        cfm_sav_Physics_Turn_kSteerTuneMinAttribEffect[4] = 90.90560150146484f;
+        cfm_sav_Physics_Turn_kSteerTuneMinAttribEffect[5] = 0.7656030058860779f;
+        cfm_sav_Physics_Turn_kSteerTuneMinAttribEffect[6] = 120.0f;
+        cfm_sav_Physics_Turn_kSteerTuneMinAttribEffect[7] = 0.7000259757041931f;
         D_004FEA40[0] = 1.0f;
         D_004FEA40[1] = 1.0f;
         D_004FEA40[2] = 1.0f;

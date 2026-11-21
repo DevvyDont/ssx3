@@ -1002,7 +1002,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void cCheatFX_resetStates_v(void* self) __asm__("cCheatFX_resetStates__FPv");
 struct sWLCode6910;
 extern "C" void cCheatFX_updateState(sWLCode6910* self);
-extern int D_004A3BC0;
+extern int cCheatFX_m_resetStates;
 
 struct sVec6518 {
     float x, y, z, w;
@@ -1155,9 +1155,9 @@ extern "C" void cCheatFX_update(sWLCode6518* self)
     if (vt[9].fn(sub + vt[9].delta) != 0) {
         return;
     }
-    if (D_004A3BC0 >= 2) {
+    if (cCheatFX_m_resetStates >= 2) {
         cCheatFX_resetStates_v(self);
-        D_004A3BC0--;
+        cCheatFX_m_resetStates--;
     }
     cCheatFX_updateState((sWLCode6910*)self);
     cBE_getInterface_Fv(SSXApp->BE, 7);
@@ -1238,8 +1238,8 @@ struct sWLCode6910 {
     unsigned char flags;        // 0x7
 };
 
-extern signed char D_00445E30[];
-extern int D_004A3BC0;
+extern signed char cCheatFX_m_cheatStateEnterCounts[];
+extern int cCheatFX_m_resetStates;
 extern "C" void cCheatFX_clearInput(cCheatFX* self);
 extern "C" int cCheatFX_getInput(cCheatFX* self);
 
@@ -1249,8 +1249,8 @@ extern "C" int cCheatFX_getInput(cCheatFX* self);
  * The input is cCheatFX_getInput's bits 0x10, 0x20 and 0x40 of m_misc (set by cCheatFX_setCheatInput), cleared by
  * cCheatFX_clearInput. With no input it clears the held bit 0 of m_misc; while bit 0 is set further input is ignored, so each
  * press counts once. State -1 (off): 0x40 starts the code (state, index, count and misc 0). State 0: 0x10 counts up
- * m_count; 0x20 compares m_count with D_00445E30[m_index] and either advances m_index (after 9 steps state 1) or drops
- * back to -1. State 1: exactly 0x60 sets D_004A3BC0 to 8; otherwise 0x40 toggles bit 1 of m_misc. cCheatFX_update calls
+ * m_count; 0x20 compares m_count with cCheatFX_m_cheatStateEnterCounts[m_index] and either advances m_index (after 9 steps state 1) or drops
+ * back to -1. State 1: exactly 0x60 sets cCheatFX_m_resetStates to 8; otherwise 0x40 toggles bit 1 of m_misc. cCheatFX_update calls
  * it.
  */
 extern "C" void cCheatFX_updateState(sWLCode6910* self)
@@ -1278,7 +1278,7 @@ extern "C" void cCheatFX_updateState(sWLCode6910* self)
         if (cheatInput & 0x10) {
             self->count++;
         } else if (cheatInput & 0x20) {
-            if (self->count == D_00445E30[(signed char)self->step]) {
+            if (self->count == cCheatFX_m_cheatStateEnterCounts[(signed char)self->step]) {
                 self->count = 0;
                 self->step++;
                 if (self->step == 9) {
@@ -1293,7 +1293,7 @@ extern "C" void cCheatFX_updateState(sWLCode6910* self)
         break;
     case 1:
         if (cheatInput == 0x60) {
-            D_004A3BC0 = 8;
+            cCheatFX_m_resetStates = 8;
         } else if (cheatInput & 0x40) {
             self->flags ^= 2;
         }
@@ -1345,7 +1345,7 @@ INCLUDE_ASM("visualfx/worldlightman", cCheatFX_setCheatInput);
  *
  * The rider code sends them: inputs 0 and 1 from two trick paths, input 2 from the handplant code. Nine
  * counted
- * steps that match D_00445E30 turn the cheat on.
+ * steps that match cCheatFX_m_cheatStateEnterCounts turn the cheat on.
  *
  * @param type  the input, 0 to 2 (On Tour flag)
  */
@@ -2404,52 +2404,52 @@ extern "C" int *cAvalanche_Brightness(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cAvalanche_UseLightMapColour);
 #ifdef SKIP_ASM
-extern int D_004A3A3C;
+extern int cAvalanche_m_UseLightMapColour;
 
 /**
- * Returns the address of the avalanche setting D_004A3A3C.
+ * Returns the address of the avalanche setting cAvalanche_m_UseLightMapColour.
  *
  * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
  * it.
  *
- * @return pointer to D_004A3A3C
+ * @return pointer to cAvalanche_m_UseLightMapColour
  */
 extern "C" int *cAvalanche_UseLightMapColour(void) {
-    return &D_004A3A3C;
+    return &cAvalanche_m_UseLightMapColour;
 }
 #endif
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cAvalanche_UseEndColour);
 #ifdef SKIP_ASM
-extern int D_004A3A40;
+extern int cAvalanche_m_UseEndColour;
 
 /**
- * Returns the address of the avalanche setting D_004A3A40.
+ * Returns the address of the avalanche setting cAvalanche_m_UseEndColour.
  *
  * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
  * it.
  *
- * @return pointer to D_004A3A40
+ * @return pointer to cAvalanche_m_UseEndColour
  */
 extern "C" int *cAvalanche_UseEndColour(void) {
-    return &D_004A3A40;
+    return &cAvalanche_m_UseEndColour;
 }
 #endif
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cAvalanche_SquareLerp);
 #ifdef SKIP_ASM
-extern int D_004A3A44;
+extern int cAvalanche_m_SquareLerp;
 
 /**
- * Returns the address of the avalanche setting D_004A3A44.
+ * Returns the address of the avalanche setting cAvalanche_m_SquareLerp.
  *
  * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
  * it.
  *
- * @return pointer to D_004A3A44
+ * @return pointer to cAvalanche_m_SquareLerp
  */
 extern "C" int *cAvalanche_SquareLerp(void) {
-    return &D_004A3A44;
+    return &cAvalanche_m_SquareLerp;
 }
 #endif
 //100%
@@ -2489,35 +2489,35 @@ extern "C" int *cAvalanche_Load(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cAvalanche_MinImpactVelocity);
 #ifdef SKIP_ASM
-extern int D_004A3A50;
+extern int cAvalanche_m_MinImpactVelocity;
 
 /**
- * Returns the address of the avalanche setting D_004A3A50.
+ * Returns the address of the avalanche setting cAvalanche_m_MinImpactVelocity.
  *
  * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
  * it.
  *
- * @return pointer to D_004A3A50
+ * @return pointer to cAvalanche_m_MinImpactVelocity
  */
 extern "C" int *cAvalanche_MinImpactVelocity(void) {
-    return &D_004A3A50;
+    return &cAvalanche_m_MinImpactVelocity;
 }
 #endif
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cAvalanche_RenderEmitters);
 #ifdef SKIP_ASM
-extern int D_004A3A54;
+extern int cAvalanche_m_RenderEmitters;
 
 /**
- * Returns the address of the avalanche setting D_004A3A54.
+ * Returns the address of the avalanche setting cAvalanche_m_RenderEmitters.
  *
  * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
  * it.
  *
- * @return pointer to D_004A3A54
+ * @return pointer to cAvalanche_m_RenderEmitters
  */
 extern "C" int *cAvalanche_RenderEmitters(void) {
-    return &D_004A3A54;
+    return &cAvalanche_m_RenderEmitters;
 }
 #endif
 //100%
@@ -2710,19 +2710,19 @@ extern "C" int *cAvalanche_Gravity(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cAvalanche_VelocityDamping);
 #ifdef SKIP_ASM
-extern int D_004A3A84;
+extern int cAvalanche_m_VelocityDamping;
 
 /**
- * Returns the address of the avalanche setting D_004A3A84 (the word between cAvalanche_m_Gravity and
+ * Returns the address of the avalanche setting cAvalanche_m_VelocityDamping (the word between cAvalanche_m_Gravity and
  * cAvalanche_m_NormalVelocityScale).
  *
  * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
  * it.
  *
- * @return pointer to D_004A3A84
+ * @return pointer to cAvalanche_m_VelocityDamping
  */
 extern "C" int *cAvalanche_VelocityDamping(void) {
-    return &D_004A3A84;
+    return &cAvalanche_m_VelocityDamping;
 }
 #endif
 //100%
@@ -2745,120 +2745,120 @@ extern "C" int *cAvalanche_NormalVelocityScale(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cAvalanche_ForwardVelocityScale);
 #ifdef SKIP_ASM
-extern int D_004A3A8C;
+extern int cAvalanche_m_ForwardVelocityScale;
 
 /**
- * Returns the address of the avalanche setting D_004A3A8C (the word after cAvalanche_m_NormalVelocityScale).
+ * Returns the address of the avalanche setting cAvalanche_m_ForwardVelocityScale (the word after cAvalanche_m_NormalVelocityScale).
  *
  * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
  * it.
  *
- * @return pointer to D_004A3A8C
+ * @return pointer to cAvalanche_m_ForwardVelocityScale
  */
 extern "C" int *cAvalanche_ForwardVelocityScale(void) {
-    return &D_004A3A8C;
+    return &cAvalanche_m_ForwardVelocityScale;
 }
 #endif
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cAvalanche_NormalToForwardScale);
 #ifdef SKIP_ASM
-extern int D_004A3A90;
+extern int cAvalanche_m_NormalToForwardScale;
 
 /**
- * Returns the address of the avalanche setting D_004A3A90.
+ * Returns the address of the avalanche setting cAvalanche_m_NormalToForwardScale.
  *
  * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
  * it.
  *
- * @return pointer to D_004A3A90
+ * @return pointer to cAvalanche_m_NormalToForwardScale
  */
 extern "C" int *cAvalanche_NormalToForwardScale(void) {
-    return &D_004A3A90;
+    return &cAvalanche_m_NormalToForwardScale;
 }
 #endif
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cAvalanche_MaxVelocity);
 #ifdef SKIP_ASM
-extern int D_004A3A94;
+extern int cAvalanche_m_MaxVelocity;
 
 /**
- * Returns the address of the avalanche setting D_004A3A94.
+ * Returns the address of the avalanche setting cAvalanche_m_MaxVelocity.
  *
  * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
  * it.
  *
- * @return pointer to D_004A3A94
+ * @return pointer to cAvalanche_m_MaxVelocity
  */
 extern "C" int *cAvalanche_MaxVelocity(void) {
-    return &D_004A3A94;
+    return &cAvalanche_m_MaxVelocity;
 }
 #endif
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cAvalanche_Damping);
 #ifdef SKIP_ASM
-extern int D_004A3A98;
+extern int cAvalanche_m_Damping;
 
 /**
- * Returns the address of the avalanche setting D_004A3A98.
+ * Returns the address of the avalanche setting cAvalanche_m_Damping.
  *
  * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
  * it.
  *
- * @return pointer to D_004A3A98
+ * @return pointer to cAvalanche_m_Damping
  */
 extern "C" int *cAvalanche_Damping(void) {
-    return &D_004A3A98;
+    return &cAvalanche_m_Damping;
 }
 #endif
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cAvalanche_NumParticles);
 #ifdef SKIP_ASM
-extern int D_004A3A9C;
+extern int cAvalanche_m_NumParticles;
 
 /**
- * Returns the address of the avalanche setting D_004A3A9C.
+ * Returns the address of the avalanche setting cAvalanche_m_NumParticles.
  *
  * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
  * it.
  *
- * @return pointer to D_004A3A9C
+ * @return pointer to cAvalanche_m_NumParticles
  */
 extern "C" int *cAvalanche_NumParticles(void) {
-    return &D_004A3A9C;
+    return &cAvalanche_m_NumParticles;
 }
 #endif
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cAvalanche_DefaultSize);
 #ifdef SKIP_ASM
-extern int D_004A3AA0;
+extern int cAvalanche_m_DefaultSize;
 
 /**
- * Returns the address of the avalanche setting D_004A3AA0.
+ * Returns the address of the avalanche setting cAvalanche_m_DefaultSize.
  *
  * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
  * it.
  *
- * @return pointer to D_004A3AA0
+ * @return pointer to cAvalanche_m_DefaultSize
  */
 extern "C" int *cAvalanche_DefaultSize(void) {
-    return &D_004A3AA0;
+    return &cAvalanche_m_DefaultSize;
 }
 #endif
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cAvalanche_PatchColourScale);
 #ifdef SKIP_ASM
-extern int D_004A3AA4;
+extern int cAvalanche_m_PatchColourScale;
 
 /**
- * Returns the address of the avalanche setting D_004A3AA4.
+ * Returns the address of the avalanche setting cAvalanche_m_PatchColourScale.
  *
  * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
  * it.
  *
- * @return pointer to D_004A3AA4
+ * @return pointer to cAvalanche_m_PatchColourScale
  */
 extern "C" int *cAvalanche_PatchColourScale(void) {
-    return &D_004A3AA4;
+    return &cAvalanche_m_PatchColourScale;
 }
 #endif
 //100%
@@ -2881,18 +2881,18 @@ extern "C" int *cAvalanche_PatchColourScale2(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cAvalanche_Seed);
 #ifdef SKIP_ASM
-extern int D_004A3AAC;
+extern int cAvalanche_m_Seed;
 
 /**
- * Returns the address of the avalanche setting D_004A3AAC (the word before cAvalanche_m_avalancheList).
+ * Returns the address of the avalanche setting cAvalanche_m_Seed (the word before cAvalanche_m_avalancheList).
  *
  * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
  * it.
  *
- * @return pointer to D_004A3AAC
+ * @return pointer to cAvalanche_m_Seed
  */
 extern "C" int *cAvalanche_Seed(void) {
-    return &D_004A3AAC;
+    return &cAvalanche_m_Seed;
 }
 #endif
 //100%
@@ -3209,7 +3209,7 @@ INCLUDE_ASM("visualfx/worldlightman", cTransitionMan_GetViewIndex__FPv);
  * Returns the view index the manager serves (+0x74) of a screen transition manager.
  *
  * It reads the view index cTransitionMan_cTransitionMan stores. It is the slot after cTransitionMan_IsTransitionPending in the
- * cTransitionMan script-object vtable D_00488100.
+ * cTransitionMan script-object vtable cTransitionMan_cScriptObjTransition_vtbl.
  *
  * @return the view index
  */

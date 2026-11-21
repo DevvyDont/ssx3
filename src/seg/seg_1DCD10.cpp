@@ -253,7 +253,7 @@ struct RS_BF98 {
 };
 struct Ctx_BF98 { char pad[0xE84]; RS_BF98* top; char pad2[0xF60 - 0xE88]; int f60; };
 extern Ctx_BF98* GrMan_seg_1DCD10 __asm__("GrMan");
-extern char D_00537AC0[];
+extern char cFogParticleMan_mSortKey[];
 struct VEnt_BF98 { short delta; short idx; void (*fn)(void*); };
 struct Obj_BF98 { int n; char* vt; };
 
@@ -277,14 +277,14 @@ static inline void G3_BF98(int c, int f, int g, int e, int d) {
 /**
  * Renders the frame's fog particles and empties the list.
  *
- * Does nothing while miNumSphere is 0. Otherwise sorts the first miNumSphere 8-byte sort keys at D_00537AC0 (On Tour
+ * Does nothing while miNumSphere is 0. Otherwise sorts the first miNumSphere 8-byte sort keys at cFogParticleMan_mSortKey (On Tour
  * cFogParticleMan::mSortKey) with qsort and the comparator cFogParticleMan__FogSortFuc, pushes a copy of the graphics
  * manager's top render-state record (GrMan +0xE84) and sets several of its fields, calls virtual slot 3
  * (platformrender, cPS2FogParticleMan_platformrender in cPS2FogParticleMan), pops the state and resets miNumSphere to 0.
  */
 extern "C" void cFogParticleMan_render(cFogParticleMan* self) {
     if (self->miNumSphere) {
-        qsort_BF98(D_00537AC0, self->miNumSphere, 8, cFogParticleMan__FogSortFuc);
+        qsort_BF98(cFogParticleMan_mSortKey, self->miNumSphere, 8, cFogParticleMan__FogSortFuc);
         Push_BF98();
         {
             Ctx_BF98* ctx = GrMan_seg_1DCD10;
@@ -482,7 +482,7 @@ struct sKey_C190 {
 };
 
 extern sCtx_C190* D_C190 __asm__("cGraphicsMan_TheGraphicsMan");
-extern sKey_C190 D_00537AC0_C190[] __asm__("D_00537AC0");
+extern sKey_C190 D_00537AC0_C190[] __asm__("cFogParticleMan_mSortKey");
 extern "C" void func_0037D968(void* self);
 
 static inline sV3_C190 operator*(const sV3_C190& a, float s)
@@ -570,7 +570,7 @@ static inline int outcode_C190(const sCtx_C190* g, const sV4_C190& v)
  * projects the centre of its bounding box (+0x68, +0x74) with the view matrix; at a depth of 25000 or more the instance
  * is skipped, beyond 18000 it fades out linearly. Each point of each part of its mesh (+0x64) is projected with view *
  * instance matrix (+0x10); points at a depth of 500 or less, or behind, are skipped, and the fade ramps in up to 2500.
- * Each remaining point gets a sort key in D_00537AC0 (index and depth) and a sprite in mSprites: corners from the
+ * Each remaining point gets a sort key in cFogParticleMan_mSortKey (index and depth) and a sprite in mSprites: corners from the
  * point's size (+0x18) scaled by +0x6AF0 / +0x6B04, colour alpha * 128 then the point's colour * 128. With @p clip set,
  * a sprite whose two corners lie outside the same clip edge is dropped. miNumSphere counts the sprites; nothing checks
  * it against the 256 sprites of the manager. It is word 5 (slot 2) of D_004882E0.
@@ -703,7 +703,7 @@ static inline int FBits_C7B0(float f) { return *(int*)&f; }
  * Draws the queued fog sprites as GS sprite primitives, far to near, in DMA chunks.
  *
  * Called through slot 3 of the cPS2FogParticleMan vtable (D_004882E0) by cFogParticleMan_render after it has sorted the
- * sort keys in D_00537AC0. Each chunk holds at most (D_004A4474 buffer size - 4) * 2 / 5 - 1 sprites. For a chunk it
+ * sort keys in cFogParticleMan_mSortKey. Each chunk holds at most (D_004A4474 buffer size - 4) * 2 / 5 - 1 sprites. For a chunk it
  * opens a packet at the graphics manager's current buffer address (+0x5A00) with func_0038F460, writes a DMA cnt tag, a
  * VIF DIRECT code, a GIF tag that sets PRIM to 0x56 (textured, alpha-blended sprite) and a REGLIST GIF tag of 5
  * registers (ST, RGBAQ, XYZ2, ST, XYZ2) looped once per sprite, then five words per sprite taken in mSortKey order from
@@ -759,7 +759,7 @@ extern "C" void cPS2FogParticleMan_platformrender(cPS2FogParticleMan* list)
         int rest = left - n;
         packet += 10;
         for (int i = start; i < start + n; i++) {
-            tFogSprite* fogSprite = &((&list->mSprites[0]))[((sSort_C7B0*)D_00537AC0)[i].idx];
+            tFogSprite* fogSprite = &((&list->mSprites[0]))[((sSort_C7B0*)cFogParticleMan_mSortKey)[i].idx];
             float invW = fogSprite->mTopLeft.w;
             packet[0] = FBits_C7B0(st0[0] * invW) | ((unsigned long)FBits_C7B0(st0[1] * invW) << 32);
             packet[1] = (int)fogSprite->mColour[1] | ((unsigned long)(int)fogSprite->mColour[2] << 8) | ((unsigned long)(int)fogSprite->mColour[3] << 16) | ((unsigned long)(int)fogSprite->mColour[0] << 24) | ((unsigned long)FBits_C7B0(invW) << 32);

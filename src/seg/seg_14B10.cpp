@@ -133,7 +133,7 @@ extern "C" void cAI_AIStateUpdate(cAI* self) {
 #endif
 
 /**
- * Does nothing: the game-init state handler's enter step (slot 1, word 3, of its vtable D_004585C8).
+ * Does nothing: the game-init state handler's enter step (slot 1, word 3, of its vtable cGameInitHandler_vtbl).
  *
  * cAI_AIStateUpdate calls it with the handler and the AI when the AI enters the game-init state.
  */
@@ -148,7 +148,7 @@ extern "C" void cAI_setAIState(cAI*, int);
 /**
  * The game-init state handler's update step: moves the AI on to state 2 (cAI_setAIState(ai, 2)).
  *
- * Slot 3 (word 7) of the handler's vtable D_004585C8; cAI_AIStateUpdate runs it every AI tick.
+ * Slot 3 (word 7) of the handler's vtable cGameInitHandler_vtbl; cAI_AIStateUpdate runs it every AI tick.
  *
  * @param stateHandler  the handler (unused)
  * @param aiObj  the AI
@@ -159,7 +159,7 @@ extern "C" void cGameInitHandler_OnUpdate(void *stateHandler, cAI* aiObj) {
 #endif
 
 /**
- * Does nothing: the game-init state handler's exit step (slot 2, word 5, of its vtable D_004585C8).
+ * Does nothing: the game-init state handler's exit step (slot 2, word 5, of its vtable cGameInitHandler_vtbl).
  *
  * cAI_AIStateUpdate calls it with the handler and the AI when the AI leaves the game-init state.
  */
@@ -172,7 +172,7 @@ INCLUDE_ASM("seg/seg_14B10", cFreerideHandler_OnGainState);
 /**
  * The freeride state handler's enter step: clears the AI's ComputerRidersActive (+0x14).
  *
- * Slot 1 (word 3) of the handler's vtable D_004585A0; cAI_AIStateUpdate calls it when the AI enters the state.
+ * Slot 1 (word 3) of the handler's vtable cFreerideHandler_vtbl; cAI_AIStateUpdate calls it when the AI enters the state.
  *
  * @param stateHandler  the handler (unused)
  * @param aiObj  the AI
@@ -190,7 +190,7 @@ extern "C" void cAI_setAIState(cAI*, int);
 /**
  * The freeride state handler's update step: moves the AI on to state 5, the race state (cAI_setAIState(ai, 5)).
  *
- * Slot 3 (word 7) of the handler's vtable D_004585A0; cAI_AIStateUpdate runs it every AI tick.
+ * Slot 3 (word 7) of the handler's vtable cFreerideHandler_vtbl; cAI_AIStateUpdate runs it every AI tick.
  *
  * @param stateHandler  the handler (unused)
  * @param aiObj  the AI
@@ -201,7 +201,7 @@ extern "C" void cFreerideHandler_OnUpdate(void *stateHandler, cAI* aiObj) {
 #endif
 
 /**
- * Does nothing: the freeride state handler's exit step (slot 2, word 5, of its vtable D_004585A0).
+ * Does nothing: the freeride state handler's exit step (slot 2, word 5, of its vtable cFreerideHandler_vtbl).
  *
  * cAI_AIStateUpdate calls it with the handler and the AI when the AI leaves the freeride state.
  */
@@ -214,7 +214,7 @@ INCLUDE_ASM("seg/seg_14B10", cPreRaceHandler_OnGainState);
 /**
  * The pre-race state handler's enter step: clears the AI's EventTimerTick (+0xC) and the handler's word +4.
  *
- * Slot 1 (word 3) of the handler's vtable D_00458550; cAI_AIStateUpdate calls it when the AI enters the state.
+ * Slot 1 (word 3) of the handler's vtable cPreRaceHandler_vtbl; cAI_AIStateUpdate calls it when the AI enters the state.
  *
  * @param stateHandler  the handler
  * @param aiObj  the AI
@@ -226,7 +226,7 @@ extern "C" void cPreRaceHandler_OnGainState(void *stateHandler, cAI* aiObj) {
 #endif
 
 /**
- * Does nothing: the pre-race state handler's update step (slot 3, word 7, of its vtable D_00458550).
+ * Does nothing: the pre-race state handler's update step (slot 3, word 7, of its vtable cPreRaceHandler_vtbl).
  *
  * cAI_AIStateUpdate runs it every AI tick in the pre-race state.
  */
@@ -234,7 +234,7 @@ extern "C" void cPreRaceHandler_OnUpdate(void) {
 }
 
 /**
- * Does nothing: the pre-race state handler's exit step (slot 2, word 5, of its vtable D_00458550).
+ * Does nothing: the pre-race state handler's exit step (slot 2, word 5, of its vtable cPreRaceHandler_vtbl).
  *
  * cAI_AIStateUpdate calls it when the AI leaves the pre-race state.
  */
@@ -248,7 +248,7 @@ INCLUDE_ASM("seg/seg_14B10", cCountdownHandler_OnGainState);
  * Starts the race countdown: three seconds of AI ticks.
  *
  * Sets the AI's CountdownTicksLeft (+0x1C) to 180 (3 s at 60 Hz, On Tour kUpdateHz). Slot 1 of the countdown handler's
- * vtable (D_00458578), run by cAI_AIStateUpdate when the AI enters the countdown state.
+ * vtable (cCountdownHandler_vtbl), run by cAI_AIStateUpdate when the AI enters the countdown state.
  *
  * @param handler  the handler (this; unused)
  * @param aiManager  the AI (cAI)
@@ -267,7 +267,7 @@ extern "C" void cAI_setAIState(cAI*, int);
  * Ticks the race countdown and starts the race when it runs out.
  *
  * Decrements the AI's CountdownTicksLeft (+0x1C) while it is positive; at 0 it calls cAI_setAIState(ai, 5), the race
- * state. Slot 3 of the countdown handler's vtable (D_00458578), run by cAI_AIStateUpdate every AI tick.
+ * state. Slot 3 of the countdown handler's vtable (cCountdownHandler_vtbl), run by cAI_AIStateUpdate every AI tick.
  *
  * @param handler  the handler (this; unused)
  * @param aiManager  the AI (cAI)
@@ -290,7 +290,7 @@ INCLUDE_ASM("seg/seg_14B10", cCountdownHandler_OnLoseState);
 /**
  * Ends the race countdown state by clearing the countdown.
  *
- * Sets the AI's CountdownTicksLeft (+0x1C) to 0. Slot 2 of the countdown handler's vtable (D_00458578), run by
+ * Sets the AI's CountdownTicksLeft (+0x1C) to 0. Slot 2 of the countdown handler's vtable (cCountdownHandler_vtbl), run by
  * cAI_AIStateUpdate when the AI leaves the countdown state.
  *
  * @param handler  the handler (this; unused)
@@ -355,7 +355,7 @@ extern "C" void cGameComm_gameEnded(int);
  * The end-race state handler's enter step: tells the online game layer the game has ended.
  *
  * Calls cGameComm_gameEnded on cGameComm_mGameComm when an online game comm exists. Slot 1 (word 3) of the handler's
- * vtable D_00458500; it is called with the handler and the AI but uses neither, so the C view takes no parameters.
+ * vtable cEndRaceHandler_vtbl; it is called with the handler and the AI but uses neither, so the C view takes no parameters.
  */
 extern "C" void cEndRaceHandler_OnGainState(void) {
     if (cGameComm_mGameComm != 0) {
@@ -365,7 +365,7 @@ extern "C" void cEndRaceHandler_OnGainState(void) {
 #endif
 
 /**
- * Does nothing: the end-race state handler's update step (slot 3, word 7, of its vtable D_00458500).
+ * Does nothing: the end-race state handler's update step (slot 3, word 7, of its vtable cEndRaceHandler_vtbl).
  *
  * cAI_AIStateUpdate runs it every AI tick in the end-race state.
  */
@@ -373,7 +373,7 @@ extern "C" void cEndRaceHandler_OnUpdate(void) {
 }
 
 /**
- * Does nothing: the end-race state handler's exit step (slot 2, word 5, of its vtable D_00458500).
+ * Does nothing: the end-race state handler's exit step (slot 2, word 5, of its vtable cEndRaceHandler_vtbl).
  *
  * cAI_AIStateUpdate calls it when the AI leaves the end-race state.
  */
@@ -2468,7 +2468,7 @@ INCLUDE_ASM("seg/seg_14B10", cHUDFX_set1);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cHUDFX_copyDispStr(cHUDFX*, signed char *);
-extern signed char D_004A5E20[];
+extern signed char gGenIntStr_gQuickBuf[];
 extern char str_pct_d[];
 
 /**
@@ -2481,8 +2481,8 @@ extern char str_pct_d[];
  */
 // Variant of cHUDFX_set that names the entry from a number (formatted into a shared buffer).
 extern "C" void cHUDFX_set1(cHUDFX* self, int id, int displayInt, float fparg0, int data) {
-    sprintf((char*)D_004A5E20, str_pct_d, displayInt);
-    cHUDFX_copyDispStr(self, D_004A5E20);
+    sprintf((char*)gGenIntStr_gQuickBuf, str_pct_d, displayInt);
+    cHUDFX_copyDispStr(self, gGenIntStr_gQuickBuf);
     self->DisplayInt = displayInt;
     self->ID = id;
     self->MaxDecay = fparg0;
@@ -2524,13 +2524,13 @@ INCLUDE_ASM("seg/seg_14B10", cHUDFX_setAsync);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cHUDFX_copyDispStr(cHUDFX*, signed char *);
-extern signed char D_004A5E20[];
+extern signed char gGenIntStr_gQuickBuf[];
 extern char str_pct_d[];
 
 /**
  * Starts a HUD effect showing a number, timed by an animation position rather than a decay limit.
  *
- * Formats @p displayInt with "%d" into the shared buffer D_004A5E20 and copies it as the text (cHUDFX_copyDispStr). Sets the
+ * Formats @p displayInt with "%d" into the shared buffer gGenIntStr_gQuickBuf and copies it as the text (cHUDFX_copyDispStr). Sets the
  * number (+0x14) to @p displayInt, the ID (+0) to @p fxId, the current decay (+8) to -@p fparg0, the data (+0xC) to
  * @p fxData and the decay limit (+4) to -1 (no limit). cRiderMetrix_updateStaticHUD, cRiderMetrix_evCollectMultiplier and
  * cRiderMetrix_addToComboChain use it.
@@ -2543,8 +2543,8 @@ extern char str_pct_d[];
  */
 // Variant of func_00117138 that names the entry from a number (formatted into a shared buffer).
 extern "C" void cHUDFX_setAsync(cHUDFX* hudFx, int fxId, int displayInt, float fparg0, int fxData) {
-    sprintf((char*)D_004A5E20, str_pct_d, displayInt);
-    cHUDFX_copyDispStr((cHUDFX*)hudFx, D_004A5E20);
+    sprintf((char*)gGenIntStr_gQuickBuf, str_pct_d, displayInt);
+    cHUDFX_copyDispStr((cHUDFX*)hudFx, gGenIntStr_gQuickBuf);
     hudFx->DisplayInt = displayInt;
     hudFx->ID = fxId;
     hudFx->CurDecay = -fparg0;

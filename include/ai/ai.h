@@ -50,7 +50,7 @@ CHECK_SIZE(cAIStateHandler, 0x4);
 
 // cPreRaceHandler: a cAIStateHandler with one int (On Tour size 0x8).
 struct cPreRaceHandler {
-    void** mVtbl; // 0x0 [R] _vt$15cPreRaceHandler (D_00458550), stored by cAI_cAI
+    void** mVtbl; // 0x0 [R] _vt$15cPreRaceHandler (cPreRaceHandler_vtbl), stored by cAI_cAI
     int unk_04;   // 0x4 [U] written by its OnGainState (cPreRaceHandler_OnGainState)
 };
 
@@ -89,12 +89,12 @@ struct cAI {
     const char* AIStateName;        // 0xA0 [O]; [U] forceAIState stores it
     cFocusMan* FocusMan;            // 0xA4 [P] getFocusMan; [R] cMemMan_alloc(0x8E0, "FocusMan")
     cDangerMan* DangerMan;          // 0xA8 [P] getDangerMan; [R] cDangerMan_cDangerMan(alloc(0xB60, "DangerMan"), this)
-    cAIStateHandler mGameInitHandler; // 0xAC [R] _vt$16cGameInitHandler (D_004585C8)
-    cAIStateHandler mFreerideHandler; // 0xB0 [R] _vt$16cFreerideHandler (D_004585A0)
-    cPreRaceHandler mPreRaceHandler;  // 0xB4 [R] _vt$15cPreRaceHandler (D_00458550)
-    cAIStateHandler mCountdownHandler; // 0xBC [R] _vt$17cCountdownHandler (D_00458578)
+    cAIStateHandler mGameInitHandler; // 0xAC [R] _vt$16cGameInitHandler (cGameInitHandler_vtbl)
+    cAIStateHandler mFreerideHandler; // 0xB0 [R] _vt$16cFreerideHandler (cFreerideHandler_vtbl)
+    cPreRaceHandler mPreRaceHandler;  // 0xB4 [R] _vt$15cPreRaceHandler (cPreRaceHandler_vtbl)
+    cAIStateHandler mCountdownHandler; // 0xBC [R] _vt$17cCountdownHandler (cCountdownHandler_vtbl)
     cAIStateHandler mRaceHandler;     // 0xC0 [R] _vt$12cRaceHandler (D_00458528)
-    cAIStateHandler mEndRaceHandler;  // 0xC4 [R] D_00458500 (unnamed in the preview); [O] the member in this place
+    cAIStateHandler mEndRaceHandler;  // 0xC4 [R] cEndRaceHandler_vtbl (unnamed in the preview); [O] the member in this place
     cAIStateHandler mShutdownHandler; // 0xC8 [R] _vt$16cShutdownHandler (D_004584D8)
     void** mVtbl;                   // 0xCC [R] _vt$3cAI (D_00458488), stored by cAI_cAI and the destructor
 };

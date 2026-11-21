@@ -3193,13 +3193,13 @@ extern "C" const char* cRiderHandler__getMotionStateName(cRiderHandler* self)
 //100%
 INCLUDE_ASM("ai/computer", cRiderHandler__getControlStateName);
 #ifdef SKIP_ASM
-extern const char* D_00459DC8[];
+extern const char* ControlStateNames[];
 extern char str_Invalid[];
 
 /**
  * Returns the name of the current control state, "Cruise" to "Void", for debug display.
  *
- * The bound check accepts 0-14 but the table D_00459DC8 has 14 entries, so CS_Num (14, the constructor's
+ * The bound check accepts 0-14 but the table ControlStateNames has 14 entries, so CS_Num (14, the constructor's
  * initial value) reads the next data word as a string pointer.
  *
  * @return the state's name, or " -- Invalid -- " for a state above 14
@@ -3210,7 +3210,7 @@ extern "C" const char* cRiderHandler__getControlStateName(cRiderHandler* self)
     if (state >= 15U) {
         return str_Invalid;
     }
-    return D_00459DC8[state];
+    return ControlStateNames[state];
 }
 #endif
 
@@ -3753,7 +3753,7 @@ struct sComp_00112338 { char pad[0x4DC]; sEnt_00112338 ent[12]; int count; };
 struct sVec4_00112338 { float x, y, z, w; } __attribute__((aligned(16)));
 struct sVE_00112338 { short delta; short index; int (*fn)(void*, float, float); };
 
-extern sEnt_00112338 D_004A5D60[];
+extern sEnt_00112338 cRider_updateTrackPath_pathEventsPrev[];
 extern "C" void* MEM_copy(void*, void*, int);
 extern "C" void cRider_checkTrackPathEvents(cRider* self, float* a, float* b, sVec4_00112338* c);
 extern "C" void cRider_checkTrackPathSwitch(cRider* self, int a);
@@ -3763,7 +3763,7 @@ extern "C" void cRider_flagEventPathEvent(cRider* self, int* arg, int a2, int a3
 /**
  * Tracks the rider along its track path: switches path when needed and raises the path events it enters and leaves.
  *
- * Copies the rider's current event list (count at +0x50C, 16-byte entries from +0x4DC) to D_004A5D60, then
+ * Copies the rider's current event list (count at +0x50C, 16-byte entries from +0x4DC) to cRider_updateTrackPath_pathEventsPrev, then
  * cRider_checkTrackPathEvents (On Tour checkTrackPathEvents) gives the distance from the path, the path position and point. While the
  * rider has distance left (+0x4D4 > 0) it calls cRider_checkTrackPathSwitch (On Tour checkTrackPathSwitch) with 0 when more than 500
  * off the path (only every 60th AITick), with 1 within 200 of the path's end, or with 0 when the path's vtable slot 2
@@ -3775,7 +3775,7 @@ extern "C" void cRider_flagEventPathEvent(cRider* self, int* arg, int a2, int a3
 extern "C" void cRider_updateTrackPath(cRider* self)
 {
     sComp_00112338* rider = (sComp_00112338*)self;
-    MEM_copy(D_004A5D60, rider->ent, rider->count << 4);
+    MEM_copy(cRider_updateTrackPath_pathEventsPrev, rider->ent, rider->count << 4);
     int n = rider->count;
     sVec4_00112338 pathPos;
     float pathDistXY;
@@ -3807,9 +3807,9 @@ extern "C" void cRider_updateTrackPath(cRider* self)
         int j;
         for (j = 0; j < n; j++)
         {
-            if (rider->ent[i].a == D_004A5D60[j].a && rider->ent[i].b == D_004A5D60[j].b)
+            if (rider->ent[i].a == cRider_updateTrackPath_pathEventsPrev[j].a && rider->ent[i].b == cRider_updateTrackPath_pathEventsPrev[j].b)
             {
-                D_004A5D60[j].a = 0;
+                cRider_updateTrackPath_pathEventsPrev[j].a = 0;
                 break;
             }
         }
@@ -3817,8 +3817,8 @@ extern "C" void cRider_updateTrackPath(cRider* self)
     }
     for (i = 0; i < n; i++)
     {
-        if (D_004A5D60[i].a)
-            cRider_flagEventPathEvent(self, (int*)&D_004A5D60[i], 1, 0);
+        if (cRider_updateTrackPath_pathEventsPrev[i].a)
+            cRider_flagEventPathEvent(self, (int*)&cRider_updateTrackPath_pathEventsPrev[i], 1, 0);
     }
 }
 #endif
