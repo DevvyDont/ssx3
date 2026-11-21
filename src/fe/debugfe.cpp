@@ -481,34 +481,34 @@ extern "C" void* cDebugLobbyScreen_cDebugLobbyScreen(cDebugLobbyScreen* self)
     onCreate.owner = ((char*)self);
     sDbgOwner17D298 onLogin;
     onLogin.owner = ((char*)self);
-    AccountMenu_AccountMenu(self->mLoginMenu, &onCreate, &onLogin);
-    ContinueMenu_ContinueMenu((ContinueMenu*)self->mContinueMenu);
+    AccountMenu_AccountMenu(&self->mLoginMenu, &onCreate, &onLogin);
+    ContinueMenu_ContinueMenu(&self->mContinueMenu);
     sDbgOwner17D298 onSelectPersona;
     onSelectPersona.owner = ((char*)self);
     sDbgOwner17D298 onCreatePersona;
     onCreatePersona.owner = ((char*)self);
     sDbgOwner17D298 onDeletePersona;
     onDeletePersona.owner = ((char*)self);
-    PersonaMenu_PersonaMenu(self->mPersonaMenu, &onSelectPersona, &onCreatePersona, &onDeletePersona);
+    PersonaMenu_PersonaMenu(&self->mPersonaMenu, &onSelectPersona, &onCreatePersona, &onDeletePersona);
     sDbgOwner17D298 onSelectRoom;
     onSelectRoom.owner = ((char*)self);
-    LobbyMenu_LobbyMenu(self->mRoomMenu, &onSelectRoom);
+    LobbyMenu_LobbyMenu(&self->mRoomMenu, &onSelectRoom);
     sDbgOwner17D298 onSelectUser;
     onSelectUser.owner = ((char*)self);
     sDbgOwner17D298 onChat;
     onChat.owner = ((char*)self);
-    RoomMenu_RoomMenu(self->mOccupantsMenu, &onSelectUser, &onChat);
+    RoomMenu_RoomMenu(&self->mOccupantsMenu, &onSelectUser, &onChat);
     sDbgOwner17D298 onMessage;
     onMessage.owner = ((char*)self);
-    ChatMenu_ChatMenu(self->mChatMenu, &onMessage);
+    ChatMenu_ChatMenu(&self->mChatMenu, &onMessage);
     sDbgOwner17D298 onAcceptChallenge;
     onAcceptChallenge.owner = ((char*)self);
     sDbgOwner17D298 onDeclineChallenge;
     onDeclineChallenge.owner = ((char*)self);
-    ChallengeResponseMenu_ChallengeResponseMenu(self->mChallengedMenu, &onAcceptChallenge, &onDeclineChallenge);
+    ChallengeResponseMenu_ChallengeResponseMenu(&self->mChallengedMenu, &onAcceptChallenge, &onDeclineChallenge);
     sDbgOwner17D298 onAbortChallenge;
     onAbortChallenge.owner = ((char*)self);
-    AbortMenu_AbortMenu(self->mAbortMenu, &onAbortChallenge);
+    AbortMenu_AbortMenu(&self->mAbortMenu, &onAbortChallenge);
     int emptyText = cBXString_EmptyString;
     cSSXApp* app = SSXApp;
     self->mUserName = (char*)emptyText;
@@ -621,14 +621,14 @@ extern "C" void cDebugLobbyScreen__cDebugLobbyScreen(cDebugLobbyScreen* self, in
     cBXString__cBXString(&self->mChallenger, 2);
     cBXString__cBXString(&self->mPassword, 2);
     cBXString__cBXString(&self->mUserName, 2);
-    dtorA_17D3B0(self->mAbortMenu);
-    dtorB_17D3B0(self->mChallengedMenu);
-    dtorC_17D3B0(self->mChatMenu);
-    dtorD_17D3B0(self->mOccupantsMenu);
-    dtorE_17D3B0(self->mRoomMenu);
-    PersonaMenu__PersonaMenu(self->mPersonaMenu, 2);
-    dtorF_17D3B0(self->mContinueMenu);
-    AccountMenu__AccountMenu(self->mLoginMenu, 2);
+    dtorA_17D3B0((char*)&self->mAbortMenu);
+    dtorB_17D3B0((char*)&self->mChallengedMenu);
+    dtorC_17D3B0((char*)&self->mChatMenu);
+    dtorD_17D3B0((char*)&self->mOccupantsMenu);
+    dtorE_17D3B0((char*)&self->mRoomMenu);
+    PersonaMenu__PersonaMenu(&self->mPersonaMenu, 2);
+    dtorF_17D3B0((char*)&self->mContinueMenu);
+    AccountMenu__AccountMenu(&self->mLoginMenu, 2);
     cMenuSys__cMenuSys(self->mMenuSys, 2);
     *(void***)self = cDebugScreen_vtbl;
     if (flags & 1)
@@ -1471,7 +1471,7 @@ extern "C" void func_0017E3B8(cDebugLobbyScreen* self)
         cMenuSys_popMenu(list);
     }
     self->mState = 0xE;
-    cMenuSys_pushMenu(self->mMenuSys, self->mChatMenu);
+    cMenuSys_pushMenu(self->mMenuSys, &self->mChatMenu);
 }
 #endif
 

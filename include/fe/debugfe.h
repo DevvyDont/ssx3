@@ -25,6 +25,7 @@
 #include "layout.h"
 #include "fe/heartbeat.h"
 #include "fe/backgroundman.h" // cBackgroundMan (cDebugMenuScreen)
+#include "fe/debuglobbymenus.h" // the debug lobby menus (cDebugLobbyScreen)
 
 struct cDebugScreen;
 struct cFont;
@@ -229,24 +230,24 @@ struct cDebugLobbyScreen {
                                     //       the ctor sets its font, input and box texture (+0x58 / +0x5C / +0x60 = 0x60
                                     //       / 0x64 / 0x68) from the debug FE; [U] the open-menu stack (count at +0x0,
                                     //       menus from +0x4): cMenuSys_pushMenu / popMenu / isActive / input / render
-    char mLoginMenu[0x594];         // 0x0070 [R] the "Login Method" menu (Create Account, Login): AccountMenu_AccountMenu(this +
+    AccountMenu mLoginMenu;         // 0x0070 [R] the "Login Method" menu (Create Account, Login): AccountMenu_AccountMenu(this +
                                     //       0x70, ...), AccountMenu__AccountMenu(.., 2) (dtor); [U] pushed on the login step
                                     //       (state 3)
-    char mContinueMenu[0x148];      // 0x0604 [R] ContinueMenu_ContinueMenu(this + 0x604) (fe/debugfe: a cMenu + one
+    ContinueMenu mContinueMenu;     // 0x0604 [R] ContinueMenu_ContinueMenu(this + 0x604) (fe/debugfe: a cMenu + one
                                     //       cPopMenuItem at +0x130); [U] pushed under every error and "declined"
                                     //       message
-    char mPersonaMenu[0x5E0];       // 0x074C [R] "Select Persona" (Create / Delete Persona): PersonaMenu_PersonaMenu /
+    PersonaMenu mPersonaMenu;       // 0x074C [R] "Select Persona" (Create / Delete Persona): PersonaMenu_PersonaMenu /
                                     //       PersonaMenu__PersonaMenu; [U] PersonaMenu_setpersonas fills it from the lobby manager
-    char mRoomMenu[0x318];          // 0x0D2C [R] "Select Room" (12 items): LobbyMenu_LobbyMenu; dtor loop over 12 * 0x24 from
+    LobbyMenu mRoomMenu;            // 0x0D2C [R] "Select Room" (12 items): LobbyMenu_LobbyMenu; dtor loop over 12 * 0x24 from
                                     //       +0x168
-    char mOccupantsMenu[0x4F0];     // 0x1044 [R] "Room Occupants" (24 items, Chat): RoomMenu_RoomMenu; [U] RoomMenu_updateusers
+    RoomMenu mOccupantsMenu;        // 0x1044 [R] "Room Occupants" (24 items, Chat): RoomMenu_RoomMenu; [U] RoomMenu_updateusers
                                     //       fills it
-    char mChatMenu[0x38C];          // 0x1534 [R] the chat menu (14 lines): ChatMenu_ChatMenu; dtor loop over 14 * 0x24 from
+    ChatMenu mChatMenu;             // 0x1534 [R] the chat menu (14 lines): ChatMenu_ChatMenu; dtor loop over 14 * 0x24 from
                                     //       +0x194
-    char mChallengedMenu[0x1EC];    // 0x18C0 [R] "You've been Challenged!" (Accept, Decline):
+    ChallengeResponseMenu mChallengedMenu;// 0x18C0 [R] "You've been Challenged!" (Accept, Decline):
                                     //       ChallengeResponseMenu_ChallengeResponseMenu(this + 0x18C0, ...); [U] func_0017D6F0 stores
                                     //       the challenger's name into its third line (lw/sw 0x1A44 = +0x184)
-    char mAbortMenu[0x158];         // 0x1AAC [R] "Abort": AbortMenu_AbortMenu; [U] func_0017DB18 pushes it while a challenge
+    AbortMenu mAbortMenu;           // 0x1AAC [R] "Abort": AbortMenu_AbortMenu; [U] func_0017DB18 pushes it while a challenge
                                     //       is pending
     char* mUserName;                // 0x1C04 cBXString (a char*, bx/bxstring.h); [R] ctor cBXString_EmptyString, dtor
                                     //       cBXString__cBXString; [U] func_0017E030 / func_0017E118 keep the typed
