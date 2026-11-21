@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/debuglobbymenus.h"
 #include "fe/debugfe.h"
 #include "fe/screenkeyboard.h"
 #include "fe/heartbeat.h"
@@ -399,13 +400,13 @@ extern "C" void cMenu_addItem(void* menu, void* item, int index);
  *
  * @return @p self
  */
-extern "C" void* ContinueMenu_ContinueMenu(void* self)
+extern "C" void* ContinueMenu_ContinueMenu(ContinueMenu* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = D_0046D740;
-    cPopMenuItem_cPopMenuItem((char*)self + 0x130, str_Continue);
-    cMenu_addItem(self, (char*)self + 0x130, -1);
-    return self;
+    self->mVtbl = D_0046D740;
+    cPopMenuItem_cPopMenuItem(&self->unk_130, str_Continue);
+    cMenu_addItem(self, &self->unk_130, -1);
+    return ((void*)self);
 }
 #endif
 
@@ -481,7 +482,7 @@ extern "C" void* cDebugLobbyScreen_cDebugLobbyScreen(cDebugLobbyScreen* self)
     sDbgOwner17D298 onLogin;
     onLogin.owner = ((char*)self);
     func_001DA988(self->mLoginMenu, &onCreate, &onLogin);
-    ContinueMenu_ContinueMenu(self->mContinueMenu);
+    ContinueMenu_ContinueMenu((ContinueMenu*)self->mContinueMenu);
     sDbgOwner17D298 onSelectPersona;
     onSelectPersona.owner = ((char*)self);
     sDbgOwner17D298 onCreatePersona;

@@ -5292,9 +5292,10 @@ INCLUDE_ASM("fe/feasyncfile", func_001A98B0__FPv);
  *
  * @return the name (as an int)
  */
-int func_001A98B0(void* self)
+int func_001A98B0(void* vself)
 {
-    return *(int*)((char*)self + 0x6C0);
+    cFEStateNet* self = (cFEStateNet*)vself;
+    return (int)self->unk_6C0;
 }
 #endif
 
@@ -13552,9 +13553,10 @@ INCLUDE_ASM("fe/feasyncfile", func_001B4198__FPv);
  *
  * cFEStateNetConfig_onUpdate then re-checks the memory card (states 6-8) and connects in func_001B45E8.
  */
-void func_001B4198(void* self)
+void func_001B4198(void* vself)
 {
-    *(int*)((char*)self + 0x708) = 6;
+    cFEStateNetConfig* self = (cFEStateNetConfig*)vself;
+    self->miState = 6;
 }
 #endif
 
@@ -16252,8 +16254,9 @@ INCLUDE_ASM("fe/feasyncfile", func_001B70A8__FPv);
  *
  * @return the value left by func_001B7778
  */
-void* func_001B70A8(void* self)
+void* func_001B70A8(void* vself)
 {
+    cFEStateNetAccountMem* self = (cFEStateNetAccountMem*)vself;
     int zero = 0;
     *(signed char*)((char*)self + 0x6e0) = (signed char)zero;
     *(signed char*)((char*)self + 0x6f1) = (signed char)zero;

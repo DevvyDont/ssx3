@@ -316,4 +316,122 @@ CHECK_OFFSET(cFELoadStateInLodge, mUserNum, 0x044);
 CHECK_OFFSET(cFELoadStateInLodge, unk_045, 0x045);
 CHECK_SIZE(cFELoadStateInLodge, 0x48);
 
+// ---------------------------------------------------------------------------------------------------------------------
+// cGameLoadState: cGameLoadScreen's load state for a race / event: "102MPMatch" on the online game path (cGamePath 2,
+// both players' panels: level and seven attribute bars) or "99QPEvent" (the event's location, titles, course stats,
+// rider and map); onGainTransition prints the load percentage into "%%". The class name: the allocation tag
+// "cGameLoadState" in cGameLoadScreen_load and the preview's _vt$14cGameLoadState (builds/x/v2 pairs it with retail
+// 0x0047C948; its onWidgetCreate__14cGameLoadStateP8cUIThing is an exact body match of func_00245598).
+// Retail code: the dtor, onCreateScreen, onGainTransition and onWidgetCreate in main/ssxappdtor (0x002453F0 ...
+// 0x00245598); the preview's widgetCreateMultiP / widgetCreateQP (func_00246278 / func_002464E8) and the player-panel
+// helper func_00246CF8 in fe/festateloadhint; there is no out-of-line ctor. No On Tour class.
+//
+// Size 0x4C: [R] cGameLoadScreen_load: operator new(0x4C, "cGameLoadState") + cUIState_cUIState(mem, mpUI), vtable,
+// word 0x48 = 0, then 0x48 = the load screen.
+// Base: cUIState (ui/uistate.h, 0x48) : cListNode (vptr at 0x8). Vtable D_0047C948 (24 slots: 1 dtor, 4 onCreateScreen,
+// 7 onGainTransition, 18 onWidgetCreate).
+// A FLAT layout, like main/game.h. Evidence tags: [R] retail's dtor and the inlined ctor / allocation in
+// cGameLoadScreen_load; [U] how retail code uses the field (src/main/ssxappdtor.cpp, src/fe/festateloadhint.cpp);
+// [O] SSX On Tour's DWARF for the cUIState part.
+
+struct cGameLoadState {
+    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
+    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] the cUIState ctor links the node to itself
+    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
+    void** mVtbl;                   // 0x008 [R] D_0047C948 (cGameLoadScreen_load, dtor func_002453F0)
+    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
+    int mHashName;                  // 0x00C [O]
+    cUIEngine* mpEngine;            // 0x010 [O]; [R] the load screen's mpUI; [U] onCreateScreen adds the screen through
+                                    //       it
+    signed char mCurrentCtrl;       // 0x014 [O]; [R] the cUIState ctor stores -1
+    unsigned char mCtrlBits;        // 0x015 [O]; [R] the cUIState ctor stores 0xF
+    char unk_016[0x2];              // 0x016 padding
+    int miMiscData;                 // 0x018 [O]
+    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes; every accessor lw/sw's the word, see
+                                    //       ui/uistate.h)
+    cUIState* mpParentState;        // 0x020 [O]
+    char mScreens[0x1C];            // 0x024 [O] cList mScreens
+    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen stores the screen; onGainTransition looks "%" up on
+                                    //       it
+    signed char mUserNum;           // 0x044 [O]; [R] the cUIState ctor stores -1
+    char unk_045[0x3];              // 0x045 padding
+    // --- cGameLoadState
+    cGameLoadScreen* mpParentModule; // 0x048 [R] 0, then cGameLoadScreen_load stores the load screen (and loads its
+                                    //       texture 0); [U] func_00246CF8 and func_002464E8 show
+                                    //       mpParentModule->mTexID[player] (views sLoadInfo_6CF8 / image[2] at 0x10).
+                                    //       Name taken from cFELoadState's [O] member in the same role (no DWARF here)
+};
+
+CHECK_OFFSET(cGameLoadState, mpPrev, 0x000);
+CHECK_OFFSET(cGameLoadState, mpNext, 0x004);
+CHECK_OFFSET(cGameLoadState, mVtbl, 0x008);
+CHECK_OFFSET(cGameLoadState, mHashName, 0x00C);
+CHECK_OFFSET(cGameLoadState, mpEngine, 0x010);
+CHECK_OFFSET(cGameLoadState, mCurrentCtrl, 0x014);
+CHECK_OFFSET(cGameLoadState, mCtrlBits, 0x015);
+CHECK_OFFSET(cGameLoadState, unk_016, 0x016);
+CHECK_OFFSET(cGameLoadState, miMiscData, 0x018);
+CHECK_OFFSET(cGameLoadState, mAttrState, 0x01C);
+CHECK_OFFSET(cGameLoadState, mpParentState, 0x020);
+CHECK_OFFSET(cGameLoadState, mScreens, 0x024);
+CHECK_OFFSET(cGameLoadState, mpScreen, 0x040);
+CHECK_OFFSET(cGameLoadState, mUserNum, 0x044);
+CHECK_OFFSET(cGameLoadState, unk_045, 0x045);
+CHECK_OFFSET(cGameLoadState, mpParentModule, 0x048);
+CHECK_SIZE(cGameLoadState, 0x4C);
+
+// ---------------------------------------------------------------------------------------------------------------------
+// cGameLoadStateOutLodge: cGameLoadScreen's load state when the game leaves the lodge (no race pending:
+// D_004A19D8 set, or game modes 5 / 6 off the online path): "118loadoutlodge" and the load percentage. The class name:
+// the allocation tag "cGameLoadStateOutLodge" in cGameLoadScreen_load and the preview's _vt$22cGameLoadStateOutLodge
+// with linkonce _$_22cGameLoadStateOutLodge, onCreateScreen__22cGameLoadStateOutLodge and onWidgetCreate__22...P8cUIThing.
+// Retail code: the dtor, onCreateScreen, onWidgetCreate (empty) and onGainTransition in main/ssxappdtor (0x00245600 ...
+// 0x00245698); there is no out-of-line ctor. No On Tour class.
+//
+// Size 0x48: [R] cGameLoadScreen_load: operator new(0x48, "cGameLoadStateOutLodge") + cUIState_cUIState(mem, mpUI) +
+// vtable (no own members).
+// Base: cUIState (ui/uistate.h, 0x48) : cListNode (vptr at 0x8). Vtable D_0047C878 (24 slots: 1 dtor, 4 onCreateScreen,
+// 7 onGainTransition, 18 onWidgetCreate).
+// A FLAT layout, like main/game.h. Evidence tags as for cGameLoadState.
+
+struct cGameLoadStateOutLodge {
+    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
+    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] the cUIState ctor links the node to itself
+    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
+    void** mVtbl;                   // 0x008 [R] D_0047C878 (cGameLoadScreen_load, dtor func_00245600)
+    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
+    int mHashName;                  // 0x00C [O]
+    cUIEngine* mpEngine;            // 0x010 [O]; [R] the load screen's mpUI; [U] onCreateScreen adds "118loadoutlodge"
+                                    //       through it
+    signed char mCurrentCtrl;       // 0x014 [O]; [R] the cUIState ctor stores -1
+    unsigned char mCtrlBits;        // 0x015 [O]; [R] the cUIState ctor stores 0xF
+    char unk_016[0x2];              // 0x016 padding
+    int miMiscData;                 // 0x018 [O]
+    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes; every accessor lw/sw's the word, see
+                                    //       ui/uistate.h)
+    cUIState* mpParentState;        // 0x020 [O]
+    char mScreens[0x1C];            // 0x024 [O] cList mScreens
+    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen stores the screen; onGainTransition looks "%" up on
+                                    //       it
+    signed char mUserNum;           // 0x044 [O]; [R] the cUIState ctor stores -1
+    char unk_045[0x3];              // 0x045 padding
+};
+
+CHECK_OFFSET(cGameLoadStateOutLodge, mpPrev, 0x000);
+CHECK_OFFSET(cGameLoadStateOutLodge, mpNext, 0x004);
+CHECK_OFFSET(cGameLoadStateOutLodge, mVtbl, 0x008);
+CHECK_OFFSET(cGameLoadStateOutLodge, mHashName, 0x00C);
+CHECK_OFFSET(cGameLoadStateOutLodge, mpEngine, 0x010);
+CHECK_OFFSET(cGameLoadStateOutLodge, mCurrentCtrl, 0x014);
+CHECK_OFFSET(cGameLoadStateOutLodge, mCtrlBits, 0x015);
+CHECK_OFFSET(cGameLoadStateOutLodge, unk_016, 0x016);
+CHECK_OFFSET(cGameLoadStateOutLodge, miMiscData, 0x018);
+CHECK_OFFSET(cGameLoadStateOutLodge, mAttrState, 0x01C);
+CHECK_OFFSET(cGameLoadStateOutLodge, mpParentState, 0x020);
+CHECK_OFFSET(cGameLoadStateOutLodge, mScreens, 0x024);
+CHECK_OFFSET(cGameLoadStateOutLodge, mpScreen, 0x040);
+CHECK_OFFSET(cGameLoadStateOutLodge, mUserNum, 0x044);
+CHECK_OFFSET(cGameLoadStateOutLodge, unk_045, 0x045);
+CHECK_SIZE(cGameLoadStateOutLodge, 0x48);
+
 #endif /* MAIN_LOADSCREENS_H */

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/gamemodehandler.h"
 #include "main/gameobjnodes.h"
 #include "input/input.h"
 #include "main/gamestate.h"
@@ -2281,8 +2282,9 @@ INCLUDE_ASM("main/ssxappdtor", func_00244620__FPv);
  *
  * Slot +0x54 (writeToReplayFrame) of D_0047CE68.
  */
-void func_00244620(void* self)
+void func_00244620(void* vself)
 {
+    cGMMPSlopeHandler* self = (cGMMPSlopeHandler*)vself;
 }
 #endif
 
@@ -2294,8 +2296,9 @@ INCLUDE_ASM("main/ssxappdtor", func_00244628__FPv);
  *
  * Slot +0x5C (readFromReplayFrame) of D_0047CE68.
  */
-void func_00244628(void* self)
+void func_00244628(void* vself)
 {
+    cGMMPSlopeHandler* self = (cGMMPSlopeHandler*)vself;
 }
 #endif
 
@@ -3331,19 +3334,19 @@ INCLUDE_ASM("main/ssxappdtor", func_002451B0);
  *
  * cGame_update ends its update with the same loop.
  */
-extern "C" void func_002451B0(void *self) {
+extern "C" void func_002451B0(cGame* self) {
     int i;
     char *obj;
     char *vtbl;
 
     i = 0;
-    if (*(int *)(*(char **)((char*)self + 0xC) + 0x78) > 0) {
+    if (*(int *)((char*)self->AI + 0x78) > 0) {
         do {
-            obj = *(char **)(*(char **)((char*)self + 0xC) + (i << 2) + 0x28);
+            obj = *(char **)((char*)self->AI + (i << 2) + 0x28);
             i++;
             vtbl = *(char **)(obj + 0x6C0);
             (*(void (**)(void *))(vtbl + 0x9C))(obj + *(short *)(vtbl + 0x98));
-        } while (i < *(int *)(*(char **)((char*)self + 0xC) + 0x78));
+        } while (i < *(int *)((char*)self->AI + 0x78));
     }
 }
 #endif
@@ -3504,9 +3507,9 @@ extern "C" void* cUIState__cUIState(void* self);
  *
  * @return cUIState__cUIState's result, passed through
  */
-extern "C" void* func_002453F0(void* self)
+extern "C" void* func_002453F0(cGameLoadState* self)
 {
-    *(void**)((char*)self + 0x8) = D_0047C948;
+    self->mVtbl = (void**)D_0047C948;
     return cUIState__cUIState(self);
 }
 #endif
@@ -3531,20 +3534,20 @@ extern char str_99QPEvent[];
  * keeps it at +0x40 and plays its first frame, then fills both players' panels with func_00246CF8(self, 0) and (self,
  * 1). Slot +0x24 (onCreateScreen) of D_0047C948.
  */
-extern "C" void func_00245418(void* self)
+extern "C" void func_00245418(cGameLoadState* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath == 2) {
-        void* engine = *(void**)((char*)self + 0x10);
+        void* engine = self->mpEngine;
         void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_102MPMatch), 0);
-        *(void**)((char*)self + 0x40) = screen;
+        self->mpScreen = (cUIScreen*)screen;
         if (screen != 0) {
             cUIScreen_playFrame(screen, 0, 0);
         }
     } else {
-        void* engine = *(void**)((char*)self + 0x10);
+        void* engine = self->mpEngine;
         void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_99QPEvent), 0);
-        *(void**)((char*)self + 0x40) = screen;
+        self->mpScreen = (cUIScreen*)screen;
         if (screen != 0) {
             cUIScreen_playFrame(screen, 0, 0);
         }
@@ -3573,9 +3576,9 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
  * @param refresh  non-zero to refresh both player panels
  * @return 0
  */
-extern "C" int func_002454F8(void* self, int refresh)
+extern "C" int func_002454F8(cGameLoadState* self, int refresh)
 {
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pct));
+    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pct));
     if (obj != 0) {
         char buf[208];
         sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)(cAppMan_TheAppMan + 0x38));
@@ -3605,7 +3608,7 @@ extern "C" void func_00246278(void* self, int a1);
  *
  * @param widget  the widget being created (passed on)
  */
-extern "C" void func_00245598(void* self, int widget)
+extern "C" void func_00245598(cGameLoadState* self, int widget)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     bool ok = cBENewRaceInterface_newRace.cGamePath != 2;
@@ -3631,9 +3634,9 @@ extern "C" void* cUIState__cUIState(void* self);
  *
  * @return cUIState__cUIState's result, passed through
  */
-extern "C" void* func_00245600(void* self)
+extern "C" void* func_00245600(cGameLoadStateOutLodge* self)
 {
-    *(void**)((char*)self + 0x8) = D_0047C878;
+    self->mVtbl = (void**)D_0047C878;
     return cUIState__cUIState(self);
 }
 #endif
@@ -3650,11 +3653,11 @@ extern char str_118loadoutlodge[];
  * Creates the leaving-the-lodge loading screen ("118loadoutlodge"): adds it to the UI engine (+0x10) with this state as
  * owner, keeps it at +0x40 and plays its first frame. Slot +0x24 (onCreateScreen) of D_0047C878.
  */
-extern "C" void func_00245628(void* self)
+extern "C" void func_00245628(cGameLoadStateOutLodge* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_118loadoutlodge), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -3668,8 +3671,9 @@ INCLUDE_ASM("main/ssxappdtor", func_00245690__FPv);
  * Does nothing: the leaving-the-lodge loading state creates no widgets of its own. Slot +0x94 (onWidgetCreate) of
  * D_0047C878.
  */
-void func_00245690(void* self)
+void func_00245690(void* vself)
 {
+    cGameLoadStateOutLodge* self = (cGameLoadStateOutLodge*)vself;
 }
 #endif
 
@@ -3690,9 +3694,9 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
  *
  * @return 0
  */
-extern "C" int func_00245698(void* self)
+extern "C" int func_00245698(cGameLoadStateOutLodge* self)
 {
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pct));
+    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pct));
     if (obj != 0) {
         char buf[208];
         sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)(cAppMan_TheAppMan + 0x38));

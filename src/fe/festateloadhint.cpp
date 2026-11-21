@@ -676,7 +676,7 @@ static inline bool IsId_246278(char* obj, char* key)
  *
  * @param obj  the widget being created (its hash name is at +0x38)
  */
-extern "C" void func_00246278(void* self, char* obj)
+extern "C" void func_00246278(cGameLoadState* self, char* obj)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (IsId_246278(obj, str_Location_Text)) {
@@ -825,7 +825,7 @@ static inline void Fmt_2464E8(char* buf, char* fmt, char* key, void* iface)
  *
  * @param obj  the widget being created (its hash name is at +0x38)
  */
-extern "C" void func_002464E8(void* self, char* obj)
+extern "C" void func_002464E8(cGameLoadState* self, char* obj)
 {
     sTable17_2464E8 tA = D_0047BAE0;
     sTable17_2464E8 tB = D_0047BB28;
@@ -927,7 +927,7 @@ extern "C" void func_002464E8(void* self, char* obj)
         sprintf1((unsigned short*)buf, fmtA, D_005308B8[idx].b1 ? 1 : v);
         cUIText_setUnicodeString(obj, buf);
     } else if (IsId_2464E8(obj, str_map_box)) {
-        char* loadScreen = *(char**)((char*)self + 0x48);
+        char* loadScreen = (char*)self->mpParentModule;
         if (loadScreen != 0) {
             int v = *(int*)(loadScreen + 0x10);
             if (v != 0) {
@@ -1026,7 +1026,7 @@ struct sName5_6CF8 { char c[5]; };
  *
  * @param player  the player slot (0 or 1)
  */
-extern "C" void func_00246CF8(void* self, char player)
+extern "C" void func_00246CF8(cGameLoadState* self, char player)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath == 2) {
@@ -1087,9 +1087,9 @@ extern "C" void func_00246CF8(void* self, char player)
         char* fmt = D_004A2C28_6CF8;
         void* obj;
         if (player == 0) {
-            obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ranking00));
+            obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ranking00));
         } else {
-            obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ranking01));
+            obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ranking01));
         }
         sprintf(buf, fmt, rank);
         if (obj != 0) {
@@ -1097,10 +1097,10 @@ extern "C" void func_00246CF8(void* self, char player)
         }
         for (int i = 0; i < 7; i++) {
             statName.c[2] = i + '0';
-            char* label = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(statName.c));
+            char* label = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(statName.c));
             barName.c[0] = player + '0';
             barName.c[1] = i + '0';
-            char* bar = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(barName.c));
+            char* bar = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(barName.c));
             if (label != 0 && bar != 0) {
                 int statValue = stats[i];
                 int level = statValue / 5;
@@ -1114,8 +1114,8 @@ extern "C" void func_00246CF8(void* self, char player)
                 cUIProgress_setValue(bar, statValue);
             }
         }
-        char* pic = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(picName.c));
-        sLoadInfo_6CF8* loadScreen = *(sLoadInfo_6CF8**)((char*)self + 0x48);
+        char* pic = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(picName.c));
+        sLoadInfo_6CF8* loadScreen = (sLoadInfo_6CF8*)self->mpParentModule;
         if (loadScreen != 0 && pic != 0) {
             int portraitTexture = loadScreen->image[player];
             if (portraitTexture != 0) {

@@ -119,8 +119,8 @@ extern "C" void func_003ACBB8(int, int);
  * @param index  the section id
  * @param fileNum  the file name passed on to func_003ACBB8
  */
-extern "C" void func_003AC9E0(void *cache, int index, int fileNum) {
-    func_003ACBB8((*(int *)((char*)(cache) + (4))) + (index * 0xC), fileNum);
+extern "C" void func_003AC9E0(cWScriptCache* cache, int index, int fileNum) {
+    func_003ACBB8(((int)cache->mpCache) + (index * 0xC), fileNum);
 }
 #endif
 
@@ -141,9 +141,9 @@ extern "C" void func_003ACC50(sWScriptCacheItem* e, int index, int value);
  * @param index  the section id
  * @param value  the script file header
  */
-extern "C" void func_003ACA10(void* self, int index, int value)
+extern "C" void func_003ACA10(cWScriptCache* self, int index, int value)
 {
-    sWScriptCacheItem* items = *(sWScriptCacheItem**)((char*)self + 0x4);
+    sWScriptCacheItem* items = (sWScriptCacheItem*)self->mpCache;
     func_003ACC50(&items[index], index, value);
 }
 #endif

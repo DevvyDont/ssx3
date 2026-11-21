@@ -1,0 +1,100 @@
+#ifndef ONLINE_DNASMAN_H
+#define ONLINE_DNASMAN_H
+
+// DNASMan: SSX 3's DNAS (Dynamic Network Authentication System) check: loads the DNAS program (OVERLAY.DAT, linked
+// with func_003FCFD8, entry points DirtyDnasRelInit / Updt / Exit) and its data (CONFIG.DAT, XOR-decoded), runs the
+// check and keeps its result texts. cFEStateAuthDNAS owns one as mpAuth (include/fe/festateauthdnas.h: built with
+// func_002561B8 on cMemMan_alloc(0xA50, "cFEStateAuthDNASCreate")); the debug menu's func_002560B0 runs one on
+// cMemMan_alloc(2640, "DNASMAN"). Retail code: unit seg/seg_156860, func_002561B8 .. func_002565E0 (C linkage
+// definitions in a .cpp). EA source: d:/ssx/code/source/online/dnasman.cpp (July 2003 preview).
+//
+// Name: DNASMan, from the preview's source file d:/ssx/code/source/online/dnasman.cpp, whose asserts name the members
+// State (kDNAS_LoadingElf / kDNAS_LoadingAuth / kDNAS_Checking), ElfData and AuthData that retail's functions use the
+// same way, and retail's allocation tag "DNASMAN" on the 2640-byte object; spelled like its online/ siblings LobbyMan
+// and BuddyMan (lobbyman.cpp / buddyman.cpp, tags "LobbyMan" / "BuddyMan"). No vtable (the destructor func_002561E0 is
+// called directly). Member names: State / ElfData / AuthData are EA's ([P]); the others are ours, in the same style.
+//
+// FLAT layout. Evidence tags: [R] the constructor's clear func_00256228; [P] the preview's asserts; [U] retail use.
+
+#include "layout.h"
+
+struct DNASMan {
+    int State;                          // 0x000 [P] (asserts on kDNAS_LoadingElf / kDNAS_LoadingAuth / kDNAS_Checking);
+                                        //       [R] 0; [U] func_00256258 1 (loading the program), func_00256460 2
+                                        //       (loading the data), func_00256510 3 (loaded), func_002562D0 4
+                                        //       (checking), func_002565E0 5 (done); func_002563F8 dispatches on it,
+                                        //       cFEStateAuthDNAS_onUpdate polls it
+    char* ElfData;                      // 0x004 [P] assert "!ElfData"; [R] 0; [U] func_00256258 allocates the
+                                        //       0x195000-byte "ElfData" buffer and loads OVERLAY.DAT into it;
+                                        //       func_002563A8 frees it
+    int ElfSize;                        // 0x008 [R] 0; [U] func_00256460: the loaded size (ASYNCFILE_release)
+    char* AuthData;                     // 0x00C [P] assert "!AuthData"; [R] 0; [U] func_00256460 allocates the 64 KB
+                                        //       "AuthData" buffer and loads CONFIG.DAT into it; func_00256510 decodes
+                                        //       it; func_002562D0 passes it on; func_002563A8 frees it
+    int AuthSize;                       // 0x010 [R] 0; [U] func_00256510: the loaded size; func_002562D0 passes it on
+    int unk_014;                        // 0x014 [R] 0; [U] func_00256258 0; cFEStateAuthDNAS_onInputBegin sets 1
+                                        //       (cancel); func_002565E0 reads it
+    int FileHandle;                     // 0x018 [R] -1; [U] func_00256258 / func_00256460: the ASYNCFILE_loadat handle;
+                                        //       func_00256460 / func_00256510 poll it
+    int unk_01C;                        // 0x01C [U] func_00256258 / func_002562D0 0; func_002565E0 stores whether the
+                                        //       check's result was 0; cFEStateAuthDNAS_onUpdate tests it (error)
+    int AuthMode;                       // 0x020 [U] func_00256258 stores its mode argument (from the profile bits);
+                                        //       func_002562D0 passes it on
+    char unk_024[0x48];                 // 0x024 start of the 160-byte parameter block given to DirtyDnasRelInit
+                                        //       (func_002562D0 clears it with MEM_fill and calls func_003FD0D8(self +
+                                        //       0x24)); not written otherwise
+    char* unk_06C;                      // 0x06C [U] func_002562D0: AuthData (parameter block)
+    int unk_070;                        // 0x070 [U] func_002562D0: AuthSize
+    char unk_074[8];                    // 0x074 [U] func_002562D0: the 8-byte key D_004A2ED8 (unaligned copy, sdl /
+                                        //       sdr)
+    char unk_07C[0x8];                  // 0x07C no access seen
+    int unk_084;                        // 0x084 [U] func_002562D0: 8 (the key length)
+    char unk_088[0x4];                  // 0x088 no access seen
+    int unk_08C;                        // 0x08C [U] func_002562D0 0
+    int unk_090;                        // 0x090 [U] func_002562D0 0
+    char unk_094[0x4];                  // 0x094 no access seen
+    char unk_098[0x10];                 // 0x098 [U] func_002562D0: strcpy of NetConnMAC()'s text
+    char unk_0A8[0x10];                 // 0x0A8 [U] func_002562D0: "SLUS_20772" (an 11-byte array copy: sdl / sdr, sh
+                                        //       at 0xB0, sb at 0xB2)
+    int unk_0B8;                        // 0x0B8 [U] func_002562D0 0
+    int unk_0BC;                        // 0x0BC [U] func_002562D0: AuthMode
+    int unk_0C0;                        // 0x0C0 [U] func_002562D0 1 (end of the parameter block)
+    char unk_0C4[0x38C];                // 0x0C4 [U] func_002565E0: the 908-byte check result (MEM_fill, then
+                                        //       func_003FD128 fills it; wide strings at +0xCC, +0x10C, +0x20C)
+    unsigned short unk_450[0x100];      // 0x450 [U] func_002565E0: USTR_copy of the result's first text;
+                                        //       cFEStateAuthDNAS_onUpdate shows it (error text)
+    unsigned short unk_650[0x100];      // 0x650 [U] func_002565E0: the second text; shown by cFEStateAuthDNAS_onUpdate
+    unsigned short unk_850[0x100];      // 0x850 [U] func_002565E0: the third text; shown by cFEStateAuthDNAS_onUpdate
+};
+
+CHECK_OFFSET(DNASMan, State, 0x000);
+CHECK_OFFSET(DNASMan, ElfData, 0x004);
+CHECK_OFFSET(DNASMan, ElfSize, 0x008);
+CHECK_OFFSET(DNASMan, AuthData, 0x00C);
+CHECK_OFFSET(DNASMan, AuthSize, 0x010);
+CHECK_OFFSET(DNASMan, unk_014, 0x014);
+CHECK_OFFSET(DNASMan, FileHandle, 0x018);
+CHECK_OFFSET(DNASMan, unk_01C, 0x01C);
+CHECK_OFFSET(DNASMan, AuthMode, 0x020);
+CHECK_OFFSET(DNASMan, unk_024, 0x024);
+CHECK_OFFSET(DNASMan, unk_06C, 0x06C);
+CHECK_OFFSET(DNASMan, unk_070, 0x070);
+CHECK_OFFSET(DNASMan, unk_074, 0x074);
+CHECK_OFFSET(DNASMan, unk_07C, 0x07C);
+CHECK_OFFSET(DNASMan, unk_084, 0x084);
+CHECK_OFFSET(DNASMan, unk_088, 0x088);
+CHECK_OFFSET(DNASMan, unk_08C, 0x08C);
+CHECK_OFFSET(DNASMan, unk_090, 0x090);
+CHECK_OFFSET(DNASMan, unk_094, 0x094);
+CHECK_OFFSET(DNASMan, unk_098, 0x098);
+CHECK_OFFSET(DNASMan, unk_0A8, 0x0A8);
+CHECK_OFFSET(DNASMan, unk_0B8, 0x0B8);
+CHECK_OFFSET(DNASMan, unk_0BC, 0x0BC);
+CHECK_OFFSET(DNASMan, unk_0C0, 0x0C0);
+CHECK_OFFSET(DNASMan, unk_0C4, 0x0C4);
+CHECK_OFFSET(DNASMan, unk_450, 0x450);
+CHECK_OFFSET(DNASMan, unk_650, 0x650);
+CHECK_OFFSET(DNASMan, unk_850, 0x850);
+CHECK_SIZE(DNASMan, 0xA50);
+
+#endif /* ONLINE_DNASMAN_H */

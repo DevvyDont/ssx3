@@ -2959,7 +2959,7 @@ static inline float Clamp_120378(float v, float lo, float hi)
  * @param vself  the cRider
  */
 // Sets the look-layer anim speed from the rider's speed and (on its frame) picks the head/body look anims.
-extern "C" void func_00120378(void* vself)
+extern "C" void func_00120378(cRider* vself)
 {
     cRider* self = (cRider*)vself;
     float sideLimit = 416.66668701171875f;
@@ -3290,7 +3290,7 @@ extern "C" void cRider_updateSplit3(cRider* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/rider", cRider_updateSplit4);
 #ifdef SKIP_ASM
-extern "C" void func_00120378(void* self);
+extern "C" void func_00120378(cRider* self);
 
 static inline void approach_11F8(sRiderChannel* riderChannel)
 {

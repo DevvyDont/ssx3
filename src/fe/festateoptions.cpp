@@ -411,12 +411,12 @@ extern void* cFEStateOptionsGame_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_00188EE8(void* self)
+extern "C" void* func_00188EE8(cFEStateOptionsGame* self)
 {
     cUIState_cUIState(self);
-    *(void***)((char*)self + 0x8) = cFEStateOptionsGame_vtbl;
-    *(int*)((char*)self + 0xC) = 0x1C;
-    return self;
+    self->mVtbl = cFEStateOptionsGame_vtbl;
+    self->mHashName = 0x1C;
+    return ((void*)self);
 }
 #endif
 
@@ -1038,13 +1038,13 @@ extern int D_004A14D4;
  *
  * @return @p self
  */
-extern "C" void* func_0018A258(void* self)
+extern "C" void* func_0018A258(cFEStateOptionsSound* self)
 {
     cUIState_cUIState(self);
-    *(void***)((char*)self + 8) = cFEStateOptionsSound_vtbl;
-    *(int*)((char*)self + 0xC) = 29;
+    self->mVtbl = cFEStateOptionsSound_vtbl;
+    self->mHashName = 29;
     D_004A14D4 = 0;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -1689,13 +1689,13 @@ extern int D_004A14D8;
  *
  * @return @p self
  */
-extern "C" void* func_0018C0E8(void* self)
+extern "C" void* func_0018C0E8(cFEStateOptionsHUD* self)
 {
     cUIState_cUIState(self);
-    *(void***)((char*)self + 8) = cFEStateOptionsHUD_vtbl;
-    *(int*)((char*)self + 0xC) = 0x1E;
+    self->mVtbl = cFEStateOptionsHUD_vtbl;
+    self->mHashName = 0x1E;
     D_004A14D8 = 0;
-    return self;
+    return ((void*)self);
 }
 #endif
 

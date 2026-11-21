@@ -2981,14 +2981,15 @@ INCLUDE_ASM("sound/bankmonitor", func_002AF8E0__FPv);
  *
  * @return self
  */
-void* func_002AF8E0(void* self)
+void* func_002AF8E0(void* vself)
 {
+    cSpeechBank* self = (cSpeechBank*)vself;
     int zero = 0;
-    *(int*)((char*)self + 0x48) = zero;
+    self->mOwnsData = zero;
     *(int*)self = -1;
-    *(int*)((char*)self + 0x44) = zero;
+    self->mpData = (void*)zero;
     *(signed char*)((char*)self + 0x4) = (signed char)zero;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -4638,10 +4639,11 @@ INCLUDE_ASM("sound/bankmonitor", func_002B1758__FPvi);
  * @param channel  the instance index / driver channel
  * @return func_002AFD10's result
  */
-void* func_002B1758(void* self, int channel)
+void* func_002B1758(void* vself, int channel)
 {
+    cSpeechSys* self = (cSpeechSys*)vself;
     // a1 also stays in $5 as func_002AFD10's second argument
-    return func_002AFD10_impl((void*)(*(int**)((char*)self + 0x4))[channel], (void*)channel);
+    return func_002AFD10_impl((void*)((int*)self->mSpeechInstance)[channel], (void*)channel);
 }
 #endif
 
@@ -7221,8 +7223,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4868__FPv);
  *
  * @return mDuckToLoops
  */
-int func_002B4868(void* self)
+int func_002B4868(void* vself)
 {
+    cSongInstance* self = (cSongInstance*)vself;
     return *(int*)((char*)*(void**)self + 0x94);
 }
 #endif
@@ -7288,9 +7291,10 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4908__FPv);
  *
  * @return mSedValue
  */
-int func_002B4908(void* self)
+int func_002B4908(void* vself)
 {
-    void* config = *(void**)((char*)self + (*(int*)((char*)self + 0x3f0) << 2) + 0x4);
+    cMusicSys* self = (cMusicSys*)vself;
+    void* config = *(void**)((char*)self + (self->mCurrentSongNum << 2) + 0x4);
     return *(int*)((char*)config + 0x98);
 }
 #endif

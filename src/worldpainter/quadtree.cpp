@@ -1542,9 +1542,10 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C4290__FPvi);
  * @param fileSlot  the file slot index (0 .. mMaxFiles - 1; not checked)
  * @return func_002C48C0's return register (it returns nothing)
  */
-void* func_002C4290(void* self, int fileSlot)
+void* func_002C4290(void* vself, int fileSlot)
 {
-    *(int*)((char*)self + 0x1c) = fileSlot;
+    cPS2MemCard* self = (cPS2MemCard*)vself;
+    self->unk_01C = fileSlot;
     return func_002C48C0((cPS2MemCard*)self, 34);
 }
 #endif
@@ -1937,10 +1938,11 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C4720__FPvii);
  * @param transferSize  the number of bytes to write
  * @return func_002C48C0's return register (it returns nothing)
  */
-void* func_002C4720(void* self, int buffer, int transferSize)
+void* func_002C4720(void* vself, int buffer, int transferSize)
 {
-    *(int*)((char*)self + 0x2c) = buffer;
-    *(int*)((char*)self + 0x20) = transferSize;
+    cPS2MemCard* self = (cPS2MemCard*)vself;
+    self->unk_02C = buffer;
+    self->unk_020 = transferSize;
     return func_002C48C0((cPS2MemCard*)self, 23);
 }
 #endif
@@ -1966,9 +1968,10 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C4758__FPv);
  * Asks for the open save file to be closed once the current write finishes: sets unk_048 to 1, and cPS2MemCard_Update
  * then calls func_002C48C0 with state 24. Card vtable slot 44.
  */
-void func_002C4758(void* self)
+void func_002C4758(void* vself)
 {
-    *(int*)((char*)self + 0x48) = 1;
+    cPS2MemCard* self = (cPS2MemCard*)vself;
+    self->unk_048 = 1;
 }
 #endif
 
@@ -2053,10 +2056,11 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C4858__FPvii);
  * @param transferSize  the number of bytes to read
  * @return func_002C48C0's return register (it returns nothing)
  */
-void* func_002C4858(void* self, int buffer, int transferSize)
+void* func_002C4858(void* vself, int buffer, int transferSize)
 {
-    *(int*)((char*)self + 0x2c) = buffer;
-    *(int*)((char*)self + 0x20) = transferSize;
+    cPS2MemCard* self = (cPS2MemCard*)vself;
+    self->unk_02C = buffer;
+    self->unk_020 = transferSize;
     return func_002C48C0((cPS2MemCard*)self, 29);
 }
 #endif
@@ -2082,9 +2086,10 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C4890__FPv);
  * Asks for the open save file to be closed once the current read finishes: sets unk_044 to 1, and cPS2MemCard_Update
  * then calls func_002C48C0 with state 30. Card vtable slot 33.
  */
-void func_002C4890(void* self)
+void func_002C4890(void* vself)
 {
-    *(int*)((char*)self + 0x44) = 1;
+    cPS2MemCard* self = (cPS2MemCard*)vself;
+    self->unk_044 = 1;
 }
 #endif
 
@@ -2637,9 +2642,10 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C5230__FPv);
  *
  * @return 1 when cPS2MemCard_GetLastError returns nonzero, else 0
  */
-int func_002C5230(void* self)
+int func_002C5230(void* vself)
 {
-    return (cPS2MemCard_GetLastError(self, *(int*)((char*)self + 0xc)) != 0);
+    cPS2MemCard* self = (cPS2MemCard*)vself;
+    return (cPS2MemCard_GetLastError(self, self->mDevice) != 0);
 }
 #endif
 
@@ -2900,8 +2906,9 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C5500__FPv);
  *
  * @return strcpy2's result
  */
-void* func_002C5500(void* self)
+void* func_002C5500(void* vself)
 {
+    cPS2MemCard* self = (cPS2MemCard*)vself;
     return strcpy2((char*)self + 0x58);
 }
 #endif
@@ -4183,10 +4190,11 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C67E8__FPvi);
  * @param device  the memory-card port (0 or 1)
  * @return func_002C48C0's return register (it returns nothing)
  */
-void* func_002C67E8(void* self, int device)
+void* func_002C67E8(void* vself, int device)
 {
-    *(int*)((char*)self + 0xc) = device;
-    *(int*)((char*)self + 0x10) = device;
+    cPS2MemCard* self = (cPS2MemCard*)vself;
+    self->mDevice = device;
+    self->unk_010 = device;
     return func_002C48C0((cPS2MemCard*)self, 3);
 }
 #endif
@@ -4380,10 +4388,11 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C6A60__FPvii);
  * @param seekOrigin  the sceMcSeek origin
  * @return func_002C48C0's return register (it returns nothing)
  */
-void* func_002C6A60(void* self, int seekOffset, int seekOrigin)
+void* func_002C6A60(void* vself, int seekOffset, int seekOrigin)
 {
-    *(int*)((char*)self + 0x14e4) = seekOffset;
-    *(int*)((char*)self + 0x14e8) = seekOrigin;
+    cPS2MemCard* self = (cPS2MemCard*)vself;
+    self->unk_14E4 = seekOffset;
+    self->unk_14E8 = seekOrigin;
     return func_002C48C0((cPS2MemCard*)self, 65);
 }
 #endif
@@ -4462,10 +4471,11 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C6B50__FPvii);
  * @param ioSize  the number of bytes to read
  * @return func_002C48C0's return register (it returns nothing)
  */
-void* func_002C6B50(void* self, int buffer, int ioSize)
+void* func_002C6B50(void* vself, int buffer, int ioSize)
 {
-    *(int*)((char*)self + 0x2c) = buffer;
-    *(int*)((char*)self + 0x24) = ioSize;
+    cPS2MemCard* self = (cPS2MemCard*)vself;
+    self->unk_02C = buffer;
+    self->unk_024 = ioSize;
     return func_002C48C0((cPS2MemCard*)self, 67);
 }
 #endif
@@ -4506,10 +4516,11 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C6BD0__FPvii);
  * @param ioSize  the number of bytes to write
  * @return func_002C48C0's return register (it returns nothing)
  */
-void* func_002C6BD0(void* self, int buffer, int ioSize)
+void* func_002C6BD0(void* vself, int buffer, int ioSize)
 {
-    *(int*)((char*)self + 0x2c) = buffer;
-    *(int*)((char*)self + 0x24) = ioSize;
+    cPS2MemCard* self = (cPS2MemCard*)vself;
+    self->unk_02C = buffer;
+    self->unk_024 = ioSize;
     return func_002C48C0((cPS2MemCard*)self, 69);
 }
 #endif

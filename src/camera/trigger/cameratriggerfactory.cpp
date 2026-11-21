@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camera/cameraalgorithms.h"
 #include "camera/script/scriptcontroller.h"
 #include "camera/trigger/cameratriggeractions.h"
 #include "camera/trigger/cameratriggervolumes.h"
@@ -3264,9 +3265,9 @@ extern void* D_0045BDE0[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void func_00176270(void* self, int flags)
+extern "C" void func_00176270(cCameraAlgorithm* self, int flags)
 {
-    *(void***)((char*)self + 0x10) = D_0045BDE0;
+    self->mVtbl = D_0045BDE0;
     if (flags & 1) {
         operator_delete((int*)self);
     }

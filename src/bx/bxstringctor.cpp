@@ -1,4 +1,6 @@
 #include "common.h"
+#include "online/privatemessage.h"
+#include "online/setupman.h"
 #include "path/trackpath.h"
 #include "online/buddyman.h"
 #include "path/aipath.h"
@@ -63,11 +65,11 @@ extern char cPrivateMessage_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void func_002688E0(void* self, int flags)
+extern "C" void func_002688E0(cPrivateMessage* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cPrivateMessage_vtbl;
-    cBXString__cBXString((char*)self + 8, 2);
-    cBXString__cBXString((char*)self + 4, 2);
+    self->mVtbl = (void**)cPrivateMessage_vtbl;
+    cBXString__cBXString(&self->mDate, 2);
+    cBXString__cBXString(&self->mText, 2);
     cBXString__cBXString(self, 2);
     if (flags & 1)
     {
@@ -1015,7 +1017,7 @@ static inline sMsgListIter_00269008 sMsgList_00269008_insert(sMsgListIter_002690
  * @param riderId  the character id from the message
  * @param hostState  the host's setup state from the message
  */
-extern "C" void func_00269008(void* self, int riderId, int hostState)
+extern "C" void func_00269008(cSetupMan* self, int riderId, int hostState)
 {
     int kind = 243;
     *(int*)self = hostState;
@@ -1077,7 +1079,7 @@ static inline sMsgListIter_002690C8 sMsgList_002690C8_insert(sMsgListIter_002690
  * @param riderId  the character id from the message
  * @param hostState  the host's setup state from the message
  */
-extern "C" void func_002690C8(void* self, int riderId, int hostState)
+extern "C" void func_002690C8(cSetupMan* self, int riderId, int hostState)
 {
     int kind = 244;
     *(int*)self = hostState;
@@ -1141,7 +1143,7 @@ struct sMsgSelf_00269188 {
  *
  * @param hostState  the host's setup state (the message's second word)
  */
-extern "C" void func_00269188(void* self, int hostState)
+extern "C" void func_00269188(cSetupMan* self, int hostState)
 {
     int kind = 247;
     ((sMsgSelf_00269188*)self)->f0 = hostState;
@@ -1204,7 +1206,7 @@ static inline sMsgListIter_00269240 sMsgList_00269240_insert(sMsgListIter_002692
  * @param hostState  the host's setup state
  * @param riderStats  the host rider's 7 attribute bytes from the message
  */
-extern "C" void func_00269240(void* self, int riderId, int hostState, void* riderStats)
+extern "C" void func_00269240(cSetupMan* self, int riderId, int hostState, void* riderStats)
 {
     int kind = 243;
     *(int*)self = hostState;
@@ -1267,7 +1269,7 @@ static inline sMsgListIter_00269300 sMsgList_00269300_insert(sMsgListIter_002693
  * @param riderId  the host's character id
  * @param hostState  the host's setup state
  */
-extern "C" void func_00269300(void* self, int riderId, int hostState)
+extern "C" void func_00269300(cSetupMan* self, int riderId, int hostState)
 {
     int kind = 245;
     *(int*)self = hostState;
@@ -1331,7 +1333,7 @@ struct sMsgSelf_002693C0 {
  *
  * @param hostState  the host's setup state (the message's second word)
  */
-extern "C" void func_002693C0(void* self, int hostState)
+extern "C" void func_002693C0(cSetupMan* self, int hostState)
 {
     int kind = 247;
     ((sMsgSelf_002693C0*)self)->f0 = hostState;
@@ -1397,7 +1399,7 @@ struct sMsg_00269478 {
  *
  * @param rowIndex  the highlighted row from the message
  */
-extern "C" void func_00269478(void* self, int rowIndex)
+extern "C" void func_00269478(cSetupMan* self, int rowIndex)
 {
     sMsg_00269478* netEvent = (sMsg_00269478*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->kind = 251;
@@ -1464,7 +1466,7 @@ struct sMsg_00269538 {
  * @param ruleSlot  the rule slot
  * @param ruleValue  the new value
  */
-extern "C" void func_00269538(void* self, int ruleSlot, int ruleValue)
+extern "C" void func_00269538(cSetupMan* self, int ruleSlot, int ruleValue)
 {
     sMsg_00269538* netEvent = (sMsg_00269538*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->kind = 0xFC;
@@ -1528,7 +1530,7 @@ struct sMsg_00269608 {
  * 1 onto LobbyMan's mEventList. func_002642B8 calls it on the host's setup manager (D_004A33CC) for a type-11 message
  * in the bragging-rights phase (state 7 or more).
  */
-extern "C" void func_00269608(void* self)
+extern "C" void func_00269608(cSetupMan* self)
 {
     switch (*(int*)self)
     {
@@ -1601,7 +1603,7 @@ struct sMsg_002696F8 {
  * mEventList. func_002642B8 calls it on the host's setup manager (D_004A33CC) for a type-13 message in the
  * bragging-rights phase (state 7 or more).
  */
-extern "C" void func_002696F8(void* self)
+extern "C" void func_002696F8(cSetupMan* self)
 {
     if (*(int*)self == 8)
         *(int*)self = 7;
@@ -1668,7 +1670,7 @@ struct sMsg_002697D0 {
  *
  * @param rowIndex  the highlighted row from the message
  */
-extern "C" void func_002697D0(void* self, int rowIndex)
+extern "C" void func_002697D0(cSetupMan* self, int rowIndex)
 {
     sMsg_002697D0* netEvent = (sMsg_002697D0*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->kind = 251;
@@ -1732,7 +1734,7 @@ struct sMsg_00269890 {
  *
  * @param rowIndex  the highlighted row from the message
  */
-extern "C" void func_00269890(void* self, int rowIndex)
+extern "C" void func_00269890(cSetupMan* self, int rowIndex)
 {
     sMsg_00269890* netEvent = (sMsg_00269890*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->kind = 251;
@@ -1799,7 +1801,7 @@ struct sMsg_00269948 {
  * @param ruleSlot  the rule slot
  * @param ruleValue  the new value
  */
-extern "C" void func_00269948(void* self, int ruleSlot, int ruleValue)
+extern "C" void func_00269948(cSetupMan* self, int ruleSlot, int ruleValue)
 {
     sMsg_00269948* netEvent = (sMsg_00269948*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->kind = 0xFC;
@@ -1867,7 +1869,7 @@ struct sMsg_00269A18 {
  * @param ruleSlot  the rule slot
  * @param ruleValue  the new value
  */
-extern "C" void func_00269A18(void* self, int ruleSlot, int ruleValue)
+extern "C" void func_00269A18(cSetupMan* self, int ruleSlot, int ruleValue)
 {
     sMsg_00269A18* netEvent = (sMsg_00269A18*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->kind = 0xFC;
@@ -1931,7 +1933,7 @@ struct sMsg_00269AE0 {
  *
  * @param hostState  the host's setup state from the message
  */
-extern "C" void func_00269AE0(void* self, int hostState)
+extern "C" void func_00269AE0(cSetupMan* self, int hostState)
 {
     *(int*)self = hostState;
     sMsg_00269AE0* netEvent = (sMsg_00269AE0*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
@@ -1995,7 +1997,7 @@ struct sMsg_00269B90 {
  *
  * @param hostState  the host's setup state from the message
  */
-extern "C" void func_00269B90(void* self, int hostState)
+extern "C" void func_00269B90(cSetupMan* self, int hostState)
 {
     *(int*)self = hostState;
     sMsg_00269B90* netEvent = (sMsg_00269B90*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
@@ -2059,7 +2061,7 @@ struct sMsg_00269C40 {
  *
  * @param hostState  the host's setup state from the message
  */
-extern "C" void func_00269C40(void* self, int hostState)
+extern "C" void func_00269C40(cSetupMan* self, int hostState)
 {
     *(int*)self = hostState;
     sMsg_00269C40* netEvent = (sMsg_00269C40*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
@@ -2122,7 +2124,7 @@ struct sMsg_00269CF0 {
  *
  * @param hostState  the setup state from the message
  */
-extern "C" void func_00269CF0(void* self, int hostState)
+extern "C" void func_00269CF0(cSetupMan* self, int hostState)
 {
     *(int*)self = hostState;
     sMsg_00269CF0* netEvent = (sMsg_00269CF0*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);

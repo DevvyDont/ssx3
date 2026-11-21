@@ -1,4 +1,5 @@
 #include "common.h"
+#include "animation/animsequencer.h"
 #include "ai/dangerman.h"
 #include "ai/rideranim.h"
 #include "replay/playbackman.h"
@@ -1101,7 +1102,7 @@ extern "C" void cRider_flagEventWipeout_9C88(void* rider, int anim, int a2, int 
 extern "C" void cRider_flagEventLand(void* rider, int a1, int a2, int a3, sHit_139C88* hit, float spd);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void* ra, int layer);
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void* ra, int layer);
-extern "C" bool func_001446A0(void* self, int bit);
+extern "C" bool func_001446A0(tEventFlags* self, int bit);
 extern "C" int func_001446A0_i(void* self, int bit) __asm__("func_001446A0");
 extern "C" float cBEStatInterface_getLandingAttrib(void* be, int idx, int stat);
 extern "C" void cRider_undoRailslideModeOrientation(void* rider);
@@ -1360,15 +1361,15 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
         V4_139C88(RIDER_139C88, 1120) = hit.pos;
         *(float*)(RIDER_139C88 + 0x454) = vu0Dot_139C88(vu0Sub_139C88(V4_139C88(RIDER_139C88, 272), hit.pos), V4_139C88(RIDER_139C88, 880));
         if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 20) {
-            if (!func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 2)) anim = 361;
+            if (!func_001446A0((tEventFlags*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0), 2)) anim = 361;
         } else if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 21) {
-            if (!func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 3)) anim = 361;
+            if (!func_001446A0((tEventFlags*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0), 3)) anim = 361;
         } else {
             int flip = 0;
             if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 19) {
                 flip = func_001446A0_i(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 2) == 0;
             } else if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 18 &&
-                       !func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 2)) {
+                       !func_001446A0((tEventFlags*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0), 2)) {
                 flip = func_001446A0_i(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 0) != 0;
             }
             char* r4 = RIDER_139C88;
@@ -8632,12 +8633,12 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00144670);
  * @param bit  the flag number, 0-63
  */
 // PORT: ulong is 64-bit here
-extern "C" void func_00144670(void* self, int bit)
+extern "C" void func_00144670(tEventFlags* self, int bit)
 {
     ulong mask = (ulong)1 << bit;
     ulong oldBits = *(ulong*)self;
     *(ulong*)self = oldBits & ~mask;
-    *(ulong*)((char*)self + 0x8) |= mask & oldBits;
+    self->IsJustChanged |= mask & oldBits;
 }
 #endif
 
@@ -8650,7 +8651,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_001446A0);
  * @param bit  the flag number, 0-63
  * @return true when set
  */
-extern "C" bool func_001446A0(void* self, int bit)
+extern "C" bool func_001446A0(tEventFlags* self, int bit)
 {
     ulong mask = (ulong)1 << bit;
     return (*(ulong*)self & mask) != 0;
@@ -8666,10 +8667,10 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_001446B8);
  * @param bit  the flag number, 0-63
  * @return true when set
  */
-extern "C" bool func_001446B8(void* self, int bit)
+extern "C" bool func_001446B8(tEventFlags* self, int bit)
 {
     ulong mask = (ulong)1 << bit;
-    return (*(ulong*)((char*)self + 0x8) & mask) != 0;
+    return (self->IsJustChanged & mask) != 0;
 }
 #endif
 

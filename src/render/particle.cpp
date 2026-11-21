@@ -6847,12 +6847,12 @@ struct sRGB_C638 {
  *
  * @return the r, g and b brightness, 1.0 = full
  */
-extern "C" sRGB_C638 func_0037C638(void* self)
+extern "C" sRGB_C638 func_0037C638(cPS2GraphicsMan* self)
 {
     sRGB_C638 colour;
-    colour.x = (float)*(unsigned int*)((char*)self + 0x59EC) * 0.0078125f;
-    colour.y = (float)*(unsigned int*)((char*)self + 0x59F0) * 0.0078125f;
-    colour.z = (float)*(unsigned int*)((char*)self + 0x59F4) * 0.0078125f;
+    colour.x = (float)(unsigned int)self->unk_59EC[0] * 0.0078125f;
+    colour.y = (float)(unsigned int)self->unk_59EC[1] * 0.0078125f;
+    colour.z = (float)(unsigned int)self->unk_59EC[2] * 0.0078125f;
     return colour;
 }
 #endif
@@ -7222,9 +7222,10 @@ INCLUDE_ASM("render/particle", func_0037CBC8__FPv);
  *
  * @return nothing meaningful (func_003691B0 returns nothing; the definition is declared void*)
  */
-void* func_0037CBC8(void* self)
+void* func_0037CBC8(void* vself)
 {
-    return func_003691B0(*(int*)((char*)self + 0x18f4));
+    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
+    return func_003691B0((int)self->mpTextureMan);
 }
 #endif
 
@@ -7437,9 +7438,10 @@ INCLUDE_ASM("render/particle", func_0037D090__FPv);
  *
  * @return nothing meaningful (func_00369130 returns nothing; the definition is declared void*)
  */
-void* func_0037D090(void* self)
+void* func_0037D090(void* vself)
 {
-    return func_00369130(*(int*)((char*)self + 0x18f4));
+    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
+    return func_00369130((int)self->mpTextureMan);
 }
 #endif
 
@@ -8254,7 +8256,7 @@ struct sPartQVec {
  * @return the projected point
  */
 // PORT: PS2-only VU0 macro-mode asm; the PC port needs a C version.
-extern "C" sPartQVec func_0037DEE0(void* self, sPartQVec* point)
+extern "C" sPartQVec func_0037DEE0(cPS2GraphicsMan* self, sPartQVec* point)
 {
     sPartQVec result;
     __asm__ __volatile__(
@@ -8276,9 +8278,9 @@ extern "C" sPartQVec func_0037DEE0(void* self, sPartQVec* point)
         "vmaddw.xyzw  $vf13, $vf6, $vf0w\n"
         "sqc2      $vf13, %0\n"
         : "=m"(result)
-        : "r"(point), "r"((char*)self + 0x58A0),
-          "m"(*(sPartQVec*)((char*)self + 0x58E0)),
-          "m"(*(sPartQVec*)((char*)self + 0x58F0)));
+        : "r"(point), "r"((char*)&self->mNetMatrix),
+          "m"(*(sPartQVec*)&self->mScreenScale),
+          "m"(*(sPartQVec*)&self->mScreenOffset));
     return result;
 }
 #endif
@@ -8299,9 +8301,9 @@ struct sPartVec4_DF40 {
  * @return the transformed (homogeneous) point
  */
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4x4 matrix * vector).
-extern "C" sPartVec4_DF40 func_0037DF40(void* self, sPartVec4_DF40* point)
+extern "C" sPartVec4_DF40 func_0037DF40(cPS2GraphicsMan* self, sPartVec4_DF40* point)
 {
-    char* mat = (char*)self + 0x58A0;
+    char* mat = (char*)&self->mNetMatrix;
     sPartVec4_DF40 result;
     __asm__ __volatile__(
         ".set push\n"

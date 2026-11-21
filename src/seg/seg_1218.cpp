@@ -98,14 +98,14 @@ static inline sVec4_0250 vNorm_0250(const sVec4_0250& v)
  * @param direction  the direction to measure
  * @return the slope value
  */
-extern "C" float func_00100250(void* self, const sVec4_0250* direction)
+extern "C" float func_00100250(cComputer* self, const sVec4_0250* direction)
 {
-    char* rider = *(char**)((char*)self + 0x18);
+    char* rider = (char*)self->mRider;
     sVec4_0250 riderSide = *(sVec4_0250*)(rider + 0x1A0);
     sVec4_0250 riderUp = *(sVec4_0250*)(rider + 0x1C0);
     sVec4_0250 planarDir = vSub_0250(*direction, vScale_0250(riderSide, vDot_0250(*direction, riderSide)));
     float slope = -vDot_0250(vNorm_0250(planarDir), riderUp);
-    float accuracy = *(float*)((char*)self + 0xDF4);
+    float accuracy = self->mAccuracy;
     if (accuracy == 1.0f)
         return slope;
     return slope * 0.12667641043663025f * accuracy;

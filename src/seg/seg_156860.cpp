@@ -1,4 +1,5 @@
 #include "common.h"
+#include "online/dnasman.h"
 #include "online/buddyman.h"
 #include "online/lobbyman.h"
 #include "be/beintnetwork.h"
@@ -780,14 +781,14 @@ extern "C" void *operator_new__FUi_6258(unsigned int, int *, int, int) __asm__("
  *
  * @param authMode  the mode, passed on to the authentication (+0x20)
  */
-extern "C" void func_00256258(char *self, int authMode) {
-    *(int *)(self + 0x20) = authMode;
-    *(int *)(self + 0x14) = 0;
-    *(int *)(self + 0x1C) = 0;
-    *(int *)(self + 0) = 1;
+extern "C" void func_00256258(DNASMan* self, int authMode) {
+    self->AuthMode = authMode;
+    self->unk_014 = 0;
+    self->unk_01C = 0;
+    self->State = 1;
     void *mem = operator_new__FUi_6258(0x195000, D_004A2EE0, 0x04000100, 0);
-    *(void **)(self + 4) = mem;
-    *(int *)(self + 0x18) = ASYNCFILE_loadat(D_004803E8, (int)mem, 0x195000);
+    self->ElfData = (char*)mem;
+    self->FileHandle = ASYNCFILE_loadat(D_004803E8, (int)mem, 0x195000);
 }
 #endif
 
@@ -862,9 +863,9 @@ extern "C" void func_002563A8(void *dnasMan) {
 INCLUDE_ASM("seg/seg_156860", func_002563F8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_00256460(char* self);
-extern "C" void func_00256510(char* self);
-extern "C" void func_002565E0(char* self);
+extern "C" void func_00256460(DNASMan* self);
+extern "C" void func_00256510(DNASMan* self);
+extern "C" void func_002565E0(DNASMan* self);
 
 /**
  * Advances a DNAS authentication by its state (+0).
@@ -875,13 +876,13 @@ extern "C" void func_002563F8(char* self)
 {
     switch (*(int*)self) {
     case 1:
-        func_00256460(self);
+        func_00256460((DNASMan*)self);
         break;
     case 2:
-        func_00256510(self);
+        func_00256510((DNASMan*)self);
         break;
     case 4:
-        func_002565E0(self);
+        func_002565E0((DNASMan*)self);
         break;
     case 0:
     case 3:
@@ -910,18 +911,18 @@ extern char str_CONFIG_DAT[];
  * (func_003FCFD8, which resolves DirtyDnasRelInit / Updt / Exit). On success it allocates a 64 KB "AuthData" buffer
  * (+0xC), starts loading "CONFIG.DAT" into it and sets the state to 2.
  */
-extern "C" void func_00256460(char *self) {
-    if (ASYNCFILE_getstatus_6460(*(int *)(self + 0x18)) == 1) {
-        *(int *)(self + 8) = 0;
-        ASYNCFILE_release_6460(*(int *)(self + 0x18), 0, self + 8);
-        int readBuffer = *(int *)(self + 4);
+extern "C" void func_00256460(DNASMan* self) {
+    if (ASYNCFILE_getstatus_6460(self->FileHandle) == 1) {
+        self->ElfSize = 0;
+        ASYNCFILE_release_6460(self->FileHandle, 0, &self->ElfSize);
+        int readBuffer = (int)self->ElfData;
         if (readBuffer != 0) {
-            int readSize = *(int *)(self + 8);
+            int readSize = self->ElfSize;
             if (readSize > 0 && func_003FCFD8_6460(readBuffer, readSize) >= 0) {
                 void *authData = operator_new__FUi_6460(0x10000, str_AuthData, 0x04000100, 0);
-                *(void **)(self + 0xC) = authData;
-                *(int *)(self + 0x18) = ASYNCFILE_loadat_6460(str_CONFIG_DAT, authData, 0x10000);
-                *(int *)(self + 0) = 2;
+                self->AuthData = (char*)authData;
+                self->FileHandle = ASYNCFILE_loadat_6460(str_CONFIG_DAT, authData, 0x10000);
+                self->State = 2;
             }
         }
     }
@@ -943,19 +944,19 @@ extern K6510 D_004A2EE8[];
  * When the load (+0x18) is done it releases it with the size in +0x10; for a nonzero size it sets the state to 3 and
  * XORs every byte of the data (+0xC) with the 4-byte key D_004A2EE8, repeating.
  */
-extern "C" void func_00256510(char *self) {
-    if (ASYNCFILE_getstatus_6510(*(int *)(self + 0x18)) == 1) {
-        *(int *)(self + 0x10) = 0;
-        ASYNCFILE_release_6510(*(int *)(self + 0x18), 0, self + 0x10);
-        unsigned char *fileData = *(unsigned char **)(self + 0xC);
+extern "C" void func_00256510(DNASMan* self) {
+    if (ASYNCFILE_getstatus_6510(self->FileHandle) == 1) {
+        self->AuthSize = 0;
+        ASYNCFILE_release_6510(self->FileHandle, 0, &self->AuthSize);
+        unsigned char *fileData = (unsigned char*)self->AuthData;
         if (fileData != 0) {
-            int n = *(int *)(self + 0x10);
+            int n = self->AuthSize;
             if (n > 0) {
-                *(int *)(self + 0) = 3;
+                self->State = 3;
                 K6510 key = D_004A2EE8[0];
                 int i;
                 unsigned char *bytePtr;
-                for (i = 0, bytePtr = fileData; i < *(int *)(self + 0x10); i++, bytePtr++) {
+                for (i = 0, bytePtr = fileData; i < self->AuthSize; i++, bytePtr++) {
                     *bytePtr ^= key.b[i % 4];
                 }
             }
@@ -980,25 +981,25 @@ extern "C" void USTR_copy_65E0(char *, char *) __asm__("USTR_copy");
  * (func_003FD128), copies three wide strings of it (+0xCC, +0x10C, +0x20C) to +0x450, +0x650 and +0x850 (USTR_copy),
  * stores whether the result was 0 at +0x1C and sets the state to 5.
  */
-extern "C" void func_002565E0(char *self) {
-    if (func_003FD100_65E0(*(int *)(self + 0x14)) == 0) {
-        char *infoBuf = self + 0xC4;
+extern "C" void func_002565E0(DNASMan* self) {
+    if (func_003FD100_65E0(self->unk_014) == 0) {
+        char *infoBuf = ((char*)self) + 0xC4;
         MEM_fill_65E0(infoBuf, 0, 908);
-        char *secondText = self + 0x650;
-        char *thirdText = self + 0x850;
+        char *secondText = (char*)&self->unk_650[0];
+        char *thirdText = (char*)&self->unk_850[0];
         int result = func_003FD128_65E0(infoBuf);
-        *(short *)(self + 0x450) = 0;
+        *(short*)&self->unk_450[0] = 0;
         *(short *)secondText = 0;
         *(short *)thirdText = 0;
-        USTR_copy_65E0(self + 0x450, self + 0xCC);
-        USTR_copy_65E0(secondText, self + 0x10C);
-        USTR_copy_65E0(thirdText, self + 0x20C);
+        USTR_copy_65E0((char*)&self->unk_450[0], ((char*)self) + 0xCC);
+        USTR_copy_65E0(secondText, ((char*)self) + 0x10C);
+        USTR_copy_65E0(thirdText, ((char*)self) + 0x20C);
         if (result == 0) {
-            *(int *)(self + 0x1C) = 1;
+            self->unk_01C = 1;
         } else {
-            *(int *)(self + 0x1C) = 0;
+            self->unk_01C = 0;
         }
-        *(int *)(self + 0) = 5;
+        self->State = 5;
     }
 }
 #endif

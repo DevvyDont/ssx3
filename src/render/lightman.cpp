@@ -1943,7 +1943,7 @@ extern "C" void func_00368138(void* self, void* pkt);
  * @param pkt  passed to func_00368138
  * @param addr  in/out: the DMA ring's current main-memory address
  */
-extern "C" void func_003904A0(void* self, int idx, void* pkt, int* addr)
+extern "C" void func_003904A0(cPS2GraphicsMan* self, int idx, void* pkt, int* addr)
 {
     if (cScreenTint_m_Enable == 0) {
         return;
@@ -1959,7 +1959,7 @@ extern "C" void func_003904A0(void* self, int idx, void* pkt, int* addr)
     int mark = func_0038F460(ring, *addr, -1, 0);
     func_003905E8(self, idx, &mark);
     *addr = func_0038F668_r(ring, mark, 4);
-    func_00368138(*(void**)((char*)self + 0x18F4), pkt);
+    func_00368138(self->mpTextureMan, pkt);
 }
 #endif
 

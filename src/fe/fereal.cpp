@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/fesound.h"
 #include "fe/festateselectmp.h"
 #include "fe/fereal.h"
 #include "fe/fecustom.h"
@@ -873,7 +874,7 @@ extern "C" void func_0019CE68(void* self);
 extern "C" void cFERiderManager_init(void* self);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFECustom_cFECustom(cFECustom* self, cUIEngine* owner);
-extern "C" void* cFESound_cFESound(void* self);
+extern "C" void* cFESound_cFESound(cFESound* self);
 extern "C" void cIrradianceDataBase_Load(void* db);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_FrontEndLoad(void* snd);
@@ -984,7 +985,7 @@ extern "C" void cRealFE_load(cRealFE* self)
     *(int*)(in + 0x14) = 0;
     ui2->input = in;
     ((sUI_1E80*)self->mpUI)->custom = cFECustom_cFECustom((cFECustom*)cMemMan_alloc(20, str_FEUICustom, 0, 0), (cUIEngine*)((sUI_1E80*)self->mpUI));
-    ((sUI_1E80*)self->mpUI)->sound = cFESound_cFESound(cMemMan_alloc(8, str_FEUISound, 0, 0));
+    ((sUI_1E80*)self->mpUI)->sound = cFESound_cFESound((cFESound*)cMemMan_alloc(8, str_FEUISound, 0, 0));
     char* g = (char*)SSXApp;
     void* feLocale = *(void**)(g + 0x8C);
     ((sUI_1E80*)self->mpUI)->f10 = feLocale;
@@ -1620,12 +1621,12 @@ extern void* cFESound_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFESound_cFESound(void* self)
+extern "C" void* cFESound_cFESound(cFESound* self)
 {
     cUISoundInterface_cUISoundInterface(self);
     *(void***)self = cFESound_vtbl;
-    *(int*)((char*)self + 0x4) = 0;
-    return self;
+    self->mDummyVar = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -1643,7 +1644,7 @@ extern "C" void cSSXAudio_MenuSound(void* snd, int a1);
  *
  * @param sel  the UI sound event
  */
-extern "C" void cFESound_playSound(void* self, int sel)
+extern "C" void cFESound_playSound(cFESound* self, int sel)
 {
     switch (sel) {
     case 1:
@@ -1681,12 +1682,12 @@ extern void* cOVSound_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cOVSound_cOVSound(void* self)
+extern "C" void* cOVSound_cOVSound(cOVSound* self)
 {
     cUISoundInterface_cUISoundInterface(self);
     *(void***)self = cOVSound_vtbl;
-    *(int*)((char*)self + 0x4) = 0;
-    return self;
+    self->mDummyVar = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -1704,7 +1705,7 @@ extern "C" void cSSXAudio_MenuSound(void* snd, int a1);
  *
  * @param sel  the sound event (On Tour: int e)
  */
-extern "C" void cOVSound_playSound(void* self, int sel)
+extern "C" void cOVSound_playSound(cOVSound* self, int sel)
 {
     switch (sel) {
     case 1:

@@ -42,4 +42,25 @@ CHECK_OFFSET(cUIEngine, mAnimBank, 0x50);
 CHECK_OFFSET(cUIEngine, mTextureBank, 0x58);
 CHECK_SIZE(cUIEngine, 0x70);
 
+
+// ---------------------------------------------------------------------------------------------------------------------
+// cUICustomInterface: the game's hook into the UI engine (cUIEngine::mpCustom above): per-frame update, screen
+// events and the next / previous state factories. The front end's cFECustom (fe/fecustom.h) derives from it.
+// [O] On Tour's class: size 0x8, member mpEngine, virtual dtor + onUpdate / onScreenEvent / getNextState /
+// getPrevState; [R] retail vtable cUICustomInterface_vtbl (0x0046DD28) has exactly those 5 slots (the base versions
+// are in the decomp's unit fe/fepopupmisc: cUICustomInterface__cUICustomInterface, _onUpdate, _onScreenEvent,
+// _getNextState, _getPrevState), its destructor stores the table at +0x4 (the vptr follows the one member, as
+// g++ 2.95 places it), and cFECustom's own members start at 0x8. Never allocated on its own; its constructor is
+// inlined into cFECustom's. A FLAT layout. Evidence tags as above.
+struct cUICustomInterface {
+    cUIEngine* mpEngine;             // 0x000 [O]; [R] cFECustom's ctors store the engine argument (fe/fecustom.h); [U]
+                                     //       the derived getNextState / getPrevState build their states on it
+    void** mVtbl;                    // 0x004 [R] cUICustomInterface__cUICustomInterface stores cUICustomInterface_vtbl
+                                     //       (0x0046DD28); cFECustom ctors store cFECustom_vtbl
+};
+
+CHECK_OFFSET(cUICustomInterface, mpEngine, 0x000);
+CHECK_OFFSET(cUICustomInterface, mVtbl, 0x004);
+CHECK_SIZE(cUICustomInterface, 0x8);
+
 #endif

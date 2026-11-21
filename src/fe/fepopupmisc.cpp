@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fe/ovstateeventresults.h"
+#include "fe/fesound.h"
 #include "fe/festateselectmp.h"
 #include "fe/festatestats.h"
 #include "fe/festateaudiooptions.h"
@@ -681,9 +683,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateOnlineMainMenu__cFEStateOnlineMainMenu__FP
  *
  * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
  */
-void* cFEStateOnlineMainMenu__cFEStateOnlineMainMenu(void* self)
+void* cFEStateOnlineMainMenu__cFEStateOnlineMainMenu(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEStateOnlineMainMenu_vtbl;
+    cFEStateNet* self = (cFEStateNet*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEStateOnlineMainMenu_vtbl);
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -789,9 +792,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetSSXWorld__cFEStateNetSSXWorld__FPv);
  *
  * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
  */
-void* cFEStateNetSSXWorld__cFEStateNetSSXWorld(void* self)
+void* cFEStateNetSSXWorld__cFEStateNetSSXWorld(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEStateNetSSXWorld_vtbl;
+    cFEStateNet* self = (cFEStateNet*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEStateNetSSXWorld_vtbl);
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -3115,7 +3119,7 @@ extern void* D_0046DD60[];
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void cFESound__cFESound(void* self, int flags)
+extern "C" void cFESound__cFESound(cFESound* self, int flags)
 {
     *(void***)self = D_0046DD60;
     if (flags & 1) {
@@ -3130,8 +3134,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFESound_soundInitialize__FPv);
 /**
  * Does nothing: the front end's sound interface needs no set-up (entry 3 of cFESound_vtbl).
  */
-void cFESound_soundInitialize(void* self)
+void cFESound_soundInitialize(void* vself)
 {
+    cFESound* self = (cFESound*)vself;
 }
 #endif
 
@@ -3141,8 +3146,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFESound_soundShutdown__FPv);
 /**
  * Does nothing: the front end's sound interface has nothing to shut down (entry 4 of cFESound_vtbl).
  */
-void cFESound_soundShutdown(void* self)
+void cFESound_soundShutdown(void* vself)
 {
+    cFESound* self = (cFESound*)vself;
 }
 #endif
 
@@ -3161,7 +3167,7 @@ extern void* D_0046DD60[];
  *
  * @param flags  g++ 2.95 destructor flags; bit 0 = free the object
  */
-extern "C" void cOVSound__cOVSound(void* self, int flags)
+extern "C" void cOVSound__cOVSound(cOVSound* self, int flags)
 {
     *(void***)self = D_0046DD60;
     if (flags & 1) {
@@ -3179,8 +3185,9 @@ INCLUDE_ASM("fe/fepopupmisc", cOVSound_soundInitialize__FPv);
  * Empty, like On Tour's cOVSound::soundInitialize. Vtable slot 3 of cOVSound_vtbl, after cOVSound_playSound (slot 2, which
  * plays the menu sounds) and before cOVSound_soundShutdown.
  */
-void cOVSound_soundInitialize(void* self)
+void cOVSound_soundInitialize(void* vself)
 {
+    cOVSound* self = (cOVSound*)vself;
 }
 #endif
 
@@ -3192,8 +3199,9 @@ INCLUDE_ASM("fe/fepopupmisc", cOVSound_soundShutdown__FPv);
  *
  * Empty, like On Tour's cOVSound::soundShutdown. Vtable slot 4 of cOVSound_vtbl, the last one.
  */
-void cOVSound_soundShutdown(void* self)
+void cOVSound_soundShutdown(void* vself)
 {
+    cOVSound* self = (cOVSound*)vself;
 }
 #endif
 
@@ -4102,9 +4110,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetNews__cFEStateNetNews__FPv);
  *
  * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
  */
-void* cFEStateNetNews__cFEStateNetNews(void* self)
+void* cFEStateNetNews__cFEStateNetNews(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEStateNetNews_vtbl;
+    cFEStateNet* self = (cFEStateNet*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEStateNetNews_vtbl);
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -4434,9 +4443,9 @@ extern void* cUICustomInterface_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void cUICustomInterface__cUICustomInterface(void* self, int flags)
+extern "C" void cUICustomInterface__cUICustomInterface(cUICustomInterface* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = cUICustomInterface_vtbl;
+    self->mVtbl = cUICustomInterface_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -9194,17 +9203,17 @@ public:
  * qualifying round), help_advance or help_sorry in heat 2, and the five overlayOpt buttons take their option ids from
  * D_0046E488 (names D_00441D10, kT_OVRCMNFinalRound for a final round), stored at +0x18.
  */
-extern "C" void func_001E5B80(void* self)
+extern "C" void func_001E5B80(cOVState_HEAT_STANDINGS* self)
 {
     unsigned short title[0x38];
     unsigned short line[104];
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_42freestyle_standings), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    engine = *(void**)((char*)self + 0x10);
+    engine = (void*)self->mpEngine;
     screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_OV_darkblue), 0);
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -9216,7 +9225,7 @@ extern "C" void func_001E5B80(void* self)
     signed char event = cBENewRaceInterface_newRace.cGameMode;
     sInfo5B80* info = (sInfo5B80*)SSXApp->GameModeMan;
     int kind = info->kind;
-    cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_track_event));
+    cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_track_event));
     func_002C2540_5B80(title, (char*)cBENewRaceInterface_getLocationName1_5B80(iface0));
     unsigned short* fmt = 0;
     switch (event) {
@@ -9241,7 +9250,7 @@ extern "C" void func_001E5B80(void* self)
     }
     sprintf2_5B80(line, D_004A2140_5B80, title, fmt);
     cUIText_setUnicodeString(uiText, line);
-    uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_title_b));
+    uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_b));
     switch (kind) {
     case 1:
         cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRCMNQFHeat1Stand));
@@ -9251,7 +9260,7 @@ extern "C" void func_001E5B80(void* self)
         cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRCMNQFHeat2Stand));
         break;
     }
-    uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_heat1));
+    uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_heat1));
     if (cBENewRaceInterface_newRace.cGamePath != 0) {
         cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRCMNScoreColon));
     }
@@ -9273,7 +9282,7 @@ extern "C" void func_001E5B80(void* self)
             int idx = D_00536708[i - 1];
             sprintf(name, str_rider_pct_d, i);
             int hl = 0;
-            uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+            uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
             if (i - 1 == D_00536730[pl0]) {
                 if (cGameModeMan_bGiveUp[pl0]) hl = 1; else hl = 0;
             } else if (cBENewRaceInterface_newRace.cGamePath == 2 && i - 1 == D_00536730[pl1]) {
@@ -9281,7 +9290,7 @@ extern "C" void func_001E5B80(void* self)
             }
             cUIText_setAsciiString(uiText, cBECharacterInterface_getShortNameByCharacter(iface2, info->a18[idx], info->a40[idx]));
             sprintf(name, str_run_1_pct_d, i);
-            uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+            uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
             if (hl && kind == 1) {
                 cUIText_setAsciiString(uiText, str_DNF);
                 any = 1;
@@ -9290,9 +9299,9 @@ extern "C" void func_001E5B80(void* self)
                 cUIText_setAsciiString(uiText, num);
             }
             sprintf(name, str_run_2_pct_d, i);
-            uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+            uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
             sprintf(name, str_total_pct_d, i);
-            cUIObj_5B80* totalText = (cUIObj_5B80*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+            cUIObj_5B80* totalText = (cUIObj_5B80*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
             if (kind == 2 || flag) {
                 if (hl) {
                     cUIText_setAsciiString(uiText, str_DNF);
@@ -9328,7 +9337,7 @@ extern "C" void func_001E5B80(void* self)
         }
         if (flag) {
             sprintf(name, str_help_current0pct_d, last);
-            cUIText* object = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+            cUIText* object = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
             cUIText_setUnicodeStringByID(object, GetHashValue32(str_kT_CMNHELPEarnedEnoughPoints));
         }
     }
@@ -9350,7 +9359,7 @@ extern "C" void func_001E5B80(void* self)
         }
         for (i = 0; i < 5; i++) {
             sprintf(name, str_overlayOptpct_d, i);
-            cUIObj_5B80* object = (cUIObj_5B80*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+            cUIObj_5B80* object = (cUIObj_5B80*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
             if (object != 0) {
                 if (i < 5) {
                     cUIText_setUnicodeStringByID((cUIText*)object, GetHashValue32(D_00441D10[ids.v[i]]));
@@ -9378,8 +9387,9 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E64A8__FPv);
  *
  * @return cOVState_onUpdate's result
  */
-void* func_001E64A8(void* self)
+void* func_001E64A8(void* vself)
 {
+    cOVState_HEAT_STANDINGS* self = (cOVState_HEAT_STANDINGS*)vself;
     return cOVState_onUpdate(self);
 }
 #endif
@@ -9409,7 +9419,7 @@ extern char str_run_pct_d_pct_d[];
  * manager's first word) with "@TextPulseWhiteOrange" (cOVState_triggerTextFade; place capped at 6) and plays menu sound
  * 0xE.
  */
-extern "C" void func_001E64C8(void* self)
+extern "C" void func_001E64C8(cOVState_HEAT_STANDINGS* self)
 {
     char buf[32];
     cUIState_onGainFocus_v(self);
@@ -9445,9 +9455,9 @@ void cReplay_setReplayPadNum(void* self, int val);
  * @param input  the input
  * @return 0
  */
-extern "C" int func_001E65B8(void* self, void* input)
+extern "C" int func_001E65B8(cOVState_HEAT_STANDINGS* self, void* input)
 {
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_overlayMenu));
+    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_overlayMenu));
     if (obj != 0) {
         if (*(unsigned char*)((char*)obj + 0x95) == 2) {
             cReplay_setReplayPadNum(SSXApp->Game->Replay, *(unsigned char*)((char*)input + 4));
@@ -9467,7 +9477,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E6630);
  * @param event   the menu event
  * @return 257 or 0
  */
-extern "C" int func_001E6630(void* self, int widget, int event)
+extern "C" int func_001E6630(cOVState_HEAT_STANDINGS* self, int widget, int event)
 {
     return event == 6 ? 257 : 0;
 }
@@ -9488,7 +9498,7 @@ extern int cOVStateManager_mMiscData;
  * @param popup  the widget
  * @param event  the widget event
  */
-extern "C" void func_001E6640(void* self, void* popup, int event)
+extern "C" void func_001E6640(cOVState_HEAT_STANDINGS* self, void* popup, int event)
 {
     if (popup != 0 && event == 5) {
         int popupId = *(int*)((char*)popup + 0x18);
@@ -9514,21 +9524,21 @@ extern "C" void cOVState_onCreateScreen(void* self);
  * Adds "43final_standings" (kept at +0x40) over "OV_darkblue", runs cOVState_onCreateScreen and sets +0x9C so the next
  * onGainTransition fills the screen.
  */
-extern "C" void func_001E6668(void* self)
+extern "C" void func_001E6668(cOVState_FINAL_STANDINGS* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_43final_standings), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    engine = *(void**)((char*)self + 0x10);
+    engine = (void*)self->mpEngine;
     screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_OV_darkblue), 0);
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     cOVState_onCreateScreen(self);
-    *(int*)((char*)self + 0x9C) = 1;
+    self->doInit = 1;
 }
 #endif
 
@@ -9671,10 +9681,10 @@ static inline unsigned short* Loc1E6718(char* name)
  *
  * @return 0 (the transition is not finished)
  */
-extern "C" int func_001E6718(void* self)
+extern "C" int func_001E6718(cOVState_FINAL_STANDINGS* self)
 {
-    if (*(int*)((char*)self + 0x9C) != 0) {
-        *(int*)((char*)self + 0x9C) = 0;
+    if (self->doInit != 0) {
+        self->doInit = 0;
         void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
         void* iface0 = cBE_getInterface_Fv(cBE_getBE(), 0);
         void* net = cBE_getInterface_Fv(cBE_getBE(), 2);
@@ -9683,7 +9693,7 @@ extern "C" int func_001E6718(void* self)
         int track = cBENewRaceInterface_newRace.cGameMode;
         int players = cBENewRaceInterface_newRace.cGamePath;
         if ((track != 0 && players == 2) || (track == 5 || track == 6)) {
-            cUIThing* dataPanel = (cUIThing*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_screenData));
+            cUIThing* dataPanel = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_screenData));
             dataPanel->setVisible(1);
             t3Vector pos = *(t3Vector*)((char*)dataPanel + 0x44);
             t3Vector raisedPos;
@@ -9692,7 +9702,7 @@ extern "C" int func_001E6718(void* self)
             raisedPos.z = pos.z;
             *(t3Vector*)((char*)dataPanel + 0x44) = raisedPos;
         }
-        cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_track_event));
+        cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_track_event));
         unsigned short name[0x38];
         func_002C2540(name, cBENewRaceInterface_getLocationName1(iface0));
         unsigned short* str = 0;
@@ -9721,7 +9731,7 @@ extern "C" int func_001E6718(void* self)
             sprintf2(title, titleFmt, name, str);
         }
         cUIText_setUnicodeString(uiText, title);
-        uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_title_b));
+        uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_b));
         if (players == 2) {
             cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRCMNMultiPlayResults));
         } else if (players == 1) {
@@ -9743,7 +9753,7 @@ extern "C" int func_001E6718(void* self)
         } else {
             cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRFinalResults));
         }
-        uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_finalScoreTime));
+        uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_finalScoreTime));
         if (track == 0 || track == 5) {
             cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRCMNTime_b));
         } else {
@@ -9768,7 +9778,7 @@ extern "C" int func_001E6718(void* self)
             if (i < count) {
                 sprintf(buf, str_riderpct_d, i + 1);
                 int finished = 0;
-                uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
+                uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
                 if (i == D_00536730[pl0]) {
                     if (D_005366A8[pl0] != 0) {
                         finished = 1;
@@ -9788,7 +9798,7 @@ extern "C" int func_001E6718(void* self)
                     cUIText_setAsciiString(uiText, cBECharacterInterface_getShortNameByCharacter(net, rider, outfit));
                 }
                 sprintf(buf, str_timePointspct_d, i + 1);
-                uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
+                uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
                 if (finished) {
                     cUIText_setAsciiString(uiText, str_DNF);
                     done = 1;
@@ -9813,7 +9823,7 @@ extern "C" int func_001E6718(void* self)
         if (players == 2 && track != 0 && track != 5) {
             same = D_00536640[pl0] == D_00536640[pl1];
         }
-        uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_b));
+        uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_b));
         if (players != 2) {
             if (track == 5 || track == 6) {
                 if (D_00536730[pl0] == 0) {
@@ -9899,7 +9909,7 @@ extern "C" int func_001E6718(void* self)
                     cUIState_showObjSafe(self, str_bronze);
                 }
                 if (cBENewRaceInterface_newRace.cGamePath == 0 && D_004A213C != 0) {
-                    void* goldIcon = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_gold));
+                    void* goldIcon = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_gold));
                     cUIIcon_setTextureByHashValue(goldIcon, GetHashValue32(str_platinum));
                 }
             }
@@ -9916,7 +9926,7 @@ extern "C" int func_001E6718(void* self)
         int netIds[1] = { 8 };
         for (int i = 0; i < 5; i++) {
             sprintf(text, str_overlayOptpct_d, i);
-            cUIThing* button = (cUIThing*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(text));
+            cUIThing* button = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(text));
             if (button != 0) {
                 cBE_getInterface_Fv(SSXApp->BE, 7);
                 if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
@@ -9963,7 +9973,7 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
  *
  * @param menu  the widget being created
  */
-extern "C" void func_001E7558(void* self, void* menu)
+extern "C" void func_001E7558(cOVState_FINAL_STANDINGS* self, void* menu)
 {
     int hash = *(int*)((char*)menu + 0x38);
     if (hash == GetHashValue32(str_overlayMenu)) {
@@ -10014,7 +10024,7 @@ extern sRect_75D0 D_004C8408;
  * "ChatGroup", sets "chatText" to kT_POPUP235Chat, shows "helptexts" and prepares "textScrollChat" (flag +0x74 bit 0,
  * rectangle D_004C8408, input map 1). Plays menu sound 0xE.
  */
-extern "C" void func_001E75D0(void* self)
+extern "C" void func_001E75D0(cOVState_FINAL_STANDINGS* self)
 {
     char buf[32];
     int second = 0;
@@ -10045,19 +10055,19 @@ extern "C" void func_001E75D0(void* self)
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cGameComm_mGameComm != 0 && cGameComm_mGameComm->mConnected != 0) {
-        cUIObjK1DEB90* groupWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ChatGroup));
+        cUIObjK1DEB90* groupWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatGroup));
         if (groupWidget != 0) {
             groupWidget->setVisible(1);
         }
-        cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_chatText));
+        cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_chatText));
         if (uiText != 0) {
             cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_POPUP235Chat_b));
         }
-        groupWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptexts));
+        groupWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptexts));
         if (groupWidget != 0) {
             groupWidget->setVisible(1);
         }
-        char* chatScroll = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_textScrollChat_b));
+        char* chatScroll = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_textScrollChat_b));
         *(int*)(chatScroll + 0x74) |= 1;
         *(sRect_75D0*)(chatScroll + 0xA8) = D_004C8408;
         cUITextScroll_setInputMap(chatScroll, 1);
@@ -10073,8 +10083,9 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E7920__FPv);
 /**
  * Does nothing when the final standings overlay loses focus (vtable entry 11, onLoseFocus).
  */
-void func_001E7920(void* self)
+void func_001E7920(void* vself)
 {
+    cOVState_FINAL_STANDINGS* self = (cOVState_FINAL_STANDINGS*)vself;
 }
 #endif
 
@@ -10098,28 +10109,28 @@ extern char str_kT_POPUP235Chat_b[];
  * hides "helptext" and "helptexts"; every 30 frames while disconnected hides "ChatGroup" and resets "chatText"; when
  * cGameComm's mOverlayTimeout reaches 0 sets it to -1 and chooses option 8 (cOVStateManager_mMiscData 8, mStatus 1).
  */
-extern "C" void func_001E7928(void* self)
+extern "C" void func_001E7928(cOVState_FINAL_STANDINGS* self)
 {
     cOVState_onUpdate(self);
     if (cGameComm_mGameComm != 0) {
         if (cGameComm_mGameComm->mConnected != 0) {
             if (cOVState_onUpdate_HandleIncomingChat(self) != 0) {
-                cUIObjK1DEB90* panelWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_b));
+                cUIObjK1DEB90* panelWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_b));
                 if (panelWidget != 0) {
                     panelWidget->setVisible(0);
                 }
-                panelWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptexts));
+                panelWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptexts));
                 if (panelWidget != 0) {
                     panelWidget->setVisible(0);
                 }
             }
         }
         if (*(int*)((char*)cAppMan_TheAppMan + 0x18) % 30 == 0 && cGameComm_mGameComm->mConnected == 0) {
-            cUIObjK1DEB90* panelWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ChatGroup));
+            cUIObjK1DEB90* panelWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatGroup));
             if (panelWidget != 0) {
                 panelWidget->setVisible(0);
             }
-            cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_chatText));
+            cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_chatText));
             if (text != 0) {
                 cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_POPUP235Chat_b));
             }
@@ -10153,9 +10164,9 @@ struct sVEntry001E7AA8 {
  * @param input  the input
  * @return 0
  */
-extern "C" int func_001E7AA8(void* self, void* input)
+extern "C" int func_001E7AA8(cOVState_FINAL_STANDINGS* self, void* input)
 {
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_overlayMenu));
+    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_overlayMenu));
     if (obj != 0) {
         if (*(unsigned char*)((char*)obj + 0x95) == 2) {
             cReplay_setReplayPadNum(SSXApp->Game->Replay, *(unsigned char*)((char*)input + 4));
@@ -10182,7 +10193,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E7B78);
  * @param event   the menu event
  * @return 257 or 0
  */
-extern "C" int func_001E7B78(void* self, int widget, int event)
+extern "C" int func_001E7B78(cOVState_FINAL_STANDINGS* self, int widget, int event)
 {
     return event == 6 ? 257 : 0;
 }
@@ -10202,7 +10213,7 @@ extern int cOVStateManager_mMiscData;
  * @param popup  the widget
  * @param event  the widget event
  */
-extern "C" void func_001E7B88(void* self, void* popup, int event)
+extern "C" void func_001E7B88(cOVState_FINAL_STANDINGS* self, void* popup, int event)
 {
     if (popup != 0 && event == 5) {
         int popupId = *(int*)((char*)popup + 0x18);
@@ -10276,18 +10287,18 @@ public:
  * (+0x18 or +0x1C not negative). Online, when the human rider's word +0x480 is set, or for game events 6-8 hides
  * "screendata" and "3D_Ov"; otherwise plays menu sound 0xE.
  */
-extern "C" void func_001E7BB0(void* self)
+extern "C" void func_001E7BB0(cOVState_RACE_FINISHOV* self)
 {
     char buf[32];
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_finishov), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     cOVState_onCreateScreen(self);
-    *(int*)((char*)self + 0x9C) = 0;
-    char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Menu0000_b));
+    *(int*)&self->unk_09C = 0;
+    char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000_b));
     if (obj != 0) {
         *(int*)(obj + 0x90) |= 8;
     }
@@ -10303,13 +10314,13 @@ extern "C" void func_001E7BB0(void* self)
     cUIState_hideObjSafe(self, str_secondrun);
     cUIState_hideObjSafe(self, str_thirdrun);
     cUIState_hideObjSafe(self, str_finalrun);
-    cUIObj_7BB0* screenWidget = (cUIObj_7BB0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pointstotal));
+    cUIObj_7BB0* screenWidget = (cUIObj_7BB0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pointstotal));
     cUIText_setAsciiString((cUIText*)screenWidget, func_0020A1A8(fptoui(D_00536640[pl] * 0.01666666753590107f)));
     int off = pl * 4;
     int i;
     for (i = 1; i < 7; i++) {
         sprintf(buf, str_placepct_d, i);
-        screenWidget = (cUIObj_7BB0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
+        screenWidget = (cUIObj_7BB0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
         screenWidget->setVisible(0);
         if (i == sel + 1) {
             screenWidget->setVisible(1);
@@ -10337,7 +10348,7 @@ extern "C" void func_001E7BB0(void* self)
     } else {
         cUIState_hideObjSafe(self, str_bronze);
     }
-    screenWidget = (cUIObj_7BB0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_new_record));
+    screenWidget = (cUIObj_7BB0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_new_record));
     int vis = 0;
     if (*(int*)(iface8 + 0x18) >= 0 || *(int*)(iface8 + 0x1C) >= 0) {
         vis = 1;
@@ -10372,7 +10383,7 @@ extern "C" void cGame_doNextState(void* self);
  * Runs cOVState_onUpdate and adds 1/60 to the timer (+0x9C); when +0xA0 is set and the timer reaches 3 seconds (1
  * second when the human rider's word +0x480 is set) purges the normal states and calls cGame_doNextState.
  */
-extern "C" void func_001E8098(void* self)
+extern "C" void func_001E8098(cOVState_RACE_FINISHOV* self)
 {
     float limit = 3.0f;
     int idx = cBENewPlayerInterface_getHumanRider(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
@@ -10382,8 +10393,8 @@ extern "C" void func_001E8098(void* self)
         limit = 1.0f;
     }
     cOVState_onUpdate(self);
-    *(float*)((char*)self + 0x9C) += 0.01666666753590107f;
-    if (*(int*)((char*)self + 0xA0) != 0 && *(float*)((char*)self + 0x9C) >= limit) {
+    self->unk_09C += 0.01666666753590107f;
+    if (self->unk_0A0 != 0 && self->unk_09C >= limit) {
         cUIStateStack_purgeNormalStates(SSXApp->Game->UI->mStateStack);
         cGame_doNextState(SSXApp->Game);
     }
@@ -10404,10 +10415,10 @@ extern "C" void cGame_doNextState(void* self);
  * @param popup  the widget
  * @param event  the widget event
  */
-extern "C" void func_001E8160(void* self, void* popup, int event)
+extern "C" void func_001E8160(cOVState_RACE_FINISHOV* self, void* popup, int event)
 {
     if (popup != 0) {
-        if (event == 5 && *(int*)((char*)self + 0xA0) != 0) {
+        if (event == 5 && self->unk_0A0 != 0) {
             cGame* game = SSXApp->Game;
             cUIStateStack_purgeNormalStates(game->UI->mStateStack);
             cGame_doNextState(game);
@@ -10429,11 +10440,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E81B0);
  * @param key     the menu event
  * @return 257 or 0
  */
-extern "C" int func_001E81B0(void* self, int widget, int key)
+extern "C" int func_001E81B0(cOVState_RACE_FINISHOV* self, int widget, int key)
 {
     int result = 0;
     if (key == 6) {
-        if (*(int*)((char*)self + 0xa0) == 0) {
+        if (self->unk_0A0 == 0) {
             result = 0;
         } else {
             return 257;
@@ -10454,14 +10465,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E81D0);
  * @param message  the message
  * @return 0
  */
-extern "C" int func_001E81D0(void* self, int message)
+extern "C" int func_001E81D0(cOVState_RACE_FINISHOV* self, int message)
 {
     switch (message) {
     case 0:
-        *(int*)((char*)self + 0xA0) = 0;
+        self->unk_0A0 = 0;
         break;
     case 1:
-        *(int*)((char*)self + 0xA0) = 1;
+        self->unk_0A0 = 1;
         break;
     }
     return 0;
@@ -10508,20 +10519,20 @@ struct sVEntry8200 {
  * online, when the human rider's word +0x480 is set, for game events 9-11 or in a final qualifying round; plays menu
  * sound 0xE.
  */
-extern "C" void func_001E8200(void* self)
+extern "C" void func_001E8200(cOVState_BASSSP_QUAL_FINISHOV* self)
 {
     char buf[32];
     unsigned short fmt[104];
     unsigned short text[104];
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_finishov), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     cOVState_onCreateScreen(self);
-    *(int*)((char*)self + 0x9C) = 0;
-    char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Menu0000_b));
+    *(int*)&self->unk_09C = 0;
+    char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000_b));
     if (obj != 0) {
         *(int*)(obj + 0x90) |= 8;
     }
@@ -10579,7 +10590,7 @@ extern "C" void func_001E8200(void* self)
     cUIObj_8200* screenWidget;
     for (i = 1; i < 7; i++) {
         sprintf(buf, str_placepct_d, i);
-        screenWidget = (cUIObj_8200*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
+        screenWidget = (cUIObj_8200*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
         screenWidget->setVisible(0);
         if (i == sel + 1) {
             screenWidget->setVisible(1);
@@ -10588,13 +10599,13 @@ extern "C" void func_001E8200(void* self)
     if ((unsigned int)sel >= 6) {
         cUIState_showObjSafe(self, str_place6);
     }
-    screenWidget = (cUIObj_8200*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pointstotal));
+    screenWidget = (cUIObj_8200*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pointstotal));
     char* loc = (char*)SSXApp->FELocale;
     sVEntry8200* vt = *(sVEntry8200**)(loc + 4);
     strcpy1(fmt, vt[4].fn(loc + vt[4].delta, GetHashValue32(str_kT_OVRCMNPointstotal)));
     sprintf1(text, fmt, *(unsigned int*)((char*)D_00536640 + off));
     cUIText_setUnicodeString(screenWidget, text);
-    screenWidget = (cUIObj_8200*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_new_record));
+    screenWidget = (cUIObj_8200*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_new_record));
     int vis = 0;
     if (*(int*)(iface8 + 0x18) >= 0 || *(int*)(iface8 + 0x1C) >= 0) {
         vis = 1;
@@ -10629,7 +10640,7 @@ extern "C" void cGame_doNextState(void* self);
  * Runs cOVState_onUpdate and adds 1/60 to the timer (+0x9C); when +0xA0 is set and the timer reaches 3 seconds (1
  * second when the human rider's word +0x480 is set) purges the normal states and calls cGame_doNextState.
  */
-extern "C" void func_001E87B8(void* self)
+extern "C" void func_001E87B8(cOVState_BASSSP_QUAL_FINISHOV* self)
 {
     float limit = 3.0f;
     int idx = cBENewPlayerInterface_getHumanRider(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
@@ -10639,8 +10650,8 @@ extern "C" void func_001E87B8(void* self)
         limit = 1.0f;
     }
     cOVState_onUpdate(self);
-    *(float*)((char*)self + 0x9C) += 0.01666666753590107f;
-    if (*(int*)((char*)self + 0xA0) != 0 && *(float*)((char*)self + 0x9C) >= limit) {
+    self->unk_09C += 0.01666666753590107f;
+    if (self->unk_0A0 != 0 && self->unk_09C >= limit) {
         cUIStateStack_purgeNormalStates(SSXApp->Game->UI->mStateStack);
         cGame_doNextState(SSXApp->Game);
     }
@@ -10661,10 +10672,10 @@ extern "C" void cGame_doNextState(void* self);
  * @param popup  the widget
  * @param event  the widget event
  */
-extern "C" void func_001E8880(void* self, void* popup, int event)
+extern "C" void func_001E8880(cOVState_BASSSP_QUAL_FINISHOV* self, void* popup, int event)
 {
     if (popup != 0) {
-        if (event == 5 && *(int*)((char*)self + 0xA0) != 0) {
+        if (event == 5 && self->unk_0A0 != 0) {
             cGame* game = SSXApp->Game;
             cUIStateStack_purgeNormalStates(game->UI->mStateStack);
             cGame_doNextState(game);
@@ -10683,11 +10694,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E88D0);
  * @param key     the menu event
  * @return 257 or 0
  */
-extern "C" int func_001E88D0(void* self, int widget, int key)
+extern "C" int func_001E88D0(cOVState_BASSSP_QUAL_FINISHOV* self, int widget, int key)
 {
     int result = 0;
     if (key == 6) {
-        if (*(int*)((char*)self + 0xa0) == 0) {
+        if (self->unk_0A0 == 0) {
             result = 0;
         } else {
             return 257;
@@ -10708,14 +10719,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E88F0);
  * @param message  the message
  * @return 0
  */
-extern "C" int func_001E88F0(void* self, int message)
+extern "C" int func_001E88F0(cOVState_BASSSP_QUAL_FINISHOV* self, int message)
 {
     switch (message) {
     case 0:
-        *(int*)((char*)self + 0xA0) = 0;
+        self->unk_0A0 = 0;
         break;
     case 1:
-        *(int*)((char*)self + 0xA0) = 1;
+        self->unk_0A0 = 1;
         break;
     }
     return 0;
@@ -10994,15 +11005,15 @@ extern "C" void cSSXAudio_MenuSound(void*, int);
  * Adds "109MultiplayerStandings" (kept at +0x40) over "OV_darkblue", calls the empty func_001E8FC0, runs
  * cOVState_onCreateScreen and plays menu sound 0xE.
  */
-extern "C" void func_001E8F00(void* self)
+extern "C" void func_001E8F00(cOVState_TOURNAMENT_STANDINGS* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_109MultiplayerStandings), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    engine = *(void**)((char*)self + 0x10);
+    engine = (void*)self->mpEngine;
     screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_OV_darkblue), 0);
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
@@ -11038,7 +11049,7 @@ extern int cOVStateManager_mMiscData;
  * @param popup  the widget
  * @param event  the widget event
  */
-extern "C" void func_001E8FC8(void* self, void* popup, int event)
+extern "C" void func_001E8FC8(cOVState_TOURNAMENT_STANDINGS* self, void* popup, int event)
 {
     if (popup != 0 && event == 5) {
         int popupId = *(int*)((char*)popup + 0x18);

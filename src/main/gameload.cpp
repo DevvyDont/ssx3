@@ -1953,19 +1953,19 @@ INCLUDE_ASM("main/gameload", func_00231280);
  * state's preloadCancel (vtable slot +0x24 of mPreloadingState, +0x204) and clears mPreloadStateID and
  * mPreloadingState.
  */
-extern "C" void func_00231280(void *self) {
+extern "C" void func_00231280(cGame* self) {
     void *obj;
     void *vtbl;
 
-    if (*(int *)((char*)self + 0x208) != 0) {
-        *(int *)((char*)self + 0x208) = 0;
+    if (self->mPendingPreloadStateID != 0) {
+        self->mPendingPreloadStateID = 0;
     }
-    if (*(int *)((char*)self + 0x20C) != 0) {
-        obj = *(void **)((char*)self + 0x204);
+    if (self->mPreloadStateID != 0) {
+        obj = (void*)self->mPreloadingState;
         vtbl = *(void **)((char*)obj + 0xC);
         (*(void (**)(void *))((char*)vtbl + 0x24))((char*)obj + *(short *)((char*)vtbl + 0x20));
-        *(int *)((char*)self + 0x20C) = 0;
-        *(void **)((char*)self + 0x204) = 0;
+        self->mPreloadStateID = 0;
+        self->mPreloadingState = 0;
     }
 }
 #endif

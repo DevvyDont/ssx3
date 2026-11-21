@@ -1,4 +1,5 @@
 #include "common.h"
+#include "wscript/missionmenuqueue.h"
 #include "wscript/wscriptmission.h"
 #include "animation/animmodel.h"
 #include "replay/frameptr.h"
@@ -2409,7 +2410,7 @@ extern "C" void cWScriptMan_quitLocalMission(cWScriptMan* self)
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_failActiveLocalMission);
 #ifdef SKIP_ASM
 extern "C" void cWScriptProcess_end(void* obj);
-extern "C" void tMissionMenuQueue_empty(void* self);
+extern "C" void tMissionMenuQueue_empty(tMissionMenuQueue* self);
 
 /**
  * Fails the local mission in progress and stops every active script process.
@@ -2435,7 +2436,7 @@ extern "C" void cWScriptMan_failActiveLocalMission(cWScriptMan* self)
         *(int*)process = 0;
         cProcessList_addProcess((char*)&self->IdleList, process);
     }
-    tMissionMenuQueue_empty(self->MissionMenuQueue);
+    tMissionMenuQueue_empty((tMissionMenuQueue*)self->MissionMenuQueue);
 }
 #endif
 
@@ -3280,7 +3281,7 @@ extern "C" int cCollectPool_readFromReplayFrame(void* collectPool, cCollectPool_
 //100%
 INCLUDE_ASM("wscript/wscriptman", tMissionMenuQueue_tMissionMenuQueue);
 #ifdef SKIP_ASM
-extern "C" void tMissionMenuQueue_init(void* self);
+extern "C" void tMissionMenuQueue_init(tMissionMenuQueue* self);
 
 /**
  * Constructs an empty mission menu queue.
@@ -3289,10 +3290,10 @@ extern "C" void tMissionMenuQueue_init(void* self);
  *
  * @return this
  */
-extern "C" void* tMissionMenuQueue_tMissionMenuQueue(void* self)
+extern "C" void* tMissionMenuQueue_tMissionMenuQueue(tMissionMenuQueue* self)
 {
     tMissionMenuQueue_init(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -3306,11 +3307,11 @@ extern "C" void MEM_fill(void* dst, int value, int size);
  *
  * Sets the read (+0x0) and write (+0x4) positions to 0 and fills the 16 twelve-byte entries from +0x8 with zero.
  */
-extern "C" void tMissionMenuQueue_init(void* self)
+extern "C" void tMissionMenuQueue_init(tMissionMenuQueue* self)
 {
     *(int*)self = 0;
-    *(int*)((char*)self + 4) = 0;
-    MEM_fill((char*)self + 8, 0, 0xC0);
+    self->Next = 0;
+    MEM_fill(&self->Queue[0], 0, 0xC0);
 }
 #endif
 
@@ -3323,11 +3324,11 @@ extern "C" void MEM_fill(void* dst, int value, int size);
  * Empties a mission menu queue: the read (+0x0) and write (+0x4) positions become 0 and the 16 entries (+0x8, 0xC0
  * bytes) are zeroed. Same body as tMissionMenuQueue_init.
  */
-extern "C" void tMissionMenuQueue_empty(void* self)
+extern "C" void tMissionMenuQueue_empty(tMissionMenuQueue* self)
 {
     *(int*)self = 0;
-    *(int*)((char*)self + 4) = 0;
-    MEM_fill((char*)self + 8, 0, 0xC0);
+    self->Next = 0;
+    MEM_fill(&self->Queue[0], 0, 0xC0);
 }
 #endif
 
@@ -3358,12 +3359,12 @@ struct cWSQueue {
  * @param cmd  the mission command (On Tour cmd)
  * @param being  the rider it applies to (On Tour being)
  */
-extern "C" void tMissionMenuQueue_addEntry(cWSQueue* self, int missionId, int cmd, int being)
+extern "C" void tMissionMenuQueue_addEntry(tMissionMenuQueue* self, int missionId, int cmd, int being)
 {
-    self->entries[self->tail].a = missionId;
-    self->entries[self->tail].b = cmd;
-    self->entries[self->tail].c = being;
-    self->tail = (self->tail + 1) % 16;
+    ((cWSQEntry*)&self->Queue[0])[self->Next].a = missionId;
+    ((cWSQEntry*)&self->Queue[0])[self->Next].b = cmd;
+    ((cWSQEntry*)&self->Queue[0])[self->Next].c = being;
+    self->Next = (self->Next + 1) % 16;
 }
 #endif
 
@@ -3390,14 +3391,14 @@ struct cWScriptQueue {
  *
  * @return the entry (mission id, command, rider; On Tour tMissionMenuQueueEntry), or 0 when the queue is empty
  */
-extern "C" cWScriptQueueEntry* tMissionMenuQueue_getNextEntry(cWScriptQueue* self)
+extern "C" cWScriptQueueEntry* tMissionMenuQueue_getNextEntry(tMissionMenuQueue* self)
 {
-    int head = self->head;
-    if (head == self->tail) {
+    int head = self->Current;
+    if (head == self->Next) {
         return 0;
     }
-    self->head = (head + 1) % 16;
-    return &self->entries[head];
+    self->Current = (head + 1) % 16;
+    return &((cWScriptQueueEntry*)&self->Queue[0])[head];
 }
 #endif
 
@@ -3409,12 +3410,12 @@ INCLUDE_ASM("wscript/wscriptman", tMissionMenuQueue_getEntry);
  *
  * @return the entry at the read position, or 0 when the queue is empty
  */
-extern "C" cWScriptQueueEntry* tMissionMenuQueue_getEntry(cWScriptQueue* self)
+extern "C" cWScriptQueueEntry* tMissionMenuQueue_getEntry(tMissionMenuQueue* self)
 {
-    if (self->head == self->tail) {
+    if (self->Current == self->Next) {
         return 0;
     }
-    return &self->entries[self->head];
+    return &((cWScriptQueueEntry*)&self->Queue[0])[self->Current];
 }
 #endif
 
@@ -4249,7 +4250,7 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_popMenuQueueEntry);
  */
 extern "C" void cWScriptMan_popMenuQueueEntry(cWScriptMan* self)
 {
-    tMissionMenuQueue_getNextEntry((cWScriptQueue*)(self->MissionMenuQueue));
+    tMissionMenuQueue_getNextEntry((tMissionMenuQueue*)((cWScriptQueue*)(self->MissionMenuQueue)));
 }
 #endif
 //100%
@@ -4262,7 +4263,7 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getMenuQueueEntry);
  */
 extern "C" void cWScriptMan_getMenuQueueEntry(cWScriptMan* self)
 {
-    tMissionMenuQueue_getEntry((cWScriptQueue*)(self->MissionMenuQueue));
+    tMissionMenuQueue_getEntry((tMissionMenuQueue*)((cWScriptQueue*)(self->MissionMenuQueue)));
 }
 #endif
 //100%

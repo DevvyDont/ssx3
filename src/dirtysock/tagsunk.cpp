@@ -1,4 +1,9 @@
 #include "common.h"
+#include "online/onlineevent.h"
+#include "online/voipman.h"
+#include "online/usbkeyboard.h"
+#include "online/sharedloginman.h"
+#include "online/setupman.h"
 #include "online/connman.h"
 #include "online/buddyman.h"
 #include "online/lobbyman.h"
@@ -5529,9 +5534,10 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025FC48__FPv);
  *
  * @return func_0025FB80()'s result
  */
-void* func_0025FC48(void* self)
+void* func_0025FC48(void* vself)
 {
-    return func_0025FB80((LobbyMan*)self, *(int*)((char*)self + 0x98), (void*)D_004807F8);
+    LobbyMan* self = (LobbyMan*)vself;
+    return func_0025FB80((LobbyMan*)self, (int)self->mOpponent, (void*)D_004807F8);
 }
 #endif
 
@@ -6317,10 +6323,11 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00261058__FPv);
  * Empties mServerName, mUserName and mPassword (first byte 0) and sets miPort to -1, which func_002613C8 treats as "no
  * saved server".
  */
-void func_00261058(void* self)
+void func_00261058(void* vself)
 {
+    BuddyMan* self = (BuddyMan*)vself;
     *(char*)self = 0;
-    *(int*)((char*)self + 0x40) = -1;
+    self->miPort = -1;
     *(char*)((char*)self + 0x44) = 0;
     *(char*)((char*)self + 0x64) = 0;
 }
@@ -8953,8 +8960,8 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void cBENewRaceInterface_setNumberHumans(void* self, int n);
 extern "C" void cBENewPlayerInterface_setPlayerCtrlID(void* self, int a1, int a2);
 extern "C" int cCommSystem_openDSockChannel(void* comm, const char* addr, unsigned short port, int a3);
-extern "C" void func_00266D58(void* self, void* ip);
-extern "C" void func_00266E30(void* self);
+extern "C" void func_00266D58(cVoipMan* self, void* ip);
+extern "C" void func_00266E30(cVoipMan* self);
 extern void* D_004A33F4;
 extern float D_004A2F14;
 extern int cBEOptionInterface_mOption[];
@@ -9021,8 +9028,8 @@ extern "C" void func_002639E0(int* self, unsigned int ip, int isHost, int ctrlId
     self[1] = cCommSystem_openDSockChannel(cCommSystem_mCommSystem, buf, cBENetworkInterface_networkOpt.iPort, isHost);
     cBE_getInterface_Fv(cBE_getBE(), 4);
     if ((cBEOptionInterface_mOption[0] >> 18) & 1) {
-        func_00266D58(D_004A33F4, (void*)ip);
-        func_00266E30(D_004A33F4);
+        func_00266D58((cVoipMan*)D_004A33F4, (void*)ip);
+        func_00266E30((cVoipMan*)D_004A33F4);
     }
     *(float*)&self[4] = D_004A2F14;
     self[0] = one;
@@ -9043,8 +9050,8 @@ extern void* D_004A33F4;
 extern "C" int cCommSystem_isChannelOpen(void* comm, int chan);
 extern "C" void cCommSystem_closeChannel(void* comm, int chan);
 extern "C" void func_00264098(void);
-extern "C" void func_00266DF8(void* self);
-extern "C" void func_00266E88(void* self);
+extern "C" void func_00266DF8(cVoipMan* self);
+extern "C" void func_00266E88(cVoipMan* self);
 extern "C" void func_0025F740(LobbyMan* self, int type);
 extern void* online_Event_vtbl[];
 extern void* online_ErrorEvent_vtbl[];
@@ -9097,8 +9104,8 @@ extern "C" void func_00263BA8(cGameConnMan* gameConn, int reason)
     if (self[0] != 0 && cCommSystem_isChannelOpen(cCommSystem_mCommSystem, self[1]) != 0)
     {
         cCommSystem_closeChannel(cCommSystem_mCommSystem, self[1]);
-        func_00266E88(D_004A33F4);
-        func_00266DF8(D_004A33F4);
+        func_00266E88((cVoipMan*)D_004A33F4);
+        func_00266DF8((cVoipMan*)D_004A33F4);
     }
     if (D_004A33CC != 0)
         func_00264098();
@@ -9141,7 +9148,7 @@ extern "C" void func_00262768(BuddyMan* self, int a1, int a2, int a3, int a4, in
 extern "C" void func_00263BA8(cGameConnMan* p, int arg);
 extern "C" void func_00264030(int a1, int a2, int a3);
 extern "C" void func_00264098(void);
-extern "C" void func_002642B8(void* self);
+extern "C" void func_002642B8(cSetupMan* self);
 // PORT: func_00264CB8 is defined with one parameter; this caller passes a second in $a1.
 extern "C" void func_00264CB8_2(void* self, int a) __asm__("func_00264CB8");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -9229,7 +9236,7 @@ extern "C" void func_00263CF0(int* self)
             return;
         }
         {
-            func_002642B8(D_004A33CC);
+            func_002642B8((cSetupMan*)D_004A33CC);
             int go = 0;
             int st = *(int*)D_004A33CC;
             if (st == 13)
@@ -9265,7 +9272,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00264030);
 extern char str_cSetupMan[];
 extern void* D_004A33CC;
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_002640C0(void* self, int a1, int a2, int a3);
+extern "C" void* func_002640C0(cSetupMan* self, int a1, int a2, int a3);
 
 /**
  * Creates the online setup manager D_004A33CC: allocates 300 bytes (tag "cSetupMan") and constructs it with
@@ -9277,7 +9284,7 @@ extern "C" void* func_002640C0(void* self, int a1, int a2, int a3);
  */
 extern "C" void func_00264030(int channel, int isHost, int ranked)
 {
-    D_004A33CC = func_002640C0(cMemMan_alloc(300, str_cSetupMan, 0x20000000, 0), channel, isHost, ranked);
+    D_004A33CC = func_002640C0((cSetupMan*)cMemMan_alloc(300, str_cSetupMan, 0x20000000, 0), channel, isHost, ranked);
 }
 #endif
 
@@ -9285,7 +9292,7 @@ extern "C" void func_00264030(int channel, int isHost, int ranked)
 INCLUDE_ASM("dirtysock/tagsunk", func_00264098);
 #ifdef SKIP_ASM
 extern void* D_004A33CC;
-extern "C" void func_00264138(void* self, int flags);
+extern "C" void func_00264138(cSetupMan* self, int flags);
 
 /**
  * Destroys the online setup manager D_004A33CC, if any (func_00264138() with flags 3), and clears the pointer.
@@ -9293,7 +9300,7 @@ extern "C" void func_00264138(void* self, int flags);
 extern "C" void func_00264098(void)
 {
     if (D_004A33CC != 0) {
-        func_00264138(D_004A33CC, 3);
+        func_00264138((cSetupMan*)D_004A33CC, 3);
         D_004A33CC = 0;
     }
 }
@@ -9316,22 +9323,22 @@ extern "C" void* MEM_fill(void* dst, int value, int size);
  * @param ranked       bIsRankedGame; stored at +0x128 (func_00264E50() then sends flat attributes)
  * @return the object
  */
-extern "C" void* func_002640C0(void* self, int channel, int isHost, int ranked)
+extern "C" void* func_002640C0(cSetupMan* self, int channel, int isHost, int ranked)
 {
-    *(int*)((char*)self + 0x0) = 1;
-    *(int*)((char*)self + 0x120) = channel;
-    *(int*)((char*)self + 0x124) = isHost;
-    *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x118) = 0;
-    *(int*)((char*)self + 0x11C) = 0;
-    *(int*)((char*)self + 0x8) = 0;
-    *(int*)((char*)self + 0xC) = 0;
-    *(int*)((char*)self + 0x128) = ranked;
-    MEM_fill((char*)self + 0x10, 0, 0x80);
-    *(int*)((char*)self + 0x90) = 0;
-    *(int*)((char*)self + 0x94) = 0;
-    MEM_fill((char*)self + 0x98, 0, 0x80);
-    return self;
+    self->mState = 1;
+    self->mChannel = channel;
+    self->mIsHost = isHost;
+    self->mPacketCache = 0;
+    self->unk_118 = 0;
+    self->unk_11C = 0;
+    self->mReadQueue.mHead = 0;
+    self->mReadQueue.mTail = 0;
+    self->mRanked = ranked;
+    MEM_fill(&self->mReadQueue.mQueue[0], 0, 0x80);
+    self->mWriteQueue.mHead = 0;
+    self->mWriteQueue.mTail = 0;
+    MEM_fill(&self->mWriteQueue.mQueue[0], 0, 0x80);
+    return ((void*)self);
 }
 #endif
 
@@ -9339,7 +9346,7 @@ extern "C" void* func_002640C0(void* self, int channel, int isHost, int ranked)
 INCLUDE_ASM("dirtysock/tagsunk", func_00264138);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern "C" void func_00264990(void* self, int* p);
+extern "C" void func_00264990(cSetupMan* self, int* p);
 
 struct sRing_264138
 {
@@ -9390,15 +9397,15 @@ static inline int* PopB_264138(sRingOwner_264138* o)
  * @param self_  the setup manager (D_004A33CC)
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void func_00264138(void* self_, int flags)
+extern "C" void func_00264138(cSetupMan* self_, int flags)
 {
     sRingOwner_264138* self = (sRingOwner_264138*)self_;
     if (self->f4 != 0)
-        func_00264990(self, self->f4);
+        func_00264990((cSetupMan*)self, self->f4);
     while (PeekA_264138(self) != 0)
-        func_00264990(self, PopA_264138(self));
+        func_00264990((cSetupMan*)self, PopA_264138(self));
     while (PeekB_264138(self) != 0)
-        func_00264990(self, PopB_264138(self));
+        func_00264990((cSetupMan*)self, PopB_264138(self));
     self->f0 = 1;
     if (flags & 1)
         operator_delete((int*)self);
@@ -9411,12 +9418,12 @@ INCLUDE_ASM("dirtysock/tagsunk", func_002642B8);
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
-extern "C" void func_00264A58(void* self);
-extern "C" void func_00264B20(void* p);
+extern "C" void func_00264A58(cSetupMan* self);
+extern "C" void func_00264B20(cSetupMan* p);
 extern "C" void func_00264BE8(void* self, void* msg, int size);
 // PORT: func_002649B0 is defined with two parameters; this caller also passes the buffer size.
 extern "C" int func_002649B0_3(void* self, void* dst, int size) __asm__("func_002649B0");
-extern "C" void func_00264F88(void* self, int a1);
+extern "C" void func_00264F88(cSetupMan* self, int a1);
 extern "C" void func_0025F740(LobbyMan* self, int type);
 extern "C" void func_00260F80(void);
 extern "C" int func_00261460(void* p);
@@ -9428,7 +9435,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int i);
 // PORT: func_00265190 takes an sName7_00264D80* (defined later in the unit).
 extern "C" void func_00265190_p(void* self, int rider, void* name) __asm__("func_00265190");
-extern "C" void func_00265290(void* self, int rider);
+extern "C" void func_00265290(cSetupMan* self, int rider);
 extern "C" void func_00265398(int* self);
 extern "C" void func_00269008(void* self, int a, int b);
 extern "C" void func_002690C8(void* self, int a, int b);
@@ -9523,12 +9530,12 @@ struct sNetSession42B8 {
  *
  * @param vself  the setup manager: state +0x0, host flag +0x124, ranked flag +0x128
  */
-extern "C" void func_002642B8(void* vself)
+extern "C" void func_002642B8(cSetupMan* vself)
 {
     sNetSession42B8* self = (sNetSession42B8*)vself;
     sMsg42B8 msg;
-    func_00264A58(self);
-    func_00264B20(self);
+    func_00264A58((cSetupMan*)self);
+    func_00264B20((cSetupMan*)self);
     int st = self->state;
     if (st == 5 || st == 10) {
         if (self->ready != 0 || st == 10) {
@@ -9566,14 +9573,14 @@ extern "C" void func_002642B8(void* vself)
         tLobbyStats info;
         ((int*)&info.mRank)[0] = msg.a;
         (*(&LobbyMan_mLobbyMan->mOpponentStats)) = info;
-        func_00264F88(self, cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(SSXApp->BE, 1), 0));
+        func_00264F88((cSetupMan*)self, cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(SSXApp->BE, 1), 0));
         return;
     }
     if (self->host != 0) {
         if (self->state < 7) {
             switch (msg.type) {
             case 1: func_00265190_p(self, msg.a, &msg.c); break;
-            case 3: func_00265290(self, msg.a); break;
+            case 3: func_00265290((cSetupMan*)self, msg.a); break;
             case 5: func_00265398((int*)self); break;
             case 0xF8:
             case 250: {
@@ -9671,7 +9678,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00264990);
  *
  * @param packet  the buffer to free
  */
-extern "C" void func_00264990(void* self, int* packet)
+extern "C" void func_00264990(cSetupMan* self, int* packet)
 {
     operator_delete(packet);
 }
@@ -9680,7 +9687,7 @@ extern "C" void func_00264990(void* self, int* packet)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002649B0);
 #ifdef SKIP_ASM
-extern "C" void func_00264A58(void* self);
+extern "C" void func_00264A58(cSetupMan* self);
 extern "C" void* MEM_copy(void* dst, const void* src, int n);
 
 struct sDsPacketK2 {
@@ -9710,14 +9717,14 @@ struct sDsPacketQueueK2 {
 // Pops the oldest queued packet into `dst`; returns its payload size (0 if empty).
 extern "C" int func_002649B0(sDsPacketQueueK2* self, void* dst)
 {
-    func_00264A58(self);
+    func_00264A58((cSetupMan*)self);
     int head = self->head;
     if (head != self->tail) {
         self->head = head + 1;
         sDsPacketK2* packet = self->slots[head % 32];
         int len = packet->size - 4;
         MEM_copy(dst, packet->data, len);
-        func_00264990(self, (int*)packet);
+        func_00264990((cSetupMan*)self, (int*)packet);
         return len;
     }
     return 0;
@@ -9751,7 +9758,7 @@ struct sDsRecvQueue_00264A58 {
  * @param setupMan  the setup manager (receive queue: tail +0x8, head +0xC, slots +0x10)
  */
 // Fills the 32-entry receive queue until it is full or no packet is pending.
-extern "C" void func_00264A58(void* setupMan)
+extern "C" void func_00264A58(cSetupMan* setupMan)
 {
     sDsRecvQueue_00264A58* self = (sDsRecvQueue_00264A58*)setupMan;
     void* buf;
@@ -9798,7 +9805,7 @@ struct sDsSendQueue_00264B20 {
  * @param setupMan  the setup manager (send queue: tail +0x90, head +0x94, slots +0x98)
  */
 // Sends queued packets until the queue is empty or the channel refuses one.
-extern "C" void func_00264B20(void* setupMan)
+extern "C" void func_00264B20(cSetupMan* setupMan)
 {
     sDsSendQueue_00264B20* self = (sDsSendQueue_00264B20*)setupMan;
     while (self->head != self->tail)
@@ -9812,7 +9819,7 @@ extern "C" void func_00264B20(void* setupMan)
         if (cCommSystem_writePacket(cCommSystem_mCommSystem, self->chan, pkt, pkt->size) == 0)
             return;
         self->head++;
-        func_00264990(self, (int*)pkt);
+        func_00264990((cSetupMan*)self, (int*)pkt);
     }
 }
 #endif
@@ -9821,7 +9828,7 @@ extern "C" void func_00264B20(void* setupMan)
 INCLUDE_ASM("dirtysock/tagsunk", func_00264BE8);
 #ifdef SKIP_ASM
 extern "C" int cCommSystem_writePacket(void* mgr, int idx, void* buf, int len);
-extern "C" void func_00264B20(void* p);
+extern "C" void func_00264B20(cSetupMan* p);
 // PORT: func_00264960 is defined as f(void); this caller passes self in $a0.
 void* func_00264960_self(void* self) __asm__("func_00264960");
 
@@ -9862,7 +9869,7 @@ int func_00264BE8_impl(void* p, const void* src, int len) __asm__("func_00264BE8
 int func_00264BE8_impl(void* setupMan, const void* src, int len)
 {
     sDsSendQueue_00264BE8* self = (sDsSendQueue_00264BE8*)setupMan;
-    func_00264B20(self);
+    func_00264B20((cSetupMan*)self);
     sDsOutPacket_00264BE8 pkt;
     pkt.kind = 0;
     pkt.flags = 0;
@@ -9895,7 +9902,7 @@ struct sTagMsg264CB8 {
  * func_00263CF0 calls it right after creating the setup manager, passing LobbyMan's unk_08C in the second argument
  * register, which is ignored. func_002642B8() stores the peer's rank when the message arrives.
  */
-extern "C" void func_00264CB8(void* self)
+extern "C" void func_00264CB8(cSetupMan* self)
 {
     sTagMsg264CB8 msg;
     msg.state = LobbyMan_mLobbyMan->mStats.mRank;
@@ -9932,7 +9939,7 @@ struct sIf264CF0 {
  *
  * @param charID  the chosen character
  */
-extern "C" void func_00264CF0(void* self, int charID)
+extern "C" void func_00264CF0(cSetupMan* self, int charID)
 {
     sIf264CF0* playerInterface = (sIf264CF0*)cBE_getInterface_Fv(cBE_getBE(), 1);
     cBENewPlayerInterface_setPlayerCharID(playerInterface, 0, charID);
@@ -9984,7 +9991,7 @@ struct sNetState_00264D80 {
  * @param charID  the opponent's character
  * @param name    the opponent's 7 attribute bytes from the setup message, or 0
  */
-extern "C" void func_00264D80(void* self, int charID, sName7_00264D80* name)
+extern "C" void func_00264D80(cSetupMan* self, int charID, sName7_00264D80* name)
 {
     sIf_00264D80* playerIface = (sIf_00264D80*)cBE_getInterface_Fv(cBE_getBE(), 1);
     cBENewPlayerInterface_setPlayerCharID(playerIface, 1, charID);
@@ -10031,7 +10038,7 @@ struct sTagMsg264E50 {
  * @param rider  the character id, or -1
  * @param state  the sender's setup state (0 for a client pick)
  */
-extern "C" void func_00264E50(void* self, int type, int rider, int state)
+extern "C" void func_00264E50(cSetupMan* self, int type, int rider, int state)
 {
     sTagMsg264E50 msg;
     msg.type = type;
@@ -10039,7 +10046,7 @@ extern "C" void func_00264E50(void* self, int type, int rider, int state)
     msg.rider = rider;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (*(int*)((char*)self + 0x128) != 0) {
+    if (self->mRanked != 0) {
         int i;
         for (i = 0; i < 7; i++)
             msg.stats[i] = 40;
@@ -10059,8 +10066,8 @@ extern "C" void func_00264E50(void* self, int type, int rider, int state)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("dirtysock/tagsunk", func_00264F88);
 #ifdef SKIP_ASM
-extern "C" void func_00264CF0(void* self, int a1);
-extern "C" void func_00264E50(void* self, int event, int a2, int state);
+extern "C" void func_00264CF0(cSetupMan* self, int a1);
+extern "C" void func_00264E50(cSetupMan* self, int event, int a2, int state);
 
 /**
  * Sends this player's highlighted character to the peer during online character select.
@@ -10071,13 +10078,13 @@ extern "C" void func_00264E50(void* self, int event, int a2, int state);
  *
  * @param rider  the character id
  */
-extern "C" void func_00264F88(void* self, int rider)
+extern "C" void func_00264F88(cSetupMan* self, int rider)
 {
     int state = *(int*)self;
     if (state == 0xC) {
         return;
     }
-    if (*(int*)((char*)self + 0x124) != 0) {
+    if (self->mIsHost != 0) {
         if (state == 1) {
             *(int*)self = 2;
         }
@@ -10095,8 +10102,8 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00265018);
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
-extern "C" void func_00264CF0(void* self, int charID);
-extern "C" void func_00264E50(void* self, int type, int rider, int state);
+extern "C" void func_00264CF0(cSetupMan* self, int charID);
+extern "C" void func_00264E50(cSetupMan* self, int type, int rider, int state);
 
 struct sMsgListNode5018 {
     sMsgListNode5018* next;
@@ -10132,9 +10139,9 @@ static inline sMsgListIter5018 sMsgList5018_insert(sMsgListIter5018 pos, void* c
  *
  * @param rider  the chosen character
  */
-extern "C" void func_00265018(void* self, int rider)
+extern "C" void func_00265018(cSetupMan* self, int rider)
 {
-    if (*(int*)((char*)self + 0x124) != 0) {
+    if (self->mIsHost != 0) {
         int st = *(int*)self;
         if (st > 0) {
             if (st < 3)
@@ -10160,7 +10167,7 @@ extern "C" void func_00265018(void* self, int rider)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("dirtysock/tagsunk", func_00265140);
 #ifdef SKIP_ASM
-extern "C" void func_00264E50(void* self, int event, int a2, int state);
+extern "C" void func_00264E50(cSetupMan* self, int event, int a2, int state);
 
 /**
  * Withdraws this player's confirmed character pick ("back" in online character select).
@@ -10180,7 +10187,7 @@ extern "C" void func_00265140(int* self)
         } else {
             event = 5;
         }
-        func_00264E50(self, event, -1, *self);
+        func_00264E50((cSetupMan*)self, event, -1, *self);
     }
 }
 #endif
@@ -10192,8 +10199,8 @@ extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
 struct sName7_00264D80;
-extern "C" void func_00264D80(void* self, int charID, sName7_00264D80* name);
-extern "C" void func_00264E50(void* self, int type, int rider, int state);
+extern "C" void func_00264D80(cSetupMan* self, int charID, sName7_00264D80* name);
+extern "C" void func_00264E50(cSetupMan* self, int type, int rider, int state);
 
 struct sMsgListNode5190 {
     sMsgListNode5190* next;
@@ -10231,7 +10238,7 @@ static inline sMsgListIter5190 sMsgList5190_insert(sMsgListIter5190 pos, void* c
  * @param rider  the opponent's character id from the message
  * @param name   the opponent's name block from the message, copied into the back end
  */
-extern "C" void func_00265190(void* self, int rider, sName7_00264D80* name)
+extern "C" void func_00265190(cSetupMan* self, int rider, sName7_00264D80* name)
 {
     int st = *(int*)self;
     if (st != 2) {
@@ -10261,8 +10268,8 @@ extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
 struct sName7_00264D80;
-extern "C" void func_00264D80(void* self, int charID, sName7_00264D80* name);
-extern "C" void func_00264E50(void* self, int type, int rider, int state);
+extern "C" void func_00264D80(cSetupMan* self, int charID, sName7_00264D80* name);
+extern "C" void func_00264E50(cSetupMan* self, int type, int rider, int state);
 
 struct sMsgListNode5290 {
     sMsgListNode5290* next;
@@ -10298,7 +10305,7 @@ static inline sMsgListIter5290 sMsgList5290_insert(sMsgListIter5290 pos, void* c
  *
  * @param rider  the opponent's character id from the message
  */
-extern "C" void func_00265290(void* self, int rider)
+extern "C" void func_00265290(cSetupMan* self, int rider)
 {
     int st = *(int*)self;
     if (st > 0) {
@@ -10439,12 +10446,12 @@ struct sNetMsg5458 {
  *
  * @param id  the highlighted row (the menu's byte at +0x95)
  */
-extern "C" void func_00265458(void* self, int id)
+extern "C" void func_00265458(cSetupMan* self, int id)
 {
     int st = *(int*)self;
     if (st != 12) {
         int type;
-        if (*(int*)((char*)self + 0x124) != 0) {
+        if (self->mIsHost != 0) {
             if (st >= 5) {
                 if (st < 7)
                     *(int*)self = 7;
@@ -10528,12 +10535,12 @@ struct sNetMsg5568 {
  * @param ruleSlot  the rule slot
  * @param newValue  the new value
  */
-extern "C" void func_00265568(void* self, int ruleSlot, int newValue)
+extern "C" void func_00265568(cSetupMan* self, int ruleSlot, int newValue)
 {
     int st = *(int*)self;
     if (st != 12) {
         int type;
-        if (*(int*)((char*)self + 0x124) != 0) {
+        if (self->mIsHost != 0) {
             if (st >= 5) {
                 if (st < 7)
                     *(int*)self = 7;
@@ -10624,14 +10631,14 @@ extern "C" void func_00264BE8(void* self, void* msg, int size);
  * a client sends type 13. The {type, state, -1} message goes out through func_00264BE8. cFEStateBraggingRights_onUpdate
  * calls it when Back unlocks a locked panel online.
  */
-extern "C" void func_00265700(void* self)
+extern "C" void func_00265700(cSetupMan* self)
 {
     sTagMsg265700 msg;
     int type;
     int state = *(int*)self;
     if (state == 12)
         return;
-    if (*(int*)((char*)self + 0x124) != 0) {
+    if (self->mIsHost != 0) {
         if (state == 9)
             *(int*)self = 7;
         type = 12;
@@ -10690,7 +10697,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00265880);
 extern char str_cSharedLoginMan[];
 extern void* D_004A33D0;
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_002658E0(void* self);
+extern "C" void* func_002658E0(cSharedLoginMan* self);
 
 /**
  * Creates the shared-login manager singleton D_004A33D0.
@@ -10700,7 +10707,7 @@ extern "C" void* func_002658E0(void* self);
  */
 extern "C" void func_00265880(void)
 {
-    D_004A33D0 = func_002658E0(cMemMan_alloc(8, str_cSharedLoginMan, 0x20000000, 0));
+    D_004A33D0 = func_002658E0((cSharedLoginMan*)cMemMan_alloc(8, str_cSharedLoginMan, 0x20000000, 0));
 }
 #endif
 
@@ -10708,7 +10715,7 @@ extern "C" void func_00265880(void)
 INCLUDE_ASM("dirtysock/tagsunk", func_002658B8);
 #ifdef SKIP_ASM
 extern void* D_004A33D0;
-extern "C" void func_00265908(void* self, int flags);
+extern "C" void func_00265908(cSharedLoginMan* self, int flags);
 
 /**
  * Destroys the shared-login manager singleton D_004A33D0, if there is one, and clears the pointer.
@@ -10718,7 +10725,7 @@ extern "C" void func_00265908(void* self, int flags);
 extern "C" void func_002658B8(void)
 {
     if (D_004A33D0 != 0) {
-        func_00265908(D_004A33D0, 3);
+        func_00265908((cSharedLoginMan*)D_004A33D0, 3);
         D_004A33D0 = 0;
     }
 }
@@ -10727,24 +10734,24 @@ extern "C" void func_002658B8(void)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_002658E0);
 #ifdef SKIP_ASM
-extern "C" void func_00265950(void* self);
+extern "C" void func_00265950(cSharedLoginMan* self);
 
 /**
  * Constructs a shared-login manager by running func_00265950 on it.
  *
  * @return @p self
  */
-extern "C" void* func_002658E0(void* self)
+extern "C" void* func_002658E0(cSharedLoginMan* self)
 {
     func_00265950(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00265908);
 #ifdef SKIP_ASM
-extern "C" void func_002659C0(void* self);
+extern "C" void func_002659C0(cSharedLoginMan* self);
 void operator_delete(int*);
 
 /**
@@ -10752,7 +10759,7 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void func_00265908(void* self, int flags)
+extern "C" void func_00265908(cSharedLoginMan* self, int flags)
 {
     func_002659C0(self);
     if (flags & 1) {
@@ -10791,7 +10798,7 @@ extern "C" void* cMemCard_CreateInstance();
  * @param vself  the shared-login manager
  */
 // Resets the DirtySock session state and creates the session object.
-extern "C" void func_00265950(void* vself)
+extern "C" void func_00265950(cSharedLoginMan* vself)
 {
     int* self = (int*)vself;
     self[0] = 1;
@@ -10820,7 +10827,7 @@ extern "C" void cMemCard_DeleteInstance(void* h);
  *
  * Calls func_003F7F18 (the library shutdown) and cMemCard_DeleteInstance(D_004A33D8).
  */
-extern "C" void func_002659C0(void* self)
+extern "C" void func_002659C0(cSharedLoginMan* self)
 {
     *(int*)self = 0;
     func_003F7F18();
@@ -10855,7 +10862,7 @@ extern int D_004A33DC;
  * with the port D_004A33DC that func_00266060 recorded. cFEStateNetAccountMem_onUpdate calls it in its popup-wait
  * states 7, 13, 21 and 25.
  */
-extern "C" void func_002659E8(void* self)
+extern "C" void func_002659E8(cSharedLoginMan* self)
 {
     if (((cDsObj2659E8*)D_004A33D8)->IsBusy() == 0) {
         ((cDsObj2659E8*)D_004A33D8)->CheckDevice(D_004A33DC);
@@ -10898,7 +10905,7 @@ extern void* D_004A33D8;
  *
  * @return the free space in KB
  */
-extern "C" int func_00265A38(void* self)
+extern "C" int func_00265A38(cSharedLoginMan* self)
 {
     return ((cDsObj265A38*)D_004A33D8)->GetFreeSpace();
 }
@@ -10909,11 +10916,11 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00265A68);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_004A3940;
-extern "C" void func_00265D98(void* state);
-extern "C" void func_00265E40(void* state);
-extern "C" void func_00265E80(void* state);
-extern "C" void func_00265EC8(void* state);
-extern "C" void func_00265F00(void* state);
+extern "C" void func_00265D98(cSharedLoginMan* state);
+extern "C" void func_00265E40(cSharedLoginMan* state);
+extern "C" void func_00265E80(cSharedLoginMan* state);
+extern "C" void func_00265EC8(cSharedLoginMan* state);
+extern "C" void func_00265F00(cSharedLoginMan* state);
 extern "C" int func_003F80E0(int* status);
 
 struct cDsObj265A68 {
@@ -10953,27 +10960,27 @@ extern "C" void func_00265A68(int* state)
         break;
     case 2:
         if (!((cDsObj265A68*)D_004A33D8)->IsBusy()) {
-            func_00265D98(state);
+            func_00265D98((cSharedLoginMan*)state);
         }
         break;
     case 6:
         if (!((cDsObj265A68*)D_004A33D8)->IsBusy()) {
-            func_00265E40(state);
+            func_00265E40((cSharedLoginMan*)state);
         }
         break;
     case 10:
         if (!((cDsObj265A68*)D_004A33D8)->IsBusy()) {
-            func_00265E80(state);
+            func_00265E80((cSharedLoginMan*)state);
         }
         break;
     case 14:
         if (!((cDsObj265A68*)D_004A33D8)->IsBusy()) {
-            func_00265EC8(state);
+            func_00265EC8((cSharedLoginMan*)state);
         }
         break;
     case 18:
         if (!((cDsObj265A68*)D_004A33D8)->IsBusy()) {
-            func_00265F00(state);
+            func_00265F00((cSharedLoginMan*)state);
         }
         break;
     case 3:
@@ -11092,7 +11099,7 @@ extern void* D_004A33D8;
  *
  * @return 1 when the card is available and not formatted, otherwise 0
  */
-extern "C" int func_00265CB0(void* self)
+extern "C" int func_00265CB0(cSharedLoginMan* self)
 {
     if (((cDsObj265CB0*)D_004A33D8)->IsAvailable1() != 0) {
         return !((cDsObj265CB0*)D_004A33D8)->IsFormatted1();
@@ -11161,7 +11168,7 @@ extern void* D_004A33D8;
  *
  * That slot also turns a last result of -1 into 0. func_001B70D0 calls it before starting most card steps.
  */
-extern "C" void func_00265D08(void* self)
+extern "C" void func_00265D08(cSharedLoginMan* self)
 {
     ((cDsObj265D08*)D_004A33D8)->v47();
 }
@@ -11244,7 +11251,7 @@ extern void* D_004A33D8;
  *
  * @return non-zero when the card was changed
  */
-extern "C" int func_00265D38(void* self)
+extern "C" int func_00265D38(cSharedLoginMan* self)
 {
     return ((cDsObj265D38*)D_004A33D8)->CardChanged1();
 }
@@ -11317,7 +11324,7 @@ extern void* D_004A33D8;
  *
  * @return 1 when the card is not available, otherwise 0
  */
-extern "C" int func_00265D68(void* self)
+extern "C" int func_00265D68(cSharedLoginMan* self)
 {
     return !((cDsObj265D68*)D_004A33D8)->IsAvailable1();
 }
@@ -11338,9 +11345,9 @@ extern "C" int func_003F8000(void* p);
  * at +0x11), starts func_003F8000(D_00536760) and sets the state word to 3. func_001B7A98 later compares the buffer
  * with the typed user name and password.
  */
-extern "C" void func_00265D98(void* self)
+extern "C" void func_00265D98(cSharedLoginMan* self)
 {
-    *(int*)((char*)self + 0x4) = 0;
+    self->mError = 0;
     D_004A33E0 = 0;
     MEM_fill(D_00536760, 0, 36);
     func_003F8000(D_00536760);
@@ -11356,8 +11363,9 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00265DF0__FPv);
  *
  * func_001B70D0 uses it for its "checking card" steps; func_00265A68 then runs func_00265D98.
  */
-void func_00265DF0(void* self)
+void func_00265DF0(void* vself)
 {
+    cSharedLoginMan* self = (cSharedLoginMan*)vself;
     *(int*)self = 2;
 }
 #endif
@@ -11370,8 +11378,9 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00265E00__FPv);
  *
  * func_00265A68 then runs func_00265E40.
  */
-void func_00265E00(void* self)
+void func_00265E00(void* vself)
 {
+    cSharedLoginMan* self = (cSharedLoginMan*)vself;
     *(int*)self = 6;
 }
 #endif
@@ -11384,8 +11393,9 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00265E10__FPv);
  *
  * func_001B70D0 uses it once the card has at least 17 KB free; func_00265A68 then runs func_00265E80.
  */
-void func_00265E10(void* self)
+void func_00265E10(void* vself)
 {
+    cSharedLoginMan* self = (cSharedLoginMan*)vself;
     *(int*)self = 10;
 }
 #endif
@@ -11398,8 +11408,9 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00265E20__FPv);
  *
  * func_001B70D0 uses it in its delete-account step ("kT_MEMDeletingPS2") and in step 26.
  */
-void func_00265E20(void* self)
+void func_00265E20(void* vself)
 {
+    cSharedLoginMan* self = (cSharedLoginMan*)vself;
     *(int*)self = 14;
 }
 #endif
@@ -11412,8 +11423,9 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00265E30__FPv);
  *
  * func_001B70D0 uses it in its "formatting" step; func_00265A68 then formats the card.
  */
-void func_00265E30(void* self)
+void func_00265E30(void* vself)
 {
+    cSharedLoginMan* self = (cSharedLoginMan*)vself;
     *(int*)self = 18;
 }
 #endif
@@ -11431,9 +11443,9 @@ extern "C" int func_003F8048(void* p);
  * Clears the result word (+0x4) and D_004A33E0, starts func_003F8048(D_00536760) (which copies the user name and
  * password from the buffer into the library session) and sets the state word to 7.
  */
-extern "C" void func_00265E40(void* self)
+extern "C" void func_00265E40(cSharedLoginMan* self)
 {
-    *(int*)((char*)self + 0x4) = 0;
+    self->mError = 0;
     D_004A33E0 = 0;
     func_003F8048(D_00536760);
     *(int*)self = 7;
@@ -11454,9 +11466,9 @@ extern "C" int func_003F7F48(void* a, void* b);
  * Clears the result word (+0x4) and D_004A33E0, starts func_003F7F48(D_00442A60, D_00536760) (which also copies the
  * user name and password from the buffer) and sets the state word to 11.
  */
-extern "C" void func_00265E80(void* self)
+extern "C" void func_00265E80(cSharedLoginMan* self)
 {
-    *(int*)((char*)self + 0x4) = 0;
+    self->mError = 0;
     D_004A33E0 = 0;
     func_003F7F48(D_00442A60, D_00536760);
     *(int*)self = 11;
@@ -11474,9 +11486,9 @@ extern "C" int func_003F80C0();
  *
  * Clears the result word (+0x4) and D_004A33E0 and sets the state word to 15.
  */
-extern "C" void func_00265EC8(void* self)
+extern "C" void func_00265EC8(cSharedLoginMan* self)
 {
-    *(int*)((char*)self + 0x4) = 0;
+    self->mError = 0;
     D_004A33E0 = 0;
     func_003F80C0();
     *(int*)self = 0xF;
@@ -11493,9 +11505,9 @@ extern int D_004A33E0;
  *
  * Clears the result word (+0x4) and D_004A33E0 and sets the state word to 19, where func_00265A68 formats the card.
  */
-extern "C" void func_00265F00(void* self)
+extern "C" void func_00265F00(cSharedLoginMan* self)
 {
-    *(int*)((char*)self + 0x4) = 0;
+    self->mError = 0;
     D_004A33E0 = 0;
     *(int*)self = 19;
 }
@@ -12257,7 +12269,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00266788);
 extern char str_cUsbKeyboard[];
 extern void* D_004A33F0;
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_002667E8(void* self);
+extern "C" void* func_002667E8(cUsbKeyboard* self);
 
 /**
  * Creates the USB keyboard reader singleton D_004A33F0.
@@ -12266,7 +12278,7 @@ extern "C" void* func_002667E8(void* self);
  */
 extern "C" void func_00266788(void)
 {
-    D_004A33F0 = func_002667E8(cMemMan_alloc(1124, str_cUsbKeyboard, 0x20000000, 0));
+    D_004A33F0 = func_002667E8((cUsbKeyboard*)cMemMan_alloc(1124, str_cUsbKeyboard, 0x20000000, 0));
 }
 #endif
 
@@ -12305,14 +12317,14 @@ extern "C" void* MEM_fill(void* dst, int value, int size);
  *
  * @return @p self
  */
-extern "C" void* func_002667E8(void* self)
+extern "C" void* func_002667E8(cUsbKeyboard* self)
 {
-    *(int*)((char*)self + 0x460) = 0;
+    self->mEnabled = 0;
     if (func_003F61D0(0, 0, D_005371D0, (void*)func_002668A8, 0) >= 0) {
-        *(int*)((char*)self + 0x460) = 1;
+        self->mEnabled = 1;
     }
     MEM_fill(self, 0, 1120);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -12557,7 +12569,7 @@ extern "C" void func_00266CA0(void)
 INCLUDE_ASM("dirtysock/tagsunk", func_00266CD8);
 #ifdef SKIP_ASM
 extern void* D_004A33F4;
-extern "C" void func_00266D10(void* self, int flags);
+extern "C" void func_00266D10(cVoipMan* self, int flags);
 
 /**
  * Destroys the voice-chat manager singleton D_004A33F4, if there is one, and clears the pointer.
@@ -12567,7 +12579,7 @@ extern "C" void func_00266D10(void* self, int flags);
 extern "C" void func_00266CD8(void)
 {
     if (D_004A33F4 != 0) {
-        func_00266D10(D_004A33F4, 3);
+        func_00266D10((cVoipMan*)D_004A33F4, 3);
         D_004A33F4 = 0;
     }
 }
@@ -12581,19 +12593,20 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00266D00__FPv);
  *
  * @return @p self
  */
-void* func_00266D00(void* self)
+void* func_00266D00(void* vself)
 {
+    cVoipMan* self = (cVoipMan*)vself;
     int zero = 0;
     *(int*)self = zero;
-    *(int*)((char*)self + 0x4) = zero;
-    return self;
+    self->mVoiceOn = zero;
+    return ((void*)self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00266D10);
 #ifdef SKIP_ASM
-extern "C" void func_00266DF8(void* self);
+extern "C" void func_00266DF8(cVoipMan* self);
 void operator_delete(int*);
 
 /**
@@ -12601,7 +12614,7 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void func_00266D10(void* self, int flags)
+extern "C" void func_00266D10(cVoipMan* self, int flags)
 {
     func_00266DF8(self);
     if (flags & 1) {
@@ -12620,8 +12633,8 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_003F6AB8(void* a0, int a1, int a2);
 extern "C" void func_003F6C10(int a0, int a1);
-extern "C" void func_00266E88(void* self);
-extern "C" void func_00266E30(void* self);
+extern "C" void func_00266E88(cVoipMan* self);
+extern "C" void func_00266E30(cVoipMan* self);
 
 /**
  * Connects voice chat to a peer and turns the voice on or off from the settings.
@@ -12633,7 +12646,7 @@ extern "C" void func_00266E30(void* self);
  *
  * @param peerAddr  the peer's address
  */
-extern "C" void func_00266D58(void* self, void* peerAddr)
+extern "C" void func_00266D58(cVoipMan* self, void* peerAddr)
 {
     if (*(int*)self == 0) {
         func_003F6AB8(peerAddr, 6000, 6000);
@@ -12660,7 +12673,7 @@ extern "C" void func_003F6AF0(void* self);
 /**
  * Disconnects voice chat: when connected (+0x0), stops the voice module (func_003F6AF0) and clears the connected word.
  */
-extern "C" void func_00266DF8(void* self)
+extern "C" void func_00266DF8(cVoipMan* self)
 {
     if (*(void**)self != 0) {
         func_003F6AF0(self);
@@ -12680,11 +12693,11 @@ extern "C" void func_003F6B20();
  *
  * Sets the voice-on word (+0x4).
  */
-extern "C" void func_00266E30(void* self)
+extern "C" void func_00266E30(cVoipMan* self)
 {
-    if (*(int*)self != 0 && *(int*)((char*)self + 0x4) == 0 && D_004A33F8 >= 10) {
+    if (*(int*)self != 0 && self->mVoiceOn == 0 && D_004A33F8 >= 10) {
         func_003F6B20();
-        *(int*)((char*)self + 0x4) = 1;
+        self->mVoiceOn = 1;
     }
 }
 #endif
@@ -12697,11 +12710,11 @@ extern "C" void func_003F6B50(void* self);
 /**
  * Turns the voice off (func_003F6B50) when connected and on, and clears the voice-on word (+0x4).
  */
-extern "C" void func_00266E88(void* self)
+extern "C" void func_00266E88(cVoipMan* self)
 {
-    if (*(int*)self != 0 && *(int*)((char*)self + 0x4) != 0) {
+    if (*(int*)self != 0 && self->mVoiceOn != 0) {
         func_003F6B50(self);
-        *(int*)((char*)self + 0x4) = 0;
+        self->mVoiceOn = 0;
     }
 }
 #endif
@@ -12714,9 +12727,9 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00266ED0);
 /**
  * Toggles the voice: turns it off when the voice-on word (+0x4) is set (func_00266E88), else on (func_00266E30).
  */
-extern "C" void func_00266ED0(void* self)
+extern "C" void func_00266ED0(cVoipMan* self)
 {
-    if (*(int*)((char*)self + 4) != 0) {
+    if (self->mVoiceOn != 0) {
         func_00266E88(self);
     } else {
         func_00266E30(self);
@@ -12749,8 +12762,9 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00266F38__FPv);
  *
  * @return the status word
  */
-void* func_00266F38(void* self)
+void* func_00266F38(void* vself)
 {
+    cVoipMan* self = (cVoipMan*)vself;
     return func_003F6C40(self);
 }
 #endif
@@ -12770,7 +12784,7 @@ extern "C" void func_003F6C10(int a0, int a1);
  * @param level  the voice level (below 10 counts as off)
  * @param maxLevel  the second value for the module (the maximum level)
  */
-extern "C" void func_00266F58(void* self, int level, int maxLevel)
+extern "C" void func_00266F58(cVoipMan* self, int level, int maxLevel)
 {
     if (*(int*)self != 0) {
         func_003F6C10(level, maxLevel);
@@ -12792,7 +12806,7 @@ extern "C" void func_003F6BA0(void* a, void* b);
  * @param outLevel  receives the first word (the level)
  * @param outMax  receives the second word (the maximum)
  */
-extern "C" void func_00266F90(void* self, void* outLevel, void* outMax)
+extern "C" void func_00266F90(cVoipMan* self, void* outLevel, void* outMax)
 {
     if (*(int*)self != 0) {
         func_003F6BA0(outLevel, outMax);
@@ -13451,9 +13465,9 @@ void operator_delete(int*);
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void online_Event__Event(void* self, int flags)
+extern "C" void online_Event__Event(online_Event* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = online_Event_vtbl;
+    self->mVtbl = online_Event_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -13500,9 +13514,9 @@ void operator_delete(int*);
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void online_ErrorEvent__ErrorEvent(void* self, int flags)
+extern "C" void online_ErrorEvent__ErrorEvent(online_ErrorEvent* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = online_Event_vtbl;
+    self->mVtbl = online_Event_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -13524,10 +13538,10 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
  *
  * @return the new event
  */
-extern "C" void* online_ErrorEvent_clone(void* self)
+extern "C" void* online_ErrorEvent_clone(online_ErrorEvent* self)
 {
     int* copy = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
-    int errorCode = *(int*)((char*)self + 0x8);
+    int errorCode = self->mError;
     copy[0] = 258;
     *(void***)((char*)copy + 0x4) = online_ErrorEvent_vtbl;
     copy[2] = errorCode;
@@ -13551,9 +13565,9 @@ void operator_delete(int*);
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void online_BuddyErrorEvent__BuddyErrorEvent(void* self, int flags)
+extern "C" void online_BuddyErrorEvent__BuddyErrorEvent(online_BuddyErrorEvent* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = online_Event_vtbl;
+    self->mVtbl = online_Event_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -13576,10 +13590,10 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
  *
  * @return the new event
  */
-extern "C" void* online_BuddyErrorEvent_clone(void* self)
+extern "C" void* online_BuddyErrorEvent_clone(online_BuddyErrorEvent* self)
 {
     int* copy = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
-    int errorCode = *(int*)((char*)self + 0x8);
+    int errorCode = self->mError;
     copy[0] = 258;
     *(void***)((char*)copy + 0x4) = online_ErrorEvent_vtbl;
     copy[2] = errorCode;
@@ -13603,9 +13617,9 @@ void operator_delete(int*);
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void online_NetErrorEvent__NetErrorEvent(void* self, int flags)
+extern "C" void online_NetErrorEvent__NetErrorEvent(online_NetErrorEvent* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = online_Event_vtbl;
+    self->mVtbl = online_Event_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -13627,10 +13641,10 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
  *
  * @return the new event
  */
-extern "C" void* online_NetErrorEvent_clone(void* self)
+extern "C" void* online_NetErrorEvent_clone(online_NetErrorEvent* self)
 {
     int* copy = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
-    int errorValue = *(int*)((char*)self + 0x8);
+    int errorValue = self->mError;
     copy[0] = 278;
     *(void***)((char*)copy + 0x4) = online_NetErrorEvent_vtbl;
     copy[2] = errorValue;
@@ -13722,10 +13736,10 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void online_NewsEvent__NewsEvent(void* self, int flags)
+extern "C" void online_NewsEvent__NewsEvent(online_NewsEvent* self, int flags)
 {
-    cBXString__cBXString((char*)self + 0x8, 2);
-    *(void***)((char*)self + 0x4) = online_Event_vtbl;
+    cBXString__cBXString(&self->mText, 2);
+    self->mVtbl = online_Event_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -13748,10 +13762,10 @@ extern "C" void* cBXString_cBXString2(void* self, const char* s);
  *
  * @return the new event
  */
-extern "C" void* online_NewsEvent_clone(void* self)
+extern "C" void* online_NewsEvent_clone(online_NewsEvent* self)
 {
     int* copy = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
-    const char* newsText = *(const char**)((char*)self + 0x8);
+    const char* newsText = (const char*)self->mText;
     *(void***)((char*)copy + 0x4) = online_NewsEvent_vtbl;
     copy[0] = 226;
     cBXString_cBXString2((char*)copy + 0x8, newsText);
@@ -13775,9 +13789,9 @@ void operator_delete(int*);
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void online_AcctTooYoungEvent__AcctTooYoungEvent(void* self, int flags)
+extern "C" void online_AcctTooYoungEvent__AcctTooYoungEvent(online_AcctTooYoungEvent* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = online_Event_vtbl;
+    self->mVtbl = online_Event_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -13799,10 +13813,10 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
  *
  * @return the new event
  */
-extern "C" void* online_AcctTooYoungEvent_clone(void* self)
+extern "C" void* online_AcctTooYoungEvent_clone(online_AcctTooYoungEvent* self)
 {
     int* copy = (int*)cMemMan_alloc(0x10, str_NetEvent, 0x20000000, 0);
-    int age = *(int*)((char*)self + 0xC);
+    int age = self->mAge;
     copy[0] = 258;
     copy[2] = 0x746F6F79;
     *(void***)((char*)copy + 0x4) = online_AcctTooYoungEvent_vtbl;
@@ -13827,11 +13841,11 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void online_AcctLockedEvent__AcctLockedEvent(void* self, int flags)
+extern "C" void online_AcctLockedEvent__AcctLockedEvent(online_AcctLockedEvent* self, int flags)
 {
-    cBXString__cBXString((char*)self + 0x10, 2);
-    cBXString__cBXString((char*)self + 0xC, 2);
-    *(void***)((char*)self + 0x4) = online_Event_vtbl;
+    cBXString__cBXString(&self->mIntro, 2);
+    cBXString__cBXString(&self->mDate, 2);
+    self->mVtbl = online_Event_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -13874,10 +13888,10 @@ static inline void Init268308(sLockMsg268308* m, const char* a, const char* b)
  * @return the new event
  */
 // Builds a "lock" message carrying the two name strings of this request.
-extern "C" void* online_AcctLockedEvent_clone(char* self)
+extern "C" void* online_AcctLockedEvent_clone(online_AcctLockedEvent* self)
 {
     sLockMsg268308* lockMsg = (sLockMsg268308*)operator new(20, str_NetEvent, 0x20000000, 0);
-    Init268308(lockMsg, *(const char**)(self + 0xC), *(const char**)(self + 0x10));
+    Init268308(lockMsg, (const char*)self->mDate, (const char*)self->mIntro);
     return lockMsg;
 }
 #endif
@@ -13949,11 +13963,11 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void online_FindPlayerEvent__FindPlayerEvent(void* self, int flags)
+extern "C" void online_FindPlayerEvent__FindPlayerEvent(online_FindPlayerEvent* self, int flags)
 {
-    cBXString__cBXString((char*)self + 0xC, 2);
-    cBXString__cBXString((char*)self + 0x8, 2);
-    *(void***)((char*)self + 0x4) = online_Event_vtbl;
+    cBXString__cBXString(&self->mRoom, 2);
+    cBXString__cBXString(&self->mName, 2);
+    self->mVtbl = online_Event_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -14004,11 +14018,11 @@ static inline void Init2684C0(sMsg2684C0* m, const char* a, const char* b, int c
  * @return the new event
  */
 // Clones a 0xE3 message (strings, ids and trailing data block).
-extern "C" void* online_FindPlayerEvent_clone(sMsg2684C0* src)
+extern "C" void* online_FindPlayerEvent_clone(online_FindPlayerEvent* src)
 {
     sMsg2684C0* copy = (sMsg2684C0*)operator new(44, str_NetEvent, 0x20000000, 0);
-    Init2684C0(copy, *(const char**)src->a, *(const char**)src->b, src->f10, src->f14);
-    copy->blk = src->blk;
+    Init2684C0(copy, *(const char**)((char*)&src->mName), *(const char**)((char*)&src->mRoom), src->mOnline, src->mAddr);
+    copy->blk = (*(sBlk2684C0*)&src->mStats);
     return copy;
 }
 #endif
@@ -14029,10 +14043,10 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void online_PingEvent__PingEvent(void* self, int flags)
+extern "C" void online_PingEvent__PingEvent(online_PingEvent* self, int flags)
 {
-    cBXString__cBXString((char*)self + 0x8, 2);
-    *(void***)((char*)self + 0x4) = online_Event_vtbl;
+    cBXString__cBXString(&self->mName, 2);
+    self->mVtbl = online_Event_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -14052,11 +14066,11 @@ extern void* online_PingEvent_vtbl[];
  *
  * @return the new event
  */
-extern "C" void* online_PingEvent_clone(void* self)
+extern "C" void* online_PingEvent_clone(online_PingEvent* self)
 {
     int* copy = (int*)cMemMan_alloc(0x10, str_NetEvent, 0x20000000, 0);
-    int ping = *(int*)((char*)self + 0xC);
-    const char* name = *(const char**)((char*)self + 0x8);
+    int ping = self->mPing;
+    const char* name = (const char*)self->mName;
     *(void***)((char*)copy + 0x4) = online_PingEvent_vtbl;
     copy[0] = 229;
     cBXString_cBXString2((char*)copy + 0x8, name);

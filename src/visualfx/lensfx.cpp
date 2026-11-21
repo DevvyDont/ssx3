@@ -1,4 +1,5 @@
 #include "common.h"
+#include "visualfx/boltonfx.h"
 #include "visualfx/ps2lensfx.h"
 #include "visualfx/renderstateman.h"
 #include "render/ps2graphicsman.h"
@@ -102,7 +103,7 @@ INCLUDE_ASM("visualfx/lensfx", func_002EC9E0);
 #ifdef SKIP_ASM
 extern void* D_00487EE8[];
 struct sLensFx;
-extern "C" void func_002ECAF0(sLensFx* self);
+extern "C" void func_002ECAF0(cBoltOnFXInterface* self);
 
 /**
  * Constructs a rider's bolt-on effect set ("cBoltOnFXInterface"): the attached particle emitters its equipment carries.
@@ -116,20 +117,20 @@ extern "C" void func_002ECAF0(sLensFx* self);
  * @param emitterOwner  the attached-emitter owner the emitters are created in
  * @return @p self
  */
-extern "C" void* func_002EC9E0(void* self, int rider, int emitterOwner)
+extern "C" void* func_002EC9E0(cBoltOnFXInterface* self, int rider, int emitterOwner)
 {
-    *(void***)((char*)self + 0xC4) = D_00487EE8;
-    *(int*)((char*)self + 0x0) = 1;
-    *(int*)((char*)self + 0x4) = rider;
-    *(int*)((char*)self + 0xC) = emitterOwner;
-    *(int*)((char*)self + 0x8) = 0;
-    char* entry = (char*)self + 0x10;
+    self->mVtbl = D_00487EE8;
+    self->mDirty = 1;
+    self->mpRider = (cRider*)rider;
+    self->mAttachedEmitterFX = (cAttachedEmitterFX*)emitterOwner;
+    self->mpCharId = 0;
+    char* entry = (char*)&self->mEntries[0];
     int i;
     for (i = 14; i != -1; i--, entry += 0xC) {
         func_002EC9D0(entry);
     }
-    func_002ECAF0((sLensFx*)self);
-    return self;
+    func_002ECAF0(self);
+    return ((void*)self);
 }
 #endif
 
@@ -138,7 +139,7 @@ INCLUDE_ASM("visualfx/lensfx", func_002ECA68);
 #ifdef SKIP_ASM
 extern void* D_00487EE8[];
 struct sLensFx;
-extern "C" void func_002ECAF0(sLensFx* self);
+extern "C" void func_002ECAF0(cBoltOnFXInterface* self);
 
 /**
  * Constructs a front-end character's bolt-on effect set ("cBoltOnFXInterface"), keyed by a character id instead of a
@@ -151,20 +152,20 @@ extern "C" void func_002ECAF0(sLensFx* self);
  * @param emitterOwner  the attached-emitter owner the emitters are created in
  * @return @p self
  */
-extern "C" void* func_002ECA68(void* self, int charIdPtr, int emitterOwner)
+extern "C" void* func_002ECA68(cBoltOnFXInterface* self, int charIdPtr, int emitterOwner)
 {
-    *(void***)((char*)self + 0xC4) = D_00487EE8;
-    *(int*)((char*)self + 0x0) = 1;
-    *(int*)((char*)self + 0x8) = charIdPtr;
-    *(int*)((char*)self + 0xC) = emitterOwner;
-    *(int*)((char*)self + 0x4) = 0;
-    char* entry = (char*)self + 0x10;
+    self->mVtbl = D_00487EE8;
+    self->mDirty = 1;
+    self->mpCharId = (int*)charIdPtr;
+    self->mAttachedEmitterFX = (cAttachedEmitterFX*)emitterOwner;
+    self->mpRider = 0;
+    char* entry = (char*)&self->mEntries[0];
     int i;
     for (i = 14; i != -1; i--, entry += 0xC) {
         func_002EC9D0(entry);
     }
-    func_002ECAF0((sLensFx*)self);
-    return self;
+    func_002ECAF0(self);
+    return ((void*)self);
 }
 #endif
 
@@ -187,11 +188,11 @@ struct sLensFx {
  *
  * The two constructors func_002EC9E0 and func_002ECA68 call it.
  */
-extern "C" void func_002ECAF0(sLensFx* self)
+extern "C" void func_002ECAF0(cBoltOnFXInterface* self)
 {
     int i;
     for (i = 0; i < 15; i++) {
-        self->entries[i].id = -1;
+        ((sLensEntry*)&self->mEntries[0])[i].id = -1;
     }
 }
 #endif
@@ -242,7 +243,7 @@ struct func_002ECBC0_sMgr {
     func_002ECBC0_sEntry entries[15];
 };
 
-extern "C" int func_002ECC28(void* self, int a1, int a2);
+extern "C" int func_002ECC28(cBoltOnFXInterface* self, int a1, int a2);
 
 /**
  * Returns the entry of a bolt-on effect set that holds an emitter of @p kind on @p itemId, creating one when there is
@@ -263,7 +264,7 @@ extern "C" int func_002ECBC0(func_002ECBC0_sMgr* self, int kind, int itemId)
             return i;
         }
     }
-    return func_002ECC28(self, kind, itemId);
+    return func_002ECC28((cBoltOnFXInterface*)self, kind, itemId);
 }
 #endif
 
@@ -283,7 +284,7 @@ extern "C" int func_002F2130(int a, int x, int y);
  * @param y  the item (attach point) id
  * @return the entry index, or 0 when full
  */
-extern "C" int func_002ECC28(void* lensMgr, int x, int y)
+extern "C" int func_002ECC28(cBoltOnFXInterface* lensMgr, int x, int y)
 {
     sLensFx* self = (sLensFx*)lensMgr;
     int i;
@@ -351,7 +352,7 @@ struct sLensMgr_CCB8 {
  *
  * @param vself  the bolt-on effect set (this)
  */
-extern "C" void func_002ECCB8(void* vself)
+extern "C" void func_002ECCB8(cBoltOnFXInterface* vself)
 {
     sLensMgr_CCB8* self = (sLensMgr_CCB8*)vself;
     int used[15];
@@ -421,14 +422,14 @@ extern "C" void func_002ECCB8(void* vself)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/lensfx", func_002ECF78);
 #ifdef SKIP_ASM
-extern "C" void func_002ECCB8(void* self);
+extern "C" void func_002ECCB8(cBoltOnFXInterface* self);
 
 /**
  * Rebuilds a bolt-on effect set (func_002ECCB8) when it is marked dirty (+0x0).
  *
  * cRider_updateSplitMiscFX and cFERider_update call it each frame.
  */
-extern "C" void func_002ECF78(void* self)
+extern "C" void func_002ECF78(cBoltOnFXInterface* self)
 {
     if (*(int*)self != 0) {
         func_002ECCB8(self);

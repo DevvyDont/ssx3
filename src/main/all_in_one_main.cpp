@@ -1,4 +1,6 @@
 #include "common.h"
+#include "online/privatemessage.h"
+#include "fe/debuglobbymenus.h"
 #include "fe/festatelegal.h"
 #include "fe/festate.h"
 #include "fe/fepopupoptionreset.h"
@@ -65,18 +67,18 @@ extern int D_00467DD8[];
  * @param declineOwner  the owner for Decline: its first word is stored at +0x134
  * @return self
  */
-extern "C" char* __sti__all_in_one_main_cpp(char* self, int* acceptOwner, int* declineOwner)
+extern "C" char* __sti__all_in_one_main_cpp(ChallengeResponseMenu* self, int* acceptOwner, int* declineOwner)
 {
-    char* item0 = self + 0x138;
-    char* item1 = self + 0x154;
-    char* item2 = self + 0x170;
-    char* item3 = self + 0x18C;
-    char* item4 = self + 0x1A4;
-    char* item5 = self + 0x1C8;
+    char* item0 = (char*)&self->unk_138;
+    char* item1 = (char*)&self->unk_154;
+    char* item2 = (char*)&self->unk_170;
+    char* item3 = (char*)&self->unk_18C;
+    char* item4 = (char*)&self->unk_1A4;
+    char* item5 = (char*)&self->unk_1C8;
     cMenu_cMenu(self);
-    *(char**)(self + 0x12C) = D_0046D3D0;
-    *(int*)(self + 0x130) = *acceptOwner;
-    *(int*)(self + 0x134) = *declineOwner;
+    self->mVtbl = (void**)D_0046D3D0;
+    self->unk_130 = (cDebugLobbyScreen*)(*acceptOwner);
+    self->unk_134 = (cDebugLobbyScreen*)(*declineOwner);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)item0, str_You_ve_been_Challenged);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)item1, str_by);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)item2, D_00467DC8);
@@ -89,7 +91,7 @@ extern "C" char* __sti__all_in_one_main_cpp(char* self, int* acceptOwner, int* d
     cMenu_addItem(self, item3, -1);
     cMenu_addItem(self, item4, -1);
     cMenu_addItem(self, item5, -1);
-    return self;
+    return ((char*)self);
 }
 #endif
 
@@ -113,14 +115,14 @@ extern int D_0046D378[];
  * @param owner  the owner reference; its first word (the debug front end) is stored at +0x130
  * @return @p menu
  */
-extern "C" void *func_001DB2B0(char *menu, int *owner) {
+extern "C" void *func_001DB2B0(AbortMenu* menu, int *owner) {
     cMenu_cMenu(menu);
-    char *abortItem = menu + 0x134;
-    *(int **)(menu + 0x12C) = D_0046D378;
-    *(int *)(menu + 0x130) = *owner;
+    char *abortItem = (char*)&menu->unk_134;
+    menu->mVtbl = (void**)D_0046D378;
+    menu->unk_130 = (cDebugLobbyScreen*)(*owner);
     cCommandMenuItem_cCommandMenuItem2(abortItem, 0, D_00467DE0, 0);
     cMenu_addItem(menu, abortItem, -1);
-    return menu;
+    return ((char*)menu);
 }
 #endif
 
@@ -202,22 +204,22 @@ extern "C" void func_001DB330(void* sub, Src_B418* src);
  *
  * @param src  the lobby manager (LobbyMan): mNumPersonas at +0x6C, mPersonas at +0x70
  */
-extern "C" void func_001DB418(Menu_B418* self, Src_B418* src)
+extern "C" void func_001DB418(PersonaMenu* self, Src_B418* src)
 {
     int i = 0;
     for (; i < src->count; i++) {
         int id = src->ids[i];
-        MenuItem_B418* it = &self->items[i];
+        MenuItem_B418* it = &((MenuItem_B418*)&self->unk_518[0])[i];
         it->data = id;
         cMenuItem_activate(it, 1);
         it->index = i;
     }
     for (; i < 4; i++) {
-        cMenuItem_activate(&self->items[i], 0);
+        cMenuItem_activate(&((MenuItem_B418*)&self->unk_518[0])[i], 0);
     }
-    func_001DB330(self->sub2E8, src);
-    cMenuItem_activate(self->item5C4, src->count >= 2);
-    cMenuItem_activate(self->item5A8, src->count < 4);
+    func_001DB330(((char*)&self->unk_2E8), src);
+    cMenuItem_activate(((char*)&self->unk_5C4), src->count >= 2);
+    cMenuItem_activate(((char*)&self->unk_5A8), src->count < 4);
 }
 #endif
 
@@ -253,24 +255,24 @@ extern char str_Receiving_Room_List[];
  *
  * @param src  the lobby manager (LobbyMan)
  */
-extern "C" void func_001DB528(Menu_B528* self, void* src)
+extern "C" void func_001DB528(LobbyMenu* self, void* src)
 {
     int i = 0;
     int n = func_0025F120(src);
     for (; i < n; i++) {
-        MenuItem_B528* it = &self->items[i];
+        MenuItem_B528* it = &((MenuItem_B528*)&self->unk_168[0])[i];
         it->data = func_0025F150(src, i);
         cMenuItem_activate(it, 1);
         it->index = i;
     }
     if (i == 0) {
-        self->items[0].data = str_Receiving_Room_List;
+        ((MenuItem_B528*)&self->unk_168[0])[0].data = str_Receiving_Room_List;
         i = 1;
-        cMenuItem_activate(&self->items[0], 1);
-        self->items[0].index = -1;
+        cMenuItem_activate(&((MenuItem_B528*)&self->unk_168[0])[0], 1);
+        ((MenuItem_B528*)&self->unk_168[0])[0].index = -1;
     }
     for (; i < 12; i++) {
-        cMenuItem_activate(&self->items[i], 0);
+        cMenuItem_activate(&((MenuItem_B528*)&self->unk_168[0])[i], 0);
     }
 }
 #endif
@@ -307,24 +309,24 @@ extern char str_No_users_in_room[];
  *
  * @param src  the lobby manager (LobbyMan)
  */
-extern "C" void func_001DB620(Menu_B620* self, void* src)
+extern "C" void func_001DB620(RoomMenu* self, void* src)
 {
     int i = 0;
     int n = func_0025F1B0(src);
     for (; i < n; i++) {
-        MenuItem_B620* it = &self->items[i];
+        MenuItem_B620* it = &((MenuItem_B620*)&self->unk_16C[0])[i];
         it->data = func_0025F1E0(src, i, 0);
         cMenuItem_activate(it, 1);
         it->index = i;
     }
     if (i == 0) {
-        self->items[0].data = str_No_users_in_room;
+        ((MenuItem_B620*)&self->unk_16C[0])[0].data = str_No_users_in_room;
         i = 1;
-        cMenuItem_activate(&self->items[0], 1);
-        self->items[0].index = -1;
+        cMenuItem_activate(&((MenuItem_B620*)&self->unk_16C[0])[0], 1);
+        ((MenuItem_B620*)&self->unk_16C[0])[0].index = -1;
     }
     for (; i < 24; i++) {
-        cMenuItem_activate(&self->items[i], 0);
+        cMenuItem_activate(&((MenuItem_B620*)&self->unk_16C[0])[i], 0);
     }
 }
 #endif
@@ -566,8 +568,8 @@ extern "C" void func_0017E558(int);
  * @param menu  the Abort menu; the debug front end is at +0x130
  * @return 0
  */
-extern "C" int func_001DBAB8(void *menu) {
-    func_0017E558((*(int *)((char*)(menu) + (0x130))));
+extern "C" int func_001DBAB8(AbortMenu* menu) {
+    func_0017E558(((int)menu->unk_130));
     return 0;
 }
 #endif
@@ -589,14 +591,14 @@ extern "C" void func_0017E4F0(int);
  * @param item  the chosen item; its ID is at +0x8
  * @return 0
  */
-extern "C" int func_001DBAD8(void *menu, void *item) {
+extern "C" int func_001DBAD8(ChallengeResponseMenu* menu, void *item) {
     int temp_3;
 
     temp_3 = (*(int *)((char*)(item) + (8)));
     if (temp_3 == 0) {
-        func_0017E490((*(int *)((char*)(menu) + (0x130))));
+        func_0017E490(((int)menu->unk_130));
     } else if (temp_3 == 1) {
-        func_0017E4F0((*(int *)((char*)(menu) + (0x134))));
+        func_0017E4F0(((int)menu->unk_134));
     }
     return 0;
 }
@@ -618,8 +620,8 @@ extern "C" void func_0017E418(int, int);
  * @param item  the chosen command item
  * @return 0
  */
-extern "C" int func_001DBB20(void *menu, void *item) {
-    func_0017E418((*(int *)((char*)(menu) + (0x130))), (*(int *)((char*)(item) + (0x14))));
+extern "C" int func_001DBB20(ChatMenu* menu, void *item) {
+    func_0017E418(((int)menu->unk_130), (*(int *)((char*)(item) + (0x14))));
     return 0;
 }
 #endif
@@ -642,12 +644,12 @@ extern "C" void func_0017E3B8_BB48(int) __asm__("func_0017E3B8");
  * @param item  the chosen item; its ID is at +0x8
  * @return 0
  */
-extern "C" int func_001DBB48(void *menu, void *item) {
+extern "C" int func_001DBB48(RoomMenu* menu, void *item) {
     int itemValue = *(int *)((char *)item + 8);
     if (itemValue == -2) {
-        func_0017E3B8_BB48(*(int *)((char *)menu + 0x134));
+        func_0017E3B8_BB48((int)menu->unk_134);
     } else if (itemValue != -1) {
-        func_0017E368_BB48(*(int *)((char *)menu + 0x130), itemValue);
+        func_0017E368_BB48((int)menu->unk_130, itemValue);
     }
     return 0;
 }
@@ -669,12 +671,12 @@ extern "C" void func_0017E2F8(int, int);
  * @param item  the chosen item; its ID is at +0x8
  * @return 0
  */
-extern "C" int func_001DBB90(void *menu, void *item) {
+extern "C" int func_001DBB90(LobbyMenu* menu, void *item) {
     int temp_5;
 
     temp_5 = (*(int *)((char*)(item) + (8)));
     if (temp_5 >= 0) {
-        func_0017E2F8((*(int *)((char*)(menu) + (0x130))), temp_5);
+        func_0017E2F8(((int)menu->unk_130), temp_5);
     }
     return 0;
 }
@@ -696,8 +698,8 @@ extern "C" void func_0017E290(int, int);
  * @param item  the chosen item; its ID is at +0x8
  * @return 0
  */
-extern "C" int func_001DBBC0(void *menu, void *item) {
-    func_0017E290((*(int *)((char*)(menu) + (0x4E0))), (*(int *)((char*)(item) + (8))));
+extern "C" int func_001DBBC0(PersonaMenu* menu, void *item) {
+    func_0017E290(((int)menu->unk_4E0), (*(int *)((char*)(item) + (8))));
     return 0;
 }
 #endif
@@ -718,8 +720,8 @@ extern "C" void func_0017E1C0_BBE8(int, void *) __asm__("func_0017E1C0");
  * @param menu  the Create Persona menu
  * @return 0
  */
-extern "C" int func_001DBBE8(char *menu) {
-    func_0017E1C0_BBE8(*(int *)(menu + 0x130), menu + 0x180);
+extern "C" int func_001DBBE8(CreatePersonaMenu* menu) {
+    func_0017E1C0_BBE8((int)menu->unk_130, ((char*)menu) + 0x180);
     return 0;
 }
 #endif
@@ -740,8 +742,8 @@ extern "C" void func_0017E228(int, int);
  * @param item  the chosen item; its ID is at +0x8
  * @return 0
  */
-extern "C" int func_001DBC10(void *menu, void *item) {
-    func_0017E228((*(int *)((char*)(menu) + (0x130))), (*(int *)((char*)(item) + (8))));
+extern "C" int func_001DBC10(DeletePersonaMenu* menu, void *item) {
+    func_0017E228(((int)menu->unk_130), (*(int *)((char*)(item) + (8))));
     return 0;
 }
 #endif
@@ -763,8 +765,8 @@ extern "C" void func_0017E030_BC38(int, char*, char*) __asm__("func_0017E030");
  *
  * @return 0
  */
-extern "C" int func_001DBC38(char *self) {
-    func_0017E030_BC38(*(int*)(self + 0x130), self + 0x180, self + 0x1AC);
+extern "C" int func_001DBC38(AccountDetailsMenu* self) {
+    func_0017E030_BC38((int)self->unk_130, ((char*)self) + 0x180, ((char*)self) + 0x1AC);
     return 0;
 }
 #endif
@@ -786,8 +788,8 @@ extern "C" void func_0017E118_BC68(int, char*, char*) __asm__("func_0017E118");
  *
  * @return 0
  */
-extern "C" int func_001DBC68(char *self) {
-    func_0017E118_BC68(*(int*)(self + 0x130), self + 0x180, self + 0x1AC);
+extern "C" int func_001DBC68(AccountDetailsMenu* self) {
+    func_0017E118_BC68((int)self->unk_130, ((char*)self) + 0x180, ((char*)self) + 0x1AC);
     return 0;
 }
 #endif
@@ -1537,10 +1539,10 @@ extern int cPrivateMessage_vtbl[];
  * @param message  the message (0x10 bytes: three cBXStrings and the vptr at +0xC)
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cPrivateMessage__cPrivateMessage(char *message, int flags) {
-    *(int **)(message + 0xC) = cPrivateMessage_vtbl;
-    cBXString__cBXString(message + 8, 2);
-    cBXString__cBXString(message + 4, 2);
+extern "C" void cPrivateMessage__cPrivateMessage(cPrivateMessage* message, int flags) {
+    message->mVtbl = (void**)cPrivateMessage_vtbl;
+    cBXString__cBXString(&message->mDate, 2);
+    cBXString__cBXString(&message->mText, 2);
     cBXString__cBXString(message, 2);
     if (flags & 1) {
         operator_delete((int*)message);
@@ -2096,11 +2098,11 @@ extern "C" void cMenu__cMenu(int, int);
  *
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
-extern "C" void func_001DCFC8(Obj *self, int flags) {
-    if (self->elems != 0) {
-        Elem *end = self->elems + 4;
+extern "C" void func_001DCFC8(DeletePersonaMenu* self, int flags) {
+    if (((Elem*)&self->unk_168[0]) != 0) {
+        Elem *end = ((Elem*)&self->unk_168[0]) + 4;
         Elem *elem = end;
-        while (self->elems != elem) {
+        while (((Elem*)&self->unk_168[0]) != elem) {
             elem--;
             elem->vt->dtor.fn((char*)elem + elem->vt->dtor.delta, 0);
         }
@@ -2222,11 +2224,11 @@ struct Obj_D258 { char pad[0x168]; Elem_D258 elems[12]; };
  *
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
-extern "C" void func_001DD258(Obj_D258 *self, int flags) {
-    if (self->elems != 0) {
-        Elem_D258 *end = self->elems + 12;
+extern "C" void func_001DD258(LobbyMenu* self, int flags) {
+    if (((Elem_D258*)&self->unk_168[0]) != 0) {
+        Elem_D258 *end = ((Elem_D258*)&self->unk_168[0]) + 12;
         Elem_D258 *elem = end;
-        while (self->elems != elem) {
+        while (((Elem_D258*)&self->unk_168[0]) != elem) {
             elem--;
             elem->vt->dtor.fn((char*)elem + elem->vt->dtor.delta, 0);
         }
@@ -2254,11 +2256,11 @@ struct Obj_D2F0 { char pad[0x16C]; Elem_D2F0 elems[24]; };
  *
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
-extern "C" void func_001DD2F0(Obj_D2F0 *self, int flags) {
+extern "C" void func_001DD2F0(RoomMenu* self, int flags) {
     cMenuItem__cMenuItem((int)self + 1228, 2);
-    if (self->elems != 0) {
-        Elem_D2F0 *elem = self->elems + 24;
-        while (self->elems != elem) {
+    if (((Elem_D2F0*)&self->unk_16C[0]) != 0) {
+        Elem_D2F0 *elem = ((Elem_D2F0*)&self->unk_16C[0]) + 24;
+        while (((Elem_D2F0*)&self->unk_16C[0]) != elem) {
             elem--;
             elem->vt->dtor.fn((char*)elem + elem->vt->dtor.delta, 0);
         }
@@ -2286,10 +2288,10 @@ struct Obj_D398 { char pad[0x194]; Elem_D398 elems[14]; };
  *
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
-extern "C" void func_001DD398(Obj_D398 *self, int flags) {
-    if (self->elems != 0) {
-        Elem_D398 *elem = self->elems + 14;
-        while (self->elems != elem) {
+extern "C" void func_001DD398(ChatMenu* self, int flags) {
+    if (((Elem_D398*)&self->unk_194[0]) != 0) {
+        Elem_D398 *elem = ((Elem_D398*)&self->unk_194[0]) + 14;
+        while (((Elem_D398*)&self->unk_194[0]) != elem) {
             elem--;
             elem->vt->dtor.fn((char*)elem + elem->vt->dtor.delta, 0);
         }
@@ -5228,10 +5230,10 @@ extern int D_0046BB88_E5F0[] __asm__("cFEStateTransition_vtbl");
  *
  * @return @p self
  */
-extern "C" void *func_001DE5F0(void *self) {
+extern "C" void *func_001DE5F0(cFEStateTransition* self) {
     cUIState_cUIState_E5F0(self, 0);
-    *(int **)((char *)self + 8) = D_0046BB88_E5F0;
-    return self;
+    self->mVtbl = (void**)D_0046BB88_E5F0;
+    return ((void*)self);
 }
 #endif
 

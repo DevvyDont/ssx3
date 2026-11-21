@@ -433,22 +433,23 @@ INCLUDE_ASM("bx/cubicspline", malloc_init_state__FPv);
  * +0x354), page size 0x1000 (+0x35C), the contiguous flag (bit 0 of +0x360) and the top (+0x30) to the first bin.
  * cDynamicMemMan_malloc_consolidate calls it on a state whose fastbin limit is still 0.
  */
-void malloc_init_state(void* self)
+void malloc_init_state(void* vself)
 {
-    char* bin = (char*)self + 0x38;
+    malloc_state* self = (malloc_state*)vself;
+    char* bin = (char*)&self->bins[0];
     for (int i = 94; i >= 0; i--) {
         *(void**)(bin + 0xC) = bin;
         *(void**)(bin + 0x8) = bin;
         bin += 8;
     }
-    *(int*)((char*)self + 0x34C) = 0x40000;
-    *(int*)((char*)self + 0x344) = 0x8000;
-    *(int*)((char*)self + 0x360) |= 1;
+    self->mmap_threshold = 0x40000;
+    self->trim_threshold = 0x8000;
+    *(int*)&self->morecore_properties |= 1;
     *(int*)self = (*(int*)self & 3) | 0x50;
-    *(void**)((char*)self + 0x30) = (char*)self + 0x38;
-    *(int*)((char*)self + 0x348) = 0;
-    *(int*)((char*)self + 0x354) = 0;
-    *(int*)((char*)self + 0x35C) = 0x1000;
+    self->top = (malloc_chunk*)(&self->bins[0]);
+    self->top_pad = 0;
+    self->n_mmaps_max = 0;
+    self->pagesize = 0x1000;
 }
 #endif
 

@@ -15,6 +15,23 @@
 struct cUIAnimationChannel;
 struct tUIAnimation;
 
+// cUIAnimationChannel: one animated channel of a cUIAnimation (cUIAnimation::mpAnimChannels points at an array of
+// them, one per channel of the animation record): a wrapper of the channel's data record that evaluates it at a frame.
+// Methods in ui/uianimation: cUIAnimationChannel_setAnimChanData, cUIAnimationChannel_evalAtFrameFloat,
+// cUIAnimationChannel_getAnimChanType. No vtable.
+// Size 0x4: [O] On Tour's class is 0x4 (mpAnimChan; methods evalAtFrameFloat, getAnimChanType, setAnimChanData);
+// [R] cUIAnimation_cUIAnimation allocates the array with operator new(n * 4 + 0x10, "UIAnimChan") and calls
+// cUIAnimationChannel_setAnimChanData(mpAnimChannels + (i << 2), record) for each channel.
+struct tUIAnimChannel;
+
+struct cUIAnimationChannel {
+    tUIAnimChannel* mpAnimChan;      // 0x000 [O]; [U] setAnimChanData stores its argument (sw 0x0); evalAtFrameFloat
+                                     //       and getAnimChanType read it (lw 0x0) and walk the record
+};
+
+CHECK_OFFSET(cUIAnimationChannel, mpAnimChan, 0x000);
+CHECK_SIZE(cUIAnimationChannel, 0x4);
+
 struct cUIAnimation {
     tUIAnimation* mpAnimHeader;          // 0x000 [O]
     cUIAnimationChannel* mpAnimChannels; // 0x004 [O]

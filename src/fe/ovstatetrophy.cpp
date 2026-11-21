@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/hudradar.h"
 #include "fe/ovstatetrophy.h"
 #include "be/beintnetwork.h"
 #include "fe/ovstateprofile.h"
@@ -110,7 +111,7 @@ struct sRect20EAA0 {
 };
 extern char D_00474230[];
 extern int D_004A276C;
-extern "C" void func_0020EC18(void* self, sRect20EAA0* a, sRect20EAA0* r);
+extern "C" void func_0020EC18(cHUDRadar* self, sRect20EAA0* a, sRect20EAA0* r);
 
 /**
  * Constructs a course-progress tracker, the 0x3C-byte object at +0x8 of each cOVStateHUD1P panel.
@@ -120,17 +121,17 @@ extern "C" void func_0020EC18(void* self, sRect20EAA0* a, sRect20EAA0* r);
  *
  * @return @p self
  */
-extern "C" void* func_0020EAA0(void* self)
+extern "C" void* func_0020EAA0(cHUDRadar* self)
 {
     sRect20EAA0 screenRect;
-    *(void**)((char*)self + 0x38) = D_00474230;
+    self->mVtbl = (void**)D_00474230;
     screenRect.x = 0.0f;
     screenRect.y = 0.0f;
     screenRect.w = 640.0f;
     screenRect.h = 480.0f;
     func_0020EC18(self, &screenRect, &screenRect);
     D_004A276C++;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -151,10 +152,10 @@ void operator_delete(int*);
  *
  * @param flags  bit 0 frees the object with operator_delete (the g++ deleting-destructor flag)
  */
-extern "C" void func_0020EB08(void* self, int flags)
+extern "C" void func_0020EB08(cHUDRadar* self, int flags)
 {
     int n = D_004A276C - 1;
-    *(void**)((char*)self + 0x38) = D_00474230;
+    self->mVtbl = (void**)D_00474230;
     D_004A276C = n;
     if (n == 0) {
         D_004A2768 = 0;
@@ -169,7 +170,7 @@ extern "C" void func_0020EB08(void* self, int flags)
 INCLUDE_ASM("fe/ovstatetrophy", func_0020EB50);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void func_0020EC18(void* self, sRect20EAA0* a, sRect20EAA0* r);
+extern "C" void func_0020EC18(cHUDRadar* self, sRect20EAA0* a, sRect20EAA0* r);
 extern "C" int cUITextureBank_getElementByHashname(void* bank, int name);
 extern "C" int cUIFontInterface_getFontByHashName(void* bank, int hash);
 extern int D_004A2764;
@@ -195,7 +196,7 @@ extern sTex_20EB50 D_004C8C58[];
  * @param screenRect  the screen bounds (the HUD passes 0, 0, 640, 480); not used beyond being passed on
  * @param area  the rectangle (x, y, w, h) the tracker fills
  */
-extern "C" void func_0020EB50(void* self, sRect20EAA0* screenRect, sRect20EAA0* area)
+extern "C" void func_0020EB50(cHUDRadar* self, sRect20EAA0* screenRect, sRect20EAA0* area)
 {
     if (D_004A2768 == 0) {
         char* res = (char*)SSXApp->Game->UI;
@@ -249,7 +250,7 @@ struct sTrophyBox_20EC18 {
  * @param area  the rectangle (x, y, w, h)
  */
 // PORT: D_004A2764 holds a texture pointer in an int (declared int elsewhere in the unit).
-extern "C" void func_0020EC18(void* self, sRect20EAA0* screenRect, sRect20EAA0* area)
+extern "C" void func_0020EC18(cHUDRadar* self, sRect20EAA0* screenRect, sRect20EAA0* area)
 {
     float textHeight;
     if (D_004A2768 != 0) {
@@ -520,7 +521,7 @@ static inline float limitStep_EDA0(float v, float prev, float lim)
  *
  * @param rider  the rider the panel follows (the cBeing at +0x6C0 gives its AI index)
  */
-extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
+extern "C" void func_0020EDA0(cHUDRadar* self, char* rider)
 {
     if (D_004A2760 != 0)
         return;
@@ -538,7 +539,7 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
     float myPos = D_004C8BC8_EDA0[me].pos;
     int n = race->count;
     for (int i = 0; i < 6; i++) {
-        if (self->last != me)
+        if (self->unk_034 != me)
             D_004C8BC8_EDA0[i].relValid = 0;
         if (i < n) {
             float d = D_004C8BC8_EDA0[i].pos - myPos;
@@ -598,7 +599,7 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
     D_004A2764_EDA0->color2 = D_004C6878;
     D_004A2764_EDA0->scale = D_004A4EC0;
     ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(10);
-    cFont_centertext(D_004A2764_EDA0, self->x, self->y, buf);
+    cFont_centertext(D_004A2764_EDA0, self->unk_000[0], self->unk_000[1], buf);
     D_004A2764_EDA0->SetScale(1.0f, 1.0f);
 
     sIcon_EDA0* arrow = &D_004C8C58_EDA0[4];
@@ -609,12 +610,12 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
             continue;
         float va = atex->v1;
         float vb = atex->v0;
-        float y = self->bottom;
+        float y = self->unk_00C;
         // retail scale literal is 0x3BA3D70B, one ulp above 0.005f
-        float ax = self->cx + -D_004C8BC8_EDA0[i].rel * 0.0050000004f;
+        float ax = self->unk_010 + -D_004C8BC8_EDA0[i].rel * 0.0050000004f;
         float hw = arrow->w * 0.5f;
         if (d > hi) {
-            y = self->top;
+            y = self->unk_008;
             va = atex->v0;
             vb = atex->v1;
         }
@@ -653,12 +654,12 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
     }
 
     sTex_EDA0* tex = D_004C8C58_EDA0[0].tex;
-    float barTop = self->y18;
-    float barBottom = self->y14;
+    float barTop = self->unk_018;
+    float barBottom = self->unk_014;
     if (*(float*)(course + 0x10) < hi)
-        barBottom += (hi - *(float*)(course + 0x10)) * self->s1C;
+        barBottom += (hi - *(float*)(course + 0x10)) * self->unk_01C;
     if (lo < 0.0f)
-        barTop += lo * self->s1C;
+        barTop += lo * self->unk_01C;
     verts[0].u = tex->u0;
     verts[0].v = tex->v0;
     verts[1].u = tex->u1;
@@ -668,22 +669,22 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
     verts[3].u = tex->u1;
     verts[3].v = tex->v1;
     sPos_EDA0 corner;
-    corner.x = self->cx - 5.499532222747803f;
+    corner.x = self->unk_010 - 5.499532222747803f;
     corner.y = barTop;
     corner.z = 0.0f;
     corner.w = 1.0f;
     verts[0].pos = corner;
-    corner.x = self->cx + 5.499532222747803f;
+    corner.x = self->unk_010 + 5.499532222747803f;
     corner.y = barTop;
     corner.z = 0.0f;
     corner.w = 1.0f;
     verts[1].pos = corner;
-    corner.x = self->cx - 5.499532222747803f;
+    corner.x = self->unk_010 - 5.499532222747803f;
     corner.y = barBottom;
     corner.z = 0.0f;
     corner.w = 1.0f;
     verts[2].pos = corner;
-    corner.x = self->cx + 5.499532222747803f;
+    corner.x = self->unk_010 + 5.499532222747803f;
     corner.y = barBottom;
     corner.z = 0.0f;
     corner.w = 1.0f;
@@ -693,22 +694,22 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
     ((cGfx_EDA0*)GrMan)->RenderTriStrip(4, verts, 0);
 
     float markY = barTop + (barBottom - barTop) * frac;
-    corner.x = self->cx - 2.7497661113739014f;
+    corner.x = self->unk_010 - 2.7497661113739014f;
     corner.y = barTop;
     corner.z = 0.0f;
     corner.w = 1.0f;
     verts[0].pos = corner;
-    corner.x = self->cx + 2.7497661113739014f;
+    corner.x = self->unk_010 + 2.7497661113739014f;
     corner.y = barTop;
     corner.z = 0.0f;
     corner.w = 1.0f;
     verts[1].pos = corner;
-    corner.x = self->cx - 2.7497661113739014f;
+    corner.x = self->unk_010 - 2.7497661113739014f;
     corner.y = markY;
     corner.z = 0.0f;
     corner.w = 1.0f;
     verts[2].pos = corner;
-    corner.x = self->cx + 2.7497661113739014f;
+    corner.x = self->unk_010 + 2.7497661113739014f;
     corner.y = markY;
     corner.z = 0.0f;
     corner.w = 1.0f;
@@ -727,7 +728,7 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
         verts[i].b = 0x80;
     }
 
-    float margin = 20.0f / self->s1C;
+    float margin = 20.0f / self->unk_01C;
     float lo2 = lo - margin;
     float hi2 = hi + margin;
     for (int i = 0; i < n; i++) {
@@ -736,8 +737,8 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
             continue;
         if (d > hi2)
             continue;
-        float x = self->cx;
-        float y = self->y18 - (d - lo) * self->s1C;
+        float x = self->unk_010;
+        float y = self->unk_018 - (d - lo) * self->unk_01C;
         int prim = 0xC;
         int icon = 1;
         if (me != i) {
@@ -756,18 +757,18 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
         float hh = iconEntry->h * 0.5f;
         float y0 = y - hh;
         float y1 = y + hh;
-        if (self->y18 <= y0)
+        if (self->unk_018 <= y0)
             continue;
-        if (y1 <= self->y14)
+        if (y1 <= self->unk_014)
             continue;
         float va = iconTexture->v0;
         float vb = iconTexture->v1;
-        if (y0 < self->y14) {
-            va = vb + (va - vb) * (y1 - self->y14) / (hh * 2.0f);
-            y0 = self->y14;
-        } else if (self->y18 < y1) {
-            vb = va + (vb - va) * (self->y18 - y0) / (hh * 2.0f);
-            y1 = self->y18;
+        if (y0 < self->unk_014) {
+            va = vb + (va - vb) * (y1 - self->unk_014) / (hh * 2.0f);
+            y0 = self->unk_014;
+        } else if (self->unk_018 < y1) {
+            vb = va + (vb - va) * (self->unk_018 - y0) / (hh * 2.0f);
+            y1 = self->unk_018;
         }
         verts[0].u = iconTexture->u0;
         verts[0].v = va;
@@ -819,23 +820,23 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
                 continue;
             sIcon_EDA0* iconEntry = &D_004C8C58_EDA0[markers[i].type + 5];
             sTex_EDA0* iconTexture = iconEntry->tex;
-            float y = self->y18 - (d - lo) * self->s1C;
+            float y = self->unk_018 - (d - lo) * self->unk_01C;
             float hw = iconEntry->w * 0.5f;
             float hh = iconEntry->h * 0.5f;
             float y0 = y - hh;
             float y1 = y + hh;
-            if (self->y18 <= y0)
+            if (self->unk_018 <= y0)
                 continue;
-            if (y1 <= self->y14)
+            if (y1 <= self->unk_014)
                 continue;
             float va = iconTexture->v0;
             float vb = iconTexture->v1;
-            if (y0 < self->y14) {
-                va = vb + (va - vb) * (y1 - self->y14) / iconEntry->h;
-                y0 = self->y14;
-            } else if (self->y18 < y1) {
-                vb = va + (vb - va) * (self->y18 - y0) / iconEntry->h;
-                y1 = self->y18;
+            if (y0 < self->unk_014) {
+                va = vb + (va - vb) * (y1 - self->unk_014) / iconEntry->h;
+                y0 = self->unk_014;
+            } else if (self->unk_018 < y1) {
+                vb = va + (vb - va) * (self->unk_018 - y0) / iconEntry->h;
+                y1 = self->unk_018;
             }
             verts[0].u = iconTexture->u0;
             verts[0].v = va;
@@ -845,22 +846,22 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
             verts[2].v = vb;
             verts[3].u = iconTexture->u1;
             verts[3].v = vb;
-            corner.x = self->cx - hw;
+            corner.x = self->unk_010 - hw;
             corner.y = y0;
             corner.z = 0.0f;
             corner.w = 1.0f;
             verts[0].pos = corner;
-            corner.x = self->cx + hw;
+            corner.x = self->unk_010 + hw;
             corner.y = y0;
             corner.z = 0.0f;
             corner.w = 1.0f;
             verts[1].pos = corner;
-            corner.x = self->cx - hw;
+            corner.x = self->unk_010 - hw;
             corner.y = y1;
             corner.z = 0.0f;
             corner.w = 1.0f;
             verts[2].pos = corner;
-            corner.x = self->cx + hw;
+            corner.x = self->unk_010 + hw;
             corner.y = y1;
             corner.z = 0.0f;
             corner.w = 1.0f;
@@ -872,7 +873,7 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
     }
     ((cGfx_EDA0*)GrMan)->stateTop--;
     ((cGfx_EDA0*)GrMan)->PopView();
-    self->last = me;
+    self->unk_034 = me;
 }
 #endif
 
@@ -1041,7 +1042,7 @@ static inline float limitStep_FB40(float v, float prev, float lim)
  * @param right  nonzero: line at the rectangle's left edge with the icons to its right; 0: line at the right edge,
  *               icons to the left
  */
-extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
+extern "C" void func_0020FB40(cHUDRadar* self, char* rider, int right)
 {
     if (D_004A2760 != 0)
         return;
@@ -1059,7 +1060,7 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
     float myPos = D_004C8BC8_FB40[me].pos;
     int n = race->count;
     for (int i = 0; i < 6; i++) {
-        if (self->last != me)
+        if (self->unk_034 != me)
             D_004C8BC8_FB40[i].relValid = 0;
         if (i < n) {
             float d = D_004C8BC8_FB40[i].pos - myPos;
@@ -1081,9 +1082,9 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
         verts[i].a = 0x80;
         verts[i].q = 1.0f;
     }
-    float x = self->x;
+    float x = self->unk_020.X;
     if (right == 0)
-        x += self->w;
+        x += self->unk_020.W;
     ((cGfx_FB40*)GrMan)->PushView();
     ((cGfx_FB40*)GrMan)->PushState();
     *((cGfx_FB40*)GrMan)->stateTop = D_00501420_FB40;
@@ -1094,8 +1095,8 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
     ((cGfx_FB40*)GrMan)->SetView(t4mat_Identity);
 
     sTex_FB40* tex = D_004C8C58_FB40[0].tex;
-    float top = self->y;
-    float bottom = top + self->h;
+    float top = self->unk_020.Y;
+    float bottom = top + self->unk_020.H;
     float lo = myDist - 5000.0f;
     float hi = lo + 10000.0f;
     sPos_FB40 corner;
@@ -1141,7 +1142,7 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
             continue;
         int prim = 0xC;
         int icon = 8;
-        float y = bottom - (d - lo) * self->scale;
+        float y = bottom - (d - lo) * self->unk_030;
         if (me != i) {
             char* otherRider = race->riders[i];
             if (((cBeing_FB40*)(otherRider + 0x6C0))->isHuman()) {
@@ -1253,7 +1254,7 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
             sTex_FB40* iconTexture = iconEntry->tex;
             float hw = iconEntry->w * 0.5f;
             float hh = iconEntry->h * 0.5f;
-            float y = bottom - (d - lo) * self->scale;
+            float y = bottom - (d - lo) * self->unk_030;
             float y0 = y - hh;
             float y1 = y + hh;
             if (y0 <= top)
@@ -1335,7 +1336,7 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
     }
     ((cGfx_FB40*)GrMan)->stateTop--;
     ((cGfx_FB40*)GrMan)->PopView();
-    self->last = me;
+    self->unk_034 = me;
 }
 #endif
 

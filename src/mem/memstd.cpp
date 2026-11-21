@@ -1,4 +1,5 @@
 #include "common.h"
+#include "movie/videodriver.h"
 #include "movie/movieplayer.h"
 #include "render/ps2graphicsman.h"
 #include "online/commchannel.h"
@@ -2575,11 +2576,11 @@ INCLUDE_ASM("mem/memstd", func_002543F0);
  * @param posY  top edge
  * @param posZ  depth
  */
-extern "C" void func_002543F0(void* self, float posX, float posY, float posZ)
+extern "C" void func_002543F0(SSX_VD_PS2_SINGLE_BUFFERD* self, float posX, float posY, float posZ)
 {
-    *(float*)((char*)self + 0x40) = posX;
-    *(float*)((char*)self + 0x44) = posY;
-    *(float*)((char*)self + 0x48) = posZ;
+    self->mPosX = posX;
+    self->mPosY = posY;
+    self->mPosZ = posZ;
 }
 #endif
 
@@ -2592,10 +2593,11 @@ INCLUDE_ASM("mem/memstd", func_00254400__FPvff);
  * @param scaleX  horizontal scale
  * @param scaleY  vertical scale
  */
-void func_00254400(void* self, float scaleX, float scaleY)
+void func_00254400(void* vself, float scaleX, float scaleY)
 {
-    *(float*)((char*)self + 0x4c) = scaleX;
-    *(float*)((char*)self + 0x50) = scaleY;
+    SSX_VD_PS2_SINGLE_BUFFERD* self = (SSX_VD_PS2_SINGLE_BUFFERD*)vself;
+    self->mScaleX = scaleX;
+    self->mScaleY = scaleY;
 }
 #endif
 
@@ -2616,7 +2618,7 @@ extern char D_004A2EA0[];
 extern char D_004A2EA8[];
 extern float D_004A2EB0[];
 extern "C" int func_00254350(int x);
-extern "C" void func_002543F0(void* self, float a, float b, float c);
+extern "C" void func_002543F0(SSX_VD_PS2_SINGLE_BUFFERD* self, float a, float b, float c);
 void func_00254400(void* self, float f0, float f1);
 // PORT: the project names this func_0037D090__FPv (one arg); this caller passes six.
 void func_0037D090_6(void* ctx, int id, int a, int b, int c, int d) __asm__("func_0037D090__FPv");
@@ -2742,7 +2744,7 @@ extern "C" void* func_00254410_body(sTexSheet_4410* self, void* owner, char* res
     self->fC = 0;
     float sw = (float)self->rend->width();
     float sh = (float)self->rend->height() - fh;
-    func_002543F0(self, (sw - fw) * 0.5f, sh * 0.5f, D_004A2EB0[0]);
+    func_002543F0((SSX_VD_PS2_SINGLE_BUFFERD*)self, (sw - fw) * 0.5f, sh * 0.5f, D_004A2EB0[0]);
     func_00254400(self, 1.0f, 1.0f);
     self->f3C = drawLayer;
     return self;
@@ -3150,18 +3152,18 @@ extern "C" void RCMP_DECODER_ReleaseFrame(void*, void*);
  *
  * Vtable slot 6 of D_00480270.
  */
-extern "C" void func_00254DC0(void* self)
+extern "C" void func_00254DC0(SSX_VD_PS2_SINGLE_BUFFERD* self)
 {
     void* rend;
     sMemStdVEntry* vt;
     do {
-        rend = *(void**)((char*)self + 0x8);
+        rend = (void*)self->m_pGrMan;
         vt = *(sMemStdVEntry**)((char*)rend + 0x10D8);
     } while (vt[18].fn((char*)rend + vt[18].delta) == 0);
-    void* resource = *(void**)((char*)self + 0xC);
+    void* resource = self->mpCurrentFrame;
     if (resource != 0) {
-        RCMP_DECODER_ReleaseFrame(*(void**)((char*)self + 0x0), resource);
-        *(void**)((char*)self + 0xC) = 0;
+        RCMP_DECODER_ReleaseFrame(self->m_pdecoder, resource);
+        self->mpCurrentFrame = 0;
     }
 }
 #endif
@@ -3277,9 +3279,9 @@ void operator_delete(int*);
  *
  * @param flags  bit 0 frees the memory
  */
-extern "C" void VIDEO_DRIVER__VIDEO_DRIVER(void* self, int flags)
+extern "C" void VIDEO_DRIVER__VIDEO_DRIVER(RCMP_VIDEO_DRIVER* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = D_004802B0;
+    self->mVtbl = D_004802B0;
     if (flags & 1) {
         operator_delete((int*)self);
     }

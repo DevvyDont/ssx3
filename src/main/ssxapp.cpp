@@ -1,4 +1,6 @@
 #include "common.h"
+#include "main/crowdman2d.h"
+#include "main/gamerender.h"
 #include "sound/icepick/worldtriggermanager.h"
 #include "sound/ssxaudio.h"
 #include "render/ps2graphicsman.h"
@@ -1490,7 +1492,7 @@ extern "C" void initOnline()
 //100%
 INCLUDE_ASM("main/ssxapp", func_00229180);
 #ifdef SKIP_ASM
-extern "C" void func_002292E0(void* self);
+extern "C" void func_002292E0(cCrowdMan2d* self);
 // PORT: the ctor's mangled name says int; it receives the allocated block (pointer in int)
 void* cCrowdRender2D_cCrowdRender2D(int mem);
 void* cCrowdRender2D_constructCrowdAnim2D(void* r);
@@ -1546,16 +1548,16 @@ struct sCrowd_229180 {
  *
  * @return @p self
  */
-extern "C" void* func_00229180(sCrowd_229180* self)
+extern "C" void* func_00229180(cCrowdMan2d* self)
 {
-    new ((char*)self + 0x8) sCrowdId_229180[128];
-    new ((char*)self + 0x210) sCrowdSlot_229180[128];
-    new ((char*)self + 0x2220) sCrowdRest_229180[40];
+    new ((char*)&self->mQuadId[0]) sCrowdId_229180[128];
+    new ((char*)&self->mQuad[0]) sCrowdSlot_229180[128];
+    new ((char*)&self->mMarker[0]) sCrowdRest_229180[40];
     // PORT: the singleton pointer is held in an int global
     D_004A2A00 = (int)self;
-    self->render = cCrowdRender2D_cCrowdRender2D((int)cMemMan_alloc(0x10, str_cCrowdRender2D, 0x20000000, 0));
-    char* anim = (char*)cCrowdRender2D_constructCrowdAnim2D(self->render);
-    self->anim = anim;
+    self->mpRender = (cCrowdRender2D*)cCrowdRender2D_cCrowdRender2D((int)cMemMan_alloc(0x10, str_cCrowdRender2D, 0x20000000, 0));
+    char* anim = (char*)cCrowdRender2D_constructCrowdAnim2D(self->mpRender);
+    self->mpAnim = (cCrowdAnim2D*)anim;
     D_00536690_229180[0].f0 = AnimCount_229180(anim);
     D_00536690_229180[0].fC = 0x20000;
     D_00536690_229180[0].f10 = 0;
@@ -1564,14 +1566,14 @@ extern "C" void* func_00229180(sCrowd_229180* self)
     D_00536690_229180[0].f8 = 0;
     D_00536690_229180[0].f6 = -1;
     func_002292E0(self);
-    return self;
+    return ((sCrowd_229180*)self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/ssxapp", func_00229278);
 #ifdef SKIP_ASM
-extern "C" void func_00229398(void* self);
+extern "C" void func_00229398(cCrowdMan2d* self);
 extern int D_004A2A00;
 void operator_delete(int* p);
 void cCrowdRender2D__cCrowdRender2D(int* self, int flags);
@@ -1584,10 +1586,10 @@ void cCrowdRender2D__cCrowdRender2D(int* self, int flags);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void func_00229278(void* self, int flags)
+extern "C" void func_00229278(cCrowdMan2d* self, int flags)
 {
     func_00229398(self);
-    int* crowdAnim = *(int**)((char*)self + 4);
+    int* crowdAnim = (int*)self->mpAnim;
     D_004A2A00 = 0;
     operator_delete(crowdAnim);
     int* renderer = *(int**)self;
@@ -1631,7 +1633,7 @@ struct sCrowd_2292E0 {
  * 0xFFFFFFFF and every slot's delay (+0x30) to 300 + BXrand() % 300; clears the marker ring index (+0x2214) and its 40
  * entries (+0x2220, 1280 bytes).
  */
-extern "C" void func_002292E0(void* self)
+extern "C" void func_002292E0(cCrowdMan2d* self)
 {
     sCrowd_2292E0* crowd = (sCrowd_2292E0*)self;
     int i;
@@ -1650,17 +1652,17 @@ extern "C" void func_002292E0(void* self)
 INCLUDE_ASM("main/ssxapp", func_00229398);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" void func_00229B90(void* self, int a1);
+extern "C" void func_00229B90(cCrowdMan2d* self, int a1);
 
 /**
  * Releases every used quad slot of the 2D crowd manager (each resource id at +0x8 other than 0xFFFFFFFF) with
  * func_00229B90.
  */
-extern "C" void func_00229398(void* self)
+extern "C" void func_00229398(cCrowdMan2d* self)
 {
     int i;
     for (i = 0; i < 0x80; i++) {
-        unsigned* slotId = (unsigned*)((char*)self + 0x8) + i;
+        unsigned* slotId = (unsigned*)(&self->mQuadId[0]) + i;
         if (*slotId != 0xFFFFFFFF) {
             func_00229B90(self, i);
         }
@@ -1671,7 +1673,7 @@ extern "C" void func_00229398(void* self)
 //100%
 INCLUDE_ASM("main/ssxapp", func_00229408);
 #ifdef SKIP_ASM
-extern "C" void func_00229B90(void* self, int a1);
+extern "C" void func_00229B90(cCrowdMan2d* self, int a1);
 
 /**
  * Releases the 2D crowd manager's quad slots in one world section: each used slot whose resource id has @p id as its
@@ -1681,11 +1683,11 @@ extern "C" void func_00229B90(void* self, int a1);
  *
  * @param id  the world section id
  */
-extern "C" void func_00229408(void* self, int id)
+extern "C" void func_00229408(cCrowdMan2d* self, int id)
 {
     int i;
     for (i = 0; i < 0x80; i++) {
-        unsigned* slotId = (unsigned*)((char*)self + 0x8) + i;
+        unsigned* slotId = (unsigned*)(&self->mQuadId[0]) + i;
         if (*slotId != 0xFFFFFFFF && *(unsigned char*)slotId == id) {
             func_00229B90(self, i);
         }
@@ -1696,15 +1698,15 @@ extern "C" void func_00229408(void* self, int id)
 //100%
 INCLUDE_ASM("main/ssxapp", func_00229498);
 #ifdef SKIP_ASM
-extern "C" void func_00229398(void* self);
-extern "C" void func_002292E0(void* self);
+extern "C" void func_00229398(cCrowdMan2d* self);
+extern "C" void func_002292E0(cCrowdMan2d* self);
 
 /**
  * Restarts the 2D crowd manager: releases every slot (func_00229398) and resets slots and markers (func_002292E0).
  *
  * cGame_partialRestart calls it.
  */
-extern "C" void func_00229498(void* self)
+extern "C" void func_00229498(cCrowdMan2d* self)
 {
     func_00229398(self);
     func_002292E0(self);
@@ -1715,7 +1717,7 @@ extern "C" void func_00229498(void* self)
 INCLUDE_ASM("main/ssxapp", func_002294C8);
 #ifdef SKIP_ASM
 extern "C" void cCrowdAnim2D_update(void* p);
-extern "C" void func_00229530(void* self);
+extern "C" void func_00229530(cCrowdMan2d* self);
 extern short D_00536690[];
 
 /**
@@ -1726,13 +1728,13 @@ extern short D_00536690[];
  * short of D_00536690; counts down each live marker of the 40-entry ring (+0x2230 in each 0x20-byte entry); then calls
  * func_00229530. cGame_update calls it.
  */
-extern "C" void func_002294C8(void* self)
+extern "C" void func_002294C8(cCrowdMan2d* self)
 {
     int i;
     char* marker;
     int frameTexId;
-    cCrowdAnim2D_update(*(void**)((char*)self + 0x4));
-    frameTexId = *(int*)((char*)*(void**)((char*)self + 0x4) + 0x10);
+    cCrowdAnim2D_update(self->mpAnim);
+    frameTexId = *(int*)((char*)self->mpAnim + 0x10);
     D_00536690[0] = frameTexId;
     marker = (char*)self;
     for (i = 39; i >= 0; i--) {
@@ -1830,7 +1832,7 @@ static inline float rands_229530(float lo, float hi)
  *
  * @param selfp  the 2D crowd manager
  */
-extern "C" void func_00229530(void* selfp)
+extern "C" void func_00229530(cCrowdMan2d* selfp)
 {
     sCrowd_229530* self = (sCrowd_229530*)selfp;
     int n = func_002A77C8(gSSXAudio, 0);
@@ -1907,11 +1909,11 @@ extern "C" void func_00229910(void* self, int slot, int a1);
  *
  * @param resourceId  the world resource id of the crowd model
  */
-extern "C" void func_00229788(void* self, int resourceId)
+extern "C" void func_00229788(cCrowdMan2d* self, int resourceId)
 {
     int i;
     for (i = 0; i < 0x40; i++) {
-        if (((unsigned int*)((char*)self + 0x8))[i] == 0xFFFFFFFF) {
+        if (((unsigned int*)(&self->mQuadId[0]))[i] == 0xFFFFFFFF) {
             func_00229910(self, i, resourceId);
             break;
         }
@@ -1922,7 +1924,7 @@ extern "C" void func_00229788(void* self, int resourceId)
 //100%
 INCLUDE_ASM("main/ssxapp", func_002297D8);
 #ifdef SKIP_ASM
-extern "C" void func_00229B90(void* self, int a1);
+extern "C" void func_00229B90(cCrowdMan2d* self, int a1);
 
 /**
  * Releases the first quad slot among the first 64 whose resource id equals @p val (func_00229B90).
@@ -1931,7 +1933,7 @@ extern "C" void func_00229B90(void* self, int a1);
  *
  * @param val  the world resource id
  */
-extern "C" void func_002297D8(void* self, int val)
+extern "C" void func_002297D8(cCrowdMan2d* self, int val)
 {
     int i;
     for (i = 0; i < 0x40; i++) {
@@ -2024,7 +2026,7 @@ static inline sModel_229820* HandleToModel_229820(unsigned int h)
  * @param boneIndex  the bone index within the part
  */
 // Points bone b of part a of the model behind handle at the shared crowd pose.
-extern "C" void func_00229820(void* self, unsigned int handle, int partIndex, int boneIndex)
+extern "C" void func_00229820(cCrowdMan2d* self, unsigned int handle, int partIndex, int boneIndex)
 {
     sModel_229820* model = HandleToModel_229820(handle);
     if (model != 0) {
@@ -2265,7 +2267,7 @@ INCLUDE_ASM("main/ssxapp", func_00229B90);
  *
  * @param slotIndex  the slot (0-127)
  */
-extern "C" void func_00229B90(void* self, int slotIndex)
+extern "C" void func_00229B90(cCrowdMan2d* self, int slotIndex)
 {
     ((unsigned int*)self)[slotIndex + 2] = 0xFFFFFFFFU;
 }
@@ -2375,7 +2377,7 @@ struct sMarkers_229BA8 {
  *
  * @param crowdMan  the 2D crowd manager
  */
-extern "C" void func_00229BA8(void* crowdMan)
+extern "C" void func_00229BA8(cCrowdMan2d* crowdMan)
 {
     sMarkers_229BA8* self = (sMarkers_229BA8*)crowdMan;
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
@@ -2430,17 +2432,17 @@ public:
  *
  * @param stream  the replay stream
  */
-extern "C" void func_00229E20(void* self, cSSXAppStream* stream)
+extern "C" void func_00229E20(cCrowdMan2d* self, cSSXAppStream* stream)
 {
-    stream->write((char*)self + 0x8, 0x200);
+    stream->write(&self->mQuadId[0], 0x200);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/ssxapp", func_00229E58);
 #ifdef SKIP_ASM
-extern "C" void func_00229398(void* self);
-extern "C" void func_002292E0(void* self);
+extern "C" void func_00229398(cCrowdMan2d* self);
+extern "C" void func_002292E0(cCrowdMan2d* self);
 extern "C" void func_00229910(void* self, int slot, int a1);
 
 // Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
@@ -2463,7 +2465,7 @@ struct sCrowdId_229E58 {
  *
  * @param stream  the replay stream
  */
-extern "C" void func_00229E58(void* self, cSSXAppStream_229E58* stream)
+extern "C" void func_00229E58(cCrowdMan2d* self, cSSXAppStream_229E58* stream)
 {
     func_00229398(self);
     func_002292E0(self);
@@ -2909,7 +2911,7 @@ struct sList_A368 {
  * @param list  the source entries
  * @param count  the number of entries
  */
-extern "C" void func_0022A368(void* self, sList_A368* list, int count)
+extern "C" void func_0022A368(FrustumIntersector* self, sList_A368* list, int count)
 {
     for (; count > 0; count--, list++) {
         sNode_A368* n = list->src->head;
@@ -2918,7 +2920,7 @@ extern "C" void func_0022A368(void* self, sList_A368* list, int count)
             n = n->next;
         }
     }
-    if (*(int*)((char*)self + 0x50A4) != 0) {
+    if ((int)self->lastinstance != 0) {
         func_00229FC8(self, 0, 0);
     }
 }
@@ -2951,7 +2953,7 @@ struct sList_A408 {
  * @param list  the source entries
  * @param count  the number of entries
  */
-extern "C" void func_0022A408(void* self, sList_A408* list, int count)
+extern "C" void func_0022A408(FrustumIntersector* self, sList_A408* list, int count)
 {
     for (; count > 0; count--, list++) {
         sNode_A408* n = list->src->head;
@@ -2960,7 +2962,7 @@ extern "C" void func_0022A408(void* self, sList_A408* list, int count)
             n = n->next;
         }
     }
-    if (*(int*)((char*)self + 0x78B0) != 0) {
+    if ((int)self->lastpatch != 0) {
         func_0022A128(self, 0, 0);
     }
 }
@@ -3116,7 +3118,7 @@ static inline int visUsable_A5A0(sVisOwner_A5A0* self, sVisNode_A5A0* n)
  * @param list_  the cell entries (cell, plane mask)
  * @param count  the number of entries
  */
-extern "C" void func_0022A5A0(void* self_, void* list_, int count)
+extern "C" void func_0022A5A0(FrustumIntersector* self_, void* list_, int count)
 {
     sVisOwner_A5A0* self = (sVisOwner_A5A0*)self_;
     sVisList_A5A0* list = (sVisList_A5A0*)list_;
@@ -3222,7 +3224,7 @@ static inline int visOnPath_A698(sVisCam_A698* cam, sVisNode_A698* n)
  * @param list_  the cell entries (cell, plane mask)
  * @param count  the number of entries
  */
-extern "C" void func_0022A698(void* self_, void* list_, int count)
+extern "C" void func_0022A698(FrustumIntersector* self_, void* list_, int count)
 {
     sVisOwner_A698* self = (sVisOwner_A698*)self_;
     sVisList_A698* list = (sVisList_A698*)list_;
@@ -3556,8 +3558,8 @@ extern "C" void cOcclusionMan_updateView(void* a, void* b);
 extern "C" void func_00229F30(void* a, void* b);
 void func_00229F80(void* p);
 extern "C" void func_0022A830(void* ctx, void* data, void* cfg);
-extern "C" void func_0022A698(void* self, void* list, int n);
-extern "C" void func_0022A5A0(void* self, void* list, int n);
+extern "C" void func_0022A698(FrustumIntersector* self, void* list, int n);
+extern "C" void func_0022A5A0(FrustumIntersector* self, void* list, int n);
 
 struct sMat_22ADD8 {
     float m[4][4];
@@ -3696,11 +3698,11 @@ extern "C" char* func_0022ADD8(char* self, sCfg_22ADD8* cfg, void* visSource, vo
     Load_22ADD8(&ctx, cfg[5].data, &cfg[5]);
     Load_22ADD8(&ctx, cfg[6].data, &cfg[6]);
     Load_22ADD8(&ctx, cfg[7].data, &cfg[7]);
-    func_0022A698(self, self + 0x98, *(int*)(self + 0x94));
-    func_0022A5A0(self, self + 0x98, *(int*)(self + 0x94));
+    func_0022A698((FrustumIntersector*)self, self + 0x98, *(int*)(self + 0x94));
+    func_0022A5A0((FrustumIntersector*)self, self + 0x98, *(int*)(self + 0x94));
     func_0022A770((sVisOwner_A770*)self, (sVisList_A770*)(self + 0x98), *(int*)(self + 0x94));
-    func_0022A408(self, (sList_A408*)(self + 0x109C), *(int*)(self + 0x1098));
-    func_0022A368(self, (sList_A368*)(self + 0x109C), *(int*)(self + 0x1098));
+    func_0022A408((FrustumIntersector*)self, (sList_A408*)(self + 0x109C), *(int*)(self + 0x1098));
+    func_0022A368((FrustumIntersector*)self, (sList_A368*)(self + 0x109C), *(int*)(self + 0x1098));
     func_0022A4A8((sWorld_22A4A8*)self, (sItem_22A4A8*)(self + 0x109C), *(int*)(self + 0x1098));
     return self;
 }
@@ -3717,7 +3719,7 @@ extern "C" void func_0022C830(void* self);
 extern "C" void cGarbageMan_Update();
 extern "C" void t4mat_invert(void* m);
 extern "C" void func_00230640(void* self);
-extern "C" void func_00229BA8(void* p);
+extern "C" void func_00229BA8(cCrowdMan2d* p);
 extern "C" void func_00344138(void* p);
 extern "C" void cMultiParticleMan_render(void* p);
 extern "C" void cGame_renderModels(void* self, void* world);
@@ -4142,7 +4144,7 @@ extern "C" int cGame_render(sGame_22B008* self)
         world = &worldData;
         func_0022ADD8((char*)world, self->cfg, self->f8C, &box, self->f10);
         func_00230640(self);
-        func_00229BA8(self->f38);
+        func_00229BA8((cCrowdMan2d*)self->f38);
         func_00344138(self->f3C);
         cMultiParticleMan_render(self->f40);
         ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x80;

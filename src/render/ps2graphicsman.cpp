@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/bxps2tex.h"
 #include "render/graphicsman.h"
 #include "render/ps2graphicsman.h"
 
@@ -25,13 +26,13 @@ struct cTexSlots367150 {
  *
  * @return the new texture id (its slot index)
  */
-extern "C" int cPSPGraphicsMan_NewNonBindTexID(cTexSlots367150* self)
+extern "C" int cPSPGraphicsMan_NewNonBindTexID(cTextureMan* self)
 {
-    void** head = self->freeHead;
-    int id = head - self->slots;
-    self->freeHead = (void**)*head;
-    self->count++;
-    char* tex = (char*)self + 8;
+    void** head = (void**)self->m_pNonBindFreeTexInfo;
+    int id = head - ((void**)&self->m_pTexInfo[0]);
+    self->m_pNonBindFreeTexInfo = (cLinkTexInfo*)((void**)*head);
+    self->m_iNumNonBindTextures++;
+    char* tex = (char*)&self->m_pTexInfo[0];
     void** slot = (void**)(tex + (id << 2));
     *slot = cMemMan_alloc(88, str_NBTexInfo, 0x21000000, 0);
     return id;
@@ -97,9 +98,9 @@ extern const char str_BTexInfo[];
  *
  * @param id  texture id (slot index) to fill
  */
-extern "C" void cPSPGraphicsMan_NewBindTexID(void* self, int id)
+extern "C" void cPSPGraphicsMan_NewBindTexID(cTextureMan* self, int id)
 {
-    char* tex = (char*)self + 8;
+    char* tex = (char*)&self->m_pTexInfo[0];
     void** slot = (void**)(tex + (id << 2));
     *slot = cMemMan_alloc(88, str_BTexInfo, 0x21000000, 0);
     *(int*)self += 1;
@@ -124,12 +125,12 @@ struct sGmPtrTable {
  *
  * @param idx  the texture id (slot index) to free
  */
-extern "C" void cPSPGraphicsMan_DeleteBindTexID(sGmPtrTable* self, int idx)
+extern "C" void cPSPGraphicsMan_DeleteBindTexID(cTextureMan* self, int idx)
 {
-    int** base = self->entries; int** slot = base + idx;
+    int** base = ((int**)&self->m_pTexInfo[0]); int** slot = base + idx;
     operator_delete(*slot);
     *slot = 0;
-    self->count--;
+    self->m_iNumBindTextures--;
 }
 #endif
 
@@ -166,9 +167,10 @@ INCLUDE_ASM("render/ps2graphicsman", func_00367340__FPvii);
  * @param size  the heap size, in 32-bit words
  * @return nothing meaningful: func_00365E40 returns nothing, though the definition is declared void*
  */
-void* func_00367340(void* self, int start, int size)
+void* func_00367340(void* vself, int start, int size)
 {
-    return func_00365E40((char*)self + 0x4350, start, size, (char*)self + 0x8);
+    cTextureMan* self = (cTextureMan*)vself;
+    return func_00365E40(self->mTempHeap, start, size, &self->m_pTexInfo[0]);
 }
 #endif
 
@@ -186,17 +188,17 @@ void cPSPGraphicsMan_PurgeBindTexIDs_1(void* self) __asm__("cPSPGraphicsMan_Purg
  * +0x4350, func_00366548), and sets the per-context bound texture ids (+0x1F4C, two words) and the loaded-CLUT texture
  * (+0x1F54) to -1. cPS2GraphicsMan_Purge calls it on mpTextureMan.
  */
-extern "C" void func_00367360(void* self)
+extern "C" void func_00367360(cTextureMan* self)
 {
     int i;
     cPSPGraphicsMan_PurgeNonBindTexIDs();
     cPSPGraphicsMan_PurgeBindTexIDs_1(self);
-    func_00366548((char*)self + 0x1F60);
-    func_00366548((char*)self + 0x4350);
+    func_00366548(self->mMainHeap);
+    func_00366548(self->mTempHeap);
     for (i = 1; i >= 0; i--) {
-        ((int*)((char*)self + 0x1F4C))[i] = -1;
+        ((int*)(&self->mBoundTex[0]))[i] = -1;
     }
-    *(int*)((char*)self + 0x1F54) = -1;
+    self->mCLUTTex = -1;
 }
 #endif
 
@@ -206,8 +208,9 @@ INCLUDE_ASM("render/ps2graphicsman", func_003673D0__FPv);
 /**
  * Does nothing: an empty texture manager hook that the frame-end code calls on mpTextureMan.
  */
-void func_003673D0(void* self)
+void func_003673D0(void* vself)
 {
+    cTextureMan* self = (cTextureMan*)vself;
 }
 #endif
 
@@ -226,10 +229,10 @@ extern "C" int func_00366CE0(void* heap, int size, int idx, int other, int a4, i
  * @param size  the number of bytes wanted
  * @return the block's first GS page
  */
-extern "C" int func_003673D8(char* self, int size)
+extern "C" int func_003673D8(cTextureMan* self, int size)
 {
-    int idx = func_00366CE0(self + 0x1F60, size, -1, -1, -1, 1);
-    char* node = *(char**)(self + 0x3F50) + idx * 0x1C;
+    int idx = func_00366CE0(self->mMainHeap, size, -1, -1, -1, 1);
+    char* node = *(char**)(((char*)self) + 0x3F50) + idx * 0x1C;
     *(int*)node |= 0x22;
     *(int*)(node + 8) = 0x7FFFFFFF;
     return *(int*)node >> 13;
@@ -239,7 +242,7 @@ extern "C" int func_003673D8(char* self, int size)
 //100%
 INCLUDE_ASM("render/ps2graphicsman", func_00367440);
 #ifdef SKIP_ASM
-extern "C" void cPSPGraphicsMan_NewBindTexID(void* self, int id);
+extern "C" void cPSPGraphicsMan_NewBindTexID(cTextureMan* self, int id);
 extern "C" int func_00366CE0(void* heap, int size, int idx, int other, int a4, int a5);
 extern "C" void func_00366E90(void* self, void* tex);
 extern "C" void* MEM_copy(void*, void*, int);
@@ -375,10 +378,9 @@ static inline int clutPsm_7440(int f)
  * @param bindId  the id to use, or a negative value to take a free non-bound id
  * @return the texture id, or -1 for a format with no bit depth
  */
-extern "C" int func_00367440(void* self, int pixelData, void* texName, int texWidth, int texHeight, int mipCount, int texelFormat, int clutFormat,
+extern "C" int func_00367440(cTextureMan* self, int pixelData, void* texName, int texWidth, int texHeight, int mipCount, int texelFormat, int clutFormat,
                              int clutData, int vramMode, int ownsData, int bindId)
 {
-    char* texMan = (char*)self;
     void* data = (void*)pixelData;
     const char* name = (const char*)texName;
     unsigned int w = texWidth;
@@ -389,12 +391,12 @@ extern "C" int func_00367440(void* self, int pixelData, void* texName, int texWi
     void* clut = (void*)clutData;
     int id;
     if (bindId < 0) {
-        id = cPSPGraphicsMan_NewNonBindTexID((cTexSlots367150*)self);
+        id = cPSPGraphicsMan_NewNonBindTexID(self);
     } else {
         cPSPGraphicsMan_NewBindTexID(self, bindId);
         id = bindId;
     }
-    char* tex = *(char**)(texMan + (id << 2) + 8);
+    char* tex = *(char**)(((char*)self) + (id << 2) + 8);
     strncpy(tex + 4, name, 8);
     *(int*)(tex + 0x0) = ownsData;
     *(int*)(tex + 0xC) = fmt;
@@ -443,7 +445,7 @@ extern "C" int func_00367440(void* self, int pixelData, void* texName, int texWi
         *(int*)(tex + 0x14) = vram;
         *(int*)(tex + 0x10) = size;
         if (*(int*)(tex + 0x0) != 0) {
-            void* copy = operator_new_7440(size, name, *(int*)(texMan + 0x1F58) | 0x05000000, 0);
+            void* copy = operator_new_7440(size, name, self->TexMemType | 0x05000000, 0);
             *(void**)(tex + 0x1C) = copy;
             MEM_copy(copy, data, size);
         } else {
@@ -458,7 +460,7 @@ extern "C" int func_00367440(void* self, int pixelData, void* texName, int texWi
     if (clut != 0 && (esz = clutEntryBytes_7440(clutFmt)) != 0) {
         int entries = (unsigned int)(*(int*)(tex + 0xC) - 11) <= 1 ? 0x10 : 0x100;
         if (*(int*)(tex + 0x0) != 0) {
-            void* copy = operator_new_7440(0x400, name, *(int*)(texMan + 0x1F58) | 0x05000000, 0);
+            void* copy = operator_new_7440(0x400, name, self->TexMemType | 0x05000000, 0);
             *(void**)(tex + 0x20) = copy;
             MEM_copy(copy, clut, entries * esz);
         } else {
@@ -493,15 +495,15 @@ extern "C" int func_00367440(void* self, int pixelData, void* texName, int texWi
             | ((ulong)((w + 0xFFF) >> 12) << 54);
     }
     if (vramMode == 1) {
-        int node = func_00366CE0(texMan + 0x1F60, *(int*)(tex + 0x14), id, -1, -1, 1);
-        int* nodeFlags = (int*)(*(char**)(texMan + 0x3F50) + node * 0x1C);
+        int node = func_00366CE0(self->mMainHeap, *(int*)(tex + 0x14), id, -1, -1, 1);
+        int* nodeFlags = (int*)(*(char**)(((char*)self) + 0x3F50) + node * 0x1C);
         int fl = *nodeFlags | 2;
         *nodeFlags = fl;
         *(int*)(tex + 0x30) = node;
         *(int*)(tex + 0x28) = fl >> 8;
     } else if (vramMode == 3) {
-        int node = func_00366CE0(texMan + 0x1F60, *(int*)(tex + 0x14) + 0x2000, id, -1, -1, 1);
-        int* nodeFlags = (int*)(*(char**)(texMan + 0x3F50) + node * 0x1C);
+        int node = func_00366CE0(self->mMainHeap, *(int*)(tex + 0x14) + 0x2000, id, -1, -1, 1);
+        int* nodeFlags = (int*)(*(char**)(((char*)self) + 0x3F50) + node * 0x1C);
         int fl = *nodeFlags | 0x22;
         *nodeFlags = fl;
         *(int*)(tex + 0x30) = node;
@@ -510,7 +512,7 @@ extern "C" int func_00367440(void* self, int pixelData, void* texName, int texWi
     }
     if (*(int*)(tex + 0x0) != 0) {
         if (*(int*)(tex + 0xC) == 9) {
-            if (*(int*)(texMan + 0x6344) < *(int*)(tex + 0x14) && vramMode == 0)
+            if (*(int*)(((char*)self) + 0x6344) < *(int*)(tex + 0x14) && vramMode == 0)
                 func_00366E90(self, tex);
             else
                 *(ulong*)(tex + 0x38) = (*(ulong*)(tex + 0x38) & ~((ulong)0x3F << 20)) | ((ulong)27 << 20);
@@ -534,11 +536,11 @@ INCLUDE_ASM("render/ps2graphicsman", func_00367B60);
  *
  * @param i  the texture id
  */
-extern "C" void func_00367B60(void* self, int i)
+extern "C" void func_00367B60(cTextureMan* self, int i)
 {
     char* obj = *(char**)((char*)self + (i << 2) + 8);
     if (*(int*)(obj + 0x28) != -1) {
-        char* sub = *(int*)(obj + 0xC) != 9 ? (char*)self + 0x1F60 : (char*)self + 0x4350;
+        char* sub = *(int*)(obj + 0xC) != 9 ? self->mMainHeap : self->mTempHeap;
         char* node = *(char**)(sub + 0x1FF0) + *(int*)(obj + 0x30) * 0x1C;
         *(int*)node &= ~2;
     }
@@ -608,7 +610,7 @@ extern "C" void func_00367BC0(sGmMan7BC0* self, int id)
         }
     }
     if (id < 1500) {
-        cPSPGraphicsMan_DeleteBindTexID((sGmPtrTable*)self, id);
+        cPSPGraphicsMan_DeleteBindTexID((cTextureMan*)((sGmPtrTable*)self), id);
     } else {
         cPSPGraphicsMan_DeleteNonBindTexID((cTexSlots3671C8*)self, id);
     }
@@ -620,7 +622,7 @@ extern "C" void func_00367BC0(sGmMan7BC0* self, int id)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/ps2graphicsman", func_00367CD0);
 #ifdef SKIP_ASM
-extern "C" int func_00367440(void* self, int a1, void* a2, int a3, int a4, int a5, int a6, int a7,
+extern "C" int func_00367440(cTextureMan* self, int a1, void* a2, int a3, int a4, int a5, int a6, int a7,
                              int a8, int a9, int a10, int a11);
 extern char str_LockTex[];
 
@@ -635,7 +637,7 @@ extern char str_LockTex[];
  * @param format  the texel format
  * @return the new texture id
  */
-extern "C" int func_00367CD0(void* self, int width, int height, int format)
+extern "C" int func_00367CD0(cTextureMan* self, int width, int height, int format)
 {
     return func_00367440(self, 0, str_LockTex, width, height, 0, format, 0, 0, 3, 0, -1);
 }
@@ -645,7 +647,7 @@ extern "C" int func_00367CD0(void* self, int width, int height, int format)
 INCLUDE_ASM("render/ps2graphicsman", func_00367D20);
 #ifdef SKIP_ASM
 extern "C" void* MEM_copy(void*, void*, int);
-extern "C" void func_00369098(void* self, int idx);
+extern "C" void func_00369098(cTextureMan* self, int idx);
 
 /**
  * Replaces the pixels and CLUT of texture @p idx and marks it for re-upload.
@@ -664,7 +666,7 @@ extern "C" void func_00369098(void* self, int idx);
  * @param clut  the new CLUT, or null
  * @param upload  nonzero to copy the data into the texture's buffers
  */
-extern "C" void func_00367D20(void* self, int idx, void* data, int width, int height, int mipCount, int texelFormat,
+extern "C" void func_00367D20(cTextureMan* self, int idx, void* data, int width, int height, int mipCount, int texelFormat,
                               int clutFormat, void* clut, int upload)
 {
     char* tex = *(char**)((char*)self + (idx << 2) + 8);
@@ -841,7 +843,7 @@ extern char D_0044B200[];
  * @param pkt  the DMA packet cursor
  */
 // PORT: 64-bit `ulong` DMA tag, pointer packed into the upper word
-extern "C" void func_00368138(void* self, ulong** pkt)
+extern "C" void func_00368138(cTextureMan* self, ulong** pkt)
 {
     (*pkt)[0] = ((ulong)(int)D_0044B200 << 32) | 0x30000022;
     (*pkt)[1] = 0;
@@ -898,7 +900,7 @@ template <class T> static inline T Max_8170(T a, T b)
  * @param gif  the upload chain cursor
  */
 // PORT: 64-bit `ulong` GIF/DMA packet words.
-extern "C" void func_00368170(void* self_, int idx, ulong** dma, ulong** gif)
+extern "C" void func_00368170(cTextureMan* self_, int idx, ulong** dma, ulong** gif)
 {
     sTexMgr_8170* self = (sTexMgr_8170*)self_;
     sBXTex_8170* texture = self->texs[idx];
@@ -987,7 +989,7 @@ extern "C" void func_00368170(void* self_, int idx, ulong** dma, ulong** gif)
         height >>= 1;
         gifCursor += 22;
     }
-    func_00368138(self, &dmaCursor);
+    func_00368138((cTextureMan*)self, &dmaCursor);
     *dma = dmaCursor;
     *gif = gifCursor;
 }
@@ -1061,7 +1063,7 @@ extern "C" void func_003684F0(sPs2UpMgr* self, int idx, ulong** dma, ulong** gif
     gifCursor[19] = 0xE;
     gifCursor[20] = 0;
     gifCursor[21] = 0x3F;
-    func_00368138(self, &dmaCursor);
+    func_00368138((cTextureMan*)self, &dmaCursor);
     gifCursor += 22;
     *dma = dmaCursor;
     *gif = gifCursor;
@@ -1072,8 +1074,8 @@ extern "C" void func_003684F0(sPs2UpMgr* self, int idx, ulong** dma, ulong** gif
 INCLUDE_ASM("render/ps2graphicsman", func_00368660);
 #ifdef SKIP_ASM
 extern "C" int func_00366CE0(void* heap, int size, int idx, int other, int a4, int a5);
-extern "C" void func_00368170(void* self, int idx, ulong** dma, ulong** gif);
-extern "C" void func_00368970(void* self, int idx, int slot, ulong** dma);
+extern "C" void func_00368170(cTextureMan* self, int idx, ulong** dma, ulong** gif);
+extern "C" void func_00368970(cTextureMan* self, int idx, int slot, ulong** dma);
 extern "C" ulong* func_0038F460(void* ring, unsigned int addr, int size, int flags);
 extern "C" void* func_0038F668(void* ring, ulong* p, int a2);
 extern void* D_004A4474;
@@ -1126,7 +1128,7 @@ struct sUpMgr_8660 {
  * @param gifOut  the upload buffer cursor, updated when an upload chain was built
  */
 // PORT: 64-bit `ulong` GIF/DMA packet words.
-extern "C" void func_00368660(char* self, int context1Tex, int context2Tex, int evictLevel, ulong** pp, void** gifOut)
+extern "C" void func_00368660(cTextureMan* self, int context1Tex, int context2Tex, int evictLevel, ulong** pp, void** gifOut)
 {
     ulong* cur = *pp;
     sUpTex_8660* objs[2];
@@ -1149,10 +1151,10 @@ extern "C" void func_00368660(char* self, int context1Tex, int context2Tex, int 
         sUpHeap_8660* heap;
         int shift;
         if (texRecord->psm == 9) {
-            heap = (sUpHeap_8660*)(self + 0x4350);
+            heap = (sUpHeap_8660*)(((char*)self) + 0x4350);
             shift = 2;
         } else {
-            heap = (sUpHeap_8660*)(self + 0x1F60);
+            heap = (sUpHeap_8660*)(((char*)self) + 0x1F60);
             shift = 0;
         }
         if (texRecord->addr < 0) {
@@ -1168,9 +1170,9 @@ extern "C" void func_00368660(char* self, int context1Tex, int context2Tex, int 
             sent = 1;
         }
         if (texRecord->clut != 0 && texRecord->caddr < 0) {
-            *(int*)(self + 0x1F54) = -1;
-            int n = func_00366CE0(self + 0x1F60, texRecord->psm - 11 < 2 ? 0x100 : 0x400, idx, other, evictLevel, 0);
-            int* nodeFlags = &((sUpHeap_8660*)(self + 0x1F60))->nodes[n].flags;
+            self->mCLUTTex = -1;
+            int n = func_00366CE0(self->mMainHeap, texRecord->psm - 11 < 2 ? 0x100 : 0x400, idx, other, evictLevel, 0);
+            int* nodeFlags = &((sUpHeap_8660*)(((char*)self) + 0x1F60))->nodes[n].flags;
             int fl = *nodeFlags | 4;
             *nodeFlags = fl;
             texRecord->cnode = n;
@@ -1267,16 +1269,15 @@ static inline int levelBlocks_8970(char* t, int lv, int shift)
  * @param dma  the DMA chain cursor
  */
 // PORT: 64-bit `ulong` GIF/DMA packet words.
-extern "C" void func_00368970(void* self, int idx, int slot, ulong** dma)
+extern "C" void func_00368970(cTextureMan* self, int idx, int slot, ulong** dma)
 {
-    char* selfBytes = (char*)self;
     ulong* packet = *dma;
     int off = slot << 2;
-    char* bound = selfBytes + 0x1F4C;
+    char* bound = (char*)&self->mBoundTex[0];
     int* cur = (int*)(bound + off);
     if (*cur != idx) {
         *cur = idx;
-        char* tex = *(char**)(selfBytes + (idx << 2) + 8);
+        char* tex = *(char**)(((char*)self) + (idx << 2) + 8);
         int rTex0, rTex1, rMip1, rMip2;
         if (slot == 0) {
             rTex0 = 6;
@@ -1327,16 +1328,16 @@ extern "C" void func_00368970(void* self, int idx, int slot, ulong** dma)
         int caddr = *(int*)(tex + 0x2C);
         int cbp = 0;
         if (caddr >= 0) {
-            *(int*)(selfBytes + 0x1F54) = idx;
+            self->mCLUTTex = idx;
             cbp = caddr;
         }
         packet[2] = *(ulong*)(tex + 0x38) | ((ulong)*(int*)(tex + 0x28) | ((ulong)cbp << 37));
         packet[3] = rTex0;
         packet += 4;
-    } else if (*(int*)(selfBytes + 0x1F54) != idx) {
-        char* tex = *(char**)(selfBytes + (idx << 2) + 8);
+    } else if (self->mCLUTTex != idx) {
+        char* tex = *(char**)(((char*)self) + (idx << 2) + 8);
         if (*(int*)(tex + 0x2C) >= 0) {
-            *(int*)(selfBytes + 0x1F54) = idx;
+            self->mCLUTTex = idx;
             packet[0] = 0x10000003;
             packet[1] = 0;
             packet[2] = 0;
@@ -1366,22 +1367,22 @@ extern "C" void func_00366E30(void* list, int i);
  *
  * @param idx  the texture id
  */
-extern "C" void func_00369098(void* self, int idx)
+extern "C" void func_00369098(cTextureMan* self, int idx)
 {
     char* tex = *(char**)((char*)self + (idx << 2) + 8);
     if (*(int*)(tex + 0x28) != -1) {
         if (*(int*)(tex + 0xC) != 9) {
-            func_00366E30((char*)self + 0x1F60, idx);
+            func_00366E30(self->mMainHeap, idx);
         } else {
-            func_00366E30((char*)self + 0x4350, idx);
+            func_00366E30(self->mTempHeap, idx);
         }
     }
     int unbound = -1;
-    int* bound = (int*)((char*)self + 0x1F4C);
+    int* bound = (int*)(&self->mBoundTex[0]);
     for (int i = 1; i >= 0; i--) {
         bound[i] = unbound;
     }
-    *(int*)((char*)self + 0x1F54) = -1;
+    self->mCLUTTex = -1;
 }
 #endif
 

@@ -1130,17 +1130,17 @@ static inline void wakeAddE398(sWakeVecE398& a, const sWakeVecE398& b)
  *
  * @param out  the position, changed in place
  */
-extern "C" void func_002DE398(char* self, sWakeVecE398* out)
+extern "C" void func_002DE398(cDynamicSprayFX* self, sWakeVecE398* out)
 {
-    float bias = *(float*)(self + 0x12C);
+    float bias = *(float*)(((char*)self) + 0x12C);
     float spread = (1.0f - wakeAbsE398(bias)) * 55.0f;
     float lo = -spread;
     sWakeVecE398 offset;
     sWakeVecE398 scaled;
-    wakeScaleE398(scaled, *(sWakeVecE398*)(self + 0x50), bias * 55.0f + (lo + (spread - lo) * wakeRandE398()));
+    wakeScaleE398(scaled, *(sWakeVecE398*)(((char*)self) + 0x50), bias * 55.0f + (lo + (spread - lo) * wakeRandE398()));
     offset = scaled;
     wakeAddE398(*out, offset);
-    wakeScaleE398(scaled, *(sWakeVecE398*)(self + 0x40), wakeRandE398() * 20.0f + -10.0f);
+    wakeScaleE398(scaled, *(sWakeVecE398*)(((char*)self) + 0x40), wakeRandE398() * 20.0f + -10.0f);
     offset = scaled;
     wakeAddE398(*out, offset);
 }
@@ -1251,7 +1251,7 @@ extern char str_DynamicSprayData[];
 extern char str_BoneIndicies[];
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
-extern "C" void func_002E26B8(void* self);
+extern "C" void func_002E26B8(cDynamicSprayFX* self);
 extern "C" void func_002DF448_E4A8(void* self) __asm__("func_002DF448");
 extern "C" void func_002DF3B0(cDynamicSprayFX* self);
 
@@ -1888,7 +1888,7 @@ extern "C" void* cDynamicSprayFX_cDynamicSprayFX(sSprayFxE4A8* self, int inChrg)
     self->SprayData()[9].fE0 = 0.0f;
     self->SprayData()[9].fE4 = 0.0f;
     self->p7C = operator new(0x78, str_BoneIndicies, 0, 0);
-    func_002E26B8(self);
+    func_002E26B8((cDynamicSprayFX*)self);
     func_002DF448_E4A8(self);
     func_002DF3B0((cDynamicSprayFX*)self);
     return self;
@@ -1925,7 +1925,7 @@ __asm__("_vt$15cVbDtor002DF1C8$13cRiderVbC_bwf = D_00488360\n"
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002DF3B0);
 #ifdef SKIP_ASM
-extern "C" void func_002E26B8(void* self);
+extern "C" void func_002E26B8(cDynamicSprayFX* self);
 extern "C" void func_002E2550(cDynamicSprayFX* self);
 
 /**
@@ -2040,42 +2040,42 @@ extern "C" int cAnimModel_getBoneSkelIndex(void* self, int idx, const char* name
  * 0-14 and 15-29 repeat the leg, hip and spine bones; entry 12 is "handright_b" between left-arm bones, possibly a
  * slip. func_002DF920 calls it while +0x80 is 0.
  */
-extern "C" void func_002DF4D0(char* self)
+extern "C" void func_002DF4D0(cDynamicSprayFX* self)
 {
-    (*(int**)(self + 0x7C))[0] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_shinleft_b);
-    (*(int**)(self + 0x7C))[1] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_footleft_b);
-    (*(int**)(self + 0x7C))[2] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_shinright_b);
-    (*(int**)(self + 0x7C))[3] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_footright_b);
-    (*(int**)(self + 0x7C))[4] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_thighleft_b);
-    (*(int**)(self + 0x7C))[5] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_thighright_b);
-    (*(int**)(self + 0x7C))[6] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_hips_b);
-    (*(int**)(self + 0x7C))[7] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_lowerspine);
-    (*(int**)(self + 0x7C))[8] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_middlespine);
-    (*(int**)(self + 0x7C))[9] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_upperspine);
-    (*(int**)(self + 0x7C))[10] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_neck);
-    (*(int**)(self + 0x7C))[11] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_clavicleleft);
-    (*(int**)(self + 0x7C))[12] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_handright_b);
-    (*(int**)(self + 0x7C))[13] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_bicepleft);
-    (*(int**)(self + 0x7C))[14] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_biceptwistleft);
-    (*(int**)(self + 0x7C))[15] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_shinleft_b);
-    (*(int**)(self + 0x7C))[16] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_footleft_b);
-    (*(int**)(self + 0x7C))[17] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_shinright_b);
-    (*(int**)(self + 0x7C))[18] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_footright_b);
-    (*(int**)(self + 0x7C))[19] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_thighleft_b);
-    (*(int**)(self + 0x7C))[20] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_thighright_b);
-    (*(int**)(self + 0x7C))[21] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_hips_b);
-    (*(int**)(self + 0x7C))[22] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_lowerspine);
-    (*(int**)(self + 0x7C))[23] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_middlespine);
-    (*(int**)(self + 0x7C))[24] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_forearmleft_b);
-    (*(int**)(self + 0x7C))[25] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_handleft_b);
-    (*(int**)(self + 0x7C))[26] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_clavicleright);
-    (*(int**)(self + 0x7C))[27] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_bicepright);
-    (*(int**)(self + 0x7C))[28] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_biceptwistright);
-    (*(int**)(self + 0x7C))[29] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_forearmright_b);
+    (*(int**)(((char*)self) + 0x7C))[0] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_shinleft_b);
+    (*(int**)(((char*)self) + 0x7C))[1] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_footleft_b);
+    (*(int**)(((char*)self) + 0x7C))[2] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_shinright_b);
+    (*(int**)(((char*)self) + 0x7C))[3] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_footright_b);
+    (*(int**)(((char*)self) + 0x7C))[4] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_thighleft_b);
+    (*(int**)(((char*)self) + 0x7C))[5] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_thighright_b);
+    (*(int**)(((char*)self) + 0x7C))[6] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_hips_b);
+    (*(int**)(((char*)self) + 0x7C))[7] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_lowerspine);
+    (*(int**)(((char*)self) + 0x7C))[8] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_middlespine);
+    (*(int**)(((char*)self) + 0x7C))[9] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_upperspine);
+    (*(int**)(((char*)self) + 0x7C))[10] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_neck);
+    (*(int**)(((char*)self) + 0x7C))[11] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_clavicleleft);
+    (*(int**)(((char*)self) + 0x7C))[12] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_handright_b);
+    (*(int**)(((char*)self) + 0x7C))[13] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_bicepleft);
+    (*(int**)(((char*)self) + 0x7C))[14] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_biceptwistleft);
+    (*(int**)(((char*)self) + 0x7C))[15] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_shinleft_b);
+    (*(int**)(((char*)self) + 0x7C))[16] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_footleft_b);
+    (*(int**)(((char*)self) + 0x7C))[17] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_shinright_b);
+    (*(int**)(((char*)self) + 0x7C))[18] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_footright_b);
+    (*(int**)(((char*)self) + 0x7C))[19] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_thighleft_b);
+    (*(int**)(((char*)self) + 0x7C))[20] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_thighright_b);
+    (*(int**)(((char*)self) + 0x7C))[21] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_hips_b);
+    (*(int**)(((char*)self) + 0x7C))[22] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_lowerspine);
+    (*(int**)(((char*)self) + 0x7C))[23] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_middlespine);
+    (*(int**)(((char*)self) + 0x7C))[24] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_forearmleft_b);
+    (*(int**)(((char*)self) + 0x7C))[25] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_handleft_b);
+    (*(int**)(((char*)self) + 0x7C))[26] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_clavicleright);
+    (*(int**)(((char*)self) + 0x7C))[27] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_bicepright);
+    (*(int**)(((char*)self) + 0x7C))[28] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_biceptwistright);
+    (*(int**)(((char*)self) + 0x7C))[29] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_forearmright_b);
     int i;
     for (i = 0; i < 30; i++) {
     }
-    *(int*)(self + 0x80) = 1;
+    *(int*)(((char*)self) + 0x80) = 1;
 }
 #endif
 
@@ -2463,7 +2463,7 @@ extern "C" void func_002DFE88(sWakeFxFE88* self)
         float lim = *(float*)(self->pD0 + 0x6C);
         if (wakeRandE398() < lim) {
         sWakeVecE398 pos = wakeAddFE88(self->pos, wakeScaleFE88(self->dir, 15.0f));
-        func_002DE398((char*)self, &pos);
+        func_002DE398((cDynamicSprayFX*)((char*)self), &pos);
         float k = wakeAbsE398(wakeDotFE88(*(sWakeVecE398*)(self->obj + 0x3B0), self->vC0)) * 1.5f;
         float faceFactor;
         if (k < 1.0f) {
@@ -2584,7 +2584,7 @@ extern "C" void func_002E0EE8(sWakeFx0EE8* self)
     char* em = self->em;
     if (self->iB0 != 0 && wakeLimit0EE8() < self->fBC && *(int*)(self->pD0 + 0x58) != 0 && flag == 0) {
         sWakeVecE398 pos = wakeAdd0EE8(self->pos, wakeScale0EE8(self->dir, 15.0f));
-        func_002DE398((char*)self, &pos);
+        func_002DE398((cDynamicSprayFX*)((char*)self), &pos);
         char* sub = self->obj + 0x6C0;
         sWakeVt0EE8* vt = *(sWakeVt0EE8**)sub;
         sWakeVecE398* riderVel = vt[2].fn(sub + vt[2].delta);
@@ -3355,7 +3355,7 @@ extern "C" void func_002E1F70(sWakeFx1F70* self)
             wakeAdd0EE8(wakeScale0EE8(*riderVel, *(float*)(self->p2C + 0x818)),
                         wakeScale0EE8(self->dir, *(float*)(self->p2C + 0x81C))),
             wakeScale0EE8(wakeScale0EE8(self->dir, *(float*)(self->p2C + 0x820)), self->fBC));
-        func_002DE398((char*)self, &pos);
+        func_002DE398((cDynamicSprayFX*)((char*)self), &pos);
         cDynamicColourEmitter_update(em, &pos, &vel, &col, 1, 0.01666666753590107f);
     } else {
         cDynamicColourEmitter_update(em, &self->pos, 0, 0, 0, 0.01666666753590107f);
@@ -3688,37 +3688,36 @@ struct sWakeVt26B8 { short delta; short index; void (*fn)(void*, void*, float); 
  *
  * @param vself  the spray effect (cDynamicSprayFX, this)
  */
-extern "C" void func_002E26B8(void* vself)
+extern "C" void func_002E26B8(cDynamicSprayFX* vself)
 {
-    char* self = (char*)vself;
-    int on = *(int*)(*(char**)self + 0x870) >= 0;
-    *(int*)(self + 0x124) = on;
+    int on = *(int*)(*(char**)vself + 0x870) >= 0;
+    *(int*)(((char*)vself) + 0x124) = on;
     if (on) {
-        *(float*)(*(char**)(self + 0x2C) + 0x498) = 55.0f;
-        *(float*)(*(char**)(self + 0x2C) + 0x4A0) = 25.0f;
-        *(float*)(*(char**)(self + 0x2C) + 0x554) = 170.0f;
-        *(float*)(*(char**)(self + 0x2C) + 0x580) = 30.0f;
-        *(float*)(*(char**)(self + 0x2C) + 0x588) = 20.0f;
-        *(float*)(*(char**)(self + 0x2C) + 0x63C) = 60.0f;
+        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x498) = 55.0f;
+        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x4A0) = 25.0f;
+        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x554) = 170.0f;
+        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x580) = 30.0f;
+        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x588) = 20.0f;
+        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x63C) = 60.0f;
     } else {
-        *(float*)(*(char**)(self + 0x2C) + 0x498) = 24.75f;
-        *(float*)(*(char**)(self + 0x2C) + 0x4A0) = 5.0f;
-        *(float*)(*(char**)(self + 0x2C) + 0x554) = 76.5f;
-        *(float*)(*(char**)(self + 0x2C) + 0x580) = 19.5f;
-        *(float*)(*(char**)(self + 0x2C) + 0x588) = 8.0f;
-        *(float*)(*(char**)(self + 0x2C) + 0x63C) = 39.0f;
+        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x498) = 24.75f;
+        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x4A0) = 5.0f;
+        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x554) = 76.5f;
+        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x580) = 19.5f;
+        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x588) = 8.0f;
+        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x63C) = 39.0f;
     }
     {
-        char* emitters = *(char**)(self + 0x28);
+        char* emitters = *(char**)(((char*)vself) + 0x28);
         char* emitter = emitters + 0xA50;
         sWakeVt26B8* vt = *(sWakeVt26B8**)(emitters + 0xC48);
-        vt[3].fn(emitter + vt[3].delta, *(char**)(self + 0x2C) + 0x488, *(float*)(emitters + 0xAA8));
+        vt[3].fn(emitter + vt[3].delta, *(char**)(((char*)vself) + 0x2C) + 0x488, *(float*)(emitters + 0xAA8));
     }
     {
-        char* emitters = *(char**)(self + 0x28);
+        char* emitters = *(char**)(((char*)vself) + 0x28);
         char* emitter = emitters + 0xC60;
         sWakeVt26B8* vt = *(sWakeVt26B8**)(emitters + 0xE58);
-        vt[3].fn(emitter + vt[3].delta, *(char**)(self + 0x2C) + 0x570, *(float*)(emitters + 0xCB8));
+        vt[3].fn(emitter + vt[3].delta, *(char**)(((char*)vself) + 0x2C) + 0x570, *(float*)(emitters + 0xCB8));
     }
 }
 #endif

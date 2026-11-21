@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/bxps2tex.h"
 #include "ui/uianimation.h"
 #include "render/simpletube.h"
 #include "bx/math3d.h"
@@ -5372,13 +5373,13 @@ INCLUDE_ASM("render/font", func_00396128);
  *
  * The first two in a two-pass loop. func_00363490 calls it on mpTextureMan before building the frame's chains.
  */
-extern "C" void func_00396128(void* self)
+extern "C" void func_00396128(cTextureMan* self)
 {
     int i;
     for (i = 0; i < 2; i++) {
-        ((int*)((char*)self + 0x1f4c))[i] = -1;
+        ((int*)(&self->mBoundTex[0]))[i] = -1;
     }
-    *(int*)((char*)self + 0x1f54) = -1;
+    self->mCLUTTex = -1;
 }
 #endif
 

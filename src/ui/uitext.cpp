@@ -534,17 +534,17 @@ struct func_003A1030_sVEntry {
  *
  * @param out  receives the size (x, y)
  */
-extern "C" void func_003A1030(void* self, func_003A1030_sVec3* out)
+extern "C" void func_003A1030(cUIText* self, func_003A1030_sVec3* out)
 {
-    if (*(int*)((char*)self + 0xB4) == 0 || ((*(int*)((char*)self + 0x14) >> 2) & 1) == 0) {
-        func_003A1030_sVEntry* vt = *(func_003A1030_sVEntry**)((char*)self + 8);
+    if ((int)self->mpString == 0 || ((self->mAttr >> 2) & 1) == 0) {
+        func_003A1030_sVEntry* vt = (func_003A1030_sVEntry*)self->mVtbl;
         vt[16].fn((char*)self + vt[16].delta);
     }
     void* font = cUIText_getFont(self);
-    int str = *(int*)((char*)self + 0xB4);
+    int str = (int)self->mpString;
     if (str != 0 && font != 0) {
         func_003A1030_sRect textRect;
-        cFont_textExtent1(font, str, &textRect, 0, *(float*)((char*)self + 0x50), *(float*)((char*)self + 0x54));
+        cFont_textExtent1(font, str, &textRect, 0, self->mScale.x, self->mScale.y);
         out->x = textRect.x1;
         out->y = textRect.y1;
     } else {
@@ -569,13 +569,13 @@ struct func_003A10F0_sVEntry {
  *
  * @return the number of lines
  */
-extern "C" int func_003A10F0(void* self)
+extern "C" int func_003A10F0(cUIText* self)
 {
-    if (*(int*)((char*)self + 0xB4) == 0 || ((*(int*)((char*)self + 0x14) >> 2) & 1) == 0) {
-        func_003A10F0_sVEntry* vt = *(func_003A10F0_sVEntry**)((char*)self + 8);
+    if ((int)self->mpString == 0 || ((self->mAttr >> 2) & 1) == 0) {
+        func_003A10F0_sVEntry* vt = (func_003A10F0_sVEntry*)self->mVtbl;
         vt[16].fn((char*)self + vt[16].delta);
     }
-    return *(int*)((char*)self + 0xA8);
+    return self->mNumLines;
 }
 #endif
 

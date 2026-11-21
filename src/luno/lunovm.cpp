@@ -1,4 +1,6 @@
 #include "common.h"
+#include "luno/lunotable.h"
+#include "luno/lunofunc.h"
 
 // A script value: {word0, word1, type}. Type 4 is a table, word0 -> cLunoTable.
 struct cLunoValue {
@@ -798,13 +800,13 @@ struct sVEntry00224C00 {
  * @param stream  the replay frame to write to
  * @param base  the address the chunk pointer is stored relative to
  */
-extern "C" void func_00224C00(void* self, sVEntry00224C00** stream, int base)
+extern "C" void func_00224C00(luno_cLunoFunc* self, sVEntry00224C00** stream, int base)
 {
     int off;
     int secondWord;
-    off = *(int*)((char*)self + 0x0) - base;
+    off = (int)self->Chunk - base;
     (*stream)[1].fn((char*)stream + (*stream)[1].delta, &off, 4);
-    secondWord = *(int*)((char*)self + 0x4);
+    secondWord = self->FuncNum;
     (*stream)[1].fn((char*)stream + (*stream)[1].delta, &secondWord, 4);
 }
 #endif
@@ -828,13 +830,13 @@ struct sVEntry00224C78 {
  * @param stream  the replay frame to read from
  * @param base  the address the chunk pointer was stored relative to
  */
-extern "C" void func_00224C78(void* self, sVEntry00224C78** stream, int base)
+extern "C" void func_00224C78(luno_cLunoFunc* self, sVEntry00224C78** stream, int base)
 {
     int buf[2];
     (*stream)[2].fn((char*)stream + (*stream)[2].delta, &buf[0], 4);
-    *(int*)((char*)self + 0x0) = base + buf[0];
+    self->Chunk = (const char*)(base + buf[0]);
     (*stream)[2].fn((char*)stream + (*stream)[2].delta, &buf[1], 4);
-    *(int*)((char*)self + 0x4) = buf[1];
+    self->FuncNum = buf[1];
 }
 #endif
 
@@ -1495,7 +1497,7 @@ extern "C" void luno_cLunoVar__cLunoVar(cLunoValue* self, int flags)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("luno/lunovm", luno_cLunoVar_writeToReplayFrame);
 #ifdef SKIP_ASM
-extern "C" void func_00224C00(void* self, sVEntry00224C00** stream, int base);
+extern "C" void func_00224C00(luno_cLunoFunc* self, sVEntry00224C00** stream, int base);
 extern "C" void luno_cLunoTable_writeToReplayFrame(void* self, sVEntry00224C00** stream, int base);
 
 /**
@@ -1511,7 +1513,7 @@ extern "C" void luno_cLunoVar_writeToReplayFrame(cLunoValue* self, sVEntry00224C
 {
     (*stream)[1].fn((char*)stream + (*stream)[1].delta, &self->type, 4);
     if (self->type == 5) {
-        func_00224C00(self, stream, base);
+        func_00224C00((luno_cLunoFunc*)self, stream, base);
     } else if (self->type == 4) {
         luno_cLunoTable_writeToReplayFrame(self, stream, base);
     } else {
@@ -1562,7 +1564,7 @@ extern "C" void luno_cLunoVar_readFromReplayFrame(cLunoValue* self, sVEntry00224
         sLunoPair_225CA0 pair;
         pair.word0 = 0;
         pair.word1 = 0;
-        func_00224C78(&pair, (sVEntry00224C78**)stream, base);
+        func_00224C78((luno_cLunoFunc*)(&pair), (sVEntry00224C78**)stream, base);
         if (self->type == 4) {
             luno_cLunoTable__cLunoTable((cLunoTableRef*)self, 2);
         }
@@ -1693,10 +1695,11 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoFunc_init__FPvii);
  * @param firstWord  the code chunk (On Tour data, stored as Chunk)
  * @param secondWord  the function index (FuncNum)
  */
-void luno_cLunoFunc_init(void* self, int firstWord, int secondWord)
+void luno_cLunoFunc_init(void* vself, int firstWord, int secondWord)
 {
+    luno_cLunoFunc* self = (luno_cLunoFunc*)vself;
     *(int*)self = firstWord;
-    *(int*)((char*)self + 0x4) = secondWord;
+    self->FuncNum = secondWord;
 }
 #endif
 
@@ -1810,15 +1813,15 @@ extern char D_00479890[];
  *
  * @param flags  destructor flags; bit 0 frees the entry
  */
-extern "C" void luno_cLunoTableEntry__cLunoTableEntry(void* self, int flags)
+extern "C" void luno_cLunoTableEntry__cLunoTableEntry(luno_cLunoTableEntry* self, int flags)
 {
-    *(void**)((char*)self + 0x1C) = D_00479890;
-    void* obj = *(void**)((char*)self + 0x18);
+    self->mVtbl = (void**)D_00479890;
+    void* obj = self->Next;
     if (obj != 0) {
         sVEntry00226768* vt = *(sVEntry00226768**)((char*)obj + 0x1C);
         vt[1].fn((char*)obj + vt[1].delta, 3);
     }
-    luno_cLunoVar__cLunoVar((cLunoValue*)((char*)self + 0xC), 2);
+    luno_cLunoVar__cLunoVar((cLunoValue*)(&self->Value), 2);
     luno_cLunoVar__cLunoVar((cLunoValue*)self, 2);
     if (flags & 1) {
         operator_delete((int*)self);

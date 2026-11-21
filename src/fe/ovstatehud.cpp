@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/textpictline.h"
 #include "fe/ovstatehud.h"
 #include "ui/uithing.h"
 #include "be/beintnewrace.h"
@@ -302,7 +303,7 @@ extern sIcon_1E92A8 D_004C8980[];
  *
  * @param textLine  the text line to lay out
  */
-extern "C" void func_001E92A8(void* textLine)
+extern "C" void func_001E92A8(tTextPictLine* textLine)
 {
     sLine_1E92A8* self = (sLine_1E92A8*)textLine;
     unsigned short* cursor;
@@ -376,7 +377,7 @@ extern "C" void func_001E92A8(void* textLine)
 INCLUDE_ASM("fe/ovstatehud", func_001E94E0);
 #ifdef SKIP_ASM
 extern "C" unsigned short* func_002C2540(unsigned short* dst, char* src);
-extern "C" void func_001E92A8(void* self);
+extern "C" void func_001E92A8(tTextPictLine* self);
 struct sVec2f { float x, y; };
 
 /**
@@ -390,11 +391,11 @@ struct sVec2f { float x, y; };
  * @param font  the font (a cFont*) to measure and draw with
  * @param scale  the line's x and y scale
  */
-extern "C" void func_001E94E0(void* self, char* str, int font, sVec2f* scale)
+extern "C" void func_001E94E0(tTextPictLine* self, char* str, int font, sVec2f* scale)
 {
-    func_002C2540((unsigned short*)((char*)self + 0x4C), str);
-    *(int*)((char*)self + 0x8) = font;
-    *(sVec2f*)((char*)self + 0x10) = *scale;
+    func_002C2540((unsigned short*)(&self->text[0]), str);
+    self->pFont = (cFont*)font;
+    *(sVec2f*)&self->fontScaleBase[0] = *scale;
     func_001E92A8(self);
 }
 #endif
@@ -403,7 +404,7 @@ extern "C" void func_001E94E0(void* self, char* str, int font, sVec2f* scale)
 INCLUDE_ASM("fe/ovstatehud", func_001E9540);
 #ifdef SKIP_ASM
 extern "C" unsigned short* strcpy1(unsigned short* dst, unsigned short* src);
-extern "C" void func_001E92A8(void* self);
+extern "C" void func_001E92A8(tTextPictLine* self);
 /**
  * Sets a HUD text line from a 16-bit string and lays it out.
  *
@@ -414,11 +415,11 @@ extern "C" void func_001E92A8(void* self);
  * @param font  the font (a cFont*) to measure and draw with
  * @param scale  the line's x and y scale
  */
-extern "C" void func_001E9540(void* self, unsigned short* str, int font, sVec2f* scale)
+extern "C" void func_001E9540(tTextPictLine* self, unsigned short* str, int font, sVec2f* scale)
 {
-    strcpy1((unsigned short*)((char*)self + 0x4C), str);
-    *(int*)((char*)self + 0x8) = font;
-    *(sVec2f*)((char*)self + 0x10) = *scale;
+    strcpy1((unsigned short*)(&self->text[0]), str);
+    self->pFont = (cFont*)font;
+    *(sVec2f*)&self->fontScaleBase[0] = *scale;
     func_001E92A8(self);
 }
 #endif

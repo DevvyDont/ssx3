@@ -1,4 +1,6 @@
 #include "common.h"
+#include "render/bxps2deferman.h"
+#include "render/bxps2tex.h"
 #include "object/objectnode.h"
 #include "object/restorenode.h"
 #include "object/particlenode.h"
@@ -8535,16 +8537,16 @@ INCLUDE_ASM("object/railmodifier", func_00362978);
  * @param tail  address of its closing tag
  */
 // PORT: 64-bit DMA tag writes (ulong) and addresses held in int.
-extern "C" void func_00362978(void* self, int packet, int tail)
+extern "C" void func_00362978(tDeferBucket* self, int packet, int tail)
 {
-    if (*(int*)((char*)self + 0xc) != 0) {
-        ulong* tag = (ulong*)(*(int*)((char*)self + 0x10) | 0x30000000);
+    if (self->mPacket != 0) {
+        ulong* tag = (ulong*)(self->mTail | 0x30000000);
         tag[0] = ((ulong)packet << 32) | 0x20000000;
         tag[1] = 0;
-        *(int*)((char*)self + 0x10) = tail;
+        self->mTail = tail;
     } else {
-        *(int*)((char*)self + 0xc) = packet;
-        *(int*)((char*)self + 0x10) = tail;
+        self->mPacket = packet;
+        self->mTail = tail;
     }
 }
 #endif
@@ -8553,7 +8555,7 @@ extern "C" void func_00362978(void* self, int packet, int tail)
 INCLUDE_ASM("object/railmodifier", func_003629B8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_00362CC8(char* self);
+extern "C" void func_00362CC8(cPS2DeferManager* self);
 
 struct sRmState_29B8 {
     unsigned int w0;
@@ -8617,10 +8619,10 @@ static inline sRmSaved_29B8* save_29B8(sRmBatch_29B8* self, sRmCtx_29B8* ctx)
  * array (+0x51484, count +0x51480): the presets at +0x57488, +0x5748C and +0x57490. The base is then set to the count
  * so later resets keep them.
  */
-extern "C" void func_003629B8(sRmBatch_29B8* self)
+extern "C" void func_003629B8(cPS2DeferManager* self)
 {
-    self->base = 0;
-    func_00362CC8((char*)self);
+    self->mNumStaticStates = 0;
+    func_00362CC8(self);
     sRmCtx_29B8* ctx = D_004A5B80_29B8;
     *ctx->top = D_00501420_29B8;
     set1_29B8(ctx, 0x3, 0, 0);
@@ -8632,9 +8634,9 @@ extern "C" void func_003629B8(sRmBatch_29B8* self)
     set0_29B8(ctx, 0x3C0, 6, 3);
     set1_29B8(ctx, 0x7C, 2, 1);
     set1_29B8(ctx, 0xF80, 7, 17);
-    self->a = save_29B8(self, ctx);
+    self->unk_57488 = (cDrawStateList*)save_29B8(((sRmBatch_29B8*)self), ctx);
     set1_29B8(ctx, 0xF80, 7, 2);
-    self->b = save_29B8(self, ctx);
+    self->unk_5748C = (cDrawStateList*)save_29B8(((sRmBatch_29B8*)self), ctx);
     set1_29B8(ctx, 0x7C, 2, 5);
     set1_29B8(ctx, 0xF80, 7, 3);
     set1_29B8(ctx, 0x3, 0, 1);
@@ -8642,8 +8644,8 @@ extern "C" void func_003629B8(sRmBatch_29B8* self)
     set1_29B8(ctx, 0x1800000, 23, 1);
     set1_29B8(ctx, 0x300000, 20, 3);
     set1_29B8(ctx, 0xFF000, 12, 92);
-    self->c = save_29B8(self, ctx);
-    self->base = self->count;
+    self->unk_57490 = (cDrawStateList*)save_29B8(((sRmBatch_29B8*)self), ctx);
+    self->mNumStaticStates = self->mUsedDrawStates;
 }
 #endif
 
@@ -8670,25 +8672,25 @@ extern sRail20_2CC8 sDrawState_s_defaultDrawState;
  * draw state (+0x69CA8) to sDrawState_s_defaultDrawState, and the current matrix (+0x69CC0) and scissor (+0x69CC4) to
  * -1 with no cached matrices (+0x69CC8).
  */
-extern "C" void func_00362CC8(char* self)
+extern "C" void func_00362CC8(cPS2DeferManager* self)
 {
-    *(int*)(self + 0x0) = 0;
-    *(int*)(self + 0x57494) = 0;
-    *(int*)(self + 0x51480) = *(int*)(self + 0x57484);
-    char* stateHashTable = self + 0x674A0;
-    InvalidDCache(stateHashTable, self + 0x6789F);
-    char* nodeHashTable = self + 0x678A0;
-    InvalidDCache(nodeHashTable, self + 0x67C9F);
+    self->mNumSubmitDMA = 0;
+    self->mUsedStates = 0;
+    self->mUsedDrawStates = self->mNumStaticStates;
+    char* stateHashTable = (char*)&self->mStateHash[0];
+    InvalidDCache(stateHashTable, ((char*)self) + 0x6789F);
+    char* nodeHashTable = (char*)&self->mBucketHash[0];
+    InvalidDCache(nodeHashTable, ((char*)self) + 0x67C9F);
     MEM_fill(D_004A5B84, 0, 0x400);
     func_0038F738(stateHashTable, 0x400, 2);
     func_0038F738(nodeHashTable, 0x400, 2);
-    *(int*)(self + 0x67CA4) = 0;
-    sRail20_2CC8* currentState = (sRail20_2CC8*)(self + 0x69CA8);
+    self->mNumSortItems = 0;
+    sRail20_2CC8* currentState = (sRail20_2CC8*)(&self->mCurrentState);
     *currentState = sDrawState_s_defaultDrawState;
-    *(int*)(self + 0x6AED0) = 0;
-    *(int*)(self + 0x69CC0) = -1;
-    *(int*)(self + 0x69CC8) = 0;
-    *(int*)(self + 0x69CC4) = -1;
+    self->mIndexPort = 0;
+    self->unk_69CC0 = -1;
+    self->mIndexView = 0;
+    self->mActivePortIndex = -1;
 }
 #endif
 
@@ -8749,7 +8751,7 @@ struct sRmBatch_2DE8 {
 // REF n2-render-layer.md: InternState, FindBucket, AppendPacket (0x362978).
 extern "C" unsigned int* cPS2DeferManager_Find(sRmBatch_2DE8* self, sRmEntry_2DE8* e, int hash);
 extern "C" sRmNode_2DE8* cPS2DeferManager_Find1(sRmBatch_2DE8* self, unsigned int* state, int key, int hash, int mtxIndex);
-extern "C" void func_00362978(void* self, int packet, int tail);
+extern "C" void func_00362978(tDeferBucket* self, int packet, int tail);
 
 union sRmTexKey_2DE8 {
     int i;
@@ -8813,7 +8815,7 @@ static inline void addEntry_2DE8(sRmBatch_2DE8* self, sRmEntry_2DE8* e, unsigned
             self->items[self->nItems++].node = n;
         }
     }
-    func_00362978(node, e->packet, e->tail);
+    func_00362978((tDeferBucket*)node, e->packet, e->tail);
     if (e->continuation != 0) {
         sRmNode_2DE8* prev = self->last;
         if (prev != 0) {
@@ -8836,7 +8838,7 @@ static inline void addEntry_2DE8(sRmBatch_2DE8* self, sRmEntry_2DE8* e, unsigned
  * @param vself  the defer manager
  */
 // PORT: (int) of a pointer for hashing.
-extern "C" void func_00362DE8(void* vself)
+extern "C" void func_00362DE8(cPS2DeferManager* vself)
 {
     sRmBatch_2DE8* self = (sRmBatch_2DE8*)vself;
     self->last = 0;
@@ -8878,9 +8880,9 @@ INCLUDE_ASM("object/railmodifier", func_00363490);
 extern void* D_004A4474;
 extern char* cGraphicsMan_TheGraphicsMan_railmodifier __asm__("cGraphicsMan_TheGraphicsMan");
 extern const int D_004A4058[];
-extern "C" void func_00362DE8(void* self);
-extern "C" void func_00364360(void* self, ulong** pp);
-extern "C" void func_00364050(char* self);
+extern "C" void func_00362DE8(cPS2DeferManager* self);
+extern "C" void func_00364360(cPS2DeferManager* self, ulong** pp);
+extern "C" void func_00364050(cPS2DeferManager* self);
 extern "C" void func_003666F8();
 extern "C" void func_0038F300(void* ring, int mode);
 extern "C" void func_00396128(void* obj);
@@ -8960,13 +8962,13 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
     sRmPassTypes_3490 split;
     int bounds[3];
     ulong* pkt;
-    func_00362DE8(self);
+    func_00362DE8((cPS2DeferManager*)self);
     *out1 = 0;
     *out2 = 0;
     pkt = (ulong*)(*pktAddr | 0x30000000);
     resetState_3490(&self->state);
-    func_00364360(self, &pkt);
-    func_00364050((char*)self);
+    func_00364360((cPS2DeferManager*)self, &pkt);
+    func_00364050((cPS2DeferManager*)((char*)self));
     func_003666F8();
     void* ring = D_004A4474;
     int saved = *(int*)ring;
@@ -9045,7 +9047,7 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
                 self->lastTex = -1;
                 prev = 0;
                 resetState_3490(&self->state);
-                func_00364360(self, &pkt);
+                func_00364360((cPS2DeferManager*)self, &pkt);
                 int* tc = (int*)((char*)obj + 0x1F4C);
                 for (int k = 0; k < 2; k++)
                     tc[k] = -1;
@@ -9069,7 +9071,7 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
                 self->lastTex = -1;
                 prev = 0;
                 resetState_3490(&self->state);
-                func_00364360(self, &pkt);
+                func_00364360((cPS2DeferManager*)self, &pkt);
                 int* tc = (int*)((char*)obj + 0x1F4C);
                 for (int k = 0; k < 2; k++)
                     tc[k] = -1;
@@ -9115,7 +9117,7 @@ INCLUDE_ASM("object/railmodifier", func_00363C20);
 // the packet-header stores, as in retail (integer-typed base steering); plain form 96.29%. Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 extern "C" void func_00362478(sGifPacket* pkt, int a, int b, int ctx);
-extern "C" void func_00364CD0(void* self, int a, int b, unsigned int c, ulong** pp);
+extern "C" void func_00364CD0(cPS2DeferManager* self, int a, int b, unsigned int c, ulong** pp);
 extern char* cGraphicsMan_TheGraphicsMan_railmodifier __asm__("cGraphicsMan_TheGraphicsMan");
 
 struct sRmGs3C20 {
@@ -9187,16 +9189,16 @@ extern "C" void func_00363C20_impl(__SIZE_TYPE__ selfi, sRmGs3C20* st, int nodeL
         if (((State3C20(self)->w0 & 0x3C0) >> 6) != ctx) {
             self->buf = nodeLayer;
             self->frame = frameWord;
-            func_00364CD0(self, (st->w0 & 0x3C0) >> 6, 0, frameWord, pp);
+            func_00364CD0((cPS2DeferManager*)self, (st->w0 & 0x3C0) >> 6, 0, frameWord, pp);
         } else if (nodeLayer != self->buf) {
             self->buf = nodeLayer;
             self->frame = frameWord;
-            func_00364CD0(self, (st->w0 & 0x3C0) >> 6, 1, frameWord, pp);
+            func_00364CD0((cPS2DeferManager*)self, (st->w0 & 0x3C0) >> 6, 1, frameWord, pp);
         }
         if (self->frame != frameWord) {
             self->buf = nodeLayer;
             self->frame = frameWord;
-            func_00364CD0(self, (st->w0 & 0x3C0) >> 6, 2, frameWord, pp);
+            func_00364CD0((cPS2DeferManager*)self, (st->w0 & 0x3C0) >> 6, 2, frameWord, pp);
         }
     }
     pkt.count = 0;
@@ -9260,12 +9262,12 @@ extern "C" void func_0038F6A8(void* ring);
  * The 4 x 257 histogram lives in the scratchpad ring (func_0038F460) and D_00505B70 is the swap buffer; after the
  * fourth pass the sorted items are back in place.
  */
-extern "C" void func_00364050(char* self)
+extern "C" void func_00364050(cPS2DeferManager* self)
 {
     void* ring = D_004A4474;
     sRmSortItem4050* dst = D_00505B70;
-    int n = *(int*)(self + 0x67CA4);
-    sRmSortItem4050* src = (sRmSortItem4050*)(self + 0x67CA8);
+    int n = self->mNumSortItems;
+    sRmSortItem4050* src = (sRmSortItem4050*)(&self->mSortItems[0]);
     int (*hist)[257] = (int (*)[257])func_0038F460(ring, 0, -1, 0);
     MEM_fill(hist, 0, 4112);
     for (int i = 0; i < n; i++) {
@@ -9363,7 +9365,7 @@ INCLUDE_ASM("object/railmodifier", func_00364360);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void func_00362478(sGifPacket* pkt, int a, int b, int ctx);
-extern "C" void func_00364CD0(void* self, int a, int b, unsigned int c, ulong** pp);
+extern "C" void func_00364CD0(cPS2DeferManager* self, int a, int b, unsigned int c, ulong** pp);
 // PORT: bound by asm label so this caller's packet type doesn't conflict with the definition.
 extern "C" void func_003627A8_4360(void* pkt, ulong** pp, int mode) __asm__("func_003627A8");
 extern char* cGraphicsMan_TheGraphicsMan_railmodifier __asm__("cGraphicsMan_TheGraphicsMan");
@@ -9402,7 +9404,7 @@ struct sRmPkt4360 {
  * @param pp  DMA chain cursor
  */
 // PORT: 64-bit DMA/GIF tag writes (ulong).
-extern "C" void func_00364360(void* self, ulong** pp)
+extern "C" void func_00364360(cPS2DeferManager* self, ulong** pp)
 {
     char* gs = cGraphicsMan_TheGraphicsMan_railmodifier;
     sRmGsState4360 st;
@@ -9503,29 +9505,29 @@ struct sRailXfTable_45B8 {
  *
  * @param in  matrix record to look up
  */
-extern "C" void func_003645B8(sRailXfTable_45B8* self, sRailXf_45B8* in)
+extern "C" void func_003645B8(cPS2DeferManager* self, sRailXf_45B8* in)
 {
     int i;
-    self->found = -1;
-    for (i = 0; i < self->count; i++) {
-        if (in->Key0Eq(self->entries[i].key0) && in->Key1Eq(self->entries[i].key1) &&
-            in->Key2Eq(self->entries[i].key2) && in->Key3Eq(self->entries[i].key3)) {
-            self->found = i;
+    self->unk_69CC0 = -1;
+    for (i = 0; i < self->mIndexView; i++) {
+        if (in->Key0Eq(((sRailXf_45B8*)&self->mViewStates[0])[i].key0) && in->Key1Eq(((sRailXf_45B8*)&self->mViewStates[0])[i].key1) &&
+            in->Key2Eq(((sRailXf_45B8*)&self->mViewStates[0])[i].key2) && in->Key3Eq(((sRailXf_45B8*)&self->mViewStates[0])[i].key3)) {
+            self->unk_69CC0 = i;
             break;
         }
     }
-    if (self->found < 0) {
-        self->entries[self->count].m0 = in->m0;
-        self->entries[self->count].m1 = in->m1;
-        self->entries[self->count].m2 = in->m2;
-        self->entries[self->count].v0 = in->v0;
-        self->entries[self->count].v1 = in->v1;
-        self->entries[self->count].key0 = in->key0;
-        self->entries[self->count].key1 = in->key1;
-        self->entries[self->count].key2 = in->key2;
-        self->entries[self->count].key3 = in->key3;
-        self->found = self->count;
-        self->count++;
+    if (self->unk_69CC0 < 0) {
+        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].m0 = in->m0;
+        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].m1 = in->m1;
+        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].m2 = in->m2;
+        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].v0 = in->v0;
+        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].v1 = in->v1;
+        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].key0 = in->key0;
+        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].key1 = in->key1;
+        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].key2 = in->key2;
+        ((sRailXf_45B8*)&self->mViewStates[0])[self->mIndexView].key3 = in->key3;
+        self->unk_69CC0 = self->mIndexView;
+        self->mIndexView++;
     }
 }
 #endif
@@ -9587,9 +9589,9 @@ struct sData20 {
  *
  * @param src  draw state to copy
  */
-extern "C" void func_00364C90(void* self, sData20* src)
+extern "C" void func_00364C90(cPS2DeferManager* self, sData20* src)
 {
-    *(sData20*)((char*)self + 0x69CA8) = *src;
+    *(sData20*)&self->mCurrentState = *src;
 }
 #endif
 
@@ -9755,7 +9757,7 @@ static inline void putQw_4CD0(ulong*& p, const void* src, int n)
  * @param pp  DMA chain cursor
  */
 // PORT: 64-bit DMA/VIF/GIF words (ulong), 128-bit copies (cQuad128), addresses held in int.
-extern "C" void func_00364CD0(void* vself, int type, int mode, unsigned int w3, ulong** pp)
+extern "C" void func_00364CD0(cPS2DeferManager* vself, int type, int mode, unsigned int w3, ulong** pp)
 {
     sDefer_4CD0* self = (sDefer_4CD0*)vself;
     sPkt_4CD0 pk(*pp);
@@ -11043,10 +11045,10 @@ struct sRmTex_366E90 {
  *
  * @param tex  the texture record to convert
  */
-extern "C" void func_00366E90(char* self, sRmTex_366E90* tex)
+extern "C" void func_00366E90(cTextureMan* self, sRmTex_366E90* tex)
 {
     int n = 0;
-    char* buf = new (str_TempTex, *(int*)(self + 0x1F58) ^ 0x100, 0) char[tex->size];
+    char* buf = new (str_TempTex, self->TexMemType ^ 0x100, 0) char[tex->size];
     int tw = (tex->tex0 >> 26) & 0xF;
     int th = (tex->tex0 >> 30) & 0xF;
     int bpp = tex->bpp;
@@ -11082,16 +11084,17 @@ INCLUDE_ASM("object/railmodifier", func_00366FE0__FPvi);
  *
  * @param val  the new memory type (cPS2GraphicsMan_InitTextures passes its memtype)
  */
-void func_00366FE0(void* self, int val)
+void func_00366FE0(void* vself, int val)
 {
-    *(int*)((char*)self + 0x1F58) = val;
+    cTextureMan* self = (cTextureMan*)vself;
+    self->TexMemType = val;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/railmodifier", func_00366FE8);
 #ifdef SKIP_ASM
-extern "C" void func_003670E0(void* self);
+extern "C" void func_003670E0(cTextureMan* self);
 extern "C" void func_00365E40(void* list, int a, int size, void* pool);
 
 /**
@@ -11102,17 +11105,17 @@ extern "C" void func_00365E40(void* list, int a, int size, void* pool);
  * the heap at +0x1F60 over 0x400000 bytes (the 4 MB of GS memory) and the one at +0x4350 over 0x1000 bytes, both
  * pointing at the record table at +0x8. cPS2GraphicsMan_Init calls it right after allocating the manager.
  */
-extern "C" void func_00366FE8(void* self)
+extern "C" void func_00366FE8(cTextureMan* self)
 {
-    *(int*)((char*)self + 0x1F58) = 0;
+    self->TexMemType = 0;
     func_003670E0(self);
-    int* bound = (int*)((char*)self + 0x1F4C);
+    int* bound = (int*)(&self->mBoundTex[0]);
     for (int i = 1; i >= 0; i--) {
         bound[i] = -1;
     }
-    *(int*)((char*)self + 0x1F54) = -1;
-    func_00365E40((char*)self + 0x1F60, 0, 0x400000, (char*)self + 0x8);
-    func_00365E40((char*)self + 0x4350, 0, 0x1000, (char*)self + 0x8);
+    self->mCLUTTex = -1;
+    func_00365E40(self->mMainHeap, 0, 0x400000, &self->m_pTexInfo[0]);
+    func_00365E40(self->mTempHeap, 0, 0x1000, &self->m_pTexInfo[0]);
 }
 #endif
 
@@ -11128,15 +11131,15 @@ extern "C" void func_00366618(void* list);
  * +0x1F60, then sets the bound texture of both contexts (+0x1F4C, +0x1F50) and the loaded CLUT texture (+0x1F54) to -1.
  * func_0037BD98 calls it before reserving the frame and depth buffers.
  */
-extern "C" void func_00367078(void* self)
+extern "C" void func_00367078(cTextureMan* self)
 {
-    func_00366618((char*)self + 0x4350);
-    func_00366618((char*)self + 0x1F60);
-    int* bound = (int*)((char*)self + 0x1F4C);
+    func_00366618(self->mTempHeap);
+    func_00366618(self->mMainHeap);
+    int* bound = (int*)(&self->mBoundTex[0]);
     for (int i = 1; i >= 0; i--) {
         bound[i] = -1;
     }
-    *(int*)((char*)self + 0x1F54) = -1;
+    self->mCLUTTex = -1;
 }
 #endif
 
@@ -11152,15 +11155,15 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  * bytes), then points the free list head (+0x1F48) at slot 1500 (+0x1778) and makes each of slots 1500 to 1998 point at
  * the next one; slot 1999 stays 0 and ends the list. cPSPGraphicsMan_NewNonBindTexID pops ids from this list.
  */
-extern "C" void func_003670E0(void* self)
+extern "C" void func_003670E0(cTextureMan* self)
 {
     int i;
-    *(int*)((char*)self + 0x0) = 0;
-    *(int*)((char*)self + 0x4) = 0;
-    MEM_fill((char*)self + 0x8, 0, 8000);
-    *(void***)((char*)self + 0x1F48) = (void**)((char*)self + 0x1778);
+    self->m_iNumBindTextures = 0;
+    self->m_iNumNonBindTextures = 0;
+    MEM_fill(&self->m_pTexInfo[0], 0, 8000);
+    self->m_pNonBindFreeTexInfo = (cLinkTexInfo*)((void**)(&self->m_pTexInfo[1500]));
     for (i = 0; i < 499; i++) {
-        void** list = *(void***)((char*)self + 0x1F48);
+        void** list = (void**)self->m_pNonBindFreeTexInfo;
         list[i] = &list[i + 1];
     }
 }

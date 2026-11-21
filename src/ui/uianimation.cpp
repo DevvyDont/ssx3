@@ -100,7 +100,7 @@ INCLUDE_ASM("ui/uianimation", cUIAnimationChannel_getAnimChanType);
  *
  * @return the channel type
  */
-extern "C" unsigned short cUIAnimationChannel_getAnimChanType(void* self)
+extern "C" unsigned short cUIAnimationChannel_getAnimChanType(cUIAnimationChannel* self)
 {
     void* anim = *(void**)self;
     if (anim != 0) {
@@ -120,9 +120,10 @@ INCLUDE_ASM("ui/uianimation", cUIAnimationChannel_setAnimChanData__FPvi);
  *
  * @param val  the channel data record
  */
-void cUIAnimationChannel_setAnimChanData(void* self, int val)
+void cUIAnimationChannel_setAnimChanData(void* vself, int val)
 {
-    *(int*)((char*)self + 0x0) = val;
+    cUIAnimationChannel* self = (cUIAnimationChannel*)vself;
+    self->mpAnimChan = (tUIAnimChannel*)val;
 }
 #endif
 
@@ -379,7 +380,7 @@ extern "C" void cUIAnimation_updateThing(cUIAnimation* self, cUIThing* obj, int 
         for (unsigned int i = 0; i < ((sUIAnimHdr75E0*)self->mpAnimHeader)->ntracks; i++) {
             float chanValue = cUIAnimationChannel_evalAtFrameFloat((cUIAnimationChannel_evalAtFrameFloat_sAnim**)(((char*)self->mpAnimChannels) + (i << 2)), frame);
             sUIAnimVt75E0* vt = (sUIAnimVt75E0*)obj->mVtbl;
-            vt[12].fn(((char*)obj) + vt[12].delta, cUIAnimationChannel_getAnimChanType(((char*)self->mpAnimChannels) + (i << 2)), chanValue);
+            vt[12].fn(((char*)obj) + vt[12].delta, cUIAnimationChannel_getAnimChanType((cUIAnimationChannel*)(((char*)self->mpAnimChannels) + (i << 2))), chanValue);
         }
     }
     self->mLastFrameEval = frame;
