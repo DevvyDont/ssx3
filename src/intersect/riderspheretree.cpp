@@ -2020,7 +2020,7 @@ extern sSphereVec4 D_004FF640[8];
 extern "C" void SphereTree_TransformAbs(SphereTree* self, sSphereVec4* transMat, float scale)
 {
     sSphereVec4* pos = (sSphereVec4*)self;
-    sSphereVec4* neg = (sSphereVec4*)((char*)self + 0x70);
+    sSphereVec4* neg = (sSphereVec4*)(&self->axis[7]);
     for (int i = 0; i < 4; i++) {
         pos[i] = mtxMulVec_C648(transMat, scale_C648(D_004FF640[i], scale));
         neg[-i] = scale_C648(pos[i], -1.0f);
@@ -2097,7 +2097,7 @@ extern "C" int SphereTree_IsSphereCollision(SphereTree* self, t4Vector* spherePo
 {
     void* tree = self->treeInfo;
     if (*(int*)((char*)tree + 0x8) != 0) {
-        *(int*)((char*)self->treeInfo + 0x28) = SphereTree_AllocBuf(tree);
+        self->treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(tree);
     }
     return SphereTree_isSphereCollision(self, spherePos, sphereRadius, (t4Vector*)&self->transCenter, 0, 0, outPush, outContact);
 }
@@ -2124,7 +2124,7 @@ extern "C" int SphereTree_IsBoxCollision(SphereTree* self, t3Vector* boxMin, t3V
 {
     void* tree = self->treeInfo;
     if (*(int*)((char*)tree + 0x8) != 0) {
-        *(int*)((char*)self->treeInfo + 0x28) = SphereTree_AllocBuf(tree);
+        self->treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(tree);
     }
     return SphereTree_isBoxCollision(self, boxMin, boxMax, (t4Vector*)&self->transCenter, 0, 0, outPos, outNormal);
 }
@@ -2166,7 +2166,7 @@ extern "C" int SphereTree_IsPlaneCollision(SphereTree* self, sVecArg_C9B8* plane
 {
     void* tree = self->treeInfo;
     if (*(int*)((char*)tree + 0x8) != 0) {
-        *(int*)((char*)self->treeInfo + 0x28) = SphereTree_AllocBuf(tree);
+        self->treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(tree);
     }
     SphereTree_populateSortAxis_v(self, zeroW_C9B8(*plane));
     self->worstCase = 0.0f;
@@ -2203,7 +2203,7 @@ extern "C" int SphereTree_IsTriCollision(SphereTree* self, t4Vector* point1, t4V
 {
     void* treeInfo = self->treeInfo;
     if (*(int*)((char*)treeInfo + 0x8) != 0) {
-        *(int*)((char*)self->treeInfo + 0x28) = SphereTree_AllocBuf(treeInfo);
+        self->treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(treeInfo);
     }
     SphereTree_populateSortAxis(self, (t4Vector*)uNorm);
     self->worstCase = 0.0f;
@@ -2236,7 +2236,7 @@ extern "C" int SphereTree_IsTreeCollision(SphereTree* self, void* other, t4Vecto
 {
     void* tree = self->treeInfo;
     if (*(int*)((char*)tree + 0x8) != 0) {
-        *(int*)((char*)self->treeInfo + 0x28) = SphereTree_AllocBuf(tree);
+        self->treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(tree);
     }
     tree = *(void**)((char*)other + 0x98);
     if (*(int*)((char*)tree + 0x8) != 0) {
@@ -3654,8 +3654,8 @@ static inline sSphereVec4 vu0Scale_E4D0(const sSphereVec4& v, float s)
 extern "C" int cWorldLine_IsTriInt(cWorldLine* self, sSphereVec4* vertA, sSphereVec4* vertB, sSphereVec4* vertC, sSphereVec4* n,
                              sSphereVec4* hit, sSphereVec4* outN, float* outT)
 {
-    sSphereVec4* origin = (sSphereVec4*)((char*)self + 0x60);
-    sSphereVec4* dir = (sSphereVec4*)((char*)self + 0x70);
+    sSphereVec4* origin = (sSphereVec4*)(&self->p0);
+    sSphereVec4* dir = (sSphereVec4*)(&self->dp);
     float denom = vu0Dot_E4D0(*dir, *n);
     if (__builtin_fabsf(denom) < 1.000000013351432e-10f) {
         return 0;
@@ -4240,7 +4240,7 @@ extern void* cWorldRider_vtbl[];
 extern "C" void cWorldRider__cWorldRider(cWorldRider* self, int flags)
 {
     self->mVtbl = cWorldRider_vtbl;
-    cRiderSphereTree__cRiderSphereTree((char*)self + 0x70, 2);
+    cRiderSphereTree__cRiderSphereTree(&self->localTree, 2);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -4335,7 +4335,7 @@ extern "C" void cRiderSphereTree_ApplyTransform(sSphereTreeNode* s, sSphereMtx* 
  */
 extern "C" void cWorldRider_Transform(cWorldRider* self, sSphereMtx* mat, float scale)
 {
-    sSphereTreeNode* node = (sSphereTreeNode*)((char*)self + 0x70);
+    sSphereTreeNode* node = (sSphereTreeNode*)(&self->localTree);
     cRiderSphereTree_operatorE((sSphereNode_9A28*)node, (sSphereNode_9A28*)self->st);
     self->st = (cRiderSphereTree*)node;
     cRiderSphereTree_ApplyTransform(node, mat, scale);

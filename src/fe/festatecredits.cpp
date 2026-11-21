@@ -267,7 +267,7 @@ extern "C" void cFEStateCredits_onRender2D(cFEStateCredits* self)
             white.w = 1.0f;
             float scaledHeight = size.y * lineH;
             float bh = box.y;
-            sV4_185F40 save = *(sV4_185F40*)((char*)self->mpTextScroll + 0x1C);
+            sV4_185F40 save = *(sV4_185F40*)&self->mpTextScroll->mColour;
             ((sRS_185F40*)GrMan->m_pCurrentDrawState)->mode = 21;
             signed char rows = (int)scaledHeight + 3;
             int scroll = self->mPixelOffset;

@@ -271,22 +271,22 @@ extern "C" void cGame__cGame(cGame* self, int flags)
 {
     void** gameStateVtbl = cGameState_vtbl;
     self->mVtbl = D_0046D970;
-    *(void***)((char*)self + 0x1F8) = gameStateVtbl;
-    *(void***)((char*)self + 0x1E8) = gameStateVtbl;
-    *(void***)((char*)self + 0x1C4) = gameStateVtbl;
-    *(void***)((char*)self + 0x1A8) = gameStateVtbl;
-    *(void***)((char*)self + 0x198) = gameStateVtbl;
-    *(void***)((char*)self + 0x184) = gameStateVtbl;
-    *(void***)((char*)self + 0x164) = gameStateVtbl;
-    *(void***)((char*)self + 0x154) = gameStateVtbl;
-    *(void***)((char*)self + 0x144) = gameStateVtbl;
-    *(void***)((char*)self + 0x134) = gameStateVtbl;
-    *(void***)((char*)self + 0x124) = gameStateVtbl;
-    *(void***)((char*)self + 0x10C) = gameStateVtbl;
-    *(void***)((char*)self + 0xFC) = gameStateVtbl;
-    *(void***)((char*)self + 0xEC) = gameStateVtbl;
-    *(void***)((char*)self + 0xDC) = gameStateVtbl;
-    *(void***)((char*)self + 0xBC) = gameStateVtbl;
+    self->mReplayStartState.mVtbl = gameStateVtbl;
+    self->mSessionTeleportState.mVtbl = gameStateVtbl;
+    self->mUserSelectState.mVtbl = gameStateVtbl;
+    self->mNextHeatState.mVtbl = gameStateVtbl;
+    self->mPodiumState.mVtbl = gameStateVtbl;
+    self->mSectionLoadState.mVtbl = gameStateVtbl;
+    self->mTrackStartState.mVtbl = gameStateVtbl;
+    self->mTransportWaitState.mVtbl = gameStateVtbl;
+    self->mEndWaitState.mVtbl = gameStateVtbl;
+    self->mPostEventState.mVtbl = gameStateVtbl;
+    self->mEndState.mVtbl = gameStateVtbl;
+    self->mFinishlineState.mVtbl = gameStateVtbl;
+    self->mRidingState.mVtbl = gameStateVtbl;
+    self->mGateState.mVtbl = gameStateVtbl;
+    self->mPreEventState.mVtbl = gameStateVtbl;
+    self->mEventStartState.mVtbl = gameStateVtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

@@ -1709,7 +1709,7 @@ extern "C" void cFEStateRewardGalleryBase_updateHighlither(cFEStateRewardGallery
             func_003A0290((char*)self->mpHilighter, &barPos);
             barPos.y = cellPos.y + self->mVertHilighterOffset;
             barPos.x = cellPos.x + self->mHorizHilighterOffset;
-            *(sVec3_F168*)((char*)self->mpHilighter + 0x44) = barPos;
+            *(sVec3_F168*)&self->mpHilighter->mPosition = barPos;
             char* selectBar = (char*)self->mpHilighter;
             sVEK1D0F30a* vt = *(sVEK1D0F30a**)(selectBar + 8);
             vt[9].fn(selectBar + vt[9].delta, 1);
@@ -1761,12 +1761,12 @@ extern "C" void cFEStateRewardGalleryBase_updateArrows(cFEStateRewardGalleryBase
 {
     cUIIcon* obj = self->mpArrowUp;
     if (obj != 0) {
-        sVEntry001D10A8* vt = *(sVEntry001D10A8**)((char*)obj + 8);
+        sVEntry001D10A8* vt = (sVEntry001D10A8*)obj->mVtbl;
         vt[9].fn((char*)obj + vt[9].delta, self->mFirstVisibleRow > 0);
     }
     cUIIcon* obj2 = self->mpArrowDown;
     if (obj2 != 0) {
-        sVEntry001D10A8* vt = *(sVEntry001D10A8**)((char*)obj2 + 8);
+        sVEntry001D10A8* vt = (sVEntry001D10A8*)obj2->mVtbl;
         vt[9].fn((char*)obj2 + vt[9].delta,
                  self->mFirstVisibleRow + self->mMaxRewardRows < self->mNumRows);
     }
@@ -1799,7 +1799,7 @@ extern "C" void* cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters(cFESt
     self->mNumTotalRewards = 0;
     self->mpDBPosters = 0;
     for (int i = 42; i >= 0; i--) {
-        ((void**)((char*)self + 0xA28))[i] = 0;
+        ((void**)(&self->mpPosters[0]))[i] = 0;
     }
     return ((void*)self);
 }
@@ -1899,7 +1899,7 @@ extern "C" void cFEStateRewardGalleryPosters_purgeRewards(cFEStateRewardGalleryP
     self->mNumTotalRewards = 0;
     self->mpDBPosters = 0;
     for (i = 42; i >= 0; i--) {
-        ((int*)((char*)self + 0xa28))[i] = 0;
+        ((int*)(&self->mpPosters[0]))[i] = 0;
     }
 }
 #endif
@@ -1929,7 +1929,7 @@ extern "C" void* cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingC
     self->mVtbl = cFEStateRewardGalleryTradingCards_vtbl;
     self->mpDBTradingCards = 0;
     for (int i = 115; i >= 0; i--) {
-        ((void**)((char*)self + 0xA28))[i] = 0;
+        ((void**)(&self->mpTradingCards[0]))[i] = 0;
     }
     return ((void*)self);
 }
@@ -2029,7 +2029,7 @@ extern "C" void cFEStateRewardGalleryTradingCards_purgeRewards(cFEStateRewardGal
     self->mNumTotalRewards = 0;
     self->mpDBTradingCards = 0;
     for (i = 115; i >= 0; i--) {
-        ((int*)((char*)self + 0xa28))[i] = 0;
+        ((int*)(&self->mpTradingCards[0]))[i] = 0;
     }
 }
 #endif
@@ -2059,7 +2059,7 @@ extern "C" void* cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptAr
     self->mVtbl = cFEStateRewardGalleryConceptArts_vtbl;
     self->mpDBConceptArts = 0;
     for (int i = 99; i >= 0; i--) {
-        ((void**)((char*)self + 0xA28))[i] = 0;
+        ((void**)(&self->mpConceptArts[0]))[i] = 0;
     }
     return ((void*)self);
 }
@@ -2159,7 +2159,7 @@ extern "C" void cFEStateRewardGalleryConceptArts_purgeRewards(cFEStateRewardGall
     self->mNumTotalRewards = 0;
     self->mpDBConceptArts = 0;
     for (i = 99; i >= 0; i--) {
-        ((int*)((char*)self + 0xa28))[i] = 0;
+        ((int*)(&self->mpConceptArts[0]))[i] = 0;
     }
 }
 #endif
@@ -2189,7 +2189,7 @@ extern "C" void* cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos(cFEStat
     self->mVtbl = cFEStateRewardGalleryVideos_vtbl;
     self->mpDBVideos = 0;
     for (int i = 1; i >= 0; i--) {
-        ((void**)((char*)self + 0xA28))[i] = 0;
+        ((void**)(&self->mpVideos[0]))[i] = 0;
     }
     return ((void*)self);
 }
@@ -2289,7 +2289,7 @@ extern "C" void cFEStateRewardGalleryVideos_purgeRewards(cFEStateRewardGalleryVi
     self->mNumTotalRewards = 0;
     self->mpDBVideos = 0;
     for (i = 1; i >= 0; i--) {
-        ((int*)((char*)self + 0xa28))[i] = 0;
+        ((int*)(&self->mpVideos[0]))[i] = 0;
     }
 }
 #endif
@@ -2319,7 +2319,7 @@ extern "C" void* cFEStateRewardGalleryToys_cFEStateRewardGalleryToys(cFEStateRew
     self->mVtbl = cFEStateRewardGalleryToys_vtbl;
     self->mpDBToys = 0;
     for (int i = 27; i >= 0; i--) {
-        ((void**)((char*)self + 0xA28))[i] = 0;
+        ((void**)(&self->mpToys[0]))[i] = 0;
     }
     return ((void*)self);
 }
@@ -2419,7 +2419,7 @@ extern "C" void cFEStateRewardGalleryToys_purgeRewards(cFEStateRewardGalleryToys
     self->mNumTotalRewards = 0;
     self->mpDBToys = 0;
     for (i = 27; i >= 0; i--) {
-        ((int*)((char*)self + 0xa28))[i] = 0;
+        ((int*)(&self->mpToys[0]))[i] = 0;
     }
 }
 #endif
@@ -2450,7 +2450,7 @@ extern "C" void* cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars
     self->mVtbl = cFEStateRewardGalleryCheatChars_vtbl;
     self->mpDBCheatChars = 0;
     for (int i = 27; i >= 0; i--) {
-        ((void**)((char*)self + 0xA28))[i] = 0;
+        ((void**)(&self->mpCheatChars[0]))[i] = 0;
     }
     return ((void*)self);
 }
@@ -2507,7 +2507,7 @@ extern "C" void cFEStateRewardGalleryCheatChars_purgeRewards(cFEStateRewardGalle
     self->mNumTotalRewards = 0;
     self->mpDBCheatChars = 0;
     for (i = 27; i >= 0; i--) {
-        ((int*)((char*)self + 0xa28))[i] = 0;
+        ((int*)(&self->mpCheatChars[0]))[i] = 0;
     }
 }
 #endif
@@ -3075,8 +3075,8 @@ extern void* cFEStateVideoPlayer_vtbl[];
 extern "C" void* cFEStateVideoPlayer_cFEStateVideoPlayer(cFEStateVideoPlayer* vself, cUIEngine* engine, cUIState* owner, signed char player)
 {
     cUIState_cUIState1(((char*)vself), engine, owner);
-    char* title = ((char*)vself) + 0x48;
-    char* body = ((char*)vself) + 0x148;
+    char* title = vself->mVideoFileName;
+    char* body = vself->mAudioFileName;
     vself->mUserNum = player;
     title[0] = 0;
     body[0] = 0;
@@ -3087,7 +3087,7 @@ extern "C" void* cFEStateVideoPlayer_cFEStateVideoPlayer(cFEStateVideoPlayer* vs
     vself->mVtbl = cFEStateVideoPlayer_vtbl;
     vself->mHashName = 6;
     vself->mInterruptible = 1;
-    tMoviePlayOptions_SetDefaults(((char*)vself) + 0x24C);
+    tMoviePlayOptions_SetDefaults(&vself->mOptions);
     *(char**)&vself->mOptions = title;
     vself->mOptions.sAudioFileName = (const char*)body;
     return ((char*)vself);
@@ -3322,7 +3322,7 @@ extern "C" void cFEStateVideoPlayer_Stop(cFEStateVideoPlayer* self)
 {
     func_002B3A98((char*)cAudioInterface_bxAudio() + 0x118);
     self->mStopPending = 0;
-    cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
+    cUIStateStack_pop(self->mpEngine->mStateStack, 1);
 }
 #endif
 

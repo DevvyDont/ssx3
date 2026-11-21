@@ -455,7 +455,7 @@ extern "C" void cOVState_MAP_onWidgetEvent(cOVState_MAP* selfp, cUIThing* pWidge
         } else {
             cOVState_MAP_cleanupIndicators(selfp);
             cOVState_MAP_setupScreenExit(selfp);
-            cUIStateStack_pop_8C28((char*)selfp->mpEngine + 0x18, 1);
+            cUIStateStack_pop_8C28(selfp->mpEngine->mStateStack, 1);
             selfp->mAttrState = (selfp->mAttrState & ~0x3F00) | 0x780;
         }
         break;
@@ -1510,7 +1510,7 @@ extern "C" int cOVState_onUpdate_HandleIncomingChat(cOVState* self)
     if (*(int*)net != 0 && self->mpScreen != 0) {
         cGameComm* sess = cGameComm_mGameComm;
         if (sess != 0 && sess->mConnected != 0) {
-            char* name = ((char*)self) + 0x58;
+            char* name = self->mszChatBuff;
             if (cGameComm_getQueuedChat((int)sess, name, 65) != 0) {
                 char* helpText = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_b));
                 if (helpText != 0)

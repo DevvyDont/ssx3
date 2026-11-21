@@ -206,7 +206,7 @@ extern "C" void cMCOverlayManager_readSetFileType(cMCOverlayManager* self, int m
     func_002C2540(fmt, str_pct_s_pct_s_e);
     func_00241AA0_r(desc, 0x200);
     cMCOverlayManager_getFileName_r(self, self->mFileType, name, 0x100);
-    sprintf1_v(((char*)self) + 0x1B4, fmt, desc, name);
+    sprintf1_v(&self->mMatch[0], fmt, desc, name);
 }
 #endif
 
@@ -351,7 +351,7 @@ extern "C" void cMCOverlayManager_writeSetFileType(cMCOverlayManager* self, int 
     func_002C2540(fmt, str_pct_s_pct_s_e);
     func_00241AA0_r(desc, 0x200);
     cMCOverlayManager_getFileName_r(self, self->mFileType, name, 0x100);
-    sprintf1_v(((char*)self) + 0x1B4, fmt, desc, name);
+    sprintf1_v(&self->mMatch[0], fmt, desc, name);
 }
 #endif
 
@@ -2478,14 +2478,14 @@ extern "C" void cMCOverlayManager_UpdateSave(cMCOverlayManager* self)
                     if (ovCallI_F698(((char*)self), 67, i)) {
                         char buf[0x200];
                         ovCallIP_F698(((char*)self), 14, i, buf);
-                        if (USTR_compare(((char*)self) + 0x276, buf) == 0 && i != self->mFileCursor) {
+                        if (USTR_compare(&self->mNewFileName[0], buf) == 0 && i != self->mFileCursor) {
                             post_F698(((char*)self), 55);
                             return;
                         }
                     }
                 }
                 if (ovCallI_F698(((char*)self), 67, self->mFileCursor)) {
-                    ovCallIP_F698(((char*)self), 14, self->mFileCursor, ((char*)self) + 0x234);
+                    ovCallIP_F698(((char*)self), 14, self->mFileCursor, &self->mActiveTitleString[0]);
                     post_F698(((char*)self), 9);
                     return;
                 }
@@ -2503,7 +2503,7 @@ extern "C" void cMCOverlayManager_UpdateSave(cMCOverlayManager* self)
         }
     }
     if ((self->callbackIsDeletePressed)() && self->mDeleteOk) {
-        ovCallIP_F698(((char*)self), 14, self->mFileCursor, ((char*)self) + 0x234);
+        ovCallIP_F698(((char*)self), 14, self->mFileCursor, &self->mActiveTitleString[0]);
         post_F698(((char*)self), 0x18);
     }
 }
@@ -2773,7 +2773,7 @@ extern "C" void cMCOverlayManager_UpdateSaveCorrupt(cMCOverlayManager* self)
         return;
     }
     if ((self->callbackIsDeletePressed)() != 0) {
-        ((cMovieDecoder_23FD40*)self->mpMemCard)->play(self->mFileCursor, ((char*)self) + 0x234);
+        ((cMovieDecoder_23FD40*)self->mpMemCard)->play(self->mFileCursor, &self->mActiveTitleString[0]);
         setState_23FD40(((char*)self), 25);
         return;
     }

@@ -155,7 +155,7 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     int i;
     for (i = 0; i < 2; i++) {
         int* inputPad = (int*)cMemMan_alloc(676, str_InputPad, 0, 0);
-        ((int**)(((char*)self) + 0xA8))[i] = inputPad;
+        ((int**)(&self->InputPads[0]))[i] = inputPad;
         *inputPad = 0;
     }
     *(int*)&self->Game = 0;
@@ -700,20 +700,20 @@ extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv)
                     cBXString_operatorE(&track, &trimmed);
                     cBXString__cBXString(&trimmed, 2);
                 }
-                cBXString_operatorE(((char*)self) + 0xCC, &track);
+                cBXString_operatorE(&self->CommandLineTrack, &track);
                 cBXString__cBXString(&track, 2);
             } else if (strcasecmp(opt, str_username_b) == 0) {
                 i++;
                 if (i >= argc) {
                     break;
                 }
-                cBXString_operatorE1(((char*)self) + 0xC4, argv[i]);
+                cBXString_operatorE1(&self->UserName, argv[i]);
             } else if (strcasecmp(opt, str_password) == 0) {
                 i++;
                 if (i >= argc) {
                     break;
                 }
-                cBXString_operatorE1(((char*)self) + 0xC8, argv[i]);
+                cBXString_operatorE1(&self->Password, argv[i]);
             } else if (strcasecmp(opt, str_realfe) == 0) {
                 self->unk_60 = 1;
             } else if (strcasecmp(opt, str_nohud) == 0) {
@@ -3677,7 +3677,7 @@ extern "C" char* func_0022ADD8(char* self, sCfg_22ADD8* cfg, void* visSource, vo
         sMat_22ADD8 gfxMatrix = vt[43].fn((char*)ps2GraphicsMan + vt[43].delta);
         MatCopy_22ADD8((sMat_22ADD8*)(self + 0x10), &gfxMatrix);
     }
-    MatCopy_22ADD8((sMat_22ADD8*)(self + 0x50), (sMat_22ADD8*)((char*)GrMan + 0x5800));
+    MatCopy_22ADD8((sMat_22ADD8*)(self + 0x50), (sMat_22ADD8*)(&GrMan->mGuardBandMatrix));
     cOcclusionMan_updateView(*(void**)(self + 0x0), *(void**)(self + 0x4));
     func_00229F30(self + 0x10, self + 0x50);
     func_00229F80(*(void**)(self + 0x4));

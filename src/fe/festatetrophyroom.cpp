@@ -238,7 +238,7 @@ extern "C" void cFEStateTrophyRoom_onWidgetEvent(cFEStateTrophyRoom* self, cUITh
         sVEntry001D4698* vt = *(sVEntry001D4698**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, self->mPeakNum);
         if (nextState != 0) {
-            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         }
         break;
     }
@@ -1357,7 +1357,7 @@ extern "C" void cFEMemCard_initFEMemCard(cFEMemCard* self_, int mode)
     cMCOverlayManager_getFileName(app, *(int*)(app + 0xB4), saveType, 0x100);
     func_002C2540(format, str_pct_s_pct_s_c);
     func_00241AA0(productCode, 0x100);
-    sprintf1(((char*)self_) + 0x11C, format, productCode, saveType);
+    sprintf1(&self_->mFileName[0], format, productCode, saveType);
 }
 #endif
 

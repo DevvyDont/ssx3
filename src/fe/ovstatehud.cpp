@@ -649,7 +649,7 @@ extern "C" void* cOVStateHUD1P_cOVStateHUD1P(cOVStateHUD1P* hud, int pEngine)
 {
     cUIState_cUIState_9A30(((char*)hud), pEngine);
     hud->mVtbl = (void**)cOVStateHUD1P_vtbl;
-    new (((char*)hud) + 0x48) sElem_9A30[2];
+    new ((char*)&hud->mRiderInfo[0]) sElem_9A30[2];
     hud->mGlow.mSourceShape = -1;
     hud->mbHideHUD = 0;
     hud->mHideHUDOV = 0;
@@ -1214,7 +1214,7 @@ extern "C" int cOVStateHUD1P_handleEvent(cOVStateHUD1P* self, int msg, unsigned 
     case 12:
         self->mRenderFlags |= 0x20000;
         *(int*)&self->mMessageFrame = 0;
-        strcpy1((unsigned short*)(((char*)self) + 0x944), str);
+        strcpy1((unsigned short*)(&self->mMessage[0]), str);
         break;
     case 13:
         self->mMessage[0] = 0;
@@ -1223,7 +1223,7 @@ extern "C" int cOVStateHUD1P_handleEvent(cOVStateHUD1P* self, int msg, unsigned 
         break;
     case 14:
         self->mRenderFlags |= 0x40000;
-        strcpy1((unsigned short*)(((char*)self) + 0xA48), str);
+        strcpy1((unsigned short*)(&self->mNetStatusMessage[0]), str);
         break;
     case 15:
         self->mNetStatusMessage[0] = 0;
@@ -1340,7 +1340,7 @@ struct sVEnt_001F1190 { short delta; short index; void (*fn)(void*, int, sHudVer
 extern "C" void cOVStateHUD1P_renderBitmap(cOVStateHUD1P* self, cOVStateHUDElem* elem, float* pos, float* size, float* scale, float* color)
 {
     if (elem != 0) {
-        *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = texOf_001F1190(elem);
+        GrMan->m_pCurrentDrawState->m_textureState.m_texid[0] = texOf_001F1190(elem);
         sHudVert_001F1190 verts[4];
         int alpha = (int)(color[0] * 128.0f);
         int red = (int)(color[1] * 128.0f);

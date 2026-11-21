@@ -764,12 +764,12 @@ extern "C" void cFEStateMountainRoom_showPassFront(cFEStateMountainRoom* self)
 {
     {
         cUIGroup* obj = self->mpPassGroup;
-        sVEntry_cFEStateMountainRoom_showPassFront* vt = *(sVEntry_cFEStateMountainRoom_showPassFront**)((char*)obj + 0x8);
+        sVEntry_cFEStateMountainRoom_showPassFront* vt = (sVEntry_cFEStateMountainRoom_showPassFront*)obj->mVtbl;
         vt[9].fn((char*)obj + vt[9].delta, 1);
     }
     if (self->mFrontTextureID >= 0) {
         cUIGroup* obj = self->mpPassFrontGroup;
-        sVEntry_cFEStateMountainRoom_showPassFront* vt = *(sVEntry_cFEStateMountainRoom_showPassFront**)((char*)obj + 0x8);
+        sVEntry_cFEStateMountainRoom_showPassFront* vt = (sVEntry_cFEStateMountainRoom_showPassFront*)obj->mVtbl;
         vt[9].fn((char*)obj + vt[9].delta, 1);
     }
 }

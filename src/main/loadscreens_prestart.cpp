@@ -1231,7 +1231,7 @@ extern "C" void cGameLoadScreen_loadTexture(cGameLoadScreen* self)
     void* fe = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath == 2) {
         cBigFile_cBigFile1_3048(&bf, str_data_ui_charpic_big, 0x100);
-        int* slot = (int*)(((char*)self) + 0x10);
+        int* slot = (int*)(&self->mTexID[0]);
         for (int i = 0; i < 2; i++) {
             sprintf(name, str_pct_spct_s_ssh, D_00442928[cBENewPlayerInterface_getPlayerCharID(plr, i != 0)], D_004A2B3C);
             char* data = FILE_loadpackz(name, 0x3000100);

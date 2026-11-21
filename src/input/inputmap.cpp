@@ -542,7 +542,7 @@ extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* cInputMapParser_newParseNode(cInputMapParser* self)
 {
     tParseNode* freeNode = self->FreeParseNodes;
-    self->FreeParseNodes = (tParseNode*)(*(void**)((char*)freeNode + 4));
+    self->FreeParseNodes = (tParseNode*)(freeNode->unk_04);
     func_00416210(freeNode, 0, 0x10);
     return freeNode;
 }

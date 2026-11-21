@@ -169,7 +169,7 @@ extern "C" void cFEStateOptions_onWidgetEvent(cFEStateOptions* self, cUIThing* w
             cKeyboardPopup_setInputText(pop, D_004A1408);
             cKeyboardPopup_setStatic2(self->mpKeyboard, D_004A1408);
             cKeyboardPopup_setIncludeKey(self->mpKeyboard, 75, 1, 2);
-            cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, self->mpKeyboard);
+            cUIStateStack_pushPopup(self->mpEngine->mStateStack, self->mpKeyboard);
             break;
         } else if (Is_00188980(widget->mHashName, D_004A1530)) {
             if (D_004A14E0 == 0 && (D_004A14D0 != 0 || D_004A14D4 != 0 || D_004A14DC != 0 || D_004A14D8 != 0)) {
@@ -192,7 +192,7 @@ extern "C" void cFEStateOptions_onWidgetEvent(cFEStateOptions* self, cUIThing* w
             sVE_188980p* vt = *(sVE_188980p**)(obj + 4);
             void* r = vt[4].fn(obj + vt[4].delta, ((sOpt_188980*)self), widget->mMiscData);
             if (r != 0)
-                cUIStateStack_push((char*)self->mpEngine + 0x18, r);
+                cUIStateStack_push(self->mpEngine->mStateStack, r);
         }
         break;
     case 6: {
@@ -210,7 +210,7 @@ extern "C" void cFEStateOptions_onWidgetEvent(cFEStateOptions* self, cUIThing* w
     case 13: {
         int r = func_00187D38((char*)self->mpKeyboard + 0x74);
         char* obj = &gUISoundNull;
-        char* sound = *(char**)((char*)self->mpEngine + 0x14);
+        char* sound = (char*)self->mpEngine->mpSound;
         if (sound != 0)
             obj = sound;
         if (obj != 0) {
@@ -397,7 +397,7 @@ extern "C" void cFEStateOptions_saveOptionPrompt(cFEStateOptions* self)
     cUIState_cUIState1(savePopup, self->mpEngine, self);
     *(void***)(savePopup + 8) = cFEPopupOptionReset_vtbl;
     *(char*)(savePopup + 0x48) = 0;
-    cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, savePopup);
+    cUIStateStack_pushPopup(self->mpEngine->mStateStack, savePopup);
     D_004A14D8 = 0;
     D_004A14E0 = 1;
     D_004A14DC = 0;
@@ -2287,7 +2287,7 @@ extern "C" void cFEStateOptionsController_onWidgetEvent(cFEStateOptionsControlle
         cUIState_cUIState1(resetPopup, self->mpEngine, ((char*)self));
         *(void***)(resetPopup + 8) = cFEPopupOptionReset_vtbl;
         *(char*)(resetPopup + 0x48) = 0;
-        cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, resetPopup);
+        cUIStateStack_pushPopup(self->mpEngine->mStateStack, resetPopup);
         break;
     }
     case 6: {
@@ -2297,7 +2297,7 @@ extern "C" void cFEStateOptionsController_onWidgetEvent(cFEStateOptionsControlle
         sVE_18CA10p* vt2 = *(sVE_18CA10p**)(obj + 4);
         void* nextState = vt2[5].fn(obj + vt2[5].delta, ((char*)self), widget->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         }
         break;
     }
@@ -2786,11 +2786,11 @@ extern "C" void cFEStateOptionsSaveLoad_onPopupEvent(cFEStateOptionsSaveLoad* se
     switch (event) {
     case 0xF:
         widget->miMiscData = 1;
-        cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
+        cUIStateStack_pop(self->mpEngine->mStateStack, 1);
         break;
     case 0x10:
         widget->miMiscData = 0;
-        cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
+        cUIStateStack_pop(self->mpEngine->mStateStack, 1);
         break;
     case 21:
         break;
@@ -2817,7 +2817,7 @@ extern "C" void cFEStateOptionsSaveLoad_onPopupEvent(cFEStateOptionsSaveLoad* se
         sVE_18D460p* vt2 = *(sVE_18D460p**)(obj + 4);
         void* x = vt2[4].fn(obj + vt2[4].delta, ((char*)self), (1 << self->mSaveLoadCurrentCtrl) | 0x100);
         if (x != 0) {
-            cUIStateStack_push((char*)self->mpEngine + 0x18, x);
+            cUIStateStack_push(self->mpEngine->mStateStack, x);
         }
         int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut));
         if (frame != 0xFFFF) {
@@ -2890,7 +2890,7 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(cFEStateOptionsSaveLoad* s
             sVE_18D648v* vt2 = *(sVE_18D648v**)(confirmPopup + 8);
             vt2[25].fn(confirmPopup + vt2[25].delta, 1);
             *(int*)(confirmPopup + 0x18) = 0;
-            cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, confirmPopup);
+            cUIStateStack_pushPopup(self->mpEngine->mStateStack, confirmPopup);
         } else {
             if (widgetId > 3) {
                 widgetId |= 1 << self->mCurrentCtrl;
@@ -2899,7 +2899,7 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(cFEStateOptionsSaveLoad* s
             sVE_18D648p* vt = *(sVE_18D648p**)(obj + 4);
             void* nextState = vt[4].fn(obj + vt[4].delta, ((char*)self), widgetId);
             if (nextState != 0) {
-                cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+                cUIStateStack_push(self->mpEngine->mStateStack, nextState);
             }
         }
         break;
@@ -2909,7 +2909,7 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(cFEStateOptionsSaveLoad* s
         sVE_18D648p* vt = *(sVE_18D648p**)(obj + 4);
         void* nextState = vt[5].fn(obj + vt[5].delta, ((char*)self), widget->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         }
         break;
     }
@@ -3596,7 +3596,7 @@ extern "C" void cFEStateOptionsDeviceSelect_updateDone(cFEStateOptionsDeviceSele
         sVEntry0018E478* vt = *(sVEntry0018E478**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, mode);
         if (nextState != 0) {
-            cUIStateStack_pushCheck((char*)self->mpEngine + 0x18, nextState);
+            cUIStateStack_pushCheck(self->mpEngine->mStateStack, nextState);
         }
     }
     self->mIsDone = 1;

@@ -232,7 +232,7 @@ extern "C" void cFEStateNetHelpPopup_createAndSetDescriptionString(cFEStateNetHe
     unsigned short* buf = 0;
     int total = 0;
     int count = 0;
-    int* ids = (int*)(((char*)helpPopup) + 0x58);
+    int* ids = (int*)(&helpPopup->muiDescription[0]);
     int i = 0;
     do {
         if (ids[i] == 0) {

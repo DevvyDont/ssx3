@@ -115,7 +115,7 @@ extern "C" void cScreenKeyboard_initScreenKeyboard(cScreenKeyboard* self, cUIScr
     cScreenKeyboard_setInputText(((char*)self), str_mypro1);
     textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_profilename));
     if (textObj != 0)
-        cUIText_setAsciiString((cUIText*)textObj, ((char*)self) + 0xEC);
+        cUIText_setAsciiString((cUIText*)textObj, self->mHiScoreName);
 }
 #endif
 

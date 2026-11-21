@@ -1859,14 +1859,14 @@ struct sInsn_00324EC8 {
 extern "C" int cInputMapParser_compileBinaryNode(cInputMapParser* self, tParseNode* node, int* dst, sInsn_00324EC8* code, int cap, int op, int defaultModifier)
 {
     int src = -1;
-    int srcLen = cInputMapParser_compileParseNode(self, (tParseNode*)(*(void**)((char*)node + 4)), &src, code, cap, defaultModifier);
+    int srcLen = cInputMapParser_compileParseNode(self, (tParseNode*)(node->unk_04), &src, code, cap, defaultModifier);
     if (srcLen < 0) {
         return -1;
     }
     code += srcLen;
     cap -= srcLen;
     int argReg = -1;
-    int argLen = cInputMapParser_compileParseNode(self, (tParseNode*)(*(void**)((char*)node + 8)), &argReg, code, cap, defaultModifier);
+    int argLen = cInputMapParser_compileParseNode(self, (tParseNode*)(node->unk_08), &argReg, code, cap, defaultModifier);
     if (argLen < 0) {
         return -1;
     }
@@ -1926,7 +1926,7 @@ struct sInsn_003250D8 {
  */
 extern "C" int cInputMapParser_compileUnaryNode(cInputMapParser* self, tParseNode* node, int* dst, sInsn_003250D8* code, int cap, int op, int defaultModifier)
 {
-    void* operand = *(void**)((char*)node + 4);
+    void* operand = node->unk_04;
     int src = -1;
     int n = cInputMapParser_compileParseNode(self, (tParseNode*)operand, &src, code, cap, defaultModifier);
     if (n < 0) {
@@ -2885,7 +2885,7 @@ extern "C" int cPadDevice_construct(void* p, int n);
  */
 extern "C" void cPadCache_init(cPadCache* self)
 {
-    self->NumPadDevices = cPadDevice_construct((char*)self + 0x2EEC, 4);
+    self->NumPadDevices = cPadDevice_construct(&self->PadDevices[0], 4);
     self->CacheReadPos = (unsigned int)29;
     self->CacheWritePos = (unsigned int)0;
 }
@@ -2942,7 +2942,7 @@ extern "C" void cPadCache_clearAllVibrations(cPadCache* self)
 {
     int i;
     for (i = 0; i < self->NumPadDevices; i++) {
-        cPadDevice_clearAllVibrations(((void**)((char*)self + 0x2EEC))[i]);
+        cPadDevice_clearAllVibrations(((void**)(&self->PadDevices[0]))[i]);
     }
 }
 #endif

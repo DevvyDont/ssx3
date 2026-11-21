@@ -492,28 +492,28 @@ extern int D_00536708[];
  */
 extern "C" void cGameModeMan_writeToReplayFrame(cGameModeMan* self, cGmStream_385D0* data)
 {
-    data->write(((char*)self) + 4, 4);
+    data->write(&self->iCurrModeHandler, 4);
     data->write(((char*)self), 4);
-    data->write(((char*)self) + 8, 4);
-    data->write(((char*)self) + 0x10, 4);
-    data->write(((char*)self) + 0x14, 4);
-    data->write(((char*)self) + 0x18, 40);
-    data->write(((char*)self) + 0x68, 4);
-    data->write(((char*)self) + 0x6C, 4);
-    data->write(((char*)self) + 0x70, 4);
+    data->write(&self->iCurrentGameEvent, 4);
+    data->write(&self->iNumberAI, 4);
+    data->write(&self->iSimAI, 4);
+    data->write(&self->iCharacters[0], 40);
+    data->write(&self->iLocation, 4);
+    data->write(&self->iNextLocation, 4);
+    data->write(&self->iNextHeat, 4);
     data->write(D_00536730, 40);
     data->write(D_00536708, 40);
-    data->write(((char*)self) + 0x78, 4);
-    data->write(((char*)self) + 0x7C, 4);
-    data->write(((char*)self) + 0x80, 4);
+    data->write(&self->uiTimeLimit, 4);
+    data->write(&self->uiPointTarget, 4);
+    data->write(&self->unk_80, 4);
     data->write(D_00536640, 40);
-    data->write(((char*)self) + 0x84, 4);
-    data->write(((char*)self) + 0x88, 4);
-    data->write(((char*)self) + 0x8C, 4);
-    data->write(((char*)self) + 0x90, 4);
-    data->write(((char*)self) + 0x94, 4);
-    data->write(((char*)self) + 0x98, 4);
-    data->write(((char*)self) + 0x9C, 4);
+    data->write(&self->bIsEventDone, 4);
+    data->write(&self->bIsTimedEvent, 4);
+    data->write(&self->bHasPointTarget, 4);
+    data->write(&self->unk_90, 4);
+    data->write(&self->unk_94, 4);
+    data->write(&self->bIsLastHeat, 4);
+    data->write(&self->bAreResultsLocked, 4);
     ((cGameModeObj_2385D0*)D_00536668[self->iCurrModeHandler])->save(data);
 }
 #endif
@@ -545,28 +545,28 @@ public:
  */
 extern "C" void cGameModeMan_readFromReplayFrame(cGameModeMan* self, cGmStream_385D0* data)
 {
-    data->read(((char*)self) + 4, 4);
+    data->read(&self->iCurrModeHandler, 4);
     data->read(((char*)self), 4);
-    data->read(((char*)self) + 8, 4);
-    data->read(((char*)self) + 0x10, 4);
-    data->read(((char*)self) + 0x14, 4);
-    data->read(((char*)self) + 0x18, 40);
-    data->read(((char*)self) + 0x68, 4);
-    data->read(((char*)self) + 0x6C, 4);
-    data->read(((char*)self) + 0x70, 4);
+    data->read(&self->iCurrentGameEvent, 4);
+    data->read(&self->iNumberAI, 4);
+    data->read(&self->iSimAI, 4);
+    data->read(&self->iCharacters[0], 40);
+    data->read(&self->iLocation, 4);
+    data->read(&self->iNextLocation, 4);
+    data->read(&self->iNextHeat, 4);
     data->read(D_00536730, 40);
     data->read(D_00536708, 40);
-    data->read(((char*)self) + 0x78, 4);
-    data->read(((char*)self) + 0x7C, 4);
-    data->read(((char*)self) + 0x80, 4);
+    data->read(&self->uiTimeLimit, 4);
+    data->read(&self->uiPointTarget, 4);
+    data->read(&self->unk_80, 4);
     data->read(D_00536640, 40);
-    data->read(((char*)self) + 0x84, 4);
-    data->read(((char*)self) + 0x88, 4);
-    data->read(((char*)self) + 0x8C, 4);
-    data->read(((char*)self) + 0x90, 4);
-    data->read(((char*)self) + 0x94, 4);
-    data->read(((char*)self) + 0x98, 4);
-    data->read(((char*)self) + 0x9C, 4);
+    data->read(&self->bIsEventDone, 4);
+    data->read(&self->bIsTimedEvent, 4);
+    data->read(&self->bHasPointTarget, 4);
+    data->read(&self->unk_90, 4);
+    data->read(&self->unk_94, 4);
+    data->read(&self->bIsLastHeat, 4);
+    data->read(&self->bAreResultsLocked, 4);
     ((cGameModeObj_2388A0*)D_00536668[self->iCurrModeHandler])->load(data);
 }
 #endif
@@ -1938,7 +1938,7 @@ extern "C" void cGMRaceHandler_raceFinish(cGMRaceHandler* self, int idx)
     int n = cBENewPlayerInterface_getHumanRider(player, 0);
     int heat = cGameModeHandler_pManager->iHeatNum - 1;
     sRace* rc = GetRace();
-    if (cAI_isRaceFinished(rc) == 0 || vcall_23A760((char*)GetRace()->riders[idx] + 0x6C0, 9) == 0) {
+    if (cAI_isRaceFinished(rc) == 0 || vcall_23A760((char*)&GetRace()->riders[idx]->mVtbl, 9) == 0) {
         int tick = rc->riders[idx]->mFinishTick;
         if (GetRace()->riders[idx]->mDidNotFinish) {
             self->tbl[heat][idx] = 360000;
@@ -1951,7 +1951,7 @@ extern "C" void cGMRaceHandler_raceFinish(cGMRaceHandler* self, int idx)
     if (cAI_isRaceFinished(rc) == 0) {
         return;
     }
-    if (vcall_23A760((char*)GetRace()->riders[idx] + 0x6C0, 8) == 0) {
+    if (vcall_23A760((char*)&GetRace()->riders[idx]->mVtbl, 8) == 0) {
         return;
     }
     for (int i = 0; i < cGameModeHandler_pManager->iNumberAI + 1; i++) {

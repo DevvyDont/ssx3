@@ -315,14 +315,14 @@ extern "C" void cGame_load(cGame* self)
     else
         self->ViewMan = (cGameViewMan*)cGameViewMan_cGameViewMan(operator new(0x38, str_GameViewMan, 0x20000000, 0), cBENewRaceInterface_newRace.iNumberHumans);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cBENetworkInterface_networkOpt.bIsHost == 0) {
-        char* secondPlayer = *(char**)((char*)self->AI + 0x44);
+        char* secondPlayer = (char*)self->AI->Players[1];
         void* cam = secondPlayer != 0 ? *(void**)(secondPlayer + 0x18) : 0;
         cCamera_switchChaseControllerTargetRider(*(void**)((char*)self->ViewMan + 0x4), cam);
     }
     char* hud = (char*)cMenuSys_cMenuSys(operator new(104, str_MenuSys, 0, 0));
     self->MenuSys = (cMenuSys*)hud;
     *(void**)(hud + 0x58) = (void*)self->DebugFont;
-    *(void**)((char*)self->MenuSys + 0x5C) = (void*)SSXApp->Inputs[0];
+    self->MenuSys->Input = (cInput*)((void*)SSXApp->Inputs[0]);
     char* file = FILE_load(str_data_fonts_menu_ssh_b, 0x100);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
@@ -670,7 +670,7 @@ struct sPtrArr_FA98 {
 
 static inline char* GetRider_FA98(int i)
 {
-    return ((sPtrArr_FA98*)((char*)SSXApp->Game->AI + 0x28))->at(i);
+    return ((sPtrArr_FA98*)(&SSXApp->Game->AI->Riders[0]))->at(i);
 }
 
 struct sElem14_FA98 {
@@ -878,7 +878,7 @@ extern "C" void cGame_resetWorld(cGame* self)
     cBucketMan_mergeBucket(bm, 1);
     cBucketMan_purgeBucket(bm, 1);
     cBucketMan_purgeBucket(bm, 8);
-    cFocusMan_reset(*(void**)((char*)self->AI + 0xA4));
+    cFocusMan_reset(self->AI->FocusMan);
     cAvalanche_reset();
     cWorld_resetMap(self->World);
     cWScriptMan_runGlobalScripts(cWScriptMan_TheWScriptMan);
@@ -1005,7 +1005,7 @@ extern "C" void cGame_sectionLoaded(cGame* self)
 {
     cAI* gameAI = self->AI;
     if (gameAI != 0) {
-        void* focusMan = *(void**)((char*)gameAI + 0xA4);
+        void* focusMan = gameAI->FocusMan;
         if (focusMan != 0) {
             *(int*)((char*)focusMan + 0xD0) = -1;
         }
@@ -1047,10 +1047,10 @@ extern "C" void cGame_sectionUnloading(cGame* self, int id)
     cBucketMan_purgeBucket1(bm, 8, id);
     cAI* gameAI = self->AI;
     if (gameAI != 0) {
-        void* focusMan = *(void**)((char*)gameAI + 0xA4);
+        void* focusMan = gameAI->FocusMan;
         if (focusMan != 0) {
             cFocusMan_purgesection(focusMan, id);
-            cFocusMan_purgesection(*(void**)((char*)self->AI + 0xA4), 0x80);
+            cFocusMan_purgesection(self->AI->FocusMan, 0x80);
         }
     }
     cWScriptMan_unloadSection(self->WScriptMan, id);
@@ -1404,11 +1404,11 @@ static inline int canUpdate_2306B8(cGame* self)
 
 static inline int updatePause_2306B8(cGame* self)
 {
-    if (cGameViewMan_isStreamReady(((char*)self->ViewMan)) == 0 || *(int*)(((char*)self->SectionMan) + 0x1D0) == 0) {
+    if (cGameViewMan_isStreamReady(((char*)self->ViewMan)) == 0 || self->SectionMan->m_bStreamReady == 0) {
         *(int*)(*((char**)((char*)self->World)) + 0x3D4) = 0;
         cWorld_update(((char*)self->World));
         cGameViewMan_updateAll(((char*)self->ViewMan));
-        if (*(int*)(((char*)self->SectionMan) + 0x1D0) == 0) {
+        if (self->SectionMan->m_bStreamReady == 0) {
             cGame_updateState(self);
             cSectionMan_update(((char*)self->SectionMan));
         }

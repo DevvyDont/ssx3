@@ -819,7 +819,7 @@ extern "C" void* cBraggingRightsMenu_cBraggingRightsMenu(cBraggingRightsMenu* se
     int i;
     self->mVtbl = D_0046B078;
     for (i = 7; i >= 0; i--) {
-        ((int*)((char*)self + 0x8))[i] = 0;
+        ((int*)(&self->mpListBox[0]))[i] = 0;
     }
     self->mpPlayerMenu = 0;
     self->mcItemEnableFlag = 0;
@@ -857,7 +857,7 @@ extern "C" void cBraggingRightsMenu_setConfirmed(cBraggingRightsMenu* self, int 
     int i;
     self->mbConfirmed = enabled;
     for (i = 0; i < 8; i++) {
-        sObj00192740* item = ((sObj00192740**)((char*)self + 0x8))[i];
+        sObj00192740* item = ((sObj00192740**)(&self->mpListBox[0]))[i];
         if (item != 0) {
             item->vt[8].fn((char*)item + item->vt[8].delta, enabled);
         }
@@ -931,7 +931,7 @@ extern "C" int cBraggingRightsMenu_findListBoxP(cBraggingRightsMenu* self, int v
 {
     int i;
     for (i = 0; i < 8; i++) {
-        if (((int*)((char*)self + 0x8))[i] == val) {
+        if (((int*)(&self->mpListBox[0]))[i] == val) {
             return i;
         }
     }
@@ -1094,7 +1094,7 @@ extern "C" void* cFEStateBraggingRights_cFEStateBraggingRights(cFEStateBraggingR
     int i;
     cFEStateNet_cFEStateNet(self, engine, 0);
     self->mVtbl = cFEStateBraggingRights_vtbl;
-    ruleSel = (char*)self + 0x6D0;
+    ruleSel = (char*)&self->mMenuCtrl[0];
     for (i = 1; i != -1; i--, ruleSel += 0x34) {
         cBraggingRightsMenu_cBraggingRightsMenu((cBraggingRightsMenu*)ruleSel);
     }

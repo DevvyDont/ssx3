@@ -148,8 +148,8 @@ extern "C" int cWorldSphTree_IsInBoxTransformed(cWorldSphTree* self, float* lo, 
     ext.y = ry;
     ext.z = rz;
     ext.w = 0.0f;
-    sV4_330540 mx = add_330540(*(sV4_330540*)((char*)self->st + 0x80), ext);
-    sV4_330540 mn = sub_330540(*(sV4_330540*)((char*)self->st + 0x80), ext);
+    sV4_330540 mx = add_330540(*(sV4_330540*)&self->st->transCenter, ext);
+    sV4_330540 mn = sub_330540(*(sV4_330540*)&self->st->transCenter, ext);
     float lx = lo[0];
     float tx = mx.x;
     if (tx < lx && mn.x < lx) return 0;
@@ -1604,7 +1604,7 @@ extern "C" int cOverlapList_splineIntersect(cOverlapList* self, sWsVec4* pos, in
     wsSubEq_334680(box.min, ext);
     wsAddEq_334680(box.max, ext);
     for (unsigned int i = 0; i < self->numtyped; i++) {
-        char* spaceNode = ((char**)(((char*)self) + 0x214))[i];
+        char* spaceNode = ((char**)(&self->typed[0]))[i];
         int type = *(int*)(spaceNode + 8);
         if (type == 2) {
             cRailModifier_splineIntersect(*(void**)(spaceNode + 0xC), &box, &box, pos, mask, &cnt, &dist, intInfo);
@@ -5653,7 +5653,7 @@ extern "C" void* cBoostNode_cBoostNode(cBoostNode* self, void* bucket, void* str
     cInstanceNode_cInstanceNode(self, bucket, stream);
     self->mVtbl = cBoostNode_vtbl;
     sVEntry_cBoostNode_cBoostNode* vt = *(sVEntry_cBoostNode_cBoostNode**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x20, 0x30);
+    vt[2].fn((char*)stream + vt[2].delta, (char*)&self->Boost, 0x30);
     return ((void*)self);
 }
 #endif
@@ -5975,7 +5975,7 @@ extern "C" void cBoostNode_writeToReplayFrame(cBoostNode* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sSerVEntry_00341A50* vt = *(sSerVEntry_00341A50**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x20, 0x30);
+    vt[1].fn((char*)stream + vt[1].delta, (char*)&self->Boost, 0x30);
 }
 #endif
 
@@ -6232,7 +6232,7 @@ extern "C" int cAnimObjectNode_updateNode(cAnimObjectNode* self)
             }
         }
     }
-    char* obj = (char*)self + 0x30;
+    char* obj = (char*)&self->unk_030;
     self->Flags |= 1;
     self->CacheTime = self->CurrTime;
     if (self->AnimComplete == 0) {
@@ -6387,7 +6387,7 @@ INCLUDE_ASM("intersect/worldsphtree", cAnimObjectNode_expire);
 extern "C" void cAnimObjectNode_expire(cAnimObjectNode* self, int runscript)
 {
     if (runscript != 0) {
-        cInstanceNode_runExpireScript((char*)self + 0x30);
+        cInstanceNode_runExpireScript(&self->unk_030);
     }
 }
 #endif
@@ -6452,7 +6452,7 @@ extern "C" void cAnimObjectNode_signal(cAnimObjectNode* self, int msg, float msg
     } else if (msg == 105) {
         *(short*)self = 0;
     } else {
-        cMoveNode_signal((char*)self + 0x30);
+        cMoveNode_signal(&self->unk_030);
     }
 }
 #endif
@@ -6559,7 +6559,7 @@ static inline void setRateMax_003421A0(sFloat_003421A0* dst, float v, char* info
  */
 extern "C" void* cAnimTeeterNode_cAnimTeeterNode1(cAnimTeeterNode* self, int bucket, char* obj, char* def)
 {
-    cAnimNode_cAnimNode((char*)self + 0x30, bucket, 4, obj, 0);
+    cAnimNode_cAnimNode(&self->CurrTime, bucket, 4, obj, 0);
     self->mVtbl = cAnimTeeterNode_vtbl;
     float animStart = 0.0f;
     char* info = *(char**)(obj + 0x80);
@@ -6608,7 +6608,7 @@ extern void* cAnimTeeterNode_vtbl[];
  */
 extern "C" void* cAnimTeeterNode_cAnimTeeterNode(cAnimTeeterNode* self, int bucket, sVEntry003422E8** stream)
 {
-    cAnimNode_cAnimNode1((char*)self + 0x30, bucket, stream);
+    cAnimNode_cAnimNode1(&self->CurrTime, bucket, stream);
     self->mVtbl = cAnimTeeterNode_vtbl;
     (*stream)[2].fn((char*)stream + (*stream)[2].delta, self, 0x30);
     self->Flags |= 1;
@@ -6901,7 +6901,7 @@ extern "C" void cAnimTeeterNode_applyForce(cAnimTeeterNode* self, sObj_342538* i
 {
     int idx = intInfo->idx;
     if (idx >= 0) {
-        sSub_342538* sub = (sSub_342538*)((char*)self + 0x44);
+        sSub_342538* sub = (sSub_342538*)(&self->unk_044);
         char* ents = sub->inf->tbl->ents;
         if (*(int*)(ents + idx * 16 + 8) != 0) {
             sWsVtSlot* vt = (sWsVtSlot*)self->mVtbl;
@@ -6956,7 +6956,7 @@ struct sVEntry_cAnimTeeterNode_writeToReplayFrame {
  */
 extern "C" void cAnimTeeterNode_writeToReplayFrame(cAnimTeeterNode* self, void* stream)
 {
-    cAnimNode_writeToReplayFrame((char*)self + 0x30, stream);
+    cAnimNode_writeToReplayFrame(&self->CurrTime, stream);
     sVEntry_cAnimTeeterNode_writeToReplayFrame* vt = *(sVEntry_cAnimTeeterNode_writeToReplayFrame**)stream;
     vt[1].fn((char*)stream + vt[1].delta, self, 0x30);
 }

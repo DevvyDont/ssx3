@@ -1050,7 +1050,7 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(cFEStateCheatCharSelect* s
     }
     case 6:
         self->mCheatCharID = 0;
-        cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
+        cUIStateStack_pop(self->mpEngine->mStateStack, 1);
         break;
     case 5: {
         int sel = menu->mMiscData + *(unsigned char*)((char*)self->mpMenu + 0x98);
@@ -1063,7 +1063,7 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(cFEStateCheatCharSelect* s
         sVEK182690b* vt = *(sVEK182690b**)(pl + 0xC);
         vt[1].fn(pl + vt[1].delta);
         self->mDone = 1;
-        cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
+        cUIStateStack_pop(self->mpEngine->mStateStack, 1);
         break;
     }
     }
@@ -1116,9 +1116,9 @@ extern "C" void cFEStateCheatCharSelect_updateCharWidgets(cFEStateCheatCharSelec
     int i;
     int idx = *(unsigned char*)((char*)self->mpMenu + 0x98);
     for (i = 0; i < 6; i++) {
-        void* it = ((void**)((char*)self + 0x54))[i];
+        void* it = ((void**)(&self->mpCharWidget[0]))[i];
         if (it != 0) {
-            int textureElem = ((int*)((char*)self + 0xf4))[idx + i];
+            int textureElem = ((int*)(&self->mpCharElem[0]))[idx + i];
             *(int*)((char*)it + 0x78) = -1;
             *(int*)((char*)it + 0x7c) = textureElem;
         }

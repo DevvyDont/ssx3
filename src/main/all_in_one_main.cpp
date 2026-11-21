@@ -2506,12 +2506,12 @@ extern "C" void *cScreenKeyboard_cScreenKeyboard(cScreenKeyboard* self) {
     self->mpBuffer = 0;
     self->mpScreenHeader = 0;
     self->mVtbl = (void**)cUIScreen_vtbl;
-    tAttrScreen_tAttrScreen((unsigned short*)(((char*)self) + 0x14));
-    cList_cList(((char*)self) + 0x18);
+    tAttrScreen_tAttrScreen((unsigned short*)(&self->mAttrScreen));
+    cList_cList(self->mThreads);
     self->mpKeyframeBlock = 0;
     self->mpObjectBlock = 0;
     self->mppObjectList = 0;
-    cUIThing_cUIThing(((char*)self) + 0x40, 0, 0);
+    cUIThing_cUIThing(self->mRootGroup, 0, 0);
     *(int **)(((char*)self) + 0x48) = cUIGroup_vtbl;
     cList_cList(((char*)self) + 0xB4);
     self->mpState = 0;
@@ -5445,7 +5445,7 @@ extern "C" void* cFEStateNet_cFEStateNet1(cFEStateNet* self)
     // An unused 16-byte local is needed to reproduce the 0x40-byte frame.
     int framePad[4];
     cUIState_cUIState1_E7B0(self, 0, 0);
-    sList_E7B0* msgList = (sList_E7B0*)(((char*)self) + 0x6C8);
+    sList_E7B0* msgList = (sList_E7B0*)(&self->mMsgList);
     self->unk_048 = 0;
     self->unk_058 = 0;
     self->mpKeyboard = 0;
@@ -5455,7 +5455,7 @@ extern "C" void* cFEStateNet_cFEStateNet1(cFEStateNet* self)
     self->unk_6B8 = 0;
     self->unk_6BC = 2;
     self->mVtbl = cFEStateNet_vtbl;
-    cBXString_cBXString2(((char*)self) + 0x6C0, D_004A1390_E7B0);
+    cBXString_cBXString2(&self->unk_6C0, D_004A1390_E7B0);
     self->mMsgList.mpNode = (void*)((sListNode_E7B0*)cMemMan_alloc(0xC, str_StlBlock, 0x20000000, 0));
     msgList->head->next = (sListNode_E7B0*)self->mMsgList.mpNode;
     msgList->head->prev = (sListNode_E7B0*)self->mMsgList.mpNode;

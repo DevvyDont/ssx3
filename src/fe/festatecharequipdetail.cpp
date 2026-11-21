@@ -1332,7 +1332,7 @@ extern "C" void cFEStateCharEquip_switchEquipMode(cFEStateCharEquip* self)
         }
     }
     ((sEquipDetailK19A3D0*)self)->f120 = 0;
-    MEM_fill((char*)self + 0xD0, D_004A11D0, 80);
+    MEM_fill(&self->mCategoryStack[0], D_004A11D0, 80);
     cFEStateCharEquip_updateHeading((cFEStateCharEquip*)self, D_004A11D0);
     func_0019B180(self, D_004A11D0);
     func_0019B618((cFEStateCharEquip*)self, 1, 1);
@@ -1412,7 +1412,7 @@ extern "C" void cFEStateCharEquip_startLargePreviewLoad(cFEStateCharEquip* self,
         self->mLargePreviewDelay = 20;
     else
         self->mLargePreviewDelay = 1;
-    char* buf = (char*)self + 0x960;
+    char* buf = self->mLargePreviewFileName;
     char* fileName = func_0014B700(cBE_getInterface_Fv(cBE_getBE(), 9), self->mCharID);
     char* dot = strrchr(fileName, '.');
     int len = dot - fileName - 1;
@@ -1423,7 +1423,7 @@ extern "C" void cFEStateCharEquip_startLargePreviewLoad(cFEStateCharEquip* self,
             break;
         namePart++;
     }
-    sprintf((char*)self + 0x960, str_pct_s_pct_spct_s, (char*)self + 0x960, namePart, dot);
+    sprintf(self->mLargePreviewFileName, str_pct_s_pct_spct_s, self->mLargePreviewFileName, namePart, dot);
 }
 #endif
 
@@ -1461,7 +1461,7 @@ extern "C" void cFEStateCharEquip_updatePreviewLoad(cFEStateCharEquip* self)
     if (self->mLargePreviewDelay > 0) {
         if (--self->mLargePreviewDelay == 0) {
             self->mPreviewTextureFileIndex = func_0019DA10((char*)SSXApp->RealFE + 0x1A70,
-                                                         self->mCharID, (char*)self + 0x960, 9, 1, 0);
+                                                         self->mCharID, self->mLargePreviewFileName, 9, 1, 0);
             self->mLargePreviewDelay = -1;
         }
     } else if (self->mPreviewTextureFileIndex >= 0) {
@@ -2669,7 +2669,7 @@ extern "C" void cFEStateCharEquip_updatePolyBar(cFEStateCharEquip* self)
         }
         sVEntry0019BC90* vt = *(sVEntry0019BC90**)(pointsBar + 8);
         vt[9].fn(pointsBar + vt[9].delta, 1);
-        *(sVec3K19BC90*)((char*)self->mpPointsBar + 0x50) = sVec3K19BC90(1.0f, -fillRatio, 1.0f);
+        *(sVec3K19BC90*)&self->mpPointsBar->mScale = sVec3K19BC90(1.0f, -fillRatio, 1.0f);
     }
 }
 #endif
@@ -2729,7 +2729,7 @@ extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(cFEStateCharEquip* s
         sVEntryIK19BD48* vt = *(sVEntryIK19BD48**)(equipBar + 8);
         vt[9].fn(equipBar + vt[9].delta, 1);
     }
-    *(sVec3K19BD48*)((char*)self->mpPointsEquipBar + 0x50) = sVec3K19BD48(1.0f, -fillRatio, 1.0f);
+    *(sVec3K19BD48*)&self->mpPointsEquipBar->mScale = sVec3K19BD48(1.0f, -fillRatio, 1.0f);
 }
 #endif
 
@@ -3104,7 +3104,7 @@ extern "C" void func_0019C7E8(cFEStateCharEquip* self, void* item)
         price *= 10;
     }
     cBuyPopupInfo_initBuyBolt((int*)((char*)popup + 0x48), id, price, self->mMoneyAvailable);
-    cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, popup);
+    cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
 }
 #endif
 

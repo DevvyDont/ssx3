@@ -671,7 +671,7 @@ extern "C" void cOVState_PROFILE_updateDone(cOVState_PROFILE* self)
         if (self->mParentOV == 0x18) {
             cGame_exit(SSXApp->Game, 0);
         } else {
-            cUIStateStack_popToStateInclusive((char*)self->mpEngine + 0x18);
+            cUIStateStack_popToStateInclusive(self->mpEngine->mStateStack);
         }
     }
     self->mIsDone = 1;
@@ -1208,7 +1208,7 @@ extern "C" void cOVState_AUTOSAVE_displayOn(cOVState_AUTOSAVE* self)
         return;
     }
     if (self->mIsProcessing != 0 && cMCOverlayManager_isManagerDone(mp) == 0 && self->mState != 6) {
-        void* bank = (char*)self->mpEngine + 0x50;
+        void* bank = self->mpEngine->mAnimBank;
         void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(str_at_pulsingicon));
         if (anim != 0) {
             cUIThing_playAnimation(obj, anim, 9, 0, 0);
@@ -1237,7 +1237,7 @@ extern "C" void cUIStateStack_popToStateInclusive(void* self);
 extern "C" void cOVState_AUTOSAVE_updateDone(cOVState_AUTOSAVE* self)
 {
     if (self->mIsDone == 0) {
-        cUIStateStack_popToStateInclusive((char*)self->mpEngine + 0x18);
+        cUIStateStack_popToStateInclusive(self->mpEngine->mStateStack);
     }
     self->mIsDone = 1;
 }
@@ -1282,10 +1282,10 @@ extern "C" void cOVState_AUTOSAVE_onDestroyScreen(cOVState_AUTOSAVE* self)
         cGame_exit(SSXApp->Game, 0);
     } else if (parentScreen == 6) {
         void* nextState = cFEStateTitle_cFEStateTitle1(cMemMan_alloc(76, str_cFEStateTitle_b, 0, 0), self->mpEngine);
-        cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+        cUIStateStack_push(self->mpEngine->mStateStack, nextState);
     } else if (parentScreen == 7) {
         void* nextState = cFEStateLodge_cFEStateLodge(cMemMan_alloc(88, str_cFEStateLodge_b, 0, 0), self->mpEngine);
-        cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+        cUIStateStack_push(self->mpEngine->mStateStack, nextState);
     } else if (parentScreen == 0) {
         void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
         void* player = cBE_getInterface_Fv(cBE_getBE(), 1);

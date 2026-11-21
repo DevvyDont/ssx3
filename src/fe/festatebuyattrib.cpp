@@ -136,7 +136,7 @@ extern "C" void cFEStateBuyAttrib_onGainFocus(cFEStateBuyAttrib* self)
 {
     cFEState_onGainFocus(self);
     cUIMenu* obj = self->pAttribMenu;
-    sVEntry001F49F8* vt = *(sVEntry001F49F8**)((char*)obj + 8);
+    sVEntry001F49F8* vt = (sVEntry001F49F8*)obj->mVtbl;
     vt[7].fn((char*)obj + vt[7].delta, 1);
 }
 #endif

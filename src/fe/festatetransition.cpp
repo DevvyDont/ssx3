@@ -96,14 +96,14 @@ extern "C" int cFEStateTransition_handleEvent(cFEStateTransition* self, int whic
     if (which == 0) {
         cUIScreen* screen = self->mpSnow;
         if (screen != 0) {
-            *(int*)((char*)screen + 0x54) |= 0x40;
+            screen->mRootGroup.mAttr |= 0x40;
             cUIScreen_playFrame(self->mpSnow, 0, 0);
             cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xF);
         }
     } else if (which == 1) {
         cUIScreen* screen = self->mpWhite;
         if (screen != 0) {
-            *(int*)((char*)screen + 0x54) |= 0x40;
+            screen->mRootGroup.mAttr |= 0x40;
             cUIScreen_playFrame(self->mpWhite, 0, 0);
         }
     }
