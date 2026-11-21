@@ -71,7 +71,7 @@ extern "C" void cFEStateNetHelpPopup_onUpdate(cFEStateNetHelpPopup* self)
     int i;
     int found = 0;
     for (i = 0; i < 2; i++) {
-        int** input = *(int***)((char*)SSXApp + (i << 2) + 0xB0);
+        int** input = (int**)SSXApp->Inputs[i];
         int ok = *input != 0 && **input != 0;
         if (ok && cInput_getValue(input, 153) != 0.0f) {
             found = 1;
@@ -792,7 +792,7 @@ extern "C" void* DeletePersonaMenu_DeletePersonaMenu(DeletePersonaMenu* self, in
     cMenu_addItem(self, &self->unk_150, -1);
     int j;
     for (j = 0; j < 4; j++) {
-        cMenu_addItem(self, (char*)&self->unk_168[0] + j * 36, -1);
+        cMenu_addItem(self, &self->unk_168[j], -1);
     }
     return ((void*)self);
 }
@@ -852,7 +852,7 @@ extern "C" void* PersonaMenu_PersonaMenu(PersonaMenu* self, int* info, int* crea
     cMenu_addItem(self, &self->unk_500, -1);
     int j;
     for (j = 0; j < 4; j++) {
-        cMenu_addItem(self, (char*)&self->unk_518[0] + j * 36, -1);
+        cMenu_addItem(self, &self->unk_518[j], -1);
     }
     cMenu_addItem(self, &self->unk_5A8, -1);
     cMenu_addItem(self, &self->unk_5C4, -1);
@@ -900,7 +900,7 @@ extern "C" void* LobbyMenu_LobbyMenu(LobbyMenu* self, int* info)
     cMenu_addItem(self, &self->unk_150, -1);
     int j;
     for (j = 0; j < 12; j++) {
-        cMenu_addItem(self, (char*)&self->unk_168[0] + j * 36, -1);
+        cMenu_addItem(self, &self->unk_168[j], -1);
     }
     return ((void*)self);
 }
@@ -952,7 +952,7 @@ extern "C" void* RoomMenu_RoomMenu(RoomMenu* self, int* occupantOwner, int* chat
     cMenu_addItem(self, &self->unk_154, -1);
     int j;
     for (j = 0; j < 0x18; j++) {
-        cMenu_addItem(self, (char*)&self->unk_16C[0] + j * 36, -1);
+        cMenu_addItem(self, &self->unk_16C[j], -1);
     }
     cMenu_addItem(self, &self->unk_4CC, -1);
     return ((void*)self);
@@ -1006,7 +1006,7 @@ extern "C" void* ChatMenu_ChatMenu(ChatMenu* self, int* info)
     cMenu_addItem(self, &self->unk_150, -1);
     int j;
     for (j = 0; j < 0xE; j++) {
-        char* item = (char*)&self->unk_194[0] + j * 36;
+        char* item = (char*)&self->unk_194[j];
         *(int*)(item + 0x8) = j;
         *(int*)(item + 0x14) = D_00467D70[j];
         cMenu_addItem(self, item, -1);

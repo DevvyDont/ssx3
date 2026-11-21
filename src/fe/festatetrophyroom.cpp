@@ -328,7 +328,7 @@ extern "C" void cFEStateTrophyRoom_updateBigArt(cFEStateTrophyRoom* self, int in
                                   self->mCharID, self->mPeakNum,
                                   self->mTrophyType, index - 1);
             if (medal != -1) {
-                textureId = *(int*)((char*)self + ((medal + 1) << 2) + 0x60);
+                textureId = self->mTextureIDs[medal + 1];
             }
         }
     }

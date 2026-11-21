@@ -4208,7 +4208,7 @@ INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_Reset__FPvi);
 void cLensFxMan_Reset(void* vself, int i)
 {
     cLensFxMan* self = (cLensFxMan*)vself;
-    *(int*)((char*)self + (i << 2) + 0x60) = 0;
+    self->mNumHalo[i] = 0;
 }
 #endif
 

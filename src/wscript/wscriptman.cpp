@@ -508,7 +508,7 @@ extern "C" void cWScriptMan_runScript(cWScriptMan* self, int* handle)
     luno_cLunoFunc_init(&scriptVar, cWorld_getWScriptScript(self->World, handle), 0);
     ret.type = 0;
     ret.word0 = 0;
-    void* table = *(void**)((char*)self + (*(unsigned char*)handle << 2) + 0x3CC);
+    void* table = (void*)self->GlobalTables[*(unsigned char*)handle];
     luno_cLunoVM_cLunoVM(&call);
     luno_cLunoVM_run(&call, &scriptVar, table, &ret);
     luno_cLunoVar__cLunoVar((cWScriptMan_isFunc_sValue*)&ret, 2);
@@ -551,7 +551,7 @@ extern "C" void cWScriptMan_runScript1(cWScriptMan* self, int* handle, int id)
     luno_cLunoFunc_init(&scriptVar, cWorld_getWScriptScript(self->World, handle), 0);
     ret.type = 0;
     ret.word0 = 0;
-    void* table = *(void**)((char*)self + (*(unsigned char*)handle << 2) + 0x3CC);
+    void* table = (void*)self->GlobalTables[*(unsigned char*)handle];
     luno_cLunoVM_cLunoVM(&call);
     luno_cLunoVM_run(&call, &scriptVar, table, &ret);
     self->Inst = (tInstanceRecord*)saved;

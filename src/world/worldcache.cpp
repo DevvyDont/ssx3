@@ -771,7 +771,7 @@ extern "C" void cWorldCache_activateSectionMem(cWorldCache* self, int i, int sec
     // PORT: pointer held in int (index-first address arithmetic)
     void** slot = (void**)(i * 4 + (int)self->m_pSectionCacheTable);
     *slot = cWorldCacheTable_cWorldCacheTable((cWorldCacheTable*)cMemMan_alloc(232, str_SectionTable, 0, 0),
-        (char*)self->mp_DataHeader->m_pSection + i * 88 + 0x20);
+        &self->mp_DataHeader->m_pSection[i].m_iTable[0]);
 }
 #endif
 

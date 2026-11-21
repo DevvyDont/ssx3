@@ -2459,7 +2459,7 @@ extern "C" void cSSXAudio_RailCarveProgram(cSSXAudio* self, cRider* rider, int* 
     char* obj = (char*)&rider->mVtbl;
     sSsVt_3FC8* vt = *(sSsVt_3FC8**)obj;
     int idx = vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta);
-    float prev = *(float*)((char*)self + (idx << 2) + 0x5990);
+    float prev = self->mLastCarveEdging[idx];
     float levelDiff = prev - level;
     if (__builtin_fabsf(levelDiff) > 0.1f) {
         if (level < prev) {
@@ -2468,7 +2468,7 @@ extern "C" void cSSXAudio_RailCarveProgram(cSSXAudio* self, cRider* rider, int* 
             level = prev + (level - prev) * 0.125f;
         }
     }
-    *(float*)((char*)self + (idx << 2) + 0x5990) = level;
+    self->mLastCarveEdging[idx] = level;
     *volume = 0x7F;
     func_00290B58_sCurve bendCurve = D_00482D08;
     *pitch = (int)(func_00290B58(&bendCurve, pressure) * 4096.0f);
@@ -2758,7 +2758,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_GetNeedLift);
 extern "C" int cSSXAudio_GetNeedLift(cSSXAudio* self, int i)
 {
     if (i < 6) {
-        return *(int*)((char*)self + (i << 2) + 0x59e8);
+        return self->mNeedLift[i];
     }
     return 0;
 }
@@ -2778,7 +2778,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_SetNeedLift);
 extern "C" void cSSXAudio_SetNeedLift(cSSXAudio* self, int i, int needLift)
 {
     if (i < 6) {
-        *(int*)((char*)self + (i << 2) + 0x59e8) = needLift;
+        self->mNeedLift[i] = needLift;
     }
 }
 #endif
@@ -2793,7 +2793,7 @@ extern "C" void cSSXAudio_ResetLift(cSSXAudio* self)
 {
     int i;
     for (i = 5; i >= 0; i--) {
-        *(int*)((char*)self + (i << 2) + 0x59e8) = 0;
+        self->mNeedLift[i] = 0;
     }
 }
 #endif
@@ -4340,16 +4340,16 @@ extern "C" void cSSXAudio_AttachSound(cSSXAudio* self, char* obj, int type, int 
     char* sl;
     int i;
     for (i = 0; i < 30; i++) {
-        if (*(int*)((char*)self + i * 0x30 + 0x5A00) == 1 && *(char**)((char*)self + i * 0x30 + 0x5A04) == obj &&
-            *(int*)((char*)self + i * 0x30 + 0x5A20) == type) {
-            cBankMonitor_BANKMONITOR_StopHandle((char*)*(char**)(cBankManager**)self->MusicSys.mpVStreamSys + 0x1D8, *(int*)((char*)self + i * 0x30 + 0x5A24), 1, 0.0f);
-            *(int*)((char*)self + i * 0x30 + 0x5A00) = 0;
+        if (self->AttachedSounds[i].used == 1 && (char*)self->AttachedSounds[i].inst == obj &&
+            self->AttachedSounds[i].patch == type) {
+            cBankMonitor_BANKMONITOR_StopHandle((char*)*(char**)(cBankManager**)self->MusicSys.mpVStreamSys + 0x1D8, self->AttachedSounds[i].handle, 1, 0.0f);
+            self->AttachedSounds[i].used = 0;
             break;
         }
     }
     for (i = 0; i < 30; i++) {
-        if (*(int*)((char*)self + i * 0x30 + 0x5A00) == 0) {
-            *(int*)((char*)self + i * 0x30 + 0x5A00) = 1;
+        if (self->AttachedSounds[i].used == 0) {
+            self->AttachedSounds[i].used = 1;
             break;
         }
     }
@@ -4378,7 +4378,7 @@ extern "C" void cSSXAudio_AttachSound(cSSXAudio* self, char* obj, int type, int 
             *(sSndVec4*)(sl + 0x5A10) = pos;
         }
     }
-    *(int*)((char*)self + i * 0x30 + 0x5A08) = id;
+    self->AttachedSounds[i].mesh = id;
     int curBank;
     int curPatch;
     if (type < 100) {
@@ -4396,7 +4396,7 @@ extern "C" void cSSXAudio_AttachSound(cSSXAudio* self, char* obj, int type, int 
     }
     float radius = 300.0f;
     int pri = 80;
-    *(int*)((char*)self + i * 0x30 + 0x5A20) = type;
+    self->AttachedSounds[i].patch = type;
     if (type == 201) {
         if (*cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)) == 8) {
             radius = 400.0f;
@@ -4407,7 +4407,7 @@ extern "C" void cSSXAudio_AttachSound(cSSXAudio* self, char* obj, int type, int 
     cBankManager** pp = (cBankManager**)self->MusicSys.mpVStreamSys;
     int volumePtr = (int)cSSXAudio_GetCurrAppliedVolumePtr(((sSSXAudioView*)self), 5, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = volumePtr;
-    *(int*)((char*)self + i * 0x30 + 0x5A24) = snd7950Commit(((sSSXAudioView*)self), (char*)self + i * 0x30 + 0x5A10, radius, pri);
+    self->AttachedSounds[i].handle = snd7950Commit(((sSSXAudioView*)self), &self->AttachedSounds[i].pos, radius, pri);
 }
 #endif
 
@@ -4425,12 +4425,12 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, fl
 extern "C" void cSSXAudio_DetachSound(cSSXAudio* self, int inst, int patch)
 {
     for (int i = 0; i < 30; i++) {
-        if (*(int*)((char*)self + i * 0x30 + 0x5A00) == 1 &&
-            *(int*)((char*)self + i * 0x30 + 0x5A04) == inst &&
-            *(int*)((char*)self + i * 0x30 + 0x5A20) == patch) {
+        if (self->AttachedSounds[i].used == 1 &&
+            (int)self->AttachedSounds[i].inst == inst &&
+            self->AttachedSounds[i].patch == patch) {
             cBankMonitor_BANKMONITOR_StopHandle(*(char**)self->MusicSys.mpVStreamSys + 0x1D8,
-                          *(int*)((char*)self + i * 0x30 + 0x5A24), 1, 0.0f);
-            *(int*)((char*)self + i * 0x30 + 0x5A00) = 0;
+                          self->AttachedSounds[i].handle, 1, 0.0f);
+            self->AttachedSounds[i].used = 0;
         }
     }
 }
@@ -4446,7 +4446,7 @@ extern "C" void cSSXAudio_InitAttachedSounds(cSSXAudio* self)
 {
     int i;
     for (i = 29; i >= 0; i--) {
-        *(int*)((char*)self + i * 0x30 + 0x5a00) = 0;
+        self->AttachedSounds[i].used = 0;
     }
 }
 #endif
@@ -4508,9 +4508,9 @@ extern "C" void cSSXAudio_ResetAttachedSounds(cSSXAudio* self)
 {
     int i;
     for (i = 0; i < 30; i++) {
-        if (*(int*)((char*)self + i * 0x30 + 0x5A00) == 1) {
-            cBankMonitor_BANKMONITOR_StopHandle((char*)*(void**)self->MusicSys.mpVStreamSys + 0x1D8, *(int*)((char*)self + i * 0x30 + 0x5A24), 1, 0.0f);
-            *(int*)((char*)self + i * 0x30 + 0x5A00) = 0;
+        if (self->AttachedSounds[i].used == 1) {
+            cBankMonitor_BANKMONITOR_StopHandle((char*)*(void**)self->MusicSys.mpVStreamSys + 0x1D8, self->AttachedSounds[i].handle, 1, 0.0f);
+            self->AttachedSounds[i].used = 0;
         }
     }
 }
@@ -12826,7 +12826,7 @@ extern "C" void* func_002A4BA8(tCrowdEventData* self)
     int i;
     *(int*)self = 0;
     for (i = 4; i >= 0; i--) {
-        *(int*)((char*)self + (i << 2) + 4) = 0;
+        *(int*)&self->mpData[i] = 0;
     }
     return ((void*)self);
 }
@@ -13691,7 +13691,7 @@ extern "C" void func_002A62F0(cCrowdInstance* voice, int b, float v);
 extern "C" void func_002A6430(cCrowdInstance* self, float fade)
 {
     for (int i = 0; i < 15; i++) {
-        if (*(int*)((char*)&self->mCrowdObjectsInfo[0] + i * 0xC) != 0) {
+        if ((int)self->mCrowdObjectsInfo[i].pCrowdObjectPos != 0) {
             func_002A62F0(self, i, fade);
         }
     }
@@ -13941,7 +13941,7 @@ extern "C" void func_002A68B0(cCrowdInstance* self, char* obj, float dt) {
         cCrowdSys* base = gpCrowdSys;
         float rem = timeLeft - dt;
         self->unk_188 = rem;
-        char* crowdData = (char*)base + (idx * 0x54 + 0x1C);
+        char* crowdData = (char*)&base->mCrowdData[idx];
         float decayTime = *(float*)(crowdData + 0x4C);
         int vol = 0x40;
         if (decayTime < rem) {
@@ -14135,7 +14135,7 @@ extern "C" void func_002A4E88(void* voice);
 extern "C" void func_002A6D18(cCrowdSys* self)
 {
     for (int i = 0; i < self->mNumInstances; i++) {
-        func_002A4E88((char*)self->mpCrowdInstances + i * 0x190);
+        func_002A4E88(&self->mpCrowdInstances[i]);
     }
 }
 #endif
@@ -14383,7 +14383,7 @@ extern "C" void func_002A72D8(cCrowdSys* self, int id, float fade)
         int instance;
         int slot;
         func_002A72C0(self, id, &instance, &slot);
-        func_002A62F0((cCrowdInstance*)((char*)self->mpCrowdInstances + instance * 0x190), slot, fade);
+        func_002A62F0(&self->mpCrowdInstances[instance], slot, fade);
     }
 }
 #endif
@@ -14405,7 +14405,7 @@ extern "C" void func_002A7340(cCrowdSys* self, int id, int value)
         int instance;
         int slot;
         func_002A72C0(self, id, &instance, &slot);
-        func_002A5CD8((s2A5CD8*)((char*)self->mpCrowdInstances + instance * 0x190), slot, value);
+        func_002A5CD8((s2A5CD8*)&self->mpCrowdInstances[instance], slot, value);
     }
 }
 #endif
@@ -14635,7 +14635,7 @@ struct sVE_7718 {
 extern "C" void func_002A7718(cCrowdSys* self)
 {
     for (int i = 0; i < self->mNumInstances; i++) {
-        func_002A6430((cCrowdInstance*)((char*)self->mpCrowdInstances + i * 0x190), 0.0f);
+        func_002A6430(&self->mpCrowdInstances[i], 0.0f);
     }
     char* sys = *(char**)self;
     sVE_7718* vt = *(sVE_7718**)(sys + 0xAB0);

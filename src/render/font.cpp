@@ -1441,7 +1441,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_setSpecularTextureId);
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  */
 extern "C" void cGraphicsMan_setSpecularTextureId(cGraphicsMan* graphicsMan, int value, int idx) {
-    *(int*)(((char*)graphicsMan) + (idx << 2) + 0xC) = value;
+    graphicsMan->m_SpecularTextureId[idx] = value;
 }
 #endif
 //100%
@@ -1455,7 +1455,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_getSpecularTextureId);
  * @return the stored texture id
  */
 extern "C" int cGraphicsMan_getSpecularTextureId(cGraphicsMan* graphicsMan, int idx) {
-    return *(int*)(((char*)graphicsMan) + (idx << 2) + 0xC);
+    return graphicsMan->m_SpecularTextureId[idx];
 }
 #endif
 //100%
@@ -1469,7 +1469,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_setPatchSpecularTextureId);
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  */
 extern "C" void cGraphicsMan_setPatchSpecularTextureId(cGraphicsMan* graphicsMan, int value, int idx) {
-    *(int*)(((char*)graphicsMan) + (idx << 2) + 0x2C) = value;
+    graphicsMan->m_PatchSpecularTextureId[idx] = value;
 }
 #endif
 //100%
@@ -1483,7 +1483,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_getPatchSpecularTextureId);
  * @return the stored texture id
  */
 extern "C" int cGraphicsMan_getPatchSpecularTextureId(cGraphicsMan* graphicsMan, int idx) {
-    return *(int*)(((char*)graphicsMan) + (idx << 2) + 0x2C);
+    return graphicsMan->m_PatchSpecularTextureId[idx];
 }
 #endif
 //100%
@@ -1497,7 +1497,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_setSnowSparkleTextureId);
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  */
 extern "C" void cGraphicsMan_setSnowSparkleTextureId(cGraphicsMan* graphicsMan, int value, int idx) {
-    *(int*)(((char*)graphicsMan) + (idx << 2) + 0x4C) = value;
+    graphicsMan->m_SnowSparkleTextureId[idx] = value;
 }
 #endif
 //100%
@@ -1511,7 +1511,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_getSnowSparkleTextureId);
  * @return the stored texture id
  */
 extern "C" int cGraphicsMan_getSnowSparkleTextureId(cGraphicsMan* graphicsMan, int idx) {
-    return *(int*)(((char*)graphicsMan) + (idx << 2) + 0x4C);
+    return graphicsMan->m_SnowSparkleTextureId[idx];
 }
 #endif
 //100%
@@ -1525,7 +1525,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_setRimTextureId);
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  */
 extern "C" void cGraphicsMan_setRimTextureId(cGraphicsMan* graphicsMan, int value, int idx) {
-    *(int*)(((char*)graphicsMan) + (idx << 2) + 0x6C) = value;
+    graphicsMan->m_RimTextureId[idx] = value;
 }
 #endif
 //100%
@@ -1539,7 +1539,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_getRimTextureId);
  * @return the stored texture id
  */
 extern "C" int cGraphicsMan_getRimTextureId(cGraphicsMan* graphicsMan, int idx) {
-    return *(int*)(((char*)graphicsMan) + (idx << 2) + 0x6C);
+    return graphicsMan->m_RimTextureId[idx];
 }
 #endif
 //100%
@@ -1553,7 +1553,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_setisInNIS);
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  */
 extern "C" void cGraphicsMan_setisInNIS(cGraphicsMan* graphicsMan, int value, int idx) {
-    *(int*)(((char*)graphicsMan) + (idx << 2) + 0x8C) = value;
+    graphicsMan->m_isInNIS[idx] = value;
 }
 #endif
 //100%
@@ -1567,7 +1567,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_getisInNIS);
  * @return the stored flag
  */
 extern "C" int cGraphicsMan_getisInNIS(cGraphicsMan* graphicsMan, int idx) {
-    return *(int*)(((char*)graphicsMan) + (idx << 2) + 0x8C);
+    return graphicsMan->m_isInNIS[idx];
 }
 #endif
 //100%
@@ -1581,7 +1581,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_setSnowSparkleDensity);
  * @param value  the new density
  */
 extern "C" void cGraphicsMan_setSnowSparkleDensity(cGraphicsMan* graphicsMan, int idx, float value) {
-    *(float*)(((char*)graphicsMan) + (idx << 2) + 0xAC) = value;
+    graphicsMan->m_SnowSparkleDensity[idx] = value;
 }
 #endif
 //100%
@@ -1595,7 +1595,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_getSnowSparkleDensity);
  * @return the stored density
  */
 extern "C" float cGraphicsMan_getSnowSparkleDensity(cGraphicsMan* graphicsMan, int idx) {
-    return *(float*)(((char*)graphicsMan) + (idx << 2) + 0xAC);
+    return graphicsMan->m_SnowSparkleDensity[idx];
 }
 #endif
 //100%
@@ -1609,7 +1609,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_setDrawDistance);
  * @param value  the new distance
  */
 extern "C" void cGraphicsMan_setDrawDistance(cGraphicsMan* graphicsMan, int idx, float value) {
-    *(float*)(((char*)graphicsMan) + (idx << 2) + 0xCC) = value;
+    graphicsMan->m_DrawDistance[idx] = value;
 }
 #endif
 //100%
@@ -1623,7 +1623,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_getDrawDistance);
  * @return the stored distance
  */
 extern "C" float cGraphicsMan_getDrawDistance(cGraphicsMan* graphicsMan, int idx) {
-    return *(float*)(((char*)graphicsMan) + (idx << 2) + 0xCC);
+    return graphicsMan->m_DrawDistance[idx];
 }
 #endif
 //100%
@@ -1637,7 +1637,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_setFogDensity);
  * @param value  the new density
  */
 extern "C" void cGraphicsMan_setFogDensity(cGraphicsMan* graphicsMan, int idx, float value) {
-    *(float*)(((char*)graphicsMan) + (idx << 2) + 0xEC) = value;
+    graphicsMan->m_FogDensity[idx] = value;
 }
 #endif
 //100%
@@ -1651,7 +1651,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_getFogDensity);
  * @return the stored density
  */
 extern "C" float cGraphicsMan_getFogDensity(cGraphicsMan* graphicsMan, int idx) {
-    return *(float*)(((char*)graphicsMan) + (idx << 2) + 0xEC);
+    return graphicsMan->m_FogDensity[idx];
 }
 #endif
 //100%
@@ -1665,7 +1665,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_setFogColourR);
  * @param value  the new red component
  */
 extern "C" void cGraphicsMan_setFogColourR(cGraphicsMan* graphicsMan, int idx, float value) {
-    *(float*)(((char*)graphicsMan) + (idx << 2) + 0x10C) = value;
+    graphicsMan->m_FogColourR[idx] = value;
 }
 #endif
 //100%
@@ -1679,7 +1679,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_getFogColourR);
  * @return the stored red component
  */
 extern "C" float cGraphicsMan_getFogColourR(cGraphicsMan* graphicsMan, int idx) {
-    return *(float*)(((char*)graphicsMan) + (idx << 2) + 0x10C);
+    return graphicsMan->m_FogColourR[idx];
 }
 #endif
 //100%
@@ -1693,7 +1693,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_setFogColourG);
  * @param value  the new green component
  */
 extern "C" void cGraphicsMan_setFogColourG(cGraphicsMan* graphicsMan, int idx, float value) {
-    *(float*)(((char*)graphicsMan) + (idx << 2) + 0x12C) = value;
+    graphicsMan->m_FogColourG[idx] = value;
 }
 #endif
 //100%
@@ -1707,7 +1707,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_getFogColourG);
  * @return the stored green component
  */
 extern "C" float cGraphicsMan_getFogColourG(cGraphicsMan* graphicsMan, int idx) {
-    return *(float*)(((char*)graphicsMan) + (idx << 2) + 0x12C);
+    return graphicsMan->m_FogColourG[idx];
 }
 #endif
 //100%
@@ -1721,7 +1721,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_setFogColourB);
  * @param value  the new blue component
  */
 extern "C" void cGraphicsMan_setFogColourB(cGraphicsMan* graphicsMan, int idx, float value) {
-    *(float*)(((char*)graphicsMan) + (idx << 2) + 0x14C) = value;
+    graphicsMan->m_FogColourB[idx] = value;
 }
 #endif
 //100%
@@ -1735,7 +1735,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_getFogColourB);
  * @return the stored blue component
  */
 extern "C" float cGraphicsMan_getFogColourB(cGraphicsMan* graphicsMan, int idx) {
-    return *(float*)(((char*)graphicsMan) + (idx << 2) + 0x14C);
+    return graphicsMan->m_FogColourB[idx];
 }
 #endif
 //100%
@@ -1749,7 +1749,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_setFogNear);
  * @param value  the new distance
  */
 extern "C" void cGraphicsMan_setFogNear(cGraphicsMan* graphicsMan, int idx, float value) {
-    *(float*)(((char*)graphicsMan) + (idx << 2) + 0x16C) = value;
+    graphicsMan->m_FogNear[idx] = value;
 }
 #endif
 //100%
@@ -1763,7 +1763,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_getFogNear);
  * @return the stored distance
  */
 extern "C" float cGraphicsMan_getFogNear(cGraphicsMan* graphicsMan, int idx) {
-    return *(float*)(((char*)graphicsMan) + (idx << 2) + 0x16C);
+    return graphicsMan->m_FogNear[idx];
 }
 #endif
 //100%
@@ -1777,7 +1777,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_setFogFar);
  * @param value  the new distance
  */
 extern "C" void cGraphicsMan_setFogFar(cGraphicsMan* graphicsMan, int idx, float value) {
-    *(float*)(((char*)graphicsMan) + (idx << 2) + 0x18C) = value;
+    graphicsMan->m_FogFar[idx] = value;
 }
 #endif
 //100%
@@ -1791,7 +1791,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_getFogFar);
  * @return the stored distance
  */
 extern "C" float cGraphicsMan_getFogFar(cGraphicsMan* graphicsMan, int idx) {
-    return *(float*)(((char*)graphicsMan) + (idx << 2) + 0x18C);
+    return graphicsMan->m_FogFar[idx];
 }
 #endif
 //100%
@@ -1808,7 +1808,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_setScreenTintScaleR);
  * @param value  the new red tint scale
  */
 extern "C" void cGraphicsMan_setScreenTintScaleR(cGraphicsMan* graphicsMan, int idx, float value) {
-    *(float*)(((char*)graphicsMan) + (idx << 2) + 0x1AC) = value;
+    graphicsMan->m_ScreenTintScaleR[idx] = value;
 }
 #endif
 //100%
@@ -1824,7 +1824,7 @@ INCLUDE_ASM("render/font", func_003941F0);
  * @return the red tint scale
  */
 extern "C" float func_003941F0(cPS2GraphicsMan* base, int idx) {
-    return *(float*)(((char*)base) + (idx << 2) + 0x1AC);
+    return base->m_ScreenTintScaleR[idx];
 }
 #endif
 //100%
@@ -1841,7 +1841,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_setScreenTintScaleG);
  * @param value  the new green tint scale
  */
 extern "C" void cGraphicsMan_setScreenTintScaleG(cGraphicsMan* graphicsMan, int idx, float value) {
-    *(float*)(((char*)graphicsMan) + (idx << 2) + 0x1CC) = value;
+    graphicsMan->m_ScreenTintScaleG[idx] = value;
 }
 #endif
 //100%
@@ -1857,7 +1857,7 @@ INCLUDE_ASM("render/font", func_00394210);
  * @return the green tint scale
  */
 extern "C" float func_00394210(cPS2GraphicsMan* base, int idx) {
-    return *(float*)(((char*)base) + (idx << 2) + 0x1CC);
+    return base->m_ScreenTintScaleG[idx];
 }
 #endif
 //100%
@@ -1874,7 +1874,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_setScreenTintScaleB);
  * @param value  the new blue tint scale
  */
 extern "C" void cGraphicsMan_setScreenTintScaleB(cGraphicsMan* graphicsMan, int idx, float value) {
-    *(float*)(((char*)graphicsMan) + (idx << 2) + 0x1EC) = value;
+    graphicsMan->m_ScreenTintScaleB[idx] = value;
 }
 #endif
 //100%
@@ -1890,7 +1890,7 @@ INCLUDE_ASM("render/font", func_00394230);
  * @return the blue tint scale
  */
 extern "C" float func_00394230(cPS2GraphicsMan* base, int idx) {
-    return *(float*)(((char*)base) + (idx << 2) + 0x1EC);
+    return base->m_ScreenTintScaleB[idx];
 }
 #endif
 //100%
@@ -1907,7 +1907,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_setScreenTintOffsetR);
  * @param value  the new red tint offset
  */
 extern "C" void cGraphicsMan_setScreenTintOffsetR(cGraphicsMan* graphicsMan, int idx, float value) {
-    *(float*)(((char*)graphicsMan) + (idx << 2) + 0x20C) = value;
+    graphicsMan->m_ScreenTintOffsetR[idx] = value;
 }
 #endif
 //100%
@@ -1923,7 +1923,7 @@ INCLUDE_ASM("render/font", func_00394250);
  * @return the red tint offset
  */
 extern "C" float func_00394250(cPS2GraphicsMan* base, int idx) {
-    return *(float*)(((char*)base) + (idx << 2) + 0x20C);
+    return base->m_ScreenTintOffsetR[idx];
 }
 #endif
 //100%
@@ -1940,7 +1940,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_setScreenTintOffsetG);
  * @param value  the new green tint offset
  */
 extern "C" void cGraphicsMan_setScreenTintOffsetG(cGraphicsMan* graphicsMan, int idx, float value) {
-    *(float*)(((char*)graphicsMan) + (idx << 2) + 0x22C) = value;
+    graphicsMan->m_ScreenTintOffsetG[idx] = value;
 }
 #endif
 //100%
@@ -1956,7 +1956,7 @@ INCLUDE_ASM("render/font", func_00394270);
  * @return the green tint offset
  */
 extern "C" float func_00394270(cPS2GraphicsMan* base, int idx) {
-    return *(float*)(((char*)base) + (idx << 2) + 0x22C);
+    return base->m_ScreenTintOffsetG[idx];
 }
 #endif
 //100%
@@ -1973,7 +1973,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_setScreenTintOffsetB);
  * @param value  the new blue tint offset
  */
 extern "C" void cGraphicsMan_setScreenTintOffsetB(cGraphicsMan* graphicsMan, int idx, float value) {
-    *(float*)(((char*)graphicsMan) + (idx << 2) + 0x24C) = value;
+    graphicsMan->m_ScreenTintOffsetB[idx] = value;
 }
 #endif
 //100%
@@ -1989,7 +1989,7 @@ INCLUDE_ASM("render/font", func_00394290);
  * @return the blue tint offset
  */
 extern "C" float func_00394290(cPS2GraphicsMan* base, int idx) {
-    return *(float*)(((char*)base) + (idx << 2) + 0x24C);
+    return base->m_ScreenTintOffsetB[idx];
 }
 #endif
 
@@ -2478,7 +2478,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetTexRef);
  */
 extern "C" char* cGraphicsMan_GetTexRef(cGraphicsMan* graphicsMan, int idx)
 {
-    return (char*)&graphicsMan->mTexRefs[0] + idx * 0xC;
+    return (char*)&graphicsMan->mTexRefs[idx];
 }
 #endif
 
@@ -2745,7 +2745,7 @@ INCLUDE_ASM("render/font", func_003946A8);
  * @param value  the texture id
  */
 extern "C" void func_003946A8(cPS2GraphicsMan* base, int idx, int value) {
-    *(int*)(((char*)base) + (idx << 2) + 0x10B0) = value;
+    base->mCharSpecTexID[idx] = value;
 }
 #endif
 //100%
@@ -2761,7 +2761,7 @@ INCLUDE_ASM("render/font", func_003946B8);
  * @return the texture id
  */
 extern "C" int func_003946B8(cPS2GraphicsMan* base, int idx) {
-    return *(int*)(((char*)base) + (idx << 2) + 0x10B0);
+    return base->mCharSpecTexID[idx];
 }
 #endif
 //100%
@@ -2849,7 +2849,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetTexture);
  * @param idx  the texture context (On Tour contextID); not range-checked
  */
 extern "C" void cGraphicsMan_SetTexture(cGraphicsMan* self, short value, int idx) {
-    *(short*)((char*)self->m_pCurrentDrawState + (idx << 1) + 0x10) = value;
+    self->m_pCurrentDrawState->m_textureState.m_texid[idx] = value;
 }
 #endif
 //100%
@@ -2905,7 +2905,7 @@ extern "C" int cGraphicsMan_DrawStateChanged(cGraphicsMan* self)
     unsigned int j;
     for (i = 0; i < 4; i++) {
         char* obj = (char*)self->mVtbl;
-        int* current = (int*)((char*)self->m_pCurrentDrawState + (i << 2));
+        int* current = (int*)&self->m_pCurrentDrawState->unk_00[i];
         char* cmp = ((sFontGetFn_47D8) * (void**)(obj + 0x204))(((char*)self) + *(short*)(obj + 0x200));
         if (*current != *(int*)(cmp + (i << 2))) return 1;
     }
@@ -2931,7 +2931,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_setEffectTexMap);
  * @param value  the texture id
  */
 extern "C" void cGraphicsMan_setEffectTexMap(cGraphicsMan* graphicsMan, int idx, int value) {
-    *(int*)(((char*)graphicsMan) + (idx << 2) + 0xF50) = value;
+    graphicsMan->_EffectTexMap[idx] = value;
 }
 #endif
 //100%
@@ -2947,7 +2947,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_getEffectTexMap);
  * @return the texture id (-1 when unset)
  */
 extern "C" int cGraphicsMan_getEffectTexMap(cGraphicsMan* graphicsMan, int idx) {
-    return *(int*)(((char*)graphicsMan) + (idx << 2) + 0xF50);
+    return graphicsMan->_EffectTexMap[idx];
 }
 #endif
 //100%
@@ -3435,7 +3435,7 @@ INCLUDE_ASM("render/font", cPS2BezierMan_GetVifCache);
  * @return the cache address
  */
 extern "C" int cPS2BezierMan_GetVifCache(cPS2BezierMan* base, int shift, int idx) {
-    return *(int*)(((char*)base) + (idx << 2) + 0x44C) + (shift << 8);
+    return (int)base->mVifCachePos[idx] + (shift << 8);
 }
 #endif
 //100%
@@ -4219,7 +4219,7 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetProjTexInfo);
  */
 extern "C" char* cPS2GraphicsMan_GetProjTexInfo(cPS2GraphicsMan* base, int idx)
 {
-    return (char*)&base->mProjTextures[0] + idx * 160;
+    return (char*)&base->mProjTextures[idx];
 }
 #endif
 //100%

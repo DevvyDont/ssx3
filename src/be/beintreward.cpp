@@ -3515,7 +3515,7 @@ INCLUDE_ASM("be/beintreward", cBEUserAwards_getAwardBits__FPvi);
 int cBEUserAwards_getAwardBits(void* vself, int i)
 {
     cBEUserAwards* self = (cBEUserAwards*)vself;
-    return *(int*)((char*)self + (i << 2) + 0x174);
+    return (int)self->mpAwardBits[i];
 }
 #endif
 

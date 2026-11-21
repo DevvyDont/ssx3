@@ -27,7 +27,7 @@ extern "C" void* cRiderAnimBase_cRiderAnimBase(cRiderAnimBase* self)
     self->Sequencer = (cAnimSequencer*)operator_new_tag(0x30, str_Sequencers, 0, 0);
     for (int i = 0; i < 6; i++)
     {
-        cAnimSequencer_init((char*)self->Sequencer + (i << 3));
+        cAnimSequencer_init(&self->Sequencer[i]);
     }
     cRiderAnimBase_reset(self);
     return ((void*)self);
@@ -56,7 +56,7 @@ extern "C" void cRiderAnimBase__cRiderAnimBase(cRiderAnimBase* self, int flags)
     self->mVtbl = (void**)cRiderAnimBase_vtbl;
     for (int i = 0; i < 6; i++)
     {
-        cAnimSequencer_expireAll((char*)self->Sequencer + (i << 3));
+        cAnimSequencer_expireAll(&self->Sequencer[i]);
     }
     void* sequencer = self->Sequencer;
     if (sequencer)
@@ -145,7 +145,7 @@ extern "C" void cRiderAnimBase_reset(cRiderAnimBase* riderAnimBase)
     cRiderAnimBase* self = riderAnimBase;
     for (int i = 0; i < 6; i++)
     {
-        cAnimSequencer_expireAll(((char*)self->Sequencer) + (i << 3));
+        cAnimSequencer_expireAll(&self->Sequencer[i]);
         self->CurrentAnimID[i] = 438;
     }
     //START
@@ -175,7 +175,7 @@ extern "C" int* cAIAnimEventMap_getAnimPlayAttr(int anim);
  */
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(cRiderAnimBase* self, int i)
 {
-    int anim = *(int*)((char*)self + (i << 2));
+    int anim = self->CurrentAnimID[i];
     if (anim == 438) {
         return 0;
     }
@@ -405,7 +405,7 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_removeAll);
 // Resets sequencer i and marks its slot empty (0x1B6 = no anim, see cRiderAnimBase_getCurrentAnimCategory).
 extern "C" void cRiderAnimBase_removeAll(cRiderAnimBase* self, int i)
 {
-    cAnimSequencer_expireAll((char*)self->Sequencer + (i << 3));
+    cAnimSequencer_expireAll(&self->Sequencer[i]);
     self->CurrentAnimID[i] = 438;
 }
 #endif
@@ -427,9 +427,9 @@ extern "C" void cAnimSequencer_fadeOutAndExpireAll(void* self, float v);
  */
 extern "C" void cRiderAnimBase_blendOutAll(cRiderAnimBase* self, int i, float blendOut)
 {
-    cAnimSequencer_removeAllEndTriggers((char*)self->Sequencer + (i << 3), 0x3F);
-    cAnimSequencer_fadeOutAndExpireAll((char*)self->Sequencer + (i << 3), blendOut);
-    *(int*)(((char*)self) + (i << 2)) = 438;
+    cAnimSequencer_removeAllEndTriggers(&self->Sequencer[i], 0x3F);
+    cAnimSequencer_fadeOutAndExpireAll(&self->Sequencer[i], blendOut);
+    self->CurrentAnimID[i] = 438;
 }
 #endif
 
@@ -718,7 +718,7 @@ extern "C" void cRiderAnimBase_setupAnimation(cRiderAnimBase* riderAnim, int ani
     sAnimState_00312598 states[0x40];
     for (int i = 0; i < 6; i++)
     {
-        n += cAnimSequencer_getAnimBlendFrames((char*)riderAnim->Sequencer + (i << 3), &states[n], 0x40 - n);
+        n += cAnimSequencer_getAnimBlendFrames(&riderAnim->Sequencer[i], &states[n], 0x40 - n);
     }
     func_0030F2B0(riderAnim->AnimModel, n, states, animMinParts);
 }
@@ -937,7 +937,7 @@ extern "C" void cRiderAnimBase_playFromAnimID(cRiderAnimBase* self, int anim, in
     {
         blend = *(float*)&cAIAnimEventMap_getAnimPlayAttr(anim)[4];
     }
-    *(int*)(((char*)self) + (slot << 2)) = cRiderAnimBase_onInput(self, (char*)self->Sequencer + (slot << 3), anim, animid, 1, kSequencerPriority[slot], blend);
+    self->CurrentAnimID[slot] = cRiderAnimBase_onInput(self, &self->Sequencer[slot], anim, animid, 1, kSequencerPriority[slot], blend);
 }
 #endif
 
@@ -955,7 +955,7 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getCurrentAnimID__FPvi);
 int cRiderAnimBase_getCurrentAnimID(void* vself, int i)
 {
     cRiderAnimBase* self = (cRiderAnimBase*)vself;
-    return *(int*)((char*)self + (i << 2));
+    return self->CurrentAnimID[i];
 }
 #endif
 

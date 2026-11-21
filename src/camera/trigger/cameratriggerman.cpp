@@ -841,7 +841,7 @@ extern "C" void cCameraTriggerMan_checkCollisions(cCameraTriggerMan* self, cRide
 {
     if (active_D320(((char*)rider))) {
         int idx = rider->mViewIndex;
-        cActiveTriggerList_clearFlags((char*)&self->ActiveTriggerList[0] + idx * 4);
+        cActiveTriggerList_clearFlags(&self->ActiveTriggerList[idx]);
         sCtx_D320 ctx;
         sRoot_D320* w = (sRoot_D320*)SSXApp->Game->BXNash;
         ctx.list = (char*)(idx * 4 + (int)self) + 0x14;
@@ -878,22 +878,22 @@ extern "C" void cCameraTriggerMan_checkCollisions(cCameraTriggerMan* self, cRide
         while (n != 0) {
             if (*(int*)(n + 0xC) == 0) {
                 char* trigger = *(char**)n;
-                if (cCameraTriggerStack_recordExitGetNext((sCamTrigStack*)(((char*)self) + (idx * 32 + 0x1C)), *(int*)trigger, &changed, &top)) {
+                if (cCameraTriggerStack_recordExitGetNext((sCamTrigStack*)&self->CameraTriggerStack[idx], *(int*)trigger, &changed, &top)) {
                     doTriggerAction_D320(*(void**)(trigger + 0x10), ((char*)rider));
                 } else if (changed) {
-                    char* topActive = (char*)cActiveTriggerList_find1(((char*)self) + (idx * 4 + 20), top);
+                    char* topActive = (char*)cActiveTriggerList_find1(&self->ActiveTriggerList[idx], top);
                     if (topActive) {
                         doTriggerAction_D320(*(void**)(topActive + 0xC), ((char*)rider));
                     }
                 }
-                n = (char*)cActiveTriggerList_remove(((char*)self) + (idx * 4 + 20), n);
+                n = (char*)cActiveTriggerList_remove(&self->ActiveTriggerList[idx], n);
             } else {
                 n = *(char**)(n + 4);
             }
         }
         for (char* listNode = *(char**)((char*)(idx * 4 + (int)self) + 0x14); listNode != 0; listNode = *(char**)(listNode + 4)) {
             if (*(int*)(listNode + 8)) {
-                cCameraTriggerStack_recordEnter(((char*)self) + (idx * 32 + 0x1C), **(int**)listNode);
+                cCameraTriggerStack_recordEnter(&self->CameraTriggerStack[idx], **(int**)listNode);
                 doTriggerAction_D320(*(void**)(*(char**)listNode + 0xC), ((char*)rider));
             }
         }

@@ -1023,7 +1023,7 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(cFEStateCheatCharSelect* s
         int sel = menu->mMiscData + *(unsigned char*)((char*)self->mpMenu + 0x98);
         sVEK182690a* vt = (sVEK182690a*)menu->mVtbl;
         vt[21].fn((char*)menu + vt[21].delta, D_004C66B8);
-        cUIText_setAsciiString(self->mpNameWidget, *(const char**)((char*)self + (sel << 2) + 0x16C));
+        cUIText_setAsciiString(self->mpNameWidget, self->mpCharNames[sel]);
         break;
     }
     case 6:
@@ -1035,7 +1035,7 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(cFEStateCheatCharSelect* s
         if (sel == 0)
             self->mCheatCharID = 0;
         else
-            self->mCheatCharID = *(int*)((char*)self + (sel << 2) + 0x7C);
+            self->mCheatCharID = self->mCharIDs[sel];
         char* pl = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setPlayerCheatCharID(pl, self->mUserNum, self->mCheatCharID);
         sVEK182690b* vt = *(sVEK182690b**)(pl + 0xC);

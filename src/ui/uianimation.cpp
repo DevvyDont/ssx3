@@ -378,9 +378,9 @@ extern "C" void cUIAnimation_updateThing(cUIAnimation* self, cUIThing* obj, int 
     if (self->mLastFrameEval == frame) return;
     if (frame < ((sUIAnimHdr75E0*)self->mpAnimHeader)->nframes) {
         for (unsigned int i = 0; i < ((sUIAnimHdr75E0*)self->mpAnimHeader)->ntracks; i++) {
-            float chanValue = cUIAnimationChannel_evalAtFrameFloat((cUIAnimationChannel_evalAtFrameFloat_sAnim**)(((char*)self->mpAnimChannels) + (i << 2)), frame);
+            float chanValue = cUIAnimationChannel_evalAtFrameFloat((cUIAnimationChannel_evalAtFrameFloat_sAnim**)&self->mpAnimChannels[i], frame);
             sUIAnimVt75E0* vt = (sUIAnimVt75E0*)obj->mVtbl;
-            vt[12].fn(((char*)obj) + vt[12].delta, cUIAnimationChannel_getAnimChanType((cUIAnimationChannel*)(((char*)self->mpAnimChannels) + (i << 2))), chanValue);
+            vt[12].fn(((char*)obj) + vt[12].delta, cUIAnimationChannel_getAnimChanType(&self->mpAnimChannels[i]), chanValue);
         }
     }
     self->mLastFrameEval = frame;

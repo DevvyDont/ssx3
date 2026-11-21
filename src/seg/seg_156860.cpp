@@ -310,7 +310,7 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_closeChannel);
  * @param channelIndex  the channel slot
  */
 extern "C" void cCommSystem_closeChannel(cCommSystem* commSystem, int channelIndex) {
-    void **slot = (void **)(((char*)commSystem) + channelIndex * 4);
+    void **slot = (void **)&commSystem->mChannels[channelIndex];
     char *channel = (char *)*slot;
     if (*(int *)channel != 0) {
         char *vt = *(char **)(channel + 8);
@@ -338,7 +338,7 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_isChannelOpen);
  * @return 1 when the slot is set, else 0
  */
 extern "C" int cCommSystem_isChannelOpen(cCommSystem* commSystem, int channelIndex) {
-    return *(int *)((char*)commSystem + (channelIndex << 2)) != 0;
+    return (int)commSystem->mChannels[channelIndex] != 0;
 }
 #endif
 
@@ -355,7 +355,7 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_isChannelConnected);
  * @return the channel's answer
  */
 extern "C" int cCommSystem_isChannelConnected(cCommSystem* commSystem, int channelIndex) {
-    char *obj = *(char **)((char*)commSystem + (channelIndex << 2));
+    char *obj = (char*)commSystem->mChannels[channelIndex];
     char *vt = *(char **)(obj + 8);
     return (*(int (**)(void *))(vt + 0x24))(obj + *(short *)(vt + 0x20));
 }
@@ -395,7 +395,7 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_readPacket);
  * @return the channel's result: nonzero when a packet was read
  */
 extern "C" int cCommSystem_readPacket(cCommSystem* commSystem, int channelIndex, int data, int maxSize) {
-    char *obj = *(char **)((char*)commSystem + (channelIndex << 2));
+    char *obj = (char*)commSystem->mChannels[channelIndex];
     char *vt = *(char **)(obj + 8);
     return (*(int (**)(void *, int, int))(vt + 0x3C))(obj + *(short *)(vt + 0x38), data, maxSize);
 }
@@ -416,7 +416,7 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_writePacket);
  * @return the channel's result: nonzero when the packet was taken
  */
 extern "C" int cCommSystem_writePacket(cCommSystem* commSystem, int channelIndex, int data, int size) {
-    char *obj = *(char **)((char*)commSystem + (channelIndex << 2));
+    char *obj = (char*)commSystem->mChannels[channelIndex];
     char *vt = *(char **)(obj + 8);
     return (*(int (**)(void *, int, int))(vt + 0x44))(obj + *(short *)(vt + 0x40), data, size);
 }
@@ -438,7 +438,7 @@ extern "C" int cCommSystem_getError(cCommSystem* commSystem, int channelIndex) {
     if ((commSystem->mNetConnError) != 0) {
         return 1;
     }
-    return *(int *)((char*)(*(void **)((char*)commSystem + (channelIndex << 2))) + 4);
+    return *(int *)((char*)((void*)commSystem->mChannels[channelIndex]) + 4);
 }
 #endif
 
@@ -1814,7 +1814,7 @@ extern "C" void cGameComm_update(cGameComm* vs)
                 continue;
             }
             for (int i = 0; i < vs->unk_0B8; i++) {
-                if (*(int*)(((char*)vs) + (i << 2) + 0xC4) == info[2]) {
+                if (vs->unk_0C4[i] == info[2]) {
                     vs->unk_138 = 0;
                     vs->unk_13C = 1;
                     break;
@@ -1830,7 +1830,7 @@ extern "C" void cGameComm_update(cGameComm* vs)
             } else {
                 int sock = func_003E7450_70D8((int)vs->unk_140, vs->unk_0C0, str_SSXPingServer, 0xE);
                 int k = vs->unk_0B8;
-                *(int*)(((char*)vs) + (k << 2) + 0xC4) = sock;
+                vs->unk_0C4[k] = sock;
                 vs->unk_0B8 = k + 1;
                 vs->unk_0BC = 4;
             }

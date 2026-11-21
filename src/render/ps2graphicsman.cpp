@@ -396,7 +396,7 @@ extern "C" int func_00367440(cTextureMan* self, int pixelData, void* texName, in
         cTextureMan_NewBindTexID(self, bindId);
         id = bindId;
     }
-    char* tex = *(char**)(((char*)self) + (id << 2) + 8);
+    char* tex = (char*)self->m_pTexInfo[id].pTexInfo;
     strncpy(tex + 4, name, 8);
     *(int*)(tex + 0x0) = ownsData;
     *(int*)(tex + 0xC) = fmt;
@@ -538,7 +538,7 @@ INCLUDE_ASM("render/ps2graphicsman", func_00367B60);
  */
 extern "C" void func_00367B60(cTextureMan* self, int i)
 {
-    char* obj = *(char**)((char*)self + (i << 2) + 8);
+    char* obj = (char*)self->m_pTexInfo[i].pTexInfo;
     if (*(int*)(obj + 0x28) != -1) {
         char* sub = *(int*)(obj + 0xC) != 9 ? self->mMainHeap : self->mTempHeap;
         char* node = *(char**)(sub + 0x1FF0) + *(int*)(obj + 0x30) * 0x1C;
@@ -669,7 +669,7 @@ extern "C" void func_00369098(cTextureMan* self, int idx);
 extern "C" void func_00367D20(cTextureMan* self, int idx, void* data, int width, int height, int mipCount, int texelFormat,
                               int clutFormat, void* clut, int upload)
 {
-    char* tex = *(char**)((char*)self + (idx << 2) + 8);
+    char* tex = (char*)self->m_pTexInfo[idx].pTexInfo;
     if (upload != 0) {
         if (data != 0) {
             MEM_copy(*(void**)(tex + 0x1C), data, *(int*)(tex + 0x10));
@@ -1277,7 +1277,7 @@ extern "C" void func_00368970(cTextureMan* self, int idx, int slot, ulong** dma)
     int* cur = (int*)(bound + off);
     if (*cur != idx) {
         *cur = idx;
-        char* tex = *(char**)(((char*)self) + (idx << 2) + 8);
+        char* tex = (char*)self->m_pTexInfo[idx].pTexInfo;
         int rTex0, rTex1, rMip1, rMip2;
         if (slot == 0) {
             rTex0 = 6;
@@ -1335,7 +1335,7 @@ extern "C" void func_00368970(cTextureMan* self, int idx, int slot, ulong** dma)
         packet[3] = rTex0;
         packet += 4;
     } else if (self->mCLUTTex != idx) {
-        char* tex = *(char**)(((char*)self) + (idx << 2) + 8);
+        char* tex = (char*)self->m_pTexInfo[idx].pTexInfo;
         if (*(int*)(tex + 0x2C) >= 0) {
             self->mCLUTTex = idx;
             packet[0] = 0x10000003;
@@ -1369,7 +1369,7 @@ extern "C" void func_00366E30(void* list, int i);
  */
 extern "C" void func_00369098(cTextureMan* self, int idx)
 {
-    char* tex = *(char**)((char*)self + (idx << 2) + 8);
+    char* tex = (char*)self->m_pTexInfo[idx].pTexInfo;
     if (*(int*)(tex + 0x28) != -1) {
         if (*(int*)(tex + 0xC) != 9) {
             func_00366E30(self->mMainHeap, idx);

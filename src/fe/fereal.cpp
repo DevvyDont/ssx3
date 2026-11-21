@@ -1393,7 +1393,7 @@ extern "C" void cRealFE_update(cRealFE* self)
         cMoviePlayer_asyncUpdate(self->mpMoviePlayer);
         if (self->mMovieSkippable != 0) {
             for (int i = 0; i < 2; i++) {
-                void** input = *(void***)((char*)SSXApp + (i << 2) + 0xB0);
+                void** input = (void**)SSXApp->Inputs[i];
                 int ok = *input != 0 && **(int**)input != 0;
                 if (ok) {
                     if (cInput_getState(input, 0x70) != 0 || cInput_getState(input, 122) != 0) {

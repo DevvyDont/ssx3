@@ -1408,7 +1408,7 @@ static inline int saIsOn(char* cfg, int off) { return *(int*)(cfg + off) == 1; }
 extern "C" void cSSXAudio_UnAttachAudioBank(cSSXAudio* self, unsigned int handle)
 {
     unsigned int slot = handle >> 8;
-    if (*(unsigned int*)((char*)self + (slot << 2) + 0x6C78) != (handle & 0xFF)) return;
+    if ((unsigned int)self->mTrackBankLoadedSection[slot] != (handle & 0xFF)) return;
     if (slot == 0) {
         char* mgr = *(char**)self->MusicSys.mpVStreamSys;
         char* cfg = *(char**)(mgr + 0xACC);
@@ -1431,7 +1431,7 @@ extern "C" void cSSXAudio_UnAttachAudioBank(cSSXAudio* self, unsigned int handle
     if (*bankEntry != 0) {
         cBankManager_BANK_UnAttach(*(void**)self->MusicSys.mpVStreamSys, slot + 8);
         *bankEntry = 0;
-        *(int*)((char*)self + (slot << 2) + 0x6C78) = -1;
+        self->mTrackBankLoadedSection[slot] = -1;
     }
 }
 #endif
@@ -2057,9 +2057,9 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetCurrAppliedVolume);
 extern "C" float cSSXAudio_GetCurrAppliedVolume(cSSXAudio* self, int volumeIndex, int charIndex)
 {
     if (volumeIndex != 4 || charIndex >= 10) {
-        return *(float*)((char*)self + (volumeIndex << 4) + 0x62C8);
+        return self->mSoundVolume[volumeIndex].appliedVolume;
     }
-    return *(float*)((char*)self + (charIndex << 2) + 0x636C);
+    return self->unk_636C[charIndex];
 }
 #endif
 
@@ -2081,7 +2081,7 @@ extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(cSSXAudio* self, int volumeIn
         // PORT: pointer held in int (only spelling found that gives idx-first addu)
         return (char*)((volumeIndex << 4) + (int)self + 0x62C8);
     }
-    return (char*)self + ((charIndex << 2) + 0x636C);
+    return (char*)&self->unk_636C[charIndex];
 }
 #endif
 
@@ -2113,7 +2113,7 @@ void cSSXAudio_SetCurrVolume_if(void*, int, float) __asm__("cSSXAudio_SetCurrVol
  */
 extern "C" void cSSXAudio_IncCurrVolume(cSSXAudio* self, int idx)
 {
-    cSSXAudio_SetCurrVolume_if(((char*)self), idx, *(float*)(((char*)self) + (idx << 4) + 0x62BC) + 0.09090909361839294f);
+    cSSXAudio_SetCurrVolume_if(((char*)self), idx, self->mSoundVolume[idx].setVolume + 0.09090909361839294f);
 }
 #endif
 //100%
@@ -2130,7 +2130,7 @@ void cSSXAudio_SetCurrVolume_if(void*, int, float) __asm__("cSSXAudio_SetCurrVol
  */
 extern "C" void cSSXAudio_DecCurrVolume(cSSXAudio* self, int idx)
 {
-    cSSXAudio_SetCurrVolume_if(((char*)self), idx, *(float*)(((char*)self) + (idx << 4) + 0x62BC) - 0.09090909361839294f);
+    cSSXAudio_SetCurrVolume_if(((char*)self), idx, self->mSoundVolume[idx].setVolume - 0.09090909361839294f);
 }
 #endif
 
@@ -2516,9 +2516,9 @@ extern "C" float cSSXAudio_MixIntToFloat(cSSXAudio* self, int i, int pct)
         return pct * 0.009999999776482582f;
     }
     if (self->mMixing != 0) {
-        return *(float*)((char*)self + (i << 2) + 0x6440);
+        return self->mMixFinalValue[i];
     }
-    return *(float*)((char*)self + (i << 2) + 0x63E4);
+    return self->mMixLevel[i];
 }
 #endif
 

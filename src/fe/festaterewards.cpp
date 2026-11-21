@@ -1839,7 +1839,7 @@ extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
 extern "C" void cFEStateRewardGalleryPosters_getIconID(cFEStateRewardGalleryPosters* self, int i)
 {
     char buf[5];
-    void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
+    void* reward = (void*)self->mpPosters[i];
     strncpy(buf, *(const char**)((char*)reward + 8), 4);
     buf[4] = 0;
     cFEStateRewardGalleryBase_getIconID(self, buf);
@@ -1969,7 +1969,7 @@ extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
 extern "C" void cFEStateRewardGalleryTradingCards_getIconID(cFEStateRewardGalleryTradingCards* self, int i)
 {
     char buf[5];
-    void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
+    void* reward = (void*)self->mpTradingCards[i];
     strncpy(buf, *(const char**)((char*)reward + 8), 4);
     buf[4] = 0;
     cFEStateRewardGalleryBase_getIconID(self, buf);
@@ -2099,7 +2099,7 @@ extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
 extern "C" void cFEStateRewardGalleryConceptArts_getIconID(cFEStateRewardGalleryConceptArts* self, int i)
 {
     char buf[5];
-    void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
+    void* reward = (void*)self->mpConceptArts[i];
     strncpy(buf, *(const char**)((char*)reward + 8), 4);
     buf[4] = 0;
     cFEStateRewardGalleryBase_getIconID(self, buf);
@@ -2229,7 +2229,7 @@ extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
 extern "C" void cFEStateRewardGalleryVideos_getIconID(cFEStateRewardGalleryVideos* self, int i)
 {
     char buf[5];
-    void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
+    void* reward = (void*)self->mpVideos[i];
     strncpy(buf, *(const char**)((char*)reward + 8), 4);
     buf[4] = 0;
     cFEStateRewardGalleryBase_getIconID(self, buf);
@@ -2359,7 +2359,7 @@ extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
 extern "C" void cFEStateRewardGalleryToys_getIconID(cFEStateRewardGalleryToys* self, int i)
 {
     char buf[5];
-    void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
+    void* reward = (void*)self->mpToys[i];
     strncpy(buf, *(const char**)((char*)reward + 8), 4);
     buf[4] = 0;
     cFEStateRewardGalleryBase_getIconID(self, buf);
@@ -2530,7 +2530,7 @@ extern "C" void* cUITextureBank_getElementByHashname(void* self, int id);
 extern "C" void cFEStateRewardGalleryCheatChars_getTextureElement(cFEStateRewardGalleryCheatChars* self, int i)
 {
     cUIEngine* obj = self->mpEngine;
-    void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
+    void* reward = (void*)self->mpCheatChars[i];
     int textureHash = GetHashValue32(*(char**)((char*)reward + 4));
     cUITextureBank_getElementByHashname(&obj->mTextureBank, textureHash);
 }

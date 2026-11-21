@@ -3025,7 +3025,7 @@ INCLUDE_ASM("fe/debugfe", cFEInput_setPadNum);
  */
 extern "C" void cFEInput_setPadNum(cFEInput* self, unsigned char idx)
 {
-    int controllerInput = *(int*)((char*)SSXApp + (idx << 2) + 0xB0);
+    int controllerInput = (int)SSXApp->Inputs[idx];
     self->mPadNum = idx;
     self->mpInput = (cInput*)controllerInput;
 }

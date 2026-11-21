@@ -1246,7 +1246,7 @@ INCLUDE_ASM("main/gameload", cGame_getTransitionMan__FPvi);
 int cGame_getTransitionMan(void* vself, int i)
 {
     cGame* self = (cGame*)vself;
-    return *(int*)((char*)self + (i << 2) + 0x5C);
+    return (int)self->TransitionMan[i];
 }
 #endif
 
@@ -1262,7 +1262,7 @@ INCLUDE_ASM("main/gameload", cGame_getSplashManager__FPvi);
 int cGame_getSplashManager(void* vself, int i)
 {
     cGame* self = (cGame*)vself;
-    return *(int*)((char*)self + (i << 2) + 0x68);
+    return (int)self->SplashManager[i];
 }
 #endif
 
@@ -2307,7 +2307,7 @@ int cInput_getState(void* obj, int a1);
 
 static inline void** PlayerObj_1840(int p)
 {
-    return *(void***)((char*)SSXApp + (p << 2) + 0xB0);
+    return (void**)SSXApp->Inputs[p];
 }
 
 static inline int IsReady_1840(void** o)

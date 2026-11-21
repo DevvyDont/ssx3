@@ -336,7 +336,7 @@ extern "C" void cBEScoreInterface_processRiderRanking(cBEScoreInterface* self, i
     int profile = cBELibrary_getProfileIndex(rider);
     if (profile >= 2)
         return;
-    *(int*)(((char*)self) + profile * 0xB0 + 0xCC) = result;
+    self->LastEventStats[profile].rank = result;
     void* be = cBE_getInterface_Fv(cBE_getBE(), 0);
     int charID = cBELibrary_getCharacterID(rider);
     int mode = cBENewRaceInterface_newRace.cGameEvent;
@@ -508,7 +508,7 @@ INCLUDE_ASM("be/beintscore", cBEScoreInterface_getPlayerLastCompletedEventStats)
  */
 extern "C" void* cBEScoreInterface_getPlayerLastCompletedEventStats(cBEScoreInterface* self, int profileIndex)
 {
-    return (char*)self + (profileIndex * 0xb0 + 0x20);
+    return (char*)&self->LastEventStats[profileIndex];
 }
 #endif
 

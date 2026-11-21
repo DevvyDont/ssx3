@@ -3768,7 +3768,7 @@ struct sPartVec4i {
 extern "C" sPartVec4i* cPS2GraphicsMan_GetViewportWindow(sPartVec4i* out, cPS2GraphicsMan* self)
 {
     int i = self->mViewportDepth;
-    float* window = (float*)((char*)self + (i * 0x230 + 0x6d20));
+    float* window = &self->mViewportStack[i].unk_000[0];
     int x = (int)window[0];
     int y = (int)window[1];
     int z = (int)window[2];
@@ -7111,7 +7111,7 @@ extern "C" int cPS2GraphicsMan_AddTexture1(cPS2GraphicsMan* self, int pixels, in
                               int clutData, int lockType, int copyMem, int bindId)
 {
     int i = func_00367440(self->mpTextureMan, pixels, name, width, height, mipmapCount, texelFormat, clutFormat, clutData, lockType, copyMem, bindId);
-    *(int*)((char*)self + (i << 2) + 0x3838) = 1;
+    self->unk_3838[i] = 1;
     return i;
 }
 #endif
@@ -7129,7 +7129,7 @@ extern "C" void func_00367BC0(void* tbl, int idx);
 extern "C" void cPS2GraphicsMan_RemoveTexture(cPS2GraphicsMan* self, int idx)
 {
     func_00367BC0(self->mpTextureMan, idx);
-    *(int*)((char*)self + (idx << 2) + 0x18F8) = 0;
+    self->unk_18F8[idx] = 0;
 }
 #endif
 

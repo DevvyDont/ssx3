@@ -439,8 +439,8 @@ extern "C" int cPathSys_loadStartpoints(cPathSys* self, char* cursor)
                 break;
             }
         }
-        ((sPathNode_B880*)self->Startpoints)[i].f24 = ((char*)self->AIPaths) + aiPathIndex * 0x40;
-        ((sPathNode_B880*)self->Startpoints)[i].f20 = ((char*)self->TrackPaths) + trackPathIndex * 0x3C;
+        ((sPathNode_B880*)self->Startpoints)[i].f24 = (char*)&self->AIPaths[aiPathIndex];
+        ((sPathNode_B880*)self->Startpoints)[i].f20 = (char*)&self->TrackPaths[trackPathIndex];
     }
     return cursor - start;
 }

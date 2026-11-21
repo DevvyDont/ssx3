@@ -82,7 +82,7 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetPos);
  * @return the position vector pointer, or 0
  */
 extern "C" int cSndPlayOpts_OPTS_GetPos(cSndPlayOpts* opts) {
-    return *(int*)((char*)opts + (opts->mInst << 2) + 0x24);
+    return (int)opts->mPosition[opts->mInst];
 }
 #endif
 
@@ -2366,7 +2366,7 @@ extern "C" void cWorldPainterSection_update(cWorldPainterSection*);
 extern "C" void cWorldPainterMan_update(cWorldPainterMan* self) {
     unsigned i;
     for (i = 0; i < *(unsigned*)self; i++) {
-        cWorldPainterSection_update((cWorldPainterSection*)((char*)(self->m_pCache) + i * 12));
+        cWorldPainterSection_update(&self->m_pCache[i]);
     }
 }
 #endif
@@ -2400,7 +2400,7 @@ extern "C" void cWorldPainterSection_load1(void*, int, int);
  * @param wpData  the section's world-painter data (a tWPHeader), kept in place (streamed)
  */
 extern "C" void cWorldPainterMan_load1(cWorldPainterMan* worldPainterMan, int sectionId, int wpData) {
-    cWorldPainterSection_load1((char*)worldPainterMan->m_pCache + sectionId * 12, sectionId, wpData);
+    cWorldPainterSection_load1(&worldPainterMan->m_pCache[sectionId], sectionId, wpData);
 }
 #endif
 

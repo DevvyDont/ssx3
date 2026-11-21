@@ -4924,7 +4924,7 @@ extern "C" void cScriptPlayerMain_Stop(cScriptPlayerMain* self)
         return;
     }
     for (int i = 0; i < self->mpSystemHeader->numEntities; i++) {
-        cScriptPlayerEntity_Stop((cScriptPlayerEntity*)((char*)self->mpEntityPlayers + i * 0x3C));
+        cScriptPlayerEntity_Stop(&self->mpEntityPlayers[i]);
     }
     self->mPlayState = 0;
     *(int*)&self->mCurrFrame = 0;
@@ -5097,7 +5097,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_GetEntity);
  */
 extern "C" void* cScriptPlayerMain_GetEntity(cScriptPlayerMain* self, int entityIndex)
 {
-    return (char*)self->mpEntityPlayers + entityIndex * 0x3c;
+    return (char*)&self->mpEntityPlayers[entityIndex];
 }
 #endif
 
@@ -5466,7 +5466,7 @@ extern "C" int cScriptPlayerMain_DoUpdate(cScriptPlayerMain* self, float time, f
     }
     for (int i = 0; i < ((unsigned char*)self->mpSystemHeader)[1]; i++) {
         int anyChanged = 0;
-        if (cScriptPlayerEntity_Update((cScriptPlayerEntity*)(((char*)self->mpEntityPlayers) + i * 0x3C), prev, self->mCurrFrame, speed, jump) != 0 || changed != 0) {
+        if (cScriptPlayerEntity_Update(&self->mpEntityPlayers[i], prev, self->mCurrFrame, speed, jump) != 0 || changed != 0) {
             anyChanged = 1;
         }
         changed = anyChanged;

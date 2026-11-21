@@ -633,7 +633,7 @@ extern "C" void cScriptPlayerMain_Pause(void* self);
  */
 extern "C" void cBXScriptEngine_PauseScript(cBXScriptEngine* self, int requestHandle)
 {
-    char* request = (char*)self + (requestHandle * 0x24 + 0x2c0);
+    char* request = (char*)&self->mScriptRequests[requestHandle];
     cScriptPlayerMain_Pause(*(void**)request);
     if (*(int*)(*(char**)request + 0x2C) > 0) {
         *(int*)(request + 0x4) = 5;
@@ -657,7 +657,7 @@ extern "C" void cScriptPlayerMain_Resume(void* self);
  */
 extern "C" void cBXScriptEngine_ResumeScript(cBXScriptEngine* self, int requestHandle)
 {
-    char* request = (char*)self + (requestHandle * 0x24 + 0x2c0);
+    char* request = (char*)&self->mScriptRequests[requestHandle];
     cScriptPlayerMain_Resume(*(void**)request);
     if (*(int*)(request + 0x4) == 5) {
         char* player = *(char**)request;
@@ -1195,7 +1195,7 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequest);
  */
 extern "C" void* cBXScriptEngine_GetRequest(cBXScriptEngine* self, int requestHandle)
 {
-    char* request = (char*)self + (requestHandle * 0x24 + 0x2c0);
+    char* request = (char*)&self->mScriptRequests[requestHandle];
     return *(int*)(request + 0x20) != 0 ? request : 0;
 }
 #endif

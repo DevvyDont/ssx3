@@ -334,7 +334,7 @@ extern "C" void cBEProfileLib_init(cBEProfileLib* self, int reload)
 {
     int i;
     for (i = 0; i < 10; i++) {
-        cBECharProfileDB_init((char*)self + i * 0xF88, i, reload);
+        cBECharProfileDB_init(&self->charProfile[i], i, reload);
     }
 }
 #endif
@@ -354,7 +354,7 @@ extern "C" void func_00156810(cBEProfileLib* self)
 {
     int i;
     for (i = 0; i < 10; i++) {
-        func_001519E0((char*)self + i * 0xF88, i);
+        func_001519E0(&self->charProfile[i], i);
     }
 }
 #endif
@@ -426,7 +426,7 @@ extern char cBEProfileLib_BackupCharProfile[];
 extern "C" void cBEProfileLib_backupCharProfile(cBEProfileLib* base, int idx)
 {
     D_004A125C = idx;
-    MEM_copy(cBEProfileLib_BackupCharProfile, ((char*)base) + idx * 3976, 3976);
+    MEM_copy(cBEProfileLib_BackupCharProfile, &base->charProfile[idx], 3976);
 }
 #endif
 
@@ -445,7 +445,7 @@ extern char cBEProfileLib_BackupCharProfile[];
  */
 extern "C" void cBEProfileLib_restoreCharProfile(cBEProfileLib* base)
 {
-    MEM_copy(((char*)base) + D_004A125C * 3976, cBEProfileLib_BackupCharProfile, 3976);
+    MEM_copy(&base->charProfile[D_004A125C], cBEProfileLib_BackupCharProfile, 3976);
 }
 #endif
 

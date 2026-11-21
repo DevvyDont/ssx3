@@ -718,7 +718,7 @@ extern "C" void cMenu_prevFocus(cMenu* self);
 extern "C" int cMenu_input(cMenu* self)
 {
     cMenu_checkFocus((cMenu*)self);
-    cMenu_input_cItem* item = *(cMenu_input_cItem**)((char*)self + (self->FocusItem << 2) + 0xC);
+    cMenu_input_cItem* item = (cMenu_input_cItem*)self->Items[self->FocusItem];
     int inputResult = item->input();
     switch (inputResult) {
     case 3:
@@ -1792,7 +1792,7 @@ INCLUDE_ASM("util/menu", cMenu_getFocusItem);
  */
 extern "C" void* cMenu_getFocusItem(cMenu* self)
 {
-    return *(void**)((char*)self + (cMenu_getFocus(self) << 2) + 0xC);
+    return (void*)self->Items[cMenu_getFocus(self)];
 }
 #endif
 

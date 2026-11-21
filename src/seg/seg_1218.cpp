@@ -2059,7 +2059,7 @@ extern "C" void cFocusMan_addbox(cFocusMan* focusMan, V_33B0 *focusBox) {
     V_33B0 boxCopy;
 
     (focusMan->LastUpdateTick) = -1;
-    (*(V_33B0 **)((char*)(focusMan) + ((focusMan->NumBoxes) << 5) + (0x10))) = focusBox;
+    ((V_33B0*)focusMan->Boxes[focusMan->NumBoxes].Box) = focusBox;
     boxCopy = *focusBox;
     (*(V_33B0 *)((char*)((((focusMan->NumBoxes) << 5) + (int)focusMan)) + (0x20))) = boxCopy;
     (focusMan->NumBoxes) = (int) ((focusMan->NumBoxes) + 1);

@@ -43,7 +43,7 @@ extern "C" void* cWorldView_getSectionName(cWorldView* self, unsigned int i)
     if (list == 0 || i >= (unsigned int)list->m_uiNumSections) {
         return 0;
     }
-    return (char*)self->mp_Section + i * 0x58;
+    return (char*)&self->mp_Section[i];
 }
 #endif
 
@@ -86,7 +86,7 @@ extern "C" int cWorldView_isSectionUnLoaded(cWorldView* self, unsigned int i)
     if (list == 0 || i >= (unsigned int)list->m_uiNumSections) {
         return 0;
     }
-    return *(int*)((char*)self + (i << 3) + 0x14) == 0;
+    return self->mp_SectionState[i].state == 0;
 }
 #endif
 
@@ -246,7 +246,7 @@ INCLUDE_ASM("world/worldview", cWorldView_getHull);
  */
 extern "C" void* cWorldView_getHull(cWorldView* self, int uiIdx)
 {
-    return (char*)(self->mp_Hulls) + uiIdx * 0x44;
+    return (char*)&self->mp_Hulls[uiIdx];
 }
 #endif
 
@@ -297,8 +297,8 @@ extern "C" int cWorldView_isBoxValid(cWorldView* vself, int box)
     }
     ok = 1;
     for (i = 0; i < ((cWorldView*)vself)->mp_Hdr->m_uiNumSections; i++) {
-        if (*(int*)((char*)&vself->mp_SectionState[0] + i * 8) == 6)
-            cWorldView_recursiveIsValid_9AC0(((char*)vself), *(int*)((char*)vself->mp_Section + i * 0x58 + 0x1C), box, &ok);
+        if (vself->mp_SectionState[i].state == 6)
+            cWorldView_recursiveIsValid_9AC0(((char*)vself), (int)vself->mp_Section[i].m_BSP.unk_0C, box, &ok);
     }
     return ok;
 }

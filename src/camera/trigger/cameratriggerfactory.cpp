@@ -7086,7 +7086,7 @@ extern "C" void cTrackFileMan_scanLocations(cTrackFileMan* self)
                 int* ip = &((sCamEntry*)&self->LocationInfo[0])[0].idx;
                 int* ap = &((sCamEntry*)&self->LocationInfo[0])[0].active;
                 strcpy(((sCamEntry*)&self->LocationInfo[0])[self->NumLocations].name, cBENewRaceInterface_getLocationFile(iface, j));
-                *(char**)((char*)self + 0x44 + self->NumLocations * 0x8C) = str_BAM_b[0];
+                *(char**)&self->LocationInfo[self->NumLocations].BigFile[0] = str_BAM_b[0];
                 ip[self->NumLocations * 35] = j;
                 ap[self->NumLocations * 35] = 1;
                 self->NumBAMLocations++;

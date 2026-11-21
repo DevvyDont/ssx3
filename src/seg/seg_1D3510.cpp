@@ -794,7 +794,7 @@ INCLUDE_ASM("seg/seg_1D3510", cMenu_getItem);
  * @return the item
  */
 extern "C" int cMenu_getItem(cMenu* menu, int itemIndex) {
-    return *(int *)(((char*)menu) + (itemIndex << 2) + 0xC);
+    return (int)menu->Items[itemIndex];
 }
 #endif
 

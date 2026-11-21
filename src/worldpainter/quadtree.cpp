@@ -106,7 +106,7 @@ extern "C" void cQuadTree_setData(cQuadTree* self, int leafKey, int leafData, fl
         return;
     }
     int size = 0x8000 / (int)fsize;
-    func_002C1A00(self, (char*)self->m_nodes + self->m_root * 8, (unsigned short)(x << 1), (unsigned short)(z << 1), size, leafKey, leafData);
+    func_002C1A00(self, &self->m_nodes[self->m_root], (unsigned short)(x << 1), (unsigned short)(z << 1), size, leafKey, leafData);
 }
 #endif
 INCLUDE_ASM("worldpainter/quadtree", func_002C1A00);
@@ -206,7 +206,7 @@ extern "C" void cQuadTree_exportTree(cQuadTree* self, char** out, int* size, voi
     *header = *((sQTHeader_1DA8*)self);
     int cnt = 0;
     unsigned short* nodeData = (unsigned short*)(header + 1);
-    cQuadTree_exportNode(self, (cQuadTree_exportNode_sOut*)nodeData, &cnt, map, (cQuadTree_exportNode_sNode*)((char*)self->m_nodes + self->m_root * 8));
+    cQuadTree_exportNode(self, (cQuadTree_exportNode_sOut*)nodeData, &cnt, map, (cQuadTree_exportNode_sNode*)&self->m_nodes[self->m_root]);
     for (i = 0; i < cnt; i++, nodeData += 4) {
         if (nodeData[0] & 1) {
             tQuadTreeNode_setSubNodes(nodeData, map[nodeData[0] >> 1], map[nodeData[1] >> 1], map[nodeData[2] >> 1], map[nodeData[3] >> 1]);
@@ -291,7 +291,7 @@ extern "C" int cQuadTree_calcUsedNodes(cQuadTree* self, unsigned short *node) {
                 unsigned short childRef = *childPtr;
                 childPtr += 1;
                 i -= 1;
-                count += cQuadTree_calcUsedNodes(self, (unsigned short *)((char*)self->m_nodes + ((childRef >> 1) * 8)));
+                count += cQuadTree_calcUsedNodes(self, &self->m_nodes[childRef >> 1].m_sub.m_children[0]);
             } while (i >= 0);
         }
     }
@@ -2727,7 +2727,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetFreeSpace1);
  */
 extern "C" void* cPS2MemCard_GetFreeSpace1(cPS2MemCard* self, int device)
 {
-    return *(void**)((char*)self + device * 0x14 + 0x180);
+    return (void*)self->unk_17C[device].unk_04;
 }
 #endif
 

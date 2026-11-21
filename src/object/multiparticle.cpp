@@ -1318,7 +1318,7 @@ extern "C" void cAnimComboNode_cacheFrame(cAnimComboNode* self)
     sMpPart_9140* meshPart = model->parts;
     for (int i = 0; i < model->count; i++, meshPart++) {
         if (meshPart->info->active != 0) {
-            cMeshAnimFrame_transform(&((sMpItem_9140*)self->AnimFrames)[n], (t4Matrix*)((char*)(self->ComboXform) + (n << 6)));
+            cMeshAnimFrame_transform(&((sMpItem_9140*)self->AnimFrames)[n], &self->ComboXform[n]);
             n++;
         }
     }

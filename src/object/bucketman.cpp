@@ -138,12 +138,12 @@ extern "C" void cBucketMan_add(cBucketMan* self, sBucketLink* node, int index)
     if (((sBucketLists*)((char*)self->Buckets))[index].flags & 1) {
         node->prev = ((sBucketLists*)((char*)self->Buckets))[index].head1.prev;
         ((sBucketLists*)((char*)self->Buckets))[index].head1.prev->next = node;
-        node->next = (sBucketLink*)(((char*)self->Buckets) + index * 0x44 + 0x24);
+        node->next = (sBucketLink*)&self->Buckets[index].AddHead;
         ((sBucketLists*)((char*)self->Buckets))[index].head1.prev = node;
     } else {
         node->prev = ((sBucketLists*)((char*)self->Buckets))[index].head0.prev;
         ((sBucketLists*)((char*)self->Buckets))[index].head0.prev->next = node;
-        node->next = (sBucketLink*)(((char*)self->Buckets) + index * 0x44 + 0x4);
+        node->next = (sBucketLink*)&self->Buckets[index].Head;
         ((sBucketLists*)((char*)self->Buckets))[index].head0.prev = node;
     }
 }
@@ -222,7 +222,7 @@ extern "C" void cBucketMan_mergeBucket(cBucketMan* self, int index)
         if (other == 0) {
             n->prev = ((sSortNode_4C98*)(*(&((tBucketHeader*)((char*)self->Buckets))[index].Head)).Next);
             ((sSortNode_4C98*)(*(&((tBucketHeader*)((char*)self->Buckets))[index].Head)).Next)->next = n;
-            n->next = (sSortNode_4C98*)(((char*)self->Buckets) + index * 0x44 + 0x4);
+            n->next = (sSortNode_4C98*)&self->Buckets[index].Head;
             (*(sSortNode_4C98**)&(*(&((tBucketHeader*)((char*)self->Buckets))[index].Head)).Next) = n;
         }
         n = nextN;
@@ -329,7 +329,7 @@ INCLUDE_ASM("object/bucketman", cBucketMan_next__FP10cBucketManPvi);
  */
 void* cBucketMan_next(cBucketMan* self, void* node, int index)
 {
-    char* bucket = ((char*)self->Buckets) + index * 68;
+    char* bucket = (char*)&self->Buckets[index];
     void* next = *(void**)((char*)node + 0x4);
     return (next == (void*)(bucket + 0x14)) ? 0 : next;
 }
@@ -348,7 +348,7 @@ INCLUDE_ASM("object/bucketman", cBucketMan_prev);
 extern "C" void* cBucketMan_prev(cBucketMan* self, void* node, int index)
 {
     void* next = *(void**)((char*)node + 0x8);
-    return (next == (void*)(((char*)self->Buckets) + index * 0x44 + 0x4)) ? 0 : next;
+    return (next == (void*)&self->Buckets[index].Head) ? 0 : next;
 }
 #endif
 
@@ -386,7 +386,7 @@ INCLUDE_ASM("object/bucketman", cBucketMan_addnext);
 extern "C" void* cBucketMan_addnext(cBucketMan* self, void* node, int index)
 {
     void* next = *(void**)((char*)node + 0x4);
-    return (next == (void*)(((char*)self->Buckets) + index * 0x44 + 0x34)) ? 0 : next;
+    return (next == (void*)&self->Buckets[index].AddTail) ? 0 : next;
 }
 #endif
 

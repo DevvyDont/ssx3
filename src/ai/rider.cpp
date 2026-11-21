@@ -3182,7 +3182,7 @@ skip:
     {
         char* refPos = (char*)&self->mPosition;
         if (self->unk_AFC)
-            refPos = (char*)self->mAnimModel->bones + (self->mBoneBoardRoot << 5);
+            refPos = (char*)&self->mAnimModel->bones[self->mBoneBoardRoot];
         cRider_SetNISGroundVectors(self, refPos);
     }
     *(&self->mModelOffset) = D_004FF120_q120F20;
@@ -5133,7 +5133,7 @@ extern "C" void cRider_initForMission(cRider* self, t4Matrix* mat)
     cRiderHandler_resetRiderFX(self->mRiderHandler);
     func_002F1A00(self->mAttachedEmitterFX);
     if ((unsigned int)self->mViewIndex < 2) {
-        char* obj = *(char**)(*(char**)((char*)SSXApp->Game->ViewMan + (self->mViewIndex << 2) + 4) + 0xA8);
+        char* obj = *(char**)((char*)SSXApp->Game->ViewMan->PlayerCamera[self->mViewIndex] + 0xA8);
         sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(obj + 0x14);
         vt[4].fn(obj + vt[4].delta);
     }

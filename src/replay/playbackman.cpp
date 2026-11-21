@@ -308,7 +308,7 @@ extern "C" int cPlaybackMan_isLoaded(cPlaybackMan* self, int fileId)
 {
     int idx = cPlaybackMan_findFileById();
     if (idx >= 0) {
-        if (*(int*)((char*)self->PlaybackFiles + idx * 0xC + 4) != 0)
+        if ((int)self->PlaybackFiles[idx].PackData != 0)
             return 1;
         if (self->AsyncHandle < 0)
             return 1;
@@ -1306,7 +1306,7 @@ INCLUDE_ASM("replay/playbackman", cReplayFrame_setRanking__FPvii);
 void cReplayFrame_setRanking(void* vself, int i, int value)
 {
     cReplayFrame* self = (cReplayFrame*)vself;
-    *(int*)((char*)self + (i << 2) + 0x20) = value;
+    self->Ranking[i] = value;
 }
 #endif
 

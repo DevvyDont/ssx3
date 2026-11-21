@@ -128,7 +128,7 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getInput);
  * @return Inputs[@p index] (+0xB0)
  */
 extern "C" int cSSXApp_getInput(cSSXApp* self, int index) {
-    return *(int *)((char *)self + (index << 2) + 0xB0);
+    return (int)self->Inputs[index];
 }
 #endif
 //100%
@@ -141,7 +141,7 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getInputMap);
  * @return InputMaps[@p index] (+0xB8)
  */
 extern "C" int cSSXApp_getInputMap(cSSXApp* self, int index) {
-    return *(int *)((char *)self + (index << 2) + 0xB8);
+    return (int)self->InputMaps[index];
 }
 #endif
 //100%
@@ -615,7 +615,7 @@ INCLUDE_ASM("main/ssxappdtor", cFELoadScreen_getTexttureID);
  * @return the texture id at +0x10 + 4 * @p index
  */
 extern "C" int cFELoadScreen_getTexttureID(cFELoadScreen* self, int index) {
-    return *(int *)((char *)self + (index << 2) + 0x10);
+    return self->mTexID[index];
 }
 #endif
 

@@ -941,7 +941,7 @@ struct sWtSnd5F60 {
  */
 extern "C" int cWorldTriggerManager_HandleCollision(cWorldTriggerManager* self, void* evt, int id, cRider* rider, int vol)
 {
-    if (*(int*)((char*)self->m_aTriggerInfo + id * 8) == 3)
+    if (self->m_aTriggerInfo[id].m_TriggerType == 3)
         return -1;
     if (evt != 0)
     {

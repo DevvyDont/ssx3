@@ -166,7 +166,7 @@ extern "C" int cBankMonitorInstance_IsFree(void*);
 extern "C" int cBankMonitor_FindFreeInstance(cBankMonitor* self, int n)
 {
     for (int i = 0; i < 64; i++) {
-        if (cBankMonitorInstance_IsFree((char*)self->mBankMonitorInstance + i * 0xC0) != 0) {
+        if (cBankMonitorInstance_IsFree(&self->mBankMonitorInstance[i]) != 0) {
             if (--n == 0) {
                 return i;
             }
@@ -404,7 +404,7 @@ extern "C" void cBankMonitor_BANKMONITOR_Pause(cBankMonitor* self)
 {
     self->mBankMonitorPaused = 1;
     for (int i = 0; i < 64; i++) {
-        cBankMonitorInstance_Pause((char*)self->mBankMonitorInstance + i * 0xC0);
+        cBankMonitorInstance_Pause(&self->mBankMonitorInstance[i]);
     }
 }
 #endif
@@ -420,7 +420,7 @@ extern "C" void cBankMonitorInstance_Resume(void*);
 extern "C" void cBankMonitor_BANKMONITOR_Resume(cBankMonitor* self)
 {
     for (int i = 0; i < 64; i++) {
-        cBankMonitorInstance_Resume((char*)self->mBankMonitorInstance + i * 0xC0);
+        cBankMonitorInstance_Resume(&self->mBankMonitorInstance[i]);
     }
     self->mBankMonitorPaused = 0;
 }
@@ -461,7 +461,7 @@ extern "C" void cBankMonitorInstance_Reset(void*);
  */
 extern "C" void cBankMonitor_BANKMONITOR_Destroy(cBankMonitor* self, int i)
 {
-    cBankMonitorInstance_Reset((char*)self->mBankMonitorInstance + i * 0xC0);
+    cBankMonitorInstance_Reset(&self->mBankMonitorInstance[i]);
 }
 #endif
 
@@ -524,8 +524,8 @@ static inline int cBankMonitor_BANKMONITOR_DestroyAll1_match(char* e, sBmKeyD410
 extern "C" void cBankMonitor_BANKMONITOR_DestroyAll1(cBankMonitor* self, sBmKeyD410 key)
 {
     for (int i = 0; i < 64; i++) {
-        if (cBankMonitor_BANKMONITOR_DestroyAll1_match((char*)self->mBankMonitorInstance + i * 0xC0, key)) {
-            cBankMonitorInstance_Reset((char*)self->mBankMonitorInstance + i * 0xC0);
+        if (cBankMonitor_BANKMONITOR_DestroyAll1_match((char*)&self->mBankMonitorInstance[i], key)) {
+            cBankMonitorInstance_Reset(&self->mBankMonitorInstance[i]);
         }
     }
 }
@@ -542,8 +542,8 @@ INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_DestroyAllWithPtr);
 extern "C" void cBankMonitor_BANKMONITOR_DestroyAllWithPtr(cBankMonitor* self, int id)
 {
     for (int i = 0; i < 64; i++) {
-        if (*(int*)((char*)self->mBankMonitorInstance + i * 0xC0 + 0x80) == id) {
-            cBankMonitorInstance_Reset((char*)self->mBankMonitorInstance + i * 0xC0);
+        if ((int)self->mBankMonitorInstance[i].mPtr == id) {
+            cBankMonitorInstance_Reset(&self->mBankMonitorInstance[i]);
         }
     }
 }
@@ -564,7 +564,7 @@ struct sVoiceC0 { int key; int idx; char pad[0xC0 - 8]; };
 extern "C" void* cBankMonitor_BANKMONITOR_GetHandle(cBankMonitor* self, int idx, int key)
 {
     for (int i = 0; i < 64; i++) {
-        if (cBankMonitorInstance_IsFree((char*)self->mBankMonitorInstance + i * 0xC0) == 0
+        if (cBankMonitorInstance_IsFree(&self->mBankMonitorInstance[i]) == 0
             && ((sVoiceC0*)self->mBankMonitorInstance)[i].key == key
             && ((sVoiceC0*)self->mBankMonitorInstance)[i].idx == idx) {
             return &((sVoiceC0*)self->mBankMonitorInstance)[i];
@@ -630,7 +630,7 @@ struct sVoiceD650 {
 extern "C" void cBankMonitor_BANKMONITOR_StopBank(cBankMonitor* self, int id, float FadeTime)
 {
     for (int i = 0; i < 64; i++) {
-        if (cBankMonitorInstance_IsFree((char*)self->mBankMonitorInstance + i * 0xC0) == 0) {
+        if (cBankMonitorInstance_IsFree(&self->mBankMonitorInstance[i]) == 0) {
             // PORT: pointer arithmetic through int
             sVoiceD650* instance = (sVoiceD650*)(i * 0xC0 + (int)self->mBankMonitorInstance);
             if (instance->state == 1 && instance->id == id) {
@@ -665,7 +665,7 @@ extern "C" int cBankMonitor_BANKMONITOR_Active(cBankMonitor* self)
 {
     int count = 0;
     for (int i = 0; i < 64; i++) {
-        if (cBankMonitorInstance_IsFree((char*)self->mBankMonitorInstance + i * 0xC0) == 0) {
+        if (cBankMonitorInstance_IsFree(&self->mBankMonitorInstance[i]) == 0) {
             // PORT: pointer arithmetic through int
             sVoiceAD730* instance = (sVoiceAD730*)(i * 0xC0 + (int)self->mBankMonitorInstance);
             if (instance->active != 0) {
@@ -690,7 +690,7 @@ extern "C" int cBankMonitor_BANKMONITOR_Used(cBankMonitor* self)
 {
     int count = 0;
     for (int i = 0; i < 64; i++) {
-        if (cBankMonitorInstance_IsFree((char*)self->mBankMonitorInstance + i * 0xC0) == 0) {
+        if (cBankMonitorInstance_IsFree(&self->mBankMonitorInstance[i]) == 0) {
             count++;
         }
     }
@@ -1219,8 +1219,8 @@ void cMonitor_MONITOR_DestroyAll1_impl(void* vself, sBmKeyDDE0 key)
 {
     cMonitor* self = (cMonitor*)vself;
     for (int i = 0; i < 48; i++) {
-        if (cMonitor_MONITOR_DestroyAll1_match((char*)&self->mMonitorInstance[0] + i * 44, key)) {
-            cMonitorInstance_Reset((cMonitorInstance*)((char*)&self->mMonitorInstance[0] + i * 0x2C));
+        if (cMonitor_MONITOR_DestroyAll1_match((char*)&self->mMonitorInstance[i], key)) {
+            cMonitorInstance_Reset(&self->mMonitorInstance[i]);
         }
         ASSERT_DDE0(i < 48);
     }
@@ -7294,7 +7294,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4908__FPv);
 int func_002B4908(void* vself)
 {
     cMusicSys* self = (cMusicSys*)vself;
-    void* config = *(void**)((char*)self + (self->mCurrentSongNum << 2) + 0x4);
+    void* config = (void*)self->mSongConfig[self->mCurrentSongNum];
     return *(int*)((char*)config + 0x98);
 }
 #endif

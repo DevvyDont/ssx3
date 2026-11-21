@@ -620,7 +620,7 @@ extern "C" int cSSXScriptEngine_IsPauseMenuAllowed(cSSXScriptEngine* self)
     if (i == 2) {
         return 1;
     }
-    return tNISList_IsPauseMenuAllowed((char*)self->mpNISLists + i * 0xCC);
+    return tNISList_IsPauseMenuAllowed(&self->mpNISLists[i]);
 }
 #endif
 
@@ -700,7 +700,7 @@ extern "C" void tNISList_AddByScriptCategory(void* e, int a, int b, int c, int d
  */
 extern "C" void cSSXScriptEngine_AddToNISListByScriptCategory(cSSXScriptEngine* self, int i, int scriptCategory, int scriptControlBits, int selectScriptNow, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
 {
-    tNISList_AddByScriptCategory((char*)self->mpNISLists + i * 0xCC, scriptCategory, scriptControlBits, selectScriptNow, mainCharAIIndex, supportChar0AIIndex, supportChar1AIIndex);
+    tNISList_AddByScriptCategory(&self->mpNISLists[i], scriptCategory, scriptControlBits, selectScriptNow, mainCharAIIndex, supportChar0AIIndex, supportChar1AIIndex);
 }
 #endif
 
@@ -721,7 +721,7 @@ extern "C" void tNISList_AddByScriptIndex(void* e, int a, int b, int c, int d, i
  */
 extern "C" void cSSXScriptEngine_AddToNISListByScriptIndex(cSSXScriptEngine* self, int i, int scriptIndex, int scriptControlBits, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
 {
-    tNISList_AddByScriptIndex((char*)self->mpNISLists + i * 0xCC, scriptIndex, scriptControlBits, mainCharAIIndex, supportChar0AIIndex, supportChar1AIIndex);
+    tNISList_AddByScriptIndex(&self->mpNISLists[i], scriptIndex, scriptControlBits, mainCharAIIndex, supportChar0AIIndex, supportChar1AIIndex);
 }
 #endif
 
@@ -879,7 +879,7 @@ extern "C" void cSSXScriptEngine_ClearNISPlayListState(cSSXScriptEngine* self);
  */
 extern "C" void cSSXScriptEngine_ResetNISList(cSSXScriptEngine* self, int i)
 {
-    tNISList_Reset((char*)self->mpNISLists + i * 0xCC, 1);
+    tNISList_Reset(&self->mpNISLists[i], 1);
     if (self->mPlayingNISList == i) {
         cSSXScriptEngine_ClearNISPlayListState(self);
     }
@@ -976,7 +976,7 @@ extern "C" void tNISList_GetState(void*);
 extern "C" void cSSXScriptEngine_GetNISListState(cSSXScriptEngine* self, int i)
 {
     cSSXScriptEngine_UpdateLoad(self);
-    tNISList_GetState((char*)self->mpNISLists + i * 0xCC);
+    tNISList_GetState(&self->mpNISLists[i]);
 }
 #endif
 
@@ -992,7 +992,7 @@ extern "C" void tNISList_GetPlayState(void*);
  */
 extern "C" void cSSXScriptEngine_GetNISListPlayState(cSSXScriptEngine* self, int i)
 {
-    tNISList_GetPlayState((char*)self->mpNISLists + i * 0xCC);
+    tNISList_GetPlayState(&self->mpNISLists[i]);
 }
 #endif
 
@@ -1008,7 +1008,7 @@ void tNISList_GetLength(void*);
  */
 extern "C" void cSSXScriptEngine_GetNISListLength(cSSXScriptEngine* self, int i)
 {
-    tNISList_GetLength((char*)self->mpNISLists + i * 0xCC);
+    tNISList_GetLength(&self->mpNISLists[i]);
 }
 #endif
 
@@ -1051,7 +1051,7 @@ extern "C" int cSSXScriptEngine_IsActiveNISInTransition(cSSXScriptEngine* self)
     if (i == 2) {
         return 0;
     }
-    return tNISList_IsInTransition((char*)self->mpNISLists + i * 0xCC);
+    return tNISList_IsInTransition(&self->mpNISLists[i]);
 }
 #endif
 
@@ -1103,7 +1103,7 @@ extern "C" int cSSXScriptEngine_IsPlayingNISListPlayer(cSSXScriptEngine* self, i
     if (i == 2) {
         return 0;
     }
-    return tNISList_IsPlayingScriptOwner((char*)self->mpNISLists + i * 0xCC, pScriptPlayerMain);
+    return tNISList_IsPlayingScriptOwner(&self->mpNISLists[i], pScriptPlayerMain);
 }
 #endif
 
@@ -1124,7 +1124,7 @@ extern "C" void tNISList_AddByScriptCategory(void* e, int a, int b, int c, int d
  */
 extern "C" void cSSXScriptEngine_AddToIdleListByScriptCategory(cSSXScriptEngine* self, int i, int scriptCategory, int flag, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
 {
-    tNISList_AddByScriptCategory((char*)self->mpIdleLists + i * 0xCC, scriptCategory, flag ? 8 : 0, 0, mainCharAIIndex, supportChar0AIIndex, supportChar1AIIndex);
+    tNISList_AddByScriptCategory(&self->mpIdleLists[i], scriptCategory, flag ? 8 : 0, 0, mainCharAIIndex, supportChar0AIIndex, supportChar1AIIndex);
 }
 #endif
 //100%
@@ -1141,7 +1141,7 @@ extern "C" void tNISList_ReadyList(tNISList* r, int a);
  */
 extern "C" void cSSXScriptEngine_ReadyIdleList(cSSXScriptEngine* self, int i, int flag)
 {
-    tNISList_ReadyList((tNISList*)((char*)self->mpIdleLists + i * 0xCC), flag ? 2 : 0);
+    tNISList_ReadyList(&self->mpIdleLists[i], flag ? 2 : 0);
 }
 #endif
 //100%
@@ -1157,7 +1157,7 @@ extern "C" int tNISList_Play(tNISList* r, int a, int b);
  */
 extern "C" void cSSXScriptEngine_PlayIdleList(cSSXScriptEngine* self, int i)
 {
-    tNISList_Play((tNISList*)((char*)self->mpIdleLists + i * 0xCC), 0, 0);
+    tNISList_Play(&self->mpIdleLists[i], 0, 0);
 }
 #endif
 //100%
@@ -1172,7 +1172,7 @@ extern "C" void tNISList_Reset(void* self, int a1);
  */
 extern "C" void cSSXScriptEngine_ResetIdleList(cSSXScriptEngine* self, int i)
 {
-    tNISList_Reset((char*)self->mpIdleLists + i * 0xCC, 1);
+    tNISList_Reset(&self->mpIdleLists[i], 1);
 }
 #endif
 
@@ -1208,7 +1208,7 @@ extern "C" void tNISList_GetState(void*);
 extern "C" void cSSXScriptEngine_GetIdleListState(cSSXScriptEngine* self, int i)
 {
     cSSXScriptEngine_UpdateLoad(self);
-    tNISList_GetState((char*)self->mpIdleLists + i * 0xCC);
+    tNISList_GetState(&self->mpIdleLists[i]);
 }
 #endif
 
@@ -2232,7 +2232,7 @@ extern "C" void cSSXScriptEngine_OnInSeqPlay(cSSXScriptEngine* self, cScriptPlay
     cBXScriptEngine_OnInSeqPlay(self, pPlayer);
     int listIndex = self->mPlayingNISList;
     if (listIndex != 2) {
-        tNISList_OnScriptPlay((char*)self->mpNISLists + listIndex * 0xCC, cBXScriptEngine_GetRequestHandleFromPlayer(self, pPlayer), pPlayer);
+        tNISList_OnScriptPlay(&self->mpNISLists[listIndex], cBXScriptEngine_GetRequestHandleFromPlayer(self, pPlayer), pPlayer);
     }
 }
 #endif
@@ -2254,7 +2254,7 @@ extern "C" void cSSXScriptEngine_OnInSeqUpdate(cSSXScriptEngine* self, cScriptPl
 {
     int listIndex = self->mPlayingNISList;
     if (listIndex != 2) {
-        tNISList_OnScriptUpdate((char*)self->mpNISLists + listIndex * 0xCC, cBXScriptEngine_GetRequestHandleFromPlayer(self, pPlayer), pPlayer, x, y);
+        tNISList_OnScriptUpdate(&self->mpNISLists[listIndex], cBXScriptEngine_GetRequestHandleFromPlayer(self, pPlayer), pPlayer, x, y);
     }
 }
 #endif
@@ -2274,7 +2274,7 @@ extern "C" void cSSXScriptEngine_OnInSeqPlayStopping(cSSXScriptEngine* self, cSc
 {
     int listIndex = self->mPlayingNISList;
     if (listIndex != 2) {
-        tNISList_OnScriptStopping((char*)self->mpNISLists + listIndex * 0xCC, cBXScriptEngine_GetRequestHandleFromPlayer(self, pPlayer), pPlayer);
+        tNISList_OnScriptStopping(&self->mpNISLists[listIndex], cBXScriptEngine_GetRequestHandleFromPlayer(self, pPlayer), pPlayer);
     }
 }
 #endif
@@ -2295,7 +2295,7 @@ extern "C" void cSSXScriptEngine_OnInSeqStop(cSSXScriptEngine* self, cScriptPlay
 {
     int listIndex = self->mPlayingNISList;
     if (listIndex != 2) {
-        tNISList_OnScriptStop((char*)self->mpNISLists + listIndex * 0xCC, cBXScriptEngine_GetRequestHandleFromPlayer(self, pPlayer), pPlayer);
+        tNISList_OnScriptStop(&self->mpNISLists[listIndex], cBXScriptEngine_GetRequestHandleFromPlayer(self, pPlayer), pPlayer);
     }
     cBXScriptEngine_OnInSeqStop(self, pPlayer);
 }
@@ -2748,7 +2748,7 @@ struct sSeSlotB268 {
  */
 extern "C" void cSSXScriptEngine_SyncLoadScriptBank(cSSXScriptEngine* self, int i, const char* name, int flags, int key, int* buf)
 {
-    sSeSlotB268* bankInfo = (sSeSlotB268*)(((char*)self) + (i * 0x10 + 0x628));
+    sSeSlotB268* bankInfo = (sSeSlotB268*)&self->mScriptDataBanks[i];
     if (bankInfo->handle != 0) {
         return;
     }
@@ -2801,7 +2801,7 @@ void tSSXScriptBankInfo_Clear(void* slot);
  */
 extern "C" void cSSXScriptEngine_AsyncLoadScriptBank(cSSXScriptEngine* self, int i, const char* name, int flags, int key, int pMem, int memSize)
 {
-    char* slot = (char*)self + (i * 16 + 0x628);
+    char* slot = (char*)&self->mScriptDataBanks[i];
     *(int*)(slot + 0x4) = key;
     if (pMem != 0) {
         *(void**)(slot + 0x8) = ASYNCFILE_loadat(name, pMem, memSize);
@@ -2835,7 +2835,7 @@ extern "C" void* cDataManager_DetachData(void* self, int key);
  */
 extern "C" void cSSXScriptEngine_PurgeScriptBank(cSSXScriptEngine* self, int i)
 {
-    char* slot = (char*)self + (i * 16 + 0x628);
+    char* slot = (char*)&self->mScriptDataBanks[i];
     int key = *(int*)slot;
     if (key != 0) {
         void* bankData = cDataManager_DetachData((char*)&self->mMaxDataInstances, key);
@@ -2866,7 +2866,7 @@ void tSSXScriptBankInfo_Clear(void* slot);
  */
 extern "C" void cSSXScriptEngine_CancelAsyncLoadScriptBank(cSSXScriptEngine* self, int i, int dataIdentifier)
 {
-    char* slot = (char*)self + (i * 16 + 0x628);
+    char* slot = (char*)&self->mScriptDataBanks[i];
     if (*(void**)(slot + 0x8) != 0) {
         ASYNCFILE_cancel(*(void**)(slot + 0x8));
         ASYNCFILE_release(*(void**)(slot + 0x8), 0, 0);
@@ -3314,7 +3314,7 @@ extern "C" void cSSXScriptEngine_FillOrientationFromObjectOrientationInfo(cSSXSc
         int k = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
         cat = D_00482660[k];
     }
-    int* tbl = *(int**)(((char*)self) + (cat << 2) + 0x558);
+    int* tbl = (int*)self->mpAnchorTableDB[cat];
     if (tbl == 0)
         return;
     unsigned int code = tbl[slot];
@@ -3492,7 +3492,7 @@ extern "C" void cSSXScriptEngine_UpdateLoad(cSSXScriptEngine*);
 extern "C" int cSSXScriptEngine_IsBankLoading(cSSXScriptEngine* self, int i)
 {
     cSSXScriptEngine_UpdateLoad(self);
-    return *(int*)((char*)self + (i << 4) + 0x630) != 0;
+    return (int)self->mScriptDataBanks[i].asyncHandle != 0;
 }
 #endif
 
@@ -4444,7 +4444,7 @@ public:
  */
 extern "C" void cScriptDatabaseObject_MarkObjectAsReserved(cScriptDatabaseObject* self, int idx, int val)
 {
-    cScriptOwnerD0C0* obj = *(cScriptOwnerD0C0**)((char*)self + (idx << 2));
+    cScriptOwnerD0C0* obj = (cScriptOwnerD0C0*)self->mpObjectDatabase[idx];
     int i = 0;
     int n = obj->GetNumScriptEntities();
     for (; i < n; i++) {
@@ -4481,7 +4481,7 @@ extern "C" void cScriptDatabaseObject_MarkEntityAsUnreserved(cScriptDatabaseObje
  */
 extern "C" void cScriptDatabaseObject_MarkObjectAsUnreserved(cScriptDatabaseObject* self, int idx)
 {
-    cScriptOwnerD170* obj = *(cScriptOwnerD170**)((char*)self + (idx << 2));
+    cScriptOwnerD170* obj = (cScriptOwnerD170*)self->mpObjectDatabase[idx];
     int i = 0;
     int n = obj->GetNumScriptEntities();
     for (; i < n; i++) {
@@ -4525,7 +4525,7 @@ int cScriptDatabaseObject_IsObjInUseByPlayer_impl(void* self, int idx, int val) 
 int cScriptDatabaseObject_IsObjInUseByPlayer_impl(void* vself, int idx, int val)
 {
     cScriptDatabaseObject* self = (cScriptDatabaseObject*)vself;
-    cScriptOwnerD210* obj = *(cScriptOwnerD210**)((char*)self + (idx << 2));
+    cScriptOwnerD210* obj = (cScriptOwnerD210*)self->mpObjectDatabase[idx];
     int i = 0;
     int n = obj->GetNumScriptEntities();
     for (; i < n; i++) {
@@ -4612,7 +4612,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_GetObject__FPvi);
 int cScriptDatabaseObject_GetObject(void* vself, int i)
 {
     cScriptDatabaseObject* self = (cScriptDatabaseObject*)vself;
-    return *(int*)((char*)self + (i << 2));
+    return (int)self->mpObjectDatabase[i];
 }
 #endif
 
@@ -7122,11 +7122,11 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_GetCameraObjectB
  */
 extern "C" int cScriptObjCameraManager_GetCameraObjectByTrack(cScriptObjCameraManager* self, int i)
 {
-    int j = *(int*)((char*)self + (i << 2) + 0xdc);
+    int j = self->mAttachedCameraObject[i];
     if (j < 0) {
         return 0;
     }
-    return *(int*)((char*)self + (j << 2) + 0xd0);
+    return (int)self->mpCameraObjects[j];
 }
 #endif
 

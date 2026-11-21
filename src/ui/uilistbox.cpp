@@ -26,9 +26,9 @@ extern "C" unsigned char cUIListBox_addEntryByAsciiString(cUIListBox* self, cons
 {
     unsigned short* wide = (unsigned short*)operator_new_tag((strlen(text) + 1) * 2, str_UILBAscii, 0x100, 0);
     UIAsciiToUnicode(wide, text);
-    *(const char**)((char*)self + self->mNumEntries * 0x14 + 0xA0) = text;
-    *(unsigned short**)((char*)self + self->mNumEntries * 0x14 + 0x9C) = wide;
-    *(int*)((char*)self + self->mNumEntries * 0x14 + 0xA4) = data;
+    self->mpEntries[self->mNumEntries].mpAsciiString = text;
+    *(unsigned short**)&self->mpEntries[self->mNumEntries].mpString = wide;
+    *(int*)&self->mpEntries[self->mNumEntries].mpData = data;
     return (self->mNumEntries)++;
 }
 #endif
@@ -56,9 +56,9 @@ extern "C" unsigned char cUIListBox_addEntryByUnicodeString(cUIListBox* self, un
 {
     unsigned short* tempString = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, str_UILISTBOXSTR, 0x100, 0);
     USTR_copy(tempString, str);
-    *(const char**)((char*)self + self->mNumEntries * 0x14 + 0xA0) = 0;
-    *(unsigned short**)((char*)self + self->mNumEntries * 0x14 + 0x9C) = tempString;
-    *(int*)((char*)self + self->mNumEntries * 0x14 + 0xA4) = data;
+    self->mpEntries[self->mNumEntries].mpAsciiString = 0;
+    *(unsigned short**)&self->mpEntries[self->mNumEntries].mpString = tempString;
+    *(int*)&self->mpEntries[self->mNumEntries].mpData = data;
     return (self->mNumEntries)++;
 }
 #endif
@@ -92,10 +92,10 @@ extern "C" unsigned char cUIListBox_addEntryByStringID(cUIListBox* self, int id,
         if (str != 0) {
             unsigned short* wide = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, str_UILBStrID, 0x100, 0);
             USTR_copy(wide, str);
-            *(const char**)((char*)self + self->mNumEntries * 0x14 + 0xA0) = 0;
-            *(unsigned short**)((char*)self + self->mNumEntries * 0x14 + 0x9C) = wide;
-            *(int*)((char*)self + self->mNumEntries * 0x14 + 0xA4) = data;
-            *(int*)((char*)self + self->mNumEntries * 0x14 + 0x98) = id;
+            self->mpEntries[self->mNumEntries].mpAsciiString = 0;
+            *(unsigned short**)&self->mpEntries[self->mNumEntries].mpString = wide;
+            *(int*)&self->mpEntries[self->mNumEntries].mpData = data;
+            *(int*)&self->mpEntries[self->mNumEntries].mStringID = id;
         }
     }
     return (self->mNumEntries)++;
@@ -149,7 +149,7 @@ INCLUDE_ASM("ui/uilistbox", cUIListBox_getCurrentAsciiText);
 extern "C" int cUIListBox_getCurrentAsciiText(cUIListBox* self)
 {
     if (self->mCurrentEntry < self->mNumEntries) {
-        return *(int*)((char*)self + self->mCurrentEntry * 0x14 + 0xA0);
+        return (int)self->mpEntries[self->mCurrentEntry].mpAsciiString;
     }
     return 0;
 }
@@ -166,7 +166,7 @@ INCLUDE_ASM("ui/uilistbox", cUIListBox_getCurrentEntryData);
 extern "C" int cUIListBox_getCurrentEntryData(cUIListBox* self)
 {
     if (self->mCurrentEntry < self->mNumEntries) {
-        return *(int*)((char*)self + self->mCurrentEntry * 0x14 + 0xA4);
+        return (int)self->mpEntries[self->mCurrentEntry].mpData;
     }
     return 0;
 }
@@ -186,7 +186,7 @@ extern "C" int cUIListBox_getEntryByData(cUIListBox* self, int key, unsigned cha
 {
     int i;
     for (i = 0; i < self->mNumEntries; i++) {
-        if (*(int*)((char*)self + i * 0x14 + 0xA4) == key) {
+        if ((int)self->mpEntries[i].mpData == key) {
             *out = i;
             return 1;
         }
@@ -225,7 +225,7 @@ extern "C" void cUIListBox_setEntryDataByIndex(cUIListBox* self, int Index, int 
 {
     unsigned char entryIndex = (unsigned char)Index;
     if (entryIndex < self->mNumEntries) {
-        *(int*)((char*)self + entryIndex * 0x14 + 0xA4) = value;
+        *(int*)&self->mpEntries[entryIndex].mpData = value;
     }
 }
 #endif

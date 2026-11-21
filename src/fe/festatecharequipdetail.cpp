@@ -1404,7 +1404,7 @@ extern "C" void cFEStateCharEquip_startLargePreviewLoad(cFEStateCharEquip* self,
         return;
     if (idx >= self->mNumItems)
         return;
-    char* namePart = *(char**)(*(char**)((char*)self + (idx << 2) + 0x124) + 0x30);
+    char* namePart = *(char**)((char*)self->mpItems[idx] + 0x30);
     if (namePart == 0)
         return;
     if (flag)
@@ -1607,7 +1607,7 @@ extern "C" void cFEStateCharEquip_updateHelpText(cFEStateCharEquip* self)
         }
         return;
     }
-    sEquipItem_A798* item = *(sEquipItem_A798**)((char*)self + (sel << 2) + 0x124);
+    sEquipItem_A798* item = (sEquipItem_A798*)self->mpItems[sel];
     if (item->flags & 0x20) {
         setText_A798(self, str_kT_FEHELPChooseCatContinue);
     } else if (isMode1_A798(self)) {
@@ -1622,7 +1622,7 @@ extern "C" void cFEStateCharEquip_updateHelpText(cFEStateCharEquip* self)
         sEquipDb_A798* db = (sEquipDb_A798*)func_0014AD28(cBE_getInterface(cBE_getBE(), 9), self->mUserNum, self->mCharID);
         sEquipEntry_A798* equipEntry = getEntry_A798(db, item->id);
         int idx = sel - ((sList_A798*)self->mpMenu)->top;
-        if (D_004A18D8 >= self->mCurrentPolyCount + *(int*)((char*)self + (idx << 2) + 0xA78)) {
+        if (D_004A18D8 >= self->mCurrentPolyCount + self->mRowPoints[idx]) {
             if (equipEntry->flags & 4)
                 setText_A798(self, str_kT_FEYourCurrentOutfit);
             else
@@ -1700,14 +1700,14 @@ extern "C" void func_0019AA08(cFEStateCharEquip* self)
     int idx = self->mpMenu->mScrollItemCurrent;
     int rowValue = 0;
     if (idx < self->mNumItems) {
-        char* item = *(char**)((char*)self + (idx << 2) + 0x124);
+        char* item = (char*)self->mpItems[idx];
         unsigned int flags = *(unsigned int*)(item + 0x34);
         if (flags & 4) {
             if (!(flags & 0x20)) {
                 showK19AA08((char*)self->mpPointsGroup, 1);
                 int topIndex = self->mpMenu->mScrollItemOffset;
                 char* iconWidget = (char*)self->mpSmallBoltIcon;
-                rowValue = *(int*)((char*)self + ((idx - topIndex) << 2) + 0xA78);
+                rowValue = self->mRowPoints[idx - topIndex];
                 if (iconWidget != 0 && *(char**)(item + 0x30) != 0 && self->mIconsLoaded != 0) {
                     showK19AA08(iconWidget, 1);
                     int iconId = cFEStateCharEquip_getIconID((cFEStateCharEquip*)self, *(char**)(item + 0x30));
@@ -1757,7 +1757,7 @@ extern "C" void func_0019AB78(cFEStateCharEquip* self)
     int sel = *(unsigned char*)(menu + 0x95);
     char* item = 0;
     if (sel >= 0 && sel < self->mNumItems)
-        item = *(char**)((char*)self + (sel << 2) + 0x124);
+        item = (char*)self->mpItems[sel];
     if (self->mpLargePreview != 0) {
         showK19AB78(self->mpLargePreview, 0);
         if (item != 0 && self->mPreviewTextureID >= 0) {
@@ -2749,7 +2749,7 @@ extern "C" void* func_0014B560(void* iface, int a1, int a2, int a3, int a4);
 extern "C" void func_0019BE80(cFEStateCharEquip* self)
 {
     int idx = self->mpMenu->mScrollItemCurrent;
-    char* item = *(char**)((char*)self + (idx << 2) + 0x124);
+    char* item = (char*)self->mpItems[idx];
     self->mMoneyAvailable = (int)func_0014B560(cBE_getInterface_Fv(cBE_getBE(), 9),
         self->mUserNum, self->mCharID, *(short*)(item + 4), 1);
 }
@@ -2796,7 +2796,7 @@ extern "C" int func_0019BEE8(cFEStateCharEquip* self)
 {
     if (self->mNumItems <= 0)
         return 0;
-    char* item = *(char**)((char*)self + (self->mpMenu->mScrollItemCurrent << 2) + 0x124);
+    char* item = (char*)self->mpItems[self->mpMenu->mScrollItemCurrent];
     if (!(*(int*)(item + 0x34) & 4))
         return 0;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);

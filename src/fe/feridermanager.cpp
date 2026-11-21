@@ -950,7 +950,7 @@ INCLUDE_ASM("fe/feridermanager", cFERider_getBonePosition);
  * @return the address of the bone's position (first quadword)
  */
 extern "C" int cFERider_getBonePosition(cFERider* riderSlot, int index) {
-    return ((int)riderSlot->mpAnimModel->bones) + ((*(int *)(((char*)(riderSlot) + (index << 2)) + (0xC7C))) << 5);
+    return ((int)riderSlot->mpAnimModel->bones) + ((riderSlot->mBoneMap[index]) << 5);
 }
 #endif
 //100%
@@ -974,7 +974,7 @@ struct sFeBone_19F6C8 {
 extern "C" void cFERider_setBonePosition(cFERider* self, int slot, cQuad128* src)
 {
     char* model = (char*)self->mpAnimModel;
-    int bone = *(int*)((char*)self + (slot << 2) + 0xC7C);
+    int bone = self->mBoneMap[slot];
     sFeBone_19F6C8* bones = *(sFeBone_19F6C8**)(model + 0x2C);
     bones[bone].q0 = *src;
 }
@@ -990,7 +990,7 @@ INCLUDE_ASM("fe/feridermanager", cFERider_getBoneQuaternion);
  * @return the address of the bone's quaternion
  */
 extern "C" int cFERider_getBoneQuaternion(cFERider* riderSlot, int index) {
-    return ((int)riderSlot->mpAnimModel->bones) + ((*(int *)(((char*)(riderSlot) + (index << 2)) + (0xC7C))) << 5) + 0x10;
+    return ((int)riderSlot->mpAnimModel->bones) + ((riderSlot->mBoneMap[index]) << 5) + 0x10;
 }
 #endif
 //100%
@@ -1012,7 +1012,7 @@ struct sFeBone_19F718 {
 extern "C" void cFERider_setBoneQuaternion(cFERider* self, int slot, cQuad128* src)
 {
     char* model = (char*)self->mpAnimModel;
-    int bone = *(int*)((char*)self + (slot << 2) + 0xC7C);
+    int bone = self->mBoneMap[slot];
     sFeBone_19F718* bones = *(sFeBone_19F718**)(model + 0x2C);
     bones[bone].q1 = *src;
 }
@@ -1800,7 +1800,7 @@ extern "C" void cFERiderManager_purge(cFERiderManager* self)
 {
     int i;
     for (i = 0; i < 2; i++) {
-        cFERider_purge((cFERider*)((char*)self + i * 0xce0));
+        cFERider_purge(&self->mHumans[i]);
     }
 }
 #endif
@@ -1819,7 +1819,7 @@ extern "C" void cFERider_setCharID(void* slot, int a1, int a2);
  */
 extern "C" void cFERiderManager_setHumanCharacter(cFERiderManager* self, int idx, int charId, int loadAll)
 {
-    cFERider_setCharID((char*)self + idx * 0xce0, charId, loadAll);
+    cFERider_setCharID(&self->mHumans[idx], charId, loadAll);
 }
 #endif
 
@@ -1834,7 +1834,7 @@ INCLUDE_ASM("fe/feridermanager", cFERiderManager_getHuman);
  */
 extern "C" void* cFERiderManager_getHuman(cFERiderManager* self, int index)
 {
-    return (char*)self + index * 0xce0;
+    return (char*)&self->mHumans[index];
 }
 #endif
 
@@ -1849,7 +1849,7 @@ INCLUDE_ASM("fe/feridermanager", cFERiderManager_getHuman1);
  */
 extern "C" void* cFERiderManager_getHuman1(cFERiderManager* self, int index)
 {
-    return (char*)self + index * 0xce0;
+    return (char*)&self->mHumans[index];
 }
 #endif
 
@@ -1881,7 +1881,7 @@ extern "C" void cFERider_setVisible(void* slot, int v);
  */
 extern "C" void cFERiderManager_setHumanVisible(cFERiderManager* self, int i, int visible)
 {
-    cFERider_setVisible((char*)self + i * 0xce0, visible);
+    cFERider_setVisible(&self->mHumans[i], visible);
 }
 #endif
 
@@ -1903,7 +1903,7 @@ extern "C" void cFERiderManager_render(cFERiderManager* self)
     *(int*)(riderBase + 0x84) = 47;
     *(int*)(riderBase + 0x10A8) = *(int*)(riderBase + 0x1008);
     for (int i = 0; i < 2; i++) {
-        riderBase = ((char*)self) + i * 3296;
+        riderBase = (char*)&self->mHumans[i];
         if (*(int*)(riderBase + 0xCC8) != 0)
             cFERider_render((cFERider*)riderBase);
     }
@@ -1922,7 +1922,7 @@ extern "C" void cFERiderManager_update(cFERiderManager* self)
 {
     int i;
     for (i = 0; i < 2; i++) {
-        cFERider_update((cFERider*)((char*)self + i * 0xce0));
+        cFERider_update(&self->mHumans[i]);
     }
 }
 #endif

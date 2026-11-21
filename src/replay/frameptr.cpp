@@ -1260,7 +1260,7 @@ extern "C" void cReplay_updateCameraSelect(int* self)
     if (!isStateFA78(self, 3)) {
         return;
     }
-    void* input = *(void**)((char*)SSXApp + (self[0x28 / 4] << 2) + 0xB0);
+    void* input = (void*)SSXApp->Inputs[self[0x28 / 4]];
     if (cInput_getState(input, 108) != 0) {
         cGameViewMan_updateAll(SSXApp->Game->ViewMan);
     }
@@ -1343,7 +1343,7 @@ extern "C" int cReplay_updateInput_impl(void* self, int debug)
     if (cur != 0) uiSound = cur;
     if (*(int*)(replay + 0x618) != 0) return 0;
     int command = 0;
-    void* input = *(void**)(((char*)app) + (*(int*)(replay + 0x28) << 2) + 0xB0);
+    void* input = (void*)app->Inputs[*(int*)(replay + 0x28)];
     if (*(int*)(replay + 0x61C) == 0 && *(int*)(replay + 0x620) == 0) {
         if (cInput_getState(input, 106)) {
             *(int*)(replay + 0x1C) = 10;

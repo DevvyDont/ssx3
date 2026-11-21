@@ -21133,7 +21133,7 @@ extern "C" int cFEStateLobbyMenu_onGainTransition(cFEStateLobbyMenu* self, int r
         func_001BE0A8(self);
         int cur = self->miSelectedChannel;
         if (cur < 4) {
-            char* list = *(char**)((char*)self + (cur << 2) + 0x708);
+            char* list = (char*)self->mpChannelList[cur];
             int n = *(unsigned char*)(list + 0x318);
             if (self->miSelectedRoom >= n) {
                 self->miSelectedRoom = n - 1;
@@ -22320,7 +22320,7 @@ extern "C" void func_001BE0A8(cFEStateLobbyMenu* self)
         }
         if (counts[type] == 0) {
             int on = func_0025F180(LobbyMan_mLobbyMan, i);
-            (*(cFEVObj_001BE0A8**)(((char*)self) + (type << 2) + 0x740))->setVisible(on);
+            ((cFEVObj_001BE0A8*)self->mpChannelLock[type])->setVisible(on);
         }
         cUIListBox_addEntryByAsciiString(list, ext.p, i);
         list->setStatic(0);
@@ -25825,7 +25825,7 @@ extern "C" void func_001C2468(cFEStateNetQuickMessages* self, int idx)
     } else {
         cBXString_Concat(&label, msg);
     }
-    func_001C2578(self, *(void**)((char*)self + (idx << 2) + 0x6D4), label.str);
+    func_001C2578(self, (void*)self->mpMessage[idx], label.str);
     cBXString__cBXString(&label, 2);
 }
 #endif
@@ -27518,7 +27518,7 @@ extern "C" void func_001C4D28(cFEStateStats* self)
         vt[2].fn(snd + vt[2].delta, 1);
     }
     if (self->miFocusMenu != 3) {
-        Show1C4D28(*(char**)((char*)self + (self->miFocusMenu << 2) + 0x6D0), 0);
+        Show1C4D28((char*)self->mpMenus[self->miFocusMenu], 0);
     }
     self->miFocusMenu += 1;
     if (self->miFocusMenu >= 4) {
@@ -27528,7 +27528,7 @@ extern "C" void func_001C4D28(cFEStateStats* self)
         Show1C4D28((char*)self->mpMenus[3], 1);
         func_001C4D28(self);
     } else {
-        char* item = *(char**)((char*)self + (self->miFocusMenu << 2) + 0x6D0);
+        char* item = (char*)self->mpMenus[self->miFocusMenu];
         if ((*(int*)(item + 0x14) >> 6) & 1) {
             Show1C4D28(item, 1);
         } else {
@@ -27570,7 +27570,7 @@ extern "C" void func_001C4E40(cFEStateStats* self)
         vt[2].fn(snd + vt[2].delta, 1);
     }
     if (self->miFocusMenu != 3) {
-        Show1C4E40(*(char**)((char*)self + (self->miFocusMenu << 2) + 0x6D0), 0);
+        Show1C4E40((char*)self->mpMenus[self->miFocusMenu], 0);
     }
     self->miFocusMenu -= 1;
     if (self->miFocusMenu >= 4) {
@@ -27580,7 +27580,7 @@ extern "C" void func_001C4E40(cFEStateStats* self)
         Show1C4E40((char*)self->mpMenus[3], 1);
         func_001C4E40(self);
     } else {
-        char* item = *(char**)((char*)self + (self->miFocusMenu << 2) + 0x6D0);
+        char* item = (char*)self->mpMenus[self->miFocusMenu];
         if ((*(int*)(item + 0x14) >> 6) & 1) {
             Show1C4E40(item, 1);
         } else {
@@ -28180,7 +28180,7 @@ INCLUDE_ASM("fe/feasyncfile", cPopupInfo_getPopupOptionNames);
  */
 extern "C" void* cPopupInfo_getPopupOptionNames(cPopupInfo* self, int iEntryNum)
 {
-    return (char*)self + ((iEntryNum << 3) + 0x24);
+    return (char*)&self->mtOptionNames[iEntryNum];
 }
 #endif
 
@@ -28315,7 +28315,7 @@ INCLUDE_ASM("fe/feasyncfile", cPopupInfo_getPopupConfirmation);
  */
 extern "C" void* cPopupInfo_getPopupConfirmation(cPopupInfo* self, int iEntryNum)
 {
-    return (char*)self + (iEntryNum * 0xc + 0x54);
+    return (char*)&self->mtConfirmation[iEntryNum];
 }
 #endif
 

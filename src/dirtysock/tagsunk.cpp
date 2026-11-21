@@ -4201,7 +4201,7 @@ extern "C" void LobbyMan_onRanklistRetrieved(LobbyMan* self, char* msg)
         int start = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_START), 0);
         int idx = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_SEQN), 0);
         int range = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_RANGE), 0);
-        *(int*)(((char*)self) + (idx << 2) + 0x104) = start + range;
+        self->mRankCount[idx] = start + range;
     } else {
         int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         event[0] = 258;

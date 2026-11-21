@@ -2962,7 +2962,7 @@ extern "C" void* cMultiParticle_cMultiParticle(cMultiParticle* mem, void* a1, vo
  */
 extern "C" void cMultiParticleMan_addParticle(cMultiParticleMan* self, int i, void* pdata, void* numInst)
 {
-    void** slot = (void**)((char*)self + (i << 2));
+    void** slot = (void**)&self->Particles[i];
     if (*slot == 0) {
         *slot = cMultiParticle_cMultiParticle((cMultiParticle*)cMemMan_alloc(80, str_MultiParticle, 0x20000000, 0), pdata, numInst);
     }
@@ -2984,7 +2984,7 @@ INCLUDE_ASM("object/movenode", cMultiParticleMan_addInst__FPvii);
 void* cMultiParticleMan_addInst(void* vself, int particleIndex, int instId)
 {
     cMultiParticleMan* self = (cMultiParticleMan*)vself;
-    return cMultiParticle_addInst(*(int*)((char*)self + (particleIndex << 2)), instId);
+    return cMultiParticle_addInst((int)self->Particles[particleIndex], instId);
 }
 #endif
 
@@ -3004,7 +3004,7 @@ INCLUDE_ASM("object/movenode", cMultiParticleMan_remInst__FPvii);
 void* cMultiParticleMan_remInst(void* vself, int particleIndex, int instId)
 {
     cMultiParticleMan* self = (cMultiParticleMan*)vself;
-    return cMultiParticle_remInst(*(int*)((char*)self + (particleIndex << 2)), instId);
+    return cMultiParticle_remInst((int)self->Particles[particleIndex], instId);
 }
 #endif
 

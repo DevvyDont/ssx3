@@ -2798,7 +2798,7 @@ struct sVEntry_A0F0 {
  */
 extern "C" void cScreenPopup_setStatic(cScreenPopup* self, int idx, int bStatic)
 {
-    char* option = *(char**)((char*)self + (idx << 2) + 0x90);
+    char* option = (char*)self->mpOptions[idx];
     if (option != 0) {
         sVEntry_A0F0* vt = *(sVEntry_A0F0**)(option + 8);
         vt[8].fn(option + vt[8].delta, bStatic);
@@ -6225,10 +6225,10 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_setIncludeKey);
 extern "C" void cKeyboardPopup_setIncludeKey(cKeyboardPopup* self, int i, int bIncludeKey, int mode)
 {
     if (mode == 0 || mode == 2) {
-        *(int*)((char*)self + (i << 2) + 0x148) = bIncludeKey;
+        self->mbRegular[i] = bIncludeKey;
     }
     if (mode == 1 || mode == 2) {
-        *(int*)((char*)self + (i << 2) + 0x298) = bIncludeKey;
+        self->mbAlternate[i] = bIncludeKey;
     }
 }
 #endif

@@ -1513,7 +1513,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryPosters_getReward__FPvi);
 int cFEStateRewardGalleryPosters_getReward(void* vself, int i)
 {
     cFEStateRewardGalleryPosters* self = (cFEStateRewardGalleryPosters*)vself;
-    return *(int*)((char*)self + (i << 2) + 0xA28);
+    return (int)self->mpPosters[i];
 }
 #endif
 
@@ -1635,7 +1635,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryTradingCards_getReward__FPvi)
 int cFEStateRewardGalleryTradingCards_getReward(void* vself, int i)
 {
     cFEStateRewardGalleryTradingCards* self = (cFEStateRewardGalleryTradingCards*)vself;
-    return *(int*)((char*)self + (i << 2) + 0xA28);
+    return (int)self->mpTradingCards[i];
 }
 #endif
 
@@ -1757,7 +1757,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryConceptArts_getReward__FPvi);
 int cFEStateRewardGalleryConceptArts_getReward(void* vself, int i)
 {
     cFEStateRewardGalleryConceptArts* self = (cFEStateRewardGalleryConceptArts*)vself;
-    return *(int*)((char*)self + (i << 2) + 0xA28);
+    return (int)self->mpConceptArts[i];
 }
 #endif
 
@@ -1879,7 +1879,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryVideos_getReward__FPvi);
 int cFEStateRewardGalleryVideos_getReward(void* vself, int i)
 {
     cFEStateRewardGalleryVideos* self = (cFEStateRewardGalleryVideos*)vself;
-    return *(int*)((char*)self + (i << 2) + 0xA28);
+    return (int)self->mpVideos[i];
 }
 #endif
 
@@ -2001,7 +2001,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryToys_getReward__FPvi);
 int cFEStateRewardGalleryToys_getReward(void* vself, int i)
 {
     cFEStateRewardGalleryToys* self = (cFEStateRewardGalleryToys*)vself;
-    return *(int*)((char*)self + (i << 2) + 0xA28);
+    return (int)self->mpToys[i];
 }
 #endif
 
@@ -2123,7 +2123,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryCheatChars_getReward__FPvi);
 int cFEStateRewardGalleryCheatChars_getReward(void* vself, int i)
 {
     cFEStateRewardGalleryCheatChars* self = (cFEStateRewardGalleryCheatChars*)vself;
-    return *(int*)((char*)self + (i << 2) + 0xA28);
+    return (int)self->mpCheatChars[i];
 }
 #endif
 

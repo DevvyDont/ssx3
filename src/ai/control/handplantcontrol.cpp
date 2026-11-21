@@ -1533,7 +1533,7 @@ struct sVEntry_13A7B0 { short delta; short index; void (*fn)(void*, void*); };
 extern "C" float cAirMotion_intersectBoard(cAirMotion* self, char* hit)
 {
     cRider* rider = self->mRider;
-    sVec4HP* pt = (sVec4HP*)((char*)rider->mAnimModel->bones + (rider->mBoneBoardRoot << 5));
+    sVec4HP* pt = (sVec4HP*)&rider->mAnimModel->bones[rider->mBoneBoardRoot];
     sVec4HP dir = *(sVec4HP*)&rider->unk_180;
     char seg[176];
     cWorldLine_cWorldLine(seg, vu0Sub_13A7B0(*pt, vu0Scale_13A7B0(dir, 200.0f)), vu0Add_13A7B0(*pt, vu0Scale_13A7B0(dir, 200.0f)), 2, 0.574999988079071f);
@@ -8098,7 +8098,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getRider);
  * @return the cRider
  */
 extern "C" int cAI_getRider(cAI* self, int index) {
-    return *(int *)((char *)self + (index << 2) + 0x28);
+    return (int)self->Riders[index];
 }
 #endif
 //100%
@@ -8111,7 +8111,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getPlayer);
  * @return the cPlayer
  */
 extern "C" int cAI_getPlayer(cAI* self, int index) {
-    return *(int *)((char *)self + (index << 2) + 0x40);
+    return (int)self->Players[index];
 }
 #endif
 //100%
@@ -8124,7 +8124,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getComputer);
  * @return the cComputer
  */
 extern "C" int cAI_getComputer(cAI* self, int index) {
-    return *(int *)((char *)self + (index << 2) + 0x48);
+    return (int)self->Computers[index];
 }
 #endif
 //100%
@@ -8137,7 +8137,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getActor);
  * @return the actor's cComputer
  */
 extern "C" int cAI_getActor(cAI* self, int index) {
-    return *(int *)((char *)self + (index << 2) + 0x5C);
+    return (int)self->Actors[index];
 }
 #endif
 //100%
@@ -8150,7 +8150,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getMissionRider);
  * @return the cMissionRider
  */
 extern "C" int cAI_getMissionRider(cAI* self, int index) {
-    return *(int *)((char *)self + (index << 2) + 0x70);
+    return (int)self->MissionRiders[index];
 }
 #endif
 //100%
@@ -8318,7 +8318,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_setPodiumActor);
  * @param value  the character id
  */
 extern "C" void cAI_setPodiumActor(cAI* self, int index, int value) {
-    *(int *)((char *)self + (index << 2) + 0x20) = value;
+    self->PodiumActorList[index] = value;
 }
 #endif
 //100%
@@ -8331,7 +8331,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getPodiumActor);
  * @return the character id
  */
 extern "C" int cAI_getPodiumActor(cAI* self, int index) {
-    return *(int *)((char *)self + (index << 2) + 0x20);
+    return self->PodiumActorList[index];
 }
 #endif
 //100%

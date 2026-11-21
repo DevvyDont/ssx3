@@ -582,7 +582,7 @@ extern "C" void cBankInstance_Unload(void*);
  */
 extern "C" void cBankManager_BANK_UnLoad(cBankManager* self, int i)
 {
-    cBankInstance_Unload((char*)self->mBank + i * 0x60);
+    cBankInstance_Unload(&self->mBank[i]);
 }
 #endif
 
@@ -608,7 +608,7 @@ struct sBankInst60 { char pad0[8]; int f8; char pad1[0x60 - 0xC]; };
  */
 extern "C" void cBankManager_BANK_AsyncLoad(cBankManager* self, int i, void* id, int mainMemFlag)
 {
-    if (cBankInstance_IsBankLoaded((cBankInstance*)((char*)self->mBank + i * 0x60), id) == 0) {
+    if (cBankInstance_IsBankLoaded(&self->mBank[i], id) == 0) {
         cAsyncSys_ASYNCSYS_Cancel(self, i);
         cAsyncSys_ASYNCSYS_QueueLoad(self, i, id, ((sBankInst60*)self->mBank)[i].f8, mainMemFlag);
     }
@@ -634,7 +634,7 @@ extern "C" void* cBankInstance_AllocMem(cBankInstance* inst, int a, int b, int c
  */
 extern "C" void* cBankManager_BANK_AllocMem(cBankManager* self, int i, int mainMemSize, int soundMemSize, int memFlags)
 {
-    return cBankInstance_AllocMem((cBankInstance*)((char*)self->mBank + i * 0x60), mainMemSize, soundMemSize, memFlags);
+    return cBankInstance_AllocMem(&self->mBank[i], mainMemSize, soundMemSize, memFlags);
 }
 #endif
 
@@ -652,7 +652,7 @@ extern "C" void cBankInstance_DeallocMem(cBankInstance*);
  */
 extern "C" void cBankManager_BANK_DeallocMem(cBankManager* self, int i)
 {
-    cBankInstance_DeallocMem((cBankInstance*)((char*)self->mBank + i * 0x60));
+    cBankInstance_DeallocMem(&self->mBank[i]);
 }
 #endif
 
@@ -670,7 +670,7 @@ extern "C" void cBankInstance_ShareBank(void* dst, void* src);
  */
 extern "C" void cBankManager_BANK_ShareBank(cBankManager* self, int i, int j)
 {
-    cBankInstance_ShareBank((char*)self->mBank + i * 0x60, (char*)self->mBank + j * 0x60);
+    cBankInstance_ShareBank(&self->mBank[i], &self->mBank[j]);
 }
 #endif
 //100%
@@ -684,7 +684,7 @@ INCLUDE_ASM("sound/bankmanager", cBankManager_BANK_UnshareBank);
  */
 extern "C" void cBankManager_BANK_UnshareBank(cBankManager* self, int i)
 {
-    cBankInstance_UnshareBank((sBankNode*)((char*)self->mBank + i * 0x60));
+    cBankInstance_UnshareBank((sBankNode*)&self->mBank[i]);
 }
 #endif
 
@@ -705,7 +705,7 @@ extern "C" void cBankInstance_Attach(cBankInstance* inst, int a, int b);
  */
 extern "C" void cBankManager_BANK_Attach(cBankManager* self, int i, int mainMemData, int mainMemSize)
 {
-    cBankInstance_Attach((cBankInstance*)((char*)self->mBank + i * 0x60), mainMemData, mainMemSize);
+    cBankInstance_Attach(&self->mBank[i], mainMemData, mainMemSize);
 }
 #endif
 
@@ -724,7 +724,7 @@ extern "C" void cBankInstance_UnAttach(cBankInstance*);
  */
 extern "C" void cBankManager_BANK_UnAttach(cBankManager* self, int i)
 {
-    cBankInstance_UnAttach((cBankInstance*)((char*)self->mBank + i * 0x60));
+    cBankInstance_UnAttach(&self->mBank[i]);
 }
 #endif
 
@@ -743,7 +743,7 @@ extern "C" void cBankInstance_OnBeginAsyncLoad(cBankInstance*);
  */
 extern "C" void cBankManager_ASYNCSYS_OnBeginAsyncLoad(cBankManager* self, int i)
 {
-    cBankInstance_OnBeginAsyncLoad((cBankInstance*)((char*)self->mBank + i * 0x60));
+    cBankInstance_OnBeginAsyncLoad(&self->mBank[i]);
 }
 #endif
 
@@ -765,7 +765,7 @@ extern "C" void cBankInstance_OnAsyncMainMemAlloc(void* inst, int a, int b);
  */
 extern "C" void cBankManager_ASYNCSYS_OnAsyncMainMemAlloc(cBankManager* self, int i, int size, int memflags)
 {
-    cBankInstance_OnAsyncMainMemAlloc((char*)self->mBank + i * 0x60, size, memflags);
+    cBankInstance_OnAsyncMainMemAlloc(&self->mBank[i], size, memflags);
 }
 #endif
 
@@ -784,7 +784,7 @@ int cBankInstance_OnAsyncMainMemSize(void*);
  */
 extern "C" void cBankManager_ASYNCSYS_OnAsyncMainMemSize(cBankManager* self, int i)
 {
-    cBankInstance_OnAsyncMainMemSize((char*)self->mBank + i * 0x60);
+    cBankInstance_OnAsyncMainMemSize(&self->mBank[i]);
 }
 #endif
 
@@ -808,7 +808,7 @@ extern "C" void cBankInstance_OnEndAsyncLoad(cBankInstance* inst, int a, int b, 
  */
 extern "C" void cBankManager_ASYNCSYS_OnEndAsyncLoad(cBankManager* self, int i, int soundHandle, int endState, int pFilename, int pBuffer, int dataSize)
 {
-    cBankInstance_OnEndAsyncLoad((cBankInstance*)((char*)self->mBank + i * 0x60), soundHandle, endState, pFilename, pBuffer, dataSize);
+    cBankInstance_OnEndAsyncLoad(&self->mBank[i], soundHandle, endState, pFilename, pBuffer, dataSize);
 }
 #endif
 
@@ -2405,7 +2405,7 @@ extern "C" void func_0028E8C0(cSSXAudio* vself, int id, int transportCall)
                     }
                 }
                 if (vself->unk_6284 == 23 || func_002A4030_id(((char*)vself), vself->unk_6284) == 0
-                    || *(int*)(((char*)vself) + (vself->unk_6284 << 2) + 0x579C) != 1) {
+                    || vself->unk_579C[vself->unk_6284] != 1) {
                     if (flag && vself->unk_6284 != 23) {
                         func_0028D488(vself);
                         cMonitor_MONITOR_Create(**(char***)&vself->MusicSys + 0x1D8, 10, D_004A3648_E8C0->v, 0, 2, 1, 0, 0);
