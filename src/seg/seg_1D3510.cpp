@@ -1764,7 +1764,7 @@ extern "C" void cMenu__cMenu(int, int);
  *
  * Destroys its three embedded items in reverse order of construction, each with cMenuItem__cMenuItem and flags 2: the
  * "back" item (+0x164), the space (+0x14C) and the text item (+0x130). Then runs cMenu__cMenu with @p flags. It is word
- * 3 (slot 1) of D_004867B0, the vtable cErrorMenu_cErrorMenu installs.
+ * 3 (slot 1) of cErrorMenu_vtbl, the vtable cErrorMenu_cErrorMenu installs.
  *
  * @param menu  the error menu
  * @param flags  passed to cMenu__cMenu (bit 0: free the memory)

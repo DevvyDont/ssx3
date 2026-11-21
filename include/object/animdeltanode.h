@@ -18,7 +18,7 @@
 // Constructors: cAnimDeltaNode_cAnimDeltaNode1 (bucket, record, tMakeAnimDeltaData*: cAnimObjectNode_cAnimObjectNode1
 // (this, bucket, 2, record, data), vtable, Delta = 0, AnimActive = 0) and cAnimDeltaNode_cAnimDeltaNode (bucket,
 // cBxReplayFrame*: cAnimObjectNode_cAnimObjectNode, vtable, Delta). Destructor cAnimDeltaNode__cAnimDeltaNode__FPv
-// (vtable, cAnimObjectNode__cAnimObjectNode). Vtable D_0048EA70 (53 slots): delta -0x30 (whole object) on 1 dtor, 12
+// (vtable, cAnimObjectNode__cAnimObjectNode). Vtable cAnimDeltaNode_vtbl (53 slots): delta -0x30 (whole object) on 1 dtor, 12
 // writeToReplayFrame, 15 updateNode, 19 getNodeState, 36 signal and on the inherited cAnimObjectNode slots 17 isComplete,
 // 31 getAnimDir, 34 expire; 53 getAnimSpeed delta -0x1C (from the cAnimNode part); delta -0x14 on cAnimNode's slots; the
 // rest are cMoveNode's (this = +0x30).
@@ -59,7 +59,7 @@ struct cAnimDeltaNode {
     int unk_030;                    // 0x30 cObjNode's leading word (unk_00 in object/objnode.h); no ctor writes it
     cObjNode* Next;                 // 0x34 [O] cObjNode::Next; [U] bucket list
     cObjNode* Prev;                 // 0x38 [O] cObjNode::Prev; [U] bucket list
-    void** mVtbl;                   // 0x3C [R] D_0048EA70 (both ctors, the dtor); [P] 0x3C; [U] updateNode calls slot
+    void** mVtbl;                   // 0x3C [R] cAnimDeltaNode_vtbl (both ctors, the dtor); [P] 0x3C; [U] updateNode calls slot
                                     //      34 (expire) with this = +0x30
     short ObjNodeType;              // 0x40 [O] cTypeObjNodeState; [R] node type 2 (cAnimObjectNode_cAnimObjectNode1)
     unsigned short Flags;           // 0x42 [O]; [P] 0x42 bit 0 = RootTransformDirty; [U] updateNode sets bit 0

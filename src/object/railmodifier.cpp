@@ -5965,19 +5965,19 @@ INCLUDE_ASM("object/railmodifier", cAnimTeeterNode__cAnimTeeterNode);
 #ifdef SKIP_ASM
 extern "C" void cAnimNode__cAnimNode(void* self, int flags);
 void operator_delete(int*);
-extern void* D_004908F8[];
+extern void* cAnimTeeterNode_vtbl[];
 
 /**
  * Destroys a teeter animation node.
  *
- * Reinstalls D_004908F8 (+0x50), destroys the animated-node part at +0x30 (cAnimNode__cAnimNode, flags 0) and frees the node
+ * Reinstalls cAnimTeeterNode_vtbl (+0x50), destroys the animated-node part at +0x30 (cAnimNode__cAnimNode, flags 0) and frees the node
  * when bit 0 of flags is set.
  *
  * @param flags  destructor flags
  */
 extern "C" void cAnimTeeterNode__cAnimTeeterNode(cAnimTeeterNode* self, int flags)
 {
-    self->mVtbl = D_004908F8;
+    self->mVtbl = cAnimTeeterNode_vtbl;
     cAnimNode__cAnimNode((char*)self + 0x30, 0);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -7632,20 +7632,20 @@ extern "C" int cAnimComboNode_getAnimDir(cAnimComboNode* self)
 }
 #endif
 
-extern void* D_0048EA70[];
+extern void* cAnimDeltaNode_vtbl[];
 extern "C" void* cAnimObjectNode__cAnimObjectNode(void*);
 
 //100%
 INCLUDE_ASM("object/railmodifier", cAnimDeltaNode__cAnimDeltaNode__FPv);
 #ifdef SKIP_ASM
 /**
- * Destroys an anim delta node: reinstalls D_0048EA70 (+0x3C) and runs the animated-object destructor cAnimObjectNode__cAnimObjectNode.
+ * Destroys an anim delta node: reinstalls cAnimDeltaNode_vtbl (+0x3C) and runs the animated-object destructor cAnimObjectNode__cAnimObjectNode.
  *
  * @return cAnimObjectNode__cAnimObjectNode's result
  */
 void* cAnimDeltaNode__cAnimDeltaNode(void* self)
 {
-    *(int*)((char*)self + 0x3c) = (int)(void*)D_0048EA70;
+    *(int*)((char*)self + 0x3c) = (int)(void*)cAnimDeltaNode_vtbl;
     return cAnimObjectNode__cAnimObjectNode(self);
 }
 #endif

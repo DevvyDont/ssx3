@@ -20,7 +20,7 @@
 // 0x30, bucket, 4, record, 0) - directly, no cAnimObjectNode - then the vtable and the state from the data, Flags |=
 // RootTransformDirty) and cAnimTeeterNode_cAnimTeeterNode (bucket, cBxReplayFrame*: cAnimNode_cAnimNode1 on +0x30,
 // vtable, the 0x30-byte state, Flags |= 1). Destructor cAnimTeeterNode__cAnimTeeterNode (vtable, cAnimNode__cAnimNode on
-// +0x30, operator delete on flags & 1). Vtable D_004908F8 (53 slots): delta -0x44 (whole object) on 1 dtor, 12
+// +0x30, operator delete on flags & 1). Vtable cAnimTeeterNode_vtbl (53 slots): delta -0x44 (whole object) on 1 dtor, 12
 // writeToReplayFrame, 15 updateNode, 19 getNodeState, 31 getAnimDir, 43 applyForce; 53 getAnimSpeed delta -0x30 (from
 // the cAnimNode part); delta -0x14 on cAnimNode's slots (26, 27, 29, 30, 32, 33, 42, 51; this = +0x30); the rest are
 // cMoveNode's / cInstanceNode's (this = +0x44).
@@ -74,7 +74,7 @@ struct cAnimTeeterNode {
     int unk_044;                    // 0x44 cObjNode's leading word (unk_00 in object/objnode.h); no ctor writes it
     cObjNode* Next;                 // 0x48 [O] cObjNode::Next; [U] bucket list
     cObjNode* Prev;                 // 0x4C [O] cObjNode::Prev; [U] bucket list
-    void** mVtbl;                   // 0x50 [R] D_004908F8 (both ctors, the dtor); [P] 0x50; [U] applyForce calls slot 29
+    void** mVtbl;                   // 0x50 [R] cAnimTeeterNode_vtbl (both ctors, the dtor); [P] 0x50; [U] applyForce calls slot 29
                                     //      (getAnimMat) with this = +0x44
     short ObjNodeType;              // 0x54 [O] cTypeObjNodeState; [R] node type 4 (cAnimNode_cAnimNode)
     unsigned short Flags;           // 0x56 [O]; [P] 0x56 bit 0 = RootTransformDirty; [R] both ctors set bit 0; [U]

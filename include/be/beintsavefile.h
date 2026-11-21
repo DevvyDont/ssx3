@@ -10,7 +10,7 @@
 // cBESaveInterface_replayBuffer D_004A1224, cBESaveInterface_bDoReplay D_004A1228; the units declare them with
 // differing types, so they are not declared here; On Tour also has ::comparisonBuffer, retail does not). One
 // instance, created on demand by cBESaveInterface_getThis (`cMemMan_alloc(0x10, "BESaveInt", 0, 0)`, bIsActive = 0,
-// vtable D_0045AD08, then bDoReplay = 0) into cBESaveInterface::instance (retail cBESaveInterface_instance,
+// vtable cBESaveInterface_vtbl, then bDoReplay = 0) into cBESaveInterface::instance (retail cBESaveInterface_instance,
 // D_004A121C); the rest of the game reaches it as cBE_getInterface(cBE_getBE(), 5). EA's source:
 // d:/ssx/code/source/be/beintsavefile.cpp (preview assert string); in retail getThis ... purgeInterface sit in the
 // be/beintsavefile unit (0x152638-0x153087), submit / discard in be/bedbreward. Retail has no out-of-line constructor.
@@ -18,7 +18,7 @@
 // Size 0x10 [R] (the allocation; the July 2003 preview's getThis allocates 0x10 too). [O] On Tour's cBESaveInterface
 // has no data members of its own (size 0x8 = its cBEInterface), and neither does retail's.
 // Base cBEInterface, written out inline as in be/beintreward.h, whose kBEInterfaceVt_* slot enum applies: vtable
-// D_0045AD08 (unnamed; cBESaveInterface's vtable), slot 1 submit = cBESaveInterface_submit, slot 2 discard =
+// cBESaveInterface_vtbl (0x0045AD08, named 2026-11-20), slot 1 submit = cBESaveInterface_submit, slot 2 discard =
 // cBESaveInterface_discard, slots 3/4 cBEInterface_writeToReplayFrame / cBEInterface_readFromReplayFrame.
 //
 // Evidence tags:
@@ -38,7 +38,7 @@ struct cBESaveInterface {
     int bIsActive;                   // 0x008 [O] cBEInterface::bIsActive; [R] getThis sets 0; [P] the preview's getThis;
                                      //       [U] cBEPreRaceState_onEnter/onExit, cBEPostRaceState_onEnter/onExit,
                                      //       cBERaceState_onEnter/onExit set 0/1 (retail has no setSaveActive)
-    void** mVtbl;                    // 0x00C [R] getThis stores D_0045AD08; [P] the preview's getThis stores
+    void** mVtbl;                    // 0x00C [R] getThis stores cBESaveInterface_vtbl; [P] the preview's getThis stores
                                      //       _vt$16cBESaveInterface
 };
 

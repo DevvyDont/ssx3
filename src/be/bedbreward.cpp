@@ -1713,7 +1713,7 @@ void cBECharacterInterface_discard(void* self)
 INCLUDE_ASM("be/bedbreward", cBESaveInterface_submit__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the save interface's submit (slot 1 of its vtable D_0045AD08).
+ * Does nothing: the save interface's submit (slot 1 of its vtable cBESaveInterface_vtbl).
  */
 void cBESaveInterface_submit(void* self)
 {
@@ -1724,7 +1724,7 @@ void cBESaveInterface_submit(void* self)
 INCLUDE_ASM("be/bedbreward", cBESaveInterface_discard__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the save interface's discard (slot 2 of its vtable D_0045AD08).
+ * Does nothing: the save interface's discard (slot 2 of its vtable cBESaveInterface_vtbl).
  */
 void cBESaveInterface_discard(void* self)
 {

@@ -733,7 +733,7 @@ CHECK_OFFSET(cVectorMenuItem, Normalize, 0x670);
 CHECK_SIZE(cVectorMenuItem, 0x674);
 
 // cErrorMenu (0x17C): a menu that shows an error text and a button that closes it. [O] size 0x17C; [R] its rows at
-// 0x130/0x14C/0x164 (ctors and the destructor, seg/seg_1D3510's cErrorMenu__cErrorMenu). Vtable D_004867B0. Base cMenu.
+// 0x130/0x14C/0x164 (ctors and the destructor, seg/seg_1D3510's cErrorMenu__cErrorMenu). Vtable cErrorMenu_vtbl. Base cMenu.
 struct cErrorMenu {
     // cMenu (0x000-0x12F)
     int NumItems;                    // 0x000 [O] cMenu::NumItems; [R] cMenu_cMenu
@@ -742,7 +742,7 @@ struct cErrorMenu {
     cMenuItem* Items[70];            // 0x00C [O] cMenu::Items; [U] cMenu_addItem (the three rows)
     cMenuSys* MenuSys;               // 0x124 [O] cMenu::MenuSys; [R] cMenu_cMenu
     int DrawLayer;                   // 0x128 [O] cMenu::DrawLayer
-    void** mVtbl;                    // 0x12C [R] both ctors store D_004867B0
+    void** mVtbl;                    // 0x12C [R] both ctors store cErrorMenu_vtbl
     cNullMenuItem Error;             // 0x130 [O]; [R] ctors cNullMenuItem_cNullMenuItem(this + 0x130, text), dtor
     cSpaceMenuItem Space;            // 0x14C [O]; [R] ctors (space 10 or 30), dtor
     cPopMenuItem Ok;                 // 0x164 [O]; [R] ctors cPopMenuItem_cPopMenuItem(this + 0x164, caption), dtor

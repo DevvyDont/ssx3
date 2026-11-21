@@ -4,7 +4,7 @@
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BESaveInt[];
-extern void* D_0045AD08[16];
+extern void* cBESaveInterface_vtbl[16];
 extern int cBESaveInterface_bDoReplay;
 
 
@@ -14,7 +14,7 @@ INCLUDE_ASM("be/beintsavefile", cBESaveInterface_getThis__Fv);
 /**
  * Returns the save interface singleton, creating it on first use.
  *
- * The first call allocates 0x10 bytes tagged "BESaveInt", clears the word at 0x8, stores the vtable D_0045AD08,
+ * The first call allocates 0x10 bytes tagged "BESaveInt", clears the word at 0x8, stores the vtable cBESaveInterface_vtbl,
  * keeps the object in cBESaveInterface_instance and clears cBESaveInterface_bDoReplay (the flag set while the 512 KB save buffer from
  * cBESaveInterface_getReplayBuffer() exists).
  *
@@ -25,7 +25,7 @@ void* cBESaveInterface_getThis()
     if (cBESaveInterface_instance == 0) {
         cBESaveInterface* mem = (cBESaveInterface*)cMemMan_alloc(0x10, str_BESaveInt, 0, 0);
         mem->bIsActive = 0;
-        (*(void**)&mem->mVtbl) = D_0045AD08;
+        (*(void**)&mem->mVtbl) = cBESaveInterface_vtbl;
         cBESaveInterface_instance = (cBESaveInterface*)(mem);
         cBESaveInterface_bDoReplay = 0;
     }

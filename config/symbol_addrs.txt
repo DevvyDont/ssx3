@@ -16449,3 +16449,9 @@ str_tilde_tilde = 0x004A4A78;
 cGFEndWaitState_vtbl = 0x0047D638;
 cMoviePlayer_m_isPlaying = 0x004A2E9C;
 gpAsyncSys = 0x004A3610;
+
+// SSX On Tour (PSP, ULKS-46038) dev-build global names, round globals_vtbl_2026-11-20c (docs/ontour_globals.tsv)
+cBESaveInterface_vtbl = 0x0045AD08;
+cErrorMenu_vtbl = 0x004867B0;
+cAnimDeltaNode_vtbl = 0x0048EA70;
+cAnimTeeterNode_vtbl = 0x004908F8;

@@ -6944,10 +6944,10 @@ extern "C" void cGraphMenuItem_render(cGraphMenuItem_D0EF8* self, float* rect)
 INCLUDE_ASM("util/menu", cErrorMenu_cErrorMenu);
 #ifdef SKIP_ASM
 void* cMenu_cMenu(void* self);
-extern void* D_004867B0[];
+extern void* cErrorMenu_vtbl[];
 
 /**
- * Constructs an empty error menu: a cMenu (cMenu_cMenu) with vtable D_004867B0 and three items, added in order.
+ * Constructs an empty error menu: a cMenu (cMenu_cMenu) with vtable cErrorMenu_vtbl and three items, added in order.
  *
  * The items are a cNullMenuItem with no caption (+0x130), a cSpaceMenuItem of 10 (+0x14C) and a "back" item
  * (cPopMenuItem_cPopMenuItem) with no caption (+0x164).
@@ -6960,7 +6960,7 @@ extern "C" void* cErrorMenu_cErrorMenu(cErrorMenu* self)
     char* spaceItem = ((char*)self) + 0x14C;
     char* item3 = ((char*)self) + 0x164;
     cMenu_cMenu(self);
-    self->mVtbl = D_004867B0;
+    self->mVtbl = cErrorMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)nullItem, 0);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)spaceItem, (void*)10);
     cPopMenuItem_cPopMenuItem((cPopMenuItem*)((s2CCDF0Item*)item3), 0);
@@ -6974,7 +6974,7 @@ extern "C" void* cErrorMenu_cErrorMenu(cErrorMenu* self)
 INCLUDE_ASM("util/menu", cErrorMenu_cErrorMenu1);
 #ifdef SKIP_ASM
 void* cMenu_cMenu(void* self);
-extern void* D_004867B0[];
+extern void* cErrorMenu_vtbl[];
 
 /**
  * Constructs an error menu with an error text and a button caption: like cErrorMenu_cErrorMenu, but the cNullMenuItem (+0x130)
@@ -6989,7 +6989,7 @@ extern "C" void* cErrorMenu_cErrorMenu1(cErrorMenu* self, void* nullText, void* 
     char* nullItem = ((char*)self) + 0x130;
     cMenu_cMenu(self);
     char* item3 = ((char*)self) + 0x164;
-    self->mVtbl = D_004867B0;
+    self->mVtbl = cErrorMenu_vtbl;
     char* spaceItem = ((char*)self) + 0x14C;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)nullItem, nullText);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)spaceItem, (void*)0x1E);

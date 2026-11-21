@@ -1371,12 +1371,12 @@ extern "C" void cAnimComboNode_cacheFrame(sMp_9140* self)
 INCLUDE_ASM("object/multiparticle", cAnimDeltaNode_cAnimDeltaNode1);
 #ifdef SKIP_ASM
 extern "C" void cAnimObjectNode_cAnimObjectNode1(void* self, int a, int type, int b, int c);
-extern void* D_0048EA70[];
+extern void* cAnimDeltaNode_vtbl[];
 
 /**
  * Constructs an anim delta node (node type 2): an animated object that plays while a delta budget lasts.
  *
- * Builds the cAnimObjectNode base (cAnimObjectNode_cAnimObjectNode1), installs D_0048EA70 at +0x3C and zeroes Delta (+0x6C) and +0x4.
+ * Builds the cAnimObjectNode base (cAnimObjectNode_cAnimObjectNode1), installs cAnimDeltaNode_vtbl at +0x3C and zeroes Delta (+0x6C) and +0x4.
  *
  * @param bucket  update bucket
  * @param instRecord  instance record
@@ -1386,7 +1386,7 @@ extern void* D_0048EA70[];
 extern "C" void* cAnimDeltaNode_cAnimDeltaNode1(cAnimDeltaNode* self, int bucket, int instRecord, int animData)
 {
     cAnimObjectNode_cAnimObjectNode1(self, bucket, 2, instRecord, animData);
-    self->mVtbl = D_0048EA70;
+    self->mVtbl = cAnimDeltaNode_vtbl;
     *(int*)&self->Delta = 0;
     self->AnimActive = 0;
     return ((void*)self);
@@ -1403,12 +1403,12 @@ struct sVEntry00359270 {
 };
 
 extern "C" void* cAnimObjectNode_cAnimObjectNode(void* self, void* a, void* stream);
-extern void* D_0048EA70[];
+extern void* cAnimDeltaNode_vtbl[];
 
 /**
  * Rebuilds an animation delta node from a replay frame: the cAnimObjectNode part, its vtable and its Delta.
  *
- * Stores the cAnimDeltaNode vtable (D_0048EA70) at +0x3C and reads the 4-byte Delta (On Tour +0x68) into
+ * Stores the cAnimDeltaNode vtable (cAnimDeltaNode_vtbl) at +0x3C and reads the 4-byte Delta (On Tour +0x68) into
  * +0x6C.
  *
  * @param bucket  bucket index, passed on to the cAnimObjectNode constructor
@@ -1418,7 +1418,7 @@ extern void* D_0048EA70[];
 extern "C" void* cAnimDeltaNode_cAnimDeltaNode(cAnimDeltaNode* self, void* bucket, void* stream)
 {
     cAnimObjectNode_cAnimObjectNode(self, bucket, stream);
-    self->mVtbl = D_0048EA70;
+    self->mVtbl = cAnimDeltaNode_vtbl;
     sVEntry00359270* vt = *(sVEntry00359270**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x6C, 4);
     return ((void*)self);

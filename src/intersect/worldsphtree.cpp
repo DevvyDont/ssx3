@@ -6487,7 +6487,7 @@ extern "C" void cAnimObjectNode_writeToReplayFrame(cAnimObjectNode* self, void* 
 INCLUDE_ASM("intersect/worldsphtree", cAnimTeeterNode_cAnimTeeterNode1);
 #ifdef SKIP_ASM
 extern char* cAppMan_TheAppMan;
-extern void* D_004908F8[];
+extern void* cAnimTeeterNode_vtbl[];
 extern "C" void cAnimNode_cAnimNode(void* p, int a1, int a2, void* obj, int a4);
 extern "C" float cAnimFrame_getStartTime(void* inst);
 
@@ -6543,7 +6543,7 @@ static inline void setRateMax_003421A0(sFloat_003421A0* dst, float v, char* info
  * cAnimTeeterNode_cAnimTeeterNode).
  *
  * Builds the animation-node base at +0x30 with cAnimNode_cAnimNode(base, @p bucket, 4, @p obj, 0) and stores the vtable
- * D_004908F8 at +0x50. From @p def (On Tour tMakeAnimTeeterData) it sets min (+0x10) from FromTime (+0x20, a 30 fps
+ * cAnimTeeterNode_vtbl at +0x50. From @p def (On Tour tMakeAnimTeeterData) it sets min (+0x10) from FromTime (+0x20, a 30 fps
  * frame; negative means the animation's start time) and max (+0x14) from ToTime (+0x24; negative means the animation
  * length, the instance's info +0x80, +0x14); BounceFactor (+0x8) to +0xC; TorqueScale (+0x4) times 1e-6 to +0x8;
  * MaxSpeed (+0xC) / 30 / the frame rate to +0x18; AnimSign (+0x1C) to +0x2C; PivotTime (+0x14) / 30 to +0x24; Damp
@@ -6560,7 +6560,7 @@ static inline void setRateMax_003421A0(sFloat_003421A0* dst, float v, char* info
 extern "C" void* cAnimTeeterNode_cAnimTeeterNode1(cAnimTeeterNode* self, int bucket, char* obj, char* def)
 {
     cAnimNode_cAnimNode((char*)self + 0x30, bucket, 4, obj, 0);
-    self->mVtbl = D_004908F8;
+    self->mVtbl = cAnimTeeterNode_vtbl;
     float animStart = 0.0f;
     char* info = *(char**)(obj + 0x80);
     if (self->AnimFrames != 0) {
@@ -6593,13 +6593,13 @@ struct sVEntry003422E8 {
 };
 
 extern "C" void* cAnimNode_cAnimNode1(void* p, int a1, void* stream);
-extern void* D_004908F8[];
+extern void* cAnimTeeterNode_vtbl[];
 
 /**
  * Constructs an animated teeter node from a replay frame.
  *
  * Builds the animation node base at +0x30 with cAnimNode_cAnimNode1 (its cMoveNode part at +0x44), stores this
- * class's vtable D_004908F8 at +0x50, reads the 0x30-byte teeter state into +0x0 from @p stream (read
+ * class's vtable cAnimTeeterNode_vtbl at +0x50, reads the 0x30-byte teeter state into +0x0 from @p stream (read
  * virtual, slot 2) and sets the root-transform-dirty flag (bit 0 of Flags, +0x56).
  *
  * @param bucket  bucket list the node joins, passed on to the base constructor
@@ -6609,7 +6609,7 @@ extern void* D_004908F8[];
 extern "C" void* cAnimTeeterNode_cAnimTeeterNode(cAnimTeeterNode* self, int bucket, sVEntry003422E8** stream)
 {
     cAnimNode_cAnimNode1((char*)self + 0x30, bucket, stream);
-    self->mVtbl = D_004908F8;
+    self->mVtbl = cAnimTeeterNode_vtbl;
     (*stream)[2].fn((char*)stream + (*stream)[2].delta, self, 0x30);
     self->Flags |= 1;
     return ((void*)self);
@@ -6661,7 +6661,7 @@ static inline float absf_00342358(float x)
  * BounceFactor (+0xC), or step and velocity zeroed when |velocity| <= 0.1.
  *
  * It then clears the torque, copies the frame to +0x34 and runs func_0034EBA0 on the animation part; on success it sets
- * the dirty flag (bit 0 of +0x56). Slot 15 of D_004908F8.
+ * the dirty flag (bit 0 of +0x56). Slot 15 of cAnimTeeterNode_vtbl.
  *
  * @param spring  the teeter node
  * @return func_0034EBA0's result: 1 after a successful frame update, else 0
@@ -6727,7 +6727,7 @@ INCLUDE_ASM("intersect/worldsphtree", cAnimTeeterNode_getAnimSpeed);
  * Returns the teeter's animation speed: its current step, or 0 while it rests against an end of its range.
  *
  * Returns 0 when the frame (+0x30) is at or below min (+0x10) with a negative step (+0x4), or at or above max (+0x14)
- * with a positive one. Last slot of D_004908F8, where D_00490B10 has cAnimObjectNode_getAnimSpeed.
+ * with a positive one. Last slot of cAnimTeeterNode_vtbl, where D_00490B10 has cAnimObjectNode_getAnimSpeed.
  *
  * @return the step per update, or 0
  */
@@ -6891,7 +6891,7 @@ static inline float vu0Dot_342538(const sVec4_342538& a, const sVec4_342538& b)
  * the hit position (@p intInfo +0x0), negates it when TorqueScale (+0x8) is negative and again when the mesh's bit in
  * AnimSign (+0x2C) is set, and adds dot(matrix * Y axis, cross(arm, force)) to the torque (+0x0).
  *
- * cAnimTeeterNode's update (cAnimTeeterNode_updateNode) consumes the torque. Slot of D_004908F8 where D_00490B10 has
+ * cAnimTeeterNode's update (cAnimTeeterNode_updateNode) consumes the torque. Slot of cAnimTeeterNode_vtbl where D_00490B10 has
  * cMoveNode_applyForce.
  *
  * @param intInfo  the hit (On Tour tIntersectInfo: position at +0x0, mesh index at +0x5C)
@@ -6950,7 +6950,7 @@ struct sVEntry_cAnimTeeterNode_writeToReplayFrame {
  * Writes an animated teeter node to a replay frame.
  *
  * Writes the animation-node part (+0x30) with cAnimNode_writeToReplayFrame, then the 0x30-byte teeter state at +0x0 with the frame's
- * write virtual (slot 1). Slot 12 of D_004908F8.
+ * write virtual (slot 1). Slot 12 of cAnimTeeterNode_vtbl.
  *
  * @param stream  the replay frame to write to (On Tour cBxReplayFrame* data)
  */
