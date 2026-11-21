@@ -1044,7 +1044,7 @@ extern "C" void cComputer_avoidTargetCruise(cComputer* self, sPad_0F88* cmd)
             steer = cComputer_calcTurn_0F88(((char*)self), &targetPos);
             cComputer_setupCrouch_0F88(((char*)self), cmd);
         } else if (tgt->Ready()) {
-            if (*(int*)((char*)tgt + 0xAB8) == *(int*)((char*)self->mRider + 0xAB8))
+            if (*(int*)((char*)tgt + 0xAB8) == (int)self->mRider->AIPath)
                 cRider_checkAIPathSwitch((char*)self->mRider, 0);
             cComputer_calculateTargetPos_0F88(&targetPos, ((char*)self));
             steer = cComputer_calcTurn_0F88(((char*)self), &targetPos);
@@ -7456,7 +7456,7 @@ extern "C" void cComputer_getPrewindCmd(cComputer* self, sPad_AA70* cmd)
 {
     sRec_AA70 buf[12];
     cRider* rider = self->mRider;
-    cTrack_AA70* trk = *(cTrack_AA70**)(((char*)rider) + 0xAB8);
+    cTrack_AA70* trk = (cTrack_AA70*)rider->AIPath;
     int n = trk->Query(buf, 12, *(float*)(((char*)rider) + 0x4C0), *(float*)(((char*)rider) + 0x4C4) + 50.0f);
     int sel = -1;
     if (Len_AA70(*(sV4_AA70*)&self->mRider->mVelocity) < self->mDesiredSpeed - 138.88890075683594f)
@@ -8007,7 +8007,7 @@ extern "C" int cComputer_checkForJumpEvent(cComputer* self, float* approachSpeed
 {
     sRec_B980 buf[12];
     cRider* rider = self->mRider;
-    cTrack_B980* trk = *(cTrack_B980**)(((char*)rider) + 0xAB8);
+    cTrack_B980* trk = (cTrack_B980*)rider->AIPath;
     int n = trk->Query(buf, 12, *(float*)(((char*)rider) + 0x4C0), *(float*)(((char*)rider) + 0x4C4) + 300.0f);
     for (int i = 0; i < n; i++) {
         if (buf[i].type == 0x10) {
@@ -8046,7 +8046,7 @@ struct sHit_BB18 { int type; int val; float lim; int d; };
 extern "C" int cComputer_checkForSpeedZone(cComputer* self_, float* out, int* ok) {
     sHit_BB18 buf[12];
     cRider* rider = self_->mRider;
-    char* track = *(char**)(((char*)rider) + 0xAB8);
+    char* track = (char*)rider->AIPath;
     char* vt = *(char**)(track + 0x34);
     int n = (*(int (**)(char*, sHit_BB18*, int, float, float))(vt + 0xC))(track + *(short*)(vt + 8), buf, 12, *(float*)(((char*)rider) + 0x4C0), *(float*)(((char*)rider) + 0x4C4) + 600.0f);
     for (int i = 0; i < n; i++) {
@@ -8077,7 +8077,7 @@ struct sHit_BBF8 { int type; int val; int d[2]; };
 extern "C" int cComputer_checkForBoardPress(cComputer* self_, int* out) {
     sHit_BBF8 buf[12];
     cRider* rider = self_->mRider;
-    char* track = *(char**)(((char*)rider) + 0xAB8);
+    char* track = (char*)rider->AIPath;
     char* vt = *(char**)(track + 0x34);
     int n = (*(int (**)(char*, sHit_BBF8*, int, float, float))(vt + 0xC))(track + *(short*)(vt + 8), buf, 12, *(float*)(((char*)rider) + 0x4C0), *(float*)(((char*)rider) + 0x4C4) + 50.0f);
     *out = 0;
@@ -8106,7 +8106,7 @@ struct sHit_BC98 { int type; int d[3]; };
 extern "C" int cComputer_checkForRail(cComputer* self) {
     sHit_BC98 buf[12];
     cRider* rider = self->mRider;
-    char* track = *(char**)(((char*)rider) + 0xAB8);
+    char* track = (char*)rider->AIPath;
     char* vt = *(char**)(track + 0x34);
     int n = (*(int (**)(char*, sHit_BC98*, int, float, float))(vt + 0xC))(track + *(short*)(vt + 8), buf, 12, *(float*)(((char*)rider) + 0x4C0), *(float*)(((char*)rider) + 0x4C4));
     for (int i = 0; i < n; i++) {

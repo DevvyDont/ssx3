@@ -6243,7 +6243,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getTrackPath);
  * @return the word at +0xAB4
  */
 extern "C" int cRider_getTrackPath(cRider* rider) {
-    return (*(int *)((char*)(rider) + (0xAB4)));
+    return ((int)rider->TrackPath);
 }
 #endif
 //100%
@@ -6269,7 +6269,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getAIPath);
  * @return the word at +0xAB8
  */
 extern "C" int cRider_getAIPath(cRider* rider) {
-    return (*(int *)((char*)(rider) + (0xAB8)));
+    return ((int)rider->AIPath);
 }
 #endif
 //100%

@@ -5440,7 +5440,7 @@ extern "C" void cResetControl_update(cResetControl* self)
         float range = 200.0f;
         cRider_switchToResetPath(self->mRider);
         cRider* rider = self->mRider;
-        const sVec4_12F398& dir = cPath_getPathHeading(*(void**)(((char*)rider) + 0xAB8), *(float*)(((char*)rider) + 0x4C4));
+        const sVec4_12F398& dir = cPath_getPathHeading(rider->AIPath, *(float*)(((char*)rider) + 0x4C4));
         if (cBE_getInterface_Fv(cBE_getBE(), 0) != 0 && cBENewRaceInterface_newRace.cGameEvent == 2)
             range = 1000.0f;
         cRider_putAt_12F398(self->mRider, (char*)self->mRider + 0x490, (sVec4_12F398*)&dir, 287, range);

@@ -76,6 +76,9 @@ struct sRiderPair {
     int unk_20;         // tick of the last glance, compared against now - 600 (cRider_checkForProximityAction)
 };
 
+struct cTrackPath;
+struct cAIPath;
+
 struct cRider {
     /* 0x000 */ sRiderPair mRelations[6]; // [X] [U] per other rider, by its mAIIndex (cRider_checkOpponentCollisions)
     /* 0x0D8 */ int unk_0D8; // set to -1, then passed to cRiderMetrix_reset(mMetrix, v) (cRider_initAlways)
@@ -245,7 +248,10 @@ struct cRider {
     /* 0xAA8 */ void* mShadow; // [P] getShadow (seen); drawn by cRider_RenderShadow
     /* 0xAAC */ float unk_AAC; // hit f6C (cRider_SetNISGroundVectors); the ctor copies 8 bytes here from D_004A5960
     /* 0xAB0 */ float unk_AB0; // hit f70 (cRider_SetNISGroundVectors)
-    /* 0xAB4 */ char unk_AB4[0x8];
+    /* 0xAB4 */ cTrackPath* TrackPath; // [R] cRider_getTrackPath returns it; [O] cRider::TrackPath (On Tour: TrackPath,
+                                     //     AIPath, then the two intersect infos, as here); [U] the lowest track path wins
+    /* 0xAB8 */ cAIPath* AIPath;       // [R] cRider_getAIPath returns it; [O] cRider::AIPath (getAIPath -> cAIPath*);
+                                     //     [U] the AI intersects it with mAIPathHint; replay frames store its index
     /* 0xABC */ int* mAIPathHint; // [X]
     /* 0xAC0 */ int* mTrackPathHint; // [X]
     /* 0xAC4 */ int mIsInNIS; // [P] IsInNIS (seen); most updates are skipped while set
@@ -408,6 +414,8 @@ CHECK_OFFSET(cRider, unk_AA4, 0xAA4);
 CHECK_OFFSET(cRider, mShadow, 0xAA8);
 CHECK_OFFSET(cRider, unk_AAC, 0xAAC);
 CHECK_OFFSET(cRider, unk_AB0, 0xAB0);
+CHECK_OFFSET(cRider, TrackPath, 0xAB4);
+CHECK_OFFSET(cRider, AIPath, 0xAB8);
 CHECK_OFFSET(cRider, mAIPathHint, 0xABC);
 CHECK_OFFSET(cRider, mTrackPathHint, 0xAC0);
 CHECK_OFFSET(cRider, mIsInNIS, 0xAC4);
