@@ -635,11 +635,6 @@ extern "C" void* func_0014D998(void* self, int i);
 extern "C" int func_00151C90(cBECharProfileDB* self, int id, int on);
 extern char D_004A6750[];
 
-struct sEconItem_1513B8
-{
-    short id;
-    short flags;
-};
 
 
 struct sEconGroup_1513B8
@@ -658,11 +653,11 @@ struct sEconDef_1513B8
     char pad10[0x28];
 };
 
-static inline sEconItem_1513B8* Find_1513B8(cBECharProfileDB* self, int id)
+static inline tBEProfileBolt* Find_1513B8(cBECharProfileDB* self, int id)
 {
     int idx = self->mpBoltsMap[id];
     if (idx >= 0)
-        return &((sEconItem_1513B8*)&self->mBolts[0])[idx];
+        return &((&self->mBolts[0]))[idx];
     return 0;
 }
 
@@ -698,9 +693,9 @@ extern "C" void func_001513B8(cBECharProfileDB* vself)
     int j;
     for (j = 0; j < self->mNumBolts; j++)
     {
-        sEconItem_1513B8* it = &((sEconItem_1513B8*)&self->mBolts[0])[j];
-        if (it->flags & 0x10)
-            it->flags |= 0x26;
+        tBEProfileBolt* it = &((&self->mBolts[0]))[j];
+        if ((*(short*)&it->flags) & 0x10)
+            *(short*)&it->flags |= 0x26;
     }
     int numDefs = func_0014D988(db, self->unk_BC0);
     sEconDef_1513B8* itemDef = (sEconDef_1513B8*)func_0014D998(db, self->unk_BC0);
@@ -709,11 +704,11 @@ extern "C" void func_001513B8(cBECharProfileDB* vself)
     {
         if (Price_1513B8(itemDef) == 0)
         {
-            Find_1513B8(self, itemDef->id)->flags |= 2;
+            (*(short*)&Find_1513B8(self, itemDef->id)->flags) |= 2;
         }
         else if (Price_1513B8(itemDef) == -1)
         {
-            Find_1513B8(self, itemDef->id)->flags |= 2;
+            (*(short*)&Find_1513B8(self, itemDef->id)->flags) |= 2;
             func_00151C90((cBECharProfileDB*)self, itemDef->id, 1);
             changed = 1;
         }
@@ -723,11 +718,11 @@ extern "C" void func_001513B8(cBECharProfileDB* vself)
         int k;
         for (k = 0; k < self->mNumBolts; k++)
         {
-            sEconItem_1513B8* it = &((sEconItem_1513B8*)&self->mBolts[0])[k];
-            if (it->flags & 0x10)
-                it->flags |= 6;
+            tBEProfileBolt* it = &((&self->mBolts[0]))[k];
+            if ((*(short*)&it->flags) & 0x10)
+                *(short*)&it->flags |= 6;
             else
-                it->flags &= ~4;
+                *(short*)&it->flags &= ~4;
         }
     }
 }
@@ -1183,11 +1178,6 @@ extern "C" void* func_0014D558(void* db, int kind, int id);
 extern "C" int func_0014D4C8(void* db, int kind, int id);
 extern "C" int func_00151EF0(cBECharProfileDB* self, int id, int on);
 
-struct sEconItem_151C90
-{
-    short id;
-    unsigned short flags;
-};
 
 
 struct sEconRel_151C90
@@ -1213,15 +1203,15 @@ struct sEconDefs_151C90
     sEconDef_151C90* defs;  // 0x4
 };
 
-static inline sEconItem_151C90* getItem_151C90(cBECharProfileDB* self, int id)
+static inline tBEProfileBolt* getItem_151C90(cBECharProfileDB* self, int id)
 {
     int idx = self->mpBoltsMap[id];
     if (idx >= 0)
-        return &((sEconItem_151C90*)&self->mBolts[0])[idx];
+        return &((&self->mBolts[0]))[idx];
     return 0;
 }
 
-static inline int isOwned_151C90(sEconItem_151C90* p)
+static inline int isOwned_151C90(tBEProfileBolt* p)
 {
     return p->flags & 0x10;
 }
@@ -1257,7 +1247,7 @@ extern "C" int func_00151C90(cBECharProfileDB* selfp, int id, int on)
     cBECharProfileDB* self = selfp;
     sEconDefs_151C90* db = (sEconDefs_151C90*)func_0014BDB8_1C90();
     sEconDef_151C90* def = getDef_151C90(db, func_0014D448(db, self->unk_BC0, id));
-    sEconItem_151C90* item = getItem_151C90(self, id);
+    tBEProfileBolt* item = getItem_151C90(self, id);
     int bit1 = hasFlag_151C90(def, 1) != 0;
     int bit8 = hasFlag_151C90(def, 8) != 0;
     int wasOn = isOwned_151C90(item) != 0;
@@ -1278,7 +1268,7 @@ extern "C" int func_00151C90(cBECharProfileDB* selfp, int id, int on)
             if (sid != id)
             {
                 int j = self->mpBoltsMap[sid];
-                if (j >= 0 && (isOwned_151C90(&((sEconItem_151C90*)&self->mBolts[0])[j]) || (rel->flags & 8)))
+                if (j >= 0 && (isOwned_151C90(&((&self->mBolts[0]))[j]) || (rel->flags & 8)))
                 {
                     if (func_00151C90((cBECharProfileDB*)self, sid, 0) == 0)
                         return 0;
@@ -1315,11 +1305,6 @@ extern "C" sEconLink_151EF0* func_0014DB40(void* db, int kind, int id, int on, i
 extern "C" int func_0014D448(void* db, int kind, int id);
 extern "C" int func_00151C90(cBECharProfileDB* self, int id, int on);
 
-struct sEconItem_151EF0
-{
-    short id;
-    unsigned short flags;
-};
 
 
 // One dependency: when condId is set, applies only if its owned state equals cond.
@@ -1345,15 +1330,15 @@ struct sEconDefs_151EF0
     sEconDef_151EF0* defs;  // 0x4
 };
 
-static inline sEconItem_151EF0* getItem_151EF0(cBECharProfileDB* self, int id)
+static inline tBEProfileBolt* getItem_151EF0(cBECharProfileDB* self, int id)
 {
     int idx = self->mpBoltsMap[id];
     if (idx >= 0)
-        return &((sEconItem_151EF0*)&self->mBolts[0])[idx];
+        return &((&self->mBolts[0]))[idx];
     return 0;
 }
 
-static inline int isOwned_151EF0(sEconItem_151EF0* p)
+static inline int isOwned_151EF0(tBEProfileBolt* p)
 {
     return p->flags & 0x10;
 }
@@ -1384,7 +1369,7 @@ extern "C" int func_00151EF0(cBECharProfileDB* selfp, int id, int on)
     sEconDefs_151EF0* db = (sEconDefs_151EF0*)func_0014BDB8_1EF0();
     int n = 0;
     sEconLink_151EF0* link = func_0014DB40(db, self->unk_BC0, id, on, &n);
-    sEconItem_151EF0* item = getItem_151EF0(self, id);
+    tBEProfileBolt* item = getItem_151EF0(self, id);
     for (int i = 0; i < n; i++, link++)
     {
         if (link->target == -1)
@@ -1394,7 +1379,7 @@ extern "C" int func_00151EF0(cBECharProfileDB* selfp, int id, int on)
             if ((isOwned_151EF0(getItem_151EF0(self, link->condId)) != 0) != (link->cond != 0))
                 continue;
         }
-        sEconItem_151EF0* targetItem = &((sEconItem_151EF0*)&self->mBolts[0])[self->mpBoltsMap[link->target]];
+        tBEProfileBolt* targetItem = &((&self->mBolts[0]))[self->mpBoltsMap[link->target]];
         int has = isOwned_151EF0(targetItem) != 0;
         if (has == (link->on != 0))
         {
@@ -1427,11 +1412,6 @@ int func_0014D988(void* self, int i);
 extern "C" void* func_0014D998(void* self, int i);
 extern "C" int func_00151EF0(cBECharProfileDB* self, int id, int on);
 
-struct sEconItem_001520E8
-{
-    short id;
-    unsigned short flags;
-};
 
 
 struct sEconDef_001520E8
@@ -1442,11 +1422,11 @@ struct sEconDef_001520E8
     int flags;          // 0x34
 };
 
-static inline sEconItem_001520E8* getItem_001520E8(cBECharProfileDB* self, int id)
+static inline tBEProfileBolt* getItem_001520E8(cBECharProfileDB* self, int id)
 {
     int idx = self->mpBoltsMap[id];
     if (idx >= 0)
-        return &((sEconItem_001520E8*)&self->mBolts[0])[idx];
+        return &((&self->mBolts[0]))[idx];
     return 0;
 }
 
@@ -1488,11 +1468,6 @@ extern "C" void* func_0014DC50(void* self, int kind);
 extern "C" int func_0014D608(void* self, int kind, int id, void** out, int a, int b);
 extern "C" int func_00151C90(cBECharProfileDB* self, int id, int on);
 
-struct sEconItem_1521F0
-{
-    short id;
-    unsigned short flags;
-};
 
 
 struct sEconGroup_1521F0
@@ -1510,11 +1485,11 @@ struct sEconDef_1521F0
     int flags;      // 0x34
 };
 
-static inline sEconItem_1521F0* Find_1521F0(cBECharProfileDB* self, int id)
+static inline tBEProfileBolt* Find_1521F0(cBECharProfileDB* self, int id)
 {
     int idx = self->mpBoltsMap[id];
     if (idx >= 0)
-        return &((sEconItem_1521F0*)&self->mBolts[0])[idx];
+        return &((&self->mBolts[0]))[idx];
     return 0;
 }
 

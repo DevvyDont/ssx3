@@ -6931,13 +6931,6 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" int cTrackFileMan_checkLocation_17A378(void* selfp, char* name, char* tag) __asm__("cTrackFileMan_checkLocation");
 extern "C" char* strcpy(char* d, const char* s);
 
-struct sCamEntry_17A378 {
-    char name[0x40];    // 0x00
-    char tag[0x40];     // 0x40
-    int type;           // 0x80
-    int f84;            // 0x84
-    int f88;            // 0x88
-};
 
 
 struct sStr_17A378 {
@@ -7018,10 +7011,10 @@ extern "C" void cTrackFileMan_scanTrackIndex(cTrackFileMan* selfp, const char* f
         sStr_17A378 str;
         cBXString_cBXString3(&str, start, stop - start);
         if (cTrackFileMan_checkLocation_17A378(self, str.s, str.s)) {
-            strcpy(((sCamEntry_17A378*)&self->LocationInfo[0])[self->NumLocations].name, str.s);
-            strcpy(((sCamEntry_17A378*)&self->LocationInfo[0])[self->NumLocations].tag, str.s);
-            ((sCamEntry_17A378*)&self->LocationInfo[0])[self->NumLocations].type = 22;
-            ((sCamEntry_17A378*)&self->LocationInfo[0])[self->NumLocations].f84 = 0;
+            strcpy(((&self->LocationInfo[0]))[self->NumLocations].File, str.s);
+            strcpy(((&self->LocationInfo[0]))[self->NumLocations].BigFile, str.s);
+            ((&self->LocationInfo[0]))[self->NumLocations].locationID = 22;
+            ((&self->LocationInfo[0]))[self->NumLocations].bIsBAM = 0;
             self->NumLocations++;
         }
         cBXString__cBXString(&str, 2);

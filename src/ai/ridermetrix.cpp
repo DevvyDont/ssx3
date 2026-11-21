@@ -51,11 +51,6 @@ extern "C" void cRiderMetrix_linkToRider(cRiderMetrix* self, cRider* rider)
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_resetHUDfx);
 #ifdef SKIP_ASM
-struct sRiderMetrixEntry_001173B8
-{
-    int state;
-    char pad[0x98];
-};
 
 
 /**
@@ -63,11 +58,11 @@ struct sRiderMetrixEntry_001173B8
  */
 extern "C" void cRiderMetrix_resetHUDfx(cRiderMetrix* self)
 {
-    if (((sRiderMetrixEntry_001173B8*)self->HUDfx) != 0)
+    if ((self->HUDfx) != 0)
     {
         for (int i = 0; i < self->NumHUDfx; i++)
         {
-            ((sRiderMetrixEntry_001173B8*)self->HUDfx)[i].state = 52;
+            (self->HUDfx)[i].ID = 52;
         }
     }
 }
@@ -76,11 +71,6 @@ extern "C" void cRiderMetrix_resetHUDfx(cRiderMetrix* self)
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_hasActiveHUDfx);
 #ifdef SKIP_ASM
-struct sRiderMetrixEntry_00117400
-{
-    int type;
-    char pad[0x98];
-};
 
 
 static inline bool rmBitTest00117400(int* bits, int i)
@@ -102,13 +92,13 @@ static inline bool rmBitTest00117400(int* bits, int i)
  */
 extern "C" int cRiderMetrix_hasActiveHUDfx(cRiderMetrix* self, int type)
 {
-    if (((sRiderMetrixEntry_00117400*)self->HUDfx) == 0)
+    if ((self->HUDfx) == 0)
         return 0;
     if (self->IsActiveFXListCacheInvalid)
     {
         for (int i = 0; i < self->NumHUDfx; i++)
         {
-            int entryType = ((sRiderMetrixEntry_00117400*)self->HUDfx)[i].type;
+            int entryType = (self->HUDfx)[i].ID;
             if (entryType != 52)
             {
                 int off = (entryType & ~0x1F) >> 3;
@@ -705,18 +695,7 @@ struct sVec17C28 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct sRider17C28 {
-    char pad_0x000[0x1C0];
-    sVec17C28 up;        // 0x1C0
-    char pad_0x1D0[0x10];
-    sVec17C28 vel;       // 0x1E0
-    char pad_0x1F0[0x110];
-    float timeScale;     // 0x300
-};
 
-struct sMetrixSlot17C28 {
-    char pad_0x00[0x9C];
-};
 
 
 // PORT: PS2-only VU0 inline asm (vector length).
@@ -753,10 +732,10 @@ static inline float len17C28(const sVec17C28& v)
  */
 extern "C" void cRiderMetrix_update(cRiderMetrix* self)
 {
-    float dt = ((sRider17C28*)self->Rider)->timeScale * 0.016666668f;
-    float speed = len17C28(((sRider17C28*)self->Rider)->vel);
+    float dt = (self->Rider)->mTimeScale * 0.016666668f;
+    float speed = len17C28((*(sVec17C28*)&(self->Rider)->mVelocity));
     if (self->ComboResetDelay >= 0.0f) {
-        if (cRider_getMotionState(((sRider17C28*)self->Rider)) == 0 && cRider_getControlState(((sRider17C28*)self->Rider)) != 1) {
+        if (cRider_getMotionState((self->Rider)) == 0 && cRider_getControlState((self->Rider)) != 1) {
             self->ComboResetDelay = self->ComboResetDelay - dt;
             if (self->ComboResetDelay <= 0.0f) {
                 cRiderMetrix_earnComboChain((cRiderMetrix*)self);
@@ -776,7 +755,7 @@ extern "C" void cRiderMetrix_update(cRiderMetrix* self)
         float stepDist = speed * dt;
         self->CurTrickRailslideDist += stepDist;
         self->CurTrickPower += stepDist * 5e-05f;
-        sVec17C28 up = ((sRider17C28*)self->Rider)->up;
+        sVec17C28 up = (*(sVec17C28*)&(self->Rider)->mMatrix.row[2]);
         if (up.z < 0.0f) {
             self->CurTrickStylePower += stepDist * 0.0002f;
         }
@@ -806,14 +785,14 @@ extern "C" void cRiderMetrix_update(cRiderMetrix* self)
         self->Totals.MaxSpeedCPS = speed;
     }
     cRiderMetrix_updateStaticHUD((cRiderMetrix*)self);
-    if (((sMetrixSlot17C28*)self->HUDfx) != 0) {
+    if ((self->HUDfx) != 0) {
         for (int i = 0; i < self->NumHUDfx; i++) {
-            cHUDFX_update(&((sMetrixSlot17C28*)self->HUDfx)[i]);
+            cHUDFX_update(&(self->HUDfx)[i]);
         }
     }
     func_00416210(((char*)&self->ActiveFXListCache[0]), 0, 8);
     self->IsActiveFXListCacheInvalid = 1;
-    cSSXAudio_SetCurTrickPower(cAudioInterface_bxAudio(), ((sRider17C28*)self->Rider), self->CurTrickPower);
+    cSSXAudio_SetCurTrickPower(cAudioInterface_bxAudio(), (self->Rider), self->CurTrickPower);
 }
 #endif
 

@@ -1932,12 +1932,6 @@ extern float D_004A3550;
 extern "C" void func_002B4388(void* mon);
 extern "C" void SNDmastervol(signed char vol);
 
-struct sSaChan7700 {
-    float user;     // +0x0
-    float base;     // +0x4
-    float gain;     // +0x8
-    float out;      // +0xC
-};
 
 
 /**
@@ -1958,74 +1952,74 @@ extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio* self_, float volume, int ch)
 {
     cSSXAudio* self = self_;
     volume = (volume <? 1.0f) >? 0.0f;
-    sSaChan7700* currVolume = &((sSaChan7700*)&self->mSoundVolume[0])[ch];
+    tSoundVolume* currVolume = &((&self->mSoundVolume[0]))[ch];
     switch (ch) {
     case 0:
-        currVolume->user = volume;
-        currVolume->base = volume;
+        currVolume->setVolume = volume;
+        currVolume->curVolume = volume;
         break;
     case 1:
-        currVolume->user = volume;
-        currVolume->base = volume * D_004A3508;
+        currVolume->setVolume = volume;
+        currVolume->curVolume = volume * D_004A3508;
         func_002B4388((char*)self + 0x118);
         break;
     case 2:
-        currVolume->user = volume;
-        currVolume->base = volume * D_004A3510;
+        currVolume->setVolume = volume;
+        currVolume->curVolume = volume * D_004A3510;
         break;
     case 3:
-        currVolume->user = volume;
-        currVolume->base = volume * D_004A3514;
+        currVolume->setVolume = volume;
+        currVolume->curVolume = volume * D_004A3514;
         break;
     case 4:
-        currVolume->user = volume;
-        currVolume->base = volume * D_004A350C;
+        currVolume->setVolume = volume;
+        currVolume->curVolume = volume * D_004A350C;
         break;
     case 5:
-        currVolume->user = volume;
-        currVolume->base = volume * D_004A3504;
+        currVolume->setVolume = volume;
+        currVolume->curVolume = volume * D_004A3504;
         break;
     case 6:
-        currVolume->user = volume;
-        currVolume->base = volume * D_004A3518;
+        currVolume->setVolume = volume;
+        currVolume->curVolume = volume * D_004A3518;
         break;
     case 7:
-        currVolume->user = volume;
-        currVolume->base = volume * D_004A351C;
+        currVolume->setVolume = volume;
+        currVolume->curVolume = volume * D_004A351C;
         break;
     case 8:
-        currVolume->user = volume;
-        currVolume->base = volume * D_004A3520;
+        currVolume->setVolume = volume;
+        currVolume->curVolume = volume * D_004A3520;
         break;
     case 9:
-        currVolume->user = volume;
-        currVolume->base = volume * D_004A3524;
+        currVolume->setVolume = volume;
+        currVolume->curVolume = volume * D_004A3524;
         break;
     case 10:
-        currVolume->user = volume;
-        currVolume->base = volume * D_004A3528;
+        currVolume->setVolume = volume;
+        currVolume->curVolume = volume * D_004A3528;
         break;
     }
-    currVolume->gain = currVolume->base * self->mDuckLevel[ch];
-    currVolume->out = currVolume->gain * self->mMixLevel[ch];
+    currVolume->duckedVolume = currVolume->curVolume * self->mDuckLevel[ch];
+    currVolume->appliedVolume = currVolume->duckedVolume * self->mMixLevel[ch];
     switch (ch) {
     case 0:
-        SNDmastervol((int)(currVolume->out * 127.0f));
+        SNDmastervol((int)(currVolume->appliedVolume * 127.0f));
         break;
     case 1:
         func_002B4388((char*)self + 0x118);
         break;
     case 4:
-        self->unk_636C[0] = currVolume->out * D_004A352C;
-        self->unk_636C[1] = currVolume->out * D_004A3530;
-        self->unk_636C[2] = currVolume->out * D_004A3534;
-        self->unk_636C[3] = currVolume->out * D_004A3538;
-        self->unk_636C[4] = currVolume->out * D_004A353C;
-        self->unk_636C[5] = currVolume->out * D_004A3540;
-        self->unk_636C[6] = currVolume->out * D_004A3544;
-        self->unk_636C[7] = currVolume->out * D_004A3548;
-        self->unk_636C[8] = currVolume->out * D_004A354C;
-        self->unk_636C[9] = currVolume->out * D_004A3550;
+        self->unk_636C[0] = currVolume->appliedVolume * D_004A352C;
+        self->unk_636C[1] = currVolume->appliedVolume * D_004A3530;
+        self->unk_636C[2] = currVolume->appliedVolume * D_004A3534;
+        self->unk_636C[3] = currVolume->appliedVolume * D_004A3538;
+        self->unk_636C[4] = currVolume->appliedVolume * D_004A353C;
+        self->unk_636C[5] = currVolume->appliedVolume * D_004A3540;
+        self->unk_636C[6] = currVolume->appliedVolume * D_004A3544;
+        self->unk_636C[7] = currVolume->appliedVolume * D_004A3548;
+        self->unk_636C[8] = currVolume->appliedVolume * D_004A354C;
+        self->unk_636C[9] = currVolume->appliedVolume * D_004A3550;
         break;
     }
 }

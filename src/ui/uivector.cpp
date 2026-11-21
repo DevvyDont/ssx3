@@ -127,10 +127,7 @@ extern "C" void cUIVector_setUIData(cUIVector* uiVector, void* pUIBase)
 //100%
 INCLUDE_ASM("ui/uivector", cUIVector_setChannelData);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct sV3_36D0 { float x, y, z; };
 struct sUV_36D0 { float u, v; };
-struct sCol_36D0 { float r, g, b, a; };
 struct sCount_36D0 {
     unsigned int flag : 1;
     unsigned int pad1 : 1;
@@ -151,7 +148,7 @@ extern "C" void cUIThing_setChannelData(void* self, unsigned short key, float v)
  */
 extern "C" void cUIVector_setChannelData(cUIVector* self, unsigned short key, float data)
 {
-    if (((sV3_36D0*)self->mpVertexPosition) == 0) {
+    if ((self->mpVertexPosition) == 0) {
         return;
     }
     if (key >= 21) {
@@ -161,15 +158,15 @@ extern "C" void cUIVector_setChannelData(cUIVector* self, unsigned short key, fl
             return;
         }
         switch ((unsigned short)(key % 9)) {
-        case 0: ((sV3_36D0*)self->mpVertexPosition)[idx].x = data; break;
-        case 1: ((sV3_36D0*)self->mpVertexPosition)[idx].y = data; break;
-        case 2: ((sV3_36D0*)self->mpVertexPosition)[idx].z = data; break;
+        case 0: (self->mpVertexPosition)[idx].x = data; break;
+        case 1: (self->mpVertexPosition)[idx].y = data; break;
+        case 2: (self->mpVertexPosition)[idx].z = data; break;
         case 3: ((sUV_36D0*)self->mpUV)[idx].u = data; break;
         case 4: ((sUV_36D0*)self->mpUV)[idx].v = data; break;
-        case 5: ((sCol_36D0*)self->mpVertexColour)[idx].r = data; break;
-        case 6: ((sCol_36D0*)self->mpVertexColour)[idx].g = data; break;
-        case 7: ((sCol_36D0*)self->mpVertexColour)[idx].b = data; break;
-        case 8: ((sCol_36D0*)self->mpVertexColour)[idx].a = data; break;
+        case 5: (self->mpVertexColour)[idx].A = data; break;
+        case 6: (self->mpVertexColour)[idx].R = data; break;
+        case 7: (self->mpVertexColour)[idx].G = data; break;
+        case 8: (self->mpVertexColour)[idx].B = data; break;
         }
     } else {
         cUIThing_setChannelData(self, key, data);
@@ -180,9 +177,6 @@ extern "C" void cUIVector_setChannelData(cUIVector* self, unsigned short key, fl
 //100%
 INCLUDE_ASM("ui/uivector", cUIVector_setChannelDataKCP);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct sV3_3808 { float x, y, z; };
-struct sCol_3808 { float r, g, b, a; };
 struct sCount_3808 {
     unsigned int flag : 1;
     unsigned int pad1 : 1;
@@ -212,7 +206,7 @@ struct sKey_3808 {
  */
 extern "C" void cUIVector_setChannelDataKCP(cUIVector* self, unsigned int n, sKey_3808* keys)
 {
-    if (((sV3_3808*)self->mpVertexPosition) == 0) {
+    if ((self->mpVertexPosition) == 0) {
         return;
     }
     for (unsigned int i = 0; i < n; i++, keys++) {
@@ -225,13 +219,13 @@ extern "C" void cUIVector_setChannelDataKCP(cUIVector* self, unsigned int n, sKe
                 continue;
             }
             switch (key % 9) {
-            case 0: ((sV3_3808*)self->mpVertexPosition)[idx].x = data; break;
-            case 1: ((sV3_3808*)self->mpVertexPosition)[idx].y = data; break;
-            case 2: ((sV3_3808*)self->mpVertexPosition)[idx].z = data; break;
-            case 5: ((sCol_3808*)self->mpVertexColour)[idx].r = data; break;
-            case 6: ((sCol_3808*)self->mpVertexColour)[idx].g = data; break;
-            case 7: ((sCol_3808*)self->mpVertexColour)[idx].b = data; break;
-            case 8: ((sCol_3808*)self->mpVertexColour)[idx].a = data; break;
+            case 0: (self->mpVertexPosition)[idx].x = data; break;
+            case 1: (self->mpVertexPosition)[idx].y = data; break;
+            case 2: (self->mpVertexPosition)[idx].z = data; break;
+            case 5: (self->mpVertexColour)[idx].A = data; break;
+            case 6: (self->mpVertexColour)[idx].R = data; break;
+            case 7: (self->mpVertexColour)[idx].G = data; break;
+            case 8: (self->mpVertexColour)[idx].B = data; break;
             }
         } else {
             switch (key) {

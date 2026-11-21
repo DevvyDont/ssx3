@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/objnode.h"
 #include "object/bucketman.h"
 
 
@@ -174,11 +175,6 @@ struct sSortNode_4C98 {
     sSortVE_4C98* vt;       // 0xC
 };
 
-struct sSortLink_4C98 {
-    int field_0x0;
-    sSortNode_4C98* prev;   // 0x4
-    sSortNode_4C98* next;   // 0x8
-};
 
 
 /**
@@ -223,10 +219,10 @@ extern "C" void cBucketMan_mergeBucket(cBucketMan* self, int index)
             }
         }
         if (other == 0) {
-            n->prev = (*(sSortLink_4C98*)&((tBucketHeader*)((char*)self->Buckets))[index].Head).prev;
-            (*(sSortLink_4C98*)&((tBucketHeader*)((char*)self->Buckets))[index].Head).prev->next = n;
+            n->prev = ((sSortNode_4C98*)(*(&((tBucketHeader*)((char*)self->Buckets))[index].Head)).Next);
+            ((sSortNode_4C98*)(*(&((tBucketHeader*)((char*)self->Buckets))[index].Head)).Next)->next = n;
             n->next = (sSortNode_4C98*)(((char*)self->Buckets) + index * 0x44 + 0x4);
-            (*(sSortLink_4C98*)&((tBucketHeader*)((char*)self->Buckets))[index].Head).prev = n;
+            (*(sSortNode_4C98**)&(*(&((tBucketHeader*)((char*)self->Buckets))[index].Head)).Next) = n;
         }
         n = nextN;
     }

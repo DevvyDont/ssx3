@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "object/flagset.h"
 #include "object/flagnode.h"
 #include "object/springrailnode.h"
@@ -450,9 +451,6 @@ struct sFrV4_92A8 {
     const float& operator[](int i) const { return (&x)[i]; }
 } __attribute__((aligned(16)));
 
-struct sFrM4_92A8 {
-    sFrV4_92A8 r[4];
-};
 
 struct sFrElem_92A8 {
     char pad_0x00[0x20];
@@ -517,22 +515,22 @@ static inline void set4_92A8(sFrV4_92A8& r, float x, float y, float z, float w)
 }
 
 // Spline basis matrix for control points a, b, c, d.
-static inline void updateMat_92A8(sFrM4_92A8& out, const sFrV4_92A8& a, const sFrV4_92A8& b, const sFrV4_92A8& c, const sFrV4_92A8& d)
+static inline void updateMat_92A8(t4Matrix& out, const sFrV4_92A8& a, const sFrV4_92A8& b, const sFrV4_92A8& c, const sFrV4_92A8& d)
 {
-    sFrM4_92A8 L;
+    t4Matrix L;
     sFrV4_92A8 v;
-    set4_92A8(L.r[1], a[0], b[0], c[0], d[0]);
-    vu0BasisMul_92A8(L.r[2], L.r[1], D_004FFAC0);
-    L.r[0] = L.r[2];
-    set4_92A8(L.r[2], a[1], b[1], c[1], d[1]);
-    vu0BasisMul_92A8(L.r[3], L.r[2], D_004FFAC0);
-    L.r[1] = L.r[3];
-    set4_92A8(L.r[3], a[2], b[2], c[2], d[2]);
-    vu0BasisMul_92A8(v, L.r[3], D_004FFAC0);
-    L.r[2] = v;
-    out.r[0] = L.r[0]; out.r[1] = L.r[1]; out.r[2] = L.r[2];
-    L.r[3].x = 0.0f; L.r[3].y = 0.0f; L.r[3].z = 0.0f; L.r[3].w = 1.0f;
-    out.r[3] = L.r[3];
+    set4_92A8(((sFrV4_92A8*)&L.row[0])[1], a[0], b[0], c[0], d[0]);
+    vu0BasisMul_92A8(((sFrV4_92A8*)&L.row[0])[2], ((sFrV4_92A8*)&L.row[0])[1], D_004FFAC0);
+    ((sFrV4_92A8*)&L.row[0])[0] = ((sFrV4_92A8*)&L.row[0])[2];
+    set4_92A8(((sFrV4_92A8*)&L.row[0])[2], a[1], b[1], c[1], d[1]);
+    vu0BasisMul_92A8(((sFrV4_92A8*)&L.row[0])[3], ((sFrV4_92A8*)&L.row[0])[2], D_004FFAC0);
+    ((sFrV4_92A8*)&L.row[0])[1] = ((sFrV4_92A8*)&L.row[0])[3];
+    set4_92A8(((sFrV4_92A8*)&L.row[0])[3], a[2], b[2], c[2], d[2]);
+    vu0BasisMul_92A8(v, ((sFrV4_92A8*)&L.row[0])[3], D_004FFAC0);
+    ((sFrV4_92A8*)&L.row[0])[2] = v;
+    ((sFrV4_92A8*)&out.row[0])[0] = ((sFrV4_92A8*)&L.row[0])[0]; ((sFrV4_92A8*)&out.row[0])[1] = ((sFrV4_92A8*)&L.row[0])[1]; ((sFrV4_92A8*)&out.row[0])[2] = ((sFrV4_92A8*)&L.row[0])[2];
+    ((sFrV4_92A8*)&L.row[0])[3].x = 0.0f; ((sFrV4_92A8*)&L.row[0])[3].y = 0.0f; ((sFrV4_92A8*)&L.row[0])[3].z = 0.0f; ((sFrV4_92A8*)&L.row[0])[3].w = 1.0f;
+    ((sFrV4_92A8*)&out.row[0])[3] = ((sFrV4_92A8*)&L.row[0])[3];
     MMI_TRANSPOSE4(&out);
 }
 
@@ -551,11 +549,11 @@ extern "C" void cFloatRailNode_updateMats(cFloatRailNode* selfv)
 {
     cFloatRailNode* self = selfv;
     int i = 1;
-    updateMat_92A8(((sFrM4_92A8*)self->Mats)[0], ((sFrElem_92A8*)self->Nodes)[0].pos, ((sFrElem_92A8*)self->Nodes)[0].pos, ((sFrElem_92A8*)self->Nodes)[1].pos, ((sFrElem_92A8*)self->Nodes)[2].pos);
+    updateMat_92A8((self->Mats)[0], ((sFrElem_92A8*)self->Nodes)[0].pos, ((sFrElem_92A8*)self->Nodes)[0].pos, ((sFrElem_92A8*)self->Nodes)[1].pos, ((sFrElem_92A8*)self->Nodes)[2].pos);
     for (; i < self->NumNodes - 2; i++) {
-        updateMat_92A8(((sFrM4_92A8*)self->Mats)[i], ((sFrElem_92A8*)self->Nodes)[i - 1].pos, ((sFrElem_92A8*)self->Nodes)[i].pos, ((sFrElem_92A8*)self->Nodes)[i + 1].pos, ((sFrElem_92A8*)self->Nodes)[i + 2].pos);
+        updateMat_92A8((self->Mats)[i], ((sFrElem_92A8*)self->Nodes)[i - 1].pos, ((sFrElem_92A8*)self->Nodes)[i].pos, ((sFrElem_92A8*)self->Nodes)[i + 1].pos, ((sFrElem_92A8*)self->Nodes)[i + 2].pos);
     }
-    updateMat_92A8(((sFrM4_92A8*)self->Mats)[i], ((sFrElem_92A8*)self->Nodes)[i - 1].pos, ((sFrElem_92A8*)self->Nodes)[i].pos, ((sFrElem_92A8*)self->Nodes)[i + 1].pos, ((sFrElem_92A8*)self->Nodes)[i + 1].pos);
+    updateMat_92A8((self->Mats)[i], ((sFrElem_92A8*)self->Nodes)[i - 1].pos, ((sFrElem_92A8*)self->Nodes)[i].pos, ((sFrElem_92A8*)self->Nodes)[i + 1].pos, ((sFrElem_92A8*)self->Nodes)[i + 1].pos);
 }
 #endif
 

@@ -47,15 +47,6 @@ struct sAnimDef_E448 {
     sAnimEntry_E448* entries;   // 0x8
 };
 
-struct sAnimNode_E448 {
-    char pad_0x0[0x2C];
-    char* res;                  // 0x2C
-    char pad_0x30[0x10];
-    int numMeshes;              // 0x40
-    int pad_0x44;
-    sMeshInst_E448* meshes;     // 0x48
-    sMeshRef_E448* refs;        // 0x4C
-};
 
 /**
  * Allocates an animation node's per-mesh caches: one cMeshAnimFrame per animated mesh and one tMeshVelocity
@@ -66,29 +57,29 @@ struct sAnimNode_E448 {
  * (tag "IntersectInfo"; 0 when none) and MeshVelocity (+0x4C) one 0x20-byte entry per mesh ("MeshVelocity");
  * each animated mesh's frame is then pointed at its record (cAnimFrame_setAnimRecord).
  */
-extern "C" void cAnimNode_setAnimMeshCache(sAnimNode_E448* self)
+extern "C" void cAnimNode_setAnimMeshCache(cAnimNode* self)
 {
-    sAnimDef_E448* def = *(sAnimDef_E448**)(self->res + 0x80);
+    sAnimDef_E448* def = *(sAnimDef_E448**)(((char*)self->Instance) + 0x80);
     sAnimEntry_E448* entry = def->entries;
     int i;
-    self->numMeshes = 0;
+    self->NumAnimMeshes = 0;
     for (i = 0; i < def->count; i++, entry++) {
         if (entry->src != 0)
-            self->numMeshes++;
+            self->NumAnimMeshes++;
     }
-    if (self->numMeshes != 0) {
-        sMeshInst_E448*& meshes = self->meshes;
-        meshes = new (str_IntersectInfo, 0x20000000, 0) sMeshInst_E448[self->numMeshes];
+    if (self->NumAnimMeshes != 0) {
+        sMeshInst_E448*& meshes = ((sMeshInst_E448*)self->AnimFrames);
+        meshes = new (str_IntersectInfo, 0x20000000, 0) sMeshInst_E448[self->NumAnimMeshes];
     } else {
-        self->meshes = 0;
+        *(sMeshInst_E448**)&self->AnimFrames = 0;
     }
-    sMeshRef_E448*& refs = self->refs;
+    sMeshRef_E448*& refs = ((sMeshRef_E448*)self->MeshVelocity);
     refs = new (str_MeshVelocity, 0x20000000, 0) sMeshRef_E448[def->count];
     entry = def->entries;
     int k = 0;
     for (i = 0; i < def->count; i++, entry++) {
         if (entry->src != 0) {
-            cAnimFrame_setAnimRecord(&self->meshes[k++], entry->src);
+            cAnimFrame_setAnimRecord(&((sMeshInst_E448*)self->AnimFrames)[k++], entry->src);
         }
     }
 }

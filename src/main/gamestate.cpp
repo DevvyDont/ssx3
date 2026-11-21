@@ -2401,21 +2401,13 @@ struct sRec_237140 {
     char pad[0x60];
 };
 
-struct sEntry_237140 {
-    sRec_237140* recs;
-    int f4;
-    int f8;
-    int fC;
-    int* f10;
-    void* f14;
-};
 
 struct sOwner_237140 {
     int f0;
     int count;
     int pad8[2];
     int n;
-    sEntry_237140 entries[1];
+    cInputSync_SyncedPad entries[1];
 };
 
 static inline void* initObj_237140(void* o, int a, int b)
@@ -2437,19 +2429,19 @@ static inline void* initObj_237140(void* o, int a, int b)
  */
 extern "C" void* cInputSync_createlocalinput(cInputSync* self, int* realinput)
 {
-    sEntry_237140* syncedPad = &((sEntry_237140*)&self->syncedpads[0])[self->numsyncedpads++];
-    syncedPad->recs = (sRec_237140*)operator_new_tag(self->latency * 100, str_InputSamples, 0, 0);
-    MEM_fill(syncedPad->recs, 0, self->latency * 100);
+    cInputSync_SyncedPad* syncedPad = &((&self->syncedpads[0]))[self->numsyncedpads++];
+    *(sRec_237140**)&syncedPad->samples = (sRec_237140*)operator_new_tag(self->latency * 100, str_InputSamples, 0, 0);
+    MEM_fill(((sRec_237140*)syncedPad->samples), 0, self->latency * 100);
     for (int i = 0; i < self->latency; i++) {
-        syncedPad->recs[i].type = 0x18;
+        ((sRec_237140*)syncedPad->samples)[i].type = 0x18;
     }
-    syncedPad->f4 = 0;
-    syncedPad->f8 = self->sendlimit;
-    syncedPad->fC = realinput[0];
-    syncedPad->f10 = (int*)cMemMan_alloc(676, str_SyncedPad, 0, 0);
-    *syncedPad->f10 = 0;
-    void* syncedInput = initObj_237140(cMemMan_alloc(8, str_SyncedInput, 0, 0), (int)syncedPad->f10, realinput[1]);
-    syncedPad->f14 = syncedInput;
+    syncedPad->readpos = 0;
+    syncedPad->writepos = self->sendlimit;
+    *(int*)&syncedPad->sourcepad = realinput[0];
+    *(int**)&syncedPad->destinationpad = (int*)cMemMan_alloc(676, str_SyncedPad, 0, 0);
+    *((int*)syncedPad->destinationpad) = 0;
+    void* syncedInput = initObj_237140(cMemMan_alloc(8, str_SyncedInput, 0, 0), (int)((int*)syncedPad->destinationpad), realinput[1]);
+    *(void**)&syncedPad->input = syncedInput;
     return syncedInput;
 }
 #endif
@@ -2473,21 +2465,13 @@ struct sRec_237280 {
     char pad[0x60];
 };
 
-struct sEntry_237280 {
-    sRec_237280* recs;
-    int f4;
-    int f8;
-    int fC;
-    int* f10;
-    void* f14;
-};
 
 struct sOwner_237280 {
     int f0;
     int count;
     int pad8[2];
     int n;
-    sEntry_237280 entries[1];
+    cInputSync_SyncedPad entries[1];
 };
 
 static inline void* initObj_237280(void* o, int a, int b)
@@ -2508,19 +2492,19 @@ static inline void* initObj_237280(void* o, int a, int b)
  */
 extern "C" void* cInputSync_createremoteinput(cInputSync* self, int realinputmap)
 {
-    sEntry_237280* syncedPad = &((sEntry_237280*)&self->syncedpads[0])[self->numsyncedpads++];
-    syncedPad->recs = (sRec_237280*)operator_new_tag(self->latency * 100, str_InputSamples, 0, 0);
-    MEM_fill(syncedPad->recs, 0, self->latency * 100);
+    cInputSync_SyncedPad* syncedPad = &((&self->syncedpads[0]))[self->numsyncedpads++];
+    *(sRec_237280**)&syncedPad->samples = (sRec_237280*)operator_new_tag(self->latency * 100, str_InputSamples, 0, 0);
+    MEM_fill(((sRec_237280*)syncedPad->samples), 0, self->latency * 100);
     for (int i = 0; i < self->latency; i++) {
-        syncedPad->recs[i].type = 0x18;
+        ((sRec_237280*)syncedPad->samples)[i].type = 0x18;
     }
-    syncedPad->f4 = 0;
-    syncedPad->f8 = self->sendlimit;
-    syncedPad->fC = 0;
-    syncedPad->f10 = (int*)cMemMan_alloc(676, str_SyncedPad, 0, 0);
-    *syncedPad->f10 = 0;
-    void* syncedInput = initObj_237280(cMemMan_alloc(8, str_SyncedInput, 0, 0), (int)syncedPad->f10, realinputmap);
-    syncedPad->f14 = syncedInput;
+    syncedPad->readpos = 0;
+    syncedPad->writepos = self->sendlimit;
+    *(int*)&syncedPad->sourcepad = 0;
+    *(int**)&syncedPad->destinationpad = (int*)cMemMan_alloc(676, str_SyncedPad, 0, 0);
+    *((int*)syncedPad->destinationpad) = 0;
+    void* syncedInput = initObj_237280(cMemMan_alloc(8, str_SyncedInput, 0, 0), (int)((int*)syncedPad->destinationpad), realinputmap);
+    *(void**)&syncedPad->input = syncedInput;
     return syncedInput;
 }
 #endif
@@ -2545,11 +2529,6 @@ extern "C" float cGameComm_getLatency(void* self);
 // cGameComm::mGameComm through On Tour's GameComm() accessor.
 static inline char* GameComm() { return (char*)cGameComm_mGameComm; }
 
-// cInputSync::PadSample (On Tour, size 0x64).
-struct PadSample_2373B8 {
-    int NumButtons;
-    float Buttons[24];
-};
 
 // cInputSync::CompressedSample (SSX 3 layout: no PlayerID byte, size 0x1C).
 struct CompressedSample_2373B8 {
@@ -2592,7 +2571,7 @@ struct cInputSync_2373B8 {
  */
 extern "C" void cInputSync_preupdate(cInputSync* self)
 {
-    PadSample_2373B8 sample;
+    cInputSync_PadSample sample;
     CompressedSample_2373B8 compsample;
     if (*(int*)(GameComm() + 0x70) < 14) {
         return;
@@ -2608,7 +2587,7 @@ extern "C" void cInputSync_preupdate(cInputSync* self)
                        cGameComm_readPacket(GameComm(), 0, &compsample, sizeof(compsample))) {
                     cInputSync_decompressinput(self, (sPackSrc_7B28*)&sample, (char*)&compsample);
                     for (int j = 0; j < self->numsamples; j++) {
-                        ((PadSample_2373B8*)sp.samples)[sp.writepos % self->latency] = sample;
+                        (sp.samples)[sp.writepos % self->latency] = sample;
                         sp.writepos++;
                     }
                 }
@@ -2618,7 +2597,7 @@ extern "C" void cInputSync_preupdate(cInputSync* self)
                 cInputSync_decompressinput(self, (sPackSrc_7B28*)&sample, (char*)&compsample);
                 while (sp.writepos - sp.readpos < self->latency - (self->numsamples - 1)) {
                     for (int j = 0; j < self->numsamples; j++) {
-                        ((PadSample_2373B8*)sp.samples)[sp.writepos % self->latency] = sample;
+                        (sp.samples)[sp.writepos % self->latency] = sample;
                         sp.writepos++;
                     }
                 }
@@ -2626,14 +2605,14 @@ extern "C" void cInputSync_preupdate(cInputSync* self)
         } else if (sp.writepos - sp.readpos < self->sendlimit - (self->numsamples - 1)) {
             self->tick++;
             if (self->tick % self->numsamples == 0) {
-                PadSample_2373B8 localsample;
+                cInputSync_PadSample localsample;
                 localsample.NumButtons = ((cInputPad_2373B8*)sp.sourcepad)->getNumButtons();
                 for (int j = 0; j < localsample.NumButtons; j++) {
                     localsample.Buttons[j] = ((cInputPad_2373B8*)sp.sourcepad)->getButtonValue(j);
                 }
                 cInputSync_sendClientInput(self, (sPackSrc_7B28*)&localsample);
                 for (int j = 0; j < self->numsamples; j++) {
-                    ((PadSample_2373B8*)sp.samples)[sp.writepos % self->latency] = localsample;
+                    (sp.samples)[sp.writepos % self->latency] = localsample;
                     sp.writepos++;
                 }
                 int n = (int)(cGameComm_getLatency(GameComm()) / *(float*)((char*)SSXApp + 0x14));
@@ -2664,16 +2643,10 @@ void cInputSync_postupdate(void* self)
 //100%
 INCLUDE_ASM("main/gamestate", cInputSync_aiinputready);
 #ifdef SKIP_ASM
-struct sSlot237950 {
-    int f0;
-    int cur;
-    int max;
-    int pad[3];
-};
 struct sOwner237950 {
     char pad[0x10];
     int count;
-    sSlot237950 slots[1];
+    cInputSync_SyncedPad slots[1];
 };
 
 /**
@@ -2696,8 +2669,8 @@ extern "C" int cInputSync_aiinputready(cInputSync* self)
     }
     int i;
     for (i = 0; i < self->numsyncedpads; i++) {
-        sSlot237950* slot = &((sSlot237950*)&self->syncedpads[0])[i];
-        if (slot->cur == slot->max) {
+        cInputSync_SyncedPad* slot = &((&self->syncedpads[0]))[i];
+        if (slot->readpos == slot->writepos) {
             return 0;
         }
     }
@@ -2714,21 +2687,13 @@ struct sFrame002379C8 {
     int first;
     char data[0x60];
 };
-struct sTrack002379C8 {
-    sFrame002379C8* frames;
-    int cur;
-    int f8;
-    int fC;
-    void* target;
-    int f14;
-};
 struct sPlayer002379C8 {
     int f0;
     int nFrames;
     int f8;
     int fC;
     int count;
-    sTrack002379C8 tracks[1];
+    cInputSync_SyncedPad tracks[1];
 };
 
 /**
@@ -2749,10 +2714,10 @@ extern "C" int cInputSync_aiupdate(cInputSync* self)
     }
     int i;
     for (i = 0; i < self->numsyncedpads; i++) {
-        sTrack002379C8* syncedPad = &((sTrack002379C8*)&self->syncedpads[0])[i];
-        sFrame002379C8* inputSample = &syncedPad->frames[syncedPad->cur % self->latency];
-        cInputPad_update(syncedPad->target, inputSample->first, inputSample->data);
-        syncedPad->cur++;
+        cInputSync_SyncedPad* syncedPad = &((&self->syncedpads[0]))[i];
+        sFrame002379C8* inputSample = &((sFrame002379C8*)syncedPad->samples)[syncedPad->readpos % self->latency];
+        cInputPad_update(((void*)syncedPad->destinationpad), inputSample->first, inputSample->data);
+        syncedPad->readpos++;
     }
     return 1;
 }

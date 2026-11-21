@@ -13,11 +13,6 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern char cScriptSoundBankManager_vtbl[];
 extern const char str_tScriptSoundBankInfo[];
 
-struct sScSndBank3450 {
-    int id;         // 0x0
-    int index;      // 0x4
-    int a;          // 0x8
-};
 
 
 /**
@@ -37,12 +32,12 @@ extern "C" cScriptSoundBankManager* cScriptSoundBankManager_cScriptSoundBankMana
     *(void**)&self->mVtbl = cScriptSoundBankManager_vtbl;
     self->mMemFlags = flags;
     self->mMaxBanks = count;
-    *(sScSndBank3450**)&self->mpBankInfo = (sScSndBank3450*)operator_new_tag(count * sizeof(sScSndBank3450), str_tScriptSoundBankInfo, flags, 0);
+    *(tScriptSoundBankInfo**)&self->mpBankInfo = (tScriptSoundBankInfo*)operator_new_tag(count * sizeof(tScriptSoundBankInfo), str_tScriptSoundBankInfo, flags, 0);
     int idx = base;
     for (int i = 0; i < self->mMaxBanks; i++) {
-        ((sScSndBank3450*)self->mpBankInfo)[i].id = -1;
-        ((sScSndBank3450*)self->mpBankInfo)[i].index = idx++;
-        ((sScSndBank3450*)self->mpBankInfo)[i].a = 0;
+        (self->mpBankInfo)[i].userID = -1;
+        (self->mpBankInfo)[i].bankNum = idx++;
+        (*(int*)&(self->mpBankInfo)[i].pData) = 0;
     }
     return self;
 }
@@ -145,16 +140,11 @@ extern "C" void cScriptSoundBankManager_UnlinkBank1(cScriptSoundBankManager* sel
 //100%
 INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_UnlinkBanksAll);
 #ifdef SKIP_ASM
-struct sDmEntry283658 {
-    char pad_0x00[0x8];
-    int used;
-    
-};
 
 struct sDmVEntry283658 {
     short delta;
     short index;
-    void (*fn)(void*, sDmEntry283658*);
+    void (*fn)(void*, tScriptSoundBankInfo*);
 };
 
 
@@ -171,8 +161,8 @@ extern "C" void cScriptSoundBankManager_UnlinkBanksAll(cScriptSoundBankManager* 
     cScriptSoundBankManager* self = self_;
     int i;
     for (i = 0; i < self->mMaxBanks; i++) {
-        if (((sDmEntry283658*)self->mpBankInfo)[i].used != 0) {
-            ((sDmVEntry283658*)self->mVtbl)[2].fn((char*)self + ((sDmVEntry283658*)self->mVtbl)[2].delta, &((sDmEntry283658*)self->mpBankInfo)[i]);
+        if (((int)(self->mpBankInfo)[i].pData) != 0) {
+            ((sDmVEntry283658*)self->mVtbl)[2].fn((char*)self + ((sDmVEntry283658*)self->mVtbl)[2].delta, &(self->mpBankInfo)[i]);
         }
     }
 }

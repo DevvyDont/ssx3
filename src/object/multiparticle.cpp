@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "object/animdeltanode.h"
 #include "object/railmannode.h"
 #include "object/animcombonode.h"
@@ -133,12 +134,6 @@ extern "C" void cMultiParticle_addInst(sParticleList* list, int item)
 //100%
 INCLUDE_ASM("object/multiparticle", cMultiParticle_remInst);
 #ifdef SKIP_ASM
-struct sMoveList_81F0 {
-    int field_0x0;          // 0x0
-    int count;              // 0x4
-    int field_0x8;          // 0x8
-    unsigned int* entries;  // 0xC
-};
 
 /**
  * Removes an instance id from a multi-particle system.
@@ -149,18 +144,18 @@ struct sMoveList_81F0 {
  * @param key  instance id to remove
  */
 // Removes the first entry equal to key, filling the hole with the last entry.
-extern "C" void cMultiParticle_remInst(sMoveList_81F0* self, unsigned int key)
+extern "C" void cMultiParticle_remInst(cMultiParticle* self, unsigned int key)
 {
     int i;
-    for (i = 0; i < self->count; i++) {
-        if (self->entries[i] == key) {
-            self->count--;
+    for (i = 0; i < self->NumInst; i++) {
+        if (((unsigned int*)self->InstIds)[i] == key) {
+            self->NumInst--;
             // the do/while(0) wrapper (a compiled-out macro block) is needed to match register allocation
             do {
-                if (i < self->count) {
-                    self->entries[i] = self->entries[self->count];
+                if (i < self->NumInst) {
+                    ((unsigned int*)self->InstIds)[i] = ((unsigned int*)self->InstIds)[self->NumInst];
                 } else {
-                    self->entries[i] = 0xFFFFFFFF;
+                    ((unsigned int*)self->InstIds)[i] = 0xFFFFFFFF;
                 }
                 return;
             } while (0);
@@ -254,16 +249,6 @@ static inline sMPVec4 vu0Add58260(const sMPVec4& a, const sMPVec4& b)
     return r;
 }
 
-struct sMultiPart58260 {
-    void* owner;            // 0x0
-    int count;              // 0x4
-    void* data;             // 0x8
-    sMPModelRef* refs;      // 0xC
-    void* desc;             // 0x10
-    char pad_0x14[0xC];
-    sMPBox box;             // 0x20
-    sMPVec4 center;         // 0x40
-};
 
 /**
  * Draws the multi-particle effect once at each loaded instance it is attached to.
@@ -272,15 +257,15 @@ struct sMultiPart58260 {
  * cStaticEmitter_render() with BoundBox (+0x20) moved by the record's position (record +0x40), drawing at
  * that position plus Offset (+0x40).
  */
-extern "C" void cMultiParticle_render(sMultiPart58260* self)
+extern "C" void cMultiParticle_render(cMultiParticle* self)
 {
-    for (int i = 0; i < self->count; i++) {
-        sMPModel* model = (sMPModel*)self->refs[i].get(*cObjectInterface_getWorld());
+    for (int i = 0; i < self->NumInst; i++) {
+        sMPModel* model = (sMPModel*)((sMPModelRef*)self->InstIds)[i].get(*cObjectInterface_getWorld());
         if (model != 0) {
-            sMPBox bounds = self->box;
+            sMPBox bounds = *(sMPBox*)&self->BoundBox;
             vu0AddTo58260(bounds.min, model->pos);
             vu0AddTo58260(bounds.max, model->pos);
-            cStaticEmitter_render(self->desc, &bounds, vu0Add58260(model->getPos(), self->center));
+            cStaticEmitter_render(((void*)self->Emitter), &bounds, vu0Add58260(model->getPos(), *(sMPVec4*)&self->Offset));
         }
     }
 }
@@ -1198,9 +1183,6 @@ static inline void vu0CopyMatrix_9030(void* dst, void* src)
         : "memory");
 }
 
-struct sMtx_9030 {
-    float m[16];
-};
 
 
 /**
@@ -1224,7 +1206,7 @@ extern "C" void cAnimComboNode_setComboXform(cAnimComboNode* vself)
     for (int i = 0; i < model->count; i++, part++) {
         if (part->info != 0) {
             sMpNode_9030* node = (sMpNode_9030*)((char*)self + 0x34);
-            vu0CopyMatrix_9030(&((sMtx_9030*)self->ComboXform)[n], node->items[n].mtx);
+            vu0CopyMatrix_9030(&(self->ComboXform)[n], node->items[n].mtx);
             n++;
         }
     }
@@ -1309,19 +1291,6 @@ struct sMpInst_9140 {
     sMpModel_9140* model;   // 0x80
 };
 
-struct sMp_9140 {
-    char pad_0x0[0x14];
-    signed char f14;        // 0x14
-    signed char f15;        // 0x15
-    signed char f16;        // 0x16
-    signed char f17;        // 0x17
-    char pad_0x18[0x48];
-    sMpInst_9140* inst;     // 0x60
-    char pad_0x64[0x18];
-    sMpItem_9140* items;    // 0x7C
-    int field_0x80;
-    sMpMtx_9140* mtx;       // 0x84
-};
 
 extern "C" void cAnimNode_cacheFrame(void* self);
 extern "C" void cMeshAnimFrame_transform(sMpItem_9140* item, sMpMtx_9140* mtx);
@@ -1333,26 +1302,26 @@ extern "C" void cMeshAnimFrame_transform(sMpItem_9140* item, sMpMtx_9140* mtx);
  * (+0x14 set, or both +0x17 and +0x15 set), each mesh of the instance's model (+0x60, model +0x80) that has an
  * animation (part info +0x1C) gets its frame transformed by the next ComboXform matrix (+0x84) with cMeshAnimFrame_transform.
  */
-extern "C" void cAnimComboNode_cacheFrame(sMp_9140* self)
+extern "C" void cAnimComboNode_cacheFrame(cAnimComboNode* self)
 {
     cAnimNode_cacheFrame((char*)self + 0x34);
-    if (self->items == 0) {
+    if (((sMpItem_9140*)self->AnimFrames) == 0) {
         return;
     }
-    if (self->f14 == 0) {
-        if (self->f17 == 0) {
+    if (*(signed char*)&self->AnimActive2 == 0) {
+        if (*(signed char*)&self->StopInPlace == 0) {
             return;
         }
-        if (self->f15 == 0) {
+        if (*(signed char*)&self->AnimComplete2 == 0) {
             return;
         }
     }
-    sMpModel_9140* model = self->inst->model;
+    sMpModel_9140* model = ((sMpInst_9140*)self->Instance)->model;
     int n = 0;
     sMpPart_9140* meshPart = model->parts;
     for (int i = 0; i < model->count; i++, meshPart++) {
         if (meshPart->info->active != 0) {
-            cMeshAnimFrame_transform(&self->items[n], (sMpMtx_9140*)((char*)self->mtx + (n << 6)));
+            cMeshAnimFrame_transform(&((sMpItem_9140*)self->AnimFrames)[n], (sMpMtx_9140*)((char*)((sMpMtx_9140*)self->ComboXform) + (n << 6)));
             n++;
         }
     }

@@ -2939,14 +2939,6 @@ cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cM
 
 extern void* cCommandMenuItem_vtbl[];
 
-struct s2CCF08Item {
-    char pad_0x00[0x10];
-    void* vtable;    // 0x10
-    int field_0x14;
-    int field_0x18;
-    int field_0x1C;
-    int field_0x20;
-};
 
 /**
  * Constructs an empty command item: ID -1, no caption (+0x14), state text (+0x18), argument (+0x1C) or data (+0x20).
@@ -2956,7 +2948,7 @@ struct s2CCF08Item {
  *
  * @return @p self
  */
-extern "C" s2CCF08Item* cCommandMenuItem_cCommandMenuItem(cCommandMenuItem* self)
+extern "C" cCommandMenuItem* cCommandMenuItem_cCommandMenuItem(cCommandMenuItem* self)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     self->Caption = 0;
@@ -2964,7 +2956,7 @@ extern "C" s2CCF08Item* cCommandMenuItem_cCommandMenuItem(cCommandMenuItem* self
     self->CmdArg = 0;
     self->Data = 0;
     self->State = 0;
-    return ((s2CCF08Item*)self);
+    return (self);
 }
 #endif
 

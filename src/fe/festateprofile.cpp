@@ -1068,34 +1068,6 @@ struct sVEntryVK18FD90 {
 #define VCALL_K18FD90(obj, off, idx) (*(sVEntryK18FD90**)((char*)(obj) + (off)))[idx].fn((char*)(obj) + (*(sVEntryK18FD90**)((char*)(obj) + (off)))[idx].delta
 
 
-struct sProfileK18FD90 {
-    int f0;                  // 0x0
-    int f4;                  // 0x4
-    void* vtbl;              // 0x8
-    int fC;                  // 0xC
-    void* engine;            // 0x10
-    unsigned char f14;       // 0x14
-    unsigned char f15;       // 0x15
-    char pad16[0x40 - 0x16];
-    char* screen;            // 0x40
-    char pad44[0x19C - 0x44];
-    int f19C;                // 0x19C
-    int f1A0;                // 0x1A0
-    char* keyboard;          // 0x1A4
-    int f1A8;                // 0x1A8
-    char pad1AC[0x1C0 - 0x1AC];
-    int state;               // 0x1C0
-    int f1C4;                // 0x1C4
-    int f1C8;                // 0x1C8
-    int slot;                // 0x1CC
-    char pad1D0[0x1E4 - 0x1D0];
-    int f1E4;                // 0x1E4
-    char pad1E8[0x214 - 0x1E8];
-    int f214;                // 0x214
-    char pad218[0x220 - 0x218];
-    int f220;                // 0x220
-    int f224;                // 0x224
-};
 
 struct sMgrK18FD90 {
     char pad0[0xF8];
@@ -1140,21 +1112,21 @@ static inline void* GetText_K18FD90(char* key)
  */
 extern "C" void cFEStateProfileLoad_onWidgetEvent(cFEStateProfileLoad* vself, cUIThing* item, int event)
 {
-    sProfileK18FD90* self = (sProfileK18FD90*)vself;
+    cFEStateProfileLoad* self = vself;
     switch (event) {
     case 13: {
         char buf[0x70];
         char fmt[0x70];
-        char* name = self->keyboard + 0x74;
+        char* name = ((char*)self->mpKeyboard) + 0x74;
         char* mp = (char*)cSSXApp_getMCManager(SSXApp);
         char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
         if (strlen(name) != 0) {
-            cBENewPlayerInterface_setPlayerName(player, self->slot, name);
+            cBENewPlayerInterface_setPlayerName(player, self->mPlayerIdx, name);
             func_002C2540(mp + 0x276, name);
         } else {
             strcpy2(fmt, GetText_K18FD90(str_kT_MEMPlayerName_b));
-            sprintf(buf, fmt, self->slot + 1);
-            cBENewPlayerInterface_setPlayerName(player, self->slot, buf);
+            sprintf(buf, fmt, self->mPlayerIdx + 1);
+            cBENewPlayerInterface_setPlayerName(player, self->mPlayerIdx, buf);
             func_002C2540(mp + 0x276, buf);
         }
         VCALLV_K18FD90(player, 0xC, 1));
@@ -1163,44 +1135,44 @@ extern "C" void cFEStateProfileLoad_onWidgetEvent(cFEStateProfileLoad* vself, cU
     }
     case 5: {
         if (((char*)item) == 0) break;
-        if (self->f1A8 != 0) break;
+        if (self->mIsProcessing != 0) break;
         char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-        if (self->f214 != 3) break;
-        ((sMgrK18FD90*)mp)->fF8 = self->f1C4 = item->mMiscData;
+        if (self->mScreenStatus != 3) break;
+        ((sMgrK18FD90*)mp)->fF8 = self->mSlot = item->mMiscData;
         switch (cFEStateProfileLoad_mScreenAction) {
         case 1:
         case 3:
-            if (self->state == 1 && self->f224 != 0) {
-                if (self->keyboard == 0) {
-                    char* kb = (char*)cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(1092, str_Keyboard, 0x100, 0), self->engine, vself, 0, self->f15);
-                    self->keyboard = kb;
+            if (self->mState == 1 && self->mMainButtonActive != 0) {
+                if (((char*)self->mpKeyboard) == 0) {
+                    char* kb = (char*)cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(1092, str_Keyboard, 0x100, 0), ((void*)self->mpEngine), vself, 0, self->mCtrlBits);
+                    *(char**)&self->mpKeyboard = kb;
                     *(int*)(kb + 0x140) = 55;
-                    cKeyboardPopup_setMaxCharacters(self->keyboard, 8);
-                    cKeyboardPopup_setIncludeKey(self->keyboard, 75, 1, 2);
-                    *(int*)(self->keyboard + 0x58) = 1;
-                    cKeyboardPopup_setDisableShiftNumbers(self->keyboard, 1);
-                    cKeyboardPopup_setIncludeKey(self->keyboard, 0xE, 0, 2);
-                    cKeyboardPopup_setIncludeKey(self->keyboard, 39, 0, 2);
-                    cKeyboardPopup_setIncludeKey(self->keyboard, 40, 0, 2);
-                    cKeyboardPopup_setIncludeKey(self->keyboard, 52, 0, 2);
-                    cKeyboardPopup_setIncludeKey(self->keyboard, 26, 0, 2);
-                    cKeyboardPopup_setIncludeKey(self->keyboard, 25, 0, 2);
-                    cKeyboardPopup_setIncludeKey(self->keyboard, 53, 0, 2);
-                    cKeyboardPopup_setIncludeKey(self->keyboard, 0x40, 0, 2);
-                    cKeyboardPopup_setIncludeKey(self->keyboard, 65, 0, 2);
-                    cKeyboardPopup_setIncludeKey(self->keyboard, 66, 0, 2);
-                    cKeyboardPopup_setMinCharacters(self->keyboard, 1);
+                    cKeyboardPopup_setMaxCharacters(((char*)self->mpKeyboard), 8);
+                    cKeyboardPopup_setIncludeKey(((char*)self->mpKeyboard), 75, 1, 2);
+                    *(int*)(((char*)self->mpKeyboard) + 0x58) = 1;
+                    cKeyboardPopup_setDisableShiftNumbers(((char*)self->mpKeyboard), 1);
+                    cKeyboardPopup_setIncludeKey(((char*)self->mpKeyboard), 0xE, 0, 2);
+                    cKeyboardPopup_setIncludeKey(((char*)self->mpKeyboard), 39, 0, 2);
+                    cKeyboardPopup_setIncludeKey(((char*)self->mpKeyboard), 40, 0, 2);
+                    cKeyboardPopup_setIncludeKey(((char*)self->mpKeyboard), 52, 0, 2);
+                    cKeyboardPopup_setIncludeKey(((char*)self->mpKeyboard), 26, 0, 2);
+                    cKeyboardPopup_setIncludeKey(((char*)self->mpKeyboard), 25, 0, 2);
+                    cKeyboardPopup_setIncludeKey(((char*)self->mpKeyboard), 53, 0, 2);
+                    cKeyboardPopup_setIncludeKey(((char*)self->mpKeyboard), 0x40, 0, 2);
+                    cKeyboardPopup_setIncludeKey(((char*)self->mpKeyboard), 65, 0, 2);
+                    cKeyboardPopup_setIncludeKey(((char*)self->mpKeyboard), 66, 0, 2);
+                    cKeyboardPopup_setMinCharacters(((char*)self->mpKeyboard), 1);
                 }
-                cKeyboardPopup_setStatic(self->keyboard, GetText_K18FD90(str_kT_KEYUserName));
-                *(int*)(self->keyboard + 0x54) = 1;
-                cKeyboardPopup_setInputText(self->keyboard, cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), self->slot));
-                cUIStateStack_pushPopup(*(char**)(*(char**)(self->screen + 0xD0) + 0x10) + 0x18, self->keyboard);
-                self->f1A0 = 1;
-                self->f19C = 0;
+                cKeyboardPopup_setStatic(((char*)self->mpKeyboard), GetText_K18FD90(str_kT_KEYUserName));
+                *(int*)(((char*)self->mpKeyboard) + 0x54) = 1;
+                cKeyboardPopup_setInputText(((char*)self->mpKeyboard), cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), self->mPlayerIdx));
+                cUIStateStack_pushPopup(*(char**)(*(char**)(((char*)self->mpScreen) + 0xD0) + 0x10) + 0x18, ((char*)self->mpKeyboard));
+                self->mProcessingKeyboard = 1;
+                self->mPopupType = 0;
             }
             break;
         case 2:
-            if (self->f224 != 0) {
+            if (self->mMainButtonActive != 0) {
                 cMCOverlayManager_readSetFileType(mp, 1);
                 VCALLV_K18FD90(self, 8, 44));
             }
@@ -1210,27 +1182,27 @@ extern "C" void cFEStateProfileLoad_onWidgetEvent(cFEStateProfileLoad* vself, cU
     }
     case 6: {
         char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-        if (self->f1A8 != 1) {
-            int st = self->state;
+        if (self->mIsProcessing != 1) {
+            int st = self->mState;
             if (st != 6) {
-                self->f1E4 = 1;
+                self->mIsCancelPressed = 1;
                 if (st == 0 || st == 2 || st == 1) {
                     VCALLV_K18FD90(mp, 1864, 1), 0);
                 }
-                self->state = 6;
+                self->mState = 6;
             }
         }
         break;
     }
     case 7:
-        if (self->f1A8 != 1 && self->state != 6 && cFEStateProfileLoad_mScreenAction != 2 && self->f220 != 0) {
+        if (self->mIsProcessing != 1 && self->mState != 6 && cFEStateProfileLoad_mScreenAction != 2 && self->mDeleteButtonActive != 0) {
             char* mp = (char*)cSSXApp_getMCManager(SSXApp);
             if (VCALL_K18FD90(*(char**)(mp + 1076), 0, 54), *(int*)(mp + 0x428)) != 0) {
-                ((sMgrK18FD90*)mp)->fF8 = self->f1C4 = item->mMiscData;
-                if (self->state == 1) {
-                    if (VCALL_K18FD90(*(char**)(mp + 1076), 0, 67), self->f1C4) != 0) {
-                        self->f1A8 = 1;
-                        self->state = 4;
+                ((sMgrK18FD90*)mp)->fF8 = self->mSlot = item->mMiscData;
+                if (self->mState == 1) {
+                    if (VCALL_K18FD90(*(char**)(mp + 1076), 0, 67), self->mSlot) != 0) {
+                        self->mIsProcessing = 1;
+                        self->mState = 4;
                         cMCOverlayManager_SetAction(mp, 0);
                         VCALLV_K18FD90(mp, 1864, 1), 0x18);
                     }

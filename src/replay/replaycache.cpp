@@ -2402,17 +2402,6 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_Play);
 #ifdef SKIP_ASM
 extern "C" float GetCubicSplineValue(float* coef, float t);
 
-struct sRcTrack25F0 {
-    char pad_0x00[0x8];
-    unsigned int* data;     // 0x8
-    int key;                // 0xC
-    unsigned int* cur;      // 0x10
-    char* body;             // 0x14
-    int field_0x18;         // 0x18
-    float value;            // 0x1C
-    char* extra;            // 0x20
-    char* next;             // 0x24
-};
 
 /**
  * Starts a spline channel of an in-game script sequence at its first key and evaluates its value at frame 0.
@@ -2426,27 +2415,27 @@ struct sRcTrack25F0 {
  * @param key  the script player entity that owns the channel (On Tour pOwner)
  * @return 1 when there is a next key to reach, otherwise 0
  */
-extern "C" int cScriptPlayerChannelSpline_Play(sRcTrack25F0* self, unsigned int* data, int key)
+extern "C" int cScriptPlayerChannelSpline_Play(cScriptPlayerChannelSpline* self, unsigned int* data, int key)
 {
     char* body = (char*)data + 4;
-    self->data = data;
-    self->key = key;
-    self->cur = data;
-    self->body = body;
-    self->field_0x18 = 0;
+    *(unsigned int**)&self->mpData = data;
+    *(int*)&self->mpOwner = key;
+    *(unsigned int**)&self->mpHeader = data;
+    *(char**)&self->mpCurrKey = body;
+    self->mCurrKeyIndex = 0;
     if (data[0] >= 2) {
-        self->next = body + *(unsigned short*)((char*)data + 4);
+        *(char**)&self->mpNextKey = body + *(unsigned short*)((char*)data + 4);
     } else {
-        self->next = 0;
+        *(char**)&self->mpNextKey = 0;
     }
-    self->value = GetCubicSplineValue((float*)(self->body + 4), 0.0f);
-    char* keyLoc = self->body;
+    self->mCurrKeyValue = GetCubicSplineValue((float*)(((char*)self->mpCurrKey) + 4), 0.0f);
+    char* keyLoc = ((char*)self->mpCurrKey);
     if (*(unsigned short*)keyLoc >= 21) {
-        self->extra = keyLoc + 0x14;
+        *(char**)&self->mpCurrKeyCustom = keyLoc + 0x14;
     } else {
-        self->extra = 0;
+        *(char**)&self->mpCurrKeyCustom = 0;
     }
-    return self->next != 0;
+    return ((char*)self->mpNextKey) != 0;
 }
 #endif
 
@@ -2483,24 +2472,24 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_Update);
  * @param currFrameNum  the sequence's current frame (On Tour currFrameNum)
  * @return 1 while the channel runs, 0 once it reached its last key (or has none to reach)
  */
-extern "C" int cScriptPlayerChannelSpline_Update(sRcTrack25F0* self, float currFrameNum)
+extern "C" int cScriptPlayerChannelSpline_Update(cScriptPlayerChannelSpline* self, float currFrameNum)
 {
-    char* n = self->next;
+    char* n = ((char*)self->mpNextKey);
     if (n == 0) return 0;
     if ((float)*(unsigned short*)(n + 2) <= currFrameNum) {
-        self->body = n;
-        self->extra = 0;
-        self->field_0x18++;
-        if (*(unsigned short*)n >= 21) self->extra = n + 0x14;
-        if (self->field_0x18 == self->cur[0] - 1) {
-            self->next = 0;
-            self->value = GetCubicSplineValue((float*)(self->body + 4), 0.0f);
+        *(char**)&self->mpCurrKey = n;
+        *(char**)&self->mpCurrKeyCustom = 0;
+        (*(int*)&self->mCurrKeyIndex)++;
+        if (*(unsigned short*)n >= 21) *(char**)&self->mpCurrKeyCustom = n + 0x14;
+        if (((int)self->mCurrKeyIndex) == ((unsigned int*)self->mpHeader)[0] - 1) {
+            *(char**)&self->mpNextKey = 0;
+            self->mCurrKeyValue = GetCubicSplineValue((float*)(((char*)self->mpCurrKey) + 4), 0.0f);
             return 0;
         }
-        self->next = self->body + *(unsigned short*)self->body;
+        *(char**)&self->mpNextKey = ((char*)self->mpCurrKey) + *(unsigned short*)((char*)self->mpCurrKey);
     }
-    char* keyLoc = self->body;
-    self->value = GetCubicSplineValue((float*)(keyLoc + 4), currFrameNum - (float)*(unsigned short*)(keyLoc + 2));
+    char* keyLoc = ((char*)self->mpCurrKey);
+    self->mCurrKeyValue = GetCubicSplineValue((float*)(keyLoc + 4), currFrameNum - (float)*(unsigned short*)(keyLoc + 2));
     return 1;
 }
 #endif
@@ -2522,14 +2511,6 @@ struct sRcItem2788 {
     void operator delete[](void* p, unsigned int size);
 };
 
-struct sRcPool2788 {
-    int tag;                    // 0x0
-    unsigned int count;         // 0x4
-    char heap[0xC];             // 0x8
-    sRcItem2788* items;         // 0x14
-    sRcItem2788* free;          // 0x18
-    int used;                   // 0x1C
-};
 
 /**
  * Constructs the in-game sequence (InSeq) manager: a heap over the caller's buffer and a pool of script
@@ -2547,24 +2528,24 @@ struct sRcPool2788 {
  *                  cScriptPlayerMain_GetInSeqCommInterface() falls back to this word (+0x0)
  * @return @p self
  */
-extern "C" sRcPool2788* cInSeq_cInSeq(sRcPool2788* self, void* pHeap, void* heapSize, unsigned int count, int tag)
+extern "C" cInSeq* cInSeq_cInSeq(cInSeq* self, void* pHeap, void* heapSize, unsigned int count, int tag)
 {
-    cScriptHeap_cScriptHeap(self->heap, pHeap, heapSize);
-    self->tag = tag;
-    self->count = count;
-    self->items = 0;
-    self->free = 0;
-    sRcItem2788** slot = &self->items;
-    *slot = new (self->heap) sRcItem2788[count];
-    for (unsigned int i = 0; i < self->count; i++) {
-        self->items[i].index = i;
-        self->items[i].next = &self->items[i + 1];
-        self->items[i].prev = &self->items[i - 1];
+    cScriptHeap_cScriptHeap(((char*)&self->mHeap), pHeap, heapSize);
+    *(int*)&self->mpCommInterface = tag;
+    self->mMaxScripts = count;
+    *(sRcItem2788**)&self->mpScriptHeap = 0;
+    *(sRcItem2788**)&self->mpScriptUnused = 0;
+    sRcItem2788** slot = (sRcItem2788**)&self->mpScriptHeap;
+    *slot = new (((char*)&self->mHeap)) sRcItem2788[count];
+    for (unsigned int i = 0; i < self->mMaxScripts; i++) {
+        ((sRcItem2788*)self->mpScriptHeap)[i].index = i;
+        ((sRcItem2788*)self->mpScriptHeap)[i].next = &((sRcItem2788*)self->mpScriptHeap)[i + 1];
+        ((sRcItem2788*)self->mpScriptHeap)[i].prev = &((sRcItem2788*)self->mpScriptHeap)[i - 1];
     }
-    self->items[0].prev = 0;
-    self->items[self->count - 1].next = 0;
-    self->used = 0;
-    self->free = self->items;
+    ((sRcItem2788*)self->mpScriptHeap)[0].prev = 0;
+    ((sRcItem2788*)self->mpScriptHeap)[self->mMaxScripts - 1].next = 0;
+    *(int*)&self->mpScriptUsed = 0;
+    *(sRcItem2788**)&self->mpScriptUnused = ((sRcItem2788*)self->mpScriptHeap);
     return self;
 }
 #endif
@@ -3947,11 +3928,6 @@ struct sRcVE3_273AA8 {
     void (*fn)(void*, void*, int);
 };
 
-struct sRcHdr_273AA8 {
-    unsigned short first;   // 0x0
-    unsigned char count;    // 0x2
-    unsigned char kind;     // 0x3
-};
 
 struct sRcRec_273AA8 {
     unsigned short type;    // 0x0
@@ -3981,11 +3957,11 @@ extern "C" int cScriptPlayerEntity_SetupPlay(cScriptPlayerEntity* self)
 {
     self->mSetupScriptHasKeysLeft = 0;
     self->mSetupScriptInitialEventBits = 0;
-    if (((sRcHdr_273AA8*)self->mpSystemHeader)->count) {
+    if ((self->mpSystemHeader)->numChannels) {
         void* heap = *(char**)(((char*)self->mpOwner) + 8) + 8;
-        *(sRcObj_273AA8***)&self->mpChannelPlayers = (sRcObj_273AA8**)cScriptHeap_AllocMem(heap, ((sRcHdr_273AA8*)self->mpSystemHeader)->count * 4);
-        char* channelData = (char*)((sRcHdr_273AA8*)self->mpSystemHeader) + ((sRcHdr_273AA8*)self->mpSystemHeader)->first;
-        for (int i = 0; i < ((sRcHdr_273AA8*)self->mpSystemHeader)->count; i++) {
+        *(sRcObj_273AA8***)&self->mpChannelPlayers = (sRcObj_273AA8**)cScriptHeap_AllocMem(heap, (self->mpSystemHeader)->numChannels * 4);
+        char* channelData = (char*)(self->mpSystemHeader) + (self->mpSystemHeader)->headerSize;
+        for (int i = 0; i < (self->mpSystemHeader)->numChannels; i++) {
             sRcRec_273AA8* channelHeader = (sRcRec_273AA8*)channelData;
             channelData += 4;
             switch (channelHeader->type) {
@@ -4025,12 +4001,12 @@ extern "C" int cScriptPlayerEntity_SetupPlay(cScriptPlayerEntity* self)
     char* x = (char*)cScriptPlayerMain_GetInSeqCommInterface((cScriptPlayerMain*)((char*)self->mpOwner));
     if (x) {
         sRcVE2_273AA8* vt = *(sRcVE2_273AA8**)x;
-        *(char**)&self->mpEntityComm = (char*)vt[6].fn(x + vt[6].delta, self, ((sRcHdr_273AA8*)self->mpSystemHeader)->kind);
+        *(char**)&self->mpEntityComm = (char*)vt[6].fn(x + vt[6].delta, self, (self->mpSystemHeader)->type);
     }
     if (((char*)self->mpEntityComm)) {
         char* pl = ((char*)self->mpEntityComm);
         sRcVE3_273AA8* vt = *(sRcVE3_273AA8**)pl;
-        vt[1].fn(pl + vt[1].delta, self, ((sRcHdr_273AA8*)self->mpSystemHeader)->kind);
+        vt[1].fn(pl + vt[1].delta, self, (self->mpSystemHeader)->type);
     }
     self->mWaitingPlayExec = 1;
     return self->mIsPlaying;
@@ -4676,18 +4652,11 @@ struct sRcElem45C0 {
     void operator delete[](void* p, unsigned int size);
 };
 
-struct sRcHdr45C0 {
-    unsigned char field_0x0;
-    unsigned char count;    // 0x1
-    unsigned short size;    // 0x2
-    int field_0x4;
-    int result;             // 0x8
-};
 
 
 // PORT: cScriptPlayerEntity_Init's third argument receives the owning stream pointer as an int.
 // PORT: the unit declares cScriptPlayerMain_Init as returning void*; it returns the header word.
-extern "C" int cScriptPlayerMain_Init_impl(cScriptPlayerMain* self, sRcHdr45C0* data, char* owner, int a3) __asm__("cScriptPlayerMain_Init");
+extern "C" int cScriptPlayerMain_Init_impl(cScriptPlayerMain* self, tInSeqScriptHeader* data, char* owner, int a3) __asm__("cScriptPlayerMain_Init");
 /**
  * Binds a script player to its script data and creates one entity player per script entity.
  *
@@ -4702,27 +4671,27 @@ extern "C" int cScriptPlayerMain_Init_impl(cScriptPlayerMain* self, sRcHdr45C0* 
  * @param playerId     the player id
  * @return the script header's size word (+0x8)
  */
-extern "C" int cScriptPlayerMain_Init_impl(cScriptPlayerMain* self, sRcHdr45C0* data, char* owner, int playerId)
+extern "C" int cScriptPlayerMain_Init_impl(cScriptPlayerMain* self, tInSeqScriptHeader* data, char* owner, int playerId)
 {
     self->mID = playerId;
     *(char**)&self->mpManager = owner;
-    *(sRcHdr45C0**)&self->mpData = data;
-    *(sRcHdr45C0**)&self->mpSystemHeader = data;
+    *(tInSeqScriptHeader**)&self->mpData = data;
+    *(tInSeqScriptHeader**)&self->mpSystemHeader = data;
     self->mJumpFrame = -1;
     self->mNumSteps = 0;
     self->mLoopScript = 0;
-    if (data->size >= 13) {
+    if (data->headerSize >= 13) {
         *(char**)&self->mpDataHeader = (char*)data + 0xC;
     }
-    char* entityData = (char*)data + ((sRcHdr45C0*)self->mpSystemHeader)->size;
-    if (((sRcHdr45C0*)self->mpSystemHeader)->count != 0) {
+    char* entityData = (char*)data + (self->mpSystemHeader)->headerSize;
+    if ((self->mpSystemHeader)->numEntities != 0) {
         sRcElem45C0** slot = (sRcElem45C0**)&self->mpEntityPlayers;
-        *slot = new (owner + 8) sRcElem45C0[((sRcHdr45C0*)self->mpSystemHeader)->count];
-        for (int i = 0; i < ((sRcHdr45C0*)self->mpSystemHeader)->count; i++) {
+        *slot = new (owner + 8) sRcElem45C0[(self->mpSystemHeader)->numEntities];
+        for (int i = 0; i < (self->mpSystemHeader)->numEntities; i++) {
             entityData += cScriptPlayerEntity_Init((cScriptPlayerEntity*)(&((sRcElem45C0*)self->mpEntityPlayers)[i]), entityData, (int)self);
         }
     }
-    return ((sRcHdr45C0*)self->mpSystemHeader)->result;
+    return ((int)(self->mpSystemHeader)->size);
 }
 #endif
 

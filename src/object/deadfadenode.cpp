@@ -60,9 +60,6 @@ struct sDfDesc_0750 {
     float fC;
 };
 
-struct sDfBlock_0750 {
-    unsigned int w[3];
-};
 
 struct sDfVE_0750 {
     short delta;
@@ -185,8 +182,8 @@ extern "C" cDeadFadeNode* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode* self, int b
     sDfMatElem_0750** pm = (sDfMatElem_0750**)&self->AnimMats;
     cInstanceNode_cInstanceNode1(self, bucket, 22, obj);
     *(void**)&self->mVtbl = cDeadFadeNode_vtbl;
-    (*(sDfBlock_0750*)&self->Data).w[0] = 0xFFFFFFFF;
-    *(sDfBlock_0750*)&self->Data = *(sDfBlock_0750*)desc;
+    ((unsigned int*)&(*(&self->Data)).InstId)[0] = 0xFFFFFFFF;
+    *(&self->Data) = *(tMakeDeadData*)desc;
     self->FadeRate = cObjectInterface_getUpdateTime() / desc->f8;
     self->DistRate = desc->fC * cObjectInterface_getUpdateTime();
     self->Dist = 0.0f;

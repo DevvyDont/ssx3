@@ -729,11 +729,6 @@ void cReplayFrameList_reset(void* self);
 extern "C" void cReplayFrameList_addFrame(void* list, void* block);
 extern "C" void MEM_fill(void* dst, int c, int n);
 
-struct sFpSlot_F228 {
-    int id;
-    char data[0xAC];
-    int fB0;
-};
 
 /**
  * Resets the replay for a new race: clears the recording, playback and save state and refills the free frame
@@ -794,17 +789,17 @@ extern "C" void cReplay_reset(cReplay* self)
     self->WriteSaveSize = 0;
     self->WriteRemaining = 0;
     self->WriteFrameCount = 0;
-    sFpSlot_F228* highlight = (sFpSlot_F228*)(&self->Highlight[0]);
+    cReplayHighlight* highlight = ((&self->Highlight[0]));
     char* highlightData = ((char*)self) + 0x498;
     void** pp = (void**)(&self->InputCache[0]);
     do {
         if (*pp) cReplayCache_reset(*pp);
-        highlight->fB0 = 0;
-        highlight->id = none;
+        *(int*)&highlight->Frame = 0;
+        highlight->PlayerId = none;
         MEM_fill(highlightData, 0, 172);
         highlightData += 0xB4;
         pp++;
-        highlight->id = i;
+        highlight->PlayerId = i;
         i++;
         highlight++;
     } while (i < 2);

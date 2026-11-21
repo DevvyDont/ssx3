@@ -2285,7 +2285,6 @@ INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan__cWorldPainterMan);
 void cMemMan_free(void *);
 void operator_delete(int *);
 extern "C" void cWorldPainterSection__cWorldPainterSection(cWorldPainterSection*, int);
-struct S12_B140 { int a, b, c; };
 /**
  * Destroys the world-painter manager: destroys and frees its section cache.
  *
@@ -2295,16 +2294,16 @@ struct S12_B140 { int a, b, c; };
  * @param flags  g++ destructor flags; bit 0 set frees the object itself (operator delete)
  */
 extern "C" void cWorldPainterMan__cWorldPainterMan(cWorldPainterMan* self, int flags) {
-    S12_B140 *arr = (S12_B140*)self->m_pCache;
+    cWorldPainterSection *arr = self->m_pCache;
     if (arr != 0) {
-        S12_B140 *section = arr + *(int*)((char*)arr - 0x10);
+        cWorldPainterSection *section = arr + *(int*)((char*)arr - 0x10);
         if (arr != section) {
             do {
                 section--;
                 cWorldPainterSection__cWorldPainterSection((cWorldPainterSection*)section, 0);
-            } while ((S12_B140*)self->m_pCache != section);
+            } while (self->m_pCache != section);
         }
-        cMemMan_free((char*)(S12_B140*)self->m_pCache - 0x10);
+        cMemMan_free((char*)self->m_pCache - 0x10);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -2319,7 +2318,7 @@ INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_init);
 extern "C" void *cWorldPainterSection_cWorldPainterSection(void *arg0);
 int operator_new_B1D0(unsigned int, void*, int, int) __asm__("operator_new__FUi");
 extern char str_cWorldPainterMan[];
-struct sArr_B1D0 { int n; S12_B140 *arr; };
+struct sArr_B1D0 { int n; cWorldPainterSection *arr; };
 
 /**
  * Sizes the section cache for a world: frees any old array and allocates @p n fresh sections.
@@ -2332,22 +2331,22 @@ struct sArr_B1D0 { int n; S12_B140 *arr; };
  */
 // Reallocates the 12-byte element array (delete[] then new[] with a count cookie).
 extern "C" void cWorldPainterMan_init(cWorldPainterMan* self, int n) {
-    if ((S12_B140*)self->m_pCache != 0) {
-        S12_B140 *oldSection = (S12_B140*)self->m_pCache + *(int*)((char*)(S12_B140*)self->m_pCache - 0x10);
-        if ((S12_B140*)self->m_pCache != oldSection) {
+    if (self->m_pCache != 0) {
+        cWorldPainterSection *oldSection = self->m_pCache + *(int*)((char*)self->m_pCache - 0x10);
+        if (self->m_pCache != oldSection) {
             do {
                 oldSection--;
                 cWorldPainterSection__cWorldPainterSection((cWorldPainterSection*)oldSection, 0);
-            } while ((S12_B140*)self->m_pCache != oldSection);
+            } while (self->m_pCache != oldSection);
         }
-        cMemMan_free((char*)(S12_B140*)self->m_pCache - 0x10);
+        cMemMan_free((char*)self->m_pCache - 0x10);
     }
     self->m_uiNumSections = (unsigned int)n;
-    S12_B140 **dst = (S12_B140**)&self->m_pCache;
+    cWorldPainterSection **dst = (cWorldPainterSection**)&self->m_pCache;
     int *blk = (int*)operator_new_B1D0(n * 12 + 0x10, str_cWorldPainterMan, 0x20000000, 0);
     blk[0] = n;
-    S12_B140 *sections = (S12_B140*)(blk + 4);
-    S12_B140 *newSection = sections;
+    cWorldPainterSection *sections = (cWorldPainterSection*)(blk + 4);
+    cWorldPainterSection *newSection = sections;
     int i;
     for (i = n - 1; i != -1; i--) {
         cWorldPainterSection_cWorldPainterSection(newSection);

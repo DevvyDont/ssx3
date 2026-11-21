@@ -2988,23 +2988,9 @@ struct sColor1A77A0 {
     float r, g, b, a;
 };
 
-struct sScreen1A77A0 {
-    char pad0[0x8];
-    void* vt;               // 0x8
-    int id;                 // 0xC
-    char pad10[0x6D0 - 0x10];
-    char name[4];           // 0x6D0
-    int f6D4;               // 0x6D4
-    int f6D8;
-    int f6DC;               // 0x6DC
-    int f6E0;               // 0x6E0
-    int f6E4;               // 0x6E4
-    int f6E8;               // 0x6E8
-    sColor1A77A0 color;     // 0x6EC
-};
 
 // PORT: the unit declares this as (void*, int, void*, int); the body uses typed arguments.
-extern "C" void* cFEStateReadMessagePopup_cFEStateReadMessagePopup_impl(sScreen1A77A0* self, int a1, int a2, const char* name) __asm__("cFEStateReadMessagePopup_cFEStateReadMessagePopup");
+extern "C" void* cFEStateReadMessagePopup_cFEStateReadMessagePopup_impl(cFEStateReadMessagePopup* self, int a1, int a2, const char* name) __asm__("cFEStateReadMessagePopup_cFEStateReadMessagePopup");
 
 /**
  * Constructs the private-message conversation popup for one sender.
@@ -3018,25 +3004,25 @@ extern "C" void* cFEStateReadMessagePopup_cFEStateReadMessagePopup_impl(sScreen1
  * @param name  the other player's name
  * @return @p self
  */
-extern "C" void* cFEStateReadMessagePopup_cFEStateReadMessagePopup_impl(sScreen1A77A0* self, int engine, int owner, const char* name)
+extern "C" void* cFEStateReadMessagePopup_cFEStateReadMessagePopup_impl(cFEStateReadMessagePopup* self, int engine, int owner, const char* name)
 {
     // An unused 16-byte local is needed to reproduce the 0x50-byte frame.
     int frameFiller[4];
     cFEStateNet_cFEStateNet_3(self, engine, owner);
-    self->vt = cFEStateReadMessagePopup_vtbl;
-    cBXString_cBXString2(self->name, name);
-    self->f6E8 = 1;
-    self->id = 73;
-    self->f6D4 = 0;
-    self->f6DC = 0;
-    self->f6E0 = 0;
-    self->f6E4 = 0;
+    *(void**)&self->mVtbl = cFEStateReadMessagePopup_vtbl;
+    cBXString_cBXString2(((char*)&self->mszSender), name);
+    self->mbResetScroll = 1;
+    self->mHashName = 73;
+    self->unk_6D4 = 0;
+    *(int*)&self->mMessages.mpStart = 0;
+    *(int*)&self->mMessages.mpFinish = 0;
+    *(int*)&self->mMessages.mpEndOfStorage = 0;
     sColor1A77A0 white;
     white.r = 1.0f;
     white.g = 1.0f;
     white.b = 1.0f;
     white.a = 1.0f;
-    self->color = white;
+    *(sColor1A77A0*)&self->mTextColour = white;
     return self;
 }
 #endif
@@ -3063,12 +3049,6 @@ struct sObj1A7848 {
     sVE1A7848* vt;
 };
 
-struct sObjVec1A7848 {
-    int f0;
-    sObj1A7848** mBegin;
-    sObj1A7848** mEnd;
-    sObj1A7848** mCap;
-};
 
 static inline void Dealloc1A7848(sObj1A7848** p, int n)
 {
@@ -3094,19 +3074,19 @@ extern "C" void cFEStateReadMessagePopup__cFEStateReadMessagePopup(cFEStateReadM
 {
     *(void**)&self->mVtbl = cFEStateReadMessagePopup_vtbl;
     for (;;) {
-        if ((*(sObjVec1A7848*)&self->mMessages).mBegin == (*(sObjVec1A7848*)&self->mMessages).mEnd) break;
-        sObj1A7848* message = (*(sObjVec1A7848*)&self->mMessages).mEnd[-1];
-        (*(sObjVec1A7848*)&self->mMessages).mEnd--;
+        if (((sObj1A7848**)(*(&self->mMessages)).mpStart) == ((sObj1A7848**)(*(&self->mMessages)).mpFinish)) break;
+        sObj1A7848* message = ((sObj1A7848**)(*(&self->mMessages)).mpFinish)[-1];
+        (*(sObj1A7848***)&(*(&self->mMessages)).mpFinish)--;
         if (message) {
             message->vt[1].fn((char*)message + message->vt[1].delta, 3);
         }
     }
-    sObjVec1A7848* messages = (sObjVec1A7848*)&self->mMessages;
-    sObj1A7848** first = (*(sObjVec1A7848*)&self->mMessages).mBegin;
-    sObj1A7848** last = (*(sObjVec1A7848*)&self->mMessages).mEnd;
-    func_0041610C(first, last, (messages->mEnd - last) * sizeof(sObj1A7848*));
-    (*(sObjVec1A7848*)&self->mMessages).mEnd -= last - first;
-    Dealloc1A7848(messages->mBegin, (*(sObjVec1A7848*)&self->mMessages).mCap - (*(sObjVec1A7848*)&self->mMessages).mBegin);
+    tFEPrivateMessageVector* messages = (&self->mMessages);
+    sObj1A7848** first = ((sObj1A7848**)(*(&self->mMessages)).mpStart);
+    sObj1A7848** last = ((sObj1A7848**)(*(&self->mMessages)).mpFinish);
+    func_0041610C(first, last, (((sObj1A7848**)messages->mpFinish) - last) * sizeof(sObj1A7848*));
+    (*(sObj1A7848***)&(*(&self->mMessages)).mpFinish) -= last - first;
+    Dealloc1A7848(((sObj1A7848**)messages->mpStart), ((sObj1A7848**)(*(&self->mMessages)).mpEndOfStorage) - ((sObj1A7848**)(*(&self->mMessages)).mpStart));
     cBXString__cBXString(((char*)&self->mszSender), 2);
     cFEStateNet__cFEStateNet_dtor(self, flags);
 }
@@ -5085,7 +5065,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001A9578);
 void func_001A93D0_3(void* self, int a1, int a2) __asm__("func_001A93D0");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 struct sFEObj_001B1F88; // defined with cFEStateChatRoom_cFEStateChatRoom (its ctor)
-extern "C" sFEObj_001B1F88* cFEStateChatRoom_cFEStateChatRoom(sFEObj_001B1F88* mem, int a1);
+extern "C" cFEStateChatRoom* cFEStateChatRoom_cFEStateChatRoom(cFEStateChatRoom* mem, int a1);
 extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cFEStateNet* mem, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" int func_0025DA90(void* self);
@@ -5108,7 +5088,7 @@ extern "C" void func_001A9578(cFEStateNet* self, int popup, int event)
         func_001A93D0_3(self, popup, event);
         void* obj;
         if (func_0025DA90(LobbyMan_mLobbyMan) != 0 && D_004A4E88 == 0) {
-            obj = cFEStateChatRoom_cFEStateChatRoom((sFEObj_001B1F88*)cMemMan_alloc(1852, str_cFEStateChatRoom, 0, 0), (int)self->mpEngine);
+            obj = cFEStateChatRoom_cFEStateChatRoom((cFEStateChatRoom*)cMemMan_alloc(1852, str_cFEStateChatRoom, 0, 0), (int)self->mpEngine);
         } else {
             obj = cFEStateOnlineMainMenu_cFEStateOnlineMainMenu((cFEStateNet*)cMemMan_alloc(1744, str_cFEStateOnlineMainMenu, 0, 0), (int)self->mpEngine);
         }
@@ -11390,7 +11370,7 @@ extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct sFEObj_001B1F88;
-extern "C" sFEObj_001B1F88* cFEStateChatRoom_cFEStateChatRoom(sFEObj_001B1F88* mem, int a1);
+extern "C" cFEStateChatRoom* cFEStateChatRoom_cFEStateChatRoom(cFEStateChatRoom* mem, int a1);
 extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cFEStateNet* mem, int a1);
 extern "C" void* cFEStateBraggingRights_cFEStateBraggingRights(void* mem, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
@@ -11443,7 +11423,7 @@ extern "C" void* func_001B15D8(cFEStateOnlineCharacterSelect* self, int eventTyp
         break;
     case 268:
         if (func_0025DA90(LobbyMan_mLobbyMan) != 0 && D_004A4E88 == 0) {
-            obj = cFEStateChatRoom_cFEStateChatRoom((sFEObj_001B1F88*)cMemMan_alloc(1852, str_cFEStateChatRoom, 0, 0), (int)self->mpEngine);
+            obj = cFEStateChatRoom_cFEStateChatRoom((cFEStateChatRoom*)cMemMan_alloc(1852, str_cFEStateChatRoom, 0, 0), (int)self->mpEngine);
         } else {
             obj = cFEStateOnlineMainMenu_cFEStateOnlineMainMenu((cFEStateNet*)cMemMan_alloc(1744, str_cFEStateOnlineMainMenu, 0, 0), (int)self->mpEngine);
         }
@@ -11890,20 +11870,6 @@ struct sCol_001B1F88 {
     float r, g, b, a;
 };
 
-struct sFEObj_001B1F88 {
-    char pad0[0x8];
-    void** vt;                     // 0x8
-    int fC;                        // 0xC
-    char pad10[0x6EC - 0x10];
-    int f6EC;                      // 0x6EC
-    int f6F0;                      // 0x6F0
-    int f6F4;                      // 0x6F4
-    int f6F8;                      // 0x6F8
-    int items[2];                  // 0x6FC
-    int items2[2];                 // 0x704
-    char name[0x20];               // 0x70C
-    sCol_001B1F88 color;           // 0x72C
-};
 
 /**
  * Constructs the chat-room state.
@@ -11915,26 +11881,26 @@ struct sFEObj_001B1F88 {
  * @param pEngine  the UI engine (On Tour cUIState's pEngine)
  * @return @p self
  */
-extern "C" sFEObj_001B1F88* cFEStateChatRoom_cFEStateChatRoom(sFEObj_001B1F88* self, int pEngine)
+extern "C" cFEStateChatRoom* cFEStateChatRoom_cFEStateChatRoom(cFEStateChatRoom* self, int pEngine)
 {
     cFEStateNet_cFEStateNet_3(self, pEngine, 0);
-    self->vt = cFEStateChatRoom_vtbl;
-    self->fC = 61;
-    self->f6F8 = 0;
+    self->mVtbl = cFEStateChatRoom_vtbl;
+    self->mHashName = 61;
+    self->mbExiting = 0;
     for (int i = 0; i < 2; i++) {
-        self->items[i] = 0;
-        self->items2[i] = 0;
+        ((int*)&self->mpMenu[0])[i] = 0;
+        self->miMenuScroll[i] = 0;
     }
-    self->f6EC = 0;
-    self->f6F0 = 0;
-    self->f6F4 = 0;
+    *(int*)&self->mpSlider1 = 0;
+    *(int*)&self->mpTextScrollChat = 0;
+    *(int*)&self->mpSlider2 = 0;
     sCol_001B1F88 colour;
     colour.r = 1.0f;
     colour.g = 1.0f;
     colour.b = 1.0f;
     colour.a = 1.0f;
-    self->color = colour;
-    strcpy(self->name, ((const char*)LobbyMan_mLobbyMan->mPersona));
+    *(sCol_001B1F88*)&self->mChatColour = colour;
+    strcpy(self->mszPlayerName, ((const char*)LobbyMan_mLobbyMan->mPersona));
     return self;
 }
 #endif
@@ -14633,7 +14599,7 @@ extern "C" int* func_002591B8();
 extern "C" void func_002636F0(void* p, int a1);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 struct sFEObj_001B6288;
-extern "C" sFEObj_001B6288* cFEStateAuthDNAS_cFEStateAuthDNAS(cFEStateAuthDNAS* self, int a1, int a2);
+extern "C" cFEStateAuthDNAS* cFEStateAuthDNAS_cFEStateAuthDNAS(cFEStateAuthDNAS* self, int a1, int a2);
 extern char str_NetConfigAuthPopup[];
 
 class cFEVObj_001B55B0 {
@@ -14691,7 +14657,7 @@ extern "C" void func_001B55B0(cFEStateNetConfig* self, void* popup, unsigned int
     }
     case 22:
         if (self->unk_6D8 == 0) {
-            char* authPopup = (char*)cFEStateAuthDNAS_cFEStateAuthDNAS((cFEStateAuthDNAS*)((sFEObj_001B6288*)cMemMan_alloc(0x700, str_NetConfigAuthPopup, 0, 0)), (int)self->mpEngine, (int)self);
+            char* authPopup = (char*)cFEStateAuthDNAS_cFEStateAuthDNAS((cFEStateAuthDNAS*)((cFEStateAuthDNAS*)cMemMan_alloc(0x700, str_NetConfigAuthPopup, 0, 0)), (int)self->mpEngine, (int)self);
             *(int*)(authPopup + 0x18) = 2074;
             cUIStateStack_pushPopup(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, authPopup);
         }
@@ -15378,22 +15344,6 @@ struct sVE_001B6288 {
     void* (*fn)(void* self, int hash);
 };
 
-struct sFEObj_001B6288 {
-    char pad0[0x8];
-    void** vt;          // 0x8
-    int fC;             // 0xC
-    char pad10[0x6A8 - 0x10];
-    int f6A8;           // 0x6A8
-    char pad6AC[0x6D0 - 0x6AC];
-    int f6D0;           // 0x6D0
-    int f6D4;           // 0x6D4
-    char pad6D8[0x6E4 - 0x6D8];
-    int f6E4;           // 0x6E4
-    char pad6E8[0x6F4 - 0x6E8];
-    int f6F4;           // 0x6F4
-    int f6F8;           // 0x6F8
-    void* f6FC;         // 0x6FC
-};
 
 /**
  * Constructs the DNAS authentication state.
@@ -15407,9 +15357,9 @@ struct sFEObj_001B6288 {
  * @param pParentState  the parent state that receives the result (On Tour pParentState)
  * @return @p self
  */
-extern "C" sFEObj_001B6288* cFEStateAuthDNAS_cFEStateAuthDNAS(cFEStateAuthDNAS* self, int pEngine, int pParentState)
+extern "C" cFEStateAuthDNAS* cFEStateAuthDNAS_cFEStateAuthDNAS(cFEStateAuthDNAS* self, int pEngine, int pParentState)
 {
-    cFEStateNet_cFEStateNet_3(((sFEObj_001B6288*)self), pEngine, pParentState);
+    cFEStateNet_cFEStateNet_3((self), pEngine, pParentState);
     self->unk_6F4 = 2;
     self->mVtbl = cFEStateAuthDNAS_vtbl;
     self->unk_6F8 = 0x1E;
@@ -15427,7 +15377,7 @@ extern "C" sFEObj_001B6288* cFEStateAuthDNAS_cFEStateAuthDNAS(cFEStateAuthDNAS* 
     }
     self->mpustrText = (unsigned short*)operator_new_tag((n + 5) * 2, str_cFEStateAuthDNAS, 0x100, 0);
     self->unk_6A8 = 0;
-    return ((sFEObj_001B6288*)self);
+    return (self);
 }
 #endif
 
@@ -21680,7 +21630,7 @@ extern "C" void func_001BE0A8(cFEStateLobbyMenu* self);
 // PORT: func_001BE038 is defined later with its own list type; bound by asm label.
 void func_001BE038_BD738(void* self) __asm__("func_001BE038");
 struct sFEObj_001B1F88;
-extern "C" sFEObj_001B1F88* cFEStateChatRoom_cFEStateChatRoom(sFEObj_001B1F88* mem, int a1);
+extern "C" cFEStateChatRoom* cFEStateChatRoom_cFEStateChatRoom(cFEStateChatRoom* mem, int a1);
 extern "C" void func_001BD848(cFEStateLobbyMenu* self, int a1, int a2);
 extern const char str_cFEStateChatRoom[];
 
@@ -21718,7 +21668,7 @@ extern "C" void* func_001BD738(cFEStateLobbyMenu* self, int msgId, int data)
         break;
     }
     case 220: case 228:
-        func_001A8A40(((char*)self), cFEStateChatRoom_cFEStateChatRoom((sFEObj_001B1F88*)cMemMan_alloc(1852, str_cFEStateChatRoom, 0, 0), (int)self->mpEngine));
+        func_001A8A40(((char*)self), cFEStateChatRoom_cFEStateChatRoom((cFEStateChatRoom*)cMemMan_alloc(1852, str_cFEStateChatRoom, 0, 0), (int)self->mpEngine));
         break;
     case 258:
         func_001BD848(self, msgId, data);

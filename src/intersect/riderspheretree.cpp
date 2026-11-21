@@ -105,14 +105,6 @@ extern "C" void cRiderSphereTree_Init1(void* self, float radius)
 //100%
 INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_Init);
 #ifdef SKIP_ASM
-struct sSphereLeaf_99C8 {
-    int type;                       // 0x00
-    char pad_0x04[0x1C];
-    float radius;                   // 0x20
-    int user;                       // 0x24
-    unsigned int parent;            // 0x28
-    int count;                      // 0x2C
-};
 
 /**
  * Sets up a rider's collision spheres: one per listed bone, plus a bounding sphere.
@@ -128,18 +120,18 @@ struct sSphereLeaf_99C8 {
  * @param user    bone of the bounding sphere (On Tour _boundBone)
  * @param radius  radius of the bounding sphere
  */
-extern "C" void cRiderSphereTree_Init(sSphereLeaf_99C8* self, int type, int n, int* ids, float* radii,
+extern "C" void cRiderSphereTree_Init(cRiderSphereTree* self, int type, int n, int* ids, float* radii,
                               int user, float radius)
 {
-    self->parent = 0xFFFFFFFF;
-    self->count = n;
-    for (int i = 0; i < self->count; i++) {
+    self->sphMask = 0xFFFFFFFF;
+    self->listLen = n;
+    for (int i = 0; i < self->listLen; i++) {
         *(int*)((char*)self + i * 0x20 + 0x44) = ids[i];
         *(float*)((char*)self + i * 0x20 + 0x40) = radii[i];
     }
-    self->type = type;
-    self->radius = radius;
-    self->user = user;
+    *(int*)&self->bonePoses = type;
+    self->boundRad = radius;
+    self->boundBone = user;
 }
 #endif
 
@@ -2526,14 +2518,6 @@ struct sSphereLevel_D028 {
     int stride;     // 0x8
 };
 
-struct sSphereTreeInfo_D028 {
-    char pad_0x00[0xC];
-    int depth;                      // 0x0C
-    char pad_0x10[0x10];
-    sSphereLevel_D028* levels;      // 0x20
-    char pad_0x24[4];
-    unsigned char* masks;           // 0x28
-};
 
 
 // PORT: PS2-only VU0 inline asm (v * s).
@@ -2591,16 +2575,16 @@ extern "C" int SphereTree_isBoxCollision(SphereTree* selfp, t3Vector* boxMin, t3
     sSphereVec4 normal;
     sSphereVec4 dir;
     float dist;
-    if (gIsBoxSphereInt(boxMin, boxMax, pos, &normal, &dir, &dist, ((sSphereTreeInfo_D028*)self->treeInfo)->levels[depth].radius * self->scale) == 0) {
+    if (gIsBoxSphereInt(boxMin, boxMax, pos, &normal, &dir, &dist, ((sSphereLevel_D028*)(self->treeInfo)->levels)[depth].radius * self->scale) == 0) {
         return 0;
     }
-    unsigned char mask = ((sSphereTreeInfo_D028*)self->treeInfo)->masks[base];
-    if (depth < ((sSphereTreeInfo_D028*)self->treeInfo)->depth && mask != 0) {
-        float off = ((sSphereTreeInfo_D028*)self->treeInfo)->levels[depth + 1].offset;
+    unsigned char mask = (self->treeInfo)->bitTree[base];
+    if (depth < (self->treeInfo)->depth && mask != 0) {
+        float off = ((sSphereLevel_D028*)(self->treeInfo)->levels)[depth + 1].offset;
         for (int i = 0; i < 8; i++) {
             if ((mask >> i) & 1) {
                 sSphereVec4 childPos = Add_D028(*(sSphereVec4*)pos, Scale_D028(((sSphereVec4*)&self->axis[0])[i], off));
-                if (SphereTree_isBoxCollision((SphereTree*)self, boxMin, boxMax, (t4Vector*)(&childPos), depth + 1, (i + 1) * ((sSphereTreeInfo_D028*)self->treeInfo)->levels[depth].stride + base, outPos, outNormal)) {
+                if (SphereTree_isBoxCollision((SphereTree*)self, boxMin, boxMax, (t4Vector*)(&childPos), depth + 1, (i + 1) * ((sSphereLevel_D028*)(self->treeInfo)->levels)[depth].stride + base, outPos, outNormal)) {
                     return 1;
                 }
             }
@@ -2622,14 +2606,6 @@ struct sSphereLevel_D208 {
     int stride;     // 0x8
 };
 
-struct sSphereTreeInfo_D208 {
-    char pad_0x00[0xC];
-    int depth;                      // 0x0C
-    char pad_0x10[0x10];
-    sSphereLevel_D208* levels;      // 0x20
-    char pad_0x24[4];
-    unsigned char* masks;           // 0x28
-};
 
 
 // PORT: PS2-only VU0 inline asm (v * s).
@@ -2727,18 +2703,18 @@ extern "C" void SphereTree_checkPlaneCollision(SphereTree* selfp, void* plane, t
 {
     SphereTree* self = selfp;
     float planeDist = Dot_D208(*(sSphereVec4*)plane, *(sSphereVec4*)pos);
-    float nodeRadius = ((sSphereTreeInfo_D208*)self->treeInfo)->levels[depth].radius * self->scale;
+    float nodeRadius = ((sSphereLevel_D208*)(self->treeInfo)->levels)[depth].radius * self->scale;
     if (!(planeDist < nodeRadius + self->worstCase))
         return;
     float distance;
-    unsigned char mask = ((sSphereTreeInfo_D208*)self->treeInfo)->masks[base];
-    if (depth < ((sSphereTreeInfo_D208*)self->treeInfo)->depth && mask != 0) {
-        distance = ((sSphereTreeInfo_D208*)self->treeInfo)->levels[depth + 1].offset;
+    unsigned char mask = (self->treeInfo)->bitTree[base];
+    if (depth < (self->treeInfo)->depth && mask != 0) {
+        distance = ((sSphereLevel_D208*)(self->treeInfo)->levels)[depth + 1].offset;
         for (int i = 0; i < 8; i++) {
             int k = self->sortAxis[i];
             if ((mask >> k) & 1) {
                 sSphereVec4 childPos = Add_D208(*(sSphereVec4*)pos, Scale_D208(((sSphereVec4*)&self->axis[0])[k], distance));
-                SphereTree_checkPlaneCollision((SphereTree*)self, plane, (t4Vector*)(&childPos), depth + 1, (k + 1) * ((sSphereTreeInfo_D208*)self->treeInfo)->levels[depth].stride + base, outA, outB);
+                SphereTree_checkPlaneCollision((SphereTree*)self, plane, (t4Vector*)(&childPos), depth + 1, (k + 1) * ((sSphereLevel_D208*)(self->treeInfo)->levels)[depth].stride + base, outA, outB);
             }
         }
         return;

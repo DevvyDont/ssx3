@@ -8407,11 +8407,6 @@ struct sHpZone_41B8 {
     int f18;
 };
 
-struct sHpLevel_41B8 {
-    int level;
-    int f4;
-    int f8;
-};
 
 struct sHpGame_41B8 {
     char pad_0x0[0x28];
@@ -8437,7 +8432,7 @@ extern "C" void cAvalanche_getAvalancheDataByPosition(sHpGround_41B8* out, sHpVe
 // inside one of the enabled zones.
 extern "C" int cDangerMan_CalcAppliedDangerLevel(cDangerMan* self, int pl)
 {
-    int lvl = ((sHpLevel_41B8*)&self->mRiderDangerTrack[0])[pl].level;
+    int lvl = ((&self->mRiderDangerTrack[0]))[pl].baseLevel;
     char* rider = ((sHpGame_41B8*)self->mpAI)->riders[pl];
     if (lvl == 0) {
         return 0;

@@ -19,12 +19,6 @@ struct sDataNode5828 {
     char pad[0x18];
 };
 
-struct cDataManager5828 {
-    int count;              // 0x0
-    sDataNode5828* nodes;   // 0x4
-    int field_0x8;          // 0x8
-    void* vtable;           // 0xC
-};
 
 /**
  * Constructs a data manager with a pool of data-instance records, all placed on the empty list.
@@ -33,14 +27,14 @@ struct cDataManager5828 {
  * @param count  number of instance records (On Tour maxDataInstances)
  * @return @p self
  */
-extern "C" cDataManager5828* cDataManager_cDataManager(cDataManager5828* self, int flags, int count)
+extern "C" cDataManager* cDataManager_cDataManager(cDataManager* self, int flags, int count)
 {
-    self->vtable = cDataManager_vtbl;
-    self->count = count;
-    self->nodes = (sDataNode5828*)operator_new_tag(count * sizeof(sDataNode5828), str_tDataInstanceInfo, flags, 0);
-    self->field_0x8 = 0;
+    *(void**)&self->mVtbl = cDataManager_vtbl;
+    self->mMaxDataInstances = count;
+    *(sDataNode5828**)&self->mpDataInstanceHeap = (sDataNode5828*)operator_new_tag(count * sizeof(sDataNode5828), str_tDataInstanceInfo, flags, 0);
+    *(int*)&self->mpEmptyDataInstanceList = 0;
     for (int i = 0; i < count; i++) {
-        cDataManager_AddToEmptyInstanceList(self, &self->nodes[i]);
+        cDataManager_AddToEmptyInstanceList(self, &((sDataNode5828*)self->mpDataInstanceHeap)[i]);
     }
     return self;
 }
@@ -200,11 +194,6 @@ INCLUDE_ASM("scripter/datamanager", cDataManager_DetachAll);
 #ifdef SKIP_ASM
 extern "C" void cDataManager_DetachData(void* self, void* entry);
 
-struct sDmEntry275B08 {
-    char pad_0x00[0x10];
-    int used;
-    int unk_0x14;
-};
 
 
 /**
@@ -214,8 +203,8 @@ extern "C" void cDataManager_DetachAll(cDataManager* self)
 {
     int i;
     for (i = 0; i < self->mMaxDataInstances; i++) {
-        if (((sDmEntry275B08*)self->mpDataInstanceHeap)[i].used != 0) {
-            cDataManager_DetachData(self, &((sDmEntry275B08*)self->mpDataInstanceHeap)[i]);
+        if ((self->mpDataInstanceHeap)[i].isRoot != 0) {
+            cDataManager_DetachData(self, &(self->mpDataInstanceHeap)[i]);
         }
     }
 }
@@ -2425,7 +2414,7 @@ extern "C" sScriptMgr_7F20* cSSXScriptEngine_cSSXScriptEngine(sScriptMgr_7F20* s
 {
     cBXScriptEngine_cBXScriptEngine(self);
     cVidEngine_cVidEngine((char*)self + 0x500);
-    cDataManager_cDataManager((cDataManager5828*)((char*)self + 0x51C), 0, 0x100);
+    cDataManager_cDataManager((cDataManager*)((char*)self + 0x51C), 0, 0x100);
     self->vt2AC = D_00482100;
     self->vt518 = D_004821A0;
     self->vt528 = D_00482168;

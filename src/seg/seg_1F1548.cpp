@@ -3047,12 +3047,6 @@ extern sCol_43E0 D_004FAC40;
 extern sCol_43E0 D_004FAC60;
 extern sCol_43E0 D_004FAC80;
 
-struct sLight_43E0 {
-    int type;
-    float a;
-    float b;
-    sCol_43E0 col;
-};
 
 
 extern "C" void cSunHalo_InitLens_43E0(cSunHalo* self) __asm__("cSunHalo_InitLens");
@@ -3066,50 +3060,50 @@ extern "C" void cSunHalo_InitLens_43E0(cSunHalo* self) __asm__("cSunHalo_InitLen
 extern "C" void cSunHalo_InitLens_43E0(cSunHalo* self)
 {
     self->mNumLens = 0;
-    ((sLight_43E0*)&self->mSunLens[0])[0].type = 1;
-    ((sLight_43E0*)&self->mSunLens[0])[0].a = 1.2999999523162842f;
-    ((sLight_43E0*)&self->mSunLens[0])[0].b = 0.03999999910593033f;
-    ((sLight_43E0*)&self->mSunLens[0])[0].col = D_004FAB80;
+    ((&self->mSunLens[0]))[0].mType = 1;
+    ((&self->mSunLens[0]))[0].mPosition = 1.2999999523162842f;
+    ((&self->mSunLens[0]))[0].mScale = 0.03999999910593033f;
+    (*(sCol_43E0*)&((&self->mSunLens[0]))[0].mColor[0]) = D_004FAB80;
     self->mNumLens++;
-    ((sLight_43E0*)&self->mSunLens[0])[1].type = 3;
-    ((sLight_43E0*)&self->mSunLens[0])[1].a = 0.595413327217102f;
-    ((sLight_43E0*)&self->mSunLens[0])[1].b = 0.03453768044710159f;
-    ((sLight_43E0*)&self->mSunLens[0])[1].col = D_004FABA0;
+    ((&self->mSunLens[0]))[1].mType = 3;
+    ((&self->mSunLens[0]))[1].mPosition = 0.595413327217102f;
+    ((&self->mSunLens[0]))[1].mScale = 0.03453768044710159f;
+    (*(sCol_43E0*)&((&self->mSunLens[0]))[1].mColor[0]) = D_004FABA0;
     self->mNumLens++;
-    ((sLight_43E0*)&self->mSunLens[0])[2].type = 0;
-    ((sLight_43E0*)&self->mSunLens[0])[2].a = 0.5f;
-    ((sLight_43E0*)&self->mSunLens[0])[2].b = 0.20000000298023224f;
-    ((sLight_43E0*)&self->mSunLens[0])[2].col = D_004FABC0;
+    ((&self->mSunLens[0]))[2].mType = 0;
+    ((&self->mSunLens[0]))[2].mPosition = 0.5f;
+    ((&self->mSunLens[0]))[2].mScale = 0.20000000298023224f;
+    (*(sCol_43E0*)&((&self->mSunLens[0]))[2].mColor[0]) = D_004FABC0;
     self->mNumLens++;
-    ((sLight_43E0*)&self->mSunLens[0])[3].type = 2;
-    ((sLight_43E0*)&self->mSunLens[0])[3].a = 0.20000000298023224f;
-    ((sLight_43E0*)&self->mSunLens[0])[3].b = 0.025077050551772118f;
-    ((sLight_43E0*)&self->mSunLens[0])[3].col = D_004FABE0;
+    ((&self->mSunLens[0]))[3].mType = 2;
+    ((&self->mSunLens[0]))[3].mPosition = 0.20000000298023224f;
+    ((&self->mSunLens[0]))[3].mScale = 0.025077050551772118f;
+    (*(sCol_43E0*)&((&self->mSunLens[0]))[3].mColor[0]) = D_004FABE0;
     self->mNumLens++;
-    ((sLight_43E0*)&self->mSunLens[0])[4].type = 0;
-    ((sLight_43E0*)&self->mSunLens[0])[4].a = 0.0f;
-    ((sLight_43E0*)&self->mSunLens[0])[4].b = 0.03999999910593033f;
-    ((sLight_43E0*)&self->mSunLens[0])[4].col = D_004FAC00;
+    ((&self->mSunLens[0]))[4].mType = 0;
+    ((&self->mSunLens[0]))[4].mPosition = 0.0f;
+    ((&self->mSunLens[0]))[4].mScale = 0.03999999910593033f;
+    (*(sCol_43E0*)&((&self->mSunLens[0]))[4].mColor[0]) = D_004FAC00;
     self->mNumLens++;
-    ((sLight_43E0*)&self->mSunLens[0])[5].type = 0;
-    ((sLight_43E0*)&self->mSunLens[0])[5].a = -0.5141515731811523f;
-    ((sLight_43E0*)&self->mSunLens[0])[5].b = 0.06998095661401749f;
-    ((sLight_43E0*)&self->mSunLens[0])[5].col = D_004FAC20;
+    ((&self->mSunLens[0]))[5].mType = 0;
+    ((&self->mSunLens[0]))[5].mPosition = -0.5141515731811523f;
+    ((&self->mSunLens[0]))[5].mScale = 0.06998095661401749f;
+    (*(sCol_43E0*)&((&self->mSunLens[0]))[5].mColor[0]) = D_004FAC20;
     self->mNumLens++;
-    ((sLight_43E0*)&self->mSunLens[0])[6].type = 1;
-    ((sLight_43E0*)&self->mSunLens[0])[6].a = -0.40145567059516907f;
-    ((sLight_43E0*)&self->mSunLens[0])[6].b = 0.030118949711322784f;
-    ((sLight_43E0*)&self->mSunLens[0])[6].col = D_004FAC40;
+    ((&self->mSunLens[0]))[6].mType = 1;
+    ((&self->mSunLens[0]))[6].mPosition = -0.40145567059516907f;
+    ((&self->mSunLens[0]))[6].mScale = 0.030118949711322784f;
+    (*(sCol_43E0*)&((&self->mSunLens[0]))[6].mColor[0]) = D_004FAC40;
     self->mNumLens++;
-    ((sLight_43E0*)&self->mSunLens[0])[7].type = 3;
-    ((sLight_43E0*)&self->mSunLens[0])[7].a = -0.6160849332809448f;
-    ((sLight_43E0*)&self->mSunLens[0])[7].b = 0.03999999910593033f;
-    ((sLight_43E0*)&self->mSunLens[0])[7].col = D_004FAC60;
+    ((&self->mSunLens[0]))[7].mType = 3;
+    ((&self->mSunLens[0]))[7].mPosition = -0.6160849332809448f;
+    ((&self->mSunLens[0]))[7].mScale = 0.03999999910593033f;
+    (*(sCol_43E0*)&((&self->mSunLens[0]))[7].mColor[0]) = D_004FAC60;
     self->mNumLens++;
-    ((sLight_43E0*)&self->mSunLens[0])[8].type = 1;
-    ((sLight_43E0*)&self->mSunLens[0])[8].a = -1.0f;
-    ((sLight_43E0*)&self->mSunLens[0])[8].b = 0.0206892192363739f;
-    ((sLight_43E0*)&self->mSunLens[0])[8].col = D_004FAC80;
+    ((&self->mSunLens[0]))[8].mType = 1;
+    ((&self->mSunLens[0]))[8].mPosition = -1.0f;
+    ((&self->mSunLens[0]))[8].mScale = 0.0206892192363739f;
+    (*(sCol_43E0*)&((&self->mSunLens[0]))[8].mColor[0]) = D_004FAC80;
     self->mNumLens++;
 }
 #endif
@@ -3649,7 +3643,6 @@ extern "C" void cWorldLightMan_purgeLightCache(void *);
 void operator_delete(int *);
 struct Base5230 { int pad; };
 struct Inner5230 : Base5230 { virtual ~Inner5230(); };
-struct Outer5230 { int pad; Inner5230 *p; };
 
 /**
  * Destroys the world light manager: its world-painter query, its light cache, then itself.
@@ -3664,7 +3657,7 @@ extern "C" void cWorldLightMan__cWorldLightMan(cWorldLightMan* lightMan, int fla
     if ((Inner5230*)lightMan->m_pWPQuery != 0) {
         delete (Inner5230*)lightMan->m_pWPQuery;
     }
-    cWorldLightMan_purgeLightCache(((Outer5230*)lightMan));
+    cWorldLightMan_purgeLightCache((lightMan));
     if (flags & 1) {
         operator_delete((int *)lightMan);
     }

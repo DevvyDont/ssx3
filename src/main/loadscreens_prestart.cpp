@@ -23,11 +23,6 @@ struct sModule_232348 {
     int f8;
 };
 
-struct sPreStart_232348 {
-    int f0;
-    float t;
-    sModule_232348* next;
-};
 
 /**
  * Updates the pre-start screen: animates and fades in the load indicator and queues the init load screen.
@@ -40,7 +35,7 @@ struct sPreStart_232348 {
  * 11 or more values with values 8 and 10 nonzero, it sets the init load screen's +0x4 flag, which probably
  * makes the start screen it creates open in mode 2.
  */
-extern "C" void cPreStartScreen_update(sPreStart_232348* self)
+extern "C" void cPreStartScreen_update(cPreStartScreen* self)
 {
     cLoadIndicator_update(SSXApp->LoadIndicator);
     float* fade = (float*)((char*)SSXApp->LoadIndicator + 4);
@@ -54,16 +49,16 @@ extern "C" void cPreStartScreen_update(sPreStart_232348* self)
         loadScreen->vt = cInitLoadScreen_vtbl;
         loadScreen->f4 = 0;
         loadScreen->f8 = 0;
-        self->next = loadScreen;
+        *(sModule_232348**)&self->nextscreen = loadScreen;
         // PORT: setNextModule takes the module pointer as an unsigned int
         cAppMan_setNextModule(app, (unsigned int)loadScreen);
     }
-    self->t += 0.01666666753590107f;
+    self->progressivetimer += 0.01666666753590107f;
     if (*(int*)(PadCache + 0x2EE8) > 0) {
-        self->t += 0.15000000596046448f;
+        self->progressivetimer += 0.15000000596046448f;
         if (cPadCache_numButtons(PadCache, 0) >= 11) {
             if (*(float*)(cPadCache_buttonValues(PadCache, 0) + 0x20) != 0.0f && *(float*)(cPadCache_buttonValues(PadCache, 0) + 0x28) != 0.0f) {
-                self->next->f4 = 1;
+                ((sModule_232348*)self->nextscreen)->f4 = 1;
             }
         }
     }

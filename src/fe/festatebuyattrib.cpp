@@ -594,10 +594,6 @@ struct sVE_5300 {
     void (*fn)(void*, int);
 };
 
-struct sObj_5300 {
-    int pad[2];
-    sVE_5300* vt;
-};
 
 struct sVE0_5300 {
     short delta;
@@ -631,8 +627,8 @@ extern "C" void cFEStateBuyAttrib_buyExperience(cFEStateBuyAttrib* buyState)
     cFEStateBuyAttrib_updateTotalCost((cFEStateBuyAttrib*)self);
     self->mBuyPrompt = 0;
     cUIState_hideObjSafe(self, str_PopupGroup);
-    sObj_5300* attribMenu = ((sObj_5300*)self->pAttribMenu);
-    attribMenu->vt[7].fn((char*)attribMenu + attribMenu->vt[7].delta, 1);
+    cUIMenu* attribMenu = (self->pAttribMenu);
+    ((sVE_5300*)attribMenu->mVtbl)[7].fn((char*)attribMenu + ((sVE_5300*)attribMenu->mVtbl)[7].delta, 1);
     sIface_5300* iface = (sIface_5300*)cBE_getInterface_Fv(cBE_getBE(), 11);
     int* bought = self->mPotentialExperience;
     for (int i = 0; i < 7; i++) {

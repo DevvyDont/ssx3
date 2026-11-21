@@ -1190,19 +1190,7 @@ struct sNode_13A8 {
     sNode_13A8* next;
 };
 
-struct sEnt_13A8 {
-    float x;
-    float y;
-    int state;
-    float px, py, pz;
-    unsigned int id;
-};
 
-struct sRec_13A8 {
-    int a;
-    int b;
-    int c;
-};
 
 
 void cDangerMan_DeleteTrackedDangerElemRecord(void*, void*);
@@ -1245,7 +1233,7 @@ extern "C" void cDangerMan_Update(cDangerMan* self)
             zoneCheckAIIndex = 0;
         cRider* pRider = ((sRiders_13A8*)self->mpAI)->getRider(zoneCheckAIIndex);
         char* sub = (char*)&pRider->mVtbl;
-        sRec_13A8* pCurrentRiderTrack = &((sRec_13A8*)&self->mRiderDangerTrack[0])[zoneCheckAIIndex];
+        tRiderDangerTrack* pCurrentRiderTrack = &((&self->mRiderDangerTrack[0]))[zoneCheckAIIndex];
         sNode_13A8* pCurrDangerZone = ((sNode_13A8*)self->mpActiveList);
         int baseDangerZoneLevel = 0;
         do {
@@ -1258,18 +1246,18 @@ extern "C" void cDangerMan_Update(cDangerMan* self)
             pCurrDangerZone = pCurrDangerZone->next;
         } while (pCurrDangerZone);
         if (baseDangerZoneLevel) {
-            pCurrentRiderTrack->a = baseDangerZoneLevel;
-            pCurrentRiderTrack->c = 60;
+            pCurrentRiderTrack->baseLevel = baseDangerZoneLevel;
+            pCurrentRiderTrack->expiryTicksLeft = 60;
         }
-        pCurrentRiderTrack->b = cDangerMan_CalcAppliedDangerLevel(self, zoneCheckAIIndex);
+        pCurrentRiderTrack->appliedLevel = cDangerMan_CalcAppliedDangerLevel(self, zoneCheckAIIndex);
     }
     do { // FAKEMATCH: see header
     for (int i = 0; i < 6; i++) {
-        sRec_13A8* riderTrack = &((sRec_13A8*)&self->mRiderDangerTrack[0])[i];
-        if (riderTrack->a) {
-            if (--riderTrack->c == 0) {
-                riderTrack->a = 0;
-                riderTrack->b = 0;
+        tRiderDangerTrack* riderTrack = &((&self->mRiderDangerTrack[0]))[i];
+        if (riderTrack->baseLevel) {
+            if (--riderTrack->expiryTicksLeft == 0) {
+                riderTrack->baseLevel = 0;
+                riderTrack->appliedLevel = 0;
             }
         }
     }
@@ -1279,25 +1267,25 @@ extern "C" void cDangerMan_Update(cDangerMan* self)
         for (int currElem = 0; currElem < 64; currElem++) {
             if (!numTrackedProcessed)
                 break;
-            sEnt_13A8* pCurrElem = &((sEnt_13A8*)&self->mTrackedDangerElems[0])[currElem];
+            tDangerElemInfo* pCurrElem = &((&self->mTrackedDangerElems[0]))[currElem];
             if (pCurrElem->state == 2)
                 continue;
             numTrackedProcessed--;
             if (pCurrElem->state == 1) {
-                pCurrElem->y -= 0.01666666753590107f;
-                if (pCurrElem->y <= 0.0f) {
+                pCurrElem->endDelaySecsLeft -= 0.01666666753590107f;
+                if (pCurrElem->endDelaySecsLeft <= 0.0f) {
                     cDangerMan_DeleteTrackedDangerElemRecord(self, pCurrElem);
                     continue;
                 }
             }
-            cComp_13A8* pInstNode = lookup_13A8(pCurrElem->id)->comp;
+            cComp_13A8* pInstNode = lookup_13A8(pCurrElem->rID)->comp;
             if (pInstNode == 0 || pInstNode->IsDead()) {
                 pCurrElem->state = 1;
             } else {
                 sVec4_13A8 instPos = pInstNode->GetXform()->pos;
-                pCurrElem->px = instPos.x;
-                pCurrElem->py = instPos.y;
-                pCurrElem->pz = instPos.z;
+                pCurrElem->pos[0] = instPos.x;
+                pCurrElem->pos[1] = instPos.y;
+                pCurrElem->pos[2] = instPos.z;
             }
         }
     }
@@ -1432,11 +1420,6 @@ struct sWorld_1728 {
 };
 
 
-struct sMgr_1728 {
-    int f0;
-    tDangerElemInfo ents[64];
-    int count;
-};
 
 extern "C" void cDangerMan_RemoveDangerElem(cDangerMan*, unsigned int*);
 
@@ -1512,7 +1495,7 @@ extern "C" void cDangerMan_RemoveDangerElem(cDangerMan* self, unsigned int* idp)
             if (elemInfo->state != 2) {
                 remaining--;
                 if (elemInfo->rID == *idp) {
-                    cDangerMan_DeleteTrackedDangerElemRecord(((sMgr_1728*)self), elemInfo);
+                    cDangerMan_DeleteTrackedDangerElemRecord((self), elemInfo);
                     return;
                 }
             }
@@ -6786,10 +6769,6 @@ struct sVec4_8A48 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct sNode_8A48 {
-    sVec4_8A48 pos;
-    char pad[0x10];
-};
 
 
 // PORT: PS2-only VU0 inline asm (vector add).
@@ -6885,7 +6864,7 @@ extern "C" int cRider_isRailLandSuccess(cRider* self, sVec4_8A48* tgt)
 {
     if (cRider_getMotionState((char*)self) != 0 && cRider_getMotionState((char*)self) != 1)
         return 0;
-    sVec4_8A48 boardCenter = vAdd_8A48(*(sVec4_8A48*)((char*)((sNode_8A48*)(self->mAnimModel)->bones) + (self->mBoneBoardRoot << 5)),
+    sVec4_8A48 boardCenter = vAdd_8A48(*(sVec4_8A48*)((char*)((self->mAnimModel)->bones) + (self->mBoneBoardRoot << 5)),
                              *(sVec4_8A48*)&self->mModelOffset);
     if (!cOverlapList_splineIntersect(self->mOverlapList, &boardCenter, tgt, 1, 300.0f))
         return 0;

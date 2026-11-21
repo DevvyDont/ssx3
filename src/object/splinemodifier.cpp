@@ -1883,19 +1883,6 @@ struct sSmVEModel_35B418 {
     void (*fn)(void*, void*, int);
 };
 
-struct cMultiSpline_35B418 {
-    sSmVE_35B418* vtable;   // 0x0
-    int count;              // 0x4
-    char pad_0x8[0x14];
-    int follow;             // 0x1C
-    char pad_0x20[0x10];
-    int dirty;              // 0x30
-    char pad_0x34[0x4];
-    int mode;               // 0x38
-    sSmBox_35B418* boxes;   // 0x3C
-    char* model;            // 0x40
-    char** insts;           // 0x44
-};
 
 extern "C" void cSpline_draw(void* a, void* b);
 
@@ -1909,32 +1896,32 @@ extern "C" void cSpline_draw(void* a, void* b);
  * 0x420 when the box needs clipping (2) or 0x400 when inside (0). DrawPath (+0x1C) draws the spline in Colour
  * (+0x20) through cSpline_draw.
  */
-extern "C" void cMultiSplineModifier_render(cMultiSpline_35B418* self)
+extern "C" void cMultiSplineModifier_render(cMultiSplineModifier* self)
 {
-    if (self->dirty != 0) {
-        self->vtable[3].fn((char*)self + self->vtable[3].delta);
+    if (self->RootTransformDirty != 0) {
+        ((sSmVE_35B418*)self->mVtbl)[3].fn((char*)self + ((sSmVE_35B418*)self->mVtbl)[3].delta);
     }
-    char* model = *(char**)(self->model + 0xC);
+    char* model = *(char**)(((char*)self->Instance) + 0xC);
     cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
-    for (int i = 1; i < self->count; i++) {
+    for (int i = 1; i < self->NumModels; i++) {
         sSmVE93_35B418* vt = (sSmVE93_35B418*)w->mVtbl;
         char* thisp = (char*)w + vt[93].delta;
-        sSmBox_35B418* box = &self->boxes[i];
+        sSmBox_35B418* box = &((sSmBox_35B418*)self->Nodes)[i];
         sSmVE43_35B418* vt2 = (sSmVE43_35B418*)w->mVtbl;
         int hit = vt[93].fn(thisp, &box->min, &box->max, vt2[43].fn((char*)w + vt2[43].delta));
         if (hit != 1) {
             sSmVEModel_35B418* mvt = *(sSmVEModel_35B418**)(model + 0xC);
-            mvt[33].fn(model + mvt[33].delta, self->insts[i] + 0x10, self->mode);
+            mvt[33].fn(model + mvt[33].delta, ((char**)self->NodeInst)[i] + 0x10, ((int)self->AnimMats));
             if (hit != 0) {
                 sSmVEModel_35B418* mvt2 = *(sSmVEModel_35B418**)(model + 0xC);
-                mvt2[5].fn(model + mvt2[5].delta, (void*)self->mode, 1056);
+                mvt2[5].fn(model + mvt2[5].delta, (void*)((int)self->AnimMats), 1056);
             } else {
                 sSmVEModel_35B418* mvt2 = *(sSmVEModel_35B418**)(model + 0xC);
-                mvt2[5].fn(model + mvt2[5].delta, (void*)self->mode, 0x400);
+                mvt2[5].fn(model + mvt2[5].delta, (void*)((int)self->AnimMats), 0x400);
             }
         }
     }
-    if (self->follow != 0) {
+    if (self->DrawPath != 0) {
         cSpline_draw((char*)self + 0x48, (char*)self + 0x20);
     }
 }

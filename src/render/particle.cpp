@@ -3721,10 +3721,6 @@ struct sPtVEntryI6A70 {
     int (*fn)(void*);
 };
 
-struct sPtView6A70 {
-    float x, y, w, h;               // 0x6D20 in the first view
-    char pad_0x10[0x220];
-};
 
 
 extern "C" void func_00376938(cPS2GraphicsMan* self, float x, float y, float w, float h);
@@ -3761,10 +3757,10 @@ extern "C" void cPS2GraphicsMan_SetViewportWindow(cPS2GraphicsMan* self, float x
             }
         }
     }
-    ((sPtView6A70*)&self->mViewportStack[0])[self->mViewportDepth].x = x;
-    ((sPtView6A70*)&self->mViewportStack[0])[self->mViewportDepth].y = y;
-    ((sPtView6A70*)&self->mViewportStack[0])[self->mViewportDepth].w = w;
-    ((sPtView6A70*)&self->mViewportStack[0])[self->mViewportDepth].h = rectHeight;
+    ((&self->mViewportStack[0]))[self->mViewportDepth].unk_000[0] = x;
+    ((&self->mViewportStack[0]))[self->mViewportDepth].unk_000[1] = y;
+    ((&self->mViewportStack[0]))[self->mViewportDepth].unk_000[2] = w;
+    ((&self->mViewportStack[0]))[self->mViewportDepth].unk_000[3] = rectHeight;
     func_00376938((cPS2GraphicsMan*)self, x, y, w, rectHeight);
     func_00364B88(((void*)self->mpDeferMan), self->mScissor);
 }
@@ -3863,15 +3859,6 @@ struct sPtQuadF_6C58 {
     float v[4];
 } __attribute__((aligned(16)));
 
-struct sPtView6C58 {
-    float x, y, w, h;               // 0x00
-    float zNear;                    // 0x10
-    float zFar;                     // 0x14
-    float fov;                      // 0x18
-    float depth;                    // 0x1C
-    int f20;                        // 0x20
-    char pad_0x24[0x230 - 0x24];
-};
 
 struct sPtVtU6C58 {
     short delta;
@@ -3926,11 +3913,11 @@ static inline void ClampScale6C58(cPS2GraphicsMan* self, float& x, float& y)
  */
 extern "C" void cPS2GraphicsMan_SetViewportPerspective(cPS2GraphicsMan* self, float fov, float zNear, float zFar)
 {
-    sPtView6C58* viewEntry = &((sPtView6C58*)&self->mViewportStack[0])[self->mViewportDepth];
-    viewEntry->f20 = 0;
-    viewEntry->zNear = zNear;
-    viewEntry->zFar = zFar;
-    viewEntry->fov = fov;
+    sViewportStack* viewEntry = &((&self->mViewportStack[0]))[self->mViewportDepth];
+    viewEntry->unk_020 = 0;
+    viewEntry->unk_010[0] = zNear;
+    viewEntry->unk_010[1] = zFar;
+    viewEntry->unk_010[2] = fov;
     // PORT: int-arithmetic view address (as in cPS2GraphicsMan_GetViewportFOV); the typed self->views[i] reads score 94-95%.
     char* viewBase = (char*)self + self->mViewportDepth * 0x230;
     float x = *(float*)(viewBase + 0x6D20);
@@ -3975,7 +3962,7 @@ extern "C" void cPS2GraphicsMan_SetViewportPerspective(cPS2GraphicsMan* self, fl
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[0][2] = 0.0f;
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[1][2] = 0.0f;
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[2][2] = zA;
-    float zB = -zFar * zA + viewEntry->depth;
+    float zB = -zFar * zA + viewEntry->unk_01C;
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[3][2] = zB;
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[0][3] = 0.0f;
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[1][3] = 0.0f;
@@ -4024,7 +4011,7 @@ extern "C" void cPS2GraphicsMan_SetViewportPerspective(cPS2GraphicsMan* self, fl
     (*(sPtQuadF_6C58*)&self->mScreenScale).v[3] = 0.0f;
     (*(sPtQuadF_6C58*)&self->mScreenOffset).v[0] = cx + 2047.5f;
     (*(sPtQuadF_6C58*)&self->mScreenOffset).v[1] = cy + 2047.5f;
-    (*(sPtQuadF_6C58*)&self->mScreenOffset).v[2] = zhi + viewEntry->depth;
+    (*(sPtQuadF_6C58*)&self->mScreenOffset).v[2] = zhi + viewEntry->unk_01C;
     (*(sPtQuadF_6C58*)&self->mScreenOffset).v[3] = 0.0f;
     float gw = 2048.0f - 2.0f * fsAbs_6C58(cx);
     float gh = 2048.0f - 2.0f * fsAbs_6C58(cy);
@@ -4050,7 +4037,7 @@ extern "C" void cPS2GraphicsMan_SetViewportPerspective(cPS2GraphicsMan* self, fl
     (*(sPtQuadF_6C58*)&self->mGuardScale).v[3] = 0.0f;
     (*(sPtQuadF_6C58*)&self->mGuardOffset).v[0] = cx + 2047.5f;
     (*(sPtQuadF_6C58*)&self->mGuardOffset).v[1] = cy + 2047.5f;
-    (*(sPtQuadF_6C58*)&self->mGuardOffset).v[2] = zhi + viewEntry->depth;
+    (*(sPtQuadF_6C58*)&self->mGuardOffset).v[2] = zhi + viewEntry->unk_01C;
     (*(sPtQuadF_6C58*)&self->mGuardOffset).v[3] = 0.0f;
     func_00376938_6C58(self, x, y, w, viewHeight);
     self->unk_5910 = 40000.0f;
@@ -4074,20 +4061,7 @@ struct sMat7278 {
     float m[4][4];
 } __attribute__((aligned(16)));
 
-struct sPtView7278 {
-    char pad_0x0[0x1C];
-    float depth;                    // 0x1C
-    char pad_0x20[0x210];
-};
 
-struct sPtCam7278 {
-    char pad_0x0[0x8];
-    float x;                        // 0x8
-    char pad_0xC[0xC];
-    float y;                        // 0x18
-    char pad_0x1C[0xC];
-    float z;                        // 0x28
-};
 
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix * vector); the PC port needs a C fallback.
@@ -4148,7 +4122,7 @@ extern "C" void func_0037D968(cPS2GraphicsMan* self);
 static inline float DepthOffset7278(cPS2GraphicsMan* self, sPt7278* pos, float dist)
 {
     if (dist != 0.0f) {
-    sPt7278 dir(((sPtCam7278*)self->mCurrentView)->x, ((sPtCam7278*)self->mCurrentView)->y, ((sPtCam7278*)self->mCurrentView)->z, 0.0f);
+    sPt7278 dir((self->mCurrentView)->row[0].z, (self->mCurrentView)->row[1].z, (self->mCurrentView)->row[2].z, 0.0f);
     sPt7278 a = MulMat7278((sMat7278*)&self->mNetMatrix, *pos);
     sPt7278 c = MulMat7278((sMat7278*)&self->mNetMatrix, Add7278(*pos, Scale7278(dir, dist)));
     float za = a.z / a.w;
@@ -4172,19 +4146,19 @@ static inline float DepthOffset7278(cPS2GraphicsMan* self, sPt7278* pos, float d
  */
 extern "C" void cPS2GraphicsMan_SetViewportZBias(cPS2GraphicsMan* self, sPt7278* pos, float dist)
 {
-    sPtView7278* view = &((sPtView7278*)&self->mViewportStack[0])[self->mViewportDepth];
+    sViewportStack* view = &((&self->mViewportStack[0]))[self->mViewportDepth];
     if (self->mMatricesValid == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
     float depthOffset = DepthOffset7278(self, pos, dist);
-    if (depthOffset != view->depth) {
-        view->depth = depthOffset;
+    if (depthOffset != view->unk_01C) {
+        view->unk_01C = depthOffset;
         float k = 32767.5f;
         if (self->mCurrentZBFormat == 49) {
             k = 8388467.5f;
         }
         self->mScreenOffset.z = k + depthOffset;
-        self->mGuardOffset.z = k + view->depth;
+        self->mGuardOffset.z = k + view->unk_01C;
         self->mMatricesValid = 0;
     }
 }
@@ -4238,10 +4212,10 @@ static inline void ZScale7458(cPS2GraphicsMan* self, float& zscale)
  */
 extern "C" void cPS2GraphicsMan_SetViewportOrthographic(cPS2GraphicsMan* self, float cx, float cy, float fx, float fy, float zNear, float zFar)
 {
-    sPtView6C58* viewEntry = &((sPtView6C58*)&self->mViewportStack[0])[self->mViewportDepth];
-    viewEntry->f20 = 1;
-    viewEntry->zNear = zNear;
-    viewEntry->zFar = zFar;
+    sViewportStack* viewEntry = &((&self->mViewportStack[0]))[self->mViewportDepth];
+    viewEntry->unk_020 = 1;
+    viewEntry->unk_010[0] = zNear;
+    viewEntry->unk_010[1] = zFar;
     // PORT: int-arithmetic view address, as in the perspective sibling cPS2GraphicsMan_SetViewportPerspective.
     char* viewBase = (char*)self + self->mViewportDepth * 0x230;
     float x = *(float*)(viewBase + 0x6D20);
@@ -4807,17 +4781,9 @@ struct sVEnt_81A0 {
     sV_81A0 (*fn)(void*, const sV_81A0*);
 };
 
-struct sRS_81A0 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    short tex;
-    short pad;
-};
 
 struct sEnt_81A0 {
-    sRS_81A0 rs;                    // 0x00
+    sDrawState rs;                    // 0x00
     unsigned int buf;               // 0x14
     unsigned int next;              // 0x18
     short key;                      // 0x1C
@@ -4980,9 +4946,9 @@ extern "C" void cPS2GraphicsMan_DrawRotatedSprite(cPS2GraphicsMan* self, sV_81A0
     unsigned int next = (unsigned int)packet & 0x0FFFFFFF;
     self->mVifCursor = next;
     sRing_81A0* ring = ((sRing_81A0*)self->mpDeferMan);
-    sRS_81A0* rs = ((sRS_81A0*)self->m_pCurrentDrawState);
+    sDrawState* rs = (self->m_pCurrentDrawState);
     if (ring->count < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
         sEnt_81A0* ringEntry = (sEnt_81A0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
         ringEntry->rs = *rs;
@@ -5075,11 +5041,6 @@ struct sFontRes8808 {
     int last;               // 0x10
 };
 
-struct sView8808 {
-    char pad_0x0[0x20];
-    int mode;               // 0x20
-    char pad_0x24[0x230 - 0x24];
-};
 
 
 // Homogeneous position (w given) with a const-reference ctor: its stores, w included, go straight to the stack
@@ -5161,7 +5122,7 @@ extern "C" void cPS2GraphicsMan_DrawString3D(cPS2GraphicsMan* self, sFontRes8808
     unsigned long* packetHead = (unsigned long*)(buf | 0x30000000);
     unsigned long* glyphOut = packetHead + 10;
     int nloop = 0;
-    if (((sView8808*)&self->mViewportStack[0])[self->mViewportDepth].mode != 0) {
+    if (((&self->mViewportStack[0]))[self->mViewportDepth].unk_020 != 0) {
         float vz = self->mScreenMatrix.row[2].z * z + self->mScreenMatrix.row[3].z;
         sPt7278 cornerMin;
         sPt7278 cornerMax;
@@ -5294,11 +5255,6 @@ struct sFontRes9028 {
     int last;               // 0x10
 };
 
-struct sView9028 {
-    char pad_0x0[0x20];
-    int mode;               // 0x20
-    char pad_0x24[0x230 - 0x24];
-};
 
 
 // Homogeneous position (w given) with a const-reference ctor: its stores, w included, go straight to the stack
@@ -5380,7 +5336,7 @@ extern "C" void cPS2GraphicsMan_DrawString3D1(cPS2GraphicsMan* self, sFontRes902
     unsigned long* packetHead = func_0038F460(D_004A4474, buf, -1, 0);
     unsigned long* packetCursor = packetHead + 10;
     int nloop = 0;
-    if (((sView9028*)&self->mViewportStack[0])[self->mViewportDepth].mode != 0) {
+    if (((&self->mViewportStack[0]))[self->mViewportDepth].unk_020 != 0) {
         float vz = self->mScreenMatrix.row[2].z * z + self->mScreenMatrix.row[3].z;
         sPt7278 topLeft;
         sPt7278 bottomRight;
@@ -5471,17 +5427,9 @@ extern "C" void cPS2GraphicsMan_DrawString3D1(cPS2GraphicsMan* self, sFontRes902
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderTriStrip);
 #ifdef SKIP_ASM
-struct sPtRS_9860 {
-    int f0;                         // bits 6..9 = layer
-    int f4;
-    int f8;                         // bits 0..4 = key
-    int fC;
-    short tex;
-    short pad;
-};
 
 struct sPtEnt_9860 {
-    sPtRS_9860 rs;                  // 0x00
+    sDrawState rs;                  // 0x00
     unsigned int buf;               // 0x14
     unsigned int next;              // 0x18
     short key;                      // 0x1C
@@ -5511,9 +5459,9 @@ extern "C" void func_0037D968(cPS2GraphicsMan* self);
 static inline void QueueRecord_9860(cPS2GraphicsMan* self, unsigned int buf, unsigned int next, int flag)
 {
     sPtRing_9860* ring = ((sPtRing_9860*)self->mpDeferMan);
-    sPtRS_9860* rs = ((sPtRS_9860*)self->m_pCurrentDrawState);
+    sDrawState* rs = (self->m_pCurrentDrawState);
     if (ring->count < 0xA28) {
-        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
         sPtEnt_9860* e = (sPtEnt_9860*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
         e->rs = *rs;
@@ -5545,14 +5493,14 @@ extern "C" void cPS2GraphicsMan_RenderTriStrip(cPS2GraphicsMan* self, int numVer
         prog = (unsigned int)D_12B8 >> 3;
     }
     D_004A4380 = 0;
-    ((sPtRS_9860*)self->m_pCurrentDrawState)->f0 = (((sPtRS_9860*)self->m_pCurrentDrawState)->f0 & ~0x3C0) | 0xC0;
-    ((sPtRS_9860*)self->m_pCurrentDrawState)->fC &= 0xC0000000;
+    (self->m_pCurrentDrawState)->unk_00[0] = (((int)(self->m_pCurrentDrawState)->unk_00[0]) & ~0x3C0) | 0xC0;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[3]) &= 0xC0000000;
     if (self->mMatricesValid == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
     int prim;
     unsigned long regs;
-    if (((sPtRS_9860*)self->m_pCurrentDrawState)->tex >= 0) {
+    if ((self->m_pCurrentDrawState)->m_textureState.m_texid[0] >= 0) {
         prim = 92;
         regs = 1042;
     } else {
@@ -5600,8 +5548,8 @@ extern "C" void cPS2GraphicsMan_RenderTriStrip(cPS2GraphicsMan* self, int numVer
     self->mVifCursor = next;
     QueueRecord_9860(self, buf, next, 0);
     self->mVifCursor += 0x10;
-    ((sPtRS_9860*)self->m_pCurrentDrawState)->f0 &= ~0x3C0;
-    ((sPtRS_9860*)self->m_pCurrentDrawState)->fC &= 0xC0000000;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[0]) &= ~0x3C0;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[3]) &= 0xC0000000;
 }
 #endif
 
@@ -5907,16 +5855,6 @@ extern char D_398[];
 extern int D_004A4510;
 extern int cRenderToggles_m_DisableCharacterSpecular;
 
-// The render-state record as this function sees it: bit-field words (f0 bits 4..5, 6..9 mode, 20..27 alpha; f4 test,
-// layer, blend, ...; f8 bits 0..4 key, 10..28 depth; fC address) and two texture ids.
-struct sRS_A610 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    short tex;
-    short tex2;
-};
 
 struct sPtVtVF_A610 {
     short delta;
@@ -6044,20 +5982,20 @@ static inline void SetField_A610(int& w, int shift, int width, int v)
 static inline void SetTest_A610(cPS2GraphicsMan* self)
 {
     if (cRenderToggles_m_DisableCharacterSpecular == 0) {
-        SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f4, 7, 5, 0x11);
+        SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[1]), 7, 5, 0x11);
     } else {
-        SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f4, 7, 5, 3);
+        SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[1]), 7, 5, 3);
     }
 }
 
 static inline void SetTex_A610(cPS2GraphicsMan* self, int t)
 {
-    ((sRS_A610*)self->m_pCurrentDrawState)->tex = t;
+    (self->m_pCurrentDrawState)->m_textureState.m_texid[0] = t;
 }
 
 static inline void SetTex2_A610(cPS2GraphicsMan* self, int t)
 {
-    ((sRS_A610*)self->m_pCurrentDrawState)->tex2 = t;
+    (self->m_pCurrentDrawState)->m_textureState.m_texid[1] = t;
 }
 
 #define MIN_A610(a, b) ((a) < (b) ? (a) : (b))
@@ -6078,8 +6016,8 @@ static inline void SetTex2_A610(cPS2GraphicsMan* self, int t)
 extern "C" void cPS2GraphicsMan_DrawCharModel(cPS2GraphicsMan* self, sMdl_A610* mdl, char* base, int shadow)
 {
     if (D_004A4510 == 0) {
-        ((sRS_A610*)self->m_pCurrentDrawState)[1] = *((sRS_A610*)self->m_pCurrentDrawState);
-        (*(sRS_A610**)&self->m_pCurrentDrawState)++;
+        (self->m_pCurrentDrawState)[1] = *(self->m_pCurrentDrawState);
+        (*(sDrawState**)&self->m_pCurrentDrawState)++;
         ((sPtVtVF_A610*)self->mVtbl)[124].fn((char*)self + ((sPtVtVF_A610*)self->mVtbl)[124].delta, 1.0f);
         if (self->mMatricesValid == 0) {
             func_0037D968((cPS2GraphicsMan*)self);
@@ -6088,40 +6026,40 @@ extern "C" void cPS2GraphicsMan_DrawCharModel(cPS2GraphicsMan* self, sMdl_A610* 
         sChunk_A610* chunk = (sChunk_A610*)(base + mdl->chunkOfs);
         t4Matrix* bones = ((t4Matrix*)self->mpScratchpad);
         SetTex2_A610(self, self->mCharSpecTexID[chunk->texSlot]);
-        SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f0, 4, 2, 3);
+        SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[0]), 4, 2, 3);
         int z = MIN_A610(0x400, Depth_A610(self, bones->row[3]) + 0x10);
         if (shadow) {
-            SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f0, 20, 8, 0);
-            SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f4, 2, 5, 7);
+            SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[0]), 20, 8, 0);
+            SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[1]), 2, 5, 7);
             SetTest_A610(self);
-            SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f4, 0, 2, 2);
-            SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f8, 10, 19, z);
-            SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f4, 23, 2, 1);
-            SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f4, 20, 2, 0);
-            SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f4, 12, 8, 20);
+            SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[1]), 0, 2, 2);
+            SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[2]), 10, 19, z);
+            SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[1]), 23, 2, 1);
+            SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[1]), 20, 2, 0);
+            SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[1]), 12, 8, 20);
         }
         for (int i = 0; i < mdl->numChunks; i++) {
             func_0037CBC8_A610(self, chunk->tex, 3);
             SetTex_A610(self, chunk->tex);
             if (!shadow) {
                 if (chunk->flags & 0x8000) {
-                    SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f4, 2, 5, 5);
-                    SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f0, 20, 8, chunk->alpha);
-                    SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f4, 7, 5, 0xC);
-                    SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f4, 0, 2, 2);
-                    SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f8, 10, 19, z);
-                    SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f4, 23, 2, 1);
-                    SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f4, 20, 2, 3);
-                    SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f4, 12, 8, 92);
+                    SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[1]), 2, 5, 5);
+                    SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[0]), 20, 8, chunk->alpha);
+                    SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[1]), 7, 5, 0xC);
+                    SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[1]), 0, 2, 2);
+                    SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[2]), 10, 19, z);
+                    SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[1]), 23, 2, 1);
+                    SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[1]), 20, 2, 3);
+                    SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[1]), 12, 8, 92);
                 } else {
-                    SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f4, 2, 5, 1);
-                    SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f0, 20, 8, 0);
+                    SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[1]), 2, 5, 1);
+                    SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[0]), 20, 8, 0);
                     SetTest_A610(self);
-                    SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f4, 0, 2, 0);
-                    SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f8, 10, 19, 0);
-                    SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f4, 23, 2, 1);
-                    SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f4, 20, 2, 0);
-                    SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f4, 12, 8, 20);
+                    SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[1]), 0, 2, 0);
+                    SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[2]), 10, 19, 0);
+                    SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[1]), 23, 2, 1);
+                    SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[1]), 20, 2, 0);
+                    SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[1]), 12, 8, 20);
                 }
             }
             if (chunk->flags & 1) {
@@ -6138,12 +6076,12 @@ extern "C" void cPS2GraphicsMan_DrawCharModel(cPS2GraphicsMan* self, sMdl_A610* 
                 unsigned int next = (unsigned int)packet & 0x0FFFFFFF;
                 sPtRing* ring = ((sPtRing*)self->mpDeferMan);
                 self->mVifCursor = next;
-                sRS_A610* rs = ((sRS_A610*)self->m_pCurrentDrawState);
+                sDrawState* rs = (self->m_pCurrentDrawState);
                 if (ring->count < 2600) {
-                    rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+                    rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
                     int key = *(int*)((char*)ring + 0x69CC0);
                     sPtRingEnt* ringEntry = (sPtRingEnt*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
-                    *(sRS_A610*)&ringEntry->rs = *rs;
+                    *(sDrawState*)&ringEntry->rs = *rs;
                     ringEntry->buf = buf;
                     ringEntry->next = next;
                     ringEntry->key = key;
@@ -6251,12 +6189,12 @@ extern "C" void cPS2GraphicsMan_DrawCharModel(cPS2GraphicsMan* self, sMdl_A610* 
                 unsigned int next = (unsigned int)packet & 0x0FFFFFFF;
                 sPtRing* ring = ((sPtRing*)self->mpDeferMan);
                 self->mVifCursor = next;
-                sRS_A610* rs = ((sRS_A610*)self->m_pCurrentDrawState);
+                sDrawState* rs = (self->m_pCurrentDrawState);
                 if (ring->count < 2600) {
-                    rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+                    rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
                     int key = *(int*)((char*)ring + 0x69CC0);
                     sPtRingEnt* ringEntry = (sPtRingEnt*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
-                    *(sRS_A610*)&ringEntry->rs = *rs;
+                    *(sDrawState*)&ringEntry->rs = *rs;
                     ringEntry->buf = buf;
                     ringEntry->next = next;
                     ringEntry->key = key;
@@ -6267,9 +6205,9 @@ extern "C" void cPS2GraphicsMan_DrawCharModel(cPS2GraphicsMan* self, sMdl_A610* 
             matIdx += chunk->numSubs;
             chunk++;
         }
-        (*(sRS_A610**)&self->m_pCurrentDrawState)--;
-        SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->f0, 6, 4, 0);
-        SetField_A610(((sRS_A610*)self->m_pCurrentDrawState)->fC, 0, 30, 0);
+        (*(sDrawState**)&self->m_pCurrentDrawState)--;
+        SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[0]), 6, 4, 0);
+        SetField_A610(((int)(self->m_pCurrentDrawState)->unk_00[3]), 0, 30, 0);
     }
 }
 #endif
@@ -6626,35 +6564,6 @@ extern "C" void func_00382AF0(cPS2GraphicsMan* self, int arg1, int arg2);
 extern "C" void func_003E6690(int a);
 extern "C" void func_003FD910(int a, int b, int c, int d);
 
-struct sParticleTarget_37BD98 {
-    char pad0[0x18F4];
-    int gs;                     // 0x18F4
-    char pad18F8[0x59D0 - 0x18F8];
-    int f59D0;                  // 0x59D0
-    char pad59D4[0x5A30 - 0x59D4];
-    unsigned int width;         // 0x5A30
-    unsigned int height;        // 0x5A34
-    unsigned int psm;           // 0x5A38
-    unsigned int psm2;          // 0x5A3C
-    unsigned int zpsm;          // 0x5A40
-    short f5A44;                // 0x5A44
-    short f5A46;                // 0x5A46
-    short f5A48;                // 0x5A48
-    int f5A4C;                  // 0x5A4C
-    unsigned int f5A50;         // 0x5A50
-    unsigned int f5A54;         // 0x5A54
-    unsigned int f5A58;         // 0x5A58
-    unsigned int f5A5C;         // 0x5A5C
-    int f5A60;                  // 0x5A60
-    int f5A64;                  // 0x5A64
-    int f5A68;                  // 0x5A68
-    int f5A6C;                  // 0x5A6C
-    int f5A70;                  // 0x5A70
-    int f5A74;                  // 0x5A74
-    int f5A78;                  // 0x5A78
-    int f5A7C;                  // 0x5A7C
-    int f5A80;                  // 0x5A80
-};
 
 /**
  * Sets a GS display mode: checks the formats, stores the display and frame buffer settings, lays out VRAM again and
@@ -6693,7 +6602,7 @@ struct sParticleTarget_37BD98 {
 extern "C" int func_0037BD98(cPS2GraphicsMan* self, unsigned int displayWidth, unsigned int displayHeight, unsigned int w, unsigned int bufferHeight,
                              unsigned int psm, unsigned int psm2, unsigned int zpsm, short resetMode, short interlaceMode, short fieldMode, int flag)
 {
-    if (!func_0037BD38(((sParticleTarget_37BD98*)self), psm2, zpsm))
+    if (!func_0037BD38((self), psm2, zpsm))
         return 0;
 
     self->unk_5A58 = (int)displayHeight;
@@ -7684,17 +7593,9 @@ extern "C" void cPS2GraphicsMan_SetNewTextureData1(cPS2GraphicsMan* self, int te
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_LockFrameToTexture);
 #ifdef SKIP_ASM
-struct sPtRS_D348 {
-    int f0;
-    int f4;
-    int f8;                         // bits 0..4 = key
-    int fC;
-    short tex;
-    short pad;
-};
 
 struct sPtEnt_D348 {
-    sPtRS_D348 rs;                  // 0x00
+    sDrawState rs;                  // 0x00
     unsigned int buf;               // 0x14
     unsigned int next;              // 0x18
     short key;                      // 0x1C
@@ -7730,9 +7631,9 @@ extern "C" int cPS2GraphicsMan_LockFrameToTexture(cPS2GraphicsMan* self, int idx
     unsigned int next = packetAddr & 0x0FFFFFFF;
     self->mVifCursor = next;
     sPtRing_D348* ring = ((sPtRing_D348*)self->mpDeferMan);
-    sPtRS_D348* rs = ((sPtRS_D348*)self->m_pCurrentDrawState);
+    sDrawState* rs = (self->m_pCurrentDrawState);
     if (ring->count < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
         sPtEnt_D348* ringEntry = (sPtEnt_D348*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
         ringEntry->rs = *rs;
@@ -7749,17 +7650,9 @@ extern "C" int cPS2GraphicsMan_LockFrameToTexture(cPS2GraphicsMan* self, int idx
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_RestoreFrameLock);
 #ifdef SKIP_ASM
-struct sPtRS_D450 {
-    int f0;
-    int f4;
-    int f8;                         // bits 0..4 = key
-    int fC;
-    short tex;
-    short pad;
-};
 
 struct sPtEnt_D450 {
-    sPtRS_D450 rs;                  // 0x00
+    sDrawState rs;                  // 0x00
     unsigned int buf;               // 0x14
     unsigned int next;              // 0x18
     short key;                      // 0x1C
@@ -7804,11 +7697,11 @@ extern "C" int cPS2GraphicsMan_RestoreFrameLock(cPS2GraphicsMan* self)
     packet += 14;
     unsigned int next = (unsigned int)packet & 0x0FFFFFFF;
     sPtRing_D450* ring = ((sPtRing_D450*)self->mpDeferMan);
-    sPtRS_D450* rs = ((sPtRS_D450*)self->m_pCurrentDrawState);
+    sDrawState* rs = (self->m_pCurrentDrawState);
     self->mVifCursor = next;
     int one = 1;
     if (ring->count < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
         sPtEnt_D450* ringEntry = (sPtEnt_D450*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
         ringEntry->rs = *rs;
@@ -7958,17 +7851,9 @@ extern "C" void cPS2GraphicsMan_AddProjectiveTexture(cPS2GraphicsMan* self, sPar
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_ShadowClearLockTexture);
 #ifdef SKIP_ASM
-struct sPtRS_D800 {
-    int f0;
-    int f4;
-    int f8;                         // bits 0..4 = key
-    int fC;
-    short tex;
-    short pad;
-};
 
 struct sPtEnt_D800 {
-    sPtRS_D800 rs;                  // 0x00
+    sDrawState rs;                  // 0x00
     unsigned int buf;               // 0x14
     unsigned int next;              // 0x18
     short key;                      // 0x1C
@@ -8007,9 +7892,9 @@ extern "C" void cPS2GraphicsMan_ShadowClearLockTexture(cPS2GraphicsMan* self, in
     unsigned int next = packetAddr & 0x0FFFFFFF;
     self->mVifCursor = next;
     sPtRing_D800* ring = ((sPtRing_D800*)self->mpDeferMan);
-    sPtRS_D800* rs = ((sPtRS_D800*)self->m_pCurrentDrawState);
+    sDrawState* rs = (self->m_pCurrentDrawState);
     if (ring->count < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
         sPtEnt_D800* e = (sPtEnt_D800*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
         ASSERT_D800(e != 0);
@@ -8810,17 +8695,9 @@ extern "C" void cPS2GraphicsMan_RenderParticleEmitter(sPtGfx_0518* self, sQuad_0
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderDynamicParticleEmitter);
 #ifdef SKIP_ASM
-struct sPtRS_07A0 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    short tex;
-    short pad;
-};
 
 struct sPtEnt_07A0 {
-    sPtRS_07A0 rs;                  // 0x00
+    sDrawState rs;                  // 0x00
     unsigned int buf;               // 0x14
     unsigned int next;              // 0x18
     short key;                      // 0x1C
@@ -8905,8 +8782,8 @@ extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter(cPS2GraphicsMan* se
 {
     if (D_004A44FC != 0)
         return;
-    ((sPtRS_07A0*)self->m_pCurrentDrawState)->f0 = (((sPtRS_07A0*)self->m_pCurrentDrawState)->f0 & ~0x3C0) | 0x100;
-    ((sPtRS_07A0*)self->m_pCurrentDrawState)->fC &= 0xC0000000;
+    (self->m_pCurrentDrawState)->unk_00[0] = (((int)(self->m_pCurrentDrawState)->unk_00[0]) & ~0x3C0) | 0x100;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[3]) &= 0xC0000000;
     if (self->mMatricesValid == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
@@ -8969,9 +8846,9 @@ extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter(cPS2GraphicsMan* se
         unsigned int next = func_0038F668(D_004A4474, writePtr, 4);
         self->mVifCursor = next;
         sPtRing_07A0* ring = ((sPtRing_07A0*)self->mpDeferMan);
-        sPtRS_07A0* rs = ((sPtRS_07A0*)self->m_pCurrentDrawState);
+        sDrawState* rs = (self->m_pCurrentDrawState);
         if (ring->count < 2600) {
-            rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+            rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
             int key = *(int*)((char*)ring + 0x69CC0);
             sPtEnt_07A0* e = (sPtEnt_07A0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
             e->rs = *rs;
@@ -8982,8 +8859,8 @@ extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter(cPS2GraphicsMan* se
         }
         self->mVifCursor += 0x10;
     }
-    ((sPtRS_07A0*)self->m_pCurrentDrawState)->f0 &= ~0x3C0;
-    ((sPtRS_07A0*)self->m_pCurrentDrawState)->fC &= 0xC0000000;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[0]) &= ~0x3C0;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[3]) &= 0xC0000000;
 }
 #endif
 
@@ -9244,18 +9121,9 @@ extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter1(sPS2GfxView_0CE0* 
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderSnowBoxFlakes);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct sPtRS_1310 {
-    int f0;                         // bits 6..9 = layer
-    int f4;
-    int f8;                         // bits 0..4 = key
-    int fC;
-    short tex;
-    short pad;
-};
 
 struct sPtEnt_1310 {
-    sPtRS_1310 rs;                  // 0x00
+    sDrawState rs;                  // 0x00
     unsigned int buf;               // 0x14
     unsigned int next;              // 0x18
     short key;                      // 0x1C
@@ -9371,10 +9239,10 @@ static inline void CopyQuads_1310(unsigned long** pp, const void* srcp, int n)
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit GS words are `ulong`.
 extern "C" void cPS2GraphicsMan_RenderSnowBoxFlakes(cPS2GraphicsMan* self, sPtObj_1310* obj)
 {
-    ((sPtRS_1310*)self->m_pCurrentDrawState)->f0 = (((sPtRS_1310*)self->m_pCurrentDrawState)->f0 & ~0x3C0) | 0x140;
-    ((sPtRS_1310*)self->m_pCurrentDrawState)->fC &= 0xC0000000;
-    ((sPtRS_1310*)self->m_pCurrentDrawState)->f4 = (((sPtRS_1310*)self->m_pCurrentDrawState)->f4 & ~3) | 2;
-    ((sPtRS_1310*)self->m_pCurrentDrawState)->f8 &= 0xE00003FF;
+    (self->m_pCurrentDrawState)->unk_00[0] = (((int)(self->m_pCurrentDrawState)->unk_00[0]) & ~0x3C0) | 0x140;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[3]) &= 0xC0000000;
+    (self->m_pCurrentDrawState)->unk_00[1] = (((int)(self->m_pCurrentDrawState)->unk_00[1]) & ~3) | 2;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[2]) &= 0xE00003FF;
     if (self->mMatricesValid == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
@@ -9406,9 +9274,9 @@ extern "C" void cPS2GraphicsMan_RenderSnowBoxFlakes(cPS2GraphicsMan* self, sPtOb
     unsigned int next = func_0038F668(D_004A4474, packet, 4);
     self->mVifCursor = next;
     sPtRing_1310* ring = ((sPtRing_1310*)self->mpDeferMan);
-    sPtRS_1310* rs = ((sPtRS_1310*)self->m_pCurrentDrawState);
+    sDrawState* rs = (self->m_pCurrentDrawState);
     if (ring->count < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
         sPtEnt_1310* ringEntry = (sPtEnt_1310*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
         ringEntry->rs = *rs;
@@ -9418,27 +9286,19 @@ extern "C" void cPS2GraphicsMan_RenderSnowBoxFlakes(cPS2GraphicsMan* self, sPtOb
         ringEntry->flag = 0;
     }
     self->mVifCursor += 0x10;
-    ((sPtRS_1310*)self->m_pCurrentDrawState)->f4 &= ~3;
-    ((sPtRS_1310*)self->m_pCurrentDrawState)->f8 &= 0xE00003FF;
-    ((sPtRS_1310*)self->m_pCurrentDrawState)->f0 &= ~0x3C0;
-    ((sPtRS_1310*)self->m_pCurrentDrawState)->fC &= 0xC0000000;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[1]) &= ~3;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[2]) &= 0xE00003FF;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[0]) &= ~0x3C0;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[3]) &= 0xC0000000;
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderSnowBoxFluffs);
 #ifdef SKIP_ASM
-struct sPtRS_16F0 {
-    int f0;                         // bits 6..9 = layer
-    int f4;
-    int f8;                         // bits 0..4 = key
-    int fC;
-    short tex;
-    short pad;
-};
 
 struct sPtEnt_16F0 {
-    sPtRS_16F0 rs;                  // 0x00
+    sDrawState rs;                  // 0x00
     unsigned int buf;               // 0x14
     unsigned int next;              // 0x18
     short key;                      // 0x1C
@@ -9554,10 +9414,10 @@ static inline void CopyQuads_16F0(unsigned long** pp, const void* srcp, int n)
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit GS words are `ulong`.
 extern "C" void cPS2GraphicsMan_RenderSnowBoxFluffs(cPS2GraphicsMan* self, sPtObj_16F0* obj)
 {
-    ((sPtRS_16F0*)self->m_pCurrentDrawState)->f0 = (((sPtRS_16F0*)self->m_pCurrentDrawState)->f0 & ~0x3C0) | 0x140;
-    ((sPtRS_16F0*)self->m_pCurrentDrawState)->fC &= 0xC0000000;
-    ((sPtRS_16F0*)self->m_pCurrentDrawState)->f4 = (((sPtRS_16F0*)self->m_pCurrentDrawState)->f4 & ~3) | 2;
-    ((sPtRS_16F0*)self->m_pCurrentDrawState)->f8 &= 0xE00003FF;
+    (self->m_pCurrentDrawState)->unk_00[0] = (((int)(self->m_pCurrentDrawState)->unk_00[0]) & ~0x3C0) | 0x140;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[3]) &= 0xC0000000;
+    (self->m_pCurrentDrawState)->unk_00[1] = (((int)(self->m_pCurrentDrawState)->unk_00[1]) & ~3) | 2;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[2]) &= 0xE00003FF;
     if (self->mMatricesValid == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
@@ -9589,9 +9449,9 @@ extern "C" void cPS2GraphicsMan_RenderSnowBoxFluffs(cPS2GraphicsMan* self, sPtOb
     unsigned int next = func_0038F668(D_004A4474, packet, 4);
     self->mVifCursor = next;
     sPtRing_16F0* ring = ((sPtRing_16F0*)self->mpDeferMan);
-    sPtRS_16F0* rs = ((sPtRS_16F0*)self->m_pCurrentDrawState);
+    sDrawState* rs = (self->m_pCurrentDrawState);
     if (ring->count < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
         sPtEnt_16F0* ringEntry = (sPtEnt_16F0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
         ringEntry->rs = *rs;
@@ -9601,10 +9461,10 @@ extern "C" void cPS2GraphicsMan_RenderSnowBoxFluffs(cPS2GraphicsMan* self, sPtOb
         ringEntry->flag = 0;
     }
     self->mVifCursor += 0x10;
-    ((sPtRS_16F0*)self->m_pCurrentDrawState)->f4 &= ~3;
-    ((sPtRS_16F0*)self->m_pCurrentDrawState)->f8 &= 0xE00003FF;
-    ((sPtRS_16F0*)self->m_pCurrentDrawState)->f0 &= ~0x3C0;
-    ((sPtRS_16F0*)self->m_pCurrentDrawState)->fC &= 0xC0000000;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[1]) &= ~3;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[2]) &= 0xE00003FF;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[0]) &= ~0x3C0;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[3]) &= 0xC0000000;
 }
 #endif
 
@@ -9761,17 +9621,9 @@ extern "C" void cPS2GraphicsMan_RenderLineStrip(cPS2GraphicsMan* self, int n, sV
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderSpline);
 #ifdef SKIP_ASM
-struct sPtRS_1F10 {
-    int f0;                         // bits 6..9 = layer
-    int f4;
-    int f8;                         // bits 0..4 = key
-    int fC;
-    short tex;
-    short pad;
-};
 
 struct sPtEnt_1F10 {
-    sPtRS_1F10 rs;                  // 0x00
+    sDrawState rs;                  // 0x00
     unsigned int buf;               // 0x14
     unsigned int next;              // 0x18
     short key;                      // 0x1C
@@ -9822,8 +9674,8 @@ extern "C" void func_0037D968(cPS2GraphicsMan* self);
 // PORT: uncached (0x30000000) pointers held in int; 64-bit GS words are `unsigned long`.
 extern "C" void cPS2GraphicsMan_RenderSpline(cPS2GraphicsMan* self, sMat_1F10* BezMat, float* col, int n)
 {
-    ((sPtRS_1F10*)self->m_pCurrentDrawState)->f0 = (((sPtRS_1F10*)self->m_pCurrentDrawState)->f0 & ~0x3C0) | 0xC0;
-    ((sPtRS_1F10*)self->m_pCurrentDrawState)->fC &= 0xC0000000;
+    (self->m_pCurrentDrawState)->unk_00[0] = (((int)(self->m_pCurrentDrawState)->unk_00[0]) & ~0x3C0) | 0xC0;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[3]) &= 0xC0000000;
     if (self->mMatricesValid == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
@@ -9848,9 +9700,9 @@ extern "C" void cPS2GraphicsMan_RenderSpline(cPS2GraphicsMan* self, sMat_1F10* B
     self->mVifCursor = (unsigned int)packet & 0x0FFFFFFF;
     sPtRing_1F10* ring = ((sPtRing_1F10*)self->mpDeferMan);
     unsigned int next = self->mVifCursor;
-    sPtRS_1F10* rs = ((sPtRS_1F10*)self->m_pCurrentDrawState);
+    sDrawState* rs = (self->m_pCurrentDrawState);
     if (ring->count < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
         sPtEnt_1F10* ringEntry = (sPtEnt_1F10*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
         ringEntry->rs = *rs;
@@ -11291,30 +11143,9 @@ extern char str_GridMeshMem[];
 extern "C" int func_00385EB0(void* self, int rows, int pitch);
 extern "C" void func_00386128(void* self, int rows, int pitch, char* dst, char* src);
 
-struct sPtSurf5138 {
-    int field_0x0;
-    void** vtable;          // 0x4
-    char pad_0x8[0x188];
-    short w;                // 0x190
-    short h;                // 0x192
-    float field_0x194;      // 0x194
-    float field_0x198;      // 0x198
-    char* buf;              // 0x19C
-    int field_0x1A0;        // 0x1A0
-    int field_0x1A4;        // 0x1A4
-    int pad_0x1A8;
-    char* bufA;             // 0x1AC
-    char* bufB;             // 0x1B0
-    char* rowsA;            // 0x1B4
-    char* rowsB;            // 0x1B8
-    int rows;               // 0x1BC
-    int pitch;              // 0x1C0
-    int field_0x1C4;        // 0x1C4
-    int valid;              // 0x1C8
-};
 
 // PORT: the unit declares cPS2GridMesh_cPS2GridMesh(void*, void*, void*, void*, unsigned int); the body takes ints.
-extern "C" sPtSurf5138* cPS2GridMesh_cPS2GridMesh_impl(sPtSurf5138* self, int w, int h, int a3, int allocFlags) __asm__("cPS2GridMesh_cPS2GridMesh");
+extern "C" cPS2GridMesh* cPS2GridMesh_cPS2GridMesh_impl(cPS2GridMesh* self, int w, int h, int a3, int allocFlags) __asm__("cPS2GridMesh_cPS2GridMesh");
 /**
  * Constructs a grid mesh of @p w x @p gridHeight vertices drawn as h - 1 strips, with two vertex buffers to update and draw in
  * turn.
@@ -11333,37 +11164,37 @@ extern "C" sPtSurf5138* cPS2GridMesh_cPS2GridMesh_impl(sPtSurf5138* self, int w,
  * @param allocFlags  memory flags for the buffer allocation
  * @return the mesh
  */
-extern "C" sPtSurf5138* cPS2GridMesh_cPS2GridMesh_impl(sPtSurf5138* self, int w, int gridHeight, int graphicsMan, int allocFlags)
+extern "C" cPS2GridMesh* cPS2GridMesh_cPS2GridMesh_impl(cPS2GridMesh* self, int w, int gridHeight, int graphicsMan, int allocFlags)
 {
     int pitch = w * 2;
     int rows = gridHeight - 1;
-    self->vtable = cPS2GridMesh_vtbl;
-    self->rows = rows;
-    self->pitch = pitch;
-    self->field_0x1C4 = graphicsMan;
-    self->field_0x194 = 20000.0f;
-    self->field_0x198 = 1.638350009918213f;
-    self->w = w;
-    self->h = gridHeight;
+    self->mVtbl = cPS2GridMesh_vtbl;
+    self->m_iNumStrip = rows;
+    self->m_iStripLen = pitch;
+    *(int*)&self->m_pGfxMan = graphicsMan;
+    self->unk_194 = 20000.0f;
+    self->unk_198 = 1.638350009918213f;
+    self->m_iWidth = w;
+    self->m_iHeight = gridHeight;
     int size = func_00385EB0(self, rows, pitch);
-    char* buf = (char*)operator_new_tag(size * 2 + (self->rows << 5), str_GridMeshMem, allocFlags, 0);
-    self->buf = buf;
+    char* buf = (char*)operator_new_tag(size * 2 + (self->m_iNumStrip << 5), str_GridMeshMem, allocFlags, 0);
+    self->m_pMem = buf;
     if (buf == 0) {
-        self->valid = 0;
+        self->mbOK = 0;
     } else {
         char* bufCursor = buf + size;
-        int rowCount = self->rows;
-        self->bufB = bufCursor;
+        int rowCount = self->m_iNumStrip;
+        self->unk_1AC[1] = bufCursor;
         bufCursor += size;
-        self->rowsA = bufCursor;
-        self->valid = 1;
+        *(char**)&self->unk_1B4[0] = bufCursor;
+        self->mbOK = 1;
         bufCursor += rowCount * 16;
-        self->rowsB = bufCursor;
-        self->bufA = buf;
-        func_00386128(self, rowCount, self->pitch, self->rowsA, buf);
-        func_00386128(self, self->rows, self->pitch, self->rowsB, self->bufB);
-        self->field_0x1A4 = 0;
-        self->field_0x1A0 = -1;
+        *(char**)&self->unk_1B4[1] = bufCursor;
+        self->unk_1AC[0] = buf;
+        func_00386128(self, rowCount, self->m_iStripLen, ((char*)self->unk_1B4[0]), buf);
+        func_00386128(self, self->m_iNumStrip, self->m_iStripLen, ((char*)self->unk_1B4[1]), self->unk_1AC[1]);
+        self->m_bUpdate = 0;
+        self->unk_1A0 = -1;
     }
     return self;
 }
@@ -13099,17 +12930,9 @@ void func_00387EC0_impl(sPtGfx_7EC0* self, sVtx_7EC0** tbl, int start, int n, in
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderBoardWake);
 #ifdef SKIP_ASM
-struct sPtRS_83B8 {
-    int f0;                         // bits 6..9 = layer
-    int f4;
-    int f8;                         // bits 0..4 = key
-    int fC;
-    short tex;
-    short pad;
-};
 
 struct sPtEnt_83B8 {
-    sPtRS_83B8 rs;                  // 0x00
+    sDrawState rs;                  // 0x00
     unsigned int buf;               // 0x14
     unsigned int next;              // 0x18
     short key;                      // 0x1C
@@ -13125,7 +12948,7 @@ struct sPtRing_83B8 {
 
 
 extern int D_004A5B84;
-extern sPtRS_83B8 D_00501420_rs __asm__("sDrawState_s_defaultDrawState");
+extern sDrawState D_00501420_rs __asm__("sDrawState_s_defaultDrawState");
 
 extern "C" void func_0037D968(cPS2GraphicsMan* self);
 extern "C" void func_003885E0(void* self, void* a, void* b, void* c, void* d, int i0, int i1, float f0, float f1);
@@ -13148,8 +12971,8 @@ extern "C" void func_003885E0(void* self, void* a, void* b, void* c, void* d, in
 // PORT: uncached (0x30000000) pointers held in int.
 extern "C" void cPS2GraphicsMan_RenderBoardWake(cPS2GraphicsMan* self, void* verts, int numSegmentsWide, void* startIndex, void* numIndices, void* stripLength, float alphaMultiplier, float alphaDelta)
 {
-    ((sPtRS_83B8*)self->m_pCurrentDrawState)->f0 = (((sPtRS_83B8*)self->m_pCurrentDrawState)->f0 & ~0x3C0) | 0xC0;
-    ((sPtRS_83B8*)self->m_pCurrentDrawState)->fC &= 0xC0000000;
+    (self->m_pCurrentDrawState)->unk_00[0] = (((int)(self->m_pCurrentDrawState)->unk_00[0]) & ~0x3C0) | 0xC0;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[3]) &= 0xC0000000;
     if (self->mMatricesValid == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
@@ -13161,9 +12984,9 @@ extern "C" void cPS2GraphicsMan_RenderBoardWake(cPS2GraphicsMan* self, void* ver
     }
     sPtRing_83B8* ring = ((sPtRing_83B8*)self->mpDeferMan);
     unsigned int next = self->mVifCursor;
-    sPtRS_83B8* rs = ((sPtRS_83B8*)self->m_pCurrentDrawState);
+    sDrawState* rs = (self->m_pCurrentDrawState);
     if (ring->count < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
         sPtEnt_83B8* ringEntry = (sPtEnt_83B8*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
         ringEntry->rs = *rs;
@@ -13173,9 +12996,9 @@ extern "C" void cPS2GraphicsMan_RenderBoardWake(cPS2GraphicsMan* self, void* ver
         ringEntry->flag = 0;
     }
     self->mVifCursor += 0x10;
-    ((sPtRS_83B8*)self->m_pCurrentDrawState)->f0 &= ~0x3C0;
-    ((sPtRS_83B8*)self->m_pCurrentDrawState)->fC &= 0xC0000000;
-    *((sPtRS_83B8*)self->m_pCurrentDrawState) = D_00501420_rs;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[0]) &= ~0x3C0;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[3]) &= 0xC0000000;
+    *(self->m_pCurrentDrawState) = D_00501420_rs;
 }
 #endif
 

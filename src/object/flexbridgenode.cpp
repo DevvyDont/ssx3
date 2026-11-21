@@ -965,24 +965,6 @@ struct sFlexMesh_75D8 {
     sVEV_75D8* vt;          // 0x04
 };
 
-struct sFlexBridge_75D8 {
-    char pad_0x00[0xC];
-    sVE_75D8* vt;           // 0x0C
-    char pad_0x10[0x8];
-    int def;                // 0x18
-    char pad_0x1C[0x4];
-    sV4_75D8 side;          // 0x20
-    sV4_75D8 up;            // 0x30
-    char pad_0x40[0x10];
-    int count;              // 0x50
-    char pad_0x54[0x74 - 0x54];
-    sFlexNode_75D8* nodes;  // 0x74
-    sFlexMesh_75D8* mesh;   // 0x78
-    sV4_75D8* pts;          // 0x7C
-    sV4_75D8* normals;      // 0x80
-    char pad_0x84[0x90 - 0x84];
-    sBox_75D8 box;          // 0x90
-};
 
 extern sV4_75D8 t4vect_ZAxis;
 
@@ -1125,36 +1107,36 @@ static inline sV4_75D8 MulMat_75D8(const sMat_75D8* m, const sV4_75D8& v)
 // side/up offsets), per-triangle normals, the transformed bounding box and the mesh update.
 extern "C" void cFlexBridgeNode_updateGrid(cFlexBridgeNode* vself)
 {
-    sFlexBridge_75D8* self = (sFlexBridge_75D8*)vself;
-    int n = self->count;
-    sV4_75D8 upRef = Scale_75D8(t4vect_ZAxis, Length_75D8(self->up));
-    sV4_75D8 sideRef = Scale_75D8(t4vect_ZAxis, Length_75D8(self->side));
+    cFlexBridgeNode* self = vself;
+    int n = self->Mesh.Width;
+    sV4_75D8 upRef = Scale_75D8(t4vect_ZAxis, Length_75D8(*(sV4_75D8*)&self->BottomRightOffset));
+    sV4_75D8 sideRef = Scale_75D8(t4vect_ZAxis, Length_75D8(*(sV4_75D8*)&self->BottomLeftOffset));
     int nverts = n * 2;
     int ntris = (n - 1) * 2;
-    sFlexNode_75D8* node = self->nodes;
+    sFlexNode_75D8* node = ((sFlexNode_75D8*)self->Mesh.Nodes);
     int i;
     for (i = 0; i < n; i++) {
         float sinAngle, cosAngle;
         fSinCos(&sinAngle, &cosAngle, node->angle);
-        self->pts[i] = Add_75D8(Add_75D8(node->pos, Scale_75D8(self->up, cosAngle)), Scale_75D8(upRef, sinAngle));
-        self->pts[n + i] = Sub_75D8(Add_75D8(node->pos, Scale_75D8(self->side, cosAngle)), Scale_75D8(sideRef, sinAngle));
+        ((sV4_75D8*)self->Verts)[i] = Add_75D8(Add_75D8(node->pos, Scale_75D8(*(sV4_75D8*)&self->BottomRightOffset, cosAngle)), Scale_75D8(upRef, sinAngle));
+        ((sV4_75D8*)self->Verts)[n + i] = Sub_75D8(Add_75D8(node->pos, Scale_75D8(*(sV4_75D8*)&self->BottomLeftOffset, cosAngle)), Scale_75D8(sideRef, sinAngle));
         node++;
     }
     int k;
     int j = 0;
     for (k = 0; k < ntris; k += 2) {
-        self->normals[k] = Normalize_75D8(Cross_75D8(Sub_75D8(self->pts[n + j + 1], self->pts[j]), Sub_75D8(self->pts[n + j], self->pts[j])));
-        self->normals[k + 1] = Normalize_75D8(Cross_75D8(Sub_75D8(self->pts[j + 1], self->pts[j]), Sub_75D8(self->pts[n + j + 1], self->pts[j])));
+        ((sV4_75D8*)self->FaceNorms)[k] = Normalize_75D8(Cross_75D8(Sub_75D8(((sV4_75D8*)self->Verts)[n + j + 1], ((sV4_75D8*)self->Verts)[j]), Sub_75D8(((sV4_75D8*)self->Verts)[n + j], ((sV4_75D8*)self->Verts)[j])));
+        ((sV4_75D8*)self->FaceNorms)[k + 1] = Normalize_75D8(Cross_75D8(Sub_75D8(((sV4_75D8*)self->Verts)[j + 1], ((sV4_75D8*)self->Verts)[j]), Sub_75D8(((sV4_75D8*)self->Verts)[n + j + 1], ((sV4_75D8*)self->Verts)[j])));
         j++;
     }
-    sBox_75D8* box = &self->box;
+    sBox_75D8* box = (sBox_75D8*)&self->BoundBox;
     sV3_75D8 pos[32];
     float minX = 1e10f, minY = 1e10f, minZ = 1e10f;
     float maxX = -1e10f, maxY = -1e10f, maxZ = -1e10f;
-    sMat_75D8* matrix = (sMat_75D8*)self->vt[24].fn((char*)self + self->vt[24].delta);
+    sMat_75D8* matrix = (sMat_75D8*)((sVE_75D8*)self->mVtbl)[24].fn((char*)self + ((sVE_75D8*)self->mVtbl)[24].delta);
     for (int vertexIndex = 0; vertexIndex < nverts; vertexIndex++) {
-        pos[vertexIndex] = self->pts[vertexIndex];
-        sV4_75D8 w = MulMat_75D8(matrix, self->pts[vertexIndex]);
+        pos[vertexIndex] = ((sV4_75D8*)self->Verts)[vertexIndex];
+        sV4_75D8 w = MulMat_75D8(matrix, ((sV4_75D8*)self->Verts)[vertexIndex]);
         minX = w.X() < minX ? w.X() : minX;
         maxX = maxX < w.X() ? w.X() : maxX;
         minY = w.Y() < minY ? w.Y() : minY;
@@ -1162,20 +1144,20 @@ extern "C" void cFlexBridgeNode_updateGrid(cFlexBridgeNode* vself)
         minZ = w.Z() < minZ ? w.Z() : minZ;
         maxZ = maxZ < w.Z() ? w.Z() : maxZ;
     }
-    sBox_75D8 old = self->box;
+    sBox_75D8 old = *(sBox_75D8*)&self->BoundBox;
     sV4_75D8 corner;
     corner.x = minX;
     corner.y = minY;
     corner.z = minZ;
     corner.w = 1.0f;
-    self->box.min = corner;
+    (*(sBox_75D8*)&self->BoundBox).min = corner;
     corner.x = maxX;
     corner.y = maxY;
     corner.z = maxZ;
-    self->box.max = corner;
-    int id = self->def;
+    (*(sBox_75D8*)&self->BoundBox).max = corner;
+    int id = ((int)self->Instance);
     nash_Nash_movenode_75D8(cObjectInterface_getNash(), 0, id, box, &old);
-    self->mesh->vt[3].fn((char*)self->mesh + self->mesh->vt[3].delta, pos);
+    ((sFlexMesh_75D8*)self->GridMesh)->vt[3].fn((char*)((sFlexMesh_75D8*)self->GridMesh) + ((sFlexMesh_75D8*)self->GridMesh)->vt[3].delta, pos);
 }
 #endif
 
@@ -1468,14 +1450,6 @@ struct sFlexBridgeVEntry8058 {
     void (*fn)(void*);
 };
 
-struct sObj00348058 {
-    char pad_0x00[0xC];
-    sFlexBridgeVEntry8058* vt;
-    char pad_0x10[0x20];
-    sBox00348058 box;
-    char pad_0x50[0x4];
-    int id;
-};
 
 extern "C" void* cObjectInterface_getNash();
 extern "C" void nash_Nash_movenode(void* world, int type, int id, sBox00348058* box, sBox00348058* old);
@@ -1490,11 +1464,11 @@ extern "C" void nash_Nash_movenode(void* world, int type, int id, sBox00348058* 
  */
 extern "C" void cFlexRailNode_updateSpaceHash(cFlexRailNode* node)
 {
-    sObj00348058* self = (sObj00348058*)node;
-    sBox00348058* box = &self->box;
-    sBox00348058 old = self->box;
-    self->vt[50].fn((char*)self + self->vt[50].delta);
-    nash_Nash_movenode(cObjectInterface_getNash(), 2, self->id, box, &old);
+    cFlexRailNode* self = node;
+    sBox00348058* box = (sBox00348058*)&self->BoundBox;
+    sBox00348058 old = *(sBox00348058*)&self->BoundBox;
+    ((sFlexBridgeVEntry8058*)self->mVtbl)[50].fn((char*)self + ((sFlexBridgeVEntry8058*)self->mVtbl)[50].delta);
+    nash_Nash_movenode(cObjectInterface_getNash(), 2, ((int)self->Node), box, &old);
 }
 #endif
 

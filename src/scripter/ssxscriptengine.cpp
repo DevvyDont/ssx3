@@ -289,7 +289,7 @@ extern "C" void cSSXScriptEngine_Update(sSse8720* self)
     cVidEngine_UpdateVideo(self->snd);
     for (int i = 0; i < 2; i++)
         cScriptObjCameraManager_Update((cScriptObjCameraManager*)self->rigs[i]);
-    cScriptObjEvent_Update((cScriptObjEvent*)((sScrObj05B8*)self->fx));
+    cScriptObjEvent_Update((cScriptObjEvent*)((cScriptObjEvent*)self->fx));
     if (self->state != 2)
     {
         sSseObj8720* nisList = &self->objsA[self->state];
@@ -5893,14 +5893,6 @@ extern void* D_00482298[];
 extern void* cScriptObjEvent_vtbl[];
 
 
-struct sScrObj05B8 {
-    char pad_0x00[0xBC];
-    tScriptObjEventSound trig[4];   // 0xBC
-    int field_0xEC;
-    int field_0xF0;
-    int field_0xF4;
-    int field_0xF8;
-};
 
 /**
  * Constructs the event script object: a script entity plus a type-5 script object with its triggers cleared.
@@ -5911,7 +5903,7 @@ struct sScrObj05B8 {
  */
 extern "C" void* cScriptObjEvent_cScriptObjEvent(cScriptObjEvent* self)
 {
-    cScriptEntity_cScriptEntity(((sScrObj05B8*)self));
+    cScriptEntity_cScriptEntity((self));
     cScriptObject_cScriptObject(&self->mObjType, 5);
     self->mScriptObjectVtbl = D_00482298;
     *(void***)self = cScriptObjEvent_vtbl;
@@ -5925,7 +5917,7 @@ extern "C" void* cScriptObjEvent_cScriptObjEvent(cScriptObjEvent* self)
         trigger->soundHandle = -1;
         trigger->endSound = 0;
     }
-    return ((sScrObj05B8*)self);
+    return (self);
 }
 #endif
 

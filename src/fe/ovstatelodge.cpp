@@ -1407,19 +1407,6 @@ struct sVE_4268 {
     void (*fn)(void*);
 };
 
-struct sTrophy_4268 {
-    char pad_0x0[0x48];
-    int f48;            // 0x48
-    char pad_0x4C[0x4];
-    int charID;         // 0x50
-    int f54;            // 0x54
-    int bank;           // 0x58
-    int count;          // 0x5C
-    int snd[5];         // 0x60
-    int tex[5];         // 0x74
-    char pad_0x88[0x14];
-    int f9C;            // 0x9C
-};
 
 /**
  * Constructs the lodge's trophy room state (one trophy and its medals) and starts loading their pictures.
@@ -1447,20 +1434,20 @@ extern "C" void* cFEStateTrophyRoom_cFEStateTrophyRoom(cFEStateTrophyRoom* self,
     self->mVtbl = cFEStateTrophyRoom_vtbl;
     self->mUserNum = idx;
     *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, idx);
-    sTrophy_4268* trophyRoom = (sTrophy_4268*)self;
-    trophyRoom->f48 = 0;
+    cFEStateTrophyRoom* trophyRoom = self;
+    *(int*)&trophyRoom->mpBigIcon = 0;
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
-    trophyRoom->charID = cBENewPlayerInterface_getPlayerCharID(pi, self->mUserNum);
+    trophyRoom->mCharID = cBENewPlayerInterface_getPlayerCharID(pi, self->mUserNum);
     sVE_4268* vt = *(sVE_4268**)((char*)pi + 0xC);
     vt[2].fn((char*)pi + vt[2].delta);
-    trophyRoom->f54 = peakNum;
-    trophyRoom->bank = trophyType;
-    trophyRoom->count = 0;
+    trophyRoom->mPeakNum = peakNum;
+    trophyRoom->mTrophyType = trophyType;
+    trophyRoom->mNumLoadingFiles = 0;
     for (int i = 0; i < 5; i++) {
-        trophyRoom->snd[i] = -1;
-        trophyRoom->tex[i] = -1;
+        trophyRoom->mTextureIDs[i] = -1;
+        trophyRoom->mTextureFileIndex[i] = -1;
     }
-    trophyRoom->f9C = -1;
+    trophyRoom->mCurSelection = -1;
     cFEStateTrophyRoom_loadTextures(self);
     return ((void*)self);
 }

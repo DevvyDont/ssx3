@@ -23,25 +23,6 @@ extern char str_cInputPad[];
 extern char str_cInput[];
 extern char str_BigFile_b[];
 
-struct cPlaybackMan_C458 {
-    cBigFile* file;         // 0x0
-    int field_0x4;          // 0x4
-    char pad_0x8[0x8];
-    int field_0x10;         // 0x10
-    char pad_0x14[0x38];
-    int field_0x4C;         // 0x4C
-    int field_0x50;         // 0x50
-    int field_0x54;         // 0x54
-    int field_0x58;         // 0x58
-    char* world;            // 0x5C
-    char* level;            // 0x60
-    int field_0x64;         // 0x64
-    int* buf;               // 0x68
-    void* stream;           // 0x6C
-    int field_0x70;         // 0x70
-    int field_0x74;         // 0x74
-    int field_0x78;         // 0x78
-};
 
 /**
  * Constructs the mission playback manager and opens the playback archive.
@@ -56,35 +37,35 @@ struct cPlaybackMan_C458 {
  *                          passes 40)
  * @return @p self
  */
-extern "C" cPlaybackMan_C458* cPlaybackMan_cPlaybackMan(cPlaybackMan_C458* self, int maxPlaybackFiles)
+extern "C" cPlaybackMan* cPlaybackMan_cPlaybackMan(cPlaybackMan* self, int maxPlaybackFiles)
 {
     cReplayFrame_cReplayFrame((char*)self + 0x14);
     cGame* world = SSXApp->Game;
-    self->world = ((char*)world);
+    *(char**)&self->Game = ((char*)world);
     char* level = (char*)world->AI;
-    self->level = level;
-    self->field_0x74 = -1;
-    self->field_0x54 = maxPlaybackFiles;
-    self->field_0x78 = -1;
-    self->field_0x10 = 0;
-    self->field_0x4C = 0;
-    self->field_0x4 = 0;
-    self->field_0x50 = 0;
-    self->field_0x58 = 0;
-    self->field_0x70 = 0;
+    *(char**)&self->AI = level;
+    self->AsyncFileNum = -1;
+    self->MaxPlaybackFiles = maxPlaybackFiles;
+    self->AsyncHandle = -1;
+    self->SaveFrame = 0;
+    *(int*)&self->SaveFrameData = 0;
+    *(int*)&self->CurrentFrame = 0;
+    self->NumPlaybackFiles = 0;
+    *(int*)&self->PlaybackFiles = 0;
+    self->State = 0;
     int* info = *(int**)(*(char**)(level + 0x40) + 0xDF0);
     int n = info[1];
-    self->field_0x64 = info[0];
-    self->buf = (int*)cMemMan_alloc(676, str_cInputPad, 0x20000000, 0);
-    self->buf[0] = 0;
+    *(int*)&self->RealInputPad = info[0];
+    *(int**)&self->InputPad = (int*)cMemMan_alloc(676, str_cInputPad, 0x20000000, 0);
+    ((int*)self->InputPad)[0] = 0;
     void* replayStream = cMemMan_alloc(8, str_cInput, 0x20000000, 0);
-    cInput_setPad(replayStream, (int)self->buf);
+    cInput_setPad(replayStream, (int)((int*)self->InputPad));
     cInput_setMap(replayStream, n);
-    self->stream = replayStream;
+    *(void**)&self->Input = replayStream;
     char name[0x100];
     sprintf(name, D_004A3418, D_004A3410);
     cBigFile* bf = cBigFile_cBigFile((cBigFile*)cMemMan_alloc(8, str_BigFile_b, 0, 0));
-    self->file = bf;
+    self->BigFile = bf;
     cBigFile_open(bf, name, 0);
     return self;
 }
@@ -268,21 +249,6 @@ struct sPbEntryC898 {
     int field_0x8;          // 0x8
 };
 
-struct cPlaybackManC898 {
-    int field_0x0;
-    int* stream;            // 0x4
-    char pad_0x8[0x8];
-    int field_0x10;         // 0x10
-    char pad_0x14[0x38];
-    void* buf4C;            // 0x4C
-    int count;              // 0x50
-    int field_0x54;
-    sPbEntryC898* entries;  // 0x58
-    char pad_0x5C[0x14];
-    int field_0x70;         // 0x70
-    int field_0x74;
-    int handle;             // 0x78
-};
 
 /**
  * Releases everything the current playback location loaded.
@@ -295,34 +261,34 @@ struct cPlaybackManC898 {
  */
 extern "C" void cPlaybackMan_purgeLocation(cPlaybackMan* playbackMan)
 {
-    cPlaybackManC898* self = (cPlaybackManC898*)playbackMan;
-    if (self->handle != -1) {
-        ASYNCFILE_cancel(self->handle);
-        self->handle = -1;
+    cPlaybackMan* self = playbackMan;
+    if (self->AsyncHandle != -1) {
+        ASYNCFILE_cancel(self->AsyncHandle);
+        self->AsyncHandle = -1;
     }
-    if (self->entries != 0) {
-        for (int i = 0; i < self->count; i++) {
-            if (self->entries[i].data != 0) {
-                cMemMan_free(self->entries[i].data);
-                self->entries[i].data = 0;
+    if (((sPbEntryC898*)self->PlaybackFiles) != 0) {
+        for (int i = 0; i < self->NumPlaybackFiles; i++) {
+            if (((sPbEntryC898*)self->PlaybackFiles)[i].data != 0) {
+                cMemMan_free(((sPbEntryC898*)self->PlaybackFiles)[i].data);
+                ((sPbEntryC898*)self->PlaybackFiles)[i].data = 0;
             }
-            self->entries[i].field_0x8 = 0;
+            ((sPbEntryC898*)self->PlaybackFiles)[i].field_0x8 = 0;
         }
-        if (self->entries != 0) {
-            cMemMan_free(self->entries);
+        if (((sPbEntryC898*)self->PlaybackFiles) != 0) {
+            cMemMan_free(((sPbEntryC898*)self->PlaybackFiles));
         }
-        self->entries = 0;
+        *(sPbEntryC898**)&self->PlaybackFiles = 0;
     }
-    if (self->buf4C != 0) {
-        cMemMan_free(self->buf4C);
-        self->buf4C = 0;
+    if (((void*)self->SaveFrameData) != 0) {
+        cMemMan_free(((void*)self->SaveFrameData));
+        *(void**)&self->SaveFrameData = 0;
     }
-    self->field_0x10 = 0;
-    if (self->stream != 0) {
-        operator_delete(self->stream);
-        self->stream = 0;
+    self->SaveFrame = 0;
+    if (((int*)self->CurrentFrame) != 0) {
+        operator_delete(((int*)self->CurrentFrame));
+        *(int**)&self->CurrentFrame = 0;
     }
-    self->field_0x70 = 0;
+    self->State = 0;
 }
 #endif
 
@@ -769,11 +735,6 @@ extern "C" int cPlaybackMan_isPauseAI(cPlaybackMan* self)
 //100%
 INCLUDE_ASM("replay/playbackman", cPlaybackMan_findFileById);
 #ifdef SKIP_ASM
-struct sPbEntry_0026CFE8 {
-    int id;
-    int unk4;
-    int unk8;
-};
 
 /**
  * Returns the index of the playback file whose id is @p id, or -1.
@@ -788,8 +749,8 @@ extern "C" int cPlaybackMan_findFileById(cPlaybackMan* self, int id)
 {
     int count = self->NumPlaybackFiles;
     for (int i = 0; i < count; i++) {
-        sPbEntry_0026CFE8 *entries = (sPbEntry_0026CFE8*)self->PlaybackFiles;
-        if (entries[i].id == id) {
+        tPlaybackFile *entries = self->PlaybackFiles;
+        if (((int)entries[i].Id) == id) {
             return i;
         }
     }

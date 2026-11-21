@@ -35,9 +35,6 @@ struct sV3_05E8 {
     sV3_05E8() {}
     sV3_05E8(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
 };
-struct sCol_05E8 {
-    float r, g, b, a;
-};
 struct sRect_05E8 {
     float x0, y0, x1, y1;
 };
@@ -52,8 +49,8 @@ struct sFont_05E8 {
     sV2_05E8 shadowOfs;     // 0x28
     sV2_05E8 scale;         // 0x30
     sV2_05E8 cur;           // 0x38
-    sCol_05E8 color;        // 0x40
-    sCol_05E8 shadowColor;  // 0x50
+    tARGB color;        // 0x40
+    tARGB shadowColor;  // 0x50
 };
 
 struct sLayerBits_05E8 {
@@ -108,15 +105,15 @@ extern "C" void cUIText_render2D(cUIText* self, float x, float y)
     font->cur.x = font->scale.x * textScale.x;
     font->cur.y = font->scale.y * textScale.y;
     if (((self->mAttr >> 5) & 1) && ((self->mAttrText >> 4) & 1)) {
-        font->color = *(sCol_05E8*)&self->mStaticColour;
+        font->color = *(&self->mStaticColour);
     } else if (((self->mAttr >> 3) & 1) == 0 && ((self->mAttrText >> 5) & 1)) {
-        font->color = *(sCol_05E8*)&self->mDisabledColour;
+        font->color = *(&self->mDisabledColour);
     } else {
-        font->color = *(sCol_05E8*)&self->mColour;
+        font->color = *(&self->mColour);
     }
     if ((self->mAttrText >> 2) & 1) {
-        sCol_05E8 shadowCol = *(sCol_05E8*)&self->mShadowColour;
-        shadowCol.r = (*(sCol_05E8*)&self->mColour).r;
+        tARGB shadowCol = *(&self->mShadowColour);
+        shadowCol.A = (*(&self->mColour)).A;
         font->shadowColor = shadowCol;
         font->shadowOfs = D_004A5A60;
     } else {

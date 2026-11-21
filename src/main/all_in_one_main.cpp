@@ -4658,14 +4658,6 @@ extern "C" void *cUIState_cUIState1_E288(void *, int, int) __asm__("cUIState_cUI
 extern int cKeyboardPopup_vtbl[];
 extern int cBXString_EmptyString;
 
-struct S_E288 {
-    int pad0[2];
-    int *vt;
-    char pad1[0x54];
-    int v60;
-    char pad2[0x3C0];
-    int v424;
-};
 /**
  * Constructs an on-screen keyboard popup with no engine and no parent (the default constructor).
  *
@@ -4674,12 +4666,12 @@ struct S_E288 {
  *
  * @return @p self
  */
-extern "C" S_E288 *cKeyboardPopup_cKeyboardPopup1(cKeyboardPopup* self) {
-    cUIState_cUIState1_E288(((S_E288*)self), 0, 0);
+extern "C" cKeyboardPopup *cKeyboardPopup_cKeyboardPopup1(cKeyboardPopup* self) {
+    cUIState_cUIState1_E288((self), 0, 0);
     self->mVtbl = (void**)cKeyboardPopup_vtbl;
     self->miMaxCharacters = 0x3F;
     self->mszStatic = (char*)cBXString_EmptyString;
-    return ((S_E288*)self);
+    return (self);
 }
 #endif
 

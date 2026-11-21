@@ -65,12 +65,6 @@ struct sCacheNode_279D0 {
     sCacheNode_279D0* next;     // 0xC
 };
 
-struct sCache_279D0 {
-    int pad0;
-    sCacheNode_279D0* lru;      // 0x4
-    sCacheNode_279D0** buckets; // 0x8
-    unsigned int count;         // 0xC
-};
 
 static inline int cAIFwdDiffCache_GetFwdDiff_less(unsigned int a, unsigned int b) { return a < b; }
 
@@ -85,10 +79,10 @@ static inline int cAIFwdDiffCache_GetFwdDiff_less(unsigned int a, unsigned int b
  * @param src  the terrain patch record (On Tour const tPatchRecord&)
  * @param out  receives the cache node (On Tour ppFwdDiff)
  */
-extern "C" void cAIFwdDiffCache_GetFwdDiff(sCache_279D0* self, void* src, sCacheNode_279D0** out)
+extern "C" void cAIFwdDiffCache_GetFwdDiff(cAIFwdDiffCache* self, void* src, sCacheNode_279D0** out)
 {
     unsigned int key = *(unsigned int*)((char*)src + 0x150);
-    sCacheNode_279D0* n = self->buckets[key % self->count];
+    sCacheNode_279D0* n = ((sCacheNode_279D0**)self->mPatchHash)[key % self->mHashSize];
     while (n != 0 && !cAIFwdDiffCache_GetFwdDiff_less(key, n->key)) {
         if (n->key == key) {
             cAIFwdDiffCache_MoveToAgeQueueTail((sFwdDiffList*)self, (sFwdDiffLink*)n);
@@ -97,11 +91,11 @@ extern "C" void cAIFwdDiffCache_GetFwdDiff(sCache_279D0* self, void* src, sCache
         }
         n = n->next;
     }
-    n = self->lru;
+    n = ((sCacheNode_279D0*)self->mAgeQueue);
     cAIFwdDiffCache_RemoveFromHash(self, n);
     n->key = key;
     cAIFwdDiffCache_AddToHash((sFwdDiffTable*)self, (sFwdDiffNode*)n);
-    self->lru = n->lruNext;
+    *(sCacheNode_279D0**)&self->mAgeQueue = n->lruNext;
     cAIFwdDiffCache_TesselatePatch((cAIFwdDiffCache*)self, src, n);
     *out = n;
 }
@@ -160,16 +154,10 @@ struct sCacheNode_7B30 {
     sCacheNode_7B30* next;
 };
 
-struct sCache_7B30 {
-    int pad0;
-    sCacheNode_7B30* lru;
-    sCacheNode_7B30** buckets;
-    unsigned int count;
-};
 
 static inline int less_7B30(unsigned int a, unsigned int b) { return a < b; }
 
-extern "C" void cAIFwdDiffCache_RemoveFromHash_7B30(sCache_7B30* self, sCacheNode_7B30* node) __asm__("cAIFwdDiffCache_RemoveFromHash");
+extern "C" void cAIFwdDiffCache_RemoveFromHash_7B30(cAIFwdDiffCache* self, sCacheNode_7B30* node) __asm__("cAIFwdDiffCache_RemoveFromHash");
 /**
  * Removes an AI forward-difference cache node from the patch hash table.
  *
@@ -178,12 +166,12 @@ extern "C" void cAIFwdDiffCache_RemoveFromHash_7B30(sCache_7B30* self, sCacheNod
  *
  * @param node  the node (On Tour node)
  */
-extern "C" void cAIFwdDiffCache_RemoveFromHash_7B30(sCache_7B30* self, sCacheNode_7B30* node)
+extern "C" void cAIFwdDiffCache_RemoveFromHash_7B30(cAIFwdDiffCache* self, sCacheNode_7B30* node)
 {
     unsigned int key = node->key;
     if (key == 0xFFFFFFFF)
         return;
-    sCacheNode_7B30** link = &self->buckets[key % self->count];
+    sCacheNode_7B30** link = &((sCacheNode_7B30**)self->mPatchHash)[key % self->mHashSize];
     if (*link == 0)
         return;
     sCacheNode_7B30* n = *link;

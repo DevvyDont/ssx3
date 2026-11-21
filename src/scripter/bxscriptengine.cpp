@@ -100,12 +100,6 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_Update);
 extern "C" void cInSeq_UpdateFrame(void* obj);
 extern "C" void cBXScriptEngine_UpdatePendingRequestState(cBXScriptEngine* self, tScriptRequestInfo* script);
 
-struct sScriptSlot_2820B0 {
-    int f0;
-    int type;           // 0x04
-    char pad8[0x18];
-    int state;          // 0x20
-};
 
 
 // Retail builds compile the per-state debug hooks to nothing.
@@ -122,12 +116,12 @@ extern "C" void cBXScriptEngine_Update(cBXScriptEngine* self)
     int i;
     cInSeq_UpdateFrame(self->mpInSeq);
     for (i = 0; i < 16; i++) {
-        sScriptSlot_2820B0* request = &((sScriptSlot_2820B0*)&self->mScriptRequests[0])[i];
-        if (request->state == 0) {
+        tScriptRequestInfo* request = &((&self->mScriptRequests[0]))[i];
+        if (request->requestType == 0) {
             continue;
         }
-        if (request->state == 1) {
-            switch (request->type) {
+        if (request->requestType == 1) {
+            switch (request->state) {
             case 0: slotNop_2820B0((self), request); break;
             case 1: cBXScriptEngine_UpdatePendingRequestState(self, (tScriptRequestInfo*)request); break;
             case 2: slotNop_2820B0((self), request); break;
@@ -143,7 +137,6 @@ extern "C" void cBXScriptEngine_Update(cBXScriptEngine* self)
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_AttachScript);
 #ifdef SKIP_ASM
-struct sSlot282150 { int value; int pad; };
 /**
  * Attaches script data to script database slot @p index, unless the slot already holds data.
  *
@@ -156,11 +149,11 @@ struct sSlot282150 { int value; int pad; };
  */
 extern "C" int cBXScriptEngine_AttachScript(cBXScriptEngine* self, int value, int index)
 {
-    sSlot282150* slots = (sSlot282150*)self->mpScriptDatabase;
-    if (slots[index].value != 0) {
+    tBXScriptState* slots = self->mpScriptDatabase;
+    if (((int)slots[index].pScriptData) != 0) {
         return 0;
     }
-    slots[index].value = value;
+    *(int*)&slots[index].pScriptData = value;
     return 1;
 }
 #endif
@@ -178,12 +171,12 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_DetachScript);
  */
 extern "C" int cBXScriptEngine_DetachScript(cBXScriptEngine* self, int index)
 {
-    sSlot282150* slots = (sSlot282150*)self->mpScriptDatabase;
-    int old = slots[index].value;
+    tBXScriptState* slots = self->mpScriptDatabase;
+    int old = ((int)slots[index].pScriptData);
     if (old == 0) {
         return 0;
     }
-    slots[index].value = 0;
+    *(int*)&slots[index].pScriptData = 0;
     return old;
 }
 #endif
@@ -332,16 +325,10 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_StopScriptAll);
 #ifdef SKIP_ASM
 extern "C" void cBXScriptEngine_StopScript(cBXScriptEngine* self, int id);
 
-struct sScriptSlot282390 {
-    int active;
-    char pad_0x04[0x18];
-    int id;
-    int pad_0x20;
-};
 
 struct sScriptEngine282390 {
     char pad_0x000[0x2C0];
-    sScriptSlot282390 slots[16];
+    tScriptRequestInfo slots[16];
 };
 
 /**
@@ -354,9 +341,9 @@ struct sScriptEngine282390 {
 extern "C" void cBXScriptEngine_StopScriptAll(cBXScriptEngine* self)
 {
     for (int i = 0; i < 16; i++) {
-        sScriptSlot282390* slot = &((sScriptSlot282390*)&self->mScriptRequests[0])[i];
-        if (slot->active != 0) {
-            cBXScriptEngine_StopScript(self, slot->id);
+        tScriptRequestInfo* slot = &((&self->mScriptRequests[0]))[i];
+        if (((int)slot->pPlayer) != 0) {
+            cBXScriptEngine_StopScript(self, slot->requestHandle);
         }
     }
 }
@@ -367,12 +354,6 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_ReleaseRequestAll);
 #ifdef SKIP_ASM
 extern "C" void cBXScriptEngine_ReleaseRequest(void* self, int id);
 
-struct sScriptSlot2823F0 {
-    int active;
-    char pad_0x04[0x18];
-    int id;
-    int state;
-};
 
 
 /**
@@ -385,9 +366,9 @@ struct sScriptSlot2823F0 {
 extern "C" void cBXScriptEngine_ReleaseRequestAll(cBXScriptEngine* self)
 {
     for (int i = 0; i < 16; i++) {
-        sScriptSlot2823F0* slot = &((sScriptSlot2823F0*)&self->mScriptRequests[0])[i];
-        if (slot->state != 0) {
-            cBXScriptEngine_ReleaseRequest((self), slot->id);
+        tScriptRequestInfo* slot = &((&self->mScriptRequests[0]))[i];
+        if (slot->requestType != 0) {
+            cBXScriptEngine_ReleaseRequest((self), slot->requestHandle);
         }
     }
 }
@@ -845,16 +826,6 @@ int cScriptPlayerMain_SetUserData(void* self, int a1);
 void cScriptPlayerMain_SetPlaySpeed(void* self, float t);
 
 
-struct sBXThread282908 {
-    void* owner;    // 0x0
-    int state;      // 0x4
-    int slot;       // 0x8
-    int pad_c;      // 0xC
-    short pad_10;   // 0x10
-    short f12;      // 0x12
-    int pending;    // 0x14
-    float time;     // 0x18
-};
 
 /**
  * Makes a data-pending script request ready once its script data has been attached.
@@ -868,21 +839,21 @@ struct sBXThread282908 {
  */
 extern "C" void cBXScriptEngine_UpdatePendingRequestState(cBXScriptEngine* self, tScriptRequestInfo* script)
 {
-    sBXThread282908* request = (sBXThread282908*)script;
-    int idx = request->pending;
+    tScriptRequestInfo* request = script;
+    int idx = request->loadingScriptIndex;
     tBXScriptState* scriptState = &(self->mpScriptDatabase)[idx];
     if (((void*)scriptState->pScriptData) == 0) return;
-    request->slot = idx;
-    request->pending = -1;
+    request->data.animFields.animScriptIndex = idx;
+    request->loadingScriptIndex = -1;
     request->state = 2;
-    request->f12 = 0;
+    request->loadPending = 0;
     int id = cInSeq_ReadyPlayer(self->mpInSeq, ((void*)scriptState->pScriptData));
     void* obj = cInSeq_GetPlayer_2(self->mpInSeq, id);
-    request->owner = obj;
+    *(void**)&request->pPlayer = obj;
     cScriptPlayerMain_SetUserData(obj, (int)request);
-    if (request->time > 0.0f) {
-        cScriptPlayerMain_SetPlaySpeed(request->owner, request->time);
-        request->time = 0.0f;
+    if (request->playSpeedRequest > 0.0f) {
+        cScriptPlayerMain_SetPlaySpeed(((void*)request->pPlayer), request->playSpeedRequest);
+        request->playSpeedRequest = 0.0f;
     }
     scriptState->numLocks++;
 }

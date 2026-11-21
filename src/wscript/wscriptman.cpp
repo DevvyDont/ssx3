@@ -663,19 +663,6 @@ struct sWSWorld9F18 {
     }* info;                    // 0x4
 };
 
-struct sWSMan9F18 {
-    int f0;                     // 0x000
-    char pad4[0x288];
-    sWSWorld9F18* world;        // 0x28C
-    int f290;                   // 0x290
-    int f294;                   // 0x294
-    int f298;                   // 0x298
-    char pad29C[0x8];
-    int f2A4;                   // 0x2A4
-    int f2A8;                   // 0x2A8
-    char pad2AC[0x14];
-    char tables[1][0x10C];      // 0x2C0
-};
 
 struct cWScriptIdTable;
 extern "C" void cCollectPool_init(cWScriptIdTable* self);
@@ -695,7 +682,7 @@ static inline bool wsIsType3_9F18(sWSSection9F18* s)
  * Resets the avalanches and the script id table first, and runs the scripts with no current rider and the
  * context fields cleared; the current rider (word 0) is restored afterwards.
  */
-extern "C" void cWScriptMan_runGlobalScripts(sWSMan9F18* self)
+extern "C" void cWScriptMan_runGlobalScripts(cWScriptMan* self)
 {
     int i;
     int saved;
@@ -704,22 +691,22 @@ extern "C" void cWScriptMan_runGlobalScripts(sWSMan9F18* self)
     {
         int k;
         for (k = 0; k < 1; k++) {
-            cCollectPool_init((cWScriptIdTable*)self->tables[k]);
+            cCollectPool_init((cWScriptIdTable*)self->CollectPools[k]);
         }
     }
-    saved = self->f0;
-    self->f0 = -1;
-    self->f290 = 0;
-    self->f294 = 0;
-    self->f298 = 0;
-    self->f2A4 = 0;
-    self->f2A8 = 0;
-    n = cWorldView_getNumSections((cWorldView*)(self->world->view + 0x10));
+    saved = self->Being;
+    self->Being = -1;
+    *(int*)&self->Inst = 0;
+    *(int*)&self->CollideInfo = 0;
+    *(int*)&self->IntersectInfo = 0;
+    *(int*)&self->CurrentProcess = 0;
+    *(int*)&self->CurrentTask = 0;
+    n = cWorldView_getNumSections((cWorldView*)(((sWSWorld9F18*)self->World)->view + 0x10));
     for (i = 0; i < n; i++) {
-        if (wsIsType3_9F18(&self->world->info->sections[i])) {
-            int* globalScript = cWorld_getGlobalScripts(self->world, i);
+        if (wsIsType3_9F18(&((sWSWorld9F18*)self->World)->info->sections[i])) {
+            int* globalScript = cWorld_getGlobalScripts(((sWSWorld9F18*)self->World), i);
             if (globalScript != 0) {
-                int cnt = cWorld_getNumGlobalScripts(self->world, i);
+                int cnt = cWorld_getNumGlobalScripts(((sWSWorld9F18*)self->World), i);
                 int j;
                 for (j = 0; j < cnt; j++, globalScript++) {
                     cWScriptMan_runScript((cWScriptMan*)self, globalScript);
@@ -727,12 +714,12 @@ extern "C" void cWScriptMan_runGlobalScripts(sWSMan9F18* self)
             }
         }
     }
-    self->f290 = 0;
-    self->f294 = 0;
-    self->f298 = 0;
-    self->f2A4 = 0;
-    self->f2A8 = 0;
-    self->f0 = saved;
+    *(int*)&self->Inst = 0;
+    *(int*)&self->CollideInfo = 0;
+    *(int*)&self->IntersectInfo = 0;
+    *(int*)&self->CurrentProcess = 0;
+    *(int*)&self->CurrentTask = 0;
+    self->Being = saved;
 }
 #endif
 

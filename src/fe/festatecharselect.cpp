@@ -910,18 +910,6 @@ struct sCW_2460 {
     int f78;                    // 0x78
     int f7C;                    // 0x7C
 };
-struct sCheat_2460 {
-    char pad0[0x48];
-    sCW_2460* f48;              // 0x48
-    sCW_2460* f4C;              // 0x4C
-    sCW_2460* f50;              // 0x50
-    sCW_2460* slots[6];         // 0x54
-    sCW_2460* f6C;              // 0x6C
-    int f70, f74;
-    int count;                  // 0x78
-    char pad7C[0xF4 - 0x7C];
-    int vals[6];                // 0xF4
-};
 
 static inline void vcall_2460(sCW_2460* w, int k, int v)
 {
@@ -937,48 +925,48 @@ static inline void vcall_2460(sCW_2460* w, int k, int v)
  *
  * @param w  the widget being created
  */
-extern "C" void cFEStateCheatCharSelect_onWidgetCreate(sCheat_2460* self, sCW_2460* w)
+extern "C" void cFEStateCheatCharSelect_onWidgetCreate(cFEStateCheatCharSelect* self, sCW_2460* w)
 {
     int hashName = w->hash;
     if (hashName == GetHashValue32(str_6pics)) {
-        self->f6C = w;
+        *(sCW_2460**)&self->mpMenu = w;
         w->id18 = 0;
-        self->f6C->b0 = 0;
-        if (self->count >= 6) cUIMenu_setScrollableMenu(self->f6C, self->count);
+        ((sCW_2460*)self->mpMenu)->b0 = 0;
+        if (self->mNumCharacters >= 6) cUIMenu_setScrollableMenu(((sCW_2460*)self->mpMenu), self->mNumCharacters);
         return;
     }
     if (hashName == GetHashValue32(str_arrowleft)) {
-        self->f48 = w;
-        vcall_2460(w, 9, self->count >= 7);
+        *(sCW_2460**)&self->mpArrowPrev = w;
+        vcall_2460(w, 9, self->mNumCharacters >= 7);
         return;
     }
     if (hashName == GetHashValue32(str_arrowright)) {
-        self->f4C = w;
-        vcall_2460(w, 9, self->count >= 7);
+        *(sCW_2460**)&self->mpArrowNext = w;
+        vcall_2460(w, 9, self->mNumCharacters >= 7);
         return;
     }
     if (hashName == GetHashValue32(str_nametext)) {
-        self->f50 = w;
+        *(sCW_2460**)&self->mpNameWidget = w;
         cUIText_setAsciiString((cUIText*)w, D_004A1408);
         return;
     }
     int i = 0;
     char** tb = D_00440FA0;
-    sCW_2460** sp = self->slots;
+    sCW_2460** sp = ((sCW_2460**)&self->mpCharWidget[0]);
     for (; i < 6; sp++, tb++, i++) {
         if (hashName == GetHashValue32(*tb)) {
             *sp = w;
             w->id18 = i;
             if (i == 0) {
-                sCWVtP_2460* vtEntry = &((sCWVtP_2460*)self->slots[0]->vt)[21];
-                vtEntry->fn((char*)self->slots[0] + vtEntry->delta, D_004C66B8);
+                sCWVtP_2460* vtEntry = &((sCWVtP_2460*)((sCW_2460**)&self->mpCharWidget[0])[0]->vt)[21];
+                vtEntry->fn((char*)((sCW_2460**)&self->mpCharWidget[0])[0] + vtEntry->delta, D_004C66B8);
             }
-            if (i >= self->count) {
+            if (i >= self->mNumCharacters) {
                 vcall_2460(*sp, 9, 0);
                 vcall_2460(*sp, 8, 1);
             } else {
                 sCW_2460* sl = *sp;
-                sl->f7C = (&self->vals[0])[i];
+                sl->f7C = (&((int*)&self->mpCharElem[0])[0])[i];
                 sl->f78 = -1;
             }
         }
