@@ -2509,13 +2509,13 @@ extern "C" void cHUDFX_copyDispStr(cHUDFX*, signed char *);
  * @param data  the effect's data
  * @param fparg0  the animation position (stored negated)
  */
-extern "C" void func_00117138(char *hudFx, int fxId, signed char *displayStr, int data, float fparg0) {
+extern "C" void func_00117138(cHUDFX* hudFx, int fxId, signed char *displayStr, int data, float fparg0) {
     cHUDFX_copyDispStr((cHUDFX*)hudFx, displayStr);
-    *(int *)(hudFx + 0) = fxId;
-    *(int *)(hudFx + 0xC) = data;
-    *(float *)(hudFx + 8) = -fparg0;
-    *(float *)(hudFx + 4) = -1.0f;
-    *(int *)(hudFx + 0x14) = 0;
+    hudFx->ID = fxId;
+    hudFx->Data = data;
+    hudFx->CurDecay = -fparg0;
+    hudFx->MaxDecay = -1.0f;
+    hudFx->DisplayInt = 0;
 }
 #endif
 

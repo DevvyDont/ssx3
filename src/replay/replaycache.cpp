@@ -5112,10 +5112,10 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_GetHeader);
  *
  * @return the data header, or 0
  */
-extern "C" void* cScriptPlayerMain_GetHeader(void* self)
+extern "C" void* cScriptPlayerMain_GetHeader(cScriptPlayerMain* self)
 {
     if (*(unsigned short*)((char*)self + 0x2) >= 13) {
-        return (char*)self + 0xc;
+        return (char*)&self->mpUserData;
     }
     return 0;
 }

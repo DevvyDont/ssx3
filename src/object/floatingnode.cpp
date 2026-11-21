@@ -800,13 +800,13 @@ extern char cInstanceNode_vtbl[];
  * @param node  instance record the node drives
  * @return self
  */
-extern "C" void* cInstanceNode_cInstanceNode1(cInstanceNode* self, void* bucket, int type, void* node)
+extern "C" void* cInstanceNode_cInstanceNode1(cInstanceNode* self, void* bucket, int type, cInstanceNode* node)
 {
     cSortObjNode_cSortObjNode1(self, bucket, type);
     self->Instance = (tInstanceRecord*)node;
     self->mVtbl = (void**)cInstanceNode_vtbl;
     cInstanceNode_setActiveNode(self, node);
-    if ((*(int*)((char*)node + 0x8) & 0x100) == 0) {
+    if (((int)node->Prev & 0x100) == 0) {
         if (type != 6 && type != 0x10 && type != 22) {
             cObjectInterface_addToFocusBox(node);
         }

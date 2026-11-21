@@ -2676,14 +2676,14 @@ struct sMenuEntCB18 { void* name; int data; };
  * @param item  the list-choice item
  * @return @p ret
  */
-extern "C" sMenuRectCB18* cEnumMenuItem_preRender(sMenuRectCB18* ret, char* item)
+extern "C" sMenuRectCB18* cEnumMenuItem_preRender(sMenuRectCB18* ret, cEnumMenuItem* item)
 {
     sMenuRectCB18 best;
     sMenuRectCB18 measured;
-    cMenuItem_textPreRender(&measured, item, *(int*)(item + 0x14), 0, str_Invalid_b);
+    cMenuItem_textPreRender(&measured, item, (int)item->Caption, 0, str_Invalid_b);
     best = measured;
-    for (int i = 0; i < *(int*)(item + 0x18); i++) {
-        cMenuItem_textPreRender(&measured, item, *(int*)(item + 0x14), 0, (*(sMenuEntCB18**)(item + 0x1C))[i].name);
+    for (int i = 0; i < item->NumTags; i++) {
+        cMenuItem_textPreRender(&measured, item, (int)item->Caption, 0, ((sMenuEntCB18*)item->Tags)[i].name);
         if (measured.z > best.z) {
             best = measured;
         }
@@ -2806,9 +2806,9 @@ extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
  * @param item  the sub-menu item (this)
  * @return @p self, the filled rectangle
  */
-extern "C" void* cSubMenuItem_preRender(void* self, void* item)
+extern "C" void* cSubMenuItem_preRender(void* self, cSubMenuItem* item)
 {
-    cMenuItem_textPreRender(self, item, 0, *(int*)((char*)item + 0x14), 0);
+    cMenuItem_textPreRender(self, item, 0, (int)item->Caption, 0);
     return self;
 }
 #endif
@@ -2904,9 +2904,9 @@ extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
  * @param item  the item
  * @return @p self, the hidden return rect
  */
-extern "C" void* cPopMenuItem_preRender(void* self, void* item)
+extern "C" void* cPopMenuItem_preRender(void* self, cPopMenuItem* item)
 {
-    cMenuItem_textPreRender(self, item, 0, *(int*)((char*)item + 0x14), 0);
+    cMenuItem_textPreRender(self, item, 0, (int)item->Caption, 0);
     return self;
 }
 #endif
@@ -3216,9 +3216,9 @@ extern void* D_004866C8[];
  * @param item  the callback item
  * @return @p self, the hidden return rect
  */
-extern "C" void* cCallbackMenuItem_preRender(void* self, void* item)
+extern "C" void* cCallbackMenuItem_preRender(void* self, cCallbackMenuItem* item)
 {
-    cMenuItem_textPreRender(self, item, *(int*)((char*)item + 0x14), 0, D_004866C8);
+    cMenuItem_textPreRender(self, item, (int)item->Caption, 0, D_004866C8);
     return self;
 }
 #endif
@@ -3302,9 +3302,9 @@ extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
  * @param item  the text-only item (this)
  * @return @p self, the filled rectangle
  */
-extern "C" void* cNullMenuItem_preRender(void* self, void* item)
+extern "C" void* cNullMenuItem_preRender(void* self, cNullMenuItem* item)
 {
-    cMenuItem_textPreRender(self, item, 0, *(int*)((char*)item + 0x14), 0);
+    cMenuItem_textPreRender(self, item, 0, (int)item->Caption, 0);
     return self;
 }
 #endif
@@ -3388,11 +3388,11 @@ struct s2CD3A0Vec {
  *
  * @return the rectangle {0, 0, 0, size}
  */
-extern "C" s2CD3A0Vec cSpaceMenuItem_preRender(void* self)
+extern "C" s2CD3A0Vec cSpaceMenuItem_preRender(cSpaceMenuItem* self)
 {
     s2CD3A0Vec rect;
     rect.x = rect.y = rect.z = 0.0f;
-    rect.w = (float)*(int*)((char*)self + 0x14);
+    rect.w = (float)self->Space;
     return rect;
 }
 #endif
@@ -3650,9 +3650,9 @@ extern void* D_004866E0[];
  * @param item  the item
  * @return @p self, the hidden return rect
  */
-extern "C" void* cCharMenuItem_preRender(void* self, void* item)
+extern "C" void* cCharMenuItem_preRender(void* self, cCharMenuItem* item)
 {
-    cMenuItem_textPreRender(self, item, *(int*)((char*)item + 0x14), 0, D_004866E0);
+    cMenuItem_textPreRender(self, item, (int)item->Caption, 0, D_004866E0);
     return self;
 }
 #endif
@@ -3946,9 +3946,9 @@ extern void* D_004866E0[];
  * @param item  the int menu item (this)
  * @return @p self, the filled rectangle
  */
-extern "C" void* cIntMenuItem_preRender(void* self, void* item)
+extern "C" void* cIntMenuItem_preRender(void* self, cIntMenuItem* item)
 {
-    cMenuItem_textPreRender(self, item, *(int*)((char*)item + 0x14), 0, D_004866E0);
+    cMenuItem_textPreRender(self, item, (int)item->Caption, 0, D_004866E0);
     return self;
 }
 #endif
@@ -4184,9 +4184,9 @@ extern void* D_004866F0[];
  * @param item  the float menu item (this)
  * @return @p self, the filled rectangle
  */
-extern "C" void* cFloatMenuItem_preRender(void* self, void* item)
+extern "C" void* cFloatMenuItem_preRender(void* self, cFloatMenuItem* item)
 {
-    cMenuItem_textPreRender(self, item, *(int*)((char*)item + 0x14), 0, D_004866F0);
+    cMenuItem_textPreRender(self, item, (int)item->Caption, 0, D_004866F0);
     return self;
 }
 #endif
@@ -4402,9 +4402,9 @@ extern void* D_004866F0[];
  * @param item  the angle menu item (this)
  * @return @p self, the filled rectangle
  */
-extern "C" void* cAngleMenuItem_preRender(void* self, void* item)
+extern "C" void* cAngleMenuItem_preRender(void* self, cAngleMenuItem* item)
 {
-    cMenuItem_textPreRender(self, item, *(int*)((char*)item + 0x14), 0, D_004866F0);
+    cMenuItem_textPreRender(self, item, (int)item->Caption, 0, D_004866F0);
     return self;
 }
 #endif
@@ -4603,17 +4603,17 @@ static inline cTextMenuItem_preRender_sResult cTextMenuItem_preRender_make(void*
  * @param item  the text-entry item
  * @return the rect
  */
-extern "C" cTextMenuItem_preRender_sResult cTextMenuItem_preRender(void* item)
+extern "C" cTextMenuItem_preRender_sResult cTextMenuItem_preRender(cTextMenuItem* item)
 {
     char buf[0x20];
-    char* name = (char*)item + 0x18;
-    int focused = item == cMenu_getFocusItem((cMenu*)(*(void**)item));
+    char* name = item->Text;
+    int focused = ((void*)item) == cMenu_getFocusItem((cMenu*)(*(void**)item));
     strcpy(buf, name);
     int len = strlen(name);
-    if (focused && *(int*)((char*)item + 0x28) == len && *(int*)((char*)item + 0x28) < 15) {
+    if (focused && item->CursorPos == len && item->CursorPos < 15) {
         strcat(buf, str_underscore);
     }
-    cTextMenuItem_preRender_sResult rowRect = cTextMenuItem_preRender_make(item, *(int*)((char*)item + 0x14), buf);
+    cTextMenuItem_preRender_sResult rowRect = cTextMenuItem_preRender_make(item, (int)item->Caption, buf);
     return rowRect;
 }
 #endif
@@ -5857,10 +5857,10 @@ struct cRGBTitleMenuItem_preRender_sRect {
  * @return @p out
  */
 // PORT: `>?` (g++ max operator); returns the rect through the hidden result pointer.
-extern "C" cRGBTitleMenuItem_preRender_sRect* cRGBTitleMenuItem_preRender(cRGBTitleMenuItem_preRender_sRect* out, void* item)
+extern "C" cRGBTitleMenuItem_preRender_sRect* cRGBTitleMenuItem_preRender(cRGBTitleMenuItem_preRender_sRect* out, cRGBTitleMenuItem* item)
 {
     cRGBTitleMenuItem_preRender_sRect rect;
-    cMenuItem_textPreRender(&rect, item, *(int*)((char*)item + 0x18), 0, 0);
+    cMenuItem_textPreRender(&rect, item, (int)item->Caption, 0, 0);
     rect.w += 36.0f;
     rect.h = rect.h >? 29.0f;
     *out = rect;
@@ -6161,15 +6161,15 @@ extern char str_pct_2f_pct_2f_pct_2f[];
  * @param item  the vector title item
  * @return @p ret
  */
-extern "C" void* cVectorTitleMenuItem_preRender(void* ret, void* item)
+extern "C" void* cVectorTitleMenuItem_preRender(void* ret, cVectorTitleMenuItem* item)
 {
     char buf[0x80];
     const char* fmt = str_pct_2f_pct_2f_pct_2f;
-    int x = fptodp((*(float**)((char*)item + 0x14))[0]);
-    int y = fptodp((*(float**)((char*)item + 0x14))[1]);
-    int z = fptodp((*(float**)((char*)item + 0x14))[2]);
+    int x = fptodp(((float*)item->Vector)[0]);
+    int y = fptodp(((float*)item->Vector)[1]);
+    int z = fptodp(((float*)item->Vector)[2]);
     sprintf(buf, fmt, x, y, z);
-    cMenuItem_textPreRender(ret, item, *(int*)((char*)item + 0x18), 0, buf);
+    cMenuItem_textPreRender(ret, item, (int)item->Caption, 0, buf);
     return ret;
 }
 #endif
@@ -6527,18 +6527,18 @@ static inline char* font_2D0D48(char* item)
  * @param item  the graph item
  * @return @p ret
  */
-extern "C" sMenuRect_2D0D48* cGraphMenuItem_preRender(sMenuRect_2D0D48* ret, char* item)
+extern "C" sMenuRect_2D0D48* cGraphMenuItem_preRender(sMenuRect_2D0D48* ret, cGraphMenuItem* item)
 {
     int margin = 100;
     int focused = 0;
-    if (item == cMenu_getFocusItem((cMenu*)(*(void**)item))) {
-        focused = *(int*)(item + 0x40) != 0;
+    if (((char*)item) == cMenu_getFocusItem((cMenu*)(*(void**)item))) {
+        focused = item->IsEditMode != 0;
     }
     int minHeight = focused ? 80 : 20;
-    char* font = font_2D0D48(item);
+    char* font = font_2D0D48(((char*)item));
     float lh = (float)*(int*)(font + 0x14) * *(float*)(font + 0x34);
-    float w = cFont_textExtent(font, *(char**)(item + 0x14), 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
-    char* font2 = font_2D0D48(item);
+    float w = cFont_textExtent(font, (char*)item->Caption, 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
+    char* font2 = font_2D0D48(((char*)item));
     float w2 = cFont_textExtent(font2, str_9_999_9_999, 0, 0, *(float*)(font2 + 0x38), *(float*)(font2 + 0x3C));
     if (w < w2) w = w2;
     sMenuRect_2D0D48 rect;
@@ -6555,7 +6555,7 @@ extern "C" sMenuRect_2D0D48* cGraphMenuItem_preRender(sMenuRect_2D0D48* ret, cha
         }
         rect.w = height;
     } else {
-        char* font3 = font_2D0D48(item);
+        char* font3 = font_2D0D48(((char*)item));
         rect.w = (float)*(int*)(font3 + 0x14) * *(float*)(font3 + 0x34) + 12.0f;
     }
     rect.z = (float)margin + w + 64.0f;

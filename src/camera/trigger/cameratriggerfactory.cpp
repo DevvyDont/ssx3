@@ -3444,9 +3444,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptAlgorithm_getTargetPos
  * @param scriptAlgo  the script camera algorithm (this)
  * @return @p self, holding the target position
  */
-extern "C" void* cScriptAlgorithm_getTargetPos(void* self, void* scriptAlgo)
+extern "C" void* cScriptAlgorithm_getTargetPos(void* self, cScriptAlgorithm* scriptAlgo)
 {
-    *(cQuad128*)self = *(cQuad128*)((char*)scriptAlgo + 0x20);
+    *(cQuad128*)self = *(cQuad128*)&scriptAlgo->Target;
     return self;
 }
 #endif

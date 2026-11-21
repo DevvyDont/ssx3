@@ -1487,10 +1487,10 @@ extern "C" void cScriptDatabaseObject_MarkEntityAsUsed(void* mgr, void* self, in
  *
  * @param entity  the InSeq player entity (cScriptPlayerEntity)
  */
-extern "C" void cScriptEntity_OnInSeqLock(cScriptEntity* self, void* entity)
+extern "C" void cScriptEntity_OnInSeqLock(cScriptEntity* self, cScriptEntity* entity)
 {
     self->mpEntity = (cScriptPlayerEntity*)entity;
-    cScriptDatabaseObject_MarkEntityAsUsed(cScriptDatabaseObject_GetDatabaseObject(), self, **(int**)((char*)entity + 0x8));
+    cScriptDatabaseObject_MarkEntityAsUsed(cScriptDatabaseObject_GetDatabaseObject(), self, *(int*)entity->mpEntity);
 }
 #endif
 
@@ -1574,7 +1574,7 @@ extern "C" void* cScriptEntityCamera_cScriptEntityCamera(cScriptEntityCamera* se
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/bxscriptengine", cScriptEntityCamera_OnInSeqLock);
 #ifdef SKIP_ASM
-extern "C" void cScriptEntity_OnInSeqLock(cScriptEntity* self, void* a1);
+extern "C" void cScriptEntity_OnInSeqLock(cScriptEntity* self, cScriptEntity* a1);
 int cScriptPlayerEntity_GetType(void* self);
 char* GetSSXCameraManualHeader(void* self);
 char* GetSSXCameraTargetHeader(void* self);
@@ -1592,7 +1592,7 @@ char* GetSSXCameraAlgorithmicHeader(void* self);
  */
 extern "C" void cScriptEntityCamera_OnInSeqLock(cScriptEntityCamera* self, void* obj)
 {
-    cScriptEntity_OnInSeqLock((cScriptEntity*)self, obj);
+    cScriptEntity_OnInSeqLock((cScriptEntity*)self, (cScriptEntity*)obj);
     switch (cScriptPlayerEntity_GetType(obj)) {
     case 0:
         self->mSubType = *(signed char*)(GetSSXCameraManualHeader(obj) + 0x21);

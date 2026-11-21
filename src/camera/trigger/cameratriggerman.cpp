@@ -933,10 +933,10 @@ struct sCams_E1D8 {
  * @param evt  the camera trigger action (On Tour cCTAction*)
  * @param rider  the rider whose camera to switch (On Tour cRider&)
  */
-extern "C" void doTriggerAction(sCamEvt_E1D8* evt, char* rider)
+extern "C" void doTriggerAction(sCamEvt_E1D8* evt, cRider* rider)
 {
     sCams_E1D8* cams = (sCams_E1D8*)SSXApp->Game->ViewMan;
-    void* cam = *(void**)(cams->cam[*(int*)(rider + 0x870)] + 0xA8);
+    void* cam = *(void**)(cams->cam[rider->mViewIndex] + 0xA8);
     switch (evt->type) {
     case 2: {
         float rate;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/rider.h"
 #include "fe/hudradar.h"
 #include "fe/ovstatetrophy.h"
 #include "be/beintnetwork.h"
@@ -510,19 +511,19 @@ static inline float limitStep_EDA0(float v, float prev, float lim)
  *
  * @param rider  the rider the panel follows (the cBeing at +0x6C0 gives its AI index)
  */
-extern "C" void func_0020EDA0(cHUDRadar* self, char* rider)
+extern "C" void func_0020EDA0(cHUDRadar* self, cRider* rider)
 {
     if (D_004A2760 != 0)
         return;
     if (D_004A275C == 0)
         return;
-    if (rider == 0)
+    if (((char*)rider) == 0)
         return;
     sMarker_EDA0* markers = (sMarker_EDA0*)D_004A2758;
     char* course = cHUDRadar_mpRadarHeader;
     if (course == 0)
         return;
-    int me = ((cBeing_EDA0*)(rider + 0x6C0))->getAIIndex();
+    int me = ((cBeing_EDA0*)(&rider->mVtbl))->getAIIndex();
     sRace_EDA0* race = (sRace_EDA0*)SSXApp->Game->AI;
     float myDist = D_004C8BC8_EDA0[me].dist;
     float myPos = D_004C8BC8_EDA0[me].pos;
@@ -1031,19 +1032,19 @@ static inline float limitStep_FB40(float v, float prev, float lim)
  * @param right  nonzero: line at the rectangle's left edge with the icons to its right; 0: line at the right edge,
  *               icons to the left
  */
-extern "C" void func_0020FB40(cHUDRadar* self, char* rider, int right)
+extern "C" void func_0020FB40(cHUDRadar* self, cRider* rider, int right)
 {
     if (D_004A2760 != 0)
         return;
     if (D_004A275C == 0)
         return;
-    if (rider == 0)
+    if (((char*)rider) == 0)
         return;
     sMarker_FB40* markers = (sMarker_FB40*)D_004A2758;
     char* course = cHUDRadar_mpRadarHeader;
     if (course == 0)
         return;
-    int me = ((cBeing_FB40*)(rider + 0x6C0))->getAIIndex();
+    int me = ((cBeing_FB40*)(&rider->mVtbl))->getAIIndex();
     sRace_FB40* race = (sRace_FB40*)SSXApp->Game->AI;
     float myDist = D_004C8BC8_FB40[me].dist;
     float myPos = D_004C8BC8_FB40[me].pos;

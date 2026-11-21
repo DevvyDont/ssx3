@@ -980,8 +980,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_getRoomName);
  * @param roomPopup  the create-room popup
  * @return the room name string
  */
-extern "C" int cFEStateNetCreateRoomPopup_getRoomName(void *roomPopup) {
-    return (*(int *)((char*)(roomPopup) + (0x6DC)));
+extern "C" int cFEStateNetCreateRoomPopup_getRoomName(cFEStateNetCreateRoomPopup* roomPopup) {
+    return ((int)roomPopup->mszRoomName);
 }
 #endif
 //100%
@@ -993,8 +993,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_getChannelName);
  * @param roomPopup  the create-room popup
  * @return the channel name string
  */
-extern "C" int cFEStateNetCreateRoomPopup_getChannelName(void *roomPopup) {
-    return (*(int *)((char*)(roomPopup) + (0x6E0)));
+extern "C" int cFEStateNetCreateRoomPopup_getChannelName(cFEStateNetCreateRoomPopup* roomPopup) {
+    return ((int)roomPopup->mszChannelName);
 }
 #endif
 //100%
@@ -1006,8 +1006,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_getPassword);
  * @param roomPopup  the create-room popup
  * @return the password string
  */
-extern "C" int cFEStateNetCreateRoomPopup_getPassword(void *roomPopup) {
-    return (*(int *)((char*)(roomPopup) + (0x6E4)));
+extern "C" int cFEStateNetCreateRoomPopup_getPassword(cFEStateNetCreateRoomPopup* roomPopup) {
+    return ((int)roomPopup->mszPassword);
 }
 #endif
 //100%
@@ -1527,9 +1527,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryPosters_getRewardCost);
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryPosters_getRewardCost(cFEStateRewardGalleryPosters* self, void* reward)
+extern "C" int cFEStateRewardGalleryPosters_getRewardCost(cFEStateRewardGalleryPosters* self, cFEStateRewardGalleryPosters* reward)
 {
-    int value = *(short*)((char*)reward + 0xc);
+    int value = *(short*)&reward->mHashName;
     if (value > 0) value = value * 10;
     return value;
 }
@@ -1649,9 +1649,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryTradingCards_getRewardCost);
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryTradingCards_getRewardCost(cFEStateRewardGalleryTradingCards* self, void* reward)
+extern "C" int cFEStateRewardGalleryTradingCards_getRewardCost(cFEStateRewardGalleryTradingCards* self, cFEStateRewardGalleryTradingCards* reward)
 {
-    int value = *(short*)((char*)reward + 0xc);
+    int value = *(short*)&reward->mHashName;
     if (value > 0) value = value * 10;
     return value;
 }
@@ -1771,9 +1771,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryConceptArts_getRewardCost);
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryConceptArts_getRewardCost(cFEStateRewardGalleryConceptArts* self, void* reward)
+extern "C" int cFEStateRewardGalleryConceptArts_getRewardCost(cFEStateRewardGalleryConceptArts* self, cFEStateRewardGalleryConceptArts* reward)
 {
-    int value = *(short*)((char*)reward + 0xc);
+    int value = *(short*)&reward->mHashName;
     if (value > 0) value = value * 10;
     return value;
 }
@@ -1893,9 +1893,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryVideos_getRewardCost);
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryVideos_getRewardCost(cFEStateRewardGalleryVideos* self, void* reward)
+extern "C" int cFEStateRewardGalleryVideos_getRewardCost(cFEStateRewardGalleryVideos* self, cFEStateRewardGalleryVideos* reward)
 {
-    int value = *(short*)((char*)reward + 0xc);
+    int value = *(short*)&reward->mHashName;
     if (value > 0) value = value * 10;
     return value;
 }
@@ -2015,9 +2015,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryToys_getRewardCost);
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryToys_getRewardCost(cFEStateRewardGalleryToys* self, void* reward)
+extern "C" int cFEStateRewardGalleryToys_getRewardCost(cFEStateRewardGalleryToys* self, cFEStateRewardGalleryToys* reward)
 {
-    int value = *(short*)((char*)reward + 0xc);
+    int value = *(short*)&reward->mHashName;
     if (value > 0) value = value * 10;
     return value;
 }
@@ -2137,9 +2137,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryCheatChars_getRewardCost);
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryCheatChars_getRewardCost(cFEStateRewardGalleryCheatChars* self, void* reward)
+extern "C" int cFEStateRewardGalleryCheatChars_getRewardCost(cFEStateRewardGalleryCheatChars* self, cFEStateRewardGalleryCheatChars* reward)
 {
-    int value = *(short*)((char*)reward + 0xc);
+    int value = *(short*)&reward->mHashName;
     if (value > 0) value = value * 10;
     return value;
 }

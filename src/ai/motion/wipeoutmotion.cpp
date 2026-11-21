@@ -891,7 +891,7 @@ struct sVEntH_137860 { short delta; short index; void (*fn)(void*, void*, const 
 extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, int flags);
-extern "C" float cWipeoutMotion_intersectGround(void* self, char* hit, sVec4WG* dir);
+extern "C" float cWipeoutMotion_intersectGround(cWipeoutMotion* self, char* hit, sVec4WG* dir);
 // PORT: the project names these __FPv (one void* param); this caller passes more.
 void cAirPredictor_land_137860(void* ap, void* pos, void* vel) __asm__("cAirPredictor_land__FPv");
 void func_00111AA0_137860(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
@@ -1014,7 +1014,7 @@ extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
     float depth = cOverlapList_terrainIntersect1(RIDER->mOverlapList, &sph, &hitA, (int)RIDER->mWallHint);
     if (depth >= 0.0f)
     {
-        float groundParam = cWipeoutMotion_intersectGround(self, (char*)&hitB, (sVec4WG*)&hitA.normal);
+        float groundParam = cWipeoutMotion_intersectGround((cWipeoutMotion*)self, (char*)&hitB, (sVec4WG*)&hitA.normal);
         float vn = 0.0f;
         float height = 0.0f;
         if (groundParam >= 0.4000000059604645f)
@@ -1108,7 +1108,7 @@ struct sMat_137D18 {
 
 struct sVEntH_137D18 { short delta; short index; void (*fn)(void*, void*, const t4Vector&); };
 
-extern "C" float cWipeoutMotion_intersectGround(void* self, char* hit, sVec4WG* dir);
+extern "C" float cWipeoutMotion_intersectGround(cWipeoutMotion* self, char* hit, sVec4WG* dir);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" void cRider_alignRiderAxis(void* rider, void* a, void* b, float x, float y);
 void func_00111AA0_137D18(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
@@ -1385,7 +1385,7 @@ extern "C" void cWipeoutMotion_stepGroundMotion(void* vself)
     t4Vector dir = vu0Normalize_137D18(vu0Add_137D18(getFront_137D18(RIDER), vu0Scale_137D18(RIDER->mVelocity, 0.0036000001709908247f)));
     cRider_alignRiderAxis(RIDER, &RIDER->mGroundNormal, &dir, RIDER->mTimeScale * 2.0f, RIDER->mTimeScale * 6.632251739501953f);
     sHit_137D18 hit;
-    float groundParam = cWipeoutMotion_intersectGround(self, (char*)&hit, (sVec4WG*)&RIDER->mGroundNormal);
+    float groundParam = cWipeoutMotion_intersectGround((cWipeoutMotion*)self, (char*)&hit, (sVec4WG*)&RIDER->mGroundNormal);
     if (0.0f <= groundParam) {
         RIDER->unk_3D0 = hit.v20;
         RIDER->mGroundNormal = hit.normal;
@@ -1705,27 +1705,27 @@ struct sVEntry_138960 { short delta; short index; void (*fn)(void*, void*); };
  * @param dir  the probe direction (the ground normal)
  * @return the hit distance, negative on a miss
  */
-extern "C" float cWipeoutMotion_intersectGround(void* self, char* hit, sVec4WG* dir)
+extern "C" float cWipeoutMotion_intersectGround(cWipeoutMotion* self, char* hit, sVec4WG* dir)
 {
-    char* rider = *(char**)((char*)self + 0x40);
+    char* rider = (char*)self->mRider;
     char seg[176];
     sVec4WG* pt = (sVec4WG*)(rider + 0x110);
     cWorldLine_cWorldLine(seg, vu0Sub_138960(*pt, vu0Scale_138960(*dir, 200.0f)), vu0Add_138960(*pt, vu0Scale_138960(*dir, 200.0f)), 2, 0.574999988079071f);
-    char* probeRider = *(char**)((char*)self + 0x40);
+    char* probeRider = (char*)self->mRider;
     float hitDist = cOverlapList_terrainIntersect1(*(void**)(probeRider + 0x860), seg, hit, *(int*)(probeRider + 0x864));
     if (hitDist >= 0.0f)
     {
         char* obj = *(char**)(hit + 0x54);
         if (obj)
         {
-            *(int*)(*(char**)((char*)self + 0x40) + 0x430) = *(int*)(obj + 0x150);
-            *(float*)(*(char**)((char*)self + 0x40) + 0xAAC) = *(float*)(hit + 0x6C);
-            *(float*)(*(char**)((char*)self + 0x40) + 0xAB0) = *(float*)(hit + 0x70);
-            *(unsigned short*)(*(char**)((char*)self + 0x40) + 0x2D4) = *(unsigned short*)(*(char**)(hit + 0x54) + 0xA);
+            self->mRider->mGroundPolyId = *(int*)(obj + 0x150);
+            self->mRider->unk_AAC = *(float*)(hit + 0x6C);
+            self->mRider->unk_AB0 = *(float*)(hit + 0x70);
+            self->mRider->unk_2D4 = *(unsigned short*)(*(char**)(hit + 0x54) + 0xA);
         }
         else
         {
-            *(unsigned int*)(*(char**)((char*)self + 0x40) + 0x430) = 0xFFFFFFFF;
+            self->mRider->mGroundPolyId = 0xFFFFFFFF;
         }
         char* hitObj = *(char**)(hit + 0x50);
         if (hitObj)

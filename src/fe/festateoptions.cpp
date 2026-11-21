@@ -3008,11 +3008,11 @@ static inline char* getString_DD60(char* name)
  * the title (kT_TITLELoadReplay/SaveOptions/LoadOptions) and which button and help texts show. The four
  * "%dmemory card" slots get kT_MEMEmpty and their index; outside replay mode only slot 1 stays visible.
  */
-extern "C" void cFEStateOptionsDeviceSelect_onCreateScreen(void* self)
+extern "C" void cFEStateOptionsDeviceSelect_onCreateScreen(cFEStateOptionsDeviceSelect* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_120MCselect), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen == 0) {
         return;
     }
@@ -3023,7 +3023,7 @@ extern "C" void cFEStateOptionsDeviceSelect_onCreateScreen(void* self)
     uiObj = getObj_DD60(self, str_btext3a);
     uiObj->setVisible(0);
     char* title;
-    if (*(int*)((char*)self + 0x1BC) == 1) {
+    if (self->mType == 1) {
         title = getString_DD60(str_kT_TITLELoadReplay);
         uiObj = getObj_DD60(self, str_btext3a);
         uiObj->setVisible(1);
@@ -3032,7 +3032,7 @@ extern "C" void cFEStateOptionsDeviceSelect_onCreateScreen(void* self)
         uiObj->setVisible(1);
         uiObj = getObj_DD60(self, str_btext5);
         uiObj->setVisible(0);
-    } else if (*(int*)((char*)self + 0x22C) != 0) {
+    } else if (self->mIsSaveScreen != 0) {
         title = getString_DD60(str_kT_TITLESaveOptions);
         uiObj = getObj_DD60(self, str_btext3);
         uiObj->setVisible(1);
@@ -3060,7 +3060,7 @@ extern "C" void cFEStateOptionsDeviceSelect_onCreateScreen(void* self)
         cUIText_setUnicodeString(uiObj, slot);
         *(sColor_DD60*)((char*)uiObj + 0x88) = gStaticColour;
         uiObj->setUseStaticColour(1);
-        if (*(int*)((char*)self + 0x1BC) != 1 && i >= 2) {
+        if (self->mType != 1 && i >= 2) {
             uiObj->setStatic(1);
             uiObj->setVisible(0);
             sprintf(buf, str_pct_d_b, i);

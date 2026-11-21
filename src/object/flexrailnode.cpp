@@ -608,13 +608,13 @@ static inline void vu0AddFR(sFrVec4& dst, sFrVec4 b)
  * @param node  intersect info of the hit (segment +0x64, t +0x68)
  * @param offset  force to apply
  */
-extern "C" void cFloatRailNode_applyForce(cFloatRailNode* self, void* node, sFrVec4* offset)
+extern "C" void cFloatRailNode_applyForce(cFloatRailNode* self, cFloatRailNode* node, sFrVec4* offset)
 {
-    if (*(int*)((char*)node + 0x64) >= 0) {
-        vu0AddFR(((sFrElem*)self->Nodes)[*(int*)((char*)node + 0x64)].pos,
-                 vu0ScaleFR(*offset, 1.0f - *(float*)((char*)node + 0x68)));
-        vu0AddFR(((sFrElem*)self->Nodes)[*(int*)((char*)node + 0x64) + 1].pos,
-                 vu0ScaleFR(*offset, *(float*)((char*)node + 0x68)));
+    if (*(int*)&node->LDamp >= 0) {
+        vu0AddFR(((sFrElem*)self->Nodes)[*(int*)&node->LDamp].pos,
+                 vu0ScaleFR(*offset, 1.0f - node->ForceScale));
+        vu0AddFR(((sFrElem*)self->Nodes)[*(int*)&node->LDamp + 1].pos,
+                 vu0ScaleFR(*offset, node->ForceScale));
     }
 }
 #endif
@@ -634,15 +634,15 @@ INCLUDE_ASM("object/flexrailnode", cFloatRailNode_updateIntersectInfo);
  */
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 // PORT: PS2-only VU0 inline asm (vector add-assign).
-extern "C" void cFloatRailNode_updateIntersectInfo(cFloatRailNode* self, void* node)
+extern "C" void cFloatRailNode_updateIntersectInfo(cFloatRailNode* self, cFloatRailNode* node)
 {
-    if (*(int*)((char*)node + 0x64) >= 0) {
-        vu0AddFR(*(sFrVec4*)((char*)node + 0x20),
-                 vu0ScaleFR(((sFrElem*)self->Nodes)[*(int*)((char*)node + 0x64)].vel,
-                            *(float*)((char*)node + 0x68)));
-        vu0AddFR(*(sFrVec4*)((char*)node + 0x20),
-                 vu0ScaleFR(((sFrElem*)self->Nodes)[*(int*)((char*)node + 0x64) + 1].vel,
-                            1.0f - *(float*)((char*)node + 0x68)));
+    if (*(int*)&node->LDamp >= 0) {
+        vu0AddFR(*(sFrVec4*)&node->NumNodes,
+                 vu0ScaleFR(((sFrElem*)self->Nodes)[*(int*)&node->LDamp].vel,
+                            node->ForceScale));
+        vu0AddFR(*(sFrVec4*)&node->NumNodes,
+                 vu0ScaleFR(((sFrElem*)self->Nodes)[*(int*)&node->LDamp + 1].vel,
+                            1.0f - node->ForceScale));
     }
 }
 #endif
@@ -1764,12 +1764,12 @@ extern "C" void cFlagManager_AddFlag(void* mgr, void* node, sFrRailDesc* desc);
  * @param src  flag make-data
  * @return self
  */
-extern "C" void* cFlagNode_cFlagNode1(cFlagNode* self, void* bucket, void* node, void* src)
+extern "C" void* cFlagNode_cFlagNode1(cFlagNode* self, void* bucket, cFlagNode* node, void* src)
 {
     sFrRailDesc desc;
     cInstanceNode_cInstanceNode1(self, bucket, 10, node);
     self->mVtbl = (void**)cFlagNode_vtbl;
-    *(unsigned int*)((char*)node + 0x8) = (*(unsigned int*)((char*)node + 0x8) & 0xFFFFFFFD) | 4;
+    node->Prev = (cObjNode*)(((unsigned int)node->Prev & 0xFFFFFFFD) | 4);
     tFlagState_tFlagState(&desc, src);
     cFlagManager_AddFlag(cObjectInterface_getFlagManager(), node, &desc);
     return ((void*)self);

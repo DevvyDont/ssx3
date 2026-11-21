@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/gameviewman.h"
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -277,11 +278,11 @@ struct sVEntry_0022E7C8 {
  * Loops over the active view count (+0x10), not the camera count (+0x0); the controller is the camera's
  * Controller (+0xA0).
  */
-extern "C" void cGameViewMan_snapAll(void* self)
+extern "C" void cGameViewMan_snapAll(cGameViewMan* self)
 {
     unsigned int i;
-    for (i = 0; i < *(unsigned int*)((char*)self + 0x10); i++) {
-        void* camera = ((void**)((char*)self + 0x4))[i];
+    for (i = 0; i < self->m_uiNumView; i++) {
+        void* camera = ((void**)(&self->PlayerCamera[0]))[i];
         void* controller = *(void**)((char*)camera + 0xA0);
         sVEntry_0022E7C8* vt = *(sVEntry_0022E7C8**)((char*)controller + 0x14);
         vt[4].fn((char*)controller + vt[4].delta);
@@ -303,11 +304,11 @@ struct sVEntry_0022E840 {
  *
  * Loops over the active view count (+0x10), not the camera count (+0x0).
  */
-extern "C" void cGameViewMan_updateAll(void* self)
+extern "C" void cGameViewMan_updateAll(cGameViewMan* self)
 {
     unsigned int i;
-    for (i = 0; i < *(unsigned int*)((char*)self + 0x10); i++) {
-        void* camera = ((void**)((char*)self + 0x4))[i];
+    for (i = 0; i < self->m_uiNumView; i++) {
+        void* camera = ((void**)(&self->PlayerCamera[0]))[i];
         sVEntry_0022E840* vt = *(sVEntry_0022E840**)((char*)camera + 0x90);
         vt[3].fn((char*)camera + vt[3].delta);
     }
@@ -325,11 +326,11 @@ extern "C" void cCamera_updateStreamFocus(void* p);
  *
  * cGame_update and cGame_render call it.
  */
-extern "C" void cGameViewMan_updateStreamFocus(void* self)
+extern "C" void cGameViewMan_updateStreamFocus(cGameViewMan* self)
 {
     unsigned int i;
-    for (i = 0; i < *(unsigned int*)((char*)self + 0x10); i++) {
-        cCamera_updateStreamFocus(((void**)((char*)self + 0x4))[i]);
+    for (i = 0; i < self->m_uiNumView; i++) {
+        cCamera_updateStreamFocus(((void**)(&self->PlayerCamera[0]))[i]);
     }
 }
 #endif

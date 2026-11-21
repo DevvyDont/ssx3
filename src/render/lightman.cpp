@@ -2507,26 +2507,26 @@ struct sV4_1508 {
  *
  * @return @p self
  */
-extern "C" void* cFont_cFont1(char* self)
+extern "C" void* cFont_cFont1(cFont* self)
 {
-    *(sV2_1508*)(self + 0x28) = sV2_1508(0.0f, 0.0f);
-    *(sV2_1508*)(self + 0x30) = sV2_1508(1.0f, 1.0f);
-    *(sV2_1508*)(self + 0x38) = *(sV2_1508*)(self + 0x30);
+    *(sV2_1508*)&self->ShadowOffset[0] = sV2_1508(0.0f, 0.0f);
+    *(sV2_1508*)&self->BaseScale[0] = sV2_1508(1.0f, 1.0f);
+    *(sV2_1508*)&self->Scale[0] = *(sV2_1508*)&self->BaseScale[0];
     {
         sV4_1508 allOnes;
         allOnes.x = 1.0f; allOnes.y = 1.0f; allOnes.z = 1.0f; allOnes.w = 1.0f;
-        *(sV4_1508*)(self + 0x40) = allOnes;
+        *(sV4_1508*)&self->Color[0] = allOnes;
     }
-    *(sV4_1508*)(self + 0x50) = sV4_1508(1.0f, 0.0f, 0.0f, 0.0f);
-    *(int*)(self + 0x60) = -1;
-    *(int*)(self + 0x0) = 0;
-    *(int*)(self + 0x4) = 0;
-    *(int*)(self + 0x8) = 0;
-    *(int*)(self + 0x14) = 0;
-    *(int*)(self + 0xC) = 0;
-    *(int*)(self + 0x10) = 0;
-    *(char*)(self + 0x64) = 0;
-    return self;
+    *(sV4_1508*)&self->ShadowColor[0] = sV4_1508(1.0f, 0.0f, 0.0f, 0.0f);
+    self->TextureID = -1;
+    self->NumGlyphs = 0;
+    self->Glyphs = 0;
+    self->MissingGlyph = 0;
+    self->MaxCharHeight = 0;
+    self->FirstCode = 0;
+    self->LastLinearCode = 0;
+    *(char*)(((char*)self) + 0x64) = 0;
+    return ((char*)self);
 }
 #endif
 

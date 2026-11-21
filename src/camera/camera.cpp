@@ -2606,17 +2606,17 @@ static inline sVec_00160228 Cross_00160228(const sVec_00160228& a, const sVec_00
  * @param pitch  the view pitch (radians)
  * @return the offset (w = 0)
  */
-extern "C" sVec_00160228 cCameraJitterer_getPositionalJitter(char* jitterer, float heading, float pitch)
+extern "C" sVec_00160228 cCameraJitterer_getPositionalJitter(cCameraJitterer* jitterer, float heading, float pitch)
 {
     float zero = 0.0f;
-    if (*(float*)(jitterer + 0x18) == zero) return D_004FF120_v160228;
+    if (jitterer->FocusJitterFactor == zero) return D_004FF120_v160228;
     sVec_00160228 fwd(fCos(pitch) * fCos(heading), fCos(pitch) * fSin(heading), -fSin(pitch), zero);
     sVec_00160228 right(fSin(heading), -fCos(heading), zero, zero);
     sVec_00160228 up = Cross_00160228(fwd, right);
-    float k = *(float*)(jitterer + 0x20) / *(float*)(jitterer + 0x28);
-    float sx = k * (*(float*)(jitterer + 0xC) - *(float*)(jitterer + 0x0));
-    float sy = k * (*(float*)(jitterer + 0x10) - *(float*)(jitterer + 0x4));
-    float sz = *(float*)(jitterer + 0x18) * 10.0f;
+    float k = jitterer->CurrFocusJitterTime / jitterer->FocusJitterTime;
+    float sx = k * (jitterer->RandomSideJitter - jitterer->OldRandomSideJitter);
+    float sy = k * (jitterer->RandomUpJitter - jitterer->OldRandomUpJitter);
+    float sz = jitterer->FocusJitterFactor * 10.0f;
     sVec_00160228 res = Scale_00160228(Add_00160228(Scale_00160228(right, sx), Scale_00160228(up, sy)), sz);
     return res;
 }
@@ -9110,10 +9110,10 @@ INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_getPose);
  * @param algorithm  the algorithm (this)
  * @return @p pose, holding the pose
  */
-extern "C" void* cLookAtChaseAlgorithm_getPose(void* pose, void* algorithm)
+extern "C" void* cLookAtChaseAlgorithm_getPose(void* pose, cLookAtChaseAlgorithm* algorithm)
 {
-    *(cQuad128*)pose = *(cQuad128*)((char*)algorithm + 0x60);
-    *(cQuad128*)((char*)pose + 0x10) = *(cQuad128*)((char*)algorithm + 0x70);
+    *(cQuad128*)pose = *(cQuad128*)&algorithm->CalculatedPose;
+    *(cQuad128*)((char*)pose + 0x10) = *(cQuad128*)&algorithm->CalculatedPose.Q;
     return pose;
 }
 #endif
@@ -9650,8 +9650,8 @@ INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_getPosition);
  * @return @p outPosition
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long long *cBasicCameraAlgorithm_getPosition(long long *outPosition, void *algorithm) {
-    *outPosition = (*(long long *)((char*)(algorithm) + (0x20)));
+extern "C" long long *cBasicCameraAlgorithm_getPosition(long long *outPosition, cBasicCameraAlgorithm* algorithm) {
+    *outPosition = (*(long long*)&algorithm->Position);
     return outPosition;
 }
 #endif
@@ -9756,9 +9756,9 @@ INCLUDE_ASM("camera/camera", cChaseAlgorithm_getTargetPos);
  * @param algorithm  the cChaseAlgorithm
  * @return self, holding a copy of CamTargetPos (+0x20)
  */
-extern "C" void* cChaseAlgorithm_getTargetPos(void* self, void* algorithm)
+extern "C" void* cChaseAlgorithm_getTargetPos(void* self, cChaseAlgorithm* algorithm)
 {
-    *(cQuad128*)self = *(cQuad128*)((char*)algorithm + 0x20);
+    *(cQuad128*)self = *(cQuad128*)&algorithm->CamTargetPos;
     return self;
 }
 #endif

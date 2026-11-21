@@ -1674,10 +1674,10 @@ extern "C" void* MEM_copy(void*, void*, int);
  * @param count  number of references
  * @param src  the tTextureRef array to copy
  */
-extern "C" void cGraphicsMan_SetTextureRefs(void* self, int count, tTextureRef* src)
+extern "C" void cGraphicsMan_SetTextureRefs(cGraphicsMan* self, int count, tTextureRef* src)
 {
-    *(int*)((char*)self + 0xE80) = count;
-    MEM_copy((char*)self + 0x280, src, count * 0xC);
+    self->mNumTexRefs = count;
+    MEM_copy(&self->mTexRefs[0], src, count * 0xC);
 }
 #endif
 
@@ -1785,14 +1785,14 @@ void cMemMan_free(void* p);
  *
  * cAnimModel_compile calls it; cGraphicsMan_AddBlendedMatrix fills the history again.
  */
-extern "C" void cGraphicsMan_ResetBlendedMatrixHistory(void* self)
+extern "C" void cGraphicsMan_ResetBlendedMatrixHistory(cGraphicsMan* self)
 {
-    void* history = *(void**)((char*)self + 0xF48);
+    void* history = self->m_blendedMatrixHistory;
     if (history != 0) {
         cMemMan_free(history);
     }
-    *(void**)((char*)self + 0xF48) = 0;
-    *(int*)((char*)self + 0xF4C) = 0;
+    self->m_blendedMatrixHistory = 0;
+    self->m_blendedMatrixHistorySize = 0;
 }
 #endif
 

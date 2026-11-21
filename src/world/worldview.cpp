@@ -1,4 +1,5 @@
 #include "common.h"
+#include "util/list.h"
 #include "world/ps2chunkresolve.h"
 #include "world/chunkresolve.h"
 #include "wscript/wscriptcache.h"
@@ -2059,7 +2060,7 @@ public:
     virtual int resolveModelHeirarchy(void* a1);
 };
 
-extern "C" int func_003ABF20(cPS2ChunkResolve* self, void* a1);
+extern "C" int func_003ABF20(cPS2ChunkResolve* self, cList* a1);
 
 static inline unsigned int cPS2ChunkResolve_resolveModel_lookup(cPS2ChunkResolve_resolveModel_cObj* self, unsigned int id)
 {
@@ -2096,7 +2097,7 @@ extern "C" int cPS2ChunkResolve_resolveModel(cPS2ChunkResolve* self, void* pMode
         *entry = cPS2ChunkResolve_resolveModel_lookup(((cPS2ChunkResolve_resolveModel_cObj*)self), *entry);
     }
     ((cPS2ChunkResolve_resolveModel_cObj*)self)->resolveModelHeirarchy(pModel);
-    func_003ABF20(self, pModel);
+    func_003ABF20(self, (cList*)pModel);
     return 1;
 }
 #endif
@@ -2115,7 +2116,7 @@ extern "C" void func_003ABF50(void* self, void* a1);
  * @return 1
  */
 // PORT: adds a pointer to an int field (offset -> pointer fixup); not 64-bit safe.
-extern "C" int func_003ABF20(cPS2ChunkResolve* self, void* list)
+extern "C" int func_003ABF20(cPS2ChunkResolve* self, cList* list)
 {
     *(int*)((char*)list + 0x24) += (int)list;
     func_003ABF50(self, list);

@@ -37,7 +37,7 @@ extern "C" void* cInstanceNode_cInstanceNode(cInstanceNode* self, void* bucket, 
 INCLUDE_ASM("object/instancenode", cInstanceNode__cInstanceNode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cInstanceNode_clearActiveNode(void* self, void* a1);
+extern "C" void cInstanceNode_clearActiveNode(void* self, cInstanceNode* a1);
 extern void* cSortObjNode__cSortObjNode_dtor(void* self, int flags) __asm__("cSortObjNode__cSortObjNode__FPv");
 
 /**
@@ -53,7 +53,7 @@ extern void* cSortObjNode__cSortObjNode_dtor(void* self, int flags) __asm__("cSo
 extern "C" void cInstanceNode__cInstanceNode(cInstanceNode* self, int flags)
 {
     self->mVtbl = (void**)cInstanceNode_vtbl;
-    cInstanceNode_clearActiveNode(self, self->Instance);
+    cInstanceNode_clearActiveNode(self, (cInstanceNode*)self->Instance);
     *(int*)((char*)self->Instance + 8) &= 0xFFFF0300;
     {
         char* instance = (char*)self->Instance;
@@ -74,9 +74,9 @@ INCLUDE_ASM("object/instancenode", cInstanceNode_setActiveNode);
  * @param node  the instance node
  * @param inst  instance record
  */
-extern "C" void cInstanceNode_setActiveNode(int node, void* inst)
+extern "C" void cInstanceNode_setActiveNode(int node, cInstanceNode* inst)
 {
-    *(int*)((char*)inst + 0xc) = node;
+    inst->mVtbl = (void**)node;
 }
 #endif
 
@@ -88,11 +88,11 @@ INCLUDE_ASM("object/instancenode", cInstanceNode_clearActiveNode);
  *
  * @param inst  instance record (may be 0)
  */
-extern "C" void cInstanceNode_clearActiveNode(void* self, void* inst)
+extern "C" void cInstanceNode_clearActiveNode(void* self, cInstanceNode* inst)
 {
-    if (inst != 0) {
-        if (*(int*)((char*)inst + 0xc) == (int)self) {
-            *(int*)((char*)inst + 0xc) = 0;
+    if (((void*)inst) != 0) {
+        if ((int)inst->mVtbl == (int)self) {
+            inst->mVtbl = 0;
         }
     }
 }

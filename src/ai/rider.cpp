@@ -3097,8 +3097,8 @@ extern "C" void cRiderHandler_updateRiderFX(int);
  *
  * @param rider  the cRider
  */
-extern "C" void func_00120EB8(void *rider) {
-    cRiderHandler_updateRiderFX((*(int *)((char*)(rider) + (0x77C))));
+extern "C" void func_00120EB8(cRider* rider) {
+    cRiderHandler_updateRiderFX(((int)rider->mRiderHandler));
 }
 #endif
 

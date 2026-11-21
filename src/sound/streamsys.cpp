@@ -1648,7 +1648,7 @@ struct sStrmVoiceCb {
  * @param voice  the bank-monitor instance (this)
  * @param time   elapsed time (On Tour Time)
  */
-extern "C" void cBankMonitorInstance_Update(void* voice, void* self, float time)
+extern "C" void cBankMonitorInstance_Update(void* voice, cBankMonitorInstance* self, float time)
 {
     if (cBankMonitorInstance_IsFree((cBankMonitorInstance*)voice) == 0 && time > 0.0f) {
         sStrmVoiceCb* sv = (sStrmVoiceCb*)voice;
@@ -1656,7 +1656,7 @@ extern "C" void cBankMonitorInstance_Update(void* voice, void* self, float time)
             (((cStrmCbOwner*)self)->*(sv->cb))(voice, time);
         }
         char* bm = 0;
-        if (self) {
+        if (((void*)self)) {
             char* snd = **(char***)((char*)self + 0x118);
             if (snd) {
                 bm = snd;
@@ -1671,7 +1671,7 @@ extern "C" void cBankMonitorInstance_Update(void* voice, void* self, float time)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", cController_BANKMONITOR_Update);
 #ifdef SKIP_ASM
-extern "C" void cBankMonitorInstance_Update(void* voice, void* self, float v);
+extern "C" void cBankMonitorInstance_Update(void* voice, cBankMonitorInstance* self, float v);
 
 /**
  * Updates all 64 bank-monitor instances.
@@ -1687,7 +1687,7 @@ extern "C" void cController_BANKMONITOR_Update(cController* self, float time)
         time = 0.0f;
     }
     for (int i = 0; i < 64; i++) {
-        cBankMonitorInstance_Update(*(char**)(**(char***)&self->MusicSys + 0xAC4) + i * 0xC0, self, time);
+        cBankMonitorInstance_Update(*(char**)(**(char***)&self->MusicSys + 0xAC4) + i * 0xC0, (cBankMonitorInstance*)self, time);
     }
 }
 #endif

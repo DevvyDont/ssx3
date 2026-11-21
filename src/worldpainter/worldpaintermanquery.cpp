@@ -1,4 +1,5 @@
 #include "common.h"
+#include "worldpainter/quadtree.h"
 #include "worldpainter/worldpainterquery.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -290,9 +291,9 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void tWorldPainterQuery__tWorldPainterQuery(void* self, int flags)
+extern "C" void tWorldPainterQuery__tWorldPainterQuery(tWorldPainterQuery* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = D_00485D30;
+    self->mVtbl = D_00485D30;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1252,9 +1253,9 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tQuadTreeNode_init);
  *
  * @param node  the tQuadTreeNode
  */
-extern "C" void tQuadTreeNode_init(void *node) {
-    (*(int *)((char*)(node) + (0))) = 0;
-    (*(int *)((char*)(node) + (4))) = 0;
+extern "C" void tQuadTreeNode_init(tQuadTreeNode* node) {
+    (*(int*)&node->m_leaf) = 0;
+    ((int)node->m_leaf.m_key) = 0;
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name

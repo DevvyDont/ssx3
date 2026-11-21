@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/movenode.h"
 #include "object/objnode.h"
 #include "object/bucketman.h"
 
@@ -585,16 +586,16 @@ extern "C" void* cInstanceNode_cInstanceNode1(void* self, void* a1, int type, vo
  * @param instRecord  the instance record the node belongs to
  * @return @p self
  */
-extern "C" void* cMoveNode_cMoveNode1(void* self, void* bucket, int type, void* instRecord)
+extern "C" void* cMoveNode_cMoveNode1(cMoveNode* self, void* bucket, int type, void* instRecord)
 {
     cInstanceNode_cInstanceNode1(self, bucket, type, instRecord);
-    *(void***)((char*)self + 0xC) = cMoveNode_vtbl;
-    *(float*)((char*)self + 0x24) = 1.0f;
-    *(unsigned short*)((char*)self + 0x12) |= 1;
-    *(int*)((char*)self + 0x1C) = 0;
-    *(int*)((char*)self + 0x20) = 0;
-    *(int*)((char*)self + 0x28) = 0;
-    return self;
+    self->mVtbl = cMoveNode_vtbl;
+    self->Fade = 1.0f;
+    self->Flags |= 1;
+    self->ModifierBlock = 0;
+    self->Debounce = 0;
+    self->TransferHack = 0;
+    return ((void*)self);
 }
 #endif
 

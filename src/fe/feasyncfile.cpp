@@ -1,4 +1,5 @@
 #include "common.h"
+#include "util/menu.h"
 #include "ui/uithing.h"
 #include "fe/festatenethelppopup.h"
 #include "ui/uimenu.h"
@@ -682,10 +683,10 @@ extern char str_kT_POPUPCMNNextChallenge[];
  *
  * @param menu  the cFEStateNetHelpPopup to fill
  */
-extern "C" void func_001A4040(cFEStateNetMessenger* self, void* menu)
+extern "C" void func_001A4040(cFEStateNetMessenger* self, cMenu* menu)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(menu, 5);
-    *(int*)((char*)menu + 0x54) = GetHashValue32(str_kT_BTNEAMessenger);
+    menu->Items[18] = (cMenuItem*)GetHashValue32(str_kT_BTNEAMessenger);
     cFEStateNetHelpPopup_setDescription(menu, 0, GetHashValue32(str_kT_HELP279BuddiesOnline));
     cFEStateNetHelpPopup_setDescription(menu, 1, GetHashValue32(str_kT_HELP279ReadMessages));
     cFEStateNetHelpPopup_setDescription(menu, 2, GetHashValue32(str_kT_HELP279StoreBuddies));
@@ -8142,10 +8143,10 @@ extern char str_kT_HELPCmnPrevious[];
  *
  * @param menu  the cFEStateNetHelpPopup to fill
  */
-extern "C" void func_001AD4F0(cFEStateSelectPersona* self, void* menu)
+extern "C" void func_001AD4F0(cFEStateSelectPersona* self, cMenu* menu)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(menu, 4);
-    *(int*)((char*)menu + 0x54) = GetHashValue32(str_kT_HELP220Persona);
+    menu->Items[18] = (cMenuItem*)GetHashValue32(str_kT_HELP220Persona);
     cFEStateNetHelpPopup_setDescription(menu, 0, GetHashValue32(str_kT_HELP220CreateName));
     cFEStateNetHelpPopup_setDescription(menu, 1, GetHashValue32(str_kT_HELP220SelectName));
     cFEStateNetHelpPopup_setOption(menu, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
@@ -9591,9 +9592,9 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
  * @param pPopup  the popup state that sent the event (On Tour pPopup)
  * @param Event  the popup event (On Tour Event)
  */
-extern "C" void cFEStateChallengePopup_onPopupEvent(cFEStateChallengePopup* self, void* pPopup, int Event)
+extern "C" void cFEStateChallengePopup_onPopupEvent(cFEStateChallengePopup* self, cFEStateChallengePopup* pPopup, int Event)
 {
-    if (*(int*)((char*)pPopup + 0x18) == 2101) {
+    if (pPopup->miMiscData == 2101) {
         ((cFEVObj_001AF428*)self)->v33(pPopup, Event);
     } else {
         cFEStateNet_onPopupEvent(((cFEVObj_001AF428*)self), pPopup, Event);
@@ -10478,9 +10479,9 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
  * @param pPopup  the popup state that sent the event (On Tour pPopup)
  * @param Event  the popup event (On Tour Event)
  */
-extern "C" void cFEStateChallengeReceivedPopup_onPopupEvent(cFEStateChallengeReceivedPopup* self, void* pPopup, int Event)
+extern "C" void cFEStateChallengeReceivedPopup_onPopupEvent(cFEStateChallengeReceivedPopup* self, cFEStateChallengeReceivedPopup* pPopup, int Event)
 {
-    if (*(int*)((char*)pPopup + 0x18) == 2101) {
+    if (pPopup->miMiscData == 2101) {
         ((cFEVObj_001B05E0*)self)->v33(pPopup, Event);
     } else {
         cFEStateNet_onPopupEvent(((cFEVObj_001B05E0*)self), pPopup, Event);
@@ -12504,10 +12505,10 @@ extern char str_kT_HELP235ScrollChat[];
  *
  * @param menu  the cFEStateNetHelpPopup to fill
  */
-extern "C" void func_001B2DA0(cFEStateChatRoom* self, void* menu)
+extern "C" void func_001B2DA0(cFEStateChatRoom* self, cMenu* menu)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(menu, 6);
-    *(int*)((char*)menu + 0x54) = GetHashValue32(str_kT_HELP235ChatRoom);
+    menu->Items[18] = (cMenuItem*)GetHashValue32(str_kT_HELP235ChatRoom);
     cFEStateNetHelpPopup_setDescription(menu, 0, GetHashValue32(str_kT_HELP235InitiateChallenge));
     cFEStateNetHelpPopup_setOption(menu, 0, GetHashValue32(str_kT_HELP235ChangePlayer), 3);
     cFEStateNetHelpPopup_setOption(menu, 1, GetHashValue32(str_kT_HELP235PlayerOptions), 0);
@@ -14569,10 +14570,10 @@ extern char str_kT_HELPCmnPrevious[];
  *
  * @param menu  the cFEStateNetHelpPopup to fill
  */
-extern "C" void func_001B54B8(cFEStateNetConfig* self, void* menu)
+extern "C" void func_001B54B8(cFEStateNetConfig* self, cMenu* menu)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(menu, 5);
-    *(int*)((char*)menu + 0x54) = GetHashValue32(str_kT_HELP200NetworkConfig);
+    menu->Items[18] = (cMenuItem*)GetHashValue32(str_kT_HELP200NetworkConfig);
     cFEStateNetHelpPopup_setDescription(menu, 0, GetHashValue32(str_kT_HELP200NetworkConfigMessage));
     cFEStateNetHelpPopup_setOption(menu, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
     cFEStateNetHelpPopup_setOption(menu, 1, GetHashValue32(str_kT_HELPCmnToggleHighlight), 4);
@@ -17970,10 +17971,10 @@ extern char str_kT_HELP211Note[];
  *
  * @param menu  the cFEStateNetHelpPopup to fill
  */
-extern "C" void func_001B9088(cFEStateCreateStep1* self, void* menu)
+extern "C" void func_001B9088(cFEStateCreateStep1* self, cMenu* menu)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(menu, 5);
-    *(int*)((char*)menu + 0x54) = GetHashValue32(str_kT_HELP211CreateNewAccount);
+    menu->Items[18] = (cMenuItem*)GetHashValue32(str_kT_HELP211CreateNewAccount);
     cFEStateNetHelpPopup_setDescription(menu, 0, GetHashValue32(str_kT_HELP211UniqueName));
     cFEStateNetHelpPopup_setDescription(menu, 1, GetHashValue32(str_kT_HELP211Password));
     cFEStateNetHelpPopup_setDescription(menu, 2, GetHashValue32(str_kT_HELP211ValidEmail));
@@ -17982,7 +17983,7 @@ extern "C" void func_001B9088(cFEStateCreateStep1* self, void* menu)
     cFEStateNetHelpPopup_setOption(menu, 2, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
     cFEStateNetHelpPopup_setOption(menu, 3, GetHashValue32(str_kT_HELPCmnPrevious), 1);
     cFEStateNetHelpPopup_setOption(menu, 4, GetHashValue32(str_kT_HELPCmnMembershipAgreement), 2);
-    *(int*)((char*)menu + 0x64) = GetHashValue32(str_kT_HELP211Note);
+    menu->Items[22] = (cMenuItem*)GetHashValue32(str_kT_HELP211Note);
 }
 #endif
 
@@ -19181,10 +19182,10 @@ extern char str_kT_HELP211Note[];
  *
  * @param menu  the help popup to fill
  */
-extern "C" void func_001BA8B8(cFEStateCreateStep2* self, void* menu)
+extern "C" void func_001BA8B8(cFEStateCreateStep2* self, cMenu* menu)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(menu, 5);
-    *(int*)((char*)menu + 0x54) = GetHashValue32(str_kT_HELP211CreateNewAccount);
+    menu->Items[18] = (cMenuItem*)GetHashValue32(str_kT_HELP211CreateNewAccount);
     cFEStateNetHelpPopup_setDescription(menu, 0, GetHashValue32(str_kT_HELP211UniqueName));
     cFEStateNetHelpPopup_setDescription(menu, 1, GetHashValue32(str_kT_HELP211Password));
     cFEStateNetHelpPopup_setDescription(menu, 2, GetHashValue32(str_kT_HELP211ValidEmail));
@@ -19193,7 +19194,7 @@ extern "C" void func_001BA8B8(cFEStateCreateStep2* self, void* menu)
     cFEStateNetHelpPopup_setOption(menu, 2, GetHashValue32(str_kT_HELPCmnSelectHighlight), 0);
     cFEStateNetHelpPopup_setOption(menu, 3, GetHashValue32(str_kT_HELPCmnPrevious), 1);
     cFEStateNetHelpPopup_setOption(menu, 4, GetHashValue32(str_kT_HELPCmnMembershipAgreement), 2);
-    *(int*)((char*)menu + 0x64) = GetHashValue32(str_kT_HELP211Note);
+    menu->Items[22] = (cMenuItem*)GetHashValue32(str_kT_HELP211Note);
 }
 #endif
 
@@ -20478,14 +20479,14 @@ extern char str_kT_HELPCmnPrevious[];
  *
  * @param menu  the help popup to fill
  */
-extern "C" void func_001BC190(cFEStateCreateDuplicate* self, void* menu)
+extern "C" void func_001BC190(cFEStateCreateDuplicate* self, cMenu* menu)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(menu, 3);
     if (self->mbAccount != 0) {
-        *(int*)((char*)menu + 0x54) = GetHashValue32(str_kT_HELP212DuplicateAccountName);
+        menu->Items[18] = (cMenuItem*)GetHashValue32(str_kT_HELP212DuplicateAccountName);
         cFEStateNetHelpPopup_setDescription(menu, 0, GetHashValue32(str_kT_HELP212DuplicateAccountNameMessage));
     } else {
-        *(int*)((char*)menu + 0x54) = GetHashValue32(str_kT_HELP212DuplicatePersona);
+        menu->Items[18] = (cMenuItem*)GetHashValue32(str_kT_HELP212DuplicatePersona);
         cFEStateNetHelpPopup_setDescription(menu, 0, GetHashValue32(str_kT_HELP212DuplicatePersonaMessage));
     }
     cFEStateNetHelpPopup_setOption(menu, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
@@ -22073,10 +22074,10 @@ extern char str_kT_HELPCmnPrevious[];
  *
  * @param menu  the help popup to fill
  */
-extern "C" void func_001BDE48(cFEStateLobbyMenu* self, void* menu)
+extern "C" void func_001BDE48(cFEStateLobbyMenu* self, cMenu* menu)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(menu, 6);
-    *(int*)((char*)menu + 0x54) = GetHashValue32(str_kT_HELP231MainLobby);
+    menu->Items[18] = (cMenuItem*)GetHashValue32(str_kT_HELP231MainLobby);
     cFEStateNetHelpPopup_setDescription(menu, 0, GetHashValue32(str_kT_HELP231LobbyMessage));
     cFEStateNetHelpPopup_setOption(menu, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
     cFEStateNetHelpPopup_setOption(menu, 1, GetHashValue32(str_kT_HELPCmnToggleHighlight), 4);
@@ -25229,10 +25230,10 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
  * @param Event  the popup event (On Tour Event)
  * @return the handler's result (On Tour's onPopupEvent returns void)
  */
-extern "C" int cFEStateNetQuickPlayPopup_onPopupEvent(cFEStateNetQuickPlayPopup* self, void* pPopup, int Event)
+extern "C" int cFEStateNetQuickPlayPopup_onPopupEvent(cFEStateNetQuickPlayPopup* self, cFEStateNetQuickPlayPopup* pPopup, int Event)
 {
     int result;
-    if (*(int*)((char*)pPopup + 0x18) == 2095) {
+    if (pPopup->miMiscData == 2095) {
         result = func_001C1B88(self, pPopup, Event);
     } else {
         result = cFEStateNet_onPopupEvent(self, pPopup, Event);
@@ -26648,10 +26649,10 @@ extern char str_kT_HELPCmnPrevious[];
  *
  * @param menu  the help popup to fill
  */
-extern "C" void func_001C3570(cFEStateStats* self, void* menu)
+extern "C" void func_001C3570(cFEStateStats* self, cMenu* menu)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(menu, 5);
-    *(int*)((char*)menu + 0x54) = GetHashValue32(str_kT_HELP249HighScore);
+    menu->Items[18] = (cMenuItem*)GetHashValue32(str_kT_HELP249HighScore);
     cFEStateNetHelpPopup_setDescription(menu, 0, GetHashValue32(str_kT_HELP249HighScoreMessages));
     cFEStateNetHelpPopup_setOption(menu, 0, GetHashValue32(str_kT_HELPCmnChangeHighlight), 3);
     cFEStateNetHelpPopup_setOption(menu, 1, GetHashValue32(str_kT_HELPCmnToggleHighlight), 4);

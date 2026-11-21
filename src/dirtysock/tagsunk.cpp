@@ -1,4 +1,5 @@
 #include "common.h"
+#include "online/commchannel.h"
 #include "online/onlineevent.h"
 #include "online/voipman.h"
 #include "online/usbkeyboard.h"
@@ -13295,8 +13296,8 @@ INCLUDE_ASM("dirtysock/tagsunk", cCommChannel_setError);
  *
  * @param channel  the cCommChannel
  */
-extern "C" void cCommChannel_setError(void *channel) {
-    (*(int *)((char*)(channel) + (4))) = 1;
+extern "C" void cCommChannel_setError(cCommChannel* channel) {
+    (channel->mError) = 1;
 }
 #endif
 //100%
@@ -13308,8 +13309,8 @@ INCLUDE_ASM("dirtysock/tagsunk", cCommChannel_getError);
  * @param channel  the cCommChannel
  * @return mError
  */
-extern "C" int cCommChannel_getError(void *channel) {
-    return (*(int *)((char*)(channel) + (4)));
+extern "C" int cCommChannel_getError(cCommChannel* channel) {
+    return (channel->mError);
 }
 #endif
 

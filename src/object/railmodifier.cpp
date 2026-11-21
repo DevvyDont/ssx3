@@ -1931,11 +1931,11 @@ public:
  *
  * @param obj  the replay frame to write to (On Tour cBxReplayFrame* data)
  */
-extern "C" void cRollerModifier_writeToReplayFrame(void* self, cRollerModifier_writeToReplayFrame_cObj* obj)
+extern "C" void cRollerModifier_writeToReplayFrame(cRollerModifier* self, cRollerModifier_writeToReplayFrame_cObj* obj)
 {
-    cRigidBody_writeToReplayFrame((cRigidBody*)((char*)self + 0x30), (cRigidBody_writeToReplayFrame_cObj*)obj);
-    obj->write((char*)self + 0x4, 40);
-    obj->writeReplayInstance(*(void**)((char*)self + 0xD0));
+    cRigidBody_writeToReplayFrame((cRigidBody*)(&self->Pose), (cRigidBody_writeToReplayFrame_cObj*)obj);
+    obj->write(&self->mKineticEnergy, 40);
+    obj->writeReplayInstance(self->m_pInstance);
 }
 #endif
 
@@ -2127,15 +2127,15 @@ static inline void vu0AddToRM(sRmVec4& dst, const sRmVec4& b)
  *
  * @return the pose (position and orientation quaternion)
  */
-extern "C" sRmXform cRollerModifier_getBodyPose(void* self)
+extern "C" sRmXform cRollerModifier_getBodyPose(cRollerModifier* self)
 {
-    sRmXform pose = *(sRmXform*)((char*)self + 0x30);
+    sRmXform pose = *(sRmXform*)&self->Pose;
     sRmVec4 negatedCom;
     sRmVec4 rotatedCom;
     sRmVec4 comOffset;
     sRmVec4 posDelta;
     sRmVec4 poseOffset;
-    vu0QuatRotToRM(comOffset, *(sRmVec4*)((char*)self + 0x40), *(sRmVec4*)((char*)self + 0x2B0));
+    vu0QuatRotToRM(comOffset, *(sRmVec4*)&self->Pose.Q, *(sRmVec4*)&self->COMOffset);
     rotatedCom = comOffset;
     vu0ScaleToRM(comOffset, rotatedCom, -1.0f);
     negatedCom = comOffset;
@@ -5146,8 +5146,8 @@ INCLUDE_ASM("object/railmodifier", cRailModifier_getSplineId);
  * @param railModifier  the rail modifier
  * @return SplineId
  */
-extern "C" int cRailModifier_getSplineId(void *railModifier) {
-    return (*(int *)((char*)(railModifier) + (0x30)));
+extern "C" int cRailModifier_getSplineId(cRailModifier* railModifier) {
+    return ((int)railModifier->SplineId);
 }
 #endif
 

@@ -1559,8 +1559,8 @@ INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_Current);
  * @param musicSys  the cMusicSys
  * @return mCurrent, or 0 when no song is set up
  */
-extern "C" int cMusicSys_MUSIC_Current(void *musicSys) {
-    return (*(int *)((char*)(musicSys) + (0x408)));
+extern "C" int cMusicSys_MUSIC_Current(cMusicSys* musicSys) {
+    return ((int)musicSys->mCurrent);
 }
 #endif
 
@@ -1575,11 +1575,11 @@ extern "C" int func_002B2488(int);
  * @param musicSys  the cMusicSys
  * @return the stream handle, or -1
  */
-extern "C" int cMusicSys_MUSIC_GetStreamHandle(void *musicSys) {
+extern "C" int cMusicSys_MUSIC_GetStreamHandle(cMusicSys* musicSys) {
     int temp_4;
     int var_2;
 
-    temp_4 = (*(int *)((char*)(musicSys) + (0x408)));
+    temp_4 = ((int)musicSys->mCurrent);
     var_2 = -1;
     if (temp_4 != 0) {
         var_2 = func_002B2488(temp_4);
@@ -1669,8 +1669,8 @@ extern "C" void func_002B2850(int, void *);
  *
  * @param musicSys  the cMusicSys
  */
-extern "C" void cMusicSys_MUSIC_SetDelay(void *musicSys) {
-    func_002B2850((*(int *)((char*)(musicSys) + (0x408))), musicSys);
+extern "C" void cMusicSys_MUSIC_SetDelay(cMusicSys* musicSys) {
+    func_002B2850(((int)musicSys->mCurrent), musicSys);
 }
 #endif
 
@@ -1683,8 +1683,8 @@ INCLUDE_ASM("bx/seg_1BA100", cMusicSys_IsSongPlaying);
  * @param musicSys  the cMusicSys
  * @return mSongPlaying
  */
-extern "C" int cMusicSys_IsSongPlaying(void *musicSys) {
-    return (*(int *)((char*)(musicSys) + (0x418)));
+extern "C" int cMusicSys_IsSongPlaying(cMusicSys* musicSys) {
+    return (musicSys->mSongPlaying);
 }
 #endif
 
@@ -1710,8 +1710,8 @@ INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_StoreDefaultActiveMap);
  * @param musicSys  the cMusicSys
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void cMusicSys_MUSIC_StoreDefaultActiveMap(void *musicSys) {
-    (*(long *)((char*)(musicSys) + (0x400))) = (long) (*(long *)((char*)(musicSys) + (0x3F8)));
+extern "C" void cMusicSys_MUSIC_StoreDefaultActiveMap(cMusicSys* musicSys) {
+    (*(long*)&musicSys->mDefaultActiveMap) = (long) (*(long*)&musicSys->mActiveMap);
 }
 #endif
 
@@ -1725,8 +1725,8 @@ INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_GetDefaultActiveMap);
  * @return mDefaultActiveMap
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long cMusicSys_MUSIC_GetDefaultActiveMap(void *musicSys) {
-    return (*(long *)((char*)(musicSys) + (0x400)));
+extern "C" long cMusicSys_MUSIC_GetDefaultActiveMap(cMusicSys* musicSys) {
+    return (*(long*)&musicSys->mDefaultActiveMap);
 }
 #endif
 
@@ -1872,8 +1872,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_SetRailSurface);
  * @param audio  the cSSXAudio
  * @param railType  the rail surface type
  */
-extern "C" void cSSXAudio_SetRailSurface(void *audio, int railType) {
-    (*(int *)((char*)(audio) + (0x598C))) = railType;
+extern "C" void cSSXAudio_SetRailSurface(cSSXAudio* audio, int railType) {
+    (audio->mRailType) = railType;
 }
 #endif
 
@@ -1929,8 +1929,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetNumPlayLists);
  * @param audio  the cSSXAudio
  * @return mNumPlayLists
  */
-extern "C" int cSSXAudio_GetNumPlayLists(void *audio) {
-    return (*(int *)((char*)(audio) + (0x6234)));
+extern "C" int cSSXAudio_GetNumPlayLists(cSSXAudio* audio) {
+    return (audio->mNumPlayLists);
 }
 #endif
 
@@ -2029,8 +2029,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetPreset);
  * @param audio  the cSSXAudio
  * @return mPreset
  */
-extern "C" int cSSXAudio_GetPreset(void *audio) {
-    return (*(int *)((char*)(audio) + (0x6470)));
+extern "C" int cSSXAudio_GetPreset(cSSXAudio* audio) {
+    return (audio->mPreset);
 }
 #endif
 
@@ -2043,8 +2043,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetAudioUpdateState);
  * @param audio  the cSSXAudio
  * @return mAudioUpdateState
  */
-extern "C" int cSSXAudio_GetAudioUpdateState(void *audio) {
-    return (*(int *)((char*)(audio) + (0x6474)));
+extern "C" int cSSXAudio_GetAudioUpdateState(cSSXAudio* audio) {
+    return (audio->mAudioUpdateState);
 }
 #endif
 

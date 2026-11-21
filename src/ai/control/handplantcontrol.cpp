@@ -5900,8 +5900,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getFront);
  * @return @p outFront
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long long *cRider_getFront(long long *outFront, void *rider) {
-    *outFront = (*(long long *)((char*)(rider) + (0x1B0)));
+extern "C" long long *cRider_getFront(long long *outFront, cRider* rider) {
+    *outFront = (*(long long*)&rider->mMatrix.row[1]);
     return outFront;
 }
 #endif
@@ -5916,8 +5916,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getSide);
  * @return @p outSide
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long long *cRider_getSide(long long *outSide, void *rider) {
-    *outSide = (*(long long *)((char*)(rider) + (0x1A0)));
+extern "C" long long *cRider_getSide(long long *outSide, cRider* rider) {
+    *outSide = (*(long long*)&rider->mMatrix);
     return outSide;
 }
 #endif
@@ -5932,8 +5932,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getUp);
  * @return @p outUp
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long long *cRider_getUp(long long *outUp, void *rider) {
-    *outUp = (*(long long *)((char*)(rider) + (0x1C0)));
+extern "C" long long *cRider_getUp(long long *outUp, cRider* rider) {
+    *outUp = (*(long long*)&rider->mMatrix.row[2]);
     return outUp;
 }
 #endif
@@ -5977,8 +5977,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getRotation);
  * @return @p outRotation
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long long *cRider_getRotation(long long *outRotation, void *rider) {
-    *outRotation = (*(long long *)((char*)(rider) + (0x120)));
+extern "C" long long *cRider_getRotation(long long *outRotation, cRider* rider) {
+    *outRotation = (*(long long*)&rider->mRotation);
     return outRotation;
 }
 #endif
@@ -6040,9 +6040,9 @@ static inline void hpCopyMat(void* dst, const void* src)
  * @param out  receives the matrix
  * @return @p out
  */
-extern "C" void* cRider_getRoot(void* out, char* self)
+extern "C" void* cRider_getRoot(void* out, cRider* self)
 {
-    hpCopyMat(out, self + 0x160);
+    hpCopyMat(out, ((char*)self) + 0x160);
     return out;
 }
 #endif
@@ -6057,8 +6057,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getGroundNormal);
  * @return @p outNormal
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long long *cRider_getGroundNormal(long long *outNormal, void *rider) {
-    *outNormal = (*(long long *)((char*)(rider) + (0x370)));
+extern "C" long long *cRider_getGroundNormal(long long *outNormal, cRider* rider) {
+    *outNormal = (*(long long*)&rider->mGroundNormal);
     return outNormal;
 }
 #endif
@@ -6165,8 +6165,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00140A48);
  * @param rider  the cRider
  * @return mGroundMaterial
  */
-extern "C" int func_00140A48(void *rider) {
-    return (*(int *)((char*)(rider) + (0x434)));
+extern "C" int func_00140A48(cRider* rider) {
+    return (rider->mGroundMaterial);
 }
 #endif
 //100%
@@ -6178,8 +6178,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00140A50);
  * @param rider  the cRider
  * @return 1 when mGroundMaterial < 17, else 0
  */
-extern "C" int func_00140A50(void *rider) {
-    return (*(int *)((char*)(rider) + (0x434))) < 17;
+extern "C" int func_00140A50(cRider* rider) {
+    return (rider->mGroundMaterial) < 17;
 }
 #endif
 //100%
@@ -6191,8 +6191,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00140A60);
  * @param rider  the cRider
  * @return 1 for materials 11-13, else 0
  */
-extern "C" int func_00140A60(void *rider) {
-    return (unsigned int) ((*(int *)((char*)(rider) + (0x434))) - 11) < 3U;
+extern "C" int func_00140A60(cRider* rider) {
+    return (unsigned int) ((rider->mGroundMaterial) - 11) < 3U;
 }
 #endif
 //100%
@@ -6884,8 +6884,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00140CA0);
  * @param rider  the cRider
  * @return mSmoothedHeading
  */
-extern "C" float func_00140CA0(void *rider) {
-    return (*(float *)((char*)(rider) + (0x5B4)));
+extern "C" float func_00140CA0(cRider* rider) {
+    return (rider->mSmoothedHeading);
 }
 #endif
 //100%
@@ -7051,8 +7051,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00140D38);
  * @param rider  the cRider
  * @param value  the new value
  */
-extern "C" void func_00140D38(void *rider, int value) {
-    (*(int *)((char*)(rider) + (0x308))) = value;
+extern "C" void func_00140D38(cRider* rider, int value) {
+    (rider->unk_308) = value;
 }
 #endif
 //100%
@@ -7129,8 +7129,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00140D78);
  * @param rider  the cRider
  * @return unk_308
  */
-extern "C" int func_00140D78(void *rider) {
-    return (*(int *)((char*)(rider) + (0x308)));
+extern "C" int func_00140D78(cRider* rider) {
+    return (rider->unk_308);
 }
 #endif
 

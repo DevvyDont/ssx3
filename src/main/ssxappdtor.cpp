@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/fadescreen.h"
 #include "main/gamemodehandler.h"
 #include "main/gameobjnodes.h"
 #include "input/input.h"
@@ -359,8 +360,8 @@ INCLUDE_ASM("main/ssxappdtor", func_00243A70);
  *
  * @param fadeScreen  the screen fade
  */
-extern "C" void func_00243A70(void *fadeScreen) {
-    (*(int *)((char*)(fadeScreen) + (8))) = 1;
+extern "C" void func_00243A70(cFadeScreen* fadeScreen) {
+    (fadeScreen->IsEnding) = 1;
 }
 #endif
 

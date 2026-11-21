@@ -3765,9 +3765,9 @@ struct sPartVec4i {
  * @param out  the rectangle to fill (the hidden struct-return pointer)
  * @return @p out
  */
-extern "C" sPartVec4i* cPS2GraphicsMan_GetViewportWindow(sPartVec4i* out, void* self)
+extern "C" sPartVec4i* cPS2GraphicsMan_GetViewportWindow(sPartVec4i* out, cPS2GraphicsMan* self)
 {
-    int i = *(int*)((char*)self + 0x10dc);
+    int i = self->mViewportDepth;
     float* window = (float*)((char*)self + (i * 0x230 + 0x6d20));
     int x = (int)window[0];
     int y = (int)window[1];

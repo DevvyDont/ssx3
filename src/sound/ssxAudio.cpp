@@ -647,7 +647,7 @@ static inline float Atan2_5930(float y, float x)
  * @param outAngles  the sound driver's play options (SNDPLAYOPTS) to fill
  * @return the squared distance in square metres
  */
-extern "C" float cSSXAudio_Calc3DPos(char* audio, char* source, SNDPLAYOPTS* outAngles)
+extern "C" float cSSXAudio_Calc3DPos(cSSXAudio* audio, char* source, SNDPLAYOPTS* outAngles)
 {
     if (*(int*)((char*)cAudioInterface_getApp() + 0x84) == 0)
         return 1.0f;
@@ -662,7 +662,7 @@ extern "C" float cSSXAudio_Calc3DPos(char* audio, char* source, SNDPLAYOPTS* out
     cy = 25.0f;
     relPos.y = (tp.y + cy) * 0.009999999776482582f;
     relPos.z = (tp.z + cz) * 0.009999999776482582f;
-    if (*(int*)(audio + 0x62B0) == 0) {
+    if (audio->mAudioMode == 0) {
         *(short*)&outAngles->azimuth = 0;
         outAngles->elevation = 0;
     } else {
@@ -3546,11 +3546,11 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_CancelRMSData);
  *
  * @param audio  the audio system
  */
-extern "C" void cSSXAudio_CancelRMSData(void *audio) {
-    (*(int *)((char*)(audio) + (0x6C58))) = 0;
-    (*(float *)((char*)(audio) + (0x6C6C))) = 1.0f;
-    (*(int *)((char*)(audio) + (0x6C60))) = 0;
-    (*(float *)((char*)(audio) + (0x6C64))) = (float) (1.0f - (*(float *)((char*)(audio) + (0x6C68))));
+extern "C" void cSSXAudio_CancelRMSData(cSSXAudio* audio) {
+    (audio->mValidRMSData) = 0;
+    (audio->mRMSFinalValue) = 1.0f;
+    (audio->mRMSStepFrame) = 0;
+    (audio->mRMSStepValue) = (float) (1.0f - (audio->mRMSCurValue));
 }
 #endif
 

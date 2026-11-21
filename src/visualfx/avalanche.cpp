@@ -400,7 +400,7 @@ static inline sVec4_6290 vScale_6290(const sVec4_6290& v, float s)
  *
  * @return the colour as (alpha, red, green, blue)
  */
-extern "C" sVec4_6290 cAvalanche_getColour(void* self)
+extern "C" sVec4_6290 cAvalanche_getColour(cAvalanche* self)
 {
     char* node = ((char**)cAvalanche_m_nodeList)[*(unsigned short*)((char*)self + 0x92) >> 8];
     char* activeNode = *(char**)(node + 0x114);

@@ -789,11 +789,11 @@ struct sObjRec_0039D008 {
  * @param key  the object hash name
  * @return the new object, or 0 when no record matches
  */
-extern "C" void* cUIScreen_createObjectByHashName(void* self, int key)
+extern "C" void* cUIScreen_createObjectByHashName(cUIScreen* self, int key)
 {
-    sObjRec_0039D008* record = (sObjRec_0039D008*)(*(char**)((char*)self + 0x38) + 4);
+    sObjRec_0039D008* record = (sObjRec_0039D008*)((char*)self->mpObjectBlock + 4);
     unsigned int i;
-    for (i = 0; i < *(*(unsigned int**)((char*)self + 0x38)); i++) {
+    for (i = 0; i < *((unsigned int*)self->mpObjectBlock); i++) {
         if (record->key == key) {
             char* obj = cUIScreen_createObjectByStruct((cUIScreen*)self, (char*)record);
             *(int*)(obj + 0x38) = key;

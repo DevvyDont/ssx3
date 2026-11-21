@@ -774,24 +774,24 @@ void cReplayFrame_setRanking(void*, int, int);
  * @param mode  non-zero when the highlight ended with a landing
  * @return 1 when a ranking was stored, 0 when nothing changed
  */
-extern "C" int cReplayHighlight_setRanking(void* self, tRiderStats* stats, int mode)
+extern "C" int cReplayHighlight_setRanking(cReplayHighlight* self, tRiderStats* stats, int mode)
 {
     if (mode) {
         int pointsGained = stats->TotalPoints - *(int*)((char*)self + 0xA0);
         if (pointsGained == 0) return 0;
         if (pointsGained >= 1000) {
-            cReplayFrame_setRanking(*(void**)((char*)self + 0xB0), *(int*)self, pointsGained);
+            cReplayFrame_setRanking(self->Frame, *(int*)self, pointsGained);
             return 1;
         }
         float airTime = stats->AirTime;
         if (airTime >= 5.0f) {
-            cReplayFrame_setRanking(*(void**)((char*)self + 0xB0), *(int*)self, (int)(airTime * 1000.0f));
+            cReplayFrame_setRanking(self->Frame, *(int*)self, (int)(airTime * 1000.0f));
             return 1;
         }
     }
     int pointsLost = stats->TotalPointsLostToWipeouts - *(int*)((char*)self + 0xA8);
     if (pointsLost == 0) return 0;
-    cReplayFrame_setRanking(*(void**)((char*)self + 0xB0), *(int*)self, -pointsLost);
+    cReplayFrame_setRanking(self->Frame, *(int*)self, -pointsLost);
     return 1;
 }
 #endif

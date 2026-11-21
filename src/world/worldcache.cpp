@@ -169,7 +169,7 @@ void* cSectionBlockAllocator_cSectionBlockAllocator(void* self, int allocator, i
 INCLUDE_ASM("world/worldcache", cSectionBlockAllocator__cSectionBlockAllocator);
 #ifdef SKIP_ASM
 void operator_delete(int*);
-extern "C" void cSectionBlockAllocator_releaseBlocks(void* self);
+extern "C" void cSectionBlockAllocator_releaseBlocks(cSectionBlockAllocator* self);
 
 /**
  * Destroys a cSectionBlockAllocator: returns its blocks (cSectionBlockAllocator_releaseBlocks) and deletes it when bit 0 of @p flags is set.
@@ -178,7 +178,7 @@ extern "C" void cSectionBlockAllocator_releaseBlocks(void* self);
  */
 extern "C" void cSectionBlockAllocator__cSectionBlockAllocator(void* self, int flags)
 {
-    cSectionBlockAllocator_releaseBlocks(self);
+    cSectionBlockAllocator_releaseBlocks((cSectionBlockAllocator*)self);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -195,16 +195,16 @@ void cWorldBlockAllocator_releaseBlock(void* self, void* item);
  *
  * m_pAllocBlocks ends up null; m_pMRUBlock is not cleared.
  */
-extern "C" void cSectionBlockAllocator_releaseBlocks(void* self)
+extern "C" void cSectionBlockAllocator_releaseBlocks(cSectionBlockAllocator* self)
 {
-    if (*(void**)((char*)self + 0xC) != 0) {
+    if (self->m_pAllocBlocks != 0) {
         void* next;
         do {
-            void* item = *(void**)((char*)self + 0xC);
+            void* item = self->m_pAllocBlocks;
             next = *(void**)((char*)item + 0x14);
             cWorldBlockAllocator_releaseBlock(*(void**)self, item);
-            *(void**)((char*)self + 0xC) = next;
-            *(int*)((char*)self + 0x8) = *(int*)((char*)self + 0x8) - 1;
+            self->m_pAllocBlocks = (tWorldMemBlock*)next;
+            self->m_uiNumBlocks = (int)self->m_uiNumBlocks - 1;
         } while (next != 0);
     }
 }
@@ -429,14 +429,14 @@ extern char str_cHullPage_Entries[];
  * @param data  the hull data (On Tour const tBxBSPHull* pBSPHull)
  * @return @p self
  */
-extern "C" void* cHullPage_cHullPage(void* self, unsigned short* data)
+extern "C" void* cHullPage_cHullPage(cHullPage* self, unsigned short* data)
 {
     *(unsigned short**)self = data;
     unsigned short n = *data;
-    *(int*)((char*)self + 0x8) = 0;
-    *(int*)((char*)self + 0x4) = n;
-    *(void**)((char*)self + 0xC) = operator_new_tag(n * 4, str_cHullPage_Entries, 0x20000000, 0);
-    return self;
+    self->m_uiCurrentPageEntry = 0;
+    self->m_uiNumPageEntry = (unsigned int)n;
+    self->m_pPageEntries = (tPageEntry*)operator_new_tag(n * 4, str_cHullPage_Entries, 0x20000000, 0);
+    return ((void*)self);
 }
 #endif
 
@@ -1120,7 +1120,7 @@ extern "C" void cWorldCache_signalPageLoadComplete(cWorldCache* self, int uiHull
 INCLUDE_ASM("world/worldcache", cWorldCache_updatePages);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cHullPage_cHullPage(void* self, unsigned short* data);
+extern "C" void* cHullPage_cHullPage(cHullPage* self, unsigned short* data);
 extern "C" void* cWorldView_getHull(void* self, int i);
 extern "C" void cStreamMan_addStreamRequest(void* self, int i, int a, int b);
 extern "C" void cWorldCache_purgePage(cWorldCache* self, int i);

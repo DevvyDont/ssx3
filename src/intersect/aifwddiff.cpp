@@ -57,7 +57,7 @@ struct sFwdDiffNode;
 extern "C" void cAIFwdDiffCache_MoveToAgeQueueTail(sFwdDiffList* list, sFwdDiffLink* n);
 extern "C" void cAIFwdDiffCache_RemoveFromHash(void* self, void* node);
 extern "C" void cAIFwdDiffCache_AddToHash(sFwdDiffTable* table, sFwdDiffNode* node);
-extern "C" void cAIFwdDiffCache_TesselatePatch(cAIFwdDiffCache* self, void* src, void* node);
+extern "C" void cAIFwdDiffCache_TesselatePatch(cAIFwdDiffCache* self, void* src, cAIFwdDiffCache* node);
 
 struct sCacheNode_279D0 {
     unsigned int key;           // 0x0
@@ -97,7 +97,7 @@ extern "C" void cAIFwdDiffCache_GetFwdDiff(cAIFwdDiffCache* self, void* src, sCa
     n->key = key;
     cAIFwdDiffCache_AddToHash((sFwdDiffTable*)self, (sFwdDiffNode*)n);
     *(sCacheNode_279D0**)&self->mAgeQueue = n->lruNext;
-    cAIFwdDiffCache_TesselatePatch((cAIFwdDiffCache*)self, src, n);
+    cAIFwdDiffCache_TesselatePatch((cAIFwdDiffCache*)self, src, (cAIFwdDiffCache*)n);
     *out = n;
 }
 #endif
@@ -249,7 +249,7 @@ extern sGp2930 D_004A5A20; // placeholder: target is a raw $gp+0x2930 reference
  * @param patch  the terrain patch record (On Tour const tPatchRecord&)
  * @param fwdDiff  the cache node to fill (On Tour node)
  */
-extern "C" void cAIFwdDiffCache_TesselatePatch(cAIFwdDiffCache* self, void* patch, void* fwdDiff)
+extern "C" void cAIFwdDiffCache_TesselatePatch(cAIFwdDiffCache* self, void* patch, cAIFwdDiffCache* fwdDiff)
 {
     sGp2930* patchEval = &D_004A5A20;
     func_00391418(patchEval, (char*)patch + 0x40);
@@ -427,20 +427,20 @@ struct sShape_27F18 {
  * @param outContact  out: the contact point (On Tour loc)
  * @return 1 on contact, else 0
  */
-extern "C" int bxSphereTree_IsRiderTreeCollision(void* self, sShape_27F18* shape, int outPush, int outContact)
+extern "C" int bxSphereTree_IsRiderTreeCollision(bxSphereTree* self, sShape_27F18* shape, int outPush, int outContact)
 {
-    void* tree = *(void**)((char*)self + 0x98);
+    void* tree = self->treeInfo;
     if (*(int*)((char*)tree + 8) != 0) {
-        *(int*)(*(char**)((char*)self + 0x98) + 0x28) = SphereTree_AllocBuf(tree);
+        *(int*)((char*)self->treeInfo + 0x28) = SphereTree_AllocBuf(tree);
     }
-    if (SphereTree_isSphereCollision(self, shape->pos, (char*)self + 0x80, 0, 0, outPush, outContact, shape->radius) == 0) {
+    if (SphereTree_isSphereCollision(self, shape->pos, &self->transCenter, 0, 0, outPush, outContact, shape->radius) == 0) {
         return 0;
     }
     if (shape->count == 0) {
         return 1;
     }
     for (int i = 0; i < shape->count; i++) {
-        if (SphereTree_isSphereCollision(self, shape->subs[i].pos, (char*)self + 0x80, 0, 0, outPush, outContact, shape->subs[i].radius) != 0) {
+        if (SphereTree_isSphereCollision(self, shape->subs[i].pos, &self->transCenter, 0, 0, outPush, outContact, shape->subs[i].radius) != 0) {
             return 1;
         }
     }

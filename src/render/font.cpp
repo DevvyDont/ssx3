@@ -4142,7 +4142,7 @@ extern "C" void cPS2GraphicsMan_updateNetMat(cPS2GraphicsMan* self);
  * @return @p out
  */
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
-extern "C" void* cPS2GraphicsMan_GetNetMatrix(void* out, void* self)
+extern "C" void* cPS2GraphicsMan_GetNetMatrix(void* out, cPS2GraphicsMan* self)
 {
     cPS2GraphicsMan_updateNetMat((cPS2GraphicsMan*)self);
     __asm__ __volatile__(
@@ -4157,7 +4157,7 @@ extern "C" void* cPS2GraphicsMan_GetNetMatrix(void* out, void* self)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"(out), "r"((char*)self + 0x58A0)
+        : "r"(out), "r"((char*)&self->mNetMatrix)
         : "memory");
     return out;
 }
@@ -4351,8 +4351,8 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetCurrentFrameBufferPage);
  * @param graphicsMan  the graphics manager
  * @return mCurrentFrameBufferPage
  */
-extern "C" int cPS2GraphicsMan_GetCurrentFrameBufferPage(void *graphicsMan) {
-    return (*(int *)((char*)(graphicsMan) + (0x5A84)));
+extern "C" int cPS2GraphicsMan_GetCurrentFrameBufferPage(cPS2GraphicsMan* graphicsMan) {
+    return (graphicsMan->mCurrentFrameBufferPage);
 }
 #endif
 //100%
@@ -4364,8 +4364,8 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetCurrentZBufferPage);
  * @param graphicsMan  the graphics manager
  * @return mCurrentZBufferPage
  */
-extern "C" int cPS2GraphicsMan_GetCurrentZBufferPage(void *graphicsMan) {
-    return (*(int *)((char*)(graphicsMan) + (0x5A80)));
+extern "C" int cPS2GraphicsMan_GetCurrentZBufferPage(cPS2GraphicsMan* graphicsMan) {
+    return (graphicsMan->mCurrentZBufferPage);
 }
 #endif
 //100%
@@ -4377,8 +4377,8 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetCurrentFBFormat);
  * @param graphicsMan  the graphics manager
  * @return mCurrentFBFormat
  */
-extern "C" int cPS2GraphicsMan_GetCurrentFBFormat(void *graphicsMan) {
-    return (*(int *)((char*)(graphicsMan) + (0x5A3C)));
+extern "C" int cPS2GraphicsMan_GetCurrentFBFormat(cPS2GraphicsMan* graphicsMan) {
+    return (graphicsMan->mCurrentFBFormat);
 }
 #endif
 //100%
@@ -4390,8 +4390,8 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetCurrentZBFormat);
  * @param graphicsMan  the graphics manager
  * @return mCurrentZBFormat
  */
-extern "C" int cPS2GraphicsMan_GetCurrentZBFormat(void *graphicsMan) {
-    return (*(int *)((char*)(graphicsMan) + (0x5A40)));
+extern "C" int cPS2GraphicsMan_GetCurrentZBFormat(cPS2GraphicsMan* graphicsMan) {
+    return (graphicsMan->mCurrentZBFormat);
 }
 #endif
 //100%
@@ -4416,8 +4416,8 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_SetMinFlipWait);
  * @param graphicsMan  the graphics manager
  * @param minWait  the vblank count
  */
-extern "C" void cPS2GraphicsMan_SetMinFlipWait(void *graphicsMan, int minWait) {
-    (*(int *)((char*)(graphicsMan) + (0x5AB8))) = minWait;
+extern "C" void cPS2GraphicsMan_SetMinFlipWait(cPS2GraphicsMan* graphicsMan, int minWait) {
+    (graphicsMan->mMinFlipWait) = minWait;
 }
 #endif
 //100%
@@ -4429,8 +4429,8 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetDisplayBufferAddress);
  * @param graphicsMan  the graphics manager
  * @return mDisplayBufferAddress
  */
-extern "C" int cPS2GraphicsMan_GetDisplayBufferAddress(void *graphicsMan) {
-    return (*(int *)((char*)(graphicsMan) + (0x5A88)));
+extern "C" int cPS2GraphicsMan_GetDisplayBufferAddress(cPS2GraphicsMan* graphicsMan) {
+    return (graphicsMan->mDisplayBufferAddress);
 }
 #endif
 //100%
@@ -4458,8 +4458,8 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetFrameBufferWidth);
  * @param graphicsMan  the graphics manager
  * @return mFrameBufferWidth
  */
-extern "C" int cPS2GraphicsMan_GetFrameBufferWidth(void *graphicsMan) {
-    return (*(int *)((char*)(graphicsMan) + (0x5A50)));
+extern "C" int cPS2GraphicsMan_GetFrameBufferWidth(cPS2GraphicsMan* graphicsMan) {
+    return (graphicsMan->mFrameBufferWidth);
 }
 #endif
 //100%
@@ -4471,8 +4471,8 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetPSMFormat);
  * @param graphicsMan  the graphics manager
  * @return mCurrentFBFormat
  */
-extern "C" int cPS2GraphicsMan_GetPSMFormat(void *graphicsMan) {
-    return (*(int *)((char*)(graphicsMan) + (0x5A3C)));
+extern "C" int cPS2GraphicsMan_GetPSMFormat(cPS2GraphicsMan* graphicsMan) {
+    return (graphicsMan->mCurrentFBFormat);
 }
 #endif
 //100%
@@ -4483,8 +4483,8 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_EnableFilter);
  *
  * @param graphicsMan  the graphics manager
  */
-extern "C" void cPS2GraphicsMan_EnableFilter(void *graphicsMan) {
-    (*(int *)((char*)(graphicsMan) + (0x59E8))) = 1;
+extern "C" void cPS2GraphicsMan_EnableFilter(cPS2GraphicsMan* graphicsMan) {
+    (graphicsMan->mFilterEnabled) = 1;
 }
 #endif
 //100%
@@ -4495,8 +4495,8 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_DisableFilter);
  *
  * @param graphicsMan  the graphics manager
  */
-extern "C" void cPS2GraphicsMan_DisableFilter(void *graphicsMan) {
-    (*(int *)((char*)(graphicsMan) + (0x59E8))) = 0;
+extern "C" void cPS2GraphicsMan_DisableFilter(cPS2GraphicsMan* graphicsMan) {
+    (graphicsMan->mFilterEnabled) = 0;
 }
 #endif
 //100%
@@ -4529,8 +4529,8 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetScreenBrightness);
  * @param graphicsMan  the graphics manager
  * @return mScreenBrightness
  */
-extern "C" float cPS2GraphicsMan_GetScreenBrightness(void *graphicsMan) {
-    return (*(float *)((char*)(graphicsMan) + (0x59FC)));
+extern "C" float cPS2GraphicsMan_GetScreenBrightness(cPS2GraphicsMan* graphicsMan) {
+    return (graphicsMan->mScreenBrightness);
 }
 #endif
 //100%
@@ -6766,14 +6766,14 @@ INCLUDE_ASM("render/font", cDynamicColourEmitter_getSubEmitterPositionVelocityCo
  * @param outB  receives &m_velocities[slot]
  * @param outC  receives &m_colours[slot]
  */
-extern "C" void cDynamicColourEmitter_getSubEmitterPositionVelocityColour(void* self, int idx, int** outA, int** outB, int** outC)
+extern "C" void cDynamicColourEmitter_getSubEmitterPositionVelocityColour(cDynamicColourEmitter* self, int idx, int** outA, int** outB, int** outC)
 {
-    int next = *(int*)((char*)self + 0x17C) + 1;
-    int i = (idx + next) % *(int*)((char*)self + 0x178);
+    int next = self->m_subEmitterId + 1;
+    int i = (idx + next) % self->m_numSubEmitters;
     int off = i * 0x10;
-    *outA = (int*)(*(char**)((char*)self + 0x1A0) + off);
-    *outB = (int*)(*(char**)((char*)self + 0x1A4) + off);
-    *outC = (int*)(*(char**)((char*)self + 0x204) + i * 4);
+    *outA = (int*)((char*)self->m_positions + off);
+    *outB = (int*)((char*)self->m_velocities + off);
+    *outC = (int*)((char*)self->m_colours + i * 4);
 }
 #endif
 //100%
@@ -6799,12 +6799,12 @@ struct sFontRGBA {
  * @param out1  receives the velocity
  * @param out2  receives the packed colour
  */
-extern "C" void cDynamicColourEmitter_getSubEmitterPositionVelocityColour1(char* self, int idx, sFontQ4* out0, sFontQ4* out1, sFontRGBA* out2)
+extern "C" void cDynamicColourEmitter_getSubEmitterPositionVelocityColour1(cDynamicColourEmitter* self, int idx, sFontQ4* out0, sFontQ4* out1, sFontRGBA* out2)
 {
-    int i = (idx + 1 + *(int*)(self + 0x17C)) % *(int*)(self + 0x178);
-    *out0 = (*(sFontQ4**)(self + 0x1A0))[i];
-    *out1 = (*(sFontQ4**)(self + 0x1A4))[i];
-    *out2 = (*(sFontRGBA**)(self + 0x204))[i];
+    int i = (idx + 1 + self->m_subEmitterId) % self->m_numSubEmitters;
+    *out0 = ((sFontQ4*)self->m_positions)[i];
+    *out1 = ((sFontQ4*)self->m_velocities)[i];
+    *out2 = ((sFontRGBA*)self->m_colours)[i];
 }
 #endif
 //100%
@@ -6829,10 +6829,10 @@ struct sFontWord_67D8 {
  * @param idx  the sub-emitter, counted from the oldest
  * @return the colour
  */
-extern "C" sFontWord_67D8 cDynamicColourEmitter_getSubEmitterColour(void* self, int idx)
+extern "C" sFontWord_67D8 cDynamicColourEmitter_getSubEmitterColour(cDynamicColourEmitter* self, int idx)
 {
-    int next = *(int*)((char*)self + 0x17C) + 1;
-    return (*(sFontWord_67D8**)((char*)self + 0x204))[(idx + next) % *(int*)((char*)self + 0x178)];
+    int next = self->m_subEmitterId + 1;
+    return ((sFontWord_67D8*)self->m_colours)[(idx + next) % self->m_numSubEmitters];
 }
 #endif
 //100%

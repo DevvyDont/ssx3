@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/font.h"
 #include "util/menu.h"
 #include "online/privatemessage.h"
 #include "fe/debuglobbymenus.h"
@@ -1411,14 +1412,14 @@ struct V2_C9D0 { float x, y; };
  * @param sx  horizontal scale factor
  * @param sy  vertical scale factor
  */
-extern "C" void cFont_textf1(void *self, int fmt, float posX, float posY, float sx, float sy, ...)
+extern "C" void cFont_textf1(cFont* self, int fmt, float posX, float posY, float sx, float sy, ...)
 {
     char *ap;
     cFont_textf1_va_start(ap);
-    *(float *)((char *)self + 0x38) = *(float *)((char *)self + 0x30) * sx;
-    *(float *)((char *)self + 0x3C) = *(float *)((char *)self + 0x34) * sy;
+    self->Scale[0] = self->BaseScale[0] * sx;
+    self->Scale[1] = self->BaseScale[1] * sy;
     cFont_vtextf_C9D0(self, fmt, ap);
-    *(V2_C9D0 *)((char *)self + 0x38) = *(V2_C9D0 *)((char *)self + 0x30);
+    *(V2_C9D0*)&self->Scale[0] = *(V2_C9D0*)&self->BaseScale[0];
 }
 #endif
 
@@ -3232,9 +3233,9 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDA30);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param message  the ASCII string
  */
-extern "C" void func_001DDA30(void *popupInfo, int message) {
-    (*(int *)((char*)(popupInfo) + (8))) = message;
-    (*(int *)((char*)(popupInfo) + (4))) = 2;
+extern "C" void func_001DDA30(cPopupInfo* popupInfo, int message) {
+    ((int)popupInfo->mtMessage.ui) = message;
+    (popupInfo->mtMessage.eType) = 2;
 }
 #endif
 
@@ -3247,9 +3248,9 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDA40);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param message  the 16-bit string
  */
-extern "C" void func_001DDA40(void *popupInfo, int message) {
-    (*(int *)((char*)(popupInfo) + (8))) = message;
-    (*(int *)((char*)(popupInfo) + (4))) = 1;
+extern "C" void func_001DDA40(cPopupInfo* popupInfo, int message) {
+    ((int)popupInfo->mtMessage.ui) = message;
+    (popupInfo->mtMessage.eType) = 1;
 }
 #endif
 
@@ -3262,9 +3263,9 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDA50);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param messageId  the text hash id
  */
-extern "C" void func_001DDA50(void *popupInfo, int messageId) {
-    (*(int *)((char*)(popupInfo) + (8))) = messageId;
-    (*(int *)((char*)(popupInfo) + (4))) = 3;
+extern "C" void func_001DDA50(cPopupInfo* popupInfo, int messageId) {
+    ((int)popupInfo->mtMessage.ui) = messageId;
+    (popupInfo->mtMessage.eType) = 3;
 }
 #endif
 
@@ -3306,9 +3307,9 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDA80);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param title  the ASCII string
  */
-extern "C" void func_001DDA80(void *popupInfo, int title) {
-    (*(int *)((char*)(popupInfo) + (0x10))) = title;
-    (*(int *)((char*)(popupInfo) + (0xC))) = 2;
+extern "C" void func_001DDA80(cPopupInfo* popupInfo, int title) {
+    ((int)popupInfo->mtTitle.ui) = title;
+    (popupInfo->mtTitle.eType) = 2;
 }
 #endif
 
@@ -3321,9 +3322,9 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDA90);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param title  the 16-bit string
  */
-extern "C" void func_001DDA90(void *popupInfo, int title) {
-    (*(int *)((char*)(popupInfo) + (0x10))) = title;
-    (*(int *)((char*)(popupInfo) + (0xC))) = 1;
+extern "C" void func_001DDA90(cPopupInfo* popupInfo, int title) {
+    ((int)popupInfo->mtTitle.ui) = title;
+    (popupInfo->mtTitle.eType) = 1;
 }
 #endif
 
@@ -3336,9 +3337,9 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDAA0);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param titleId  the text hash id
  */
-extern "C" void func_001DDAA0(void *popupInfo, int titleId) {
-    (*(int *)((char*)(popupInfo) + (0x10))) = titleId;
-    (*(int *)((char*)(popupInfo) + (0xC))) = 3;
+extern "C" void func_001DDAA0(cPopupInfo* popupInfo, int titleId) {
+    ((int)popupInfo->mtTitle.ui) = titleId;
+    (popupInfo->mtTitle.eType) = 3;
 }
 #endif
 
@@ -3380,9 +3381,9 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDAD0);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param entryBoxTitle  the ASCII string
  */
-extern "C" void func_001DDAD0(void *popupInfo, int entryBoxTitle) {
-    (*(int *)((char*)(popupInfo) + (0x18))) = entryBoxTitle;
-    (*(int *)((char*)(popupInfo) + (0x14))) = 2;
+extern "C" void func_001DDAD0(cPopupInfo* popupInfo, int entryBoxTitle) {
+    ((int)popupInfo->mtEntryBoxTitle.ui) = entryBoxTitle;
+    (popupInfo->mtEntryBoxTitle.eType) = 2;
 }
 #endif
 
@@ -3395,9 +3396,9 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDAE0);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param entryBoxTitle  the 16-bit string
  */
-extern "C" void func_001DDAE0(void *popupInfo, int entryBoxTitle) {
-    (*(int *)((char*)(popupInfo) + (0x18))) = entryBoxTitle;
-    (*(int *)((char*)(popupInfo) + (0x14))) = 1;
+extern "C" void func_001DDAE0(cPopupInfo* popupInfo, int entryBoxTitle) {
+    ((int)popupInfo->mtEntryBoxTitle.ui) = entryBoxTitle;
+    (popupInfo->mtEntryBoxTitle.eType) = 1;
 }
 #endif
 
@@ -3410,9 +3411,9 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDAF0);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param entryBoxTitleId  the text hash id
  */
-extern "C" void func_001DDAF0(void *popupInfo, int entryBoxTitleId) {
-    (*(int *)((char*)(popupInfo) + (0x18))) = entryBoxTitleId;
-    (*(int *)((char*)(popupInfo) + (0x14))) = 3;
+extern "C" void func_001DDAF0(cPopupInfo* popupInfo, int entryBoxTitleId) {
+    ((int)popupInfo->mtEntryBoxTitle.ui) = entryBoxTitleId;
+    (popupInfo->mtEntryBoxTitle.eType) = 3;
 }
 #endif
 
@@ -3455,9 +3456,9 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDB20);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param entryBoxInitial  the ASCII string
  */
-extern "C" void func_001DDB20(void *popupInfo, int entryBoxInitial) {
-    (*(int *)((char*)(popupInfo) + (0x20))) = entryBoxInitial;
-    (*(int *)((char*)(popupInfo) + (0x1C))) = 2;
+extern "C" void func_001DDB20(cPopupInfo* popupInfo, int entryBoxInitial) {
+    ((int)popupInfo->mtEntryBoxInitial.ui) = entryBoxInitial;
+    (popupInfo->mtEntryBoxInitial.eType) = 2;
 }
 #endif
 
@@ -3471,9 +3472,9 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDB30);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param entryBoxInitial  the 16-bit string
  */
-extern "C" void func_001DDB30(void *popupInfo, int entryBoxInitial) {
-    (*(int *)((char*)(popupInfo) + (0x20))) = entryBoxInitial;
-    (*(int *)((char*)(popupInfo) + (0x1C))) = 1;
+extern "C" void func_001DDB30(cPopupInfo* popupInfo, int entryBoxInitial) {
+    ((int)popupInfo->mtEntryBoxInitial.ui) = entryBoxInitial;
+    (popupInfo->mtEntryBoxInitial.eType) = 1;
 }
 #endif
 
@@ -3487,9 +3488,9 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDB40);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param entryBoxInitialId  the text hash id
  */
-extern "C" void func_001DDB40(void *popupInfo, int entryBoxInitialId) {
-    (*(int *)((char*)(popupInfo) + (0x20))) = entryBoxInitialId;
-    (*(int *)((char*)(popupInfo) + (0x1C))) = 3;
+extern "C" void func_001DDB40(cPopupInfo* popupInfo, int entryBoxInitialId) {
+    ((int)popupInfo->mtEntryBoxInitial.ui) = entryBoxInitialId;
+    (popupInfo->mtEntryBoxInitial.eType) = 3;
 }
 #endif
 
@@ -3533,9 +3534,9 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDB70);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param postPending  the ASCII string
  */
-extern "C" void func_001DDB70(void *popupInfo, int postPending) {
-    (*(int *)((char*)(popupInfo) + (0x50))) = postPending;
-    (*(int *)((char*)(popupInfo) + (0x4C))) = 2;
+extern "C" void func_001DDB70(cPopupInfo* popupInfo, int postPending) {
+    ((int)popupInfo->mtPostPending.ui) = postPending;
+    (popupInfo->mtPostPending.eType) = 2;
 }
 #endif
 
@@ -3549,9 +3550,9 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDB80);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param postPending  the 16-bit string
  */
-extern "C" void func_001DDB80(void *popupInfo, int postPending) {
-    (*(int *)((char*)(popupInfo) + (0x50))) = postPending;
-    (*(int *)((char*)(popupInfo) + (0x4C))) = 1;
+extern "C" void func_001DDB80(cPopupInfo* popupInfo, int postPending) {
+    ((int)popupInfo->mtPostPending.ui) = postPending;
+    (popupInfo->mtPostPending.eType) = 1;
 }
 #endif
 
@@ -3564,9 +3565,9 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDB90);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param postPendingId  the text hash id
  */
-extern "C" void func_001DDB90(void *popupInfo, int postPendingId) {
-    (*(int *)((char*)(popupInfo) + (0x50))) = postPendingId;
-    (*(int *)((char*)(popupInfo) + (0x4C))) = 3;
+extern "C" void func_001DDB90(cPopupInfo* popupInfo, int postPendingId) {
+    ((int)popupInfo->mtPostPending.ui) = postPendingId;
+    (popupInfo->mtPostPending.eType) = 3;
 }
 #endif
 
@@ -3608,8 +3609,8 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDBC0);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param deferEvents  the new flag value
  */
-extern "C" void func_001DDBC0(void *popupInfo, int deferEvents) {
-    (*(int *)((char*)(popupInfo) + (0xB4))) = deferEvents;
+extern "C" void func_001DDBC0(cPopupInfo* popupInfo, int deferEvents) {
+    (popupInfo->mbDeferEventsFlag) = deferEvents;
 }
 #endif
 
@@ -3622,8 +3623,8 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDBC8);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return mbDeferEventsFlag
  */
-extern "C" int func_001DDBC8(void *popupInfo) {
-    return (*(int *)((char*)(popupInfo) + (0xB4)));
+extern "C" int func_001DDBC8(cPopupInfo* popupInfo) {
+    return (popupInfo->mbDeferEventsFlag);
 }
 #endif
 

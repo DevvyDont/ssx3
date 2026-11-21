@@ -645,8 +645,8 @@ extern "C" void cPS2MemCard_GetLastError_39B8(void*, int) __asm__("cPS2MemCard_G
  *
  * @param memCard  the memory card
  */
-extern "C" void cPS2MemCard_GetLastError1(void *memCard) {
-    cPS2MemCard_GetLastError_39B8(memCard, (*(int *)((char*)(memCard) + (0xC))));
+extern "C" void cPS2MemCard_GetLastError1(cPS2MemCard* memCard) {
+    cPS2MemCard_GetLastError_39B8(memCard, (memCard->mDevice));
 }
 #endif
 
@@ -661,8 +661,8 @@ INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_GetState);
  * @param memCard  the memory card
  * @return mState
  */
-extern "C" int cPS2MemCard_GetState(void *memCard) {
-    return (*(int *)((char*)(memCard) + (4)));
+extern "C" int cPS2MemCard_GetState(cPS2MemCard* memCard) {
+    return (memCard->mState);
 }
 #endif
 
@@ -683,8 +683,8 @@ INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_GetNumDirTable);
  * @param memCard  the memory card
  * @return mNumDirTable
  */
-extern "C" int cPS2MemCard_GetNumDirTable(void *memCard) {
-    return (*(int *)((char*)(memCard) + (0x54)));
+extern "C" int cPS2MemCard_GetNumDirTable(cPS2MemCard* memCard) {
+    return (memCard->mNumDirTable);
 }
 #endif
 

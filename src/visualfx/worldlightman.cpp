@@ -1240,8 +1240,8 @@ struct sWLCode6910 {
 
 extern signed char D_00445E30[];
 extern int D_004A3BC0;
-extern "C" void cCheatFX_clearInput(void* self);
-extern "C" int cCheatFX_getInput(void* self);
+extern "C" void cCheatFX_clearInput(cCheatFX* self);
+extern "C" int cCheatFX_getInput(cCheatFX* self);
 
 /**
  * Advances a cheat effect's code state machine (m_cheatState) by this frame's cheat input, then clears the input.
@@ -1255,8 +1255,8 @@ extern "C" int cCheatFX_getInput(void* self);
  */
 extern "C" void cCheatFX_updateState(sWLCode6910* self)
 {
-    int cheatInput = cCheatFX_getInput(self);
-    cCheatFX_clearInput(self);
+    int cheatInput = cCheatFX_getInput((cCheatFX*)self);
+    cCheatFX_clearInput((cCheatFX*)self);
     if (cheatInput == 0) {
         self->flags &= ~1;
         return;
@@ -1373,9 +1373,9 @@ INCLUDE_ASM("visualfx/worldlightman", cCheatFX_clearInput);
  *
  * cCheatFX_updateState calls it after reading the input.
  */
-extern "C" void cCheatFX_clearInput(void* self)
+extern "C" void cCheatFX_clearInput(cCheatFX* self)
 {
-    unsigned char* flagByte = (unsigned char*)((char*)self + 0x7);
+    unsigned char* flagByte = (unsigned char*)(&self->m_cheatState.m_misc);
     *flagByte &= 0x8f;
 }
 #endif
@@ -1390,9 +1390,9 @@ INCLUDE_ASM("visualfx/worldlightman", cCheatFX_getInput);
  *
  * @return the input bits
  */
-extern "C" int cCheatFX_getInput(void* self)
+extern "C" int cCheatFX_getInput(cCheatFX* self)
 {
-    return *(unsigned char*)((char*)self + 0x7) & 0x70;
+    return *(unsigned char*)&self->m_cheatState.m_misc & 0x70;
 }
 #endif
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/player.h"
 #include "ealib/rcmpbase.h"
 #include "ealib/avsubtitle.h"
 #include "ealib/ps2sonycodec.h"
@@ -264,7 +265,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003AE2F8);
  * @param player  the movie player
  * @param table  the subtitle array (two words: entries, count), or 0 for none
  */
-extern "C" void func_003AE2F8(void *player, int table) {
+extern "C" void func_003AE2F8(cPlayer* player, int table) {
     (*(int *)((char*)(player) + (0x70))) = table;
 }
 #endif

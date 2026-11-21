@@ -52,11 +52,11 @@ extern "C" void* cRiderSphereTree_operatorE_v(void* self) __asm__("cRiderSphereT
  */
 // NOTE: the array's offset is unconstrained by the target: the empty-ctor loop is deleted
 // (vec_mark), leaving only the dead `li 0x13; li -1` pair. 0x30 = sSphereNode children[].
-extern "C" void* cRiderSphereTree_cRiderSphereTree1(void* self)
+extern "C" void* cRiderSphereTree_cRiderSphereTree1(cRiderSphereTree* self)
 {
-    new ((char*)self + 0x30) sRiderSphere_329910[20];
+    new (self->sphList) sRiderSphere_329910[20];
     cRiderSphereTree_operatorE_v(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -90,15 +90,15 @@ INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_Init1);
  *
  * @param radius  the sphere's radius (On Tour cursorRadius)
  */
-extern "C" void cRiderSphereTree_Init1(void* self, float radius)
+extern "C" void cRiderSphereTree_Init1(cRiderSphereTree* self, float radius)
 {
-    *(unsigned int*)((char*)self + 0x28) = 0xFFFFFFFF;
-    *(int*)((char*)self + 0x2C) = 1;
-    *(float*)((char*)self + 0x20) = radius;
+    self->sphMask = 0xFFFFFFFF;
+    self->listLen = 1;
+    self->boundRad = radius;
     *(float*)((char*)self + 0x40) = radius;
-    *(int*)((char*)self + 0x24) = -1;
+    self->boundBone = -1;
     *(int*)((char*)self + 0x44) = -1;
-    *(int*)((char*)self + 0x0) = 0;
+    self->bonePoses = 0;
 }
 #endif
 

@@ -1890,9 +1890,9 @@ struct sVec2 { float x; float y; };
  * @param out  the result buffer (g++'s hidden return pointer for a t2Vector returned by value)
  * @return @p out
  */
-extern "C" sVec2* cUIIcon_getTileUV(sVec2* out, char* self)
+extern "C" sVec2* cUIIcon_getTileUV(sVec2* out, cUIIcon* self)
 {
-    *out = *(sVec2*)(self + 0x80);
+    *out = *(sVec2*)&self->mTileUV[0];
     return out;
 }
 #endif

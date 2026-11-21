@@ -272,9 +272,9 @@ void* LobbyMan_onincomingmsg(void* self);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268B08(void* self, void* message, char* lobbyMan)
+extern "C" void func_00268B08(void* self, void* message, LobbyMan* lobbyMan)
 {
-    LobbyMan_onincomingmsg(lobbyMan + D_004A2FF0.v);
+    LobbyMan_onincomingmsg(((char*)lobbyMan) + D_004A2FF0.v);
 }
 #endif
 
@@ -802,9 +802,9 @@ void func_0025FC20(void* self);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268EC8(void* self, void* message, char* lobbyMan)
+extern "C" void func_00268EC8(void* self, void* message, LobbyMan* lobbyMan)
 {
-    func_0025FC20(lobbyMan + D_004A3268.v);
+    func_0025FC20(((char*)lobbyMan) + D_004A3268.v);
 }
 #endif
 
@@ -956,9 +956,9 @@ void BuddyMan_onBuddySend(void* self);
  * @param message  the callback's message, passed through to the handler
  * @param buddyMan  the buddy manager the callback was registered with
  */
-extern "C" void func_00268FE0(void* self, void* message, char* buddyMan)
+extern "C" void func_00268FE0(void* self, void* message, BuddyMan* buddyMan)
 {
-    BuddyMan_onBuddySend(buddyMan + D_004A33A0.v);
+    BuddyMan_onBuddySend(((char*)buddyMan) + D_004A33A0.v);
 }
 #endif
 
@@ -3044,12 +3044,12 @@ struct sBXSeg16 {
  * @param pathParam  the position along the path (On Tour param)
  * @return @p out
  */
-extern "C" sBXSeg16* cPath_getPathHeading(sBXSeg16* out, void* self, float pathParam)
+extern "C" sBXSeg16* cPath_getPathHeading(sBXSeg16* out, cPath* self, float pathParam)
 {
     int i = 0;
     for (;;) {
-        sBXSeg16* segment = &(*(sBXSeg16**)((char*)self + 0x18))[i];
-        if (i == *(int*)((char*)self + 0x8) - 1 || pathParam <= segment->fC) {
+        sBXSeg16* segment = &((sBXSeg16*)self->Nodes)[i];
+        if (i == self->NumNodes - 1 || pathParam <= segment->fC) {
             out->f0 = segment->f0;
             out->f4 = segment->f4;
             out->f8 = segment->f8;
