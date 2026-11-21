@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/uistatebuypopup.h"
 #include "ui/uimenu.h"
 #include "ui/uiinput.h"
 #include "ui/uistate.h"
@@ -187,7 +188,7 @@ extern "C" void cFEStateBuyAttrib_buyExperience(cFEStateBuyAttrib* self);
 extern "C" void cFEStateBuyAttrib_onPopupEvent(cFEStateBuyAttrib* self, cUIState* sender, int msg)
 {
     if (msg == 22) {
-        if (*(int*)((char*)sender + 0x6C) != 0) {
+        if (((cUIStateBuyPopup*)sender)->mbAccept != 0) {
             cFEStateBuyAttrib_buyExperience(self);
         }
     }

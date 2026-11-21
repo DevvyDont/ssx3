@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/uistatebuypopup.h"
 #include "ui/uithing.h"
 #include "fe/festatevideoplayer.h"
 #include "ui/uiicon.h"
@@ -619,7 +620,7 @@ extern "C" void cFEStateRewardGalleryBase_onPopupEvent(cFEStateRewardGalleryBase
         if (((self->mAttrState >> 3) & 1) == 0) {
             self->mAttrState |= 8;
         }
-        if (widget->mHashName == 7 && *(int*)((char*)widget + 0x6C) != 0) {
+        if (widget->mHashName == 7 && ((cUIStateBuyPopup*)widget)->mbAccept != 0) {
             sVE_FD18* vt = (sVE_FD18*)self->mVtbl;
             vt[30].fn((char*)self + vt[30].delta,
                       self->mFirstVisibleRow * self->mMaxRewardColumns + self->mpSelected->mMiscData);

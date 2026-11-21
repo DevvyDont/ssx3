@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/uistatebuypopup.h"
 #include "fe/festatebigradio.h"
 #include "ui/uimenu.h"
 #include "ui/uistate.h"
@@ -489,7 +490,7 @@ extern "C" void cFEStateRequestLine_onPopupEvent(cFEStateRequestLine* self, cUIS
         if (((self->mAttrState >> 3) & 1) == 0) {
             self->mAttrState |= 8;
         }
-        if (item->mHashName == 7 && *(int*)((char*)item + 0x6C) != 0) {
+        if (item->mHashName == 7 && ((cUIStateBuyPopup*)item)->mbAccept != 0) {
             int song = self->mSongOrder[self->mFirstVisibleSong + self->mpRadioMenu->mpSelected->mMiscData];
             cFEStateRequestLine_buySong((cFEStateRequestLine*)self, song);
             cFEStateRequestLine_updatePlayList((cFEStateRequestLine*)self);

@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fe/keyboardpopup.h"
+#include "fe/festatecharselect.h"
 #include "ui/uistate.h"
 #include "ui/uithing.h"
 #include "ui/uiengine.h"
@@ -478,15 +480,15 @@ extern "C" void cFEStateLodgeRiderDetail_onPopupEvent(cFEStateLodgeRiderDetail* 
     if (event != 22)
         return;
     if (IsK1F4108(popup->mHashName, str_131cheat_char_b)) {
-        int cheatCharId = *(int*)(((char*)popup) + 0x70);
-        if (*(int*)(((char*)popup) + 0x74) != 0) {
+        int cheatCharId = ((cFEStateCheatCharSelect*)popup)->mCheatCharID;
+        if (((cFEStateCheatCharSelect*)popup)->mDone != 0) {
             void* np2 = cBE_getInterface_Fv(cBE_getBE(), 1);
             cBENewPlayerInterface_setPlayerCheatCharID(np2, self->mUserNum, cheatCharId);
             commitK1F4108(np2);
         }
     } else if (popup->mHashName == 0) {
-        if (*(int*)(((char*)popup) + 0x5C) != 0) {
-            char* name = ((char*)popup) + 0x74;
+        if (((cKeyboardPopup*)popup)->mbAcceptText != 0) {
+            char* name = ((cKeyboardPopup*)popup)->mszEditString;
             if (strlen(name) != 0) {
                 cBENewPlayerInterface_setPlayerName(np, self->mUserNum, name);
                 commitK1F4108(np);

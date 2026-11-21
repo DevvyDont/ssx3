@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/uistatebuypopup.h"
 #include "ui/uistate.h"
 #include "ui/uithing.h"
 #include "be/beintnewrace.h"
@@ -494,9 +495,9 @@ extern "C" void cFEStateUberTrick_onPopupEvent(cFEStateUberTrick* self, cUIState
     case 21:
         break;
     case 22:
-        if (*(int*)((char*)item + 0x6C) != 0) {
+        if (((cUIStateBuyPopup*)item)->mbAccept != 0) {
             int charID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
-            cBEEconInterface_reduceMoney(cBE_getInterface_Fv(cBE_getBE(), 11), self->mUserNum, charID, *(int*)((char*)item + 0x48));
+            cBEEconInterface_reduceMoney(cBE_getInterface_Fv(cBE_getBE(), 11), self->mUserNum, charID, ((cUIStateBuyPopup*)item)->mInfo.mCost);
             int entryIndex = *(signed char*)(*(char**)((char*)self->mpMainMenu + 0xA0) + 0x18);
             int flagBit = *(signed char*)(*(char**)((char*)self->mpTrickMenu + 0xA0) + 0x18);
             void* pi = cBE_getInterface_Fv(cBE_getBE(), 6);

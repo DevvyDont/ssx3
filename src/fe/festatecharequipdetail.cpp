@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/uistatebuypopup.h"
 #include "fe/ferider.h"
 #include "fe/festatecharequip.h"
 #include "ui/uistate.h"
@@ -655,7 +656,7 @@ extern "C" void cFEStateCharEquip_onPopupEvent(cFEStateCharEquip* self, cUIState
         if (((self->mAttrState >> 3) & 1) == 0) {
             self->mAttrState |= 8;
         }
-        if (widget->mHashName == 7 && *(int*)((char*)widget + 0x6C) != 0) {
+        if (widget->mHashName == 7 && ((cUIStateBuyPopup*)widget)->mbAccept != 0) {
             func_0019BE80(self);
             cFEStateCharEquip_updateBankWidget(self);
             if (func_0019B458((sEquipDetail*)self, *(unsigned char*)((char*)self->mpMenu + 0x95))) {

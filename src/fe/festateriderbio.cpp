@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fe/keyboardpopup.h"
+#include "fe/festatecharselect.h"
 #include "fe/festateriderdetail.h"
 #include "ui/uistate.h"
 #include "ui/uithing.h"
@@ -199,16 +201,16 @@ extern "C" void cFEStateRiderDetail_onPopupEvent(cFEStateRiderDetail* self, cUIS
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
     if (msg == 22) {
         if (Is_001835F8(item->mHashName, str_131cheat_char)) {
-            int cheatCharId = *(int*)((char*)item + 0x70);
-            if (*(int*)((char*)item + 0x74) != 0) {
+            int cheatCharId = ((cFEStateCheatCharSelect*)item)->mCheatCharID;
+            if (((cFEStateCheatCharSelect*)item)->mDone != 0) {
                 void* pi2 = cBE_getInterface_Fv(cBE_getBE(), 1);
                 cBENewPlayerInterface_setPlayerCheatCharID(pi2, self->mUserNum, cheatCharId);
                 sVE_35F8* vt = *(sVE_35F8**)((char*)pi2 + 0xC);
                 vt[1].fn((char*)pi2 + vt[1].delta);
             }
         } else if (item->mHashName == 0) {
-            char* name = (char*)item + 0x74;
-            if (*(int*)((char*)item + 0x5C) != 0 && strlen(name) != 0) {
+            char* name = ((cKeyboardPopup*)item)->mszEditString;
+            if (((cKeyboardPopup*)item)->mbAcceptText != 0 && strlen(name) != 0) {
                 cBENewPlayerInterface_setPlayerName(pi, self->mUserNum, name);
                 sVE_35F8* vt = *(sVE_35F8**)((char*)pi + 0xC);
                 vt[1].fn((char*)pi + vt[1].delta);
