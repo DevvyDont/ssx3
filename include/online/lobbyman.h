@@ -96,6 +96,16 @@ CHECK_OFFSET(tLobbyStats, unk_0C, 0x0C);
 CHECK_OFFSET(tLobbyStats, unk_10, 0x10);
 CHECK_SIZE(tLobbyStats, 0x14);
 
+// LobbyMan::mEventList, a g++ 2.95 std::list<online::Event*, BXAllocator>: the allocator (one word: BXAllocator is
+// stateful) and the pointer to the list's head node (a 0xC-byte node: next, prev, value; the list is circular through
+// it, so the head's next is the first event). The node layout is each unit's own sMsgListNode view for now.
+struct tLobbyEventList {
+    int mAllocator;                 // 0x0 [R] BXAllocator (the ctor stores it before allocating the head node)
+    void* mpHead;                   // 0x4 [R] the head node ("StlBlock", 0xC bytes); [U] new events are linked in
+                                    //     before it (push_back)
+};
+CHECK_SIZE(tLobbyEventList, 0x8);
+
 struct LobbyMan {
     int mState;                     // 0x000 [P] "state == ..." asserts (preview offset 0x4); [R] ctor 0;
                                     //       [U] func_0025B608 (send request) stores the new state; values above
@@ -162,10 +172,10 @@ struct LobbyMan {
                                     //       update subtracts the frame time and gives up when it goes negative
     float unk_0E4;                  // 0x0E4 [U] update subtracts the frame time (no other writer seen)
     char* mServerName;              // 0x0E8 [R] ctor cBXString(.., "ps2ssx04.ea.com"); [U] connect looks it up
-    char mEventList[0x8];           // 0x0EC [R] std::list<online::Event*, BXAllocator>: allocator word at 0xEC,
+    tLobbyEventList mEventList;     // 0x0EC [R] std::list<online::Event*, BXAllocator>: allocator word at 0xEC,
                                     //       node pointer at 0xF0 (ctor allocates the 0xC-byte head node "StlBlock",
                                     //       dtor func_001DB718 + delete); [U] every reply pushes an Event before
-                                    //       the head node (*(node**)(this + 0xF0)); 37 readers outside the class
+                                    //       the head node (mEventList.mpHead); 51 functions outside the class
     void* mpConfig;                 // 0x0F4 [R] ctor 0; [U] func_0025A650 creates it (NetGameUtilCreate) from the
                                     //       logged-in "pers" config; func_0025A730 looks keys up; func_0025A6F8 frees
     int mRankSlot;                  // 0x0F8 [R] ctor 0; [U] func_0025E348 selects the rank-list slot (0..28)

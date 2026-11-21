@@ -291,10 +291,10 @@ extern "C" void* LobbyMan_LobbyMan(LobbyMan* self_)
     self_->mOpponent = (char*)D_004A3E90_94D0;
     self_->mAuth = (char*)D_004A3E90_94D0;
     cBXString_cBXString2(&self_->mServerName, str_ps2ssx04_ea_com);
-    sList_94D0* lst = (sList_94D0*)(((char*)self_) + 0xEC);
-    *(sListNode_94D0**)(((char*)self_) + 0xF0) = (sListNode_94D0*)cMemMan_alloc(0xC, str_StlBlock_b, 0x20000000, 0);
-    lst->head->next = *(sListNode_94D0**)(((char*)self_) + 0xF0);
-    lst->head->prev = *(sListNode_94D0**)(((char*)self_) + 0xF0);
+    sList_94D0* lst = (sList_94D0*)(&self_->mEventList);
+    self_->mEventList.mpHead = (void*)((sListNode_94D0*)cMemMan_alloc(0xC, str_StlBlock_b, 0x20000000, 0));
+    lst->head->next = (sListNode_94D0*)self_->mEventList.mpHead;
+    lst->head->prev = (sListNode_94D0*)self_->mEventList.mpHead;
     self_->mpConfig = 0;
     self_->mRankSlot = 0;
     self_->unk_0FC = 0;
@@ -362,7 +362,7 @@ extern "C" void LobbyMan__LobbyMan(LobbyMan* self_, int flags)
     func_0025B800(self_);
     dtorSub_9628((char*)&self_->mAccount);
     dtorSub_9628((char*)&self_->mNewAccount);
-    dtorList_9628(self_->mEventList);
+    dtorList_9628((char*)&self_->mEventList);
     cBXString__cBXString(&self_->mServerName, 2);
     cBXString__cBXString(&self_->mAuth, 2);
     cBXString__cBXString(&self_->mOpponent, 2);
@@ -458,7 +458,7 @@ extern "C" void LobbyMan_onconnectionmsg(LobbyMan* self, int* msg)
         event[0] = 277;
         *(void***)((char*)event + 0x4) = online_Event_vtbl;
         void* mp = event;
-        sMsgListK2_insert(*(sMsgListNodeK2**)(((char*)self) + 0xF0), mp);
+        sMsgListK2_insert((sMsgListNodeK2*)self->mEventList.mpHead, mp);
         self->mDisconnected = 1;
         if (*func_002591D0() != 0)
             func_00263BA8(func_002591D0(), 2);
@@ -513,7 +513,7 @@ extern "C" void LobbyMan_onuserlistupdate(LobbyMan* self)
     event[0] = 0xE0;
     *(void***)((char*)event + 0x4) = online_Event_vtbl;
     void* mp = event;
-    sMsgListK2b_insert(*(sMsgListNodeK2b**)(((char*)self) + 0xF0), mp);
+    sMsgListK2b_insert((sMsgListNodeK2b*)self->mEventList.mpHead, mp);
 }
 #endif
 
@@ -566,7 +566,7 @@ extern "C" void LobbyMan_onranklistupdate(LobbyMan* self, int message)
     event[0] = 225;
     *(void***)((char*)event + 0x4) = online_Event_vtbl;
     void* mp = event;
-    sMsgListK2c_insert(*(sMsgListNodeK2c**)(((char*)self) + 0xF0), mp);
+    sMsgListK2c_insert((sMsgListNodeK2c*)self->mEventList.mpHead, mp);
 }
 #endif
 
@@ -1325,7 +1325,7 @@ extern "C" void func_0025AB40(LobbyMan* self, const char* sender, const char* te
     cBXString__cBXString(&sa, 2);
     cBXString__cBXString(&sb, 2);
     void* mp = event;
-    sMsgListAB40_insert(*(sMsgListNodeAB40**)(((char*)self) + 0xF0), mp);
+    sMsgListAB40_insert((sMsgListNodeAB40*)self->mEventList.mpHead, mp);
 }
 #endif
 
@@ -1623,9 +1623,9 @@ extern "C" void func_0025AC50(LobbyMan* self)
         self->unk_0E4 -= *(float*)(((char*)app) + 0x14);
     }
     func_00261490(BuddyMan_mBuddyMan);
-    while (((sMsgListAC50*)(((char*)self) + 0xEC))->first() != *(sMsgListNodeAC50**)(((char*)self) + 0xF0)) {
-        void* msg = ((sMsgListAC50*)(((char*)self) + 0xEC))->front();
-        ((sMsgListAC50*)(((char*)self) + 0xEC))->pop_front();
+    while (((sMsgListAC50*)(&self->mEventList))->first() != (sMsgListNodeAC50*)self->mEventList.mpHead) {
+        void* msg = ((sMsgListAC50*)(&self->mEventList))->front();
+        ((sMsgListAC50*)(&self->mEventList))->pop_front();
         func_0017D260(((char*)self), msg);
         if (msg != 0) {
             sVEntryAC50* vt = *(sVEntryAC50**)((char*)msg + 4);
@@ -1775,7 +1775,7 @@ extern "C" void func_0025B6D8(LobbyMan* self, int conn)
     event[0] = type;
     *(void***)((char*)event + 0x4) = online_Event_vtbl;
     void* mp = event;
-    sMsgListB6D8_insert(*(sMsgListNodeB6D8**)(((char*)self) + 0xF0), mp);
+    sMsgListB6D8_insert((sMsgListNodeB6D8*)self->mEventList.mpHead, mp);
 }
 #endif
 
@@ -1967,7 +1967,7 @@ extern "C" void func_0025B9C8(LobbyMan* self, char* msg)
     event[0] = type;
     *(void***)((char*)event + 0x4) = online_Event_vtbl;
     void* mp = event;
-    sMsgListB9C8_insert(*(sMsgListNodeB9C8**)(((char*)self) + 0xF0), mp);
+    sMsgListB9C8_insert((sMsgListNodeB9C8*)self->mEventList.mpHead, mp);
 }
 #endif
 
@@ -2173,7 +2173,7 @@ extern "C" void func_0025BF18(LobbyMan* self, char* msg)
     event[0] = type;
     *(void***)((char*)event + 0x4) = online_Event_vtbl;
     void* mp = event;
-    sMsgListBF18_insert(*(sMsgListNodeBF18**)(((char*)self) + 0xF0), mp);
+    sMsgListBF18_insert((sMsgListNodeBF18*)self->mEventList.mpHead, mp);
 }
 #endif
 
@@ -2296,7 +2296,7 @@ extern "C" void func_0025C1E0(LobbyMan* self, const char* value)
     event[0] = type;
     *(void***)((char*)event + 0x4) = online_Event_vtbl;
     void* mp = event;
-    sMsgListC1E0_insert(*(sMsgListNodeC1E0**)(((char*)self) + 0xF0), mp);
+    sMsgListC1E0_insert((sMsgListNodeC1E0*)self->mEventList.mpHead, mp);
 }
 #endif
 
@@ -2419,7 +2419,7 @@ extern "C" void func_0025C3F8(LobbyMan* self, const char* value)
     event[0] = type;
     *(void***)((char*)event + 0x4) = online_Event_vtbl;
     void* mp = event;
-    sMsgListC3F8_insert(*(sMsgListNodeC3F8**)(((char*)self) + 0xF0), mp);
+    sMsgListC3F8_insert((sMsgListNodeC3F8*)self->mEventList.mpHead, mp);
 }
 #endif
 
@@ -2601,7 +2601,7 @@ extern "C" void func_0025C610(LobbyMan* self)
     int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     event[0] = type;
     *(void***)((char*)event + 0x4) = online_Event_vtbl;
-    post_C610(self->mEventList, event);
+    post_C610((char*)&self->mEventList, event);
 }
 #endif
 
@@ -2731,7 +2731,7 @@ extern "C" void LobbyMan_onauthentication(LobbyMan* self, char *msg)
     int *event = (int *) operator new(8, str_NetEvent, 0x20000000, 0);
     *((void ***) (((char *) event) + 0x4)) = online_Event_vtbl;
     event[0] = 212;
-    post_C610(self->mEventList, event);
+    post_C610((char*)&self->mEventList, event);
   }
   else
     if (status == 0x6C6F636B)
@@ -3096,7 +3096,7 @@ extern "C" void func_0025D1B8(LobbyMan* self, const char* name)
         event[0] = type;
         *(void***)((char*)event + 0x4) = online_Event_vtbl;
         void* mp = event;
-        sMsgListD1B8_insert(*(sMsgListNodeD1B8**)(((char*)self) + 0xF0), mp);
+        sMsgListD1B8_insert((sMsgListNodeD1B8*)self->mEventList.mpHead, mp);
     }
 }
 #endif
@@ -3233,7 +3233,7 @@ extern "C" void func_0025D428(LobbyMan* self, int idx)
         event[0] = type;
         *(void***)((char*)event + 0x4) = online_Event_vtbl;
         void* mp = event;
-        sMsgListD428_insert(*(sMsgListNodeD428**)(((char*)self) + 0xF0), mp);
+        sMsgListD428_insert((sMsgListNodeD428*)self->mEventList.mpHead, mp);
     }
 }
 #endif
@@ -3298,7 +3298,7 @@ extern "C" void LobbyMan_onpersonadeleted(LobbyMan* self, char* msg)
     *(int*)self = 1;
     if (*(int*)(msg + 0x8) == 0) {
         LobbyMan* lobbyMan = self;
-        char* lst = self->mEventList;
+        char* lst = (char*)&self->mEventList;
         lobbyMan->mNumPersonas--;
         for (int i = lobbyMan->mDeletePersonaIdx; i < lobbyMan->mNumPersonas; i++)
             cBXString_operatorE(&((char**)&lobbyMan->mPersonas[0])[i], &((char**)&lobbyMan->mPersonas[0])[i + 1]);
@@ -3311,7 +3311,7 @@ extern "C" void LobbyMan_onpersonadeleted(LobbyMan* self, char* msg)
         event[0] = 258;
         *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
         event[2] = *(int*)(msg + 0x8);
-        post_D538(self->mEventList, event);
+        post_D538((char*)&self->mEventList, event);
     }
 }
 #endif
@@ -3361,7 +3361,7 @@ static inline sMsgListIterK6c0 sMsgListK6c0_insert(sMsgListIterK6c0 pos, void* c
 extern "C" void LobbyMan_onroomlistupdate(LobbyMan* self)
 {
     int* event = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-    sMsgListNodeK6c0* list = *(sMsgListNodeK6c0**)(((char*)self) + 0xF0);
+    sMsgListNodeK6c0* list = (sMsgListNodeK6c0*)self->mEventList.mpHead;
     event[0] = 223;
     *(void***)((char*)event + 0x4) = online_Event_vtbl;
     void* mp = event;
@@ -3794,7 +3794,7 @@ extern "C" void LobbyMan_onPingReceived(LobbyMan* self, char* msg)
     cBXString_cBXString2((char*)event + 0x8, name);
     event[3] = pingTime;
     void* mp = event;
-    sMsgListDDE0_insert(*(sMsgListNodeDDE0**)(((char*)self) + 0xF0), mp);
+    sMsgListDDE0_insert((sMsgListNodeDDE0*)self->mEventList.mpHead, mp);
 }
 #endif
 
@@ -4201,7 +4201,7 @@ extern "C" void LobbyMan_onRanklistRetrieved(LobbyMan* self, char* msg)
         *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
         event[2] = status;
         void* mp = event;
-        sMsgListE590_insert(*(sMsgListNodeE590**)(((char*)self) + 0xF0), mp);
+        sMsgListE590_insert((sMsgListNodeE590*)self->mEventList.mpHead, mp);
     }
 }
 #endif
@@ -4258,7 +4258,7 @@ extern "C" void func_0025E6D0(LobbyMan* self, const char* name)
             event[0] = type;
             *(void***)((char*)event + 0x4) = online_Event_vtbl;
             void* mp = event;
-            sMsgListE6D0_insert(*(sMsgListNodeE6D0**)(((char*)self) + 0xF0), mp);
+            sMsgListE6D0_insert((sMsgListNodeE6D0*)self->mEventList.mpHead, mp);
         } else {
             char buf[0x100];
             buf[0] = 0;
@@ -4517,7 +4517,7 @@ extern "C" void func_0025EB00(LobbyMan* self, char* msg)
         strcpy(netEvent->s2, tagN);
         strcpy(netEvent->s3, tagA);
         netEvent->stats = info;
-        sMsgList_25EB00* eventList = (sMsgList_25EB00*)(((char*)self) + 0xF0);
+        sMsgList_25EB00* eventList = (sMsgList_25EB00*)(&self->mEventList.mpHead);
         void* mp = netEvent;
         eventList->insert(eventList->end(), mp);
     } else if (type != 0x75757372) {
@@ -4525,7 +4525,7 @@ extern "C" void func_0025EB00(LobbyMan* self, char* msg)
         netEvent[0] = 258;
         *(void***)((char*)netEvent + 0x4) = online_ErrorEvent_vtbl;
         netEvent[2] = type;
-        sMsgList_25EB00* eventList = (sMsgList_25EB00*)(((char*)self) + 0xF0);
+        sMsgList_25EB00* eventList = (sMsgList_25EB00*)(&self->mEventList.mpHead);
         void* mp = netEvent;
         eventList->insert(eventList->end(), mp);
     }
@@ -4710,7 +4710,7 @@ extern "C" void LobbyMan_onQuickMatchResponse(LobbyMan* self, char* msg)
         *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
         event[2] = status;
         void* mp = event;
-        sMsgListK2e_insert(*(sMsgListNodeK2e**)(((char*)self) + 0xF0), mp);
+        sMsgListK2e_insert((sMsgListNodeK2e*)self->mEventList.mpHead, mp);
     }
 }
 #endif
@@ -5200,7 +5200,7 @@ extern "C" void func_0025F628(LobbyMan* selfp, int notify, int flag)
             netEvent[0] = type;
             *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
             void* mp = netEvent;
-            sMsgListF628_insert(*(sMsgListNodeF628**)(((char*)selfp) + 0xF0), mp);
+            sMsgListF628_insert((sMsgListNodeF628*)selfp->mEventList.mpHead, mp);
         }
     }
 }
@@ -5267,7 +5267,7 @@ extern "C" void func_0025F740(LobbyMan* selfp, int type)
             netEvent[0] = type;
             *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
             void* mp = netEvent;
-            sMsgListF740_insert(*(sMsgListNodeF740**)(((char*)selfp) + 0xF0), mp);
+            sMsgListF740_insert((sMsgListNodeF740*)selfp->mEventList.mpHead, mp);
         }
     }
 }
@@ -5359,7 +5359,7 @@ extern "C" void LobbyMan_onchallengeresponse(LobbyMan* self, char* msg)
             *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
             event[2] = *(int*)(msg + 0x8);
             void* mp = event;
-            sMsgListF8A0_insert(*(sMsgListNodeF8A0**)(((char*)self) + 0xF0), mp);
+            sMsgListF8A0_insert((sMsgListNodeF8A0*)self->mEventList.mpHead, mp);
         }
     } else if (func_004165A8(buf, str_chal) == 0) {
         if (*(int*)self == 21)
@@ -5589,7 +5589,7 @@ extern "C" void func_0025FC70(LobbyMan* self, int playerName, int newState)
     netEvent[0] = kind;
     *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
     void* mp = netEvent;
-    sMsgList_0025FC70_insert(*(sMsgListNode_0025FC70**)((char*)self + 0xF0), mp);
+    sMsgList_0025FC70_insert((sMsgListNode_0025FC70*)self->mEventList.mpHead, mp);
     self->mTimeout = 20.0f;
     D_004A5154 = 21.0f;
 }
@@ -6135,10 +6135,10 @@ extern "C" void LobbyMan_onresultsreportresponse(LobbyMan* self, char* msg)
         int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         event[0] = type;
         *(void***)((char*)event + 0x4) = online_Event_vtbl;
-        post_0C68(self->mEventList, event);
+        post_0C68((char*)&self->mEventList, event);
     } else {
         int err = *(int*)(msg + 0x8);
-        char* lst = self->mEventList;
+        char* lst = (char*)&self->mEventList;
         int* event = (int*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
         event[0] = 258;
         *(void***)((char*)event + 0x4) = online_Event_vtbl;
@@ -6891,7 +6891,7 @@ extern "C" void BuddyMan_onBuddyAdd(int buddyMan)
     *(void***)((char*)event + 0x4) = online_Event_vtbl;
     event[0] = 266;
     void* mp = event;
-    sMsgList_002618C0_insert((*(sMsgListNode_002618C0**)((char*)lobbyMan + 0xF0)), mp);
+    sMsgList_002618C0_insert(((sMsgListNode_002618C0*)lobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -6950,7 +6950,7 @@ extern "C" void BuddyMan_onBuddyDelete(int buddyMan)
     event->vt = online_Event_vtbl;
     event->kind = 267;
     void* mp = event;
-    sMsgList_00261970_insert((*(sMsgListNode_00261970**)((char*)lobbyMan + 0xF0)), mp);
+    sMsgList_00261970_insert(((sMsgListNode_00261970*)lobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -7067,7 +7067,7 @@ extern "C" void BuddyMan_onReceiveMessage(BuddyMan* self, char* msg)
     int kind = 265;
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     sMsg_00261A28* event = new (str_NetEvent, 0x20000000, 0) sMsg_00261A28(kind);
-    sMsgList_00261A28_insert((*(sMsgListNode_00261A28**)((char*)lobbyMan + 0xF0)), event);
+    sMsgList_00261A28_insert(((sMsgListNode_00261A28*)lobbyMan->mEventList.mpHead), event);
 }
 #endif
 
@@ -8795,7 +8795,7 @@ extern "C" void func_002636F0(int* out, int val)
             *(void***)((char*)errorEvent + 0x4) = online_NetErrorEvent_vtbl;
             errorEvent[2] = val;
             void* mp = errorEvent;
-            sMsgList36F0_insert((*(sMsgListNode36F0**)((char*)lobbyMan + 0xF0)), mp);
+            sMsgList36F0_insert(((sMsgListNode36F0*)lobbyMan->mEventList.mpHead), mp);
         }
         *out = 0;
     }
@@ -10147,7 +10147,7 @@ extern "C" void func_00265018(void* self, int rider)
         netEvent[0] = type;
         *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
         void* mp = netEvent;
-        sMsgList5018_insert((*(sMsgListNode5018**)((char*)lobbyMan + 0xF0)), mp);
+        sMsgList5018_insert(((sMsgListNode5018*)lobbyMan->mEventList.mpHead), mp);
     } else {
         func_00264E50(self, 3, rider, *(int*)self);
     }
@@ -10246,7 +10246,7 @@ extern "C" void func_00265190(void* self, int rider, sName7_00264D80* name)
         netEvent[0] = type;
         *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
         void* mp = netEvent;
-        sMsgList5190_insert((*(sMsgListNode5190**)((char*)lobbyMan + 0xF0)), mp);
+        sMsgList5190_insert(((sMsgListNode5190*)lobbyMan->mEventList.mpHead), mp);
     }
 }
 #endif
@@ -10313,7 +10313,7 @@ extern "C" void func_00265290(void* self, int rider)
         netEvent[0] = type;
         *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
         void* mp = netEvent;
-        sMsgList5290_insert((*(sMsgListNode5290**)((char*)lobbyMan + 0xF0)), mp);
+        sMsgList5290_insert(((sMsgListNode5290*)lobbyMan->mEventList.mpHead), mp);
     }
 }
 #endif
@@ -10373,7 +10373,7 @@ extern "C" void func_00265398(int* self)
     netEvent->vt = online_Event_vtbl;
     netEvent->kind = 247;
     void* mp = netEvent;
-    sMsgList_00265398_insert((*(sMsgListNode_00265398**)((char*)lobbyMan + 0xF0)), mp);
+    sMsgList_00265398_insert(((sMsgListNode_00265398*)lobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -10460,7 +10460,7 @@ extern "C" void func_00265458(void* self, int id)
         updateEvent->v0 = id;
         updateEvent->flag = 0;
         void* mp = updateEvent;
-        sMsgList5458_insert((*(sMsgListNode5458**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
+        sMsgList5458_insert(((sMsgListNode5458*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
     }
 }
 #endif
@@ -10550,7 +10550,7 @@ extern "C" void func_00265568(void* self, int ruleSlot, int newValue)
         updateEvent->v1 = newValue;
         updateEvent->flag = 0;
         void* mp = updateEvent;
-        sMsgList5568_insert((*(sMsgListNode5568**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
+        sMsgList5568_insert(((sMsgListNode5568*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
     }
 }
 #endif

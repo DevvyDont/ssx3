@@ -1022,7 +1022,7 @@ extern "C" void func_00269008(void* self, int riderId, int hostState)
     netEvent[0] = kind;
     *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
     void* mp = netEvent;
-    sMsgList_00269008_insert((*(sMsgListNode_00269008**)((char*)lobbyMan + 0xF0)), mp);
+    sMsgList_00269008_insert(((sMsgListNode_00269008*)lobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1084,7 +1084,7 @@ extern "C" void func_002690C8(void* self, int riderId, int hostState)
     netEvent[0] = kind;
     *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
     void* mp = netEvent;
-    sMsgList_002690C8_insert((*(sMsgListNode_002690C8**)((char*)lobbyMan + 0xF0)), mp);
+    sMsgList_002690C8_insert(((sMsgListNode_002690C8*)lobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1147,7 +1147,7 @@ extern "C" void func_00269188(void* self, int hostState)
     netEvent[0] = kind;
     *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
     void* mp = netEvent;
-    sMsgList_00269188_insert((*(sMsgListNode_00269188**)((char*)lobbyMan + 0xF0)), mp);
+    sMsgList_00269188_insert(((sMsgListNode_00269188*)lobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1211,7 +1211,7 @@ extern "C" void func_00269240(void* self, int riderId, int hostState, void* ride
     netEvent[0] = kind;
     *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
     void* mp = netEvent;
-    sMsgList_00269240_insert((*(sMsgListNode_00269240**)((char*)lobbyMan + 0xF0)), mp);
+    sMsgList_00269240_insert(((sMsgListNode_00269240*)lobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1274,7 +1274,7 @@ extern "C" void func_00269300(void* self, int riderId, int hostState)
     netEvent[0] = kind;
     *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
     void* mp = netEvent;
-    sMsgList_00269300_insert((*(sMsgListNode_00269300**)((char*)lobbyMan + 0xF0)), mp);
+    sMsgList_00269300_insert(((sMsgListNode_00269300*)lobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1337,7 +1337,7 @@ extern "C" void func_002693C0(void* self, int hostState)
     netEvent[0] = kind;
     *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
     void* mp = netEvent;
-    sMsgList_002693C0_insert((*(sMsgListNode_002693C0**)((char*)lobbyMan + 0xF0)), mp);
+    sMsgList_002693C0_insert(((sMsgListNode_002693C0*)lobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1402,7 +1402,7 @@ extern "C" void func_00269478(void* self, int rowIndex)
     netEvent->f8 = 1;
     netEvent->fC = rowIndex;
     void* mp = netEvent;
-    sMsgList_00269478_insert((*(sMsgListNode_00269478**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
+    sMsgList_00269478_insert(((sMsgListNode_00269478*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1470,7 +1470,7 @@ extern "C" void func_00269538(void* self, int ruleSlot, int ruleValue)
     netEvent->fC = ruleSlot;
     netEvent->f10 = ruleValue;
     void* mp = netEvent;
-    sMsgList_00269538_insert((*(sMsgListNode_00269538**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
+    sMsgList_00269538_insert(((sMsgListNode_00269538*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1543,7 +1543,7 @@ extern "C" void func_00269608(void* self)
     netEvent->vt = D_004813E0;
     netEvent->f8 = 1;
     void* mp = netEvent;
-    sMsgList_00269608_insert((*(sMsgListNode_00269608**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
+    sMsgList_00269608_insert(((sMsgListNode_00269608*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1608,7 +1608,7 @@ extern "C" void func_002696F8(void* self)
     netEvent->vt = D_004813C0;
     netEvent->f8 = 1;
     void* mp = netEvent;
-    sMsgList_002696F8_insert((*(sMsgListNode_002696F8**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
+    sMsgList_002696F8_insert(((sMsgListNode_002696F8*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1673,7 +1673,7 @@ extern "C" void func_002697D0(void* self, int rowIndex)
     netEvent->f8 = 1;
     netEvent->fC = rowIndex;
     void* mp = netEvent;
-    sMsgList_002697D0_insert((*(sMsgListNode_002697D0**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
+    sMsgList_002697D0_insert(((sMsgListNode_002697D0*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1737,7 +1737,7 @@ extern "C" void func_00269890(void* self, int rowIndex)
     netEvent->f8 = 0;
     netEvent->fC = rowIndex;
     void* mp = netEvent;
-    sMsgList_00269890_insert((*(sMsgListNode_00269890**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
+    sMsgList_00269890_insert(((sMsgListNode_00269890*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1805,7 +1805,7 @@ extern "C" void func_00269948(void* self, int ruleSlot, int ruleValue)
     netEvent->fC = ruleSlot;
     netEvent->f10 = ruleValue;
     void* mp = netEvent;
-    sMsgList_00269948_insert((*(sMsgListNode_00269948**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
+    sMsgList_00269948_insert(((sMsgListNode_00269948*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1873,7 +1873,7 @@ extern "C" void func_00269A18(void* self, int ruleSlot, int ruleValue)
     netEvent->fC = ruleSlot;
     netEvent->f10 = ruleValue;
     void* mp = netEvent;
-    sMsgList_00269A18_insert((*(sMsgListNode_00269A18**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
+    sMsgList_00269A18_insert(((sMsgListNode_00269A18*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -1936,7 +1936,7 @@ extern "C" void func_00269AE0(void* self, int hostState)
     netEvent->vt = D_004813E0;
     netEvent->f8 = 1;
     void* mp = netEvent;
-    sMsgList_00269AE0_insert((*(sMsgListNode_00269AE0**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
+    sMsgList_00269AE0_insert(((sMsgListNode_00269AE0*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -2000,7 +2000,7 @@ extern "C" void func_00269B90(void* self, int hostState)
     netEvent->vt = D_004813E0;
     netEvent->f8 = 0;
     void* mp = netEvent;
-    sMsgList_00269B90_insert((*(sMsgListNode_00269B90**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
+    sMsgList_00269B90_insert(((sMsgListNode_00269B90*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -2064,7 +2064,7 @@ extern "C" void func_00269C40(void* self, int hostState)
     netEvent->vt = D_004813C0;
     netEvent->f8 = 1;
     void* mp = netEvent;
-    sMsgList_00269C40_insert((*(sMsgListNode_00269C40**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
+    sMsgList_00269C40_insert(((sMsgListNode_00269C40*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
@@ -2127,7 +2127,7 @@ extern "C" void func_00269CF0(void* self, int hostState)
     netEvent->vt = D_004813C0;
     netEvent->f8 = 0;
     void* mp = netEvent;
-    sMsgList_00269CF0_insert((*(sMsgListNode_00269CF0**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
+    sMsgList_00269CF0_insert(((sMsgListNode_00269CF0*)LobbyMan_mLobbyMan->mEventList.mpHead), mp);
 }
 #endif
 
