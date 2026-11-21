@@ -2,7 +2,7 @@
 #include "object/instanceman.h"
 
 //100%
-INCLUDE_ASM("wscript/wscriptcompile", cWScriptCompile_parseKeywords);
+INCLUDE_ASM("wscript/wscriptcompile", cInstanceMan_cInstanceMan);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -38,7 +38,7 @@ struct cWScriptCompileKw {
  * @param n  number of instance records (On Tour numInstances)
  * @return @p self
  */
-extern "C" cWScriptCompileKw* cWScriptCompile_parseKeywords(cWScriptCompileKw* self, int instanceSectionId, int n)
+extern "C" cWScriptCompileKw* cInstanceMan_cInstanceMan(cWScriptCompileKw* self, int instanceSectionId, int n)
 {
     int i;
     self->f0 = instanceSectionId;

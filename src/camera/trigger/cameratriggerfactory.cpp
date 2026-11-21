@@ -3577,7 +3577,7 @@ extern "C" int cBoundedAlgorithm_getBoundAction(cBoundedAlgorithm* boundedAlgo) 
 }
 #endif
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176438);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptCameraController_IsControllerActive);
 #ifdef SKIP_ASM
 /**
  * Returns the word at +0x18 of @p object.
@@ -3587,7 +3587,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176438);
  * @param object  the object to read
  * @return the 32-bit word at +0x18
  */
-extern "C" int func_00176438(void *object) {
+extern "C" int cScriptCameraController_IsControllerActive(void *object) {
     return (*(int *)((char*)(object) + (0x18)));
 }
 #endif

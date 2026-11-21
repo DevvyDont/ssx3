@@ -5,7 +5,7 @@
 // bytes) for objects created at run time (world scripts, replays): a record array and a free list. One instance:
 // cGame_load (src/main/gameload.cpp) does `operator new(0x10, "InstancesMan", 0x20000000)` + the constructor with
 // section id 0x80 and 0x40 records, kept as cGame::InstanceMan (main/game.h 0x88; the preview's getInstanceMan__C5cGame).
-// Methods: the constructor (misnamed cWScriptCompile_parseKeywords at 0x00351030), the destructor, allocInstance /
+// Methods: the constructor cInstanceMan_cInstanceMan (0x00351030; formerly misnamed cWScriptCompile_parseKeywords), the destructor, allocInstance /
 // allocInstance1 (take a record off the free list and stamp its id), freeInstance, copyInstance, and func_003512C0 (claim
 // record id >> 8 when the id's section byte matches).
 // No EA path in the preview; its inline asserts "(((tInstanceManRecord*)(inst)) - Instances) < NumInstances" and

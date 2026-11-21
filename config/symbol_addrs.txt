@@ -10721,6 +10721,9 @@ cWorldPainterSection_load = 0x002BB4D8; //type:func
 cBEMissionInterface_setNextSessionID = 0x0015BD00; //type:func
 cGFEndWaitState__cGFEndWaitState = 0x00243D58; //type:func
 
+// 2026-11-20-agents-func: names by evidence (docs/function_names.tsv)
+cScriptCameraController_IsControllerActive = 0x00176438; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func
@@ -10855,7 +10858,7 @@ get_t3Vector = 0x002D25A0; //type:func
 FILE_loadpackat = 0x003E2470; //type:func
 checkActiveNode = 0x002FAE38; //type:func
 cFEStateUberTrick_updateTrickMenu = 0x00183DE0; //type:func
-cWScriptCompile_parseKeywords = 0x00351030; //type:func
+cInstanceMan_cInstanceMan = 0x00351030; //type:func
 cWScriptMan_addProcess = 0x003094C8; //type:func
 cWScriptMan_addProcess1 = 0x00309568; //type:func
 cWScriptProcess_cWScriptProcess = 0x00307598; //type:func
