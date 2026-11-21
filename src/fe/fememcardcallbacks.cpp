@@ -1479,7 +1479,7 @@ static inline void notifyK1D8700(char* self, char* mp)
  */
 extern "C" void cFEMemCard_onPopupEvent(void* self_, int popup, int button)
 {
-    char* self = (char*)self_;
+    cFEMemCard* self = (cFEMemCard*)((char*)self_);
     if (button >= 0xF && button <= 17) {
         int choice = 0;
         if (button == 0x10) {
@@ -1488,58 +1488,58 @@ extern "C" void cFEMemCard_onPopupEvent(void* self_, int popup, int button)
             choice = 2;
         }
         char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-        switch (*(int*)(self + 0x19C)) {
+        switch (self->mPopupType) {
         case 2:
             if (choice == 0) {
                 VCALL_K1D8700(self, 45);
             } else {
-                *(int*)(self + 0x1C0) = 1;
+                self->mState = 1;
             }
             break;
         case 19:
             if (choice == 0) {
-                *(int*)(self + 0x1F0) = 0;
+                self->mIsOverwriteOK = 0;
                 VCALL_K1D8700(self, 41);
-                notifyK1D8700(self, mp);
+                notifyK1D8700(((char*)self), mp);
             } else {
-                *(int*)(self + 0x1EC) = 1;
+                self->mIsRetryPressed = 1;
             }
             break;
         case 1:
             if (choice != 0) {
                 VCALL_K1D8700(self, 41);
-                notifyK1D8700(self, mp);
+                notifyK1D8700(((char*)self), mp);
             } else {
-                *(int*)(self + 0x1C0) = 3;
-                *(int*)(self + 0x1F0) = 1;
+                self->mState = 3;
+                self->mIsOverwriteOK = 1;
             }
             break;
         case 9:
             if (choice == 0) {
                 VCALL_K1D8700(self, 41);
-                notifyK1D8700(self, mp);
+                notifyK1D8700(((char*)self), mp);
             } else {
-                *(int*)(self + 0x1EC) = 1;
+                self->mIsRetryPressed = 1;
             }
             break;
         case 18:
             if (choice == 0) {
-                *(int*)(self + 0x1EC) = 1;
+                self->mIsRetryPressed = 1;
             } else {
                 VCALL_K1D8700(self, 41);
-                notifyK1D8700(self, mp);
+                notifyK1D8700(((char*)self), mp);
             }
             break;
         case 10:
             if (choice == 0) {
                 VCALL_K1D8700(self, 41);
-                notifyK1D8700(self, mp);
+                notifyK1D8700(((char*)self), mp);
             }
             break;
         case 11:
-            *(int*)(self + 0x1F0) = 0;
+            self->mIsOverwriteOK = 0;
             VCALL_K1D8700(self, 41);
-            notifyK1D8700(self, mp);
+            notifyK1D8700(((char*)self), mp);
             break;
         case 4:
         case 5:
@@ -1547,22 +1547,22 @@ extern "C" void cFEMemCard_onPopupEvent(void* self_, int popup, int button)
             VCALL_K1D8700(self, 40);
             break;
         case 3:
-            *(int*)(self + 0x1B0) = 0;
+            self->mIsLoadWait = 0;
             if (choice == 0) {
-                *(int*)(self + 0x1A8) = 1;
-                *(int*)(self + 0x1E0) = 1;
+                self->mIsProcessing = 1;
+                self->mIsDeletePressed = 1;
             } else {
                 VCALL_K1D8700(self, 41);
-                notifyK1D8700(self, mp);
+                notifyK1D8700(((char*)self), mp);
             }
             break;
         case 12:
             if (choice == 0) {
                 VCALL_K1D8700(self, 41);
-                *(int*)(self + 0x1C0) = 1;
-                notifyK1D8700(self, mp);
+                self->mState = 1;
+                notifyK1D8700(((char*)self), mp);
             } else if (choice == 1) {
-                *(int*)(self + 0x1EC) = 1;
+                self->mIsRetryPressed = 1;
             } else {
                 cFEMemCard_callbackSaveFileCorrupt();
                 return;
@@ -1570,48 +1570,48 @@ extern "C" void cFEMemCard_onPopupEvent(void* self_, int popup, int button)
             break;
         case 13:
             if (choice == 0) {
-                *(int*)(self + 0x1C0) = 3;
-                *(int*)(self + 0x1F0) = 1;
+                self->mState = 3;
+                self->mIsOverwriteOK = 1;
             } else {
                 VCALL_K1D8700(self, 41);
-                notifyK1D8700(self, mp);
+                notifyK1D8700(((char*)self), mp);
             }
             break;
         case 7:
-            *(int*)(self + 0x1A8) = 0;
-            *(int*)(self + 0x1E0) = 0;
-            if (*(int*)(self + 0x1F4) != 0) {
+            self->mIsProcessing = 0;
+            self->mIsDeletePressed = 0;
+            if (self->mIsLoadPressed != 0) {
                 VCALL_K1D8700(self, 41);
             }
-            if (*(int*)(self + 0x1DC) != 0) {
-                *(int*)(self + 0x1A8) = 1;
+            if (self->mIsSavePressed != 0) {
+                self->mIsProcessing = 1;
             }
-            notifyK1D8700(self, mp);
+            notifyK1D8700(((char*)self), mp);
             break;
         case 16:
-            *(int*)(self + 0x1E8) = 0;
+            self->mIsFormatPressed = 0;
             cFEMemCard_SetLoadPressed((cFEMemCard*)self, 0);
-            if (*(int*)(self + 0x1DC) != 0) {
-                *(int*)(self + 0x1A8) = 1;
+            if (self->mIsSavePressed != 0) {
+                self->mIsProcessing = 1;
             } else {
-                *(int*)(self + 0x1A8) = 0;
+                self->mIsProcessing = 0;
             }
-            notifyK1D8700(self, mp);
+            notifyK1D8700(((char*)self), mp);
             break;
         case 17:
-            *(int*)(self + 0x1E8) = 0;
+            self->mIsFormatPressed = 0;
             VCALL_K1D8700(self, 41);
             break;
         case 14:
         case 15:
-            *(int*)(self + 0x1B0) = 0;
+            self->mIsLoadWait = 0;
             if (choice == 0) {
-                *(int*)(self + 0x1A8) = 1;
-                *(int*)(self + 0x1E8) = 1;
+                self->mIsProcessing = 1;
+                self->mIsFormatPressed = 1;
             } else if (choice == 1) {
-                *(int*)(self + 0x1E8) = 0;
+                self->mIsFormatPressed = 0;
                 VCALL_K1D8700(self, 41);
-                notifyK1D8700(self, mp);
+                notifyK1D8700(((char*)self), mp);
             }
             break;
         case 8:
@@ -1622,18 +1622,18 @@ extern "C" void cFEMemCard_onPopupEvent(void* self_, int popup, int button)
             VCALL_K1D8700(self, 41);
             break;
         }
-        if (*(int*)(self + 0x19C) != 22) {
+        if (self->mPopupType != 22) {
             cUIStateStack_pop(&cFEMemCard_mInstance->mpEngine->mStateStack, 1);
         }
-        *(int*)(self + 0x210) = 0;
+        self->mIsStatusPopupOn = 0;
     } else if (button == 22) {
         char* fe = (char*)cFEMemCard_mInstance;
         if (*(int*)(fe + 0x1A0) != 0) {
             *(int*)(fe + 0x1A4) = 0;
             *(int*)(fe + 0x1A0) = 0;
         } else {
-            if (*(int*)(self + 0x19C) == button) {
-                *(int*)(self + 0x210) = 0;
+            if (self->mPopupType == button) {
+                self->mIsStatusPopupOn = 0;
             }
             *(int*)&cFEMemCard_mInstance->mStatusPopup = 0;
         }

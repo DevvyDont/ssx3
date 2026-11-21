@@ -274,10 +274,10 @@ extern "C" void cGame_load(cGame* self)
         GMsrand(BXrand());
     }
     {
-        char* ai = (char*)cAI_cAI(operator new(208, str_AI, 0, 0));
+        cAI* ai = (cAI*)((char*)cAI_cAI(operator new(208, str_AI, 0, 0)));
         self->AI = (cAI*)ai;
-        sVEntryVoidGL* vt = *(sVEntryVoidGL**)(ai + 0xCC);
-        vt[2].fn(ai + vt[2].delta);
+        sVEntryVoidGL* vt = (sVEntryVoidGL*)ai->mVtbl;
+        vt[2].fn(((char*)ai) + vt[2].delta);
     }
     cLoadTimer_setnextpercent(&cAppMan_TheAppMan->LoadTimer, 55.0f);
     self->PlaybackMan = (cPlaybackMan*)cPlaybackMan_cPlaybackMan(operator new(0x7C, str_PlaybackMan, 0x20000000, 0), 40);
@@ -322,9 +322,9 @@ extern "C" void cGame_load(cGame* self)
         void* cam = secondPlayer != 0 ? *(void**)(secondPlayer + 0x18) : 0;
         cCamera_switchChaseControllerTargetRider(self->ViewMan->PlayerCamera[0], cam);
     }
-    char* hud = (char*)cMenuSys_cMenuSys(operator new(104, str_MenuSys, 0, 0));
+    cMenuSys* hud = (cMenuSys*)((char*)cMenuSys_cMenuSys(operator new(104, str_MenuSys, 0, 0)));
     self->MenuSys = (cMenuSys*)hud;
-    *(void**)(hud + 0x58) = (void*)self->DebugFont;
+    hud->Font = (cFont*)((void*)self->DebugFont);
     self->MenuSys->Input = (cInput*)((void*)SSXApp->Inputs[0]);
     char* file = FILE_load(str_data_fonts_menu_ssh_b, 0x100);
     {

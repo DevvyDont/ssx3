@@ -841,8 +841,8 @@ extern "C" void cAI_InitPlayers(cAI* aiManager)
     int n = *(int*)(Cfg_IP() + 0x34);
     for (; i < n; i++) {
         int ch = cBENewPlayerInterface_getRiderCtrlID(iface, i);
-        char* obj = cPlayer_cPlayer_IP(cMemMan_alloc_IP(6480, str_Player, 0x80000000, 0), 1);
-        self->mRiders[i] = obj ? *(sRiderIP**)(obj + 0x18) : 0;
+        cPlayer* obj = (cPlayer*)cPlayer_cPlayer_IP(cMemMan_alloc_IP(6480, str_Player, 0x80000000, 0), 1);
+        self->mRiders[i] = ((char*)obj) ? (sRiderIP*)obj->mRider : 0;
         self->mRiders[i]->mIndex = idx;
         self->mRiders[i]->mCtrl = idx;
         int ctrl = cBENewPlayerInterface_getControllerMapping(iface, idx);
@@ -854,13 +854,13 @@ extern "C" void cAI_InitPlayers(cAI* aiManager)
                 int* inputBase = (int*)app;
                 inputBase += ctrl;
                 *(int*)(*box + 4) = inputBase[46];
-                SetHud_IP(obj, cInputSync_createlocalinput(app->Game->InputSync, *box), HudTab_IP(ch));
+                SetHud_IP(((char*)obj), cInputSync_createlocalinput(app->Game->InputSync, *box), HudTab_IP(ch));
             } else {
                 cSSXApp* app = SSXApp;
-                (*(sRiderIP**)(obj + 0x18))->f87C = 0;
+                ((sRiderIP*)obj->mRider)->f87C = 0;
                 int* inputBase = (int*)app;
                 inputBase += ctrl;
-                SetHud_IP(obj, cInputSync_createremoteinput(app->Game->InputSync, (void*)inputBase[46]), 0);
+                SetHud_IP(((char*)obj), cInputSync_createremoteinput(app->Game->InputSync, (void*)inputBase[46]), 0);
             }
         } else {
             cSSXApp* app = SSXApp;
@@ -871,18 +871,18 @@ extern "C" void cAI_InitPlayers(cAI* aiManager)
             inputBase += ctrl;
             hud += ch;
             *(int*)(*box + 4) = inputBase[46];
-            SetHud_IP(obj, (int)*box, hud[3003]);
+            SetHud_IP(((char*)obj), (int)*box, hud[3003]);
             self->mRiders[i]->mCtrl = idx;
         }
-        cRider_addFocusBox(*(void**)(obj + 0x18));
+        cRider_addFocusBox(obj->mRider);
         nPlayers++;
-        cRider_addRiderMetrix(*(cRider**)(obj + 0x18));
+        cRider_addRiderMetrix(obj->mRider);
         cAI_applyPlayerRulesCustom((cAI*)self, (cPlayer*)obj, i);
-        *(int*)(*(char**)(obj + 0x18) + 0x2F8) = 0;
+        *(int*)&obj->mRider->unk_2F8 = 0;
         cRider_initOnce(self->mRiders[i], 0);
         cBENewRaceInterface_assignPlayer(rm, idx, idx);
         idx++;
-        self->mPlayers[i] = obj;
+        self->mPlayers[i] = ((char*)obj);
     }
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
         if (cBENetworkInterface_networkOpt.bIsHost != 0) {
@@ -1087,9 +1087,9 @@ extern "C" void cAI_initComputerRiders(cAI* aiManager)
     for (int i = 0; i < n; i++)
     {
         int ch = cBENewPlayerInterface_getRiderCharID(iface, idx);
-        char* obj = (char*)cComputer_cComputer(cMemMan_alloc(6800, str_ComputerRider, 0x80000000, 0), 1, 0);
+        cComputer* obj = (cComputer*)((char*)cComputer_cComputer(cMemMan_alloc(6800, str_ComputerRider, 0x80000000, 0), 1, 0));
         sRiderCR** slot = &self->mRiders[idx];
-        sRiderCR* rider = obj ? *(sRiderCR**)(obj + 0x18) : 0;
+        sRiderCR* rider = ((char*)obj) ? (sRiderCR*)obj->RiderHandler.GroundMotion.mRider : 0;
         *slot = rider;
         rider->mIndex = idx;
         cBENewPlayerInterface_setRiderCtrlID(iface, idx, -1);
@@ -1098,12 +1098,12 @@ extern "C" void cAI_initComputerRiders(cAI* aiManager)
         sRiderCR* slotRider = *slot;
         int noController = -1;
         slotRider->mCtrl = noController;
-        cRider_addRiderMetrix(*(cRider**)(obj + 0x18));
+        cRider_addRiderMetrix(obj->RiderHandler.GroundMotion.mRider);
         cComputer_setAttributeLevels(obj);
         cComputer_updateRiderDifficulty(obj);
         cAI_applyComputerRulesCustom((cAI*)self, (cComputer*)obj);
         cBENewRaceInterface_assignPlayer(rm, idx, idx);
-        self->mObjs[self->mNumComputers] = obj;
+        self->mObjs[self->mNumComputers] = ((char*)obj);
         self->mNumComputers++;
         idx++;
     }

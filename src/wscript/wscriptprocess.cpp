@@ -2077,8 +2077,8 @@ extern "C" void cWScriptMan_update(cWScriptMan* self)
             self->Inst = (tInstanceRecord*)lookup_309270(*(sRefWorld_309270**)self->World, event->id);
         char* next = *(char**)&self->ActiveList;
         while (next != 0) {
-            char* proc = next;
-            next = *(char**)(proc + 0x18);
+            cWScriptProcess* proc = (cWScriptProcess*)next;
+            next = (char*)proc->Next;
             self->CurrentProcess = (cWScriptProcess*)proc;
             if (event->flags & 0x20000)
                 cWScriptProcess_dispatchProcessEvent((cWScriptProcess*)proc, event);
@@ -2090,8 +2090,8 @@ extern "C" void cWScriptMan_update(cWScriptMan* self)
     }
     char* next = *(char**)&self->ActiveList;
     while (next != 0) {
-        char* proc = next;
-        next = *(char**)(proc + 0x18);
+        cWScriptProcess* proc = (cWScriptProcess*)next;
+        next = (char*)proc->Next;
         self->CurrentProcess = (cWScriptProcess*)proc;
         cWScriptProcess_update((cWScriptProcess_update_cProc*)proc);
     }

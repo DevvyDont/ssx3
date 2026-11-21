@@ -5130,9 +5130,9 @@ public:
 extern "C" void cColorMenuItem_render(cColorMenuItem* self, float* rect)
 {
     {
-        char* menu = *(char**)self;
-        sVEntry_2CF1C8* vt = *(sVEntry_2CF1C8**)(menu + 0x12C);
-        char* thisp = menu + vt[9].delta;
+        cMenu* menu = (cMenu*)(*(char**)self);
+        sVEntry_2CF1C8* vt = (sVEntry_2CF1C8*)menu->mVtbl;
+        char* thisp = ((char*)menu) + vt[9].delta;
         vt[9].fn(thisp, rect, ((void*)self) == cMenu_getFocusItem((cMenu*)menu));
     }
     float barX = rect[0] + rect[2] - 16.0f - 80.0f;

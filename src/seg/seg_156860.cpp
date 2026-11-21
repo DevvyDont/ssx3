@@ -1692,18 +1692,18 @@ static inline int* Pop_6EE0(PacketQueue_6EE0* q)
 // PORT: the unit declares this as (int, int)
 extern "C" void cGameComm__cGameComm(int self, int flags)
 {
-    char* gameComm = (char*)self;
+    cGameComm* gameComm = (cGameComm*)((char*)self);
     int i;
-    if (*(void**)(gameComm + 0x3EC)) cMemMan_free_6EE0(*(void**)(gameComm + 0x3EC));
-    if (*(int**)(gameComm + 0x134)) cGameComm_freePacket((cGameComm*)gameComm, *(int**)(gameComm + 0x134));
+    if (gameComm->mBEBuffer) cMemMan_free_6EE0(gameComm->mBEBuffer);
+    if ((int*)gameComm->mPacketCache) cGameComm_freePacket((cGameComm*)gameComm, (int*)gameComm->mPacketCache);
     for (i = 0; i < 4; i++) {
-        while (Peek_6EE0((PacketQueue_6EE0*)(gameComm + 0x144) + i)) {
-            cGameComm_freePacket((cGameComm*)gameComm, Pop_6EE0((PacketQueue_6EE0*)(gameComm + 0x144) + i));
+        while (Peek_6EE0((PacketQueue_6EE0*)(&gameComm->mReadQueue[0]) + i)) {
+            cGameComm_freePacket((cGameComm*)gameComm, Pop_6EE0((PacketQueue_6EE0*)(&gameComm->mReadQueue[0]) + i));
         }
     }
-    if (*(void**)(gameComm + 0x140)) {
-        func_003E73E0(*(void**)(gameComm + 0x140));
-        *(void**)(gameComm + 0x140) = 0;
+    if (gameComm->unk_140) {
+        func_003E73E0(gameComm->unk_140);
+        gameComm->unk_140 = 0;
     }
     if (flags & 1) operator_delete__FPi((int*)gameComm);
 }

@@ -706,14 +706,14 @@ extern "C" void cBXScriptEngine_UpdatePendingRequestState(cBXScriptEngine* self,
  */
 extern "C" int cBXScriptEngine_GetRequestState(cBXScriptEngine* self, int requestHandle)
 {
-    char* request = (char*)cBXScriptEngine_GetRequest(self, requestHandle);
-    if (request == 0) {
+    tScriptRequestInfo* request = (tScriptRequestInfo*)((char*)cBXScriptEngine_GetRequest(self, requestHandle));
+    if (((char*)request) == 0) {
         return 0;
     }
-    if (*(int*)(request + 0x4) == 1) {
+    if (request->state == 1) {
         cBXScriptEngine_UpdatePendingRequestState(self, (tScriptRequestInfo*)request);
     }
-    return *(int*)(request + 0x4);
+    return request->state;
 }
 #endif
 
@@ -754,14 +754,14 @@ extern "C" void cBXScriptEngine_UpdatePendingRequestState(cBXScriptEngine* self,
  */
 extern "C" int cBXScriptEngine_IsRequestPlaybackEnding(cBXScriptEngine* self, int requestHandle)
 {
-    char* request = (char*)cBXScriptEngine_GetRequest(self, requestHandle);
-    if (request == 0) {
+    tScriptRequestInfo* request = (tScriptRequestInfo*)((char*)cBXScriptEngine_GetRequest(self, requestHandle));
+    if (((char*)request) == 0) {
         return 0;
     }
-    if (*(int*)(request + 0x4) == 1) {
+    if (request->state == 1) {
         cBXScriptEngine_UpdatePendingRequestState(self, (tScriptRequestInfo*)request);
     }
-    if (*(int*)(request + 0x4) != 4 && *(int*)(request + 0x4) != 5) {
+    if (request->state != 4 && request->state != 5) {
         return 0;
     }
     return *(int*)(*(char**)request + 0x20) == 4;

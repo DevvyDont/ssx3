@@ -6537,16 +6537,16 @@ extern "C" void cSSXAudio_UpdateLandedUber(cSSXAudio* self)
 {
     if (cSSXAudio_ReplayMode(self) != 0) return;
     // PORT: cSSXAudio_GetFocusRider returns a rider pointer as int
-    char* localRider = (char*)cSSXAudio_GetFocusRider(self, -1);
-    if (*(int*)(localRider + 0x870) == self->unk_5820) {
-        if (*(int*)(localRider + 0x2F4) == 10 && self->unk_581C != *(int*)(localRider + 0x2F4) &&
+    cRider* localRider = (cRider*)((char*)cSSXAudio_GetFocusRider(self, -1));
+    if (localRider->mViewIndex == self->unk_5820) {
+        if (localRider->mUberLevel == 10 && self->unk_581C != localRider->mUberLevel &&
             *(int*)((char*)cAudioInterface_getGame() + 0x214) == 4) {
             func_002A3DE0((cSSXAudio*)self, (cRider*)localRider, 2);
         }
     } else {
-        self->unk_5820 = *(int*)(localRider + 0x870);
+        self->unk_5820 = localRider->mViewIndex;
     }
-    self->unk_581C = *(int*)(localRider + 0x2F4);
+    self->unk_581C = localRider->mUberLevel;
 }
 #endif
 

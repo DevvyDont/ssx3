@@ -1026,9 +1026,9 @@ extern "C" int cRiderAnimBase_playInto(cRiderAnimBase* self, cAnimSequencer* seq
     float targetWeight = *(float*)(node + 0x98);
     cAnimSequencer_expire(seq, node);
     cRiderAnimBase_play(self, anim, 0, -1.0f);
-    char* sequence = (char*)cAnimSequencer_getSequence(seq, 0);
-    *(float*)(sequence + 0x98) = currentWeight;
-    *(float*)(sequence + 0x94) = currentWeight;
+    cAnimSequence* sequence = (cAnimSequence*)((char*)cAnimSequencer_getSequence(seq, 0));
+    sequence->TargetWeight = currentWeight;
+    sequence->CurrentWeight = currentWeight;
     if (timeLeft != 0.0f)
     {
         cAnimSequence_fadeWeight((cAnimSequence*)sequence, targetWeight, timeLeft);

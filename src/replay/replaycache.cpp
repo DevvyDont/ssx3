@@ -3832,10 +3832,10 @@ extern "C" int cScriptPlayerEntity_Init(cScriptPlayerEntity* self, char* data, i
     self->mpOwner = (cScriptPlayerMain*)size;
     self->mpVariationTable = (unsigned int*)(data + 8);
     self->mCurrVariation = 0;
-    char* rec = data + *(int*)(data + 8);
+    tInSeqEntityHeader* rec = (tInSeqEntityHeader*)(data + *(int*)(data + 8));
     self->mpSystemHeader = (tInSeqEntityHeader*)rec;
     if (*(unsigned short*)rec > 8) {
-        self->mpHeader = (const char*)(rec + 8);
+        self->mpHeader = (const char*)(&rec->nextSectionStart);
     } else {
         self->mpHeader = 0;
     }
@@ -3888,10 +3888,10 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_SetEntityVariation);
 extern "C" void cScriptPlayerEntity_SetEntityVariation(cScriptPlayerEntity* self, int idx)
 {
     self->mCurrVariation = idx;
-    char* rec = (char*)self->mpData + ((int*)self->mpVariationTable)[idx];
+    tInSeqEntityHeader* rec = (tInSeqEntityHeader*)((char*)self->mpData + ((int*)self->mpVariationTable)[idx]);
     self->mpSystemHeader = (tInSeqEntityHeader*)rec;
     if (*(unsigned short*)rec > 8) {
-        self->mpHeader = (const char*)(rec + 8);
+        self->mpHeader = (const char*)(&rec->nextSectionStart);
     } else {
         self->mpHeader = 0;
     }

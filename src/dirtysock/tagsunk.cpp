@@ -6264,24 +6264,24 @@ extern "C" void func_00260F80(void)
 {
     // An unused 32-byte local is needed to reproduce the 0x30-byte frame.
     int framePad[8];
-    char* buddyMan = (char*)operator new(0xF0, str_BuddyMan, 0x20000000, 0);
-    *(int*)(buddyMan + 0x40) = -1;
-    *(int*)(buddyMan + 0xA4) = 0x15180;
-    *(void**)(buddyMan + 0xEC) = cBXString_EmptyString;
-    *(int*)(buddyMan + 0xAC) = 0;
-    *(int*)(buddyMan + 0xB0) = 0;
-    *(int*)(buddyMan + 0xB4) = 0;
-    *(int*)(buddyMan + 0xBC) = 0;
-    *(int*)(buddyMan + 0xC0) = 0;
-    *(int*)(buddyMan + 0xC4) = 0;
-    *(int*)(buddyMan + 0xC8) = 0;
-    *(int*)(buddyMan + 0xCC) = 0;
-    *(int*)(buddyMan + 0xD0) = 0;
-    *(int*)(buddyMan + 0xD8) = 0;
-    *(int*)(buddyMan + 0xDC) = 0;
-    *(int*)(buddyMan + 0xE0) = 0;
-    *(int*)(buddyMan + 0xE4) = 0;
-    *(int*)(buddyMan + 0xE8) = 0;
+    BuddyMan* buddyMan = (BuddyMan*)((char*)operator new(0xF0, str_BuddyMan, 0x20000000, 0));
+    buddyMan->miPort = -1;
+    buddyMan->miMsgTimeout = 0x15180;
+    buddyMan->mResource = (char*)cBXString_EmptyString;
+    buddyMan->mMessagesStart = 0;
+    buddyMan->mMessagesFinish = 0;
+    buddyMan->mMessagesEnd = 0;
+    buddyMan->mChallengersStart = 0;
+    buddyMan->mChallengersFinish = 0;
+    buddyMan->mChallengersEnd = 0;
+    buddyMan->mpBuddyApi = 0;
+    buddyMan->mpRoster = 0;
+    buddyMan->miError = 0;
+    buddyMan->mState = 0;
+    buddyMan->mbDisconnected = 0;
+    buddyMan->mbLoggedIn = 0;
+    buddyMan->unk_0E4 = 0;
+    buddyMan->mbRosterDone = 0;
     BuddyMan_mBuddyMan = (BuddyMan*)(buddyMan);
 }
 #endif

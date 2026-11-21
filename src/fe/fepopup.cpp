@@ -2707,17 +2707,17 @@ struct sSelfK1C9B98 { char pad[0x2D0]; sEntryK1C9B98 entries[4]; };
  */
 extern "C" void cScreenPopup_createConfirmationPopup(cScreenPopup* self, int idx)
 {
-    char* popup = (char*)cScreenPopup_cScreenPopup((cScreenPopup*)cMemMan_alloc(864, str_Confirmation_Popup, 0x100, 0), self->mpEngine, (cUIState*)self);
+    cScreenPopup* popup = (cScreenPopup*)((char*)cScreenPopup_cScreenPopup((cScreenPopup*)cMemMan_alloc(864, str_Confirmation_Popup, 0x100, 0), self->mpEngine, (cUIState*)self));
     self->mpConfirmPopup = (cScreenPopup*)popup;
-    char* slots = popup + 0xBC;
-    *(int*)(popup + 0xBC) = 2;
+    char* slots = (char*)&popup->info;
+    popup->info.meType = 2;
     func_001C57C0(slots, 0, GetHashValue32(str_kT_CMNYes));
     func_001C57C0(slots, 1, GetHashValue32(str_kT_CMNNo));
     sVec3K1C9B98 popupOffset(30.0f, 40.0f, 0.0f);
-    *(sVec3K1C9B98*)(popup + 0x158) = popupOffset;
-    *(int*)(popup + 0x14C) = self->miLayerOffset + 3;
-    *(int*)(popup + 0x168) = ((sSelfK1C9B98*)self)->entries[idx].c;
-    *(sPairK1C9B98*)(popup + 0xC0) = ((sSelfK1C9B98*)self)->entries[idx].p;
+    *(sVec3K1C9B98*)&popup->info.mvOffset[0] = popupOffset;
+    popup->info.miLayerOffset = self->miLayerOffset + 3;
+    popup->info.miDefaultOption = ((sSelfK1C9B98*)self)->entries[idx].c;
+    *(sPairK1C9B98*)&popup->info.mtMessage = ((sSelfK1C9B98*)self)->entries[idx].p;
     self->miActiveConfirmation = idx;
     cUIStateStack_pushPopup((char*)*(void**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18,
                   self->mpConfirmPopup);

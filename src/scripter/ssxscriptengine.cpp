@@ -6591,9 +6591,9 @@ extern "C" int cScriptObjCameraManager_RemoveCameraObject_impl(sSeEng11E8* self,
 {
     int k = *(int*)(key + 4);
     for (int i = 0; i < 2; i++) {
-        char* cameraObj = self->objs[i];
-        if (cameraObj != 0 && *(int*)(cameraObj + 4) == k) {
-            if (self->count > 0 && *(int*)(cameraObj + 0x14) != 0) {
+        cScriptObjCamera* cameraObj = (cScriptObjCamera*)self->objs[i];
+        if (((char*)cameraObj) != 0 && *(int*)(((char*)cameraObj) + 4) == k) {
+            if (self->count > 0 && (int)cameraObj->mpCameraEntity != 0) {
                 cScriptObjCamera_SetCameraEntity((cScriptObjCamera*)cameraObj, 0);
                 for (int j = 0; j < 2; j++) {
                     if (self->slots[j] == i) {

@@ -6925,9 +6925,9 @@ struct sBankMonHdr { char pad[0x40]; int f40; char names[1][0x20]; };
 extern "C" void func_002B43D8(cMusicSys* self)
 {
     char buf[256];
-    void* songInstance = self->mCurrent;
-    if (songInstance != 0) {
-        int bank = *(int*)((char*)songInstance + 0x34);
+    cSongInstance* songInstance = (cSongInstance*)self->mCurrent;
+    if (((void*)songInstance) != 0) {
+        int bank = songInstance->unk_34;
         if ((*(sBankMonHdr**)songInstance)->f40 != 0) {
             int n = func_002B24C0((cSongInstance*)songInstance);
             void* currentSong = self->mCurrent;
