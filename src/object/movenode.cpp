@@ -50,12 +50,13 @@ void* cMoveNode_cMoveNode_3(void* self, void* a, void* stream) __asm__("cMoveNod
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
  * @return @p self
  */
-void* cMoveNode_cMoveNode_3(void* self, void* bucket, void* stream)
+void* cMoveNode_cMoveNode_3(void* vself, void* bucket, void* stream)
 {
+    cMoveNode* self = (cMoveNode*)vself;
     int flag;
     cInstanceNode_cInstanceNode(self, bucket, stream);
-    *(int*)((char*)self + 0x1C) = 0;
-    *(void**)((char*)self + 0xC) = cMoveNode_vtbl;
+    self->ModifierBlock = 0;
+    self->mVtbl = (void**)cMoveNode_vtbl;
     sSerVEntry_55298* readEntry = &(*(sSerVEntry_55298**)stream)[2];
     readEntry->fn((char*)stream + readEntry->delta, (char*)self + 0x20, 4);
     readEntry = &(*(sSerVEntry_55298**)stream)[2];
@@ -66,11 +67,11 @@ void* cMoveNode_cMoveNode_3(void* self, void* bucket, void* stream)
     readEntry->fn((char*)stream + readEntry->delta, &flag, 4);
     if (flag) {
         cMoveNode_addModifierBlock((cMoveNode*)self);
-        tModifierBlock_readFromReplayFrame(*(void**)((char*)self + 0x1C), stream);
+        tModifierBlock_readFromReplayFrame(self->ModifierBlock, stream);
     }
     cMoveNode_setupOverlapSystem((cMoveNode*)self);
-    *(unsigned short*)((char*)self + 0x12) |= 1;
-    return self;
+    self->Flags |= 1;
+    return ((void*)self);
 }
 #endif
 
@@ -422,10 +423,11 @@ INCLUDE_ASM("object/movenode", cMoveNode_addFade__FPvT0);
  * @param fadeData  add-fade make-data
  * @return the new Fade (left in f0; callers ignore it)
  */
-float cMoveNode_addFade(void* self, void* fadeData)
+float cMoveNode_addFade(void* vself, void* fadeData)
 {
+    cMoveNode* self = (cMoveNode*)vself;
     float fade = *(float*)((char*)fadeData + 0x4);
-    *(float*)((char*)self + 0x24) = fade;
+    self->Fade = fade;
     return fade;
 }
 #endif
@@ -1747,8 +1749,9 @@ void cMoveNode_writeToReplayFrame_2(void* self, void* stream) __asm__("cMoveNode
  *
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
  */
-void cMoveNode_writeToReplayFrame_2(void* self, void* stream)
+void cMoveNode_writeToReplayFrame_2(void* vself, void* stream)
 {
+    cMoveNode* self = (cMoveNode*)vself;
     cInstanceNode_writeToReplayFrame(self, stream);
     sSerVEntry_56B30* writeEntry = &(*(sSerVEntry_56B30**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x20, 4);
@@ -1756,10 +1759,10 @@ void cMoveNode_writeToReplayFrame_2(void* self, void* stream)
     writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x24, 4);
     writeEntry = &(*(sSerVEntry_56B30**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x28, 4);
-    int flag = *(void**)((char*)self + 0x1C) != 0;
+    int flag = self->ModifierBlock != 0;
     writeEntry = &(*(sSerVEntry_56B30**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, &flag, 4);
-    void* block = *(void**)((char*)self + 0x1C);
+    void* block = self->ModifierBlock;
     if (block != 0) {
         tModifierBlock_writeToReplayFrame(block, stream);
     }
@@ -2986,8 +2989,9 @@ INCLUDE_ASM("object/movenode", cMultiParticleMan_addInst__FPvii);
  * @param instId  instance id to add
  * @return whatever cMultiParticle_addInst leaves (callers ignore it)
  */
-void* cMultiParticleMan_addInst(void* self, int particleIndex, int instId)
+void* cMultiParticleMan_addInst(void* vself, int particleIndex, int instId)
 {
+    cMultiParticleMan* self = (cMultiParticleMan*)vself;
     return cMultiParticle_addInst(*(int*)((char*)self + (particleIndex << 2)), instId);
 }
 #endif
@@ -3005,8 +3009,9 @@ INCLUDE_ASM("object/movenode", cMultiParticleMan_remInst__FPvii);
  * @param instId  instance id to remove
  * @return whatever cMultiParticle_remInst leaves (callers ignore it)
  */
-void* cMultiParticleMan_remInst(void* self, int particleIndex, int instId)
+void* cMultiParticleMan_remInst(void* vself, int particleIndex, int instId)
 {
+    cMultiParticleMan* self = (cMultiParticleMan*)vself;
     return cMultiParticle_remInst(*(int*)((char*)self + (particleIndex << 2)), instId);
 }
 #endif

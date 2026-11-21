@@ -490,9 +490,10 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan_reset__FPv);
  * Clears the saved-frame flag (+0x10) that cPlaybackMan_saveFrame sets and cPlaybackMan_restoreFrame tests. The mission
  * scripts call it after cPlaybackMan_stop when a local mission is cancelled or quit.
  */
-void cPlaybackMan_reset(void* self)
+void cPlaybackMan_reset(void* vself)
 {
-    *(int*)((char*)self + 0x10) = 0;
+    cPlaybackMan* self = (cPlaybackMan*)vself;
+    self->SaveFrame = 0;
 }
 #endif
 
@@ -649,10 +650,11 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan_stopPerform__FPv);
  *
  * Calls cPlaybackMan_restoreFrame, then sets the mode (+0x70) to 0. cPlaybackMan_stop uses it for mode 2.
  */
-void cPlaybackMan_stopPerform(void* self)
+void cPlaybackMan_stopPerform(void* vself)
 {
+    cPlaybackMan* self = (cPlaybackMan*)vself;
     cPlaybackMan_restoreFrame((cPlaybackMan*)self);
-    *(int*)((char*)self + 0x70) = 0;
+    self->State = 0;
 }
 #endif
 
@@ -901,11 +903,12 @@ INCLUDE_ASM("replay/playbackman", cReplayCache_reset__FPv);
  *
  * The command buffer itself is kept. cReplay_init and cReplay_reset call it for each input cache.
  */
-void cReplayCache_reset(void* self)
+void cReplayCache_reset(void* vself)
 {
-    *(int*)((char*)self + 0x0) = 0;
-    *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x8) = 0;
+    cReplayCache* self = (cReplayCache*)vself;
+    self->RecordCursor = 0;
+    self->PlaybackCursor = 0;
+    self->PlaybackLeft = 0;
 }
 #endif
 
@@ -1381,8 +1384,9 @@ INCLUDE_ASM("replay/playbackman", cReplay_addReplayFrame__FPv);
  *
  * @return cReplayFrameList_addFrame's result as this unit declares it (addFrame returns nothing)
  */
-void* cReplay_addReplayFrame(void* self)
+void* cReplay_addReplayFrame(void* vself)
 {
+    cReplay* self = (cReplay*)vself;
     return cReplayFrameList_addFrame((char*)self + 0x3b0);
 }
 #endif

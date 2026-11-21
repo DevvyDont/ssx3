@@ -1175,9 +1175,10 @@ INCLUDE_ASM("bx/memblockman", cPS2ExecutionMan_waitHalt__FPv);
  *
  * @return WaitSema's result
  */
-void* cPS2ExecutionMan_waitHalt(void* self)
+void* cPS2ExecutionMan_waitHalt(void* vself)
 {
-    return WaitSema(*(int*)((char*)self + 0xc));
+    cPS2ExecutionMan* self = (cPS2ExecutionMan*)vself;
+    return WaitSema(self->mHaltSema);
 }
 #endif
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatestats.h"
 #include "fe/festateaudiooptions.h"
 #include "fe/festatetrophyroom.h"
 #include "fe/festatenethelppopup.h"
@@ -194,9 +195,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupScreenPos__cFEPopupScreenPos__FPv);
  *
  * @return no meaningful value (cUIState__cUIState() returns nothing)
  */
-void* cFEPopupScreenPos__cFEPopupScreenPos(void* self)
+void* cFEPopupScreenPos__cFEPopupScreenPos(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEPopupScreenPos_vtbl;
+    cFEPopupScreenPos* self = (cFEPopupScreenPos*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEPopupScreenPos_vtbl);
     return cUIState__cUIState(self);
 }
 #endif
@@ -466,9 +468,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRiderBio__cFEStateRiderBio__FPv);
  *
  * @return meaningless (the void base destructor's leftover return register)
  */
-void* cFEStateRiderBio__cFEStateRiderBio(void* self)
+void* cFEStateRiderBio__cFEStateRiderBio(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEState_vtbl;
+    cFEStateRiderBio* self = (cFEStateRiderBio*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEState_vtbl);
     return cUIState__cUIState(self);
 }
 #endif
@@ -509,9 +512,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRuleSelect__cFEStateRuleSelect__FPv);
  *
  * @return meaningless (the void base destructor's leftover return register)
  */
-void* cFEStateRuleSelect__cFEStateRuleSelect(void* self)
+void* cFEStateRuleSelect__cFEStateRuleSelect(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEState_vtbl;
+    cFEStateRuleSelect* self = (cFEStateRuleSelect*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEState_vtbl);
     return cUIState__cUIState(self);
 }
 #endif
@@ -742,9 +746,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPop
  *
  * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
  */
-void* cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup(void* self)
+void* cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEStateNetQuickPlayPopup_vtbl;
+    cFEStateNetQuickPlayPopup* self = (cFEStateNetQuickPlayPopup*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEStateNetQuickPlayPopup_vtbl);
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -834,9 +839,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickMessages__cFEStateNetQuickMessages
  *
  * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
  */
-void* cFEStateNetQuickMessages__cFEStateNetQuickMessages(void* self)
+void* cFEStateNetQuickMessages__cFEStateNetQuickMessages(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEStateNetQuickMessages_vtbl;
+    cFEStateNetQuickMessages* self = (cFEStateNetQuickMessages*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEStateNetQuickMessages_vtbl);
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -1052,9 +1058,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetHelpPopup__cFEStateNetHelpPopup__FPv);
  *
  * @return no meaningful value (cUIState__cUIState() returns nothing)
  */
-void* cFEStateNetHelpPopup__cFEStateNetHelpPopup(void* self)
+void* cFEStateNetHelpPopup__cFEStateNetHelpPopup(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEStateNetHelpPopup_vtbl;
+    cFEStateNetHelpPopup* self = (cFEStateNetHelpPopup*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEStateNetHelpPopup_vtbl);
     return cUIState__cUIState(self);
 }
 #endif
@@ -1509,8 +1516,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryPosters_getReward__FPvi);
  * @param i  the reward index
  * @return the reward record (passed around as an int)
  */
-int cFEStateRewardGalleryPosters_getReward(void* self, int i)
+int cFEStateRewardGalleryPosters_getReward(void* vself, int i)
 {
+    cFEStateRewardGalleryPosters* self = (cFEStateRewardGalleryPosters*)vself;
     return *(int*)((char*)self + (i << 2) + 0xA28);
 }
 #endif
@@ -1630,8 +1638,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryTradingCards_getReward__FPvi)
  * @param i  the reward index
  * @return the reward record (passed around as an int)
  */
-int cFEStateRewardGalleryTradingCards_getReward(void* self, int i)
+int cFEStateRewardGalleryTradingCards_getReward(void* vself, int i)
 {
+    cFEStateRewardGalleryTradingCards* self = (cFEStateRewardGalleryTradingCards*)vself;
     return *(int*)((char*)self + (i << 2) + 0xA28);
 }
 #endif
@@ -1751,8 +1760,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryConceptArts_getReward__FPvi);
  * @param i  the reward index
  * @return the reward record (passed around as an int)
  */
-int cFEStateRewardGalleryConceptArts_getReward(void* self, int i)
+int cFEStateRewardGalleryConceptArts_getReward(void* vself, int i)
 {
+    cFEStateRewardGalleryConceptArts* self = (cFEStateRewardGalleryConceptArts*)vself;
     return *(int*)((char*)self + (i << 2) + 0xA28);
 }
 #endif
@@ -1872,8 +1882,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryVideos_getReward__FPvi);
  * @param i  the reward index
  * @return the reward record (passed around as an int)
  */
-int cFEStateRewardGalleryVideos_getReward(void* self, int i)
+int cFEStateRewardGalleryVideos_getReward(void* vself, int i)
 {
+    cFEStateRewardGalleryVideos* self = (cFEStateRewardGalleryVideos*)vself;
     return *(int*)((char*)self + (i << 2) + 0xA28);
 }
 #endif
@@ -1993,8 +2004,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryToys_getReward__FPvi);
  * @param i  the reward index
  * @return the reward record (passed around as an int)
  */
-int cFEStateRewardGalleryToys_getReward(void* self, int i)
+int cFEStateRewardGalleryToys_getReward(void* vself, int i)
 {
+    cFEStateRewardGalleryToys* self = (cFEStateRewardGalleryToys*)vself;
     return *(int*)((char*)self + (i << 2) + 0xA28);
 }
 #endif
@@ -2114,8 +2126,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryCheatChars_getReward__FPvi);
  * @param i  the reward index
  * @return the reward record (passed around as an int)
  */
-int cFEStateRewardGalleryCheatChars_getReward(void* self, int i)
+int cFEStateRewardGalleryCheatChars_getReward(void* vself, int i)
 {
+    cFEStateRewardGalleryCheatChars* self = (cFEStateRewardGalleryCheatChars*)vself;
     return *(int*)((char*)self + (i << 2) + 0xA28);
 }
 #endif
@@ -2493,9 +2506,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStatePeakRoom__cFEStatePeakRoom__FPv);
  *
  * @return meaningless (the void base destructor's leftover return register)
  */
-void* cFEStatePeakRoom__cFEStatePeakRoom(void* self)
+void* cFEStatePeakRoom__cFEStatePeakRoom(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEState_vtbl;
+    cFEStatePeakRoom* self = (cFEStatePeakRoom*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEState_vtbl);
     return cUIState__cUIState(self);
 }
 #endif
@@ -2579,9 +2593,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardsRoom__cFEStateRewardsRoom__FPv);
  *
  * @return meaningless (the void base destructor's leftover return register)
  */
-void* cFEStateRewardsRoom__cFEStateRewardsRoom(void* self)
+void* cFEStateRewardsRoom__cFEStateRewardsRoom(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEState_vtbl;
+    cFEStateRewardsRoom* self = (cFEStateRewardsRoom*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEState_vtbl);
     return cUIState__cUIState(self);
 }
 #endif
@@ -2616,9 +2631,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode__cFEPopupSelectMulti
  *
  * @return no meaningful value (cUIState__cUIState() returns nothing)
  */
-void* cFEPopupSelectMultiplayerMode__cFEPopupSelectMultiplayerMode(void* self)
+void* cFEPopupSelectMultiplayerMode__cFEPopupSelectMultiplayerMode(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEPopupSelectMultiplayerMode_vtbl;
+    cFEPopupSelectMultiplayerMode* self = (cFEPopupSelectMultiplayerMode*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEPopupSelectMultiplayerMode_vtbl);
     return cUIState__cUIState(self);
 }
 #endif
@@ -2764,9 +2780,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode_getData__FPv);
  *
  * @return 1 after an entry was chosen (widget event 5), 0 after widget event 6 (probably cancel)
  */
-signed char cFEPopupSelectMultiplayerMode_getData(void* self)
+signed char cFEPopupSelectMultiplayerMode_getData(void* vself)
 {
-    return *(signed char*)((char*)self + 0x48);
+    cFEPopupSelectMultiplayerMode* self = (cFEPopupSelectMultiplayerMode*)vself;
+    return *(signed char*)&self->mMultiMode;
 }
 #endif
 
@@ -2836,9 +2853,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateAudioOptions__cFEStateAudioOptions__FPv);
  *
  * @return meaningless (the void base destructor's leftover return register)
  */
-void* cFEStateAudioOptions__cFEStateAudioOptions(void* self)
+void* cFEStateAudioOptions__cFEStateAudioOptions(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEState_vtbl;
+    cFEStateAudioOptions* self = (cFEStateAudioOptions*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEState_vtbl);
     return cUIState__cUIState(self);
 }
 #endif
@@ -2891,9 +2909,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine__cFEStateRequestLine__FPv);
  *
  * @return meaningless (the void base destructor's leftover return register)
  */
-void* cFEStateRequestLine__cFEStateRequestLine(void* self)
+void* cFEStateRequestLine__cFEStateRequestLine(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEState_vtbl;
+    cFEStateRequestLine* self = (cFEStateRequestLine*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEState_vtbl);
     return cUIState__cUIState(self);
 }
 #endif
@@ -3262,9 +3281,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateMPCircuit__cFEStateMPCircuit__FPv);
  *
  * @return meaningless (the void base destructor's leftover return register)
  */
-void* cFEStateMPCircuit__cFEStateMPCircuit(void* self)
+void* cFEStateMPCircuit__cFEStateMPCircuit(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEState_vtbl;
+    cFEStateMPCircuit* self = (cFEStateMPCircuit*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEState_vtbl);
     return cUIState__cUIState(self);
 }
 #endif
@@ -3344,9 +3364,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateSelectPersona__cFEStateSelectPersona__FPv)
  *
  * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
  */
-void* cFEStateSelectPersona__cFEStateSelectPersona(void* self)
+void* cFEStateSelectPersona__cFEStateSelectPersona(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEStateSelectPersona_vtbl;
+    cFEStateSelectPersona* self = (cFEStateSelectPersona*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEStateSelectPersona_vtbl);
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -3551,9 +3572,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateOnlineCharacterSelect__cFEStateOnlineChara
  *
  * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
  */
-void* cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect(void* self)
+void* cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEStateOnlineCharacterSelect_vtbl;
+    cFEStateOnlineCharacterSelect* self = (cFEStateOnlineCharacterSelect*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEStateOnlineCharacterSelect_vtbl);
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -3910,9 +3932,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateStep2__cFEStateCreateStep2__FPv);
  *
  * @return cFEStateNet__cFEStateNet()'s result (not meaningful; declared void* by the unit)
  */
-void* cFEStateCreateStep2__cFEStateCreateStep2(void* self)
+void* cFEStateCreateStep2__cFEStateCreateStep2(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEStateCreateStep2_vtbl;
+    cFEStateCreateStep2* self = (cFEStateCreateStep2*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEStateCreateStep2_vtbl);
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -3965,9 +3988,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateDuplicate__cFEStateCreateDuplicate__
  *
  * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
  */
-void* cFEStateCreateDuplicate__cFEStateCreateDuplicate(void* self)
+void* cFEStateCreateDuplicate__cFEStateCreateDuplicate(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEStateCreateDuplicate_vtbl;
+    cFEStateCreateDuplicate* self = (cFEStateCreateDuplicate*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEStateCreateDuplicate_vtbl);
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -4053,9 +4077,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateStats__cFEStateStats__FPv);
  *
  * @return cFEStateNet__cFEStateNet()'s result (not meaningful; declared void* by the unit)
  */
-void* cFEStateStats__cFEStateStats(void* self)
+void* cFEStateStats__cFEStateStats(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEStateStats_vtbl;
+    cFEStateStats* self = (cFEStateStats*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEStateStats_vtbl);
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -5081,9 +5106,10 @@ INCLUDE_ASM("fe/fepopupmisc", cUIInput_setPadNum__FPvi);
  *
  * @param val  pad number, stored as a byte at offset 4
  */
-void cUIInput_setPadNum(void* self, int val)
+void cUIInput_setPadNum(void* vself, int val)
 {
-    *(char*)((char*)self + 0x4) = (char)val;
+    cUIInput* self = (cUIInput*)vself;
+    *(char*)&self->mPadNum = (char)val;
 }
 #endif
 

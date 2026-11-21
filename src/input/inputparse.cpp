@@ -3584,14 +3584,15 @@ INCLUDE_ASM("input/inputparse", cAIFwdDiffCache_cAIFwdDiffCache__FPv);
  *
  * @return @p self
  */
-void* cAIFwdDiffCache_cAIFwdDiffCache(void* self)
+void* cAIFwdDiffCache_cAIFwdDiffCache(void* vself)
 {
+    cAIFwdDiffCache* self = (cAIFwdDiffCache*)vself;
     int initValue = 0;
     *(int*)self = initValue;
-    *(int*)((char*)self + 0x4) = initValue;
-    *(int*)((char*)self + 0x8) = initValue;
-    *(int*)((char*)self + 0xc) = initValue;
-    return self;
+    self->mAgeQueue = (tAIFwdDiff*)initValue;
+    self->mPatchHash = (tAIFwdDiff**)initValue;
+    self->mHashSize = initValue;
+    return ((void*)self);
 }
 #endif
 

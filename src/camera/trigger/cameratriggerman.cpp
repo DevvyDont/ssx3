@@ -662,10 +662,11 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerStack_recordEnter__
  *
  * @param triggerId  the entered trigger's id (On Tour triggerID)
  */
-void cCameraTriggerStack_recordEnter(void* self, int triggerId)
+void cCameraTriggerStack_recordEnter(void* vself, int triggerId)
 {
+    cCameraTriggerStack* self = (cCameraTriggerStack*)vself;
     *(int*)((char*)self + (*(int*)self << 2) + 0x8) = triggerId;
-    *(int*)((char*)self + 0x4) = triggerId;
+    self->LastEnterPlayed = triggerId;
     *(int*)self = *(int*)self + 1;
 }
 #endif

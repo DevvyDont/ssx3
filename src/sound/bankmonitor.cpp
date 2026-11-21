@@ -729,11 +729,12 @@ INCLUDE_ASM("sound/bankmonitor", cMonitorInstance_cMonitorInstance__FPv);
  *
  * @return self
  */
-void* cMonitorInstance_cMonitorInstance(void* self)
+void* cMonitorInstance_cMonitorInstance(void* vself)
 {
+    cMonitorInstance* self = (cMonitorInstance*)vself;
     *(int*)self = 0;
-    *(int*)((char*)self + 0x4) = -1;
-    return self;
+    self->mCountReset = -1;
+    return ((void*)self);
 }
 #endif
 
@@ -841,10 +842,11 @@ INCLUDE_ASM("sound/bankmonitor", cMonitorInstance_CountReset__FPvi);
  *
  * @param periodMs  the callback period in ms, or -1 to free the instance
  */
-void cMonitorInstance_CountReset(void* self, int periodMs)
+void cMonitorInstance_CountReset(void* vself, int periodMs)
 {
-    *(int*)((char*)self + 0x4) = periodMs;
-    *(int*)((char*)self + 0x8) = periodMs;
+    cMonitorInstance* self = (cMonitorInstance*)vself;
+    self->mCountReset = periodMs;
+    self->mCountdown = periodMs;
 }
 #endif
 
@@ -870,9 +872,10 @@ INCLUDE_ASM("sound/bankmonitor", cMonitorInstance_Disable__FPv);
  *
  * cMonitorInstance_Reset calls it before marking the instance free.
  */
-void cMonitorInstance_Disable(void* self)
+void cMonitorInstance_Disable(void* vself)
 {
-    *(int*)((char*)self + 0x0) = 0;
+    cMonitorInstance* self = (cMonitorInstance*)vself;
+    self->mEnabled = 0;
 }
 #endif
 
@@ -1212,8 +1215,9 @@ void cMonitor_MONITOR_DestroyAll1_impl(void* self, sBmKeyDDE0 key) __asm__("cMon
  *
  * @param key  the callback to cancel (8-byte pointer to member function)
  */
-void cMonitor_MONITOR_DestroyAll1_impl(void* self, sBmKeyDDE0 key)
+void cMonitor_MONITOR_DestroyAll1_impl(void* vself, sBmKeyDDE0 key)
 {
+    cMonitor* self = (cMonitor*)vself;
     for (int i = 0; i < 48; i++) {
         if (cMonitor_MONITOR_DestroyAll1_match((char*)self + 0x98 + i * 44, key)) {
             cMonitorInstance_Reset((cMonitorInstance*)((char*)self + 0x98 + i * 0x2C));
@@ -7469,9 +7473,10 @@ INCLUDE_ASM("sound/bankmonitor", cMusicSys_GetMPFFile__FPv);
  *
  * @return mMPFFile
  */
-int cMusicSys_GetMPFFile(void* self)
+int cMusicSys_GetMPFFile(void* vself)
 {
-    return *(int*)((char*)self + 0x5434);
+    cMusicSys* self = (cMusicSys*)vself;
+    return (int)self->mMPFFile;
 }
 #endif
 

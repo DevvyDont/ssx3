@@ -981,8 +981,9 @@ INCLUDE_ASM("visualfx/worldlightman", cCheatFX_resetStates__FPv);
  *
  * @return the cleared state's address (the memset result; On Tour's version returns nothing)
  */
-void* cCheatFX_resetStates(void* self)
+void* cCheatFX_resetStates(void* vself)
 {
+    cCheatFX* self = (cCheatFX*)vself;
     return func_00416210(((char*)self + 0x4), 0, 4);
 }
 #endif
@@ -3207,9 +3208,10 @@ INCLUDE_ASM("visualfx/worldlightman", cTransitionMan_GetViewIndex__FPv);
  *
  * @return the view index
  */
-int cTransitionMan_GetViewIndex(void* self)
+int cTransitionMan_GetViewIndex(void* vself)
 {
-    return *(int*)((char*)self + 0x74);
+    cTransitionMan* self = (cTransitionMan*)vself;
+    return self->mViewIndex;
 }
 #endif
 

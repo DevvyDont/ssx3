@@ -117,10 +117,11 @@ struct sSectionLink {
  *
  * @return the event
  */
-void* cSectionMan_allocEvent(void* self)
+void* cSectionMan_allocEvent(void* vself)
 {
-    sSectionLink* node = *(sSectionLink**)((char*)self + 0x198);
-    *(sSectionLink**)((char*)self + 0x198) = node->next;
+    cSectionMan* self = (cSectionMan*)vself;
+    sSectionLink* node = (sSectionLink*)self->m_pFreeEventList;
+    self->m_pFreeEventList = (tSectionManEvent*)node->next;
     return node;
 }
 #endif
@@ -136,11 +137,12 @@ INCLUDE_ASM("main/sectionman", cSectionMan_freeEvent__FPvT0);
  * @param node  the event to free
  * @return the previous head of the free list
  */
-int cSectionMan_freeEvent(void* self, void* node)
+int cSectionMan_freeEvent(void* vself, void* node)
 {
-    int prevHead = *(int*)((char*)self + 0x198);
+    cSectionMan* self = (cSectionMan*)vself;
+    int prevHead = (int)self->m_pFreeEventList;
     *(int*)((char*)node + 0x4) = prevHead;
-    *(int*)((char*)self + 0x198) = (int)node;
+    self->m_pFreeEventList = (tSectionManEvent*)((int)node);
     return prevHead;
 }
 #endif

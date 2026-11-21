@@ -968,9 +968,10 @@ INCLUDE_ASM("fe/festateruleselect", cBraggingRightsMenu_setEnableFlag__FPvi);
  *
  * @param val  the mask, bit i for row i
  */
-void cBraggingRightsMenu_setEnableFlag(void* self, int val)
+void cBraggingRightsMenu_setEnableFlag(void* vself, int val)
 {
-    *(int*)((char*)self + 0x2C) = val;
+    cBraggingRightsMenu* self = (cBraggingRightsMenu*)vself;
+    self->mcItemEnableFlag = val;
 }
 #endif
 

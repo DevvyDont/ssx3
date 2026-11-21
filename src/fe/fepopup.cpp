@@ -150,9 +150,10 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_onDestroyScreen__FPv);
  *
  * @return the result of cUIState_onDestroyScreen()
  */
-void* cScreenPopup_onDestroyScreen(void* self)
+void* cScreenPopup_onDestroyScreen(void* vself)
 {
-    *(int*)((char*)self + 0x2b8) = 0;
+    cScreenPopup* self = (cScreenPopup*)vself;
+    self->mbShowing = 0;
     return cUIState_onDestroyScreen(self);
 }
 #endif

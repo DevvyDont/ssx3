@@ -74,9 +74,10 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_ENTERLODGE_onDestroyScreen__FPv);
  *
  * @return cOVState_onDestroyScreen()'s return value (On Tour's returns nothing)
  */
-void* cOVState_ENTERLODGE_onDestroyScreen(void* self)
+void* cOVState_ENTERLODGE_onDestroyScreen(void* vself)
 {
-    *(int*)((char*)self + 0x50) = 0;
+    cOVState_ENTERLODGE* self = (cOVState_ENTERLODGE*)vself;
+    self->mRestoreCutSceneMode = 0;
     return cOVState_onDestroyScreen(self);
 }
 #endif

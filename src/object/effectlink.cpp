@@ -690,9 +690,10 @@ INCLUDE_ASM("object/effectlink", cDynamicParticleModifier_fadeEffect__FPv);
  * Sets the fade flag (offset 0x14). cDynamicParticleModifier_update then stops emitting and marks the effect
  * finished once the emitter's count at offset 0x240 (probably its live particles) reaches 0.
  */
-void cDynamicParticleModifier_fadeEffect(void* self)
+void cDynamicParticleModifier_fadeEffect(void* vself)
 {
-    *(int*)((char*)self + 0x14) = 1;
+    cDynamicParticleModifier* self = (cDynamicParticleModifier*)vself;
+    self->Fade = 1;
 }
 #endif
 

@@ -55,11 +55,12 @@ void* cBEScoreInterface_cBEScoreInterface_impl(void* self) __asm__("cBEScoreInte
  *
  * @return @p self
  */
-void* cBEScoreInterface_cBEScoreInterface_impl(void* self)
+void* cBEScoreInterface_cBEScoreInterface_impl(void* vself)
 {
-    *(void***)((char*)self + 0xC) = cBEScoreInterface_vtbl;
+    cBEScoreInterface* self = (cBEScoreInterface*)vself;
+    self->mVtbl = cBEScoreInterface_vtbl;
     cBEScoreInterface_discard((cBEScoreInterface*)self);
-    return self;
+    return ((void*)self);
 }
 #endif
 

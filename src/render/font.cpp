@@ -1119,9 +1119,10 @@ INCLUDE_ASM("render/font", cPlayerLights_BoardIsAdditive__FPvi);
  *
  * @param val  the new flag
  */
-void cPlayerLights_BoardIsAdditive(void* self, int val)
+void cPlayerLights_BoardIsAdditive(void* vself, int val)
 {
-    *(int*)((char*)self + 0xA4) = val;
+    cPlayerLights* self = (cPlayerLights*)vself;
+    self->mBoardIsAdditive = val;
 }
 #endif
 
@@ -3248,9 +3249,10 @@ INCLUDE_ASM("render/font", cPS2BezierMan_SetNearLOD__FPvf);
  *
  * @param nearLOD  the near LOD distance
  */
-void cPS2BezierMan_SetNearLOD(void* self, float nearLOD)
+void cPS2BezierMan_SetNearLOD(void* vself, float nearLOD)
 {
-    *(float*)((char*)self + 0x33C) = nearLOD;
+    cPS2BezierMan* self = (cPS2BezierMan*)vself;
+    self->mNearLODcm = nearLOD;
 }
 #endif
 
@@ -3264,9 +3266,10 @@ INCLUDE_ASM("render/font", cPS2BezierMan_SetFarLOD__FPvf);
  *
  * @param farLOD  the far LOD distance
  */
-void cPS2BezierMan_SetFarLOD(void* self, float farLOD)
+void cPS2BezierMan_SetFarLOD(void* vself, float farLOD)
 {
-    *(float*)((char*)self + 0x340) = farLOD;
+    cPS2BezierMan* self = (cPS2BezierMan*)vself;
+    self->mFarLODcm = farLOD;
 }
 #endif
 
@@ -3280,9 +3283,10 @@ INCLUDE_ASM("render/font", cPS2BezierMan_GetNearLOD__FPv);
  *
  * @return the near LOD distance
  */
-float cPS2BezierMan_GetNearLOD(void* self)
+float cPS2BezierMan_GetNearLOD(void* vself)
 {
-    return *(float*)((char*)self + 0x33C);
+    cPS2BezierMan* self = (cPS2BezierMan*)vself;
+    return self->mNearLODcm;
 }
 #endif
 
@@ -3296,9 +3300,10 @@ INCLUDE_ASM("render/font", cPS2BezierMan_GetFarLOD__FPv);
  *
  * @return the far LOD distance
  */
-float cPS2BezierMan_GetFarLOD(void* self)
+float cPS2BezierMan_GetFarLOD(void* vself)
 {
-    return *(float*)((char*)self + 0x340);
+    cPS2BezierMan* self = (cPS2BezierMan*)vself;
+    return self->mFarLODcm;
 }
 #endif
 
@@ -3312,9 +3317,10 @@ INCLUDE_ASM("render/font", cPS2BezierMan_SetLmapStart__FPvi);
  *
  * @param lmapStart  the first light-map index
  */
-void cPS2BezierMan_SetLmapStart(void* self, int lmapStart)
+void cPS2BezierMan_SetLmapStart(void* vself, int lmapStart)
 {
-    *(int*)((char*)self + 0x354) = lmapStart;
+    cPS2BezierMan* self = (cPS2BezierMan*)vself;
+    self->mLmapStart = lmapStart;
 }
 #endif
 
@@ -3328,9 +3334,10 @@ INCLUDE_ASM("render/font", cPS2BezierMan_EnableWireMode__FPvi);
  *
  * @param enable  non-zero to draw wireframe
  */
-void cPS2BezierMan_EnableWireMode(void* self, int enable)
+void cPS2BezierMan_EnableWireMode(void* vself, int enable)
 {
-    *(int*)((char*)self + 0x344) = enable;
+    cPS2BezierMan* self = (cPS2BezierMan*)vself;
+    self->mWireModeEnabled = enable;
 }
 #endif
 
@@ -3344,9 +3351,10 @@ INCLUDE_ASM("render/font", cPS2BezierMan_EnableLightMaps__FPvi);
  *
  * @param enable  non-zero to use light maps
  */
-void cPS2BezierMan_EnableLightMaps(void* self, int enable)
+void cPS2BezierMan_EnableLightMaps(void* vself, int enable)
 {
-    *(int*)((char*)self + 0x34C) = enable;
+    cPS2BezierMan* self = (cPS2BezierMan*)vself;
+    self->mLightMapsEnabled = enable;
 }
 #endif
 
@@ -3360,9 +3368,10 @@ INCLUDE_ASM("render/font", cPS2BezierMan_EnableShadows__FPvi);
  *
  * @param enable  non-zero to draw shadows
  */
-void cPS2BezierMan_EnableShadows(void* self, int enable)
+void cPS2BezierMan_EnableShadows(void* vself, int enable)
 {
-    *(int*)((char*)self + 0x350) = enable;
+    cPS2BezierMan* self = (cPS2BezierMan*)vself;
+    self->mShadowsEnabled = enable;
 }
 #endif
 
@@ -3376,9 +3385,10 @@ INCLUDE_ASM("render/font", cPS2BezierMan_IsWireModeEnabled__FPv);
  *
  * @return the wireframe flag
  */
-int cPS2BezierMan_IsWireModeEnabled(void* self)
+int cPS2BezierMan_IsWireModeEnabled(void* vself)
 {
-    return *(int*)((char*)self + 0x344);
+    cPS2BezierMan* self = (cPS2BezierMan*)vself;
+    return self->mWireModeEnabled;
 }
 #endif
 
@@ -3392,9 +3402,10 @@ INCLUDE_ASM("render/font", cPS2BezierMan_IsLightMapsEnabled__FPv);
  *
  * @return the light-map flag
  */
-int cPS2BezierMan_IsLightMapsEnabled(void* self)
+int cPS2BezierMan_IsLightMapsEnabled(void* vself)
 {
-    return *(int*)((char*)self + 0x34C);
+    cPS2BezierMan* self = (cPS2BezierMan*)vself;
+    return self->mLightMapsEnabled;
 }
 #endif
 
@@ -3408,9 +3419,10 @@ INCLUDE_ASM("render/font", cPS2BezierMan_IsShadowsEnabled__FPv);
  *
  * @return the shadow flag
  */
-int cPS2BezierMan_IsShadowsEnabled(void* self)
+int cPS2BezierMan_IsShadowsEnabled(void* vself)
 {
-    return *(int*)((char*)self + 0x350);
+    cPS2BezierMan* self = (cPS2BezierMan*)vself;
+    return self->mShadowsEnabled;
 }
 #endif
 
@@ -3550,9 +3562,10 @@ INCLUDE_ASM("render/font", cPS2LightMan_GetLightObj__FPvi);
  * @param index  the light index
  * @return a pointer to m_pLights[@p index]
  */
-void* cPS2LightMan_GetLightObj(void* self, int index)
+void* cPS2LightMan_GetLightObj(void* vself, int index)
 {
-    return ((char*)*(void**)((char*)self + 0x4) + index * 4);
+    cPS2LightMan* self = (cPS2LightMan*)vself;
+    return ((char*)self->m_pLights + index * 4);
 }
 #endif
 
@@ -3603,9 +3616,10 @@ INCLUDE_ASM("render/font", cPS2LightMan_ResetDynamicLights__FPv);
 /**
  * Removes all dynamic lights by zeroing the light manager's dynamic light count (+0xC).
  */
-void cPS2LightMan_ResetDynamicLights(void* self)
+void cPS2LightMan_ResetDynamicLights(void* vself)
 {
-    *(int*)((char*)self + 0xC) = 0;
+    cPS2LightMan* self = (cPS2LightMan*)vself;
+    self->m_iDynLight = 0;
 }
 #endif
 
@@ -3999,9 +4013,10 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetNumDisplayModes__FPv);
  *
  * @return the number of display modes
  */
-int cPS2GraphicsMan_GetNumDisplayModes(void* self)
+int cPS2GraphicsMan_GetNumDisplayModes(void* vself)
 {
-    return *(int*)((char*)self + 0x59C4);
+    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
+    return self->NumDisplayModes;
 }
 #endif
 
@@ -4013,9 +4028,10 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetDTV__FPv);
  *
  * @return the word at unk_5A4C
  */
-int cPS2GraphicsMan_GetDTV(void* self)
+int cPS2GraphicsMan_GetDTV(void* vself)
 {
-    return *(int*)((char*)self + 0x5A4C);
+    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
+    return self->unk_5A4C;
 }
 #endif
 
@@ -4027,9 +4043,10 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetDisplayMode1__FPv);
  *
  * @return the current display mode index
  */
-int cPS2GraphicsMan_GetDisplayMode1(void* self)
+int cPS2GraphicsMan_GetDisplayMode1(void* vself)
 {
-    return *(int*)((char*)self + 0x59C8);
+    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
+    return self->CurrentDisplayMode;
 }
 #endif
 
@@ -4171,9 +4188,10 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_ClearProjTextures__FPv);
  *
  * Sets mNumProjTextures (+0x13EC) to 0; cPS2GraphicsMan_AddProjectiveTexture() adds them again.
  */
-void cPS2GraphicsMan_ClearProjTextures(void* self)
+void cPS2GraphicsMan_ClearProjTextures(void* vself)
 {
-    *(int*)((char*)self + 0x13EC) = 0;
+    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
+    self->mNumProjTextures = 0;
 }
 #endif
 
@@ -4320,9 +4338,10 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_getCurrentFrameCount__FPv);
  *
  * @return the frame counter
  */
-int cPS2GraphicsMan_getCurrentFrameCount(void* self)
+int cPS2GraphicsMan_getCurrentFrameCount(void* vself)
 {
-    return *(int*)((char*)self + 0x5A74);
+    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
+    return self->mCurrentFrameCount;
 }
 #endif
 
@@ -4655,9 +4674,10 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_SetShinyBoarder__FPvi);
  *
  * @param state  non-zero to draw riders shiny (On Tour State)
  */
-void cPS2GraphicsMan_SetShinyBoarder(void* self, int state)
+void cPS2GraphicsMan_SetShinyBoarder(void* vself, int state)
 {
-    *(int*)((char*)self + 0x6D14) = state;
+    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
+    self->mShinyBoarder = state;
 }
 #endif
 
@@ -4700,11 +4720,12 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_PopView__FPv);
  * Moves mCurrentView (+0x13E4) back by one 0x40-byte matrix, decrements mViewDepth (+0x13E0) and clears mMatricesValid
  * (+0x6B90) so the combined matrices are rebuilt. No underflow check (the preview asserted).
  */
-void cPS2GraphicsMan_PopView(void* self)
+void cPS2GraphicsMan_PopView(void* vself)
 {
-    *(int*)((char*)self + 0x6b90) = 0;
-    *(char**)((char*)self + 0x13e4) -= 0x40;
-    *(int*)((char*)self + 0x13e0) -= 1;
+    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
+    self->mMatricesValid = 0;
+    *(char**)&self->mCurrentView -= 0x40;
+    self->mViewDepth -= 1;
 }
 #endif
 
@@ -4921,9 +4942,10 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetView__FPv);
  *
  * @return the current view matrix
  */
-int cPS2GraphicsMan_GetView(void* self)
+int cPS2GraphicsMan_GetView(void* vself)
 {
-    return *(int*)((char*)self + 0x13E4);
+    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
+    return (int)self->mCurrentView;
 }
 #endif
 
@@ -5322,9 +5344,10 @@ INCLUDE_ASM("render/font", cPS2GridMesh_IsOk__FPv);
  *
  * @return the word at +0x1C8
  */
-int cPS2GridMesh_IsOk(void* self)
+int cPS2GridMesh_IsOk(void* vself)
 {
-    return *(int*)((char*)self + 0x1C8);
+    cPS2GridMesh* self = (cPS2GridMesh*)vself;
+    return self->mbOK;
 }
 #endif
 

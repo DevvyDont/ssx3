@@ -308,8 +308,9 @@ INCLUDE_ASM("camera/camera", cCamera_snapResultAlgorithm__FPv);
  *
  * @return cLookAtChaseAlgorithm_snapCurrent's result
  */
-void* cCamera_snapResultAlgorithm(void* self)
+void* cCamera_snapResultAlgorithm(void* vself)
 {
+    cCamera* self = (cCamera*)vself;
     return cLookAtChaseAlgorithm_snapCurrent((cLookAtChaseAlgorithm*)((char*)self + 0xc0));
 }
 #endif
@@ -1589,9 +1590,10 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getLean__FPv);
  *
  * @return the lean value
  */
-float cRiderCameraTarget_getLean(void* self)
+float cRiderCameraTarget_getLean(void* vself)
 {
-    return *(float*)((char*)*(void**)((char*)self + 0x4) + 0x1f0);
+    cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
+    return *(float*)((char*)self->Rider + 0x1f0);
 }
 #endif
 
@@ -1645,9 +1647,10 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getHandplantSplineTangent__FPv);
  *
  * @return a pointer to the tangent
  */
-void* cRiderCameraTarget_getHandplantSplineTangent(void* self)
+void* cRiderCameraTarget_getHandplantSplineTangent(void* vself)
 {
-    return (char*)*(void**)((char*)*(void**)((char*)self + 0x4) + 0x77c) + 0x130;
+    cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
+    return (char*)*(void**)((char*)self->Rider + 0x77c) + 0x130;
 }
 #endif
 
@@ -1661,9 +1664,10 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getHandplantTarget__FPv);
  *
  * @return a pointer to the target point
  */
-void* cRiderCameraTarget_getHandplantTarget(void* self)
+void* cRiderCameraTarget_getHandplantTarget(void* vself)
 {
-    return (char*)*(void**)((char*)*(void**)((char*)self + 0x4) + 0x77c) + 0x140;
+    cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
+    return (char*)*(void**)((char*)self->Rider + 0x77c) + 0x140;
 }
 #endif
 
@@ -1677,9 +1681,10 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getTotalAirTime__FPv);
  *
  * @return the total air time in seconds
  */
-float cRiderCameraTarget_getTotalAirTime(void* self)
+float cRiderCameraTarget_getTotalAirTime(void* vself)
 {
-    return *(float*)((char*)*(void**)((char*)*(void**)((char*)self + 0x4) + 0x788) + 0x98);
+    cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
+    return *(float*)((char*)*(void**)((char*)self->Rider + 0x788) + 0x98);
 }
 #endif
 
@@ -1731,9 +1736,10 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getApexPos__FPv);
  *
  * @return a pointer to the apex position
  */
-void* cRiderCameraTarget_getApexPos(void* self)
+void* cRiderCameraTarget_getApexPos(void* vself)
 {
-    return (char*)*(void**)((char*)*(void**)((char*)self + 0x4) + 0x788) + 0x40;
+    cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
+    return (char*)*(void**)((char*)self->Rider + 0x788) + 0x40;
 }
 #endif
 
@@ -1747,9 +1753,10 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getHalfPipeNormal__FPv);
  *
  * @return a pointer to the normal
  */
-void* cRiderCameraTarget_getHalfPipeNormal(void* self)
+void* cRiderCameraTarget_getHalfPipeNormal(void* vself)
 {
-    return (char*)*(void**)((char*)self + 0x4) + 0x3c0;
+    cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
+    return (char*)self->Rider + 0x3c0;
 }
 #endif
 
@@ -1763,9 +1770,10 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getBoostWarp__FPv);
  *
  * @return the boost amount
  */
-float cRiderCameraTarget_getBoostWarp(void* self)
+float cRiderCameraTarget_getBoostWarp(void* vself)
 {
-    return *(float*)((char*)*(void**)((char*)self + 0x4) + 0x2fc);
+    cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
+    return *(float*)((char*)self->Rider + 0x2fc);
 }
 #endif
 
@@ -1779,9 +1787,10 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getCrouch__FPv);
  *
  * @return the crouch amount
  */
-float cRiderCameraTarget_getCrouch(void* self)
+float cRiderCameraTarget_getCrouch(void* vself)
 {
-    return *(float*)((char*)*(void**)((char*)self + 0x4) + 0x220);
+    cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
+    return *(float*)((char*)self->Rider + 0x220);
 }
 #endif
 
@@ -1816,9 +1825,10 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getSurfaceType__FPv);
  *
  * @return the surface type (On Tour eSurfaceType)
  */
-int cRiderCameraTarget_getSurfaceType(void* self)
+int cRiderCameraTarget_getSurfaceType(void* vself)
 {
-    return *(int*)((char*)*(void**)((char*)self + 0x4) + 0x438);
+    cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
+    return *(int*)((char*)self->Rider + 0x438);
 }
 #endif
 
@@ -1832,9 +1842,10 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getVerticalJump__FPv);
  *
  * @return the vertical jump value
  */
-float cRiderCameraTarget_getVerticalJump(void* self)
+float cRiderCameraTarget_getVerticalJump(void* vself)
 {
-    return *(float*)((char*)*(void**)((char*)self + 0x4) + 0x5a4);
+    cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
+    return *(float*)((char*)self->Rider + 0x5a4);
 }
 #endif
 
@@ -1848,9 +1859,10 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_didPop__FPv);
  *
  * @return nonzero when the rider popped
  */
-int cRiderCameraTarget_didPop(void* self)
+int cRiderCameraTarget_didPop(void* vself)
 {
-    return *(int*)((char*)*(void**)((char*)self + 0x4) + 0x5a8);
+    cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
+    return *(int*)((char*)self->Rider + 0x5a8);
 }
 #endif
 
@@ -1953,9 +1965,10 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_isRidingFlexRail__FPv);
  *
  * @return nonzero on a flex rail
  */
-int cRiderCameraTarget_isRidingFlexRail(void* self)
+int cRiderCameraTarget_isRidingFlexRail(void* vself)
 {
-    return *(int*)((char*)*(void**)((char*)self + 0x4) + 0x5ac);
+    cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
+    return *(int*)((char*)self->Rider + 0x5ac);
 }
 #endif
 
@@ -1969,9 +1982,10 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getLandingNormal__FPv);
  *
  * @return a pointer to the landing normal
  */
-void* cRiderCameraTarget_getLandingNormal(void* self)
+void* cRiderCameraTarget_getLandingNormal(void* vself)
 {
-    return (char*)*(void**)((char*)*(void**)((char*)self + 0x4) + 0x788) + 0x20;
+    cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
+    return (char*)*(void**)((char*)self->Rider + 0x788) + 0x20;
 }
 #endif
 
@@ -1985,9 +1999,10 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getLandingVelocity__FPv);
  *
  * @return a pointer to the landing velocity
  */
-void* cRiderCameraTarget_getLandingVelocity(void* self)
+void* cRiderCameraTarget_getLandingVelocity(void* vself)
 {
-    return (char*)*(void**)((char*)*(void**)((char*)self + 0x4) + 0x788) + 0x10;
+    cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
+    return (char*)*(void**)((char*)self->Rider + 0x788) + 0x10;
 }
 #endif
 
@@ -2941,9 +2956,10 @@ INCLUDE_ASM("camera/camera", cMatrixChaseAlgorithm__cMatrixChaseAlgorithm__FPv);
  *
  * @return the base destructor's result (declared void*)
  */
-void* cMatrixChaseAlgorithm__cMatrixChaseAlgorithm(void* self)
+void* cMatrixChaseAlgorithm__cMatrixChaseAlgorithm(void* vself)
 {
-    *(int*)((char*)self + 0x10) = (int)(void*)cMatrixChaseAlgorithm_vtbl;
+    cMatrixChaseAlgorithm* self = (cMatrixChaseAlgorithm*)vself;
+    self->mVtbl = (void**)((int)(void*)cMatrixChaseAlgorithm_vtbl);
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -3226,9 +3242,10 @@ INCLUDE_ASM("camera/camera", cRelativeChaseAlgorithm__cRelativeChaseAlgorithm__F
  *
  * @return the base destructor's result (declared void*)
  */
-void* cRelativeChaseAlgorithm__cRelativeChaseAlgorithm(void* self)
+void* cRelativeChaseAlgorithm__cRelativeChaseAlgorithm(void* vself)
 {
-    *(int*)((char*)self + 0x10) = (int)(void*)cRelativeChaseAlgorithm_vtbl;
+    cRelativeChaseAlgorithm* self = (cRelativeChaseAlgorithm*)vself;
+    self->mVtbl = (void**)((int)(void*)cRelativeChaseAlgorithm_vtbl);
     return cLookAtChaseAlgorithm__cLookAtChaseAlgorithm(self);
 }
 #endif
@@ -4654,9 +4671,10 @@ INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_EndPostRace__FP
  *
  * @return cChaseCameraController_createChaseAlgorithmCut's result (declared void*)
  */
-void* cChaseCameraController_switchCamera_EndPostRace(void* self)
+void* cChaseCameraController_switchCamera_EndPostRace(void* vself)
 {
-    return cChaseCameraController_createChaseAlgorithmCut(self, *(int*)((char*)self + 0x24), 0);
+    cChaseCameraController* self = (cChaseCameraController*)vself;
+    return cChaseCameraController_createChaseAlgorithmCut(self, self->CamSwitchRecord.PlayerChoiceType, 0);
 }
 #endif
 
@@ -4698,9 +4716,10 @@ INCLUDE_ASM("camera/camera", cChaseAlgorithm_setTarget__FPvi);
  *
  * @param val  the camera target (On Tour cRiderCameraTarget *camTarget)
  */
-void cChaseAlgorithm_setTarget(void* self, int val)
+void cChaseAlgorithm_setTarget(void* vself, int val)
 {
-    *(int*)((char*)self + 0x30) = val;
+    cChaseAlgorithm* self = (cChaseAlgorithm*)vself;
+    self->Target = (cRiderCameraTarget*)val;
 }
 #endif
 
@@ -4785,15 +4804,16 @@ extern void* D_0045BDE0[];
  */
 // PORT: cLookAtChaseAlgorithm__cLookAtChaseAlgorithm is the base deleting dtor (self, flags); the unit declares it with one arg
 // (cLookAtChaseAlgorithm__cLookAtChaseAlgorithm_dtor is declared earlier in the unit with this asm label).
-void cLookAtChaseAlgorithm__cLookAtChaseAlgorithm_dtor(void* self, int flags)
+void cLookAtChaseAlgorithm__cLookAtChaseAlgorithm_dtor(void* vself, int flags)
 {
-    *(void***)((char*)self + 0x10) = cLookAtChaseAlgorithm_vtbl;
+    cLookAtChaseAlgorithm* self = (cLookAtChaseAlgorithm*)vself;
+    self->mVtbl = cLookAtChaseAlgorithm_vtbl;
     cCubicSplineInterpolant__cCubicSplineInterpolant((char*)self + 0x334, 2);
     cCubicSplineInterpolant__cCubicSplineInterpolant((char*)self + 0x328, 2);
     cCubicSplineInterpolant__cCubicSplineInterpolant((char*)self + 0x31C, 2);
     cCubicSplineInterpolant__cCubicSplineInterpolant((char*)self + 0x310, 2);
     cCubicSplineInterpolant__cCubicSplineInterpolant((char*)self + 0x304, 2);
-    *(void***)((char*)self + 0x10) = D_0045BDE0;
+    self->mVtbl = D_0045BDE0;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -9755,9 +9775,10 @@ INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_shouldSnapOnUpdate__FPv);
  *
  * @return the DoSnap flag (nonzero to snap)
  */
-int cLookAtChaseAlgorithm_shouldSnapOnUpdate(void* self)
+int cLookAtChaseAlgorithm_shouldSnapOnUpdate(void* vself)
 {
-    return *(int*)((char*)self + 0x2F0);
+    cLookAtChaseAlgorithm* self = (cLookAtChaseAlgorithm*)vself;
+    return self->DoSnap;
 }
 #endif
 

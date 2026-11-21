@@ -1546,9 +1546,10 @@ INCLUDE_ASM("main/game", cSectionMan_isPreLoadModeDone__FPv);
  *
  * @return cGame_isPreloadedStateReady's answer (nonzero when ready)
  */
-void* cSectionMan_isPreLoadModeDone(void* self)
+void* cSectionMan_isPreLoadModeDone(void* vself)
 {
-    return cGame_isPreloadedStateReady(*(int*)((char*)self + 0x1b0));
+    cSectionMan* self = (cSectionMan*)vself;
+    return cGame_isPreloadedStateReady((int)self->mpGame);
 }
 #endif
 

@@ -259,13 +259,14 @@ INCLUDE_ASM("util/list", cList_clear__FPv);
  * Points the list head (+0x0) at itself and the tail (+0x4) at the sentinel node (+0xC), whose next/prev (+0xC, +0x10)
  * point back at the head and itself.
  */
-void cList_clear(void* self)
+void cList_clear(void* vself)
 {
+    cList* self = (cList*)vself;
     void* sentinel = (char*)self + 0xc;
-    *(void**)((char*)self + 0x4) = sentinel;
-    *(void**)((char*)self + 0xc) = self;
-    *(void**)((char*)self + 0x10) = sentinel;
-    *(void**)self = self;
+    self->mStart.mpNext = (cListNode*)sentinel;
+    *(void**)&self->mEnd = ((void*)self);
+    self->mEnd.mpNext = (cListNode*)sentinel;
+    *(void**)self = ((void*)self);
 }
 #endif
 

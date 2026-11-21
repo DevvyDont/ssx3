@@ -1007,9 +1007,10 @@ INCLUDE_ASM("ui/uistatestack", cUIThing_getEngine__FPv);
  *
  * @return the UI engine
  */
-int cUIThing_getEngine(void* self)
+int cUIThing_getEngine(void* vself)
 {
-    return *(int*)((char*)*(void**)((char*)*(void**)((char*)self + 0x5c) + 0xd0) + 0x10);
+    cUIThing* self = (cUIThing*)vself;
+    return *(int*)((char*)*(void**)((char*)self->mpScreen + 0xd0) + 0x10);
 }
 #endif
 

@@ -1241,8 +1241,9 @@ INCLUDE_ASM("main/gameload", cGame_getTransitionMan__FPvi);
  * @param i  the view (player) index, 0 or 1
  * @return the cTransitionMan
  */
-int cGame_getTransitionMan(void* self, int i)
+int cGame_getTransitionMan(void* vself, int i)
 {
+    cGame* self = (cGame*)vself;
     return *(int*)((char*)self + (i << 2) + 0x5C);
 }
 #endif
@@ -1256,8 +1257,9 @@ INCLUDE_ASM("main/gameload", cGame_getSplashManager__FPvi);
  * @param i  the view (player) index, 0 or 1
  * @return the cSplashManager
  */
-int cGame_getSplashManager(void* self, int i)
+int cGame_getSplashManager(void* vself, int i)
 {
+    cGame* self = (cGame*)vself;
     return *(int*)((char*)self + (i << 2) + 0x68);
 }
 #endif
@@ -1933,9 +1935,10 @@ INCLUDE_ASM("main/gameload", cGame_setPreloadState__FPvi);
  *
  * @param val  the state id to preload
  */
-void cGame_setPreloadState(void* self, int val)
+void cGame_setPreloadState(void* vself, int val)
 {
-    *(int*)((char*)self + 0x208) = val;
+    cGame* self = (cGame*)vself;
+    self->mPendingPreloadStateID = val;
 }
 #endif
 
@@ -2883,13 +2886,14 @@ INCLUDE_ASM("main/gameload", cPreStartScreen_cPreStartScreen__FPv);
  *
  * @return @p self
  */
-void* cPreStartScreen_cPreStartScreen(void* self)
+void* cPreStartScreen_cPreStartScreen(void* vself)
 {
+    cPreStartScreen* self = (cPreStartScreen*)vself;
     int zero = 0;
-    *(int*)((char*)self + 0x4) = zero;
+    *(int*)&self->progressivetimer = zero;
     *(int*)self = (int)(void*)cPreStartScreen_vtbl;
-    *(int*)((char*)self + 0x8) = zero;
-    return self;
+    self->nextscreen = (cInitLoadScreen*)zero;
+    return ((void*)self);
 }
 #endif
 

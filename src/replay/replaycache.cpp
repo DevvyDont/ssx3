@@ -541,9 +541,10 @@ INCLUDE_ASM("replay/replaycache", cReplay_stopAutoReplay__FPv);
  * InstantReplay and StartInstantReplay and, unless Loaded, restores the saved frame). The state is then set
  * to 13 either way, overriding the one cReplay_stopReplay chose.
  */
-void cReplay_stopAutoReplay(void* self)
+void cReplay_stopAutoReplay(void* vself)
 {
-    if (*(int*)((char*)self + 0x61C) != 0) {
+    cReplay* self = (cReplay*)vself;
+    if (self->AutoReplay != 0) {
         cReplay_stopReplay(self);
     }
     cReplay_setReplayState(self, 13);
@@ -1622,13 +1623,14 @@ INCLUDE_ASM("replay/replaycache", cReplay_writeCheckSumStart__FPv);
  *
  * @return the new WriteState (declared void*)
  */
-void* cReplay_writeCheckSumStart(void* self)
+void* cReplay_writeCheckSumStart(void* vself)
 {
+    cReplay* self = (cReplay*)vself;
     int zero = 0;
-    void* nextState = (char*)*(void**)((char*)self + 0x638) + 0x1;
-    *(int*)((char*)self + 0x644) = zero;
-    *(int*)((char*)self + 0x648) = zero;
-    *(int*)((char*)self + 0x638) = (int)nextState;
+    void* nextState = (char*)self->WriteState + 0x1;
+    self->WriteSrc = (char*)zero;
+    self->WriteSrcSize = zero;
+    self->WriteState = (int)nextState;
     return nextState;
 }
 #endif
@@ -2454,16 +2456,17 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_Stop__FPv);
 /**
  * Stops a spline channel: clears its data, owner, header, keys, key index, value and custom data (+0x8 .. +0x24).
  */
-void cScriptPlayerChannelSpline_Stop(void* self)
+void cScriptPlayerChannelSpline_Stop(void* vself)
 {
-    *(int*)((char*)self + 0x8) = 0;
-    *(int*)((char*)self + 0xc) = 0;
-    *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x14) = 0;
-    *(int*)((char*)self + 0x18) = 0;
-    *(int*)((char*)self + 0x1c) = 0;
-    *(int*)((char*)self + 0x20) = 0;
-    *(int*)((char*)self + 0x24) = 0;
+    cScriptPlayerChannelSpline* self = (cScriptPlayerChannelSpline*)vself;
+    self->mpData = 0;
+    self->mpOwner = 0;
+    self->mpHeader = 0;
+    self->mpCurrKey = 0;
+    self->mCurrKeyIndex = 0;
+    *(int*)&self->mCurrKeyValue = 0;
+    self->mpCurrKeyCustom = 0;
+    self->mpNextKey = 0;
 }
 #endif
 
@@ -4372,9 +4375,10 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_GetChannel__FPvi);
  * @param channelIndex  the channel index
  * @return the channel player (cScriptPlayerChannel*)
  */
-int cScriptPlayerEntity_GetChannel(void* self, int channelIndex)
+int cScriptPlayerEntity_GetChannel(void* vself, int channelIndex)
 {
-    return *(int*)((char*)*(void**)((char*)self + 0x24) + channelIndex * 4);
+    cScriptPlayerEntity* self = (cScriptPlayerEntity*)vself;
+    return *(int*)((char*)self->mpChannelPlayers + channelIndex * 4);
 }
 #endif
 
@@ -4433,9 +4437,10 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_GetScriptLength__FPv);
  *
  * @return the length in frames
  */
-int cScriptPlayerEntity_GetScriptLength(void* self)
+int cScriptPlayerEntity_GetScriptLength(void* vself)
 {
-    return *(int*)((char*)*(void**)((char*)self + 0x1c) + 0x4);
+    cScriptPlayerEntity* self = (cScriptPlayerEntity*)vself;
+    return *(int*)((char*)self->mpSystemHeader + 0x4);
 }
 #endif
 
@@ -4482,9 +4487,10 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_GetNumVariations__FPv);
  *
  * @return the variation count
  */
-int cScriptPlayerEntity_GetNumVariations(void* self)
+int cScriptPlayerEntity_GetNumVariations(void* vself)
 {
-    return *(int*)((char*)*(void**)((char*)self + 0x10) + 0x4);
+    cScriptPlayerEntity* self = (cScriptPlayerEntity*)vself;
+    return *(int*)((char*)self->mpBlockHeader + 0x4);
 }
 #endif
 
@@ -4556,9 +4562,10 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_GetType__FPv);
  *
  * @return the entity type
  */
-unsigned char cScriptPlayerEntity_GetType(void* self)
+unsigned char cScriptPlayerEntity_GetType(void* vself)
 {
-    return *(unsigned char*)((char*)*(void**)((char*)self + 0x1c) + 0x3);
+    cScriptPlayerEntity* self = (cScriptPlayerEntity*)vself;
+    return *(unsigned char*)((char*)self->mpSystemHeader + 0x3);
 }
 #endif
 
@@ -4828,9 +4835,10 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_SetPlaySpeed__FPvf);
  *
  * @param val  the new speed (1.0 = normal)
  */
-void cScriptPlayerMain_SetPlaySpeed(void* self, float val)
+void cScriptPlayerMain_SetPlaySpeed(void* vself, float val)
 {
-    *(float*)((char*)self + 0x24) = val;
+    cScriptPlayerMain* self = (cScriptPlayerMain*)vself;
+    self->mPlaySpeed = val;
 }
 #endif
 
@@ -4846,9 +4854,10 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_Play__FPv);
  *
  * @return cScriptPlayerMain_Play1's (meaningless) result
  */
-void* cScriptPlayerMain_Play(void* self)
+void* cScriptPlayerMain_Play(void* vself)
 {
-    return cScriptPlayerMain_Play1(self, *(int*)((char*)self + 0x1c));
+    cScriptPlayerMain* self = (cScriptPlayerMain*)vself;
+    return cScriptPlayerMain_Play1(self, self->mLoopScript);
 }
 #endif
 
@@ -4869,15 +4878,16 @@ void cScriptPlayerMain_Play1_impl(void* self, int a1) __asm__("cScriptPlayerMain
  *
  * @param loopScript  non-zero to loop the script
  */
-void cScriptPlayerMain_Play1_impl(void* self, int loopScript)
+void cScriptPlayerMain_Play1_impl(void* vself, int loopScript)
 {
-    if (*(int*)((char*)self + 0x20) != 0) {
-        if (*(int*)((char*)self + 0x3c) != 0) {
-            *(int*)((char*)self + 0x40) = 0;
+    cScriptPlayerMain* self = (cScriptPlayerMain*)vself;
+    if (self->mPlayState != 0) {
+        if (self->mEntityUpdateInProgress != 0) {
+            self->mDoStopInEntityUpdate = 0;
         }
     } else {
-        *(int*)((char*)self + 0x1c) = loopScript;
-        *(int*)((char*)self + 0x20) = 1;
+        self->mLoopScript = loopScript;
+        self->mPlayState = 1;
     }
 }
 #endif
@@ -5138,10 +5148,11 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_SetUserData__FPvi);
  * @param userData  the new user data
  * @return the old mpUserData
  */
-int cScriptPlayerMain_SetUserData(void* self, int userData)
+int cScriptPlayerMain_SetUserData(void* vself, int userData)
 {
-    int old = *(int*)((char*)self + 0xc);
-    *(int*)((char*)self + 0xc) = userData;
+    cScriptPlayerMain* self = (cScriptPlayerMain*)vself;
+    int old = (int)self->mpUserData;
+    self->mpUserData = (void*)userData;
     return old;
 }
 #endif
@@ -5569,9 +5580,10 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_GetCustom__FPv);
  *
  * @return the custom data (a void* in On Tour, typed int here)
  */
-int cScriptPlayerChannelSpline_GetCustom(void* self)
+int cScriptPlayerChannelSpline_GetCustom(void* vself)
 {
-    return *(int*)((char*)self + 0x20);
+    cScriptPlayerChannelSpline* self = (cScriptPlayerChannelSpline*)vself;
+    return (int)self->mpCurrKeyCustom;
 }
 #endif
 
@@ -5611,9 +5623,10 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_GetOwner__FPv);
  *
  * @return the owning entity (On Tour: cScriptPlayerEntity*), typed int here
  */
-int cScriptPlayerChannelSpline_GetOwner(void* self)
+int cScriptPlayerChannelSpline_GetOwner(void* vself)
 {
-    return *(int*)((char*)self + 0xC);
+    cScriptPlayerChannelSpline* self = (cScriptPlayerChannelSpline*)vself;
+    return (int)self->mpOwner;
 }
 #endif
 
@@ -5625,9 +5638,10 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_IsPlaying__FPv);
  *
  * @return 1 if the word at +0x8 is nonzero, otherwise 0
  */
-int cScriptPlayerChannelSpline_IsPlaying(void* self)
+int cScriptPlayerChannelSpline_IsPlaying(void* vself)
 {
-    return (*(int*)((char*)self + 0x8) != 0);
+    cScriptPlayerChannelSpline* self = (cScriptPlayerChannelSpline*)vself;
+    return ((int)self->mpData != 0);
 }
 #endif
 
@@ -5653,9 +5667,10 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_GetCustom__FPv);
  *
  * @return the custom data (a void* in On Tour, typed int here)
  */
-int cScriptPlayerChannelBlock_GetCustom(void* self)
+int cScriptPlayerChannelBlock_GetCustom(void* vself)
 {
-    return *(int*)((char*)self + 0x24);
+    cScriptPlayerChannelBlock* self = (cScriptPlayerChannelBlock*)vself;
+    return (int)self->mpActiveBlockList;
 }
 #endif
 
@@ -5681,9 +5696,10 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_GetOwner__FPv);
  *
  * @return the owning entity (On Tour: cScriptPlayerEntity*), typed int here
  */
-int cScriptPlayerChannelBlock_GetOwner(void* self)
+int cScriptPlayerChannelBlock_GetOwner(void* vself)
 {
-    return *(int*)((char*)self + 0xC);
+    cScriptPlayerChannelBlock* self = (cScriptPlayerChannelBlock*)vself;
+    return (int)self->mpOwner;
 }
 #endif
 
@@ -5695,9 +5711,10 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_IsPlaying__FPv);
  *
  * @return 1 if the word at +0x8 is nonzero, otherwise 0
  */
-int cScriptPlayerChannelBlock_IsPlaying(void* self)
+int cScriptPlayerChannelBlock_IsPlaying(void* vself)
 {
-    return (*(int*)((char*)self + 0x8) != 0);
+    cScriptPlayerChannelBlock* self = (cScriptPlayerChannelBlock*)vself;
+    return ((int)self->mpData != 0);
 }
 #endif
 
@@ -5723,9 +5740,10 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_GetCustom__FPv);
  *
  * @return the custom data (a void* in On Tour, typed int here)
  */
-int cScriptPlayerChannelEvent_GetCustom(void* self)
+int cScriptPlayerChannelEvent_GetCustom(void* vself)
 {
-    return *(int*)((char*)self + 0x1C);
+    cScriptPlayerChannelEvent* self = (cScriptPlayerChannelEvent*)vself;
+    return (int)self->mpEventArray;
 }
 #endif
 
@@ -5751,9 +5769,10 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_GetOwner__FPv);
  *
  * @return the owning entity (On Tour: cScriptPlayerEntity*), typed int here
  */
-int cScriptPlayerChannelEvent_GetOwner(void* self)
+int cScriptPlayerChannelEvent_GetOwner(void* vself)
 {
-    return *(int*)((char*)self + 0xC);
+    cScriptPlayerChannelEvent* self = (cScriptPlayerChannelEvent*)vself;
+    return (int)self->mpOwner;
 }
 #endif
 
@@ -5765,9 +5784,10 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_IsPlaying__FPv);
  *
  * @return 1 if the word at +0x8 is nonzero, otherwise 0
  */
-int cScriptPlayerChannelEvent_IsPlaying(void* self)
+int cScriptPlayerChannelEvent_IsPlaying(void* vself)
 {
-    return (*(int*)((char*)self + 0x8) != 0);
+    cScriptPlayerChannelEvent* self = (cScriptPlayerChannelEvent*)vself;
+    return ((int)self->mpData != 0);
 }
 #endif
 
@@ -5793,9 +5813,10 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_GetCustom__FPv);
  *
  * @return the custom data (a void* in On Tour, typed int here)
  */
-int cScriptPlayerChannelObject_GetCustom(void* self)
+int cScriptPlayerChannelObject_GetCustom(void* vself)
 {
-    return *(int*)((char*)self + 0x20);
+    cScriptPlayerChannelObject* self = (cScriptPlayerChannelObject*)vself;
+    return (int)self->mpActiveObjectList;
 }
 #endif
 
@@ -5821,9 +5842,10 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_GetOwner__FPv);
  *
  * @return the owning entity (On Tour: cScriptPlayerEntity*), typed int here
  */
-int cScriptPlayerChannelObject_GetOwner(void* self)
+int cScriptPlayerChannelObject_GetOwner(void* vself)
 {
-    return *(int*)((char*)self + 0xC);
+    cScriptPlayerChannelObject* self = (cScriptPlayerChannelObject*)vself;
+    return (int)self->mpOwner;
 }
 #endif
 
@@ -5835,9 +5857,10 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_IsPlaying__FPv);
  *
  * @return 1 if the word at +0x8 is nonzero, otherwise 0
  */
-int cScriptPlayerChannelObject_IsPlaying(void* self)
+int cScriptPlayerChannelObject_IsPlaying(void* vself)
 {
-    return (*(int*)((char*)self + 0x8) != 0);
+    cScriptPlayerChannelObject* self = (cScriptPlayerChannelObject*)vself;
+    return ((int)self->mpData != 0);
 }
 #endif
 

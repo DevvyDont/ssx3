@@ -441,9 +441,10 @@ INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_setNumHelpOptions__FP
  *
  * @param numOptions  the number of rows set with cFEStateNetHelpPopup_setOption (up to 7)
  */
-void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int numOptions)
+void cFEStateNetHelpPopup_setNumHelpOptions(void* vself, int numOptions)
 {
-    *(int*)((char*)self + 0x48) = numOptions;
+    cFEStateNetHelpPopup* self = (cFEStateNetHelpPopup*)vself;
+    self->miNumOptions = numOptions;
 }
 #endif
 
@@ -460,8 +461,9 @@ INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_setDescription__FPvii
  * @param descriptionNum  the line, 0-2
  * @param description  the text id (hash)
  */
-void cFEStateNetHelpPopup_setDescription(void* self, int descriptionNum, int description)
+void cFEStateNetHelpPopup_setDescription(void* vself, int descriptionNum, int description)
 {
+    cFEStateNetHelpPopup* self = (cFEStateNetHelpPopup*)vself;
     *(int*)((char*)self + (descriptionNum << 2) + 0x58) = description;
 }
 #endif

@@ -15,12 +15,13 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern const char str_Frame_Block[];
 
 // same body as cReplayFramePtr_setBlock, inlined here
-static inline void cReplayFramePtr_setBlockInl(void* self, char* buf, int size)
+static inline void cReplayFramePtr_setBlockInl(void* vself, char* buf, int size)
 {
-    *(char**)((char*)self + 0x4) = buf;
-    *(char**)((char*)self + 0x8) = buf + size;
-    *(char**)((char*)self + 0xc) = buf;
-    *(int*)((char*)self + 0x10) = size;
+    cReplayFramePtr* self = (cReplayFramePtr*)vself;
+    self->Block = buf;
+    self->WriteData = buf + size;
+    self->ReadData = buf;
+    self->Size = size;
 }
 
 /**
@@ -98,11 +99,12 @@ INCLUDE_ASM("replay/frameptr", cReplayFramePtr_writeRewind__FPv);
  *
  * @return the block start (Block)
  */
-int cReplayFramePtr_writeRewind(void* self)
+int cReplayFramePtr_writeRewind(void* vself)
 {
-    int block = *(int*)((char*)self + 0x4);
-    *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x8) = block;
+    cReplayFramePtr* self = (cReplayFramePtr*)vself;
+    int block = (int)self->Block;
+    self->Size = 0;
+    self->WriteData = (char*)block;
     return block;
 }
 #endif
@@ -875,9 +877,10 @@ INCLUDE_ASM("replay/frameptr", cReplay_setReplayState__FPvi);
  *
  * @param val  the new state (On Tour tReplayState)
  */
-void cReplay_setReplayState(void* self, int val)
+void cReplay_setReplayState(void* vself, int val)
 {
-    *(int*)((char*)self + 0x0) = val;
+    cReplay* self = (cReplay*)vself;
+    self->State = val;
 }
 #endif
 
@@ -1110,9 +1113,10 @@ INCLUDE_ASM("replay/frameptr", cReplay_setReplayPadNum__FPvi);
  *
  * @param val  the pad number
  */
-void cReplay_setReplayPadNum(void* self, int val)
+void cReplay_setReplayPadNum(void* vself, int val)
 {
-    *(int*)((char*)self + 0x28) = val;
+    cReplay* self = (cReplay*)vself;
+    self->PadNum = val;
 }
 #endif
 

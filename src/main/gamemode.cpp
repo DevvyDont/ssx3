@@ -301,10 +301,11 @@ INCLUDE_ASM("main/gamemode", cGameModeMan_restorePreviousHeat__FPv);
  *
  * @return the restored heat number
  */
-int cGameModeMan_restorePreviousHeat(void* self)
+int cGameModeMan_restorePreviousHeat(void* vself)
 {
-    int restoreHeat = *(int*)((char*)self + 0x74);
-    *(int*)((char*)self + 0x70) = restoreHeat;
+    cGameModeMan* self = (cGameModeMan*)vself;
+    int restoreHeat = self->iRestoreHeat;
+    self->iNextHeat = restoreHeat;
     return restoreHeat;
 }
 #endif

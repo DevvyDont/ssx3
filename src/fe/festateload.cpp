@@ -53,8 +53,9 @@ INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onWidgetCreate__FPv);
  *
  * @return cUITemplate_MAP_onWidgetCreate()'s return value (it returns nothing meaningful)
  */
-void* cFEStateEventSelect_onWidgetCreate(void* self)
+void* cFEStateEventSelect_onWidgetCreate(void* vself)
 {
+    cFEStateEventSelect* self = (cFEStateEventSelect*)vself;
     return cUITemplate_MAP_onWidgetCreate((char*)self + 0x48);
 }
 #endif
@@ -69,8 +70,9 @@ INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onGainTransition__FPv);
  *
  * @return cUITemplate_MAP_onGainTransition()'s result
  */
-void* cFEStateEventSelect_onGainTransition(void* self)
+void* cFEStateEventSelect_onGainTransition(void* vself)
 {
+    cFEStateEventSelect* self = (cFEStateEventSelect*)vself;
     return cUITemplate_MAP_onGainTransition((char*)self + 0x48);
 }
 #endif

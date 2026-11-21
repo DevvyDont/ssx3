@@ -1,4 +1,5 @@
 #include "common.h"
+#include "intersect/worldline.h"
 #include "intersect/bxnash.h"
 #include "intersect/overlaplist.h"
 #include "object/animteeternode.h"
@@ -223,11 +224,12 @@ INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_UnTransform__FPv);
  *
  * @return the original tree pointer (declared int; On Tour returns void)
  */
-int cWorldSphTree_UnTransform(void* self)
+int cWorldSphTree_UnTransform(void* vself)
 {
-    int original = *(int*)((char*)self + 0x64);
-    *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x60) = original;
+    cWorldSphTree* self = (cWorldSphTree*)vself;
+    int original = (int)self->origSt;
+    self->isTransformed = 0;
+    self->st = (bxSphereTree*)original;
     return original;
 }
 #endif
@@ -5103,9 +5105,10 @@ INCLUDE_ASM("intersect/worldsphtree", cWorldLine_GetIdealParam__FPv);
  *
  * @return the radius stored at offset 0xA0 by the line's constructor
  */
-float cWorldLine_GetIdealParam(void* self)
+float cWorldLine_GetIdealParam(void* vself)
 {
-    return *(float*)((char*)self + 0xA0);
+    cWorldLine* self = (cWorldLine*)vself;
+    return self->idealParam;
 }
 #endif
 
@@ -5672,9 +5675,10 @@ INCLUDE_ASM("intersect/worldsphtree", cBoostNode__cBoostNode__FPv);
  *
  * @return cInstanceNode__cInstanceNode()'s result (it returns nothing meaningful)
  */
-void* cBoostNode__cBoostNode(void* self)
+void* cBoostNode__cBoostNode(void* vself)
 {
-    *(int*)((char*)self + 0xc) = (int)(void*)cBoostNode_vtbl;
+    cBoostNode* self = (cBoostNode*)vself;
+    self->mVtbl = (void**)((int)(void*)cBoostNode_vtbl);
     return cInstanceNode__cInstanceNode(self);
 }
 #endif

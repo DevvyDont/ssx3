@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/loadtimer.h"
 #include "bx/execman.h"
 
 //100%
@@ -469,13 +470,14 @@ INCLUDE_ASM("bx/appman", cExecutionMan_checkHalt__FPvi);
  * @param flag  nonzero to also call the virtual halt (cAppMan_checkHalt() passes 1, cPS2ExecutionMan_halt() passes 0)
  * @return no meaningful value; the body sets no return value
  */
-int cExecutionMan_checkHalt(void* self, int flag)
+int cExecutionMan_checkHalt(void* vself, int flag)
 {
+    cExecutionMan* self = (cExecutionMan*)vself;
     void (*fn)(void*) = *(void (**)(void*))self;
     if (fn != 0) {
-        fn(*(void**)((char*)self + 0x4));
+        fn(self->HaltData);
         if (flag != 0) {
-            void* vt = *(void**)((char*)self + 0x8);
+            void* vt = self->mVtbl;
             short off = *(short*)((char*)vt + 0x70);
             void (*fn2)(void*) = *(void (**)(void*))((char*)vt + 0x74);
             fn2((char*)self + off);
@@ -530,14 +532,15 @@ INCLUDE_ASM("bx/appman", cLoadTimer_startload__FPvf);
  *
  * @param rateScale  the estimated load time; cLoadTimer_setnextpercent scales the approach rate by it
  */
-void cLoadTimer_startload(void* self, float rateScale)
+void cLoadTimer_startload(void* vself, float rateScale)
 {
-    *(float*)((char*)self + 0xC) = rateScale;
-    *(int*)((char*)self + 0x0) = 0;
-    *(int*)((char*)self + 0x8) = 0;
-    *(int*)((char*)self + 0x14) = 0;
-    *(int*)((char*)self + 0x18) = 0;
-    *(int*)((char*)self + 0x1C) = 0;
+    cLoadTimer* self = (cLoadTimer*)vself;
+    self->loadtime = rateScale;
+    *(int*)&self->loadpercent = 0;
+    *(int*)&self->target = 0;
+    *(int*)&self->offset = 0;
+    *(int*)&self->scale = 0;
+    *(int*)&self->decay = 0;
 }
 #endif
 
@@ -555,23 +558,24 @@ INCLUDE_ASM("bx/appman", cLoadTimer_setnextpercent__FPvf);
  *
  * @param newValue  the new target percentage
  */
-void cLoadTimer_setnextpercent(void* self, float newValue)
+void cLoadTimer_setnextpercent(void* vself, float newValue)
 {
-    float old8 = *(float*)((char*)self + 0x8);
-    float raw = *(float*)((char*)self + 0xC);
+    cLoadTimer* self = (cLoadTimer*)vself;
+    float old8 = self->target;
+    float raw = self->loadtime;
     float diff = newValue - old8;
-    float x0 = *(float*)((char*)self + 0x0);
+    float x0 = self->loadpercent;
     float rate = raw * diff;
     int now = *(int*)((char*)cAppMan_TheAppMan + 0x1C);
     x0 = x0 - newValue;
     rate = rate * 0.01f;
-    *(float*)((char*)self + 0x4) = old8;
-    *(float*)((char*)self + 0x18) = x0;
-    *(int*)((char*)self + 0x10) = now;
+    self->lasttarget = old8;
+    self->scale = x0;
+    self->targettick = now;
     float result = -1.5f / rate;
-    *(float*)((char*)self + 0x14) = newValue;
-    *(float*)((char*)self + 0x8) = newValue;
-    *(float*)((char*)self + 0x1C) = result;
+    self->offset = newValue;
+    self->target = newValue;
+    self->decay = result;
 }
 #endif
 
@@ -587,11 +591,12 @@ INCLUDE_ASM("bx/appman", cLoadTimer_update__FPv);
  * the app manager's Tick (+0x1C) and TimerPeriod (+0x14); expf is the exponential. cAppMan_mainLoop calls it
  * each frame while a module is loading.
  */
-void cLoadTimer_update(void* self)
+void cLoadTimer_update(void* vself)
 {
-    int delta = *(int*)((char*)cAppMan_TheAppMan + 0x1C) - *(int*)((char*)self + 0x10);
-    float ret = expf((float)delta * *(float*)((char*)cAppMan_TheAppMan + 0x14) * *(float*)((char*)self + 0x1C));
-    *(float*)((char*)self + 0x0) = *(float*)((char*)self + 0x14) + *(float*)((char*)self + 0x18) * ret;
+    cLoadTimer* self = (cLoadTimer*)vself;
+    int delta = *(int*)((char*)cAppMan_TheAppMan + 0x1C) - self->targettick;
+    float ret = expf((float)delta * *(float*)((char*)cAppMan_TheAppMan + 0x14) * self->decay);
+    self->loadpercent = self->offset + self->scale * ret;
 }
 #endif
 
@@ -603,11 +608,12 @@ INCLUDE_ASM("bx/appman", cLoadTimer_endload__FPv);
  *
  * cAppMan_mainLoop calls it once the loading module reports it is done.
  */
-void cLoadTimer_endload(void* self)
+void cLoadTimer_endload(void* vself)
 {
-    *(float*)((char*)self + 0x14) = 100.0f;
-    *(int*)((char*)self + 0x18) = 0;
-    *(float*)((char*)self + 0x0) = 100.0f;
+    cLoadTimer* self = (cLoadTimer*)vself;
+    self->offset = 100.0f;
+    *(int*)&self->scale = 0;
+    self->loadpercent = 100.0f;
 }
 #endif
 

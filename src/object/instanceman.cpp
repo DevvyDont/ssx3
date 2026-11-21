@@ -986,9 +986,10 @@ INCLUDE_ASM("object/instanceman", cMeshAnimNode__cMeshAnimNode__FPv);
  *
  * @return no meaningful value (cInstanceNode__cInstanceNode returns nothing)
  */
-void* cMeshAnimNode__cMeshAnimNode(void* self)
+void* cMeshAnimNode__cMeshAnimNode(void* vself)
 {
-    *(int*)((char*)self + 0xc) = (int)(void*)cMeshAnimNode_vtbl;
+    cMeshAnimNode* self = (cMeshAnimNode*)vself;
+    self->mVtbl = (void**)((int)(void*)cMeshAnimNode_vtbl);
     return cInstanceNode__cInstanceNode(self);
 }
 #endif

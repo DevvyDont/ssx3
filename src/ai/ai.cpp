@@ -5847,14 +5847,15 @@ INCLUDE_ASM("ai/ai", cBoardPressControl_gainFocus__FPv);
  * Sets State to 0 (BP_Into), clears BalanceSec, OffBalanceSec, PressTimer and IsOllieHeld, and clears the
  * rider's board-press jump latch (rider + 0x360).
  */
-void cBoardPressControl_gainFocus(void* self)
+void cBoardPressControl_gainFocus(void* vself)
 {
+    cBoardPressControl* self = (cBoardPressControl*)vself;
     *(int*)self = 0;
-    *(int*)((char*)*(void**)((char*)self + 0x14) + 0x360) = 0;
-    *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x8) = 0;
-    *(int*)((char*)self + 0xc) = 0;
-    *(int*)((char*)self + 0x10) = 0;
+    *(int*)((char*)self->mRider + 0x360) = 0;
+    *(int*)&self->BalanceSec = 0;
+    *(int*)&self->OffBalanceSec = 0;
+    *(int*)&self->PressTimer = 0;
+    self->IsOllieHeld = 0;
 }
 #endif
 

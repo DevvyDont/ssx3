@@ -203,9 +203,10 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_Init__FPv);
 /**
  * Clears the engine's NIS skip lockout, mNumFramesNoSkip (+0x554). cGame_gainFocus calls it.
  */
-void cSSXScriptEngine_Init(void* self)
+void cSSXScriptEngine_Init(void* vself)
 {
-    *(int*)((char*)self + 0x554) = 0;
+    cSSXScriptEngine* self = (cSSXScriptEngine*)vself;
+    self->mNumFramesNoSkip = 0;
 }
 #endif
 
@@ -218,9 +219,10 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_DeInit__FPv);
  * Stores 0 in mNumFramesNoSkip (+0x554), exactly what cSSXScriptEngine_Init (On Tour Init, called from cGame_gainFocus) does
  * too. cGame_loseFocus calls it on ScriptEngine.
  */
-void cSSXScriptEngine_DeInit(void* self)
+void cSSXScriptEngine_DeInit(void* vself)
 {
-    *(int*)((char*)self + 0x554) = 0;
+    cSSXScriptEngine* self = (cSSXScriptEngine*)vself;
+    self->mNumFramesNoSkip = 0;
 }
 #endif
 
@@ -373,8 +375,9 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_Render__FPv);
  *
  * @return cVidEngine_RenderVideo's return register
  */
-void* cSSXScriptEngine_Render(void* self)
+void* cSSXScriptEngine_Render(void* vself)
 {
+    cSSXScriptEngine* self = (cSSXScriptEngine*)vself;
     return cVidEngine_RenderVideo((char*)self + 0x500);
 }
 #endif
@@ -630,9 +633,10 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_DisallowNISListSkip__FP
  *
  * @param val  the number of frames
  */
-void cSSXScriptEngine_DisallowNISListSkip(void* self, int val)
+void cSSXScriptEngine_DisallowNISListSkip(void* vself, int val)
 {
-    *(int*)((char*)self + 0x554) = val;
+    cSSXScriptEngine* self = (cSSXScriptEngine*)vself;
+    self->mNumFramesNoSkip = val;
 }
 #endif
 
@@ -1773,8 +1777,9 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetAnimationBankInfo__F
  *
  * @return the bank's tScriptAnimBankInfo record, or 0 if none is linked
  */
-void* cSSXScriptEngine_GetAnimationBankInfo(void* self)
+void* cSSXScriptEngine_GetAnimationBankInfo(void* vself)
 {
+    cSSXScriptEngine* self = (cSSXScriptEngine*)vself;
     return cScriptAnimBankManager_GetBankInfo((char*)self + 0xa28);
 }
 #endif
@@ -1792,8 +1797,9 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetSoundBankInfo__FPv);
  *
  * @return the bank's tScriptSoundBankInfo record
  */
-void* cSSXScriptEngine_GetSoundBankInfo(void* self)
+void* cSSXScriptEngine_GetSoundBankInfo(void* vself)
 {
+    cSSXScriptEngine* self = (cSSXScriptEngine*)vself;
     return cScriptSoundBankManager_GetBankInfo((char*)self + 0xa38);
 }
 #endif
@@ -3342,10 +3348,11 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_AllocScriptSetupInfo__F
  *
  * @return the record
  */
-void* cSSXScriptEngine_AllocScriptSetupInfo(void* self)
+void* cSSXScriptEngine_AllocScriptSetupInfo(void* vself)
 {
-    void* head = *(void**)((char*)self + 0x548);
-    *(void**)((char*)self + 0x548) = *(void**)((char*)head + 0x10);
+    cSSXScriptEngine* self = (cSSXScriptEngine*)vself;
+    void* head = self->mpSetupInfoUnused;
+    self->mpSetupInfoUnused = (tSSXScriptSetupInfoLinked*)(*(void**)((char*)head + 0x10));
     *(void**)((char*)head + 0x10) = 0;
     return head;
 }
@@ -3359,14 +3366,15 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ReleaseScriptSetupInfo_
  *
  * @param setupInfo  the record
  */
-void cSSXScriptEngine_ReleaseScriptSetupInfo(void* self, void* setupInfo)
+void cSSXScriptEngine_ReleaseScriptSetupInfo(void* vself, void* setupInfo)
 {
-    *(void**)((char*)setupInfo + 0x10) = *(void**)((char*)self + 0x548);
+    cSSXScriptEngine* self = (cSSXScriptEngine*)vself;
+    *(void**)((char*)setupInfo + 0x10) = (void*)self->mpSetupInfoUnused;
     *(int*)setupInfo = -1;
     *(int*)((char*)setupInfo + 0x4) = -1;
     *(int*)((char*)setupInfo + 0x8) = -1;
     *(int*)((char*)setupInfo + 0xc) = -1;
-    *(void**)((char*)self + 0x548) = setupInfo;
+    self->mpSetupInfoUnused = (tSSXScriptSetupInfoLinked*)setupInfo;
 }
 #endif
 
@@ -4514,8 +4522,9 @@ int cScriptDatabaseObject_IsObjInUseByPlayer_impl(void* self, int idx, int val) 
  * @param val  the player ID
  * @return 1 when one is, else 0
  */
-int cScriptDatabaseObject_IsObjInUseByPlayer_impl(void* self, int idx, int val)
+int cScriptDatabaseObject_IsObjInUseByPlayer_impl(void* vself, int idx, int val)
 {
+    cScriptDatabaseObject* self = (cScriptDatabaseObject*)vself;
     cScriptOwnerD210* obj = *(cScriptOwnerD210**)((char*)self + (idx << 2));
     int i = 0;
     int n = obj->GetNumScriptEntities();
@@ -4604,8 +4613,9 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_GetObject__FPvi);
  * @param i  the object ID
  * @return the object, or 0
  */
-int cScriptDatabaseObject_GetObject(void* self, int i)
+int cScriptDatabaseObject_GetObject(void* vself, int i)
 {
+    cScriptDatabaseObject* self = (cScriptDatabaseObject*)vself;
     return *(int*)((char*)self + (i << 2));
 }
 #endif
@@ -4902,9 +4912,10 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_SetCameraManager__FPvi)
  *
  * @param val  the camera manager, or 0
  */
-void cScriptObjCamera_SetCameraManager(void* self, int val)
+void cScriptObjCamera_SetCameraManager(void* vself, int val)
 {
-    *(int*)((char*)self + 0x10) = val;
+    cScriptObjCamera* self = (cScriptObjCamera*)vself;
+    self->mpCameraManager = (cScriptObjCameraManager*)val;
 }
 #endif
 
@@ -4978,9 +4989,10 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_SetCameraWeight__FPvf);
  *
  * @param val  the weight (0-1)
  */
-void cScriptObjCamera_SetCameraWeight(void* self, float val)
+void cScriptObjCamera_SetCameraWeight(void* vself, float val)
 {
-    *(float*)((char*)self + 0x18) = val;
+    cScriptObjCamera* self = (cScriptObjCamera*)vself;
+    self->mWeight = val;
 }
 #endif
 
@@ -5825,10 +5837,11 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjRider_ScriptAnimIDToGameAnimIn
  * @param gameAnimIndex  receives the game animation index (int)
  * @param gameAnimBankId  receives the anim bank number (int)
  */
-void cScriptObjRider_ScriptAnimIDToGameAnimInfo(void* self, int scriptAnimId, void* gameAnimIndex, void* gameAnimBankId)
+void cScriptObjRider_ScriptAnimIDToGameAnimInfo(void* vself, int scriptAnimId, void* gameAnimIndex, void* gameAnimBankId)
 {
-    *(int*)gameAnimBankId = *(int*)((char*)*(void**)((char*)self + 0x1c) + 0x4);
-    *(int*)gameAnimIndex = (*(int**)((char*)*(void**)((char*)self + 0x1c) + 0x10))[scriptAnimId];
+    cScriptObjRider* self = (cScriptObjRider*)vself;
+    *(int*)gameAnimBankId = *(int*)((char*)self->mpAnimBankInfo + 0x4);
+    *(int*)gameAnimIndex = (*(int**)((char*)self->mpAnimBankInfo + 0x10))[scriptAnimId];
 }
 #endif
 
@@ -5843,9 +5856,10 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjRider_ScriptSoundIDToGameSound
  * @param gameSoundIndex  receives the game sound index (int)
  * @param gameSoundBankId  receives the sound bank number (int)
  */
-void cScriptObjRider_ScriptSoundIDToGameSoundInfo(void* self, int scriptSoundId, void* gameSoundIndex, void* gameSoundBankId)
+void cScriptObjRider_ScriptSoundIDToGameSoundInfo(void* vself, int scriptSoundId, void* gameSoundIndex, void* gameSoundBankId)
 {
-    *(int*)gameSoundBankId = *(int*)((char*)*(void**)((char*)self + 0x20) + 0x4);
+    cScriptObjRider* self = (cScriptObjRider*)vself;
+    *(int*)gameSoundBankId = *(int*)((char*)self->mpSoundBankInfo + 0x4);
     *(int*)gameSoundIndex = scriptSoundId;
 }
 #endif
@@ -6424,9 +6438,10 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjEvent_ScriptSoundIDToGameSound
  * @param gameSoundIndex  receives the game sound index (int)
  * @param gameSoundBankId  receives the sound bank number (int)
  */
-void cScriptObjEvent_ScriptSoundIDToGameSoundInfo(void* self, int scriptSoundId, void* gameSoundIndex, void* gameSoundBankId)
+void cScriptObjEvent_ScriptSoundIDToGameSoundInfo(void* vself, int scriptSoundId, void* gameSoundIndex, void* gameSoundBankId)
 {
-    *(int*)gameSoundBankId = *(int*)((char*)*(void**)((char*)self + 0xf8) + 0x4);
+    cScriptObjEvent* self = (cScriptObjEvent*)vself;
+    *(int*)gameSoundBankId = *(int*)((char*)self->mpSoundBankInfo + 0x4);
     *(int*)gameSoundIndex = scriptSoundId;
 }
 #endif
@@ -6500,9 +6515,10 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_SetViewIndex__FP
  *
  * @param val  the view index
  */
-void cScriptObjCameraManager_SetViewIndex(void* self, int val)
+void cScriptObjCameraManager_SetViewIndex(void* vself, int val)
 {
-    *(int*)((char*)self + 0xF8) = val;
+    cScriptObjCameraManager* self = (cScriptObjCameraManager*)vself;
+    self->mViewIndex = val;
 }
 #endif
 

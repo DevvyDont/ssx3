@@ -4819,8 +4819,9 @@ void cSSXAudio_RiderCollision_8488(void* self, sSs8488Rider* a, sSs8488Rider* b)
  * @param rider  the rider whose position the sound follows
  * @param opponent  the other rider
  */
-void cSSXAudio_RiderCollision_8488(void* self, sSs8488Rider* rider, sSs8488Rider* opponent)
+void cSSXAudio_RiderCollision_8488(void* vself, sSs8488Rider* rider, sSs8488Rider* opponent)
 {
+    cSSXAudio* self = (cSSXAudio*)vself;
     if (cSSXAudio_CameraInRange(self, rider->getPosition(), 100.0f) < 0) return;
     if (cSSXAudio_InCameraView_8488(self, rider->getPosition(), 100.0f) == 0) return;
     bool okA = *(int*)((char*)rider + 0x874) && rider->f87C;
@@ -4832,7 +4833,7 @@ void cSSXAudio_RiderCollision_8488(void* self, sSs8488Rider* rider, sSs8488Rider
     sVec4_8488 sum = vu0Add_8488(*rider->getVelocity(), *opponent->getVelocity());
     int volume = (int)func_00290C10(1, (float)(int)vu0Length_8488(sum));
     int handle = snd8488Add(self, rider, 0, 54, volume);
-    cSSXAudio_PlayHistoryAdd((cSSXAudio*)self, (void*)7, handle, *(volatile int*)(**(char***)((char*)self + 0x118) + 0x260) + 50, 0, 0);
+    cSSXAudio_PlayHistoryAdd((cSSXAudio*)self, (void*)7, handle, *(volatile int*)(**(char***)&self->MusicSys + 0x260) + 50, 0, 0);
 }
 #endif
 
@@ -7689,9 +7690,10 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_SetBigChallengeStarting__FPv);
  *
  * The lodge overlay (fe/ovstateenterlodge.cpp) calls it when a big challenge is being started; cSSXAudio_BigChallengeBegin clears it.
  */
-void cSSXAudio_SetBigChallengeStarting(void* self)
+void cSSXAudio_SetBigChallengeStarting(void* vself)
 {
-    *(int*)((char*)self + 0x5FD8) = 1;
+    cSSXAudio* self = (cSSXAudio*)vself;
+    self->mBigChallengeStarting = 1;
 }
 #endif
 

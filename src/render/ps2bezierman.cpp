@@ -28,14 +28,15 @@ struct sBezSlot_8AE0 {
  *
  * @return @p self
  */
-void* cPS2BezierMan_cPS2BezierMan(void* self)
+void* cPS2BezierMan_cPS2BezierMan(void* vself)
 {
+    cPS2BezierMan* self = (cPS2BezierMan*)vself;
     cBezierMan_cBezierMan_r(self);
-    *(void**)((char*)self + 0x4) = cPS2BezierMan_vtbl;
+    self->mVtbl = (void**)cPS2BezierMan_vtbl;
     func_00372B30((char*)self + 0x10);
     new ((char*)self + 0x8) sBezSlot_8AE0[2];
     cPS2BezierMan_Init(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 

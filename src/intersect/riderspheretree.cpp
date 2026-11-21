@@ -4352,11 +4352,12 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldRider_UnTransform__FPv);
  *
  * @return the original tree pointer (declared int; On Tour returns void)
  */
-int cWorldRider_UnTransform(void* self)
+int cWorldRider_UnTransform(void* vself)
 {
-    int origTree = *(int*)((char*)self + 0x64);
-    *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x60) = origTree;
+    cWorldRider* self = (cWorldRider*)vself;
+    int origTree = (int)self->origSt;
+    self->isTransformed = 0;
+    self->st = (cRiderSphereTree*)origTree;
     return origTree;
 }
 #endif

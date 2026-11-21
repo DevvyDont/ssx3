@@ -3949,9 +3949,10 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetCurrentSoundMode__FPv);
  *
  * @return the options' sound mode
  */
-void* cSSXAudio_GetCurrentSoundMode(void* self)
+void* cSSXAudio_GetCurrentSoundMode(void* vself)
 {
-    return cSSXAudio_AudioModeToBEAudioMode((cSSXAudio*)self, *(int*)((char*)self + 0x62b0));
+    cSSXAudio* self = (cSSXAudio*)vself;
+    return cSSXAudio_AudioModeToBEAudioMode((cSSXAudio*)self, self->mAudioMode);
 }
 #endif
 
@@ -3965,10 +3966,11 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_PlayIntroMovieWithDJ__FPv);
  *
  * @return the previous flag
  */
-int cSSXAudio_PlayIntroMovieWithDJ(void* self)
+int cSSXAudio_PlayIntroMovieWithDJ(void* vself)
 {
-    int old = *(int*)((char*)self + 0x6c88);
-    *(int*)((char*)self + 0x6c88) = 0;
+    cSSXAudio* self = (cSSXAudio*)vself;
+    int old = self->mPlayIntroMovieWithDJ;
+    self->mPlayIntroMovieWithDJ = 0;
     return old;
 }
 #endif

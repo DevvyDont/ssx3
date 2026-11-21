@@ -258,9 +258,10 @@ INCLUDE_ASM("world/worldview", cWorldView_getNumHull__FPv);
  *
  * @return the hull count
  */
-int cWorldView_getNumHull(void* self)
+int cWorldView_getNumHull(void* vself)
 {
-    return *(int*)((char*)*(void**)((char*)self + 0x4) + 0x10);
+    cWorldView* self = (cWorldView*)vself;
+    return *(int*)((char*)self->mp_Hdr + 0x10);
 }
 #endif
 

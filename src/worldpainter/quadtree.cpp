@@ -1635,9 +1635,10 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_DeleteFileSlot__FPvi);
  * @param fileSlot  the file slot (0..mMaxFiles-1)
  * @return func_002C48C0's result
  */
-void* cPS2MemCard_DeleteFileSlot(void* self, int fileSlot)
+void* cPS2MemCard_DeleteFileSlot(void* vself, int fileSlot)
 {
-    *(int*)((char*)self + 0x1c) = fileSlot;
+    cPS2MemCard* self = (cPS2MemCard*)vself;
+    self->unk_01C = fileSlot;
     return func_002C48C0((cPS2MemCard*)self, 19);
 }
 #endif
@@ -1652,9 +1653,10 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetDataSize__FPv);
  *
  * @return the file size in bytes
  */
-int cPS2MemCard_GetDataSize(void* self)
+int cPS2MemCard_GetDataSize(void* vself)
 {
-    return *(int*)((char*)self + 0x490);
+    cPS2MemCard* self = (cPS2MemCard*)vself;
+    return (int)self->unk_480.m_fileSizeByte;
 }
 #endif
 
@@ -1669,9 +1671,10 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SetDataSize__FPvi);
  *
  * @param val  the data size in bytes
  */
-void cPS2MemCard_SetDataSize(void* self, int val)
+void cPS2MemCard_SetDataSize(void* vself, int val)
 {
-    *(int*)((char*)self + 0x24) = val;
+    cPS2MemCard* self = (cPS2MemCard*)vself;
+    self->unk_024 = val;
 }
 #endif
 
@@ -2732,9 +2735,10 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetFreeSpace__FPv);
  *
  * @return the free space in KB
  */
-void* cPS2MemCard_GetFreeSpace(void* self)
+void* cPS2MemCard_GetFreeSpace(void* vself)
 {
-    return cPS2MemCard_GetFreeSpace1((cPS2MemCard*)self, *(int*)((char*)self + 0xc));
+    cPS2MemCard* self = (cPS2MemCard*)vself;
+    return cPS2MemCard_GetFreeSpace1((cPS2MemCard*)self, self->mDevice);
 }
 #endif
 

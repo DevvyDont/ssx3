@@ -1406,9 +1406,10 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_exit__FPv);
 /**
  * Sets the memory-card screen's state (+0x1C0) to 6.
  */
-void cFEMemCard_exit(void* self)
+void cFEMemCard_exit(void* vself)
 {
-    *(int*)((char*)self + 0x1C0) = 6;
+    cFEMemCard* self = (cFEMemCard*)vself;
+    self->mState = 6;
 }
 #endif
 
@@ -1693,11 +1694,12 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_exitSave__FPv);
  *
  * Clears the flags at +0x1A8 and +0x1DC and sets +0x1C0 to 1.
  */
-void cFEMemCard_exitSave(void* self)
+void cFEMemCard_exitSave(void* vself)
 {
-    *(int*)((char*)self + 0x1A8) = 0;
-    *(int*)((char*)self + 0x1C0) = 1;
-    *(int*)((char*)self + 0x1DC) = 0;
+    cFEMemCard* self = (cFEMemCard*)vself;
+    self->mIsProcessing = 0;
+    self->mState = 1;
+    self->mIsSavePressed = 0;
 }
 #endif
 
@@ -2094,9 +2096,10 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_updateSkip__FPv);
 /**
  * Sets the memory-card screen state (+0x1C0) to 1.
  */
-void cFEMemCard_updateSkip(void* self)
+void cFEMemCard_updateSkip(void* vself)
 {
-    *(int*)((char*)self + 0x1C0) = 1;
+    cFEMemCard* self = (cFEMemCard*)vself;
+    self->mState = 1;
 }
 #endif
 

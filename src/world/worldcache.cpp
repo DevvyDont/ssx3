@@ -112,11 +112,12 @@ INCLUDE_ASM("world/worldcache", cWorldBlockAllocator_getFreeBlock__FPv);
  *
  * @return the tWorldMemBlock
  */
-void* cWorldBlockAllocator_getFreeBlock(void* self)
+void* cWorldBlockAllocator_getFreeBlock(void* vself)
 {
-    void* item = *(void**)((char*)self + 0x10);
-    *(void**)((char*)self + 0x10) = *(void**)((char*)item + 0x14);
-    *(int*)((char*)self + 0x8) -= 1;
+    cWorldBlockAllocator* self = (cWorldBlockAllocator*)vself;
+    void* item = self->m_pFreeBlocks;
+    self->m_pFreeBlocks = (tWorldMemBlock*)(*(void**)((char*)item + 0x14));
+    *(int*)&self->m_uiNumFreeBlocks -= 1;
     *(int*)((char*)item + 0x10) = 1;
     return item;
 }
@@ -131,12 +132,13 @@ INCLUDE_ASM("world/worldcache", cWorldBlockAllocator_releaseBlock__FPvT0);
  *
  * @param item  the tWorldMemBlock
  */
-void cWorldBlockAllocator_releaseBlock(void* self, void* item)
+void cWorldBlockAllocator_releaseBlock(void* vself, void* item)
 {
+    cWorldBlockAllocator* self = (cWorldBlockAllocator*)vself;
     *(int*)((char*)item + 0x10) = 0;
-    *(void**)((char*)item + 0x14) = *(void**)((char*)self + 0x10);
-    *(void**)((char*)self + 0x10) = item;
-    *(int*)((char*)self + 0x8) += 1;
+    *(void**)((char*)item + 0x14) = (void*)self->m_pFreeBlocks;
+    self->m_pFreeBlocks = (tWorldMemBlock*)item;
+    *(int*)&self->m_uiNumFreeBlocks += 1;
 }
 #endif
 

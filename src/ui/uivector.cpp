@@ -1737,9 +1737,10 @@ INCLUDE_ASM("ui/uivector", cUIIcon__cUIIcon__FPv);
  *
  * @return no meaningful value (the cUIThing destructor returns nothing)
  */
-void* cUIIcon__cUIIcon(void* self)
+void* cUIIcon__cUIIcon(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cUIIcon_vtbl;
+    cUIIcon* self = (cUIIcon*)vself;
+    self->mVtbl = (void**)((int)(void*)cUIIcon_vtbl);
     return cUIThing__cUIThing(self);
 }
 #endif

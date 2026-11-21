@@ -1145,9 +1145,10 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequestPlayerByPlayerI
  *
  * @return the cScriptPlayerMain cInSeq_GetPlayer returns
  */
-void* cBXScriptEngine_GetRequestPlayerByPlayerID(void* self)
+void* cBXScriptEngine_GetRequestPlayerByPlayerID(void* vself)
 {
-    return cInSeq_GetPlayer(*(int*)((char*)self + 0x2b8));
+    cBXScriptEngine* self = (cBXScriptEngine*)vself;
+    return cInSeq_GetPlayer((int)self->mpInSeq);
 }
 #endif
 
@@ -1308,9 +1309,10 @@ INCLUDE_ASM("scripter/bxscriptengine", cScriptObjTransition_SetCameraManager__FP
  *
  * @param val  the camera manager (cScriptObjCameraManager)
  */
-void cScriptObjTransition_SetCameraManager(void* self, int val)
+void cScriptObjTransition_SetCameraManager(void* vself, int val)
 {
-    *(int*)((char*)self + 0x10) = val;
+    cScriptObjTransition* self = (cScriptObjTransition*)vself;
+    self->mpCameraManager = (cScriptObjCameraManager*)val;
 }
 #endif
 
@@ -1329,9 +1331,10 @@ INCLUDE_ASM("scripter/bxscriptengine", cScriptObjTransition_SetTransition__FPvii
  * @param transition  the transition kind (9 = none)
  * @return whatever cScriptObjTransition_SetTransition1 leaves in the return register (it returns nothing)
  */
-void* cScriptObjTransition_SetTransition(void* self, int playerID, int transition)
+void* cScriptObjTransition_SetTransition(void* vself, int playerID, int transition)
 {
-    return cScriptObjTransition_SetTransition1(self, playerID, transition, *(int*)((char*)self + 0x28));
+    cScriptObjTransition* self = (cScriptObjTransition*)vself;
+    return cScriptObjTransition_SetTransition1(self, playerID, transition, self->mInfo.transitionColour);
 }
 #endif
 
@@ -1469,12 +1472,13 @@ INCLUDE_ASM("scripter/bxscriptengine", cScriptEntity_cScriptEntity__FPv);
  *
  * @return @p self
  */
-void* cScriptEntity_cScriptEntity(void* self)
+void* cScriptEntity_cScriptEntity(void* vself)
 {
+    cScriptEntity* self = (cScriptEntity*)vself;
     *(void***)self = cScriptEntity_vtbl;
-    *(int*)((char*)self + 0x4) = -1;
-    *(int*)((char*)self + 0x8) = 0;
-    return self;
+    self->mDBID = -1;
+    self->mpEntity = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -1486,9 +1490,10 @@ INCLUDE_ASM("scripter/bxscriptengine", cScriptEntity_IsPlaying__FPv);
  *
  * @return 1 when bound, else 0
  */
-int cScriptEntity_IsPlaying(void* self)
+int cScriptEntity_IsPlaying(void* vself)
 {
-    return (*(int*)((char*)self + 0x8) != 0);
+    cScriptEntity* self = (cScriptEntity*)vself;
+    return ((int)self->mpEntity != 0);
 }
 #endif
 
@@ -1873,10 +1878,11 @@ INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_OnStartObjectUse__FPv);
  *
  * @return the new use count (left in $v0 by the code; On Tour's method is void)
  */
-void* cScriptObject_OnStartObjectUse(void* self)
+void* cScriptObject_OnStartObjectUse(void* vself)
 {
-    void* useCount = (char*)*(void**)((char*)self + 0x8) + 0x1;
-    *(int*)((char*)self + 0x8) = (int)useCount;
+    cScriptObject* self = (cScriptObject*)vself;
+    void* useCount = (char*)self->mInUse + 0x1;
+    self->mInUse = (int)useCount;
     return useCount;
 }
 #endif
@@ -1889,10 +1895,11 @@ INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_OnEndObjectUse__FPv);
  *
  * @return the new use count
  */
-void* cScriptObject_OnEndObjectUse(void* self)
+void* cScriptObject_OnEndObjectUse(void* vself)
 {
-    void* useCount = (char*)*(void**)((char*)self + 0x8) - 0x1;
-    *(int*)((char*)self + 0x8) = (int)useCount;
+    cScriptObject* self = (cScriptObject*)vself;
+    void* useCount = (char*)self->mInUse - 0x1;
+    self->mInUse = (int)useCount;
     return useCount;
 }
 #endif

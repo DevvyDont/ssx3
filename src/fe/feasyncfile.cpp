@@ -11968,9 +11968,10 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateChatRoom__cFEStateChatRoom__FPv);
  *
  * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
  */
-void* cFEStateChatRoom__cFEStateChatRoom(void* self)
+void* cFEStateChatRoom__cFEStateChatRoom(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEStateChatRoom_vtbl;
+    cFEStateChatRoom* self = (cFEStateChatRoom*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEStateChatRoom_vtbl);
     return cFEStateNet__cFEStateNet(self);
 }
 #endif
@@ -15908,9 +15909,10 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateAuthDNASError__cFEStateAuthDNASError__FPv)
  *
  * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
  */
-void* cFEStateAuthDNASError__cFEStateAuthDNASError(void* self)
+void* cFEStateAuthDNASError__cFEStateAuthDNASError(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEStateAuthDNASError_vtbl;
+    cFEStateAuthDNASError* self = (cFEStateAuthDNASError*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEStateAuthDNASError_vtbl);
     return cFEStateNet__cFEStateNet(self);
 }
 #endif

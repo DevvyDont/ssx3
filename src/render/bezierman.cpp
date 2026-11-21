@@ -132,8 +132,9 @@ INCLUDE_ASM("render/bezierman", cPS2BezierMan_Reset__FPv);
  *
  * @return no meaningful value (func_003739D0 returns nothing)
  */
-void* cPS2BezierMan_Reset(void* self)
+void* cPS2BezierMan_Reset(void* vself)
 {
+    cPS2BezierMan* self = (cPS2BezierMan*)vself;
     return func_003739D0((char*)self + 0x10);
 }
 #endif
@@ -147,12 +148,13 @@ INCLUDE_ASM("render/bezierman", cPS2BezierMan_ClearPatches__FPv);
  * It sits in slot 17 of the cPS2BezierMan vtable (cPSPBezierMan_vtbl), between the shadow switches and
  * cPS2BezierMan_DrawPatches; func_0038D638 calls it through that slot from cPS2BezierMan_Init.
  */
-void cPS2BezierMan_ClearPatches(void* self)
+void cPS2BezierMan_ClearPatches(void* vself)
 {
-    *(int*)((char*)self + 0x458) = 0;
-    *(int*)((char*)self + 0x3c9c) = 0;
-    *(int*)((char*)self + 0x4a60) = 0;
-    *(int*)((char*)self + 0x4d84) = 0;
+    cPS2BezierMan* self = (cPS2BezierMan*)vself;
+    self->mNum4x4Patches = 0;
+    self->mNum6x6Patches = 0;
+    self->mNum8x8Patches = 0;
+    self->mNumMixedPatches = 0;
 }
 #endif
 

@@ -3051,8 +3051,9 @@ INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onWidgetCreate__FPv);
  *
  * @return what cUITemplate_MAP_onWidgetCreate leaves in the return register (that function returns nothing)
  */
-void* cOVState_TRANSPORT_onWidgetCreate(void* self)
+void* cOVState_TRANSPORT_onWidgetCreate(void* vself)
 {
+    cOVState_TRANSPORT* self = (cOVState_TRANSPORT*)vself;
     return cUITemplate_MAP_onWidgetCreate((char*)self + 0x9c);
 }
 #endif
@@ -3071,8 +3072,9 @@ INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onGainTransition__FPv);
  *
  * @return the template's result
  */
-void* cOVState_TRANSPORT_onGainTransition(void* self)
+void* cOVState_TRANSPORT_onGainTransition(void* vself)
 {
+    cOVState_TRANSPORT* self = (cOVState_TRANSPORT*)vself;
     return cUITemplate_MAP_onGainTransition((char*)self + 0x9c);
 }
 #endif
@@ -3180,8 +3182,9 @@ INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onInputAlways__FPv);
  *
  * @return what cUITemplate_MAP_onInputAlways leaves in the return register (it returns nothing)
  */
-void* cOVState_TRANSPORT_onInputAlways(void* self)
+void* cOVState_TRANSPORT_onInputAlways(void* vself)
 {
+    cOVState_TRANSPORT* self = (cOVState_TRANSPORT*)vself;
     return cUITemplate_MAP_onInputAlways((char*)self + 0x9c);
 }
 #endif

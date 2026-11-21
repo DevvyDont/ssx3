@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/flexbridgenode.h"
 #include "object/physicsmodifier.h"
 #include "object/effectlink.h"
 #include "render/ps2graphicsman.h"
@@ -1339,10 +1340,11 @@ INCLUDE_ASM("object/modifierblock", cSpring_cSpring__FPv);
  *
  * @return self
  */
-void* cSpring_cSpring(void* self)
+void* cSpring_cSpring(void* vself)
 {
-    *(int*)((char*)self + 0x24) = 0;
-    return self;
+    cSpring* self = (cSpring*)vself;
+    self->Nodes = 0;
+    return ((void*)self);
 }
 #endif
 

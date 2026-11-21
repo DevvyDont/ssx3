@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camera/cameraalgolist.h"
 #include "be/beintaggression.h"
 #include "be/beintmission.h"
 #include "be/beintbagt.h"
@@ -2078,12 +2079,13 @@ INCLUDE_ASM("be/bedbreward", cCameraAlgoList_cCameraAlgoList__FPv);
  *
  * @return @p self
  */
-void* cCameraAlgoList_cCameraAlgoList(void* self)
+void* cCameraAlgoList_cCameraAlgoList(void* vself)
 {
+    cCameraAlgoList* self = (cCameraAlgoList*)vself;
     int initValue = 0;
     *(int*)self = initValue;
-    *(int*)((char*)self + 0x4) = initValue;
-    return self;
+    self->Length = initValue;
+    return ((void*)self);
 }
 #endif
 

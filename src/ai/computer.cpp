@@ -2197,9 +2197,10 @@ INCLUDE_ASM("ai/computer", cRider_flagEventMissionStart__FPv);
  *
  * @return cRiderMetrix_evMissionStart's result
  */
-void* cRider_flagEventMissionStart(void* self)
+void* cRider_flagEventMissionStart(void* vself)
 {
-    return cRiderMetrix_evMissionStart(*(int*)((char*)self + 0x790));
+    cRider* self = (cRider*)vself;
+    return cRiderMetrix_evMissionStart((int)self->mMetrix);
 }
 #endif
 
@@ -4476,9 +4477,10 @@ INCLUDE_ASM("ai/computer", cRider_getDistanceLeft__FPv);
  *
  * @return mDistToFinish (+0x4D0)
  */
-float cRider_getDistanceLeft(void* self)
+float cRider_getDistanceLeft(void* vself)
 {
-    return *(float*)((char*)self + 0x4D0);
+    cRider* self = (cRider*)vself;
+    return self->mDistToFinish;
 }
 #endif
 
@@ -4492,8 +4494,9 @@ INCLUDE_ASM("ai/computer", cRider_getTotalPathDistance__FPv);
  *
  * @return the float at +0x4D8
  */
-float cRider_getTotalPathDistance(void* self)
+float cRider_getTotalPathDistance(void* vself)
 {
+    cRider* self = (cRider*)vself;
     return *(float*)((char*)self + 0x4D8);
 }
 #endif

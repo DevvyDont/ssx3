@@ -956,9 +956,10 @@ INCLUDE_ASM("fe/festatestore", cFEStateCredits__cFEStateCredits__FPv);
  *
  * @return no meaningful value (cUIState__cUIState() returns nothing)
  */
-void* cFEStateCredits__cFEStateCredits(void* self)
+void* cFEStateCredits__cFEStateCredits(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEState_vtbl;
+    cFEStateCredits* self = (cFEStateCredits*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEState_vtbl);
     return cUIState__cUIState(self);
 }
 #endif

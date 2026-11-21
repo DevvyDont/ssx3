@@ -480,9 +480,10 @@ INCLUDE_ASM("ai/airpredictor", cAirPredictor_land__FPv);
  * cWipeoutMotion_resolveAirMotion calls it with the rider's mPosition and mVelocity, which are ignored (the C
  * declaration takes only self).
  */
-void cAirPredictor_land(void* self)
+void cAirPredictor_land(void* vself)
 {
-    *(int*)((char*)self + 0x98) = 0;
+    cAirPredictor* self = (cAirPredictor*)vself;
+    *(int*)&self->TotalAirTime = 0;
 }
 #endif
 

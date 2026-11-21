@@ -1433,8 +1433,9 @@ INCLUDE_ASM("visualfx/boardtrailfx", cTrickBoostFX_reset__FPv);
  * readFromReplayFrame). Called by the constructor, cRiderHandler_resetRiderFX,
  * cRiderHandler_readFromReplayFrame and func_002F7ED0.
  */
-void cTrickBoostFX_reset(void* self)
+void cTrickBoostFX_reset(void* vself)
 {
+    cTrickBoostFX* self = (cTrickBoostFX*)vself;
     *(int*)((char*)self + 0xc) = 0;
     *(int*)((char*)self + 0x10) = 0;
 }

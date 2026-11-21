@@ -3080,12 +3080,13 @@ INCLUDE_ASM("render/particle", cPlayerShadow_cPlayerShadow__FPv);
  *
  * @return the constructed shadow (self)
  */
-void* cPlayerShadow_cPlayerShadow(void* self)
+void* cPlayerShadow_cPlayerShadow(void* vself)
 {
-    *(int*)((char*)self + 0x170) = -1;
-    *(int*)((char*)self + 0x174) = 0x80;
-    *(int*)((char*)self + 0x178) = 0x80;
-    return self;
+    cPlayerShadow* self = (cPlayerShadow*)vself;
+    self->mLockTexture = -1;
+    self->mShadowTexWidth = 0x80;
+    self->mShadowTexHeight = 0x80;
+    return ((void*)self);
 }
 #endif
 
@@ -7205,8 +7206,9 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_PlatformUploadTextures__FPv);
  *
  * @return no meaningful value (MEM_copy returns nothing)
  */
-void* cPS2GraphicsMan_PlatformUploadTextures(void* self)
+void* cPS2GraphicsMan_PlatformUploadTextures(void* vself)
 {
+    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
     return MEM_copy((char*)self + 0x18f8, (char*)self + 0x3838, 8000);
 }
 #endif
@@ -8112,9 +8114,10 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_AddLockedFrameTexture__FPv);
  *
  * @return the new texture id
  */
-void* cPS2GraphicsMan_AddLockedFrameTexture(void* self)
+void* cPS2GraphicsMan_AddLockedFrameTexture(void* vself)
 {
-    return func_00367CD0(*(int*)((char*)self + 0x18f4));
+    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
+    return func_00367CD0((int)self->mpTextureMan);
 }
 #endif
 
@@ -12497,10 +12500,11 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetLensFXCallBack__FPvii);
  * @param callback  the function to call, or 0
  * @param callbackArg  the argument passed to it
  */
-void cPS2GraphicsMan_SetLensFXCallBack(void* self, int callback, int callbackArg)
+void cPS2GraphicsMan_SetLensFXCallBack(void* vself, int callback, int callbackArg)
 {
-    *(int*)((char*)self + 0x6d0c) = callback;
-    *(int*)((char*)self + 0x6d10) = callbackArg;
+    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
+    self->mPhase2Callback = (void (*)(int))callback;
+    self->mPhase2CallbackArg = callbackArg;
 }
 #endif
 

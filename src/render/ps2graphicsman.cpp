@@ -1764,11 +1764,12 @@ INCLUDE_ASM("render/ps2graphicsman", cGraphicsMan_InitTextureFiles__FPvii);
  * @param numFiles  number of texture file names
  * @param fileNames  the array of file names (const char**, held as an int)
  */
-void cGraphicsMan_InitTextureFiles(void* self, int numFiles, int fileNames)
+void cGraphicsMan_InitTextureFiles(void* vself, int numFiles, int fileNames)
 {
-    *(int*)((char*)self + 0x27c) = fileNames;
-    *(int*)((char*)self + 0x278) = numFiles;
-    *(int*)((char*)self + 0xe80) = 0;
+    cGraphicsMan* self = (cGraphicsMan*)vself;
+    self->mTextureFiles = (void**)fileNames;
+    self->mNumTextureFiles = numFiles;
+    self->mNumTexRefs = 0;
 }
 #endif
 

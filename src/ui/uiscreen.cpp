@@ -280,8 +280,9 @@ void* cUIScreen_playFrame_impl(void* self, unsigned short frame, int ThreadType)
  * @param ThreadType  0 for the primary thread, otherwise an extra thread
  * @return the new thread
  */
-void* cUIScreen_playFrame_impl(void* self, unsigned short frame, int ThreadType)
+void* cUIScreen_playFrame_impl(void* vself, unsigned short frame, int ThreadType)
 {
+    cUIScreen* self = (cUIScreen*)vself;
     if (ThreadType == 0) {
         void* pPrimary = cUIScreen_getPrimaryThread((cUIScreen*)self);
         if (pPrimary != 0) {
@@ -1093,8 +1094,9 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_onInput__FPv);
  *
  * @return cUIGroup_onInput()'s result (On Tour: whether the input was handled)
  */
-void* cUIScreen_onInput(void* self)
+void* cUIScreen_onInput(void* vself)
 {
+    cUIScreen* self = (cUIScreen*)vself;
     return cUIGroup_onInput((char*)self + 0x40);
 }
 #endif
@@ -1812,8 +1814,9 @@ INCLUDE_ASM("ui/uiscreen", cUIState_onDestroyScreen__FPv);
  *
  * @return cList_destroyList()'s return value (On Tour's onDestroyScreen returns nothing)
  */
-void* cUIState_onDestroyScreen(void* self)
+void* cUIState_onDestroyScreen(void* vself)
 {
+    cUIState* self = (cUIState*)vself;
     return cList_destroyList(((char*)self + 0x24));
 }
 #endif

@@ -1393,10 +1393,11 @@ INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_incFocusCount__FPv);
  *
  * @return the new FocusCount
  */
-void* cMultiSplineModifier_incFocusCount(void* self)
+void* cMultiSplineModifier_incFocusCount(void* vself)
 {
-    void* focusCount = (char*)*(void**)((char*)self + 0x34) + 0x1;
-    *(int*)((char*)self + 0x34) = (int)focusCount;
+    cMultiSplineModifier* self = (cMultiSplineModifier*)vself;
+    void* focusCount = (char*)self->FocusCount + 0x1;
+    self->FocusCount = (int)focusCount;
     return focusCount;
 }
 #endif
@@ -1411,10 +1412,11 @@ INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_decFocusCount__FPv);
  *
  * @return the new FocusCount
  */
-void* cMultiSplineModifier_decFocusCount(void* self)
+void* cMultiSplineModifier_decFocusCount(void* vself)
 {
-    void* focusCount = (char*)*(void**)((char*)self + 0x34) - 0x1;
-    *(int*)((char*)self + 0x34) = (int)focusCount;
+    cMultiSplineModifier* self = (cMultiSplineModifier*)vself;
+    void* focusCount = (char*)self->FocusCount - 0x1;
+    self->FocusCount = (int)focusCount;
     return focusCount;
 }
 #endif

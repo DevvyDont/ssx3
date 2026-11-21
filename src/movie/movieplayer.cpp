@@ -277,12 +277,13 @@ void cMCOverlayManager_readSetSize_impl(void* self, int a) __asm__("cMCOverlayMa
  *
  * @param size  the file's data size
  */
-void cMCOverlayManager_readSetSize_impl(void* self, int size)
+void cMCOverlayManager_readSetSize_impl(void* vself, int size)
 {
-    void* obj = *(void**)((char*)self + 0x434);
+    cMCOverlayManager* self = (cMCOverlayManager*)vself;
+    void* obj = self->mpMemCard;
     sMovieVEntryCAA0* vt = *(sMovieVEntryCAA0**)obj;
     vt[19].fn((char*)obj + vt[19].delta, size);
-    *(int*)((char*)self + 0xF0) = size;
+    self->mSize = size;
 }
 #endif
 
@@ -2540,9 +2541,10 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_selectDevice__FPvi);
  *
  * @param val  the device index
  */
-void cMCOverlayManager_selectDevice(void* self, int val)
+void cMCOverlayManager_selectDevice(void* vself, int val)
 {
-    *(int*)((char*)self + 0x428) = val;
+    cMCOverlayManager* self = (cMCOverlayManager*)vself;
+    self->mSelectedDevice = val;
 }
 #endif
 
@@ -4991,9 +4993,10 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_GatherDeviceInfo__FPv);
  *
  * @return no meaningful value (cMCOverlayManager_GatherDeviceInfo1 returns nothing)
  */
-void* cMCOverlayManager_GatherDeviceInfo(void* self)
+void* cMCOverlayManager_GatherDeviceInfo(void* vself)
 {
-    return cMCOverlayManager_GatherDeviceInfo1(self, *(int*)((char*)self + 0x42c));
+    cMCOverlayManager* self = (cMCOverlayManager*)vself;
+    return cMCOverlayManager_GatherDeviceInfo1(self, self->mCurrCheckDevice);
 }
 #endif
 
@@ -5373,14 +5376,15 @@ INCLUDE_ASM("movie/movieplayer", cOcclusionMan_cOcclusionMan__FPv);
  *
  * @return @p self
  */
-void* cOcclusionMan_cOcclusionMan(void* self)
+void* cOcclusionMan_cOcclusionMan(void* vself)
 {
+    cOcclusionMan* self = (cOcclusionMan*)vself;
     int zeroValue = 0;
-    *(int*)((char*)self + 0x4) = zeroValue;
-    *(int*)((char*)self + 0x108) = zeroValue;
-    *(int*)((char*)self + 0x10c) = zeroValue;
+    self->m_iNumPlanes = zeroValue;
+    self->m_iNumInView = zeroValue;
+    self->m_iNumActive = zeroValue;
     *(int*)self = zeroValue;
-    return self;
+    return ((void*)self);
 }
 #endif
 

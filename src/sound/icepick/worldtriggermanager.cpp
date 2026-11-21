@@ -607,20 +607,21 @@ int cWorldTriggerManager_LoadTriggerInfo_impl(void* self) __asm__("cWorldTrigger
  *
  * @return 0 when the file's first byte is nonzero (rejected), otherwise 1
  */
-int cWorldTriggerManager_LoadTriggerInfo_impl(void* self)
+int cWorldTriggerManager_LoadTriggerInfo_impl(void* vself)
 {
+    cWorldTriggerManager* self = (cWorldTriggerManager*)vself;
     if (BXFILE_exists(str_p5H) != 0) {
         char* data = FILE_loadpack(str_p5H, 0);
-        *(char**)((char*)self + 0x338) = data;
+        self->m_pcTriggerInfoFile = data;
         if (*data != 0) {
             return 0;
         }
-        *(int*)((char*)self + 0x340) = *(int*)(data + 8) + 2;
-        *(sTrigInfoEnt**)((char*)self + 0x33C) = (sTrigInfoEnt*)operator_new_tag(*(int*)((char*)self + 0x340) * 8, str_m_aTriggerInfoInstances, 0, 0);
+        self->m_iNumTriggers = *(int*)(data + 8) + 2;
+        self->m_aTriggerInfo = (tTriggerTypePointer*)((sTrigInfoEnt*)operator_new_tag(self->m_iNumTriggers * 8, str_m_aTriggerInfoInstances, 0, 0));
         int* cursor = (int*)(data + 0xC);
-        for (int i = 2; i < *(int*)((char*)self + 0x340); i++) {
-            (*(sTrigInfoEnt**)((char*)self + 0x33C))[i].type = *cursor;
-            (*(sTrigInfoEnt**)((char*)self + 0x33C))[i].data = cursor;
+        for (int i = 2; i < self->m_iNumTriggers; i++) {
+            ((sTrigInfoEnt*)self->m_aTriggerInfo)[i].type = *cursor;
+            ((sTrigInfoEnt*)self->m_aTriggerInfo)[i].data = cursor;
             int trigType = *cursor;
             if (trigType == 1) {
                 cursor += 6;
@@ -633,9 +634,9 @@ int cWorldTriggerManager_LoadTriggerInfo_impl(void* self)
             }
         }
     } else {
-        *(char**)((char*)self + 0x338) = 0;
-        *(int*)((char*)self + 0x340) = 0;
-        *(sTrigInfoEnt**)((char*)self + 0x33C) = 0;
+        self->m_pcTriggerInfoFile = 0;
+        self->m_iNumTriggers = 0;
+        self->m_aTriggerInfo = 0;
     }
     return 1;
 }
@@ -1364,12 +1365,13 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_ResetState
  *
  * Sets +0x324 and +0x330 to 0 and +0x328 and +0x32C to -1.
  */
-void cWorldTriggerManager_ResetStates(void* self)
+void cWorldTriggerManager_ResetStates(void* vself)
 {
-    *(int*)((char*)self + 0x330) = 0;
-    *(int*)((char*)self + 0x324) = 0;
-    *(int*)((char*)self + 0x328) = -1;
-    *(int*)((char*)self + 0x32c) = -1;
+    cWorldTriggerManager* self = (cWorldTriggerManager*)vself;
+    self->mLastHitObjectResult = 0;
+    self->mNumHitObjects = 0;
+    self->mLastHitObject = -1;
+    self->mLastHitObjectChecked = -1;
 }
 #endif
 

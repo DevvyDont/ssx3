@@ -3465,13 +3465,14 @@ INCLUDE_ASM("mem/memstd", cCommChannel_cCommChannel__FPv);
  *
  * @return @p self
  */
-void* cCommChannel_cCommChannel(void* self)
+void* cCommChannel_cCommChannel(void* vself)
 {
+    cCommChannel* self = (cCommChannel*)vself;
     int zero = 0;
     *(int*)self = zero;
-    *(int*)((char*)self + 0x8) = (int)(void*)cCommChannel_vtbl;
-    *(int*)((char*)self + 0x4) = zero;
-    return self;
+    self->mVtbl = (void**)((int)(void*)cCommChannel_vtbl);
+    self->mError = zero;
+    return ((void*)self);
 }
 #endif
 
@@ -3502,10 +3503,11 @@ INCLUDE_ASM("mem/memstd", cCommChannel_channelOpen__FPv);
  *
  * @return 1
  */
-int cCommChannel_channelOpen(void* self)
+int cCommChannel_channelOpen(void* vself)
 {
+    cCommChannel* self = (cCommChannel*)vself;
     int one = 1;
-    *(int*)((char*)self + 0x4) = 0;
+    self->mError = 0;
     *(int*)self = one;
     return one;
 }

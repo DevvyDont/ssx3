@@ -3512,8 +3512,9 @@ INCLUDE_ASM("be/beintreward", cBEUserAwards_getAwardBits__FPvi);
  * @param i  the reward type (On Tour rewardType)
  * @return the bit array, or null for types without one
  */
-int cBEUserAwards_getAwardBits(void* self, int i)
+int cBEUserAwards_getAwardBits(void* vself, int i)
 {
+    cBEUserAwards* self = (cBEUserAwards*)vself;
     return *(int*)((char*)self + (i << 2) + 0x174);
 }
 #endif

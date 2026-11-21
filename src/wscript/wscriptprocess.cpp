@@ -836,9 +836,10 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_getScriptCode__FPv);
  *
  * @return the code, or 0 when the id is invalid
  */
-void* cWScriptProcess_getScriptCode(void* self)
+void* cWScriptProcess_getScriptCode(void* vself)
 {
-    return cWScriptMan_getScriptCode(*(int*)((char*)self + 0x10));
+    cWScriptProcess* self = (cWScriptProcess*)vself;
+    return cWScriptMan_getScriptCode((int)self->Manager);
 }
 #endif
 
@@ -1635,8 +1636,9 @@ void* cWScriptMan_allocateGlobalTable_impl(void* self, int i) __asm__("cWScriptM
  * @param i  the world section index
  * @return the new table
  */
-void* cWScriptMan_allocateGlobalTable_impl(void* self, int i)
+void* cWScriptMan_allocateGlobalTable_impl(void* vself, int i)
 {
+    cWScriptMan* self = (cWScriptMan*)vself;
     char* base = (char*)self + 0x3CC;
     void** slot = (void**)(base + (i << 2));
     if (*slot != 0) {

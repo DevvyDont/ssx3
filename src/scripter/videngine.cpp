@@ -238,11 +238,12 @@ INCLUDE_ASM("scripter/videngine", cCircularBuffer_Reset__FPv);
  * Empties a circular buffer of NIS list entries: head (+0x8C, On Tour mHeadIndex), tail (+0x90, mTailIndex) and full
  * flag (+0x94, mIsFull) become 0.
  */
-void cCircularBuffer_Reset(void* self)
+void cCircularBuffer_Reset(void* vself)
 {
-    *(int*)((char*)self + 0x8c) = 0;
-    *(int*)((char*)self + 0x90) = 0;
-    *(int*)((char*)self + 0x94) = 0;
+    cCircularBuffer* self = (cCircularBuffer*)vself;
+    self->mHeadIndex = 0;
+    self->mTailIndex = 0;
+    self->mIsFull = 0;
 }
 #endif
 
@@ -271,9 +272,10 @@ INCLUDE_ASM("scripter/videngine", cCircularBuffer_IsFull__FPv);
  *
  * @return the flag
  */
-int cCircularBuffer_IsFull(void* self)
+int cCircularBuffer_IsFull(void* vself)
 {
-    return *(int*)((char*)self + 0x94);
+    cCircularBuffer* self = (cCircularBuffer*)vself;
+    return self->mIsFull;
 }
 #endif
 

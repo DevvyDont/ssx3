@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/bucketman.h"
 #include "object/objnode.h"
 
 extern "C" void cBucketMan_add(void* mgr, void* node, void* param);
@@ -122,10 +123,11 @@ void cTypeObjNode__cTypeObjNode_impl(void* self, int flags) __asm__("cTypeObjNod
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-void cTypeObjNode__cTypeObjNode_impl(void* self, int flags)
+void cTypeObjNode__cTypeObjNode_impl(void* vself, int flags)
 {
-    *(void***)((char*)self + 0xC) = cTypeObjNode_vtbl;
-    D_0044AFF0[*(short*)((char*)self + 0x10)]--;
+    cTypeObjNode* self = (cTypeObjNode*)vself;
+    self->mVtbl = cTypeObjNode_vtbl;
+    D_0044AFF0[self->ObjNodeType]--;
     cObjNode__cObjNode((cObjNode*)self, flags);
 }
 #endif
@@ -209,9 +211,10 @@ INCLUDE_ASM("object/objnode", cSortObjNode__cSortObjNode__FPv);
  *
  * @return no meaningful value (the base destructor returns nothing)
  */
-void* cSortObjNode__cSortObjNode(void* self)
+void* cSortObjNode__cSortObjNode(void* vself)
 {
-    *(int*)((char*)self + 0xc) = (int)(void*)cSortObjNode_vtbl;
+    cSortObjNode* self = (cSortObjNode*)vself;
+    self->mVtbl = (void**)((int)(void*)cSortObjNode_vtbl);
     return cTypeObjNode__cTypeObjNode(self);
 }
 #endif
@@ -259,12 +262,13 @@ INCLUDE_ASM("object/objnode", cBucketMan_cBucketMan__FPv);
  *
  * @return self
  */
-void* cBucketMan_cBucketMan(void* self)
+void* cBucketMan_cBucketMan(void* vself)
 {
+    cBucketMan* self = (cBucketMan*)vself;
     int zero = 0;
-    *(int*)((char*)self + 0x4) = zero;
+    self->Buckets = (tBucketHeader*)zero;
     *(int*)self = zero;
-    return self;
+    return ((void*)self);
 }
 #endif
 

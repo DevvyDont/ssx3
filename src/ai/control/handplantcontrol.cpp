@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/dangerman.h"
 #include "ai/rideranim.h"
 #include "replay/playbackman.h"
 #include "replay/frameptr.h"
@@ -627,9 +628,10 @@ INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_resolve__FPv);
  * @return cRider_updateBoundBox()'s result, declared void* here; no meaningful value (On Tour's resolve
  *         returns nothing)
  */
-void* cHandplantMotion_resolve(void* self)
+void* cHandplantMotion_resolve(void* vself)
 {
-    return cRider_updateBoundBox(*(int*)((char*)self + 0xa0), 0);
+    cHandplantMotion* self = (cHandplantMotion*)vself;
+    return cRider_updateBoundBox((int)self->mRider, 0);
 }
 #endif
 
@@ -5943,8 +5945,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getPosition__FPv);
  *
  * @return self + 0x110
  */
-void* cRider_getPosition(void* self)
+void* cRider_getPosition(void* vself)
 {
+    cRider* self = (cRider*)vself;
     return (char*)self + 0x110;
 }
 #endif
@@ -5987,8 +5990,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getVelocity__FPv);
  *
  * @return a pointer to mVelocity (+0x1E0)
  */
-void* cRider_getVelocity(void* self)
+void* cRider_getVelocity(void* vself)
 {
+    cRider* self = (cRider*)vself;
     return (char*)self + 0x1E0;
 }
 #endif
@@ -6497,9 +6501,10 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getAIIndex__FPv);
  *
  * @return mAIIndex (cRider offset 0x86C)
  */
-int cRider_getAIIndex(void* self)
+int cRider_getAIIndex(void* vself)
 {
-    return *(int*)((char*)self + 0x86C);
+    cRider* self = (cRider*)vself;
+    return self->mAIIndex;
 }
 #endif
 
@@ -6575,9 +6580,10 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_isHuman__FPv);
  *
  * @return mIsHuman (cRider offset 0x874): nonzero for a human rider, 0 for a computer one
  */
-int cRider_isHuman(void* self)
+int cRider_isHuman(void* vself)
 {
-    return *(int*)((char*)self + 0x874);
+    cRider* self = (cRider*)vself;
+    return self->mIsHuman;
 }
 #endif
 
@@ -8363,11 +8369,12 @@ INCLUDE_ASM("ai/control/handplantcontrol", cDangerMan_DeleteTrackedDangerElemRec
  * @param entry  the element record
  * @return 2
  */
-int cDangerMan_DeleteTrackedDangerElemRecord(void* self, void* entry)
+int cDangerMan_DeleteTrackedDangerElemRecord(void* vself, void* entry)
 {
+    cDangerMan* self = (cDangerMan*)vself;
     int inactiveState = 2;
     *(int*)((char*)entry + 0x8) = inactiveState;
-    *(int*)((char*)self + 0x704) = (int)((char*)*(void**)((char*)self + 0x704) - 0x1);
+    self->mTrackedDangerElemNum = (int)((char*)self->mTrackedDangerElemNum - 0x1);
     return inactiveState;
 }
 #endif

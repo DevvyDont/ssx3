@@ -305,13 +305,14 @@ void* cBankInstance_OnAsyncMainMemAlloc_impl(void* self, int size, int flags) __
  * @param flags  memory flags
  * @return the bank's main-memory block
  */
-void* cBankInstance_OnAsyncMainMemAlloc_impl(void* self, int size, int flags)
+void* cBankInstance_OnAsyncMainMemAlloc_impl(void* vself, int size, int flags)
 {
-    if (*(int*)((char*)self + 0x8) == 0) {
-        *(void**)((char*)self + 0x10) = MEM_alloc(str_DynamicSoundMem, size, flags);
-        *(int*)((char*)self + 0x14) = size;
+    cBankInstance* self = (cBankInstance*)vself;
+    if (self->mAllocLocation == 0) {
+        self->mpMainMemData = (char*)MEM_alloc(str_DynamicSoundMem, size, flags);
+        self->mMainMemDataSize = size;
     }
-    return *(void**)((char*)self + 0x10);
+    return self->mpMainMemData;
 }
 #endif
 
@@ -323,9 +324,10 @@ INCLUDE_ASM("sound/bankmanager", cBankInstance_OnAsyncMainMemSize__FPv);
  *
  * @return the bank's main-memory data size (+0x14, On Tour mMainMemDataSize)
  */
-int cBankInstance_OnAsyncMainMemSize(void* self)
+int cBankInstance_OnAsyncMainMemSize(void* vself)
 {
-    return *(int*)((char*)self + 0x14);
+    cBankInstance* self = (cBankInstance*)vself;
+    return self->mMainMemDataSize;
 }
 #endif
 

@@ -926,10 +926,11 @@ INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_onDestroyScreen__FPv);
  * The teardown, cFEMemCard_onDestroyScreen(), calls helpers of back-end interface 5, runs three memory card manager calls
  * when its word at +0x434 is set, and frees the buffer at +0x1D4 when one is held.
  */
-void cFEStateProfileLoad_onDestroyScreen(void* self)
+void cFEStateProfileLoad_onDestroyScreen(void* vself)
 {
+    cFEStateProfileLoad* self = (cFEStateProfileLoad*)vself;
     cFEMemCard_onDestroyScreen(self);
-    *(int*)((char*)self + 0x1a4) = 0;
+    self->mpKeyboard = 0;
 }
 #endif
 

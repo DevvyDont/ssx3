@@ -4220,8 +4220,9 @@ INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_Reset__FPvi);
  *
  * @param i  the view index
  */
-void cLensFxMan_Reset(void* self, int i)
+void cLensFxMan_Reset(void* vself, int i)
 {
+    cLensFxMan* self = (cLensFxMan*)vself;
     *(int*)((char*)self + (i << 2) + 0x60) = 0;
 }
 #endif
@@ -6067,11 +6068,12 @@ INCLUDE_ASM("visualfx/boardwakefx", cSnowBox_resetWind__FPv);
  *
  * Zeroes +0x90 and +0x94 and sets +0xB0 to 1.
  */
-void cSnowBox_resetWind(void* self)
+void cSnowBox_resetWind(void* vself)
 {
-    *(int*)((char*)self + 0x94) = 0;
-    *(int*)((char*)self + 0xb0) = 1;
-    *(int*)((char*)self + 0x90) = 0;
+    cSnowBox* self = (cSnowBox*)vself;
+    *(int*)&self->mTotalTimeToWindChange = 0;
+    self->mResetWind = 1;
+    *(int*)&self->mCurrentTimeToWindChange = 0;
 }
 #endif
 

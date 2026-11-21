@@ -1,4 +1,5 @@
 #include "common.h"
+#include "visualfx/ps2lensfx.h"
 #include "visualfx/renderstateman.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
@@ -40,11 +41,12 @@ void* cPS2LensFxMan_cPS2LensFxMan_impl(void* self) __asm__("cPS2LensFxMan_cPS2Le
  *
  * @return this
  */
-void* cPS2LensFxMan_cPS2LensFxMan_impl(void* self)
+void* cPS2LensFxMan_cPS2LensFxMan_impl(void* vself)
 {
+    cPS2LensFxMan* self = (cPS2LensFxMan*)vself;
     cLensFxMan_cLensFxMan(self);
-    *(int*)((char*)self + 0x649c) = (int)(void*)cPS2LensFxMan_vtbl;
-    return self;
+    self->mVtbl = (void**)((int)(void*)cPS2LensFxMan_vtbl);
+    return ((void*)self);
 }
 #endif
 
@@ -62,9 +64,10 @@ INCLUDE_ASM("visualfx/lensfx", cPS2LensFxMan__cPS2LensFxMan__FPv);
  *
  * @return cLensFxMan__cLensFxMan's result
  */
-void* cPS2LensFxMan__cPS2LensFxMan(void* self)
+void* cPS2LensFxMan__cPS2LensFxMan(void* vself)
 {
-    *(int*)((char*)self + 0x649c) = (int)(void*)cPS2LensFxMan_vtbl;
+    cPS2LensFxMan* self = (cPS2LensFxMan*)vself;
+    self->mVtbl = (void**)((int)(void*)cPS2LensFxMan_vtbl);
     return cLensFxMan__cLensFxMan(self);
 }
 #endif

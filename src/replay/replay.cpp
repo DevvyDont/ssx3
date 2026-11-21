@@ -1,4 +1,5 @@
 #include "common.h"
+#include "replay/frameptr.h"
 #include "ai/ridermetrix.h"
 #include "replay/replay.h"
 #include "world/world.h"
@@ -386,8 +387,9 @@ INCLUDE_ASM("replay/replay", cReplay_findFrame__FPv);
  *
  * @return the frame containing the tick (see cReplayFrameList_findFrame)
  */
-void* cReplay_findFrame(void* self)
+void* cReplay_findFrame(void* vself)
 {
+    cReplay* self = (cReplay*)vself;
     return cReplayFrameList_findFrame((char*)self + 0x3b0);
 }
 #endif
@@ -519,13 +521,14 @@ INCLUDE_ASM("replay/replay", cReplayFrameList_cReplayFrameList__FPv);
  *
  * @return @p self
  */
-void* cReplayFrameList_cReplayFrameList(void* self)
+void* cReplayFrameList_cReplayFrameList(void* vself)
 {
+    cReplayFrameList* self = (cReplayFrameList*)vself;
     int zero = 0;
-    *(int*)((char*)self + 0x4) = zero;
+    self->Head = (cReplayFrame*)zero;
     *(int*)self = zero;
-    *(int*)((char*)self + 0x8) = zero;
-    return self;
+    self->NumFrames = zero;
+    return ((void*)self);
 }
 #endif
 
@@ -538,11 +541,12 @@ INCLUDE_ASM("replay/replay", cReplayFrameList_reset__FPv);
  * Clears the head (+0x0), tail (+0x4) and count (+0x8) without touching the frames. cReplay_reset and cReplay_purge
  * reset FrameList and FreeFrameList with it, cReplay_load FrameList.
  */
-void cReplayFrameList_reset(void* self)
+void cReplayFrameList_reset(void* vself)
 {
-    *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x0) = 0;
-    *(int*)((char*)self + 0x8) = 0;
+    cReplayFrameList* self = (cReplayFrameList*)vself;
+    self->Head = 0;
+    self->Tail = 0;
+    self->NumFrames = 0;
 }
 #endif
 
@@ -726,9 +730,10 @@ INCLUDE_ASM("replay/replay", cReplayHighlight_end__FPv);
  *
  * cReplay_endMarkHighlight calls it on Highlight[playerId] once the highlight is kept.
  */
-void cReplayHighlight_end(void* self)
+void cReplayHighlight_end(void* vself)
 {
-    *(int*)((char*)self + 0xB0) = 0;
+    cReplayHighlight* self = (cReplayHighlight*)vself;
+    self->Frame = 0;
 }
 #endif
 
@@ -801,15 +806,16 @@ INCLUDE_ASM("replay/replay", cReplayFramePtr_cReplayFramePtr__FPv);
  *
  * @return @p self
  */
-void* cReplayFramePtr_cReplayFramePtr(void* self)
+void* cReplayFramePtr_cReplayFramePtr(void* vself)
 {
+    cReplayFramePtr* self = (cReplayFramePtr*)vself;
     int zeroValue = 0;
-    *(int*)((char*)self + 0x4) = zeroValue;
+    self->Block = (char*)zeroValue;
     *(int*)self = (int)(void*)cReplayFramePtr_vtbl;
-    *(int*)((char*)self + 0x8) = zeroValue;
-    *(int*)((char*)self + 0xc) = zeroValue;
-    *(int*)((char*)self + 0x10) = zeroValue;
-    return self;
+    self->WriteData = (char*)zeroValue;
+    self->ReadData = (char*)zeroValue;
+    self->Size = zeroValue;
+    return ((void*)self);
 }
 #endif
 

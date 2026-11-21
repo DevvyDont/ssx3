@@ -208,9 +208,10 @@ INCLUDE_ASM("sound/streamsys", cStreamInstance_SetBaseVolume__FPvi);
  *
  * @param val  the volume, 0..127 (On Tour Vol)
  */
-void cStreamInstance_SetBaseVolume(void* self, int val)
+void cStreamInstance_SetBaseVolume(void* vself, int val)
 {
-    *(char*)((char*)self + 0xC) = (char)val;
+    cStreamInstance* self = (cStreamInstance*)vself;
+    *(char*)&self->mBaseVol = (char)val;
 }
 #endif
 
@@ -286,11 +287,12 @@ int cStreamInstance_GetStatus_impl(void* self, void* out) __asm__("cStreamInstan
  * @param out  receives the status (SNDSTREAMSTATUS)
  * @return the driver's result
  */
-int cStreamInstance_GetStatus_impl(void* self, void* out)
+int cStreamInstance_GetStatus_impl(void* vself, void* out)
 {
+    cStreamInstance* self = (cStreamInstance*)vself;
     int result;
     SNDSYS_entercritical();
-    result = SNDSTRM_status(*(int*)((char*)self + 0x8), out);
+    result = SNDSTRM_status(self->mHandle, out);
     SNDSYS_leavecritical();
     return result;
 }
@@ -631,9 +633,10 @@ INCLUDE_ASM("sound/streamsys", cStreamInstance_Purge__FPv);
  *
  * @return SNDSTRM_purge's result
  */
-void* cStreamInstance_Purge(void* self)
+void* cStreamInstance_Purge(void* vself)
 {
-    return SNDSTRM_purge(*(int*)((char*)self + 0x8));
+    cStreamInstance* self = (cStreamInstance*)vself;
+    return SNDSTRM_purge(self->mHandle);
 }
 #endif
 
@@ -1403,9 +1406,10 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_GetInstance__FPvi);
  * @param index  the stream index
  * @return the stream instance
  */
-int cStreamSys_STREAM_GetInstance(void* self, int index)
+int cStreamSys_STREAM_GetInstance(void* vself, int index)
 {
-    return *(int*)((char*)*(void**)((char*)self + 0x8) + index * 4);
+    cStreamSys* self = (cStreamSys*)vself;
+    return *(int*)((char*)self->mStreamInstance + index * 4);
 }
 #endif
 
@@ -2030,10 +2034,11 @@ INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_SetBank__FPvii);
  * @param bank  the bank
  * @param patch  the patch
  */
-void cBankMonitorInstance_SetBank(void* self, int bank, int patch)
+void cBankMonitorInstance_SetBank(void* vself, int bank, int patch)
 {
-    *(int*)((char*)self + 0xc) = bank;
-    *(int*)((char*)self + 0x10) = patch;
+    cBankMonitorInstance* self = (cBankMonitorInstance*)vself;
+    self->mRestartInfo.bank.mBank = bank;
+    self->mRestartInfo.bank.mPatch = patch;
 }
 #endif
 
@@ -2066,10 +2071,11 @@ INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_SetMIDI__FPvii);
  * @param midiData  the sequence data
  * @param bank  the bank
  */
-void cBankMonitorInstance_SetMIDI(void* self, int midiData, int bank)
+void cBankMonitorInstance_SetMIDI(void* vself, int midiData, int bank)
 {
-    *(int*)((char*)self + 0xc) = midiData;
-    *(int*)((char*)self + 0x10) = bank;
+    cBankMonitorInstance* self = (cBankMonitorInstance*)vself;
+    self->mRestartInfo.bank.mBank = midiData;
+    self->mRestartInfo.bank.mPatch = bank;
 }
 #endif
 

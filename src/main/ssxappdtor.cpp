@@ -1,4 +1,5 @@
 #include "common.h"
+#include "input/input.h"
 #include "main/gamestate.h"
 #include "main/sectionman.h"
 #include "be/beintnewrace.h"
@@ -1931,9 +1932,10 @@ INCLUDE_ASM("main/ssxappdtor", cInput_setPad__FPvi);
  *
  * @param val  the pad (a pointer passed as an int)
  */
-void cInput_setPad(void* self, int val)
+void cInput_setPad(void* vself, int val)
 {
-    *(int*)((char*)self + 0x0) = val;
+    cInput* self = (cInput*)vself;
+    self->Pad = (cInputPad*)val;
 }
 #endif
 
@@ -1947,9 +1949,10 @@ INCLUDE_ASM("main/ssxappdtor", cInput_setMap__FPvi);
  *
  * @param val  the input map (passed as an int)
  */
-void cInput_setMap(void* self, int val)
+void cInput_setMap(void* vself, int val)
 {
-    *(int*)((char*)self + 0x4) = val;
+    cInput* self = (cInput*)vself;
+    self->Map = (cInputMap*)val;
 }
 #endif
 
@@ -2744,9 +2747,10 @@ INCLUDE_ASM("main/ssxappdtor", cGameComm_stopSyncInput__FPv);
  *
  * cGFFinishlineState_gainFocus calls it on cGameComm_mGameComm before the race-end flow.
  */
-void cGameComm_stopSyncInput(void* self)
+void cGameComm_stopSyncInput(void* vself)
 {
-    *(int*)((char*)self + 0x40) = 0;
+    cGameComm* self = (cGameComm*)vself;
+    self->mSyncInput = 0;
 }
 #endif
 

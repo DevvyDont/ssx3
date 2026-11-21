@@ -336,15 +336,16 @@ INCLUDE_ASM("scripter/datamanager", cDataManager_AddToEmptyInstanceList__FPvT0);
  *
  * @param node  the instance record (On Tour tDataInstanceInfo*)
  */
-void cDataManager_AddToEmptyInstanceList(void* self, void* node)
+void cDataManager_AddToEmptyInstanceList(void* vself, void* node)
 {
+    cDataManager* self = (cDataManager*)vself;
     *(int*)((char*)node + 0x8) = 0;
     *(int*)((char*)node + 0xc) = 0;
     *(int*)((char*)node + 0x10) = 0;
     *(int*)((char*)node + 0x0) = 0;
     *(int*)((char*)node + 0x4) = 0;
-    *(void**)((char*)node + 0x14) = *(void**)((char*)self + 0x8);
-    *(void**)((char*)self + 0x8) = node;
+    *(void**)((char*)node + 0x14) = (void*)self->mpEmptyDataInstanceList;
+    self->mpEmptyDataInstanceList = (tDataInstanceInfo*)node;
 }
 #endif
 
@@ -359,10 +360,11 @@ INCLUDE_ASM("scripter/datamanager", cDataManager_GetEmptyInstance__FPv);
  *
  * @return the instance record
  */
-void* cDataManager_GetEmptyInstance(void* self)
+void* cDataManager_GetEmptyInstance(void* vself)
 {
-    void* head = *(void**)((char*)self + 0x8);
-    *(void**)((char*)self + 0x8) = *(void**)((char*)head + 0x14);
+    cDataManager* self = (cDataManager*)vself;
+    void* head = self->mpEmptyDataInstanceList;
+    self->mpEmptyDataInstanceList = (tDataInstanceInfo*)(*(void**)((char*)head + 0x14));
     *(void**)((char*)head + 0x14) = 0;
     return head;
 }

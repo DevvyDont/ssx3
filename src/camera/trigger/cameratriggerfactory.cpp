@@ -1633,9 +1633,10 @@ void cTriggerAlgorithm__cTriggerAlgorithm_impl(void* self, int flags) __asm__("c
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-void cTriggerAlgorithm__cTriggerAlgorithm_impl(void* self, int flags)
+void cTriggerAlgorithm__cTriggerAlgorithm_impl(void* vself, int flags)
 {
-    *(void***)((char*)self + 0x10) = D_0045BDE0;
+    cTriggerAlgorithm* self = (cTriggerAlgorithm*)vself;
+    self->mVtbl = D_0045BDE0;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -2275,9 +2276,10 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm__cBoundedAl
  *
  * @return cTriggerAlgorithm__cTriggerAlgorithm's result (the destructor returns nothing)
  */
-void* cBoundedAlgorithm__cBoundedAlgorithm(void* self)
+void* cBoundedAlgorithm__cBoundedAlgorithm(void* vself)
 {
-    *(int*)((char*)self + 0x10) = (int)(void*)cBoundedAlgorithm_vtbl;
+    cBoundedAlgorithm* self = (cBoundedAlgorithm*)vself;
+    self->mVtbl = (void**)((int)(void*)cBoundedAlgorithm_vtbl);
     return cTriggerAlgorithm__cTriggerAlgorithm(self);
 }
 #endif
@@ -7335,13 +7337,14 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBackgroundMan_cBackgroundMan
  *
  * @return @p self
  */
-void* cBackgroundMan_cBackgroundMan(void* self)
+void* cBackgroundMan_cBackgroundMan(void* vself)
 {
+    cBackgroundMan* self = (cBackgroundMan*)vself;
     int zero = 0;
-    *(int*)((char*)self + 0x4) = zero;
-    *(int*)((char*)self + 0x8) = -1;
+    self->miNumImage = zero;
+    self->miActiveImage = -1;
     *(int*)self = zero;
-    return self;
+    return ((void*)self);
 }
 #endif
 

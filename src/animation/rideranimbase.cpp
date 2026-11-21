@@ -952,8 +952,9 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getCurrentAnimID__FPvi);
  * @param i  the sequencer (On Tour tAIAnimSequencerID sid)
  * @return the current AI anim id
  */
-int cRiderAnimBase_getCurrentAnimID(void* self, int i)
+int cRiderAnimBase_getCurrentAnimID(void* vself, int i)
 {
+    cRiderAnimBase* self = (cRiderAnimBase*)vself;
     return *(int*)((char*)self + (i << 2));
 }
 #endif

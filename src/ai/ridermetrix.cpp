@@ -481,9 +481,10 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_getCurTrickPower__FPv);
  *
  * @return the trick power
  */
-float cRiderMetrix_getCurTrickPower(void* self)
+float cRiderMetrix_getCurTrickPower(void* vself)
 {
-    return *(float*)((char*)self + 0x14);
+    cRiderMetrix* self = (cRiderMetrix*)vself;
+    return self->CurTrickPower;
 }
 #endif
 
@@ -647,12 +648,13 @@ int cRiderMetrix_addHUDfx_impl(void* self, int a, const char* b, float c, int d)
  * @param data  extra data stored in the slot (+0xC)
  * @return the slot index used, or -1 without a bank
  */
-int cRiderMetrix_addHUDfx_impl(void* self, int hfx, const char* displayStr, float decayTime, int data)
+int cRiderMetrix_addHUDfx_impl(void* vself, int hfx, const char* displayStr, float decayTime, int data)
 {
-    if (*(sMetrixSlotAE8**)((char*)self + 0x1B0) == 0)
+    cRiderMetrix* self = (cRiderMetrix*)vself;
+    if ((sMetrixSlotAE8*)self->HUDfx == 0)
         return -1;
     int idx = cRiderMetrix_allocHUDfx((cRiderMetrix*)self, hfx);
-    cHUDFX_set(&(*(sMetrixSlotAE8**)((char*)self + 0x1B0))[idx], hfx, displayStr, decayTime, data);
+    cHUDFX_set(&((sMetrixSlotAE8*)self->HUDfx)[idx], hfx, displayStr, decayTime, data);
     return idx;
 }
 #endif
@@ -682,12 +684,13 @@ int cRiderMetrix_addHUDfx1_impl(void* self, int type, int value, int arg, float 
  * @param duration  seconds the message stays
  * @return the slot index used, or -1 without a bank
  */
-int cRiderMetrix_addHUDfx1_impl(void* self, int type, int value, int data, float duration)
+int cRiderMetrix_addHUDfx1_impl(void* vself, int type, int value, int data, float duration)
 {
-    if (*(sMetrixSlotB88**)((char*)self + 0x1B0) == 0)
+    cRiderMetrix* self = (cRiderMetrix*)vself;
+    if ((sMetrixSlotB88*)self->HUDfx == 0)
         return -1;
     int idx = cRiderMetrix_allocHUDfx((cRiderMetrix*)self, type);
-    cHUDFX_set1(&(*(sMetrixSlotB88**)((char*)self + 0x1B0))[idx], type, value, duration, data);
+    cHUDFX_set1(&((sMetrixSlotB88*)self->HUDfx)[idx], type, value, duration, data);
     return idx;
 }
 #endif
@@ -1808,12 +1811,13 @@ float cRiderMetrix_evSpin_impl(void* self, float x) __asm__("cRiderMetrix_evSpin
  * @param x  the trick's total spin so far, in radians (On Tour rad)
  * @return 0.0 (no boost change)
  */
-float cRiderMetrix_evSpin_impl(void* self, float x)
+float cRiderMetrix_evSpin_impl(void* vself, float x)
 {
-    *(float*)((char*)self + 0x14) -= metrixAbs_00119898(*(float*)((char*)self + 0x34)) * 0.015915492549538612f;
-    *(float*)((char*)self + 0x34) = x;
-    *(float*)((char*)self + 0x14) += metrixAbs_00119898(x) * 0.015915492549538612f;
-    *(float*)((char*)self + 0x14) = *(float*)((char*)self + 0x14) >? 0.0f;
+    cRiderMetrix* self = (cRiderMetrix*)vself;
+    self->CurTrickPower -= metrixAbs_00119898(self->CurTrickSpinAng) * 0.015915492549538612f;
+    self->CurTrickSpinAng = x;
+    self->CurTrickPower += metrixAbs_00119898(x) * 0.015915492549538612f;
+    self->CurTrickPower = self->CurTrickPower >? 0.0f;
     return 0.0f;
 }
 #endif
@@ -1863,9 +1867,10 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evRailSpin__FPvi);
  * @param rsm  the rail-slide mode (On Tour rsm)
  * @return evSpin's result (0.0)
  */
-void* cRiderMetrix_evRailSpin(void* self, int rsm)
+void* cRiderMetrix_evRailSpin(void* vself, int rsm)
 {
-    *(int*)((char*)self + 0x20) = rsm;
+    cRiderMetrix* self = (cRiderMetrix*)vself;
+    self->CurTrickRailslideMode = rsm;
     return cRiderMetrix_evSpin(self);
 }
 #endif
@@ -1883,14 +1888,15 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evUberGrindStart__FPvii);
  * @param rsm  the rail-slide mode (On Tour rsm)
  * @return 0.0, read back from the hold time just zeroed
  */
-float cRiderMetrix_evUberGrindStart(void* self, int grindID, int rsm)
+float cRiderMetrix_evUberGrindStart(void* vself, int grindID, int rsm)
 {
-    *(float*)((char*)self + 0x6c) = 0.0f;
-    *(int*)((char*)self + 0xc) = rsm;
-    *(int*)((char*)self + 0x20) = rsm;
-    *(int*)((char*)self + 0x70) = grindID;
-    *(int*)((char*)self + 0x5c) = 1;
-    return *(float*)((char*)self + 0x6c);
+    cRiderMetrix* self = (cRiderMetrix*)vself;
+    self->CurTrickUberGrindHoldSec = 0.0f;
+    self->InitTrickRailslideMode = rsm;
+    self->CurTrickRailslideMode = rsm;
+    self->CurTrickUberGrind = grindID;
+    self->CurTrickIsUber = 1;
+    return self->CurTrickUberGrindHoldSec;
 }
 #endif
 

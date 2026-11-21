@@ -331,11 +331,12 @@ INCLUDE_ASM("main/loadscreens_prestart", cPreGameLoadScreen_cPreGameLoadScreen__
  *
  * @return @p self
  */
-void* cPreGameLoadScreen_cPreGameLoadScreen(void* self)
+void* cPreGameLoadScreen_cPreGameLoadScreen(void* vself)
 {
-    *(int*)((char*)self + 0x4) = 0;
+    cPreGameLoadScreen* self = (cPreGameLoadScreen*)vself;
+    self->ending = 0;
     *(int*)self = (int)(void*)cPreGameLoadScreen_vtbl;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -351,11 +352,12 @@ INCLUDE_ASM("main/loadscreens_prestart", cPreFELoadScreen_cPreFELoadScreen__FPv)
  *
  * @return @p self
  */
-void* cPreFELoadScreen_cPreFELoadScreen(void* self)
+void* cPreFELoadScreen_cPreFELoadScreen(void* vself)
 {
-    *(int*)((char*)self + 0x4) = 0;
+    cPreFELoadScreen* self = (cPreFELoadScreen*)vself;
+    self->ending = 0;
     *(int*)self = (int)(void*)cPreFELoadScreen_vtbl;
-    return self;
+    return ((void*)self);
 }
 #endif
 

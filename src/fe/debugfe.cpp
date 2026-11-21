@@ -2451,9 +2451,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isStart__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isStart(void* self)
+void* cFEInput_isStart(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x70);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 0x70);
 }
 #endif
 
@@ -2465,9 +2466,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isSelect__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isSelect(void* self)
+void* cFEInput_isSelect(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 113);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 113);
 }
 #endif
 
@@ -2479,9 +2481,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isNext__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isNext(void* self)
+void* cFEInput_isNext(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 122);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 122);
 }
 #endif
 
@@ -2493,9 +2496,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isPrevious__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isPrevious(void* self)
+void* cFEInput_isPrevious(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 123);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 123);
 }
 #endif
 
@@ -2507,9 +2511,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isOption__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isOption(void* self)
+void* cFEInput_isOption(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x7c);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 0x7c);
 }
 #endif
 
@@ -2521,9 +2526,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isMisc__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isMisc(void* self)
+void* cFEInput_isMisc(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 125);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 125);
 }
 #endif
 
@@ -2535,9 +2541,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isNextHeld__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isNextHeld(void* self)
+void* cFEInput_isNextHeld(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 151);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 151);
 }
 #endif
 
@@ -2549,9 +2556,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isPreviousHeld__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isPreviousHeld(void* self)
+void* cFEInput_isPreviousHeld(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 152);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 152);
 }
 #endif
 
@@ -2563,9 +2571,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isOptionHeld__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isOptionHeld(void* self)
+void* cFEInput_isOptionHeld(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 153);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 153);
 }
 #endif
 
@@ -2577,9 +2586,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isMiscHeld__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isMiscHeld(void* self)
+void* cFEInput_isMiscHeld(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 154);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 154);
 }
 #endif
 
@@ -2591,9 +2601,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isNextReleased__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isNextReleased(void* self)
+void* cFEInput_isNextReleased(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 155);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 155);
 }
 #endif
 
@@ -2605,9 +2616,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isPreviousReleased__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isPreviousReleased(void* self)
+void* cFEInput_isPreviousReleased(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 156);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 156);
 }
 #endif
 
@@ -2619,9 +2631,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isOptionReleased__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isOptionReleased(void* self)
+void* cFEInput_isOptionReleased(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 157);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 157);
 }
 #endif
 
@@ -2633,9 +2646,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isMiscReleased__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isMiscReleased(void* self)
+void* cFEInput_isMiscReleased(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 158);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 158);
 }
 #endif
 
@@ -2647,9 +2661,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isUp__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isUp(void* self)
+void* cFEInput_isUp(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 114);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 114);
 }
 #endif
 
@@ -2661,9 +2676,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isDown__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isDown(void* self)
+void* cFEInput_isDown(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 115);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 115);
 }
 #endif
 
@@ -2675,9 +2691,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isLeft__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isLeft(void* self)
+void* cFEInput_isLeft(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 116);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 116);
 }
 #endif
 
@@ -2689,9 +2706,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isRight__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isRight(void* self)
+void* cFEInput_isRight(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 117);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 117);
 }
 #endif
 
@@ -2703,9 +2721,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isUpHeld__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isUpHeld(void* self)
+void* cFEInput_isUpHeld(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 147);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 147);
 }
 #endif
 
@@ -2717,9 +2736,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isDownHeld__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isDownHeld(void* self)
+void* cFEInput_isDownHeld(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 148);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 148);
 }
 #endif
 
@@ -2731,9 +2751,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isLeftHeld__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isLeftHeld(void* self)
+void* cFEInput_isLeftHeld(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 149);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 149);
 }
 #endif
 
@@ -2745,9 +2766,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isRightHeld__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isRightHeld(void* self)
+void* cFEInput_isRightHeld(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 150);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 150);
 }
 #endif
 
@@ -2759,9 +2781,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isRShift1__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isRShift1(void* self)
+void* cFEInput_isRShift1(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x7e);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 0x7e);
 }
 #endif
 
@@ -2773,9 +2796,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isRShift2__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isRShift2(void* self)
+void* cFEInput_isRShift2(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x7f);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 0x7f);
 }
 #endif
 
@@ -2787,9 +2811,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isLShift1__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isLShift1(void* self)
+void* cFEInput_isLShift1(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 0x80);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 0x80);
 }
 #endif
 
@@ -2801,9 +2826,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isLShift2__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isLShift2(void* self)
+void* cFEInput_isLShift2(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 129);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 129);
 }
 #endif
 
@@ -2815,9 +2841,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isRShift1Held__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isRShift1Held(void* self)
+void* cFEInput_isRShift1Held(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 130);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 130);
 }
 #endif
 
@@ -2829,9 +2856,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isRShift2Held__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isRShift2Held(void* self)
+void* cFEInput_isRShift2Held(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 131);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 131);
 }
 #endif
 
@@ -2843,9 +2871,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isLShift1Held__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isLShift1Held(void* self)
+void* cFEInput_isLShift1Held(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 132);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 132);
 }
 #endif
 
@@ -2857,9 +2886,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isLShift2Held__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isLShift2Held(void* self)
+void* cFEInput_isLShift2Held(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 133);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 133);
 }
 #endif
 
@@ -2871,9 +2901,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isCamZoom__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isCamZoom(void* self)
+void* cFEInput_isCamZoom(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 144);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 144);
 }
 #endif
 
@@ -2885,9 +2916,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isCamPan__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isCamPan(void* self)
+void* cFEInput_isCamPan(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 146);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 146);
 }
 #endif
 
@@ -2899,9 +2931,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isCamRotate__FPv);
  *
  * @return nonzero when the state is active (On Tour returns bool)
  */
-void* cFEInput_isCamRotate(void* self)
+void* cFEInput_isCamRotate(void* vself)
 {
-    return cInput_getState(*(int*)((char*)self + 0x18), 145);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getState((int)self->mpInput, 145);
 }
 #endif
 
@@ -2915,9 +2948,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_getCamZoom__FPv);
  *
  * @return cInput_getValue's result (On Tour returns float; declared void* here)
  */
-void* cFEInput_getCamZoom(void* self)
+void* cFEInput_getCamZoom(void* vself)
 {
-    return cInput_getValue(*(int*)((char*)self + 0x18), 144);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getValue((int)self->mpInput, 144);
 }
 #endif
 
@@ -2929,9 +2963,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_getCamPan__FPv);
  *
  * @return cInput_getValue's result (On Tour returns float; declared void* here)
  */
-void* cFEInput_getCamPan(void* self)
+void* cFEInput_getCamPan(void* vself)
 {
-    return cInput_getValue(*(int*)((char*)self + 0x18), 146);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getValue((int)self->mpInput, 146);
 }
 #endif
 
@@ -2943,9 +2978,10 @@ INCLUDE_ASM("fe/debugfe", cFEInput_getCamRotate__FPv);
  *
  * @return cInput_getValue's result (On Tour returns float; declared void* here)
  */
-void* cFEInput_getCamRotate(void* self)
+void* cFEInput_getCamRotate(void* vself)
 {
-    return cInput_getValue(*(int*)((char*)self + 0x18), 145);
+    cFEInput* self = (cFEInput*)vself;
+    return cInput_getValue((int)self->mpInput, 145);
 }
 #endif
 

@@ -1,4 +1,13 @@
 #include "common.h"
+#include "object/restorenode.h"
+#include "object/particlenode.h"
+#include "object/hidenode.h"
+#include "object/flexbridgenode.h"
+#include "object/debouncenode.h"
+#include "object/deadnode.h"
+#include "object/counternode.h"
+#include "object/conveyornode.h"
+#include "object/animdeltanode.h"
 #include "object/animframe.h"
 #include "object/flagset.h"
 #include "object/animteeternode.h"
@@ -3669,9 +3678,10 @@ INCLUDE_ASM("object/railmodifier", cSortObjNode_getSortIndex__FPv);
  *
  * @return the sort index
  */
-int cSortObjNode_getSortIndex(void* self)
+int cSortObjNode_getSortIndex(void* vself)
 {
-    return *(int*)((char*)self + 0x14);
+    cSortObjNode* self = (cSortObjNode*)vself;
+    return (int)self->SortIndex;
 }
 #endif
 
@@ -3886,9 +3896,10 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_getSectionId__FPv);
  *
  * @return the section number
  */
-unsigned char cInstanceNode_getSectionId(void* self)
+unsigned char cInstanceNode_getSectionId(void* vself)
 {
-    return *(unsigned char*)((char*)*(void**)((char*)self + 0x18) + 0x78);
+    cInstanceNode* self = (cInstanceNode*)vself;
+    return *(unsigned char*)((char*)self->Instance + 0x78);
 }
 #endif
 
@@ -4009,9 +4020,10 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_getRootTransform__FPv);
  *
  * @return pointer to the instance's matrix
  */
-void* cInstanceNode_getRootTransform(void* self)
+void* cInstanceNode_getRootTransform(void* vself)
 {
-    return (char*)*(void**)((char*)self + 0x18) + 0x10;
+    cInstanceNode* self = (cInstanceNode*)vself;
+    return (char*)self->Instance + 0x10;
 }
 #endif
 
@@ -4025,9 +4037,10 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_getRootTransform1__FPv);
  *
  * @return pointer to the node's instance matrix
  */
-void* cInstanceNode_getRootTransform1(void* self)
+void* cInstanceNode_getRootTransform1(void* vself)
 {
-    return (char*)*(void**)((char*)self + 0x18) + 0x10;
+    cInstanceNode* self = (cInstanceNode*)vself;
+    return (char*)self->Instance + 0x10;
 }
 #endif
 
@@ -4279,9 +4292,10 @@ INCLUDE_ASM("object/railmodifier", cDeadNode__cDeadNode__FPv);
  *
  * @return no meaningful value (cInstanceNode__cInstanceNode returns nothing)
  */
-void* cDeadNode__cDeadNode(void* self)
+void* cDeadNode__cDeadNode(void* vself)
 {
-    *(int*)((char*)self + 0xc) = (int)(void*)cDeadNode_vtbl;
+    cDeadNode* self = (cDeadNode*)vself;
+    self->mVtbl = (void**)((int)(void*)cDeadNode_vtbl);
     return cInstanceNode__cInstanceNode(self);
 }
 #endif
@@ -4341,9 +4355,10 @@ INCLUDE_ASM("object/railmodifier", cHideNode__cHideNode__FPv);
  *
  * @return cInstanceNode__cInstanceNode's result
  */
-void* cHideNode__cHideNode(void* self)
+void* cHideNode__cHideNode(void* vself)
 {
-    *(int*)((char*)self + 0xc) = (int)(void*)cHideNode_vtbl;
+    cHideNode* self = (cHideNode*)vself;
+    self->mVtbl = (void**)((int)(void*)cHideNode_vtbl);
     return cInstanceNode__cInstanceNode(self);
 }
 #endif
@@ -4404,9 +4419,10 @@ INCLUDE_ASM("object/railmodifier", cRestoreNode__cRestoreNode__FPv);
  *
  * @return cInstanceNode__cInstanceNode's result
  */
-void* cRestoreNode__cRestoreNode(void* self)
+void* cRestoreNode__cRestoreNode(void* vself)
 {
-    *(int*)((char*)self + 0xc) = (int)(void*)cRestoreNode_vtbl;
+    cRestoreNode* self = (cRestoreNode*)vself;
+    self->mVtbl = (void**)((int)(void*)cRestoreNode_vtbl);
     return cInstanceNode__cInstanceNode(self);
 }
 #endif
@@ -4876,9 +4892,10 @@ INCLUDE_ASM("object/railmodifier", cPhysicsModifier_isActive__FPv);
  *
  * @return the active flag (nonzero when active)
  */
-int cPhysicsModifier_isActive(void* self)
+int cPhysicsModifier_isActive(void* vself)
 {
-    return *(int*)((char*)self + 0x0);
+    cPhysicsModifier* self = (cPhysicsModifier*)vself;
+    return self->Active;
 }
 #endif
 
@@ -5692,9 +5709,10 @@ INCLUDE_ASM("object/railmodifier", cAnimObjectNode_isComplete__FPv);
  *
  * @return the completion flag (nonzero when complete)
  */
-int cAnimObjectNode_isComplete(void* self)
+int cAnimObjectNode_isComplete(void* vself)
 {
-    return *(int*)((char*)self + 0x8);
+    cAnimObjectNode* self = (cAnimObjectNode*)vself;
+    return self->AnimComplete;
 }
 #endif
 
@@ -6087,9 +6105,10 @@ INCLUDE_ASM("object/railmodifier", cDebounceNode__cDebounceNode__FPv);
  *
  * @return no meaningful value (cMoveNode__cMoveNode returns nothing)
  */
-void* cDebounceNode__cDebounceNode(void* self)
+void* cDebounceNode__cDebounceNode(void* vself)
 {
-    *(int*)((char*)self + 0xc) = (int)(void*)cDebounceNode_vtbl;
+    cDebounceNode* self = (cDebounceNode*)vself;
+    self->mVtbl = (void**)((int)(void*)cDebounceNode_vtbl);
     return cMoveNode__cMoveNode(self);
 }
 #endif
@@ -6117,9 +6136,10 @@ INCLUDE_ASM("object/railmodifier", cConveyorNode__cConveyorNode__FPv);
  *
  * @return cInstanceNode__cInstanceNode's result
  */
-void* cConveyorNode__cConveyorNode(void* self)
+void* cConveyorNode__cConveyorNode(void* vself)
 {
-    *(int*)((char*)self + 0xc) = (int)(void*)cConveyorNode_vtbl;
+    cConveyorNode* self = (cConveyorNode*)vself;
+    self->mVtbl = (void**)((int)(void*)cConveyorNode_vtbl);
     return cInstanceNode__cInstanceNode(self);
 }
 #endif
@@ -6132,8 +6152,9 @@ INCLUDE_ASM("object/railmodifier", cConveyorNode_getNodeState__FPv);
  *
  * @return pointer to the state
  */
-void* cConveyorNode_getNodeState(void* self)
+void* cConveyorNode_getNodeState(void* vself)
 {
+    cConveyorNode* self = (cConveyorNode*)vself;
     return (char*)self + 0x1C;
 }
 #endif
@@ -6152,9 +6173,10 @@ INCLUDE_ASM("object/railmodifier", cCounterNode__cCounterNode__FPv);
  *
  * @return no meaningful value (cInstanceNode__cInstanceNode returns nothing)
  */
-void* cCounterNode__cCounterNode(void* self)
+void* cCounterNode__cCounterNode(void* vself)
 {
-    *(int*)((char*)self + 0xc) = (int)(void*)cCounterNode_vtbl;
+    cCounterNode* self = (cCounterNode*)vself;
+    self->mVtbl = (void**)((int)(void*)cCounterNode_vtbl);
     return cInstanceNode__cInstanceNode(self);
 }
 #endif
@@ -6209,8 +6231,9 @@ INCLUDE_ASM("object/railmodifier", cFlexBridgeNode_getBoundBox__FPv);
  *
  * @return the address of the bound box (On Tour const tBoundBox*)
  */
-void* cFlexBridgeNode_getBoundBox(void* self)
+void* cFlexBridgeNode_getBoundBox(void* vself)
 {
+    cFlexBridgeNode* self = (cFlexBridgeNode*)vself;
     return (char*)self + 0x90;
 }
 #endif
@@ -6648,9 +6671,10 @@ INCLUDE_ASM("object/railmodifier", cPositionModifier_isRootTransformDirty__FPv);
  *
  * @return RootTransformDirty
  */
-int cPositionModifier_isRootTransformDirty(void* self)
+int cPositionModifier_isRootTransformDirty(void* vself)
 {
-    return *(int*)((char*)self + 0x44);
+    cPositionModifier* self = (cPositionModifier*)vself;
+    return self->RootTransformDirty;
 }
 #endif
 
@@ -6707,9 +6731,10 @@ INCLUDE_ASM("object/railmodifier", cPositionModifier_getRadius__FPv);
  *
  * @return Radius
  */
-float cPositionModifier_getRadius(void* self)
+float cPositionModifier_getRadius(void* vself)
 {
-    return *(float*)((char*)self + 0x40);
+    cPositionModifier* self = (cPositionModifier*)vself;
+    return self->Radius;
 }
 #endif
 
@@ -6721,9 +6746,10 @@ INCLUDE_ASM("object/railmodifier", cPositionModifier_setRadius__FPvf);
  *
  * @param val  new radius
  */
-void cPositionModifier_setRadius(void* self, float val)
+void cPositionModifier_setRadius(void* vself, float val)
 {
-    *(float*)((char*)self + 0x40) = val;
+    cPositionModifier* self = (cPositionModifier*)vself;
+    self->Radius = val;
 }
 #endif
 
@@ -6780,9 +6806,10 @@ INCLUDE_ASM("object/railmodifier", cParentModifier_update__FPv);
  * The parent modifier's update virtual: marks the root transform dirty (+0x44) so it follows the parent every
  * frame.
  */
-void cParentModifier_update(void* self)
+void cParentModifier_update(void* vself)
 {
-    *(int*)((char*)self + 0x44) = 1;
+    cParentModifier* self = (cParentModifier*)vself;
+    self->RootTransformDirty = 1;
 }
 #endif
 
@@ -6794,9 +6821,10 @@ INCLUDE_ASM("object/railmodifier", cParentModifier_getMesh__FPv);
  *
  * @return the mesh index within the parent instance
  */
-int cParentModifier_getMesh(void* self)
+int cParentModifier_getMesh(void* vself)
 {
-    return *(int*)((char*)self + 0x90);
+    cParentModifier* self = (cParentModifier*)vself;
+    return self->Mesh;
 }
 #endif
 
@@ -6859,9 +6887,10 @@ INCLUDE_ASM("object/railmodifier", cMagnetModifier_isRootTransformDirty__FPv);
  *
  * @return 1 when dirty, otherwise 0
  */
-int cMagnetModifier_isRootTransformDirty(void* self)
+int cMagnetModifier_isRootTransformDirty(void* vself)
 {
-    return (*(int*)((char*)self + 0x50) != 0);
+    cMagnetModifier* self = (cMagnetModifier*)vself;
+    return (self->RootTransformDirty != 0);
 }
 #endif
 
@@ -6916,9 +6945,10 @@ INCLUDE_ASM("object/railmodifier", cMagnetModifier_getRadius__FPv);
  *
  * @return the radius
  */
-float cMagnetModifier_getRadius(void* self)
+float cMagnetModifier_getRadius(void* vself)
 {
-    return *(float*)((char*)self + 0x40);
+    cMagnetModifier* self = (cMagnetModifier*)vself;
+    return self->Radius;
 }
 #endif
 
@@ -7033,9 +7063,10 @@ INCLUDE_ASM("object/railmodifier", cAvaSplineModifier_getRadius__FPv);
  *
  * @return the radius
  */
-float cAvaSplineModifier_getRadius(void* self)
+float cAvaSplineModifier_getRadius(void* vself)
 {
-    return *(float*)((char*)self + 0x30);
+    cAvaSplineModifier* self = (cAvaSplineModifier*)vself;
+    return self->Radius;
 }
 #endif
 
@@ -7047,9 +7078,10 @@ INCLUDE_ASM("object/railmodifier", cAvaSplineModifier_setRadius__FPvf);
  *
  * @param val  the new radius (On Tour radius)
  */
-void cAvaSplineModifier_setRadius(void* self, float val)
+void cAvaSplineModifier_setRadius(void* vself, float val)
 {
-    *(float*)((char*)self + 0x30) = val;
+    cAvaSplineModifier* self = (cAvaSplineModifier*)vself;
+    self->Radius = val;
 }
 #endif
 
@@ -7111,9 +7143,10 @@ INCLUDE_ASM("object/railmodifier", cSplineModifier_isComplete__FPv);
  *
  * @return the completion flag (nonzero when complete)
  */
-int cSplineModifier_isComplete(void* self)
+int cSplineModifier_isComplete(void* vself)
 {
-    return *(int*)((char*)self + 0x50);
+    cSplineModifier* self = (cSplineModifier*)vself;
+    return self->Complete;
 }
 #endif
 
@@ -7123,9 +7156,10 @@ INCLUDE_ASM("object/railmodifier", cSplineModifier_clearComplete__FPv);
 /**
  * Clears the spline modifier's completion flag at +0x50.
  */
-void cSplineModifier_clearComplete(void* self)
+void cSplineModifier_clearComplete(void* vself)
 {
-    *(int*)((char*)self + 0x50) = 0;
+    cSplineModifier* self = (cSplineModifier*)vself;
+    self->Complete = 0;
 }
 #endif
 
@@ -7166,9 +7200,10 @@ INCLUDE_ASM("object/railmodifier", cSplineModifier_getRadius__FPv);
  *
  * @return the radius
  */
-float cSplineModifier_getRadius(void* self)
+float cSplineModifier_getRadius(void* vself)
 {
-    return *(float*)((char*)self + 0x4C);
+    cSplineModifier* self = (cSplineModifier*)vself;
+    return self->Radius;
 }
 #endif
 
@@ -7180,9 +7215,10 @@ INCLUDE_ASM("object/railmodifier", cSplineModifier_setRadius__FPvf);
  *
  * @param val  the new radius
  */
-void cSplineModifier_setRadius(void* self, float val)
+void cSplineModifier_setRadius(void* vself, float val)
 {
-    *(float*)((char*)self + 0x4C) = val;
+    cSplineModifier* self = (cSplineModifier*)vself;
+    self->Radius = val;
 }
 #endif
 
@@ -7194,9 +7230,10 @@ INCLUDE_ASM("object/railmodifier", cSplineModifier_isRootTransformDirty__FPv);
  *
  * @return the dirty flag (nonzero when the root transform is out of date)
  */
-int cSplineModifier_isRootTransformDirty(void* self)
+int cSplineModifier_isRootTransformDirty(void* vself)
 {
-    return *(int*)((char*)self + 0x58);
+    cSplineModifier* self = (cSplineModifier*)vself;
+    return self->RootTransformDirty;
 }
 #endif
 
@@ -7251,9 +7288,10 @@ INCLUDE_ASM("object/railmodifier", cMultiSplineModifier_getBoundBox__FPv);
  *
  * @return the address of the bound box (On Tour const tBoundBox*)
  */
-void* cMultiSplineModifier_getBoundBox(void* self)
+void* cMultiSplineModifier_getBoundBox(void* vself)
 {
-    return (char*)*(void**)((char*)self + 0x3c) + 0x30;
+    cMultiSplineModifier* self = (cMultiSplineModifier*)vself;
+    return (char*)self->Nodes + 0x30;
 }
 #endif
 
@@ -7295,9 +7333,10 @@ INCLUDE_ASM("object/railmodifier", cMultiSplineModifier_getRadius__FPv);
  *
  * @return the radius
  */
-float cMultiSplineModifier_getRadius(void* self)
+float cMultiSplineModifier_getRadius(void* vself)
 {
-    return *(float*)((char*)self + 0x18);
+    cMultiSplineModifier* self = (cMultiSplineModifier*)vself;
+    return self->Radius;
 }
 #endif
 
@@ -7309,9 +7348,10 @@ INCLUDE_ASM("object/railmodifier", cMultiSplineModifier_setRadius__FPvf);
  *
  * @param val  the new radius
  */
-void cMultiSplineModifier_setRadius(void* self, float val)
+void cMultiSplineModifier_setRadius(void* vself, float val)
 {
-    *(float*)((char*)self + 0x18) = val;
+    cMultiSplineModifier* self = (cMultiSplineModifier*)vself;
+    self->Radius = val;
 }
 #endif
 
@@ -7418,9 +7458,10 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_collide1__FPv);
  *
  * @return no meaningful value (cRollerModifier_Collision returns nothing)
  */
-void* cRollerModifier_collide1(void* self)
+void* cRollerModifier_collide1(void* vself)
 {
-    *(int*)((char*)self + 0x20) = 0;
+    cRollerModifier* self = (cRollerModifier*)vself;
+    *(int*)&self->Life = 0;
     return cRollerModifier_Collision(self);
 }
 #endif
@@ -7476,9 +7517,10 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_getRadius__FPv);
  *
  * @return the radius
  */
-float cRollerModifier_getRadius(void* self)
+float cRollerModifier_getRadius(void* vself)
 {
-    return *(float*)((char*)self + 0x24);
+    cRollerModifier* self = (cRollerModifier*)vself;
+    return self->Radius;
 }
 #endif
 
@@ -7490,9 +7532,10 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_setRadius__FPvf);
  *
  * @param val  the new radius
  */
-void cRollerModifier_setRadius(void* self, float val)
+void cRollerModifier_setRadius(void* vself, float val)
 {
-    *(float*)((char*)self + 0x24) = val;
+    cRollerModifier* self = (cRollerModifier*)vself;
+    self->Radius = val;
 }
 #endif
 
@@ -7568,9 +7611,10 @@ INCLUDE_ASM("object/railmodifier", cParticleNode__cParticleNode__FPv);
  *
  * @return no meaningful value (cMoveNode__cMoveNode returns nothing)
  */
-void* cParticleNode__cParticleNode(void* self)
+void* cParticleNode__cParticleNode(void* vself)
 {
-    *(int*)((char*)self + 0xc) = (int)(void*)cParticleNode_vtbl;
+    cParticleNode* self = (cParticleNode*)vself;
+    self->mVtbl = (void**)((int)(void*)cParticleNode_vtbl);
     return cMoveNode__cMoveNode(self);
 }
 #endif
@@ -7643,9 +7687,10 @@ INCLUDE_ASM("object/railmodifier", cAnimDeltaNode__cAnimDeltaNode__FPv);
  *
  * @return cAnimObjectNode__cAnimObjectNode's result
  */
-void* cAnimDeltaNode__cAnimDeltaNode(void* self)
+void* cAnimDeltaNode__cAnimDeltaNode(void* vself)
 {
-    *(int*)((char*)self + 0x3c) = (int)(void*)cAnimDeltaNode_vtbl;
+    cAnimDeltaNode* self = (cAnimDeltaNode*)vself;
+    self->mVtbl = (void**)((int)(void*)cAnimDeltaNode_vtbl);
     return cAnimObjectNode__cAnimObjectNode(self);
 }
 #endif

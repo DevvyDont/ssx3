@@ -537,15 +537,16 @@ INCLUDE_ASM("util/menu", cMenu_cMenu__FPv);
  *
  * @return @p self
  */
-void* cMenu_cMenu(void* self)
+void* cMenu_cMenu(void* vself)
 {
+    cMenu* self = (cMenu*)vself;
     int zeroValue = 0;
     *(int*)self = zeroValue;
-    *(int*)((char*)self + 0x12c) = (int)(void*)cMenu_vtbl;
-    *(int*)((char*)self + 0x4) = zeroValue;
-    *(int*)((char*)self + 0x8) = zeroValue;
-    *(int*)((char*)self + 0x124) = zeroValue;
-    return self;
+    self->mVtbl = (void**)((int)(void*)cMenu_vtbl);
+    self->FocusItem = zeroValue;
+    self->TopItem = zeroValue;
+    self->MenuSys = (cMenuSys*)zeroValue;
+    return ((void*)self);
 }
 #endif
 
@@ -1921,15 +1922,16 @@ INCLUDE_ASM("util/menu", cMenuSys_init__FPv);
  *
  * Zeroes +0x0, +0x54, +0x58 and +0x64, sets +0x48 to 11 and +0x4C and +0x50 to -1.
  */
-void cMenuSys_init(void* self)
+void cMenuSys_init(void* vself)
 {
-    *(int*)((char*)self + 0x58) = 0;
-    *(int*)((char*)self + 0x54) = 0;
+    cMenuSys* self = (cMenuSys*)vself;
+    self->Font = 0;
+    self->Active = 0;
     *(int*)self = 0;
-    *(int*)((char*)self + 0x64) = 0;
-    *(int*)((char*)self + 0x4c) = -1;
+    self->MenuYOffset = 0;
+    self->VKey = -1;
     *(int*)((char*)self + 0x48) = 11;
-    *(int*)((char*)self + 0x50) = -1;
+    self->AsciiKey = -1;
 }
 #endif
 
@@ -1962,9 +1964,10 @@ INCLUDE_ASM("util/menu", cMenuSys_activate__FPvi);
  *
  * @param val  nonzero to activate
  */
-void cMenuSys_activate(void* self, int val)
+void cMenuSys_activate(void* vself, int val)
 {
-    *(int*)((char*)self + 0x54) = val;
+    cMenuSys* self = (cMenuSys*)vself;
+    self->Active = val;
 }
 #endif
 
@@ -2061,8 +2064,9 @@ INCLUDE_ASM("util/menu", cMenuSys_getKey__FPv);
  *
  * @return the menu key code (0 up, 1 down, 2 left, 3 right, 6 select, 7 back, ...)
  */
-int cMenuSys_getKey(void* self)
+int cMenuSys_getKey(void* vself)
 {
+    cMenuSys* self = (cMenuSys*)vself;
     return *(int*)((char*)self + 0x48);
 }
 #endif
@@ -2075,9 +2079,10 @@ INCLUDE_ASM("util/menu", cMenuSys_getVKey__FPv);
  *
  * @return the virtual key code
  */
-int cMenuSys_getVKey(void* self)
+int cMenuSys_getVKey(void* vself)
 {
-    return *(int*)((char*)self + 0x4C);
+    cMenuSys* self = (cMenuSys*)vself;
+    return self->VKey;
 }
 #endif
 
@@ -2089,9 +2094,10 @@ INCLUDE_ASM("util/menu", cMenuSys_getAsciiKey__FPv);
  *
  * @return the character code
  */
-int cMenuSys_getAsciiKey(void* self)
+int cMenuSys_getAsciiKey(void* vself)
 {
-    return *(int*)((char*)self + 0x50);
+    cMenuSys* self = (cMenuSys*)vself;
+    return self->AsciiKey;
 }
 #endif
 
@@ -2107,9 +2113,10 @@ INCLUDE_ASM("util/menu", cMenuSys_getLeft__FPv);
  *
  * @return the left value
  */
-void* cMenuSys_getLeft(void* self)
+void* cMenuSys_getLeft(void* vself)
 {
-    return cInput_getValue(*(int*)((char*)self + 0x5c), 0x3e);
+    cMenuSys* self = (cMenuSys*)vself;
+    return cInput_getValue((int)self->Input, 0x3e);
 }
 #endif
 
@@ -2123,9 +2130,10 @@ INCLUDE_ASM("util/menu", cMenuSys_getRight__FPv);
  *
  * @return the right value
  */
-void* cMenuSys_getRight(void* self)
+void* cMenuSys_getRight(void* vself)
 {
-    return cInput_getValue(*(int*)((char*)self + 0x5c), 0x3f);
+    cMenuSys* self = (cMenuSys*)vself;
+    return cInput_getValue((int)self->Input, 0x3f);
 }
 #endif
 
@@ -2139,9 +2147,10 @@ INCLUDE_ASM("util/menu", cMenuSys_getUp__FPv);
  *
  * @return the up value
  */
-void* cMenuSys_getUp(void* self)
+void* cMenuSys_getUp(void* vself)
 {
-    return cInput_getValue(*(int*)((char*)self + 0x5c), 0x40);
+    cMenuSys* self = (cMenuSys*)vself;
+    return cInput_getValue((int)self->Input, 0x40);
 }
 #endif
 
@@ -2155,9 +2164,10 @@ INCLUDE_ASM("util/menu", cMenuSys_getDown__FPv);
  *
  * @return the down value
  */
-void* cMenuSys_getDown(void* self)
+void* cMenuSys_getDown(void* vself)
 {
-    return cInput_getValue(*(int*)((char*)self + 0x5c), 65);
+    cMenuSys* self = (cMenuSys*)vself;
+    return cInput_getValue((int)self->Input, 65);
 }
 #endif
 
@@ -2174,9 +2184,10 @@ int cMenuSys_getLeftShift_impl(void* self) __asm__("cMenuSys_getLeftShift");
  *
  * @return 1 while held, else 0
  */
-int cMenuSys_getLeftShift_impl(void* self)
+int cMenuSys_getLeftShift_impl(void* vself)
 {
-    return cInput_getValue_f(*(int*)((char*)self + 0x5c), 66) != 0.0f;
+    cMenuSys* self = (cMenuSys*)vself;
+    return cInput_getValue_f((int)self->Input, 66) != 0.0f;
 }
 #endif
 
@@ -2193,9 +2204,10 @@ int cMenuSys_getRightShift_impl(void* self) __asm__("cMenuSys_getRightShift");
  *
  * @return 1 while held, else 0
  */
-int cMenuSys_getRightShift_impl(void* self)
+int cMenuSys_getRightShift_impl(void* vself)
 {
-    return cInput_getValue_f(*(int*)((char*)self + 0x5c), 67) != 0.0f;
+    cMenuSys* self = (cMenuSys*)vself;
+    return cInput_getValue_f((int)self->Input, 67) != 0.0f;
 }
 #endif
 
@@ -2826,9 +2838,10 @@ void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_te
  * @param rect  the row rectangle (a tRect pointer passed as an int)
  * @return no meaningful value (the draw helper returns nothing; On Tour's render is void)
  */
-void* cSubMenuItem_render(void* self, int rect)
+void* cSubMenuItem_render(void* vself, int rect)
 {
-    return cMenuItem_textRender1_5(self, rect, 0, *(int*)((char*)self + 0x14), 0);
+    cSubMenuItem* self = (cSubMenuItem*)vself;
+    return cMenuItem_textRender1_5(self, rect, 0, (int)self->Caption, 0);
 }
 #endif
 
@@ -2918,9 +2931,10 @@ void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_te
  * @param rect  the row's rect
  * @return cMenuItem_textRender1's return value
  */
-void* cPopMenuItem_render(void* self, int rect)
+void* cPopMenuItem_render(void* vself, int rect)
 {
-    return cMenuItem_textRender1_5(self, rect, 0, *(int*)((char*)self + 0x14), 0);
+    cPopMenuItem* self = (cPopMenuItem*)vself;
+    return cMenuItem_textRender1_5(self, rect, 0, (int)self->Caption, 0);
 }
 #endif
 
@@ -3240,9 +3254,10 @@ void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_te
  * @param rect  the row's rect
  * @return cMenuItem_textRender1's return value
  */
-void* cCallbackMenuItem_render(void* self, int rect)
+void* cCallbackMenuItem_render(void* vself, int rect)
 {
-    return cMenuItem_textRender1_5(self, rect, *(int*)((char*)self + 0x14), 0, D_004866C8);
+    cCallbackMenuItem* self = (cCallbackMenuItem*)vself;
+    return cMenuItem_textRender1_5(self, rect, (int)self->Caption, 0, D_004866C8);
 }
 #endif
 
@@ -3325,9 +3340,10 @@ void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_te
  * @param rect  the row rectangle (a tRect pointer passed as an int)
  * @return no meaningful value (the draw helper returns nothing; On Tour's render is void)
  */
-void* cNullMenuItem_render(void* self, int rect)
+void* cNullMenuItem_render(void* vself, int rect)
 {
-    return cMenuItem_textRender1_5(self, rect, 0, *(int*)((char*)self + 0x14), 0);
+    cNullMenuItem* self = (cNullMenuItem*)vself;
+    return cMenuItem_textRender1_5(self, rect, 0, (int)self->Caption, 0);
 }
 #endif
 
@@ -5432,8 +5448,9 @@ INCLUDE_ASM("util/menu", cExpandMenuItem_addItem__FPvT0);
  *
  * @param item  the menu item to add
  */
-void cExpandMenuItem_addItem(void* self, void* item)
+void cExpandMenuItem_addItem(void* vself, void* item)
 {
+    cExpandMenuItem* self = (cExpandMenuItem*)vself;
     cMenu_addItem2((char*)self + 0x18, item);
 }
 #endif

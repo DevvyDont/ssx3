@@ -180,14 +180,15 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_cWScriptCacheEntry__FPv);
  *
  * @return @p self
  */
-void* cWScriptCacheEntry_cWScriptCacheEntry(void* self)
+void* cWScriptCacheEntry_cWScriptCacheEntry(void* vself)
 {
+    cWScriptCacheEntry* self = (cWScriptCacheEntry*)vself;
     int zero = 0;
     *(short*)self = (short)zero;
-    *(int*)((char*)self + 0x4) = -1;
-    *(int*)((char*)self + 0x8) = zero;
-    *(short*)((char*)self + 0x2) = (short)zero;
-    return self;
+    self->mAsyncHandle = -1;
+    self->mpScriptHeader = (tScriptFileHeader*)zero;
+    self->mStreamed = (short)zero;
+    return ((void*)self);
 }
 #endif
 

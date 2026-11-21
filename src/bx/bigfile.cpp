@@ -131,15 +131,16 @@ INCLUDE_ASM("bx/bigfile", cBlockMan_cBlockMan__FPv);
  *
  * @return @p self
  */
-void* cBlockMan_cBlockMan(void* self)
+void* cBlockMan_cBlockMan(void* vself)
 {
+    cBlockMan* self = (cBlockMan*)vself;
     int zero = 0;
     *(int*)self = zero;
-    *(int*)((char*)self + 0x10) = 0x10;
-    *(int*)((char*)self + 0x4) = zero;
-    *(int*)((char*)self + 0x8) = zero;
-    *(int*)((char*)self + 0xc) = zero;
-    return self;
+    self->Allignment = 0x10;
+    self->MemorySize = zero;
+    self->Groups = (tBlockGroup*)zero;
+    self->NumGroups = zero;
+    return ((void*)self);
 }
 #endif
 

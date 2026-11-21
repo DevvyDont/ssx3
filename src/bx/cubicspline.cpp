@@ -77,15 +77,16 @@ INCLUDE_ASM("bx/cubicspline", cCubicSplineInterpolant_initAsClamped__FPvff);
  * @param start  the slope at the first point
  * @param end  the slope at the last point
  */
-void cCubicSplineInterpolant_initAsClamped(void* self, float start, float end)
+void cCubicSplineInterpolant_initAsClamped(void* vself, float start, float end)
 {
+    cCubicSplineInterpolant* self = (cCubicSplineInterpolant*)vself;
     cCubicSplineInterpolant_initCommon(self);
     unsigned int flags = *(unsigned int*)self;
-    void* ptr = *(void**)((char*)self + 0x8);
+    void* ptr = self->CubicSplines;
     flags |= 1;
     *(unsigned int*)self = flags;
     *(float*)((char*)ptr + 0x10) = start;
-    *(float*)((char*)self + 0x4) = end;
+    self->MaxX = end;
 }
 #endif
 
@@ -100,11 +101,12 @@ INCLUDE_ASM("bx/cubicspline", cCubicSplineInterpolant_purge__FPv);
  *
  * cCubicSplineInterpolant_initCommon calls it before allocating new data.
  */
-void cCubicSplineInterpolant_purge(void* self)
+void cCubicSplineInterpolant_purge(void* vself)
 {
-    if (*(void**)((char*)self + 0x8) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0x8));
-        *(void**)((char*)self + 0x8) = 0;
+    cCubicSplineInterpolant* self = (cCubicSplineInterpolant*)vself;
+    if (self->CubicSplines != 0) {
+        cMemMan_free(self->CubicSplines);
+        self->CubicSplines = 0;
     }
     int flags = *(int*)self;
     flags &= -3;
@@ -2012,13 +2014,14 @@ INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_cDynamicMemMan__FPv);
  *
  * @return @p self
  */
-void* cDynamicMemMan_cDynamicMemMan(void* self)
+void* cDynamicMemMan_cDynamicMemMan(void* vself)
 {
-    *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x8) = 0;
-    *(int*)((char*)self + 0xC) = 0;
-    *(int*)((char*)self + 0x0) = 0;
-    return self;
+    cDynamicMemMan* self = (cDynamicMemMan*)vself;
+    self->Heap = 0;
+    self->CoreTop = 0;
+    self->HeapSize = 0;
+    self->MallocState = 0;
+    return ((void*)self);
 }
 #endif
 

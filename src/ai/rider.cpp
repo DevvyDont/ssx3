@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/player.h"
 #include "bx/math3d.h"
 #include "render/ps2graphicsman.h"
 #include "animation/animmodel.h"
@@ -7363,10 +7364,11 @@ INCLUDE_ASM("ai/rider", cPlayer_vibrationReset__FPv);
 /**
  * Clears the player's two vibration levels, unk_DFC and unk_E00 (cRider virtual slot 16).
  */
-void cPlayer_vibrationReset(void* self)
+void cPlayer_vibrationReset(void* vself)
 {
-    *(float*)((char*)self + 0xE00) = 0.0f;
-    *(float*)((char*)self + 0xDFC) = 0.0f;
+    cPlayer* self = (cPlayer*)vself;
+    self->unk_E00 = 0.0f;
+    self->unk_DFC = 0.0f;
 }
 #endif
 
@@ -7392,9 +7394,10 @@ INCLUDE_ASM("ai/rider", cPlayer_vibrationRumble__FPvf);
  *
  * @param val  the rumble strength
  */
-void cPlayer_vibrationRumble(void* self, float val)
+void cPlayer_vibrationRumble(void* vself, float val)
 {
-    *(float*)((char*)self + 0xE00) = val;
+    cPlayer* self = (cPlayer*)vself;
+    self->unk_E00 = val;
 }
 #endif
 

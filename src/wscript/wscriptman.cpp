@@ -2192,11 +2192,12 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_updateMissionPoints__FPvii);
  * @param points  the current points
  * @param goal  the points goal
  */
-void cWScriptMan_updateMissionPoints(void* self, int points, int goal)
+void cWScriptMan_updateMissionPoints(void* vself, int points, int goal)
 {
-    *(int*)((char*)self + 0x4) = 1;
-    *(int*)((char*)self + 0x8) = points;
-    *(int*)((char*)self + 0xc) = goal;
+    cWScriptMan* self = (cWScriptMan*)vself;
+    self->MissionPointsEnable = 1;
+    self->MissionPoints = points;
+    self->MissionPointsGoal = goal;
 }
 #endif
 
@@ -2209,11 +2210,12 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_updateMissionCount__FPvii);
  * @param count  the current count
  * @param maxCount  the maximum count
  */
-void cWScriptMan_updateMissionCount(void* self, int count, int maxCount)
+void cWScriptMan_updateMissionCount(void* vself, int count, int maxCount)
 {
-    *(int*)((char*)self + 0x10) = 1;
-    *(int*)((char*)self + 0x14) = count;
-    *(int*)((char*)self + 0x18) = maxCount;
+    cWScriptMan* self = (cWScriptMan*)vself;
+    self->MissionCountEnable = 1;
+    self->MissionCount = count;
+    self->MissionCountMax = maxCount;
 }
 #endif
 
@@ -2226,11 +2228,12 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_updateMissionTicks__FPvii);
  * @param ticks  the clock ticks
  * @param dir  the clock direction
  */
-void cWScriptMan_updateMissionTicks(void* self, int ticks, int dir)
+void cWScriptMan_updateMissionTicks(void* vself, int ticks, int dir)
 {
-    *(int*)((char*)self + 0x1c) = 1;
-    *(int*)((char*)self + 0x20) = ticks;
-    *(int*)((char*)self + 0x24) = dir;
+    cWScriptMan* self = (cWScriptMan*)vself;
+    self->MissionTicksEnable = 1;
+    self->MissionTicks = ticks;
+    self->MissionTicksDir = dir;
 }
 #endif
 
@@ -2244,11 +2247,12 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_updateMissionHeight__FPviT0);
  * @param being  the rider index
  * @param src  the instance record
  */
-void cWScriptMan_updateMissionHeight(void* self, int being, void* src)
+void cWScriptMan_updateMissionHeight(void* vself, int being, void* src)
 {
-    *(int*)((char*)self + 0x28) = 1;
-    *(int*)((char*)self + 0x30) = being;
-    *(int*)((char*)self + 0x2c) = *(int*)((char*)src + 0x78);
+    cWScriptMan* self = (cWScriptMan*)vself;
+    self->MissionHeightEnable = 1;
+    self->MissionHeightBeing = being;
+    self->MissionHeightInstId = *(int*)((char*)src + 0x78);
 }
 #endif
 
@@ -2459,8 +2463,9 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_isProcessActive__FPvT0);
  * @param process  the process (On Tour process)
  * @return 1 when a process with @p process's id (+0x20) is in the active list at +0x2B8, else 0
  */
-int cWScriptMan_isProcessActive(void* self, void* process)
+int cWScriptMan_isProcessActive(void* vself, void* process)
 {
+    cWScriptMan* self = (cWScriptMan*)vself;
     return (cProcessList_findProcess1((char*)self + 0x2b8, *(int*)((char*)process + 0x20)) != 0);
 }
 #endif

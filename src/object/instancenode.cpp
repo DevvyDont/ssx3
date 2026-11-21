@@ -123,9 +123,10 @@ INCLUDE_ASM("object/instancenode", cInstanceNode_runExpireScript__FPv);
  *
  * @return cObjectInterface_runExpireScript's result (nonzero when a script ran)
  */
-void* cInstanceNode_runExpireScript(void* self)
+void* cInstanceNode_runExpireScript(void* vself)
 {
-    return cObjectInterface_runExpireScript(*(int*)((char*)self + 0x18));
+    cInstanceNode* self = (cInstanceNode*)vself;
+    return cObjectInterface_runExpireScript((int)self->Instance);
 }
 #endif
 
@@ -141,9 +142,10 @@ INCLUDE_ASM("object/instancenode", cInstanceNode_runOnLoseFocusScript__FPv);
  *
  * @return cObjectInterface_runOnLoseFocusScript()'s result
  */
-void* cInstanceNode_runOnLoseFocusScript(void* self)
+void* cInstanceNode_runOnLoseFocusScript(void* vself)
 {
-    return cObjectInterface_runOnLoseFocusScript(*(int*)((char*)self + 0x18));
+    cInstanceNode* self = (cInstanceNode*)vself;
+    return cObjectInterface_runOnLoseFocusScript((int)self->Instance);
 }
 #endif
 

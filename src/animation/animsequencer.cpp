@@ -541,10 +541,11 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequencer_init__FPv);
  * Initialises an animation sequencer as empty: zeroes its count (On Tour NumPlaying) and its sequence list
  * head.
  */
-void cAnimSequencer_init(void* self)
+void cAnimSequencer_init(void* vself)
 {
+    cAnimSequencer* self = (cAnimSequencer*)vself;
     *(int*)self = 0;
-    *(void**)((char*)self + 0x4) = 0;
+    self->PlayList = 0;
 }
 #endif
 
@@ -1227,11 +1228,12 @@ void cMdfArchive_linkArchive_impl(void* self, char* data) __asm__("cMdfArchive_l
  *
  * @param data  the MDF archive header
  */
-void cMdfArchive_linkArchive_impl(void* self, char* data)
+void cMdfArchive_linkArchive_impl(void* vself, char* data)
 {
-    *(char**)((char*)self + 0x4) = data;
-    *(char**)((char*)self + 0x8) = data + *(short*)(data + 0x6);
-    *(char**)((char*)self + 0xC) = data + *(int*)(data + 0x8);
+    cMdfArchive* self = (cMdfArchive*)vself;
+    self->ArchiveHeader = (tMdfArchive*)data;
+    self->ModelHeaders = (tMdfModelHeader*)(data + *(short*)(data + 0x6));
+    self->Data = data + *(int*)(data + 0x8);
 }
 #endif
 

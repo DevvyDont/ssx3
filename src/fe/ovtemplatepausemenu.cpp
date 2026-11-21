@@ -356,9 +356,10 @@ INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onDestroyScreen__FPv
  *
  * @return cOVState_onDestroyScreen()'s return value (On Tour's returns nothing)
  */
-void* cOVTemplate_PauseMenu_onDestroyScreen(void* self)
+void* cOVTemplate_PauseMenu_onDestroyScreen(void* vself)
 {
-    *(int*)((char*)self + 0xc4) = 0;
+    cOVTemplate_PauseMenu* self = (cOVTemplate_PauseMenu*)vself;
+    self->mpThread = 0;
     return cOVState_onDestroyScreen(self);
 }
 #endif
