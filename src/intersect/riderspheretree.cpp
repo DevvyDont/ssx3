@@ -142,16 +142,6 @@ struct sVec4_9A28 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct sSphereNode_9A28 {
-    int type;            // 0x00
-    char pad_0x04[0xC];
-    sVec4_9A28 center;   // 0x10
-    float radius;        // 0x20
-    int user;            // 0x24
-    int parent;          // 0x28
-    int count;           // 0x2C
-    char children[1];    // 0x30
-};
 
 extern "C" void MEM_copy(void* dst, void* src, int size);
 
@@ -165,15 +155,15 @@ extern "C" void MEM_copy(void* dst, void* src, int size);
  * @param src  the tree to copy (On Tour copy)
  * @return @p self
  */
-extern "C" sSphereNode_9A28* cRiderSphereTree_operatorE(sSphereNode_9A28* self, sSphereNode_9A28* src)
+extern "C" cRiderSphereTree* cRiderSphereTree_operatorE(cRiderSphereTree* self, cRiderSphereTree* src)
 {
-    self->type = src->type;
-    self->radius = src->radius;
-    self->center = src->center;
-    self->user = src->user;
-    self->count = src->count;
-    self->parent = src->parent;
-    MEM_copy(self->children, src->children, self->count << 5);
+    (*(int*)&self->bonePoses) = ((int)src->bonePoses);
+    self->boundRad = src->boundRad;
+    (*(sVec4_9A28*)&self->boundCen) = (*(sVec4_9A28*)&src->boundCen);
+    self->boundBone = src->boundBone;
+    self->listLen = src->listLen;
+    self->sphMask = ((int)src->sphMask);
+    MEM_copy(((char*)&self->sphList[0]), ((char*)&src->sphList[0]), self->listLen << 5);
     return self;
 }
 #endif
@@ -4261,7 +4251,7 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldRider_Transform);
 #ifdef SKIP_ASM
 struct sSphereNode_9A28;
 struct sSphereMtx;
-extern "C" sSphereNode_9A28* cRiderSphereTree_operatorE(sSphereNode_9A28* self, sSphereNode_9A28* src);
+extern "C" cRiderSphereTree* cRiderSphereTree_operatorE(cRiderSphereTree* self, cRiderSphereTree* src);
 extern "C" void cRiderSphereTree_ApplyTransform(sSphereTreeNode* s, sSphereMtx* m, float scale);
 
 /**
@@ -4277,7 +4267,7 @@ extern "C" void cRiderSphereTree_ApplyTransform(sSphereTreeNode* s, sSphereMtx* 
 extern "C" void cWorldRider_Transform(cWorldRider* self, sSphereMtx* mat, float scale)
 {
     sSphereTreeNode* node = (sSphereTreeNode*)(&self->localTree);
-    cRiderSphereTree_operatorE((sSphereNode_9A28*)node, (sSphereNode_9A28*)self->st);
+    cRiderSphereTree_operatorE((cRiderSphereTree*)node, self->st);
     self->st = (cRiderSphereTree*)node;
     cRiderSphereTree_ApplyTransform(node, mat, scale);
     self->isTransformed = 1;

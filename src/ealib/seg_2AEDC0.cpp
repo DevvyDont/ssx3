@@ -1261,9 +1261,6 @@ extern "C" void RCMP_AV_SUBTITLE_ARRAY_Init(void* vself, unsigned int count, int
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_ARRAY_GetSubtitle);
 #ifdef SKIP_ASM
-struct sWScriptEntry_3AF230 {
-    char pad[0x34];
-};
 
 /**
  * Returns a subtitle array's entry by index.
@@ -1274,12 +1271,12 @@ struct sWScriptEntry_3AF230 {
  * @param i  the entry index
  * @return the entry (0x34-byte stride), or 0 when index > count
  */
-extern "C" sWScriptEntry_3AF230* RCMP_AV_SUBTITLE_ARRAY_GetSubtitle(RCMP_AV_SUBTITLE_ARRAY* self, unsigned int i)
+extern "C" RCMP_AV_SUBTITLE* RCMP_AV_SUBTITLE_ARRAY_GetSubtitle(RCMP_AV_SUBTITLE_ARRAY* self, unsigned int i)
 {
     if (self->mNumberOfSubtitle < i) {
         return 0;
     }
-    return &((sWScriptEntry_3AF230*)self->mSubTitle)[i];
+    return &(self->mSubTitle)[i];
 }
 #endif
 //100%
@@ -2531,10 +2528,6 @@ struct sWSNode_B0C58 {
     sWSNode_B0C58* prev;
 };
 
-struct sScript_B0C58 {
-    char pad00[0x10];
-    int count;
-};
 
 struct sData_B0C58 {
     int f0;
@@ -2559,9 +2552,9 @@ struct sData_B0C58 {
  * @param firstChunk  the first CHUNK
  * @return 2 (usable)
  */
-extern "C" int PS2_SONY_CODEC_INTERNAL_Init(PS2_SONY_CODEC_INTERNAL* self, sScript_B0C58* script, sData_B0C58* firstChunk)
+extern "C" int PS2_SONY_CODEC_INTERNAL_Init(PS2_SONY_CODEC_INTERNAL* self, RCMP_DECODER* script, sData_B0C58* firstChunk)
 {
-    (*(sScript_B0C58**)&self->mpDecoder) = script;
+    (*(RCMP_DECODER**)&self->mpDecoder) = script;
     self->mCurrentFrameNumber = 0;
     self->unk_14 = 0;
     if (self->mpWorkBuffer != 0) {
@@ -2595,7 +2588,7 @@ extern "C" int PS2_SONY_CODEC_INTERNAL_Init(PS2_SONY_CODEC_INTERNAL* self, sScri
     self->mHeight = codedHeight;
     D_005094DC_s = w >> 1;
     D_005094E0_s = codedHeight >> 1;
-    int n = ((sScript_B0C58*)self->mpDecoder)->count;
+    int n = ((int)(self->mpDecoder)->m_IData.m_MaxFramesOutstanding);
     for (int i = 0; i < n; i++) {
         int cw = self->mWidth;
         int ch = self->mHeight;

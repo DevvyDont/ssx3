@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "main/crowdman2d.h"
 #include "main/gamerender.h"
 #include "sound/icepick/worldtriggermanager.h"
@@ -1604,11 +1605,6 @@ INCLUDE_ASM("main/ssxapp", func_002292E0);
 extern "C" void MEM_fill(void* dst, int c, int n);
 unsigned int BXrand();
 
-struct sCrowdSlot_2292E0 {
-    char pad_0x00[0x30];
-    int delay;              // 0x30
-    char pad_0x34[0xC];
-};
 
 
 /**
@@ -1623,10 +1619,10 @@ extern "C" void func_002292E0(cCrowdMan2d* self)
     cCrowdMan2d* crowd = self;
     int i;
     crowd->mCheerLevel = 0;
-    MEM_fill(((sCrowdSlot_2292E0*)&crowd->mQuad[0]), 0, 0x2000);
+    MEM_fill(((&crowd->mQuad[0])), 0, 0x2000);
     for (i = 0; i < 128; i++) {
         crowd->mQuadId[i] = 0xFFFFFFFF;
-        ((sCrowdSlot_2292E0*)&crowd->mQuad[0])[i].delay = BXrand() % 300 + 300;
+        ((&crowd->mQuad[0]))[i].mDelay = BXrand() % 300 + 300;
     }
     crowd->mMarkerIndex = 0;
     MEM_fill(((char*)&crowd->mMarker[0]), 0, 1280);
@@ -2341,11 +2337,6 @@ static inline void set2_229BA8(cGfx_229BA8* g, int mask, int shift, int v)
 }
 
 
-struct sMarker_229BA8 {
-    sV4_229BA8 pos;     // 0x0
-    int count;          // 0x10
-    char pad[0xC];
-};
 
 
 /**
@@ -2367,9 +2358,9 @@ extern "C" void func_00229BA8(cCrowdMan2d* crowdMan)
     sV2_229BA8 uv1(1.0f, 1.0f);
     sV4_229BA8 col(1.0f, 1.0f, 1.0f, 1.0f);
     sV2_229BA8 size(100.0f, 100.0f);
-    sMarker_229BA8* markerList = ((sMarker_229BA8*)&self->mMarker[0]);
+    tCrowdMarker2d* markerList = ((&self->mMarker[0]));
     for (int i = 0; i < 40; i++) {
-        if (markerList[i].count > 0) {
+        if (markerList[i].mLife > 0) {
             if (!pushed) {
                 pushed = 1;
                 ((cGfx_229BA8*)ps2GraphicsMan)->top[1] = ((cGfx_229BA8*)ps2GraphicsMan)->top[0];
@@ -2386,7 +2377,7 @@ extern "C" void func_00229BA8(cCrowdMan2d* crowdMan)
                 set2_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0x3E0, 5, 4);
                 set1_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0x7C, 2, 7);
             }
-            ((cGfx_229BA8*)ps2GraphicsMan)->DrawSprite(&((sMarker_229BA8*)&self->mMarker[0])[i].pos, &size, &uv0, &uv1, &col);
+            ((cGfx_229BA8*)ps2GraphicsMan)->DrawSprite(&(*(sV4_229BA8*)&((&self->mMarker[0]))[i].mPos), &size, &uv0, &uv1, &col);
         }
     }
     if (pushed) {
@@ -3542,14 +3533,11 @@ extern "C" void func_0022A830(void* ctx, void* data, void* cfg);
 extern "C" void FrustumIntersector_AddAllPatchesInside(FrustumIntersector* self, void* list, int n);
 extern "C" void FrustumIntersector_AddAllInstancesInside(FrustumIntersector* self, void* list, int n);
 
-struct sMat_22ADD8 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 struct sVEMat_22ADD8 {
     short delta;
     short index;
-    sMat_22ADD8 (*fn)(void*);
+    t4Matrix (*fn)(void*);
 };
 
 struct sCfg_22ADD8 {
@@ -3565,7 +3553,7 @@ struct sCtx_22ADD8 {
 };
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy through vf1..vf4).
-static inline void MatCopy_22ADD8(sMat_22ADD8* dst, const sMat_22ADD8* src)
+static inline void MatCopy_22ADD8(t4Matrix* dst, const t4Matrix* src)
 {
     __asm__ __volatile__(
         "lqc2      $vf1, 0x0(%1)\n"
@@ -3657,10 +3645,10 @@ extern "C" char* FrustumIntersector_FrustumIntersector(char* self, sCfg_22ADD8* 
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVEMat_22ADD8* vt = (sVEMat_22ADD8*)ps2GraphicsMan->mVtbl;
-        sMat_22ADD8 gfxMatrix = vt[43].fn((char*)ps2GraphicsMan + vt[43].delta);
-        MatCopy_22ADD8((sMat_22ADD8*)(self + 0x10), &gfxMatrix);
+        t4Matrix gfxMatrix = vt[43].fn((char*)ps2GraphicsMan + vt[43].delta);
+        MatCopy_22ADD8((t4Matrix*)(self + 0x10), &gfxMatrix);
     }
-    MatCopy_22ADD8((sMat_22ADD8*)(self + 0x50), (sMat_22ADD8*)(&GrMan->mGuardBandMatrix));
+    MatCopy_22ADD8((t4Matrix*)(self + 0x50), ((&GrMan->mGuardBandMatrix)));
     cOcclusionMan_updateView(*(void**)(self + 0x0), *(void**)(self + 0x4));
     func_00229F30(self + 0x10, self + 0x50);
     func_00229F80(*(void**)(self + 0x4));

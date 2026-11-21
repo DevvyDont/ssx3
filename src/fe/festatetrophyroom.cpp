@@ -1574,11 +1574,6 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" int cReplay_getSaveData(void* self, int* a, int* b);
 extern "C" void cMCOverlayManager_WriteData(void* self, int a, int b);
 
-// cFEMemCard_mInstance: the active memory-card state object (passed to cFEMemCard_createReadBuffer in this unit).
-struct sFEMemCard_5D78 {
-    char pad[0x1BC];
-    int mode;   // 0x1BC
-};
 
 /**
  * Memory-card write-progress callback: feeds the manager the next block of a replay being saved.
@@ -1593,7 +1588,7 @@ struct sFEMemCard_5D78 {
 extern "C" int cFEMemCard_callbackWriteUpdate(int key)
 {
     int out;
-    if (((sFEMemCard_5D78*)cFEMemCard_mInstance)->mode == 1) {
+    if ((cFEMemCard_mInstance)->mType == 1) {
         void* mcManager = cSSXApp_getMCManager(SSXApp);
         if (cReplay_getSaveData(SSXApp->Game->Replay, &out, &key) != 0) {
             cMCOverlayManager_WriteData(mcManager, out, key);
@@ -1733,16 +1728,6 @@ static inline sSndCfg_1D5F40 Cfg_1D5F40()
     return D_00535610_1D5F40;
 }
 
-struct sMemCard_1D5F40 {
-    char pad0[0x1BC];
-    int op;                         // 0x1BC
-    char pad1C0[0x1CC - 0x1C0];
-    int slot;                       // 0x1CC
-    char* buf;                      // 0x1D0
-    char* data;                     // 0x1D4
-    char pad1D8[0x228 - 0x1D8];
-    int busy;                       // 0x228
-};
 
 /**
  * Memory-card read-finished callback: loads what was read into the back end and frees the read buffer.
@@ -1763,9 +1748,9 @@ struct sMemCard_1D5F40 {
 extern "C" int cFEMemCard_readDone()
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
-    switch (((sMemCard_1D5F40*)cFEMemCard_mInstance)->op) {
+    switch ((cFEMemCard_mInstance)->mType) {
     case 2:
-        if (!cBESaveInterface_loadSaveGame(iface, ((sMemCard_1D5F40*)cFEMemCard_mInstance)->buf))
+        if (!cBESaveInterface_loadSaveGame(iface, (cFEMemCard_mInstance)->mpReadBuffer))
             return 0;
         if (cAudioInterface_bxAudio() != 0) {
             cBE_getInterface_Fv(cBE_getBE(), 4);
@@ -1778,18 +1763,18 @@ extern "C" int cFEMemCard_readDone()
         }
         break;
     case 0:
-        if (!cBESaveInterface_loadSaveProfile(iface, ((sMemCard_1D5F40*)cFEMemCard_mInstance)->buf, ((sMemCard_1D5F40*)cFEMemCard_mInstance)->slot))
+        if (!cBESaveInterface_loadSaveProfile(iface, (cFEMemCard_mInstance)->mpReadBuffer, (cFEMemCard_mInstance)->mPlayerIdx))
             return 0;
         break;
     case 1:
         break;
     }
-    if (((sMemCard_1D5F40*)cFEMemCard_mInstance)->busy == 1) {
-        if (((sMemCard_1D5F40*)cFEMemCard_mInstance)->data != 0)
-            cMemMan_free(((sMemCard_1D5F40*)cFEMemCard_mInstance)->data);
-        ((sMemCard_1D5F40*)cFEMemCard_mInstance)->buf = 0;
-        ((sMemCard_1D5F40*)cFEMemCard_mInstance)->data = 0;
-        ((sMemCard_1D5F40*)cFEMemCard_mInstance)->busy = 0;
+    if ((cFEMemCard_mInstance)->mBufferState == 1) {
+        if ((cFEMemCard_mInstance)->mpStartReadBuffer != 0)
+            cMemMan_free((cFEMemCard_mInstance)->mpStartReadBuffer);
+        (cFEMemCard_mInstance)->mpReadBuffer = 0;
+        (cFEMemCard_mInstance)->mpStartReadBuffer = 0;
+        (cFEMemCard_mInstance)->mBufferState = 0;
     }
     return 1;
 }

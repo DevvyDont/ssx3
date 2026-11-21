@@ -2557,18 +2557,6 @@ struct sLmVec4_15E8 {
     }
 };
 
-struct sLmLight_15E8 {
-    char pad_0x0[0x8];
-    int field_0x8;          // 0x8
-    char pad_0xc[0x1C];
-    sLmVec2_15E8 v28;       // 0x28
-    sLmVec2_15E8 v30;       // 0x30
-    sLmVec2_15E8 v38;       // 0x38
-    sLmVec4_15E8 v40;       // 0x40
-    sLmVec4_15E8 v50;       // 0x50
-    char pad_0x60[0x4];
-    unsigned char b64;      // 0x64
-};
 
 extern "C" void cFont_loadFont(cFont* self, const char* name, int flags);
 
@@ -2583,22 +2571,22 @@ extern "C" void cFont_loadFont(cFont* self, const char* name, int flags);
  * @param flags  memory flags for the font's allocations (On Tour: memtype)
  * @return @p self
  */
-extern "C" sLmLight_15E8* cFont_cFont(sLmLight_15E8* self, const char* name, int flags)
+extern "C" cFont* cFont_cFont(cFont* self, const char* name, int flags)
 {
-    self->field_0x8 = 0;
-    self->v28 = sLmVec2_15E8(0.0f, 0.0f);
-    self->v30 = sLmVec2_15E8(1.0f, 1.0f);
-    self->v38 = self->v30;
+    (*(int*)&self->MissingGlyph) = 0;
+    (*(sLmVec2_15E8*)&self->ShadowOffset[0]) = sLmVec2_15E8(0.0f, 0.0f);
+    (*(sLmVec2_15E8*)&self->BaseScale[0]) = sLmVec2_15E8(1.0f, 1.0f);
+    (*(sLmVec2_15E8*)&self->Scale[0]) = (*(sLmVec2_15E8*)&self->BaseScale[0]);
     {
         sLmVec4_15E8 white;
         white.x = 1.0f;
         white.y = 1.0f;
         white.z = 1.0f;
         white.w = 1.0f;
-        self->v40 = white;
+        (*(sLmVec4_15E8*)&self->Color[0]) = white;
     }
-    self->v50 = sLmVec4_15E8(1.0f, 0.0f, 0.0f, 0.0f);
-    self->b64 = 0;
+    (*(sLmVec4_15E8*)&self->ShadowColor[0]) = sLmVec4_15E8(1.0f, 0.0f, 0.0f, 0.0f);
+    self->FontName[0] = 0;
     cFont_loadFont((cFont*)self, name, flags);
     return self;
 }

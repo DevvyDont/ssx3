@@ -648,11 +648,6 @@ struct sMenuStack17D688 {
     int count;      // 0x0
     void* items[8]; // 0x4
 };
-struct sDebugFE17D688 {
-    int f0;
-    int f4;
-    sMenuStack17D688 stack; // 0x8
-};
 
 static inline void* sMenuStack17D688_top(sMenuStack17D688* self)
 {
@@ -669,12 +664,12 @@ static inline void* sMenuStack17D688_top(sMenuStack17D688* self)
  * at +0x8 has a menu open it runs its input (cMenuSys_input), then func_0017DB18 advances the state. cDebugFE_update
  * calls it through the active screen's virtual slot 2.
  */
-extern "C" void cDebugLobbyScreen_update(sDebugFE17D688* self)
+extern "C" void cDebugLobbyScreen_update(cDebugLobbyScreen* self)
 {
     cCommSystem_update(cCommSystem_mCommSystem);
     func_0025AC50(LobbyMan_mLobbyMan);
-    if (sMenuStack17D688_top(&self->stack) != 0)
-        cMenuSys_input(&self->stack);
+    if (sMenuStack17D688_top(&(*(sMenuStack17D688*)&self->mMenuSys)) != 0)
+        cMenuSys_input(&(*(sMenuStack17D688*)&self->mMenuSys));
     func_0017DB18((cDebugLobbyScreen*)self);
 }
 #endif
@@ -700,22 +695,6 @@ void func_0025CD28(void* a, int b);
 void func_0025FC28(void* a, int b);
 
 
-struct sDebugFE17D6F0 {
-    int f0;                       // 0x0
-    int state;                    // 0x4
-    int menu[0x1A];               // 0x8: menu stack (count first)
-    char items70[0x604 - 0x70];   // 0x70
-    char items604[0x74C - 0x604]; // 0x604
-    char items74C[0xD2C - 0x74C]; // 0x74C
-    char itemsD2C[0x1044 - 0xD2C];   // 0xD2C
-    char items1044[0x18C0 - 0x1044]; // 0x1044
-    char items18C0[0x1A44 - 0x18C0]; // 0x18C0
-    int f1A44;                    // 0x1A44
-    char pad1A48[0x1C04 - 0x1A48];
-    char* user;                   // 0x1C04
-    char* pass;                   // 0x1C08
-    int text;                     // 0x1C0C (cBXString)
-};
 
 static inline void ClearMenu0017D6F0(int* list)
 {
@@ -762,18 +741,18 @@ static inline void SetMenu0017D6F0(int* menu, void* items)
  */
 extern "C" void func_0017D6F0(cDebugLobbyScreen* vself, void* ev)
 {
-    sDebugFE17D6F0* self = (sDebugFE17D6F0*)vself;
+    cDebugLobbyScreen* self = vself;
     switch (*(int*)ev) {
     case 277: {
-        int* list = self->menu;
+        int* list = ((int*)&self->mMenuSys);
         while (*list != 0) {
             cMenuSys_popMenu(list);
         }
         if (SSXApp->unk_74 != 0) {
-            self->state = 0;
+            self->mState = 0;
         } else {
-            self->state = 19;
-            cMenuSys_pushMenu(self->menu, self->items604);
+            self->mState = 19;
+            cMenuSys_pushMenu(((int*)&self->mMenuSys), ((char*)&self->mContinueMenu));
         }
         break;
     }
@@ -785,26 +764,26 @@ extern "C" void func_0017D6F0(cDebugLobbyScreen* vself, void* ev)
             cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, SSXApp->UserName);
             cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, SSXApp->Password);
             func_0025C610(LobbyMan_mLobbyMan);
-            self->state = 5;
+            self->mState = 5;
         } else {
-            self->state = 3;
-            cMenuSys_pushMenu(self->menu, self->items70);
+            self->mState = 3;
+            cMenuSys_pushMenu(((int*)&self->mMenuSys), ((char*)&self->mLoginMenu));
         }
         break;
     case 203:
-        self->state = 5;
-        cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, self->user);
-        cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, self->pass);
+        self->mState = 5;
+        cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, self->mUserName);
+        cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, self->mPassword);
         func_0025C610(LobbyMan_mLobbyMan);
         break;
     case 212:
         if (SSXApp->unk_74 != 0) {
-            self->state = 7;
+            self->mState = 7;
             func_0025CD28(LobbyMan_mLobbyMan, 0);
         } else {
-            PersonaMenu_setpersonas(self->items74C, LobbyMan_mLobbyMan);
-            cMenuSys_pushMenu(self->menu, self->items74C);
-            self->state = 6;
+            PersonaMenu_setpersonas(((char*)&self->mPersonaMenu), LobbyMan_mLobbyMan);
+            cMenuSys_pushMenu(((int*)&self->mMenuSys), ((char*)&self->mPersonaMenu));
+            self->mState = 6;
         }
         break;
     case 218:
@@ -813,54 +792,54 @@ extern "C" void func_0017D6F0(cDebugLobbyScreen* vself, void* ev)
             for (i = 0; i < func_0025F120(LobbyMan_mLobbyMan); i++) {
                 if (func_004165A8(func_0025F150(LobbyMan_mLobbyMan, i), str_A_West) == 0) {
                     func_0025D800(LobbyMan_mLobbyMan, i, 0);
-                    self->state = 11;
+                    self->mState = 11;
                 }
             }
         } else {
-            cMenuSys_pushMenu(self->menu, self->itemsD2C);
-            self->state = 10;
+            cMenuSys_pushMenu(((int*)&self->mMenuSys), ((char*)&self->mRoomMenu));
+            self->mState = 10;
         }
         break;
     case 214:
     case 216:
-        PersonaMenu_setpersonas(self->items74C, LobbyMan_mLobbyMan);
-        cMenuSys_pushMenu(self->menu, self->items74C);
-        self->state = 6;
+        PersonaMenu_setpersonas(((char*)&self->mPersonaMenu), LobbyMan_mLobbyMan);
+        cMenuSys_pushMenu(((int*)&self->mMenuSys), ((char*)&self->mPersonaMenu));
+        self->mState = 6;
         break;
     case 220:
         if (func_0025F430(LobbyMan_mLobbyMan) != 0) {
-            cMenuSys_pushMenu(self->menu, self->items1044);
-            self->state = 0xC;
+            cMenuSys_pushMenu(((int*)&self->mMenuSys), ((char*)&self->mOccupantsMenu));
+            self->mState = 0xC;
         } else {
-            cMenuSys_pushMenu(self->menu, self->itemsD2C);
-            self->state = 10;
+            cMenuSys_pushMenu(((int*)&self->mMenuSys), ((char*)&self->mRoomMenu));
+            self->mState = 10;
         }
         break;
     case 237:
     case 0xF0:
     case 241: {
-        self->state = 17;
-        int* list = self->menu;
+        self->mState = 17;
+        int* list = ((int*)&self->mMenuSys);
         while (*list != 0) {
             cMenuSys_popMenu(list);
         }
-        cMenuSys_pushMenu(self->menu, self->items604);
+        cMenuSys_pushMenu(((int*)&self->mMenuSys), ((char*)&self->mContinueMenu));
         break;
     }
     case 239:
         func_0017DE70((cDebugLobbyScreen*)((char*)self));
-        self->state = 0x10;
+        self->mState = 0x10;
         break;
     case 236:
-        if (self->state == 0xC) {
-            int* list = self->menu;
+        if (self->mState == 0xC) {
+            int* list = ((int*)&self->mMenuSys);
             while (*list != 0) {
                 cMenuSys_popMenu(list);
             }
-            self->state = 0xF;
-            cBXString_operatorE(&self->text, (char*)ev + 8);
-            self->f1A44 = self->text;
-            cMenuSys_pushMenu(self->menu, self->items18C0);
+            self->mState = 0xF;
+            cBXString_operatorE(&(*(int*)&self->mChallenger), (char*)ev + 8);
+            (*(int*)&self->mChallengedMenu.unk_170.Caption) = ((int)self->mChallenger);
+            cMenuSys_pushMenu(((int*)&self->mMenuSys), ((char*)&self->mChallengedMenu));
         } else {
             func_0025FC28(LobbyMan_mLobbyMan, *(int*)((char*)ev + 8));
         }
@@ -957,18 +936,6 @@ extern "C" void cCommSystem_netConnLocalAddr(void* comm, int* info);
 extern "C" void func_00266D58(void* p, int ip);
 extern "C" void func_00266E30(void* p);
 
-struct sDebugFE17DB18 {
-    int f0;                          // 0x0
-    unsigned int state;              // 0x4
-    int menu[0x1A];                  // 0x8: menu stack (count first)
-    char items70[0x74C - 0x70];      // 0x70
-    char items74C[0xD2C - 0x74C];    // 0x74C
-    char itemsD2C[0x1044 - 0xD2C];   // 0xD2C
-    char items1044[0x18C0 - 0x1044]; // 0x1044
-    char items18C0[0x1AAC - 0x18C0]; // 0x18C0
-    char items1AAC[0x1C10 - 0x1AAC]; // 0x1AAC
-    int channel;                     // 0x1C10
-};
 
 /**
  * Advances the debug lobby screen's state machine, re-running it until the state (+0x4) stops changing.
@@ -996,10 +963,10 @@ struct sDebugFE17DB18 {
  */
 extern "C" void func_0017DB18(cDebugLobbyScreen* vself)
 {
-    sDebugFE17DB18* self = (sDebugFE17DB18*)vself;
+    cDebugLobbyScreen* self = vself;
     unsigned int state;
     do {
-        state = self->state;
+        state = ((unsigned int)self->mState);
         switch (state) {
         case 0: {
             cCommSystem* comm = cCommSystem_mCommSystem;
@@ -1007,80 +974,80 @@ extern "C" void func_0017DB18(cDebugLobbyScreen* vself)
             if (!busy) {
                 cCommSystem_netConnConnect((char*)comm, 0);
             }
-            self->state = 1;
+            self->mState = 1;
             break;
         }
         case 1:
             if (cCommSystem_mCommSystem->mNetConnState != 3 && cCommSystem_mCommSystem->mNetConnState != 4) {
                 func_0025B6D8(LobbyMan_mLobbyMan, 0);
-                self->state = 2;
+                self->mState = 2;
             }
             break;
         case 13:
-            if (cMenuSys_isActive(self->menu) == 0) {
-                cMenuSys_pushMenu(self->menu, self->items1AAC);
+            if (cMenuSys_isActive(((int*)&self->mMenuSys)) == 0) {
+                cMenuSys_pushMenu(((int*)&self->mMenuSys), ((char*)&self->mAbortMenu));
             }
             break;
         case 17:
-            if (cMenuSys_isActive(self->menu) == 0) {
-                self->state = 0xC;
-                cMenuSys_pushMenu(self->menu, self->items1044);
+            if (cMenuSys_isActive(((int*)&self->mMenuSys)) == 0) {
+                self->mState = 0xC;
+                cMenuSys_pushMenu(((int*)&self->mMenuSys), ((char*)&self->mOccupantsMenu));
             }
             break;
         case 24:
-            if (cMenuSys_isActive(self->menu) == 0) {
-                cMenuSys_pushMenu(self->menu, self->items1044);
-                self->state = 0xC;
+            if (cMenuSys_isActive(((int*)&self->mMenuSys)) == 0) {
+                cMenuSys_pushMenu(((int*)&self->mMenuSys), ((char*)&self->mOccupantsMenu));
+                self->mState = 0xC;
             }
             break;
         case 21:
-            if (cMenuSys_isActive(self->menu) == 0) {
-                self->state = 3;
-                cMenuSys_pushMenu(self->menu, self->items70);
+            if (cMenuSys_isActive(((int*)&self->mMenuSys)) == 0) {
+                self->mState = 3;
+                cMenuSys_pushMenu(((int*)&self->mMenuSys), ((char*)&self->mLoginMenu));
             }
             break;
         case 20:
-            if (cMenuSys_isActive(self->menu) == 0) {
-                self->state = 3;
-                cMenuSys_pushMenu(self->menu, self->items70);
+            if (cMenuSys_isActive(((int*)&self->mMenuSys)) == 0) {
+                self->mState = 3;
+                cMenuSys_pushMenu(((int*)&self->mMenuSys), ((char*)&self->mLoginMenu));
             }
             break;
         case 18:
         case 19:
-            if (cMenuSys_isActive(self->menu) == 0) {
-                self->state = 0;
+            if (cMenuSys_isActive(((int*)&self->mMenuSys)) == 0) {
+                self->mState = 0;
             }
             break;
         case 22:
-            if (cMenuSys_isActive(self->menu) == 0) {
-                PersonaMenu_setpersonas(self->items74C, LobbyMan_mLobbyMan);
-                cMenuSys_pushMenu(self->menu, self->items74C);
-                self->state = 6;
+            if (cMenuSys_isActive(((int*)&self->mMenuSys)) == 0) {
+                PersonaMenu_setpersonas(((char*)&self->mPersonaMenu), LobbyMan_mLobbyMan);
+                cMenuSys_pushMenu(((int*)&self->mMenuSys), ((char*)&self->mPersonaMenu));
+                self->mState = 6;
             }
             break;
         case 23:
-            if (cMenuSys_isActive(self->menu) == 0) {
-                cMenuSys_pushMenu(self->menu, self->itemsD2C);
-                self->state = 10;
+            if (cMenuSys_isActive(((int*)&self->mMenuSys)) == 0) {
+                cMenuSys_pushMenu(((int*)&self->mMenuSys), ((char*)&self->mRoomMenu));
+                self->mState = 10;
             }
             break;
         case 15: {
-            int* menu = self->menu;
+            int* menu = ((int*)&self->mMenuSys);
             if (*menu == 0) {
-                cMenuSys_pushMenu(menu, self->items18C0);
+                cMenuSys_pushMenu(menu, ((char*)&self->mChallengedMenu));
             }
             break;
         }
         case 6: {
-            int* menu = self->menu;
+            int* menu = ((int*)&self->mMenuSys);
             if (*menu == 0) {
-                cMenuSys_pushMenu(menu, self->items74C);
+                cMenuSys_pushMenu(menu, ((char*)&self->mPersonaMenu));
             }
             break;
         }
         case 10: {
-            int* menu = self->menu;
-            char* items = self->itemsD2C;
+            int* menu = ((int*)&self->mMenuSys);
+            char* items = ((char*)&self->mRoomMenu);
             if (*menu == 0) {
                 cMenuSys_pushMenu(menu, items);
             }
@@ -1088,32 +1055,32 @@ extern "C" void func_0017DB18(cDebugLobbyScreen* vself)
             break;
         }
         case 12:
-            if (self->menu[0] == 0) {
+            if (((int*)&self->mMenuSys)[0] == 0) {
                 func_0025D800(LobbyMan_mLobbyMan, -1, 0);
-                self->state = 11;
+                self->mState = 11;
             } else {
-                RoomMenu_updateusers(self->items1044, LobbyMan_mLobbyMan);
+                RoomMenu_updateusers(((char*)&self->mOccupantsMenu), LobbyMan_mLobbyMan);
             }
             break;
         case 3: {
-            int* menu = self->menu;
+            int* menu = ((int*)&self->mMenuSys);
             if (*menu == 0) {
-                cMenuSys_pushMenu(menu, self->items70);
+                cMenuSys_pushMenu(menu, ((char*)&self->mLoginMenu));
             }
             break;
         }
         case 14: {
-            int* menu = self->menu;
+            int* menu = ((int*)&self->mMenuSys);
             if (*menu == 0) {
-                self->state = 0xC;
-                cMenuSys_pushMenu(menu, self->items1044);
+                self->mState = 0xC;
+                cMenuSys_pushMenu(menu, ((char*)&self->mOccupantsMenu));
             }
             break;
         }
         case 16:
-            if (cCommSystem_isChannelConnected(cCommSystem_mCommSystem, self->channel) != 0) {
+            if (cCommSystem_isChannelConnected(cCommSystem_mCommSystem, self->mGameChannel) != 0) {
                 int info[4];
-                cGameComm_construct(self->channel, LobbyMan_mLobbyMan->mIsHost);
+                cGameComm_construct(self->mGameChannel, LobbyMan_mLobbyMan->mIsHost);
                 cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
                 cCommSystem_netConnLocalAddr(cCommSystem_mCommSystem, info);
                 func_00266D58(VoipMan, info[0]);
@@ -1121,7 +1088,7 @@ extern "C" void func_0017DB18(cDebugLobbyScreen* vself)
             }
             break;
         }
-    } while (self->state != state);
+    } while (((unsigned int)self->mState) != state);
 }
 #endif
 

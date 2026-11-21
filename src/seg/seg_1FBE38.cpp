@@ -4620,10 +4620,6 @@ struct sRefSet_1440 {
     char pad_0x0[0x1C];
     unsigned int* refs;     // 0x1C
 };
-struct sRefWorld_1440 {
-    char pad_0x0[0x8];
-    sRefSet_1440** sets;         // 0x8
-};
 // The script manager (cWScriptMan_1440 in the prototype, whose setBeing stores at 0x0); D_004A3DD8_1440 points at the
 // instance.
 struct cWScriptMan_1440 {
@@ -4690,7 +4686,7 @@ extern "C" cLunoValue_1440 MovieFunc(int n, sBindArg_1FBE38_1440* params) {
     if (~id == 0) {
         obj = D_004A3DD8_1440->f290;
     } else {
-        sRefSet_1440 *section = ((sRefWorld_1440*)cWorld_m_pTheWorld->m_pWorldCache)->sets[id & 0xFF];
+        sRefSet_1440 *section = ((sRefSet_1440**)(cWorld_m_pTheWorld->m_pWorldCache)->m_pSectionCacheTable)[id & 0xFF];
         unsigned i;
         if (!section || (i = section->refs[id >> 8] >> 8) == 0)
             obj = 0;

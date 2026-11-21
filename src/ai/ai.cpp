@@ -2932,16 +2932,12 @@ int cRider_getMotionState(void* self);
 void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
-struct sVec4_12C130
-{
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4_12C130 vu0Scale_12C130(const sVec4_12C130& in, float s)
+static inline t4Vector vu0Scale_12C130(const t4Vector& in, float s)
 {
-    sVec4_12C130 v = in;
-    sVec4_12C130 r;
+    t4Vector v = in;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -2973,7 +2969,7 @@ extern "C" void cGateControl_doGetupFromSit(cGateControl* self, void* cmd)
             if (cRiderAnimBase_getCurrentAnimFramePercent(self->mRider->mRiderAnim, 2) > 0.5f)
             {
                 cRider* rider = self->mRider;
-                *(sVec4_12C130*)&rider->mVelocity = vu0Scale_12C130(*(sVec4_12C130*)&rider->mMatrix.row[1], 555.5555419921875f);
+                *(&rider->mVelocity) = vu0Scale_12C130(*(&rider->mMatrix.row[1]), 555.5555419921875f);
                 cRider_setMotionState_impl(self->mRider, 0);
             }
         }
@@ -3117,7 +3113,7 @@ extern "C" void cGateControl_doGateLaunch(cGateControl* self, void* cmd)
     if (cRider_getMotionState(self->mRider) == 3 && self->GateAnticipate >= 0.6200000047683716f)
     {
         cRider* rider = self->mRider;
-        *(sVec4_12C130*)&rider->mVelocity = vu0Scale_12C130(*(sVec4_12C130*)&rider->mMatrix.row[1], self->CurThrustMax);
+        *(&rider->mVelocity) = vu0Scale_12C130(*(&rider->mMatrix.row[1]), self->CurThrustMax);
         cRider_setMotionState_impl(self->mRider, 0);
     }
     if (self->GateAnticipate == 1.0f)
@@ -3183,12 +3179,9 @@ INCLUDE_ASM("ai/ai", cFinishLineControl_gainFocus);
 extern "C" float cRiderMetrix_evReset(void* self, int a1);
 extern float nFinishLineControl_kFinishStopThreshCPS;
 
-struct sAiVec4_12C5C8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float aiLength_12C5C8(const sAiVec4_12C5C8& v)
+static inline float aiLength_12C5C8(const t4Vector& v)
 {
     float r;
     int t;
@@ -3225,7 +3218,7 @@ extern "C" void cFinishLineControl_gainFocus(cFinishLineControl* self)
 {
     cRiderMetrix_evReset(self->mRider->mMetrix, 1);
     cRider* rider = self->mRider;
-    if (nFinishLineControl_kFinishStopThreshCPS < aiLength_12C5C8(*(sAiVec4_12C5C8*)&rider->mVelocity))
+    if (nFinishLineControl_kFinishStopThreshCPS < aiLength_12C5C8(*(&rider->mVelocity)))
     {
         self->FinishState = 0;
         return;
@@ -3260,13 +3253,9 @@ int cRiderAnimBase_getCurrentAnimID(void* self, int i);
 extern float nFinishLineControl_kFinishStopThreshCPS;
 extern char t4vect_Zero[];
 
-struct sVec4_12C678
-{
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (vector *= scalar).
-static inline void vu0ScaleEq_12C678(sVec4_12C678& v, float s)
+static inline void vu0ScaleEq_12C678(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -3280,7 +3269,7 @@ static inline void vu0ScaleEq_12C678(sVec4_12C678& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float aiLength_12C678(const sVec4_12C678& v)
+static inline float aiLength_12C678(const t4Vector& v)
 {
     float r;
     int t;
@@ -3357,9 +3346,9 @@ extern "C" void cFinishLineControl_update(cFinishLineControl* self)
             }
             else
             {
-                vu0ScaleEq_12C678(*(sVec4_12C678*)&self->mRider->mVelocity, 0.9700000286102295f);
+                vu0ScaleEq_12C678(*(&self->mRider->mVelocity), 0.9700000286102295f);
                 if (aiAbs_12C678(self->mRider->mSlewed[3].cur) == 1.0f ||
-                    aiLength_12C678(*(sVec4_12C678*)&self->mRider->mVelocity) < nFinishLineControl_kFinishStopThreshCPS)
+                    aiLength_12C678(*(&self->mRider->mVelocity)) < nFinishLineControl_kFinishStopThreshCPS)
                 {
                     self->FinishState = 1;
                 }
@@ -3375,7 +3364,7 @@ extern "C" void cFinishLineControl_update(cFinishLineControl* self)
         float floatZero = 0.0f;
         cRider_setupCrouchBrake((char*)self->mRider, floatZero, floatZero);
         cRider_setupLean((char*)self->mRider, floatZero);
-        vu0ScaleEq_12C678(*(sVec4_12C678*)&self->mRider->mVelocity, 0.9300000071525574f);
+        vu0ScaleEq_12C678(*(&self->mRider->mVelocity), 0.9300000071525574f);
         if (aiAbs_12C678(self->mRider->mSlewed[3].cur) < 0.20000000298023224f &&
             self->mRider->mSlewed[0].cur == floatZero)
         {
@@ -3389,7 +3378,7 @@ extern "C" void cFinishLineControl_update(cFinishLineControl* self)
         break;
     }
     case 2:
-        *(sVec4_12C678*)&self->mRider->mVelocity = *(sVec4_12C678*)t4vect_Zero;
+        *(&self->mRider->mVelocity) = *(t4Vector*)t4vect_Zero;
         *(float*)((char*)self->mRider->mRiderAnim + 0x1C) = 0.75f;
         cRider_checkForReaction((char*)self->mRider);
         *(float*)((char*)self->mRider->mRiderAnim + 0x1C) = 1.0f;
@@ -3400,7 +3389,7 @@ extern "C" void cFinishLineControl_update(cFinishLineControl* self)
         }
         break;
     case 3:
-        *(sVec4_12C678*)&self->mRider->mVelocity = *(sVec4_12C678*)t4vect_Zero;
+        *(&self->mRider->mVelocity) = *(t4Vector*)t4vect_Zero;
         break;
     }
     if (anim != prev)
@@ -3835,7 +3824,7 @@ static inline void aiTail_12D160(void* self)
 extern "C" void cWipeoutControl_updateGround(cWipeoutControl* self)
 {
     cRider* rider = self->mRider;
-    float speed = aiLength_12C5C8(*(sAiVec4_12C5C8*)&rider->mVelocity);
+    float speed = aiLength_12C5C8(*(&rider->mVelocity));
     if (rider->mViewIndex >= 0)
     {
         float speedScalar = speed * 0.035999998450279236f;
@@ -3857,7 +3846,7 @@ extern "C" void cWipeoutControl_updateGround(cWipeoutControl* self)
         self->IsNewImpact = 0;
         cRider* rider4 = self->mRider;
         sVEntry12D160* vt = (sVEntry12D160*)rider4->mVtbl;
-        vt[17].fn(((char*)rider4) + vt[17].delta, aiLength_12C5C8(*(sAiVec4_12C5C8*)&self->LatestImpact));
+        vt[17].fn(((char*)rider4) + vt[17].delta, aiLength_12C5C8(*(&self->LatestImpact)));
         return;
     }
     if (aiIsOne_12D160((char*)self->mRider) && speed < 27.77777862548828f)
@@ -3935,13 +3924,9 @@ extern "C" float cRiderAnimBase_getCurrentAnimFramePercent(void* self, int i);
 extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
 extern "C" void cAnimSequence_setSubAnimTime(void* self, int idx, float v);
 
-struct sAiVec4_12D4E8
-{
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float aiDot_12D4E8(const sAiVec4_12D4E8& a, const sAiVec4_12D4E8& b)
+static inline float aiDot_12D4E8(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -3961,9 +3946,9 @@ static inline float aiDot_12D4E8(const sAiVec4_12D4E8& a, const sAiVec4_12D4E8& 
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sAiVec4_12D4E8 aiScale_12D4E8(const sAiVec4_12D4E8& in, float s)
+static inline t4Vector aiScale_12D4E8(const t4Vector& in, float s)
 {
-    sAiVec4_12D4E8 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -4009,14 +3994,14 @@ extern "C" void cWipeoutControl_updateAir(cWipeoutControl* self)
         if (self->mRider->mRiderHandler->WipeoutMotion.WipeoutMotionState == 0)
         {
             if (self->mRider->mGroundNormal.z > 0.8999999761581421f &&
-                aiDot_12D4E8(*(sAiVec4_12D4E8*)&self->LatestImpact, *(sAiVec4_12D4E8*)&self->mRider->mGroundNormal) <
-                    aiLength_12C5C8(*(sAiVec4_12C5C8*)&self->LatestImpact) * -0.8999999761581421f)
+                aiDot_12D4E8(*(&self->LatestImpact), *(&self->mRider->mGroundNormal)) <
+                    aiLength_12C5C8(*(&self->LatestImpact)) * -0.8999999761581421f)
             {
                 cWipeoutControl_playWipeoutStuckAnim(self);
                 cRider* rider2 = self->mRider;
-                sAiVec4_12D4E8 normalVel = aiScale_12D4E8(*(sAiVec4_12D4E8*)&rider2->mGroundNormal,
-                    aiDot_12D4E8(*(sAiVec4_12D4E8*)&rider2->mGroundNormal, *(sAiVec4_12D4E8*)&rider2->mVelocity));
-                *(sAiVec4_12D4E8*)&rider2->mVelocity = normalVel;
+                t4Vector normalVel = aiScale_12D4E8(*(&rider2->mGroundNormal),
+                    aiDot_12D4E8(*(&rider2->mGroundNormal), *(&rider2->mVelocity)));
+                *(&rider2->mVelocity) = normalVel;
                 *(int*)self = 4;
             }
             else
@@ -4042,7 +4027,7 @@ extern "C" void cWipeoutControl_updateAir(cWipeoutControl* self)
         self->IsNewImpact = 0;
         cRider* rider3 = self->mRider;
         sVEntry12D4E8* vt = (sVEntry12D4E8*)rider3->mVtbl;
-        vt[17].fn(((char*)rider3) + vt[17].delta, aiLength_12C5C8(*(sAiVec4_12C5C8*)&self->LatestImpact));
+        vt[17].fn(((char*)rider3) + vt[17].delta, aiLength_12C5C8(*(&self->LatestImpact)));
         return;
     }
     if (cRiderAnimBase_isCurrentAnimEndFlag(self->mRider->mRiderAnim, 2) != 0 ||
@@ -4104,7 +4089,7 @@ extern "C" void cWipeoutControl_updateRecover(cWipeoutControl* self)
         self->IsNewImpact = 0;
         cRider* rider = self->mRider;
         sVEntry12D848* vt = (sVEntry12D848*)rider->mVtbl;
-        vt[17].fn(((char*)rider) + vt[17].delta, aiLength_12C5C8(*(sAiVec4_12C5C8*)&self->LatestImpact));
+        vt[17].fn(((char*)rider) + vt[17].delta, aiLength_12C5C8(*(&self->LatestImpact)));
         cSSXAudio_Land(cAudioInterface_bxAudio(), self->mRider, 0.0f);
     }
     cRider* rider = self->mRider;
@@ -4742,7 +4727,7 @@ extern "C" float cWipeoutControl_chooseTumbleAnimRate(cWipeoutControl* self)
     cRider* rider = self->mRider;
     cRiderHandler* handler = rider->mRiderHandler;
     char* animSeq = cRiderAnimBase_getCurrentAnimSequence(rider->mRiderAnim, 2);
-    float rawRate = aiLength_12C5C8(*(sAiVec4_12C5C8*)&handler->WipeoutMotion.RiderAngVelocity) * *(float*)(animSeq + 0x10) * 0.15915493667125702f;
+    float rawRate = aiLength_12C5C8(*(&handler->WipeoutMotion.RiderAngVelocity)) * *(float*)(animSeq + 0x10) * 0.15915493667125702f;
     float res = aiClamp_12E528(rawRate, 0.5f, 2.0f);
     if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 29 ||
         cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 25)
@@ -6823,7 +6808,7 @@ extern "C" int cBoardPressControl_checkForWipeout(cBoardPressControl* self, void
     {
         sInfo_130DD0 info;
         cRider* rider4 = self->mRider;
-        float speed = aiLength_12C5C8(*(sAiVec4_12C5C8*)&rider4->mVelocity);
+        float speed = aiLength_12C5C8(*(&rider4->mVelocity));
         info.pos = *(sQuat_12FEC8*)&rider4->mPosition;
         info.up = Scale_130DD0(t4vect_ZAxis, -1.0f);
         info.speed = speed;
@@ -8178,15 +8163,11 @@ struct sAnimEntry_132FB8
 // Typed view of kHandplantAnim (cHandplantControl_gainFocus reads it as raw bytes); bound by asm label.
 extern sAnimEntry_132FB8 D_00459FC8_tbl[][2] __asm__("kHandplantAnim");
 
-struct sVec4_132FB8
-{
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sVec3_132FB8
 {
     float x, y, z;
-    sVec3_132FB8(sVec4_132FB8 v) { x = v.x; y = v.y; z = v.z; }
+    sVec3_132FB8(t4Vector v) { x = v.x; y = v.y; z = v.z; }
 };
 
 struct sQuat_132FB8
@@ -8233,7 +8214,7 @@ extern "C" void cHandplantControl_playHandplantAnim(cHandplantControl* self, int
     if (D_00459FC8_tbl[mode][type].flip != 0)
     {
         cRider* rider = self->mRider;
-        sQuat_132FB8 newRotation = QuatMul_132FB8(sQuat_132FB8(sVec3_132FB8(*(sVec4_132FB8*)&rider->mMatrix.row[2]), 0.0f), *(sQuat_132FB8*)&rider->mRotation);
+        sQuat_132FB8 newRotation = QuatMul_132FB8(sQuat_132FB8(sVec3_132FB8(*(&rider->mMatrix.row[2])), 0.0f), *(sQuat_132FB8*)&rider->mRotation);
         *(sQuat_132FB8*)&self->mRider->mRotation = newRotation;
         cRider_updateOrientationImplicit(self->mRider);
         cRiderAnimBase_changeHeadingOffset(self->mRider->mRiderAnim, 3.1415927410125732f);

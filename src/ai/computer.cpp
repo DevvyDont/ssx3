@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "animation/animmodel.h"
 #include "ai/airpredictor.h"
 #include "replay/frameptr.h"
@@ -724,12 +725,9 @@ extern "C" int cAI_aiRidersOnPath(sAi0010FC30* self, int team);
 extern "C" float cRider_calculateAheadDist(cRider* self, int arg1);
 extern "C" float cPath_intersectPath(void* path, void* a1, void* a2, void* a3, int n);
 
-struct sVec4_10D410 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (vector length).
-static inline float vu0Length_10D410(const sVec4_10D410& v)
+static inline float vu0Length_10D410(const t4Vector& v)
 {
     float r;
     int t;
@@ -750,9 +748,9 @@ static inline float vu0Length_10D410(const sVec4_10D410& v)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4_10D410 vu0Scale_10D410(const sVec4_10D410& v, float s)
+static inline t4Vector vu0Scale_10D410(const t4Vector& v, float s)
 {
-    sVec4_10D410 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -767,9 +765,9 @@ static inline sVec4_10D410 vu0Scale_10D410(const sVec4_10D410& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sVec4_10D410 vu0Add_10D410(const sVec4_10D410& a, const sVec4_10D410& b)
+static inline t4Vector vu0Add_10D410(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_10D410 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -843,7 +841,7 @@ extern "C" float cComputer_scorePath(cComputer* self, char* tgt)
     if (self->mShouldTakeShortcuts == 0 && solo != 0) {
         return 0.0f;
     }
-    float speed = vu0Length_10D410(*(sVec4_10D410*)&self->mRider->mVelocity) * 0.035999998450279236f;
+    float speed = vu0Length_10D410(*(&self->mRider->mVelocity)) * 0.035999998450279236f;
     if (lvl == 0) {
         if ((float)speedLimit_10D410(kind) < speed) {
             return 0.0f;
@@ -854,11 +852,11 @@ extern "C" float cComputer_scorePath(cComputer* self, char* tgt)
         }
     }
     cRider* rider = self->mRider;
-    float len = vu0Length_10D410(*(sVec4_10D410*)&rider->mVelocity);
+    float len = vu0Length_10D410(*(&rider->mVelocity));
     float total = 22.0f;
     float lookAheadSec = cRider_calculateAheadDist((cRider*)rider, 1) / len;
-    sVec4_10D410 pos = vu0Add_10D410(*(sVec4_10D410*)&self->mRider->mPosition, vu0Scale_10D410(*(sVec4_10D410*)&self->mRider->mVelocity, lookAheadSec));
-    sVec4_10D410 out;
+    t4Vector pos = vu0Add_10D410(*(&self->mRider->mPosition), vu0Scale_10D410(*(&self->mRider->mVelocity), lookAheadSec));
+    t4Vector out;
     float distOut;
     cPath_intersectPath(tgt, &pos, &out, &distOut, 1);
     float distToPath = distOut;
@@ -3651,19 +3649,15 @@ extern "C" void* cPathSys_getStartpoint(void*, int, int);
 extern char gPaths[];
 extern "C" float cRider_getStartGateHorizOffset(void* self);
 
-struct sVec4_00112180
-{
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-void cRider_putAt_112180(void* self, sVec4_00112180* a, sVec4_00112180* b, int n, float t) __asm__("cRider_putAt");
+void cRider_putAt_112180(void* self, t4Vector* a, t4Vector* b, int n, float t) __asm__("cRider_putAt");
 extern "C" float cPath_intersectPath1(void* path, void* a1, void* a2, void* a3, void* hint, int n);
-sVec4_00112180 cPath_getPathPos_112180(void* path, int* inRange, float t) __asm__("cPath_getPathPos");
+t4Vector cPath_getPathPos_112180(void* path, int* inRange, float t) __asm__("cPath_getPathPos");
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4_00112180 vu0Scale_112180(const sVec4_00112180& v, float s)
+static inline t4Vector vu0Scale_112180(const t4Vector& v, float s)
 {
-    sVec4_00112180 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -3677,7 +3671,7 @@ static inline sVec4_00112180 vu0Scale_112180(const sVec4_00112180& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add-assign).
-static inline void vu0AddEq_112180(sVec4_00112180& dst, sVec4_00112180 b)
+static inline void vu0AddEq_112180(t4Vector& dst, t4Vector b)
 {
     __asm__(
         ".set push\n"
@@ -3710,8 +3704,8 @@ extern "C" void cRider_initPath(cRider* self, int flag)
     float* startPoint = (float*)cPathSys_getStartpoint(gPaths, 1, self->mAIIndex);
     if (flag)
     {
-        sVec4_00112180 dir;
-        sVec4_00112180 pos;
+        t4Vector dir;
+        t4Vector pos;
         dir.x = startPoint[5];
         dir.y = startPoint[6];
         dir.z = startPoint[7];
@@ -3727,7 +3721,7 @@ extern "C" void cRider_initPath(cRider* self, int flag)
     *(int*)((char*)self->mTrackPathHint + 0x14) = -1;
     self->TrackPath = (cTrackPath*)((void**)startPoint)[8];
     self->AIPath = (cAIPath*)((void**)startPoint)[9];
-    sVec4_00112180 up;
+    t4Vector up;
     up.x = 0.0f;
     up.y = 0.0f;
     up.z = 0.0f;
@@ -3740,8 +3734,8 @@ extern "C" void cRider_initPath(cRider* self, int flag)
     self->mDistToFinish = self->MinDistanceLeft = trackLen - res;
     res = cPath_intersectPath1(self->AIPath, &self->mPosition, &self->PathPos, &self->PathDistXY, self->mAIPathHint, 1);
     self->PrevPathParam = self->PathParam = res;
-    sVec4_00112180 pos2 = cPath_getPathPos_112180(self->AIPath, 0, res + 796.0f);
-    *(sVec4_00112180*)&self->IntersectPos = pos2;
+    t4Vector pos2 = cPath_getPathPos_112180(self->AIPath, 0, res + 796.0f);
+    *(&self->IntersectPos) = pos2;
 }
 #endif
 
@@ -3882,10 +3876,6 @@ int cRider_isPipeJump(void* self)
 //100%
 INCLUDE_ASM("ai/computer", cRider_updateAIPath);
 #ifdef SKIP_ASM
-struct sVec4_001125C0
-{
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sVE_001125C0 { short delta; short index; int (*fn)(void*, float, float); };
 
@@ -3895,7 +3885,7 @@ bool cRider_isPipeJump_b(void* self) __asm__("cRider_isPipeJump__FPv");
 cQuad128 cRider_setAimTarget_2(void* self, int a) __asm__("cRider_setAimTarget");
 extern "C" float cPath_intersectPath1(void* path, void* a1, void* a2, void* a3, void* hint, int n);
 extern "C" float cPath_intersectPath(void* path, void* a1, void* a2, void* a3, int n);
-sVec4_001125C0 cPath_getPathPos_1125C0(void* path, int* inRange, float t) __asm__("cPath_getPathPos");
+t4Vector cPath_getPathPos_1125C0(void* path, int* inRange, float t) __asm__("cPath_getPathPos");
 extern "C" float cPath_getLength(void* self);
 extern "C" void cRider_checkAIPathSwitch(cRider* self, int a);
 
@@ -3943,7 +3933,7 @@ extern "C" void cRider_updateAIPath(cRider* self)
     else
         self->PathParam = cPath_intersectPath(self->AIPath, &self->mPosition, &self->PathPos, &self->PathDistXY, 0);
     float k = cRider_calculateAheadDist(self, nf);
-    *(sVec4_001125C0*)&self->IntersectPos = cPath_getPathPos_1125C0(self->AIPath, 0, self->PathParam + k);
+    *(&self->IntersectPos) = cPath_getPathPos_1125C0(self->AIPath, 0, self->PathParam + k);
     cRider_setAimTarget_2(((char*)self), nf);
     if (0.0f < self->MinDistanceLeft)
     {
@@ -3968,17 +3958,14 @@ extern "C" void cRider_updateAIPath(cRider* self)
 //100%
 INCLUDE_ASM("ai/computer", cRider_checkTrackPathSwitch);
 #ifdef SKIP_ASM
-struct sVec4_1127F0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 extern char gPaths[];
 extern "C" int cPathSys_getNearTrackPaths(void* tree, void* pos, void** out, int maxOut);
 extern "C" float cPath_intersectPath(void* path, void* a1, void* a2, void* a3, int n);
-sVec4_1127F0 cPath_getPathPos_1127F0(void* path, int* inRange, float t) __asm__("cPath_getPathPos");
+t4Vector cPath_getPathPos_1127F0(void* path, int* inRange, float t) __asm__("cPath_getPathPos");
 
 // PORT: PS2-only VU0 inline asm (vector length).
-static inline float vu0Length_1127F0(const sVec4_1127F0& v)
+static inline float vu0Length_1127F0(const t4Vector& v)
 {
     float r;
     int t;
@@ -3999,9 +3986,9 @@ static inline float vu0Length_1127F0(const sVec4_1127F0& v)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4_1127F0 vu0Scale_1127F0(const sVec4_1127F0& v, float s)
+static inline t4Vector vu0Scale_1127F0(const t4Vector& v, float s)
 {
-    sVec4_1127F0 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -4015,9 +4002,9 @@ static inline sVec4_1127F0 vu0Scale_1127F0(const sVec4_1127F0& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sVec4_1127F0 vu0Add_1127F0(const sVec4_1127F0& a, const sVec4_1127F0& b)
+static inline t4Vector vu0Add_1127F0(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_1127F0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -4029,9 +4016,9 @@ static inline sVec4_1127F0 vu0Add_1127F0(const sVec4_1127F0& a, const sVec4_1127
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sVec4_1127F0 vu0Sub_1127F0(const sVec4_1127F0& a, const sVec4_1127F0& b)
+static inline t4Vector vu0Sub_1127F0(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_1127F0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -4043,7 +4030,7 @@ static inline sVec4_1127F0 vu0Sub_1127F0(const sVec4_1127F0& a, const sVec4_1127
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0Dot_1127F0(const sVec4_1127F0& a, const sVec4_1127F0& b)
+static inline float vu0Dot_1127F0(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -4080,16 +4067,16 @@ static inline float vu0Dot_1127F0(const sVec4_1127F0& a, const sVec4_1127F0& b)
 extern "C" void cRider_checkTrackPathSwitch(cRider* vself, int skipCur)
 {
     void* paths[3];
-    sVec4_1127F0 out;
-    sVec4_1127F0 pos;
-    float len = vu0Length_1127F0(*(sVec4_1127F0*)&vself->mVelocity);
+    t4Vector out;
+    t4Vector pos;
+    float len = vu0Length_1127F0(*(&vself->mVelocity));
     void* best = vself->TrackPath;
     float bestD = 9.999999933815813e+36f;
     if (len == 0.0f) {
-        pos = *(sVec4_1127F0*)&vself->mPosition;
+        pos = *(&vself->mPosition);
     } else {
         float aheadScale = cRider_calculateAheadDist(vself, 1) / len;
-        pos = vu0Add_1127F0(*(sVec4_1127F0*)&vself->mPosition, vu0Scale_1127F0(*(sVec4_1127F0*)&vself->mVelocity, aheadScale));
+        pos = vu0Add_1127F0(*(&vself->mPosition), vu0Scale_1127F0(*(&vself->mVelocity), aheadScale));
     }
     int n = cPathSys_getNearTrackPaths(gPaths, &pos, paths, 3);
     for (int i = 0; i < n; i++) {
@@ -4104,8 +4091,8 @@ extern "C" void cRider_checkTrackPathSwitch(cRider* vself, int skipCur)
             }
         }
         nearParam += 796.0f;
-        sVec4_1127F0 aheadDelta = vu0Sub_1127F0(pos, cPath_getPathPos_1127F0(paths[i], 0, nearParam));
-        sVec4_1127F0 nearDelta = vu0Sub_1127F0(*(sVec4_1127F0*)&vself->mPosition, out);
+        t4Vector aheadDelta = vu0Sub_1127F0(pos, cPath_getPathPos_1127F0(paths[i], 0, nearParam));
+        t4Vector nearDelta = vu0Sub_1127F0(*(&vself->mPosition), out);
         float dist = vu0Dot_1127F0(nearDelta, nearDelta) + vu0Dot_1127F0(aheadDelta, aheadDelta);
         if (dist < bestD) {
             best = paths[i];
@@ -4119,19 +4106,16 @@ extern "C" void cRider_checkTrackPathSwitch(cRider* vself, int skipCur)
 //100%
 INCLUDE_ASM("ai/computer", cRider_checkAIPathSwitch);
 #ifdef SKIP_ASM
-struct sVec4_112A50 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 extern char gPaths[];
 extern "C" int cPathSys_getNearAIPaths(void* tree, void* pos, void** out, int maxOut, int a4);
 extern "C" float cPath_getLength(void* self);
 extern "C" float cPath_intersectPath1(void* path, void* a1, void* a2, void* a3, void* hint, int n);
 extern "C" float cPath_intersectPath(void* path, void* a1, void* a2, void* a3, int n);
-sVec4_112A50 cPath_getPathPos_112A50(void* path, int* inRange, float t) __asm__("cPath_getPathPos");
+t4Vector cPath_getPathPos_112A50(void* path, int* inRange, float t) __asm__("cPath_getPathPos");
 
 // PORT: PS2-only VU0 inline asm (vector length).
-static inline float vu0Length_112A50(const sVec4_112A50& v)
+static inline float vu0Length_112A50(const t4Vector& v)
 {
     float r;
     int t;
@@ -4152,9 +4136,9 @@ static inline float vu0Length_112A50(const sVec4_112A50& v)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4_112A50 vu0Scale_112A50(const sVec4_112A50& v, float s)
+static inline t4Vector vu0Scale_112A50(const t4Vector& v, float s)
 {
-    sVec4_112A50 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -4168,9 +4152,9 @@ static inline sVec4_112A50 vu0Scale_112A50(const sVec4_112A50& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sVec4_112A50 vu0Add_112A50(const sVec4_112A50& a, const sVec4_112A50& b)
+static inline t4Vector vu0Add_112A50(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_112A50 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -4182,9 +4166,9 @@ static inline sVec4_112A50 vu0Add_112A50(const sVec4_112A50& a, const sVec4_112A
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sVec4_112A50 vu0Sub_112A50(const sVec4_112A50& a, const sVec4_112A50& b)
+static inline t4Vector vu0Sub_112A50(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_112A50 r;
+    t4Vector r;
     __asm__ __volatile__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -4196,7 +4180,7 @@ static inline sVec4_112A50 vu0Sub_112A50(const sVec4_112A50& a, const sVec4_112A
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0Dot_112A50(const sVec4_112A50& a, const sVec4_112A50& b)
+static inline float vu0Dot_112A50(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -4236,16 +4220,16 @@ struct sVEf_112A50 { short delta; short index; float (*fn)(void*, void*); };
 extern "C" void cRider_checkAIPathSwitch(cRider* vself, int keep)
 {
     void* paths[6];
-    sVec4_112A50 out;
-    sVec4_112A50 pos;
-    float len = vu0Length_112A50(*(sVec4_112A50*)&vself->mVelocity);
+    t4Vector out;
+    t4Vector pos;
+    float len = vu0Length_112A50(*(&vself->mVelocity));
     void* best = 0;
     float bestD = 9.999999933815813e+36f;
     float bestW = -1.0f;
     if (len == 0.0f) {
-        pos = *(sVec4_112A50*)&vself->mPosition;
+        pos = *(&vself->mPosition);
     } else {
-        pos = vu0Add_112A50(*(sVec4_112A50*)&vself->mPosition, vu0Scale_112A50(*(sVec4_112A50*)&vself->mVelocity, 796.0f / len));
+        pos = vu0Add_112A50(*(&vself->mPosition), vu0Scale_112A50(*(&vself->mVelocity), 796.0f / len));
     }
     int n = cPathSys_getNearAIPaths(gPaths, &pos, paths, 6, 0);
     for (int i = 0; i < n; i++) {
@@ -4257,8 +4241,8 @@ extern "C" void cRider_checkAIPathSwitch(cRider* vself, int keep)
         if (cPath_getLength(paths[i]) - 200.0f < nearParam) {
             continue;
         }
-        sVec4_112A50 aheadDelta = vu0Sub_112A50(pos, cPath_getPathPos_112A50(paths[i], 0, nearParam + 796.0f));
-        sVec4_112A50 nearDelta = vu0Sub_112A50(*(sVec4_112A50*)&vself->mPosition, out);
+        t4Vector aheadDelta = vu0Sub_112A50(pos, cPath_getPathPos_112A50(paths[i], 0, nearParam + 796.0f));
+        t4Vector nearDelta = vu0Sub_112A50(*(&vself->mPosition), out);
         float dist = vu0Dot_112A50(nearDelta, nearDelta) + vu0Dot_112A50(aheadDelta, aheadDelta);
         char* being = (char*)&vself->mVtbl;
         sVEi_112A50* ve = &(*(sVEi_112A50**)being)[9];
@@ -4287,7 +4271,7 @@ extern "C" void cRider_checkAIPathSwitch(cRider* vself, int keep)
         *(int*)((char*)vself->mAIPathHint + 0x14) = -1;
         float pathParam = cPath_intersectPath1(vself->AIPath, &vself->mPosition, &vself->PathPos, &vself->PathDistXY, vself->mAIPathHint, 1);
         vself->PathParam = pathParam;
-        *(sVec4_112A50*)&vself->IntersectPos = cPath_getPathPos_112A50(vself->AIPath, 0, pathParam + 796.0f);
+        *(&vself->IntersectPos) = cPath_getPathPos_112A50(vself->AIPath, 0, pathParam + 796.0f);
         vself->PrevPathParam = vself->PathParam;
     }
 }
@@ -4296,9 +4280,6 @@ extern "C" void cRider_checkAIPathSwitch(cRider* vself, int keep)
 //100%
 INCLUDE_ASM("ai/computer", cRider_switchToResetPath);
 #ifdef SKIP_ASM
-struct sVec4_112D58 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sVE_112D58 { short delta; short index; int (*fn)(void*); };
 
@@ -4307,12 +4288,12 @@ int cPathSys_getNearResetPaths_112D58(void* self, void* a1, void** out, int maxO
 extern "C" float cPath_intersectPath(void* path, void* a1, void* a2, void* a3, int n);
 extern "C" float cPath_intersectPath1(void* path, void* a1, void* a2, void* a3, void* hint, int n);
 extern "C" float cPath_getLength(void* self);
-sVec4_112D58 cAIPath_getResetPos_112D58(void* path, float* t) __asm__("cAIPath_getResetPos");
+t4Vector cAIPath_getResetPos_112D58(void* path, float* t) __asm__("cAIPath_getResetPos");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sVec4_112D58 vu0Sub_112D58(const sVec4_112D58& a, const sVec4_112D58& b)
+static inline t4Vector vu0Sub_112D58(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_112D58 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -4324,7 +4305,7 @@ static inline sVec4_112D58 vu0Sub_112D58(const sVec4_112D58& a, const sVec4_112D
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0Dot_112D58(const sVec4_112D58& a, const sVec4_112D58& b)
+static inline float vu0Dot_112D58(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -4358,7 +4339,7 @@ static inline float vu0Dot_112D58(const sVec4_112D58& a, const sVec4_112D58& b)
 extern "C" void cRider_switchToResetPath(cRider* self)
 {
     void* paths[6];
-    sVec4_112D58 pos;
+    t4Vector pos;
     int n = cPathSys_getNearResetPaths_112D58(gPaths, &self->mPosition, paths, 6);
     void* best = 0;
     float bestD = 9.999999933815813e+36f;
@@ -4373,8 +4354,8 @@ extern "C" void cRider_switchToResetPath(cRider* self)
         if (ve->fn(being + ve->delta) == 0 && len - 200.0f < nearParam)
             continue;
         float aheadParam = nearParam + 796.0f;
-        sVec4_112D58 aheadDelta = vu0Sub_112D58(*(sVec4_112D58*)&self->mPosition, cAIPath_getResetPos_112D58(paths[i], &aheadParam));
-        sVec4_112D58 nearDelta = vu0Sub_112D58(*(sVec4_112D58*)&self->mPosition, pos);
+        t4Vector aheadDelta = vu0Sub_112D58(*(&self->mPosition), cAIPath_getResetPos_112D58(paths[i], &aheadParam));
+        t4Vector nearDelta = vu0Sub_112D58(*(&self->mPosition), pos);
         float dist = vu0Dot_112D58(nearDelta, nearDelta) + vu0Dot_112D58(aheadDelta, aheadDelta);
         if (dist < bestD)
         {
@@ -4390,9 +4371,9 @@ extern "C" void cRider_switchToResetPath(cRider* self)
         self->AIPath = (cAIPath*)best;
     *(int*)((char*)self->mAIPathHint + 0x14) = -1;
     self->PathParam = cPath_intersectPath1(self->AIPath, &self->mPosition, &self->PathPos, &self->PathDistXY, self->mAIPathHint, 1);
-    *(sVec4_112D58*)&self->PathPos = cAIPath_getResetPos_112D58(self->AIPath, (float*)(&self->PathParam));
+    *(&self->PathPos) = cAIPath_getResetPos_112D58(self->AIPath, (float*)(&self->PathParam));
     float aimParam = self->PathParam + 796.0f;
-    *(sVec4_112D58*)&self->IntersectPos = cAIPath_getResetPos_112D58(self->AIPath, &aimParam);
+    *(&self->IntersectPos) = cAIPath_getResetPos_112D58(self->AIPath, &aimParam);
     self->PrevPathParam = self->PathParam;
 }
 #endif

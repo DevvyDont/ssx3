@@ -247,7 +247,6 @@ INCLUDE_ASM("fe/festatecharsetup", cFEStateCharSetup_updateWidget);
 #ifdef SKIP_ASM
 struct cUIText;
 struct sVec4_182DB8 { float x, y, z, w; } __attribute__((aligned(16)));
-struct sCam_182DB8 { char pad[0x10]; float fov; };
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
@@ -275,7 +274,7 @@ extern "C" void cFEStateCharSetup_updateWidget(cFEStateCharSetup* self)
     cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_rider_name));
     signed char cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
     cUIText_setAsciiString(text, (const char*)cBECharacterInterface_getShortNameByCharacter(cBE_getInterface_Fv(cBE_getBE(), 2), cid, 0));
-    sCam_182DB8* cam = (sCam_182DB8*)SSXApp->RealFE;
+    cFE* cam = SSXApp->RealFE;
     sVec4_182DB8 pos;
     pos.x = 0.0f;
     pos.y = 200.0f;
@@ -286,8 +285,8 @@ extern "C" void cFEStateCharSetup_updateWidget(cFEStateCharSetup* self)
     lookAt.y = 0.0f;
     lookAt.z = 0.0f;
     lookAt.w = 1.0f;
-    cSimpleCamera_setupCamWithPosAndTarget((char*)cam + 0x10, &pos, &lookAt);
-    cam->fov = 0.4363323450088501f;
+    cSimpleCamera_setupCamWithPosAndTarget(&cam->mCamera, &pos, &lookAt);
+    cam->mCamera.View = 0.4363323450088501f;
     cFEStateCharSetup_show3DCharacter(self, 1);
     self->mbIsFirst = 1;
     cFEStateCharSetup_updateCharacter3DPos(self);

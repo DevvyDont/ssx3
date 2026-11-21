@@ -143,14 +143,6 @@ struct sRect22E550 {
     float x, y, w, h;
 };
 
-struct cGameViewMan22E550 {
-    unsigned int count;      // 0x0
-    sCam22E550* cams[2];     // 0x4
-    int mode;                // 0xC
-    int views;               // 0x10
-    int f14;                 // 0x14
-    sRect22E550 rects[2];    // 0x18
-};
 
 /**
  * Splits or joins the screen when the game's state changes: one full-screen view, or two side-by-side halves for states
@@ -163,11 +155,11 @@ struct cGameViewMan22E550 {
  * Then clears the world view's active flags for the unused view (one view) or for both (two views). cGame_updateState
  * calls it.
  */
-extern "C" void cGameViewMan_updateViewState(cGameViewMan22E550* self)
+extern "C" void cGameViewMan_updateViewState(cGameViewMan* self)
 {
     cGame* game = SSXApp->Game;
     int mode = game->mCurrentStateID;
-    if (self->mode == mode) {
+    if (self->m_GFState == mode) {
         return;
     }
     int n = *(int*)game->Replay;
@@ -175,43 +167,43 @@ extern "C" void cGameViewMan_updateViewState(cGameViewMan22E550* self)
     if (busy) {
         return;
     }
-    self->mode = mode;
-    if (self->count == 1) {
+    self->m_GFState = mode;
+    if (self->m_uiNumPlayers == 1) {
         return;
     }
     float w = (float)((cDisp22E550*)GrMan)->GetScreenWidth();
     float screenHeight = (float)((cDisp22E550*)GrMan)->GetScreenHeight();
-    switch (self->mode) {
+    switch (self->m_GFState) {
     case 3:
     case 4:
     case 5: {
         float hw = w * 0.5f;
-        self->views = 2;
-        self->f14 = 0;
-        self->rects[0].x = 0.0f;
-        self->rects[0].y = 0.0f;
-        self->rects[0].w = hw;
-        self->rects[0].h = screenHeight;
-        self->rects[1].x = hw;
-        self->rects[1].y = 0.0f;
-        self->rects[1].w = hw;
-        self->rects[1].h = screenHeight;
-        self->cams[0]->farClip = 20000.0f;
-        self->cams[1]->farClip = 20000.0f;
+        self->m_uiNumView = 2;
+        self->m_uiCurrentView = 0;
+        ((sRect22E550*)&self->m_ViewRect[0])[0].x = 0.0f;
+        ((sRect22E550*)&self->m_ViewRect[0])[0].y = 0.0f;
+        ((sRect22E550*)&self->m_ViewRect[0])[0].w = hw;
+        ((sRect22E550*)&self->m_ViewRect[0])[0].h = screenHeight;
+        ((sRect22E550*)&self->m_ViewRect[0])[1].x = hw;
+        ((sRect22E550*)&self->m_ViewRect[0])[1].y = 0.0f;
+        ((sRect22E550*)&self->m_ViewRect[0])[1].w = hw;
+        ((sRect22E550*)&self->m_ViewRect[0])[1].h = screenHeight;
+        ((sCam22E550**)&self->PlayerCamera[0])[0]->farClip = 20000.0f;
+        ((sCam22E550**)&self->PlayerCamera[0])[1]->farClip = 20000.0f;
         break;
     }
     default:
-        self->views = 1;
-        self->rects[0].w = w;
-        self->rects[0].h = screenHeight;
-        self->f14 = 0;
-        self->rects[0].x = 0.0f;
-        self->rects[0].y = 0.0f;
-        self->cams[0]->farClip = 30000.0f;
+        self->m_uiNumView = 1;
+        ((sRect22E550*)&self->m_ViewRect[0])[0].w = w;
+        ((sRect22E550*)&self->m_ViewRect[0])[0].h = screenHeight;
+        self->m_uiCurrentView = 0;
+        ((sRect22E550*)&self->m_ViewRect[0])[0].x = 0.0f;
+        ((sRect22E550*)&self->m_ViewRect[0])[0].y = 0.0f;
+        ((sCam22E550**)&self->PlayerCamera[0])[0]->farClip = 30000.0f;
         break;
     }
-    if (self->views == 1) {
-        int idx = self->cams[1]->index;
+    if (((int)self->m_uiNumView) == 1) {
+        int idx = ((sCam22E550**)&self->PlayerCamera[0])[1]->index;
         (*(sSlots22E550**)SSXApp->Game->World)->e[idx].active = 0;
     } else {
         (*(sSlots22E550**)SSXApp->Game->World)->e[0].active = 0;
@@ -232,11 +224,6 @@ struct sItem0022E730 {
     char pad[0x90];
     sVEntry0022E730* vt;
 };
-struct sList0022E730 {
-    unsigned int count;
-    sItem0022E730* items[3];
-    int field_0x10;
-};
 void operator_delete(int* p);
 
 /**
@@ -247,16 +234,16 @@ void operator_delete(int* p);
  *
  * @param flags  bit 0: free the object's memory
  */
-extern "C" void cGameViewMan__cGameViewMan(sList0022E730* self, int flags)
+extern "C" void cGameViewMan__cGameViewMan(cGameViewMan* self, int flags)
 {
     unsigned int i;
-    for (i = 0; i < self->count; i++) {
-        sItem0022E730* it = self->items[i];
+    for (i = 0; i < self->m_uiNumPlayers; i++) {
+        sItem0022E730* it = ((sItem0022E730**)&self->PlayerCamera[0])[i];
         if (it != 0) {
             it->vt[1].fn((char*)it + it->vt[1].delta, 3);
         }
     }
-    self->field_0x10 = 0;
+    self->m_uiNumView = 0;
     if (flags & 1) {
         operator_delete((int*)self);
     }

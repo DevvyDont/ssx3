@@ -2691,8 +2691,7 @@ struct sVec3K1C9B98 {
     float x, y, z;
     sVec3K1C9B98(float a, float b, float c) : x(a), y(b), z(c) {}
 };
-struct sPairK1C9B98 { int a, b; };
-struct sEntryK1C9B98 { sPairK1C9B98 p; int c; };
+struct sEntryK1C9B98 { tPopupElement p; int c; };
 struct sSelfK1C9B98 { char pad[0x2D0]; sEntryK1C9B98 entries[4]; };
 
 /**
@@ -2717,7 +2716,7 @@ extern "C" void cScreenPopup_createConfirmationPopup(cScreenPopup* self, int idx
     *(sVec3K1C9B98*)&popup->info.mvOffset[0] = popupOffset;
     popup->info.miLayerOffset = self->miLayerOffset + 3;
     popup->info.miDefaultOption = ((sSelfK1C9B98*)self)->entries[idx].c;
-    *(sPairK1C9B98*)&popup->info.mtMessage = ((sSelfK1C9B98*)self)->entries[idx].p;
+    *(&popup->info.mtMessage) = ((sSelfK1C9B98*)self)->entries[idx].p;
     self->miActiveConfirmation = idx;
     cUIStateStack_pushPopup((char*)*(void**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18,
                   self->mpConfirmPopup);

@@ -9,13 +9,6 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern char cScriptAnimBankManager_vtbl[];
 extern const char str_tScriptAnimBankInfo[];
 
-struct sScAnimBank53B8 {
-    int id;         // 0x0
-    int index;      // 0x4
-    int a;          // 0x8
-    int b;          // 0xC
-    int c;          // 0x10
-};
 
 
 /**
@@ -37,14 +30,14 @@ extern "C" cScriptAnimBankManager* cScriptAnimBankManager_cScriptAnimBankManager
     self->mMemFlags = flags;
     self->mMaxBanks = count;
     //E
-    (*(sScAnimBank53B8**)&self->mpBankInfo) = (sScAnimBank53B8*)operator_new_tag(count * sizeof(sScAnimBank53B8), str_tScriptAnimBankInfo, flags, 0);
+    (*(tScriptAnimBankInfo**)&self->mpBankInfo) = (tScriptAnimBankInfo*)operator_new_tag(count * sizeof(tScriptAnimBankInfo), str_tScriptAnimBankInfo, flags, 0);
     int idx = base;
     for (int i = 0; i < self->mMaxBanks; i++) {
-        ((sScAnimBank53B8*)self->mpBankInfo)[i].id = -1;
-        ((sScAnimBank53B8*)self->mpBankInfo)[i].index = idx++;
-        ((sScAnimBank53B8*)self->mpBankInfo)[i].a = 0;
-        ((sScAnimBank53B8*)self->mpBankInfo)[i].b = 0;
-        ((sScAnimBank53B8*)self->mpBankInfo)[i].c = 0;
+        (self->mpBankInfo)[i].userID = -1;
+        (self->mpBankInfo)[i].bankNum = idx++;
+        (*(int*)&(self->mpBankInfo)[i].pData) = 0;
+        (self->mpBankInfo)[i].numAnims = 0;
+        (*(int*)&(self->mpBankInfo)[i].pTableAnimID) = 0;
     }
     return self;
 }
@@ -200,16 +193,11 @@ extern "C" void cScriptAnimBankManager_UnlinkBank(cScriptAnimBankManager* self, 
 //100%
 INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_UnlinkBanksAll);
 #ifdef SKIP_ASM
-struct sDmEntry275698 {
-    char pad_0x00[0x8];
-    int used;
-    char pad_0x0C[0x8];
-};
 
 struct sDmVEntry275698 {
     short delta;
     short index;
-    void (*fn)(void*, sDmEntry275698*);
+    void (*fn)(void*, tScriptAnimBankInfo*);
 };
 
 
@@ -227,8 +215,8 @@ extern "C" void cScriptAnimBankManager_UnlinkBanksAll(cScriptAnimBankManager* se
     cScriptAnimBankManager* self = self_;
     int i;
     for (i = 0; i < self->mMaxBanks; i++) {
-        if (((sDmEntry275698*)self->mpBankInfo)[i].used != 0) {
-            ((sDmVEntry275698*)self->mVtbl)[2].fn((char*)self + ((sDmVEntry275698*)self->mVtbl)[2].delta, &((sDmEntry275698*)self->mpBankInfo)[i]);
+        if (((int)(self->mpBankInfo)[i].pData) != 0) {
+            ((sDmVEntry275698*)self->mVtbl)[2].fn((char*)self + ((sDmVEntry275698*)self->mVtbl)[2].delta, &(self->mpBankInfo)[i]);
         }
     }
 }

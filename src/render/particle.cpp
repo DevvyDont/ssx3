@@ -1426,14 +1426,11 @@ extern "C" void cSimpleTube__cSimpleTube(cSimpleTube* self, int flags)
 //100%
 INCLUDE_ASM("render/particle", cSimpleTube_render);
 #ifdef SKIP_ASM
-struct sPtV4_26C8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sPtVtx_26C8 {
-    sPtV4_26C8 a;
-    sPtV4_26C8 b;
-    sPtV4_26C8 pos;                 // 0x20
+    t4Vector a;
+    t4Vector b;
+    t4Vector pos;                 // 0x20
 };
 
 struct sPtRS_26C8 {
@@ -1462,15 +1459,15 @@ struct sPtCtx_26C8 {
 extern int cTube_m_Enable;
 extern float cTube_m_ScaleWidth;
 extern float cTube_m_ScaleHeight;
-extern sPtV4_26C8 t4vect_ZAxis;
+extern t4Vector t4vect_ZAxis;
 extern sPtVtx_26C8 D_00501440_v26C8[] __asm__("cSimpleTube_m_vertices");
 extern sPtRS_26C8 D_00501420_rs26C8 __asm__("sDrawState_s_defaultDrawState");
 extern sPtCtx_26C8* D_004A5B80_ctx26C8 __asm__("cGraphicsMan_TheGraphicsMan");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sPtV4_26C8 Sub_26C8(const sPtV4_26C8& a, const sPtV4_26C8& b)
+static inline t4Vector Sub_26C8(const t4Vector& a, const t4Vector& b)
 {
-    sPtV4_26C8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1483,7 +1480,7 @@ static inline sPtV4_26C8 Sub_26C8(const sPtV4_26C8& a, const sPtV4_26C8& b)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place vector subtract).
-static inline void SubEq_26C8(sPtV4_26C8& a, const sPtV4_26C8& b)
+static inline void SubEq_26C8(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -1496,9 +1493,9 @@ static inline void SubEq_26C8(sPtV4_26C8& a, const sPtV4_26C8& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sPtV4_26C8 Add_26C8(const sPtV4_26C8& a, const sPtV4_26C8& b)
+static inline t4Vector Add_26C8(const t4Vector& a, const t4Vector& b)
 {
-    sPtV4_26C8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1511,9 +1508,9 @@ static inline sPtV4_26C8 Add_26C8(const sPtV4_26C8& a, const sPtV4_26C8& b)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt).
-static inline sPtV4_26C8 Norm_26C8(const sPtV4_26C8& v)
+static inline t4Vector Norm_26C8(const t4Vector& v)
 {
-    sPtV4_26C8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -1532,9 +1529,9 @@ static inline sPtV4_26C8 Norm_26C8(const sPtV4_26C8& v)
 }
 
 // PORT: PS2-only VU0 inline asm (cross product, w = 0).
-static inline sPtV4_26C8 Cross_26C8(const sPtV4_26C8& a, const sPtV4_26C8& b)
+static inline t4Vector Cross_26C8(const t4Vector& a, const t4Vector& b)
 {
-    sPtV4_26C8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -1549,9 +1546,9 @@ static inline sPtV4_26C8 Cross_26C8(const sPtV4_26C8& a, const sPtV4_26C8& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sPtV4_26C8 Scale_26C8(const sPtV4_26C8& v, float s)
+static inline t4Vector Scale_26C8(const t4Vector& v, float s)
 {
-    sPtV4_26C8 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1585,16 +1582,16 @@ extern "C" void cSimpleTube_render(cSimpleTube* self)
     if (cTube_m_Enable == 0) {
         return;
     }
-    sPtV4_26C8 dir = Norm_26C8(Sub_26C8(((sPtV4_26C8*)self->m_positions)[self->m_numSegments], ((sPtV4_26C8*)self->m_positions)[0]));
-    sPtV4_26C8 sideOffset = Scale_26C8(Norm_26C8(Cross_26C8(dir, t4vect_ZAxis)), cTube_m_ScaleWidth);
-    sPtV4_26C8 otherSideOffset = Scale_26C8(sideOffset, -1.0f);
+    t4Vector dir = Norm_26C8(Sub_26C8((self->m_positions)[self->m_numSegments], (self->m_positions)[0]));
+    t4Vector sideOffset = Scale_26C8(Norm_26C8(Cross_26C8(dir, t4vect_ZAxis)), cTube_m_ScaleWidth);
+    t4Vector otherSideOffset = Scale_26C8(sideOffset, -1.0f);
     SubEq_26C8(sideOffset, Scale_26C8(t4vect_ZAxis, cTube_m_ScaleHeight));
     SubEq_26C8(otherSideOffset, Scale_26C8(t4vect_ZAxis, cTube_m_ScaleHeight));
     for (int i = 0; i < self->m_numSegments + 1; i++) {
-        D_00501440_v26C8[2 * i].pos = Add_26C8(((sPtV4_26C8*)self->m_positions)[i], otherSideOffset);
-        D_00501440_v26C8[2 * i + 1].pos = ((sPtV4_26C8*)self->m_positions)[i];
-        D_00501440_v26C8[2 * (i + self->m_numSegments + 2)].pos = ((sPtV4_26C8*)self->m_positions)[i];
-        D_00501440_v26C8[((self->m_numSegments + i) << 1) + 5].pos = Add_26C8(((sPtV4_26C8*)self->m_positions)[i], sideOffset);
+        D_00501440_v26C8[2 * i].pos = Add_26C8((self->m_positions)[i], otherSideOffset);
+        D_00501440_v26C8[2 * i + 1].pos = (self->m_positions)[i];
+        D_00501440_v26C8[2 * (i + self->m_numSegments + 2)].pos = (self->m_positions)[i];
+        D_00501440_v26C8[((self->m_numSegments + i) << 1) + 5].pos = Add_26C8((self->m_positions)[i], sideOffset);
     }
     D_00501440_v26C8[2 * self->m_numSegments + 2] = D_00501440_v26C8[2 * self->m_numSegments + 1];
     D_00501440_v26C8[2 * self->m_numSegments + 3] = D_00501440_v26C8[2 * self->m_numSegments + 4];
@@ -1605,7 +1602,7 @@ extern "C" void cSimpleTube_render(cSimpleTube* self)
     sPtVEntry_26C8* vt = ctx->vtable;
     vt[71].fn((char*)ctx + vt[71].delta, ((self->m_numSegments + 1) << 2) | 2, D_00501440_v26C8, 0);
     for (int i = 0; i < self->m_numSegments + 1; i++) {
-        D_00501440_v26C8[i].pos = ((sPtV4_26C8*)self->m_positions)[i];
+        D_00501440_v26C8[i].pos = (self->m_positions)[i];
     }
     vt = ctx->vtable;
     vt[73].fn((char*)ctx + vt[73].delta, self->m_numSegments + 1, D_00501440_v26C8, 0);
@@ -3441,9 +3438,6 @@ extern "C" int cPS2GraphicsMan_SetDTV(cPS2GraphicsMan* self, int enable)
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_PushViewport);
 #ifdef SKIP_ASM
 
-struct sPtMtx65B8 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 struct sPtScis65B8 {
     unsigned short v[4];
@@ -3456,13 +3450,13 @@ struct sPtGfx65B8 {
     char pad_0x10E0[0x18F0 - 0x10E0];
     char* keys;                     // 0x18F0
     char pad_0x18F4[0x5780 - 0x18F4];
-    sPtMtx65B8 m5780;               // 0x5780
-    sPtMtx65B8 m57C0;               // 0x57C0
-    sPtMtx65B8 m5800;               // 0x5800
+    t4Matrix m5780;               // 0x5780
+    t4Matrix m57C0;               // 0x57C0
+    t4Matrix m5800;               // 0x5800
     t4Vector q5840;                 // 0x5840
     t4Vector q5850;                 // 0x5850
-    sPtMtx65B8 m5860;               // 0x5860
-    sPtMtx65B8 m58A0;               // 0x58A0
+    t4Matrix m5860;               // 0x5860
+    t4Matrix m58A0;               // 0x58A0
     t4Vector q58E0;                 // 0x58E0
     t4Vector q58F0;                 // 0x58F0
     sPtScis65B8 scissor;            // 0x5900
@@ -3472,7 +3466,7 @@ struct sPtGfx65B8 {
     char pad_0x5914[0xC];
     t4Vector q5920;                 // 0x5920
     char pad_0x5930[0x6AF0 - 0x5930];
-    sPtMtx65B8 m6AF0;               // 0x6AF0
+    t4Matrix m6AF0;               // 0x6AF0
     char pad_0x6B30[0x40];
     t4Vector q6B70;                 // 0x6B70
     t4Vector q6B80;                 // 0x6B80
@@ -3481,7 +3475,7 @@ struct sPtGfx65B8 {
 };
 
 // PORT: PS2-only VU0 asm (lqc2/sqc2 4x4 matrix copy).
-static inline void vu0CopyMtx65B8(sPtMtx65B8* dst, sPtMtx65B8* src)
+static inline void vu0CopyMtx65B8(t4Matrix* dst, t4Matrix* src)
 {
     __asm__ __volatile__(
         "lqc2      $vf1, 0x0(%0)\n"
@@ -3512,16 +3506,16 @@ extern "C" void cPS2GraphicsMan_PushViewport(cPS2GraphicsMan* self)
     viewportStack->mDeferScissorIndex = *(int*)((char*)self->mpDeferMan + 0x69CC4);
     viewportStack->unk_024 = self->unk_590C;
     viewportStack->unk_028 = self->unk_5908;
-    vu0CopyMtx65B8((sPtMtx65B8*)&viewportStack->mScreenMatrix, (sPtMtx65B8*)&self->mScreenMatrix);
+    vu0CopyMtx65B8((&viewportStack->mScreenMatrix), (&self->mScreenMatrix));
     *(&viewportStack->unk_030) = *(&self->unk_6B70);
     *(&viewportStack->unk_040) = *(&self->unk_6B80);
-    vu0CopyMtx65B8((sPtMtx65B8*)&viewportStack->mWorld, (sPtMtx65B8*)&self->mWorld);
-    vu0CopyMtx65B8((sPtMtx65B8*)&viewportStack->mView, (sPtMtx65B8*)&self->mView);
-    vu0CopyMtx65B8((sPtMtx65B8*)&viewportStack->mGuardBandMatrix, (sPtMtx65B8*)&self->mGuardBandMatrix);
+    vu0CopyMtx65B8((&viewportStack->mWorld), (&self->mWorld));
+    vu0CopyMtx65B8((&viewportStack->mView), (&self->mView));
+    vu0CopyMtx65B8((&viewportStack->mGuardBandMatrix), (&self->mGuardBandMatrix));
     *(&viewportStack->mGuardScale) = *(&self->mGuardScale);
     *(&viewportStack->mGuardOffset) = *(&self->mGuardOffset);
-    vu0CopyMtx65B8((sPtMtx65B8*)&viewportStack->mViewProj, (sPtMtx65B8*)&self->mViewProj);
-    vu0CopyMtx65B8((sPtMtx65B8*)&viewportStack->mNetMatrix, (sPtMtx65B8*)&self->mNetMatrix);
+    vu0CopyMtx65B8((&viewportStack->mViewProj), (&self->mViewProj));
+    vu0CopyMtx65B8((&viewportStack->mNetMatrix), (&self->mNetMatrix));
     *(&viewportStack->mScreenScale) = *(&self->mScreenScale);
     *(&viewportStack->mScreenOffset) = *(&self->mScreenOffset);
     viewportStack->unk_02C = self->unk_5910;
@@ -3535,9 +3529,6 @@ extern "C" void cPS2GraphicsMan_PushViewport(cPS2GraphicsMan* self)
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_PopViewport);
 #ifdef SKIP_ASM
 
-struct sPtMtx6768 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 struct sPtScis6768 {
     unsigned short v[4];
@@ -3550,13 +3541,13 @@ struct sPtGfx6768 {
     char pad_0x10E0[0x18F0 - 0x10E0];
     char* keys;                     // 0x18F0
     char pad_0x18F4[0x5780 - 0x18F4];
-    sPtMtx6768 m5780;               // 0x5780
-    sPtMtx6768 m57C0;               // 0x57C0
-    sPtMtx6768 m5800;               // 0x5800
+    t4Matrix m5780;               // 0x5780
+    t4Matrix m57C0;               // 0x57C0
+    t4Matrix m5800;               // 0x5800
     t4Vector q5840;                 // 0x5840
     t4Vector q5850;                 // 0x5850
-    sPtMtx6768 m5860;               // 0x5860
-    sPtMtx6768 m58A0;               // 0x58A0
+    t4Matrix m5860;               // 0x5860
+    t4Matrix m58A0;               // 0x58A0
     t4Vector q58E0;                 // 0x58E0
     t4Vector q58F0;                 // 0x58F0
     sPtScis6768 scissor;            // 0x5900
@@ -3566,7 +3557,7 @@ struct sPtGfx6768 {
     char pad_0x5914[0xC];
     t4Vector q5920;                 // 0x5920
     char pad_0x5930[0x6AF0 - 0x5930];
-    sPtMtx6768 m6AF0;               // 0x6AF0
+    t4Matrix m6AF0;               // 0x6AF0
     char pad_0x6B30[0x40];
     t4Vector q6B70;                 // 0x6B70
     t4Vector q6B80;                 // 0x6B80
@@ -3576,7 +3567,7 @@ struct sPtGfx6768 {
 };
 
 // PORT: PS2-only VU0 asm (lqc2/sqc2 4x4 matrix copy).
-static inline void vu0CopyMtx6768(sPtMtx6768* dst, sPtMtx6768* src)
+static inline void vu0CopyMtx6768(t4Matrix* dst, t4Matrix* src)
 {
     __asm__ __volatile__(
         "lqc2      $vf1, 0x0(%0)\n"
@@ -3612,16 +3603,16 @@ extern "C" void cPS2GraphicsMan_PopViewport(cPS2GraphicsMan* self)
     }
     self->unk_590C = viewportStack->unk_024;
     self->unk_5908 = viewportStack->unk_028;
-    vu0CopyMtx6768((sPtMtx6768*)&self->mScreenMatrix, (sPtMtx6768*)&viewportStack->mScreenMatrix);
+    vu0CopyMtx6768((&self->mScreenMatrix), (&viewportStack->mScreenMatrix));
     *(&self->unk_6B70) = *(&viewportStack->unk_030);
     *(&self->unk_6B80) = *(&viewportStack->unk_040);
-    vu0CopyMtx6768((sPtMtx6768*)&self->mWorld, (sPtMtx6768*)&viewportStack->mWorld);
-    vu0CopyMtx6768((sPtMtx6768*)&self->mView, (sPtMtx6768*)&viewportStack->mView);
-    vu0CopyMtx6768((sPtMtx6768*)&self->mGuardBandMatrix, (sPtMtx6768*)&viewportStack->mGuardBandMatrix);
+    vu0CopyMtx6768((&self->mWorld), (&viewportStack->mWorld));
+    vu0CopyMtx6768((&self->mView), (&viewportStack->mView));
+    vu0CopyMtx6768((&self->mGuardBandMatrix), (&viewportStack->mGuardBandMatrix));
     *(&self->mGuardScale) = *(&viewportStack->mGuardScale);
     *(&self->mGuardOffset) = *(&viewportStack->mGuardOffset);
-    vu0CopyMtx6768((sPtMtx6768*)&self->mViewProj, (sPtMtx6768*)&viewportStack->mViewProj);
-    vu0CopyMtx6768((sPtMtx6768*)&self->mNetMatrix, (sPtMtx6768*)&viewportStack->mNetMatrix);
+    vu0CopyMtx6768((&self->mViewProj), (&viewportStack->mViewProj));
+    vu0CopyMtx6768((&self->mNetMatrix), (&viewportStack->mNetMatrix));
     *(&self->mScreenScale) = *(&viewportStack->mScreenScale);
     *(&self->mScreenOffset) = *(&viewportStack->mScreenOffset);
     self->unk_5910 = viewportStack->unk_02C;
@@ -4035,15 +4026,12 @@ struct sPt7278 {
     sPt7278(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
-struct sMat7278 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 
 
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix * vector); the PC port needs a C fallback.
-static inline sPt7278 MulMat7278(const sMat7278* m, const sPt7278& v)
+static inline sPt7278 MulMat7278(const t4Matrix* m, const sPt7278& v)
 {
     sPt7278 r;
     __asm__(
@@ -4101,8 +4089,8 @@ static inline float DepthOffset7278(cPS2GraphicsMan* self, sPt7278* pos, float d
 {
     if (dist != 0.0f) {
     sPt7278 dir((self->mCurrentView)->row[0].z, (self->mCurrentView)->row[1].z, (self->mCurrentView)->row[2].z, 0.0f);
-    sPt7278 a = MulMat7278((sMat7278*)&self->mNetMatrix, *pos);
-    sPt7278 c = MulMat7278((sMat7278*)&self->mNetMatrix, Add7278(*pos, Scale7278(dir, dist)));
+    sPt7278 a = MulMat7278((&self->mNetMatrix), *pos);
+    sPt7278 c = MulMat7278((&self->mNetMatrix), Add7278(*pos, Scale7278(dir, dist)));
     float za = a.z / a.w;
     float zc = c.z / c.w;
     if (-1.0f <= za && za <= 1.0f && -1.0f <= zc && zc <= 1.0f) {
@@ -5140,7 +5128,7 @@ extern "C" void cPS2GraphicsMan_DrawString3D(cPS2GraphicsMan* self, sFontRes8808
                 Set2_8808(uv1, (glyphRec->u + glyphRec->w) * su, (glyphRec->v + glyphRec->h) * sv);
                 Set2_8808(size, glyphRec->w * sx * 0.5f, glyphRec->h * sy * 0.5f);
                 sPtPos8808 pos(x + glyphRec->xoff * sx + size[0], y + glyphRec->yoff * sy + size[1], z, 1.0f);
-                sPt7278 projCentre = MulMat7278((sMat7278*)&self->mScreenWorld, pos);
+                sPt7278 projCentre = MulMat7278((&self->mScreenWorld), pos);
                 float inv = 1.0f / projCentre.w;
                 projCentre.x *= inv;
                 projCentre.y *= inv;
@@ -5354,7 +5342,7 @@ extern "C" void cPS2GraphicsMan_DrawString3D1(cPS2GraphicsMan* self, sFontRes902
                 Set2_9028(uv1, (glyphInfo->u + glyphInfo->w) * su, (glyphInfo->v + glyphInfo->h) * sv);
                 Set2_9028(size, glyphInfo->w * sx * 0.5f, glyphInfo->h * sy * 0.5f);
                 sPtPos9028 pos(x + glyphInfo->xoff * sx + size[0], y + glyphInfo->yoff * sy + size[1], z, 1.0f);
-                sPt7278 screenCentre = MulMat7278((sMat7278*)&self->mScreenWorld, pos);
+                sPt7278 screenCentre = MulMat7278((&self->mScreenWorld), pos);
                 float inv = 1.0f / screenCentre.w;
                 screenCentre.x *= inv;
                 screenCentre.y *= inv;
@@ -5907,7 +5895,7 @@ static inline int Depth_A610(cPS2GraphicsMan* self, t4Vector v)
         "vmtir      $vi1, $vf11w\n"
         "cfc2.ni    %0, $vi1\n"
         : "=&r"(r)
-        : "m"(*(sPtQuadF*)&self->unk_5920), "m"(v), "r"((sMat7278*)&self->mNetMatrix)
+        : "m"(*(sPtQuadF*)&self->unk_5920), "m"(v), "r"((&self->mNetMatrix))
         : "memory");
     return (int)r;
 }
@@ -7925,12 +7913,9 @@ extern "C" int cPS2GraphicsMan_GetTextureHeight(cPS2GraphicsMan* self, int idx)
 //100%
 INCLUDE_ASM("render/particle", func_0037D968);
 #ifdef SKIP_ASM
-struct sMat_D968 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, d = b * a).
-static inline void vu0MulMat_D968(sMat_D968* d, const sMat_D968* a, const sMat_D968* b)
+static inline void vu0MulMat_D968(t4Matrix* d, const t4Matrix* a, const t4Matrix* b)
 {
     __asm__ __volatile__(
         "lqc2      $vf4, 0x0(%1)\n"
@@ -7967,7 +7952,7 @@ static inline void vu0MulMat_D968(sMat_D968* d, const sMat_D968* a, const sMat_D
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
-static inline void vu0CopyMat_D968(sMat_D968* d, const sMat_D968* s)
+static inline void vu0CopyMat_D968(t4Matrix* d, const t4Matrix* s)
 {
     __asm__ __volatile__(
         "lqc2      $vf1, 0x0(%1)\n"
@@ -7983,7 +7968,7 @@ static inline void vu0CopyMat_D968(sMat_D968* d, const sMat_D968* s)
         : "memory");
 }
 
-extern "C" void func_003645B8(void* ring, sMat_D968* m);
+extern "C" void func_003645B8(void* ring, t4Matrix* m);
 
 /**
  * Recomputes the cached transform matrices from the current view matrix and sets mMatricesValid to 1.
@@ -7998,19 +7983,19 @@ extern "C" void func_003645B8(void* ring, sMat_D968* m);
 extern "C" void func_0037D968(cPS2GraphicsMan* selfp)
 {
     selfp->mMatricesValid = 1;
-    sMat_D968 copy;
-    sMat_D968 product;
-    vu0MulMat_D968(&product, (sMat_D968*)(&selfp->mScreenMatrix), (sMat_D968*)selfp->mCurrentView);
+    t4Matrix copy;
+    t4Matrix product;
+    vu0MulMat_D968(&product, ((&selfp->mScreenMatrix)), selfp->mCurrentView);
     vu0CopyMat_D968(&copy, &product);
-    vu0CopyMat_D968((sMat_D968*)(&selfp->mScreenWorld), &copy);
-    vu0CopyMat_D968((sMat_D968*)(&selfp->mWorld), (sMat_D968*)selfp->mCurrentView);
-    vu0MulMat_D968(&product, (sMat_D968*)(&selfp->mView), (sMat_D968*)(&selfp->mWorld));
+    vu0CopyMat_D968(((&selfp->mScreenWorld)), &copy);
+    vu0CopyMat_D968(((&selfp->mWorld)), selfp->mCurrentView);
+    vu0MulMat_D968(&product, ((&selfp->mView)), ((&selfp->mWorld)));
     vu0CopyMat_D968(&copy, &product);
-    vu0CopyMat_D968((sMat_D968*)(&selfp->mGuardBandMatrix), &copy);
-    vu0MulMat_D968(&product, (sMat_D968*)(&selfp->mViewProj), (sMat_D968*)(&selfp->mWorld));
+    vu0CopyMat_D968(((&selfp->mGuardBandMatrix)), &copy);
+    vu0MulMat_D968(&product, ((&selfp->mViewProj)), ((&selfp->mWorld)));
     vu0CopyMat_D968(&copy, &product);
-    vu0CopyMat_D968((sMat_D968*)(&selfp->mNetMatrix), &copy);
-    func_003645B8(selfp->mpDeferMan, (sMat_D968*)(&selfp->mWorld));
+    vu0CopyMat_D968(((&selfp->mNetMatrix)), &copy);
+    func_003645B8(selfp->mpDeferMan, ((&selfp->mWorld)));
 }
 #endif
 

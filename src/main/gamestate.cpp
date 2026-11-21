@@ -1434,10 +1434,6 @@ struct sIface_6418 {
     int f10;
 };
 
-struct sRace_6418 {
-    char pad0[0x1C8];
-    int f1C8;
-};
 
 struct sGS_6418 {
     int f0;
@@ -1550,7 +1546,7 @@ extern "C" void cGFUserSelectState_update(void* self)
                     return;
                 }
                 *(int*)((char*)self + 0x1C) = 0;
-                ((sRace_6418*)(void*)SSXApp->Game->SectionMan)->f1C8 = one;
+                ((cSectionMan*)(void*)SSXApp->Game->SectionMan)->mWaitTransport = one;
                 cSectionMan_load(SSXApp->Game->SectionMan, *(int*)((char*)self + 0x18), 7);
                 ns = 3;
                 break;

@@ -397,9 +397,6 @@ INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_loseFocus);
 // cHandplantMotion_calcExitVel returns a value in $2 that is unused here; declaring it int keeps $2 free as the target has it.
 extern "C" int cHandplantMotion_calcExitVel(void* self);
 
-struct sVec4_9178 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 /**
  * Ends the handplant motion: makes sure the exit velocity is computed and gives it to the rider.
@@ -411,7 +408,7 @@ struct sVec4_9178 {
 extern "C" void cHandplantMotion_loseFocus(cHandplantMotion* self)
 {
     cHandplantMotion_calcExitVel(self);
-    *(sVec4_9178*)&self->mRider->mVelocity = *(sVec4_9178*)&self->ExitVel;
+    *(&self->mRider->mVelocity) = *(&self->ExitVel);
 }
 #endif
 
@@ -1848,7 +1845,6 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_gainFocus);
 #ifdef SKIP_ASM
 extern "C" void cRider_updateOrientationImplicit(void*);
 extern "C" void cRider_doLeanPoseAdjust(void* self, void* q);
-struct sQuadHP_0013AD20 { float x, y, z, w; } __attribute__((aligned(16)));
 
 /**
  * Starts the rail motion: resets the rider's lean channels and the rail-slide state.
@@ -1886,7 +1882,7 @@ extern "C" void cRailslideMotion_gainFocus(cRailslideMotion* self)
     *(int*)&rider4->mSlewed[9].target = 0;
     self->ForceNaturalAir = 0;
     *(int*)&self->CrookedSlideAngle = 0;
-    *(sQuadHP_0013AD20*)&self->PrevPos = *(sQuadHP_0013AD20*)&self->mRider->mPosition;
+    *(&self->PrevPos) = *(&self->mRider->mPosition);
     *(int*)&self->StuckSec = 0;
 }
 #endif

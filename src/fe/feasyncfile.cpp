@@ -3605,7 +3605,7 @@ int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 struct sList1A83D8;
-extern "C" void func_001A83D8(sList1A83D8* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
+extern "C" void func_001A83D8(cUITextScroll* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
 // PORT: sprintf1 is a varargs formatter (dst, fmt, ...); the unit declares a 3-arg view
 extern "C" void sprintf1_1A81F0(void* str, int fmt, ...) __asm__("sprintf1");
 extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
@@ -3692,7 +3692,7 @@ extern "C" void func_001A81F0(cFEStateReadMessagePopup* self)
         strcat(buf, msgEntry->ext);
         cUITextScroll_addAsciiString(list, buf);
     }
-    func_001A83D8((sList1A83D8*)list, 40, 8, count, top, sel, self->mbResetScroll, 0);
+    func_001A83D8(list, 40, 8, count, top, sel, self->mbResetScroll, 0);
     self->mbResetScroll = 0;
 }
 #endif
@@ -3702,12 +3702,6 @@ INCLUDE_ASM("fe/feasyncfile", func_001A83D8);
 #ifdef SKIP_ASM
 extern "C" void cUITextScroll_deleteLineByIndex(void* list, int a1);
 
-struct sList1A83D8 {
-    char pad[0xC4];
-    short top;
-    short sel;
-    unsigned short count;
-};
 
 /**
  * Trims a text scroller and restores its scroll position after it was refilled.
@@ -3725,12 +3719,12 @@ struct sList1A83D8 {
  * @param scrollToEnd  non-zero to jump to the end
  * @param trim  non-zero to delete surplus lines
  */
-extern "C" void func_001A83D8(sList1A83D8* list, int keep, unsigned int sel, int total, int pos, int selIndex, int scrollToEnd, int trim)
+extern "C" void func_001A83D8(cUITextScroll* list, int keep, unsigned int sel, int total, int pos, int selIndex, int scrollToEnd, int trim)
 {
     if (list == 0) return;
     int toEnd = 0;
     if (total == pos + 1 || scrollToEnd != 0) toEnd = 1;
-    int n = list->count - keep;
+    int n = list->mLineSize - keep;
     int atStart = pos == 0;
     int removed = 0;
     if (n > 0 && trim != 0) {
@@ -3739,29 +3733,29 @@ extern "C" void func_001A83D8(sList1A83D8* list, int keep, unsigned int sel, int
         }
     }
     if (toEnd) {
-        unsigned short lineCount = list->count;
+        unsigned short lineCount = list->mLineSize;
         if (sel >= lineCount) {
-            list->sel = 0;
+            list->mLinesOffset = 0;
         } else {
-            list->sel = lineCount - sel;
+            list->mLinesOffset = lineCount - sel;
         }
-        list->top = list->count - 1;
+        list->mSelectedIndex = list->mLineSize - 1;
     } else if (atStart) {
-        list->sel = 0;
-        list->top = 0;
+        list->mLinesOffset = 0;
+        list->mSelectedIndex = 0;
     } else {
         int newTop = pos - removed;
         if (newTop <= 0) {
-            list->top = 0;
-            list->sel = 0;
+            list->mSelectedIndex = 0;
+            list->mLinesOffset = 0;
         } else {
             int newSel = selIndex - removed;
             if (newSel <= 0) {
-                list->sel = 0;
+                list->mLinesOffset = 0;
             } else {
-                list->sel = newSel;
+                list->mLinesOffset = newSel;
             }
-            list->top = newTop;
+            list->mSelectedIndex = newTop;
         }
     }
 }
@@ -12428,7 +12422,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001B2CD0);
 #ifdef SKIP_ASM
 struct cUIText;
 struct sList1A83D8;
-extern "C" void func_001A83D8(sList1A83D8* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
+extern "C" void func_001A83D8(cUITextScroll* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
 extern "C" void cUITextScroll_addAsciiString(cUITextScroll* text, char* str);
 extern char str_colon_sp[];
 extern "C" void* cBXString_cBXString1(void* self, void* other);
@@ -12441,12 +12435,6 @@ struct sBXString1B2CD0 {
     char* str;
 };
 
-struct sListInfo1B2CD0 {
-    char pad[0xC4];
-    unsigned short pos;     // 0xC4
-    unsigned short a5;      // 0xC6
-    unsigned short a3;      // 0xC8
-};
 
 /**
  * Appends a chat message ("name: text") to the chat history mpTextScrollChat.
@@ -12465,20 +12453,20 @@ extern "C" void func_001B2CD0(cFEStateChatRoom* self, int infov)
     if ((int)self->mpScreen == 0) {
         return;
     }
-    sListInfo1B2CD0* list = (sListInfo1B2CD0*)self->mpTextScrollChat;
+    cUITextScroll* list = self->mpTextScrollChat;
     if (list == 0) {
         return;
     }
-    int lineCount = list->a3;
+    int lineCount = list->mLineSize;
     int first = lineCount == 0;
-    int pos = list->pos;
-    int lineOffset = list->a5;
+    int pos = list->mSelectedIndex;
+    int lineOffset = list->mLinesOffset;
     sBXString1B2CD0 text;
     cBXString_cBXString1(&text, info + 0x8);
     cBXString_Concat(&text, str_colon_sp);
     func_003189A0((cBXString*)&text, (char**)(info + 0xC));
     cUITextScroll_addAsciiString(self->mpTextScrollChat, text.str);
-    func_001A83D8((sList1A83D8*)self->mpTextScrollChat, 0x40, 6, lineCount, pos, lineOffset, first, 1);
+    func_001A83D8(self->mpTextScrollChat, 0x40, 6, lineCount, pos, lineOffset, first, 1);
     cBXString__cBXString(&text, 2);
 }
 #endif

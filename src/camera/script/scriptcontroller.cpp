@@ -511,19 +511,6 @@ static inline float Length_169570(const sVec2_169570& v)
     return Sqrt_169570(v.x * v.x + v.y * v.y);
 }
 
-// This frame's camera channel values (On Tour tSSXFrameCameraManual, 0x28 bytes); angles in degrees.
-struct sFrameInfo_169570 {
-    float posX;                   // 0x00: camera position (world)
-    float posY;                   // 0x04
-    float posZ;                   // 0x08
-    float targetX;                // 0x0C: look-at point (world)
-    float targetY;                // 0x10
-    float targetZ;                // 0x14
-    float roll;                   // 0x18
-    float fov;                    // 0x1C
-    float jitterFocus;            // 0x20
-    float jitterRoll;             // 0x24
-};
 
 
 /**
@@ -549,18 +536,18 @@ extern "C" void cScriptManualAlgorithm_update(cScriptManualAlgorithm* algorithm)
     char* baseTransform = (char*)&algorithm->ScriptObj->mBaseTransform;
     self->Near = header[0];
     self->Far = header[1];
-    GetSSXCameraManualFrame(cam, &(*(sFrameInfo_169570*)&self->FrameInfo));
-    self->View = (*(sFrameInfo_169570*)&self->FrameInfo).fov * 0.01745329424738884f;
-    (*(sVec4_169570*)&self->Position) = sVec4_169570((*(sFrameInfo_169570*)&self->FrameInfo).posX, (*(sFrameInfo_169570*)&self->FrameInfo).posY, (*(sFrameInfo_169570*)&self->FrameInfo).posZ, 1.0f);
+    GetSSXCameraManualFrame(cam, &(*(&self->FrameInfo)));
+    self->View = (*(&self->FrameInfo)).fov * 0.01745329424738884f;
+    (*(sVec4_169570*)&self->Position) = sVec4_169570((*(&self->FrameInfo)).posX, (*(&self->FrameInfo)).posY, (*(&self->FrameInfo)).posZ, 1.0f);
     (*(sVec4_169570*)&self->Position) = mtxMulVec_169570(baseTransform, (*(sVec4_169570*)&self->Position));
-    self->Roll = (*(sFrameInfo_169570*)&self->FrameInfo).roll * 0.01745329424738884f + algorithm->ScriptObj->mBaseRotX;
-    (*(sVec4_169570*)&self->Target) = mtxMulVec_169570(baseTransform, sVec4_169570((*(sFrameInfo_169570*)&self->FrameInfo).targetX, (*(sFrameInfo_169570*)&self->FrameInfo).targetY, (*(sFrameInfo_169570*)&self->FrameInfo).targetZ, 1.0f));
+    self->Roll = (*(&self->FrameInfo)).roll * 0.01745329424738884f + algorithm->ScriptObj->mBaseRotX;
+    (*(sVec4_169570*)&self->Target) = mtxMulVec_169570(baseTransform, sVec4_169570((*(&self->FrameInfo)).targetX, (*(&self->FrameInfo)).targetY, (*(&self->FrameInfo)).targetZ, 1.0f));
     sVec4_169570 delta = Sub_169570((*(sVec4_169570*)&self->Target), (*(sVec4_169570*)&self->Position));
     self->Heading = Atan2_169570(delta.y, delta.x);
     float horizontalLen = Length_169570(sVec2_169570(delta.x, delta.y));
     self->Pitch = Atan2_169570(delta.z, horizontalLen);
-    cCameraJitterer_updatePositionalJitter(&algorithm->Jitterer, (*(sFrameInfo_169570*)&self->FrameInfo).jitterFocus);
-    cCameraJitterer_updateRollJitter(&algorithm->Jitterer, (*(sFrameInfo_169570*)&self->FrameInfo).jitterRoll);
+    cCameraJitterer_updatePositionalJitter(&algorithm->Jitterer, (*(&self->FrameInfo)).jitterFocus);
+    cCameraJitterer_updateRollJitter(&algorithm->Jitterer, (*(&self->FrameInfo)).jitterRoll);
 }
 #endif
 
@@ -873,19 +860,6 @@ static inline sVec4_169DB0 Sub_169DB0(const sVec4_169DB0& a, const sVec4_169DB0&
     return r;
 }
 
-// This frame's camera channel values (On Tour tSSXFrameCameraTarget, 0x28 bytes); angles in degrees.
-struct sFrameInfo_169DB0 {
-    float targetX;                // 0x00: look-at point (world)
-    float targetY;                // 0x04
-    float targetZ;                // 0x08
-    float targetDistance;         // 0x0C: camera distance back from the target
-    float pitch;                  // 0x10
-    float heading;                // 0x14
-    float roll;                   // 0x18
-    float fov;                    // 0x1C
-    float jitterFocus;            // 0x20
-    float jitterRoll;             // 0x24
-};
 
 
 /**
@@ -913,22 +887,22 @@ extern "C" void cScriptPointAlgorithm_update(cScriptPointAlgorithm* algorithm)
     char* baseTransform = (char*)&algorithm->ScriptObj->mBaseTransform;
     self->Near = header[0];
     self->Far = header[1];
-    GetSSXCameraTargetFrame(cam, &(*(sFrameInfo_169DB0*)&self->FrameInfo));
+    GetSSXCameraTargetFrame(cam, &(*(&self->FrameInfo)));
     self->Near = header[0];
     self->Far = header[1];
-    self->View = (*(sFrameInfo_169DB0*)&self->FrameInfo).fov * 0.01745329424738884f;
+    self->View = (*(&self->FrameInfo)).fov * 0.01745329424738884f;
     cScriptObjCamera* scriptObj = algorithm->ScriptObj;
-    self->Heading = (*(sFrameInfo_169DB0*)&self->FrameInfo).heading * 0.01745329424738884f + scriptObj->mBaseRotZ;
-    self->Pitch = (*(sFrameInfo_169DB0*)&self->FrameInfo).pitch * 0.01745329424738884f + scriptObj->mBaseRotY;
-    self->Roll = (*(sFrameInfo_169DB0*)&self->FrameInfo).roll * 0.01745329424738884f + scriptObj->mBaseRotX;
-    (*(sVec4_169DB0*)&self->Target) = mtxMulVec_169DB0(baseTransform, sVec4_169DB0((*(sFrameInfo_169DB0*)&self->FrameInfo).targetX, (*(sFrameInfo_169DB0*)&self->FrameInfo).targetY, (*(sFrameInfo_169DB0*)&self->FrameInfo).targetZ, 1.0f));
+    self->Heading = (*(&self->FrameInfo)).heading * 0.01745329424738884f + scriptObj->mBaseRotZ;
+    self->Pitch = (*(&self->FrameInfo)).pitch * 0.01745329424738884f + scriptObj->mBaseRotY;
+    self->Roll = (*(&self->FrameInfo)).roll * 0.01745329424738884f + scriptObj->mBaseRotX;
+    (*(sVec4_169DB0*)&self->Target) = mtxMulVec_169DB0(baseTransform, sVec4_169DB0((*(&self->FrameInfo)).targetX, (*(&self->FrameInfo)).targetY, (*(&self->FrameInfo)).targetZ, 1.0f));
     float sinHead, cosHead, sinPitch, cosPitch;
     fSinCos(&sinHead, &cosHead, self->Heading);
     fSinCos(&sinPitch, &cosPitch, self->Pitch);
     sVec4_169DB0 look(cosPitch * cosHead, cosPitch * sinHead, sinPitch, 0.0f);
-    (*(sVec4_169DB0*)&self->Position) = Sub_169DB0((*(sVec4_169DB0*)&self->Target), Scale_169DB0(look, (*(sFrameInfo_169DB0*)&self->FrameInfo).targetDistance));
-    cCameraJitterer_updatePositionalJitter(&algorithm->Jitterer, (*(sFrameInfo_169DB0*)&self->FrameInfo).jitterFocus);
-    cCameraJitterer_updateRollJitter(&algorithm->Jitterer, (*(sFrameInfo_169DB0*)&self->FrameInfo).jitterRoll);
+    (*(sVec4_169DB0*)&self->Position) = Sub_169DB0((*(sVec4_169DB0*)&self->Target), Scale_169DB0(look, (*(&self->FrameInfo)).targetDistance));
+    cCameraJitterer_updatePositionalJitter(&algorithm->Jitterer, (*(&self->FrameInfo)).jitterFocus);
+    cCameraJitterer_updateRollJitter(&algorithm->Jitterer, (*(&self->FrameInfo)).jitterRoll);
 }
 #endif
 
@@ -1296,18 +1270,6 @@ static inline float Length_16A510(const sVec2_16A510& v)
     return Sqrt_16A510(v.x * v.x + v.y * v.y);
 }
 
-// This frame's camera channel values (On Tour tSSXFrameCameraSubject, 0x24 bytes); angles in degrees.
-struct sFrameInfo_16A510 {
-    float posX;                   // 0x00: camera position (world)
-    float posY;                   // 0x04
-    float posZ;                   // 0x08
-    float targetLeadDistance;     // 0x0C: target lead along the rider's forward axis (+0x1B0)
-    float targetLeadHeight;       // 0x10: target lead along the rider's up axis (+0x1C0)
-    float roll;                   // 0x14
-    float fov;                    // 0x18
-    float jitterFocus;            // 0x1C
-    float jitterRoll;             // 0x20
-};
 
 
 struct sVEp_16A510 {
@@ -1347,23 +1309,23 @@ extern "C" void cScriptTargetAlgorithm_update(cScriptTargetAlgorithm* algorithm)
     }
     self->Near = header[0];
     self->Far = header[1];
-    GetSSXCameraSubjectFrame(cam, &(*(sFrameInfo_16A510*)&self->FrameInfo));
+    GetSSXCameraSubjectFrame(cam, &(*(&self->FrameInfo)));
     char* obj = rider + 0x6C0;
     sVec4_16A510 rot = *(sVec4_16A510*)(*(char**)(rider + 0x780) + 0x140);
-    self->View = (*(sFrameInfo_16A510*)&self->FrameInfo).fov * 0.01745329424738884f;
-    self->Roll = (*(sFrameInfo_16A510*)&self->FrameInfo).roll * 0.01745329424738884f + algorithm->ScriptObj->mBaseRotX;
-    (*(sVec4_16A510*)&self->Position) = sVec4_16A510((*(sFrameInfo_16A510*)&self->FrameInfo).posX, (*(sFrameInfo_16A510*)&self->FrameInfo).posY, (*(sFrameInfo_16A510*)&self->FrameInfo).posZ, (*(sVec4_16A510*)&self->Position).w);
+    self->View = (*(&self->FrameInfo)).fov * 0.01745329424738884f;
+    self->Roll = (*(&self->FrameInfo)).roll * 0.01745329424738884f + algorithm->ScriptObj->mBaseRotX;
+    (*(sVec4_16A510*)&self->Position) = sVec4_16A510((*(&self->FrameInfo)).posX, (*(&self->FrameInfo)).posY, (*(&self->FrameInfo)).posZ, (*(sVec4_16A510*)&self->Position).w);
     (*(sVec4_16A510*)&self->Position) = mtxMulVec_16A510(baseTransform, (*(sVec4_16A510*)&self->Position));
     sVEp_16A510* vt = *(sVEp_16A510**)obj;
     sVec4_16A510* rp = vt[5].fn(obj + vt[5].delta);
-    (*(sVec4_16A510*)&self->Target) = Add_16A510(Add_16A510(*rp, Scale_16A510(vec_16A510(rider + 0x1B0), (*(sFrameInfo_16A510*)&self->FrameInfo).targetLeadDistance * rot.y)),
-                               Scale_16A510(vec_16A510(rider + 0x1C0), (*(sFrameInfo_16A510*)&self->FrameInfo).targetLeadHeight * rot.x));
+    (*(sVec4_16A510*)&self->Target) = Add_16A510(Add_16A510(*rp, Scale_16A510(vec_16A510(rider + 0x1B0), (*(&self->FrameInfo)).targetLeadDistance * rot.y)),
+                               Scale_16A510(vec_16A510(rider + 0x1C0), (*(&self->FrameInfo)).targetLeadHeight * rot.x));
     sVec4_16A510 look = Sub_16A510((*(sVec4_16A510*)&self->Target), (*(sVec4_16A510*)&self->Position));
     self->Heading = Atan2_16A510(look.y, look.x);
     float horizontalLen = Length_16A510(sVec2_16A510(look.x, look.y));
     self->Pitch = Atan2_16A510(look.z, horizontalLen);
-    cCameraJitterer_updatePositionalJitter(&algorithm->Jitterer, (*(sFrameInfo_16A510*)&self->FrameInfo).jitterFocus);
-    cCameraJitterer_updateRollJitter(&algorithm->Jitterer, (*(sFrameInfo_16A510*)&self->FrameInfo).jitterRoll);
+    cCameraJitterer_updatePositionalJitter(&algorithm->Jitterer, (*(&self->FrameInfo)).jitterFocus);
+    cCameraJitterer_updateRollJitter(&algorithm->Jitterer, (*(&self->FrameInfo)).jitterRoll);
 }
 #endif
 
@@ -1703,18 +1665,6 @@ static inline float Length_16AD98(const sVec2_16AD98& v)
     return Sqrt_16AD98(v.x * v.x + v.y * v.y);
 }
 
-// This frame's camera channel values (On Tour tSSXFrameCameraAlgorithmic, 0x24 bytes); angles in degrees.
-struct sFrameInfo_16AD98 {
-    float targetLeadDistance;     // 0x00: target lead along the rider's forward axis (+0x1B0)
-    float targetLeadHeight;       // 0x04: target lead along the rider's up axis (+0x1C0)
-    float optimalTargetDistance;  // 0x08: camera distance from the target
-    float optimalPitch;           // 0x0C
-    float optimalHeading;         // 0x10
-    float roll;                   // 0x14
-    float fov;                    // 0x18
-    float jitterFocus;            // 0x1C
-    float jitterRoll;             // 0x20
-};
 
 
 struct sVEp_16AD98 {
@@ -1753,11 +1703,11 @@ extern "C" void cScriptRelativeAlgorithm_snap(cScriptRelativeAlgorithm* algorith
     cScriptRelativeAlgorithm* self = algorithm;
     char* cam = (char*)algorithm->ScriptObj->mpCameraEntity->mpEntity;
     float* header = GetSSXCameraAlgorithmicHeader(cam);
-    GetSSXCameraAlgorithmicFrame(cam, &(*(sFrameInfo_16AD98*)&self->FrameInfo));
+    GetSSXCameraAlgorithmicFrame(cam, &(*(&self->FrameInfo)));
     self->Near = header[0];
     self->Far = header[1];
-    self->View = (*(sFrameInfo_16AD98*)&self->FrameInfo).fov * 0.01745329424738884f;
-    self->Roll = (*(sFrameInfo_16AD98*)&self->FrameInfo).roll * 0.01745329424738884f + algorithm->ScriptObj->mBaseRotX;
+    self->View = (*(&self->FrameInfo)).fov * 0.01745329424738884f;
+    self->Roll = (*(&self->FrameInfo)).roll * 0.01745329424738884f + algorithm->ScriptObj->mBaseRotX;
     char* rider = cSSXScriptEngine_GetSubjectRider(ScriptEngine, ((signed char*)header)[0x1D], *(int*)(cam + 8));
     if (rider == 0) {
         rider = (char*)SSXApp->Game->AI->Riders[0];
@@ -1766,23 +1716,23 @@ extern "C" void cScriptRelativeAlgorithm_snap(cScriptRelativeAlgorithm* algorith
     sVec4_16AD98 rot = *(sVec4_16AD98*)(*(char**)(rider + 0x780) + 0x140);
     sVEp_16AD98* vt = *(sVEp_16AD98**)obj;
     sVec4_16AD98* rp = vt[5].fn(obj + vt[5].delta);
-    (*(sVec4_16AD98*)&self->Target) = Add_16AD98(Add_16AD98(*rp, Scale_16AD98(vec_16AD98(rider + 0x1B0), (*(sFrameInfo_16AD98*)&self->FrameInfo).targetLeadDistance * rot.y)),
-                           Scale_16AD98(vec_16AD98(rider + 0x1C0), (*(sFrameInfo_16AD98*)&self->FrameInfo).targetLeadHeight * rot.x));
+    (*(sVec4_16AD98*)&self->Target) = Add_16AD98(Add_16AD98(*rp, Scale_16AD98(vec_16AD98(rider + 0x1B0), (*(&self->FrameInfo)).targetLeadDistance * rot.y)),
+                           Scale_16AD98(vec_16AD98(rider + 0x1C0), (*(&self->FrameInfo)).targetLeadHeight * rot.x));
     float pitchAngle;
     float headingAngle;
     float k;
     if (((signed char*)header)[0x1E] == 0) {
         sVec4_16AD98 front = vec_16AD98(rider + 0x1B0);
         sVec4_16AD98* pv = &front;
-        float optPitch = (*(sFrameInfo_16AD98*)&self->FrameInfo).optimalPitch * 0.01745329424738884f;
+        float optPitch = (*(&self->FrameInfo)).optimalPitch * 0.01745329424738884f;
         pitchAngle = Atan2_16AD98(front.z, Length_16AD98(sVec2_16AD98(front.x, front.y))) - optPitch;
-        float optHead = (*(sFrameInfo_16AD98*)&self->FrameInfo).optimalHeading * 0.01745329424738884f;
+        float optHead = (*(&self->FrameInfo)).optimalHeading * 0.01745329424738884f;
         headingAngle = optHead + Atan2_16AD98(pv->y, pv->x);
-        k = (*(sFrameInfo_16AD98*)&self->FrameInfo).optimalTargetDistance;
+        k = (*(&self->FrameInfo)).optimalTargetDistance;
     } else {
-        pitchAngle = (*(sFrameInfo_16AD98*)&self->FrameInfo).optimalPitch * 0.01745329424738884f;
-        headingAngle = (*(sFrameInfo_16AD98*)&self->FrameInfo).optimalHeading * 0.01745329424738884f;
-        k = (*(sFrameInfo_16AD98*)&self->FrameInfo).optimalTargetDistance;
+        pitchAngle = (*(&self->FrameInfo)).optimalPitch * 0.01745329424738884f;
+        headingAngle = (*(&self->FrameInfo)).optimalHeading * 0.01745329424738884f;
+        k = (*(&self->FrameInfo)).optimalTargetDistance;
     }
     float sinHead, cosHead, sinPitch, cosPitch;
     cScriptObjCamera* scriptObj = algorithm->ScriptObj;
@@ -1792,8 +1742,8 @@ extern "C" void cScriptRelativeAlgorithm_snap(cScriptRelativeAlgorithm* algorith
     fSinCos(&sinPitch, &cosPitch, pitchAngle);
     sVec4_16AD98 look(cosPitch * cosHead, cosPitch * sinHead, -sinPitch, 0.0f);
     (*(sVec4_16AD98*)&self->Position) = Sub_16AD98((*(sVec4_16AD98*)&self->Target), Scale_16AD98(look, k));
-    cCameraJitterer_updatePositionalJitter(&algorithm->Jitterer, (*(sFrameInfo_16AD98*)&self->FrameInfo).jitterFocus);
-    cCameraJitterer_updateRollJitter(&algorithm->Jitterer, (*(sFrameInfo_16AD98*)&self->FrameInfo).jitterRoll);
+    cCameraJitterer_updatePositionalJitter(&algorithm->Jitterer, (*(&self->FrameInfo)).jitterFocus);
+    cCameraJitterer_updateRollJitter(&algorithm->Jitterer, (*(&self->FrameInfo)).jitterRoll);
 }
 #endif
 
@@ -1928,18 +1878,6 @@ static inline float Length_B180(const sVec2_B180& v)
     return Sqrt_B180(v.x * v.x + v.y * v.y);
 }
 
-// This frame's camera channel values (On Tour tSSXFrameCameraAlgorithmic, 0x24 bytes); angles in degrees.
-struct sFrameInfo_B180 {
-    float targetLeadDistance;     // 0x00: target lead along the rider's forward axis (+0x1B0)
-    float targetLeadHeight;       // 0x04: target lead along the rider's up axis (+0x1C0)
-    float optimalTargetDistance;  // 0x08: camera distance from the target
-    float optimalPitch;           // 0x0C
-    float optimalHeading;         // 0x10
-    float roll;                   // 0x14
-    float fov;                    // 0x18
-    float jitterFocus;            // 0x1C
-    float jitterRoll;             // 0x20
-};
 
 
 struct sVEp_B180 {
@@ -2027,24 +1965,24 @@ extern "C" void cScriptRelativeAlgorithm_update(cScriptRelativeAlgorithm* algori
     }
     self->Near = header[0];
     self->Far = header[1];
-    GetSSXCameraAlgorithmicFrame(cam, &(*(sFrameInfo_B180*)&self->FrameInfo));
-    self->View = (*(sFrameInfo_B180*)&self->FrameInfo).fov * 0.01745329424738884f;
-    self->Roll = (*(sFrameInfo_B180*)&self->FrameInfo).roll * 0.01745329424738884f + algorithm->ScriptObj->mBaseRotX;
+    GetSSXCameraAlgorithmicFrame(cam, &(*(&self->FrameInfo)));
+    self->View = (*(&self->FrameInfo)).fov * 0.01745329424738884f;
+    self->Roll = (*(&self->FrameInfo)).roll * 0.01745329424738884f + algorithm->ScriptObj->mBaseRotX;
     float pitchAngle;
     float headingAngle;
     float k;
     if (((signed char*)header)[0x1E] == 0) {
         sVec4_B180 front = vec_B180(rider + 0x1B0);
         sVec4_B180* pv = &front;
-        float optPitch = (*(sFrameInfo_B180*)&self->FrameInfo).optimalPitch * 0.01745329424738884f;
+        float optPitch = (*(&self->FrameInfo)).optimalPitch * 0.01745329424738884f;
         pitchAngle = Atan2_B180(front.z, Length_B180(sVec2_B180(front.x, front.y))) - optPitch;
-        float optHead = (*(sFrameInfo_B180*)&self->FrameInfo).optimalHeading * 0.01745329424738884f;
+        float optHead = (*(&self->FrameInfo)).optimalHeading * 0.01745329424738884f;
         headingAngle = optHead + Atan2_B180(pv->y, pv->x);
-        k = (*(sFrameInfo_B180*)&self->FrameInfo).optimalTargetDistance;
+        k = (*(&self->FrameInfo)).optimalTargetDistance;
     } else {
-        pitchAngle = (*(sFrameInfo_B180*)&self->FrameInfo).optimalPitch * 0.01745329424738884f;
-        headingAngle = (*(sFrameInfo_B180*)&self->FrameInfo).optimalHeading * 0.01745329424738884f;
-        k = (*(sFrameInfo_B180*)&self->FrameInfo).optimalTargetDistance;
+        pitchAngle = (*(&self->FrameInfo)).optimalPitch * 0.01745329424738884f;
+        headingAngle = (*(&self->FrameInfo)).optimalHeading * 0.01745329424738884f;
+        k = (*(&self->FrameInfo)).optimalTargetDistance;
     }
     char* obj = rider + 0x6C0;
     cScriptObjCamera* scriptObj = algorithm->ScriptObj;
@@ -2053,8 +1991,8 @@ extern "C" void cScriptRelativeAlgorithm_update(cScriptRelativeAlgorithm* algori
     sVec4_B180 rot = *(sVec4_B180*)(*(char**)(rider + 0x780) + 0x140);
     sVEp_B180* vt = *(sVEp_B180**)obj;
     sVec4_B180* rp = vt[5].fn(obj + vt[5].delta);
-    (*(sVec4_B180*)&self->Target) = Add_B180(Add_B180(*rp, Scale_B180(vec_B180(rider + 0x1B0), (*(sFrameInfo_B180*)&self->FrameInfo).targetLeadDistance * rot.y)),
-                         Scale_B180(vec_B180(rider + 0x1C0), (*(sFrameInfo_B180*)&self->FrameInfo).targetLeadHeight * rot.x));
+    (*(sVec4_B180*)&self->Target) = Add_B180(Add_B180(*rp, Scale_B180(vec_B180(rider + 0x1B0), (*(&self->FrameInfo)).targetLeadDistance * rot.y)),
+                         Scale_B180(vec_B180(rider + 0x1C0), (*(&self->FrameInfo)).targetLeadHeight * rot.x));
     float sinHead, cosHead, sinPitch, cosPitch;
     fSinCos(&sinHead, &cosHead, headingAngle);
     fSinCos(&sinPitch, &cosPitch, pitchAngle);
@@ -2074,8 +2012,8 @@ extern "C" void cScriptRelativeAlgorithm_update(cScriptRelativeAlgorithm* algori
     self->Heading = Atan2_B180(toTarget.y, toTarget.x);
     float horizontalLen = Length_B180(sVec2_B180(toTarget.x, toTarget.y));
     self->Pitch = Atan2_B180(toTarget.z, horizontalLen);
-    cCameraJitterer_updatePositionalJitter(&algorithm->Jitterer, (*(sFrameInfo_B180*)&self->FrameInfo).jitterFocus);
-    cCameraJitterer_updateRollJitter(&algorithm->Jitterer, (*(sFrameInfo_B180*)&self->FrameInfo).jitterRoll);
+    cCameraJitterer_updatePositionalJitter(&algorithm->Jitterer, (*(&self->FrameInfo)).jitterFocus);
+    cCameraJitterer_updateRollJitter(&algorithm->Jitterer, (*(&self->FrameInfo)).jitterRoll);
 }
 #endif
 

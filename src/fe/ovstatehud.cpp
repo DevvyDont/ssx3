@@ -267,10 +267,6 @@ struct sIcon_1E92A8 {
     float h;            // 0x10
     char pad14[0x10];
 };
-struct sSeg_1E92A8 {
-    float w;
-    unsigned short* str;
-};
 extern sIcon_1E92A8 D_004C8980[];
 
 /**
@@ -299,25 +295,25 @@ extern "C" void splitTextPictLine(tTextPictLine* textLine)
     unsigned short* cursor;
     int n = 0;
     sFont_1E92A8* font = ((sFont_1E92A8*)self->pFont);
-    sSeg_1E92A8* segs = ((sSeg_1E92A8*)&self->elems[0]);
+    tTextPictElemSpec* segs = ((&self->elems[0]));
     char buf[16];
     char name[32];
     font->sx = font->w30 * self->fontScaleBase[0];
     font->sy = font->h34 * self->fontScaleBase[1];
-    ((sSeg_1E92A8*)&self->elems[0])[0].w = 0;
-    float maxh = ((sSeg_1E92A8*)&self->elems[0])[0].w;
+    ((&self->elems[0]))[0].width = 0;
+    float maxh = ((&self->elems[0]))[0].width;
     self->numElems = 0;
-    ((sSeg_1E92A8*)&self->elems[0])[0].str = ((unsigned short*)&self->text[0]);
-    cursor = ((sSeg_1E92A8*)&self->elems[0])[0].str;
+    (*(unsigned short**)&((&self->elems[0]))[0].unk_04) = ((unsigned short*)&self->text[0]);
+    cursor = ((unsigned short*)((&self->elems[0]))[0].unk_04);
     float total = maxh;
     while (*cursor != 0) {
         if (*cursor == 0x40) {
             *cursor = 0;
             cursor++;
-            if (*segs[n].str != 0) {
-                float w = cFont_textExtent1(font, segs[n].str, buf, 1, font->sx, font->sy);
+            if (*((unsigned short*)segs[n].unk_04) != 0) {
+                float w = cFont_textExtent1(font, ((unsigned short*)segs[n].unk_04), buf, 1, font->sx, font->sy);
                 total += w;
-                segs[n].w = w;
+                segs[n].width = w;
             }
             n++;
             char* namePos = name;
@@ -334,23 +330,23 @@ extern "C" void splitTextPictLine(tTextPictLine* textLine)
                 if (candidate->hash == h) { picture = candidate; break; }
             }
             // The icon entry is kept in the segment's string slot.
-            segs[n].str = (unsigned short*)picture;
+            (*(unsigned short**)&segs[n].unk_04) = (unsigned short*)picture;
             float ew = picture->w;
-            segs[n].w = ew;
+            segs[n].width = ew;
             total += ew;
             n++;
             if (maxh < picture->h) maxh = picture->h;
-            segs[n].str = cursor;
-            segs[n].w = 0;
+            (*(unsigned short**)&segs[n].unk_04) = cursor;
+            segs[n].width = 0;
             if (*cursor != 0) cursor++;
         } else {
             cursor++;
         }
     }
-    if (*segs[n].str != 0) {
-        float w = cFont_textExtent1(font, segs[n].str, buf, 0, font->sx, font->sy);
+    if (*((unsigned short*)segs[n].unk_04) != 0) {
+        float w = cFont_textExtent1(font, ((unsigned short*)segs[n].unk_04), buf, 0, font->sx, font->sy);
         total += w;
-        segs[n].w = w;
+        segs[n].width = w;
         n++;
     }
     self->numElems = n;

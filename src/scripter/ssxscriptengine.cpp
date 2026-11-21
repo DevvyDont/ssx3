@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "main/gameviewman.h"
 #include "scripter/scriptentitycam.h"
 #include "ui/uiengine.h"
@@ -2726,12 +2727,6 @@ extern "C" int BXFILE_size(const char* name);
 extern "C" int* FILE_loadz(const char* name, int flags);
 extern "C" int FILE_loadatz(const char* name, int* buf, int a2);
 
-struct sSeSlotB268 {
-    int handle;     // 0x0
-    int key;        // 0x4
-    int field_0x8;
-    int temp;       // 0xC
-};
 
 /**
  * Loads a script bank file now and attaches its contents, unless the bank is already loaded.
@@ -2748,11 +2743,11 @@ struct sSeSlotB268 {
  */
 extern "C" void cSSXScriptEngine_SyncLoadScriptBank(cSSXScriptEngine* self, int i, const char* name, int flags, int key, int* buf)
 {
-    sSeSlotB268* bankInfo = (sSeSlotB268*)&self->mScriptDataBanks[i];
-    if (bankInfo->handle != 0) {
+    tSSXScriptBankInfo* bankInfo = (&self->mScriptDataBanks[i]);
+    if (((int)bankInfo->dataBankHandle) != 0) {
         return;
     }
-    bankInfo->key = key;
+    bankInfo->dataIdentifier = key;
     int size = 0;
     int* data;
     if (buf != 0) {
@@ -2773,11 +2768,11 @@ extern "C" void cSSXScriptEngine_SyncLoadScriptBank(cSSXScriptEngine* self, int 
         return;
     }
     self->mCurrAttachingBankNum = i;
-    bankInfo->handle = cDataManager_AttachData(&self->mMaxDataInstances, name, data, size);
+    (*(int*)&bankInfo->dataBankHandle) = cDataManager_AttachData(&self->mMaxDataInstances, name, data, size);
     self->mCurrAttachingBankNum = 10;
-    bankInfo->temp = 1;
+    bankInfo->dynamicMem = 1;
     if (buf != 0) {
-        bankInfo->temp = 0;
+        bankInfo->dynamicMem = 0;
     }
 }
 #endif
@@ -3116,10 +3111,6 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_FillOrientationFromRide
 #ifdef SKIP_ASM
 extern "C" float func_0031C228(float x);
 
-struct sVec4_27B948
-{
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sVec2_27B948
 {
@@ -3127,7 +3118,7 @@ struct sVec2_27B948
     sVec2_27B948(float a, float b) : x(a), y(b) {}
 };
 
-struct sVEntry_27B948 { short delta; short index; sVec4_27B948* (*fn)(void*); };
+struct sVEntry_27B948 { short delta; short index; t4Vector* (*fn)(void*); };
 
 // PORT: PS2 sqrt.s asm helper; use sqrtf on PC.
 static inline float Sqrt_27B948(float x)
@@ -3172,12 +3163,12 @@ static inline float Atan2_27B948(float y, float x)
  * @param pitch  receives the pitch of the rider's direction (+0x1B0)
  * @param yaw  receives the heading of the rider's direction
  */
-extern "C" void cSSXScriptEngine_FillOrientationFromRiderOrientationInfo(cSSXScriptEngine* self, cRider* obj, sVec4_27B948* pos, int* roll, float* pitch, float* yaw)
+extern "C" void cSSXScriptEngine_FillOrientationFromRiderOrientationInfo(cSSXScriptEngine* self, cRider* obj, t4Vector* pos, int* roll, float* pitch, float* yaw)
 {
     char* sub = (char*)&obj->mVtbl;
     sVEntry_27B948* vtEntry = &(*(sVEntry_27B948**)sub)[5];
     *pos = *vtEntry->fn(sub + vtEntry->delta);
-    sVec4_27B948 dir = *(sVec4_27B948*)&obj->mMatrix.row[1];
+    t4Vector dir = *(&obj->mMatrix.row[1]);
     *yaw = Atan2_27B948(dir.y, dir.x);
     sVec2_27B948 horiz(dir.x, dir.y);
     *pitch = Atan2_27B948(dir.z, Length_27B948(horiz));
@@ -6461,9 +6452,6 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_Update);
 #ifdef SKIP_ASM
 extern "C" void cScriptObjCameraManager_SetupCameraObject(cScriptObjCameraManager* self, int a1, int a2);
 
-struct sVec4_1100 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 /**
  * Per-frame update of a script camera manager in use: follows its view's camera and sets its cameras up once.
@@ -6477,7 +6465,7 @@ extern "C" void cScriptObjCameraManager_Update(cScriptObjCameraManager* self)
     if (self->mInUse > 0) {
         char* riders = (char*)SSXApp->Game->ViewMan;
         char* rider = *(char**)(riders + (self->mViewIndex << 2) + 4);
-        *(sVec4_1100*)&self->mFocusBox = *(sVec4_1100*)(rider + 0x20);
+        *(&self->mFocusBox) = *(t4Vector*)(rider + 0x20);
         if ((int)self->mpEntity == 0) {
             cScriptObjCameraManager_SetupCameraObject(self, 0, 0);
         }

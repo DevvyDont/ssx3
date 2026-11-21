@@ -4414,9 +4414,6 @@ struct sV3_2898 {
     float x, y, z;
 };
 
-struct sMat_2898 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 struct sRS_2898 {
     int f0;
@@ -4428,7 +4425,7 @@ struct sRS_2898 {
 
 struct sObj_2898 {
     char pad0[0x110];
-    sMat_2898 mat;                  // 0x110
+    t4Matrix mat;                  // 0x110
     sV4_2898 f150;                  // 0x150
     sV4_2898 f160;                  // 0x160
     void* f170;                     // 0x170
@@ -4444,7 +4441,7 @@ struct sVE4_2898 { short delta; short index; void (*fn)(void*, void*, void*, voi
 extern int D_004A4C00;
 extern sV3_2898 cRider_RenderShadow_lnorm;
 
-extern "C" void func_00374D00(void* obj, sV3_2898* a, sV3_2898* b, sV3_2898* dir, sMat_2898* bones, int f);
+extern "C" void func_00374D00(void* obj, sV3_2898* a, sV3_2898* b, sV3_2898* dir, t4Matrix* bones, int f);
 extern "C" void cAnimModel_rendershadow(void* model, int lod, sV4_2898* a, sV4_2898* b);
 extern "C" void cPlayerShadow_AddShadow(void* obj);
 int cRider_getMotionState(void*);
@@ -4482,7 +4479,7 @@ static inline sV4_2898 Scale_2898(const sV4_2898& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
-static inline void CopyMat_2898(sMat_2898* d, sMat_2898* s)
+static inline void CopyMat_2898(t4Matrix* d, t4Matrix* s)
 {
     __asm__(
         "lqc2      $vf1, 0x0(%1)\n"
@@ -4549,7 +4546,7 @@ extern "C" void cRider_RenderShadow(cRider* self)
             objUp.z = upRow.z;
         }
         float k = 0.3f;
-        func_00374D00(Shadow_2898(self), &center, &objUp, &cRider_RenderShadow_lnorm, (sMat_2898*)Model_2898(self)->unk_030, 0);
+        func_00374D00(Shadow_2898(self), &center, &objUp, &cRider_RenderShadow_lnorm, Model_2898(self)->unk_030, 0);
         cPS2GraphicsMan* grManPushView = GrMan;
         top_2898(grManPushView)->f8 = (top_2898(grManPushView)->f8 & ~0x3E0) | 0x20;
         top_2898(grManPushView)->f4 = (top_2898(grManPushView)->f4 & 0xFE7FFFFF) | 0x1000000;
@@ -4568,7 +4565,7 @@ extern "C" void cRider_RenderShadow(cRider* self)
         if (cRider_getMotionState(self) == 0) {
             k = 0.0f;
         }
-        sMat_2898 mat;
+        t4Matrix mat;
         CopyMat_2898(&mat, &Shadow_2898(self)->mat);
         sV4_2898 tuvScale = Shadow_2898(self)->f150;
         sV4_2898 tuvTrans = Shadow_2898(self)->f160;

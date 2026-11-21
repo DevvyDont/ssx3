@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "animation/animmodel.h"
 #include "fe/fereal.h"
 #include "fe/feridermanager.h"
@@ -746,16 +747,11 @@ INCLUDE_ASM("fe/feridermanager", cFERider_rotate);
 extern "C" void cFERider_updateModelPose(cFERider* self);
 extern "C" void fSinCos(float* s, float* c, float angle);
 
-struct sQuat_F488 {
-    float x, y, z, w;
-    sQuat_F488() {}
-    sQuat_F488(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
-static inline sQuat_F488 QuatMul_F488(const sQuat_F488& a, const sQuat_F488& b)
+static inline t4Vector QuatMul_F488(const t4Vector& a, const t4Vector& b)
 {
-    sQuat_F488 r;
+    t4Vector r;
     __asm__(
         "lqc2       $vf4, %1\n"
         "lqc2       $vf5, %2\n"
@@ -782,13 +778,13 @@ static inline sQuat_F488 QuatMul_F488(const sQuat_F488& a, const sQuat_F488& b)
  * @param axis   the axis (x, y, z used)
  * @param angle  the angle in radians
  */
-extern "C" void cFERider_rotate(cFERider* self, sQuat_F488* axis, float angle)
+extern "C" void cFERider_rotate(cFERider* self, t4Vector* axis, float angle)
 {
-    sQuat_F488* rot = (sQuat_F488*)(&self->mPose.Q);
-    sQuat_F488 turn;
+    t4Vector* rot = ((&self->mPose.Q));
+    t4Vector turn;
     float sinHalf, cosHalf;
     fSinCos(&sinHalf, &cosHalf, angle * 0.5f);
-    sQuat_F488 rotQuat;
+    t4Vector rotQuat;
     rotQuat.w = cosHalf;
     rotQuat.x = sinHalf * axis->x;
     rotQuat.y = sinHalf * axis->y;

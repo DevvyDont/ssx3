@@ -11,7 +11,7 @@ INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_setupGrid);
 #ifdef SKIP_ASM
 struct sBox00348058;
 extern "C" void* cObjectInterface_getNash();
-extern "C" void nash_Nash_movenode(void* world, int type, int id, sBox00348058* box, sBox00348058* old);
+extern "C" void nash_Nash_movenode(void* world, int type, int id, tBoundBox* box, tBoundBox* old);
 void cMemMan_free(void*);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
@@ -187,7 +187,7 @@ extern "C" void cFlexBridgeNode_setupGrid(sFlexGrid* self)
     gridVecAdd(self->box.max, self->box.max, ext);
     // PORT: the unit declares nash_Nash_movenode's third parameter as int; the def pointer is passed through it
     int id = (int)self->def;
-    nash_Nash_movenode(cObjectInterface_getNash(), 0, id, (sBox00348058*)&self->box, (sBox00348058*)&old);
+    nash_Nash_movenode(cObjectInterface_getNash(), 0, id, (tBoundBox*)&self->box, (tBoundBox*)&old);
     int baseVertex = 0;
     int j = 0;
     for (int k = 0; k < ntris - 1; k += 2) {
@@ -1434,10 +1434,6 @@ extern "C" void cFlexRailNode_update(cFlexRailNode* self)
 //100%
 INCLUDE_ASM("object/flexbridgenode", cFlexRailNode_updateSpaceHash);
 #ifdef SKIP_ASM
-struct sBox00348058 {
-    float min[4];
-    float max[4];
-} __attribute__((aligned(16)));
 
 struct sFlexBridgeVEntry8058 {
     short delta;
@@ -1447,7 +1443,7 @@ struct sFlexBridgeVEntry8058 {
 
 
 extern "C" void* cObjectInterface_getNash();
-extern "C" void nash_Nash_movenode(void* world, int type, int id, sBox00348058* box, sBox00348058* old);
+extern "C" void nash_Nash_movenode(void* world, int type, int id, tBoundBox* box, tBoundBox* old);
 
 /**
  * Recomputes a flexible rail's bounding box and moves it in the Nash space hash.
@@ -1460,8 +1456,8 @@ extern "C" void nash_Nash_movenode(void* world, int type, int id, sBox00348058* 
 extern "C" void cFlexRailNode_updateSpaceHash(cFlexRailNode* node)
 {
     cFlexRailNode* self = node;
-    sBox00348058* box = (sBox00348058*)&self->BoundBox;
-    sBox00348058 old = *(sBox00348058*)&self->BoundBox;
+    tBoundBox* box = (&self->BoundBox);
+    tBoundBox old = *(&self->BoundBox);
     ((sFlexBridgeVEntry8058*)self->mVtbl)[50].fn((char*)self + ((sFlexBridgeVEntry8058*)self->mVtbl)[50].delta);
     nash_Nash_movenode(cObjectInterface_getNash(), 2, ((int)self->Node), box, &old);
 }
@@ -1571,13 +1567,9 @@ struct sFbV_8290 {
     float& W() { return w; }
 } __attribute__((aligned(16)));
 
-// One cubic segment: P(t) = M * (t^3, t^2, t, 1).
-struct sFbM_8290 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (out = m * v).
-static inline sFbV_8290 fbApply_8290(const sFbM_8290* m, const sFbV_8290& v)
+static inline sFbV_8290 fbApply_8290(const t4Matrix* m, const sFbV_8290& v)
 {
     sFbV_8290 out;
     __asm__(
@@ -1716,7 +1708,7 @@ static inline float fbAbs_8290(float x)
 
 // splineEval / splineSlope (On Tour names): the cubic segment and its derivative at t.
 // On Tour: splineEval_8290(const t4Matrix&, float): the point at t, (t^3, t^2, t, 1) through the coefficient rows.
-static inline sFbV_8290 splineEval_8290(const sFbM_8290& mat, float t)
+static inline sFbV_8290 splineEval_8290(const t4Matrix& mat, float t)
 {
     sFbV_8290 v;
     v.W() = 1.0f;
@@ -1727,7 +1719,7 @@ static inline sFbV_8290 splineEval_8290(const sFbM_8290& mat, float t)
 }
 
 // On Tour: splineSlope_8290(const t4Matrix&, float): the tangent at t, (3t^2, 2t, 1, 0).
-static inline sFbV_8290 splineSlope_8290(const sFbM_8290& mat, float t)
+static inline sFbV_8290 splineSlope_8290(const t4Matrix& mat, float t)
 {
     sFbV_8290 v;
     v.W() = 0.0f;
@@ -1836,7 +1828,7 @@ extern "C" void cFlexRailNode_splineIntersect(cFlexRailNode* self, const sFbV_82
         float x3 = 1.0f;
         sFbV_8290 nextp;
         sFbV_8290 tmp;
-        const sFbM_8290& mat = ((sFbM_8290*)self->Mats)[seg];
+        const t4Matrix& mat = (self->Mats)[seg];
         lastp = splineEval_8290(mat, x0);
         float cd = fbLength_8290(fbSub_8290(*bpos, lastp));
         int ci = 0;

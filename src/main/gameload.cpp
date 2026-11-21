@@ -1338,10 +1338,6 @@ struct sObjC_2306B8 {
     sVEntryI_2306B8* vtbl;
 };
 
-struct sObj48_2306B8 {
-    char pad0[0xC];
-    sObjC_2306B8* fC;
-};
 
 
 static inline void pushState_2306B8(int state)
@@ -1481,7 +1477,7 @@ static inline int updateState_2306B8(cGame* self)
         func_0020CA10();
         pushState_2306B8(2);
         {
-            sObjC_2306B8* o = ((sObj48_2306B8*)((char*)self->UI))->fC;
+            sObjC_2306B8* o = ((sObjC_2306B8*)((cUIEngine*)((char*)self->UI))->mpInput);
             sVEntryI_2306B8* vt = o->vtbl;
             vt[44].fn((char*)o + vt[44].delta, (*(unsigned char*)&self->PauseOwner));
         }

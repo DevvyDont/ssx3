@@ -310,15 +310,11 @@ extern "C" void cRailModifier_buildXform(cRailModifier_C0E8* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cRailModifier_update);
 #ifdef SKIP_ASM
-struct sBox0035C4E0 {
-    float min[4];
-    float max[4];
-} __attribute__((aligned(16)));
 
 
 extern "C" void cRailModifier_updateBoundBox(void* self);
 extern "C" void* cObjectInterface_getNash();
-extern "C" void nash_Nash_movenode(void* world, int type, int id, sBox0035C4E0* box, sBox0035C4E0* old);
+extern "C" void nash_Nash_movenode(void* world, int type, int id, tBoundBox* box, tBoundBox* old);
 
 /**
  * Recomputes the rail's world bound box and moves its rail-space node in the Nash octree from the old box to the
@@ -328,8 +324,8 @@ extern "C" void nash_Nash_movenode(void* world, int type, int id, sBox0035C4E0* 
  */
 extern "C" void cRailModifier_update(cRailModifier* self)
 {
-    sBox0035C4E0* box = (sBox0035C4E0*)&self->BoundBox;
-    sBox0035C4E0 old = *(sBox0035C4E0*)&self->BoundBox;
+    tBoundBox* box = (&self->BoundBox);
+    tBoundBox old = *(&self->BoundBox);
     cRailModifier_updateBoundBox((self));
     nash_Nash_movenode(cObjectInterface_getNash(), 2, (int)self->Node, box, &old);
 }
@@ -364,12 +360,9 @@ extern "C" void cRailModifier_writeToReplayFrame(cRailModifier* self, cStream003
 //100%
 INCLUDE_ASM("object/railmodifier", cRailModifier_getInvMat);
 #ifdef SKIP_ASM
-struct sRmMat44C5A0 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, d = b * a).
-static inline void vu0MulMatC5A0(sRmMat44C5A0* d, const sRmMat44C5A0* a, const sRmMat44C5A0* b)
+static inline void vu0MulMatC5A0(t4Matrix* d, const t4Matrix* a, const t4Matrix* b)
 {
     __asm__ __volatile__(
         "lqc2      $vf4, 0x0(%1)\n"
@@ -406,7 +399,7 @@ static inline void vu0MulMatC5A0(sRmMat44C5A0* d, const sRmMat44C5A0* a, const s
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
-static inline void vu0CopyMatC5A0(sRmMat44C5A0* d, const sRmMat44C5A0* s)
+static inline void vu0CopyMatC5A0(t4Matrix* d, const t4Matrix* s)
 {
     __asm__ __volatile__(
         "lqc2      $vf1, 0x0(%1)\n"
@@ -422,7 +415,7 @@ static inline void vu0CopyMatC5A0(sRmMat44C5A0* d, const sRmMat44C5A0* s)
         : "memory");
 }
 
-extern "C" void cInstanceNode_buildMeshMat(void* model, int bone, sRmMat44C5A0* out);
+extern "C" void cInstanceNode_buildMeshMat(void* model, int bone, t4Matrix* out);
 
 /**
  * Builds the rail's inverse transform: the instance's mesh matrix (cInstanceNode_buildMeshMat, cInstanceNode::buildMeshMat with
@@ -430,12 +423,12 @@ extern "C" void cInstanceNode_buildMeshMat(void* model, int bone, sRmMat44C5A0* 
  *
  * @param mat  receives the matrix (On Tour t4Matrix& mat)
  */
-extern "C" void cRailModifier_getInvMat(cRailModifier* self, sRmMat44C5A0* mat)
+extern "C" void cRailModifier_getInvMat(cRailModifier* self, t4Matrix* mat)
 {
     cInstanceNode_buildMeshMat(self->Instance, self->Mesh, mat);
-    sRmMat44C5A0* src = (sRmMat44C5A0*)&self->XForm;
-    sRmMat44C5A0 copy;
-    sRmMat44C5A0 product;
+    t4Matrix* src = (&self->XForm);
+    t4Matrix copy;
+    t4Matrix product;
     vu0MulMatC5A0(&product, mat, src);
     vu0CopyMatC5A0(&copy, &product);
     vu0CopyMatC5A0(mat, &copy);
@@ -8564,10 +8557,6 @@ struct sRmCtx_29B8 {
     sRmState_29B8* top;     // 0xE84
 };
 
-struct sRmSaved_29B8 {
-    sRmState_29B8 st;
-    int pad;
-};
 
 
 extern sRmCtx_29B8* D_004A5B80_29B8 __asm__("cGraphicsMan_TheGraphicsMan");
@@ -8588,11 +8577,11 @@ static inline void set2_29B8(sRmCtx_29B8* ctx, unsigned int mask, int shift, uns
     ctx->top->w2 = (ctx->top->w2 & ~mask) | ((v << shift) & mask);
 }
 
-static inline sRmSaved_29B8* save_29B8(cPS2DeferManager* self, sRmCtx_29B8* ctx)
+static inline cDrawStateList* save_29B8(cPS2DeferManager* self, sRmCtx_29B8* ctx)
 {
     sRmState_29B8* src = ctx->top;
-    sRmSaved_29B8* d = &((sRmSaved_29B8*)&self->mDrawStates[0])[self->mUsedDrawStates++];
-    d->st = *src;
+    cDrawStateList* d = &((&self->mDrawStates[0]))[self->mUsedDrawStates++];
+    (*(sRmState_29B8*)&d->mDrawState) = *src;
     return d;
 }
 

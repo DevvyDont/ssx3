@@ -418,23 +418,6 @@ struct sMapNode_1428 {
     int fC;
 };
 
-struct sMapData_1428 {
-    void* f0;
-    void* f4;
-    void* f8;
-    unsigned char fC;
-    char pad_0xD[0x8C - 0xD];
-    int f8C;
-    int f90;
-    int f94;
-    char pad_0x98[0xE0 - 0x98];
-    sMapNode_1428* freeList;        // 0xE0
-    sMapNode_1428 nodes[0x800];     // 0xE4
-    int f80E4;
-    char pad_0x80E8[0x108EC - 0x80E8];
-    int ids[63];                    // 0x108EC
-    int numIds;                     // 0x109E8
-};
 
 /**
  * Constructs an input-map parser over a script in memory and parses the whole file.
@@ -451,24 +434,24 @@ struct sMapData_1428 {
 // Initialises a compiled input map: id stack 63..1 and the node free list.
 extern "C" void* cInputMapParser_cInputMapParser(cInputMapParser* vself, void* file, void* length)
 {
-    sMapData_1428* self = (sMapData_1428*)vself;
-    self->f4 = length;
-    self->f0 = file;
-    self->f8 = file;
-    self->f80E4 = 0;
-    self->f8C = 1;
-    self->f90 = 1;
-    self->fC = 0;
-    self->f94 = 0;
-    self->numIds = 0;
+    cInputMapParser* self = vself;
+    (*(void**)&self->FileLength) = length;
+    (*(void**)&self->File) = file;
+    (*(void**)&self->FilePointer) = file;
+    self->NumIdentifiers = 0;
+    self->LineNumber = 1;
+    self->IsLineStart = 1;
+    self->FileName[0] = 0;
+    self->ErrorFlag = 0;
+    self->NumFreeRegisters = 0;
     for (int i = 63; i > 0; i--) {
-        self->ids[self->numIds++] = i;
+        self->FreeRegisters[self->NumFreeRegisters++] = i;
     }
-    self->freeList = self->nodes;
+    (*(sMapNode_1428**)&self->FreeParseNodes) = ((sMapNode_1428*)&self->ParseNodes[0]);
     for (int j = 1; j < 0x800; j++) {
-        self->nodes[j - 1].next = &self->nodes[j];
+        ((sMapNode_1428*)&self->ParseNodes[0])[j - 1].next = &((sMapNode_1428*)&self->ParseNodes[0])[j];
     }
-    self->nodes[0x7FF].next = 0;
+    ((sMapNode_1428*)&self->ParseNodes[0])[0x7FF].next = 0;
     cInputMapParser_parseFile(self);
     return self;
 }

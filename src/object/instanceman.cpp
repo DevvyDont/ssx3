@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "bx/appman.h"
 #include "object/instanceman.h"
 #include "object/animframe.h"
@@ -186,12 +187,9 @@ extern "C" void cAnimFrame_readFromReplayFrame(cAnimFrame* src, cInstSink *sink)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/instanceman", cMeshAnimFrame_cMeshAnimFrame);
 #ifdef SKIP_ASM
-struct sImMat44_351480 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
-static inline void vu0CopyMat_351480(sImMat44_351480* d, const sImMat44_351480* s)
+static inline void vu0CopyMat_351480(t4Matrix* d, const t4Matrix* s)
 {
     __asm__ __volatile__(
         "lqc2      $vf1, 0x0(%1)\n"
@@ -208,7 +206,7 @@ static inline void vu0CopyMat_351480(sImMat44_351480* d, const sImMat44_351480* 
 }
 
 extern void* cMeshAnimFrame_vtbl[];
-extern sImMat44_351480 t4mat_Identity;
+extern t4Matrix t4mat_Identity;
 extern "C" void* cAnimFrame_cAnimFrame(void* self, float* src, float f);
 // PORT: cMeshAnimFrame_update is defined later in the unit with a typed self; bound by asm label.
 void cMeshAnimFrame_update_vf(void* self, float f) __asm__("cMeshAnimFrame_update");
@@ -227,7 +225,7 @@ extern "C" void* cMeshAnimFrame_cMeshAnimFrame(cMeshAnimFrame* self, float* src,
 {
     cAnimFrame_cAnimFrame(self, src, time);
     self->mVtbl = cMeshAnimFrame_vtbl;
-    vu0CopyMat_351480((sImMat44_351480*)(&self->FrameMatrix), &t4mat_Identity);
+    vu0CopyMat_351480(((&self->FrameMatrix)), &t4mat_Identity);
     self->AnimRecord = (const tAnimRecord*)src;
     cMeshAnimFrame_update_vf(self, time);
     return ((void*)self);
@@ -1310,12 +1308,9 @@ extern "C" void cMeshAnimNode_loseFocus(cMeshAnimNode* self)
 //100%
 INCLUDE_ASM("object/instanceman", cMeshAnimNode_render);
 #ifdef SKIP_ASM
-struct sV4_352810 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sMat_352810 {
-    sV4_352810 r[4];
+    t4Vector r[4];
     sMat_352810() {}
 } __attribute__((aligned(16)));
 
@@ -1388,13 +1383,13 @@ struct sDebris_352810 {
     char pad20[4];
     float fade;             // 0x24
     char pad28[8];
-    sV4_352810 rot[24];     // 0x30
+    t4Vector rot[24];     // 0x30
     char pad1B0[0x200];
-    sV4_352810 pos[24];     // 0x3B0
+    t4Vector pos[24];     // 0x3B0
 };
 
 // PORT: PS2-only VU0 inline asm (quaternion to rotation matrix, row 3 = (0,0,0,1)).
-static inline void QuatToMat_352810(sMat_352810* d, const sV4_352810& q)
+static inline void QuatToMat_352810(sMat_352810* d, const t4Vector& q)
 {
     __asm__ __volatile__(
         "lqc2       $vf4, %1\n"
@@ -1434,7 +1429,7 @@ static inline void QuatToMat_352810(sMat_352810* d, const sV4_352810& q)
         : "memory");
 }
 
-static inline void setOffset_352810(sMat_352810& m, const sV4_352810& v)
+static inline void setOffset_352810(sMat_352810& m, const t4Vector& v)
 {
     m.r[3] = v;
 }
@@ -1465,8 +1460,8 @@ extern "C" void cMeshAnimNode_render(cMeshAnimNode* self)
     sMat_352810 animMats[24];
     char* pModel = *(char**)((char*)self->Instance + 0x80);
     for (int i = 0; i < *(int*)(pModel + 4); i++) {
-        QuatToMat_352810(&animMats[i], ((sV4_352810*)&self->Qrot[0])[i]);
-        setOffset_352810(animMats[i], ((sV4_352810*)&self->Pos[0])[i]);
+        QuatToMat_352810(&animMats[i], ((&self->Qrot[0]))[i]);
+        setOffset_352810(animMats[i], ((&self->Pos[0]))[i]);
     }
     float fade = 1.0f;
     if (self->FadeTime >= 0.0f && self->Life <= self->FadeTime) {

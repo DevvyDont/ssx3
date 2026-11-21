@@ -416,10 +416,6 @@ extern char str_Temp_String[];
 extern char str_kT_MEMOVGameCorruptPS2[];
 extern char str_kT_CMNContinue[];
 
-struct sFEMC_001D7010 {
-    char pad[0x19C];
-    int f19C;
-};
 
 /**
  * Reports a corrupt save file with a Continue button (popup 12).
@@ -443,7 +439,7 @@ extern "C" void cFEMemCard_callbackFileCorrupt(void)
     char* sf = *(char**)(mp + 0x434);
     sVEntryV001D69E0* sfvt = *(sVEntryV001D69E0**)sf;
     sfvt[14].fn(sf + sfvt[14].delta, *(int*)(mp + 0xF8), name2);
-    ((sFEMC_001D7010*)cFEMemCard_mInstance)->f19C = 0xC;
+    (cFEMemCard_mInstance)->mPopupType = 0xC;
     char* locale = (char*)SSXApp->FELocale;
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
     sprintf1(buf, (unsigned short*)ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMOVGameCorruptPS2)), name);

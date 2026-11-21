@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/2drender.h"
 #include "ai/rider.h"
 #include "fe/hudradar.h"
 #include "fe/ovstatetrophy.h"
@@ -107,12 +108,9 @@ extern "C" void cOVStateTrophy_onWidgetEvent(cOVStateTrophy* self, cUIObj_20E9A0
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", cHUDRadar_cHUDRadar);
 #ifdef SKIP_ASM
-struct sRect20EAA0 {
-    float x, y, w, h;
-};
 extern char D_00474230[];
 extern int D_004A276C;
-extern "C" void func_0020EC18(cHUDRadar* self, sRect20EAA0* a, sRect20EAA0* r);
+extern "C" void func_0020EC18(cHUDRadar* self, tRect* a, tRect* r);
 
 /**
  * Constructs a course-progress tracker, the 0x3C-byte object at +0x8 of each cOVStateHUD1P panel.
@@ -124,12 +122,12 @@ extern "C" void func_0020EC18(cHUDRadar* self, sRect20EAA0* a, sRect20EAA0* r);
  */
 extern "C" void* cHUDRadar_cHUDRadar(cHUDRadar* self)
 {
-    sRect20EAA0 screenRect;
+    tRect screenRect;
     self->mVtbl = (void**)D_00474230;
-    screenRect.x = 0.0f;
-    screenRect.y = 0.0f;
-    screenRect.w = 640.0f;
-    screenRect.h = 480.0f;
+    screenRect.X = 0.0f;
+    screenRect.Y = 0.0f;
+    screenRect.W = 640.0f;
+    screenRect.H = 480.0f;
     func_0020EC18(self, &screenRect, &screenRect);
     D_004A276C++;
     return ((void*)self);
@@ -171,7 +169,7 @@ extern "C" void cHUDRadar__cHUDRadar(cHUDRadar* self, int flags)
 INCLUDE_ASM("fe/ovstatetrophy", func_0020EB50);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void func_0020EC18(cHUDRadar* self, sRect20EAA0* a, sRect20EAA0* r);
+extern "C" void func_0020EC18(cHUDRadar* self, tRect* a, tRect* r);
 extern "C" int cUITextureBank_getElementByHashname(void* bank, int name);
 extern "C" int cUIFontInterface_getFontByHashName(void* bank, int hash);
 extern int D_004A2764;
@@ -197,7 +195,7 @@ extern sTex_20EB50 D_004C8C58[];
  * @param screenRect  the screen bounds (the HUD passes 0, 0, 640, 480); not used beyond being passed on
  * @param area  the rectangle (x, y, w, h) the tracker fills
  */
-extern "C" void func_0020EB50(cHUDRadar* self, sRect20EAA0* screenRect, sRect20EAA0* area)
+extern "C" void func_0020EB50(cHUDRadar* self, tRect* screenRect, tRect* area)
 {
     if (D_004A2768 == 0) {
         char* res = (char*)SSXApp->Game->UI;
@@ -240,7 +238,7 @@ struct sVec2_20EC18 {
  * @param area  the rectangle (x, y, w, h)
  */
 // PORT: D_004A2764 holds a texture pointer in an int (declared int elsewhere in the unit).
-extern "C" void func_0020EC18(cHUDRadar* self, sRect20EAA0* screenRect, sRect20EAA0* area)
+extern "C" void func_0020EC18(cHUDRadar* self, tRect* screenRect, tRect* area)
 {
     float textHeight;
     if (D_004A2768 != 0) {
@@ -250,15 +248,15 @@ extern "C" void func_0020EC18(cHUDRadar* self, sRect20EAA0* screenRect, sRect20E
         textHeight = 30.0f;
     }
     float arrowHeight = D_004C8C58_f[72 / 4];
-    (*(sVec2_20EC18*)&(self)->unk_000[0]) = sVec2_20EC18(area->x + area->w * 0.5f, (area->y + area->h) - textHeight);
-    (self)->unk_008 = area->y;
-    (self)->unk_00C = area->y + area->h - textHeight - arrowHeight;
-    (self)->unk_010 = area->x + area->w * 0.5f;
-    (self)->unk_014 = area->y + arrowHeight;
+    (*(sVec2_20EC18*)&(self)->unk_000[0]) = sVec2_20EC18(area->X + area->W * 0.5f, (area->Y + area->H) - textHeight);
+    (self)->unk_008 = area->Y;
+    (self)->unk_00C = area->Y + area->H - textHeight - arrowHeight;
+    (self)->unk_010 = area->X + area->W * 0.5f;
+    (self)->unk_014 = area->Y + arrowHeight;
     (self)->unk_018 = (self)->unk_00C;
     (self)->unk_01C = ((self)->unk_00C - (self)->unk_008 - arrowHeight) * 9.999999747378752e-05f;
-    (*(sRect20EAA0*)&(self)->unk_020) = *area;
-    (self)->unk_030 = (*(sRect20EAA0*)&(self)->unk_020).h * 9.999999747378752e-05f;
+    (*(&(self)->unk_020)) = *area;
+    (self)->unk_030 = (*(&(self)->unk_020)).H * 9.999999747378752e-05f;
 }
 #endif
 

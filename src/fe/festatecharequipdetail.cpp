@@ -1539,13 +1539,6 @@ struct sEquipItem_A798 {
     char pad_0x10[0x34 - 0x10];
     int flags;      // 0x34
 };
-struct sList_A798 {
-    char pad_0x0[0x95];
-    unsigned char sel;   // 0x95
-    unsigned char count; // 0x96
-    char pad_0x97;
-    unsigned char top;   // 0x98
-};
 int GetHashValue32(char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void* cBE_getBE();
@@ -1594,7 +1587,7 @@ extern "C" void cFEStateCharEquip_updateHelpText(cFEStateCharEquip* self)
     if ((cUIObj_A798*)self->mpHelpText == 0)
         return;
     ((cUIObj_A798*)self->mpHelpText)->setVisible(0);
-    int sel = ((sList_A798*)self->mpMenu)->sel;
+    int sel = (self->mpMenu)->mScrollItemCurrent;
     if (sel < 0 || sel >= self->mNumItems) {
         ((cUIObj_A798*)self->mpHelpText)->setVisible(1);
         if (!isMode1_A798(self)) {
@@ -1621,7 +1614,7 @@ extern "C" void cFEStateCharEquip_updateHelpText(cFEStateCharEquip* self)
     } else {
         sEquipDb_A798* db = (sEquipDb_A798*)func_0014AD28(cBE_getInterface(cBE_getBE(), 9), self->mUserNum, self->mCharID);
         sEquipEntry_A798* equipEntry = getEntry_A798(db, item->id);
-        int idx = sel - ((sList_A798*)self->mpMenu)->top;
+        int idx = sel - (self->mpMenu)->mScrollItemOffset;
         if (D_004A18D8 >= self->mCurrentPolyCount + self->mRowPoints[idx]) {
             if (equipEntry->flags & 4)
                 setText_A798(self, str_kT_FEYourCurrentOutfit);
@@ -2283,13 +2276,6 @@ public:
     virtual void v10();
     virtual void setColor(void* c);
 };
-struct sList_B618 {
-    char pad_0x0[0x95];
-    unsigned char sel;   // 0x95
-    unsigned char count; // 0x96
-    char pad_0x97;
-    unsigned char top;   // 0x98
-};
 int GetHashValue32(char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
@@ -2341,13 +2327,13 @@ extern "C" void func_0019B618(cFEStateCharEquip* self, int reset, int select)
         ((cUIObj_B618*)self->mpBoltNameWidgets[0])->setVisible(1);
         ((cUIObj_B618*)self->mpBoltNameWidgets[0])->setColor(D_004C6708);
         cUIText_setUnicodeStringByID(self->mpBoltNameWidgets[0], GetHashValue32(str_kT_FEEmpty));
-        ((sList_B618*)self->mpMenu)->count = 1;
-        ((sList_B618*)self->mpMenu)->top = 0;
+        (self->mpMenu)->mScrollItemNum = 1;
+        (self->mpMenu)->mScrollItemOffset = 0;
         visibleRow = 0;
         n = 1;
     } else {
-        sList_B618* scrollList = (sList_B618*)self->mpMenu;
-        visibleRow = scrollList->sel - scrollList->top;
+        cUIMenu* scrollList = self->mpMenu;
+        visibleRow = scrollList->mScrollItemCurrent - scrollList->mScrollItemOffset;
     }
     if (visibleRow >= n)
         visibleRow = n - 1;
@@ -2356,8 +2342,8 @@ extern "C" void func_0019B618(cFEStateCharEquip* self, int reset, int select)
     if (reset)
         visibleRow = 0;
     if (select) {
-        sList_B618* scrollList = (sList_B618*)self->mpMenu;
-        cUIMenu_setSelectedByIndex(scrollList, scrollList->top + visibleRow);
+        cUIMenu* scrollList = self->mpMenu;
+        cUIMenu_setSelectedByIndex(scrollList, scrollList->mScrollItemOffset + visibleRow);
     }
 }
 #endif
@@ -2411,7 +2397,7 @@ struct sCharEquip_19B7E0 {
     char pad0[0x44];
     signed char team;               // 0x44
     char pad45[0x5C - 0x45];
-    sList_B618* list;               // 0x5C
+    cUIMenu* list;               // 0x5C
     char pad60[0x8C - 0x60];
     cUIObj_B618* texts[6];          // 0x8C
     cUIObj_B618* icons[6];          // 0xA4
@@ -2440,8 +2426,8 @@ struct sCharEquip_19B7E0 {
 extern "C" void func_0019B7E0(cFEStateCharEquip* selfv, int i)
 {
     sCharEquip_19B7E0* self = (sCharEquip_19B7E0*)selfv;
-    sList_B618* scrollList = self->list;
-    int top = scrollList ? scrollList->top : 0;
+    cUIMenu* scrollList = self->list;
+    int top = scrollList ? scrollList->mScrollItemOffset : 0;
     sItem_19B7E0* item = self->items[top + i];
     cUIObj_B618* text = self->texts[i];
     cUIObj_B618* icon = self->icons[i];

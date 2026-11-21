@@ -1911,27 +1911,24 @@ extern "C" void tParticleEmitter_stopMotion(tParticleEmitter* self)
 //100%
 INCLUDE_ASM("render/graphicsman", tParticleEmitter_setVelocity);
 #ifdef SKIP_ASM
-struct sGmVec4_D020 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sGmFrustum_D020 {
     char pad_0x00[0x4C];
     float scale;            // 0x4C
     char pad_0x50[0x20];
-    sGmVec4_D020 v70;       // 0x70
-    sGmVec4_D020 v80;       // 0x80
-    sGmVec4_D020 v90;       // 0x90
-    sGmVec4_D020 vA0;       // 0xA0
+    t4Vector v70;       // 0x70
+    t4Vector v80;       // 0x80
+    t4Vector v90;       // 0x90
+    t4Vector vA0;       // 0xA0
 };
 
-extern sGmVec4_D020 t4vect_XAxis;
-extern sGmVec4_D020 t4vect_YAxis;
+extern t4Vector t4vect_XAxis;
+extern t4Vector t4vect_YAxis;
 
 // PORT: PS2-only VU0 inline asm (v / s).
-static inline sGmVec4_D020 gmDivD020(const sGmVec4_D020& v, float s)
+static inline t4Vector gmDivD020(const t4Vector& v, float s)
 {
-    sGmVec4_D020 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1947,9 +1944,9 @@ static inline sGmVec4_D020 gmDivD020(const sGmVec4_D020& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sGmVec4_D020 gmAddD020(const sGmVec4_D020& a, const sGmVec4_D020& b)
+static inline t4Vector gmAddD020(const t4Vector& a, const t4Vector& b)
 {
-    sGmVec4_D020 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1961,9 +1958,9 @@ static inline sGmVec4_D020 gmAddD020(const sGmVec4_D020& a, const sGmVec4_D020& 
 }
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sGmVec4_D020 gmSubD020(const sGmVec4_D020& a, const sGmVec4_D020& b)
+static inline t4Vector gmSubD020(const t4Vector& a, const t4Vector& b)
 {
-    sGmVec4_D020 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1975,9 +1972,9 @@ static inline sGmVec4_D020 gmSubD020(const sGmVec4_D020& a, const sGmVec4_D020& 
 }
 
 // PORT: PS2-only VU0 inline asm (v * s).
-static inline sGmVec4_D020 gmScaleD020(const sGmVec4_D020& v, float s)
+static inline t4Vector gmScaleD020(const t4Vector& v, float s)
 {
-    sGmVec4_D020 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1991,7 +1988,7 @@ static inline sGmVec4_D020 gmScaleD020(const sGmVec4_D020& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float gmLengthD020(const sGmVec4_D020& v)
+static inline float gmLengthD020(const t4Vector& v)
 {
     float r;
     int t;
@@ -2012,7 +2009,7 @@ static inline float gmLengthD020(const sGmVec4_D020& v)
 }
 
 // PORT: PS2-only VU0 inline asm (a -= b).
-static inline void gmSubFromD020(sGmVec4_D020& a, const sGmVec4_D020& b)
+static inline void gmSubFromD020(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %0\n"
@@ -2024,9 +2021,9 @@ static inline void gmSubFromD020(sGmVec4_D020& a, const sGmVec4_D020& b)
 }
 
 // PORT: PS2-only VU0 inline asm (cross product, w = 0).
-static inline sGmVec4_D020 gmCrossD020(const sGmVec4_D020& a, const sGmVec4_D020& b)
+static inline t4Vector gmCrossD020(const t4Vector& a, const t4Vector& b)
 {
-    sGmVec4_D020 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -2040,9 +2037,9 @@ static inline sGmVec4_D020 gmCrossD020(const sGmVec4_D020& a, const sGmVec4_D020
 }
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt; the result stays in $vf5).
-static inline sGmVec4_D020 gmNormalizeD020(const sGmVec4_D020& v)
+static inline t4Vector gmNormalizeD020(const t4Vector& v)
 {
-    sGmVec4_D020 r;
+    t4Vector r;
     __asm__ __volatile__(
         "lqc2      $vf3, %0\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -2070,16 +2067,16 @@ static inline sGmVec4_D020 gmNormalizeD020(const sGmVec4_D020& v)
  * @param dir  the base velocity (direction and speed)
  * @param spread  the cone spread, relative to the speed
  */
-extern "C" void tParticleEmitter_setVelocity(tParticleEmitter* self, const sGmVec4_D020* dir, float spread)
+extern "C" void tParticleEmitter_setVelocity(tParticleEmitter* self, const t4Vector* dir, float spread)
 {
-    *(sGmVec4_D020*)&self->V0 = gmDivD020(*dir, self->Damp);
-    float len = gmLengthD020(*(sGmVec4_D020*)&self->V0);
-    const sGmVec4_D020* axis = (dir->x != 0.0f) ? &t4vect_YAxis : &t4vect_XAxis;
-    sGmVec4_D020 norm = gmNormalizeD020(gmCrossD020(*dir, *axis));
-    *(sGmVec4_D020*)&self->Vr0 = gmScaleD020(gmScaleD020(norm, spread), len);
-    *(sGmVec4_D020*)&self->Vr1 = gmScaleD020(gmCrossD020(*(sGmVec4_D020*)&self->V0, norm), spread);
-    *(cQuad128*)(sGmVec4_D020*)&self->Vr2 = t4vect_Zero;
-    gmSubFromD020(*(sGmVec4_D020*)&self->V0, gmScaleD020(gmAddD020(gmAddD020(*(sGmVec4_D020*)&self->Vr0, *(sGmVec4_D020*)&self->Vr1), *(sGmVec4_D020*)&self->Vr2), 1.5f));
+    *(&self->V0) = gmDivD020(*dir, self->Damp);
+    float len = gmLengthD020(*(&self->V0));
+    const t4Vector* axis = (dir->x != 0.0f) ? &t4vect_YAxis : &t4vect_XAxis;
+    t4Vector norm = gmNormalizeD020(gmCrossD020(*dir, *axis));
+    *(&self->Vr0) = gmScaleD020(gmScaleD020(norm, spread), len);
+    *(&self->Vr1) = gmScaleD020(gmCrossD020(*(&self->V0), norm), spread);
+    *(cQuad128*)(&self->Vr2) = t4vect_Zero;
+    gmSubFromD020(*(&self->V0), gmScaleD020(gmAddD020(gmAddD020(*(&self->Vr0), *(&self->Vr1)), *(&self->Vr2)), 1.5f));
 }
 #endif
 
@@ -2270,9 +2267,6 @@ extern "C" void func_0036D400(float* seed)
 //100%
 INCLUDE_ASM("render/graphicsman", tParticleEmitter_stepContinous);
 #ifdef SKIP_ASM
-struct sGmVec4_D428 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
 extern "C" void tParticleEmitter_step(tParticleEmitter* self, float val);
@@ -2283,7 +2277,7 @@ extern "C" void tParticleEmitter_step(tParticleEmitter* self, float val);
 extern "C" float func_0036D400_f(float* seed) __asm__("func_0036D400");
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (a += b, 4 floats).
-static inline void gmVecAddEq_D428(sGmVec4_D428& a, const sGmVec4_D428& b)
+static inline void gmVecAddEq_D428(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         ".set push\n"
@@ -2319,7 +2313,7 @@ extern "C" void tParticleEmitter_stepContinous_impl(tParticleEmitter* self, floa
             break;
         }
         self->EndTime = time - step;
-        gmVecAddEq_D428(*(sGmVec4_D428*)&self->X0, *(sGmVec4_D428*)&self->Xi);
+        gmVecAddEq_D428(*(&self->X0), *(&self->Xi));
         func_0036D400_f(&((float*)&self->SeedX0)[0]);
         func_0036D400_f(&((float*)&self->SeedX0)[1]);
         func_0036D400_f(&((float*)&self->SeedX0)[2]);
@@ -2521,9 +2515,6 @@ struct sGmV4_0058 {
 extern "C" void tParticleEmitter_setColour_0058(void* self, const sGmV4_0058& a, const sGmV4_0058& b, const sGmV4_0058& c,
                                    const sGmV4_0058& d, float t) __asm__("tParticleEmitter_setColour");
 
-struct sGmMtx_0058 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (a + b).
 static inline sGmV4_0058 vu0Add_0058(const sGmV4_0058& a, const sGmV4_0058& b)
@@ -2577,7 +2568,7 @@ static inline sGmV4_0058 vu0Div_0058(const sGmV4_0058& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (m * v).
-static inline sGmV4_0058 vu0ApplyGM_0058(const sGmMtx_0058* m, const sGmV4_0058& v)
+static inline sGmV4_0058 vu0ApplyGM_0058(const t4Matrix* m, const sGmV4_0058& v)
 {
     sGmV4_0058 r;
     __asm__(
@@ -2639,14 +2630,14 @@ extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* self, t4Matrix* 
         self->SeedX0 = seed;
     }
     tParticleEmitter_stopMotion(self);
-    *(sGmV4_0058*)&self->X0 = vu0ApplyGM_0058((sGmMtx_0058*)transform, sGmV4_0058(*(float*)((char*)particleData + 0x24), *(float*)((char*)particleData + 0x28), *(float*)((char*)particleData + 0x2C), 1.0f));
-    *(sGmV4_0058*)&self->Xr0 = vu0ApplyGM_0058((sGmMtx_0058*)transform, sGmV4_0058(*(float*)((char*)particleData + 0x30), *(float*)((char*)particleData + 0x34), *(float*)((char*)particleData + 0x38), 0.0f));
-    *(sGmV4_0058*)&self->Xr1 = vu0ApplyGM_0058((sGmMtx_0058*)transform, sGmV4_0058(*(float*)((char*)particleData + 0x3C), *(float*)((char*)particleData + 0x40), *(float*)((char*)particleData + 0x44), 0.0f));
+    *(sGmV4_0058*)&self->X0 = vu0ApplyGM_0058(transform, sGmV4_0058(*(float*)((char*)particleData + 0x24), *(float*)((char*)particleData + 0x28), *(float*)((char*)particleData + 0x2C), 1.0f));
+    *(sGmV4_0058*)&self->Xr0 = vu0ApplyGM_0058(transform, sGmV4_0058(*(float*)((char*)particleData + 0x30), *(float*)((char*)particleData + 0x34), *(float*)((char*)particleData + 0x38), 0.0f));
+    *(sGmV4_0058*)&self->Xr1 = vu0ApplyGM_0058(transform, sGmV4_0058(*(float*)((char*)particleData + 0x3C), *(float*)((char*)particleData + 0x40), *(float*)((char*)particleData + 0x44), 0.0f));
     vu0SubInGM_0058(*(sGmV4_0058*)&self->X0, vu0Scale_0058(vu0Add_0058(*(sGmV4_0058*)&self->Xr0, *(sGmV4_0058*)&self->Xr1), 1.5f));
-    *(sGmV4_0058*)&self->V0 = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)transform, sGmV4_0058(*(float*)((char*)particleData + 0x48), *(float*)((char*)particleData + 0x4C), *(float*)((char*)particleData + 0x50), 0.0f)), *(float*)((char*)particleData + 0xC));
-    *(sGmV4_0058*)&self->Vr0 = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)transform, sGmV4_0058(*(float*)((char*)particleData + 0x54), *(float*)((char*)particleData + 0x58), *(float*)((char*)particleData + 0x5C), 0.0f)), *(float*)((char*)particleData + 0xC));
-    *(sGmV4_0058*)&self->Vr1 = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)transform, sGmV4_0058(*(float*)((char*)particleData + 0x60), *(float*)((char*)particleData + 0x64), *(float*)((char*)particleData + 0x68), 0.0f)), *(float*)((char*)particleData + 0xC));
-    *(sGmV4_0058*)&self->Vr2 = vu0Div_0058(vu0ApplyGM_0058((sGmMtx_0058*)transform, sGmV4_0058(*(float*)((char*)particleData + 0x6C), *(float*)((char*)particleData + 0x70), *(float*)((char*)particleData + 0x74), 0.0f)), *(float*)((char*)particleData + 0xC));
+    *(sGmV4_0058*)&self->V0 = vu0Div_0058(vu0ApplyGM_0058(transform, sGmV4_0058(*(float*)((char*)particleData + 0x48), *(float*)((char*)particleData + 0x4C), *(float*)((char*)particleData + 0x50), 0.0f)), *(float*)((char*)particleData + 0xC));
+    *(sGmV4_0058*)&self->Vr0 = vu0Div_0058(vu0ApplyGM_0058(transform, sGmV4_0058(*(float*)((char*)particleData + 0x54), *(float*)((char*)particleData + 0x58), *(float*)((char*)particleData + 0x5C), 0.0f)), *(float*)((char*)particleData + 0xC));
+    *(sGmV4_0058*)&self->Vr1 = vu0Div_0058(vu0ApplyGM_0058(transform, sGmV4_0058(*(float*)((char*)particleData + 0x60), *(float*)((char*)particleData + 0x64), *(float*)((char*)particleData + 0x68), 0.0f)), *(float*)((char*)particleData + 0xC));
+    *(sGmV4_0058*)&self->Vr2 = vu0Div_0058(vu0ApplyGM_0058(transform, sGmV4_0058(*(float*)((char*)particleData + 0x6C), *(float*)((char*)particleData + 0x70), *(float*)((char*)particleData + 0x74), 0.0f)), *(float*)((char*)particleData + 0xC));
     vu0SubInGM_0058(*(sGmV4_0058*)&self->V0, vu0Scale_0058(vu0Add_0058(vu0Add_0058(*(sGmV4_0058*)&self->Vr0, *(sGmV4_0058*)&self->Vr1), *(sGmV4_0058*)&self->Vr2), 1.5f));
     tParticleEmitter_setColour_0058(self,
                        vu0Scale_0058(sGmV4_0058(*(float*)((char*)particleData + 0x88), *(float*)((char*)particleData + 0x8C), *(float*)((char*)particleData + 0x90), *(float*)((char*)particleData + 0x84)), 128.0f),

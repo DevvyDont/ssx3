@@ -13,7 +13,6 @@
 INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onCreateScreen);
 #ifdef SKIP_ASM
 struct sVec4_181148 { float x, y, z, w; } __attribute__((aligned(16)));
-struct sCam_181148 { char pad[0x10]; float fov; };
 int GetHashValue32(char* str);
 extern char str_08sel_char[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -37,7 +36,7 @@ extern "C" void cFEStateCharSelect_onCreateScreen(cFEStateCharSelect* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    sCam_181148* cam = (sCam_181148*)SSXApp->RealFE;
+    cFE* cam = SSXApp->RealFE;
     sVec4_181148 pos;
     pos.x = 0.0f;
     pos.y = 200.0f;
@@ -48,8 +47,8 @@ extern "C" void cFEStateCharSelect_onCreateScreen(cFEStateCharSelect* self)
     lookAt.y = 0.0f;
     lookAt.z = 0.0f;
     lookAt.w = 1.0f;
-    cSimpleCamera_setupCamWithPosAndTarget((char*)cam + 0x10, &pos, &lookAt);
-    cam->fov = 0.4363323450088501f;
+    cSimpleCamera_setupCamWithPosAndTarget(&cam->mCamera, &pos, &lookAt);
+    cam->mCamera.View = 0.4363323450088501f;
     cFERider_setVisible(cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum), 0);
     self->mbDraw3D = 1;
     self->mPan = -1.0f;

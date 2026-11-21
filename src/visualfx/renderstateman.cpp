@@ -1378,14 +1378,6 @@ struct sRsSeg_EF950 {
     sRsVec4_EF950 p1;
 };
 
-struct sTrail_EF950 {
-    char* rider;                // 0x0
-    sRsSeg_EF950* ring;         // 0x4
-    int head;                   // 0x8
-    int count;                  // 0xC
-    float start;                // 0x10
-    int len;                    // 0x14
-};
 
 extern sRsCtx_EF950* GrMan_renderstateman __asm__("GrMan");
 extern sRsState_EF950 sDrawState_s_defaultDrawState[];
@@ -1495,9 +1487,9 @@ static inline void rsVert_EF950(sRsVert_EF950* v, float u, float w, const sRsCol
  * D_004A3B74, _EffectTexMap[61] scrolled by the trail offset. Segment alpha falls off as 1 - t^2/(len-1)^2,
  * and the segments are placed back at 0.7 x the current hips position.
  */
-extern "C" void cAirStreamerFX_render(sTrail_EF950* self)
+extern "C" void cAirStreamerFX_render(cAirStreamerFX* self)
 {
-    if (self->count < 2) {
+    if (self->StreamBufLen < 2) {
         return;
     }
     rsPush_EF950(GrMan_renderstateman);
@@ -1505,12 +1497,12 @@ extern "C" void cAirStreamerFX_render(sTrail_EF950* self)
     int glow = 0;
     float alpha = 0.3f;
     float start = 0.0f;
-    if (cPowerUpFXToggles_m_TestTrickBoost != 0 || 0.0f < *(float*)(self->rider + 0x2EC)) {
+    if (cPowerUpFXToggles_m_TestTrickBoost != 0 || 0.0f < *(float*)(((char*)self->mRider) + 0x2EC)) {
         glow = 1;
         alpha = 1.0f;
         *(short*)((char*)GrMan_renderstateman->top + 0x10) = rsTex1044_EF950(GrMan_renderstateman);
         GrMan_renderstateman->top->f0 &= ~0xC;
-        start = self->start;
+        start = self->mVOffset;
     } else {
         sRsCtx_EF950* renderCtx = GrMan_renderstateman;
         renderCtx->top->f0 |= 0xC;
@@ -1527,11 +1519,11 @@ extern "C" void cAirStreamerFX_render(sTrail_EF950* self)
     rsSetA_EF950(ctx, 0x7C, 2, 7);
     sRsVert_EF950 vertsL[52];
     sRsVert_EF950 vertsR[52];
-    char* rider = self->rider;
+    char* rider = ((char*)self->mRider);
     float uvy = start;
-    float invSq = 1.0f / (float)((self->len - 1) * (self->len - 1));
+    float invSq = 1.0f / (float)((self->mMaxStreamerSegments - 1) * (self->mMaxStreamerSegments - 1));
     sRsVec4_EF950 off = rsScale_EF950(rsRow_EF950(*(char**)(*(char**)(rider + 0x780) + 0x30), *(int*)(rider + 0x89C), 0x30), 0.7f);
-    float dv = 1.0f / (float)self->count;
+    float dv = 1.0f / (float)self->StreamBufLen;
     float falloffT = 0.0f;
     int nverts = 0;
     sRsColor_EF950 color;
@@ -1541,7 +1533,7 @@ extern "C" void cAirStreamerFX_render(sTrail_EF950* self)
     color.w = 1.0f;
     sRsVec4_EF950 leftPos;
     sRsVec4_EF950 rightPos;
-    rider = self->rider;
+    rider = ((char*)self->mRider);
     sRsVec4_EF950 col = rsRow_EF950(*(char**)(*(char**)(rider + 0x780) + 0x34), *(int*)(rider + 0x8A4), 0x20);
     float size = 15.0f;
     if (glow) {
@@ -1550,9 +1542,9 @@ extern "C" void cAirStreamerFX_render(sTrail_EF950* self)
         size = 37.5f;
     }
     sRsVec4_EF950 half = rsScale_EF950(col, size * 0.5f);
-    int j = self->head;
+    int j = self->StreamBufHead;
     int k = 0;
-    for (int i = 0; i < self->count; i++) {
+    for (int i = 0; i < self->StreamBufLen; i++) {
         if (j < 0) {
             j = 24;
         }
@@ -1560,8 +1552,8 @@ extern "C" void cAirStreamerFX_render(sTrail_EF950* self)
         if (color.x < 0.0f) {
             color.x = 0.0f;
         }
-        leftPos = rsAdd_EF950(self->ring[j].p0, off);
-        rightPos = rsAdd_EF950(self->ring[j].p1, off);
+        leftPos = rsAdd_EF950(((sRsSeg_EF950*)self->StreamBuf)[j].p0, off);
+        rightPos = rsAdd_EF950(((sRsSeg_EF950*)self->StreamBuf)[j].p1, off);
         rsVert_EF950(&vertsL[k], 0.0f, uvy, color, rsSub_EF950(leftPos, half));
         rsVert_EF950(&vertsR[k], 0.0f, uvy, color, rsSub_EF950(rightPos, half));
         k++;
