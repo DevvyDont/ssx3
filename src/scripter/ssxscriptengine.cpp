@@ -5832,8 +5832,8 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjRider_ScriptAnimIDToGameAnimIn
 void cScriptObjRider_ScriptAnimIDToGameAnimInfo(void* vself, int scriptAnimId, void* gameAnimIndex, void* gameAnimBankId)
 {
     cScriptObjRider* self = (cScriptObjRider*)vself;
-    *(int*)gameAnimBankId = *(int*)((char*)self->mpAnimBankInfo + 0x4);
-    *(int*)gameAnimIndex = (*(int**)((char*)self->mpAnimBankInfo + 0x10))[scriptAnimId];
+    *(int*)gameAnimBankId = self->mpAnimBankInfo->bankNum;
+    *(int*)gameAnimIndex = (self->mpAnimBankInfo->pTableAnimID)[scriptAnimId];
 }
 #endif
 

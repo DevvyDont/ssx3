@@ -1,4 +1,5 @@
 #include "common.h"
+#include "animation/animmodel.h"
 #include "ai/computer.h"
 #include "ai/player.h"
 #include "replay/frameptr.h"
@@ -4657,11 +4658,11 @@ extern "C" void cWipeoutControl_playWipeoutStuckAnim(cWipeoutControl* self)
     sXf_12E010 newPose;
     func_0030ECD8(&newPose, self->mRider->mAnimModel, buf, 0);
     cRider* rd = self->mRider;
-    char* trk = (char*)rd->mAnimModel;
-    sQuat_12BE20* n = (sQuat_12BE20*)((rd->mBoneHips << 4) + *(int*)(trk + 0x24));
+    cAnimModel* trk = rd->mAnimModel;
+    sQuat_12BE20* n = (sQuat_12BE20*)((rd->mBoneHips << 4) + (int)trk->localPos);
     sXf_12E010 node;
-    node.pos = sQuat_12BE20(n->x * *(float*)(trk + 0x140), n->y * *(float*)(trk + 0x144),
-                            n->z * *(float*)(trk + 0x148), n->w * *(float*)(trk + 0x14C));
+    node.pos = sQuat_12BE20(n->x * trk->unk_140.x, n->y * trk->unk_140.y,
+                            n->z * trk->unk_140.z, n->w * trk->unk_140.w);
     node.rot = *(sQuat_12BE20*)((char*)rd->mAnimModel->localRot + (rd->mBoneHips << 4));
     sXf_12E010 y = Combine_12E010(node, Invert_12E010(newPose));
     sXf_12E010* rx = (sXf_12E010*)(&self->mRider->mPosition);
@@ -4740,9 +4741,9 @@ static inline float aiClamp_12E528(float v, float lo, float hi)
 extern "C" float cWipeoutControl_chooseTumbleAnimRate(cWipeoutControl* self)
 {
     cRider* rider = self->mRider;
-    char* handler = (char*)rider->mRiderHandler;
+    cRiderHandler* handler = rider->mRiderHandler;
     char* animSeq = cRiderAnimBase_getCurrentAnimSequence(rider->mRiderAnim, 2);
-    float rawRate = aiLength_12C5C8(*(sAiVec4_12C5C8*)(handler + 0x60)) * *(float*)(animSeq + 0x10) * 0.15915493667125702f;
+    float rawRate = aiLength_12C5C8(*(sAiVec4_12C5C8*)&handler->WipeoutMotion.RiderAngVelocity) * *(float*)(animSeq + 0x10) * 0.15915493667125702f;
     float res = aiClamp_12E528(rawRate, 0.5f, 2.0f);
     if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 29 ||
         cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 25)

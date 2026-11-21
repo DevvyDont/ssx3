@@ -1372,7 +1372,7 @@ extern "C" void cUIIcon_setTextureByHashValue(cUIIcon* self, int id)
 {
     cUIScreen* screen = self->mpScreen;
     cUIState* state = screen->mpState;
-    void* engine = state->mpEngine;
+    cUIEngine* engine = state->mpEngine;
     self->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname((cUITextureBank*)((char*)engine + 0x58), id);
 }
 #endif
@@ -1681,8 +1681,8 @@ extern "C" void cUIListBox_setUnicodePrivate(cUIListBox* self, unsigned char idx
 {
     cUIScreen* screen = self->mpScreen;
     cUIState* state = screen->mpState;
-    void* engine = state->mpEngine;
-    if (*(void**)((char*)engine + 0x10) != 0) {
+    cUIEngine* engine = state->mpEngine;
+    if (engine->mpLocaleInterface != 0) {
         cUIListBox_setUnicodePrivate_sEntry* tbl = (cUIListBox_setUnicodePrivate_sEntry*)(&self->mpEntries[0].mpString);
         cUIListBox_setUnicodePrivate_sEntry* entry = &tbl[idx];
         if (entry->str) {

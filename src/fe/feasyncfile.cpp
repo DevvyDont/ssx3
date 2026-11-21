@@ -14657,8 +14657,8 @@ extern "C" void func_001B55B0(cFEStateNetConfig* self, void* popup, unsigned int
     }
     case 22:
         if (self->unk_6D8 == 0) {
-            char* authPopup = (char*)cFEStateAuthDNAS_cFEStateAuthDNAS((cFEStateAuthDNAS*)((cFEStateAuthDNAS*)cMemMan_alloc(0x700, str_NetConfigAuthPopup, 0, 0)), (int)self->mpEngine, (int)self);
-            *(int*)(authPopup + 0x18) = 2074;
+            cFEStateAuthDNAS* authPopup = cFEStateAuthDNAS_cFEStateAuthDNAS((cFEStateAuthDNAS*)((cFEStateAuthDNAS*)cMemMan_alloc(0x700, str_NetConfigAuthPopup, 0, 0)), (int)self->mpEngine, (int)self);
+            authPopup->miMiscData = 2074;
             cUIStateStack_pushPopup(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, authPopup);
         }
         self->unk_6D8 = 0;

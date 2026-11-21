@@ -356,10 +356,10 @@ extern "C" void cSplineModifier_updateRootTransform(cSplineModifier* self)
     (*(sSmM44_9830*)&self->Transform).m[3][1] = pos.y;
     (*(sSmM44_9830*)&self->Transform).m[3][2] = pos.z;
     (*(sSmM44_9830*)&self->Transform).m[3][3] = 1.0f;
-    char* sub = (char*)&self->BoundBox;
+    tBoundBox* sub = &self->BoundBox;
     if (self->HeadTweak != 0.0f) {
         const sSmV3_9830* axis = &t4vect_ZAxis;
-        fSinCos(&sc[3][0], &sc[3][1], *(float*)(sub + 0x28));
+        fSinCos(&sc[3][0], &sc[3][1], *(float*)(((char*)sub) + 0x28));
         float k = 1.0f - sc[3][1];
         float kx = k * axis->x;
         float ky = k * axis->y;

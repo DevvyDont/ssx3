@@ -2429,17 +2429,17 @@ static inline float Atan2_174200(float y, float x)
  */
 extern "C" void cBoundedAlgorithm_update(cBoundedAlgorithm* self)
 {
-    char* act = (char*)self->BoundAction;
-    self->IdealDist = *(float*)(act + 0x10);
-    self->HeightOffset = *(float*)(act + 0x18);
-    self->PitchOffset = *(float*)(act + 0x1C);
-    self->View = *(float*)(act + 0x14);
-    self->LeadDistance = *(float*)(act + 0x20);
+    cCTActionBoundedCam* act = self->BoundAction;
+    self->IdealDist = act->IdealDist;
+    self->HeightOffset = act->HeightOffset;
+    self->PitchOffset = act->PitchOffset;
+    self->View = act->FieldOfView;
+    self->LeadDistance = act->LeadDistance;
     t4Vector lookTarget;
-    if (*(int*)(act + 0x24) == 1) {
-        lookTarget.x = *(float*)(act + 0x28);
-        lookTarget.y = *(float*)(act + 0x2C);
-        lookTarget.z = *(float*)(act + 0x30);
+    if (act->TargetType == 1) {
+        lookTarget.x = act->TargetPoint.x;
+        lookTarget.y = act->TargetPoint.y;
+        lookTarget.z = act->TargetPoint.z;
         lookTarget.w = 1.0f;
     } else {
         t4Vector leadPos, riderPos, leadOffset, riderFront;
@@ -2621,12 +2621,12 @@ extern "C" void cBoundedAlgorithm_snap(cBoundedAlgorithm* self, long subjectId)
         if (vEntry->fn(calleeObj + vEntry->delta) != subjectId)
             return;
     }
-    char* act = (char*)self->BoundAction;
+    cCTActionBoundedCam* act = self->BoundAction;
     t4Vector lookTarget;
-    if (*(int*)(act + 0x24) == 1) {
-        lookTarget.x = *(float*)(act + 0x28);
-        lookTarget.y = *(float*)(act + 0x2C);
-        lookTarget.z = *(float*)(act + 0x30);
+    if (act->TargetType == 1) {
+        lookTarget.x = act->TargetPoint.x;
+        lookTarget.y = act->TargetPoint.y;
+        lookTarget.z = act->TargetPoint.z;
         lookTarget.w = 1.0f;
     } else {
         t4Vector leadPos, riderPos, leadOffset, riderFront;
@@ -2643,12 +2643,12 @@ extern "C" void cBoundedAlgorithm_snap(cBoundedAlgorithm* self, long subjectId)
         ScaleTo_1744B0(heightLift, D_004FF160_44B0, self->HeightOffset);
         AddTo_1744B0(lookTarget, leadPos, heightLift);
     }
-    char* act2 = (char*)self->BoundAction;
-    self->IdealDist = *(float*)(act2 + 0x10);
-    self->HeightOffset = *(float*)(act2 + 0x18);
-    self->PitchOffset = *(float*)(act2 + 0x1C);
-    self->View = *(float*)(act2 + 0x14);
-    self->LeadDistance = *(float*)(act2 + 0x20);
+    cCTActionBoundedCam* act2 = self->BoundAction;
+    self->IdealDist = act2->IdealDist;
+    self->HeightOffset = act2->HeightOffset;
+    self->PitchOffset = act2->PitchOffset;
+    self->View = act2->FieldOfView;
+    self->LeadDistance = act2->LeadDistance;
     cTriggerAlgorithm_snap(((char*)self), subjectId);
     {
         char* calleeObj = (char*)self->BoundAction->BoundObj;

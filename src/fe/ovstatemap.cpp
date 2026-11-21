@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/gamestate.h"
 #include "ui/uitext.h"
 #include "ui/uithing.h"
 #include "fe/ovstatemap.h"
@@ -1562,10 +1563,10 @@ extern "C" void cOVState_onWidgetEvent(cOVState* self, int pWidget, int Event)
 {
     cGame* w = SSXApp->Game;
     if (((char*)w) != 0) {
-        char* currentState = (char*)w->mCurrentState;
-        if (currentState != 0) {
-            sVEntry0020A6A8* vt = *(sVEntry0020A6A8**)(currentState + 0xC);
-            vt[9].fn(currentState + vt[9].delta, pWidget, Event);
+        cGameState* currentState = w->mCurrentState;
+        if (((char*)currentState) != 0) {
+            sVEntry0020A6A8* vt = (sVEntry0020A6A8*)currentState->mVtbl;
+            vt[9].fn(((char*)currentState) + vt[9].delta, pWidget, Event);
         }
     }
 }

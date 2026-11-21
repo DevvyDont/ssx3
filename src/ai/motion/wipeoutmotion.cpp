@@ -1,4 +1,5 @@
 #include "common.h"
+#include "animation/animmodel.h"
 #include "replay/frameptr.h"
 #include "ai/riderhandler.h"
 #include "main/game.h"
@@ -794,9 +795,9 @@ extern "C" void cWipeoutMotion_updateBoardSphereTree(cWipeoutMotion* self)
     sVec4_7550 pts[4];
     sRadii_7550 radii = D_00458220;
     cRider* rider = self->mRider;
-    char* model = (char*)rider->mAnimModel;
-    sBone_7550* bone = &(*(sBone_7550**)(model + 0x2C))[rider->mBoneBoardChild];
-    float modelScale = *(float*)(model + 0x140);
+    cAnimModel* model = rider->mAnimModel;
+    sBone_7550* bone = &((sBone_7550*)model->bones)[rider->mBoneBoardChild];
+    float modelScale = model->unk_140.x;
     sVec4_7550 boardAxis = vu0Scale_7550(xAxis_7550(bone), modelScale);
     pts[0] = vu0Add_7550(bone->pos, vu0Scale_7550(boardAxis, 70.0f));
     pts[1] = vu0Add_7550(bone->pos, vu0Scale_7550(boardAxis, 30.0f));

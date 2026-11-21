@@ -942,10 +942,10 @@ extern "C" void cScriptPointAlgorithm_update(cScriptPointAlgorithm* algorithm)
     self->Near = header[0];
     self->Far = header[1];
     self->View = self->FrameInfo.fov * 0.01745329424738884f;
-    char* scriptObj = (char*)algorithm->ScriptObj;
-    self->Heading = self->FrameInfo.heading * 0.01745329424738884f + *(float*)(scriptObj + 0x78);
-    self->Pitch = self->FrameInfo.pitch * 0.01745329424738884f + *(float*)(scriptObj + 0x74);
-    self->Roll = self->FrameInfo.roll * 0.01745329424738884f + *(float*)(scriptObj + 0x70);
+    cScriptObjCamera* scriptObj = algorithm->ScriptObj;
+    self->Heading = self->FrameInfo.heading * 0.01745329424738884f + scriptObj->mBaseRotZ;
+    self->Pitch = self->FrameInfo.pitch * 0.01745329424738884f + scriptObj->mBaseRotY;
+    self->Roll = self->FrameInfo.roll * 0.01745329424738884f + scriptObj->mBaseRotX;
     self->Target = mtxMulVec_169DB0(baseTransform, sVec4_169DB0(self->FrameInfo.targetX, self->FrameInfo.targetY, self->FrameInfo.targetZ, 1.0f));
     float sinHead, cosHead, sinPitch, cosPitch;
     fSinCos(&sinHead, &cosHead, self->Heading);
@@ -1840,9 +1840,9 @@ extern "C" void cScriptRelativeAlgorithm_snap(cScriptRelativeAlgorithm* algorith
         k = self->FrameInfo.optimalTargetDistance;
     }
     float sinHead, cosHead, sinPitch, cosPitch;
-    char* scriptObj = (char*)algorithm->ScriptObj;
-    headingAngle += *(float*)(scriptObj + 0x78);
-    pitchAngle += *(float*)(scriptObj + 0x74);
+    cScriptObjCamera* scriptObj = algorithm->ScriptObj;
+    headingAngle += scriptObj->mBaseRotZ;
+    pitchAngle += scriptObj->mBaseRotY;
     fSinCos(&sinHead, &cosHead, headingAngle);
     fSinCos(&sinPitch, &cosPitch, pitchAngle);
     sVec4_16AD98 look(cosPitch * cosHead, cosPitch * sinHead, -sinPitch, 0.0f);
@@ -2114,9 +2114,9 @@ extern "C" void cScriptRelativeAlgorithm_update(cScriptRelativeAlgorithm* algori
         k = self->FrameInfo.optimalTargetDistance;
     }
     char* obj = rider + 0x6C0;
-    char* scriptObj = (char*)algorithm->ScriptObj;
-    pitchAngle += *(float*)(scriptObj + 0x74);
-    headingAngle += *(float*)(scriptObj + 0x78);
+    cScriptObjCamera* scriptObj = algorithm->ScriptObj;
+    pitchAngle += scriptObj->mBaseRotY;
+    headingAngle += scriptObj->mBaseRotZ;
     sVec4_B180 rot = *(sVec4_B180*)(*(char**)(rider + 0x780) + 0x140);
     sVEp_B180* vt = *(sVEp_B180**)obj;
     sVec4_B180* rp = vt[5].fn(obj + vt[5].delta);

@@ -59,9 +59,9 @@ extern "C" void cFELoadHintState_onCreateScreen(cFELoadHintState* self)
     }
     char* icon = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Bitmap0000_b));
     if (icon != 0) {
-        char* loadInfo = (char*)self->mpParentModule;
-        if (loadInfo != 0) {
-            int textureId = *(int*)(loadInfo + 0x10);
+        cFELoadScreen* loadInfo = self->mpParentModule;
+        if (((char*)loadInfo) != 0) {
+            int textureId = loadInfo->mTexID[0];
             if (textureId != 0) {
                 *(int*)(icon + 0x78) = textureId;
                 *(int*)(icon + 0x7C) = 0;
