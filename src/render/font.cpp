@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "bx/bxstring.h"
 #include "render/bxps2tex.h"
 #include "ui/uianimation.h"
@@ -252,7 +253,7 @@ extern "C" void cFont_downloadTexture(cFont* self, sFontTexHdr* img)
         palEntry += 4;
     }
     sFontVEntryDL* vt = (sFontVEntryDL*)ps2GraphicsMan->mVtbl;
-    self->TextureID = vt[47].fn((char*)ps2GraphicsMan + vt[47].delta, pix, self->FontName, img->w, newHeight, 0, 11, 1, pal, 0, 1, -1);
+    self->TextureID = vt[47].fn(vthis(ps2GraphicsMan, vt[47]), pix, self->FontName, img->w, newHeight, 0, 11, 1, pal, 0, 1, -1);
     if (pix != 0)
         cMemMan_free(pix);
     if (pal != 0)
@@ -341,14 +342,14 @@ extern "C" void cFont_text(cFont* self, float x, float y, sMat00391C48* str)
         if (shadowLayer < 0) shadowLayer = 0;
         top->unk_00[2] = (((int)top->unk_00[2]) & ~0x3E0) | ((shadowLayer << 5) & 0x3E0);
         sFontVEntry1CB0* vt = (sFontVEntry1CB0*)ps2GraphicsMan->mVtbl;
-        vt[80].fn((char*)ps2GraphicsMan + vt[80].delta, self, str, (char*)&self->ShadowColor[0],
+        vt[80].fn(vthis(ps2GraphicsMan, vt[80]), self, str, (char*)&self->ShadowColor[0],
                   pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1],
                   self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
         sDrawState* top2 = ps2GraphicsMan->m_pCurrentDrawState;
         top2->unk_00[2] = (((int)top2->unk_00[2]) & ~0x3E0) | (saved << 5);
     }
     sFontVEntry1CB0* vt = (sFontVEntry1CB0*)ps2GraphicsMan->mVtbl;
-    vt[80].fn((char*)ps2GraphicsMan + vt[80].delta, self, str, (char*)&self->Color[0], pos.x, pos.y,
+    vt[80].fn(vthis(ps2GraphicsMan, vt[80]), self, str, (char*)&self->Color[0], pos.x, pos.y,
               self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
 }
 #endif
@@ -408,14 +409,14 @@ extern "C" void cFont_text1(cFont* self, float x, float y, void* unicodeStr)
         if (shadowLayer < 0) shadowLayer = 0;
         top->unk_00[2] = (((int)top->unk_00[2]) & ~0x3E0) | ((shadowLayer << 5) & 0x3E0);
         sFontVEntry1E30* vt = (sFontVEntry1E30*)ps2GraphicsMan->mVtbl;
-        vt[81].fn((char*)ps2GraphicsMan + vt[81].delta, self, unicodeStr, (char*)&self->ShadowColor[0],
+        vt[81].fn(vthis(ps2GraphicsMan, vt[81]), self, unicodeStr, (char*)&self->ShadowColor[0],
                   pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1],
                   self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
         sDrawState* top2 = ps2GraphicsMan->m_pCurrentDrawState;
         top2->unk_00[2] = (((int)top2->unk_00[2]) & ~0x3E0) | (saved << 5);
     }
     sFontVEntry1E30* vt = (sFontVEntry1E30*)ps2GraphicsMan->mVtbl;
-    vt[81].fn((char*)ps2GraphicsMan + vt[81].delta, self, unicodeStr, (char*)&self->Color[0], pos.x, pos.y,
+    vt[81].fn(vthis(ps2GraphicsMan, vt[81]), self, unicodeStr, (char*)&self->Color[0], pos.x, pos.y,
               self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
 }
 #endif
@@ -4099,7 +4100,7 @@ struct sFontVEntry23 {
 extern "C" void cPS2GraphicsMan_SetViewportWindow1(cPS2GraphicsMan* self, float* rect, int applyScreenOffset)
 {
     sFontVEntry23* vt = (sFontVEntry23*)self->mVtbl;
-    vt[23].fn((char*)self + vt[23].delta, applyScreenOffset, rect[0], rect[1], rect[2], rect[3]);
+    vt[23].fn(vthis(self, vt[23]), applyScreenOffset, rect[0], rect[1], rect[2], rect[3]);
 }
 #endif
 

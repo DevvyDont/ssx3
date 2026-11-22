@@ -219,7 +219,7 @@ extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
                 (selfp)->mbSessionUnlocked[i] = 1;
                 sStrMgr_87F0* locale = (sStrMgr_87F0*)SSXApp->FELocale;
                 sVE_87F0* vt = locale->vt;
-                void* str = ((VGetFn_87F0)vt[4].fn)((char*)locale + vt[4].delta, GetHashValue32(str_kT_MAPSessionPt));
+                void* str = ((VGetFn_87F0)vt[4].fn)(vthis(locale, vt[4]), GetHashValue32(str_kT_MAPSessionPt));
                 if (str == 0) {
                     continue;
                 }
@@ -237,8 +237,8 @@ extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
                 menuItem->f18 = i + 1;
             } else {
                 (selfp)->mbSessionUnlocked[i] = 0;
-                ((VIntFn_87F0)menuItem->vt[9].fn)((char*)menuItem + menuItem->vt[9].delta, 0);
-                ((VIntFn_87F0)menuItem->vt[8].fn)((char*)menuItem + menuItem->vt[8].delta, 1);
+                ((VIntFn_87F0)menuItem->vt[9].fn)(vthis(menuItem, menuItem->vt[9]), 0);
+                ((VIntFn_87F0)menuItem->vt[8].fn)(vthis(menuItem, menuItem->vt[8]), 1);
             }
         }
         void* menu = cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_SessionViewPoints));
@@ -261,12 +261,12 @@ extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
         menuItem = (sUIObj_87F0*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu_Yes));
         if (menuItem != 0) {
             menuItem->f18 = 0;
-            ((VPtrFn_87F0)menuItem->vt[11].fn)((char*)menuItem + menuItem->vt[11].delta, kMAPCOLOR_REGULAR);
+            ((VPtrFn_87F0)menuItem->vt[11].fn)(vthis(menuItem, menuItem->vt[11]), kMAPCOLOR_REGULAR);
         }
         menuItem = (sUIObj_87F0*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu_No));
         if (menuItem != 0) {
             menuItem->f18 = 1;
-            ((VPtrFn_87F0)menuItem->vt[11].fn)((char*)menuItem + menuItem->vt[11].delta, kMAPCOLOR_REGULAR);
+            ((VPtrFn_87F0)menuItem->vt[11].fn)(vthis(menuItem, menuItem->vt[11]), kMAPCOLOR_REGULAR);
         }
     }
     return 0;
@@ -611,16 +611,16 @@ extern "C" void cOVState_MAP_setupPopup(cOVState_MAP* selfp)
         cUIState_showObjSafe(((char*)selfp), str_Popup1);
         cUIState_hideObjSafe(((char*)selfp), str_Popup2);
         if (list != 0) {
-            ((VIntFn_9010)list->vt[7].fn)((char*)list + list->vt[7].delta, 0);
+            ((VIntFn_9010)list->vt[7].fn)(vthis(list, list->vt[7]), 0);
             n = list->f95;
         }
         if (menu != 0) {
-            ((VIntFn_9010)menu->vt[7].fn)((char*)menu + menu->vt[7].delta, 1);
-            ((VIntFn_9010)menu->vt[9].fn)((char*)menu + menu->vt[9].delta, 1);
+            ((VIntFn_9010)menu->vt[7].fn)(vthis(menu, menu->vt[7]), 1);
+            ((VIntFn_9010)menu->vt[9].fn)(vthis(menu, menu->vt[9]), 1);
         }
         sStrMgr_9010* locale = (sStrMgr_9010*)SSXApp->FELocale;
         sVE_9010* vt = locale->vt;
-        void* str = ((VGetFn_9010)vt[4].fn)((char*)locale + vt[4].delta, GetHashValue32(str_kT_MAPSessionPt));
+        void* str = ((VGetFn_9010)vt[4].fn)(vthis(locale, vt[4]), GetHashValue32(str_kT_MAPSessionPt));
         if (str != 0) {
             sprintf2(text, str_pct_s_pct_d_d, str, n + 1);
             void* label = cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_PopupTitle));
@@ -650,17 +650,17 @@ extern "C" void cOVState_MAP_setupPopup(cOVState_MAP* selfp)
             cUIText_setUnicodeStringByID(confirmYes, GetHashValue32(str_kT_CMNYes_b));
         }
         if (confirmNo != 0) {
-            ((VIntFn_9010)confirmNo->vt[9].fn)((char*)confirmNo + confirmNo->vt[9].delta, 1);
-            ((VIntFn_9010)confirmNo->vt[8].fn)((char*)confirmNo + confirmNo->vt[8].delta, 0);
+            ((VIntFn_9010)confirmNo->vt[9].fn)(vthis(confirmNo, confirmNo->vt[9]), 1);
+            ((VIntFn_9010)confirmNo->vt[8].fn)(vthis(confirmNo, confirmNo->vt[8]), 0);
         }
         cUIState_showObjSafe(((char*)selfp), str_ConfirmMenu_No);
     } else {
         cUIState_hideObjSafe(((char*)selfp), str_ConfirmPopup);
         if (list != 0) {
-            ((VIntFn_9010)list->vt[7].fn)((char*)list + list->vt[7].delta, 1);
+            ((VIntFn_9010)list->vt[7].fn)(vthis(list, list->vt[7]), 1);
         }
         if (menu != 0) {
-            ((VIntFn_9010)menu->vt[7].fn)((char*)menu + menu->vt[7].delta, 0);
+            ((VIntFn_9010)menu->vt[7].fn)(vthis(menu, menu->vt[7]), 0);
         }
     }
 }
@@ -857,10 +857,10 @@ extern "C" void cOVState_MAP_setWidgetHiliteColor(cOVState_MAP* self, cUIText* o
 {
     if (on != 0) {
         sVEntry_cOVState_MAP_setWidgetHiliteColor* vt = (sVEntry_cOVState_MAP_setWidgetHiliteColor*)obj->mVtbl;
-        vt[11].fn((char*)obj + vt[11].delta, kMAPCOLOR_HIGHLIGHTED);
+        vt[11].fn(vthis(obj, vt[11]), kMAPCOLOR_HIGHLIGHTED);
     } else {
         sVEntry_cOVState_MAP_setWidgetHiliteColor* vt = (sVEntry_cOVState_MAP_setWidgetHiliteColor*)obj->mVtbl;
-        vt[11].fn((char*)obj + vt[11].delta, kMAPCOLOR_HIGHLIGHTED_LOCKED);
+        vt[11].fn(vthis(obj, vt[11]), kMAPCOLOR_HIGHLIGHTED_LOCKED);
     }
 }
 #endif
@@ -888,10 +888,10 @@ extern "C" void cOVState_MAP_setWidgetUnHiliteColor(cOVState_MAP* self, cUIText*
 {
     if (on != 0) {
         sVEntry_cOVState_MAP_setWidgetUnHiliteColor* vt = (sVEntry_cOVState_MAP_setWidgetUnHiliteColor*)obj->mVtbl;
-        vt[11].fn((char*)obj + vt[11].delta, kMAPCOLOR_REGULAR);
+        vt[11].fn(vthis(obj, vt[11]), kMAPCOLOR_REGULAR);
     } else {
         sVEntry_cOVState_MAP_setWidgetUnHiliteColor* vt = (sVEntry_cOVState_MAP_setWidgetUnHiliteColor*)obj->mVtbl;
-        vt[11].fn((char*)obj + vt[11].delta, kMAPCOLOR_REGULAR_LOCKED);
+        vt[11].fn(vthis(obj, vt[11]), kMAPCOLOR_REGULAR_LOCKED);
     }
 }
 #endif
@@ -1533,7 +1533,7 @@ extern "C" void cOVState_onWidgetEvent(cOVState* self, int pWidget, int Event)
         cGameState* currentState = w->mCurrentState;
         if (((char*)currentState) != 0) {
             sVEntry<void(void*, int, int)>* vt = (sVEntry<void(void*, int, int)>*)currentState->mVtbl;
-            vt[9].fn(((char*)currentState) + vt[9].delta, pWidget, Event);
+            vt[9].fn(vthis(currentState, vt[9]), pWidget, Event);
         }
     }
 }

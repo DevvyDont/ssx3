@@ -334,19 +334,19 @@ extern "C" void cFEStateOptions_onPopupEvent(cFEStateOptions* self, cUIState* po
         if (IsK188D08(popup->mHashName, str_111resetopts)) {
             void* uiObj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1530));
             sVEK188D08a* vt = (sVEK188D08a*)popup->mVtbl;
-            if (vt[23].fn(((char*)popup) + vt[23].delta, 0)) {
+            if (vt[23].fn(vthis(popup, vt[23]), 0)) {
                 if (uiObj != 0) {
                     self->mbToSaveOptionScreen = 1;
                     self->mbLetFrameGo = 1;
                     sVEK188D08b* vt2 = (sVEK188D08b*)self->mVtbl;
-                    vt2[19].fn((char*)self + vt2[19].delta, uiObj, 5);
+                    vt2[19].fn(vthis(self, vt2[19]), uiObj, 5);
                 }
             } else {
                 if (uiObj != 0) {
                     self->mbToSaveOptionScreen = 0;
                     self->mbLetFrameGo = 1;
                     sVEK188D08b* vt2 = (sVEK188D08b*)self->mVtbl;
-                    vt2[19].fn((char*)self + vt2[19].delta, uiObj, 6);
+                    vt2[19].fn(vthis(self, vt2[19]), uiObj, 6);
                 }
             }
         }
@@ -1776,7 +1776,7 @@ extern "C" void cFEStateOptionsHUD_onPopupEvent(cFEStateOptionsHUD* self, cUISta
         int popupHash = widget->mHashName;
         if (popupHash == GetHashValue32(str_111resetopts)) {
             sVE_18C1B8* getDataEntry = &((sVE_18C1B8*)widget->mVtbl)[23];
-            if (getDataEntry->fn((char*)widget + getDataEntry->delta, 2) != 0) {
+            if (getDataEntry->fn(vthis(widget, *getDataEntry), 2) != 0) {
                 cBEOptionInterface_defaultHUD(iface);
                 cFEStateOptionsHUD_updateWidget(self);
                 D_004A14D8 = 1;
@@ -1895,7 +1895,7 @@ extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, cUITh
     }
     case 1: {
         sVE_18C2A0* vt = (sVE_18C2A0*)widget->mVtbl;
-        vt[9].fn(((char*)widget) + vt[9].delta, 1);
+        vt[9].fn(vthis(widget, vt[9]), 1);
         D_004A14D8 = 1;
         D_00535610_C2A0.mode = *(unsigned char*)&widget->mMiscData;
         break;
@@ -1904,7 +1904,7 @@ extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, cUITh
         if (Is_0018C2A0(widget->mHashName, D_004A14F8) || Is_0018C2A0(widget->mHashName, D_004A1500) ||
             Is_0018C2A0(widget->mHashName, D_004A1508)) {
             sVE_18C2A0* vt = (sVE_18C2A0*)widget->mVtbl;
-            vt[9].fn(((char*)widget) + vt[9].delta, 0);
+            vt[9].fn(vthis(widget, vt[9]), 0);
         }
         break;
     }
@@ -3517,7 +3517,7 @@ extern "C" void cFEStateOptionsDeviceSelect_updateDone(cFEStateOptionsDeviceSele
         }
         void* obj = *(void**)self->mpEngine;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
-        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, mode);
+        void* nextState = vt[5].fn(vthis(obj, vt[5]), self, mode);
         if (nextState != 0) {
             cUIStateStack_pushCheck(&self->mpEngine->mStateStack, nextState);
         }

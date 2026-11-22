@@ -4441,7 +4441,7 @@ extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, s
         ScaleEq_57B8(w, velScale);
         rider->mVelocity = Add_57B8(w, Scale_57B8(hit->n, out));
         sVEf_57B8* vt = *(sVEf_57B8**)&rider->mVtbl;
-        vt[kRiderVt_vibrationBump].fn((char*)rider + vt[kRiderVt_vibrationBump].delta, vn);
+        vt[kRiderVt_vibrationBump].fn(vthis(rider, vt[kRiderVt_vibrationBump]), vn);
         if (cRiderAnimBase_getCurrentAnimID(rider->mRiderAnim, 2) != 268 || cRiderAnimBase_getCurrentAnimFramePercent(rider->mRiderAnim, 2) > 0.20000000298023224f) {
             rider->mSurfaceType = 0;
             cRider_flagEventLand(rider, 0, 0, 0, hit, speed);
@@ -4609,7 +4609,7 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
         }
     }
     sVEf_5D98* vt = *(sVEf_5D98**)&self->mVtbl;
-    vt[kRiderVt_vibrationBump].fn((char*)self + vt[kRiderVt_vibrationBump].delta, info->vn);
+    vt[kRiderVt_vibrationBump].fn(vthis(self, vt[kRiderVt_vibrationBump]), info->vn);
     char* sub = (char*)&self->mVtbl;
     if (cRider_getMotionState(self) == 2) {
         if (self->mRiderHandler->WipeoutMotion.WipeoutMotionState == 1) {

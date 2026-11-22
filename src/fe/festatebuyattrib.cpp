@@ -135,7 +135,7 @@ extern "C" void cFEStateBuyAttrib_onGainFocus(cFEStateBuyAttrib* self)
     cFEState_onGainFocus(self);
     cUIMenu* obj = self->pAttribMenu;
     sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)obj->mVtbl;
-    vt[7].fn((char*)obj + vt[7].delta, 1);
+    vt[7].fn(vthis(obj, vt[7]), 1);
 }
 #endif
 
@@ -258,7 +258,7 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(cFEStateBuyAttrib* self, char* o
             cUIState_hideObjSafe(((char*)self), str_PopupGroup);
             cUIMenu* o = self->pAttribMenu;
             sVE_4A90* vt = (sVE_4A90*)o->mVtbl;
-            vt[7].fn(((char*)o) + vt[7].delta, 1);
+            vt[7].fn(vthis(o, vt[7]), 1);
         } else {
             char* mgr = *(char**)self->mpEngine;
             sVEr_4A90* vt = *(sVEr_4A90**)(mgr + 4);
@@ -327,7 +327,7 @@ extern "C" void cFEStateBuyAttrib_onInputAlways(cFEStateBuyAttrib* self, cUIInpu
     unsigned char idx = *((unsigned char*)cUIScreen_getObjectByHashName(self->mpAttribScreen, GetHashValue32(str_AttribMenu)) + 0x95);
     if (self->mBuyPrompt == 0) {
         sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)w->mVtbl;
-        if (vt[19].fn(((char*)w) + vt[19].delta) != 0) {
+        if (vt[19].fn(vthis(w, vt[19])) != 0) {
             int* bought = self->mPotentialExperience;
             int* cnt = &bought[idx];
             changed = 1;
@@ -341,7 +341,7 @@ extern "C" void cFEStateBuyAttrib_onInputAlways(cFEStateBuyAttrib* self, cUIInpu
             }
         } else {
             sVEntry<int(void*)>* vt2 = (sVEntry<int(void*)>*)w->mVtbl;
-            if (vt2[20].fn(((char*)w) + vt2[20].delta) != 0) {
+            if (vt2[20].fn(vthis(w, vt2[20])) != 0) {
                 int* level = self->mExperienceLevel;
                 int* lvl = &level[idx];
                 changed = 1;
@@ -447,7 +447,7 @@ extern "C" void cFEStateBuyAttrib_updateCostPerLevel(cFEStateBuyAttrib* self)
             cUIText_setAsciiString(text, getDollarString(cBEEconInterface_getAttribCost(iface, *levels - 1)));
             if (*levels >= 11) {
                 sVE4FC0* vt = *(sVE4FC0**)((char*)text + 8);
-                vt[9].fn((char*)text + vt[9].delta, 0);
+                vt[9].fn(vthis(text, vt[9]), 0);
             }
         }
     }
@@ -620,7 +620,7 @@ extern "C" void cFEStateBuyAttrib_buyExperience(cFEStateBuyAttrib* buyState)
             cBEEconInterface_buyAttribute(iface, 0, cBELibrary_getCharacterID(0), D_004780B0[i]);
         }
     }
-    iface->vt[1].fn((char*)iface + iface->vt[1].delta);
+    iface->vt[1].fn(vthis(iface, iface->vt[1]));
     int* max = self->mExperience;
     int* added = self->mPotentialExperience;
     for (int i = 0; i < 7; i++) {
@@ -810,7 +810,7 @@ extern "C" void cFEStateCareerStats_onWidgetEvent(cFEStateCareerStats* self, cUI
     case 6: {
         void* obj = *(void**)self->mpEngine;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
-        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, item->mMiscData);
+        void* nextState = vt[5].fn(vthis(obj, vt[5]), self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }

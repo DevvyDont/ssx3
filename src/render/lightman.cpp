@@ -429,7 +429,7 @@ extern "C" void c2DRender_drawRect(c2DRender* self, tBxVertex* verts, float* rec
     (*(sLmQuadVec4_E118*)&verts[3].p) = sLmQuadVec4_E118(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ps2GraphicsMan->mVtbl;
-    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, verts, 0);
+    vt[71].fn(vthis(ps2GraphicsMan, vt[71]), 4, verts, 0);
 }
 #endif
 //100%
@@ -456,7 +456,7 @@ extern "C" void c2DRender_drawRotRect(c2DRender* self, tBxVertex* verts, float* 
     (*(sLmQuadVec4_E118*)&verts[2].p) = sLmQuadVec4_E118(rect[0] + rect[2], rect[1] + rect[3], 0.0f, 1.0f);
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ps2GraphicsMan->mVtbl;
-    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, verts, 0);
+    vt[71].fn(vthis(ps2GraphicsMan, vt[71]), 4, verts, 0);
 }
 #endif
 //100%
@@ -493,7 +493,7 @@ extern "C" void c2DRender_drawRect1(c2DRender* self, tBxVertex* verts, float* re
     *corner3 = func_0038E0A8(&corner3->x, mat);
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ps2GraphicsMan->mVtbl;
-    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, verts, 0);
+    vt[71].fn(vthis(ps2GraphicsMan, vt[71]), 4, verts, 0);
 }
 #endif
 //100%
@@ -531,7 +531,7 @@ extern "C" void c2DRender_drawRotRect1(c2DRender* self, tBxVertex* verts, float*
     *corner3 = func_0038E0A8(&corner3->x, mat);
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ps2GraphicsMan->mVtbl;
-    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, verts, 0);
+    vt[71].fn(vthis(ps2GraphicsMan, vt[71]), 4, verts, 0);
 }
 #endif
 //100%
@@ -567,7 +567,7 @@ extern "C" void c2DRender_drawRect2(c2DRender* self, tBxVertex* vtx, float* rect
     vtx[3].v = uv[1] + uv[3];
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ps2GraphicsMan->mVtbl;
-    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, vtx, 0);
+    vt[71].fn(vthis(ps2GraphicsMan, vt[71]), 4, vtx, 0);
 }
 #endif
 //100%
@@ -603,7 +603,7 @@ extern "C" void c2DRender_drawRotRect2(c2DRender* self, tBxVertex* vtx, float* r
     vtx[3].v = uv[1] + uv[3];
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ps2GraphicsMan->mVtbl;
-    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, vtx, 0);
+    vt[71].fn(vthis(ps2GraphicsMan, vt[71]), 4, vtx, 0);
 }
 #endif
 //100%
@@ -650,7 +650,7 @@ extern "C" void c2DRender_drawRect3(c2DRender* self, tBxVertex* vtx, float* rect
     *corner3 = func_0038E0A8(&corner3->x, mat);
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ps2GraphicsMan->mVtbl;
-    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, vtx, 0);
+    vt[71].fn(vthis(ps2GraphicsMan, vt[71]), 4, vtx, 0);
 }
 #endif
 //100%
@@ -697,7 +697,7 @@ extern "C" void c2DRender_drawRotRect3(c2DRender* self, tBxVertex* vtx, float* r
     *corner3 = func_0038E0A8(&corner3->x, mat);
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ps2GraphicsMan->mVtbl;
-    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, vtx, 0);
+    vt[71].fn(vthis(ps2GraphicsMan, vt[71]), 4, vtx, 0);
 }
 #endif
 
@@ -772,7 +772,7 @@ extern "C" void c2DRender_drawRect4(c2DRender* self, float* topLeft, float* bott
     verts[3].t = one;
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sLmQuadVEntry* vt = (sLmQuadVEntry*)ps2GraphicsMan->mVtbl;
-    vt[71].fn((char*)ps2GraphicsMan + vt[71].delta, 4, verts, 0);
+    vt[71].fn(vthis(ps2GraphicsMan, vt[71]), 4, verts, 0);
 }
 #endif
 
@@ -810,7 +810,7 @@ extern "C" void c2DRender_drawLine(c2DRender* self, sLmQuadVec4_E118* start, sLm
     ((int*)&verts[0].r)[3] = alpha;
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     sLmQuadVEntry_E118* vt = (sLmQuadVEntry_E118*)ctx->mVtbl;
-    vt[73].fn((char*)ctx + vt[73].delta, 2, verts, 0);
+    vt[73].fn(vthis(ctx, vt[73]), 2, verts, 0);
 }
 #endif
 
@@ -970,7 +970,7 @@ extern "C" void cPlants_update(void)
     float cosAngle;
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sLmVEntry_EE78* vt = (sLmVEntry_EE78*)ps2GraphicsMan->mVtbl;
-    float frameClock = (float)vt[114].fn((char*)ps2GraphicsMan + vt[114].delta);
+    float frameClock = (float)vt[114].fn(vthis(ps2GraphicsMan, vt[114]));
     int i;
     for (i = 0; i < 8; i++) {
         sLmMat_EE78* pm = &branchMat;
@@ -1975,7 +1975,7 @@ extern "C" void cRenderToggles_update()
 {
     cPS2GraphicsMan* mgr = cGraphicsMan_TheGraphicsMan;
     sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)mgr->mVtbl;
-    vt[16].fn((char*)mgr + vt[16].delta, cRenderToggles_m_AIUpdatesPerRender);
+    vt[16].fn(vthis(mgr, vt[16]), cRenderToggles_m_AIUpdatesPerRender);
     if (cRenderToggles_m_ResetStats != 0) {
         cRenderToggles_m_ResetStats = 0;
     }

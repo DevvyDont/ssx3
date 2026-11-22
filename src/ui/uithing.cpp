@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "ui/uidata.h"
 #include "ui/uiscreen.h"
 #include "ui/uitext.h"
@@ -388,7 +389,7 @@ extern "C" void cUIText_setUIData(sUIThing03F0* self, tUIText* data)
 {
     cUIThing_setUIData_2(self, data);
     self->mode = data->mFontID & 3;
-    self->vt[23].fn((char*)self + self->vt[23].delta, data->mBools1 & 1);
+    self->vt[23].fn(vthis(self, self->vt[23]), data->mBools1 & 1);
     cUIText_setUnicodeStringByID((cUIText*)self, ((int)data->mStringID));
     int textFlags = *(int*)((char*)self + 0x74) >> 2;
     if (textFlags & 1) {
@@ -451,7 +452,7 @@ extern "C" void cUIText_updateLocale(cUIText* self)
                 }
             }
             cUIText_updateLocale_sVEntry* vt2 = (cUIText_updateLocale_sVEntry*)self->mVtbl;
-            ((void (*)(void*, int))vt2[5].fn)((char*)self + vt2[5].delta, 1);
+            ((void (*)(void*, int))vt2[5].fn)(vthis(self, vt2[5]), 1);
         }
     }
 }

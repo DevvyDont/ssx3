@@ -32,9 +32,9 @@ extern "C" void* cDebounceNode_cDebounceNode(cDebounceNode* self, void* bucket, 
     cMoveNode_cMoveNode(self, bucket, stream);
     self->mVtbl = (void**)cDebounceNode_vtbl;
     sVEntry<void(void*, void*, int)>* readEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-    readEntry->fn((char*)stream + readEntry->delta, (char*)&self->Life, 4);
+    readEntry->fn(vthis(stream, *readEntry), (char*)&self->Life, 4);
     readEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-    readEntry->fn((char*)stream + readEntry->delta, (char*)&self->Type, 4);
+    readEntry->fn(vthis(stream, *readEntry), (char*)&self->Type, 4);
     return ((void*)self);
 }
 #endif
@@ -59,7 +59,7 @@ extern "C" int cDebounceNode_updateNode(cDebounceNode* self)
         self->Life = n;
         if (n == 0) {
             sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
-            vt[34].fn((char*)self + vt[34].delta, 1);
+            vt[34].fn(vthis(self, vt[34]), 1);
             return 0;
         }
     }
@@ -92,13 +92,13 @@ extern "C" void cDebounceNode_loseFocus(cDebounceNode* self)
             void* parent = self->Instance;
             if (((void*)self) != 0) {
                 sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)self->mVtbl;
-                vt[1].fn((char*)self + vt[1].delta, 3);
+                vt[1].fn(vthis(self, vt[1]), 3);
             }
             cDeadNode_cDeadNode(cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), parent);
         } else {
             if (((void*)self) != 0) {
                 sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)self->mVtbl;
-                vt[1].fn((char*)self + vt[1].delta, 3);
+                vt[1].fn(vthis(self, vt[1]), 3);
             }
         }
     }
@@ -151,20 +151,20 @@ extern "C" void cDebounceNode_expire(cDebounceNode* self, int check)
             void* parent = self->Instance;
             if (((void*)self) != 0) {
                 sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)self->mVtbl;
-                vt[1].fn((char*)self + vt[1].delta, 3);
+                vt[1].fn(vthis(self, vt[1]), 3);
             }
             cDeadNode_cDeadNode(cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), parent);
         } else if (mode == 3) {
             void* parent = self->Instance;
             if (((void*)self) != 0) {
                 sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)self->mVtbl;
-                vt[1].fn((char*)self + vt[1].delta, 3);
+                vt[1].fn(vthis(self, vt[1]), 3);
             }
             cRestoreNode_cRestoreNode(cMemMan_alloc(0x1C, str_RestoreNode_b, 0x20000000, 0), parent);
         } else {
             if (((void*)self) != 0) {
                 sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)self->mVtbl;
-                vt[1].fn((char*)self + vt[1].delta, 3);
+                vt[1].fn(vthis(self, vt[1]), 3);
             }
         }
     }
@@ -194,9 +194,9 @@ extern "C" void cDebounceNode_writeToReplayFrame(cDebounceNode* self, void* stre
 {
     cMoveNode_writeToReplayFrame(self, stream);
     sDebounceVEntry2FA8* writeEntry = &(*(sDebounceVEntry2FA8**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->Life, 4);
+    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->Life, 4);
     writeEntry = &(*(sDebounceVEntry2FA8**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->Type, 4);
+    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->Type, 4);
 }
 #endif
 
@@ -291,7 +291,7 @@ extern "C" void* cConveyorNode_cConveyorNode1(cConveyorNode* self, void* bucket,
     cInstanceNode_cInstanceNode(self, bucket, stream);
     self->mVtbl = (void**)cConveyorNode_vtbl;
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, (char*)&self->Vel, 44);
+    vt[2].fn(vthis(stream, vt[2]), (char*)&self->Vel, 44);
     return ((void*)self);
 }
 #endif
@@ -559,7 +559,7 @@ extern "C" void cConveyorNode_updateIntersectInfo(sNode3130* self, tIntersectInf
     if (hit->Mesh < 0) {
         return;
     }
-    sMat3130* w = self->vt[24].fn((char*)self + self->vt[24].delta);
+    sMat3130* w = self->vt[24].fn(vthis(self, self->vt[24]));
     sBone3130* bones = *(sBone3130**)(*(char**)(self->model + 0x80) + 0x8);
     sMat3130 boneMat = *bones[hit->Mesh].mat;
     for (int parentIndex = bones[hit->Mesh].parent; parentIndex != -1; parentIndex = bones[parentIndex].parent) {
@@ -758,7 +758,7 @@ extern "C" void cConveyorNode_writeToReplayFrame(cConveyorNode* self, void* stre
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sDebounceVEntry* vt = *(sDebounceVEntry**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)&self->Vel, 44);
+    vt[1].fn(vthis(stream, vt[1]), (char*)&self->Vel, 44);
 }
 #endif
 
@@ -811,7 +811,7 @@ extern "C" void* cCounterNode_cCounterNode(cCounterNode* self, void* bucket, voi
     cInstanceNode_cInstanceNode(self, bucket, stream);
     self->mVtbl = (void**)cCounterNode_vtbl;
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, (char*)&self->Count, 0x8);
+    vt[2].fn(vthis(stream, vt[2]), (char*)&self->Count, 0x8);
     return ((void*)self);
 }
 #endif
@@ -836,7 +836,7 @@ extern "C" void cCounterNode_update(cCounterNode* self)
     if (self->Count == 0) {
         self->Count = -1;
         sDebounceVEntry1* vt = (sDebounceVEntry1*)self->mVtbl;
-        vt[34].fn((char*)self + vt[34].delta, 1);
+        vt[34].fn(vthis(self, vt[34]), 1);
     }
 }
 #endif
@@ -941,7 +941,7 @@ extern "C" void cCounterNode_writeToReplayFrame(cCounterNode* self, void* stream
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sDebounceVEntryA18* vt = *(sDebounceVEntryA18**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)&self->Count, 0x8);
+    vt[1].fn(vthis(stream, vt[1]), (char*)&self->Count, 0x8);
 }
 #endif
 
@@ -1315,7 +1315,7 @@ extern "C" void func_003441A8(sDebounceElem41A8* self, cDebounceStream* replaySt
     int i;
     for (i = 0; i < 5; i++) {
         sDebounceVEntry41A8* writeSlot = &(*(sDebounceVEntry41A8**)replayStream)[1];
-        writeSlot->fn((char*)replayStream + writeSlot->delta, &self[i].field_0x8, 4);
+        writeSlot->fn(vthis(replayStream, *writeSlot), &self[i].field_0x8, 4);
         if (self[i].field_0x8 != 0xFFFFFFFF) {
             func_00344FC0(&self[i], replayStream);
         }
@@ -1356,7 +1356,7 @@ extern "C" void func_00344240(sDebounceElem4240* self, cDebounceStream* replaySt
     func_00343BC0((sDebounceBlock*)self);
     for (i = 0; i < 5; i++) {
         sDebounceVEntry4240* readSlot = &(*(sDebounceVEntry4240**)replayStream)[2];
-        readSlot->fn((char*)replayStream + readSlot->delta, &self[i].field_0x8, 4);
+        readSlot->fn(vthis(replayStream, *readSlot), &self[i].field_0x8, 4);
         if (self[i].field_0x8 != 0xFFFFFFFF) {
             func_00344FF8(&self[i], replayStream);
         }
@@ -1805,7 +1805,7 @@ void func_00344800_v(sDebounceOwner4800* self)
         sDebounceItem4800* item = items + ((int*)items)[-4];
         while (self->items != item) {
             item--;
-            item->vt[1].fn((char*)item + item->vt[1].delta, 0);
+            item->vt[1].fn(vthis(item, item->vt[1]), 0);
         }
         cMemMan_free((char*)self->items - 0x10);
     }
@@ -1866,7 +1866,7 @@ extern "C" void func_003449F0(void* elem)
     }
     for (int i = 0; i < self->count; i++) {
         sDebounceItem49F0* item = (sDebounceItem49F0*)(i * 0xD0 + (int)self->items);
-        item->vt[2].fn((char*)item + item->vt[2].delta, self->time);
+        item->vt[2].fn(vthis(item, item->vt[2]), self->time);
     }
     func_00344AA0(self);
 }
@@ -2159,12 +2159,12 @@ extern "C" void func_00344E18(void* self)
         {
             func_00344730((sDebounce4730*)self, *(int*)((char*)self + off + 0x10));
             sVE7_44E18* vt = (sVE7_44E18*)ps2GraphicsMan->mVtbl;
-            vt[95].fn((char*)ps2GraphicsMan + vt[95].delta, model, 1.0f, (char*)self + 0x118, (char*)model + 0x10, *(void**)((char*)self + 0x1E8), 0, 0);
+            vt[95].fn(vthis(ps2GraphicsMan, vt[95]), model, 1.0f, (char*)self + 0x118, (char*)model + 0x10, *(void**)((char*)self + 0x1E8), 0, 0);
         }
         else
         {
             sVE5_44E18* vt = (sVE5_44E18*)ps2GraphicsMan->mVtbl;
-            vt[96].fn((char*)ps2GraphicsMan + vt[96].delta, model, *(void**)((char*)self + 0x1E8), 0, 0);
+            vt[96].fn(vthis(ps2GraphicsMan, vt[96]), model, *(void**)((char*)self + 0x1E8), 0, 0);
         }
     }
 }

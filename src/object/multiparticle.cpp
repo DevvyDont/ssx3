@@ -296,19 +296,19 @@ extern "C" void cStaticEmitter_writeToReplayFrame(void* desc, void* stream);
 extern "C" void cMultiParticle_writeToReplayFrame(cMultiParticle* self, void* stream)
 {
     sVEntry<void(void*, void*, int)>* writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (self), 4);
+    writeEntry->fn(vthis(stream, *writeEntry), (self), 4);
     writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, &self->NumInst, 4);
+    writeEntry->fn(vthis(stream, *writeEntry), &self->NumInst, 4);
     writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, self->Particle, 216);
+    writeEntry->fn(vthis(stream, *writeEntry), self->Particle, 216);
     cStaticEmitter_writeToReplayFrame(self->Emitter, stream);
     writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->Offset, 0x10);
+    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->Offset, 0x10);
     writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->BoundBox, 0x20);
+    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->BoundBox, 0x20);
     if (self->NumInst > 0) {
         writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-        writeEntry->fn((char*)stream + writeEntry->delta, (int*)self->InstIds, self->NumInst << 2);
+        writeEntry->fn(vthis(stream, *writeEntry), (int*)self->InstIds, self->NumInst << 2);
     }
 }
 #endif
@@ -834,7 +834,7 @@ extern "C" void cRailManNode_writeToReplayFrame(cRailManNode* self, void* stream
 {
     cSortObjNode_writeToReplayFrame(self, stream);
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)&self->RailInfo, 0x200);
+    vt[1].fn(vthis(stream, vt[1]), (char*)&self->RailInfo, 0x200);
 }
 #endif
 
@@ -972,7 +972,7 @@ extern "C" void* cAnimComboNode_cAnimComboNode(cAnimComboNode* self, void* bucke
     cAnimObjectNode_cAnimObjectNode(&self->AnimType, bucket, stream);
     self->mVtbl = (void**)cAnimComboNode_vtbl;
     sStreamVE_8DB0* vt = *(sStreamVE_8DB0**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, self, 0x18);
+    vt[2].fn(vthis(stream, vt[2]), self, 0x18);
     *pp = new (str_ComboXform, 0x20000000, 0) sParticle_8DB0[self->NumAnimMeshes];
     cAnimComboNode_setComboXform(self);
     return ((void*)self);
@@ -1230,7 +1230,7 @@ extern "C" void cAnimComboNode_writeToReplayFrame(cAnimComboNode* self, void* ob
 {
     cAnimObjectNode_writeToReplayFrame((char*)&self->AnimType, obj);
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn((char*)obj + vt[1].delta, self, 0x18);
+    vt[1].fn(vthis(obj, vt[1]), self, 0x18);
 }
 #endif
 
@@ -1343,7 +1343,7 @@ extern "C" void* cAnimDeltaNode_cAnimDeltaNode(cAnimDeltaNode* self, void* bucke
     cAnimObjectNode_cAnimObjectNode(self, bucket, stream);
     self->mVtbl = cAnimDeltaNode_vtbl;
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, (char*)&self->Delta, 4);
+    vt[2].fn(vthis(stream, vt[2]), (char*)&self->Delta, 4);
     return ((void*)self);
 }
 #endif
@@ -1450,7 +1450,7 @@ extern "C" void cAnimDeltaNode_writeToReplayFrame(cAnimDeltaNode* self, void* st
 {
     cAnimObjectNode_writeToReplayFrame(self, stream);
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)&self->Delta, 0x4);
+    vt[1].fn(vthis(stream, vt[1]), (char*)&self->Delta, 0x4);
 }
 #endif
 

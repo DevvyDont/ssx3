@@ -52,7 +52,7 @@ extern "C" void cFEStateRiderBio_onCreateScreen(cFEStateRiderBio* self)
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     self->mCharID = cBENewPlayerInterface_getPlayerCharID(iface, self->mUserNum);
     sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)iface + 0xC);
-    vt[2].fn((char*)iface + vt[2].delta);
+    vt[2].fn(vthis(iface, vt[2]));
     self->mScreen = 0;
     cFEStateRiderBio_setupBioScreen(self);
     cFEStateRiderBio_setupCharPics(self);
@@ -344,7 +344,7 @@ extern "C" void cFEStateRiderBio_onWidgetEvent(cFEStateRiderBio* self, cUIThing*
     case 6: {
         void* obj = *(void**)self->mpEngine;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
-        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, item->mMiscData);
+        void* nextState = vt[5].fn(vthis(obj, vt[5]), self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }

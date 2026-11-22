@@ -97,7 +97,7 @@ struct sTrophy_43F0 {
 static inline void vcall_43F0(void* o, int slot, int arg)
 {
     sVEntry_43F0* vt = *(sVEntry_43F0**)((char*)o + 8);
-    vt[slot].fn((char*)o + vt[slot].delta, arg);
+    vt[slot].fn(vthis(o, vt[slot]), arg);
 }
 
 /**
@@ -235,7 +235,7 @@ extern "C" void cFEStateTrophyRoom_onWidgetEvent(cFEStateTrophyRoom* self, cUITh
         }
         void* obj = *(void**)self->mpEngine;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
-        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, self->mPeakNum);
+        void* nextState = vt[5].fn(vthis(obj, vt[5]), self, self->mPeakNum);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
@@ -753,14 +753,14 @@ extern "C" void cFEStateRewardsRoom_onWidgetEvent(cFEStateRewardsRoom* self, cUI
     case 5: {
         void* obj = *(void**)self->mpEngine;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
-        void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, item->mMiscData);
+        void* nextState = vt[4].fn(vthis(obj, vt[4]), self, item->mMiscData);
         cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         break;
     }
     case 6: {
         void* obj = *(void**)self->mpEngine;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
-        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, item->mMiscData);
+        void* nextState = vt[5].fn(vthis(obj, vt[5]), self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
@@ -1474,7 +1474,7 @@ extern "C" void cFEMemCard_writeStart(void)
         char* buf = (char*)operator_new_tag(1600, str_Temp_String, 0x100, 0);
         cMCOverlayManager_GetMessage(app, buf, 800);
         sVE_59A0* vt = (sVE_59A0*)cFEMemCard_mInstance->mVtbl;
-        vt[36].fn((char*)cFEMemCard_mInstance + vt[36].delta, buf, 1, 1, 0, 0, 1);
+        vt[36].fn(vthis(cFEMemCard_mInstance, vt[36]), buf, 1, 1, 0, 0, 1);
         cFEMemCard_mInstance->mIsStatusPopupOn = 1;
         if (buf != 0) {
             cMemMan_free(buf);

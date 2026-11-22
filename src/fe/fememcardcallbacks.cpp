@@ -1211,7 +1211,7 @@ extern "C" void cFEMemCard_callbackFileChecked(void)
             strcpy1(buf, ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMNoCardsPS2)));
             cUIText_setUnicodeStringWrap(obj, buf);
             sVEntry<void(void*, ...)>* bvt = *(sVEntry<void(void*, ...)>**)((char*)obj + 8);
-            bvt[9].fn((char*)obj + bvt[9].delta, 1);
+            bvt[9].fn(vthis(obj, bvt[9]), 1);
             if (buf != 0) {
                 cMemMan_free(buf);
             }
@@ -1355,7 +1355,7 @@ extern "C" void cFEMemCard_startLoad(cFEMemCard* self)
     self->mIsProcessing = 1;
     sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
     self->mState = 5;
-    vt[47].fn((char*)self + vt[47].delta);
+    vt[47].fn(vthis(self, vt[47]));
 }
 #endif
 
@@ -1645,7 +1645,7 @@ extern "C" int cFEMemCard_onInputBegin(cFEMemCard* self, cUIInput* input)
     if (self->mIsProcessing == 1)
         return 0;
     sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)input->mVtbl;
-    if (vt[19].fn((char*)input + vt[19].delta)) {
+    if (vt[19].fn(vthis(input, vt[19]))) {
         handled = 1;
         self->mDoPrevMemCard = handled;
         if (self->mpScreen) {
@@ -1655,7 +1655,7 @@ extern "C" int cFEMemCard_onInputBegin(cFEMemCard* self, cUIInput* input)
         }
     } else {
         sVEntry<int(void*)>* vt2 = (sVEntry<int(void*)>*)input->mVtbl;
-        if (vt2[20].fn((char*)input + vt2[20].delta)) {
+        if (vt2[20].fn(vthis(input, vt2[20]))) {
             handled = 1;
             self->mDoNextMemCard = handled;
             if (self->mpScreen) {
@@ -1690,7 +1690,7 @@ extern "C" void cFEMemCard_displayStatusPopup(cFEMemCard* self)
     self->mPopupType = 22;
     cMCOverlayManager_GetMessage(obj, buf, 800);
     sVEntry<void(void*, unsigned short*, int, int, int, int, int)>* vt = (sVEntry<void(void*, unsigned short*, int, int, int, int, int)>*)self->mVtbl;
-    vt[36].fn((char*)self + vt[36].delta, buf, 1, 1, 0, 0, 1);
+    vt[36].fn(vthis(self, vt[36]), buf, 1, 1, 0, 0, 1);
     self->mIsStatusPopupOn = 1;
 }
 #endif
@@ -1967,7 +1967,7 @@ extern "C" void cFEMemCard_updateStart(cFEMemCard* self)
     if (self->mScreenStatus != 1) {
         self->mScreenStatus = 1;
         sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
-        vt[35].fn((char*)self + vt[35].delta, 1);
+        vt[35].fn(vthis(self, vt[35]), 1);
     }
 }
 #endif
@@ -2245,7 +2245,7 @@ extern "C" void cFEMemCard_onGainFocus(cFEMemCard* self)
     void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_text_box_message));
     if (obj != 0) {
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)obj + 8);
-        vt[9].fn((char*)obj + vt[9].delta, 0);
+        vt[9].fn(vthis(obj, vt[9]), 0);
     }
 }
 #endif

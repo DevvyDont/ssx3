@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "online/dnasman.h"
 #include "online/buddyman.h"
 #include "online/lobbyman.h"
@@ -240,7 +241,7 @@ extern "C" void cCommSystem_update(cCommSystem* self)
         for (i = 0; i < 1; i++) {
             sCommObj_5A20* channel = ((sCommObj_5A20**)&self->mChannels[0])[i];
             if (channel != 0) {
-                channel->vt[3].fn((char*)channel + channel->vt[3].delta);
+                channel->vt[3].fn(vthis(channel, channel->vt[3]));
             }
         }
         break;
@@ -2953,7 +2954,7 @@ extern "C" void cGameComm_syncGame(cGameComm* self)
         void* ui = cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setPlayerCtrlID(ui, 1, cBENewPlayerInterface_getPlayerCtrlID(ui, 0));
         sVEnt_8448* vt = *(sVEnt_8448**)((char*)ui + 0xC);
-        vt[1].fn((char*)ui + vt[1].delta);
+        vt[1].fn(vthis(ui, vt[1]));
     }
     AIgetseed_8448(&self->mServerSettings);
     while (!ggSynced_8448(((char*)self)) && ggDropped_8448(((char*)self)) == 0) {

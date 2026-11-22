@@ -380,7 +380,7 @@ extern "C" void cUIEngine_update(cUIEngine* self)
 {
     cUIInput* obj = self->mpInput;
     sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)obj->mVtbl;
-    vt[46].fn((char*)obj + vt[0x2E].delta);
+    vt[46].fn(vthis(obj, vt[0x2E]));
     cUIStateStack_update((char*)&self->mStateStack);
 }
 #endif
@@ -815,7 +815,7 @@ extern "C" void* cUIGroup_getObjectByHashName(cUIGroup* self, int id)
     if (n != 0) {
         do {
             cUIGroup_getObjectByHashName_sVEntry* vtEntry = &(*(cUIGroup_getObjectByHashName_sVEntry**)((char*)n + 8))[14];
-            void* found = vtEntry->fn((char*)n + vtEntry->delta, id);
+            void* found = vtEntry->fn(vthis(n, *vtEntry), id);
             if (found != 0) {
                 return found;
             }
@@ -851,7 +851,7 @@ extern "C" void cUIGroup_updateLocale(cUIGroup* self)
     if (n != 0) {
         do {
             cUIGroup_updateLocale_sVEntry* vt = *(cUIGroup_updateLocale_sVEntry**)((char*)n + 8);
-            vt[0x10].fn((char*)n + vt[0x10].delta);
+            vt[0x10].fn(vthis(n, vt[0x10]));
             n = *(void**)((char*)n + 4);
         } while (!cListNode_isSentinel((cListNode*)n));
     }
@@ -913,7 +913,7 @@ extern "C" void cUIGroup_render3D(cUIGroup* self, int pRenCon)
     if (n != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
             cUIGroup_render3D_sVEntry* vt = *(cUIGroup_render3D_sVEntry**)((char*)n + 8);
-            vt[18].fn((char*)n + vt[0x12].delta, pRenCon);
+            vt[18].fn(vthis(n, vt[0x12]), pRenCon);
             n = *(void**)((char*)n + 4);
         }
     }
@@ -942,7 +942,7 @@ extern "C" void cUIGroup_render2D(cUIGroup* self, float x, float y)
         do {
             if ((*(int*)((char*)n + 0x14) >> 6) & 1) {
                 cUIGroup_render2D_sVEntry* vt = *(cUIGroup_render2D_sVEntry**)((char*)n + 8);
-                vt[17].fn((char*)n + vt[0x11].delta, self->mPosition.x + x, self->mPosition.y + y);
+                vt[17].fn(vthis(n, vt[0x11]), self->mPosition.x + x, self->mPosition.y + y);
             }
             n = *(void**)((char*)n + 4);
         } while (!cListNode_isSentinel((cListNode*)n));
@@ -978,7 +978,7 @@ extern "C" void cUIGroup_update(cUIGroup* self, unsigned short ev)
     if (n != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
             cUIGroup_update_sVEntry* vt = *(cUIGroup_update_sVEntry**)((char*)n + 8);
-            vt[19].fn((char*)n + vt[19].delta, ev);
+            vt[19].fn(vthis(n, vt[19]), ev);
             n = *(void**)((char*)n + 4);
         }
     }
@@ -1271,7 +1271,7 @@ extern "C" void cUIIcon_render2D(cUIIcon_8A78* self, float x, float y)
     sV3_8A78 pos = self->pos;
     sV3_8A78 size;
     sV3_8A78 scale = self->scale;
-    self->vt[20].fn((char*)self + self->vt[20].delta, &size);
+    self->vt[20].fn(vthis(self, self->vt[20]), &size);
     size.x *= scale.x;
     size.y *= scale.y;
     cUIThing_applyPivot(self, &pos, &size);
@@ -1320,7 +1320,7 @@ extern "C" void cUIIcon_render2D(cUIIcon_8A78* self, float x, float y)
     int* w = &rc->top->f8;
     *w = (*w & ~0x3E0) | ((((self->f15 & 0x1F) + 9) << 5) & 0x3E0);
     sVE_8A78* vt = rc->vt;
-    vt[568 / 8].fn((char*)rc + vt[0x238 / 8].delta, 4, verts, 0);
+    vt[568 / 8].fn(vthis(rc, vt[0x238 / 8]), 4, verts, 0);
     PopRS_8A78();
 }
 #endif
@@ -1423,7 +1423,7 @@ extern "C" void cUIListBox_setUIData(sUIObj9820* self, tUIListBox* data)
 {
     cUIThing_setUIData_2(self, data);
     self->mode = data->mFontID & 3;
-    self->vt[23].fn((char*)self + self->vt[23].delta, data->mFlags & 1);
+    self->vt[23].fn(vthis(self, self->vt[23]), data->mFlags & 1);
     int listAttr = *(int*)((char*)self + 0x74) >> 2;
     if (listAttr & 1) {
         self->color = sUIColor9820(data->mSColour.a * 0.003921568859368563f, data->mSColour.r * 0.003921568859368563f,
@@ -1477,7 +1477,7 @@ struct sVE_9970 { short delta; short index; int (*fn)(void*, ...); };
 static inline int inputIs_9970(void* in, int slot)
 {
     sVE_9970* vt = *(sVE_9970**)((char*)in + 8);
-    return vt[slot].fn((char*)in + vt[slot].delta);
+    return vt[slot].fn(vthis(in, vt[slot]));
 }
 
 static inline void focusNotify_9970(char* self, int what)
@@ -1702,7 +1702,7 @@ extern "C" void cUIListBox_updateLocale(cUIListBox_updateLocale_sObj* self)
             }
         }
         cUIListBox_updateLocale_sVEntry* vt2 = *(cUIListBox_updateLocale_sVEntry**)((char*)self + 8);
-        ((void (*)(void*, int))vt2[5].fn)((char*)self + vt2[5].delta, 1);
+        ((void (*)(void*, int))vt2[5].fn)(vthis(self, vt2[5]), 1);
     }
 }
 #endif

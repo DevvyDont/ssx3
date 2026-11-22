@@ -587,9 +587,9 @@ extern "C" void OverlapInstancesCallback_operatorCall(OverlapInstancesCallback* 
             }
         } else if (flags & 0x40) {
             sVEntry<void>* vt = node->obj->vt;
-            if (((Test_3309D8)vt[44].fn)((char*)node->obj + vt[44].delta)) {
+            if (((Test_3309D8)vt[44].fn)(vthis(node->obj, vt[44]))) {
                 sVEntry<void>* vt2 = node->obj->vt;
-                tBoundBox* objBox = ((GetBox_3309D8)vt2[45].fn)((char*)node->obj + vt2[45].delta);
+                tBoundBox* objBox = ((GetBox_3309D8)vt2[45].fn)(vthis(node->obj, vt2[45]));
                 if (overlapBox_3309D8(((tBoundBox*)ctx->box), objBox)) {
                     int* cnt = ((int*)ctx->number);
                     int n = *cnt;
@@ -1267,9 +1267,9 @@ extern "C" int cOverlapList_terrainIntersect(cOverlapList* vself, void* vq, sHit
                 continue;
             }
             sVEnt_333EF8* vt = node->obj->vt;
-            if (((Test_333EF8)vt[44].fn)((char*)node->obj + vt[44].delta)) {
+            if (((Test_333EF8)vt[44].fn)(vthis(node->obj, vt[44]))) {
                 sVEnt_333EF8* vt2 = node->obj->vt;
-                sBox_333EF8* objBox = ((GetBox_333EF8)vt2[45].fn)((char*)node->obj + vt2[45].delta);
+                sBox_333EF8* objBox = ((GetBox_333EF8)vt2[45].fn)(vthis(node->obj, vt2[45]));
                 if (overlapBox_333EF8(query, objBox)) {
                     n += intersect_instanceIntersect(query, node, &hits[n], cap - n, 2);
                 }
@@ -1864,9 +1864,9 @@ extern "C" int func_4888(sWsQuery_4888* intersectType, sWsInst_4888* node, sWsHi
 {
     if (node->obj != 0) {
         sWsVtSlot* vt = node->obj->vt;
-        if (((Test_4888)vt[38].fn)((char*)node->obj + vt[38].delta)) {
+        if (((Test_4888)vt[38].fn)(vthis(node->obj, vt[38]))) {
             sWsVtSlot* vt2 = node->obj->vt;
-            return ((Query_4888)vt2[39].fn)((char*)node->obj + vt2[39].delta, intersectType, buf, cap, mode);
+            return ((Query_4888)vt2[39].fn)(vthis(node->obj, vt2[39]), intersectType, buf, cap, mode);
         }
     }
     int type = node->def->type;
@@ -1879,13 +1879,13 @@ extern "C" int func_4888(sWsQuery_4888* intersectType, sWsInst_4888* node, sWsHi
     sWsMat_4888* boneMats = mats;
     if (obj != 0) {
         sWsVtSlot* vt = obj->vt;
-        if (((Test_4888)vt[26].fn)((char*)obj + vt[26].delta)) {
+        if (((Test_4888)vt[26].fn)(vthis(obj, vt[26]))) {
             useLocal = 0;
             sWsVtSlot* vt2 = obj->vt;
-            boneMats = ((GetMat_4888)vt2[28].fn)((char*)obj + vt2[28].delta, node);
+            boneMats = ((GetMat_4888)vt2[28].fn)(vthis(obj, vt2[28]), node);
         } else {
             sWsVtSlot* vt2 = obj->vt;
-            pMat = ((GetMat_4888)vt2[25].fn)((char*)obj + vt2[25].delta, node);
+            pMat = ((GetMat_4888)vt2[25].fn)(vthis(obj, vt2[25]), node);
         }
     }
     sWsBoneTbl_4888* tbl = node->tbl;
@@ -1971,14 +1971,14 @@ extern "C" int func_4888(sWsQuery_4888* intersectType, sWsInst_4888* node, sWsHi
         InvertOrtho_4888(inv);
         int inum = 0;
         void* tri = 0;
-        ((SetXf_4888)intersectType->vt[1].fn)((char*)intersectType + intersectType->vt[1].delta, 1.0f / node->scale, &inv);
+        ((SetXf_4888)intersectType->vt[1].fn)(vthis(intersectType, intersectType->vt[1]), 1.0f / node->scale, &inv);
         if (type == 2) {
-            inum = ((Tris_4888)intersectType->vt[7].fn)((char*)intersectType + intersectType->vt[7].delta, bone->mesh, bone->mesh + 0xC, ii, 64);
+            inum = ((Tris_4888)intersectType->vt[7].fn)(vthis(intersectType, intersectType->vt[7]), bone->mesh, bone->mesh + 0xC, ii, 64);
         } else {
-            if (((Hit_4888)intersectType->vt[9].fn)((char*)intersectType + intersectType->vt[9].delta, bone->mesh, bone->mesh + 0xC)) {
+            if (((Hit_4888)intersectType->vt[9].fn)(vthis(intersectType, intersectType->vt[9]), bone->mesh, bone->mesh + 0xC)) {
                 if (type == 3) {
                     tri = tSphTreeList_getMeshTree(cWorld_getPolyModelInfo_4888(cWorld_m_pTheWorld, node), k);
-                    inum = ((Mesh_4888)intersectType->vt[6].fn)((char*)intersectType + intersectType->vt[6].delta, tri, ii, 64);
+                    inum = ((Mesh_4888)intersectType->vt[6].fn)(vthis(intersectType, intersectType->vt[6]), tri, ii, 64);
                 } else {
                     inum = cWorldIntersectType_IsMeshInt_cap(intersectType, tPolyModelList_getMeshPolyModel_4888(cWorld_getSphereTreeInfo_4888(cWorld_m_pTheWorld, node), k),
                                              *(int*)(bone->mesh + 0x18) & 1, ii, 64);
@@ -1986,7 +1986,7 @@ extern "C" int func_4888(sWsQuery_4888* intersectType, sWsInst_4888* node, sWsHi
             }
             k++;
         }
-        ((Reset_4888)intersectType->vt[2].fn)((char*)intersectType + intersectType->vt[2].delta);
+        ((Reset_4888)intersectType->vt[2].fn)(vthis(intersectType, intersectType->vt[2]));
         for (int j = 0; j < inum; j++) {
             ii[j].nrm = vu0MtxMul_4888(boneMat, ii[j].nrm);
             buf[n] = ii[j];
@@ -5435,7 +5435,7 @@ extern "C" void* cBoostNode_cBoostNode(cBoostNode* self, void* bucket, void* str
     cInstanceNode_cInstanceNode(self, bucket, stream);
     self->mVtbl = cBoostNode_vtbl;
     sVEntry_cBoostNode_cBoostNode* vt = *(sVEntry_cBoostNode_cBoostNode**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, (char*)&self->Boost, 0x30);
+    vt[2].fn(vthis(stream, vt[2]), (char*)&self->Boost, 0x30);
     return ((void*)self);
 }
 #endif
@@ -5511,32 +5511,32 @@ extern "C" void cBoostNode_update(cBoostNode* self)
         }
     }
     sVEntry<void>* vt = (sVEntry<void>*)self->mVtbl;
-    ((Fn0_003415D0)vt[49].fn)((char*)self + vt[49].delta);
+    ((Fn0_003415D0)vt[49].fn)(vthis(self, vt[49]));
     if (self->Type == 1 || self->Time <= 0) {
         for (int i = 0; i < func_002D1AF0(); i++) {
             void** obj = cObjectInterface_getBeing(i);
             if (self->Type == 2) {
                 sVEntry<void>* ovt = (sVEntry<void>*)*obj;
-                if (((Test0_003415D0)ovt[9].fn)((char*)obj + ovt[9].delta) != 0) continue;
+                if (((Test0_003415D0)ovt[9].fn)(vthis(obj, ovt[9])) != 0) continue;
             }
             sVEntry<void>* ovt = (sVEntry<void>*)*obj;
-            if (((Test_003415D0)ovt[3].fn)((char*)obj + ovt[3].delta, (int)self->Instance) != 0) {
+            if (((Test_003415D0)ovt[3].fn)(vthis(obj, ovt[3]), (int)self->Instance) != 0) {
                 hit = 1;
                 if (self->Drag < 0.0f) {
                     sVEntry<void>* vtbl = (sVEntry<void>*)self->mVtbl;
-                    ((Fn1_003415D0)vtbl[48].fn)((char*)self + vtbl[48].delta, obj);
+                    ((Fn1_003415D0)vtbl[48].fn)(vthis(self, vtbl[48]), obj);
                 } else {
                     sVEntry<void>* vtbl = (sVEntry<void>*)self->mVtbl;
-                    ((Fn1_003415D0)vtbl[47].fn)((char*)self + vtbl[47].delta, obj);
+                    ((Fn1_003415D0)vtbl[47].fn)(vthis(self, vtbl[47]), obj);
                 }
             }
         }
     }
     sVEntry<void>* vtbl2 = (sVEntry<void>*)self->mVtbl;
-    ((Fn0_003415D0)vtbl2[50].fn)((char*)self + vtbl2[50].delta);
+    ((Fn0_003415D0)vtbl2[50].fn)(vthis(self, vtbl2[50]));
     if (hit == 0) {
         sVEntry<void>* vtbl3 = (sVEntry<void>*)self->mVtbl;
-        ((FnI_003415D0)vtbl3[34].fn)((char*)self + vtbl3[34].delta, 1);
+        ((FnI_003415D0)vtbl3[34].fn)(vthis(self, vtbl3[34]), 1);
     }
 }
 #endif
@@ -5741,7 +5741,7 @@ extern "C" void cBoostNode_writeToReplayFrame(cBoostNode* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)&self->Boost, 0x30);
+    vt[1].fn(vthis(stream, vt[1]), (char*)&self->Boost, 0x30);
 }
 #endif
 
@@ -6238,7 +6238,7 @@ extern "C" void cAnimObjectNode_writeToReplayFrame(cAnimObjectNode* self, void* 
 {
     cAnimNode_writeToReplayFrame((char*)&self->CurrTime, stream);
     sVEntry_cAnimObjectNode_writeToReplayFrame* vt = *(sVEntry_cAnimObjectNode_writeToReplayFrame**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, self, 0x1C);
+    vt[1].fn(vthis(stream, vt[1]), self, 0x1C);
 }
 #endif
 
@@ -6658,7 +6658,7 @@ extern "C" void cAnimTeeterNode_applyForce(cAnimTeeterNode* self, sObj_342538* i
         char* ents = sub->inf->tbl->ents;
         if (*(int*)(ents + idx * 16 + 8) != 0) {
             sWsVtSlot* vt = (sWsVtSlot*)self->mVtbl;
-            char* animMat = ((GetMat_342538)vt[29].fn)((char*)sub + vt[29].delta, idx);
+            char* animMat = ((GetMat_342538)vt[29].fn)(vthis(sub, vt[29]), idx);
             char* pivotMat = animMat;
             if (vu0Length_342538(*force) > 100.0f) {
                 sVec4_342538 leverArm;
@@ -6711,7 +6711,7 @@ extern "C" void cAnimTeeterNode_writeToReplayFrame(cAnimTeeterNode* self, void* 
 {
     cAnimNode_writeToReplayFrame(&self->CurrTime, stream);
     sVEntry_cAnimTeeterNode_writeToReplayFrame* vt = *(sVEntry_cAnimTeeterNode_writeToReplayFrame**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, self, 0x30);
+    vt[1].fn(vthis(stream, vt[1]), self, 0x30);
 }
 #endif
 
@@ -6826,25 +6826,25 @@ extern "C" void cBoostModifier_update(cBoostModifier* self)
         }
     }
     sVEntry<void>* vt = (sVEntry<void>*)self->mVtbl;
-    ((Fn0_00342880)vt[9].fn)((char*)self + vt[9].delta);
+    ((Fn0_00342880)vt[9].fn)(vthis(self, vt[9]));
     if (self->Type == 1 || self->Time <= 0) {
         for (int i = 0; i < func_002D1AF0(); i++) {
             void** obj = cObjectInterface_getBeing(i);
             sVEntry<void>* ovt = (sVEntry<void>*)*obj;
-            if (((Test_00342880)ovt[3].fn)((char*)obj + ovt[3].delta, (int)self->Instance) != 0) {
+            if (((Test_00342880)ovt[3].fn)(vthis(obj, ovt[3]), (int)self->Instance) != 0) {
                 self->Active = 1;
                 if (self->Drag < 0.0f) {
                     sVEntry<void>* vtbl = (sVEntry<void>*)self->mVtbl;
-                    ((Fn1_00342880)vtbl[8].fn)((char*)self + vtbl[8].delta, obj);
+                    ((Fn1_00342880)vtbl[8].fn)(vthis(self, vtbl[8]), obj);
                 } else {
                     sVEntry<void>* vtbl = (sVEntry<void>*)self->mVtbl;
-                    ((Fn1_00342880)vtbl[7].fn)((char*)self + vtbl[7].delta, obj);
+                    ((Fn1_00342880)vtbl[7].fn)(vthis(self, vtbl[7]), obj);
                 }
             }
         }
     }
     sVEntry<void>* vtbl2 = (sVEntry<void>*)self->mVtbl;
-    ((Fn0_00342880)vtbl2[10].fn)((char*)self + vtbl2[10].delta);
+    ((Fn0_00342880)vtbl2[10].fn)(vthis(self, vtbl2[10]));
 }
 #endif
 
@@ -7029,9 +7029,9 @@ extern "C" void cBoostModifier_writeToReplayFrame(cBoostModifier* self, void* st
 {
     cPhysicsModifier_writeToReplayFrame(self, stream);
     sVEntry_cBoostModifier_writeToReplayFrame* vt = *(sVEntry_cBoostModifier_writeToReplayFrame**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)&self->Boost, 0x30);
+    vt[1].fn(vthis(stream, vt[1]), (char*)&self->Boost, 0x30);
     sVEntry1_cBoostModifier_writeToReplayFrame* vt1 = *(sVEntry1_cBoostModifier_writeToReplayFrame**)stream;
-    vt1[5].fn((char*)stream + vt1[5].delta, (int)self->Instance);
+    vt1[5].fn(vthis(stream, vt1[5]), (int)self->Instance);
 }
 #endif
 

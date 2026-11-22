@@ -280,7 +280,7 @@ extern "C" void cGameModeMan_restartHeat(cGameModeMan* self)
     int i;
     void* obj = cGameModeMan_aHandler[self->iCurrModeHandler];
     sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)obj;
-    vt[2].fn((char*)obj + vt[2].delta);
+    vt[2].fn(vthis(obj, vt[2]));
     for (i = 5; i >= 0; i--) {
         cGameModeMan_bGiveUp[i] = 0;
     }
@@ -346,7 +346,7 @@ extern "C" void cGameModeMan_raceFinish(cGameModeMan* self, int idx, int pRiderS
 {
     void* obj = cGameModeMan_aHandler[self->iCurrModeHandler];
     sVEntry_00238358* vt = *(sVEntry_00238358**)obj;
-    vt[8].fn((char*)obj + vt[8].delta, idx);
+    vt[8].fn(vthis(obj, vt[8]), idx);
     if (*cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)) < 17) {
         int n = *(int*)SSXApp->Game->Replay;
         int ok = n != 0 && n < 10;
@@ -390,7 +390,7 @@ extern "C" void cGameModeMan_riderCheckpointHit(cGameModeMan* self, int iRider, 
 {
     void* obj = cGameModeMan_aHandler[self->iCurrModeHandler];
     sVEntry<void(void*, int, int)>* vt = *(sVEntry<void(void*, int, int)>**)obj;
-    vt[6].fn((char*)obj + vt[6].delta, iRider, iSecsAdded);
+    vt[6].fn(vthis(obj, vt[6]), iRider, iSecsAdded);
 }
 #endif
 
@@ -410,7 +410,7 @@ extern "C" void cGameModeMan_riderGateHit(cGameModeMan* self, int iRider, int iG
 {
     void* obj = cGameModeMan_aHandler[self->iCurrModeHandler];
     sVEntry<void(void*, int, int)>* vt = *(sVEntry<void(void*, int, int)>**)obj;
-    vt[7].fn((char*)obj + vt[7].delta, iRider, iGateID);
+    vt[7].fn(vthis(obj, vt[7]), iRider, iGateID);
 }
 #endif
 
@@ -432,7 +432,7 @@ extern "C" void cGameModeMan_getHeatScore(cGameModeMan* self, int iRider, int iH
 {
     void* obj = cGameModeMan_aHandler[self->iCurrModeHandler];
     sVEntry<void(void*, int, int)>* vt = *(sVEntry<void(void*, int, int)>**)obj;
-    vt[9].fn((char*)obj + vt[9].delta, iRider, iHeat);
+    vt[9].fn(vthis(obj, vt[9]), iRider, iHeat);
 }
 #endif
 
@@ -678,7 +678,7 @@ extern "C" void cGameModeHandler_purge(void* self)
     func_00416210(gm->iCharacters, 0, 40);
     func_00416210(cGameModeHandler_pManager->iCheatCharacters, 0, 40);
     sVEntry00238C80* vtEntry = &(*(sVEntry00238C80**)self)[5];
-    vtEntry->fn((char*)self + vtEntry->delta);
+    vtEntry->fn(vthis(self, *vtEntry));
 }
 #endif
 
@@ -826,7 +826,7 @@ extern "C" void cGMBigAirHandler_init(sScore_238E20* self)
             gameModeMan->unk_94 = 0;
         }
         func_00416210(self->t, 0, 0x78);
-        self->vt[4].fn((char*)self + self->vt[4].delta);
+        self->vt[4].fn(vthis(self, self->vt[4]));
         if (cGameModeHandler_pManager->bIsEventDone == 1) {
             func_00239938_self(self);
         }
@@ -865,7 +865,7 @@ extern "C" void cGMBigAirHandler_init(sScore_238E20* self)
         int* firstHeatScores = self->t[0];
         if (manager->bIsEventDone == 1) {
             func_00416210(firstHeatScores, 0, 0x78);
-            self->vt[4].fn((char*)self + self->vt[4].delta);
+            self->vt[4].fn(vthis(self, self->vt[4]));
             func_00239938_self(self);
             func_00239AA0((sScore_239AA0*)self);
         }
@@ -1363,7 +1363,7 @@ extern "C" void cGMMPSlopeHandler_init(void* self)
     gm2->uiTimeLimit = heatTimeLimit * 60;
     func_00416210(gm2->iCharacters, -1, 40);
     sVEntry_239D88* vtEntry = &(*(sVEntry_239D88**)self)[4];
-    vtEntry->fn((char*)self + vtEntry->delta);
+    vtEntry->fn(vthis(self, *vtEntry));
     cGameModeHandler_pManager->iCharacters[0] = cBENewPlayerInterface_getPlayerCharID(player, 0);
     cGameModeHandler_pManager->iCharacters[1] = cBENewPlayerInterface_getPlayerCharID(player, 1);
     cGameModeHandler_pManager->iCheatCharacters[0] = cBENewPlayerInterface_getPlayerCheatCharID(player, 0);
@@ -2098,7 +2098,7 @@ extern "C" void cGMMPRaceHandler_init(void* self)
     gm2->bHasPointTarget = 0;
     func_00416210((char*)self + 4, 9, 40);
     sVEntry_23AC88* vtEntry = &(*(sVEntry_23AC88**)self)[5];
-    vtEntry->fn((char*)self + vtEntry->delta);
+    vtEntry->fn(vthis(self, *vtEntry));
     cGameModeHandler_pManager->iCharacters[0] = cBENewPlayerInterface_getPlayerCharID(player, 0);
     cGameModeHandler_pManager->iCharacters[1] = cBENewPlayerInterface_getPlayerCharID(player, 1);
     cGameModeHandler_pManager->iCheatCharacters[0] = cBENewPlayerInterface_getPlayerCheatCharID(player, 0);
@@ -2297,7 +2297,7 @@ extern "C" void cGMFreerideHandler_init(void* self)
     int humanRider = cBENewPlayerInterface_getHumanRider(iface, 0);
     cGameModeHandler_pManager->iCharacters[humanRider] = cBENewPlayerInterface_getRiderCharID(iface, cBENewPlayerInterface_getHumanRider(iface, 0));
     sVEntry_23B170* vtEntry = &(*(sVEntry_23B170**)self)[4];
-    vtEntry->fn((char*)self + vtEntry->delta);
+    vtEntry->fn(vthis(self, *vtEntry));
     cGameModeMan* gm2 = cGameModeHandler_pManager;
     gm2->iNextHeat = one;
     gm2->iRestoreHeat = one;
@@ -2414,7 +2414,7 @@ extern "C" void cGMTimeHandler_init(void* self)
     gm2->iNextHeat = 2;
     gm2->iRestoreHeat = 2;
     sVEntry_23B268* vt = *(sVEntry_23B268**)self;
-    vt[5].fn((char*)self + vt[5].delta);
+    vt[5].fn(vthis(self, vt[5]));
     func_00416210(cGameModeHandler_pManager->iCharacters, -1, 40);
     int humanRider = cBENewPlayerInterface_getHumanRider(player, 0);
     cGameModeHandler_pManager->iCharacters[humanRider] = cBENewPlayerInterface_getRiderCharID(player, cBENewPlayerInterface_getHumanRider(player, 0));
@@ -2631,7 +2631,7 @@ extern "C" void cGMRivalTimeHandler_init(void* self)
     gm->bIsLastHeat = one;
     gm->bAreResultsLocked = 0;
     sVEntry_23B6C0* vt = *(sVEntry_23B6C0**)self;
-    vt[5].fn((char*)self + vt[5].delta);
+    vt[5].fn(vthis(self, vt[5]));
     if (cBENewRaceInterface_newRace.cGamePath == 2) {
         cGameModeHandler_pManager->iNumberAI = 0;
         int firstHuman = cBENewPlayerInterface_getHumanRider(player, 0);
@@ -2830,7 +2830,7 @@ extern "C" void cGMRivalPointHandler_init(void* self)
     gm2->unk_94 = 0;
     gm2->bIsLastHeat = one;
     sVEntry_23BB98* vt = *(sVEntry_23BB98**)self;
-    vt[4].fn((char*)self + vt[4].delta);
+    vt[4].fn(vthis(self, vt[4]));
     if (cBENewRaceInterface_newRace.cGamePath == 2) {
         cGameModeHandler_pManager->iNumberAI = 0;
         int firstHuman = cBENewPlayerInterface_getHumanRider(player, 0);
@@ -3035,7 +3035,7 @@ extern "C" void cGMPointHandler_init(void* self)
     gm3->iRestoreHeat = 2;
     gm3->uiTimeLimit = heatTimeLimit * 60;
     sVEntry_23C0D0* vt = *(sVEntry_23C0D0**)self;
-    vt[4].fn((char*)self + vt[4].delta);
+    vt[4].fn(vthis(self, vt[4]));
     func_00416210(cGameModeHandler_pManager->iCharacters, -1, 40);
     int humanRider = cBENewPlayerInterface_getHumanRider(player, 0);
     cGameModeHandler_pManager->iCharacters[humanRider] = cBENewPlayerInterface_getRiderCharID(player, cBENewPlayerInterface_getHumanRider(player, 0));
@@ -3269,7 +3269,7 @@ extern "C" void cGMDebugHandler_init(void* self)
         }
     }
     sVEntry_23C618* vtEntry = &(*(sVEntry_23C618**)self)[4];
-    vtEntry->fn((char*)self + vtEntry->delta);
+    vtEntry->fn(vthis(self, *vtEntry));
     cGameModeMan* gm2 = cGameModeHandler_pManager;
     gm2->iNextHeat = 1;
     gm2->uiTimeLimit = 0;

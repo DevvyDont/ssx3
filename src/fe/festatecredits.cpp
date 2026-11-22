@@ -365,14 +365,14 @@ INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onInputBegin);
 extern "C" int cFEStateCredits_onInputBegin(cFEStateCredits* self, cUIInput* pInput)
 {
     sVEntry<int(void*)>* vtEntry = &((sVEntry<int(void*)>*)pInput->mVtbl)[17];
-    if (vtEntry->fn((char*)pInput + vtEntry->delta)) {
+    if (vtEntry->fn(vthis(pInput, *vtEntry))) {
         if (self->mPixelDelta >= -7) {
             self->mPixelDelta -= 1;
         }
         return 1;
     }
     vtEntry = &((sVEntry<int(void*)>*)pInput->mVtbl)[18];
-    if (vtEntry->fn((char*)pInput + vtEntry->delta)) {
+    if (vtEntry->fn(vthis(pInput, *vtEntry))) {
         if (self->mPixelDelta < 8) {
             self->mPixelDelta += 1;
         }
@@ -424,7 +424,7 @@ extern "C" void cFEStateCredits_onWidgetEvent(cFEStateCredits* self, cUIThing* i
     if (((void*)item) != 0 && msg == 6) {
         void* obj = *(void**)self->mpEngine;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
-        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, 36);
+        void* nextState = vt[5].fn(vthis(obj, vt[5]), self, 36);
         if (nextState != 0) {
             cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         }

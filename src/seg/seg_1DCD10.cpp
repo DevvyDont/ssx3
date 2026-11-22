@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "visualfx/fog.h"
 #include "render/ps2graphicsman.h"
 
@@ -302,7 +303,7 @@ extern "C" void cFogParticleMan_render(cFogParticleMan* self) {
         G3_BF98(5, 1, 0, 3, 0);
         {
             VEnt_BF98* vtEntry = (VEnt_BF98*)((char*)self->mVtbl + 0x18);
-            vtEntry->fn((char*)self + vtEntry->delta);
+            vtEntry->fn(vthis(self, *vtEntry));
         }
         Pop_BF98();
         self->miNumSphere = 0;

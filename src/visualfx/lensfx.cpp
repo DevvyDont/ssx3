@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "fe/fereal.h"
 #include "bx/appman.h"
 #include "visualfx/boltonfx.h"
@@ -729,7 +730,7 @@ static inline float Lerp_DB20(float a, float b, float t)
 static inline sV4_DB20 Sample_DB20(float u, float v, short tex)
 {
     sVE57_DB20* vt = (sVE57_DB20*)GrMan->mVtbl;
-    return vt[58].fn((char*)GrMan + vt[58].delta, u, v, tex, 1);
+    return vt[58].fn(vthis(GrMan, vt[58]), u, v, tex, 1);
 }
 
 /**
@@ -932,7 +933,7 @@ extern "C" float cRenderStateMan_SunPitchOffset(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p14;
-    return *obj->vt[27].fn((char*)obj + obj->vt[27].delta);
+    return *obj->vt[27].fn(vthis(obj, obj->vt[27]));
 }
 #endif
 
@@ -954,7 +955,7 @@ extern "C" float cRenderStateMan_SunYawOffset(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p14;
-    return *obj->vt[28].fn((char*)obj + obj->vt[28].delta);
+    return *obj->vt[28].fn(vthis(obj, obj->vt[28]));
 }
 #endif
 
@@ -976,7 +977,7 @@ extern "C" float cRenderStateMan_SunColorR(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p14;
-    return *obj->vt[29].fn((char*)obj + obj->vt[29].delta);
+    return *obj->vt[29].fn(vthis(obj, obj->vt[29]));
 }
 #endif
 
@@ -998,7 +999,7 @@ extern "C" float cRenderStateMan_SunColorG(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p14;
-    return *obj->vt[30].fn((char*)obj + obj->vt[30].delta);
+    return *obj->vt[30].fn(vthis(obj, obj->vt[30]));
 }
 #endif
 
@@ -1020,7 +1021,7 @@ extern "C" float cRenderStateMan_SunColorB(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p14;
-    return *obj->vt[31].fn((char*)obj + obj->vt[31].delta);
+    return *obj->vt[31].fn(vthis(obj, obj->vt[31]));
 }
 #endif
 
@@ -1042,7 +1043,7 @@ extern "C" float cRenderStateMan_SunIntensity(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p14;
-    return *obj->vt[32].fn((char*)obj + obj->vt[32].delta);
+    return *obj->vt[32].fn(vthis(obj, obj->vt[32]));
 }
 #endif
 
@@ -1065,7 +1066,7 @@ extern "C" int cRenderStateMan_SunType(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p14;
-    return *(int*)obj->vt[33].fn((char*)obj + obj->vt[33].delta);
+    return *(int*)obj->vt[33].fn(vthis(obj, obj->vt[33]));
 }
 #endif
 
@@ -1087,7 +1088,7 @@ extern "C" float cRenderStateMan_LensIntensity(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p14;
-    return *obj->vt[34].fn((char*)obj + obj->vt[34].delta);
+    return *obj->vt[34].fn(vthis(obj, obj->vt[34]));
 }
 #endif
 
@@ -1109,7 +1110,7 @@ extern "C" float cRenderStateMan_SunRadius(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p14;
-    return *obj->vt[35].fn((char*)obj + obj->vt[35].delta);
+    return *obj->vt[35].fn(vthis(obj, obj->vt[35]));
 }
 #endif
 
@@ -1242,7 +1243,7 @@ extern "C" float cRenderStateMan_DrawDistance(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p0;
-    return *obj->vt[6].fn((char*)obj + obj->vt[6].delta);
+    return *obj->vt[6].fn(vthis(obj, obj->vt[6]));
 }
 #endif
 
@@ -1265,7 +1266,7 @@ extern "C" float cRenderStateMan_SkyBoxRotation(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p10;
-    return *obj->vt[26].fn((char*)obj + obj->vt[26].delta);
+    return *obj->vt[26].fn(vthis(obj, obj->vt[26]));
 }
 #endif
 
@@ -1289,7 +1290,7 @@ extern "C" float cRenderStateMan_SnowIntensity(int i)
     if (cRenderStateMan_m_indoor == 0) {
         sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
         sLensFxObj* obj = *renderState->p20;
-        return *obj->vt[43].fn((char*)obj + obj->vt[43].delta) * (1.0f - *(float*)((char*)renderState + 0x24));
+        return *obj->vt[43].fn(vthis(obj, obj->vt[43])) * (1.0f - *(float*)((char*)renderState + 0x24));
     }
     return 0.0f;
 }
@@ -1313,7 +1314,7 @@ extern "C" float cRenderStateMan_FlakeSize(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p20;
-    return *obj->vt[44].fn((char*)obj + obj->vt[44].delta);
+    return *obj->vt[44].fn(vthis(obj, obj->vt[44]));
 }
 #endif
 
@@ -1336,7 +1337,7 @@ extern "C" float cRenderStateMan_WindIntensity(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p20;
-    return *obj->vt[45].fn((char*)obj + obj->vt[45].delta) * (1.0f - *(float*)((char*)renderState + 0x24));
+    return *obj->vt[45].fn(vthis(obj, obj->vt[45])) * (1.0f - *(float*)((char*)renderState + 0x24));
 }
 #endif
 
@@ -1359,7 +1360,7 @@ extern "C" float cRenderStateMan_WindRotation(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p20;
-    return *obj->vt[46].fn((char*)obj + obj->vt[46].delta);
+    return *obj->vt[46].fn(vthis(obj, obj->vt[46]));
 }
 #endif
 
@@ -1382,7 +1383,7 @@ extern "C" float cRenderStateMan_SnowFlurries(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p20;
-    return *obj->vt[49].fn((char*)obj + obj->vt[49].delta);
+    return *obj->vt[49].fn(vthis(obj, obj->vt[49]));
 }
 #endif
 
@@ -1406,7 +1407,7 @@ extern "C" float cRenderStateMan_SnowFluffItensity(int i)
     if (cRenderStateMan_m_indoor == 0) {
         sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
         sLensFxObj* obj = *renderState->p20;
-        return *obj->vt[51].fn((char*)obj + obj->vt[51].delta);
+        return *obj->vt[51].fn(vthis(obj, obj->vt[51]));
     }
     return 0.0f;
 }
@@ -1431,7 +1432,7 @@ extern "C" float cRenderStateMan_SnowFluffWindIntensity(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p20;
-    return *obj->vt[52].fn((char*)obj + obj->vt[52].delta);
+    return *obj->vt[52].fn(vthis(obj, obj->vt[52]));
 }
 #endif
 
@@ -1454,7 +1455,7 @@ extern "C" float cRenderStateMan_SnowGravityMultiplier(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p20;
-    return *obj->vt[50].fn((char*)obj + obj->vt[50].delta);
+    return *obj->vt[50].fn(vthis(obj, obj->vt[50]));
 }
 #endif
 
@@ -1477,7 +1478,7 @@ extern "C" float cRenderStateMan_Temperature(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p20;
-    return *obj->vt[48].fn((char*)obj + obj->vt[48].delta);
+    return *obj->vt[48].fn(vthis(obj, obj->vt[48]));
 }
 #endif
 
@@ -1500,7 +1501,7 @@ extern "C" float cRenderStateMan_LightningChance(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p20;
-    return *obj->vt[53].fn((char*)obj + obj->vt[53].delta);
+    return *obj->vt[53].fn(vthis(obj, obj->vt[53]));
 }
 #endif
 
@@ -1523,7 +1524,7 @@ extern "C" float cRenderStateMan_SnowFlakeColourA(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p20;
-    return *obj->vt[54].fn((char*)obj + obj->vt[54].delta);
+    return *obj->vt[54].fn(vthis(obj, obj->vt[54]));
 }
 #endif
 

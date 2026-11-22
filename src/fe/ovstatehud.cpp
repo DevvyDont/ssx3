@@ -1064,11 +1064,11 @@ extern "C" void cOVStateHUD1P_onCreateScreen(cOVStateHUD1P* vself)
     self->f490 = 0xDEEDDEED;
     {
         sVEntry<unsigned int(void*, int)>* vt = (sVEntry<unsigned int (void*, int)>*)GrMan->mVtbl;
-        self->scrW.set(vt[56].fn((char*)GrMan + vt[56].delta, self->mode));
+        self->scrW.set(vt[56].fn(vthis(GrMan, vt[56]), self->mode));
     }
     {
         sVEntry<unsigned int(void*, int)>* vt = (sVEntry<unsigned int (void*, int)>*)GrMan->mVtbl;
-        self->scrH.set(vt[57].fn((char*)GrMan + vt[57].delta, self->mode));
+        self->scrH.set(vt[57].fn(vthis(GrMan, vt[57]), self->mode));
     }
     self->w444[0] = findElem_9AD0(self->engine, str_nm1w);
     self->w444[1] = findElem_9AD0(self->engine, str_nm2w);
@@ -1356,7 +1356,7 @@ extern "C" void cOVStateHUD1P_renderBitmap(cOVStateHUD1P* self, cOVStateHUDElem*
         corner.w = 1.0f;
         verts[3].p = corner;
         sVEnt_001F1190* vt = (sVEnt_001F1190*)GrMan->mVtbl;
-        vt[71].fn((char*)GrMan + vt[71].delta, 4, verts, 0);
+        vt[71].fn(vthis(GrMan, vt[71]), 4, verts, 0);
     }
 }
 #endif
@@ -1422,7 +1422,7 @@ extern "C" void cOVStateHUD1P_renderQuad(cOVStateHUD1P* self, float* pos, float*
     verts[3].p = corner;
     *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = -1;
     sVEnt_001F1338* vt = (sVEnt_001F1338*)GrMan->mVtbl;
-    vt[71].fn((char*)GrMan + vt[71].delta, 4, verts, 0);
+    vt[71].fn(vthis(GrMan, vt[71]), 4, verts, 0);
 }
 #endif
 

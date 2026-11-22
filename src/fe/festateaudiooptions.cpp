@@ -205,7 +205,7 @@ static inline void* vcall_AOWE(sAudioOptions_AOWE* self, int slot, sWidget_AOWE*
 
 static inline void setEnabled_AOWE(sToggle_AOWE* t, int on)
 {
-    ((void (*)(void*, int))t->vt[6].fn)((char*)t + t->vt[6].delta, on);
+    ((void (*)(void*, int))t->vt[6].fn)(vthis(t, t->vt[6]), on);
 }
 
 /**
@@ -552,7 +552,7 @@ extern "C" void cFEStateRequestLine_onDestroyScreen(cFEStateRequestLine* self)
         void* obj = cUIStateStack_findState((char*)self->mpEngine + 0x18, GetHashValue32(str_hud));
         if (obj != 0) {
             sVEntry<int(void*, int, int)>* vtEntry = &(*(sVEntry<int(void*, int, int)>**)((char*)obj + 8))[24];
-            vtEntry->fn((char*)obj + vtEntry->delta, 4, 0);
+            vtEntry->fn(vthis(obj, *vtEntry), 4, 0);
         }
     }
     cUIState_onDestroyScreen(self);

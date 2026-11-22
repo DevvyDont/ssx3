@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "visualfx/visualeffectsman.h"
 #include "visualfx/aivisualeffectsman.h"
 #include "ai/riderhandler.h"
@@ -45,7 +46,7 @@ extern "C" float cRenderStateMan_SnowFlakeColourR(int i)
     sRSMEntry* entry = &cRenderStateMan_m_state[i];
     sRSMObj* stateObj = *entry->p20;
     sRSMVEntry* vt = stateObj->vt;
-    return *vt[55].fn((char*)stateObj + vt[55].delta);
+    return *vt[55].fn(vthis(stateObj, vt[55]));
 }
 #endif
 
@@ -68,7 +69,7 @@ extern "C" float cRenderStateMan_SnowFlakeColourG(int i)
     sRSMEntry* entry = &cRenderStateMan_m_state[i];
     sRSMObj* stateObj = *entry->p20;
     sRSMVEntry* vt = stateObj->vt;
-    return *vt[56].fn((char*)stateObj + vt[56].delta);
+    return *vt[56].fn(vthis(stateObj, vt[56]));
 }
 #endif
 
@@ -91,7 +92,7 @@ extern "C" float cRenderStateMan_SnowFlakeColourB(int i)
     sRSMEntry* entry = &cRenderStateMan_m_state[i];
     sRSMObj* stateObj = *entry->p20;
     sRSMVEntry* vt = stateObj->vt;
-    return *vt[57].fn((char*)stateObj + vt[57].delta);
+    return *vt[57].fn(vthis(stateObj, vt[57]));
 }
 #endif
 
@@ -114,7 +115,7 @@ extern "C" float cRenderStateMan_SnowFluffColourA(int i)
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p20;
     sRSMVEntry* vt = stateQuery->vt;
-    return *vt[58].fn((char*)stateQuery + vt[58].delta);
+    return *vt[58].fn(vthis(stateQuery, vt[58]));
 }
 #endif
 
@@ -137,7 +138,7 @@ extern "C" float cRenderStateMan_SnowFluffColourR(int i)
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p20;
     sRSMVEntry* vt = stateQuery->vt;
-    return *vt[59].fn((char*)stateQuery + vt[59].delta);
+    return *vt[59].fn(vthis(stateQuery, vt[59]));
 }
 #endif
 
@@ -160,7 +161,7 @@ extern "C" float cRenderStateMan_SnowFluffColourG(int i)
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p20;
     sRSMVEntry* vt = stateQuery->vt;
-    return *vt[60].fn((char*)stateQuery + vt[60].delta);
+    return *vt[60].fn(vthis(stateQuery, vt[60]));
 }
 #endif
 
@@ -183,7 +184,7 @@ extern "C" float cRenderStateMan_SnowFluffColourB(int i)
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p20;
     sRSMVEntry* vt = stateQuery->vt;
-    return *vt[61].fn((char*)stateQuery + vt[61].delta);
+    return *vt[61].fn(vthis(stateQuery, vt[61]));
 }
 #endif
 
@@ -207,7 +208,7 @@ extern "C" float cRenderStateMan_FogDensity(int i)
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p04;
     sRSMVEntry* vt = stateQuery->vt;
-    return *vt[7].fn((char*)stateQuery + vt[7].delta);
+    return *vt[7].fn(vthis(stateQuery, vt[7]));
 }
 #endif
 
@@ -231,7 +232,7 @@ extern "C" float cRenderStateMan_FogNear(int i)
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p04;
     sRSMVEntry* vt = stateQuery->vt;
-    return *vt[8].fn((char*)stateQuery + vt[8].delta);
+    return *vt[8].fn(vthis(stateQuery, vt[8]));
 }
 #endif
 
@@ -255,7 +256,7 @@ extern "C" float cRenderStateMan_FogFar(int i)
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p04;
     sRSMVEntry* vt = stateQuery->vt;
-    return *vt[9].fn((char*)stateQuery + vt[9].delta);
+    return *vt[9].fn(vthis(stateQuery, vt[9]));
 }
 #endif
 
@@ -279,7 +280,7 @@ extern "C" float cRenderStateMan_FogColourR(int i)
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p04;
     sRSMVEntry* vt = stateQuery->vt;
-    return *vt[10].fn((char*)stateQuery + vt[10].delta);
+    return *vt[10].fn(vthis(stateQuery, vt[10]));
 }
 #endif
 
@@ -303,7 +304,7 @@ extern "C" float cRenderStateMan_FogColourG(int i)
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p04;
     sRSMVEntry* vt = stateQuery->vt;
-    return *vt[11].fn((char*)stateQuery + vt[11].delta);
+    return *vt[11].fn(vthis(stateQuery, vt[11]));
 }
 #endif
 
@@ -327,7 +328,7 @@ extern "C" float cRenderStateMan_FogColourB(int i)
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p04;
     sRSMVEntry* vt = stateQuery->vt;
-    return *vt[12].fn((char*)stateQuery + vt[12].delta);
+    return *vt[12].fn(vthis(stateQuery, vt[12]));
 }
 #endif
 
@@ -353,7 +354,7 @@ extern "C" float cRenderStateMan_ScreenTintScaleR(int i)
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
         sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
         sRSMVEntry* vt = stateQuery->vt;
-        return *vt[20].fn((char*)stateQuery + vt[20].delta);
+        return *vt[20].fn(vthis(stateQuery, vt[20]));
     }
     return 1.0f;
 }
@@ -381,7 +382,7 @@ extern "C" float cRenderStateMan_ScreenTintScaleG(int i)
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
         sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
         sRSMVEntry* vt = stateQuery->vt;
-        return *vt[21].fn((char*)stateQuery + vt[21].delta);
+        return *vt[21].fn(vthis(stateQuery, vt[21]));
     }
     return 1.0f;
 }
@@ -409,7 +410,7 @@ extern "C" float cRenderStateMan_ScreenTintScaleB(int i)
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
         sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
         sRSMVEntry* vt = stateQuery->vt;
-        return *vt[22].fn((char*)stateQuery + vt[22].delta);
+        return *vt[22].fn(vthis(stateQuery, vt[22]));
     }
     return 1.0f;
 }
@@ -437,7 +438,7 @@ extern "C" float cRenderStateMan_ScreenTintOffsetR(int i)
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
         sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
         sRSMVEntry* vt = stateQuery->vt;
-        return *vt[23].fn((char*)stateQuery + vt[23].delta);
+        return *vt[23].fn(vthis(stateQuery, vt[23]));
     }
     return 0.0f;
 }
@@ -465,7 +466,7 @@ extern "C" float cRenderStateMan_ScreenTintOffsetG(int i)
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
         sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
         sRSMVEntry* vt = stateQuery->vt;
-        return *vt[24].fn((char*)stateQuery + vt[24].delta);
+        return *vt[24].fn(vthis(stateQuery, vt[24]));
     }
     return 0.0f;
 }
@@ -493,7 +494,7 @@ extern "C" float cRenderStateMan_ScreenTintOffsetB(int i)
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
         sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
         sRSMVEntry* vt = stateQuery->vt;
-        return *vt[25].fn((char*)stateQuery + vt[25].delta);
+        return *vt[25].fn(vthis(stateQuery, vt[25]));
     }
     return 0.0f;
 }
@@ -519,7 +520,7 @@ extern "C" float cRenderStateMan_LightGlowCutoff(int i)
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p08;
     sRSMVEntry* vt = stateQuery->vt;
-    return *vt[13].fn((char*)stateQuery + vt[13].delta);
+    return *vt[13].fn(vthis(stateQuery, vt[13]));
 }
 #endif
 
@@ -543,7 +544,7 @@ extern "C" float cRenderStateMan_LightGlowCutoffScale(int i)
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p08;
     sRSMVEntry* vt = stateQuery->vt;
-    return *vt[14].fn((char*)stateQuery + vt[14].delta);
+    return *vt[14].fn(vthis(stateQuery, vt[14]));
 }
 #endif
 
@@ -567,7 +568,7 @@ extern "C" float cRenderStateMan_LightGlowCopyIntensity(int i)
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p08;
     sRSMVEntry* vt = stateQuery->vt;
-    return *vt[15].fn((char*)stateQuery + vt[15].delta);
+    return *vt[15].fn(vthis(stateQuery, vt[15]));
 }
 #endif
 
@@ -591,7 +592,7 @@ extern "C" float cRenderStateMan_LightGlowSourceIntensity(int i)
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p08;
     sRSMVEntry* vt = stateQuery->vt;
-    return *vt[16].fn((char*)stateQuery + vt[16].delta);
+    return *vt[16].fn(vthis(stateQuery, vt[16]));
 }
 #endif
 
@@ -615,7 +616,7 @@ extern "C" float cRenderStateMan_LightGlowFrameIntensity(int i)
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p08;
     sRSMVEntry* vt = stateQuery->vt;
-    return *vt[17].fn((char*)stateQuery + vt[17].delta);
+    return *vt[17].fn(vthis(stateQuery, vt[17]));
 }
 #endif
 
@@ -639,7 +640,7 @@ extern "C" float cRenderStateMan_LightGlowBlend2(int i)
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p08;
     sRSMVEntry* vt = stateQuery->vt;
-    return *vt[18].fn((char*)stateQuery + vt[18].delta);
+    return *vt[18].fn(vthis(stateQuery, vt[18]));
 }
 #endif
 
@@ -663,7 +664,7 @@ extern "C" float cRenderStateMan_LightGlowBlend3(int i)
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p08;
     sRSMVEntry* vt = stateQuery->vt;
-    return *vt[19].fn((char*)stateQuery + vt[19].delta);
+    return *vt[19].fn(vthis(stateQuery, vt[19]));
 }
 #endif
 
@@ -687,7 +688,7 @@ extern "C" float cRenderStateMan_RimLightIntensityOffset(int i)
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p1C;
     sRSMVEntry* vt = stateQuery->vt;
-    return *vt[42].fn((char*)stateQuery + vt[42].delta);
+    return *vt[42].fn(vthis(stateQuery, vt[42]));
 }
 #endif
 
@@ -710,7 +711,7 @@ extern "C" float cRenderStateMan_AmbientLightIntensityOffset(int i)
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p1C;
     sRSMVEntry* vt = stateQuery->vt;
-    return *vt[41].fn((char*)stateQuery + vt[41].delta);
+    return *vt[41].fn(vthis(stateQuery, vt[41]));
 }
 #endif
 
@@ -734,7 +735,7 @@ extern "C" float cRenderStateMan_SnowSparkleDensity(int i)
     sRSMEntry* entry = &cRenderStateMan_m_state[i];
     sRSMObj* object = **(sRSMObj***)((char*)entry + 0x18);
     sRSMVEntry* vt = object->vt;
-    return *vt[36].fn((char*)object + vt[36].delta) * (1.0f - *(float*)((char*)entry + 0x24));
+    return *vt[36].fn(vthis(object, vt[36])) * (1.0f - *(float*)((char*)entry + 0x24));
 }
 #endif
 
@@ -757,7 +758,7 @@ extern "C" float cRenderStateMan_PlayerWindIntensity(int i)
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p20;
     sRSMVEntry* vt = stateQuery->vt;
-    return *vt[47].fn((char*)stateQuery + vt[47].delta);
+    return *vt[47].fn(vthis(stateQuery, vt[47]));
 }
 #endif
 
@@ -786,7 +787,7 @@ extern "C" void* cRenderStateMan_LightIrradianceName(int i)
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
         sRSMObj* stateQuery = *renderState->p1C;
         sRSMVEntry* vt = stateQuery->vt;
-        return vt[37].fn((char*)stateQuery + vt[37].delta);
+        return vt[37].fn(vthis(stateQuery, vt[37]));
     }
 }
 #endif
@@ -816,7 +817,7 @@ extern "C" void* cRenderStateMan_ShadowIrradianceName(int i)
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
         sRSMObj* stateQuery = *renderState->p1C;
         sRSMVEntry* vt = stateQuery->vt;
-        return vt[38].fn((char*)stateQuery + vt[38].delta);
+        return vt[38].fn(vthis(stateQuery, vt[38]));
     }
 }
 #endif
@@ -846,7 +847,7 @@ extern "C" void* cRenderStateMan_TunnelIrradianceName(int i)
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
         sRSMObj* stateQuery = *renderState->p1C;
         sRSMVEntry* vt = stateQuery->vt;
-        return vt[39].fn((char*)stateQuery + vt[39].delta);
+        return vt[39].fn(vthis(stateQuery, vt[39]));
     }
 }
 #endif
@@ -876,7 +877,7 @@ extern "C" void* cRenderStateMan_ObjectIrradianceName(int i)
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
         sRSMObj* stateQuery = *renderState->p1C;
         sRSMVEntry* vt = stateQuery->vt;
-        return vt[40].fn((char*)stateQuery + vt[40].delta);
+        return vt[40].fn(vthis(stateQuery, vt[40]));
     }
 }
 #endif
@@ -1566,9 +1567,9 @@ extern "C" void cAirStreamerFX_render(cAirStreamerFX* self)
         falloffT += 1.0f;
     }
     sRsCtx_EF950* grMan = GrMan_renderstateman;
-    grMan->vtable[71].fn((char*)grMan + grMan->vtable[71].delta, nverts, vertsL, 0);
+    grMan->vtable[71].fn(vthis(grMan, grMan->vtable[71]), nverts, vertsL, 0);
     grMan = GrMan_renderstateman;
-    grMan->vtable[71].fn((char*)grMan + grMan->vtable[71].delta, nverts, vertsR, 0);
+    grMan->vtable[71].fn(vthis(grMan, grMan->vtable[71]), nverts, vertsR, 0);
     rsPop_EF950(GrMan_renderstateman);
 }
 #endif

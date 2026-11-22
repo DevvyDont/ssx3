@@ -327,7 +327,7 @@ extern "C" void cUIVector_render2D(cUIVector* self, float x, float y)
         pos[2] = 0.0f;
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVE_3A39F8* vt = (sVE_3A39F8*)ps2GraphicsMan->mVtbl;
-        ((tDraw_3A39F8)vt[72].fn)((char*)ps2GraphicsMan + vt[72].delta, ((sCount_3A39F8*)(((char*)self) + 0x74))->mode, ((sCount_3A39F8*)(((char*)self) + 0x74))->count,
+        ((tDraw_3A39F8)vt[72].fn)(vthis(ps2GraphicsMan, vt[72]), ((sCount_3A39F8*)(((char*)self) + 0x74))->mode, ((sCount_3A39F8*)(((char*)self) + 0x74))->count,
                                   self->mpTriangles, self->mpVertexPositionRender, 0, self->mpVertexColour, pos);
         return;
     }
@@ -353,7 +353,7 @@ extern "C" void cUIVector_render2D(cUIVector* self, float x, float y)
     }
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVE_3A39F8* vt = (sVE_3A39F8*)ps2GraphicsMan->mVtbl;
-    ((tDraw2_3A39F8)vt[73].fn)((char*)ps2GraphicsMan + vt[73].delta, ((sCount_3A39F8*)(((char*)self) + 0x74))->count, self->mpVertices, 0);
+    ((tDraw2_3A39F8)vt[73].fn)(vthis(ps2GraphicsMan, vt[73]), ((sCount_3A39F8*)(((char*)self) + 0x74))->count, self->mpVertices, 0);
 }
 #endif
 
@@ -1518,7 +1518,7 @@ INCLUDE_ASM("ui/uivector", cListOpOnInput_onListNode);
 extern "C" void* cListOpOnInput_onListNode(cList* self, cListNode* obj)
 {
     sVEntry<int(void*, void*)>* vt = (sVEntry<int(void*, void*)>*)obj->mVtbl;
-    if (vt[0xF].fn((char*)obj + vt[0xF].delta, self->mStart.mpNext) == 0) {
+    if (vt[0xF].fn(vthis(obj, vt[0xF]), self->mStart.mpNext) == 0) {
         return 0;
     }
     return ((void*)obj);
@@ -2558,7 +2558,7 @@ extern "C" void cUIPair_setEntry(cUIPair* self, cUIThing* obj)
     cUIThing* old = self->mpEntry;
     if (((char*)old) != 0) {
         sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)old->mVtbl;
-        vt[1].fn(((char*)old) + vt[1].delta, 3);
+        vt[1].fn(vthis(old, vt[1]), 3);
     }
     self->mpEntry = (cUIThing*)obj;
 }
@@ -2591,7 +2591,7 @@ extern "C" void cUIPair_setWidget(cUIPair* self, cUIThing* obj)
     cUIThing* old = self->mpWidget;
     if (((char*)old) != 0) {
         sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)old->mVtbl;
-        vt[1].fn(((char*)old) + vt[1].delta, 3);
+        vt[1].fn(vthis(old, vt[1]), 3);
     }
     self->mpWidget = (cUIThing*)obj;
 }

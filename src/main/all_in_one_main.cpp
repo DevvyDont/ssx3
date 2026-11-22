@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "render/font.h"
 #include "util/menu.h"
 #include "online/privatemessage.h"
@@ -2085,7 +2086,7 @@ extern "C" void DeletePersonaMenu__DeletePersonaMenu(DeletePersonaMenu* self, in
         Elem *elem = end;
         while (((Elem*)&self->unk_168[0]) != elem) {
             elem--;
-            elem->vt->dtor.fn((char*)elem + elem->vt->dtor.delta, 0);
+            elem->vt->dtor.fn(vthis(elem, elem->vt->dtor), 0);
         }
     }
     cMenuItem__cMenuItem((int)self + 336, 2);
@@ -2242,7 +2243,7 @@ extern "C" void RoomMenu__RoomMenu(RoomMenu* self, int flags) {
         Elem_D2F0 *elem = ((Elem_D2F0*)&self->unk_16C[0]) + 24;
         while (((Elem_D2F0*)&self->unk_16C[0]) != elem) {
             elem--;
-            elem->vt->dtor.fn((char*)elem + elem->vt->dtor.delta, 0);
+            elem->vt->dtor.fn(vthis(elem, elem->vt->dtor), 0);
         }
     }
     cMenuItem__cMenuItem((int)self + 340, 2);

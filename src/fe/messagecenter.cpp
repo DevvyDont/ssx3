@@ -97,7 +97,7 @@ struct sReqLine_6F98 {
 
 static inline void show_6F98(sWidget_6F98* w, int on)
 {
-    w->vt[9].fn((char*)w + w->vt[9].delta, on);
+    w->vt[9].fn(vthis(w, w->vt[9]), on);
 }
 
 static inline int countBits_6F98(ulong v)

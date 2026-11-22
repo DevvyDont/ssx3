@@ -839,7 +839,7 @@ extern "C" void cUIThing_deleteAnimation(cUIThing* self)
     cUIAnimation* obj = self->mpAnim;
     if (obj != 0) {
         sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)obj->mVtbl;
-        vt[1].fn((char*)obj + vt[1].delta, 3);
+        vt[1].fn(vthis(obj, vt[1]), 3);
         self->mpAnim = (cUIAnimation*)0;
     }
 }
@@ -939,7 +939,7 @@ extern "C" void cUIThing_setUIData(sState39FE00* self, sStateDef39FE00* def)
     self->id = def->id;
     self->layer = def->layer;
     self->b0 = (*(int*)((char*)def + 8) >> 6) & 1;
-    self->vt[9].fn((char*)self + self->vt[9].delta, (*(int*)((char*)def + 8) >> 9) & 1);
+    self->vt[9].fn(vthis(self, self->vt[9]), (*(int*)((char*)def + 8) >> 9) & 1);
     self->b7 = def->b7;
     self->data = def + 1;
 }

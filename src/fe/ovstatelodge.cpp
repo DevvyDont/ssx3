@@ -159,7 +159,7 @@ extern "C" void cFEStateMountainRoom__cFEStateMountainRoom(cFEStateMountainRoom*
     if (id >= 0) {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)ps2GraphicsMan->mVtbl;
-        vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, id);
+        vt[50].fn(vthis(ps2GraphicsMan, vt[50]), id);
     }
     self->mVtbl = cFEState_vtbl;
     cUIState__cUIState(self, flags);
@@ -295,7 +295,7 @@ struct sWidget_2AD0 {
 
 static inline void wShow_2AD0(sWidget_2AD0* w, int on)
 {
-    w->vt[9].fn((char*)w + w->vt[9].delta, on);
+    w->vt[9].fn(vthis(w, w->vt[9]), on);
 }
 
 static inline void setW_2AD0(char* s, int off, sWidget_2AD0* w)
@@ -472,7 +472,7 @@ extern "C" int cFEStateMountainRoom_onInputBegin(cFEStateMountainRoom* self, cUI
 {
     if (IsShown1D2EA0(((char*)self))) {
     sVEntry<int(void*)>* wvt = (sVEntry<int(void*)>*)widget->mVtbl;
-    if (wvt[6].fn(((char*)widget) + wvt[6].delta)) {
+    if (wvt[6].fn(vthis(widget, wvt[6]))) {
         char* snd = *(char**)&self->mpEngine->mpSound;
         if (snd == 0) {
             snd = &gUISoundNull;
@@ -481,7 +481,7 @@ extern "C" int cFEStateMountainRoom_onInputBegin(cFEStateMountainRoom* self, cUI
         svt[2].fn(snd + svt[2].delta, 3);
         cUIGroup* w = self->mpPassGroup;
         sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)w->mVtbl;
-        vt[9].fn(((char*)w) + vt[9].delta, 0);
+        vt[9].fn(vthis(w, vt[9]), 0);
     }
     return 1;
     }
@@ -574,13 +574,13 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(cFEStateMountainRoom* self, c
             break;
         }
         sFactory_MR* factory = *(sFactory_MR**)self->mpEngine;
-        void* nextState = factory->vt[4].fn((char*)factory + factory->vt[4].delta, ((char*)self), idx - 1);
+        void* nextState = factory->vt[4].fn(vthis(factory, factory->vt[4]), ((char*)self), idx - 1);
         cUIStateStack_push_MR(&self->mpEngine->mStateStack, nextState);
         break;
     }
     case 6: {
         sFactory_MR* factory = *(sFactory_MR**)self->mpEngine;
-        void* nextState = factory->vt[5].fn((char*)factory + factory->vt[5].delta, ((char*)self), w->mMiscData);
+        void* nextState = factory->vt[5].fn(vthis(factory, factory->vt[5]), ((char*)self), w->mMiscData);
         if (nextState == 0) {
             break;
         }
@@ -615,7 +615,7 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(cFEStateMountainRoom* self, c
             break;
         }
         sText_MR* helpText = (sText_MR*)self->mpHelpText;
-        helpText->vt[9].fn((char*)helpText + helpText->vt[9].delta, 1);
+        helpText->vt[9].fn(vthis(helpText, helpText->vt[9]), 1);
         cUIText_setUnicodeStringByID(self->mpHelpText, stringId);
         break;
     }
@@ -709,7 +709,7 @@ extern "C" void cFEStateMountainRoom_updateTextureLoad(cFEStateMountainRoom* vse
     char* fileData = (char*)func_0019E2B0(mgr, vself->mCharID, vself->mTextureFileIndex);
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVEntry<int(void*, void*, void*, int, int, int)>* vt = (sVEntry<int(void*, void*, void*, int, int, int)>*)ps2GraphicsMan->mVtbl;
-    int id = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, fileData + *(int*)(fileData + 0x14), str_pass, 0, 1, -1);
+    int id = vt[46].fn(vthis(ps2GraphicsMan, vt[46]), fileData + *(int*)(fileData + 0x14), str_pass, 0, 1, -1);
     char* snd = (char*)vself->mpPassIcon;
     vself->mFrontTextureID = id;
     *(int*)(snd + 0x78) = id;
@@ -752,12 +752,12 @@ extern "C" void cFEStateMountainRoom_showPassFront(cFEStateMountainRoom* self)
     {
         cUIGroup* obj = self->mpPassGroup;
         sVEntry_cFEStateMountainRoom_showPassFront* vt = (sVEntry_cFEStateMountainRoom_showPassFront*)obj->mVtbl;
-        vt[9].fn((char*)obj + vt[9].delta, 1);
+        vt[9].fn(vthis(obj, vt[9]), 1);
     }
     if (self->mFrontTextureID >= 0) {
         cUIGroup* obj = self->mpPassFrontGroup;
         sVEntry_cFEStateMountainRoom_showPassFront* vt = (sVEntry_cFEStateMountainRoom_showPassFront*)obj->mVtbl;
-        vt[9].fn((char*)obj + vt[9].delta, 1);
+        vt[9].fn(vthis(obj, vt[9]), 1);
     }
 }
 #endif
@@ -1011,7 +1011,7 @@ struct sPeak_38F8 {
 
 static inline void wShow_38F8(sWidget_38F8* w, int on)
 {
-    w->vt[9].fn((char*)w + w->vt[9].delta, on);
+    w->vt[9].fn(vthis(w, w->vt[9]), on);
 }
 
 /**
@@ -1161,7 +1161,7 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, cUIThing*
                           self->mCharID, self->mPeakNum, item->mMiscData) != 0) {
             void* obj = *(void**)self->mpEngine;
             sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
-            void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, (self->mPeakNum << 16) | item->mMiscData);
+            void* nextState = vt[4].fn(vthis(obj, vt[4]), self, (self->mPeakNum << 16) | item->mMiscData);
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
         break;
@@ -1175,7 +1175,7 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, cUIThing*
         }
         void* obj = *(void**)self->mpEngine;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
-        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, id);
+        void* nextState = vt[5].fn(vthis(obj, vt[5]), self, id);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
@@ -1423,7 +1423,7 @@ extern "C" void* cFEStateTrophyRoom_cFEStateTrophyRoom(cFEStateTrophyRoom* self,
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
     trophyRoom->mCharID = cBENewPlayerInterface_getPlayerCharID(pi, self->mUserNum);
     sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)pi + 0xC);
-    vt[2].fn((char*)pi + vt[2].delta);
+    vt[2].fn(vthis(pi, vt[2]));
     trophyRoom->mPeakNum = peakNum;
     trophyRoom->mTrophyType = trophyType;
     trophyRoom->mNumLoadingFiles = 0;

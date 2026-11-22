@@ -144,7 +144,7 @@ extern "C" void cFlexBridgeNode_setupGrid(sFlexGrid* self)
     int nverts = n * 2;
     int ntris = (n - 1) * 2;
     sGridVEntry* vtEntry = &(((sGridVEntry*)world->mVtbl))[76];
-    self->mesh = (sGridMesh*)vtEntry->fn((char*)world + vtEntry->delta, n, 2, 0x20000000);
+    self->mesh = (sGridMesh*)vtEntry->fn(vthis(world, *vtEntry), n, 2, 0x20000000);
     sGridV4*& pts0 = self->pts[0];
     pts0 = new (str_BridgeVerts, 0x20000000, 0) sGridV4[nverts];
     sGridV4*& pts1 = self->pts[1];
@@ -156,7 +156,7 @@ extern "C" void cFlexBridgeNode_setupGrid(sFlexGrid* self)
     sGridV2* uv = new (str_TempBridgeUVs, 0x100, 0) sGridV2[nverts];
     sGridCol* col = new (str_TempBridgeRGBs, 0x100, 0) sGridCol[nverts];
     sGridVEntryV* gfxVtEntry = &(((sGridVEntryV*)world->mVtbl))[97];
-    gfxVtEntry->fn((char*)world + gfxVtEntry->delta, self->def, 0, pos, uvs, cols);
+    gfxVtEntry->fn(vthis(world, *gfxVtEntry), self->def, 0, pos, uvs, cols);
     for (int i = 0; i < n; i++) {
         float floatIndex = (float)i;
         float inv = 1.0f / (float)(n - 1);
@@ -174,7 +174,7 @@ extern "C" void cFlexBridgeNode_setupGrid(sFlexGrid* self)
         col[n + i].b = cols[2].b + (cols[3].b - cols[2].b) * floatIndex * inv;
     }
     sGridVEntryV* meshVtEntry = &self->mesh->vt[6];
-    meshVtEntry->fn((char*)self->mesh + meshVtEntry->delta, pos, col, uv);
+    meshVtEntry->fn(vthis(self->mesh, *meshVtEntry), pos, col, uv);
     if (uv != 0) {
         cMemMan_free(uv);
     }
@@ -642,7 +642,7 @@ extern "C" void cFlexBridgeNode_updateIntersectInfo(cFlexBridgeNode* self, sFlSt
         int pairIndex = idx / 2;
         sFlEnt_70D0* ents = (sFlEnt_70D0*)self->Mesh.Nodes;
         sFlVE_70D0* vt = (sFlVE_70D0*)self->mVtbl;
-        sV4_70D0* matrix = vt[24].fn((char*)self + vt[24].delta);
+        sV4_70D0* matrix = vt[24].fn(vthis(self, vt[24]));
         sFlEnt_70D0* entry = (sFlEnt_70D0*)(pairIndex * 0x50 + (int)ents);
         sV4_70D0 axisVec = vu0MtxMul_70D0(matrix, vu0ScaleP_70D0(&D_004FF140_70D0, entry->f24));
         sV4_70D0 arm = vu0Sub_70D0(intInfo->v[0], vu0MtxMul_70D0(matrix, entry->a));
@@ -852,9 +852,9 @@ extern "C" int cFlexBridgeNode_intersect(cFlexBridgeNode* self, sFTester_7268* t
     sFM_7268 inv;
     Copy_7268(&inv, matrix);
     TransposeInverse_7268(&inv);
-    ((SetXformFn_7268)tester->vt[1].fn)((char*)tester + tester->vt[1].delta, &inv, 1.0f / ((sFData_7268*)self->Instance)->scale);
+    ((SetXformFn_7268)tester->vt[1].fn)(vthis(tester, tester->vt[1]), &inv, 1.0f / ((sFData_7268*)self->Instance)->scale);
     int n = cWorldIntersectType_IsMeshInt(tester, &mesh, 1, out, cap);
-    ((VoidFn_7268)tester->vt[2].fn)((char*)tester + tester->vt[2].delta);
+    ((VoidFn_7268)tester->vt[2].fn)(vthis(tester, tester->vt[2]));
     for (int i = 0; i < n; i++) {
         sFHit_7268* hit = &out[i];
         Reset_7268(hit);
@@ -1205,7 +1205,7 @@ extern "C" void cFlexBridgeNode_render(cFlexBridgeNode* self)
         }
     }
     sVE24_7B80* sv = (sVE24_7B80*)self->mVtbl;
-    void* mtx = sv[24].fn(((char*)self) + sv[24].delta);
+    void* mtx = sv[24].fn(vthis(self, sv[24]));
     TOP_7B80(ctx)[1] = TOP_7B80(ctx)[0];
     sRS_7B80* state = TOP_7B80(ctx);
     TOP_7B80(ctx) = state + 1;
@@ -1243,7 +1243,7 @@ extern "C" void cFlexBridgeNode_writeToReplayFrame(cFlexBridgeNode* self, void* 
     cInstanceNode_writeToReplayFrame(self, stream);
     cSpring_writeToReplayFrame((char*)&self->Mesh, stream);
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)&self->BottomLeftOffset, 0x30);
+    vt[1].fn(vthis(stream, vt[1]), (char*)&self->BottomLeftOffset, 0x30);
 }
 #endif
 
@@ -1326,7 +1326,7 @@ extern "C" void* cFlexRailNode_cFlexRailNode1(cFlexRailNode* self, void* bucket,
     cInstanceNode_cInstanceNode(((char*)self), bucket, stream);
     self->mVtbl = (void**)cFlexRailNode_vtbl;
     sVEntry<void(void*, void*, int)>* readSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-    readSlot->fn((char*)stream + readSlot->delta, (char*)&self->NumNodes, 0x30);
+    readSlot->fn(vthis(stream, *readSlot), (char*)&self->NumNodes, 0x30);
     *segs = new (str_FlexNodeMats, 0x20000000, 0) sFlexSeg_347D90[self->NumNodes - 1];
     self->Tube = (cSimpleTube*)cSimpleTube_cSimpleTube(cMemMan_alloc(0xC, str_Tube_b, 0x20000000, 0), self->NumNodes * 8 - 9);
     return ((char*)self);
@@ -1359,7 +1359,7 @@ extern "C" void cFlexRailNode__cFlexRailNode(cFlexRailNode* self, int flags)
     void* obj = self->Tube;
     if (obj != 0) {
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)obj;
-        vt[1].fn((char*)obj + vt[1].delta, 3);
+        vt[1].fn(vthis(obj, vt[1]), 3);
     }
     cInstanceNode__cInstanceNode(self, flags);
 }
@@ -1380,9 +1380,9 @@ extern "C" void cFlexRailNode_updateSpaceHash(cFlexRailNode* self);
 extern "C" void cFlexRailNode_update(cFlexRailNode* self)
 {
     sVEntry<void(void*)>* vt1 = (sVEntry<void(void*)>*)self->mVtbl;
-    vt1[47].fn((char*)self + vt1[47].delta);
+    vt1[47].fn(vthis(self, vt1[47]));
     sVEntry<void(void*)>* vt2 = (sVEntry<void(void*)>*)self->mVtbl;
-    vt2[48].fn((char*)self + vt2[48].delta);
+    vt2[48].fn(vthis(self, vt2[48]));
     cFlexRailNode_updateSpaceHash(self);
 }
 #endif
@@ -1458,8 +1458,8 @@ extern "C" void cFlexRailNode_render(cFlexRailNode* self)
 {
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     sVE_3480C8* vt = (sVE_3480C8*)ctx->mVtbl;
-    if (((tCull_3480C8)vt[93].fn)((char*)ctx + vt[93].delta, ((char*)&self->BoundBox), ((char*)&self->BoundBox.MaxPoint),
-                                  ((tGetMat_3480C8)vt[43].fn)((char*)ctx + vt[43].delta)) == 1) return;
+    if (((tCull_3480C8)vt[93].fn)(vthis(ctx, vt[93]), ((char*)&self->BoundBox), ((char*)&self->BoundBox.MaxPoint),
+                                  ((tGetMat_3480C8)vt[43].fn)(vthis(ctx, vt[43]))) == 1) return;
     if (D_004A5980 == 0) {
         D_004FF6C0[0][0] = 0.0f;
         D_004FF6C0[0][1] = 0.0f;
@@ -1851,7 +1851,7 @@ extern "C" void cFlexRailNode_splineIntersect(cFlexRailNode* self, const sFbV_82
             intInfo->dir = fbNormalize_8290(splineSlope_8290(mat, lastt));
             intInfo->obj = (void*)self->Instance;
             sFbVE_8290* vt = (sFbVE_8290*)self->mVtbl;
-            intInfo->f5C = vt[49].fn(((char*)self) + vt[49].delta, seg);
+            intInfo->f5C = vt[49].fn(vthis(self, vt[49]), seg);
             intInfo->seg = seg;
             intInfo->f58 = 0;
             intInfo->t = lastt;
@@ -1888,7 +1888,7 @@ extern "C" void cFlexRailNode_writeToReplayFrame(cFlexRailNode* self, void* stre
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)&self->NumNodes, 0x30);
+    vt[1].fn(vthis(stream, vt[1]), (char*)&self->NumNodes, 0x30);
 }
 #endif
 

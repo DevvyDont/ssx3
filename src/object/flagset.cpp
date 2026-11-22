@@ -155,7 +155,7 @@ extern "C" void cFlagSet_CreateMesh(cFlagSet* flagSet, void* item)
     sFsV3_CM verts[50];
     cFlagSet_updateGrid((cFlagSet*)self, (t3Vector*)verts);
     sFsMesh_CM* flagMesh = self->mesh;
-    flagMesh->vt[6].fn((char*)flagMesh + flagMesh->vt[6].delta, verts, col, uv);
+    flagMesh->vt[6].fn(vthis(flagMesh, flagMesh->vt[6]), verts, col, uv);
 }
 #endif
 
@@ -249,7 +249,7 @@ extern "C" void cFlagSet_update(cFlagSet* elem)
         cFlagSet_updateGrid((cFlagSet*)self, (t3Vector*)verts);
         cGridMesh* gridMesh = (self->mGridMesh);
         sVEntry<void(void*, void*)>* setVertsSlot = &((sVEntry<void (void*, void*)>*)gridMesh->mVtbl)[3];
-        setVertsSlot->fn((char*)gridMesh + setVertsSlot->delta, verts);
+        setVertsSlot->fn(vthis(gridMesh, *setVertsSlot), verts);
     }
     if (0.001f < self->mFlagData.mUScrollRate || 0.001f < self->mFlagData.mVScrollRate) {
         self->mScrollU += self->mFlagData.mUScrollRate;
@@ -601,10 +601,10 @@ extern "C" void cFlagSet_writeToReplayFrame(cFlagSet* elem, void* stream)
     int i;
     sFlagSet_C2E0* self = (sFlagSet_C2E0*)elem;
     sFlagSetVEntryC2E0a* writeFn = &(*(sFlagSetVEntryC2E0a**)stream)[1];
-    writeFn->fn((char*)stream + writeFn->delta, self, 0x60);
+    writeFn->fn(vthis(stream, *writeFn), self, 0x60);
     for (i = 0; i < self->count; i++) {
         sFlagSetVEntryC2E0b* writeItemFn = &(*(sFlagSetVEntryC2E0b**)stream)[5];
-        writeItemFn->fn((char*)stream + writeItemFn->delta, self->items[i]);
+        writeItemFn->fn(vthis(stream, *writeItemFn), self->items[i]);
     }
 }
 #endif
@@ -631,10 +631,10 @@ extern "C" void cFlagSet_readFromReplayFrame(cFlagSet* elem, void* stream)
     int i;
     sFlagSet_C2E0* self = (sFlagSet_C2E0*)elem;
     sVEntry<void(void*, void*, int)>* readFn = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-    readFn->fn((char*)stream + readFn->delta, self, 0x60);
+    readFn->fn(vthis(stream, *readFn), self, 0x60);
     for (i = 0; i < self->count; i++) {
         sVEntry<void*(void*)>* readItemFn = &(*(sVEntry<void*(void*)>**)stream)[3];
-        self->items[i] = readItemFn->fn((char*)stream + readItemFn->delta);
+        self->items[i] = readItemFn->fn(vthis(stream, *readItemFn));
     }
     if (self->count > 0) {
         cFlagSet_CreateMesh((cFlagSet*)self, self->items[0]);
@@ -710,7 +710,7 @@ extern "C" void cFlagManager__cFlagManager(cFlagManager* self, int flags)
         sFlagSetElem_C4B8* flagSet = ((sFlagSetElem_C4B8*)&self->mFlagSets[0]) + 15;
         while (((sFlagSetElem_C4B8*)&self->mFlagSets[0]) != flagSet) {
             flagSet--;
-            flagSet->vt[1].fn((char*)flagSet + flagSet->vt[1].delta, 0);
+            flagSet->vt[1].fn(vthis(flagSet, flagSet->vt[1]), 0);
         }
     }
     cObjNode__cObjNode(((sFlagSet_C4B8*)self), flags);
@@ -1245,7 +1245,7 @@ extern "C" void* cFenceNode_cFenceNode(cFenceNode* self, void* bucket, void* str
     self->mVtbl = cFenceNode_vtbl;
     new ((char*)&self->GridMesh) sFlagElem_CBE8[16];
     sFlagSetVEntry_CBE8* vtEntry = &(*(sFlagSetVEntry_CBE8**)stream)[2];
-    vtEntry->fn((char*)stream + vtEntry->delta, (char*)&self->FenceData, 36);
+    vtEntry->fn(vthis(stream, *vtEntry), (char*)&self->FenceData, 36);
     cFenceNode_setupFence(self);
     return ((void*)self);
 }
@@ -1412,7 +1412,7 @@ extern "C" void cFenceNode_update(cFenceNode* self)
     self->Force += self->ForceStep;
     if (self->ForceMax < 0.01f && fabs_34CE48(*(float*)(((char*)osc) + 0x10)) < 0.01f) {
         sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
-        vt[34].fn(((char*)self) + vt[34].delta, 1);
+        vt[34].fn(vthis(self, vt[34]), 1);
         return;
     }
     if (0.0f <= self->ForceStep) {
@@ -1550,7 +1550,7 @@ extern "C" void cFenceNode_updateGrid(cFenceNode* fenceNode)
     }
     sFlagMesh_CF98* gridMesh = self->mesh;
     sFlagVEntry_CF98* setVertsSlot = &gridMesh->vt[3];
-    setVertsSlot->fn((char*)gridMesh + setVertsSlot->delta, pts);
+    setVertsSlot->fn(vthis(gridMesh, *setVertsSlot), pts);
 }
 #endif
 
@@ -1666,7 +1666,7 @@ extern "C" void cFenceNode_setupFence(cFenceNode* fenceNode)
         col[i + 8].b = qcol[2].b + (qcol[3].b - qcol[2].b) * column * 0.1428571492433548f;
     }
     sFsMesh_D1E8* gridMesh = self->mesh;
-    gridMesh->vt[6].fn((char*)gridMesh + gridMesh->vt[6].delta, pos, col, uv);
+    gridMesh->vt[6].fn(vthis(gridMesh, gridMesh->vt[6]), pos, col, uv);
     cFenceNode_updateGrid((cFenceNode*)self);
 }
 #endif
@@ -1819,7 +1819,7 @@ extern "C" void cFenceNode_writeToReplayFrame(cFenceNode* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)&self->FenceData, 36);
+    vt[1].fn(vthis(stream, vt[1]), (char*)&self->FenceData, 36);
 }
 #endif
 
@@ -1923,9 +1923,9 @@ extern "C" void* cAnimNode_cAnimNode1(cAnimNode* self, void* bucket, void* strea
     *slot = new (str_AnimMats, 0x20000000, 0) sFlagSlot_34DAC8[*(int*)(*(char**)(*(char**)(node + 0x18) + 0x80) + 4)];
     cAnimNode_setAnimMeshCache(((char*)self));
     sStreamVE_DAC8* vt = *(sStreamVE_DAC8**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, ((char*)self), 20);
+    vt[2].fn(vthis(stream, vt[2]), ((char*)self), 20);
     sStreamVE_DAC8* vt2 = *(sStreamVE_DAC8**)stream;
-    vt2[2].fn((char*)stream + vt2[2].delta, &skippedWord, 4);
+    vt2[2].fn(vthis(stream, vt2[2]), &skippedWord, 4);
     cAnimNode_cacheFrame(self);
     return ((char*)self);
 }
@@ -1981,7 +1981,7 @@ extern "C" void cAnimNode__cAnimNode(cAnimNode* self, int flags)
         sFlagItem_DBA8* frameIter = items + ((int*)items)[-4];
         while ((sFlagItem_DBA8*)self->AnimFrames != frameIter) {
             frameIter--;
-            frameIter->vt[1].fn((char*)frameIter + frameIter->vt[1].delta, 0);
+            frameIter->vt[1].fn(vthis(frameIter, frameIter->vt[1]), 0);
         }
         cMemMan_free((char*)(sFlagItem_DBA8*)self->AnimFrames - 0x10);
     }
@@ -2027,7 +2027,7 @@ struct sFlagSetVEntry_DC90c {
 extern "C" void cAnimNode_updateRootTransform(cAnimNode* self)
 {
     sFlagSetVEntry_DC90a* vt = (sFlagSetVEntry_DC90a*)self->mVtbl;
-    vt[52].fn((char*)self + vt[52].delta);
+    vt[52].fn(vthis(self, vt[52]));
     char* sub = (char*)&self->unk_014;
     sFlagSetVEntry_DC90c* vt2 = (sFlagSetVEntry_DC90c*)self->mVtbl;
     void* objB = sub + vt2[33].delta;
@@ -2285,9 +2285,9 @@ extern "C" void cAnimNode_writeToReplayFrame(cAnimNode* self, void* stream)
     int dummy;
     cMoveNode_writeToReplayFrame(&self->unk_014, stream);
     sSerVEntry_0034E3D8* writeFn = &(*(sSerVEntry_0034E3D8**)stream)[1];
-    writeFn->fn((char*)stream + writeFn->delta, self, 20);
+    writeFn->fn(vthis(stream, *writeFn), self, 20);
     writeFn = &(*(sSerVEntry_0034E3D8**)stream)[1];
-    writeFn->fn((char*)stream + writeFn->delta, &dummy, 4);
+    writeFn->fn(vthis(stream, *writeFn), &dummy, 4);
 }
 #endif
 

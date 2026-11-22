@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "scripter/nislist.h"
 #include "sound/ssxaudio.h"
 #include "scripter/videngine.h"
@@ -110,12 +111,12 @@ extern "C" int cVidEngine_PlayVideo(cVidEngine* self)
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVtEnt* vt = (sVtEnt*)ps2GraphicsMan->mVtbl;
-        self->mSavedDisplayFormat = *((int*(*)(void*))vt[42].fn)((char*)ps2GraphicsMan + vt[42].delta);
+        self->mSavedDisplayFormat = *((int*(*)(void*))vt[42].fn)(vthis(ps2GraphicsMan, vt[42]));
     }
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVtEnt* vt = (sVtEnt*)ps2GraphicsMan->mVtbl;
-        ((void(*)(void*, int))vt[40].fn)((char*)ps2GraphicsMan + vt[40].delta, 0);
+        ((void(*)(void*, int))vt[40].fn)(vthis(ps2GraphicsMan, vt[40]), 0);
     }
     cSSXAudio_PauseSFX(cAudioInterface_bxAudio());
     return 1;

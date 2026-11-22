@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "util/objectinterface.h"
 #include "bx/math3d.h"
 #include "ui/uithing.h"
@@ -365,7 +366,7 @@ struct VEnt_37E0 { short delta; short idx; int (*fn)(void*, int); };
  */
 extern "C" void cPS2MemCard_IsInvalid1(cPS2MemCard* pS2MemCard) {
     VEnt_37E0 *vtEntry = (VEnt_37E0*)(*(char **)pS2MemCard + 0x180);
-    vtEntry->fn((char*)pS2MemCard + vtEntry->delta, pS2MemCard->mDevice);
+    vtEntry->fn(vthis(pS2MemCard, *vtEntry), pS2MemCard->mDevice);
 }
 #endif
 
@@ -384,7 +385,7 @@ struct VEnt_3810 { short delta; short idx; int (*fn)(void*, int); };
  */
 extern "C" void cPS2MemCard_IsAvailable1(cPS2MemCard* pS2MemCard) {
     VEnt_3810 *vtEntry = (VEnt_3810*)(*(char **)pS2MemCard + 0x1A0);
-    vtEntry->fn((char*)pS2MemCard + vtEntry->delta, pS2MemCard->mDevice);
+    vtEntry->fn(vthis(pS2MemCard, *vtEntry), pS2MemCard->mDevice);
 }
 #endif
 
@@ -485,7 +486,7 @@ struct VEnt_38F0 { short delta; short idx; int (*fn)(void*, int); };
  */
 extern "C" void cPS2MemCard_IsFormatted1(cPS2MemCard* pS2MemCard) {
     VEnt_38F0 *vtEntry = (VEnt_38F0*)(*(char **)pS2MemCard + 0x1C0);
-    vtEntry->fn((char*)pS2MemCard + vtEntry->delta, pS2MemCard->mDevice);
+    vtEntry->fn(vthis(pS2MemCard, *vtEntry), pS2MemCard->mDevice);
 }
 #endif
 
@@ -598,7 +599,7 @@ struct VEnt_3980 { short delta; short idx; void (*fn)(void*, int, int, int); };
  */
 extern "C" void func_002D3980(cPS2MemCard* pS2MemCard, int device, int nameBuffer, int extraArg) {
     VEnt_3980 *vtEntry = (VEnt_3980*)(*(char **)pS2MemCard + 0x230);
-    vtEntry->fn((char*)pS2MemCard + vtEntry->delta, device, nameBuffer, extraArg);
+    vtEntry->fn(vthis(pS2MemCard, *vtEntry), device, nameBuffer, extraArg);
 }
 #endif
 

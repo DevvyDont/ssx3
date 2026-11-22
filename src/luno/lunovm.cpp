@@ -853,7 +853,7 @@ extern "C" void luno_cLunoTableData__cLunoTableData(cLunoTable* self, int flags)
 
         while (self->nodes != entry) {
             entry--;
-            entry->vtable[1].func((char*)entry + entry->vtable[1].delta, 0);
+            entry->vtable[1].func(vthis(entry, entry->vtable[1]), 0);
         }
         cMemMan_free((char*)self->nodes - 0x10);
     }
@@ -1043,7 +1043,7 @@ extern "C" void luno_cLunoTable_emptyTable(cLunoTableRef* ref)
         cLunoTableEntry* entry = ref->table->nodes + *(int*)((char*)ref->table->nodes - 0x10);
         while (ref->table->nodes != entry) {
             entry--;
-            entry->vtable[1].func((char*)entry + entry->vtable[1].delta, 0);
+            entry->vtable[1].func(vthis(entry, entry->vtable[1]), 0);
         }
         cMemMan_free((char*)ref->table->nodes - 0x10);
     }
@@ -1312,7 +1312,7 @@ extern "C" void luno_cLunoTable_set(cLunoTableRef* self, cLunoValue* key, cLunoV
             if (n->value.type == 0) {
                 prev->next = n->next;
                 if (n != 0) {
-                    n->vtable[1].func((char*)n + n->vtable[1].delta, 3);
+                    n->vtable[1].func(vthis(n, n->vtable[1]), 3);
                 }
             }
             return;
@@ -1437,7 +1437,7 @@ extern "C" void luno_cLunoTable_readFromReplayFrame(cLunoTableRef* self, sVEntry
         cLunoTableEntry* node = self->table->nodes + *(int*)((char*)self->table->nodes - 0x10);
         while (self->table->nodes != node) {
             node--;
-            node->vtable[1].func((char*)node + node->vtable[1].delta, 0);
+            node->vtable[1].func(vthis(node, node->vtable[1]), 0);
         }
         cMemMan_free((char*)self->table->nodes - 0x10);
     }
@@ -1800,7 +1800,7 @@ extern "C" void luno_cLunoTableEntry__cLunoTableEntry(luno_cLunoTableEntry* self
     luno_cLunoTableEntry* obj = self->Next;
     if (((void*)obj) != 0) {
         sVEntry00226768* vt = (sVEntry00226768*)obj->mVtbl;
-        vt[1].fn((char*)obj + vt[1].delta, 3);
+        vt[1].fn(vthis(obj, vt[1]), 3);
     }
     luno_cLunoVar__cLunoVar((cLunoValue*)(&self->Value), 2);
     luno_cLunoVar__cLunoVar((cLunoValue*)self, 2);

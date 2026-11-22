@@ -1837,7 +1837,7 @@ extern "C" void* cTriggerAlgorithm_snapCurrent(cTriggerAlgorithm* self)
     sVE173678b* vt = (sVE173678b*)self->mVtbl;
     char* riderIface = (char*)&self->Target->Rider->mVtbl;
     sVE173678a* vt2 = *(sVE173678a**)riderIface;
-    return vt[3].fn((char*)self + vt[3].delta, vt2[7].fn(riderIface + vt2[7].delta));
+    return vt[3].fn(vthis(self, vt[3]), vt2[7].fn(riderIface + vt2[7].delta));
 }
 #endif
 
@@ -2689,7 +2689,7 @@ extern "C" void* cBoundedAlgorithm_snapCurrent(cBoundedAlgorithm* self)
     sVE1747A0b* vt = (sVE1747A0b*)self->mVtbl;
     char* riderIface = (char*)&self->Target->Rider->mVtbl;
     sVE1747A0a* vt2 = *(sVE1747A0a**)riderIface;
-    return vt[3].fn((char*)self + vt[3].delta, vt2[7].fn(riderIface + vt2[7].delta));
+    return vt[3].fn(vthis(self, vt[3]), vt2[7].fn(riderIface + vt2[7].delta));
 }
 #endif
 
@@ -6299,7 +6299,7 @@ extern "C" void cPOST_RACE_1ChaseAlgorithm_snap(cPOST_RACE_1ChaseAlgorithm* self
         cLookAtChaseAlgorithm_snap(self, id);
         cLookAtChaseAlgorithm_setupInitialCamDir(self, 100.0f, 100.0f);
         sCamVEntryVoidA* vt2 = (sCamVEntryVoidA*)self->mVtbl;
-        vt2[5].fn((char*)self + vt2[5].delta);
+        vt2[5].fn(vthis(self, vt2[5]));
     }
 }
 #endif
@@ -7309,7 +7309,7 @@ extern "C" void cBackgroundMan__cBackgroundMan(cBackgroundMan* self, int flags)
             {
                 cPS2GraphicsMan* obj = GrMan;
                 sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)obj->mVtbl;
-                vt[50].fn((char*)obj + vt[50].delta, id);
+                vt[50].fn(vthis(obj, vt[50]), id);
             }
         }
         if (self->mpiImageTID != 0)

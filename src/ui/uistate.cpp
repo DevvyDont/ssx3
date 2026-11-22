@@ -30,7 +30,7 @@ extern "C" void cUIState_hideObjSafe(cUIState* self, char* name)
             void* obj = cUIScreen_getObjectByHashName(n, GetHashValue32(name));
             if (obj != 0) {
                 sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)obj + 8);
-                vt[9].fn((char*)obj + vt[9].delta, 0);
+                vt[9].fn(vthis(obj, vt[9]), 0);
                 return;
             }
             n = n->mpNext;
@@ -66,7 +66,7 @@ extern "C" void cUIState_showObjSafe(cUIState* self, char* name)
             void* obj = cUIScreen_getObjectByHashName(n, GetHashValue32(name));
             if (obj != 0) {
                 sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)obj + 8);
-                vt[9].fn((char*)obj + vt[9].delta, 1);
+                vt[9].fn(vthis(obj, vt[9]), 1);
                 return;
             }
             n = n->mpNext;
@@ -460,7 +460,7 @@ extern "C" void cUIStateStack_update(cUIStateStack* self)
         do {
             if ((*(int*)((char*)n + 0x1C) >> 5) & 1) {
                 sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)n->mVtbl;
-                vt[0xC].fn((char*)n + vt[0xC].delta);
+                vt[0xC].fn(vthis(n, vt[0xC]));
             }
             cUIState_updateScreens(n);
             n = n->mpNext;

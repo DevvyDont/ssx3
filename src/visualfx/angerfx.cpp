@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "visualfx/avalanche.h"
 #include "ai/riderhandler.h"
 #include "render/ps2graphicsman.h"
@@ -409,7 +410,7 @@ extern "C" void func_002D5048(sAnger_2D4C08* self)
         return;
     }
     sGfx_2D5048* graphics = (sGfx_2D5048*)GrMan_angerfx;
-    sM4_2D5048* viewMatrix = ((sM4_2D5048* (*)(void*))graphics->vtable[35].fn)((char*)graphics + graphics->vtable[35].delta);
+    sM4_2D5048* viewMatrix = ((sM4_2D5048* (*)(void*))graphics->vtable[35].fn)(vthis(graphics, graphics->vtable[35]));
     sM4_2D5048* bm = &(*(sBones_2D5048**)(self->rider + 0x780))->mats[*(int*)(self->rider + 0x8A8)];
     sV4_2D5048 headPos = bm->v[3];
     sV4_2D5048 viewPos = MatVec_2D5048(viewMatrix, headPos);
@@ -476,7 +477,7 @@ extern "C" void func_002D5048(sAnger_2D4C08* self)
         vtx[3].v = 0.0f;
     }
     sGfx_2D5048* gd = (sGfx_2D5048*)GrMan_angerfx;
-    ((void (*)(void*, int, sVtx_2D5048*, int))gd->vtable[71].fn)((char*)gd + gd->vtable[71].delta, 4, vtx, 0);
+    ((void (*)(void*, int, sVtx_2D5048*, int))gd->vtable[71].fn)(vthis(gd, gd->vtable[71]), 4, vtx, 0);
     ((sGfx_2D5048*)GrMan_angerfx)->top--;
 }
 #endif

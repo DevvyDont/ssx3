@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 
 #include "camera/trigger/cameratriggerlist.h"
 
@@ -64,14 +65,14 @@ extern "C" void cCameraTriggerList_reset(cCameraTriggerList* self_)
         if (((sTrig_16BF40**)self->Triggers)[i]->fC)
         {
             sTrigPart_16BF40* part = ((sTrig_16BF40**)self->Triggers)[i]->fC;
-            part->vt[1].fn((char*)part + part->vt[1].delta);
+            part->vt[1].fn(vthis(part, part->vt[1]));
             operator_delete((int*)((sTrig_16BF40**)self->Triggers)[i]->fC);
             ((sTrig_16BF40**)self->Triggers)[i]->fC = 0;
         }
         if (((sTrig_16BF40**)self->Triggers)[i]->f10)
         {
             sTrigPart_16BF40* part = ((sTrig_16BF40**)self->Triggers)[i]->f10;
-            part->vt[1].fn((char*)part + part->vt[1].delta);
+            part->vt[1].fn(vthis(part, part->vt[1]));
             operator_delete((int*)((sTrig_16BF40**)self->Triggers)[i]->f10);
             ((sTrig_16BF40**)self->Triggers)[i]->f10 = 0;
         }

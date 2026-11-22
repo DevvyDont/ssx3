@@ -1362,7 +1362,7 @@ static inline void drawQuad(sHudVertex* v)
 {
     cPS2GraphicsMan* ctx = GrMan;
     sVEntry<void(void*, int, sHudVertex*, int)>* vt = (sVEntry<void (void*, int, sHudVertex*, int)>*)ctx->mVtbl;
-    vt[71].fn((char*)ctx + vt[71].delta, 4, v, 0);
+    vt[71].fn(vthis(ctx, vt[71]), 4, v, 0);
 }
 
 extern "C" void tHUDDef_getPos(void*, void*);
@@ -1619,7 +1619,7 @@ static inline void drawQuad_D9A0(sHudVertex* v)
 {
     cPS2GraphicsMan* ctx = GrMan;
     sVEntry<void(void*, int, sHudVertex*, int)>* vt = (sVEntry<void (void*, int, sHudVertex*, int)>*)ctx->mVtbl;
-    vt[71].fn((char*)ctx + vt[71].delta, 4, v, 0);
+    vt[71].fn(vthis(ctx, vt[71]), 4, v, 0);
 }
 
 extern "C" void tHUDDef_getPos(void*, void*);
@@ -2159,7 +2159,7 @@ extern "C" void func_0021EA00(cOVStateHUD1P* self, sColour* col, float* pos, flo
         vtx[7].pos = sVtxPos(pos[0] + w, pos[1] + height, 0.0f, 1.0f);
         cPS2GraphicsMan* ctx = GrMan;
         sVEntry<void(void*, int, sHudVertex*, int)>* vt = (sVEntry<void (void*, int, sHudVertex*, int)>*)ctx->mVtbl;
-        vt[71].fn((char*)ctx + vt[71].delta, 8, vtx, 0);
+        vt[71].fn(vthis(ctx, vt[71]), 8, vtx, 0);
     } else {
         sHudVertex vtx[4];
         for (int i = 0; i < 4; i++) {
@@ -2187,7 +2187,7 @@ extern "C" void func_0021EA00(cOVStateHUD1P* self, sColour* col, float* pos, flo
         vtx[3].pos = sVtxPos(pos[0] + w, pos[1] + height, 0.0f, 1.0f);
         cPS2GraphicsMan* ctx = GrMan;
         sVEntry<void(void*, int, sHudVertex*, int)>* vt = (sVEntry<void (void*, int, sHudVertex*, int)>*)ctx->mVtbl;
-        vt[71].fn((char*)ctx + vt[71].delta, 4, vtx, 0);
+        vt[71].fn(vthis(ctx, vt[71]), 4, vtx, 0);
     }
 }
 #endif

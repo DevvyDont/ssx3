@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "ai/rider.h"
 #include "intersect/worldline.h"
 #include "intersect/worldrider.h"
@@ -1486,12 +1487,12 @@ extern "C" int cWorldIntersectType_IsPatchInt_typed(sQuery_B6E0* query, void* ob
             sSphereVec4& triNormal0 = CellNormal_B6E0(cachedCell, 0, *corner11, *corner10, *corner01);
             if (triNormal0.x != 99999997952.0f && (!query->facing || Dot_A1C0(triNormal0, query->dir) <= 0.8f)) {
                 sVE_B6E0* vt = query->vt;
-                if (vt[4].test((char*)query + vt[4].delta, corner11, corner10, corner01, &triNormal0, hitPos, hitNormal, hitParam)) {
+                if (vt[4].test(vthis(query, vt[4]), corner11, corner10, corner01, &triNormal0, hitPos, hitNormal, hitParam)) {
                     float hitU = cache->u * scale + half;
                     float hitV = cache->v * scale + half;
                     if (query->type == 2) {
                         sVE_B6E0* vt = query->vt;
-                        vt[8].uv((char*)query + vt[8].delta, obj, &hitU, &hitV, hitPos, hitNormal, hitParam);
+                        vt[8].uv(vthis(query, vt[8]), obj, &hitU, &hitV, hitPos, hitNormal, hitParam);
                     }
                     uvOut[0] = hitU;
                     uvOut[1] = hitV;
@@ -1502,12 +1503,12 @@ extern "C" int cWorldIntersectType_IsPatchInt_typed(sQuery_B6E0* query, void* ob
             sSphereVec4& triNormal1 = CellNormal_B6E0(cachedCell, 1, *corner01, *corner10, *corner00);
             if (triNormal1.x != 99999997952.0f && (!query->facing || Dot_A1C0(triNormal1, query->dir) <= 0.8f)) {
                 sVE_B6E0* vt = query->vt;
-                if (vt[4].test((char*)query + vt[4].delta, corner01, corner10, corner00, &triNormal1, hitPos, hitNormal, hitParam)) {
+                if (vt[4].test(vthis(query, vt[4]), corner01, corner10, corner00, &triNormal1, hitPos, hitNormal, hitParam)) {
                     float hitU = cache->u * scale + half;
                     float hitV = cache->v * scale + half;
                     if (query->type == 2) {
                         sVE_B6E0* vt = query->vt;
-                        vt[8].uv((char*)query + vt[8].delta, obj, &hitU, &hitV, hitPos, hitNormal, hitParam);
+                        vt[8].uv(vthis(query, vt[8]), obj, &hitU, &hitV, hitPos, hitNormal, hitParam);
                     }
                     uvOut[0] = hitU;
                     uvOut[1] = hitV;
@@ -1533,12 +1534,12 @@ extern "C" int cWorldIntersectType_IsPatchInt_typed(sQuery_B6E0* query, void* ob
                 sSphereVec4& triNormal0 = CellNormal_B6E0(cell, 0, *corner11, *corner10, *corner01);
                 if (triNormal0.x != 99999997952.0f && (!query->facing || Dot_A1C0(triNormal0, query->dir) <= 0.8f)) {
                     sVE_B6E0* vt = query->vt;
-                    if (vt[4].test((char*)query + vt[4].delta, corner11, corner10, corner01, &triNormal0, hitPos, hitNormal, hitParam)) {
+                    if (vt[4].test(vthis(query, vt[4]), corner11, corner10, corner01, &triNormal0, hitPos, hitNormal, hitParam)) {
                         float hitU = cellU * scale + half;
                         float hitV = cellV * scale + half;
                         if (query->type == 2) {
                             sVE_B6E0* vt = query->vt;
-                            vt[8].uv((char*)query + vt[8].delta, obj, &hitU, &hitV, hitPos, hitNormal, hitParam);
+                            vt[8].uv(vthis(query, vt[8]), obj, &hitU, &hitV, hitPos, hitNormal, hitParam);
                         }
                         uvOut[0] = hitU;
                         uvOut[1] = hitV;
@@ -1555,12 +1556,12 @@ extern "C" int cWorldIntersectType_IsPatchInt_typed(sQuery_B6E0* query, void* ob
                 sSphereVec4& triNormal1 = CellNormal_B6E0(cell, 1, *corner01, *corner10, *corner00);
                 if (triNormal1.x != 99999997952.0f && (!query->facing || Dot_A1C0(triNormal1, query->dir) <= 0.8f)) {
                     sVE_B6E0* vt = query->vt;
-                    if (vt[4].test((char*)query + vt[4].delta, corner01, corner10, corner00, &triNormal1, hitPos, hitNormal, hitParam)) {
+                    if (vt[4].test(vthis(query, vt[4]), corner01, corner10, corner00, &triNormal1, hitPos, hitNormal, hitParam)) {
                         float hitU = cellU * scale + half;
                         float hitV = cellV * scale + half;
                         if (query->type == 2) {
                             sVE_B6E0* vt = query->vt;
-                            vt[8].uv((char*)query + vt[8].delta, obj, &hitU, &hitV, hitPos, hitNormal, hitParam);
+                            vt[8].uv(vthis(query, vt[8]), obj, &hitU, &hitV, hitPos, hitNormal, hitParam);
                         }
                         uvOut[0] = hitU;
                         uvOut[1] = hitV;
@@ -1702,9 +1703,9 @@ extern "C" int cWorldIntersectType_IsMeshInt(sTriTester_C0F8* self, sTriMesh_C0F
             sV4_C0F8* corner2 = &vertices[mesh->indices[i * 3 + 2]];
             int isHit;
             if (flag != 0) {
-                isHit = self->vt[5].fn((char*)self + self->vt[5].delta, corner0, corner1, corner2, nrm, &pos, &hn, &hitParam);
+                isHit = self->vt[5].fn(vthis(self, self->vt[5]), corner0, corner1, corner2, nrm, &pos, &hn, &hitParam);
             } else {
-                isHit = self->vt[4].fn((char*)self + self->vt[4].delta, corner0, corner1, corner2, nrm, &pos, &hn, &hitParam);
+                isHit = self->vt[4].fn(vthis(self, self->vt[4]), corner0, corner1, corner2, nrm, &pos, &hn, &hitParam);
             }
             if (isHit == 0) {
                 continue;
@@ -1735,7 +1736,7 @@ extern "C" int cWorldIntersectType_IsMeshInt(sTriTester_C0F8* self, sTriMesh_C0F
         for (int boxIndex = 0; boxIndex < nb; boxIndex++) {
             sTriBox_C0F8* box = &mesh->boxes[boxIndex];
             sVE_C0F8b* vt = (sVE_C0F8b*)self->vt;
-            if (!vt[9].fn((char*)self + vt[9].delta, box->lo, box->hi)) {
+            if (!vt[9].fn(vthis(self, vt[9]), box->lo, box->hi)) {
                 continue;
             }
             int end = (boxIndex + 1) * 10 < mesh->numTris ? (boxIndex + 1) * 10 : mesh->numTris;
@@ -1750,9 +1751,9 @@ extern "C" int cWorldIntersectType_IsMeshInt(sTriTester_C0F8* self, sTriMesh_C0F
                 sV4_C0F8* corner2 = &vertices[mesh->indices[i * 3 + 2]];
                 int isHit;
                 if (flag != 0) {
-                    isHit = self->vt[5].fn((char*)self + self->vt[5].delta, corner0, corner1, corner2, nrm, &pos, &hn, &hitParam);
+                    isHit = self->vt[5].fn(vthis(self, self->vt[5]), corner0, corner1, corner2, nrm, &pos, &hn, &hitParam);
                 } else {
-                    isHit = self->vt[4].fn((char*)self + self->vt[4].delta, corner0, corner1, corner2, nrm, &pos, &hn, &hitParam);
+                    isHit = self->vt[4].fn(vthis(self, self->vt[4]), corner0, corner1, corner2, nrm, &pos, &hn, &hitParam);
                 }
                 if (isHit == 0) {
                     continue;

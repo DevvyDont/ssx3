@@ -107,9 +107,9 @@ extern "C" void cFEStateLodge_onWidgetCreate(cFEStateLodge* self, cUIThing* w)
     } else if (hashName == GetHashValue32(str_option_7)) {
         w->mMiscData = 7;
         sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)w->mVtbl;
-        vt[8].fn((char*)w + vt[8].delta, 1);
+        vt[8].fn(vthis(w, vt[8]), 1);
         vt = (sVEntry<void(void*, int)>*)w->mVtbl;
-        vt[9].fn((char*)w + vt[9].delta, 0);
+        vt[9].fn(vthis(w, vt[9]), 0);
     } else if (hashName == GetHashValue32(str_title_lodge)) {
         int lvl = cBENewPlayerInterface_getLastHub(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
         if (lvl >= 17) {
@@ -300,7 +300,7 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, u
         case 0x10: {
             self->bToNextState = 1;
             sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)self->mVtbl;
-            vt[19].fn(((char*)self) + vt[19].delta, cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_option_0)), 5);
+            vt[19].fn(vthis(self, vt[19]), cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_option_0)), 5);
             break;
         }
         case 17: {
@@ -446,7 +446,7 @@ static inline int IsK1F4108(int id, char* s)
 static inline void commitK1F4108(void* np)
 {
     sVEntryK1F4108* vt = *(sVEntryK1F4108**)((char*)np + 0xC);
-    vt[1].fn((char*)np + vt[1].delta);
+    vt[1].fn(vthis(np, vt[1]));
 }
 
 /**

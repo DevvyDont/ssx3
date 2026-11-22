@@ -50,7 +50,7 @@ extern "C" void cUIMenu_setSelected(cUIMenu* self, cUIThing* item, int play)
         }
         cUIThing* oldSelected = self->mpSelected;
         cUIMenu_sVEntryA* va = (cUIMenu_sVEntryA*)oldSelected->mVtbl;
-        va[7].fn(((char*)oldSelected) + va[7].delta, 0);
+        va[7].fn(vthis(oldSelected, va[7]), 0);
         char* screenState = (char*)self->mpScreen->mpState;
         cUIMenu_sVEntryB* vb = *(cUIMenu_sVEntryB**)(screenState + 8);
         vb[19].fn(screenState + vb[19].delta, self->mpSelected, 2);
@@ -61,7 +61,7 @@ extern "C" void cUIMenu_setSelected(cUIMenu* self, cUIThing* item, int play)
     vb2[19].fn(selState + vb2[19].delta, ((char*)item), 1);
     cUIThing* newSelected = self->mpSelected;
     cUIMenu_sVEntryA* va2 = (cUIMenu_sVEntryA*)newSelected->mVtbl;
-    va2[7].fn(((char*)newSelected) + va2[7].delta, 1);
+    va2[7].fn(vthis(newSelected, va2[7]), 1);
     unsigned short ev2 = cUIThing_getKeyframerEvent(self->mpSelected, 0);
     if (ev2 != 0xFFFF) {
         void* scr = self->mpSelected->mpScreen;
@@ -150,13 +150,13 @@ extern "C" int cUIMenu_onInputChangeItem(cUIMenu* self, unsigned char old);
 static inline int inputIs_B000(void* in, int slot)
 {
     sVEntry<int(void*, ...)>* vt = *(sVEntry<int(void*, ...)>**)((char*)in + 8);
-    return vt[slot].fn((char*)in + vt[slot].delta);
+    return vt[slot].fn(vthis(in, vt[slot]));
 }
 
 static inline int inputBtn_B000(void* in, int button)
 {
     sVEntry<int(void*, ...)>* vt = *(sVEntry<int(void*, ...)>**)((char*)in + 8);
-    return vt[2].fn((char*)in + vt[2].delta, button);
+    return vt[2].fn(vthis(in, vt[2]), button);
 }
 
 static inline void focusNotify_B000(char* self, void* item, int what)
@@ -212,7 +212,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
     }
     if (bit_B000(((char*)cur), 20, 3) && !bit_B000(((char*)cur), 20, 5)) {
         sVEntry<int(void*, ...)>* vt = (sVEntry<int(void*, ...)>*)cur->mVtbl;
-        if (vt[15].fn(((char*)cur) + vt[15].delta, in) != 0) {
+        if (vt[15].fn(vthis(cur, vt[15]), in) != 0) {
             return 1;
         }
     }
@@ -364,7 +364,7 @@ extern "C" void cUIMenu_render2D(cUIMenu* self, float x, float y)
         do {
             if ((*(int*)((char*)n + 0x14) >> 6) & 1) {
                 cUIMenu_render2D_sVEntry* vt = *(cUIMenu_render2D_sVEntry**)((char*)n + 8);
-                vt[17].fn((char*)n + vt[0x11].delta, self->mPosition.x + x, self->mPosition.y + y);
+                vt[17].fn(vthis(n, vt[0x11]), self->mPosition.x + x, self->mPosition.y + y);
             }
             n = *(void**)((char*)n + 4);
         } while (!cListNode_isSentinel((cListNode*)n));
@@ -618,12 +618,12 @@ extern "C" void cUIPair_setVisible(cUIPair* self, int on)
     cUIThing* entry = self->mpEntry;
     if (entry != 0) {
         cUIPair_setVisible_sVEntry* vt = (cUIPair_setVisible_sVEntry*)entry->mVtbl;
-        vt[9].fn((char*)entry + vt[9].delta, on);
+        vt[9].fn(vthis(entry, vt[9]), on);
     }
     cUIThing* widget = self->mpWidget;
     if (widget != 0) {
         cUIPair_setVisible_sVEntry* vt = (cUIPair_setVisible_sVEntry*)widget->mVtbl;
-        vt[9].fn((char*)widget + vt[9].delta, on);
+        vt[9].fn(vthis(widget, vt[9]), on);
     }
 }
 #endif
@@ -666,7 +666,7 @@ extern "C" void cUIPair_setFocus(cUIPair* self, int on)
     cUIThing* entry = self->mpEntry;
     if (((char*)entry) != 0) {
         cUIPair_setFocus_sVEntryA* va = (cUIPair_setFocus_sVEntryA*)entry->mVtbl;
-        va[7].fn(((char*)entry) + va[7].delta, on);
+        va[7].fn(vthis(entry, va[7]), on);
     }
     char* widget = (char*)self->mpWidget;
     if (widget == 0) {
@@ -682,7 +682,7 @@ extern "C" void cUIPair_setFocus(cUIPair* self, int on)
         }
         cUIThing* widgetObj = self->mpWidget;
         cUIPair_setFocus_sVEntryA* vc = (cUIPair_setFocus_sVEntryA*)widgetObj->mVtbl;
-        vc[7].fn(((char*)widgetObj) + vc[7].delta, 1);
+        vc[7].fn(vthis(widgetObj, vc[7]), 1);
         char* screenState = (char*)self->mpScreen->mpState;
         cUIPair_setFocus_sVEntryB* vo = *(cUIPair_setFocus_sVEntryB**)(screenState + 8);
         vo[19].fn(screenState + vo[19].delta, self->mpWidget, 1);
@@ -696,7 +696,7 @@ extern "C" void cUIPair_setFocus(cUIPair* self, int on)
         }
         cUIThing* widgetObj = self->mpWidget;
         cUIPair_setFocus_sVEntryA* vc = (cUIPair_setFocus_sVEntryA*)widgetObj->mVtbl;
-        vc[7].fn(((char*)widgetObj) + vc[7].delta, 0);
+        vc[7].fn(vthis(widgetObj, vc[7]), 0);
         char* screenState = (char*)self->mpScreen->mpState;
         cUIPair_setFocus_sVEntryB* vo = *(cUIPair_setFocus_sVEntryB**)(screenState + 8);
         vo[19].fn(screenState + vo[19].delta, self->mpWidget, 2);
@@ -857,7 +857,7 @@ struct sVEv_BED8 { short delta; short index; void (*fn)(void*, ...); };
 static inline int inputIs_BED8(void* in, int slot)
 {
     sVE_BED8* vt = *(sVE_BED8**)((char*)in + 8);
-    return vt[slot].fn((char*)in + vt[slot].delta);
+    return vt[slot].fn(vthis(in, vt[slot]));
 }
 
 static inline void focusNotify_BED8(char* self, int what)
@@ -933,7 +933,7 @@ extern "C" int cUIPair_onInput(cUIPair* self, cUIInput* in)
         cUIThing* sub = self->mpWidget;
         if (((char*)sub) != 0) {
             sVE_BED8* vt = (sVE_BED8*)sub->mVtbl;
-            return vt[15].fn(((char*)sub) + vt[15].delta, in);
+            return vt[15].fn(vthis(sub, vt[15]), in);
         }
         return 0;
     }
@@ -961,12 +961,12 @@ extern "C" void cUIPair_render2D(cUIPair* self, float x, float y)
     cUIThing* entry = self->mpEntry;
     if (entry != 0) {
         cUIPair_render2D_sVEntry* vtEntry = &((cUIPair_render2D_sVEntry*)entry->mVtbl)[17];
-        vtEntry->fn((char*)entry + vtEntry->delta, x + self->mPosition.x, y + self->mPosition.y);
+        vtEntry->fn(vthis(entry, *vtEntry), x + self->mPosition.x, y + self->mPosition.y);
     }
     cUIThing* widget = self->mpWidget;
     if (widget != 0) {
         cUIPair_render2D_sVEntry* vtEntry = &((cUIPair_render2D_sVEntry*)widget->mVtbl)[17];
-        vtEntry->fn((char*)widget + vtEntry->delta, x + self->mPosition.x, y + self->mPosition.y);
+        vtEntry->fn(vthis(widget, *vtEntry), x + self->mPosition.x, y + self->mPosition.y);
     }
 }
 #endif
@@ -1043,12 +1043,12 @@ extern "C" void cUIProgress__cUIProgress(cUIProgress* self, int flags)
     cUIThing* background = self->mpObjBackground;
     if (background != 0) {
         cUIProgress__cUIProgress_sVEntry* vt = (cUIProgress__cUIProgress_sVEntry*)background->mVtbl;
-        vt[1].fn((char*)background + vt[1].delta, 3);
+        vt[1].fn(vthis(background, vt[1]), 3);
     }
     cUIThing* knob = self->mpObjKnob;
     if (knob != 0) {
         cUIProgress__cUIProgress_sVEntry* vt = (cUIProgress__cUIProgress_sVEntry*)knob->mVtbl;
-        vt[1].fn((char*)knob + vt[1].delta, 3);
+        vt[1].fn(vthis(knob, vt[1]), 3);
     }
     cUIThing__cUIThing(self, flags);
 }
@@ -1094,10 +1094,10 @@ extern "C" void cUIProgress_render2D(cUIProgress* self, float x, float y)
         float px = x + self->mPosition.x;
         float py = y + self->mPosition.y;
         cUIProgress_render2D_sVEntry* vt = (cUIProgress_render2D_sVEntry*)background->mVtbl;
-        vt[17].fn((char*)background + vt[17].delta, px, py);
+        vt[17].fn(vthis(background, vt[17]), px, py);
         cUIThing* knob = self->mpObjKnob;
         cUIProgress_render2D_sVEntry* vt2 = (cUIProgress_render2D_sVEntry*)knob->mVtbl;
-        vt2[17].fn((char*)knob + vt2[17].delta, px, py);
+        vt2[17].fn(vthis(knob, vt2[17]), px, py);
     }
 }
 #endif
@@ -1128,12 +1128,12 @@ extern "C" void cUIProgress_update(cUIProgress* self, unsigned short ev)
     cUIThing* knob = self->mpObjKnob;
     if (knob != 0) {
         cUIProgress_update_sVEntry* vt = (cUIProgress_update_sVEntry*)knob->mVtbl;
-        vt[19].fn((char*)knob + vt[19].delta, ev);
+        vt[19].fn(vthis(knob, vt[19]), ev);
     }
     cUIThing* background = self->mpObjBackground;
     if (background != 0) {
         cUIProgress_update_sVEntry* vt = (cUIProgress_update_sVEntry*)background->mVtbl;
-        vt[19].fn((char*)background + vt[19].delta, ev);
+        vt[19].fn(vthis(background, vt[19]), ev);
     }
 }
 #endif

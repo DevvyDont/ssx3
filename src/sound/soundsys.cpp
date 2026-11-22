@@ -1702,7 +1702,7 @@ extern "C" void cSSXAudio_StopRiderSound(cSSXAudio* self, int Rider)
     sSys292AE8* sys = *(sSys292AE8**)self->MusicSys.mpVStreamSys;
     sVE292AE8* vt = sys->bank.vt;
     sys = (sSys292AE8*)&sys->bank;
-    vt[4].fn((char*)sys + vt[4].delta, Rider);
+    vt[4].fn(vthis(sys, vt[4]), Rider);
     cMonitor_MONITOR_DestroyAll1(&(*(sSys292AE8**)self->MusicSys.mpVStreamSys)->bank, D_004A36A8[0].v);
 }
 #endif
@@ -2961,7 +2961,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_PlayPauseSound);
 extern "C" int cSSXAudio_PlayPauseSound(cSSXAudio* self)
 {
     sVEntry<int(void*, int, int)>* vt = (sVEntry<int(void*, int, int)>*)self->mVtbl;
-    return vt[1].fn((char*)self + vt[1].delta, 0, 0);
+    return vt[1].fn(vthis(self, vt[1]), 0, 0);
 }
 #endif
 
@@ -3016,7 +3016,7 @@ extern "C" void cSSXAudio_MenuSound(cSSXAudio* self, int cue)
     }
     if (id != -1) {
         sVEntry<int(void*, int, int)>* vt = (sVEntry<int(void*, int, int)>*)self->mVtbl;
-        vt[1].fn((char*)self + vt[1].delta, 0, id);
+        vt[1].fn(vthis(self, vt[1]), 0, id);
     }
 }
 #endif
@@ -9016,7 +9016,7 @@ extern "C" int func_0029F620(void* self, cRider* obj)
 {
     void* sub = (char*)&obj->mVtbl;
     sSndVEntry29F620* vt = *(sSndVEntry29F620**)sub;
-    if (vt[7].fn((char*)sub + vt[7].delta) == 0) {
+    if (vt[7].fn(vthis(sub, vt[7])) == 0) {
         return 0xE;
     }
     return 0xF;
@@ -13304,7 +13304,7 @@ void func_002A4E88_c(sCrowd4E88* self)
     if (self->state != 0) {
         cCrowdSys* sys = gpCrowdSys;
         sCrowdVt4E88* vt = (sCrowdVt4E88*)((void*)sys->mVtbl);
-        int anticipateLevel = vt[2].fn((char*)sys + vt[2].delta, self->mViewPort, &outA, &outB);
+        int anticipateLevel = vt[2].fn(vthis(sys, vt[2]), self->mViewPort, &outA, &outB);
         if (anticipateLevel == 1 || anticipateLevel == 2) {
             self->f18C = anticipateLevel;
         }
@@ -15718,7 +15718,7 @@ extern "C" void cPS2SoundManager_Init(cPS2SoundManager* self, int mode)
     self->mSoundHeap = operator_new_tag(0x32000, str_mSoundHeap, 0, 0);
     func_003B5478();
     sSndVtE8CB0* vt = ((sSndVtE8CB0*)self->mVtbl);
-    vt[2].fn((char*)self + vt[2].delta, mode);
+    vt[2].fn(vthis(self, vt[2]), mode);
     func_003B5158(self->mSoundHeap, 0x32000, 0x80303);
     self->unk_310 = 31;
     self->unk_318 = -1;

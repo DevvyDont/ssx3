@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "bx/math3d.h"
 #include "fe/ferider.h"
 #include "be/berewarddb.h"
@@ -318,7 +319,7 @@ struct sWidget_1620 {
 
 static inline void refresh_1620(sWidget_1620* w)
 {
-    w->vt[9].fn((char*)w + w->vt[9].delta, 0);
+    w->vt[9].fn(vthis(w, w->vt[9]), 0);
 }
 
 /**
@@ -910,7 +911,7 @@ struct sCW_2460 {
 
 static inline void vcall_2460(sCW_2460* w, int k, int v)
 {
-    w->vt[k].fn((char*)w + w->vt[k].delta, v);
+    w->vt[k].fn(vthis(w, w->vt[k]), v);
 }
 
 /**
@@ -1012,13 +1013,13 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(cFEStateCheatCharSelect* s
     switch (msg) {
     case 2: {
         sVEK182690a* vt = (sVEK182690a*)menu->mVtbl;
-        vt[21].fn((char*)menu + vt[21].delta, D_004C66A8);
+        vt[21].fn(vthis(menu, vt[21]), D_004C66A8);
         break;
     }
     case 1: {
         int sel = menu->mMiscData + *(unsigned char*)((char*)self->mpMenu + 0x98);
         sVEK182690a* vt = (sVEK182690a*)menu->mVtbl;
-        vt[21].fn((char*)menu + vt[21].delta, D_004C66B8);
+        vt[21].fn(vthis(menu, vt[21]), D_004C66B8);
         cUIText_setAsciiString(self->mpNameWidget, self->mpCharNames[sel]);
         break;
     }

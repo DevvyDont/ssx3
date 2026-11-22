@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "bx/appman.h"
 #include "bx/math3d.h"
 #include "object/animnode.h"
@@ -127,13 +128,13 @@ extern "C" void cAnimNode_calcPosition(cAnimNode* self, int id, int idx, sVec4_E
     void* obj = (char*)&self->unk_014;
     if (id == (int)self->Instance) {
         sVEntry_E600a* vt = (sVEntry_E600a*)self->mVtbl;
-        sVec4_E600 position = vt[29].fn((char*)obj + vt[29].delta, idx)->r[3];
+        sVec4_E600 position = vt[29].fn(vthis(obj, vt[29]), idx)->r[3];
         *out = position;
         return;
     }
     sMat_E600 buf[24];
     sVEntry_E600b* vt = (sVEntry_E600b*)self->mVtbl;
-    vt[33].fn((char*)obj + vt[33].delta, id + 0x10, buf);
+    vt[33].fn(vthis(obj, vt[33]), id + 0x10, buf);
     sVec4_E600 position = buf[idx].r[3];
     *out = position;
 }
@@ -426,7 +427,7 @@ extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
         char* node = (char*)self->AnimFrames + k * 208;
         k++;
         sVE_E798* vt = (sVE_E798*)self->mVtbl;
-        float animSpeed = ((float (*)(void*))vt[53].fn)(((char*)self) + vt[53].delta);
+        float animSpeed = ((float (*)(void*))vt[53].fn)(vthis(self, vt[53]));
         sVec4_E798 pos;
         sVec4_E798 rotv;
         cAnimFrame_getDeriv(node, &pos, &rotv, self->CacheTime);
@@ -667,12 +668,12 @@ extern "C" void* cFloatingNode_cFloatingNode1(cFloatingNode* self, void* bucket,
     self->Info = 0;
     self->mVtbl = cFloatingNode_vtbl;
     sStreamVE_ED88* vt = *(sStreamVE_ED88**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, &hasInfo, 4);
+    vt[2].fn(vthis(stream, vt[2]), &hasInfo, 4);
     if (hasInfo != 0) {
         cFloatingNode_initInfo((cFloatingNode*)self);
     }
     sStreamVE_ED88* vt2 = *(sStreamVE_ED88**)stream;
-    vt2[2].fn((char*)stream + vt2[2].delta, (char*)&self->ZSpring, 72);
+    vt2[2].fn(vthis(stream, vt2[2]), (char*)&self->ZSpring, 72);
     sAnimFrame_ED88** pf = (sAnimFrame_ED88**)(&self->AnimMats);
     *pf = new (str_FloatingMats, 0x20000000, 0) sAnimFrame_ED88[*(int*)(*(char**)((char*)self->Instance + 0x80) + 0x4)];
     self->Flags |= 1;

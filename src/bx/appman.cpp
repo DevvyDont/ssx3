@@ -108,7 +108,7 @@ extern "C" int cAppMan_run(cAppMan* self, char* exec, int ac, int av)
     self->TimerHz = 60;
     call1_6D60(exec, 8, 2, 60);
     sVEntry<void(void*, int, int)>* vt = (sVEntry<void(void*, int, int)>*)self->mVtbl;
-    vt[3].fn(((char*)self) + vt[3].delta, ac, av);
+    vt[3].fn(vthis(self, vt[3]), ac, av);
     call1_6D60((char*)self->ExecutionMan, 8, 9, (int)self->LoadingModule);
     while (call0_6D60((char*)self->ExecutionMan, 8, 10) == 0) {
         callv_6D60((char*)self->ExecutionMan, 8, 11);
@@ -438,7 +438,7 @@ extern "C" void cExecutionMan_halt_impl(cExecutionMan* self, int callback, int d
     (*(int*)&self->HaltData) = data;
     sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)((void*)self->mVtbl);
     (*(int*)&self->HaltCallback) = callback;
-    vt[13].fn((char*)self + vt[13].delta);
+    vt[13].fn(vthis(self, vt[13]));
 }
 #endif
 

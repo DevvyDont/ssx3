@@ -559,7 +559,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(cOVState_PAUSE_OPTIONS* sel
                 func_00266E30(VoipMan);
             }
         }
-        iface->vtbl[1].fn((char*)iface + iface->vtbl[1].delta);
+        iface->vtbl[1].fn(vthis(iface, iface->vtbl[1]));
         break;
     }
 }
@@ -1013,7 +1013,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(cOVState_PAUSE_O
             cUIText_setUnicodeStringByID(infoText, GetHashValue32(str_kT_PauseErrorServerCheckTimedOut));
         }
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)infoText + 0x8);
-        vt[9].fn((char*)infoText + vt[9].delta, self->mbShouldDisplayAuxInfo);
+        vt[9].fn(vthis(infoText, vt[9]), self->mbShouldDisplayAuxInfo);
     }
 }
 #endif
@@ -1045,7 +1045,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(cOVState_PAUSE_O
             cUIText_setUnicodeStringByID(infoText, GetHashValue32(str_kT_PauseErrorOpponentDisconnected));
         }
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)infoText + 0x8);
-        vt[9].fn((char*)infoText + vt[9].delta, self->mbShouldDisplayAuxInfo);
+        vt[9].fn(vthis(infoText, vt[9]), self->mbShouldDisplayAuxInfo);
         cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(self, 1);
     }
 }

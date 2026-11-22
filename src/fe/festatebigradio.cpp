@@ -320,15 +320,15 @@ extern "C" void cFEStateBraggingRights_onUpdate(cFEStateBraggingRights* self)
             panelIdx = i;
         }
         sVESet_3338* vt = *(sVESet_3338**)((char*)obj + 8);
-        vt[44].fn((char*)obj + vt[44].delta, id);
+        vt[44].fn(vthis(obj, vt[44]), id);
         sVEGet_3338* vt2 = *(sVEGet_3338**)((char*)obj + 8);
-        if (vt2[40].fn((char*)obj + vt2[40].delta) != 0 && get6F8_3338((char*)self + panelIdx * 0x34) == 0) {
+        if (vt2[40].fn(vthis(obj, vt2[40])) != 0 && get6F8_3338((char*)self + panelIdx * 0x34) == 0) {
             void* menu = *(void**)((char*)self + panelIdx * 0x34 + 0x6D0);
             sVEPtr_3338* vt3 = *(sVEPtr_3338**)((char*)menu + 8);
-            vt3[15].fn((char*)menu + vt3[15].delta, obj);
+            vt3[15].fn(vthis(menu, vt3[15]), obj);
         } else {
             sVEGet_3338* vt4 = *(sVEGet_3338**)((char*)obj + 8);
-            if (vt4[6].fn((char*)obj + vt4[6].delta) != 0 && get6F8_3338((char*)self + panelIdx * 0x34) != 0) {
+            if (vt4[6].fn(vthis(obj, vt4[6])) != 0 && get6F8_3338((char*)self + panelIdx * 0x34) != 0) {
                 char label[5];  // "11", "21" for the second panel
                 *(struct sStr3_3338*)label = *(struct sStr3_3338*)str_11;
                 func_00416210_3338(label + 3, 0, 2);
@@ -557,7 +557,7 @@ static inline int isOn_38F8()
 static inline void* vcall_38F8(char* self, int slot, cUIThing* w)
 {
     sVObj_38F8* o = **(sVObj_38F8***)(self + 0x10);
-    return o->vt[slot].fn((char*)o + o->vt[slot].delta, self, w->mMiscData);
+    return o->vt[slot].fn(vthis(o, o->vt[slot]), self, w->mMiscData);
 }
 
 /**
@@ -1086,12 +1086,12 @@ struct sVEntry00194498b {
 extern "C" void DisableTextWidget(void* self)
 {
     sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)self + 8);
-    vt[8].fn((char*)self + vt[8].delta, 1);
+    vt[8].fn(vthis(self, vt[8]), 1);
     tARGB colour = *(tARGB*)((char*)self + 0x1C);
     if (colour.A > 0.5f) {
         colour.A = 0.5f;
         sVEntry00194498b* vt2 = *(sVEntry00194498b**)((char*)self + 8);
-        vt2[11].fn((char*)self + vt2[11].delta, &colour);
+        vt2[11].fn(vthis(self, vt2[11]), &colour);
     }
 }
 #endif

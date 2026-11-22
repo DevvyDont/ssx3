@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "replay/frameptr.h"
 #include "ai/ridermetrix.h"
 #include "replay/replay.h"
@@ -81,7 +82,7 @@ extern "C" void cReplay_restoreFrame(cReplay* self, cStreamRF* stream)
     vt[9].fn(game + vt[9].delta, stream);
     cAI* aiObj = SSXApp->Game->AI;
     sVtS_DBF0* vt2 = (sVtS_DBF0*)aiObj->mVtbl;
-    vt2[8].fn(((char*)aiObj) + vt2[8].delta, stream);
+    vt2[8].fn(vthis(aiObj, vt2[8]), stream);
     cAvalanche_readFromReplayFrame((char*)stream);
     cWScriptMan_readFromReplayFrame(cWScriptMan_TheWScriptMan, stream);
     func_00229E58(TheCrowdMan2d, stream);
@@ -158,7 +159,7 @@ extern "C" void cReplay_applyBucket(cReplay* self, int bucket)
     cBucketMan* bm = (cBucketMan*)&gBucketMan;
     while (node != 0) {
         sBucketVEntryDE58* vt = *(sBucketVEntryDE58**)((char*)node + 0xC);
-        vt[3].fn((char*)node + vt[3].delta);
+        vt[3].fn(vthis(node, vt[3]));
         node = cBucketMan_next(bm, node, bucket);
     }
 }
@@ -294,7 +295,7 @@ extern "C" void cReplay_restoreObject(cReplay* self, void* bucket, cStreamRB* st
     case 22: {
         sObj_RO* deadFadeNode = cDeadFadeNode_cDeadFadeNode1_RO(cMemMan_alloc(0x3C, str_DeadFade, 0x20000000, 0), bucket, stream);
         if (deadFadeNode != 0) {
-            deadFadeNode->vt[1].fn((char*)deadFadeNode + deadFadeNode->vt[1].delta, 3);
+            deadFadeNode->vt[1].fn(vthis(deadFadeNode, deadFadeNode->vt[1]), 3);
         }
         break;
     }

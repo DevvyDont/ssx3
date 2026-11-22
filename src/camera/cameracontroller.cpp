@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "camera/cameracontroller.h"
 #include "camera/race/racecontroller.h"
 
@@ -95,7 +96,7 @@ void cCameraController_snap_impl(void* vself, int subjectID)
     {
         void* obj = n->obj;
         sCamCtrlVE* vt = *(sCamCtrlVE**)((char*)obj + 0x10);
-        vt[3].fn((char*)obj + vt[3].delta, subjectID);
+        vt[3].fn(vthis(obj, vt[3]), subjectID);
     }
     cCamera_snapResultAlgorithm(self->Camera);
     cSplashManager_CameraSnapped(self->Camera);
@@ -132,7 +133,7 @@ extern "C" void cCameraController_snapCurrent(cCameraController* self)
     {
         void* obj = n->obj;
         sCamCtrlVE0* vt = *(sCamCtrlVE0**)((char*)obj + 0x10);
-        vt[4].fn((char*)obj + vt[4].delta);
+        vt[4].fn(vthis(obj, vt[4]));
     }
     cCamera_snapResultAlgorithm(self->Camera);
     cSplashManager_CameraSnapped(self->Camera);

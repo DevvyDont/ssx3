@@ -1758,7 +1758,7 @@ INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_writeToReplayFrame);
 extern "C" void cWipeoutMotion_writeToReplayFrame(cWipeoutMotion* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn((char*)obj + vt[1].delta, self, 0x40);
+    vt[1].fn(vthis(obj, vt[1]), self, 0x40);
 }
 #endif
 
@@ -1777,7 +1777,7 @@ INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_readFromReplayFrame);
 extern "C" void cWipeoutMotion_readFromReplayFrame(cWipeoutMotion* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn((char*)obj + vt[2].delta, self, 0x40);
+    vt[2].fn(vthis(obj, vt[2]), self, 0x40);
 }
 #endif
 

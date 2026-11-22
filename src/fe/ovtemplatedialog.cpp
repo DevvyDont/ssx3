@@ -1815,7 +1815,7 @@ extern "C" void cOVTemplate_Dialog_onCreateScreen(cOVTemplate_Dialog* self)
     case 1: {
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_OVRCMNQuitGame));
         sObj_DlgCreate* quitChallengeTitle = (sObj_DlgCreate*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_quitchallenge));
-        quitChallengeTitle->vt[9].fn((char*)quitChallengeTitle + quitChallengeTitle->vt[9].delta, 0);
+        quitChallengeTitle->vt[9].fn(vthis(quitChallengeTitle, quitChallengeTitle->vt[9]), 0);
         break;
     }
     case 0:
@@ -1836,7 +1836,7 @@ extern "C" void cOVTemplate_Dialog_onCreateScreen(cOVTemplate_Dialog* self)
     case 6: {
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_CMNSaveBeforeQuit));
         sObj_DlgCreate* quitChallengeTitle = (sObj_DlgCreate*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_quitchallenge));
-        quitChallengeTitle->vt[9].fn((char*)quitChallengeTitle + quitChallengeTitle->vt[9].delta, 0);
+        quitChallengeTitle->vt[9].fn(vthis(quitChallengeTitle, quitChallengeTitle->vt[9]), 0);
         break;
     }
     default:

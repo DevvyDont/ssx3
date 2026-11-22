@@ -473,7 +473,7 @@ extern "C" int cSSXScriptEngine_ForcePlayUpdate(cSSXScriptEngine* self, int key)
         for (int i = 0; i < 2; i++, slot++) {
             sSsxVEntry8AD0* vt = (sSsxVEntry8AD0*)self->mVtbl;
             int id = slot->id;
-            void* obj = (char*)self + vt[4].delta;
+            void* obj = vthis(self, vt[4]);
             // PORT: cBXScriptEngine_GetRequestPlayerByReqHandle returns a pointer as int
             if (vt[4].fn(obj, id, *(int*)cBXScriptEngine_GetRequestPlayerByReqHandle(self, key))) {
                 cScriptObjCameraManager_Update((cScriptObjCameraManager*)slot);
@@ -2510,7 +2510,7 @@ extern sScTbl_AC60 D_00481E90;
 static inline int Call_AC60(sScRider_AC60* r, int slot)
 {
     sScSub_AC60* s = &r->sub;
-    return s->vt[slot].fn((char*)s + s->vt[slot].delta);
+    return s->vt[slot].fn(vthis(s, s->vt[slot]));
 }
 
 /**
@@ -4348,7 +4348,7 @@ extern "C" void cScriptDatabaseObject_RemoveObjectAll(cScriptDatabaseObject* sel
     for (i = 0; i < 20; i++) {
         if (((int*)self)[i] != 0) {
             sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)self->mVtbl;
-            vt[3].fn((char*)self + vt[3].delta, i);
+            vt[3].fn(vthis(self, vt[3]), i);
         }
     }
 }
@@ -4641,7 +4641,7 @@ extern "C" void cScriptDatabaseObject_MarkEntityAsUsed(sScrOwnerD400* self, int*
 {
     sVEntry<int(void*, int, int)>* vt = *(sVEntry<int(void*, int, int)>**)((char*)self + 0x2A8);
     tScriptEntityRecord* record = &self->slots[key[1]];
-    if (vt[4].fn((char*)self + vt[4].delta, record->objID, value) == 0) {
+    if (vt[4].fn(vthis(self, vt[4]), record->objID, value) == 0) {
         char* obj = (char*)self->objs[record->objID];
         sScrVEntryD400b* vt2 = *(sScrVEntryD400b**)(obj + 0xC);
         vt2[4].fn(obj + vt2[4].delta, value);
@@ -4695,7 +4695,7 @@ extern "C" void cScriptDatabaseObject_MarkEntityAsFree(sScrOwnerD4A0* self, int*
     record->value = -1;
     record->set = 0;
     sScrVEntryD4A0* vt = *(sScrVEntryD4A0**)((char*)self + 0x2A8);
-    if (vt[4].fn((char*)self + vt[4].delta, record->id, old) == 0) {
+    if (vt[4].fn(vthis(self, vt[4]), record->id, old) == 0) {
         char* obj = (char*)self->objs[record->id];
         sScrVEntryD4A0b* vt2 = *(sScrVEntryD4A0b**)(obj + 0xC);
         vt2[5].fn(obj + vt2[5].delta, old);
@@ -4855,12 +4855,12 @@ extern "C" void cScriptObjCamera_SetCameraEntity(cScriptObjCamera* self, void* a
         int id = cScriptDatabaseObject_GetPlayerIDByEntity((cScriptDatabaseObject*)(cScriptDatabaseObject_GetDatabaseObject()), anim);
         if (self->mpCameraEntity != 0) {
             sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
-            vt[5].fn(((char*)self) + vt[5].delta, self->mPlayerID);
+            vt[5].fn(vthis(self, vt[5]), self->mPlayerID);
         }
         self->mpCameraEntity = (cScriptEntityCamera*)anim;
         self->mPlayerID = id;
         sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
-        vt[4].fn(((char*)self) + vt[4].delta, id);
+        vt[4].fn(vthis(self, vt[4]), id);
     } else if (self->mpCameraEntity != 0) {
         __asm__ __volatile__(
             ".set noreorder\n"
@@ -4880,7 +4880,7 @@ extern "C" void cScriptObjCamera_SetCameraEntity(cScriptObjCamera* self, void* a
         *(int*)&self->mBaseRotY = 0;
         *(int*)&self->mBaseRotZ = 0;
         sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
-        vt[5].fn(((char*)self) + vt[5].delta, self->mPlayerID);
+        vt[5].fn(vthis(self, vt[5]), self->mPlayerID);
         self->mpCameraEntity = 0;
         self->mPlayerID = -1;
     }

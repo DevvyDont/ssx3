@@ -1815,7 +1815,7 @@ extern "C" void cRider_flagEventLand(cRider* self, int isPipe, int rsm, int pres
     if (0.0f < powerUp)
         self->mPowerUpTrickTimer = 0.0f;
     sVEf_0010E910* vf = &((sVEf_0010E910*)self->mVtbl)[17];
-    vf->fn(((char*)self) + vf->delta, speed * 0.5f);
+    vf->fn(vthis(self, *vf), speed * 0.5f);
     cSSXAudio_Land(gSSXAudio, ((char*)self), powerUp);
 }
 #endif
@@ -2022,7 +2022,7 @@ static inline sXf_EB30 Combine_EB30(const sXf_EB30& a, const sXf_EB30& b)
 extern "C" void cRider_flagEventWipeout(cRider* rider, int anim, int isPunch, int surf, char* evt)
 {
     sVE_EB30* vt = *(sVE_EB30**)&rider->mVtbl;
-    vt[kRiderVt_vibrationBump].fn((char*)rider + vt[kRiderVt_vibrationBump].delta, *(float*)(evt + 0x30) * 5.0f);
+    vt[kRiderVt_vibrationBump].fn(vthis(rider, vt[kRiderVt_vibrationBump]), *(float*)(evt + 0x30) * 5.0f);
     float amt = cRiderMetrix_evWipeout(rider->mMetrix, isPunch);
     cRider_flagEventBoostPowerUp(rider, 1, amt);
     cSSXAudio_WipeoutHit(cAudioInterface_bxAudio(), rider);
@@ -4202,7 +4202,7 @@ extern "C" void cRider_checkAIPathSwitch(cRider* vself, int keep)
         sVEntry<int(void*)>* ve = &(*(sVEntry<int(void*)>**)being)[9];
         if (ve->fn(being + ve->delta) == 1) {
             sVEntry<float(void*, void*)>* vf = &((sVEntry<float(void*, void*)>*)vself->mVtbl)[20];
-            dist = vf->fn(((char*)vself) + vf->delta, paths[i]);
+            dist = vf->fn(vthis(vself, *vf), paths[i]);
             if (bestW < dist) {
                 best = paths[i];
                 bestW = dist;

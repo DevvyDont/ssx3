@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "world/instancerecord.h"
 #include "bx/math3d.h"
 #include "world/worldview.h"
@@ -479,7 +480,7 @@ struct sFloat_F600 {
 extern "C" void cFloatingNode_applyForce(cFloatingNode* self, sV4_F600* intInfo, sV4_F600* force)
 {
     sFlVE_F600* vt = (sFlVE_F600*)self->mVtbl;
-    sV4_F600* transform = vt[24].fn((char*)self + vt[24].delta);
+    sV4_F600* transform = vt[24].fn(vthis(self, vt[24]));
     sV4_F600 arm = vu0Sub_F600(intInfo[0], pos_F600(transform));
     sV4_F600 axisX = vu0MtxMul_F600(transform, &D_004FF140_F600[0]);
     sV4_F600 axisY = vu0MtxMul_F600(transform, &D_004FF150_F600[0]);
@@ -635,7 +636,7 @@ extern "C" void cFloatingNode_updateIntersectInfo(cFloatingNode* self, sV4_F790*
 {
     cMoveNode_updateIntersectInfo((self), intInfo);
     sFlVE_F790* vt = (sFlVE_F790*)self->mVtbl;
-    sV4_F790* transform = vt[24].fn((char*)self + vt[24].delta);
+    sV4_F790* transform = vt[24].fn(vthis(self, vt[24]));
     sFlBase_F790* base = (sFlBase_F790*)&self->ZSpring;
     sV4_F790 arm = vu0Sub_F790(intInfo[0], pos_F790(transform));
     sV4_F790 axisX = vu0MtxMul_F790(transform, &D_004FF140_F790[0]);
@@ -734,9 +735,9 @@ extern "C" void cFloatingNode_writeToReplayFrame(cFloatingNode* self, void* stre
     cMoveNode_writeToReplayFrame(self, stream);
     has = ((void*)self->Info) != 0;
     sFloatingVEntryFA88* vtEntry = &(*(sFloatingVEntryFA88**)stream)[1];
-    vtEntry->fn((char*)stream + vtEntry->delta, &has, 4);
+    vtEntry->fn(vthis(stream, *vtEntry), &has, 4);
     vtEntry = &(*(sFloatingVEntryFA88**)stream)[1];
-    vtEntry->fn((char*)stream + vtEntry->delta, (char*)&self->ZSpring, 72);
+    vtEntry->fn(vthis(stream, *vtEntry), (char*)&self->ZSpring, 72);
 }
 #endif
 

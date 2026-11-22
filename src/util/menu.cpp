@@ -1282,7 +1282,7 @@ extern "C" void cMenu_drawBox1(cMenu* self, void* rect, int on)
 {
     sVEntry2CB880* vt = (sVEntry2CB880*)self->mVtbl;
     fn2CB880* drawBoxFn = &vt[8].fn;
-    (*drawBoxFn)((char*)self + vt[8].delta, rect, on ? kBoxSelectedColor : kBoxUnselectedColor);
+    (*drawBoxFn)(vthis(self, vt[8]), rect, on ? kBoxSelectedColor : kBoxUnselectedColor);
 }
 #endif
 
@@ -1407,7 +1407,7 @@ public:
 extern "C" void cMenu_renderUpArrow(cMenu* self, float* rect)
 {
     sVEntry2CB880* vt = (sVEntry2CB880*)self->mVtbl;
-    vt[8].fn((char*)self + vt[8].delta, rect, kBoxSelectedColor);
+    vt[8].fn(vthis(self, vt[8]), rect, kBoxSelectedColor);
     *(short*)((char*)((cCtx_2CB8C8*)GrMan)->top + 0x10) = -1;
     ((cCtx_2CB8C8*)GrMan)->top->f4_2 = 1;
     sVtx_2CB8C8 arrowVerts[6];
@@ -1562,7 +1562,7 @@ public:
 extern "C" void cMenu_renderDownArrow(cMenu* self, float* rect)
 {
     sVEntry2CB880* vt = (sVEntry2CB880*)self->mVtbl;
-    vt[8].fn((char*)self + vt[8].delta, rect, kBoxSelectedColor);
+    vt[8].fn(vthis(self, vt[8]), rect, kBoxSelectedColor);
     *(short*)((char*)((cCtx_2CBAC8*)GrMan)->top + 0x10) = -1;
     ((cCtx_2CBAC8*)GrMan)->top->f4_2 = 1;
     sVtx_2CBAC8 arrowVerts[6];
@@ -1865,7 +1865,7 @@ extern "C" void cMenu_onLoseFocus(cMenu* menu)
     s2CBFD0Menu* self = (s2CBFD0Menu*)menu;
     void* item = self->items[self->selected];
     sVEntry2CBFD0* vt = *(sVEntry2CBFD0**)((char*)item + 0x10);
-    vt[7].fn((char*)item + vt[7].delta);
+    vt[7].fn(vthis(item, vt[7]));
     self->wrap = 0;
 }
 #endif
@@ -2591,7 +2591,7 @@ struct sEnt_2CC8F0 {
 static inline void notify_2CC8F0(cEnumMenuItem* self)
 {
     sVEntry<void>* vt = (sVEntry<void>*)self->Menu->mVtbl;
-    ((Notify_2CC8F0)vt[4].fn)(((char*)self->Menu) + vt[4].delta, self);
+    ((Notify_2CC8F0)vt[4].fn)(vthis(self->Menu, vt[4]), self);
 }
 
 /**
@@ -2619,7 +2619,7 @@ extern "C" int cEnumMenuItem_input(cEnumMenuItem* vself)
     }
     if (cMenuItem_getKey((void**)self) == 6) {
         sVEntry<void>* vt = (sVEntry<void>*)self->Menu->mVtbl;
-        result = ((Pick_2CC8F0)vt[3].fn)(((char*)self->Menu) + vt[3].delta, self, 0);
+        result = ((Pick_2CC8F0)vt[3].fn)(vthis(self->Menu, vt[3]), self, 0);
     } else {
     int n = self->NumTags;
     int i = 0;
@@ -5628,7 +5628,7 @@ extern "C" sMenuRect_2CFB58* cExpandMenuItem_preRender(sMenuRect_2CFB58* ret, sM
     for (int i = 0; i < self->count; i++) {
         if (cMenuItem_isActive((cMenuItem*)self->items[i])) {
             sVEnt_2CFB58* vt = self->items[i]->vt;
-            self->rects[i] = vt[4].fn((char*)self->items[i] + vt[4].delta);
+            self->rects[i] = vt[4].fn(vthis(self->items[i], vt[4]));
             if (self == cMenu_getFocusItem((cMenu*)self->owner) || self->items[i] == self->sel) {
                 total.w += self->rects[i].w;
             }
@@ -6459,7 +6459,7 @@ extern "C" int cGraphMenuItem_input(cGraphMenuItem* self)
     }
     if (changed) {
         sVE_D0908* vt = (sVE_D0908*)self->Menu->mVtbl;
-        vt[4].fn(((char*)self->Menu) + vt[4].delta, self);
+        vt[4].fn(vthis(self->Menu, vt[4]), self);
     }
     }
     return result;

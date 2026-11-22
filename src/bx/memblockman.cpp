@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "bx/appman.h"
 #include "bx/execman.h"
 
@@ -1139,14 +1140,14 @@ extern "C" void cPS2ExecutionMan_wait(cPS2ExecutionMan* self)
 {
     self->mIsWaiting = 1;
     sMemBlkVEntryA* vt = (sMemBlkVEntryA*)self->mVtbl;
-    vt[11].fn((char*)self + vt[11].delta);
+    vt[11].fn(vthis(self, vt[11]));
     WaitSema(self->mSyncSema);
     self->mIsWaiting = 0;
     while (PollSema(self->mSyncSema) == self->mSyncSema)
     {
     }
     sMemBlkVEntryB* vt2 = (sMemBlkVEntryB*)self->mVtbl;
-    vt2[12].fn((char*)self + vt2[12].delta);
+    vt2[12].fn(vthis(self, vt2[12]));
 }
 #endif
 
@@ -1345,7 +1346,7 @@ extern "C" void func_0031AC60(void* self)
     {
         void* obj = *(void* volatile*)((char*)self + 0x14048);
         sMemJobVEntry* vt = *(sMemJobVEntry**)obj;
-        vt[2].fn((char*)obj + vt[2].delta);
+        vt[2].fn(vthis(obj, vt[2]));
         *(void* volatile*)((char*)self + 0x14048) = 0;
     }
     WakeupThread(*(int*)((char*)self + 0x10));

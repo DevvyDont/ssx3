@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "intersect/bxnash.h"
 #include "sound/ssxaudio.h"
 #include "main/game.h"
@@ -1468,7 +1469,7 @@ extern "C" int cWorldTriggerManager_ObjectRefFirstFrame(cWorldTriggerManager* se
     }
     float prev = *(float*)((char*)state + 0x68);
     sWtmVEntryF* vt = *(sWtmVEntryF**)((char*)obj + 0xC);
-    float cur = vt[30].fn((char*)obj + vt[30].delta);
+    float cur = vt[30].fn(vthis(obj, vt[30]));
     int below = cur < prev;
     int triggered = *(int*)((char*)state + 0x6C) != 0 && !below;
     *(float*)((char*)state + 0x68) = cur;

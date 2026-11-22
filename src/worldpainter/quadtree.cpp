@@ -1476,7 +1476,7 @@ extern "C" void cPS2MemCard_GetDir1(cPS2MemCard* self, unsigned short* name)
     char buf[1000];
     strcpy2_impl(buf, name);
     sVEntry<void(void*, char*)>* vt = *(sVEntry<void(void*, char*)>**)self;
-    vt[6].fn((char*)self + vt[6].delta, buf);
+    vt[6].fn(vthis(self, vt[6]), buf);
 }
 #endif
 
@@ -3551,15 +3551,15 @@ static inline unsigned short* qtLoc6128(char* key)
 extern "C" void cPS2MemCard_GetTitleString(sQT6128* self, int fileSlot, unsigned short* dst)
 {
     unsigned short buf[64];
-    if (self->vt[53].fn((char*)self + self->vt[53].delta) == 0) {
+    if (self->vt[53].fn(vthis(self, self->vt[53])) == 0) {
         strcpy1(buf, qtLoc6128(str_kT_MEMEmpty_c));
-    } else if (self->vt[55].fn((char*)self + self->vt[55].delta) == 0) {
+    } else if (self->vt[55].fn(vthis(self, self->vt[55])) == 0) {
         strcpy1(buf, qtLoc6128(str_kT_MEMUnavailable));
     } else if (self->ents[fileSlot].f0 != 0 || self->ents[fileSlot].f4 != 0) {
         strcpy1(buf, qtLoc6128(str_kT_MEMFileCorruptPS2));
     } else if (self->ents[fileSlot].f8 != 0) {
         strcpy1(buf, qtLoc6128(str_kT_MEMNoFreeSpace));
-    } else if (((sQTVtI6128*)self->vt)[67].fn((char*)self + self->vt[67].delta, fileSlot) == 0) {
+    } else if (((sQTVtI6128*)self->vt)[67].fn(vthis(self, self->vt[67]), fileSlot) == 0) {
         strcpy1(buf, qtLoc6128(str_kT_MEMEmpty_c));
     } else {
         func_002C2540(buf, self->ents[fileSlot].name);

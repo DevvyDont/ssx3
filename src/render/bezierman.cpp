@@ -267,7 +267,7 @@ extern "C" void cPS2BezierMan_AddPatch(cPS2BezierMan* self, void* pPatch, void* 
 {
     if (cRenderToggles_m_DisablePatches == 0) {
         sVEntry<void(void*, void*, void*, void*, void*, int)>* vt = (sVEntry<void(void*, void*, void*, void*, void*, int)>*)self->mVtbl;
-        vt[22].fn((char*)self + vt[22].delta, pPatch, edges, texid, clip, 0);
+        vt[22].fn(vthis(self, vt[22]), pPatch, edges, texid, clip, 0);
     }
 }
 #endif
@@ -677,7 +677,7 @@ static inline void Render_B370(sBezMan_B370* self)
         func_0037D968_B370(gm);
     }
     int matrix = *(int*)((char*)dm + 0x69CC0);
-    sM4_B370 view = *((tGetMat_B370)gm->vtable[35].fn)((char*)gm + gm->vtable[35].delta);
+    sM4_B370 view = *((tGetMat_B370)gm->vtable[35].fn)(vthis(gm, gm->vtable[35]));
     int viewIdx = gm->view;
     sM4_B370 t = view;
     OrthoInverse_B370(t);

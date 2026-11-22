@@ -491,7 +491,7 @@ extern "C" void cFEStateUberTrick_onPopupEvent(cFEStateUberTrick* self, cUIState
             void* pi = cBE_getInterface_Fv(cBE_getBE(), 6);
             func_0014FE08(pi, self->mUserNum, entryIndex, flagBit);
             sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)((char*)pi + 0xC);
-            vt[1].fn((char*)pi + vt[1].delta);
+            vt[1].fn(vthis(pi, vt[1]));
             void* helpText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_custom));
             if (helpText != 0) {
                 cUIText_setUnicodeStringByID((cUIText*)helpText, GetHashValue32(str_kT_66HELPCustomUber));
@@ -685,7 +685,7 @@ static inline void PlaySound_185268(char* self, int id)
     if (snd == 0)
         snd = &gUISoundNull;
     if (snd != 0)
-        ((void (*)(void*, int))snd->vt[2].fn)((char*)snd + snd->vt[2].delta, id);
+        ((void (*)(void*, int))snd->vt[2].fn)(vthis(snd, snd->vt[2]), id);
 }
 
 static inline void Back_185268(char* self)

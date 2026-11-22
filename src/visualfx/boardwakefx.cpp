@@ -4417,7 +4417,7 @@ extern "C" void cLensFxMan_SampleLens(cLensFxMan* selfp)
                 if (self->suns[bufferId][viewIdx].active != 0) {
                     float visibility = 0;
                     sVE3130* vEntry = &self->vt[4];
-                    if (vEntry->fn((char*)self + vEntry->delta, &self->suns[bufferId][viewIdx], &visibility)) {
+                    if (vEntry->fn(vthis(self, *vEntry), &self->suns[bufferId][viewIdx], &visibility)) {
                         self->suns[bufferId][viewIdx].vis = visibility;
                     } else {
                         self->suns[bufferId][viewIdx].vis = ((sLensSunBanks3130*)self)->suns[prev][viewIdx].vis;
@@ -4431,7 +4431,7 @@ extern "C" void cLensFxMan_SampleLens(cLensFxMan* selfp)
                 if (self->halos[bufferId][viewIdx][i].active != 0) {
                     float visibility = 0;
                     sVE3130* vEntry = &self->vt[4];
-                    if (vEntry->fn((char*)self + vEntry->delta, &self->halos[bufferId][viewIdx][i], &visibility)) {
+                    if (vEntry->fn(vthis(self, *vEntry), &self->halos[bufferId][viewIdx][i], &visibility)) {
                         self->halos[bufferId][viewIdx][i].light->vis[viewIdx] = visibility;
                     } else {
                         self->halos[bufferId][viewIdx][i].light->vis[viewIdx] = ((sLensHaloBanks3130*)self)->halos[prev][viewIdx][i].light->vis[viewIdx];
@@ -5324,11 +5324,11 @@ extern "C" int cTransitionMan_StartTransition_def(void* self, int initiator, voi
             if (~*(int*)((char*)self + 0x6C) == 0) {
                 if (transitionIn != 0) {
                     sBWVEntryI4370* vt = *(sBWVEntryI4370**)transitionIn;
-                    vt[1].fn((char*)transitionIn + vt[1].delta, 3);
+                    vt[1].fn(vthis(transitionIn, vt[1]), 3);
                 }
                 if (transitionOut != 0) {
                     sBWVEntryI4370* vt = *(sBWVEntryI4370**)transitionOut;
-                    vt[1].fn((char*)transitionOut + vt[1].delta, 3);
+                    vt[1].fn(vthis(transitionOut, vt[1]), 3);
                 }
                 return 0;
             }
@@ -5654,7 +5654,7 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
     float curTime = self->mfCurrentTime;
     if (self->mRequestingScreenGrab != 0 && self->mfInTime + self->mfHoldTime <= curTime) {
         sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)((sRsVt47E8*)ctx->mVtbl);
-        vt[61].fn((char*)ctx + vt[61].delta, (int*)&self->mScreenGrabHandle);
+        vt[61].fn(vthis(ctx, vt[61]), (int*)&self->mScreenGrabHandle);
         self->mRequestingScreenGrab = 0;
     }
     char* transition;
@@ -5682,7 +5682,7 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
     ((sRsVt47E8*)ctx->mVtbl)[31].fn((char*)ctx + ((sRsVt47E8*)ctx->mVtbl)[31].delta);
     ((sRsVt47E8*)ctx->mVtbl)[37].fn((char*)ctx + ((sRsVt47E8*)ctx->mVtbl)[37].delta);
     sRsVtV47E8* vv = (sRsVtV47E8*)((sRsVt47E8*)ctx->mVtbl);
-    vv[26].fn((char*)ctx + vv[26].delta, 0, 0, 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f);
+    vv[26].fn(vthis(ctx, vv[26]), 0, 0, 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f);
     rsSetB47E8(ctx, 0x3E0, 5, 8);
     rsSetA47E8(ctx, 0x400000, 22, 1);
     rsSetA47E8(ctx, 0x1800000, 23, 2);
@@ -6843,7 +6843,7 @@ extern "C" void cSnowFall_render(sWakeFx_6008* self)
     rsSetB_6008(ctx, 0x1FFFFC00, 10, 0);
     ctx->top->tex = rsTexF70_6008(ctx);
     sMat_6008 snowMatrix;
-    snowMatrix = *ctx->vtable[35].fn((char*)ctx + ctx->vtable[35].delta);
+    snowMatrix = *ctx->vtable[35].fn(vthis(ctx, ctx->vtable[35]));
     snowMatrix.v[3] = t4vect_Origin;
     sRiders_6008* rs2 = riders_6008();
     sWakeVec5430 camDir = *(sWakeVec5430*)(rs2->riders[rs2->cur] + 0x80);

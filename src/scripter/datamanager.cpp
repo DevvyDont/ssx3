@@ -118,11 +118,11 @@ extern "C" sDmNode5920* cDataManager_AttachData(cDataManager* self, int pName, v
     REALabortflag[0] = saved;
     if (big != 0) {
         sDmVEntry5920* vt = (sDmVEntry5920*)self->mVtbl;
-        vt[4].fn((char*)self + vt[4].delta, pName, data, size, n, &n->field_0x4);
+        vt[4].fn(vthis(self, vt[4]), pName, data, size, n, &n->field_0x4);
         cDataManager_AttachDataFromBigfile(self, (char*)data, (sDmNode5B98*)n);
     } else {
         sDmVEntry5920* vt = (sDmVEntry5920*)self->mVtbl;
-        vt[2].fn((char*)self + vt[2].delta, pName, data, size, n, &n->field_0x4);
+        vt[2].fn(vthis(self, vt[2]), pName, data, size, n, &n->field_0x4);
     }
     return n;
 }
@@ -302,7 +302,7 @@ extern "C" sDmNode5B98* cDataManager_AttachDataFromBigfile(cDataManager* self, c
             prev->next = n;
             prev = n;
             sDmVEntry5B98* vt = (sDmVEntry5B98*)self->mVtbl;
-            vt[2].fn((char*)self + vt[2].delta, name, sub, ent[1], prev, &prev->field_0x4);
+            vt[2].fn(vthis(self, vt[2]), name, sub, ent[1], prev, &prev->field_0x4);
         }
         name = BIG_locateentryz(big, 0, i++, &ent[0], 0);
     }
@@ -2453,7 +2453,7 @@ extern "C" void cSSXScriptEngine__cSSXScriptEngine(cSSXScriptEngine* self, int f
         do {
             while (begin != cameraManager) {
                 cameraManager--;
-                cameraManager->vt[1].fn((char*)cameraManager + cameraManager->vt[1].delta, 0);
+                cameraManager->vt[1].fn(vthis(cameraManager, cameraManager->vt[1]), 0);
             }
         } while (0);
     }

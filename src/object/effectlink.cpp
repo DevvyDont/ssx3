@@ -144,7 +144,7 @@ extern "C" void* cEffectModifier_cEffectModifier1(cEffectModifier* effectModifie
     self->link.prev = 0;
     self->vt = cEffectModifier_vtbl;
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
-    self->value = vt[3].fn((char*)obj + vt[3].delta);
+    self->value = vt[3].fn(vthis(obj, vt[3]));
     cEffectModifier_EffectCount++;
     return ((void*)effectModifier);
 }
@@ -197,7 +197,7 @@ struct sEffVEntry {
 extern "C" void cEffectModifier_writeToReplayFrame(cEffectModifier* self, void* obj)
 {
     sEffVEntry* vt = *(sEffVEntry**)obj;
-    vt[5].fn((char*)obj + vt[5].delta, self->Instance);
+    vt[5].fn(vthis(obj, vt[5]), self->Instance);
 }
 #endif
 
@@ -255,7 +255,7 @@ extern "C" void* cParticleModifier_cParticleModifier(cParticleModifier* self, in
     void* transform;
     if (obj != 0) {
         sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)((char*)obj + 0xC);
-        transform = vu0CopyMatrix003458C0(&self->Transform, vt[24].fn((char*)obj + vt[24].delta));
+        transform = vu0CopyMatrix003458C0(&self->Transform, vt[24].fn(vthis(obj, vt[24])));
     } else {
         transform = vu0CopyMatrix003458C0(&self->Transform, own + 0x10);
     }
@@ -292,14 +292,14 @@ extern "C" void* cParticleModifier_cParticleModifier1(cParticleModifier* self, v
     self->mVtbl = cParticleModifier_vtbl;
     cStaticEmitter_cStaticEmitter(&self->Emitter);
     sVEntry<void(void*, void*, int)>* readSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-    readSlot->fn((char*)stream + readSlot->delta, (char*)&self->Complete, 4);
+    readSlot->fn(vthis(stream, *readSlot), (char*)&self->Complete, 4);
     if (self->Complete == 0) {
         void* buf = operator_new1(216);
         self->ParticleData = (tParticleData*)buf;
         readSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-        readSlot->fn((char*)stream + readSlot->delta, buf, 216);
+        readSlot->fn(vthis(stream, *readSlot), buf, 216);
         readSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-        readSlot->fn((char*)stream + readSlot->delta, (char*)&self->Transform, 0x40);
+        readSlot->fn(vthis(stream, *readSlot), (char*)&self->Transform, 0x40);
         cStaticEmitter_setupEmitter(&self->Emitter, &self->Transform, (int)self->ParticleData);
         cStaticEmitter_readFromReplayFrame(&self->Emitter, stream);
     } else {
@@ -408,12 +408,12 @@ extern "C" void cParticleModifier_writeToReplayFrame(cParticleModifier* self, vo
 {
     cEffectModifier_writeToReplayFrame((cEffectModifier*)self, stream);
     sEffectLinkVEntry5BF0* writeEntry = &(*(sEffectLinkVEntry5BF0**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->Complete, 4);
+    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->Complete, 4);
     if (self->Complete == 0) {
         writeEntry = &(*(sEffectLinkVEntry5BF0**)stream)[1];
-        writeEntry->fn((char*)stream + writeEntry->delta, self->ParticleData, 216);
+        writeEntry->fn(vthis(stream, *writeEntry), self->ParticleData, 216);
         writeEntry = &(*(sEffectLinkVEntry5BF0**)stream)[1];
-        writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->Transform, 0x40);
+        writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->Transform, 0x40);
         cStaticEmitter_writeToReplayFrame((char*)&self->Emitter, stream);
     }
 }
@@ -514,12 +514,12 @@ extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleMo
     cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(((char*)&self->Emitter));
     self->Emitter.mVtbl = cDynamicEmitter_vtbl;
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, data, 80);
+    vt[2].fn(vthis(stream, vt[2]), data, 80);
     if (self->Complete == 0) {
         void* particleData = operator_new1(216);
         self->ParticleData = (tParticleData*)((sTarget00345C90*)particleData);
         sVEntry<void(void*, void*, int)>* vt2 = *(sVEntry<void(void*, void*, int)>**)stream;
-        vt2[2].fn((char*)stream + vt2[2].delta, particleData, 216);
+        vt2[2].fn(vthis(stream, vt2[2]), particleData, 216);
         cBaseClass_DynamicEmitter_setupEmitter(((char*)&self->Emitter), (sTarget00345C90*)self->ParticleData, -1.0f);
         cBaseClass_DynamicEmitter_readFromReplayFrame(((char*)&self->Emitter), (cStream00371318*)stream);
         cBaseClass_DynamicEmitter_updateBASE(((char*)&self->Emitter), (sVec4_00345C90*)&self->Pos, (sVec4_00345C90*)&self->Vel, 1, 0.01666666753590107f);
@@ -718,10 +718,10 @@ extern "C" void cDynamicParticleModifier_writeToReplayFrame(cDynamicParticleModi
 {
     cEffectModifier_writeToReplayFrame((cEffectModifier*)self, stream);
     sVEntry<void(void*, void*, int)>* writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->Mesh, 80);
+    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->Mesh, 80);
     if (self->Complete == 0) {
         writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-        writeEntry->fn((char*)stream + writeEntry->delta, self->ParticleData, 216);
+        writeEntry->fn(vthis(stream, *writeEntry), self->ParticleData, 216);
         cBaseClass_DynamicEmitter_writeToReplayFrame((char*)&self->Emitter, stream);
     }
 }
@@ -811,7 +811,7 @@ extern "C" void* cHaloModifier_cHaloModifier1(cHaloModifier* self, void* stream)
     cEffectModifier_cEffectModifier1((cEffectModifier*)self, stream);
     self->mVtbl = cHaloModifier_vtbl;
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, (char*)&self->Color, 0x30);
+    vt[2].fn(vthis(stream, vt[2]), (char*)&self->Color, 0x30);
     cHaloModifier_HaloCount++;
     return ((void*)self);
 }
@@ -902,7 +902,7 @@ extern "C" void cHaloModifier_writeToReplayFrame(cHaloModifier* self, void* stre
 {
     cEffectModifier_writeToReplayFrame((cEffectModifier*)self, stream);
     sEffectLinkVEntry* vt = *(sEffectLinkVEntry**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)&self->Color, 0x30);
+    vt[1].fn(vthis(stream, vt[1]), (char*)&self->Color, 0x30);
 }
 #endif
 
@@ -977,7 +977,7 @@ extern "C" void* cFlexBridgeNode_cFlexBridgeNode(cFlexBridgeNode* self, int buck
     sEffV2_346350 uv[4];
     sEffV4_346350 col[4];
     sEffVE_346350* vt = (sEffVE_346350*)cGraphicsMan_TheGraphicsMan->mVtbl;
-    vt[97].fn((char*)cGraphicsMan_TheGraphicsMan + vt[97].delta, self->Instance, 0, pts, uv, col);
+    vt[97].fn(vthis(cGraphicsMan_TheGraphicsMan, vt[97]), self->Instance, 0, pts, uv, col);
     sEffV3_346350 span;
     span.x = pts[1].x - pts[0].x;
     span.y = pts[1].y - pts[0].y;
@@ -1022,7 +1022,7 @@ extern "C" void* cFlexBridgeNode_cFlexBridgeNode1(cFlexBridgeNode* self, void* b
     cSpring_cSpring1((char*)&self->Mesh, stream);
     cFlexBridgeNode_setupGrid(self);
     sVEntry<void(void*, void*, int)>* readEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-    readEntry->fn((char*)stream + readEntry->delta, payload, 0x30);
+    readEntry->fn(vthis(stream, *readEntry), payload, 0x30);
     cFlexBridgeNode_updateGrid(self);
     return ((void*)self);
 }

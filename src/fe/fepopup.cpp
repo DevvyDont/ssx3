@@ -190,7 +190,7 @@ extern "C" void cScreenPopup_onGainFocus(cScreenPopup* self)
         }
         {
             sVEntry<void>* vt = (sVEntry<void>*)self->mVtbl;
-            ((int (*)(void*, void*, int, int))vt[20].fn)((char*)self + vt[20].delta, self->mpMenu, 5, 0);
+            ((int (*)(void*, void*, int, int))vt[20].fn)(vthis(self, vt[20]), self->mpMenu, 5, 0);
         }
     }
 }
@@ -302,7 +302,7 @@ extern "C" void cScreenPopup_redrawPopup(cScreenPopup* self)
         sColor5DD8 bgScale = *(sColor5DD8*)&self->mvCurrentScale[0];
         cScreenPopup_scaleBackground(self, (sColor_7738*)&bgScale);
         sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
-        vt[6].fn((char*)self + vt[6].delta, 0);
+        vt[6].fn(vthis(self, vt[6]), 0);
     }
 }
 #endif
@@ -1784,7 +1784,7 @@ extern "C" void cScreenPopup_getStringSize3(cScreenPopup* self, void* obj, void*
 {
     t2Vector widgetSize;
     sVEntry001C8628* vt = *(sVEntry001C8628**)((char*)obj + 8);
-    vt[20].fn((char*)obj + vt[20].delta, &widgetSize);
+    vt[20].fn(vthis(obj, vt[20]), &widgetSize);
     *(float*)((char*)out + 0x8) = widgetSize.x;
     *(float*)((char*)out + 0xC) = widgetSize.y;
 }
@@ -1829,7 +1829,7 @@ extern "C" void cScreenPopup_createTitleBar(cScreenPopup* self, cPopupInfo* pInf
             }
         } else {
             sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)text + 8);
-            vt[9].fn((char*)text + vt[9].delta, 0);
+            vt[9].fn(vthis(text, vt[9]), 0);
         }
     }
 }
@@ -1930,7 +1930,7 @@ extern "C" void cScreenPopup_changePivot(cScreenPopup* self, void* obj, unsigned
         return;
     t2Vector size;
     sVEntryK8930* vt = *(sVEntryK8930**)((char*)obj + 8);
-    vt[20].fn((char*)obj + vt[20].delta, &size);
+    vt[20].fn(vthis(obj, vt[20]), &size);
     sVec3K8930 pos = *(sVec3K8930*)((char*)obj + 0x44);
     pivotBits->state = state;
     if (fOffset == 0.0f)
@@ -2355,7 +2355,7 @@ extern "C" void cScreenPopup_getMessageLineWrapSize2(cScreenPopup* self, void* t
     sVec3_94B0 textScale;
     t2Vector size;
     sVEntry_94B0* vt = *(sVEntry_94B0**)((char*)text + 8);
-    vt[20].fn((char*)text + vt[20].delta, &size);
+    vt[20].fn(vthis(text, vt[20]), &size);
     textScale = *(sVec3_94B0*)((char*)text + 0x50);
     while (i < n) {
         if (buf[i] == gUSTRBackSlash1 && buf[i + 1] == gUSTRBackSlash1) {
@@ -2426,7 +2426,7 @@ extern "C" void cScreenPopup_getMessageLineWrapSize(cScreenPopup* self, void* pT
     t3Vector_9648 vScale;
     t3Vector_9648 vTextSize;
     sVEntry_9648* vt = *(sVEntry_9648**)((char*)pText + 8);
-    vt[20].fn((char*)pText + vt[20].delta, &vTextSize);
+    vt[20].fn(vthis(pText, vt[20]), &vTextSize);
     vScale = *(t3Vector_9648*)((char*)pText + 0x50);
     while (pTempString[j] != 0) {
         char char1 = pTempString[j];
@@ -2570,7 +2570,7 @@ extern "C" void cScreenPopup_getTextBoxWrapSize1(cScreenPopup* self, cUIText* te
     sVec3_9938 textScale;
     t2Vector size;
     sVEntry_9938* vt = *(sVEntry_9938**)((char*)text + 8);
-    vt[20].fn((char*)text + vt[20].delta, &size);
+    vt[20].fn(vthis(text, vt[20]), &size);
     textScale = *(sVec3_9938*)((char*)text + 0x50);
     while (i < n) {
         if (buf[i] == gUSTRBackSlash1 && buf[i + 1] == gUSTRBackSlash1) {
@@ -2980,7 +2980,7 @@ extern "C" void cScreenPopup_hideWidgetSafe(cScreenPopup* self, void* obj)
 {
     if (obj != 0) {
         sVEntry_cScreenPopup_hideWidgetSafe* vt = *(sVEntry_cScreenPopup_hideWidgetSafe**)((char*)obj + 0x8);
-        vt[9].fn((char*)obj + vt[9].delta, 0);
+        vt[9].fn(vthis(obj, vt[9]), 0);
     }
 }
 #endif
@@ -3005,7 +3005,7 @@ extern "C" void cScreenPopup_showWidgetSafe(cScreenPopup* self, void* obj)
 {
     if (obj != 0) {
         sVEntry_cScreenPopup_showWidgetSafe* vt = *(sVEntry_cScreenPopup_showWidgetSafe**)((char*)obj + 0x8);
-        vt[9].fn((char*)obj + vt[9].delta, 1);
+        vt[9].fn(vthis(obj, vt[9]), 1);
     }
 }
 #endif
@@ -3074,7 +3074,7 @@ extern "C" void cScreenPopup_onUpdate(cScreenPopup* self)
     if (self->mbPassUpdate != 0) {
         cUIState* obj = self->mpParentState;
         sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)obj->mVtbl;
-        vt[12].fn((char*)obj + vt[12].delta);
+        vt[12].fn(vthis(obj, vt[12]));
     }
     cUIState_onUpdate(self);
 }
@@ -3147,7 +3147,7 @@ extern "C" void cScreenPopup_onPopupEvent(cScreenPopup* self, cUIState* child, i
             if (self->miConfimationReturnCode != -1) {
                 cUIState* obj = self->mpParentState;
                 sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)obj->mVtbl;
-                vt[17].fn(((char*)obj) + vt[17].delta, ((char*)self), self->miConfimationReturnCode);
+                vt[17].fn(vthis(obj, vt[17]), ((char*)self), self->miConfimationReturnCode);
             }
         }
         break;
@@ -3202,7 +3202,7 @@ extern "C" void cScreenPopup_checkAndFixTextEntry(cScreenPopup* self, cUIText* t
     float ext[4];
     float dots[4];
     sVEntry_A6A0* vt = *(sVEntry_A6A0**)((char*)text + 8);
-    vt[20].fn((char*)text + vt[20].delta, &size);
+    vt[20].fn(vthis(text, vt[20]), &size);
     char* font = (char*)cUIText_getFont(text);
     float sx = *(float*)(font + 0x30) * scale.x;
     float sy = *(float*)(font + 0x34) * scale.y;
@@ -3829,7 +3829,7 @@ extern "C" void cKeyboardPopup_onUpdate(cKeyboardPopup* self)
         cUIState* obj = self->mpParentState;
         if (((void*)obj) != 0) {
             sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)obj->mVtbl;
-            vt[12].fn((char*)obj + vt[12].delta);
+            vt[12].fn(vthis(obj, vt[12]));
         }
     }
 }
@@ -3890,14 +3890,14 @@ extern "C" void cKeyboardPopup_onWidgetCreate(cKeyboardPopup* self, void* widget
 {
     if (IsK1CB2C8(*(int*)((char*)widget + 0x38), str_HelpGroup)) {
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)widget + 8);
-        vt[9].fn((char*)widget + vt[9].delta, 0);
+        vt[9].fn(vthis(widget, vt[9]), 0);
         if (isOnK1CB2C8()) {
             sVEntry<void(void*, int)>* vt2 = *(sVEntry<void(void*, int)>**)((char*)widget + 8);
-            vt2[9].fn((char*)widget + vt2[9].delta, 1);
+            vt2[9].fn(vthis(widget, vt2[9]), 1);
         }
         if ((int)SSXApp->Game != 0) {
             sVEntry<void(void*, int)>* vt3 = *(sVEntry<void(void*, int)>**)((char*)widget + 8);
-            vt3[9].fn((char*)widget + vt3[9].delta, 0);
+            vt3[9].fn(vthis(widget, vt3[9]), 0);
         }
     } else if (IsK1CB2C8(*(int*)((char*)widget + 0x38), str_back_com)) {
         self->mpBackCompact = (cUIVector*)widget;
@@ -3928,7 +3928,7 @@ extern "C" int cKeyboardPopup_handleEvent(cKeyboardPopup* self, int msg, int pPa
         cUIState* obj = self->mpParentState;
         if (((void*)obj) != 0) {
             sVEntry<int(void*, int, int)>* vt = (sVEntry<int(void*, int, int)>*)obj->mVtbl;
-            return vt[24].fn((char*)obj + vt[24].delta, msg, pParam);
+            return vt[24].fn(vthis(obj, vt[24]), msg, pParam);
         }
     }
     return 0;
@@ -4840,7 +4840,7 @@ extern "C" void cKeyboardPopup_pressKey(cKeyboardPopup* self_, int flag)
             if (self->closeOnAccept != 0)
                 cUIStateStack_pop_r(self->owner + 0x18, 1);
             self->done = 1;
-            self->parent->vt[19].fn((char*)self->parent + self->parent->vt[19].delta, 0, 13);
+            self->parent->vt[19].fn(vthis(self->parent, self->parent->vt[19]), 0, 13);
             break;
         case 75:
             if (cKeyboardPopup_allowSelection_out(self, 75, 0) != 0)
@@ -4848,7 +4848,7 @@ extern "C" void cKeyboardPopup_pressKey(cKeyboardPopup* self_, int flag)
             break;
         case 0:
             cUIStateStack_pop_r(self->owner + 0x18, 1);
-            self->parent->vt[19].fn((char*)self->parent + self->parent->vt[19].delta, 0, 0xE);
+            self->parent->vt[19].fn(vthis(self->parent, self->parent->vt[19]), 0, 0xE);
             break;
         case 4:
         case 5:
@@ -4885,7 +4885,7 @@ extern "C" void cKeyboardPopup_pressKey(cKeyboardPopup* self_, int flag)
         sUIObj_C1E0* keyObj = (sUIObj_C1E0*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
         if (keyObj != 0) {
             // PORT: takes the address of a temporary (accepted by g++ 2.95); use a named local elsewhere.
-            keyObj->vt[11].fn((char*)keyObj + keyObj->vt[11].delta, &sColor_C1E0(0.3f, 0, 0, 0));
+            keyObj->vt[11].fn(vthis(keyObj, keyObj->vt[11]), &sColor_C1E0(0.3f, 0, 0, 0));
         }
     }
 }
@@ -5733,10 +5733,10 @@ extern "C" void cKeyboardPopup_redrawScreen(cKeyboardPopup* self)
                 cUIText_setAsciiString(text, ch);
                 if (cKeyboardPopup_allowSelection(self, i, 0) == 0) {
                     sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)((char*)text + 8);
-                    vt[11].fn((char*)text + vt[11].delta, gtStaticColor);
+                    vt[11].fn(vthis(text, vt[11]), gtStaticColor);
                 } else {
                     sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)((char*)text + 8);
-                    vt[11].fn((char*)text + vt[11].delta, gtNotStatic);
+                    vt[11].fn(vthis(text, vt[11]), gtNotStatic);
                 }
             }
         }
@@ -5798,13 +5798,13 @@ struct sTextVE_1CD9B8 {
 static inline void SetColor_1CD9B8(cUIText* text, void* col)
 {
     sTextVE_1CD9B8* vt = *(sTextVE_1CD9B8**)((char*)text + 8);
-    ((int (*)(void*, void*))vt[11].fn)((char*)text + vt[11].delta, col);
+    ((int (*)(void*, void*))vt[11].fn)(vthis(text, vt[11]), col);
 }
 
 static inline void SetVisible_1CD9B8(cUIText* text, int on)
 {
     sTextVE_1CD9B8* vt = *(sTextVE_1CD9B8**)((char*)text + 8);
-    ((void (*)(void*, int))vt[9].fn)((char*)text + vt[9].delta, on);
+    ((void (*)(void*, int))vt[9].fn)(vthis(text, vt[9]), on);
 }
 
 /**
@@ -6112,7 +6112,7 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, cUIInput* ev)
         if (snd == 0)
             snd = &gUISoundNull;
         if (changed && snd != 0)
-            ((void (*)(void*, int))snd->vt[2].fn)((char*)snd + snd->vt[2].delta, sound);
+            ((void (*)(void*, int))snd->vt[2].fn)(vthis(snd, snd->vt[2]), sound);
     }
     return 1;
 }

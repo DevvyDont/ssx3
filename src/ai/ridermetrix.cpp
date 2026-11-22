@@ -129,7 +129,7 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_writeToReplayFrame);
 extern "C" void cRiderMetrix_writeToReplayFrame(cRiderMetrix* self, void* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn((char*)obj + vt[1].delta, self, 428);
+    vt[1].fn(vthis(obj, vt[1]), self, 428);
 }
 #endif
 
@@ -147,7 +147,7 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_readFromReplayFrame);
 extern "C" void cRiderMetrix_readFromReplayFrame(cRiderMetrix* self, void* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn((char*)obj + vt[2].delta, self, 428);
+    vt[2].fn(vthis(obj, vt[2]), self, 428);
 }
 #endif
 

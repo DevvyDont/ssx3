@@ -134,7 +134,7 @@ extern "C" void cScriptSoundBankManager_UnlinkBank1(cScriptSoundBankManager* sel
     sSndEntry* bankInfo = cScriptSoundBankManager_GetBankInfo(((sSndList*)self), id);
     if (bankInfo != 0) {
         sScSndVEntry* vt = (sScSndVEntry*)self->mVtbl;
-        vt[2].fn((char*)self + vt[2].delta, bankInfo);
+        vt[2].fn(vthis(self, vt[2]), bankInfo);
     }
 }
 #endif

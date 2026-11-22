@@ -176,15 +176,15 @@ sRenderCam_C1B0* func_0022C1B0_impl(sRenderCam_C1B0* self)
     self->f = 3.0f;
     self->pos.w = 1.0f;
     sCamObj_C1B0* bezierMan = self->cam;
-    float nearLod = bezierMan->vt[8].fn((char*)bezierMan + bezierMan->vt[8].delta);
+    float nearLod = bezierMan->vt[8].fn(vthis(bezierMan, bezierMan->vt[8]));
     bezierMan = self->cam;
-    float farLod = bezierMan->vt[9].fn((char*)bezierMan + bezierMan->vt[9].delta);
+    float farLod = bezierMan->vt[9].fn(vthis(bezierMan, bezierMan->vt[9]));
     nearLod = nearLod * nearLod * 2.0f;
     farLod = farLod * farLod * 2.0f;
     self->k = (self->n - self->f) / (farLod - nearLod);
     self->c = self->f - self->k * nearLod;
     bezierMan = self->cam;
-    ((sVEv_C1B0*)bezierMan->vt)[17].fn((char*)bezierMan + bezierMan->vt[17].delta);
+    ((sVEv_C1B0*)bezierMan->vt)[17].fn(vthis(bezierMan, bezierMan->vt[17]));
     return self;
 }
 #endif
@@ -211,7 +211,7 @@ extern "C" void func_0022C3B8(void* self, int flags)
 {
     void* obj = *(void**)self;
     sVEntry_func_0022C3B8* vt = *(sVEntry_func_0022C3B8**)((char*)obj + 0x4);
-    vt[18].fn((char*)obj + vt[18].delta);
+    vt[18].fn(vthis(obj, vt[18]));
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -322,7 +322,7 @@ void func_0022C410_impl(void* vctx, sPatch_C410* patch, int flag)
     ids[0] = patch->id0;
     ids[1] = patch->id1;
     sCamObj_C410* bezierMan = ctx->cam;
-    bezierMan->vt[21].fn((char*)bezierMan + bezierMan->vt[21].delta, patch, fog, ids, flag);
+    bezierMan->vt[21].fn(vthis(bezierMan, bezierMan->vt[21]), patch, fog, ids, flag);
 }
 #endif
 
@@ -365,7 +365,7 @@ extern "C" void cGame_renderPatches(cGame* self, void* world)
     if ((int)self->ViewMan->m_uiCurrentView == 0) {
         void* obj = cBezierMan_TheBezierMan;
         sVEntry0022C620* vt = *(sVEntry0022C620**)((char*)obj + 4);
-        vt[5].fn((char*)obj + vt[5].delta);
+        vt[5].fn(vthis(obj, vt[5]));
     }
     func_0022C3B8(ctx, 2);
 }
@@ -393,14 +393,14 @@ extern "C" void cGame_renderFogVolumes(cGame* self, void* world)
     if (n != 0) {
         cFogParticleMan* fogMan = self->FogMan;
         sVEntry_renderFog* vt = (sVEntry_renderFog*)fogMan->mVtbl;
-        vt[2].fn((char*)fogMan + vt[2].delta, fog, n, 0);
+        vt[2].fn(vthis(fogMan, vt[2]), fog, n, 0);
     }
     fog = (char*)world + 0x7AC0;
     n = *(int*)((char*)world + 0x7ABC);
     if (n != 0) {
         cFogParticleMan* fogMan = self->FogMan;
         sVEntry_renderFog* vt = (sVEntry_renderFog*)fogMan->mVtbl;
-        vt[2].fn((char*)fogMan + vt[2].delta, fog, n, 2);
+        vt[2].fn(vthis(fogMan, vt[2]), fog, n, 2);
     }
     cFogParticleMan_render(self->FogMan);
 }

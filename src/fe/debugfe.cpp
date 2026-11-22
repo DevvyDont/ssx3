@@ -199,7 +199,7 @@ extern "C" void cDebugMenuScreen_draw(cDebugMenuScreen* self)
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sDbgVEntry* vt = (sDbgVEntry*)ps2GraphicsMan->mVtbl;
-        cFont_righttextf(font, 580.0f, y, str_pct_s, vt[9].fn((char*)ps2GraphicsMan + vt[9].delta) ? str_On_480p : str_Off_NTSC);
+        cFont_righttextf(font, 580.0f, y, str_pct_s, vt[9].fn(vthis(ps2GraphicsMan, vt[9])) ? str_On_480p : str_Off_NTSC);
     }
     y += lineheight;
     font->setColor(self->SelectedItem == 11 ? selectColor : normalColor);
@@ -1125,7 +1125,7 @@ struct sVEnt_17DE70 { short delta; short index; void (*fn)(void*); };
 static inline void vcall1_17DE70(void* obj)
 {
     sVEnt_17DE70* vt = *(sVEnt_17DE70**)((char*)obj + 0xC);
-    vt[1].fn((char*)obj + vt[1].delta);
+    vt[1].fn(vthis(obj, vt[1]));
 }
 
 /**
@@ -2086,7 +2086,7 @@ extern "C" void cDebugFE_load(sDebugFE_17F868* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVEnt_17F868* vt = (sVEnt_17F868*)ps2GraphicsMan->mVtbl;
-    ((Fn1_17F868)vt[44].fn)((char*)ps2GraphicsMan + vt[44].delta, 0);
+    ((Fn1_17F868)vt[44].fn)(vthis(ps2GraphicsMan, vt[44]), 0);
     self->font = (char*)cFont_cFont(cMemMan_alloc(132, str_DebugFont, 0, 0), str_data_fonts_debugfnt_sfn, 0);
     sVec2_17F868 sc(1.600000023841858f, 1.600000023841858f);
     *(sVec2_17F868*)(self->font + 0x30) = sc;
@@ -2098,14 +2098,14 @@ extern "C" void cDebugFE_load(sDebugFE_17F868* self)
         if (payload) {
             cPS2GraphicsMan* theGraphicsMan = cGraphicsMan_TheGraphicsMan;
             sVEnt_17F868* gvt = (sVEnt_17F868*)theGraphicsMan->mVtbl;
-            self->snd1C = ((Load_17F868)gvt[46].fn)((char*)theGraphicsMan + gvt[46].delta, payload, str_part, 0, 1, -1);
+            self->snd1C = ((Load_17F868)gvt[46].fn)(vthis(theGraphicsMan, gvt[46]), payload, str_part, 0, 1, -1);
         }
         cMemMan_free(data);
     }
     data = FILE_load(str_data_fonts_menu_ssh, 0x100);
     cPS2GraphicsMan* graphicsMan = GrMan;
     sVEnt_17F868* vt2 = (sVEnt_17F868*)graphicsMan->mVtbl;
-    self->snd20 = ((Load_17F868)vt2[46].fn)((char*)graphicsMan + vt2[46].delta, (char*)data + data[5], str_menu, 0, 1, -1);
+    self->snd20 = ((Load_17F868)vt2[46].fn)(vthis(graphicsMan, vt2[46]), (char*)data + data[5], str_menu, 0, 1, -1);
     if (data) {
         cMemMan_free(data);
     }
@@ -2208,13 +2208,13 @@ extern "C" void cDebugFE_purge(cDebugFE* self)
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)ps2GraphicsMan->mVtbl;
-        vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, self->BoxTID);
+        vt[50].fn(vthis(ps2GraphicsMan, vt[50]), self->BoxTID);
     }
     if (self->ParticleTID >= 0)
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)ps2GraphicsMan->mVtbl;
-        vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, self->ParticleTID);
+        vt[50].fn(vthis(ps2GraphicsMan, vt[50]), self->ParticleTID);
     }
     if (self->Font != 0)
         cFont__cFont(self->Font, 3);

@@ -884,11 +884,11 @@ extern "C" sImInst* cMeshAnimNode_cMeshAnimNode1(sImInst* self, void* bucket, vo
     }
     if (obj != 0) {
         sImVEntry* ownerSlot = &obj->vt[24];
-        root = (sImMtx*)ownerSlot->fn((char*)obj + ownerSlot->delta);
+        root = (sImMtx*)ownerSlot->fn(vthis(obj, *ownerSlot));
         ownerSlot = &obj->vt[26];
-        if (ownerSlot->fn((char*)obj + ownerSlot->delta) != 0) {
+        if (ownerSlot->fn(vthis(obj, *ownerSlot)) != 0) {
             ownerSlot = &obj->vt[27];
-            mats = (sImMtx*)ownerSlot->fn((char*)obj + ownerSlot->delta);
+            mats = (sImMtx*)ownerSlot->fn(vthis(obj, *ownerSlot));
             if (def->bone != -1) {
                 root = &mats[def->bone];
                 mats = local;
@@ -914,7 +914,7 @@ extern "C" sImInst* cMeshAnimNode_cMeshAnimNode1(sImInst* self, void* bucket, vo
     }
     if (owner != 0) {
         sImVEntryI* vt = (sImVEntryI*)owner->vt;
-        vt[1].fn((char*)owner + vt[1].delta, 3);
+        vt[1].fn(vthis(owner, vt[1]), 3);
     }
     self->f390 = sImV4(def->a[0], def->a[1], def->a[2]);
     self->f3A0 = sImV4(def->b[0], def->b[1], def->b[2]);
@@ -962,7 +962,7 @@ extern "C" void* cMeshAnimNode_cMeshAnimNode(cMeshAnimNode* self, void* bucket, 
     new ((char*)&self->Angle[0]) sInstElem2168[24];
     new ((char*)&self->Pos[16]) sInstElem2168[24];
     sVEntry<void(void*, void*, int)>* vtEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-    vtEntry->fn((char*)stream + vtEntry->delta, (char*)&self->Life, 0xC);
+    vtEntry->fn(vthis(stream, *vtEntry), (char*)&self->Life, 0xC);
     self->Life = -1.0f;
     return ((void*)self);
 }
@@ -1210,7 +1210,7 @@ extern "C" void cMeshAnimNode_update(sDebris_352500* self)
     if (self->timer > 0.0f) {
         self->timer -= cAppMan_TheAppMan->TimerPeriod;
         if (self->timer <= 0.0f) {
-            self->vt[34].fn((char*)self + self->vt[34].delta, 1);
+            self->vt[34].fn(vthis(self, self->vt[34]), 1);
             return;
         }
     }
@@ -1257,7 +1257,7 @@ extern "C" void cMeshAnimNode_expire(cMeshAnimNode* self, int check)
     }
     if (self->Type == 2 && ((void*)self) != 0) {
         sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
-        vt[1].fn((char*)self + vt[1].delta, 3);
+        vt[1].fn(vthis(self, vt[1]), 3);
     }
 }
 #endif
@@ -1283,7 +1283,7 @@ extern "C" void cMeshAnimNode_loseFocus(cMeshAnimNode* self)
         *(int*)((char*)self->Instance + 0x8) |= 2;
         if (((void*)self) != 0) {
             sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
-            vt[1].fn((char*)self + vt[1].delta, 3);
+            vt[1].fn(vthis(self, vt[1]), 3);
         }
     } else {
         cInstanceNode_makeThisDead(self);
@@ -1475,7 +1475,7 @@ extern "C" void cMeshAnimNode_writeToReplayFrame(cMeshAnimNode* self, void* stre
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)&self->Life, 0xC);
+    vt[1].fn(vthis(stream, vt[1]), (char*)&self->Life, 0xC);
 }
 #endif
 

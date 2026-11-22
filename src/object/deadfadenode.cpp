@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "object/deadfadenode.h"
 #include "object/restorenode.h"
 #include "object/hidenode.h"
@@ -190,13 +191,13 @@ extern "C" cDeadFadeNode* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode* self, int b
     self->Fade = 1.0f;
     sDfModel_0750* model = ((sDfInst_0750*)self->Instance)->model;
     *pm = new (str_DeadFadeAnimMats, 0x20000000, 0) sDfMatElem_0750[model->count];
-    if (other != 0 && ((DfBoolFn_0750)other->vt[26].fn)((char*)other + other->vt[26].delta)) {
-        sDfMat_0750* src = ((DfMatFn_0750)other->vt[27].fn)((char*)other + other->vt[27].delta);
+    if (other != 0 && ((DfBoolFn_0750)other->vt[26].fn)(vthis(other, other->vt[26]))) {
+        sDfMat_0750* src = ((DfMatFn_0750)other->vt[27].fn)(vthis(other, other->vt[27]));
         MEM_copy(((sDfMatElem_0750*)self->AnimMats), src, model->count << 6);
     } else {
         sDfMat_0750* base = &((sDfInst_0750*)self->Instance)->world;
         if (other != 0) {
-            base = ((DfMatFn_0750)other->vt[24].fn)((char*)other + other->vt[24].delta);
+            base = ((DfMatFn_0750)other->vt[24].fn)(vthis(other, other->vt[24]));
         }
         sDfPart_0750* part = model->parts;
         float k = ((sDfInst_0750*)self->Instance)->scale;
@@ -218,7 +219,7 @@ extern "C" cDeadFadeNode* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode* self, int b
         }
     }
     if (other != 0) {
-        ((DfSetFn_0750)other->vt[1].fn)((char*)other + other->vt[1].delta, 3);
+        ((DfSetFn_0750)other->vt[1].fn)(vthis(other, other->vt[1]), 3);
     }
     ((sDfInst_0750*)self->Instance)->flags &= ~0x60;
     ((sDfInst_0750*)self->Instance)->flags = (((sDfInst_0750*)self->Instance)->flags & ~2) | 4;

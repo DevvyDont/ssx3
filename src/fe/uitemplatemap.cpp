@@ -700,7 +700,7 @@ extern "C" void cUITemplate_MAP_setupScreenExit(cUITemplate_MAP* self)
     void* obj = self->mpMap;
     if (obj != 0) {
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)obj + 8);
-        vt[9].fn((char*)obj + vt[9].delta, 0);
+        vt[9].fn(vthis(obj, vt[9]), 0);
     }
 }
 #endif
@@ -766,9 +766,9 @@ extern "C" void cUITemplate_MAP_onInputAlways_r(void* self, void* menu) __asm__(
 extern "C" void cUITemplate_MAP_onInputAlways_r(void* self, void* menu)
 {
     sVEntry<int(void*)>* isUpSlot = &(*(sVEntry<int(void*)>**)((char*)menu + 8))[17];
-    if (isUpSlot->fn((char*)menu + isUpSlot->delta) == 0) {
+    if (isUpSlot->fn(vthis(menu, *isUpSlot)) == 0) {
         sVEntry<int(void*)>* isDownSlot = &(*(sVEntry<int(void*)>**)((char*)menu + 8))[18];
-        if (isDownSlot->fn((char*)menu + isDownSlot->delta) == 0) {
+        if (isDownSlot->fn(vthis(menu, *isDownSlot)) == 0) {
             return;
         }
     }
@@ -1804,7 +1804,7 @@ static inline int setPic00204FF0(char* name)
 {
     void* obj = SSXApp->FELocale;
     sVEntry00204FF0* vt = *(sVEntry00204FF0**)((char*)obj + 4);
-    return vt[4].fn((char*)obj + vt[4].delta, GetHashValue32(name));
+    return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
 /**
@@ -2938,10 +2938,10 @@ extern "C" void cUITemplate_MAP_setWidgetHiliteColor(cUITemplate_MAP* self, void
     if (obj != 0) {
         if (on != 0) {
             sVEntry_cUITemplate_MAP_setWidgetHiliteColor* vt = *(sVEntry_cUITemplate_MAP_setWidgetHiliteColor**)((char*)obj + 0x8);
-            vt[11].fn((char*)obj + vt[11].delta, kMAPCOLOR_HIGHLIGHTED);
+            vt[11].fn(vthis(obj, vt[11]), kMAPCOLOR_HIGHLIGHTED);
         } else {
             sVEntry_cUITemplate_MAP_setWidgetHiliteColor* vt = *(sVEntry_cUITemplate_MAP_setWidgetHiliteColor**)((char*)obj + 0x8);
-            vt[11].fn((char*)obj + vt[11].delta, kMAPCOLOR_HIGHLIGHTED_LOCKED);
+            vt[11].fn(vthis(obj, vt[11]), kMAPCOLOR_HIGHLIGHTED_LOCKED);
         }
     }
 }
@@ -2972,10 +2972,10 @@ extern "C" void cUITemplate_MAP_setWidgetUnHiliteColor(cUITemplate_MAP* self, vo
     if (obj != 0) {
         if (on != 0) {
             sVEntry_cUITemplate_MAP_setWidgetUnHiliteColor* vt = *(sVEntry_cUITemplate_MAP_setWidgetUnHiliteColor**)((char*)obj + 0x8);
-            vt[11].fn((char*)obj + vt[11].delta, kMAPCOLOR_REGULAR);
+            vt[11].fn(vthis(obj, vt[11]), kMAPCOLOR_REGULAR);
         } else {
             sVEntry_cUITemplate_MAP_setWidgetUnHiliteColor* vt = *(sVEntry_cUITemplate_MAP_setWidgetUnHiliteColor**)((char*)obj + 0x8);
-            vt[11].fn((char*)obj + vt[11].delta, kMAPCOLOR_REGULAR_LOCKED);
+            vt[11].fn(vthis(obj, vt[11]), kMAPCOLOR_REGULAR_LOCKED);
         }
     }
 }

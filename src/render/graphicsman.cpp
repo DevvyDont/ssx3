@@ -185,7 +185,7 @@ extern "C" void cGraphicsMan_FlushRenderer(cGraphicsMan* self)
 {
     for (;;) {
         sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)self->mVtbl;
-        if (vt[18].fn((char*)self + vt[18].delta) != 0) break;
+        if (vt[18].fn(vthis(self, vt[18])) != 0) break;
         ((cGmApp_9C28*)cAppMan_TheAppMan->ExecutionMan)->prepause();
         SYNCTASK_run(0);
         THREAD_yield(0);
@@ -217,7 +217,7 @@ struct sGfxVEntry95 {
 extern "C" void cGraphicsMan_RenderModel(cGraphicsMan* self, void* obj, int animMats, int texMat, int renderFlags)
 {
     sGfxVEntry95* vt = (sGfxVEntry95*)self->mVtbl;
-    vt[95].fn((char*)self + vt[95].delta, obj, *(int*)((char*)obj + 0x94), (char*)obj + 0x10, animMats, texMat, renderFlags, 1.0f);
+    vt[95].fn(vthis(self, vt[95]), obj, *(int*)((char*)obj + 0x94), (char*)obj + 0x10, animMats, texMat, renderFlags, 1.0f);
 }
 #endif
 
@@ -295,7 +295,7 @@ extern "C" void cGraphicsMan_RenderIndexedTriList(cGraphicsMan* self, int NumTri
             }
             Indices += 3;
             sGmVE_369CF8* vt = (sGmVE_369CF8*)self->mVtbl;
-            vt[71].fn(((char*)self) + vt[71].delta, 3, verts, 0);
+            vt[71].fn(vthis(self, vt[71]), 3, verts, 0);
         }
     } else {
         for (int i = 0; i < NumTris; i++) {
@@ -312,7 +312,7 @@ extern "C" void cGraphicsMan_RenderIndexedTriList(cGraphicsMan* self, int NumTri
             }
             Indices += 3;
             sGmVE_369CF8* vt = (sGmVE_369CF8*)self->mVtbl;
-            vt[71].fn(((char*)self) + vt[71].delta, 3, verts, 0);
+            vt[71].fn(vthis(self, vt[71]), 3, verts, 0);
         }
     }
 }
@@ -435,7 +435,7 @@ extern "C" void cGraphicsMan_RenderSpline(cGraphicsMan* self, sV4_A048* BezMat, 
         curveParam += step;
     }
     sGmVE_A048* vt = (sGmVE_A048*)self->mVtbl;
-    vt[73].fn((char*)self + vt[73].delta, n, verts, 0);
+    vt[73].fn(vthis(self, vt[73]), n, verts, 0);
 }
 #endif
 
@@ -855,7 +855,7 @@ extern "C" void func_0036AC00(cPS2GraphicsMan* self, int idx, void* pkt2, int* h
     int zBufPage = self->mCurrentZBufferPage;
     int frameBufPage = self->mCurrentFrameBufferPage;
     sGmVEntry_AC00* vt = (sGmVEntry_AC00*)self->mVtbl;
-    int n = vt[11].fn(((char*)self) + vt[11].delta);
+    int n = vt[11].fn(vthis(self, vt[11]));
     func_0036AE20(self, idx, zBufPage, frameBufPage, n * 2, &pkt);
     *handle = func_0038F668(dma, pkt, 4);
     pkt = func_0038F460(dma, *handle, -1, 0);
@@ -1000,7 +1000,7 @@ struct sGmMan_B5E8 {
 static inline unsigned int gmVCall_B5E8(sGmMan_B5E8* self, int slot)
 {
     sGmVE_B5E8* vt = self->vt;
-    return vt[slot].fn((char*)self + vt[slot].delta);
+    return vt[slot].fn(vthis(self, vt[slot]));
 }
 
 /**
@@ -2849,8 +2849,8 @@ extern "C" void cStaticEmitter_render1(cStaticEmitter* selfp)
 {
     sGfxCtx_708C0* gfx = D_004A5B80_708C0;
     sGfxVEntry_708C0* vt = gfx->vtable;
-    if (((tCull_708C0)vt[93].fn)((char*)gfx + vt[93].delta, (char*)&selfp->BoundBox, (char*)&selfp->BoundBox.MaxPoint,
-                                 ((tGetMat_708C0)vt[43].fn)((char*)gfx + vt[43].delta)) == 1) {
+    if (((tCull_708C0)vt[93].fn)(vthis(gfx, vt[93]), (char*)&selfp->BoundBox, (char*)&selfp->BoundBox.MaxPoint,
+                                 ((tGetMat_708C0)vt[43].fn)(vthis(gfx, vt[43]))) == 1) {
         return;
     }
     if ((selfp)->m_initialized == 0) {
@@ -2868,7 +2868,7 @@ extern "C" void cStaticEmitter_render1(cStaticEmitter* selfp)
     gfx->top->flagsA = (gfx->top->flagsA & ~0x7C) | ((layer << 2) & 0x7C);
     gfx->top->tex = GetTexId_708C0((selfp)->TextureId + (int)selfp->mCurrentFlipTexture);
     sGfxVEntry_708C0* vt2 = gfx->vtable;
-    ((tDraw_708C0)vt2[82].fn)((char*)gfx + vt2[82].delta, (char*)&selfp->Emitter);
+    ((tDraw_708C0)vt2[82].fn)(vthis(gfx, vt2[82]), (char*)&selfp->Emitter);
     gfx->top--;
 }
 #endif
@@ -2906,7 +2906,7 @@ extern "C" void cStaticEmitter_writeToReplayFrame(cStaticEmitter* self, sGmSerOb
     buf.a = self->Duration;
     buf.b = self->Emitter.EndTime;
     buf.c = self->m_initialized;
-    out->vt[1].fn((char*)out + out->vt[1].delta, &buf, 12);
+    out->vt[1].fn(vthis(out, out->vt[1]), &buf, 12);
 }
 #endif
 

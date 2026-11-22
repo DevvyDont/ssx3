@@ -139,7 +139,7 @@ extern "C" void cBENewPlayerInterface_defaultCtrl(cBENewPlayerInterface* self)
         entry[i].iUseDualShock = 1;
     }
     sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
-    vt[2].fn((char*)self + vt[2].delta);
+    vt[2].fn(vthis(self, vt[2]));
 }
 #endif
 

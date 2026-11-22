@@ -2908,7 +2908,7 @@ extern "C" void cManualChaseAlgorithm_snap(cManualChaseAlgorithm* self, int id)
         cLookAtChaseAlgorithm_snap(((cLookAtChaseAlgorithm*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cLookAtChaseAlgorithm*)self), 100.0f, 100.0f);
         sCamVEntryVoidA* vt2 = (sCamVEntryVoidA*)self->mVtbl;
-        vt2[5].fn((char*)self + vt2[5].delta);
+        vt2[5].fn(vthis(self, vt2[5]));
     }
 }
 #endif
@@ -3185,7 +3185,7 @@ extern "C" void cMatrixChaseAlgorithm_snap(cMatrixChaseAlgorithm* self, int id)
         cLookAtChaseAlgorithm_snap(self, id);
         cLookAtChaseAlgorithm_setupInitialCamDir((cLookAtChaseAlgorithm*)self, 100.0f, 100.0f);
         sCamVEntryVoidA* vt2 = (sCamVEntryVoidA*)self->mVtbl;
-        vt2[5].fn((char*)self + vt2[5].delta);
+        vt2[5].fn(vthis(self, vt2[5]));
     }
 }
 #endif
@@ -3363,7 +3363,7 @@ extern "C" void cRelativeChaseAlgorithm_snap(cRelativeChaseAlgorithm* self, int 
         cLookAtChaseAlgorithm_setupInitialCamDir((cLookAtChaseAlgorithm*)self, 100.0f, 100.0f);
         self->Initialized = 0;
         sCamVEntryVoidA* vt2 = (sCamVEntryVoidA*)self->mVtbl;
-        vt2[5].fn((char*)self + vt2[5].delta);
+        vt2[5].fn(vthis(self, vt2[5]));
     }
 }
 #endif
@@ -3721,7 +3721,7 @@ extern "C" void cSplineCamAlgorithm_snap(cSplineCamAlgorithm* self, int id)
     {
         cLookAtChaseAlgorithm_snap(self, id);
         sCamVEntryVoid* vt2 = (sCamVEntryVoid*)self->mVtbl;
-        vt2[5].fn((char*)self + vt2[5].delta);
+        vt2[5].fn(vthis(self, vt2[5]));
     }
 }
 #endif
@@ -4820,12 +4820,12 @@ extern "C" void cLookAtChaseAlgorithm_updateAlgorithm(cLookAtChaseAlgorithm* sel
 {
     if (self->DoSnap != 0) {
         sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
-        vt[4].fn((char*)self + vt[4].delta);
+        vt[4].fn(vthis(self, vt[4]));
     }
     sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
-    vt[5].fn((char*)self + vt[5].delta);
+    vt[5].fn(vthis(self, vt[5]));
     sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)self->mVtbl;
-    vt2[8].fn((char*)self + vt2[8].delta, ignoreCollisions);
+    vt2[8].fn(vthis(self, vt2[8]), ignoreCollisions);
 }
 #endif
 
@@ -5154,7 +5154,7 @@ extern "C" void cLookAtChaseAlgorithm_setupHalfPipeCam(cLookAtChaseAlgorithm* se
                 {
                     cRiderCameraTarget* obj = self->Target;
                     sVEntry_162A20* vt = *(sVEntry_162A20**)obj;
-                    t4Vector groundNormal = vt[9].fn((char*)obj + vt[9].delta);
+                    t4Vector groundNormal = vt[9].fn(vthis(obj, vt[9]));
                     if (groundNormal.z < 0.10000000149011612f)
                     {
                         self->HalfPipeInitWait = 0.0f;
@@ -7966,7 +7966,7 @@ extern "C" void cLookAtChaseAlgorithm_doRaceCamFinalPhase(cLookAtChaseAlgorithm*
 {
     cRaceCamFinalPhaseData finalPhaseData;
     sCamVE166228* vt = (sCamVE166228*)self->mVtbl;
-    vt[7].fn((char*)self + vt[7].delta, &finalPhaseData);
+    vt[7].fn(vthis(self, vt[7]), &finalPhaseData);
     cLookAtChaseAlgorithm_calcPitchHeading(self, 0);
     if (finalPhaseData.DoPitchBlending != 0)
         cLookAtChaseAlgorithm_updatePitchBlending(self, finalPhaseData.PitchBlendingMaxAngleUp, finalPhaseData.PitchBlendingMaxAngleDown, finalPhaseData.PitchBlendingSmoothnessUp, finalPhaseData.PitchBlendingSmoothnessDown);
@@ -8800,7 +8800,7 @@ extern "C" void* cLookAtChaseAlgorithm_snapCurrent(cLookAtChaseAlgorithm* self)
     sVEntry<void*(void*, void*)>* vt = (sVEntry<void*(void*, void*)>*)self->mVtbl;
     char* targetMgr = (char*)&self->Target->Rider->mVtbl;
     sVEntry<void*(void*)>* vt2 = *(sVEntry<void*(void*)>**)targetMgr;
-    return vt[3].fn((char*)self + vt[3].delta, vt2[7].fn(targetMgr + vt2[7].delta));
+    return vt[3].fn(vthis(self, vt[3]), vt2[7].fn(targetMgr + vt2[7].delta));
 }
 #endif
 

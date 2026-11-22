@@ -97,7 +97,7 @@ extern "C" void* cTypeObjNode_cTypeObjNode(cTypeObjNode* self, void* bucket, voi
     cObjNode_cObjNode_3((cObjNode*)self, bucket, stream);
     self->mVtbl = cTypeObjNode_vtbl;
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, (char*)&self->ObjNodeType, 4);
+    vt[2].fn(vthis(stream, vt[2]), (char*)&self->ObjNodeType, 4);
     cTypeObjNode_ObjNodeCount[self->ObjNodeType]++;
     return ((void*)self);
 }
@@ -189,7 +189,7 @@ extern "C" void* cSortObjNode_cSortObjNode(cSortObjNode* self, void* bucket, voi
     cTypeObjNode_cTypeObjNode((cTypeObjNode*)self, bucket, stream);
     self->mVtbl = cSortObjNode_vtbl;
     sVEntryCSortObjNode* vt = *(sVEntryCSortObjNode**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, (char*)&self->SortIndex, 4);
+    vt[2].fn(vthis(stream, vt[2]), (char*)&self->SortIndex, 4);
     return ((void*)self);
 }
 #endif

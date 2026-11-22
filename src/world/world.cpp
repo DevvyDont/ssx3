@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
 
@@ -63,7 +64,7 @@ extern "C" void cWorld__cWorld(void** self, int flags)
 {
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
     sWorldVEntry0* vtEntry = &((sWorldVEntry0*)obj->mVtbl)[107];
-    vtEntry->fn((char*)obj + vtEntry->delta);
+    vtEntry->fn(vthis(obj, *vtEntry));
     if (self[0] != 0) {
         cWorldCache__cWorldCache((int*)self[0], 3);
     }

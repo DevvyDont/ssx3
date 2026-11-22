@@ -631,7 +631,7 @@ extern "C" void cRiderAnimBase_updateAnimation(cRiderAnimBase* self, int animMin
         {
             cAnimSequenceNode* next = *(cAnimSequenceNode**)((char*)node + 0xC8);
             sVEntry003123C0* vt = (sVEntry003123C0*)self->mVtbl;
-            vt[2].fn(((char*)self) + vt[2].delta, &(self->Sequencer)[i], node, timescale);
+            vt[2].fn(vthis(self, vt[2]), &(self->Sequencer)[i], node, timescale);
             node = next;
         }
     }
@@ -679,7 +679,7 @@ extern "C" void cRiderAnimBase_expireAnimation(cRiderAnimBase* self)
     for (int k = 0; k < n; k++)
     {
         sVEntry00312490* vt = (sVEntry00312490*)self->mVtbl;
-        vt[3].fn(((char*)self) + vt[3].delta, list[k].seqr, ((cAnimSequenceNode*)list[k].seq));
+        vt[3].fn(vthis(self, vt[3]), list[k].seqr, ((cAnimSequenceNode*)list[k].seq));
     }
 }
 #endif
@@ -746,7 +746,7 @@ extern "C" tAnimBlendFrame cRiderAnimBase_getAIAnimFrame(cRiderAnimBase* self, i
     if (animid == kAnimIDInvalid)
     {
         sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)self->mVtbl;
-        animid = *(int*)(vt[4].fn(((char*)self) + vt[4].delta, anim) * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
+        animid = *(int*)(vt[4].fn(vthis(self, vt[4]), anim) * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
     }
     cRiderAnimBase_onInput(self, &seq, anim, animid, 1, 0, 0.0f);
     cAnimSequence_setSubAnimTime(cAnimSequencer_getSequence(&seq, 0), 0, startFrameTime);
@@ -775,7 +775,7 @@ extern char** cAnimDataBase_TheAnimDataBase;
 extern "C" float cRiderAnimBase_getAIAnimDuration(cRiderAnimBase* self, int aid)
 {
     sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)self->mVtbl;
-    int id = vt[4].fn(((char*)self) + vt[4].delta, aid);
+    int id = vt[4].fn(vthis(self, vt[4]), aid);
     if (id == 519)
         return 0.0f;
     unsigned int animId = *(unsigned int*)(id * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
@@ -809,7 +809,7 @@ struct sAnimKey00312820 {
 extern "C" float cRiderAnimBase_getAIAnimEventTime(cRiderAnimBase* self, int anim, int frame)
 {
     sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)self->mVtbl;
-    int id = vt[4].fn(((char*)self) + vt[4].delta, anim);
+    int id = vt[4].fn(vthis(self, vt[4]), anim);
     if (id == 519)
         return 0.0f;
     unsigned int mapEntry = *(unsigned int*)(id * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);

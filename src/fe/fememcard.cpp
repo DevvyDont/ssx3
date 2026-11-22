@@ -793,7 +793,7 @@ extern "C" void cFEStateMemCard_onPopupEvent(cFEStateMemCard* self, cUIState* po
     if (!cancel)
     {
       sVEntry<void(void *)> *vt = (sVEntry<void(void *)>*)self->mVtbl;
-      vt[41].fn(((char *) self) + vt[41].delta);
+      vt[41].fn(vthis(self, vt[41]));
       cMCOverlayManager_update(cSSXApp_getMCManager(SSXApp));
       cFEStateMemCard_terminateFreeSpaceCheck(self);
     }
@@ -835,10 +835,10 @@ extern "C" void cFEStateMemCard_displayStatus(void)
         cMCOverlayManager_GetMessage(mp, buf, 800);
         cUIText_setUnicodeStringWrap(obj, buf);
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)obj + 8);
-        vt[9].fn((char*)obj + vt[9].delta, 1);
+        vt[9].fn(vthis(obj, vt[9]), 1);
     } else {
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)obj + 8);
-        vt[9].fn((char*)obj + vt[9].delta, 0);
+        vt[9].fn(vthis(obj, vt[9]), 0);
     }
 }
 #endif
@@ -906,7 +906,7 @@ extern "C" void cFEStateMemCard_startProfileRead(void)
     *(int*)((char*)memCardState + 0x1C4) = profileFile;
     *(int*)((char*)memCardState + 0x1BC) = 0;
     sVtEnt_001877B0* vt = *(sVtEnt_001877B0**)((char*)mp + 0x748);
-    vt[1].fn((char*)mp + vt[1].delta, 53);
+    vt[1].fn(vthis(mp, vt[1]), 53);
     cMCOverlayManager_getFileName_r(mp, 1, name, 20);
     func_002C2540(fmt, str_pct_s_pct_s_c);
     func_00241AA0_r(desc, 0x10);
@@ -960,7 +960,7 @@ extern "C" void cFEStateMemCard_startSettingsRead(void)
     cMCOverlayManager_readSetSize(mp, cBESaveInterface_getSaveGameSize_K187920());
     cMCOverlayManager_readSetFileType(mp, 2);
     sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)mp + 0x748);
-    vt[1].fn((char*)mp + vt[1].delta, 53);
+    vt[1].fn(vthis(mp, vt[1]), 53);
     void* st = cFEStateMemCard_mInstance;
     *(int*)((char*)st + 0x1BC) = two;
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)st + 0x40), GetHashValue32(str_exclam));

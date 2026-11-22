@@ -2057,7 +2057,7 @@ extern "C" void cMoviePlayer_purge(cMoviePlayer* self)
     RCMP_VIDEO_DRIVER* videoDriver = moviePlayer->m_pVd;
     if (((void*)videoDriver) != 0) {
         sVEntry<void(void*, int)>* dtorEntry = &((sVEntry<void(void*, int)>*)videoDriver->mVtbl)[1];
-        dtorEntry->fn((char*)videoDriver + dtorEntry->delta, 3);
+        dtorEntry->fn(vthis(videoDriver, *dtorEntry), 3);
         moviePlayer->m_pVd = 0;
         cMoviePlayer_m_isPlaying--;
     }
@@ -2141,20 +2141,20 @@ extern "C" void cMoviePlayer_syncPlay(cMoviePlayer* self)
             if (moviePlayer->mbReDraw != 0) {
                 RCMP_VIDEO_DRIVER* videoDriver = moviePlayer->m_pVd;
                 sVEntry<void(void*)>* slotEntry = &((sVEntry<void(void*)>*)videoDriver->mVtbl)[5];
-                slotEntry->fn(((char*)videoDriver) + slotEntry->delta);
+                slotEntry->fn(vthis(videoDriver, *slotEntry));
             } else {
                 RCMP_VIDEO_DRIVER* videoDriver = moviePlayer->m_pVd;
                 sVEntry<void(void*, void*)>* slotEntry = &((sVEntry<void(void*, void*)>*)videoDriver->mVtbl)[4];
-                slotEntry->fn(((char*)videoDriver) + slotEntry->delta, moviePlayer->mpCurrFrame);
+                slotEntry->fn(vthis(videoDriver, *slotEntry), moviePlayer->mpCurrFrame);
             }
             sVEntry<void(void*)>* w = &((sVEntry<void(void*)>*)cGraphicsMan_TheGraphicsMan->mVtbl)[20];
-            w->fn((char*)cGraphicsMan_TheGraphicsMan + w->delta);
+            w->fn(vthis(cGraphicsMan_TheGraphicsMan, *w));
             SYNCTASK_run(0);
             THREAD_yield(0);
             if (func_003AE780(((char*)moviePlayer->m_pPlayer)) != 0) {
                 RCMP_VIDEO_DRIVER* videoDriver = moviePlayer->m_pVd;
                 sVEntry<void(void*)>* slotEntry = &((sVEntry<void(void*)>*)videoDriver->mVtbl)[6];
-                slotEntry->fn(((char*)videoDriver) + slotEntry->delta);
+                slotEntry->fn(vthis(videoDriver, *slotEntry));
                 moviePlayer->mpCurrFrame = (void*)func_003AE6C8(((char*)moviePlayer->m_pPlayer), *(float*)(((char*)moviePlayer->m_pPlayer) + 0x48));
                 moviePlayer->mbReDraw = 0;
             } else {
@@ -3145,7 +3145,7 @@ extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_CompleteDraw(SSX_VD_PS2_SINGLE_BUFFERD
     do {
         rend = (void*)self->m_pGrMan;
         vt = *(sMemStdVEntry**)((char*)rend + 0x10D8);
-    } while (vt[18].fn((char*)rend + vt[18].delta) == 0);
+    } while (vt[18].fn(vthis(rend, vt[18])) == 0);
     void* resource = self->mpCurrentFrame;
     if (resource != 0) {
         RCMP_DECODER_ReleaseFrame(self->m_pdecoder, resource);

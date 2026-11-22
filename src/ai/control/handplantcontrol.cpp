@@ -872,7 +872,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_writeToReplayFrame);
 extern "C" void cHandplantMotion_writeToReplayFrame(cHandplantMotion* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn((char*)obj + vt[1].delta, self, 160);
+    vt[1].fn(vthis(obj, vt[1]), self, 160);
 }
 #endif
 
@@ -890,7 +890,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_readFromReplayFrame)
 extern "C" void cHandplantMotion_readFromReplayFrame(cHandplantMotion* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn((char*)obj + vt[2].delta, self, 160);
+    vt[2].fn(vthis(obj, vt[2]), self, 160);
 }
 #endif
 
@@ -1800,7 +1800,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_writeToReplayFrame);
 extern "C" void cAirMotion_writeToReplayFrame(cAirMotion* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn((char*)obj + vt[1].delta, self, 0x4);
+    vt[1].fn(vthis(obj, vt[1]), self, 0x4);
 }
 #endif
 
@@ -1818,7 +1818,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_readFromReplayFrame);
 extern "C" void cAirMotion_readFromReplayFrame(cAirMotion* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn((char*)obj + vt[2].delta, self, 0x4);
+    vt[2].fn(vthis(obj, vt[2]), self, 0x4);
 }
 #endif
 
@@ -2949,7 +2949,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_writeToReplayFrame);
 extern "C" void cRailslideMotion_writeToReplayFrame(cRailslideMotion* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn((char*)obj + vt[1].delta, self, 80);
+    vt[1].fn(vthis(obj, vt[1]), self, 80);
 }
 #endif
 
@@ -2967,7 +2967,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_readFromReplayFrame)
 extern "C" void cRailslideMotion_readFromReplayFrame(cRailslideMotion* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn((char*)obj + vt[2].delta, self, 80);
+    vt[2].fn(vthis(obj, vt[2]), self, 80);
 }
 #endif
 
@@ -4886,7 +4886,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_writeToReplayFrame);
 extern "C" void cGroundMotion_writeToReplayFrame(cGroundMotion* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn((char*)obj + vt[1].delta, self, 0x18);
+    vt[1].fn(vthis(obj, vt[1]), self, 0x18);
 }
 #endif
 
@@ -4904,7 +4904,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_readFromReplayFrame);
 extern "C" void cGroundMotion_readFromReplayFrame(cGroundMotion* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn((char*)obj + vt[2].delta, self, 0x18);
+    vt[2].fn(vthis(obj, vt[2]), self, 0x18);
 }
 #endif
 

@@ -152,7 +152,7 @@ struct sPopup_EC68 {
 extern "C" int cFEPopupVideoCalibration_onInputBegin(cFEPopupVideoCalibration* self, cUIInput* in)
 {
     sVEi_EC68* vt = (sVEi_EC68*)in->mVtbl;
-    if (vt[5].fn(((char*)in) + vt[5].delta) != 0) {
+    if (vt[5].fn(vthis(in, vt[5])) != 0) {
         if (*(signed char*)&self->mImage == 0) {
             cUIObjK1DEB90* obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1540));
             if (obj != 0) {
@@ -178,7 +178,7 @@ extern "C" int cFEPopupVideoCalibration_onInputBegin(cFEPopupVideoCalibration* s
         if (uiSound == 0)
             uiSound = &D_004A5A58_EC68;
         if (uiSound != 0)
-            uiSound->vt[2].fn((char*)uiSound + uiSound->vt[2].delta, 6);
+            uiSound->vt[2].fn(vthis(uiSound, uiSound->vt[2]), 6);
     }
     return 1;
 }
@@ -325,7 +325,7 @@ static inline void sound_F050(cFEPopupScreenPos* s, int msg)
     if (p == 0)
         p = &gUISoundNull;
     if (p != 0)
-        p->vt[2].fn((char*)p + p->vt[2].delta, msg);
+        p->vt[2].fn(vthis(p, p->vt[2]), msg);
 }
 
 static inline void playFrame_F050(cFEPopupScreenPos* s, char* name)
@@ -393,7 +393,7 @@ extern "C" void cFEPopupScreenPos_onUpdate(cFEPopupScreenPos* self)
         self->mX = clamp_F050(self->mX, -20, 20);
         self->mY = clamp_F050(self->mY, -20, 20);
         sVEntry<void(void*, int, int)>* rv = (sVEntry<void(void*, int, int)>*)GrMan->mVtbl;
-        rv[12].fn((char*)GrMan + rv[12].delta, self->mX, self->mY);
+        rv[12].fn(vthis(GrMan, rv[12]), self->mX, self->mY);
         return;
     }
 }
@@ -3433,7 +3433,7 @@ extern "C" void cFEStateChallengePopup__cFEStateChallengePopup(cFEStateChallenge
     self->mVtbl = cFEStateChallengePopup_vtbl;
     void* obj = self->mpParentState;
     sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)obj + 8);
-    vt[32].fn((char*)obj + vt[32].delta);
+    vt[32].fn(vthis(obj, vt[32]));
     cFEStateNet__cFEStateNet_dtor(self, flags);
 }
 #endif
@@ -3494,7 +3494,7 @@ extern "C" void cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup(c
     self->mVtbl = cFEStateChallengeReceivedPopup_vtbl;
     void* obj = self->mpParentState;
     sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)obj + 8);
-    vt[32].fn((char*)obj + vt[32].delta);
+    vt[32].fn(vthis(obj, vt[32]));
     cBXString__cBXString((char*)&self->mszChallenger, 2);
     cFEStateNet__cFEStateNet_dtor(self, flags);
 }
@@ -7603,7 +7603,7 @@ extern "C" void cOVState_MESSAGECENTER_onWidgetCreate(sPopup_1E3EC0* self, void*
     }
     if (widgetHash == GetHashValue32(str_MessageView)) {
         sVEntry_1E3EC0* vt = *(sVEntry_1E3EC0**)((char*)w + 8);
-        vt[9].fn((char*)w + vt[9].delta, 0);
+        vt[9].fn(vthis(w, vt[9]), 0);
         return;
     }
     if (widgetHash == GetHashValue32(str_MenuFroms)) {
@@ -7621,7 +7621,7 @@ extern "C" void cOVState_MESSAGECENTER_onWidgetCreate(sPopup_1E3EC0* self, void*
     if (widgetHash == GetHashValue32(str_NoMessage)) {
         self->f148 = w;
         sVEntry_1E3EC0* vt = *(sVEntry_1E3EC0**)((char*)w + 8);
-        vt[9].fn((char*)w + vt[9].delta, 0);
+        vt[9].fn(vthis(w, vt[9]), 0);
         return;
     }
     for (int i = 0; i < 8; i++) {
@@ -7644,7 +7644,7 @@ extern "C" void cOVState_MESSAGECENTER_onWidgetCreate(sPopup_1E3EC0* self, void*
         if (widgetHash == GetHashValue32(buf)) {
             self->aFC[i] = w;
             sVEntry_1E3EC0* vt = *(sVEntry_1E3EC0**)((char*)w + 8);
-            vt[27].fn((char*)w + vt[27].delta, 1);
+            vt[27].fn(vthis(w, vt[27]), 1);
             return;
         }
         sprintf(buf, str_Numberpct_d, i);
@@ -7681,12 +7681,12 @@ extern "C" void cOVState_MESSAGECENTER_onGainFocus(cOVState_MESSAGECENTER* self)
         cUIMenu_setSelectedByIndex(self->mpMenu, func_001E3680(37));
         void* menu = self->mpMenu;
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)menu + 8);
-        vt[7].fn((char*)menu + vt[7].delta, 1);
+        vt[7].fn(vthis(menu, vt[7]), 1);
         func_001E50C8(self, 37, -1);
     } else {
         void* menu = self->mpMenu;
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)menu + 8);
-        vt[7].fn((char*)menu + vt[7].delta, 1);
+        vt[7].fn(vthis(menu, vt[7]), 1);
     }
 }
 #endif
@@ -7803,7 +7803,7 @@ extern "C" void cOVState_MESSAGECENTER_onWidgetEvent(cOVState_MESSAGECENTER* sel
         for (i = 0; i < 8; i++) {
             void* subjectText = ((void**)&self->mpSubject)[i];
             sVEntry001E4200* vt = *(sVEntry001E4200**)((char*)subjectText + 8);
-            vt[5].fn((char*)subjectText + vt[5].delta, 0);
+            vt[5].fn(vthis(subjectText, vt[5]), 0);
         }
         break;
     }
@@ -8057,7 +8057,7 @@ extern "C" void func_001E4840(cOVState_MESSAGECENTER* self, void* obj)
 {
     if (obj != 0) {
         sVEntry_func_001E4840* vt = *(sVEntry_func_001E4840**)((char*)obj + 0x8);
-        vt[9].fn((char*)obj + vt[9].delta, 0);
+        vt[9].fn(vthis(obj, vt[9]), 0);
     }
 }
 #endif
@@ -8080,7 +8080,7 @@ extern "C" void func_001E4878(cOVState_MESSAGECENTER* self, void* obj)
 {
     if (obj != 0) {
         sVEntry_func_001E4878* vt = *(sVEntry_func_001E4878**)((char*)obj + 0x8);
-        vt[9].fn((char*)obj + vt[9].delta, 1);
+        vt[9].fn(vthis(obj, vt[9]), 1);
     }
 }
 #endif
@@ -8333,7 +8333,7 @@ static inline void setTint_4C78(sObj_4C78* o, int v, int idx)
 
 static inline void show_4C78(sObj_4C78* o)
 {
-    o->vt[9].fn((char*)o + o->vt[9].delta, 1);
+    o->vt[9].fn(vthis(o, o->vt[9]), 1);
 }
 
 /**
@@ -8673,7 +8673,7 @@ extern "C" void cOVState_ViewPopup_onWidgetCreate(cOVState_ViewPopup* self, void
 {
     int nameHash = *(int*)((char*)widget + 0x38);
     sVEntryK1E52F8* vt = *(sVEntryK1E52F8**)((char*)widget + 8);
-    vt[9].fn((char*)widget + vt[9].delta, 1);
+    vt[9].fn(vthis(widget, vt[9]), 1);
     if (nameHash == GetHashValue32(str_From)) {
         self->mpFrom = (cUIText*)widget;
     } else if (nameHash == GetHashValue32(str_Subject)) {
@@ -8753,12 +8753,12 @@ extern "C" void func_001E5428(cOVState_ViewPopup* self)
         void* buttonWidget = self->mpButtonSquare;
         if (buttonWidget != 0) {
             sVEntryK1E5428* vt = *(sVEntryK1E5428**)((char*)buttonWidget + 8);
-            vt[9].fn((char*)buttonWidget + vt[9].delta, 0);
+            vt[9].fn(vthis(buttonWidget, vt[9]), 0);
         }
         buttonWidget = (void*)self->mpDeleteMessage;
         if (buttonWidget != 0) {
             sVEntryK1E5428* vt = *(sVEntryK1E5428**)((char*)buttonWidget + 8);
-            vt[9].fn((char*)buttonWidget + vt[9].delta, 0);
+            vt[9].fn(vthis(buttonWidget, vt[9]), 0);
         }
         if (self->mpKeepMessage != 0) {
             cUIText_setUnicodeStringByID(self->mpKeepMessage, GetHashValue32(str_kT_BTNKeepMsg));
@@ -8899,7 +8899,7 @@ extern "C" void func_001E5780(cOVState_ViewPopup* self, int idx)
             cUIText_setUnicodeStringByID(self->mpMessageLine0, *(int*)(messageEntry + 0x14));
             void* obj = self->mpMessageLine0;
             sVEntry001E5780* vt = *(sVEntry001E5780**)((char*)obj + 8);
-            vt[9].fn((char*)obj + vt[9].delta, 1);
+            vt[9].fn(vthis(obj, vt[9]), 1);
         }
     }
 }
@@ -10140,7 +10140,7 @@ extern "C" int cOVState_FINAL_STANDINGS_onInputBegin(cOVState_FINAL_STANDINGS* s
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cGameComm_mGameComm != 0 && cGameComm_mGameComm->mConnected != 0) {
         sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)((char*)input + 8);
-        if (vt[27].fn((char*)input + vt[27].delta) != 0) {
+        if (vt[27].fn(vthis(input, vt[27])) != 0) {
             cOVStateManager_triggerOverlay(40);
         }
     }

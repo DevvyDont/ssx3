@@ -208,7 +208,7 @@ extern "C" void cFEStateTitle_onWidgetEvent(cFEStateTitle* self, cUIThing* msg, 
     if (type == 5) {
         void* obj = *(void**)self->mpEngine;
         sVEntry_cFEStateTitle_onWidgetEvent* vt = *(sVEntry_cFEStateTitle_onWidgetEvent**)((char*)obj + 0x4);
-        void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, msg->mMiscData);
+        void* nextState = vt[4].fn(vthis(obj, vt[4]), self, msg->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
@@ -299,7 +299,7 @@ extern "C" void cFEStateMainMenu_onCreateScreen(cFEStateMainMenu* self)
     void* iface = cBE_getInterface_Fv(SSXApp->BE, 7);
     cBENetworkInterface_networkOpt.bIsNetworkGame = 0;
     sVEntry<void(void*)>* vt0 = *(sVEntry<void(void*)>**)((char*)iface + 0xC);
-    vt0[1].fn((char*)iface + vt0[1].delta);
+    vt0[1].fn(vthis(iface, vt0[1]));
     func_0028F140(cAudioInterface_bxAudio(), 1);
     char* obj = *(char**)&self->mpEngine->mpInput;
     *(unsigned char*)&self->mNumOfCtrl = 0;
@@ -644,14 +644,14 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(cFEStateMainMenu* self_, cUIThing
             return;
         }
         sObj_194EB0* obj = *(sObj_194EB0**)self_->mpEngine;
-        void* nextState = ((void* (*)(void*, void*, int))obj->vt[4].fn)((char*)obj + obj->vt[4].delta, ((char*)self_), item_->mMiscData);
+        void* nextState = ((void* (*)(void*, void*, int))obj->vt[4].fn)(vthis(obj, obj->vt[4]), ((char*)self_), item_->mMiscData);
         if (nextState != 0)
             cUIStateStack_push(&self_->mpEngine->mStateStack, nextState);
         break;
     }
     case 6: {
         sObj_194EB0* obj = *(sObj_194EB0**)self_->mpEngine;
-        void* nextState = ((void* (*)(void*, void*, int))obj->vt[5].fn)((char*)obj + obj->vt[5].delta, ((char*)self_), item_->mMiscData);
+        void* nextState = ((void* (*)(void*, void*, int))obj->vt[5].fn)(vthis(obj, obj->vt[5]), ((char*)self_), item_->mMiscData);
         if (nextState != 0)
             cUIStateStack_push(&self_->mpEngine->mStateStack, nextState);
         break;
@@ -740,13 +740,13 @@ extern "C" void cFEStateMainMenu_onPopupEvent(cFEStateMainMenu* self, cUIState* 
         return;
     }
     sVEntry<int(void*, int)>* ovt = (sVEntry<int(void*, int)>*)obj->mVtbl;
-    if (ovt[23].fn(((char*)obj) + ovt[23].delta, 0) != 0) {
+    if (ovt[23].fn(vthis(obj, ovt[23]), 0) != 0) {
         self->mGoToNextState = 1;
         int savedCtrl = *(signed char*)&self->mSaveCurrentCtrl;
         *(char*)&self->mCurrentCtrl = savedCtrl;
         cUIThing_playKeyframerEvent(self->mpSelectMultiModeWidget, 2);
         sVEntry<void(void*, ...)>* svt = (sVEntry<void(void*, ...)>*)self->mVtbl;
-        svt[19].fn((char*)self + svt[19].delta, self->mpSelectMultiModeWidget, 5);
+        svt[19].fn(vthis(self, svt[19]), self->mpSelectMultiModeWidget, 5);
     }
     Show195328(self, str_hl);
     Show195328(self, str_3_help_multi);

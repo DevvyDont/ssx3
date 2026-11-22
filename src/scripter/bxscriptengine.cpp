@@ -239,7 +239,7 @@ extern "C" int cBXScriptEngine_RequestAnimationScript(cBXScriptEngine* self, int
         request->state = one;
         request->f12 = one;
         sBxsVEntry21A0* vtableEntry = &((sBxsVEntry21A0*)self->mVtbl)[7];
-        if (vtableEntry->fn((char*)self + vtableEntry->delta, idx) == 0) {
+        if (vtableEntry->fn(vthis(self, *vtableEntry), idx) == 0) {
             request->state = 7;
             cBXScriptEngine_ResetRequest(self, request);
             return -1;
@@ -882,7 +882,7 @@ extern "C" void cBXScriptEngine_OnInSeqPlay(cBXScriptEngine* self, cScriptPlayer
 {
     char* request = (char*)pPlayer->mpUserData;
     sBxsVEntry10* vt = (sBxsVEntry10*)self->mVtbl;
-    vt[10].fn((char*)self + vt[10].delta, pPlayer, *(int*)(request + 0x8), *(int*)(request + 0xC));
+    vt[10].fn(vthis(self, vt[10]), pPlayer, *(int*)(request + 0x8), *(int*)(request + 0xC));
     *(int*)(request + 0x4) = 4;
 }
 #endif
@@ -908,7 +908,7 @@ extern "C" void cBXScriptEngine_OnInSeqStop(cBXScriptEngine* self, cScriptPlayer
 {
     char* request = (char*)msg->mpUserData;
     sVEntry<void(void*, void*, int, int)>* vt = (sVEntry<void(void*, void*, int, int)>*)self->mVtbl;
-    vt[11].fn((char*)self + vt[11].delta, msg, *(int*)(request + 0x8), *(int*)(request + 0xC));
+    vt[11].fn(vthis(self, vt[11]), msg, *(int*)(request + 0x8), *(int*)(request + 0xC));
     *(int*)(request + 0x4) = 2;
     if (*(short*)(request + 0x10) != 0) {
         cBXScriptEngine_ReleaseRequest(self, *(int*)(request + 0x1C));
@@ -1337,7 +1337,7 @@ extern "C" void cScriptObjTransition_SetTransition1_impl(sBxsFade2DD0* self, int
 {
     if (self->kind != 9) {
         sBxsVEntry2DD0* vt = self->vtable;
-        vt[5].fn((char*)self + vt[5].delta, self->id);
+        vt[5].fn(vthis(self, vt[5]), self->id);
     }
     if (kind == 9 || inFrames + holdFrames + outFrames <= currFrame) {
         self->kind = 9;
@@ -1355,7 +1355,7 @@ extern "C" void cScriptObjTransition_SetTransition1_impl(sBxsFade2DD0* self, int
         self->rateB = holdFrames * 0.01666666753590107f;
         self->rateC = outFrames * 0.01666666753590107f;
         sBxsVEntry2DD0* vt = self->vtable;
-        vt[4].fn((char*)self + vt[4].delta, self->id);
+        vt[4].fn(vthis(self, vt[4]), self->id);
     }
 }
 #endif

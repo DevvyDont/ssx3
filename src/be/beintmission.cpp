@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "be/beintmission.h"
 #include "replay/frameptr.h"
 #include "main/ssxapp.h"
@@ -1463,12 +1464,12 @@ extern "C" void cBEMissionInterface_writeToReplayFrame(cBEMissionInterface* self
     char* base = D_004A6CAC;
     int off = characterId * 3976;
     sSerVEntry_001547E8* writeEntry = &(*(sSerVEntry_001547E8**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, base + off, 276);
+    writeEntry->fn(vthis(stream, *writeEntry), base + off, 276);
     writeEntry = &(*(sSerVEntry_001547E8**)stream)[1];
     char* base2 = base + 0x114;
-    writeEntry->fn((char*)stream + writeEntry->delta, base2 + off, 352);
+    writeEntry->fn(vthis(stream, *writeEntry), base2 + off, 352);
     writeEntry = &(*(sSerVEntry_001547E8**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->bIsActive, 4);
+    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->bIsActive, 4);
 }
 #endif
 
@@ -1497,12 +1498,12 @@ extern "C" void cBEMissionInterface_readFromReplayFrame(cBEMissionInterface* sel
     char* base = D_004A6CAC;
     int off = characterId * 3976;
     sSerVEntry_00154898* readEntry = &(*(sSerVEntry_00154898**)stream)[2];
-    readEntry->fn((char*)stream + readEntry->delta, base + off, 276);
+    readEntry->fn(vthis(stream, *readEntry), base + off, 276);
     readEntry = &(*(sSerVEntry_00154898**)stream)[2];
     char* base2 = base + 0x114;
-    readEntry->fn((char*)stream + readEntry->delta, base2 + off, 352);
+    readEntry->fn(vthis(stream, *readEntry), base2 + off, 352);
     readEntry = &(*(sSerVEntry_00154898**)stream)[2];
-    readEntry->fn((char*)stream + readEntry->delta, (char*)&self->bIsActive, 4);
+    readEntry->fn(vthis(stream, *readEntry), (char*)&self->bIsActive, 4);
 }
 #endif
 

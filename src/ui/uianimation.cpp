@@ -380,7 +380,7 @@ extern "C" void cUIAnimation_updateThing(cUIAnimation* self, cUIThing* obj, int 
         for (unsigned int i = 0; i < (self->mpAnimHeader)->mNumChannels; i++) {
             float chanValue = cUIAnimationChannel_evalAtFrameFloat((cUIAnimationChannel_evalAtFrameFloat_sAnim**)&self->mpAnimChannels[i], frame);
             sVEntry<void(void*, int, float)>* vt = (sVEntry<void(void*, int, float)>*)obj->mVtbl;
-            vt[12].fn(((char*)obj) + vt[12].delta, cUIAnimationChannel_getAnimChanType(&self->mpAnimChannels[i]), chanValue);
+            vt[12].fn(vthis(obj, vt[12]), cUIAnimationChannel_getAnimChanType(&self->mpAnimChannels[i]), chanValue);
         }
     }
     self->mLastFrameEval = frame;

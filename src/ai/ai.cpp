@@ -183,7 +183,7 @@ extern "C" void cAI_init(sAiObj128818* self)
     for (i = 0; i < 1; i++) self->a70[i] = 0;
     for (i = 0; i < 5; i++) self->a48[i] = 0;
     cAI_loadAnims_self(self);
-    self->vt[6].fn((char*)self + self->vt[6].delta);
+    self->vt[6].fn(vthis(self, self->vt[6]));
     cAI_commonInit((cAI*)self, 1);
     for (i = 0; i < 2; i++) self->a20[i] = 0;
 }
@@ -563,7 +563,7 @@ extern "C" void cAI_render(sAI_91E0* self)
         if (*(int*)(curRider + 0x884) == 0 && *(int*)(curRider + 0x888) == -1) {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             sVEntry_91E0* vt = (sVEntry_91E0*)ps2GraphicsMan->mVtbl;
-            int frameTick = vt[114].fn((char*)ps2GraphicsMan + vt[114].delta);
+            int frameTick = vt[114].fn(vthis(ps2GraphicsMan, vt[114]));
             *(int*)(self->list28[n] + 0x888) = frameTick + 4;
         }
     }
@@ -1721,7 +1721,7 @@ extern "C" void func_0012A998(cAI* self)
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
                 char* obj = list[i];
                 sVEntry0012A998* gvt = (sVEntry0012A998*)ps2GraphicsMan->mVtbl;
-                (*(cRider**)(obj + 0x18))->mSafeRenderTick = gvt[114].fn((char*)ps2GraphicsMan + gvt[114].delta) + 4;
+                (*(cRider**)(obj + 0x18))->mSafeRenderTick = gvt[114].fn(vthis(ps2GraphicsMan, gvt[114])) + 4;
             }
         }
     }
@@ -1808,7 +1808,7 @@ extern "C" void cAI_prepareToPurgeComputerRiders(sAiObj12AB20* self)
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             char* rider = self->mRiders[i];
             sVEntry0012AB20* vt = (sVEntry0012AB20*)ps2GraphicsMan->mVtbl;
-            *(int*)(*(char**)(rider + 0x18) + 0x888) = vt[114].fn((char*)ps2GraphicsMan + vt[114].delta) + 4;
+            *(int*)(*(char**)(rider + 0x18) + 0x888) = vt[114].fn(vthis(ps2GraphicsMan, vt[114])) + 4;
         }
     }
 }
@@ -1883,7 +1883,7 @@ extern "C" void cAI_prepareToPurgeComputerActors(sAiObj12AC48* self)
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             char* rider = self->mRiders[i];
             sVEntry0012AC48* vt = (sVEntry0012AC48*)ps2GraphicsMan->mVtbl;
-            *(int*)(*(char**)(rider + 0x18) + 0x888) = vt[114].fn((char*)ps2GraphicsMan + vt[114].delta) + 4;
+            *(int*)(*(char**)(rider + 0x18) + 0x888) = vt[114].fn(vthis(ps2GraphicsMan, vt[114])) + 4;
         }
     }
 }
@@ -2540,7 +2540,7 @@ static inline void replayWriteObj(char* obj, void* frame)
 extern "C" void cAI_writeToReplayFrame(cAI* self, cReplayFramePtr* frame)
 {
     sVEntryWF* vt = *(sVEntryWF**)frame;
-    vt[1].fn((char*)frame + vt[1].delta, (self), 40);
+    vt[1].fn(vthis(frame, vt[1]), (self), 40);
     for (int i = 0; i < self->NumberOfPlayersAllocated; i++)
     {
         replayWriteObj(((char**)&self->Players[0])[i], frame);
@@ -2587,7 +2587,7 @@ static inline void replayReadObj(char* obj, void* frame)
 extern "C" void cAI_readFromReplayFrame(cAI* self, cReplayFramePtr* frame)
 {
     sVEntryRF* vt = *(sVEntryRF**)frame;
-    vt[2].fn((char*)frame + vt[2].delta, (self), 40);
+    vt[2].fn(vthis(frame, vt[2]), (self), 40);
     int state = self->CurrentAIState;
     cAI_forceAIState((self), self->PreviousAIState);
     self->PreviousAIStateHandler = (cAIStateHandler*)(int)self->CurrentAIStateHandler;
@@ -3146,7 +3146,7 @@ INCLUDE_ASM("ai/ai", cGateControl_writeToReplayFrame);
 extern "C" void cGateControl_writeToReplayFrame(cGateControl* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn((char*)obj + vt[1].delta, self, 20);
+    vt[1].fn(vthis(obj, vt[1]), self, 20);
 }
 #endif
 
@@ -3162,7 +3162,7 @@ INCLUDE_ASM("ai/ai", cGateControl_readFromReplayFrame);
 extern "C" void cGateControl_readFromReplayFrame(cGateControl* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn((char*)obj + vt[2].delta, self, 20);
+    vt[2].fn(vthis(obj, vt[2]), self, 20);
 }
 #endif
 
@@ -3402,7 +3402,7 @@ INCLUDE_ASM("ai/ai", cFinishLineControl_writeToReplayFrame);
 extern "C" void cFinishLineControl_writeToReplayFrame(cFinishLineControl* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn((char*)obj + vt[1].delta, self, 0x4);
+    vt[1].fn(vthis(obj, vt[1]), self, 0x4);
 }
 #endif
 
@@ -3418,7 +3418,7 @@ INCLUDE_ASM("ai/ai", cFinishLineControl_readFromReplayFrame);
 extern "C" void cFinishLineControl_readFromReplayFrame(cFinishLineControl* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn((char*)obj + vt[2].delta, self, 0x4);
+    vt[2].fn(vthis(obj, vt[2]), self, 0x4);
 }
 #endif
 
@@ -3817,14 +3817,14 @@ extern "C" void cWipeoutControl_updateGround(cWipeoutControl* self)
     {
         cRider* rider3 = self->mRider;
         sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)rider3->mVtbl;
-        vt[18].fn(((char*)rider3) + vt[18].delta, k * 0.5f);
+        vt[18].fn(vthis(rider3, vt[18]), k * 0.5f);
     }
     if (self->IsNewImpact != 0)
     {
         self->IsNewImpact = 0;
         cRider* rider4 = self->mRider;
         sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)rider4->mVtbl;
-        vt[17].fn(((char*)rider4) + vt[17].delta, aiLength_12C5C8(*(&self->LatestImpact)));
+        vt[17].fn(vthis(rider4, vt[17]), aiLength_12C5C8(*(&self->LatestImpact)));
         return;
     }
     if (aiIsOne_12D160((char*)self->mRider) && speed < 27.77777862548828f)
@@ -4004,7 +4004,7 @@ extern "C" void cWipeoutControl_updateAir(cWipeoutControl* self)
         self->IsNewImpact = 0;
         cRider* rider3 = self->mRider;
         sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)rider3->mVtbl;
-        vt[17].fn(((char*)rider3) + vt[17].delta, aiLength_12C5C8(*(&self->LatestImpact)));
+        vt[17].fn(vthis(rider3, vt[17]), aiLength_12C5C8(*(&self->LatestImpact)));
         return;
     }
     if (cRiderAnimBase_isCurrentAnimEndFlag(self->mRider->mRiderAnim, 2) != 0 ||
@@ -4769,7 +4769,7 @@ INCLUDE_ASM("ai/ai", cWipeoutControl_writeToReplayFrame);
 extern "C" void cWipeoutControl_writeToReplayFrame(cWipeoutControl* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn((char*)obj + vt[1].delta, self, 0x80);
+    vt[1].fn(vthis(obj, vt[1]), self, 0x80);
 }
 #endif
 
@@ -4788,7 +4788,7 @@ INCLUDE_ASM("ai/ai", cWipeoutControl_readFromReplayFrame);
 extern "C" void cWipeoutControl_readFromReplayFrame(cWipeoutControl* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn((char*)obj + vt[2].delta, self, 0x80);
+    vt[2].fn(vthis(obj, vt[2]), self, 0x80);
 }
 #endif
 
@@ -5418,7 +5418,7 @@ INCLUDE_ASM("ai/ai", cResetControl_writeToReplayFrame);
 extern "C" void cResetControl_writeToReplayFrame(cResetControl* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn((char*)obj + vt[1].delta, self, 0x8);
+    vt[1].fn(vthis(obj, vt[1]), self, 0x8);
 }
 #endif
 
@@ -5436,7 +5436,7 @@ INCLUDE_ASM("ai/ai", cResetControl_readFromReplayFrame);
 extern "C" void cResetControl_readFromReplayFrame(cResetControl* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn((char*)obj + vt[2].delta, self, 0x8);
+    vt[2].fn(vthis(obj, vt[2]), self, 0x8);
 }
 #endif
 
@@ -5718,7 +5718,7 @@ INCLUDE_ASM("ai/ai", cNaturalAirControl_writeToReplayFrame);
 extern "C" void cNaturalAirControl_writeToReplayFrame(cNaturalAirControl* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn((char*)obj + vt[1].delta, self, 20);
+    vt[1].fn(vthis(obj, vt[1]), self, 20);
 }
 #endif
 
@@ -5736,7 +5736,7 @@ INCLUDE_ASM("ai/ai", cNaturalAirControl_readFromReplayFrame);
 extern "C" void cNaturalAirControl_readFromReplayFrame(cNaturalAirControl* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn((char*)obj + vt[2].delta, self, 20);
+    vt[2].fn(vthis(obj, vt[2]), self, 20);
 }
 #endif
 
@@ -6922,7 +6922,7 @@ INCLUDE_ASM("ai/ai", cBoardPressControl_writeToReplayFrame);
 extern "C" void cBoardPressControl_writeToReplayFrame(cBoardPressControl* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn((char*)obj + vt[1].delta, self, 20);
+    vt[1].fn(vthis(obj, vt[1]), self, 20);
 }
 #endif
 
@@ -6940,7 +6940,7 @@ INCLUDE_ASM("ai/ai", cBoardPressControl_readFromReplayFrame);
 extern "C" void cBoardPressControl_readFromReplayFrame(cBoardPressControl* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn((char*)obj + vt[2].delta, self, 20);
+    vt[2].fn(vthis(obj, vt[2]), self, 20);
 }
 #endif
 
@@ -7706,7 +7706,7 @@ INCLUDE_ASM("ai/ai", cRailslideControl_writeToReplayFrame);
 extern "C" void cRailslideControl_writeToReplayFrame(cRailslideControl* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn((char*)obj + vt[1].delta, self, 0x8);
+    vt[1].fn(vthis(obj, vt[1]), self, 0x8);
 }
 #endif
 
@@ -7724,7 +7724,7 @@ INCLUDE_ASM("ai/ai", cRailslideControl_readFromReplayFrame);
 extern "C" void cRailslideControl_readFromReplayFrame(cRailslideControl* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn((char*)obj + vt[2].delta, self, 0x8);
+    vt[2].fn(vthis(obj, vt[2]), self, 0x8);
 }
 #endif
 
@@ -8123,7 +8123,7 @@ INCLUDE_ASM("ai/ai", cHandplantControl_writeToReplayFrame);
 extern "C" void cHandplantControl_writeToReplayFrame(cHandplantControl* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn((char*)obj + vt[1].delta, self, 20);
+    vt[1].fn(vthis(obj, vt[1]), self, 20);
 }
 #endif
 
@@ -8141,7 +8141,7 @@ INCLUDE_ASM("ai/ai", cHandplantControl_readFromReplayFrame);
 extern "C" void cHandplantControl_readFromReplayFrame(cHandplantControl* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn((char*)obj + vt[2].delta, self, 20);
+    vt[2].fn(vthis(obj, vt[2]), self, 20);
 }
 #endif
 
@@ -9853,7 +9853,7 @@ INCLUDE_ASM("ai/ai", cSpinControl_writeToReplayFrame);
 extern "C" void cSpinControl_writeToReplayFrame(cSpinControl* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn((char*)obj + vt[1].delta, self, 88);
+    vt[1].fn(vthis(obj, vt[1]), self, 88);
 }
 #endif
 
@@ -9871,7 +9871,7 @@ INCLUDE_ASM("ai/ai", cSpinControl_readFromReplayFrame);
 extern "C" void cSpinControl_readFromReplayFrame(cSpinControl* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn((char*)obj + vt[2].delta, self, 88);
+    vt[2].fn(vthis(obj, vt[2]), self, 88);
 }
 #endif
 
@@ -10098,7 +10098,7 @@ INCLUDE_ASM("ai/ai", cUberGrindControl_writeToReplayFrame);
 extern "C" void cUberGrindControl_writeToReplayFrame(cUberGrindControl* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn((char*)obj + vt[1].delta, self, 0x8);
+    vt[1].fn(vthis(obj, vt[1]), self, 0x8);
 }
 #endif
 
@@ -10116,7 +10116,7 @@ INCLUDE_ASM("ai/ai", cUberGrindControl_readFromReplayFrame);
 extern "C" void cUberGrindControl_readFromReplayFrame(cUberGrindControl* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn((char*)obj + vt[2].delta, self, 0x8);
+    vt[2].fn(vthis(obj, vt[2]), self, 0x8);
 }
 #endif
 

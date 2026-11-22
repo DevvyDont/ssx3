@@ -2844,7 +2844,7 @@ struct sRailSerVEntry {
 extern "C" void* cUVScrollModifier_cUVScrollModifier1(cUVScrollModifier* self, void* stream)
 {
     sRailSerVEntry* vt = *(sRailSerVEntry**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, self, 80);
+    vt[2].fn(vthis(stream, vt[2]), self, 80);
     return ((void*)self);
 }
 #endif
@@ -3619,7 +3619,7 @@ struct sRailVEntryU800 {
 extern "C" int cSortObjNode_compare(cSortObjNode* self, void* obj)
 {
     sRailVEntryU800* vt = *(sRailVEntryU800**)((char*)obj + 0xC);
-    return vt[8].fn((char*)obj + vt[8].delta) >= self->SortIndex;
+    return vt[8].fn(vthis(obj, vt[8])) >= self->SortIndex;
 }
 #endif
 
@@ -3643,7 +3643,7 @@ struct sRailVEntryU840 {
 extern "C" int cSortObjNode_equal(cSortObjNode* self, void* obj)
 {
     sRailVEntryU840* vt = *(sRailVEntryU840**)((char*)obj + 0xC);
-    return self->SortIndex == vt[8].fn((char*)obj + vt[8].delta);
+    return self->SortIndex == vt[8].fn(vthis(obj, vt[8]));
 }
 #endif
 
@@ -5577,7 +5577,7 @@ extern "C" int cAnimNode_getAnimMats(cAnimNode* self)
     if (self->Flags & 1) {
         void* sub = (char*)&self->unk_014;
         sRailVEntry1098* vt = (sRailVEntry1098*)self->mVtbl;
-        vt[51].fn((char*)sub + vt[51].delta);
+        vt[51].fn(vthis(sub, vt[51]));
     }
     return (int)self->AnimMats;
 }
@@ -6520,7 +6520,7 @@ extern "C" int cFloatingNode_getAnimMats(cFloatingNode* self)
 {
     if (self->Flags & 1) {
         sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
-        vt[51].fn((char*)self + vt[51].delta);
+        vt[51].fn(vthis(self, vt[51]));
     }
     return (int)self->AnimMats;
 }
@@ -6544,7 +6544,7 @@ extern "C" t4Matrix* cFloatingNode_getAnimMat(cFloatingNode* self, int i)
 {
     if (self->Flags & 1) {
         sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
-        vt[51].fn((char*)self + vt[51].delta);
+        vt[51].fn(vthis(self, vt[51]));
     }
     return &(self->AnimMats)[i];
 }
@@ -6580,8 +6580,8 @@ struct sRmVtbl1858 {
 extern "C" void cFloatingNode_updateRootTransform(cFloatingNode* self)
 {
     sRmVtbl1858* vt = (sRmVtbl1858*)self->mVtbl;
-    void* obj = (char*)self + vt->set.delta;
-    void* transform = vt->get.fn((char*)self + vt->get.delta);
+    void* obj = vthis(self, vt->set);
+    void* transform = vt->get.fn(vthis(self, vt->get));
     vt->set.fn(obj, transform, self->AnimMats);
     self->Flags &= ~1;
 }
@@ -6723,7 +6723,7 @@ extern "C" void* cPositionModifier_getRootTransform(cPositionModifier* self)
 {
     if (self->RootTransformDirty != 0) {
         sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)self;
-        vt[3].fn((char*)self + vt[3].delta);
+        vt[3].fn(vthis(self, vt[3]));
     }
     return (char*)&self->Transform;
 }
@@ -6945,7 +6945,7 @@ extern "C" void* cMagnetModifier_getRootTransform(cMagnetModifier* self)
 {
     if (self->RootTransformDirty != 0) {
         sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)self;
-        vt[3].fn((char*)self + vt[3].delta);
+        vt[3].fn(vthis(self, vt[3]));
     }
     return (char*)&self->Transform;
 }
@@ -7198,7 +7198,7 @@ extern "C" void* cSplineModifier_getRootTransform(cSplineModifier* self)
 {
     if (self->RootTransformDirty != 0) {
         sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)self;
-        vt[3].fn((char*)self + vt[3].delta);
+        vt[3].fn(vthis(self, vt[3]));
     }
     return (char*)&self->Transform;
 }
@@ -7312,7 +7312,7 @@ extern "C" void* cMultiSplineModifier_getRootTransform1(cMultiSplineModifier* se
 {
     if (self->RootTransformDirty != 0) {
         sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)self;
-        vt[3].fn((char*)self + vt[3].delta);
+        vt[3].fn(vthis(self, vt[3]));
     }
     return *(char**)self->NodeInst + 0x10;
 }

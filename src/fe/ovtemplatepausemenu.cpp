@@ -467,7 +467,7 @@ static inline void stopReplay_PMWE()
 
 static inline void setColor_PMWE(sWidget_PMWE* w, void* c)
 {
-    w->vt[11].fn((char*)w + w->vt[11].delta, c);
+    w->vt[11].fn(vthis(w, w->vt[11]), c);
 }
 
 /**
@@ -494,10 +494,10 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(cOVTemplate_PauseMenu* self,
             snd = *(sSnd_PMWE**)((char*)self->mpEngine + 0x14);
         cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(str_Menu_b));
         if (self->mPauseOptionUnlocked[w->idx] == 0) {
-            snd->vt[2].fn((char*)snd + snd->vt[2].delta, 4);
+            snd->vt[2].fn(vthis(snd, snd->vt[2]), 4);
             return;
         }
-        snd->vt[2].fn((char*)snd + snd->vt[2].delta, 6);
+        snd->vt[2].fn(vthis(snd, snd->vt[2]), 6);
         cOVTemplate_PauseMenu_mSelectedMenuIndex = *((unsigned char*)text + 0x95);
         int frame = cUIScreen_getFrameByLabel((cUIScreen*)self->mpPauseScreen, GetHashValue32(str_trans_out));
         cUIScreen_playFrame(self->mpPauseScreen, frame, 1);

@@ -1652,7 +1652,7 @@ extern "C" void cGraphicsMan_ForceActiveDrawState(cGraphicsMan* self, int* mask)
         ((short*)(&self->m_activeDrawState.m_textureState))[j] = 0x7FFF;
     }
     sVEntry<void(void*, int*)>* vt = (sVEntry<void(void*, int*)>*)self->mVtbl;
-    vt[62].fn((char*)self + vt[62].delta, mask);
+    vt[62].fn(vthis(self, vt[62]), mask);
 }
 #endif
 
@@ -1735,7 +1735,7 @@ extern "C" int cGraphicsMan_GetTextureID(cGraphicsMan* graphicsMan, const char* 
         void* shape = SHAPE_locatez(self->src[j], self->ents[self->count].name);
         if (shape != 0) {
             sVEntry<int(void*, void*, const char*, int, int, int)>* vt = *(sVEntry<int(void*, void*, const char*, int, int, int)>**)((char*)self + 0x10D8);
-            self->ents[self->count].handle = vt[46].fn((char*)self + vt[46].delta, shape, str_charshp_b, 0, 1, -1);
+            self->ents[self->count].handle = vt[46].fn(vthis(self, vt[46]), shape, str_charshp_b, 0, 1, -1);
             return self->ents[self->count++].handle;
         }
     }

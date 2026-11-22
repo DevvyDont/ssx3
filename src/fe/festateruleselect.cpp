@@ -328,8 +328,8 @@ extern "C" void cFEStateRuleSelect_onCreateScreen(sRuleSel_19188* self)
         rowListBox->flags &= ~1;
         sUIObj_19188* rowItem = (sUIObj_19188*)find_19188(self, lp);
         if (i >= count) {
-            rowItem->vt[9].fn((char*)rowItem + rowItem->vt[9].delta, 0);
-            rowItem->vt[8].fn((char*)rowItem + rowItem->vt[8].delta, 1);
+            rowItem->vt[9].fn(vthis(rowItem, rowItem->vt[9]), 0);
+            rowItem->vt[8].fn(vthis(rowItem, rowItem->vt[8]), 1);
         }
         if (i < 9) {
             label.c[0]++;
@@ -766,17 +766,17 @@ extern "C" void cFEStateRuleSelect_updateMenuColor(cFEStateRuleSelect* selfp)
         sObj_2488* textBox = (sObj_2488*)cUIScreen_getObjectByHashName(selfp->mpScreen, GetHashValue32(name1));
         if (listBox && textBox) {
             if (*(signed char*)(((char*)selfp) + listBox->idx + 0x51) > 0) {
-                textBox->vt[25].fn((char*)textBox + textBox->vt[25].delta, 1);
+                textBox->vt[25].fn(vthis(textBox, textBox->vt[25]), 1);
                 textBox->q88 = gStaticColour;
-                textBox->vt[8].fn((char*)textBox + textBox->vt[8].delta, 1);
-                listBox->vt[24].fn((char*)listBox + listBox->vt[24].delta, 1);
+                textBox->vt[8].fn(vthis(textBox, textBox->vt[8]), 1);
+                listBox->vt[24].fn(vthis(listBox, listBox->vt[24]), 1);
                 listBox->q88 = gStaticColour;
-                listBox->vt[8].fn((char*)listBox + listBox->vt[8].delta, 1);
+                listBox->vt[8].fn(vthis(listBox, listBox->vt[8]), 1);
             } else {
-                textBox->vt[25].fn((char*)textBox + textBox->vt[25].delta, 0);
-                textBox->vt[8].fn((char*)textBox + textBox->vt[8].delta, 0);
-                listBox->vt[24].fn((char*)listBox + listBox->vt[24].delta, 0);
-                listBox->vt[8].fn((char*)listBox + listBox->vt[8].delta, 0);
+                textBox->vt[25].fn(vthis(textBox, textBox->vt[25]), 0);
+                textBox->vt[8].fn(vthis(textBox, textBox->vt[8]), 0);
+                listBox->vt[24].fn(vthis(listBox, listBox->vt[24]), 0);
+                listBox->vt[8].fn(vthis(listBox, listBox->vt[8]), 0);
             }
         }
         if (i < 9) {
@@ -888,15 +888,15 @@ extern "C" void cBraggingRightsMenu_setMenuItemColor(sRuleSel_001927B0* self)
         if (i == sel) {
             cUIThing* item = self->items[i];
             sVEnt_001927B0* colorEntry = &((sVEnt_001927B0*)item->mVtbl)[11];
-            colorEntry->fn((char*)item + colorEntry->delta, sColor_001927B0(1.0f, 1.0f, 1.0f, 1.0f));
+            colorEntry->fn(vthis(item, *colorEntry), sColor_001927B0(1.0f, 1.0f, 1.0f, 1.0f));
         } else if (cUIListBox_getCurrentEntryData(self->items[i])) {
             cUIThing* item = self->items[i];
             sVEnt_001927B0* colorEntry = &((sVEnt_001927B0*)item->mVtbl)[11];
-            colorEntry->fn((char*)item + colorEntry->delta, sColor_001927B0(1.0f, 0.5921568870544434f, 0.04313725605607033f, 0.0f));
+            colorEntry->fn(vthis(item, *colorEntry), sColor_001927B0(1.0f, 0.5921568870544434f, 0.04313725605607033f, 0.0f));
         } else {
             cUIThing* item = self->items[i];
             sVEnt_001927B0* colorEntry = &((sVEnt_001927B0*)item->mVtbl)[11];
-            colorEntry->fn((char*)item + colorEntry->delta, sColor_001927B0(1.0f, 0.14509804546833038f, 0.027450982481241226f, 0.019607843831181526f));
+            colorEntry->fn(vthis(item, *colorEntry), sColor_001927B0(1.0f, 0.14509804546833038f, 0.027450982481241226f, 0.019607843831181526f));
         }
     }
 }

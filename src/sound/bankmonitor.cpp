@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "sound/ssxaudio.h"
 #include "sound/songinstance.h"
 #include "sound/speechinstance.h"
@@ -3684,7 +3685,7 @@ extern "C" int func_002B04D8_impl(sBankList* self, sBmArgs_04D8* speechEvent)
         sprintf(buf, str_pct_spct_spct_s_dat, str_data_b, (char*)&D_004A37B4->mBigFileName[0] + lang * 20, (char*)*slot + 4);
         cSpeechSys* speechSys = D_004A37B4;
         sSndVtSlot* vt0 = (sSndVtSlot*)speechSys->mVtbl;
-        int volumeId = ((int (*)(void*, int, int))vt0[2].fn)((char*)speechSys + vt0[2].delta, self->f0, (*slot)->f40);
+        int volumeId = ((int (*)(void*, int, int))vt0[2].fn)(vthis(speechSys, vt0[2]), self->f0, (*slot)->f40);
         char* speechBase; sSndVtSlot* vt;
         int remainingMs = (int)cStreamSys_STREAM_TimeRemaining(D_004A37B4->mpVStreamSys, self->id);
         int playHandle;
@@ -3714,7 +3715,7 @@ extern "C" int func_002B04D8_impl(sBankList* self, sBmArgs_04D8* speechEvent)
         }
         cSpeechSys* speechSystem = D_004A37B4;
         sSndVtSlot* vt2 = (sSndVtSlot*)speechSystem->mVtbl;
-        return ((Fn1_04D8)vt2[1].fn)((char*)speechSystem + vt2[1].delta, self->id, buf, speechEvent->f4, *(int*)((char*)self + 0x8CC), *(int*)((char*)self + 0x8C8), *(int*)((char*)self + 0x8D0), *(float*)((char*)self + 0x8F4), *(int*)((char*)self + 0x8F8), *(int*)((char*)self + 0x8FC));
+        return ((Fn1_04D8)vt2[1].fn)(vthis(speechSystem, vt2[1]), self->id, buf, speechEvent->f4, *(int*)((char*)self + 0x8CC), *(int*)((char*)self + 0x8C8), *(int*)((char*)self + 0x8D0), *(float*)((char*)self + 0x8F4), *(int*)((char*)self + 0x8F8), *(int*)((char*)self + 0x8FC));
     }
     return -1;
 }
@@ -4331,7 +4332,7 @@ extern "C" int func_002B1268(cSpeechSys* self, void* msg)
     int slot = *(int*)((char*)msg + 0x20);
     if (slot != -1) {
         sVE1268* vt = (sVE1268*)self->mVtbl;
-        int speechVolume = vt[3].fn((char*)self + vt[3].delta, *(int*)ent, slot, *(int*)(ent + 0x8D0));
+        int speechVolume = vt[3].fn(vthis(self, vt[3]), *(int*)ent, slot, *(int*)(ent + 0x8D0));
         if (speechVolume != 0) {
             cStreamSys_STREAM_SetVolControl(*(void**)self, *(int*)(ent + 4), speechVolume);
         }
@@ -6333,7 +6334,7 @@ extern "C" int func_002B3BC0(cMusicSys* self, int musicState)
     int changed = 0;
     if (self->mSongPlaying != 0 && musicState != self->unk_41C) {
         sBankMonVEntry* vt = (sBankMonVEntry*)self->mVtbl;
-        vt[3].fn((char*)self + vt[3].delta);
+        vt[3].fn(vthis(self, vt[3]));
         self->unk_41C = musicState;
         changed = 1;
     }

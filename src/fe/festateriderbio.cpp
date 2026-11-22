@@ -48,7 +48,7 @@ extern "C" void cFEStateRiderDetail_onCreateScreen(cFEStateRiderDetail* self)
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
     int charID = cBENewPlayerInterface_getPlayerCharID(pi, self->mUserNum);
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)((char*)pi + 0xC);
-    vt[2].fn((char*)pi + vt[2].delta);
+    vt[2].fn(vthis(pi, vt[2]));
     cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, self->mUserNum, 0);
     cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->mUserNum, charID, 0);
     func_0028F140(cAudioInterface_bxAudio(), 1);
@@ -78,7 +78,7 @@ static inline void showObj_001833D0(void* self, char* name, int id)
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
     if (obj != 0) {
         sVtEnt_001833D0* vt = *(sVtEnt_001833D0**)((char*)obj + 8);
-        vt[9].fn((char*)obj + vt[9].delta, 1);
+        vt[9].fn(vthis(obj, vt[9]), 1);
         *(int*)((char*)obj + 0x18) = id;
     }
 }
@@ -199,14 +199,14 @@ extern "C" void cFEStateRiderDetail_onPopupEvent(cFEStateRiderDetail* self, cUIS
                 void* pi2 = cBE_getInterface_Fv(cBE_getBE(), 1);
                 cBENewPlayerInterface_setPlayerCheatCharID(pi2, self->mUserNum, cheatCharId);
                 sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)pi2 + 0xC);
-                vt[1].fn((char*)pi2 + vt[1].delta);
+                vt[1].fn(vthis(pi2, vt[1]));
             }
         } else if (item->mHashName == 0) {
             char* name = ((cKeyboardPopup*)item)->mszEditString;
             if (((cKeyboardPopup*)item)->mbAcceptText != 0 && strlen(name) != 0) {
                 cBENewPlayerInterface_setPlayerName(pi, self->mUserNum, name);
                 sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)pi + 0xC);
-                vt[1].fn((char*)pi + vt[1].delta);
+                vt[1].fn(vthis(pi, vt[1]));
             }
         }
         cFEStateCharSetup_show3DCharacter(self, 1);

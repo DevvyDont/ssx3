@@ -235,7 +235,7 @@ extern "C" void cGame_load(cGame* self)
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVEntryVoidGL* vt = (sVEntryVoidGL*)ps2GraphicsMan->mVtbl;
-        vt[44].fn((char*)ps2GraphicsMan + vt[44].delta, 0);
+        vt[44].fn(vthis(ps2GraphicsMan, vt[44]), 0);
     }
     self->IsStreamPaused = 0;
     self->m_bFlushStreamer = 0;
@@ -279,7 +279,7 @@ extern "C" void cGame_load(cGame* self)
         cAI* ai = (cAI*)((char*)cAI_cAI(operator new(208, str_AI, 0, 0)));
         self->AI = (cAI*)ai;
         sVEntryVoidGL* vt = (sVEntryVoidGL*)ai->mVtbl;
-        vt[2].fn(((char*)ai) + vt[2].delta);
+        vt[2].fn(vthis(ai, vt[2]));
     }
     cLoadTimer_setnextpercent(&cAppMan_TheAppMan->LoadTimer, 55.0f);
     self->PlaybackMan = (cPlaybackMan*)cPlaybackMan_cPlaybackMan(operator new(0x7C, str_PlaybackMan, 0x20000000, 0), 40);
@@ -332,7 +332,7 @@ extern "C" void cGame_load(cGame* self)
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVEntryGL* vt = (sVEntryGL*)ps2GraphicsMan->mVtbl;
-        int result = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, file + *(int*)(file + 0x14), str_menu_b, 0, 1, -1);
+        int result = vt[46].fn(vthis(ps2GraphicsMan, vt[46]), file + *(int*)(file + 0x14), str_menu_b, 0, 1, -1);
         self->mBoxTextureID = result;
         self->MenuSys->BoxTexture = result;
     }
@@ -719,7 +719,7 @@ extern "C" void cGame_purge(char* self)
     {
         cPS2GraphicsMan* be = GrMan;
         sVEnt0_FA98* vtEntry = (sVEnt0_FA98*)((char*)be->mVtbl + 0x98);
-        vtEntry->fn((char*)be + vtEntry->delta);
+        vtEntry->fn(vthis(be, *vtEntry));
     }
     cFEAsyncManager_FlushFEAsyncTextures(SSXApp->mFEAsyncManager);
     cSSXScriptEngine_ForceEndScriptsAll(ScriptEngine);
@@ -767,12 +767,12 @@ extern "C" void cGame_purge(char* self)
     {
         cPS2GraphicsMan* be = GrMan;
         sVEnt0_FA98* vtEntry = (sVEnt0_FA98*)((char*)be->mVtbl + 0x388);
-        vtEntry->fn((char*)be + vtEntry->delta);
+        vtEntry->fn(vthis(be, *vtEntry));
     }
     {
         cPS2GraphicsMan* be = GrMan;
         sVEnt1_FA98* vtEntry = (sVEnt1_FA98*)((char*)be->mVtbl + 0x190);
-        vtEntry->fn((char*)be + vtEntry->delta, *(void**)(self + 0x220));
+        vtEntry->fn(vthis(be, *vtEntry), *(void**)(self + 0x220));
     }
     cGraphicsMan_PurgeTextures(GrMan);
     cIrradianceDataBase_Purge(cIrradianceDataBase_TheDataBase);
@@ -935,7 +935,7 @@ extern "C" void cGame_partialRestart(cGame* self)
     cBucketMan_purgeBucket(bm, 8);
     cAI* gameAI = self->AI;
     sVEntry_230180a* vt = (sVEntry_230180a*)gameAI->mVtbl;
-    vt[5].fn(((char*)gameAI) + vt[5].delta, 3);
+    vt[5].fn(vthis(gameAI, vt[5]), 3);
     cAvalanche_reset();
     cGameViewMan_snapAll(self->ViewMan);
     cWorld_resetMap(self->World);
@@ -1411,7 +1411,7 @@ static inline int updatePause_2306B8(cGame* self)
         if (self->m_bFlushStreamer != 0) {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)ps2GraphicsMan->mVtbl;
-            vt[19].fn((char*)ps2GraphicsMan + vt[19].delta);
+            vt[19].fn(vthis(ps2GraphicsMan, vt[19]));
             cGameViewMan_updateStreamFocus(((char*)self->ViewMan));
             cWorldCache_flushInActivePages(*((void**)((char*)self->World)));
             self->m_bFlushStreamer = 0;
@@ -1472,7 +1472,7 @@ static inline int updateState_2306B8(cGame* self)
         {
             sObjC_2306B8* o = ((sObjC_2306B8*)((cUIEngine*)((char*)self->UI))->mpInput);
             sVEntryI_2306B8* vt = o->vtbl;
-            vt[44].fn((char*)o + vt[44].delta, (*(unsigned char*)&self->PauseOwner));
+            vt[44].fn(vthis(o, vt[44]), (*(unsigned char*)&self->PauseOwner));
         }
         cSSXAudio_PauseAudio(cAudioInterface_bxAudio());
         cSSXAudio_PlayPauseSound(cAudioInterface_bxAudio());
@@ -1536,7 +1536,7 @@ extern "C" void cGame_update(cGame* self)
                 if (cReplay_isPauseAI((char*)self->Replay) == 0 && !(cPauseState_Flags & 8)) {
                     cSSXScriptEngine* w = ScriptEngine;
                     sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)w->mVtbl;
-                    vt[5].fn(((char*)w) + vt[5].delta);
+                    vt[5].fn(vthis(w, vt[5]));
                 }
             }
             skip = 0;
@@ -1561,7 +1561,7 @@ extern "C" void cGame_update(cGame* self)
                 {
                     cAI* gameAI = self->AI;
                     sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)gameAI->mVtbl;
-                    vt[3].fn(((char*)gameAI) + vt[3].delta);
+                    vt[3].fn(vthis(gameAI, vt[3]));
                 }
                 if (!(cPauseState_Flags & 0x10)) {
                     cBucketMan_updateBucket(&gBucketMan, 2);
@@ -1678,7 +1678,7 @@ extern "C" int cGame_loseFocus(cGame* self)
 {
     void* obj = self->StreamPause;
     sVEntry00230E98* vt = *(sVEntry00230E98**)obj;
-    if (vt[3].fn((char*)obj + vt[3].delta) == 0) {
+    if (vt[3].fn(vthis(obj, vt[3])) == 0) {
         return 0;
     }
     if (cFadeScreen_loseFocus((cFadeScreen*)self) == 0) {
@@ -1981,7 +1981,7 @@ extern "C" int cGame_isPreloadedStateReady(cGame* self)
         return 1;
     }
     sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)preloadingState->mVtbl;
-    return vt[8].fn((char*)preloadingState + vt[8].delta);
+    return vt[8].fn(vthis(preloadingState, vt[8]));
 }
 #endif
 

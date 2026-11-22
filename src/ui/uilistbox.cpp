@@ -303,7 +303,7 @@ extern "C" void cUIListBox_setCallbackListBox(cUIListBox* self, int count)
     *(int*)&self->mAttrListBox |= 0x10;
     void* obj = self->mpScreen->mpState;
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)((char*)obj + 8);
-    vt[19].fn((char*)obj + vt[0x13].delta, self, 9);
+    vt[19].fn(vthis(obj, vt[0x13]), self, 9);
 }
 #endif
 
@@ -355,7 +355,7 @@ extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
             }
             cUIThing* selected = self->mpSelected;
             sVEntry<void(void*, int)>* va = (sVEntry<void(void*, int)>*)selected->mVtbl;
-            va[7].fn(((char*)selected) + va[7].delta, 1);
+            va[7].fn(vthis(selected, va[7]), 1);
             char* owner = (char*)self->mpScreen->mpState;
             sVEntry<void(void*, void*, int)>* vb = *(sVEntry<void(void*, void*, int)>**)(owner + 8);
             vb[19].fn(owner + vb[19].delta, self->mpSelected, 1);
@@ -372,7 +372,7 @@ extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
             }
             cUIThing* selected = self->mpSelected;
             sVEntry<void(void*, int)>* va = (sVEntry<void(void*, int)>*)selected->mVtbl;
-            va[7].fn(((char*)selected) + va[7].delta, 0);
+            va[7].fn(vthis(selected, va[7]), 0);
             char* owner = (char*)self->mpScreen->mpState;
             sVEntry<void(void*, void*, int)>* vb = *(sVEntry<void(void*, void*, int)>**)(owner + 8);
             vb[19].fn(owner + vb[19].delta, self->mpSelected, 2);

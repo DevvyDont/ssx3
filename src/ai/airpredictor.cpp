@@ -571,7 +571,7 @@ INCLUDE_ASM("ai/airpredictor", cAirPredictor_writeToReplayFrame);
 extern "C" void cAirPredictor_writeToReplayFrame(cAirPredictor* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn((char*)obj + vt[1].delta, self, 176);
+    vt[1].fn(vthis(obj, vt[1]), self, 176);
 }
 #endif
 
@@ -587,7 +587,7 @@ INCLUDE_ASM("ai/airpredictor", cAirPredictor_readFromReplayFrame);
 extern "C" void cAirPredictor_readFromReplayFrame(cAirPredictor* self, cReplayFramePtr* obj)
 {
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn((char*)obj + vt[2].delta, self, 176);
+    vt[2].fn(vthis(obj, vt[2]), self, 176);
 }
 #endif
 

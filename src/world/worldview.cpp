@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "sound/ssxaudio.h"
 #include "bx/appman.h"
 #include "util/list.h"
@@ -1713,13 +1714,13 @@ extern "C" void* cPS2ChunkResolve_resolve(cPS2ChunkResolve* self, int msg, unsig
     case 9: {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
         sVEntry_AE68* vtEntry = (sVEntry_AE68*)((char*)w->mVtbl + 0x170);
-        ((tMsgS_AE68)vtEntry->fn)((char*)w + vtEntry->delta, obj, str_strm_tex, 0, 0, RID >> 8);
+        ((tMsgS_AE68)vtEntry->fn)(vthis(w, *vtEntry), obj, str_strm_tex, 0, 0, RID >> 8);
         break;
     }
     case 10: {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
         sVEntry_AE68* vtEntry = (sVEntry_AE68*)((char*)w->mVtbl + 0x170);
-        ((tMsgS_AE68)vtEntry->fn)((char*)w + vtEntry->delta, obj, str_strm_lpg, 0, 0, (RID >> 8) + self->m_iNumImages);
+        ((tMsgS_AE68)vtEntry->fn)(vthis(w, *vtEntry), obj, str_strm_lpg, 0, 0, (RID >> 8) + self->m_iNumImages);
         break;
     }
     case 3:
@@ -1932,13 +1933,13 @@ extern "C" void* cPS2ChunkResolve_unresolve(cPS2ChunkResolve* self, unsigned int
     case 9: {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
         sWVEntry_B498* vt = (sWVEntry_B498*)ps2GraphicsMan->mVtbl;
-        ((void (*)(void*, unsigned int))vt[50].fn)((char*)ps2GraphicsMan + vt[50].delta, resourceId >> 8);
+        ((void (*)(void*, unsigned int))vt[50].fn)(vthis(ps2GraphicsMan, vt[50]), resourceId >> 8);
         break;
     }
     case 10: {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
         sWVEntry_B498* vt = (sWVEntry_B498*)ps2GraphicsMan->mVtbl;
-        ((void (*)(void*, unsigned int))vt[50].fn)((char*)ps2GraphicsMan + vt[50].delta, (resourceId >> 8) + self->m_iNumImages);
+        ((void (*)(void*, unsigned int))vt[50].fn)(vthis(ps2GraphicsMan, vt[50]), (resourceId >> 8) + self->m_iNumImages);
         break;
     }
     case 3: {
@@ -1965,7 +1966,7 @@ extern "C" void* cPS2ChunkResolve_unresolve(cPS2ChunkResolve* self, unsigned int
     }
     case 6: {
         sWVEntry_B498* vt = (sWVEntry_B498*)self->mVtbl;
-        if (((int (*)(void*, void*))vt[22].fn)(((char*)self) + vt[22].delta, data)) {
+        if (((int (*)(void*, void*))vt[22].fn)(vthis(self, vt[22]), data)) {
             *(int*)(data + 0x8) = 6;
             sWVBox_B498 box;
             WV_MAKEBOX_B498(box, data, 68);

@@ -397,7 +397,7 @@ extern "C" void cReplayFramePtr_writeReplayInstance(sFpSerObj* out, void* obj)
     if (obj != 0) {
         id = *(unsigned int*)((char*)obj + 0x78);
     }
-    out->vt[1].fn((char*)out + out->vt[1].delta, &id, 4);
+    out->vt[1].fn(vthis(out, out->vt[1]), &id, 4);
 }
 #endif
 
@@ -428,7 +428,7 @@ extern "C" void cReplayFramePtr_writeReplayInstance1(sFpSerObj* out, void* obj)
     } else {
         rec.type = 0;
     }
-    out->vt[1].fn((char*)out + out->vt[1].delta, &rec, 8);
+    out->vt[1].fn(vthis(out, out->vt[1]), &rec, 8);
 }
 #endif
 
@@ -1344,24 +1344,24 @@ extern "C" int cReplay_updateInput_impl(void* self, int debug)
         } else if (cInput_getState(input, 104)) {
             if (!isStateFB88(replay, 3)) command = 7;
             else if (!isIdleFB88(replay)) {
-                uiSound->vt[2].fn((char*)uiSound + uiSound->vt[2].delta, 2);
+                uiSound->vt[2].fn(vthis(uiSound, uiSound->vt[2]), 2);
                 command = 4;
             } else {
-                uiSound->vt[2].fn((char*)uiSound + uiSound->vt[2].delta, 4);
+                uiSound->vt[2].fn(vthis(uiSound, uiSound->vt[2]), 4);
             }
         } else if (cInput_getState(input, 105)) {
             if (isStateFB88(replay, 3)) {
                 if (!isIdleNoCamFB88(replay)) {
-                    uiSound->vt[2].fn((char*)uiSound + uiSound->vt[2].delta, 2);
+                    uiSound->vt[2].fn(vthis(uiSound, uiSound->vt[2]), 2);
                     command = 3;
                 } else {
-                    uiSound->vt[2].fn((char*)uiSound + uiSound->vt[2].delta, 4);
+                    uiSound->vt[2].fn(vthis(uiSound, uiSound->vt[2]), 4);
                 }
             } else {
                 command = 7;
             }
         } else if (cInput_getState(input, 108)) {
-            uiSound->vt[2].fn((char*)uiSound + uiSound->vt[2].delta, 2);
+            uiSound->vt[2].fn(vthis(uiSound, uiSound->vt[2]), 2);
             cReplay_cycleReplayCameraAlgorithm((cReplay*)self);
         }
     }

@@ -2536,7 +2536,7 @@ extern "C" int cPath_initPath(cPath* self, char* src)
     int itemSize;
     int itemCount;
     sVEntry<void(void*)>* vt0 = (sVEntry<void(void*)>*)((void*)self->mVtbl);
-    vt0[3].fn((char*)self + vt0[3].delta);
+    vt0[3].fn(vthis(self, vt0[3]));
     pathREAD_tInt32_A180(&n, src);
     src += 4;
     for (int i = 0; i < n; i++)
@@ -2546,7 +2546,7 @@ extern "C" int cPath_initPath(cPath* self, char* src)
         pathREAD_tInt32_A180(&itemSize, src);
         src += 4;
         sVEntry<void(void*, char*, int, int)>* vt1 = (sVEntry<void(void*, char*, int, int)>*)((void*)self->mVtbl);
-        vt1[4].fn((char*)self + vt1[4].delta, src, chunkId, itemSize);
+        vt1[4].fn(vthis(self, vt1[4]), src, chunkId, itemSize);
         src += itemSize;
     }
     pathREAD_tInt32_A180(&itemCount, src);

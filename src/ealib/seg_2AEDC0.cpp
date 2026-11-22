@@ -1904,7 +1904,7 @@ extern "C" void RCMP_DECODER_FreeChosenCodec(RCMP_DECODER* self)
     void* obj = self->m_codec;
     if (obj != 0) {
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)obj;
-        vt[1].fn((char*)obj + vt[1].delta, 3);
+        vt[1].fn(vthis(obj, vt[1]), 3);
         self->m_codec = 0;
     }
 }

@@ -139,7 +139,7 @@ static inline void call0_AE00(int slot)
 {
     sCtx_AE00* g = ctx_AE00();
     sVEnt_AE00* e = &g->vt[slot];
-    ((fnV_AE00)e->fn)((char*)g + e->delta);
+    ((fnV_AE00)e->fn)(vthis(g, *e));
 }
 
 static inline void setAlpha_AE00(sRS_AE00* rs, int v) { rs->alpha = v; }
@@ -182,12 +182,12 @@ extern "C" void cBackgroundMan_renderImage(cBackgroundMan* self)
     {
         sCtx_AE00* graphics = ctx_AE00();
         sVEnt_AE00* vtEntry = &graphics->vt[26];
-        ((fnRect_AE00)vtEntry->fn)((char*)graphics + vtEntry->delta, 0, 0, 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f);
+        ((fnRect_AE00)vtEntry->fn)(vthis(graphics, *vtEntry), 0, 0, 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f);
     }
     {
         sCtx_AE00* graphics = ctx_AE00();
         sVEnt_AE00* vtEntry = &graphics->vt[34];
-        ((fnP_AE00)vtEntry->fn)((char*)graphics + vtEntry->delta, t4mat_Identity);
+        ((fnP_AE00)vtEntry->fn)(vthis(graphics, *vtEntry), t4mat_Identity);
     }
     setState_AE00();
     sVert_AE00 verts[4];
@@ -232,7 +232,7 @@ extern "C" void cBackgroundMan_renderImage(cBackgroundMan* self)
     {
         sCtx_AE00* graphics = ctx_AE00();
         sVEnt_AE00* vtEntry = &graphics->vt[71];
-        vtEntry->fn((char*)graphics + vtEntry->delta, 4, verts, 0);
+        vtEntry->fn(vthis(graphics, *vtEntry), 4, verts, 0);
     }
     ctx_AE00()->top--;
     call0_AE00(32);
@@ -402,7 +402,7 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
     cBENetworkInterface_networkOpt.iPort = 3658;
     cBENetworkInterface_networkOpt.bIsHost = 0;
     sVE_B1B0* vt7 = *(sVE_B1B0**)((char*)iface7 + 0xC);
-    vt7[1].fn((char*)iface7 + vt7[1].delta);
+    vt7[1].fn(vthis(iface7, vt7[1]));
     self->f8C44 = 0;
     self->f8C34 = 0;
     self->f8C30 = -1;
@@ -415,9 +415,9 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
     void* snd = cAudioInterface_bxAudio();
     func_00289520(snd, (char*)cAudioInterface_bxAudio() + (self->f8C34 * 0x14 + 0x60A4));
     sVE_B1B0* vt1 = *(sVE_B1B0**)((char*)iface1 + 0xC);
-    vt1[1].fn((char*)iface1 + vt1[1].delta);
+    vt1[1].fn(vthis(iface1, vt1[1]));
     sVE_B1B0* vt0 = *(sVE_B1B0**)((char*)iface0 + 0xC);
-    vt0[1].fn((char*)iface0 + vt0[1].delta);
+    vt0[1].fn(vthis(iface0, vt0[1]));
     return self;
 }
 #endif
@@ -518,7 +518,7 @@ struct sGfx_B4E0 {
 static inline void update_B4E0(void* iface)
 {
     sVE_B4E0* vt = *(sVE_B4E0**)((char*)iface + 0xC);
-    vt[1].fn((char*)iface + vt[1].delta);
+    vt[1].fn(vthis(iface, vt[1]));
 }
 
 static inline bool commIdle_B4E0(cCommSystem* commSystem)
@@ -883,7 +883,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         }
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sGfxVE_B4E0* vt = (sGfxVE_B4E0*)ps2GraphicsMan->mVtbl;
-        ((void (*)(void*, int))vt[8].fn)((char*)ps2GraphicsMan + vt[8].delta, !((bool (*)(void*))vt[9].fn)((char*)ps2GraphicsMan + vt[9].delta));
+        ((void (*)(void*, int))vt[8].fn)(vthis(ps2GraphicsMan, vt[8]), !((bool (*)(void*))vt[9].fn)(vthis(ps2GraphicsMan, vt[9])));
         break;
     }
     case 11:

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "main/gameviewman.h"
 #include "replay/frame.h"
 #include "replay/replaycache.h"
@@ -1566,14 +1567,14 @@ extern "C" void cReplay_saveDeadBucket(cReplay* self, cPbStream* data)
     }
     {
         sVEntryDA88* vt = *(sVEntryDA88**)data;
-        vt[1].fn((char*)data + vt[1].delta, hdr, 8);
+        vt[1].fn(vthis(data, vt[1]), hdr, 8);
     }
     if (hdr[0] > 0) {
         for (node = cBucketMan_first(bucketMan_DA88(), 8); node != 0; node = cBucketMan_next(bucketMan_DA88(), node, 8)) {
             int id[1];
             id[0] = *(int*)(*(char**)((char*)node + 0x18) + 0x78);
             sVEntryDA88* vt = *(sVEntryDA88**)data;
-            vt[1].fn((char*)data + vt[1].delta, id, 4);
+            vt[1].fn(vthis(data, vt[1]), id, 4);
         }
     }
 }

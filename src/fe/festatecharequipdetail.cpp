@@ -477,7 +477,7 @@ extern char str_points[];
 static inline void hide_FE(void* w)
 {
     sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)w + 8);
-    vt[9].fn((char*)w + vt[9].delta, 0);
+    vt[9].fn(vthis(w, vt[9]), 0);
 }
 
 struct sCharEquip_FE {
@@ -1150,11 +1150,11 @@ extern "C" int cFEStateCharEquip_getIconID(cFEStateCharEquip* self, const char* 
             if (id == -1) {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
                 sVEK19A098a* vt = (sVEK19A098a*)ps2GraphicsMan->mVtbl;
-                self->mIconTextureID = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, data, str_icon, 0, 1, -1);
+                self->mIconTextureID = vt[46].fn(vthis(ps2GraphicsMan, vt[46]), data, str_icon, 0, 1, -1);
             } else {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
                 sVEK19A098b* vt = (sVEK19A098b*)ps2GraphicsMan->mVtbl;
-                vt[48].fn((char*)ps2GraphicsMan + vt[48].delta, id, data, 1);
+                vt[48].fn(vthis(ps2GraphicsMan, vt[48]), id, data, 1);
             }
             return self->mIconTextureID;
         }
@@ -1444,7 +1444,7 @@ extern "C" void cFEStateCharEquip_updatePreviewLoad(cFEStateCharEquip* self)
             if (entry != 0) {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
                 sVEntry<int(void*, void*, char*, int, int, int)>* vt = (sVEntry<int(void*, void*, char*, int, int, int)>*)ps2GraphicsMan->mVtbl;
-                self->mPreviewTextureID = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, entry + *(int*)(entry + 0x14), str_preview, 0, 1, -1);
+                self->mPreviewTextureID = vt[46].fn(vthis(ps2GraphicsMan, vt[46]), entry + *(int*)(entry + 0x14), str_preview, 0, 1, -1);
             } else {
                 self->mPreviewTextureID = -1;
             }
@@ -1706,7 +1706,7 @@ struct sVEntryK19AB78 {
 static inline void showK19AB78(void* o, int on)
 {
     sVEntryK19AB78* vt = *(sVEntryK19AB78**)((char*)o + 8);
-    vt[9].fn((char*)o + vt[9].delta, on);
+    vt[9].fn(vthis(o, vt[9]), on);
 }
 
 /**
@@ -2461,7 +2461,7 @@ struct sVEntryK19BA60 {
 static inline void showK19BA60(void* o, int on)
 {
     sVEntryK19BA60* vt = *(sVEntryK19BA60**)((char*)o + 8);
-    vt[9].fn((char*)o + vt[9].delta, on);
+    vt[9].fn(vthis(o, vt[9]), on);
 }
 
 struct sCharEquipK19BA60 {
@@ -2627,7 +2627,7 @@ extern "C" void cFEStateCharEquip_updatePolyBar(cFEStateCharEquip* self)
             fillRatio = 0.0f;
         }
         sVEntry0019BC90* vt = (sVEntry0019BC90*)pointsBar->mVtbl;
-        vt[9].fn(((char*)pointsBar) + vt[9].delta, 1);
+        vt[9].fn(vthis(pointsBar, vt[9]), 1);
         *(sVec3K19BC90*)&self->mpPointsBar->mScale = sVec3K19BC90(1.0f, -fillRatio, 1.0f);
     }
 }
@@ -2677,16 +2677,16 @@ extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(cFEStateCharEquip* s
     if (D_004A18D8 < self->mCurrentPolyCount + delta) {
         cUIThing* equipBar = self->mpPointsEquipBar;
         sVEntryK19BD48* vt = (sVEntryK19BD48*)equipBar->mVtbl;
-        vt[11].fn(((char*)equipBar) + vt[11].delta, D_004C66E8);
+        vt[11].fn(vthis(equipBar, vt[11]), D_004C66E8);
     } else {
         cUIThing* equipBar = self->mpPointsEquipBar;
         sVEntryK19BD48* vt = (sVEntryK19BD48*)equipBar->mVtbl;
-        vt[11].fn(((char*)equipBar) + vt[11].delta, D_004C66F8);
+        vt[11].fn(vthis(equipBar, vt[11]), D_004C66F8);
     }
     {
         cUIThing* equipBar = self->mpPointsEquipBar;
         sVEntryIK19BD48* vt = (sVEntryIK19BD48*)equipBar->mVtbl;
-        vt[9].fn(((char*)equipBar) + vt[9].delta, 1);
+        vt[9].fn(vthis(equipBar, vt[9]), 1);
     }
     *(sVec3K19BD48*)&self->mpPointsEquipBar->mScale = sVec3K19BD48(1.0f, -fillRatio, 1.0f);
 }
@@ -4825,7 +4825,7 @@ extern "C" void cFERider__cFERider(cFERider* self, int flags)
         if (slot->TextureID >= 0) {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)ps2GraphicsMan->mVtbl;
-            vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, slot->TextureID);
+            vt[50].fn(vthis(ps2GraphicsMan, vt[50]), slot->TextureID);
         }
         slot->TextureID = none;
         slot->Name[0] = 0;
@@ -4925,7 +4925,7 @@ extern "C" void cFERider_setCharID(cFERider* self, unsigned int item, int flag)
     if (self->mSafeRenderCount < 0) {
         cPS2GraphicsMan* w = GrMan;
         sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)w->mVtbl;
-        self->mSafeRenderCount = vt[114].fn((char*)w + vt[114].delta) + 4;
+        self->mSafeRenderCount = vt[114].fn(vthis(w, vt[114])) + 4;
         self->mSetVisible = self->mVisible;
         self->mVisible = 0;
     }

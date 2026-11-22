@@ -74,7 +74,7 @@ extern "C" void cOVStateRewardsList_onWidgetEvent(cOVStateRewardsList* self, cUI
         if (*(int*)((char*)item + 0x18) == 1) {
             void* obj = *(void**)self->mpEngine;
             sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
-            nextState = vt[4].fn((char*)obj + vt[4].delta, self, 1);
+            nextState = vt[4].fn(vthis(obj, vt[4]), self, 1);
         }
         cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         break;
@@ -82,7 +82,7 @@ extern "C" void cOVStateRewardsList_onWidgetEvent(cOVStateRewardsList* self, cUI
     case 6: {
         void* obj = *(void**)self->mpEngine;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
-        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
+        void* nextState = vt[5].fn(vthis(obj, vt[5]), self, *(int*)((char*)item + 0x18));
         if (nextState != 0) {
             cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         }

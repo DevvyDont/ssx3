@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "sound/ssxaudio.h"
 #include "main/loadscreens.h"
 #include "render/ps2graphicsman.h"
@@ -873,7 +874,7 @@ extern "C" void cStartScreen_gainFocus(cStartScreen* self)
     clear_2C98(&cLightGlow_m_Enable);
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVE_2C98* vt = (sVE_2C98*)ps2GraphicsMan->mVtbl;
-    vt[15].fn((char*)ps2GraphicsMan + vt[15].delta, sVec3i_2C98(0, 0, 0));
+    vt[15].fn(vthis(ps2GraphicsMan, vt[15]), sVec3i_2C98(0, 0, 0));
 }
 #endif
 
@@ -1116,7 +1117,7 @@ extern "C" void cGameLoadScreen_load(cGameLoadScreen* self)
 {
     cPS2GraphicsMan* w = GrMan;
     sVE_2E20* vt = (sVE_2E20*)w->mVtbl;
-    vt[44].fn((char*)w + vt[44].delta, 0x100);
+    vt[44].fn(vthis(w, vt[44]), 0x100);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     void* ui = cUIEngine_cUIEngine(operator new(0x70, str_UIEngine_b, 0x100, 0));
     self->mpUI = (cUIEngine*)ui;
@@ -1202,7 +1203,7 @@ static inline int loadTex_3048(char* data, const char* name)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVE_3048* vt = (sVE_3048*)ps2GraphicsMan->mVtbl;
-    return vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, data + *(int*)(data + 0x14), name, 0, 1, -1);
+    return vt[46].fn(vthis(ps2GraphicsMan, vt[46]), data + *(int*)(data + 0x14), name, 0, 1, -1);
 }
 
 /**
@@ -1285,7 +1286,7 @@ extern "C" void cGameLoadScreen_gainFocus(void)
     *fogEnable = 0;
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVE_3260* vt = (sVE_3260*)ps2GraphicsMan->mVtbl;
-    vt[15].fn((char*)ps2GraphicsMan + vt[15].delta, sVec3i_3260(0, 0, 0));
+    vt[15].fn(vthis(ps2GraphicsMan, vt[15]), sVec3i_3260(0, 0, 0));
     func_0028F768(cAudioInterface_bxAudio());
 }
 #endif

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "worldpainter/quadtree.h"
 #include "bx/math3d.h"
 #include "render/2drender.h"
@@ -2875,7 +2876,7 @@ extern "C" void cWorldPainterMan_render1(cWorldPainterMan* ctx, cQuadTree* tree,
         corner.w = 1.0f;
         (*(&verts[4].p)) = corner;
         sQtVEntry_B928* vt = (sQtVEntry_B928*)ps2GraphicsMan->mVtbl;
-        vt[73].fn((char*)ps2GraphicsMan + vt[73].delta, 5, verts, 0);
+        vt[73].fn(vthis(ps2GraphicsMan, vt[73]), 5, verts, 0);
     }
 }
 #endif
@@ -4475,7 +4476,7 @@ extern "C" void tWPInGameData_Fog_blend(tWPInGameData_Fog* self, tWPData_Fog* sr
     VEnt_CF38* vtEntry;
     float inv;
     vtEntry = (VEnt_CF38*)((char*)self->mVtbl + 0x218);
-    vtEntry->fn((char*)self + vtEntry->delta);
+    vtEntry->fn(vthis(self, *vtEntry));
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
     ((Pair_CF38*)&self->m_FogDensity)[0].cur = blendFactor * ((float*)&src->m_FogDensity)[0] + inv * ((Pair_CF38*)&self->m_FogDensity)[0].cur;
@@ -4491,7 +4492,7 @@ extern "C" void tWPInGameData_Fog_blend(tWPInGameData_Fog* self, tWPData_Fog* sr
     ((Pair_CF38*)&self->m_FogDensity)[5].cur = blendFactor * ((float*)&src->m_FogDensity)[5] + inv * ((Pair_CF38*)&self->m_FogDensity)[5].cur;
     ((Pair_CF38*)&self->m_FogDensity)[5].tgt = ((float*)&src->m_FogDensity)[5];
     vtEntry = (VEnt_CF38*)((char*)self->mVtbl + 0x218);
-    vtEntry->fn((char*)self + vtEntry->delta);
+    vtEntry->fn(vthis(self, *vtEntry));
 }
 #endif
 
@@ -4518,7 +4519,7 @@ extern "C" void tWPInGameData_LightGlow_blend(tWPInGameData_LightGlow* self, tWP
     VEnt_D068* vtEntry;
     float inv;
     vtEntry = (VEnt_D068*)((char*)self->mVtbl + 0x218);
-    vtEntry->fn((char*)self + vtEntry->delta);
+    vtEntry->fn(vthis(self, *vtEntry));
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
     ((Pair_D068*)&self->m_LightGlowCutoff)[0].cur = blendFactor * ((float*)&src->m_LightGlowCutoff)[0] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[0].cur;
@@ -4537,7 +4538,7 @@ extern "C" void tWPInGameData_LightGlow_blend(tWPInGameData_LightGlow* self, tWP
     ((Pair_D068*)&self->m_LightGlowCutoff)[6].tgt = ((float*)&src->m_LightGlowCutoff)[6];
     {
         VEntV_D068* vtEntryV = (VEntV_D068*)((char*)self->mVtbl + 0x218);
-        vtEntryV->fn((char*)self + vtEntryV->delta);
+        vtEntryV->fn(vthis(self, *vtEntryV));
     }
 }
 #endif
@@ -4563,7 +4564,7 @@ extern "C" void tWPInGameData_ScreenTint_blend(tWPInGameData_ScreenTint* self, t
     VEnt_D1B8* vtEntry;
     float inv;
     vtEntry = (VEnt_D1B8*)((char*)self->mVtbl + 0x218);
-    vtEntry->fn((char*)self + vtEntry->delta);
+    vtEntry->fn(vthis(self, *vtEntry));
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
     ((Pair_D1B8*)&self->m_ScreenTintScaleR)[0].cur = blendFactor * ((float*)&src->m_ScreenTintScaleR)[0] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[0].cur;
@@ -4579,7 +4580,7 @@ extern "C" void tWPInGameData_ScreenTint_blend(tWPInGameData_ScreenTint* self, t
     ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].cur = blendFactor * ((float*)&src->m_ScreenTintScaleR)[5] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].cur;
     ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].tgt = ((float*)&src->m_ScreenTintScaleR)[5];
     vtEntry = (VEnt_D1B8*)((char*)self->mVtbl + 0x218);
-    vtEntry->fn((char*)self + vtEntry->delta);
+    vtEntry->fn(vthis(self, *vtEntry));
 }
 #endif
 
@@ -4628,7 +4629,7 @@ extern "C" void tWPInGameData_Sun_blend(tWPInGameData_Sun* self, tWPData_Sun* sr
     VEnt_D378* vtEntry;
     float inv;
     vtEntry = (VEnt_D378*)((char*)self->mVtbl + 0x218);
-    vtEntry->fn((char*)self + vtEntry->delta);
+    vtEntry->fn(vthis(self, *vtEntry));
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
     ((Pair_D378*)&self->m_SunPitchOffset)[0].cur = blendFactor * ((float*)&src->m_SunPitchOffset)[0] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[0].cur;
@@ -4650,7 +4651,7 @@ extern "C" void tWPInGameData_Sun_blend(tWPInGameData_Sun* self, tWPData_Sun* sr
     ((Pair_D378*)&self->m_LensIntensity)[1].cur = blendFactor * ((float*)&src->m_LensIntensity)[1] + inv * ((Pair_D378*)&self->m_LensIntensity)[1].cur;
     ((Pair_D378*)&self->m_LensIntensity)[1].tgt = ((float*)&src->m_LensIntensity)[1];
     vtEntry = (VEnt_D378*)((char*)self->mVtbl + 0x218);
-    vtEntry->fn((char*)self + vtEntry->delta);
+    vtEntry->fn(vthis(self, *vtEntry));
 }
 #endif
 
@@ -5596,13 +5597,13 @@ struct VE_E2D8 { short delta; short idx; int (*fn)(void *, void *, int); };
  */
 extern "C" void tWPInGameData_MusicTrigger_readFromReplayFrame(tWPInGameData_MusicTrigger* self, cReplayFramePtr* frame) {
     VE_E2D8 *readEntry = &(*(VE_E2D8 **)frame)[2];
-    readEntry->fn(((char*)frame) + readEntry->delta, (char*)&self->m_Type, 4);
+    readEntry->fn(vthis(frame, *readEntry), (char*)&self->m_Type, 4);
     readEntry = &(*(VE_E2D8 **)frame)[2];
-    readEntry->fn(((char*)frame) + readEntry->delta, ((char*)self), 4);
+    readEntry->fn(vthis(frame, *readEntry), ((char*)self), 4);
     readEntry = &(*(VE_E2D8 **)frame)[2];
-    readEntry->fn(((char*)frame) + readEntry->delta, (char*)&self->m_Value, 4);
+    readEntry->fn(vthis(frame, *readEntry), (char*)&self->m_Value, 4);
     readEntry = &(*(VE_E2D8 **)frame)[2];
-    readEntry->fn(((char*)frame) + readEntry->delta, ((char*)self), 4);
+    readEntry->fn(vthis(frame, *readEntry), ((char*)self), 4);
 }
 #endif
 
@@ -5708,7 +5709,7 @@ struct VEnt_E518 { short delta; short idx; void (*fn)(void*, void*, int); };
 
 static inline void Wr_E518(cReplayFramePtr* s, void* p, int n) {
     VEnt_E518* e = (VEnt_E518*)(((char*)s->mVtbl) + 0x10);
-    e->fn((char*)s + e->delta, p, n);
+    e->fn(vthis(s, *e), p, n);
 }
 
 /**
@@ -5742,7 +5743,7 @@ struct VEnt_E698 { short delta; short idx; void (*fn)(void*, void*, int); };
 
 static inline void Wr_E698(cReplayFramePtr* s, void* p, int n) {
     VEnt_E698* e = (VEnt_E698*)(((char*)s->mVtbl) + 0x10);
-    e->fn((char*)s + e->delta, p, n);
+    e->fn(vthis(s, *e), p, n);
 }
 
 /**
@@ -5778,7 +5779,7 @@ struct VEnt_E850 { short delta; short idx; void (*fn)(void*, void*, int); };
 
 static inline void Wr_E850(cReplayFramePtr* s, void* p, int n) {
     VEnt_E850* e = (VEnt_E850*)(((char*)s->mVtbl) + 0x10);
-    e->fn((char*)s + e->delta, p, n);
+    e->fn(vthis(s, *e), p, n);
 }
 
 /**
@@ -5837,7 +5838,7 @@ struct Stream_EA38 { char* vt; };
 
 static inline void Wr_EA38(Stream_EA38* s, void* p, int n) {
     VEnt_EA38* e = (VEnt_EA38*)(s->vt + 0x10);
-    e->fn((char*)s + e->delta, p, n);
+    e->fn(vthis(s, *e), p, n);
 }
 
 /**
@@ -5902,7 +5903,7 @@ struct Stream_ECC8 { char* vt; };
 
 static inline void Wr_ECC8(Stream_ECC8* s, void* p, int n) {
     VEnt_ECC8* e = (VEnt_ECC8*)(s->vt + 0x10);
-    e->fn((char*)s + e->delta, p, n);
+    e->fn(vthis(s, *e), p, n);
 }
 
 /**
@@ -6005,13 +6006,13 @@ struct VE_F2A0 { short delta; short idx; int (*fn)(void *, void *, int); };
  */
 extern "C" void tWPInGameData_Danger_readFromReplayFrame(tWPInGameData_Danger* self, cReplayFramePtr* frame) {
     VE_F2A0 *readEntry = &(*(VE_F2A0 **)frame)[2];
-    readEntry->fn(((char*)frame) + readEntry->delta, (char*)&self->m_Level, 4);
+    readEntry->fn(vthis(frame, *readEntry), (char*)&self->m_Level, 4);
     readEntry = &(*(VE_F2A0 **)frame)[2];
-    readEntry->fn(((char*)frame) + readEntry->delta, ((char*)self), 4);
+    readEntry->fn(vthis(frame, *readEntry), ((char*)self), 4);
     readEntry = &(*(VE_F2A0 **)frame)[2];
-    readEntry->fn(((char*)frame) + readEntry->delta, (char*)&self->m_PointRate, 4);
+    readEntry->fn(vthis(frame, *readEntry), (char*)&self->m_PointRate, 4);
     readEntry = &(*(VE_F2A0 **)frame)[2];
-    readEntry->fn(((char*)frame) + readEntry->delta, ((char*)self), 4);
+    readEntry->fn(vthis(frame, *readEntry), ((char*)self), 4);
 }
 #endif
 
@@ -6029,13 +6030,13 @@ struct VE_F340 { short delta; short idx; int (*fn)(void *, void *, int); };
  */
 extern "C" void tWPInGameData_MusicTrigger_writeToReplayFrame(tWPInGameData_MusicTrigger* self, cReplayFramePtr* frame) {
     VE_F340 *writeEntry = &(*(VE_F340 **)frame)[1];
-    writeEntry->fn(((char*)frame) + writeEntry->delta, (char*)&self->m_Type, 4);
+    writeEntry->fn(vthis(frame, *writeEntry), (char*)&self->m_Type, 4);
     writeEntry = &(*(VE_F340 **)frame)[1];
-    writeEntry->fn(((char*)frame) + writeEntry->delta, ((char*)self), 4);
+    writeEntry->fn(vthis(frame, *writeEntry), ((char*)self), 4);
     writeEntry = &(*(VE_F340 **)frame)[1];
-    writeEntry->fn(((char*)frame) + writeEntry->delta, (char*)&self->m_Value, 4);
+    writeEntry->fn(vthis(frame, *writeEntry), (char*)&self->m_Value, 4);
     writeEntry = &(*(VE_F340 **)frame)[1];
-    writeEntry->fn(((char*)frame) + writeEntry->delta, ((char*)self), 4);
+    writeEntry->fn(vthis(frame, *writeEntry), ((char*)self), 4);
 }
 #endif
 
@@ -6138,7 +6139,7 @@ struct VEnt_F580 { short delta; short idx; void (*fn)(void*, void*, int); };
 
 static inline void Wr_F580(cReplayFramePtr* s, void* p, int n) {
     VEnt_F580* e = (VEnt_F580*)(((char*)s->mVtbl) + 0x8);
-    e->fn((char*)s + e->delta, p, n);
+    e->fn(vthis(s, *e), p, n);
 }
 
 /**
@@ -6172,7 +6173,7 @@ struct VEnt_F700 { short delta; short idx; void (*fn)(void*, void*, int); };
 
 static inline void Wr_F700(cReplayFramePtr* s, void* p, int n) {
     VEnt_F700* e = (VEnt_F700*)(((char*)s->mVtbl) + 0x8);
-    e->fn((char*)s + e->delta, p, n);
+    e->fn(vthis(s, *e), p, n);
 }
 
 /**
@@ -6209,7 +6210,7 @@ struct Stream_F8B8 { char* vt; };
 
 static inline void Wr_F8B8(Stream_F8B8* s, void* p, int n) {
     VEnt_F8B8* e = (VEnt_F8B8*)(s->vt + 0x8);
-    e->fn((char*)s + e->delta, p, n);
+    e->fn(vthis(s, *e), p, n);
 }
 
 /**
@@ -6267,7 +6268,7 @@ struct Stream_FAA0 { char* vt; };
 
 static inline void Wr_FAA0(Stream_FAA0* s, void* p, int n) {
     VEnt_FAA0* e = (VEnt_FAA0*)(s->vt + 0x8);
-    e->fn((char*)s + e->delta, p, n);
+    e->fn(vthis(s, *e), p, n);
 }
 
 /**
@@ -6331,7 +6332,7 @@ struct Stream_FD30 { char* vt; };
 
 static inline void Wr_FD30(Stream_FD30* s, void* p, int n) {
     VEnt_FD30* e = (VEnt_FD30*)(s->vt + 0x8);
-    e->fn((char*)s + e->delta, p, n);
+    e->fn(vthis(s, *e), p, n);
 }
 
 /**
@@ -6436,12 +6437,12 @@ struct VE_0308 { short delta; short idx; int (*fn)(void *, void *, int); };
  */
 extern "C" void tWPInGameData_Danger_writeToReplayFrame(tWPInGameData_Danger* self, cReplayFramePtr* frame) {
     VE_0308 *writeEntry = &(*(VE_0308 **)frame)[1];
-    writeEntry->fn(((char*)frame) + writeEntry->delta, (char*)&self->m_Level, 4);
+    writeEntry->fn(vthis(frame, *writeEntry), (char*)&self->m_Level, 4);
     writeEntry = &(*(VE_0308 **)frame)[1];
-    writeEntry->fn(((char*)frame) + writeEntry->delta, ((char*)self), 4);
+    writeEntry->fn(vthis(frame, *writeEntry), ((char*)self), 4);
     writeEntry = &(*(VE_0308 **)frame)[1];
-    writeEntry->fn(((char*)frame) + writeEntry->delta, (char*)&self->m_PointRate, 4);
+    writeEntry->fn(vthis(frame, *writeEntry), (char*)&self->m_PointRate, 4);
     writeEntry = &(*(VE_0308 **)frame)[1];
-    writeEntry->fn(((char*)frame) + writeEntry->delta, ((char*)self), 4);
+    writeEntry->fn(vthis(frame, *writeEntry), ((char*)self), 4);
 }
 #endif

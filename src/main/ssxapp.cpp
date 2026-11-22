@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "input/inputparse.h"
 #include "bx/math3d.h"
 #include "main/crowdman2d.h"
@@ -919,20 +920,20 @@ extern "C" void cSSXApp_purge(sSSXAppPurge* self)
         cSSXScriptEngine* ssxScriptEngine = ScriptEngine;
         if (ssxScriptEngine) {  // delete ScriptEngine: the virtual destructor (slot 1) with flags 3
             sVEPurge* vt = (sVEPurge*)ssxScriptEngine->mVtbl;
-            vt[1].fn((char*)ssxScriptEngine + vt[1].delta, 3);
+            vt[1].fn(vthis(ssxScriptEngine, vt[1]), 3);
         }
         ScriptEngine = 0;
     }
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVEPurge0* vt = (sVEPurge0*)ps2GraphicsMan->mVtbl;
-        vt[3].fn((char*)ps2GraphicsMan + vt[3].delta);
+        vt[3].fn(vthis(ps2GraphicsMan, vt[3]));
     }
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         if (ps2GraphicsMan) {
             sVEPurge* vt = (sVEPurge*)ps2GraphicsMan->mVtbl;
-            vt[1].fn((char*)ps2GraphicsMan + vt[1].delta, 3);
+            vt[1].fn(vthis(ps2GraphicsMan, vt[1]), 3);
         }
     }
     GrMan = 0;
@@ -2220,7 +2221,7 @@ extern "C" void func_00229910_r(sCrowd_229910* self, int index, tResourceID_2299
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sModel_229910* model = HandleToModel_229910(RID);
     sVEntry_229910* vt = (sVEntry_229910*)ps2GraphicsMan->mVtbl;
-    vt[97].fn((char*)ps2GraphicsMan + vt[97].delta, model, 0, pos, uv, col);
+    vt[97].fn(vthis(ps2GraphicsMan, vt[97]), model, 0, pos, uv, col);
     for (int i = 0; i < 4; i++) {
         pts[i] = MulMV_229910(model->mat, sV4_229910(pos[i], 1.0f));
     }
@@ -3625,7 +3626,7 @@ extern "C" char* FrustumIntersector_FrustumIntersector(char* self, sCfg_22ADD8* 
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVEMat_22ADD8* vt = (sVEMat_22ADD8*)ps2GraphicsMan->mVtbl;
-        t4Matrix gfxMatrix = vt[43].fn((char*)ps2GraphicsMan + vt[43].delta);
+        t4Matrix gfxMatrix = vt[43].fn(vthis(ps2GraphicsMan, vt[43]));
         MatCopy_22ADD8((t4Matrix*)(self + 0x10), &gfxMatrix);
     }
     MatCopy_22ADD8((t4Matrix*)(self + 0x50), ((&GrMan->mGuardBandMatrix)));

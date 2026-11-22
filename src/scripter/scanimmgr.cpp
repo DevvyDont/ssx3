@@ -186,7 +186,7 @@ extern "C" void cScriptAnimBankManager_UnlinkBank(cScriptAnimBankManager* self, 
     void* bankInfo = cScriptAnimBankManager_GetBankInfo(((sAnimList*)self), id);
     if (bankInfo != 0) {
         sScAnimVEntry* vt = (sScAnimVEntry*)self->mVtbl;
-        vt[2].fn((char*)self + vt[2].delta, bankInfo);
+        vt[2].fn(vthis(self, vt[2]), bankInfo);
     }
 }
 #endif

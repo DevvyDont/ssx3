@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "world/chunkresolve.h"
 #include "bx/appman.h"
 #include "render/ps2graphicsman.h"
@@ -632,7 +633,7 @@ extern "C" void cWorldCache_purge(cWorldCache* worldCache)
     cWorldCache_resetPageMap((cWorldCache*)self);
     cWorldCache_purge_sObj* chunkResolve = ((cWorldCache_purge_sObj*)self->mp_ChunkResolve);
     if (chunkResolve != 0) {
-        chunkResolve->vt[1].fn((char*)chunkResolve + chunkResolve->vt[1].delta, 3);
+        chunkResolve->vt[1].fn(vthis(chunkResolve, chunkResolve->vt[1]), 3);
     }
     if (((int*)self->m_pSharedCacheTable) != 0) {
         cWorldCacheTable__cWorldCacheTable(((int*)self->m_pSharedCacheTable), 3);
@@ -1150,7 +1151,7 @@ static inline int Frame_8668()
 {
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sVE_8668* vt = (sVE_8668*)ps2GraphicsMan->mVtbl;
-    return vt[114].fn((char*)ps2GraphicsMan + vt[114].delta);
+    return vt[114].fn(vthis(ps2GraphicsMan, vt[114]));
 }
 
 /**
@@ -1543,10 +1544,10 @@ extern "C" void cWorldCache_addBxStreamDataSubmit(sWorldCache8CD0* self, int gro
     list->count++;
     if (chunk == (int)&cStreamMan_NULLCHUNK) {
         sWCObj8CD0* callbackObj = self->obj;
-        callbackObj->vt[3].fn((char*)callbackObj + callbackObj->vt[3].delta, id, key, 0);
+        callbackObj->vt[3].fn(vthis(callbackObj, callbackObj->vt[3]), id, key, 0);
     } else {
         sWCObj8CD0* callbackObj = self->obj;
-        chunk = callbackObj->vt[3].fn((char*)callbackObj + callbackObj->vt[3].delta, id, key, chunk);
+        chunk = callbackObj->vt[3].fn(vthis(callbackObj, callbackObj->vt[3]), id, key, chunk);
     }
     {
         sWCSlot8CD0* slot = &tbl[id];
@@ -1963,7 +1964,7 @@ extern "C" void cWorldView_update(cWorldView* worldView)
                 self->entries[i].state = 5;
                 cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
                 sVE_9258* vt = (sVE_9258*)ps2GraphicsMan->mVtbl;
-                vt[102].fn((char*)ps2GraphicsMan + vt[102].delta, i);
+                vt[102].fn(vthis(ps2GraphicsMan, vt[102]), i);
             }
             break;
         case 4:

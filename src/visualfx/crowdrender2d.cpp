@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "bx/appman.h"
 #include "visualfx/crowdanim2d.h"
 #include "render/ps2graphicsman.h"
@@ -89,7 +90,7 @@ extern "C" void cCrowdRender2D_init_impl(int* self)
             char* shape = SHAPE_locate(self[0], D_00445D38_B6D0[i].names[j]);
             D_00445D38_B6D0[i].shapes[j] = shape;
             sVEnt_B6D0* vt = (sVEnt_B6D0*)cGraphicsMan_TheGraphicsMan->mVtbl;
-            D_00445D38_B6D0[i].handles[j] = ((tRegister_B6D0)vt[46].fn)((char*)cGraphicsMan_TheGraphicsMan + vt[46].delta, shape, D_00445D38_B6D0[i].names[j], 0, 0, -1);
+            D_00445D38_B6D0[i].handles[j] = ((tRegister_B6D0)vt[46].fn)(vthis(cGraphicsMan_TheGraphicsMan, vt[46]), shape, D_00445D38_B6D0[i].names[j], 0, 0, -1);
         }
     }
     char* first = D_00445D38_B6D0[0].shapes[0];
@@ -123,7 +124,7 @@ int cCrowdRender2D_purge(int* param_1)
         for (j = 0; j < D_00445D38_B6D0[i].count; j++) {
             cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
             sCrowdVEntry2D* vt = (sCrowdVEntry2D*)obj->mVtbl;
-            vt[50].fn((char*)obj + vt[0x32].delta, D_00445D38_B6D0[i].handles[j]);
+            vt[50].fn(vthis(obj, vt[0x32]), D_00445D38_B6D0[i].handles[j]);
         }
     }
     return MEM_free(*param_1);

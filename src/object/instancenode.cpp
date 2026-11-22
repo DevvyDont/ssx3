@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "object/deadnode.h"
 #include "object/instancenode.h"
 
@@ -28,7 +29,7 @@ extern "C" void* cInstanceNode_cInstanceNode(cInstanceNode* self, void* bucket, 
     cSortObjNode_cSortObjNode(self, bucket, stream);
     self->mVtbl = (void**)cInstanceNode_vtbl;
     sInstNodeCtorVEntry* vt = *(sInstNodeCtorVEntry**)stream;
-    self->Instance = (tInstanceRecord*)vt[4].fn((char*)stream + vt[4].delta, self);
+    self->Instance = (tInstanceRecord*)vt[4].fn(vthis(stream, vt[4]), self);
     return ((void*)self);
 }
 #endif
@@ -182,7 +183,7 @@ extern "C" void cInstanceNode_expire(cInstanceNode* self, int runscript)
     *(int*)((char*)self->Instance + 8) |= 2;
     if (((void*)self) != 0) {
         sInstNodeVEntryFD00* vt = (sInstNodeVEntryFD00*)self->mVtbl;
-        vt[1].fn((char*)self + vt[1].delta, 3);
+        vt[1].fn(vthis(self, vt[1]), 3);
     }
 }
 #endif
@@ -212,7 +213,7 @@ extern "C" void cInstanceNode_loseFocus(cInstanceNode* self)
     *flagsPtr |= 2;
     if (((void*)self) != 0) {
         sInstNodeVEntryFD90* vt = (sInstNodeVEntryFD90*)self->mVtbl;
-        vt[1].fn((char*)self + vt[1].delta, 3);
+        vt[1].fn(vthis(self, vt[1]), 3);
     }
 }
 #endif
@@ -264,7 +265,7 @@ extern "C" void cInstanceNode_makeThisDead(cInstanceNode* self)
     int instance = (int)self->Instance;
     if (((void*)self) != 0) {
         sInstNodeDtorVEntry* vt = (sInstNodeDtorVEntry*)self->mVtbl;
-        vt[1].fn((char*)self + vt[1].delta, 3);
+        vt[1].fn(vthis(self, vt[1]), 3);
     }
     cDeadNode_cDeadNode((cDeadNode*)cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), instance);
 }
@@ -292,7 +293,7 @@ extern "C" void cInstanceNode_writeToReplayFrame(cInstanceNode* self, void* stre
 {
     cSortObjNode_writeToReplayFrame(self, stream);
     sInstNodeVEntry* vt = *(sInstNodeVEntry**)stream;
-    vt[6].fn((char*)stream + vt[6].delta, self);
+    vt[6].fn(vthis(stream, vt[6]), self);
 }
 #endif
 
@@ -457,11 +458,11 @@ extern "C" void cInstanceNode_buildMeshMat(sInInst_FED8* self, int mesh, sInMat_
     sInModel_FED8* pModel = self->pModel;
     sInOther_FED8* instNode = self->other;
     if (instNode != 0) {
-        if (mesh != -1 && ((InBoolFn_FED8)instNode->vt[26].fn)((char*)instNode + instNode->vt[26].delta)) {
-            vu0CopyMat_FED8(out, ((InPartMatFn_FED8)self->other->vt[29].fn)((char*)self->other + self->other->vt[29].delta, mesh));
+        if (mesh != -1 && ((InBoolFn_FED8)instNode->vt[26].fn)(vthis(instNode, instNode->vt[26]))) {
+            vu0CopyMat_FED8(out, ((InPartMatFn_FED8)self->other->vt[29].fn)(vthis(self->other, self->other->vt[29]), mesh));
             return;
         }
-        base = ((InMatFn_FED8)self->other->vt[24].fn)((char*)self->other + self->other->vt[24].delta);
+        base = ((InMatFn_FED8)self->other->vt[24].fn)(vthis(self->other, self->other->vt[24]));
     }
     sInPart_FED8* parts = pModel->parts;
     if (mesh >= 0) {

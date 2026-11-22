@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "bx/appman.h"
 #include "ai/riderhandler.h"
 #include "render/ps2graphicsman.h"
@@ -250,7 +251,7 @@ extern "C" void* cBoardSparkFX_cBoardSparkFX(sBoardSparkFXView* self, int inChrg
     self->params->fD4 = 27.0f;
     self->params->count = 14;
     sBsEmitter* em = self->emitter;
-    em->vt[3].fn((char*)em + em->vt[3].delta, self->params, em->rate);
+    em->vt[3].fn(vthis(em, em->vt[3]), self->params, em->rate);
     self->active = 0;
     cBoardSparkFX_reset((cBoardSparkFX*)self);
     return self;
@@ -544,7 +545,7 @@ extern "C" void cBoardSparkFX_update(sSparkFx_ABC8* self)
     tParticleEmitter_stepContinous(self->gfx, dt);
     if (self->active) {
         sEmitter_ABC8* em = self->emitter;
-        em->vt[3].fn((char*)em + em->vt[3].delta, self->params, em->rate);
+        em->vt[3].fn(vthis(em, em->vt[3]), self->params, em->rate);
         self->active = 1;
     }
     self->f70 = 0;
@@ -709,7 +710,7 @@ extern "C" void cBoardSparkFX_render(cBoardSparkFX* self)
         *GrMan->m_pCurrentDrawState = self->mSparkDrawState;
         cPS2GraphicsMan* ctx = GrMan;
         sVE_B478a* vt = (sVE_B478a*)ctx->mVtbl;
-        vt[82].fn((char*)ctx + vt[82].delta, (int)self->mSparkEmitter);
+        vt[82].fn(vthis(ctx, vt[82]), (int)self->mSparkEmitter);
         pop_B478(GrMan);
     }
     if (self->mRenderSparkFlash != 0) {
@@ -738,7 +739,7 @@ extern "C" void cBoardSparkFX_render(cBoardSparkFX* self)
             sVec2_B478 size(((float*)(((char*)self) + 0x60))[i], ((float*)(((char*)self) + 0x60))[i]);
             cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
             sVE_B478b* vt = (sVE_B478b*)ctx->mVtbl;
-            vt[78].fn((char*)ctx + vt[78].delta, ((char*)self) + 0x30 + i * 0x10, &size, uv0, uv1, &D_004D57A0);
+            vt[78].fn(vthis(ctx, vt[78]), ((char*)self) + 0x30 + i * 0x10, &size, uv0, uv1, &D_004D57A0);
         }
         pop_B478(GrMan);
     }

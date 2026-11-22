@@ -48,7 +48,7 @@ extern "C" int cFEStateNetHelpPopup_handleEvent(cFEStateNetHelpPopup* self, int 
         void* obj = self->mpParentState;
         if (obj != 0) {
             sVEntry<int(void*, int, int)>* vt = *(sVEntry<int(void*, int, int)>**)((char*)obj + 8);
-            return vt[24].fn((char*)obj + vt[24].delta, msg, msgParam);
+            return vt[24].fn(vthis(obj, vt[24]), msg, msgParam);
         }
     }
     return 0;
@@ -285,7 +285,7 @@ struct sNetHelp_1DA238 {
 
 static inline void show_1DA238(sWidget_1DA238* w, int on)
 {
-    w->vt[9].fn((char*)w + w->vt[9].delta, on);
+    w->vt[9].fn(vthis(w, w->vt[9]), on);
 }
 
 /**

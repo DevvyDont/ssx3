@@ -114,7 +114,7 @@ extern "C" int tModifierBlock_getBoundBox(tModifierBlock* self)
     sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
     if (node != 0) {
         sMbVEntryI* vt = *(sMbVEntryI**)node;
-        return vt[12].fn((char*)node + vt[12].delta);
+        return vt[12].fn(vthis(node, vt[12]));
     }
     return 0;
 }
@@ -145,7 +145,7 @@ void tModifierBlock_setBoundBox_impl(tModifierBlock* self, void* box)
     sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
     if (node != 0) {
         sMbVEntry* vt = *(sMbVEntry**)node;
-        vt[13].fn((char*)node + vt[13].delta, box);
+        vt[13].fn(vthis(node, vt[13]), box);
     }
 }
 #endif
@@ -169,7 +169,7 @@ extern "C" float tModifierBlock_getRadius(tModifierBlock* self)
     sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
     if (node != 0) {
         sMbVEntryF* vt = *(sMbVEntryF**)node;
-        return vt[14].fn((char*)node + vt[14].delta);
+        return vt[14].fn(vthis(node, vt[14]));
     }
     return 0.0f;
 }
@@ -221,7 +221,7 @@ extern "C" void tModifierBlock_preUpdate(tModifierBlock* self)
     sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
     if (node != 0) {
         sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)node;
-        vt[2].fn((char*)node + vt[2].delta);
+        vt[2].fn(vthis(node, vt[2]));
     }
     if (self->UVScroll != 0) {
         cUVScrollModifier_update(self->UVScroll);
@@ -234,7 +234,7 @@ extern "C" void tModifierBlock_preUpdate(tModifierBlock* self)
         ((sVEntry<void(void*)>*)physicsModifier->mVtbl)[2].fn((char*)physicsModifier + ((sVEntry<void(void*)>*)physicsModifier->mVtbl)[2].delta);
         physicsModifier = self->Physics;
         sMbVEntryI2C70* vt2 = (sMbVEntryI2C70*)((sVEntry<void(void*)>*)physicsModifier->mVtbl);
-        if (vt2[4].fn((char*)physicsModifier + vt2[4].delta) == 0) {
+        if (vt2[4].fn(vthis(physicsModifier, vt2[4])) == 0) {
             tModifierBlock_remPhysicsModifier(self);
         }
     }
@@ -265,7 +265,7 @@ extern "C" void tModifierBlock_postUpdate(tModifierBlock* self)
         sMbLink2D20* link = head;
         do {
             sMbLink2D20* next = link->next;
-            link->vt[5].fn((char*)link + link->vt[5].delta);
+            link->vt[5].fn(vthis(link, link->vt[5]));
             link = next;
         } while (link != 0);
     }
@@ -274,14 +274,14 @@ extern "C" void tModifierBlock_postUpdate(tModifierBlock* self)
         sMbLink2D20* link = head;
         do {
             sMbLink2D20* next = link->next;
-            link->vt[3].fn((char*)link + link->vt[3].delta);
+            link->vt[3].fn(vthis(link, link->vt[3]));
             link = next;
         } while (link != 0);
     }
     sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
     if (node != 0) {
         sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)node;
-        vt[4].fn((char*)node + vt[4].delta);
+        vt[4].fn(vthis(node, vt[4]));
     }
 }
 #endif
@@ -307,14 +307,14 @@ extern "C" void tModifierBlock_render(tModifierBlock* self)
         do {
             next = *(void**)effect;
             sMbVEntryV2DD0* vt = *(sMbVEntryV2DD0**)((char*)effect + 0x8);
-            vt[6].fn((char*)effect + vt[6].delta);
+            vt[6].fn(vthis(effect, vt[6]));
             effect = next;
         } while (effect != 0);
     }
     sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
     if (node != 0) {
         sMbVEntryV2DD0* vt = *(sMbVEntryV2DD0**)node;
-        vt[11].fn((char*)node + vt[11].delta);
+        vt[11].fn(vthis(node, vt[11]));
     }
 }
 #endif
@@ -332,7 +332,7 @@ extern "C" int tModifierBlock_isRootTransformDirty(tModifierBlock* self)
     sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
     if (node != 0) {
         sMbVEntryI* vt = *(sMbVEntryI**)node;
-        if (vt[17].fn((char*)node + vt[17].delta) != 0) {
+        if (vt[17].fn(vthis(node, vt[17])) != 0) {
             return 1;
         }
     }
@@ -352,7 +352,7 @@ extern "C" void tModifierBlock_updateRootTransform(tModifierBlock* self)
     sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
     if (node != 0) {
         sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)node;
-        vt[3].fn((char*)node + vt[3].delta);
+        vt[3].fn(vthis(node, vt[3]));
     }
 }
 #endif
@@ -372,7 +372,7 @@ extern "C" int tModifierBlock_isComplete(tModifierBlock* self)
     sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
     if (node != 0) {
         sMbVEntryI* vt = *(sMbVEntryI**)node;
-        return vt[6].fn((char*)node + vt[6].delta);
+        return vt[6].fn(vthis(node, vt[6]));
     }
     return 0;
 }
@@ -397,7 +397,7 @@ extern "C" void tModifierBlock_clearComplete(tModifierBlock* self)
     sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
     if (node != 0) {
         sMbVEntryV* vt = *(sMbVEntryV**)node;
-        vt[7].fn((char*)node + vt[7].delta);
+        vt[7].fn(vthis(node, vt[7]));
     }
 }
 #endif
@@ -430,7 +430,7 @@ extern "C" void tModifierBlock_signal(tModifierBlock* self, int id, float value)
     sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
     if (node != 0) {
         sVEntry<void(void*, int, float)>* vt = *(sVEntry<void(void*, int, float)>**)node;
-        vt[5].fn((char*)node + vt[5].delta, id, value);
+        vt[5].fn(vthis(node, vt[5]), id, value);
     }
     if (self->UVScroll != 0) {
         cUVScrollModifier_signal(self->UVScroll, id, value);
@@ -447,7 +447,7 @@ extern "C" void tModifierBlock_signal(tModifierBlock* self, int id, float value)
         sMbLink2F40* effect = firstEffect;
         do {
             sMbLink2F40* next = effect->next;
-            effect->vt[7].fn((char*)effect + effect->vt[7].delta, id, value);
+            effect->vt[7].fn(vthis(effect, effect->vt[7]), id, value);
             effect = next;
         } while (effect != 0);
     }
@@ -474,13 +474,13 @@ extern "C" void tModifierBlock_applyForce(tModifierBlock* self, int intInfo, int
     void* obj;
     if (node != 0) {
         sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)node;
-        obj = vt[25].fn((char*)node + vt[25].delta);
+        obj = vt[25].fn(vthis(node, vt[25]));
     } else {
         obj = 0;
     }
     if (obj != 0) {
         sVEntry<void(void*, int, int)>* vt2 = *(sVEntry<void(void*, int, int)>**)((char*)obj + 0xC);
-        vt2[43].fn((char*)obj + vt2[43].delta, intInfo, force);
+        vt2[43].fn(vthis(obj, vt2[43]), intInfo, force);
     }
 }
 #endif
@@ -501,7 +501,7 @@ extern "C" void tModifierBlock_updateIntersectInfo(tModifierBlock* self, void* i
     sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
     if (node != 0) {
         sMbVEntry* vt = *(sMbVEntry**)node;
-        vt[22].fn((char*)node + vt[22].delta, intInfo);
+        vt[22].fn(vthis(node, vt[22]), intInfo);
     }
 }
 #endif
@@ -523,7 +523,7 @@ extern "C" void tModifierBlock_remTransformModifier(tModifierBlock* self)
     sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
     if (node != 0) {
         sMbVEntryDel* vt = *(sMbVEntryDel**)node;
-        vt[1].fn((char*)node + vt[1].delta, 3);
+        vt[1].fn(vthis(node, vt[1]), 3);
         self->RootTransform = 0;
     }
 }
@@ -581,7 +581,7 @@ extern "C" void tModifierBlock_remPhysicsModifier(tModifierBlock* self)
     cPhysicsModifier* obj = self->Physics;
     if (obj != 0) {
         sMbVEntryDel2* vt = (sMbVEntryDel2*)obj->mVtbl;
-        vt[1].fn((char*)obj + vt[1].delta, 3);
+        vt[1].fn(vthis(obj, vt[1]), 3);
         self->Physics = 0;
     }
 }
@@ -616,7 +616,7 @@ extern "C" void tModifierBlock_remEffectModifier(tModifierBlock* self)
         do {
             sModBlockLink* next = effect->next;
             if (effect != 0) {
-                effect->vt[1].fn((char*)effect + effect->vt[1].delta, 3);
+                effect->vt[1].fn(vthis(effect, effect->vt[1]), 3);
             }
             effect = next;
         } while (effect != 0);
@@ -652,7 +652,7 @@ extern "C" void tModifierBlock_fadeEffectModifier(tModifierBlock* self)
         sModBlockLink3228* link = head;
         do {
             sModBlockLink3228* next = link->next;
-            link->vt[3].fn((char*)link + link->vt[3].delta);
+            link->vt[3].fn(vthis(link, link->vt[3]));
             link = next;
         } while (link != 0);
     }
@@ -687,9 +687,9 @@ extern "C" void tModifierBlock_remHaloModifier(tModifierBlock* self)
         sModBlockLink3278* link = head;
         do {
             sModBlockLink3278* next = link->next;
-            if (((int (*)(void*))link->vt[2].fn)((char*)link + link->vt[2].delta) == 3) {
+            if (((int (*)(void*))link->vt[2].fn)(vthis(link, link->vt[2])) == 3) {
                 if (link != 0) {
-                    ((void (*)(void*, int))link->vt[1].fn)((char*)link + link->vt[1].delta, 3);
+                    ((void (*)(void*, int))link->vt[1].fn)(vthis(link, link->vt[1]), 3);
                 }
             }
             link = next;
@@ -732,7 +732,7 @@ extern "C" void tModifierBlock_remRailModifier(tModifierBlock* self, unsigned in
     loop:
         if (rail == 0) return;
         if (rail->id == id) {
-            rail->vt[1].fn((char*)rail + rail->vt[1].delta, 3);
+            rail->vt[1].fn(vthis(rail, rail->vt[1]), 3);
             return;
         }
         rail = rail->next;
@@ -741,7 +741,7 @@ extern "C" void tModifierBlock_remRailModifier(tModifierBlock* self, unsigned in
         do {
             sModBlockLink3300* next = rail->next;
             if (rail != 0) {
-                rail->vt[1].fn((char*)rail + rail->vt[1].delta, 3);
+                rail->vt[1].fn(vthis(rail, rail->vt[1]), 3);
             }
             rail = next;
         } while (rail != 0);
@@ -769,7 +769,7 @@ extern "C" void tModifierBlock_transferEffectModifier(tModifierBlock* self, cEff
     while (effect != 0) {
         void* next = *(void**)effect;
         sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)effect + 0x8);
-        vt[3].fn((char*)effect + vt[3].delta);
+        vt[3].fn(vthis(effect, vt[3]));
         cEffectLink_append(&self->Effect, effect);
         effect = next;
     }
@@ -1176,7 +1176,7 @@ extern "C" void cSkyBox_render(cSkyBox* self)
         *(unsigned int*)(skyInstance + 8) = (*(unsigned int*)(skyInstance + 8) & ~2u) | 4;
         char* instToDraw = (char*)self->m_pInstanceSky;
         sVE_53B10* vt = (sVE_53B10*)ctx->mVtbl;
-        vt[95].fn((char*)ctx + vt[95].delta, instToDraw, 1.0f, *(void**)(*(char**)(instToDraw + 0x80) + 0xC), &skyMatrix, 0, 0, 21536);
+        vt[95].fn(vthis(ctx, vt[95]), instToDraw, 1.0f, *(void**)(*(char**)(instToDraw + 0x80) + 0xC), &skyMatrix, 0, 0, 21536);
     }
     sRS_53B10* topDrawState = (sRS_53B10*)ctx->m_pCurrentDrawState;
     *(sRS_53B10**)&ctx->m_pCurrentDrawState = topDrawState - 1;
@@ -1384,10 +1384,10 @@ extern "C" void cSpring_setupNodes(void* self);
 extern "C" void* cSpring_cSpring1(cSpring* self, void* stream)
 {
     sVEntry<void(void*, void*, int)>* readSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-    readSlot->fn((char*)stream + readSlot->delta, self, 36);
+    readSlot->fn(vthis(stream, *readSlot), self, 36);
     cSpring_setupNodes(self);
     readSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
-    readSlot->fn((char*)stream + readSlot->delta, self->Nodes, *(int*)self * 80);
+    readSlot->fn(vthis(stream, *readSlot), self->Nodes, *(int*)self * 80);
     return ((void*)self);
 }
 #endif

@@ -1989,7 +1989,7 @@ extern "C" void cVisualEffectsObjNode__cVisualEffectsObjNode(cVisualEffectsObjNo
     void* obj = self->VisualEffectsMan;
     if (obj != 0) {
         sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode* vt = *(sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode**)((char*)obj + 0x44);
-        vt[1].fn((char*)obj + vt[1].delta, 3);
+        vt[1].fn(vthis(obj, vt[1]), 3);
     }
     cObjNode__cObjNode(self, flags);
 }
@@ -2819,7 +2819,7 @@ extern "C" void cAIVisualEffectsObjNode__cAIVisualEffectsObjNode(cAIVisualEffect
     void* obj = self->AIVisualEffectsMan;
     if (obj != 0) {
         sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode* vt = *(sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode**)((char*)obj + 0x4);
-        vt[1].fn((char*)obj + vt[1].delta, 3);
+        vt[1].fn(vthis(obj, vt[1]), 3);
     }
     cObjNode__cObjNode(self, flags);
 }
@@ -3145,7 +3145,7 @@ extern "C" bool cGame_updateUI(cGame* self)
         cPauseState_Stack[++cPauseState_StackIdx] = 2;
         cPauseState_Flags = D_004428F8[0];
         sUIObj_4B48* uiObject = ((sUIEngine_4B48*)self->UI)->fC;
-        uiObject->vt[44].fn((char*)uiObject + uiObject->vt[44].delta, *(unsigned char*)&self->PauseOwner);
+        uiObject->vt[44].fn(vthis(uiObject, uiObject->vt[44]), *(unsigned char*)&self->PauseOwner);
         cSSXAudio_PauseAudio(cAudioInterface_bxAudio());
         cSSXAudio_PlayPauseSound(cAudioInterface_bxAudio());
         return false;
@@ -3217,7 +3217,7 @@ extern "C" void cGame_updateAI(cGame* self)
             cReplay_update((int)self->Replay);
         if (cReplay_isPauseAI((int)self->Replay) == 0 && (cPauseState_Flags & 8) == 0) {
             sVEntry<void>* vt = (sVEntry<void>*)ScriptEngine->mVtbl;
-            ((void (*)(void*))vt[5].fn)((char*)ScriptEngine + vt[5].delta);
+            ((void (*)(void*))vt[5].fn)(vthis(ScriptEngine, vt[5]));
         }
     }
     obj = gBucketMan;

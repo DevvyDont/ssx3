@@ -1291,7 +1291,7 @@ extern "C" void cOVState_AUTOSAVE_onDestroyScreen(cOVState_AUTOSAVE* self)
         cBENewRaceInterface_newRace.iLocationIdx = cBENewPlayerInterface_getLastHub(player, 0);
         cBENewRaceInterface_bIsBamLocation = 1;
         sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)race + 0xC);
-        vt[1].fn((char*)race + vt[1].delta);
+        vt[1].fn(vthis(race, vt[1]));
         cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen_b, 0x100, 0)));
     }
 }

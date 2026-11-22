@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "be/beintoption.h"
 #include "sound/ssxaudio.h"
 #include "bx/appman.h"
@@ -86,7 +87,7 @@ extern "C" int cFECustom_onScreenEvent(cFECustom* self, int screen, int hash)
         void* obj = self->mpTransitionState;
         if (obj != 0) {
             sVEntry001A07C8* vt = *(sVEntry001A07C8**)((char*)obj + 8);
-            vt[24].fn((char*)obj + vt[24].delta, 1, 0);
+            vt[24].fn(vthis(obj, vt[24]), 1, 0);
         }
         return 1;
     }
@@ -248,7 +249,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
             void* obj = self[4];
             if (obj != 0) {
                 sVEntryGNS* vt = *(sVEntryGNS**)((char*)obj + 8);
-                vt[24].fn((char*)obj + vt[24].delta, 0, 0);
+                vt[24].fn(vthis(obj, vt[24]), 0, 0);
             }
             break;
         }
@@ -309,7 +310,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
                     cBENewRaceInterface_bIsBamLocation = one;
                 }
                 sVEntry0GNS* vt = *(sVEntry0GNS**)((char*)nr + 0xC);
-                vt[1].fn((char*)nr + vt[1].delta);
+                vt[1].fn(vthis(nr, vt[1]));
                 D_004A19DC = 1;
                 cAppMan_setNextModule((cAppMan*)SSXApp, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
                 break;
@@ -441,7 +442,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
             cBENewRaceInterface_newRace.iLocationIdx = cBENewPlayerInterface_getLastHub(pl, 0);
             cBENewRaceInterface_bIsBamLocation = 1;
             sVEntry0GNS* vt = *(sVEntry0GNS**)((char*)nr + 0xC);
-            vt[1].fn((char*)nr + vt[1].delta);
+            vt[1].fn(vthis(nr, vt[1]));
             cAppMan_setNextModule((cAppMan*)SSXApp, cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
             break;
         }
@@ -946,7 +947,7 @@ extern "C" void cRealFE_load(cRealFE* self)
     {
         cPS2GraphicsMan* g = GrMan;
         sVE_1E80* vt = (sVE_1E80*)g->mVtbl;
-        vt[44].fn((char*)g + vt[44].delta, 0);
+        vt[44].fn(vthis(g, vt[44]), 0);
     }
     sUI_1E80* ui = ((sUI_1E80*)self->mpUI);
     // Looks like a macro expansion: a local copy of the path plus the load call.
@@ -1062,7 +1063,7 @@ extern "C" void cRealFE_purge(cRealFE* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVEntry001A2190* vt = (sVEntry001A2190*)ps2GraphicsMan->mVtbl;
-    vt[19].fn((char*)ps2GraphicsMan + vt[19].delta);
+    vt[19].fn(vthis(ps2GraphicsMan, vt[19]));
     cRealFE_purgeCharAnimations(self);
     cFERiderManager_purge(&self->mRiderManager);
     func_0019CF40(self->mBoltFileManager);
@@ -1144,14 +1145,14 @@ static inline void feCall(int slot)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sFeVE* vt = (sFeVE*)ps2GraphicsMan->mVtbl;
-    ((void (*)(void*))vt[slot].fn)((char*)ps2GraphicsMan + vt[slot].delta);
+    ((void (*)(void*))vt[slot].fn)(vthis(ps2GraphicsMan, vt[slot]));
 }
 
 static inline unsigned int feCallU(int slot)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sFeVE* vt = (sFeVE*)ps2GraphicsMan->mVtbl;
-    return ((unsigned int (*)(void*))vt[slot].fn)((char*)ps2GraphicsMan + vt[slot].delta);
+    return ((unsigned int (*)(void*))vt[slot].fn)(vthis(ps2GraphicsMan, vt[slot]));
 }
 
 /**
@@ -1199,12 +1200,12 @@ extern "C" int cRealFE_render(cRealFE* self)
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             sFeVE* vt = (sFeVE*)ps2GraphicsMan->mVtbl;
             ((void (*)(void*, int, int, float, float, float, float, float, float))vt[26].fn)(
-                (char*)ps2GraphicsMan + vt[26].delta, 0, 0, 0.0f, 0.0f, w, hgt, 0.0f, 1.0f);
+                vthis(ps2GraphicsMan, vt[26]), 0, 0, 0.0f, 0.0f, w, hgt, 0.0f, 1.0f);
         }
         {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             sFeVE* vt = (sFeVE*)ps2GraphicsMan->mVtbl;
-            ((void (*)(void*, void*))vt[34].fn)((char*)ps2GraphicsMan + vt[34].delta, t4mat_Identity);
+            ((void (*)(void*, void*))vt[34].fn)(vthis(ps2GraphicsMan, vt[34]), t4mat_Identity);
         }
         feW()->top->setAlpha(9);
         sFeVert verts[4];
@@ -1240,7 +1241,7 @@ extern "C" int cRealFE_render(cRealFE* self)
         {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             sFeVE* vt = (sFeVE*)ps2GraphicsMan->mVtbl;
-            ((void (*)(void*, int, sFeVert*, int))vt[71].fn)((char*)ps2GraphicsMan + vt[71].delta, 4, verts, 0);
+            ((void (*)(void*, int, sFeVert*, int))vt[71].fn)(vthis(ps2GraphicsMan, vt[71]), 4, verts, 0);
         }
         feCall(22);
         feCall(32);
@@ -1253,13 +1254,13 @@ extern "C" int cRealFE_render(cRealFE* self)
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sFeVE* vt = (sFeVE*)ps2GraphicsMan->mVtbl;
-        ((void (*)(void*, float, float, float))vt[25].fn)((char*)ps2GraphicsMan + vt[25].delta,
+        ((void (*)(void*, float, float, float))vt[25].fn)(vthis(ps2GraphicsMan, vt[25]),
             *(float*)((char*)self + 0x10), *(float*)((char*)self + 0x14), *(float*)((char*)self + 0x18));
     }
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sFeVE* vt = (sFeVE*)ps2GraphicsMan->mVtbl;
-        ((void (*)(void*, void*))vt[34].fn)((char*)ps2GraphicsMan + vt[34].delta, (char*)self + 0x50);
+        ((void (*)(void*, void*))vt[34].fn)(vthis(ps2GraphicsMan, vt[34]), (char*)self + 0x50);
     }
     {
         sFeWorld* w = feW();
@@ -1575,7 +1576,7 @@ extern "C" void cRealFE_loadStartState(cRealFE* self)
     sStartState_1A2C40* backState = new (str_cFEStateBackground, 0, 0) sStartState_1A2C40;
     cUIState_cUIState(backState, (char*)self->mpUI);
     backState->vt = (sVEnt_1A2C40*)cFEStateBackground_vtbl;
-    backState->vt[4].fn((char*)backState + backState->vt[4].delta);
+    backState->vt[4].fn(vthis(backState, backState->vt[4]));
     cUIStateStack_pushExplicit(&self->mpUI->mStateStack, backState);
     switch (cRealFE_mStartState) {
     case 0: {

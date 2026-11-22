@@ -84,7 +84,7 @@ extern "C" cGameViewMan22E3B8* cGameViewMan_cGameViewMan(cGameViewMan22E3B8* sel
         if (i < self->count) {
             self->cams[i].p = (sCam22E3B8*)cCamera_cCamera(cMemMan_alloc(1200, str_GameCamera, 0x20000000, 0), i);
             sCam22E3B8* camera = self->cams[i].p;
-            camera->vt[2].fn((char*)camera + camera->vt[2].delta, i, 0.7853981852531433f, 30.0f, farClip);
+            camera->vt[2].fn(vthis(camera, camera->vt[2]), i, 0.7853981852531433f, 30.0f, farClip);
             cCamera_setCurrentController(self->cams[i].p, 2);
         } else {
             self->cams[i].p = 0;
@@ -265,7 +265,7 @@ extern "C" void cGameViewMan_snapAll(cGameViewMan* self)
         void* camera = ((void**)(&self->PlayerCamera[0]))[i];
         void* controller = *(void**)((char*)camera + 0xA0);
         sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)controller + 0x14);
-        vt[4].fn((char*)controller + vt[4].delta);
+        vt[4].fn(vthis(controller, vt[4]));
     }
 }
 #endif
@@ -285,7 +285,7 @@ extern "C" void cGameViewMan_updateAll(cGameViewMan* self)
     for (i = 0; i < self->m_uiNumView; i++) {
         void* camera = ((void**)(&self->PlayerCamera[0]))[i];
         sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)camera + 0x90);
-        vt[3].fn((char*)camera + vt[3].delta);
+        vt[3].fn(vthis(camera, vt[3]));
     }
 }
 #endif

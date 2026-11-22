@@ -291,9 +291,9 @@ INCLUDE_ASM("object/spring", cSpring_writeToReplayFrame);
 extern "C" void cSpring_writeToReplayFrame(cSpring* self, void* stream)
 {
     sVEntry<void(void*, void*, int)>* writeSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeSlot->fn((char*)stream + writeSlot->delta, self, 36);
+    writeSlot->fn(vthis(stream, *writeSlot), self, 36);
     writeSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeSlot->fn((char*)stream + writeSlot->delta, self->Nodes, *(int*)self * 80);
+    writeSlot->fn(vthis(stream, *writeSlot), self->Nodes, *(int*)self * 80);
 }
 #endif
 

@@ -836,7 +836,7 @@ extern "C" void cOVState_TOPTIMES_onWidgetEvent(cOVState_TOPTIMES* self, cUIThin
     if (((void*)pWidget) != 0) {
         if (Event == 5) {
             sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
-            vt[26].fn((char*)self + vt[26].delta);
+            vt[26].fn(vthis(self, vt[26]));
         }
     }
 }

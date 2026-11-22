@@ -2574,7 +2574,7 @@ extern "C" void cAvalanche_readFromReplayFrame(int* self)
     }
     {
         sVEntry_RR* vtEntry = &(*(sVEntry_RR**)self)[2];
-        vtEntry->fn((char*)self + vtEntry->delta, buf.ids, 0x80);
+        vtEntry->fn(vthis(self, *vtEntry), buf.ids, 0x80);
     }
     for (i = 0; i < 16; i++) {
         if (buf.ids[i] >= 0) {

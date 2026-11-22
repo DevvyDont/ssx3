@@ -496,7 +496,7 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id)
 {
     self->mStringID = id;
     sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
-    vt[5].fn((char*)self + vt[5].delta, 0);  // virtual cUIThing::setCached(false)
+    vt[5].fn(vthis(self, vt[5]), 0);  // virtual cUIThing::setCached(false)
 }
 #endif
 
@@ -540,7 +540,7 @@ extern "C" void func_003A1030(cUIText* self, func_003A1030_sVec3* out)
 {
     if ((int)self->mpString == 0 || ((self->mAttr >> 2) & 1) == 0) {
         func_003A1030_sVEntry* vt = (func_003A1030_sVEntry*)self->mVtbl;
-        vt[16].fn((char*)self + vt[16].delta);
+        vt[16].fn(vthis(self, vt[16]));
     }
     void* font = cUIText_getFont(self);
     int str = (int)self->mpString;
@@ -575,7 +575,7 @@ extern "C" int func_003A10F0(cUIText* self)
 {
     if ((int)self->mpString == 0 || ((self->mAttr >> 2) & 1) == 0) {
         func_003A10F0_sVEntry* vt = (func_003A10F0_sVEntry*)self->mVtbl;
-        vt[16].fn((char*)self + vt[16].delta);
+        vt[16].fn(vthis(self, vt[16]));
     }
     return self->mNumLines;
 }
@@ -656,7 +656,7 @@ extern "C" void cUITextScroll_setUIData(sUIText11B8* self, tUITextScroll* data)
 {
     cUIThing_setUIData_2(self, data);
     self->mode = data->mFontID & 3;
-    self->vt[23].fn((char*)self + self->vt[23].delta, data->mTextFlags & 1);
+    self->vt[23].fn(vthis(self, self->vt[23]), data->mTextFlags & 1);
     if (((int)data->mStringID) != 0) {
         cUITextScroll_clearBuffer_1(self);
         cUITextScroll_addUnicodeStringByID((cUITextScroll*)self, ((int)data->mStringID));
@@ -924,7 +924,7 @@ struct sText_1588 {
 extern "C" void cUITextScroll_render2D(sText_1588* self, float x, float y)
 {
     if (((self->flags14 >> 2) & 1) == 0) {
-        self->vt[16].fn((char*)self + self->vt[16].delta);
+        self->vt[16].fn(vthis(self, self->vt[16]));
     }
     sFont_1588* font = (sFont_1588*)cUITextScroll_getFont((cUITextScroll*)self);
     if (font == 0) {

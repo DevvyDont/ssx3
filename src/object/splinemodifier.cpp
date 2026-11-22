@@ -1406,12 +1406,12 @@ extern "C" void* cMultiSplineModifier_getRootTransform(cMultiSplineModifier* sel
 {
     if (self->RootTransformDirty != 0) {
         sSmVEntryV_AAF0* vt = *(sSmVEntryV_AAF0**)self;
-        vt[3].fn((char*)self + vt[3].delta);
+        vt[3].fn(vthis(self, vt[3]));
     }
     if (item == (void*)self->Instance) {
         void* obj = *(void**)((char*)item + 0xC);
         sSmVEntryP_AAF0* vt2 = *(sSmVEntryP_AAF0**)((char*)obj + 0xC);
-        return vt2[24].fn((char*)obj + vt2[24].delta);
+        return vt2[24].fn(vthis(obj, vt2[24]));
     }
     return (char*)item + 0x10;
 }
@@ -1448,16 +1448,16 @@ extern "C" int cMultiSplineModifier_getAnimMats(cMultiSplineModifier* self, void
     if (item == cur) {
         void* obj = *(void**)((char*)item + 0xC);
         sSmVEntryI_AB60* vtEntry = &(*(sSmVEntryI_AB60**)((char*)obj + 0xC))[26];
-        if (vtEntry->fn((char*)obj + vtEntry->delta) != 0) {
+        if (vtEntry->fn(vthis(obj, *vtEntry)) != 0) {
             obj = *(void**)((char*)self->Instance + 0xC);
             vtEntry = &(*(sSmVEntryI_AB60**)((char*)obj + 0xC))[27];
-            return vtEntry->fn((char*)obj + vtEntry->delta);
+            return vtEntry->fn(vthis(obj, *vtEntry));
         }
         return 0;
     }
     void* obj = *(void**)((char*)cur + 0xC);
     sSmVEntryV_AB60* vt = *(sSmVEntryV_AB60**)((char*)obj + 0xC);
-    vt[33].fn((char*)obj + vt[33].delta, (char*)item + 0x10, (int)self->AnimMats);
+    vt[33].fn(vthis(obj, vt[33]), (char*)item + 0x10, (int)self->AnimMats);
     return (int)self->AnimMats;
 }
 #endif
@@ -2229,7 +2229,7 @@ extern "C" char* cRailModifier_cRailModifier(cRailModifier* self, sSmDesc_B708* 
     self->SplineId = desc->id;
     self->Mesh = desc->f8;
     sSmModelObj_B708* modelObj = model->obj;
-    if (modelObj->vt[44].fn((char*)modelObj + modelObj->vt[44].delta) == 0) {
+    if (modelObj->vt[44].fn(vthis(modelObj, modelObj->vt[44])) == 0) {
         sSmModel_B708* instModel = (sSmModel_B708*)self->Instance;
         tBoundBox bounds;
         (*(&bounds.MinPoint)).x = instModel->minx;
@@ -2673,9 +2673,9 @@ static inline void vecAddEq_C040(t4Vector& a, const t4Vector& b)
 extern "C" void cRailModifier_updateBoundBox(cRailModifier* self)
 {
     sSmObj_C040* ownerObj = ((sSmOwner_C040*)self->Instance)->obj;
-    if (ownerObj->vt->v44.fn((char*)ownerObj + ownerObj->vt->v44.delta) != 0) {
+    if (ownerObj->vt->v44.fn(vthis(ownerObj, ownerObj->vt->v44)) != 0) {
         ownerObj = ((sSmOwner_C040*)self->Instance)->obj;
-        tBoundBox* bounds = ownerObj->vt->v45.fn((char*)ownerObj + ownerObj->vt->v45.delta);
+        tBoundBox* bounds = ownerObj->vt->v45.fn(vthis(ownerObj, ownerObj->vt->v45));
         (*(&self->BoundBox)) = *bounds;
         t4Vector margin;
         margin.x = 100.0f;

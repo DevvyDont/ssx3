@@ -322,7 +322,7 @@ extern "C" void cBEAggressionInterface_writeToReplayFrame(cBEAggressionInterface
 {
     int n = D_005305E0[0];
     sStreamVE_1560A0* vt = *(sStreamVE_1560A0**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, &n, 4);
+    vt[1].fn(vthis(stream, vt[1]), &n, 4);
     for (int i = 0; i < n; i++)
     {
         int profile = cBELibrary_getProfileIndex(i);
@@ -330,7 +330,7 @@ extern "C" void cBEAggressionInterface_writeToReplayFrame(cBEAggressionInterface
         {
             int characterId = cBELibrary_getCharacterID(i);
             sStreamVE_1560A0* vt2 = *(sStreamVE_1560A0**)stream;
-            vt2[1].fn((char*)stream + vt2[1].delta, &cBELibrary_profileLib[profile][characterId].aggression[j], 3);
+            vt2[1].fn(vthis(stream, vt2[1]), &cBELibrary_profileLib[profile][characterId].aggression[j], 3);
         }
     }
 }
@@ -355,7 +355,7 @@ extern "C" void cBEAggressionInterface_readFromReplayFrame(cBEAggressionInterfac
 {
     int n;
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, &n, 4);
+    vt[2].fn(vthis(stream, vt[2]), &n, 4);
     for (int i = 0; i < n; i++)
     {
         int profile = cBELibrary_getProfileIndex(i);
@@ -363,7 +363,7 @@ extern "C" void cBEAggressionInterface_readFromReplayFrame(cBEAggressionInterfac
         {
             int charId = cBELibrary_getCharacterID(i);
             sVEntry<void(void*, void*, int)>* vt2 = *(sVEntry<void(void*, void*, int)>**)stream;
-            vt2[2].fn((char*)stream + vt2[2].delta, &cBELibrary_profileLib[profile][charId].aggression[j], 3);
+            vt2[2].fn(vthis(stream, vt2[2]), &cBELibrary_profileLib[profile][charId].aggression[j], 3);
         }
     }
 }

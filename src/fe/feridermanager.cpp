@@ -534,7 +534,7 @@ extern "C" void cFERider_render(cFERider* selfp)
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVE_EE88* vt = (sVE_EE88*)ps2GraphicsMan->mVtbl;
-        vt[69].fn((char*)ps2GraphicsMan + vt[69].delta, &worldMatrix, 1);
+        vt[69].fn(vthis(ps2GraphicsMan, vt[69]), &worldMatrix, 1);
     }
     int* fl = (int*)(&GrMan->m_pCurrentDrawState->unk_00[2]);
     unsigned int old = (unsigned int)(*fl & 0x3E0) >> 5;
@@ -580,7 +580,7 @@ extern "C" void cFERider_update(cFERider* selfp)
     if (self->mSafeRenderCount >= 0) {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)ps2GraphicsMan->mVtbl;
-        if (self->mSafeRenderCount < vt[114].fn((char*)ps2GraphicsMan + vt[114].delta)) {
+        if (self->mSafeRenderCount < vt[114].fn(vthis(ps2GraphicsMan, vt[114]))) {
             self->mSafeRenderCount = -1;
             cFERider_init(self, self->mProfileIndex, self->mNewCharID, self->mNewLoadAll);
         }
@@ -1192,13 +1192,13 @@ extern "C" void func_0019F908(cFERider* self, sPkg_F908* pkg, int replace)
             if (replace) {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
                 sVE_F908b* vt = (sVE_F908b*)ps2GraphicsMan->mVtbl;
-                vt[48].fn((char*)ps2GraphicsMan + vt[48].delta, id, data, 1);
+                vt[48].fn(vthis(ps2GraphicsMan, vt[48]), id, data, 1);
             }
         } else {
             strcpy(((&self->mTextureRefs[0]))[self->mNumTextureRefs].Name, name);
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             sVE_F908a* vt = (sVE_F908a*)ps2GraphicsMan->mVtbl;
-            ((&self->mTextureRefs[0]))[self->mNumTextureRefs].TextureID = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, data, str_charshp, 0, 1, -1);
+            ((&self->mTextureRefs[0]))[self->mNumTextureRefs].TextureID = vt[46].fn(vthis(ps2GraphicsMan, vt[46]), data, str_charshp, 0, 1, -1);
             self->mNumTextureRefs++;
         }
     }

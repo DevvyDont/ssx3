@@ -1051,7 +1051,7 @@ extern "C" void cAnimSequencer_readFromReplayFrame(cAnimSequencer* self, void* s
 {
     int n;
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, &n, 4);
+    vt[2].fn(vthis(stream, vt[2]), &n, 4);
     *(int*)self = 0;
     for (int i = 0; i < n; i++)
     {

@@ -878,11 +878,11 @@ extern "C" void cGFTrackStartState_writeToReplayFrame(cGFTrackStartState* self, 
 {
     cGameState_writeToReplayFrame_2(self, stream);
     sVEntry_cGFTrackStartState_writeToReplayFrame* writeSlot = &(*(sVEntry_cGFTrackStartState_writeToReplayFrame**)stream)[1];
-    writeSlot->fn((char*)stream + writeSlot->delta, (char*)&self->mPreLoadState, 4);
+    writeSlot->fn(vthis(stream, *writeSlot), (char*)&self->mPreLoadState, 4);
     writeSlot = &(*(sVEntry_cGFTrackStartState_writeToReplayFrame**)stream)[1];
-    writeSlot->fn((char*)stream + writeSlot->delta, (char*)&self->mPlayFirstTimeBCVideo, 4);
+    writeSlot->fn(vthis(stream, *writeSlot), (char*)&self->mPlayFirstTimeBCVideo, 4);
     writeSlot = &(*(sVEntry_cGFTrackStartState_writeToReplayFrame**)stream)[1];
-    writeSlot->fn((char*)stream + writeSlot->delta, (char*)&self->mPreLoadTicks, 4);
+    writeSlot->fn(vthis(stream, *writeSlot), (char*)&self->mPreLoadTicks, 4);
 }
 #endif
 
@@ -910,11 +910,11 @@ extern "C" void cGFTrackStartState_readFromReplayFrame(cGFTrackStartState* self,
 {
     cGameState_readFromReplayFrame_2(self, stream);
     sVEntry_cGFTrackStartState_readFromReplayFrame* readSlot = &(*(sVEntry_cGFTrackStartState_readFromReplayFrame**)stream)[2];
-    readSlot->fn((char*)stream + readSlot->delta, (char*)&self->mPreLoadState, 4);
+    readSlot->fn(vthis(stream, *readSlot), (char*)&self->mPreLoadState, 4);
     readSlot = &(*(sVEntry_cGFTrackStartState_readFromReplayFrame**)stream)[2];
-    readSlot->fn((char*)stream + readSlot->delta, (char*)&self->mPlayFirstTimeBCVideo, 4);
+    readSlot->fn(vthis(stream, *readSlot), (char*)&self->mPlayFirstTimeBCVideo, 4);
     readSlot = &(*(sVEntry_cGFTrackStartState_readFromReplayFrame**)stream)[2];
-    readSlot->fn((char*)stream + readSlot->delta, (char*)&self->mPreLoadTicks, 4);
+    readSlot->fn(vthis(stream, *readSlot), (char*)&self->mPreLoadTicks, 4);
 }
 #endif
 
@@ -1163,11 +1163,11 @@ extern "C" void cGFNextHeatState_writeToReplayFrame(cGFNextHeatState* self, cRep
 {
     cGameState_writeToReplayFrame_2(self, stream);
     sVEntry_cGFNextHeatState_writeToReplayFrame* writeSlot = &(*(sVEntry_cGFNextHeatState_writeToReplayFrame**)stream)[1];
-    writeSlot->fn((char*)stream + writeSlot->delta, (char*)&self->CurrentNextHeatState, 4);
+    writeSlot->fn(vthis(stream, *writeSlot), (char*)&self->CurrentNextHeatState, 4);
     writeSlot = &(*(sVEntry_cGFNextHeatState_writeToReplayFrame**)stream)[1];
-    writeSlot->fn((char*)stream + writeSlot->delta, (char*)&self->WaitTicks, 4);
+    writeSlot->fn(vthis(stream, *writeSlot), (char*)&self->WaitTicks, 4);
     writeSlot = &(*(sVEntry_cGFNextHeatState_writeToReplayFrame**)stream)[1];
-    writeSlot->fn((char*)stream + writeSlot->delta, (char*)&self->PlayTransport, 4);
+    writeSlot->fn(vthis(stream, *writeSlot), (char*)&self->PlayTransport, 4);
 }
 #endif
 
@@ -1195,11 +1195,11 @@ extern "C" void cGFNextHeatState_readFromReplayFrame(cGFNextHeatState* self, cRe
 {
     cGameState_readFromReplayFrame_2(self, stream);
     sVEntry_cGFNextHeatState_readFromReplayFrame* readSlot = &(*(sVEntry_cGFNextHeatState_readFromReplayFrame**)stream)[2];
-    readSlot->fn((char*)stream + readSlot->delta, (char*)&self->CurrentNextHeatState, 4);
+    readSlot->fn(vthis(stream, *readSlot), (char*)&self->CurrentNextHeatState, 4);
     readSlot = &(*(sVEntry_cGFNextHeatState_readFromReplayFrame**)stream)[2];
-    readSlot->fn((char*)stream + readSlot->delta, (char*)&self->WaitTicks, 4);
+    readSlot->fn(vthis(stream, *readSlot), (char*)&self->WaitTicks, 4);
     readSlot = &(*(sVEntry_cGFNextHeatState_readFromReplayFrame**)stream)[2];
-    readSlot->fn((char*)stream + readSlot->delta, (char*)&self->PlayTransport, 4);
+    readSlot->fn(vthis(stream, *readSlot), (char*)&self->PlayTransport, 4);
 }
 #endif
 
@@ -1579,13 +1579,13 @@ extern "C" void cGFUserSelectState_writeToReplayFrame(cGFUserSelectState* self, 
 {
     cGameState_writeToReplayFrame_2(self, stream);
     sVEntry_cGFUserSelectState_writeToReplayFrame* writeSlot = &(*(sVEntry_cGFUserSelectState_writeToReplayFrame**)stream)[1];
-    writeSlot->fn((char*)stream + writeSlot->delta, (char*)&self->mCurrState, 4);
+    writeSlot->fn(vthis(stream, *writeSlot), (char*)&self->mCurrState, 4);
     writeSlot = &(*(sVEntry_cGFUserSelectState_writeToReplayFrame**)stream)[1];
-    writeSlot->fn((char*)stream + writeSlot->delta, (char*)&self->mMode, 4);
+    writeSlot->fn(vthis(stream, *writeSlot), (char*)&self->mMode, 4);
     writeSlot = &(*(sVEntry_cGFUserSelectState_writeToReplayFrame**)stream)[1];
-    writeSlot->fn((char*)stream + writeSlot->delta, (char*)&self->mOverlayDone, 4);
+    writeSlot->fn(vthis(stream, *writeSlot), (char*)&self->mOverlayDone, 4);
     writeSlot = &(*(sVEntry_cGFUserSelectState_writeToReplayFrame**)stream)[1];
-    writeSlot->fn((char*)stream + writeSlot->delta, (char*)&self->mNextLocation, 4);
+    writeSlot->fn(vthis(stream, *writeSlot), (char*)&self->mNextLocation, 4);
 }
 #endif
 
@@ -1613,13 +1613,13 @@ extern "C" void cGFUserSelectState_readFromReplayFrame(cGFUserSelectState* self,
 {
     cGameState_readFromReplayFrame_2(self, stream);
     sVEntry_cGFUserSelectState_readFromReplayFrame* readSlot = &(*(sVEntry_cGFUserSelectState_readFromReplayFrame**)stream)[2];
-    readSlot->fn((char*)stream + readSlot->delta, (char*)&self->mCurrState, 4);
+    readSlot->fn(vthis(stream, *readSlot), (char*)&self->mCurrState, 4);
     readSlot = &(*(sVEntry_cGFUserSelectState_readFromReplayFrame**)stream)[2];
-    readSlot->fn((char*)stream + readSlot->delta, (char*)&self->mMode, 4);
+    readSlot->fn(vthis(stream, *readSlot), (char*)&self->mMode, 4);
     readSlot = &(*(sVEntry_cGFUserSelectState_readFromReplayFrame**)stream)[2];
-    readSlot->fn((char*)stream + readSlot->delta, (char*)&self->mOverlayDone, 4);
+    readSlot->fn(vthis(stream, *readSlot), (char*)&self->mOverlayDone, 4);
     readSlot = &(*(sVEntry_cGFUserSelectState_readFromReplayFrame**)stream)[2];
-    readSlot->fn((char*)stream + readSlot->delta, (char*)&self->mNextLocation, 4);
+    readSlot->fn(vthis(stream, *readSlot), (char*)&self->mNextLocation, 4);
 }
 #endif
 

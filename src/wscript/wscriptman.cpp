@@ -157,7 +157,7 @@ extern "C" void cWScriptMan_startProcess(cWScriptMan* self, cWScriptProcess* obj
     void* saved = self->CurrentProcess;
     self->CurrentProcess = (cWScriptProcess*)obj;
     sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)obj->mVtbl;
-    vt[4].fn((char*)obj + vt[4].delta);
+    vt[4].fn(vthis(obj, vt[4]));
     self->CurrentProcess = (cWScriptProcess*)saved;
 }
 #endif
@@ -179,7 +179,7 @@ extern "C" void cWScriptMan_stopProcess(cWScriptMan* self, cWScriptProcess* obj)
     void* saved = self->CurrentProcess;
     self->CurrentProcess = (cWScriptProcess*)obj;
     sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)obj->mVtbl;
-    vt[6].fn((char*)obj + vt[6].delta);
+    vt[6].fn(vthis(obj, vt[6]));
     self->CurrentProcess = (cWScriptProcess*)saved;
 }
 #endif
@@ -764,7 +764,7 @@ extern "C" void cWScriptMan_doOnCollideScript(cWScriptMan* self, void* collideIn
     int saved = self->Being;
     {
         sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
-        self->Being = vt[7].fn((char*)obj + vt[7].delta);
+        self->Being = vt[7].fn(vthis(obj, vt[7]));
     }
     self->Inst = (tInstanceRecord*)(*(int*)((char*)intersectInfo + 0x50));
     self->CollideInfo = (tCollideInfo*)collideInfo;
@@ -772,7 +772,7 @@ extern "C" void cWScriptMan_doOnCollideScript(cWScriptMan* self, void* collideIn
     int raiseEvent;
     {
         sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
-        raiseEvent = vt[8].fn((char*)obj + vt[8].delta);
+        raiseEvent = vt[8].fn(vthis(obj, vt[8]));
     }
     if (raiseEvent) {
         if (SSXApp->Game->mCurrentStateID != 4) {
@@ -1637,7 +1637,7 @@ extern "C" void* cWScriptMan_getCurrentMission(cWScriptMan* self)
     cWScriptProcess* obj = self->CurrentProcess;
     if (obj != 0) {
         sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)obj->mVtbl;
-        if (vt[3].fn((char*)obj + vt[3].delta) != 0) {
+        if (vt[3].fn(vthis(obj, vt[3])) != 0) {
             return self->CurrentProcess;
         }
     }
@@ -1786,7 +1786,7 @@ struct sNode_B0E8 {
 static inline void destroy_B0E8(sNode_B0E8* n)
 {
     if (n != 0) {
-        n->vt[1].fn((char*)n + n->vt[1].delta, 3);
+        n->vt[1].fn(vthis(n, n->vt[1]), 3);
     }
 }
 
@@ -2661,7 +2661,7 @@ extern "C" void cWScriptMan_writeToReplayFrame(sWSManBB10* self, cReplayFramePtr
     int j;
     {
         sWSVtVBB10* vtEntry = &(*(sWSVtVBB10**)stream)[1];
-        vtEntry->fn((char*)stream + vtEntry->delta, self, 652);
+        vtEntry->fn(vthis(stream, *vtEntry), self, 652);
     }
     {
         int k;
@@ -2682,13 +2682,13 @@ extern "C" void cWScriptMan_writeToReplayFrame(sWSManBB10* self, cReplayFramePtr
     }
     {
         sWSVtVBB10* vtEntry = &(*(sWSVtVBB10**)stream)[1];
-        vtEntry->fn((char*)stream + vtEntry->delta, &count, 4);
+        vtEntry->fn(vthis(stream, *vtEntry), &count, 4);
     }
     for (j = 0; j < 50; j++) {
         if (self->objs[j] != 0) {
             sWSVtVBB10* vtEntry = &(*(sWSVtVBB10**)stream)[1];
             int scriptBase;
-            vtEntry->fn((char*)stream + vtEntry->delta, &j, 4);
+            vtEntry->fn(vthis(stream, *vtEntry), &j, 4);
             scriptBase = cWScriptCache_getScriptBase(*(void**)(self->world + 4), j);
             luno_cLunoTable_writeToReplayFrame(self->objs[j], stream, scriptBase);
         }
@@ -2714,12 +2714,12 @@ extern "C" void cWScriptMan_writeReplayProcessList(cWScriptMan* self, void** lis
 {
     int n = cProcessList_getCount((cWScriptListHead*)list);
     sVEntry<void(void*, void*, int)>* vtEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    vtEntry->fn((char*)stream + vtEntry->delta, &n, 4);
+    vtEntry->fn(vthis(stream, *vtEntry), &n, 4);
     char* node = (char*)*list;
     while (node != 0) {
         int id = *(int*)(node + 0x20);
         vtEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-        vtEntry->fn((char*)stream + vtEntry->delta, &id, 4);
+        vtEntry->fn(vthis(stream, *vtEntry), &id, 4);
         cWScriptProcess_writeToReplayFrame(node, stream);
         node = *(char**)(node + 0x18);
     }
