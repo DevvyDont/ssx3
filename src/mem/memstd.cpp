@@ -2643,7 +2643,6 @@ INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD__SSX_VD_PS2_SINGLE_BUFFERD);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void* D_00480270[];
 extern void* RCMP_VIDEO_DRIVER_vtbl[];
-extern void* (*D_00509434[])(void*);
 
 struct sRVEntry_2547B8 {
     short delta;
@@ -2687,7 +2686,7 @@ extern "C" void SSX_VD_PS2_SINGLE_BUFFERD__SSX_VD_PS2_SINGLE_BUFFERD(SSX_VD_PS2_
     }
     self->mVtbl = RCMP_VIDEO_DRIVER_vtbl;
     if (flags & 1) {
-        D_00509434[0](self);
+        RCMP_rcmp_sys.FreeMemFunc(self);
     }
 }
 #endif
@@ -3233,22 +3232,22 @@ extern "C" void func_00255720(int size, void* tag, int align, int hdrSize, int f
 INCLUDE_ASM("mem/memstd", func_00255750);
 #ifdef SKIP_ASM
 /**
- * Frees @p self through the movie free hook (D_00509434); the video driver's operator delete.
+ * Frees @p self through the movie free hook (RCMP_rcmp_sys.FreeMemFunc); the video driver's operator delete.
  */
 extern "C" void func_00255750(void* self)
 {
-    D_00509434[0](self);
+    RCMP_rcmp_sys.FreeMemFunc(self);
 }
 #endif
 //100%
 INCLUDE_ASM("mem/memstd", func_00255778);
 #ifdef SKIP_ASM
 /**
- * Frees @p self through the movie free hook (D_00509434); the video driver's array operator delete.
+ * Frees @p self through the movie free hook (RCMP_rcmp_sys.FreeMemFunc); the video driver's array operator delete.
  */
 extern "C" void func_00255778(void* self)
 {
-    D_00509434[0](self);
+    RCMP_rcmp_sys.FreeMemFunc(self);
 }
 #endif
 //100%
