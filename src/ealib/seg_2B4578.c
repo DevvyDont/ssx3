@@ -932,7 +932,7 @@ extern int SHAPE_size_neat(char *) __asm__("SHAPE_size");
 extern int SHAPE_isclut_neat(int) __asm__("SHAPE_isclut");
 extern void MEM_move_neat(char *, char *, int) __asm__("MEM_move");
 extern int sprintf_neat(char *, char *, ...) __asm__("sprintf");
-extern char D_004957B8_neat[] __asm__("D_004957B8");
+extern char str_EAGLpct_d_neat[] __asm__("str_EAGLpct_d");
 
 /**
  * Copies a shape and its whole block chain to new memory, realigning each block and relinking the chain.
@@ -974,7 +974,7 @@ void SHAPE_cloneat(char *dst, char *src) {
             if (size != 0) {
                 MEM_move_neat(prev, curShape, size);
                 if (*(unsigned char *)prev == 105 && size >= 21) {
-                    sprintf_neat(prev + 0x10, D_004957B8_neat, *(short *)(prev + 4));
+                    sprintf_neat(prev + 0x10, str_EAGLpct_d_neat, *(short *)(prev + 4));
                 }
             }
             n = *(int *)curShape >> 8;
@@ -13581,7 +13581,7 @@ extern int f_72F8_3450(void *, int) __asm__("SNDI_getb");
 extern char D_0050AAF4_3450[] __asm__("D_0050AAF4");
 struct G_3450 { char pad[0xF]; char c; void *fn; };
 extern struct G_3450 sndmix_3450[] __asm__("sndmix");
-extern char D_0044DD70_3450[] __asm__("D_0044DD70");
+extern char str_FX_3450[] __asm__("str_FX");
 extern char f_C878_3450[] __asm__("func_003CC878");
 
 /**
@@ -13589,7 +13589,7 @@ extern char f_C878_3450[] __asm__("func_003CC878");
  *
  * With +0x42 of sndgs set it installs func_003CC878 as the IOP effect callback (sndmix). Type 1 (a custom
  * effect) sends the effect data from the bus record's +0x04 with RPC function 2 (func_003C0B10), its length read from
- * the data by SNDI_getb; any other type sends the 4-byte D_0044DD70 (effect off) and clears the callback flag.
+ * the data by SNDI_getb; any other type sends the 4-byte str_FX (effect off) and clears the callback flag.
  * Called by func_003C35F8.
  *
  * @param busType  the bus type (1 = custom effect data)
@@ -13603,7 +13603,7 @@ void func_003C3450(int busType) {
         sndmix_3450[0].c = 1;
     }
     if (busType != 1) {
-        f_0B10_3450(2, D_0044DD70_3450, 4);
+        f_0B10_3450(2, str_FX_3450, 4);
         if (*(unsigned char *)(driverState + 0x42) != 0)
             sndmix_3450[0].c = 0;
     } else {
@@ -25445,7 +25445,7 @@ INCLUDE_ASM("ealib/seg_2B4578", PATHI_copyevent);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0044F420_2068[] __asm__("D_0044F420");
 extern int D_0044F43C_2068[] __asm__("D_0044F43C");
-extern char D_00495B48_2068[] __asm__("D_00495B48");
+extern char str_PATHI_copyevent_can_t_add_new_event_size_2068[] __asm__("str_PATHI_copyevent_can_t_add_new_event_size");
 extern void func_0041605C_2068(unsigned int, void *, int) __asm__("func_0041605C");
 
 /**
@@ -25483,7 +25483,7 @@ unsigned int PATHI_copyevent(void *event) {
         return cur;
     }
     if (D_0044F43C_2068[0] & 0x120) {
-        func_003D1658(D_00495B48_2068, temp_9, temp_6 - cur);
+        func_003D1658(str_PATHI_copyevent_can_t_add_new_event_size_2068, temp_9, temp_6 - cur);
     }
     return 0;
 }

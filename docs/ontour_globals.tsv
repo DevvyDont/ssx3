@@ -5416,3 +5416,38 @@ ps2_addr	name	previous	source	evidence
 004C66F8	kOriginalColour	D_004C66F8	ontour	neighbour of kColourEnabled: [O] On Tour fe sti second tARGB after gDisableColour = kOriginalColour {1,0.863,0.341,x} (ssxa 0x0011258C); [U] retail D_004C66F8 = {1,0.862745166,0.34117648,D_004C6338[3]} (src/main/all_in_one_main.cpp:1154); the equip bar's normal colour (src/fe/festatecharequipdetail.cpp:2629)
 004781C0	gOnlinePauseMenu	D_004781C0	ontour	neighbour of the pause tables: [O] On Tour const int[3] gOnlinePauseMenu {1,3,12} (dwarf_dbg 004D8B70), used by cOVState_PAUSE_ONLINE::onCreateScreen (PSP 0x0013176C); [U] retail int[3] {1,3,13} after gQuickPlayMenu, used by cOVState_PAUSE_ONLINE_onCreateScreen (src/fe/ovtemplatepausemenu.cpp:803; already commented as gOnlinePauseMenu)
 004A2868	gSystemInitiatedPauseMenu	D_004A2868	ontour	neighbour: [O] On Tour const int[2] gSystemInitiatedPauseMenu {1,12} (dwarf_dbg 004D8B7C), the alternative list in cOVState_PAUSE_ONLINE::onCreateScreen (PSP 0x0013176C); [U] retail .sdata int[2] {1,13}, the alternative list in cOVState_PAUSE_ONLINE_onCreateScreen (src/fe/ovtemplatepausemenu.cpp:806; already commented)
+0044DD70	str_FX	D_0044DD70	contents	[D] contents "FX\n"; declared char[] in every unit; used as a string
+00450C08	str_I	D_00450C08	contents	[D] contents " ]I"; declared char[] in every unit; used as a string
+0045B250	str_SUPERPIPE_Chase_Camera_Algorithm	D_0045B250	contents	[D] contents "SUPERPIPE Chase Camera Algorithm"; declared char[] in every unit; used as a string
+0045B328	str_Idle_Chase_Camera_Algorithm	D_0045B328	contents	[D] contents "Idle Chase Camera Algorithm"; declared char[] in every unit; used as a string
+0045D018	str_10_10_53_35	D_0045D018	contents	[D] contents "10.10.53.35"; declared char[] in every unit; used as a string
+0045D028	str_10_10_53_25	D_0045D028	contents	[D] contents "10.10.53.25"; declared char[] in every unit; used as a string
+0045FAD8	str_greyedout	D_0045FAD8	contents	[D] contents "greyedout"; declared char[] in every unit; used as a string
+00470AE8	str_SP_PeakList_Art	D_00470AE8	contents	[D] contents "SP_PeakList Art"; declared char[] in every unit; used as a string
+00470E50	str_peakgoal_emptybox3	D_00470E50	contents	[D] contents "peakgoal emptybox3"; declared char[] in every unit; used as a string
+0047BF78	str_pct_02_0f_pct_02_0f_d	D_0047BF78	contents	[D] contents "%02.0f:%02.0f"; declared char[] in every unit; used as a string
+004800E0	str_Type_Name_Address_Size_Actual_Type_CRC_S	D_004800E0	contents	[D] contents "Type         Name                      Address        Size      Actual Type  CR; declared char[] in every unit; used as a string
+00480198	str_Not_initialized	D_00480198	contents	[D] contents "Not initialized\n"; declared char[] in every unit; used as a string
+00480E20	str_Unknown_Error_Code_pct_08x_pct_cpct_cpct	D_00480E20	contents	[D] contents "Unknown Error Code %08x '%c%c%c%c'\n"; declared char[] in every unit; used as a string
+00495510	str_temporal_scalability_not_implemented	D_00495510	contents	[D] contents "temporal scalability not implemented\n"; declared char[] in every unit; used as a string
+004957B8	str_EAGLpct_d	D_004957B8	contents	[D] contents "EAGL%d"; declared char[] in every unit; used as a string
+00495B48	str_PATHI_copyevent_can_t_add_new_event_size	D_00495B48	contents	[D] contents "PATHI_copyevent : can't add new event, size %d bytes (%d bytes free).\n"; declared char[] in every unit; used as a string
+00495BC0	str_0123456789abcdef	D_00495BC0	contents	[D] contents "0123456789abcdef"; declared char[] in every unit; used as a string
+00495BD8	str_0123456789ABCDEF	D_00495BD8	contents	[D] contents "0123456789ABCDEF"; declared char[] in every unit; used as a string
+00495D18	str_xpct_04x	D_00495D18	contents	[D] contents "\\x%04x"; declared char[] in every unit; used as a string
+00495D28	str_File_Sys	D_00495D28	contents	[D] contents "File Sys"; declared char[] in every unit; used as a string
+00495D68	str_bigfile_buf	D_00495D68	contents	[D] contents "bigfile buf"; declared char[] in every unit; used as a string
+00495EE8	str_pct_s_b	D_00495EE8	contents	[D] contents "%s"; declared char[] in every unit; used as a string
+00495F00	str_FILE_pct_s_LINE_pct_d	D_00495F00	contents	[D] contents "FILE %s LINE %d\n"; declared char[] in every unit; used as a string
+00495F48	str_recv_pct_cpct_cpct_cpct_c_pct_cpct_cpct	D_00495F48	contents	[D] contents "recv: %c%c%c%c/%c%c%c%c\n"; declared char[] in every unit; used as a string
+00495F68	str_null_data	D_00495F68	contents	[D] contents " [null data]\n"; declared char[] in every unit; used as a string
+00495F78	str_binary_data	D_00495F78	contents	[D] contents " [binary data]\n"; declared char[] in every unit; used as a string
+00495F88	str_long_data	D_00495F88	contents	[D] contents " [long data]\n"; declared char[] in every unit; used as a string
+00495F98	str_server_ICMP_timeout	D_00495F98	contents	[D] contents "server ICMP timeout\n"; declared char[] in every unit; used as a string
+00497038	str_USBD_IRX_b	D_00497038	contents	[D] contents "USBD.IRX"; declared char[] in every unit; used as a string
+004A1708	str_normal	D_004A1708	contents	[D] contents "normal"; declared char[] in every unit; used as a string
+004A3960	str_PS2D	D_004A3960	contents	[D] contents "PS2D"; declared char[] in every unit; used as a string
+004A48A8	str_VERS_c	D_004A48A8	contents	[D] contents "VERS"; declared char[] in every unit; used as a string
+004A48F0	str_pct_s_e	D_004A48F0	contents	[D] contents "%s\n"; declared char[] in every unit; used as a string
+004A48F8	str_bogus	D_004A48F8	contents	[D] contents "bogus"; declared char[] in every unit; used as a string
+004A4900	str_server	D_004A4900	contents	[D] contents "@server"; declared char[] in every unit; used as a string

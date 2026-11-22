@@ -569,9 +569,9 @@ extern "C" int MEM_comment(void* p);
 struct sMemBlock002522B0;
 extern "C" int checksentinel(FREEBLOCK* blk);
 extern "C" int MEM_crc16(void* p, int size, int seed);
-extern char D_004800E0[];
+extern char str_Type_Name_Address_Size_Actual_Type_CRC_S[];
 extern char D_00480140[];
-extern char D_00480198[];
+extern char str_Not_initialized[];
 extern char str_SPACE[];
 extern char D_004801C0[];
 extern char* D_004801E8[];
@@ -601,11 +601,11 @@ extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const c
 {
     int total = 0;
     int crc = 0;
-    cb(D_004800E0);
+    cb(str_Type_Name_Address_Size_Actual_Type_CRC_S);
     cb(D_00480140);
     MEMCLASS* cls = (MEMCLASS*)D_004D2438[(int)thing & 0x3F];
     if (cls == 0) {
-        cb(D_00480198);
+        cb(str_Not_initialized);
         return;
     }
     for (MEMBLOCK* blk = (cls->bottomblock); blk != 0; blk = (MEMBLOCK*)blk->next) {

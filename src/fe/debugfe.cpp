@@ -298,8 +298,8 @@ extern "C" void cGameComm_construct(int ch, int host);
 extern "C" void func_00266D58(void* p, int ip);
 extern "C" void func_00266E30(void* p);
 extern void* VoipMan;
-extern char D_0045D018[] __attribute__((aligned(8)));
-extern char D_0045D028[] __attribute__((aligned(8)));
+extern char str_10_10_53_35[] __attribute__((aligned(8)));
+extern char str_10_10_53_25[] __attribute__((aligned(8)));
 
 struct sNetCfg_D0A8 {
     int active;             // 0x0
@@ -314,7 +314,7 @@ extern sNetCfg_D0A8 cBENetworkInterface_networkOpt_D0A8 __asm__("cBENetworkInter
  *
  * Fetches the network interface (cBE_getInterface__Fv kind 7; the result is unused) and returns at once unless
  * cBENetworkInterface_networkOpt.bIsNetworkGame is set. Reads this console's address with cCommSystem_netConnLocalAddr: a console at
- * 10.10.53.25 (0x0A0A3519) dials "10.10.53.35" (D_0045D018), any other dials "10.10.53.25" (D_0045D028). Opens a
+ * 10.10.53.25 (0x0A0A3519) dials "10.10.53.35" (str_10_10_53_35), any other dials "10.10.53.25" (str_10_10_53_25). Opens a
  * DirtySock channel with cCommSystem_openDSockChannel on networkOpt.iPort, as host or client by bIsHost, and spins
  * until the channel reports connected (cCommSystem_isChannelConnected), running the comm update cCommSystem_update, SYNCTASK_run(0) and
  * THREAD_yieldticks(1) on each pass. Then creates the game comm (cGameComm_construct with the channel and bIsHost) and
@@ -334,9 +334,9 @@ extern "C" void func_0017D0A8(void)
     int info[4];
     cCommSystem_netConnLocalAddr(cCommSystem_mCommSystem, info);
     if (info[0] == 0x0A0A3519) {
-        __builtin_memcpy(addr, D_0045D018, 12);
+        __builtin_memcpy(addr, str_10_10_53_35, 12);
     } else {
-        __builtin_memcpy(addr, D_0045D028, 12);
+        __builtin_memcpy(addr, str_10_10_53_25, 12);
     }
     int ch;
     if (cBENetworkInterface_networkOpt_D0A8.host) {

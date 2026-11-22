@@ -565,8 +565,8 @@ INCLUDE_ASM("ealib/seg_2DCAE8", USTR_vsprintf);
 extern void USTR_copycstr(short *arg0, signed char *arg1);
 extern int output_number_C450(unsigned short **, long, int, int, int, int, unsigned short *) __asm__("output_number");
 extern long func_00412550_C450(int) __asm__("litodp");
-extern signed char D_00495BC0_C450[] __asm__("D_00495BC0");
-extern signed char D_00495BD8_C450[] __asm__("D_00495BD8");
+extern signed char str_0123456789abcdef_C450[] __asm__("str_0123456789abcdef");
+extern signed char str_0123456789ABCDEF_C450[] __asm__("str_0123456789ABCDEF");
 
 #define VA_ARG_C450(ap, T) (*(T *)((ap += 8) - 8))
 
@@ -593,8 +593,8 @@ void USTR_vsprintf_impl(unsigned short *dst, unsigned short *fmt, char *ap) {
     int more;
 
     count = 0;
-    USTR_copycstr((short *)lower, D_00495BC0_C450);
-    USTR_copycstr((short *)upper, D_00495BD8_C450);
+    USTR_copycstr((short *)lower, str_0123456789abcdef_C450);
+    USTR_copycstr((short *)upper, str_0123456789ABCDEF_C450);
     fmtChar = *fmt++;
     for (;;) {
         while (fmtChar != 0 && fmtChar != '%') {
@@ -828,7 +828,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", USTR_strcpyW);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern char D_00495D18_CB20[] __asm__("D_00495D18");
+extern char str_xpct_04x_CB20[] __asm__("str_xpct_04x");
 extern int sprintf_CB20(char *, const char *, ...) __asm__("sprintf");
 
 /**
@@ -842,7 +842,7 @@ void USTR_strcpyW(char *dst, unsigned short *src) {
     int wideChar;
     while ((wideChar = *src) != 0) {
         if ((unsigned short)wideChar >= 0x100 || ((unsigned short)wideChar == 92 && src[1] == 0x78)) {
-            sprintf_CB20(dst, D_00495D18_CB20, *src);
+            sprintf_CB20(dst, str_xpct_04x_CB20, *src);
             dst += 6;
         } else {
             *dst++ = *src;
@@ -860,7 +860,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_init);
 extern int FILESYS_initadr_CBD8(int, int, int, int) __asm__("FILESYS_initadr");
 extern int FILESYS_overhead_CBD8(int, int, int) __asm__("FILESYS_overhead");
 extern int (*gFileSysOpts_CBD8[])(char *, int, int) __asm__("gFileSysOpts");
-extern char D_00495D28_CBD8[] __asm__("D_00495D28");
+extern char str_File_Sys_CBD8[] __asm__("str_File_Sys");
 extern int gFileDevice_CBD8[] __asm__("gFileDevice");
 extern int pFileDeviceMem_CBD8[] __asm__("pFileDeviceMem");
 
@@ -880,7 +880,7 @@ extern int pFileDeviceMem_CBD8[] __asm__("pFileDeviceMem");
 int FILESYS_init(int maxopenfiles, int maxdirfiles, int maxfileops) {
     int workBuffer;
     if (gFileDevice_CBD8[0] == 0) {
-        workBuffer = gFileSysOpts_CBD8[1](D_00495D28_CBD8, FILESYS_overhead_CBD8(maxopenfiles, maxdirfiles, maxfileops), 0x100);
+        workBuffer = gFileSysOpts_CBD8[1](str_File_Sys_CBD8, FILESYS_overhead_CBD8(maxopenfiles, maxdirfiles, maxfileops), 0x100);
         pFileDeviceMem_CBD8[0] = workBuffer;
         return FILESYS_initadr_CBD8(maxopenfiles, maxdirfiles, maxfileops, workBuffer);
     }
@@ -1657,7 +1657,7 @@ extern struct sAB0Lock D_00519AC4;
 extern int FILESYS_completeop_D8E8(int) __asm__("FILESYS_completeop");
 extern int BIG_typeofheader_D8E8(int) __asm__("BIG_typeofheader");
 extern int BIG_sizeofheader_D8E8(int) __asm__("BIG_sizeofheader");
-extern char D_00495D68_D8E8[] __asm__("D_00495D68");
+extern char str_bigfile_buf_D8E8[] __asm__("str_bigfile_buf");
 extern void iFILESYS_ExecCommand_D8E8(void *) __asm__("iFILESYS_ExecCommand");
 extern char iFILE_addbigreadcallback_D8E8[] __asm__("iFILE_addbigreadcallback");
 
@@ -1690,7 +1690,7 @@ void iFILE_addbigreadcallback(int opHandle, int opStatus, struct FILEBIG_def *bi
         fs = &gFileSysOpts;
         fs->free((void *)((int)bigNode->header));
         bigNode->headersize = n;
-        (*(int*)&bigNode->header) = (int)fs->malloc(D_00495D68_D8E8, n, bigNode->memflags);
+        (*(int*)&bigNode->header) = (int)fs->malloc(str_bigfile_buf_D8E8, n, bigNode->memflags);
         opHandle = FILESYS_read(((struct sFsHd*)bigNode->handle), 0, ((int)bigNode->header), n, k, bigNode);
         FILESYS_callbackop(opHandle, iFILE_addbigreadcallback_D8E8);
     } else {
@@ -1748,7 +1748,7 @@ extern void iFILESYS_ExecCommand_DAC0(C_DAC0 *) __asm__("iFILESYS_ExecCommand");
 extern Q_DAC0 *D_00519AE4_DAC0 __asm__("D_00519AE4");
 extern int strncmp_DAC0(char *, char *, int) __asm__("strncmp");
 extern void *(*gFileSysOpts_DAC0[])(char *, int, int) __asm__("gFileSysOpts");
-extern char D_00495D68_DAC0[] __asm__("D_00495D68");
+extern char str_bigfile_buf_DAC0[] __asm__("str_bigfile_buf");
 extern int FILESYS_open_DAC0(char *, int, int, R_DAC0 *) __asm__("FILESYS_open");
 extern void fCF70_DAC0(int, void *) __asm__("FILESYS_callbackop");
 extern char iFILE_addbigopencallback_DAC0[] __asm__("iFILE_addbigopencallback");
@@ -1784,7 +1784,7 @@ int FILESYS_addbig(char *name, int memFlags, int priority, int userData) {
     ((R_DAC0 *)bigNode)->cmd = fileOp;
     ((R_DAC0 *)bigNode)->size = 0x800;
     ((R_DAC0 *)bigNode)->b = memFlags;
-    ((R_DAC0 *)bigNode)->buf = (int)gFileSysOpts_DAC0[1](D_00495D68_DAC0, 0x800, memFlags);
+    ((R_DAC0 *)bigNode)->buf = (int)gFileSysOpts_DAC0[1](str_bigfile_buf_DAC0, 0x800, memFlags);
     fCF70_DAC0(FILESYS_open_DAC0(name, 1, priority, (R_DAC0 *)bigNode), iFILE_addbigopencallback_DAC0);
     return *(int *)fileOp;
 }
@@ -1940,7 +1940,7 @@ extern char *strcpy_DE78(char *, char *) __asm__("strcpy");
 extern int strncmp_DE78(char *, char *, int) __asm__("strncmp");
 extern void strcat_DE78(char *, char *) __asm__("strcat");
 extern char *REAL_filedevice_DE78[] __asm__("REAL_filedevice");
-extern char *D_00450C08_DE78[] __asm__("D_00450C08");
+extern char *str_I_DE78[] __asm__("str_I");
 extern int D_00450C44_DE78[] __asm__("D_00450C44");
 extern int D_00450C48_DE78[] __asm__("D_00450C48");
 extern char currentdirectory_DE78[] __asm__("currentdirectory");
@@ -1949,7 +1949,7 @@ extern char D_00495D78_DE78[] __asm__("D_00495D78");
 /**
  * Sets the file system's current path (currentdirectory) from @p path.
  *
- * With the 3-character device prefix (D_00450C08) the call is ignored when the device mode (D_00450C48 & 3) is 2, else
+ * With the 3-character device prefix (str_I) the call is ignored when the device mode (D_00450C48 & 3) is 2, else
  * device 1 is selected (D_00450C44) and the prefix skipped; with the host root prefix (REAL_filedevice) it is ignored unless
  * mode bit 2 is set, else device 2 is selected. The rest is copied and, when it fits, ends with '/'. ps2main passes
  * "cd:".
@@ -1959,7 +1959,7 @@ extern char D_00495D78_DE78[] __asm__("D_00495D78");
 void FILESYS_setcurrentpath(char *path) {
     int n, len;
     n = strlen_DE78(REAL_filedevice_DE78[0]);
-    if (strncmp_DE78(path, D_00450C08_DE78[0], 3) == 0) {
+    if (strncmp_DE78(path, str_I_DE78[0], 3) == 0) {
         if ((D_00450C48_DE78[0] & 3) == 2) return;
         D_00450C44_DE78[0] = 1;
         path += 3;
@@ -9354,7 +9354,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", REAL_abortmessage);
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
 extern int vsprintf(char *dst, const char *fmt, char *ap);
 extern void (*D_00450DD8_6070[])(char *, char *) __asm__("D_00450DD8");
-extern char D_00495EE8_6070[] __asm__("D_00495EE8");
+extern char str_pct_s_b_6070[] __asm__("str_pct_s_b");
 
 /**
  * Formats an abort message and hands it to the installed abort handler.
@@ -9373,7 +9373,7 @@ void REAL_abortmessage(const char *fmt, ...) {
     } else {
         buf[0] = 0;
     }
-    D_00450DD8_6070[0](D_00495EE8_6070, buf);
+    D_00450DD8_6070[0](str_pct_s_b_6070, buf);
 }
 #endif
 
@@ -9384,7 +9384,7 @@ extern void REAL_exit(void);
 extern void PRINT_string_60E8(int, char *, ...) __asm__("PRINT_string");
 extern int vsprintf_60E8(char *, char *, char *) __asm__("vsprintf");
 extern char str_ERROR_pct_s[];
-extern char D_00495F00[];
+extern char str_FILE_pct_s_LINE_pct_d[];
 extern char *REALabortfilename_100C[] __asm__("REALabortfilename");
 extern int REALabortlinenum_1010[] __asm__("REALabortlinenum");
 
@@ -9404,7 +9404,7 @@ void SYSTEM_abortmessage(char *fmt, ...) {
     }
     PRINT_string_60E8(2, str_ERROR_pct_s, buf);
     if (REALabortfilename_100C[0] != 0) {
-        PRINT_string_60E8(2, D_00495F00, REALabortfilename_100C[0], REALabortlinenum_1010[0]);
+        PRINT_string_60E8(2, str_FILE_pct_s_LINE_pct_d, REALabortfilename_100C[0], REALabortlinenum_1010[0]);
     }
     REAL_exit();
 }
@@ -11059,7 +11059,7 @@ void func_003E7F70(char *lobby, int reason, int flags) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7FF0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char D_004A48A8_7FF0[] __asm__("D_004A48A8");
+extern char str_VERS_c_7FF0[] __asm__("str_VERS_c");
 extern void *func_002591E8_7FF0(int) __asm__("func_002591E8");
 extern void memset_7FF0(void *, int, int) __asm__("memset");
 extern char *strchr_7FF0(char *, int) __asm__("strchr");
@@ -11093,7 +11093,7 @@ void *func_003E7FF0(char *tagString, int debugData, int debugProc) {
             if (strchr_7FF0(tagString, 61) != 0) {
                 cDirtysock_tag_TagFieldDupl_7FF0(lobbyRef + 0x34, 0x100, tagString);
             } else {
-                cDirtysock_tag_TagFieldSetString_7FF0(lobbyRef + 0x34, 0x100, D_004A48A8_7FF0, tagString);
+                cDirtysock_tag_TagFieldSetString_7FF0(lobbyRef + 0x34, 0x100, str_VERS_c_7FF0, tagString);
             }
         }
         *(int*)lobbyRef = func_003F5478_7FF0(0x8000);
@@ -11889,11 +11889,11 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8FD0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern void func_003E76A8_8FD0(void *, const char *, ...) __asm__("func_003E76A8");
-extern char D_00495F48_8FD0[] __asm__("D_00495F48");
-extern char D_00495F68_8FD0[] __asm__("D_00495F68");
-extern char D_00495F78_8FD0[] __asm__("D_00495F78");
-extern char D_00495F88_8FD0[] __asm__("D_00495F88");
-extern char D_004A48F0_8FD0[] __asm__("D_004A48F0");
+extern char str_recv_pct_cpct_cpct_cpct_c_pct_cpct_cpct_8FD0[] __asm__("str_recv_pct_cpct_cpct_cpct_c_pct_cpct_cpct");
+extern char str_null_data_8FD0[] __asm__("str_null_data");
+extern char str_binary_data_8FD0[] __asm__("str_binary_data");
+extern char str_long_data_8FD0[] __asm__("str_long_data");
+extern char str_pct_s_e_8FD0[] __asm__("str_pct_s_e");
 
 /**
  * Prints an incoming lobby message for debugging.
@@ -11924,7 +11924,7 @@ void func_003E8FD0(void *out, int *event) {
             eventCode = 0x2D2D2D2D;
         }
     }
-    func_003E76A8_8FD0(out, D_00495F48_8FD0, eventKind >> 24, eventKind >> 16, eventKind >> 8, eventKind, eventCode >> 24, eventCode >> 16, eventCode >> 8, eventCode);
+    func_003E76A8_8FD0(out, str_recv_pct_cpct_cpct_cpct_c_pct_cpct_cpct_8FD0, eventKind >> 24, eventKind >> 16, eventKind >> 8, eventKind, eventCode >> 24, eventCode >> 16, eventCode >> 8, eventCode);
     n = 0;
     bad = 0;
     for (; eventText[n] != 0 && eventText[n] < 0x7F; n++) {
@@ -11934,13 +11934,13 @@ void func_003E8FD0(void *out, int *event) {
         }
     }
     if (n == 0) {
-        func_003E76A8_8FD0(out, D_00495F68_8FD0);
+        func_003E76A8_8FD0(out, str_null_data_8FD0);
     } else if (bad == 1) {
-        func_003E76A8_8FD0(out, D_00495F78_8FD0);
+        func_003E76A8_8FD0(out, str_binary_data_8FD0);
     } else if (n > 0xF0) {
-        func_003E76A8_8FD0(out, D_00495F88_8FD0);
+        func_003E76A8_8FD0(out, str_long_data_8FD0);
     } else {
-        func_003E76A8_8FD0(out, D_004A48F0_8FD0, eventText);
+        func_003E76A8_8FD0(out, str_pct_s_e_8FD0, eventText);
     }
 }
 #endif
@@ -11957,7 +11957,7 @@ extern int *func_003EE560_9160(int, int) __asm__("func_003EE560");
 extern int func_003EE550_9160(int) __asm__("func_003EE550");
 extern int func_003EED08_9160(int, void *) __asm__("func_003EED08");
 extern void *func_003EE480_9160(int, int) __asm__("func_003EE480");
-extern char D_004A48F8_9160[] __asm__("D_004A48F8") __attribute__((aligned(8)));
+extern char str_bogus_9160[] __asm__("str_bogus") __attribute__((aligned(8)));
 
 /**
  * Ranks the entries of the lobby's rank list and drops those below a cut-off.
@@ -11986,7 +11986,7 @@ int func_003E9160(LobbyApiRefT* self, int limit) {
     while ((rankEntry = func_003EE560_9160(rankList, k)) != 0) {
         if ((unsigned)(rankEntry[0] - 1) >= 0x1FFF) {
             rankEntry[0] = 500;
-            __builtin_memcpy(rankEntry + 2, D_004A48F8_9160, 6);
+            __builtin_memcpy(rankEntry + 2, str_bogus_9160, 6);
         }
         k++;
         hist[rankEntry[0]]++;
@@ -12112,7 +12112,7 @@ extern int cDirtysock_tag_TagFieldFind_94F0(int, char *) __asm__("cDirtysock_tag
 extern int cDirtysock_tag_TagFieldGetNumber_94F0(int, int) __asm__("cDirtysock_tag_TagFieldGetNumber");
 extern void func_003E76A8_94F0(void *, char *) __asm__("func_003E76A8");
 extern int func_003F4330_94F0(void) __asm__("func_003F4330");
-extern char D_00495F98_94F0[] __asm__("D_00495F98");
+extern char str_server_ICMP_timeout_94F0[] __asm__("str_server_ICMP_timeout");
 extern char str_PING_b_94F0[] __asm__("str_PING_b");
 
 /**
@@ -12131,7 +12131,7 @@ void func_003E94F0(void *lobby, void *event) {
     if (*(int *)((char *)event + 4) == 0x70696E67) {
         n = cDirtysock_tag_TagFieldGetNumber_94F0(cDirtysock_tag_TagFieldFind_94F0(*(int *)((char *)event + 0xC), str_PING_b_94F0), 0);
         if (n == 0) {
-            func_003E76A8_94F0(lobby, D_00495F98_94F0);
+            func_003E76A8_94F0(lobby, str_server_ICMP_timeout_94F0);
             *(int *)((char *)lobby + 0x20) += 1;
             if (*(int *)((char *)lobby + 0x20) == 3) {
                 *(int *)((char *)lobby + 0x20) = 0;
@@ -12152,7 +12152,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E9590);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003E8DC0_9590(void *, void *, int, int, void *, int) __asm__("func_003E8DC0");
-extern char D_004A4900_9590[] __asm__("D_004A4900");
+extern char str_server_9590[] __asm__("str_server");
 extern char func_003E94F0_9590[] __asm__("func_003E94F0");
 
 /**
@@ -12162,7 +12162,7 @@ extern char func_003E94F0_9590[] __asm__("func_003E94F0");
  * @param lobby  the lobby
  */
 void func_003E9590(LobbyApiRefT* lobby) {
-    func_003E8DC0_9590(lobby, D_004A4900_9590, lobby->mAddress, 3000, func_003E94F0_9590, 0);
+    func_003E8DC0_9590(lobby, str_server_9590, lobby->mAddress, 3000, func_003E94F0_9590, 0);
 }
 #endif
 

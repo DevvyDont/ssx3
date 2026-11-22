@@ -14,8 +14,8 @@ INCLUDE_ASM("camera/cameraalgorithms", cChaseCameraController_createChaseAlgorit
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
-extern char D_0045B250[], D_0045B278[], D_0045B298[], D_0045B2B0[], D_0045B2D8[], str_DEFAULT_4_Chase_Camera_Algorithm[];
-extern char D_0045B328[], D_0045B348[], D_0045B370[], D_0045B390[], str_Lazy_Chase_Camera_Algorithm[];
+extern char str_SUPERPIPE_Chase_Camera_Algorithm[], D_0045B278[], D_0045B298[], D_0045B2B0[], D_0045B2D8[], str_DEFAULT_4_Chase_Camera_Algorithm[];
+extern char str_Idle_Chase_Camera_Algorithm[], D_0045B348[], D_0045B370[], D_0045B390[], str_Lazy_Chase_Camera_Algorithm[];
 extern char D_0045B3D0[], D_0045B3F8[], D_0045B420[], D_0045B448[], D_0045B470[], D_0045B498[], D_0045B4C0[], str_Direction_NE_Chase_Camera_Algorithm[];
 extern char D_0045B510[], D_0045B538[], D_0045B558[], D_0045B578[], str_POST_RACE_1_Chase_Camera_Algorithm[];
 
@@ -81,7 +81,7 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(cChaseCameraCon
         if (!camNetActive_D0A0(n)) {
             char* target = *(char**)(ctx + 8);
             if (*(int*)(target + 0x28) == 2) {
-                void* mem = cMemMan_alloc(944, D_0045B250, 0x20000000, 0);
+                void* mem = cMemMan_alloc(944, str_SUPERPIPE_Chase_Camera_Algorithm, 0x20000000, 0);
                 sCamTmp_D0A0 lineStart;
                 cCTBoundObjLine_worldPoint1(&lineStart, target);
                 sCamTmp_D0A0 lineEnd;
@@ -110,7 +110,7 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(cChaseCameraCon
         break;
     }
     case 7:
-        algo = cIdleChaseAlgorithm_cIdleChaseAlgorithm(cMemMan_alloc(912, D_0045B328, 0x20000000, 0));
+        algo = cIdleChaseAlgorithm_cIdleChaseAlgorithm(cMemMan_alloc(912, str_Idle_Chase_Camera_Algorithm, 0x20000000, 0));
         break;
     case 9:
         algo = cMidRightChaseAlgorithm_cMidRightChaseAlgorithm(cMemMan_alloc(912, D_0045B348, 0x20000000, 0));

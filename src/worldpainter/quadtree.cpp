@@ -2129,7 +2129,7 @@ extern "C" void* memcpy(void* dst, const void* src, unsigned int n);
 extern int D_004A3940;
 extern char str_pct_s_pct_s_h[];
 extern char str_pct_s_pct_s_i[];
-extern char D_004A3960[] __attribute__((aligned(4)));
+extern char str_PS2D[] __attribute__((aligned(4)));
 extern char str_icon_sys[];
 extern char* D_004459F0[];
 extern char D_00445A00[];
@@ -2249,7 +2249,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
     case 38: {
         char* title = S_48C0(88);
         MEM_fill(&D_005376F8, 0, 964);
-        memcpy(&D_005376F8, D_004A3960, 5);
+        memcpy(&D_005376F8, str_PS2D, 5);
         cMemCard_AsciiToShiftJIS(self, D_005376F8.title, title);
         if (I_48C0(0x8) > 0)
             D_005376F8.offsLF = I_48C0(0x8);

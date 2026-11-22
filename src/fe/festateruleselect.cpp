@@ -61,8 +61,8 @@ extern signed char D_00441008[];
 extern char* D_00441018[];
 // PORT: the frame labels are copied with the builtin block move (the original likely used
 // strcpy on string literals); the two strings live at these symbols.
-extern char D_0045FAD8[] __attribute__((aligned(8)));
-extern char D_004A1708[] __attribute__((aligned(8)));
+extern char str_greyedout[] __attribute__((aligned(8)));
+extern char str_normal[] __attribute__((aligned(8)));
 
 struct sStr3_1388 { char c[3]; };
 
@@ -184,9 +184,9 @@ extern "C" void cFEStateRuleSelect_setupMenu(cFEStateRuleSelect* self_, signed c
         char* arrowRight = (char*)find_1388(self, str_arrw_right);
         if (arrowLeft) SetVisible_1388(arrowLeft, 0);
         if (arrowRight) SetVisible_1388(arrowRight, 0);
-        __builtin_memcpy(frame, D_004A1708, 7);
+        __builtin_memcpy(frame, str_normal, 7);
     } else {
-        __builtin_memcpy(frame, D_0045FAD8, 10);
+        __builtin_memcpy(frame, str_greyedout, 10);
     }
     int frameIndex = cUIScreen_getFrameByLabel((cUIScreen*)((void*)self->mpScreen), GetHashValue32(frame));
     if (frameIndex != 0xFFFF)
@@ -468,8 +468,8 @@ extern char* D_00441058[];
 
 // PORT: the frame labels are copied with the builtin block move (the original likely used
 // strcpy on string literals); the two strings live at these symbols.
-extern char D_0045FAD8[] __attribute__((aligned(8)));
-extern char D_004A1708[] __attribute__((aligned(8)));
+extern char str_greyedout[] __attribute__((aligned(8)));
+extern char str_normal[] __attribute__((aligned(8)));
 
 struct sVE_1E48 {
     short delta;
@@ -515,13 +515,13 @@ extern "C" int cFEStateRuleSelect_onWidgetMenu(cFEStateRuleSelect* self, cUIMenu
                 if (arrowLeft) SetVisible_1E48(arrowLeft, 1);
                 if (arrowRight) SetVisible_1E48(arrowRight, 1);
                 play = 1;
-                __builtin_memcpy(label, D_0045FAD8, 10);
+                __builtin_memcpy(label, str_greyedout, 10);
             }
         } else {
             if (arrowLeft) SetVisible_1E48(arrowLeft, 0);
             if (arrowRight) SetVisible_1E48(arrowRight, 0);
             play = 1;
-            __builtin_memcpy(label, D_004A1708, 7);
+            __builtin_memcpy(label, str_normal, 7);
         }
         if (play) {
             int frameIndex = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(label));

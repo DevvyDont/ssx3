@@ -6177,14 +6177,14 @@ extern "C" void cBXString_printf(void* str, const char* fmt, ...);
 extern void* cBXString_EmptyString;
 extern char str_Duplicate[];
 extern char str_Timeout[];
-extern char D_00480E20[];
+extern char str_Unknown_Error_Code_pct_08x_pct_cpct_cpct[];
 
 
 /**
  * Builds the display text for a lobby error code given as a four-character tag.
  *
  * 'dupl' gives "Duplicate", 'time' gives "Timeout"; any other code is formatted with cBXString_printf as "Unknown Error
- * Code %08x '%c%c%c%c'\n" (D_00480E20) from the code and its four bytes. Used by the debug front end (cDebugLobbyScreen_draw).
+ * Code %08x '%c%c%c%c'\n" (str_Unknown_Error_Code_pct_08x_pct_cpct_cpct) from the code and its four bytes. Used by the debug front end (cDebugLobbyScreen_draw).
  *
  * @param ret   the cBXString to construct (the g++ return slot)
  * @param tag   the error code
@@ -6205,7 +6205,7 @@ extern "C" void* func_00260E50(void* ret, void* self, unsigned int tag)
     {
         cBXString tagText;
         tagText.Str = (char*)cBXString_EmptyString;
-        cBXString_printf(&tagText, D_00480E20, tag, tag >> 24, (tag >> 16) & 0xFF, (tag >> 8) & 0xFF, tag & 0xFF);
+        cBXString_printf(&tagText, str_Unknown_Error_Code_pct_08x_pct_cpct_cpct, tag, tag >> 24, (tag >> 16) & 0xFF, (tag >> 8) & 0xFF, tag & 0xFF);
         cBXString_cBXString1(ret, &tagText);
         cBXString__cBXString(&tagText, 2);
         break;

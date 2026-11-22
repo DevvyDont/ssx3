@@ -3590,7 +3590,7 @@ extern int horizontal_subsampling_factor_n __asm__("D_005095EC");
 extern int vertical_subsampling_factor_m __asm__("D_005095F0");
 extern int vertical_subsampling_factor_n __asm__("D_005095F4");
 extern char str_sequence_scalable_extension[];
-extern char D_00495510[];
+extern char str_temporal_scalability_not_implemented[];
 void* marker_bit(void* self);
 // Get_Bits returning int: with the unit's void* (or mpeg2decode's unsigned int) declaration GCC keeps the
 // globals' %hi parts in s-registers across the calls.
@@ -3628,7 +3628,7 @@ extern "C" void sequence_scalable_extension(void)
     }
 
     if (ld->scalable_mode == 4) /* SC_TEMP */
-        Error(D_00495510);
+        Error(str_temporal_scalability_not_implemented);
 }
 #endif
 

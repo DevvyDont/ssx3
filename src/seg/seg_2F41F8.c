@@ -2103,7 +2103,7 @@ extern struct sKb D_00525F80;
 extern char *strcpy(char *, const char *);
 extern char* strcat(char *, const char *);
 extern int fBA68(char *, int, const char *) __asm__("sceSifLoadModule");
-extern char D_00497038[], str_USBKB_IRX_b[];
+extern char str_USBD_IRX_b[], str_USBKB_IRX_b[];
 /**
  * Loads the USB driver modules USBD.IRX and USBKB.IRX from a directory.
  *
@@ -2124,7 +2124,7 @@ int func_003F5DA8(char *name, char *str) {
     }
     if (str == 0) goto fail;
     strcpy(path, name);
-    strcat(path, D_00497038);
+    strcat(path, str_USBD_IRX_b);
     D_00525F80.fd[0] = fBA68(path, 0, 0);
     if (D_00525F80.fd[0] < 0) goto fail;
     strcpy(path, name);

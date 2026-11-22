@@ -1482,7 +1482,7 @@ int cBERewardInterface_getEarningsTarget(void* self, int peak);
 extern "C" int cBEEconInterface_getTotalMoneyEarned1(void* self, int rider);
 int cBEScoreInterface_getCurrentHighlightLevel(void* self, int i);
 void cUIText_setAsciiString(cUIText* text, const char* str);
-extern char D_00470AE8[], D_004A2648[], D_00470AF8[], D_00470B08[], D_004A2650[], D_00470B20[], str_Mountain[];
+extern char str_SP_PeakList_Art[], D_004A2648[], D_00470AF8[], D_00470B08[], D_004A2650[], D_00470B20[], str_Mountain[];
 extern char D_004A2658[], D_00470B38[], D_00470B50[], D_00470B68[], D_00470B80[], D_00470B98[], str_kT_10HELPUnlockPeak3[];
 extern char D_00470BC8[], D_00470BE0[], D_00470BF8[], D_00470C10[], D_00470C20[], D_00470C30[], str_SP_Freestylecheck[];
 extern char D_00470C60[], D_00470C70[], D_00470C88[], D_00470C98[], D_00470CB0[], D_00470CC8[], str_SP_GameStat1[];
@@ -1529,11 +1529,11 @@ extern "C" void cUITemplate_MAP_setupPeakInfo(cUITemplate_MAP* tmpl)
     void* score = cBE_getInterface_Fv(cBE_getBE(), 8);
     int ch = cBELibrary_getCharacterID(0);
     if (self->mTransportPopupActive != 0) {
-        cUIState_hideObjSafe(((void*)self->mpUIState), D_00470AE8);
+        cUIState_hideObjSafe(((void*)self->mpUIState), str_SP_PeakList_Art);
         cUIState_hideObjSafe(((void*)self->mpUIState), D_004A2648);
         cUIState_hideObjSafe(((void*)self->mpUIState), str_Locks_Info);
     } else {
-        cUIState_showObjSafe(((void*)self->mpUIState), D_00470AE8);
+        cUIState_showObjSafe(((void*)self->mpUIState), str_SP_PeakList_Art);
         cUIState_showObjSafe(((void*)self->mpUIState), D_004A2648);
         cUIState_showObjSafe(((void*)self->mpUIState), str_Locks_Info);
     }
@@ -1918,7 +1918,7 @@ extern char D_004A23C0[];
 extern char str_pct_S_pct_s_b[];
 extern char str_pct_S_Jam_b_oals[] __asm__("str_pct_S_Jam_b");
 extern char str_kT_cmnRaceCaps_b_oals[] __asm__("str_kT_cmnRaceCaps_b");
-extern char D_00470E50[], D_00470E68[], D_00470E80[], D_00470E98[], D_00470EB0[], D_00470EC0[], str_kT_Peak3name_b[];
+extern char str_peakgoal_emptybox3[], D_00470E68[], D_00470E80[], D_00470E98[], D_00470EB0[], D_00470EC0[], str_kT_Peak3name_b[];
 extern char D_00470EE0[], D_00470EF0[], D_00470F00[], D_00470F18[], D_00470F28[], D_00470F38[], str_peakgoal_check0[];
 extern char D_00470F58[], D_00470F70[], D_00470F90[], D_00470FA8[], D_00470FC0[], D_00470FD0[], str_SPG_Event4[];
 extern char D_00470FF0[], D_00471000[], D_00471010[], D_00471020[], D_00471030[], D_00471040[], str_SPG_Eventpct_dbox[];
@@ -1945,7 +1945,7 @@ extern "C" void cUITemplate_MAP_setupPeakGoals(cUITemplate_MAP* tmpl)
     char buf[32];
     cUIText* title = (cUIText*)cUIScreen_getObjectByHashName(tmpl->mpScreen, GetHashValue32(str_HelpText));
     if (cUITemplate_MAP_mMapStyle < 2) {
-        cUIState_hideObjSafe(tmpl->mpUIState, D_00470E50);
+        cUIState_hideObjSafe(tmpl->mpUIState, str_peakgoal_emptybox3);
         cUIState_hideObjSafe(tmpl->mpUIState, D_00470E68);
         cUIState_hideObjSafe(tmpl->mpUIState, D_00470E80);
         cUIState_hideObjSafe(tmpl->mpUIState, D_00470E98);

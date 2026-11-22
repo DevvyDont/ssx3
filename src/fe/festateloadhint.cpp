@@ -1370,7 +1370,7 @@ extern char str_results_grabtime[];
 extern char str_results_best_combo[];
 // PORT: the literal "%02.0f:%02.0f" (strcpy of a constant expands to an aligned 14-byte copy);
 // splat names it, so copy from the symbol with the literal's length and rodata alignment.
-extern char D_0047BF78[] __attribute__((aligned(8)));
+extern char str_pct_02_0f_pct_02_0f_d[] __attribute__((aligned(8)));
 
 static inline int wHash_7AB0(char* w) { return *(int*)(w + 0x38); }
 
@@ -1429,7 +1429,7 @@ extern "C" void cFELoadState_widgetCreateQP(cFELoadState* self, cUIThing* widget
         int sec = totalSeconds % 60;
         char fmt[0x20];
         char buf[0x20];
-        __builtin_memcpy(fmt, D_0047BF78, sizeof("%02.0f:%02.0f"));
+        __builtin_memcpy(fmt, str_pct_02_0f_pct_02_0f_d, sizeof("%02.0f:%02.0f"));
         sprintf(buf, fmt, fptodp((float)min), fptodp((float)sec));
         cUIText_setAsciiString((cUIText*)widget, buf);
     } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_best_combo)) {
