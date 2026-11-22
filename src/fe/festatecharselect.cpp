@@ -786,7 +786,6 @@ extern void* cFEStateCheatCharSelect_vtbl[];
 extern char* D_00440F78[];
 
 struct sCharEnt_2220 { char* name; char* label; int f8; char pad[3]; signed char id; };
-struct sCharList_2220 { char pad[0x28]; sCharEnt_2220* ents; char pad2C[0x50 - 0x2C]; int count; };
 struct sCharSel_2220 {
     char pad0[0x8];
     void** vt;                  // 0x8
@@ -836,10 +835,10 @@ extern "C" sCharSel_2220* cFEStateCheatCharSelect_cFEStateCheatCharSelect(sCharS
     int faceHash = GetHashValue32(D_00440F78[slot]);
     self->hashes[0] = cUITextureBank_getElementByHashname(ownerState + 0x58, faceHash);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
-    sCharList_2220* list = (sCharList_2220*)cBERewardInterface_getDB();
-    int n = list->count;
+    cBERewardDB* list = cBERewardInterface_getDB();
+    int n = list->mNumCheatChars;
     for (int i = 0; i < n; i++) {
-        sCharEnt_2220* charEntry = &list->ents[i];
+        sCharEnt_2220* charEntry = &((sCharEnt_2220*)list->mpCheatChars)[i];
         if (cBERewardInterface_isCheatCharOwned(iface, self->player, slot, charEntry->id)) {
             char* lbl = charEntry->label;
             self->ids[self->count] = charEntry->id;

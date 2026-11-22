@@ -1085,12 +1085,8 @@ extern "C" void cOverlapList_geteverything(cOverlapList* self, tBoundBox* box)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cOverlapList_terrainIntersect);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sVec4_333EF8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-extern sVec4_333EF8 D_004FF120_333EF8[] __asm__("t4vect_Zero");
+extern t4Vector D_004FF120_333EF8[] __asm__("t4vect_Zero");
 
 
 struct sTriObj_333EF8 {
@@ -1193,8 +1189,8 @@ static inline void reset_333EF8(tIntersectInfo* h)
     h->Face = -1;
     h->Seg = -1;
     h->Stype = -1;
-    (*(sVec4_333EF8*)&h->Ivel) = *D_004FF120_333EF8;
-    (*(sVec4_333EF8*)&h->Iangvel) = *D_004FF120_333EF8;
+    (*(&h->Ivel)) = *D_004FF120_333EF8;
+    (*(&h->Iangvel)) = *D_004FF120_333EF8;
     (*(int*)&h->T) = 0;
     h->u = 0;
     h->v = 0;
@@ -1234,9 +1230,9 @@ extern "C" int cOverlapList_terrainIntersect(cOverlapList* vself, void* vq, sHit
         if (!overlapTri_333EF8(query, obj)) {
             continue;
         }
-        sVec4_333EF8 uv;
-        sVec4_333EF8 pos;
-        sVec4_333EF8 nrm;
+        t4Vector uv;
+        t4Vector pos;
+        t4Vector nrm;
         void* node;
         float dist;
         cAIFwdDiffCache_GetFwdDiff(self->owner->cache, obj, &node);
@@ -1244,8 +1240,8 @@ extern "C" int cOverlapList_terrainIntersect(cOverlapList* vself, void* vq, sHit
             continue;
         }
         reset_333EF8(&hits[n]);
-        (*(sVec4_333EF8*)&hits[n].Ipos) = pos;
-        (*(sVec4_333EF8*)&hits[n].Inorm) = nrm;
+        (*(&hits[n].Ipos)) = pos;
+        (*(&hits[n].Inorm)) = nrm;
         hits[n].Stype = obj->id;
         (*(void**)&hits[n].Patch) = obj;
         hits[n].Iparam = dist;
@@ -2367,11 +2363,6 @@ INCLUDE_ASM("intersect/worldsphtree", TerrainCallback_intersectpatch);
 
 extern t4Vector t4vect_Zero[];
 
-struct sQuery_335960 {
-    char pad00[0x20];
-    float max[4];
-    float min[4];
-};
 
 struct sTriObj_335960 {
     char pad00[8];
@@ -2407,12 +2398,12 @@ struct sHit_335960 {
 extern "C" void cAIFwdDiffCache_GetFwdDiff(void* cache, void* src, void** out);
 extern "C" int cWorldIntersectType_IsPatchInt(void* q, void* obj, void* node, t4Vector* pos, t4Vector* nrm, float* dist, t4Vector* uv, int arg);
 
-static inline int overlap_335960(const sQuery_335960* q, const sTriObj_335960* n)
+static inline int overlap_335960(const cWorldIntersectType* q, const sTriObj_335960* n)
 {
     int r = 0;
-    if (q->max[0] > n->bmin[0] && q->min[0] < n->bmax[0] &&
-        q->max[1] > n->bmin[1] && q->min[1] < n->bmax[1] &&
-        q->max[2] > n->bmin[2] && q->min[2] < n->bmax[2]) {
+    if (((float*)&q->boxMax)[0] > n->bmin[0] && ((float*)&q->boxMin)[0] < n->bmax[0] &&
+        ((float*)&q->boxMax)[1] > n->bmin[1] && ((float*)&q->boxMin)[1] < n->bmax[1] &&
+        ((float*)&q->boxMax)[2] > n->bmin[2] && ((float*)&q->boxMin)[2] < n->bmax[2]) {
         r = 1;
     }
     return r;
@@ -2458,9 +2449,9 @@ extern "C" void TerrainCallback_intersectpatch(void* vctx, void* vobj)
     void* node;
     float dist;
     if ((obj->flags & 0x41) != 65) return;
-    if (!overlap_335960(((sQuery_335960*)ctx->intersecttype), obj)) return;
+    if (!overlap_335960((ctx->intersecttype), obj)) return;
     cAIFwdDiffCache_GetFwdDiff(((void*)ctx->fwddiffcache), obj, &node);
-    if (!cWorldIntersectType_IsPatchInt(((sQuery_335960*)ctx->intersecttype), obj, node, &pos, &nrm, &dist, &uv, ((int)ctx->hint))) return;
+    if (!cWorldIntersectType_IsPatchInt((ctx->intersecttype), obj, node, &pos, &nrm, &dist, &uv, ((int)ctx->hint))) return;
     reset_335960(&((sHit_335960*)ctx->intersectinfo)[*ctx->numintersectinfo]);
     ((sHit_335960*)ctx->intersectinfo)[*ctx->numintersectinfo].pos = pos;
     ((sHit_335960*)ctx->intersectinfo)[*ctx->numintersectinfo].nrm = nrm;
@@ -2485,11 +2476,6 @@ struct sBox_335B90 {
     float max[4];
 };
 
-struct sQuery_335B90 {
-    char pad00[0x20];
-    float max[4];
-    float min[4];
-};
 
 struct sObj_335B90 {
     int pad00[3];
@@ -2500,23 +2486,23 @@ struct sObj_335B90 {
 
 extern "C" int intersect_instanceIntersect(void* q, void* node, void* buf, int cap, int mode);
 
-static inline int overlapNode_335B90(const sQuery_335B90* q, const tInstanceRecord* n)
+static inline int overlapNode_335B90(const cWorldIntersectType* q, const tInstanceRecord* n)
 {
     int r = 0;
-    if (q->max[0] > n->m_fvMin.m[0] && q->min[0] < n->m_fvMax.m[0] &&
-        q->max[1] > n->m_fvMin.m[1] && q->min[1] < n->m_fvMax.m[1] &&
-        q->max[2] > n->m_fvMin.m[2] && q->min[2] < n->m_fvMax.m[2]) {
+    if (((float*)&q->boxMax)[0] > n->m_fvMin.m[0] && ((float*)&q->boxMin)[0] < n->m_fvMax.m[0] &&
+        ((float*)&q->boxMax)[1] > n->m_fvMin.m[1] && ((float*)&q->boxMin)[1] < n->m_fvMax.m[1] &&
+        ((float*)&q->boxMax)[2] > n->m_fvMin.m[2] && ((float*)&q->boxMin)[2] < n->m_fvMax.m[2]) {
         r = 1;
     }
     return r;
 }
 
-static inline int overlapBox_335B90(const sQuery_335B90* q, const sBox_335B90* o)
+static inline int overlapBox_335B90(const cWorldIntersectType* q, const sBox_335B90* o)
 {
     int r = 0;
-    if (q->max[0] > o->min[0] && q->min[0] < o->max[0] &&
-        q->max[1] > o->min[1] && q->min[1] < o->max[1] &&
-        q->max[2] > o->min[2] && q->min[2] < o->max[2]) {
+    if (((float*)&q->boxMax)[0] > o->min[0] && ((float*)&q->boxMin)[0] < o->max[0] &&
+        ((float*)&q->boxMax)[1] > o->min[1] && ((float*)&q->boxMin)[1] < o->max[1] &&
+        ((float*)&q->boxMax)[2] > o->min[2] && ((float*)&q->boxMin)[2] < o->max[2]) {
         r = 1;
     }
     return r;
@@ -2525,7 +2511,7 @@ static inline int overlapBox_335B90(const sQuery_335B90* q, const sBox_335B90* o
 static inline void collect_335B90(TerrainCallback* ctx, tInstanceRecord* node)
 {
     int n = *ctx->numintersectinfo;
-    *ctx->numintersectinfo += intersect_instanceIntersect(((sQuery_335B90*)ctx->intersecttype), node, &ctx->intersectinfo[n], ctx->maxintersectinfo - n, 2);
+    *ctx->numintersectinfo += intersect_instanceIntersect((ctx->intersecttype), node, &ctx->intersectinfo[n], ctx->maxintersectinfo - n, 2);
 }
 
 /**
@@ -2547,7 +2533,7 @@ extern "C" void TerrainCallback_intersectinstance(void* vctx, void* vnode)
     if (((int)node->m_pCollideRecord) == 0) return;
     int flags = node->m_iFlags;
     if (flags & 0x20) {
-        if (overlapNode_335B90(((sQuery_335B90*)ctx->intersecttype), node)) {
+        if (overlapNode_335B90((ctx->intersecttype), node)) {
             collect_335B90(ctx, node);
         }
     } else if (flags & 0x40) {
@@ -2556,7 +2542,7 @@ extern "C" void TerrainCallback_intersectinstance(void* vctx, void* vnode)
         if (((Test_335B90)vt[44].fn)((char*)((sObj_335B90*)node->m_pActiveNode) + vt[44].delta)) {
             sVEntry<void>* vt2 = ((sObj_335B90*)node->m_pActiveNode)->vt;
             sBox_335B90* objBox = ((GetBox_335B90)vt2[45].fn)((char*)((sObj_335B90*)node->m_pActiveNode) + vt2[45].delta);
-            if (overlapBox_335B90(((sQuery_335B90*)ctx->intersecttype), objBox)) {
+            if (overlapBox_335B90((ctx->intersecttype), objBox)) {
                 collect_335B90(ctx, node);
             }
         }
@@ -2567,14 +2553,11 @@ extern "C" void TerrainCallback_intersectinstance(void* vctx, void* vnode)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cBXNash_terrainIntersect);
 #ifdef SKIP_ASM
-struct sQuad_335D78 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
 struct sBox_335D78 {
-    sQuad_335D78 min;
-    sQuad_335D78 max;
+    t4Vector min;
+    t4Vector max;
 };
 
 
@@ -2655,14 +2638,14 @@ extern "C" int cBXNash_terrainIntersect(cBXNash* vself, void* vq, sHit_00336850*
     TerrainCallback ctx;
     sBox_335D78 box;
     int count;
-    (*(sQuery_335960**)&ctx.intersecttype) = (sQuery_335960*)query;
+    (*(cWorldIntersectType**)&ctx.intersecttype) = query;
     (*(sHit_335960**)&ctx.intersectinfo) = (sHit_335960*)hits;
     ctx.maxintersectinfo = cap;
     ctx.numintersectinfo = &count;
     (*(int*)&ctx.hint) = hitCache;
     (*(void**)&ctx.fwddiffcache) = grid->cache;
-    box.min = (*(sQuad_335D78*)&query->boxMin);
-    box.max = (*(sQuad_335D78*)&query->boxMax);
+    box.min = (*(&query->boxMin));
+    box.max = (*(&query->boxMax));
     TerrainCallback* pctx = &ctx;
     count = 0;
     queryCell_335D78(grid, 0, &box, pctx);
@@ -2923,11 +2906,6 @@ struct sBox_336D40 {
     float max[4];
 };
 
-struct sQuery_336D40 {
-    char pad00[0x20];
-    float max[4];
-    float min[4];
-};
 
 struct sObj_336D40 {
     int pad00[3];
@@ -2938,23 +2916,23 @@ struct sObj_336D40 {
 
 extern "C" int intersect_instanceIntersect(void* q, void* node, void* buf, int cap, int mode);
 
-static inline int overlapNode_336D40(const sQuery_336D40* q, const tInstanceRecord* n)
+static inline int overlapNode_336D40(const cWorldIntersectType* q, const tInstanceRecord* n)
 {
     int r = 0;
-    if (q->max[0] > n->m_fvMin.m[0] && q->min[0] < n->m_fvMax.m[0] &&
-        q->max[1] > n->m_fvMin.m[1] && q->min[1] < n->m_fvMax.m[1] &&
-        q->max[2] > n->m_fvMin.m[2] && q->min[2] < n->m_fvMax.m[2]) {
+    if (((float*)&q->boxMax)[0] > n->m_fvMin.m[0] && ((float*)&q->boxMin)[0] < n->m_fvMax.m[0] &&
+        ((float*)&q->boxMax)[1] > n->m_fvMin.m[1] && ((float*)&q->boxMin)[1] < n->m_fvMax.m[1] &&
+        ((float*)&q->boxMax)[2] > n->m_fvMin.m[2] && ((float*)&q->boxMin)[2] < n->m_fvMax.m[2]) {
         r = 1;
     }
     return r;
 }
 
-static inline int overlapBox_336D40(const sQuery_336D40* q, const sBox_336D40* o)
+static inline int overlapBox_336D40(const cWorldIntersectType* q, const sBox_336D40* o)
 {
     int r = 0;
-    if (q->max[0] > o->min[0] && q->min[0] < o->max[0] &&
-        q->max[1] > o->min[1] && q->min[1] < o->max[1] &&
-        q->max[2] > o->min[2] && q->min[2] < o->max[2]) {
+    if (((float*)&q->boxMax)[0] > o->min[0] && ((float*)&q->boxMin)[0] < o->max[0] &&
+        ((float*)&q->boxMax)[1] > o->min[1] && ((float*)&q->boxMin)[1] < o->max[1] &&
+        ((float*)&q->boxMax)[2] > o->min[2] && ((float*)&q->boxMin)[2] < o->max[2]) {
         r = 1;
     }
     return r;
@@ -2963,7 +2941,7 @@ static inline int overlapBox_336D40(const sQuery_336D40* q, const sBox_336D40* o
 static inline void collect_336D40(StaticObjectCallback* ctx, tInstanceRecord* node, int mode)
 {
     int n = *ctx->numintersectinfo;
-    *ctx->numintersectinfo += intersect_instanceIntersect(((sQuery_336D40*)ctx->intersecttype), node, &ctx->intersectinfo[n], ctx->maxintersectinfo - n, mode);
+    *ctx->numintersectinfo += intersect_instanceIntersect((ctx->intersecttype), node, &ctx->intersectinfo[n], ctx->maxintersectinfo - n, mode);
 }
 
 /**
@@ -2985,7 +2963,7 @@ extern "C" void StaticObjectCallback_intersectinstance(void* vctx, void* vnode)
     int mode = ctx->includeridable ? 3 : 1;
     int flags = node->m_iFlags;
     if (flags & 0x20) {
-        if (overlapNode_336D40(((sQuery_336D40*)ctx->intersecttype), node)) {
+        if (overlapNode_336D40((ctx->intersecttype), node)) {
             collect_336D40(ctx, node, mode);
         }
     } else if (flags & 0x40) {
@@ -2993,7 +2971,7 @@ extern "C" void StaticObjectCallback_intersectinstance(void* vctx, void* vnode)
         if (((Test_336D40)vt[44].fn)((char*)((sObj_336D40*)node->m_pActiveNode) + vt[44].delta)) {
             sVEntry<void>* vt2 = ((sObj_336D40*)node->m_pActiveNode)->vt;
             sBox_336D40* objBox = ((GetBox_336D40)vt2[45].fn)((char*)((sObj_336D40*)node->m_pActiveNode) + vt2[45].delta);
-            if (overlapBox_336D40(((sQuery_336D40*)ctx->intersecttype), objBox)) {
+            if (overlapBox_336D40((ctx->intersecttype), objBox)) {
                 collect_336D40(ctx, node, mode);
             }
         }
@@ -3004,14 +2982,11 @@ extern "C" void StaticObjectCallback_intersectinstance(void* vctx, void* vnode)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cBXNash_staticObjectIntersect);
 #ifdef SKIP_ASM
-struct sQuad_336F30 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
 struct sBox_336F30 {
-    sQuad_336F30 min;
-    sQuad_336F30 max;
+    t4Vector min;
+    t4Vector max;
 };
 
 struct sOct_336F30 {
@@ -3091,13 +3066,13 @@ extern "C" int cBXNash_staticObjectIntersect(cBXNash* vself, void* vq, sHit_0033
     StaticObjectCallback ctx;
     sBox_336F30 box;
     int count;
-    (*(sQuery_336D40**)&ctx.intersecttype) = (sQuery_336D40*)query;
+    (*(cWorldIntersectType**)&ctx.intersecttype) = query;
     (*(char**)&ctx.intersectinfo) = (char*)hits;
     ctx.maxintersectinfo = cap;
     ctx.numintersectinfo = &count;
     ctx.includeridable = full;
-    box.min = (*(sQuad_336F30*)&query->boxMin);
-    box.max = (*(sQuad_336F30*)&query->boxMax);
+    box.min = (*(&query->boxMin));
+    box.max = (*(&query->boxMax));
     StaticObjectCallback* pctx = &ctx;
     count = 0;
     queryCell_336F30(grid, 0, &box, pctx);
@@ -3194,7 +3169,7 @@ INCLUDE_ASM("intersect/worldsphtree", cBXNash_splineIntersect);
 #ifdef SKIP_ASM
 struct sTree_3411B8;
 struct sQuery_3411B8;
-extern "C" void nash_Cell_descend6(nash_Cell* tree, sQuery_3411B8* q);
+extern "C" void nash_Cell_descend6(nash_Cell* tree, SplineCallback* q);
 
 
 struct sOct_337A48 {
@@ -3232,14 +3207,14 @@ static inline void collect_337A48(sOct_337A48* tree, SplineCallback* q)
             }
         }
     }
-    if (tree->child[0] != 0) nash_Cell_descend6((nash_Cell*)((sTree_3411B8*)tree->child[0]), (sQuery_3411B8*)q);
-    if (tree->child[1] != 0) nash_Cell_descend6((nash_Cell*)((sTree_3411B8*)tree->child[1]), (sQuery_3411B8*)q);
-    if (tree->child[2] != 0) nash_Cell_descend6((nash_Cell*)((sTree_3411B8*)tree->child[2]), (sQuery_3411B8*)q);
-    if (tree->child[3] != 0) nash_Cell_descend6((nash_Cell*)((sTree_3411B8*)tree->child[3]), (sQuery_3411B8*)q);
-    if (tree->child[4] != 0) nash_Cell_descend6((nash_Cell*)((sTree_3411B8*)tree->child[4]), (sQuery_3411B8*)q);
-    if (tree->child[5] != 0) nash_Cell_descend6((nash_Cell*)((sTree_3411B8*)tree->child[5]), (sQuery_3411B8*)q);
-    if (tree->child[6] != 0) nash_Cell_descend6((nash_Cell*)((sTree_3411B8*)tree->child[6]), (sQuery_3411B8*)q);
-    if (tree->child[7] != 0) nash_Cell_descend6((nash_Cell*)((sTree_3411B8*)tree->child[7]), (sQuery_3411B8*)q);
+    if (tree->child[0] != 0) nash_Cell_descend6((nash_Cell*)((sTree_3411B8*)tree->child[0]), q);
+    if (tree->child[1] != 0) nash_Cell_descend6((nash_Cell*)((sTree_3411B8*)tree->child[1]), q);
+    if (tree->child[2] != 0) nash_Cell_descend6((nash_Cell*)((sTree_3411B8*)tree->child[2]), q);
+    if (tree->child[3] != 0) nash_Cell_descend6((nash_Cell*)((sTree_3411B8*)tree->child[3]), q);
+    if (tree->child[4] != 0) nash_Cell_descend6((nash_Cell*)((sTree_3411B8*)tree->child[4]), q);
+    if (tree->child[5] != 0) nash_Cell_descend6((nash_Cell*)((sTree_3411B8*)tree->child[5]), q);
+    if (tree->child[6] != 0) nash_Cell_descend6((nash_Cell*)((sTree_3411B8*)tree->child[6]), q);
+    if (tree->child[7] != 0) nash_Cell_descend6((nash_Cell*)((sTree_3411B8*)tree->child[7]), q);
 }
 
 static inline void queryCell_337A48(sGrid_337A48* grid, int i, tBoundBox* box, SplineCallback* q)
@@ -5198,14 +5173,6 @@ extern "C" void* func_003400D8(int, int);
 //100%
 INCLUDE_ASM("intersect/worldsphtree", nash_Cell_descend6);
 #ifdef SKIP_ASM
-struct sQuery_3411B8 {
-    sWsVec4* pos;               // 0x00
-    int a7;                     // 0x04
-    int mask;                   // 0x08
-    int* cnt;                   // 0x0C
-    float* dist;                // 0x10
-    tBoundBox* box;         // 0x14
-};
 
 struct sTree_3411B8 {
     sTree_3411B8* child[8];
@@ -5224,17 +5191,17 @@ struct sTree_3411B8 {
  * @param tree  the octree cell (On Tour nash::Cell)
  * @param splineQuery  the spline query (On Tour SplineCallback)
  */
-extern "C" void nash_Cell_descend6(nash_Cell* tree, sQuery_3411B8* splineQuery)
+extern "C" void nash_Cell_descend6(nash_Cell* tree, SplineCallback* splineQuery)
 {
     for (char* typedNode = *(char**)&tree->nodesinside[2]; typedNode != 0; typedNode = *(char**)typedNode) {
         int type = *(int*)(typedNode + 8);
         if (type == 2) {
-            cRailModifier_splineIntersect(*(void**)(typedNode + 0xC), splineQuery->box, splineQuery->box, splineQuery->pos, splineQuery->mask, splineQuery->cnt, splineQuery->dist, splineQuery->a7);
+            cRailModifier_splineIntersect(*(void**)(typedNode + 0xC), ((tBoundBox*)splineQuery->box), ((tBoundBox*)splineQuery->box), ((sWsVec4*)splineQuery->intersectpos), ((int)splineQuery->splinefiltermask), splineQuery->hit, splineQuery->intersectdist, ((int)splineQuery->intersectinfo));
         } else if (type == 3) {
-            cFlexRailNode_splineIntersect(*(void**)(typedNode + 0xC), splineQuery->box, splineQuery->box, splineQuery->pos, splineQuery->mask, splineQuery->cnt, splineQuery->dist, splineQuery->a7);
+            cFlexRailNode_splineIntersect(*(void**)(typedNode + 0xC), ((tBoundBox*)splineQuery->box), ((tBoundBox*)splineQuery->box), ((sWsVec4*)splineQuery->intersectpos), ((int)splineQuery->splinefiltermask), splineQuery->hit, splineQuery->intersectdist, ((int)splineQuery->intersectinfo));
         } else if (type == 1) {
-            if (*(int*)(*(char**)(typedNode + 0x68) + 0x1C) & splineQuery->mask) {
-                intersect_staticSplineSegmentIntersect(typedNode, splineQuery->box, splineQuery->pos, splineQuery->cnt, splineQuery->dist, splineQuery->a7);
+            if (*(int*)(*(char**)(typedNode + 0x68) + 0x1C) & ((int)splineQuery->splinefiltermask)) {
+                intersect_staticSplineSegmentIntersect(typedNode, ((tBoundBox*)splineQuery->box), ((sWsVec4*)splineQuery->intersectpos), splineQuery->hit, splineQuery->intersectdist, ((int)splineQuery->intersectinfo));
             }
         }
     }

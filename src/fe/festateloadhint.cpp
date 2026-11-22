@@ -1194,10 +1194,6 @@ extern "C" unsigned int fptoui(float f);
 extern "C" char* func_0020A1A8(int v);
 extern "C" char* strcpy(char* dst, const char* src);
 
-struct sLoadInfo_72C0 {
-    char pad0[0x10];
-    int image[2];                   // 0x10: per-player image
-};
 
 static inline void Activate_72C0(char* obj)
 {
@@ -1339,9 +1335,9 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* vself, char player)
     sName2_72C0 picName = *(sName2_72C0*)D_004A2C18;
     picName.c[0] = side + '0';
     cUIIcon* pic = (cUIIcon*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(picName.c));
-    sLoadInfo_72C0* loadInfo = (sLoadInfo_72C0*)self->mpParentModule;
+    cFELoadScreen* loadInfo = self->mpParentModule;
     if (loadInfo != 0 && ((char*)pic) != 0) {
-        int textureId = loadInfo->image[player];
+        int textureId = loadInfo->mTexID[player];
         if (textureId != 0) {
             pic->mTextureID = textureId;
             pic->mpTextureElem = 0;

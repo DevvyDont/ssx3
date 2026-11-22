@@ -3373,9 +3373,6 @@ extern "C" void func_002E1F70(sWakeFx1F70* self)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E2260);
 #ifdef SKIP_ASM
-struct sWakeMtx2260 {
-    sWakeVecE398 row[4];
-};
 
 struct sWakeFx2260 {
     char* obj;                  // 0x00
@@ -3431,7 +3428,7 @@ extern "C" void func_002E2260(sWakeFx2260* self)
         sWakeVecE398 vel;
         sWakeVecE398 scaledVel;
         cRider* obj;
-        sWakeMtx2260* boneMats;
+        t4Matrix* boneMats;
         int k;
         alpha = wakeClamp2260(self->f4 * 1.5f, zero, 1.0f);
         col = self->col;
@@ -3439,8 +3436,8 @@ extern "C" void func_002E2260(sWakeFx2260* self)
         dt = 0.01666666753590107f;
         obj = (cRider*)self->obj;
         k = self->p7C[self->i78];
-        boneMats = (sWakeMtx2260*)obj->mAnimModel->unk_030;
-        pos = ((sWakeMtx2260*)((char*)boneMats + (k << 6)))->row[3];
+        boneMats = obj->mAnimModel->unk_030;
+        pos = ((sWakeVecE398*)&((t4Matrix*)((char*)boneMats + (k << 6)))->row[0])[3];
         wakeScaleE398(scaledVel, *(sWakeVecE398*)&obj->mVelocity, *(float*)(self->p2C + 0x900));
         vel = scaledVel;
         cDynamicColourEmitter_update(em, &pos, &vel, &col, 1, dt);
@@ -3454,8 +3451,8 @@ extern "C" void func_002E2260(sWakeFx2260* self)
     } else {
         cRider* obj = (cRider*)self->obj;
         int k = obj->mBoneHips;
-        sWakeMtx2260* boneMats = (sWakeMtx2260*)obj->mAnimModel->unk_030;
-        sWakeVecE398 pos = ((sWakeMtx2260*)((char*)boneMats + (k << 6)))->row[3];
+        t4Matrix* boneMats = obj->mAnimModel->unk_030;
+        sWakeVecE398 pos = ((sWakeVecE398*)&((t4Matrix*)((char*)boneMats + (k << 6)))->row[0])[3];
         cDynamicColourEmitter_update(em, &pos, 0, 0, 0, 0.01666666753590107f);
     }
 }
@@ -5571,14 +5568,6 @@ extern "C" void FigureOutTransitionUVs(void);
 // PORT: cWorldPainterMan_reset is defined with an unused self param; this caller passes none.
 void cWorldPainterMan_reset_47E8() __asm__("cWorldPainterMan_reset__FPv");
 
-struct sRsState47E8 {
-    int f0;                     // 0x0
-    int flagsA;                 // 0x4
-    int flagsB;                 // 0x8
-    int fC;                     // 0xC
-    short tex;                  // 0x10
-    short pad;
-};
 
 struct sRsVt47E8 {
     short delta;
@@ -5619,17 +5608,17 @@ struct sFade47E8 {
 
 static inline void rsSetA47E8(cPS2GraphicsMan* ctx, int mask, int shift, int v)
 {
-    ((sRsState47E8*)ctx->m_pCurrentDrawState)->flagsA = (((sRsState47E8*)ctx->m_pCurrentDrawState)->flagsA & ~mask) | ((v << shift) & mask);
+    (ctx->m_pCurrentDrawState)->unk_00[1] = (((int)(ctx->m_pCurrentDrawState)->unk_00[1]) & ~mask) | ((v << shift) & mask);
 }
 
 static inline void rsSetB47E8(cPS2GraphicsMan* ctx, int mask, int shift, int v)
 {
-    ((sRsState47E8*)ctx->m_pCurrentDrawState)->flagsB = (((sRsState47E8*)ctx->m_pCurrentDrawState)->flagsB & ~mask) | ((v << shift) & mask);
+    (ctx->m_pCurrentDrawState)->unk_00[2] = (((int)(ctx->m_pCurrentDrawState)->unk_00[2]) & ~mask) | ((v << shift) & mask);
 }
 
 static inline void rsSet047E8(cPS2GraphicsMan* ctx, int mask, int shift, int v)
 {
-    ((sRsState47E8*)ctx->m_pCurrentDrawState)->f0 = (((sRsState47E8*)ctx->m_pCurrentDrawState)->f0 & ~mask) | ((v << shift) & mask);
+    (ctx->m_pCurrentDrawState)->unk_00[0] = (((int)(ctx->m_pCurrentDrawState)->unk_00[0]) & ~mask) | ((v << shift) & mask);
 }
 
 static inline int fadeTex47E8(sFade47E8* self)
@@ -5680,8 +5669,8 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
     if (clamped >= 0.93f) {
         cWorldPainterMan_reset_47E8();
     }
-    ((sRsState47E8*)ctx->m_pCurrentDrawState)[1] = ((sRsState47E8*)ctx->m_pCurrentDrawState)[0];
-    (*(sRsState47E8**)&ctx->m_pCurrentDrawState)++;
+    (ctx->m_pCurrentDrawState)[1] = (ctx->m_pCurrentDrawState)[0];
+    (*(sDrawState**)&ctx->m_pCurrentDrawState)++;
     ((sRsVt47E8*)ctx->mVtbl)[21].fn(vthis(ctx, ((sRsVt47E8*)ctx->mVtbl)[21]));
     ((sRsVt47E8*)ctx->mVtbl)[31].fn(vthis(ctx, ((sRsVt47E8*)ctx->mVtbl)[31]));
     ((sRsVt47E8*)ctx->mVtbl)[37].fn(vthis(ctx, ((sRsVt47E8*)ctx->mVtbl)[37]));
@@ -5697,9 +5686,9 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
     rsSetA47E8(ctx, 0x3, 0, 2);
     rsSetB47E8(ctx, 0x1FFFFC00, 10, 0);
     if (self->mUsingScreenGrab != 0) {
-        ((sRsState47E8*)ctx->m_pCurrentDrawState)->tex = fadeTex47E8(((sFade47E8*)self));
+        (ctx->m_pCurrentDrawState)->m_textureState.m_texid[0] = fadeTex47E8(((sFade47E8*)self));
     } else {
-        ((sRsState47E8*)ctx->m_pCurrentDrawState)->tex = -1;
+        (ctx->m_pCurrentDrawState)->m_textureState.m_texid[0] = -1;
     }
     if (self->mUsingScreenGrab == 0 || self->mRequestingScreenGrab == 0) {
         sFadeVt47E8* ov = *(sFadeVt47E8**)transition;
@@ -5707,7 +5696,7 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
     }
     ((sRsVt47E8*)ctx->mVtbl)[32].fn(vthis(ctx, ((sRsVt47E8*)ctx->mVtbl)[32]));
     ((sRsVt47E8*)ctx->mVtbl)[22].fn(vthis(ctx, ((sRsVt47E8*)ctx->mVtbl)[22]));
-    (*(sRsState47E8**)&ctx->m_pCurrentDrawState)--;
+    (*(sDrawState**)&ctx->m_pCurrentDrawState)--;
 }
 #endif
 

@@ -2045,22 +2045,19 @@ extern "C" void* cBasicCameraAlgorithm_cBasicCameraAlgorithm(cBasicCameraAlgorit
 //100%
 INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_getPose);
 #ifdef SKIP_ASM
-struct sV_15F9B8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sM_15F9B8 {
     float m[4][4];
 } __attribute__((aligned(16)));
 
 struct sPair_15F9B8 {
-    sV_15F9B8 a;
-    sV_15F9B8 b;
+    t4Vector a;
+    t4Vector b;
 };
 
 extern sM_15F9B8 D_004FF1A0_15F9B8 __asm__("t4mat_Identity");
-extern sV_15F9B8 D_004FF150_15F9B8 __asm__("t4vect_YAxis");
-extern sV_15F9B8 D_004FF160_v15F9B8 __asm__("t4vect_ZAxis");
+extern t4Vector D_004FF150_15F9B8 __asm__("t4vect_YAxis");
+extern t4Vector D_004FF160_v15F9B8 __asm__("t4vect_ZAxis");
 extern "C" void fSinCos(float* sout, float* cout, float x);
 extern "C" sPair_15F9B8 tPose_tPose_15F9B8(sM_15F9B8* m) __asm__("tPose_tPose");
 
@@ -2123,7 +2120,7 @@ static inline void vu0MulMtx_15F9B8(sM_15F9B8* dst, const sM_15F9B8* a, const sM
 }
 
 // PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
-static inline void vu0TransMtx_15F9B8(sM_15F9B8* m, const sV_15F9B8& v)
+static inline void vu0TransMtx_15F9B8(sM_15F9B8* m, const t4Vector& v)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -2148,7 +2145,7 @@ static inline void SinCos_15F9B8(float* s, float* c, float angle)
     fSinCos(s, c, angle);
 }
 
-static inline void RotAxis_15F9B8(sM_15F9B8* m, const sV_15F9B8& axis, float angle)
+static inline void RotAxis_15F9B8(sM_15F9B8* m, const t4Vector& axis, float angle)
 {
     sM_15F9B8 r;
     float s;
@@ -2195,7 +2192,7 @@ extern "C" sPair_15F9B8 cBasicCameraAlgorithm_getPose(cBasicCameraAlgorithm* src
 {
     sM_15F9B8 poseMatrix;
     vu0CopyMtx_15F9B8(&poseMatrix, &D_004FF1A0_15F9B8);
-    vu0TransMtx_15F9B8(&poseMatrix, *(sV_15F9B8*)&src->Position);
+    vu0TransMtx_15F9B8(&poseMatrix, *(&src->Position));
     RotAxis_15F9B8(&poseMatrix, D_004FF150_15F9B8, -src->Pitch);
     RotAxis_15F9B8(&poseMatrix, D_004FF160_v15F9B8, src->Heading);
     return tPose_tPose_15F9B8(&poseMatrix);

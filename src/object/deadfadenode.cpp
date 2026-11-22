@@ -46,15 +46,6 @@ struct sDfModel_0750 {
     sDfPart_0750* parts;    // 0x8
 };
 
-struct sDfInst_0750 {
-    char pad_0x00[0x8];
-    unsigned int flags;     // 0x8
-    char pad_0x0C[0x4];
-    sDfMat_0750 world;      // 0x10
-    char pad_0x50[0x30];
-    sDfModel_0750* model;   // 0x80
-    float scale;            // 0x84
-};
 
 struct sDfDesc_0750 {
     int w[2];
@@ -190,18 +181,18 @@ extern "C" cDeadFadeNode* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode* self, int b
     self->DistRate = desc->fC * cObjectInterface_getUpdateTime();
     self->Dist = 0.0f;
     self->Fade = 1.0f;
-    sDfModel_0750* model = ((sDfInst_0750*)self->Instance)->model;
+    sDfModel_0750* model = ((sDfModel_0750*)(self->Instance)->m_Model);
     *pm = new (str_DeadFadeAnimMats, 0x20000000, 0) sDfMatElem_0750[model->count];
     if (other != 0 && ((DfBoolFn_0750)other->vt[26].fn)(vthis(other, other->vt[26]))) {
         sDfMat_0750* src = ((DfMatFn_0750)other->vt[27].fn)(vthis(other, other->vt[27]));
         MEM_copy(((sDfMatElem_0750*)self->AnimMats), src, model->count << 6);
     } else {
-        sDfMat_0750* base = &((sDfInst_0750*)self->Instance)->world;
+        sDfMat_0750* base = &(*(sDfMat_0750*)&(self->Instance)->m_fmTransform);
         if (other != 0) {
             base = ((DfMatFn_0750)other->vt[24].fn)(vthis(other, other->vt[24]));
         }
         sDfPart_0750* part = model->parts;
-        float k = ((sDfInst_0750*)self->Instance)->scale;
+        float k = (self->Instance)->m_fScale;
         sDfV4_0750 scaleVec;
         scaleVec.x = k;
         scaleVec.y = k;
@@ -222,8 +213,8 @@ extern "C" cDeadFadeNode* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode* self, int b
     if (other != 0) {
         ((DfSetFn_0750)other->vt[1].fn)(vthis(other, other->vt[1]), 3);
     }
-    ((sDfInst_0750*)self->Instance)->flags &= ~0x60;
-    ((sDfInst_0750*)self->Instance)->flags = (((sDfInst_0750*)self->Instance)->flags & ~2) | 4;
+    (*(unsigned int*)&(self->Instance)->m_iFlags) &= ~0x60;
+    (self->Instance)->m_iFlags = (((unsigned int)(self->Instance)->m_iFlags) & ~2) | 4;
     return self;
 }
 #endif

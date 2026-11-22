@@ -3036,9 +3036,6 @@ INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_gainFocus);
 #ifdef SKIP_ASM
 extern "C" int AITick();
 
-struct sHpVec4_13C7A8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sHpEntry_13C7A8 {
     char pad0[0x14];
@@ -3048,7 +3045,7 @@ struct sHpEntry_13C7A8 {
 };
 
 // PORT: PS2-only VU0 inline asm (in-place vector times scalar).
-static inline void vu0ScaleEq_13C7A8(sHpVec4_13C7A8& v, float s)
+static inline void vu0ScaleEq_13C7A8(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -3089,7 +3086,7 @@ extern "C" void cGroundMotion_gainFocus(sHpCtl_13C7A8* self)
     float k = rider->mAnimModel->unk_140.x;
     self->m4 = k * snow->m14;
     self->m8 = k * snow->m18;
-    *(sHpVec4_13C7A8*)&rider->DampGroundNormal = *(sHpVec4_13C7A8*)&rider->mGroundNormal;
+    *(&rider->DampGroundNormal) = *(&rider->mGroundNormal);
     self->mC = 0;
     int aiTick = AITick();
     self->m10 = aiTick;
@@ -3099,7 +3096,7 @@ extern "C" void cGroundMotion_gainFocus(sHpCtl_13C7A8* self)
         penaltyFraction = (ticksOutOfGround - 40) * 0.010000000707805157f + 0.699999988079071f;
     else
         penaltyFraction = 0.699999988079071f;
-    vu0ScaleEq_13C7A8(*(sHpVec4_13C7A8*)(self->mRider + 0x1E0), penaltyFraction <? 1.0f);
+    vu0ScaleEq_13C7A8(*(t4Vector*)(self->mRider + 0x1E0), penaltyFraction <? 1.0f);
 }
 #endif
 

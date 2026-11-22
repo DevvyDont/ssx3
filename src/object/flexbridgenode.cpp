@@ -609,19 +609,12 @@ struct sFlVE_70D0 {
     sV4_70D0* (*fn)(void*);
 };
 
-struct sFlEnt_70D0 {
-    sV4_70D0 a;         // 0x00
-    sV4_70D0 b;         // 0x10
-    char pad_0x20[4];
-    float f24;          // 0x24
-    char pad_0x28[0x28];
-};
 
 struct sFlBridge_70D0 {
     char pad_0x00[0xC];
     sFlVE_70D0* vt;     // 0x0C
     char pad_0x10[0x64];
-    sFlEnt_70D0* ents;  // 0x74
+    tSpringNode* ents;  // 0x74
 };
 
 struct sFlState_70D0 {
@@ -642,13 +635,13 @@ extern "C" void cFlexBridgeNode_updateIntersectInfo(cFlexBridgeNode* self, sFlSt
     int idx = intInfo->idx;
     if (idx >= 0) {
         int pairIndex = idx / 2;
-        sFlEnt_70D0* ents = (sFlEnt_70D0*)self->Mesh.Nodes;
+        tSpringNode* ents = self->Mesh.Nodes;
         sFlVE_70D0* vt = (sFlVE_70D0*)self->mVtbl;
         sV4_70D0* matrix = vt[24].fn(vthis(self, vt[24]));
-        sFlEnt_70D0* entry = (sFlEnt_70D0*)(pairIndex * 0x50 + (int)ents);
-        sV4_70D0 axisVec = vu0MtxMul_70D0(matrix, vu0ScaleP_70D0(&D_004FF140_70D0, entry->f24));
-        sV4_70D0 arm = vu0Sub_70D0(intInfo->v[0], vu0MtxMul_70D0(matrix, entry->a));
-        sV4_70D0 pointVelocity = vu0Add_70D0(vu0MtxMul_70D0(matrix, entry->b), vu0Cross_70D0(arm, axisVec));
+        tSpringNode* entry = (tSpringNode*)(pairIndex * 0x50 + (int)ents);
+        sV4_70D0 axisVec = vu0MtxMul_70D0(matrix, vu0ScaleP_70D0(&D_004FF140_70D0, entry->W));
+        sV4_70D0 arm = vu0Sub_70D0(intInfo->v[0], vu0MtxMul_70D0(matrix, (*(sV4_70D0*)&entry->P)));
+        sV4_70D0 pointVelocity = vu0Add_70D0(vu0MtxMul_70D0(matrix, (*(sV4_70D0*)&entry->V)), vu0Cross_70D0(arm, axisVec));
         vu0AddEq_70D0(intInfo->v[2], pointVelocity);
         vu0AddEq_70D0(intInfo->v[3], axisVec);
     }
@@ -716,12 +709,6 @@ struct sFList_7268 {
     int count;          // 0x4
 };
 
-struct sFData_7268 {
-    char pad0[0x80];
-    sFList_7268* list;  // 0x80
-    float scale;        // 0x84
-    char* elems;        // 0x88
-};
 
 
 typedef sFM_7268* (*GetMtxFn_7268)(void*);
@@ -854,24 +841,24 @@ extern "C" int cFlexBridgeNode_intersect(cFlexBridgeNode* self, sFTester_7268* t
     sFM_7268 inv;
     Copy_7268(&inv, matrix);
     TransposeInverse_7268(&inv);
-    ((SetXformFn_7268)tester->vt[1].fn)(vthis(tester, tester->vt[1]), &inv, 1.0f / ((sFData_7268*)self->Instance)->scale);
+    ((SetXformFn_7268)tester->vt[1].fn)(vthis(tester, tester->vt[1]), &inv, 1.0f / (self->Instance)->m_fScale);
     int n = cWorldIntersectType_IsMeshInt(tester, &mesh, 1, out, cap);
     ((VoidFn_7268)tester->vt[2].fn)(vthis(tester, tester->vt[2]));
     for (int i = 0; i < n; i++) {
         sFHit_7268* hit = &out[i];
         Reset_7268(hit);
-        float dataScale = ((sFData_7268*)self->Instance)->scale;
+        float dataScale = (self->Instance)->m_fScale;
         float one = 1.0f;
         hit->pos = MulVec_7268(matrix, Mul_7268(hit->pos, sFV_7268(dataScale, dataScale, dataScale, one)));
         hit->nrm = MulVec_7268(matrix, hit->nrm);
         hit->type = 1;
-        hit->owner = ((sFData_7268*)self->Instance);
-        int k = ((sFData_7268*)self->Instance)->list->count - 1;
+        hit->owner = (self->Instance);
+        int k = ((sFList_7268*)(self->Instance)->m_Model)->count - 1;
         hit->f48 = 0;
         hit->f5C = k;
         hit->v20 = D_004FF120_v7268;
         hit->v30 = D_004FF120_v7268;
-        hit->f4C = *(short*)(((sFData_7268*)self->Instance)->elems + k * 12 + 0x1A);
+        hit->f4C = *(short*)(((char*)(self->Instance)->m_pCollideRecord) + k * 12 + 0x1A);
     }
     return n;
 }
@@ -940,10 +927,6 @@ struct sVEV_75D8 {
     void (*fn)(...);
 };
 
-struct sFlexMesh_75D8 {
-    char pad_0x00[0x4];
-    sVEV_75D8* vt;          // 0x04
-};
 
 
 extern sV4_75D8 t4vect_ZAxis;
@@ -1137,7 +1120,7 @@ extern "C" void cFlexBridgeNode_updateGrid(cFlexBridgeNode* vself)
     (*(sV4_75D8*)&(*(&self->BoundBox)).MaxPoint) = corner;
     int id = ((int)self->Instance);
     nash_Nash_movenode_75D8(cObjectInterface_getNash(), 0, id, box, &old);
-    ((sFlexMesh_75D8*)self->GridMesh)->vt[3].fn((char*)((sFlexMesh_75D8*)self->GridMesh) + ((sFlexMesh_75D8*)self->GridMesh)->vt[3].delta, pos);
+    ((sVEV_75D8*)(self->GridMesh)->mVtbl)[3].fn((char*)(self->GridMesh) + ((sVEV_75D8*)(self->GridMesh)->mVtbl)[3].delta, pos);
 }
 #endif
 

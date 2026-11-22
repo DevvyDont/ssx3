@@ -387,14 +387,6 @@ extern "C" void pathREAD_t3Vector(void* dst, void* src);
 
 extern int D_00445428[];
 
-struct sPathNode_B880 {
-    int id;             // 0x0
-    int type;           // 0x4
-    char pos[0xC];      // 0x8
-    char dir[0xC];      // 0x14
-    char* f20;          // 0x20
-    char* f24;          // 0x24
-};
 
 
 /**
@@ -417,30 +409,30 @@ extern "C" int cPathSys_loadStartpoints(cPathSys* self, char* cursor)
     char* start = cursor;
     pathREAD_tInt32(&fileWord, cursor);
     cursor += 4;
-    *(sPathNode_B880**)&self->Startpoints = (sPathNode_B880*)cursor;
+    *(tPathStartpoint**)&self->Startpoints = (tPathStartpoint*)cursor;
     self->NumStartpoints = fileWord;
     for (int i = 0; i < self->NumStartpoints; i++) {
-        pathREAD_tInt32(&((sPathNode_B880*)self->Startpoints)[i].id, cursor);
+        pathREAD_tInt32(&(self->Startpoints)[i].Arg, cursor);
         cursor += 4;
         pathREAD_tInt32(&fileWord, cursor);
         cursor += 4;
-        pathREAD_t3Vector(((sPathNode_B880*)self->Startpoints)[i].pos, cursor);
+        pathREAD_t3Vector(((char*)&(self->Startpoints)[i].Pos), cursor);
         cursor += 0xC;
-        pathREAD_t3Vector(((sPathNode_B880*)self->Startpoints)[i].dir, cursor);
+        pathREAD_t3Vector(((char*)&(self->Startpoints)[i].Dir), cursor);
         cursor += 0xC;
         pathREAD_tInt32(&aiPathIndex, cursor);
         cursor += 4;
         pathREAD_tInt32(&trackPathIndex, cursor);
         cursor += 4;
-        ((sPathNode_B880*)self->Startpoints)[i].type = 0;
+        (self->Startpoints)[i].Type = 0;
         for (int j = 0; j < 3; j++) {
             if (D_00445428[j] == fileWord) {
-                ((sPathNode_B880*)self->Startpoints)[i].type = j;
+                (self->Startpoints)[i].Type = j;
                 break;
             }
         }
-        ((sPathNode_B880*)self->Startpoints)[i].f24 = (char*)&self->AIPaths[aiPathIndex];
-        ((sPathNode_B880*)self->Startpoints)[i].f20 = (char*)&self->TrackPaths[trackPathIndex];
+        (*(char**)&(self->Startpoints)[i].InitAIPath) = (char*)&self->AIPaths[aiPathIndex];
+        (*(char**)&(self->Startpoints)[i].InitTrackPath) = (char*)&self->TrackPaths[trackPathIndex];
     }
     return cursor - start;
 }

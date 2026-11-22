@@ -140,9 +140,6 @@ extern "C" void cRiderSphereTree_Init(cRiderSphereTree* self, int type, int n, i
 //100%
 INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_operatorE);
 #ifdef SKIP_ASM
-struct sVec4_9A28 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
 extern "C" void MEM_copy(void* dst, void* src, int size);
@@ -161,7 +158,7 @@ extern "C" cRiderSphereTree* cRiderSphereTree_operatorE(cRiderSphereTree* self, 
 {
     (*(int*)&self->bonePoses) = ((int)src->bonePoses);
     self->boundRad = src->boundRad;
-    (*(sVec4_9A28*)&self->boundCen) = (*(sVec4_9A28*)&src->boundCen);
+    (*(&self->boundCen)) = (*(&src->boundCen));
     self->boundBone = src->boundBone;
     self->listLen = src->listLen;
     self->sphMask = ((int)src->sphMask);

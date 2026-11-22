@@ -165,10 +165,6 @@ extern "C" void cBXString_printf(void* str, const char* fmt, ...)
 //100%
 INCLUDE_ASM("seg/seg_21A1C0", cBXString_trimRight);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct cBXString_94F0 {
-    char* str;
-};
 extern "C" void cBXString_copyBeforeWrite(void* self);
 extern unsigned char D_00499C81[];
 
@@ -179,12 +175,12 @@ extern unsigned char D_00499C81[];
  * table D_00499C81) starts, cuts the text there and sets the header's DataLength (text - 8). No retail code calls it.
  */
 // Strips trailing white space (D_00499C81 is the ctype table + 1, bit 8 = space).
-extern "C" void cBXString_trimRight(cBXString_94F0* self)
+extern "C" void cBXString_trimRight(cBXString* self)
 {
     cBXString_copyBeforeWrite(self);
     char* end = 0;
     char* scanPos;
-    for (scanPos = self->str; *scanPos != 0; scanPos++) {
+    for (scanPos = self->Str; *scanPos != 0; scanPos++) {
         if (end == 0)
             end = scanPos;
         if (!(D_00499C81[(int)*scanPos] & 8))
@@ -192,7 +188,7 @@ extern "C" void cBXString_trimRight(cBXString_94F0* self)
     }
     if (end != 0) {
         *end = 0;
-        *(int*)(self->str - 8) = end - self->str;
+        *(int*)(self->Str - 8) = end - self->Str;
     }
 }
 #endif
@@ -200,10 +196,6 @@ extern "C" void cBXString_trimRight(cBXString_94F0* self)
 //100%
 INCLUDE_ASM("seg/seg_21A1C0", cBXString_trimLeft);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct cBXString_9578 {
-    char* str;
-};
 extern "C" void cBXString_copyBeforeWrite(void* self);
 extern "C" void* func_0041610C(void* dst, const void* src, int n);
 extern unsigned char D_00499C81[];
@@ -216,15 +208,15 @@ extern unsigned char D_00499C81[];
  * - 8). No retail code calls it.
  */
 // Strips leading white space.
-extern "C" void cBXString_trimLeft(cBXString_9578* self)
+extern "C" void cBXString_trimLeft(cBXString* self)
 {
     cBXString_copyBeforeWrite(self);
-    char* textStart = self->str;
+    char* textStart = self->Str;
     while (D_00499C81[(int)*textStart] & 8)
         textStart++;
-    int len = *(int*)(self->str - 8) - (textStart - self->str);
-    func_0041610C(self->str, textStart, len + 1);
-    *(int*)(self->str - 8) = len;
+    int len = *(int*)(self->Str - 8) - (textStart - self->Str);
+    func_0041610C(self->Str, textStart, len + 1);
+    *(int*)(self->Str - 8) = len;
 }
 #endif
 

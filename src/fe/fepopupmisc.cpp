@@ -305,10 +305,7 @@ struct sVEm_F050 {
     void (*fn)(void*, int);
 };
 
-struct sDefObj_F050 {
-    sVEm_F050* vt;
-};
-extern sDefObj_F050 gUISoundNull;
+extern cUISoundInterface gUISoundNull;
 
 struct sVEi_F050 {
     short delta;
@@ -327,11 +324,11 @@ static inline int padCall_F050(char* in, int slot)
 
 static inline void sound_F050(cFEPopupScreenPos* s, int msg)
 {
-    sDefObj_F050* p = (sDefObj_F050*)s->mpEngine->mpSound;
+    cUISoundInterface* p = s->mpEngine->mpSound;
     if (p == 0)
         p = &gUISoundNull;
     if (p != 0)
-        p->vt[2].fn(vthis(p, p->vt[2]), msg);
+        ((sVEm_F050*)p->mVtbl)[2].fn(vthis(p, ((sVEm_F050*)p->mVtbl)[2]), msg);
 }
 
 static inline void playFrame_F050(cFEPopupScreenPos* s, char* name)
@@ -9629,15 +9626,6 @@ struct t3Vector {
     float x, y, z;
 };
 
-// The race setup at SSXApp + 0xC0 (mode, then per-slot rider and outfit ids).
-struct sRaceSetup_6718 {
-    int mode;
-    char pad_0x4[0x14];
-    int rider[10];              // 0x18
-    int outfit[10];             // 0x40
-    char pad_0x68[0x8];
-    int f70;                    // 0x70
-};
 
 static inline unsigned short* Loc1E6718(char* name)
 {
@@ -9666,8 +9654,8 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
         void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
         void* iface0 = cBE_getInterface_Fv(cBE_getBE(), 0);
         void* net = cBE_getInterface_Fv(cBE_getBE(), 2);
-        sRaceSetup_6718* raceSetup = (sRaceSetup_6718*)SSXApp->GameModeMan;
-        int mode = raceSetup->mode;
+        cGameModeMan* raceSetup = SSXApp->GameModeMan;
+        int mode = raceSetup->iHeatNum;
         int track = cBENewRaceInterface_newRace.cGameMode;
         int players = cBENewRaceInterface_newRace.cGamePath;
         if ((track != 0 && players == 2) || (track == 5 || track == 6)) {
@@ -9771,8 +9759,8 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
                 } else if (cBENewRaceInterface_newRace.cGamePath == 2 && i == cGameModeMan_iRanking[pl1]) {
                     cUIText_setAsciiString(uiText, func_00146F88(player, pl1));
                 } else {
-                    int rider = raceSetup->rider[idx];
-                    int outfit = raceSetup->outfit[idx];
+                    int rider = raceSetup->iCharacters[idx];
+                    int outfit = raceSetup->iCheatCharacters[idx];
                     cUIText_setAsciiString(uiText, cBECharacterInterface_getShortNameByCharacter(net, rider, outfit));
                 }
                 sprintf(buf, str_timePointspct_d, i + 1);
@@ -9918,7 +9906,7 @@ extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDING
                 } else {
                     if (i < 5) {
                         cUIText_setUnicodeStringByID((cUIText*)button, GetHashValue32(D_00441D10[ids.v[i]]));
-                        if (i == 0 && ids.v[0] == 1 && raceSetup->f70 == 3) {
+                        if (i == 0 && ids.v[0] == 1 && raceSetup->iNextHeat == 3) {
                             cUIText_setUnicodeStringByID((cUIText*)button, GetHashValue32(str_kT_OVRCMNFinalRound));
                         }
                         *(int*)((char*)button + 0x18) = ids.v[i];

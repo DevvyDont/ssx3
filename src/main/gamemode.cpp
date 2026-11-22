@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ai/ridermetrix.h"
 #include "ai/player.h"
 #include "be/beintnewrace.h"
 #include "main/gamemode.h"
@@ -937,12 +938,6 @@ struct sScore_239230 {
     int t[3][10];
 };
 
-// cRiderMetrix block copied out of the rider (0xAC bytes; finish time at 0x9C).
-struct sStats_239230 {
-    int v[0x9C / 4];
-    int time;           // 0x9C
-    int w[3];
-};
 
 
 static inline cAI* Race_239230()
@@ -972,12 +967,12 @@ extern "C" void func_00239230(sScore_239230* self, int idx)
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     int quick = cBENewRaceInterface_newRace.cGamePath;
     int n = cBENewPlayerInterface_getHumanRider(player, 0);
-    sStats_239230 st = *(sStats_239230*)&Rider_239230(idx)->mMetrix->Totals;
+    tRiderStats st = *(&Rider_239230(idx)->mMetrix->Totals);
     if (Rider_239230(idx)->mDidNotFinish != 0) {
         self->t[cGameModeHandler_pManager->iHeatNum - 1][idx] = 0;
         D_005366A8[idx] = 1;
     } else {
-        self->t[cGameModeHandler_pManager->iHeatNum - 1][idx] = st.time;
+        self->t[cGameModeHandler_pManager->iHeatNum - 1][idx] = st.TotalPoints;
         D_005366A8[idx] = 0;
     }
     if (cAI_isRaceFinished(Race_239230()) == 0)
@@ -1389,13 +1384,13 @@ INCLUDE_ASM("main/gamemode", cGMMPSlopeHandler_raceFinish);
 extern "C" void cGMMPSlopeHandler_raceFinish(void* self, int idx)
 {
     cAI* race = Race_239230();
-    sStats_239230 st = *(sStats_239230*)&race->Riders[idx]->mMetrix->Totals;
+    tRiderStats st = *(&race->Riders[idx]->mMetrix->Totals);
     bool dnf = Rider_239230(idx)->mDidNotFinish != 0;
     if (dnf) {
         D_00536640[idx] = 0;
         D_005366A8[idx] = 1;
     } else {
-        D_00536640[idx] = st.time;
+        D_00536640[idx] = st.TotalPoints;
         D_005366A8[idx] = 0;
     }
     bool over = cAI_isRaceFinished(race) != 0;
@@ -2865,11 +2860,6 @@ extern int D_005366A8[];
 extern int cGameModeMan_iRanking[];
 
 
-struct sStats_23BDB8 {
-    int v[0x9C / 4];
-    int time;           // 0x9C
-    int w[3];
-};
 
 struct sClk_23BDB8 {
     char pad_0x0[0x28];
@@ -2897,9 +2887,9 @@ extern "C" void cGMRivalPointHandler_raceFinish(void* self, int idx)
         D_00536640[idx] = 0;
         D_005366A8[idx] = 1;
     } else {
-        sStats_23BDB8 st = *(sStats_23BDB8*)&rider->mMetrix->Totals;
+        tRiderStats st = *(&rider->mMetrix->Totals);
         D_005366A8[idx] = 0;
-        D_00536640[idx] = st.time;
+        D_00536640[idx] = st.TotalPoints;
     }
     if (cAI_isRaceFinished(SSXApp->Game->AI) == 0) {
         return;

@@ -6,11 +6,6 @@ extern "C" int cBELibrary_getScoreType(int a, int b);
 //100%
 INCLUDE_ASM("be/bedbprofile", cBECharProfileDB_getScoreStats__FPvii);
 #ifdef SKIP_ASM
-struct sScoreStat_00152398
-{
-    int a;
-    int b;
-};
 
 
 /**
@@ -28,7 +23,7 @@ void* cBECharProfileDB_getScoreStats(void* self, int locID, int event)
     if (type == 26) {
         return 0;
     }
-    return &((sScoreStat_00152398*)&((cBECharProfileDB*)self)->mScoreStats[0])[type];
+    return &((&((cBECharProfileDB*)self)->mScoreStats[0]))[type];
 }
 #endif
 

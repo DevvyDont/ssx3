@@ -275,10 +275,6 @@ int func_0014D988(void* self, int i);
 extern "C" void* func_0014D998(sBELibTables* self, int i);
 unsigned int BXrand();
 
-struct sBEFlagEntry_6C70 {
-    unsigned short field_0x0;
-    unsigned short flags;
-};
 
 struct sBEEntry_6C70 {
     char pad_0x0[4];
@@ -287,11 +283,11 @@ struct sBEEntry_6C70 {
     int flags;          // 0x34
 };
 
-static inline sBEFlagEntry_6C70* Flag_6C70(char* p, sBEEntry_6C70* e)
+static inline tBEProfileBolt* Flag_6C70(char* p, sBEEntry_6C70* e)
 {
     short s = (*(short**)(p + 0x288))[e->id];
     if (s >= 0)
-        return (sBEFlagEntry_6C70*)(p + 0x290) + s;
+        return (tBEProfileBolt*)(p + 0x290) + s;
     return 0;
 }
 
@@ -356,9 +352,9 @@ extern "C" int func_00156C70(void* self, int profileIndex, int characterId, int 
             {
                 short id = def->id;
                 short flagSlot = (charRecord->mpBoltsMap)[id];
-                sBEFlagEntry_6C70* flagEntry;
+                tBEProfileBolt* flagEntry;
                 if (flagSlot >= 0)
-                    flagEntry = (sBEFlagEntry_6C70*)(&charRecord->mBolts[0]) + flagSlot;
+                    flagEntry = ((&charRecord->mBolts[0])) + flagSlot;
                 else
                     flagEntry = 0;
                 if ((flagEntry->flags & 2) == 0)
@@ -371,9 +367,9 @@ extern "C" int func_00156C70(void* self, int profileIndex, int characterId, int 
             {
                 short id = def->id;
                 short flagSlot = (charRecord->mpBoltsMap)[id];
-                sBEFlagEntry_6C70* flagEntry;
+                tBEProfileBolt* flagEntry;
                 if (flagSlot >= 0)
-                    flagEntry = (sBEFlagEntry_6C70*)(&charRecord->mBolts[0]) + flagSlot;
+                    flagEntry = ((&charRecord->mBolts[0])) + flagSlot;
                 else
                     flagEntry = 0;
                 if ((flagEntry->flags & 2) == 0)
@@ -386,9 +382,9 @@ extern "C" int func_00156C70(void* self, int profileIndex, int characterId, int 
             {
                 short id = def->id;
                 short flagSlot = (charRecord->mpBoltsMap)[id];
-                sBEFlagEntry_6C70* flagEntry;
+                tBEProfileBolt* flagEntry;
                 if (flagSlot >= 0)
-                    flagEntry = (sBEFlagEntry_6C70*)(&charRecord->mBolts[0]) + flagSlot;
+                    flagEntry = ((&charRecord->mBolts[0])) + flagSlot;
                 else
                     flagEntry = 0;
                 if ((flagEntry->flags & 2) == 0)

@@ -6449,10 +6449,6 @@ INCLUDE_ASM("seg/seg_316FB8", __sfp);
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-struct __sbuf_0010 {
-	unsigned char *_base;
-	int	_size;
-};
 /* newlib 1.9's struct _reent up to __sglue (0x1d8) */
 #define NDYNAMIC_0010 4
 #define ENOMEM_0010 12
@@ -6497,15 +6493,15 @@ found:
   stream->_p = 0;		/* no current pointer */
   stream->_w = 0;			/* nothing to read or write */
   stream->_r = 0;
-  (*(struct __sbuf_0010*)&stream->_bf)._base = 0;		/* no buffer */
-  (*(struct __sbuf_0010*)&stream->_bf)._size = 0;
+  (*(struct __sbuf*)&stream->_bf)._base = 0;		/* no buffer */
+  (*(struct __sbuf*)&stream->_bf)._size = 0;
   stream->_lbfsize = 0;		/* not line buffered */
   stream->_file = -1;		/* no file */
   /* fp->_cookie = <any>; */	/* caller sets cookie, _read/_write etc */
-  (*(struct __sbuf_0010*)&stream->_ub)._base = 0;		/* no ungetc buffer */
-  (*(struct __sbuf_0010*)&stream->_ub)._size = 0;
-  (*(struct __sbuf_0010*)&stream->_lb)._base = 0;		/* no line buffer */
-  (*(struct __sbuf_0010*)&stream->_lb)._size = 0;
+  (*(struct __sbuf*)&stream->_ub)._base = 0;		/* no ungetc buffer */
+  (*(struct __sbuf*)&stream->_ub)._size = 0;
+  (*(struct __sbuf*)&stream->_lb)._base = 0;		/* no line buffer */
+  (*(struct __sbuf*)&stream->_lb)._size = 0;
   (*(struct _reent**)&stream->_data) = reent;
   return stream;
 }

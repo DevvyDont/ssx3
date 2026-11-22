@@ -515,10 +515,6 @@ extern "C" void func_00358700(int kind)
 //100%
 INCLUDE_ASM("object/multiparticle", cRailManNode_disableRail);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sMpVec4_8780 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 struct sMpCell_8780 {
     int level;
     int x, y, z;
@@ -629,14 +625,14 @@ extern "C" void cRailManNode_disableRail(cRailManNode* self, int idx)
     tSplineSegmentRecord* node = (tSplineSegmentRecord*)part->first;
     for (int i = 0; i < part->count; i++) {
         tBoundBox box;
-        (*(sMpVec4_8780*)&box.MinPoint).x = node->m_fvMin.m[0];
-        (*(sMpVec4_8780*)&box.MinPoint).y = node->m_fvMin.m[1];
-        (*(sMpVec4_8780*)&box.MinPoint).z = node->m_fvMin.m[2];
-        (*(sMpVec4_8780*)&box.MinPoint).w = 1.0f;
-        (*(sMpVec4_8780*)&box.MaxPoint).x = node->m_fvMax.m[0];
-        (*(sMpVec4_8780*)&box.MaxPoint).y = node->m_fvMax.m[1];
-        (*(sMpVec4_8780*)&box.MaxPoint).z = node->m_fvMax.m[2];
-        (*(sMpVec4_8780*)&box.MaxPoint).w = 1.0f;
+        (*(&box.MinPoint)).x = node->m_fvMin.m[0];
+        (*(&box.MinPoint)).y = node->m_fvMin.m[1];
+        (*(&box.MinPoint)).z = node->m_fvMin.m[2];
+        (*(&box.MinPoint)).w = 1.0f;
+        (*(&box.MaxPoint)).x = node->m_fvMax.m[0];
+        (*(&box.MaxPoint)).y = node->m_fvMax.m[1];
+        (*(&box.MaxPoint)).z = node->m_fvMax.m[2];
+        (*(&box.MaxPoint)).w = 1.0f;
         remove_8780(cObjectInterface_getNash(), node, &box);
         node = (tSplineSegmentRecord*)node->m_NextSeg;
     }
@@ -646,10 +642,6 @@ extern "C" void cRailManNode_disableRail(cRailManNode* self, int idx)
 //100%
 INCLUDE_ASM("object/multiparticle", cRailManNode_enableRail);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sMpVec4_8998 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 struct sMpCell_8998 {
     int level;
     int x, y, z;
@@ -736,14 +728,14 @@ extern "C" void cRailManNode_enableRail(cRailManNode* self, int idx)
     tSplineSegmentRecord* node = (tSplineSegmentRecord*)part->first;
     for (int i = 0; i < part->count; i++) {
         tBoundBox box;
-        (*(sMpVec4_8998*)&box.MinPoint).x = node->m_fvMin.m[0];
-        (*(sMpVec4_8998*)&box.MinPoint).y = node->m_fvMin.m[1];
-        (*(sMpVec4_8998*)&box.MinPoint).z = node->m_fvMin.m[2];
-        (*(sMpVec4_8998*)&box.MinPoint).w = 1.0f;
-        (*(sMpVec4_8998*)&box.MaxPoint).x = node->m_fvMax.m[0];
-        (*(sMpVec4_8998*)&box.MaxPoint).y = node->m_fvMax.m[1];
-        (*(sMpVec4_8998*)&box.MaxPoint).z = node->m_fvMax.m[2];
-        (*(sMpVec4_8998*)&box.MaxPoint).w = 1.0f;
+        (*(&box.MinPoint)).x = node->m_fvMin.m[0];
+        (*(&box.MinPoint)).y = node->m_fvMin.m[1];
+        (*(&box.MinPoint)).z = node->m_fvMin.m[2];
+        (*(&box.MinPoint)).w = 1.0f;
+        (*(&box.MaxPoint)).x = node->m_fvMax.m[0];
+        (*(&box.MaxPoint)).y = node->m_fvMax.m[1];
+        (*(&box.MaxPoint)).z = node->m_fvMax.m[2];
+        (*(&box.MaxPoint)).w = 1.0f;
         insert_8998(cObjectInterface_getNash(), node, &box);
         node = (tSplineSegmentRecord*)node->m_NextSeg;
     }
@@ -1140,11 +1132,6 @@ struct sMpPart_9030 {
     int field_0xc;
 };
 
-struct sMpModel_9030 {
-    int field_0x0;
-    int count;              // 0x4
-    sMpPart_9030* parts;    // 0x8
-};
 
 
 struct sMpNode_9030 {
@@ -1186,10 +1173,10 @@ extern "C" void cAnimComboNode_setComboXform(cAnimComboNode* vself)
     if (self->NumAnimMeshes <= 0) {
         return;
     }
-    sMpModel_9030* model = ((sMpModel_9030*)(self->Instance)->m_Model);
+    tModelRecord* model = ((self->Instance)->m_Model);
     int n = 0;
-    sMpPart_9030* part = model->parts;
-    for (int i = 0; i < model->count; i++, part++) {
+    sMpPart_9030* part = ((sMpPart_9030*)model->m_MeshHeirarchy);
+    for (int i = 0; i < model->m_iNumMeshes; i++, part++) {
         if (part->info != 0) {
             sMpNode_9030* node = (sMpNode_9030*)(&self->CurrTime);
             vu0CopyMatrix_9030(&(self->ComboXform)[n], node->items[n].mtx);
@@ -1255,11 +1242,6 @@ struct sMpPart_9140 {
     int field_0xc;
 };
 
-struct sMpModel_9140 {
-    int field_0x0;
-    int count;              // 0x4
-    sMpPart_9140* parts;    // 0x8
-};
 
 
 
@@ -1287,10 +1269,10 @@ extern "C" void cAnimComboNode_cacheFrame(cAnimComboNode* self)
             return;
         }
     }
-    sMpModel_9140* model = ((sMpModel_9140*)(self->Instance)->m_Model);
+    tModelRecord* model = ((self->Instance)->m_Model);
     int n = 0;
-    sMpPart_9140* meshPart = model->parts;
-    for (int i = 0; i < model->count; i++, meshPart++) {
+    sMpPart_9140* meshPart = ((sMpPart_9140*)model->m_MeshHeirarchy);
+    for (int i = 0; i < model->m_iNumMeshes; i++, meshPart++) {
         if (meshPart->info->active != 0) {
             cMeshAnimFrame_transform(&(self->AnimFrames)[n], &self->ComboXform[n]);
             n++;

@@ -412,11 +412,6 @@ struct sWVSlot_9D60 {
     int f4;
 };
 
-struct sWVItem_9D60 {
-    char pad0[0x1C];
-    void* section;
-    char pad20[0x58 - 0x20];
-};
 
 struct sWVCam_9D60 {
     int active;
@@ -452,7 +447,7 @@ extern "C" void cWorldView_refreshStreamFocus(cWorldView* self, int cam)
         for (i = 0; i < (unsigned int)self->mp_Hdr->m_uiNumSections; i++) {
             int st = ((sWVSlot_9D60*)&self->mp_SectionState[0])[i].state;
             if (st == 5 || st == 6) {
-                cWorldView_recursiveTreeFocus(self, ((sWVItem_9D60*)self->mp_Section)[i].section, cam, st == 6);
+                cWorldView_recursiveTreeFocus(self, ((void*)(self->mp_Section)[i].m_BSP.unk_0C), cam, st == 6);
             }
         }
         self->m_StreamFocus[cam].m_iFocusTick = frame;
@@ -2380,13 +2375,8 @@ struct func_003AC358_sEnt {
     int f8;
     int fC;
 };
-struct func_003AC358_sList {
-    int f0;
-    int count;
-    func_003AC358_sEnt* entries;
-};
 
-extern "C" void* func_003AC508(cPS2ChunkResolve* self, tInstanceRecord* a1, func_003AC358_sList* list, void* cur);
+extern "C" void* func_003AC508(cPS2ChunkResolve* self, tInstanceRecord* a1, tModelRecord* list, void* cur);
 
 /**
  * Turns a streamed instance's DMA data offset (+0x98) into a pointer and fixes up its per-instance packets.
@@ -2401,13 +2391,13 @@ extern "C" void* func_003AC508(cPS2ChunkResolve* self, tInstanceRecord* a1, func
 extern "C" int func_003AC358(cPS2ChunkResolve* self, tInstanceRecord* instance)
 {
     int i;
-    func_003AC358_sList* list;
+    tModelRecord* list;
     void* cur;
     *(int*)((char*)instance + 0x98) += (int)instance;
-    list = (func_003AC358_sList*)instance->m_Model;
+    list = instance->m_Model;
     cur = *(void**)((char*)instance + 0x98);
-    int n = list->count;
-    func_003AC358_sEnt* entry = list->entries;
+    int n = list->m_iNumMeshes;
+    func_003AC358_sEnt* entry = ((func_003AC358_sEnt*)list->m_MeshHeirarchy);
     for (i = 0; i < n; i++, entry++) {
         func_003AC358_sObj* object = entry->obj;
         if (object != 0) {
@@ -2498,7 +2488,7 @@ extern char D_00509400[];
  */
 // Walks one instance DMA chain: relocates the ref tags (+0x98 instance base for geometry, +0x24 for the
 // rest) and patches each packet's MSCAL (first one D_2270, later ones D_22C8).
-extern "C" void* func_003AC508(cPS2ChunkResolve* self, tInstanceRecord* instance, func_003AC358_sList* list, void* cur)
+extern "C" void* func_003AC508(cPS2ChunkResolve* self, tInstanceRecord* instance, tModelRecord* list, void* cur)
 {
     tModelRecord* ctx = (tModelRecord*)list;
     char* tagPtr = (char*)cur;

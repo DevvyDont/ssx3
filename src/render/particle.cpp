@@ -582,9 +582,6 @@ extern "C" void cDynamicColourEmitter_purge(cDynamicColourEmitter* self, int res
 //100%
 INCLUDE_ASM("render/particle", cDynamicColourEmitter_reset);
 #ifdef SKIP_ASM
-struct sRGBA_1600 {
-    unsigned char r, g, b, a;
-};
 
 // Function-local static `sRGBA black(0,0,0,0)` and its init guard, spelled out
 // as the globals splat named.
@@ -611,7 +608,7 @@ extern "C" void cDynamicColourEmitter_reset(cDynamicColourEmitter* self)
             D_004A599B = 0;
             D_004A599C = 1;
         }
-        ((sRGBA_1600*)self->m_colours)[i] = *(sRGBA_1600*)&D_004A5998;
+        (self->m_colours)[i] = *(tPackedRGBA*)&D_004A5998;
     }
 }
 #endif
@@ -3331,20 +3328,6 @@ extern "C" void* cPS2GraphicsMan_SetDisplayMode(cPS2GraphicsMan* self)
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetDisplayMode1);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct sPartTexEnt_3764C0 {
-    char pad_0x00[0x80];
-    unsigned int a1;    // 0x80
-    unsigned int a2;    // 0x84
-    unsigned int w;     // 0x88
-    unsigned int h;     // 0x8C
-    unsigned int psm;   // 0x90
-    unsigned int psm2;  // 0x94
-    unsigned int zpsm;  // 0x98
-    bool flag;             // 0x9C
-    int id;             // 0xA0
-};
 
 
 int func_0037BD98_3764C0(void* self, unsigned int a1, unsigned int a2, unsigned int w, unsigned int h,
@@ -3366,10 +3349,10 @@ extern "C" int cPS2GraphicsMan_SetDisplayMode1(cPS2GraphicsMan* self, int idx)
     if (self->CurrentDisplayMode == idx) {
         return 1;
     }
-    func_0037BD98_3764C0(self, ((sPartTexEnt_3764C0*)self->DisplayModes)[idx].a1, ((sPartTexEnt_3764C0*)self->DisplayModes)[idx].a2, ((sPartTexEnt_3764C0*)self->DisplayModes)[idx].w,
-                         ((sPartTexEnt_3764C0*)self->DisplayModes)[idx].h, ((sPartTexEnt_3764C0*)self->DisplayModes)[idx].psm, ((sPartTexEnt_3764C0*)self->DisplayModes)[idx].psm2,
-                         ((sPartTexEnt_3764C0*)self->DisplayModes)[idx].zpsm, 0, ((sPartTexEnt_3764C0*)self->DisplayModes)[idx].flag ? 1 : 0,
-                         ((sPartTexEnt_3764C0*)self->DisplayModes)[idx].flag ? 0 : 1, ((sPartTexEnt_3764C0*)self->DisplayModes)[idx].id);
+    func_0037BD98_3764C0(self, ((unsigned int)(self->DisplayModes)[idx].unk_080), ((unsigned int)(self->DisplayModes)[idx].unk_084), ((unsigned int)(self->DisplayModes)[idx].unk_088),
+                         ((unsigned int)(self->DisplayModes)[idx].unk_08C), ((unsigned int)(self->DisplayModes)[idx].unk_090), ((unsigned int)(self->DisplayModes)[idx].unk_094),
+                         ((unsigned int)(self->DisplayModes)[idx].unk_098), 0, (*(bool*)&(self->DisplayModes)[idx].unk_09C) ? 1 : 0,
+                         (*(bool*)&(self->DisplayModes)[idx].unk_09C) ? 0 : 1, (self->DisplayModes)[idx].unk_0A0);
     self->CurrentDisplayMode = idx;
     return 1;
 }
@@ -4350,16 +4333,8 @@ struct sRect_7A10 {
     sRect_7A10(float ax, float ay, float aw, float ah) : x(ax), y(ay), w(aw), h(ah) {}
 };
 
-struct sPtRS_7A10 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    short tex;
-    short pad;
-};
 
-extern sPtRS_7A10 D_00501420_rs7A10 __asm__("sDrawState_s_defaultDrawState");
+extern sDrawState D_00501420_rs7A10 __asm__("sDrawState_s_defaultDrawState");
 extern char D_005059D8[];
 extern "C" void func_00363490(void* ring, unsigned int* a, int* x, unsigned int* b, int* y);
 extern "C" void* WaitSema(int sema);  // WaitSema (returns in $2: the call clobbers v0)
@@ -4483,7 +4458,7 @@ void cGfx_7A10::EndFrame_impl()
     gfxBase->mGifCursor = gfxBase->mGifHalfStart = gfxBase->mGifBuffBase + gfxBase->mGifBuildIndex * 0x26600;
     InvalidDCache(gfxBase->mVifCursor, gfxBase->mVifCursor + 0xCCC80);
     InvalidDCache(gfxBase->mGifCursor, gfxBase->mGifCursor + 0x26600);
-    *(sPtRS_7A10*)gfxBase->m_pCurrentDrawState = D_00501420_rs7A10;
+    *gfxBase->m_pCurrentDrawState = D_00501420_rs7A10;
     func_00362CC8(gfxBase->mpDeferMan);
     func_003673D0(gfxBase->mpTextureMan);
     ResetViewport();
@@ -4737,11 +4712,6 @@ struct sEnt_81A0 {
     char pad_0x20[0x60];
 };
 
-struct sRing_81A0 {
-    int count;                      // 0x0
-    char pad_0x4[0x7C];
-    sEnt_81A0 ents[1];              // 0x80
-};
 
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
@@ -4891,12 +4861,12 @@ extern "C" void cPS2GraphicsMan_DrawRotatedSprite(cPS2GraphicsMan* self, sV_81A0
     }
     unsigned int next = (unsigned int)packet & 0x0FFFFFFF;
     self->mVifCursor = next;
-    sRing_81A0* ring = ((sRing_81A0*)self->mpDeferMan);
+    cPS2DeferManager* ring = (self->mpDeferMan);
     sDrawState* rs = (self->m_pCurrentDrawState);
-    if (ring->count < 2600) {
-        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-        int key = *(int*)((char*)ring + 0x69CC0);
-        sEnt_81A0* ringEntry = (sEnt_81A0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+    if (ring->mNumSubmitDMA < 2600) {
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        int key = ring->unk_69CC0;
+        sEnt_81A0* ringEntry = (sEnt_81A0*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sEnt_81A0*)&ring->mSubmits[0]) | 0x30000000));
         ringEntry->rs = *rs;
         ringEntry->buf = buf;
         ringEntry->next = next;
@@ -5383,11 +5353,6 @@ struct sPtEnt_9860 {
     char pad_0x20[0x60];
 };
 
-struct sPtRing_9860 {
-    int count;                      // 0x0
-    char pad_0x4[0x7C];
-    sPtEnt_9860 ents[1];            // 0x80
-};
 
 
 struct sVtx_9860 {
@@ -5404,12 +5369,12 @@ extern "C" void func_0037D968(cPS2GraphicsMan* self);
 
 static inline void QueueRecord_9860(cPS2GraphicsMan* self, unsigned int buf, unsigned int next, int flag)
 {
-    sPtRing_9860* ring = ((sPtRing_9860*)self->mpDeferMan);
+    cPS2DeferManager* ring = (self->mpDeferMan);
     sDrawState* rs = (self->m_pCurrentDrawState);
-    if (ring->count < 0xA28) {
-        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-        int key = *(int*)((char*)ring + 0x69CC0);
-        sPtEnt_9860* e = (sPtEnt_9860*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+    if (ring->mNumSubmitDMA < 0xA28) {
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        int key = ring->unk_69CC0;
+        sPtEnt_9860* e = (sPtEnt_9860*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_9860*)&ring->mSubmits[0]) | 0x30000000));
         e->rs = *rs;
         e->buf = buf;
         e->next = next;
@@ -6165,11 +6130,6 @@ struct sPtEnt_B548 {
     char pad_0x20[0x60];
 };
 
-struct sPtRing_B548 {
-    int count;                      // 0x0
-    char pad_0x4[0x7C];
-    sPtEnt_B548 ents[1];            // 0x80
-};
 
 struct sMat_B548 {
     float m[4][4];
@@ -6259,12 +6219,12 @@ static inline void BoneHeader_B548(unsigned long** pp, float* col)
 
 static inline void QueueRecord_B548(cPS2GraphicsMan* self, unsigned int buf, unsigned int next, int flag)
 {
-    sPtRing_B548* ring = ((sPtRing_B548*)self->mpDeferMan);
+    cPS2DeferManager* ring = (self->mpDeferMan);
     sPtRS_B548* rs = ((sPtRS_B548*)self->m_pCurrentDrawState);
-    if (ring->count < 0xA28) {
-        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-        int key = *(int*)((char*)ring + 0x69CC0);
-        sPtEnt_B548* e = (sPtEnt_B548*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+    if (ring->mNumSubmitDMA < 0xA28) {
+        rs->f8 = (rs->f8 & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        int key = ring->unk_69CC0;
+        sPtEnt_B548* e = (sPtEnt_B548*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_B548*)&ring->mSubmits[0]) | 0x30000000));
         e->rs = *rs;
         e->buf = buf;
         e->next = next;
@@ -7532,11 +7492,6 @@ struct sPtEnt_D348 {
     char pad_0x20[0x60];
 };
 
-struct sPtRing_D348 {
-    int count;                      // 0x0
-    char pad_0x4[0x7C];
-    sPtEnt_D348 ents[1];            // 0x80
-};
 
 
 extern "C" void func_00367DB8_D348(void* texset, int idx, unsigned int* buf) __asm__("func_00367DB8");
@@ -7559,12 +7514,12 @@ extern "C" int cPS2GraphicsMan_LockFrameToTexture(cPS2GraphicsMan* self, int idx
     func_00367DB8_D348(((void*)self->mpTextureMan), idx, &packetAddr);
     unsigned int next = packetAddr & 0x0FFFFFFF;
     self->mVifCursor = next;
-    sPtRing_D348* ring = ((sPtRing_D348*)self->mpDeferMan);
+    cPS2DeferManager* ring = (self->mpDeferMan);
     sDrawState* rs = (self->m_pCurrentDrawState);
-    if (ring->count < 2600) {
-        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-        int key = *(int*)((char*)ring + 0x69CC0);
-        sPtEnt_D348* ringEntry = (sPtEnt_D348*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+    if (ring->mNumSubmitDMA < 2600) {
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        int key = ring->unk_69CC0;
+        sPtEnt_D348* ringEntry = (sPtEnt_D348*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_D348*)&ring->mSubmits[0]) | 0x30000000));
         ringEntry->rs = *rs;
         ringEntry->buf = buf;
         ringEntry->next = next;
@@ -7589,11 +7544,6 @@ struct sPtEnt_D450 {
     char pad_0x20[0x60];
 };
 
-struct sPtRing_D450 {
-    int count;                      // 0x0
-    char pad_0x4[0x7C];
-    sPtEnt_D450 ents[1];            // 0x80
-};
 
 
 /**
@@ -7625,14 +7575,14 @@ extern "C" int cPS2GraphicsMan_RestoreFrameLock(cPS2GraphicsMan* self)
     packet[13] = 0x18;
     packet += 14;
     unsigned int next = (unsigned int)packet & 0x0FFFFFFF;
-    sPtRing_D450* ring = ((sPtRing_D450*)self->mpDeferMan);
+    cPS2DeferManager* ring = (self->mpDeferMan);
     sDrawState* rs = (self->m_pCurrentDrawState);
     self->mVifCursor = next;
     int one = 1;
-    if (ring->count < 2600) {
-        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-        int key = *(int*)((char*)ring + 0x69CC0);
-        sPtEnt_D450* ringEntry = (sPtEnt_D450*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+    if (ring->mNumSubmitDMA < 2600) {
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        int key = ring->unk_69CC0;
+        sPtEnt_D450* ringEntry = (sPtEnt_D450*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_D450*)&ring->mSubmits[0]) | 0x30000000));
         ringEntry->rs = *rs;
         ringEntry->one = one;
         ringEntry->next = next;
@@ -7790,11 +7740,6 @@ struct sPtEnt_D800 {
     char pad_0x20[0x60];
 };
 
-struct sPtRing_D800 {
-    int count;                      // 0x0
-    char pad_0x4[0x7C];
-    sPtEnt_D800 ents[1];            // 0x80
-};
 
 
 extern "C" void func_00367F18_D800(void* texset, int idx, float* color, unsigned int* buf) __asm__("func_00367F18");
@@ -7820,12 +7765,12 @@ extern "C" void cPS2GraphicsMan_ShadowClearLockTexture(cPS2GraphicsMan* self, in
     func_00367F18_D800(((void*)self->mpTextureMan), idx, color, &packetAddr);
     unsigned int next = packetAddr & 0x0FFFFFFF;
     self->mVifCursor = next;
-    sPtRing_D800* ring = ((sPtRing_D800*)self->mpDeferMan);
+    cPS2DeferManager* ring = (self->mpDeferMan);
     sDrawState* rs = (self->m_pCurrentDrawState);
-    if (ring->count < 2600) {
-        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-        int key = *(int*)((char*)ring + 0x69CC0);
-        sPtEnt_D800* e = (sPtEnt_D800*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+    if (ring->mNumSubmitDMA < 2600) {
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        int key = ring->unk_69CC0;
+        sPtEnt_D800* e = (sPtEnt_D800*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_D800*)&ring->mSubmits[0]) | 0x30000000));
         ASSERT_D800(e != 0);
         e->rs = *rs;
         e->buf = buf;
@@ -8631,11 +8576,6 @@ struct sPtEnt_07A0 {
     char pad_0x20[0x60];
 };
 
-struct sPtRing_07A0 {
-    int count;                      // 0x0
-    char pad_0x4[0x7C];
-    sPtEnt_07A0 ents[1];            // 0x80
-};
 
 struct sQuad_07A0 {
     unsigned int w[4];
@@ -8771,12 +8711,12 @@ extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter(cPS2GraphicsMan* se
         writePtr += 2;
         unsigned int next = func_0038F668(D_004A4474, writePtr, 4);
         self->mVifCursor = next;
-        sPtRing_07A0* ring = ((sPtRing_07A0*)self->mpDeferMan);
+        cPS2DeferManager* ring = (self->mpDeferMan);
         sDrawState* rs = (self->m_pCurrentDrawState);
-        if (ring->count < 2600) {
-            rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-            int key = *(int*)((char*)ring + 0x69CC0);
-            sPtEnt_07A0* e = (sPtEnt_07A0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        if (ring->mNumSubmitDMA < 2600) {
+            rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+            int key = ring->unk_69CC0;
+            sPtEnt_07A0* e = (sPtEnt_07A0*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_07A0*)&ring->mSubmits[0]) | 0x30000000));
             e->rs = *rs;
             e->buf = buf;
             e->next = next;
@@ -9057,11 +8997,6 @@ struct sPtEnt_1310 {
     char pad_0x20[0x60];
 };
 
-struct sPtRing_1310 {
-    int count;                      // 0x0
-    char pad_0x4[0x7C];
-    sPtEnt_1310 ents[1];            // 0x80
-};
 
 struct sQuad_1310 {
     unsigned int w[4];
@@ -9199,12 +9134,12 @@ extern "C" void cPS2GraphicsMan_RenderSnowBoxFlakes(cPS2GraphicsMan* self, sPtOb
     packet += 2;
     unsigned int next = func_0038F668(D_004A4474, packet, 4);
     self->mVifCursor = next;
-    sPtRing_1310* ring = ((sPtRing_1310*)self->mpDeferMan);
+    cPS2DeferManager* ring = (self->mpDeferMan);
     sDrawState* rs = (self->m_pCurrentDrawState);
-    if (ring->count < 2600) {
-        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-        int key = *(int*)((char*)ring + 0x69CC0);
-        sPtEnt_1310* ringEntry = (sPtEnt_1310*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+    if (ring->mNumSubmitDMA < 2600) {
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        int key = ring->unk_69CC0;
+        sPtEnt_1310* ringEntry = (sPtEnt_1310*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_1310*)&ring->mSubmits[0]) | 0x30000000));
         ringEntry->rs = *rs;
         ringEntry->buf = buf;
         ringEntry->next = next;
@@ -9232,11 +9167,6 @@ struct sPtEnt_16F0 {
     char pad_0x20[0x60];
 };
 
-struct sPtRing_16F0 {
-    int count;                      // 0x0
-    char pad_0x4[0x7C];
-    sPtEnt_16F0 ents[1];            // 0x80
-};
 
 struct sQuad_16F0 {
     unsigned int w[4];
@@ -9374,12 +9304,12 @@ extern "C" void cPS2GraphicsMan_RenderSnowBoxFluffs(cPS2GraphicsMan* self, sPtOb
     packet += 2;
     unsigned int next = func_0038F668(D_004A4474, packet, 4);
     self->mVifCursor = next;
-    sPtRing_16F0* ring = ((sPtRing_16F0*)self->mpDeferMan);
+    cPS2DeferManager* ring = (self->mpDeferMan);
     sDrawState* rs = (self->m_pCurrentDrawState);
-    if (ring->count < 2600) {
-        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-        int key = *(int*)((char*)ring + 0x69CC0);
-        sPtEnt_16F0* ringEntry = (sPtEnt_16F0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+    if (ring->mNumSubmitDMA < 2600) {
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        int key = ring->unk_69CC0;
+        sPtEnt_16F0* ringEntry = (sPtEnt_16F0*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_16F0*)&ring->mSubmits[0]) | 0x30000000));
         ringEntry->rs = *rs;
         ringEntry->buf = buf;
         ringEntry->next = next;
@@ -9557,11 +9487,6 @@ struct sPtEnt_1F10 {
     char pad_0x20[0x60];
 };
 
-struct sPtRing_1F10 {
-    int count;                      // 0x0
-    char pad_0x4[0x7C];
-    sPtEnt_1F10 ents[1];            // 0x80
-};
 
 
 struct sMat_1F10 {
@@ -9624,13 +9549,13 @@ extern "C" void cPS2GraphicsMan_RenderSpline(cPS2GraphicsMan* self, sMat_1F10* B
     packet[21] = (unsigned long)(((unsigned int)D_3BF0 >> 3) | 0x14000000) << 32;
     packet += 22;
     self->mVifCursor = (unsigned int)packet & 0x0FFFFFFF;
-    sPtRing_1F10* ring = ((sPtRing_1F10*)self->mpDeferMan);
+    cPS2DeferManager* ring = (self->mpDeferMan);
     unsigned int next = self->mVifCursor;
     sDrawState* rs = (self->m_pCurrentDrawState);
-    if (ring->count < 2600) {
-        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-        int key = *(int*)((char*)ring + 0x69CC0);
-        sPtEnt_1F10* ringEntry = (sPtEnt_1F10*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+    if (ring->mNumSubmitDMA < 2600) {
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        int key = ring->unk_69CC0;
+        sPtEnt_1F10* ringEntry = (sPtEnt_1F10*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_1F10*)&ring->mSubmits[0]) | 0x30000000));
         ringEntry->rs = *rs;
         ringEntry->buf = buf;
         ringEntry->next = next;
@@ -12860,11 +12785,6 @@ struct sPtEnt_83B8 {
     char pad_0x20[0x60];
 };
 
-struct sPtRing_83B8 {
-    int count;                      // 0x0
-    char pad_0x4[0x7C];
-    sPtEnt_83B8 ents[1];            // 0x80
-};
 
 
 extern int D_004A5B84;
@@ -12902,13 +12822,13 @@ extern "C" void cPS2GraphicsMan_RenderBoardWake(cPS2GraphicsMan* self, void* ver
     for (i = 0; i < numSegmentsWide - 1; i++) {
         func_003885E0(self, verts, startIndex, numIndices, stripLength, i, i + 1, alphaMultiplier, alphaDelta);
     }
-    sPtRing_83B8* ring = ((sPtRing_83B8*)self->mpDeferMan);
+    cPS2DeferManager* ring = (self->mpDeferMan);
     unsigned int next = self->mVifCursor;
     sDrawState* rs = (self->m_pCurrentDrawState);
-    if (ring->count < 2600) {
-        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-        int key = *(int*)((char*)ring + 0x69CC0);
-        sPtEnt_83B8* ringEntry = (sPtEnt_83B8*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+    if (ring->mNumSubmitDMA < 2600) {
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        int key = ring->unk_69CC0;
+        sPtEnt_83B8* ringEntry = (sPtEnt_83B8*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_83B8*)&ring->mSubmits[0]) | 0x30000000));
         ringEntry->rs = *rs;
         ringEntry->buf = buf;
         ringEntry->next = next;

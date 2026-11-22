@@ -2031,22 +2031,13 @@ extern "C" void* cInputExec_getTempReg(cInputExec* self, int i)
 //100%
 INCLUDE_ASM("input/inputparse", cInputExec_getButton);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct sInputEntry3252F8 {
-    float value;        // 0x0
-    unsigned int a;     // 0x4
-    unsigned int b;     // 0x8
-    unsigned int c;     // 0xC
-    unsigned int d;     // 0x10
-    int pad[2];
-};
 
 
 
 static inline unsigned int GetA3252F8(cInputPad* l, int idx)
 {
     if (idx < l->NumButtons) {
-        return ((sInputEntry3252F8*)&l->Buttons[0])[idx].a;
+        return ((unsigned int)((&l->Buttons[0]))[idx].IsPressed);
     }
     return 0;
 }
@@ -2054,7 +2045,7 @@ static inline unsigned int GetA3252F8(cInputPad* l, int idx)
 static inline unsigned int GetB3252F8(cInputPad* l, int idx)
 {
     if (idx < l->NumButtons) {
-        return ((sInputEntry3252F8*)&l->Buttons[0])[idx].b;
+        return ((unsigned int)((&l->Buttons[0]))[idx].IsReleased);
     }
     return 0;
 }
@@ -2062,7 +2053,7 @@ static inline unsigned int GetB3252F8(cInputPad* l, int idx)
 static inline unsigned int GetC3252F8(cInputPad* l, int idx)
 {
     if (idx < l->NumButtons) {
-        return ((sInputEntry3252F8*)&l->Buttons[0])[idx].c;
+        return ((unsigned int)((&l->Buttons[0]))[idx].IsHeld);
     }
     return 0;
 }
@@ -2070,7 +2061,7 @@ static inline unsigned int GetC3252F8(cInputPad* l, int idx)
 static inline unsigned int GetD3252F8(cInputPad* l, int idx)
 {
     if (idx < l->NumButtons) {
-        return ((sInputEntry3252F8*)&l->Buttons[0])[idx].d;
+        return ((unsigned int)((&l->Buttons[0]))[idx].IsRepeated);
     }
     return 0;
 }
@@ -2095,7 +2086,7 @@ float cInputExec_getButton_impl(cInputExec* self, int idx, unsigned int kind)
     switch (kind) {
     case 0:
         if (idx < (self->Pad)->NumButtons) {
-            return ((sInputEntry3252F8*)&(self->Pad)->Buttons[0])[idx].value;
+            return ((&(self->Pad)->Buttons[0]))[idx].Value;
         }
         break;
     case 1:

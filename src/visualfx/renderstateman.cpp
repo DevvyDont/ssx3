@@ -1377,10 +1377,6 @@ struct sRsCtx_EF950 {
     sRsVEnt_EF950* vtable;      // 0x10D8
 };
 
-struct sRsSeg_EF950 {
-    sRsVec4_EF950 p0;
-    sRsVec4_EF950 p1;
-};
 
 
 extern sRsCtx_EF950* GrMan_renderstateman __asm__("GrMan");
@@ -1556,8 +1552,8 @@ extern "C" void cAirStreamerFX_render(cAirStreamerFX* self)
         if (color.x < 0.0f) {
             color.x = 0.0f;
         }
-        leftPos = rsAdd_EF950(((sRsSeg_EF950*)self->StreamBuf)[j].p0, off);
-        rightPos = rsAdd_EF950(((sRsSeg_EF950*)self->StreamBuf)[j].p1, off);
+        leftPos = rsAdd_EF950((*(sRsVec4_EF950*)&(self->StreamBuf)[j].l), off);
+        rightPos = rsAdd_EF950((*(sRsVec4_EF950*)&(self->StreamBuf)[j].r), off);
         rsVert_EF950(&vertsL[k], 0.0f, uvy, color, rsSub_EF950(leftPos, half));
         rsVert_EF950(&vertsR[k], 0.0f, uvy, color, rsSub_EF950(rightPos, half));
         k++;

@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "render/2drender.h"
 #include "camera/camera.h"
 #include "main/gameviewman.h"
 #include "render/ps2graphicsman.h"
@@ -141,9 +142,6 @@ struct sSlots22E550 {
     sSlot22E550 e[2];
 };
 
-struct sRect22E550 {
-    float x, y, w, h;
-};
 
 
 /**
@@ -182,25 +180,25 @@ extern "C" void cGameViewMan_updateViewState(cGameViewMan* self)
         float hw = w * 0.5f;
         self->m_uiNumView = 2;
         self->m_uiCurrentView = 0;
-        ((sRect22E550*)&self->m_ViewRect[0])[0].x = 0.0f;
-        ((sRect22E550*)&self->m_ViewRect[0])[0].y = 0.0f;
-        ((sRect22E550*)&self->m_ViewRect[0])[0].w = hw;
-        ((sRect22E550*)&self->m_ViewRect[0])[0].h = screenHeight;
-        ((sRect22E550*)&self->m_ViewRect[0])[1].x = hw;
-        ((sRect22E550*)&self->m_ViewRect[0])[1].y = 0.0f;
-        ((sRect22E550*)&self->m_ViewRect[0])[1].w = hw;
-        ((sRect22E550*)&self->m_ViewRect[0])[1].h = screenHeight;
+        ((&self->m_ViewRect[0]))[0].X = 0.0f;
+        ((&self->m_ViewRect[0]))[0].Y = 0.0f;
+        ((&self->m_ViewRect[0]))[0].W = hw;
+        ((&self->m_ViewRect[0]))[0].H = screenHeight;
+        ((&self->m_ViewRect[0]))[1].X = hw;
+        ((&self->m_ViewRect[0]))[1].Y = 0.0f;
+        ((&self->m_ViewRect[0]))[1].W = hw;
+        ((&self->m_ViewRect[0]))[1].H = screenHeight;
         ((sCam22E550**)&self->PlayerCamera[0])[0]->farClip = 20000.0f;
         ((sCam22E550**)&self->PlayerCamera[0])[1]->farClip = 20000.0f;
         break;
     }
     default:
         self->m_uiNumView = 1;
-        ((sRect22E550*)&self->m_ViewRect[0])[0].w = w;
-        ((sRect22E550*)&self->m_ViewRect[0])[0].h = screenHeight;
+        ((&self->m_ViewRect[0]))[0].W = w;
+        ((&self->m_ViewRect[0]))[0].H = screenHeight;
         self->m_uiCurrentView = 0;
-        ((sRect22E550*)&self->m_ViewRect[0])[0].x = 0.0f;
-        ((sRect22E550*)&self->m_ViewRect[0])[0].y = 0.0f;
+        ((&self->m_ViewRect[0]))[0].X = 0.0f;
+        ((&self->m_ViewRect[0]))[0].Y = 0.0f;
         ((sCam22E550**)&self->PlayerCamera[0])[0]->farClip = 30000.0f;
         break;
     }

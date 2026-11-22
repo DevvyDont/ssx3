@@ -883,10 +883,6 @@ struct sVE_4330 {
     void (*fn)(void*, ...);
 };
 
-struct sObj_4330 {
-    int pad[2];
-    sVE_4330* vt;
-};
 
 /**
  * Handles the messenger screen's widget events: the buddy rows, the find-user keyboard and going back.
@@ -908,13 +904,13 @@ struct sObj_4330 {
  * @param pWidget  the widget (On Tour: cUIThing* pWidget)
  * @param msg  the widget event
  */
-extern "C" void cFEStateNetMessenger_onWidgetEvent(cFEStateNetMessenger* self, sObj_4330* pWidget, int msg)
+extern "C" void cFEStateNetMessenger_onWidgetEvent(cFEStateNetMessenger* self, cUIState* pWidget, int msg)
 {
     char buf[0x20];
     switch (msg) {
     case 6: {
-        sObj_4330* o = (sObj_4330*)self->mpParentState;
-        o->vt[17].fn(vthis(o, o->vt[17]), ((char*)self), 20);
+        cUIState* o = self->mpParentState;
+        ((sVE_4330*)o->mVtbl)[17].fn(vthis(o, ((sVE_4330*)o->mVtbl)[17]), ((char*)self), 20);
         break;
     }
     case 8:
@@ -925,7 +921,7 @@ extern "C" void cFEStateNetMessenger_onWidgetEvent(cFEStateNetMessenger* self, s
         cKeyboardPopup_setIncludeKey(self->mpKeyboard, 53, 0, 2);
         break;
     case 5: {
-        int idx = *(int*)((char*)pWidget + 0x18);
+        int idx = pWidget->miMiscData;
         if (idx < 0) {
             break;
         }
@@ -952,7 +948,7 @@ extern "C" void cFEStateNetMessenger_onWidgetEvent(cFEStateNetMessenger* self, s
     case 1:
         for (int i = 0; i < 15; i++) {
             sprintf(buf, str_personapct_02d, i);
-            int id = *(int*)((char*)pWidget + 0x38);
+            int id = (int)pWidget->mScreens.mEnd.mVtbl;
             if (id == GetHashValue32(buf)) {
                 func_001A6070_4330(((char*)self), i + self->miScrollOffset);
                 func_001A5FB8_4330(((char*)self), i);
@@ -966,12 +962,12 @@ extern "C" void cFEStateNetMessenger_onWidgetEvent(cFEStateNetMessenger* self, s
     case 2: {
         for (int i = 0; i < 15; i++) {
             sprintf(buf, str_personapct_02d, i);
-            int id = *(int*)((char*)pWidget + 0x38);
+            int id = (int)pWidget->mScreens.mEnd.mVtbl;
             if (id == GetHashValue32(buf)) {
                 sprintf(buf, str_ps2Xpct_02d, i);
-                sObj_4330* o = (sObj_4330*)cUIScreen_getObjectByHashName_4330(self->mpScreen, GetHashValue32(buf));
+                cUIState* o = (cUIState*)cUIScreen_getObjectByHashName_4330(self->mpScreen, GetHashValue32(buf));
                 if (o != 0) {
-                    o->vt[9].fn(vthis(o, o->vt[9]), 0);
+                    ((sVE_4330*)o->mVtbl)[9].fn(vthis(o, ((sVE_4330*)o->mVtbl)[9]), 0);
                 }
                 ((cObjV_4330*)pWidget)->set(cVec_4330(1.0f, 0.0f, 0.0f, 0.0f));
                 func_001A66A8_4330(((char*)self), i, 0);
@@ -14191,9 +14187,6 @@ extern char str_pct_d_c[];
 struct sNetEntry_4CD8 { int f0; char name4[0x3E]; char name42[0xBE]; };
 extern sNetEntry_4CD8 cCommSystem_mNetConns[10];
 
-struct sVec3_001B4CD8 {
-    float x, y, z;
-};
 
 struct sVec4_001B4CD8 {
     float x, y, z, w;
@@ -14240,7 +14233,7 @@ extern "C" void func_001B4CD8(cFEStateNetConfig* self)
     unsigned short name[64];
     unsigned short line[64];
     sVec4_001B4CD8 size;
-    sVec3_001B4CD8 scale;
+    t3Vector scale;
     sVec4_001B4CD8 pos;
     func_00255F20(cCommSystem_mCommSystem, D_004A1B90[D_004A1B80]);
     self->miNumSettings = cCommSystem_mNumNetConn;
@@ -14268,7 +14261,7 @@ extern "C" void func_001B4CD8(cFEStateNetConfig* self)
         }
     } else {
         ((cFEVObj_001B4CD8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_LBSettings)))->getSize(&pos);
-        scale = *(sVec3_001B4CD8*)&self->mpLBSettings->mScale;
+        scale = *(&self->mpLBSettings->mScale);
         if (self->miNumSettings > 4) {
             self->miNumSettings = 4;
         }

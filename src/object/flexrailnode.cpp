@@ -624,15 +624,6 @@ struct sFrV_98E8 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct sFrN_98E8 {
-    sFrV_98E8 force;            // 0x00
-    sFrV_98E8 vel;              // 0x10
-    sFrV_98E8 posA;             // 0x20
-    sFrV_98E8 posB;             // 0x30
-    sFrModelRef9220 model;      // 0x40
-    int bone;                   // 0x44
-    char pad48[8];
-};
 
 extern "C" float cObjectInterface_getUpdateTime();
 extern "C" void cFloatRailNode_getPosition(cFloatRailNode* self, tFloatRailNode* node);
@@ -708,18 +699,18 @@ static inline void vu0AddEq_98E8(sFrV_98E8& dst, sFrV_98E8 b)
 extern "C" void cFloatRailNode_updateNodes(cFloatRailNode* self)
 {
     float dt = cObjectInterface_getUpdateTime();
-    sFrN_98E8* n = (sFrN_98E8*)self->Nodes;
+    tFloatRailNode* n = self->Nodes;
     for (int i = 0; i < self->NumNodes; i++, n++) {
-        if (*(int*)((char*)n->model.get() + 0xC))
+        if (*(int*)((char*)(*(sFrModelRef9220*)&n->InstId).get() + 0xC))
             cFloatRailNode_getPosition(self, (tFloatRailNode*)n);
         float* k = (float*)(&self->LSpring);
         float ks = -self->LSpring;
-        sFrV_98E8 acc = vu0Add_98E8(vu0Scale_98E8(vu0Sub_98E8(n->posA, n->posB), ks),
-                                    vu0Scale_98E8(n->force, k[2]));
-        vu0AddEq_98E8(acc, vu0Scale_98E8(n->vel, -self->LDamp));
-        vu0AddEq_98E8(n->posA, vu0Scale_98E8(n->vel, dt));
-        vu0AddEq_98E8(n->vel, vu0Scale_98E8(acc, dt));
-        n->force = D_004FF120_98E8;
+        sFrV_98E8 acc = vu0Add_98E8(vu0Scale_98E8(vu0Sub_98E8((*(sFrV_98E8*)&n->Pos), (*(sFrV_98E8*)&n->OPos)), ks),
+                                    vu0Scale_98E8((*(sFrV_98E8*)&n->Force), k[2]));
+        vu0AddEq_98E8(acc, vu0Scale_98E8((*(sFrV_98E8*)&n->Vel), -self->LDamp));
+        vu0AddEq_98E8((*(sFrV_98E8*)&n->Pos), vu0Scale_98E8((*(sFrV_98E8*)&n->Vel), dt));
+        vu0AddEq_98E8((*(sFrV_98E8*)&n->Vel), vu0Scale_98E8(acc, dt));
+        (*(sFrV_98E8*)&n->Force) = D_004FF120_98E8;
     }
 }
 #endif

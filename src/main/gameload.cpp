@@ -1074,12 +1074,6 @@ INCLUDE_ASM("main/gameload", cGame_loadWScriptManSection);
 // cWScriptMan_allocateGlobalTable
 void* cWScriptMan_loadSection_2(void* self, int sectionId) __asm__("cWScriptMan_loadSection__FPv");
 
-struct sScriptSection_0430 {
-    short state;
-    short pad;
-    int f4;
-    void* data;
-};
 
 
 struct sWorldCache_0430 {
@@ -1090,7 +1084,7 @@ struct sWorldCache_0430 {
 
 static inline bool isSectionLoaded_0430(cWScriptCache* c, int sectionId)
 {
-    return ((sScriptSection_0430*)c->mpCache)[sectionId].state >= 2 && ((sScriptSection_0430*)c->mpCache)[sectionId].data != 0;
+    return (c->mpCache)[sectionId].mState >= 2 && ((void*)(c->mpCache)[sectionId].mpScriptHeader) != 0;
 }
 
 /**

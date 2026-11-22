@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "render/particle.h"
 #include "object/instancenode.h"
 #include "world/instancerecord.h"
 #include "bx/math3d.h"
@@ -437,12 +438,6 @@ struct sVec4_00345C90 {
     sVec4_00345C90(float a, float b, float c, float d) { x = a; y = b; z = c; w = d; }
 } __attribute__((aligned(16)));
 
-struct sTarget00345C90 {
-    char pad0[0x48];
-    float x;
-    float y;
-    float z;
-};
 
 
 /**
@@ -461,7 +456,7 @@ struct sTarget00345C90 {
  * @param pos  offset from that mesh
  * @return @p self
  */
-extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleModifier1(cDynamicParticleModifier* self, sTarget00345C90* particleDesc, int owner, int bone, sVec4_00345C90* pos)
+extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleModifier1(cDynamicParticleModifier* self, tParticleData* particleDesc, int owner, int bone, sVec4_00345C90* pos)
 {
     cEffectModifier_cEffectModifier((cEffectModifier*)self, owner);
     self->mVtbl = cDynamicParticleModifier_vtbl;
@@ -470,12 +465,12 @@ extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleMo
     self->ParticleData = (tParticleData*)particleDesc;
     self->Mesh = bone;
     *(sVec4_00345C90*)&self->Offset = *pos;
-    *(sVec4_00345C90*)&self->InitVel = sVec4_00345C90(particleDesc->x, particleDesc->y, particleDesc->z, 0.0f);
+    *(sVec4_00345C90*)&self->InitVel = sVec4_00345C90(particleDesc->VelX, particleDesc->VelY, particleDesc->VelZ, 0.0f);
     self->Fade = 0;
-    particleDesc->x = 0.0f;
-    particleDesc->y = 0.0f;
-    particleDesc->z = 0.0f;
-    cBaseClass_DynamicEmitter_setupEmitter(((char*)&self->Emitter), (sTarget00345C90*)self->ParticleData, -1.0f);
+    particleDesc->VelX = 0.0f;
+    particleDesc->VelY = 0.0f;
+    particleDesc->VelZ = 0.0f;
+    cBaseClass_DynamicEmitter_setupEmitter(((char*)&self->Emitter), self->ParticleData, -1.0f);
     cDynamicParticleModifier_updatePosition(self);
     cDynamicParticleModifier_DynamicParticleCount++;
     self->Complete = 0;
@@ -518,10 +513,10 @@ extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleMo
     vt[2].fn(vthis(stream, vt[2]), data, 80);
     if (self->Complete == 0) {
         void* particleData = operator_new1(216);
-        self->ParticleData = (tParticleData*)((sTarget00345C90*)particleData);
+        self->ParticleData = (tParticleData*)((tParticleData*)particleData);
         sVEntry<void(void*, void*, int)>* vt2 = *(sVEntry<void(void*, void*, int)>**)stream;
         vt2[2].fn(vthis(stream, vt2[2]), particleData, 216);
-        cBaseClass_DynamicEmitter_setupEmitter(((char*)&self->Emitter), (sTarget00345C90*)self->ParticleData, -1.0f);
+        cBaseClass_DynamicEmitter_setupEmitter(((char*)&self->Emitter), self->ParticleData, -1.0f);
         cBaseClass_DynamicEmitter_readFromReplayFrame(((char*)&self->Emitter), (cStream00371318*)stream);
         cBaseClass_DynamicEmitter_updateBASE(((char*)&self->Emitter), (sVec4_00345C90*)&self->Pos, (sVec4_00345C90*)&self->Vel, 1, 0.01666666753590107f);
     } else {

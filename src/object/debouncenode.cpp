@@ -305,12 +305,9 @@ INCLUDE_ASM("object/debouncenode", cConveyorNode_updateIntersectInfo);
 typedef int cQuad3130 __attribute__((mode(TI)));
 extern cQuad3130 t4vect_YAxis;
 
-struct sVec3130 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sMat3130 {
-    sVec3130 r[4];
+    t4Vector r[4];
     sMat3130() {}
     // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
     sMat3130(const sMat3130& o)
@@ -387,15 +384,15 @@ static inline sMat3130 mulMat3130(const sMat3130& a, const sMat3130& b)
 }
 
 // PORT: PS2-only VU0 inline asm (load a vector into vf8).
-static inline void loadVf8_3130(const sVec3130& v)
+static inline void loadVf8_3130(const t4Vector& v)
 {
     __asm__ __volatile__("lqc2      $vf8, 0x0(%0)\n" : : "r"(&v));
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix * vf8).
-static inline sVec3130 mulVec3130(const sMat3130& m)
+static inline t4Vector mulVec3130(const sMat3130& m)
 {
-    sVec3130 r;
+    t4Vector r;
     __asm__ __volatile__(
         "lqc2      $vf4, 0x0(%1)\n"
         "lqc2      $vf5, 0x10(%1)\n"
@@ -413,9 +410,9 @@ static inline sVec3130 mulVec3130(const sMat3130& m)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sVec3130 sub3130(const sVec3130& a, const sVec3130& b)
+static inline t4Vector sub3130(const t4Vector& a, const t4Vector& b)
 {
-    sVec3130 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -428,7 +425,7 @@ static inline sVec3130 sub3130(const sVec3130& a, const sVec3130& b)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place a += b).
-static inline void addEq3130(sVec3130& a, const sVec3130& b)
+static inline void addEq3130(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %0\n"
@@ -441,9 +438,9 @@ static inline void addEq3130(sVec3130& a, const sVec3130& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
-static inline sVec3130 scale3130(const sVec3130& v, float s)
+static inline t4Vector scale3130(const t4Vector& v, float s)
 {
-    sVec3130 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -458,9 +455,9 @@ static inline sVec3130 scale3130(const sVec3130& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (cross product, w = 0).
-static inline sVec3130 cross3130(const sVec3130& a, const sVec3130& b)
+static inline t4Vector cross3130(const t4Vector& a, const t4Vector& b)
 {
-    sVec3130 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -475,7 +472,7 @@ static inline sVec3130 cross3130(const sVec3130& a, const sVec3130& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float len3130(const sVec3130& v)
+static inline float len3130(const t4Vector& v)
 {
     float r;
     int t;
@@ -496,9 +493,9 @@ static inline float len3130(const sVec3130& v)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt).
-static inline sVec3130 norm3130(const sVec3130& v)
+static inline t4Vector norm3130(const t4Vector& v)
 {
-    sVec3130 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -516,7 +513,7 @@ static inline sVec3130 norm3130(const sVec3130& v)
     return r;
 }
 
-static inline sVec3130 pos3130(const sMat3130& m)
+static inline t4Vector pos3130(const sMat3130& m)
 {
     return m.r[3];
 }
@@ -569,17 +566,17 @@ extern "C" void cConveyorNode_updateIntersectInfo(sNode3130* self, tIntersectInf
     }
     boneMat = mulMat3130(*w, boneMat);
     if (self->flags[hit->Mesh] != 0) {
-        sVec3130 offset = sub3130((*(sVec3130*)&hit->Ipos), pos3130(boneMat));
+        t4Vector offset = sub3130((*(&hit->Ipos)), pos3130(boneMat));
         float k = self->strength / len3130(offset);
-        sVec3130 impulse = scale3130((*(sVec3130*)&hit->Inorm), k);
-        sVec3130 torque = cross3130(offset, impulse);
-        addEq3130((*(sVec3130*)&hit->Ivel), torque);
-        addEq3130((*(sVec3130*)&hit->Iangvel), impulse);
+        t4Vector impulse = scale3130((*(&hit->Inorm)), k);
+        t4Vector torque = cross3130(offset, impulse);
+        addEq3130((*(&hit->Ivel)), torque);
+        addEq3130((*(&hit->Iangvel)), impulse);
     } else {
-        loadVf8_3130(*(sVec3130*)&t4vect_YAxis);
-        sVec3130 n = norm3130(mulVec3130(boneMat));
-        sVec3130 torque = scale3130(cross3130(n, (*(sVec3130*)&hit->Inorm)), self->strength);
-        addEq3130((*(sVec3130*)&hit->Ivel), torque);
+        loadVf8_3130(*(t4Vector*)&t4vect_YAxis);
+        t4Vector n = norm3130(mulVec3130(boneMat));
+        t4Vector torque = scale3130(cross3130(n, (*(&hit->Inorm))), self->strength);
+        addEq3130((*(&hit->Ivel)), torque);
     }
 }
 #endif

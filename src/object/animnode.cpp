@@ -47,11 +47,6 @@ struct sAnimEntry_E448 {
     int pad_0xC;
 };
 
-struct sAnimDef_E448 {
-    int pad_0x0;
-    int count;                  // 0x4
-    sAnimEntry_E448* entries;   // 0x8
-};
 
 
 /**
@@ -65,11 +60,11 @@ struct sAnimDef_E448 {
  */
 extern "C" void cAnimNode_setAnimMeshCache(cAnimNode* self)
 {
-    sAnimDef_E448* def = (sAnimDef_E448*)self->Instance->m_Model;
-    sAnimEntry_E448* entry = def->entries;
+    tModelRecord* def = self->Instance->m_Model;
+    sAnimEntry_E448* entry = ((sAnimEntry_E448*)def->m_MeshHeirarchy);
     int i;
     self->NumAnimMeshes = 0;
-    for (i = 0; i < def->count; i++, entry++) {
+    for (i = 0; i < def->m_iNumMeshes; i++, entry++) {
         if (entry->src != 0)
             self->NumAnimMeshes++;
     }
@@ -80,10 +75,10 @@ extern "C" void cAnimNode_setAnimMeshCache(cAnimNode* self)
         *(sMeshInst_E448**)&self->AnimFrames = 0;
     }
     sMeshRef_E448*& refs = ((sMeshRef_E448*)self->MeshVelocity);
-    refs = new (str_MeshVelocity, 0x20000000, 0) sMeshRef_E448[def->count];
-    entry = def->entries;
+    refs = new (str_MeshVelocity, 0x20000000, 0) sMeshRef_E448[def->m_iNumMeshes];
+    entry = ((sAnimEntry_E448*)def->m_MeshHeirarchy);
     int k = 0;
-    for (i = 0; i < def->count; i++, entry++) {
+    for (i = 0; i < def->m_iNumMeshes; i++, entry++) {
         if (entry->src != 0) {
             cAnimFrame_setAnimRecord(&((sMeshInst_E448*)self->AnimFrames)[k++], entry->src);
         }
@@ -283,12 +278,6 @@ struct sDelta_E798 {
     sVec4_E798 rot;
 };
 
-struct sBone_E798 {
-    int parent;
-    int f4;
-    int active;
-    int fC;
-};
 
 struct sVE_E798 {
     short delta;
@@ -423,12 +412,12 @@ extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
     }
     tModelRecord* info = (tModelRecord*)obj->Instance->m_Model;
     int k = 0;
-    sBone_E798* ent = (sBone_E798*)info->m_MeshHeirarchy;
+    tMeshHeirarchyRecord* ent = info->m_MeshHeirarchy;
     for (int i = 0; i < info->m_iNumMeshes; i++, ent++) {
         ((sDelta_E798*)(char*)self->MeshVelocity)[i].pos = t4vect_Zero;
         ((sDelta_E798*)(char*)self->MeshVelocity)[i].rot = t4vect_Zero;
         float d2r = 0.01745329424738884f;
-        if (ent->active == 0) continue;
+        if (((int)ent->m_MeshAnim) == 0) continue;
         cMeshAnimFrame* node = &self->AnimFrames[k];
         k++;
         sVE_E798* vt = (sVE_E798*)self->mVtbl;
@@ -469,11 +458,11 @@ extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
         rotv = vu0MulMat_E798(&eulerMat, rotv);
         pos = vu0MulMat_E798(&(self->AnimMats)[i], pos);
         rotv = vu0MulMat_E798(&(self->AnimMats)[i], rotv);
-        if (ent->parent >= 0) {
-            sVec4_E798 parentOffset = vu0Sub_E798(boneE798Pos(((char*)self), i), boneE798Pos(((char*)self), ent->parent));
-            vu0AddEq_E798(rotv, ((sDelta_E798*)(char*)self->MeshVelocity)[ent->parent].rot);
-            vu0AddEq_E798(pos, vu0Add_E798(((sDelta_E798*)(char*)self->MeshVelocity)[ent->parent].pos,
-                                           vu0Cross_E798(parentOffset, ((sDelta_E798*)(char*)self->MeshVelocity)[ent->parent].rot)));
+        if (ent->m_iParentID >= 0) {
+            sVec4_E798 parentOffset = vu0Sub_E798(boneE798Pos(((char*)self), i), boneE798Pos(((char*)self), ent->m_iParentID));
+            vu0AddEq_E798(rotv, ((sDelta_E798*)(char*)self->MeshVelocity)[ent->m_iParentID].rot);
+            vu0AddEq_E798(pos, vu0Add_E798(((sDelta_E798*)(char*)self->MeshVelocity)[ent->m_iParentID].pos,
+                                           vu0Cross_E798(parentOffset, ((sDelta_E798*)(char*)self->MeshVelocity)[ent->m_iParentID].rot)));
         }
         ((sDelta_E798*)(char*)self->MeshVelocity)[i].pos = pos;
         vu0AddEq_E798(((sDelta_E798*)(char*)self->MeshVelocity)[i].rot, rotv);

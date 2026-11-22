@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "world/instancerecord.h"
 #include "animation/animsequencer.h"
 #include "animation/gameanimmap.h"
 #include "fe/ferider.h"
@@ -116,27 +117,23 @@ extern "C" float cComputer_calcTilt(cComputer* self, const t4Vector* direction)
 //100%
 INCLUDE_ASM("seg/seg_1218", cComputer_calcTurn);
 #ifdef SKIP_ASM
-struct sV4_0348
-{
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 class cObj_0348 {
 public:
     virtual void vm1();
-    virtual sV4_0348* GetDir();
+    virtual t4Vector* GetDir();
     virtual void v1();
     virtual void v2();
-    virtual sV4_0348* GetPos();
+    virtual t4Vector* GetPos();
 };
 
-extern sV4_0348 D_004FF160_v0348 __asm__("t4vect_ZAxis");
+extern t4Vector D_004FF160_v0348 __asm__("t4vect_ZAxis");
 extern "C" float func_0031C228(float);
 
 // PORT: PS2-only VU0 inline asm (cross product, w = 0).
-static inline sV4_0348 Cross_0348(const sV4_0348& a, const sV4_0348& b)
+static inline t4Vector Cross_0348(const t4Vector& a, const t4Vector& b)
 {
-    sV4_0348 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -151,9 +148,9 @@ static inline sV4_0348 Cross_0348(const sV4_0348& a, const sV4_0348& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sV4_0348 Sub_0348(const sV4_0348& a, const sV4_0348& b)
+static inline t4Vector Sub_0348(const t4Vector& a, const t4Vector& b)
 {
-    sV4_0348 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -166,9 +163,9 @@ static inline sV4_0348 Sub_0348(const sV4_0348& a, const sV4_0348& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sV4_0348 Scale_0348(const sV4_0348& v, float s)
+static inline t4Vector Scale_0348(const t4Vector& v, float s)
 {
-    sV4_0348 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -183,9 +180,9 @@ static inline sV4_0348 Scale_0348(const sV4_0348& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt).
-static inline sV4_0348 Norm_0348(const sV4_0348& v)
+static inline t4Vector Norm_0348(const t4Vector& v)
 {
-    sV4_0348 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -204,7 +201,7 @@ static inline sV4_0348 Norm_0348(const sV4_0348& v)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float Dot_0348(const sV4_0348& a, const sV4_0348& b)
+static inline float Dot_0348(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -252,7 +249,7 @@ static inline float Atan2_0348(float y, float x)
 
 static inline cObj_0348* Obj_0348(char* self) { return (cObj_0348*)(*(char**)(self + 0x18) + 0x6C0); }
 
-extern "C" float cComputer_calcTurn_0348(char* self, sV4_0348* target) __asm__("cComputer_calcTurn");
+extern "C" float cComputer_calcTurn_0348(char* self, t4Vector* target) __asm__("cComputer_calcTurn");
 /**
  * Returns the steering amount that turns the computer rider towards a point.
  *
@@ -266,15 +263,15 @@ extern "C" float cComputer_calcTurn_0348(char* self, sV4_0348* target) __asm__("
  * @param target  the point to steer towards
  * @return the turn amount, -0.98 to 0.98
  */
-extern "C" float cComputer_calcTurn_0348(char* vself, sV4_0348* target)
+extern "C" float cComputer_calcTurn_0348(char* vself, t4Vector* target)
 {
     cComputer* self = (cComputer*)vself;
-    sV4_0348 up = *(sV4_0348*)&self->RiderHandler.GroundMotion.mRider->mMatrix.row[2];
+    t4Vector up = *(&self->RiderHandler.GroundMotion.mRider->mMatrix.row[2]);
     if (up.z <= 0.0f)
         up = D_004FF160_v0348;
-    sV4_0348 fwd = *Obj_0348(((char*)self))->GetDir();
-    sV4_0348 side = Cross_0348(fwd, up);
-    sV4_0348 toTarget = Sub_0348(*target, *Obj_0348(((char*)self))->GetPos());
+    t4Vector fwd = *Obj_0348(((char*)self))->GetDir();
+    t4Vector side = Cross_0348(fwd, up);
+    t4Vector toTarget = Sub_0348(*target, *Obj_0348(((char*)self))->GetPos());
     toTarget.z = 0.0f;
     toTarget = Norm_0348(toTarget);
     toTarget = Norm_0348(Sub_0348(toTarget, Scale_0348(up, Dot_0348(toTarget, up))));
@@ -343,14 +340,6 @@ static inline t4Vector Scale_0610(const t4Vector& v, float s)
     return r;
 }
 
-struct sCam_0610 {
-    char pad0[0x110];
-    t4Vector pos;       // 0x110
-    char pad120[0x490 - 0x120];
-    t4Vector target;    // 0x490
-    char pad4A0[0x10];
-    t4Vector base;      // 0x4B0
-};
 
 // PORT: the unit later declares cComputer_calculateTargetPos with the out-pointer spelled out; same symbol, by-value return here
 t4Vector cComputer_calculateTargetPos_0610(char* self) __asm__("cComputer_calculateTargetPos");
@@ -366,9 +355,9 @@ t4Vector cComputer_calculateTargetPos_0610(char* self) __asm__("cComputer_calcul
 t4Vector cComputer_calculateTargetPos_0610(char* vself)
 {
     cComputer* self = (cComputer*)vself;
-    t4Vector toTarget = Sub_0610(((sCam_0610*)self->RiderHandler.GroundMotion.mRider)->target, ((sCam_0610*)self->RiderHandler.GroundMotion.mRider)->pos);
+    t4Vector toTarget = Sub_0610((self->RiderHandler.GroundMotion.mRider)->PathPos, (self->RiderHandler.GroundMotion.mRider)->mPosition);
     toTarget = Scale_0610(toTarget, 0.1f);
-    return Add_0610(((sCam_0610*)self->RiderHandler.GroundMotion.mRider)->base, toTarget);
+    return Add_0610((self->RiderHandler.GroundMotion.mRider)->AimTargetPos, toTarget);
 }
 #endif
 
@@ -2315,7 +2304,6 @@ extern "C" int cRiderAnim_onExpireINTO_RSFS_3918(void* self, void* ev, void* dat
 extern "C" int cRiderAnim_onExpireINTO_PRESS_3918(void* self, void* ev, void* data) __asm__("cRiderAnim_onExpireINTO_PRESS");
 extern "C" int cRiderAnim_onExpireBLENDTO_GEAR_CYC_3918(void* self, void* ev, void* data) __asm__("cRiderAnim_onExpireBLENDTO_GEAR_CYC");
 
-struct sEvent3918 { int a; int b; };
 
 
 /**
@@ -2331,9 +2319,9 @@ struct sEvent3918 { int a; int b; };
  * @param data  the expiring sequence; its first word is the tAIAnimID
  */
 // Runs the handler for an animation event's type and stores its result in the per-event slot.
-extern "C" void cRiderAnim_expireRule(cRiderAnim* self, sEvent3918* ev, int* data)
+extern "C" void cRiderAnim_expireRule(cRiderAnim* self, cAnimSequencer* ev, int* data)
 {
-    int idx = ev - (sEvent3918*)self->Sequencer;
+    int idx = ev - self->Sequencer;
     char* info = cAIAnimEventMap_getAnimPlayAttr(*data);
     switch (*(int*)(info + 8)) {
     case 0:
@@ -3993,12 +3981,6 @@ struct sMat_5398 {
     sTri_5398 tris[1];
 };
 
-struct sSurf_5398 {
-    char pad[8];
-    int flags;
-    char padC[0x88 - 0xC];
-    sMat_5398* mat;
-};
 
 
 
@@ -4012,8 +3994,8 @@ int cRider_getMotionState(void*);
 extern "C" void cRider_checkRailBodyCollisions(void*);
 extern "C" float cRider_objectIntersect_5398(char*, cScope_5398*, tIntersectInfo*) __asm__("cRider_objectIntersect");
 extern "C" int cRider_isGroundNormalValid(void*);
-extern "C" void cRider_doObjectCollision_5398(char*, sSurf_5398*, tCollideInfo*, tIntersectInfo*, float) __asm__("cRider_doObjectCollision");
-extern "C" void cSSXAudio_CollisionSound_5398(void*, char*, sSurf_5398*, int) __asm__("cSSXAudio_CollisionSound");
+extern "C" void cRider_doObjectCollision_5398(char*, tInstanceRecord*, tCollideInfo*, tIntersectInfo*, float) __asm__("cRider_doObjectCollision");
+extern "C" void cSSXAudio_CollisionSound_5398(void*, char*, tInstanceRecord*, int) __asm__("cSSXAudio_CollisionSound");
 extern "C" void cCameraTriggerMan_checkCollisions(void*, void*);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 extern char* D_004A3500_5398 __asm__("gSSXAudio");
@@ -4127,9 +4109,9 @@ static inline sV4_5398 Norm_5398(const sV4_5398& v)
     return r;
 }
 
-static inline unsigned short TriFlags_5398(sSurf_5398* s, int i)
+static inline unsigned short TriFlags_5398(tInstanceRecord* s, int i)
 {
-    return ((sTri_5398*)(i * sizeof(sTri_5398) + (int)s->mat->tris))->flags; // PORT: pointer in int
+    return ((sTri_5398*)(i * sizeof(sTri_5398) + (int)((sMat_5398*)s->m_pCollideRecord)->tris))->flags; // PORT: pointer in int
 }
 
 /**
@@ -4180,14 +4162,14 @@ extern "C" void cRider_checkObjectCollisions(cRider* self, sV4_5398* norm)
         (*(sV4_5398*)&info.Direct) = Norm_5398(*(sV4_5398*)&self->mVelocity);
         (*(sV4_5398*)&info.Reflect) = (*(sV4_5398*)&contact.Inorm);
         info.Vel = k;
-        if ((TriFlags_5398(((sSurf_5398*)contact.Inst), contact.Mesh) & 2) && !(((sSurf_5398*)contact.Inst)->flags & 0x2000)) {
+        if ((TriFlags_5398((contact.Inst), contact.Mesh) & 2) && !((contact.Inst)->m_iFlags & 0x2000)) {
             *(&self->CollideIntersectInfo) = contact;
             *(&self->CollideInfo) = info;
         }
-        if (TriFlags_5398(((sSurf_5398*)contact.Inst), contact.Mesh) & 1)
-            cRider_doObjectCollision_5398(((char*)self), ((sSurf_5398*)contact.Inst), &info, &contact, overlap);
-        if (!(((sSurf_5398*)contact.Inst)->flags & 0x2000))
-            cSSXAudio_CollisionSound_5398(D_004A3500_5398, ((char*)self), ((sSurf_5398*)contact.Inst), contact.Mesh);
+        if (TriFlags_5398((contact.Inst), contact.Mesh) & 1)
+            cRider_doObjectCollision_5398(((char*)self), (contact.Inst), &info, &contact, overlap);
+        if (!((contact.Inst)->m_iFlags & 0x2000))
+            cSSXAudio_CollisionSound_5398(D_004A3500_5398, ((char*)self), (contact.Inst), contact.Mesh);
     }
     cCameraTriggerMan_checkCollisions(((char*)&gCamTriggerMan), ((char*)self));
     cWorldRider__cWorldRider(&sc, 2);
@@ -6520,10 +6502,6 @@ struct sNode_86B8 {
     float qx, qy, qz, qw;
 };
 
-struct sPath_86B8 {
-    char pad[0x2C];
-    sNode_86B8* nodes;
-};
 
 struct sHit_86B8 {
     sV4_86B8 pos;
@@ -6673,7 +6651,7 @@ extern "C" int cRider_isRailBoardIntersect_86B8(char* self, sV4_86B8* tgt, sV4_8
 extern "C" int cRider_isRailBoardIntersect_86B8(char* vself, sV4_86B8* tgt, sV4_86B8* dir)
 {
     cRider* self = (cRider*)vself;
-    sNode_86B8* n = &((sPath_86B8*)self->mAnimModel)->nodes[self->mBoneBoardRoot];
+    sNode_86B8* n = &((sNode_86B8*)(self->mAnimModel)->bones)[self->mBoneBoardRoot];
     const sV4_86B8& fwd = Fwd_86B8(n);
     sV4_86B8 pos = Add_86B8(n->pos, *(sV4_86B8*)&self->mModelOffset);
     float blend = self->mSlewed[9].cur;

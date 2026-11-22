@@ -299,13 +299,7 @@ extern "C" void cAIFwdDiffCache_InitializeCache(cAIFwdDiffCache* self, tAIFwdDif
 //100%
 INCLUDE_ASM("intersect/aifwddiff", bxSphereTree_operatorE);
 #ifdef SKIP_ASM
-struct sQuad_27CC8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-struct sBlock_27CC8 {
-    int d[32];
-};
 
 
 /**
@@ -322,11 +316,11 @@ extern "C" bxSphereTree* bxSphereTree_operatorE(bxSphereTree* self, bxSphereTree
 {
     int i;
     for (i = 0; i < 8; i++) {
-        ((sQuad_27CC8*)&self->axis[0])[i] = ((sQuad_27CC8*)&src->axis[0])[i];
+        ((&self->axis[0]))[i] = ((&src->axis[0]))[i];
     }
-    (*(sQuad_27CC8*)&self->transCenter) = (*(sQuad_27CC8*)&src->transCenter);
-    (*(sBlock_27CC8*)&self->staticInfo) = (*(sBlock_27CC8*)&src->staticInfo);
-    (*(sBlock_27CC8**)&self->treeInfo) = &(*(sBlock_27CC8*)&self->staticInfo);
+    (*(&self->transCenter)) = (*(&src->transCenter));
+    (*(&self->staticInfo)) = (*(&src->staticInfo));
+    (*(tSphTreeInfo**)&self->treeInfo) = &(*(&self->staticInfo));
     return self;
 }
 #endif
@@ -353,39 +347,39 @@ extern "C" int bxSphereTree_Load(bxSphereTree* self, char* buf, int aTreeID)
     if (buf == 0) {
         return 0;
     }
-    (*(sBlock_27CC8*)&self->staticInfo).d[0] = aTreeID;
-    (*(sBlock_27CC8*)&self->staticInfo).d[1] = 0;
-    (*(sBlock_27CC8**)&self->treeInfo) = &(*(sBlock_27CC8*)&self->staticInfo);
-    (*(sBlock_27CC8*)&self->staticInfo).d[4] = 1;
+    ((int*)&(*(&self->staticInfo)).treeID)[0] = aTreeID;
+    ((int*)&(*(&self->staticInfo)).treeID)[1] = 0;
+    (*(tSphTreeInfo**)&self->treeInfo) = &(*(&self->staticInfo));
+    ((int*)&(*(&self->staticInfo)).treeID)[4] = 1;
     int len0;
     int len1;
     MEM_copy(&len0, buf, 4);
     MEM_copy(&len1, buf + 4, 4);
-    MEM_copy((char*)((sBlock_27CC8*)self->treeInfo) + 0x8, buf + 0x8, 4);
-    MEM_copy((char*)((sBlock_27CC8*)self->treeInfo) + 0xC, buf + 0xC, 4);
-    MEM_copy((char*)((sBlock_27CC8*)self->treeInfo) + 0x14, buf + 0x10, 0xC);
-    MEM_copy((char*)((sBlock_27CC8*)self->treeInfo) + 0x2C, buf + 0x1C, 0xC);
-    MEM_copy((char*)((sBlock_27CC8*)self->treeInfo) + 0x38, buf + 0x28, 36);
-    MEM_copy((char*)((sBlock_27CC8*)self->treeInfo) + 0x5C, buf + 0x4C, 36);
+    MEM_copy(&self->treeInfo->isCompressed, buf + 0x8, 4);
+    MEM_copy(&self->treeInfo->depth, buf + 0xC, 4);
+    MEM_copy(&self->treeInfo->rootCenter[0], buf + 0x10, 0xC);
+    MEM_copy(&self->treeInfo->centerOfMass[0], buf + 0x1C, 0xC);
+    MEM_copy(&self->treeInfo->momentOfInertia[0][0], buf + 0x28, 36);
+    MEM_copy(&self->treeInfo->invMomentOfInertia[0][0], buf + 0x4C, 36);
     char* cursor = buf + 0x70;
-    *(char**)((char*)((sBlock_27CC8*)self->treeInfo) + 0x20) = cursor;
-    cursor += (*(int*)((char*)((sBlock_27CC8*)self->treeInfo) + 0xC) + 1) * 0xC;
-    *(char**)((char*)((sBlock_27CC8*)self->treeInfo) + 0x24) = cursor;
+    self->treeInfo->levels = (tLevel*)cursor;
+    cursor += (self->treeInfo->depth + 1) * 0xC;
+    self->treeInfo->cmpTree = (unsigned char*)cursor;
     cursor += len1;
     cursor += len0;
-    tSphTreeInfo* treeInfo = (tSphTreeInfo*)((char*)((sBlock_27CC8*)self->treeInfo));
+    tSphTreeInfo* treeInfo = (tSphTreeInfo*)((char*)(self->treeInfo));
     if (treeInfo->isCompressed != 0) {
         treeInfo->bitTree = 0;
     } else {
         treeInfo->bitTree = (unsigned char*)((char*)treeInfo->cmpTree);
     }
-    sQuad_27CC8 centre;
-    tSphTreeInfo* infoBlock = (tSphTreeInfo*)((char*)((sBlock_27CC8*)self->treeInfo));
+    t4Vector centre;
+    tSphTreeInfo* infoBlock = (tSphTreeInfo*)((char*)(self->treeInfo));
     centre.x = infoBlock->rootCenter[0];
     centre.y = infoBlock->rootCenter[1];
     centre.z = infoBlock->rootCenter[2];
     centre.w = 1.0f;
-    (*(sQuad_27CC8*)&self->transCenter) = centre;
+    (*(&self->transCenter)) = centre;
     return cursor - buf;
 }
 #endif
@@ -396,11 +390,6 @@ INCLUDE_ASM("intersect/aifwddiff", bxSphereTree_IsRiderTreeCollision);
 extern "C" int SphereTree_AllocBuf(void* self);
 extern "C" int SphereTree_isSphereCollision(void* self, void* pos, void* out, int a3, int a4, int a5, int a6, float radius);
 
-struct sSphere_27F18 {
-    float pos[4];
-    float radius;
-    int pad[3];
-};
 
 /**
  * Tests a sphere tree against a rider's spheres.
@@ -429,7 +418,7 @@ extern "C" int bxSphereTree_IsRiderTreeCollision(bxSphereTree* self, cRiderSpher
         return 1;
     }
     for (int i = 0; i < shape->listLen; i++) {
-        if (SphereTree_isSphereCollision(self, ((sSphere_27F18*)&shape->sphList[0])[i].pos, &self->transCenter, 0, 0, outPush, outContact, ((sSphere_27F18*)&shape->sphList[0])[i].radius) != 0) {
+        if (SphereTree_isSphereCollision(self, ((float*)&((&shape->sphList[0]))[i].cen), &self->transCenter, 0, 0, outPush, outContact, ((&shape->sphList[0]))[i].rad) != 0) {
             return 1;
         }
     }
@@ -558,14 +547,6 @@ struct sLevel_281D0 {
     float child;   // 0x4
     int stride;    // 0x8
 };
-struct sGrid_281D0 {
-    char pad0[0x8];
-    int pad8;
-    char padC[0x14];
-    sLevel_281D0* levels; // 0x20
-    char pad24[4];
-    unsigned char* bits;  // 0x28
-};
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline void vu0Scale_281D0(t4Vector& r, const t4Vector& v, float s)
@@ -613,9 +594,9 @@ extern "C" void func_281D0(bxSphereTree* self, int end, t4Vector* pos, int level
 extern "C" void func_281D0(bxSphereTree* self, int end, t4Vector* pos, int level, int off)
 {
     if (level < end) {
-        float levelOffset = *(float*)((char*)((sGrid_281D0*)self->treeInfo)->levels + level * 12 + 0x10);
+        float levelOffset = *(float*)((char*)((sLevel_281D0*)(self->treeInfo)->levels) + level * 12 + 0x10);
         for (int i = 0; i < 8; i++) {
-            if ((((sGrid_281D0*)self->treeInfo)->bits[off] >> i) & 1) {
+            if (((self->treeInfo)->bitTree[off] >> i) & 1) {
                 t4Vector sum;
                 t4Vector offsetVec;
                 t4Vector tmpVec;
@@ -623,7 +604,7 @@ extern "C" void func_281D0(bxSphereTree* self, int end, t4Vector* pos, int level
                 offsetVec = tmpVec;
                 vu0Add_281D0(tmpVec, *pos, offsetVec);
                 sum = tmpVec;
-                int st = ((sGrid_281D0*)self->treeInfo)->levels[level].stride;
+                int st = ((sLevel_281D0*)(self->treeInfo)->levels)[level].stride;
                 func_281D0(self, end, &sum, level + 1, (i + 1) * st + off);
             }
         }
@@ -632,7 +613,7 @@ extern "C" void func_281D0(bxSphereTree* self, int end, t4Vector* pos, int level
         sVEntry<void(void*, float, void*, void*, int)>* vt = &((sVEntry<void(void*, float, void*, void*, int)>*)w->mVtbl)[87];
         char* thisp = (char*)w + vt->delta;
         t4Vector color;
-        float boxSize = ((sGrid_281D0*)self->treeInfo)->levels[level].scale * self->scale;
+        float boxSize = ((sLevel_281D0*)(self->treeInfo)->levels)[level].scale * self->scale;
         color.x = 1.0f;
         color.y = 0.0f;
         color.z = 1.0f;

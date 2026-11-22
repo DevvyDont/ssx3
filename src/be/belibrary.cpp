@@ -114,7 +114,6 @@ INCLUDE_ASM("be/belibrary", func_0014A188);
 struct sBlk4C_A188 { char b[0x4C]; };
 struct sBlkF88_A188 { char b[0xF88]; };
 struct sBlk9B50_A188 { char b[0x9B50]; };
-struct sBlk20_A188 { char b[0x20]; };
 
 // The whole player table (cBELibrary_playerDB) as one block: the copy below keeps cBEPlayerDB's 4-byte alignment, which a
 // memcpy from a char* would not (gcc's inline block move takes the smaller alignment of its two pointers).
@@ -153,7 +152,7 @@ extern "C" void func_0014A188(char* data)
     }
     *(sBlk9B50_A188*)data = D_004BA348_A188;
     data += sizeof(sBlk9B50_A188);
-    *(sBlk20_A188*)data = (*(sBlk20_A188*)&cBERules_mRules);
+    *(tBERuleOptionDB*)data = (*(&cBERules_mRules));
 }
 #endif
 
@@ -177,7 +176,6 @@ extern "C" cBEIface_14A5E0* cBEStatInterface_getThis(void);
 struct sBlk4C_14A5E0 { char d[0x4C]; };
 struct sBlkF88_14A5E0 { char d[0xF88]; };
 struct sBlk9B50_14A5E0 { char d[0x9B50]; };
-struct sBlk20_14A5E0 { char d[0x20]; };
 
 extern sBlkF88_14A5E0 D_004A6CA8_14A5E0[] __asm__("cBELibrary_profileLib");
 extern sBlkF88_14A5E0 D_004B07F8[];
@@ -216,7 +214,7 @@ extern "C" void cBELibrary_readFromData(char* data)
     }
     D_004BA348 = *(sBlk9B50_14A5E0*)data;
     data += 0x9B50;
-    (*(sBlk20_14A5E0*)&cBERules_mRules) = *(sBlk20_14A5E0*)data;
+    (*(&cBERules_mRules)) = *(tBERuleOptionDB*)data;
     beInterface = cBEBAGTInterface_getThis();
     beInterface->onLoad();
     beInterface = cBEMissionInterface_getThis();

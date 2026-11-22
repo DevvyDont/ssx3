@@ -617,11 +617,6 @@ extern "C" unsigned int cDynamicMemMan_dlmorecore(cDynamicMemMan* self, long inc
 extern "C" long __divdi3(long a, long b);
 extern "C" long __muldi3(long a, long b);
 
-struct sChunk_31E6D8
-{
-    unsigned int prev_size;
-    unsigned int size;
-};
 
 
 /**
@@ -646,18 +641,18 @@ extern "C" int cDynamicMemMan_sYSTRIm(cDynamicMemMan* ms, unsigned int topPad, m
     unsigned int pagesz;
 
     pagesz = av->pagesize;
-    top_size = ((sChunk_31E6D8*)av->top)->size & ~3;
+    top_size = (av->top)->size & ~3;
     extra = __muldi3(__divdi3(top_size - topPad - 16 + (pagesz - 1), pagesz) - 1, pagesz);
     if (extra > 0) {
         current_brk = (char*)cDynamicMemMan_dlmorecore(ms, 0);
-        if (current_brk == (char*)((sChunk_31E6D8*)av->top) + top_size) {
+        if (current_brk == (char*)(av->top) + top_size) {
             cDynamicMemMan_dlmorecore(ms, -extra);
             new_brk = (char*)cDynamicMemMan_dlmorecore(ms, 0);
             if (new_brk != (char*)0xFFFFFFFF) {
                 released = current_brk - new_brk;
                 if (released != 0) {
                     av->sbrked_mem -= released;
-                    ((sChunk_31E6D8*)av->top)->size = (top_size - released) | 1;
+                    (av->top)->size = (top_size - released) | 1;
                     return 1;
                 }
             }

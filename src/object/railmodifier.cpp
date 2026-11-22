@@ -8496,44 +8496,37 @@ INCLUDE_ASM("object/railmodifier", func_003629B8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00362CC8(cPS2DeferManager* self);
 
-struct sRmState_29B8 {
-    unsigned int w0;
-    unsigned int w1;
-    unsigned int w2;
-    unsigned int w3;
-    short tex[2];
-};
 
 struct sRmCtx_29B8 {
     char pad0[0xE84];
-    sRmState_29B8* top;     // 0xE84
+    sDrawState* top;     // 0xE84
 };
 
 
 
 extern sRmCtx_29B8* D_004A5B80_29B8 __asm__("cGraphicsMan_TheGraphicsMan");
-extern sRmState_29B8 D_00501420_29B8 __asm__("sDrawState_s_defaultDrawState");
+extern sDrawState D_00501420_29B8 __asm__("sDrawState_s_defaultDrawState");
 
 static inline void set0_29B8(sRmCtx_29B8* ctx, unsigned int mask, int shift, unsigned int v)
 {
-    ctx->top->w0 = (ctx->top->w0 & ~mask) | ((v << shift) & mask);
+    ctx->top->unk_00[0] = (ctx->top->unk_00[0] & ~mask) | ((v << shift) & mask);
 }
 
 static inline void set1_29B8(sRmCtx_29B8* ctx, unsigned int mask, int shift, unsigned int v)
 {
-    ctx->top->w1 = (ctx->top->w1 & ~mask) | ((v << shift) & mask);
+    ctx->top->unk_00[1] = (ctx->top->unk_00[1] & ~mask) | ((v << shift) & mask);
 }
 
 static inline void set2_29B8(sRmCtx_29B8* ctx, unsigned int mask, int shift, unsigned int v)
 {
-    ctx->top->w2 = (ctx->top->w2 & ~mask) | ((v << shift) & mask);
+    ctx->top->unk_00[2] = (ctx->top->unk_00[2] & ~mask) | ((v << shift) & mask);
 }
 
 static inline cDrawStateList* save_29B8(cPS2DeferManager* self, sRmCtx_29B8* ctx)
 {
-    sRmState_29B8* src = ctx->top;
+    sDrawState* src = ctx->top;
     cDrawStateList* d = &((&self->mDrawStates[0]))[self->mUsedDrawStates++];
-    (*(sRmState_29B8*)&d->mDrawState) = *src;
+    (*(&d->mDrawState)) = *src;
     return d;
 }
 

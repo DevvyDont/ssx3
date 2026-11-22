@@ -1021,11 +1021,6 @@ struct sHandle_8528 {
     unsigned int type : 8;
     unsigned int index : 24;
 };
-struct sRef_8528 {
-    unsigned char kind;
-    unsigned char type;
-    unsigned short index;
-};
 struct sCell_8528 {
     int loaded;             // 0x0
     int f4;
@@ -1053,9 +1048,9 @@ extern "C" void cWorldCache_purgePage(cWorldCache* vself, int cell)
     sHandle_8528 resHandle;
     *(unsigned int*)&resHandle = 0xFFFFFFFF;  // starts as the invalid handle
     for (int i = ((int)list->m_uiCurrentPageEntry) - 1; i >= 0; i--) {
-        resHandle.type = ((sRef_8528*)list->m_pPageEntries)[i].type;
-        resHandle.index = ((sRef_8528*)list->m_pPageEntries)[i].index;
-        cWorldCache_removeBxStreamData(self, cell, ((sRef_8528*)list->m_pPageEntries)[i].kind, resHandle);
+        resHandle.type = (list->m_pPageEntries)[i].m_uiSectionID;
+        resHandle.index = (list->m_pPageEntries)[i].m_uiGUID;
+        cWorldCache_removeBxStreamData(self, cell, (list->m_pPageEntries)[i].m_uiType, resHandle);
     }
     if (self->cells[cell].list != 0)
         cHullPage__cHullPage((int*)self->cells[cell].list, 3);

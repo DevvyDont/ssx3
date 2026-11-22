@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "main/gamestate.h"
 #include "wscript/wscriptman.h"
 #include "main/game.h"
 #include "sound/ssxaudio.h"
@@ -117,11 +118,6 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_ENTERLODGE_onWidgetEvent);
 extern int cRealFE_mStartState;
 extern "C" void cGame_exit(void* game, int a);
 extern "C" void cUIStateStack_pop(void*, int);
-struct sFlag001F72E0 {
-    int f0;
-    int f4;
-    int active;
-};
 struct sSelf001F72E0 {
     char pad[0x10];
     char* mgr;
@@ -145,7 +141,7 @@ extern "C" void cOVState_ENTERLODGE_onWidgetEvent(cOVState_ENTERLODGE* self, cUI
     if (((void*)widget) != 0) {
         switch (msg) {
         case 5:
-            ((sFlag001F72E0*)(SSXApp->Game)->mCurrentState)->active = 1;
+            ((SSXApp->Game)->mCurrentState)->mOverlayDone = 1;
             switch (widget->mMiscData) {
             case 0:
                 {
@@ -162,7 +158,7 @@ extern "C" void cOVState_ENTERLODGE_onWidgetEvent(cOVState_ENTERLODGE* self, cUI
             break;
         case 6:
             self->mRemovePDA = 1;
-            ((sFlag001F72E0*)(SSXApp->Game)->mCurrentState)->active = 1;
+            ((SSXApp->Game)->mCurrentState)->mOverlayDone = 1;
             cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
             break;
         }

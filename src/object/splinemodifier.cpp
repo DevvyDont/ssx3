@@ -1238,16 +1238,8 @@ extern "C" void cMultiSplineModifier_restoreOverlapSystem(cMultiSplineModifier* 
 //100%
 INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_updateOverlapSystem);
 #ifdef SKIP_ASM
-struct sSmVec4_A918 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
-struct sSmElem_A918 {
-    char pad_0x0[0x30];
-    tBoundBox box;        // 0x30
-    char pad_0x50[0x10];
-};
 
 
 
@@ -1256,9 +1248,9 @@ extern "C" void* cObjectInterface_getNash();
 extern "C" void nash_Nash_movenode(void* world, int type, void* id, sBox_F048* box, sBox_F048* old);
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sSmVec4_A918 vu0Sub_A918(const sSmVec4_A918& a, const sSmVec4_A918& b)
+static inline t4Vector vu0Sub_A918(const t4Vector& a, const t4Vector& b)
 {
-    sSmVec4_A918 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1271,9 +1263,9 @@ static inline sSmVec4_A918 vu0Sub_A918(const sSmVec4_A918& a, const sSmVec4_A918
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sSmVec4_A918 vu0Add_A918(const sSmVec4_A918& a, const sSmVec4_A918& b)
+static inline t4Vector vu0Add_A918(const t4Vector& a, const t4Vector& b)
 {
-    sSmVec4_A918 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1285,27 +1277,27 @@ static inline sSmVec4_A918 vu0Add_A918(const sSmVec4_A918& a, const sSmVec4_A918
     return r;
 }
 
-static inline sSmVec4_A918 instPos_A918(cMultiSplineModifier* self, int i)
+static inline t4Vector instPos_A918(cMultiSplineModifier* self, int i)
 {
-    return *(sSmVec4_A918*)(((char**)self->NodeInst)[i] + 0x40);
+    return *(t4Vector*)(((char**)self->NodeInst)[i] + 0x40);
 }
 
 struct sSmInst_A918 {
     char pad_0x0[0x40];
-    sSmVec4_A918 pos;       // 0x40
+    t4Vector pos;       // 0x40
     char pad_0x50[0x10];
     float bmin[3];          // 0x60
     float bmax[3];          // 0x6C
 };
 
-static inline void setMin_A918(sSmInst_A918* in, const sSmVec4_A918& v)
+static inline void setMin_A918(sSmInst_A918* in, const t4Vector& v)
 {
     in->bmin[0] = v.x;
     in->bmin[1] = v.y;
     in->bmin[2] = v.z;
 }
 
-static inline void setMax_A918(sSmInst_A918* in, const sSmVec4_A918& v)
+static inline void setMax_A918(sSmInst_A918* in, const t4Vector& v)
 {
     in->bmax[0] = v.x;
     in->bmax[1] = v.y;
@@ -1326,19 +1318,19 @@ extern "C" void cMultiSplineModifier_updateOverlapSystem(cMultiSplineModifier* s
         ((sVEntry<void(void*)>*)self->mVtbl)[3].fn(vthis(self, ((sVEntry<void(void*)>*)self->mVtbl)[3]));
     }
     for (int i = 1; i < self->NumModels; i++) {
-        tBoundBox old = ((sSmElem_A918*)self->Nodes)[i].box;
+        tBoundBox old = (self->Nodes)[i].BoundBox;
         float halfSize = self->Radius;
-        sSmVec4_A918 ext;
+        t4Vector ext;
         ext.x = halfSize;
         ext.y = halfSize;
         ext.z = halfSize;
         ext.w = 0.0f;
-        (*(sSmVec4_A918*)&((sSmElem_A918*)self->Nodes)[i].box.MinPoint) = vu0Sub_A918(instPos_A918(self, i), ext);
-        (*(sSmVec4_A918*)&((sSmElem_A918*)self->Nodes)[i].box.MaxPoint) = vu0Add_A918(instPos_A918(self, i), ext);
+        (*(&(self->Nodes)[i].BoundBox.MinPoint)) = vu0Sub_A918(instPos_A918(self, i), ext);
+        (*(&(self->Nodes)[i].BoundBox.MaxPoint)) = vu0Add_A918(instPos_A918(self, i), ext);
         void* id = ((char**)self->NodeInst)[i];
-        nash_Nash_movenode(cObjectInterface_getNash(), 0, id, (sBox_F048*)&((sSmElem_A918*)self->Nodes)[i].box, (sBox_F048*)&old);
-        setMin_A918((sSmInst_A918*)((char**)self->NodeInst)[i], (*(sSmVec4_A918*)&((sSmElem_A918*)self->Nodes)[i].box.MinPoint));
-        setMax_A918((sSmInst_A918*)((char**)self->NodeInst)[i], (*(sSmVec4_A918*)&((sSmElem_A918*)self->Nodes)[i].box.MaxPoint));
+        nash_Nash_movenode(cObjectInterface_getNash(), 0, id, (sBox_F048*)&(self->Nodes)[i].BoundBox, (sBox_F048*)&old);
+        setMin_A918((sSmInst_A918*)((char**)self->NodeInst)[i], (*(&(self->Nodes)[i].BoundBox.MinPoint)));
+        setMax_A918((sSmInst_A918*)((char**)self->NodeInst)[i], (*(&(self->Nodes)[i].BoundBox.MaxPoint)));
     }
 }
 #endif
@@ -1839,12 +1831,6 @@ struct sSmVec4_35B418 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct sSmBox_35B418 {
-    char pad_0x0[0x30];
-    sSmVec4_35B418 min;     // 0x30
-    sSmVec4_35B418 max;     // 0x40
-    char pad_0x50[0x10];
-};
 
 struct sSmMat_35B418 {
     sSmVec4_35B418 r[4];
@@ -1889,9 +1875,9 @@ extern "C" void cMultiSplineModifier_render(cMultiSplineModifier* self)
     for (int i = 1; i < self->NumModels; i++) {
         sSmVE93_35B418* vt = (sSmVE93_35B418*)w->mVtbl;
         char* thisp = (char*)w + vt[93].delta;
-        sSmBox_35B418* box = &((sSmBox_35B418*)self->Nodes)[i];
+        tMultiNode* box = &(self->Nodes)[i];
         sSmVE43_35B418* vt2 = (sSmVE43_35B418*)w->mVtbl;
-        int hit = vt[93].fn(thisp, &box->min, &box->max, vt2[43].fn((char*)w + vt2[43].delta));
+        int hit = vt[93].fn(thisp, &(*(sSmVec4_35B418*)&box->BoundBox), &(*(sSmVec4_35B418*)&box->BoundBox.MaxPoint), vt2[43].fn((char*)w + vt2[43].delta));
         if (hit != 1) {
             sSmVEModel_35B418* mvt = (sSmVEModel_35B418*)model->mVtbl;
             mvt[33].fn(((char*)model) + mvt[33].delta, ((char**)self->NodeInst)[i] + 0x10, ((int)self->AnimMats));
@@ -2086,13 +2072,6 @@ struct sSmModelObj_B708 {
     char pad0[0xC];
     sSmVEntry_B708* vt;             // 0xC
 };
-struct sSmModel_B708 {
-    char pad0[0xC];
-    sSmModelObj_B708* obj;          // 0xC
-    char pad10[0x50];
-    float minx, miny, minz;         // 0x60
-    float maxx, maxy, maxz;         // 0x6C
-};
 struct sSmDesc_B708 {
     int f0;
     unsigned int id;                // 0x4
@@ -2179,16 +2158,16 @@ static inline void addEq_B708(t4Vector& a, const t4Vector& b)
         : "m"(b));
 }
 
-static inline tBoundBox getBox_B708(const sSmModel_B708* m)
+static inline tBoundBox getBox_B708(const tInstanceRecord* m)
 {
     tBoundBox b;
-    (*(&b.MinPoint)).x = m->minx;
-    (*(&b.MinPoint)).y = m->miny;
-    (*(&b.MinPoint)).z = m->minz;
+    (*(&b.MinPoint)).x = m->m_fvMin.m[0];
+    (*(&b.MinPoint)).y = m->m_fvMin.m[1];
+    (*(&b.MinPoint)).z = m->m_fvMin.m[2];
     (*(&b.MinPoint)).w = 1.0f;
-    (*(&b.MaxPoint)).x = m->maxx;
-    (*(&b.MaxPoint)).y = m->maxy;
-    (*(&b.MaxPoint)).z = m->maxz;
+    (*(&b.MaxPoint)).x = m->m_fvMax.m[0];
+    (*(&b.MaxPoint)).y = m->m_fvMax.m[1];
+    (*(&b.MaxPoint)).z = m->m_fvMax.m[2];
     (*(&b.MaxPoint)).w = 1.0f;
     return b;
 }
@@ -2222,7 +2201,7 @@ static inline void grow_B708(tBoundBox& box, float d)
  * @param model  the instance the rail belongs to (On Tour tInstanceRecord* inst)
  * @return @p self
  */
-extern "C" char* cRailModifier_cRailModifier(cRailModifier* self, sSmDesc_B708* desc, sSmModel_B708* model)
+extern "C" char* cRailModifier_cRailModifier(cRailModifier* self, sSmDesc_B708* desc, tInstanceRecord* model)
 {
     tBoundBox* box = ((&self->BoundBox));
     self->SplineId = 0xFFFFFFFF;
@@ -2232,17 +2211,17 @@ extern "C" char* cRailModifier_cRailModifier(cRailModifier* self, sSmDesc_B708* 
     self->Instance = (tInstanceRecord*)model;
     self->SplineId = desc->id;
     self->Mesh = desc->f8;
-    sSmModelObj_B708* modelObj = model->obj;
+    sSmModelObj_B708* modelObj = ((sSmModelObj_B708*)model->m_pActiveNode);
     if (modelObj->vt[44].fn(vthis(modelObj, modelObj->vt[44])) == 0) {
-        sSmModel_B708* instModel = (sSmModel_B708*)self->Instance;
+        tInstanceRecord* instModel = self->Instance;
         tBoundBox bounds;
-        (*(&bounds.MinPoint)).x = instModel->minx;
-        (*(&bounds.MinPoint)).y = instModel->miny;
-        (*(&bounds.MinPoint)).z = instModel->minz;
+        (*(&bounds.MinPoint)).x = instModel->m_fvMin.m[0];
+        (*(&bounds.MinPoint)).y = instModel->m_fvMin.m[1];
+        (*(&bounds.MinPoint)).z = instModel->m_fvMin.m[2];
         (*(&bounds.MinPoint)).w = 1.0f;
-        (*(&bounds.MaxPoint)).x = instModel->maxx;
-        (*(&bounds.MaxPoint)).y = instModel->maxy;
-        (*(&bounds.MaxPoint)).z = instModel->maxz;
+        (*(&bounds.MaxPoint)).x = instModel->m_fvMax.m[0];
+        (*(&bounds.MaxPoint)).y = instModel->m_fvMax.m[1];
+        (*(&bounds.MaxPoint)).z = instModel->m_fvMax.m[2];
         (*(&bounds.MaxPoint)).w = 1.0f;
         setBox_B708(((char*)self), bounds);
         t4Vector margin;
@@ -2629,10 +2608,6 @@ struct sSmObj_C040 {
     sSmVtbl_C040* vt;       // 0xC
 };
 
-struct sSmOwner_C040 {
-    char pad_0x0[0xC];
-    sSmObj_C040* obj;       // 0xC
-};
 
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (a -= b, 4 floats).
@@ -2676,9 +2651,9 @@ static inline void vecAddEq_C040(t4Vector& a, const t4Vector& b)
  */
 extern "C" void cRailModifier_updateBoundBox(cRailModifier* self)
 {
-    sSmObj_C040* ownerObj = ((sSmOwner_C040*)self->Instance)->obj;
+    sSmObj_C040* ownerObj = ((sSmObj_C040*)(self->Instance)->m_pActiveNode);
     if (ownerObj->vt->v44.fn(vthis(ownerObj, ownerObj->vt->v44)) != 0) {
-        ownerObj = ((sSmOwner_C040*)self->Instance)->obj;
+        ownerObj = ((sSmObj_C040*)(self->Instance)->m_pActiveNode);
         tBoundBox* bounds = ownerObj->vt->v45.fn(vthis(ownerObj, ownerObj->vt->v45));
         (*(&self->BoundBox)) = *bounds;
         t4Vector margin;

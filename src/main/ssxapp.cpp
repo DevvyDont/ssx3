@@ -3314,11 +3314,6 @@ struct sVisOwner_A830 {
     sVisEntry_A830 part[0x200];     // 0x109C
 };
 
-struct sQ_A830 {
-    float x, y, z, w;
-    sQ_A830() {}
-    sQ_A830(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
-} __attribute__((aligned(16)));
 
 static inline float cellScale_A830(int level)
 {
@@ -3329,14 +3324,14 @@ static inline float cellScale_A830(int level)
 
 // PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallmsr/cfc2); the PC port needs a C
 // version of the microprogram at D_948 (sphere vs frustum plane test).
-static inline int sphereTest_A830(char* vinst, int* mask, sQ_A830* sphere)
+static inline int sphereTest_A830(char* vinst, int* mask, t4Vector* sphere)
 {
     cOcclusionMan* inst = (cOcclusionMan*)vinst;
     int res = 1;
     for (int i = 0; i < inst->m_iNumActive; i++) {
         int bit = 1 << i;
         if (*mask & bit) {
-            sQ_A830* m = (sQ_A830*)(&inst->m_InView[i].pVis->m_fvPlaneCoeffs);
+            t4Vector* m = ((&inst->m_InView[i].pVis->m_fvPlaneCoeffs));
             int r;
             __asm__ __volatile__(
                 "lqc2      $vf1, %1\n"
@@ -3403,13 +3398,13 @@ extern "C" void func_0022A830(void* vctx, void* vnode, void* vcfg)
     sVisNode_A830* node = (sVisNode_A830*)vnode;
     sVisCell_A830* cfg = (sVisCell_A830*)vcfg;
     int vec[4] __attribute__((aligned(16)));
-    sQ_A830 sphere;
+    t4Vector sphere;
     int mask = ctx->mask;
     int cullResult;
     if (ctx->inside != 0) {
         cullResult = 0;
         if (mask != 0)
-            { sQ_A830 cellSphere; float cellSize = cellScale_A830(cfg->level); cellSphere.w = cellSize * 1.2124354839324951f; cellSphere.x = ((float)cfg->x + 0.5f) * cellSize; cellSphere.y = ((float)cfg->y + 0.5f) * cellSize; cellSphere.z = ((float)cfg->z + 0.5f) * cellSize; sphere = cellSphere; }
+            { t4Vector cellSphere; float cellSize = cellScale_A830(cfg->level); cellSphere.w = cellSize * 1.2124354839324951f; cellSphere.x = ((float)cfg->x + 0.5f) * cellSize; cellSphere.y = ((float)cfg->y + 0.5f) * cellSize; cellSphere.z = ((float)cfg->z + 0.5f) * cellSize; sphere = cellSphere; }
     } else {
         vec[0] = cfg->x;
         vec[1] = cfg->y;
@@ -3434,7 +3429,7 @@ extern "C" void func_0022A830(void* vctx, void* vnode, void* vcfg)
             : "r"(vec), "r"(D_00442130), "r"(ctx->owner + 0x10)
             : "memory");
         if (mask != 0)
-            { sQ_A830 cellSphere; float cellSize = cellScale_A830(cfg->level); cellSphere.w = cellSize * 1.2124354839324951f; cellSphere.x = ((float)cfg->x + 0.5f) * cellSize; cellSphere.y = ((float)cfg->y + 0.5f) * cellSize; cellSphere.z = ((float)cfg->z + 0.5f) * cellSize; sphere = cellSphere; }
+            { t4Vector cellSphere; float cellSize = cellScale_A830(cfg->level); cellSphere.w = cellSize * 1.2124354839324951f; cellSphere.x = ((float)cfg->x + 0.5f) * cellSize; cellSphere.y = ((float)cfg->y + 0.5f) * cellSize; cellSphere.z = ((float)cfg->z + 0.5f) * cellSize; sphere = cellSphere; }
         boxResult_A830(&cullResult);
     }
     bool out_ = cullResult == 1;

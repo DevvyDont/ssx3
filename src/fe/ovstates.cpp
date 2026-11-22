@@ -96,11 +96,6 @@ INCLUDE_ASM("fe/ovstates", cFEStateTitle_onUpdate);
 extern "C" void cUIState_onUpdate(void* self);
 extern int cRealFE_mMovieList;
 
-struct sItem_1948A8 {
-    char pad[0xC];
-    int active;
-    char pad2[0xC];
-};
 
 struct sApp_1948A8 {
     char pad[0xB0];
@@ -110,7 +105,7 @@ struct sApp_1948A8 {
 static inline int isActive_1948A8(cInputPad* l, int j)
 {
     if (j < l->NumButtons) {
-        return ((sItem_1948A8*)&l->Buttons[0])[j].active;
+        return ((&l->Buttons[0]))[j].IsHeld;
     }
     return 0;
 }

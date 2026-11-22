@@ -2082,22 +2082,19 @@ extern "C" void cTriggerAlgorithm_update(cTriggerAlgorithm* self)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTriggerAlgorithm_getPose);
 #ifdef SKIP_ASM
-struct sV_173E40 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sM_173E40 {
     float m[4][4];
 } __attribute__((aligned(16)));
 
 struct sPair_173E40 {
-    sV_173E40 a;
-    sV_173E40 b;
+    t4Vector a;
+    t4Vector b;
 };
 
 extern sM_173E40 t4mat_Identity;
-extern sV_173E40 t4vect_YAxis;
-extern sV_173E40 D_004FF160_v173E40 __asm__("t4vect_ZAxis");
+extern t4Vector t4vect_YAxis;
+extern t4Vector D_004FF160_v173E40 __asm__("t4vect_ZAxis");
 extern "C" void fSinCos(float* sout, float* cout, float x);
 extern "C" sPair_173E40 tPose_tPose(sM_173E40* m);
 
@@ -2160,7 +2157,7 @@ static inline void vu0MulMtx_173E40(sM_173E40* dst, const sM_173E40* a, const sM
 }
 
 // PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
-static inline void vu0TransMtx_173E40(sM_173E40* m, const sV_173E40& v)
+static inline void vu0TransMtx_173E40(sM_173E40* m, const t4Vector& v)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -2185,7 +2182,7 @@ static inline void SinCos_173E40(float* s, float* c, float angle)
     fSinCos(s, c, angle);
 }
 
-static inline void RotAxis_173E40(sM_173E40* m, const sV_173E40& axis, float angle)
+static inline void RotAxis_173E40(sM_173E40* m, const t4Vector& axis, float angle)
 {
     sM_173E40 r;
     float s;
@@ -2235,7 +2232,7 @@ extern "C" sPair_173E40 cTriggerAlgorithm_getPose(cTriggerAlgorithm* src)
 {
     sM_173E40 poseMtx;
     vu0CopyMtx_173E40(&poseMtx, &t4mat_Identity);
-    vu0TransMtx_173E40(&poseMtx, *(sV_173E40*)&src->Position);
+    vu0TransMtx_173E40(&poseMtx, *(&src->Position));
     RotAxis_173E40(&poseMtx, t4vect_YAxis, -src->Pitch);
     RotAxis_173E40(&poseMtx, D_004FF160_v173E40, src->Heading);
     return tPose_tPose(&poseMtx);

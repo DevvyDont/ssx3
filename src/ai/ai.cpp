@@ -7014,10 +7014,6 @@ extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 int cRiderAnimBase_getCurrentAnimID(void* self, int i);
 unsigned int AIrand();
 
-struct sAiVec4_1620
-{
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sAiBitsX_1620
 {
@@ -7043,7 +7039,7 @@ struct sAiBitsD_1620
 };
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float aiDot_1620(const sAiVec4_1620& a, const sAiVec4_1620& b)
+static inline float aiDot_1620(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -7063,7 +7059,7 @@ static inline float aiDot_1620(const sAiVec4_1620& a, const sAiVec4_1620& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float aiLength_1620(const sAiVec4_1620& v)
+static inline float aiLength_1620(const t4Vector& v)
 {
     float r;
     int t;
@@ -7118,7 +7114,7 @@ extern "C" void cCruiseControl_update(cCruiseControl* self, tCruiseCmd* in)
     float y = ((sAiBitsY_1620*)in)->v * 0.032258063554763794f;
     float desBrake = ((sAiBitsC_1620*)((char*)in + 4))->v * 0.032258063554763794f;
     cRider* rider = (cRider*)(*(char**)self);
-    if (aiDot_1620(*(sAiVec4_1620*)&rider->mVelocity, *(sAiVec4_1620*)&rider->mGroundForward) < floatZero)
+    if (aiDot_1620(*(&rider->mVelocity), *(&rider->mGroundForward)) < floatZero)
         desBrake = floatZero;
     if (cRider_checkForFinishLine(rider))
         return;
@@ -7200,7 +7196,7 @@ extern "C" void cCruiseControl_update(cCruiseControl* self, tCruiseCmd* in)
     else
     {
         cRider* rider1 = (cRider*)(*(char**)self);
-        float spd = aiLength_1620(*(sAiVec4_1620*)&rider1->mVelocity);
+        float spd = aiLength_1620(*(&rider1->mVelocity));
         if (rider1->mSlewed[3].cur == 0.0f)
         {
             rider1->mSlewed[1].target = rider1->mSlewed[0].cur;
@@ -7829,10 +7825,6 @@ static inline float Length_29B0(const sV4_29B0& v)
     return r;
 }
 
-struct sRider_29B0 {
-    char pad[0x1E0];
-    sV4_29B0 vel;
-};
 
 struct sFlags_29B0 {
     char pad[0x1C];
@@ -7858,7 +7850,7 @@ extern "C" void cHandplantControl_init(cHandplantControl* self, tIntersectInfo* 
     int on = 1;
     self->EnterSec = enterSec;
     self->HandplantType = flag ? on : 0;
-    self->IsMissedHandplant = Length_29B0(((sRider_29B0*)self->mRider)->vel) > 2222.2222f;
+    self->IsMissedHandplant = Length_29B0((*(sV4_29B0*)&(self->mRider)->mVelocity)) > 2222.2222f;
     bool surfaceFlag = false;
     sFlags_29B0* hitObj = ((sFlags_29B0*)intersectInfo->Spline);
     if (hitObj != 0)

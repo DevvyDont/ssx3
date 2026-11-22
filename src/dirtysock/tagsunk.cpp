@@ -5102,10 +5102,6 @@ static inline char* Race_25F4C0()
     return ((char*)&cBENewRaceInterface_newRace);
 }
 
-struct sDsStats_25F4C0 {
-    char pad[0xB8];
-    int fB8, fBC, fC0, fC4;
-};
 
 extern "C" void func_0025F4C0_impl(char* self, const char* name, int a2) __asm__("func_0025F4C0");
 /**
@@ -5142,7 +5138,7 @@ extern "C" void func_0025F4C0_impl(char* vself, const char* name, int matchType)
     char buf[0x40];
     sprintf(buf, str_pct_s_pct_d_pct_d_pct_d_pct_d_pct_d_pct_b, str_challenge, locationID, event, track, y, multipliers, powerUps, ai, pointIcons,
             cCommSystem_getSignature_F4C0(cCommSystem_mCommSystem),
-            ((sDsStats_25F4C0*)self)->fBC, ((sDsStats_25F4C0*)self)->fC0, ((sDsStats_25F4C0*)self)->fC4, ((sDsStats_25F4C0*)self)->fB8);
+            (self)->mStats.unk_04, (self)->mStats.unk_08, (self)->mStats.unk_0C, (self)->mStats.mRank);
     func_0025FB80_v(self, (int)self->mOpponent, buf);
     *(int*)self = 22;
 }

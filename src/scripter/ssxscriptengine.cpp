@@ -1534,10 +1534,6 @@ struct sScriptOpt_9A70 {
     short mask;                     // 0x2
 };
 
-struct sScriptCount_9A70 {
-    int count;
-    int pad[2];
-};
 
 /**
  * Picks a random variation for each entity of a script that is starting, then counts the play.
@@ -1598,7 +1594,7 @@ extern "C" void cSSXScriptEngine_OnStartScript(cSSXScriptEngine* self, sScript_9
                 cScriptPlayerEntity_SetEntityVariation(ev, BXrand() % cnt);
         }
     }
-    ((sScriptCount_9A70*)self->mpMasterTable)[idx].count++;
+    (self->mpMasterTable)[idx].numTimesPlayed++;
 }
 #endif
 
