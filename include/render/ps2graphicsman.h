@@ -123,11 +123,11 @@ struct tTVDisplayFormat {
 // cGraphicsMan::AddProjectiveTexture(const t4Vector&, const t4Matrix&, const t4Matrix&, float, int), which
 // cPS2GraphicsMan_AddProjectiveTexture (cPS2GraphicsMan's override) copies in order. EA's type name is not known.
 struct tProjTexInfo {
-    t4Vector unk_00;                // 0x00 [U] cPS2GraphicsMan_AddProjectiveTexture (first argument)
-    t4Matrix unk_10;                // 0x10 [U] cPS2GraphicsMan_AddProjectiveTexture (second argument); passed to slot 93 by cPS2GraphicsMan_CheckProjectiveTexturesHits
-    t4Matrix unk_50;                // 0x50 [U] cPS2GraphicsMan_AddProjectiveTexture (third argument)
+    t4Vector mShdwProjPos;                // 0x00 [U] cPS2GraphicsMan_AddProjectiveTexture (first argument)
+    t4Matrix mShdwClipMat;                // 0x10 [U] cPS2GraphicsMan_AddProjectiveTexture (second argument); passed to slot 93 by cPS2GraphicsMan_CheckProjectiveTexturesHits
+    t4Matrix mShdwProjMat;                // 0x50 [U] cPS2GraphicsMan_AddProjectiveTexture (third argument)
     float unk_90;                   // 0x90 [U] cPS2GraphicsMan_AddProjectiveTexture (float argument)
-    int unk_94;                     // 0x94 [U] cPS2GraphicsMan_AddProjectiveTexture (int argument)
+    int mShdwTexID;                     // 0x94 [U] cPS2GraphicsMan_AddProjectiveTexture (int argument)
     char unk_98[0x8];               // 0x98 padding to 16
 };
 
@@ -357,11 +357,11 @@ CHECK_OFFSET(tTVDisplayFormat, mfXAspectAdjust, 0x0C);
 CHECK_OFFSET(tTVDisplayFormat, mfYAspectAdjust, 0x10);
 CHECK_SIZE(tTVDisplayFormat, 0x14);
 
-CHECK_OFFSET(tProjTexInfo, unk_00, 0x00);
-CHECK_OFFSET(tProjTexInfo, unk_10, 0x10);
-CHECK_OFFSET(tProjTexInfo, unk_50, 0x50);
+CHECK_OFFSET(tProjTexInfo, mShdwProjPos, 0x00);
+CHECK_OFFSET(tProjTexInfo, mShdwClipMat, 0x10);
+CHECK_OFFSET(tProjTexInfo, mShdwProjMat, 0x50);
 CHECK_OFFSET(tProjTexInfo, unk_90, 0x90);
-CHECK_OFFSET(tProjTexInfo, unk_94, 0x94);
+CHECK_OFFSET(tProjTexInfo, mShdwTexID, 0x94);
 CHECK_OFFSET(tProjTexInfo, unk_98, 0x98);
 CHECK_SIZE(tProjTexInfo, 0xA0);
 

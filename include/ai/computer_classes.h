@@ -246,8 +246,8 @@ struct cCompSlots_cmp { cCompSlot_cmp slotA[5]; cCompSlot_cmp slotB[5]; };
 class cComp_cmp : public cCompPart00_cmp, public cCompPart01_cmp, public cCompPart02_cmp, public cCompPart03_cmp, public cCompPart04_cmp, public cCompPart05_cmp, public cCompPart06_cmp, public cCompPart07_cmp, public cCompPart08_cmp, public cCompPart09_cmp, public cCompPart10_cmp, public cCompPart11_cmp, public cCompPart12_cmp, public cCompPart13_cmp, public cCompPart14_cmp, public cCompPart15_cmp, public cCompPart16_cmp, public cCompPart17_cmp, public cCompPart18_cmp, public cCompPart19_cmp, public cCompPart20_cmp, public cCompPart21_cmp, public cCompPart22_cmp, public cCompPart23_cmp, public cCompPart24_cmp, public cCompPart25_cmp, public cCompPart26_cmp, public cCompPart27_cmp, public cCompPart28_cmp, public cCompPart29_cmp, public cCompPart30_cmp, public cCompSlots_cmp {
 public:
     char tail[0x10];
-    int fDE0;
-    int fDE4;
+    int MotionState;
+    int ControlState;
     cComp_cmp();
     virtual void v01() = 0;
     virtual void v02();

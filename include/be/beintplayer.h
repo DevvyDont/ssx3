@@ -82,8 +82,8 @@ struct cBEPlayerDB {
     signed char cCheatCharacterID;  // 0x12 [O]; [R] set/getPlayerCheatCharID, set/getRiderCheatCharID
     signed char cControlMap;        // 0x13 [O] (On Tour's member after cCheatCharacterID); [R] get/setControllerMapping;
                                     //      the reset clears it
-    int unk_014;                    // 0x14 [R] cBENewPlayerInterface_getCamera / cBENewPlayerInterface_setCamera get / set it per player (no On Tour
-                                    //      counterpart at this position)
+    int iCamera;                    // 0x14 [R] cBENewPlayerInterface_getCamera / cBENewPlayerInterface_setCamera get / set it per player; [O] On Tour
+                                    //      cBEPlayerDB::iCamera (0x38 there, after cControlMap as here)
     int unk_018;                    // 0x18 [R] func_00147718 / func_00147758 get / set it per player
 };
 
@@ -92,7 +92,7 @@ CHECK_OFFSET(cBEPlayerDB, iControllerID, 0x0C);
 CHECK_OFFSET(cBEPlayerDB, cCharacterID, 0x11);
 CHECK_OFFSET(cBEPlayerDB, cCheatCharacterID, 0x12);
 CHECK_OFFSET(cBEPlayerDB, cControlMap, 0x13);
-CHECK_OFFSET(cBEPlayerDB, unk_014, 0x14);
+CHECK_OFFSET(cBEPlayerDB, iCamera, 0x14);
 CHECK_OFFSET(cBEPlayerDB, unk_018, 0x18);
 CHECK_SIZE(cBEPlayerDB, 0x1C);
 

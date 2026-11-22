@@ -7525,11 +7525,11 @@ static inline void vu0CopyMtxP(sPartMtx* dst, sPartMtx* src)
  */
 extern "C" void cPS2GraphicsMan_AddProjectiveTexture(cPS2GraphicsMan* self, sPartQ16* pos, sPartMtx* clipMat, sPartMtx* projMat, float intensity, int i)
 {
-    (*(sPartQ16*)&((&self->mProjTextures[0]))[self->mNumProjTextures].unk_00) = *pos;
-    vu0CopyMtxP(&(*(sPartMtx*)&((&self->mProjTextures[0]))[self->mNumProjTextures].unk_10), clipMat);
-    vu0CopyMtxP(&(*(sPartMtx*)&((&self->mProjTextures[0]))[self->mNumProjTextures].unk_50), projMat);
+    (*(sPartQ16*)&((&self->mProjTextures[0]))[self->mNumProjTextures].mShdwProjPos) = *pos;
+    vu0CopyMtxP(&(*(sPartMtx*)&((&self->mProjTextures[0]))[self->mNumProjTextures].mShdwClipMat), clipMat);
+    vu0CopyMtxP(&(*(sPartMtx*)&((&self->mProjTextures[0]))[self->mNumProjTextures].mShdwProjMat), projMat);
     ((&self->mProjTextures[0]))[self->mNumProjTextures].unk_90 = intensity;
-    ((&self->mProjTextures[0]))[self->mNumProjTextures].unk_94 = i;
+    ((&self->mProjTextures[0]))[self->mNumProjTextures].mShdwTexID = i;
     self->mNumProjTextures++;
 }
 #endif

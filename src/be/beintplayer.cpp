@@ -1458,7 +1458,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getCamera);
  */
 extern "C" int cBENewPlayerInterface_getCamera(cBENewPlayerInterface* self, int index)
 {
-    return cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)].unk_014;
+    return cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)].iCamera;
 }
 #endif
 //100%
@@ -1475,7 +1475,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setCamera);
 extern "C" void cBENewPlayerInterface_setCamera(cBENewPlayerInterface* self, int index, int value)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
-    cBENewPlayerInterface_tempPlayers[id].unk_014 = value;
+    cBENewPlayerInterface_tempPlayers[id].iCamera = value;
 }
 #endif
 //100%

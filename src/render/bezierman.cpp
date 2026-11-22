@@ -1562,7 +1562,7 @@ static inline void CopyMat_D448(void* d, const void* s)
 
 static inline int Tex_D448(tProjTexInfo* l)
 {
-    return l->unk_94;
+    return l->mShdwTexID;
 }
 
 static inline void QueueRecord_D448(cPS2GraphicsMan* gfx, unsigned int buf, unsigned int next, int flag)
@@ -1615,7 +1615,7 @@ extern "C" void func_0038D448(void* self, int kind, void* tbl, void* patch, int 
             packetCursor[1] = 0;
             packetCursor[2] = 0x20000000;
             packetCursor[3] = (long)0x6C048080 << 32;
-            CopyMat_D448(packetCursor + 4, &(*(&projTex->unk_50)));
+            CopyMat_D448(packetCursor + 4, &(*(&projTex->mShdwProjMat)));
             packetCursor[12] = 0;
             packetCursor[13] = (long)(programTable[extra + 6].addr | 0x14000000) << 32;
             packetCursor += 14;

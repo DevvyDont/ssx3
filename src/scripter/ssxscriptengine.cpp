@@ -6276,13 +6276,13 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_cScriptObjCamera
 cScriptEngine_1018::cScriptEngine_1018() : cScriptObject_1018(0)
 {
     for (int i = 1; i >= 0; i--) {
-        f[i] = 0;
+        mpCameraObjects[i] = 0;
     }
     for (int i = 0; i < 9; i++) {
         slots[i].setOwner(this);
     }
-    fD8 = 0;
-    fF8 = -1;
+    mpTransitionObject = 0;
+    mViewIndex = -1;
     cScriptObjCameraManager_ResetScriptManagementVars(this);
 }
 

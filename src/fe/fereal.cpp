@@ -258,7 +258,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
             break;
         }
         case 1:
-            SSXApp->unk_60 = 0;
+            SSXApp->UseRealFE = 0;
             cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreFELoadScreen_cPreFELoadScreen(cMemMan_alloc(8, str_cPreFELoadScreen, 0x100, 0)));
             return 0;
         }

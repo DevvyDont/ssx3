@@ -102,7 +102,7 @@ struct cGameComm {
     int mCheating[2];            // 0x024 [O] (On Tour [4]); [U] checkErrors (cGameComm_checkErrors) sets 2 (6+ pauses) or 3
                                  //       (3+ unplugs) for this machine / the peer; "CHEAT0/1"
     int unk_02C;                 // 0x02C [R] 0; [U] set to 1 when the link times out (unk_094 runs out in checkErrors,
-                                 //       unk_05C reaches 1800 in cGameComm_checkActive); never read in retail
+                                 //       mSyncInputDelay reaches 1800 in cGameComm_checkActive); never read in retail
     int mCommError;              // 0x030 [O]; [U] setCommError sets 1 (once: it guards the other fields); "COMMERR"
     int unk_034;                 // 0x034 [R] the time at construction; [U] gameStartRace (cGameComm_gameStartRace) stores the race
                                  //       start time (SSXApp +0x18 / +0x10); the reporter subtracts it from unk_038/unk_03C
@@ -120,9 +120,9 @@ struct cGameComm {
                                  //       command; 6+ means cheating 2
     int unk_054;                 // 0x054 [U] this machine's controller-unplug count (sendUnplugCmd); 3+ means cheating 3
     int unk_058;                 // 0x058 [U] the peer's unplug count (command 2)
-    int unk_05C;                 // 0x05C [U] frames without a packet while the peer isn't paused (cGameComm_checkActive); 1800 ends
+    int mSyncInputDelay;                 // 0x05C [U] frames without a packet while the peer isn't paused (cGameComm_checkActive); 1800 ends
                                  //       the link; cleared when an input packet arrives (readPacket channel 0)
-    int unk_060;                 // 0x060 [R] 30; [U] frames without a packet (cGameComm_checkActive); at 60 mWaitingMessage is set
+    int mWaitingTimer;                 // 0x060 [R] 30; [U] frames without a packet (cGameComm_checkActive); at 60 mWaitingMessage is set
                                  //       (On Tour has mWaitingTimer[4] in this area)
     int mOverlayTimeout;         // 0x064 [O]; [R] -1; [U] the pause overlays start it (0x4B0, func_001FD0D8; 0x8CA0 in
                                  //       ovtemplatedialog), stop it (-1) and test == 0; counted down by cGameComm_updateTimeout
@@ -135,7 +135,7 @@ struct cGameComm {
                                  //       (commands 0/1)
     int mGameStartGate;          // 0x07C [O]; [U] gameStartGate (cGameComm_gameStartGate, from cGFGateState_gainFocus) sets 1
     int mRaceInProgress;         // 0x080 [O]; [U] gameStartRace sets 1, gameEnded clears it
-    int mWaitingMessage;         // 0x084 [O]; [U] set when the peer goes quiet (unk_060 == 60); updateMessageDisplay
+    int mWaitingMessage;         // 0x084 [O]; [U] set when the peer goes quiet (mWaitingTimer == 60); updateMessageDisplay
                                  //       (cGameComm_updateMessageDisplay) then shows "kT_OVRCMNWaitPlayer"
     int mRemoteExitGame;         // 0x088 [O]; [U] the exit-game command sets 1
     int mRemoteEndGame;          // 0x08C [O]; [U] the exit-game command sets 1 while the race still runs; checkErrors
@@ -237,8 +237,8 @@ CHECK_OFFSET(cGameComm, mAlone, 0x048);
 CHECK_OFFSET(cGameComm, mPauseCount, 0x04C);
 CHECK_OFFSET(cGameComm, unk_054, 0x054);
 CHECK_OFFSET(cGameComm, unk_058, 0x058);
-CHECK_OFFSET(cGameComm, unk_05C, 0x05C);
-CHECK_OFFSET(cGameComm, unk_060, 0x060);
+CHECK_OFFSET(cGameComm, mSyncInputDelay, 0x05C);
+CHECK_OFFSET(cGameComm, mWaitingTimer, 0x060);
 CHECK_OFFSET(cGameComm, mOverlayTimeout, 0x064);
 CHECK_OFFSET(cGameComm, mPauseTimeout, 0x068);
 CHECK_OFFSET(cGameComm, unk_06C, 0x06C);

@@ -55,12 +55,12 @@ extern "C" cSSXApp* cSSXApp_cSSXApp(cSSXApp* self)
         self->unk_EC[i] = 0;
     }
     self->unk_118 = 0;
-    self->unk_74 = 0;
+    self->AutoLobby = 0;
     self->unk_68 = 0;
     self->unk_6C = 0;
     self->unk_70 = 0;
-    self->unk_60 = 1;
-    self->unk_64 = 1;
+    self->UseRealFE = 1;
+    self->ShowHUD = 1;
     MEM_fill(((char*)&self->InputPads[0]), 0, 8);
     MEM_fill(((char*)&self->InputMaps[0]), 0, 8);
     MEM_fill(((char*)&self->Inputs[0]), 0, 8);
@@ -712,16 +712,16 @@ extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv)
                 }
                 cBXString_operatorE1(&self->Password, argv[i]);
             } else if (strcasecmp(opt, str_realfe) == 0) {
-                self->unk_60 = 1;
+                self->UseRealFE = 1;
             } else if (strcasecmp(opt, str_nohud) == 0) {
-                self->unk_64 = 0;
+                self->ShowHUD = 0;
             } else if (strcasecmp(opt, str_autolobby) == 0) {
-                self->unk_74 = 1;
+                self->AutoLobby = 1;
             }
         }
         i++;
     }
-    cRenderToggles_m_DisableHUD = self->unk_64 == 0;
+    cRenderToggles_m_DisableHUD = self->ShowHUD == 0;
 }
 #endif
 
@@ -1004,7 +1004,7 @@ extern "C" void* cDebugFE_cDebugFE(void* p);
 extern "C" void cSSXApp_startFELoad(cSSXApp* self)
 {
     cFEPopupConfirm_mUsePreFE = 0;
-    if (self->unk_60 != 0) {
+    if (self->UseRealFE != 0) {
         void* frontEnd = cRealFE_cRealFE(cMemMan_alloc(0xB5AE0, str_FEModule, 0, 0));
         *(void**)&self->RealFE = frontEnd;
         cAppMan_setNextModule((cAppMan*)self, (unsigned int)frontEnd);

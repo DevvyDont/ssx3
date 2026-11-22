@@ -74,9 +74,9 @@ struct sRiderPair {
                         //      sComputer_0010D8F8::b)
     float mDistance;       // [X] distance to that rider, compared < 1000 (cRider_checkForProximityAction); On Tour XYDist
     float mAngle;       // [X] bearing to that rider; minus the heading, wrapped to +-pi (cRider_checkForProximityAction); On Tour Theta
-    int unk_10;         // a tick (cRider_checkOpponentCollisions); On Tour CollideTick
-    int unk_14;         // a tick (cRider_checkOpponentCollisions); On Tour OverlapTick
-    int unk_18;         // a tick (cRider_checkOpponentCollisions); On Tour PunchTick
+    int CollideTick;         // a tick (cRider_checkOpponentCollisions); On Tour CollideTick
+    int OverlapTick;         // a tick (cRider_checkOpponentCollisions); On Tour OverlapTick
+    int PunchTick;         // a tick (cRider_checkOpponentCollisions); On Tour PunchTick
     int mAggressive;         // [X] tested nonzero (cRider_checkForProximityAction); On Tour ShouldTaunt
     int unk_20;         // tick of the last glance, compared against now - 600 (cRider_checkForProximityAction); On Tour LastTauntTick
 };
@@ -85,9 +85,9 @@ CHECK_OFFSET(sRiderPair, mValid, 0x00);
 CHECK_OFFSET(sRiderPair, IsHuman, 0x04);
 CHECK_OFFSET(sRiderPair, mDistance, 0x08);
 CHECK_OFFSET(sRiderPair, mAngle, 0x0C);
-CHECK_OFFSET(sRiderPair, unk_10, 0x10);
-CHECK_OFFSET(sRiderPair, unk_14, 0x14);
-CHECK_OFFSET(sRiderPair, unk_18, 0x18);
+CHECK_OFFSET(sRiderPair, CollideTick, 0x10);
+CHECK_OFFSET(sRiderPair, OverlapTick, 0x14);
+CHECK_OFFSET(sRiderPair, PunchTick, 0x18);
 CHECK_OFFSET(sRiderPair, mAggressive, 0x1C);
 CHECK_OFFSET(sRiderPair, unk_20, 0x20);
 CHECK_SIZE(sRiderPair, 0x24);

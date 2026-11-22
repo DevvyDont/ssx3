@@ -2647,8 +2647,8 @@ INCLUDE_ASM("ai/computer", cRiderHandler_cRiderHandler);
 cComp_cmp::cComp_cmp()
 {
     mRiderHandler = this;
-    fDE0 = 6;
-    fDE4 = 14;
+    MotionState = 6;
+    ControlState = 14;
 }
 
 // PORT: the compiler names these constructors __<len><Class>[i]; map them to the address-derived names.

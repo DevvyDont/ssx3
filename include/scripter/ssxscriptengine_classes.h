@@ -38,10 +38,10 @@ public:
 class cScriptEngine_1018 : public cScriptObject_1018, public cScriptEntity_1018 {
 public:
     cScriptSlot_1018 slots[9];
-    int f[2];
-    int fD8;
+    int mpCameraObjects[2];
+    int mpTransitionObject;
     char padDC[0x1C];
-    int fF8;
+    int mViewIndex;
     cScriptEngine_1018() __asm__("cScriptObjCameraManager_cScriptObjCameraManager");
     virtual void so01();
     virtual void se01();

@@ -60,12 +60,12 @@ struct cSSXApp {
     cLoadTimer LoadTimer;                // 0x038 [O] cAppMan::LoadTimer
     int LoadState;                       // 0x058 [O] cAppMan::LoadState (volatile eLoadState)
     void** mVtbl;                        // 0x05C cAppMan's vtable pointer (_vt$7cSSXApp after construction)
-    int unk_60;                          // 0x060 [R] set to 1 by the constructor
-    int unk_64;                          // 0x064 [R] set to 1 by the constructor
+    int UseRealFE;                          // 0x060 [R] set to 1 by the constructor
+    int ShowHUD;                          // 0x064 [R] set to 1 by the constructor
     int unk_68;                          // 0x068 [R] zeroed by the constructor
     int unk_6C;                          // 0x06C [R] zeroed by the constructor
     int unk_70;                          // 0x070 [R] zeroed by the constructor
-    int unk_74;                          // 0x074 [R] zeroed by the constructor
+    int AutoLobby;                          // 0x074 [R] zeroed by the constructor
     cBE* BE;                             // 0x078 [P] getBE; [U] passed to cBE_getInterface
     cFE* RealFE;                         // 0x07C [P] getRealFE; [U] +0xB0 is cFE::mRiderManager (as in On Tour)
     cDebugFE* DebugFE;                   // 0x080 [P] getDebugFE

@@ -39,7 +39,7 @@ struct sAnimModelPart {
     unsigned long mask;         // 0x10 64-bit bone/channel mask OR'd into cAnimModel::mask (func_0030E9E0)
     sAnimModelLod lods[4];      // 0x18
     char* boneNames;            // 0x38 numBones names of 0x50 bytes (cAnimModel_getBoneSkelIndex, cAnimModel_getGraftMask)
-    char* unk_3C;               // 0x3C data + src[0x1C] (addModelPartLOD)
+    char* HotSpots;               // 0x3C data + src[0x1C] (addModelPartLOD)
     char* unk_40;               // 0x40 data + src[0x2C]
     int numBones;               // 0x44 = (short)src[0x4A]; loop bound over this part's bones and names
     int unk_48;                 // 0x48 = (short)src[0x4E]

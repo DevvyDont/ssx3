@@ -2263,14 +2263,14 @@ extern "C" void cGameComm_checkActive(cGameComm* gameComm)
             if (gameComm->mPauseMenu[1] == 0 && gameComm->mUnPauseTimer <= 0) {
                 cSSXApp* appObj = SSXApp;
                 int n = ++gameComm->mStallThreshold;
-                ++gameComm->unk_060;
+                ++gameComm->mWaitingTimer;
                 unsigned int st = *(int*)appObj->Game->AI - 4;
                 if (st < 2) {
                     if (n >= 10) gameComm->mStallTimer += 1.0f;
                     if (gameComm->mStallThreshold == 10) ++gameComm->mStallCount;
                 }
             }
-            if (gameComm->unk_060 == 60) gameComm->mWaitingMessage = 1;
+            if (gameComm->mWaitingTimer == 60) gameComm->mWaitingMessage = 1;
         }
         if (gameComm->mRaceInProgress != 0) {
             if (gameComm->mDesync != 0) {
@@ -2278,8 +2278,8 @@ extern "C" void cGameComm_checkActive(cGameComm* gameComm)
                 cGameComm_displayError(gameComm);
                 return;
             }
-            if (gameComm->mPauseMenu[1] == 0) ++gameComm->unk_05C;
-            if (gameComm->unk_05C >= 1800) {
+            if (gameComm->mPauseMenu[1] == 0) ++gameComm->mSyncInputDelay;
+            if (gameComm->mSyncInputDelay >= 1800) {
                 gameComm->unk_02C = 1;
                 cGameComm_setCommError(gameComm);
                 cGameComm_displayError(gameComm);
@@ -2342,8 +2342,8 @@ extern "C" int cGameComm_readPacket(cGameComm* self, int ch, int dst, int maxsiz
         MEM_copy_7BD8((void*)dst, packet->data, len);
         cGameComm_freePacket((cGameComm*)gameComm, (int*)packet);
         if (ch == 0) {
-            gameComm->unk_05C = 0;
-            gameComm->unk_060 = 0;
+            gameComm->mSyncInputDelay = 0;
+            gameComm->mWaitingTimer = 0;
             gameComm->mStallThreshold = 0;
             gameComm->mWaitingMessage = 0;
         }
@@ -3053,14 +3053,14 @@ extern "C" void cGameComm_sendPauseCmd(cGameComm* self, int pause) {
             self->mPauseMenu[0] = 1;
             self->mPauseCount[0] = self->mPauseCount[0] + 1;
             self->mUnPauseTimer = 0;
-            self->unk_05C = 0;
+            self->mSyncInputDelay = 0;
         } else {
             buf[0] = 1;
             self->mPauseMenu[0] = 0;
             self->mUnPauseFlag = 0;
-            self->unk_060 = 0;
+            self->mWaitingTimer = 0;
             self->mWaitingMessage = 0;
-            self->unk_05C = 0;
+            self->mSyncInputDelay = 0;
             if (self->mGameStartGate == 0) {
                 func_00258870(self, 1800, 0);
             } else {
@@ -3398,7 +3398,7 @@ extern "C" void cGameComm_updateMessageDisplay(cGameComm* self)
 {
     char buf[0x100];
     if (self->mWaitingMessage != 0) {
-        self->unk_060 = 0;
+        self->mWaitingTimer = 0;
     }
     char* ui = (char*)SSXApp->Game->UI;
     if (ui == 0) {

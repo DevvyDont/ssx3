@@ -746,7 +746,7 @@ extern "C" void func_0017D6F0(cDebugLobbyScreen* vself, online_Event* ev)
         while (*list != 0) {
             cMenuSys_popMenu(list);
         }
-        if (SSXApp->unk_74 != 0) {
+        if (SSXApp->AutoLobby != 0) {
             self->mState = 0;
         } else {
             self->mState = 19;
@@ -758,7 +758,7 @@ extern "C" void func_0017D6F0(cDebugLobbyScreen* vself, online_Event* ev)
         func_0017DA30((cDebugLobbyScreen*)self, *(int*)((char*)ev + 8));
         break;
     case 201:
-        if (SSXApp->unk_74 != 0) {
+        if (SSXApp->AutoLobby != 0) {
             cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, SSXApp->UserName);
             cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, SSXApp->Password);
             func_0025C610(LobbyMan_mLobbyMan);
@@ -775,7 +775,7 @@ extern "C" void func_0017D6F0(cDebugLobbyScreen* vself, online_Event* ev)
         func_0025C610(LobbyMan_mLobbyMan);
         break;
     case 212:
-        if (SSXApp->unk_74 != 0) {
+        if (SSXApp->AutoLobby != 0) {
             self->mState = 7;
             func_0025CD28(LobbyMan_mLobbyMan, 0);
         } else {
@@ -785,7 +785,7 @@ extern "C" void func_0017D6F0(cDebugLobbyScreen* vself, online_Event* ev)
         }
         break;
     case 218:
-        if (SSXApp->unk_74 != 0) {
+        if (SSXApp->AutoLobby != 0) {
             int i;
             for (i = 0; i < LobbyMan_getnumrooms(LobbyMan_mLobbyMan); i++) {
                 if (strcmp(func_0025F150(LobbyMan_mLobbyMan, i), str_A_West) == 0) {
@@ -885,7 +885,7 @@ extern "C" void func_0017DA30(cDebugLobbyScreen* self, int errorCode)
         SetMode0017DA30(self, 20);
         break;
     case 5:
-        if (SSXApp->unk_74 != 0) {
+        if (SSXApp->AutoLobby != 0) {
             cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, SSXApp->UserName);
             cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, SSXApp->Password);
             func_0025C610(LobbyMan_mLobbyMan);
@@ -2053,7 +2053,7 @@ extern "C" void cDebugFE_load(sDebugFE_17F868* self)
     }
     self->cur = self->objs[0] = cDebugMenuScreen_cDebugMenuScreen(cMemMan_alloc(35912, str_DebugMenu, 0, 0));
     self->objs[1] = cDebugLobbyScreen_cDebugLobbyScreen((cDebugLobbyScreen*)cMemMan_alloc(7192, str_LobbyMenu, 0, 0));
-    if (SSXApp->unk_74) {
+    if (SSXApp->AutoLobby) {
         self->cur = self->objs[1];
     } else {
         self->cur = self->objs[0];

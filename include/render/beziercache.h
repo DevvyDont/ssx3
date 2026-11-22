@@ -32,7 +32,7 @@
 struct t3Vector;
 
 struct cBezierCache {
-    int unk_000[3];                  // 0x000 [R] the table sizes per patch size (900, 220, 140 from cPS2BezierMan)
+    int mCacheSize[3];                  // 0x000 [R] the table sizes per patch size (900, 220, 140 from cPS2BezierMan)
     void* m4x4CacheRecord;           // 0x00C [P] "m4x4CacheRecord == NULL"; [R] "4x4CacheRecord" table, 12-byte records
                                      //       (word 8 = -1 when free)
     void* m6x6CacheRecord;           // 0x010 [P] "m6x6CacheRecord == NULL"; [R] "6x6CacheRecord"
@@ -40,7 +40,7 @@ struct cBezierCache {
     void* unk_018[3];                // 0x018 [U] the three record tables again, indexed by patch size
     int* unk_024[3];                 // 0x024 [R] the "4x4FreeList" / 6x6 / 8x8 buffers
     int* unk_030[3];                 // 0x030 [U] free-list cursors, indexed by patch size
-    int unk_03C[3];                  // 0x03C [U] free-list stack pointers (counts), indexed by patch size
+    int mFreeListSP[3];                  // 0x03C [U] free-list stack pointers (counts), indexed by patch size
     t3Vector* unk_048[3];            // 0x048 [R] "4x4PosCache" / 6x6 / 8x8: n x n positions per record
     t2Vector* unk_054[3];            // 0x054 [R] "4x4UVCache" / 6x6 / 8x8
     t2Vector* unk_060[3];            // 0x060 [R] "4x4LMUVCache" / 6x6 / 8x8 (light-map UVs)
@@ -50,11 +50,11 @@ struct cBezierCache {
     t4Vector unk_110[8];             // 0x110 [U] 8x8 basis table
     t4Vector* unk_190[3];            // 0x190 [U] the three basis tables, indexed by patch size (cPS2BezierMan_GetBezST)
     int unk_19C[3];                  // 0x19C [U] the patch order per size (4, 6, 8)
-    int unk_1A8[3];                  // 0x1A8 [R] normal-cache sizes per patch size
+    int mNrmCacheSize[3];                  // 0x1A8 [R] normal-cache sizes per patch size
     t3Vector* unk_1B4[3];            // 0x1B4 [R] "4x4NrmCache" / 6x6 / 8x8
     int* unk_1C0[3];                 // 0x1C0 [R] "4x4FreeNrmList" / 6x6 / 8x8 buffers
     int* unk_1CC[3];                 // 0x1CC [U] normal free-list cursors
-    int unk_1D8[3];                  // 0x1D8 [U] normal free-list stack pointers
+    int mFreeNrmListSP[3];                  // 0x1D8 [U] normal free-list stack pointers
     char unk_1E4[0xC];               // 0x1E4 padding (t4Vector alignment)
     t4Vector unk_1F0[4];             // 0x1F0 [U] 4x4 derivative basis table
     t4Vector unk_230[6];             // 0x230 [U] 6x6 derivative basis table
@@ -63,14 +63,14 @@ struct cBezierCache {
                                      //       (cPS2BezierMan_GetBezdST)
 };
 
-CHECK_OFFSET(cBezierCache, unk_000, 0x000);
+CHECK_OFFSET(cBezierCache, mCacheSize, 0x000);
 CHECK_OFFSET(cBezierCache, m4x4CacheRecord, 0x00C);
 CHECK_OFFSET(cBezierCache, m6x6CacheRecord, 0x010);
 CHECK_OFFSET(cBezierCache, m8x8CacheRecord, 0x014);
 CHECK_OFFSET(cBezierCache, unk_018, 0x018);
 CHECK_OFFSET(cBezierCache, unk_024, 0x024);
 CHECK_OFFSET(cBezierCache, unk_030, 0x030);
-CHECK_OFFSET(cBezierCache, unk_03C, 0x03C);
+CHECK_OFFSET(cBezierCache, mFreeListSP, 0x03C);
 CHECK_OFFSET(cBezierCache, unk_048, 0x048);
 CHECK_OFFSET(cBezierCache, unk_054, 0x054);
 CHECK_OFFSET(cBezierCache, unk_060, 0x060);
@@ -79,11 +79,11 @@ CHECK_OFFSET(cBezierCache, unk_0B0, 0x0B0);
 CHECK_OFFSET(cBezierCache, unk_110, 0x110);
 CHECK_OFFSET(cBezierCache, unk_190, 0x190);
 CHECK_OFFSET(cBezierCache, unk_19C, 0x19C);
-CHECK_OFFSET(cBezierCache, unk_1A8, 0x1A8);
+CHECK_OFFSET(cBezierCache, mNrmCacheSize, 0x1A8);
 CHECK_OFFSET(cBezierCache, unk_1B4, 0x1B4);
 CHECK_OFFSET(cBezierCache, unk_1C0, 0x1C0);
 CHECK_OFFSET(cBezierCache, unk_1CC, 0x1CC);
-CHECK_OFFSET(cBezierCache, unk_1D8, 0x1D8);
+CHECK_OFFSET(cBezierCache, mFreeNrmListSP, 0x1D8);
 CHECK_OFFSET(cBezierCache, unk_1F0, 0x1F0);
 CHECK_OFFSET(cBezierCache, unk_230, 0x230);
 CHECK_OFFSET(cBezierCache, unk_290, 0x290);

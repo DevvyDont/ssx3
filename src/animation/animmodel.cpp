@@ -48,7 +48,7 @@ extern "C" void cAnimModel_addModelPartLOD(cAnimModel* self, int lod, char* part
     self->parts[self->numParts].lods[lod].refs[index].data = data;
     self->parts[self->numParts].boneNames = data + *(int*)(part + 0x18);
     self->parts[self->numParts].unk_40 = data + *(int*)(part + 0x2C);
-    self->parts[self->numParts].unk_3C = data + *(int*)(part + 0x1C);
+    self->parts[self->numParts].HotSpots = data + *(int*)(part + 0x1C);
     self->parts[self->numParts].numBones = *(short*)(part + 0x4A);
     self->parts[self->numParts].unk_48 = *(short*)(part + 0x4E);
     self->parts[self->numParts].unk_4C = *(short*)(part + 0x50);
@@ -613,7 +613,7 @@ extern "C" t4Vector cAnimModel_transformHotSpot(cAnimModel* model, int id, int i
         sAnimModelPart* part = (sAnimModelPart*)(i * (int)sizeof(sAnimModelPart) + (int)model->parts);
         if (part->id == id)
         {
-            tMdfHotSpot* pt = (tMdfHotSpot*)((index << 4) + (int)part->unk_3C);
+            tMdfHotSpot* pt = (tMdfHotSpot*)((index << 4) + (int)part->HotSpots);
             t4Matrix* boneMatrix = (t4Matrix*)(((pt->mBoneId + part->firstBone) << 6) + (int)model->SkelMatricesScaled);
             t4Vector localPoint;
             localPoint.x = pt->mOffset[0];
