@@ -9765,7 +9765,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", MEM_copy);
  * Copies n bytes from src to dst (hand-written EE memcpy).
  *
  * Copies under 18 bytes, or from a source that is not 16-byte aligned, byte by byte. An unaligned destination is
- * first aligned by func_003E665C(); aligned copies move 128-byte quadword blocks, then 8-byte and single-byte
+ * first aligned by MEM_copy_2(); aligned copies move 128-byte quadword blocks, then 8-byte and single-byte
  * tails. Overlapping ranges are not handled, and nothing is returned.
  *
  * @param dst  destination
@@ -9773,7 +9773,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", MEM_copy);
  * @param n    number of bytes to copy
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-// PORT: PS2-only hand-written memcpy (0x80-byte lq/sq blocks, ld/sd and byte tails, unfilled delay slots; it branches into func_003E665C, which jumps back into it); the whole
+// PORT: PS2-only hand-written memcpy (0x80-byte lq/sq blocks, ld/sd and byte tails, unfilled delay slots; it branches into MEM_copy_2, which jumps back into it); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function.
 __asm__(
     ".set push\n.set noreorder\n.set noat\n"
@@ -9781,7 +9781,7 @@ __asm__(
     "slti $8, $6, 0x12\n"
     ".word 0x1500002A /* bnez $8, .L003E6624: raw word */\n"
     "andi $8, $4, 0xF\n"
-    ".word 0x15000036 /* bnez $8, func_003E665C: raw word */\n"
+    ".word 0x15000036 /* bnez $8, MEM_copy_2: raw word */\n"
     "nop\n"
     ".L003E6588:\n"
     "andi $8, $5, 0xF\n"
@@ -9849,14 +9849,14 @@ __asm__(
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E665C);
+INCLUDE_ASM("ealib/seg_2DCAE8", MEM_copy_2);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: PS2-only hand-written byte-align head of the memcpy above (jumps back into MEM_copy once the destination is 16-byte aligned); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function.
 __asm__(
     ".set push\n.set noreorder\n.set noat\n"
-    ".text\n.align 2\n.globl func_003E665C\n.type func_003E665C, @function\nfunc_003E665C:\n"
+    ".text\n.align 2\n.globl MEM_copy_2\n.type MEM_copy_2, @function\nMEM_copy_2:\n"
     "andi $8, $4, 0xF\n"
     ".word 0x1100FFC9 /* beqz $8, .L003E6588 in MEM_copy: raw word */\n"
     "nop\n"
@@ -9865,12 +9865,12 @@ __asm__(
     "lbu $9, 0x0($5)\n"
     "addiu $5, $5, 0x1\n"
     "sb $9, 0x0($4)\n"
-    "j func_003E665C\n"
+    "j MEM_copy_2\n"
     "addiu $4, $4, 0x1\n"
     ".L003E6684:\n"
     "jr $31\n"
     "nop\n"
-    ".size func_003E665C, . - func_003E665C\n"
+    ".size MEM_copy_2, . - MEM_copy_2\n"
     ".set pop\n");
 #endif
 

@@ -1248,10 +1248,10 @@ extern "C" void cOVStateHiScoreList__cOVStateHiScoreList(cOVStateHiScoreList* se
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021D160);
+INCLUDE_ASM("fe/all_in_one_fe", cFont_textf2);
 #ifdef SKIP_ASM
 // PORT: hand-rolled EE EABI va_start (gcc 2.95 va-mips.h form); use <stdarg.h> off-PS2.
-#define func_0021D160_va_start(ap) \
+#define cFont_textf2_va_start(ap) \
     (ap = (char*)__builtin_next_arg() \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
 extern "C" void cFont_vtextf(int, int, char*);
@@ -1268,9 +1268,9 @@ extern "C" void cFont_vtextf(int, int, char*);
  * @param font  the font (cFont, the method's this)
  * @param fmt  printf-style format string
  */
-extern "C" void func_0021D160(float x, float y, int font, int fmt, ...) {
+extern "C" void cFont_textf2(float x, float y, int font, int fmt, ...) {
     char* ap;
-    func_0021D160_va_start(ap);
+    cFont_textf2_va_start(ap);
     cFont_vtextf(font, fmt, ap);
 }
 #endif
@@ -5225,10 +5225,10 @@ extern "C" void* cOVStateTrophy__cOVStateTrophy(cOVStateTrophy* self) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_002223E8);
+INCLUDE_ASM("fe/all_in_one_fe", cFont_centertextf_2);
 #ifdef SKIP_ASM
 // PORT: hand-rolled EE EABI va_start (gcc 2.95 va-mips.h form); use <stdarg.h> off-PS2.
-#define func_002223E8_va_start(ap) \
+#define cFont_centertextf_2_va_start(ap) \
     (ap = (char*)__builtin_next_arg() \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
 extern "C" void cFont_vcentertextf(int, int, char*);
@@ -5245,9 +5245,9 @@ extern "C" void cFont_vcentertextf(int, int, char*);
  * @param font  the font to draw with
  * @param fmt  the printf format
  */
-extern "C" void func_002223E8(float x, float y, int font, int fmt, ...) {
+extern "C" void cFont_centertextf_2(float x, float y, int font, int fmt, ...) {
     char* ap;
-    func_002223E8_va_start(ap);
+    cFont_centertextf_2_va_start(ap);
     cFont_vcentertextf(font, fmt, ap);
 }
 #endif

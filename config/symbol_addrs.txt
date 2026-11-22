@@ -11417,6 +11417,17 @@ __tf19__builtin_type_info = 0x00415E68; //type:func
 __tf16__attr_type_info = 0x00415ED8; //type:func
 __tf19__pointer_type_info = 0x00415F48; //type:func
 
+// fn_names4c: names by evidence (docs/function_names.tsv)
+cOVStateHUD1P_renderText3 = 0x001F25E0; //type:func
+cFont_textf2 = 0x0021D160; //type:func
+cFont_centertextf_2 = 0x002223E8; //type:func
+cVisualEffect__cVisualEffect_2 = 0x00396160; //type:func
+cVisualEffect_update_2 = 0x00396190; //type:func
+cVisualEffect_render_2 = 0x00396198; //type:func
+cVisualEffect_deferredRender_2 = 0x003961A0; //type:func
+MEM_copy_2 = 0x003E665C; //type:func
+__ieee754_log_2 = 0x0041F3A8; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func

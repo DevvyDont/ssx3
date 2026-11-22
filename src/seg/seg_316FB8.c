@@ -5833,7 +5833,7 @@ double __ieee754_fmod(double x, double y)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_0041F3A8);
+INCLUDE_ASM("seg/seg_316FB8", __ieee754_log_2);
 #ifdef SKIP_ASM
 /* newlib 1.9 libm/math/e_log.c (__ieee754_log) and the fdlibm.h word macros, verbatim:
  * ====================================================
@@ -5897,7 +5897,7 @@ static const double zero_0041F3A8   =  0.0;
  * @param x  the value
  * @return ln(x)
  */
-double func_0041F3A8(double x)
+double __ieee754_log_2(double x)
 {
 	double hfsq,frac,ratio,z,poly,w,evenTerms,oddTerms,dk;
 	int k,hx,i,j;
@@ -6002,13 +6002,13 @@ log10_2lo_F9D8  =  3.69423907715893078616e-13; /* 0x3D59FEF3, 0x11F12B36 */
 
 static const double zero_F9D8   =  0.0;
 
-extern double __ieee754_log_F9D8(double) __asm__("func_0041F3A8");
+extern double __ieee754_log_F9D8(double) __asm__("__ieee754_log_2");
 
 /**
  * Returns the base-10 logarithm of a double.
  *
  * fdlibm: log10(0) is -infinity, a negative argument NaN, infinity and NaN return x + x; subnormals are scaled by 2^54.
- * It splits off the binary exponent k and returns k*log10(2) (in two parts) plus ivln10 * func_0041F3A8(mantissa).
+ * It splits off the binary exponent k and returns k*log10(2) (in two parts) plus ivln10 * __ieee754_log_2(mantissa).
  * func_0041B728 calls it.
  *
  * @param x  the value

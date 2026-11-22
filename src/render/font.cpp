@@ -5361,7 +5361,7 @@ extern "C" void func_00396128(cTextureMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00396160);
+INCLUDE_ASM("render/font", cVisualEffect__cVisualEffect_2);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -5374,7 +5374,7 @@ extern char cVisualEffect_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void func_00396160(int* self, int flags)
+extern "C" void cVisualEffect__cVisualEffect_2(int* self, int flags)
 {
     *(void**)self = cVisualEffect_vtbl;
     if (flags & 1) {
@@ -5383,38 +5383,38 @@ extern "C" void func_00396160(int* self, int flags)
 }
 #endif
 //100%
-INCLUDE_ASM("render/font", func_00396190);
+INCLUDE_ASM("render/font", cVisualEffect_update_2);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  *
  * Nothing references it (no call, no vtable entry).
  */
-extern "C" void func_00396190(void) {
+extern "C" void cVisualEffect_update_2(void) {
 
 }
 #endif
 //100%
-INCLUDE_ASM("render/font", func_00396198);
+INCLUDE_ASM("render/font", cVisualEffect_render_2);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  *
  * Nothing references it (no call, no vtable entry).
  */
-extern "C" void func_00396198(void) {
+extern "C" void cVisualEffect_render_2(void) {
 
 }
 #endif
 //100%
-INCLUDE_ASM("render/font", func_003961A0);
+INCLUDE_ASM("render/font", cVisualEffect_deferredRender_2);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  *
  * Nothing references it (no call, no vtable entry).
  */
-extern "C" void func_003961A0(void) {
+extern "C" void cVisualEffect_deferredRender_2(void) {
 
 }
 #endif

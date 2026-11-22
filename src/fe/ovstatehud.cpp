@@ -146,7 +146,7 @@ INCLUDE_ASM("fe/ovstatehud", tHUDDef_getColour1__FPvT0);
  * Copies a HUD element definition's colour into @p outColor as an (r, g, b, a) vector.
  *
  * The alpha at +0x10 goes to the fourth float and red, green, blue (+0x14..+0x1C) to the first three. The blending text
- * renderers cOVStateHUD1P_renderText1 and func_001F25E0 use it to interpolate two elements' colours with VU0 vector maths.
+ * renderers cOVStateHUD1P_renderText1 and cOVStateHUD1P_renderText3 use it to interpolate two elements' colours with VU0 vector maths.
  *
  * @param outColor  receives the colour as an (r, g, b, a) 4-vector
  */
@@ -1696,7 +1696,7 @@ INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_renderText1);
 // NOTE w1 2026-10-21: cOVStateHUD1P_renderText1 best 99.94 (not committed). Only residual: 4 insns at the start of the
 // last block before the jal cFont_text: $f0..$f3 numbering of the font->f38/f3C = f30/f34 * resEsc[] loads
 // is swapped (local alloc; sx regs reports nothing). Tried operand order / statement order / locals (99.78-99.94).
-// Sibling func_001F25E0 is identical except: cFont_textExtent1 instead of cFont_textExtent (str is const unsigned
+// Sibling cOVStateHUD1P_renderText3 is identical except: cFont_textExtent1 instead of cFont_textExtent (str is const unsigned
 // short*),
 // cFont_text1 instead of cFont_text. Needs sColor_001F16C0, sHudElemDef_001F16C0 from cOVStateHUD1P_renderTime1's
 // block.
@@ -1973,7 +1973,7 @@ extern "C" void cOVStateHUD1P_renderText2(cOVStateHUD1P* ctx, cFont* font, tHUDD
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001F25E0);
+INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_renderText3);
 #ifdef SKIP_ASM
 
 struct sCol_001F25E0 {
@@ -2056,7 +2056,7 @@ static inline t4Vector vu0Scale_25E0(const t4Vector& v, float s)
  * @param flags  vertical pivot override, 0x7F for the elements'
  */
 // Draws text blended between two HUD element layouts (t = 0 is element idx1, t = 1 is element idx2).
-extern "C" void func_001F25E0(cOVStateHUD1P* ctx, float blend, cFont* font, tHUDDef* defs, int idx1, int idx2, const unsigned short* str, int reflect, float* scaleMul, float* posOff, tARGB* color, float* rect, int align, int flags)
+extern "C" void cOVStateHUD1P_renderText3(cOVStateHUD1P* ctx, float blend, cFont* font, tHUDDef* defs, int idx1, int idx2, const unsigned short* str, int reflect, float* scaleMul, float* posOff, tARGB* color, float* rect, int align, int flags)
 {
     float scale[2];
     float extent[4];

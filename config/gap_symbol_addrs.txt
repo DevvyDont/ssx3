@@ -4787,7 +4787,6 @@ lbl_003B2E30 = 0x003B2E30; //type:label
 // --- gap 0x003B3578-0x003EB198 (no owning cpp segment) ---
 func_003C52C8 = 0x003C52C8; //type:func
 func_003CCA38 = 0x003CCA38; //type:func
-func_003E665C = 0x003E665C; //type:func
 
 // --- src/dirtysock/tags.cpp ---
 func_003ECB00 = 0x003ECB00; //type:func

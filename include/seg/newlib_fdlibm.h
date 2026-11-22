@@ -28,7 +28,7 @@ typedef union
 CHECK_SIZE(ieee_float_shape_type, 0x4);
 
 /* The double-word union (fdlibm.h, __IEEE_LITTLE_ENDIAN branch: lsw first). [L] fdlibm.h; [U] the soft-float double
-   routines in seg/seg_316FB8 (func_0041F3A8: EXTRACT_WORDS reads msw = word 1, lsw = word 0)
+   routines in seg/seg_316FB8 (__ieee754_log_2: EXTRACT_WORDS reads msw = word 1, lsw = word 0)
    (views group D: ieee_double_shape_type_0041F3A8). */
 typedef union
 {
