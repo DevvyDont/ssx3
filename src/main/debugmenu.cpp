@@ -3833,7 +3833,7 @@ INCLUDE_ASM("main/debugmenu", func_002501A8__FPv);
 /**
  * Runs the visual effects menu unit's static constructors: calls __sti__visualeffectsmenu_cpp(1, 0xFFFF).
  *
- * It is entry +0x30 of the global constructor table D_0043CE38 that __do_global_ctors (libgcc's __do_global_ctors) walks;
+ * It is entry +0x30 of the global constructor table __CTOR_LIST__ that __do_global_ctors (libgcc's __do_global_ctors) walks;
  * func_002501C8 is its destructor twin. The declared parameter is not used.
  *
  * @return __sti__visualeffectsmenu_cpp's result
@@ -4352,7 +4352,7 @@ INCLUDE_ASM("main/debugmenu", func_00251690__FPv);
 /**
  * Runs the AI visual effects menu unit's static constructors: calls __sti__aivisualeffectsmenu_cpp(1, 0xFFFF).
  *
- * It is entry +0x34 of the global constructor table D_0043CE38; func_002516B0 is its destructor twin. The declared
+ * It is entry +0x34 of the global constructor table __CTOR_LIST__; func_002516B0 is its destructor twin. The declared
  * parameter is not used.
  *
  * @return __sti__aivisualeffectsmenu_cpp's result

@@ -1448,7 +1448,7 @@ INCLUDE_ASM("fe/festateloadhint", func_00247E20__FPv);
 /**
  * Runs a static-constructor pass: calls func_00242EB8(1, 0xFFFF), the static initialiser of the SSXApp globals.
  *
- * It is entry +0x2C of the global constructor table D_0043CE38; func_00247E40 is its destructor twin. The declared
+ * It is entry +0x2C of the global constructor table __CTOR_LIST__; func_00247E40 is its destructor twin. The declared
  * parameter is not used.
  *
  * @return func_00242EB8()'s result

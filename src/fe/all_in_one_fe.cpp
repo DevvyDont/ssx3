@@ -5261,7 +5261,7 @@ extern "C" void __sti__all_in_one_fe_cpp(int, int);
 /**
  * Runs this unit's static constructors: calls __sti__all_in_one_fe_cpp(1, 0xFFFF).
  *
- * g++'s global-constructor entry for the unit; its address is in the constructor table D_0043CE38 (+0x24).
+ * g++'s global-constructor entry for the unit; its address is in the constructor table __CTOR_LIST__ (+0x24).
  */
 extern "C" void func_00222428(void) {
     __sti__all_in_one_fe_cpp(1, 0xFFFF);

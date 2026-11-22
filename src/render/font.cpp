@@ -8584,7 +8584,7 @@ INCLUDE_ASM("render/font", func_003970F8__FPv);
 /**
  * Runs the render unit's static initialisers: __sti__all_in_one_render_cpp(1, 0xffff).
  *
- * Listed in the global constructor table D_0043CE38 (count 0x27, then one function per unit); @p self is ignored.
+ * Listed in the global constructor table __CTOR_LIST__ (count 0x27, then one function per unit); @p self is ignored.
  *
  * @return whatever __sti__all_in_one_render_cpp returns
  */

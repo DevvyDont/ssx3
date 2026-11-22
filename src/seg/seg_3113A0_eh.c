@@ -18,7 +18,7 @@ extern int abort(void) __attribute__((noreturn));
 /**
  * Default terminate handler: calls abort (abort) and never returns.
  *
- * The terminate-handler pointer D_00453440 starts out pointing here.
+ * The terminate-handler pointer __terminate_func starts out pointing here.
  *
  * @return never returns
  */
@@ -30,15 +30,15 @@ int __default_terminate(void) {
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", __terminate);
 #ifdef SKIP_ASM
-extern void (*D_00453440[])(void);
+extern void (*__terminate_func[])(void);
 /**
- * Calls the current terminate handler D_00453440 (never returns).
+ * Calls the current terminate handler __terminate_func (never returns).
  *
  * The exception-handling code calls it for every fatal state (no handler, no active exception, failed allocation or
  * unwind); the pure-virtual filler __pure_virtual calls it too.
  */
 void __terminate(void) {
-    D_00453440[0]();
+    __terminate_func[0]();
 }
 #endif
 

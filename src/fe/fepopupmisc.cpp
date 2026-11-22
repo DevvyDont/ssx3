@@ -5130,7 +5130,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E12B0__FPv);
 /**
  * Runs all_in_one_main's static constructors: calls func_001DBC98(1, 0xFFFF).
  *
- * Entry +0x20 of the global constructor table D_0043CE38 that __do_global_ctors (__do_global_ctors) walks; func_001E12D0 is
+ * Entry +0x20 of the global constructor table __CTOR_LIST__ that __do_global_ctors (__do_global_ctors) walks; func_001E12D0 is
  * its destructor twin. The declared parameter is not used.
  *
  * @return func_001DBC98's result

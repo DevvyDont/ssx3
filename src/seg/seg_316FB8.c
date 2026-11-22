@@ -1853,9 +1853,9 @@ INCLUDE_ASM("seg/seg_316FB8", __svfscanf);
 /* newlib ctype.h; D_00499C81 is _ctype_ + 1 */
 #define isspace_00417AB8(c)	(D_00499C81[(unsigned)(c)]&010)
 #define isupper_00417AB8(c)	(D_00499C81[(unsigned)(c)]&01)
-#define MB_CUR_MAX_00417AB8 (*(int *)D_00455140)
+#define MB_CUR_MAX_00417AB8 (*(int *)__mb_cur_max)
 extern char D_00499C81[];
-extern char D_00455140[];
+extern char __mb_cur_max[];
 extern const short D_00499D90[17]; /* static const short basefix[17] */
 extern int mbtowc_r_7AB8(int, unsigned short *, char *, int, int *) __asm__("_mbtowc_r");
 extern char *__sccl(char *, char *);
@@ -1898,7 +1898,7 @@ int __svfscanf_(struct F7648 *fp, char *fmt0, char *ap) __asm__("__svfscanf");
  * by __sccl), %d %i %o %u %x %X %p (digits collected into a buffer and converted through a function pointer:
  * strtol, or strtoul for the unsigned ones), %e %f %g (atof, then dptofp for a float target), %n and %%.
  * Characters read too far are pushed back with ungetc. Multibyte format characters are decoded with _mbtowc_r when
- * the locale's MB_CUR_MAX (D_00455140) is above 1. %c without suppression reads with fread; buffer refills go
+ * the locale's MB_CUR_MAX (__mb_cur_max) is above 1. %c without suppression reads with fread; buffer refills go
  * through __srefill.
  *
  * @param fp    the input stream
@@ -3426,7 +3426,7 @@ union __dmath_004198D8
 #define HUGE_VAL_004198D8 (infinity_004198D8[0].d)
 #define Bcopy_004198D8(x,y) g98D8_memcpy((char *)&x->_sign, (char *)&y->_sign, y->_wds*sizeof(int) + 2*sizeof(int))
 extern const union __dmath_004198D8 infinity_004198D8[] __asm__("D_0049A898");
-extern const double tens_004198D8[] __asm__("D_0049A8F8");
+extern const double tens_004198D8[] __asm__("__mprec_tens");
 extern const double bigtens_004198D8[] __asm__("D_0049A9C0");
 extern const double tinytens_004198D8[] __asm__("D_0049A9E8");
 extern void *g98D8_memcpy(void *, void *, int) __asm__("func_0041605C");
@@ -5377,7 +5377,7 @@ INCLUDE_ASM("seg/seg_316FB8", _setlocale_r);
 #ifdef SKIP_ASM
 extern char D_0049A7D0b[] __asm__("D_0049A7D0");
 extern char D_0049A7C0[], D_0049A7D0[], D_0049A7D8[], D_0049A7E0[], D_0049A7E8[];
-extern char D_00455140[], D_00455148[], D_00455150[];
+extern char __mb_cur_max[], lc_ctype[], last_lc_ctype[];
 extern int strcmp_cmp(char *, char *) __asm__("strcmp");
 extern char *strcpy_(char *, char *) __asm__("strcpy");
 extern unsigned strlen_(char *) __asm__("strlen");
@@ -5386,8 +5386,8 @@ char *_setlocale_r_(int *p, int category, char *locale) __asm__("_setlocale_r");
  * Sets or queries the locale for a category and returns the locale name, or null when it is not supported.
  *
  * Only "C" and "" are accepted, plus "C-JIS", "C-EUCJP" and "C-SJIS" for category 2 (LC_CTYPE). Setting LC_CTYPE (or
- * LC_ALL, 0) saves the previous ctype name in D_00455150, copies the new one to D_00455148 and sets MB_CUR_MAX
- * (D_00455140) to 8 for C-JIS, 2 for the other two-part names, else 1. A successful set records the category (+0x30)
+ * LC_ALL, 0) saves the previous ctype name in last_lc_ctype, copies the new one to lc_ctype and sets MB_CUR_MAX
+ * (__mb_cur_max) to 8 for C-JIS, 2 for the other two-part names, else 1. A successful set records the category (+0x30)
  * and locale (+0x34) in the struct. The second "C" comparison in the LC_CTYPE test repeats the first, as in newlib.
  *
  * @param reent         the reentrancy struct
@@ -5402,45 +5402,45 @@ char *_setlocale_r_(int *reent, int category, char *locale) {
             if (strcmp_cmp(locale, D_0049A7D0) && strcmp_cmp(locale, D_0049A7C0))
                 return 0;
             if (category == 0) {
-                strcpy_(D_00455150, D_00455148);
-                strcpy_(D_00455148, locale);
-                *(int *)D_00455140 = 1;
+                strcpy_(last_lc_ctype, lc_ctype);
+                strcpy_(lc_ctype, locale);
+                *(int *)__mb_cur_max = 1;
             }
         } else {
             if (strcmp_cmp(locale, D_0049A7D0) && strcmp_cmp(locale, D_0049A7C0) && strcmp_cmp(locale, D_0049A7D0) &&
                 strcmp_cmp(locale, D_0049A7D8) && strcmp_cmp(locale, D_0049A7E0) &&
                 strcmp_cmp(locale, D_0049A7E8))
                 return 0;
-            strcpy_(D_00455150, D_00455148);
-            strcpy_(D_00455148, locale);
+            strcpy_(last_lc_ctype, lc_ctype);
+            strcpy_(lc_ctype, locale);
             if (strcmp_cmp(locale, D_0049A7D8) == 0)
-                *(int *)D_00455140 = 8;
+                *(int *)__mb_cur_max = 8;
             else if (strlen_(locale) >= 2)
-                *(int *)D_00455140 = 2;
+                *(int *)__mb_cur_max = 2;
             else
-                *(int *)D_00455140 = 1;
+                *(int *)__mb_cur_max = 1;
         }
         reent[13] = (int)locale;
         reent[0xC] = category;
-        return category == 2 ? D_00455150 : D_0049A7D0b;
+        return category == 2 ? last_lc_ctype : D_0049A7D0b;
     }
-    return category == 2 ? D_00455148 : D_0049A7D0b;
+    return category == 2 ? lc_ctype : D_0049A7D0b;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_316FB8", _localeconv_r);
 #ifdef SKIP_ASM
-extern char D_0049A790[];
+extern char lconv[];
 /**
- * Returns the fixed numeric-formatting locale table D_0049A790.
+ * Returns the fixed numeric-formatting locale table lconv.
  *
  * The table's decimal point is "." (D_0049A7C8). The reentrancy argument is ignored.
  *
  * @return the locale convention table
  */
 char *_localeconv_r(void) {
-    return D_0049A790;
+    return lconv;
 }
 #endif
 
@@ -7567,12 +7567,12 @@ double _ratio(struct Bigint *numerator, struct Bigint *denominator)
 //100%
 INCLUDE_ASM("seg/seg_316FB8", _mprec_log10);
 #ifdef SKIP_ASM
-extern double D_0049A8F8[];
+extern double __mprec_tens[];
 extern double dpmul(double, double);
 /**
  * Returns 10 to the power n as a double.
  *
- * Powers below 24 come from the table D_0049A8F8; larger ones multiply 1.0 by 10 n times with dpmul. _gcvt calls it.
+ * Powers below 24 come from the table __mprec_tens; larger ones multiply 1.0 by 10 n times with dpmul. _gcvt calls it.
  *
  * @param n  the power (not negative)
  * @return 10^n
@@ -7580,7 +7580,7 @@ extern double dpmul(double, double);
 double _mprec_log10(int n) {
     double powerOfTen = 1.0;
     if (n < 24)
-        return D_0049A8F8[n];
+        return __mprec_tens[n];
     if (n > 0) {
         do {
             powerOfTen = dpmul(powerOfTen, 10.0);
@@ -8314,7 +8314,7 @@ union double_union_00422780
 #define Int_max_00422780 14
 #define n_bigtens_00422780 5
 #define Bcopy_00422780(x,y) func_0041605C((char *)&x->sign, (char *)&y->sign, y->wds*sizeof(int) + 2*sizeof(int))
-extern const double tens_00422780[] __asm__("D_0049A8F8");
+extern const double tens_00422780[] __asm__("__mprec_tens");
 extern const double bigtens_00422780[] __asm__("D_0049A9C0");
 extern struct Bigint *g2780_Balloc(struct _reent_00422780 *, int) __asm__("_Balloc");
 extern void g2780_Bfree(struct _reent_00422780 *, struct Bigint *) __asm__("_Bfree");

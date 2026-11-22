@@ -16,19 +16,19 @@ extern "C" {
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", terminate);
 #ifdef SKIP_ASM
-// __terminate_func / __unexpected_func (retail data D_00453440 / D_00453A38); never return
+// __terminate_func / __unexpected_func (retail data __terminate_func / __unexpected_func); never return
 typedef void (*sVfpNoRet)(void) __attribute__((__noreturn__));
-extern sVfpNoRet D_00453440_f __asm__("D_00453440");
+extern sVfpNoRet __terminate_func_f __asm__("__terminate_func");
 // terminate()
 void terminate_800(void) __asm__("terminate") __attribute__((__noreturn__));
 /**
- * Calls the current terminate handler D_00453440 (never returns).
+ * Calls the current terminate handler __terminate_func (never returns).
  *
  * __default_unexpected__Fv, the C++ exception helpers and __eh_alloc call it.
  */
 void terminate_800(void)
 {
-    D_00453440_f();
+    __terminate_func_f();
 }
 #endif
 
@@ -40,7 +40,7 @@ void unexpected_dflt_818(void) __asm__("__default_unexpected__Fv") __attribute__
 /**
  * Default unexpected-exception handler: calls terminate (never returns).
  *
- * The unexpected-handler pointer D_00453A38 starts out pointing here.
+ * The unexpected-handler pointer __unexpected_func starts out pointing here.
  */
 void unexpected_dflt_818(void)
 {
@@ -52,18 +52,18 @@ void unexpected_dflt_818(void)
 INCLUDE_ASM("seg/seg_313800_exception", set_terminate__FPFv_v);
 #ifdef SKIP_ASM
 // set_terminate(): install a new terminate handler, return the old one
-extern void* D_00453440_p __asm__("D_00453440");
+extern void* __terminate_func_p __asm__("__terminate_func");
 void* set_terminate_828(void* f) __asm__("set_terminate__FPFv_v");
 /**
- * Installs a new terminate handler in D_00453440 and returns the old one.
+ * Installs a new terminate handler in __terminate_func and returns the old one.
  *
  * @param newHandler  the new handler
  * @return the previous handler
  */
 void* set_terminate_828(void* newHandler)
 {
-    void* old = D_00453440_p;
-    D_00453440_p = newHandler;
+    void* old = __terminate_func_p;
+    __terminate_func_p = newHandler;
     return old;
 }
 #endif
@@ -71,16 +71,16 @@ void* set_terminate_828(void* newHandler)
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", set_unexpected__FPFv_v);
 #ifdef SKIP_ASM
-extern int D_00453A38[];
+extern int __unexpected_func[];
 /**
- * Installs a new unexpected-exception handler in D_00453A38 and returns the old one.
+ * Installs a new unexpected-exception handler in __unexpected_func and returns the old one.
  *
  * @param newHandler  the new handler
  * @return the previous handler
  */
 int set_unexpected__FPFv_v(int newHandler) {
-    int oldHandler = D_00453A38[0];
-    D_00453A38[0] = newHandler;
+    int oldHandler = __unexpected_func[0];
+    __unexpected_func[0] = newHandler;
     return oldHandler;
 }
 #endif
@@ -88,18 +88,18 @@ int set_unexpected__FPFv_v(int newHandler) {
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", unexpected__Fv);
 #ifdef SKIP_ASM
-// __terminate_func / __unexpected_func (retail data D_00453440 / D_00453A38); never return
-extern sVfpNoRet D_00453A38_f __asm__("D_00453A38");
+// __terminate_func / __unexpected_func (retail data __terminate_func / __unexpected_func); never return
+extern sVfpNoRet __unexpected_func_f __asm__("__unexpected_func");
 // unexpected()
 void unexpected_848(void) __asm__("unexpected__Fv") __attribute__((__noreturn__));
 /**
- * Calls the current unexpected-exception handler D_00453A38 (never returns).
+ * Calls the current unexpected-exception handler __unexpected_func (never returns).
  *
  * __check_eh_spec calls it.
  */
 void unexpected_848(void)
 {
-    D_00453A38_f();
+    __unexpected_func_f();
 }
 #endif
 
@@ -335,11 +335,11 @@ INCLUDE_ASM("seg/seg_313800_exception", __check_eh_spec);
    destructors and typeid functions those of exception.cc's #pragma implementation "exception". */
 __asm__("terminate__Fv = terminate\n"
         "_vt$9exception = D_004998B8\n"
-        "_vt$13bad_exception = D_004998A0\n"
+        "_vt$13bad_exception = bad_exception_vtbl\n"
         "_$_13bad_exception = bad_exception__bad_exception\n"
-        "_vt$8bad_cast = D_00499A30\n"
+        "_vt$8bad_cast = bad_cast_vtbl\n"
         "_$_8bad_cast = bad_cast__bad_cast\n"
-        "_vt$10bad_typeid = D_00499A18\n"
+        "_vt$10bad_typeid = bad_typeid_vtbl\n"
         "_$_10bad_typeid = bad_typeid__bad_typeid");
 
 extern "C++" {
@@ -438,7 +438,7 @@ extern "C" void __check_eh_spec (int n, const void **spec) __asm__("__check_eh_s
  *
  * Rethrows when the current exception's type matches one of the n allowed type_infos (__throw_type_match_rtti). Otherwise it
  * calls unexpected__Fv (unexpected); if that throws a different exception, the new one is checked against the list the
- * same way and rethrown on a match. Failing that it throws a new bad_exception (vtable D_004998A0, type __tf13bad_exception,
+ * same way and rethrown on a match. Failing that it throws a new bad_exception (vtable bad_exception_vtbl, type __tf13bad_exception,
  * destructor bad_exception__bad_exception) when bad_exception's type_info matches an entry, and calls terminate (terminate)
  * otherwise.
  *
@@ -493,7 +493,7 @@ extern "C" void __throw_bad_cast (void) __asm__("__throw_bad_cast");
 /**
  * Throws a new bad_cast; never returns.
  *
- * Allocates the object with __eh_alloc, gives it bad_cast's vtable (D_00499A30), pushes it with __cp_push_exception (type
+ * Allocates the object with __eh_alloc, gives it bad_cast's vtable (bad_cast_vtbl), pushes it with __cp_push_exception (type
  * from the vtable's type_info function, destructor bad_cast__bad_cast) and throws with __throw. g++ calls this for a
  * failed dynamic_cast to a reference type.
  */
@@ -512,7 +512,7 @@ extern "C" void __throw_bad_typeid (void) __asm__("__throw_bad_typeid");
 /**
  * Throws a new bad_typeid; never returns.
  *
- * Allocates the object with __eh_alloc, gives it bad_typeid's vtable (D_00499A18), pushes it with __cp_push_exception
+ * Allocates the object with __eh_alloc, gives it bad_typeid's vtable (bad_typeid_vtbl), pushes it with __cp_push_exception
  * (type from the vtable's type_info function, destructor bad_typeid__bad_typeid) and throws with __throw. g++ calls this
  * when typeid is applied to a dereferenced null pointer.
  */
@@ -572,7 +572,7 @@ extern int operator_delete__FPi(int *);
  * Destroys a bad_exception: puts back the base exception vtable and frees the object when bit 0 of the flag is set.
  *
  * g++ deleting-destructor shape: stores D_004998B8 (exception's vtable) and calls operator_delete__FPi on flag & 1. It
- * fills the destructor slot of bad_exception's vtable D_004998A0.
+ * fills the destructor slot of bad_exception's vtable bad_exception_vtbl.
  *
  * @param excObject  the bad_exception object
  * @param flags  destructor flags: bit 0 frees the storage
@@ -587,15 +587,15 @@ int bad_exception__bad_exception(int **excObject, int flags) {
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", bad_exception_bad_exception);
 #ifdef SKIP_ASM
-extern char D_004998A0[];
+extern char bad_exception_vtbl[];
 /**
- * Constructs a bad_exception: stores its vtable (D_004998A0) and returns the object.
+ * Constructs a bad_exception: stores its vtable (bad_exception_vtbl) and returns the object.
  *
  * @param excObject  the object to construct
  * @return the constructed object
  */
 void *bad_exception_bad_exception(void **excObject) {
-    *excObject = D_004998A0;
+    *excObject = bad_exception_vtbl;
     return excObject;
 }
 #endif

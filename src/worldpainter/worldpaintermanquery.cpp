@@ -1184,7 +1184,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1688__FPv);
 #ifdef SKIP_ASM
 /**
  * Runs the world-painter query unit's static constructors: func_002C0B70(1, 0xFFFF). It is entry 23 of the static
- * constructor table D_0043CE38.
+ * constructor table __CTOR_LIST__.
  *
  * @return func_002C0B70's return register (it returns nothing)
  */

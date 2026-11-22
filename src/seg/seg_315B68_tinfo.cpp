@@ -447,7 +447,7 @@ extern int operator_delete__FPi(int *);
  * Destroys a bad_typeid: puts back the base exception vtable and frees the object when bit 0 of the flag is set.
  *
  * g++ deleting-destructor shape: stores D_004998B8 (exception's vtable) and calls operator_delete__FPi on flag & 1.
- * Fills the destructor slot of bad_typeid's vtable D_00499A18.
+ * Fills the destructor slot of bad_typeid's vtable bad_typeid_vtbl.
  *
  * @param excObject     the bad_typeid object
  * @param flag  destructor flags: bit 0 frees the storage
@@ -462,15 +462,15 @@ int bad_typeid__bad_typeid(int **excObject, int flag) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", bad_typeid_bad_typeid);
 #ifdef SKIP_ASM
-extern int D_00499A18[];
+extern int bad_typeid_vtbl[];
 /**
- * Constructs a bad_typeid: stores its vtable (D_00499A18) and returns the object.
+ * Constructs a bad_typeid: stores its vtable (bad_typeid_vtbl) and returns the object.
  *
  * @param excObject  the object to construct
  * @return the constructed object
  */
 int *bad_typeid_bad_typeid(int **excObject) {
-    *excObject = D_00499A18;
+    *excObject = bad_typeid_vtbl;
     return (int*)excObject;
 }
 #endif
@@ -509,7 +509,7 @@ extern int operator_delete__FPi(int *);
  * Destroys a bad_cast: puts back the base exception vtable and frees the object when bit 0 of the flag is set.
  *
  * g++ deleting-destructor shape: stores D_004998B8 (exception's vtable) and calls operator_delete__FPi on flag & 1.
- * Fills the destructor slot of bad_cast's vtable D_00499A30.
+ * Fills the destructor slot of bad_cast's vtable bad_cast_vtbl.
  *
  * @param excObject     the bad_cast object
  * @param flag  destructor flags: bit 0 frees the storage
@@ -524,15 +524,15 @@ int bad_cast__bad_cast(int **excObject, int flag) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", bad_cast_bad_cast);
 #ifdef SKIP_ASM
-extern int D_00499A30[];
+extern int bad_cast_vtbl[];
 /**
- * Constructs a bad_cast: stores its vtable (D_00499A30) and returns the object.
+ * Constructs a bad_cast: stores its vtable (bad_cast_vtbl) and returns the object.
  *
  * @param excObject  the object to construct
  * @return the constructed object
  */
 int *bad_cast_bad_cast(int **excObject) {
-    *excObject = D_00499A30;
+    *excObject = bad_cast_vtbl;
     return (int*)excObject;
 }
 #endif
@@ -838,11 +838,11 @@ int __is_pointer(int *typePtr) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", __rtti_ptr);
 #ifdef SKIP_ASM
-extern int D_00499BC8[];
+extern int __pointer_type_info_vtbl[];
 /**
  * Constructs a pointer type_info in caller-supplied storage (does nothing for null storage).
  *
- * Stores the name (+0), the __pointer_type_info vtable D_00499BC8 (+4) and the pointed-to type (+8).
+ * Stores the name (+0), the __pointer_type_info vtable __pointer_type_info_vtbl (+4) and the pointed-to type (+8).
  *
  * @param storage  the storage, or null
  * @param typeName  the mangled type name
@@ -852,7 +852,7 @@ void __rtti_ptr(int *storage, int typeName, int pointeeType) {
     if (storage != 0) {
         storage[2] = pointeeType;
         storage[0] = typeName;
-        storage[1] = (int)D_00499BC8;
+        storage[1] = (int)__pointer_type_info_vtbl;
     }
 }
 #endif
@@ -860,11 +860,11 @@ void __rtti_ptr(int *storage, int typeName, int pointeeType) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", __rtti_attr);
 #ifdef SKIP_ASM
-extern int D_00499BB8[];
+extern int __attr_type_info_vtbl[];
 /**
  * Constructs a cv-qualified type's type_info in caller-supplied storage (does nothing for null storage).
  *
- * Stores the name (+0), the __attr_type_info vtable D_00499BB8 (+4), the unqualified type (+8) and the qualifier bits
+ * Stores the name (+0), the __attr_type_info vtable __attr_type_info_vtbl (+4), the unqualified type (+8) and the qualifier bits
  * (+0xC: 1 const, 2 volatile).
  *
  * @param storage  the storage, or null
@@ -877,7 +877,7 @@ void __rtti_attr(int *storage, int typeName, int cvQualifiers, int baseType) {
         storage[3] = cvQualifiers;
         storage[0] = typeName;
         storage[2] = baseType;
-        storage[1] = (int)D_00499BB8;
+        storage[1] = (int)__attr_type_info_vtbl;
     }
 }
 #endif
@@ -885,11 +885,11 @@ void __rtti_attr(int *storage, int typeName, int cvQualifiers, int baseType) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", __rtti_func);
 #ifdef SKIP_ASM
-extern int D_00499B98[];
+extern int __func_type_info_vtbl[];
 /**
  * Constructs the type_info of a function type in caller-supplied storage (does nothing for null storage).
  *
- * Stores the name (+0) and the __func_type_info vtable D_00499B98 (+4).
+ * Stores the name (+0) and the __func_type_info vtable __func_type_info_vtbl (+4).
  *
  * @param storage  the storage, or null
  * @param typeName  the mangled type name
@@ -897,7 +897,7 @@ extern int D_00499B98[];
 void __rtti_func(int *storage, int typeName) {
     if (storage != 0) {
         storage[0] = typeName;
-        storage[1] = (int)D_00499B98;
+        storage[1] = (int)__func_type_info_vtbl;
     }
 }
 #endif
@@ -905,12 +905,12 @@ void __rtti_func(int *storage, int typeName) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", __rtti_ptmf);
 #ifdef SKIP_ASM
-extern int D_00499B88[];
+extern int __ptmf_type_info_vtbl[];
 /**
  * Constructs the type_info of a pointer-to-member-function type in caller-supplied storage (does nothing for null
  * storage).
  *
- * Stores the name (+0) and the __ptmf_type_info vtable D_00499B88 (+4).
+ * Stores the name (+0) and the __ptmf_type_info vtable __ptmf_type_info_vtbl (+4).
  *
  * @param storage  the storage, or null
  * @param typeName  the mangled type name
@@ -918,7 +918,7 @@ extern int D_00499B88[];
 void __rtti_ptmf(int *storage, int typeName) {
     if (storage != 0) {
         storage[0] = typeName;
-        storage[1] = (int)D_00499B88;
+        storage[1] = (int)__ptmf_type_info_vtbl;
     }
 }
 #endif
@@ -926,11 +926,11 @@ void __rtti_ptmf(int *storage, int typeName) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", __rtti_ptmd);
 #ifdef SKIP_ASM
-extern int D_00499B78[];
+extern int __ptmd_type_info_vtbl[];
 /**
  * Constructs the type_info of a pointer-to-data-member type in caller-supplied storage (does nothing for null storage).
  *
- * Stores the name (+0) and the __ptmd_type_info vtable D_00499B78 (+4).
+ * Stores the name (+0) and the __ptmd_type_info vtable __ptmd_type_info_vtbl (+4).
  *
  * @param storage  the storage, or null
  * @param typeName  the mangled type name
@@ -938,7 +938,7 @@ extern int D_00499B78[];
 void __rtti_ptmd(int *storage, int typeName) {
     if (storage != 0) {
         storage[0] = typeName;
-        storage[1] = (int)D_00499B78;
+        storage[1] = (int)__ptmd_type_info_vtbl;
     }
 }
 #endif
@@ -946,11 +946,11 @@ void __rtti_ptmd(int *storage, int typeName) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", __rtti_array);
 #ifdef SKIP_ASM
-extern int D_00499B68[];
+extern int __array_type_info_vtbl[];
 /**
  * Constructs the type_info of an array type in caller-supplied storage (does nothing for null storage).
  *
- * Stores the name (+0) and the __array_type_info vtable D_00499B68 (+4).
+ * Stores the name (+0) and the __array_type_info vtable __array_type_info_vtbl (+4).
  *
  * @param storage  the storage, or null
  * @param typeName  the mangled type name
@@ -958,7 +958,7 @@ extern int D_00499B68[];
 void __rtti_array(int *storage, int typeName) {
     if (storage != 0) {
         storage[0] = typeName;
-        storage[1] = (int)D_00499B68;
+        storage[1] = (int)__array_type_info_vtbl;
     }
 }
 #endif
@@ -1003,24 +1003,24 @@ typedef unsigned int size_t;
 inline void* operator new(size_t, void* p) throw() { return p; }
 
 extern "C" {
-extern const int D_00499BA8[];
-extern unsigned char D_00454158[8];
-extern unsigned char D_00454160[8];
-extern unsigned char D_00454168[8];
-extern unsigned char D_00454170[8];
-extern unsigned char D_00454178[8];
-extern unsigned char D_00454180[8];
-extern unsigned char D_00454188[8];
-extern unsigned char D_00454190[8];
-extern unsigned char D_00454198[8];
-extern unsigned char D_004541A0[8];
-extern unsigned char D_004541A8[8];
-extern unsigned char D_004541B0[8];
-extern unsigned char D_004541B8[8];
-extern unsigned char D_004541C0[8];
-extern unsigned char D_004541C8[8];
-extern unsigned char D_004541D0[8];
-extern unsigned char D_004541D8[8];
+extern const int __builtin_type_info_vtbl[];
+extern unsigned char __tiv[8];
+extern unsigned char __tix[8];
+extern unsigned char __til[8];
+extern unsigned char __tii[8];
+extern unsigned char __tis[8];
+extern unsigned char __tib[8];
+extern unsigned char __tic[8];
+extern unsigned char __tiw[8];
+extern unsigned char __tir[8];
+extern unsigned char __tid[8];
+extern unsigned char __tif[8];
+extern unsigned char __tiUi[8];
+extern unsigned char __tiUl[8];
+extern unsigned char __tiUx[8];
+extern unsigned char __tiUs[8];
+extern unsigned char __tiUc[8];
+extern unsigned char __tiSc[8];
 extern const char D_00499AE0[];
 extern const char D_00499AE8[];
 extern const char D_00499AF0[];
@@ -1044,7 +1044,7 @@ class __builtin_ti {
     const char* _name;
     const void* vtbl_;
 public:
-    __builtin_ti(const char* n) : _name(n), vtbl_(D_00499BA8) {}
+    __builtin_ti(const char* n) : _name(n), vtbl_(__builtin_type_info_vtbl) {}
 };
 
 // (a non-polymorphic stand-in class that stores the retail vtable's address: a real polymorphic class would emit its
@@ -1064,12 +1064,12 @@ extern "C" const __builtin_ti& __tfv_a(void) __asm__("__tfv");
 /**
  * Returns the type_info object of the builtin type void, building it on first use.
  *
- * When the first word of D_00454158 is zero, constructs a type_info there with the name "v" (D_00499AE0, g++'s mangled
- * code for void) and the __builtin_type_info vtable D_00499BA8.
+ * When the first word of __tiv is zero, constructs a type_info there with the name "v" (D_00499AE0, g++'s mangled
+ * code for void) and the __builtin_type_info vtable __builtin_type_info_vtbl.
  *
- * @return the type_info object D_00454158
+ * @return the type_info object __tiv
  */
-BUILTIN(__tfv_a, D_00454158, D_00499AE0)
+BUILTIN(__tfv_a, __tiv, D_00499AE0)
 #endif
 
 //100%
@@ -1078,12 +1078,12 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __tfx);
 /**
  * Returns the type_info object of the builtin type long long, building it on first use.
  *
- * When the first word of D_00454160 is zero, constructs a type_info there with the name "x" (D_00499AE8, g++'s mangled
- * code for long long) and the __builtin_type_info vtable D_00499BA8.
+ * When the first word of __tix is zero, constructs a type_info there with the name "x" (D_00499AE8, g++'s mangled
+ * code for long long) and the __builtin_type_info vtable __builtin_type_info_vtbl.
  *
- * @return the type_info object D_00454160
+ * @return the type_info object __tix
  */
-BUILTIN(__tfx, D_00454160, D_00499AE8)
+BUILTIN(__tfx, __tix, D_00499AE8)
 #endif
 
 //100%
@@ -1092,12 +1092,12 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __tfl);
 /**
  * Returns the type_info object of the builtin type long, building it on first use.
  *
- * When the first word of D_00454168 is zero, constructs a type_info there with the name "l" (D_00499AF0, g++'s mangled
- * code for long) and the __builtin_type_info vtable D_00499BA8.
+ * When the first word of __til is zero, constructs a type_info there with the name "l" (D_00499AF0, g++'s mangled
+ * code for long) and the __builtin_type_info vtable __builtin_type_info_vtbl.
  *
- * @return the type_info object D_00454168
+ * @return the type_info object __til
  */
-BUILTIN(__tfl, D_00454168, D_00499AF0)
+BUILTIN(__tfl, __til, D_00499AF0)
 #endif
 
 //100%
@@ -1106,12 +1106,12 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __tfi);
 /**
  * Returns the type_info object of the builtin type int, building it on first use.
  *
- * When the first word of D_00454170 is zero, constructs a type_info there with the name "i" (D_00499AF8, g++'s mangled
- * code for int) and the __builtin_type_info vtable D_00499BA8.
+ * When the first word of __tii is zero, constructs a type_info there with the name "i" (D_00499AF8, g++'s mangled
+ * code for int) and the __builtin_type_info vtable __builtin_type_info_vtbl.
  *
- * @return the type_info object D_00454170
+ * @return the type_info object __tii
  */
-BUILTIN(__tfi, D_00454170, D_00499AF8)
+BUILTIN(__tfi, __tii, D_00499AF8)
 #endif
 
 //100%
@@ -1120,12 +1120,12 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __tfs);
 /**
  * Returns the type_info object of the builtin type short, building it on first use.
  *
- * When the first word of D_00454178 is zero, constructs a type_info there with the name "s" (D_00499B00, g++'s mangled
- * code for short) and the __builtin_type_info vtable D_00499BA8.
+ * When the first word of __tis is zero, constructs a type_info there with the name "s" (D_00499B00, g++'s mangled
+ * code for short) and the __builtin_type_info vtable __builtin_type_info_vtbl.
  *
- * @return the type_info object D_00454178
+ * @return the type_info object __tis
  */
-BUILTIN(__tfs, D_00454178, D_00499B00)
+BUILTIN(__tfs, __tis, D_00499B00)
 #endif
 
 //100%
@@ -1134,12 +1134,12 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __tfb);
 /**
  * Returns the type_info object of the builtin type bool, building it on first use.
  *
- * When the first word of D_00454180 is zero, constructs a type_info there with the name "b" (D_00499B08, g++'s mangled
- * code for bool) and the __builtin_type_info vtable D_00499BA8.
+ * When the first word of __tib is zero, constructs a type_info there with the name "b" (D_00499B08, g++'s mangled
+ * code for bool) and the __builtin_type_info vtable __builtin_type_info_vtbl.
  *
- * @return the type_info object D_00454180
+ * @return the type_info object __tib
  */
-BUILTIN(__tfb, D_00454180, D_00499B08)
+BUILTIN(__tfb, __tib, D_00499B08)
 #endif
 
 //100%
@@ -1148,12 +1148,12 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __tfc);
 /**
  * Returns the type_info object of the builtin type char, building it on first use.
  *
- * When the first word of D_00454188 is zero, constructs a type_info there with the name "c" (D_00499B10, g++'s mangled
- * code for char) and the __builtin_type_info vtable D_00499BA8.
+ * When the first word of __tic is zero, constructs a type_info there with the name "c" (D_00499B10, g++'s mangled
+ * code for char) and the __builtin_type_info vtable __builtin_type_info_vtbl.
  *
- * @return the type_info object D_00454188
+ * @return the type_info object __tic
  */
-BUILTIN(__tfc, D_00454188, D_00499B10)
+BUILTIN(__tfc, __tic, D_00499B10)
 #endif
 
 //100%
@@ -1162,12 +1162,12 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __tfw);
 /**
  * Returns the type_info object of the builtin type wchar_t, building it on first use.
  *
- * When the first word of D_00454190 is zero, constructs a type_info there with the name "w" (D_00499B18, g++'s mangled
- * code for wchar_t) and the __builtin_type_info vtable D_00499BA8.
+ * When the first word of __tiw is zero, constructs a type_info there with the name "w" (D_00499B18, g++'s mangled
+ * code for wchar_t) and the __builtin_type_info vtable __builtin_type_info_vtbl.
  *
- * @return the type_info object D_00454190
+ * @return the type_info object __tiw
  */
-BUILTIN(__tfw, D_00454190, D_00499B18)
+BUILTIN(__tfw, __tiw, D_00499B18)
 #endif
 
 //100%
@@ -1176,12 +1176,12 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __tfr);
 /**
  * Returns the type_info object of the builtin type long double, building it on first use.
  *
- * When the first word of D_00454198 is zero, constructs a type_info there with the name "r" (D_00499B20, g++'s mangled
- * code for long double) and the __builtin_type_info vtable D_00499BA8.
+ * When the first word of __tir is zero, constructs a type_info there with the name "r" (D_00499B20, g++'s mangled
+ * code for long double) and the __builtin_type_info vtable __builtin_type_info_vtbl.
  *
- * @return the type_info object D_00454198
+ * @return the type_info object __tir
  */
-BUILTIN(__tfr, D_00454198, D_00499B20)
+BUILTIN(__tfr, __tir, D_00499B20)
 #endif
 
 //100%
@@ -1190,12 +1190,12 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __tfd);
 /**
  * Returns the type_info object of the builtin type double, building it on first use.
  *
- * When the first word of D_004541A0 is zero, constructs a type_info there with the name "d" (D_00499B28, g++'s mangled
- * code for double) and the __builtin_type_info vtable D_00499BA8.
+ * When the first word of __tid is zero, constructs a type_info there with the name "d" (D_00499B28, g++'s mangled
+ * code for double) and the __builtin_type_info vtable __builtin_type_info_vtbl.
  *
- * @return the type_info object D_004541A0
+ * @return the type_info object __tid
  */
-BUILTIN(__tfd, D_004541A0, D_00499B28)
+BUILTIN(__tfd, __tid, D_00499B28)
 #endif
 
 //100%
@@ -1204,12 +1204,12 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __tff);
 /**
  * Returns the type_info object of the builtin type float, building it on first use.
  *
- * When the first word of D_004541A8 is zero, constructs a type_info there with the name "f" (D_00499B30, g++'s mangled
- * code for float) and the __builtin_type_info vtable D_00499BA8.
+ * When the first word of __tif is zero, constructs a type_info there with the name "f" (D_00499B30, g++'s mangled
+ * code for float) and the __builtin_type_info vtable __builtin_type_info_vtbl.
  *
- * @return the type_info object D_004541A8
+ * @return the type_info object __tif
  */
-BUILTIN(__tff, D_004541A8, D_00499B30)
+BUILTIN(__tff, __tif, D_00499B30)
 #endif
 
 //100%
@@ -1218,12 +1218,12 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __tfUi);
 /**
  * Returns the type_info object of the builtin type unsigned int, building it on first use.
  *
- * When the first word of D_004541B0 is zero, constructs a type_info there with the name "Ui" (D_00499B38, g++'s mangled
- * code for unsigned int) and the __builtin_type_info vtable D_00499BA8.
+ * When the first word of __tiUi is zero, constructs a type_info there with the name "Ui" (D_00499B38, g++'s mangled
+ * code for unsigned int) and the __builtin_type_info vtable __builtin_type_info_vtbl.
  *
- * @return the type_info object D_004541B0
+ * @return the type_info object __tiUi
  */
-BUILTIN(__tfUi, D_004541B0, D_00499B38)
+BUILTIN(__tfUi, __tiUi, D_00499B38)
 #endif
 
 //100%
@@ -1232,12 +1232,12 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __tfUl);
 /**
  * Returns the type_info object of the builtin type unsigned long, building it on first use.
  *
- * When the first word of D_004541B8 is zero, constructs a type_info there with the name "Ul" (D_00499B40, g++'s mangled
- * code for unsigned long) and the __builtin_type_info vtable D_00499BA8.
+ * When the first word of __tiUl is zero, constructs a type_info there with the name "Ul" (D_00499B40, g++'s mangled
+ * code for unsigned long) and the __builtin_type_info vtable __builtin_type_info_vtbl.
  *
- * @return the type_info object D_004541B8
+ * @return the type_info object __tiUl
  */
-BUILTIN(__tfUl, D_004541B8, D_00499B40)
+BUILTIN(__tfUl, __tiUl, D_00499B40)
 #endif
 
 //100%
@@ -1246,12 +1246,12 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __tfUx);
 /**
  * Returns the type_info object of the builtin type unsigned long long, building it on first use.
  *
- * When the first word of D_004541C0 is zero, constructs a type_info there with the name "Ux" (D_00499B48, g++'s mangled
- * code for unsigned long long) and the __builtin_type_info vtable D_00499BA8.
+ * When the first word of __tiUx is zero, constructs a type_info there with the name "Ux" (D_00499B48, g++'s mangled
+ * code for unsigned long long) and the __builtin_type_info vtable __builtin_type_info_vtbl.
  *
- * @return the type_info object D_004541C0
+ * @return the type_info object __tiUx
  */
-BUILTIN(__tfUx, D_004541C0, D_00499B48)
+BUILTIN(__tfUx, __tiUx, D_00499B48)
 #endif
 
 //100%
@@ -1260,12 +1260,12 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __tfUs);
 /**
  * Returns the type_info object of the builtin type unsigned short, building it on first use.
  *
- * When the first word of D_004541C8 is zero, constructs a type_info there with the name "Us" (D_00499B50, g++'s mangled
- * code for unsigned short) and the __builtin_type_info vtable D_00499BA8.
+ * When the first word of __tiUs is zero, constructs a type_info there with the name "Us" (D_00499B50, g++'s mangled
+ * code for unsigned short) and the __builtin_type_info vtable __builtin_type_info_vtbl.
  *
- * @return the type_info object D_004541C8
+ * @return the type_info object __tiUs
  */
-BUILTIN(__tfUs, D_004541C8, D_00499B50)
+BUILTIN(__tfUs, __tiUs, D_00499B50)
 #endif
 
 //100%
@@ -1274,12 +1274,12 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __tfUc);
 /**
  * Returns the type_info object of the builtin type unsigned char, building it on first use.
  *
- * When the first word of D_004541D0 is zero, constructs a type_info there with the name "Uc" (D_00499B58, g++'s mangled
- * code for unsigned char) and the __builtin_type_info vtable D_00499BA8.
+ * When the first word of __tiUc is zero, constructs a type_info there with the name "Uc" (D_00499B58, g++'s mangled
+ * code for unsigned char) and the __builtin_type_info vtable __builtin_type_info_vtbl.
  *
- * @return the type_info object D_004541D0
+ * @return the type_info object __tiUc
  */
-BUILTIN(__tfUc, D_004541D0, D_00499B58)
+BUILTIN(__tfUc, __tiUc, D_00499B58)
 #endif
 
 //100%
@@ -1288,12 +1288,12 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __tfSc);
 /**
  * Returns the type_info object of the builtin type signed char, building it on first use.
  *
- * When the first word of D_004541D8 is zero, constructs a type_info there with the name "Sc" (D_00499B60, g++'s mangled
- * code for signed char) and the __builtin_type_info vtable D_00499BA8.
+ * When the first word of __tiSc is zero, constructs a type_info there with the name "Sc" (D_00499B60, g++'s mangled
+ * code for signed char) and the __builtin_type_info vtable __builtin_type_info_vtbl.
  *
- * @return the type_info object D_004541D8
+ * @return the type_info object __tiSc
  */
-BUILTIN(__tfSc, D_004541D8, D_00499B60)
+BUILTIN(__tfSc, __tiSc, D_00499B60)
 #endif
 
 extern "C" {
@@ -1379,7 +1379,7 @@ void __ptmd_type_info____ptmd_type_info(void) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", __tf16__ptmf_type_info);
 #ifdef SKIP_ASM
-extern int D_0053EA90[];
+extern int __ti16__ptmf_type_info[];
 extern int D_00499C08[];
 extern int D_004A5BB0[];
 extern int *__tf9type_info_a(void) __asm__("__tf9type_info");
@@ -1388,17 +1388,17 @@ int *__tf16__ptmf_type_info_a(void) __asm__("__tf16__ptmf_type_info");
 /**
  * Returns the type_info object of class __ptmf_type_info, building it on first use.
  *
- * When D_0053EA90 is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
- * type_info in D_0053EA90 with __rtti_si, name "16__ptmf_type_info" (D_00499C08) and base D_004A5BB0.
+ * When __ti16__ptmf_type_info is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
+ * type_info in __ti16__ptmf_type_info with __rtti_si, name "16__ptmf_type_info" (D_00499C08) and base D_004A5BB0.
  *
- * @return the type_info object D_0053EA90
+ * @return the type_info object __ti16__ptmf_type_info
  */
 int *__tf16__ptmf_type_info_a(void) {
-    if (D_0053EA90[0] == 0) {
+    if (__ti16__ptmf_type_info[0] == 0) {
         __tf9type_info_a();
-        __rtti_si(D_0053EA90, (int)D_00499C08, (int)D_004A5BB0);
+        __rtti_si(__ti16__ptmf_type_info, (int)D_00499C08, (int)D_004A5BB0);
     }
-    return D_0053EA90;
+    return __ti16__ptmf_type_info;
 }
 #endif
 
@@ -1418,7 +1418,7 @@ void __ptmf_type_info____ptmf_type_info(void) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", __tf16__func_type_info);
 #ifdef SKIP_ASM
-extern int D_0053EA70[];
+extern int __ti16__func_type_info[];
 extern int D_00499C20[];
 extern int D_004A5BB0[];
 extern int *__tf9type_info_a(void) __asm__("__tf9type_info");
@@ -1427,17 +1427,17 @@ int *__tf16__func_type_info_a(void) __asm__("__tf16__func_type_info");
 /**
  * Returns the type_info object of class __func_type_info, building it on first use.
  *
- * When D_0053EA70 is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
- * type_info in D_0053EA70 with __rtti_si, name "16__func_type_info" (D_00499C20) and base D_004A5BB0.
+ * When __ti16__func_type_info is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
+ * type_info in __ti16__func_type_info with __rtti_si, name "16__func_type_info" (D_00499C20) and base D_004A5BB0.
  *
- * @return the type_info object D_0053EA70
+ * @return the type_info object __ti16__func_type_info
  */
 int *__tf16__func_type_info_a(void) {
-    if (D_0053EA70[0] == 0) {
+    if (__ti16__func_type_info[0] == 0) {
         __tf9type_info_a();
-        __rtti_si(D_0053EA70, (int)D_00499C20, (int)D_004A5BB0);
+        __rtti_si(__ti16__func_type_info, (int)D_00499C20, (int)D_004A5BB0);
     }
-    return D_0053EA70;
+    return __ti16__func_type_info;
 }
 #endif
 
@@ -1457,7 +1457,7 @@ void __func_type_info____func_type_info(void) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", __tf19__builtin_type_info);
 #ifdef SKIP_ASM
-extern int D_0053EAD0[];
+extern int __ti19__builtin_type_info[];
 extern int D_00499C38[];
 extern int D_004A5BB0[];
 extern int *__tf9type_info_a(void) __asm__("__tf9type_info");
@@ -1466,17 +1466,17 @@ int *__tf19__builtin_type_info_a(void) __asm__("__tf19__builtin_type_info");
 /**
  * Returns the type_info object of class __builtin_type_info, building it on first use.
  *
- * When D_0053EAD0 is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
- * type_info in D_0053EAD0 with __rtti_si, name "19__builtin_type_info" (D_00499C38) and base D_004A5BB0.
+ * When __ti19__builtin_type_info is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
+ * type_info in __ti19__builtin_type_info with __rtti_si, name "19__builtin_type_info" (D_00499C38) and base D_004A5BB0.
  *
- * @return the type_info object D_0053EAD0
+ * @return the type_info object __ti19__builtin_type_info
  */
 int *__tf19__builtin_type_info_a(void) {
-    if (D_0053EAD0[0] == 0) {
+    if (__ti19__builtin_type_info[0] == 0) {
         __tf9type_info_a();
-        __rtti_si(D_0053EAD0, (int)D_00499C38, (int)D_004A5BB0);
+        __rtti_si(__ti19__builtin_type_info, (int)D_00499C38, (int)D_004A5BB0);
     }
-    return D_0053EAD0;
+    return __ti19__builtin_type_info;
 }
 #endif
 
@@ -1496,7 +1496,7 @@ void __builtin_type_info____builtin_type_info(void) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", __tf16__attr_type_info);
 #ifdef SKIP_ASM
-extern int D_0053EA80[];
+extern int __ti16__attr_type_info[];
 extern int D_00499C50[];
 extern int D_004A5BB0[];
 extern int *__tf9type_info_a(void) __asm__("__tf9type_info");
@@ -1505,17 +1505,17 @@ int *__tf16__attr_type_info_a(void) __asm__("__tf16__attr_type_info");
 /**
  * Returns the type_info object of class __attr_type_info, building it on first use.
  *
- * When D_0053EA80 is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
- * type_info in D_0053EA80 with __rtti_si, name "16__attr_type_info" (D_00499C50) and base D_004A5BB0.
+ * When __ti16__attr_type_info is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
+ * type_info in __ti16__attr_type_info with __rtti_si, name "16__attr_type_info" (D_00499C50) and base D_004A5BB0.
  *
- * @return the type_info object D_0053EA80
+ * @return the type_info object __ti16__attr_type_info
  */
 int *__tf16__attr_type_info_a(void) {
-    if (D_0053EA80[0] == 0) {
+    if (__ti16__attr_type_info[0] == 0) {
         __tf9type_info_a();
-        __rtti_si(D_0053EA80, (int)D_00499C50, (int)D_004A5BB0);
+        __rtti_si(__ti16__attr_type_info, (int)D_00499C50, (int)D_004A5BB0);
     }
-    return D_0053EA80;
+    return __ti16__attr_type_info;
 }
 #endif
 
@@ -1535,7 +1535,7 @@ void __attr_type_info____attr_type_info(void) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", __tf19__pointer_type_info);
 #ifdef SKIP_ASM
-extern int D_0053EAB0[];
+extern int __ti19__pointer_type_info[];
 extern int D_00499C68[];
 extern int D_004A5BB0[];
 extern int *__tf9type_info_a(void) __asm__("__tf9type_info");
@@ -1544,17 +1544,17 @@ int *__tf19__pointer_type_info_a(void) __asm__("__tf19__pointer_type_info");
 /**
  * Returns the type_info object of class __pointer_type_info, building it on first use.
  *
- * When D_0053EAB0 is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
- * type_info in D_0053EAB0 with __rtti_si, name "19__pointer_type_info" (D_00499C68) and base D_004A5BB0.
+ * When __ti19__pointer_type_info is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
+ * type_info in __ti19__pointer_type_info with __rtti_si, name "19__pointer_type_info" (D_00499C68) and base D_004A5BB0.
  *
- * @return the type_info object D_0053EAB0
+ * @return the type_info object __ti19__pointer_type_info
  */
 int *__tf19__pointer_type_info_a(void) {
-    if (D_0053EAB0[0] == 0) {
+    if (__ti19__pointer_type_info[0] == 0) {
         __tf9type_info_a();
-        __rtti_si(D_0053EAB0, (int)D_00499C68, (int)D_004A5BB0);
+        __rtti_si(__ti19__pointer_type_info, (int)D_00499C68, (int)D_004A5BB0);
     }
-    return D_0053EAB0;
+    return __ti19__pointer_type_info;
 }
 #endif
 

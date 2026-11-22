@@ -387,7 +387,7 @@ INCLUDE_ASM("bx/execman", func_00320B28__FPv);
 /**
  * Runs the bx unit's static constructors: __sti__all_in_one_bx_cpp(1, 0xFFFF).
  *
- * Entry +0x80 of the global constructor table D_0043CE38. The argument is not read.
+ * Entry +0x80 of the global constructor table __CTOR_LIST__. The argument is not read.
  *
  * @return no meaningful value (declared void*)
  */

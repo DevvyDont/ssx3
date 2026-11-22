@@ -13320,10 +13320,10 @@ extern float floorf(float);	/* floorf */
 #define scalbnf_EC58 scalbnf
 #define floorf_EC58 floorf
 /* the file's static tables, at their retail addresses */
-extern const int D_004995E8[];	/* init_jk[] = {4,7,9} */
-extern const float D_004995F8[];	/* PIo2[] */
-#define init_jk_EC58 D_004995E8
-#define PIo2_EC58 D_004995F8
+extern const int init_jk[];	/* init_jk[] = {4,7,9} */
+extern const float PIo2[];	/* PIo2[] */
+#define init_jk_EC58 init_jk
+#define PIo2_EC58 PIo2
 
 static const float
 zero_EC58   = 0.0,
@@ -13337,7 +13337,7 @@ twon8_EC58  =  3.9062500000e-03; /* 0x3b800000 */
 	 * @p x holds the angle as @p nx 8-bit chunks with @p xExponent the exponent of the first. It multiplies them with terms of @p
 	 * ipio2 (as floats), distils the products into 8-bit integers, takes the integer part modulo 8 as the quadrant and
 	 * recomputes with more terms while the fraction has lost precision. The fraction goes to @p y in one, two or three
-	 * floats depending on @p prec (term counts D_004995E8, pi/2 pieces D_004995F8). Uses scalbnf and floorf.
+	 * floats depending on @p prec (term counts init_jk, pi/2 pieces PIo2). Uses scalbnf and floorf.
 	 * __ieee754_rem_pio2f calls it.
 	 *
 	 * @param x  the input chunks
@@ -13886,7 +13886,7 @@ void __do_global_dtors(int exitStatus) {
 INCLUDE_ASM("seg/seg_2FE810", __do_global_ctors);
 #ifdef SKIP_ASM
 typedef void (*func_ptr)(void);
-extern func_ptr D_0043CE38[0];
+extern func_ptr __CTOR_LIST__[0];
 
 
 
@@ -13894,16 +13894,16 @@ extern func_ptr D_0043CE38[0];
    scores 98.52; its loop notes shape the register allocation) */
 #define DO_GLOBAL_CTORS_BODY_FBE0                                       \
 do {                                                                    \
-  unsigned long nptrs = (unsigned long) D_0043CE38[0];                  \
+  unsigned long nptrs = (unsigned long) __CTOR_LIST__[0];                  \
   unsigned i;                                                           \
   if (nptrs == (unsigned long)-1)                                       \
-    for (nptrs = 0; D_0043CE38[nptrs + 1] != 0; nptrs++);               \
+    for (nptrs = 0; __CTOR_LIST__[nptrs + 1] != 0; nptrs++);               \
   for (i = nptrs; i >= 1; i--)                                          \
-    D_0043CE38[i] ();                                                   \
+    __CTOR_LIST__[i] ();                                                   \
 } while (0)
 
 /**
- * Runs the static constructors listed in D_0043CE38, last to first.
+ * Runs the static constructors listed in __CTOR_LIST__, last to first.
  *
  * The list's first word is the count, or -1 when the list is null-terminated (then it is counted first).
  */

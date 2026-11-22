@@ -2044,7 +2044,7 @@ INCLUDE_ASM("be/bedbreward", func_0015C8F0__FPv);
 #ifdef SKIP_ASM
 /**
  * Runs the unit's static initializer: __sti__all_in_one_be_cpp(1, 0xFFFF) (an entry of the global constructor list
- * D_0043CE38).
+ * __CTOR_LIST__).
  *
  * @return what __sti__all_in_one_be_cpp leaves in the return register (unused)
  */

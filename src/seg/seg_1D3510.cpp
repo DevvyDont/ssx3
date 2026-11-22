@@ -1842,7 +1842,7 @@ extern "C" void func_002D2988(int, int);
 /**
  * Runs a static initializer of this unit: func_002D2988 with initialize 1 and priority 0xFFFF.
  *
- * It is word 24 of the global constructor table D_0043CE38 (walked by __do_global_ctors).
+ * It is word 24 of the global constructor table __CTOR_LIST__ (walked by __do_global_ctors).
  */
 extern "C" void func_002D4060(void) {
     func_002D2988(1, 0xFFFF);
@@ -2021,7 +2021,7 @@ extern "C" void func_002D40C0(int, int);
 /**
  * Runs a static initializer of this unit: func_002D40C0 with initialize 1 and priority 0xFFFF.
  *
- * It is word 25 of the global constructor table D_0043CE38 (walked by __do_global_ctors).
+ * It is word 25 of the global constructor table __CTOR_LIST__ (walked by __do_global_ctors).
  */
 extern "C" void func_002D48D0(void) {
     func_002D40C0(1, 0xFFFF);
