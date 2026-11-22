@@ -407,10 +407,6 @@ extern "C" void cWorldView_recursiveIsValid(cWorldView* world, sSection_9BB8* se
 //100%
 INCLUDE_ASM("world/worldview", cWorldView_refreshStreamFocus);
 #ifdef SKIP_ASM
-struct sWVSlot_9D60 {
-    int state;
-    int f4;
-};
 
 
 struct sWVCam_9D60 {
@@ -445,7 +441,7 @@ extern "C" void cWorldView_refreshStreamFocus(cWorldView* self, int cam)
         self->m_StreamFocus[cam].m_fSafeTestRadius = loadRadius;
         unsigned int i;
         for (i = 0; i < (unsigned int)self->mp_Hdr->m_uiNumSections; i++) {
-            int st = ((sWVSlot_9D60*)&self->mp_SectionState[0])[i].state;
+            int st = ((&self->mp_SectionState[0]))[i].state;
             if (st == 5 || st == 6) {
                 cWorldView_recursiveTreeFocus(self, ((void*)(self->mp_Section)[i].m_BSP.unk_0C), cam, st == 6);
             }
@@ -611,16 +607,6 @@ struct sSecInfo_A028 {
     unsigned short id;  // 0x02
 };
 
-struct sSection_A028 {
-    float bmin[4];      // 0x00
-    float bmax[4];      // 0x10
-    sV4_A028 n0;        // 0x20
-    sV4_A028 n1;        // 0x30
-    char pad40[0x10];
-    void* child0;       // 0x50
-    void* child1;       // 0x54
-    sSecInfo_A028* info; // 0x58
-};
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float Dot_A028(const sV4_A028& a, const sV4_A028& b)
@@ -642,12 +628,12 @@ static inline float Dot_A028(const sV4_A028& a, const sV4_A028& b)
     return r;
 }
 
-static inline int overlap_A028(const sV4_A028* c, const sSection_A028* s)
+static inline int overlap_A028(const sV4_A028* c, const tBxBSPNode* s)
 {
     int r = 0;
-    if (c[0].x <= s->bmax[0] && c[1].x >= s->bmin[0] &&
-        c[0].y <= s->bmax[1] && c[1].y >= s->bmin[1] &&
-        c[0].z <= s->bmax[2] && c[1].z >= s->bmin[2]) {
+    if (c[0].x <= s->m_v4BoxMax.m[0] && c[1].x >= s->m_v4BoxMin.m[0] &&
+        c[0].y <= s->m_v4BoxMax.m[1] && c[1].y >= s->m_v4BoxMin.m[1] &&
+        c[0].z <= s->m_v4BoxMax.m[2] && c[1].z >= s->m_v4BoxMin.m[2]) {
         r = 1;
     }
     return r;
@@ -670,22 +656,22 @@ static inline int overlap_A028(const sV4_A028* c, const sSection_A028* s)
  */
 extern "C" void cWorldView_recursiveTreeFocus(void* self_, void* sec_, int cam, int loaded)
 {
-    if (!overlap_A028(&((sWV_A028*)self_)->cams[cam].bmin, (sSection_A028*)sec_))
+    if (!overlap_A028(&((sWV_A028*)self_)->cams[cam].bmin, (tBxBSPNode*)sec_))
         return;
-    if (((sSection_A028*)sec_)->info != 0) {
-        float dist = cWorldView_getDistanceToBox(self_, &((sWV_A028*)self_)->cams[cam].pos, sec_, ((sSection_A028*)sec_)->bmax);
+    if (((sSecInfo_A028*)((tBxBSPNode*)sec_)->m_pHull) != 0) {
+        float dist = cWorldView_getDistanceToBox(self_, &((sWV_A028*)self_)->cams[cam].pos, sec_, ((tBxBSPNode*)sec_)->m_v4BoxMax.m);
         float safeRadius = ((sWV_A028*)self_)->cams[cam].near;
         float w;
         if (dist < 0.0f) {
             w = 0.800000011920929f;
-            if (cWorldCache_isPageLoaded(((sWV_A028*)self_)->world, ((sSection_A028*)sec_)->info->id) == 0)
+            if (cWorldCache_isPageLoaded(((sWV_A028*)self_)->world, ((sSecInfo_A028*)((tBxBSPNode*)sec_)->m_pHull)->id) == 0)
                 safeRadius = 0.0f;
         } else {
             if (((sWV_A028*)self_)->cams[cam].range < dist)
                 return;
             w = (1.0f - dist / ((sWV_A028*)self_)->cams[cam].range) * 0.800000011920929f;
             if (dist < safeRadius) {
-                if (cWorldCache_isPageLoaded(((sWV_A028*)self_)->world, ((sSection_A028*)sec_)->info->id) == 0)
+                if (cWorldCache_isPageLoaded(((sWV_A028*)self_)->world, ((sSecInfo_A028*)((tBxBSPNode*)sec_)->m_pHull)->id) == 0)
                     safeRadius = dist;
             }
         }
@@ -693,15 +679,15 @@ extern "C" void cWorldView_recursiveTreeFocus(void* self_, void* sec_, int cam, 
             ((sWV_A028*)self_)->cams[cam].near = safeRadius;
         if (safeRadius < ((sWV_A028*)self_)->cams[cam].best)
             ((sWV_A028*)self_)->cams[cam].best = safeRadius;
-        cWorldCache_touchPage(((sWV_A028*)self_)->world, ((sSection_A028*)sec_)->info->id, w);
+        cWorldCache_touchPage(((sWV_A028*)self_)->world, ((sSecInfo_A028*)((tBxBSPNode*)sec_)->m_pHull)->id, w);
     }
-    if (((sSection_A028*)sec_)->child0 != 0) {
-        if (Dot_A028(((sSection_A028*)sec_)->n0, ((sWV_A028*)self_)->cams[cam].bmin) < 0.0f)
-            cWorldView_recursiveTreeFocus(self_, ((sSection_A028*)sec_)->child0, cam, loaded);
+    if (((void*)((tBxBSPNode*)sec_)->m_pInChild) != 0) {
+        if (Dot_A028((*(sV4_A028*)&((tBxBSPNode*)sec_)->m_v4SplitPlaneIn), ((sWV_A028*)self_)->cams[cam].bmin) < 0.0f)
+            cWorldView_recursiveTreeFocus(self_, ((void*)((tBxBSPNode*)sec_)->m_pInChild), cam, loaded);
     }
-    if (((sSection_A028*)sec_)->child1 != 0) {
-        if (Dot_A028(((sSection_A028*)sec_)->n1, ((sWV_A028*)self_)->cams[cam].bmax) < 0.0f)
-            cWorldView_recursiveTreeFocus(self_, ((sSection_A028*)sec_)->child1, cam, loaded);
+    if (((void*)((tBxBSPNode*)sec_)->m_pOutChild) != 0) {
+        if (Dot_A028((*(sV4_A028*)&((tBxBSPNode*)sec_)->m_v4SplitPlaneOut), ((sWV_A028*)self_)->cams[cam].bmax) < 0.0f)
+            cWorldView_recursiveTreeFocus(self_, ((void*)((tBxBSPNode*)sec_)->m_pOutChild), cam, loaded);
     }
 }
 #endif
@@ -1307,10 +1293,6 @@ INCLUDE_ASM("world/worldview", cChunkResolve_resolveCollideModel);
 extern "C" void SphereTree_init(void* self);
 extern "C" int bxSphereTree_Load(void* self, char* data, void* ctx);
 
-struct sList_3AAA08 {
-    char* items;
-    int count;
-};
 
 struct sNode_3AAA08 {
     unsigned short n;
@@ -1321,13 +1303,6 @@ struct sNode_3AAA08 {
     char* p10;
 };
 
-struct sChunk_3AAA08 {
-    unsigned short type;
-    unsigned short n;
-    char* data;             // 0x4
-    sList_3AAA08* list;     // 0x8
-    char* items;            // 0xC
-};
 
 /**
  * Builds a collision model's runtime data after it is loaded.
@@ -1341,45 +1316,45 @@ struct sChunk_3AAA08 {
  * @param pCollideModel  the collision model record (On Tour pCollideModel)
  * @return 1
  */
-extern "C" int cChunkResolve_resolveCollideModel(cChunkResolve* self, void* ctx, sChunk_3AAA08* pCollideModel)
+extern "C" int cChunkResolve_resolveCollideModel(cChunkResolve* self, void* ctx, tCollideModelRecord* pCollideModel)
 {
-    if ((int)pCollideModel->data == -1) {
-        pCollideModel->data = 0;
+    if ((int)pCollideModel->m_pColData == -1) {
+        pCollideModel->m_pColData = 0;
     } else {
-        pCollideModel->data = (char*)pCollideModel + (int)pCollideModel->data;
+        pCollideModel->m_pColData = (char*)pCollideModel + (int)pCollideModel->m_pColData;
     }
-    if ((int)pCollideModel->list == -1) {
-        pCollideModel->list = 0;
+    if ((int)((tSphTreeList*)pCollideModel->m_pPolyModelList) == -1) {
+        (*(tSphTreeList**)&pCollideModel->m_pPolyModelList) = 0;
     } else {
-        pCollideModel->list = (sList_3AAA08*)((char*)pCollideModel + (int)pCollideModel->list);
+        (*(tSphTreeList**)&pCollideModel->m_pPolyModelList) = (tSphTreeList*)((char*)pCollideModel + (int)((tSphTreeList*)pCollideModel->m_pPolyModelList));
     }
-    if ((int)pCollideModel->items == -1) {
-        pCollideModel->items = 0;
+    if ((int)((char*)pCollideModel->m_pSphTree) == -1) {
+        (*(char**)&pCollideModel->m_pSphTree) = 0;
     } else {
-        pCollideModel->items = (char*)pCollideModel + (int)pCollideModel->items;
+        (*(char**)&pCollideModel->m_pSphTree) = (char*)pCollideModel + (int)((char*)pCollideModel->m_pSphTree);
     }
-    if (pCollideModel->type == 3) {
-        sList_3AAA08* modelList = pCollideModel->list;
-        modelList->count = 0;
-        modelList->items = 0;
-        modelList->count = pCollideModel->n;
-        modelList->items = pCollideModel->items;
-        for (int i = 0; i < modelList->count; i++) {
-            SphereTree_init(modelList->items + i * 320);
+    if (pCollideModel->m_usMethod == 3) {
+        tSphTreeList* modelList = ((tSphTreeList*)pCollideModel->m_pPolyModelList);
+        modelList->NumMesh = 0;
+        (*(char**)&modelList->MeshTree) = 0;
+        modelList->NumMesh = pCollideModel->m_usNumMesh;
+        (*(char**)&modelList->MeshTree) = ((char*)pCollideModel->m_pSphTree);
+        for (int i = 0; i < modelList->NumMesh; i++) {
+            SphereTree_init(&modelList->MeshTree[i]);
         }
-        char* data = pCollideModel->data;
-        for (int i = 0; i < modelList->count; i++) {
-            data += bxSphereTree_Load(modelList->items + i * 320, data, ctx);
+        char* data = pCollideModel->m_pColData;
+        for (int i = 0; i < modelList->NumMesh; i++) {
+            data += bxSphereTree_Load(&modelList->MeshTree[i], data, ctx);
         }
-    } else if (pCollideModel->type == 1) {
-        sList_3AAA08* modelList = pCollideModel->list;
-        modelList->count = 0;
-        modelList->items = 0;
-        modelList->count = pCollideModel->n;
-        modelList->items = pCollideModel->items;
-        sNode_3AAA08* node = (sNode_3AAA08*)pCollideModel->data;
-        for (int i = 0; i < modelList->count; i++) {
-            ((sNode_3AAA08**)modelList->items)[i] = node;
+    } else if (pCollideModel->m_usMethod == 1) {
+        tSphTreeList* modelList = ((tSphTreeList*)pCollideModel->m_pPolyModelList);
+        modelList->NumMesh = 0;
+        (*(char**)&modelList->MeshTree) = 0;
+        modelList->NumMesh = pCollideModel->m_usNumMesh;
+        (*(char**)&modelList->MeshTree) = ((char*)pCollideModel->m_pSphTree);
+        sNode_3AAA08* node = (sNode_3AAA08*)pCollideModel->m_pColData;
+        for (int i = 0; i < modelList->NumMesh; i++) {
+            ((sNode_3AAA08**)modelList->MeshTree)[i] = node;
             node->p4 = (char*)node + (int)node->p4;
             node->p8 = (char*)node + (int)node->p8;
             node->pC = (char*)node + (int)node->pC;
@@ -2115,22 +2090,11 @@ INCLUDE_ASM("world/worldview", func_003ABF50);
 #ifdef SKIP_ASM
 extern "C" void func_003ABFC0(void* self, void* item, void* list);
 
-struct func_003ABF50_sEntry {
-    int field_0x0;
-    void* item;     // 0x4
-    int field_0x8;
-    int field_0xC;
-};
 
-struct func_003ABF50_sList {
-    int field_0x0;
-    int count;                       // 0x4
-    func_003ABF50_sEntry* entries;   // 0x8
-};
 
 // PORT: the unit declares func_003ABF50 as returning void (func_003ABF20 calls it that way),
 // but the body returns 1; bind the int-returning body to the symbol with an asm label.
-int func_003ABF50_impl(void* self, func_003ABF50_sList* list) __asm__("func_003ABF50");
+int func_003ABF50_impl(void* self, tModelRecord* list) __asm__("func_003ABF50");
 
 /**
  * Fixes up the DMA packets of each mesh of a model: func_003ABFC0 on every non-null mesh in the model's list (count
@@ -2139,14 +2103,14 @@ int func_003ABF50_impl(void* self, func_003ABF50_sList* list) __asm__("func_003A
  * @param list  the tModelRecord
  * @return 1
  */
-int func_003ABF50_impl(void* self, func_003ABF50_sList* list)
+int func_003ABF50_impl(void* self, tModelRecord* list)
 {
-    int n = list->count;
-    func_003ABF50_sEntry* entry = list->entries;
+    int n = list->m_iNumMeshes;
+    tMeshHeirarchyRecord* entry = (list->m_MeshHeirarchy);
     int i;
     for (i = 0; i < n; i++, entry++) {
-        if (entry->item != 0) {
-            func_003ABFC0(self, entry->item, list);
+        if (((void*)entry->m_Mesh) != 0) {
+            func_003ABFC0(self, ((void*)entry->m_Mesh), list);
         }
     }
     return 1;
@@ -2360,16 +2324,6 @@ extern "C" int cPS2ChunkResolve_resolveInstance(cPS2ChunkResolve_resolveInstance
 //100%
 INCLUDE_ASM("world/worldview", func_003AC358);
 #ifdef SKIP_ASM
-struct func_003AC358_sObj {
-    char pad[0x1C];
-    int count;
-};
-struct func_003AC358_sEnt {
-    int f0;
-    func_003AC358_sObj* obj;
-    int f8;
-    int fC;
-};
 
 extern "C" void* func_003AC508(cPS2ChunkResolve* self, tInstanceRecord* a1, tModelRecord* list, void* cur);
 
@@ -2392,12 +2346,12 @@ extern "C" int func_003AC358(cPS2ChunkResolve* self, tInstanceRecord* instance)
     list = instance->m_Model;
     cur = *(void**)((char*)instance + 0x98);
     int n = list->m_iNumMeshes;
-    func_003AC358_sEnt* entry = ((func_003AC358_sEnt*)list->m_MeshHeirarchy);
+    tMeshHeirarchyRecord* entry = (list->m_MeshHeirarchy);
     for (i = 0; i < n; i++, entry++) {
-        func_003AC358_sObj* object = entry->obj;
+        tMeshRecord* object = (entry->m_Mesh);
         if (object != 0) {
             int j;
-            for (j = 0; j < object->count; j++) {
+            for (j = 0; j < object->m_iNumContexts; j++) {
                 cur = func_003AC508(self, instance, list, cur);
             }
         }

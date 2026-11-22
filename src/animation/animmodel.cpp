@@ -1,4 +1,5 @@
 #include "common.h"
+#include "animation/mdfarchive.h"
 #include "animation/animdatabase.h"
 #include "vtable.h"
 #include "animation/adfdatasource.h"
@@ -505,12 +506,6 @@ static inline sAnimModelBone amCombine_0200(const sAnimModelBone& a, const sAnim
     return r;
 }
 
-// One boneNames entry (0x50 bytes): the name, then the parent bone (< 0 = root).
-struct sAmBoneInfo_0200 {
-    char name[0x12];
-    short parent;
-    char pad[0x3C];
-};
 
 /**
  * Rebuilds every bone's world transform from the model's local pose.
@@ -528,13 +523,13 @@ extern "C" void cAnimModel_transform(cAnimModel* self, sAnimModelBone* roots)
     for (int i = 0; i < self->numParts; i++)
     {
         // PORT: pointer arithmetic through int (offset-first addu).
-        sAmBoneInfo_0200* info = (sAmBoneInfo_0200*)((sAnimModelPart*)(i * (int)sizeof(sAnimModelPart) + (int)self->parts))->boneNames;
+        tMdfBone* info = (tMdfBone*)((sAnimModelPart*)(i * (int)sizeof(sAnimModelPart) + (int)self->parts))->boneNames;
         for (int j = 0; j < ((sAnimModelPart*)(i * (int)sizeof(sAnimModelPart) + (int)self->parts))->numBones; j++)
         {
             int k = j + ((sAnimModelPart*)(i * (int)sizeof(sAnimModelPart) + (int)self->parts))->firstBone;
             sAnimModelBone* parent;
-            sAmBoneInfo_0200* boneInfo = &info[j];
-            short parentIndex = boneInfo->parent;
+            tMdfBone* boneInfo = &info[j];
+            short parentIndex = boneInfo->mParentId;
             if (parentIndex < 0)
                 parent = roots++;
             else
@@ -596,10 +591,6 @@ static inline t4Vector amMulMat_0458(const t4Matrix* m, const t4Vector& v)
     return r;
 }
 
-struct sAmPoint_0458 {
-    float x, y, z;
-    int bone;
-};
 
 /**
  * Returns point @p index of the part whose id is @p id, transformed by its bone matrix, or t4vect_Origin if none.
@@ -622,12 +613,12 @@ extern "C" t4Vector cAnimModel_transformHotSpot(cAnimModel* model, int id, int i
         sAnimModelPart* part = (sAnimModelPart*)(i * (int)sizeof(sAnimModelPart) + (int)model->parts);
         if (part->id == id)
         {
-            sAmPoint_0458* pt = (sAmPoint_0458*)((index << 4) + (int)part->unk_3C);
-            t4Matrix* boneMatrix = (t4Matrix*)(((pt->bone + part->firstBone) << 6) + (int)model->unk_034);
+            tMdfHotSpot* pt = (tMdfHotSpot*)((index << 4) + (int)part->unk_3C);
+            t4Matrix* boneMatrix = (t4Matrix*)(((pt->mBoneId + part->firstBone) << 6) + (int)model->unk_034);
             t4Vector localPoint;
-            localPoint.x = pt->x;
-            localPoint.y = pt->y;
-            localPoint.z = pt->z;
+            localPoint.x = pt->mOffset[0];
+            localPoint.y = pt->mOffset[1];
+            localPoint.z = pt->mOffset[2];
             localPoint.w = 1.0f;
             return amMulMat_0458(boneMatrix, localPoint);
         }
@@ -1126,15 +1117,11 @@ INCLUDE_ASM("animation/animmodel", gGenCacheBucket);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_AnimChanCache[];
 
-struct sAnimElem_310F18
-{
-    int a[5];
-};
 
 struct sAnimNode_310F18
 {
     int used;                   // 0x00
-    sAnimElem_310F18* data;     // 0x04
+    tCmpChannel* data;     // 0x04
     char pad8[0x14];
     sAnimNode_310F18* prev;     // 0x1C
     sAnimNode_310F18* next;     // 0x20
@@ -1162,7 +1149,7 @@ extern "C" sAnimNode_310F18* gGenCacheBucket(int bank, int n)
         D_004FE7A0_310F18[bank][i].next = &D_004FE7A0_310F18[bank][i] + 1;
         D_004FE7A0_310F18[bank][i].prev = &D_004FE7A0_310F18[bank][i] - 1;
         D_004FE7A0_310F18[bank][i].used = 0;
-        D_004FE7A0_310F18[bank][i].data = new (str_AnimChanCache, 0x20000000, 0) sAnimElem_310F18[n];
+        D_004FE7A0_310F18[bank][i].data = new (str_AnimChanCache, 0x20000000, 0) tCmpChannel[n];
     }
     D_004FE7A0_310F18[bank][0].prev = &D_004FE7A0_310F18[bank][19];
     D_004FE7A0_310F18[bank][19].next = D_004FE7A0_310F18[bank];

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "animation/animdatabase.h"
 #include "vtable.h"
 #include "animation/mdfarchive.h"
@@ -674,10 +675,6 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequencer_getAnimBlendFrames);
 struct sSeq_00314418;
 extern "C" float cAnimSequence_getNetWeight_314418(sSeq_00314418* self, int i) __asm__("cAnimSequence_getNetWeight");
 
-struct sVec4_314418
-{
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sSeqTrack_314418
 {
@@ -692,8 +689,8 @@ struct sSeq_00314418
 {
     sSeqTrack_314418 tracks[3];     // 0x00
     char pad54[0xC];
-    sVec4_314418 a;                 // 0x60
-    sVec4_314418 b;                 // 0x70
+    t4Vector a;                 // 0x60
+    t4Vector b;                 // 0x70
     int c;                          // 0x80
     int d;                          // 0x84
     long e;                         // 0x88
@@ -726,8 +723,8 @@ extern "C" int cAnimSequencer_getAnimBlendFrames(cAnimSequencer* self, tAnimBlen
                 tAnimBlendFrame* blendFrame = &out[count];
                 (*(int*)&blendFrame->SourceFrame) = n->tracks[j].id;
                 blendFrame->SourceFrame.Time = n->tracks[j].time;
-                (*(sVec4_314418*)&blendFrame->OrientationOffset) = n->a;
-                (*(sVec4_314418*)&blendFrame->OrientationOffset.Q) = n->b;
+                (*(t4Vector*)&blendFrame->OrientationOffset) = n->a;
+                (*(&blendFrame->OrientationOffset.Q)) = n->b;
                 blendFrame->IsFlipped = n->c;
                 blendFrame->Priority = n->d;
                 blendFrame->Weight = cAnimSequence_getNetWeight_314418(n, j);
@@ -1249,7 +1246,7 @@ extern "C" int strcasecmp(const char* a, const char* b);
 extern "C" int cMdfArchive_findModelPart(cMdfArchive* self, const char* name) {
     int i;
     for (i = 0; i < self->ArchiveHeader->mNumModels; i++) {
-        if (strcasecmp(name, (char*)self->ModelHeaders + i * 0x60) == 0)
+        if (strcasecmp(name, (char*)&self->ModelHeaders[i]) == 0)
             return 1;
     }
     return 0;
@@ -1271,8 +1268,8 @@ extern "C" int strcasecmp(const char* a, const char* b);
 extern "C" char* cMdfArchive_getModelPartPtr(cMdfArchive* self, const char* name) {
     int i;
     for (i = 0; i < self->ArchiveHeader->mNumModels; i++) {
-        if (strcasecmp(name, (char*)self->ModelHeaders + i * 0x60) == 0)
-            return (char*)self->ModelHeaders + i * 0x60;
+        if (strcasecmp(name, (char*)&self->ModelHeaders[i]) == 0)
+            return (char*)&self->ModelHeaders[i];
     }
     return 0;
 }

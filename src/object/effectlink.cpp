@@ -747,17 +747,6 @@ struct sEffObj_6120 {
     int f30;            // 0x30
 };
 
-struct sEffSrc_6120 {
-    int f0;     // 0x0
-    int f4;     // 0x4
-    int f8;     // 0x8
-    float w;    // 0xC
-    float x;    // 0x10
-    float y;    // 0x14
-    float z;    // 0x18
-    float f1C;  // 0x1C
-    int f20;    // 0x20
-};
 
 /**
  * Constructs a halo modifier for an instance from halo make-data.
@@ -770,15 +759,15 @@ struct sEffSrc_6120 {
  * @param instRecord  instance record the halo belongs to
  * @return self
  */
-extern "C" void* cHaloModifier_cHaloModifier(sEffObj_6120* self, sEffSrc_6120* src, int instRecord)
+extern "C" void* cHaloModifier_cHaloModifier(sEffObj_6120* self, tAddHaloData* src, int instRecord)
 {
     cEffectModifier_cEffectModifier((cEffectModifier*)self, instRecord);
     self->vt = cHaloModifier_vtbl;
-    self->f24 = src->f4;
-    self->f28 = src->f8;
-    self->q = sEffQuat_6120(src->x, src->y, src->z, src->w);
-    self->f20 = src->f1C;
-    self->f2C = src->f20;
+    self->f24 = src->Type;
+    self->f28 = src->Mesh;
+    self->q = sEffQuat_6120(src->ColourR, src->ColourG, src->ColourB, src->ColourA);
+    self->f20 = src->Radius;
+    self->f2C = src->Speed;
     self->f30 = 0;
     cHaloModifier_HaloCount++;
     return self;
@@ -1033,9 +1022,6 @@ extern "C" void* cObjectInterface_getNash();
 extern "C" void cSpring__cSpring(void* self, int flags);
 extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
-struct sVec4_346568 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
 
@@ -1071,17 +1057,17 @@ extern "C" void cFlexBridgeNode__cFlexBridgeNode(cFlexBridgeNode* self, int flag
     ((sVEntry<void(void*, void*)>*)cGraphicsMan_TheGraphicsMan->mVtbl)[77].fn(vthis(cGraphicsMan_TheGraphicsMan, ((sVEntry<void(void*, void*)>*)cGraphicsMan_TheGraphicsMan->mVtbl)[77]), self->GridMesh);
     tBoundBox old = *(&self->BoundBox);
     tInstanceRecord* inst = self->Instance;
-    sVec4_346568 corner;
+    t4Vector corner;
     corner.x = inst->m_fvMin.m[0];
     corner.y = inst->m_fvMin.m[1];
     corner.z = inst->m_fvMin.m[2];
     corner.w = 1.0f;
-    *(sVec4_346568*)&self->BoundBox = corner;
+    *(t4Vector*)&self->BoundBox = corner;
     corner.x = inst->m_fvMax.m[0];
     corner.y = inst->m_fvMax.m[1];
     corner.z = inst->m_fvMax.m[2];
     corner.w = 1.0f;
-    *(sVec4_346568*)&self->BoundBox.MaxPoint = corner;
+    *(&self->BoundBox.MaxPoint) = corner;
     nash_Nash_movenode(cObjectInterface_getNash(), 0, inst, box, &old);
     cSpring__cSpring(&self->Mesh, 2);
     cInstanceNode__cInstanceNode(((char*)self), flags);

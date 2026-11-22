@@ -462,14 +462,6 @@ struct sRmSeg_C698 {
     sRmSeg_C698* next;      // 0x64
 };
 
-// A rail spline resource.
-struct sRmSpline_C698 {
-    char pad_0x00[0x1C];
-    unsigned int mask;      // 0x1C
-    int numSegs;            // 0x20
-    sRmSeg_C698* segs;      // 0x24
-    int id;                 // 0x28
-};
 
 struct sRmSet_C698 {
     char pad_0x00[0x44];
@@ -509,27 +501,6 @@ struct sRmRef_C698 {
 };
 
 
-// Hit record (position, normal, distance, type, ids, spline parameter).
-struct sRmHit_C698 {
-    t4Vector pos;       // 0x00
-    t4Vector nrm;       // 0x10
-    t4Vector v20;       // 0x20
-    t4Vector v30;       // 0x30
-    float dist;         // 0x40
-    int type;           // 0x44
-    int pad48;
-    int id;             // 0x4C
-    void* model;        // 0x50
-    void* obj;          // 0x54
-    void* spline;       // 0x58
-    int bone;           // 0x5C
-    int f60;            // 0x60
-    int f64;            // 0x64
-    float t;            // 0x68
-    float u;            // 0x6C
-    float v;            // 0x70
-    int pad74[3];
-};
 
 // A direction (w = 0); stores w first, like sVec4W in ai/rider.cpp.
 struct sRmDir_C698 : t4Vector {
@@ -759,19 +730,19 @@ static inline float clamp_C698(float x, float lo, float hi)
     return x >= lo ? x <? hi : lo;
 }
 
-static inline void resetHit_C698(sRmHit_C698* h)
+static inline void resetHit_C698(tIntersectInfo* h)
 {
-    h->type = 2;
-    h->obj = 0;
-    h->model = 0;
-    h->spline = 0;
-    h->bone = -1;
-    h->f60 = -1;
-    h->f64 = -1;
-    h->id = -1;
-    h->v20 = D_004FF120_C698;
-    h->v30 = D_004FF120_C698;
-    h->t = 0;
+    h->HitType = 2;
+    (*(void**)&h->Patch) = 0;
+    (*(void**)&h->Inst) = 0;
+    (*(void**)&h->Spline) = 0;
+    h->Mesh = -1;
+    h->Face = -1;
+    h->Seg = -1;
+    h->Stype = -1;
+    h->Ivel = D_004FF120_C698;
+    h->Iangvel = D_004FF120_C698;
+    h->T = 0;
     h->u = 0;
     h->v = 0;
 }
@@ -795,16 +766,16 @@ static inline void resetHit_C698(sRmHit_C698* h)
  * @param out  receives the hit (On Tour tIntersectInfo* intInfo)
  */
 extern "C" void cRailModifier_splineIntersect(cRailModifier* self, t4Vector* box, t4Vector* box2, const t4Vector* point, unsigned int mask,
-                              int* found, float* bestDist, sRmHit_C698* out)
+                              int* found, float* bestDist, tIntersectInfo* out)
 {
-    sRmSpline_C698* spline = (sRmSpline_C698*)(*(sRmRef_C698*)&self->SplineId).get(*cObjectInterface_getWorld());
-    if ((spline->mask & mask) == 0) {
+    tSplineRecord* spline = (tSplineRecord*)(*(sRmRef_C698*)&self->SplineId).get(*cObjectInterface_getWorld());
+    if ((((unsigned int)spline->m_iFlags) & mask) == 0) {
         return;
     }
     sRmMat44 mat;
     cRailModifier_getInvMat_C698((self), &mat);
-    sRmSeg_C698* seg = spline->segs;
-    for (int i = 0; i < spline->numSegs; i++, seg = seg->next) {
+    sRmSeg_C698* seg = ((sRmSeg_C698*)spline->m_HeaderSeg);
+    for (int i = 0; i < spline->m_iNumSegments; i++, seg = seg->next) {
         float tLo = 0.0f;
         float tHi = 1.0f;
         t4Vector pos;
@@ -881,14 +852,14 @@ extern "C" void cRailModifier_splineIntersect(cRailModifier* self, t4Vector* box
             *found = 1;
             *bestDist = dist;
             resetHit_C698(out);
-            out->pos = pos;
-            out->nrm = vu0Normal_C698(evalTan_C698(&segMat, t));
-            out->id = spline->id;
-            out->model = (void*)self->Instance;
-            out->bone = self->Mesh;
-            out->t = t;
-            out->spline = spline;
-            out->obj = 0;
+            out->Ipos = pos;
+            out->Inorm = vu0Normal_C698(evalTan_C698(&segMat, t));
+            out->Stype = spline->m_eSurfaceType;
+            (*(void**)&out->Inst) = (void*)self->Instance;
+            out->Mesh = self->Mesh;
+            out->T = t;
+            (*(void**)&out->Spline) = spline;
+            (*(void**)&out->Patch) = 0;
         }
     }
 }
@@ -8487,34 +8458,30 @@ INCLUDE_ASM("object/railmodifier", func_003629B8);
 extern "C" void func_00362CC8(cPS2DeferManager* self);
 
 
-struct sRmCtx_29B8 {
-    char pad0[0xE84];
-    sDrawState* top;     // 0xE84
-};
 
 
 
-extern sRmCtx_29B8* D_004A5B80_29B8 __asm__("cGraphicsMan_TheGraphicsMan");
+extern cPS2GraphicsMan* D_004A5B80_29B8 __asm__("cGraphicsMan_TheGraphicsMan");
 extern sDrawState D_00501420_29B8 __asm__("sDrawState_s_defaultDrawState");
 
-static inline void set0_29B8(sRmCtx_29B8* ctx, unsigned int mask, int shift, unsigned int v)
+static inline void set0_29B8(cPS2GraphicsMan* ctx, unsigned int mask, int shift, unsigned int v)
 {
-    ctx->top->unk_00[0] = (ctx->top->unk_00[0] & ~mask) | ((v << shift) & mask);
+    ctx->m_pCurrentDrawState->unk_00[0] = (ctx->m_pCurrentDrawState->unk_00[0] & ~mask) | ((v << shift) & mask);
 }
 
-static inline void set1_29B8(sRmCtx_29B8* ctx, unsigned int mask, int shift, unsigned int v)
+static inline void set1_29B8(cPS2GraphicsMan* ctx, unsigned int mask, int shift, unsigned int v)
 {
-    ctx->top->unk_00[1] = (ctx->top->unk_00[1] & ~mask) | ((v << shift) & mask);
+    ctx->m_pCurrentDrawState->unk_00[1] = (ctx->m_pCurrentDrawState->unk_00[1] & ~mask) | ((v << shift) & mask);
 }
 
-static inline void set2_29B8(sRmCtx_29B8* ctx, unsigned int mask, int shift, unsigned int v)
+static inline void set2_29B8(cPS2GraphicsMan* ctx, unsigned int mask, int shift, unsigned int v)
 {
-    ctx->top->unk_00[2] = (ctx->top->unk_00[2] & ~mask) | ((v << shift) & mask);
+    ctx->m_pCurrentDrawState->unk_00[2] = (ctx->m_pCurrentDrawState->unk_00[2] & ~mask) | ((v << shift) & mask);
 }
 
-static inline cDrawStateList* save_29B8(cPS2DeferManager* self, sRmCtx_29B8* ctx)
+static inline cDrawStateList* save_29B8(cPS2DeferManager* self, cPS2GraphicsMan* ctx)
 {
-    sDrawState* src = ctx->top;
+    sDrawState* src = ctx->m_pCurrentDrawState;
     cDrawStateList* d = &((&self->mDrawStates[0]))[self->mUsedDrawStates++];
     (*(&d->mDrawState)) = *src;
     return d;
@@ -8532,8 +8499,8 @@ extern "C" void func_003629B8(cPS2DeferManager* self)
 {
     self->mNumStaticStates = 0;
     func_00362CC8(self);
-    sRmCtx_29B8* ctx = D_004A5B80_29B8;
-    *ctx->top = D_00501420_29B8;
+    cPS2GraphicsMan* ctx = D_004A5B80_29B8;
+    *ctx->m_pCurrentDrawState = D_00501420_29B8;
     set1_29B8(ctx, 0x3, 0, 0);
     set2_29B8(ctx, 0x1FFFFC00, 10, 0);
     set1_29B8(ctx, 0x1800000, 23, 1);
@@ -9029,13 +8996,6 @@ extern "C" void func_00362478(sGifPacket* pkt, int a, int b, int ctx);
 extern "C" void func_00364CD0(cPS2DeferManager* self, int a, int b, unsigned int c, ulong** pp);
 extern char* cGraphicsMan_TheGraphicsMan_railmodifier __asm__("cGraphicsMan_TheGraphicsMan");
 
-struct sRmGs3C20 {
-    unsigned int w0;
-    unsigned int w1;
-    unsigned int w2;
-    unsigned int w3;
-    short tex[2];
-};
 
 struct sRmKey3C20 {
     unsigned short a, b, c, d;
@@ -9043,7 +9003,7 @@ struct sRmKey3C20 {
 
 struct sRmRend3C20 {
     char pad_0x0[0x69CA8];
-    sRmGs3C20 state;            // 0x69CA8
+    sDrawState state;            // 0x69CA8
     unsigned int frame;         // 0x69CBC
     int buf;                    // 0x69CC0
     int scissor;                // 0x69CC4
@@ -9051,7 +9011,7 @@ struct sRmRend3C20 {
     sRmKey3C20 keys[1];         // 0x6AED4
 };
 
-static inline sRmGs3C20* State3C20(sRmRend3C20* self)
+static inline sDrawState* State3C20(sRmRend3C20* self)
 {
     return &self->state;
 }
@@ -9067,7 +9027,7 @@ static inline unsigned int Bits3C20(unsigned int w, unsigned int m)
 }
 
 // PORT: 64-bit DMA/GIF tag writes (ulong); self arrives as a pointer-sized integer (__SIZE_TYPE__).
-extern "C" void func_00363C20_impl(__SIZE_TYPE__ selfi, sRmGs3C20* st, int a2, ulong** pp) __asm__("func_00363C20");
+extern "C" void func_00363C20_impl(__SIZE_TYPE__ selfi, sDrawState* st, int a2, ulong** pp) __asm__("func_00363C20");
 /**
  * Writes the GS register changes needed to go from the defer manager's current draw state (+0x69CA8) to st.
  *
@@ -9083,7 +9043,7 @@ extern "C" void func_00363C20_impl(__SIZE_TYPE__ selfi, sRmGs3C20* st, int a2, u
  * @param nodeLayer  the bucket's matrix/layer index
  * @param pp  DMA chain cursor
  */
-extern "C" void func_00363C20_impl(__SIZE_TYPE__ selfi, sRmGs3C20* st, int nodeLayer, ulong** pp)
+extern "C" void func_00363C20_impl(__SIZE_TYPE__ selfi, sDrawState* st, int nodeLayer, ulong** pp)
 {
     sRmRend3C20* self = (sRmRend3C20*)selfi;
     sRmPkt27A8 pkt;
@@ -9092,60 +9052,60 @@ extern "C" void func_00363C20_impl(__SIZE_TYPE__ selfi, sRmGs3C20* st, int nodeL
     (*pp)[2] = 0;
     (*pp)[3] = (ulong)1 << 60;
     *pp += 4;
-    int ctx = (st->w0 & 0x3C0) >> 6;
+    int ctx = (st->unk_00[0] & 0x3C0) >> 6;
     if (ctx != 0) {
-        unsigned int frameWord = Mask3C20(0x3FFFFFFF, st->w3);
-        if (((State3C20(self)->w0 & 0x3C0) >> 6) != ctx) {
+        unsigned int frameWord = Mask3C20(0x3FFFFFFF, st->unk_00[3]);
+        if (((State3C20(self)->unk_00[0] & 0x3C0) >> 6) != ctx) {
             self->buf = nodeLayer;
             self->frame = frameWord;
-            func_00364CD0((cPS2DeferManager*)self, (st->w0 & 0x3C0) >> 6, 0, frameWord, pp);
+            func_00364CD0((cPS2DeferManager*)self, (st->unk_00[0] & 0x3C0) >> 6, 0, frameWord, pp);
         } else if (nodeLayer != self->buf) {
             self->buf = nodeLayer;
             self->frame = frameWord;
-            func_00364CD0((cPS2DeferManager*)self, (st->w0 & 0x3C0) >> 6, 1, frameWord, pp);
+            func_00364CD0((cPS2DeferManager*)self, (st->unk_00[0] & 0x3C0) >> 6, 1, frameWord, pp);
         }
         if (self->frame != frameWord) {
             self->buf = nodeLayer;
             self->frame = frameWord;
-            func_00364CD0((cPS2DeferManager*)self, (st->w0 & 0x3C0) >> 6, 2, frameWord, pp);
+            func_00364CD0((cPS2DeferManager*)self, (st->unk_00[0] & 0x3C0) >> 6, 2, frameWord, pp);
         }
     }
     pkt.count = 0;
     pkt.base = *pp;
     pkt.cur = *pp + 6;
-    int k = st->w2 & 0x1F;
+    int k = st->unk_00[2] & 0x1F;
     if (k != self->scissor) {
         self->scissor = k;
         if (k >= 0) {
             func_003623D8((sGifPacket*)&pkt, self->keys[k].a, self->keys[k].c, self->keys[k].b, self->keys[k].d);
         }
     }
-    if (((State3C20(self)->w1 & 0x400000) >> 22) != ((st->w1 & 0x400000) >> 22)) {
+    if (((State3C20(self)->unk_00[1] & 0x400000) >> 22) != ((st->unk_00[1] & 0x400000) >> 22)) {
         cPS2GraphicsMan* gs = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_railmodifier;
         func_00362660((sGifPacket*)&pkt, (unsigned int)gs->mCurrentZBufferPage, (unsigned int)gs->mCurrentZBFormat,
-                      (st->w1 & 0x400000) >> 22, 0);
+                      (st->unk_00[1] & 0x400000) >> 22, 0);
         func_00362660((sGifPacket*)&pkt, (unsigned int)gs->mCurrentZBufferPage, (unsigned int)gs->mCurrentZBFormat,
-                      (st->w1 & 0x400000) >> 22, 1);
+                      (st->unk_00[1] & 0x400000) >> 22, 1);
     }
-    if (Bits3C20(State3C20(self)->w1, 0x1800000) != Bits3C20(st->w1, 0x1800000) ||
-        Bits3C20(State3C20(self)->w1, 0x300000) != Bits3C20(st->w1, 0x300000) ||
-        Bits3C20(State3C20(self)->w1, 0xFF000) != Bits3C20(st->w1, 0xFF000)) {
-        func_003626D8((sRmGsPacket*)&pkt, (st->w1 & 0x1800000) >> 23, (st->w1 & 0x300000) >> 20,
-                      (st->w1 & 0xFF000) >> 12, 0);
-        func_003626D8((sRmGsPacket*)&pkt, (st->w1 & 0x1800000) >> 23, (st->w1 & 0x300000) >> 20,
-                      (st->w1 & 0xFF000) >> 12, 1);
+    if (Bits3C20(State3C20(self)->unk_00[1], 0x1800000) != Bits3C20(st->unk_00[1], 0x1800000) ||
+        Bits3C20(State3C20(self)->unk_00[1], 0x300000) != Bits3C20(st->unk_00[1], 0x300000) ||
+        Bits3C20(State3C20(self)->unk_00[1], 0xFF000) != Bits3C20(st->unk_00[1], 0xFF000)) {
+        func_003626D8((sRmGsPacket*)&pkt, (st->unk_00[1] & 0x1800000) >> 23, (st->unk_00[1] & 0x300000) >> 20,
+                      (st->unk_00[1] & 0xFF000) >> 12, 0);
+        func_003626D8((sRmGsPacket*)&pkt, (st->unk_00[1] & 0x1800000) >> 23, (st->unk_00[1] & 0x300000) >> 20,
+                      (st->unk_00[1] & 0xFF000) >> 12, 1);
     }
-    if ((State3C20(self)->w0 & 0xC) != (st->w0 & 0xC)) {
-        func_003625C0((sGifPacket*)&pkt, (st->w0 & 0xC) >> 2, 0);
+    if ((State3C20(self)->unk_00[0] & 0xC) != (st->unk_00[0] & 0xC)) {
+        func_003625C0((sGifPacket*)&pkt, (st->unk_00[0] & 0xC) >> 2, 0);
     }
-    if (((State3C20(self)->w1 & 0x7C) >> 2) != ((st->w1 & 0x7C) >> 2) || ((State3C20(self)->w0 >> 12) & 0xFF) != ((st->w0 >> 12) & 0xFF)) {
-        func_00362478((sGifPacket*)&pkt, (st->w1 & 0x7C) >> 2, (st->w0 >> 12) & 0xFF, 0);
+    if (((State3C20(self)->unk_00[1] & 0x7C) >> 2) != ((st->unk_00[1] & 0x7C) >> 2) || ((State3C20(self)->unk_00[0] >> 12) & 0xFF) != ((st->unk_00[0] >> 12) & 0xFF)) {
+        func_00362478((sGifPacket*)&pkt, (st->unk_00[1] & 0x7C) >> 2, (st->unk_00[0] >> 12) & 0xFF, 0);
     }
-    if ((State3C20(self)->w0 & 0x30) != (st->w0 & 0x30)) {
-        func_003625C0((sGifPacket*)&pkt, (st->w0 & 0x30) >> 4, 1);
+    if ((State3C20(self)->unk_00[0] & 0x30) != (st->unk_00[0] & 0x30)) {
+        func_003625C0((sGifPacket*)&pkt, (st->unk_00[0] & 0x30) >> 4, 1);
     }
-    if (((State3C20(self)->w1 & 0xF80) >> 7) != ((st->w1 & 0xF80) >> 7) || ((State3C20(self)->w0 >> 20) & 0xFF) != ((st->w0 >> 20) & 0xFF)) {
-        func_00362478((sGifPacket*)&pkt, (st->w1 & 0xF80) >> 7, (st->w0 >> 20) & 0xFF, 1);
+    if (((State3C20(self)->unk_00[1] & 0xF80) >> 7) != ((st->unk_00[1] & 0xF80) >> 7) || ((State3C20(self)->unk_00[0] >> 20) & 0xFF) != ((st->unk_00[0] >> 20) & 0xFF)) {
+        func_00362478((sGifPacket*)&pkt, (st->unk_00[1] & 0xF80) >> 7, (st->unk_00[0] >> 20) & 0xFF, 1);
     }
     self->state = *st;
     func_003627A8(&pkt, pp, 1);
@@ -10926,18 +10886,6 @@ extern "C" void MEM_copy(void* dst, void* src, int size);
 extern "C" void func_00390198(void* self, int w, int h, void* buf, char* src);
 extern char str_TempTex[];
 
-struct sRmTex_366E90 {
-    char pad_0x0[0xC];
-    int state;          // 0xC
-    int size;           // 0x10
-    char pad_0x14[0x4];
-    int bpp;            // 0x18
-    char* data;         // 0x1C
-    char pad_0x20[0x4];
-    int mipCount;           // 0x24
-    char pad_0x28[0x10];
-    unsigned long tex0; // 0x38
-};
 
 /**
  * Converts the pixel data of every mip level of @p tex in place with func_00390198, then sets its format code to 10.
@@ -10950,17 +10898,17 @@ struct sRmTex_366E90 {
  *
  * @param tex  the texture record to convert
  */
-extern "C" void func_00366E90(cTextureMan* self, sRmTex_366E90* tex)
+extern "C" void func_00366E90(cTextureMan* self, tTexInfo* tex)
 {
     int n = 0;
-    char* buf = new (str_TempTex, self->TexMemType ^ 0x100, 0) char[tex->size];
-    int tw = (tex->tex0 >> 26) & 0xF;
-    int th = (tex->tex0 >> 30) & 0xF;
-    int bpp = tex->bpp;
+    char* buf = new (str_TempTex, self->TexMemType ^ 0x100, 0) char[tex->mSize];
+    int tw = ((*(unsigned long*)&tex->mTEX0) >> 26) & 0xF;
+    int th = ((*(unsigned long*)&tex->mTEX0) >> 30) & 0xF;
+    int bpp = tex->mBPP;
     int w = 1 << tw;
     int height = 1 << th;
-    char* src = tex->data;
-    if (tex->mipCount >= 0) {
+    char* src = ((char*)tex->mpTexels);
+    if (tex->mNumMips >= 0) {
         do {
             n++;
             int bytes = w * height * bpp / 8;
@@ -10972,12 +10920,12 @@ extern "C" void func_00366E90(cTextureMan* self, sRmTex_366E90* tex)
             src += bytes;
             w >>= 1;
             height >>= 1;
-        } while (n <= tex->mipCount);
+        } while (n <= tex->mNumMips);
     }
     if (buf != 0) {
         cMemMan_free(buf);
     }
-    tex->state = 10;
+    tex->mFormat = 10;
 }
 #endif
 

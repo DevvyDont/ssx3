@@ -1,5 +1,8 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uithing.h"
+#include "bx/math3d.h"
+#include "render/2drender.h"
 #include "world/patchrecord.h"
 #include "render/ps2bezierman.h"
 #include "render/ps2graphicsman.h"
@@ -177,12 +180,6 @@ struct sBezMan_B190 {
     tBezierMixedPatchEntry mix[75];      // 0x4D88
 };
 
-struct sBezObj_B190 {
-    char pad_0x0[0x1A6];
-    unsigned short tex4;    // 0x1A6
-    unsigned short tex6;    // 0x1A8
-    unsigned short tex8;    // 0x1AA
-};
 
 /**
  * Queues one Bezier patch for drawing in the list that matches its four edge LODs.
@@ -200,7 +197,7 @@ struct sBezObj_B190 {
  * @param ignoredArg  ignored
  * @param extra  stored in the entry's unk_04 (used as the patch's program/table index when the patch is drawn)
  */
-extern "C" void func_0038B190(cPS2BezierMan* bezierMan, sBezObj_B190* patchRec, unsigned char* edgeLods, int ignoredArg, int extra)
+extern "C" void func_0038B190(cPS2BezierMan* bezierMan, tPatchRecord* patchRec, unsigned char* edgeLods, int ignoredArg, int extra)
 {
     if (edgeLods[0] == edgeLods[2] && edgeLods[1] == edgeLods[3] && edgeLods[0] == edgeLods[1]) {
         switch (edgeLods[0]) {
@@ -210,7 +207,7 @@ extern "C" void func_0038B190(cPS2BezierMan* bezierMan, sBezObj_B190* patchRec, 
                 (*(int*)&patchEntry->unk_04) = extra;
                 patchEntry->mpPatch = patchRec;
                 patchEntry->mLod = 0;
-                patchEntry->unk_0C = patchRec->tex4;
+                patchEntry->unk_0C = (*(unsigned short*)&patchRec->m_sCacheRecord[0]);
             }
             break;
         case 6:
@@ -219,7 +216,7 @@ extern "C" void func_0038B190(cPS2BezierMan* bezierMan, sBezObj_B190* patchRec, 
                 (*(int*)&patchEntry->unk_04) = extra;
                 patchEntry->mLod = 1;
                 patchEntry->mpPatch = patchRec;
-                patchEntry->unk_0C = patchRec->tex6;
+                patchEntry->unk_0C = (*(unsigned short*)&patchRec->m_sCacheRecord[1]);
             }
             break;
         case 8:
@@ -228,7 +225,7 @@ extern "C" void func_0038B190(cPS2BezierMan* bezierMan, sBezObj_B190* patchRec, 
                 (*(int*)&patchEntry->unk_04) = extra;
                 patchEntry->mLod = 2;
                 patchEntry->mpPatch = patchRec;
-                patchEntry->unk_0C = patchRec->tex8;
+                patchEntry->unk_0C = (*(unsigned short*)&patchRec->m_sCacheRecord[2]);
             }
             break;
         }
@@ -240,7 +237,7 @@ extern "C" void func_0038B190(cPS2BezierMan* bezierMan, sBezObj_B190* patchRec, 
         patchEntry->mpPatch = patchRec;
         int* pk = &patchEntry->mLod;
         *pk = (edgeLods[0] == 8 || edgeLods[1] == 8 || edgeLods[2] == 8 || edgeLods[3] == 8) ? 2 : 0;
-        patchEntry->unk_0C = patchRec->tex8;
+        patchEntry->unk_0C = (*(unsigned short*)&patchRec->m_sCacheRecord[2]);
         for (int i = 0; i < 4; i++) {
             patchEntry->mEdgeLods[i] = edgeLods[i];
         }
@@ -879,36 +876,25 @@ struct sV4_C590 {
     sV4_C590(const float& ax, const float& ay, const float& az, const float& aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
-struct sV3_C590 {
-    float x, y, z;
-};
 
-struct sUV_C590 {
-    float u, v;
-};
 
-struct sBezVert_C590 {
-    float st[4];                    // 0x00
-    int rgba[4];                    // 0x10
-    sV4_C590 pos;                   // 0x20
-};
 
 struct sGmVE_C590 {
     short delta;
     short index;
-    void (*fn)(void*, int, sBezVert_C590*, int);
+    void (*fn)(void*, int, tBxVertex*, int);
 };
 
 extern char* D_004A5B80_C590 __asm__("cGraphicsMan_TheGraphicsMan");
 
-static inline void setVert_C590(sBezVert_C590* v, const sV3_C590& p, const sUV_C590& uv)
+static inline void setVert_C590(tBxVertex* v, const t3Vector& p, const t2Vector& uv)
 {
-    v->pos = sV4_C590(p.x, p.y, p.z, 1.0f);
-    v->st[0] = uv.u;
-    v->st[1] = uv.v;
-    v->st[2] = 1.0f;
-    v->rgba[0] = v->rgba[1] = v->rgba[2] = 0x80;
-    v->rgba[3] = 0x80;
+    (*(sV4_C590*)&v->p) = sV4_C590(p.x, p.y, p.z, 1.0f);
+    ((float*)&v->u)[0] = uv.x;
+    ((float*)&v->u)[1] = uv.y;
+    ((float*)&v->u)[2] = 1.0f;
+    ((int*)&v->r)[0] = ((int*)&v->r)[1] = ((int*)&v->r)[2] = 0x80;
+    ((int*)&v->r)[3] = 0x80;
 }
 
 /**
@@ -922,9 +908,9 @@ static inline void setVert_C590(sBezVert_C590* v, const sV3_C590& p, const sUV_C
  * @param uvs  the matching texture coordinates
  * @param n  the grid size (points per row and column)
  */
-extern "C" void func_0038C590(sV3_C590* pts, sUV_C590* uvs, int n)
+extern "C" void func_0038C590(t3Vector* pts, t2Vector* uvs, int n)
 {
-    sBezVert_C590 verts[64];
+    tBxVertex verts[64];
     cPS2GraphicsMan* gfx = (cPS2GraphicsMan*)D_004A5B80_C590;
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
@@ -1414,14 +1400,6 @@ struct sRing_D168 {
     char pad_0x4[0x7C];
     sEnt_D168 ents[1];              // 0x80
 };
-struct sGfx_D168 {
-    char pad_0x0[0xE84];
-    sRS_D168* top;                  // 0xE84
-    char pad_0xE88[0x10A8 - 0xE88];
-    int defTex;                     // 0x10A8
-    char pad_0x10AC[0x18F0 - 0x10AC];
-    sRing_D168* ring;               // 0x18F0
-};
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
 static inline void CopyMat_D168(void* d, const void* src)
 {
@@ -1441,12 +1419,12 @@ static inline void CopyMat_D168(void* d, const void* src)
 
 struct sProg_D168 { int addr; int size; };
 struct sPatch_D168 { void* obj; int extra; };
-extern sGfx_D168* D_004A5B80_D168 __asm__("cGraphicsMan_TheGraphicsMan");
+extern cPS2GraphicsMan* D_004A5B80_D168 __asm__("cGraphicsMan_TheGraphicsMan");
 
-static inline void QueueRecord_D168(sGfx_D168* gfx, unsigned int buf, unsigned int next, int flag)
+static inline void QueueRecord_D168(cPS2GraphicsMan* gfx, unsigned int buf, unsigned int next, int flag)
 {
-    sRing_D168* ring = gfx->ring;
-    sRS_D168* rs = gfx->top;
+    sRing_D168* ring = ((sRing_D168*)gfx->mpDeferMan);
+    sRS_D168* rs = ((sRS_D168*)gfx->m_pCurrentDrawState);
     if (ring->count < 0xA28) {
         int lyr = *(int*)((char*)ring + 0x69CC4) & 0x1F;
         rs->f8 = (rs->f8 & ~0x1F) | lyr;
@@ -1488,9 +1466,9 @@ extern "C" void func_0038D168_impl(void* self, void* patch, void* obj, int type,
 extern "C" void func_0038D168_impl(void* self, void* patch, void* obj, int type, char* progs, void* prog, unsigned int* handle)
 {
     char* manager = (char*)self;
-    sGfx_D168* gfx = D_004A5B80_D168;
-    gfx->top[1] = gfx->top[0];
-    gfx->top++;
+    cPS2GraphicsMan* gfx = D_004A5B80_D168;
+    ((sRS_D168*)gfx->m_pCurrentDrawState)[1] = ((sRS_D168*)gfx->m_pCurrentDrawState)[0];
+    (*(sRS_D168**)&gfx->m_pCurrentDrawState)++;
     int idx = *(int*)((char*)patch + 8);
     int vecDataAddr;
     switch (type) {
@@ -1507,17 +1485,17 @@ extern "C" void func_0038D168_impl(void* self, void* patch, void* obj, int type,
         vecDataAddr = 0;
         break;
     }
-    gfx->top->tex = -1;
+    ((sRS_D168*)gfx->m_pCurrentDrawState)->tex = -1;
     int tex = *(short*)((char*)obj + 0x1A4);
     if (tex < 0) {
-        tex = gfx->defTex;
+        tex = gfx->mSpecTexID;
     }
-    gfx->top->tex2 = tex;
-    gfx->top->f0 |= 0x30;
+    ((sRS_D168*)gfx->m_pCurrentDrawState)->tex2 = tex;
+    ((sRS_D168*)gfx->m_pCurrentDrawState)->f0 |= 0x30;
     if (*(int*)((char*)obj + 0xC) & 0x400000) {
-        gfx->top->f4 = (gfx->top->f4 & ~0xF80) | 0x880;
+        ((sRS_D168*)gfx->m_pCurrentDrawState)->f4 = (((sRS_D168*)gfx->m_pCurrentDrawState)->f4 & ~0xF80) | 0x880;
     } else {
-        gfx->top->f4 = (gfx->top->f4 & ~0xF80) | 0x100;
+        ((sRS_D168*)gfx->m_pCurrentDrawState)->f4 = (((sRS_D168*)gfx->m_pCurrentDrawState)->f4 & ~0xF80) | 0x100;
     }
     int n = type * 2 + 4;
     int nn = n * n;
@@ -1543,7 +1521,7 @@ extern "C" void func_0038D168_impl(void* self, void* patch, void* obj, int type,
     *handle = next;
     QueueRecord_D168(gfx, buf, next, 1);
     *handle += 0x10;
-    gfx->top--;
+    (*(sRS_D168**)&gfx->m_pCurrentDrawState)--;
 }
 #endif
 
@@ -1574,24 +1552,6 @@ struct sRing_D448 {
 struct sMat_D448 {
     float m[4][4];
 } __attribute__((aligned(16)));
-// Projector light (PS2GraphicsMan AddLight record, 0xA0 bytes).
-struct sLight_D448 {
-    float color[4];                 // 0x00
-    sMat_D448 mat0;                 // 0x10
-    sMat_D448 mat;                  // 0x50
-    float f90;                      // 0x90
-    int tex;                        // 0x94
-    char pad_0x98[8];
-} __attribute__((aligned(16)));
-struct sGfx_D448 {
-    char pad_0x0[0xE84];
-    sRS_D448* top;                  // 0xE84
-    char pad_0xE88[0x13EC - 0xE88];
-    unsigned int nLights;           // 0x13EC
-    sLight_D448 lights[1];          // 0x13F0
-    char pad_0x1490[0x18F0 - 0x1490];
-    sRing_D448* ring;               // 0x18F0
-};
 struct sPatch_D448 {
     void* obj;
     int extra;
@@ -1600,7 +1560,7 @@ struct sTex_D448 {
     int addr;
     int pad;
 };
-extern sGfx_D448* D_004A5B80_D448 __asm__("cGraphicsMan_TheGraphicsMan");
+extern cPS2GraphicsMan* D_004A5B80_D448 __asm__("cGraphicsMan_TheGraphicsMan");
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
 static inline void CopyMat_D448(void* d, const void* s)
@@ -1619,15 +1579,15 @@ static inline void CopyMat_D448(void* d, const void* s)
         : "memory");
 }
 
-static inline int Tex_D448(sLight_D448* l)
+static inline int Tex_D448(tProjTexInfo* l)
 {
-    return l->tex;
+    return l->unk_94;
 }
 
-static inline void QueueRecord_D448(sGfx_D448* gfx, unsigned int buf, unsigned int next, int flag)
+static inline void QueueRecord_D448(cPS2GraphicsMan* gfx, unsigned int buf, unsigned int next, int flag)
 {
-    sRing_D448* ring = gfx->ring;
-    sRS_D448* rs = gfx->top;
+    sRing_D448* ring = ((sRing_D448*)gfx->mpDeferMan);
+    sRS_D448* rs = ((sRS_D448*)gfx->m_pCurrentDrawState);
     if (ring->count < 0xA28) {
         int lyr = *(int*)((char*)ring + 0x69CC4) & 0x1F;
         rs->f8 = (rs->f8 & ~0x1F) | lyr;
@@ -1659,22 +1619,22 @@ static inline void QueueRecord_D448(sGfx_D448* gfx, unsigned int buf, unsigned i
 // One projector pass per light whose bit is set in mask: UNPACK the light matrix, then MSCAL the patch program.
 extern "C" void func_0038D448(void* self, int kind, void* tbl, void* patch, int mask, unsigned int* handle)
 {
-    sGfx_D448* gfx = D_004A5B80_D448;
+    cPS2GraphicsMan* gfx = D_004A5B80_D448;
     sTex_D448* programTable = (sTex_D448*)tbl;
     int extra = ((sPatch_D448*)patch)->extra;
     unsigned int i;
-    for (i = 0; i < gfx->nLights; i++) {
-        sLight_D448* projTex = &gfx->lights[i];
+    for (i = 0; i < ((unsigned int)gfx->mNumProjTextures); i++) {
+        tProjTexInfo* projTex = &((&gfx->mProjTextures[0]))[i];
         if ((mask >> i) & 1) {
             unsigned int buf = *handle;
-            gfx->top->tex2 = Tex_D448(projTex);
+            ((sRS_D448*)gfx->m_pCurrentDrawState)->tex2 = Tex_D448(projTex);
             long* packetCursor = (long*)(buf | 0x30000000);
-            gfx->top->f0 = (gfx->top->f0 & ~0x30) | 0x30;
+            ((sRS_D448*)gfx->m_pCurrentDrawState)->f0 = (((sRS_D448*)gfx->m_pCurrentDrawState)->f0 & ~0x30) | 0x30;
             packetCursor[0] = 0x10000006;
             packetCursor[1] = 0;
             packetCursor[2] = 0x20000000;
             packetCursor[3] = (long)0x6C048080 << 32;
-            CopyMat_D448(packetCursor + 4, &projTex->mat);
+            CopyMat_D448(packetCursor + 4, &(*(sMat_D448*)&projTex->unk_50));
             packetCursor[12] = 0;
             packetCursor[13] = (long)(programTable[extra + 6].addr | 0x14000000) << 32;
             packetCursor += 14;
@@ -1765,7 +1725,6 @@ extern "C" void func_0038D668(float* seed)
 //100%
 INCLUDE_ASM("render/bezierman", func_0038D690);
 #ifdef SKIP_ASM
-struct sVec3_D690 { float x, y, z; };
 struct sQuad_D690 { long lo; long hi; } __attribute__((aligned(16)));
 struct sRS_D690 {
     int f0;
@@ -1788,17 +1747,9 @@ struct sRing_D690 {
     char pad_0x4[0x7C];
     sEnt_D690 ents[1];              // 0x80
 };
-struct sGfx_D690 {
-    char pad_0x0[0xC4];
-    float detailScale;              // 0xC4
-    char pad_0xC8[0xE84 - 0xC8];
-    sRS_D690* top;                  // 0xE84
-    char pad_0xE88[0x18F0 - 0xE88];
-    sRing_D690* ring;               // 0x18F0
-};
 extern float cDetailSystem_m_PS2SparkleCount;
 extern void* D_004A4474;
-extern sGfx_D690* D_004A5B80_D690 __asm__("cGraphicsMan_TheGraphicsMan");
+extern cPS2GraphicsMan* D_004A5B80_D690 __asm__("cGraphicsMan_TheGraphicsMan");
 extern char D_1460[];
 extern "C" char* func_0038F460(void* self, unsigned int addr, int size, int flags);
 extern "C" unsigned int func_0038F668(void* self, char* end, int arg);
@@ -1837,12 +1788,12 @@ extern "C" void func_0038D690(void* self, void* obj, tBezierPatchEntry* patch, u
     if ((patchRec->m_iFlags & 0x800000) == 0) {
         return;
     }
-    sVec3_D690 boxDiagonal;
+    t3Vector boxDiagonal;
     boxDiagonal.z = patchRec->m_fvMin.m[2] - patchRec->m_fvMax.m[2];
-    sGfx_D690* gfx = D_004A5B80_D690;
+    cPS2GraphicsMan* gfx = D_004A5B80_D690;
     boxDiagonal.x = patchRec->m_fvMin.m[0] - patchRec->m_fvMax.m[0];
     boxDiagonal.y = patchRec->m_fvMin.m[1] - patchRec->m_fvMax.m[1];
-    int n = (int)((boxDiagonal.x * boxDiagonal.x + boxDiagonal.y * boxDiagonal.y + boxDiagonal.z * boxDiagonal.z) * (cDetailSystem_m_PS2SparkleCount * 3.3333333249174757e-07f) * gfx->detailScale);
+    int n = (int)((boxDiagonal.x * boxDiagonal.x + boxDiagonal.y * boxDiagonal.y + boxDiagonal.z * boxDiagonal.z) * (cDetailSystem_m_PS2SparkleCount * 3.3333333249174757e-07f) * gfx->m_SnowSparkleDensity[6]);
     if (patch->mLod < 2) {
         n /= 2;
     }
@@ -1865,8 +1816,8 @@ extern "C" void func_0038D690(void* self, void* obj, tBezierPatchEntry* patch, u
     packetCursor += 0x10;
     unsigned int next = func_0038F668(D_004A4474, packetCursor, 4);
     *handle = next;
-    sRing_D690* ring = gfx->ring;
-    sRS_D690* rs = gfx->top;
+    sRing_D690* ring = ((sRing_D690*)gfx->mpDeferMan);
+    sRS_D690* rs = ((sRS_D690*)gfx->m_pCurrentDrawState);
     if (ring->count < 2600) {
         rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
@@ -1884,30 +1835,14 @@ extern "C" void func_0038D690(void* self, void* obj, tBezierPatchEntry* patch, u
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/bezierman", func_0038D968);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sRS_D968 {
-    int field_0x0;
-    int flagsA;
-    int flagsB;
-    int field_0xC;
-    short tex;
-    short pad;
-};
 struct sCtx_D968 {
     char pad_0x0[0x64];
     int texSel;                                 // 0x64
     char pad_0x68[0xE84 - 0x68];
-    sRS_D968* top;                              // 0xE84
+    sDrawState* top;                              // 0xE84
     char pad_0xE88[0xF50 - 0xE88];
     int texIds[(0x6B90 - 0xF50) / 4];           // 0xF50
     int field_0x6B90;                           // 0x6B90
-};
-struct sBezPatch_D968 {
-    void* obj;
-    int extra;
-    int kind;
-    unsigned short tex;
-    short pad;
 };
 struct sBezMixPatch_D968 {
     void* obj;
@@ -1916,13 +1851,6 @@ struct sBezMixPatch_D968 {
     unsigned short tex;
     short pad;
     unsigned char types[4];
-};
-struct sBezMan_D968 {
-    char pad_0x0[0x4A60];
-    int n8;                         // 0x4A60
-    sBezPatch_D968 list8[50];       // 0x4A64
-    int nMix;                       // 0x4D84
-    sBezMixPatch_D968 mix[75];      // 0x4D88
 };
 extern int cRenderToggles_m_DisableSparkles;
 extern sCtx_D968* D_004A5B80_D968 __asm__("cGraphicsMan_TheGraphicsMan");
@@ -1940,36 +1868,36 @@ extern "C" void func_0038D690(void* self, void* obj, tBezierPatchEntry* patch, u
  *
  * @param packetHandle  the packet write cursor
  */
-extern "C" void func_0038D968(sBezMan_D968* self, unsigned int* packetHandle)
+extern "C" void func_0038D968(cPS2BezierMan* self, unsigned int* packetHandle)
 {
     if (cRenderToggles_m_DisableSparkles != 0) {
         return;
     }
     sCtx_D968* ctx = D_004A5B80_D968;
     ctx->top[1] = ctx->top[0];
-    sRS_D968* savedState = ctx->top;
+    sDrawState* savedState = ctx->top;
     ctx->top = savedState + 1;
     int tex = ctx->texIds[ctx->texSel];
-    savedState[1].tex = tex;
-    ctx->top->flagsA = (ctx->top->flagsA & ~0x7C) | 0x54;
-    ctx->top->flagsB = (ctx->top->flagsB & ~0x3E0) | 0x80;
-    ctx->top->flagsA = (ctx->top->flagsA & 0xFE7FFFFF) | 0x800000;
-    ctx->top->flagsA = (ctx->top->flagsA & 0xFFCFFFFF) | 0x300000;
-    ctx->top->flagsA = (ctx->top->flagsA & 0xFFF00FFF) | 0x5C000;
-    ctx->top->flagsA = (ctx->top->flagsA & 0xFFBFFFFF) | 0x400000;
+    savedState[1].m_textureState.m_texid[0] = tex;
+    ctx->top->unk_00[1] = (((int)ctx->top->unk_00[1]) & ~0x7C) | 0x54;
+    ctx->top->unk_00[2] = (((int)ctx->top->unk_00[2]) & ~0x3E0) | 0x80;
+    ctx->top->unk_00[1] = (((int)ctx->top->unk_00[1]) & 0xFE7FFFFF) | 0x800000;
+    ctx->top->unk_00[1] = (((int)ctx->top->unk_00[1]) & 0xFFCFFFFF) | 0x300000;
+    ctx->top->unk_00[1] = (((int)ctx->top->unk_00[1]) & 0xFFF00FFF) | 0x5C000;
+    ctx->top->unk_00[1] = (((int)ctx->top->unk_00[1]) & 0xFFBFFFFF) | 0x400000;
     if (ctx->field_0x6B90 == 0) {
         func_0037D968(ctx);
     }
-    ctx->top->field_0x0 = (ctx->top->field_0x0 & ~0x3C0) | 0x100;
-    ctx->top->field_0xC = ctx->top->field_0xC & 0xC0000000;
-    ctx->top->flagsA = (ctx->top->flagsA & ~3) | 2;
-    ctx->top->flagsB = ctx->top->flagsB & 0xE00003FF;
-    for (int i = 0; i < self->n8; i++) {
-        sBezPatch_D968* patchEntry = &self->list8[i];
-        func_0038D690(self, func_0038F708(patchEntry->obj, 432, 2), (tBezierPatchEntry*)patchEntry, packetHandle);
+    ctx->top->unk_00[0] = (((int)ctx->top->unk_00[0]) & ~0x3C0) | 0x100;
+    ctx->top->unk_00[3] = ((int)ctx->top->unk_00[3]) & 0xC0000000;
+    ctx->top->unk_00[1] = (((int)ctx->top->unk_00[1]) & ~3) | 2;
+    ctx->top->unk_00[2] = ((int)ctx->top->unk_00[2]) & 0xE00003FF;
+    for (int i = 0; i < self->mNum8x8Patches; i++) {
+        tBezierPatchEntry* patchEntry = &((&self->m8x8Patches[0]))[i];
+        func_0038D690(self, func_0038F708(patchEntry->mpPatch, 432, 2), (tBezierPatchEntry*)patchEntry, packetHandle);
     }
-    for (int i = 0; i < self->nMix; i++) {
-        sBezMixPatch_D968* patchEntry = &self->mix[i];
+    for (int i = 0; i < self->mNumMixedPatches; i++) {
+        sBezMixPatch_D968* patchEntry = &((sBezMixPatch_D968*)&self->mMixedPatches[0])[i];
         if (patchEntry->kind > 0) {
             func_0038D690(self, func_0038F708(patchEntry->obj, 432, 2), (tBezierPatchEntry*)patchEntry, packetHandle);
         }

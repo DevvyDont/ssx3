@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "world/worldcache.h"
 #include "world/worldrecords.h"
 #include "bx/math3d.h"
 #include "bx/appman.h"
@@ -270,20 +271,15 @@ struct sImRange;
 struct sImRangeTable;
 extern "C" sImRange* cAnimChannel_nextSegment(sImRangeTable* t, int* cur, float x);
 
-struct sImSeg_351538 {
-    float a, b, c, d;
-    float lo;
-    float hi;
-};
 
 struct sImCurve_351538 {
     int count;
-    sImSeg_351538* segs;
+    tSegmentRecord* segs;
 };
 
-static inline bool inRange_351538(sImSeg_351538* e, float x)
+static inline bool inRange_351538(tSegmentRecord* e, float x)
 {
-    return e->lo <= x && x < e->hi;
+    return e->m_fStart <= x && x < e->m_fEnd;
 }
 
 // PORT: the unit declares cAnimFrame_update(void*) for its caller; the body also reads t from $f12
@@ -309,11 +305,11 @@ void cAnimFrame_update_impl(char* vself, float time)
     for (int i = 0; i < 16; i++) {
         sImCurve_351538* curve = *curves;
         if ((unsigned int)self->AnimRecord->m_ChannelMask & mask) {
-            sImSeg_351538* segment = &curve->segs[*cur];
+            tSegmentRecord* segment = &curve->segs[*cur];
             if (!inRange_351538(segment, time)) {
-                segment = (sImSeg_351538*)cAnimChannel_nextSegment((sImRangeTable*)curve, cur, time);
+                segment = (tSegmentRecord*)cAnimChannel_nextSegment((sImRangeTable*)curve, cur, time);
             }
-            *out = ((segment->a * time + segment->b) * time + segment->c) * time + segment->d;
+            *out = ((segment->m_fvInv.m[0] * time + segment->m_fvInv.m[1]) * time + segment->m_fvInv.m[2]) * time + segment->m_fvInv.m[3];
             curves++;
             cur++;
         }
@@ -328,15 +324,10 @@ INCLUDE_ASM("object/instanceman", cAnimFrame_getDeriv);
 #ifdef SKIP_ASM
 extern "C" sImRange* cAnimChannel_nextSegment(sImRangeTable* t, int* cur, float x);
 
-struct sImSeg_351660 {
-    float a, b, c, d;
-    float lo;
-    float hi;
-};
 
 struct sImCurve_351660 {
     int count;
-    sImSeg_351660* segs;
+    tSegmentRecord* segs;
 };
 
 struct sImV4_351660 {
@@ -345,9 +336,9 @@ struct sImV4_351660 {
     sImV4_351660(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
-static inline bool inRange_351660(sImSeg_351660* e, float x)
+static inline bool inRange_351660(tSegmentRecord* e, float x)
 {
-    return e->lo <= x && x < e->hi;
+    return e->m_fStart <= x && x < e->m_fEnd;
 }
 
 /**
@@ -372,13 +363,13 @@ extern "C" void cAnimFrame_getDeriv(cAnimFrame* self, sImV4_351660* vel, sImV4_3
     for (int i = 0; i < 16; i++, mask <<= 1, outRate++) {
         sImCurve_351660* channel = *curves;
         if (self->AnimRecord->m_ChannelMask & mask) {
-            sImSeg_351660* segment = &channel->segs[*cur];
+            tSegmentRecord* segment = &channel->segs[*cur];
             if (!inRange_351660(segment, time)) {
-                segment = (sImSeg_351660*)cAnimChannel_nextSegment((sImRangeTable*)channel, cur, time);
+                segment = (tSegmentRecord*)cAnimChannel_nextSegment((sImRangeTable*)channel, cur, time);
             }
             curves++;
             cur++;
-            *outRate = segment->a * (time * 3.0f) * time + 2.0f * segment->b * time + segment->c;
+            *outRate = segment->m_fvInv.m[0] * (time * 3.0f) * time + 2.0f * segment->m_fvInv.m[1] * time + segment->m_fvInv.m[2];
         } else {
             *outRate = 0.0f;
         }
@@ -1327,13 +1318,8 @@ struct sCacheInfo_352810 {
     char pad0[8];
     unsigned int count;     // 0x8
 };
-struct cWorldCache_352810 {
-    sCacheInfo_352810* info;            // 0x0
-    cWorldCacheTable_352810* global;    // 0x4
-    cWorldCacheTable_352810** tables;   // 0x8
-};
 struct cWorld_352810 {
-    cWorldCache_352810* cache;          // 0x0
+    cWorldCache* cache;          // 0x0
 };
 
 static inline bool tableValid_352810(cWorldCacheTable_352810* t, int type, unsigned int uid)
@@ -1344,15 +1330,15 @@ static inline bool tableValid_352810(cWorldCacheTable_352810* t, int type, unsig
     return (t->type[type].entries[uid] & 0xFFFFFF00) != 0;
 }
 
-static inline bool cacheValid_352810(cWorldCache_352810* c, int type, tResourceID_352810 rid)
+static inline bool cacheValid_352810(cWorldCache* c, int type, tResourceID_352810 rid)
 {
     unsigned int uiSection = rid.sid;
     unsigned int uiUID = rid.uid;
     if (uiSection == 0xFF) {
-        return tableValid_352810(c->global, type, uiUID);
+        return tableValid_352810(((cWorldCacheTable_352810*)c->m_pSharedCacheTable), type, uiUID);
     }
-    if (uiSection < c->info->count && c->tables[uiSection] != 0) {
-        return tableValid_352810(c->tables[uiSection], type, uiUID);
+    if (uiSection < ((sCacheInfo_352810*)c->mp_DataHeader)->count && ((cWorldCacheTable_352810**)c->m_pSectionCacheTable)[uiSection] != 0) {
+        return tableValid_352810(((cWorldCacheTable_352810**)c->m_pSectionCacheTable)[uiSection], type, uiUID);
     }
     return false;
 }
@@ -1442,7 +1428,7 @@ extern "C" void cMeshAnimNode_render(cMeshAnimNode* self)
         short* pMaterialRecord = ((short**)((char*)self->Instance->m_MaterialBlock + 4))[i];
         tResourceID_352810 resourceId;
         initRID_352810(&resourceId, 0xFF, *pMaterialRecord);
-        if (!cacheValid_352810((cWorldCache_352810*)cWorld_m_pTheWorld->m_pWorldCache, 9, resourceId)) {
+        if (!cacheValid_352810(cWorld_m_pTheWorld->m_pWorldCache, 9, resourceId)) {
             return;
         }
     }

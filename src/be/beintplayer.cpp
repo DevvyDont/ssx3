@@ -2123,11 +2123,7 @@ extern "C" int cBEStatInterface_getStatFromProfile(cBEStatInterface* self, int p
 //100%
 INCLUDE_ASM("be/beintplayer", func_001482D0);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sCharStat_001482D0 {
-    signed char v[15];
-};
-extern sCharStat_001482D0 D_005308D8_001482D0[] __asm__("cBELibrary_statDefault");
+extern tBEStatDefault D_005308D8_001482D0[] __asm__("cBELibrary_statDefault");
 
 /**
  * Copies record @p character of cBELibrary_statDefault, the 15-byte per-character default-stat table, into @p dst.
@@ -2140,7 +2136,7 @@ extern sCharStat_001482D0 D_005308D8_001482D0[] __asm__("cBELibrary_statDefault"
  * @param character  the character
  * @return @p dst
  */
-extern "C" sCharStat_001482D0* func_001482D0(sCharStat_001482D0* dst, int iface, int character)
+extern "C" tBEStatDefault* func_001482D0(tBEStatDefault* dst, int iface, int character)
 {
     *dst = D_005308D8_001482D0[character];
     return dst;
@@ -2152,10 +2148,7 @@ INCLUDE_ASM("be/beintplayer", func_00148328);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getCharacterID(int);
 
-struct sCharStat_00148328 {
-    signed char v[15];
-};
-extern sCharStat_00148328 D_005308D8_00148328[] __asm__("cBELibrary_statDefault");
+extern tBEStatDefault D_005308D8_00148328[] __asm__("cBELibrary_statDefault");
 
 /**
  * Copies a rider's record of cBELibrary_statDefault, the 15-byte per-character default-stat table, into @p dst.
@@ -2168,7 +2161,7 @@ extern sCharStat_00148328 D_005308D8_00148328[] __asm__("cBELibrary_statDefault"
  * @param rider  the rider
  * @return @p dst
  */
-extern "C" sCharStat_00148328* func_00148328(sCharStat_00148328* dst, int iface, int rider)
+extern "C" tBEStatDefault* func_00148328(tBEStatDefault* dst, int iface, int rider)
 {
     int charId = cBELibrary_getCharacterID(rider);
     *dst = D_005308D8_00148328[charId];

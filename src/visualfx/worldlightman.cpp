@@ -159,9 +159,6 @@ struct sQuad_5400 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct sMat_5400 {
-    sQuad_5400 row[4];
-};
 
 struct sAABox_5400 {
     sVec_5400 min;
@@ -223,7 +220,7 @@ struct sVEr_5400 {
 extern "C" sNode_5400* cWorldLightMan_evictHashTableEntry_n(sMan_5400* self, int priority) __asm__("cWorldLightMan_evictHashTableEntry");
 extern "C" sBox_5400* cWorldLightMan_evictOverlapNode(sMan_5400* self, int priority);
 extern "C" void cWorldLightMan_IntersectLights1(void* self, void* a1, void* a2, void* a3, int count);
-extern "C" void cInstanceNode_buildMeshMat(void* obj, int a1, sMat_5400* out);
+extern "C" void cInstanceNode_buildMeshMat(void* obj, int a1, t4Matrix* out);
 extern "C" void cOverlapList_gettyped(void* cell, sAABox_5400* box);
 extern "C" cIrradiance* cRenderStateMan_getCustomIrradiance(void);
 extern "C" int cIrradianceDataBase_GetIDByName(void*, void*);
@@ -278,9 +275,9 @@ static inline float Length_5400(const sVec_5400& v)
     return r;
 }
 
-static inline sVec_5400 Trans_5400(const sMat_5400& m)
+static inline sVec_5400 Trans_5400(const t4Matrix& m)
 {
-    return *(const sVec_5400*)&m.row[3];
+    return *(const sVec_5400*)&((sQuad_5400*)&m.row[0])[3];
 }
 
 static inline sVec_5400 ObjPos_5400(char* vobj)
@@ -369,7 +366,7 @@ extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(sMan_5400* self, tInsta
         reload = 1;
         moved = 1;
         if ((int)obj->m_pActiveNode != 0) {
-            sMat_5400 meshMat;
+            t4Matrix meshMat;
             cInstanceNode_buildMeshMat(obj, 0, &meshMat);
             pos = Trans_5400(meshMat);
         } else {
@@ -377,7 +374,7 @@ extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(sMan_5400* self, tInsta
         }
     } else if (force) {
         if ((int)obj->m_pActiveNode != 0) {
-            sMat_5400 meshMat;
+            t4Matrix meshMat;
             cInstanceNode_buildMeshMat(obj, 0, &meshMat);
             pos = Trans_5400(meshMat);
         } else {
@@ -1003,13 +1000,6 @@ struct sRider6518 {
     sVec6518 dir;               // 0x3A0
 };
 
-struct sWLCode6518 {
-    sRider6518* rider;          // 0x0
-    signed char state;          // 0x4
-    unsigned char step;         // 0x5
-    signed char count;          // 0x6
-    unsigned char flags;        // 0x7
-};
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float len6518(const sVec6518& v)
@@ -1100,11 +1090,6 @@ static inline sVec6518 add6518(const sVec6518& a, const sVec6518& b)
     return r;
 }
 
-struct sVEsub6518 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 /**
  * Runs the rider's cheat for a tick: reads the entered inputs and, while the cheat is on, applies its rider
@@ -1116,10 +1101,10 @@ struct sVEsub6518 {
  * true,
  * so the velocity reset after it is dead code.
  */
-extern "C" void cCheatFX_update(sWLCode6518* self)
+extern "C" void cCheatFX_update(cCheatFX* self)
 {
-    char* sub = (char*)self->rider + 0x6C0;
-    sVEsub6518* vt = *(sVEsub6518**)sub;
+    char* sub = (char*)((sRider6518*)self->mRider) + 0x6C0;
+    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
     if (vt[9].fn(vthis(sub, vt[9])) != 0) {
         return;
     }
@@ -1130,29 +1115,29 @@ extern "C" void cCheatFX_update(sWLCode6518* self)
     cCheatFX_updateState((sWLCode6910*)self);
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
-        self->state = 0;
+        (*(signed char*)&self->m_cheatState) = 0;
     }
-    if (self->state == 1) {
-        self->rider->mode = 11;
-        self->rider->f308 = (self->flags >> 1) & 1;
-        self->rider->f2F8 = 1.0f;
-        self->rider->f2F0 = 60.0f;
-        self->rider->f2EC = 60.0f;
-        self->rider->f2E8 = 60.0f;
-        self->rider->f304 = 0;
+    if ((*(signed char*)&self->m_cheatState) == 1) {
+        ((sRider6518*)self->mRider)->mode = 11;
+        ((sRider6518*)self->mRider)->f308 = ((*(unsigned char*)&self->m_cheatState.m_misc) >> 1) & 1;
+        ((sRider6518*)self->mRider)->f2F8 = 1.0f;
+        ((sRider6518*)self->mRider)->f2F0 = 60.0f;
+        ((sRider6518*)self->mRider)->f2EC = 60.0f;
+        ((sRider6518*)self->mRider)->f2E8 = 60.0f;
+        ((sRider6518*)self->mRider)->f304 = 0;
     } else {
-        self->rider->f308 = 1;
-        if (self->rider->mode != 11) {
+        ((sRider6518*)self->mRider)->f308 = 1;
+        if (((sRider6518*)self->mRider)->mode != 11) {
             return;
         }
-        self->rider->mode = 0;
-        self->rider->f2F8 = 0.0f;
-        self->rider->f2F0 = 0.0f;
-        self->rider->f2EC = 0.0f;
-        self->rider->f2E8 = 0.0f;
-        self->rider->f304 = 1;
+        ((sRider6518*)self->mRider)->mode = 0;
+        ((sRider6518*)self->mRider)->f2F8 = 0.0f;
+        ((sRider6518*)self->mRider)->f2F0 = 0.0f;
+        ((sRider6518*)self->mRider)->f2EC = 0.0f;
+        ((sRider6518*)self->mRider)->f2E8 = 0.0f;
+        ((sRider6518*)self->mRider)->f304 = 1;
     }
-    sRider6518* curRider = self->rider;
+    sRider6518* curRider = ((sRider6518*)self->mRider);
     if (curRider->mode != 11) {
         return;
     }
@@ -1162,10 +1147,10 @@ extern "C" void cCheatFX_update(sWLCode6518* self)
     float len = len6518(curRider->vel);
     if (len < curRider->maxSpeed && len != 0.0f) {
         curRider->vel = norm6518(curRider->vel);
-        scaleEq6518(self->rider->vel, self->rider->maxSpeed * self->rider->blend + len * (1.0f - self->rider->blend));
-        len = len6518(self->rider->vel);
+        scaleEq6518(((sRider6518*)self->mRider)->vel, ((sRider6518*)self->mRider)->maxSpeed * ((sRider6518*)self->mRider)->blend + len * (1.0f - ((sRider6518*)self->mRider)->blend));
+        len = len6518(((sRider6518*)self->mRider)->vel);
     }
-    curRider = self->rider;
+    curRider = ((sRider6518*)self->mRider);
     if (curRider->steer == 0.0f) {
         return;
     }
@@ -1175,9 +1160,9 @@ extern "C" void cCheatFX_update(sWLCode6518* self)
     if (!(9.999999747378752e-05f < len6518(curRider->vel))) {
         return;
     }
-    curRider->vel = add6518(scale6518(norm6518(curRider->dir), len * self->rider->steer),
-                     scale6518(norm6518(self->rider->vel), len * (1.0f - self->rider->steer)));
-    curRider = self->rider;
+    curRider->vel = add6518(scale6518(norm6518(curRider->dir), len * ((sRider6518*)self->mRider)->steer),
+                     scale6518(norm6518(((sRider6518*)self->mRider)->vel), len * (1.0f - ((sRider6518*)self->mRider)->steer)));
+    curRider = ((sRider6518*)self->mRider);
     if (curRider->vel.x < 0.0f && curRider->vel.x >= 0.0f) {
         curRider->vel = t4vect_Origin;
     }

@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "bx/math3d.h"
 #include "ai/rider.h"
 #include "object/instancenode.h"
 #include "world/instancerecord.h"
@@ -1359,9 +1360,6 @@ static inline sVec3_8A00 Normalize_8A00(const sVec3_8A00& a)
     return a;
 }
 
-struct sMat_8A00 {
-    sRow_8A00 v[4];
-} __attribute__((aligned(16)));
 
 
 
@@ -1385,12 +1383,12 @@ struct sVE_8A00 {
 
 extern int cAvalanche_m_RenderLines;
 extern sOut_8A00 D_004D5B70_8A00[] __asm__("vertlist");
-extern sMat_8A00 D_004FF1A0_8A00 __asm__("t4mat_Identity");
+extern t4Matrix D_004FF1A0_8A00 __asm__("t4mat_Identity");
 extern sRow_8A00 D_004FF130_8A00 __asm__("t4vect_Origin");
 extern "C" void fSinCos(float* s, float* c, float angle);
 
 // PORT: PS2-only VU0 inline asm (matrix copy).
-static inline void CopyMat_8A00(sMat_8A00* d, const sMat_8A00* s)
+static inline void CopyMat_8A00(t4Matrix* d, const t4Matrix* s)
 {
     __asm__ __volatile__(
         "lqc2      $vf1, 0x0(%1)\n"
@@ -1420,7 +1418,7 @@ static inline void AddTo_8A00(sRow_8A00& a, const sRow_8A00& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply: a = a * b).
-static inline void MulMat_8A00(sMat_8A00* a, const sMat_8A00* b)
+static inline void MulMat_8A00(t4Matrix* a, const t4Matrix* b)
 {
     __asm__ __volatile__(
         "lqc2      $vf4, 0x0(%0)\n"
@@ -1458,20 +1456,20 @@ static inline void MulMat_8A00(sMat_8A00* a, const sMat_8A00* b)
 
 // matrix *= matrix through VU0. Declared to return the matrix by value but there is no return statement (g++ 2.95
 // accepts it); the ignored by-value result is the unwritten 64-byte call temp in the retail frame.
-static inline sMat_8A00 operator*=(sMat_8A00& a, const sMat_8A00& b)
+static inline t4Matrix operator*=(t4Matrix& a, const t4Matrix& b)
 {
     MulMat_8A00(&a, &b);
 }
 
 // Rotate m about axis by angle, keeping its translation.
-static inline void Rotate_8A00(sMat_8A00& m, const sRow_8A00& axis, float angle)
+static inline void Rotate_8A00(t4Matrix& m, const sRow_8A00& axis, float angle)
 {
-    sMat_8A00 old;
+    t4Matrix old;
     float s;
     float c;
     CopyMat_8A00(&old, &m);
-    sRow_8A00 trans = old.v[3];
-    old.v[3] = D_004FF130_8A00;
+    sRow_8A00 trans = ((sRow_8A00*)&old.row[0])[3];
+    ((sRow_8A00*)&old.row[0])[3] = D_004FF130_8A00;
     fSinCos(&s, &c, angle);
     float t = 1.0f - c;
     float x = axis.x;
@@ -1483,23 +1481,23 @@ static inline void Rotate_8A00(sMat_8A00& m, const sRow_8A00& axis, float angle)
     float sx = s * x;
     float sy = s * y;
     float sz = s * z;
-    m.v[3].x = 0.0f;
-    m.v[3].y = 0.0f;
-    m.v[3].z = 0.0f;
-    m.v[3].w = 1.0f;
-    m.v[3] = trans;
-    m.v[0].w = 0.0f;
-    m.v[1].w = 0.0f;
-    m.v[2].w = 0.0f;
-    m.v[0].x = tx * x + c;
-    m.v[1].x = tx * y + sz;
-    m.v[2].x = tx * z - sy;
-    m.v[0].y = ty * x - sz;
-    m.v[1].y = ty * y + c;
-    m.v[2].y = ty * z + sx;
-    m.v[0].z = tz * x + sy;
-    m.v[1].z = tz * y - sx;
-    m.v[2].z = tz * z + c;
+    ((sRow_8A00*)&m.row[0])[3].x = 0.0f;
+    ((sRow_8A00*)&m.row[0])[3].y = 0.0f;
+    ((sRow_8A00*)&m.row[0])[3].z = 0.0f;
+    ((sRow_8A00*)&m.row[0])[3].w = 1.0f;
+    ((sRow_8A00*)&m.row[0])[3] = trans;
+    ((sRow_8A00*)&m.row[0])[0].w = 0.0f;
+    ((sRow_8A00*)&m.row[0])[1].w = 0.0f;
+    ((sRow_8A00*)&m.row[0])[2].w = 0.0f;
+    ((sRow_8A00*)&m.row[0])[0].x = tx * x + c;
+    ((sRow_8A00*)&m.row[0])[1].x = tx * y + sz;
+    ((sRow_8A00*)&m.row[0])[2].x = tx * z - sy;
+    ((sRow_8A00*)&m.row[0])[0].y = ty * x - sz;
+    ((sRow_8A00*)&m.row[0])[1].y = ty * y + c;
+    ((sRow_8A00*)&m.row[0])[2].y = ty * z + sx;
+    ((sRow_8A00*)&m.row[0])[0].z = tz * x + sy;
+    ((sRow_8A00*)&m.row[0])[1].z = tz * y - sx;
+    ((sRow_8A00*)&m.row[0])[2].z = tz * z + c;
     m *= old;
 }
 
@@ -1529,7 +1527,7 @@ extern "C" void tActiveAvalancheNode_renderLines(tActiveAvalancheNode* nodep)
     if ((node->m_node) == 0) {
         return;
     }
-    sMat_8A00 matrix;
+    t4Matrix matrix;
     CopyMat_8A00(&matrix, &D_004FF1A0_8A00);
     PushRS_8A00(GrMan);
     SetBits_8A00(((int)(GrMan->m_pCurrentDrawState)->unk_00[1]), 0x7C, 2, 1);
@@ -1545,7 +1543,7 @@ extern "C" void tActiveAvalancheNode_renderLines(tActiveAvalancheNode* nodep)
             scratchVec.z = n.z;
             scratchVec.w = 0.0f;
             Rotate_8A00(matrix, scratchVec, ((node->m_node)->m_history)[i].m_rs * 0.008213315159082413f);
-            matrix.v[3] = pos;
+            ((sRow_8A00*)&matrix.row[0])[3] = pos;
             D_004D5B70_8A00[i].r = ((node->m_node)->m_history)[i].m_r;
             D_004D5B70_8A00[i].g = ((node->m_node)->m_history)[i].m_g;
             D_004D5B70_8A00[i].b = ((node->m_node)->m_history)[i].m_b;
@@ -2187,16 +2185,7 @@ struct sAvAct_D97A8 {
 };
 extern sAvAct_D97A8 D_act_D97A8[] __asm__("cAvalanche_m_activeNodes");
 
-struct sAvSlot_D97A8 {
-    sAvGroup_D97A8* group;      // 0x0
-    sAvAct_D97A8* active;       // 0x4
-    void* arr;                  // 0x8
-    int fC;
-    int f10;                    // 0x10
-    int f14;                    // 0x14
-    float time;                 // 0x18
-};
-extern sAvSlot_D97A8 D_slots_D97A8[] __asm__("cAvalanche_m_activeAvalanches");
+extern tActiveAvalanche D_slots_D97A8[] __asm__("cAvalanche_m_activeAvalanches");
 
 /**
  * Starts the avalanche with the given id in a free active slot.
@@ -2216,18 +2205,18 @@ extern "C" int cAvalanche_triggerAvalanche(int id)
         if (avalanche->id != id)
             continue;
         for (int j = 0; j < 16; j++) {
-            if (D_slots_D97A8[j].group == avalanche)
+            if (((sAvGroup_D97A8*)D_slots_D97A8[j].m_avalanche) == avalanche)
                 return (int)0x80000000;
         }
-        sAvSlot_D97A8* slot = D_slots_D97A8;
+        tActiveAvalanche* slot = D_slots_D97A8;
         for (int i = 0; i < 16; i++, slot++) {
-            if (slot->group != 0)
+            if (((sAvGroup_D97A8*)slot->m_avalanche) != 0)
                 continue;
-            slot->group = avalanche;
-            slot->active = 0;
-            slot->time = 0.0f;
-            slot->f10 = 0;
-            slot->f14 = 0;
+            (*(sAvGroup_D97A8**)&slot->m_avalanche) = avalanche;
+            (*(sAvAct_D97A8**)&slot->m_activeNodeList) = 0;
+            slot->m_currTime = 0.0f;
+            slot->m_nextCollision = 0;
+            slot->m_nextGroundCollision = 0;
             sAvAct_D97A8* act = D_act_D97A8;
             int k = 0;
             for (sAvNode_D97A8* n = avalanche->nodes; n != 0; n = n->next) {
@@ -2235,8 +2224,8 @@ extern "C" int cAvalanche_triggerAvalanche(int id)
                     if (act->data == 0) {
                         act->data = n;
                         n->act = act;
-                        act->next = slot->active;
-                        slot->active = act;
+                        act->next = ((sAvAct_D97A8*)slot->m_activeNodeList);
+                        (*(sAvAct_D97A8**)&slot->m_activeNodeList) = act;
                         act->f0 = 0;
                         act->pos = n->pos;
                         CopyMatrix_D97A8(&act->m20, &D_004FF1A0_D97A8);
@@ -2261,8 +2250,8 @@ extern "C" int cAvalanche_triggerAvalanche(int id)
                     }
                 }
                 if (k == 64) {
-                    slot->group = 0;
-                    for (act = slot->active; act != 0; act = act->next) {
+                    (*(sAvGroup_D97A8**)&slot->m_avalanche) = 0;
+                    for (act = ((sAvAct_D97A8*)slot->m_activeNodeList); act != 0; act = act->next) {
                         if (act->data)
                             act->data->act = 0;
                         act->data = 0;

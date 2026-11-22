@@ -560,17 +560,13 @@ struct sM_9828 {
     float m[4][4];
 } __attribute__((aligned(16)));
 
-struct sPair_9828 {
-    t4Vector a;
-    t4Vector b;
-};
 
 extern sM_9828 D_004FF1A0_9828 __asm__("t4mat_Identity");
 extern t4Vector D_004FF140_9828 __asm__("t4vect_XAxis");
 extern t4Vector D_004FF150_9828 __asm__("t4vect_YAxis");
 extern t4Vector D_004FF160_9828 __asm__("t4vect_ZAxis");
 extern "C" void fSinCos(float* s, float* c, float angle);
-extern "C" sPair_9828 tPose_tPose_9828(sM_9828* m) __asm__("tPose_tPose");
+extern "C" tPose tPose_tPose_9828(sM_9828* m) __asm__("tPose_tPose");
 extern "C" t4Vector cCameraJitterer_getPositionalJitter_9828(char* p, float a, float b) __asm__("cCameraJitterer_getPositionalJitter");
 extern "C" float cCameraJitterer_getRollJitter(void* self);
 
@@ -721,7 +717,7 @@ static inline void RotAxis_9828(sM_9828* m, const t4Vector& axis, float angle)
  * @param algorithm  the cScriptManualAlgorithm (this)
  * @return the pose: position and rotation quaternion (On Tour tPose), returned by value
  */
-extern "C" sPair_9828 cScriptManualAlgorithm_getPose(cScriptManualAlgorithm* algorithm)
+extern "C" tPose cScriptManualAlgorithm_getPose(cScriptManualAlgorithm* algorithm)
 {
     sM_9828 mat;
     vu0CopyMtx_9828(&mat, &D_004FF1A0_9828);
@@ -915,17 +911,13 @@ struct sM_9F88 {
     float m[4][4];
 } __attribute__((aligned(16)));
 
-struct sPair_9F88 {
-    t4Vector a;
-    t4Vector b;
-};
 
 extern sM_9F88 D_004FF1A0_9F88 __asm__("t4mat_Identity");
 extern t4Vector D_004FF140_9F88 __asm__("t4vect_XAxis");
 extern t4Vector D_004FF150_9F88 __asm__("t4vect_YAxis");
 extern t4Vector D_004FF160_9F88 __asm__("t4vect_ZAxis");
 extern "C" void fSinCos(float* s, float* c, float angle);
-extern "C" sPair_9F88 tPose_tPose_9F88(sM_9F88* m) __asm__("tPose_tPose");
+extern "C" tPose tPose_tPose_9F88(sM_9F88* m) __asm__("tPose_tPose");
 extern "C" t4Vector cCameraJitterer_getPositionalJitter_9F88(char* p, float a, float b) __asm__("cCameraJitterer_getPositionalJitter");
 extern "C" float cCameraJitterer_getRollJitter(void* self);
 
@@ -1076,7 +1068,7 @@ static inline void RotAxis_9F88(sM_9F88* m, const t4Vector& axis, float angle)
  * @param algorithm  the cScriptPointAlgorithm (this)
  * @return the pose: position and rotation quaternion (On Tour tPose), returned by value
  */
-extern "C" sPair_9F88 cScriptPointAlgorithm_getPose(cScriptPointAlgorithm* algorithm)
+extern "C" tPose cScriptPointAlgorithm_getPose(cScriptPointAlgorithm* algorithm)
 {
     sM_9F88 mat;
     vu0CopyMtx_9F88(&mat, &D_004FF1A0_9F88);
@@ -1338,17 +1330,13 @@ struct sM_A868 {
     float m[4][4];
 } __attribute__((aligned(16)));
 
-struct sPair_A868 {
-    t4Vector a;
-    t4Vector b;
-};
 
 extern sM_A868 D_004FF1A0_A868 __asm__("t4mat_Identity");
 extern t4Vector D_004FF140_A868 __asm__("t4vect_XAxis");
 extern t4Vector D_004FF150_A868 __asm__("t4vect_YAxis");
 extern t4Vector D_004FF160_A868 __asm__("t4vect_ZAxis");
 extern "C" void fSinCos(float* s, float* c, float angle);
-extern "C" sPair_A868 tPose_tPose_A868(sM_A868* m) __asm__("tPose_tPose");
+extern "C" tPose tPose_tPose_A868(sM_A868* m) __asm__("tPose_tPose");
 extern "C" t4Vector cCameraJitterer_getPositionalJitter_A868(char* p, float a, float b) __asm__("cCameraJitterer_getPositionalJitter");
 extern "C" float cCameraJitterer_getRollJitter(void* self);
 
@@ -1499,7 +1487,7 @@ static inline void RotAxis_A868(sM_A868* m, const t4Vector& axis, float angle)
  * @param algorithm  the cScriptTargetAlgorithm (this)
  * @return the pose: position and rotation quaternion (On Tour tPose), returned by value
  */
-extern "C" sPair_A868 cScriptTargetAlgorithm_getPose(cScriptTargetAlgorithm* algorithm)
+extern "C" tPose cScriptTargetAlgorithm_getPose(cScriptTargetAlgorithm* algorithm)
 {
     sM_A868 mat;
     vu0CopyMtx_A868(&mat, &D_004FF1A0_A868);

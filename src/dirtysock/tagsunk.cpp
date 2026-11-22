@@ -6178,9 +6178,6 @@ extern char str_Duplicate[];
 extern char str_Timeout[];
 extern char D_00480E20[];
 
-struct sBXStr_00260E50 {
-    char* p;
-};
 
 /**
  * Builds the display text for a lobby error code given as a four-character tag.
@@ -6205,8 +6202,8 @@ extern "C" void* func_00260E50(void* ret, void* self, unsigned int tag)
         break;
     default:
     {
-        sBXStr_00260E50 tagText;
-        tagText.p = (char*)cBXString_EmptyString;
+        cBXString tagText;
+        tagText.Str = (char*)cBXString_EmptyString;
         cBXString_printf(&tagText, D_00480E20, tag, tag >> 24, (tag >> 16) & 0xFF, (tag >> 8) & 0xFF, tag & 0xFF);
         cBXString_cBXString1(ret, &tagText);
         cBXString__cBXString(&tagText, 2);
@@ -8181,9 +8178,6 @@ extern "C" void* func_0041610C(void* dst, const void* src, unsigned int n);
 extern "C" void* strcasecmp(void*, void*);
 extern "C" void func_00268F90(void* self, void* a1, int a2);
 
-struct sBXStr_262EC0 {
-    char* p;
-};
 
 struct sObjVec_262EC0 {
     void* alloc;
@@ -8215,23 +8209,23 @@ extern "C" void func_00262EC0(BuddyMan* self, int idx)
     char* name = (char*)func_002625C8(self, idx);
     if (name == 0)
         return;
-    sBXStr_262EC0 nameStr;
+    cBXString nameStr;
     cBXString_cBXString2(&nameStr, name);
     func_003F11F8(self->mpBuddyApi, name, (void*)func_00268F90, ((char*)self), 600);
-    if (func_00262A38(self, nameStr.p))
+    if (func_00262A38(self, nameStr.Str))
     {
         for (int i = func_00262938(self) - 1; i >= 0; i--)
         {
             void** message = (void**)func_00263630(self, i);
-            if (message != 0 && strcasecmp(*message, nameStr.p) == 0)
+            if (message != 0 && strcasecmp(*message, nameStr.Str) == 0)
                 func_002635A8(self, i);
         }
     }
-    if (func_00263128(self, nameStr.p))
+    if (func_00263128(self, nameStr.Str))
     {
         // PORT: the name is passed through an int parameter.
-        func_0025FC28_v(LobbyMan_mLobbyMan, (int)nameStr.p);
-        int k = func_00262E20(self, nameStr.p);
+        func_0025FC28_v(LobbyMan_mLobbyMan, (int)nameStr.Str);
+        int k = func_00262E20(self, nameStr.Str);
         sObjVec_262EC0* challengers = (sObjVec_262EC0*)(&self->mChallengersAlloc);
         // PORT: pointer arithmetic through int.
         void** pos = (void**)(k * 4 + (int)(void**)self->mChallengersStart);
@@ -9771,16 +9765,12 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00264B20);
 #ifdef SKIP_ASM
 extern "C" int cCommSystem_writePacket(void* mgr, int idx, void* buf, int len);
 
-struct sDsPacket_00264B20 {
-    unsigned short kind;   // 0x0
-    unsigned short size;   // 0x2 (including this 4-byte header)
-};
 
 struct sDsSendQueue_00264B20 {
     char pad_0x00[0x90];
     int tail;                          // 0x90
     int head;                          // 0x94
-    sDsPacket_00264B20* slots[32];     // 0x98
+    tGameCommPacket* slots[32];     // 0x98
     char pad_0x118[0x120 - 0x118];
     int chan;                          // 0x120
 };
@@ -9799,13 +9789,13 @@ extern "C" void func_00264B20(cSetupMan* setupMan)
     sDsSendQueue_00264B20* self = (sDsSendQueue_00264B20*)setupMan;
     while (self->head != self->tail)
     {
-        sDsPacket_00264B20* pkt;
+        tGameCommPacket* pkt;
         int head = self->head;
         if (head < self->tail)
             pkt = self->slots[head % 32];
         else
             pkt = 0;
-        if (cCommSystem_writePacket(cCommSystem_mCommSystem, self->chan, pkt, pkt->size) == 0)
+        if (cCommSystem_writePacket(cCommSystem_mCommSystem, self->chan, pkt, pkt->mSize) == 0)
             return;
         self->head++;
         func_00264990((cSetupMan*)self, (int*)pkt);
@@ -12383,15 +12373,9 @@ struct sSlotFlags_668E8 {
     unsigned b4 : 1;
 };
 
-struct sSlot_668E8 {
-    int count;                  // 0x0
-    int start;                  // 0x4
-    unsigned char buf[64][2];   // 0x8
-    sSlotFlags_668E8 flags;     // 0x88
-};
 
 struct sSlots_668E8 {
-    sSlot_668E8 slot[8];        // 0x0
+    tUsbKeyboardSlot slot[8];        // 0x0
     int enabled;                // 0x460
 };
 
@@ -12422,36 +12406,36 @@ extern "C" void func_002668E8(sSlots_668E8* self)
         return;
     func_003F63F0();
     for (int i = 0; i < 8; i++) {
-        sSlot_668E8* keyboardSlot = &self->slot[i];
-        keyboardSlot->flags.active = func_003F6520(i) == 1;
-        if (!keyboardSlot->flags.active)
-            *(int*)&keyboardSlot->flags = 0;
+        tUsbKeyboardSlot* keyboardSlot = &self->slot[i];
+        (*(sSlotFlags_668E8*)&keyboardSlot->mFlags).active = func_003F6520(i) == 1;
+        if (!(*(sSlotFlags_668E8*)&keyboardSlot->mFlags).active)
+            *(int*)&(*(sSlotFlags_668E8*)&keyboardSlot->mFlags) = 0;
     }
     int n = func_003F6348();
     for (int j = 0; j < n; j++) {
-        if (self->slot[j].flags.active) {
+        if ((*(sSlotFlags_668E8*)&self->slot[j].mFlags).active) {
             sConn_668E8* readBlock = (sConn_668E8*)func_003F64E0(j);
             if (readBlock != 0) {
                 for (int k = 0; k < readBlock->count; k++) {
                     unsigned char* translated = func_003F68F0(readBlock, 0, k);
                     if (translated[0] != 0 || translated[1] != 0) {
-                        int w = self->slot[j].count;
+                        int w = self->slot[j].mCount;
                         int idx = ringIdx_668E8(w);
-                        int ringStart = self->slot[j].start;
+                        int ringStart = self->slot[j].mRead;
                         if (w - ringStart >= 0x40)
-                            self->slot[j].start = ringStart + 1;
-                        self->slot[j].buf[idx][0] = translated[0];
-                        self->slot[j].buf[idx][1] = translated[1];
-                        self->slot[j].count++;
+                            self->slot[j].mRead = ringStart + 1;
+                        self->slot[j].mKeys[idx][0] = translated[0];
+                        self->slot[j].mKeys[idx][1] = translated[1];
+                        self->slot[j].mCount++;
                     }
                 }
                 if (func_003F6838(readBlock, 0, 0, 0x10))
-                    self->slot[j].flags.b4 = 1;
+                    (*(sSlotFlags_668E8*)&self->slot[j].mFlags).b4 = 1;
                 else
-                    self->slot[j].flags.b4 = 0;
-                self->slot[j].flags.b2 = readBlock->on;
-                self->slot[j].flags.b3 = readBlock->on;
-                self->slot[j].flags.b1 = readBlock->on;
+                    (*(sSlotFlags_668E8*)&self->slot[j].mFlags).b4 = 0;
+                (*(sSlotFlags_668E8*)&self->slot[j].mFlags).b2 = readBlock->on;
+                (*(sSlotFlags_668E8*)&self->slot[j].mFlags).b3 = readBlock->on;
+                (*(sSlotFlags_668E8*)&self->slot[j].mFlags).b1 = readBlock->on;
             }
         }
     }

@@ -4485,11 +4485,6 @@ extern "C" void cRiderAnimBase_changeOrientationOffset(void* self, void* xf);
 extern int D_004A4C00;
 extern "C" void cRider_updateOrientationImplicit(void*);
 
-struct sXf_12E010
-{
-    sQuat_12BE20 pos;
-    sQuat_12BE20 rot;
-};
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
 static inline sQuat_12BE20 QuatMul_12E010(const sQuat_12BE20& a, const sQuat_12BE20& b)
@@ -4585,32 +4580,32 @@ static inline sQuat_12BE20 Scale_12E010(const sQuat_12BE20& v, float s)
     return r;
 }
 
-static inline sQuat_12BE20 Conj_12E010(const sXf_12E010& p)
+static inline sQuat_12BE20 Conj_12E010(const tPose& p)
 {
     sQuat_12BE20 r;
-    r.w = p.rot.w;
-    r.x = p.rot.x;
-    r.y = p.rot.y;
-    r.z = p.rot.z;
+    r.w = (*(sQuat_12BE20*)&p.Q).w;
+    r.x = (*(sQuat_12BE20*)&p.Q).x;
+    r.y = (*(sQuat_12BE20*)&p.Q).y;
+    r.z = (*(sQuat_12BE20*)&p.Q).z;
     r.x = -r.x;
     r.y = -r.y;
     r.z = -r.z;
     return r;
 }
 
-static inline sXf_12E010 Invert_12E010(const sXf_12E010& a)
+static inline tPose Invert_12E010(const tPose& a)
 {
-    sXf_12E010 r;
-    r.rot = Conj_12E010(a);
-    r.pos = Add_12E010(Scale_12E010(Rot_12E010(r.rot, Sub_12E010(a.pos, D_004FF130_12BE20)), -1.0f), D_004FF130_12BE20);
+    tPose r;
+    (*(sQuat_12BE20*)&r.Q) = Conj_12E010(a);
+    (*(sQuat_12BE20*)&r.P) = Add_12E010(Scale_12E010(Rot_12E010((*(sQuat_12BE20*)&r.Q), Sub_12E010((*(sQuat_12BE20*)&a.P), D_004FF130_12BE20)), -1.0f), D_004FF130_12BE20);
     return r;
 }
 
-static inline sXf_12E010 Combine_12E010(const sXf_12E010& a, const sXf_12E010& b)
+static inline tPose Combine_12E010(const tPose& a, const tPose& b)
 {
-    sXf_12E010 r;
-    r.rot = QuatMul_12E010(a.rot, b.rot);
-    r.pos = Add_12E010(Rot_12E010(a.rot, Sub_12E010(b.pos, D_004FF130_12BE20)), a.pos);
+    tPose r;
+    (*(sQuat_12BE20*)&r.Q) = QuatMul_12E010((*(sQuat_12BE20*)&a.Q), (*(sQuat_12BE20*)&b.Q));
+    (*(sQuat_12BE20*)&r.P) = Add_12E010(Rot_12E010((*(sQuat_12BE20*)&a.Q), Sub_12E010((*(sQuat_12BE20*)&b.P), D_004FF130_12BE20)), (*(sQuat_12BE20*)&a.P));
     return r;
 }
 
@@ -4631,21 +4626,21 @@ extern "C" void cWipeoutControl_playWipeoutStuckAnim(cWipeoutControl* self)
         anim = 410;
     char buf[80];
     cRiderAnimBase_getAIAnimFrame(buf, rider->mRiderAnim, anim, D_004A4C08_E010.a, 0.0f);
-    sXf_12E010 newPose;
+    tPose newPose;
     func_0030ECD8(&newPose, self->mRider->mAnimModel, buf, 0);
     cRider* rd = self->mRider;
     cAnimModel* trk = rd->mAnimModel;
     sQuat_12BE20* n = (sQuat_12BE20*)((rd->mBoneHips << 4) + (int)trk->localPos);
-    sXf_12E010 node;
-    node.pos = sQuat_12BE20(n->x * trk->unk_140.x, n->y * trk->unk_140.y,
+    tPose node;
+    (*(sQuat_12BE20*)&node.P) = sQuat_12BE20(n->x * trk->unk_140.x, n->y * trk->unk_140.y,
                             n->z * trk->unk_140.z, n->w * trk->unk_140.w);
-    node.rot = *(sQuat_12BE20*)((char*)rd->mAnimModel->localRot + (rd->mBoneHips << 4));
-    sXf_12E010 y = Combine_12E010(node, Invert_12E010(newPose));
-    sXf_12E010* rx = (sXf_12E010*)(&self->mRider->mPosition);
+    (*(sQuat_12BE20*)&node.Q) = *(sQuat_12BE20*)((char*)rd->mAnimModel->localRot + (rd->mBoneHips << 4));
+    tPose y = Combine_12E010(node, Invert_12E010(newPose));
+    tPose* rx = (tPose*)(&self->mRider->mPosition);
     *rx = Combine_12E010(*rx, y);
     cRider_updateOrientationImplicit(self->mRider);
     cRider* rd3 = self->mRider;
-    sXf_12E010 w = Invert_12E010(y);
+    tPose w = Invert_12E010(y);
     cRiderAnimBase_changeOrientationOffset(rd3->mRiderAnim, &w);
     cRiderAnimBase_play(self->mRider->mRiderAnim, anim, 0, -1.0f);
 }
@@ -7786,12 +7781,9 @@ extern "C" void cHandplantControl_gainFocus(cHandplantControl* self)
 //100%
 INCLUDE_ASM("ai/ai", cHandplantControl_init);
 #ifdef SKIP_ASM
-struct sV4_29B0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (vector length via vsqrt).
-static inline float Length_29B0(const sV4_29B0& v)
+static inline float Length_29B0(const t4Vector& v)
 {
     float r;
     int t;
@@ -7836,7 +7828,7 @@ extern "C" void cHandplantControl_init(cHandplantControl* self, tIntersectInfo* 
     int on = 1;
     self->EnterSec = enterSec;
     self->HandplantType = flag ? on : 0;
-    self->IsMissedHandplant = Length_29B0((*(sV4_29B0*)&(self->mRider)->mVelocity)) > 2222.2222f;
+    self->IsMissedHandplant = Length_29B0((*(&(self->mRider)->mVelocity))) > 2222.2222f;
     bool surfaceFlag = false;
     sFlags_29B0* hitObj = ((sFlags_29B0*)intersectInfo->Spline);
     if (hitObj != 0)

@@ -541,7 +541,7 @@ extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* vself, void* vseq, int ani
     nd->blendIn = ((float*)cAIAnimEventMap_getAnimPlayAttr(anim))[6];
     nd->m84 = priority;
     // PORT: (int) address arithmetic for the clip header (index-first addu).
-    int n = *(unsigned short*)((char*)(((unsigned int)animid >> 8) * 0x14 + *(int*)((char*)cAnimDataBase_TheAnimDataBase->DataSources[(unsigned int)animid & 0xFF] + 0x8)) + 0x12);
+    int n = *(unsigned short*)((char*)(((unsigned int)animid >> 8) * 0x14 + (int)cAnimDataBase_TheAnimDataBase->DataSources[(unsigned int)animid & 0xFF]->Anims) + 0x12);
     for (int i = 0; i < n; i++)
     {
         cAdfDataSource* bank = (cAdfDataSource*)((char*)cAnimDataBase_TheAnimDataBase->DataSources[(unsigned int)animid & 0xFF]);
@@ -789,10 +789,6 @@ extern "C" float cRiderAnimBase_getAIAnimDuration(cRiderAnimBase* self, int aid)
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getAIAnimEventTime);
 #ifdef SKIP_ASM
 
-struct sAnimKey00312820 {
-    unsigned short value;
-    unsigned short pad;
-};
 
 /**
  * Returns the time in seconds of tag number @p frame in the clip that AI anim @p anim plays, or -1 if it has fewer.
@@ -818,8 +814,8 @@ extern "C" float cRiderAnimBase_getAIAnimEventTime(cRiderAnimBase* self, int ani
     float frameTime;
     if (frame < animRec->mNumTags)
     {
-        sAnimKey00312820* keys = (sAnimKey00312820*)clip->Tags;
-        frameTime = keys[animRec->mTagIndex + frame].value * 0.03333333507180214f;
+        tAdfTag* keys = clip->Tags;
+        frameTime = keys[animRec->mTagIndex + frame].mTagFrame * 0.03333333507180214f;
     }
     else
     {

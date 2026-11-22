@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ealib/snd.h"
 #include "vtable.h"
 #include "sound/ssxaudio.h"
 #include "sound/songinstance.h"
@@ -5417,12 +5418,6 @@ INCLUDE_ASM("sound/bankmonitor", func_002B2600);
 // The unit declares func_002B25C8(void*, int); its second arg is really an out pointer.
 void func_002B25C8_out(void* self, void* out) __asm__("func_002B25C8");
 
-struct func_002B2600_sInfo {
-    int type;
-    int value;
-    int c;
-    int d;
-};
 
 /**
  * Returns the song's play position in ms: the current request's position when its status type is 2, else 0.
@@ -5433,10 +5428,10 @@ struct func_002B2600_sInfo {
  */
 extern "C" float func_002B2600(cSongInstance* self)
 {
-    func_002B2600_sInfo info;
+    SNDREQUESTSTATUS info;
     func_002B25C8_out(self, &info);
-    if (info.type == 2) {
-        return (float)info.value;
+    if (info.state == 2) {
+        return (float)info.currenttime;
     }
     return 0.0f;
 }
@@ -5445,12 +5440,6 @@ extern "C" float func_002B2600(cSongInstance* self)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B2640);
 #ifdef SKIP_ASM
-struct func_002B2640_sInfo {
-    int type;
-    int value;
-    int c;
-    int d;
-};
 
 extern "C" float func_002B26B8(cSongInstance* self);
 
@@ -5463,10 +5452,10 @@ float func_002B2640_impl(void* self) __asm__("func_002B2640");
  */
 float func_002B2640_impl(void* self)
 {
-    func_002B2640_sInfo info;
+    SNDREQUESTSTATUS info;
     func_002B25C8_out(self, &info);
-    if (info.type == 2) {
-        return (float)info.c;
+    if (info.state == 2) {
+        return (float)info.timetoend;
     }
     return func_002B26B8((cSongInstance*)self);
 }

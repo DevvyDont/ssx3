@@ -1,4 +1,6 @@
 #include "common.h"
+#include "bx/math3d.h"
+#include "world/worldrecords.h"
 #include "world/instancerecord.h"
 #include "vtable.h"
 #include "object/deadnode.h"
@@ -499,21 +501,12 @@ struct sInMat44_0288 {
     float m[4][4];
 } __attribute__((aligned(16)));
 
-struct sInVec4_0288 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-struct sInBone_0288 {
-    int parent;                 // 0x0
-    int f4;
-    int f8;
-    sInMat44_0288* mat;         // 0xC
-};
 
 struct sInSkel_0288 {
     int f0;
     int count;                  // 0x4
-    sInBone_0288* bones;        // 0x8
+    tMeshHeirarchyRecord* bones;        // 0x8
 };
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, d = b * a).
@@ -570,24 +563,24 @@ static inline void vu0CopyMat_0288(sInMat44_0288* d, const sInMat44_0288* s)
         : "memory");
 }
 
-static inline void buildBone_0288(sInMat44_0288* d, const sInMat44_0288* parent, const sInMat44_0288* m, const sInVec4_0288& scale)
+static inline void buildBone_0288(sInMat44_0288* d, const sInMat44_0288* parent, const sInMat44_0288* m, const t4Vector& scale)
 {
     sInMat44_0288 local;
-    sInVec4_0288 v;
-    sInVec4_0288 tr;
+    t4Vector v;
+    t4Vector tr;
     sInMat44_0288 t;
-    v = *(sInVec4_0288*)m->m[0];
-    *(sInVec4_0288*)local.m[0] = v;
-    v = *(sInVec4_0288*)m->m[1];
-    *(sInVec4_0288*)local.m[1] = v;
-    v = *(sInVec4_0288*)m->m[2];
-    *(sInVec4_0288*)local.m[2] = v;
-    tr = *(sInVec4_0288*)m->m[3];
+    v = *(t4Vector*)m->m[0];
+    *(t4Vector*)local.m[0] = v;
+    v = *(t4Vector*)m->m[1];
+    *(t4Vector*)local.m[1] = v;
+    v = *(t4Vector*)m->m[2];
+    *(t4Vector*)local.m[2] = v;
+    tr = *(t4Vector*)m->m[3];
     v.x = tr.x * scale.x;
     v.y = tr.y * scale.y;
     v.z = tr.z * scale.z;
     v.w = tr.w * scale.w;
-    *(sInVec4_0288*)local.m[3] = v;
+    *(t4Vector*)local.m[3] = v;
     vu0MulMat_0288(&t, parent, &local);
     vu0CopyMat_0288(d, &t);
 }
@@ -608,19 +601,19 @@ extern "C" void cInstanceNode_makeAnimMats(cInstanceNode* self, sInMat44_0288* p
     tInstanceRecord* instance = self->Instance;
     sInSkel_0288* sk = (sInSkel_0288*)instance->m_Model;
     float uniformScale = instance->m_fScale;
-    sInBone_0288* bone = sk->bones;
-    sInVec4_0288 scale;
+    tMeshHeirarchyRecord* bone = sk->bones;
+    t4Vector scale;
     scale.x = uniformScale;
     scale.y = uniformScale;
     scale.z = uniformScale;
     scale.w = 1.0f;
     for (int i = 0; i < sk->count; i++, bone++) {
         sInMat44_0288 boneMat;
-        if (bone->parent != -1) {
-            buildBone_0288(&boneMat, &out[bone->parent], bone->mat, scale);
+        if (bone->m_iParentID != -1) {
+            buildBone_0288(&boneMat, &out[bone->m_iParentID], ((sInMat44_0288*)bone->m_pMeshMatrix), scale);
             vu0CopyMat_0288(&out[i], &boneMat);
         } else {
-            buildBone_0288(&boneMat, parent, bone->mat, scale);
+            buildBone_0288(&boneMat, parent, ((sInMat44_0288*)bone->m_pMeshMatrix), scale);
             vu0CopyMat_0288(&out[i], &boneMat);
         }
     }

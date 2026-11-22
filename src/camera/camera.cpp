@@ -193,11 +193,6 @@ struct sApp_15DE60
     int viewports[4];          // 0xB0
 };
 
-struct sRiderRef_15DE60
-{
-    void** vt;
-    int rider;
-};
 
 /**
  * Sets up the camera for one view: limits, controllers, rider target and stream focus.
@@ -226,9 +221,9 @@ extern "C" void cCamera_init(sCamera_15DE60* self, int riderIndex, float view, f
     self->manual->viewport = ((sApp_15DE60*)SSXApp)->viewports[0];
     cManualCameraController_setCurrentAlgorithmType(self->manual, 81);
     self->chase->viewport = ((sApp_15DE60*)SSXApp)->viewports[riderIndex];
-    sRiderRef_15DE60* riderRef = (sRiderRef_15DE60*)operator new(8, str_RiderCameraTarget, 0, 0);
-    riderRef->vt = cRiderCameraTarget_vtbl;
-    riderRef->rider = *(int*)(((sApp_15DE60*)SSXApp)->world->riders + (riderIndex << 2) + 0x28);
+    cRiderCameraTarget* riderRef = (cRiderCameraTarget*)operator new(8, str_RiderCameraTarget, 0, 0);
+    riderRef->mVtbl = cRiderCameraTarget_vtbl;
+    (*(int*)&riderRef->Rider) = *(int*)(((sApp_15DE60*)SSXApp)->world->riders + (riderIndex << 2) + 0x28);
     cChaseCameraController_setTarget((cChaseCameraController*)self->chase, (int*)riderRef);
     cChaseCameraController_switchCamera_Volume((cChaseCameraController*)((sCam162060*)self->chase), 76, 0, 1.0f);
     cChaseAlgorithm_setTarget((char*)self + 0xC0, (int)riderRef);
@@ -333,9 +328,6 @@ struct sXf {
 
 extern t4Matrix D_004C53A0_E050 __asm__("CamAxisFlip");
 
-struct sObj_E050 {
-    char pad[0x390];
-} __attribute__((aligned(16)));
 
 extern "C" void* cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm(void* self);
 extern "C" void cLookAtChaseAlgorithm_calcPitchHeading(void* self, int a1);
@@ -481,12 +473,12 @@ extern "C" void cSimpleCamera_setupCamWithPosAndTarget_impl(char* self, char* a1
 extern "C" void cSimpleCamera_setupCamWithPosAndTarget_impl(char* vself, char* camPos, char* camTargetPos)
 {
     cSimpleCamera* self = (cSimpleCamera*)vself;
-    sObj_E050 lookAtAlgo;
+    cLookAtChaseAlgorithm lookAtAlgo;
     cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm(&lookAtAlgo);
-    *(cQuad128*)((char*)&lookAtAlgo + 0x20) = *(cQuad128*)camTargetPos;
-    *(cQuad128*)((char*)&lookAtAlgo + 0x40) = *(cQuad128*)camPos;
-    *(float*)((char*)&lookAtAlgo + 0x4C) = 1.0f;
-    *(float*)((char*)&lookAtAlgo + 0x2C) = 1.0f;
+    *(cQuad128*)&(&lookAtAlgo)->CamTargetPos = *(cQuad128*)camTargetPos;
+    *(cQuad128*)&(&lookAtAlgo)->Position = *(cQuad128*)camPos;
+    (&lookAtAlgo)->Position.w = 1.0f;
+    (&lookAtAlgo)->CamTargetPos.w = 1.0f;
     cLookAtChaseAlgorithm_calcPitchHeading(&lookAtAlgo, 1);
     cLookAtChaseAlgorithm_calcPose(&lookAtAlgo);
     sXf out = cLookAtChaseAlgorithm_getPose_E050(&lookAtAlgo);
@@ -799,28 +791,6 @@ struct cCameraController_E668 {
     cCameraAlgoList_E668* list;
 };
 
-struct cCamera_E668 {
-    float fov;                          // 0x0
-    float nearZ;                        // 0x4
-    float farZ;                         // 0x8
-    float maxFov;                       // 0xC
-    float minClip;                      // 0x10
-    float maxClip;                      // 0x14
-    int id;                             // 0x18
-    int pad1C;
-    tPose_E668 pose;                    // 0x20
-    t4Matrix viewMat;                   // 0x40
-    t4Vector viewDir;                   // 0x80
-    int pad90[4];
-    cCameraController_E668* controller; // 0xA0
-    int padA4;
-    cCameraController_E668* prevController; // 0xA8
-    int padAC[5];
-    char lookAtChase[0x20];             // 0xC0 cLookAtChaseAlgorithm
-    t4Vector blendTarget;               // 0xE0
-    char padF0[0x10];
-    t4Vector blendPos;                  // 0x100
-};
 
 // PORT: PS2-only VU0 inline asm (scalar * vector).
 static inline t4Vector operator*(float s, const t4Vector& v)
@@ -981,7 +951,7 @@ static inline float bracket_E668(float lo, float v, float hi)
     return (lo <= v) ? (v <? hi) : lo; // PORT: g++ <? operator
 }
 
-extern "C" void cCamera_updateCamMat_E668(cCamera_E668* self) __asm__("cCamera_updateCamMat");
+extern "C" void cCamera_updateCamMat_E668(cCamera* self) __asm__("cCamera_updateCamMat");
 /**
  * Computes the camera's pose, matrix, direction and lens from its current Controller's algorithm list.
  *
@@ -1000,89 +970,85 @@ extern "C" void cCamera_updateCamMat_E668(cCamera_E668* self) __asm__("cCamera_u
  * as the floor and stored in cRenderStateMan_m_farPlane (the render far plane), and View is clamped to [0, MaxView] and Near and Far to
  * [MinNear, MaxFar].
  */
-extern "C" void cCamera_updateCamMat_E668(cCamera_E668* self)
+extern "C" void cCamera_updateCamMat_E668(cCamera* self)
 {
     cCameraAlgoListNode_E668* algoNode;
     tPose_E668 tempPose;
     float totalWeight = 0.0f;
 
-    self->pose.setIdentity();
-    algoNode = self->controller->list->head;
+    (*(tPose_E668*)&self->Pose).setIdentity();
+    algoNode = ((cCameraController_E668*)self->Controller)->list->head;
     cCameraAlgorithm_E668* algo = algoNode->algo;
-    bool listLengthOne = self->controller->list->length == 1;
+    bool listLengthOne = ((cCameraController_E668*)self->Controller)->list->length == 1;
     if (listLengthOne || algo->type == 74) {
-        self->pose = algo->getPose();
-        if (self->controller == self->prevController) {
-            self->blendPos = self->pose.pos;
-            self->blendTarget = algo->getTarget();
+        (*(tPose_E668*)&self->Pose) = algo->getPose();
+        if (((cCameraController_E668*)self->Controller) == ((cCameraController_E668*)self->ChaseController)) {
+            self->ResultAlgorithm.Position = (*(tPose_E668*)&self->Pose).pos;
+            self->ResultAlgorithm.CamTargetPos = algo->getTarget();
         }
     } else {
-        self->blendTarget = D_004FF120_E668;
-        self->blendPos = D_004FF120_E668;
-        for (algoNode = self->controller->list->head; algoNode; algoNode = algoNode->next) {
+        self->ResultAlgorithm.CamTargetPos = D_004FF120_E668;
+        self->ResultAlgorithm.Position = D_004FF120_E668;
+        for (algoNode = ((cCameraController_E668*)self->Controller)->list->head; algoNode; algoNode = algoNode->next) {
             if (algoNode->weight > 0.0001f) {
                 totalWeight += algoNode->weight;
                 float weightFactor = algoNode->weight / totalWeight;
                 tempPose = algoNode->algo->getPose();
                 t4Vector tempPosePos = tempPose.pos;
-                t4Vector tempAlgoPos = self->blendPos;
-                self->blendPos = weightFactor * tempPosePos + (1.0f - weightFactor) * tempAlgoPos;
+                t4Vector tempAlgoPos = self->ResultAlgorithm.Position;
+                self->ResultAlgorithm.Position = weightFactor * tempPosePos + (1.0f - weightFactor) * tempAlgoPos;
                 t4Vector algoTargetPos = algoNode->algo->getTarget();
-                t4Vector tempAlgoTargetPos = self->blendTarget;
-                self->blendTarget = weightFactor * algoTargetPos + (1.0f - weightFactor) * tempAlgoTargetPos;
+                t4Vector tempAlgoTargetPos = self->ResultAlgorithm.CamTargetPos;
+                self->ResultAlgorithm.CamTargetPos = weightFactor * algoTargetPos + (1.0f - weightFactor) * tempAlgoTargetPos;
             }
         }
-        self->blendPos.w = 1.0f;
-        self->blendTarget.w = 1.0f;
-        cLookAtChaseAlgorithm_calcPitchHeading(self->lookAtChase, 1);
-        cLookAtChaseAlgorithm_calcPose(self->lookAtChase);
-        self->pose = cLookAtChaseAlgorithm_getPose_E668(self->lookAtChase);
+        self->ResultAlgorithm.Position.w = 1.0f;
+        self->ResultAlgorithm.CamTargetPos.w = 1.0f;
+        cLookAtChaseAlgorithm_calcPitchHeading(((char*)&self->ResultAlgorithm), 1);
+        cLookAtChaseAlgorithm_calcPose(((char*)&self->ResultAlgorithm));
+        (*(tPose_E668*)&self->Pose) = cLookAtChaseAlgorithm_getPose_E668(((char*)&self->ResultAlgorithm));
     }
-    if (self->controller == self->prevController) {
+    if (((cCameraController_E668*)self->Controller) == ((cCameraController_E668*)self->ChaseController)) {
         cCamera_avoidGround(self);
         cCamera_applyCameraShake_E668(self);
-        cLookAtChaseAlgorithm_calcPitchHeading(self->lookAtChase, 0);
-        cLookAtChaseAlgorithm_calcPose(self->lookAtChase);
-        self->pose = cLookAtChaseAlgorithm_getPose_E668(self->lookAtChase);
+        cLookAtChaseAlgorithm_calcPitchHeading(((char*)&self->ResultAlgorithm), 0);
+        cLookAtChaseAlgorithm_calcPose(((char*)&self->ResultAlgorithm));
+        (*(tPose_E668*)&self->Pose) = cLookAtChaseAlgorithm_getPose_E668(((char*)&self->ResultAlgorithm));
     }
-    CopyMtx_E668(&self->viewMat, &D_004C53A0_E668);
+    CopyMtx_E668(&self->CamMat, &D_004C53A0_E668);
     t4Matrix quaternionMat;
-    QuatToMtx_E668(&self->pose.orient, &quaternionMat);
-    MulEqMtx_E668(&self->viewMat, &quaternionMat);
-    Translate_E668(&self->viewMat, t4Vec_E668(-t3Vector_E668(self->pose.pos.x, self->pose.pos.y, self->pose.pos.z), 1.0f));
-    self->viewDir = t4Vec_E668(self->viewMat.row[0].z, self->viewMat.row[1].z, self->viewMat.row[2].z, 0.0f);
-    self->fov = 0.0f;
-    self->nearZ = 0.0f;
-    self->farZ = 0.0f;
+    QuatToMtx_E668(&(*(tPose_E668*)&self->Pose).orient, &quaternionMat);
+    MulEqMtx_E668(&self->CamMat, &quaternionMat);
+    Translate_E668(&self->CamMat, t4Vec_E668(-t3Vector_E668((*(tPose_E668*)&self->Pose).pos.x, (*(tPose_E668*)&self->Pose).pos.y, (*(tPose_E668*)&self->Pose).pos.z), 1.0f));
+    self->Direction = t4Vec_E668(self->CamMat.row[0].z, self->CamMat.row[1].z, self->CamMat.row[2].z, 0.0f);
+    self->View = 0.0f;
+    self->Near = 0.0f;
+    self->Far = 0.0f;
     totalWeight = 0.0f;
-    for (algoNode = self->controller->list->head; algoNode; algoNode = algoNode->next) {
+    for (algoNode = ((cCameraController_E668*)self->Controller)->list->head; algoNode; algoNode = algoNode->next) {
         if (algoNode->lensWeight != 0.0f) {
             totalWeight += algoNode->lensWeight;
             float weightFactor = algoNode->lensWeight / totalWeight;
-            self->fov = weightFactor * algoNode->algo->fov + (1.0f - weightFactor) * self->fov;
-            self->nearZ = weightFactor * algoNode->algo->nearZ + (1.0f - weightFactor) * self->nearZ;
-            self->farZ = weightFactor * algoNode->algo->farZ + (1.0f - weightFactor) * self->farZ;
+            self->View = weightFactor * algoNode->algo->fov + (1.0f - weightFactor) * self->View;
+            self->Near = weightFactor * algoNode->algo->nearZ + (1.0f - weightFactor) * self->Near;
+            self->Far = weightFactor * algoNode->algo->farZ + (1.0f - weightFactor) * self->Far;
         }
     }
-    cRenderStateMan_update(self->id + 6, self->pose.pos.x, self->pose.pos.y, -99999.0f);
-    self->farZ = bracket_E668(self->minClip, self->farZ, cRenderStateMan_DrawDistance(self->id + 6));
-    cRenderStateMan_m_farPlane = self->farZ;
-    self->fov = bracket_E668(0.0f, self->fov, self->maxFov);
-    self->nearZ = bracket_E668(self->minClip, self->nearZ, self->maxClip);
-    self->farZ = bracket_E668(self->minClip, self->farZ, self->maxClip);
+    cRenderStateMan_update(self->ViewIndex + 6, (*(tPose_E668*)&self->Pose).pos.x, (*(tPose_E668*)&self->Pose).pos.y, -99999.0f);
+    self->Far = bracket_E668(self->MinNear, self->Far, cRenderStateMan_DrawDistance(self->ViewIndex + 6));
+    cRenderStateMan_m_farPlane = self->Far;
+    self->View = bracket_E668(0.0f, self->View, self->MaxView);
+    self->Near = bracket_E668(self->MinNear, self->Near, self->MaxFar);
+    self->Far = bracket_E668(self->MinNear, self->Far, self->MaxFar);
 }
 #endif
 
 //100%
 INCLUDE_ASM("camera/camera", cCamera_updateStreamFocus);
 #ifdef SKIP_ASM
-struct sVec4_15EC98
-{
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-extern "C" void cWorldView_setFocus(void* self, unsigned int i, sVec4_15EC98* v, float f);
-extern "C" int cWorldView_getFocus(void* self, int i, sVec4_15EC98* outPos, float* outT);
+extern "C" void cWorldView_setFocus(void* self, unsigned int i, t4Vector* v, float f);
+extern "C" int cWorldView_getFocus(void* self, int i, t4Vector* outPos, float* outT);
 
 struct sCacheSlot_15EC98
 {
@@ -1125,9 +1091,9 @@ extern "C" void cCamera_updateStreamFocus(cCamera* self)
     float far = clamp_15EC98(viewDist * 0.6666666865348816f, 15000.0f, 30000.0f);
     cWorld* sys = cWorld_m_pTheWorld;
     ((sWorld_15EC98*)(char*)sys->m_pWorldCache)->slots[self->StreamFocusID].active = 1;
-    cWorldView_setFocus(&sys->m_pWorldCache->m_WorldView, self->StreamFocusID, (sVec4_15EC98*)(&self->Pose), streamRadius);
+    cWorldView_setFocus(&sys->m_pWorldCache->m_WorldView, self->StreamFocusID, (t4Vector*)(&self->Pose), streamRadius);
     self->bStreamIsReady = 0;
-    sVec4_15EC98 pos;
+    t4Vector pos;
     float focusDist;
     if (cWorldView_getFocus(&sys->m_pWorldCache->m_WorldView, self->StreamFocusID, &pos, &focusDist)) {
         if (far <= focusDist || viewDist <= focusDist)
@@ -2050,16 +2016,12 @@ struct sM_15F9B8 {
     float m[4][4];
 } __attribute__((aligned(16)));
 
-struct sPair_15F9B8 {
-    t4Vector a;
-    t4Vector b;
-};
 
 extern sM_15F9B8 D_004FF1A0_15F9B8 __asm__("t4mat_Identity");
 extern t4Vector D_004FF150_15F9B8 __asm__("t4vect_YAxis");
 extern t4Vector D_004FF160_v15F9B8 __asm__("t4vect_ZAxis");
 extern "C" void fSinCos(float* sout, float* cout, float x);
-extern "C" sPair_15F9B8 tPose_tPose_15F9B8(sM_15F9B8* m) __asm__("tPose_tPose");
+extern "C" tPose tPose_tPose_15F9B8(sM_15F9B8* m) __asm__("tPose_tPose");
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
 static inline void vu0CopyMtx_15F9B8(sM_15F9B8* dst, const sM_15F9B8* src)
@@ -2188,7 +2150,7 @@ static inline void RotAxis_15F9B8(sM_15F9B8* m, const t4Vector& axis, float angl
  * @param src  the algorithm (a cBasicCameraAlgorithm)
  * @return the pose (position and rotation quaternion), through the hidden return slot
  */
-extern "C" sPair_15F9B8 cBasicCameraAlgorithm_getPose(cBasicCameraAlgorithm* src)
+extern "C" tPose cBasicCameraAlgorithm_getPose(cBasicCameraAlgorithm* src)
 {
     sM_15F9B8 poseMatrix;
     vu0CopyMtx_15F9B8(&poseMatrix, &D_004FF1A0_15F9B8);
@@ -2730,11 +2692,6 @@ extern float D_004A1280;
 extern float D_004A1284;
 
 
-struct sCamInfo_1604B8 {
-    char pad0[0x10];
-    t4Vector pos;    // 0x10
-    char pad20[0x50];
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline t4Vector Scale_1604B8(const t4Vector& v, float s)
@@ -2843,7 +2800,7 @@ struct sGame_1604B8 {
  */
 extern "C" void cManualChaseAlgorithm_update(cManualChaseAlgorithm* self)
 {
-    sCamInfo_1604B8 info;
+    cChaseSetup info;
     cLookAtChaseAlgorithm_setupChaseData(((char*)self), (cChaseSetup*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
@@ -2871,7 +2828,7 @@ extern "C" void cManualChaseAlgorithm_update(cManualChaseAlgorithm* self)
     cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading(((char*)self), &dir);
     DivEq_1604B8(dir, Length_1604B8(dir));
     D_004A1284 = Clamp_1604B8(D_004A1284 * (az * k + 1.0f), 150.0f, 850.0f);
-    *(&self->CamTargetPos) = info.pos;
+    *(&self->CamTargetPos) = info.TPos;
     *(&self->Position) = Sub_1604B8(*(&self->CamTargetPos), Scale_1604B8(dir, D_004A1284));
 }
 #endif
@@ -3815,25 +3772,8 @@ INCLUDE_ASM("camera/camera", cIdleChaseAlgorithm_update);
 
 extern t4Vector D_004FF160_1728 __asm__("t4vect_ZAxis");
 
-// The per-frame camera input record (0x70 bytes) that cLookAtChaseAlgorithm_setupChaseData_1728 fills from the target for the chase algorithms.
-struct sCamInfo_1728 {
-    t4Vector f00;               // 0x00
-    t4Vector pos;               // 0x10
-    t4Vector dir;               // 0x20
-    t4Vector out;               // 0x30: written back by cLookAtChaseAlgorithm_setupCamDirection
-    int mode;                   // 0x40
-    float speed;                // 0x44: length of dir
-    char pad48[4];
-    float f4C;                  // 0x4C
-    float f50;                  // 0x50
-    float f54;                  // 0x54
-    int f58;                    // 0x58
-    int f5C;                    // 0x5C
-    int f60;                    // 0x60
-    int f64;                    // 0x64
-};
 
-extern "C" void cLookAtChaseAlgorithm_setupChaseData_1728(void* self, sCamInfo_1728* out, float a, float b, float c, float d,
+extern "C" void cLookAtChaseAlgorithm_setupChaseData_1728(void* self, cChaseSetup* out, float a, float b, float c, float d,
                               float e, float f, float g, float h) __asm__("cLookAtChaseAlgorithm_setupChaseData");
 
 // PORT: PS2-only VU0 inline asm (vector add).
@@ -3922,7 +3862,7 @@ extern "C" void cIdleChaseAlgorithm_update_v(char* self) __asm__("cIdleChaseAlgo
 extern "C" void cIdleChaseAlgorithm_update_v(char* vself)
 {
     cIdleChaseAlgorithm* self = (cIdleChaseAlgorithm*)vself;
-    sCamInfo_1728 info;
+    cChaseSetup info;
     cLookAtChaseAlgorithm_setupChaseData_1728(self, &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
@@ -5278,16 +5218,8 @@ static inline float ClampLo_162B90(float v, float lo)
 }
 
 
-struct sCam_162B90 {
-    char pad00[0x20];
-    t4Vector v20;
-    char pad30[0x1B4];
-    float f1E4;
-    char pad1E8[0x20];
-    float f208;
-};
 
-extern "C" void cLookAtChaseAlgorithm_updateCamTargetLate_i(float a, float b, float c, float d, float e, sCam_162B90* self, sCamInfo* src) __asm__("cLookAtChaseAlgorithm_updateCamTargetLate");
+extern "C" void cLookAtChaseAlgorithm_updateCamTargetLate_i(float a, float b, float c, float d, float e, cLookAtChaseAlgorithm* self, sCamInfo* src) __asm__("cLookAtChaseAlgorithm_updateCamTargetLate");
 /**
  * Raises the look-at point above the rider by a smoothed height that grows with speed, boost and crouch.
  *
@@ -5306,17 +5238,17 @@ extern "C" void cLookAtChaseAlgorithm_updateCamTargetLate_i(float a, float b, fl
  * @param smoothness  smoothing: the weight kept from last frame (On Tour smoothness)
  * @param src  the frame's chase setup (On Tour const cChaseSetup&)
  */
-extern "C" void cLookAtChaseAlgorithm_updateCamTargetLate_i(float defaultHeight, float height, float crouchCorrection, float boostHeight, float smoothness, sCam_162B90* self, sCamInfo* src)
+extern "C" void cLookAtChaseAlgorithm_updateCamTargetLate_i(float defaultHeight, float height, float crouchCorrection, float boostHeight, float smoothness, cLookAtChaseAlgorithm* self, sCamInfo* src)
 {
     float dist = src->speed - 1388.888916015625f;
     float speedFrac = Min_162B90(ClampLo_162B90(dist, 0.0f) * 0.0005142856971360743f, 1.0f);
     float x;
-    if (src->f60 != 0) x = self->f208;
+    if (src->f60 != 0) x = self->LastTargetCrouchFactor;
     else x = src->f54;
-    self->f208 = x;
-    float smoothedHeight = smoothness * self->f1E4 + (1.0f - smoothness) * (defaultHeight + speedFrac * height + src->f4C * boostHeight + crouchCorrection * x);
-    self->f1E4 = smoothedHeight;
-    AddTo_162B90(self->v20, Scale_162B90(D_004FF160_2B90, smoothedHeight));
+    self->LastTargetCrouchFactor = x;
+    float smoothedHeight = smoothness * self->LastHeight + (1.0f - smoothness) * (defaultHeight + speedFrac * height + src->f4C * boostHeight + crouchCorrection * x);
+    self->LastHeight = smoothedHeight;
+    AddTo_162B90(self->CamTargetPos, Scale_162B90(D_004FF160_2B90, smoothedHeight));
     cLookAtChaseAlgorithm_verify_v(self);
 }
 #endif
@@ -5324,23 +5256,13 @@ extern "C" void cLookAtChaseAlgorithm_updateCamTargetLate_i(float defaultHeight,
 //100%
 INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_setupCamDirection);
 #ifdef SKIP_ASM
-struct sV_162C78 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sVE_162C78 {
     short delta;
     short index;
-    sV_162C78 (*fn)(void*);
+    t4Vector (*fn)(void*);
 };
 
-struct sInfo_162C78 {
-    char pad0[0x20];
-    sV_162C78 dir;      // 0x20
-    sV_162C78 out;      // 0x30
-    char pad40[0x4];
-    float speed;        // 0x44
-};
 
 struct sHist_162C78 {
     float a[5];         // 0x00
@@ -5355,7 +5277,7 @@ struct sHist_162C78 {
 extern "C" float func_0031C128(float x);
 
 // PORT: PS2-only VU0 inline asm (dot product).
-static inline float Dot_162C78(const sV_162C78& a, const sV_162C78& b)
+static inline float Dot_162C78(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -5375,9 +5297,9 @@ static inline float Dot_162C78(const sV_162C78& a, const sV_162C78& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sV_162C78 Scale_162C78(const sV_162C78& v, float s)
+static inline t4Vector Scale_162C78(const t4Vector& v, float s)
 {
-    sV_162C78 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -5392,9 +5314,9 @@ static inline sV_162C78 Scale_162C78(const sV_162C78& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sV_162C78 Add_162C78(const sV_162C78& a, const sV_162C78& b)
+static inline t4Vector Add_162C78(const t4Vector& a, const t4Vector& b)
 {
-    sV_162C78 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -5407,7 +5329,7 @@ static inline sV_162C78 Add_162C78(const sV_162C78& a, const sV_162C78& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float Length_162C78(const sV_162C78& v)
+static inline float Length_162C78(const t4Vector& v)
 {
     float r;
     int t;
@@ -5428,7 +5350,7 @@ static inline float Length_162C78(const sV_162C78& v)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place vector divided by scalar).
-static inline void DivEq_162C78(sV_162C78& v, float s)
+static inline void DivEq_162C78(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -5444,7 +5366,7 @@ static inline void DivEq_162C78(sV_162C78& v, float s)
         : "memory");
 }
 
-static inline void Normalize_162C78(sV_162C78& v)
+static inline void Normalize_162C78(t4Vector& v)
 {
     DivEq_162C78(v, Length_162C78(v));
 }
@@ -5466,24 +5388,24 @@ static inline float Clamp_162C78(float v, float lo, float hi)
     return lo;
 }
 
-static inline sV_162C78 Get_162C78(char* self, int slot)
+static inline t4Vector Get_162C78(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
     sVE_162C78* e = &(*(sVE_162C78**)o)[slot];
     return e->fn(vthis(o, *e));
 }
 
-static inline sV_162C78 Lerp_162C78(const sV_162C78& p, const sV_162C78& q, float t)
+static inline t4Vector Lerp_162C78(const t4Vector& p, const t4Vector& q, float t)
 {
     return Add_162C78(Scale_162C78(p, t), Scale_162C78(q, 1.0f - t));
 }
 
-static inline void LerpTo_162C78(sV_162C78& out, const sV_162C78& p, const sV_162C78& q, float t)
+static inline void LerpTo_162C78(t4Vector& out, const t4Vector& p, const t4Vector& q, float t)
 {
     out = Add_162C78(Scale_162C78(p, t), Scale_162C78(q, 1.0f - t));
 }
 
-extern "C" void cLookAtChaseAlgorithm_setupCamDirection_impl(char* self, sInfo_162C78* info) __asm__("cLookAtChaseAlgorithm_setupCamDirection");
+extern "C" void cLookAtChaseAlgorithm_setupCamDirection_impl(char* self, cChaseSetup* info) __asm__("cLookAtChaseAlgorithm_setupCamDirection");
 /**
  * Computes the frame's chase direction (setup +0x30, On Tour CameraDirection) from the rider's velocity, damping
  * turns with TurningPIDFilter.
@@ -5497,24 +5419,24 @@ extern "C" void cLookAtChaseAlgorithm_setupCamDirection_impl(char* self, sInfo_1
  *
  * @param info  the frame's chase setup (On Tour cChaseSetup& chaseSetup_outArg)
  */
-extern "C" void cLookAtChaseAlgorithm_setupCamDirection_impl(char* self, sInfo_162C78* info)
+extern "C" void cLookAtChaseAlgorithm_setupCamDirection_impl(char* self, cChaseSetup* info)
 {
-    sV_162C78 n;
-    if (info->speed > 27.77777862548828f) {
-        sV_162C78 velocity = Get_162C78(self, 3);
+    t4Vector n;
+    if (info->TargetSpeed > 27.77777862548828f) {
+        t4Vector velocity = Get_162C78(self, 3);
         if (Dot_162C78(velocity, velocity) < 1.0f) {
-            velocity = *(sV_162C78*)(self + 0x1C0);
+            velocity = *(t4Vector*)(self + 0x1C0);
         }
-        *(sV_162C78*)(self + 0x1C0) = velocity;
+        *(t4Vector*)(self + 0x1C0) = velocity;
         float ang;
-        float len = Sqrt_162C78(Dot_162C78(*(sV_162C78*)(self + 0x80), *(sV_162C78*)(self + 0x80)) *
-                                Dot_162C78(*(sV_162C78*)(self + 0x1C0), *(sV_162C78*)(self + 0x1C0)));
+        float len = Sqrt_162C78(Dot_162C78(*(t4Vector*)(self + 0x80), *(t4Vector*)(self + 0x80)) *
+                                Dot_162C78(*(t4Vector*)(self + 0x1C0), *(t4Vector*)(self + 0x1C0)));
         if (len < 0.0010000000474974513f) {
             ang = 0.0f;
         } else {
             ang = 1.5707963705062866f -
                   func_0031C128(Clamp_162C78(
-                      Dot_162C78(*(sV_162C78*)(self + 0x80), *(sV_162C78*)(self + 0x1C0)) / len, -1.0f, 1.0f));
+                      Dot_162C78(*(t4Vector*)(self + 0x80), *(t4Vector*)(self + 0x1C0)) / len, -1.0f, 1.0f));
         }
         ang = (ang - 0.19082477688789368f) >? 0.0f;
         float prev = ((sHist_162C78*)(self + 0x340))->b[(((sHist_162C78*)(self + 0x340))->idx + 4) % 5];
@@ -5535,13 +5457,13 @@ extern "C" void cLookAtChaseAlgorithm_setupCamDirection_impl(char* self, sInfo_1
         if ((unsigned)(*(int*)(*(char**)(*(char**)(self + 0x30) + 4) + 0x434) - 11) < 3) {
             smoothing = Sqrt_162C78(Sqrt_162C78(smoothing));
         }
-        LerpTo_162C78(n, *(sV_162C78*)(self + 0x80), Scale_162C78(info->dir, 1.0f / info->speed), smoothing);
-        *(sV_162C78*)(self + 0x80) = n;
+        LerpTo_162C78(n, *(t4Vector*)(self + 0x80), Scale_162C78((*(&info->TVel)), 1.0f / info->TargetSpeed), smoothing);
+        *(t4Vector*)(self + 0x80) = n;
     } else {
-        n = *(sV_162C78*)(self + 0x80);
+        n = *(t4Vector*)(self + 0x80);
     }
     Normalize_162C78(n);
-    info->out = n;
+    (*(&info->CameraDirection)) = n;
 }
 #endif
 
@@ -5837,16 +5759,8 @@ static inline float Sqrt_163270(float x)
 }
 
 
-struct sCam_163270 {
-    char pad00[0x40];
-    t4Vector v40;
-    char pad50[0x184];
-    float f1D4;
-    char pad1D8[0x2C];
-    float f204;
-};
 
-extern "C" void cLookAtChaseAlgorithm_updateDropWithSpeed_i(float a, float b, float c, float d, float e, sCam_163270* self, sCamInfo* src) __asm__("cLookAtChaseAlgorithm_updateDropWithSpeed");
+extern "C" void cLookAtChaseAlgorithm_updateDropWithSpeed_i(float a, float b, float c, float d, float e, cLookAtChaseAlgorithm* self, sCamInfo* src) __asm__("cLookAtChaseAlgorithm_updateDropWithSpeed");
 /**
  * Lowers the eye by a smoothed drop that grows with speed, less a fixed rise, plus a crouch or boost term.
  *
@@ -5862,7 +5776,7 @@ extern "C" void cLookAtChaseAlgorithm_updateDropWithSpeed_i(float a, float b, fl
  * @param smoothness  smoothing: the weight kept from last frame (On Tour smoothness)
  * @param src  the frame's chase setup (On Tour const cChaseSetup&)
  */
-extern "C" void cLookAtChaseAlgorithm_updateDropWithSpeed_i(float dropPerSpeed, float defaultRise, float boostDrop, float crouchDrop, float smoothness, sCam_163270* self, sCamInfo* src)
+extern "C" void cLookAtChaseAlgorithm_updateDropWithSpeed_i(float dropPerSpeed, float defaultRise, float boostDrop, float crouchDrop, float smoothness, cLookAtChaseAlgorithm* self, sCamInfo* src)
 {
     float dist = ClampLo_162B90(src->speed - 1388.888916015625f, 0.0f);
     float speedFrac;
@@ -5876,12 +5790,12 @@ extern "C" void cLookAtChaseAlgorithm_updateDropWithSpeed_i(float dropPerSpeed, 
     }
     float tt = speedFrac * speedFrac;
     float x;
-    if (src->f60 != 0) x = self->f204;
+    if (src->f60 != 0) x = self->LastCrouchFactor;
     else x = tt * crouchDrop * (src->f54 - 0.5f);
-    self->f204 = x;
-    float smoothedDrop = smoothness * self->f1D4 + (1.0f - smoothness) * (dropPerSpeed * (dist * 9.999999747378752e-05f) * Sqrt_163270(dist) - defaultRise + (x >? (boostDrop * Sqrt_163270(src->f4C))));
-    self->f1D4 = smoothedDrop;
-    SubTo_163270(self->v40, Scale_162B90(D_004FF160_3270, smoothedDrop));
+    self->LastCrouchFactor = x;
+    float smoothedDrop = smoothness * self->LastDrop + (1.0f - smoothness) * (dropPerSpeed * (dist * 9.999999747378752e-05f) * Sqrt_163270(dist) - defaultRise + (x >? (boostDrop * Sqrt_163270(src->f4C))));
+    self->LastDrop = smoothedDrop;
+    SubTo_163270(self->Position, Scale_162B90(D_004FF160_3270, smoothedDrop));
     cLookAtChaseAlgorithm_verify_v(self);
 }
 #endif
@@ -8415,9 +8329,6 @@ extern "C" void cLookAtChaseAlgorithm_calcPitchHeading_def(char* self)
 //100%
 INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading);
 #ifdef SKIP_ASM
-struct sV_1668B8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sM_1668B8 {
     float m[4][4];
@@ -8425,9 +8336,9 @@ struct sM_1668B8 {
 
 
 extern sM_1668B8 D_004FF1A0_1668B8 __asm__("t4mat_Identity");
-extern sV_1668B8 D_004FF150_1668B8 __asm__("t4vect_YAxis");
-extern sV_1668B8 D_004FF160_v1668B8 __asm__("t4vect_ZAxis");
-extern sV_1668B8 D_004FF130_v1668B8 __asm__("t4vect_Origin");
+extern t4Vector D_004FF150_1668B8 __asm__("t4vect_YAxis");
+extern t4Vector D_004FF160_v1668B8 __asm__("t4vect_ZAxis");
+extern t4Vector D_004FF130_v1668B8 __asm__("t4vect_Origin");
 extern "C" void fSinCos(float* sout, float* cout, float x);
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
@@ -8528,7 +8439,7 @@ static inline void vu0MulEqMtx_1668B8(sM_1668B8* m, const sM_1668B8* b)
 }
 
 // PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
-static inline void vu0TransMtx_1668B8(sM_1668B8* m, const sV_1668B8& v)
+static inline void vu0TransMtx_1668B8(sM_1668B8* m, const t4Vector& v)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -8553,12 +8464,12 @@ static inline void SinCos_1668B8(float* s, float* c, float angle)
     fSinCos(s, c, angle);
 }
 
-static inline void Rotate_1668B8(sM_1668B8* m, const sV_1668B8& axis, float angle)
+static inline void Rotate_1668B8(sM_1668B8* m, const t4Vector& axis, float angle)
 {
     sM_1668B8 tm;
     vu0CopyMtx_1668B8(&tm, m);
-    sV_1668B8 pos = *(sV_1668B8*)tm.m[3];
-    *(sV_1668B8*)tm.m[3] = D_004FF130_v1668B8;
+    t4Vector pos = *(t4Vector*)tm.m[3];
+    *(t4Vector*)tm.m[3] = D_004FF130_v1668B8;
     float s;
     float c;
     SinCos_1668B8(&s, &c, angle);
@@ -8589,23 +8500,23 @@ static inline void Rotate_1668B8(sM_1668B8* m, const sV_1668B8& axis, float angl
     m->m[0][3] = 0.0f;
     m->m[1][3] = 0.0f;
     m->m[2][3] = 0.0f;
-    *(sV_1668B8*)m->m[3] = pos;
+    *(t4Vector*)m->m[3] = pos;
     vu0MulEqMtx_1668B8(m, &tm);
 }
 
-static inline sV_1668B8 Row_1668B8(const sM_1668B8& m, int i)
+static inline t4Vector Row_1668B8(const sM_1668B8& m, int i)
 {
-    return *(const sV_1668B8*)m.m[i];
+    return *(const t4Vector*)m.m[i];
 }
 
-extern "C" void cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading_impl(char* self, sV_1668B8* out) __asm__("cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading");
+extern "C" void cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading_impl(char* self, t4Vector* out) __asm__("cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading");
 /**
  * Computes the look vector for the current Pitch and Heading: row 0 of t4mat_Identity turned by -Pitch about the y
  * axis and then by -Heading about the z axis.
  *
  * @param out  receives the look vector
  */
-extern "C" void cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading_impl(char* self, sV_1668B8* out)
+extern "C" void cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading_impl(char* self, t4Vector* out)
 {
     sM_1668B8 lookMatrix;
     vu0CopyMtx_1668B8(&lookMatrix, &D_004FF1A0_1668B8);
@@ -8811,16 +8722,6 @@ extern "C" void* cLookAtChaseAlgorithm_snapCurrent(cLookAtChaseAlgorithm* self)
 //100%
 INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_calcPose);
 #ifdef SKIP_ASM
-struct sV_166F90 {
-    float x, y, z, w;
-    sV_166F90() {}
-    sV_166F90(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
-    sV_166F90 Conj() const
-    {
-        sV_166F90 r(-x, -y, -z, w);
-        return r;
-    }
-} __attribute__((aligned(16)));
 
 struct sM_166F90 {
     float m[4][4];
@@ -8828,14 +8729,14 @@ struct sM_166F90 {
 
 
 extern sM_166F90 D_004FF1A0_166F90 __asm__("t4mat_Identity");
-extern sV_166F90 D_004FF150_166F90 __asm__("t4vect_YAxis");
-extern sV_166F90 D_004FF160_v166F90 __asm__("t4vect_ZAxis");
-extern sV_166F90 D_004FF130_v166F90 __asm__("t4vect_Origin");
+extern t4Vector D_004FF150_166F90 __asm__("t4vect_YAxis");
+extern t4Vector D_004FF160_v166F90 __asm__("t4vect_ZAxis");
+extern t4Vector D_004FF130_v166F90 __asm__("t4vect_Origin");
 extern "C" void fSinCos(float* sout, float* cout, float x);
 
 struct sPair_166F90 {
-    sV_166F90 pos;
-    sV_166F90 rot;
+    t4Vector pos;
+    t4Vector rot;
 };
 
 struct sCamXf_166F90 {
@@ -8944,7 +8845,7 @@ static inline void vu0MulEqMtx_166F90(sM_166F90* m, const sM_166F90* b)
 }
 
 // PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
-static inline void vu0TransMtx_166F90(sM_166F90* m, const sV_166F90* v)
+static inline void vu0TransMtx_166F90(sM_166F90* m, const t4Vector* v)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -8969,12 +8870,12 @@ static inline void SinCos_166F90(float* s, float* c, float angle)
     fSinCos(s, c, angle);
 }
 
-static inline void Rotate_166F90(sM_166F90* m, const sV_166F90& axis, float angle)
+static inline void Rotate_166F90(sM_166F90* m, const t4Vector& axis, float angle)
 {
     sM_166F90 tm;
     vu0CopyMtx_166F90(&tm, m);
-    sV_166F90 pos = *(sV_166F90*)tm.m[3];
-    *(sV_166F90*)tm.m[3] = D_004FF130_v166F90;
+    t4Vector pos = *(t4Vector*)tm.m[3];
+    *(t4Vector*)tm.m[3] = D_004FF130_v166F90;
     float s;
     float c;
     SinCos_166F90(&s, &c, angle);
@@ -9005,13 +8906,13 @@ static inline void Rotate_166F90(sM_166F90* m, const sV_166F90& axis, float angl
     m->m[0][3] = 0.0f;
     m->m[1][3] = 0.0f;
     m->m[2][3] = 0.0f;
-    *(sV_166F90*)m->m[3] = pos;
+    *(t4Vector*)m->m[3] = pos;
     vu0MulEqMtx_166F90(m, &tm);
 }
 
-static inline sV_166F90 ConjF_166F90(float x, float y, float z, float w)
+static inline t4Vector ConjF_166F90(float x, float y, float z, float w)
 {
-    sV_166F90 r;
+    t4Vector r;
     r.w = w;
     r.x = -x;
     r.y = -y;
@@ -9030,7 +8931,7 @@ extern "C" void cLookAtChaseAlgorithm_calcPose_impl(char* self) __asm__("cLookAt
 extern "C" void cLookAtChaseAlgorithm_calcPose_impl(char* self)
 {
     *(float*)(self + 0x4C) = 1.0f;
-    sV_166F90* pos = (sV_166F90*)(self + 0x40);
+    t4Vector* pos = (t4Vector*)(self + 0x40);
     sM_166F90 poseMatrix;
     vu0CopyMtx_166F90(&poseMatrix, &D_004FF1A0_166F90);
     vu0TransMtx_166F90(&poseMatrix, pos);
@@ -9041,7 +8942,7 @@ extern "C" void cLookAtChaseAlgorithm_calcPose_impl(char* self)
         tPose_tPose_166F90(&xf, &poseMatrix);
         ((sCamXf_166F90*)self)->xf = xf;
     }
-    *(sV_166F90*)(self + 0x70) = ConjF_166F90(*(float*)(self + 0x70), *(float*)(self + 0x74), *(float*)(self + 0x78), *(float*)(self + 0x7C));
+    *(t4Vector*)(self + 0x70) = ConjF_166F90(*(float*)(self + 0x70), *(float*)(self + 0x74), *(float*)(self + 0x78), *(float*)(self + 0x7C));
 }
 #endif
 

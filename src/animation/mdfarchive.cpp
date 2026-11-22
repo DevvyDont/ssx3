@@ -13,13 +13,6 @@ extern "C" void unpack(void* src, void* dst);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern const char str_MdfModel_pct_s[];
 
-struct sMdfPart_00314CB0
-{
-    char name[0x10];
-    int dataOffset;
-    int dataSize;
-    char pad_0x18[0x48];
-};
 
 
 /**
@@ -35,12 +28,12 @@ struct sMdfPart_00314CB0
 extern "C" void* cMdfArchive_getModelPartByIndex(cMdfArchive* self, int i)
 {
     char name[0x40];
-    sprintf(name, str_MdfModel_pct_s, &((sMdfPart_00314CB0*)self->ModelHeaders)[i]);
-    char* model = (char*)operator_new_tag(((sMdfPart_00314CB0*)self->ModelHeaders)[i].dataSize + 0x60, name, 0x3000000, 0);
-    MEM_copy(model, &((sMdfPart_00314CB0*)self->ModelHeaders)[i], 0x60);
-    if (((sMdfPart_00314CB0*)self->ModelHeaders)[i].dataSize)
+    sprintf(name, str_MdfModel_pct_s, &(self->ModelHeaders)[i]);
+    char* model = (char*)operator_new_tag((self->ModelHeaders)[i].mDataSize + 0x60, name, 0x3000000, 0);
+    MEM_copy(model, &(self->ModelHeaders)[i], 0x60);
+    if ((self->ModelHeaders)[i].mDataSize)
     {
-        unpack(self->Data + ((sMdfPart_00314CB0*)self->ModelHeaders)[i].dataOffset, model + 0x60);
+        unpack(self->Data + (self->ModelHeaders)[i].mDataOffset, model + 0x60);
     }
     return model;
 }
@@ -241,7 +234,7 @@ void cGameAnimMap_setMap_handle(sMdfIndex_00314E88* self, unsigned int hash, sMd
 extern "C" void cGameAnimMap_addSource(cGameAnimMap* self, int kind, cAdfDataSource* list)
 {
     sMdfHandle_00314F30 handle;
-    for (int i = 0; i < *(short*)((char*)list->Archive + 2); i++)
+    for (int i = 0; i < list->Archive->mNumAnims; i++)
     {
         SetKind_00314F30(&handle, kind);
         SetIndex_00314F30(&handle, i);
@@ -264,7 +257,7 @@ extern void* kAnimIDInvalid;
  */
 extern "C" void cGameAnimMap_remSource(cGameAnimMap* self, cAdfDataSource* list)
 {
-    for (int i = 0; i < *(short*)((char*)list->Archive + 2); i++)
+    for (int i = 0; i < list->Archive->mNumAnims; i++)
     {
         cGameAnimMap_setMap(self, *(unsigned int*)(i * 0x14 + (int)list->Anims), kAnimIDInvalid);
     }

@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uiengine.h"
+#include "wscript/missionmenuqueue.h"
 #include "ai/rider.h"
 #include "ai/ai.h"
 #include "world/worldcache.h"
@@ -3019,30 +3021,18 @@ extern int D_004428FC[];
 extern int D_00442920[];
 extern char str_90bc_fail_b[];
 
-// A script message (cWScriptQueueEntry).
-struct sMsg_4B48 {
-    int a;
-    int type;
-    int c;
-};
 
-// The script manager's message queue (wscript/wscriptman: cWScriptQueue).
-struct sQueue_4B48 {
-    int head;
-    int tail;
-    sMsg_4B48 entries[16];
-};
 
-extern "C" sMsg_4B48* tMissionMenuQueue_getEntry(sQueue_4B48* self);
-extern "C" sMsg_4B48* tMissionMenuQueue_getNextEntry(sQueue_4B48* self);
+extern "C" tMissionMenuQueueEntry* tMissionMenuQueue_getEntry(tMissionMenuQueue* self);
+extern "C" tMissionMenuQueueEntry* tMissionMenuQueue_getNextEntry(tMissionMenuQueue* self);
 
 // The script manager (cWScriptMan_TheWScriptMan); hasMessage / popMessage are inline here
 // (out-of-line copies: cWScriptMan_isMenuQueueReady, cWScriptMan_popMenuQueueEntry).
 struct sScript_4B48 {
     char pad0[0x1C4];
-    sQueue_4B48 queue;              // 0x1C4
-    bool hasMessage() { return queue.head != queue.tail; }
-    sMsg_4B48* popMessage() { return tMissionMenuQueue_getNextEntry(&queue); }
+    tMissionMenuQueue queue;              // 0x1C4
+    bool hasMessage() { return queue.Current != queue.Next; }
+    tMissionMenuQueueEntry* popMessage() { return tMissionMenuQueue_getNextEntry(&queue); }
 };
 
 struct sVSlot_4B48 {
@@ -3062,12 +3052,6 @@ struct sStateStack_4B48 {
 
 extern "C" int cUIStateStack_findState(sStateStack_4B48* p, int hash);
 
-struct sUIEngine_4B48 {
-    char pad0[0xC];
-    sUIObj_4B48* fC;                // 0xC
-    char pad10[0x18 - 0x10];
-    sStateStack_4B48 states;        // 0x18
-};
 
 
 static inline bool racing_4B48(int s)
@@ -3106,23 +3090,23 @@ extern "C" bool cGame_updateUI(cGame* self)
     cOVStateManager_update();
     if (cMenuSys_isActive(((void*)self->MenuSys)) == 0) {
         sScript_4B48* sm = ((sScript_4B48*)self->WScriptMan);
-        sQueue_4B48* msgQueue = &sm->queue;
+        tMissionMenuQueue* msgQueue = &sm->queue;
         if (sm->hasMessage()) {
-            sMsg_4B48* msg = tMissionMenuQueue_getEntry(msgQueue);
-            if (msg->type == 8) {
+            tMissionMenuQueueEntry* msg = tMissionMenuQueue_getEntry(msgQueue);
+            if (msg->Cmd == 8) {
                 cOVStateManager_triggerOverlay(29);
                 cPauseState_Stack[++cPauseState_StackIdx] = 3;
                 cPauseState_Flags = D_004428FC[0];
                 cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 4, 0, 1.0f);
                 return false;
             }
-            if (msg->type == 9) {
-                cWScriptMan_doMissionCmd(((sScript_4B48*)self->WScriptMan), msg->a, 5, msg->c);
-                if (cUIStateStack_findState(&((sUIEngine_4B48*)self->UI)->states, GetHashValue32(str_90bc_fail_b)) == 0) {
+            if (msg->Cmd == 9) {
+                cWScriptMan_doMissionCmd(((sScript_4B48*)self->WScriptMan), ((int)msg->MissionId), 5, msg->Being);
+                if (cUIStateStack_findState(&(*(sStateStack_4B48*)&(self->UI)->mStateStack), GetHashValue32(str_90bc_fail_b)) == 0) {
                     cOVStateManager_triggerOverlay(0x1E);
                     cPauseState_Stack[++cPauseState_StackIdx] = 3;
                     cPauseState_Flags = D_004428FC[0];
-                    cUIEngine_update(((sUIEngine_4B48*)self->UI));
+                    cUIEngine_update((self->UI));
                 } else {
                     ((sScript_4B48*)cWScriptMan_TheWScriptMan)->popMessage();
                 }
@@ -3139,7 +3123,7 @@ extern "C" bool cGame_updateUI(cGame* self)
         return false;
     }
     if (cMenuSys_isActive(((void*)self->MenuSys)) != 0) {
-        cUIEngine_update(((sUIEngine_4B48*)self->UI));
+        cUIEngine_update((self->UI));
         cMenuSys_input(((void*)self->MenuSys));
         return false;
     }
@@ -3148,14 +3132,14 @@ extern "C" bool cGame_updateUI(cGame* self)
         cOVStateManager_triggerPauseMenu();
         cPauseState_Stack[++cPauseState_StackIdx] = 2;
         cPauseState_Flags = D_004428F8[0];
-        sUIObj_4B48* uiObject = ((sUIEngine_4B48*)self->UI)->fC;
+        sUIObj_4B48* uiObject = ((sUIObj_4B48*)(self->UI)->mpInput);
         uiObject->vt[44].fn(vthis(uiObject, uiObject->vt[44]), *(unsigned char*)&self->PauseOwner);
         cSSXAudio_PauseAudio(cAudioInterface_bxAudio());
         cSSXAudio_PlayPauseSound(cAudioInterface_bxAudio());
         return false;
     }
     int wasPaused = cPauseState_Flags & 1;
-    cUIEngine_update(((sUIEngine_4B48*)self->UI));
+    cUIEngine_update((self->UI));
     if (cOVStateManager_pauseOverlayActive() != 0) {
         return false;
     }
@@ -3476,11 +3460,11 @@ extern "C" void func_002452D8(cUIState* self, char* msg, int type)
     }
     if (isHash_2452D8(*(int*)(msg + 0x38), str_yes_c)) {
         sUIObj_2452D8* newState = newUIObj_2452D8(self, 0);
-        cUIStateStack_push((char*)self->mpEngine + 0x18, newState);
+        cUIStateStack_push(&self->mpEngine->mStateStack, newState);
         ((sRVEntry_2452D8*)cGraphicsMan_TheGraphicsMan->mVtbl)[8].fn(vthis(cGraphicsMan_TheGraphicsMan, ((sRVEntry_2452D8*)cGraphicsMan_TheGraphicsMan->mVtbl)[8]), 1);
     } else {
         sUIObj_2452D8* newState = newUIObj_2452D8(self, 1);
-        cUIStateStack_push((char*)self->mpEngine + 0x18, newState);
+        cUIStateStack_push(&self->mpEngine->mStateStack, newState);
     }
 }
 #endif

@@ -1,5 +1,9 @@
 #include "vtable.h"
 #include "common.h"
+#include "object/debouncenode.h"
+#include "object/movenode.h"
+#include "object/instancenode.h"
+#include "world/patchrecord.h"
 #include "world/worldrecords.h"
 #include "world/instancerecord.h"
 #include "intersect/worldinttypes.h"
@@ -836,10 +840,6 @@ struct sGrid_331E90 {
 };
 
 
-struct sCtx2_331E90 {
-    OverlapInstancesCallback nodes;
-    OverlapInstancesCallback objs;
-};
 
 static inline int overlapObj_331E90(const tBoundBox* b, const sObj_331E90* n)
 {
@@ -907,21 +907,21 @@ static inline void queryCell_331E90(sGrid_331E90* grid, int i, tBoundBox* box, O
  */
 extern "C" void cOverlapList_getpatchesandinstances(cOverlapList* self, tBoundBox* box)
 {
-    sCtx2_331E90 ctx;
+    OverlapPatchesAndInstancesCallback ctx;
     self->deletecount = ((sGrid_331E90*)self->nash)->unkA0;
-    (*(sNode_3309D8***)&ctx.nodes.instances) = ((sNode_3309D8**)&self->instances[0]);
-    (*(int**)&ctx.nodes.number) = (int*)&self->numinstances;
-    ctx.nodes.maximum = 0x40;
-    (*(tBoundBox**)&ctx.nodes.box) = box;
-    (*(sNode_3309D8***)&ctx.objs.instances) = ((sNode_3309D8**)&self->patches[0]);
-    (*(int**)&ctx.objs.number) = (int*)&self->numpatches;
-    ctx.objs.maximum = 0x40;
-    (*(tBoundBox**)&ctx.objs.box) = box;
-    OverlapInstancesCallback* objs = &ctx.objs;
+    (*(sNode_3309D8***)&ctx.instancecallback.instances) = ((sNode_3309D8**)&self->instances[0]);
+    (*(int**)&ctx.instancecallback.number) = (int*)&self->numinstances;
+    ctx.instancecallback.maximum = 0x40;
+    (*(tBoundBox**)&ctx.instancecallback.box) = box;
+    (*(sNode_3309D8***)&(*(OverlapInstancesCallback*)&ctx.patchescallback).instances) = ((sNode_3309D8**)&self->patches[0]);
+    (*(int**)&(*(OverlapInstancesCallback*)&ctx.patchescallback).number) = (int*)&self->numpatches;
+    (*(OverlapInstancesCallback*)&ctx.patchescallback).maximum = 0x40;
+    (*(tBoundBox**)&(*(OverlapInstancesCallback*)&ctx.patchescallback).box) = box;
+    OverlapInstancesCallback* objs = &(*(OverlapInstancesCallback*)&ctx.patchescallback);
     self->numinstances = 0;
     *((int*)objs->number) = 0;
     sGrid_331E90* grid = ((sGrid_331E90*)self->nash);
-    OverlapInstancesCallback* pctx = &ctx.nodes;
+    OverlapInstancesCallback* pctx = &ctx.instancecallback;
     queryCell_331E90(grid, 0, box, pctx);
     queryCell_331E90(grid, 1, box, pctx);
     queryCell_331E90(grid, 2, box, pctx);
@@ -968,11 +968,6 @@ struct sGrid_332DB8 {
 };
 
 
-struct sCtx3_332DB8 {
-    OverlapInstancesCallback nodes;
-    OverlapInstancesCallback objs;
-    OverlapInstancesCallback all;
-};
 
 struct sTag_332DB8 {
 };
@@ -996,30 +991,30 @@ static inline void add_332DB8(OverlapInstancesCallback* s, void* p)
     *cnt = n + 1;
 }
 
-static inline void collect_332DB8(sTree_332DB8* tree, sCtx3_332DB8* ctx)
+static inline void collect_332DB8(sTree_332DB8* tree, OverlapEverythingCallback* ctx)
 {
-    OverlapInstancesCallback_operatorCall(&ctx->nodes, (nash_Cell*)tree);
-    OverlapInstancesCallback* s = &ctx->objs;
+    OverlapInstancesCallback_operatorCall(&ctx->instancecallback, (nash_Cell*)tree);
+    OverlapInstancesCallback* s = &(*(OverlapInstancesCallback*)&ctx->patchescallback);
     for (sObj_332DB8* p = tree->objs; p != 0; p = p->next) {
         if (overlapObj_332DB8(((tBoundBox*)s->box), p)) {
             add_332DB8(s, p);
         }
     }
-    s = &ctx->all;
+    s = &(*(OverlapInstancesCallback*)&ctx->typedcallback);
     for (void** q = tree->all; q != 0; q = (void**)*q) {
         add_332DB8(s, q);
     }
-    if (tree->child[0]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[0]), (OverlapEverythingCallback*)ctx);
-    if (tree->child[1]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[1]), (OverlapEverythingCallback*)ctx);
-    if (tree->child[2]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[2]), (OverlapEverythingCallback*)ctx);
-    if (tree->child[3]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[3]), (OverlapEverythingCallback*)ctx);
-    if (tree->child[4]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[4]), (OverlapEverythingCallback*)ctx);
-    if (tree->child[5]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[5]), (OverlapEverythingCallback*)ctx);
-    if (tree->child[6]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[6]), (OverlapEverythingCallback*)ctx);
-    if (tree->child[7]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[7]), (OverlapEverythingCallback*)ctx);
+    if (tree->child[0]) nash_Cell_descend3((nash_Cell*)((nash_Cell*)tree->child[0]), (OverlapEverythingCallback*)ctx);
+    if (tree->child[1]) nash_Cell_descend3((nash_Cell*)((nash_Cell*)tree->child[1]), (OverlapEverythingCallback*)ctx);
+    if (tree->child[2]) nash_Cell_descend3((nash_Cell*)((nash_Cell*)tree->child[2]), (OverlapEverythingCallback*)ctx);
+    if (tree->child[3]) nash_Cell_descend3((nash_Cell*)((nash_Cell*)tree->child[3]), (OverlapEverythingCallback*)ctx);
+    if (tree->child[4]) nash_Cell_descend3((nash_Cell*)((nash_Cell*)tree->child[4]), (OverlapEverythingCallback*)ctx);
+    if (tree->child[5]) nash_Cell_descend3((nash_Cell*)((nash_Cell*)tree->child[5]), (OverlapEverythingCallback*)ctx);
+    if (tree->child[6]) nash_Cell_descend3((nash_Cell*)((nash_Cell*)tree->child[6]), (OverlapEverythingCallback*)ctx);
+    if (tree->child[7]) nash_Cell_descend3((nash_Cell*)((nash_Cell*)tree->child[7]), (OverlapEverythingCallback*)ctx);
 }
 
-static inline void queryCell_332DB8(sGrid_332DB8* grid, int i, tBoundBox* box, sCtx3_332DB8* ctx)
+static inline void queryCell_332DB8(sGrid_332DB8* grid, int i, tBoundBox* box, OverlapEverythingCallback* ctx)
 {
     sCell_332DB8* cell = &grid->cells[i];
     if (grid->cells[i].tree != 0) {
@@ -1050,27 +1045,27 @@ static inline void queryCell_332DB8(sGrid_332DB8* grid, int i, tBoundBox* box, s
  */
 extern "C" void cOverlapList_geteverything(cOverlapList* self, tBoundBox* box)
 {
-    sCtx3_332DB8 ctx;
+    OverlapEverythingCallback ctx;
     self->deletecount = ((sGrid_332DB8*)self->nash)->unkA0;
-    (*(sNode_3309D8***)&ctx.nodes.instances) = ((sNode_3309D8**)&self->instances[0]);
-    (*(int**)&ctx.nodes.number) = (int*)&self->numinstances;
-    ctx.nodes.maximum = 0x40;
-    (*(tBoundBox**)&ctx.nodes.box) = box;
-    (*(sNode_3309D8***)&ctx.objs.instances) = ((sNode_3309D8**)&self->patches[0]);
-    (*(int**)&ctx.objs.number) = (int*)&self->numpatches;
-    ctx.objs.maximum = 0x40;
-    (*(tBoundBox**)&ctx.objs.box) = box;
-    OverlapInstancesCallback* objs = &ctx.objs;
+    (*(sNode_3309D8***)&ctx.instancecallback.instances) = ((sNode_3309D8**)&self->instances[0]);
+    (*(int**)&ctx.instancecallback.number) = (int*)&self->numinstances;
+    ctx.instancecallback.maximum = 0x40;
+    (*(tBoundBox**)&ctx.instancecallback.box) = box;
+    (*(sNode_3309D8***)&(*(OverlapInstancesCallback*)&ctx.patchescallback).instances) = ((sNode_3309D8**)&self->patches[0]);
+    (*(int**)&(*(OverlapInstancesCallback*)&ctx.patchescallback).number) = (int*)&self->numpatches;
+    (*(OverlapInstancesCallback*)&ctx.patchescallback).maximum = 0x40;
+    (*(tBoundBox**)&(*(OverlapInstancesCallback*)&ctx.patchescallback).box) = box;
+    OverlapInstancesCallback* objs = &(*(OverlapInstancesCallback*)&ctx.patchescallback);
     self->numinstances = 0;
     *((int*)objs->number) = 0;
-    (*(sNode_3309D8***)&ctx.all.instances) = ((sNode_3309D8**)&self->typed[0]);
-    (*(int**)&ctx.all.number) = (int*)&self->numtyped;
-    ctx.all.maximum = 0x200;
-    (*(tBoundBox**)&ctx.all.box) = box;
-    OverlapInstancesCallback* all = &ctx.all;
+    (*(sNode_3309D8***)&(*(OverlapInstancesCallback*)&ctx.typedcallback).instances) = ((sNode_3309D8**)&self->typed[0]);
+    (*(int**)&(*(OverlapInstancesCallback*)&ctx.typedcallback).number) = (int*)&self->numtyped;
+    (*(OverlapInstancesCallback*)&ctx.typedcallback).maximum = 0x200;
+    (*(tBoundBox**)&(*(OverlapInstancesCallback*)&ctx.typedcallback).box) = box;
+    OverlapInstancesCallback* all = &(*(OverlapInstancesCallback*)&ctx.typedcallback);
     *((int*)all->number) = 0;
     sGrid_332DB8* grid = ((sGrid_332DB8*)self->nash);
-    sCtx3_332DB8* pctx = &ctx;
+    OverlapEverythingCallback* pctx = &ctx;
     queryCell_332DB8(grid, 0, box, pctx);
     queryCell_332DB8(grid, 1, box, pctx);
     queryCell_332DB8(grid, 2, box, pctx);
@@ -1089,14 +1084,6 @@ INCLUDE_ASM("intersect/worldsphtree", cOverlapList_terrainIntersect);
 extern t4Vector D_004FF120_333EF8[] __asm__("t4vect_Zero");
 
 
-struct sTriObj_333EF8 {
-    char pad00[8];
-    short id;
-    unsigned short flags;
-    char pad0C[0x14C];
-    float bmin[3];
-    float bmax[3];
-};
 
 
 struct sVEnt_333EF8 { short delta; short index; void* fn; };
@@ -1114,17 +1101,6 @@ struct sObj_333EF8 {
     sVEnt_333EF8* vt;
 };
 
-struct sNode_333EF8 {
-    void* next;
-    int pad04;
-    int flags;
-    sObj_333EF8* obj;
-    int pad10[20];
-    float bmin[3];
-    float bmax[3];
-    int pad78[4];
-    int active;
-};
 
 struct sOwner_333EF8 {
     char pad00[0xA4];
@@ -1135,9 +1111,9 @@ struct sTree_333EF8 {
     sOwner_333EF8* owner;           // 0x0
     int pad04;
     unsigned int count;             // 0x8
-    sNode_333EF8* items[0x40];      // 0xC
+    tInstanceRecord* items[0x40];      // 0xC
     unsigned int ntris;             // 0x10C
-    sTriObj_333EF8* tris[1];        // 0x110
+    tPatchRecord* tris[1];        // 0x110
 };
 
 extern "C" void cAIFwdDiffCache_GetFwdDiff(void* cache, void* src, void** out);
@@ -1146,23 +1122,23 @@ struct sHit_003342D0;
 extern "C" int cWorldIntersectType_IsPatchInt(void* q, void* obj, void* node, t4Vector* pos, t4Vector* nrm, float* dist, t4Vector* uv, int arg);
 extern "C" int intersect_instanceIntersect(void* q, void* node, void* buf, int cap, int mode);
 
-static inline int overlapTri_333EF8(const cWorldIntersectType* q, const sTriObj_333EF8* n)
+static inline int overlapTri_333EF8(const cWorldIntersectType* q, const tPatchRecord* n)
 {
     int r = 0;
-    if (((float*)&q->boxMax)[0] > n->bmin[0] && ((float*)&q->boxMin)[0] < n->bmax[0] &&
-        ((float*)&q->boxMax)[1] > n->bmin[1] && ((float*)&q->boxMin)[1] < n->bmax[1] &&
-        ((float*)&q->boxMax)[2] > n->bmin[2] && ((float*)&q->boxMin)[2] < n->bmax[2]) {
+    if (((float*)&q->boxMax)[0] > n->m_fvMin.m[0] && ((float*)&q->boxMin)[0] < n->m_fvMax.m[0] &&
+        ((float*)&q->boxMax)[1] > n->m_fvMin.m[1] && ((float*)&q->boxMin)[1] < n->m_fvMax.m[1] &&
+        ((float*)&q->boxMax)[2] > n->m_fvMin.m[2] && ((float*)&q->boxMin)[2] < n->m_fvMax.m[2]) {
         r = 1;
     }
     return r;
 }
 
-static inline int overlapNode_333EF8(const cWorldIntersectType* q, const sNode_333EF8* n)
+static inline int overlapNode_333EF8(const cWorldIntersectType* q, const tInstanceRecord* n)
 {
     int r = 0;
-    if (((float*)&q->boxMax)[0] > n->bmin[0] && ((float*)&q->boxMin)[0] < n->bmax[0] &&
-        ((float*)&q->boxMax)[1] > n->bmin[1] && ((float*)&q->boxMin)[1] < n->bmax[1] &&
-        ((float*)&q->boxMax)[2] > n->bmin[2] && ((float*)&q->boxMin)[2] < n->bmax[2]) {
+    if (((float*)&q->boxMax)[0] > n->m_fvMin.m[0] && ((float*)&q->boxMin)[0] < n->m_fvMax.m[0] &&
+        ((float*)&q->boxMax)[1] > n->m_fvMin.m[1] && ((float*)&q->boxMin)[1] < n->m_fvMax.m[1] &&
+        ((float*)&q->boxMax)[2] > n->m_fvMin.m[2] && ((float*)&q->boxMin)[2] < n->m_fvMax.m[2]) {
         r = 1;
     }
     return r;
@@ -1223,8 +1199,8 @@ extern "C" int cOverlapList_terrainIntersect(cOverlapList* vself, void* vq, sHit
     tIntersectInfo* hits = (tIntersectInfo*)vhits;
     int n = 0;
     for (unsigned int i = 0; i < self->ntris; i++) {
-        sTriObj_333EF8* obj = self->tris[i];
-        if ((obj->flags & 0x41) != 65) {
+        tPatchRecord* obj = self->tris[i];
+        if ((obj->m_sSurfaceFlags & 0x41) != 65) {
             continue;
         }
         if (!overlapTri_333EF8(query, obj)) {
@@ -1242,7 +1218,7 @@ extern "C" int cOverlapList_terrainIntersect(cOverlapList* vself, void* vq, sHit
         reset_333EF8(&hits[n]);
         (*(&hits[n].Ipos)) = pos;
         (*(&hits[n].Inorm)) = nrm;
-        hits[n].Stype = obj->id;
+        hits[n].Stype = obj->m_sSurfaceType;
         (*(void**)&hits[n].Patch) = obj;
         hits[n].Iparam = dist;
         hits[n].u = uv.x;
@@ -1250,23 +1226,23 @@ extern "C" int cOverlapList_terrainIntersect(cOverlapList* vself, void* vq, sHit
         n++;
     }
     for (unsigned int j = 0; j < self->count; j++) {
-        sNode_333EF8* node = self->items[j];
-        if (node->active == 0) {
+        tInstanceRecord* node = self->items[j];
+        if (((int)node->m_pCollideRecord) == 0) {
             continue;
         }
-        int flags = node->flags;
+        int flags = node->m_iFlags;
         if (flags & 0x20) {
             if (overlapNode_333EF8(query, node)) {
                 n += intersect_instanceIntersect(query, node, &hits[n], cap - n, 2);
             }
         } else if (flags & 0x40) {
-            if (node->obj == 0) {
+            if (((sObj_333EF8*)node->m_pActiveNode) == 0) {
                 continue;
             }
-            sVEnt_333EF8* vt = node->obj->vt;
-            if (((Test_333EF8)vt[44].fn)(vthis(node->obj, vt[44]))) {
-                sVEnt_333EF8* vt2 = node->obj->vt;
-                sBox_333EF8* objBox = ((GetBox_333EF8)vt2[45].fn)(vthis(node->obj, vt2[45]));
+            sVEnt_333EF8* vt = ((sObj_333EF8*)node->m_pActiveNode)->vt;
+            if (((Test_333EF8)vt[44].fn)(vthis(((sObj_333EF8*)node->m_pActiveNode), vt[44]))) {
+                sVEnt_333EF8* vt2 = ((sObj_333EF8*)node->m_pActiveNode)->vt;
+                sBox_333EF8* objBox = ((GetBox_333EF8)vt2[45].fn)(vthis(((sObj_333EF8*)node->m_pActiveNode), vt2[45]));
                 if (overlapBox_333EF8(query, objBox)) {
                     n += intersect_instanceIntersect(query, node, &hits[n], cap - n, 2);
                 }
@@ -1369,10 +1345,6 @@ struct sBox_334458 {
 };
 
 
-struct sObj_334458 {
-    int pad00[3];
-    sVEntry<void>* vt;
-};
 
 
 struct sList_334458 {
@@ -1433,10 +1405,10 @@ extern "C" int cOverlapList_staticObjectIntersect(sList_334458* self, cWorldInte
                 n += intersect_instanceIntersect(query, node, &buf[n], cap - n, mode);
             }
         } else if (flags & 0x40) {
-            sVEntry<void>* vt = ((sObj_334458*)node->m_pActiveNode)->vt;
-            if (((Test_334458)vt[44].fn)((char*)((sObj_334458*)node->m_pActiveNode) + vt[44].delta)) {
-                sVEntry<void>* vt2 = ((sObj_334458*)node->m_pActiveNode)->vt;
-                sBox_334458* objBox = ((GetBox_334458)vt2[45].fn)((char*)((sObj_334458*)node->m_pActiveNode) + vt2[45].delta);
+            sVEntry<void>* vt = ((sVEntry<void>*)(node->m_pActiveNode)->mVtbl);
+            if (((Test_334458)vt[44].fn)((char*)(node->m_pActiveNode) + vt[44].delta)) {
+                sVEntry<void>* vt2 = ((sVEntry<void>*)(node->m_pActiveNode)->mVtbl);
+                sBox_334458* objBox = ((GetBox_334458)vt2[45].fn)((char*)(node->m_pActiveNode) + vt2[45].delta);
                 if (overlapBox_334458(query, objBox)) {
                     n += intersect_instanceIntersect(query, node, &buf[n], cap - n, mode);
                 }
@@ -1637,16 +1609,6 @@ struct sWsInstDef_4888 {
     sWsPart_4888 parts[1];      // 0x10
 };
 
-// A world instance: collision object, world matrix, skeleton, scale, definition.
-struct sWsInst_4888 {
-    char pad00[0xC];
-    sWsVObj* obj;               // 0xC
-    sWsMat_4888 mat;            // 0x10
-    char pad50[0x30];
-    sWsBoneTbl_4888* tbl;       // 0x80
-    float scale;                // 0x84
-    sWsInstDef_4888* def;       // 0x88
-};
 
 // A triangle hit record (0x80 bytes; empty ctor).
 struct sWsHit_4888 {
@@ -1666,11 +1628,6 @@ struct sWsHit_4888 {
     sWsHit_4888() {}
 } __attribute__((aligned(16)));
 
-// The query object (vtable at 0x50).
-struct sWsQuery_4888 {
-    char pad00[0x50];
-    sWsVtSlot* vt;              // 0x50
-};
 
 typedef int (*Test_4888)(void*);
 typedef int (*Query_4888)(void*, void*, void*, int, int);
@@ -1842,7 +1799,7 @@ static inline sWsPart_4888* GetPart_4888(sWsInstDef_4888* def, int i)
 
 // Collects the triangle hits of instance `node` against query q into buf (mode 1: unnamed parts only, mode 2: named
 // parts only); bone matrices come from the instance's animated object or are built here from the skeleton.
-extern "C" int func_4888(sWsQuery_4888* q, sWsInst_4888* node, sWsHit_4888* buf, int cap, int mode) __asm__("intersect_instanceIntersect");
+extern "C" int func_4888(cWorldIntersectType* q, tInstanceRecord* node, sWsHit_4888* buf, int cap, int mode) __asm__("intersect_instanceIntersect");
 /**
  * Intersects a world query with one instance, writing up to @p cap hits.
  *
@@ -1857,21 +1814,21 @@ extern "C" int func_4888(sWsQuery_4888* q, sWsInst_4888* node, sWsHit_4888* buf,
  * @param mode  intersection flags
  * @return the number of hits written
  */
-extern "C" int func_4888(sWsQuery_4888* intersectType, sWsInst_4888* node, sWsHit_4888* buf, int cap, int mode)
+extern "C" int func_4888(cWorldIntersectType* intersectType, tInstanceRecord* node, sWsHit_4888* buf, int cap, int mode)
 {
-    if (node->obj != 0) {
-        sWsVtSlot* vt = node->obj->vt;
-        if (((Test_4888)vt[38].fn)(vthis(node->obj, vt[38]))) {
-            sWsVtSlot* vt2 = node->obj->vt;
-            return ((Query_4888)vt2[39].fn)(vthis(node->obj, vt2[39]), intersectType, buf, cap, mode);
+    if (((sWsVObj*)node->m_pActiveNode) != 0) {
+        sWsVtSlot* vt = ((sWsVObj*)node->m_pActiveNode)->vt;
+        if (((Test_4888)vt[38].fn)(vthis(((sWsVObj*)node->m_pActiveNode), vt[38]))) {
+            sWsVtSlot* vt2 = ((sWsVObj*)node->m_pActiveNode)->vt;
+            return ((Query_4888)vt2[39].fn)(vthis(((sWsVObj*)node->m_pActiveNode), vt2[39]), intersectType, buf, cap, mode);
         }
     }
-    int type = node->def->type;
+    int type = ((sWsInstDef_4888*)node->m_pCollideRecord)->type;
     if (type != 3 && type != 1 && type != 2)
         return 0;
-    sWsVObj* obj = node->obj;
+    sWsVObj* obj = ((sWsVObj*)node->m_pActiveNode);
     sWsMat_4888 mats[24];
-    sWsMat_4888* pMat = &node->mat;
+    sWsMat_4888* pMat = &(*(sWsMat_4888*)&node->m_fmTransform);
     int useLocal = 1;
     sWsMat_4888* boneMats = mats;
     if (obj != 0) {
@@ -1885,9 +1842,9 @@ extern "C" int func_4888(sWsQuery_4888* intersectType, sWsInst_4888* node, sWsHi
             pMat = ((GetMat_4888)vt2[25].fn)(vthis(obj, vt2[25]), node);
         }
     }
-    sWsBoneTbl_4888* tbl = node->tbl;
+    sWsBoneTbl_4888* tbl = ((sWsBoneTbl_4888*)node->m_Model);
     sWsBone_4888* bone = tbl->bones;
-    float instScale = node->scale;
+    float instScale = node->m_fScale;
     t4Vector scl;
     scl.x = instScale;
     scl.y = instScale;
@@ -1951,13 +1908,13 @@ extern "C" int func_4888(sWsQuery_4888* intersectType, sWsInst_4888* node, sWsHi
         if (bone->mesh == 0)
             continue;
         if (mode == 2) {
-            if (GetPart_4888(node->def, i)->id == -1) {
+            if (GetPart_4888(((sWsInstDef_4888*)node->m_pCollideRecord), i)->id == -1) {
                 if (type != 2)
                     k++;
                 continue;
             }
         } else if (mode == 1) {
-            if (GetPart_4888(node->def, i)->id != -1) {
+            if (GetPart_4888(((sWsInstDef_4888*)node->m_pCollideRecord), i)->id != -1) {
                 if (type != 2)
                     k++;
                 continue;
@@ -1968,14 +1925,14 @@ extern "C" int func_4888(sWsQuery_4888* intersectType, sWsInst_4888* node, sWsHi
         InvertOrtho_4888(inv);
         int inum = 0;
         void* tri = 0;
-        ((SetXf_4888)intersectType->vt[1].fn)(vthis(intersectType, intersectType->vt[1]), 1.0f / node->scale, &inv);
+        ((SetXf_4888)((sWsVtSlot*)intersectType->mVtbl)[1].fn)(vthis(intersectType, ((sWsVtSlot*)intersectType->mVtbl)[1]), 1.0f / node->m_fScale, &inv);
         if (type == 2) {
-            inum = ((Tris_4888)intersectType->vt[7].fn)(vthis(intersectType, intersectType->vt[7]), bone->mesh, bone->mesh + 0xC, ii, 64);
+            inum = ((Tris_4888)((sWsVtSlot*)intersectType->mVtbl)[7].fn)(vthis(intersectType, ((sWsVtSlot*)intersectType->mVtbl)[7]), bone->mesh, bone->mesh + 0xC, ii, 64);
         } else {
-            if (((Hit_4888)intersectType->vt[9].fn)(vthis(intersectType, intersectType->vt[9]), bone->mesh, bone->mesh + 0xC)) {
+            if (((Hit_4888)((sWsVtSlot*)intersectType->mVtbl)[9].fn)(vthis(intersectType, ((sWsVtSlot*)intersectType->mVtbl)[9]), bone->mesh, bone->mesh + 0xC)) {
                 if (type == 3) {
                     tri = tSphTreeList_getMeshTree(cWorld_getPolyModelInfo_4888(cWorld_m_pTheWorld, node), k);
-                    inum = ((Mesh_4888)intersectType->vt[6].fn)(vthis(intersectType, intersectType->vt[6]), tri, ii, 64);
+                    inum = ((Mesh_4888)((sWsVtSlot*)intersectType->mVtbl)[6].fn)(vthis(intersectType, ((sWsVtSlot*)intersectType->mVtbl)[6]), tri, ii, 64);
                 } else {
                     inum = cWorldIntersectType_IsMeshInt_cap(intersectType, tPolyModelList_getMeshPolyModel_4888(cWorld_getSphereTreeInfo_4888(cWorld_m_pTheWorld, node), k),
                                              *(int*)(bone->mesh + 0x18) & 1, ii, 64);
@@ -1983,7 +1940,7 @@ extern "C" int func_4888(sWsQuery_4888* intersectType, sWsInst_4888* node, sWsHi
             }
             k++;
         }
-        ((Reset_4888)intersectType->vt[2].fn)(vthis(intersectType, intersectType->vt[2]));
+        ((Reset_4888)((sWsVtSlot*)intersectType->mVtbl)[2].fn)(vthis(intersectType, ((sWsVtSlot*)intersectType->mVtbl)[2]));
         for (int j = 0; j < inum; j++) {
             ii[j].nrm = vu0MtxMul_4888(boneMat, ii[j].nrm);
             buf[n] = ii[j];
@@ -1996,8 +1953,8 @@ extern "C" int func_4888(sWsQuery_4888* intersectType, sWsInst_4888* node, sWsHi
             buf[n].v20 = *D_004FF120_4888;
             buf[n].v30 = *D_004FF120_4888;
             buf[n].obj = 0;
-            if (GetPart_4888(node->def, i)->id != -1)
-                buf[n].id = GetPart_4888(node->def, i)->id;
+            if (GetPart_4888(((sWsInstDef_4888*)node->m_pCollideRecord), i)->id != -1)
+                buf[n].id = GetPart_4888(((sWsInstDef_4888*)node->m_pCollideRecord), i)->id;
             n++;
         }
     }
@@ -2029,35 +1986,7 @@ struct sF5_335128 {
 extern const sF5_335128 D_0048E560_335128 __asm__("D_0048E560");
 extern const sF5_335128 D_0048E578_335128 __asm__("D_0048E578");
 
-// A cubic curve object: coefficient rows at 0x10 (point = M * (t^3, t^2, t, 1)) and a bounding box.
-struct sCurveObj_335128 {
-    char pad00[0x10];
-    sV_335128 m[4];         // 0x10
-    char pad50[0x18];
-    char* owner;            // 0x68 (id at +0x28)
-    float bmin[3];          // 0x6C
-    float bmax[3];          // 0x78
-};
 
-struct sHit_335128 {
-    sV_335128 pos;      // 0x00
-    sV_335128 nrm;      // 0x10
-    sV_335128 v20;      // 0x20
-    sV_335128 v30;      // 0x30
-    float dist;         // 0x40
-    int type;           // 0x44
-    int pad48;
-    int id;             // 0x4C
-    int f50;            // 0x50
-    void* obj;          // 0x54
-    void* f58;          // 0x58
-    int f5C;            // 0x5C
-    int f60;            // 0x60
-    int f64;            // 0x64
-    float t;            // 0x68
-    float u;            // 0x6C
-    float v;            // 0x70
-};
 
 // PORT: PS2-only VU0 macro-mode asm (4x4 matrix times vector).
 static inline sV_335128 MatMulV_335128(const sV_335128* m, const sV_335128& v)
@@ -2226,19 +2155,19 @@ static inline sV_335128 splineSlope_335128(const sV_335128* emat, float w)
     return MatMulV_335128(emat, v);
 }
 
-static inline void reset_335128(sHit_335128* h)
+static inline void reset_335128(tIntersectInfo* h)
 {
-    h->type = 2;
-    h->obj = 0;
-    h->f50 = 0;
-    h->f58 = 0;
-    h->f5C = -1;
-    h->f60 = -1;
-    h->f64 = -1;
-    h->id = -1;
-    h->v20 = D_004FF120_335128;
-    h->v30 = D_004FF120_335128;
-    h->t = 0;
+    h->HitType = 2;
+    (*(void**)&h->Patch) = 0;
+    (*(int*)&h->Inst) = 0;
+    (*(void**)&h->Spline) = 0;
+    h->Mesh = -1;
+    h->Face = -1;
+    h->Seg = -1;
+    h->Stype = -1;
+    (*(sV_335128*)&h->Ivel) = D_004FF120_335128;
+    (*(sV_335128*)&h->Iangvel) = D_004FF120_335128;
+    h->T = 0;
     h->u = 0;
     h->v = 0;
 }
@@ -2246,7 +2175,7 @@ static inline void reset_335128(sHit_335128* h)
 // intersect::staticSplineSegmentIntersect (On Tour name): closest point on a spline segment to intersectpos,
 // a coarse 4-segment scan, then a golden-section search.
 // The unit declares intersect_staticSplineSegmentIntersect with an int last parameter; bind the typed definition by asm label.
-extern "C" void intersect_staticSplineSegmentIntersect_typed(sCurveObj_335128* pSplineSeg, tBoundBox* box, sV_335128* intersectpos, bool* hit, float* intersectdist, sHit_335128* intersectinfo) __asm__("intersect_staticSplineSegmentIntersect");
+extern "C" void intersect_staticSplineSegmentIntersect_typed(tSplineSegmentRecord* pSplineSeg, tBoundBox* box, sV_335128* intersectpos, bool* hit, float* intersectdist, tIntersectInfo* intersectinfo) __asm__("intersect_staticSplineSegmentIntersect");
 /**
  * Finds the point of a spline segment nearest @p intersectpos and records it when it beats the best hit so far.
  *
@@ -2266,11 +2195,11 @@ extern "C" void intersect_staticSplineSegmentIntersect_typed(sCurveObj_335128* p
  * @param intersectdist  in/out: the distance of the recorded hit
  * @param intersectinfo  out: the hit record (0x80 bytes)
  */
-extern "C" void intersect_staticSplineSegmentIntersect_typed(sCurveObj_335128* pSplineSeg, tBoundBox* box, sV_335128* intersectpos, bool* hit, float* intersectdist, sHit_335128* intersectinfo)
+extern "C" void intersect_staticSplineSegmentIntersect_typed(tSplineSegmentRecord* pSplineSeg, tBoundBox* box, sV_335128* intersectpos, bool* hit, float* intersectdist, tIntersectInfo* intersectinfo)
 {
-    if ((*(sWsVec4*)&box->MaxPoint).x < pSplineSeg->bmin[0] || (*(sWsVec4*)&box->MinPoint).x > pSplineSeg->bmax[0] ||
-        (*(sWsVec4*)&box->MaxPoint).y < pSplineSeg->bmin[1] || (*(sWsVec4*)&box->MinPoint).y > pSplineSeg->bmax[1] ||
-        (*(sWsVec4*)&box->MaxPoint).z < pSplineSeg->bmin[2] || (*(sWsVec4*)&box->MinPoint).z > pSplineSeg->bmax[2]) {
+    if ((*(sWsVec4*)&box->MaxPoint).x < pSplineSeg->m_fvMin.m[0] || (*(sWsVec4*)&box->MinPoint).x > pSplineSeg->m_fvMax.m[0] ||
+        (*(sWsVec4*)&box->MaxPoint).y < pSplineSeg->m_fvMin.m[1] || (*(sWsVec4*)&box->MinPoint).y > pSplineSeg->m_fvMax.m[1] ||
+        (*(sWsVec4*)&box->MaxPoint).z < pSplineSeg->m_fvMin.m[2] || (*(sWsVec4*)&box->MinPoint).z > pSplineSeg->m_fvMax.m[2]) {
         return;
     }
 
@@ -2283,11 +2212,11 @@ extern "C" void intersect_staticSplineSegmentIntersect_typed(sCurveObj_335128* p
     float x3 = 1.0f;
     sV_335128 nextp;
     sV_335128 tmp;
-    lastp = splineEval_335128(pSplineSeg->m, x0);
+    lastp = splineEval_335128(((sV_335128*)&pSplineSeg->m_fmBasisMat), x0);
     float cd = Length_335128(Sub_335128(*intersectpos, lastp));
     int ci = 0;
     for (i = 1; i < 5; i++) {
-        nextp = splineEval_335128(pSplineSeg->m, i * 0.25f);
+        nextp = splineEval_335128(((sV_335128*)&pSplineSeg->m_fmBasisMat), i * 0.25f);
         tmp = Sub_335128(nextp, lastp);
         float chordFraction = Dot_335128(Sub_335128(*intersectpos, lastp), tmp) / Dot_335128(tmp, tmp);
         chordFraction = Clamp_335128(chordFraction, 1.0f);
@@ -2305,13 +2234,13 @@ extern "C" void intersect_staticSplineSegmentIntersect_typed(sCurveObj_335128* p
     x3 = maxx.v[ci];
     float x1 = x0 + (x3 - x0) * kBottomSplit;
     float x2 = x0 + (x3 - x0) * kTopSplit;
-    lastp = splineEval_335128(pSplineSeg->m, x0);
+    lastp = splineEval_335128(((sV_335128*)&pSplineSeg->m_fmBasisMat), x0);
     dist0 = Length_335128(Sub_335128(lastp, *intersectpos));
-    lastp = splineEval_335128(pSplineSeg->m, x1);
+    lastp = splineEval_335128(((sV_335128*)&pSplineSeg->m_fmBasisMat), x1);
     dist1 = Length_335128(Sub_335128(lastp, *intersectpos));
-    lastp = splineEval_335128(pSplineSeg->m, x2);
+    lastp = splineEval_335128(((sV_335128*)&pSplineSeg->m_fmBasisMat), x2);
     dist2 = Length_335128(Sub_335128(lastp, *intersectpos));
-    lastp = splineEval_335128(pSplineSeg->m, x3);
+    lastp = splineEval_335128(((sV_335128*)&pSplineSeg->m_fmBasisMat), x3);
     dist3 = Length_335128(Sub_335128(lastp, *intersectpos));
     float lastd = dist2;
     float lastt = x2;
@@ -2320,7 +2249,7 @@ extern "C" void intersect_staticSplineSegmentIntersect_typed(sCurveObj_335128* p
             x0 = x1;
             x1 = x2;
             x2 = x1 * kTopSplit + x3 * kBottomSplit;
-            lastp = splineEval_335128(pSplineSeg->m, x2);
+            lastp = splineEval_335128(((sV_335128*)&pSplineSeg->m_fmBasisMat), x2);
             float tmp = Length_335128(Sub_335128(lastp, *intersectpos));
             dist0 = dist1;
             dist1 = dist2;
@@ -2331,7 +2260,7 @@ extern "C" void intersect_staticSplineSegmentIntersect_typed(sCurveObj_335128* p
             x3 = x2;
             x2 = x1;
             x1 = x2 * kTopSplit + x0 * kBottomSplit;
-            lastp = splineEval_335128(pSplineSeg->m, x1);
+            lastp = splineEval_335128(((sV_335128*)&pSplineSeg->m_fmBasisMat), x1);
             float tmp = Length_335128(Sub_335128(lastp, *intersectpos));
             dist3 = dist2;
             dist2 = dist1;
@@ -2344,15 +2273,15 @@ extern "C" void intersect_staticSplineSegmentIntersect_typed(sCurveObj_335128* p
         *hit = true;
         *intersectdist = lastd;
         reset_335128(intersectinfo);
-        intersectinfo->pos = lastp;
-        intersectinfo->nrm = Normalize_335128(splineSlope_335128(pSplineSeg->m, lastt));
-        intersectinfo->id = *(int*)(pSplineSeg->owner + 0x28);
-        intersectinfo->f50 = 0;
-        intersectinfo->f5C = -1;
-        intersectinfo->f58 = pSplineSeg->owner;
-        intersectinfo->t = lastt;
-        intersectinfo->f64 = -1;
-        intersectinfo->obj = 0;
+        (*(sV_335128*)&intersectinfo->Ipos) = lastp;
+        (*(sV_335128*)&intersectinfo->Inorm) = Normalize_335128(splineSlope_335128(((sV_335128*)&pSplineSeg->m_fmBasisMat), lastt));
+        intersectinfo->Stype = pSplineSeg->m_Parent->m_eSurfaceType;
+        (*(int*)&intersectinfo->Inst) = 0;
+        intersectinfo->Mesh = -1;
+        (*(void**)&intersectinfo->Spline) = ((char*)pSplineSeg->m_Parent);
+        intersectinfo->T = lastt;
+        intersectinfo->Seg = -1;
+        (*(void**)&intersectinfo->Patch) = 0;
     }
 }
 #endif
@@ -2373,26 +2302,6 @@ struct sTriObj_335960 {
     float bmax[3];
 };
 
-struct sHit_335960 {
-    t4Vector pos;   // 0x00
-    t4Vector nrm;   // 0x10
-    t4Vector v20;   // 0x20
-    t4Vector v30;   // 0x30
-    float dist;         // 0x40
-    int type;           // 0x44
-    int pad48;
-    int id;             // 0x4C
-    int f50;            // 0x50
-    void* obj;          // 0x54
-    int f58;            // 0x58
-    int f5C;            // 0x5C
-    int f60;            // 0x60
-    int f64;            // 0x64
-    int f68;            // 0x68
-    float u;            // 0x6C
-    float v;            // 0x70
-    int pad74[3];
-};
 
 
 extern "C" void cAIFwdDiffCache_GetFwdDiff(void* cache, void* src, void** out);
@@ -2409,19 +2318,19 @@ static inline int overlap_335960(const cWorldIntersectType* q, const sTriObj_335
     return r;
 }
 
-static inline void reset_335960(sHit_335960* h)
+static inline void reset_335960(tIntersectInfo* h)
 {
-    h->type = 2;
-    h->obj = 0;
-    h->f50 = 0;
-    h->f58 = 0;
-    h->f5C = -1;
-    h->f60 = -1;
-    h->f64 = -1;
-    h->id = -1;
-    h->v20 = *t4vect_Zero;
-    h->v30 = *t4vect_Zero;
-    h->f68 = 0;
+    h->HitType = 2;
+    (*(void**)&h->Patch) = 0;
+    (*(int*)&h->Inst) = 0;
+    (*(int*)&h->Spline) = 0;
+    h->Mesh = -1;
+    h->Face = -1;
+    h->Seg = -1;
+    h->Stype = -1;
+    h->Ivel = *t4vect_Zero;
+    h->Iangvel = *t4vect_Zero;
+    (*(int*)&h->T) = 0;
     h->u = 0;
     h->v = 0;
 }
@@ -2452,14 +2361,14 @@ extern "C" void TerrainCallback_intersectpatch(void* vctx, void* vobj)
     if (!overlap_335960((ctx->intersecttype), obj)) return;
     cAIFwdDiffCache_GetFwdDiff(((void*)ctx->fwddiffcache), obj, &node);
     if (!cWorldIntersectType_IsPatchInt((ctx->intersecttype), obj, node, &pos, &nrm, &dist, &uv, ((int)ctx->hint))) return;
-    reset_335960(&((sHit_335960*)ctx->intersectinfo)[*ctx->numintersectinfo]);
-    ((sHit_335960*)ctx->intersectinfo)[*ctx->numintersectinfo].pos = pos;
-    ((sHit_335960*)ctx->intersectinfo)[*ctx->numintersectinfo].nrm = nrm;
-    ((sHit_335960*)ctx->intersectinfo)[*ctx->numintersectinfo].id = obj->id;
-    ((sHit_335960*)ctx->intersectinfo)[*ctx->numintersectinfo].obj = obj;
-    ((sHit_335960*)ctx->intersectinfo)[*ctx->numintersectinfo].dist = dist;
-    ((sHit_335960*)ctx->intersectinfo)[*ctx->numintersectinfo].u = uv.x;
-    ((sHit_335960*)ctx->intersectinfo)[*ctx->numintersectinfo].v = uv.y;
+    reset_335960(&(ctx->intersectinfo)[*ctx->numintersectinfo]);
+    (ctx->intersectinfo)[*ctx->numintersectinfo].Ipos = pos;
+    (ctx->intersectinfo)[*ctx->numintersectinfo].Inorm = nrm;
+    (ctx->intersectinfo)[*ctx->numintersectinfo].Stype = obj->id;
+    (*(void**)&(ctx->intersectinfo)[*ctx->numintersectinfo].Patch) = obj;
+    (ctx->intersectinfo)[*ctx->numintersectinfo].Iparam = dist;
+    (ctx->intersectinfo)[*ctx->numintersectinfo].u = uv.x;
+    (ctx->intersectinfo)[*ctx->numintersectinfo].v = uv.y;
     (*ctx->numintersectinfo)++;
 }
 #endif
@@ -2469,18 +2378,10 @@ INCLUDE_ASM("intersect/worldsphtree", TerrainCallback_intersectinstance);
 #ifdef SKIP_ASM
 struct sBox_335B90;
 typedef int (*Test_335B90)(void*);
-typedef sBox_335B90* (*GetBox_335B90)(void*);
-
-struct sBox_335B90 {
-    float min[4];
-    float max[4];
-};
+typedef tBoundBox* (*GetBox_335B90)(void*);
 
 
-struct sObj_335B90 {
-    int pad00[3];
-    sVEntry<void>* vt;
-};
+
 
 
 
@@ -2497,12 +2398,12 @@ static inline int overlapNode_335B90(const cWorldIntersectType* q, const tInstan
     return r;
 }
 
-static inline int overlapBox_335B90(const cWorldIntersectType* q, const sBox_335B90* o)
+static inline int overlapBox_335B90(const cWorldIntersectType* q, const tBoundBox* o)
 {
     int r = 0;
-    if (((float*)&q->boxMax)[0] > o->min[0] && ((float*)&q->boxMin)[0] < o->max[0] &&
-        ((float*)&q->boxMax)[1] > o->min[1] && ((float*)&q->boxMin)[1] < o->max[1] &&
-        ((float*)&q->boxMax)[2] > o->min[2] && ((float*)&q->boxMin)[2] < o->max[2]) {
+    if (((float*)&q->boxMax)[0] > ((float*)&o->MinPoint)[0] && ((float*)&q->boxMin)[0] < ((float*)&o->MaxPoint)[0] &&
+        ((float*)&q->boxMax)[1] > ((float*)&o->MinPoint)[1] && ((float*)&q->boxMin)[1] < ((float*)&o->MaxPoint)[1] &&
+        ((float*)&q->boxMax)[2] > ((float*)&o->MinPoint)[2] && ((float*)&q->boxMin)[2] < ((float*)&o->MaxPoint)[2]) {
         r = 1;
     }
     return r;
@@ -2537,11 +2438,11 @@ extern "C" void TerrainCallback_intersectinstance(void* vctx, void* vnode)
             collect_335B90(ctx, node);
         }
     } else if (flags & 0x40) {
-        if (((sObj_335B90*)node->m_pActiveNode) == 0) return;
-        sVEntry<void>* vt = ((sObj_335B90*)node->m_pActiveNode)->vt;
-        if (((Test_335B90)vt[44].fn)((char*)((sObj_335B90*)node->m_pActiveNode) + vt[44].delta)) {
-            sVEntry<void>* vt2 = ((sObj_335B90*)node->m_pActiveNode)->vt;
-            sBox_335B90* objBox = ((GetBox_335B90)vt2[45].fn)((char*)((sObj_335B90*)node->m_pActiveNode) + vt2[45].delta);
+        if ((node->m_pActiveNode) == 0) return;
+        sVEntry<void>* vt = ((sVEntry<void>*)(node->m_pActiveNode)->mVtbl);
+        if (((Test_335B90)vt[44].fn)((char*)(node->m_pActiveNode) + vt[44].delta)) {
+            sVEntry<void>* vt2 = ((sVEntry<void>*)(node->m_pActiveNode)->mVtbl);
+            tBoundBox* objBox = ((GetBox_335B90)vt2[45].fn)((char*)(node->m_pActiveNode) + vt2[45].delta);
             if (overlapBox_335B90((ctx->intersecttype), objBox)) {
                 collect_335B90(ctx, node);
             }
@@ -2555,10 +2456,6 @@ INCLUDE_ASM("intersect/worldsphtree", cBXNash_terrainIntersect);
 #ifdef SKIP_ASM
 
 
-struct sBox_335D78 {
-    t4Vector min;
-    t4Vector max;
-};
 
 
 struct sCell_335D78 {
@@ -2598,7 +2495,7 @@ static inline void collect_335D78(nash_Cell* node, TerrainCallback* ctx)
     if (((void**)&node->children[0][0][0])[7] != 0) nash_Cell_descend4((nash_Cell*)((void**)&node->children[0][0][0])[7], ctx);
 }
 
-static inline void queryCell_335D78(sGrid_335D78* grid, int i, sBox_335D78* box, TerrainCallback* ctx)
+static inline void queryCell_335D78(sGrid_335D78* grid, int i, tBoundBox* box, TerrainCallback* ctx)
 {
     sCell_335D78* cell = &grid->cells[i];
     if (grid->cells[i].tree != 0) {
@@ -2636,16 +2533,16 @@ extern "C" int cBXNash_terrainIntersect(cBXNash* vself, void* vq, sHit_00336850*
     sGrid_335D78* grid = (sGrid_335D78*)vself;
     cWorldIntersectType* query = (cWorldIntersectType*)vq;
     TerrainCallback ctx;
-    sBox_335D78 box;
+    tBoundBox box;
     int count;
     (*(cWorldIntersectType**)&ctx.intersecttype) = query;
-    (*(sHit_335960**)&ctx.intersectinfo) = (sHit_335960*)hits;
+    (*(tIntersectInfo**)&ctx.intersectinfo) = (tIntersectInfo*)hits;
     ctx.maxintersectinfo = cap;
     ctx.numintersectinfo = &count;
     (*(int*)&ctx.hint) = hitCache;
     (*(void**)&ctx.fwddiffcache) = grid->cache;
-    box.min = (*(&query->boxMin));
-    box.max = (*(&query->boxMax));
+    box.MinPoint = (*(&query->boxMin));
+    box.MaxPoint = (*(&query->boxMax));
     TerrainCallback* pctx = &ctx;
     count = 0;
     queryCell_335D78(grid, 0, &box, pctx);
@@ -2741,13 +2638,10 @@ extern "C" float cBXNash_terrainIntersect1(cBXNash* self, cWorldIntersectType* i
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cBXNash_getGroundHeight);
 #ifdef SKIP_ASM
-struct sQuad_369D8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sHit_003369D8 {
-    sQuad_369D8 p;          // 0x00
-    sQuad_369D8 n;          // 0x10
+    t4Vector p;          // 0x00
+    t4Vector n;          // 0x10
     float pad20[8];         // 0x20
     float dist;             // 0x40
     int pad44[3];
@@ -2758,12 +2652,8 @@ struct sHit_003369D8 {
 } __attribute__((aligned(16)));
 
 
-struct sCell_369D8 {
-    int f0, f4, f8, fC;
-    void* node;             // 0x10
-};
 
-extern "C" void* cWorldLine_cWorldLine(void* seg, const sQuad_369D8& a, const sQuad_369D8& b, int n, float r);
+extern "C" void* cWorldLine_cWorldLine(void* seg, const t4Vector& a, const t4Vector& b, int n, float r);
 struct sCtx_369D8 {
     float* pos;             // 0x0
     char flags[8];          // 0x4
@@ -2774,7 +2664,7 @@ struct sTrav_369D8 {
     sCtx_369D8 ctx;         // 0x4
 };
 
-extern "C" void nash_privy_QueryHelper_help(char* flag, TerrainCallback* q, TerrainCallback* q2, sCtx_369D8* ctx, void* node, sCell_369D8* cell);
+extern "C" void nash_privy_QueryHelper_help(char* flag, TerrainCallback* q, TerrainCallback* q2, sCtx_369D8* ctx, void* node, nash_Octant* cell);
 
 // PORT: PS2 FPU abs.s via inline asm; use fabsf off-PS2.
 static inline float absf_003369D8(float x)
@@ -2805,9 +2695,9 @@ static inline int isBetter_003369D8(sHit_003369D8* a, sHit_003369D8* b)
     return *(unsigned int*)(a->tri + 0x150) < *(unsigned int*)(b->tri + 0x150);
 }
 
-static inline void visit_003369D8(sCell_369D8* c, char* flag, TerrainCallback* q, sCtx_369D8* p)
+static inline void visit_003369D8(nash_Octant* c, char* flag, TerrainCallback* q, sCtx_369D8* p)
 {
-    nash_privy_QueryHelper_help(flag, q, q, p, c->node, c);
+    nash_privy_QueryHelper_help(flag, q, q, p, ((void*)c->rootcell), c);
 }
 
 /**
@@ -2824,19 +2714,19 @@ static inline void visit_003369D8(sCell_369D8* c, char* flag, TerrainCallback* q
  * @param outN  out: the hit normal
  * @return 1 on a hit, otherwise 0
  */
-extern "C" int cBXNash_getGroundHeight(cBXNash* self, float* pos, sQuad_369D8* outP, sQuad_369D8* outN)
+extern "C" int cBXNash_getGroundHeight(cBXNash* self, float* pos, t4Vector* outP, t4Vector* outN)
 {
     char seg[176];
     float lo = pos[2] - 100000.0f;
     float hi = pos[2] + 100000.0f;
     float idealParam = clamp_003369D8((pos[2] + 20.0f - lo) / (hi - lo), 0.0f, 1.0f);
     {
-        sQuad_369D8 lineStart;
+        t4Vector lineStart;
         lineStart.x = pos[0];
         lineStart.y = pos[1];
         lineStart.z = lo;
         lineStart.w = 1.0f;
-        sQuad_369D8 lineEnd;
+        t4Vector lineEnd;
         lineEnd.x = pos[0];
         lineEnd.y = pos[1];
         lineEnd.z = hi;
@@ -2855,22 +2745,22 @@ extern "C" int cBXNash_getGroundHeight(cBXNash* self, float* pos, sQuad_369D8* o
     tr.count = 0;
     tr.ctx.pos = pos;
     sCtx_369D8* ctx = &tr.ctx;
-    sCell_369D8* octant0 = &((sCell_369D8*)self)[0];
-    sCell_369D8* octant1 = &((sCell_369D8*)self)[1];
-    sCell_369D8* octant2 = &((sCell_369D8*)self)[2];
-    sCell_369D8* octant3 = &((sCell_369D8*)self)[3];
-    sCell_369D8* octant4 = &((sCell_369D8*)self)[4];
-    sCell_369D8* octant5 = &((sCell_369D8*)self)[5];
-    sCell_369D8* octant6 = &((sCell_369D8*)self)[6];
-    sCell_369D8* octant7 = &((sCell_369D8*)self)[7];
-    if (((sCell_369D8*)self)[0].node) visit_003369D8(octant0, &tr.ctx.flags[0], &terrainQuery, ctx);
-    if (((sCell_369D8*)self)[1].node) visit_003369D8(octant1, &tr.ctx.flags[1], &terrainQuery, ctx);
-    if (((sCell_369D8*)self)[2].node) visit_003369D8(octant2, &tr.ctx.flags[2], &terrainQuery, ctx);
-    if (((sCell_369D8*)self)[3].node) visit_003369D8(octant3, &tr.ctx.flags[3], &terrainQuery, ctx);
-    if (((sCell_369D8*)self)[4].node) visit_003369D8(octant4, &tr.ctx.flags[4], &terrainQuery, ctx);
-    if (((sCell_369D8*)self)[5].node) visit_003369D8(octant5, &tr.ctx.flags[5], &terrainQuery, ctx);
-    if (((sCell_369D8*)self)[6].node) visit_003369D8(octant6, &tr.ctx.flags[6], &terrainQuery, ctx);
-    if (((sCell_369D8*)self)[7].node) visit_003369D8(octant7, &tr.ctx.flags[7], &terrainQuery, ctx);
+    nash_Octant* octant0 = &((nash_Octant*)self)[0];
+    nash_Octant* octant1 = &((nash_Octant*)self)[1];
+    nash_Octant* octant2 = &((nash_Octant*)self)[2];
+    nash_Octant* octant3 = &((nash_Octant*)self)[3];
+    nash_Octant* octant4 = &((nash_Octant*)self)[4];
+    nash_Octant* octant5 = &((nash_Octant*)self)[5];
+    nash_Octant* octant6 = &((nash_Octant*)self)[6];
+    nash_Octant* octant7 = &((nash_Octant*)self)[7];
+    if (((void*)((nash_Octant*)self)[0].rootcell)) visit_003369D8(octant0, &tr.ctx.flags[0], &terrainQuery, ctx);
+    if (((void*)((nash_Octant*)self)[1].rootcell)) visit_003369D8(octant1, &tr.ctx.flags[1], &terrainQuery, ctx);
+    if (((void*)((nash_Octant*)self)[2].rootcell)) visit_003369D8(octant2, &tr.ctx.flags[2], &terrainQuery, ctx);
+    if (((void*)((nash_Octant*)self)[3].rootcell)) visit_003369D8(octant3, &tr.ctx.flags[3], &terrainQuery, ctx);
+    if (((void*)((nash_Octant*)self)[4].rootcell)) visit_003369D8(octant4, &tr.ctx.flags[4], &terrainQuery, ctx);
+    if (((void*)((nash_Octant*)self)[5].rootcell)) visit_003369D8(octant5, &tr.ctx.flags[5], &terrainQuery, ctx);
+    if (((void*)((nash_Octant*)self)[6].rootcell)) visit_003369D8(octant6, &tr.ctx.flags[6], &terrainQuery, ctx);
+    if (((void*)((nash_Octant*)self)[7].rootcell)) visit_003369D8(octant7, &tr.ctx.flags[7], &terrainQuery, ctx);
     if (tr.count == 0) {
         return 0;
     }
@@ -2899,18 +2789,10 @@ INCLUDE_ASM("intersect/worldsphtree", StaticObjectCallback_intersectinstance);
 #ifdef SKIP_ASM
 struct sBox_336D40;
 typedef int (*Test_336D40)(void*);
-typedef sBox_336D40* (*GetBox_336D40)(void*);
-
-struct sBox_336D40 {
-    float min[4];
-    float max[4];
-};
+typedef tBoundBox* (*GetBox_336D40)(void*);
 
 
-struct sObj_336D40 {
-    int pad00[3];
-    sVEntry<void>* vt;
-};
+
 
 
 
@@ -2927,12 +2809,12 @@ static inline int overlapNode_336D40(const cWorldIntersectType* q, const tInstan
     return r;
 }
 
-static inline int overlapBox_336D40(const cWorldIntersectType* q, const sBox_336D40* o)
+static inline int overlapBox_336D40(const cWorldIntersectType* q, const tBoundBox* o)
 {
     int r = 0;
-    if (((float*)&q->boxMax)[0] > o->min[0] && ((float*)&q->boxMin)[0] < o->max[0] &&
-        ((float*)&q->boxMax)[1] > o->min[1] && ((float*)&q->boxMin)[1] < o->max[1] &&
-        ((float*)&q->boxMax)[2] > o->min[2] && ((float*)&q->boxMin)[2] < o->max[2]) {
+    if (((float*)&q->boxMax)[0] > ((float*)&o->MinPoint)[0] && ((float*)&q->boxMin)[0] < ((float*)&o->MaxPoint)[0] &&
+        ((float*)&q->boxMax)[1] > ((float*)&o->MinPoint)[1] && ((float*)&q->boxMin)[1] < ((float*)&o->MaxPoint)[1] &&
+        ((float*)&q->boxMax)[2] > ((float*)&o->MinPoint)[2] && ((float*)&q->boxMin)[2] < ((float*)&o->MaxPoint)[2]) {
         r = 1;
     }
     return r;
@@ -2967,10 +2849,10 @@ extern "C" void StaticObjectCallback_intersectinstance(void* vctx, void* vnode)
             collect_336D40(ctx, node, mode);
         }
     } else if (flags & 0x40) {
-        sVEntry<void>* vt = ((sObj_336D40*)node->m_pActiveNode)->vt;
-        if (((Test_336D40)vt[44].fn)((char*)((sObj_336D40*)node->m_pActiveNode) + vt[44].delta)) {
-            sVEntry<void>* vt2 = ((sObj_336D40*)node->m_pActiveNode)->vt;
-            sBox_336D40* objBox = ((GetBox_336D40)vt2[45].fn)((char*)((sObj_336D40*)node->m_pActiveNode) + vt2[45].delta);
+        sVEntry<void>* vt = ((sVEntry<void>*)(node->m_pActiveNode)->mVtbl);
+        if (((Test_336D40)vt[44].fn)((char*)(node->m_pActiveNode) + vt[44].delta)) {
+            sVEntry<void>* vt2 = ((sVEntry<void>*)(node->m_pActiveNode)->mVtbl);
+            tBoundBox* objBox = ((GetBox_336D40)vt2[45].fn)((char*)(node->m_pActiveNode) + vt2[45].delta);
             if (overlapBox_336D40((ctx->intersecttype), objBox)) {
                 collect_336D40(ctx, node, mode);
             }
@@ -2984,10 +2866,6 @@ INCLUDE_ASM("intersect/worldsphtree", cBXNash_staticObjectIntersect);
 #ifdef SKIP_ASM
 
 
-struct sBox_336F30 {
-    t4Vector min;
-    t4Vector max;
-};
 
 struct sOct_336F30 {
     void* child[8];
@@ -3026,7 +2904,7 @@ static inline void collect_336F30(sOct_336F30* node, StaticObjectCallback* ctx)
     if (node->child[7] != 0) nash_Cell_descend5((nash_Cell*)node->child[7], ctx);
 }
 
-static inline void queryCell_336F30(sGrid_336F30* grid, int i, sBox_336F30* box, StaticObjectCallback* ctx)
+static inline void queryCell_336F30(sGrid_336F30* grid, int i, tBoundBox* box, StaticObjectCallback* ctx)
 {
     sCell_336F30* cell = &grid->cells[i];
     if (grid->cells[i].tree != 0) {
@@ -3064,15 +2942,15 @@ extern "C" int cBXNash_staticObjectIntersect(cBXNash* vself, void* vq, sHit_0033
     sGrid_336F30* grid = (sGrid_336F30*)vself;
     cWorldIntersectType* query = (cWorldIntersectType*)vq;
     StaticObjectCallback ctx;
-    sBox_336F30 box;
+    tBoundBox box;
     int count;
     (*(cWorldIntersectType**)&ctx.intersecttype) = query;
     (*(char**)&ctx.intersectinfo) = (char*)hits;
     ctx.maxintersectinfo = cap;
     ctx.numintersectinfo = &count;
     ctx.includeridable = full;
-    box.min = (*(&query->boxMin));
-    box.max = (*(&query->boxMax));
+    box.MinPoint = (*(&query->boxMin));
+    box.MaxPoint = (*(&query->boxMax));
     StaticObjectCallback* pctx = &ctx;
     count = 0;
     queryCell_336F30(grid, 0, &box, pctx);
@@ -3794,10 +3672,6 @@ struct sTree_33B748 {
     void** all;
 };
 
-struct sCell_33B748 {
-    int level;
-    int x, y, z;
-};
 
 // PORT: alias; the unit defines nash_Cell_descend3 later with its own struct types.
 extern "C" void nash_Cell_descend3_33B748(sTree_33B748* self, OverlapEverythingCallback* ctx) __asm__("nash_Cell_descend3");
@@ -3876,12 +3750,12 @@ extern "C" void nash_privy_QueryHelper_helpX4(char* flag, OverlapEverythingCallb
     OverlapEverythingCallback* ctx2 = vctx2;
     tBoundBox* box = (tBoundBox*)vbox;
     sTree_33B748* node = (sTree_33B748*)vnode;
-    sCell_33B748* cell = (sCell_33B748*)vcell;
+    nash_CellKey* cell = (nash_CellKey*)vcell;
     visit_33B748(node, ctx);
     if (cell->level == 11) {
         return;
     }
-    sCell_33B748 sub;
+    nash_CellKey sub;
     sub.level = cell->level - 1;
     sub.x = cell->x * 2;
     sub.y = cell->y * 2;
@@ -4191,7 +4065,7 @@ static inline int Classify_DBE8(sCtx_DBE8* ctx, sCell_DBE8* c)
  * @param vnode  the cell (On Tour const Cell *)
  * @param vcell  the cell's key: level, x, y, z (On Tour CellKey)
  */
-extern "C" void nash_privy_QueryHelper_help(char* flag, TerrainCallback* query, TerrainCallback* insideQuery, sCtx_369D8* vctx, void* vnode, sCell_369D8* vcell)
+extern "C" void nash_privy_QueryHelper_help(char* flag, TerrainCallback* query, TerrainCallback* insideQuery, sCtx_369D8* vctx, void* vnode, nash_Octant* vcell)
 {
     sCtx_DBE8* ctx = (sCtx_DBE8*)vctx;
     sOct_DBE8* node = (sOct_DBE8*)vnode;
@@ -4246,35 +4120,35 @@ extern "C" void nash_privy_QueryHelper_help(char* flag, TerrainCallback* query, 
         sub.y = cell->y * 2;
         sub.z = cell->z * 2;
         if (node->child[0]) {
-            nash_privy_QueryHelper_help(flag, query, insideQuery, vctx, node->child[0], (sCell_369D8*)&sub);
+            nash_privy_QueryHelper_help(flag, query, insideQuery, vctx, node->child[0], (nash_Octant*)&sub);
         }
         sub.x++;
         if (node->child[4]) {
-            nash_privy_QueryHelper_help(flag, query, insideQuery, vctx, node->child[4], (sCell_369D8*)&sub);
+            nash_privy_QueryHelper_help(flag, query, insideQuery, vctx, node->child[4], (nash_Octant*)&sub);
         }
         sub.y++;
         if (node->child[6]) {
-            nash_privy_QueryHelper_help(flag, query, insideQuery, vctx, node->child[6], (sCell_369D8*)&sub);
+            nash_privy_QueryHelper_help(flag, query, insideQuery, vctx, node->child[6], (nash_Octant*)&sub);
         }
         sub.x--;
         if (node->child[2]) {
-            nash_privy_QueryHelper_help(flag, query, insideQuery, vctx, node->child[2], (sCell_369D8*)&sub);
+            nash_privy_QueryHelper_help(flag, query, insideQuery, vctx, node->child[2], (nash_Octant*)&sub);
         }
         sub.z++;
         if (node->child[3]) {
-            nash_privy_QueryHelper_help(flag, query, insideQuery, vctx, node->child[3], (sCell_369D8*)&sub);
+            nash_privy_QueryHelper_help(flag, query, insideQuery, vctx, node->child[3], (nash_Octant*)&sub);
         }
         sub.x++;
         if (node->child[7]) {
-            nash_privy_QueryHelper_help(flag, query, insideQuery, vctx, node->child[7], (sCell_369D8*)&sub);
+            nash_privy_QueryHelper_help(flag, query, insideQuery, vctx, node->child[7], (nash_Octant*)&sub);
         }
         sub.y--;
         if (node->child[5]) {
-            nash_privy_QueryHelper_help(flag, query, insideQuery, vctx, node->child[5], (sCell_369D8*)&sub);
+            nash_privy_QueryHelper_help(flag, query, insideQuery, vctx, node->child[5], (nash_Octant*)&sub);
         }
         sub.x--;
         if (node->child[1]) {
-            nash_privy_QueryHelper_help(flag, query, insideQuery, vctx, node->child[1], (sCell_369D8*)&sub);
+            nash_privy_QueryHelper_help(flag, query, insideQuery, vctx, node->child[1], (nash_Octant*)&sub);
         }
     }
 }
@@ -4444,10 +4318,6 @@ extern "C" void nash_privy_QueryHelper_helpX6(char* flag, StaticObjectCallback* 
 INCLUDE_ASM("intersect/worldsphtree", nash_privy_QueryHelper_helpX7);
 #ifdef SKIP_ASM
 
-struct sCell_33ED60 {
-    int level;
-    int x, y, z;
-};
 
 struct sOct_33ED60 {
     sOct_33ED60* child[8];
@@ -4521,12 +4391,12 @@ extern "C" void nash_privy_QueryHelper_helpX7(char* flag, SplineCallback* vctx, 
     SplineCallback* ctx2 = (SplineCallback*)vctx2;
     tBoundBox* box = (tBoundBox*)vbox;
     sOct_33ED60* node = (sOct_33ED60*)vnode;
-    sCell_33ED60* cell = (sCell_33ED60*)vcell;
+    nash_CellKey* cell = (nash_CellKey*)vcell;
     objs_33ED60(node->objs, ctx);
     if (cell->level == 11) {
         return;
     }
-    sCell_33ED60 sub;
+    nash_CellKey sub;
     sub.level = cell->level - 1;
     sub.x = cell->x * 2;
     sub.y = cell->y * 2;
@@ -5029,10 +4899,6 @@ INCLUDE_ASM("intersect/worldsphtree", nash_Cell_descend3);
 struct sCtx_3309D8;
 extern "C" void OverlapInstancesCallback_operatorCall(OverlapInstancesCallback* ctx, nash_Cell* tree);
 
-struct sBox_340DC0 {
-    float min[4];
-    float max[4];
-};
 
 
 
@@ -5043,12 +4909,6 @@ struct sObjNode_340DC0 {
     float bmax[3];
 };
 
-struct sTree_340DC0 {
-    sTree_340DC0* child[8];
-    void* nodes;
-    sObjNode_340DC0* objs;
-    void** all;
-};
 
 static inline void add_340DC0(OverlapTypedCallback* s, void* p)
 {
@@ -5058,12 +4918,12 @@ static inline void add_340DC0(OverlapTypedCallback* s, void* p)
     *cnt = n + 1;
 }
 
-static inline int overlap_340DC0(const sBox_340DC0* b, const sObjNode_340DC0* n)
+static inline int overlap_340DC0(const tBoundBox* b, const sObjNode_340DC0* n)
 {
     int r = 0;
-    if (b->min[0] <= n->bmax[0] && b->max[0] >= n->bmin[0] &&
-        b->min[1] <= n->bmax[1] && b->max[1] >= n->bmin[1] &&
-        b->min[2] <= n->bmax[2] && b->max[2] >= n->bmin[2]) {
+    if (((float*)&b->MinPoint)[0] <= n->bmax[0] && ((float*)&b->MaxPoint)[0] >= n->bmin[0] &&
+        ((float*)&b->MinPoint)[1] <= n->bmax[1] && ((float*)&b->MaxPoint)[1] >= n->bmin[1] &&
+        ((float*)&b->MinPoint)[2] <= n->bmax[2] && ((float*)&b->MaxPoint)[2] >= n->bmin[2]) {
         r = 1;
     }
     return r;
@@ -5084,7 +4944,7 @@ extern "C" void nash_Cell_descend3(nash_Cell* self, OverlapEverythingCallback* c
     OverlapInstancesCallback_operatorCall((OverlapInstancesCallback*)ctx, self);
     OverlapTypedCallback* bucket = &(*(OverlapTypedCallback*)&ctx->patchescallback);
     for (sObjNode_340DC0* objNode = *(sObjNode_340DC0**)&self->nodesinside[1]; objNode != 0; objNode = objNode->next) {
-        if (overlap_340DC0(((sBox_340DC0*)bucket->box), objNode)) {
+        if (overlap_340DC0(((tBoundBox*)bucket->box), objNode)) {
             add_340DC0(bucket, objNode);
         }
     }
@@ -5092,14 +4952,14 @@ extern "C" void nash_Cell_descend3(nash_Cell* self, OverlapEverythingCallback* c
     for (void** allNode = *(void***)&self->nodesinside[2]; allNode != 0; allNode = (void**)*allNode) {
         add_340DC0(bucket, allNode);
     }
-    if (((sTree_340DC0**)&self->children[0])[0]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0**)&self->children[0])[0], ctx);
-    if (((sTree_340DC0**)&self->children[0])[1]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0**)&self->children[0])[1], ctx);
-    if (((sTree_340DC0**)&self->children[0])[2]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0**)&self->children[0])[2], ctx);
-    if (((sTree_340DC0**)&self->children[0])[3]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0**)&self->children[0])[3], ctx);
-    if (((sTree_340DC0**)&self->children[0])[4]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0**)&self->children[0])[4], ctx);
-    if (((sTree_340DC0**)&self->children[0])[5]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0**)&self->children[0])[5], ctx);
-    if (((sTree_340DC0**)&self->children[0])[6]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0**)&self->children[0])[6], ctx);
-    if (((sTree_340DC0**)&self->children[0])[7]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0**)&self->children[0])[7], ctx);
+    if (((nash_Cell**)&self->children[0])[0]) nash_Cell_descend3((nash_Cell*)((nash_Cell**)&self->children[0])[0], ctx);
+    if (((nash_Cell**)&self->children[0])[1]) nash_Cell_descend3((nash_Cell*)((nash_Cell**)&self->children[0])[1], ctx);
+    if (((nash_Cell**)&self->children[0])[2]) nash_Cell_descend3((nash_Cell*)((nash_Cell**)&self->children[0])[2], ctx);
+    if (((nash_Cell**)&self->children[0])[3]) nash_Cell_descend3((nash_Cell*)((nash_Cell**)&self->children[0])[3], ctx);
+    if (((nash_Cell**)&self->children[0])[4]) nash_Cell_descend3((nash_Cell*)((nash_Cell**)&self->children[0])[4], ctx);
+    if (((nash_Cell**)&self->children[0])[5]) nash_Cell_descend3((nash_Cell*)((nash_Cell**)&self->children[0])[5], ctx);
+    if (((nash_Cell**)&self->children[0])[6]) nash_Cell_descend3((nash_Cell*)((nash_Cell**)&self->children[0])[6], ctx);
+    if (((nash_Cell**)&self->children[0])[7]) nash_Cell_descend3((nash_Cell*)((nash_Cell**)&self->children[0])[7], ctx);
 }
 #endif
 
@@ -5239,29 +5099,7 @@ struct sVec4_341388 {
     sVec4_341388(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
-struct sDef_341388 {
-    int f00;
-    short type;
-    short pad06;
-    float time;
-    float f0C;
-    float f10;
-    float x, y, z;
-};
 
-struct sObj_341388 {
-    int pad00[3];
-    void** vt;
-    int pad10[2];
-    char* mtx;
-    int pad1C;
-    sVec4_341388 pos;
-    float speed;
-    float f34;
-    int t38;
-    int t3C;
-    int type;
-};
 
 extern void* cBoostNode_vtbl[];
 extern sVec4_341388 D_004FF120_341388[] __asm__("t4vect_Zero");
@@ -5347,31 +5185,31 @@ static inline sVec4_341388 vu0Xform_341388(const sVec4_341388& v, const char* m)
  * @param def  the script's boost data (On Tour tMakeBoostData)
  * @return @p self
  */
-extern "C" sObj_341388* cBoostNode_cBoostNode1(cBoostNode* self, void* bucket, int nodeType, void* instance, sDef_341388* def)
+extern "C" cBoostNode* cBoostNode_cBoostNode1(cBoostNode* self, void* bucket, int nodeType, void* instance, tMakeBoostData* def)
 {
-    cInstanceNode_cInstanceNode1(((sObj_341388*)self), bucket, nodeType, instance);
+    cInstanceNode_cInstanceNode1((self), bucket, nodeType, instance);
     self->mVtbl = cBoostNode_vtbl;
-    int type = def->type;
+    int type = def->Type;
     self->Type = type;
-    self->BoostTime = (int)(def->time * (float)cAppMan_TheAppMan->TimerHz);
-    if (def->x == 0.0f && def->y == 0.0f && def->z == 0.0f) {
+    self->BoostTime = (int)(def->BoostTime * (float)cAppMan_TheAppMan->TimerHz);
+    if (def->BoostX == 0.0f && def->BoostY == 0.0f && def->BoostZ == 0.0f) {
         if (type == 2) {
             *(sVec4_341388*)&self->Boost = *D_004FF150_341388;
         } else {
             *(sVec4_341388*)&self->Boost = *D_004FF120_341388;
         }
     } else {
-        *(sVec4_341388*)&self->Boost = vu0Normalize_341388(sVec4_341388(def->x, def->y, def->z, 0.0f));
+        *(sVec4_341388*)&self->Boost = vu0Normalize_341388(sVec4_341388(def->BoostX, def->BoostY, def->BoostZ, 0.0f));
     }
-    self->MaxSpeed = def->f10 * 27.77777862548828f;
-    self->Drag = def->f0C;
+    self->MaxSpeed = def->MaxSpeed * 27.77777862548828f;
+    self->Drag = def->Drag;
     self->Time = self->Type ? self->BoostTime : 0;
     if (self->Type == 2) {
         char* instMatrix = (char*)&self->Instance->m_fmTransform;
         *(sVec4_341388*)&self->Boost = vu0Xform_341388(vu0Scale_341388(*(sVec4_341388*)&self->Boost, -1.0f), instMatrix);
         self->MaxSpeed = -self->MaxSpeed;
     }
-    return ((sObj_341388*)self);
+    return (self);
 }
 #endif
 
@@ -6213,26 +6051,6 @@ extern void* cAnimTeeterNode_vtbl[];
 extern "C" void cAnimNode_cAnimNode(void* p, int a1, int a2, void* obj, int a4);
 extern "C" float cAnimFrame_getStartTime(void* inst);
 
-struct sSphCtl_003421A0 {
-    int f00;            // 0x00
-    int f04;            // 0x04
-    float f08;          // 0x08
-    float f0C;          // 0x0C
-    float f10;          // 0x10
-    float f14;          // 0x14
-    float f18;          // 0x18
-    float f1C;          // 0x1C
-    float f20;          // 0x20
-    float f24;          // 0x24
-    int f28;            // 0x28
-    int f2C;            // 0x2C
-    char pad30[0x20];
-    void** vt;          // 0x50
-    char pad54[2];
-    unsigned short flags; // 0x56
-    char pad58[0x20];
-    void* inst;         // 0x78
-};
 
 struct sFloat_003421A0 {
     float v;
@@ -6302,7 +6120,7 @@ extern "C" void* cAnimTeeterNode_cAnimTeeterNode1(cAnimTeeterNode* self, int buc
     *(int*)&self->TorqueSum = 0;
     *(int*)&self->AnimSpeed = 0;
     *(int*)&self->W = 0;
-    return ((sSphCtl_003421A0*)self);
+    return (self);
 }
 #endif
 
@@ -6467,17 +6285,11 @@ INCLUDE_ASM("intersect/worldsphtree", cAnimTeeterNode_applyForce);
 // From peak3project's fork (github.com/peak3project/ssx3).
 // ---- Shared declarations: one type per real thing, used by the functions below ----
 
-// g++ 2.95 vtable entry with an untyped function slot (cast at the call).
-struct sVec4_342538 {
-    float x, y, z, w;
-    sVec4_342538() {}
-} __attribute__((aligned(16)));
 
 typedef char* (*GetMat_342538)(void*, int);
 
 struct sBodyTbl_342538 { char pad00[8]; char* ents; };
 struct sBodyInf_342538 { char pad00[0x80]; sBodyTbl_342538* tbl; };
-struct sSub_342538 { char pad00[0x18]; sBodyInf_342538* inf; };
 
 struct sSelf_342538 {
     float sum;                      // 0x00
@@ -6489,16 +6301,11 @@ struct sSelf_342538 {
     sBodyInf_342538* inf;            // 0x5C
 };
 
-struct sObj_342538 {
-    sVec4_342538 pos;               // 0x00
-    char pad10[0x4C];
-    int idx;                        // 0x5C
-};
 
-extern sVec4_342538 D_004FF150_342538[] __asm__("t4vect_YAxis");
+extern t4Vector D_004FF150_342538[] __asm__("t4vect_YAxis");
 
 // PORT: PS2-only VU0 inline asm (vector length via vsqrt).
-static inline float vu0Length_342538(const sVec4_342538& v)
+static inline float vu0Length_342538(const t4Vector& v)
 {
     float r;
     int t;
@@ -6519,7 +6326,7 @@ static inline float vu0Length_342538(const sVec4_342538& v)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline void vu0Sub_342538(sVec4_342538& r, const sVec4_342538& a, const sVec4_342538& b)
+static inline void vu0Sub_342538(t4Vector& r, const t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -6532,7 +6339,7 @@ static inline void vu0Sub_342538(sVec4_342538& r, const sVec4_342538& a, const s
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline void vu0Scale_342538(sVec4_342538& r, const sVec4_342538& v, float s)
+static inline void vu0Scale_342538(t4Vector& r, const t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -6547,7 +6354,7 @@ static inline void vu0Scale_342538(sVec4_342538& r, const sVec4_342538& v, float
 }
 
 // PORT: PS2-only VU0 inline asm (matrix times vector).
-static inline void vu0Xform_342538(sVec4_342538& r, const sVec4_342538& v, const char* m)
+static inline void vu0Xform_342538(t4Vector& r, const t4Vector& v, const char* m)
 {
     __asm__(
         "lqc2      $vf8, %2\n"
@@ -6566,7 +6373,7 @@ static inline void vu0Xform_342538(sVec4_342538& r, const sVec4_342538& v, const
 }
 
 // PORT: PS2-only VU0 inline asm (cross product xyz).
-static inline void vu0Cross_342538(sVec4_342538& r, const sVec4_342538& a, const sVec4_342538& b)
+static inline void vu0Cross_342538(t4Vector& r, const t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf4, %1\n"
@@ -6581,7 +6388,7 @@ static inline void vu0Cross_342538(sVec4_342538& r, const sVec4_342538& a, const
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0Dot_342538(const sVec4_342538& a, const sVec4_342538& b)
+static inline float vu0Dot_342538(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -6615,30 +6422,30 @@ static inline float vu0Dot_342538(const sVec4_342538& a, const sVec4_342538& b)
  * @param intInfo  the hit (On Tour tIntersectInfo: position at +0x0, mesh index at +0x5C)
  * @param force  the force vector
  */
-extern "C" void cAnimTeeterNode_applyForce(cAnimTeeterNode* self, sObj_342538* intInfo, sVec4_342538* force)
+extern "C" void cAnimTeeterNode_applyForce(cAnimTeeterNode* self, tIntersectInfo* intInfo, t4Vector* force)
 {
-    int idx = intInfo->idx;
+    int idx = intInfo->Mesh;
     if (idx >= 0) {
-        sSub_342538* sub = (sSub_342538*)(&self->unk_044);
-        tMeshHeirarchyRecord* ents = (tMeshHeirarchyRecord*)sub->inf->tbl->ents;
+        cMoveNode* sub = (cMoveNode*)(&self->unk_044);
+        tMeshHeirarchyRecord* ents = (tMeshHeirarchyRecord*)((sBodyInf_342538*)sub->Instance)->tbl->ents;
         if ((int)ents[idx].m_MeshAnim != 0) {
             sWsVtSlot* vt = (sWsVtSlot*)self->mVtbl;
             char* animMat = ((GetMat_342538)vt[29].fn)(vthis(sub, vt[29]), idx);
             char* pivotMat = animMat;
             if (vu0Length_342538(*force) > 100.0f) {
-                sVec4_342538 leverArm;
-                sVec4_342538 a;
-                sVec4_342538 vuResult;
-                sVec4_342538 torqueVec;
-                a = *(sVec4_342538*)(animMat + 0x30);
-                vu0Sub_342538(vuResult, intInfo->pos, a);
+                t4Vector leverArm;
+                t4Vector a;
+                t4Vector vuResult;
+                t4Vector torqueVec;
+                a = *(t4Vector*)(animMat + 0x30);
+                vu0Sub_342538(vuResult, (*(&intInfo->Ipos)), a);
                 leverArm = vuResult;
                 if (self->TorqueScale < 0.0f) {
                     vu0Scale_342538(vuResult, leverArm, -1.0f);
                     a = vuResult;
                     leverArm = vuResult;
                 }
-                if ((self->AnimSign >> intInfo->idx) & 1) {
+                if ((self->AnimSign >> intInfo->Mesh) & 1) {
                     vu0Scale_342538(vuResult, leverArm, -1.0f);
                     a = vuResult;
                     leverArm = vuResult;
@@ -6683,15 +6490,6 @@ extern "C" void cAnimTeeterNode_writeToReplayFrame(cAnimTeeterNode* self, void* 
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cBoostModifier_cBoostModifier);
 #ifdef SKIP_ASM
-struct sSphDef_342768 {
-    int f00;
-    short type;
-    short pad06;
-    float time;
-    float f0C;
-    float f10;
-    float x, y, z;
-};
 extern void* cBoostModifier_vtbl[];
 
 /**
@@ -6708,23 +6506,23 @@ extern void* cBoostModifier_vtbl[];
  * @param instRecord  the instance record the modifier belongs to
  * @return @p self
  */
-extern "C" void* cBoostModifier_cBoostModifier(cBoostModifier* self, sSphDef_342768* def, int instRecord)
+extern "C" void* cBoostModifier_cBoostModifier(cBoostModifier* self, tAddBoostData* def, int instRecord)
 {
     self->Active = 1;
     self->mVtbl = cBoostModifier_vtbl;
     self->Instance = (tInstanceRecord*)instRecord;
-    int type = def->type;
+    int type = def->Type;
     self->Type = type;
-    int boostFrames = (int)(def->time * (float)cAppMan_TheAppMan->TimerHz);
+    int boostFrames = (int)(def->BoostTime * (float)cAppMan_TheAppMan->TimerHz);
     self->BoostTime = boostFrames;
     t4Vector boostDir;
-    boostDir.x = def->x;
-    boostDir.y = def->y;
-    boostDir.z = def->z;
+    boostDir.x = def->BoostX;
+    boostDir.y = def->BoostY;
+    boostDir.z = def->BoostZ;
     boostDir.w = 0.0f;
     *(&self->Boost) = boostDir;
-    self->MaxSpeed = def->f10 * 100.0f;
-    self->Drag = def->f0C;
+    self->MaxSpeed = def->MaxSpeed * 100.0f;
+    self->Drag = def->Drag;
     self->Time = type == 1 ? boostFrames : 0;
     return (self);
 }
@@ -7007,27 +6805,8 @@ extern "C" void* cMoveNode_cMoveNode1(void* self, void* a1, int type, void* a3);
 extern "C" void cMoveNode_transferFromOld(void* self, void* a1);
 extern void* cDebounceNode_vtbl[];
 
-struct sNode_342C08 {
-    int pad00[2];
-    unsigned int flags;
-};
 
-struct sDef_342C08 {
-    int f00;
-    float time;
-    int f08;
-    int mode;
-};
 
-struct sSelf_342C08 {
-    int pad00[3];
-    void** vt;
-    int pad10[2];
-    sNode_342C08* node;
-    int pad1C[4];
-    int t2C;
-    int t30;
-};
 
 /**
  * Constructs a debounce node that takes over from an instance's old node, and sets the instance's visibility.
@@ -7047,22 +6826,22 @@ struct sSelf_342C08 {
  * @param oldNode  the node it replaces (On Tour pOldNode)
  * @return @p self
  */
-extern "C" void* cDebounceNode_cDebounceNode1(sSelf_342C08* self, void* bucket, void* instance, sDef_342C08* def, void* oldNode)
+extern "C" void* cDebounceNode_cDebounceNode1(cDebounceNode* self, void* bucket, void* instance, tMakeDebounceData* def, void* oldNode)
 {
     cMoveNode_cMoveNode1(self, bucket, 0, instance);
-    self->vt = cDebounceNode_vtbl;
-    self->t2C = (int)(def->time * (float)cAppMan_TheAppMan->TimerHz);
-    self->t30 = def->f08;
+    self->mVtbl = cDebounceNode_vtbl;
+    self->Life = (int)(def->Time * (float)cAppMan_TheAppMan->TimerHz);
+    self->Type = def->Type;
     cMoveNode_transferFromOld(self, oldNode);
-    if (def->mode == 0) {
-        self->node->flags &= 0xFFFFFFF0;
-    } else if (def->mode == 1) {
-        self->node->flags |= 1;
-        self->node->flags = (self->node->flags & ~2u) | 4;
+    if (def->Visible == 0) {
+        (*(unsigned int*)&(self->Instance)->m_iFlags) &= 0xFFFFFFF0;
+    } else if (def->Visible == 1) {
+        (*(unsigned int*)&(self->Instance)->m_iFlags) |= 1;
+        (self->Instance)->m_iFlags = (((unsigned int)(self->Instance)->m_iFlags) & ~2u) | 4;
     } else {
-        sNode_342C08* n = self->node;
-        if ((n->flags & 3) == 3) {
-            n->flags = (n->flags & ~2u) | 4;
+        tInstanceRecord* n = (self->Instance);
+        if ((((unsigned int)n->m_iFlags) & 3) == 3) {
+            n->m_iFlags = (((unsigned int)n->m_iFlags) & ~2u) | 4;
         }
     }
     return self;

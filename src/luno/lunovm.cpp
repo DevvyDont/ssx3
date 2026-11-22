@@ -1778,11 +1778,6 @@ extern "C" cLunoValue* luno_cLunoVar_operatorPlus(cLunoValue* self, const cLunoV
 //100%
 INCLUDE_ASM("luno/lunovm", luno_cLunoTableEntry__cLunoTableEntry);
 #ifdef SKIP_ASM
-struct sVEntry00226768 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 extern char D_00479890[];
 
 /**
@@ -1799,7 +1794,7 @@ extern "C" void luno_cLunoTableEntry__cLunoTableEntry(luno_cLunoTableEntry* self
     self->mVtbl = (void**)D_00479890;
     luno_cLunoTableEntry* obj = self->Next;
     if (((void*)obj) != 0) {
-        sVEntry00226768* vt = (sVEntry00226768*)obj->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)obj->mVtbl;
         vt[1].fn(vthis(obj, vt[1]), 3);
     }
     luno_cLunoVar__cLunoVar((cLunoValue*)(&self->Value), 2);

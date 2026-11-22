@@ -250,10 +250,6 @@ struct sGmUV_369CF8 {
     float y() const { return v; }
 };
 
-struct sGmUVW_369CF8 {
-    float x, y, z, w;
-    sGmUVW_369CF8() {}
-} __attribute__((aligned(16)));
 
 
 struct sGmVE_369CF8 {
@@ -281,9 +277,9 @@ extern "C" void cGraphicsMan_RenderIndexedTriList(cGraphicsMan* self, int NumTri
                               sGmUV_369CF8* UV, sGmV4_369CF8* Color, sGmV3_369CF8* Offset)
 {
     tBxVertex verts[3];
-    (*(sGmUVW_369CF8*)&verts[2].u).z = 1.0f;
-    (*(sGmUVW_369CF8*)&verts[1].u).z = 1.0f;
-    (*(sGmUVW_369CF8*)&verts[0].u).z = 1.0f;
+    (*(t4Vector*)&verts[2].u).z = 1.0f;
+    (*(t4Vector*)&verts[1].u).z = 1.0f;
+    (*(t4Vector*)&verts[0].u).z = 1.0f;
     if (UV) {
         for (int i = 0; i < NumTris; i++) {
             for (int j = 0; j < 3; j++) {
@@ -293,8 +289,8 @@ extern "C" void cGraphicsMan_RenderIndexedTriList(cGraphicsMan* self, int NumTri
                 verts[j].r = (int)(Color[Index].y * 0.5f);
                 verts[j].g = (int)(Color[Index].z * 0.5f);
                 verts[j].b = (int)(Color[Index].w * 0.5f);
-                (*(sGmUVW_369CF8*)&verts[j].u).x = UV[Index].x();
-                (*(sGmUVW_369CF8*)&verts[j].u).y = UV[Index].y();
+                (*(t4Vector*)&verts[j].u).x = UV[Index].x();
+                (*(t4Vector*)&verts[j].u).y = UV[Index].y();
             }
             Indices += 3;
             sGmVE_369CF8* vt = (sGmVE_369CF8*)self->mVtbl;
@@ -309,9 +305,9 @@ extern "C" void cGraphicsMan_RenderIndexedTriList(cGraphicsMan* self, int NumTri
                 verts[j].r = (int)(Color[Index].y * 0.5f);
                 verts[j].g = (int)(Color[Index].z * 0.5f);
                 verts[j].b = (int)(Color[Index].w * 0.5f);
-                (*(sGmUVW_369CF8*)&verts[j].u).z = 1.0f;
-                (*(sGmUVW_369CF8*)&verts[j].u).x = 0.0f;
-                (*(sGmUVW_369CF8*)&verts[j].u).y = 0.0f;
+                (*(t4Vector*)&verts[j].u).z = 1.0f;
+                (*(t4Vector*)&verts[j].u).x = 0.0f;
+                (*(t4Vector*)&verts[j].u).y = 0.0f;
             }
             Indices += 3;
             sGmVE_369CF8* vt = (sGmVE_369CF8*)self->mVtbl;
@@ -1438,10 +1434,6 @@ struct sGmEntry_C740 {
     float v[7];
 };
 
-struct sGmOwner_C740 {
-    char pad[0x6CD4];
-    sGmEntry_C740 entries[1];
-};
 
 /**
  * Copies the seven cLightGlow PS2 tweak values into the graphics manager's glow entry for view @p idx.
@@ -1454,7 +1446,7 @@ struct sGmOwner_C740 {
  */
 extern "C" void func_0036C740(void* self, int idx)
 {
-    char* entry = (char*)&((sGmOwner_C740*)self)->entries[idx];
+    char* entry = (char*)&((sGmEntry_C740*)&((cPS2GraphicsMan*)self)->unk_6CD4[0][0])[idx];
     *(float*)(entry + 0x0) = cLightGlow_m_PS2MinIntensity;
     *(float*)(entry + 0x4) = cLightGlow_m_PS2ModIntensity;
     *(float*)(entry + 0x8) = cLightGlow_m_PS2CopyIntensity;
@@ -2814,18 +2806,13 @@ struct sGfxMat_708C0 {
     float m[4][4];
 };
 
-struct sGfxVEntry_708C0 {
-    short delta;
-    short index;
-    void* fn;
-};
 
 struct sGfxCtx_708C0 {
     char pad_0x0[0xE84];
     sGfxRS_708C0* top;          // 0xE84
     char pad_0xE88[0xF50 - 0xE88];
     int texIds[(0x10D8 - 0xF50) / 4];   // 0xF50
-    sGfxVEntry_708C0* vtable;   // 0x10D8
+    sVEntry<void>* vtable;   // 0x10D8
 };
 
 extern sGfxCtx_708C0* D_004A5B80_708C0 __asm__("cGraphicsMan_TheGraphicsMan");
@@ -2853,7 +2840,7 @@ static inline int GetTexId_708C0(int i)
 extern "C" void cStaticEmitter_render1(cStaticEmitter* selfp)
 {
     sGfxCtx_708C0* gfx = D_004A5B80_708C0;
-    sGfxVEntry_708C0* vt = gfx->vtable;
+    sVEntry<void>* vt = gfx->vtable;
     if (((tCull_708C0)vt[93].fn)(vthis(gfx, vt[93]), (char*)&selfp->BoundBox, (char*)&selfp->BoundBox.MaxPoint,
                                  ((tGetMat_708C0)vt[43].fn)(vthis(gfx, vt[43]))) == 1) {
         return;
@@ -2872,7 +2859,7 @@ extern "C" void cStaticEmitter_render1(cStaticEmitter* selfp)
     gfx->top->flagsA = (gfx->top->flagsA & 0xFFF00FFF) | 0x14000;
     gfx->top->flagsA = (gfx->top->flagsA & ~0x7C) | ((layer << 2) & 0x7C);
     gfx->top->tex = GetTexId_708C0((selfp)->TextureId + (int)selfp->mCurrentFlipTexture);
-    sGfxVEntry_708C0* vt2 = gfx->vtable;
+    sVEntry<void>* vt2 = gfx->vtable;
     ((tDraw_708C0)vt2[82].fn)(vthis(gfx, vt2[82]), (char*)&selfp->Emitter);
     gfx->top--;
 }

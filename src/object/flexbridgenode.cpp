@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "intersect/worldinttypes.h"
+#include "world/worldrecords.h"
 #include "world/worldcache.h"
 #include "render/ps2gridmesh.h"
 #include "world/instancerecord.h"
@@ -502,19 +504,13 @@ extern "C" void cFlexBridgeNode_applyForce(cFlexBridgeNode* self, tIntersectInfo
 //100%
 INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_updateIntersectInfo);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct sV4_70D0 {
-    float x, y, z, w;
-    sV4_70D0() {}
-    sV4_70D0(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
-} __attribute__((aligned(16)));
 
-extern sV4_70D0 D_004FF140_70D0 __asm__("t4vect_XAxis");
+extern t4Vector D_004FF140_70D0 __asm__("t4vect_XAxis");
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sV4_70D0 vu0Sub_70D0(const sV4_70D0& a, const sV4_70D0& b)
+static inline t4Vector vu0Sub_70D0(const t4Vector& a, const t4Vector& b)
 {
-    sV4_70D0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -526,9 +522,9 @@ static inline sV4_70D0 vu0Sub_70D0(const sV4_70D0& a, const sV4_70D0& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sV4_70D0 vu0Add_70D0(const sV4_70D0& a, const sV4_70D0& b)
+static inline t4Vector vu0Add_70D0(const t4Vector& a, const t4Vector& b)
 {
-    sV4_70D0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -540,7 +536,7 @@ static inline sV4_70D0 vu0Add_70D0(const sV4_70D0& a, const sV4_70D0& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a += b).
-static inline void vu0AddEq_70D0(sV4_70D0& a, const sV4_70D0& b)
+static inline void vu0AddEq_70D0(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %0\n"
@@ -552,9 +548,9 @@ static inline void vu0AddEq_70D0(sV4_70D0& a, const sV4_70D0& b)
 }
 
 // PORT: PS2-only VU0 inline asm (*v * s).
-static inline sV4_70D0 vu0ScaleP_70D0(const sV4_70D0* v, float s)
+static inline t4Vector vu0ScaleP_70D0(const t4Vector* v, float s)
 {
-    sV4_70D0 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -568,9 +564,9 @@ static inline sV4_70D0 vu0ScaleP_70D0(const sV4_70D0* v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix times vector).
-static inline sV4_70D0 vu0MtxMul_70D0(const sV4_70D0* m, const sV4_70D0& v)
+static inline t4Vector vu0MtxMul_70D0(const t4Vector* m, const t4Vector& v)
 {
-    sV4_70D0 r;
+    t4Vector r;
     __asm__(
         "lqc2         $vf8, %1\n"
         "lqc2         $vf4, 0x0(%2)\n"
@@ -588,9 +584,9 @@ static inline sV4_70D0 vu0MtxMul_70D0(const sV4_70D0* m, const sV4_70D0& v)
 }
 
 // PORT: PS2-only VU0 inline asm (cross product, w = 0).
-static inline sV4_70D0 vu0Cross_70D0(const sV4_70D0& a, const sV4_70D0& b)
+static inline t4Vector vu0Cross_70D0(const t4Vector& a, const t4Vector& b)
 {
-    sV4_70D0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -606,7 +602,7 @@ static inline sV4_70D0 vu0Cross_70D0(const sV4_70D0& a, const sV4_70D0& b)
 struct sFlVE_70D0 {
     short delta;
     short index;
-    sV4_70D0* (*fn)(void*);
+    t4Vector* (*fn)(void*);
 };
 
 
@@ -617,10 +613,6 @@ struct sFlBridge_70D0 {
     tSpringNode* ents;  // 0x74
 };
 
-struct sFlState_70D0 {
-    sV4_70D0 v[6];
-    int idx;            // 0x60
-};
 
 /**
  * Adds the motion of the bridge segment that was hit to an intersection's velocities.
@@ -630,20 +622,20 @@ struct sFlState_70D0 {
  *
  * @param intInfo  the hit (On Tour tIntersectInfo); nothing happens without a triangle index
  */
-extern "C" void cFlexBridgeNode_updateIntersectInfo(cFlexBridgeNode* self, sFlState_70D0* intInfo)
+extern "C" void cFlexBridgeNode_updateIntersectInfo(cFlexBridgeNode* self, tIntersectInfo* intInfo)
 {
-    int idx = intInfo->idx;
+    int idx = intInfo->Face;
     if (idx >= 0) {
         int pairIndex = idx / 2;
         tSpringNode* ents = self->Mesh.Nodes;
         sFlVE_70D0* vt = (sFlVE_70D0*)self->mVtbl;
-        sV4_70D0* matrix = vt[24].fn(vthis(self, vt[24]));
+        t4Vector* matrix = vt[24].fn(vthis(self, vt[24]));
         tSpringNode* entry = (tSpringNode*)(pairIndex * 0x50 + (int)ents);
-        sV4_70D0 axisVec = vu0MtxMul_70D0(matrix, vu0ScaleP_70D0(&D_004FF140_70D0, entry->W));
-        sV4_70D0 arm = vu0Sub_70D0(intInfo->v[0], vu0MtxMul_70D0(matrix, (*(sV4_70D0*)&entry->P)));
-        sV4_70D0 pointVelocity = vu0Add_70D0(vu0MtxMul_70D0(matrix, (*(sV4_70D0*)&entry->V)), vu0Cross_70D0(arm, axisVec));
-        vu0AddEq_70D0(intInfo->v[2], pointVelocity);
-        vu0AddEq_70D0(intInfo->v[3], axisVec);
+        t4Vector axisVec = vu0MtxMul_70D0(matrix, vu0ScaleP_70D0(&D_004FF140_70D0, entry->W));
+        t4Vector arm = vu0Sub_70D0(((&intInfo->Ipos))[0], vu0MtxMul_70D0(matrix, (*(&entry->P))));
+        t4Vector pointVelocity = vu0Add_70D0(vu0MtxMul_70D0(matrix, (*(&entry->V))), vu0Cross_70D0(arm, axisVec));
+        vu0AddEq_70D0(((&intInfo->Ipos))[2], pointVelocity);
+        vu0AddEq_70D0(((&intInfo->Ipos))[3], axisVec);
     }
 }
 #endif
@@ -667,42 +659,10 @@ struct sFM_7268 {
 
 extern sFV_7268 D_004FF120_v7268 __asm__("t4vect_Zero");
 
-struct sFMesh_7268 {
-    unsigned short numTris;     // 0x0
-    short numVerts;             // 0x2
-    void* indices;              // 0x4
-    void* boxes;                // 0x8
-    sFV_7268* verts;            // 0xC
-    sFV_7268* normals;          // 0x10
-};
 
-struct sFHit_7268 {
-    sFV_7268 pos;       // 0x00
-    sFV_7268 nrm;       // 0x10
-    sFV_7268 v20;       // 0x20
-    sFV_7268 v30;       // 0x30
-    float t;            // 0x40
-    int type;           // 0x44
-    int f48;            // 0x48
-    int f4C;            // 0x4C
-    void* owner;        // 0x50
-    int f54;            // 0x54
-    int f58;            // 0x58
-    int f5C;            // 0x5C
-    int tri;            // 0x60
-    int f64;            // 0x64
-    int f68;            // 0x68
-    int f6C;            // 0x6C
-    int f70;            // 0x70
-    int pad[3];
-};
 
 struct sFVE_7268 { short delta; short index; void* fn; };
 
-struct sFTester_7268 {
-    char pad0[0x50];
-    sFVE_7268* vt;      // 0x50
-};
 
 struct sFList_7268 {
     int pad0;
@@ -715,7 +675,7 @@ typedef sFM_7268* (*GetMtxFn_7268)(void*);
 typedef void (*SetXformFn_7268)(void*, sFM_7268*, float);
 typedef void (*VoidFn_7268)(void*);
 
-extern "C" int cWorldIntersectType_IsMeshInt(sFTester_7268* t, sFMesh_7268* mesh, int flag, sFHit_7268* out, int cap);
+extern "C" int cWorldIntersectType_IsMeshInt(cWorldIntersectType* t, tPolyModelMesh* mesh, int flag, tIntersectInfo* out, int cap);
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
 static inline void Copy_7268(sFM_7268* d, const sFM_7268* s)
@@ -782,21 +742,21 @@ static inline sFV_7268 Mul_7268(const sFV_7268& a, const sFV_7268& b)
     return sFV_7268(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w);
 }
 
-static inline void Reset_7268(sFHit_7268* h)
+static inline void Reset_7268(tIntersectInfo* h)
 {
-    h->f54 = 0;
-    h->owner = 0;
-    h->f58 = 0;
-    h->f5C = -1;
-    h->tri = -1;
-    h->f64 = -1;
-    h->type = 2;
-    h->f4C = -1;
-    h->v20 = D_004FF120_v7268;
-    h->v30 = D_004FF120_v7268;
-    h->f68 = 0;
-    h->f6C = 0;
-    h->f70 = 0;
+    (*(int*)&h->Patch) = 0;
+    (*(void**)&h->Inst) = 0;
+    (*(int*)&h->Spline) = 0;
+    h->Mesh = -1;
+    h->Face = -1;
+    h->Seg = -1;
+    h->HitType = 2;
+    h->Stype = -1;
+    (*(sFV_7268*)&h->Ivel) = D_004FF120_v7268;
+    (*(sFV_7268*)&h->Iangvel) = D_004FF120_v7268;
+    (*(int*)&h->T) = 0;
+    (*(int*)&h->u) = 0;
+    (*(int*)&h->v) = 0;
 }
 
 // Orthonormal inverse in place: transpose the 3x3 part, position = R^T * -t.
@@ -826,39 +786,39 @@ static inline void TransposeInverse_7268(sFM_7268* t)
  * @param flags   query flags; bit 1 must be set
  * @return the number of hits
  */
-extern "C" int cFlexBridgeNode_intersect(cFlexBridgeNode* self, sFTester_7268* tester, sFHit_7268* out, int cap, int flags)
+extern "C" int cFlexBridgeNode_intersect(cFlexBridgeNode* self, cWorldIntersectType* tester, tIntersectInfo* out, int cap, int flags)
 {
     if (!(flags & 2)) {
         return 0;
     }
-    sFMesh_7268 mesh;
-    mesh.numTris = (self->Mesh.Width - 1) * 2;
-    mesh.numVerts = self->Mesh.Width * 2;
-    mesh.indices = ((void*)self->Faces);
-    mesh.verts = ((sFV_7268*)self->Verts);
-    mesh.normals = ((sFV_7268*)self->FaceNorms);
+    tPolyModelMesh mesh;
+    mesh.NumFaces = (self->Mesh.Width - 1) * 2;
+    mesh.NumVertices = self->Mesh.Width * 2;
+    (*(void**)&mesh.Face) = ((void*)self->Faces);
+    (*(sFV_7268**)&mesh.Vertex) = ((sFV_7268*)self->Verts);
+    (*(sFV_7268**)&mesh.Normal) = ((sFV_7268*)self->FaceNorms);
     sFM_7268* matrix = ((GetMtxFn_7268)((sFVE_7268*)self->mVtbl)[24].fn)(vthis(self, ((sFVE_7268*)self->mVtbl)[24]));
     sFM_7268 inv;
     Copy_7268(&inv, matrix);
     TransposeInverse_7268(&inv);
-    ((SetXformFn_7268)tester->vt[1].fn)(vthis(tester, tester->vt[1]), &inv, 1.0f / (self->Instance)->m_fScale);
+    ((SetXformFn_7268)((sFVE_7268*)tester->mVtbl)[1].fn)(vthis(tester, ((sFVE_7268*)tester->mVtbl)[1]), &inv, 1.0f / (self->Instance)->m_fScale);
     int n = cWorldIntersectType_IsMeshInt(tester, &mesh, 1, out, cap);
-    ((VoidFn_7268)tester->vt[2].fn)(vthis(tester, tester->vt[2]));
+    ((VoidFn_7268)((sFVE_7268*)tester->mVtbl)[2].fn)(vthis(tester, ((sFVE_7268*)tester->mVtbl)[2]));
     for (int i = 0; i < n; i++) {
-        sFHit_7268* hit = &out[i];
+        tIntersectInfo* hit = &out[i];
         Reset_7268(hit);
         float dataScale = (self->Instance)->m_fScale;
         float one = 1.0f;
-        hit->pos = MulVec_7268(matrix, Mul_7268(hit->pos, sFV_7268(dataScale, dataScale, dataScale, one)));
-        hit->nrm = MulVec_7268(matrix, hit->nrm);
-        hit->type = 1;
-        hit->owner = (self->Instance);
+        (*(sFV_7268*)&hit->Ipos) = MulVec_7268(matrix, Mul_7268((*(sFV_7268*)&hit->Ipos), sFV_7268(dataScale, dataScale, dataScale, one)));
+        (*(sFV_7268*)&hit->Inorm) = MulVec_7268(matrix, (*(sFV_7268*)&hit->Inorm));
+        hit->HitType = 1;
+        (*(void**)&hit->Inst) = (self->Instance);
         int k = ((sFList_7268*)(self->Instance)->m_Model)->count - 1;
-        hit->f48 = 0;
-        hit->f5C = k;
-        hit->v20 = D_004FF120_v7268;
-        hit->v30 = D_004FF120_v7268;
-        hit->f4C = *(short*)(((char*)(self->Instance)->m_pCollideRecord) + k * 12 + 0x1A);
+        (*(int*)&hit->SphTree) = 0;
+        hit->Mesh = k;
+        (*(sFV_7268*)&hit->Ivel) = D_004FF120_v7268;
+        (*(sFV_7268*)&hit->Iangvel) = D_004FF120_v7268;
+        hit->Stype = *(short*)(((char*)(self->Instance)->m_pCollideRecord) + k * 12 + 0x1A);
     }
     return n;
 }
@@ -1249,12 +1209,6 @@ struct sFlexSeg_347D90 {
     sFlexSeg_347D90() {}
 };
 
-struct sFlexDef_347D90 {
-    int f0;
-    unsigned int links[8];
-    char pad24[0x44 - 0x24];
-    int f44;
-};
 
 /**
  * Constructs the flex-rail base of a float or spring rail (bucket 1) for a placed rail instance.
@@ -1269,15 +1223,15 @@ struct sFlexDef_347D90 {
  * @param def  rail make-data
  * @return self
  */
-extern "C" void* cFlexRailNode_cFlexRailNode(cFlexRailNode* self, void* nodeType, void* instRecord, sFlexDef_347D90* def)
+extern "C" void* cFlexRailNode_cFlexRailNode(cFlexRailNode* self, void* nodeType, void* instRecord, tMakeFlexRailData* def)
 {
     cInstanceNode_cInstanceNode1(((char*)self), 1, nodeType, instRecord);
     self->mVtbl = (void**)cFlexRailNode_vtbl;
-    int len = def->f44;
+    int len = def->Flags;
     self->NumNodes = 0;
     self->RailFlags = len;
     for (int i = 0; i < 8; i++) {
-        if (def->links[i] != 0xFFFFFFFF) {
+        if (((unsigned int*)&def->InstId1)[i] != 0xFFFFFFFF) {
             self->NumNodes += 1;
         }
     }
@@ -1676,45 +1630,25 @@ static inline float bracket_8290(float lo, float x, float hi)
 }
 
 
-// Closest-point result written by cFlexRailNode_splineIntersect.
-struct sFbHit_8290 {
-    sFbV_8290 pos;      // 0x00
-    sFbV_8290 dir;      // 0x10: unit tangent at the hit
-    sFbV_8290 v20;      // 0x20
-    sFbV_8290 v30;      // 0x30
-    int pad40;
-    int type;           // 0x44
-    int pad48;
-    int surf;           // 0x4C
-    void* obj;          // 0x50
-    int f54;
-    int f58;
-    int f5C;
-    int f60;
-    int seg;            // 0x64
-    float t;            // 0x68
-    float f6C;
-    float f70;
-};
 
 extern sFbV_8290 t4vect_Zero;
 
 // tIntersectInfo::Init (On Tour name).
-static inline void Init_8290(sFbHit_8290* h)
+static inline void Init_8290(tIntersectInfo* h)
 {
-    h->type = 2;
-    h->f54 = 0;
-    h->obj = 0;
-    h->f58 = 0;
-    h->f5C = -1;
-    h->f60 = -1;
-    h->seg = -1;
-    h->surf = -1;
-    h->v20 = t4vect_Zero;
-    h->v30 = t4vect_Zero;
-    h->t = 0.0f;
-    h->f6C = 0.0f;
-    h->f70 = 0.0f;
+    h->HitType = 2;
+    (*(int*)&h->Patch) = 0;
+    (*(void**)&h->Inst) = 0;
+    (*(int*)&h->Spline) = 0;
+    h->Mesh = -1;
+    h->Face = -1;
+    h->Seg = -1;
+    h->Stype = -1;
+    (*(sFbV_8290*)&h->Ivel) = t4vect_Zero;
+    (*(sFbV_8290*)&h->Iangvel) = t4vect_Zero;
+    h->T = 0.0f;
+    h->u = 0.0f;
+    h->v = 0.0f;
 }
 
 // The golden-section brackets per coarse sample (rodata).
@@ -1743,7 +1677,7 @@ extern float D_0048E7F0[5];
  * @param intInfo  intersect info filled on a hit
  */
 extern "C" void cFlexRailNode_splineIntersect(cFlexRailNode* self, const sFbV_8290* minBpos, const sFbV_8290* maxBpos, const sFbV_8290* bpos,
-                              unsigned int splineFilterMask, int* hit, float* dist, sFbHit_8290* intInfo)
+                              unsigned int splineFilterMask, int* hit, float* dist, tIntersectInfo* intInfo)
 {
     if (((unsigned int)self->RailFlags & splineFilterMask) == 0) {
         return;
@@ -1826,23 +1760,23 @@ extern "C" void cFlexRailNode_splineIntersect(cFlexRailNode* self, const sFbV_82
             *hit = 1;
             *dist = lastd;
             Init_8290(intInfo);
-            intInfo->pos = lastp;
-            intInfo->dir = fbNormalize_8290(splineSlope_8290(mat, lastt));
-            intInfo->obj = (void*)self->Instance;
+            (*(sFbV_8290*)&intInfo->Ipos) = lastp;
+            (*(sFbV_8290*)&intInfo->Inorm) = fbNormalize_8290(splineSlope_8290(mat, lastt));
+            (*(void**)&intInfo->Inst) = (void*)self->Instance;
             sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)self->mVtbl;
-            intInfo->f5C = vt[49].fn(vthis(self, vt[49]), seg);
-            intInfo->seg = seg;
-            intInfo->f58 = 0;
-            intInfo->t = lastt;
-            int mesh = intInfo->f5C;
+            intInfo->Mesh = vt[49].fn(vthis(self, vt[49]), seg);
+            intInfo->Seg = seg;
+            (*(int*)&intInfo->Spline) = 0;
+            intInfo->T = lastt;
+            int mesh = intInfo->Mesh;
             if (mesh <= 0) {
                 mesh = 0;
             }
             short* surf = (short*)((char*)self->Instance->m_pCollideRecord + 0x1A + mesh * 12);
             if (*surf == -1) {
-                intInfo->surf = 0;
+                intInfo->Stype = 0;
             } else {
-                intInfo->surf = *surf;
+                intInfo->Stype = *surf;
             }
         }
     }

@@ -542,11 +542,6 @@ extern "C" void bxSphereTree_Draw(bxSphereTree* octree) {
 //100%
 INCLUDE_ASM("intersect/aifwddiff", bxSphereTree_drawLeaves);
 #ifdef SKIP_ASM
-struct sLevel_281D0 {
-    float scale;   // 0x0
-    float child;   // 0x4
-    int stride;    // 0x8
-};
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline void vu0Scale_281D0(t4Vector& r, const t4Vector& v, float s)
@@ -594,7 +589,7 @@ extern "C" void func_281D0(bxSphereTree* self, int end, t4Vector* pos, int level
 extern "C" void func_281D0(bxSphereTree* self, int end, t4Vector* pos, int level, int off)
 {
     if (level < end) {
-        float levelOffset = *(float*)((char*)((sLevel_281D0*)(self->treeInfo)->levels) + level * 12 + 0x10);
+        float levelOffset = *(float*)((char*)&(self->treeInfo)->levels[level] + 0x10);
         for (int i = 0; i < 8; i++) {
             if (((self->treeInfo)->bitTree[off] >> i) & 1) {
                 t4Vector sum;
@@ -604,7 +599,7 @@ extern "C" void func_281D0(bxSphereTree* self, int end, t4Vector* pos, int level
                 offsetVec = tmpVec;
                 vu0Add_281D0(tmpVec, *pos, offsetVec);
                 sum = tmpVec;
-                int st = ((sLevel_281D0*)(self->treeInfo)->levels)[level].stride;
+                int st = ((self->treeInfo)->levels)[level].indexOffset;
                 func_281D0(self, end, &sum, level + 1, (i + 1) * st + off);
             }
         }
@@ -613,7 +608,7 @@ extern "C" void func_281D0(bxSphereTree* self, int end, t4Vector* pos, int level
         sVEntry<void(void*, float, void*, void*, int)>* vt = &((sVEntry<void(void*, float, void*, void*, int)>*)w->mVtbl)[87];
         char* thisp = (char*)w + vt->delta;
         t4Vector color;
-        float boxSize = ((sLevel_281D0*)(self->treeInfo)->levels)[level].scale * self->scale;
+        float boxSize = ((self->treeInfo)->levels)[level].radius * self->scale;
         color.x = 1.0f;
         color.y = 0.0f;
         color.z = 1.0f;

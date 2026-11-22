@@ -34,14 +34,6 @@ struct sTrigPart_16BF40
     sVEntry_16BF40* vt;     // 0x4
 };
 
-struct sTrig_16BF40
-{
-    int f0;
-    int f4;
-    int* f8;
-    sTrigPart_16BF40* fC;
-    sTrigPart_16BF40* f10;
-};
 
 
 /**
@@ -57,28 +49,28 @@ extern "C" void cCameraTriggerList_reset(cCameraTriggerList* self_)
     cCameraTriggerList* self = self_;
     for (int i = 0; i < self->NumTriggers; i++)
     {
-        if (((sTrig_16BF40**)self->Triggers)[i]->f8)
+        if (((int*)((tCameraTrigger**)self->Triggers)[i]->Volume))
         {
-            operator_delete(((sTrig_16BF40**)self->Triggers)[i]->f8);
-            ((sTrig_16BF40**)self->Triggers)[i]->f8 = 0;
+            operator_delete(((int*)((tCameraTrigger**)self->Triggers)[i]->Volume));
+            (*(int**)&((tCameraTrigger**)self->Triggers)[i]->Volume) = 0;
         }
-        if (((sTrig_16BF40**)self->Triggers)[i]->fC)
+        if (((sTrigPart_16BF40*)((tCameraTrigger**)self->Triggers)[i]->EnterAction))
         {
-            sTrigPart_16BF40* part = ((sTrig_16BF40**)self->Triggers)[i]->fC;
+            sTrigPart_16BF40* part = ((sTrigPart_16BF40*)((tCameraTrigger**)self->Triggers)[i]->EnterAction);
             part->vt[1].fn(vthis(part, part->vt[1]));
-            operator_delete((int*)((sTrig_16BF40**)self->Triggers)[i]->fC);
-            ((sTrig_16BF40**)self->Triggers)[i]->fC = 0;
+            operator_delete((int*)((sTrigPart_16BF40*)((tCameraTrigger**)self->Triggers)[i]->EnterAction));
+            (*(sTrigPart_16BF40**)&((tCameraTrigger**)self->Triggers)[i]->EnterAction) = 0;
         }
-        if (((sTrig_16BF40**)self->Triggers)[i]->f10)
+        if (((sTrigPart_16BF40*)((tCameraTrigger**)self->Triggers)[i]->ExitAction))
         {
-            sTrigPart_16BF40* part = ((sTrig_16BF40**)self->Triggers)[i]->f10;
+            sTrigPart_16BF40* part = ((sTrigPart_16BF40*)((tCameraTrigger**)self->Triggers)[i]->ExitAction);
             part->vt[1].fn(vthis(part, part->vt[1]));
-            operator_delete((int*)((sTrig_16BF40**)self->Triggers)[i]->f10);
-            ((sTrig_16BF40**)self->Triggers)[i]->f10 = 0;
+            operator_delete((int*)((sTrigPart_16BF40*)((tCameraTrigger**)self->Triggers)[i]->ExitAction));
+            (*(sTrigPart_16BF40**)&((tCameraTrigger**)self->Triggers)[i]->ExitAction) = 0;
         }
-        if (((sTrig_16BF40**)self->Triggers)[i])
-            tCameraTrigger__tCameraTrigger(((sTrig_16BF40**)self->Triggers)[i], 3);
-        ((sTrig_16BF40**)self->Triggers)[i] = 0;
+        if (((tCameraTrigger**)self->Triggers)[i])
+            tCameraTrigger__tCameraTrigger(((tCameraTrigger**)self->Triggers)[i], 3);
+        ((tCameraTrigger**)self->Triggers)[i] = 0;
     }
     cCameraTriggerList_initHeader((cCameraTriggerList*)self);
 }

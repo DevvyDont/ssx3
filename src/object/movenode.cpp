@@ -764,9 +764,6 @@ INCLUDE_ASM("object/movenode", cMoveNode_transferFromOld);
 #ifdef SKIP_ASM
 extern "C" void cMoveNode_transferEffectModifier(cMoveNode* self, cMoveNode* other);
 
-struct sMat44_355F10 {
-    float m[16];
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
 static inline void vu0CopyMatrix_355F10(void* dst, void* src)
@@ -812,7 +809,7 @@ extern "C" void cMoveNode_transferFromOld(cMoveNode* self, cInstanceNode* srcv)
         vd[1].fn(vthis(srcv, vd[1]), 3);
         return;
     }
-    sMat44_355F10 copy;
+    t4Matrix copy;
     vu0CopyMatrix_355F10(&copy, transform);
     int keep = self->Instance->m_iFlags;
     sVEntry<void(void*, int)>* vd = (sVEntry<void(void*, int)>*)srcv->mVtbl;

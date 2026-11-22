@@ -2749,14 +2749,6 @@ struct sSphereTreeInfo_D470 {
     unsigned char* masks;           // 0x28
 };
 
-struct sSphereOct_D470 {
-    sSphereVec4 dirs[8];            // 0x00
-    char pad_0x80[0x10];
-    float scale;                    // 0x90
-    float best;                     // 0x94: deepest penetration found so far
-    sSphereTreeInfo_D470* tree;     // 0x98
-    int order[8];                   // 0x9C: child visiting order
-};
 
 // PORT: PS2-only VU0 inline asm (v * s).
 static inline sSphereVec4 Scale_D470(const sSphereVec4& v, float s)
@@ -2905,18 +2897,18 @@ extern "C" void SphereTree_checkTriCollision_v(void* selfp, sSphereVec4* a1, sSp
 // penetration below self->best (*outA = push-out vector, *outB = contact point).
 extern "C" void SphereTree_checkTriCollision_v(void* selfp, sSphereVec4* point1, sSphereVec4* point2, sSphereVec4* point3, sSphereVec4* uNorm, sSphereVec4* pos, int depth, int base, sSphereVec4* outA, sSphereVec4* outB)
 {
-    sSphereOct_D470* self = (sSphereOct_D470*)selfp;
+    SphereTree* self = (SphereTree*)selfp;
     float planeDist = Dot_D470(*uNorm, Sub_D470(*pos, *point1));
-    float levelRadius = self->tree->levels[depth].radius * self->scale;
+    float levelRadius = ((sSphereTreeInfo_D470*)self->treeInfo)->levels[depth].radius * self->scale;
     if (depth == 0 && planeDist < 0.0f) {
         return;
     }
-    if (!(planeDist < levelRadius + self->best)) {
+    if (!(planeDist < levelRadius + self->worstCase)) {
         return;
     }
     int leaf = 0;
-    unsigned char mask = self->tree->masks[base];
-    if (!(depth < self->tree->depth && depth < 3 && mask != 0)) {
+    unsigned char mask = ((sSphereTreeInfo_D470*)self->treeInfo)->masks[base];
+    if (!(depth < ((sSphereTreeInfo_D470*)self->treeInfo)->depth && depth < 3 && mask != 0)) {
         leaf = 1;
     }
     sSphereVec4 planePoint = Sub_D470(*pos, Scale_D470(*uNorm, planeDist));
@@ -2949,22 +2941,22 @@ extern "C" void SphereTree_checkTriCollision_v(void* selfp, sSphereVec4* point1,
         }
     }
     if (!leaf) {
-        float f = self->tree->levels[depth + 1].offset;
+        float f = ((sSphereTreeInfo_D470*)self->treeInfo)->levels[depth + 1].offset;
         for (int i = 0; i < 8; i++) {
-            int k = self->order[i];
+            int k = self->sortAxis[i];
             if ((mask >> k) & 1) {
-                sSphereVec4 childPos = Add_D470(*pos, Scale_D470(self->dirs[k], f));
-                SphereTree_checkTriCollision_v(self, point1, point2, point3, uNorm, &childPos, depth + 1, (k + 1) * self->tree->levels[depth].stride + base, outA, outB);
+                sSphereVec4 childPos = Add_D470(*pos, Scale_D470(((sSphereVec4*)&self->axis[0])[k], f));
+                SphereTree_checkTriCollision_v(self, point1, point2, point3, uNorm, &childPos, depth + 1, (k + 1) * ((sSphereTreeInfo_D470*)self->treeInfo)->levels[depth].stride + base, outA, outB);
             }
         }
         return;
     }
     float f = planeDist - levelRadius;
-    if (f < self->best) {
+    if (f < self->worstCase) {
         sSphereVec4 n = Scale_D470(*uNorm, -f);
         *outA = n;
         *outB = planePoint;
-        self->best = f;
+        self->worstCase = f;
     }
 }
 #endif
@@ -3367,22 +3359,6 @@ struct sSphereV4_E100 : sSphereVec4 {
     }
 };
 
-struct sRiderCapsule_E100 {
-    int state;          // 0x00
-    int f4;             // 0x04
-    int f8;             // 0x08
-    int pad_0xC[5];
-    sSphereVec4 max;    // 0x20
-    sSphereVec4 min;    // 0x30
-    sSphereVec4 center; // 0x40
-    void* vtbl;         // 0x50
-    int pad_0x54[3];
-    sSphereVec4 p0;     // 0x60
-    sSphereVec4 dir;    // 0x70
-    sSphereVec4 p0b;    // 0x80
-    sSphereVec4 dirb;   // 0x90
-    float radius;       // 0xA0
-};
 
 /**
  * Constructs a world line query from two end points.
@@ -3398,7 +3374,7 @@ struct sRiderCapsule_E100 {
  * @param idealParam  the preferred hit parameter (On Tour aIdealParam)
  * @return @p self
  */
-extern "C" sRiderCapsule_E100* cWorldLine_cWorldLine(cWorldLine* self, sSphereVec4* startPoint, sSphereVec4* endPoint,
+extern "C" cWorldLine* cWorldLine_cWorldLine(cWorldLine* self, sSphereVec4* startPoint, sSphereVec4* endPoint,
                                              int state, float idealParam)
 {
     self->mPrecision = state;
@@ -3417,7 +3393,7 @@ extern "C" sRiderCapsule_E100* cWorldLine_cWorldLine(cWorldLine* self, sSphereVe
                                startPoint->y < endPoint->y ? startPoint->y : endPoint->y,
                                startPoint->z < endPoint->z ? startPoint->z : endPoint->z, 1.0f);
     *(sSphereVec4*)&self->boxCenter = sphereCapsuleDiv(sphereCapsuleAdd((sSphereVec4*)&self->boxMin, (sSphereVec4*)&self->boxMax), 2.0f);
-    return ((sRiderCapsule_E100*)self);
+    return (self);
 }
 #endif
 
@@ -3675,40 +3651,20 @@ extern int D_004A5978;
 extern sSphereVec4 D_004FF260[];
 extern sSphereVec4 D_004FF120_E690[] __asm__("t4vect_Zero");
 
-struct sHit_E690 {
-    sSphereVec4 pos;    // 0x00
-    sSphereVec4 nrm;    // 0x10
-    sSphereVec4 v20;    // 0x20
-    sSphereVec4 v30;    // 0x30
-    float dist;         // 0x40
-    int type;           // 0x44
-    int pad48;
-    int id;             // 0x4C
-    int f50;            // 0x50
-    void* obj;          // 0x54
-    int f58;            // 0x58
-    int f5C;            // 0x5C
-    int f60;            // 0x60
-    int f64;            // 0x64
-    float f68;          // 0x68
-    float u;            // 0x6C
-    float v;            // 0x70
-    int pad74[3];
-};
 
-static inline void reset_E690(sHit_E690* h)
+static inline void reset_E690(tIntersectInfo* h)
 {
-    h->type = 2;
-    h->obj = 0;
-    h->f50 = 0;
-    h->f58 = 0;
-    h->f5C = -1;
-    h->f60 = -1;
-    h->f64 = -1;
-    h->id = -1;
-    h->v20 = *D_004FF120_E690;
-    h->v30 = *D_004FF120_E690;
-    h->f68 = 0;
+    h->HitType = 2;
+    (*(void**)&h->Patch) = 0;
+    (*(int*)&h->Inst) = 0;
+    (*(int*)&h->Spline) = 0;
+    h->Mesh = -1;
+    h->Face = -1;
+    h->Seg = -1;
+    h->Stype = -1;
+    (*(sSphereVec4*)&h->Ivel) = *D_004FF120_E690;
+    (*(sSphereVec4*)&h->Iangvel) = *D_004FF120_E690;
+    h->T = 0;
     h->u = 0;
     h->v = 0;
 }
@@ -3732,7 +3688,7 @@ struct sRay_E690 {
  * @param hits  receives up to 2 intersections (On Tour tIntersectInfo* ti); On Tour's max count is not passed
  * @return the number of hits written (0-2)
  */
-extern "C" int cWorldLine_IsBoxInt(cWorldLine* self, float* bmin, float* bmax, sHit_E690* hits)
+extern "C" int cWorldLine_IsBoxInt(cWorldLine* self, float* bmin, float* bmax, tIntersectInfo* hits)
 {
     float tmin = -1.0f;
     float tmax = 2.0f;
@@ -3798,18 +3754,18 @@ extern "C" int cWorldLine_IsBoxInt(cWorldLine* self, float* bmin, float* bmax, s
     }
     int n = 0;
     if (0.0f <= tmin) {
-        sHit_E690* entryHit = &hits[0];
+        tIntersectInfo* entryHit = &hits[0];
         reset_E690(entryHit);
-        entryHit->nrm = D_004FF260[fmin];
-        entryHit->pos = vu0Add_E4D0(*(sSphereVec4*)&self->p0, vu0Scale_E4D0(*(sSphereVec4*)&self->dp, tmin));
-        entryHit->dist = tmin;
+        (*(sSphereVec4*)&entryHit->Inorm) = D_004FF260[fmin];
+        (*(sSphereVec4*)&entryHit->Ipos) = vu0Add_E4D0(*(sSphereVec4*)&self->p0, vu0Scale_E4D0(*(sSphereVec4*)&self->dp, tmin));
+        entryHit->Iparam = tmin;
         n = 1;
     }
     if (tmax < 1.0f) {
         reset_E690(&hits[n]);
-        hits[n].nrm = D_004FF260[fmax];
-        hits[n].pos = vu0Add_E4D0(*(sSphereVec4*)&self->p0, vu0Scale_E4D0(*(sSphereVec4*)&self->dp, tmax));
-        hits[n].dist = tmax;
+        (*(sSphereVec4*)&hits[n].Inorm) = D_004FF260[fmax];
+        (*(sSphereVec4*)&hits[n].Ipos) = vu0Add_E4D0(*(sSphereVec4*)&self->p0, vu0Scale_E4D0(*(sSphereVec4*)&self->dp, tmax));
+        hits[n].Iparam = tmax;
         n++;
     }
     return n;

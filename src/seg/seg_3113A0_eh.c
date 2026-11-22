@@ -658,9 +658,8 @@ int unwind_410C18(int *info, int pc, struct frame_state *buf, struct F410C18 **p
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", __throw);
 #ifdef SKIP_ASM
-struct S410F48 { char b[0x2F0]; } __attribute__((aligned(8)));
 extern void __terminate(void);
-extern struct S410F48 *get_410F48(void *, void *) __asm__("__frame_state_for");
+extern struct frame_state *get_410F48(void *, void *) __asm__("__frame_state_for");
 extern void *throw_helper(void *, int, void *, void *);
 /**
  * Throws the current exception: finds its handler and jumps there with the registers restored.
@@ -672,11 +671,11 @@ extern void *throw_helper(void *, int, void *, void *);
  * call it.
  */
 void __throw(void) {
-    struct S410F48 ctx0;
-    struct S410F48 buf;
-    struct S410F48 *frameState;
+    struct frame_state ctx0;
+    struct frame_state buf;
+    struct frame_state *frameState;
     int *info;
-    struct S410F48 *pb;
+    struct frame_state *pb;
     void **pa;
     void *pc;
     __builtin_unwind_init();
@@ -707,9 +706,8 @@ __asm__(".globl D_004110B8\n\t.type D_004110B8,@function\n\tD_004110B8 = __throw
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", __rethrow);
 #ifdef SKIP_ASM
-struct S411128 { char b[0x2F0]; } __attribute__((aligned(8)));
 extern void __terminate(void);
-extern struct S411128 *get_411128(void *, void *) __asm__("__frame_state_for");
+extern struct frame_state *get_411128(void *, void *) __asm__("__frame_state_for");
 extern void *throw_helper(void *, int, void *, void *);
 /**
  * Rethrows the current exception from a given exception-table entry.
@@ -720,11 +718,11 @@ extern void *throw_helper(void *, int, void *, void *);
  * @param val  the table entry to rethrow out of
  */
 void __rethrow(int val) {
-    struct S411128 ctx0;
-    struct S411128 buf;
-    struct S411128 *frameState;
+    struct frame_state ctx0;
+    struct frame_state buf;
+    struct frame_state *frameState;
     int *info;
-    struct S411128 *pb;
+    struct frame_state *pb;
     void **pa;
     void *pc;
     __builtin_unwind_init();

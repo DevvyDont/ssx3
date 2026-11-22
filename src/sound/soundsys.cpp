@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ealib/snd.h"
 #include "sound/bankmonitor.h"
 #include "world/instancerecord.h"
 #include "main/game.h"
@@ -525,14 +526,9 @@ extern "C" int cBankSys_SFX_End(cBankSys* vself)
 //100%
 INCLUDE_ASM("sound/soundsys", func_00290B58);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sCurve_290B58 {
-    float key[5];       // 0x0
-    float value[5];     // 0x14
-};
 
 // Named _impl: a later block declares func_00290B58 with its own curve struct.
-extern "C" float func_00290B58_impl(sCurve_290B58* c, float x) __asm__("func_00290B58");
+extern "C" float func_00290B58_impl(AudioTable* c, float x) __asm__("func_00290B58");
 /**
  * Evaluates a 5-point piecewise-linear curve at a value, clamping to the end values outside its keys.
  *
@@ -545,18 +541,18 @@ extern "C" float func_00290B58_impl(sCurve_290B58* c, float x) __asm__("func_002
  * @param x  the input value
  * @return the curve's value at @p x
  */
-extern "C" float func_00290B58_impl(sCurve_290B58* curvePoints, float x)
+extern "C" float func_00290B58_impl(AudioTable* curvePoints, float x)
 {
     for (int i = 1; i < 5; i++) {
-        if (curvePoints->key[i - 1] <= x && x < curvePoints->key[i]) {
-            float scaledRise = (x - curvePoints->key[i - 1]) * (curvePoints->value[i] - curvePoints->value[i - 1]);
-            return curvePoints->value[i - 1] + scaledRise / (curvePoints->key[i] - curvePoints->key[i - 1]);
+        if (curvePoints->x[i - 1] <= x && x < curvePoints->x[i]) {
+            float scaledRise = (x - curvePoints->x[i - 1]) * (curvePoints->y[i] - curvePoints->y[i - 1]);
+            return curvePoints->y[i - 1] + scaledRise / (curvePoints->x[i] - curvePoints->x[i - 1]);
         }
     }
-    if (x < curvePoints->key[0])
-        return curvePoints->value[0];
-    if (curvePoints->key[4] <= x)
-        return curvePoints->value[4];
+    if (x < curvePoints->x[0])
+        return curvePoints->y[0];
+    if (curvePoints->x[4] <= x)
+        return curvePoints->y[4];
     return 0.0f;
 }
 #endif
@@ -564,13 +560,9 @@ extern "C" float func_00290B58_impl(sCurve_290B58* curvePoints, float x)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_00290C10);
 #ifdef SKIP_ASM
-struct func_00290B58_sCurve {
-    float x[5];
-    float y[5];
-};
 
-extern "C" float func_00290B58(func_00290B58_sCurve* c, float v);
-extern func_00290B58_sCurve gAudioTables[];
+extern "C" float func_00290B58(AudioTable* c, float v);
+extern AudioTable gAudioTables[];
 
 /**
  * Evaluates audio curve gAudioTables[i] at a value (func_00290B58).
@@ -1988,8 +1980,8 @@ extern "C" void cSSXAudio_HandleCarve(cSSXAudio* self, void* obj) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_ChatterProgram);
 #ifdef SKIP_ASM
-extern func_00290B58_sCurve D_00482AF8;
-extern func_00290B58_sCurve D_00482B20;
+extern AudioTable D_00482AF8;
+extern AudioTable D_00482B20;
 
 /**
  * Computes a chatter loop's volume and pitch bend from the rider's audio speed through two curves.
@@ -2004,8 +1996,8 @@ extern func_00290B58_sCurve D_00482B20;
 extern "C" void cSSXAudio_ChatterProgram(cSSXAudio* self, cRider* vrider, int* out1, int* out2) {
     cRider* rider = (cRider*)vrider;
     float spd = rider->mAudioSpeed;
-    func_00290B58_sCurve volumeCurve = D_00482AF8;
-    func_00290B58_sCurve bendCurve = D_00482B20;
+    AudioTable volumeCurve = D_00482AF8;
+    AudioTable bendCurve = D_00482B20;
     *out1 = (int)func_00290B58(&volumeCurve, spd);
     *out2 = (int)(func_00290B58(&bendCurve, spd) * 4096.0f);
 }
@@ -2150,8 +2142,8 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_HardGlideProgram);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sSsVt_3538 { short delta; short index; int (*fn)(void*); };
-extern const func_00290B58_sCurve D_00482B78;
-extern const func_00290B58_sCurve D_00482BA0;
+extern const AudioTable D_00482B78;
+extern const AudioTable D_00482BA0;
 
 static inline float* getLevels_3538(void* self) { return (float*)((char*)self + 0x59B8); }
 
@@ -2189,9 +2181,9 @@ void cSSXAudio_HardGlideProgram_impl(void* self, cRider* rider, int* volume, int
             level = prev + (level - prev) * 0.25f;
         }
     }
-    func_00290B58_sCurve volumeCurve = D_00482B78;
+    AudioTable volumeCurve = D_00482B78;
     *(float*)((char*)getLevels_3538(self) + (idx << 2)) = level;
-    func_00290B58_sCurve bendCurve = D_00482BA0;
+    AudioTable bendCurve = D_00482BA0;
     *volume = (int)func_00290B58(&volumeCurve, level);
     *pitch = (int)(func_00290B58(&bendCurve, level) * 4096.0f);
 }
@@ -2201,8 +2193,8 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_SoftGlideProgram);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sSsVt_3740 { short delta; short index; int (*fn)(void*); };
-extern const func_00290B58_sCurve D_00482BC8;
-extern const func_00290B58_sCurve D_00482BF0;
+extern const AudioTable D_00482BC8;
+extern const AudioTable D_00482BF0;
 
 static inline float* getLevels_3740(void* self) { return (float*)((char*)self + 0x59B8); }
 
@@ -2240,9 +2232,9 @@ void cSSXAudio_SoftGlideProgram_impl(void* self, cRider* rider, int* volume, int
             level = prev + (level - prev) * 0.25f;
         }
     }
-    func_00290B58_sCurve volumeCurve = D_00482BC8;
+    AudioTable volumeCurve = D_00482BC8;
     *(float*)((char*)getLevels_3740(self) + (idx << 2)) = level;
-    func_00290B58_sCurve bendCurve = D_00482BF0;
+    AudioTable bendCurve = D_00482BF0;
     *volume = (int)func_00290B58(&volumeCurve, level);
     *pitch = (int)(func_00290B58(&bendCurve, level) * 4096.0f);
 }
@@ -2252,8 +2244,8 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_RailGlideProgram);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sSsVt_3948 { short delta; short index; int (*fn)(void*); };
-extern const func_00290B58_sCurve D_00482C18;
-extern const func_00290B58_sCurve D_00482C40;
+extern const AudioTable D_00482C18;
+extern const AudioTable D_00482C40;
 
 static inline float* getLevels_3948(void* self) { return (float*)((char*)self + 0x59B8); }
 
@@ -2291,9 +2283,9 @@ void cSSXAudio_RailGlideProgram_impl(void* self, cRider* rider, int* volume, int
             level = prev + (level - prev) * 0.25f;
         }
     }
-    func_00290B58_sCurve volumeCurve = D_00482C18;
+    AudioTable volumeCurve = D_00482C18;
     *(float*)((char*)getLevels_3948(self) + (idx << 2)) = level;
-    func_00290B58_sCurve bendCurve = D_00482C40;
+    AudioTable bendCurve = D_00482C40;
     *volume = (int)func_00290B58(&volumeCurve, level);
     *pitch = (int)(func_00290B58(&bendCurve, level) * 4096.0f);
 }
@@ -2351,8 +2343,8 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_HardCarveProgram);
 struct sSndVtI { short delta; short index; int (*fn)(void*); };
 
 static inline float* sndLevels5990(void* self) { return (float*)((char*)self + 0x5990); }
-extern const func_00290B58_sCurve D_00482C68;
-extern const func_00290B58_sCurve D_00482C90;
+extern const AudioTable D_00482C68;
+extern const AudioTable D_00482C90;
 
 /**
  * Computes a rider's carve volume and bend for surface program 0 from its edging, braking, pressure and speed.
@@ -2382,9 +2374,9 @@ extern "C" void cSSXAudio_HardCarveProgram(cSSXAudio* self, cRider* rider, int* 
             level = prev + (level - prev) * 0.125f;
         }
     }
-    func_00290B58_sCurve volumeCurve = D_00482C68;
+    AudioTable volumeCurve = D_00482C68;
     *(float*)((char*)sndLevels5990(self) + (idx << 2)) = level;
-    func_00290B58_sCurve bendCurve = D_00482C90;
+    AudioTable bendCurve = D_00482C90;
     *volume = (int)func_00290B58(&volumeCurve, level);
     *pitch = (int)(func_00290B58(&bendCurve, pressure) * 4096.0f);
     float speed = rider->mAudioSpeed;
@@ -2397,8 +2389,8 @@ extern "C" void cSSXAudio_HardCarveProgram(cSSXAudio* self, cRider* rider, int* 
 INCLUDE_ASM("sound/soundsys", cSSXAudio_SoftCarveProgram);
 #ifdef SKIP_ASM
 struct sSsVt_3DC0 { short delta; short index; int (*fn)(void*); };
-extern const func_00290B58_sCurve D_00482CB8;
-extern const func_00290B58_sCurve D_00482CE0;
+extern const AudioTable D_00482CB8;
+extern const AudioTable D_00482CE0;
 
 static inline float* getLevels_3DC0(void* self) { return (float*)((char*)self + 0x5990); }
 
@@ -2433,9 +2425,9 @@ extern "C" void cSSXAudio_SoftCarveProgram(cSSXAudio* self, cRider* rider, int* 
             level = prev + (level - prev) * 0.125f;
         }
     }
-    func_00290B58_sCurve volCurve = D_00482CB8;
+    AudioTable volCurve = D_00482CB8;
     *(float*)((char*)getLevels_3DC0(self) + (idx << 2)) = level;
-    func_00290B58_sCurve bendCurve = D_00482CE0;
+    AudioTable bendCurve = D_00482CE0;
     *volume = (int)func_00290B58(&volCurve, level);
     *pitch = (int)(func_00290B58(&bendCurve, pressure) * 4096.0f);
 }
@@ -2444,7 +2436,7 @@ extern "C" void cSSXAudio_SoftCarveProgram(cSSXAudio* self, cRider* rider, int* 
 INCLUDE_ASM("sound/soundsys", cSSXAudio_RailCarveProgram);
 #ifdef SKIP_ASM
 struct sSsVt_3FC8 { short delta; short index; int (*fn)(void*); };
-extern const func_00290B58_sCurve D_00482D08;
+extern const AudioTable D_00482D08;
 
 /**
  * Computes a rider's carve volume and bend for surface program 2: full volume, with the bend from its pressure.
@@ -2475,7 +2467,7 @@ extern "C" void cSSXAudio_RailCarveProgram(cSSXAudio* self, cRider* rider, int* 
     }
     self->mLastCarveEdging[idx] = level;
     *volume = 0x7F;
-    func_00290B58_sCurve bendCurve = D_00482D08;
+    AudioTable bendCurve = D_00482D08;
     *pitch = (int)(func_00290B58(&bendCurve, pressure) * 4096.0f);
     float speed = rider->mAudioSpeed;
     if (speed < 0.1f) {
@@ -2816,7 +2808,7 @@ extern "C" int SNDover(int id);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
 // cSSXAudio_Surface takes the rider here (the unit declares (void*, int)).
 int cSSXAudio_Surface_p(void* self, cRider* rider) __asm__("cSSXAudio_Surface");
-extern const func_00290B58_sCurve D_00482D30;
+extern const AudioTable D_00482D30;
 
 struct sSsVt48D0 { short delta; short index; int (*fn)(void*); };
 
@@ -2871,7 +2863,7 @@ extern "C" void cSSXAudio_Land(cSSXAudio* vself, cRider* rider, float powerupGai
             return;
         }
     }
-    func_00290B58_sCurve landCurve = D_00482D30;
+    AudioTable landCurve = D_00482D30;
     int vol = (int)func_00290B58(&landCurve, rider->unk_770);
     if (vol > 127) {
         vol = 127;
@@ -3673,7 +3665,7 @@ static inline void sfxBegin_6310(struct sSSXAudioView* self, int a, int b)
     self->mPatch[self->mpVBankManager->sub.cur] = b;
 }
 
-extern func_00290B58_sCurve D_00482DA0;
+extern AudioTable D_00482DA0;
 /**
  * Plays a rider's wipeout impact sound: bank 10 patch 9 in states 2 and 3, else a random bank-0 patch from 48.
  *
@@ -3699,7 +3691,7 @@ extern "C" void cSSXAudio_WipeoutHit(cSSXAudio* vself, cRider* obj)
             return;
         }
     }
-    struct func_00290B58_sCurve curve = D_00482DA0;
+    struct AudioTable curve = D_00482DA0;
     int vol = (int)func_00290B58(&curve, obj->unk_770);
     int bankNum = 0;
     int patchNum;
@@ -3778,7 +3770,7 @@ extern "C" int cSSXAudio_CameraInRange(void* self, int which, float f);
 extern "C" unsigned int cSoundSys_SndRand(void* rng);
 
 extern sSndCallback D_004A36B0_cb[] __asm__("D_004A36B0");
-extern func_00290B58_sCurve D_00482DA0;
+extern AudioTable D_00482DA0;
 /**
  * Starts a wiping-out rider's slide loop (bank 0, patch 51) unless it is already playing.
  *
@@ -3806,7 +3798,7 @@ extern "C" void cSSXAudio_WipeoutSlideStart(cSSXAudio* vself, sSndOwner* wipeout
             return;
         }
     }
-    func_00290B58_sCurve curve = D_00482DA0;
+    AudioTable curve = D_00482DA0;
     int vol = (int)func_00290B58(&curve, *(float*)(wipeoutControl->rider + 0x770));
     int patchNum = 51;
     if (vol > 0x7F) {
@@ -3943,7 +3935,7 @@ extern "C" int cSSXAudio_CameraInRange(void* self, int which, float f);
 extern "C" unsigned int cSoundSys_SndRand(void* rng);
 
 extern sSndCallback D_004A36B8_cb[] __asm__("D_004A36B8");
-extern func_00290B58_sCurve D_00482DA0;
+extern AudioTable D_00482DA0;
 /**
  * Starts the wipeout tumble sound of the rider a wipeout control drives, unless one is already playing.
  *
@@ -3970,7 +3962,7 @@ extern "C" void cSSXAudio_WipeoutTumbleStart(cSSXAudio* vself, sSndOwner* wipeou
             return;
         }
     }
-    func_00290B58_sCurve curve = D_00482DA0;
+    AudioTable curve = D_00482DA0;
     int vol = (int)func_00290B58(&curve, *(float*)(wipeoutControl->rider + 0x770));
     int patchNum = 52;
     if (vol > 0x7F) {
@@ -15750,33 +15742,6 @@ extern "C" void SNDSYS_getopts(void* cfg);
 extern "C" void SNDSYS_setopts(void* cfg);
 extern "C" void func_003BC930();
 
-struct sSnd8D90Cfg {
-    char pad0[0x28];
-    short f28;
-    unsigned short f2A;
-    short f2C;
-    unsigned char f2E;
-    unsigned char f2F;
-    unsigned char f30;
-    char pad31[0x3F - 0x31];
-    unsigned char f3F;
-    unsigned char f40;
-    unsigned char f41;
-    char pad42[0x47 - 0x42];
-    unsigned char f47;
-    char pad48;
-    unsigned char f49;
-    char pad4A[0x4C - 0x4A];
-    unsigned char f4C;
-    char pad4D;
-    short f4E;
-    short f50;
-    short f52;
-    short f54;
-    short f56;
-    short f58;
-    char pad5A[0xE0 - 0x5A];
-};
 
 /**
  * Switches the sound driver configuration for an audio mode.
@@ -15792,57 +15757,57 @@ struct sSnd8D90Cfg {
  */
 extern "C" int cPS2SoundManager_SetMode(cPS2SoundManager* self, int mode)
 {
-    sSnd8D90Cfg cfg;
+    SNDSYSOPTS cfg;
     SNDSYS_getopts(&cfg);
-    cfg.f2A = 36000;
-    cfg.f2C = 24000;
-    cfg.f3F = 0;
-    cfg.f40 = 50;
-    cfg.f41 = 50;
-    cfg.f28 = 20;
+    cfg.set.outputrate = 36000;
+    cfg.set.outputrateiopcpu = 24000;
+    cfg.set.loadiopmodules = 0;
+    cfg.set.resamplequality = 50;
+    cfg.set.iopcpuresamplequality = 50;
+    cfg.set.maxbanks = 20;
     switch (mode) {
     case 3:
         if (self->unk_008 == 1) return 1;
-        cfg.f2E = 0x10;
-        cfg.f2F = 8;
-        cfg.f30 = 0x18;
-        cfg.f47 = 4;
-        cfg.f4C = 3;
-        cfg.f4E = 40;
-        cfg.f50 = 288;
-        cfg.f52 = 36;
-        cfg.f49 = 2;
+        cfg.set.voicesmaincpu = 0x10;
+        cfg.set.voicesiopcpu = 8;
+        cfg.set.voicesspu = 0x18;
+        cfg.set.outputchannels = 4;
+        cfg.set.numrendermodes = 3;
+        cfg.set.rendermode[0] = 40;
+        cfg.set.rendermode[1] = 288;
+        cfg.set.rendermode[2] = 36;
+        cfg.set.outputspdifmode = 2;
         func_003BC930();
         self->unk_008 = 2;
         break;
     case 2:
         if (self->unk_008 == 2) return 1;
-        cfg.f2E = 0x10;
-        cfg.f2F = 8;
-        cfg.f30 = 0x30;
-        cfg.f49 = 1;
-        cfg.f47 = 2;
-        cfg.f4C = 6;
-        cfg.f4E = 72;
-        cfg.f50 = 320;
-        cfg.f52 = 68;
-        cfg.f54 = 40;
-        cfg.f56 = 288;
-        cfg.f58 = 36;
+        cfg.set.voicesmaincpu = 0x10;
+        cfg.set.voicesiopcpu = 8;
+        cfg.set.voicesspu = 0x30;
+        cfg.set.outputspdifmode = 1;
+        cfg.set.outputchannels = 2;
+        cfg.set.numrendermodes = 6;
+        cfg.set.rendermode[0] = 72;
+        cfg.set.rendermode[1] = 320;
+        cfg.set.rendermode[2] = 68;
+        cfg.set.rendermode[3] = 40;
+        cfg.set.rendermode[4] = 288;
+        cfg.set.rendermode[5] = 36;
         self->unk_008 = 1;
         break;
     case 0:
     case 1:
         if (self->unk_008 == 2) return 1;
-        cfg.f2E = 0x10;
-        cfg.f2F = 8;
-        cfg.f30 = 0x30;
-        cfg.f49 = 1;
-        cfg.f47 = 2;
-        cfg.f4C = 3;
-        cfg.f4E = 40;
-        cfg.f50 = 288;
-        cfg.f52 = 36;
+        cfg.set.voicesmaincpu = 0x10;
+        cfg.set.voicesiopcpu = 8;
+        cfg.set.voicesspu = 0x30;
+        cfg.set.outputspdifmode = 1;
+        cfg.set.outputchannels = 2;
+        cfg.set.numrendermodes = 3;
+        cfg.set.rendermode[0] = 40;
+        cfg.set.rendermode[1] = 288;
+        cfg.set.rendermode[2] = 36;
         self->unk_008 = 1;
         break;
     }

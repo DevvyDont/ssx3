@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "bx/math3d.h"
 #include "render/bxps2tex.h"
 #include "render/graphicsman.h"
 #include "render/ps2graphicsman.h"
@@ -771,14 +772,10 @@ struct sGsTex0Bits7F18 {
     ulong CLD : 3;
 };
 
-struct sPs2RenderTex7F18 {
-    char pad_0x00[0x38];
-    sGsTex0Bits7F18 tex0;   // 0x38
-};
 
 struct sPs2TexSet7F18 {
     char pad_0x00[0x8];
-    sPs2RenderTex7F18* tex[1];  // 0x08
+    tTexInfo* tex[1];  // 0x08
 };
 
 union sFloatBits7F18 {
@@ -800,7 +797,7 @@ union sFloatBits7F18 {
  */
 extern "C" void cTextureMan_ShadowClearLockTexture(sPs2TexSet7F18* self, int idx, float* color, ulong** pp)
 {
-    sPs2RenderTex7F18* renderTex = self->tex[idx];
+    tTexInfo* renderTex = self->tex[idx];
     ulong* packet = *pp;
     sFloatBits7F18 qValue;
     qValue.f = 1.0f;
@@ -814,15 +811,15 @@ extern "C" void cTextureMan_ShadowClearLockTexture(sPs2TexSet7F18* self, int idx
     packet[7] = (ulong)(int)(color[1] * 128.0f) | ((ulong)(int)(color[2] * 128.0f) << 8) |
            ((ulong)(int)(color[3] * 128.0f) << 16) | ((ulong)(int)(color[0] * 128.0f) << 24) |
            ((ulong)qValue.i << 32);
-    packet[8] = (ulong)((0x800 - ((1 << renderTex->tex0.TW) >> 1)) << 4) |
-           ((ulong)((0x800 - ((1 << renderTex->tex0.TH) >> 1)) << 4) << 16) | ((ulong)1 << 32);
-    packet[9] = (ulong)((((1 << renderTex->tex0.TW) >> 1) + 2049) << 4) |
-           ((ulong)((((1 << renderTex->tex0.TH) >> 1) + 2049) << 4) << 16) | ((ulong)1 << 32);
+    packet[8] = (ulong)((0x800 - ((1 << (*(sGsTex0Bits7F18*)&renderTex->mTEX0).TW) >> 1)) << 4) |
+           ((ulong)((0x800 - ((1 << (*(sGsTex0Bits7F18*)&renderTex->mTEX0).TH) >> 1)) << 4) << 16) | ((ulong)1 << 32);
+    packet[9] = (ulong)((((1 << (*(sGsTex0Bits7F18*)&renderTex->mTEX0).TW) >> 1) + 2049) << 4) |
+           ((ulong)((((1 << (*(sGsTex0Bits7F18*)&renderTex->mTEX0).TH) >> 1) + 2049) << 4) << 16) | ((ulong)1 << 32);
     packet[10] = ((ulong)0x10000000 << 32) | 0x8001;
     packet[11] = 0xE;
     {
-        ulong hi = ((ulong)((1 << renderTex->tex0.TH) - 2) << 48) | (((ulong)1 << 32) | 1);
-        packet[12] = ((ulong)((1 << renderTex->tex0.TW) - 2) << 16) | hi;
+        ulong hi = ((ulong)((1 << (*(sGsTex0Bits7F18*)&renderTex->mTEX0).TH) - 2) << 48) | (((ulong)1 << 32) | 1);
+        packet[12] = ((ulong)((1 << (*(sGsTex0Bits7F18*)&renderTex->mTEX0).TW) - 2) << 16) | hi;
     }
     packet[13] = 0x40;
     packet += 14;
@@ -1091,23 +1088,10 @@ struct sUpHeap_8660 {
     sUpNode_8660* nodes;    // 0x1FF0
 };
 
-struct sUpTex_8660 {
-    char pad_0x00[0xC];
-    unsigned int psm;       // 0xC
-    char pad_0x10[0x4];
-    int size;               // 0x14
-    char pad_0x18[0x8];
-    int clut;               // 0x20
-    char pad_0x24[0x4];
-    int addr;               // 0x28
-    int caddr;              // 0x2C
-    int node;               // 0x30
-    int cnode;              // 0x34
-};
 
 struct sUpMgr_8660 {
     char pad_0x0[0x8];
-    sUpTex_8660* texs[0x7D1];   // 0x8
+    tTexInfo* texs[0x7D1];   // 0x8
     int state[2];               // 0x1F4C
 };
 
@@ -1132,7 +1116,7 @@ struct sUpMgr_8660 {
 extern "C" void func_00368660(cTextureMan* self, int context1Tex, int context2Tex, int evictLevel, ulong** pp, void** gifOut)
 {
     ulong* cur = *pp;
-    sUpTex_8660* objs[2];
+    tTexInfo* objs[2];
     if (context1Tex < 0 && context2Tex < 0)
         return;
     objs[0] = context1Tex >= 0 ? ((sUpMgr_8660*)self)->texs[context1Tex] : 0;
@@ -1148,36 +1132,36 @@ extern "C" void func_00368660(cTextureMan* self, int context1Tex, int context2Te
         int other = context1Tex;
         if (k == 0)
             other = context2Tex;
-        sUpTex_8660* texRecord = ((sUpMgr_8660*)self)->texs[idx];
+        tTexInfo* texRecord = ((sUpMgr_8660*)self)->texs[idx];
         sUpHeap_8660* heap;
         int shift;
-        if (texRecord->psm == 9) {
+        if (((unsigned int)texRecord->mFormat) == 9) {
             heap = (sUpHeap_8660*)(((char*)self) + 0x4350);
             shift = 2;
         } else {
             heap = (sUpHeap_8660*)(((char*)self) + 0x1F60);
             shift = 0;
         }
-        if (texRecord->addr < 0) {
+        if (texRecord->mTexAddr < 0) {
             ((sUpMgr_8660*)self)->state[k] = -1;
-            int n = func_00366CE0(heap, texRecord->size, idx, other, evictLevel, 1);
+            int n = func_00366CE0(heap, texRecord->mVRAMSize, idx, other, evictLevel, 1);
             sUpNode_8660* nd = &heap->nodes[n];
             int fl = nd->flags;
-            texRecord->node = n;
-            texRecord->addr = (fl >> 8) << shift;
+            texRecord->mTexBlock = n;
+            texRecord->mTexAddr = (fl >> 8) << shift;
             if (gif == 0)
                 gif = func_0038F460(D_004A4474, *(unsigned int*)gifOut, -1, 0);
             func_00368170(self, idx, &cur, &gif);
             sent = 1;
         }
-        if (texRecord->clut != 0 && texRecord->caddr < 0) {
+        if (((int)texRecord->mCLUTData) != 0 && texRecord->mCLUTAddr < 0) {
             self->mCLUTTex = -1;
-            int n = func_00366CE0(self->mMainHeap, texRecord->psm - 11 < 2 ? 0x100 : 0x400, idx, other, evictLevel, 0);
+            int n = func_00366CE0(self->mMainHeap, ((unsigned int)texRecord->mFormat) - 11 < 2 ? 0x100 : 0x400, idx, other, evictLevel, 0);
             int* nodeFlags = &((sUpHeap_8660*)(((char*)self) + 0x1F60))->nodes[n].flags;
             int fl = *nodeFlags | 4;
             *nodeFlags = fl;
-            texRecord->cnode = n;
-            texRecord->caddr = fl >> 8;
+            texRecord->mCLUTBlock = n;
+            texRecord->mCLUTAddr = fl >> 8;
             if (gif == 0)
                 gif = func_0038F460(D_004A4474, *(unsigned int*)gifOut, -1, 0);
             func_003684F0((sPs2UpMgr*)self, idx, &cur, &gif);
@@ -1527,13 +1511,10 @@ struct sGfxState_691F8 {
     sGfxState_691F8() {}
 };
 
-struct sKey8_691F8 {
-    int a, b;
-};
 
 extern sRS_691F8 sDrawState_s_defaultDrawState;
 extern sTexPair_691F8 D_004A5A10[];
-extern sKey8_691F8 t2vect_Zero[];
+extern t2Vector t2vect_Zero[];
 
 static inline void gfxSet0_691F8(sRS_691F8* r, int v, int mask, int shift)
 {
@@ -1600,7 +1581,7 @@ extern "C" void* cGraphicsMan_cGraphicsMan(cGraphicsMan* self)
         ((sRS_691F8*)(&self->m_drawStateStack[0]))[k] = sDrawState_s_defaultDrawState;
     }
     self->m_pCurrentDrawState = (sDrawState*)((sRS_691F8*)(&self->m_drawStateStack[0]));
-    *(sKey8_691F8*)self = t2vect_Zero[0];
+    *(t2Vector*)self = t2vect_Zero[0];
     self->m_AIUpdatesPerRender = 0;
     MEM_fill(&self->_EffectTexMap[0], 0xFFFFFFFF, 344);
     self->mNumViews = 1;

@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "object/movenode.h"
 #include "world/worldrecords.h"
 #include "object/instancenode.h"
 #include "world/instancerecord.h"
@@ -917,12 +918,6 @@ void* cObjectInterface_getInstanceMan();
 void cInstanceMan_copyInstance(void* man, sInstanceStruct* inst, void* tmpl);
 extern "C" void MEM_copy(void* dst, void* src, int n);
 
-struct sSplineInstA458 {
-    char pad_0x0[0x8];
-    unsigned int flags;     // 0x8
-    char pad_0xC[0x6C];
-    int field_0x78;         // 0x78
-};
 
 
 /**
@@ -937,13 +932,13 @@ extern "C" void cMultiSplineModifier_setupNodes(cMultiSplineModifier* multiSplin
 {
     cMultiSplineModifier* self = multiSpline;
     int i;
-    int keep = ((sSplineInstA458**)self->NodeInst)[0]->field_0x78;
-    MEM_copy(((sSplineInstA458**)self->NodeInst)[0], ((void*)self->Instance), 160);
-    ((sSplineInstA458**)self->NodeInst)[0]->field_0x78 = keep;
+    int keep = ((int)((tInstanceRecord**)self->NodeInst)[0]->m_RID);
+    MEM_copy(((tInstanceRecord**)self->NodeInst)[0], ((void*)self->Instance), 160);
+    ((tInstanceRecord**)self->NodeInst)[0]->m_RID = keep;
     for (i = 1; i < self->NumModels; i++) {
-        cInstanceMan_copyInstance(cObjectInterface_getInstanceMan(), (sInstanceStruct*)((sSplineInstA458**)self->NodeInst)[i], ((void*)self->Instance));
-        ((sSplineInstA458**)self->NodeInst)[i]->flags = (((sSplineInstA458**)self->NodeInst)[i]->flags & ~0x40) | 0x20;
-        ((sSplineInstA458**)self->NodeInst)[i]->flags &= ~0x100;
+        cInstanceMan_copyInstance(cObjectInterface_getInstanceMan(), (sInstanceStruct*)((tInstanceRecord**)self->NodeInst)[i], ((void*)self->Instance));
+        ((tInstanceRecord**)self->NodeInst)[i]->m_iFlags = (((unsigned int)((tInstanceRecord**)self->NodeInst)[i]->m_iFlags) & ~0x40) | 0x20;
+        (*(unsigned int*)&((tInstanceRecord**)self->NodeInst)[i]->m_iFlags) &= ~0x100;
     }
 }
 #endif
@@ -1169,12 +1164,6 @@ INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_restoreOverlapSystem);
 void operator_delete(int*);
 extern "C" void* cObjectInterface_getNash();
 
-struct sHashKey_A780 {
-    int level;      // 0x0
-    int x;          // 0x4
-    int y;          // 0x8
-    int z;          // 0xC
-};
 
 struct sOctCell_A780 {
     void* child[8];
@@ -1182,8 +1171,8 @@ struct sOctCell_A780 {
 };
 
 
-extern "C" void nash_Nash_findkey_A780(sHashKey_A780* out, void* box) __asm__("nash_Nash_findkey");
-extern "C" void nash_Cell_remnode_A780(sOctCell_A780* oct, int type, void* node, sHashKey_A780* key,
+extern "C" void nash_Nash_findkey_A780(nash_CellKey* out, void* box) __asm__("nash_Nash_findkey");
+extern "C" void nash_Cell_remnode_A780(sOctCell_A780* oct, int type, void* node, nash_CellKey* key,
                                    nash_Octant* cell) __asm__("nash_Cell_remnode");
 
 static inline int octEmpty_A780(sOctCell_A780* o)
@@ -1220,7 +1209,7 @@ extern "C" void cMultiSplineModifier_restoreOverlapSystem(cMultiSplineModifier* 
         // PORT: the segment array (0x60-byte entries) is indexed with 32-bit integer arithmetic.
         char* box = (char*)(i * 0x60 + (int)vself->Nodes) + 0x30;
         (*(int*)((char*)cell + 0xA0))++;
-        sHashKey_A780 key;
+        nash_CellKey key;
         nash_Nash_findkey_A780(&key, box);
         nash_Octant* cellX = key.x < 0 ? cell + 4 : cell;
         nash_Octant* cellXY = key.y < 0 ? cellX + 2 : cellX;
@@ -1282,26 +1271,19 @@ static inline t4Vector instPos_A918(cMultiSplineModifier* self, int i)
     return *(t4Vector*)(((char**)self->NodeInst)[i] + 0x40);
 }
 
-struct sSmInst_A918 {
-    char pad_0x0[0x40];
-    t4Vector pos;       // 0x40
-    char pad_0x50[0x10];
-    float bmin[3];          // 0x60
-    float bmax[3];          // 0x6C
-};
 
-static inline void setMin_A918(sSmInst_A918* in, const t4Vector& v)
+static inline void setMin_A918(tInstanceRecord* in, const t4Vector& v)
 {
-    in->bmin[0] = v.x;
-    in->bmin[1] = v.y;
-    in->bmin[2] = v.z;
+    in->m_fvMin.m[0] = v.x;
+    in->m_fvMin.m[1] = v.y;
+    in->m_fvMin.m[2] = v.z;
 }
 
-static inline void setMax_A918(sSmInst_A918* in, const t4Vector& v)
+static inline void setMax_A918(tInstanceRecord* in, const t4Vector& v)
 {
-    in->bmax[0] = v.x;
-    in->bmax[1] = v.y;
-    in->bmax[2] = v.z;
+    in->m_fvMax.m[0] = v.x;
+    in->m_fvMax.m[1] = v.y;
+    in->m_fvMax.m[2] = v.z;
 }
 
 /**
@@ -1329,8 +1311,8 @@ extern "C" void cMultiSplineModifier_updateOverlapSystem(cMultiSplineModifier* s
         (*(&(self->Nodes)[i].BoundBox.MaxPoint)) = vu0Add_A918(instPos_A918(self, i), ext);
         void* id = ((char**)self->NodeInst)[i];
         nash_Nash_movenode(cObjectInterface_getNash(), 0, id, (sBox_F048*)&(self->Nodes)[i].BoundBox, (sBox_F048*)&old);
-        setMin_A918((sSmInst_A918*)((char**)self->NodeInst)[i], (*(&(self->Nodes)[i].BoundBox.MinPoint)));
-        setMax_A918((sSmInst_A918*)((char**)self->NodeInst)[i], (*(&(self->Nodes)[i].BoundBox.MaxPoint)));
+        setMin_A918((tInstanceRecord*)((char**)self->NodeInst)[i], (*(&(self->Nodes)[i].BoundBox.MinPoint)));
+        setMax_A918((tInstanceRecord*)((char**)self->NodeInst)[i], (*(&(self->Nodes)[i].BoundBox.MaxPoint)));
     }
 }
 #endif
@@ -2050,11 +2032,6 @@ struct sSmSeg_B708 {
     float minx, miny, minz;         // 0x6C
     float maxx, maxy, maxz;         // 0x78
 };
-struct sSmTrack_B708 {
-    char pad0[0x20];
-    int count;                      // 0x20
-    sSmSeg_B708* first;             // 0x24
-};
 struct sSmSet_B708 {
     char pad0[0x44];
     unsigned int* refs;             // 0x44
@@ -2067,15 +2044,6 @@ struct sSmVEntry_B708 {
     short delta;
     short index;
     int (*fn)(void*);
-};
-struct sSmModelObj_B708 {
-    char pad0[0xC];
-    sSmVEntry_B708* vt;             // 0xC
-};
-struct sSmDesc_B708 {
-    int f0;
-    unsigned int id;                // 0x4
-    int f8;                         // 0x8
 };
 
 static inline sSmRoot_B708* findRoot_B708(char* w, int x, int y, int z)
@@ -2107,12 +2075,12 @@ static inline void insert_B708(char* w, void* item, const tBoundBox* box)
     nash_Octant_addnode(findRoot_B708(w, c.x, c.y, c.z), 2, item, &c);
 }
 
-static inline sSmTrack_B708* toTrack_B708(unsigned int p)
+static inline tSplineRecord* toTrack_B708(unsigned int p)
 {
-    return (sSmTrack_B708*)(p << 2);
+    return (tSplineRecord*)(p << 2);
 }
 
-static inline sSmTrack_B708* refToTrack_B708(unsigned int v)
+static inline tSplineRecord* refToTrack_B708(unsigned int v)
 {
     unsigned int p = v >> 8;
     if (p == 0) {
@@ -2124,7 +2092,7 @@ static inline sSmTrack_B708* refToTrack_B708(unsigned int v)
 struct sSmRef_B708 {
     unsigned int id;
 
-    sSmTrack_B708* get()
+    tSplineRecord* get()
     {
         sSmSet_B708* set = (*(sSmWorld_B708**)cObjectInterface_getWorld())->sets[id & 0xFF];
         if (set == 0) {
@@ -2201,7 +2169,7 @@ static inline void grow_B708(tBoundBox& box, float d)
  * @param model  the instance the rail belongs to (On Tour tInstanceRecord* inst)
  * @return @p self
  */
-extern "C" char* cRailModifier_cRailModifier(cRailModifier* self, sSmDesc_B708* desc, tInstanceRecord* model)
+extern "C" char* cRailModifier_cRailModifier(cRailModifier* self, tAddRailData* desc, tInstanceRecord* model)
 {
     tBoundBox* box = ((&self->BoundBox));
     self->SplineId = 0xFFFFFFFF;
@@ -2209,10 +2177,10 @@ extern "C" char* cRailModifier_cRailModifier(cRailModifier* self, sSmDesc_B708* 
     self->Next = 0;
     self->Prev = 0;
     self->Instance = (tInstanceRecord*)model;
-    self->SplineId = desc->id;
-    self->Mesh = desc->f8;
-    sSmModelObj_B708* modelObj = ((sSmModelObj_B708*)model->m_pActiveNode);
-    if (modelObj->vt[44].fn(vthis(modelObj, modelObj->vt[44])) == 0) {
+    self->SplineId = desc->SplineId;
+    self->Mesh = desc->Mesh;
+    cInstanceNode* modelObj = (model->m_pActiveNode);
+    if (((sSmVEntry_B708*)modelObj->mVtbl)[44].fn(vthis(modelObj, ((sSmVEntry_B708*)modelObj->mVtbl)[44])) == 0) {
         tInstanceRecord* instModel = self->Instance;
         tBoundBox bounds;
         (*(&bounds.MinPoint)).x = instModel->m_fvMin.m[0];
@@ -2235,9 +2203,9 @@ extern "C" char* cRailModifier_cRailModifier(cRailModifier* self, sSmDesc_B708* 
     cRailModifier_buildXform(((char*)self));
     cRailModifier_updateBoundBox(self);
     insert_B708((char*)cObjectInterface_getNash(), self->Node, box);
-    sSmTrack_B708* track = ((sSmRef_B708*)(&self->SplineId))->get();
-    sSmSeg_B708* seg = track->first;
-    for (int i = 0; i < track->count; i++) {
+    tSplineRecord* track = ((sSmRef_B708*)(&self->SplineId))->get();
+    sSmSeg_B708* seg = ((sSmSeg_B708*)track->m_HeaderSeg);
+    for (int i = 0; i < track->m_iNumSegments; i++) {
         tBoundBox bounds;
         (*(&bounds.MinPoint)).x = seg->minx;
         (*(&bounds.MinPoint)).y = seg->miny;
@@ -2603,10 +2571,6 @@ struct sSmVtbl_C040 {
     sSmVEntryB_C040 v45;    // 0x168
 };
 
-struct sSmObj_C040 {
-    char pad_0x0[0xC];
-    sSmVtbl_C040* vt;       // 0xC
-};
 
 
 
@@ -2651,10 +2615,10 @@ static inline void vecAddEq_C040(t4Vector& a, const t4Vector& b)
  */
 extern "C" void cRailModifier_updateBoundBox(cRailModifier* self)
 {
-    sSmObj_C040* ownerObj = ((sSmObj_C040*)(self->Instance)->m_pActiveNode);
-    if (ownerObj->vt->v44.fn(vthis(ownerObj, ownerObj->vt->v44)) != 0) {
-        ownerObj = ((sSmObj_C040*)(self->Instance)->m_pActiveNode);
-        tBoundBox* bounds = ownerObj->vt->v45.fn(vthis(ownerObj, ownerObj->vt->v45));
+    cInstanceNode* ownerObj = ((self->Instance)->m_pActiveNode);
+    if (((sSmVtbl_C040*)ownerObj->mVtbl)->v44.fn(vthis(ownerObj, ((sSmVtbl_C040*)ownerObj->mVtbl)->v44)) != 0) {
+        ownerObj = ((self->Instance)->m_pActiveNode);
+        tBoundBox* bounds = ((sSmVtbl_C040*)ownerObj->mVtbl)->v45.fn(vthis(ownerObj, ((sSmVtbl_C040*)ownerObj->mVtbl)->v45));
         (*(&self->BoundBox)) = *bounds;
         t4Vector margin;
         margin.x = 100.0f;

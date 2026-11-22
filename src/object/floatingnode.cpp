@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/worldrecords.h"
 #include "vtable.h"
 #include "world/instancerecord.h"
 #include "bx/math3d.h"
@@ -185,17 +186,11 @@ struct sVec4_F120 {
     sVec4_F120(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
-// Bone: parent index (-1 for the root) and its local transform.
-struct sBone_F120 {
-    int parent;
-    int pad4[2];
-    t4Matrix* local;   // 0xC
-};
 
 struct sSkel_F120 {
     int pad0;
     int count;          // 0x4
-    sBone_F120* bones;  // 0x8
+    tMeshHeirarchyRecord* bones;  // 0x8
 };
 
 
@@ -342,20 +337,20 @@ extern "C" void cFloatingNode_makeAnimMats(cFloatingNode* self, t4Matrix* mat, t
     tiltMat.row[3].w = 1.0f;
     sSkel_F120* skel = (sSkel_F120*)self->Instance->m_Model;
     float sc4 = self->Instance->m_fScale;
-    sBone_F120* bone = skel->bones;
+    tMeshHeirarchyRecord* bone = skel->bones;
     sVec4_F120 scale(sc4, sc4, sc4, 1.0f);
     int i;
     for (i = 0; i < skel->count; i++, bone++) {
         t4Matrix boneMat;
-        if (bone->parent != -1) {
-            Pose_F120(&boneMat, &out[bone->parent], bone->local, scale);
+        if (bone->m_iParentID != -1) {
+            Pose_F120(&boneMat, &out[bone->m_iParentID], ((t4Matrix*)bone->m_pMeshMatrix), scale);
             Copy_F120(&out[i], &boneMat);
         } else {
             t4Matrix w;
             t4Matrix rootMat;
             Mul_F120(&rootMat, mat, &tiltMat);
             Copy_F120(&w, &rootMat);
-            Pose_F120(&boneMat, &w, bone->local, scale);
+            Pose_F120(&boneMat, &w, ((t4Matrix*)bone->m_pMeshMatrix), scale);
             Copy_F120(&out[i], &boneMat);
         }
     }
@@ -366,18 +361,14 @@ extern "C" void cFloatingNode_makeAnimMats(cFloatingNode* self, t4Matrix* mat, t
 //100%
 INCLUDE_ASM("object/floatingnode", cFloatingNode_applyForce);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct sV4_F600 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-extern sV4_F600 D_004FF140_F600[] __asm__("t4vect_XAxis");
-extern sV4_F600 D_004FF150_F600[] __asm__("t4vect_YAxis");
+extern t4Vector D_004FF140_F600[] __asm__("t4vect_XAxis");
+extern t4Vector D_004FF150_F600[] __asm__("t4vect_YAxis");
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sV4_F600 vu0Sub_F600(const sV4_F600& a, const sV4_F600& b)
+static inline t4Vector vu0Sub_F600(const t4Vector& a, const t4Vector& b)
 {
-    sV4_F600 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -389,15 +380,15 @@ static inline sV4_F600 vu0Sub_F600(const sV4_F600& a, const sV4_F600& b)
     return r;
 }
 
-static inline sV4_F600 pos_F600(sV4_F600* m)
+static inline t4Vector pos_F600(t4Vector* m)
 {
     return m[3];
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix times vector).
-static inline sV4_F600 vu0MtxMul_F600(const sV4_F600* m, const sV4_F600* v)
+static inline t4Vector vu0MtxMul_F600(const t4Vector* m, const t4Vector* v)
 {
-    sV4_F600 r;
+    t4Vector r;
     __asm__(
         "lqc2         $vf8, %1\n"
         "lqc2         $vf4, 0x0(%2)\n"
@@ -416,9 +407,9 @@ static inline sV4_F600 vu0MtxMul_F600(const sV4_F600* m, const sV4_F600* v)
 }
 
 // PORT: PS2-only VU0 inline asm (cross product, w = 0).
-static inline sV4_F600 vu0Cross_F600(const sV4_F600& a, const sV4_F600& b)
+static inline t4Vector vu0Cross_F600(const t4Vector& a, const t4Vector& b)
 {
-    sV4_F600 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -433,7 +424,7 @@ static inline sV4_F600 vu0Cross_F600(const sV4_F600& a, const sV4_F600& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0Dot_F600(const sV4_F600& a, const sV4_F600& b)
+static inline float vu0Dot_F600(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -455,7 +446,7 @@ static inline float vu0Dot_F600(const sV4_F600& a, const sV4_F600& b)
 struct sFlVE_F600 {
     short delta;
     short index;
-    sV4_F600* (*fn)(void*);
+    t4Vector* (*fn)(void*);
 };
 
 struct sFloat_F600 {
@@ -478,15 +469,15 @@ struct sFloat_F600 {
  * @param intInfo  the hit (On Tour tIntersectInfo): position, then normal
  * @param force    the force
  */
-extern "C" void cFloatingNode_applyForce(cFloatingNode* self, sV4_F600* intInfo, sV4_F600* force)
+extern "C" void cFloatingNode_applyForce(cFloatingNode* self, t4Vector* intInfo, t4Vector* force)
 {
     sFlVE_F600* vt = (sFlVE_F600*)self->mVtbl;
-    sV4_F600* transform = vt[24].fn(vthis(self, vt[24]));
-    sV4_F600 arm = vu0Sub_F600(intInfo[0], pos_F600(transform));
-    sV4_F600 axisX = vu0MtxMul_F600(transform, &D_004FF140_F600[0]);
-    sV4_F600 axisY = vu0MtxMul_F600(transform, &D_004FF150_F600[0]);
+    t4Vector* transform = vt[24].fn(vthis(self, vt[24]));
+    t4Vector arm = vu0Sub_F600(intInfo[0], pos_F600(transform));
+    t4Vector axisX = vu0MtxMul_F600(transform, &D_004FF140_F600[0]);
+    t4Vector axisY = vu0MtxMul_F600(transform, &D_004FF150_F600[0]);
     self->Force += vu0Dot_F600(*force, intInfo[1]);
-    sV4_F600 torque = vu0Cross_F600(*force, arm);
+    t4Vector torque = vu0Cross_F600(*force, arm);
     self->TX += vu0Dot_F600(torque, axisX);
     self->TY += vu0Dot_F600(torque, axisY);
 }
@@ -615,14 +606,6 @@ struct sFlVE_F790 {
     sV4_F790* (*fn)(void*);
 };
 
-struct sFlBase_F790 {
-    char pad_0x00[0x1C];
-    float f1C;
-    char pad_0x20[0x10];
-    float f30;
-    char pad_0x34[0xC];
-    float f40;
-};
 
 
 /**
@@ -638,12 +621,12 @@ extern "C" void cFloatingNode_updateIntersectInfo(cFloatingNode* self, sV4_F790*
     cMoveNode_updateIntersectInfo((self), intInfo);
     sFlVE_F790* vt = (sFlVE_F790*)self->mVtbl;
     sV4_F790* transform = vt[24].fn(vthis(self, vt[24]));
-    sFlBase_F790* base = (sFlBase_F790*)&self->ZSpring;
+    cFloatingNodeState* base = (cFloatingNodeState*)&self->ZSpring;
     sV4_F790 arm = vu0Sub_F790(intInfo[0], pos_F790(transform));
     sV4_F790 axisX = vu0MtxMul_F790(transform, &D_004FF140_F790[0]);
     sV4_F790 axisY = vu0MtxMul_F790(transform, &D_004FF150_F790[0]);
-    sV4_F790 angVel = vu0Add_F790(vu0Scale_F790(axisX, base->f30), vu0Scale_F790(axisY, base->f40));
-    vu0AddEq_F790(intInfo[2], vu0Add_F790(sV4_F790(0.0f, 0.0f, base->f1C, 0.0f), vu0Cross_F790(arm, angVel)));
+    sV4_F790 angVel = vu0Add_F790(vu0Scale_F790(axisX, base->WX), vu0Scale_F790(axisY, base->WY));
+    vu0AddEq_F790(intInfo[2], vu0Add_F790(sV4_F790(0.0f, 0.0f, base->Vel, 0.0f), vu0Cross_F790(arm, angVel)));
     vu0AddEq_F790(intInfo[3], angVel);
 }
 #endif

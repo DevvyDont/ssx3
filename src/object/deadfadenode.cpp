@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/instancenode.h"
 #include "world/instancerecord.h"
 #include "vtable.h"
 #include "object/deadfadenode.h"
@@ -47,11 +48,6 @@ struct sDfModel_0750 {
 };
 
 
-struct sDfDesc_0750 {
-    int w[2];
-    float f8;
-    float fC;
-};
 
 
 struct sDfVE_0750 {
@@ -60,10 +56,6 @@ struct sDfVE_0750 {
     void* fn;
 };
 
-struct sDfOther_0750 {
-    char pad_0x00[0xC];
-    sDfVE_0750* vt;         // 0xC
-};
 
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, d = b * a).
@@ -170,26 +162,26 @@ typedef void (*DfSetFn_0750)(void*, int);
  * @param other   the instance's previous node, or 0 (On Tour pOldNode); it is deleted here
  * @return self
  */
-extern "C" cDeadFadeNode* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode* self, int bucket, void* obj, sDfDesc_0750* desc, sDfOther_0750* other)
+extern "C" cDeadFadeNode* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode* self, int bucket, void* obj, tMakeDeadFadeData* desc, cInstanceNode* other)
 {
     sDfMatElem_0750** pm = (sDfMatElem_0750**)&self->AnimMats;
     cInstanceNode_cInstanceNode1(self, bucket, 22, obj);
     *(void**)&self->mVtbl = cDeadFadeNode_vtbl;
     ((unsigned int*)&(*(&self->Data)).InstId)[0] = 0xFFFFFFFF;
     *(&self->Data) = *(tMakeDeadData*)desc;
-    self->FadeRate = cObjectInterface_getUpdateTime() / desc->f8;
-    self->DistRate = desc->fC * cObjectInterface_getUpdateTime();
+    self->FadeRate = cObjectInterface_getUpdateTime() / desc->FadeTime;
+    self->DistRate = desc->ZVel * cObjectInterface_getUpdateTime();
     self->Dist = 0.0f;
     self->Fade = 1.0f;
     sDfModel_0750* model = ((sDfModel_0750*)(self->Instance)->m_Model);
     *pm = new (str_DeadFadeAnimMats, 0x20000000, 0) sDfMatElem_0750[model->count];
-    if (other != 0 && ((DfBoolFn_0750)other->vt[26].fn)(vthis(other, other->vt[26]))) {
-        sDfMat_0750* src = ((DfMatFn_0750)other->vt[27].fn)(vthis(other, other->vt[27]));
+    if (other != 0 && ((DfBoolFn_0750)((sDfVE_0750*)other->mVtbl)[26].fn)(vthis(other, ((sDfVE_0750*)other->mVtbl)[26]))) {
+        sDfMat_0750* src = ((DfMatFn_0750)((sDfVE_0750*)other->mVtbl)[27].fn)(vthis(other, ((sDfVE_0750*)other->mVtbl)[27]));
         MEM_copy(((sDfMatElem_0750*)self->AnimMats), src, model->count << 6);
     } else {
         sDfMat_0750* base = &(*(sDfMat_0750*)&(self->Instance)->m_fmTransform);
         if (other != 0) {
-            base = ((DfMatFn_0750)other->vt[24].fn)(vthis(other, other->vt[24]));
+            base = ((DfMatFn_0750)((sDfVE_0750*)other->mVtbl)[24].fn)(vthis(other, ((sDfVE_0750*)other->mVtbl)[24]));
         }
         sDfPart_0750* part = model->parts;
         float k = (self->Instance)->m_fScale;
@@ -211,7 +203,7 @@ extern "C" cDeadFadeNode* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode* self, int b
         }
     }
     if (other != 0) {
-        ((DfSetFn_0750)other->vt[1].fn)(vthis(other, other->vt[1]), 3);
+        ((DfSetFn_0750)((sDfVE_0750*)other->mVtbl)[1].fn)(vthis(other, ((sDfVE_0750*)other->mVtbl)[1]), 3);
     }
     (*(unsigned int*)&(self->Instance)->m_iFlags) &= ~0x60;
     (self->Instance)->m_iFlags = (((unsigned int)(self->Instance)->m_iFlags) & ~2) | 4;

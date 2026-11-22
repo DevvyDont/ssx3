@@ -1,4 +1,6 @@
 #include "common.h"
+#include "render/bxps2deferman.h"
+#include "render/2drender.h"
 #include "vtable.h"
 #include "bx/bxstring.h"
 #include "render/bxps2tex.h"
@@ -359,17 +361,12 @@ extern "C" void cFont_text(cFont* self, float x, float y, sMat00391C48* str)
 INCLUDE_ASM("render/font", cFont_text1);
 #ifdef SKIP_ASM
 
-struct sFontVEntry1E30 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, void*, void*, float, float, float, float, float, float, float);
-};
 
 struct sFontCtx1E30 {
     char pad_0x0[0xE84];
     sDrawState* top;           // 0xE84
     char pad_0xE88[0x10D8 - 0xE88];
-    sFontVEntry1E30* vtable;    // 0x10D8
+    sVEntry<void(void*, void*, void*, void*, float, float, float, float, float, float, float)>* vtable;    // 0x10D8
 };
 
 
@@ -410,14 +407,14 @@ extern "C" void cFont_text1(cFont* self, float x, float y, void* unicodeStr)
         int shadowLayer = saved - 1;
         if (shadowLayer < 0) shadowLayer = 0;
         top->unk_00[2] = (((int)top->unk_00[2]) & ~0x3E0) | ((shadowLayer << 5) & 0x3E0);
-        sFontVEntry1E30* vt = (sFontVEntry1E30*)ps2GraphicsMan->mVtbl;
+        sVEntry<void(void*, void*, void*, void*, float, float, float, float, float, float, float)>* vt = (sVEntry<void(void*, void*, void*, void*, float, float, float, float, float, float, float)>*)ps2GraphicsMan->mVtbl;
         vt[81].fn(vthis(ps2GraphicsMan, vt[81]), self, unicodeStr, (char*)&self->ShadowColor[0],
                   pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1],
                   self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
         sDrawState* top2 = ps2GraphicsMan->m_pCurrentDrawState;
         top2->unk_00[2] = (((int)top2->unk_00[2]) & ~0x3E0) | (saved << 5);
     }
-    sFontVEntry1E30* vt = (sFontVEntry1E30*)ps2GraphicsMan->mVtbl;
+    sVEntry<void(void*, void*, void*, void*, float, float, float, float, float, float, float)>* vt = (sVEntry<void(void*, void*, void*, void*, float, float, float, float, float, float, float)>*)ps2GraphicsMan->mVtbl;
     vt[81].fn(vthis(ps2GraphicsMan, vt[81]), self, unicodeStr, (char*)&self->Color[0], pos.x, pos.y,
               self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
 }
@@ -519,9 +516,6 @@ INCLUDE_ASM("render/font", cFont_textExtent1);
 #ifdef SKIP_ASM
 
 
-struct sRect21F0 {
-    float x0, y0, x1, y1;
-};
 
 static inline tGlyph* sFontRes21F0_find(cFont* font, int c)
 {
@@ -565,48 +559,48 @@ static inline tGlyph* sFontRes21F0_find(cFont* font, int c)
 extern "C" float cFont_textExtent1(cFont* f_, const unsigned short* unicodeText, void* r_, int mono, float sx, float sy)
 {
     cFont* font = f_;
-    sRect21F0* outRect = (sRect21F0*)r_;
-    sRect21F0 localRect;
-    sRect21F0* rc = outRect ? outRect : &localRect;
-    rc->x0 = 0.0f;
-    rc->y0 = 0.0f;
-    rc->x1 = 0.0f;
-    rc->y1 = 0.0f;
+    tRect* outRect = (tRect*)r_;
+    tRect localRect;
+    tRect* rc = outRect ? outRect : &localRect;
+    rc->X = 0.0f;
+    rc->Y = 0.0f;
+    rc->W = 0.0f;
+    rc->H = 0.0f;
     float x = 0.0f;
     float y = 0.0f;
     for (; *unicodeText; unicodeText++) {
         tGlyph* glyph = sFontRes21F0_find(font, *unicodeText);
         if (glyph) {
             float adv = glyph->advance * sx;
-            rc->x0 = (x + glyph->xoffset * sx) <? rc->x0;
-            rc->y0 = (y + glyph->yoffset * sy) <? rc->y0;
-            rc->y1 = (y + (glyph->yoffset + glyph->height) * sy) >? rc->y1;
+            rc->X = (x + glyph->xoffset * sx) <? rc->X;
+            rc->Y = (y + glyph->yoffset * sy) <? rc->Y;
+            rc->H = (y + (glyph->yoffset + glyph->height) * sy) >? rc->H;
             float nx;
             if (!mono) {
-                rc->x1 = (x + (glyph->xoffset + glyph->width) * sx) >? rc->x1;
+                rc->W = (x + (glyph->xoffset + glyph->width) * sx) >? rc->W;
                 nx = x + adv;
             } else {
-                rc->x1 = (x + adv) >? rc->x1;
+                rc->W = (x + adv) >? rc->W;
                 nx = x + adv;
             }
             x = nx;
         }
     }
-    rc->x1 = rc->x1 + rc->x0;
-    rc->y1 = rc->y1 + rc->y0;
+    rc->W = rc->W + rc->X;
+    rc->H = rc->H + rc->Y;
     if (font->ShadowOffset[0] < 0.0f) {
-        rc->x0 = rc->x0 - font->ShadowOffset[0];
-        rc->x1 = rc->x1 - font->ShadowOffset[0];
+        rc->X = rc->X - font->ShadowOffset[0];
+        rc->W = rc->W - font->ShadowOffset[0];
     } else {
-        rc->x1 = rc->x1 + font->ShadowOffset[0];
+        rc->W = rc->W + font->ShadowOffset[0];
     }
     if (font->ShadowOffset[1] < 0.0f) {
-        rc->y0 = rc->y0 - font->ShadowOffset[1];
-        rc->y1 = rc->y1 - font->ShadowOffset[1];
+        rc->Y = rc->Y - font->ShadowOffset[1];
+        rc->H = rc->H - font->ShadowOffset[1];
     } else {
-        rc->y1 = rc->y1 + font->ShadowOffset[1];
+        rc->H = rc->H + font->ShadowOffset[1];
     }
-    return rc->x1;
+    return rc->W;
 }
 #endif
 
@@ -3444,7 +3438,7 @@ INCLUDE_ASM("render/font", cPS2BezierMan_GetBezST);
  * @return the word at +0x1A0
  */
 extern "C" int cPS2BezierMan_GetBezST(cPS2BezierMan* bezierMan) {
-    return (*(int *)((char*)(bezierMan) + (0x1A0)));
+    return ((int)bezierMan->mPatchCache.unk_190[0]);
 }
 #endif
 //100%
@@ -3457,7 +3451,7 @@ INCLUDE_ASM("render/font", cPS2BezierMan_GetBezdST);
  * @return the word at +0x320
  */
 extern "C" int cPS2BezierMan_GetBezdST(cPS2BezierMan* bezierMan) {
-    return (*(int *)((char*)(bezierMan) + (0x320)));
+    return ((int)bezierMan->mPatchCache.unk_310[0]);
 }
 #endif
 //100%
@@ -4532,24 +4526,11 @@ extern "C" float cPS2GraphicsMan_GetScreenBrightness(cPS2GraphicsMan* graphicsMa
 //100%
 INCLUDE_ASM("render/font", cPS2GraphicsMan_AddDMAToWorld);
 #ifdef SKIP_ASM
-struct sEnt_55B0 {
-    sDrawState rs;                    // 0x00
-    unsigned int buf;               // 0x14
-    unsigned int next;              // 0x18
-    short key;                      // 0x1C
-    short flag;                     // 0x1E
-    char pad_0x20[0x60];
-};
-struct sRing_55B0 {
-    int count;                      // 0x0
-    char pad_0x4[0x7C];
-    sEnt_55B0 ents[1];              // 0x80
-};
 struct sGfx_55B0 {
     char pad_0x0[0xE84];
     sDrawState* top;                  // 0xE84
     char pad_0xE88[0x18F0 - 0xE88];
-    sRing_55B0* ring;               // 0x18F0
+    cPS2DeferManager* ring;               // 0x18F0
 };
 
 /**
@@ -4568,16 +4549,16 @@ struct sGfx_55B0 {
 extern "C" void cPS2GraphicsMan_AddDMAToWorld(cPS2GraphicsMan* gfx, unsigned int buf, unsigned int next, int flag)
 {
     sDrawState* rs = gfx->m_pCurrentDrawState;
-    sRing_55B0* ring = (sRing_55B0*)gfx->mpDeferMan;
-    if (ring->count < 2600) {
-        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-        int key = *(int*)((char*)ring + 0x69CC0);
-        sEnt_55B0* record = (sEnt_55B0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
-        record->rs = *rs;
-        record->buf = buf;
-        record->next = next;
-        record->key = key;
-        record->flag = flag;
+    cPS2DeferManager* ring = gfx->mpDeferMan;
+    if (ring->mNumSubmitDMA < 2600) {
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        int key = ring->unk_69CC0;
+        tDeferSubmit* record = (tDeferSubmit*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((tDeferSubmit*)&ring->mSubmits[0]) | 0x30000000));
+        record->mDrawState = *rs;
+        record->mPacket = buf;
+        record->mTail = next;
+        record->mViewIndex = key;
+        record->mContinuation = flag;
     }
 }
 #endif

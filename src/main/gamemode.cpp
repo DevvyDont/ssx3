@@ -3044,11 +3044,6 @@ struct sGM_23C2D8 {
     int f9C;
 };
 
-struct sStats_23C2D8 {
-    int v[0x9C / 4];
-    int time;           // 0x9C
-    int w[3];
-};
 
 struct sClk_23C2D8 {
     char pad_0x0[0x28];
@@ -3067,7 +3062,7 @@ struct sClk_23C2D8 {
 extern "C" void cGMPointHandler_raceFinish(void* self, int idx)
 {
     sClk_23C2D8* clk = (sClk_23C2D8*)SSXApp->Game->AI;
-    sStats_23C2D8 st = *(sStats_23C2D8*)(*(char**)(clk->riders[idx] + 0x790) + 0xFC);
+    tRiderStats st = *(tRiderStats*)(*(char**)(clk->riders[idx] + 0x790) + 0xFC);
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     cRider* rider = (cRider*)((sClk_23C2D8*)SSXApp->Game->AI)->riders[idx];
     if (rider->mDidNotFinish != 0) {
@@ -3077,9 +3072,9 @@ extern "C" void cGMPointHandler_raceFinish(void* self, int idx)
         D_005366A8[idx] = 1;
     } else {
         cGameModeMan* gm = cGameModeHandler_pManager;
-        if (st.time < (int)gm->uiPointTarget) {
+        if (st.TotalPoints < (int)gm->uiPointTarget) {
             rider->unk_100 = 0;
-            D_00536640[idx] = st.time;
+            D_00536640[idx] = st.TotalPoints;
             gm->iNextHeat = 1;
             D_005366A8[idx] = 0;
         } else {
@@ -3087,11 +3082,11 @@ extern "C" void cGMPointHandler_raceFinish(void* self, int idx)
             int tier1Target = cBENewRaceInterface_getPeakGoal(race, cGameModeHandler_pManager->iCurrentGameEvent, 1) * 100;
             cGameModeMan* gm2 = cGameModeHandler_pManager;
             *(int*)(((sClk_23C2D8*)SSXApp->Game->AI)->riders[idx] + 0x100) = 1;
-            D_00536640[idx] = st.time;
+            D_00536640[idx] = st.TotalPoints;
             gm2->bIsEventDone = 1;
-            if (st.time >= tier2Target) {
+            if (st.TotalPoints >= tier2Target) {
                 cGameModeMan_iRanking[idx] = 0;
-            } else if (st.time >= tier1Target) {
+            } else if (st.TotalPoints >= tier1Target) {
                 cGameModeMan_iRanking[idx] = 1;
             } else {
                 cGameModeMan_iRanking[idx] = 2;

@@ -752,13 +752,9 @@ struct sMPRef8B28 {
     sMPRef8B28() : id(0xFFFFFFFF) {}
 };
 
-struct sMPMgr8B28 {
-    char pad_0x0[0x18];
-    sMPRef8B28 slots[128];          // 0x18
-};
 
 extern void* cRailManNode_ActiveNode;
-extern sMPMgr8B28* D_004A4040_mgr8B28 __asm__("cRailManNode_ActiveNode");
+extern cRailManNode* D_004A4040_mgr8B28 __asm__("cRailManNode_ActiveNode");
 extern char str_RailMan_b[];
 extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
 extern "C" void* cRailManNode_cRailManNode1(cRailManNode* self, void* a1);
@@ -783,18 +779,18 @@ extern "C" void cRailManNode_addRail(sMPRef8B28 key, int add)
     sMPRef8B28 kFree;
     int idx = -1;
     for (int i = 0; i < 128; i++) {
-        if (idx == -1 && D_004A4040_mgr8B28->slots[i].id == kFree.id) {
+        if (idx == -1 && ((sMPRef8B28*)&D_004A4040_mgr8B28->RailInfo[0])[i].id == kFree.id) {
             idx = i;
         }
-        if (D_004A4040_mgr8B28->slots[i].id == key.id) {
+        if (((sMPRef8B28*)&D_004A4040_mgr8B28->RailInfo[0])[i].id == key.id) {
             idx = i;
             goto found;
         }
     }
 found:
-    sMPMgr8B28* mgr = D_004A4040_mgr8B28;
+    cRailManNode* mgr = D_004A4040_mgr8B28;
     if (idx != -1) {
-        sMPRef8B28& railSlot = mgr->slots[idx];
+        sMPRef8B28& railSlot = ((sMPRef8B28*)&mgr->RailInfo[0])[idx];
         if (railSlot.id == key.id) {
             if (add == 0) {
                 return;
@@ -802,7 +798,7 @@ found:
         } else if (add != 0) {
             return;
         }
-        mgr->slots[idx] = key;
+        ((sMPRef8B28*)&mgr->RailInfo[0])[idx] = key;
         if (add != 0) {
             cRailManNode_enableRail((cRailManNode*)mgr, idx);
         } else {
@@ -854,20 +850,7 @@ struct sMPElem8C80 {
 // One-member union view of a float field (see the FAKEMATCH note on cAnimComboNode_cAnimComboNode1).
 union uFloat8C80 { float v; };
 
-struct sMPDesc8C80 {
-    char pad_0x0[0x10];
-    float f10;              // 0x10
-    char pad_0x14[0x14];
-    float f28;              // 0x28
-    float f2C;              // 0x2C
-    float f30;              // 0x30
-    int f34;                // 0x34
-};
 
-struct sMPOwner8C80 {
-    char pad_0x0[0x80];
-    char* p80;              // 0x80
-};
 
 struct sMP8C80 {
     float f0;               // 0x0
@@ -907,19 +890,19 @@ struct sMP8C80 {
 // spelling matches.
 // cAnimComboNode::cAnimComboNode(int bucket, tInstanceRecord* pInstance, const tMakeAnimComboData* adata)
 // (SSX On Tour symbols; frame counts are scaled by 1/30, and f0 is then divided by the cAppMan tick rate like ticks2secs).
-extern "C" void* cAnimComboNode_cAnimComboNode1(cAnimComboNode* self, int bucket, sMPOwner8C80* pInstance, const sMPDesc8C80* adata)
+extern "C" void* cAnimComboNode_cAnimComboNode1(cAnimComboNode* self, int bucket, tInstanceRecord* pInstance, const tMakeAnimComboData* adata)
 {
     cAnimObjectNode_cAnimObjectNode1_8C80((char*)&self->AnimType, bucket, 3, pInstance, adata);
     self->mVtbl = (void**)cAnimComboNode_vtbl;
     float* rate = &self->FromTime2;
-    tModelRecord* pModel = (tModelRecord*)pInstance->p80;
-    *rate = (adata->f28 < 0.0f ? adata->f10 : adata->f28) * 0.03333333507180214f;
+    tModelRecord* pModel = (tModelRecord*)pInstance->m_Model;
+    *rate = (adata->FromTime2 < 0.0f ? adata->ToTime : adata->FromTime2) * 0.03333333507180214f;
     uFloat8C80* life = (uFloat8C80*)&self->ToTime2;
-    life->v = adata->f2C < 0.0f ? pModel->m_fAnimTime : adata->f2C * 0.03333333507180214f;
+    life->v = adata->ToTime2 < 0.0f ? pModel->m_fAnimTime : adata->ToTime2 * 0.03333333507180214f;
     int fps = cAppMan_TheAppMan->TimerHz;
-    self->AnimSpeed2 = adata->f30 * 0.03333333507180214f / (float)fps;
-    self->Stop = adata->f34 != 0;
-    self->StopInPlace = adata->f34 < 0;
+    self->AnimSpeed2 = adata->Speed2 * 0.03333333507180214f / (float)fps;
+    self->Stop = adata->Stop != 0;
+    self->StopInPlace = adata->Stop < 0;
     int n = self->NumAnimMeshes;
     sMPElem8C80** slot = (sMPElem8C80**)&self->ComboXform;
     *slot = new (operator_new_tag(n << 6, str_ComboXform, 0x20000000, 0)) sMPElem8C80[n];

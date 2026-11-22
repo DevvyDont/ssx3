@@ -18,17 +18,6 @@ extern "C" int cMoviePlayer_init(void* p, void* q);
 extern "C" void cMoviePlayer__cMoviePlayer(void* p, int a1);
 extern const char str_VidEnginePlayer[];
 
-struct sVidParams38E8 {
-    int file;       // 0x0
-    int f4;         // 0x4
-    int f8;         // 0x8
-    int fC;         // 0xC
-    int f10;        // 0x10
-    int f14;        // 0x14
-    int f18;        // 0x18
-    int f1C;        // 0x1C
-    float f20;      // 0x20
-};
 
 /**
  * Creates the video player and prepares a video for playback, unless a player already exists.
@@ -44,15 +33,15 @@ extern "C" int cVidEngine_ReadyVideo(void** self, int file)
 {
     if (*self != 0) return 0;
     *self = cMoviePlayer_cMoviePlayer(cMemMan_alloc(68, str_VidEnginePlayer, 0x100, 0));
-    sVidParams38E8 params;
+    tMoviePlayOptions params;
     tMoviePlayOptions_SetDefaults(&params);
     //S
-    params.file = file;
-    params.f8 = 1;
-    params.f18 = 0x100;
-    params.f1C = 9;
-    params.fC = 0;
-    params.f10 = 0;
+    (*(int*)&params.sVideoFileName) = file;
+    params.bSoundOn = 1;
+    params.iMemType = 0x100;
+    params.iDrawLayer = 9;
+    params.bFullScreen = 0;
+    params.bPreLoad = 0;
     //E
     if (cMoviePlayer_init(*self, &params) == 0) {
         if (*self != 0) cMoviePlayer__cMoviePlayer(*self, 3);

@@ -1,5 +1,9 @@
 #include "vtable.h"
 #include "common.h"
+#include "intersect/bxnash.h"
+#include "world/worldview.h"
+#include "ai/focusbox.h"
+#include "intersect/worldrider.h"
 #include "util/surfprop.h"
 #include "object/instancenode.h"
 #include "ai/airpredictor.h"
@@ -646,22 +650,10 @@ INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_calcExitVel);
 extern t4Vector D_004FF120_9548 __asm__("t4vect_Zero");
 extern t4Vector D_004FF160_9548 __asm__("t4vect_ZAxis");
 
-struct sHP_9548 {
-    char pad0[0x10];
-    float fx, fy, fz, fw; // 0x10
-    t4Vector v20;     // 0x20
-    t4Vector pad30;   // 0x30
-    t4Vector v40;     // 0x40
-    char pad50[0x3C];
-    float m8C;       // 0x8C
-    int m90;         // 0x90
-    char pad94[0xC];
-    char* rider;     // 0xA0
-};
 
-static inline int neq_9548(sHP_9548* a, const t4Vector& b)
+static inline int neq_9548(cHandplantMotion* a, const t4Vector& b)
 {
-    return a->fx != b.x || a->fy != b.y || a->fz != b.z || a->fw != b.w;
+    return a->ExitVel.x != b.x || a->ExitVel.y != b.y || a->ExitVel.z != b.z || a->ExitVel.w != b.w;
 }
 
 // PORT: PS2-only VU0 inline asm (dst = a x b, w = 0).
@@ -768,7 +760,7 @@ static inline void vu0SubTo_9548(t4Vector& dst, const t4Vector& a, const t4Vecto
     dst = r;
 }
 
-extern "C" int cHandplantMotion_calcExitVel_x(sHP_9548* s) __asm__("cHandplantMotion_calcExitVel");
+extern "C" int cHandplantMotion_calcExitVel_x(cHandplantMotion* s) __asm__("cHandplantMotion_calcExitVel");
 /**
  * Works out the handplant's exit velocity (ExitVel) from the rider's HandplantMode; returns whether it is set.
  *
@@ -781,80 +773,80 @@ extern "C" int cHandplantMotion_calcExitVel_x(sHP_9548* s) __asm__("cHandplantMo
  * @param handplant  the cHandplantMotion (this)
  * @return 1 when ExitVel is set, else 0
  */
-extern "C" int cHandplantMotion_calcExitVel_x(sHP_9548* handplant)
+extern "C" int cHandplantMotion_calcExitVel_x(cHandplantMotion* handplant)
 {
     if (neq_9548(handplant, D_004FF120_9548))
         return 1;
-    int kind = *(int*)(handplant->rider + 0x32C);
+    int kind = handplant->mRider->HandplantMode;
     t4Vector n;
     if (kind == 3) {
         t4Vector exitVel;
-        vu0CrossTo_9548(exitVel, D_004FF160_9548, handplant->v20);
+        vu0CrossTo_9548(exitVel, D_004FF160_9548, handplant->SplineDir);
         vu0NormTo_9548(n, exitVel);
-        float tangentSpeed = handplant->m8C * 0.699999988079071f;
+        float tangentSpeed = handplant->InitTangentSpeed * 0.699999988079071f;
         float k = 2.0f;
-        if (handplant->m90 != 0)
+        if (handplant->IsRailSpline != 0)
             k = 15.0f;
-        float approachDot = vu0Dot_9548(handplant->v40, n);
+        float approachDot = vu0Dot_9548(handplant->ApproachDir, n);
         float sideSpeed = k * 27.77777862548828f;
         if (approachDot < 0.0f)
             sideSpeed = -sideSpeed;
         t4Vector alongVel;
-        vu0ScaleTo_9548(alongVel, handplant->v20, tangentSpeed);
+        vu0ScaleTo_9548(alongVel, handplant->SplineDir, tangentSpeed);
         t4Vector sideVel;
         vu0ScaleTo_9548(sideVel, n, sideSpeed);
         vu0SubTo_9548(exitVel, alongVel, sideVel);
-        *(t4Vector*)&handplant->fx = exitVel;
+        *(t4Vector*)&handplant->ExitVel.x = exitVel;
         float z = 0.0f;
-        if (handplant->m90 != 0)
+        if (handplant->IsRailSpline != 0)
             z = 10.0f;
-        *(float*)((char*)handplant + 0x18) = z * 27.77777862548828f;
+        handplant->ExitVel.z = z * 27.77777862548828f;
         return 1;
     }
     if (kind == 4) {
         t4Vector exitVel;
-        vu0CrossTo_9548(exitVel, handplant->v20, D_004FF160_9548);
+        vu0CrossTo_9548(exitVel, handplant->SplineDir, D_004FF160_9548);
         vu0NormTo_9548(n, exitVel);
         float z = 0.0f;
-        float approachDot = vu0Dot_9548(n, handplant->v40);
+        float approachDot = vu0Dot_9548(n, handplant->ApproachDir);
         if (approachDot < z)
             vu0ScaleEq_9548(n, -1.0f);
         float k = 5.0f;
-        if (handplant->m90 != 0)
+        if (handplant->IsRailSpline != 0)
             k = 15.0f;
         float kphScale = 27.77777862548828f;
         vu0ScaleTo_9548(exitVel, n, k * kphScale);
-        *(t4Vector*)&handplant->fx = exitVel;
-        if (handplant->m90 != 0)
+        *(t4Vector*)&handplant->ExitVel.x = exitVel;
+        if (handplant->IsRailSpline != 0)
             z = 5.0f;
         k = z * kphScale;
-        *(float*)((char*)handplant + 0x18) = k;
+        handplant->ExitVel.z = k;
         return 1;
     }
     if (kind == 5) {
         t4Vector exitVel;
-        vu0CrossTo_9548(exitVel, handplant->v20, D_004FF160_9548);
+        vu0CrossTo_9548(exitVel, handplant->SplineDir, D_004FF160_9548);
         vu0NormTo_9548(n, exitVel);
         float z = 0.0f;
-        float approachDot = vu0Dot_9548(n, handplant->v40);
+        float approachDot = vu0Dot_9548(n, handplant->ApproachDir);
         if (z < approachDot)
             vu0ScaleEq_9548(n, -1.0f);
         float k = 5.0f;
-        if (handplant->m90 != 0)
+        if (handplant->IsRailSpline != 0)
             k = 15.0f;
         float kphScale = 27.77777862548828f;
         vu0ScaleTo_9548(exitVel, n, k * kphScale);
-        *(t4Vector*)&handplant->fx = exitVel;
-        if (handplant->m90 != 0)
+        *(t4Vector*)&handplant->ExitVel.x = exitVel;
+        if (handplant->IsRailSpline != 0)
             z = 5.0f;
         k = z * kphScale;
-        *(float*)((char*)handplant + 0x18) = k;
+        handplant->ExitVel.z = k;
         return 1;
     }
     if (kind == 6) {
-        vu0ScaleTo_9548(n, handplant->v20, 833.3333740234375f);
-        *(t4Vector*)&handplant->fx = n;
-        *(float*)((char*)handplant + 0x18) += 416.66668701171875f;
+        vu0ScaleTo_9548(n, handplant->SplineDir, 833.3333740234375f);
+        *(t4Vector*)&handplant->ExitVel.x = n;
+        handplant->ExitVel.z += 416.66668701171875f;
         return 1;
     }
     return 0;
@@ -1058,19 +1050,6 @@ done:
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_resolve);
 #ifdef SKIP_ASM
-struct sHit_139C88 {
-    sVec4HP pos;                // 0x00
-    sVec4HP normal;             // 0x10
-    sVec4HP vel;                // 0x20
-    char pad30[0x1C];           // 0x30
-    int surface;                // 0x4C
-    char* obj50;                // 0x50
-    char* obj54;                // 0x54
-    char pad58[0x14];           // 0x58
-    float f6C;                  // 0x6C
-    float f70;                  // 0x70
-    char pad74[0xC];            // 0x74
-} __attribute__((aligned(16)));
 
 struct sInfo_139C88 {
     sVec4HP pos;                // 0x00
@@ -1079,11 +1058,11 @@ struct sInfo_139C88 {
     float speed;                // 0x30
 } __attribute__((aligned(16)));
 
-struct sVEnt_139C88 { short delta; short index; void (*fn)(void*, sHit_139C88*, const sVec4HP&); };
+struct sVEnt_139C88 { short delta; short index; void (*fn)(void*, tIntersectInfo*, const sVec4HP&); };
 
 extern int kInAirSphereMask;
 extern void* cWScriptMan_TheWScriptMan;
-extern "C" float cAirMotion_intersectBoard_9C88(void* self, sHit_139C88* hit) __asm__("cAirMotion_intersectBoard");
+extern "C" float cAirMotion_intersectBoard_9C88(void* self, tIntersectInfo* hit) __asm__("cAirMotion_intersectBoard");
 extern "C" void cRider_updateBoundBox_9C88(void* rider, int a) __asm__("cRider_updateBoundBox");
 extern "C" void cRider_checkForReset(void* rider, int a, int b);
 extern "C" void cRider_moveFromCollision(void* rider, void* v);
@@ -1091,7 +1070,7 @@ extern "C" void cRider_checkObjectCollisions(void* rider, int a1);
 extern "C" void cRider_checkObjectCollisions_p(void* rider, void* v) __asm__("cRider_checkObjectCollisions");
 extern "C" void cRider_checkOpponentCollisions(void* rider);
 extern "C" void cRider_flagEventWipeout_9C88(void* rider, int anim, int a2, int a3, sInfo_139C88* info) __asm__("cRider_flagEventWipeout");
-extern "C" void cRider_flagEventLand(void* rider, int a1, int a2, int a3, sHit_139C88* hit, float spd);
+extern "C" void cRider_flagEventLand(void* rider, int a1, int a2, int a3, tIntersectInfo* hit, float spd);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void* ra, int layer);
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void* ra, int layer);
 extern "C" bool tEventFlags_isSet1(tEventFlags* self, int bit);
@@ -1296,11 +1275,11 @@ static inline sVec4HP row_139C88(char* r, int k)
  */
 extern "C" void cAirMotion_resolve(cAirMotion* self)
 {
-    sHit_139C88 hit;
+    tIntersectInfo hit;
     float intParam = cAirMotion_intersectBoard_9C88(self, &hit);
     float vn = 0.0f;
     if (intParam >= 0.5f) {
-        vn = vu0Dot_139C88(vu0Sub_139C88(V4_139C88(RIDER_139C88, 0x1E0), hit.vel), hit.normal);
+        vn = vu0Dot_139C88(vu0Sub_139C88(V4_139C88(RIDER_139C88, 0x1E0), (*(sVec4HP*)&hit.Ivel)), (*(sVec4HP*)&hit.Inorm));
     }
     if (intParam >= 0.5f && vn < 0.0f) {
         float spd = vu0Len_139C88(V4_139C88(RIDER_139C88, 0x1E0));
@@ -1308,25 +1287,25 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
             cRider_setControlState_9C88(RIDER_139C88, 13);
         }
         cAirPredictor_land_9C88(*(void**)(RIDER_139C88 + 0x788), RIDER_139C88 + 0x110, RIDER_139C88 + 0x1E0);
-        tSurfData* surf = &SSXApp->Game->SurfPropCache->SurfData[hit.surface];
+        tSurfData* surf = &SSXApp->Game->SurfPropCache->SurfData[hit.Stype];
         int fl;
-        if (surf->IsResetSurface != 0 || (hit.obj54 != 0 && (fl = *(short*)(hit.obj54 + 0xA), (fl & 2) != 0))) {
+        if (surf->IsResetSurface != 0 || (((char*)hit.Patch) != 0 && (fl = *(short*)(((char*)hit.Patch) + 0xA), (fl & 2) != 0))) {
             cRider_checkForReset(RIDER_139C88, 0, 1);
             return;
         }
-        float pen = vu0Dot_139C88(vu0Sub_139C88(hit.pos, V4_139C88(RIDER_139C88, 272)), hit.normal) - surf->PowderDepth3G;
+        float pen = vu0Dot_139C88(vu0Sub_139C88((*(sVec4HP*)&hit.Ipos), V4_139C88(RIDER_139C88, 272)), (*(sVec4HP*)&hit.Inorm)) - surf->PowderDepth3G;
         if (0.0f < pen) {
-            sVec4HP push = vu0Scale_139C88(hit.normal, pen);
+            sVec4HP push = vu0Scale_139C88((*(sVec4HP*)&hit.Inorm), pen);
             cRider_moveFromCollision(RIDER_139C88, &push);
         }
-        V4_139C88(RIDER_139C88, 880) = hit.normal;
-        V4_139C88(RIDER_139C88, 976) = hit.vel;
+        V4_139C88(RIDER_139C88, 880) = (*(sVec4HP*)&hit.Inorm);
+        V4_139C88(RIDER_139C88, 976) = (*(sVec4HP*)&hit.Ivel);
         *(float*)(RIDER_139C88 + 0x770) = -vn;
         V4_139C88(RIDER_139C88, 0x380) = V4_139C88(RIDER_139C88, 880);
-        if (hit.obj54 != 0) {
-            *(int*)(RIDER_139C88 + 0x430) = *(int*)(hit.obj54 + 0x150);
-            *(float*)(RIDER_139C88 + 0xAAC) = hit.f6C;
-            *(float*)(RIDER_139C88 + 0xAB0) = hit.f70;
+        if (((char*)hit.Patch) != 0) {
+            *(int*)(RIDER_139C88 + 0x430) = *(int*)(((char*)hit.Patch) + 0x150);
+            *(float*)(RIDER_139C88 + 0xAAC) = hit.u;
+            *(float*)(RIDER_139C88 + 0xAB0) = hit.v;
         } else {
             *(unsigned int*)(RIDER_139C88 + 0x430) = 0xFFFFFFFF;
         }
@@ -1338,8 +1317,8 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
         if (surf->MaxLandingPenetrationVel < vn2) {
             vu0AddEq_139C88(V4_139C88(RIDER_139C88, 0x1E0), vu0Scale_139C88(V4_139C88(r, 880), vn2 - surf->MaxLandingPenetrationVel));
         }
-        if (hit.obj50 != 0) {
-            char* handler = *(char**)(hit.obj50 + 0xC);
+        if (((char*)hit.Inst) != 0) {
+            char* handler = (char*)hit.Inst->m_pActiveNode;
             if (handler != 0) {
                 sVEnt_139C88* vt = *(sVEnt_139C88**)(handler + 0xC);
                 vt[43].fn(vthis(handler, vt[43]), &hit, vu0Scale_139C88(vu0Scale_139C88(imp, -1.0f), (float)SSXApp->TimerHz));
@@ -1349,9 +1328,9 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
         char* r2 = RIDER_139C88;
         V4_139C88(r2, 928) = vu0Normalize_139C88(vu0Sub_139C88(row_139C88(r2, 1), vu0Scale_139C88(V4_139C88(r2, 880), vu0Dot_139C88(row_139C88(r2, 1), V4_139C88(r2, 880)))));
         V4_139C88(RIDER_139C88, 944) = vu0Cross_139C88(V4_139C88(RIDER_139C88, 880), V4_139C88(RIDER_139C88, 928));
-        *(int*)(RIDER_139C88 + 0x438) = hit.surface;
-        V4_139C88(RIDER_139C88, 1120) = hit.pos;
-        *(float*)(RIDER_139C88 + 0x454) = vu0Dot_139C88(vu0Sub_139C88(V4_139C88(RIDER_139C88, 272), hit.pos), V4_139C88(RIDER_139C88, 880));
+        *(int*)(RIDER_139C88 + 0x438) = hit.Stype;
+        V4_139C88(RIDER_139C88, 1120) = (*(sVec4HP*)&hit.Ipos);
+        *(float*)(RIDER_139C88 + 0x454) = vu0Dot_139C88(vu0Sub_139C88(V4_139C88(RIDER_139C88, 272), (*(sVec4HP*)&hit.Ipos)), V4_139C88(RIDER_139C88, 880));
         if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 20) {
             if (!tEventFlags_isSet1((tEventFlags*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0), 2)) anim = 361;
         } else if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 21) {
@@ -1405,9 +1384,9 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
         }
         if (anim != 438) {
             sInfo_139C88 info;
-            info.pos = hit.pos;
+            info.pos = (*(sVec4HP*)&hit.Ipos);
             info.dir = vu0Normalize_139C88(V4_139C88(RIDER_139C88, 0x1E0));
-            info.up = hit.normal;
+            info.up = (*(sVec4HP*)&hit.Inorm);
             info.speed = absf_139C88(vn);
             cRider_flagEventWipeout_9C88(RIDER_139C88, anim, 0, *(int*)(RIDER_139C88 + 0x438), &info);
         } else {
@@ -2665,7 +2644,7 @@ extern "C" void cRailslideMotion_resolve(cRailslideMotion* self)
     sTbl_BFA8 tbl = D_00458230;
     if (cRider_getControlState(RIDER_BFA8) == 0xC) {
         cRider* rider = (cRider*)(RIDER_BFA8);
-        *(int*)((char*)rider->mSphereTree + 0x28) = tbl.v[rider->mRiderHandler->UberGrindControl.CurrentGrind];
+        rider->mSphereTree->sphMask = tbl.v[rider->mRiderHandler->UberGrindControl.CurrentGrind];
     } else {
         *(int*)(*(char**)(RIDER_BFA8 + 0xAA0) + 0x28) = 22;
     }
@@ -2696,30 +2675,7 @@ extern "C" void cRider_reactToCollision(void* rider, void* info, int id);
 extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 
-struct sHit_13C140 {
-    sVec4HP pos;            // 0x00
-    sVec4HP normal;         // 0x10
-    sVec4HP v20;            // 0x20
-    float pad30[4];         // 0x30
-    float dist;             // 0x40
-    int pad44[2];           // 0x44
-    int m4C;                // 0x4C
-    char* obj;              // 0x50
-    char* tri;              // 0x54
-    int pad58[5];           // 0x58
-    float m6C;              // 0x6C
-    float m70;              // 0x70
-    int pad74[3];           // 0x74
-} __attribute__((aligned(16)));
 
-struct sSphere_13C140 {
-    int state;              // 0x00
-    int f4;                 // 0x04
-    int f8;                 // 0x08
-    int padC;               // 0x0C
-    sVec4HP dir;            // 0x10
-    char rest[0x320 - 0x20];
-} __attribute__((aligned(16)));
 
 struct sInfo_13C140 {
     sVec4HP pos;
@@ -2863,20 +2819,20 @@ extern "C" void cRailslideMotion_checkTerrainCollisions(cRailslideMotion* self)
 {
     if (cRider_getControlState(RIDER) == 9)
         return;
-    sHit_13C140 hit;
-    sSphere_13C140 sph;
+    tIntersectInfo hit;
+    cWorldRider sph;
     char* rider = RIDER;
     cWorldRider_cWorldRider(&sph, *(void**)(rider + 0xAA0), !riderFlag_13C140(rider));
     float penetration = cOverlapList_terrainIntersect1(*(void**)(RIDER + 0x860), &sph, &hit, *(int*)(RIDER + 0x868));
     if (penetration < 0.0f) { cWorldRider__cWorldRider(&sph, 2); return; }
     {
-        float dot = vu0Dot_13C140(RV(880), hit.normal);
+        float dot = vu0Dot_13C140(RV(880), (*(sVec4HP*)&hit.Inorm));
         if (dot < -0.9998999834060669f) { cWorldRider__cWorldRider(&sph, 2); return; }
         if (dot < 0.0f)
-            hit.normal = vu0Normalize_13C140(vu0Sub_13C140(hit.normal, vu0Scale_13C140(RV(880), dot)));
+            (*(sVec4HP*)&hit.Inorm) = vu0Normalize_13C140(vu0Sub_13C140((*(sVec4HP*)&hit.Inorm), vu0Scale_13C140(RV(880), dot)));
     }
     {
-        sVec4HP push = vu0Scale_13C140(vu0Scale_13C140(hit.normal, 1.100000023841858f), penetration);
+        sVec4HP push = vu0Scale_13C140(vu0Scale_13C140((*(sVec4HP*)&hit.Inorm), 1.100000023841858f), penetration);
         cRider_moveFromCollision(RIDER, &push);
         cRider_updateOrientationImplicit(RIDER);
         sVec4HP posDelta = vu0Sub_13C140(SV(0x30), RV(272));
@@ -2888,27 +2844,27 @@ extern "C" void cRailslideMotion_checkTerrainCollisions(cRailslideMotion* self)
             self->StuckSec += 0.01666666753590107f;
             if (0.5f < self->StuckSec) {
                 sVec4HP fwd = RV(432);
-                float dd = vu0Dot_13C140(fwd, hit.normal);
+                float dd = vu0Dot_13C140(fwd, (*(sVec4HP*)&hit.Inorm));
                 float spd = 1111.111083984375f;
                 if (dd < -0.9990000128746033f) {
                     RV(0x1E0) = vu0Scale_13C140(fwd, spd);
                 } else {
-                    sVec4HP pushDir = vu0Sub_13C140(fwd, vu0Scale_13C140(hit.normal, dd));
+                    sVec4HP pushDir = vu0Sub_13C140(fwd, vu0Scale_13C140((*(sVec4HP*)&hit.Inorm), dd));
                     RV(0x1E0) = vu0Scale_13C140(vu0Normalize_13C140(pushDir), spd);
                 }
             }
         }
-        float dot2 = vu0Dot_13C140(vu0Scale_13C140(hit.normal, -1.0f), RV(0x1E0));
+        float dot2 = vu0Dot_13C140(vu0Scale_13C140((*(sVec4HP*)&hit.Inorm), -1.0f), RV(0x1E0));
         if (dot2 < 0.0f) { cWorldRider__cWorldRider(&sph, 2); return; }
         sVec4HP n = vu0Normalize_13C140(RV(0x1E0));
         float newNormVel = dot2 * 0.5f < 27.77777862548828f ? 27.77777862548828f : dot2 * 0.5f;
-        vu0AddEq_13C140(RV(0x1E0), vu0Scale_13C140(hit.normal, dot2 + newNormVel));
+        vu0AddEq_13C140(RV(0x1E0), vu0Scale_13C140((*(sVec4HP*)&hit.Inorm), dot2 + newNormVel));
         sInfo_13C140 info;
-        info.pos = hit.pos;
+        info.pos = (*(sVec4HP*)&hit.Ipos);
         info.dir = n;
-        info.normal = hit.normal;
+        info.normal = (*(sVec4HP*)&hit.Inorm);
         info.depth = newNormVel;
-        cRider_reactToCollision(RIDER, &info, hit.m4C);
+        cRider_reactToCollision(RIDER, &info, hit.Stype);
     }
     cWorldRider__cWorldRider(&sph, 2);
 }
@@ -3036,12 +2992,6 @@ INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_gainFocus);
 extern "C" int AITick();
 
 
-struct sHpEntry_13C7A8 {
-    char pad0[0x14];
-    float m14;
-    float m18;
-    char pad1C[0xB0 - 0x1C];
-};
 
 // PORT: PS2-only VU0 inline asm (in-place vector times scalar).
 static inline void vu0ScaleEq_13C7A8(t4Vector& v, float s)
@@ -3080,11 +3030,11 @@ extern "C" void cGroundMotion_gainFocus(sHpCtl_13C7A8* self)
 {
     self->m0 = 0;
     cRider* rider = (cRider*)self->mRider;
-    sHpEntry_13C7A8* tbl = (sHpEntry_13C7A8*)SSXApp->Game->SurfPropCache;
-    sHpEntry_13C7A8* snow = &tbl[rider->mSurfaceType];
+    tSurfData* tbl = (tSurfData*)SSXApp->Game->SurfPropCache;
+    tSurfData* snow = &tbl[rider->mSurfaceType];
     float k = rider->mAnimModel->unk_140.x;
-    self->m4 = k * snow->m14;
-    self->m8 = k * snow->m18;
+    self->m4 = k * snow->PowderDepth1G;
+    self->m8 = k * snow->PowderDepth3G;
     *(&rider->DampGroundNormal) = *(&rider->mGroundNormal);
     self->mC = 0;
     int aiTick = AITick();
@@ -3798,22 +3748,6 @@ INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_step);
 #include "ai/rider.h"
 
 
-// One 0xB0-byte surface entry (SSXApp -> +0x84 -> +0x44, indexed by cRider::mSurfaceType).
-struct sSurf_13D818 {
-    float m00;        // 0x00
-    float pad04[2];
-    float m0C;        // 0x0C: turn angle scale (degrees)
-    float m10;        // 0x10: max height above ground
-    float m14;        // 0x14
-    float m18;        // 0x18
-    float pad1C[3];
-    float m28;        // 0x28
-    float m2C;        // 0x2C
-    float m30;        // 0x30
-    float m34;        // 0x34
-    float m38;        // 0x38
-    char pad3C[0xB0 - 0x3C];
-};
 
 struct sCurvePt_13D818 { float x, y; };
 extern sCurvePt_13D818* kPowderTiltBwd;
@@ -3823,9 +3757,9 @@ extern sCurvePt_13D818* kSteerTuneMinAttribEffect;
 extern sCurvePt_13D818* kSteerTuneMaxAttribEffect;
 extern sCurvePt_13D818* D_004A1158;
 
-extern "C" float cGroundMotion_getSnowForce_13D818(void* self, sSurf_13D818* e, float h, float vn, float dt) __asm__("cGroundMotion_getSnowForce");
-extern float cGroundMotion_getBoostForce_D818(void* self, sSurf_13D818* e) __asm__("cGroundMotion_getBoostForce");
-extern "C" float cGroundMotion_getSlipForce_13D818(void* self, sSurf_13D818* e, float a, float b) __asm__("cGroundMotion_getSlipForce");
+extern "C" float cGroundMotion_getSnowForce_13D818(void* self, tSurfData* e, float h, float vn, float dt) __asm__("cGroundMotion_getSnowForce");
+extern float cGroundMotion_getBoostForce_D818(void* self, tSurfData* e) __asm__("cGroundMotion_getBoostForce");
+extern "C" float cGroundMotion_getSlipForce_13D818(void* self, tSurfData* e, float a, float b) __asm__("cGroundMotion_getSlipForce");
 // PORT: cBEStatInterface_getEdgingAttrib is declared void in this unit; this caller uses its float result.
 extern "C" float cBEStatInterface_getEdgingAttrib_f(void* iface, int rider, int b) __asm__("cBEStatInterface_getEdgingAttrib");
 extern "C" void cRider_rotateOrientation(cRider* self, const t4Vector& axis, float angle);
@@ -4182,10 +4116,10 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
         vu0ScaleEq_13D818(self->mRider->mVelocity, self->mRider->unk_2E4 / spd);
 
     float dt = self->mRider->mTimeScale * 0.01666666753590107f;
-    sSurf_13D818* snow = &((sSurf_13D818*)SSXApp->Game->SurfPropCache)[self->mRider->mSurfaceType];
+    tSurfData* snow = &((tSurfData*)SSXApp->Game->SurfPropCache)[self->mRider->mSurfaceType];
     float scale = self->mRider->mAnimModel->unk_140.x;
-    self->PowderDepth1G = approach_13D818(self->PowderDepth1G, scale * snow->m14, dt * 100.0f);
-    self->PowderDepth3G = approach_13D818(self->PowderDepth3G, scale * snow->m18, dt * 100.0f);
+    self->PowderDepth1G = approach_13D818(self->PowderDepth1G, scale * snow->PowderDepth1G, dt * 100.0f);
+    self->PowderDepth3G = approach_13D818(self->PowderDepth3G, scale * snow->PowderDepth3G, dt * 100.0f);
 
     t4Vector rel = vu0Sub_13D818(self->mRider->mVelocity, self->mRider->GroundVelocity);
     float dN = vu0Dot_13D818(rel, self->mRider->mGroundNormal);
@@ -4194,7 +4128,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     float lean = -self->mRider->mSlewed[0].cur;
     float push = cGroundMotion_getSnowForce_13D818((self), snow, self->mRider->unk_454, dN, dt);
     float drag = cGroundMotion_getBoostForce_D818((self), snow);
-    float steer = cGroundMotion_getSlipForce_13D818((self), snow, dF, push / snow->m00);
+    float steer = cGroundMotion_getSlipForce_13D818((self), snow, dF, push / snow->Gravity);
     float edge = cGroundMotion_getDigForce(self, (float*)snow, dS, dF, lean);
     if (self->mRider->mGroundNormal.z < 0.0f && push < 0.0f)
         push = 0.0f;
@@ -4205,11 +4139,11 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     float k = cBEStatInterface_getEdgingAttrib_f(cBE_getInterface_Fv(cBE_getBE(), 3), self->mRider->mAIIndex, self->mRider->mStatsIndex);
     float curveRange = hi - lo;
     float sinBank, c;
-    fSinCos(&sinBank, &c, snow->m0C * (lo + (k * curveRange + curveRange)) * 0.01745329424738884f * lean);
-    float lift = (push <? (snow->m00 + snow->m00)) / c;
+    fSinCos(&sinBank, &c, snow->MaxLeanAngle * (lo + (k * curveRange + curveRange)) * 0.01745329424738884f * lean);
+    float lift = (push <? (snow->Gravity + snow->Gravity)) / c;
     t4Vector up = vu0Add_13D818(vu0Scale_13D818(self->mRider->mGroundNormal, c), vu0Scale_13D818(self->mRider->mGroundSide, sinBank));
     push -= lift;
-    sVec4C_13D818 grav(0.0f, 0.0f, -snow->m00, 0.0f);
+    sVec4C_13D818 grav(0.0f, 0.0f, -snow->Gravity, 0.0f);
     t4Vector force = vu0Add_13D818(vu0Add_13D818(vu0Add_13D818(vu0Add_13D818(
         vu0Scale_13D818(self->mRider->mGroundNormal, push), vu0Scale_13D818(up, lift)),
         vu0Scale_13D818(self->mRider->mGroundForward, steer + drag)),
@@ -4272,7 +4206,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
         9.999999747378752e-06f < relSpeed) {
         t4Vector ax = vu0Div_13D818(vu0Cross_13D818(rel, self->mRider->mGroundForward), relSpeed);
         float yaw = -func_0031C128(clamp_13D818(vu0Dot_13D818(ax, self->mRider->mGroundNormal), -1.0f, 1.0f));
-        float turnKickFlare = snow->m30;
+        float turnKickFlare = snow->TurnKickFlare;
         float turn = (turnKickFlare * ((1.0f - lean * lean) * 0.4000000059604645f) + 1.100000023841858f) * lean *
                      (curve_13D818(kMaxTurnKickAngle, relSpeed * 0.035999998450279236f) * 0.01745329424738884f);
         turn /= self->mRider->mSlewed[4].cur * 0.9955680966377258f + 1.0f;
@@ -4280,7 +4214,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
         yaw += turn;
         if (vu0Dot_13D818(rel, self->mRider->mGroundForward) < 0.0f)
             yaw = -yaw;
-        float rate = (snow->m34 * (relSpeed * 9.999999974752427e-07f) * relSpeed * dt) <? 1.0f;
+        float rate = (snow->TurnHeadAdjustRate * (relSpeed * 9.999999974752427e-07f) * relSpeed * dt) <? 1.0f;
         float lowSpd = 555.5555419921875f; // kph2cps(20)
         t4Vector dir;
         t4Vector side = vu0Cross_13D818(self->mRider->mGroundNormal, D_004FF160_13D818);
@@ -4293,8 +4227,8 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
         }
         float fallLineAlign = absf_13D818(vu0Dot_13D818(rel, dir)) / relSpeed;
         float speedRatio = (relSpeed / lowSpd) <? 1.0f;
-        float c = (speedRatio * (0.5f - fallLineAlign) * (snow->m28 + snow->m28)) >? 0.0f;
-        float grip = (snow->m2C + c) <? 1.0f;
+        float c = (speedRatio * (0.5f - fallLineAlign) * (snow->SlopeFactorHeadMult + snow->SlopeFactorHeadMult)) >? 0.0f;
+        float grip = (snow->BackTurnHeadMult + c) <? 1.0f;
         if (grip <= (yaw <= 0.0f ? -lean : lean) * 0.8999999761581421f)
             rate = (yaw <= 0.0f) ? rate * 0.8999999761581421f * -lean : rate * 0.8999999761581421f * lean;
         else
@@ -4380,7 +4314,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
         self->mRider->mVelocity = vu0Add_13D818(self->mRider->GroundVelocity, rel);
     }
 
-    float maxH = snow->m10;
+    float maxH = snow->AirHeight;
     if (got == 0 || maxH < self->mRider->unk_454) {
         if (self->mRider->unk_308 != 0 || lost)
             self->ForceNaturalAir = 1;
@@ -4392,7 +4326,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
             float al = vu0Len_13D818(axis);
             if (0.0010000000474974513f < al) {
                 vu0DivEq_13D818(axis, al);
-                float tilt = -func_0031C128(al <? 1.0f) * 0.01666666753590107f * snow->m38;
+                float tilt = -func_0031C128(al <? 1.0f) * 0.01666666753590107f * snow->TurnAdjustRate;
                 cRider_rotateOrientation(self->mRider, axis, tilt);
             }
         }
@@ -4449,14 +4383,8 @@ int cRider_getMotionState(void* rider);
 void cRider_setMotionState_impl_13F178(void* rider, int v) __asm__("cRider_setMotionState__FPv");
 extern int kOnGroundSphereMask;
 
-struct sInfo_13F178 {
-    sVec4HP pos;
-    sVec4HP dir;
-    sVec4HP up;
-    int f30;
-} __attribute__((aligned(16)));
 
-extern "C" void cRider_flagEventWipeout(void* rider, int a1, int a2, int a3, sInfo_13F178* info);
+extern "C" void cRider_flagEventWipeout(void* rider, int a1, int a2, int a3, tCollideInfo* info);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline sVec4HP vu0Scale_13F178(const sVec4HP& v, float s)
@@ -4576,11 +4504,11 @@ extern "C" void cGroundMotion_resolve(cGroundMotion* self)
         char* snow = (char*)&SSXApp->Game->SurfPropCache->SurfData[idx];
         int fl;
         if (idx == 18) {
-            sInfo_13F178 info;
-            info.pos = *(sVec4HP*)&rider->mPosition;
-            info.dir = vu0Normalize_13F178(*(sVec4HP*)&rider->mVelocity);
-            info.up = *(sVec4HP*)(RIDER_13F178 + 0x370);
-            info.f30 = 0;
+            tCollideInfo info;
+            (*(sVec4HP*)&info.Pos) = *(sVec4HP*)&rider->mPosition;
+            (*(sVec4HP*)&info.Direct) = vu0Normalize_13F178(*(sVec4HP*)&rider->mVelocity);
+            (*(sVec4HP*)&info.Reflect) = *(sVec4HP*)(RIDER_13F178 + 0x370);
+            (*(int*)&info.Vel) = 0;
             cRider_flagEventWipeout(RIDER_13F178, 360, 0, *(int*)(RIDER_13F178 + 0x438), &info);
         } else if (*(int*)(snow + 0x44) != 0 || (fl = *(short*)&rider->SurfaceFlags, (fl & 2) != 0)) {
             cRider_checkForReset(rider, 0, 1);
@@ -4663,30 +4591,7 @@ extern "C" void cSSXAudio_WallCollision(void* snd, void* rider);
 extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 
-struct sHit_13F488 {
-    sVec4HP pos;            // 0x00
-    sVec4HP normal;         // 0x10
-    sVec4HP v20;            // 0x20
-    float pad30[4];         // 0x30
-    float dist;             // 0x40
-    int pad44[2];           // 0x44
-    int m4C;                // 0x4C
-    char* obj;              // 0x50
-    char* tri;              // 0x54
-    int pad58[5];           // 0x58
-    float m6C;              // 0x6C
-    float m70;              // 0x70
-    int pad74[3];           // 0x74
-} __attribute__((aligned(16)));
 
-struct sSphere_13F488 {
-    int state;              // 0x00
-    int f4;                 // 0x04
-    int f8;                 // 0x08
-    int padC;               // 0x0C
-    sVec4HP dir;            // 0x10
-    char rest[0x320 - 0x20];
-} __attribute__((aligned(16)));
 
 struct sInfo_13F488 {
     sVec4HP pos;
@@ -4820,49 +4725,49 @@ extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
         if (rider->PathDistXY < 50.0f && absf_13F488(rider->PathPos.z - rider->mPosition.z) < 50.0f)
             return;
     }
-    sHit_13F488 hit;
-    sSphere_13F488 sph;
+    tIntersectInfo hit;
+    cWorldRider sph;
     cRider* rider = (cRider*)(RIDER);
     cWorldRider_cWorldRider(&sph, rider->mSphereTree, !riderFlag_13F488(((char*)rider)));
-    sph.f8 = 1;
-    sph.dir = RV(880);
+    sph.useRejectNormal = 1;
+    (*(sVec4HP*)&sph.rejectNormal) = RV(880);
     float penetration = cOverlapList_terrainIntersect1(*(void**)(RIDER + 0x860), &sph, &hit, *(int*)(RIDER + 0x868));
     if (penetration < 0.0f)
         { cWorldRider__cWorldRider(&sph, 2); return; }
-    if (hit.obj != 0) {
-        char* handler = *(char**)(hit.obj + 0xC);
+    if (((char*)hit.Inst) != 0) {
+        char* handler = (char*)hit.Inst->m_pActiveNode;
         if (handler) {
             sVEntH_13F488* vt = *(sVEntH_13F488**)(handler + 0xC);
             vt[42].fn(vthis(handler, vt[42]), &hit);
         }
     }
     {
-        float dot = vu0Dot_13F488(RV(880), hit.normal);
+        float dot = vu0Dot_13F488(RV(880), (*(sVec4HP*)&hit.Inorm));
         if (dot < -0.9998999834060669f)
             { cWorldRider__cWorldRider(&sph, 2); return; }
         if (dot < 0.0f)
-            hit.normal = vu0Normalize_13F488(vu0Sub_13F488(hit.normal, vu0Scale_13F488(RV(880), dot)));
+            (*(sVec4HP*)&hit.Inorm) = vu0Normalize_13F488(vu0Sub_13F488((*(sVec4HP*)&hit.Inorm), vu0Scale_13F488(RV(880), dot)));
     }
     {
-        sVec4HP push = vu0Scale_13F488(vu0Scale_13F488(hit.normal, 1.100000023841858f), penetration);
+        sVec4HP push = vu0Scale_13F488(vu0Scale_13F488((*(sVec4HP*)&hit.Inorm), 1.100000023841858f), penetration);
         cRider_moveFromCollision(RIDER, &push);
-        sVec4HP netVelocity = vu0Sub_13F488(RV(0x1E0), hit.v20);
-        float dot2 = vu0Dot_13F488(vu0Scale_13F488(hit.normal, -1.0f), netVelocity);
+        sVec4HP netVelocity = vu0Sub_13F488(RV(0x1E0), (*(sVec4HP*)&hit.Ivel));
+        float dot2 = vu0Dot_13F488(vu0Scale_13F488((*(sVec4HP*)&hit.Inorm), -1.0f), netVelocity);
         if (dot2 < 0.0f)
             { cWorldRider__cWorldRider(&sph, 2); return; }
         sVec4HP n = vu0Normalize_13F488(netVelocity);
         float k = dot2 * 0.05000000074505806f;
         if (k < 27.77777862548828f)
             k = 27.77777862548828f;
-        vu0AddEq_13F488(RV(0x1E0), vu0Scale_13F488(hit.normal, dot2 + k));
+        vu0AddEq_13F488(RV(0x1E0), vu0Scale_13F488((*(sVec4HP*)&hit.Inorm), dot2 + k));
         cRider_turnFromCollision(RIDER, &hit);
         cRider_updateOrientationImplicit(RIDER);
         sInfo_13F488 info;
-        info.pos = hit.pos;
+        info.pos = (*(sVec4HP*)&hit.Ipos);
         info.dir = n;
-        info.normal = hit.normal;
+        info.normal = (*(sVec4HP*)&hit.Inorm);
         info.depth = dot2;
-        cRider_reactToCollision(RIDER, &info, hit.m4C);
+        cRider_reactToCollision(RIDER, &info, hit.Stype);
         cSSXAudio_WallCollision(cAudioInterface_bxAudio(), RIDER);
     }
     cWorldRider__cWorldRider(&sph, 2);
@@ -8338,14 +8243,6 @@ INCLUDE_ASM("ai/control/handplantcontrol", cDangerMan_CalcAppliedDangerLevel);
 
 
 
-// Handplant zone: a sphere (type 2 = disabled).
-struct sHpZone_41B8 {
-    float radius;           // 0x0
-    int f4;
-    int type;               // 0x8
-    t3Vector center;    // 0xC
-    int f18;
-};
 
 
 struct sHpGame_41B8 {
@@ -8404,24 +8301,24 @@ extern "C" int cDangerMan_CalcAppliedDangerLevel(cDangerMan* self, int pl)
         return 1;
     }
     int n = self->mTrackedDangerElemNum;
-    sHpZone_41B8* z = ((sHpZone_41B8*)&self->mTrackedDangerElems[0]);
+    tDangerElemInfo* z = ((&self->mTrackedDangerElems[0]));
     for (int i = 0; i < 64 && n != 0; i++, z++) {
-        if (z->type == 2) {
+        if (z->state == 2) {
             continue;
         }
         n--;
-        float distSq = z->center.x - pos[0];
+        float distSq = (*(t3Vector*)&z->pos[0]).x - pos[0];
         float radiusSq = z->radius * z->radius;
         distSq = distSq * distSq;
         if (radiusSq < distSq) {
             continue;
         }
-        float dy = z->center.y - pos[1];
+        float dy = (*(t3Vector*)&z->pos[0]).y - pos[1];
         dy = dy * dy;
         if (radiusSq < dy) {
             continue;
         }
-        float dz = z->center.z - pos[2];
+        float dz = (*(t3Vector*)&z->pos[0]).z - pos[2];
         distSq = distSq + dy + dz * dz;
         if (!(radiusSq < distSq)) {
             return lvl;
@@ -8434,23 +8331,8 @@ extern "C" int cDangerMan_CalcAppliedDangerLevel(cDangerMan* self, int pl)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", func_00144368);
 #ifdef SKIP_ASM
-struct sKey_144368 {
-    int level;
-    int x;
-    int y;
-    int z;
-};
 
-struct sBox_144368 {
-    float min[4];
-    float max[4];
-};
 
-struct sTree_144368 {
-    void* f0;
-    sBox_144368* boxes;
-    int count;
-};
 
 struct sNode_144368 {
     sNode_144368* child[8];
@@ -8469,9 +8351,9 @@ extern "C" void FocusQuery_addcell(void* a, sNode_144368* node, int leaf);
  * @param node  the cell node (eight child pointers)
  * @param key  the cell's level and coordinates
  */
-extern "C" void func_00144368(sTree_144368* self, sNode_144368* node, sKey_144368* key)
+extern "C" void func_00144368(FocusCallback* self, sNode_144368* node, nash_CellKey* key)
 {
-    int n = self->count;
+    int n = self->numboxes;
     int i = 0;
     int ok;
     do {
@@ -8482,23 +8364,23 @@ extern "C" void func_00144368(sTree_144368* self, sNode_144368* node, sKey_14436
         scaleBits.i = (key->level + 0x7F) << 23;
         float cellSize = scaleBits.f;
         // PORT: pointer arithmetic through int
-        sBox_144368* box = (sBox_144368*)((i << 5) + (int)self->boxes);
+        tBoundBox* box = (tBoundBox*)((i << 5) + (int)((tBoundBox*)self->boxes));
         ok = 0;
-        if (((float)key->x - 0.2f) * cellSize <= box->max[0] && ((float)key->y - 0.2f) * cellSize <= box->max[1] && ((float)key->z - 0.2f) * cellSize <= box->max[2]
-            && box->min[0] <= ((float)(key->x + 1) + 0.2f) * cellSize && box->min[1] <= ((float)(key->y + 1) + 0.2f) * cellSize && box->min[2] <= ((float)(key->z + 1) + 0.2f) * cellSize) {
+        if (((float)key->x - 0.2f) * cellSize <= ((float*)&box->MaxPoint)[0] && ((float)key->y - 0.2f) * cellSize <= ((float*)&box->MaxPoint)[1] && ((float)key->z - 0.2f) * cellSize <= ((float*)&box->MaxPoint)[2]
+            && ((float*)&box->MinPoint)[0] <= ((float)(key->x + 1) + 0.2f) * cellSize && ((float*)&box->MinPoint)[1] <= ((float)(key->y + 1) + 0.2f) * cellSize && ((float*)&box->MinPoint)[2] <= ((float)(key->z + 1) + 0.2f) * cellSize) {
             ok = 1;
         }
         i++;
     } while (!ok);
     int leaf = key->level < 14;
-    FocusQuery_addcell(self->f0, node, leaf);
+    FocusQuery_addcell(((void*)self->query), node, leaf);
     if (leaf) {
         return;
     }
     if (key->level == 11) {
         return;
     }
-    sKey_144368 k;
+    nash_CellKey k;
     k.level = key->level - 1;
     k.x = key->x * 2;
     k.y = key->y * 2;

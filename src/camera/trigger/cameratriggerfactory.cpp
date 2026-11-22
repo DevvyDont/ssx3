@@ -1,4 +1,6 @@
 #include "common.h"
+#include "bx/bigfile.h"
+#include "worldpainter/worldpainterquery.h"
 #include "world/worldview.h"
 #include "intersect/bxnash.h"
 #include "bx/bxstring.h"
@@ -1580,11 +1582,8 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTriggerAlgorithm_cTriggerAlg
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cChaseAlgorithm_cChaseAlgorithm(void* self);
 extern void* cTriggerAlgorithm_vtbl[];
-struct sQuad_00173208 {
-    int v[4];
-} __attribute__((aligned(16)));
 
-extern sQuad_00173208 D_004FF130_00173208 __asm__("t4vect_Origin");
+extern t4Vector D_004FF130_00173208 __asm__("t4vect_Origin");
 
 /**
  * Constructs a trigger camera algorithm: a chase camera that follows the rider from a configurable distance and angle.
@@ -1612,7 +1611,7 @@ extern "C" void* cTriggerAlgorithm_cTriggerAlgorithm(cTriggerAlgorithm* self)
     self->IdealDist = 400.0f;
     *(int*)&self->LeadDistance = 0;
     self->PitchOffset = 20.0f;
-    *(sQuad_00173208*)&self->Position = D_004FF130_00173208;
+    *(&self->Position) = D_004FF130_00173208;
     self->AlgorithmType = 90;
     *(int*)&self->Pitch = 0;
     *(int*)&self->Heading = 0;
@@ -2077,16 +2076,12 @@ struct sM_173E40 {
     float m[4][4];
 } __attribute__((aligned(16)));
 
-struct sPair_173E40 {
-    t4Vector a;
-    t4Vector b;
-};
 
 extern sM_173E40 t4mat_Identity;
 extern t4Vector t4vect_YAxis;
 extern t4Vector D_004FF160_v173E40 __asm__("t4vect_ZAxis");
 extern "C" void fSinCos(float* sout, float* cout, float x);
-extern "C" sPair_173E40 tPose_tPose(sM_173E40* m);
+extern "C" tPose tPose_tPose(sM_173E40* m);
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
 static inline void vu0CopyMtx_173E40(sM_173E40* dst, const sM_173E40* src)
@@ -2218,7 +2213,7 @@ static inline void RotAxis_173E40(sM_173E40* m, const t4Vector& axis, float angl
  * @param src  the trigger camera algorithm (this)
  * @return the pose: position and rotation quaternion (On Tour tPose), returned by value
  */
-extern "C" sPair_173E40 cTriggerAlgorithm_getPose(cTriggerAlgorithm* src)
+extern "C" tPose cTriggerAlgorithm_getPose(cTriggerAlgorithm* src)
 {
     sM_173E40 poseMtx;
     vu0CopyMtx_173E40(&poseMtx, &t4mat_Identity);
@@ -6503,13 +6498,8 @@ struct sColor_179798 {
     sColor_179798(float ar, float ag, float ab, float aa) : r(ar), g(ag), b(ab), a(aa) {}
 };
 
-struct sFlags_179798 {
-    unsigned char a;
-    unsigned int b : 24;
-    sFlags_179798(unsigned char aa, unsigned int ab) : a(aa), b(ab) {}
-};
 
-extern sFlags_179798 D_004A4DF8;
+extern tWorldPainterRegionType D_004A4DF8;
 extern sColor_179798 D_004C5F90;
 extern sColor_179798 D_004C5FA0;
 extern sColor_179798 D_004C5FB0;
@@ -6640,7 +6630,7 @@ extern "C" void func_00179798_impl(int initialize, int priority)
         new (&D_004C62E0) sColor_179798(1.0f, 0.7843739986419678f, 0.06132800132036209f, 0.03945299983024597f);
         new (&D_004C62F0) sColor_179798(1.0f, 0.0f, 1.0f, 0.0f);
         new (&D_004C6300) sColor_179798(1.0f, 1.0f, 0.0f, 0.0f);
-        new (&D_004A4DF8) sFlags_179798(0xFF, 0xFFFFFF);
+        new (&D_004A4DF8) tWorldPainterRegionType(0xFF, 0xFFFFFF);
     }
 }
 #endif
@@ -7074,12 +7064,6 @@ struct sCamName_A830 {
 };
 
 
-struct sBigFile_A830 {
-    int f0;
-    int f4;
-    sBigFile_A830() {}
-    sBigFile_A830(const sBigFile_A830&);
-};
 
 /**
  * Tells whether a track location file can be added to the location table: it is not listed yet and its big file has
@@ -7107,7 +7091,7 @@ extern "C" int cTrackFileMan_checkLocation(cTrackFileMan* self, char* name, char
     }
     cBXString base;
     cBXString workStr;
-    sBigFile_A830 bf;
+    cBigFile bf;
     sCamName_A830 nm;
     char* pre = str_data_worlds;
     cBXString_cBXString2(&workStr, tag);
@@ -7151,12 +7135,6 @@ struct sCamEntry_17A978 {
 
 
 
-// Non-POD (user-declared copy ctor, never defined) so locals get the 16-byte slots g++ gives classes.
-struct sStr_17A978 {
-    char* s;
-    sStr_17A978() {}
-    sStr_17A978(const sStr_17A978&);
-};
 
 struct sBigFile_17A978 {
     int f0;
@@ -7206,8 +7184,8 @@ extern "C" int cTrackFileMan_checkLocation1(cTrackFileMan* selfp, int n, void* n
     if (!fail) {
         return 0;
     }
-    sStr_17A978 base;
-    sStr_17A978 workStr;
+    cBXString base;
+    cBXString workStr;
     sBigFile_17A978 bf;
     char* pre = str_data_worlds;
     cBXString_cBXString2(&workStr, tag);
@@ -7215,9 +7193,9 @@ extern "C" int cTrackFileMan_checkLocation1(cTrackFileMan* selfp, int n, void* n
     cBXString__cBXString(&workStr, 2);
     cBigFile* pbf = (cBigFile*)&bf;
     func_00318630((cBXString*)&workStr, (cBXString*)&base, str_big);
-    cBigFile_cBigFile1_17A978(pbf, workStr.s, 0x100);
+    cBigFile_cBigFile1_17A978(pbf, workStr.Str, 0x100);
     cBXString__cBXString(&workStr, 2);
-    int anyFound = isValidMap(base.s, n, names);
+    int anyFound = isValidMap(base.Str, n, names);
     if (anyFound == 0) {
         cBigFile__cBigFile((cBigFile*)&bf, 2);
         cBXString__cBXString(&base, 2);

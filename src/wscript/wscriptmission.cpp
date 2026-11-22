@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintbagt.h"
 #include "ui/uithing.h"
 #include "vtable.h"
 #include "fe/festateubertrick.h"
@@ -16,7 +17,7 @@ void* cList_first(cList* list);
 int GetHashValue32(char*);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* self, const char* str);
-extern "C" sWSMEntry4520* func_0014FF90(void* iface, int player, int slot, void* out);
+extern "C" tBEUber* func_0014FF90(void* iface, int player, int slot, void* out);
 extern "C" int cBEBAGTInterface_chooseUberVar(void* iface, int player, int slot, int a3);
 extern "C" int func_00150048(void* iface, int player, int slot, int idx);
 extern "C" int func_0014FFB8(void* iface, int player, int slot, int idx);
@@ -240,11 +241,6 @@ INCLUDE_ASM("wscript/wscriptmission", cFEStateUberTrick_updateTrickMenuEntry);
 struct cList;
 struct cUIText;
 
-struct sWSMEntry4520 {
-    int f0;
-    short f4;
-    unsigned short id;          // 0x6
-};
 
 struct sWSMRider4520 {
     char pad0[0x18];
@@ -275,7 +271,7 @@ void* cList_first(cList* list);
 int GetHashValue32(char*);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* self, const char* str);
-extern "C" sWSMEntry4520* func_0014FF90(void* iface, int player, int slot, void* out);
+extern "C" tBEUber* func_0014FF90(void* iface, int player, int slot, void* out);
 extern "C" int cBEEconInterface_getMoney(void* iface, int player, int charID);
 extern "C" const char* getDollarString(int id);
 
@@ -296,11 +292,11 @@ extern "C" void cFEStateUberTrick_updateTrickMenuEntry(sWSMission4520* self)
     signed char categoryIndex = self->p4C->rider->slot;
     signed char trickIndex = self->p50->rider->slot;
     char buf[16];
-    sWSMEntry4520* tbl = func_0014FF90(cBE_getInterface_Fv(cBE_getBE(), 6), self->player, categoryIndex, buf);
+    tBEUber* tbl = func_0014FF90(cBE_getInterface_Fv(cBE_getBE(), 6), self->player, categoryIndex, buf);
     void* screen = cList_first((cList*)self->list);
     cUIText* costText = (cUIText*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cost_num));
     if (costText != 0) {
-        cUIText_setAsciiString(costText, getDollarString(tbl[trickIndex].id));
+        cUIText_setAsciiString(costText, getDollarString(tbl[trickIndex].cost));
     }
     cUIText* moneyText = (cUIText*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_have_num));
     if (moneyText != 0) {

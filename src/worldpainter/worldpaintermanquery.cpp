@@ -97,27 +97,22 @@ struct sColor_2C0B70 {
 };
 
 
-struct sFlags_2C0B70 {
-    unsigned char a;
-    unsigned int b : 24;
-    sFlags_2C0B70(unsigned char aa, unsigned int ab) : a(aa), b(ab) {}
-};
 
 extern int D_004A53D0_w[2] __asm__("kNullNameField");
-extern sFlags_2C0B70 D_004A53D8;
-extern sFlags_2C0B70 D_004A53E0;
-extern sFlags_2C0B70 D_004A53E8;
-extern sFlags_2C0B70 D_004A53F0;
-extern sFlags_2C0B70 D_004A53F8;
-extern sFlags_2C0B70 D_004A5400;
-extern sFlags_2C0B70 D_004A5408;
-extern sFlags_2C0B70 D_004A5410;
-extern sFlags_2C0B70 D_004A5418;
-extern sFlags_2C0B70 D_004A5420;
-extern sFlags_2C0B70 D_004A5428;
-extern sFlags_2C0B70 D_004A5430;
-extern sFlags_2C0B70 D_004A5438;
-extern sFlags_2C0B70 D_004A5440;
+extern tWorldPainterRegionType D_004A53D8;
+extern tWorldPainterRegionType D_004A53E0;
+extern tWorldPainterRegionType D_004A53E8;
+extern tWorldPainterRegionType D_004A53F0;
+extern tWorldPainterRegionType D_004A53F8;
+extern tWorldPainterRegionType D_004A5400;
+extern tWorldPainterRegionType D_004A5408;
+extern tWorldPainterRegionType D_004A5410;
+extern tWorldPainterRegionType D_004A5418;
+extern tWorldPainterRegionType D_004A5420;
+extern tWorldPainterRegionType D_004A5428;
+extern tWorldPainterRegionType D_004A5430;
+extern tWorldPainterRegionType D_004A5438;
+extern tWorldPainterRegionType D_004A5440;
 
 extern sColor_2C0B70 D_004D4638;
 extern sColor_2C0B70 D_004D4648;
@@ -251,20 +246,20 @@ extern "C" void func_002C0B70_impl(int initialize, int priority)
         new (&D_004D49A8) sColor_2C0B70(1.0f, 1.0f, 0.0f, 0.0f);
         D_004A53D0_w[1] = 0;
         D_004A53D0_w[0] = 0;
-        new (&D_004A53D8) sFlags_2C0B70(0, 0);
-        new (&D_004A53E0) sFlags_2C0B70(1, 1);
-        new (&D_004A53E8) sFlags_2C0B70(2, 2);
-        new (&D_004A53F0) sFlags_2C0B70(3, 3);
-        new (&D_004A53F8) sFlags_2C0B70(4, 4);
-        new (&D_004A5400) sFlags_2C0B70(5, 5);
-        new (&D_004A5408) sFlags_2C0B70(6, 6);
-        new (&D_004A5410) sFlags_2C0B70(7, 7);
-        new (&D_004A5418) sFlags_2C0B70(8, 8);
-        new (&D_004A5420) sFlags_2C0B70(9, 9);
-        new (&D_004A5428) sFlags_2C0B70(10, 10);
-        new (&D_004A5430) sFlags_2C0B70(11, 11);
-        new (&D_004A5438) sFlags_2C0B70(12, 12);
-        new (&D_004A5440) sFlags_2C0B70(13, 13);
+        new (&D_004A53D8) tWorldPainterRegionType(0, 0);
+        new (&D_004A53E0) tWorldPainterRegionType(1, 1);
+        new (&D_004A53E8) tWorldPainterRegionType(2, 2);
+        new (&D_004A53F0) tWorldPainterRegionType(3, 3);
+        new (&D_004A53F8) tWorldPainterRegionType(4, 4);
+        new (&D_004A5400) tWorldPainterRegionType(5, 5);
+        new (&D_004A5408) tWorldPainterRegionType(6, 6);
+        new (&D_004A5410) tWorldPainterRegionType(7, 7);
+        new (&D_004A5418) tWorldPainterRegionType(8, 8);
+        new (&D_004A5420) tWorldPainterRegionType(9, 9);
+        new (&D_004A5428) tWorldPainterRegionType(10, 10);
+        new (&D_004A5430) tWorldPainterRegionType(11, 11);
+        new (&D_004A5438) tWorldPainterRegionType(12, 12);
+        new (&D_004A5440) tWorldPainterRegionType(13, 13);
     }
 }
 #endif

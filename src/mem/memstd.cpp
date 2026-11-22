@@ -30,18 +30,6 @@ struct sMemNode_251718 {
     sMemNode_251718* prev;
 };
 
-struct sMemClass_251718 {
-    char name[8];
-    sMemNode_251718* first;     // 0x8
-    sMemNode_251718* last;      // 0xC
-    sMemNode_251718 head;       // 0x10
-    int f28;                    // 0x28
-    int align;                  // 0x2C
-    int hdr;                    // 0x30
-    int flags;                  // 0x34
-    int locked;                 // 0x38
-    int sema[5];                // 0x3C
-};
 
 /**
  * Creates a memory class (heap) over a block of memory and registers it under an id.
@@ -80,7 +68,7 @@ extern "C" int MEMCLASS_create(int id, char* name, MEMCLASS* mem, int size, int 
     end -= hdr + 0x30;
     sprintf(buf, str_pct_s_LOW, name);
     sMemNode_251718* blk = (sMemNode_251718*)(data - 0x10);
-    sMemClass_251718* cls = (sMemClass_251718*)(&mem->freehead);
+    MEMCLASS* cls = (MEMCLASS*)(&mem->freehead);
     MEM_initblock(mem, buf, 80, hdr, flags | 0x8000, 0, blk);
     MEM_initblock(blk, 0, end - (char*)blk - 0x10, hdr, flags, mem, end);
     sprintf(buf, str_pct_s_HIGH, name);
@@ -90,8 +78,8 @@ extern "C" int MEMCLASS_create(int id, char* name, MEMCLASS* mem, int size, int 
     strcpy(cls->name, name);
     mem->freehead.prev = (struct MEMBLOCK*)end;
     mem->freehead.next = (struct MEMBLOCK*)((char*)mem);
-    cls->first->tag = 16979;
-    cls->last->tag = 16979;
+    ((sMemNode_251718*)cls->bottomblock)->tag = 16979;
+    ((sMemNode_251718*)cls->topblock)->tag = 16979;
     *(unsigned short*)&mem->freehead.nextfree = 16979;
     mem->freehead.prevfree = (struct FREEBLOCK*)0x7FFFFFFF;
     mem->hasmutex = sizeAlign;
@@ -124,8 +112,8 @@ extern "C" int MEMCLASS_create(int id, char* name, MEMCLASS* mem, int size, int 
     blk->tag = 16966;
     blk->flags |= 0x4000;
     if (lock) {
-        MUTEX_create(cls->sema);
-        cls->locked = 1;
+        MUTEX_create(((int*)&cls->mutex));
+        cls->hasmutex = 1;
     }
     return blk->size;
 }
@@ -148,11 +136,11 @@ extern "C" void MUTEX_destroy(void*);
 extern "C" int MEMCLASS_remove(int id)
 {
     void** slot = &D_004D2438[id & 0x3F];
-    sMemClass_251718* cls = (sMemClass_251718*)*slot;
+    MEMCLASS* cls = (MEMCLASS*)*slot;
     int removed = 0;
     if (cls != 0) {
-        if (cls->locked != 0) {
-            MUTEX_destroy(cls->sema);
+        if (cls->hasmutex != 0) {
+            MUTEX_destroy(((int*)&cls->mutex));
         }
         MEM_fill(cls, 0, 80);
         *slot = 0;
@@ -172,10 +160,6 @@ struct sMemNode_251A08 {
     sMemNode_251A08* next;
 };
 
-struct sMemClass_251A08 {
-    char pad0[0x8];
-    sMemNode_251A08* first;     // 0x8
-};
 
 /**
  * Frees every block of memory class @p id: walks its block list from the first block and calls MEM_free on the data
@@ -188,9 +172,9 @@ struct sMemClass_251A08 {
  */
 extern "C" void* MEMCLASS_purge(int id)
 {
-    sMemClass_251A08* cls = (sMemClass_251A08*)D_004D2438[id & 0x3F];
+    MEMCLASS* cls = (MEMCLASS*)D_004D2438[id & 0x3F];
     void* freeResult = (void*)1;
-    for (sMemNode_251A08* n = cls->first; n != 0 && freeResult != 0; n = n->next) {
+    for (sMemNode_251A08* n = ((sMemNode_251A08*)cls->bottomblock); n != 0 && freeResult != 0; n = n->next) {
         if (!(n->flags & 0xC000)) {
             freeResult = MEM_free((char*)n + 0x10);
         }
@@ -239,8 +223,8 @@ extern "C" int MEM_largestunused(int id)
     if (id == 0) {
         id = D_004A2E78_1AC0;
     }
-    sMemClass_251718* cls = (sMemClass_251718*)D_004D2438[id & 0x3F];
-    sMemNode_251718* n = cls->head.next;
+    MEMCLASS* cls = (MEMCLASS*)D_004D2438[id & 0x3F];
+    sMemNode_251718* n = (*(sMemNode_251718*)&cls->freehead).next;
     sMemNode_251718* best = 0;
     int largestData = 0;
     for (;;) {
@@ -282,9 +266,9 @@ extern "C" int MEM_totalunused(int id)
     if (id == 0) {
         id = D_004A2E78_1B50;
     }
-    sMemClass_251718* cls = (sMemClass_251718*)D_004D2438[id & 0x3F];
+    MEMCLASS* cls = (MEMCLASS*)D_004D2438[id & 0x3F];
     int total = 0;
-    sMemNode_251718* n = cls->head.next;
+    sMemNode_251718* n = (*(sMemNode_251718*)&cls->freehead).next;
     while (n->tag != 16979) {
         ASSERT_1B50(n != 0);
         total += n->size - 0x10;
@@ -303,10 +287,6 @@ struct sMemNode_251BB0 {
     sMemNode_251BB0* next;
 };
 
-struct sMemClass_251BB0 {
-    char pad0[0x8];
-    sMemNode_251BB0* first;     // 0x8
-};
 
 /**
  * Finds the block that contains address @p addr: searches the block list of every memory class for a block whose data
@@ -319,9 +299,9 @@ extern "C" void* MEM_findcontaining(unsigned int addr)
 {
     int i;
     for (i = 0; i < 0x40; i++) {
-        sMemClass_251BB0* cls = (sMemClass_251BB0*)D_004D2438[i & 0x3F];
+        MEMCLASS* cls = (MEMCLASS*)D_004D2438[i & 0x3F];
         if (cls != 0) {
-            sMemNode_251BB0* n = cls->first;
+            sMemNode_251BB0* n = ((sMemNode_251BB0*)cls->bottomblock);
             unsigned int data;
             while (1) {
                 n = n->next;
@@ -347,10 +327,6 @@ struct sMemNode_251C38 {
     sMemNode_251C38* next;
 };
 
-struct sMemClass_251C38 {
-    char pad0[0x8];
-    sMemNode_251C38* first;     // 0x8
-};
 
 int MEM_name(void* self);
 extern "C" int strcasecmp(int, int);
@@ -368,9 +344,9 @@ extern "C" void* MEM_find(int name)
 {
     int i;
     for (i = 0; i < 0x40; i++) {
-        sMemClass_251C38* cls = (sMemClass_251C38*)D_004D2438[i & 0x3F];
+        MEMCLASS* cls = (MEMCLASS*)D_004D2438[i & 0x3F];
         if (cls != 0) {
-            sMemNode_251C38* n = cls->first;
+            sMemNode_251C38* n = ((sMemNode_251C38*)cls->bottomblock);
             void* data = (char*)n + 0x10;
             do {
                 int blockName = MEM_name(data);
@@ -459,15 +435,6 @@ struct sMemNode_251D50 {
     sMemNode_251D50* prev;
 };
 
-struct sMemClass_251D50 {
-    char pad0[0xC];
-    char* last;                 // 0xC
-    sMemNode_251D50 head;       // 0x10
-    int f28;
-    int align;                  // 0x2C
-    int hdr;                    // 0x30
-    int flags;                  // 0x34
-};
 
 extern void* D_004D2438[];
 
@@ -485,9 +452,9 @@ extern void* D_004D2438[];
  */
 extern "C" int MEMCLASS_link(int id, char* mem, int size)
 {
-    sMemClass_251D50* cls = (sMemClass_251D50*)D_004D2438[id & 0x3F];
+    MEMCLASS* cls = (MEMCLASS*)D_004D2438[id & 0x3F];
     char buf[0x100];
-    int hdr = cls->hdr;
+    int hdr = cls->infosize;
     int align = cls->align;
     char* end = mem + size;
     char* data = mem;
@@ -497,18 +464,18 @@ extern "C" int MEMCLASS_link(int id, char* mem, int size)
     end -= hdr + 0x30;
     int flags = cls->flags;
     sMemNode_251D50* blk = (sMemNode_251D50*)(data - 0x10);
-    char* last = cls->last;
+    char* last = ((char*)cls->topblock);
     sprintf(buf, str_pct_s_LINK, cls);
     MEM_initblock(last, buf, 0, hdr, flags | 0x8000, *(void**)(last + 0xC), mem);
     MEM_initblock(mem, buf, 0, hdr, flags | 0x8000, last, blk);
     MEM_initblock(blk, 0, end - (char*)blk - 0x10, hdr, flags, mem, end);
     sprintf(buf, str_pct_s_HIGH, cls);
     MEM_initblock(end, buf, 0, hdr, flags | 0x8100, blk, 0);
-    cls->last = end;
-    sMemNode_251D50* nextNode = &cls->head;
+    (*(char**)&cls->topblock) = end;
+    sMemNode_251D50* nextNode = &(*(sMemNode_251D50*)&cls->freehead);
     sMemNode_251D50* prevNode = nextNode;
     int sz = *(char**)(data - 8) - (char*)blk;
-    if ((char*)cls->head.next + ((char*)cls->head.prev - (char*)cls->head.next) / 2 < (char*)blk) {
+    if ((char*)(*(sMemNode_251D50*)&cls->freehead).next + ((char*)(*(sMemNode_251D50*)&cls->freehead).prev - (char*)(*(sMemNode_251D50*)&cls->freehead).next) / 2 < (char*)blk) {
         do
             prevNode = prevNode->prev;
         while (blk < prevNode);
@@ -600,7 +567,7 @@ INCLUDE_ASM("mem/memstd", MEM_printclassf);
 int MEM_name(void* self);
 extern "C" int MEM_comment(void* p);
 struct sMemBlock002522B0;
-extern "C" int checksentinel(sMemBlock002522B0* blk);
+extern "C" int checksentinel(FREEBLOCK* blk);
 extern "C" int MEM_crc16(void* p, int size, int seed);
 extern char D_004800E0[];
 extern char D_00480140[];
@@ -613,18 +580,7 @@ extern char str_FREE[];
 extern char str_unknown[];
 extern char D_004A2E70[];
 
-struct sMemNode_252010 {
-    unsigned short tag;
-    unsigned short flags;
-    int size;
-    char* next;
-    void* fC;
-};
 
-struct sMemClass_252010 {
-    char pad0[0x8];
-    sMemNode_252010* first;     // 0x8
-};
 
 extern void* D_004D2438[];
 
@@ -647,12 +603,12 @@ extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const c
     int crc = 0;
     cb(D_004800E0);
     cb(D_00480140);
-    sMemClass_252010* cls = (sMemClass_252010*)D_004D2438[(int)thing & 0x3F];
+    MEMCLASS* cls = (MEMCLASS*)D_004D2438[(int)thing & 0x3F];
     if (cls == 0) {
         cb(D_00480198);
         return;
     }
-    for (sMemNode_252010* blk = cls->first; blk != 0; blk = (sMemNode_252010*)blk->next) {
+    for (MEMBLOCK* blk = (cls->bottomblock); blk != 0; blk = (MEMBLOCK*)blk->next) {
         char* data = (char*)blk + 0x10;
         char* blockName = (char*)MEM_name(data);
         if (blockName == 0)
@@ -660,20 +616,20 @@ extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const c
         char* comment = (char*)MEM_comment(data);
         if (comment == 0)
             comment = D_004A2E58;
-        if (blk->flags & 0x4000) {
+        if (blk->type & 0x4000) {
             int sz = blk->size;
-            if (sz > 0x10 && !(blk->flags & 0x8000))
+            if (sz > 0x10 && !(blk->type & 0x8000))
                 crc = MEM_crc16((char*)blk + 0x18, sz - 0x18, 64490);
             total += sz;
-            int st = checksentinel((sMemBlock002522B0*)blk);
-            cb(fmt, str_FREE, str_SPACE, data, sz, blk->next - (char*)blk, blk->flags, crc, D_004801E8[st], D_004A2E58);
+            int st = checksentinel((FREEBLOCK*)blk);
+            cb(fmt, str_FREE, str_SPACE, data, sz, ((char*)blk->next) - (char*)blk, blk->type, crc, D_004801E8[st], D_004A2E58);
         } else {
             int sz = blk->size;
             crc = 0;
-            if (sz != 0 && !(blk->flags & 0x8000))
+            if (sz != 0 && !(blk->type & 0x8000))
                 crc = MEM_crc16(data, sz, 64490);
-            int st = checksentinel((sMemBlock002522B0*)blk);
-            cb(fmt, str_unknown, blockName, data, blk->size, blk->next - (char*)blk, blk->flags, crc, D_004801E8[st], comment);
+            int st = checksentinel((FREEBLOCK*)blk);
+            cb(fmt, str_unknown, blockName, data, blk->size, ((char*)blk->next) - (char*)blk, blk->type, crc, D_004801E8[st], comment);
         }
         cb(D_004A2E70);
     }
@@ -716,15 +672,6 @@ extern "C" int checkfree(void* self)
 //100%
 INCLUDE_ASM("mem/memstd", checksentinel);
 #ifdef SKIP_ASM
-struct sMemBlock002522B0 {
-    unsigned short tag;
-    unsigned short flags;
-    int size;
-    int f8;
-    int fC;
-    void* a;
-    void* b;
-};
 
 static inline unsigned int readBE32_002522B0(unsigned char* p)
 {
@@ -742,25 +689,25 @@ static inline unsigned int readBE32_002522B0(unsigned char* p)
  * @return 1 when the block is consistent, else 0
  */
 // PORT: the block-end address is computed as size + (int)blk (pointer held in int) to get the target's addu operand order.
-extern "C" int checksentinel(sMemBlock002522B0* blk)
+extern "C" int checksentinel(FREEBLOCK* blk)
 {
     int ok = 0;
-    unsigned short tag = blk->tag;
+    unsigned short tag = blk->signature;
     if (tag == 16979) {
-        if (blk->flags & 0x8000) {
+        if (blk->type & 0x8000) {
             ok = 1;
         } else {
             D_004A2E74 = 2;
         }
     } else if (tag == 16966) {
-        if (blk->flags & 0x4000) {
-            ok = checkfree(blk->a);
+        if (blk->type & 0x4000) {
+            ok = checkfree(((void*)blk->nextfree));
             if (ok) {
-                ok = checkfree(blk->b);
+                ok = checkfree(((void*)blk->prevfree));
             }
         }
     } else if (tag == 16973) {
-        if (!(blk->flags & 0x2000) || readBE32_002522B0((unsigned char*)(blk->size + (int)blk) + 0x10) == 0x42454E44) {
+        if (!(blk->type & 0x2000) || readBE32_002522B0((unsigned char*)(blk->size + (int)blk) + 0x10) == 0x42454E44) {
             ok = 1;
         } else {
             D_004A2E74 = 3;
@@ -822,14 +769,6 @@ struct sMemNode_2523D0 {
     sMemNode_2523D0* prev;      // 0x14 (free list)
 };
 
-struct sMemClass_2523D0 {
-    char pad0[0x10];
-    sMemNode_2523D0 head;       // 0x10
-    int align;                  // 0x28
-    char pad2C[0xC];
-    int locked;                 // 0x38
-    char mutex[4];              // 0x3C
-};
 
 extern void* D_004D2438[];
 
@@ -856,7 +795,7 @@ static inline void Unlink_2523D0(sMemNode_2523D0* b)
 // PORT: pointer arithmetic done in int (see MEM_comment).
 extern "C" int _MEM_free(void* mem)
 {
-    sMemClass_2523D0* cls;
+    MEMCLASS* cls;
     sMemNode_2523D0* blk;
     sMemNode_2523D0* back;
     sMemNode_2523D0* fwd;
@@ -868,10 +807,10 @@ extern "C" int _MEM_free(void* mem)
     int sz;
 
     if (mem != 0) {
-        cls = (sMemClass_2523D0*)D_004D2438[*(unsigned short*)((int)mem - 0xE) & 0x3F];
+        cls = (MEMCLASS*)D_004D2438[*(unsigned short*)((int)mem - 0xE) & 0x3F];
         blk = (sMemNode_2523D0*)((int)mem - 0x10);
-        if (cls->locked) {
-            MUTEX_lock(cls->mutex);
+        if (cls->hasmutex) {
+            MUTEX_lock(((char*)&cls->mutex));
         }
         back = *(sMemNode_2523D0**)((int)mem - 4);
         fwd = *(sMemNode_2523D0**)((int)mem - 8);
@@ -898,7 +837,7 @@ extern "C" int _MEM_free(void* mem)
         if (size <= 7) {
             size = 8;
         }
-        split = (sMemNode_2523D0*)((char*)back + ((size + cls->align + 0xF) & -cls->align));
+        split = (sMemNode_2523D0*)((char*)back + ((size + cls->defaultalign + 0xF) & -cls->defaultalign));
         if (blk != split) {
             split->flags = blk->flags;
             blk = split;
@@ -907,10 +846,10 @@ extern "C" int _MEM_free(void* mem)
             back->end = blk;
             fwd->back = blk;
         }
-        nextFree = &cls->head;
+        nextFree = &(*(sMemNode_2523D0*)&cls->freehead);
         prevFree = nextFree;
         sz = (char*)blk->end - (char*)blk;
-        if ((char*)cls->head.next + ((char*)cls->head.prev - (char*)cls->head.next) / 2 < (char*)blk) {
+        if ((char*)(*(sMemNode_2523D0*)&cls->freehead).next + ((char*)(*(sMemNode_2523D0*)&cls->freehead).prev - (char*)(*(sMemNode_2523D0*)&cls->freehead).next) / 2 < (char*)blk) {
             do
                 prevFree = prevFree->prev;
             while (blk < prevFree);
@@ -928,8 +867,8 @@ extern "C" int _MEM_free(void* mem)
         nextFree->prev = blk;
         blk->tag = 16966;
         blk->flags |= 0x4000;
-        if (cls->locked) {
-            MUTEX_unlock(cls->mutex);
+        if (cls->hasmutex) {
+            MUTEX_unlock(((char*)&cls->mutex));
         }
     }
     return 1;
@@ -1098,14 +1037,6 @@ struct sMemNode_252718 {
     sMemNode_252718* prev;      // 0x14 (free list)
 };
 
-struct sMemClass_252718 {
-    char pad0[0x10];
-    sMemNode_252718 head;       // 0x10
-    int align;                  // 0x28
-    char pad2C[0xC];
-    int locked;                 // 0x38
-    char mutex[4];              // 0x3C
-};
 
 extern void* D_004D2438[];
 
@@ -1134,7 +1065,7 @@ static inline void Unlink_252718(sMemNode_252718* b)
 extern "C" void* _MEM_resize(void* mem, int size)
 {
     int id = *(unsigned short*)((int)mem - 0xE);
-    sMemClass_252718* cls = (sMemClass_252718*)D_004D2438[id & 0x3F];
+    MEMCLASS* cls = (MEMCLASS*)D_004D2438[id & 0x3F];
     sMemNode_252718* blk = (sMemNode_252718*)((int)mem - 0x10);
     sMemNode_252718* fwd;
     sMemNode_252718* nb;
@@ -1145,8 +1076,8 @@ extern "C" void* _MEM_resize(void* mem, int size)
     int hdr;
     int sz;
 
-    if (cls->locked) {
-        MUTEX_lock(cls->mutex);
+    if (cls->hasmutex) {
+        MUTEX_lock(((char*)&cls->mutex));
     }
     fwd = *(sMemNode_252718**)((int)mem - 8);
     if (fwd->flags & 0x4000) {
@@ -1167,7 +1098,7 @@ extern "C" void* _MEM_resize(void* mem, int size)
     }
     hdr = MEM_tailsize(0, id);
     avail = ((char*)fwd - (char*)blk) - 0x10;
-    want = (((want + hdr + 0x10) + (cls->align - 1)) & -cls->align) - 0x10;
+    want = (((want + hdr + 0x10) + (cls->defaultalign - 1)) & -cls->defaultalign) - 0x10;
     if (avail < want) {
         want = avail;
         size = avail - hdr;
@@ -1177,10 +1108,10 @@ extern "C" void* _MEM_resize(void* mem, int size)
     if (avail - want > 0x40) {
         nb = (sMemNode_252718*)((char*)mem + (want + 0x10));
         MEM_initblock(nb, 0, 0, 0, 0, blk, fwd);
-        nextFree = &cls->head;
+        nextFree = &(*(sMemNode_252718*)&cls->freehead);
         prevFree = nextFree;
         sz = (char*)nb->end - (char*)nb;
-        if ((char*)cls->head.next + ((char*)cls->head.prev - (char*)cls->head.next) / 2 < (char*)nb) {
+        if ((char*)(*(sMemNode_252718*)&cls->freehead).next + ((char*)(*(sMemNode_252718*)&cls->freehead).prev - (char*)(*(sMemNode_252718*)&cls->freehead).next) / 2 < (char*)nb) {
             do
                 prevFree = prevFree->prev;
             while (nb < prevFree);
@@ -1201,8 +1132,8 @@ extern "C" void* _MEM_resize(void* mem, int size)
         fwd->back = nb;
         blk->end = nb;
     }
-    if (cls->locked) {
-        MUTEX_unlock(cls->mutex);
+    if (cls->hasmutex) {
+        MUTEX_unlock(((char*)&cls->mutex));
     }
     return mem;
 }
@@ -1280,24 +1211,14 @@ struct sMemHdr_2A10 {
     sMemNode_2A10* pprev;       // 0xC
 };
 
-struct sMemClass_2A10 {
-    char pad0[0x10];
-    sMemNode_2A10 head;         // 0x10
-    int align;                  // 0x28
-    int bigAlign;               // 0x2C
-    int hdr;                    // 0x30
-    int flags;                  // 0x34
-    int locked;                 // 0x38
-    int sema[5];                // 0x3C
-};
 
 extern int D_004A2E78_2A10 __asm__("D_004A2E78");
 extern int (*D_004A2E7C_2A10)(int, int, int) __asm__("D_004A2E7C");
 
 // First free block of at least size bytes (same body as FREE_find).
-static inline sMemNode_2A10* FirstFit_2A10(sMemClass_2A10* cls, int size, int back)
+static inline sMemNode_2A10* FirstFit_2A10(MEMCLASS* cls, int size, int back)
 {
-    sMemNode_2A10* n = &cls->head;
+    sMemNode_2A10* n = &(*(sMemNode_2A10*)&cls->freehead);
     if (back == 0) {
         do {
             n = n->fnext;
@@ -1311,16 +1232,16 @@ static inline sMemNode_2A10* FirstFit_2A10(sMemClass_2A10* cls, int size, int ba
 }
 
 // Largest free block holding min bytes (same body as FREE_findlargest).
-static inline sMemNode_2A10* BestFit_2A10(sMemClass_2A10* cls, int min, int back)
+static inline sMemNode_2A10* BestFit_2A10(MEMCLASS* cls, int min, int back)
 {
     int v = min - 1;
     if (v < 0) {
         v = 0;
     }
     sMemNode_2A10* best = 0;
-    sMemNode_2A10* n = &cls->head;
+    sMemNode_2A10* n = &(*(sMemNode_2A10*)&cls->freehead);
     if (back == 0) {
-        n = cls->head.fnext;
+        n = (*(sMemNode_2A10*)&cls->freehead).fnext;
         for (;;) {
             if (v < n->size - 0x10) {
                 if (n->tag == 0x4253) {
@@ -1332,7 +1253,7 @@ static inline sMemNode_2A10* BestFit_2A10(sMemClass_2A10* cls, int min, int back
             n = n->fnext;
         }
     } else {
-        n = cls->head.fprev;
+        n = (*(sMemNode_2A10*)&cls->freehead).fprev;
         for (;;) {
             if (v < n->size - 0x10) {
                 if (n->tag == 0x4253) {
@@ -1348,12 +1269,12 @@ static inline sMemNode_2A10* BestFit_2A10(sMemClass_2A10* cls, int min, int back
 }
 
 // Inserts a block into the address-sorted free list (same body as FREE_add).
-static inline void InsertFree_2A10(sMemClass_2A10* cls, sMemNode_2A10* blk)
+static inline void InsertFree_2A10(MEMCLASS* cls, sMemNode_2A10* blk)
 {
-    sMemNode_2A10* q = &cls->head;
+    sMemNode_2A10* q = &(*(sMemNode_2A10*)&cls->freehead);
     sMemNode_2A10* p = q;
     int sz = (char*)blk->pnext - (char*)blk;
-    if ((char*)cls->head.fnext + ((char*)cls->head.fprev - (char*)cls->head.fnext) / 2 < (char*)blk) {
+    if ((char*)(*(sMemNode_2A10*)&cls->freehead).fnext + ((char*)(*(sMemNode_2A10*)&cls->freehead).fprev - (char*)(*(sMemNode_2A10*)&cls->freehead).fnext) / 2 < (char*)blk) {
         do
             p = p->fprev;
         while (blk < p);
@@ -1413,21 +1334,21 @@ extern "C" char* _MEM_allocaligna_impl(void* name, int size, int align, int offs
     int retry;
     if (flags == 0)
         flags = D_004A2E78_2A10;
-    sMemClass_2A10* cls = (sMemClass_2A10*)D_004D2438[flags & 0x3F];
+    MEMCLASS* cls = (MEMCLASS*)D_004D2438[flags & 0x3F];
     if (size < 0)
         return 0;
     int top = flags & 0x200;
     int back = flags & 0x100;
     do {
         retry = 0;
-        if (cls->locked != 0)
-            MUTEX_lock(cls->sema);
-        int amask = cls->align - 1;
+        if (cls->hasmutex != 0)
+            MUTEX_lock(((int*)&cls->mutex));
+        int amask = cls->defaultalign - 1;
         int mask;
         if (align == 0) {
             mask = amask;
             if (flags & 0x400)
-                mask = cls->bigAlign - 1;
+                mask = cls->align - 1;
         } else {
             mask = align - 1;
         }
@@ -1475,12 +1396,12 @@ extern "C" char* _MEM_allocaligna_impl(void* name, int size, int align, int offs
                 blk->pnext->pprev = blk;
                 blk->pprev->pnext = blk;
             }
-            MEM_initblock((sMemNode_2A10*)(allocation - 0x10), 0, size, cls->hdr, flags, blk->pprev, blk->pnext);
+            MEM_initblock((sMemNode_2A10*)(allocation - 0x10), 0, size, cls->infosize, flags, blk->pprev, blk->pnext);
         } else if (D_004A2E7C_2A10 != 0) {
             retry = D_004A2E7C_2A10(0, size, flags);
         }
-        if (cls->locked != 0)
-            MUTEX_unlock(cls->sema);
+        if (cls->hasmutex != 0)
+            MUTEX_unlock(((int*)&cls->mutex));
     } while (retry == 1);
     return allocation;
 }
@@ -1675,9 +1596,9 @@ INCLUDE_ASM("mem/memstd", FREE_find);
  * @param back  nonzero to search from the top of memory down
  * @return the block, or 0
  */
-extern "C" sMemNode_251718* FREE_find(sMemClass_251718* cls, int size, int back)
+extern "C" sMemNode_251718* FREE_find(MEMCLASS* cls, int size, int back)
 {
-    sMemNode_251718* n = &cls->head;
+    sMemNode_251718* n = &(*(sMemNode_251718*)&cls->freehead);
     if (back == 0) {
         do {
             n = n->next;
@@ -1707,7 +1628,7 @@ INCLUDE_ASM("mem/memstd", FREE_findlargest);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Largest block in the class whose payload exceeds size - 1, walking forward
 // (dir 0) or backward; 0 if none.
-extern "C" sMemNode_251718* FREE_findlargest(sMemClass_251718* cls, int size, int dir)
+extern "C" sMemNode_251718* FREE_findlargest(MEMCLASS* cls, int size, int dir)
 {
     int best = size - 1;
     if (best < 0) {
@@ -1716,7 +1637,7 @@ extern "C" sMemNode_251718* FREE_findlargest(sMemClass_251718* cls, int size, in
     sMemNode_251718* bestNode = 0;
     sMemNode_251718* node;
     if (dir == 0) {
-        node = cls->head.next;
+        node = (*(sMemNode_251718*)&cls->freehead).next;
         for (;;) {
             if (best < node->size - 0x10) {
                 if (node->tag == 16979) {
@@ -1728,7 +1649,7 @@ extern "C" sMemNode_251718* FREE_findlargest(sMemClass_251718* cls, int size, in
             node = node->next;
         }
     } else {
-        node = cls->head.prev;
+        node = (*(sMemNode_251718*)&cls->freehead).prev;
         for (;;) {
             if (best < node->size - 0x10) {
                 if (node->tag == 16979) {
@@ -1756,11 +1677,11 @@ INCLUDE_ASM("mem/memstd", FREE_gettotalfree);
  * @param back  nonzero to walk the list backwards
  * @return the free bytes
  */
-extern "C" int FREE_gettotalfree(sMemClass_251718* cls, int back)
+extern "C" int FREE_gettotalfree(MEMCLASS* cls, int back)
 {
     int total = 0;
     if (back == 0) {
-        sMemNode_251718* n = cls->head.next;
+        sMemNode_251718* n = (*(sMemNode_251718*)&cls->freehead).next;
         while (n->tag != 16979) {
             int size = n->size;
             int rest = total - 0x10;
@@ -1768,7 +1689,7 @@ extern "C" int FREE_gettotalfree(sMemClass_251718* cls, int back)
             total = rest + size;
         }
     } else {
-        sMemNode_251718* n = cls->head.prev;
+        sMemNode_251718* n = (*(sMemNode_251718*)&cls->freehead).prev;
         while (n->tag != 16979) {
             int size = n->size;
             int rest = total - 0x10;
@@ -1791,12 +1712,12 @@ INCLUDE_ASM("mem/memstd", FREE_add);
  * @param cls  the memory class
  * @param blk  the block to insert
  */
-extern "C" void FREE_add(sMemClass_251D50* cls, sMemNode_251D50* blk)
+extern "C" void FREE_add(MEMCLASS* cls, sMemNode_251D50* blk)
 {
-    sMemNode_251D50* nextNode = &cls->head;
+    sMemNode_251D50* nextNode = &(*(sMemNode_251D50*)&cls->freehead);
     sMemNode_251D50* prevNode = nextNode;
     int sz = blk->end - (char*)blk;
-    if ((char*)cls->head.next + ((char*)cls->head.prev - (char*)cls->head.next) / 2 < (char*)blk) {
+    if ((char*)(*(sMemNode_251D50*)&cls->freehead).next + ((char*)(*(sMemNode_251D50*)&cls->freehead).prev - (char*)(*(sMemNode_251D50*)&cls->freehead).next) / 2 < (char*)blk) {
         do
             prevNode = prevNode->prev;
         while (blk < prevNode);
@@ -1955,19 +1876,8 @@ extern char D_004A2E98[];
 extern "C" void* func_003ADE08(void* mem, int a1, int a2, char* name, int a4, int a5, int a6);
 extern "C" void* func_003ADDC0(void* mem, int a1, int a2, int a3, int a4);
 
-struct sMemCfg_2534A8 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    int f10;
-    int f14;
-    int f18;
-    int f1C;
-    int f20;
-};
 
-extern "C" int cMoviePlayer_init_impl(void* self, sMemCfg_2534A8* cfg) __asm__("cMoviePlayer_init");
+extern "C" int cMoviePlayer_init_impl(void* self, tMoviePlayOptions* cfg) __asm__("cMoviePlayer_init");
 /**
  * Opens a movie: purges the player (cMoviePlayer_purge), copies the 0x24-byte play options @p cfg to +0x14 and creates the
  * REAL decoder (+0x38).
@@ -1980,12 +1890,12 @@ extern "C" int cMoviePlayer_init_impl(void* self, sMemCfg_2534A8* cfg) __asm__("
  * @param cfg  the play options (filled from tMoviePlayOptions_SetDefaults's defaults)
  * @return 1 (always)
  */
-extern "C" int cMoviePlayer_init_impl(void* vself, sMemCfg_2534A8* cfg)
+extern "C" int cMoviePlayer_init_impl(void* vself, tMoviePlayOptions* cfg)
 {
     cMoviePlayer* self = (cMoviePlayer*)vself;
     cMoviePlayer_purge((cMoviePlayer*)self);
     int soundOff = 1;
-    *(sMemCfg_2534A8*)&self->m_PlayOp = *cfg;
+    *(&self->m_PlayOp) = *cfg;
     int optionSet = 0;
     if (self->m_PlayOp.bPreLoad != 0) {
         optionSet = 1;

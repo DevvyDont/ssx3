@@ -195,17 +195,6 @@ void cBXScriptEngine_ResetRequest(void* self, void* v);
 
 
 
-struct sBXThread21A0 {
-    void* owner;    // 0x0
-    int state;      // 0x4
-    int slot;       // 0x8
-    int arg;        // 0xC
-    short pad_10;   // 0x10
-    short f12;      // 0x12
-    int pending;    // 0x14
-    float time;     // 0x18
-    int result;     // 0x1C
-};
 
 /**
  * Creates an animation script request (request type 1) for script @p idx and returns its handle.
@@ -226,12 +215,12 @@ struct sBXThread21A0 {
 extern "C" int cBXScriptEngine_RequestAnimationScript(cBXScriptEngine* self, int idx, int userData)
 {
     tBXScriptState* scriptState = &(self->mpScriptDatabase)[idx];
-    sBXThread21A0* request = (sBXThread21A0*)cBXScriptEngine_CreateNewRequest(self, 1);
+    tScriptRequestInfo* request = (tScriptRequestInfo*)cBXScriptEngine_CreateNewRequest(self, 1);
     if (((void*)scriptState->pScriptData) == 0) {
         int one = 1;
-        request->pending = idx;
+        request->loadingScriptIndex = idx;
         request->state = one;
-        request->f12 = one;
+        request->loadPending = one;
         sVEntry<int(void*, int)>* vtableEntry = &((sVEntry<int(void*, int)>*)self->mVtbl)[7];
         if (vtableEntry->fn(vthis(self, *vtableEntry), idx) == 0) {
             request->state = 7;
@@ -239,16 +228,16 @@ extern "C" int cBXScriptEngine_RequestAnimationScript(cBXScriptEngine* self, int
             return -1;
         }
     } else {
-        request->slot = idx;
+        request->data.animFields.animScriptIndex = idx;
         request->state = 2;
         int id = cInSeq_ReadyPlayer(self->mpInSeq, ((void*)scriptState->pScriptData));
         void* obj = cInSeq_GetPlayer_2(self->mpInSeq, id);
-        request->owner = obj;
+        (*(void**)&request->pPlayer) = obj;
         cScriptPlayerMain_SetUserData(obj, (int)request);
         scriptState->numLocks++;
     }
-    request->arg = userData;
-    return request->result;
+    (*(int*)&request->pUserData) = userData;
+    return request->requestHandle;
 }
 #endif
 
@@ -488,11 +477,6 @@ struct sVEnt_282540 {
 typedef void (*tVFn1_282540)(void*, int);
 typedef void (*tVFn2_282540)(void*, int, int);
 
-struct sTblEnt_282540 {
-    int f0;                 // 0x0
-    unsigned short refs;    // 0x4
-    short pad6;
-};
 
 struct sScriptSlot_282540 {
     int* obj;               // 0x00
@@ -510,7 +494,7 @@ struct sScriptEngine_282540 {
     char pad0[0x2A8];
     sVEnt_282540* vt;       // 0x2A8
     char pad2AC[4];
-    sTblEnt_282540* tbl;    // 0x2B0
+    tBXScriptState* tbl;    // 0x2B0
     char pad2B4[4];
     void* mgr;              // 0x2B8
 };
@@ -550,8 +534,8 @@ extern "C" int cBXScriptEngine_ReleaseRequest_impl(sScriptEngine_282540* self, i
     switch (s->state) {
     case 1:
         {
-            sTblEnt_282540* loadingState = self->tbl + s->f14;
-            if (loadingState->f0 == 0) {
+            tBXScriptState* loadingState = self->tbl + s->f14;
+            if (((int)loadingState->pScriptData) == 0) {
                 VCALL1(self, 8, s->f14);
             }
         }
@@ -572,8 +556,8 @@ extern "C" int cBXScriptEngine_ReleaseRequest_impl(sScriptEngine_282540* self, i
         cInSeq_RecyclePlayer(self->mgr, *s->obj);
     }
     if (s->tblIdx >= 0) {
-        sTblEnt_282540* scriptState = self->tbl + s->tblIdx;
-        if (--scriptState->refs == 0) {
+        tBXScriptState* scriptState = self->tbl + s->tblIdx;
+        if (--scriptState->numLocks == 0) {
             VCALL1(self, 9, s->tblIdx);
         }
     }

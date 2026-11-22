@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/2drender.h"
 #include "main/game.h"
 #include "ai/rider.h"
 #include "bx/math3d.h"
@@ -1345,11 +1346,6 @@ struct sRsVertUV_EF950 {
     sRsVertUV_EF950() {}
 } __attribute__((aligned(16)));
 
-struct sRsVert_EF950 {
-    sRsVertUV_EF950 uv;     // 0x00
-    int r, g, b, a;         // 0x10
-    sRsVec4_EF950 pos;      // 0x20
-};
 
 struct sRsState_EF950 {
     int f0;                 // 0x0
@@ -1363,7 +1359,7 @@ struct sRsState_EF950 {
 struct sRsVEnt_EF950 {
     short delta;
     short index;
-    void (*fn)(void*, int, sRsVert_EF950*, int);
+    void (*fn)(void*, int, tBxVertex*, int);
 };
 
 struct sRsCtx_EF950 {
@@ -1467,16 +1463,16 @@ static inline sRsVec4_EF950 rsRow_EF950(char* base, int idx, int off)
     return *(sRsVec4_EF950*)(base + (idx << 6) + off);
 }
 
-static inline void rsVert_EF950(sRsVert_EF950* v, float u, float w, const sRsColor_EF950& c, const sRsVec4_EF950& p)
+static inline void rsVert_EF950(tBxVertex* v, float u, float w, const sRsColor_EF950& c, const sRsVec4_EF950& p)
 {
     v->r = (int)(c.y * 255.0f);
     v->g = (int)(c.z * 255.0f);
     v->b = (int)(c.w * 255.0f);
     v->a = (int)(c.x * 128.0f);
-    v->uv.z = 1.0f;
-    v->pos = p;
-    v->uv.x = u;
-    v->uv.y = w;
+    (*(sRsVertUV_EF950*)&v->u).z = 1.0f;
+    (*(sRsVec4_EF950*)&v->p) = p;
+    (*(sRsVertUV_EF950*)&v->u).x = u;
+    (*(sRsVertUV_EF950*)&v->u).y = w;
 }
 
 /**
@@ -1517,8 +1513,8 @@ extern "C" void cAirStreamerFX_render(cAirStreamerFX* self)
     rsSetB_EF950(ctx, 0x1FFFFC00, 10, 0);
     rsSetB_EF950(ctx, 0x3E0, 5, 8);
     rsSetA_EF950(ctx, 0x7C, 2, 7);
-    sRsVert_EF950 vertsL[52];
-    sRsVert_EF950 vertsR[52];
+    tBxVertex vertsL[52];
+    tBxVertex vertsR[52];
     cRider* rider = self->mRider;
     float uvy = start;
     float invSq = 1.0f / (float)((self->mMaxStreamerSegments - 1) * (self->mMaxStreamerSegments - 1));

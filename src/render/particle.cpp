@@ -1,5 +1,9 @@
 #include "vtable.h"
 #include "common.h"
+#include "visualfx/snowbox.h"
+#include "render/font.h"
+#include "render/graphicsman.h"
+#include "render/playerlights.h"
 #include "render/bxps2deferman.h"
 #include "ealib/shape.h"
 #include "visualfx/worldlightman.h"
@@ -436,18 +440,13 @@ extern "C" void cBaseClass_DynamicEmitter_readFromReplayFrame(cBaseClass_Dynamic
 INCLUDE_ASM("render/particle", cDynamicEmitter_render);
 #ifdef SKIP_ASM
 
-struct sPtVEntry1380 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
 
 struct sPtCtx1380 {
     char pad_0x0[0xE84];
     sDrawState* top;             // 0xE84
     char pad_0xE88[0xF50 - 0xE88];
     int texIds[(0x10D8 - 0xF50) / 4];   // 0xF50
-    sPtVEntry1380* vtable;      // 0x10D8
+    sVEntry<void(void*, void*)>* vtable;      // 0x10D8
 };
 
 extern char* cGraphicsMan_TheGraphicsMan_particle __asm__("cGraphicsMan_TheGraphicsMan");
@@ -485,7 +484,7 @@ extern "C" void cDynamicEmitter_render(cDynamicEmitter* self, int blend)
     ctx->top[1] = ctx->top[0];
     ctx->top++;
     *ctx->top = (*(&self->mDrawState));
-    sPtVEntry1380* vt = ctx->vtable;
+    sVEntry<void(void*, void*)>* vt = ctx->vtable;
     vt[83].fn(vthis(ctx, vt[83]), (self));
     ctx->top--;
 }
@@ -617,18 +616,13 @@ extern "C" void cDynamicColourEmitter_reset(cDynamicColourEmitter* self)
 INCLUDE_ASM("render/particle", cDynamicColourEmitter_render);
 #ifdef SKIP_ASM
 
-struct sPtVEntry1688 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
 
 struct sPtCtx1688 {
     char pad_0x0[0xE84];
     sDrawState* top;             // 0xE84
     char pad_0xE88[0xF50 - 0xE88];
     int texIds[(0x10D8 - 0xF50) / 4];   // 0xF50
-    sPtVEntry1688* vtable;      // 0x10D8
+    sVEntry<void(void*, void*)>* vtable;      // 0x10D8
 };
 
 extern char* cGraphicsMan_TheGraphicsMan_particle __asm__("cGraphicsMan_TheGraphicsMan");
@@ -665,7 +659,7 @@ extern "C" void cDynamicColourEmitter_render(cDynamicColourEmitter* self, int bl
     ctx->top[1] = ctx->top[0];
     ctx->top++;
     *ctx->top = (*(&self->mDrawState));
-    sPtVEntry1688* vt = ctx->vtable;
+    sVEntry<void(void*, void*)>* vt = ctx->vtable;
     vt[84].fn(vthis(ctx, vt[84]), (self));
     ctx->top--;
 }
@@ -1435,12 +1429,6 @@ struct sPtVEntry_26C8 {
     void (*fn)(void*, int, sPtVtx_26C8*, int);
 };
 
-struct sPtCtx_26C8 {
-    char pad_0x0[0xE84];
-    sPtRS_26C8* top;                // 0xE84
-    char pad_0xE88[0x10D8 - 0xE88];
-    sPtVEntry_26C8* vtable;         // 0x10D8
-};
 
 
 extern int cTube_m_Enable;
@@ -1449,7 +1437,7 @@ extern float cTube_m_ScaleHeight;
 extern t4Vector t4vect_ZAxis;
 extern sPtVtx_26C8 D_00501440_v26C8[] __asm__("cSimpleTube_m_vertices");
 extern sPtRS_26C8 D_00501420_rs26C8 __asm__("sDrawState_s_defaultDrawState");
-extern sPtCtx_26C8* D_004A5B80_ctx26C8 __asm__("cGraphicsMan_TheGraphicsMan");
+extern cPS2GraphicsMan* D_004A5B80_ctx26C8 __asm__("cGraphicsMan_TheGraphicsMan");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline t4Vector Sub_26C8(const t4Vector& a, const t4Vector& b)
@@ -1582,18 +1570,18 @@ extern "C" void cSimpleTube_render(cSimpleTube* self)
     }
     D_00501440_v26C8[2 * self->m_numSegments + 2] = D_00501440_v26C8[2 * self->m_numSegments + 1];
     D_00501440_v26C8[2 * self->m_numSegments + 3] = D_00501440_v26C8[2 * self->m_numSegments + 4];
-    sPtCtx_26C8* ctx = D_004A5B80_ctx26C8;
-    ctx->top[1] = ctx->top[0];
-    ctx->top++;
-    *ctx->top = D_00501420_rs26C8;
-    sPtVEntry_26C8* vt = ctx->vtable;
+    cPS2GraphicsMan* ctx = D_004A5B80_ctx26C8;
+    ((sPtRS_26C8*)ctx->m_pCurrentDrawState)[1] = ((sPtRS_26C8*)ctx->m_pCurrentDrawState)[0];
+    (*(sPtRS_26C8**)&ctx->m_pCurrentDrawState)++;
+    *((sPtRS_26C8*)ctx->m_pCurrentDrawState) = D_00501420_rs26C8;
+    sPtVEntry_26C8* vt = ((sPtVEntry_26C8*)ctx->mVtbl);
     vt[71].fn(vthis(ctx, vt[71]), ((self->m_numSegments + 1) << 2) | 2, D_00501440_v26C8, 0);
     for (int i = 0; i < self->m_numSegments + 1; i++) {
         D_00501440_v26C8[i].pos = (self->m_positions)[i];
     }
-    vt = ctx->vtable;
+    vt = ((sPtVEntry_26C8*)ctx->mVtbl);
     vt[73].fn(vthis(ctx, vt[73]), self->m_numSegments + 1, D_00501440_v26C8, 0);
-    ctx->top--;
+    (*(sPtRS_26C8**)&ctx->m_pCurrentDrawState)--;
 }
 #endif
 
@@ -2142,16 +2130,13 @@ extern "C" void func_003739D0(sPtPools39D0* self)
 //100%
 INCLUDE_ASM("render/particle", func_00373C28);
 #ifdef SKIP_ASM
-struct sPtVec3_3C28 {
-    float x, y, z;
-};
 
 // One bone matrix: 4 rows of 4 floats; column j of each row is used for output component j.
 struct sPtMtx_3C28 {
     float m[4][4];
 };
 
-static inline float ptBlend_3C28(sPtVec3_3C28* p, sPtMtx_3C28* mt, float* w, int j)
+static inline float ptBlend_3C28(t3Vector* p, sPtMtx_3C28* mt, float* w, int j)
 {
     float x = p->x;
     float y = p->y;
@@ -2174,7 +2159,7 @@ static inline float ptBlend_3C28(sPtVec3_3C28* p, sPtMtx_3C28* mt, float* w, int
  * @param w  the blend weights (only w[0] to w[2] are read)
  * @param out  receives x, y, z
  */
-extern "C" void func_00373C28(void* self, sPtVec3_3C28* points, sPtMtx_3C28* mt, float* w, float* out)
+extern "C" void func_00373C28(void* self, t3Vector* points, sPtMtx_3C28* mt, float* w, float* out)
 {
     out[0] = ptBlend_3C28(points, mt, w, 0);
     out[1] = ptBlend_3C28(points, mt, w, 1);
@@ -2421,9 +2406,6 @@ extern "C" void func_00374440(char* self, sPtRect* rect, sPtVec2* out, int idx)
 //100%
 INCLUDE_ASM("render/particle", func_00374518);
 #ifdef SKIP_ASM
-struct sPatchVec4518 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sPatchOut4518 {
     float x, y, z;
@@ -2452,10 +2434,10 @@ static inline sPatchOut4518 Normalize4518(const sPatchOut4518& v)
 
 struct sPatchSet4518 {
     char pad_0x00[0x190];
-    sPatchVec4518* basis[3];    // 0x190
+    t4Vector* basis[3];    // 0x190
     int count[3];               // 0x19C
     char pad_0x1A8[0x310 - 0x1A8];
-    sPatchVec4518* dbasis[3];   // 0x310
+    t4Vector* dbasis[3];   // 0x310
 };
 
 /**
@@ -2476,8 +2458,8 @@ struct sPatchSet4518 {
 extern "C" void func_00374518(sPatchSet4518* self, char* mat, sPatchOut4518* out, int idx)
 {
     int n = self->count[idx];
-    sPatchVec4518* basis = self->basis[idx];
-    sPatchVec4518* dbasis = self->dbasis[idx];
+    t4Vector* basis = self->basis[idx];
+    t4Vector* dbasis = self->dbasis[idx];
     sPatchOut4518* cursor = out;
     int i;
     __asm__ __volatile__(
@@ -2521,7 +2503,7 @@ extern "C" void func_00374518(sPatchSet4518* self, char* mat, sPatchOut4518* out
             :
             : "r"(&dbasis[i]));
         for (int j = 0; j < n; j++) {
-            sPatchVec4518 point;
+            t4Vector point;
             __asm__(
                 "lqc2      $vf22, 0x0(%1)\n"
                 "vmulax.xyzw ACC, $vf18, $vf22x\n"
@@ -2557,7 +2539,7 @@ extern "C" void func_00374518(sPatchSet4518* self, char* mat, sPatchOut4518* out
             :
             : "r"(&basis[i]));
         for (int j = 0; j < n; j++) {
-            sPatchVec4518 point;
+            t4Vector point;
             __asm__(
                 "lqc2      $vf22, 0x0(%1)\n"
                 "vmulax.xyzw ACC, $vf18, $vf22x\n"
@@ -2577,14 +2559,7 @@ extern "C" void func_00374518(sPatchSet4518* self, char* mat, sPatchOut4518* out
 //100%
 INCLUDE_ASM("render/particle", func_003747A0);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sPV3_47A0 {
-    float x, y, z;
-};
 
-struct sPV2_47A0 {
-    float x, y;
-};
 
 struct sPEnt_47A0 {
     char* mat;      // 0x0
@@ -2598,26 +2573,26 @@ struct sPMgr_47A0 {
     char pad_0x24[0xC];
     int* freeList[3];               // 0x30
     int freeCount[3];               // 0x3C
-    sPV3_47A0 (*pos0)[16];          // 0x48
-    sPV3_47A0 (*pos1)[36];          // 0x4C
-    sPV3_47A0 (*pos2)[64];          // 0x50
-    sPV2_47A0 (*uv0)[16];           // 0x54
-    sPV2_47A0 (*uv1)[36];           // 0x58
-    sPV2_47A0 (*uv2)[64];           // 0x5C
-    sPV2_47A0 (*col0)[16];          // 0x60
-    sPV2_47A0 (*col1)[36];          // 0x64
-    sPV2_47A0 (*col2)[64];          // 0x68
+    t3Vector (*pos0)[16];          // 0x48
+    t3Vector (*pos1)[36];          // 0x4C
+    t3Vector (*pos2)[64];          // 0x50
+    t2Vector (*uv0)[16];           // 0x54
+    t2Vector (*uv1)[36];           // 0x58
+    t2Vector (*uv2)[64];           // 0x5C
+    t2Vector (*col0)[16];          // 0x60
+    t2Vector (*col1)[36];          // 0x64
+    t2Vector (*col2)[64];          // 0x68
     char pad_0x6C[0x1B4 - 0x6C];
-    sPV3_47A0 (*nrm0)[16];          // 0x1B4
-    sPV3_47A0 (*nrm1)[36];          // 0x1B8
-    sPV3_47A0 (*nrm2)[64];          // 0x1BC
+    t3Vector (*nrm0)[16];          // 0x1B4
+    t3Vector (*nrm1)[36];          // 0x1B8
+    t3Vector (*nrm2)[64];          // 0x1BC
     char pad_0x1C0[0xC];
     int* nfreeList[3];              // 0x1CC
     int nfreeCount[3];              // 0x1D8
 };
 
 // func_00374518 is declared through a local view so the unit's own definition keeps its types
-extern "C" void func_00374518_47A0(sPMgr_47A0* self, char* mat, sPV3_47A0* out, int idx) __asm__("func_00374518");
+extern "C" void func_00374518_47A0(sPMgr_47A0* self, char* mat, t3Vector* out, int idx) __asm__("func_00374518");
 
 static inline int PopSlot_47A0(sPMgr_47A0* self, int idx)
 {
@@ -2630,7 +2605,7 @@ static inline int PopSlot_47A0(sPMgr_47A0* self, int idx)
     return r;
 }
 
-static inline sPV3_47A0* PosOf_47A0(sPMgr_47A0* self, int idx, int slot)
+static inline t3Vector* PosOf_47A0(sPMgr_47A0* self, int idx, int slot)
 {
     switch (idx) {
     case 0:
@@ -2643,7 +2618,7 @@ static inline sPV3_47A0* PosOf_47A0(sPMgr_47A0* self, int idx, int slot)
     return 0;
 }
 
-static inline sPV2_47A0* UVOf_47A0(sPMgr_47A0* self, int idx, int slot)
+static inline t2Vector* UVOf_47A0(sPMgr_47A0* self, int idx, int slot)
 {
     switch (idx) {
     case 0:
@@ -2656,7 +2631,7 @@ static inline sPV2_47A0* UVOf_47A0(sPMgr_47A0* self, int idx, int slot)
     return 0;
 }
 
-static inline sPV2_47A0* ColOf_47A0(sPMgr_47A0* self, int idx, int slot)
+static inline t2Vector* ColOf_47A0(sPMgr_47A0* self, int idx, int slot)
 {
     switch (idx) {
     case 0:
@@ -2669,7 +2644,7 @@ static inline sPV2_47A0* ColOf_47A0(sPMgr_47A0* self, int idx, int slot)
     return 0;
 }
 
-static inline sPV3_47A0* NrmOf_47A0(sPMgr_47A0* self, int idx, int slot)
+static inline t3Vector* NrmOf_47A0(sPMgr_47A0* self, int idx, int slot)
 {
     switch (idx) {
     case 0:
@@ -2703,9 +2678,9 @@ static inline sPV3_47A0* NrmOf_47A0(sPMgr_47A0* self, int idx, int slot)
 extern "C" int func_003747A0(sPMgr_47A0* self, char* mat, int idx, int bit, int normals)
 {
     int slot = PopSlot_47A0(self, idx);
-    sPV3_47A0* pos = PosOf_47A0(self, idx, slot);
-    sPV2_47A0* uv = UVOf_47A0(self, idx, slot);
-    sPV2_47A0* col = ColOf_47A0(self, idx, slot);
+    t3Vector* pos = PosOf_47A0(self, idx, slot);
+    t2Vector* uv = UVOf_47A0(self, idx, slot);
+    t2Vector* col = ColOf_47A0(self, idx, slot);
     func_00374180((sPatchSet*)self, mat, (sPatchOut*)pos, idx);
     func_00374298((char*)self, mat, (sV2_4298*)uv, idx);
     func_00374440((char*)self, (sPtRect*)mat, (sPtVec2*)col, idx);
@@ -2715,7 +2690,7 @@ extern "C" int func_003747A0(sPMgr_47A0* self, char* mat, int idx, int bit, int 
     entry->flags |= 0xC | (1 << bit);
     if (normals) {
         int nslot = self->nfreeList[idx][--self->nfreeCount[idx]];
-        sPV3_47A0* nrm = NrmOf_47A0(self, idx, nslot);
+        t3Vector* nrm = NrmOf_47A0(self, idx, nslot);
         func_00374518_47A0(self, mat, nrm, idx);
         entry->nslot = nslot;
     }
@@ -3092,11 +3067,6 @@ INCLUDE_ASM("render/particle", cPlayerShadow_LockShadowTexture);
 #ifdef SKIP_ASM
 extern char* cGraphicsMan_TheGraphicsMan_particle __asm__("cGraphicsMan_TheGraphicsMan");
 
-struct sPtVEntry_5990 {
-    short delta;
-    short index;
-    int (*fn)(void*, int, int, int);
-};
 
 /**
  * Creates the render target texture for a rider's shadow if it has none yet.
@@ -3111,7 +3081,7 @@ extern "C" void cPlayerShadow_LockShadowTexture(void* self)
     cPlayerShadow* shadow = (cPlayerShadow*)self;
     if (shadow->mLockTexture < 0) {
         cPS2GraphicsMan* mgr = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_particle;
-        sPtVEntry_5990* vt = (sPtVEntry_5990*)mgr->mVtbl;
+        sVEntry<int(void*, int, int, int)>* vt = (sVEntry<int(void*, int, int, int)>*)mgr->mVtbl;
         shadow->mLockTexture = vt[52].fn(vthis(mgr, vt[52]), shadow->mShadowTexWidth, shadow->mShadowTexHeight, 2);
     }
 }
@@ -3402,9 +3372,6 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_PushViewport);
 #ifdef SKIP_ASM
 
 
-struct sPtScis65B8 {
-    unsigned short v[4];
-};
 
 
 struct sPtGfx65B8 {
@@ -3422,7 +3389,7 @@ struct sPtGfx65B8 {
     t4Matrix m58A0;               // 0x58A0
     t4Vector q58E0;                 // 0x58E0
     t4Vector q58F0;                 // 0x58F0
-    sPtScis65B8 scissor;            // 0x5900
+    tDeferViewPort scissor;            // 0x5900
     float f5908;                    // 0x5908
     float f590C;                    // 0x590C
     float f5910;                    // 0x5910
@@ -3465,7 +3432,7 @@ extern "C" void cPS2GraphicsMan_sViewportStack_operatorE(sViewportStack* dst, sV
 extern "C" void cPS2GraphicsMan_PushViewport(cPS2GraphicsMan* self)
 {
     sViewportStack* viewportStack = &((&self->mViewportStack[0]))[self->mViewportDepth];
-    *(sPtScis65B8*)&viewportStack->mScissor[0] = *(sPtScis65B8*)&self->mScissor[0];
+    *(tDeferViewPort*)&viewportStack->mScissor[0] = *(tDeferViewPort*)&self->mScissor[0];
     viewportStack->mDeferScissorIndex = self->mpDeferMan->mActivePortIndex;
     viewportStack->unk_024 = self->unk_590C;
     viewportStack->unk_028 = self->unk_5908;
@@ -3493,9 +3460,6 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_PopViewport);
 #ifdef SKIP_ASM
 
 
-struct sPtScis6768 {
-    unsigned short v[4];
-};
 
 
 struct sPtGfx6768 {
@@ -3513,7 +3477,7 @@ struct sPtGfx6768 {
     t4Matrix m58A0;               // 0x58A0
     t4Vector q58E0;                 // 0x58E0
     t4Vector q58F0;                 // 0x58F0
-    sPtScis6768 scissor;            // 0x5900
+    tDeferViewPort scissor;            // 0x5900
     float f5908;                    // 0x5908
     float f590C;                    // 0x590C
     float f5910;                    // 0x5910
@@ -3558,9 +3522,9 @@ extern "C" void cPS2GraphicsMan_PopViewport(cPS2GraphicsMan* self)
 {
     self->mViewportDepth--;
     sViewportStack* viewportStack = &((&self->mViewportStack[0]))[self->mViewportDepth];
-    *(sPtScis6768*)&self->mScissor[0] = *(sPtScis6768*)&viewportStack->mScissor[0];
+    *(tDeferViewPort*)&self->mScissor[0] = *(tDeferViewPort*)&viewportStack->mScissor[0];
     if (viewportStack->mDeferScissorIndex == -1) {
-        func_00364B88((char*)self->mpDeferMan, (sPtScis6768*)&self->mScissor[0]);
+        func_00364B88((char*)self->mpDeferMan, (tDeferViewPort*)&self->mScissor[0]);
     } else {
         self->mpDeferMan->mActivePortIndex = viewportStack->mDeferScissorIndex;
     }
@@ -3587,11 +3551,6 @@ extern "C" void cPS2GraphicsMan_PopViewport(cPS2GraphicsMan* self)
 //100%
 INCLUDE_ASM("render/particle", func_00376938);
 #ifdef SKIP_ASM
-struct sPtVEntryI6938 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 
 /**
@@ -3611,9 +3570,9 @@ struct sPtVEntryI6938 {
 extern "C" void func_00376938(cPS2GraphicsMan* pS2GraphicsMan, float x, float y, float w, float rectHeight)
 {
     cPS2GraphicsMan* self = pS2GraphicsMan;
-    sPtVEntryI6938* vtEntry = &((sPtVEntryI6938*)self->mVtbl)[10];
+    sVEntry<int(void*)>* vtEntry = &((sVEntry<int(void*)>*)self->mVtbl)[10];
     int width = vtEntry->fn(vthis(self, *vtEntry));
-    vtEntry = &((sPtVEntryI6938*)self->mVtbl)[11];
+    vtEntry = &((sVEntry<int(void*)>*)self->mVtbl)[11];
     int height = vtEntry->fn(vthis(self, *vtEntry));
     if (x < 0.0f) {
         w += x;
@@ -3651,11 +3610,6 @@ extern "C" void func_00376938(cPS2GraphicsMan* pS2GraphicsMan, float x, float y,
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetViewportWindow);
 #ifdef SKIP_ASM
-struct sPtVEntryI6A70 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 
 
@@ -3677,7 +3631,7 @@ extern "C" void func_00364B88(void* table, void* key);
  */
 extern "C" void cPS2GraphicsMan_SetViewportWindow(cPS2GraphicsMan* self, float x, float y, float w, float rectHeight)
 {
-    sPtVEntryI6A70* vtEntry = &((sPtVEntryI6A70*)self->mVtbl)[11];
+    sVEntry<int(void*)>* vtEntry = &((sVEntry<int(void*)>*)self->mVtbl)[11];
     int height = vtEntry->fn(vthis(self, *vtEntry));
     int mode = self->mTVDisplayFormat.mDisplayFormat;
     if (mode < 3) {
@@ -4703,14 +4657,6 @@ struct sVEnt_81A0 {
 };
 
 
-struct sEnt_81A0 {
-    sDrawState rs;                    // 0x00
-    unsigned int buf;               // 0x14
-    unsigned int next;              // 0x18
-    short key;                      // 0x1C
-    short flag;                     // 0x1E
-    char pad_0x20[0x60];
-};
 
 
 
@@ -4866,12 +4812,12 @@ extern "C" void cPS2GraphicsMan_DrawRotatedSprite(cPS2GraphicsMan* self, sV_81A0
     if (ring->mNumSubmitDMA < 2600) {
         rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->unk_69CC0;
-        sEnt_81A0* ringEntry = (sEnt_81A0*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sEnt_81A0*)&ring->mSubmits[0]) | 0x30000000));
-        ringEntry->rs = *rs;
-        ringEntry->buf = buf;
-        ringEntry->next = next;
-        ringEntry->key = key;
-        ringEntry->flag = 0;
+        tDeferSubmit* ringEntry = (tDeferSubmit*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((&ring->mSubmits[0])) | 0x30000000));
+        ringEntry->mDrawState = *rs;
+        ringEntry->mPacket = buf;
+        ringEntry->mTail = next;
+        ringEntry->mViewIndex = key;
+        ringEntry->mContinuation = 0;
     }
     self->mVifCursor += 0x10;
 }
@@ -4937,25 +4883,7 @@ static inline int Bits_CF0(float f)
     u.f = f;
     return u.i;
 }
-struct sGlyph8808 {
-    unsigned short code;    // 0x0
-    unsigned char w;        // 0x2
-    unsigned char h;        // 0x3
-    unsigned short u;       // 0x4
-    unsigned short v;       // 0x6
-    signed char adv;        // 0x8
-    signed char xoff;       // 0x9
-    signed char yoff;       // 0xA
-    char pad;
-};
 
-struct sFontRes8808 {
-    int count;              // 0x0
-    sGlyph8808* table;      // 0x4
-    sGlyph8808* def;        // 0x8
-    int first;              // 0xC
-    int last;               // 0x10
-};
 
 
 
@@ -4979,17 +4907,17 @@ static inline void Set2_8808(float* d, float a, float b)
 }
 
 // Glyph lookup: direct index for [first, last], binary search above, default glyph if not found.
-static inline sGlyph8808* Find8808(sFontRes8808* f, int c)
+static inline tGlyph* Find8808(cFont* f, int c)
 {
-    if (c < f->first)
+    if (c < f->FirstCode)
         return 0;
-    if (c <= f->last)
-        return f->table + c - f->first;
-    int lo = f->last - f->first;
-    int hi = f->count;
+    if (c <= f->LastLinearCode)
+        return (f->Glyphs) + c - f->FirstCode;
+    int lo = f->LastLinearCode - f->FirstCode;
+    int hi = f->NumGlyphs;
     do {
         int mid = (lo + hi) >> 1;
-        sGlyph8808* p = f->table + mid;
+        tGlyph* p = (f->Glyphs) + mid;
         if (c == p->code)
             return p;
         if (c < p->code)
@@ -4997,7 +4925,7 @@ static inline sGlyph8808* Find8808(sFontRes8808* f, int c)
         else
             lo = mid + 1;
     } while (lo < hi);
-    return f->def;
+    return (f->MissingGlyph);
 }
 
 /**
@@ -5028,7 +4956,7 @@ static inline sGlyph8808* Find8808(sFontRes8808* f, int c)
  * @param z  the depth
  */
 // PORT: PS2-only GS packet build and VU0 inline asm; uncached (0x30000000) pointers.
-extern "C" void cPS2GraphicsMan_DrawString3D(cPS2GraphicsMan* self, sFontRes8808* font, char* text, float* color,
+extern "C" void cPS2GraphicsMan_DrawString3D(cPS2GraphicsMan* self, cFont* font, char* text, float* color,
                               float x, float y, float sx, float sy, float su, float sv, float z)
 {
     if (self->mMatricesValid == 0) {
@@ -5047,37 +4975,37 @@ extern "C" void cPS2GraphicsMan_DrawString3D(cPS2GraphicsMan* self, sFontRes8808
         cornerMax.z = vz;
         cornerMax.w = 1.0f;
         for (; *text; text++) {
-            sGlyph8808* glyphRec = Find8808(font, (unsigned char)*text);
+            tGlyph* glyphRec = Find8808(font, (unsigned char)*text);
             if (glyphRec) {
                 nloop++;
                 float uv0[2];
                 float uv1[2];
                 Set2_8808(uv0, glyphRec->u * su, glyphRec->v * sv);
-                Set2_8808(uv1, (glyphRec->u + glyphRec->w) * su, (glyphRec->v + glyphRec->h) * sv);
-                cornerMin.x = (x + glyphRec->xoff * sx) * self->mScreenMatrix.row[0].x + self->mScreenMatrix.row[3].x;
-                cornerMin.y = (y + glyphRec->yoff * sy) * self->mScreenMatrix.row[1].y + self->mScreenMatrix.row[3].y;
-                cornerMax.x = cornerMin.x + glyphRec->w * sx * self->mScreenMatrix.row[0].x;
-                cornerMax.y = cornerMin.y + glyphRec->h * sy * self->mScreenMatrix.row[1].y;
+                Set2_8808(uv1, (glyphRec->u + glyphRec->width) * su, (glyphRec->v + glyphRec->height) * sv);
+                cornerMin.x = (x + glyphRec->xoffset * sx) * self->mScreenMatrix.row[0].x + self->mScreenMatrix.row[3].x;
+                cornerMin.y = (y + glyphRec->yoffset * sy) * self->mScreenMatrix.row[1].y + self->mScreenMatrix.row[3].y;
+                cornerMax.x = cornerMin.x + glyphRec->width * sx * self->mScreenMatrix.row[0].x;
+                cornerMax.y = cornerMin.y + glyphRec->height * sy * self->mScreenMatrix.row[1].y;
                 glyphOut[0] = Bits_CF0(uv0[0]) | ((long)Bits_CF0(uv0[1]) << 32);
                 glyphOut[1] = (int)cornerMin.x | ((long)(int)cornerMin.y << 16) | ((long)(int)cornerMin.z << 32);
                 glyphOut[2] = Bits_CF0(uv1[0]) | ((long)Bits_CF0(uv1[1]) << 32);
                 glyphOut[3] = (int)cornerMax.x | ((long)(int)cornerMax.y << 16) | ((long)(int)cornerMax.z << 32);
                 glyphOut += 4;
-                x += glyphRec->adv * sx;
+                x += glyphRec->advance * sx;
             }
         }
     } else {
         for (; *text; text++) {
-            sGlyph8808* glyphRec = Find8808(font, (unsigned char)*text);
+            tGlyph* glyphRec = Find8808(font, (unsigned char)*text);
             if (glyphRec) {
                 nloop++;
                 float uv0[2];
                 float uv1[2];
                 float size[2];
                 Set2_8808(uv0, glyphRec->u * su, glyphRec->v * sv);
-                Set2_8808(uv1, (glyphRec->u + glyphRec->w) * su, (glyphRec->v + glyphRec->h) * sv);
-                Set2_8808(size, glyphRec->w * sx * 0.5f, glyphRec->h * sy * 0.5f);
-                sPtPos8808 pos(x + glyphRec->xoff * sx + size[0], y + glyphRec->yoff * sy + size[1], z, 1.0f);
+                Set2_8808(uv1, (glyphRec->u + glyphRec->width) * su, (glyphRec->v + glyphRec->height) * sv);
+                Set2_8808(size, glyphRec->width * sx * 0.5f, glyphRec->height * sy * 0.5f);
+                sPtPos8808 pos(x + glyphRec->xoffset * sx + size[0], y + glyphRec->yoffset * sy + size[1], z, 1.0f);
                 sPt7278 projCentre = MulMat7278((&self->mScreenWorld), pos);
                 float inv = 1.0f / projCentre.w;
                 projCentre.x *= inv;
@@ -5093,7 +5021,7 @@ extern "C" void cPS2GraphicsMan_DrawString3D(cPS2GraphicsMan* self, sFontRes8808
                 glyphOut[2] = Bits_CF0(uv1[0]) | ((long)Bits_CF0(uv1[1]) << 32);
                 glyphOut[3] = (int)cornerMax.x | ((long)(int)cornerMax.y << 16) | ((long)(int)(cornerMax.z * cornerMax.w) << 32);
                 glyphOut += 4;
-                x += glyphRec->adv * sx;
+                x += glyphRec->advance * sx;
             }
         }
     }
@@ -5151,25 +5079,7 @@ typedef int cQuad128_CF0 __attribute__((mode(TI)));
 
 
 
-struct sGlyph9028 {
-    unsigned short code;    // 0x0
-    unsigned char w;        // 0x2
-    unsigned char h;        // 0x3
-    unsigned short u;       // 0x4
-    unsigned short v;       // 0x6
-    signed char adv;        // 0x8
-    signed char xoff;       // 0x9
-    signed char yoff;       // 0xA
-    char pad;
-};
 
-struct sFontRes9028 {
-    int count;              // 0x0
-    sGlyph9028* table;      // 0x4
-    sGlyph9028* def;        // 0x8
-    int first;              // 0xC
-    int last;               // 0x10
-};
 
 
 
@@ -5193,17 +5103,17 @@ static inline void Set2_9028(float* d, float a, float b)
 }
 
 // Glyph lookup: direct index for [first, last], binary search above, default glyph if not found.
-static inline sGlyph9028* Find9028(sFontRes9028* f, int c)
+static inline tGlyph* Find9028(cFont* f, int c)
 {
-    if (c < f->first)
+    if (c < f->FirstCode)
         return 0;
-    if (c <= f->last)
-        return f->table + c - f->first;
-    int lo = f->last - f->first;
-    int hi = f->count;
+    if (c <= f->LastLinearCode)
+        return (f->Glyphs) + c - f->FirstCode;
+    int lo = f->LastLinearCode - f->FirstCode;
+    int hi = f->NumGlyphs;
     do {
         int mid = (lo + hi) >> 1;
-        sGlyph9028* p = f->table + mid;
+        tGlyph* p = (f->Glyphs) + mid;
         if (c == p->code)
             return p;
         if (c < p->code)
@@ -5211,7 +5121,7 @@ static inline sGlyph9028* Find9028(sFontRes9028* f, int c)
         else
             lo = mid + 1;
     } while (lo < hi);
-    return f->def;
+    return (f->MissingGlyph);
 }
 
 /**
@@ -5242,7 +5152,7 @@ static inline sGlyph9028* Find9028(sFontRes9028* f, int c)
  * @param z  the depth
  */
 // PORT: PS2-only GS packet build and VU0 inline asm; uncached (0x30000000) pointers.
-extern "C" void cPS2GraphicsMan_DrawString3D1(cPS2GraphicsMan* self, sFontRes9028* font, unsigned short* wideText, float* color,
+extern "C" void cPS2GraphicsMan_DrawString3D1(cPS2GraphicsMan* self, cFont* font, unsigned short* wideText, float* color,
                               float x, float y, float sx, float sy, float su, float sv, float z)
 {
     if (self->mMatricesValid == 0) {
@@ -5261,37 +5171,37 @@ extern "C" void cPS2GraphicsMan_DrawString3D1(cPS2GraphicsMan* self, sFontRes902
         bottomRight.z = vz;
         bottomRight.w = 1.0f;
         for (; *wideText; wideText++) {
-            sGlyph9028* glyphInfo = Find9028(font, *wideText);
+            tGlyph* glyphInfo = Find9028(font, *wideText);
             if (glyphInfo) {
                 nloop++;
                 float uv0[2];
                 float uv1[2];
                 Set2_9028(uv0, glyphInfo->u * su, glyphInfo->v * sv);
-                Set2_9028(uv1, (glyphInfo->u + glyphInfo->w) * su, (glyphInfo->v + glyphInfo->h) * sv);
-                topLeft.x = (x + glyphInfo->xoff * sx) * self->mScreenMatrix.row[0].x + self->mScreenMatrix.row[3].x;
-                topLeft.y = (y + glyphInfo->yoff * sy) * self->mScreenMatrix.row[1].y + self->mScreenMatrix.row[3].y;
-                bottomRight.x = topLeft.x + glyphInfo->w * sx * self->mScreenMatrix.row[0].x;
-                bottomRight.y = topLeft.y + glyphInfo->h * sy * self->mScreenMatrix.row[1].y;
+                Set2_9028(uv1, (glyphInfo->u + glyphInfo->width) * su, (glyphInfo->v + glyphInfo->height) * sv);
+                topLeft.x = (x + glyphInfo->xoffset * sx) * self->mScreenMatrix.row[0].x + self->mScreenMatrix.row[3].x;
+                topLeft.y = (y + glyphInfo->yoffset * sy) * self->mScreenMatrix.row[1].y + self->mScreenMatrix.row[3].y;
+                bottomRight.x = topLeft.x + glyphInfo->width * sx * self->mScreenMatrix.row[0].x;
+                bottomRight.y = topLeft.y + glyphInfo->height * sy * self->mScreenMatrix.row[1].y;
                 packetCursor[0] = Bits_CF0(uv0[0]) | ((long)Bits_CF0(uv0[1]) << 32);
                 packetCursor[1] = (int)topLeft.x | ((long)(int)topLeft.y << 16) | ((long)(int)topLeft.z << 32);
                 packetCursor[2] = Bits_CF0(uv1[0]) | ((long)Bits_CF0(uv1[1]) << 32);
                 packetCursor[3] = (int)bottomRight.x | ((long)(int)bottomRight.y << 16) | ((long)(int)bottomRight.z << 32);
                 packetCursor += 4;
-                x += glyphInfo->adv * sx;
+                x += glyphInfo->advance * sx;
             }
         }
     } else {
         for (; *wideText; wideText++) {
-            sGlyph9028* glyphInfo = Find9028(font, *wideText);
+            tGlyph* glyphInfo = Find9028(font, *wideText);
             if (glyphInfo) {
                 nloop++;
                 float uv0[2];
                 float uv1[2];
                 float size[2];
                 Set2_9028(uv0, glyphInfo->u * su, glyphInfo->v * sv);
-                Set2_9028(uv1, (glyphInfo->u + glyphInfo->w) * su, (glyphInfo->v + glyphInfo->h) * sv);
-                Set2_9028(size, glyphInfo->w * sx * 0.5f, glyphInfo->h * sy * 0.5f);
-                sPtPos9028 pos(x + glyphInfo->xoff * sx + size[0], y + glyphInfo->yoff * sy + size[1], z, 1.0f);
+                Set2_9028(uv1, (glyphInfo->u + glyphInfo->width) * su, (glyphInfo->v + glyphInfo->height) * sv);
+                Set2_9028(size, glyphInfo->width * sx * 0.5f, glyphInfo->height * sy * 0.5f);
+                sPtPos9028 pos(x + glyphInfo->xoffset * sx + size[0], y + glyphInfo->yoffset * sy + size[1], z, 1.0f);
                 sPt7278 screenCentre = MulMat7278((&self->mScreenWorld), pos);
                 float inv = 1.0f / screenCentre.w;
                 screenCentre.x *= inv;
@@ -5307,7 +5217,7 @@ extern "C" void cPS2GraphicsMan_DrawString3D1(cPS2GraphicsMan* self, sFontRes902
                 packetCursor[2] = Bits_CF0(uv1[0]) | ((long)Bits_CF0(uv1[1]) << 32);
                 packetCursor[3] = (int)bottomRight.x | ((long)(int)bottomRight.y << 16) | ((long)(int)(bottomRight.z * bottomRight.w) << 32);
                 packetCursor += 4;
-                x += glyphInfo->adv * sx;
+                x += glyphInfo->advance * sx;
             }
         }
     }
@@ -5355,9 +5265,6 @@ struct sPtEnt_9860 {
 
 
 
-struct sVtx_9860 {
-    unsigned long q[6];
-} __attribute__((aligned(16)));
 
 extern int D_004A4380;
 extern int D_004A4474;
@@ -5395,7 +5302,7 @@ static inline void QueueRecord_9860(cPS2GraphicsMan* self, unsigned int buf, uns
  * @param src  the vertices
  */
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit GS words are `ulong`.
-extern "C" void cPS2GraphicsMan_RenderTriStrip(cPS2GraphicsMan* self, int numVerts, sVtx_9860* src)
+extern "C" void cPS2GraphicsMan_RenderTriStrip(cPS2GraphicsMan* self, int numVerts, tBxVertex* src)
 {
     unsigned int prog;
     if (D_004A4380) {
@@ -5443,14 +5350,14 @@ extern "C" void cPS2GraphicsMan_RenderTriStrip(cPS2GraphicsMan* self, int numVer
         packet[6] = (long)k * 3;
         packet[7] = 0;
         packet += 8;
-        sVtx_9860* dstVert = (sVtx_9860*)packet;
+        tBxVertex* dstVert = (tBxVertex*)packet;
         int i = k;
         while (i--) {
             *dstVert++ = *src++;
         }
         numVerts += 2;
         src -= 2;
-        packet = (unsigned long*)((sVtx_9860*)packet + k);
+        packet = (unsigned long*)((tBxVertex*)packet + k);
         packet[0] = 0;
         packet[1] = (unsigned long)(prog | 0x14000000) << 32;
         packet += 2;
@@ -5504,53 +5411,6 @@ struct sPtVtVP_A260 {
     void (*fn)(void*, void*);
 };
 
-// cPS2GraphicsMan_A260 (prototype class) as the particle renderers see it: render-state stack top, texture ids, draw
-// ring, texture set, scissor, frame-buffer setup, bounds. Fields named by their users; the rest is padding.
-struct cPS2GraphicsMan_A260 {
-    char pad_0x0[0xE84];
-    sPtRenderState* top;            // 0xE84
-    char pad_0xE88[0xF50 - 0xE88];
-    int texIds[(0x10D8 - 0xF50) / 4];   // 0xF50
-    sPtVtVP_A260* vtable;                // 0x10D8
-    char pad_0x10DC[0x18F0 - 0x10DC];
-    sPtRing* ring;                  // 0x18F0
-    void* texset;                   // 0x18F4
-    char pad_0x18F8[0x5860 - 0x18F8];
-    sPtMatrixV_A260 m5860;               // 0x5860
-    char pad_0x58A0[0x5900 - 0x58A0];
-    unsigned short scX;             // 0x5900
-    unsigned short scY;             // 0x5902
-    unsigned short scW;             // 0x5904
-    unsigned short scH;             // 0x5906
-    char pad_0x5908[0x5A00 - 0x5908];
-    unsigned int bufAddr;           // 0x5A00
-    char pad_0x5A04[0x5A28 - 0x5A04];
-    unsigned int pendBuf;           // 0x5A28
-    unsigned long* pend;            // 0x5A2C
-    unsigned int width;             // 0x5A30
-    unsigned int height;            // 0x5A34
-    char pad_0x5A38[0x4];
-    unsigned int psm;               // 0x5A3C
-    char pad_0x5A40[0x5A50 - 0x5A40];
-    unsigned int fbw;               // 0x5A50
-    char pad_0x5A54[0x5A84 - 0x5A54];
-    unsigned int fbp;               // 0x5A84
-    char pad_0x5A88[0x6AF0 - 0x5A88];
-    float f6AF0;                    // 0x6AF0
-    char pad_0x6AF4[0x6B04 - 0x6AF4];
-    float f6B04;                    // 0x6B04
-    char pad_0x6B08[0x6B30 - 0x6B08];
-    sPtMatrix_A260 m6B30;                // 0x6B30
-    float xmin;                     // 0x6B70
-    float ymin;                     // 0x6B74
-    float zmin;                     // 0x6B78
-    float wmin;                     // 0x6B7C
-    float xmax;                     // 0x6B80
-    float ymax;                     // 0x6B84
-    float zmax;                     // 0x6B88
-    float wmax;                     // 0x6B8C
-    int texReady;                   // 0x6B90
-};
 
 extern "C" unsigned long* func_0038F460(int dma, unsigned int buf, int a2, int a3);
 
@@ -5580,40 +5440,40 @@ static inline unsigned long gsPrim_A260(int prim)
  * @return the vertex area: @p n entries of three quadwords (ST or unused, RGBAQ, XYZ2)
  */
 // PORT: PS2-only GS packet build (DMA tag + GIF tag + PRIM/TEX registers).
-extern "C" unsigned long* func_0037A260(cPS2GraphicsMan_A260* self, int n)
+extern "C" unsigned long* func_0037A260(cPS2GraphicsMan* self, int n)
 {
     unsigned int addr = (D_004A4380 ? (unsigned int)D_12B0 : (unsigned int)D_12B8) >> 3;
     int primType;
     long regList;
     D_004A4380 = 0;
-    self->top->f0 = (self->top->f0 & ~0x3C0) | 0xC0;
-    self->top->fC &= 0xC0000000;
-    if (self->texReady == 0) {
+    ((sPtRenderState*)self->m_pCurrentDrawState)->f0 = (((sPtRenderState*)self->m_pCurrentDrawState)->f0 & ~0x3C0) | 0xC0;
+    ((sPtRenderState*)self->m_pCurrentDrawState)->fC &= 0xC0000000;
+    if (self->mMatricesValid == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
-    if (self->top->tex >= 0) {
+    if (((sPtRenderState*)self->m_pCurrentDrawState)->tex >= 0) {
         primType = 92;
         regList = 1042;
     } else {
         primType = 76;
         regList = 1055;
     }
-    unsigned int buf = self->bufAddr;
-    self->pendBuf = buf;
-    self->pend = func_0038F460(D_004A4474, buf, -1, 0);
-    self->pend[0] = (n * 3 + 4) | 0x10000000;
-    self->pend[1] = 0;
-    self->pend[2] = 0;
-    self->pend[3] = (unsigned long)((n * 3 + 2) << 16 | 0x6C008000U) << 32;
-    self->pend[4] = (unsigned long)(n | 0x8000) | gsPrim_A260(primType) | ((unsigned long)0xC000 << 46);
-    self->pend[5] = regList;
-    self->pend[6] = (long)n * 3;
-    self->pend[7] = 0;
-    unsigned long* verts = self->pend + 8;
-    self->pend = verts + n * 6;
-    self->pend[0] = 0;
-    self->pend[1] = (unsigned long)(addr | 0x14000000) << 32;
-    self->pend += 2;
+    unsigned int buf = self->mVifCursor;
+    self->unk_5A28 = buf;
+    (*(unsigned long**)&self->unk_5A2C) = func_0038F460(D_004A4474, buf, -1, 0);
+    ((unsigned long*)self->unk_5A2C)[0] = (n * 3 + 4) | 0x10000000;
+    ((unsigned long*)self->unk_5A2C)[1] = 0;
+    ((unsigned long*)self->unk_5A2C)[2] = 0;
+    ((unsigned long*)self->unk_5A2C)[3] = (unsigned long)((n * 3 + 2) << 16 | 0x6C008000U) << 32;
+    ((unsigned long*)self->unk_5A2C)[4] = (unsigned long)(n | 0x8000) | gsPrim_A260(primType) | ((unsigned long)0xC000 << 46);
+    ((unsigned long*)self->unk_5A2C)[5] = regList;
+    ((unsigned long*)self->unk_5A2C)[6] = (long)n * 3;
+    ((unsigned long*)self->unk_5A2C)[7] = 0;
+    unsigned long* verts = ((unsigned long*)self->unk_5A2C) + 8;
+    (*(unsigned long**)&self->unk_5A2C) = verts + n * 6;
+    ((unsigned long*)self->unk_5A2C)[0] = 0;
+    ((unsigned long*)self->unk_5A2C)[1] = (unsigned long)(addr | 0x14000000) << 32;
+    (*(unsigned long**)&self->unk_5A2C) += 2;
     return verts;
 }
 #endif
@@ -5621,17 +5481,9 @@ extern "C" unsigned long* func_0037A260(cPS2GraphicsMan_A260* self, int n)
 //100%
 INCLUDE_ASM("render/particle", func_0037A430);
 #ifdef SKIP_ASM
-struct sPtRS_A430 {
-    int f0;                         // bits 6..9 = layer
-    int f4;
-    int f8;                         // bits 0..4 = key
-    int fC;
-    short tex;
-    short pad;
-};
 
 struct sPtEnt_A430 {
-    sPtRS_A430 rs;                  // 0x00
+    sDrawState rs;                  // 0x00
     unsigned int buf;               // 0x14
     unsigned int next;              // 0x18
     short key;                      // 0x1C
@@ -5639,23 +5491,7 @@ struct sPtEnt_A430 {
     char pad_0x20[0x60];
 };
 
-struct sPtRing_A430 {
-    int count;                      // 0x0
-    char pad_0x4[0x7C];
-    sPtEnt_A430 ents[1];            // 0x80
-};
 
-struct sPtGfx_A430 {
-    char pad_0x0[0xE84];
-    sPtRS_A430* top;                // 0xE84
-    char pad_0xE88[0x18F0 - 0xE88];
-    sPtRing_A430* ring;             // 0x18F0
-    char pad_0x18F4[0x5A00 - 0x18F4];
-    unsigned int bufAddr;           // 0x5A00
-    char pad_0x5A04[0x5A28 - 0x5A04];
-    unsigned int pendBuf;           // 0x5A28
-    unsigned long* pend;            // 0x5A2C
-};
 
 extern int D_004A4474;
 extern "C" unsigned int func_0038F668(int dma, unsigned long* p, int a2);
@@ -5670,28 +5506,28 @@ extern "C" unsigned int func_0038F668(int dma, unsigned long* p, int a2);
  * unk_5A28/unk_5A2C are reset to 0. cSpeedBoostFX_render calls it after filling the vertices.
  */
 // PORT: uncached (0x30000000) pointers held in int.
-extern "C" void func_0037A430(sPtGfx_A430* self)
+extern "C" void func_0037A430(cPS2GraphicsMan* self)
 {
-    unsigned int next = func_0038F668(D_004A4474, self->pend, 4);
-    self->bufAddr = next;
-    unsigned int buf = self->pendBuf;
-    sPtRing_A430* ring = self->ring;
-    sPtRS_A430* rs = self->top;
-    if (ring->count < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-        int key = *(int*)((char*)ring + 0x69CC0);
-        sPtEnt_A430* deferEntry = (sPtEnt_A430*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+    unsigned int next = func_0038F668(D_004A4474, ((unsigned long*)self->unk_5A2C), 4);
+    self->mVifCursor = next;
+    unsigned int buf = self->unk_5A28;
+    cPS2DeferManager* ring = (self->mpDeferMan);
+    sDrawState* rs = (self->m_pCurrentDrawState);
+    if (ring->mNumSubmitDMA < 2600) {
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        int key = ring->unk_69CC0;
+        sPtEnt_A430* deferEntry = (sPtEnt_A430*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_A430*)&ring->mSubmits[0]) | 0x30000000));
         deferEntry->rs = *rs;
         deferEntry->buf = buf;
         deferEntry->next = next;
         deferEntry->key = key;
         deferEntry->flag = 0;
     }
-    self->bufAddr += 0x10;
-    self->top->f0 &= ~0x3C0;
-    self->top->fC &= 0xC0000000;
-    self->pendBuf = 0;
-    self->pend = 0;
+    self->mVifCursor += 0x10;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[0]) &= ~0x3C0;
+    (*(int*)&(self->m_pCurrentDrawState)->unk_00[3]) &= 0xC0000000;
+    self->unk_5A28 = 0;
+    (*(unsigned long**)&self->unk_5A2C) = 0;
 }
 #endif
 
@@ -5753,11 +5589,6 @@ extern int cRenderToggles_m_DisablePlayerStrips;
 extern int cRenderToggles_m_DisableCharacterSpecular;
 
 
-struct sPtVtVF_A610 {
-    short delta;
-    short index;
-    void (*fn)(void*, float);
-};
 
 // One matrix list of a model chunk: count + bone indices.
 struct sMtxList_A610 {
@@ -5915,7 +5746,7 @@ extern "C" void cPS2GraphicsMan_DrawCharModel(cPS2GraphicsMan* self, sMdl_A610* 
     if (cRenderToggles_m_DisablePlayerStrips == 0) {
         (self->m_pCurrentDrawState)[1] = *(self->m_pCurrentDrawState);
         (*(sDrawState**)&self->m_pCurrentDrawState)++;
-        ((sPtVtVF_A610*)self->mVtbl)[124].fn(vthis(self, ((sPtVtVF_A610*)self->mVtbl)[124]), 1.0f);
+        ((sVEntry<void(void*, float)>*)self->mVtbl)[124].fn(vthis(self, ((sVEntry<void(void*, float)>*)self->mVtbl)[124]), 1.0f);
         if (self->mMatricesValid == 0) {
             func_0037D968((cPS2GraphicsMan*)self);
         }
@@ -6702,9 +6533,6 @@ static inline float clamp_C570(float x, float hi)
     return x >= 0.0f ? (x <? hi) : 0.0f;
 }
 
-struct sPartColour_C570 {
-    float r, g, b;
-};
 
 /**
  * Sets the screen brightness colour: unk_59EC[0..2] = @p colour's r, g and b, each clamped to 0..1 and times 128,
@@ -6715,12 +6543,12 @@ struct sPartColour_C570 {
  *
  * @param colour  the brightness per channel (1.0 = full)
  */
-extern "C" void func_0037C570(cPS2GraphicsMan* self, sPartColour_C570* colour)
+extern "C" void func_0037C570(cPS2GraphicsMan* self, tRGB* colour)
 {
     float one = 1.0f;
-    self->unk_59EC[0] = fptoui(clamp_C570(colour->r, one) * 128.0f);
-    self->unk_59EC[1] = fptoui(clamp_C570(colour->g, one) * 128.0f);
-    self->unk_59EC[2] = fptoui(clamp_C570(colour->b, one) * 128.0f);
+    self->unk_59EC[0] = fptoui(clamp_C570(colour->R, one) * 128.0f);
+    self->unk_59EC[1] = fptoui(clamp_C570(colour->G, one) * 128.0f);
+    self->unk_59EC[2] = fptoui(clamp_C570(colour->B, one) * 128.0f);
 }
 #endif
 
@@ -6826,11 +6654,6 @@ void* cPS2GraphicsMan_PlatformUploadTextures(void* vself)
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_PlatformPurgeTextures);
 #ifdef SKIP_ASM
-struct sVEntry0037C830 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Removes every loaded texture: for each of the 2000 slots with a non-zero entry at +0x18F8 calls virtual slot 50
@@ -6841,7 +6664,7 @@ extern "C" void cPS2GraphicsMan_PlatformPurgeTextures(cPS2GraphicsMan* self)
     int i;
     for (i = 0; i < 2000; i++) {
         if (((int*)(&self->unk_18F8[0]))[i] != 0) {
-            sVEntry0037C830* vt = (sVEntry0037C830*)self->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
             vt[50].fn(vthis(self, vt[50]), i);
         }
     }
@@ -7483,14 +7306,6 @@ extern "C" void cPS2GraphicsMan_SetNewTextureData1(cPS2GraphicsMan* self, int te
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_LockFrameToTexture);
 #ifdef SKIP_ASM
 
-struct sPtEnt_D348 {
-    sDrawState rs;                  // 0x00
-    unsigned int buf;               // 0x14
-    unsigned int next;              // 0x18
-    short key;                      // 0x1C
-    short flag;                     // 0x1E
-    char pad_0x20[0x60];
-};
 
 
 
@@ -7519,12 +7334,12 @@ extern "C" int cPS2GraphicsMan_LockFrameToTexture(cPS2GraphicsMan* self, int idx
     if (ring->mNumSubmitDMA < 2600) {
         rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->unk_69CC0;
-        sPtEnt_D348* ringEntry = (sPtEnt_D348*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_D348*)&ring->mSubmits[0]) | 0x30000000));
-        ringEntry->rs = *rs;
-        ringEntry->buf = buf;
-        ringEntry->next = next;
-        ringEntry->key = key;
-        ringEntry->flag = 0;
+        tDeferSubmit* ringEntry = (tDeferSubmit*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((&ring->mSubmits[0])) | 0x30000000));
+        ringEntry->mDrawState = *rs;
+        ringEntry->mPacket = buf;
+        ringEntry->mTail = next;
+        ringEntry->mViewIndex = key;
+        ringEntry->mContinuation = 0;
     }
     self->mVifCursor += 0x10;
     return 1;
@@ -7535,14 +7350,6 @@ extern "C" int cPS2GraphicsMan_LockFrameToTexture(cPS2GraphicsMan* self, int idx
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_RestoreFrameLock);
 #ifdef SKIP_ASM
 
-struct sPtEnt_D450 {
-    sDrawState rs;                  // 0x00
-    unsigned int buf;               // 0x14
-    unsigned int next;              // 0x18
-    short key;                      // 0x1C
-    short one;                      // 0x1E
-    char pad_0x20[0x60];
-};
 
 
 
@@ -7582,12 +7389,12 @@ extern "C" int cPS2GraphicsMan_RestoreFrameLock(cPS2GraphicsMan* self)
     if (ring->mNumSubmitDMA < 2600) {
         rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->unk_69CC0;
-        sPtEnt_D450* ringEntry = (sPtEnt_D450*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_D450*)&ring->mSubmits[0]) | 0x30000000));
-        ringEntry->rs = *rs;
-        ringEntry->one = one;
-        ringEntry->next = next;
-        ringEntry->key = key;
-        ringEntry->buf = buf;
+        tDeferSubmit* ringEntry = (tDeferSubmit*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((&ring->mSubmits[0])) | 0x30000000));
+        ringEntry->mDrawState = *rs;
+        ringEntry->mContinuation = one;
+        ringEntry->mTail = next;
+        ringEntry->mViewIndex = key;
+        ringEntry->mPacket = buf;
     }
     self->mVifCursor += 0x10;
     return 0;
@@ -7731,14 +7538,6 @@ extern "C" void cPS2GraphicsMan_AddProjectiveTexture(cPS2GraphicsMan* self, sPar
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_ShadowClearLockTexture);
 #ifdef SKIP_ASM
 
-struct sPtEnt_D800 {
-    sDrawState rs;                  // 0x00
-    unsigned int buf;               // 0x14
-    unsigned int next;              // 0x18
-    short key;                      // 0x1C
-    short flag;                     // 0x1E
-    char pad_0x20[0x60];
-};
 
 
 
@@ -7770,13 +7569,13 @@ extern "C" void cPS2GraphicsMan_ShadowClearLockTexture(cPS2GraphicsMan* self, in
     if (ring->mNumSubmitDMA < 2600) {
         rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->unk_69CC0;
-        sPtEnt_D800* e = (sPtEnt_D800*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_D800*)&ring->mSubmits[0]) | 0x30000000));
+        tDeferSubmit* e = (tDeferSubmit*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((&ring->mSubmits[0])) | 0x30000000));
         ASSERT_D800(e != 0);
-        e->rs = *rs;
-        e->buf = buf;
-        e->next = next;
-        e->key = key;
-        e->flag = 1;
+        e->mDrawState = *rs;
+        e->mPacket = buf;
+        e->mTail = next;
+        e->mViewIndex = key;
+        e->mContinuation = 1;
     }
     self->mVifCursor += 0x10;
 }
@@ -8471,21 +8270,13 @@ struct sPtEnt_0518 {
     char pad_0x20[0x60];
 };
 
-struct sPtRing_0518 {
-    int count;                      // 0x0
-    char pad_0x4[0x7C];
-    sPtEnt_0518 ents[1];            // 0x80
-};
 
-struct sQuad_0518 {
-    unsigned int w[4];
-} __attribute__((aligned(16)));
 
 struct sPtGfx_0518 {
     char pad_0x0[0xE84];
     sPtRS_0518* top;                // 0xE84
     char pad_0xE88[0x18F0 - 0xE88];
-    sPtRing_0518* ring;             // 0x18F0
+    cPS2DeferManager* ring;             // 0x18F0
     char pad_0x18F4[0x5A00 - 0x18F4];
     unsigned int bufAddr;           // 0x5A00
     char pad_0x5A04[0x6B90 - 0x5A04];
@@ -8501,9 +8292,9 @@ extern "C" void func_0037D968(cPS2GraphicsMan* self);
 
 static inline void CopyQuads_0518(unsigned long** pp, const void* srcp, int n)
 {
-    const sQuad_0518* src = (const sQuad_0518*)srcp;
-    sQuad_0518* d = (sQuad_0518*)*pp;
-    sQuad_0518* end = d + n;
+    const t4Vector* src = (const t4Vector*)srcp;
+    t4Vector* d = (t4Vector*)*pp;
+    t4Vector* end = d + n;
     while (d != end) {
         *d++ = *src++;
     }
@@ -8519,7 +8310,7 @@ static inline void CopyQuads_0518(unsigned long** pp, const void* srcp, int n)
  *
  * @param obj  the particle emitter (tParticleEmitter)
  */
-extern "C" void cPS2GraphicsMan_RenderParticleEmitter(sPtGfx_0518* self, sQuad_0518* obj)
+extern "C" void cPS2GraphicsMan_RenderParticleEmitter(sPtGfx_0518* self, t4Vector* obj)
 {
     if (cRenderToggles_m_DisableStaticEmitters != 0)
         return;
@@ -8545,13 +8336,13 @@ extern "C" void cPS2GraphicsMan_RenderParticleEmitter(sPtGfx_0518* self, sQuad_0
     if (self->texReady == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
-    sPtRing_0518* ring = self->ring;
+    cPS2DeferManager* ring = self->ring;
     unsigned int next = self->bufAddr;
     sPtRS_0518* rs = self->top;
-    if (ring->count < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
-        int key = *(int*)((char*)ring + 0x69CC0);
-        sPtEnt_0518* ringEntry = (sPtEnt_0518*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+    if (ring->mNumSubmitDMA < 2600) {
+        rs->f8 = (rs->f8 & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        int key = ring->unk_69CC0;
+        sPtEnt_0518* ringEntry = (sPtEnt_0518*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_0518*)&ring->mSubmits[0]) | 0x30000000));
         ringEntry->rs = *rs;
         ringEntry->buf = buf;
         ringEntry->next = next;
@@ -8582,17 +8373,6 @@ struct sQuad_07A0 {
 } __attribute__((aligned(16)));
 
 
-struct sTrail_07A0 {
-    char pad_0x0[0x20];
-    sQuad_07A0 q[0x15];             // 0x20
-    float scale;                    // 0x170 (unused here)
-    char pad_0x174[4];
-    int count;                      // 0x178
-    int head;                       // 0x17C
-    char pad_0x180[0x20];
-    sQuad_07A0* posA;               // 0x1A0
-    sQuad_07A0* posB;               // 0x1A4
-};
 
 struct sHdr_07A0 {
     int seg;
@@ -8644,7 +8424,7 @@ static inline void CopyQuads_07A0(unsigned long** pp, const void* srcp, int n)
  * @param obj  the emitter (cBaseClass_DynamicEmitter layout)
  */
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit GS words are `ulong`.
-extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter(cPS2GraphicsMan* self, sTrail_07A0* obj)
+extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter(cPS2GraphicsMan* self, cBaseClass_DynamicEmitter* obj)
 {
     if (cRenderToggles_m_DisableDynamicEmitters != 0)
         return;
@@ -8653,10 +8433,10 @@ extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter(cPS2GraphicsMan* se
     if (self->mMatricesValid == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
-    int n = obj->count;
+    int n = obj->m_numSubEmitters;
     sHdr_07A0 hdr;
     int done = 0;
-    hdr.step = *(int*)((char*)obj + 0x20) / n;
+    hdr.step = obj->m_emitter.NumParticles / n;
     hdr.fstep = (float)hdr.step;
     int nb = n / 64 + 1;
     for (int i = 0; i < nb; i++) {
@@ -8666,16 +8446,16 @@ extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter(cPS2GraphicsMan* se
         writePtr[1] = 0;
         writePtr[2] = 0;
         writePtr[3] = (unsigned long)55601 << 47;
-        hdr.v = hdr.fstep * (float)(i * 64) * *(float*)((char*)obj + 0x2C);
-        int seg = obj->count - done;
+        hdr.v = hdr.fstep * (float)(i * 64) * obj->m_emitter.TimeStep;
+        int seg = obj->m_numSubEmitters - done;
         if (seg >= 65)
             seg = 0x40;
         hdr.seg = seg;
         writePtr += 4;
-        CopyQuads_07A0(&writePtr, obj->q, 21);
+        CopyQuads_07A0(&writePtr, ((sQuad_07A0*)&obj->m_emitter), 21);
         CopyQuads_07A0(&writePtr, &hdr, 1);
-        int wrap = obj->head + 1;
-        int ringSize = obj->count;
+        int wrap = obj->m_subEmitterId + 1;
+        int ringSize = obj->m_numSubEmitters;
         int firstIndex = (done + wrap) % ringSize;
         done += hdr.seg;
         int over = firstIndex + hdr.seg - ringSize;
@@ -8689,21 +8469,21 @@ extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter(cPS2GraphicsMan* se
         sQuad_07A0* lastB;
         if (done < ringSize) {
             int e = Wrap_07A0(done, wrap, ringSize);
-            lastB = obj->posB + e;
-            lastA = obj->posA + e;
+            lastB = ((sQuad_07A0*)obj->m_velocities) + e;
+            lastA = ((sQuad_07A0*)obj->m_positions) + e;
         } else {
             int e = Wrap_07A0(done - 1, wrap, ringSize);
-            lastB = obj->posB + e;
-            lastA = obj->posA + e;
+            lastB = ((sQuad_07A0*)obj->m_velocities) + e;
+            lastA = ((sQuad_07A0*)obj->m_positions) + e;
         }
-        CopyQuads_07A0(&writePtr, obj->posA + firstIndex, first);
+        CopyQuads_07A0(&writePtr, ((sQuad_07A0*)obj->m_positions) + firstIndex, first);
         if (over > 0)
-            CopyQuads_07A0(&writePtr, obj->posA, over);
+            CopyQuads_07A0(&writePtr, ((sQuad_07A0*)obj->m_positions), over);
         CopyQuads_07A0(&writePtr, lastA, 1);
         writePtr = (unsigned long*)((sQuad_07A0*)writePtr + pad);
-        CopyQuads_07A0(&writePtr, obj->posB + firstIndex, first);
+        CopyQuads_07A0(&writePtr, ((sQuad_07A0*)obj->m_velocities) + firstIndex, first);
         if (over > 0)
-            CopyQuads_07A0(&writePtr, obj->posB, over);
+            CopyQuads_07A0(&writePtr, ((sQuad_07A0*)obj->m_velocities), over);
         CopyQuads_07A0(&writePtr, lastB, 1);
         writePtr = (unsigned long*)((sQuad_07A0*)writePtr + pad);
         writePtr[0] = (unsigned long)(((unsigned int)D_510 >> 3) | 0x14000000) << 32;
@@ -9023,15 +8803,8 @@ struct sMat_1310 {
     }
 } __attribute__((aligned(16)));
 
-struct sVec4_1310 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
-struct sPtObj_1310 {
-    sQuad_1310 q[5];                // 0x00
-    sMat_1310 mat;                  // 0x50
-};
 
 extern int D_004A4474;
 extern char D_0[];
@@ -9098,7 +8871,7 @@ static inline void CopyQuads_1310(unsigned long** pp, const void* srcp, int n)
  * @param obj  the snow box data
  */
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit GS words are `ulong`.
-extern "C" void cPS2GraphicsMan_RenderSnowBoxFlakes(cPS2GraphicsMan* self, sPtObj_1310* obj)
+extern "C" void cPS2GraphicsMan_RenderSnowBoxFlakes(cPS2GraphicsMan* self, tSnowBoxData* obj)
 {
     (self->m_pCurrentDrawState)->unk_00[0] = (((int)(self->m_pCurrentDrawState)->unk_00[0]) & ~0x3C0) | 0x140;
     (*(int*)&(self->m_pCurrentDrawState)->unk_00[3]) &= 0xC0000000;
@@ -9107,7 +8880,7 @@ extern "C" void cPS2GraphicsMan_RenderSnowBoxFlakes(cPS2GraphicsMan* self, sPtOb
     if (self->mMatricesValid == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
-    sMat_1310 xform = MulMat_1310(*(sMat_1310*)&self->mViewProj, obj->mat);
+    sMat_1310 xform = MulMat_1310(*(sMat_1310*)&self->mViewProj, (*(sMat_1310*)&obj->mSnowBoxToWorldMatrix));
     unsigned int buf = self->mVifCursor;
     unsigned long* packet = func_0038F460(D_004A4474, buf, -1, 0);
     packet[0] = 0x1000000D;
@@ -9115,12 +8888,12 @@ extern "C" void cPS2GraphicsMan_RenderSnowBoxFlakes(cPS2GraphicsMan* self, sPtOb
     packet[2] = 0;
     packet[3] = (unsigned long)55319 << 47;
     packet += 4;
-    sVec4_1310 zeroVec;
+    t4Vector zeroVec;
     zeroVec.x = 0.0f;
     zeroVec.y = 0.0f;
     zeroVec.z = 0.0f;
     zeroVec.w = 0.0f;
-    sVec4_1310 onesXY;
+    t4Vector onesXY;
     onesXY.x = 1.0f;
     onesXY.y = 1.0f;
     onesXY.z = 0.0f;
@@ -9128,7 +8901,7 @@ extern "C" void cPS2GraphicsMan_RenderSnowBoxFlakes(cPS2GraphicsMan* self, sPtOb
     CopyQuads_1310(&packet, (const sQuad_1310*)&xform, 4);
     CopyQuads_1310(&packet, (const sQuad_1310*)&zeroVec, 1);
     CopyQuads_1310(&packet, (const sQuad_1310*)&onesXY, 1);
-    CopyQuads_1310(&packet, obj->q, 5);
+    CopyQuads_1310(&packet, ((sQuad_1310*)&obj->mParticleOffset), 5);
     packet[0] = (unsigned long)(((unsigned int)D_0 >> 3) | 0x14000000) << 32;
     packet[1] = (unsigned long)34816 << 45;
     packet += 2;
@@ -9193,15 +8966,8 @@ struct sMat_16F0 {
     }
 } __attribute__((aligned(16)));
 
-struct sVec4_16F0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
-struct sPtObj_16F0 {
-    sQuad_16F0 q[5];                // 0x00
-    sMat_16F0 mat;                  // 0x50
-};
 
 extern int D_004A4474;
 extern char D_408[];
@@ -9268,7 +9034,7 @@ static inline void CopyQuads_16F0(unsigned long** pp, const void* srcp, int n)
  * @param obj  the snow box data
  */
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit GS words are `ulong`.
-extern "C" void cPS2GraphicsMan_RenderSnowBoxFluffs(cPS2GraphicsMan* self, sPtObj_16F0* obj)
+extern "C" void cPS2GraphicsMan_RenderSnowBoxFluffs(cPS2GraphicsMan* self, tSnowBoxData* obj)
 {
     (self->m_pCurrentDrawState)->unk_00[0] = (((int)(self->m_pCurrentDrawState)->unk_00[0]) & ~0x3C0) | 0x140;
     (*(int*)&(self->m_pCurrentDrawState)->unk_00[3]) &= 0xC0000000;
@@ -9277,7 +9043,7 @@ extern "C" void cPS2GraphicsMan_RenderSnowBoxFluffs(cPS2GraphicsMan* self, sPtOb
     if (self->mMatricesValid == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
-    sMat_16F0 xform = MulMat_16F0(*(sMat_16F0*)&self->mViewProj, obj->mat);
+    sMat_16F0 xform = MulMat_16F0(*(sMat_16F0*)&self->mViewProj, (*(sMat_16F0*)&obj->mSnowBoxToWorldMatrix));
     unsigned int buf = self->mVifCursor;
     unsigned long* packet = func_0038F460(D_004A4474, buf, -1, 0);
     packet[0] = 0x1000000D;
@@ -9285,12 +9051,12 @@ extern "C" void cPS2GraphicsMan_RenderSnowBoxFluffs(cPS2GraphicsMan* self, sPtOb
     packet[2] = 0;
     packet[3] = (unsigned long)55319 << 47;
     packet += 4;
-    sVec4_16F0 zeroVec;
+    t4Vector zeroVec;
     zeroVec.x = 0.0f;
     zeroVec.y = 0.0f;
     zeroVec.z = 0.0f;
     zeroVec.w = 0.0f;
-    sVec4_16F0 onesXY;
+    t4Vector onesXY;
     onesXY.x = 1.0f;
     onesXY.y = 1.0f;
     onesXY.z = 0.0f;
@@ -9298,7 +9064,7 @@ extern "C" void cPS2GraphicsMan_RenderSnowBoxFluffs(cPS2GraphicsMan* self, sPtOb
     CopyQuads_16F0(&packet, (const sQuad_16F0*)&xform, 4);
     CopyQuads_16F0(&packet, (const sQuad_16F0*)&zeroVec, 1);
     CopyQuads_16F0(&packet, (const sQuad_16F0*)&onesXY, 1);
-    CopyQuads_16F0(&packet, obj->q, 5);
+    CopyQuads_16F0(&packet, ((sQuad_16F0*)&obj->mParticleOffset), 5);
     packet[0] = (unsigned long)(((unsigned int)D_408 >> 3) | 0x14000000) << 32;
     packet[1] = (unsigned long)34816 << 45;
     packet += 2;
@@ -9478,25 +9244,14 @@ extern "C" void cPS2GraphicsMan_RenderLineStrip(cPS2GraphicsMan* self, int n, sV
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderSpline);
 #ifdef SKIP_ASM
 
-struct sPtEnt_1F10 {
-    sDrawState rs;                  // 0x00
-    unsigned int buf;               // 0x14
-    unsigned int next;              // 0x18
-    short key;                      // 0x1C
-    short flag;                     // 0x1E
-    char pad_0x20[0x60];
-};
 
 
 
-struct sMat_1F10 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 extern char D_3BF0[];
 
 // PORT: PS2-only VU0 inline asm (matrix copy); the PC port needs a C fallback.
-static inline void CopyMat_1F10(sMat_1F10* dst, const sMat_1F10* src)
+static inline void CopyMat_1F10(t4Matrix* dst, const t4Matrix* src)
 {
     __asm__(
         "lqc2      $vf1, 0x0(%1)\n"
@@ -9523,7 +9278,7 @@ extern "C" void func_0037D968(cPS2GraphicsMan* self);
  * @param n  the number of points
  */
 // PORT: uncached (0x30000000) pointers held in int; 64-bit GS words are `unsigned long`.
-extern "C" void cPS2GraphicsMan_RenderSpline(cPS2GraphicsMan* self, sMat_1F10* BezMat, float* col, int n)
+extern "C" void cPS2GraphicsMan_RenderSpline(cPS2GraphicsMan* self, t4Matrix* BezMat, float* col, int n)
 {
     (self->m_pCurrentDrawState)->unk_00[0] = (((int)(self->m_pCurrentDrawState)->unk_00[0]) & ~0x3C0) | 0xC0;
     (*(int*)&(self->m_pCurrentDrawState)->unk_00[3]) &= 0xC0000000;
@@ -9542,7 +9297,7 @@ extern "C" void cPS2GraphicsMan_RenderSpline(cPS2GraphicsMan* self, sMat_1F10* B
     packet[7] = 1;
     packet[8] = (unsigned long)(n | 0x8000) | ((unsigned long)32778 << 45);
     packet[9] = 4;
-    CopyMat_1F10((sMat_1F10*)(packet + 10), BezMat);
+    CopyMat_1F10((t4Matrix*)(packet + 10), BezMat);
     packet[18] = n;
     packet[19] = 0;
     packet[20] = 0;
@@ -9555,12 +9310,12 @@ extern "C" void cPS2GraphicsMan_RenderSpline(cPS2GraphicsMan* self, sMat_1F10* B
     if (ring->mNumSubmitDMA < 2600) {
         rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->unk_69CC0;
-        sPtEnt_1F10* ringEntry = (sPtEnt_1F10*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_1F10*)&ring->mSubmits[0]) | 0x30000000));
-        ringEntry->rs = *rs;
-        ringEntry->buf = buf;
-        ringEntry->next = next;
-        ringEntry->key = key;
-        ringEntry->flag = 0;
+        tDeferSubmit* ringEntry = (tDeferSubmit*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((&ring->mSubmits[0])) | 0x30000000));
+        ringEntry->mDrawState = *rs;
+        ringEntry->mPacket = buf;
+        ringEntry->mTail = next;
+        ringEntry->mViewIndex = key;
+        ringEntry->mContinuation = 0;
     }
     self->mVifCursor += 0x10;
 }
@@ -9569,21 +9324,8 @@ extern "C" void cPS2GraphicsMan_RenderSpline(cPS2GraphicsMan* self, sMat_1F10* B
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_DrawSphere);
 #ifdef SKIP_ASM
-struct sPt2170 {
-    float x, y, z, w;
-    sPt2170() {}
-} __attribute__((aligned(16)));
 
-struct sMat2170 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
-struct sVtx2170 {
-    float s, t, q, pad;     // 0x00
-    int r, g, b, a;         // 0x10
-    sPt2170 pos;            // 0x20
-    sVtx2170() {}
-};
 
 
 struct cRMgr2170 {
@@ -9622,7 +9364,7 @@ struct cRMgr2170 {
     virtual void PopView();
     virtual void v33();
     virtual void v34();
-    virtual sMat2170* GetView();
+    virtual t4Matrix* GetView();
     virtual void v36();
     virtual void IdentityView();
     virtual void v38();
@@ -9660,14 +9402,14 @@ struct cRMgr2170 {
     virtual void v70();
     virtual void v71();
     virtual void v72();
-    virtual void RenderLineStrip(int n, sVtx2170* v, int f);
+    virtual void RenderLineStrip(int n, tBxVertex* v, int f);
 };
 
-extern sPt2170 D_004FFBC0[];
+extern t4Vector D_004FFBC0[];
 extern int D_004A59A0;
 
 // PORT: PS2-only VU0 inline asm (matrix copy); the PC port needs a C fallback.
-static inline void CopyMat2170(sMat2170* dst, const sMat2170* src)
+static inline void CopyMat2170(t4Matrix* dst, const t4Matrix* src)
 {
     __asm__(
         "lqc2      $vf1, 0x0(%1)\n"
@@ -9684,9 +9426,9 @@ static inline void CopyMat2170(sMat2170* dst, const sMat2170* src)
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix * vector); the PC port needs a C fallback.
-static inline sPt2170 MulMat2170(const sMat2170* m, const sPt2170& v)
+static inline t4Vector MulMat2170(const t4Matrix* m, const t4Vector& v)
 {
-    sPt2170 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf8, %2\n"
         "lqc2      $vf4, 0x0(%1)\n"
@@ -9705,9 +9447,9 @@ static inline sPt2170 MulMat2170(const sMat2170* m, const sPt2170& v)
 }
 
 // PORT: PS2-only VU0 inline asm (vector * scalar); the PC port needs a C fallback.
-static inline sPt2170 Scale2170(const sPt2170& v, float s)
+static inline t4Vector Scale2170(const t4Vector& v, float s)
 {
-    sPt2170 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -9722,9 +9464,9 @@ static inline sPt2170 Scale2170(const sPt2170& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add); the PC port needs a C fallback.
-static inline sPt2170 Add2170(const sPt2170& a, const sPt2170& b)
+static inline t4Vector Add2170(const t4Vector& a, const t4Vector& b)
 {
-    sPt2170 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -9754,15 +9496,15 @@ static inline sPt2170 Add2170(const sPt2170& a, const sPt2170& b)
  * @param radius  the radius
  * @param segs    the detail step, or 0 to pick it from the distance
  */
-extern "C" void cPS2GraphicsMan_DrawSphere(cPS2GraphicsMan* mgr, sPt2170* pos, float* col, float radius, int segs)
+extern "C" void cPS2GraphicsMan_DrawSphere(cPS2GraphicsMan* mgr, t4Vector* pos, float* col, float radius, int segs)
 {
-    sMat2170 viewMat;
+    t4Matrix viewMat;
     int step;
     int i;
     int k;
 
     CopyMat2170(&viewMat, ((cRMgr2170*)mgr)->GetView());
-    sPt2170 viewCenter = MulMat2170(&viewMat, *pos);
+    t4Vector viewCenter = MulMat2170(&viewMat, *pos);
     if (3000.0f < viewCenter.z) {
         return;
     }
@@ -9847,23 +9589,23 @@ extern "C" void cPS2GraphicsMan_DrawSphere(cPS2GraphicsMan* mgr, sPt2170* pos, f
     ((cRMgr2170*)mgr)->PushView();
     ((cRMgr2170*)mgr)->IdentityView();
 
-    sVtx2170 verts[17];
+    tBxVertex verts[17];
     i = 0;
     for (k = 0; k < 16; k += step) {
         verts[i].r = (int)(col[1] * 128.0f);
         verts[i].g = (int)(col[2] * 128.0f);
         verts[i].b = (int)(col[3] * 128.0f);
         verts[i].a = (int)(col[0] * 128.0f);
-        sPt2170 circlePoint = Add2170(viewCenter, Scale2170(D_004FFBC0[k], radius));
-        verts[i].pos = circlePoint;
+        t4Vector circlePoint = Add2170(viewCenter, Scale2170(D_004FFBC0[k], radius));
+        verts[i].p = circlePoint;
         i++;
     }
     verts[i].r = (int)(col[1] * 128.0f);
     verts[i].g = (int)(col[2] * 128.0f);
     verts[i].b = (int)(col[3] * 128.0f);
     verts[i].a = (int)(col[0] * 128.0f);
-    sPt2170 circlePoint = Add2170(viewCenter, Scale2170(D_004FFBC0[0], radius));
-    verts[i].pos = circlePoint;
+    t4Vector circlePoint = Add2170(viewCenter, Scale2170(D_004FFBC0[0], radius));
+    verts[i].p = circlePoint;
     i++;
     ((cRMgr2170*)mgr)->RenderLineStrip(i, verts, 0);
     (mgr->m_pCurrentDrawState)->unk_00[1] = (((int)(mgr->m_pCurrentDrawState)->unk_00[1]) & ~0x7C) | 4;
@@ -10040,12 +9782,9 @@ void* func_00382740(void* self)
 //100%
 INCLUDE_ASM("render/particle", func_00382760);
 #ifdef SKIP_ASM
-struct sPtQuad_2760 {
-    unsigned int w[4];
-} __attribute__((aligned(16)));
 
 
-extern sPtQuad_2760 D_0044B9C0;
+extern t4Vector D_0044B9C0;
 extern "C" void* WaitSema(int sema);
 extern "C" void SignalSema(int sema);
 extern "C" void FlushCache(int);
@@ -10098,7 +9837,7 @@ extern "C" void* func_00382760(cPS2GraphicsMan* selfp)
             FlushCache(0);
             while (*(volatile int*)0x1000D000 & 0x100) {
             }
-            *(sPtQuad_2760*)0x10005000 = D_0044B9C0;
+            *(t4Vector*)0x10005000 = D_0044B9C0;
             *(volatile int*)0x10003010 = 4;
             while (*(volatile int*)0x10003C00 & 0x1F000003) {
             }
@@ -10112,7 +9851,7 @@ extern "C" void* func_00382760(cPS2GraphicsMan* selfp)
             if (self->mPhase2Callback) {
                 self->mPhase2Callback(self->mPhase2CallbackArg);
             }
-            *(sPtQuad_2760*)0x10005000 = D_0044B9C0;
+            *(t4Vector*)0x10005000 = D_0044B9C0;
             *(volatile int*)0x10003010 = 4;
             while (*(volatile int*)0x10003C00 & 0x1F000003) {
             }
@@ -10572,33 +10311,10 @@ extern "C" void func_00383808(void* self, int src, int dbp, int w, int height, i
 //100%
 INCLUDE_ASM("render/particle", func_00383A10);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// Clips the segment p[0]-p[1] (projected points, v[] their vertices) against the six
-// guard-band planes; codes[] are the outcodes from cPS2GraphicsMan_RenderLineStrip (0x20/0x10 depth, 8/4 y, 2/1 x).
-// The clipped end replaces the outside point; returns 0 when the segment is fully outside.
-struct sClipPt_3A10 {
-    float x, y, z, w;
-};
 
-struct sClipVtx_3A10 {
-    float s, t, pad0, pad1;         // 0x00
-    unsigned int c[4];              // 0x10 rgba
-    float pos[4];                   // 0x20
-};
 
-struct sClipCtx_3A10 {
-    char pad_0x0[0x6B70];
-    float xmin;                     // 0x6B70
-    float ymin;                     // 0x6B74
-    float zfar;                     // 0x6B78
-    float wfar;                     // 0x6B7C
-    float xmax;                     // 0x6B80
-    float ymax;                     // 0x6B84
-    float znear;                    // 0x6B88
-    float wnear;                    // 0x6B8C
-};
 
-extern "C" int func_00383A10_impl(sClipCtx_3A10* self, sClipVtx_3A10* v, sClipPt_3A10* p, int* codes) __asm__("func_00383A10");
+extern "C" int func_00383A10_impl(cPS2GraphicsMan* self, tBxVertex* v, t4Vector* p, int* codes) __asm__("func_00383A10");
 
 /**
  * Clips the segment between two projected points to the guard band, moving the outside end(s) onto it, and returns 0
@@ -10615,13 +10331,13 @@ extern "C" int func_00383A10_impl(sClipCtx_3A10* self, sClipVtx_3A10* v, sClipPt
  * @param codes  the two clip codes, updated in place
  * @return 1 when part of the segment is inside, 0 when it is all outside
  */
-extern "C" int func_00383A10_impl(sClipCtx_3A10* self, sClipVtx_3A10* verts, sClipPt_3A10* points, int* codes)
+extern "C" int func_00383A10_impl(cPS2GraphicsMan* self, tBxVertex* verts, t4Vector* points, int* codes)
 {
     int unionCodes = codes[0] | codes[1];
 
     if (unionCodes & 0x20) {
         float w0 = points[0].w;
-        float plane = self->wfar;
+        float plane = self->unk_6B70.w;
         float frac = (w0 - plane) / (w0 - points[1].w);
         int k = (codes[0] & 0x20) == 0;
         float dx = frac * (points[0].x - points[1].x);
@@ -10629,25 +10345,25 @@ extern "C" int func_00383A10_impl(sClipCtx_3A10* self, sClipVtx_3A10* verts, sCl
         float tv = frac * points[1].w / plane;
         points[k].x = points[0].x - dx;
         points[k].y = points[0].y - dy;
-        points[k].z = self->zfar;
-        points[k].w = self->wfar;
-        verts[k].s = verts[0].s + tv * (verts[1].s - verts[0].s);
-        verts[k].t = verts[0].t + tv * (verts[1].t - verts[0].t);
-        *(int*)&verts[k].c[0] = (int)((float)verts[0].c[0] + tv * (float)(verts[1].c[0] - verts[0].c[0]));
-        *(int*)&verts[k].c[1] = (int)((float)verts[0].c[1] + tv * (float)(verts[1].c[1] - verts[0].c[1]));
-        *(int*)&verts[k].c[2] = (int)((float)verts[0].c[2] + tv * (float)(verts[1].c[2] - verts[0].c[2]));
-        *(int*)&verts[k].c[3] = (int)((float)verts[0].c[3] + tv * (float)(verts[1].c[3] - verts[0].c[3]));
+        points[k].z = self->unk_6B70.z;
+        points[k].w = self->unk_6B70.w;
+        verts[k].u = verts[0].u + tv * (verts[1].u - verts[0].u);
+        verts[k].v = verts[0].v + tv * (verts[1].v - verts[0].v);
+        *(int*)&((unsigned int*)&verts[k].r)[0] = (int)((float)((unsigned int*)&verts[0].r)[0] + tv * (float)(((unsigned int*)&verts[1].r)[0] - ((unsigned int*)&verts[0].r)[0]));
+        *(int*)&((unsigned int*)&verts[k].r)[1] = (int)((float)((unsigned int*)&verts[0].r)[1] + tv * (float)(((unsigned int*)&verts[1].r)[1] - ((unsigned int*)&verts[0].r)[1]));
+        *(int*)&((unsigned int*)&verts[k].r)[2] = (int)((float)((unsigned int*)&verts[0].r)[2] + tv * (float)(((unsigned int*)&verts[1].r)[2] - ((unsigned int*)&verts[0].r)[2]));
+        *(int*)&((unsigned int*)&verts[k].r)[3] = (int)((float)((unsigned int*)&verts[0].r)[3] + tv * (float)(((unsigned int*)&verts[1].r)[3] - ((unsigned int*)&verts[0].r)[3]));
         codes[k] = 0;
-        if (points[k].x < self->xmin) codes[k] |= 2;
-        if (points[k].x > self->xmax) codes[k] |= 1;
-        if (points[k].y < self->ymin) codes[k] |= 8;
-        if (points[k].y > self->ymax) codes[k] |= 4;
+        if (points[k].x < self->unk_6B70.x) codes[k] |= 2;
+        if (points[k].x > self->unk_6B80.x) codes[k] |= 1;
+        if (points[k].y < self->unk_6B70.y) codes[k] |= 8;
+        if (points[k].y > self->unk_6B80.y) codes[k] |= 4;
         if (codes[0] & codes[1]) return 0;
         unionCodes = codes[0] | codes[1];
     }
     if (unionCodes & 0x10) {
         float w0 = points[0].w;
-        float plane = self->wnear;
+        float plane = self->unk_6B80.w;
         float frac = (w0 - plane) / (w0 - points[1].w);
         int k = (codes[0] & 0x10) == 0;
         float dx = frac * (points[0].x - points[1].x);
@@ -10655,68 +10371,68 @@ extern "C" int func_00383A10_impl(sClipCtx_3A10* self, sClipVtx_3A10* verts, sCl
         float tv = frac * points[1].w / plane;
         points[k].x = points[0].x - dx;
         points[k].y = points[0].y - dy;
-        points[k].z = self->znear;
-        points[k].w = self->wnear;
-        verts[k].s = verts[0].s + tv * (verts[1].s - verts[0].s);
-        verts[k].t = verts[0].t + tv * (verts[1].t - verts[0].t);
-        *(int*)&verts[k].c[0] = (int)((float)verts[0].c[0] + tv * (float)(verts[1].c[0] - verts[0].c[0]));
-        *(int*)&verts[k].c[1] = (int)((float)verts[0].c[1] + tv * (float)(verts[1].c[1] - verts[0].c[1]));
-        *(int*)&verts[k].c[2] = (int)((float)verts[0].c[2] + tv * (float)(verts[1].c[2] - verts[0].c[2]));
-        *(int*)&verts[k].c[3] = (int)((float)verts[0].c[3] + tv * (float)(verts[1].c[3] - verts[0].c[3]));
+        points[k].z = self->unk_6B80.z;
+        points[k].w = self->unk_6B80.w;
+        verts[k].u = verts[0].u + tv * (verts[1].u - verts[0].u);
+        verts[k].v = verts[0].v + tv * (verts[1].v - verts[0].v);
+        *(int*)&((unsigned int*)&verts[k].r)[0] = (int)((float)((unsigned int*)&verts[0].r)[0] + tv * (float)(((unsigned int*)&verts[1].r)[0] - ((unsigned int*)&verts[0].r)[0]));
+        *(int*)&((unsigned int*)&verts[k].r)[1] = (int)((float)((unsigned int*)&verts[0].r)[1] + tv * (float)(((unsigned int*)&verts[1].r)[1] - ((unsigned int*)&verts[0].r)[1]));
+        *(int*)&((unsigned int*)&verts[k].r)[2] = (int)((float)((unsigned int*)&verts[0].r)[2] + tv * (float)(((unsigned int*)&verts[1].r)[2] - ((unsigned int*)&verts[0].r)[2]));
+        *(int*)&((unsigned int*)&verts[k].r)[3] = (int)((float)((unsigned int*)&verts[0].r)[3] + tv * (float)(((unsigned int*)&verts[1].r)[3] - ((unsigned int*)&verts[0].r)[3]));
         codes[k] = 0;
-        if (points[k].x < self->xmin) codes[k] |= 2;
-        if (points[k].x > self->xmax) codes[k] |= 1;
-        if (points[k].y < self->ymin) codes[k] |= 8;
-        if (points[k].y > self->ymax) codes[k] |= 4;
+        if (points[k].x < self->unk_6B70.x) codes[k] |= 2;
+        if (points[k].x > self->unk_6B80.x) codes[k] |= 1;
+        if (points[k].y < self->unk_6B70.y) codes[k] |= 8;
+        if (points[k].y > self->unk_6B80.y) codes[k] |= 4;
         if (codes[0] & codes[1]) return 0;
         unionCodes = codes[0] | codes[1];
     }
     if (unionCodes & 8) {
-        float frac = (points[0].y - self->ymin) / (points[0].y - points[1].y);
+        float frac = (points[0].y - self->unk_6B70.y) / (points[0].y - points[1].y);
         int k = (codes[0] & 8) == 0;
         float dx = frac * (points[0].x - points[1].x);
         float dz = frac * (points[0].z - points[1].z);
         float dw = frac * (points[0].w - points[1].w);
         points[k].x = points[0].x - dx;
-        points[k].y = self->ymin;
+        points[k].y = self->unk_6B70.y;
         points[k].z = points[0].z - dz;
         points[k].w = points[0].w - dw;
-        verts[k].s = verts[0].s + frac * (verts[1].s - verts[0].s);
-        verts[k].t = verts[0].t + frac * (verts[1].t - verts[0].t);
-        *(int*)&verts[k].c[0] = (int)((float)verts[0].c[0] + frac * (float)(verts[1].c[0] - verts[0].c[0]));
-        *(int*)&verts[k].c[1] = (int)((float)verts[0].c[1] + frac * (float)(verts[1].c[1] - verts[0].c[1]));
-        *(int*)&verts[k].c[2] = (int)((float)verts[0].c[2] + frac * (float)(verts[1].c[2] - verts[0].c[2]));
-        *(int*)&verts[k].c[3] = (int)((float)verts[0].c[3] + frac * (float)(verts[1].c[3] - verts[0].c[3]));
+        verts[k].u = verts[0].u + frac * (verts[1].u - verts[0].u);
+        verts[k].v = verts[0].v + frac * (verts[1].v - verts[0].v);
+        *(int*)&((unsigned int*)&verts[k].r)[0] = (int)((float)((unsigned int*)&verts[0].r)[0] + frac * (float)(((unsigned int*)&verts[1].r)[0] - ((unsigned int*)&verts[0].r)[0]));
+        *(int*)&((unsigned int*)&verts[k].r)[1] = (int)((float)((unsigned int*)&verts[0].r)[1] + frac * (float)(((unsigned int*)&verts[1].r)[1] - ((unsigned int*)&verts[0].r)[1]));
+        *(int*)&((unsigned int*)&verts[k].r)[2] = (int)((float)((unsigned int*)&verts[0].r)[2] + frac * (float)(((unsigned int*)&verts[1].r)[2] - ((unsigned int*)&verts[0].r)[2]));
+        *(int*)&((unsigned int*)&verts[k].r)[3] = (int)((float)((unsigned int*)&verts[0].r)[3] + frac * (float)(((unsigned int*)&verts[1].r)[3] - ((unsigned int*)&verts[0].r)[3]));
         codes[k] = 0;
-        if (points[k].x < self->xmin) codes[k] |= 2;
-        if (points[k].x > self->xmax) codes[k] |= 1;
+        if (points[k].x < self->unk_6B70.x) codes[k] |= 2;
+        if (points[k].x > self->unk_6B80.x) codes[k] |= 1;
         if (codes[0] & codes[1]) return 0;
         unionCodes = codes[0] | codes[1];
     }
     if (unionCodes & 4) {
-        float frac = (points[0].y - self->ymax) / (points[0].y - points[1].y);
+        float frac = (points[0].y - self->unk_6B80.y) / (points[0].y - points[1].y);
         int k = (codes[0] & 4) == 0;
         float dx = frac * (points[0].x - points[1].x);
         float dz = frac * (points[0].z - points[1].z);
         float dw = frac * (points[0].w - points[1].w);
         points[k].x = points[0].x - dx;
-        points[k].y = self->ymax;
+        points[k].y = self->unk_6B80.y;
         points[k].z = points[0].z - dz;
         points[k].w = points[0].w - dw;
-        verts[k].s = verts[0].s + frac * (verts[1].s - verts[0].s);
-        verts[k].t = verts[0].t + frac * (verts[1].t - verts[0].t);
-        *(int*)&verts[k].c[0] = (int)((float)verts[0].c[0] + frac * (float)(verts[1].c[0] - verts[0].c[0]));
-        *(int*)&verts[k].c[1] = (int)((float)verts[0].c[1] + frac * (float)(verts[1].c[1] - verts[0].c[1]));
-        *(int*)&verts[k].c[2] = (int)((float)verts[0].c[2] + frac * (float)(verts[1].c[2] - verts[0].c[2]));
-        *(int*)&verts[k].c[3] = (int)((float)verts[0].c[3] + frac * (float)(verts[1].c[3] - verts[0].c[3]));
+        verts[k].u = verts[0].u + frac * (verts[1].u - verts[0].u);
+        verts[k].v = verts[0].v + frac * (verts[1].v - verts[0].v);
+        *(int*)&((unsigned int*)&verts[k].r)[0] = (int)((float)((unsigned int*)&verts[0].r)[0] + frac * (float)(((unsigned int*)&verts[1].r)[0] - ((unsigned int*)&verts[0].r)[0]));
+        *(int*)&((unsigned int*)&verts[k].r)[1] = (int)((float)((unsigned int*)&verts[0].r)[1] + frac * (float)(((unsigned int*)&verts[1].r)[1] - ((unsigned int*)&verts[0].r)[1]));
+        *(int*)&((unsigned int*)&verts[k].r)[2] = (int)((float)((unsigned int*)&verts[0].r)[2] + frac * (float)(((unsigned int*)&verts[1].r)[2] - ((unsigned int*)&verts[0].r)[2]));
+        *(int*)&((unsigned int*)&verts[k].r)[3] = (int)((float)((unsigned int*)&verts[0].r)[3] + frac * (float)(((unsigned int*)&verts[1].r)[3] - ((unsigned int*)&verts[0].r)[3]));
         codes[k] = 0;
-        if (points[k].x < self->xmin) codes[k] |= 2;
-        if (points[k].x > self->xmax) codes[k] |= 1;
+        if (points[k].x < self->unk_6B70.x) codes[k] |= 2;
+        if (points[k].x > self->unk_6B80.x) codes[k] |= 1;
         if (codes[0] & codes[1]) return 0;
         unionCodes = codes[0] | codes[1];
     }
     if (unionCodes & 2) {
-        float plane = self->xmin;
+        float plane = self->unk_6B70.x;
         float frac = (points[0].x - plane) / (points[0].x - points[1].x);
         int k = (codes[0] & 2) == 0;
         float dy = frac * (points[0].y - points[1].y);
@@ -10726,16 +10442,16 @@ extern "C" int func_00383A10_impl(sClipCtx_3A10* self, sClipVtx_3A10* verts, sCl
         points[k].y = points[0].y - dy;
         points[k].z = points[0].z - dz;
         points[k].w = points[0].w - dw;
-        verts[k].s = verts[0].s + frac * (verts[1].s - verts[0].s);
-        verts[k].t = verts[0].t + frac * (verts[1].t - verts[0].t);
-        *(int*)&verts[k].c[0] = (int)((float)verts[0].c[0] + frac * (float)(verts[1].c[0] - verts[0].c[0]));
-        *(int*)&verts[k].c[1] = (int)((float)verts[0].c[1] + frac * (float)(verts[1].c[1] - verts[0].c[1]));
-        *(int*)&verts[k].c[2] = (int)((float)verts[0].c[2] + frac * (float)(verts[1].c[2] - verts[0].c[2]));
-        *(int*)&verts[k].c[3] = (int)((float)verts[0].c[3] + frac * (float)(verts[1].c[3] - verts[0].c[3]));
+        verts[k].u = verts[0].u + frac * (verts[1].u - verts[0].u);
+        verts[k].v = verts[0].v + frac * (verts[1].v - verts[0].v);
+        *(int*)&((unsigned int*)&verts[k].r)[0] = (int)((float)((unsigned int*)&verts[0].r)[0] + frac * (float)(((unsigned int*)&verts[1].r)[0] - ((unsigned int*)&verts[0].r)[0]));
+        *(int*)&((unsigned int*)&verts[k].r)[1] = (int)((float)((unsigned int*)&verts[0].r)[1] + frac * (float)(((unsigned int*)&verts[1].r)[1] - ((unsigned int*)&verts[0].r)[1]));
+        *(int*)&((unsigned int*)&verts[k].r)[2] = (int)((float)((unsigned int*)&verts[0].r)[2] + frac * (float)(((unsigned int*)&verts[1].r)[2] - ((unsigned int*)&verts[0].r)[2]));
+        *(int*)&((unsigned int*)&verts[k].r)[3] = (int)((float)((unsigned int*)&verts[0].r)[3] + frac * (float)(((unsigned int*)&verts[1].r)[3] - ((unsigned int*)&verts[0].r)[3]));
         codes[k] = 0;
     }
     if (unionCodes & 1) {
-        float plane = self->xmax;
+        float plane = self->unk_6B80.x;
         float frac = (points[0].x - plane) / (points[0].x - points[1].x);
         int k = (codes[0] & 1) == 0;
         float dy = frac * (points[0].y - points[1].y);
@@ -10745,12 +10461,12 @@ extern "C" int func_00383A10_impl(sClipCtx_3A10* self, sClipVtx_3A10* verts, sCl
         points[k].y = points[0].y - dy;
         points[k].z = points[0].z - dz;
         points[k].w = points[0].w - dw;
-        verts[k].s = verts[0].s + frac * (verts[1].s - verts[0].s);
-        verts[k].t = verts[0].t + frac * (verts[1].t - verts[0].t);
-        *(int*)&verts[k].c[0] = (int)((float)verts[0].c[0] + frac * (float)(verts[1].c[0] - verts[0].c[0]));
-        *(int*)&verts[k].c[1] = (int)((float)verts[0].c[1] + frac * (float)(verts[1].c[1] - verts[0].c[1]));
-        *(int*)&verts[k].c[2] = (int)((float)verts[0].c[2] + frac * (float)(verts[1].c[2] - verts[0].c[2]));
-        *(int*)&verts[k].c[3] = (int)((float)verts[0].c[3] + frac * (float)(verts[1].c[3] - verts[0].c[3]));
+        verts[k].u = verts[0].u + frac * (verts[1].u - verts[0].u);
+        verts[k].v = verts[0].v + frac * (verts[1].v - verts[0].v);
+        *(int*)&((unsigned int*)&verts[k].r)[0] = (int)((float)((unsigned int*)&verts[0].r)[0] + frac * (float)(((unsigned int*)&verts[1].r)[0] - ((unsigned int*)&verts[0].r)[0]));
+        *(int*)&((unsigned int*)&verts[k].r)[1] = (int)((float)((unsigned int*)&verts[0].r)[1] + frac * (float)(((unsigned int*)&verts[1].r)[1] - ((unsigned int*)&verts[0].r)[1]));
+        *(int*)&((unsigned int*)&verts[k].r)[2] = (int)((float)((unsigned int*)&verts[0].r)[2] + frac * (float)(((unsigned int*)&verts[1].r)[2] - ((unsigned int*)&verts[0].r)[2]));
+        *(int*)&((unsigned int*)&verts[k].r)[3] = (int)((float)((unsigned int*)&verts[0].r)[3] + frac * (float)(((unsigned int*)&verts[1].r)[3] - ((unsigned int*)&verts[0].r)[3]));
         codes[k] = 0;
     }
     return 1;
@@ -11103,9 +10819,6 @@ extern "C" void cPS2GridMesh__cPS2GridMesh(cPS2GridMesh* self, int flags)
 //100%
 INCLUDE_ASM("render/particle", cPS2GridMesh_Update);
 #ifdef SKIP_ASM
-struct sPtVtx52E8 {
-    float x, y, z;
-};
 
 struct sPtRow52E8 {
     int field_0x0;
@@ -11138,7 +10851,7 @@ extern "C" void func_00385A38(cPS2GridMesh* self, short* out, int i, sPartVec3* 
  *
  * @param verts  the grid positions, row by row (x, y, z floats)
  */
-extern "C" void cPS2GridMesh_Update(sPtSurf52E8* self, sPtVtx52E8* verts)
+extern "C" void cPS2GridMesh_Update(sPtSurf52E8* self, t3Vector* verts)
 {
     int idx = self->field_0x1A0 == 0;
     for (int i = 0; i < self->rows; i++) {
@@ -11149,8 +10862,8 @@ extern "C" void cPS2GridMesh_Update(sPtSurf52E8* self, sPtVtx52E8* verts)
         int k = 0;
         int j = 0;
         if (j < self->w) {
-            sPtVtx52E8* lowerVert = &verts[next];
-            sPtVtx52E8* upperVert = &verts[base];
+            t3Vector* lowerVert = &verts[next];
+            t3Vector* upperVert = &verts[base];
             do {
                 func_00385A38((cPS2GridMesh*)self, row->out, k, (sPartVec3*)upperVert);
                 func_00385A38((cPS2GridMesh*)self, row->out, k + 1, (sPartVec3*)lowerVert);
@@ -11168,9 +10881,6 @@ extern "C" void cPS2GridMesh_Update(sPtSurf52E8* self, sPtVtx52E8* verts)
 //100%
 INCLUDE_ASM("render/particle", cPS2GridMesh_Update1);
 #ifdef SKIP_ASM
-struct sPtUV5410 {
-    float u, v;
-};
 
 struct sShortUV;
 
@@ -11204,7 +10914,7 @@ extern "C" void func_00385BA0(cPS2GridMesh* self, sShortUV* dst, int idx, float*
  *
  * @param uvs  the grid texture coordinates, row by row (u, v floats)
  */
-extern "C" void cPS2GridMesh_Update1(sPtSurf5410* self, sPtUV5410* uvs)
+extern "C" void cPS2GridMesh_Update1(sPtSurf5410* self, t2Vector* uvs)
 {
     int idx = self->field_0x1A0 == 0;
     for (int i = 0; i < self->rows; i++) {
@@ -11215,8 +10925,8 @@ extern "C" void cPS2GridMesh_Update1(sPtSurf5410* self, sPtUV5410* uvs)
         int k = 0;
         int j = 0;
         if (j < self->w) {
-            sPtUV5410* lowerUv = (sPtUV5410*)((next << 3) + (int)uvs);  // PORT: pointer in int
-            sPtUV5410* upperUv = (sPtUV5410*)((base << 3) + (int)uvs);  // PORT: pointer in int
+            t2Vector* lowerUv = (t2Vector*)((next << 3) + (int)uvs);  // PORT: pointer in int
+            t2Vector* upperUv = (t2Vector*)((base << 3) + (int)uvs);  // PORT: pointer in int
             do {
                 func_00385BA0((cPS2GridMesh*)self, row->uv, k, (float*)upperUv);
                 func_00385BA0((cPS2GridMesh*)self, row->uv, k + 1, (float*)lowerUv);
@@ -11576,9 +11286,6 @@ struct sMat_5C10 {
     }
 } __attribute__((aligned(16)));
 
-struct sVec4_5C10 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sBez_5C10 {
     char pad_0x0[0x194];
@@ -11593,7 +11300,7 @@ struct sBez_5C10 {
 };
 
 // PORT: PS2-only VU0 inline asm (scale the rows of a 4x4 matrix by a vector).
-static inline sMat_5C10 ScaleMat_5C10(const sMat_5C10& m, const sVec4_5C10& v)
+static inline sMat_5C10 ScaleMat_5C10(const sMat_5C10& m, const t4Vector& v)
 {
     sMat_5C10 d;
     __asm__ __volatile__(
@@ -11620,7 +11327,7 @@ extern int D_004A4474;
 extern "C" unsigned long* func_0038F460(int dma, unsigned int buf, int a2, int a3);
 extern "C" unsigned int func_0038F668(int dma, unsigned long* p, int a2);
 extern "C" void func_0037D968(cPS2GraphicsMan* self);
-extern "C" void func_0037E120_5C10(sPtGfx_5C10* gfx, sMat_5C10* m, sMat_5C10* hdr, sVec4_5C10* scale, int flag, int a5, int prim, char** pp) __asm__("func_0037E120");
+extern "C" void func_0037E120_5C10(sPtGfx_5C10* gfx, sMat_5C10* m, sMat_5C10* hdr, t4Vector* scale, int flag, int a5, int prim, char** pp) __asm__("func_0037E120");
 
 /**
  * Draws the mesh with texture @p tex: queues a call of its current vertex buffer on the defer manager.
@@ -11654,7 +11361,7 @@ extern "C" void cPS2GridMesh_Render1(sBez_5C10* self, sMat_5C10* mat, int tex, i
     unsigned int addr = self->gfx->bufAddr;
     sMat_5C10 baseMatrix = *mat;
     float meshRange = self->scale;
-    sVec4_5C10 sc;
+    t4Vector sc;
     sc.x = meshRange;
     sc.y = meshRange;
     sc.z = meshRange;
@@ -11790,7 +11497,6 @@ extern "C" void func_003865D8(void *node, void **head) {
 //100%
 INCLUDE_ASM("render/particle", func_003865E8);
 #ifdef SKIP_ASM
-struct sVE3865E8 { short delta; short index; void (*fn)(void*, int); };
 
 /**
  * Deletes every object of the singly linked list starting at @p head (link at +0x8), calling each one's virtual
@@ -11807,7 +11513,7 @@ extern "C" void func_003865E8(void* head)
         do {
             void* next = *(void**)((char*)node + 8);
             if (node != 0) {
-                sVE3865E8* vt = *(sVE3865E8**)((char*)node + 4);
+                sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)node + 4);
                 vt[1].fn(vthis(node, vt[1]), 3);
             }
             node = next;
@@ -11918,22 +11624,12 @@ struct sBone_66F0 {
     sTrack_66F0* tracks;
 };
 
-struct sBlend_66F0 {
-    int n;
-    unsigned char* w;
-    int idx;
-};
 
 struct sRef_66F0 {
     int n;
     int* idx;
 };
 
-struct sSlot_66F0 {
-    int n;
-    unsigned char* w;
-    int idx;
-};
 
 struct sMdl_66F0 {
     char pad0[0x18];
@@ -11943,7 +11639,7 @@ struct sMdl_66F0 {
     char pad24[0xC];
     int o30;
     int o34;
-    sBlend_66F0* blends;
+    tMdfBlendedMatrix* blends;
     sRef_66F0* refs;
     int x40;
     short nblends;
@@ -11972,9 +11668,9 @@ struct sMdl_66F0 {
  * @param slots  the shared blended-matrix list (On Tour blendedMats)
  * @param x      stored in the model at +0x40 (On Tour: float* morphWeights)
  */
-extern "C" void cPS2GraphicsMan_ResolveCharModel(cPS2GraphicsMan* gfx, sMdl_66F0* inModel, char* base, int* tbl, int* count, sSlot_66F0* slots, int x)
+extern "C" void cPS2GraphicsMan_ResolveCharModel(cPS2GraphicsMan* gfx, sMdl_66F0* inModel, char* base, int* tbl, int* count, tMdfBlendedMatrix* slots, int x)
 {
-    inModel->blends = (sBlend_66F0*)(base + inModel->o34);
+    inModel->blends = (tMdfBlendedMatrix*)(base + inModel->o34);
     inModel->refs = (sRef_66F0*)(base + inModel->o30);
     char* mats = base + inModel->o18;
     sBone_66F0* bones = (sBone_66F0*)(base + inModel->o20);
@@ -12015,22 +11711,22 @@ extern "C" void cPS2GraphicsMan_ResolveCharModel(cPS2GraphicsMan* gfx, sMdl_66F0
             mt[9] = tbl[mt[8]] + mt[9];
     }
     for (int i = 0; i < inModel->nblends; i++) {
-        sBlend_66F0* blendEntry = &inModel->blends[i];
-        blendEntry->w = (unsigned char*)(base + (int)blendEntry->w);
-        for (int j = 0; j < blendEntry->n; j++)
-            blendEntry->w[j * 4 + 2] += tbl[blendEntry->w[j * 4 + 3]];
+        tMdfBlendedMatrix* blendEntry = &inModel->blends[i];
+        (*(unsigned char**)&blendEntry->m_matrixList) = (unsigned char*)(base + (int)((unsigned char*)blendEntry->m_matrixList));
+        for (int j = 0; j < blendEntry->m_iNumMatrices; j++)
+            ((unsigned char*)blendEntry->m_matrixList)[j * 4 + 2] += tbl[((unsigned char*)blendEntry->m_matrixList)[j * 4 + 3]];
         cGraphicsMan_AddBlendedMatrix(gfx, blendEntry);
         for (int k = 0;; k++) {
             if (k == *count) {
-                slots[*count].n = blendEntry->n;
-                slots[*count].w = blendEntry->w;
-                slots[*count].idx = *count;
-                blendEntry->idx = *count;
+                slots[*count].m_iNumMatrices = blendEntry->m_iNumMatrices;
+                (*(unsigned char**)&slots[*count].m_matrixList) = ((unsigned char*)blendEntry->m_matrixList);
+                slots[*count].m_iMatrixId = *count;
+                blendEntry->m_iMatrixId = *count;
                 (*count)++;
                 goto next;
             }
             if (areBlendedMatricesEqual(blendEntry, &slots[k], 0, 0, 0)) {
-                blendEntry->idx = k;
+                blendEntry->m_iMatrixId = k;
                 goto next;
             }
         }
@@ -12039,7 +11735,7 @@ extern "C" void cPS2GraphicsMan_ResolveCharModel(cPS2GraphicsMan* gfx, sMdl_66F0
     for (int i = 0; i < inModel->nrefs; i++) {
         sRef_66F0* refEntry = &inModel->refs[i];
         for (int j = 0; j < refEntry->n; j++)
-            refEntry->idx[j] = inModel->blends[refEntry->idx[j]].idx;
+            refEntry->idx[j] = inModel->blends[refEntry->idx[j]].m_iMatrixId;
     }
 }
 #endif
@@ -12174,13 +11870,6 @@ extern "C" void cPS2GraphicsMan_update(cPS2GraphicsMan* self)
 //100%
 INCLUDE_ASM("render/particle", func_00386D10);
 #ifdef SKIP_ASM
-struct sPartStrip_6D10 {
-    void* verts;    // 0x0
-    void* cols;     // 0x4
-    int count;      // 0x8
-    int field_0xc;
-    int field_0x10;
-};
 
 extern "C" void func_00387EC0(void* self, void* verts, void* cols, int count, void* a4, void* a5, void* a6, float f0, float f1);
 
@@ -12200,11 +11889,11 @@ extern "C" void func_00387EC0(void* self, void* verts, void* cols, int count, vo
  * @param alphaScale  alpha multiplier passed for every trail
  * @param alphaStep  alpha step per vertex passed for every trail
  */
-extern "C" void func_00386D10(void* self, sPartStrip_6D10* strips, int n, void* firstRing, void* secondRing, void* textured, float alphaScale, float alphaStep)
+extern "C" void func_00386D10(void* self, BoardTrailInfoT* strips, int n, void* firstRing, void* secondRing, void* textured, float alphaScale, float alphaStep)
 {
     for (; n > 0; n--, strips++) {
-        if (strips->count >= 2) {
-            func_00387EC0(self, strips->verts, strips->cols, strips->count, firstRing, secondRing, textured, alphaScale, alphaStep);
+        if (strips->stripLength >= 2) {
+            func_00387EC0(self, ((void*)strips->verts), ((void*)strips->startIndex), strips->stripLength, firstRing, secondRing, textured, alphaScale, alphaStep);
         }
     }
 }
@@ -12263,11 +11952,6 @@ struct sRS_6E78 {
     short pad;
 };
 
-struct sVEnt_6E78 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 struct sQ_6E78 {
     int w[4];
@@ -12297,7 +11981,7 @@ struct sGfx_6E78 {
     sRS_6E78* top;                  // 0xE84
     char pad_0xE88[0xF50 - 0xE88];
     int texIds[(0x10D8 - 0xF50) / 4];   // 0xF50
-    sVEnt_6E78* vtable;             // 0x10D8
+    sVEntry<int(void*)>* vtable;             // 0x10D8
     char pad_0x10DC[0x18F0 - 0x10DC];
     sRing_6E78* ring;               // 0x18F0
     char pad_0x18F4[0x5840 - 0x18F4];
@@ -12440,7 +12124,7 @@ static inline void DmaEnd_6E78(sPkt_6E78* pkt, sGfx_6E78* self)
  * @param strips  the trails (0x14 bytes each: ring table, start index, vertex count, alpha, alpha step)
  * @param n  number of trails
  */
-extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(sGfx_6E78* self, sPartStrip_6D10* strips, int n)
+extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(sGfx_6E78* self, BoardTrailInfoT* strips, int n)
 {
     *self->top = D_00501420_rs6E78;
     self->top->f8 = (self->top->f8 & ~0x3E0) | 0x60;
@@ -12457,7 +12141,7 @@ extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(sGfx_6E78* self, sPart
     int tex = self->texIds[D_004A45D4.texIndex];
     self->top->tex = tex;
 
-    sVEnt_6E78* vt = self->vtable;
+    sVEntry<int(void*)>* vt = self->vtable;
     int width = vt[10].fn(vthis(self, vt[10]));
     sPkt_6E78* pkt = (sPkt_6E78*)D_004A5B84;
     unsigned int fbp = self->fbp;
@@ -12776,14 +12460,6 @@ void func_00387EC0_impl(sPtGfx_7EC0* self, sVtx_7EC0** tbl, int start, int n, in
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderBoardWake);
 #ifdef SKIP_ASM
 
-struct sPtEnt_83B8 {
-    sDrawState rs;                  // 0x00
-    unsigned int buf;               // 0x14
-    unsigned int next;              // 0x18
-    short key;                      // 0x1C
-    short flag;                     // 0x1E
-    char pad_0x20[0x60];
-};
 
 
 
@@ -12828,12 +12504,12 @@ extern "C" void cPS2GraphicsMan_RenderBoardWake(cPS2GraphicsMan* self, void* ver
     if (ring->mNumSubmitDMA < 2600) {
         rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->unk_69CC0;
-        sPtEnt_83B8* ringEntry = (sPtEnt_83B8*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((sPtEnt_83B8*)&ring->mSubmits[0]) | 0x30000000));
-        ringEntry->rs = *rs;
-        ringEntry->buf = buf;
-        ringEntry->next = next;
-        ringEntry->key = key;
-        ringEntry->flag = 0;
+        tDeferSubmit* ringEntry = (tDeferSubmit*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((&ring->mSubmits[0])) | 0x30000000));
+        ringEntry->mDrawState = *rs;
+        ringEntry->mPacket = buf;
+        ringEntry->mTail = next;
+        ringEntry->mViewIndex = key;
+        ringEntry->mContinuation = 0;
     }
     self->mVifCursor += 0x10;
     (*(int*)&(self->m_pCurrentDrawState)->unk_00[0]) &= ~0x3C0;
@@ -12845,14 +12521,7 @@ extern "C" void cPS2GraphicsMan_RenderBoardWake(cPS2GraphicsMan* self, void* ver
 //100%
 INCLUDE_ASM("render/particle", func_003885E0);
 #ifdef SKIP_ASM
-struct sVtx_85E0 {
-    unsigned long q[6];
-} __attribute__((aligned(16)));
 
-struct sPtGfx_85E0 {
-    char pad_0x0[0x5A00];
-    unsigned int bufAddr;           // 0x5A00
-};
 
 extern int D_004A43B0;
 extern char D_3A00[];
@@ -12865,7 +12534,7 @@ static inline unsigned int Unpack_85E0(int addr, int num, int flg, unsigned int 
 }
 
 // The unit declares func_003885E0 with void* parameters (caller cPS2GraphicsMan_RenderBoardWake); bind the real types.
-extern "C" void func_003885E0_impl(sPtGfx_85E0* self, sVtx_85E0** strips, int start, int ring, int count, int i0, int i1,
+extern "C" void func_003885E0_impl(cPS2GraphicsMan* self, tBxVertex** strips, int start, int ring, int count, int i0, int i1,
                                    float t, float dt) __asm__("func_003885E0");
 
 /**
@@ -12891,14 +12560,14 @@ extern "C" void func_003885E0_impl(sPtGfx_85E0* self, sVtx_85E0** strips, int st
  * @param dt  alpha step per vertex
  */
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit VIF/GIF words are `ulong`.
-void func_003885E0_impl(sPtGfx_85E0* self, sVtx_85E0** strips, int start, int ring, int count, int firstRow, int secondRow, float alphaStart,
+void func_003885E0_impl(cPS2GraphicsMan* self, tBxVertex** strips, int start, int ring, int count, int firstRow, int secondRow, float alphaStart,
                         float dt)
 {
     unsigned int prog = (unsigned int)(D_004A43B0 ? D_3A00 : D_3A08) >> 3;
     int prim = 92;
     unsigned long regs = 1042;
     int first = 1;
-    unsigned long* packetCursor = (unsigned long*)(self->bufAddr | 0x30000000);
+    unsigned long* packetCursor = (unsigned long*)(self->mVifCursor | 0x30000000);
     D_004A43B0 = 0;
     while (count != 0) {
         int n = count < 37 ? count : 36;
@@ -12935,7 +12604,7 @@ void func_003885E0_impl(sPtGfx_85E0* self, sVtx_85E0** strips, int start, int ri
             packetCursor[3] = (unsigned long)Unpack_85E0(addr, 3, 1, unpack) << 32;
             addr += 3;
             packetCursor += 4;
-            *(sVtx_85E0*)packetCursor = strips[firstRow][k];
+            *(tBxVertex*)packetCursor = strips[firstRow][k];
             packetCursor += 6;
         }
         if (headCount != 0) {
@@ -12967,7 +12636,7 @@ void func_003885E0_impl(sPtGfx_85E0* self, sVtx_85E0** strips, int start, int ri
             packetCursor[3] = (unsigned long)Unpack_85E0(addr, 3, 1, unpack) << 32;
             addr += 3;
             packetCursor += 4;
-            *(sVtx_85E0*)packetCursor = strips[secondRow][k];
+            *(tBxVertex*)packetCursor = strips[secondRow][k];
             packetCursor += 6;
         }
         if (headCount != 0) {
@@ -13005,7 +12674,7 @@ void func_003885E0_impl(sPtGfx_85E0* self, sVtx_85E0** strips, int start, int ri
             first = 0;
         }
     }
-    self->bufAddr = (unsigned int)packetCursor & 0x0FFFFFFF;
+    self->mVifCursor = (unsigned int)packetCursor & 0x0FFFFFFF;
 }
 #endif
 
@@ -13281,9 +12950,6 @@ extern "C" void func_00389590(sPartVec4* dst, sPartVec4* src, sPartVec4* weights
 //100%
 INCLUDE_ASM("render/particle", func_00389620);
 #ifdef SKIP_ASM
-struct sVec4_9620 {
-    float x, y, z, w;
-};
 
 /**
  * Adds @p src's fourth components times @p dt to @p dst's, for the ten vectors of an irradiance set; x, y and z are not
@@ -13295,10 +12961,10 @@ struct sVec4_9620 {
  * @param src  the set whose w components are added
  * @param dt  the factor
  */
-extern "C" void func_00389620(sVec4_9620* dst, sVec4_9620* src, float dt)
+extern "C" void func_00389620(cIrradiance* dst, cIrradiance* src, float dt)
 {
-    float* srcW = &src->w;
-    float* dstW = &dst->w;
+    float* srcW = &src->unk_000[0].w;
+    float* dstW = &dst->unk_000[0].w;
     for (int i = 0; i < 10; i++) {
         *dstW += *srcW * dt;
         dstW += 4;
@@ -13474,12 +13140,7 @@ extern "C" sParticleEntryA0* cIrradianceDataBase_Get(cIrradianceDataBase* self, 
 extern "C" void func_00389CB8(sPartVec4* self, void* p, float s);
 extern int cIrradianceDataBase_mDefaultId;
 
-struct sPartLib_9C38 {
-    int f0;
-    int count;      // 0x4
-    void* items;    // 0x8
-};
-extern sPartLib_9C38 cIrradianceDataBase_TheDataBase;
+extern cIrradianceDataBase cIrradianceDataBase_TheDataBase;
 extern sPartVec4 cIrradiance_kv4White;
 
 /**
@@ -13495,8 +13156,8 @@ extern sPartVec4 cIrradiance_kv4White;
 extern "C" void func_00389C38(sPartVec4* self, void* sunPos)
 {
     cIrradiance_Clear(self);
-    sPartLib_9C38* lib = &cIrradianceDataBase_TheDataBase;
-    if (lib->count > 0) {
+    cIrradianceDataBase* lib = &cIrradianceDataBase_TheDataBase;
+    if (lib->mNumItem > 0) {
         func_00389590(self, (sPartVec4*)cIrradianceDataBase_Get((cIrradianceDataBase*)lib, cIrradianceDataBase_mDefaultId), &cIrradiance_kv4White, 1.0f);
     }
     if (sunPos != 0) {
@@ -14071,27 +13732,8 @@ extern "C" int func_0038A618(float* point, float* n, tLightRecord* forceSrc, flo
 //100%
 INCLUDE_ASM("render/particle", func_0038A6A8);
 #ifdef SKIP_ASM
-struct sForce_38A6A8 {
-    char pad0[0x10];
-    int type;           // 0x10
-    float strength;     // 0x14
-    char pad18[4];
-    float radius;       // 0x1C
-    float dir[3];       // 0x20
-    char pad2C[0x5C - 0x2C];
-    float outer;        // 0x5C
-    float inner;        // 0x60
-    signed char curve;  // 0x64
-    signed char power;  // 0x65
-};
 
-struct sVec3_38A6A8 {
-    float x, y, z;
-};
 
-struct sVec4_38A6A8 {
-    float x, y, z, w;
-};
 
 static inline float powgen_38A6A8(float x, int n)
 {
@@ -14128,16 +13770,16 @@ static inline float powi_38A6A8(float x, int n)
     return powgen_38A6A8(x, n);
 }
 
-static inline float fade_38A6A8(sForce_38A6A8* s, float dist)
+static inline float fade_38A6A8(tLightRecord* s, float dist)
 {
-    if (s->radius < 5000.0f || dist <= 3750.0f)
+    if (s->m_fMaxDistance < 5000.0f || dist <= 3750.0f)
         return 1.0f;
     return 1.0f - (dist - 3750.0f) * 0.0008f;
 }
 
-static inline float curve_38A6A8(sForce_38A6A8* s, float t)
+static inline float curve_38A6A8(tLightRecord* s, float t)
 {
-    int c = s->curve;
+    int c = s->m_cDecayRate;
     t *= 100.0f;
     if (t < 1.0f) {
         switch (c) {
@@ -14172,37 +13814,37 @@ static inline float clamp_38A6A8(float x, float hi)
  * @param point  the lit point
  * @param forceSrc  the world light
  */
-extern "C" void func_0038A6A8(void* self, float* point, sForce_38A6A8* forceSrc)
+extern "C" void func_0038A6A8(void* self, float* point, tLightRecord* forceSrc)
 {
-    sVec4_38A6A8 n;
-    sVec3_38A6A8 out;
+    t4Vector n;
+    t3Vector out;
     float dist;
     float inv;
     float planeD;
     float k;
     float fade;
 
-    switch (forceSrc->type) {
+    switch (forceSrc->m_eLightType) {
     case 0:
         break;
     case 1:
         if (!func_0038A530(point, (float*)&n, (tLightRecord*)forceSrc, &dist, &inv, &planeD))
             return;
-        if (!(planeD >= forceSrc->inner))
+        if (!(planeD >= forceSrc->unk_060))
             return;
         fade = fade_38A6A8(forceSrc, dist);
-        k = curve_38A6A8(forceSrc, inv) * forceSrc->strength * fade;
-        if (planeD >= forceSrc->outer)
-            k *= powi_38A6A8(planeD, forceSrc->power);
+        k = curve_38A6A8(forceSrc, inv) * forceSrc->m_fIntensity * fade;
+        if (planeD >= forceSrc->unk_05C)
+            k *= powi_38A6A8(planeD, forceSrc->m_cDropOff);
         else {
-            k *= powi_38A6A8(forceSrc->outer, forceSrc->power);
-            k *= (planeD - forceSrc->inner) / (forceSrc->outer - forceSrc->inner);
+            k *= powi_38A6A8(forceSrc->unk_05C, forceSrc->m_cDropOff);
+            k *= (planeD - forceSrc->unk_060) / (forceSrc->unk_05C - forceSrc->unk_060);
         }
         k = clamp_38A6A8(k, 5.0f);
         {
-            float x = forceSrc->dir[0] * k;
-            float y = forceSrc->dir[1] * k;
-            float z = forceSrc->dir[2] * k;
+            float x = forceSrc->m_fvColor[0] * k;
+            float y = forceSrc->m_fvColor[1] * k;
+            float z = forceSrc->m_fvColor[2] * k;
             out.x = x;
             out.y = y;
             out.z = z;
@@ -14213,11 +13855,11 @@ extern "C" void func_0038A6A8(void* self, float* point, sForce_38A6A8* forceSrc)
         if (!func_0038A618(point, (float*)&n, (tLightRecord*)forceSrc, &dist, &inv))
             return;
         fade = fade_38A6A8(forceSrc, dist);
-        k = curve_38A6A8(forceSrc, inv) * forceSrc->strength * fade;
+        k = curve_38A6A8(forceSrc, inv) * forceSrc->m_fIntensity * fade;
         k = clamp_38A6A8(k, 5.0f);
-        out.x = forceSrc->dir[0] * k;
-        out.y = forceSrc->dir[1] * k;
-        out.z = forceSrc->dir[2] * k;
+        out.x = forceSrc->m_fvColor[0] * k;
+        out.y = forceSrc->m_fvColor[1] * k;
+        out.z = forceSrc->m_fvColor[2] * k;
         func_00389520(self, (float*)&n, &out);
         break;
     }

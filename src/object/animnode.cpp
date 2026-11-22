@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/rider.h"
 #include "world/instancerecord.h"
 #include "object/movenode.h"
 #include "object/animframe.h"
@@ -36,10 +37,6 @@ struct sMeshInst_E448 {
     void operator delete[](void* p, unsigned int size);
 };
 
-struct sMeshRef_E448 {
-    char data[0x20];
-    sMeshRef_E448() {}
-};
 
 struct sAnimEntry_E448 {
     int pad_0x0[2];
@@ -74,8 +71,8 @@ extern "C" void cAnimNode_setAnimMeshCache(cAnimNode* self)
     } else {
         *(sMeshInst_E448**)&self->AnimFrames = 0;
     }
-    sMeshRef_E448*& refs = ((sMeshRef_E448*)self->MeshVelocity);
-    refs = new (str_MeshVelocity, 0x20000000, 0) sMeshRef_E448[def->m_iNumMeshes];
+    tMeshVelocity*& refs = (self->MeshVelocity);
+    refs = new (str_MeshVelocity, 0x20000000, 0) tMeshVelocity[def->m_iNumMeshes];
     entry = ((sAnimEntry_E448*)def->m_MeshHeirarchy);
     int k = 0;
     for (i = 0; i < def->m_iNumMeshes; i++, entry++) {
@@ -89,12 +86,9 @@ extern "C" void cAnimNode_setAnimMeshCache(cAnimNode* self)
 //100%
 INCLUDE_ASM("object/animnode", cAnimNode_calcPosition);
 #ifdef SKIP_ASM
-struct sVec4_E600 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sMat_E600 {
-    sVec4_E600 r[4];
+    t4Vector r[4];
     sMat_E600() {}
 };
 
@@ -122,19 +116,19 @@ struct sVEntry_E600b {
  * @param idx  the mesh index (On Tour mesh)
  * @param out  receives the position (x, y, z, w)
  */
-extern "C" void cAnimNode_calcPosition(cAnimNode* self, int id, int idx, sVec4_E600* out)
+extern "C" void cAnimNode_calcPosition(cAnimNode* self, int id, int idx, t4Vector* out)
 {
     void* obj = (char*)&self->unk_014;
     if (id == (int)self->Instance) {
         sVEntry_E600a* vt = (sVEntry_E600a*)self->mVtbl;
-        sVec4_E600 position = vt[29].fn(vthis(obj, vt[29]), idx)->r[3];
+        t4Vector position = vt[29].fn(vthis(obj, vt[29]), idx)->r[3];
         *out = position;
         return;
     }
     sMat_E600 buf[24];
     sVEntry_E600b* vt = (sVEntry_E600b*)self->mVtbl;
     vt[33].fn(vthis(obj, vt[33]), id + 0x10, buf);
-    sVec4_E600 position = buf[idx].r[3];
+    t4Vector position = buf[idx].r[3];
     *out = position;
 }
 #endif
@@ -142,36 +136,18 @@ extern "C" void cAnimNode_calcPosition(cAnimNode* self, int id, int idx, sVec4_E
 //100%
 INCLUDE_ASM("object/animnode", cAnimNode_updateIntersectInfo);
 #ifdef SKIP_ASM
-struct sVec4_E698 {
-    float x, y, z, w;
-    sVec4_E698() {}
-} __attribute__((aligned(16)));
 
-struct sDelta_E698 {
-    sVec4_E698 pos;
-    sVec4_E698 rot;
-};
 
-struct sBody_E698 {
-    sVec4_E698 pos;     // 0x00
-    char pad10[0x10];
-    sVec4_E698 vel;     // 0x20
-    sVec4_E698 angVel;  // 0x30
-    char pad40[0x10];
-    int anim;           // 0x50
-    char pad54[0x8];
-    int bone;           // 0x5C
-};
 
 // Takes the body as a second (out) argument, as in multiparticle.cpp.
-extern "C" void cMoveNode_updateIntersectInfo(void* self, sBody_E698* body);
+extern "C" void cMoveNode_updateIntersectInfo(void* self, tIntersectInfo* body);
 extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self);
-extern "C" void cAnimNode_calcPosition_E698(void* self, int id, int idx, sVec4_E698* out) __asm__("cAnimNode_calcPosition");
+extern "C" void cAnimNode_calcPosition_E698(void* self, int id, int idx, t4Vector* out) __asm__("cAnimNode_calcPosition");
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sVec4_E698 vu0Sub_E698(const sVec4_E698& a, const sVec4_E698& b)
+static inline t4Vector vu0Sub_E698(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_E698 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -184,9 +160,9 @@ static inline sVec4_E698 vu0Sub_E698(const sVec4_E698& a, const sVec4_E698& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sVec4_E698 vu0Add_E698(const sVec4_E698& a, const sVec4_E698& b)
+static inline t4Vector vu0Add_E698(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_E698 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -199,9 +175,9 @@ static inline sVec4_E698 vu0Add_E698(const sVec4_E698& a, const sVec4_E698& b)
 }
 
 // PORT: PS2-only VU0 inline asm (cross product, w = 0).
-static inline sVec4_E698 vu0Cross_E698(const sVec4_E698& a, const sVec4_E698& b)
+static inline t4Vector vu0Cross_E698(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_E698 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -216,7 +192,7 @@ static inline sVec4_E698 vu0Cross_E698(const sVec4_E698& a, const sVec4_E698& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a += b).
-static inline void vu0AddEq_E698(sVec4_E698& a, const sVec4_E698& b)
+static inline void vu0AddEq_E698(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %0\n"
@@ -240,21 +216,21 @@ static inline void vu0AddEq_E698(sVec4_E698& a, const sVec4_E698& b)
  *              velocity +0x30, instance +0x50, mesh index +0x5C
  */
 // Applies the attached bone's motion delta to the body: vel += delta.pos + (body.pos - bonePos) x delta.rot; angVel += delta.rot.
-extern "C" void cAnimNode_updateIntersectInfo(cAnimNode* self, sBody_E698* body)
+extern "C" void cAnimNode_updateIntersectInfo(cAnimNode* self, tIntersectInfo* body)
 {
     cMoveNode_updateIntersectInfo(&self->unk_014, body);
-    int bone = body->bone;
+    int bone = body->Mesh;
     if (bone < 0)
         return;
     if (self->MeshVelocityDirty != 0)
         cAnimNode_updateMeshVelocity(self);
-    sVec4_E698 meshPos;
-    cAnimNode_calcPosition_E698(((char*)self), body->anim, bone, &meshPos);
-    sVec4_E698 offset = vu0Sub_E698(body->pos, meshPos);
-    sVec4_E698 rot = ((sDelta_E698*)(char*)self->MeshVelocity)[bone].rot;
-    vu0AddEq_E698(body->vel, vu0Add_E698(((sDelta_E698*)(char*)self->MeshVelocity)[bone].pos,
-                                          vu0Cross_E698(offset, ((sDelta_E698*)(char*)self->MeshVelocity)[bone].rot)));
-    vu0AddEq_E698(body->angVel, rot);
+    t4Vector meshPos;
+    cAnimNode_calcPosition_E698(((char*)self), ((int)body->Inst), bone, &meshPos);
+    t4Vector offset = vu0Sub_E698((*(&body->Ipos)), meshPos);
+    t4Vector rot = (*(&((tMeshVelocity*)(char*)self->MeshVelocity)[bone].AngVel));
+    vu0AddEq_E698((*(&body->Ivel)), vu0Add_E698((*(&((tMeshVelocity*)(char*)self->MeshVelocity)[bone].Vel)),
+                                          vu0Cross_E698(offset, (*(&((tMeshVelocity*)(char*)self->MeshVelocity)[bone].AngVel)))));
+    vu0AddEq_E698((*(&body->Iangvel)), rot);
 }
 #endif
 
@@ -273,10 +249,6 @@ struct sVec3_E798 {
 
 
 
-struct sDelta_E798 {
-    sVec4_E798 pos;
-    sVec4_E798 rot;
-};
 
 
 
@@ -409,8 +381,8 @@ extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
     int k = 0;
     tMeshHeirarchyRecord* ent = info->m_MeshHeirarchy;
     for (int i = 0; i < info->m_iNumMeshes; i++, ent++) {
-        ((sDelta_E798*)(char*)self->MeshVelocity)[i].pos = t4vect_Zero;
-        ((sDelta_E798*)(char*)self->MeshVelocity)[i].rot = t4vect_Zero;
+        (*(sVec4_E798*)&((tMeshVelocity*)(char*)self->MeshVelocity)[i].Vel) = t4vect_Zero;
+        (*(sVec4_E798*)&((tMeshVelocity*)(char*)self->MeshVelocity)[i].AngVel) = t4vect_Zero;
         float d2r = 0.01745329424738884f;
         if (((int)ent->m_MeshAnim) == 0) continue;
         cMeshAnimFrame* node = &self->AnimFrames[k];
@@ -455,12 +427,12 @@ extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
         rotv = vu0MulMat_E798(&(self->AnimMats)[i], rotv);
         if (ent->m_iParentID >= 0) {
             sVec4_E798 parentOffset = vu0Sub_E798(boneE798Pos(((char*)self), i), boneE798Pos(((char*)self), ent->m_iParentID));
-            vu0AddEq_E798(rotv, ((sDelta_E798*)(char*)self->MeshVelocity)[ent->m_iParentID].rot);
-            vu0AddEq_E798(pos, vu0Add_E798(((sDelta_E798*)(char*)self->MeshVelocity)[ent->m_iParentID].pos,
-                                           vu0Cross_E798(parentOffset, ((sDelta_E798*)(char*)self->MeshVelocity)[ent->m_iParentID].rot)));
+            vu0AddEq_E798(rotv, (*(sVec4_E798*)&((tMeshVelocity*)(char*)self->MeshVelocity)[ent->m_iParentID].AngVel));
+            vu0AddEq_E798(pos, vu0Add_E798((*(sVec4_E798*)&((tMeshVelocity*)(char*)self->MeshVelocity)[ent->m_iParentID].Vel),
+                                           vu0Cross_E798(parentOffset, (*(sVec4_E798*)&((tMeshVelocity*)(char*)self->MeshVelocity)[ent->m_iParentID].AngVel))));
         }
-        ((sDelta_E798*)(char*)self->MeshVelocity)[i].pos = pos;
-        vu0AddEq_E798(((sDelta_E798*)(char*)self->MeshVelocity)[i].rot, rotv);
+        (*(sVec4_E798*)&((tMeshVelocity*)(char*)self->MeshVelocity)[i].Vel) = pos;
+        vu0AddEq_E798((*(sVec4_E798*)&((tMeshVelocity*)(char*)self->MeshVelocity)[i].AngVel), rotv);
     }
     self->MeshVelocityDirty = 0;
 }

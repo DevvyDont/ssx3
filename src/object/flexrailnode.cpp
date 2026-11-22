@@ -51,22 +51,18 @@ extern "C" void cFlexRailNode_addSpaceHash(cFlexRailNode* self)
 INCLUDE_ASM("object/flexrailnode", cFlexRailNode_remSpaceHash);
 #ifdef SKIP_ASM
 void operator_delete(int*);
-struct sOctCell_8C48 {
-    void* child[8];
-    void* lists[3];
-};
 
 
-extern "C" void nash_Cell_remnode(sOctCell_8C48* oct, int type, cFlexRailSpaceNode* node, nash_CellKey* key, nash_Octant* cell);
+extern "C" void nash_Cell_remnode(nash_Cell* oct, int type, cFlexRailSpaceNode* node, nash_CellKey* key, nash_Octant* cell);
 
-static inline int octEmpty_8C48(sOctCell_8C48* o)
+static inline int octEmpty_8C48(nash_Cell* o)
 {
-    if (o->child[0] != 0 || o->child[1] != 0 || o->child[2] != 0 || o->child[3] != 0
-        || o->child[4] != 0 || o->child[5] != 0 || o->child[6] != 0 || o->child[7] != 0) {
+    if (((void**)&o->children[0][0][0])[0] != 0 || ((void**)&o->children[0][0][0])[1] != 0 || ((void**)&o->children[0][0][0])[2] != 0 || ((void**)&o->children[0][0][0])[3] != 0
+        || ((void**)&o->children[0][0][0])[4] != 0 || ((void**)&o->children[0][0][0])[5] != 0 || ((void**)&o->children[0][0][0])[6] != 0 || ((void**)&o->children[0][0][0])[7] != 0) {
         return 0;
     }
     for (int i = 0; i < 3; i++) {
-        if (o->lists[i] != 0) {
+        if (((void**)&o->nodesinside[0])[i] != 0) {
             return 0;
         }
     }
@@ -92,10 +88,10 @@ extern "C" void cFlexRailNode_remSpaceHash(cFlexRailNode* self)
     nash_Octant* cellXY = key.y < 0 ? cellX + 2 : cellX;
     nash_Octant* cellXYZ = key.z < 0 ? cellXY + 1 : cellXY;
     nash_Octant* octant = cellXYZ;
-    nash_Cell_remnode(((sOctCell_8C48*)octant->rootcell), 2, node, &key, octant);
-    if (octEmpty_8C48(((sOctCell_8C48*)octant->rootcell))) {
-        operator_delete((int*)((sOctCell_8C48*)octant->rootcell));
-        (*(sOctCell_8C48**)&octant->rootcell) = 0;
+    nash_Cell_remnode((octant->rootcell), 2, node, &key, octant);
+    if (octEmpty_8C48((octant->rootcell))) {
+        operator_delete((int*)(octant->rootcell));
+        (*(nash_Cell**)&octant->rootcell) = 0;
     }
     operator_delete((int*)self->Node);
     self->Node = 0;
@@ -620,20 +616,17 @@ extern "C" void cFloatRailNode_updateIntersectInfo(cFloatRailNode* self, cFloatR
 //100%
 INCLUDE_ASM("object/flexrailnode", cFloatRailNode_updateNodes);
 #ifdef SKIP_ASM
-struct sFrV_98E8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
 extern "C" float cObjectInterface_getUpdateTime();
 extern "C" void cFloatRailNode_getPosition(cFloatRailNode* self, tFloatRailNode* node);
 // View (cFloatRailNode_cFloatRailNode earlier in this unit declares it with its own type).
-extern sFrV_98E8 D_004FF120_98E8 __asm__("t4vect_Zero");
+extern t4Vector D_004FF120_98E8 __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sFrV_98E8 vu0Sub_98E8(const sFrV_98E8& a, const sFrV_98E8& b)
+static inline t4Vector vu0Sub_98E8(const t4Vector& a, const t4Vector& b)
 {
-    sFrV_98E8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -646,9 +639,9 @@ static inline sFrV_98E8 vu0Sub_98E8(const sFrV_98E8& a, const sFrV_98E8& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sFrV_98E8 vu0Scale_98E8(const sFrV_98E8& v, float s)
+static inline t4Vector vu0Scale_98E8(const t4Vector& v, float s)
 {
-    sFrV_98E8 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -663,9 +656,9 @@ static inline sFrV_98E8 vu0Scale_98E8(const sFrV_98E8& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sFrV_98E8 vu0Add_98E8(const sFrV_98E8& a, const sFrV_98E8& b)
+static inline t4Vector vu0Add_98E8(const t4Vector& a, const t4Vector& b)
 {
-    sFrV_98E8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -678,7 +671,7 @@ static inline sFrV_98E8 vu0Add_98E8(const sFrV_98E8& a, const sFrV_98E8& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add-assign).
-static inline void vu0AddEq_98E8(sFrV_98E8& dst, sFrV_98E8 b)
+static inline void vu0AddEq_98E8(t4Vector& dst, t4Vector b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -705,12 +698,12 @@ extern "C" void cFloatRailNode_updateNodes(cFloatRailNode* self)
             cFloatRailNode_getPosition(self, (tFloatRailNode*)n);
         float* k = (float*)(&self->LSpring);
         float ks = -self->LSpring;
-        sFrV_98E8 acc = vu0Add_98E8(vu0Scale_98E8(vu0Sub_98E8((*(sFrV_98E8*)&n->Pos), (*(sFrV_98E8*)&n->OPos)), ks),
-                                    vu0Scale_98E8((*(sFrV_98E8*)&n->Force), k[2]));
-        vu0AddEq_98E8(acc, vu0Scale_98E8((*(sFrV_98E8*)&n->Vel), -self->LDamp));
-        vu0AddEq_98E8((*(sFrV_98E8*)&n->Pos), vu0Scale_98E8((*(sFrV_98E8*)&n->Vel), dt));
-        vu0AddEq_98E8((*(sFrV_98E8*)&n->Vel), vu0Scale_98E8(acc, dt));
-        (*(sFrV_98E8*)&n->Force) = D_004FF120_98E8;
+        t4Vector acc = vu0Add_98E8(vu0Scale_98E8(vu0Sub_98E8((*(&n->Pos)), (*(&n->OPos))), ks),
+                                    vu0Scale_98E8((*(&n->Force)), k[2]));
+        vu0AddEq_98E8(acc, vu0Scale_98E8((*(&n->Vel)), -self->LDamp));
+        vu0AddEq_98E8((*(&n->Pos)), vu0Scale_98E8((*(&n->Vel)), dt));
+        vu0AddEq_98E8((*(&n->Vel)), vu0Scale_98E8(acc, dt));
+        (*(&n->Force)) = D_004FF120_98E8;
     }
 }
 #endif
@@ -1884,12 +1877,9 @@ INCLUDE_ASM("object/flexrailnode", cFlagSet_AddFlag);
 #ifdef SKIP_ASM
 extern "C" void cFlagSet_CreateMesh(void* self, void* mesh);
 
-struct sFlagDef_34B038 {
-    int v[0x58 / 4];
-};
 
 struct sFlagSet_34B038 {
-    sFlagDef_34B038 def;
+    tFlagState def;
     int f58;
     int count;
     char pad60[0x94 - 0x60];
@@ -1906,7 +1896,7 @@ struct sFlagSet_34B038 {
  * @param def  converted flag data
  * @param mesh  instance record of the flag
  */
-extern "C" void cFlagSet_AddFlag(sFlagSet_34B038* self, sFlagDef_34B038* def, tInstanceRecord* mesh)
+extern "C" void cFlagSet_AddFlag(sFlagSet_34B038* self, tFlagState* def, tInstanceRecord* mesh)
 {
     if (self->count == 0) {
         self->def = *def;

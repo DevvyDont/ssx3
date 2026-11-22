@@ -21,10 +21,6 @@ struct sVECam22E3B8 {
     void (*fn)(void*, int, float, float, float);
 };
 
-struct sCam22E3B8 {
-    char pad[0x90];
-    sVECam22E3B8* vt;
-};
 
 class cDisp22E3B8 {
 public:
@@ -44,7 +40,7 @@ public:
 };
 
 struct sCamRef22E3B8 {
-    sCam22E3B8* p;
+    cCamera* p;
     sCamRef22E3B8() {}
     void* operator new[](unsigned int, void* where) { return where; }
 };
@@ -83,9 +79,9 @@ extern "C" cGameViewMan22E3B8* cGameViewMan_cGameViewMan(cGameViewMan22E3B8* sel
     unsigned int i;
     for (i = 0; i < 2; i++) {
         if (i < self->count) {
-            self->cams[i].p = (sCam22E3B8*)cCamera_cCamera(cMemMan_alloc(1200, str_GameCamera, 0x20000000, 0), i);
-            sCam22E3B8* camera = self->cams[i].p;
-            camera->vt[2].fn(vthis(camera, camera->vt[2]), i, 0.7853981852531433f, 30.0f, farClip);
+            self->cams[i].p = (cCamera*)cCamera_cCamera(cMemMan_alloc(1200, str_GameCamera, 0x20000000, 0), i);
+            cCamera* camera = self->cams[i].p;
+            ((sVECam22E3B8*)camera->mVtbl)[2].fn(vthis(camera, ((sVECam22E3B8*)camera->mVtbl)[2]), i, 0.7853981852531433f, 30.0f, farClip);
             cCamera_setCurrentController(self->cams[i].p, 2);
         } else {
             self->cams[i].p = 0;
@@ -125,12 +121,6 @@ public:
     virtual unsigned int GetScreenHeight();
 };
 
-struct sCam22E550 {
-    char pad[0x14];
-    float farClip;      // 0x14
-    char pad18[0xB0 - 0x18];
-    int index;          // 0xB0
-};
 
 struct sSlot22E550 {
     int active;
@@ -188,8 +178,8 @@ extern "C" void cGameViewMan_updateViewState(cGameViewMan* self)
         ((&self->m_ViewRect[0]))[1].Y = 0.0f;
         ((&self->m_ViewRect[0]))[1].W = hw;
         ((&self->m_ViewRect[0]))[1].H = screenHeight;
-        ((sCam22E550**)&self->PlayerCamera[0])[0]->farClip = 20000.0f;
-        ((sCam22E550**)&self->PlayerCamera[0])[1]->farClip = 20000.0f;
+        ((cCamera**)&self->PlayerCamera[0])[0]->MaxFar = 20000.0f;
+        ((cCamera**)&self->PlayerCamera[0])[1]->MaxFar = 20000.0f;
         break;
     }
     default:
@@ -199,11 +189,11 @@ extern "C" void cGameViewMan_updateViewState(cGameViewMan* self)
         self->m_uiCurrentView = 0;
         ((&self->m_ViewRect[0]))[0].X = 0.0f;
         ((&self->m_ViewRect[0]))[0].Y = 0.0f;
-        ((sCam22E550**)&self->PlayerCamera[0])[0]->farClip = 30000.0f;
+        ((cCamera**)&self->PlayerCamera[0])[0]->MaxFar = 30000.0f;
         break;
     }
     if (((int)self->m_uiNumView) == 1) {
-        int idx = ((sCam22E550**)&self->PlayerCamera[0])[1]->index;
+        int idx = ((cCamera**)&self->PlayerCamera[0])[1]->StreamFocusID;
         (*(sSlots22E550**)SSXApp->Game->World)->e[idx].active = 0;
     } else {
         (*(sSlots22E550**)SSXApp->Game->World)->e[0].active = 0;

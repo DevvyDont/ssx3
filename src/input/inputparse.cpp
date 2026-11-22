@@ -1596,12 +1596,7 @@ extern "C" void* cInputMapParser_parseUnaryFunc(cInputMapParser* self, int op)
 //100%
 INCLUDE_ASM("input/inputparse", cInputMapParser_compileStatement);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sEntry_324590 {
-    char pad[0x40];
-    void* code;     // 0x40
-};
-extern "C" sEntry_324590* cInputMapParser_lookupIdentifierName_K(void* self, const char* name) __asm__("cInputMapParser_lookupIdentifierName");
+extern "C" tIdentifier* cInputMapParser_lookupIdentifierName_K(void* self, const char* name) __asm__("cInputMapParser_lookupIdentifierName");
 extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNode* node, int* src, void* code, int cap, int a5);
 extern char D_0048E208[];
 extern char str_opcode_buffer_overflow[];
@@ -1618,14 +1613,14 @@ extern char str_opcode_buffer_overflow[];
 // Compiles one named statement into out (space-terminated); returns the new length or -1.
 extern "C" int cInputMapParser_compileStatement(cInputMapParser* self, const char* name, int* out, int max, int defaultModifier)
 {
-    sEntry_324590* ident = cInputMapParser_lookupIdentifierName_K(self, name);
+    tIdentifier* ident = cInputMapParser_lookupIdentifierName_K(self, name);
     if (ident == 0) {
         cInputMapParser_error(self, D_0048E208, name);
         return -1;
     }
     int sep = ' ';
     int state = 0;
-    int n = cInputMapParser_compileParseNode(self, (tParseNode*)ident->code, &state, out, max, defaultModifier);
+    int n = cInputMapParser_compileParseNode(self, (tParseNode*)((void*)ident->Expression), &state, out, max, defaultModifier);
     max -= n;
     out += n;
     if (max <= 0) {
@@ -2413,12 +2408,6 @@ extern "C" int cInputPreProcessor_copyLine(cInputPreProcessor* self, sParseStrea
 extern "C" unsigned char* FILE_loadsize(const char* name, int* size, int flags);
 extern char D_004A3FA0[];
 
-struct sParseStream_326078 {
-    unsigned char* base;
-    int size;
-    unsigned char* cur;
-    int line;
-};
 
 /**
  * Reads one file into the output, line by line, starting with a "# 1 "file"" tag line.
@@ -2429,18 +2418,18 @@ struct sParseStream_326078 {
 extern "C" void cInputPreProcessor_readFile(cInputPreProcessor* self, int path, int fn)
 {
     char name[160];
-    sParseStream_326078 st;
+    tInputSource st;
     sprintf(name, D_004A3FA0, path, fn);
-    unsigned char* fileData = FILE_loadsize(name, &st.size, 0);
-    st.cur = st.base = fileData;
-    st.line = 1;
+    unsigned char* fileData = FILE_loadsize(name, &st.DataLen, 0);
+    (*(unsigned char**)&st.ReadPtr) = (*(unsigned char**)&st.Data) = fileData;
+    st.LineNumber = 1;
     cInputPreProcessor_readChar(self, (sParseStream*)&st);
     // PORT: the unit declares cInputPreProcessor_writeTagLine's third parameter as int; it receives a char*.
-    cInputPreProcessor_writeTagLine(self, st.line, (int)name);
+    cInputPreProcessor_writeTagLine(self, st.LineNumber, (int)name);
     while (cInputPreProcessor_copyLine(self, (sParseStream*)&st, path, fn)) {
     }
-    if (st.base) {
-        cMemMan_free(st.base);
+    if (st.Data) {
+        cMemMan_free(((unsigned char*)st.Data));
     }
 }
 #endif

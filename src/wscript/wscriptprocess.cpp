@@ -31,13 +31,6 @@ struct sElem_307598 {
     void operator delete[](void* p, unsigned int size);
 };
 
-struct sDef_307598 {
-    int f0;
-    int count;          // 0x4
-    char* elemDefs;     // 0x8
-    int a[3];           // 0xC
-    int b[10];          // 0x18
-};
 
 /**
  * Constructs a world-script process for a world section from its process definition: resolves its scripts and
@@ -56,23 +49,23 @@ struct sDef_307598 {
  * @param def  the 0x40-byte process definition from the world (On Tour tWScriptProcessData)
  * @return @p self
  */
-extern "C" void* cWScriptProcess_cWScriptProcess(cWScriptProcess* self, cWScriptMan* man, int sectionId, sDef_307598* def)
+extern "C" void* cWScriptProcess_cWScriptProcess(cWScriptProcess* self, cWScriptMan* man, int sectionId, tWScriptProcessData* def)
 {
     self->mVtbl = (void**)cWScriptProcess_vtbl;
     MEM_fill(self->ProcessScriptCode, 0, 0xC);
     self->SectionId = (unsigned int)sectionId;
     self->Manager = (cWScriptMan*)man;
-    self->ProcessId = (unsigned int)def->f0;
+    self->ProcessId = (unsigned int)((int)def->ProcessId);
     self->Local = 0;
     for (int i = 0; i < 3; i++)
-        self->ProcessScriptCode[i] = (char*)cWScriptMan_getScriptCode_2(self->Manager, def->a[i]);
+        self->ProcessScriptCode[i] = (char*)cWScriptMan_getScriptCode_2(self->Manager, ((int*)&def->ProcessScriptId[0])[i]);
     for (int j = 0; j < 10; j++)
-        self->EventScriptCode[j] = (char*)cWScriptMan_getScriptCode_2(self->Manager, def->b[j]);
-    int n = def->count;
+        self->EventScriptCode[j] = (char*)cWScriptMan_getScriptCode_2(self->Manager, ((int*)&def->EventScriptId[0])[j]);
+    int n = def->NumTasks;
     self->NumTasks = n;
     sElem_307598** pv = (sElem_307598**)&self->Tasks;
     *pv = new (str_WScriptTasks, 0x20000000, 0) sElem_307598[n];
-    char* ed = def->elemDefs;
+    char* ed = ((char*)def->unk_008);
     for (int k = 0; k < self->NumTasks; k++, ed += 0x38)
         cWScriptTask_initTask((cWScriptTask*)&((sElem_307598*)self->Tasks)[k], self, (cWScriptTask_initTask_sDef*)ed);
     self->State = 0;

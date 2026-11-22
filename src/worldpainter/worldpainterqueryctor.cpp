@@ -1,4 +1,5 @@
 #include "common.h"
+#include "worldpainter/worldpainterman.h"
 #include "vtable.h"
 #include "worldpainter/worldpainterquery.h"
 #include "main/game.h"
@@ -203,17 +204,11 @@ struct sLayer_0778 {
     void* cells[1];         // 0x8
 };
 
-struct sEntry_0778 {
-    short type;
-    short pad;
-    int f4;
-    sLayer_0778* layer;     // 0x8
-};
 
 
-static inline int valid_0778(sEntry_0778* e)
+static inline int valid_0778(cWorldPainterSection* e)
 {
-    return e->type == 3 && e->layer != 0 && e->layer->count > 0;
+    return e->m_iState == 3 && ((sLayer_0778*)e->m_pWPHeader) != 0 && ((sLayer_0778*)e->m_pWPHeader)->count > 0;
 }
 
 static inline void end_0778(tWPInGameData* o)
@@ -257,9 +252,9 @@ extern "C" tWPInGameData* cWorldPainterQuery_queryPosition(cWorldPainterQuery* s
     int idx = cWorldPainterMan_m_iCurrSection;
     self->m_x = x;
     self->m_y = z;
-    while (valid_0778(&(*(sEntry_0778**)(map + 4))[idx])) {
-        sEntry_0778* entry = (sEntry_0778*)(*(char**)(map + 4) + idx * (int)sizeof(sEntry_0778));
-        void* cell = entry->layer->cells[*(unsigned char*)&(*(unsigned int*)&self->m_regionType)];
+    while (valid_0778(&(*(cWorldPainterSection**)(map + 4))[idx])) {
+        cWorldPainterSection* entry = (cWorldPainterSection*)(*(char**)(map + 4) + idx * (int)sizeof(cWorldPainterSection));
+        void* cell = ((sLayer_0778*)entry->m_pWPHeader)->cells[*(unsigned char*)&(*(unsigned int*)&self->m_regionType)];
         if (cell == 0) {
             if (first) {
                 end_0778((self->m_data));

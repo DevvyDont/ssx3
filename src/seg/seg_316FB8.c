@@ -2668,16 +2668,6 @@ void vsprintf(char *buf, int fmt, char *ap) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", vsnprintf);
 #ifdef SKIP_ASM
-struct F18720 {
-    char *p;
-    int r;
-    unsigned w;
-    short flags, file;
-    char *base;
-    unsigned size;
-    int pad[0x54 / 4 - 6];
-    int ent;
-};
 extern int D_00454944;
 /**
  * Formats a variable argument list into a buffer of limited size and returns the count, or -1 when it did not fit.
@@ -2695,17 +2685,17 @@ extern int D_00454944;
  * @return the character count, or -1 when it is larger than n
  */
 int vsnprintf(char *buf, unsigned n, int fmt, char *ap) {
-    struct F18720 strStream;
+    struct __sFILE strStream;
     int charCount;
-    strStream.p = buf;
-    strStream.w = n;
-    strStream.flags = 520;
-    strStream.base = buf;
-    strStream.size = n;
-    strStream.ent = D_00454944;
+    (*(char**)&strStream._p) = buf;
+    strStream._w = n;
+    strStream._flags = 520;
+    (*(char**)&strStream._bf) = buf;
+    strStream._bf._size = n;
+    (*(int*)&strStream._data) = D_00454944;
     charCount = vfprintf((int)&strStream, fmt, ap);
     if (n < (unsigned)charCount) charCount = -1;
-    *strStream.p = 0;
+    *((char*)strStream._p) = 0;
     return charCount;
 }
 #endif
@@ -6363,15 +6353,6 @@ fflush_FE30 (register struct __sFILE_FE30 * fp)
 //100%
 INCLUDE_ASM("seg/seg_316FB8", std);
 #ifdef SKIP_ASM
-struct F41FF40 {
-    int p, r, w;
-    short flags, file;
-    int base, size_, lbf;
-    int cookie;
-    void *rd, *wr, *sk, *cl;
-    int pad[0x54 / 4 - 12];
-    int ent;
-};
 extern long __sread(), __swrite(), __sseek();
 /**
  * Initialises one of the three standard FILE structs.
@@ -6386,20 +6367,20 @@ extern long __sread(), __swrite(), __sseek();
  * @param file    the descriptor
  * @param ent     the reentrancy struct
  */
-void std(struct F41FF40 *stream, short flags, short file, int ent) {
-    stream->p = 0;
-    stream->r = 0;
-    stream->w = 0;
-    stream->flags = flags;
-    stream->file = file;
-    stream->base = 0;
-    stream->lbf = 0;
-    stream->cookie = (int)stream;
-    stream->rd = __sread;
-    stream->wr = __swrite;
-    stream->sk = __sseek;
-    stream->cl = (void *)__sclose;
-    stream->ent = ent;
+void std(struct __sFILE *stream, short flags, short file, int ent) {
+    (*(int*)&stream->_p) = 0;
+    stream->_r = 0;
+    stream->_w = 0;
+    stream->_flags = flags;
+    stream->_file = file;
+    (*(int*)&stream->_bf) = 0;
+    stream->_lbfsize = 0;
+    (*(int*)&stream->_cookie) = (int)stream;
+    (*(void**)&stream->_read) = __sread;
+    (*(void**)&stream->_write) = __swrite;
+    (*(void**)&stream->_seek) = __sseek;
+    (*(void**)&stream->_close) = (void *)__sclose;
+    (*(int*)&stream->_data) = ent;
 }
 #endif
 

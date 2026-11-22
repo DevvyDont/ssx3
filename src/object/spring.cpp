@@ -24,17 +24,6 @@ struct sSpNode_53EF0 {
     int pad44[3];           // 0x44
 };
 
-struct sSpring_53EF0 {
-    int n;                  // 0x00
-    float k;                // 0x04
-    float damp;             // 0x08
-    float c;                // 0x0C
-    float e;                // 0x10
-    int pad14[2];           // 0x14
-    float rest;             // 0x1C
-    float scale;            // 0x20
-    sSpNode_53EF0* nodes;   // 0x24
-};
 
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -44,13 +33,13 @@ extern sSpVec_53EF0 D_004FF120_53EF0 __asm__("t4vect_Zero");
  * Allocates the spring's chain of nodes ("SpringNodes") with zero position, velocity, force, angle and
  * torque.
  */
-extern "C" void cSpring_setupNodes(sSpring_53EF0* self)
+extern "C" void cSpring_setupNodes(cSpring* self)
 {
     int i;
-    sSpNode_53EF0** dst = &self->nodes;
-    *dst = new (str_SpringNodes, 0x20000000, 0) sSpNode_53EF0[self->n];
-    sSpNode_53EF0* nd = self->nodes;
-    for (i = 0; i < self->n; i++, nd++) {
+    sSpNode_53EF0** dst = &(*(sSpNode_53EF0**)&self->Nodes);
+    *dst = new (str_SpringNodes, 0x20000000, 0) sSpNode_53EF0[self->Width];
+    sSpNode_53EF0* nd = ((sSpNode_53EF0*)self->Nodes);
+    for (i = 0; i < self->Width; i++, nd++) {
         nd->p = D_004FF120_53EF0;
         nd->v = D_004FF120_53EF0;
         nd->f = D_004FF120_53EF0;
@@ -70,28 +59,7 @@ struct sSpVec_53FC0 {
     sSpVec_53FC0(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-struct sSpNode_53FC0 {
-    sSpVec_53FC0 p;         // 0x00
-    sSpVec_53FC0 v;         // 0x10
-    float a;                // 0x20
-    float av;               // 0x24
-    int pad28[2];           // 0x28
-    sSpVec_53FC0 f;         // 0x30
-    float t;                // 0x40
-    int pad44[3];           // 0x44
-};
 
-struct sSpring_53FC0 {
-    int n;                  // 0x00
-    float k;                // 0x04
-    float damp;             // 0x08
-    float c;                // 0x0C
-    float e;                // 0x10
-    int pad14[2];           // 0x14
-    float rest;             // 0x1C
-    float scale;            // 0x20
-    sSpNode_53FC0* nodes;   // 0x24
-};
 
 extern sSpVec_53FC0 D_004FF120_sp __asm__("t4vect_Zero");
 
@@ -234,44 +202,44 @@ static inline float spLength_53FC0(const sSpVec_53FC0& v)
  * The end nodes stay fixed. Velocities are solved semi-implicitly with each node's neighbours for stability;
  * gravity is -980 on z. The applied forces and torques are cleared afterwards.
  */
-extern "C" void cSpring_update(sSpring_53FC0* self)
+extern "C" void cSpring_update(cSpring* self)
 {
     sSpVec_53FC0 gravity(0.0f, 0.0f, -980.0f, 0.0f);
     float dt = 1.0f / (float)cAppMan_TheAppMan->TimerHz;
     sSpVec_53FC0 forces[16];
     float torques[16];
-    forces[0] = forces[self->n - 1] = D_004FF120_sp;
-    torques[0] = torques[self->n - 1] = 0.0f;
-    for (int i = 1; i < self->n - 1; i++) {
-        sSpVec_53FC0 toPrev = spSub_53FC0(self->nodes[i - 1].p, self->nodes[i].p);
-        sSpVec_53FC0 toNext = spSub_53FC0(self->nodes[i + 1].p, self->nodes[i].p);
-        spScaleEq_53FC0(toPrev, 1.0f - self->rest * self->scale / spLength_53FC0(toPrev));
-        spScaleEq_53FC0(toNext, 1.0f - self->rest * self->scale / spLength_53FC0(toNext));
-        forces[i] = spScaleF_53FC0(self->k, spAdd_53FC0(toPrev, toNext));
-        spAddEq_53FC0(forces[i], spScaleF_53FC0(dt * self->k, spSub_53FC0(spAdd_53FC0(self->nodes[i - 1].v, self->nodes[i + 1].v), spScale_53FC0(self->nodes[i].v, 2.0f))));
+    forces[0] = forces[self->Width - 1] = D_004FF120_sp;
+    torques[0] = torques[self->Width - 1] = 0.0f;
+    for (int i = 1; i < self->Width - 1; i++) {
+        sSpVec_53FC0 toPrev = spSub_53FC0((*(sSpVec_53FC0*)&self->Nodes[i - 1].P), (*(sSpVec_53FC0*)&self->Nodes[i].P));
+        sSpVec_53FC0 toNext = spSub_53FC0((*(sSpVec_53FC0*)&self->Nodes[i + 1].P), (*(sSpVec_53FC0*)&self->Nodes[i].P));
+        spScaleEq_53FC0(toPrev, 1.0f - self->Length * self->SegLen / spLength_53FC0(toPrev));
+        spScaleEq_53FC0(toNext, 1.0f - self->Length * self->SegLen / spLength_53FC0(toNext));
+        forces[i] = spScaleF_53FC0(self->LSpring, spAdd_53FC0(toPrev, toNext));
+        spAddEq_53FC0(forces[i], spScaleF_53FC0(dt * self->LSpring, spSub_53FC0(spAdd_53FC0((*(sSpVec_53FC0*)&self->Nodes[i - 1].V), (*(sSpVec_53FC0*)&self->Nodes[i + 1].V)), spScale_53FC0((*(sSpVec_53FC0*)&self->Nodes[i].V), 2.0f))));
         // PORT: pointer arithmetic in int (only form that gives the target's index-first addu and
         // signed -0x30 offsets; g++ 2.95 turns nd[-1] into an unsigned 0xFFFFFFB0 offset).
-        sSpNode_53FC0* nd = (sSpNode_53FC0*)(i * 0x50 + (int)self->nodes);
-        torques[i] = self->c * (((sSpNode_53FC0*)((int)nd - 0x50))->a - nd->a + nd[1].a - nd->a);
-        torques[i] += dt * self->c * (((sSpNode_53FC0*)((int)nd - 0x50))->av + nd[1].av - nd->av * 2.0f);
-        spAddEq_53FC0(forces[i], spAdd_53FC0(spScale_53FC0(nd->v, -self->damp), gravity));
-        torques[i] += -self->e * self->nodes[i].av;
+        tSpringNode* nd = (tSpringNode*)(i * 0x50 + (int)self->Nodes);
+        torques[i] = self->ASpring * (((tSpringNode*)((int)nd - 0x50))->O - nd->O + nd[1].O - nd->O);
+        torques[i] += dt * self->ASpring * (((tSpringNode*)((int)nd - 0x50))->W + nd[1].W - nd->W * 2.0f);
+        spAddEq_53FC0(forces[i], spAdd_53FC0(spScale_53FC0((*(sSpVec_53FC0*)&nd->V), -self->LDamp), gravity));
+        torques[i] += -self->ADamp * self->Nodes[i].W;
     }
-    for (int i = 1; i < self->n - 1; i++) {
-        spAddEq_53FC0(forces[i], self->nodes[i].f);
-        torques[i] += self->nodes[i].t;
+    for (int i = 1; i < self->Width - 1; i++) {
+        spAddEq_53FC0(forces[i], (*(sSpVec_53FC0*)&self->Nodes[i].F));
+        torques[i] += self->Nodes[i].T;
     }
-    for (int i = 1; i < self->n - 1; i++) {
-        sSpVec_53FC0 deltaVel = spAdd_53FC0(spScale_53FC0(forces[i], dt), spDiv_53FC0(spScaleF_53FC0(dt * dt * dt * self->k, spAdd_53FC0(forces[i - 1], forces[i + 1])), dt * dt * 2.0f * self->k + 1.0f));
-        deltaVel = spDiv_53FC0(deltaVel, dt * dt * 2.0f * self->k + 1.0f);
-        spAddEq_53FC0(self->nodes[i].v, deltaVel);
-        spAddEq_53FC0(self->nodes[i].p, spScale_53FC0(self->nodes[i].v, dt));
-        self->nodes[i].av += (dt * torques[i] + dt * dt * dt * self->c * (torques[i - 1] + torques[i + 1]) / (dt * dt * 2.0f * self->c + 1.0f)) / (dt * dt * 2.0f * self->c + 1.0f);
-        self->nodes[i].a += dt * self->nodes[i].av;
+    for (int i = 1; i < self->Width - 1; i++) {
+        sSpVec_53FC0 deltaVel = spAdd_53FC0(spScale_53FC0(forces[i], dt), spDiv_53FC0(spScaleF_53FC0(dt * dt * dt * self->LSpring, spAdd_53FC0(forces[i - 1], forces[i + 1])), dt * dt * 2.0f * self->LSpring + 1.0f));
+        deltaVel = spDiv_53FC0(deltaVel, dt * dt * 2.0f * self->LSpring + 1.0f);
+        spAddEq_53FC0((*(sSpVec_53FC0*)&self->Nodes[i].V), deltaVel);
+        spAddEq_53FC0((*(sSpVec_53FC0*)&self->Nodes[i].P), spScale_53FC0((*(sSpVec_53FC0*)&self->Nodes[i].V), dt));
+        self->Nodes[i].W += (dt * torques[i] + dt * dt * dt * self->ASpring * (torques[i - 1] + torques[i + 1]) / (dt * dt * 2.0f * self->ASpring + 1.0f)) / (dt * dt * 2.0f * self->ASpring + 1.0f);
+        self->Nodes[i].O += dt * self->Nodes[i].W;
     }
-    for (int i = 0; i < self->n; i++) {
-        self->nodes[i].f = D_004FF120_sp;
-        self->nodes[i].t = 0.0f;
+    for (int i = 0; i < self->Width; i++) {
+        (*(sSpVec_53FC0*)&self->Nodes[i].F) = D_004FF120_sp;
+        self->Nodes[i].T = 0.0f;
     }
 }
 #endif

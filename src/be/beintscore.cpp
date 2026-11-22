@@ -176,12 +176,7 @@ struct sScore_154AB8 {
     sScoreSlot_154AB8 slots[2]; // 0x20
 };
 
-struct sHighScore_154AB8 {
-    unsigned int value;
-    int charID;
-    char name[0xC];
-};
-sHighScore_154AB8* cBELibrary_getHighScoreTable_154AB8(int event, int mode) __asm__("cBELibrary_getHighScoreTable");
+tBEHighScore* cBELibrary_getHighScoreTable_154AB8(int event, int mode) __asm__("cBELibrary_getHighScoreTable");
 
 struct sRaceSettings_154AB8 {
     char pad_0x00[0x40];
@@ -248,20 +243,20 @@ extern "C" void cBEScoreInterface_processEventRiderStats(sScore_154AB8* self, in
         score = (int)(score * (1.0f / 60.0f));
     }
     if (cBEScoreInterface_isEligibleForHighScore((cBEScoreInterface*)self, profile)) {
-        sHighScore_154AB8* highScores = cBELibrary_getHighScoreTable_154AB8(event, mode);
+        tBEHighScore* highScores = cBELibrary_getHighScoreTable_154AB8(event, mode);
         if (highScores != 0) {
             for (int i = 0; i < 5; i++) {
                 int better;
                 if (timed)
-                    better = highScores[i].value < score;
+                    better = highScores[i].uiHighScore < score;
                 else
-                    better = score < highScores[i].value;
+                    better = score < highScores[i].uiHighScore;
                 if (!better) {
                     for (int j = 4; j > i; j--)
                         highScores[j] = highScores[j - 1];
-                    highScores[i].charID = charID;
-                    highScores[i].value = score;
-                    strcpy(highScores[i].name, cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), rider));
+                    highScores[i].cCharacter = charID;
+                    highScores[i].uiHighScore = score;
+                    strcpy(highScores[i].strUserName, cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), rider));
                     self->rank[profile] = i;
                     if (cBENewRaceInterface_newRace.iNumberHumans >= 2) {
                         if (self->rank[1 - profile] >= i) {
@@ -377,11 +372,7 @@ extern "C" void cBEScoreInterface_processRiderRanking(cBEScoreInterface* self, i
 //100%
 INCLUDE_ASM("be/beintscore", func_001550E8);
 #ifdef SKIP_ASM
-struct sScoreEntry_001550E8 {
-    int value;
-    char pad[0x10];
-};
-extern "C" sScoreEntry_001550E8* cBELibrary_getHighScoreTable(int a, int b);
+extern "C" tBEHighScore* cBELibrary_getHighScoreTable(int a, int b);
 
 /**
  * Returns the score of one entry in an event's high-score table.
@@ -395,9 +386,9 @@ extern "C" sScoreEntry_001550E8* cBELibrary_getHighScoreTable(int a, int b);
  */
 extern "C" int func_001550E8(cBEScoreInterface* self, int i, int event, int mode)
 {
-    sScoreEntry_001550E8* highScores = cBELibrary_getHighScoreTable(event, mode);
+    tBEHighScore* highScores = cBELibrary_getHighScoreTable(event, mode);
     if (highScores != 0) {
-        return highScores[i].value;
+        return ((int)highScores[i].uiHighScore);
     }
     return 0;
 }
@@ -423,10 +414,10 @@ extern int D_005305F0[];
 extern "C" int func_00155130(cBEScoreInterface* self, int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    sScoreEntry_001550E8* highScores = cBELibrary_getHighScoreTable(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
+    tBEHighScore* highScores = cBELibrary_getHighScoreTable(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
     if (highScores != 0)
     {
-        return highScores[i].value;
+        return ((int)highScores[i].uiHighScore);
     }
     return 0;
 }
@@ -435,12 +426,6 @@ extern "C" int func_00155130(cBEScoreInterface* self, int i)
 //100%
 INCLUDE_ASM("be/beintscore", func_00155190);
 #ifdef SKIP_ASM
-struct sScoreEntryB_00155190
-{
-    int value;
-    int idx;
-    char pad[0xC];
-};
 struct sScoreSlot_00155190
 {
     char data[0x88];
@@ -461,22 +446,16 @@ extern void* D_004A1244;
 extern "C" void* func_00155190(cBEScoreInterface* self, int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    sScoreEntryB_00155190* highScores = (sScoreEntryB_00155190*)cBELibrary_getHighScoreTable(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
+    tBEHighScore* highScores = cBELibrary_getHighScoreTable(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
     if (highScores == 0)
         return D_004A1244;
-    return &D_00530990[highScores[i].idx];
+    return &D_00530990[highScores[i].cCharacter];
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintscore", func_00155208);
 #ifdef SKIP_ASM
-struct sScoreEntryB_00155208
-{
-    int value;
-    int idx;
-    char f8[0xC];
-};
 extern void* D_004A1244;
 
 /**
@@ -490,9 +469,9 @@ extern void* D_004A1244;
 extern "C" void* func_00155208(cBEScoreInterface* self, int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    sScoreEntryB_00155208* highScores = (sScoreEntryB_00155208*)cBELibrary_getHighScoreTable(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
+    tBEHighScore* highScores = cBELibrary_getHighScoreTable(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
     if (highScores != 0)
-        return highScores[i].f8;
+        return highScores[i].strUserName;
     return D_004A1244;
 }
 #endif

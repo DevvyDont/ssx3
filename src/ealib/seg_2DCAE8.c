@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ealib/hlafile.h"
 #include "ealib/filesys.h"
 #include "ealib/hlsfile.h"
 
@@ -1405,7 +1406,6 @@ extern int f_E800_D438() __asm__("reservehandle");
 extern void f_E668_D438(int *) __asm__("iFILE_perror");
 extern char *f_strncpy_D438(char *, char *, int) __asm__("strncpy");
 extern void f_Exec_D438(int *) __asm__("iFILESYS_ExecCommand");
-struct R_D438 { unsigned flags; int pad4, pad8; int wC; int w10; int w14; int w18; int pad1C, pad20; char *w24; };
 
 /**
  * Queues a file-exists operation (type 8) for a path; returns its handle.
@@ -1419,19 +1419,19 @@ struct R_D438 { unsigned flags; int pad4, pad8; int wC; int w10; int w14; int w1
  * @return the operation handle
  */
 int FILESYS_exists(char *fileName, int priority, int userData) {
-    struct R_D438 *fileOp = (struct R_D438 *)f_E670_D438();
-    fileOp->w14 = userData;
-    fileOp->w10 = priority;
-    fileOp->flags = (fileOp->flags & 0xFF0FFFFF) | 0x800000;
-    fileOp->w18 = 1;
-    fileOp->w24 = (char *)f_E800_D438();
-    if (fileOp->w24 == 0) {
-        fileOp->wC = 2;
+    struct FILEOPERATION_def *fileOp = (struct FILEOPERATION_def *)f_E670_D438();
+    (*(int*)&fileOp->userdata) = userData;
+    fileOp->priority = priority;
+    (*(unsigned int*)&fileOp->op) = ((*(unsigned int*)&fileOp->op) & 0xFF0FFFFF) | 0x800000;
+    fileOp->value = 1;
+    (*(char**)&fileOp->handle) = (char *)f_E800_D438();
+    if (((char*)fileOp->handle) == 0) {
+        fileOp->error = 2;
         f_E668_D438((int *)fileOp);
     }
-    f_strncpy_D438(fileOp->w24 + 0x10, fileName, 0x100);
+    f_strncpy_D438(((char*)fileOp->handle) + 0x10, fileName, 0x100);
     f_Exec_D438((int *)fileOp);
-    return fileOp->flags;
+    return (*(unsigned int*)&fileOp->op);
 }
 #endif
 
@@ -3334,7 +3334,6 @@ extern void f_EF40_F690(void *) __asm__("newrequestid");
 extern int f_D4E8_F690(int, int, int, void *) __asm__("FILESYS_open");
 extern void f_CF70_F690(int, void *) __asm__("FILESYS_callbackop");
 extern char f_F2C0_F690[] __asm__("loadfileopencallback");
-struct O_F690 { int w0, w4, w8, wC, w10, w14, w18; volatile int w1C; int w20, w24, w28, w2C; };
 
 /**
  * Starts loading a whole file into newly allocated memory; returns the request id (0 on failure).
@@ -3347,21 +3346,21 @@ struct O_F690 { int w0, w4, w8, wC, w10, w14, w18; volatile int w1C; int w20, w2
  * @return the request id, or 0
  */
 int ASYNCFILE_load(int name, int memtype) {
-    struct O_F690 *req = (struct O_F690 *)f_EED8_F690(D_00519BF8_F690);
+    struct REQUESTSTRUCTtag *req = (struct REQUESTSTRUCTtag *)f_EED8_F690(D_00519BF8_F690);
     if (req != 0) {
         f_EF40_F690(req);
-        req->w28 = memtype;
-        req->w8 = 0;
-        req->wC = 0;
-        req->w10 = 0;
-        req->w18 = 0;
-        req->w24 = 0;
-        req->w2C = 0;
-        req->w14 = 1;
-        req->w1C = f_D4E8_F690(name, 1, 100, req);
-        if (req->w1C != 0) {
-            f_CF70_F690(req->w1C, f_F2C0_F690);
-            return req->w0;
+        req->readsize = memtype;
+        req->bytesread = 0;
+        req->releaseflag = 0;
+        req->cancelflag = 0;
+        (*(int*)&req->callback) = 0;
+        req->foffset = 0;
+        (*(int*)&req->destaddr) = 0;
+        (*(int*)&req->loadaddr) = 1;
+        req->fop = f_D4E8_F690(name, 1, 100, req);
+        if (req->fop != 0) {
+            f_CF70_F690(req->fop, f_F2C0_F690);
+            return req->id;
         }
         return 0;
     }
@@ -3375,7 +3374,6 @@ INCLUDE_ASM("ealib/seg_2DCAE8", ASYNCFILE_loadat);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void loadfileopencallback_F748(void) __asm__("loadfileopencallback");
 extern int D_00519BF8_F748[] __asm__("freequeue");
-struct Q_F748 { int w0; int p1[1]; int f8; int fc; int f10; int f14; int f18; volatile int h; int p2[1]; int f24; int f28; int f2c; };
 
 /**
  * Starts loading a whole file asynchronously into a caller buffer; returns the request id, or 0 when no request is free
@@ -3390,21 +3388,21 @@ struct Q_F748 { int w0; int p1[1]; int f8; int fc; int f10; int f14; int f18; vo
  * @return the request id, or 0
  */
 int ASYNCFILE_loadat(int fileName, int address, int maxSize) {
-    struct Q_F748 *request = (struct Q_F748 *)queuefetch((void **)D_00519BF8_F748);
+    struct REQUESTSTRUCTtag *request = (struct REQUESTSTRUCTtag *)queuefetch((void **)D_00519BF8_F748);
     if (request == 0) return 0;
     newrequestid(request);
-    request->f28 = maxSize;
-    request->f2c = address;
-    request->f8 = 0;
-    request->fc = 0;
-    request->f10 = 0;
-    request->f14 = 0;
-    request->f18 = 0;
-    request->f24 = 0;
-    request->h = FILESYS_open(fileName, 1, 100, request);
-    if (request->h == 0) return 0;
-    FILESYS_callbackop(request->h, loadfileopencallback_F748);
-    return request->w0;
+    request->readsize = maxSize;
+    (*(int*)&request->destaddr) = address;
+    request->bytesread = 0;
+    request->releaseflag = 0;
+    request->cancelflag = 0;
+    (*(int*)&request->loadaddr) = 0;
+    (*(int*)&request->callback) = 0;
+    request->foffset = 0;
+    request->fop = FILESYS_open(fileName, 1, 100, request);
+    if (request->fop == 0) return 0;
+    FILESYS_callbackop(request->fop, loadfileopencallback_F748);
+    return request->id;
 }
 #endif
 

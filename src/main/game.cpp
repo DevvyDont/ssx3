@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "camera/camera.h"
 #include "visualfx/lensfx.h"
 #include "world/worldcache.h"
 #include "main/gamerender.h"
@@ -515,11 +516,6 @@ struct sVE_C830 {
     void (*fn)(void*, float, float, float, float, int);
 };
 
-struct sCam_C830 {
-    float x, y, z;
-    char padC[0x40 - 0xC];
-    char tex[1];
-};
 
 struct sView_C830 {
     float x, y, w, h;
@@ -527,7 +523,7 @@ struct sView_C830 {
 
 struct sViews_C830 {
     int f0;
-    sCam_C830* cams[3];
+    cCamera* cams[3];
     unsigned int count;
     int cur;
     sView_C830 views[1];
@@ -544,20 +540,6 @@ struct sFont_C830 {
     void SetScale(float sx, float sy) { f38 = f30 * sx; f3C = f34 * sy; }
 };
 
-struct sGame_C830 {
-    char pad0[0x24];
-    sFont_C830* font;       // 0x24
-    char pad28[0x48 - 0x28];
-    void* f48;              // 0x48
-    char pad4C[0x84 - 0x4C];
-    sViews_C830* views;     // 0x84
-    char pad88[0x94 - 0x88];
-    void* hudTimer;         // 0x94
-    char pad98[0xA4 - 0x98];
-    void* fA4;              // 0xA4
-    char padA8[0xAC - 0xA8];
-    int frames;             // 0xAC
-};
 
 extern char gBucketMan[4];
 extern char t4mat_Identity[];
@@ -586,16 +568,16 @@ extern "C" void cWorldTriggerManager_Update(void* p);
  * cWorldTriggerManager_Update(gWorldTriggerManager) and zeroes mUpdateTick (+0xAC). cGame_render calls it at the end of each of its
  * three render paths.
  */
-extern "C" void func_0022C830(sGame_C830* self)
+extern "C" void func_0022C830(cGame* self)
 {
     unsigned int i = 0;
-    if (self->views->count != 0) {
+    if (((sViews_C830*)self->ViewMan)->count != 0) {
     do {
-        self->views->cur = i;
-        sCam_C830* cam = self->views->cams[self->views->cur];
-        ((cGfx_C830*)GrMan)->SetViewportWindow1(&self->views->views[i], 1);
-        ((cGfx_C830*)GrMan)->SetViewportPerspective(cam->x, cam->y, cam->z);
-        ((cGfx_C830*)GrMan)->SetView(cam->tex);
+        ((sViews_C830*)self->ViewMan)->cur = i;
+        cCamera* cam = ((sViews_C830*)self->ViewMan)->cams[((sViews_C830*)self->ViewMan)->cur];
+        ((cGfx_C830*)GrMan)->SetViewportWindow1(&((sViews_C830*)self->ViewMan)->views[i], 1);
+        ((cGfx_C830*)GrMan)->SetViewportPerspective(cam->View, cam->Near, cam->Far);
+        ((cGfx_C830*)GrMan)->SetView(((char*)&cam->CamMat));
         *(short*)((char*)((cGfx_C830*)GrMan)->stateTop + 0x12) = ((cGfx_C830*)GrMan)->GetLayer();
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         Set1_C830((cGfx_C830*)ps2GraphicsMan, 0xF80, 7, 7);
@@ -606,7 +588,7 @@ extern "C" void func_0022C830(sGame_C830* self)
         Set2_C830((cGfx_C830*)ps2GraphicsMan, 0x3E0, 5, 4);
         cBucketMan_renderBucket(gBucketMan, 3);
         i++;
-    } while (i < self->views->count);
+    } while (i < ((sViews_C830*)self->ViewMan)->count);
     }
     {
         sVE_C830* vt = (sVE_C830*)GrMan->mVtbl;
@@ -619,16 +601,16 @@ extern "C" void func_0022C830(sGame_C830* self)
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     Set2_C830((cGfx_C830*)ps2GraphicsMan, 0x3E0, 5, 0x18);
     Set1_C830((cGfx_C830*)ps2GraphicsMan, 0x7C, 2, 5);
-    self->font->SetScale(0.8f, 0.8f);
-    self->font->scale = sV2_C830(2.0f, 2.0f);
-    self->font->color = sVec4_C830(1.0f, 0.8f, 0.8f, 0.0f);
+    ((sFont_C830*)self->DebugFont)->SetScale(0.8f, 0.8f);
+    ((sFont_C830*)self->DebugFont)->scale = sV2_C830(2.0f, 2.0f);
+    ((sFont_C830*)self->DebugFont)->color = sVec4_C830(1.0f, 0.8f, 0.8f, 0.0f);
     cSSXScriptEngine_Render(ScriptEngine);
-    cUIEngine_render2D(self->f48);
-    cBXLoadIndicator_Render(self->hudTimer);
-    if (cMenuSys_isActive(self->fA4) != 0) {
-        cMenuSys_render(self->fA4);
-        self->font->scale = sV2_C830(2.0f, 2.0f);
-        self->font->color = sVec4_C830(1.0f, 0.8f, 0.8f, 0.0f);
+    cUIEngine_render2D(((void*)self->UI));
+    cBXLoadIndicator_Render(((void*)self->LoadIndicator));
+    if (cMenuSys_isActive(((void*)self->MenuSys)) != 0) {
+        cMenuSys_render(((void*)self->MenuSys));
+        ((sFont_C830*)self->DebugFont)->scale = sV2_C830(2.0f, 2.0f);
+        ((sFont_C830*)self->DebugFont)->color = sVec4_C830(1.0f, 0.8f, 0.8f, 0.0f);
     }
     ((cGfx_C830*)GrMan)->SetScreenClearColour(sV3_C830(0.0f, 0.0f, 0.0f));
     // Storing through a pointer keeps the store ahead of the reload of GrMan.
@@ -637,9 +619,9 @@ extern "C" void func_0022C830(sGame_C830* self)
     *depthFogEnable = 0;
     ((cGfx_C830*)GrMan)->DrawFrame();
     *depthFogEnable = saved;
-    cSSXAudio_Update(gSSXAudio, 1, (float)self->frames * (1.0f / 60.0f));
+    cSSXAudio_Update(gSSXAudio, 1, (float)self->mUpdateTick * (1.0f / 60.0f));
     cWorldTriggerManager_Update(gWorldTriggerManager);
-    self->frames = 0;
+    self->mUpdateTick = 0;
 }
 #endif
 

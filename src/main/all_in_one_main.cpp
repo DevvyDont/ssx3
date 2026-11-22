@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fe/festatereadmessagepopup.h"
+#include "fe/festatenetmessenger.h"
 #include "online/lobbyman.h"
 #include "vtable.h"
 #include "render/font.h"
@@ -181,14 +183,9 @@ struct Menu_B418 {
     char item5C4[0x1C];             // 0x5C4
 };
 
-struct Src_B418 {
-    char pad0[0x6C];
-    int count;          // 0x6C
-    int ids[4];         // 0x70
-};
 
 extern "C" void cMenuItem_activate(void* item, int enable);
-extern "C" void DeletePersonaMenu_setpersonas(void* sub, Src_B418* src);
+extern "C" void DeletePersonaMenu_setpersonas(void* sub, LobbyMan* src);
 
 /**
  * Fills the debug "Select Persona" menu from the lobby manager's persona list.
@@ -202,11 +199,11 @@ extern "C" void DeletePersonaMenu_setpersonas(void* sub, Src_B418* src);
  *
  * @param src  the lobby manager (LobbyMan): mNumPersonas at +0x6C, mPersonas at +0x70
  */
-extern "C" void PersonaMenu_setpersonas(PersonaMenu* self, Src_B418* src)
+extern "C" void PersonaMenu_setpersonas(PersonaMenu* self, LobbyMan* src)
 {
     int i = 0;
-    for (; i < src->count; i++) {
-        int id = src->ids[i];
+    for (; i < src->mNumPersonas; i++) {
+        int id = ((int*)&src->mPersonas[0])[i];
         cCommandMenuItem* it = &((&self->unk_518[0]))[i];
         (*(int*)&it->Caption) = id;
         cMenuItem_activate(it, 1);
@@ -216,8 +213,8 @@ extern "C" void PersonaMenu_setpersonas(PersonaMenu* self, Src_B418* src)
         cMenuItem_activate(&((&self->unk_518[0]))[i], 0);
     }
     DeletePersonaMenu_setpersonas(((char*)&self->unk_2E8), src);
-    cMenuItem_activate(((char*)&self->unk_5C4), src->count >= 2);
-    cMenuItem_activate(((char*)&self->unk_5A8), src->count < 4);
+    cMenuItem_activate(((char*)&self->unk_5C4), src->mNumPersonas >= 2);
+    cMenuItem_activate(((char*)&self->unk_5A8), src->mNumPersonas < 4);
 }
 #endif
 
@@ -320,7 +317,6 @@ INCLUDE_ASM("main/all_in_one_main", func_001DB718);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 struct N_B718 { N_B718 *next; N_B718 *prev; };
-struct L_B718 { int pad; N_B718 *head; };
 
 /**
  * Empties a std::list: frees every node and leaves the head node linked to itself.
@@ -329,15 +325,15 @@ struct L_B718 { int pad; N_B718 *head; };
  * the head's next and prev to the head. The head itself is kept. The LobbyMan destructor uses it on mEventList; the
  * async-file and lobby-tag code use it on their own lists.
  */
-extern "C" void func_001DB718(L_B718 *self) {
-    N_B718 *node = self->head->next;
-    while (node != self->head) {
+extern "C" void func_001DB718(tLobbyEventList *self) {
+    N_B718 *node = ((N_B718*)self->mpHead)->next;
+    while (node != ((N_B718*)self->mpHead)) {
         N_B718 *n = node;
         node = node->next;
         operator_delete((int *)n);
     }
-    self->head->next = self->head;
-    self->head->prev = self->head;
+    ((N_B718*)self->mpHead)->next = ((N_B718*)self->mpHead);
+    ((N_B718*)self->mpHead)->prev = ((N_B718*)self->mpHead);
 }
 #endif
 
@@ -352,12 +348,6 @@ void* cMemMan_free(void* ptr);
 void operator_delete(int*);
 extern char str_StlBlock[];
 
-struct sPtrVecDB778 {
-    void* alloc;
-    void** start;
-    void** finish;
-    void** eos;
-};
 
 static inline void** sPtrVecDB778_allocate(unsigned int n)
 {
@@ -414,28 +404,28 @@ static inline void** sPtrVecDB778_copy_backward(void** first, void** last, void*
  * @param pos  where to insert
  * @param x  the pointer to insert (passed by reference)
  */
-extern "C" void func_001DB778(sPtrVecDB778* self, void** pos, void* const& x)
+extern "C" void func_001DB778(tFEStringPtrVector* self, void** pos, void* const& x)
 {
-    if (self->finish != self->eos) {
-        if (self->finish != 0)
-            *self->finish = self->finish[-1];
-        ++self->finish;
+    if (((void**)self->mpFinish) != ((void**)self->mpEndOfStorage)) {
+        if (((void**)self->mpFinish) != 0)
+            *((void**)self->mpFinish) = ((void**)self->mpFinish)[-1];
+        ++(*(void***)&self->mpFinish);
         void* x_copy = x;
-        sPtrVecDB778_copy_backward(pos, self->finish - 2, self->finish - 1);
+        sPtrVecDB778_copy_backward(pos, ((void**)self->mpFinish) - 2, ((void**)self->mpFinish) - 1);
         *pos = x_copy;
     } else {
-        unsigned int old_size = self->finish - self->start;
+        unsigned int old_size = ((void**)self->mpFinish) - ((void**)self->mpStart);
         unsigned int len = old_size != 0 ? 2 * old_size : 1;
         void** new_start = sPtrVecDB778_allocate(len);
         void** new_finish = new_start;
-        new_finish = sPtrVecDB778_ucopy(self->start, pos, new_start);
+        new_finish = sPtrVecDB778_ucopy(((void**)self->mpStart), pos, new_start);
         sPtrVecDB778_construct(new_finish, x);
         ++new_finish;
-        new_finish = sPtrVecDB778_ucopy(pos, self->finish, new_finish);
-        sPtrVecDB778_deallocate(self->start, self->eos - self->start);
-        self->start = new_start;
-        self->finish = new_finish;
-        self->eos = new_start + len;
+        new_finish = sPtrVecDB778_ucopy(pos, ((void**)self->mpFinish), new_finish);
+        sPtrVecDB778_deallocate(((void**)self->mpStart), ((void**)self->mpEndOfStorage) - ((void**)self->mpStart));
+        (*(void***)&self->mpStart) = new_start;
+        (*(void***)&self->mpFinish) = new_finish;
+        (*(void***)&self->mpEndOfStorage) = new_start + len;
     }
 }
 #endif
@@ -451,12 +441,6 @@ void* cMemMan_free(void* ptr);
 void operator_delete(int*);
 extern char str_StlBlock[];
 
-struct sPtrVecDB918 {
-    void* alloc;
-    void** start;
-    void** finish;
-    void** eos;
-};
 
 static inline void** sPtrVecDB918_allocate(unsigned int n)
 {
@@ -512,28 +496,28 @@ static inline void** sPtrVecDB918_copy_backward(void** first, void** last, void*
  * @param pos  where to insert
  * @param x  the pointer to insert (passed by reference)
  */
-extern "C" void func_001DB918(sPtrVecDB918* self, void** pos, void* const& x)
+extern "C" void func_001DB918(tFEPrivateMessageVector* self, void** pos, void* const& x)
 {
-    if (self->finish != self->eos) {
-        if (self->finish != 0)
-            *self->finish = self->finish[-1];
-        ++self->finish;
+    if (((void**)self->mpFinish) != ((void**)self->mpEndOfStorage)) {
+        if (((void**)self->mpFinish) != 0)
+            *((void**)self->mpFinish) = ((void**)self->mpFinish)[-1];
+        ++(*(void***)&self->mpFinish);
         void* x_copy = x;
-        sPtrVecDB918_copy_backward(pos, self->finish - 2, self->finish - 1);
+        sPtrVecDB918_copy_backward(pos, ((void**)self->mpFinish) - 2, ((void**)self->mpFinish) - 1);
         *pos = x_copy;
     } else {
-        unsigned int old_size = self->finish - self->start;
+        unsigned int old_size = ((void**)self->mpFinish) - ((void**)self->mpStart);
         unsigned int len = old_size != 0 ? 2 * old_size : 1;
         void** new_start = sPtrVecDB918_allocate(len);
         void** new_finish = new_start;
-        new_finish = sPtrVecDB918_ucopy(self->start, pos, new_start);
+        new_finish = sPtrVecDB918_ucopy(((void**)self->mpStart), pos, new_start);
         sPtrVecDB918_construct(new_finish, x);
         ++new_finish;
-        new_finish = sPtrVecDB918_ucopy(pos, self->finish, new_finish);
-        sPtrVecDB918_deallocate(self->start, self->eos - self->start);
-        self->start = new_start;
-        self->finish = new_finish;
-        self->eos = new_start + len;
+        new_finish = sPtrVecDB918_ucopy(pos, ((void**)self->mpFinish), new_finish);
+        sPtrVecDB918_deallocate(((void**)self->mpStart), ((void**)self->mpEndOfStorage) - ((void**)self->mpStart));
+        (*(void***)&self->mpStart) = new_start;
+        (*(void***)&self->mpFinish) = new_finish;
+        (*(void***)&self->mpEndOfStorage) = new_start + len;
     }
 }
 #endif

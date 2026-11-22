@@ -1,4 +1,5 @@
 #include "common.h"
+#include "replay/replaycache.h"
 #include "ai/ridermetrix.h"
 #include "vtable.h"
 #include "replay/frame.h"
@@ -1489,15 +1490,10 @@ INCLUDE_ASM("replay/replaycache", cReplay_writeInput);
 #ifdef SKIP_ASM
 extern "C" int HUFF_encode(void* src, int size, void* dst, int* state);
 
-struct sRcEntry1510 {
-    int field_0x0;          // 0x0
-    char pad_0x4[0x8];
-    void* data;             // 0xC
-};
 
 struct sReplayCache1510 {
     char pad_0x0[0x48C];
-    sRcEntry1510* entries[(0x638 - 0x48C) / 4];   // 0x48C
+    cReplayCache* entries[(0x638 - 0x48C) / 4];   // 0x48C
     int field_0x638;        // 0x638
     char pad_0x63C[0x4];
     int* out;               // 0x640
@@ -1541,13 +1537,13 @@ extern "C" void cReplay_writeInput(sReplayCache1510* self)
         self->pending = 0;
         self->header = 0;
         self->pendingSize = 0;
-        sRcEntry1510* inputCache = self->entries[cur];
+        cReplayCache* inputCache = self->entries[cur];
         if (inputCache != 0) {
-            self->pending = inputCache->data;
+            self->pending = ((void*)inputCache->CmdFrame);
             self->header = self->out;
             self->pendingSize = 0x8000;
             *self->out = 0x11111112;
-            self->header[1] = inputCache->field_0x0;
+            self->header[1] = inputCache->RecordCursor;
             self->cur++;
         } else {
             self->cur = cur + 1;
@@ -1648,15 +1644,6 @@ extern "C" int cReplayFrame_loadFrame(void* self, char** pp);
 void cReplayFrameList_reset(void* self);
 extern "C" void cReplayFrameList_addFrame(void* list, void* node);
 
-struct sRcSave1758 {
-    int field_0x0;
-    int frameCount;         // 0x4
-    int f8;                 // 0x8
-    int fC;                 // 0xC
-    int f10;                // 0x10
-    int f14;                // 0x14
-    int streamCount;        // 0x18
-};
 
 struct sReplayCache1758 {
     int state;                  // 0x0
@@ -1692,27 +1679,27 @@ struct sReplayCache1758 {
  */
 extern "C" int cReplay_load(cReplay* self, char* buf)
 {
-    sRcSave1758* data = (sRcSave1758*)buf;
+    tReplayManSaveHeader* data = (tReplayManSaveHeader*)buf;
     char** pp = &buf;
-    if (data->streamCount != ((sRcWorld_0730*)((SSXApp)->Game)->AI)->numRiders) {
+    if (data->Players != ((sRcWorld_0730*)((SSXApp)->Game)->AI)->numRiders) {
         return 0;
     }
     {
         self->Loaded = 1;
-        self->SaveFrameTicks = data->f8;
-        self->ReplayError = data->fC != 0;
-        self->RecordTick = data->f10;
-        self->EndRecordTick = data->f14;
+        self->SaveFrameTicks = data->SaveFrameTicks;
+        self->ReplayError = data->ReplayError != 0;
+        self->RecordTick = data->RecordTick;
+        self->EndRecordTick = data->EndRecordTick;
         self->SaveFrame = 0;
         self->PlaybackTick = 0;
         cReplayFrameList_reset(((char*)&self->FrameList));
         *pp = (char*)data + 0x28;
-        for (int i = 0; i < data->frameCount; i++) {
+        for (int i = 0; i < data->NumSaveFrames; i++) {
             void* node = cReplay_allocReplayFrame(self);
             cReplayFrame_loadFrame(node, pp);
             cReplayFrameList_addFrame(((char*)&self->FrameList), node);
         }
-        for (int i = 0; i < data->streamCount; i++) {
+        for (int i = 0; i < data->Players; i++) {
             if (((void**)&self->InputCache[0])[i] != 0) {
                 cReplayCache_load(((void**)&self->InputCache[0])[i], pp);
             }

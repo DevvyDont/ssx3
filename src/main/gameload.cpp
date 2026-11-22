@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "object/bucketman.h"
 #include "world/worldcache.h"
 #include "ai/player.h"
 #include "replay/replay.h"
@@ -1148,12 +1149,6 @@ extern int cPauseState_Flags;
 extern int cPauseState_Stack[];
 extern int D_00442910[];
 
-struct sGameLoad_0558 {
-    char pad_0x00[0x28];
-    void* field_0x28;       // 0x28
-    char pad_0x2C[0xA4 - 0x2C];
-    void* field_0xA4;       // 0xA4
-};
 
 /**
  * Starts replay playback, the mirror of cGame_stopReplay.
@@ -1162,12 +1157,12 @@ struct sGameLoad_0558 {
  * entry 8 of the table cPauseState_FlagsTable), starts the replay (+0x28) with cReplay_startReplay(replay, 0, 0, 0) and calls
  * cMenuSys_activate (On Tour cMenuSys::activate) with 0 on the menu system (+0xA4). The pause stack index is not checked.
  */
-extern "C" void cGame_startReplay(sGameLoad_0558* self)
+extern "C" void cGame_startReplay(cGame* self)
 {
     cPauseState_Stack[++cPauseState_StackIdx] = 8;
     cPauseState_Flags = D_00442910[0];
-    cReplay_startReplay(self->field_0x28, 0, 0, 0);
-    cMenuSys_activate(self->field_0xA4, 0);
+    cReplay_startReplay(((void*)self->Replay), 0, 0, 0);
+    cMenuSys_activate(((void*)self->MenuSys), 0);
 }
 #endif
 
@@ -1202,8 +1197,7 @@ extern "C" void cGame_stopReplay(cGame* self)
 INCLUDE_ASM("main/gameload", cGame_renderBuckets);
 #ifdef SKIP_ASM
 extern "C" void cBucketMan_renderBucket(void* mgr, int id);
-struct sGp2898 { int a, b; };
-extern sGp2898 gBucketMan; // target: raw $gp+0x2898 (splat doesn't symbolize it)
+extern cBucketMan gBucketMan; // target: raw $gp+0x2898 (splat doesn't symbolize it)
 extern int D_004428D8[];
 
 /**
@@ -1214,7 +1208,7 @@ extern int D_004428D8[];
 extern "C" void cGame_renderBuckets(void)
 {
     int i;
-    sGp2898* mgr = &gBucketMan;
+    cBucketMan* mgr = &gBucketMan;
     for (i = 0; i < 6; i++) {
         cBucketMan_renderBucket(mgr, D_004428D8[i]);
     }

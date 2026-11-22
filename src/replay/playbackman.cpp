@@ -335,7 +335,6 @@ extern "C" int ASYNCFILE_load(char* path, int flags);
 extern char* D_004A3414;
 extern char str_bar_c[];
 
-struct sPbEntry_26C9F0 { int id; int used; int pad; };
 struct sPb_26C9F0 {
     char pad0[8];
     char name[0x50];
@@ -363,13 +362,13 @@ extern "C" int cPlaybackMan_load(cPlaybackMan* self_, int key)
     char path[0x100];
     int idx = cPlaybackMan_findFileById_C9F0((sPbMan_26CFE8*)self, key);
     if (idx >= 0) {
-        sPbEntry_26C9F0* entry = (sPbEntry_26C9F0*)(idx * 0xC + self->entries);
-        if (entry->used != 0)
+        tPlaybackFile* entry = (tPlaybackFile*)(idx * 0xC + self->entries);
+        if (((int)entry->PackData) != 0)
             return 1;
         self->cur = idx;
         self->handle = -1;
         int num = kPlaybackPath;
-        sprintf(path, D_004A3414, str_bar_c, num, self->name, entry->id);
+        sprintf(path, D_004A3414, str_bar_c, num, self->name, ((int)entry->Id));
         int asyncHandle = ASYNCFILE_load(path, 0x100);
         self->handle = asyncHandle;
         if (asyncHandle >= 0)
@@ -1219,18 +1218,6 @@ extern "C" void cReplayFrame_clearFrame(cReplayFrame* self)
 INCLUDE_ASM("replay/playbackman", cReplayFrame_loadFrame);
 #ifdef SKIP_ASM
 
-struct sPbHeader_D678 {
-    int field_0x0;
-    int field_0x4;
-    int field_0x8;
-    int field_0xc;
-    tReplayFrameType colour;    // 0x10
-    int field_0x14;
-    int field_0x18;
-    int field_0x1c;
-    int field_0x20;
-    int field_0x24;
-};
 
 struct sPbFrame_D678 {
     char pad_0x0[0x10];
@@ -1264,18 +1251,18 @@ void cReplayFramePtr_putFrameBlock_2(void* self, int a) __asm__("cReplayFramePtr
  */
 extern "C" int cReplayFrame_loadFrame(cReplayFrame* self, char** pp)
 {
-    sPbHeader_D678 header;
+    tReplayFrameSave header;
     char* start = *pp;
     *pp = start + 0x28;
     MEM_copy(&header, start, 40);
-    self->Size = header.field_0x4;
-    self->FrameStartTick = header.field_0x8;
-    self->FrameEndTick = header.field_0xc;
-    (*(&self->FrameType)) = header.colour;
-    self->Ranking[0] = header.field_0x14;
-    self->Ranking[1] = header.field_0x18;
-    self->HighlightEndTick[0] = header.field_0x1c;
-    self->HighlightEndTick[1] = header.field_0x20;
+    self->Size = header.Size;
+    self->FrameStartTick = ((int)header.FrameStartTick);
+    self->FrameEndTick = ((int)header.FrameEndTick);
+    (*(&self->FrameType)) = header.FrameType;
+    self->Ranking[0] = header.Ranking[0];
+    self->Ranking[1] = header.Ranking[1];
+    self->HighlightEndTick[0] = header.HighlightEndTick[0];
+    self->HighlightEndTick[1] = header.HighlightEndTick[1];
     cReplayFramePtr_loadBlock(self, pp, start + 0x24);
     cReplayFramePtr_putFrameBlock_2(self, 1);
     return 1;

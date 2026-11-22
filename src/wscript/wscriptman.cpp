@@ -716,11 +716,6 @@ extern "C" void cWScriptMan_runGlobalScripts(cWScriptMan* self)
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_doOnCollideScript);
 #ifdef SKIP_ASM
 struct cWScriptMan_isFunc_sValue;
-struct sValue_30A060 {
-    int word0;
-    int word1;
-    int type;
-};
 struct sCall_30A060 {
     int pad;
     ~sCall_30A060() {}
@@ -786,8 +781,8 @@ extern "C" void cWScriptMan_doOnCollideScript(cWScriptMan* self, void* collideIn
         cWScriptMan_eventCollide(self, (int)self->Inst->m_RID);
     }
     {
-        sValue_30A060 scriptFunc;
-        sValue_30A060 ret;
+        luno_cLunoVar scriptFunc;
+        luno_cLunoVar ret;
         sCall_30A060 call;
         int id = cWorld_getWScriptHeaderId(self->World, (int)self->Inst, 2);
         if (valid_30A060(&id)) {
@@ -795,8 +790,8 @@ extern "C" void cWScriptMan_doOnCollideScript(cWScriptMan* self, void* collideIn
                 cWScriptMan_runScript(self, &id);
             } else {
                 luno_cLunoFunc_init(&scriptFunc, cWorld_getWScriptScript(self->World, &id), 0);
-                ret.type = 0;
-                ret.word0 = 0;
+                ret.Type = 0;
+                ret.Data.Int = 0;
                 luno_cLunoVM_cLunoVM(&call);
                 cWScriptProcess* process = (cWScriptProcess*)self->CurrentTask;
                 if (((char*)process) != 0)

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "util/surfprop.h"
 #include "render/particle.h"
 #include "ai/rider.h"
@@ -655,10 +656,6 @@ INCLUDE_ASM("visualfx/boardsparkfx", cBoardSparkFX_render);
 extern "C" void cDynamicColourEmitter_render(void* self, int a1);
 
 
-struct sVec2_B478 {
-    float x, y;
-    sVec2_B478(float ax, float ay) : x(ax), y(ay) {}
-};
 struct sVec4_B478 {
     float x, y, z, w;
     sVec4_B478(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
@@ -675,15 +672,10 @@ extern int D_004A54E8;
 extern int D_004A54EC;
 extern sVec4_B478 D_004D57A0;
 
-struct sVE_B478a {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 struct sVE_B478b {
     short delta;
     short index;
-    void (*fn)(void*, void*, sVec2_B478*, const sVec2_B478*, const sVec2_B478*, const sVec4_B478*);
+    void (*fn)(void*, void*, t2Vector*, const t2Vector*, const t2Vector*, const sVec4_B478*);
 };
 
 static inline void push_B478(cPS2GraphicsMan* ctx)
@@ -713,7 +705,7 @@ extern "C" void cBoardSparkFX_render(cBoardSparkFX* self)
         push_B478(GrMan);
         *GrMan->m_pCurrentDrawState = self->mSparkDrawState;
         cPS2GraphicsMan* ctx = GrMan;
-        sVE_B478a* vt = (sVE_B478a*)ctx->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)ctx->mVtbl;
         vt[82].fn(vthis(ctx, vt[82]), (int)self->mSparkEmitter);
         pop_B478(GrMan);
     }
@@ -737,10 +729,10 @@ extern "C" void cBoardSparkFX_render(cBoardSparkFX* self)
             D_004D57A0.z = 1.0f;
             D_004D57A0.w = 1.0f;
         }
-        sVec2_B478* uv0 = (sVec2_B478*)&D_004A54D0;
-        sVec2_B478* uv1 = (sVec2_B478*)&D_004A54E0;
+        t2Vector* uv0 = (t2Vector*)&D_004A54D0;
+        t2Vector* uv1 = (t2Vector*)&D_004A54E0;
         for (int i = 0; i < 3; i++) {
-            sVec2_B478 size(((float*)(((char*)self) + 0x60))[i], ((float*)(((char*)self) + 0x60))[i]);
+            t2Vector size(((float*)(((char*)self) + 0x60))[i], ((float*)(((char*)self) + 0x60))[i]);
             cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
             sVE_B478b* vt = (sVE_B478b*)ctx->mVtbl;
             vt[78].fn(vthis(ctx, vt[78]), ((char*)self) + 0x30 + i * 0x10, &size, uv0, uv1, &D_004D57A0);

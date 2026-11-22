@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/worldview.h"
 #include "camera/trigger/cameratriggervolumes.h"
 #include "vtable.h"
 #include "intersect/bxnash.h"
@@ -749,10 +750,6 @@ struct sVEnt_D320 {
 
 
 
-struct sBox_D320 {
-    t4Vector min;
-    t4Vector max;
-};
 
 
 static inline void walk_D320(void* vvnode, CameraCollisionCallback* ctx)
@@ -789,7 +786,7 @@ static inline void walk_D320(void* vvnode, CameraCollisionCallback* ctx)
     if (node->children[1][1][1]) descend(node->children[1][1][1], ctx);
 }
 
-static inline void collect_D320(nash_Octant* r, char* hits, int k, CameraCollisionCallback* ctx, sBox_D320* box)
+static inline void collect_D320(nash_Octant* r, char* hits, int k, CameraCollisionCallback* ctx, tBoundBox* box)
 {
     void* node = ((void*)r->rootcell);
     char* hit = hits + k;
@@ -844,9 +841,9 @@ extern "C" void cCameraTriggerMan_checkCollisions(cCameraTriggerMan* self, cRide
         char* sub = (char*)&rider->mVtbl;
         t4Vector* riderPosMin = getPos_D320(sub);
         t4Vector* riderPosMax = getPos_D320(sub);
-        sBox_D320 box;
-        box.min = *riderPosMin;
-        box.max = *riderPosMax;
+        tBoundBox box;
+        box.MinPoint = *riderPosMin;
+        box.MaxPoint = *riderPosMax;
         // PORT: eight 1-byte hit flags kept in one 8-byte slot (relies on sizeof(long) == 8).
         long hits;
         CameraCollisionCallback* pc = &ctx;

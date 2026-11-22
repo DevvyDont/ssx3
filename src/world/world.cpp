@@ -1,4 +1,6 @@
 #include "common.h"
+#include "bx/bxstring.h"
+#include "fe/debugfe.h"
 #include "world/worldcache.h"
 #include "world/worldrecords.h"
 #include "vtable.h"
@@ -226,10 +228,6 @@ void cMemMan_free(void*);
 extern char str_bar_e[];
 extern char str_sdb[];
 
-struct sName_3A6948 {
-    char* name;
-    int ok;
-};
 
 struct sEntry_3A6948 {
     char name[0x58];
@@ -243,11 +241,6 @@ struct sFile_3A6948 {
     sEntry_3A6948* entries;     // 0x14
 };
 
-struct sStr_3A6948 {
-    char* s;
-    sStr_3A6948() {}
-    sStr_3A6948(const sStr_3A6948&);
-};
 
 /**
  * Checks which of @p n section names exist in a track's .sdb section table.
@@ -263,20 +256,20 @@ struct sStr_3A6948 {
  * @param names  the names, each with a found flag
  * @return 1 when at least one name was found, else 0
  */
-extern "C" int isValidMap(const char* path, int n, sName_3A6948* names)
+extern "C" int isValidMap(const char* path, int n, tWorldSectionScan* names)
 {
     sFile_3A6948* data;
     int ret;
     {
-        sStr_3A6948 full;
-        sStr_3A6948 prefixedBuf;
-        sStr_3A6948 str;
+        cBXString full;
+        cBXString prefixedBuf;
+        cBXString str;
         char* pre = str_bar_e;
         cBXString* prefixed = (cBXString*)&prefixedBuf;
         cBXString_cBXString2(&str, path);
         func_003186D0(prefixed, pre, (cBXString*)&str);
         func_00318630((cBXString*)&full, prefixed, str_sdb);
-        data = (sFile_3A6948*)FILE_loadz(full.s, 0x3000000);
+        data = (sFile_3A6948*)FILE_loadz(full.Str, 0x3000000);
         cBXString__cBXString(&full, 2);
         cBXString__cBXString(prefixed, 2);
         cBXString__cBXString(&str, 2);
@@ -289,16 +282,16 @@ extern "C" int isValidMap(const char* path, int n, sName_3A6948* names)
         ret = 0;
         for (i = 0; i < n; i++)
         {
-            sStr_3A6948 upperName;
+            cBXString upperName;
             unsigned int j;
-            names[i].ok = 0;
-            cBXString_cBXString2(&upperName, names[i].name);
+            names[i].bFound = 0;
+            cBXString_cBXString2(&upperName, ((char*)names[i].sectionName));
             cBXString_makeUpper((cBXString*)&upperName);
             for (j = 0; j < data->count; j++)
             {
-                if (strcmp(&data->entries[j], upperName.s) == 0)
+                if (strcmp(&data->entries[j], upperName.Str) == 0)
                 {
-                    names[i].ok = ret = 1;
+                    names[i].bFound = ret = 1;
                     break;
                 }
             }

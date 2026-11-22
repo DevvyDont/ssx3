@@ -1,5 +1,11 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uithing.h"
+#include "render/irradiance.h"
+#include "render/font.h"
+#include "intersect/overlaplist.h"
+#include "intersect/worldline.h"
+#include "be/bedbprofile.h"
 #include "ai/airpredictor.h"
 #include "ai/ridermetrix.h"
 #include "animation/animsequencer.h"
@@ -60,21 +66,8 @@ extern const char str_Line_Intersect_Hint[];
 extern const char str_Wall_Intersect_Hint[];
 extern const char str_BoaderShadow[];
 
-struct sKey8_B698 {
-    int a, b;
-};
-extern sKey8_B698 t2vect_Zero[];
+extern t2Vector t2vect_Zero[];
 
-struct sRiderAux_B698 {
-    int f0;                     // 0x000
-    int f4;                     // 0x004
-    unsigned int f8;            // 0x008
-    char padC[0x100];           // 0x00C
-    unsigned int f10C;          // 0x10C
-    char pad110[0x100];         // 0x110
-    unsigned int f210;          // 0x210
-    char pad214[0xA14 - 0x214];
-};
 
 // PORT: the unit declares cRider_cRider as void, but the ctor returns this; bind by asm label.
 extern "C" void* cRider_cRider_impl(cRider* self) __asm__("cRider_cRider");
@@ -117,16 +110,16 @@ extern "C" void* cRider_cRider_impl(cRider* self)
     self->mSphereTree = 0;
     self->InTunnel = 0;
     self->mGroundPolyId = none;
-    *(sKey8_B698*)&self->unk_AAC = t2vect_Zero[0];
+    *(t2Vector*)&self->unk_AAC = t2vect_Zero[0];
     self->mTrackPathHint = (tPathIntersectInfo*)cMemMan_alloc(0x20, str_Track_path_intersect_info, 0, 0);
     self->mAIPathHint = (tPathIntersectInfo*)cMemMan_alloc(0x20, str_AI_path_intersect_info, 0, 0);
-    sRiderAux_B698* aux = new (str_OverlapList, 0, 0) sRiderAux_B698;
+    cOverlapList* aux = new (str_OverlapList, 0, 0) cOverlapList;
     int nash = (int)SSXApp->Game->BXNash;  // the overlap list queries the game's Nash collision grid
-    aux->f0 = nash;
-    aux->f4 = 0;
-    aux->f8 = none;
-    aux->f10C = none;
-    aux->f210 = none;
+    (*(int*)&aux->nash) = nash;
+    aux->deletecount = 0;
+    aux->numinstances = none;
+    aux->numpatches = none;
+    aux->numtyped = none;
     self->mOverlapList = aux;
     self->mAttachedEmitterFX = func_002F1850(cMemMan_alloc(168, str_AttachedEmitterFX, 0, 0), self);
     self->mBoltOnFX = cBoltOnFXInterface_cBoltOnFXInterface(cMemMan_alloc(200, str_cBoltOnFXInterface, 0, 0), (int)self, (int)self->mAttachedEmitterFX);
@@ -336,19 +329,7 @@ struct sBEEntry_11BBE8
     char pad[0x32];
 };
 
-struct sSlot_11BBE8
-{
-    short a;
-    unsigned short flags;
-};
 
-struct sRiderData_11BBE8
-{
-    char pad[0x288];
-    short* map;         // 0x288
-    int f28C;
-    sSlot_11BBE8 slots[1]; // 0x290
-};
 
 /**
  * Fills @p list with the BE part entries the rider wears and returns how many.
@@ -386,15 +367,15 @@ extern "C" int func_0011BBE8(void* vself, char** list)
     }
     else
     {
-        sRiderData_11BBE8* riderData = (sRiderData_11BBE8*)func_0014AD50(iface, self->mAIIndex);
+        cBECharProfileDB* riderData = (cBECharProfileDB*)func_0014AD50(iface, self->mAIIndex);
         int cnt = func_0014D988(db, ch);
         sBEEntry_11BBE8* part = (sBEEntry_11BBE8*)func_0014D998(db, ch);
         for (int i = 0; i < cnt; i++, part++)
         {
-            short idx = riderData->map[part->f4];
-            sSlot_11BBE8* slot;
+            short idx = riderData->mpBoltsMap[part->f4];
+            tBEProfileBolt* slot;
             if (idx >= 0)
-                slot = &riderData->slots[idx];
+                slot = &((&riderData->mBolts[0]))[idx];
             else
                 slot = 0;
             if (slot->flags & 0x10)
@@ -416,18 +397,7 @@ extern "C" char* strcpy(char* dst, const char* src);
 void* func_0011B678(void* self);
 extern "C" void qsort(void* base, int n, int size, void* (*cmp)(void*));
 
-struct sAnimName_11BD60
-{
-    char name[0x100];
-    int f100;
-    int f104;
-};
 
-struct sAnimNameTable_11BD60
-{
-    sAnimName_11BD60 e[40];
-    int count;      // 0x2940
-};
 
 /**
  * Adds the animation file names of @p n parts to the rider's load list (mLoadList), skipping duplicates, and sorts it.
@@ -444,25 +414,25 @@ extern "C" void func_0011BD60(cRider* self, void** list, int n)
     for (int i = 0; i < n; i++, list++)
     {
         char* name = *(char**)((char*)*list + 0x28);
-        sAnimNameTable_11BD60* nameTable = ((sAnimNameTable_11BD60*)self->mLoadList);
+        tRiderLoadList* nameTable = ((tRiderLoadList*)self->mLoadList);
         if (name == 0) continue;
         if (*name == 0) continue;
         int j;
-        for (j = 0; j < nameTable->count; j++)
+        for (j = 0; j < nameTable->MdlLoadNum; j++)
         {
-            if (strcmp(name, &nameTable->e[j]) == 0) goto next;
+            if (strcmp(name, &((&nameTable->LoadList[0]))[j]) == 0) goto next;
         }
         {
-            sAnimName_11BD60* entry = &nameTable->e[nameTable->count];
-            strcpy(entry->name, name);
-            entry->f100 = -1;
-            entry->f104 = 0;
-            nameTable->count++;
+            tRiderLoader* entry = &((&nameTable->LoadList[0]))[nameTable->MdlLoadNum];
+            strcpy(entry->FileName, name);
+            entry->FileOp = -1;
+            (*(int*)&entry->DataPtr) = 0;
+            nameTable->MdlLoadNum++;
         }
     next:;
     }
-    sAnimNameTable_11BD60* sortTable = ((sAnimNameTable_11BD60*)self->mLoadList);
-    qsort(sortTable, sortTable->count, 264, func_0011B678);
+    tRiderLoadList* sortTable = ((tRiderLoadList*)self->mLoadList);
+    qsort(sortTable, sortTable->MdlLoadNum, 264, func_0011B678);
 }
 #endif
 
@@ -481,19 +451,7 @@ extern "C" int cBELibrary_getCheatCharacterID(int c);
 extern "C" int func_0014AC50(int c);
 extern "C" int func_0014B988(void* iface, int b, int a, void* item, char* out);
 
-struct sAnimName_11BE88
-{
-    char name[0x100];
-    int f100;
-    int f104;
-};
 
-struct sAnimNameTable_11BE88
-{
-    sAnimName_11BE88 e[40];
-    int start;      // 0x2940
-    int count;      // 0x2944
-};
 
 /**
  * Adds the texture names of @p n parts to the rider's second load list (mLoadList seen with a start index at +0x2940
@@ -513,20 +471,20 @@ extern "C" void func_0011BE88(cRider* self, void** list, int n)
     if (cBELibrary_getCheatCharacterID(self->mAIIndex)) {
         for (int i = 0; i < n; i++) {
             char* name = *(char**)((char*)list[i] + 0x2C);
-            sAnimNameTable_11BE88* nameTable = ((sAnimNameTable_11BE88*)self->mLoadList);
+            tRiderLoadList* nameTable = ((tRiderLoadList*)self->mLoadList);
             if (name == 0) continue;
             if (*name == 0) continue;
             int j;
-            int end = nameTable->count + nameTable->start;
-            for (j = nameTable->start; j < end; j++) {
-                if (strcmp(name, &nameTable->e[j]) == 0) goto next;
+            int end = nameTable->TexLoadNum + nameTable->MdlLoadNum;
+            for (j = nameTable->MdlLoadNum; j < end; j++) {
+                if (strcmp(name, &((&nameTable->LoadList[0]))[j]) == 0) goto next;
             }
             {
-                sAnimName_11BE88* entry = &nameTable->e[end];
-                strcpy(entry->name, name);
-                entry->f100 = -1;
-                entry->f104 = 0;
-                nameTable->count++;
+                tRiderLoader* entry = &((&nameTable->LoadList[0]))[end];
+                strcpy(entry->FileName, name);
+                entry->FileOp = -1;
+                (*(int*)&entry->DataPtr) = 0;
+                nameTable->TexLoadNum++;
             }
         next:;
         }
@@ -536,25 +494,25 @@ extern "C" void func_0011BE88(cRider* self, void** list, int n)
             char buf[0x100];
             if (func_0014B988(iface, profileIndex, characterId, list[i], buf) == 0) continue;
             char* name = buf;
-            sAnimNameTable_11BE88* nameTable = ((sAnimNameTable_11BE88*)self->mLoadList);
+            tRiderLoadList* nameTable = ((tRiderLoadList*)self->mLoadList);
             if (*name == 0) continue;
             int j;
-            int end = nameTable->count + nameTable->start;
-            for (j = nameTable->start; j < end; j++) {
-                if (strcmp(name, &nameTable->e[j]) == 0) goto next2;
+            int end = nameTable->TexLoadNum + nameTable->MdlLoadNum;
+            for (j = nameTable->MdlLoadNum; j < end; j++) {
+                if (strcmp(name, &((&nameTable->LoadList[0]))[j]) == 0) goto next2;
             }
             {
-                sAnimName_11BE88* entry = &nameTable->e[end];
-                strcpy(entry->name, name);
-                entry->f100 = -1;
-                entry->f104 = 0;
-                nameTable->count++;
+                tRiderLoader* entry = &((&nameTable->LoadList[0]))[end];
+                strcpy(entry->FileName, name);
+                entry->FileOp = -1;
+                (*(int*)&entry->DataPtr) = 0;
+                nameTable->TexLoadNum++;
             }
         next2:;
         }
     }
-    sAnimNameTable_11BE88* sortTable = ((sAnimNameTable_11BE88*)self->mLoadList);
-    qsort(&sortTable->e[sortTable->start], sortTable->count, 264, func_0011B678);
+    tRiderLoadList* sortTable = ((tRiderLoadList*)self->mLoadList);
+    qsort(&((&sortTable->LoadList[0]))[sortTable->MdlLoadNum], sortTable->TexLoadNum, 264, func_0011B678);
 }
 #endif
 
@@ -841,18 +799,10 @@ extern const t4Vector D_004FF120_D660 __asm__("t4vect_Zero");
 extern const t4Vector D_004FF130_D660 __asm__("t4vect_Origin");
 extern const t4Vector D_004FF160_D660 __asm__("t4vect_ZAxis");
 
-struct sRay_D660 {
-    char data[0xB0];
-} __attribute__((aligned(16)));
 
-struct sHit_D660 {
-    t4Vector pos;       // 0x00
-    t4Vector normal;    // 0x10
-    char pad20[0x60];
-} __attribute__((aligned(16)));
 
-void cWorldLine_cWorldLine_D660(sRay_D660* ray, const t4Vector& a, const t4Vector& b, int n, float t) __asm__("cWorldLine_cWorldLine");
-extern float cBXNash_terrainIntersect1_D660(void* coll, sRay_D660* ray, sHit_D660* hit, int flags) __asm__("cBXNash_terrainIntersect1");
+void cWorldLine_cWorldLine_D660(cWorldLine* ray, const t4Vector& a, const t4Vector& b, int n, float t) __asm__("cWorldLine_cWorldLine");
+extern float cBXNash_terrainIntersect1_D660(void* coll, cWorldLine* ray, tIntersectInfo* hit, int flags) __asm__("cBXNash_terrainIntersect1");
 
 
 // Quaternion; the ctor stores w, then y, x, z (that order reproduces the retail store schedule).
@@ -1150,13 +1100,13 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
     {
         t4Vector lo = Add_D660(*pos, Scale_D660(D_004FF160_D660, -7000.0f));
         t4Vector hi = Add_D660(*pos, Scale_D660(D_004FF160_D660, 200.0f));
-        sHit_D660 hit;
-        sRay_D660 ray;
+        tIntersectInfo hit;
+        cWorldLine ray;
         cWorldLine_cWorldLine_D660(&ray, lo, hi, 2, 0.9791666865348816f);
         if (cBXNash_terrainIntersect1_D660(SSXApp->Game->BXNash, &ray, &hit, 0) >= 0.0f)
         {
-            placePos = hit.pos;
-            n = hit.normal;
+            placePos = hit.Ipos;
+            n = hit.Inorm;
         }
         AddEq_D660(placePos, Scale_D660(D_004FF160_D660, drop));
     }
@@ -3761,16 +3711,12 @@ INCLUDE_ASM("ai/rider", func_00121F30);
 #ifdef SKIP_ASM
 extern "C" void fSinCos(float* s, float* c, float angle);
 
-struct sVec4_121F30
-{
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4x4 matrix * vector).
-static inline sVec4_121F30 mtxMulVec_121F30(sVec4_121F30* m, sVec4_121F30* v)
+static inline t4Vector mtxMulVec_121F30(t4Vector* m, t4Vector* v)
 {
-    sVec4_121F30 r;
+    t4Vector r;
     __asm__(
         ".set push\n"
         ".set noreorder\n"
@@ -3801,11 +3747,11 @@ extern "C" void func_00121F30(cRider* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVEntry<void*(void*)>* gvt = (sVEntry<void*(void*)>*)ps2GraphicsMan->mVtbl;
-    sVec4_121F30* viewMtx = (sVec4_121F30*)gvt[35].fn(vthis(ps2GraphicsMan, gvt[35]));
+    t4Vector* viewMtx = (t4Vector*)gvt[35].fn(vthis(ps2GraphicsMan, gvt[35]));
     char* obj = (char*)&self->mVtbl;
     sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)obj;
-    sVec4_121F30* pos = (sVec4_121F30*)vt[kRiderVt_getPosition].fn(vthis(obj, vt[kRiderVt_getPosition]));
-    sVec4_121F30 viewPos = mtxMulVec_121F30(viewMtx, pos);
+    t4Vector* pos = (t4Vector*)vt[kRiderVt_getPosition].fn(vthis(obj, vt[kRiderVt_getPosition]));
+    t4Vector viewPos = mtxMulVec_121F30(viewMtx, pos);
     float z = viewPos.z;
     cPS2GraphicsMan* graphicsMan = GrMan;
     sVEntry<float(void*)>* gvt2 = (sVEntry<float(void*)>*)graphicsMan->mVtbl;
@@ -3943,22 +3889,18 @@ extern "C" void cRider_updateActiveLights(cRider* self)
 //100%
 INCLUDE_ASM("ai/rider", cRider_SetRiderLights);
 #ifdef SKIP_ASM
-struct sXf_20D8 {
-    float m[40];
-} __attribute__((aligned(16)));
 struct sV3_20D8 {
     float x, y, z;
     sV3_20D8() {}
     sV3_20D8(float a, float b, float c) : x(a), y(b), z(c) {}
 };
 struct sPt_20D8 { float x, y, z; };
-struct sQ_20D8 { float v[4]; };
 struct sPath_20D8 {
     float x, y, z;
     int n;
     sPt_20D8 pts[5];
     int pad;
-    sQ_20D8 q[5];
+    t4Vector q[5];
 };
 extern "C" void cIrradiance_Clear(void* p);
 extern "C" void* cRenderStateMan_getIrradiance(void* p);
@@ -3967,7 +3909,7 @@ extern "C" void* cRider_getHipPosition(void* dst, cRider* self);
 extern "C" void func_00389CB8(void* m, void* q, float f);
 extern "C" void func_0038A6A8(void* m, void* q, void* p);
 extern "C" void func_00389558(void* m, sV3_20D8* v);
-extern "C" void func_00389520(void* m, sQ_20D8* q, sV3_20D8* v);
+extern "C" void func_00389520(void* m, t4Vector* q, sV3_20D8* v);
 
 /**
  * Builds the rider's light block (unk_7C0) from its environment, active world lights and handler lights.
@@ -3979,12 +3921,12 @@ extern "C" void func_00389520(void* m, sQ_20D8* q, sV3_20D8* v);
  */
 extern "C" void cRider_SetRiderLights(cRider* self)
 {
-    sQ_20D8 hipPos;
+    t4Vector hipPos;
     cIrradiance_Clear(self->unk_7C0);
     {
         char* obj = (char*)&self->mVtbl;
         sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)obj;
-        *(sXf_20D8*)&self->unk_7C0[0] = *(sXf_20D8*)cRenderStateMan_getIrradiance(vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex])));
+        *(cIrradiance*)&self->unk_7C0[0] = *(cIrradiance*)cRenderStateMan_getIrradiance(vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex])));
     }
     cRider_getHipPosition(&hipPos, self);
     char* lightState = self->unk_7C0;
@@ -4006,7 +3948,7 @@ extern "C" void cRider_SetRiderLights(cRider* self)
             func_00389558(self->unk_7C0, &lightColour);
         }
         for (int j = 0; j < playerLights->n; j++) {
-            sQ_20D8* qq = &playerLights->q[j];
+            t4Vector* qq = &playerLights->q[j];
             sV3_20D8 lightColour(playerLights->pts[j].x, playerLights->pts[j].y, playerLights->pts[j].z);
             func_00389520(self->unk_7C0, qq, &lightColour);
         }
@@ -4299,10 +4241,6 @@ public:
 
 
 
-struct sV2_2680 {
-    float x, y;
-    sV2_2680(const float& ax, const float& ay) : x(ax), y(ay) {}
-};
 
 extern sGsState_2680 sDrawState_s_defaultDrawState;
 extern char t4mat_Identity[];
@@ -4317,12 +4255,6 @@ struct sV2v_2680 {
     sV2v_2680(float ax, float ay) { y = ay; x = ax; }
 };
 
-struct sOverlay_2680 {
-    char pad00[0x28];
-    sV2_2680 f28;
-    sV2_2680 f30;
-    sV2_2680 f38;
-};
 
 /**
  * Opens and closes a 640x480 2D pass with the default draw state, drawing nothing, unless the HUD is disabled.
@@ -4336,8 +4268,8 @@ extern "C" void func_00122680(void)
 {
     ASSERT_2680(SSXApp != 0);
     if (cRenderToggles_m_DisableHUD == 0) {
-        sOverlay_2680* debugFont = (sOverlay_2680*)SSXApp->Game->DebugFont;
-        debugFont->f38 = debugFont->f30;
+        cFont* debugFont = SSXApp->Game->DebugFont;
+        (*(t2Vector*)&debugFont->Scale[0]) = (*(t2Vector*)&debugFont->BaseScale[0]);
         ((cGraphicsMan_2680*)GrMan)->PushViewport();
         ((cGraphicsMan_2680*)GrMan)->PushView();
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
@@ -4349,8 +4281,8 @@ extern "C" void func_00122680(void)
         ((cGraphicsMan_2680*)GrMan)->SetView(t4mat_Identity);
         ((cGraphicsMan_2680*)GrMan)->stateTop->f8_5 = 24;
         ((cGraphicsMan_2680*)GrMan)->stateTop->f4_2 = 5;
-        debugFont->f28 = sV2_2680(2.0f, 2.0f);
-        *(sV2v_2680*)&debugFont->f28 = sV2v_2680(0.0f, 0.0f);
+        (*(t2Vector*)&debugFont->ShadowOffset[0]) = t2Vector(2.0f, 2.0f);
+        *(sV2v_2680*)&(*(t2Vector*)&debugFont->ShadowOffset[0]) = sV2v_2680(0.0f, 0.0f);
         ((cGraphicsMan_2680*)GrMan)->PopView();
         ((cGraphicsMan_2680*)GrMan)->PopViewport();
         ((cGraphicsMan_2680*)GrMan)->stateTop--;
@@ -4368,9 +4300,6 @@ struct sV4_2898 {
     sV4_2898(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
-struct sV3_2898 {
-    float x, y, z;
-};
 
 
 struct sRS_2898 {
@@ -4395,9 +4324,9 @@ struct sVE3_2898 { short delta; short index; void (*fn)(void*, void*, void*); };
 struct sVE4_2898 { short delta; short index; void (*fn)(void*, void*, void*, void*); };
 
 extern int D_004A4C00;
-extern sV3_2898 cRider_RenderShadow_lnorm;
+extern t3Vector cRider_RenderShadow_lnorm;
 
-extern "C" void func_00374D00(void* obj, sV3_2898* a, sV3_2898* b, sV3_2898* dir, t4Matrix* bones, int f);
+extern "C" void func_00374D00(void* obj, t3Vector* a, t3Vector* b, t3Vector* dir, t4Matrix* bones, int f);
 extern "C" void cAnimModel_rendershadow(void* model, int lod, sV4_2898* a, sV4_2898* b);
 extern "C" void cPlayerShadow_AddShadow(void* obj);
 int cRider_getMotionState(void*);
@@ -4451,7 +4380,7 @@ static inline void CopyMat_2898(t4Matrix* d, t4Matrix* s)
         : "memory");
 }
 
-static inline void Set3_2898(sV3_2898& v, float x, float y, float z)
+static inline void Set3_2898(t3Vector& v, float x, float y, float z)
 {
     v.x = x;
     v.y = y;
@@ -4483,7 +4412,7 @@ extern "C" void cRider_RenderShadow(cRider* self)
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         top_2898(ps2GraphicsMan)[1] = top_2898(ps2GraphicsMan)[0];
         top_2898(ps2GraphicsMan)++;
-        sV3_2898 center;
+        t3Vector center;
         {
             sV4_2898 midpoint = Scale_2898(Add_2898(BonePos_2898(self, self->unk_918), BonePos_2898(self, self->unk_8E8)), 0.5f);
             center.x = midpoint.x;
@@ -4494,7 +4423,7 @@ extern "C" void cRider_RenderShadow(cRider* self)
             Set3_2898(cRider_RenderShadow_lnorm, 0.0f, 0.0f, -1.0f);
             D_004A4C00 = 1;
         }
-        sV3_2898 objUp;
+        t3Vector objUp;
         {
             sV4_2898 upRow = *(sV4_2898*)&self->mMatrix.row[2];
             objUp.x = upRow.x;
@@ -5218,12 +5147,6 @@ struct sItem_3640 {
     unsigned short flags;
 };
 
-struct sDb_3640 {
-    char pad0[0x288];
-    short* map;                 // 0x288
-    char pad28C[0x4];
-    sItem_3640 items[1];        // 0x290
-};
 
 struct sEnt_3640 {
     char pad0[0x4];
@@ -5234,11 +5157,11 @@ struct sEnt_3640 {
     int flags;                  // 0x34
 };
 
-static inline sItem_3640* lookup_3640(sDb_3640* d, int i)
+static inline sItem_3640* lookup_3640(cBECharProfileDB* d, int i)
 {
-    short k = d->map[i];
+    short k = d->mpBoltsMap[i];
     if (k >= 0) {
-        return &d->items[k];
+        return &((sItem_3640*)&d->mBolts[0])[k];
     }
     return 0;
 }
@@ -5330,7 +5253,7 @@ extern "C" void cRider_OnStartObjectUse(cRider* self)
     if (rec[6] != 0) {
         void* iface = cBE_getInterface(cBE_getBE(), 9);
         void* tbl = func_0014BDB8_3640();
-        sDb_3640* db = (sDb_3640*)func_0014AD50(iface, self->mAIIndex);
+        cBECharProfileDB* db = (cBECharProfileDB*)func_0014AD50(iface, self->mAIIndex);
         int identity = cRider_getIdentity(self);
         int n = func_0014D988(tbl, identity);
         sEnt_3640* entry = (sEnt_3640*)func_0014D998(tbl, identity);
@@ -5373,12 +5296,6 @@ struct sItem_123B48 {
     unsigned short flags;
 };
 
-struct sDb_123B48 {
-    char pad0[0x288];
-    short* map;                 // 0x288
-    char pad28C[0x4];
-    sItem_123B48 items[1];      // 0x290
-};
 
 struct sEnt_123B48 {
     char pad0[0x4];
@@ -5389,11 +5306,11 @@ struct sEnt_123B48 {
     int flags;                  // 0x34
 };
 
-static inline sItem_123B48* lookup_123B48(sDb_123B48* d, int i)
+static inline sItem_123B48* lookup_123B48(cBECharProfileDB* d, int i)
 {
-    short k = d->map[i];
+    short k = d->mpBoltsMap[i];
     if (k >= 0) {
-        return &d->items[k];
+        return &((sItem_123B48*)&d->mBolts[0])[k];
     }
     return 0;
 }
@@ -5423,7 +5340,7 @@ static inline int entItem_123B48(sEnt_123B48* e)
     return e->item;
 }
 
-static inline unsigned short itemFlags_123B48(sDb_123B48* db, sEnt_123B48* e)
+static inline unsigned short itemFlags_123B48(cBECharProfileDB* db, sEnt_123B48* e)
 {
     return lookup_123B48(db, entItem_123B48(e))->flags;
 }
@@ -5460,7 +5377,7 @@ extern "C" void cRider_OnEndObjectUse(cRider* self)
     if (*(signed char*)((char*)GetSSXActorHeader(self->unk_6D8) + 6) != 0) {
         void* iface = cBE_getInterface(cBE_getBE(), 9);
         void* tbl = func_0014BDB8_noarg();
-        sDb_123B48* db = (sDb_123B48*)func_0014AD50(iface, self->mAIIndex);
+        cBECharProfileDB* db = (cBECharProfileDB*)func_0014AD50(iface, self->mAIIndex);
         int identity = cRider_getIdentity(self);
         int n = func_0014D988(tbl, identity);
         sEnt_123B48* entry = (sEnt_123B48*)func_0014D998(tbl, identity);
@@ -5529,19 +5446,7 @@ extern "C" int func_002A1B58(void* self, int msg, int a);
 extern "C" int func_002A1B88(void* self, int type, int a, int b);
 extern "C" void* cSSXScriptEngine_GetSubjectRider(void* self, int i, int a2);
 
-struct sAnimEvent_123E30
-{
-    int id;
-    signed char* arg;
-};
 
-struct sAnimEventInfo_123E30
-{
-    int pad[4];
-    int count;                      // 0x10
-    sAnimEvent_123E30* events;      // 0x14
-    int pad18[6];
-};
 
 /**
  * Handles an in-sequence script's key events: sends its sound events for the rider.
@@ -5559,14 +5464,14 @@ struct sAnimEventInfo_123E30
  */
 extern "C" void cRider_OnInSeqKeyEvent(cRider* self, int id, float currFrame, float ignoredFloat, int type, int flags)
 {
-    sAnimEventInfo_123E30 info;
+    tSSXFrameActor info;
     if (flags & 0x10)
     {
         GetSSXActorFrame(id, &info);
-        for (int i = 0; i < info.count; i++)
+        for (int i = 0; i < info.numSpeechEvent; i++)
         {
-            sAnimEvent_123E30* event = &info.events[i];
-            int ev = event->id;
+            tSpeechEvent* event = &(info.pSpeechEventArray)[i];
+            int ev = event->eventID;
             if (ev == 102) continue;
             if (ev < 100)
             {
@@ -5578,7 +5483,7 @@ extern "C" void cRider_OnInSeqKeyEvent(cRider* self, int id, float currFrame, fl
                 ev -= 100;
                 void* snd = cAudioInterface_bxAudio();
                 // PORT: id is a handle that is also read as a pointer here.
-                int subjectRider = (int)cSSXScriptEngine_GetSubjectRider(ScriptEngine, *event->arg, *(int*)(id + 8));
+                int subjectRider = (int)cSSXScriptEngine_GetSubjectRider(ScriptEngine, *((signed char*)event->pCustom), *(int*)(id + 8));
                 func_002A1B88(snd, ev, (int)self, subjectRider);
                 self->unk_AC8 = 1;
             }
@@ -5597,17 +5502,10 @@ int GetSSXActorHeader(void* self);
 
 extern t4Vector D_004FF160_3F38 __asm__("t4vect_ZAxis");
 
-struct sRay_3F38 {
-    char data[0xB0];
-} __attribute__((aligned(16)));
 
-struct sHit_3F38 {
-    t4Vector pos;
-    char pad[0x70];
-} __attribute__((aligned(16)));
 
-extern "C" void cWorldLine_cWorldLine_3F38(sRay_3F38* ray, const t4Vector& a, const t4Vector& b, int n, float t) __asm__("cWorldLine_cWorldLine");
-extern "C" float cBXNash_terrainIntersect1(void* self, sRay_3F38* ray, sHit_3F38* out, int a3);
+extern "C" void cWorldLine_cWorldLine_3F38(cWorldLine* ray, const t4Vector& a, const t4Vector& b, int n, float t) __asm__("cWorldLine_cWorldLine");
+extern "C" float cBXNash_terrainIntersect1(void* self, cWorldLine* ray, tIntersectInfo* out, int a3);
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
 static inline t4Vector Scale_3F38(const t4Vector& v, float s)
@@ -5756,11 +5654,11 @@ extern "C" t4Vector cRider_GetNISEndPosition(cRider* self)
     }
     t4Vector lo = Add_3F38(pos, Scale_3F38(D_004FF160_3F38, -7000.0f));
     t4Vector hi = Add_3F38(pos, Scale_3F38(D_004FF160_3F38, 200.0f));
-    sHit_3F38 hit;
-    sRay_3F38 ray;
+    tIntersectInfo hit;
+    cWorldLine ray;
     cWorldLine_cWorldLine_3F38(&ray, lo, hi, 2, 0.9791666865348816f);
     if (cBXNash_terrainIntersect1(SSXApp->Game->BXNash, &ray, &hit, 0) >= 0.0f)
-        pos = hit.pos;
+        pos = hit.Ipos;
     AddTo_3F38(pos, Scale_3F38(D_004FF160_3F38, lift));
     return pos;
 }
@@ -5807,27 +5705,11 @@ INCLUDE_ASM("ai/rider", cRider_SetNISGroundVectors);
 extern t4Vector D_004FF120_42B0 __asm__("t4vect_Zero");
 extern t4Vector D_004FF160_42B0 __asm__("t4vect_ZAxis");
 
-struct sRay_42B0 {
-    char data[0xB0];
-} __attribute__((aligned(16)));
-
-struct sHit_42B0 {
-    t4Vector pos;        // 0x00
-    t4Vector nrm;        // 0x10
-    t4Vector v20;        // 0x20
-    char pad30[0x1C];
-    int mat;            // 0x4C
-    int pad50;
-    char* obj;          // 0x54
-    char pad58[0x14];
-    float f6C;          // 0x6C
-    float f70;          // 0x70
-    char pad74[0xC];
-} __attribute__((aligned(16)));
 
 
-extern "C" void cWorldLine_cWorldLine(sRay_42B0* ray, const t4Vector& a, const t4Vector& b, int n, float t);
-extern "C" float cOverlapList_terrainIntersect1(void* coll, sRay_42B0* ray, sHit_42B0* hit, int flags);
+
+extern "C" void cWorldLine_cWorldLine(cWorldLine* ray, const t4Vector& a, const t4Vector& b, int n, float t);
+extern "C" float cOverlapList_terrainIntersect1(void* coll, cWorldLine* ray, tIntersectInfo* hit, int flags);
 void func_00111AA0_42B0(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
 
 // PORT: PS2-only VU0 inline asm (vector length).
@@ -6006,16 +5888,16 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
     t4Vector probeBase = Add_42B0(*(t4Vector*)pRiderPos, Scale_42B0(*(&self->mGroundSide), sideOffset));
     t4Vector lo = Add_42B0(probeBase, Scale_42B0(*(&self->mGroundNormal), -100.0f));
     t4Vector hi = Add_42B0(probeBase, Scale_42B0(*(&self->mGroundNormal), 200.0f));
-    sHit_42B0 hit;
-    sRay_42B0 ray;
+    tIntersectInfo hit;
+    cWorldLine ray;
     cWorldLine_cWorldLine(&ray, lo, hi, 2, 0.5f);
     float hitDist = cOverlapList_terrainIntersect1(self->mOverlapList, &ray, &hit, 0);
     *(&self->LastGroundNormal) = *(&self->mGroundNormal);
-    if (hitDist > 0.0f && hit.obj != 0) {
-        self->mGroundPolyId = *(int*)(hit.obj + 0x150);
-        self->unk_AAC = hit.f6C;
-        self->unk_AB0 = hit.f70;
-        self->SurfaceFlags = *(unsigned short*)(hit.obj + 0xA);
+    if (hitDist > 0.0f && ((char*)hit.Patch) != 0) {
+        self->mGroundPolyId = *(int*)(((char*)hit.Patch) + 0x150);
+        self->unk_AAC = hit.u;
+        self->unk_AB0 = hit.v;
+        self->SurfaceFlags = *(unsigned short*)(((char*)hit.Patch) + 0xA);
     } else {
         *(unsigned int*)&self->mGroundPolyId = 0xFFFFFFFF;
     }
@@ -6034,18 +5916,18 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
         return;
     }
     if (self->unk_AFC != 0 && self->unk_B00 == 0) {
-        func_00111AA0_42B0(self->mRiderHandler, &hit, &hit.nrm, hit.mat, Length_42B0(hit.v20));
+        func_00111AA0_42B0(self->mRiderHandler, &hit, &hit.Inorm, hit.Stype, Length_42B0(hit.Ivel));
     }
     self->unk_B00 = 1;
-    self->mSurfaceType = hit.mat;
-    if (hit.mat == -1)
+    self->mSurfaceType = hit.Stype;
+    if (hit.Stype == -1)
         self->mSurfaceType = 0;
-    *(&self->mGroundNormal) = hit.nrm;
-    *(&self->mGroundContactPoint) = hit.pos;
-    *(&self->GroundVelocity) = hit.v20;
+    *(&self->mGroundNormal) = hit.Inorm;
+    *(&self->mGroundContactPoint) = hit.Ipos;
+    *(&self->GroundVelocity) = hit.Ivel;
     *(&self->mGroundForward) = Normalize_42B0(SubV_42B0(*(&self->mMatrix.row[1]), Scale_42B0(*(&self->mGroundNormal), DotV_42B0(*(&self->mMatrix.row[1]), *(&self->mGroundNormal)))));
     *(&self->mGroundSide) = Cross_42B0(*(&self->mGroundNormal), *(&self->mGroundForward));
-    self->unk_454 = Dot_42B0(Sub_42B0(probeBase, hit.pos), *(&self->mGroundNormal));
+    self->unk_454 = Dot_42B0(Sub_42B0(probeBase, hit.Ipos), *(&self->mGroundNormal));
     float speedDrop = self->unk_B04 - speed;
     *(int*)&self->mAudioBraking = 0;
     if (speedDrop < self->mAudioBraking) {
@@ -6108,11 +5990,6 @@ struct sQ_124788
 
 extern sQ_124788 D_004FF130_124788 __asm__("t4vect_Origin");
 
-struct sXf_124788
-{
-    sQ_124788 pos;
-    sQ_124788 rot;
-};
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
 static inline sQ_124788 QuatMul_124788(const sQ_124788& a, const sQ_124788& b)
@@ -6244,32 +6121,32 @@ static inline sQ_124788 MatMulV_124788(const char* m, const sQ_124788& v)
     return r;
 }
 
-static inline sQ_124788 Conj_124788(const sXf_124788& p)
+static inline sQ_124788 Conj_124788(const tPose& p)
 {
     sQ_124788 r;
-    r.w = p.rot.w;
-    r.x = p.rot.x;
-    r.y = p.rot.y;
-    r.z = p.rot.z;
+    r.w = (*(sQ_124788*)&p.Q).w;
+    r.x = (*(sQ_124788*)&p.Q).x;
+    r.y = (*(sQ_124788*)&p.Q).y;
+    r.z = (*(sQ_124788*)&p.Q).z;
     r.x = -r.x;
     r.y = -r.y;
     r.z = -r.z;
     return r;
 }
 
-static inline sXf_124788 Invert_124788(const sXf_124788& a)
+static inline tPose Invert_124788(const tPose& a)
 {
-    sXf_124788 r;
-    r.rot = Conj_124788(a);
-    r.pos = Add_124788(Scale_124788(Rot_124788(r.rot, Sub_124788(a.pos, D_004FF130_124788)), -1.0f), D_004FF130_124788);
+    tPose r;
+    (*(sQ_124788*)&r.Q) = Conj_124788(a);
+    (*(sQ_124788*)&r.P) = Add_124788(Scale_124788(Rot_124788((*(sQ_124788*)&r.Q), Sub_124788((*(sQ_124788*)&a.P), D_004FF130_124788)), -1.0f), D_004FF130_124788);
     return r;
 }
 
-static inline sXf_124788 Combine_124788(const sXf_124788& a, const sXf_124788& b)
+static inline tPose Combine_124788(const tPose& a, const tPose& b)
 {
-    sXf_124788 r;
-    r.rot = QuatMul_124788(a.rot, b.rot);
-    r.pos = Add_124788(Rot_124788(a.rot, Sub_124788(b.pos, D_004FF130_124788)), a.pos);
+    tPose r;
+    (*(sQ_124788*)&r.Q) = QuatMul_124788((*(sQ_124788*)&a.Q), (*(sQ_124788*)&b.Q));
+    (*(sQ_124788*)&r.P) = Add_124788(Rot_124788((*(sQ_124788*)&a.Q), Sub_124788((*(sQ_124788*)&b.P), D_004FF130_124788)), (*(sQ_124788*)&a.P));
     return r;
 }
 
@@ -6278,32 +6155,11 @@ static inline sQ_124788 GetFront_124788(cRider* rider)
     return *(sQ_124788*)&rider->mMatrix.row[1];
 }
 
-struct sAnimFlags_124788 {
-    signed char heading;    // 0x0
-    signed char root;       // 0x1
-    signed char drift;      // 0x2
-};
 
-struct sAnimInfo_124788 {
-    int name;                       // 0x00
-    int frame;                      // 0x04
-    char pad08[0x8];
-    float rate;                     // 0x10
-    float speed;                    // 0x14
-    unsigned int start;             // 0x18
-    sAnimFlags_124788* flags;       // 0x1C
-};
 
-struct sAnimEvent_124788 {
-    int active;                     // 0x00
-    sAnimInfo_124788* info;         // 0x04
-    char pad08[0x10];
-    float pos[3];                   // 0x18
-    float ang[3];                   // 0x24 degrees
-};
 
 // The unit declares cRider_DoInSeqAnimUpdate(void*, void*, float, float, int); bind the typed definition by asm label.
-extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, sAnimEvent_124788* pFrameInfo, float currFrame, float frameDelta, int eventBits) __asm__("cRider_DoInSeqAnimUpdate");
+extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, tSSXFrameActor* pFrameInfo, float currFrame, float frameDelta, int eventBits) __asm__("cRider_DoInSeqAnimUpdate");
 /**
  * Drives the rider from an in-game scripted sequence (NIS) frame: starts its animation and follows the scripted
  * position and angles.
@@ -6326,41 +6182,41 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, sAnimEvent_124788* 
  * @param frameDelta  frames advanced this update
  * @param eventBits  bit 0: key event on this frame; bit 1: the sequence ended
  */
-extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, sAnimEvent_124788* pFrameInfo, float currFrame, float frameDelta, int eventBits)
+extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, tSSXFrameActor* pFrameInfo, float currFrame, float frameDelta, int eventBits)
 {
     if (eventBits & 1) {
-        if (pFrameInfo->active == 0) {
+        if (pFrameInfo->numMainAnim == 0) {
             return;
         }
-        sAnimInfo_124788* pCurrMainAnim = pFrameInfo->info;
-        sAnimFlags_124788* pCurrMainAnimCustom = pCurrMainAnim->flags;
-        if ((float)pCurrMainAnim->frame != currFrame) {
+        tMainAnim* pCurrMainAnim = (pFrameInfo->pMainAnimList);
+        tTagCustomMainAnim* pCurrMainAnimCustom = (pCurrMainAnim->pCustom);
+        if ((float)pCurrMainAnim->data.scriptStartFrame != currFrame) {
             return;
         }
-        float startTime = pCurrMainAnim->rate * 0.01666666753590107f;
+        float startTime = pCurrMainAnim->data.currObjectFrame * 0.01666666753590107f;
         int animID;
         int sourceID;
-        cScriptObjRider_ScriptAnimIDToGameAnimInfo(&self->mScriptObjRiderVtbl, pCurrMainAnim->name, &animID, &sourceID);
+        cScriptObjRider_ScriptAnimIDToGameAnimInfo(&self->mScriptObjRiderVtbl, pCurrMainAnim->data.objectID, &animID, &sourceID);
         tAnimID animInfo(sourceID, animID);
-        if (pCurrMainAnimCustom->root != 0) {
+        if (pCurrMainAnimCustom->alignBody != 0) {
             char buf[80];
             cRiderAnimBase_getAIAnimFrame(buf, self->mRiderAnim, 432, animInfo, startTime);
-            sXf_124788 animPose;
+            tPose animPose;
             func_0030ECD8(&animPose, self->mAnimModel, buf, 0);
             cAnimModel* trk = self->mAnimModel;
             sQ_124788* n = (sQ_124788*)((self->mBoneHips << 4) + (int)trk->localPos);
-            sXf_124788 node;
-            node.pos = sQ_124788(n->x * trk->unk_140.x, n->y * trk->unk_140.y,
+            tPose node;
+            (*(sQ_124788*)&node.P) = sQ_124788(n->x * trk->unk_140.x, n->y * trk->unk_140.y,
                                  n->z * trk->unk_140.z, n->w * trk->unk_140.w);
-            node.rot = *(sQ_124788*)((char*)self->mAnimModel->localRot + (self->mBoneHips << 4));
-            sXf_124788 y = Combine_124788(node, Invert_124788(animPose));
-            sXf_124788* rx = (sXf_124788*)&self->mPosition;
+            (*(sQ_124788*)&node.Q) = *(sQ_124788*)((char*)self->mAnimModel->localRot + (self->mBoneHips << 4));
+            tPose y = Combine_124788(node, Invert_124788(animPose));
+            tPose* rx = (tPose*)&self->mPosition;
             *rx = Combine_124788(*rx, y);
             cRider_updateOrientationImplicit(self);
-            sXf_124788 w = Invert_124788(y);
+            tPose w = Invert_124788(y);
             cRiderAnimBase_changeOrientationOffset(self->mRiderAnim, &w);
         }
-        if (pCurrMainAnimCustom->drift != 0) {
+        if (pCurrMainAnimCustom->applySGOffsets != 0) {
             float kneeOffset = cRider_getStartGateKneeOffset(self);
             self->mSlewed[18].target = kneeOffset;
             self->mSlewed[18].rate = 0;
@@ -6368,7 +6224,7 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, sAnimEvent_124788* 
             AddEq_124788(*(sQ_124788*)&self->mPosition, Scale_124788(GetFront_124788(self), cRider_getStartGateHorizOffset(self)));
             cRider_updateOrientationImplicit(self);
         }
-        int isFlipped = pCurrMainAnimCustom->heading != 0;
+        int isFlipped = pCurrMainAnimCustom->isFlipped != 0;
         if (isFlipped != self->unk_2D8) {
             float headingOffset = 0.0f;
             if (isFlipped) {
@@ -6377,24 +6233,24 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, sAnimEvent_124788* 
             cRiderAnimBase_changeHeadingOffset(self->mRiderAnim, headingOffset);
             self->unk_2D8 = isFlipped;
         }
-        float start = pCurrMainAnim->start;
-        self->mRiderAnim->FrameRateFactor = pCurrMainAnim->speed;
+        float start = pCurrMainAnim->data.blendInFrames;
+        self->mRiderAnim->FrameRateFactor = pCurrMainAnim->data.playRate;
         cRiderAnimBase_playFromAnimID(self->mRiderAnim, 432, animInfo, start * 0.01666666753590107f);
         cAnimSequence_setSubAnimTime(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2), 0, startTime);
         cRiderAnimBase_setupAnimation(self->mRiderAnim, 0);
         self->mRiderAnim->FrameRateFactor = 1.0f;
-    } else if ((eventBits & 2) && pFrameInfo->active == 0) {
+    } else if ((eventBits & 2) && pFrameInfo->numMainAnim == 0) {
         cRiderAnimBase_play(self->mRiderAnim, 5, 0, -1.0f);
     }
     sQ_124788 oldStart = *(sQ_124788*)&self->unk_AE0;
-    *(sQ_124788*)&self->unk_AE0 = sQ_124788(pFrameInfo->pos[0], pFrameInfo->pos[1], pFrameInfo->pos[2], 1.0f);
+    *(sQ_124788*)&self->unk_AE0 = sQ_124788(((float*)&pFrameInfo->posX)[0], ((float*)&pFrameInfo->posX)[1], ((float*)&pFrameInfo->posX)[2], 1.0f);
     float prevAngX = self->unk_AF0;
     float prevAngY = self->unk_AF4;
     float prevAngZ = self->unk_AF8;
     sQ_124788 oldPos = *(sQ_124788*)&self->mPosition;
-    self->unk_AF0 = pFrameInfo->ang[0] * 0.01745329424738884f;
-    self->unk_AF4 = pFrameInfo->ang[1] * 0.01745329424738884f;
-    self->unk_AF8 = pFrameInfo->ang[2] * 0.01745329424738884f;
+    self->unk_AF0 = ((float*)&pFrameInfo->rotX)[0] * 0.01745329424738884f;
+    self->unk_AF4 = ((float*)&pFrameInfo->rotX)[1] * 0.01745329424738884f;
+    self->unk_AF8 = ((float*)&pFrameInfo->rotX)[2] * 0.01745329424738884f;
     AddEq_124788(*(sQ_124788*)&self->mPosition,
                  MatMulV_124788((char*)&self->mScriptMatrix, Sub_124788(*(sQ_124788*)&self->unk_AE0, oldStart)));
     sQ_124788 delta = Sub_124788(*(sQ_124788*)&self->mPosition, oldPos);
@@ -6690,13 +6546,6 @@ struct sWtTrack_5448 {
     sWtSub_5448 sub;         // 0x1D8
 };
 
-struct sWtSnd_5448 {
-    sWtTrack_5448* track;    // 0x0
-    int* types;              // 0x4
-    int* args;               // 0x8
-    char pad[0x10C];
-    sWtTrack_5448** cur;     // 0x118
-};
 
 struct sSfxEnt_5448 {
     int id;                  // 0x0
@@ -6733,11 +6582,11 @@ extern "C" void cRider_DoInSeqSoundUpdate(cRider* vself, void* vobj, float when,
     cRider* self = (cRider*)vself;
     char* obj = (char*)vobj;
     int* ids = self->unk_B08;
-    sWtSnd_5448* snd = (sWtSnd_5448*)cAudioInterface_bxAudio();
+    cSSXAudio* snd = cAudioInterface_bxAudio();
     int i;
     for (i = 0; i < 4; i++) {
         if (ids[i] >= 0) {
-            if (cBankMonitor_BANKMONITOR_GetHandle((char*)*snd->cur + 0x1D8, ids[i], 1) == 0)
+            if (cBankMonitor_BANKMONITOR_GetHandle((char*)*(*(sWtTrack_5448***)&snd->MusicSys) + 0x1D8, ids[i], 1) == 0)
                 ids[i] = -1;
         }
     }
@@ -6752,7 +6601,7 @@ extern "C" void cRider_DoInSeqSoundUpdate(cRider* vself, void* vobj, float when,
             cScriptObjRider_ScriptSoundIDToGameSoundInfo(&self->mScriptObjRiderVtbl, curSound->id, &gameSoundIndex, &type);
             int tp = type;
             int ar = gameSoundIndex;
-            sWtTrack_5448* curTrack = snd->track;
+            sWtTrack_5448* curTrack = ((sWtTrack_5448*)snd->mpVBankManager);
             sWtSub_5448* trackSub = &curTrack->sub;
             curTrack->sub.cur++;
             trackSub->ents[curTrack->sub.cur] = trackSub->cfg;
@@ -6774,23 +6623,23 @@ extern "C" void cRider_DoInSeqSoundUpdate(cRider* vself, void* vobj, float when,
             trackSub->p84[curTrack->sub.cur] = 0;
             trackSub->p78[curTrack->sub.cur] = 0x7F;
             trackSub->p7C[curTrack->sub.cur] = 1;
-            snd->types[snd->track->sub.cur] = tp;
-            snd->args[snd->track->sub.cur] = ar;
+            snd->mBank[((sWtTrack_5448*)snd->mpVBankManager)->sub.cur] = tp;
+            snd->mPatch[((sWtTrack_5448*)snd->mpVBankManager)->sub.cur] = ar;
             {
-                sWtTrack_5448* volTrack = *snd->cur;
+                sWtTrack_5448* volTrack = *(*(sWtTrack_5448***)&snd->MusicSys);
                 sWtSub_5448* s2 = &volTrack->sub;
                 s2->p38[volTrack->sub.cur] = *curSound->vol;
                 s2->ents[volTrack->sub.cur].b0 = MAX_5448(MIN_5448(s2->p38[s2->cur], 0x7F), 0);
             }
             {
-                sWtTrack_5448** pt = snd->cur;
+                sWtTrack_5448** pt = (*(sWtTrack_5448***)&snd->MusicSys);
                 int h = cSSXAudio_GetCurrAppliedVolumePtr(snd, 4, 0);
                 (*pt)->sub.p3C[(*pt)->sub.cur] = h;
             }
             {
-                sWtTrack_5448* posTrack = *snd->cur;
+                sWtTrack_5448* posTrack = *(*(sWtTrack_5448***)&snd->MusicSys);
                 posTrack->sub.arr24[posTrack->sub.cur] = (int)rp;
-                sWtTrack_5448** pt = snd->cur;
+                sWtTrack_5448** pt = (*(sWtTrack_5448***)&snd->MusicSys);
                 int h = cSSXAudio_GetClosestCamera1(snd, self);
                 (*pt)->sub.p64[(*pt)->sub.cur] = h;
             }
@@ -6809,7 +6658,7 @@ extern "C" void cRider_DoInSeqSoundUpdate(cRider* vself, void* vobj, float when,
         for (i = 0; i < 4; i++) {
             if (keep[i] != 0) {
                 if (ids[i] >= 0) {
-                    cBankMonitor_BANKMONITOR_StopHandle((char*)*snd->cur + 0x1D8, ids[i], 1, 0.0f);
+                    cBankMonitor_BANKMONITOR_StopHandle((char*)*(*(sWtTrack_5448***)&snd->MusicSys) + 0x1D8, ids[i], 1, 0.0f);
                     ids[i] = -1;
                 }
             }

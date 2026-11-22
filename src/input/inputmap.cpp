@@ -212,12 +212,6 @@ INCLUDE_ASM("input/inputmap", cInputMap_getValue1);
 void* cInputExec_cInputExec(void* self);
 extern "C" float cInputExec_execute(void* parser, void* a1, void* a2);
 
-struct sParser_1010 {
-    int f0;                 // 0x0
-    char pad4[0x108];
-    float v[8];             // 0x10C
-    char pad12C[0x190 - 0x12C];
-};
 
 /**
  * Evaluates one compiled map statement against a controller pad with a default button modifier and eight config values.
@@ -241,17 +235,17 @@ struct sParser_1010 {
  */
 extern "C" float cInputMap_getValue1(cInputMap* self, void* inputPad, int stateId, int modifier, float config0, float config1, float config2, float config3, float config4, float config5, float config6, float config7)
 {
-    sParser_1010 parser;
+    cInputExec parser;
     cInputExec_cInputExec(&parser);
-    parser.f0 = modifier;
-    parser.v[0] = config0;
-    parser.v[1] = config1;
-    parser.v[2] = config2;
-    parser.v[3] = config3;
-    parser.v[4] = config4;
-    parser.v[5] = config5;
-    parser.v[6] = config6;
-    parser.v[7] = config7;
+    parser.DefaultButtonModifier = modifier;
+    ((float*)&parser.Config[1])[0] = config0;
+    ((float*)&parser.Config[1])[1] = config1;
+    ((float*)&parser.Config[1])[2] = config2;
+    ((float*)&parser.Config[1])[3] = config3;
+    ((float*)&parser.Config[1])[4] = config4;
+    ((float*)&parser.Config[1])[5] = config5;
+    ((float*)&parser.Config[1])[6] = config6;
+    ((float*)&parser.Config[1])[7] = config7;
     return cInputExec_execute(&parser, inputPad, &self->OpCodeBuf[(self->MapOffset)[stateId]]);
 }
 #endif
@@ -285,12 +279,6 @@ INCLUDE_ASM("input/inputmap", cInputMap_getState1);
 void* cInputExec_cInputExec(void* self);
 extern "C" float cInputExec_execute(void* parser, void* a1, void* a2);
 
-struct sParser_1188 {
-    int f0;                 // 0x0
-    char pad4[0x108];
-    float v[8];             // 0x10C
-    char pad12C[0x190 - 0x12C];
-};
 
 /**
  * Tells whether one compiled map statement is nonzero for a controller pad, with a default button modifier and eight
@@ -314,17 +302,17 @@ struct sParser_1188 {
  */
 extern "C" int cInputMap_getState1(cInputMap* self, void* inputPad, int stateId, int modifier, float config0, float config1, float config2, float config3, float config4, float config5, float config6, float config7)
 {
-    sParser_1188 parser;
+    cInputExec parser;
     cInputExec_cInputExec(&parser);
-    parser.f0 = modifier;
-    parser.v[0] = config0;
-    parser.v[1] = config1;
-    parser.v[2] = config2;
-    parser.v[3] = config3;
-    parser.v[4] = config4;
-    parser.v[5] = config5;
-    parser.v[6] = config6;
-    parser.v[7] = config7;
+    parser.DefaultButtonModifier = modifier;
+    ((float*)&parser.Config[1])[0] = config0;
+    ((float*)&parser.Config[1])[1] = config1;
+    ((float*)&parser.Config[1])[2] = config2;
+    ((float*)&parser.Config[1])[3] = config3;
+    ((float*)&parser.Config[1])[4] = config4;
+    ((float*)&parser.Config[1])[5] = config5;
+    ((float*)&parser.Config[1])[6] = config6;
+    ((float*)&parser.Config[1])[7] = config7;
     return cInputExec_execute(&parser, inputPad, &self->OpCodeBuf[(self->MapOffset)[stateId]]) != 0.0f;
 }
 #endif

@@ -42,10 +42,6 @@ int GetHashValue32(char* s);
 extern char* cGameState_mpGame;
 extern char str_StartlightBegin[];
 
-struct sRace_234AD0 {
-    char pad[0x8C];
-    int f8C;
-};
 
 /**
  * Starts the start-gate countdown: resets the replay for the race, puts the AI in state 4 and fires
@@ -55,7 +51,7 @@ struct sRace_234AD0 {
  */
 extern "C" void cGFGateState_gainFocus(cGFGateState* self)
 {
-    (*(sRace_234AD0**)(cGameState_mpGame + 0xC))->f8C = 0;
+    (*(cAI**)(cGameState_mpGame + 0xC))->ComputerActorsActive = 0;
     if (cGameComm_mGameComm != 0) {
         cGameComm_gameStartGate((char*)cGameComm_mGameComm);
     }
@@ -1010,14 +1006,7 @@ INCLUDE_ASM("main/gamestate", cGFNextHeatState_update);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 struct sVec4_236960;
-struct sVec4_235CC8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-struct sRaceMan_235CC8 {
-    char pad0[0x14];
-    int f14;
-};
 
 struct sCacheTbl_235CC8 {
     char pad[0x250];
@@ -1043,7 +1032,7 @@ extern "C" void cAI_initAIRiders(void* p);
 extern "C" int cAI_isAILoadedAndReady(void* p);
 void cAI_resolveRace(void* p);
 extern "C" void cAI_loadRiders(void* p);
-extern "C" sVec4_235CC8 cRider_getEventStartPos(void* rider);
+extern "C" t4Vector cRider_getEventStartPos(void* rider);
 extern "C" void cWorldView_setFocus(void* cache, int idx, const t4Vector* pos, float radius);
 extern "C" int cWorldView_getTestFocus(void* cache, int idx, t4Vector* pos, float* dist);
 extern "C" int cSSXScriptEngine_GetNISListState(void* p, int a);
@@ -1081,10 +1070,10 @@ extern "C" void cGFNextHeatState_update(cGFNextHeatState* self)
     case 1:
         if (cAI_isAILoadedAndReady(game->AI)) {
             cAI_resolveRace(SSXApp->Game->AI);
-            (*(sRaceMan_235CC8**)(cGameState_mpGame + 0xC))->f14 = 1;
+            (*(cAI**)(cGameState_mpGame + 0xC))->ComputerRidersActive = 1;
             ((sCacheTbl_235CC8*)*cache)->slot[idx].f0 = 1;
             cPlayer* player = SSXApp->Game->AI->Players[0];
-            sVec4_235CC8 pos = cRider_getEventStartPos(player->mRider);
+            t4Vector pos = cRider_getEventStartPos(player->mRider);
             cWorldView_setFocus(*cache + 0x10, idx, (const t4Vector*)&pos, 45000.0f);
             self->CurrentNextHeatState = 2;
         } else {
@@ -1093,7 +1082,7 @@ extern "C" void cGFNextHeatState_update(cGFNextHeatState* self)
         break;
     case 2:
         if (self->PlayTransport != 0) {
-            sVec4_235CC8 focusPos;
+            t4Vector focusPos;
             float dist;
             cWorldView_getTestFocus(*cache + 0x10, idx, (t4Vector*)&focusPos, &dist);
             if (dist < 20000.0f)

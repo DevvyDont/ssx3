@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/riderhandler.h"
 #include "vtable.h"
 #include "sound/ssxaudio.h"
 #include "bx/math3d.h"
@@ -813,12 +814,6 @@ extern char str_LATE_SPIN[];
 extern char str_LATE_FLIP[];
 
 
-struct sRiderSub_117FE0 {
-    char pad[0x2C0];
-    int state;              // 0x2C0
-    char pad2C4[0x330 - 0x2C4];
-    float f330;             // 0x330
-};
 
 struct sVE_117FE0 {
     short delta;
@@ -845,9 +840,9 @@ static inline float approach_117FE0(float target, float cur, float step)
     return r;
 }
 
-static inline bool subStateIs_117FE0(sRiderSub_117FE0* s, int st)
+static inline bool subStateIs_117FE0(cRiderHandler* s, int st)
 {
-    return s->state == st;
+    return s->WipeoutControl.RiderState == st;
 }
 
 // PORT: abs.s helper.
@@ -893,8 +888,8 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
         cRiderMetrix_addHUDfx1(self, 1, pts, cRiderMetrix_calcTrickLevel((cRiderMetrix*)self, pts), -1.0f);
         cSSXAudio_PointsEvent(cAudioInterface_bxAudio(), self->Rider, pts);
     }
-    if (cRider_getControlState(self->Rider) == 8 && !subStateIs_117FE0(((sRiderSub_117FE0*)(self->Rider)->mRiderHandler), 3))
-        cHUDFX_setAsync_f(&self->HUDfx[11], 11, 0, ((sRiderSub_117FE0*)(self->Rider)->mRiderHandler)->f330 <? 1.0f, 0);
+    if (cRider_getControlState(self->Rider) == 8 && !subStateIs_117FE0(((self->Rider)->mRiderHandler), 3))
+        cHUDFX_setAsync_f(&self->HUDfx[11], 11, 0, ((self->Rider)->mRiderHandler)->WipeoutControl.RecoverPercent <? 1.0f, 0);
     else
         cRiderMetrix_removeHUDfx((cRiderMetrix*)self, 11);
     cRiderMetrix_removeHUDfx((cRiderMetrix*)self, 0x10);
@@ -914,9 +909,9 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
         int fail = 0;
         float angle;
         if (cRider_getControlState(self->Rider) == 2)
-            angle = cPrewindControl_getFlipSpinInputAng((char*)((sRiderSub_117FE0*)(self->Rider)->mRiderHandler) + 0x1F0, &fail);
+            angle = cPrewindControl_getFlipSpinInputAng(&(self->Rider)->mRiderHandler->PrewindControl, &fail);
         else
-            angle = cSpinControl_getFlipSpinInputAng((char*)((sRiderSub_117FE0*)(self->Rider)->mRiderHandler) + 0x230, &fail);
+            angle = cSpinControl_getFlipSpinInputAng(&(self->Rider)->mRiderHandler->SpinControl, &fail);
         if (fail != 0) {
             cRiderMetrix_removeHUDfx((cRiderMetrix*)self, 13);
         } else {
@@ -947,7 +942,7 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
                 cRiderMetrix_addHUDfx1(self, 0xC, 0, 0, -1.0f);
         } else {
             int fail2 = 0;
-            float yaw = cSpinControl_getFlipSpinAng((char*)((sRiderSub_117FE0*)(self->Rider)->mRiderHandler) + 0x230, &fail2);
+            float yaw = cSpinControl_getFlipSpinAng(&(self->Rider)->mRiderHandler->SpinControl, &fail2);
             if (fail2 != 0) {
                 cRiderMetrix_removeHUDfx((cRiderMetrix*)self, 0xC);
                 cRiderMetrix_removeHUDfx((cRiderMetrix*)self, 13);
@@ -993,8 +988,8 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
                 } else {
                     main = 20;
                 }
-                float w1 = cSpinControl_getInvertScale((char*)((sRiderSub_117FE0*)(self->Rider)->mRiderHandler) + 0x230);
-                float w2 = cSpinControl_getOffAxisScale((char*)((sRiderSub_117FE0*)(self->Rider)->mRiderHandler) + 0x230);
+                float w1 = cSpinControl_getInvertScale(&(self->Rider)->mRiderHandler->SpinControl);
+                float w2 = cSpinControl_getOffAxisScale(&(self->Rider)->mRiderHandler->SpinControl);
                 cHUDFX_setAsync_f(&self->HUDfx[main], main, 0, 1.0f, 0);
                 if (invertZone1 != 52)
                     cHUDFX_setAsync_f(&self->HUDfx[invertZone1], invertZone1, 0, w1, 1);

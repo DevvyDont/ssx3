@@ -1,4 +1,5 @@
 #include "common.h"
+#include "seg/buddyapi.h"
 
 //100%
 INCLUDE_ASM("seg/seg_2F0F40", func_003EFF40);
@@ -418,12 +419,8 @@ struct S07A0Obj {
     int pad[3];
     void (*fn)(struct S07A0Obj*);
 };
-struct S07A0 {
-    struct S07A0Obj* obj;
-    int f4;
-};
-extern int func_003F0B50(struct S07A0*);
-extern void func_003F0BE0(struct S07A0*);
+extern int func_003F0B50(struct BuddyApiRefT*);
+extern void func_003F0BE0(struct BuddyApiRefT*);
 extern void func_003F55B8(int);
 extern void func_00259210(void*);
 /**
@@ -434,14 +431,14 @@ extern void func_00259210(void*);
  *
  * @param buddyRef  the BuddyApi state
  */
-void func_003F07A0(struct S07A0* buddyRef) {
-    if (buddyRef->obj) {
-        buddyRef->obj->fn(buddyRef->obj);
-        buddyRef->obj = 0;
+void func_003F07A0(struct BuddyApiRefT* buddyRef) {
+    if (((struct S07A0Obj*)buddyRef->mpHostLookup)) {
+        ((struct S07A0Obj*)buddyRef->mpHostLookup)->fn(((struct S07A0Obj*)buddyRef->mpHostLookup));
+        (*(struct S07A0Obj**)&buddyRef->mpHostLookup) = 0;
     }
     func_003F0B50(buddyRef);
     func_003F0BE0(buddyRef);
-    func_003F55B8(buddyRef->f4);
+    func_003F55B8(((int)buddyRef->mpSession));
     func_00259210(buddyRef);
 }
 #endif
@@ -570,7 +567,7 @@ int func_003F08E8(char* self, int serverName, int port, int ms, char* host, char
     char* sep;
     char* buf = self + 0x394;
     char* nickBuf;
-    func_003F0B50((struct S07A0*)self);
+    func_003F0B50((struct BuddyApiRefT*)self);
     *(int*)(self + 0x4C0) = ctx;
     *(int*)(self + 0x4C4) = cb;
     *(int*)(self + 0x10) = port;
@@ -638,13 +635,13 @@ extern int func_003F5738(int);
  * @param buddyRef  the BuddyApi state
  * @return 0
  */
-int func_003F0B50(struct S07A0* buddyRef) {
-    if (buddyRef->obj) {
-        buddyRef->obj->fn(buddyRef->obj);
-        buddyRef->obj = 0;
+int func_003F0B50(struct BuddyApiRefT* buddyRef) {
+    if (((struct S07A0Obj*)buddyRef->mpHostLookup)) {
+        ((struct S07A0Obj*)buddyRef->mpHostLookup)->fn(((struct S07A0Obj*)buddyRef->mpHostLookup));
+        (*(struct S07A0Obj**)&buddyRef->mpHostLookup) = 0;
     }
     func_003F00D8_0B50((int*)buddyRef, 0x44495343, (int)D_004A4AE8);
-    func_003F5738(buddyRef->f4);
+    func_003F5738(((int)buddyRef->mpSession));
     if (((int*)buddyRef)[2] == 5) {
         func_003F0610_0B50((int*)buddyRef, 6);
     }
@@ -673,7 +670,7 @@ extern void func_003EE260(int);
  *
  * @param sp  the BuddyApi state
  */
-void func_003F0BE0(struct S07A0* sp) {
+void func_003F0BE0(struct BuddyApiRefT* sp) {
     int* buddyApi = (int*)sp;
     int event[4];
     int x;
@@ -1311,7 +1308,7 @@ void func_003F17D8(struct Conn_17D8* self) {
             self->stateCb(self, &ev, self->stateCtx);
             self->timeout = 0;
             if (ev.arg != 0) {
-                func_003F0B50((struct S07A0*)self);
+                func_003F0B50((struct BuddyApiRefT*)self);
             }
         }
         if (ev.type == 0x52454356 && self->admnCb != 0) {

@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "render/ps2scratchpad.h"
 #include "bx/math3d.h"
 #include "render/2drender.h"
 #include "render/ps2lightman.h"
@@ -1059,16 +1060,6 @@ extern "C" void func_0038F7B0(void);
 // PORT: the unit declares D_004A5B84 as int further down; bind a pointer view by asm label
 extern char* D_004A5B84_F300 __asm__("D_004A5B84");
 
-struct sLightBufs_F300 {
-    int mode;        // 0x0
-    int count;       // 0x4
-    int f8;          // 0x8
-    int fC;          // 0xC
-    int stride;      // 0x10
-    char* buf[3];    // 0x14
-    int f20[3];      // 0x20
-    int f2C[3];      // 0x2C
-};
 
 /**
  * Splits the scratchpad into the buffers of the DMA ring for @p mode.
@@ -1084,43 +1075,43 @@ struct sLightBufs_F300 {
  *
  * @param mode  the layout, 1 to 7
  */
-extern "C" void func_0038F300(sLightBufs_F300* self, int mode)
+extern "C" void func_0038F300(cPS2ScratchPad* self, int mode)
 {
     int i;
-    if (self->mode == mode) {
+    if (self->unk_00 == mode) {
         return;
     }
-    self->mode = mode;
+    self->unk_00 = mode;
     switch (mode) {
-    case 1: self->count = 1; break;
-    case 2: self->count = 2; break;
-    case 3: self->count = 2; break;
-    case 4: self->count = 2; break;
-    case 5: self->count = 2; break;
+    case 1: self->unk_04 = 1; break;
+    case 2: self->unk_04 = 2; break;
+    case 3: self->unk_04 = 2; break;
+    case 4: self->unk_04 = 2; break;
+    case 5: self->unk_04 = 2; break;
     case 6:
     case 7:
-        self->count = 3;
+        self->unk_04 = 3;
         break;
     }
-    self->f8 = 0;
-    self->fC = 0;
+    self->unk_08 = 0;
+    self->mDMABlock = 0;
     switch (mode) {
-    case 1: self->stride = 0x400; break;
-    case 2: self->stride = 0x200; break;
-    case 3: self->stride = 0x1C0; break;
-    case 4: self->stride = 0x180; break;
-    case 6: self->stride = 320; break;
+    case 1: self->mBlockSize = 0x400; break;
+    case 2: self->mBlockSize = 0x200; break;
+    case 3: self->mBlockSize = 0x1C0; break;
+    case 4: self->mBlockSize = 0x180; break;
+    case 6: self->mBlockSize = 320; break;
     case 5:
     case 7:
-        self->stride = 0x100;
+        self->mBlockSize = 0x100;
         break;
     }
-    for (i = 0; i < self->count; i++) {
-        self->buf[i] = (char*)0x70000000 + self->stride * i * 16;
-        self->f20[i] = 0;
-        self->f2C[i] = 0;
+    for (i = 0; i < self->unk_04; i++) {
+        self->mBlockAddr[i] = (char*)0x70000000 + self->mBlockSize * i * 16;
+        ((int*)&self->unk_20[0])[i] = 0;
+        self->unk_2C[i] = 0;
     }
-    int total = self->stride * self->count;
+    int total = self->mBlockSize * self->unk_04;
     if (total < 0x400) {
         D_004A5B84_F300 = (char*)0x70000000 + total * 16;
     } else {
@@ -1204,19 +1195,9 @@ extern "C" int func_0038F4F8(void* self, unsigned int addr, int size, int flags)
 //100%
 INCLUDE_ASM("render/lightman", func_0038F560);
 #ifdef SKIP_ASM
-struct sLightDma_F560 {
-    int field_0x0;
-    int count;              // 0x4
-    int next;               // 0x8
-    int cur;                // 0xC
-    int defSize;            // 0x10
-    int result[3];          // 0x14
-    unsigned int addr[3];   // 0x20
-    int size[3];            // 0x2C
-};
 
 // PORT: func_0038F598 takes (self, size, flags) and returns the buffer address.
-unsigned int func_0038F598_f560(sLightDma_F560* self, int size, int flags) __asm__("func_0038F598");
+unsigned int func_0038F598_f560(cPS2ScratchPad* self, int size, int flags) __asm__("func_0038F598");
 
 /**
  * Flushes the ring's current buffer with the size recorded for it (func_0038F598).
@@ -1224,9 +1205,9 @@ unsigned int func_0038F598_f560(sLightDma_F560* self, int size, int flags) __asm
  * @param flags  func_0038F598's wait flags
  * @return func_0038F598's result: the main-memory address after the copied data
  */
-extern "C" unsigned int func_0038F560(sLightDma_F560* self, int flags)
+extern "C" unsigned int func_0038F560(cPS2ScratchPad* self, int flags)
 {
-    return func_0038F598_f560(self, self->size[self->cur] << 4, flags);
+    return func_0038F598_f560(self, self->unk_2C[self->mDMABlock] << 4, flags);
 }
 #endif
 
@@ -1886,10 +1867,6 @@ struct sLmEntry_0458 {
     float v[6];
 };
 
-struct sLmOwner_0458 {
-    char pad[0x6CA4];
-    sLmEntry_0458 entries[1];
-};
 
 /**
  * Copies the screen-tint colour and fill tweak values into the graphics manager's tint entry for view @p idx.
@@ -1901,7 +1878,7 @@ struct sLmOwner_0458 {
  */
 extern "C" void func_00390458(void* self, int idx)
 {
-    char* entry = (char*)&((sLmOwner_0458*)self)->entries[idx];
+    char* entry = (char*)&((sLmEntry_0458*)&((cPS2GraphicsMan*)self)->unk_6CA4[0][0])[idx];
     *(float*)(entry + 0x0) = cScreenTint_m_ColourR;
     *(float*)(entry + 0x4) = cScreenTint_m_ColourG;
     *(float*)(entry + 0x8) = cScreenTint_m_ColourB;
@@ -1944,7 +1921,7 @@ extern "C" void func_003904A0(cPS2GraphicsMan* self, int idx, void* pkt, int* ad
     if (cScreenTint_m_OverrideWP != 0) {
         func_00390458(self, idx);
     }
-    float* tint = ((sLmOwner_0458*)self)->entries[idx].v;
+    float* tint = ((sLmEntry_0458*)&(self)->unk_6CA4[0][0])[idx].v;
     if (tint[0] == 1.0f && tint[1] == 1.0f && tint[2] == 1.0f && tint[3] == 0.0f && tint[4] == 0.0f && tint[5] == 0.0f) {
         return;
     }
@@ -2183,16 +2160,7 @@ struct sGs_0F20 {
     void SetF2(int v) { int* w = (int*)((char*)this + 4); *w = (*w & ~0x7C) | ((v << 2) & 0x7C); }
 };
 
-struct sPos_0F20 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-struct sHudVert_0F20 {
-    float u, v, q, f0C;
-    int r, g, b, a;
-    sPos_0F20 pos;
-    sHudVert_0F20() {}
-};
 
 extern sGs_0F20 D_00501420_0F20 __asm__("sDrawState_s_defaultDrawState");
 extern int D_004A460C_i __asm__("cScreenTint_m_LightningEnable");
@@ -2229,7 +2197,7 @@ public:
     virtual void v58(); virtual void v59(); virtual void v60(); virtual void v61();
     virtual void v62(); virtual void v63(); virtual void v64(); virtual void v65();
     virtual void v66(); virtual void v67(); virtual void v68(); virtual void v69();
-    virtual void RenderTriStrip(int, sHudVert_0F20*, int);
+    virtual void RenderTriStrip(int, tBxVertex*, int);
 };
 
 /**
@@ -2277,25 +2245,25 @@ extern "C" void cScreenTint_render()
         ((cGfx_0F20*)ps2GraphicsMan)->stateTop->f4_12 = 20;
         ((cGfx_0F20*)ps2GraphicsMan)->stateTop->SetF2(D_004A46AC_i);
         *(short*)((char*)((cGfx_0F20*)ps2GraphicsMan)->stateTop + 0x10) = -1;
-        sHudVert_0F20 verts[4];
-        sPos_0F20 corner;
+        tBxVertex verts[4];
+        t4Vector corner;
         corner.x = quadLeft;
         corner.z = 0.0f;
         corner.y = 0.0f;
         corner.w = 1.0f;
-        verts[0].pos = corner;
+        (*(&verts[0].p)) = corner;
         corner.x = quadLeft + quadWidth;
         corner.z = 0.0f;
         corner.y = 0.0f;
-        verts[1].pos = corner;
+        (*(&verts[1].p)) = corner;
         corner.x = quadLeft;
         corner.z = 0.0f;
         corner.y = 480.0f;
-        verts[2].pos = corner;
+        (*(&verts[2].p)) = corner;
         corner.x = quadLeft + quadWidth;
         corner.z = 0.0f;
         corner.y = 480.0f;
-        verts[3].pos = corner;
+        (*(&verts[3].p)) = corner;
         if (flag) {
             float al = D_004A469C_f;
             int red = (int)(al * D_004A46A0_f * 255.0f);
@@ -2307,7 +2275,7 @@ extern "C" void cScreenTint_render()
                 verts[i].g = gg;
                 verts[i].b = bb;
                 verts[i].a = aa;
-                verts[i].q = 1.0f;
+                verts[i].one = 1.0f;
             }
             ((cGfx_0F20*)ps2GraphicsMan)->RenderTriStrip(4, verts, 0);
         }

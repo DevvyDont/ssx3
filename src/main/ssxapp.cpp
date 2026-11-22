@@ -1,4 +1,7 @@
 #include "common.h"
+#include "intersect/bxnash.h"
+#include "main/game.h"
+#include "world/worldrecords.h"
 #include "world/instancerecord.h"
 #include "render/occlusionman.h"
 #include "vtable.h"
@@ -80,10 +83,6 @@ struct sApp_6900 {
 };
 
 
-struct sGfx_6900 {
-    char pad_0x0[0x10D8];
-    sVEntry<void>* vt;   // 0x10D8
-};
 
 struct sColor_6900 {
     float r, g, b, a;
@@ -149,7 +148,7 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     PadCache = pm;
     char* graphicsMan = (char*)cGraphicsMan_construct();
     GrMan = (cPS2GraphicsMan*)(graphicsMan);
-    sVEntry<void>* vt = ((sGfx_6900*)graphicsMan)->vt;
+    sVEntry<void>* vt = ((sVEntry<void>*)((cPS2GraphicsMan*)graphicsMan)->mVtbl);
     ((V0Fn_6900)vt[2].fn)(graphicsMan + vt[2].delta);
     cLightMan_construct();
     cBezierMan_construct();
@@ -1721,14 +1720,11 @@ struct sRingOwner;
 struct sQuad229;
 extern "C" void func_00229738(sRingOwner* self, sQuad229* q, int value);
 
-struct sVec4_229530 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sCrowdSlot_229530 {
-    sVec4_229530 pos;       // 0x00
-    sVec4_229530 dx;        // 0x10
-    sVec4_229530 dy;        // 0x20
+    t4Vector pos;       // 0x00
+    t4Vector dx;        // 0x10
+    t4Vector dy;        // 0x20
     int delay;              // 0x30
     char pad_0x34[0xC];
 };
@@ -1743,9 +1739,9 @@ struct sCrowd_229530 {
 };
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sVec4_229530 Add_229530(const sVec4_229530& a, const sVec4_229530& b)
+static inline t4Vector Add_229530(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_229530 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1758,9 +1754,9 @@ static inline sVec4_229530 Add_229530(const sVec4_229530& a, const sVec4_229530&
 }
 
 // PORT: PS2-only VU0 inline asm (v * s).
-static inline sVec4_229530 Scale_229530(const sVec4_229530& v, float s)
+static inline t4Vector Scale_229530(const t4Vector& v, float s)
 {
-    sVec4_229530 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1814,7 +1810,7 @@ extern "C" void func_00229530(cCrowdMan2d* selfp)
             if (self->slots[i].delay <= 0) {
                 float dxScale = rands_229530(-1.0f, 1.0f);
                 float dyScale = rands_229530(-1.0f, 1.0f);
-                sVec4_229530 spawnPos = Add_229530(Add_229530(self->slots[i].pos, Scale_229530(self->slots[i].dx, dxScale)),
+                t4Vector spawnPos = Add_229530(Add_229530(self->slots[i].pos, Scale_229530(self->slots[i].dx, dxScale)),
                                             Scale_229530(self->slots[i].dy, dyScale));
                 func_00229738((sRingOwner*)self, (sQuad229*)&spawnPos, 3);
                 self->slots[i].delay = BXrand() % 300 + 300;
@@ -1926,27 +1922,12 @@ struct sHMgr_229820 {
 
 extern "C" sHMgr_229820** cObjectInterface_getWorld(void);
 
-struct sPart_229820 {
-    char pad[0x1C];
-    int count;                  // 0x1C
-    short** bones;              // 0x20
-};
 
-struct sPartRef_229820 {
-    int f0;
-    sPart_229820* part;         // 0x4
-    int f8, fC;
-};
 
-struct sSkel_229820 {
-    int f0;
-    int count;                  // 0x4
-    sPartRef_229820* parts;     // 0x8
-};
 
 struct sModel_229820 {
     char pad[0x80];
-    sSkel_229820* skel;         // 0x80
+    tModelRecord* skel;         // 0x80
     char pad84[0x94 - 0x84];
     struct {
         int f0;
@@ -1995,13 +1976,13 @@ extern "C" void func_00229820(cCrowdMan2d* self, unsigned int handle, int partIn
 {
     sModel_229820* model = HandleToModel_229820(handle);
     if (model != 0) {
-        sSkel_229820* skeleton = model->skel;
+        tModelRecord* skeleton = model->skel;
         void** dst = model->pose->bones;
-        sPartRef_229820* parts = skeleton->parts;
-        if (partIndex < skeleton->count) {
-            sPart_229820* skelPart = parts[partIndex].part;
-            if (boneIndex < skelPart->count)
-                dst[*skelPart->bones[boneIndex]] = D_00536690_229820;
+        tMeshHeirarchyRecord* parts = (skeleton->m_MeshHeirarchy);
+        if (partIndex < skeleton->m_iNumMeshes) {
+            tMeshRecord* skelPart = (parts[partIndex].m_Mesh);
+            if (boneIndex < skelPart->m_iNumContexts)
+                dst[*((short**)skelPart->m_pContexts)[boneIndex]] = D_00536690_229820;
         }
     }
 }
@@ -2174,16 +2155,9 @@ struct sCrowdSlot_229910 {
     char pad_0x34[0xC];
 };
 
-struct sCrowd_229910 {
-    int pad0;
-    int* anim;                          // 0x4
-    tResourceID_229910 ids[128];              // 0x8
-    char pad_0x208[0x8];
-    sCrowdSlot_229910 slots[128];       // 0x210
-};
 
 // PORT: callers declare func_00229910 as (void*, int, int); defined under an asm label.
-extern "C" void func_00229910_r(sCrowd_229910* self, int index, tResourceID_229910 RID) __asm__("func_00229910");
+extern "C" void func_00229910_r(cCrowdMan2d* self, int index, tResourceID_229910 RID) __asm__("func_00229910");
 
 /**
  * Places quad slot @p index on the crowd model of @p RID: keeps the id and derives the slot's centre and half-axes from
@@ -2198,9 +2172,9 @@ extern "C" void func_00229910_r(sCrowd_229910* self, int index, tResourceID_2299
  * @param RID  the world resource id of the model
  */
 // Places crowd quad index on the model behind RID: corner points from the renderer, then base/width/height.
-extern "C" void func_00229910_r(sCrowd_229910* self, int index, tResourceID_229910 RID)
+extern "C" void func_00229910_r(cCrowdMan2d* self, int index, tResourceID_229910 RID)
 {
-    self->ids[index] = RID;
+    ((tResourceID_229910*)&self->mQuadId[0])[index] = RID;
     sV4_229910 pts[4];
     sV3_229910 pos[4];
     sV2_229910 uv[4];
@@ -2212,15 +2186,15 @@ extern "C" void func_00229910_r(sCrowd_229910* self, int index, tResourceID_2299
     for (int i = 0; i < 4; i++) {
         pts[i] = MulMV_229910(model->mat, sV4_229910(pos[i], 1.0f));
     }
-    self->slots[index].pos = Add_229910(pts[0], Scale_229910(Sub_229910(pts[3], pts[0]), 0.5f));
-    self->slots[index].dx = Scale_229910(Sub_229910(pts[2], pts[0]), 0.45f);
-    self->slots[index].dy = Scale_229910(Sub_229910(pts[1], pts[0]), 0.45f);
+    ((sCrowdSlot_229910*)&self->mQuad[0])[index].pos = Add_229910(pts[0], Scale_229910(Sub_229910(pts[3], pts[0]), 0.5f));
+    ((sCrowdSlot_229910*)&self->mQuad[0])[index].dx = Scale_229910(Sub_229910(pts[2], pts[0]), 0.45f);
+    ((sCrowdSlot_229910*)&self->mQuad[0])[index].dy = Scale_229910(Sub_229910(pts[1], pts[0]), 0.45f);
     sV4_229910 up;
     up.x = 0.0f;
     up.y = 0.0f;
     up.z = 150.0f;
     up.w = 0.0f;
-    AddTo_229910(self->slots[index].pos, up);
+    AddTo_229910(((sCrowdSlot_229910*)&self->mQuad[0])[index].pos, up);
 }
 #endif
 
@@ -2849,10 +2823,6 @@ struct sNode_A368 {
     sNode_A368* next;
 };
 
-struct sSrc_A368 {
-    char pad_0x0[0x20];
-    sNode_A368* head;   // 0x20
-};
 
 
 /**
@@ -2867,7 +2837,7 @@ struct sSrc_A368 {
 extern "C" void FrustumIntersector_AddAllInstancesCrossing(FrustumIntersector* self, CellClipT* list, int count)
 {
     for (; count > 0; count--, list++) {
-        sNode_A368* n = ((sSrc_A368*)list->pCell)->head;
+        sNode_A368* n = (*(sNode_A368**)&((nash_Cell*)list->pCell)->nodesinside[0]);
         while (n != 0) {
             FrustumIntersector_crossinginstance(self, n, ((int)list->uVisMask));
             n = n->next;
@@ -2888,10 +2858,6 @@ struct sNode_A408 {
     sNode_A408* next;
 };
 
-struct sSrc_A408 {
-    char pad_0x0[0x24];
-    sNode_A408* head;   // 0x24
-};
 
 
 /**
@@ -2905,7 +2871,7 @@ struct sSrc_A408 {
 extern "C" void FrustumIntersector_AddAllPatchesCrossing(FrustumIntersector* self, CellClipT* list, int count)
 {
     for (; count > 0; count--, list++) {
-        sNode_A408* n = ((sSrc_A408*)list->pCell)->head;
+        sNode_A408* n = (*(sNode_A408**)&((nash_Cell*)list->pCell)->nodesinside[1]);
         while (n != 0) {
             FrustumIntersector_crossingpatch(self, n, ((int)list->uVisMask));
             n = n->next;
@@ -2926,10 +2892,6 @@ struct sNode_22A4A8 {
     int type;
 };
 
-struct sItem_22A4A8 {
-    char* list;
-    int arg;
-};
 
 extern "C" void FrustumIntersector_crossingfogvolume(void* self, sNode_22A4A8* node, int arg);
 
@@ -2952,12 +2914,12 @@ struct sWorld_22A4A8 {
  * @param items  the source entries
  * @param n  the number of entries
  */
-extern "C" void FrustumIntersector_AddAllTypedCrossing(sWorld_22A4A8* self, sItem_22A4A8* items, int n)
+extern "C" void FrustumIntersector_AddAllTypedCrossing(sWorld_22A4A8* self, CellClipT* items, int n)
 {
     for (; n > 0; n--, items++) {
-        for (sNode_22A4A8* object = *(sNode_22A4A8**)(items->list + 0x28); object != 0; object = object->next) {
+        for (sNode_22A4A8* object = *(sNode_22A4A8**)(((char*)items->pCell) + 0x28); object != 0; object = object->next) {
             if (object->type == 7) {
-                FrustumIntersector_crossingfogvolume(self, object, items->arg);
+                FrustumIntersector_crossingfogvolume(self, object, ((int)items->uVisMask));
             } else if (object->type == 8) {
                 self->nodes[self->count++] = object;
             }
@@ -3100,10 +3062,6 @@ struct sVisNode_A698 {
     short path;             // 0x156
 };
 
-struct sVisSrc_A698 {
-    char pad_0x0[0x24];
-    sVisNode_A698* head;    // 0x24
-};
 
 
 struct sVisSlot_A698 {
@@ -3174,7 +3132,7 @@ extern "C" void FrustumIntersector_AddAllPatchesInside(FrustumIntersector* self_
     sVisOwner_A698* self = (sVisOwner_A698*)self_;
     CellClipT* list = (CellClipT*)list_;
     for (; count > 0; count--, list++) {
-        sVisNode_A698* n = ((sVisSrc_A698*)list->pCell)->head;
+        sVisNode_A698* n = (*(sVisNode_A698**)&((nash_Cell*)list->pCell)->nodesinside[1]);
         while (n != 0) {
             // A do/while(0) block around the body (as a macro would) reproduces the target's register choice.
             do {
@@ -3202,10 +3160,6 @@ struct sVisNode_A770 {
     int sphere[4];          // 0x50
 };
 
-struct sVisSrc_A770 {
-    char pad_0x0[0x28];
-    sVisNode_A770* head;    // 0x28
-};
 
 
 struct sVisOwner_A770 {
@@ -3246,7 +3200,7 @@ static inline int visSphereTest_A770(int* sphere, int frustum)
 extern "C" void FrustumIntersector_AddAllTypedInside(sVisOwner_A770* self, CellClipT* list, int count)
 {
     for (; count > 0; count--, list++) {
-        sVisNode_A770* n = ((sVisSrc_A770*)list->pCell)->head;
+        sVisNode_A770* n = (*(sVisNode_A770**)&((nash_Cell*)list->pCell)->nodesinside[2]);
         while (n != 0) {
             if (n->type == 7) {
                 int frustum = ((int)list->uVisMask);
@@ -3268,19 +3222,7 @@ INCLUDE_ASM("main/ssxapp", FrustumCallback_operatorCall);
 extern char D_948[];
 extern char D_00442130[];
 
-struct sVisCtx_A830 {
-    char* owner;    // 0x0
-    char* inst;     // 0x4
-    int mask;       // 0x8
-    int inside;     // 0xC
-};
 
-struct sVisCell_A830 {
-    int level;      // 0x0
-    int x;          // 0x4
-    int y;          // 0x8
-    int z;          // 0xC
-};
 
 struct sVisNode_A830 {
     sVisNode_A830* child[8];
@@ -3379,14 +3321,14 @@ static inline void boxResult_A830(int* r)
  */
 extern "C" void FrustumCallback_operatorCall(void* vctx, void* vnode, void* vcfg)
 {
-    sVisCtx_A830* ctx = (sVisCtx_A830*)vctx;
+    FrustumCallback* ctx = (FrustumCallback*)vctx;
     sVisNode_A830* node = (sVisNode_A830*)vnode;
-    sVisCell_A830* cfg = (sVisCell_A830*)vcfg;
+    nash_CellKey* cfg = (nash_CellKey*)vcfg;
     int vec[4] __attribute__((aligned(16)));
     t4Vector sphere;
-    int mask = ctx->mask;
+    int mask = ((int)ctx->vismask_);
     int cullResult;
-    if (ctx->inside != 0) {
+    if (ctx->insidefrustum_ != 0) {
         cullResult = 0;
         if (mask != 0)
             { t4Vector cellSphere; float cellSize = cellScale_A830(cfg->level); cellSphere.w = cellSize * 1.2124354839324951f; cellSphere.x = ((float)cfg->x + 0.5f) * cellSize; cellSphere.y = ((float)cfg->y + 0.5f) * cellSize; cellSphere.z = ((float)cfg->z + 0.5f) * cellSize; sphere = cellSphere; }
@@ -3411,7 +3353,7 @@ extern "C" void FrustumCallback_operatorCall(void* vctx, void* vnode, void* vcfg
             "vmaddw.xyz $vf16, $vf3, $vf1w\n"
             "vcallms   0x570\n"
             :
-            : "r"(vec), "r"(D_00442130), "r"(ctx->owner + 0x10)
+            : "r"(vec), "r"(D_00442130), "r"((char*)&ctx->intersector->VFIntersect)
             : "memory");
         if (mask != 0)
             { t4Vector cellSphere; float cellSize = cellScale_A830(cfg->level); cellSphere.w = cellSize * 1.2124354839324951f; cellSphere.x = ((float)cfg->x + 0.5f) * cellSize; cellSphere.y = ((float)cfg->y + 0.5f) * cellSize; cellSphere.z = ((float)cfg->z + 0.5f) * cellSize; sphere = cellSphere; }
@@ -3420,19 +3362,19 @@ extern "C" void FrustumCallback_operatorCall(void* vctx, void* vnode, void* vcfg
     bool out_ = cullResult == 1;
     if (out_)
         return;
-    if (mask != 0 && sphereTest_A830(ctx->inst, &mask, &sphere) == 0)
+    if (mask != 0 && sphereTest_A830(((char*)ctx->occlusionman), &mask, &sphere) == 0)
         return;
     if (cullResult == 0) {
-        ((sVisOwner_A830*)ctx->owner)->in[((sVisOwner_A830*)ctx->owner)->countIn].node = node;
-        ((sVisOwner_A830*)ctx->owner)->in[((sVisOwner_A830*)ctx->owner)->countIn].mask = mask;
-        ((sVisOwner_A830*)ctx->owner)->countIn++;
-        sVisCtx_A830 childCtx;
-        childCtx.inside = 1;
-        childCtx.owner = ctx->owner;
-        childCtx.inst = ctx->inst;
-        childCtx.mask = mask;
+        ((sVisOwner_A830*)ctx->intersector)->in[((sVisOwner_A830*)ctx->intersector)->countIn].node = node;
+        ((sVisOwner_A830*)ctx->intersector)->in[((sVisOwner_A830*)ctx->intersector)->countIn].mask = mask;
+        ((sVisOwner_A830*)ctx->intersector)->countIn++;
+        FrustumCallback childCtx;
+        childCtx.insidefrustum_ = 1;
+        (*(char**)&childCtx.intersector) = ((char*)ctx->intersector);
+        (*(char**)&childCtx.occlusionman) = ((char*)ctx->occlusionman);
+        childCtx.vismask_ = mask;
         if (cfg->level != 11) {
-            sVisCell_A830 n;
+            nash_CellKey n;
             n.level = cfg->level - 1;
             n.x = cfg->x * 2;
             n.y = cfg->y * 2;
@@ -3454,16 +3396,16 @@ extern "C" void FrustumCallback_operatorCall(void* vctx, void* vnode, void* vcfg
             if (node->child[1]) FrustumCallback_operatorCall(&childCtx, node->child[1], &n);
         }
     } else if (cullResult == 2) {
-        ((sVisOwner_A830*)ctx->owner)->part[((sVisOwner_A830*)ctx->owner)->countPart].node = node;
-        ((sVisOwner_A830*)ctx->owner)->part[((sVisOwner_A830*)ctx->owner)->countPart].mask = mask;
-        ((sVisOwner_A830*)ctx->owner)->countPart++;
-        sVisCtx_A830 childCtx;
-        childCtx.inside = 0;
-        childCtx.owner = ctx->owner;
-        childCtx.inst = ctx->inst;
-        childCtx.mask = mask;
+        ((sVisOwner_A830*)ctx->intersector)->part[((sVisOwner_A830*)ctx->intersector)->countPart].node = node;
+        ((sVisOwner_A830*)ctx->intersector)->part[((sVisOwner_A830*)ctx->intersector)->countPart].mask = mask;
+        ((sVisOwner_A830*)ctx->intersector)->countPart++;
+        FrustumCallback childCtx;
+        childCtx.insidefrustum_ = 0;
+        (*(char**)&childCtx.intersector) = ((char*)ctx->intersector);
+        (*(char**)&childCtx.occlusionman) = ((char*)ctx->occlusionman);
+        childCtx.vismask_ = mask;
         if (cfg->level != 11) {
-            sVisCell_A830 n;
+            nash_CellKey n;
             n.level = cfg->level - 1;
             n.x = cfg->x * 2;
             n.y = cfg->y * 2;
@@ -3632,7 +3574,7 @@ extern "C" char* FrustumIntersector_FrustumIntersector(char* self, sCfg_22ADD8* 
     FrustumIntersector_AddAllTypedInside((sVisOwner_A770*)self, (CellClipT*)(self + 0x98), *(int*)(self + 0x94));
     FrustumIntersector_AddAllPatchesCrossing((FrustumIntersector*)self, (CellClipT*)(self + 0x109C), *(int*)(self + 0x1098));
     FrustumIntersector_AddAllInstancesCrossing((FrustumIntersector*)self, (CellClipT*)(self + 0x109C), *(int*)(self + 0x1098));
-    FrustumIntersector_AddAllTypedCrossing((sWorld_22A4A8*)self, (sItem_22A4A8*)(self + 0x109C), *(int*)(self + 0x1098));
+    FrustumIntersector_AddAllTypedCrossing((sWorld_22A4A8*)self, (CellClipT*)(self + 0x109C), *(int*)(self + 0x1098));
     return self;
 }
 #endif
@@ -3829,36 +3771,6 @@ struct sWorld_22B008 {
     char data[0x81D0];
 } __attribute__((aligned(16)));
 
-struct sGame_22B008 {
-    char pad_0x0[0xC];
-    cScene_22B008* scene;           // 0xC
-    int f10;                        // 0x10
-    cRenderer_22B008* renderer;     // 0x14
-    char pad_0x18[0x1C - 0x18];
-    sRenderTarget_22B008* target;   // 0x1C
-    sCfg_22ADD8* cfg;               // 0x20
-    sHud_22B008* hud;               // 0x24
-    char pad_0x28[0x30 - 0x28];
-    void* f30;                      // 0x30
-    char pad_0x34[0x38 - 0x34];
-    void* f38;                      // 0x38
-    void* f3C;                      // 0x3C
-    void* f40;                      // 0x40
-    char pad_0x44[0x48 - 0x44];
-    void* f48;                      // 0x48
-    char pad_0x4C[0x84 - 0x4C];
-    sViewMan_22B008* views;         // 0x84
-    char pad_0x88[0x8C - 0x88];
-    void* f8C;                      // 0x8C
-    char pad_0x90[0x94 - 0x90];
-    void* f94;                      // 0x94
-    sLoader_22B008* loader;         // 0x98
-    int f9C;                        // 0x9C
-    int fA0;                        // 0xA0
-    void* menu;                     // 0xA4
-    char pad_0xA8[0xAC - 0xA8];
-    int frames;                     // 0xAC
-};
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy through vf1..vf4).
 static inline void MatCopy_22B008(sMat_22B008* dst, const sMat_22B008* src)
@@ -3943,15 +3855,15 @@ static inline void Grow_22B008(sBox_22B008& b, const sV4_22B008& c)
         b.max.z = c.z;
 }
 
-static inline int IsReady_22B008(sGame_22B008* self)
+static inline int IsReady_22B008(cGame* self)
 {
-    cGameViewMan_updateStreamFocus(self->views);
-    if (self->f9C != 0) {
+    cGameViewMan_updateStreamFocus(((sViewMan_22B008*)self->ViewMan));
+    if (self->IsStreamPaused != 0) {
         return 0;
     }
-    if (cGameViewMan_isStreamReady(self->views) == 0) {
-        self->f9C = 1;
-        self->fA0 = 1;
+    if (cGameViewMan_isStreamReady(((sViewMan_22B008*)self->ViewMan)) == 0) {
+        self->IsStreamPaused = 1;
+        self->m_bFlushStreamer = 1;
         return 0;
     }
     return 1;
@@ -3974,14 +3886,14 @@ static inline int IsReady_22B008(sGame_22B008* self)
  *
  * @return 0 when GrMan's slot 17 returns 0, otherwise 1
  */
-extern "C" int cGame_render(sGame_22B008* self)
+extern "C" int cGame_render(cGame* self)
 {
     if (((cGfx_22B008*)GrMan)->IsRenderReady() == 0) {
         return 0;
     }
     ((cGfx_22B008*)GrMan)->RenderFullScreenEffects(-1);
     {
-        sLoader_22B008* streamPause = self->loader;
+        sLoader_22B008* streamPause = ((sLoader_22B008*)self->StreamPause);
         sVEntry<int(void*, int)>* vt = streamPause->vt;
         char* thisp = (char*)streamPause + vt[2].delta;
         int (**pfn)(void*, int) = &vt[2].fn;
@@ -4000,21 +3912,21 @@ extern "C" int cGame_render(sGame_22B008* self)
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     ((cGfx_22B008*)ps2GraphicsMan)->f10A8 = ((cGfx_22B008*)ps2GraphicsMan)->tbl[((cGfx_22B008*)ps2GraphicsMan)->cur];
     ((cGfx_22B008*)ps2GraphicsMan)->f10AC = ((cGfx_22B008*)ps2GraphicsMan)->tbl[((cGfx_22B008*)ps2GraphicsMan)->f44];
-    self->target->views = self->views->views;
-    ((cGfx_22B008*)ps2GraphicsMan)->f270 = self->views->views;
+    ((sRenderTarget_22B008*)self->LensFxMan)->views = ((sViewMan_22B008*)self->ViewMan)->views;
+    ((cGfx_22B008*)ps2GraphicsMan)->f270 = ((sViewMan_22B008*)self->ViewMan)->views;
     sWorld_22B008* world = 0;
-    for (unsigned int i = 0; i < self->views->views; i++) {
+    for (unsigned int i = 0; i < ((sViewMan_22B008*)self->ViewMan)->views; i++) {
         ((cGfx_22B008*)GrMan)->view = i;
         ((cGfx_22B008*)GrMan)->ClearProjTextures();
-        self->views->cur = i;
-        sCam_22B008* cam = self->views->cams[self->views->cur];
-        ((cGfx_22B008*)GrMan)->SetViewportWindow1(&self->views->rects[i], 1);
+        ((sViewMan_22B008*)self->ViewMan)->cur = i;
+        sCam_22B008* cam = ((sViewMan_22B008*)self->ViewMan)->cams[((sViewMan_22B008*)self->ViewMan)->cur];
+        ((cGfx_22B008*)GrMan)->SetViewportWindow1(&((sViewMan_22B008*)self->ViewMan)->rects[i], 1);
         ((cGfx_22B008*)GrMan)->SetView1(&cam->mat);
         ((cGfx_22B008*)GrMan)->SetViewportPerspective(cam->fov, 1.0f, cam->farClip);
         ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & 0xFE7FFFFF) | 0x800000;
         ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & 0xFFCFFFFF) | 0x300000;
         ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & 0xFFF00FFF) | 0xD000;
-        self->renderer->v04();
+        ((cRenderer_22B008*)self->SkyBox)->v04();
         ((cGfx_22B008*)GrMan)->SetViewportPerspective(cam->fov, cam->nearClip, cam->farClip);
         ((cGfx_22B008*)GrMan)->RenderFullScreenEffects(i);
         ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x80;
@@ -4066,13 +3978,13 @@ extern "C" int cGame_render(sGame_22B008* self)
         Grow_22B008(bounds, corner);
         sWorld_22B008 worldData;
         world = &worldData;
-        FrustumIntersector_FrustumIntersector((char*)world, self->cfg, self->f8C, &box, self->f10);
+        FrustumIntersector_FrustumIntersector((char*)world, ((sCfg_22ADD8*)self->BXNash), ((void*)self->OcclusionMan), &box, ((int)self->World));
         cGame_renderBuckets(self);
-        func_00229BA8((cCrowdMan2d*)self->f38);
-        func_00344138(self->f3C);
-        cMultiParticleMan_render(self->f40);
+        func_00229BA8((cCrowdMan2d*)((void*)self->CrowdMan2d));
+        func_00344138(((void*)self->CrowdMan3d));
+        cMultiParticleMan_render(((void*)self->MultiParticleMan));
         ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x80;
-        self->scene->v04();
+        ((cScene_22B008*)self->AI)->v04();
         cGame_renderModels(self, world);
         cGame_renderFogVolumes(self, world);
         cGame_renderLightHalos(self, world, i);
@@ -4089,32 +4001,32 @@ extern "C" int cGame_render(sGame_22B008* self)
     ((cGfx_22B008*)GrMan)->SetView1(&D_004FF1A0_22B008);
     ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x300;
     ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & ~0x7C) | 0x14;
-    sHud_22B008* hud = self->hud;
+    sHud_22B008* hud = ((sHud_22B008*)self->DebugFont);
     hud->f38 = hud->f30 * 0.8f;
     hud->f3C = hud->f34 * 0.8f;
-    self->hud->scale = sScale_22B008(2.0f, 2.0f);
-    self->hud->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);
-    if (cMenuSys_isActive(self->menu) != 0) {
-        cMenuSys_render(self->menu);
-        self->hud->scale = sScale_22B008(2.0f, 2.0f);
-        self->hud->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);
+    ((sHud_22B008*)self->DebugFont)->scale = sScale_22B008(2.0f, 2.0f);
+    ((sHud_22B008*)self->DebugFont)->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);
+    if (cMenuSys_isActive(((void*)self->MenuSys)) != 0) {
+        cMenuSys_render(((void*)self->MenuSys));
+        ((sHud_22B008*)self->DebugFont)->scale = sScale_22B008(2.0f, 2.0f);
+        ((sHud_22B008*)self->DebugFont)->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);
     }
     *((cGfx_22B008*)GrMan)->top = D_00501420_22B008;
     ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x300;
     ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & ~0x7C) | 0x14;
-    self->hud->scale = sScale_22B008(2.0f, 2.0f);
-    self->hud->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);
+    ((sHud_22B008*)self->DebugFont)->scale = sScale_22B008(2.0f, 2.0f);
+    ((sHud_22B008*)self->DebugFont)->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);
     if (cRenderToggles_m_DisableHUD == 0) {
-        self->hud->scale = sScale_22B008(0.0f, 0.0f);
-        cUIEngine_render2D(self->f48);
-        cWScriptMan_render(self->f30);
+        ((sHud_22B008*)self->DebugFont)->scale = sScale_22B008(0.0f, 0.0f);
+        cUIEngine_render2D(((void*)self->UI));
+        cWScriptMan_render(((void*)self->WScriptMan));
     }
     cSSXScriptEngine_Render(ScriptEngine);
-    cBXLoadIndicator_Render(self->f94);
+    cBXLoadIndicator_Render(((void*)self->LoadIndicator));
     ((cGfx_22B008*)GrMan)->DrawFrame();
-    cSSXAudio_Update(gSSXAudio, (float)self->frames * (1.0f / 60.0f), 1);
+    cSSXAudio_Update(gSSXAudio, (float)self->mUpdateTick * (1.0f / 60.0f), 1);
     cWorldTriggerManager_Update(gWorldTriggerManager);
-    self->frames = 0;
+    self->mUpdateTick = 0;
     return 1;
 }
 #endif

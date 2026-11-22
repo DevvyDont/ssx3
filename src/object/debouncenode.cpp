@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "world/instancerecord.h"
+#include "object/animframe.h"
 #include "world/worldcache.h"
 #include "world/worldrecords.h"
 #include "bx/math3d.h"
@@ -205,18 +207,7 @@ extern "C" void cDebounceNode_writeToReplayFrame(cDebounceNode* self, void* stre
 //100%
 INCLUDE_ASM("object/debouncenode", cConveyorNode_cConveyorNode);
 #ifdef SKIP_ASM
-struct sVec2_3010 {
-    float x;
-    float y;
-};
 
-struct sDesc_3010 {
-    int f0;
-    float f4;
-    float f8;
-    float fC;
-    int f10[8];
-};
 
 struct sFlags_3010 {
     char pad_0x00[0x8];
@@ -231,7 +222,7 @@ struct sDebounce_3010 {
     float f1C;              // 0x1C
     unsigned char c20[8];   // 0x20
     char pad_0x28[0x10];
-    sVec2_3010 v38;         // 0x38
+    t2Vector v38;         // 0x38
     int f40;
     int f44;
 };
@@ -252,19 +243,19 @@ extern "C" void* cInstanceNode_cInstanceNode1(void* self, void* a1, int type, vo
  * @param desc  conveyor make-data (Vel, UScroll, VScroll, Rotate0..7)
  * @return self
  */
-extern "C" void* cConveyorNode_cConveyorNode(sDebounce_3010* self, void* bucket, void* instRecord, sDesc_3010* desc)
+extern "C" void* cConveyorNode_cConveyorNode(sDebounce_3010* self, void* bucket, void* instRecord, tMakeConveyorData* desc)
 {
     cInstanceNode_cInstanceNode1(self, bucket, 0xF, instRecord);
     self->vt = cConveyorNode_vtbl;
-    self->f1C = desc->f4;
-    sVec2_3010 uvScroll;
-    uvScroll.x = desc->f8;
-    uvScroll.y = desc->fC;
+    self->f1C = desc->Vel;
+    t2Vector uvScroll;
+    uvScroll.x = desc->UScroll;
+    uvScroll.y = desc->VScroll;
     self->v38 = uvScroll;
     self->f40 = 0;
     self->f44 = 0;
     for (int i = 0; i < 8; i++) {
-        self->c20[i] = desc->f10[i];
+        self->c20[i] = ((int*)&desc->Rotate0)[i];
     }
     self->flags->w = (self->flags->w & ~2) | 4;
     return self;
@@ -518,12 +509,6 @@ static inline t4Vector pos3130(const sMat3130& m)
     return m.r[3];
 }
 
-struct sBone3130 {
-    int parent;                 // 0x0
-    int pad4;                   // 0x4
-    int pad8;                   // 0x8
-    sMat3130* mat;              // 0xC
-};
 
 struct sVE3130 {
     short delta;
@@ -559,10 +544,10 @@ extern "C" void cConveyorNode_updateIntersectInfo(sNode3130* self, tIntersectInf
         return;
     }
     sMat3130* w = self->vt[24].fn(vthis(self, self->vt[24]));
-    sBone3130* bones = *(sBone3130**)(*(char**)(self->model + 0x80) + 0x8);
-    sMat3130 boneMat = *bones[hit->Mesh].mat;
-    for (int parentIndex = bones[hit->Mesh].parent; parentIndex != -1; parentIndex = bones[parentIndex].parent) {
-        boneMat = mulMat3130(*bones[parentIndex].mat, boneMat);
+    tMeshHeirarchyRecord* bones = *(tMeshHeirarchyRecord**)(*(char**)(self->model + 0x80) + 0x8);
+    sMat3130 boneMat = *((sMat3130*)bones[hit->Mesh].m_pMeshMatrix);
+    for (int parentIndex = bones[hit->Mesh].m_iParentID; parentIndex != -1; parentIndex = bones[parentIndex].m_iParentID) {
+        boneMat = mulMat3130(*((sMat3130*)bones[parentIndex].m_pMeshMatrix), boneMat);
     }
     boneMat = mulMat3130(*w, boneMat);
     if (self->flags[hit->Mesh] != 0) {
@@ -1110,23 +1095,17 @@ struct sDebounceState;
 extern "C" void func_003442E0(sDebounceState* self);
 extern "C" void* func_00344800(void* self);
 
-struct sModel3F38 {
-    char pad_0x0[0x8];
-    unsigned int flags;     // 0x8
-    char pad_0xc[0x74];
-    unsigned int* key;      // 0x80
-};
 
-static inline sModel3F38* refToPtr3F38(unsigned int p)
+static inline tInstanceRecord* refToPtr3F38(unsigned int p)
 {
-    return (sModel3F38*)(p << 2);
+    return (tInstanceRecord*)(p << 2);
 }
 
 struct sModelSet3F38 {
     char pad_0x0[0x1C];
     unsigned int* refs;     // 0x1C
 
-    sModel3F38* lookup(unsigned int idx)
+    tInstanceRecord* lookup(unsigned int idx)
     {
         unsigned int p = refs[idx] >> 8;
         if (p == 0) {
@@ -1141,7 +1120,7 @@ struct sWorld3F38 {
     sModelSet3F38** sets;   // 0x8
 };
 
-static inline sModel3F38* getModel3F38(unsigned int id)
+static inline tInstanceRecord* getModel3F38(unsigned int id)
 {
     sModelSet3F38* set = (*(sWorld3F38**)cObjectInterface_getWorld())->sets[id & 0xFF];
     if (set == 0) {
@@ -1153,7 +1132,7 @@ static inline sModel3F38* getModel3F38(unsigned int id)
 struct sModelRef3F38 {
     unsigned int id;
 
-    sModel3F38* get()
+    tInstanceRecord* get()
     {
         return getModel3F38(id);
     }
@@ -1178,8 +1157,8 @@ struct sBlock3F38 {
         for (int j = 0; j < 32; j++) {
             if (ents[j].ref.id == id) {
                 sEnt3F38* e = &ents[j];
-                sModel3F38* m2 = e->ref.get();
-                m2->flags = (m2->flags & 0xFFFFFFFB) | 2;
+                tInstanceRecord* m2 = e->ref.get();
+                m2->m_iFlags = (((unsigned int)m2->m_iFlags) & 0xFFFFFFFB) | 2;
                 ents[j].ref.id = 0xFFFFFFFF;
                 if (--count <= 0) {
                     func_00344800(this);
@@ -1209,8 +1188,8 @@ struct sDebounceMgr3F38 {
  */
 extern "C" void func_00343F38(sDebounceMgr3F38* self, unsigned int id)
 {
-    sModel3F38* model = getModel3F38(id);
-    unsigned int* key = model->key;
+    tInstanceRecord* model = getModel3F38(id);
+    unsigned int* key = ((unsigned int*)model->m_Model);
     for (int i = 0; i < 5; i++) {
         if (*key >> 8 == self->blocks[i].key) {
             self->blocks[i].release(id);
@@ -1486,16 +1465,11 @@ struct sDbPad_43A8 {
     sDbPad_43A8() {}
 };
 
-struct sDbEntry_43A8 {
-    int pad_0x0[2];
-    void* src;                      // 0x8
-    int pad_0xC;
-};
 
 struct sDbDef_43A8 {
     int pad_0x0;
     int count;                      // 0x4
-    sDbEntry_43A8* entries;         // 0x8
+    tMeshHeirarchyRecord* entries;         // 0x8
     int pad_0xC[2];
     float period;                   // 0x14
 };
@@ -1511,12 +1485,6 @@ struct sDbList_43A8 {
     sDbItem_43A8* items[1];         // 0x4
 };
 
-struct sDbModel_43A8 {
-    char pad_0x0[0x80];
-    sDbDef_43A8* def;               // 0x80
-    char pad_0x84[0x10];
-    sDbList_43A8* list;             // 0x94
-};
 
 struct sDbSlot_43A8 {
     unsigned short value;           // 0x0
@@ -1526,16 +1494,16 @@ struct sDbSlot_43A8 {
     int f10;
 };
 
-static inline sDbModel_43A8* refToPtr_43A8(unsigned int p)
+static inline tInstanceRecord* refToPtr_43A8(unsigned int p)
 {
-    return (sDbModel_43A8*)(p << 2);
+    return (tInstanceRecord*)(p << 2);
 }
 
 struct sDbModelSet_43A8 {
     char pad_0x0[0x1C];
     unsigned int* refs;             // 0x1C
 
-    sDbModel_43A8* lookup(unsigned int idx)
+    tInstanceRecord* lookup(unsigned int idx)
     {
         unsigned int p = refs[idx] >> 8;
         if (p == 0) {
@@ -1553,7 +1521,7 @@ struct sDbWorld_43A8 {
 struct sDbModelRef_43A8 {
     unsigned int id;
 
-    sDbModel_43A8* get()
+    tInstanceRecord* get()
     {
         sDbModelSet_43A8* set = (*(sDbWorld_43A8**)cObjectInterface_getWorld())->sets[id & 0xFF];
         if (set == 0) {
@@ -1602,16 +1570,16 @@ extern "C" void func_003443A8_impl(sDbOwner_43A8* self) __asm__("func_003443A8")
  */
 extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
 {
-    sDbModel_43A8* animModel = self->model.get();
+    tInstanceRecord* animModel = self->model.get();
     int i;
-    self->def = animModel->def;
+    self->def = ((sDbDef_43A8*)animModel->m_Model);
     self->period = self->def->period;
     sDbPad_43A8*& buf = self->buf;
     buf = new (str_AnimMats, 0x20000000, 0) sDbPad_43A8[self->def->count];
-    sDbEntry_43A8* entry = self->def->entries;
+    tMeshHeirarchyRecord* entry = self->def->entries;
     self->nActive = 0;
     for (i = 0; i < self->def->count; i++, entry++) {
-        if (entry->src != 0)
+        if (((void*)entry->m_MeshAnim) != 0)
             self->nActive++;
     }
     if (self->nActive != 0) {
@@ -1623,8 +1591,8 @@ extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
     entry = self->def->entries;
     int k = 0;
     for (i = 0; i < self->def->count; i++, entry++) {
-        if (entry->src != 0) {
-            cAnimFrame_setAnimRecord(&self->meshes[k++], entry->src);
+        if (((void*)entry->m_MeshAnim) != 0) {
+            cAnimFrame_setAnimRecord(&self->meshes[k++], ((void*)entry->m_MeshAnim));
         }
     }
     for (i = 0; i < self->nActive; i++) {
@@ -1633,9 +1601,9 @@ extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
     }
     func_00344AA0_43A8(self);
     self->first = 0;
-    self->count = animModel->list->count;
+    self->count = ((sDbList_43A8*)animModel->m_MaterialBlock)->count;
     for (i = 0; i < self->count; i++) {
-        char* itemData = animModel->list->items[i]->data;
+        char* itemData = ((sDbList_43A8*)animModel->m_MaterialBlock)->items[i]->data;
         if (itemData != 0) {
             self->first = *(int*)itemData;
             break;
@@ -1644,7 +1612,7 @@ extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
     MEM_fill(&self->total, 0, 196);
     self->total = self->count;
     for (i = 0; i < self->count; i++) {
-        sDbItem_43A8* item = animModel->list->items[i];
+        sDbItem_43A8* item = ((sDbList_43A8*)animModel->m_MaterialBlock)->items[i];
         if (item->data != 0) {
             self->ptrs[i] = &self->slots[i];
             self->ptrs[i]->fC = item->fC;
@@ -1676,21 +1644,17 @@ struct sItemList4730 {
     sItem4730* items[1];    // 0x4
 };
 
-struct sModel4730 {
-    char pad_0x0[0x94];
-    sItemList4730* list;    // 0x94
-};
 
-static inline sModel4730* refToPtr4730(unsigned int p)
+static inline tInstanceRecord* refToPtr4730(unsigned int p)
 {
-    return (sModel4730*)(p << 2);
+    return (tInstanceRecord*)(p << 2);
 }
 
 struct sModelSet4730 {
     char pad_0x0[0x1C];
     unsigned int* refs;     // 0x1C
 
-    sModel4730* lookup(unsigned int idx)
+    tInstanceRecord* lookup(unsigned int idx)
     {
         unsigned int p = refs[idx] >> 8;
         if (p == 0) {
@@ -1709,7 +1673,7 @@ struct sWorld4730 {
 struct sModelRef4730 {
     unsigned int id;
 
-    sModel4730* get()
+    tInstanceRecord* get()
     {
         sModelSet4730* set = (*(sWorld4730**)cObjectInterface_getWorld())->sets[id & 0xFF];
         if (set == 0) {
@@ -1743,9 +1707,9 @@ struct sDebounce4730 {
  */
 extern "C" void func_00344730(sDebounce4730* self, int index)
 {
-    sModel4730* animModel = self->model.get();
+    tInstanceRecord* animModel = self->model.get();
     for (int i = 0; i < self->count; i++) {
-        char* itemData = animModel->list->items[i]->data;
+        char* itemData = ((sItemList4730*)animModel->m_MaterialBlock)->items[i]->data;
         if (itemData != 0) {
             self->slots[i].value = *(unsigned short*)(itemData + (index << 2) + 4);
         }
@@ -1765,16 +1729,11 @@ struct sDebounceVEntry4800 {
     void (*fn)(void*, int);
 };
 
-struct sDebounceItem4800 {
-    char pad_0x0[0x84];
-    sDebounceVEntry4800* vt;    // 0x84
-    char pad_0x88[0x48];
-};
 
 struct sDebounceOwner4800 {
     char pad_0x0[0x1E8];
     void* buf;                  // 0x1E8
-    sDebounceItem4800* items;   // 0x1EC, array-new block (count at -0x10)
+    cMeshAnimFrame* items;   // 0x1EC, array-new block (count at -0x10)
 };
 
 // The unit declares func_00344800 as `void* (void*)`, but the body returns nothing
@@ -1789,12 +1748,12 @@ void func_00344800_v(sDebounceOwner4800* self) __asm__("func_00344800");
  */
 void func_00344800_v(sDebounceOwner4800* self)
 {
-    sDebounceItem4800* items = self->items;
+    cMeshAnimFrame* items = self->items;
     if (items != 0) {
-        sDebounceItem4800* item = items + ((int*)items)[-4];
+        cMeshAnimFrame* item = items + ((int*)items)[-4];
         while (self->items != item) {
             item--;
-            item->vt[1].fn(vthis(item, item->vt[1]), 0);
+            ((sDebounceVEntry4800*)item->mVtbl)[1].fn(vthis(item, ((sDebounceVEntry4800*)item->mVtbl)[1]), 0);
         }
         cMemMan_free((char*)self->items - 0x10);
     }
@@ -1817,11 +1776,6 @@ struct sDebounceVEntry49F0 {
     void (*fn)(void*, float);
 };
 
-struct sDebounceItem49F0 {
-    char pad_0x0[0x84];
-    sDebounceVEntry49F0* vt;    // 0x84
-    char pad_0x88[0x48];
-};
 
 struct sDebounceOwner49F0 {
     char pad_0x0[0x10C];
@@ -1831,7 +1785,7 @@ struct sDebounceOwner49F0 {
     float period;               // 0x1E0
     float step;                 // 0x1E4
     void* buf;                  // 0x1E8
-    sDebounceItem49F0* items;   // 0x1EC
+    cMeshAnimFrame* items;   // 0x1EC
 };
 
 extern "C" void func_00344AA0(sDebounceOwner49F0* self);
@@ -1854,8 +1808,8 @@ extern "C" void func_003449F0(void* elem)
         self->time = newTime - self->period;
     }
     for (int i = 0; i < self->count; i++) {
-        sDebounceItem49F0* item = (sDebounceItem49F0*)(i * 0xD0 + (int)self->items);
-        item->vt[2].fn(vthis(item, item->vt[2]), self->time);
+        cMeshAnimFrame* item = (cMeshAnimFrame*)(i * 0xD0 + (int)self->items);
+        ((sDebounceVEntry49F0*)item->mVtbl)[2].fn(vthis(item, ((sDebounceVEntry49F0*)item->mVtbl)[2]), self->time);
     }
     func_00344AA0(self);
 }
@@ -2091,11 +2045,6 @@ struct sTrackWorld51C0;
 extern "C" sTrackWorld51C0** cObjectInterface_getWorld();
 extern "C" void func_00344730(sDebounce4730* self, int index);
 
-struct sModel_44E18 {
-    char pad_0x0[0x7D];
-    unsigned char page;     // 0x7D
-    short slot;             // 0x7E
-};
 
 struct sModelSet_44E18 {
     char pad_0x0[0x1C];
@@ -2107,18 +2056,18 @@ struct sWorld_44E18 {
     sModelSet_44E18** sets; // 0x8
 };
 
-static inline sModel_44E18* GetModel_44E18(unsigned int* ref)
+static inline tInstanceRecord* GetModel_44E18(unsigned int* ref)
 {
-    return (sModel_44E18*)((sModelRef4730*)ref)->get();
+    return ((sModelRef4730*)ref)->get();
 }
 
-static inline int IsLoaded_44E18(sModel_44E18* m)
+static inline int IsLoaded_44E18(tInstanceRecord* m)
 {
     cWorldCache* wc = cWorld_m_pTheWorld->m_pWorldCache;
-    if (m->page == 0xFF)
+    if (m->m_SMap.m_uiSectionID == 0xFF)
         return 1;
-    int ok = wc->m_WorldView.mp_SectionState[m->page].state == 6;
-    return ok ? wc->m_HullPages[m->slot].m_State == 3 : 0;
+    int ok = wc->m_WorldView.mp_SectionState[m->m_SMap.m_uiSectionID].state == 6;
+    return ok ? wc->m_HullPages[m->m_SMap.m_iHullID].m_State == 3 : 0;
 }
 
 struct sVE7_44E18 { short delta; short index; void (*fn)(void*, void*, float, void*, void*, void*, int, int); };
@@ -2141,14 +2090,14 @@ extern "C" void func_00344E18(void* self)
     {
         if (~*ref == 0)
             continue;
-        sModel_44E18* model = GetModel_44E18(ref);
+        tInstanceRecord* model = GetModel_44E18(ref);
         if (!IsLoaded_44E18(model))
             continue;
         if (*(int*)((char*)self + 0x114) >= 2)
         {
             func_00344730((sDebounce4730*)self, *(int*)((char*)self + off + 0x10));
             sVE7_44E18* vt = (sVE7_44E18*)ps2GraphicsMan->mVtbl;
-            vt[95].fn(vthis(ps2GraphicsMan, vt[95]), model, 1.0f, (char*)self + 0x118, (char*)model + 0x10, *(void**)((char*)self + 0x1E8), 0, 0);
+            vt[95].fn(vthis(ps2GraphicsMan, vt[95]), model, 1.0f, (char*)self + 0x118, (char*)&model->m_fmTransform, *(void**)((char*)self + 0x1E8), 0, 0);
         }
         else
         {

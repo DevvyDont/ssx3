@@ -38,10 +38,6 @@ struct sBgFile_17ACC8 {
     } shapes[1];
 };
 
-struct sBgMan_17ACC8 {
-    int* images;
-    int count;
-};
 
 /**
  * Loads the background images from data/textures/backs.ssh and registers each one with the graphics manager.
@@ -354,7 +350,7 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
     self->vt = cDebugMenuScreen_vtbl;
     cBackgroundMan_cBackgroundMan(self->bg);
     cTrackFileMan_scanLocations(&self->sub);
-    cBackgroundMan_loadImages((cBackgroundMan*)((sBgMan_17ACC8*)self->bg));
+    cBackgroundMan_loadImages((cBackgroundMan*)((cBackgroundMan*)self->bg));
     void* iface0 = cBE_getInterface_B1B0(cBE_getBE(), 0);
     void* iface7 = cBE_getInterface_B1B0(SSXApp->BE, 7);
     self->f8C24 = 0;
@@ -547,9 +543,9 @@ static inline void playSong_B4E0(sLS_B1B0* self)
     func_00289520(snd, (char*)cAudioInterface_bxAudio() + (self->f8C34 * 0x14 + 0x60A4));
 }
 
-static inline int bgCount_B4E0(sBgMan_17ACC8* bg)
+static inline int bgCount_B4E0(cBackgroundMan* bg)
 {
-    return bg->count;
+    return bg->miNumImage;
 }
 
 /**
@@ -871,9 +867,9 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
     }
     case 9:
         if (dir == 3) {
-            self->f8C30 = (self->f8C30 + 2) % (bgCount_B4E0((sBgMan_17ACC8*)self->bg) + 1) - 1;
+            self->f8C30 = (self->f8C30 + 2) % (bgCount_B4E0((cBackgroundMan*)self->bg) + 1) - 1;
         } else if (dir == 2) {
-            self->f8C30 = (self->f8C30 + bgCount_B4E0((sBgMan_17ACC8*)self->bg) + 1) % (bgCount_B4E0((sBgMan_17ACC8*)self->bg) + 1) - 1;
+            self->f8C30 = (self->f8C30 + bgCount_B4E0((cBackgroundMan*)self->bg) + 1) % (bgCount_B4E0((cBackgroundMan*)self->bg) + 1) - 1;
         }
         cBackgroundMan_setActiveImage(self->bg, self->f8C30);
         break;

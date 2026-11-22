@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/graphicsman.h"
 #include "animation/animsequencer.h"
 #include "ai/rider.h"
 #include "vtable.h"
@@ -377,12 +378,9 @@ INCLUDE_ASM("visualfx/boardtrailfx", cBoardTrailFX_update);
 // Segments in the trail ring buffer (the prototype asserts BufHead < kTrailNumSeg).
 enum { kTrailNumSeg = 54 };
 
-struct sBTV4_8938 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sBTMtx_8938 {
-    sBTV4_8938 row[4];
+    t4Vector row[4];
 };
 
 // One trail vertex: texture coordinates, integer colour (0..255) and position.
@@ -390,7 +388,7 @@ struct sBTVtx_8938 {
     float u, v, q;
     int f0C;
     int r, g, b, a;
-    sBTV4_8938 pos;
+    t4Vector pos;
 };
 
 // The trail part of sBoardTrailFXView (the cRider virtual base follows at +0xF0).
@@ -410,9 +408,9 @@ struct sBTrail_8938 {
     float lift;                 // 0xA0
     int fA4;                    // 0xA4
     int padA8[2];               // 0xA8
-    sBTV4_8938 colB0;           // 0xB0
-    sBTV4_8938 lastDir;         // 0xC0
-    sBTV4_8938 side;            // 0xD0
+    t4Vector colB0;           // 0xB0
+    t4Vector lastDir;         // 0xC0
+    t4Vector side;            // 0xD0
 };
 
 // Rider colour (a, r, g, b) of the render-state table entry (0xF0 bytes each).
@@ -445,9 +443,9 @@ extern "C" float func_0031C228(float);
 extern "C" int cBoardTrailFX_shouldSample_8938(sBTrail_8938* self, float d) __asm__("cBoardTrailFX_shouldSample");
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
-static inline sBTV4_8938 btScale(const sBTV4_8938& v, float s)
+static inline t4Vector btScale(const t4Vector& v, float s)
 {
-    sBTV4_8938 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -462,9 +460,9 @@ static inline sBTV4_8938 btScale(const sBTV4_8938& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sBTV4_8938 btAdd(const sBTV4_8938& a, const sBTV4_8938& b)
+static inline t4Vector btAdd(const t4Vector& a, const t4Vector& b)
 {
-    sBTV4_8938 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -477,9 +475,9 @@ static inline sBTV4_8938 btAdd(const sBTV4_8938& a, const sBTV4_8938& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sBTV4_8938 btSub(const sBTV4_8938& a, const sBTV4_8938& b)
+static inline t4Vector btSub(const t4Vector& a, const t4Vector& b)
 {
-    sBTV4_8938 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -493,7 +491,7 @@ static inline sBTV4_8938 btSub(const sBTV4_8938& a, const sBTV4_8938& b)
 
 // PORT: PS2-only VU0 inline asm (a += b). Assembled in noreorder mode: retail leaves the final sqc2 out of a
 // following branch delay slot.
-static inline void btAddEq(sBTV4_8938& a, const sBTV4_8938& b)
+static inline void btAddEq(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         ".set push\n"
@@ -509,7 +507,7 @@ static inline void btAddEq(sBTV4_8938& a, const sBTV4_8938& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float btLength(const sBTV4_8938& v)
+static inline float btLength(const t4Vector& v)
 {
     float r;
     int t;
@@ -530,7 +528,7 @@ static inline float btLength(const sBTV4_8938& v)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float btDot(const sBTV4_8938& a, const sBTV4_8938& b)
+static inline float btDot(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -550,9 +548,9 @@ static inline float btDot(const sBTV4_8938& a, const sBTV4_8938& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector divided by scalar).
-static inline sBTV4_8938 btDiv(const sBTV4_8938& v, float s)
+static inline t4Vector btDiv(const t4Vector& v, float s)
 {
-    sBTV4_8938 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -569,9 +567,9 @@ static inline sBTV4_8938 btDiv(const sBTV4_8938& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize).
-static inline sBTV4_8938 btNormalize(const sBTV4_8938& v)
+static inline t4Vector btNormalize(const t4Vector& v)
 {
-    sBTV4_8938 r;
+    t4Vector r;
     __asm__(
         "lqc2       $vf3, %1\n"
         "vaddw.x    $vf6, $vf0, $vf0w\n"
@@ -590,9 +588,9 @@ static inline sBTV4_8938 btNormalize(const sBTV4_8938& v)
 }
 
 // PORT: PS2-only VU0 inline asm (cross product, w = 0).
-static inline sBTV4_8938 btCross(const sBTV4_8938& a, const sBTV4_8938& b)
+static inline t4Vector btCross(const t4Vector& a, const t4Vector& b)
 {
-    sBTV4_8938 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -664,12 +662,12 @@ static inline sBTMtx_8938* btBone(char* r, int off)
     return &((sBTMtx_8938*)*(char**)(*(char**)(r + 0x780) + 0x34))[*(int*)(r + off)];
 }
 
-static inline sBTV4_8938 btBoneRow(char* r, int off, int row)
+static inline t4Vector btBoneRow(char* r, int off, int row)
 {
     return btBone(r, off)->row[row];
 }
 
-static inline sBTV4_8938 btBonePos(char* r, int off)
+static inline t4Vector btBonePos(char* r, int off)
 {
     return btBone(r, off)->row[3];
 }
@@ -728,16 +726,16 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
         prev = (self->head + kTrailNumSeg - 1) % kTrailNumSeg;
     }
     self->lift = D_004A4588 - self->fade * D_004A458C;
-    sBTV4_8938 pts[4];
-    const sBTV4_8938& pos = btBoneRow(self->rider, 2212, 3);
-    const sBTV4_8938& side = btBoneRow(self->rider, 2212, 2);
-    const sBTV4_8938& fwd = btBoneRow(self->rider, 2212, 0);
-    sBTV4_8938 halfLengthVec = btScale(fwd, 87.5f);
-    sBTV4_8938 halfWidthVec = btScale(side, 17.5f);
+    t4Vector pts[4];
+    const t4Vector& pos = btBoneRow(self->rider, 2212, 3);
+    const t4Vector& side = btBoneRow(self->rider, 2212, 2);
+    const t4Vector& fwd = btBoneRow(self->rider, 2212, 0);
+    t4Vector halfLengthVec = btScale(fwd, 87.5f);
+    t4Vector halfWidthVec = btScale(side, 17.5f);
     if (cRider_getMotionState(self->rider) == 0 || (btCanDraw(self->rider) && *(int*)(self->rider + 0xB00) != 0)) {
-        sBTV4_8938 left = btSub(pos, halfLengthVec);
+        t4Vector left = btSub(pos, halfLengthVec);
         float sideSign = 0.0f;
-        sBTV4_8938 right = btAdd(pos, halfLengthVec);
+        t4Vector right = btAdd(pos, halfLengthVec);
         if (*(int*)(self->rider + 0x330) != 0) {
             int k = cRiderAnimBase_getCurrentAnimID(*(void**)(self->rider + 0x784), 2);
             if (k >= 23 && k <= 0x1E) {
@@ -765,60 +763,60 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
             pts[2] = btBonePos(((char*)riderObj), 2328);
             pts[3] = btBonePos(((char*)riderObj), 2280);
         } else {
-            sBTV4_8938 left = btSub(pos, halfLengthVec);
+            t4Vector left = btSub(pos, halfLengthVec);
             pts[2] = btAdd(left, halfWidthVec);
             pts[3] = btSub(left, halfWidthVec);
         }
     }
-    float speed = btLength(*(sBTV4_8938*)(self->rider + 0x1E0));
-    sBTV4_8938 dir;
+    float speed = btLength(*(t4Vector*)(self->rider + 0x1E0));
+    t4Vector dir;
     if (speed < 0.01f) {
         dir = self->lastDir;
     } else {
-        dir = btDiv(*(sBTV4_8938*)(self->rider + 0x1E0), speed);
+        dir = btDiv(*(t4Vector*)(self->rider + 0x1E0), speed);
     }
-    dir = btNormalize(btSub(dir, btScale(*(sBTV4_8938*)(self->rider + 0x370), btDot(dir, *(sBTV4_8938*)(self->rider + 0x370)))));
-    sBTV4_8938 across = btCross(dir, *(sBTV4_8938*)(self->rider + 0x370));
+    dir = btNormalize(btSub(dir, btScale(*(t4Vector*)(self->rider + 0x370), btDot(dir, *(t4Vector*)(self->rider + 0x370)))));
+    t4Vector across = btCross(dir, *(t4Vector*)(self->rider + 0x370));
     if (btDot(across, self->side) < 0.0f) {
         across = btScale(across, -1.0f);
     }
-    sBTV4_8938 contactToPt1 = btSub(pts[1], *(sBTV4_8938*)(self->rider + 0x460));
-    sBTV4_8938 contactToPt0 = btSub(pts[0], *(sBTV4_8938*)(self->rider + 0x460));
-    sBTV4_8938 contactToPt3 = btSub(pts[3], *(sBTV4_8938*)(self->rider + 0x460));
-    sBTV4_8938 contactToPt2 = btSub(pts[2], *(sBTV4_8938*)(self->rider + 0x460));
+    t4Vector contactToPt1 = btSub(pts[1], *(t4Vector*)(self->rider + 0x460));
+    t4Vector contactToPt0 = btSub(pts[0], *(t4Vector*)(self->rider + 0x460));
+    t4Vector contactToPt3 = btSub(pts[3], *(t4Vector*)(self->rider + 0x460));
+    t4Vector contactToPt2 = btSub(pts[2], *(t4Vector*)(self->rider + 0x460));
     float sideDist1 = btDot(contactToPt1, across);
     float sideDist0 = btDot(contactToPt0, across);
     float sideDist3 = btDot(contactToPt3, across);
     float sideDist2 = btDot(contactToPt2, across);
-    sBTV4_8938 top;
-    sBTV4_8938 bot;
+    t4Vector top;
+    t4Vector bot;
     if (sideDist0 < sideDist1 && sideDist3 < sideDist1 && sideDist2 < sideDist1) {
-        top = btSub(pts[1], btScale(*(sBTV4_8938*)(self->rider + 0x370), btDot(*(sBTV4_8938*)(self->rider + 0x370), contactToPt1) - D_004A3B28));
+        top = btSub(pts[1], btScale(*(t4Vector*)(self->rider + 0x370), btDot(*(t4Vector*)(self->rider + 0x370), contactToPt1) - D_004A3B28));
     } else if (sideDist1 < sideDist0 && sideDist3 < sideDist0 && sideDist2 < sideDist0) {
-        top = btSub(pts[0], btScale(*(sBTV4_8938*)(self->rider + 0x370), btDot(*(sBTV4_8938*)(self->rider + 0x370), contactToPt0) - D_004A3B28));
+        top = btSub(pts[0], btScale(*(t4Vector*)(self->rider + 0x370), btDot(*(t4Vector*)(self->rider + 0x370), contactToPt0) - D_004A3B28));
     } else if (sideDist1 < sideDist3 && sideDist0 < sideDist3 && sideDist2 < sideDist3) {
-        top = btSub(pts[3], btScale(*(sBTV4_8938*)(self->rider + 0x370), btDot(*(sBTV4_8938*)(self->rider + 0x370), contactToPt3) - D_004A3B28));
+        top = btSub(pts[3], btScale(*(t4Vector*)(self->rider + 0x370), btDot(*(t4Vector*)(self->rider + 0x370), contactToPt3) - D_004A3B28));
     } else {
-        top = btSub(pts[2], btScale(*(sBTV4_8938*)(self->rider + 0x370), btDot(*(sBTV4_8938*)(self->rider + 0x370), contactToPt2) - D_004A3B28));
+        top = btSub(pts[2], btScale(*(t4Vector*)(self->rider + 0x370), btDot(*(t4Vector*)(self->rider + 0x370), contactToPt2) - D_004A3B28));
     }
     if (sideDist1 < sideDist0 && sideDist1 < sideDist3 && sideDist1 < sideDist2) {
-        bot = btSub(pts[1], btScale(*(sBTV4_8938*)(self->rider + 0x370), btDot(*(sBTV4_8938*)(self->rider + 0x370), contactToPt1) - D_004A3B28));
+        bot = btSub(pts[1], btScale(*(t4Vector*)(self->rider + 0x370), btDot(*(t4Vector*)(self->rider + 0x370), contactToPt1) - D_004A3B28));
     } else if (sideDist0 < sideDist1 && sideDist0 < sideDist3 && sideDist0 < sideDist2) {
-        bot = btSub(pts[0], btScale(*(sBTV4_8938*)(self->rider + 0x370), btDot(*(sBTV4_8938*)(self->rider + 0x370), contactToPt0) - D_004A3B28));
+        bot = btSub(pts[0], btScale(*(t4Vector*)(self->rider + 0x370), btDot(*(t4Vector*)(self->rider + 0x370), contactToPt0) - D_004A3B28));
     } else if (sideDist3 < sideDist1 && sideDist3 < sideDist0 && sideDist3 < sideDist2) {
-        bot = btSub(pts[3], btScale(*(sBTV4_8938*)(self->rider + 0x370), btDot(*(sBTV4_8938*)(self->rider + 0x370), contactToPt3) - D_004A3B28));
+        bot = btSub(pts[3], btScale(*(t4Vector*)(self->rider + 0x370), btDot(*(t4Vector*)(self->rider + 0x370), contactToPt3) - D_004A3B28));
     } else {
-        bot = btSub(pts[2], btScale(*(sBTV4_8938*)(self->rider + 0x370), btDot(*(sBTV4_8938*)(self->rider + 0x370), contactToPt2) - D_004A3B28));
+        bot = btSub(pts[2], btScale(*(t4Vector*)(self->rider + 0x370), btDot(*(t4Vector*)(self->rider + 0x370), contactToPt2) - D_004A3B28));
     }
-    sBTV4_8938 et = btSub(top, *(sBTV4_8938*)(self->rider + 0x460));
-    sBTV4_8938 eb = btSub(bot, *(sBTV4_8938*)(self->rider + 0x460));
+    t4Vector et = btSub(top, *(t4Vector*)(self->rider + 0x460));
+    t4Vector eb = btSub(bot, *(t4Vector*)(self->rider + 0x460));
     float ft = btDot(et, dir);
     float fb = btDot(eb, dir);
     float st = btDot(et, across);
     float sb = btDot(eb, across);
     if (cRider_getMotionState(self->rider) == 2) {
-        top = btAdd(btAdd(*(sBTV4_8938*)(self->rider + 0x460), btScale(across, st * 0.75f)), btScale(*(sBTV4_8938*)(self->rider + 0x370), D_004A3B28));
-        bot = btAdd(btAdd(*(sBTV4_8938*)(self->rider + 0x460), btScale(across, sb * 0.75f)), btScale(*(sBTV4_8938*)(self->rider + 0x370), D_004A3B28));
+        top = btAdd(btAdd(*(t4Vector*)(self->rider + 0x460), btScale(across, st * 0.75f)), btScale(*(t4Vector*)(self->rider + 0x370), D_004A3B28));
+        bot = btAdd(btAdd(*(t4Vector*)(self->rider + 0x460), btScale(across, sb * 0.75f)), btScale(*(t4Vector*)(self->rider + 0x370), D_004A3B28));
     }
     self->strip[2][self->head].pos = top;
     self->strip[0][self->head].pos = top;
@@ -836,20 +834,20 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
     if (speed * 0.0036000001709908247f <= 1.0f) {
         k *= speed * 0.0036000001709908247f;
     }
-    sBTV4_8938 ground = btAdd(*(sBTV4_8938*)(self->rider + 0x460), btScale(*(sBTV4_8938*)(self->rider + 0x370), D_004A3B28));
-    sBTV4_8938 mid;
+    t4Vector ground = btAdd(*(t4Vector*)(self->rider + 0x460), btScale(*(t4Vector*)(self->rider + 0x370), D_004A3B28));
+    t4Vector mid;
     if (ft < fb) {
         mid = btAdd(ground, btScale(dir, k * ft));
     } else {
         mid = btAdd(ground, btScale(dir, k * fb));
     }
-    sBTV4_8938 topEdge = btAdd(mid, btScale(across, st));
-    sBTV4_8938 botEdge = btAdd(mid, btScale(across, sb));
-    sBTV4_8938 n = btNormalize(btSub(botEdge, topEdge));
-    sBTV4_8938 innerWidth = btScale(n, D_004A4580);
-    sBTV4_8938 outerWidth = btScale(btScale(n, D_004A4584), btAbs(*(float*)(self->rider + 0x454) <? 0.0f) + 10.0f);
-    sBTV4_8938 w = btScale(*(sBTV4_8938*)(self->rider + 0x370), self->lift);
-    sBTV4_8938 h = btScale(*(sBTV4_8938*)(self->rider + 0x370), *(float*)(self->rider + 0x454) <? 0.0f);
+    t4Vector topEdge = btAdd(mid, btScale(across, st));
+    t4Vector botEdge = btAdd(mid, btScale(across, sb));
+    t4Vector n = btNormalize(btSub(botEdge, topEdge));
+    t4Vector innerWidth = btScale(n, D_004A4580);
+    t4Vector outerWidth = btScale(btScale(n, D_004A4584), btAbs(*(float*)(self->rider + 0x454) <? 0.0f) + 10.0f);
+    t4Vector w = btScale(*(t4Vector*)(self->rider + 0x370), self->lift);
+    t4Vector h = btScale(*(t4Vector*)(self->rider + 0x370), *(float*)(self->rider + 0x454) <? 0.0f);
     self->strip[2][prev].pos = btAdd(btAdd(btSub(topEdge, outerWidth), h), h);
     self->strip[0][prev].pos = btAdd(btSub(topEdge, btScale(innerWidth, self->w1)), w);
     self->strip[3][prev].pos = btAdd(topEdge, h);
@@ -868,8 +866,8 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
     for (int i = 0; i < 6; i++) {
         self->strip[i][self->head].pos.w = 1.0f;
     }
-    sBTV4_8938 stripStep0 = btSub(self->strip[0][self->head].pos, self->strip[0][prev].pos);
-    sBTV4_8938 stripStep1 = btSub(self->strip[1][self->head].pos, self->strip[1][prev].pos);
+    t4Vector stripStep0 = btSub(self->strip[0][self->head].pos, self->strip[0][prev].pos);
+    t4Vector stripStep1 = btSub(self->strip[1][self->head].pos, self->strip[1][prev].pos);
     int back0 = btDot(stripStep0, dir) < 0.0f;
     int back1 = btDot(stripStep1, dir) < 0.0f;
     if (back0) {
@@ -990,14 +988,7 @@ INCLUDE_ASM("visualfx/boardtrailfx", func_002EA538);
 #ifdef SKIP_ASM
 extern int D_004A45C8;
 
-struct sTrailStripA538 {
-    char* pts;                  // 0x0
-    int start;                  // 0x4
-    int count;                  // 0x8
-    int fC;                     // 0xC
-    float scale;                // 0x10
-};
-struct sRctxVtA538 { short delta; short index; void (*fn)(void*, sTrailStripA538*, int); };
+struct sRctxVtA538 { short delta; short index; void (*fn)(void*, BoardTrailInfoT*, int); };
 
 /**
  * Draws the board trails of several riders in one batch through the graphics manager.
@@ -1012,7 +1003,7 @@ struct sRctxVtA538 { short delta; short index; void (*fn)(void*, sTrailStripA538
  */
 extern "C" void func_002EA538(char** trails, int n)
 {
-    sTrailStripA538 strips[16];
+    BoardTrailInfoT strips[16];
     int count = 0;
     push_A480((sRenderCtx_A480*)GrMan);
     if (n > 0) {
@@ -1032,11 +1023,11 @@ extern "C" void func_002EA538(char** trails, int n)
         int st = start % 54;
         float sc = 1.0f / (float)D_004A45C8;
         if (count < 16) {
-            strips[count].pts = (char*)&trail->BufVerts[0];
-            strips[count].start = st;
-            strips[count].count = cnt;
-            strips[count].fC = 0;
-            strips[count].scale = sc;
+            (*(char**)&strips[count].verts) = (char*)&trail->BufVerts[0];
+            strips[count].startIndex = st;
+            strips[count].stripLength = cnt;
+            (*(int*)&strips[count].alphaMultiplier) = 0;
+            strips[count].alphaDelta = sc;
             count++;
         }
     } while (trails++, --n > 0);
@@ -1252,12 +1243,8 @@ INCLUDE_ASM("visualfx/boardtrailfx", cCutSceneTransitionMan_update);
 extern "C" void cCutSceneTransitionMan_ForceToRegularMode(cCutSceneTransitionMan* self);
 extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(cCutSceneTransitionMan* self);
 
-struct sFadeCol_A900 {
-    int id;
-    float c[4];
-};
 
-struct sVE_A900 { short delta; short index; void (*fn)(void*, sFadeCol_A900*); };
+struct sVE_A900 { short delta; short index; void (*fn)(void*, tTVDisplayFormat*); };
 
 struct sFade_A900 {
     char pad0[0x10];
@@ -1299,12 +1286,12 @@ extern "C" void cCutSceneTransitionMan_update(cCutSceneTransitionMan* self)
     float k = self->mfCurrentTime / self->mfLengthOfTime;
     if (mode == 2)
         k = 1.0f - k;
-    sFadeCol_A900 col;
-    col.id = self->mRegularTVFormat.mDisplayFormat;
-    col.c[2] = ((float*)&self->mRegularTVFormat.mfTVYOffset)[2] + (((float*)&self->mCutSceneTVFormat.mfTVYOffset)[2] - ((float*)&self->mRegularTVFormat.mfTVYOffset)[2]) * k;
-    col.c[3] = ((float*)&self->mRegularTVFormat.mfTVYOffset)[3] + (((float*)&self->mCutSceneTVFormat.mfTVYOffset)[3] - ((float*)&self->mRegularTVFormat.mfTVYOffset)[3]) * k;
-    col.c[0] = ((float*)&self->mRegularTVFormat.mfTVYOffset)[0] + (((float*)&self->mCutSceneTVFormat.mfTVYOffset)[0] - ((float*)&self->mRegularTVFormat.mfTVYOffset)[0]) * k;
-    col.c[1] = ((float*)&self->mRegularTVFormat.mfTVYOffset)[1] + (((float*)&self->mCutSceneTVFormat.mfTVYOffset)[1] - ((float*)&self->mRegularTVFormat.mfTVYOffset)[1]) * k;
+    tTVDisplayFormat col;
+    col.mDisplayFormat = self->mRegularTVFormat.mDisplayFormat;
+    ((float*)&col.mfTVYOffset)[2] = ((float*)&self->mRegularTVFormat.mfTVYOffset)[2] + (((float*)&self->mCutSceneTVFormat.mfTVYOffset)[2] - ((float*)&self->mRegularTVFormat.mfTVYOffset)[2]) * k;
+    ((float*)&col.mfTVYOffset)[3] = ((float*)&self->mRegularTVFormat.mfTVYOffset)[3] + (((float*)&self->mCutSceneTVFormat.mfTVYOffset)[3] - ((float*)&self->mRegularTVFormat.mfTVYOffset)[3]) * k;
+    ((float*)&col.mfTVYOffset)[0] = ((float*)&self->mRegularTVFormat.mfTVYOffset)[0] + (((float*)&self->mCutSceneTVFormat.mfTVYOffset)[0] - ((float*)&self->mRegularTVFormat.mfTVYOffset)[0]) * k;
+    ((float*)&col.mfTVYOffset)[1] = ((float*)&self->mRegularTVFormat.mfTVYOffset)[1] + (((float*)&self->mCutSceneTVFormat.mfTVYOffset)[1] - ((float*)&self->mRegularTVFormat.mfTVYOffset)[1]) * k;
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sVE_A900* vt = (sVE_A900*)ps2GraphicsMan->mVtbl;
     vt[41].fn(vthis(ps2GraphicsMan, vt[41]), &col);
@@ -1612,19 +1599,6 @@ struct sRctx_B198 {
 
 extern sRS_B198 D_00501420_B198 __asm__("sDrawState_s_defaultDrawState");
 
-// One strip vertex: texture coords, 0..255 colour (alpha 0..128), position.
-struct sTrailVtx_B198 {
-    float s;                    // 0x00
-    float t;                    // 0x04
-    float q;                    // 0x08
-    int pad;                    // 0x0C
-    int r;                      // 0x10
-    int g;                      // 0x14
-    int b;                      // 0x18
-    int a;                      // 0x1C
-    sV4_2EADD0 pos;             // 0x20
-    sTrailVtx_B198() {}
-};
 
 struct sTrailCol_B198 {
     float a;
@@ -1639,16 +1613,16 @@ static inline void push_B198(sRctx_B198* ctx)
     ctx->top++;
 }
 
-static inline void addVtx_B198(sTrailVtx_B198* v, const sTrailCol_B198& c, float s, float t, const sV4_2EADD0& pos)
+static inline void addVtx_B198(tBxVertex* v, const sTrailCol_B198& c, float s, float t, const sV4_2EADD0& pos)
 {
     v->r = (int)(c.r * 255.0f);
     v->g = (int)(c.g * 255.0f);
     v->b = (int)(c.b * 255.0f);
     v->a = (int)(c.a * 128.0f);
-    v->q = 1.0f;
-    v->pos = pos;
-    v->s = s;
-    v->t = t;
+    v->one = 1.0f;
+    (*(sV4_2EADD0*)&v->p) = pos;
+    v->u = s;
+    v->v = t;
 }
 
 /**
@@ -1676,7 +1650,7 @@ extern "C" void cTrickBoostFX_render(sTrail_2EADD0* self)
     ((sRS_B198*)GrMan->m_pCurrentDrawState)->f4 = (((sRS_B198*)GrMan->m_pCurrentDrawState)->f4 & ~0x7C) | 0x1C;
     ((sRS_B198*)GrMan->m_pCurrentDrawState)->f4 = (((sRS_B198*)GrMan->m_pCurrentDrawState)->f4 & 0xFFBFFFFF) | 0x400000;
 
-    sTrailVtx_B198 verts[4][7];
+    tBxVertex verts[4][7];
     int counts[4];
     for (int k = 3; k >= 0; k--) {
         counts[k] = 0;

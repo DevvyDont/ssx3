@@ -139,9 +139,6 @@ extern "C" void cScriptObject_DeInitScriptObject(void* self);
 extern "C" void cVidEngine_ResetVideoEngine(void* p);
 extern "C" void cRenderStateMan_setInNIS(int);
 
-struct sSseObj8590 {
-    char data[0xCC];
-};
 
 struct sSseEngine8590 {
     char pad_0x0[0x500];
@@ -149,9 +146,9 @@ struct sSseEngine8590 {
     char anims[0x544 - 0x51C];      // 0x51C
     void* buf;                      // 0x544
     int field_0x548;                // 0x548
-    sSseObj8590* objsA;             // 0x54C
+    tNISList* objsA;             // 0x54C
     char pad_0x550[0x624 - 0x550];
-    sSseObj8590* objsB;             // 0x624
+    tNISList* objsB;             // 0x624
     char pad_0x628[0x6D0 - 0x628];
     char rigs[2][0x120];            // 0x6D0
     char pad_0x910[0xC];
@@ -184,7 +181,7 @@ extern "C" void cSSXScriptEngine_Purge(sSseEngine8590* self)
     cDataManager_DetachAll(self->anims);
     cVidEngine_ResetVideoEngine(self->snd);
     if (self->objsA != 0) {
-        sSseObj8590* objPtr = self->objsA + ((int*)self->objsA)[-4];
+        tNISList* objPtr = self->objsA + ((int*)self->objsA)[-4];
         while (self->objsA != objPtr) {
             objPtr--;
             tNISList__tNISList((int*)objPtr, 0);
@@ -195,7 +192,7 @@ extern "C" void cSSXScriptEngine_Purge(sSseEngine8590* self)
         cMemMan_free(self->buf);
     }
     if (self->objsB != 0) {
-        sSseObj8590* objPtr = self->objsB + ((int*)self->objsB)[-4];
+        tNISList* objPtr = self->objsB + ((int*)self->objsB)[-4];
         while (self->objsB != objPtr) {
             objPtr--;
             tNISList__tNISList((int*)objPtr, 0);
@@ -1523,16 +1520,7 @@ struct sScriptHdr_9A70 {
     unsigned char numEvents;        // 0x1
 };
 
-struct sScript_9A70 {
-    char pad_0x0[0x10];
-    sScriptHdr_9A70* hdr;           // 0x10
-};
 
-struct sScriptOpt_9A70 {
-    signed char slot;               // 0x0
-    char pad_0x1;
-    short mask;                     // 0x2
-};
 
 
 /**
@@ -1548,7 +1536,7 @@ struct sScriptOpt_9A70 {
  * @param players  the request's setup info: the three AI indices of the cast
  */
 // Picks a random option for every choice event of a script, honouring the per-slot team flags.
-extern "C" void cSSXScriptEngine_OnStartScript(cSSXScriptEngine* self, sScript_9A70* script, int idx, int* players)
+extern "C" void cSSXScriptEngine_OnStartScript(cSSXScriptEngine* self, cScriptPlayerMain* script, int idx, int* players)
 {
     int flags[21];
     int cands[32];
@@ -1560,7 +1548,7 @@ extern "C" void cSSXScriptEngine_OnStartScript(cSSXScriptEngine* self, sScript_9
         for (j = 0; j < 21; j++)
             all |= flags[j];
     }
-    for (i = 0; i < script->hdr->numEvents; i++) {
+    for (i = 0; i < ((sScriptHdr_9A70*)script->mpSystemHeader)->numEvents; i++) {
         void* ev = cScriptPlayerMain_GetEntity(script, i);
         if (cScriptPlayerEntity_GetType(ev) == 5) {
             int cnt = cScriptPlayerEntity_GetNumVariations(ev);
@@ -1568,20 +1556,20 @@ extern "C" void cSSXScriptEngine_OnStartScript(cSSXScriptEngine* self, sScript_9
                 int numCands = 0;
                 int k;
                 for (k = 0; k < cnt; k++) {
-                    sScriptOpt_9A70* opt = (sScriptOpt_9A70*)GetSSXActorHeader1_9A70(ev, k);
-                    int slot = D_00482608[opt->slot];
+                    tSSXHeaderActor* opt = (tSSXHeaderActor*)GetSSXActorHeader1_9A70(ev, k);
+                    int slot = D_00482608[opt->role];
                     if (slot >= 0) {
-                        if (opt->mask == 0 || (opt->mask & flags[slot]) != 0)
+                        if (opt->character == 0 || (opt->character & flags[slot]) != 0)
                             cands[numCands++] = k;
                     } else {
-                        if (opt->mask == 0 || (opt->mask & all) != 0)
+                        if (opt->character == 0 || (opt->character & all) != 0)
                             cands[numCands++] = k;
                     }
                 }
                 if (numCands > 0) {
                     cScriptPlayerEntity_SetEntityVariation(ev, cands[BXrand() % numCands]);
-                    sScriptOpt_9A70* opt = (sScriptOpt_9A70*)GetSSXActorHeader(ev);
-                    int slot = D_00482608[opt->slot];
+                    tSSXHeaderActor* opt = (tSSXHeaderActor*)GetSSXActorHeader(ev);
+                    int slot = D_00482608[opt->role];
                     if (slot >= 0) {
                         all &= ~flags[slot];
                         flags[slot] = 0;
@@ -1639,9 +1627,6 @@ public:
     virtual int v09();
 };
 
-struct sScrSlot9D00 {
-    char pad[0x120];
-};
 
 
 /**
@@ -1657,9 +1642,9 @@ extern "C" int cSSXScriptEngine_AddObject(cSSXScriptEngine* self, cScriptOwner9D
 {
     int result = cScriptDatabaseObject_AddObject((cScriptDatabaseObject*)(self), obj);
     if (obj->state == 1) {
-        cScriptObjCameraManager_AddCameraObject((cScriptObjCameraManager*)(&((sScrSlot9D00*)&self->mObjectCameraManager[0])[*(int*)((char*)obj + 0x7C)]), (cScriptObjCamera*)obj);
+        cScriptObjCameraManager_AddCameraObject((cScriptObjCameraManager*)(&((&self->mObjectCameraManager[0]))[*(int*)((char*)obj + 0x7C)]), (cScriptObjCamera*)obj);
     } else if (obj->state == 2) {
-        cScriptObjCameraManager_SetTransitionObject((cScriptObjCameraManager*)(&((sScrSlot9D00*)&self->mObjectCameraManager[0])[obj->v09()]), obj);
+        cScriptObjCameraManager_SetTransitionObject((cScriptObjCameraManager*)(&((&self->mObjectCameraManager[0]))[obj->v09()]), obj);
     }
     return result;
 }
@@ -1887,13 +1872,10 @@ struct sVec_27A0D8 {
     sVec_27A0D8() {}
     sVec_27A0D8(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {}
 } __attribute__((aligned(16)));
-struct sV3_27A0D8 {
-    float x, y, z;
-};
 extern int D_004A51D8;
-extern sV3_27A0D8 D_004D3770[3];
+extern t3Vector D_004D3770[3];
 // D_004D3680[20..22] is D_004D3770[0..2]; the lookup indexes by the raw id.
-extern sV3_27A0D8 D_004D3680[];
+extern t3Vector D_004D3680[];
 extern "C" void cSSXScriptEngine_FillOrientationFromStartPointInfo_v(void* self, void* obj, sVec_27A0D8* pos, int* flag, float* pitch, float* yaw)
     __asm__("cSSXScriptEngine_FillOrientationFromStartPointInfo");
 extern "C" void cSSXScriptEngine_FillOrientationFromRiderOrientationInfo_v(void* self, void* obj, sVec_27A0D8* pos, int* flag, float* pitch, float* yaw)
@@ -2049,7 +2031,7 @@ extern "C" void cSSXScriptEngine_GetAnchorOrientation_impl(char* self, int id, v
             D_004D3770[2].z = 280.0f;
             D_004A51D8 = 1;
         }
-        sV3_27A0D8* anchorOffset = &D_004D3680[id];
+        t3Vector* anchorOffset = &D_004D3680[id];
         sVec_27A0D8 off(anchorOffset->x, anchorOffset->y, anchorOffset->z, 0.0f);
         cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 0, pos, baseRotX, baseRotY, baseRotZ, 50, &off);
         break;
@@ -2616,12 +2598,6 @@ extern char str_ScriptChoice[];
 
 
 
-struct sPri_27B0C0
-{
-    int pri;
-    int a;
-    int b;
-};
 
 
 /**
@@ -2650,7 +2626,7 @@ extern "C" int* cSSXScriptEngine_GetScriptFromCategory(cSSXScriptEngine* engine,
     for (int i = 0; i < count; i++)
     {
         tSSXHiveScriptFilter* script = &scripts[i];
-        int pri = ((sPri_27B0C0*)self->mpMasterTable)[script->scriptIndex].pri;
+        int pri = (self->mpMasterTable)[script->scriptIndex].numTimesPlayed;
         if (pri <= best)
         {
             int fail = 0;
@@ -5930,24 +5906,14 @@ struct sSePair07B0 {
     int b;
 };
 
-struct sSeSound07B0 {
-    int id;
-    int field_0x4;
-    int field_0x8;
-};
 
-struct sSeInfo07B0 {
-    int v[9];
-    int active;     // 0x24
-    int pad[2];
-};
 
 struct sSeEngine07B0 {
     char pad_0x0[0x8];
     void* owner;                // 0x8
     char pad_0xC[0x10];
     sSePair07B0 pairs[(0xBC - 0x1C) / 8];   // 0x1C
-    sSeSound07B0 sounds[4];     // 0xBC
+    tScriptObjEventSound sounds[4];     // 0xBC
     int pairCount;              // 0xEC
     int field_0xF0;             // 0xF0
     int field_0xF4;             // 0xF4
@@ -5967,7 +5933,7 @@ struct sSeEngine07B0 {
  */
 extern "C" void cScriptObjEvent_OnEndObjectUse(sSeEngine07B0* self)
 {
-    sSeInfo07B0 info;
+    tSSXFrameGameEvent info;
     cScriptObject_OnEndObjectUse((char*)self + 0xC);
     for (int i = 0; i < self->pairCount; i++) {
         cWScriptMan_runFunc(cWScriptMan_TheWScriptMan, self->pairs[i].b, self->pairs[i].a);
@@ -5976,17 +5942,17 @@ extern "C" void cScriptObjEvent_OnEndObjectUse(sSeEngine07B0* self)
         func_002A1BD0(cAudioInterface_bxAudio());
     }
     for (int i = 0; i < 4; i++) {
-        int id = self->sounds[i].id;
+        int id = self->sounds[i].soundHandle;
         if (id >= 0) {
             cBankMonitor_BANKMONITOR_StopHandle(*(char**)*(char**)&cAudioInterface_bxAudio()->MusicSys + 0x1D8, id, 1, 0.0f);
         }
-        sSeSound07B0* soundSlot = &self->sounds[i];
-        soundSlot->field_0x8 = -1;
-        soundSlot->id = -1;
-        soundSlot->field_0x4 = 0;
+        tScriptObjEventSound* soundSlot = &self->sounds[i];
+        soundSlot->soundID = -1;
+        soundSlot->soundHandle = -1;
+        soundSlot->endSound = 0;
     }
     GetSSXGameEventFrame(self->owner, &info);
-    if (info.active != 0) {
+    if (((int)info.pEnviroStateList) != 0) {
         cRenderStateMan_m_indoor = 0;
     }
     self->pairCount = 0;
@@ -6085,13 +6051,6 @@ struct sWtTrack_08E8 {
     sWtSub_08E8 sub;         // 0x1D8
 };
 
-struct sWtSnd_08E8 {
-    sWtTrack_08E8* track;    // 0x0
-    int* types;              // 0x4
-    int* args;               // 0x8
-    char pad[0x10C];
-    sWtTrack_08E8** cur;     // 0x118
-};
 
 struct sSfxEnt_08E8 {
     int id;                  // 0x0
@@ -6103,30 +6062,12 @@ struct sSfxEnt_08E8 {
     sSfxEnt_08E8* next;      // 0x20
 };
 
-struct sSeLink_08E8 {
-    int a;
-    int* b;
-};
 
 struct sSeCmd_08E8 {
     int id;
     int pad;
 };
 
-// Filled by GetSSXGameEventFrame.
-struct sSeInfo_08E8 {
-    int nLinks;                 // 0x00
-    sSeLink_08E8* links;        // 0x04
-    int nStops;                 // 0x08
-    sSeCmd_08E8* stops;         // 0x0C
-    int nCmds;                  // 0x10
-    sSeCmd_08E8* cmds;          // 0x14
-    int pad18;
-    sSfxEnt_08E8* sfx;          // 0x1C
-    int pad20;
-    int active;                 // 0x24
-    int pad28[2];
-};
 
 struct sSePair_08E8 {
     int a;
@@ -6177,7 +6118,7 @@ struct sSeEngine_08E8 {
  */
 extern "C" void cScriptObjEvent_OnInSeqKeyEvent(sSeEngine_08E8* self, cScriptPlayerEntity* obj, int entityType, float when, int flags)
 {
-    sSeInfo_08E8 info;
+    tSSXFrameGameEvent info;
     GetSSXGameEventFrame(obj, &info);
     void* iface0 = cBE_getInterface_Fv(cBE_getBE(), 0);
     int owner;
@@ -6188,10 +6129,10 @@ extern "C" void cScriptObjEvent_OnInSeqKeyEvent(sSeEngine_08E8* self, cScriptPla
         owner = cSectionMan_getWorldSectionIDFromBELocationID(mgr, *cBENewRaceInterface_getLocation(iface0));
     }
     int i;
-    for (i = 0; i < info.nLinks; i++) {
-        sSeLink_08E8* worldEvent = &info.links[i];
-        cWScriptMan_runFunc(cWScriptMan_TheWScriptMan, owner, worldEvent->a);
-        int id = *worldEvent->b;
+    for (i = 0; i < info.numWorldScriptEvent; i++) {
+        tWorldScriptEvent* worldEvent = &(info.pWorldScriptEventArray)[i];
+        cWScriptMan_runFunc(cWScriptMan_TheWScriptMan, owner, worldEvent->eventID);
+        int id = *((int*)worldEvent->pCustom);
         if (id != D_004A525C) {
             int found = 0;
             int j;
@@ -6214,16 +6155,16 @@ extern "C" void cScriptObjEvent_OnInSeqKeyEvent(sSeEngine_08E8* self, cScriptPla
     if (flags & 4) {
         cRenderStateMan_m_indoor = 1;
     }
-    sWtSnd_08E8* snd = (sWtSnd_08E8*)cAudioInterface_bxAudio();
-    for (i = 0; i < info.nStops; i++) {
-        sSeCmd_08E8* audioEvent = &info.stops[i];
+    cSSXAudio* snd = cAudioInterface_bxAudio();
+    for (i = 0; i < info.numMusicEvent; i++) {
+        sSeCmd_08E8* audioEvent = &((sSeCmd_08E8*)info.pMusicEventArray)[i];
         int id = audioEvent->id;
         if (id != 0xFF) {
             func_0028E8C0(snd, id, 0);
         }
     }
-    for (i = 0; i < info.nCmds; i++) {
-        sSeCmd_08E8* audioEvent = &info.cmds[i];
+    for (i = 0; i < info.numSpeechEvent; i++) {
+        sSeCmd_08E8* audioEvent = &((sSeCmd_08E8*)info.pSpeechEventArray)[i];
         int id = audioEvent->id;
         if (id != 17) {
             if (id == 0x10) {
@@ -6240,12 +6181,12 @@ extern "C" void cScriptObjEvent_OnInSeqKeyEvent(sSeEngine_08E8* self, cScriptPla
                 self->sounds[i].count = 1;
             }
         }
-        for (sSfxEnt_08E8* soundEntry = info.sfx; soundEntry != 0; soundEntry = soundEntry->next) {
+        for (sSfxEnt_08E8* soundEntry = ((sSfxEnt_08E8*)info.pSoundList); soundEntry != 0; soundEntry = soundEntry->next) {
             self->sounds[soundEntry->slot].count = 0;
         }
     }
     if (flags & 1) {
-        for (sSfxEnt_08E8* soundEntry = info.sfx; soundEntry != 0; soundEntry = soundEntry->next) {
+        for (sSfxEnt_08E8* soundEntry = ((sSfxEnt_08E8*)info.pSoundList); soundEntry != 0; soundEntry = soundEntry->next) {
             if ((float)soundEntry->when < when)
                 break;
             int slot = soundEntry->slot;
@@ -6253,7 +6194,7 @@ extern "C" void cScriptObjEvent_OnInSeqKeyEvent(sSeEngine_08E8* self, cScriptPla
             if (self->sounds[slot].id >= 0) {
                 play = 0;
                 if (self->sounds[slot].target != soundEntry->id) {
-                    cBankMonitor_BANKMONITOR_StopHandle((char*)*snd->cur + 0x1D8, self->sounds[slot].id, 1, 0.0f);
+                    cBankMonitor_BANKMONITOR_StopHandle((char*)*(*(sWtTrack_08E8***)&snd->MusicSys) + 0x1D8, self->sounds[slot].id, 1, 0.0f);
                     play = 1;
                 }
             }
@@ -6262,7 +6203,7 @@ extern "C" void cScriptObjEvent_OnInSeqKeyEvent(sSeEngine_08E8* self, cScriptPla
                 cScriptObjEvent_ScriptSoundIDToGameSoundInfo(self, soundEntry->id, &gameSoundIndex, &type);
                 int tp = type;
                 int ar = gameSoundIndex;
-                sWtTrack_08E8* pushSystem = snd->track;
+                sWtTrack_08E8* pushSystem = ((sWtTrack_08E8*)snd->mpVBankManager);
                 sWtSub_08E8* sb = &pushSystem->sub;
                 pushSystem->sub.cur++;
                 sb->ents[pushSystem->sub.cur] = sb->cfg;
@@ -6284,21 +6225,21 @@ extern "C" void cScriptObjEvent_OnInSeqKeyEvent(sSeEngine_08E8* self, cScriptPla
                 sb->p84[pushSystem->sub.cur] = 0;
                 sb->p78[pushSystem->sub.cur] = 0x7F;
                 sb->p7C[pushSystem->sub.cur] = 1;
-                snd->types[snd->track->sub.cur] = tp;
-                snd->args[snd->track->sub.cur] = ar;
+                snd->mBank[((sWtTrack_08E8*)snd->mpVBankManager)->sub.cur] = tp;
+                snd->mPatch[((sWtTrack_08E8*)snd->mpVBankManager)->sub.cur] = ar;
                 {
-                    sWtTrack_08E8* volumeSystem = *snd->cur;
+                    sWtTrack_08E8* volumeSystem = *(*(sWtTrack_08E8***)&snd->MusicSys);
                     sWtSub_08E8* s2 = &volumeSystem->sub;
                     s2->p38[volumeSystem->sub.cur] = *soundEntry->vol;
                     s2->ents[volumeSystem->sub.cur].b0 = MAX_08E8(MIN_08E8(s2->p38[s2->cur], 0x7F), 0);
                 }
                 {
-                    sWtTrack_08E8** pt = snd->cur;
+                    sWtTrack_08E8** pt = (*(sWtTrack_08E8***)&snd->MusicSys);
                     int volumeSetting = cSSXAudio_GetCurrAppliedVolumePtr(snd, 4, 0);
                     (*pt)->sub.p3C[(*pt)->sub.cur] = volumeSetting;
                 }
                 {
-                    sWtTrack_08E8* resetSystem = *snd->cur;
+                    sWtTrack_08E8* resetSystem = *(*(sWtTrack_08E8***)&snd->MusicSys);
                     resetSystem->sub.p64[resetSystem->sub.cur] = 0;
                 }
                 self->sounds[slot].id = cBankSys_SFX_End(snd);

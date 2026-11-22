@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "scripter/scriptobjcammgr.h"
 #include "visualfx/transitionman.h"
 #include "sound/ssxaudio.h"
 #include "ui/uiengine.h"
@@ -79,13 +80,6 @@ extern "C" sDmNode5B98* cDataManager_AttachDataFromBigfile(cDataManager* self, c
 extern int REALabortflag[];
 
 
-struct sDmNode5920 {
-    int field_0x0;
-    int field_0x4;          // 0x4
-    void* data;             // 0x8
-    int size;               // 0xC
-    int refs;               // 0x10
-};
 
 /**
  * Registers a block of data with the data manager and returns its instance record.
@@ -102,23 +96,23 @@ struct sDmNode5920 {
  * @param size  its size in bytes
  * @return the instance record (the data handle)
  */
-extern "C" sDmNode5920* cDataManager_AttachData(cDataManager* self, int pName, void* data, int size)
+extern "C" tDataInstanceInfo* cDataManager_AttachData(cDataManager* self, int pName, void* data, int size)
 {
-    sDmNode5920* n = (sDmNode5920*)cDataManager_GetEmptyInstance(self);
+    tDataInstanceInfo* n = (tDataInstanceInfo*)cDataManager_GetEmptyInstance(self);
     int saved = REALabortflag[0];
-    n->data = data;
-    n->refs = 1;
-    n->size = size;
+    n->pData = data;
+    n->isRoot = 1;
+    n->dataSize = size;
     REALabortflag[0] = 0;
     int big = BIG_sizeofheader(data);
     REALabortflag[0] = saved;
     if (big != 0) {
         sVEntry<void(void*, int, void*, int, void*, void*)>* vt = (sVEntry<void(void*, int, void*, int, void*, void*)>*)self->mVtbl;
-        vt[4].fn(vthis(self, vt[4]), pName, data, size, n, &n->field_0x4);
+        vt[4].fn(vthis(self, vt[4]), pName, data, size, n, &(*(int*)&n->pUserData2));
         cDataManager_AttachDataFromBigfile(self, (char*)data, (sDmNode5B98*)n);
     } else {
         sVEntry<void(void*, int, void*, int, void*, void*)>* vt = (sVEntry<void(void*, int, void*, int, void*, void*)>*)self->mVtbl;
-        vt[2].fn(vthis(self, vt[2]), pName, data, size, n, &n->field_0x4);
+        vt[2].fn(vthis(self, vt[2]), pName, data, size, n, &(*(int*)&n->pUserData2));
     }
     return n;
 }
@@ -580,15 +574,6 @@ extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
 // The unit declares cCircularBuffer_GetNumEntries as returning void*, but it returns the list's count.
 int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_GetNumEntries");
 
-struct sDmCmd6048 {
-    int type;       // 0x0
-    int a1;         // 0x4
-    int a2;         // 0x8
-    int id;         // 0xC
-    int a3;         // 0x10
-    int a4;         // 0x14
-    int a5;         // 0x18
-};
 
 /**
  * Appends the script with master-table index @p scriptIndex to the NIS list, then sets up the next script if the list is
@@ -609,14 +594,14 @@ extern "C" int tNISList_AddByScriptIndex(tNISList* self, int scriptIndex, int co
 {
     if (cCircularBuffer_IsFull(&self->mList) == 0) {
         void* list = (char*)&self->mList;
-        sDmCmd6048 cmd;
-        cmd.type = 0x1C;
-        cmd.id = -1;
-        cmd.a2 = controlBits;
-        cmd.a1 = scriptIndex;
-        cmd.a3 = aiCharIndexMain;
-        cmd.a4 = aiCharIndexSupport0;
-        cmd.a5 = aiCharIndexSupport1;
+        tNISListEntry cmd;
+        cmd.category = 0x1C;
+        cmd.scriptHandle = -1;
+        cmd.controlBits = controlBits;
+        cmd.scriptIndex = scriptIndex;
+        cmd.aiCharIndexMain = aiCharIndexMain;
+        cmd.aiCharIndexSupport0 = aiCharIndexSupport0;
+        cmd.aiCharIndexSupport1 = aiCharIndexSupport1;
         cCircularBuffer_AddToTail(list, &cmd);
         if (self->mState != 0 && self->mNextPendingScriptIndex < 0) {
         self->mNextPendingScriptIndex = tNISList_SetupNextScript(self, cCircularBuffer_GetNumEntries_count(list) - 1, 0);
@@ -787,12 +772,6 @@ struct sDmFade_6388 {
     short tOut;             // 0xE
 };
 
-struct sDmItem_6388 {
-    int f0;
-    int f4;
-    int flags;              // 0x8
-    int id;                 // 0xC
-};
 
 // The unit declares tNISList_Play as void; it returns the state at 0xA4.
 int tNISList_Play_impl(char* self, int fade, int notify) __asm__("tNISList_Play");
@@ -831,7 +810,7 @@ int tNISList_Play_impl(char* vself, int fade, int notify)
     if (self->mState != 2) {
         return self->mState;
     }
-    sDmItem_6388* item = (sDmItem_6388*)cCircularBuffer_operatorIndex(&self->mList.mBuffer[0], 0);
+    tNISListEntry* item = (tNISListEntry*)cCircularBuffer_operatorIndex(&self->mList.mBuffer[0], 0);
     dm->mState = 3;
     char* table = (char*)&SSXApp->Game->UI->mStateStack;
     char* hudState = (char*)cUIStateStack_findState(table, GetHashValue32(str_hud_e));
@@ -840,7 +819,7 @@ int tNISList_Play_impl(char* vself, int fade, int notify)
         vtEntry->fn(vthis(hudState, *vtEntry), 0, 0);
     }
     if (tNISList_IsVideo((tNISList*)self, item) == 0) {
-        cSSXScriptEngine_PlayRequestScript_i(*(void**)self, self->mViewIndex, item->id, 0, (item->flags >> 3) & 1);
+        cSSXScriptEngine_PlayRequestScript_i(*(void**)self, self->mViewIndex, item->scriptHandle, 0, (item->controlBits >> 3) & 1);
         if (self->mIsCutSceneHandler != 0) {
             void* snd = cGame_getTransitionMan(SSXApp->Game, 0);
             if (*(int*)((char*)snd + 0x44) != 0) {
@@ -849,7 +828,7 @@ int tNISList_Play_impl(char* vself, int fade, int notify)
             int tIn = 0;
             int tHold = 0;
             float cutSceneTime = 0.0f;
-            sDmFade_6388* transitionInfo = (sDmFade_6388*)GetSSXScriptHeader(cBXScriptEngine_GetRequestPlayerByReqHandle(*(void**)self, item->id));
+            sDmFade_6388* transitionInfo = (sDmFade_6388*)GetSSXScriptHeader(cBXScriptEngine_GetRequestPlayerByReqHandle(*(void**)self, item->scriptHandle));
             if (fade) {
                 tIn = transitionInfo->tIn;
                 tHold = transitionInfo->tHold;
@@ -873,7 +852,7 @@ int tNISList_Play_impl(char* vself, int fade, int notify)
                 }
                 if (self->mTransitionWaitFrames > 0) {
                     notify = 0;
-                    cBXScriptEngine_PauseScript(*(void**)self, item->id);
+                    cBXScriptEngine_PauseScript(*(void**)self, item->scriptHandle);
                     self->mIsStartTransition = 1;
                     self->mInScriptTransition = 1;
                 }
@@ -886,7 +865,7 @@ int tNISList_Play_impl(char* vself, int fade, int notify)
         if (notify) {
             char* eng = *(char**)self;
             sDmVEntry2_6388* vtEntry = &(*(sDmVEntry2_6388**)(eng + 0x2A8))[6];
-            vtEntry->fn(vthis(eng, *vtEntry), item->id);
+            vtEntry->fn(vthis(eng, *vtEntry), item->scriptHandle);
         }
     } else {
         if (self->mIsCutSceneHandler != 0) {
@@ -1743,15 +1722,6 @@ extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
 extern "C" int* tNISList_GetVideoDBRecord_p(void* self, void* ent) __asm__("tNISList_GetVideoDBRecord");
 int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_GetNumEntries");
 
-struct sDmEnt7450 {
-    int f0;     // 0x0
-    int f4;     // 0x4
-    int flags;  // 0x8
-    int id;     // 0xC
-    int a;      // 0x10
-    int b;      // 0x14
-    int c;      // 0x18
-};
 
 /**
  * Finds the next entry of the NIS list that can play, requesting its script or readying its video.
@@ -1770,24 +1740,24 @@ extern "C" int tNISList_SetupNextScript(tNISList* vself, int index, int skipFlag
     int count = cCircularBuffer_GetNumEntries_count(&vself->mList);
     int i = index;
     for (; i < count; i++) {
-        sDmEnt7450* currEntry = (sDmEnt7450*)cCircularBuffer_operatorIndex(&vself->mList, i);
-        if (skipFlagged && (currEntry->flags & 2))
+        tNISListEntry* currEntry = (tNISListEntry*)cCircularBuffer_operatorIndex(&vself->mList, i);
+        if (skipFlagged && (currEntry->controlBits & 2))
             continue;
-        if (currEntry->id >= 0)
+        if (currEntry->scriptHandle >= 0)
             return i;
         if (tNISList_IsVideo(vself, currEntry) == 0) {
             void* eng = *(void**)vself;
-            if (currEntry->f4 >= 0)
-                currEntry->id = cSSXScriptEngine_RequestScriptByIndex(eng, currEntry->f4, currEntry->a, currEntry->b, currEntry->c);
+            if (currEntry->scriptIndex >= 0)
+                currEntry->scriptHandle = cSSXScriptEngine_RequestScriptByIndex(eng, currEntry->scriptIndex, currEntry->aiCharIndexMain, currEntry->aiCharIndexSupport0, currEntry->aiCharIndexSupport1);
             else
-                currEntry->id = cSSXScriptEngine_RequestScriptByCategory(*(void**)vself, currEntry->f0, currEntry->a, currEntry->b, currEntry->c);
-            if (currEntry->id >= 0)
+                currEntry->scriptHandle = cSSXScriptEngine_RequestScriptByCategory(*(void**)vself, currEntry->category, currEntry->aiCharIndexMain, currEntry->aiCharIndexSupport0, currEntry->aiCharIndexSupport1);
+            if (currEntry->scriptHandle >= 0)
                 return i;
         } else {
             if (*(int*)(*(char**)vself + 0x500) == 0) {
                 int* videoEntry = tNISList_GetVideoDBRecord_p(((char*)vself), currEntry);
                 if (cVidEngine_ReadyVideo((void**)(*(char**)vself + 0x500), *videoEntry) != 0)
-                    currEntry->id = 0;
+                    currEntry->scriptHandle = 0;
             }
             return i;
         }
@@ -2023,12 +1993,6 @@ extern "C" void cTransitionMan_StartTransitionOut(void* snd, int a1, int h, floa
 extern "C" void cTransitionMan_StartTransitionScreenGrab(void* snd, int a1, int h, int a3, float t);
 
 
-struct sDmEnt_7980 {
-    int v0;
-    int cat;                // 0x4
-    int key;                // 0x8
-    float t;                // 0xC
-};
 
 // The unit declares tNISList_DoTransitionToNext as void; it returns whether it handled the update.
 int tNISList_DoTransitionToNext_impl(char* self) __asm__("tNISList_DoTransitionToNext");
@@ -2085,19 +2049,19 @@ int tNISList_DoTransitionToNext_impl(char* vself)
             }
         }
     } else {
-        sDmEnt_7980* videoInfo = (sDmEnt_7980*)tNISList_GetVideoDBRecord((tNISList*)self, (int*)item);
+        tVideoDB* videoInfo = (tVideoDB*)tNISList_GetVideoDBRecord((tNISList*)self, (int*)item);
         cTransitionMan* snd = (cTransitionMan*)cGame_getTransitionMan(SSXApp->Game, 0);
         if (snd->mbPlayingTransition != 0) {
             cTransitionMan_EndTransition(snd);
         }
-        if (0.0f < videoInfo->t) {
-            if (videoInfo->cat != 7) {
-                int transition = cSSXScriptEngine_MakeTransitionObject(*(void**)self, videoInfo->cat, videoInfo->key);
-                cTransitionMan_StartTransitionOut(snd, 2, transition, videoInfo->t);
+        if (0.0f < videoInfo->transitionOutTime) {
+            if (videoInfo->transitionOut != 7) {
+                int transition = cSSXScriptEngine_MakeTransitionObject(*(void**)self, videoInfo->transitionOut, videoInfo->transitionColour);
+                cTransitionMan_StartTransitionOut(snd, 2, transition, videoInfo->transitionOutTime);
                 self->mTransitionWaitFrames = 0;
             } else {
-                int transition = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, 7, videoInfo->key);
-                cTransitionMan_StartTransitionScreenGrab(snd, 2, transition, 0, videoInfo->t);
+                int transition = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, 7, videoInfo->transitionColour);
+                cTransitionMan_StartTransitionScreenGrab(snd, 2, transition, 0, videoInfo->transitionOutTime);
                 self->mTransitionWaitFrames = 0;
             }
         }
@@ -2408,11 +2372,6 @@ struct sVE_780B8 {
     void (*fn)(void*, int);
 };
 
-struct sSlot_780B8 {
-    char pad[0xC];
-    sVE_780B8* vt;              // 0xC
-    char rest[0x120 - 0x10];
-};
 
 /**
  * Destroys the script engine: runs DeInitOnce() if needed, then destroys the members and bases in reverse
@@ -2439,13 +2398,13 @@ extern "C" void cSSXScriptEngine__cSSXScriptEngine(cSSXScriptEngine* self, int f
     self->mObjectGameState.mScriptObjectVtbl = D_00482318;
     self->mObjectGameState.mVtbl = cScriptObjGS_vtbl;
     cScriptObject__cScriptObject(&self->mObjectGameState.mObjType, 0);
-    sSlot_780B8* cameraManager = (sSlot_780B8*)(&self->mObjectGameState);
-    sSlot_780B8* begin = (sSlot_780B8*)(&self->mObjectCameraManager[0]);
+    cScriptObjCameraManager* cameraManager = (cScriptObjCameraManager*)(&self->mObjectGameState);
+    cScriptObjCameraManager* begin = ((&self->mObjectCameraManager[0]));
     if (begin != 0) {
         do {
             while (begin != cameraManager) {
                 cameraManager--;
-                cameraManager->vt[1].fn(vthis(cameraManager, cameraManager->vt[1]), 0);
+                ((sVE_780B8*)cameraManager->mVtbl)[1].fn(vthis(cameraManager, ((sVE_780B8*)cameraManager->mVtbl)[1]), 0);
             }
         } while (0);
     }
@@ -2463,16 +2422,11 @@ extern "C" void cBXScriptEngine_SetupBXEngine(void* self, int count, int a2, int
 extern char* kpScriptMasterTableFilename;
 extern char* kpScriptMasterTableDebugFilename;
 
-struct sDmScript8210 {
-    int field_0x0;
-    int field_0x4;
-    int offset;             // 0x8
-};
 
 struct sDmEngine8210 {
     char pad_0x0[0x52C];
     int* hdr;                   // 0x52C
-    sDmScript8210* scripts;     // 0x530
+    tSSXHiveScriptMaster* scripts;     // 0x530
     char* base;                 // 0x534
     char pad_0x538[0x1C];
     int field_0x554;            // 0x554
@@ -2492,16 +2446,16 @@ extern "C" void cSSXScriptEngine_InitOnce(sDmEngine8210* self)
 {
     int* hdr = (int*)FILE_loadz(kpScriptMasterTableFilename, 0);
     self->hdr = hdr;
-    self->scripts = (sDmScript8210*)(hdr + 1);
+    self->scripts = (tSSXHiveScriptMaster*)(hdr + 1);
     char* base = (char*)FILE_loadz(kpScriptMasterTableDebugFilename, 0);
     self->base = base;
     if (base != 0) {
         for (int i = 0; i < *self->hdr; i++) {
-            self->scripts[i].offset = (int)self->base + self->scripts[i].offset;
+            (*(int*)&self->scripts[i].debugNamePtr) = (int)self->base + (*(int*)&self->scripts[i].debugNamePtr);
         }
     } else {
         for (int i = 0; i < *self->hdr; i++) {
-            self->scripts[i].offset = 0;
+            (*(int*)&self->scripts[i].debugNamePtr) = 0;
         }
     }
     self->field_0x554 = 0;

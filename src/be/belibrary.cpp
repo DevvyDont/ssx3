@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintreward.h"
 #include "be/beprofilelib.h"
 #include "be/beintplayer.h"
 #include "be/beintoption.h"
@@ -305,11 +306,6 @@ extern const char str_BEBoltInt[];
 extern void* cBEInterface_vtbl[16];
 extern void* cBEBoltInterface_instance;
 
-struct cBELibraryInterface_0014ABE0 {
-    char pad_0x00[8];
-    int field_0x8;
-    void* vtable;
-};
 
 /**
  * Returns the bolt (equipment) interface singleton, creating it on first use.
@@ -323,9 +319,9 @@ struct cBELibraryInterface_0014ABE0 {
 extern "C" void* cBEBoltInterface_getThis(void)
 {
     if (cBEBoltInterface_instance == 0) {
-        cBELibraryInterface_0014ABE0* mem = (cBELibraryInterface_0014ABE0*)cMemMan_alloc(0x10, str_BEBoltInt, 0, 0);
-        mem->field_0x8 = 0;
-        mem->vtable = cBEInterface_vtbl;
+        cBEInterface* mem = (cBEInterface*)cMemMan_alloc(0x10, str_BEBoltInt, 0, 0);
+        mem->bIsActive = 0;
+        (*(void**)&mem->mVtbl) = cBEInterface_vtbl;
         cBEBoltInterface_instance = mem;
     }
     return cBEBoltInterface_instance;

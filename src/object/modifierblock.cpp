@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "bx/math3d.h"
 #include "object/movenode.h"
 #include "world/worldrecords.h"
 #include "world/instancerecord.h"
@@ -1077,13 +1078,7 @@ extern "C" void* cObjectInterface_getCameraPosition(int i);
 extern int cRenderToggles_m_DisableSkyBox;
 extern char t4mat_Identity[];
 
-struct sMat_53B10 {
-    float m[16];
-} __attribute__((aligned(16)));
 
-struct sVec4_53B10 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sRS_53B10 {
     unsigned int f0lo : 2;
@@ -1111,7 +1106,7 @@ struct sCtx_53B10 {
 
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
-static inline void vu0CopyMatrix_53B10(sMat_53B10* dst, void* src)
+static inline void vu0CopyMatrix_53B10(t4Matrix* dst, void* src)
 {
     __asm__ __volatile__(
         "lqc2      $vf1, 0x0(%1)\n"
@@ -1148,10 +1143,10 @@ extern "C" void cSkyBox_render(cSkyBox* self)
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     if (self->m_pInstanceSky == 0)
         return;
-    sMat_53B10 skyMatrix;
+    t4Matrix skyMatrix;
     vu0CopyMatrix_53B10(&skyMatrix, t4mat_Identity);
-    sVec4_53B10 pos = *(sVec4_53B10*)cObjectInterface_getCameraPosition(cObjectInterface_getCurrentCameraNum_i());
-    *(sVec4_53B10*)&skyMatrix.m[12] = pos;
+    t4Vector pos = *(t4Vector*)cObjectInterface_getCameraPosition(cObjectInterface_getCurrentCameraNum_i());
+    *(t4Vector*)&((float*)&skyMatrix.row[0])[12] = pos;
     ((sRS_53B10*)ctx->m_pCurrentDrawState)[1] = ((sRS_53B10*)ctx->m_pCurrentDrawState)[0];
     sRS_53B10* drawState = (sRS_53B10*)ctx->m_pCurrentDrawState;
     *(sRS_53B10**)&ctx->m_pCurrentDrawState = drawState + 1;
@@ -1321,16 +1316,7 @@ INCLUDE_ASM("object/modifierblock", cSpring_setupSpring);
 #ifdef SKIP_ASM
 extern "C" void cSpring_setupNodes(void* self);
 
-struct sSpringDesc_3E08 {
-    float f0, f4, f8, fC, f10, f14, f18;
-    int count;      // 0x1C
-};
 
-struct sSpring_3E08 {
-    int count;      // 0x0
-    float f4, f8, fC, f10, f14, f18, f1C;
-    float seg;      // 0x20
-};
 
 /**
  * Sets a spring up from its data and length: copies the parameters and lays the nodes out evenly.
@@ -1342,19 +1328,19 @@ struct sSpring_3E08 {
  * @param sdata    the spring data (On Tour tSpringData* sdata)
  * @param len  the spring's length (On Tour length)
  */
-extern "C" void cSpring_setupSpring(void* self, sSpringDesc_3E08* sdata, float len)
+extern "C" void cSpring_setupSpring(void* self, tSpringData* sdata, float len)
 {
-    sSpring_3E08* spring = (sSpring_3E08*)self;
-    int n = sdata->count;
-    spring->count = n;
-    spring->f4 = sdata->f0;
-    spring->f8 = sdata->f4;
-    spring->fC = sdata->f8;
-    spring->f10 = sdata->fC;
-    spring->f14 = sdata->f10;
-    spring->f18 = sdata->f14 * 9.999999974752427e-07f;
-    spring->f1C = sdata->f18;
-    spring->seg = len / (float)(n - 1);
+    cSpring* spring = (cSpring*)self;
+    int n = sdata->Width;
+    spring->Width = n;
+    spring->LSpring = sdata->LSpring;
+    spring->LDamp = sdata->LDamp;
+    spring->ASpring = sdata->ASpring;
+    spring->ADamp = sdata->ADamp;
+    spring->ForceScale = sdata->ForceScale;
+    spring->TorqueScale = sdata->TorqueScale * 9.999999974752427e-07f;
+    spring->Length = sdata->LengthScale;
+    spring->SegLen = len / (float)(n - 1);
     cSpring_setupNodes(self);
 }
 #endif
