@@ -8262,10 +8262,10 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
  * @param popup  the popup state
  * @param event  popup event (15 + chosen option, 20 back, 22 the popup is gone)
  */
-extern "C" void func_001AD9C8(void* self, void* popup, int event)
+extern "C" void func_001AD9C8(cFEStateSelectPersona* self, void* popup, int event)
 {
     if (event == 0xF) {
-        func_0025D428(LobbyMan_mLobbyMan, *(void**)((char*)self + 0x6D4));
+        func_0025D428(LobbyMan_mLobbyMan, (void*)self->miDeletePersona);
         cFEStateNet_onPopupEvent(self, popup, 0xF);
     } else {
         cFEStateNet_onPopupEvent(self, popup, event);

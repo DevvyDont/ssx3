@@ -1324,11 +1324,11 @@ extern void* cMemCard_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cPS2MemCard__cPS2MemCard(void* self, int flags)
+extern "C" void cPS2MemCard__cPS2MemCard(cPS2MemCard* self, int flags)
 {
     *(void***)self = cPS2MemCard_vtbl;
     cPS2MemCard_CleanUp((cPS2MemCard*)self);
-    void* iconData = *(void**)((char*)self + 0x30);
+    void* iconData = (void*)self->unk_030;
     if (iconData != 0) {
         MEM_free(iconData);
     }

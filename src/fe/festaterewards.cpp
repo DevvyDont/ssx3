@@ -1473,10 +1473,10 @@ extern "C" const char* getDollarString(void* a0);
 /**
  * Shows the player's cash (+0x54) as a dollar string in the "you_have_amount" text (+0x910), when that widget exists.
  */
-extern "C" void cFEStateRewardGalleryBase_updateAvailableCash(void* self)
+extern "C" void cFEStateRewardGalleryBase_updateAvailableCash(cFEStateRewardGalleryBase* self)
 {
-    if (*(cUIText**)((char*)self + 0x910) != 0) {
-        cUIText_setAsciiString(*(cUIText**)((char*)self + 0x910), getDollarString(*(void**)((char*)self + 0x54)));
+    if (self->mpAvailableCashText != 0) {
+        cUIText_setAsciiString(self->mpAvailableCashText, getDollarString((void*)self->mMoney));
     }
 }
 #endif

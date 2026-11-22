@@ -447,7 +447,7 @@ INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_onPopupEvent);
 extern "C" void cFEStateRequestLine_buySong(cFEStateRequestLine* self, int idx);
 extern "C" void cFEStateRequestLine_updatePlayList(cFEStateRequestLine* self);
 extern "C" void cFEStateRequestLine_updateHilightedSongInfo(cFEStateRequestLine* self, int a1);
-extern "C" void cFEStateRequestLine_updateCash(void* self);
+extern "C" void cFEStateRequestLine_updateCash(cFEStateRequestLine* self);
 extern "C" void cFEStateRequestLine_updateFreeSongMarkers(cFEStateRequestLine* self);
 extern "C" void cFEStateRequestLine_updateButtonsText(cFEStateRequestLine* self, int a1);
 extern "C" void cFEStateRequestLine_updateHelpText(cFEStateRequestLine* self, int a1);
@@ -1040,10 +1040,10 @@ extern "C" const char* getDollarString(void* a0);
 /**
  * Shows the player's cash (+0x168) in the cash text (+0x1E0) through getDollarString(), when the text exists.
  */
-extern "C" void cFEStateRequestLine_updateCash(void* self)
+extern "C" void cFEStateRequestLine_updateCash(cFEStateRequestLine* self)
 {
-    if (*(cUIText**)((char*)self + 0x1E0) != 0) {
-        cUIText_setAsciiString(*(cUIText**)((char*)self + 0x1E0), getDollarString(*(void**)((char*)self + 0x168)));
+    if (self->mpCash != 0) {
+        cUIText_setAsciiString(self->mpCash, getDollarString((void*)self->mMoney));
     }
 }
 #endif

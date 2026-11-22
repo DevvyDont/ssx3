@@ -635,7 +635,7 @@ extern "C" void cFEStateCharEquip_onWidgetCreate(sCharEquip_FE* self, cUIThing* 
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onPopupEvent);
 #ifdef SKIP_ASM
 extern "C" void func_0019BE80(cFEStateCharEquip* self);
-extern "C" void cFEStateCharEquip_updateBankWidget(void* self);
+extern "C" void cFEStateCharEquip_updateBankWidget(cFEStateCharEquip* self);
 struct sEquipDetail;
 extern "C" int func_0019B458(sEquipDetail* self, int idx);
 extern "C" void func_0019B618(cFEStateCharEquip* self, int a1, int a2);
@@ -2496,10 +2496,10 @@ extern "C" const char* getDollarString(void* a0);
 /**
  * Shows the money (+0xC0) in the bank text (+0x64) through getDollarString.
  */
-extern "C" void cFEStateCharEquip_updateBankWidget(void* self)
+extern "C" void cFEStateCharEquip_updateBankWidget(cFEStateCharEquip* self)
 {
-    if (*(cUIText**)((char*)self + 0x64) != 0) {
-        cUIText_setAsciiString(*(cUIText**)((char*)self + 0x64), getDollarString(*(void**)((char*)self + 0xC0)));
+    if (self->mpBank != 0) {
+        cUIText_setAsciiString(self->mpBank, getDollarString((void*)self->mMoneyAvailable));
     }
 }
 #endif

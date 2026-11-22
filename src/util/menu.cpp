@@ -3001,10 +3001,10 @@ INCLUDE_ASM("util/menu", cCommandMenuItem_init);
  * @param label  caption
  * @param commandArg  argument for onCommand
  */
-extern "C" void cCommandMenuItem_init(void *item, int label, int commandArg) {
-    (*(int *)((char*)(item) + (0x14))) = label;
-    (*(int *)((char*)(item) + (0x1C))) = commandArg;
-    (*(int *)((char*)(item) + (0x18))) = 0;
+extern "C" void cCommandMenuItem_init(cCommandMenuItem* item, int label, int commandArg) {
+    item->Caption = (const char*)label;
+    (item->CmdArg) = commandArg;
+    item->State = 0;
 }
 #endif
 
@@ -3029,11 +3029,11 @@ extern "C" int cMenuItem_getKey(void** self);
  *
  * @return the base input's result, or onCommand's
  */
-extern "C" int cCommandMenuItem_input(void* self)
+extern "C" int cCommandMenuItem_input(cCommandMenuItem* self)
 {
     int baseResult = cMenuItem_input((cMenuItem*)self);
     if (cMenuItem_isLocked((cMenuItem*)self) == 0 && baseResult == 0 && cMenuItem_getKey((void**)self) == 6) {
-        baseResult = (*(cCommandMenuItem_input_cMenu**)self)->onCommand(self, *(void**)((char*)self + 0x1C));
+        baseResult = (*(cCommandMenuItem_input_cMenu**)self)->onCommand(self, (void*)self->CmdArg);
     }
     return baseResult;
 }
@@ -7077,7 +7077,7 @@ INCLUDE_ASM("util/menu", cObjectInterface_getNumBeings);
  */
 extern "C" void* cObjectInterface_getNumBeings()
 {
-    return *(void**)((char*)SSXApp->Game->AI + 0x78);
+    return (void*)SSXApp->Game->AI->NumberOfRidersAllocated;
 }
 #endif
 
@@ -7325,7 +7325,7 @@ INCLUDE_ASM("util/menu", cObjectInterface_getAITick);
  */
 extern "C" void* cObjectInterface_getAITick()
 {
-    return *(void**)((char*)SSXApp->Game->AI + 0x8);
+    return (void*)SSXApp->Game->AI->AITick;
 }
 #endif
 

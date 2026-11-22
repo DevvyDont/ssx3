@@ -1927,10 +1927,10 @@ extern "C" void cFEMemCard_SetLoadPressed(cFEMemCard* self, int on)
 {
     self->mIsLoadPressed = on;
     if (on) {
-        char* mcManager = (char*)cSSXApp_getMCManager(SSXApp);
-        char* obj = *(char**)(mcManager + 0x434);
+        cMCOverlayManager* mcManager = (cMCOverlayManager*)((char*)cSSXApp_getMCManager(SSXApp));
+        char* obj = (char*)mcManager->mpMemCard;
         sVEntry<void(void*, void*, void*)>* vt = *(sVEntry<void(void*, void*, void*)>**)obj;
-        vt[14].fn(vthis(obj, vt[14]), *(void**)(mcManager + 0xF8), (char*)&self->mLastLoadFileName);
+        vt[14].fn(vthis(obj, vt[14]), (void*)mcManager->mFileCursor, (char*)&self->mLastLoadFileName);
     } else {
         *(short*)&self->mLastLoadFileName[0] = 0;
     }

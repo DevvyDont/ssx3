@@ -4341,7 +4341,7 @@ int SNDmastervol(int masterVol) {
     SNDSYS_entercritical();
     sndgs.mastervol = masterVol;
     for (i = 0; i < sndgs.voicestotal; i++) {
-        channel = (struct CHANPUB *)((char *)(struct CHANPUB*)sndgs.chan + i * 0x8C);
+        channel = &((struct CHANPUB*)sndgs.chan)[i];
         if ((*(char*)&channel->status) == 1 && channel->handle >= 0) {
             f_A7B0_8160(i);
             f_2A50_8160(i);
@@ -4565,7 +4565,7 @@ int SNDautovol(int soundHandle, int n, int targetVol) {
         setChan = -1;
         targetVol <<= 16;
         while (iSNDpatchkey_8530(chanIndex, &setChan)) {
-            char *channel = (char*)sndgs.chan + setChan * 140;
+            char *channel = (char*)&sndgs.chan[setChan];
             *(int *)(channel + 0x34) = targetVol;
             *(int *)(channel + 0x30) = (targetVol - *(int *)(channel + 0x38)) / n;
         }
@@ -4640,7 +4640,7 @@ short func_003B86C0(void) {
     if (i < 0) {
         return -8;
     }
-    return *(short *)((char*)sndgs.chan + i * 0x8C + 0x3A);
+    return *(short *)((char*)&sndgs.chan[i] + 0x3A);
 }
 #endif
 
@@ -4670,7 +4670,7 @@ int func_003B8700(int soundHandle, int dryLevel) {
         setChan = -1;
         while (iSNDpatchkey_8700(chanIndex, &setChan) != 0) {
             
-            *(char *)((char*)sndgs.chan + setChan * 0x8C + 0x5F) = dryLevel;
+            *(char*)&sndgs.chan[setChan].drylevel = dryLevel;
             func_003C2EC8_8700(setChan);
         }
     }
@@ -4750,7 +4750,7 @@ int SNDCTRL_timemult(int soundHandle, int timeMult) {
         setChan = -1;
         while (iSNDpatchkey_8838(chanIndex, &setChan) != 0) {
             int i = setChan;
-            *(short *)((char*)sndgs.chan + i * 0x8C + 0x6A) = timeMult;
+            *(short*)&sndgs.chan[i].timemult = timeMult;
             SNDPLATFORM_timemult_8838(i, timeMult);
         }
     }
@@ -7131,7 +7131,7 @@ int SNDBANKI_playpatch_impl(int *self, int *cur, int bankHandle, int patchNum, s
     if (n == 1) {
         k = f_A6E8_B588(ids[0]);
         if (k >= 0) {
-            chanEntry = (char*)sndgs.chan + k * 140;
+            chanEntry = (char*)&sndgs.chan[k];
             chanEntry[0x26] = 0;
             chanEntry[0x27] = 0;
         }
@@ -7139,7 +7139,7 @@ int SNDBANKI_playpatch_impl(int *self, int *cur, int bankHandle, int patchNum, s
         for (i = 0; i < n; i++) {
             k = f_A6E8_B588(ids[i]);
             if (k >= 0) {
-                chanEntry = (char*)sndgs.chan + k * 140;
+                chanEntry = (char*)&sndgs.chan[k];
                 chanEntry[0x26] = tag;
                 chanEntry[0x27] = 0;
             }
@@ -7617,7 +7617,7 @@ int SNDpitchbend(int soundHandle, int bend) {
     if (chanIndex >= 0) {
         setChan = -1;
         while (f_AA00_C6B8(chanIndex, &setChan) != 0) {
-            channel = (char*)sndgs.chan + setChan * 140;
+            channel = (char*)&sndgs.chan[setChan];
             if (*(char *)(channel + 0x64) == bend)
                 return 0;
             if (*(short *)(channel + 0x82) != 0) {
@@ -12756,7 +12756,7 @@ int SNDPLATFORM_setfxlevel(int id, int k) {
     int i, sendLevel;
     float sendGain;
 
-    ch = (struct CHANPUB *)((char *)(struct CHANPUB*)sndgs.chan + id * 0x8C);
+    ch = &((struct CHANPUB*)sndgs.chan)[id];
     if (ch->rendermode & 8) {
         for (i = 0; i < ch->numchan; i++) {
             if (ch->unk_62[0] != 0) {
@@ -12838,7 +12838,7 @@ void func_003C2A50(int id) {
     int j;
     int outputCount;
 
-    ch = (struct CHANPUB *)((char *)(struct CHANPUB*)sndgs.chan + id * 0x8C);
+    ch = &((struct CHANPUB*)sndgs.chan)[id];
     if (ch->rendermode & 8) {
         for (i = 0; i < ch->numchan; i++) {
             if (sndgs.sso.set.outputspdifmode != 2) {
@@ -12935,7 +12935,7 @@ struct G_3010 { char pad[0x2F]; unsigned char a; unsigned char b; char pad2[0x1B
 int SNDPLATFORM_timemult(int channelIndex, int timeMult) {
     struct CHANPUB *channel;
     int i;
-    channel = (struct CHANPUB *)((char*)sndgs.chan + channelIndex * 0x8C);
+    channel = &sndgs.chan[channelIndex];
     if (channel->rendermode & 4) {
         for (i = 0; i < channel->numchan; i++)
             MIX_settimemult(channel->voices[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), timeMult);
@@ -12964,7 +12964,7 @@ struct G_30C8 { char pad[0x2F]; unsigned char a; unsigned char b; char pad2[0x1B
 void func_003C30C8(int channelIndex, int amount) {
     struct CHANPUB *channel;
     int i;
-    channel = (struct CHANPUB *)((char*)sndgs.chan + channelIndex * 0x8C);
+    channel = &sndgs.chan[channelIndex];
     if (channel->rendermode & 4) {
         for (i = 0; i < channel->numchan; i++)
             func_003C8B80(channel->voices[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), amount);
@@ -12987,7 +12987,7 @@ extern void func_003C8D00_3178(int, float) __asm__("func_003C8D00");
  * @param cutoff  the cutoff frequency in Hz
  */
 void SNDPLATFORM_lowpass(int idx, int cutoff) {
-    char *channel = ((char*)(struct CHANPUB*)sndgs.chan) + idx * 140;
+    char *channel = (char*)&((struct CHANPUB*)sndgs.chan)[idx];
     int i;
     short *voiceList;
     float normCutoff;
@@ -13025,7 +13025,7 @@ struct G_3250 { char pad[0x2F]; unsigned char a; unsigned char b; char pad2[0x1B
 void SNDPLATFORM_highpass(int channelIndex, int cutoff) {
     struct CHANPUB *channel;
     int i;
-    channel = (struct CHANPUB *)((char*)sndgs.chan + channelIndex * 0x8C);
+    channel = &sndgs.chan[channelIndex];
     if (channel->rendermode & 4) {
         for (i = 0; i < channel->numchan; i++)
             MIX_sethighpass(channel->voices[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), cutoff);
@@ -13606,7 +13606,7 @@ int SNDPLATFORM_playtimbre(struct SNDIPATCHHEADER *patchHeader, int base, int id
     struct CHANPUB *ch;
     int i;
 
-    ch = (struct CHANPUB *)((char *)(struct CHANPUB*)sndgs.chan + id * 0x8C);
+    ch = &((struct CHANPUB*)sndgs.chan)[id];
     if (ch->rendermode & 8) {
         SNDPLATFORM_setpitch(id);
         f38E0_3EE0(id);
@@ -14437,7 +14437,7 @@ struct G_5068 { char pad[0x2F]; unsigned char a; unsigned char b; char pad2[0x1B
 int SNDPLATFORM_filteradd(int channelIndex, int filterDesc) {
     struct CHANPUB *channel;
     int i;
-    channel = (struct CHANPUB *)((char*)sndgs.chan + channelIndex * 0x8C);
+    channel = &sndgs.chan[channelIndex];
     if (channel->rendermode & 4) {
         for (i = 0; i < channel->numchan; i++)
             MIX_filteradd_5068(channel->voices[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), i, filterDesc);
@@ -14466,7 +14466,7 @@ struct G_5128 { char pad[0x2F]; unsigned char a; unsigned char b; char pad2[0x1B
 int SNDPLATFORM_filterremove(int channelIndex, int filterOrder) {
     struct CHANPUB *channel;
     int i;
-    channel = (struct CHANPUB *)((char*)sndgs.chan + channelIndex * 0x8C);
+    channel = &sndgs.chan[channelIndex];
     if (channel->rendermode & 4) {
         for (i = 0; i < channel->numchan; i++)
             MIX_filterremove(channel->voices[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), filterOrder);
@@ -17482,7 +17482,7 @@ void MIX_play(int voice) {
     float *sendGain;
     float *channelGain;
     i = 0;
-    voiceState = (SNDMIXVOICE*)((char*)sndmix.smv + voice * 0x60);
+    voiceState = &sndmix.smv[voice];
     *(int*)&voiceState->lastmixed = 0;
     sendGain = (float *)(&voiceState->wetbusgainprev[0]);
     voiceState->gainchanged = 0;
@@ -17538,7 +17538,7 @@ extern void SNDMEMI_free_8468(struct SFILTERNODE *) __asm__("SNDMEMI_free");
  * @param idx  the mixer voice
  */
 void MIX_stop(int idx) {
-    struct SNDMIXVOICE *voiceState = (struct SNDMIXVOICE *)(((char*)sndmix.smv) + idx * 0x60);
+    struct SNDMIXVOICE *voiceState = &sndmix.smv[idx];
     int i;
     struct SFILTERNODE *nd;
     struct SFILTERNODE *next;
@@ -17761,7 +17761,7 @@ INCLUDE_ASM("ealib/seg_2B4578", MIX_getframe);
  * @return the frame, or -1 when the voice has no decoder
  */
 int MIX_getframe(int idx) {
-    char *voiceState = (char*)sndmix.smv + idx * 0x60;
+    char *voiceState = (char*)&sndmix.smv[idx];
     int (*fn)(int) = *(int (**)(int))(voiceState + 0x44);
     if (fn != 0) {
         return fn(*(int *)(voiceState + 0x48));
@@ -17958,7 +17958,7 @@ void MIX_sethighpass(int voice, int cutoff) {
     SNDMIXVOICE* voiceState;
     char *buf;
 
-    voiceState = (SNDMIXVOICE*)((char*)sndmix.smv + voice * 0x60);
+    voiceState = &sndmix.smv[voice];
     if (cutoff > 0) {
         if ((char*)voiceState->phps == 0) {
             char *hpfState = SNDMEMI_alloc_8C30(288);
@@ -18037,7 +18037,7 @@ extern void SNDMEMI_free_8EC0(char *) __asm__("SNDMEMI_free");
  * @param filterOrder  the filter's order (+0x18 of the node)
  */
 void MIX_filterremove(int voice, int filterOrder) {
-    char *rec = (char*)sndmix.smv + voice * 0x60;
+    char *rec = (char*)&sndmix.smv[voice];
     SFILTERNODE* node = (SFILTERNODE*)(*(char **)(rec + 0x40));
     void (*fn)(char *);
     do {
@@ -18824,16 +18824,16 @@ void SFILTER_unpackf_9AC8(void) __asm__("SFILTER_unpackf");
  * @param node  the node
  * @param source  the init block from MIX_playinit
  */
-void SFILTER_unpackfinit(char *node, UNPACKINITPARAMS* source) {
+void SFILTER_unpackfinit(UNPACKFSTATE* node, UNPACKINITPARAMS* source) {
     int dataPtr;
-    *(void (**)(void))(node + 0) = SFILTER_unpackf_9AC8;
+    *(void (**)(void))&node->sfn = SFILTER_unpackf_9AC8;
     dataPtr = (int)source->psample;
-    *(int *)(node + 0x20) = 0;
-    *(int *)(node + 0x1C) = dataPtr;
-    *(int *)(node + 0x24) = source->totalframes;
-    *(int *)(node + 0x28) = source->bits16;
+    node->curframe = 0;
+    node->psample = (char*)dataPtr;
+    node->totalframes = source->totalframes;
+    node->bits16 = source->bits16;
     source->unpackgetframe = (void*)SFILTER_unpackfgetframe_9AC8;
-    *(int *)(node + 4) = 0;
+    node->sfn.restorefn = 0;
 }
 #endif
 
@@ -19672,15 +19672,15 @@ extern void SFILTER_lpfRC();
  * @param node  the node
  * @return 0
  */
-int SFILTER_createLPFRC(void *node) {
-    (*(int *)((char*)(node) + (8))) = 0;
-    (*(void (**)())((char*)(node) + (0))) = SFILTER_lpfRC;
-    (*(int *)((char*)(node) + (0xC))) = 0;
-    (*(int *)((char*)(node) + (0x10))) = 0;
-    (*(int *)((char*)(node) + (0x14))) = 0;
-    (*(signed char *)((char*)(node) + (0x1B))) = 0;
-    (*(int *)((char*)(node) + (4))) = 0;
-    (*(int *)((char*)(node) + (0x1C))) = 0;
+int SFILTER_createLPFRC(LPFRCSTATE* node) {
+    node->sfn.pfnnext = 0;
+    (*(void (**)())&node->sfn) = SFILTER_lpfRC;
+    node->sfn.pfnnext2 = 0;
+    node->sfn.pfnprev1 = 0;
+    node->sfn.pfnprev2 = 0;
+    (*(signed char*)&node->sfn.clean) = 0;
+    node->sfn.restorefn = 0;
+    (*(int*)&node->lpf) = 0;
     return 0;
 }
 #endif
@@ -20597,7 +20597,7 @@ void func_003CC070(int rate) {
             params[0] = f_72F8_C070(nodeRecord + 4, 2) << 8;
             params[1] = rate << 8;
             params[2] = f_72F8_C070(nodeRecord + 6, 2);
-            SFILTER_createLPFRC(obj);
+            SFILTER_createLPFRC((LPFRCSTATE*)obj);
             SFILTER_modifyLPFRC((LPFRCSTATE*)obj, params);
             break;
         case 2:
@@ -23077,15 +23077,15 @@ extern void SFILTER_amplf();
  * @param node  the node
  * @return 0
  */
-int SFILTER_createAMPLF(void *node) {
-    (*(int *)((char*)(node) + (8))) = 0;
-    (*(void (**)())((char*)(node) + (0))) = SFILTER_amplf;
-    (*(int *)((char*)(node) + (0xC))) = 0;
-    (*(int *)((char*)(node) + (0x10))) = 0;
-    (*(int *)((char*)(node) + (0x14))) = 0;
-    (*(signed char *)((char*)(node) + (0x1B))) = 0;
-    (*(int *)((char*)(node) + (4))) = 0;
-    (*(int *)((char*)(node) + (0x1C))) = 0;
+int SFILTER_createAMPLF(AMPLFSTATE* node) {
+    node->sfn.pfnnext = 0;
+    (*(void (**)())&node->sfn) = SFILTER_amplf;
+    node->sfn.pfnnext2 = 0;
+    node->sfn.pfnprev1 = 0;
+    node->sfn.pfnprev2 = 0;
+    (*(signed char*)&node->sfn.clean) = 0;
+    node->sfn.restorefn = 0;
+    (*(int*)&node->gain) = 0;
     return 0;
 }
 #endif
@@ -23213,16 +23213,16 @@ void SFILTER_mixerrestore_F2C0(void) __asm__("SFILTER_mixerrestore");
  * @param node  the node
  * @return 0
  */
-int SFILTER_createMIX(char *node) {
-    *(void (**)(void))(node + 4) = SFILTER_mixerrestore_F2C0;
-    *(void (**)(void))(node + 0) = SFILTER_mixer_F2C0;
-    *(int *)(node + 8) = 0;
-    *(int *)(node + 0xC) = 0;
-    *(int *)(node + 0x10) = 0;
-    *(int *)(node + 0x14) = 0;
-    *(signed char *)(node + 0x1B) = 0;
-    *(int *)(node + 0x1C) = 0;
-    *(int *)(node + 0x20) = 0;
+int SFILTER_createMIX(MIXERSTATE* node) {
+    node->sfn.restorefn = (void (*)(void*))SFILTER_mixerrestore_F2C0;
+    *(void (**)(void))&node->sfn = SFILTER_mixer_F2C0;
+    node->sfn.pfnnext = 0;
+    node->sfn.pfnnext2 = 0;
+    node->sfn.pfnprev1 = 0;
+    node->sfn.pfnprev2 = 0;
+    *(signed char*)&node->sfn.clean = 0;
+    node->ptempbuf = 0;
+    node->tempbufframes = 0;
     return 0;
 }
 #endif
@@ -23324,17 +23324,17 @@ void SFILTER_reson_F498(void) __asm__("SFILTER_reson");
  * @param effect  the node
  * @return 0
  */
-int SFILTER_createRESON(char *effect) {
-    *(int *)(effect + 8) = 0;
-    *(void (**)(void))(effect + 0) = SFILTER_reson_F498;
-    *(int *)(effect + 0xC) = 0;
-    *(int *)(effect + 0x10) = 0;
-    *(int *)(effect + 0x14) = 0;
-    *(signed char *)(effect + 0x1B) = 0;
-    *(int *)(effect + 4) = 0;
-    *(int *)(effect + 0x34) = 0;
-    *(int *)(effect + 0x38) = 0;
-    *(int *)(effect + 0x3C) = 0;
+int SFILTER_createRESON(RESONSTATE* effect) {
+    effect->sfn.pfnnext = 0;
+    *(void (**)(void))&effect->sfn = SFILTER_reson_F498;
+    effect->sfn.pfnnext2 = 0;
+    effect->sfn.pfnprev1 = 0;
+    effect->sfn.pfnprev2 = 0;
+    *(signed char*)&effect->sfn.clean = 0;
+    effect->sfn.restorefn = 0;
+    *(int*)&effect->xn = 0;
+    *(int*)&effect->ynminus1 = 0;
+    *(int*)&effect->ynminus2 = 0;
     return 0;
 }
 #endif
@@ -23524,10 +23524,10 @@ void SFILTER_src_F798(void) __asm__("SFILTER_src");
  * @param effect  the source node
  * @param buffer  the float samples it will hand out
  */
-void SFILTER_initSOURCE(void *effect, int buffer) {
-    *(int *)((char *)effect + 0x1C) = buffer;
-    *(int *)((char *)effect + 4) = 0;
-    *(void (**)(void))((char *)effect + 0) = SFILTER_src_F798;
+void SFILTER_initSOURCE(SRCSTATE* effect, int buffer) {
+    effect->pdata = (float*)buffer;
+    effect->sfn.restorefn = 0;
+    *(void (**)(void))&effect->sfn = SFILTER_src_F798;
 }
 #endif
 
@@ -23697,16 +23697,16 @@ void SFILTER_echorestore_F998(void) __asm__("SFILTER_echorestore");
  * @param effect  the node
  * @return 0
  */
-int SFILTER_createECHO(char *effect) {
-    *(void (**)(void))(effect + 4) = SFILTER_echorestore_F998;
-    *(void (**)(void))(effect + 0) = SFILTER_echo_F998;
-    *(int *)(effect + 8) = 0;
-    *(int *)(effect + 0xC) = 0;
-    *(int *)(effect + 0x10) = 0;
-    *(int *)(effect + 0x14) = 0;
-    *(signed char *)(effect + 0x1B) = 0;
-    *(int *)(effect + 0x20) = 0;
-    *(int *)(effect + 0x1C) = 0;
+int SFILTER_createECHO(ECHOSTATE* effect) {
+    effect->sfn.restorefn = (void (*)(void*))SFILTER_echorestore_F998;
+    *(void (**)(void))&effect->sfn = SFILTER_echo_F998;
+    effect->sfn.pfnnext = 0;
+    effect->sfn.pfnnext2 = 0;
+    effect->sfn.pfnprev1 = 0;
+    effect->sfn.pfnprev2 = 0;
+    *(signed char*)&effect->sfn.clean = 0;
+    effect->punaligneddelaybuf = 0;
+    effect->pdelaybuf = 0;
     return 0;
 }
 #endif

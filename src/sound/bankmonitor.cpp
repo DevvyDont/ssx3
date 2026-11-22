@@ -7080,11 +7080,11 @@ INCLUDE_ASM("sound/bankmonitor", func_002B46E8);
  */
 extern "C" void* func_002B46E8(cMusicSys* self)
 {
-    void* inner = self->mSongInstance;
-    if (inner == 0) {
+    cSongInstance* inner = self->mSongInstance;
+    if (((void*)inner) == 0) {
         return 0;
     }
-    return *(void**)((char*)inner + 0x4C);
+    return (void*)inner->unk_4C;
 }
 #endif
 

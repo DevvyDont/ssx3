@@ -252,10 +252,10 @@ extern char str_data_ui_mapgfx_big[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cFEAsyncManager__cFEAsyncManager(void* self, int flags)
+extern "C" void cFEAsyncManager__cFEAsyncManager(cFEAsyncManager* self, int flags)
 {
     if (BXFILE_exists(str_data_ui_mapgfx_big) != 0) {
-        FILESYS_delbigsync(*(void**)((char*)self + 0x58C), 100);
+        FILESYS_delbigsync((void*)self->mMapGfxBigFile, 100);
     }
     if (flags & 1) {
         operator_delete((int*)self);
