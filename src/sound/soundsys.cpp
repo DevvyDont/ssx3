@@ -7713,7 +7713,7 @@ extern "C" void cSSXAudio_BigChallengeBegin(cSSXAudio* self, int mission)
         }
         func_002B4708(bank);
     }
-    if (self->unk_608C == 2) {
+    if (self->mRadioModeID == 2) {
         return;
     }
     if ((unsigned int)(func_002B49E0(&self->MusicSys) - 1) < 3) {

@@ -219,13 +219,13 @@ struct cSSXAudio {
                                         //        (cUITemplate_MAP's map-screen entry) clears it, then sets it to 1 when
                                         //        it pauses the SFX (cSSXAudio_PauseSFX); func_0028F678 (map-screen exit)
                                         //        resumes them (cSSXAudio_ResumeSFX) only when set, and clears it
-    int unk_608C;                       // 0x608C [R] ctor 0; [U] func_0028BF78 sets it (switching the radio mode
+    int mRadioModeID;                       // 0x608C [R] ctor 0; [U] func_0028BF78 sets it (switching the radio mode
                                         //        restarts the music) and 11 methods read it (cSSXAudio_FrontEndLoad,
                                         //        cSSXAudio_FrontEndPurge, cSSXAudio_NeedWPAmbience, func_0028CF98,
                                         //        ...); retail accessor 0x2BAD68; the radio mode: values 0..3 as
                                         //        On Tour's eRadioModeID (cSSXAudio_NeedWPAmbience tests 2,
-                                        //        kRADIOMODE_MOUNTAIN); likely the preview's GetRadioModeID (0x6134)
-    int unk_6090;                       // 0x6090 [R] ctor 0; [U] cSSXAudio_FrontEndLoad copies unk_608C into it, cSSXAudio_FrontEndPurge tests == 2
+                                        //        kRADIOMODE_MOUNTAIN); the preview's GetRadioModeID (0x6134; the paired NeedWPAmbience reads it)
+    int unk_6090;                       // 0x6090 [R] ctor 0; [U] cSSXAudio_FrontEndLoad copies mRadioModeID into it, cSSXAudio_FrontEndPurge tests == 2
     char unk_6094[0x4];                 // 0x6094 no retail access seen (or padding)
     unsigned long mRadioPlayList;       // 0x6098 PORT: 64-bit long; [P] GetRadioPlayList (preview 0x6138, retail 0x2BAD70 ld 0x6098; layout_xlate pair-seen); [R] ctor sd 0
     float unk_60A0;                     // 0x60A0 [U] func_0028C8C8: the song's overlay level during a long jump
@@ -249,12 +249,12 @@ struct cSSXAudio {
     int unk_6268;                       // 0x6268 [U] cSSXAudio_InGameInit stores
     int unk_626C;                       // 0x626C [U] cSSXAudio_InGameInit stores
     int unk_6270;                       // 0x6270 [U] cSSXAudio_InGameInit stores
-    int unk_6274;                       // 0x6274 [U] cSSXAudio_InGameInit stores; maybe the preview's PathfinderCanChangeVolume (0x6314 - 0xA0)
+    int unk_6274;                       // 0x6274 [U] cSSXAudio_InGameInit stores (the shift here is -0x94: the preview's PathfinderCanChangeVolume is mPathfinderCanChangeVolume at 0x6280)
     char unk_6278[0x4];                 // 0x6278 [U] func_0028E088 writes it, func_0028E100 reads it
-                                        //        (maybe the preview's SetTransportTrack field, 0x6318 - 0xA0)
+                                        //        (not the preview's SetTransportTrack field: that is mTransportTrack, shift -0x94)
     int unk_627C;                       // 0x627C [R] ctor 1; [U] cSSXAudio_InGameLoad, cSSXAudio_CountdownBeep, cSSXAudio_CountdownGateDrop
-    int unk_6280;                       // 0x6280 retail accessor 0x2BADA0 (lw)
-    int unk_6284;                       // 0x6284 [R] ctor 23
+    int mPathfinderCanChangeVolume;                       // 0x6280 [P] PathfinderCanChangeVolume__9cSSXAudio (preview 0x6314; func_002AF6C0 = preview 0x281170); retail accessor 0x2BADA0 (lw); [U] the Pathfinder volume callback applies a volume only when set
+    int mTransportTrack;                       // 0x6284 [P] SetTransportTrack__9cSSXAudio13eBELocationID (preview 0x6318: both ctors store 23 there, kMAX_LOCATIONS); [R] ctor 23; [U] func_0028F558 stores the map screen's location
     int unk_6288;                       // 0x6288 [U] cSSXAudio_InGameInit
     char unk_628C[0x4];                 // 0x628C no retail access seen (or padding)
     int unk_6290;                       // 0x6290 [U] cSSXAudio_FrontEndLoad stores 10
@@ -422,7 +422,7 @@ CHECK_OFFSET(cSSXAudio, mCurTrickPower, 0x6074);
 CHECK_OFFSET(cSSXAudio, mLastTime, 0x607C);
 CHECK_OFFSET(cSSXAudio, mLastWipeoutRecoverPercent, 0x6080);
 CHECK_OFFSET(cSSXAudio, mPausedSFXForMapScreen, 0x6088);
-CHECK_OFFSET(cSSXAudio, unk_608C, 0x608C);
+CHECK_OFFSET(cSSXAudio, mRadioModeID, 0x608C);
 CHECK_OFFSET(cSSXAudio, unk_6090, 0x6090);
 CHECK_OFFSET(cSSXAudio, unk_6094, 0x6094);
 CHECK_OFFSET(cSSXAudio, mRadioPlayList, 0x6098);
@@ -446,8 +446,8 @@ CHECK_OFFSET(cSSXAudio, unk_6270, 0x6270);
 CHECK_OFFSET(cSSXAudio, unk_6274, 0x6274);
 CHECK_OFFSET(cSSXAudio, unk_6278, 0x6278);
 CHECK_OFFSET(cSSXAudio, unk_627C, 0x627C);
-CHECK_OFFSET(cSSXAudio, unk_6280, 0x6280);
-CHECK_OFFSET(cSSXAudio, unk_6284, 0x6284);
+CHECK_OFFSET(cSSXAudio, mPathfinderCanChangeVolume, 0x6280);
+CHECK_OFFSET(cSSXAudio, mTransportTrack, 0x6284);
 CHECK_OFFSET(cSSXAudio, unk_6288, 0x6288);
 CHECK_OFFSET(cSSXAudio, unk_628C, 0x628C);
 CHECK_OFFSET(cSSXAudio, unk_6290, 0x6290);

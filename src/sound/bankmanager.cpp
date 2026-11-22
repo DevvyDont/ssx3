@@ -852,9 +852,9 @@ extern sCfg_BF78 cBEOptionInterface_mOption_BF78 __asm__("cBEOptionInterface_mOp
  */
 extern "C" void func_0028BF78(cSSXAudio* self, int state)
 {
-    if (self->unk_608C == state)
+    if (self->mRadioModeID == state)
         return;
-    self->unk_608C = state;
+    self->mRadioModeID = state;
     switch (state) {
     case 0: {
         func_002B4070_BF78(&self->MusicSys, *(long*)&self->MusicSys.mDefaultActiveMap);
@@ -953,13 +953,13 @@ extern "C" void func_0028C2D0(cSSXAudio* self, long key)
 {
     if (*(long*)&self->mRadioPlayList != key) {
         *(long*)&self->mRadioPlayList = key;
-        int state = self->unk_608C;
+        int state = self->mRadioModeID;
         if (state == 1 || state == 3) {
             func_002B4070(&self->MusicSys);
             bmRestartC2D0(((char*)self));
         }
     } else {
-        int state = self->unk_608C;
+        int state = self->mRadioModeID;
         if (state == 1 || state == 3) {
             bmRestartC2D0(((char*)self));
         }
@@ -1405,7 +1405,7 @@ extern "C" void func_0028CDF8(cSSXAudio* self)
     if (cSSXAudio_ReplayMode(self) != 0) {
         return;
     }
-    if (self->unk_608C == 2) {
+    if (self->mRadioModeID == 2) {
         return;
     }
     sRace_28CDF8* race = (sRace_28CDF8*)SSXApp->GameModeMan;
@@ -1500,11 +1500,11 @@ extern "C" void func_0028CF98(cSSXAudio* self, int startEvent, int skipPeakTheme
     if (cSSXAudio_ReplayMode(self) != 0 && self->unk_6294 == 0) {
         return;
     }
-    self->unk_6280 = 0;
+    self->mPathfinderCanChangeVolume = 0;
     *(int*)((char*)self + 0x62A0) = -1;
     self->unk_623C = 0;
     self->unk_6240 = 0;
-    if (self->unk_608C == 2) {
+    if (self->mRadioModeID == 2) {
         int peakNumber = type == -1 ? func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0))) : type;
         if (peakNumber == 1) {
             bmLoad_CF98(self, str_Peak1Amb, 8, 101);
@@ -1515,7 +1515,7 @@ extern "C" void func_0028CF98(cSSXAudio* self, int startEvent, int skipPeakTheme
         }
         char* mon = (char*)&self->MusicSys;
         func_002B46D0(mon);
-        self->unk_6280 = 1;
+        self->mPathfinderCanChangeVolume = 1;
         func_002B3CC0(mon, 0);
         func_002B3C28(mon, 0x7F);
         return;
@@ -1606,7 +1606,7 @@ extern "C" void func_0028D5A0(cSSXAudio* self, int id)
     int cur;
     int type;
     int want;
-    if (self->unk_6284 == 23) {
+    if (self->mTransportTrack == 23) {
         return;
     }
     cur = func_002B49E0(&self->MusicSys);
@@ -1845,7 +1845,7 @@ INCLUDE_ASM("sound/bankmanager", func_0028D960);
  */
 extern "C" int func_0028D960(cSSXAudio* self)
 {
-    unsigned int state = (unsigned int)self->unk_608C;
+    unsigned int state = (unsigned int)self->mRadioModeID;
     if (state < 2 || state == 3) {
         return 1;
     }
@@ -1980,7 +1980,7 @@ extern "C" int func_0028E088(cSSXAudio* self, char *event) {
     int obj;
     int eventValue;
 
-    obj = (int)self->MusicSys.mCurrent;
+    obj = (int)self->MusicSys.mSongInstance;
     if (obj == 0 || func_002B2550(obj) == -1) {
         self->unk_6274 = 1;
         *(int *)(((char*)self) + 0x6278) = *(int *)(event + 0x1C);
@@ -2068,27 +2068,27 @@ extern "C" void func_0028E100(cSSXAudio* self)
     if (st == 0) {
         if (func_0028D960(self)) {
             int locGroup;
-            id = self->unk_6284;
+            id = self->mTransportTrack;
             if (id == 23) {
                 locGroup = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             } else {
                 locGroup = func_002A1E20(self, id);
-                self->unk_6284 = 23;
+                self->mTransportTrack = 23;
             }
             bmLoadBank_E100(((char*)self), locGroup);
         }
     } else if (st == 2) {
         if (func_0028D960(self)) {
-            id = self->unk_6284;
+            id = self->mTransportTrack;
             if (id != 23) {
                 if (func_002A4030(self)) {
                     func_0028D488(self);
                     func_0028CF98(self, 36, 1, -1, 0);
                 } else {
-                    id = self->unk_6284;
+                    id = self->mTransportTrack;
                     bmLoadBank_E100(((char*)self), func_002A1E20(self, id));
                 }
-                self->unk_6284 = 23;
+                self->mTransportTrack = 23;
             }
         }
     } else if (st == 4) {
@@ -2374,7 +2374,7 @@ extern "C" void func_0028E8C0(cSSXAudio* vself, int id, int transportCall)
             vself->unk_6258 = 0;
             vself->unk_577C = 0;
             vself->unk_6254 = 1;
-            vself->unk_5814 = vself->unk_6284;
+            vself->unk_5814 = vself->mTransportTrack;
             func_0028DF08(((char*)vself));
             char* mon = (char*)&vself->MusicSys;
             vself->unk_578C = 0;
@@ -2398,9 +2398,9 @@ extern "C" void func_0028E8C0(cSSXAudio* vself, int id, int transportCall)
                         }
                     }
                 }
-                if (vself->unk_6284 == 23 || func_002A4030_id(((char*)vself), vself->unk_6284) == 0
-                    || vself->unk_579C[vself->unk_6284] != 1) {
-                    if (flag && vself->unk_6284 != 23) {
+                if (vself->mTransportTrack == 23 || func_002A4030_id(((char*)vself), vself->mTransportTrack) == 0
+                    || vself->unk_579C[vself->mTransportTrack] != 1) {
+                    if (flag && vself->mTransportTrack != 23) {
                         func_0028D488(vself);
                         cMonitor_MONITOR_Create(**(char***)&vself->MusicSys + 0x1D8, 10, D_004A3648_E8C0->v, 0, 2, 1, 0, 0);
                     }
@@ -2418,7 +2418,7 @@ extern "C" void func_0028E8C0(cSSXAudio* vself, int id, int transportCall)
                     sBmVtE8C0* vt = (sBmVtE8C0*)vself->MusicSys.mVtbl;
                     ((tBmLoadE8C0)vt[2].fn)(vthis(mon2, vt[2]), str_pktrans, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(((char*)vself), 1, 0), 1);
                     func_002B49C0(mon2, 401);
-                    if (func_002A1E20(((char*)vself), vself->unk_6284) == 2) {
+                    if (func_002A1E20(((char*)vself), vself->mTransportTrack) == 2) {
                         sBmVtE8C0* vt2 = (sBmVtE8C0*)vself->MusicSys.mVtbl;
                         ((tBmSetE8C0)vt2[4].fn)(vthis(mon2, vt2[4]), 2);
                     } else {
@@ -2429,7 +2429,7 @@ extern "C" void func_0028E8C0(cSSXAudio* vself, int id, int transportCall)
                     func_002B3A70(mon2);
                 }
             } else {
-                func_0028D5A0(vself, vself->unk_6284);
+                func_0028D5A0(vself, vself->mTransportTrack);
                 sBmVtE8C0* vt = (sBmVtE8C0*)vself->MusicSys.mVtbl;
                 ((tBmSetE8C0)vt[4].fn)(vthis(mon, vt[4]), 0x1E);
             }
@@ -2814,10 +2814,10 @@ extern "C" void func_0028EF90(cSSXAudio* self);
  */
 extern "C" void func_0028F558(cSSXAudio* self, int id)
 {
-    self->unk_6284 = id;
+    self->mTransportTrack = id;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (iface != 0) {
-        if (*cBENewRaceInterface_getLocation(iface) == self->unk_6284) {
+        if (*cBENewRaceInterface_getLocation(iface) == self->mTransportTrack) {
             func_0028EF90(self);
         }
     }
@@ -2858,7 +2858,7 @@ extern "C" void func_0028F5B8(cSSXAudio* self)
         self->mPausedSFXForMapScreen = 1;
     }
     cSSXAudio_MenuSound(self, 9);
-    if (self->unk_608C != 2) {
+    if (self->mRadioModeID != 2) {
         char* mon = (char*)&self->MusicSys;
         func_002B3D48(mon, 1.0f);
         func_0028F768(self);

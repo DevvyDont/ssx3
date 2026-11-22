@@ -1562,7 +1562,7 @@ INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_Current);
  * @return mCurrent, or 0 when no song is set up
  */
 extern "C" int cMusicSys_MUSIC_Current(cMusicSys* musicSys) {
-    return ((int)musicSys->mCurrent);
+    return ((int)musicSys->mSongInstance);
 }
 #endif
 
@@ -1581,7 +1581,7 @@ extern "C" int cMusicSys_MUSIC_GetStreamHandle(cMusicSys* musicSys) {
     int temp_4;
     int var_2;
 
-    temp_4 = ((int)musicSys->mCurrent);
+    temp_4 = ((int)musicSys->mSongInstance);
     var_2 = -1;
     if (temp_4 != 0) {
         var_2 = func_002B2488(temp_4);
@@ -1672,7 +1672,7 @@ extern "C" void func_002B2850(int, void *);
  * @param musicSys  the cMusicSys
  */
 extern "C" void cMusicSys_MUSIC_SetDelay(cMusicSys* musicSys) {
-    func_002B2850(((int)musicSys->mCurrent), musicSys);
+    func_002B2850(((int)musicSys->mSongInstance), musicSys);
 }
 #endif
 
@@ -1903,7 +1903,7 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetRadioModeID);
  * @return unk_608C
  */
 extern "C" int cSSXAudio_GetRadioModeID(cSSXAudio* audio) {
-    return (audio->unk_608C);
+    return (audio->mRadioModeID);
 }
 #endif
 
@@ -1976,7 +1976,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BADA0);
  * @return unk_6280
  */
 extern "C" int func_002BADA0(cSSXAudio* audio) {
-    return (audio->unk_6280);
+    return (audio->mPathfinderCanChangeVolume);
 }
 #endif
 

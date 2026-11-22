@@ -245,12 +245,12 @@ extern "C" char* cSSXAudio_cSSXAudio(cSSXAudio* self, int inchrg, int maxBanks, 
     new (S_4C68 + 0x5FF4) sEmpty4_4C68[3];
     self->mAvalancheHitIndex = -1;
     self->mAvalancheInstanceCount = 0;
-    self->unk_608C = 0;
+    self->mRadioModeID = 0;
     self->unk_6090 = 0;
     *(long*)&self->mRadioPlayList = 0;
     self->unk_6254 = 0;
     self->unk_627C = 1;
-    self->unk_6284 = 23;
+    self->mTransportTrack = 23;
     self->unk_6294 = 0;
     self->unk_6298 = 0;
     self->unk_62A4 = -1;
@@ -981,7 +981,7 @@ extern "C" void cSSXAudio_FrontEndLoad(cSSXAudio* self)
     vt[2].fn(thisp, str_charsel, 0xC, cSSXAudio_GetCurrAppliedVolumePtr((cSSXAudio*)self, 1, 0), 1);
     func_002B49C0(mon, 301);
     self->unk_6290 = 10;
-    self->unk_6090 = self->unk_608C;
+    self->unk_6090 = self->mRadioModeID;
     cSSXAudio_ResumeAudio(self);
     FileParser__FileParser(&parser, 2);
 }
@@ -1021,7 +1021,7 @@ extern "C" void cBankManager_BANK_UnLoad(void*, int);
  */
 extern "C" void cSSXAudio_FrontEndPurge(cSSXAudio* self)
 {
-    if (self->unk_608C == 2 || self->unk_6090 == 2) {
+    if (self->mRadioModeID == 2 || self->unk_6090 == 2) {
         func_002B3AC0((char*)&self->MusicSys);
     } else {
         func_002B3D48((char*)&self->MusicSys, 1.0f);
@@ -1761,7 +1761,7 @@ extern "C" void func_00287410(cSSXAudio* self)
     float level = cSSXAudio_Volume2Float(self);
     cSSXAudio_SetCurrVolume_if(self, 1, level);
     cSSXAudio_SetCurrVolume_if(self, 8, level);
-    if (self->unk_62B8 != 0 && self->unk_608C != 2) {
+    if (self->unk_62B8 != 0 && self->mRadioModeID != 2) {
         cSSXAudio_SetCurrVolume_if(self, 2, level);
     }
 }
@@ -1828,7 +1828,7 @@ extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int a1);
  */
 extern "C" void cSSXAudio_SetDJSpeech(cSSXAudio* self, int on)
 {
-    if (on != 0 && self->unk_608C != 2 && self->unk_608C != 3) {
+    if (on != 0 && self->mRadioModeID != 2 && self->mRadioModeID != 3) {
         cSSXAudio_SetCurrVolume((cSSXAudio*)self, cSSXAudio_GetCurrSetVolume(self, 1), 2);
         self->unk_62B8 = 1;
     } else {
@@ -3585,7 +3585,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_NeedWPAmbience);
  */
 extern "C" int cSSXAudio_NeedWPAmbience(cSSXAudio* self)
 {
-    return self->unk_608C == 2;
+    return self->mRadioModeID == 2;
 }
 #endif
 

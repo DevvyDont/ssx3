@@ -3,7 +3,7 @@
 
 // cSongConfiguration and cSongInstance: cMusicSys's per-song data (sound/musicsys.h). cMusicSys's ctor reads one
 // cSongConfiguration per section of data/config/music.inf into cMusicSys::mSongConfig[]; the playing song is a
-// cSongInstance (cMusicSys::mCurrent) that streams the song's interactive-music data ("Pathfinder") and its loop
+// cSongInstance (cMusicSys::mSongInstance) that streams the song's interactive-music data ("Pathfinder") and its loop
 // overlay. EA source d:/ssx/code/source/sound/musicsys.cpp (preview strings "SongInstance", "PathfinderStream",
 // "PathfinderOverlay", "cSongConfiguration", "mSongConfigurations[mNumSongs]->mNumBankData < MUSIC_MAXLOOPFILES";
 // preview vtable _vt$18cSongConfiguration). Retail methods: sound/bankmonitor unit 0x2B1A98..0x2B2850, just before
@@ -46,11 +46,11 @@ struct cSongConfiguration {
     void** mVtbl;            // 0xA8 [R] D_00483980 (_vt$18cSongConfiguration: slot 1 = the dtor cSongConfiguration__cSongConfiguration)
 };
 
-// cSongInstance (0xC4): the playing song (cMusicSys::mCurrent). No vtable.
+// cSongInstance (0xC4): the playing song (cMusicSys::mSongInstance). No vtable.
 struct cSongInstance {
     cSongConfiguration* mpConfig; // 0x00 (our name) [R] ctor arg 3; [U] every method reads the song's settings through it
     SNDPLAYOPTS mPlayOpts;        // 0x04 (our name) [R] ctor copies the current cSndPlayOpts level (mCurrent[mInst], sdl/sdr); [U] func_002B21E0 passes &mPlayOpts to the stream opens
-    int unk_1C;                   // 0x1C [R] ctor -1; [U] func_002B21E0: main stream handle (func_003D25F0(0x11000001, ...))
+    int mHandle;                   // 0x1C [P] assert "mHandle == -1" (musicsys.cpp:295, this+0x1C); [R] ctor -1; [U] func_002B21E0: main stream handle (func_003D25F0(0x11000001, ...))
     int unk_20;                   // 0x20 [U] func_002B21E0: overlay stream handle (func_003D25F0(0x11000002, ...))
     void* unk_24;                 // 0x24 [R] ctor operator new(0x37000, "PathfinderStream"); dtor cMemMan_free; [U] main stream buffer
     void* unk_28;                 // 0x28 [R] ctor operator new(func_003D3058(1, 0), "PathfinderOverlay"); dtor cMemMan_free; [U] overlay stream buffer (0x6A400)
@@ -96,7 +96,7 @@ CHECK_OFFSET(cSongConfiguration, mVtbl, 0xA8);
 CHECK_SIZE(cSongConfiguration, 0xAC);
 CHECK_OFFSET(cSongInstance, mpConfig, 0x00);
 CHECK_OFFSET(cSongInstance, mPlayOpts, 0x04);
-CHECK_OFFSET(cSongInstance, unk_1C, 0x1C);
+CHECK_OFFSET(cSongInstance, mHandle, 0x1C);
 CHECK_OFFSET(cSongInstance, unk_20, 0x20);
 CHECK_OFFSET(cSongInstance, unk_24, 0x24);
 CHECK_OFFSET(cSongInstance, unk_28, 0x28);

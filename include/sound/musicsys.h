@@ -41,7 +41,7 @@ struct cMusicSys {
     char unk_3F4[0x4];                        // 0x03F4 padding (mActiveMap is 8-aligned)
     unsigned long mActiveMap;                 // 0x03F8 PORT: 64-bit long on the EE. [P] MUSIC_StoreDefaultActiveMap (ld); [R] ctor sets bit n for song n; [U] func_002B3EE8/func_002B3FE8/cMusicSys_getActiveMap/func_002B4AF0
     unsigned long mDefaultActiveMap;          // 0x0400 [P] MUSIC_StoreDefaultActiveMap (sd) / MUSIC_GetDefaultActiveMap (retail 0x2BACD8)
-    cSongInstance* mCurrent;                  // 0x0408 [P] MUSIC_Current (retail 0x2BAC30), MUSIC_GetStreamHandle, MUSIC_SetDelay; [U] func_002B3838: func_002B1B98 = cMemMan_alloc(0xC4, "SongInstance") + ctor func_002B1C50; dtor func_002B1F78
+    cSongInstance* mSongInstance;                  // 0x0408 [P] assert "mSongInstance" (musicsys.cpp:1487, this+0x408); MUSIC_Current (retail 0x2BAC30), MUSIC_GetStreamHandle, MUSIC_SetDelay; [U] func_002B3838: func_002B1B98 = cMemMan_alloc(0xC4, "SongInstance") + ctor func_002B1C50; dtor func_002B1F78
     float unk_40C;                            // 0x040C [U] func_002B3D80: volume fade step per tick; func_002B3E20 (monitor callback) adds it
     float unk_410;                            // 0x0410 [U] func_002B3D80/func_002B3E20: current faded volume
     int unk_414;                              // 0x0414 [U] func_002B3D80/func_002B3E20: fade target volume
@@ -49,9 +49,9 @@ struct cMusicSys {
     int unk_41C;                              // 0x041C [U] func_002B3838 -1; func_002B3BC0 compares/stores its argument; retail accessor 0x2BACE8
     int mCategory[64][5];                     // 0x0420 [R] ctor zeroes; ini CATEGORY n (< 5) sets mCategory[song][n] = 1; [U] func_002B41E8/func_002B42B8 filter by it
     int mCategoryCount[5];                    // 0x0920 [R] ctor zeroes; [U] func_002B3EE8/func_002B3FE8 count active songs per category, func_002B3EB0 resets
-    char mTitle[64][100];                     // 0x0934 [R] ini TITLE; [U] func_002B40F0 returns mTitle[i or mCurrentSongNum]
-    char mArtist[64][100];                    // 0x2234 [R] ini ARTIST; [U] func_002B4120
-    char mAlbum[64][100];                     // 0x3B34 [R] ini ALBUM; [U] func_002B4150
+    char mDisplaySongName[64][100];                     // 0x0934 [P] assert strlen(mDisplaySongName[...]) (musicsys.cpp, preview +0xA38, -0x104); [R] ini TITLE; [U] func_002B40F0 returns [i or mCurrentSongNum]
+    char mDisplaySongArtist[64][100];                    // 0x2234 [P] assert strlen(mDisplaySongArtist[...]) (preview +0x2338); [R] ini ARTIST; [U] func_002B4120
+    char mDisplaySongAlbum[64][100];                     // 0x3B34 [P] assert strlen(mDisplaySongAlbum[...]) (preview +0x3C38); [R] ini ALBUM; [U] func_002B4150
     char* mMPFFile;                           // 0x5434 [R] operator new[](0x6400, "MPF data file"), freed by the dtor; preview assert "gMusicSys->GetMPFFile() != NULL"; [U] cMusicSys_GetMPFFile__FPv returns it, func_002B4A20 loads into it
     void* unk_5438;                           // 0x5438 [R] ctor 0; [U] func_002B4A20: async file handle of the MPF load (ASYNCFILE_cancel/release), func_002B4AA0 polls it
     int mShortcut;                            // 0x543C [R] ctor 0; [P] SetShortcut / GetOnShortcut (preview 0x5540, bracketed 0x5434..0x5440)
@@ -70,7 +70,7 @@ CHECK_OFFSET(cMusicSys, mCurrentSongNum, 0x03F0);
 CHECK_OFFSET(cMusicSys, unk_3F4, 0x03F4);
 CHECK_OFFSET(cMusicSys, mActiveMap, 0x03F8);
 CHECK_OFFSET(cMusicSys, mDefaultActiveMap, 0x0400);
-CHECK_OFFSET(cMusicSys, mCurrent, 0x0408);
+CHECK_OFFSET(cMusicSys, mSongInstance, 0x0408);
 CHECK_OFFSET(cMusicSys, unk_40C, 0x040C);
 CHECK_OFFSET(cMusicSys, unk_410, 0x0410);
 CHECK_OFFSET(cMusicSys, unk_414, 0x0414);
@@ -78,9 +78,9 @@ CHECK_OFFSET(cMusicSys, mSongPlaying, 0x0418);
 CHECK_OFFSET(cMusicSys, unk_41C, 0x041C);
 CHECK_OFFSET(cMusicSys, mCategory, 0x0420);
 CHECK_OFFSET(cMusicSys, mCategoryCount, 0x0920);
-CHECK_OFFSET(cMusicSys, mTitle, 0x0934);
-CHECK_OFFSET(cMusicSys, mArtist, 0x2234);
-CHECK_OFFSET(cMusicSys, mAlbum, 0x3B34);
+CHECK_OFFSET(cMusicSys, mDisplaySongName, 0x0934);
+CHECK_OFFSET(cMusicSys, mDisplaySongArtist, 0x2234);
+CHECK_OFFSET(cMusicSys, mDisplaySongAlbum, 0x3B34);
 CHECK_OFFSET(cMusicSys, mMPFFile, 0x5434);
 CHECK_OFFSET(cMusicSys, unk_5438, 0x5438);
 CHECK_OFFSET(cMusicSys, mShortcut, 0x543C);
