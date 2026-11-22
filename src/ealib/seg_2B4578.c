@@ -21273,7 +21273,7 @@ extern int D_0044E848[];
 extern int D_0044E870_C070[] __asm__("D_0044E870");
 extern struct G_C070 D_00515B40_C070 __asm__("D_00515B40");
 extern void *f_5C60_C070(int) __asm__("SNDMEMI_alloc");
-extern void *memset(void *, int, unsigned int) __asm__("memset");
+extern void *memset_C070(void *, int, unsigned int) __asm__("memset");
 extern int f_72F8_C070(void *, int) __asm__("SNDI_getb");
 extern int f_EE88_C070(void *) __asm__("SFILTER_createLPFFIR8");
 extern void f_EED0_C070(void *, int *) __asm__("SFILTER_modifyLPFFIR8");
@@ -21312,7 +21312,7 @@ void func_003CC070(int rate) {
 
     D_00515D40 = &D_005175C0_C070;
     D_00515D48 = f_5C60_C070(0x1C);
-    memset(D_00515D48, 0, 0x1C);
+    memset_C070(D_00515D48, 0, 0x1C);
     last = D_00515D58 - 1;
     D_00515D4C = D_005175F8;
     D_00515D50 = D_005175FC;
@@ -21321,8 +21321,8 @@ void func_003CC070(int rate) {
     nodeRecord = D_00515D4C;
     for (i = 0; i < count; i++) {
         D_00515D44[i] = f_5C60_C070(D_0044E848[*nodeRecord]);
-        memset(D_00515D44[i], 0, D_0044E848[*nodeRecord]);
-        memset(params, 0, 0x10);
+        memset_C070(D_00515D44[i], 0, D_0044E848[*nodeRecord]);
+        memset_C070(params, 0, 0x10);
         switch (*nodeRecord) {
         case 0:
             f_F7B0_C070(D_00515D44[i]);
@@ -21404,7 +21404,7 @@ void func_003CC070(int rate) {
         link += 12;
     }
     D_00515D80_C070[0x1800 / 4] = 3000;
-    memset(D_00515D80_C070, 0, 0x800);
+    memset_C070(D_00515D80_C070, 0, 0x800);
     nodeRecord = D_00515D4C;
     D_00517600 = 0;
     while (*nodeRecord != 0) {
