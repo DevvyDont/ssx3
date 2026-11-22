@@ -383,7 +383,7 @@ extern "C" int cDebugMenuScreen_getMaxAIRiders(cDebugMenuScreen* self, int path,
 //100%
 INCLUDE_ASM("fe/debugfe", ContinueMenu_ContinueMenu);
 #ifdef SKIP_ASM
-extern void* D_0046D740[];
+extern void* ContinueMenu_vtbl[];
 extern char str_Continue[];
 void* cMenu_cMenu(void* self);
 extern "C" void* cPopMenuItem_cPopMenuItem(void* self, void* text);
@@ -392,7 +392,7 @@ extern "C" void cMenu_addItem(void* menu, void* item, int index);
 /**
  * Constructs the debug lobby's "Continue" menu: a cMenu with a single "Continue" command item.
  *
- * Runs cMenu_cMenu, stores the menu's vtable D_0046D740 at +0x12C (its destructor is ContinueMenu__ContinueMenu), builds the item at
+ * Runs cMenu_cMenu, stores the menu's vtable ContinueMenu_vtbl at +0x12C (its destructor is ContinueMenu__ContinueMenu), builds the item at
  * +0x130 with cPopMenuItem_cPopMenuItem and str_Continue and appends it (cMenu_addItem, index -1). The debug lobby screen
  * (cDebugLobbyScreen_cDebugLobbyScreen) keeps it at +0x604 and pushes it under every error and "declined" message.
  *
@@ -401,7 +401,7 @@ extern "C" void cMenu_addItem(void* menu, void* item, int index);
 extern "C" void* ContinueMenu_ContinueMenu(ContinueMenu* self)
 {
     cMenu_cMenu(self);
-    self->mVtbl = D_0046D740;
+    self->mVtbl = ContinueMenu_vtbl;
     cPopMenuItem_cPopMenuItem(&self->unk_130, str_Continue);
     cMenu_addItem(self, &self->unk_130, -1);
     return ((void*)self);

@@ -3542,7 +3542,7 @@ INCLUDE_ASM("render/font", cPS2LightMan_GetLightObj__FPvi);
 /**
  * Returns the address of light slot @p index in the light table (&m_pLights[index]).
  *
- * Slot 2 of the cPS2LightMan vtable D_00493650.
+ * Slot 2 of the cPS2LightMan vtable cPS2LightMan_vtbl.
  *
  * @param index  the light index
  * @return a pointer to m_pLights[@p index]
@@ -3643,7 +3643,7 @@ INCLUDE_ASM("render/font", cPS2LightMan_LoadLight__FPv);
 /**
  * Does nothing: cPS2LightMan's body for vtable slot 13.
  *
- * Slot 13 of the cPS2LightMan vtable D_00493650; it overrides cLightMan_LoadLight__FPv, which is empty too.
+ * Slot 13 of the cPS2LightMan vtable cPS2LightMan_vtbl; it overrides cLightMan_LoadLight__FPv, which is empty too.
  */
 void cPS2LightMan_LoadLight(void* self)
 {
@@ -3656,7 +3656,7 @@ INCLUDE_ASM("render/font", cPS2LightMan_SetChannel__FPv);
 /**
  * Does nothing: cPS2LightMan's body for vtable slot 14.
  *
- * Slot 14 of the cPS2LightMan vtable D_00493650; it overrides cLightMan_SetChannel__FPv, which is empty too.
+ * Slot 14 of the cPS2LightMan vtable cPS2LightMan_vtbl; it overrides cLightMan_SetChannel__FPv, which is empty too.
  */
 void cPS2LightMan_SetChannel(void* self)
 {
@@ -3669,7 +3669,7 @@ INCLUDE_ASM("render/font", cPS2LightMan_ClearChannel__FPv);
 /**
  * Does nothing: cPS2LightMan's body for vtable slot 15.
  *
- * Slot 15 of the cPS2LightMan vtable D_00493650; it overrides cLightMan_ClearChannel__FPv, which is empty too.
+ * Slot 15 of the cPS2LightMan vtable cPS2LightMan_vtbl; it overrides cLightMan_ClearChannel__FPv, which is empty too.
  */
 void cPS2LightMan_ClearChannel(void* self)
 {

@@ -15,7 +15,7 @@
 // places its next member at +0xC (cScriptEntityCamera's mSubType, cScriptObjRider's cScriptObject part, the camera
 // manager's mEntityCameras at 0x10 + 0xC). On Tour: 0xC with the same member offsets.
 // The vptr is at 0x0 here, not after the data: the ctor stores cScriptEntity_vtbl at +0x0, and the derived objects' tables
-// (cScriptObjRider_vtbl at cScriptObjRider+0x0, D_00482360 at cScriptObjCameraManager+0x10) agree.
+// (cScriptObjRider_vtbl at cScriptObjRider+0x0, cScriptObjCameraManager_cScriptEntity_vtbl at cScriptObjCameraManager+0x10) agree.
 //
 // A FLAT layout, like main/game.h. Evidence tags:
 //   [R] retail ctor cScriptEntity_cScriptEntity__FPv;

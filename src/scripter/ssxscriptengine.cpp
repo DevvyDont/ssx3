@@ -6250,7 +6250,7 @@ cScriptEngine_1018::cScriptEngine_1018() : cScriptObject_1018(0)
 }
 
 // PORT: the retail names of the vtables g++ references here.
-__asm__("_vt$18cScriptEngine_1018$18cScriptEntity_1018 = D_00482360\n"
+__asm__("_vt$18cScriptEngine_1018$18cScriptEntity_1018 = cScriptObjCameraManager_cScriptEntity_vtbl\n"
         "_vt$18cScriptEngine_1018 = cScriptObjCameraManager_vtbl\n");
 #endif
 

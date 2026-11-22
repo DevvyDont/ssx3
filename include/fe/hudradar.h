@@ -5,7 +5,7 @@
 // icons placed by distance; the 1-player view has a "trophy box" text line, split screen a thin line per panel). EA's
 // source fe/hudradar.cpp (preview assert strings, e.g. "radarLoc.H > (messageHeight + (offScreenArrowHeight * 2.0f))";
 // retail code sits in the decomp's unit fe/ovstatetrophy). Name: the preview's vtable section _vt$9cHUDRadar pairs with
-// retail D_00474230 (builds/x/v2/vtables_v2.tsv) and its slot 1 (preview 0x001D1930) matches the retail destructor
+// retail cHUDRadar_vtbl (builds/x/v2/vtables_v2.tsv) and its slot 1 (preview 0x001D1930) matches the retail destructor
 // cHUDRadar__cHUDRadar; the preview also keeps the static inlines IsRadarShown__9cHUDRadar / ShowRadar__9cHUDRadarb (a gp
 // global, not a member). On Tour has no cHUDRadar.
 //
@@ -43,7 +43,7 @@ struct cHUDRadar {
                                      //       func_0020FB40 lwc1)
     int unk_034;                     // 0x034 [U] the viewer's AI index from the last frame: both renders compare and
                                      //       store it (lw/sw)
-    void** mVtbl;                    // 0x038 [R] cHUDRadar_cHUDRadar stores D_00474230 (1 slot), cHUDRadar__cHUDRadar restores it;
+    void** mVtbl;                    // 0x038 [R] cHUDRadar_cHUDRadar stores cHUDRadar_vtbl (1 slot), cHUDRadar__cHUDRadar restores it;
                                      //       [P] _vt$9cHUDRadar
 };
 

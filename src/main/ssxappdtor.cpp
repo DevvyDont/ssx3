@@ -2207,7 +2207,7 @@ void operator_delete(int* ptr);
 extern char cGameModeHandler_vtbl[];
 
 /**
- * Destroys the scored three-heat event handler (handler 0, vtable D_0047CFA0): resets the vtable to the base handler
+ * Destroys the scored three-heat event handler (handler 0, vtable cGMBigAirHandler_vtbl): resets the vtable to the base handler
  * vtable cGameModeHandler_vtbl and frees the object when asked.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
@@ -2229,7 +2229,7 @@ void operator_delete(int* ptr);
 extern char cGameModeHandler_vtbl[];
 
 /**
- * Destroys the timed three-heat event handler (handler 1, vtable D_0047CF38): resets the vtable to the base handler
+ * Destroys the timed three-heat event handler (handler 1, vtable cGMRaceHandler_vtbl): resets the vtable to the base handler
  * vtable cGameModeHandler_vtbl and frees the object when asked.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
@@ -2323,7 +2323,7 @@ void operator_delete(int* ptr);
 extern char cGameModeHandler_vtbl[];
 
 /**
- * Destroys the freeride handler (handler 2, vtable D_0047CE00): resets the vtable to the base handler vtable cGameModeHandler_vtbl
+ * Destroys the freeride handler (handler 2, vtable cGMFreerideHandler_vtbl): resets the vtable to the base handler vtable cGameModeHandler_vtbl
  * and frees the object when asked.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
@@ -2345,7 +2345,7 @@ void operator_delete(int* ptr);
 extern char cGameModeHandler_vtbl[];
 
 /**
- * Destroys the located timed-event handler (handler 4, vtable D_0047CD98): resets the vtable to the base handler vtable
+ * Destroys the located timed-event handler (handler 4, vtable cGMTimeHandler_vtbl): resets the vtable to the base handler vtable
  * cGameModeHandler_vtbl and frees the object when asked.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
@@ -2367,7 +2367,7 @@ void operator_delete(int* ptr);
 extern char cGameModeHandler_vtbl[];
 
 /**
- * Destroys the head-to-head event handler (handler 5, vtable D_0047CD30): resets the vtable to the base handler vtable
+ * Destroys the head-to-head event handler (handler 5, vtable cGMRivalTimeHandler_vtbl): resets the vtable to the base handler vtable
  * cGameModeHandler_vtbl and frees the object when asked.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
@@ -2389,7 +2389,7 @@ void operator_delete(int* ptr);
 extern char cGameModeHandler_vtbl[];
 
 /**
- * Destroys the head-to-head scored event handler (handler 6, vtable D_0047CCC8): resets the vtable to the base handler
+ * Destroys the head-to-head scored event handler (handler 6, vtable cGMRivalPointHandler_vtbl): resets the vtable to the base handler
  * vtable cGameModeHandler_vtbl and frees the object when asked.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()

@@ -532,7 +532,7 @@ extern "C" void* cCommandMenuItem_cCommandMenuItem2(void* self, int a1, void* a2
 extern "C" void* cPopMenuItem_cPopMenuItem(void* self, void* text);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
 extern "C" char* strncat(char* dst, const char* src, int n);
-extern void* D_0046D690[];
+extern void* AccountDetailsMenu_vtbl[];
 extern char str_Create_Account[];
 extern char str_Login_Name[];
 extern char str_Password[];
@@ -549,7 +549,7 @@ static inline void copyName_1DA648(char* dst, const char* src)
  * Constructs the debug "Create Account" menu: a title, a spacer, "Login Name" and "Password" entries pre-filled from
  * SSXApp, an action item and "Cancel".
  *
- * Runs cMenu_cMenu(), stores vtable D_0046D690 (onCommand AccountDetailsMenu_onCommand, which creates the account) and the owner from
+ * Runs cMenu_cMenu(), stores vtable AccountDetailsMenu_vtbl (onCommand AccountDetailsMenu_onCommand, which creates the account) and the owner from
  * @p vinfo at +0x130, and builds the items in place: the "Create Account" title (cNullMenuItem), a spacer of 10, two
  * text entries (cTextMenuItem_cTextMenuItem()) labelled "Login Name" (+0x168) and "Password" (+0x194), an action item labelled @p actionLabel
  * (cCommandMenuItem_cCommandMenuItem2(), +0x1C0) and a "Cancel" item (cPopMenuItem_cPopMenuItem(), +0x1E4), adding all six in that order. The entries'
@@ -563,7 +563,7 @@ static inline void copyName_1DA648(char* dst, const char* src)
 extern "C" void* AccountDetailsMenu_AccountDetailsMenu(AccountDetailsMenu* self, void* vinfo, void* actionLabel)
 {
     cMenu_cMenu(self);
-    self->mVtbl = D_0046D690;
+    self->mVtbl = AccountDetailsMenu_vtbl;
     self->unk_130 = (cDebugLobbyScreen*)(*(int*)vinfo);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->unk_134), str_Create_Account);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->unk_150), (void*)10);
@@ -596,7 +596,7 @@ extern "C" void* cCommandMenuItem_cCommandMenuItem2(void* self, int a1, void* a2
 extern "C" void* cPopMenuItem_cPopMenuItem(void* self, void* text);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
 extern "C" char* strncat(char* dst, const char* src, int n);
-extern void* D_0046D6E8[];
+extern void* AccountDetailsMenu1_vtbl[];
 extern char str_Create_Account[];
 extern char str_Login_Name[];
 extern char str_Password[];
@@ -613,7 +613,7 @@ static inline void copyName_1DA7E8(char* dst, const char* src)
  * Constructs the debug "Login" menu: the same items as AccountDetailsMenu_AccountDetailsMenu ("Create Account" title, "Login Name", "Password",
  * an action item, "Cancel") with the Login vtable.
  *
- * Runs cMenu_cMenu(), stores vtable D_0046D6E8 (onCommand AccountDetailsMenu_onCommand1, which logs in with the typed name and
+ * Runs cMenu_cMenu(), stores vtable AccountDetailsMenu1_vtbl (onCommand AccountDetailsMenu_onCommand1, which logs in with the typed name and
  * password) and the owner from @p vinfo at +0x130, builds and adds the six items, and pre-fills the name and password
  * entries (+0x180, +0x1AC) with up to 15 characters of SSXApp's UserName and Password. The title is "Create Account"
  * here too (likely a copy-paste slip; AccountMenu_AccountMenu labels the sub-menu "Login").
@@ -625,7 +625,7 @@ static inline void copyName_1DA7E8(char* dst, const char* src)
 extern "C" void* AccountDetailsMenu_AccountDetailsMenu1(AccountDetailsMenu* self, void* vinfo, void* actionLabel)
 {
     cMenu_cMenu(self);
-    self->mVtbl = D_0046D6E8;
+    self->mVtbl = AccountDetailsMenu1_vtbl;
     self->unk_130 = (cDebugLobbyScreen*)(*(int*)vinfo);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->unk_134), str_Create_Account);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->unk_150), (void*)10);
@@ -657,7 +657,7 @@ extern "C" void* cSubMenuItem_cSubMenuItem(void* self, void* a1, void* a2);
 extern "C" void* AccountDetailsMenu_AccountDetailsMenu(AccountDetailsMenu* self, void* a1, void* a2);
 extern "C" void* AccountDetailsMenu_AccountDetailsMenu1(AccountDetailsMenu* self, void* a1, void* a2);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0046D638[];
+extern void* AccountMenu_vtbl[];
 extern char str_Create_Account[];
 extern char str_Login[];
 extern char str_Login_Method[];
@@ -665,7 +665,7 @@ extern char str_Login_Method[];
 /**
  * Constructs the debug "Login Method" menu with "Create Account" and "Login" sub-menus.
  *
- * Runs cMenu_cMenu(), stores vtable D_0046D638, builds the Create Account menu (AccountDetailsMenu_AccountDetailsMenu()) at +0x130 and the
+ * Runs cMenu_cMenu(), stores vtable AccountMenu_vtbl, builds the Create Account menu (AccountDetailsMenu_AccountDetailsMenu()) at +0x130 and the
  * Login menu (AccountDetailsMenu_AccountDetailsMenu1()) at +0x32C, labelling their action items "Create Account" and "Login", then adds the
  * "Login Method" title, a spacer of 10 and two cSubMenuItems opening those menus. cDebugLobbyScreen_cDebugLobbyScreen() builds it at +0x70 of
  * the debug front end.
@@ -677,7 +677,7 @@ extern char str_Login_Method[];
 extern "C" void* AccountMenu_AccountMenu(AccountMenu* self, void* createOwner, void* loginOwner)
 {
     cMenu_cMenu(self);
-    self->mVtbl = D_0046D638;
+    self->mVtbl = AccountMenu_vtbl;
     AccountDetailsMenu_AccountDetailsMenu((AccountDetailsMenu*)(&self->unk_130), createOwner, str_Create_Account);
     AccountDetailsMenu_AccountDetailsMenu1((AccountDetailsMenu*)(&self->unk_32C), loginOwner, str_Login);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->unk_528), str_Login_Method);
@@ -703,7 +703,7 @@ cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cTextMenuItem_cTextMenuItem(void* self, void* a1, const char* name);
 extern "C" void* cCommandMenuItem_cCommandMenuItem2(void* self, int a1, void* a2, int a3);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0046D588[];
+extern void* CreatePersonaMenu_vtbl[];
 extern char str_Create_Persona[];
 extern char str_Persona_Name[];
 extern char D_004A1408[];
@@ -712,7 +712,7 @@ extern char str_Create[];
 /**
  * Constructs the debug "Create Persona" menu: a title, a spacer, a "Persona Name" entry and a "Create" item.
  *
- * Runs cMenu_cMenu(), stores vtable D_0046D588 (onCommand CreatePersonaMenu_onCommand, which creates the persona) and the owner from
+ * Runs cMenu_cMenu(), stores vtable CreatePersonaMenu_vtbl (onCommand CreatePersonaMenu_onCommand, which creates the persona) and the owner from
  * @p info at +0x130, builds the "Create Persona" title, a spacer of 14, a text entry labelled "Persona Name"
  * (cTextMenuItem_cTextMenuItem(), +0x168) and a "Create" action item (cCommandMenuItem_cCommandMenuItem2(), +0x194), and adds them in that order.
  *
@@ -722,7 +722,7 @@ extern char str_Create[];
 extern "C" void* CreatePersonaMenu_CreatePersonaMenu(CreatePersonaMenu* self, int* info)
 {
     cMenu_cMenu(self);
-    self->mVtbl = D_0046D588;
+    self->mVtbl = CreatePersonaMenu_vtbl;
     self->unk_130 = (cDebugLobbyScreen*)(*info);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->unk_134), str_Create_Persona);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->unk_150), (void*)0xE);
@@ -746,13 +746,13 @@ cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cCommandMenuItem_cCommandMenuItem(void* self);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0046D5E0[];
+extern void* DeletePersonaMenu_vtbl[];
 extern char str_Delete_Persona[];
 
 /**
  * Constructs the debug "Delete Persona" menu: a title, a spacer and four blank persona lines.
  *
- * Runs cMenu_cMenu(), stores vtable D_0046D5E0 (onCommand DeletePersonaMenu_onCommand, which deletes the chosen persona) and the
+ * Runs cMenu_cMenu(), stores vtable DeletePersonaMenu_vtbl (onCommand DeletePersonaMenu_onCommand, which deletes the chosen persona) and the
  * owner from @p info at +0x130, builds the "Delete Persona" title and a spacer of 14, constructs four empty command
  * items (cCommandMenuItem_cCommandMenuItem()) at +0x168 (0x24 bytes apart) and adds all six. DeletePersonaMenu_setpersonas later fills in the persona
  * lines.
@@ -765,7 +765,7 @@ extern "C" void* DeletePersonaMenu_DeletePersonaMenu(DeletePersonaMenu* self, in
     char* personaItem = (char*)&self->unk_168[0];
     int i = 3;
     cMenu_cMenu(self);
-    self->mVtbl = D_0046D5E0;
+    self->mVtbl = DeletePersonaMenu_vtbl;
     self->unk_130 = (cDebugLobbyScreen*)(*info);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->unk_134), str_Delete_Persona);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->unk_150), (void*)0xE);
@@ -797,7 +797,7 @@ void CreatePersonaMenu_CreatePersonaMenu_v(void* self, int* info) __asm__("Creat
 void DeletePersonaMenu_DeletePersonaMenu_v(void* self, int* info) __asm__("DeletePersonaMenu_DeletePersonaMenu");
 extern "C" void* cCommandMenuItem_cCommandMenuItem(void* self);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0046D530[];
+extern void* PersonaMenu_vtbl[];
 extern char str_Select_Persona[];
 extern char str_Create_Persona[];
 extern char str_Delete_Persona[];
@@ -806,7 +806,7 @@ extern char str_Delete_Persona[];
 /**
  * Constructs the debug "Select Persona" menu with four persona lines and "Create Persona" / "Delete Persona" sub-menus.
  *
- * Runs cMenu_cMenu(), stores vtable D_0046D530 (onCommand PersonaMenu_onCommand, which selects the chosen persona), builds the
+ * Runs cMenu_cMenu(), stores vtable PersonaMenu_vtbl (onCommand PersonaMenu_onCommand, which selects the chosen persona), builds the
  * Create Persona menu (CreatePersonaMenu_CreatePersonaMenu()) at +0x130 and the Delete Persona menu (DeletePersonaMenu_DeletePersonaMenu()) at +0x2E8, stores the
  * owner from @p info at +0x4E0, then builds the "Select Persona" title, a spacer of 14, four empty command items
  * (cCommandMenuItem_cCommandMenuItem()) at +0x518 and cSubMenuItems for the two sub-menus, adding them in that order. PersonaMenu_setpersonas fills
@@ -820,7 +820,7 @@ extern char str_Delete_Persona[];
 extern "C" void* PersonaMenu_PersonaMenu(PersonaMenu* self, int* info, int* createOwner, int* deleteOwner)
 {
     cMenu_cMenu(self);
-    self->mVtbl = D_0046D530;
+    self->mVtbl = PersonaMenu_vtbl;
     CreatePersonaMenu_CreatePersonaMenu_v(&self->unk_130, createOwner);
     DeletePersonaMenu_DeletePersonaMenu_v(&self->unk_2E8, deleteOwner);
     self->unk_4E0 = (cDebugLobbyScreen*)(*info);
@@ -855,13 +855,13 @@ cNullMenuItem* cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* text);
 cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cCommandMenuItem_cCommandMenuItem(void* self);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0046D4D8[];
+extern void* LobbyMenu_vtbl[];
 extern char str_Select_Room[];
 
 /**
  * Constructs the debug "Select Room" menu: a title, a spacer and twelve blank room lines.
  *
- * Runs cMenu_cMenu(), stores vtable D_0046D4D8 (onCommand LobbyMenu_onCommand, which joins the chosen room) and the owner
+ * Runs cMenu_cMenu(), stores vtable LobbyMenu_vtbl (onCommand LobbyMenu_onCommand, which joins the chosen room) and the owner
  * from @p info at +0x130, builds the "Select Room" title and a spacer of 14, constructs twelve empty command items
  * (cCommandMenuItem_cCommandMenuItem()) at +0x168 (0x24 bytes apart) and adds all fourteen. LobbyMenu_updaterooms fills in the room names.
  *
@@ -873,7 +873,7 @@ extern "C" void* LobbyMenu_LobbyMenu(LobbyMenu* self, int* info)
     char* roomItem = (char*)&self->unk_168[0];
     int i = 11;
     cMenu_cMenu(self);
-    self->mVtbl = D_0046D4D8;
+    self->mVtbl = LobbyMenu_vtbl;
     self->unk_130 = (cDebugLobbyScreen*)(*info);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->unk_134), str_Select_Room);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->unk_150), (void*)0xE);
@@ -902,14 +902,14 @@ cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cCommandMenuItem_cCommandMenuItem(void* self);
 extern "C" void* cCommandMenuItem_cCommandMenuItem2(void* self, int a1, void* a2, int a3);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0046D480[];
+extern void* RoomMenu_vtbl[];
 extern char str_Room_Occupants[];
 extern char str_Chat[];
 
 /**
  * Constructs the debug "Room Occupants" menu: a title, a spacer, 24 blank occupant lines and a "Chat" item.
  *
- * Runs cMenu_cMenu(), stores vtable D_0046D480 (onCommand RoomMenu_onCommand) and the owners from @p occupantOwner (+0x130, used for an
+ * Runs cMenu_cMenu(), stores vtable RoomMenu_vtbl (onCommand RoomMenu_onCommand) and the owners from @p occupantOwner (+0x130, used for an
  * occupant) and @p chatOwner (+0x134, used by "Chat"), builds the "Room Occupants" title and a spacer of 14, 24 empty command
  * items (cCommandMenuItem_cCommandMenuItem()) at +0x16C (0x24 bytes apart) and a "Chat" action item with id -2 (cCommandMenuItem_cCommandMenuItem2(), +0x4CC),
  * and adds them in that order. RoomMenu_updateusers fills in the occupants.
@@ -923,7 +923,7 @@ extern "C" void* RoomMenu_RoomMenu(RoomMenu* self, int* occupantOwner, int* chat
     char* occupantItem = (char*)&self->unk_16C[0];
     int i = 23;
     cMenu_cMenu(self);
-    self->mVtbl = D_0046D480;
+    self->mVtbl = RoomMenu_vtbl;
     self->unk_130 = (cDebugLobbyScreen*)(*occupantOwner);
     self->unk_134 = (cDebugLobbyScreen*)(*chatOwner);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->unk_138), str_Room_Occupants);
@@ -955,7 +955,7 @@ cSpaceMenuItem* cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* text);
 extern "C" void* cCommandMenuItem_cCommandMenuItem(void* self);
 extern "C" void* cTextMenuItem_cTextMenuItem(void* self, void* a1, const char* name);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern void* D_0046D428[];
+extern void* ChatMenu_vtbl[];
 extern char str_Chat_Menu[];
 extern char str_Enter_Chat[];
 extern char D_004A1408[];
@@ -964,7 +964,7 @@ extern int D_00467D70[];
 /**
  * Constructs the debug "Chat Menu": a title, a spacer, an "Enter Chat" entry and fourteen canned chat lines.
  *
- * Runs cMenu_cMenu(), stores vtable D_0046D428 (onCommand ChatMenu_onCommand, which sends the chosen line as a lobby chat
+ * Runs cMenu_cMenu(), stores vtable ChatMenu_vtbl (onCommand ChatMenu_onCommand, which sends the chosen line as a lobby chat
  * message) and the owner from @p info at +0x130, builds the "Chat Menu" title, a spacer of 14 and a text entry labelled
  * "Enter Chat" (cTextMenuItem_cTextMenuItem(), +0x168), then fourteen command items (cCommandMenuItem_cCommandMenuItem()) at +0x194, each with id j
  * (+0x8) and the label D_00467D70[j] (canned lines such as "Assassins!"). Adds the title, the spacer and the fourteen
@@ -978,7 +978,7 @@ extern "C" void* ChatMenu_ChatMenu(ChatMenu* self, int* info)
     char* chatItem = (char*)&self->unk_194[0];
     int i = 13;
     cMenu_cMenu(self);
-    self->mVtbl = D_0046D428;
+    self->mVtbl = ChatMenu_vtbl;
     self->unk_130 = (cDebugLobbyScreen*)(*info);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->unk_134), str_Chat_Menu);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->unk_150), (void*)0xE);

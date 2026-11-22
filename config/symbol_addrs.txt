@@ -17867,3 +17867,25 @@ cWorldLine_IsBoxInt_norms = 0x004FF260;
 cPathArrow_m_vertices = 0x00504560;
 cPlants_m_meshDeformationMatrixList = 0x00504D80;
 cChunkResolve_cChunkResolve_colliderecord = 0x00508F50;
+
+// SSX On Tour (PSP, ULKS-46038) dev-build global names, round globals_round4_G4vt (docs/ontour_globals.tsv)
+AbortMenu_vtbl = 0x0046D378;
+ChatMenu_vtbl = 0x0046D428;
+RoomMenu_vtbl = 0x0046D480;
+LobbyMenu_vtbl = 0x0046D4D8;
+PersonaMenu_vtbl = 0x0046D530;
+CreatePersonaMenu_vtbl = 0x0046D588;
+DeletePersonaMenu_vtbl = 0x0046D5E0;
+AccountMenu_vtbl = 0x0046D638;
+AccountDetailsMenu_vtbl = 0x0046D690;
+AccountDetailsMenu1_vtbl = 0x0046D6E8;
+ContinueMenu_vtbl = 0x0046D740;
+cHUDRadar_vtbl = 0x00474230;
+cGMRivalPointHandler_vtbl = 0x0047CCC8;
+cGMRivalTimeHandler_vtbl = 0x0047CD30;
+cGMTimeHandler_vtbl = 0x0047CD98;
+cGMFreerideHandler_vtbl = 0x0047CE00;
+cGMRaceHandler_vtbl = 0x0047CF38;
+cGMBigAirHandler_vtbl = 0x0047CFA0;
+cScriptObjCameraManager_cScriptEntity_vtbl = 0x00482360;
+cPS2LightMan_vtbl = 0x00493650;

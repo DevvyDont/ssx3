@@ -12,7 +12,7 @@
 //   cScriptObject  at 0x00: mObjType, mObjID, mInUse, vptr at 0x0C (primary: cScriptObjCameraManager_vtbl, 7 slots:
 //                  1 dtor, 2 cScriptObject_PauseObjScript, 3 cScriptObject_ResumeObjScript, 4 OnStartObjectUse,
 //                  5 OnEndObjectUse, 6 GetNumScriptEntities, 7 GetScriptEntity);
-//   cScriptEntity  at 0x10: vptr at 0x10 (D_00482360 = _vt$23cScriptObjCameraManager$13cScriptEntity; its overrides
+//   cScriptEntity  at 0x10: vptr at 0x10 (cScriptObjCameraManager_cScriptEntity_vtbl = _vt$23cScriptObjCameraManager$13cScriptEntity; its overrides
 //                  OnInSeqKeyEvent / OnInSeqUpdate / IsMatchingEntity carry delta -0x10, so they get the full object),
 //                  mDBID, mpEntity.
 // g++ 2.95 puts each base's vptr after that base's own data. EA's source:
@@ -44,7 +44,7 @@ struct cScriptObjCameraManager {
     int mInUse;                                 // 0x008 [O]; [R] cScriptObject ctor 0; [U] Update tests it
     void** mVtbl;                               // 0x00C [R] the ctor / dtor store cScriptObjCameraManager_vtbl
     // --- cScriptEntity (ctor cScriptEntity_cScriptEntity__FPv(self+0x10))
-    void** mEntityVtbl;                         // 0x010 [R] the ctor stores D_00482360 (the cScriptEntity vtable)
+    void** mEntityVtbl;                         // 0x010 [R] the ctor stores cScriptObjCameraManager_cScriptEntity_vtbl (the cScriptEntity vtable)
     int mDBID;                                  // 0x014 [O]; [R] cScriptEntity ctor -1
     cScriptPlayerEntity* mpEntity;              // 0x018 [O]; [R] cScriptEntity ctor 0; [U] Update reads it
     // --- cScriptObjCameraManager

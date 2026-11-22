@@ -109,12 +109,12 @@ void cMenu_cMenu(void*);
 extern "C" void cCommandMenuItem_cCommandMenuItem2(char*, int, int *, int);
 extern "C" void cMenu_addItem(void *, char*, int);
 extern int D_00467DE0[];
-extern int D_0046D378[];
+extern int AbortMenu_vtbl[];
 
 /**
  * Constructs the debug online front end's "Abort" menu: a cMenu with one command item.
  *
- * Runs cMenu_cMenu, stores the menu's vtable D_0046D378 at +0x12C and the owner's first word at +0x130, builds a
+ * Runs cMenu_cMenu, stores the menu's vtable AbortMenu_vtbl at +0x12C and the owner's first word at +0x130, builds a
  * command item (cCommandMenuItem_cCommandMenuItem2) at +0x134 with ID 0 and caption "Abort", and adds it with cMenu_addItem. Selecting it
  * runs AbortMenu_onCommand. cDebugLobbyScreen_cDebugLobbyScreen builds it at +0x1AAC of the debug front end.
  *
@@ -125,7 +125,7 @@ extern int D_0046D378[];
 extern "C" void *AbortMenu_AbortMenu(AbortMenu* menu, int *owner) {
     cMenu_cMenu(menu);
     char *abortItem = (char*)&menu->unk_134;
-    menu->mVtbl = (void**)D_0046D378;
+    menu->mVtbl = (void**)AbortMenu_vtbl;
     menu->unk_130 = (cDebugLobbyScreen*)(*owner);
     cCommandMenuItem_cCommandMenuItem2(abortItem, 0, D_00467DE0, 0);
     cMenu_addItem(menu, abortItem, -1);
@@ -531,7 +531,7 @@ extern "C" void func_0017E558(int);
 /**
  * Handles the debug "Abort" menu's command: hands control back to the debug front end via func_0017E558.
  *
- * It is the onCommand slot of the Abort menu's vtable D_0046D378. func_0017E558 pushes the Room Occupants menu, sets
+ * It is the onCommand slot of the Abort menu's vtable AbortMenu_vtbl. func_0017E558 pushes the Room Occupants menu, sets
  * the debug front end's state to 0xC and calls func_0025F628 on the lobby manager.
  *
  * @param menu  the Abort menu; the debug front end is at +0x130
@@ -581,7 +581,7 @@ extern "C" void func_0017E418(int, int);
 /**
  * Handles the debug "Chat Menu" command: sends the chosen line as a lobby chat message.
  *
- * It is the onCommand slot of the chat menu's vtable D_0046D428 (built by ChatMenu_ChatMenu). It passes the item's caption
+ * It is the onCommand slot of the chat menu's vtable ChatMenu_vtbl (built by ChatMenu_ChatMenu). It passes the item's caption
  * (+0x14, one of the canned lines in D_00467D70) to func_0017E418 with the debug front end at +0x130, which returns to
  * the Room Occupants menu and sends the text with func_0025AAE0 ("mesg").
  *
@@ -605,7 +605,7 @@ extern "C" void func_0017E3B8_BB48(int) __asm__("func_0017E3B8");
 /**
  * Handles the debug "Room Occupants" menu's commands.
  *
- * It is the onCommand slot of vtable D_0046D480 (built by RoomMenu_RoomMenu). The "Chat" item (ID -2) calls func_0017E3B8
+ * It is the onCommand slot of vtable RoomMenu_vtbl (built by RoomMenu_RoomMenu). The "Chat" item (ID -2) calls func_0017E3B8
  * with the owner at +0x134, which opens the chat menu; an occupant (ID 0 and up) calls func_0017E368 with the owner at
  * +0x130 and the occupant's index; the placeholder line (ID -1) does nothing.
  *
@@ -632,7 +632,7 @@ extern "C" void func_0017E2F8(int, int);
 /**
  * Handles the debug "Select Room" menu's command: joins the chosen room.
  *
- * It is the onCommand slot of vtable D_0046D4D8 (built by LobbyMenu_LobbyMenu). For an item ID of 0 or more it calls
+ * It is the onCommand slot of vtable LobbyMenu_vtbl (built by LobbyMenu_LobbyMenu). For an item ID of 0 or more it calls
  * func_0017E2F8 with the debug front end at +0x130 and the room index (state 11, then func_0025D800 on the lobby
  * manager); the "Receiving Room List" placeholder (ID -1) is ignored.
  *
@@ -659,7 +659,7 @@ extern "C" void func_0017E290(int, int);
 /**
  * Handles the debug "Select Persona" menu's command: selects the chosen persona.
  *
- * It is the onCommand slot of vtable D_0046D530 (built by PersonaMenu_PersonaMenu). It calls func_0017E290 with the debug front
+ * It is the onCommand slot of vtable PersonaMenu_vtbl (built by PersonaMenu_PersonaMenu). It calls func_0017E290 with the debug front
  * end stored at +0x4E0 and the item's ID (the persona index), which sets state 7 and calls func_0025CD28 on the lobby
  * manager.
  *
@@ -682,7 +682,7 @@ extern "C" void func_0017E1C0_BBE8(int, void *) __asm__("func_0017E1C0");
 /**
  * Handles the debug "Create Persona" menu's command: creates a persona with the typed name.
  *
- * It is the onCommand slot of vtable D_0046D588 (built by CreatePersonaMenu_CreatePersonaMenu). It calls func_0017E1C0 with the debug front
+ * It is the onCommand slot of vtable CreatePersonaMenu_vtbl (built by CreatePersonaMenu_CreatePersonaMenu). It calls func_0017E1C0 with the debug front
  * end at +0x130 and the persona name buffer at +0x180 (the text-entry item at +0x168), which sets state 8 and calls
  * func_0025D1B8 on the lobby manager. It ignores which item was chosen.
  *
@@ -703,7 +703,7 @@ extern "C" void func_0017E228(int, int);
 /**
  * Handles the debug "Delete Persona" menu's command: deletes the chosen persona.
  *
- * It is the onCommand slot of vtable D_0046D5E0 (built by DeletePersonaMenu_DeletePersonaMenu). It calls func_0017E228 with the debug front
+ * It is the onCommand slot of vtable DeletePersonaMenu_vtbl (built by DeletePersonaMenu_DeletePersonaMenu). It calls func_0017E228 with the debug front
  * end at +0x130 and the item's ID (the persona index set by DeletePersonaMenu_setpersonas), which sets state 9 and calls func_0025D428
  * on the lobby manager.
  *
@@ -726,7 +726,7 @@ extern "C" void func_0017E030_BC38(int, char*, char*) __asm__("func_0017E030");
 /**
  * Handles the debug "Create Account" menu's command: creates an account with the typed name and password.
  *
- * It is the onCommand slot of vtable D_0046D690 (built by AccountDetailsMenu_AccountDetailsMenu). It calls func_0017E030 with the debug front
+ * It is the onCommand slot of vtable AccountDetailsMenu_vtbl (built by AccountDetailsMenu_AccountDetailsMenu). It calls func_0017E030 with the debug front
  * end at +0x130, the login-name buffer at +0x180 and the password buffer at +0x1AC; that fills the lobby manager's
  * mNewAccount form and sends it with func_0025B9C8. It ignores which item was chosen.
  *
@@ -749,7 +749,7 @@ extern "C" void func_0017E118_BC68(int, char*, char*) __asm__("func_0017E118");
 /**
  * Handles the debug "Login" menu's command: logs in with the typed name and password.
  *
- * It is the onCommand slot of vtable D_0046D6E8 (built by AccountDetailsMenu_AccountDetailsMenu1). It calls func_0017E118 with the debug front
+ * It is the onCommand slot of vtable AccountDetailsMenu1_vtbl (built by AccountDetailsMenu_AccountDetailsMenu1). It calls func_0017E118 with the debug front
  * end at +0x130, the login-name buffer at +0x180 and the password buffer at +0x1AC; that copies them into the lobby
  * manager's mUserName / mPassword and calls func_0025C610. It ignores which item was chosen.
  *
@@ -1928,7 +1928,7 @@ extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
 /**
- * Destroys the debug lobby's "Continue" menu (vtable D_0046D740, built by ContinueMenu_ContinueMenu): its one item, then the menu.
+ * Destroys the debug lobby's "Continue" menu (vtable ContinueMenu_vtbl, built by ContinueMenu_ContinueMenu): its one item, then the menu.
  *
  * Destroys the item at +0x130 with cMenuItem__cMenuItem (flags 2: no free), then runs cMenu__cMenu with the caller's
  * flags. The July 2003 preview calls this class ContinueMenu.
@@ -1949,7 +1949,7 @@ extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
 /**
- * Destroys the debug lobby's "Login" menu (vtable D_0046D6E8, built by AccountDetailsMenu_AccountDetailsMenu1).
+ * Destroys the debug lobby's "Login" menu (vtable AccountDetailsMenu1_vtbl, built by AccountDetailsMenu_AccountDetailsMenu1).
  *
  * Destroys its six items in reverse order (+0x1E4 Cancel, +0x1C0 the command item, +0x194 password, +0x168 login name,
  * +0x150 spacer, +0x134 title) with cMenuItem__cMenuItem (flags 2), then runs cMenu__cMenu with the caller's flags. The
@@ -1976,7 +1976,7 @@ extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
 /**
- * Destroys the debug lobby's "Create Account" menu (vtable D_0046D690, built by AccountDetailsMenu_AccountDetailsMenu).
+ * Destroys the debug lobby's "Create Account" menu (vtable AccountDetailsMenu_vtbl, built by AccountDetailsMenu_AccountDetailsMenu).
  *
  * Same layout as the Login menu: destroys the six items from +0x1E4 down to +0x134 with cMenuItem__cMenuItem (flags 2),
  * then runs cMenu__cMenu with the caller's flags. The preview calls this class
@@ -2031,7 +2031,7 @@ static inline void SubMenuA_CEA0(int m)
 }
 
 /**
- * Destroys the debug lobby's "Login Method" menu (vtable D_0046D638, built by AccountMenu_AccountMenu) with its two submenus.
+ * Destroys the debug lobby's "Login Method" menu (vtable AccountMenu_vtbl, built by AccountMenu_AccountMenu) with its two submenus.
  *
  * Tears down, innermost first, the menu's four items (+0x578, +0x55C, +0x544, +0x528), the embedded Login menu at
  * +0x32C (its items and cMenu base) and the Create Account menu at +0x130 (its items and cMenu base), all with flags 2,
@@ -2057,7 +2057,7 @@ extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
 /**
- * Destroys the debug lobby's "Delete Persona" menu (vtable D_0046D5E0, built by DeletePersonaMenu_DeletePersonaMenu).
+ * Destroys the debug lobby's "Delete Persona" menu (vtable DeletePersonaMenu_vtbl, built by DeletePersonaMenu_DeletePersonaMenu).
  *
  * Destroys the four command items at +0x168 (0x24 bytes each) in reverse order through each item's virtual destructor
  * (the vtable at +0x10 of the item, with the entry's this adjustment), then the spacer (+0x150) and the title (+0x134)
@@ -2088,7 +2088,7 @@ extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
 /**
- * Destroys the debug lobby's "Create Persona" menu (vtable D_0046D588, built by CreatePersonaMenu_CreatePersonaMenu).
+ * Destroys the debug lobby's "Create Persona" menu (vtable CreatePersonaMenu_vtbl, built by CreatePersonaMenu_CreatePersonaMenu).
  *
  * Destroys its four items (+0x194 Create, +0x168 persona name, +0x150 spacer, +0x134 title) with cMenuItem__cMenuItem
  * (flags 2), then runs cMenu__cMenu with the caller's flags. The preview calls this class
@@ -2159,7 +2159,7 @@ struct cPersonaMenu_DD0C8 : cMenuBase_DD0C8 {
 };
 
 /**
- * Destroys the debug lobby's "Select Persona" menu (vtable D_0046D530, built by PersonaMenu_PersonaMenu) with its two submenus.
+ * Destroys the debug lobby's "Select Persona" menu (vtable PersonaMenu_vtbl, built by PersonaMenu_PersonaMenu) with its two submenus.
  *
  * A compiler-generated destructor: it destroys the menu's own items (the Create/Delete Persona submenu items at +0x5C4
  * and +0x5A8, the four persona items at +0x518 through their virtual destructors, the spacer and the title), then the
@@ -2183,7 +2183,7 @@ struct VTab_D258 { int a; int b; VEnt_D258 dtor; };
 struct Obj_D258 { char pad[0x168]; cCommandMenuItem elems[12]; };
 
 /**
- * Destroys the debug lobby's "Select Room" menu (vtable D_0046D4D8, built by LobbyMenu_LobbyMenu).
+ * Destroys the debug lobby's "Select Room" menu (vtable LobbyMenu_vtbl, built by LobbyMenu_LobbyMenu).
  *
  * Destroys the twelve room items at +0x168 in reverse order through their virtual destructors, then the spacer (+0x150)
  * and the title (+0x134) with cMenuItem__cMenuItem, and finally cMenu__cMenu with the caller's flags. The preview calls
@@ -2214,7 +2214,7 @@ struct VTab_D2F0 { int a; int b; VEnt_D2F0 dtor; };
 struct Obj_D2F0 { char pad[0x16C]; cCommandMenuItem elems[24]; };
 
 /**
- * Destroys the debug lobby's "Room Occupants" menu (vtable D_0046D480, built by RoomMenu_RoomMenu).
+ * Destroys the debug lobby's "Room Occupants" menu (vtable RoomMenu_vtbl, built by RoomMenu_RoomMenu).
  *
  * Destroys the "Chat" item (+0x4CC), the 24 occupant items at +0x16C in reverse order through their virtual
  * destructors, the spacer (+0x154) and the title (+0x138), then runs cMenu__cMenu with the caller's flags. The preview
@@ -2245,7 +2245,7 @@ struct VTab_D398 { int a; int b; VEnt_D398 dtor; };
 struct Obj_D398 { char pad[0x194]; cCommandMenuItem elems[14]; };
 
 /**
- * Destroys the debug lobby's "Chat Menu" (vtable D_0046D428, built by ChatMenu_ChatMenu).
+ * Destroys the debug lobby's "Chat Menu" (vtable ChatMenu_vtbl, built by ChatMenu_ChatMenu).
  *
  * Destroys the 14 canned-message items at +0x194 in reverse order through their virtual destructors, then the chat
  * text-entry item (+0x168), the spacer (+0x150) and the title (+0x134) with cMenuItem__cMenuItem, and finally
@@ -2302,7 +2302,7 @@ extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
 /**
- * Destroys the debug lobby's "Abort" menu (vtable D_0046D378, built by AbortMenu_AbortMenu): its one item, then the menu.
+ * Destroys the debug lobby's "Abort" menu (vtable AbortMenu_vtbl, built by AbortMenu_AbortMenu): its one item, then the menu.
  *
  * Destroys the command item at +0x134 with cMenuItem__cMenuItem (flags 2), then runs cMenu__cMenu with the caller's
  * flags. The preview calls this class AbortMenu<cDebugLobbyScreen::OnAbortChallenge>.

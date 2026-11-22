@@ -112,14 +112,14 @@ extern "C" void cOVStateTrophy_onWidgetEvent(cOVStateTrophy* self, cUIObj_20E9A0
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", cHUDRadar_cHUDRadar);
 #ifdef SKIP_ASM
-extern char D_00474230[];
+extern char cHUDRadar_vtbl[];
 extern int D_004A276C;
 extern "C" void func_0020EC18(cHUDRadar* self, tRect* a, tRect* r);
 
 /**
  * Constructs a course-progress tracker, the 0x3C-byte object at +0x8 of each cOVStateHUD1P panel.
  *
- * Installs its vtable D_00474230 at +0x38, lays it out over the whole 640 x 480 screen with func_0020EC18 and counts
+ * Installs its vtable cHUDRadar_vtbl at +0x38, lays it out over the whole 640 x 480 screen with func_0020EC18 and counts
  * the instance in D_004A276C (cHUDRadar__cHUDRadar drops the count). cOVStateHUD1P_cOVStateHUD1P and func_0021CBA0 call it.
  *
  * @return @p self
@@ -127,7 +127,7 @@ extern "C" void func_0020EC18(cHUDRadar* self, tRect* a, tRect* r);
 extern "C" void* cHUDRadar_cHUDRadar(cHUDRadar* self)
 {
     tRect screenRect;
-    self->mVtbl = (void**)D_00474230;
+    self->mVtbl = (void**)cHUDRadar_vtbl;
     screenRect.X = 0.0f;
     screenRect.Y = 0.0f;
     screenRect.W = 640.0f;
@@ -141,16 +141,16 @@ extern "C" void* cHUDRadar_cHUDRadar(cHUDRadar* self)
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", cHUDRadar__cHUDRadar);
 #ifdef SKIP_ASM
-extern char D_00474230[];
+extern char cHUDRadar_vtbl[];
 extern int D_004A276C;
 extern int D_004A2768;
 void operator_delete(int*);
 
 /**
- * Destroys a course-progress tracker: restores its vtable D_00474230 and drops the instance count D_004A276C.
+ * Destroys a course-progress tracker: restores its vtable cHUDRadar_vtbl and drops the instance count D_004A276C.
  *
  * When the last tracker goes, D_004A2768 is cleared so the next layout (func_0020EB50) looks the icon textures and the
- * font up again. It is the only slot of D_00474230 (+0xC); cOVStateHUD1P__cOVStateHUD1P calls it for the panels'
+ * font up again. It is the only slot of cHUDRadar_vtbl (+0xC); cOVStateHUD1P__cOVStateHUD1P calls it for the panels'
  * trackers.
  *
  * @param flags  bit 0 frees the object with operator_delete (the g++ deleting-destructor flag)
@@ -158,7 +158,7 @@ void operator_delete(int*);
 extern "C" void cHUDRadar__cHUDRadar(cHUDRadar* self, int flags)
 {
     int n = D_004A276C - 1;
-    self->mVtbl = (void**)D_00474230;
+    self->mVtbl = (void**)cHUDRadar_vtbl;
     D_004A276C = n;
     if (n == 0) {
         D_004A2768 = 0;

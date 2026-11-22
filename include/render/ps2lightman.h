@@ -4,11 +4,11 @@
 // cPS2LightMan: the light manager (cLightMan::TheLightMan): an array of light instances, the first n static (from the
 // world's light records) followed by 50 dynamic slots handed out per frame. Size 0x14: [R] cLightMan_construct__Fv
 // (render/lightman) does cMemMan_alloc(0x14, "LightMan") + cLightMan_cLightMan__FP12cPSPLightMan (vtable
-// cLightMan_vtbl, stores TheLightMan), then stores D_00493650. Destructors cPS2LightMan__cPS2LightMan__FPv (slot 0) ->
+// cLightMan_vtbl, stores TheLightMan), then stores cPS2LightMan_vtbl. Destructors cPS2LightMan__cPS2LightMan__FPv (slot 0) ->
 // cLightMan__cLightMan (restores cLightMan_vtbl, clears TheLightMan).
 // Bases: cLightMan (On Tour 0x4: vptr only) <- cPSPLightMan (retail class name kept from On Tour, render/ps2lightman)
 // <- cPS2LightMan. The vptr is at 0x0 because cLightMan has no data.
-// Methods (D_00493650, On Tour's cPSPLightMan order): 0 ~cPS2LightMan, 1 GetLightObj(i) cPS2LightMan_GetLightObj__FPvi,
+// Methods (cPS2LightMan_vtbl, On Tour's cPSPLightMan order): 0 ~cPS2LightMan, 1 GetLightObj(i) cPS2LightMan_GetLightObj__FPvi,
 // 2 Init(n) cPS2LightMan_Init, 3 Purge cPS2LightMan_Purge, 4 CreateLights cPS2LightMan_CreateLights, 5 ResetDynamicLights,
 // 6 GetDynamicLight cPS2LightMan_GetDynamicLight, 7 SetAmbient (empty), 8-11 CreateAmbient/Directional/Point/Spot cPS2LightMan_CreateAmbient,
 // cPS2LightMan_CreateDirectional, cPS2LightMan_CreatePoint, cPS2LightMan_CreateSpot (render/lightman), 12-14 cPS2LightMan_LoadLight/40/48 (empty).
@@ -24,7 +24,7 @@ struct cLightInst;
 
 struct cPS2LightMan {
     // --- cLightMan
-    void** mVtbl;                    // 0x00 [R] cLightMan_vtbl (cPSPLightMan ctor), D_00493650 (cLightMan_construct)
+    void** mVtbl;                    // 0x00 [R] cLightMan_vtbl (cPSPLightMan ctor), cPS2LightMan_vtbl (cLightMan_construct)
     // --- cPSPLightMan
     cLightInst** m_pLights;          // 0x04 [O]; [R] Init: = new((n + 50) * 4); [U] GetLightObj returns &m_pLights[i];
                                      //      Purge frees it; CreateLights / Create* index it

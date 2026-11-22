@@ -64,7 +64,7 @@ struct tHUDRiderInfo {
     int rider;                      // 0x00 [O]; [U] onCreateScreen: the local rider's cBeing getAIIndex() (On Tour stores
                                     //       the same call's result here)
     int playerID;                   // 0x04 [O]; [U] onCreateScreen: the rider's index in the race (On Tour: player index)
-    cHUDRadar unk_08;               // 0x08 [R] course-progress tracker (cHUDRadar_cHUDRadar constructs it, vptr D_00474230 at its
+    cHUDRadar unk_08;               // 0x08 [R] course-progress tracker (cHUDRadar_cHUDRadar constructs it, vptr cHUDRadar_vtbl at its
                                     //       0x38; cHUDRadar__cHUDRadar destroys it; func_0020EB50 lays it out); retail only
     int currRank;                   // 0x44 [O]; [U] -1
     float rankAnimFrame;            // 0x48 [O]; [U] 1.0

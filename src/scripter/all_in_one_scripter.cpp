@@ -437,13 +437,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCameraManager__cScriptObjC
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cScriptObject__cScriptObject_48A0(void *) __asm__("cScriptObject__cScriptObject");
-extern char D_00482360[];
+extern char cScriptObjCameraManager_cScriptEntity_vtbl[];
 extern char cScriptObjCameraManager_vtbl[];
 
 /**
  * Destroys the script camera manager through the cScriptObject destructor.
  *
- * Stores the vtable of its cScriptEntity base part (D_00482360; its overridden entries adjust this by -0x10) at +0x10
+ * Stores the vtable of its cScriptEntity base part (cScriptObjCameraManager_cScriptEntity_vtbl; its overridden entries adjust this by -0x10) at +0x10
  * and its own vtable cScriptObjCameraManager_vtbl at +0xC, then calls cScriptObject__cScriptObject, which receives the
  * g++ delete flags untouched in the second argument register (this declaration leaves them out). Nothing of the
  * manager's own is torn down.
@@ -451,7 +451,7 @@ extern char cScriptObjCameraManager_vtbl[];
  * @param manager  the camera manager being destroyed (this)
  */
 extern "C" void cScriptObjCameraManager__cScriptObjCameraManager(cScriptObjCameraManager* manager) {
-    manager->mEntityVtbl = (void**)D_00482360;
+    manager->mEntityVtbl = (void**)cScriptObjCameraManager_cScriptEntity_vtbl;
     manager->mVtbl = (void**)cScriptObjCameraManager_vtbl;
     cScriptObject__cScriptObject_48A0(manager);
 }
