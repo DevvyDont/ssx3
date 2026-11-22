@@ -19593,7 +19593,8 @@ int SFILTER_unpackpf_9C08(char *o, int n, int unused, int *buf) __asm__("SFILTER
  * @param buf  the float destination
  * @return the frames produced since the report (0 when nothing was available)
  */
-int SFILTER_unpackpf_9C08(char *vnode, int n, int srcBuffer, int *buf) {
+int SFILTER_unpackpf_9C08(char *vvnode, int n, int srcBuffer, int *buf) {
+    UNPACKPFSTATE* vnode = (UNPACKPFSTATE*)vvnode;
     UNPACKPFSTATE* node = (UNPACKPFSTATE*)vnode;
     int blockLen, last;
     int runLength;

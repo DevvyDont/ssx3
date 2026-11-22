@@ -1276,8 +1276,9 @@ static inline bool isActiveFB88(char* s)
     return st != 0 && st < 10;
 }
 
-static inline bool isIdleFB88(char* vs)
+static inline bool isIdleFB88(char* vvs)
 {
+    cReplay* vs = (cReplay*)vvs;
     cReplay* s = (cReplay*)vs;
     bool r = false;
     if (isActiveFB88(((char*)s))) r = s->PlaybackTick == s->EndRecordTick;

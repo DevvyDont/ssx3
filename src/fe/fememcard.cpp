@@ -676,8 +676,9 @@ extern "C" void cMCOverlayManager_ReturnToDevSelectScreen(void* mp);
 extern "C" void cFEStateMemCard_startProfileRead(void);
 extern "C" void cFEStateMemCard_exitScreen(cFEStateMemCard* self);
 
-static inline int moviePlaying_K1874E8(void* vmp)
+static inline int moviePlaying_K1874E8(void* vvmp)
 {
+    cMCOverlayManager* vmp = (cMCOverlayManager*)vvmp;
     cMCOverlayManager* mp = (cMCOverlayManager*)vmp;
     int r = 0;
     if (mp->mCurrDeviceStateAck == 0)

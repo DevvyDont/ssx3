@@ -240,7 +240,7 @@ static inline void set_0778(tWPInGameData* o, float* d, float v)
 extern "C" tWPInGameData* cWorldPainterQuery_queryPosition(cWorldPainterQuery* self, float x, float z, float blend)
 {
     int first = 1;
-    char* map = *(char**)((char*)SSXApp->Game->World + 0x8);
+    cWorldPainterMan* map = (cWorldPainterMan*)(*(char**)((char*)SSXApp->Game->World + 0x8));
     if ((self->m_data)->m_wpTravelDistance != -99999.0f) {
         first = 0;
     }
@@ -252,8 +252,8 @@ extern "C" tWPInGameData* cWorldPainterQuery_queryPosition(cWorldPainterQuery* s
     int idx = cWorldPainterMan_m_iCurrSection;
     self->m_x = x;
     self->m_y = z;
-    while (valid_0778(&(*(cWorldPainterSection**)(map + 4))[idx])) {
-        cWorldPainterSection* entry = (cWorldPainterSection*)(*(char**)(map + 4) + idx * (int)sizeof(cWorldPainterSection));
+    while (valid_0778(&(map->m_pCache)[idx])) {
+        cWorldPainterSection* entry = (cWorldPainterSection*)((char*)map->m_pCache + idx * (int)sizeof(cWorldPainterSection));
         void* cell = ((sLayer_0778*)entry->m_pWPHeader)->cells[*(unsigned char*)&(*(unsigned int*)&self->m_regionType)];
         if (cell == 0) {
             if (first) {

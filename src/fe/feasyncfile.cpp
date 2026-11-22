@@ -3422,8 +3422,9 @@ extern char str_cPrivateMessage[];
 extern void* cPrivateMessage_vtbl[];
 extern char D_004A1408[];
 
-static inline void* Init_001A7ED8(char* vp, const char* a, const char* b, const char* c)
+static inline void* Init_001A7ED8(char* vvp, const char* a, const char* b, const char* c)
 {
+    cPrivateMessage* vp = (cPrivateMessage*)vvp;
     cPrivateMessage* p = (cPrivateMessage*)vp;
     p->mVtbl = cPrivateMessage_vtbl;
     cBXString_cBXString2(p, a);
@@ -3480,8 +3481,9 @@ static inline void* GetSession_001A7F78()
     return BuddyMan_mBuddyMan;
 }
 
-static inline void* Init_001A7F78(char* vp, char* vsrc)
+static inline void* Init_001A7F78(char* vvp, char* vsrc)
 {
+    cPrivateMessage* vp = (cPrivateMessage*)vvp;
     cPrivateMessage* src = (cPrivateMessage*)vsrc;
     cPrivateMessage* p = (cPrivateMessage*)vp;
     p->mVtbl = cPrivateMessage_vtbl;
@@ -5556,15 +5558,17 @@ struct sBXString1A9CC0 {
 };
 
 // Popup message line: type 3 = string id.
-static inline void SetMsg_1A9CC0(char* vmsg, char* id)
+static inline void SetMsg_1A9CC0(char* vvmsg, char* id)
 {
+    cPopupInfo* vmsg = (cPopupInfo*)vvmsg;
     cPopupInfo* msg = (cPopupInfo*)vmsg;
     msg->mtMessage.ui = GetHashValue32(id);
     msg->mtMessage.eType = 3;
 }
 
-static inline void SetText_1A9CC0(char* vpopup, char* id)
+static inline void SetText_1A9CC0(char* vvpopup, char* id)
 {
+    cScreenPopup* vpopup = (cScreenPopup*)vvpopup;
     cScreenPopup* popup = (cScreenPopup*)vpopup;
     popup->info.mtMessage.ui = GetHashValue32(id);
     popup->info.mtMessage.eType = 3;
@@ -15730,8 +15734,9 @@ public:
     virtual void setVisible(int on);
 };
 
-static inline void PlayLabel_001B6C98(void* vself, char* label)
+static inline void PlayLabel_001B6C98(void* vvself, char* label)
 {
+    cUIState* vself = (cUIState*)vvself;
     cUIState* self = (cUIState*)vself;
     int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(label));
     if (frame != 0xFFFF) {

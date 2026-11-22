@@ -4183,8 +4183,9 @@ struct sAlloc_E0F60 {
 
 // The zeroed triple at 0x6E8 looks like an STL vector; its constructor takes an
 // allocator temporary, which is what leaves the unused stack slot.
-static inline void InitVec_E0F60(void* vself, const sAlloc_E0F60& a = sAlloc_E0F60())
+static inline void InitVec_E0F60(void* vvself, const sAlloc_E0F60& a = sAlloc_E0F60())
 {
+    cFEStateNetMessenger* vself = (cFEStateNetMessenger*)vvself;
     cFEStateNetMessenger* self = (cFEStateNetMessenger*)vself;
     self->mNames.mpStart = 0;
     self->mNames.mpFinish = 0;

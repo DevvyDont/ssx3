@@ -9991,11 +9991,11 @@ extern "C" void cUberGrindControl_update(cUberGrindControl* self, void* in)
 {
     if (cRider_checkForReset_i((char*)self->mRider, (*(int*)in >> 12) & 1, 0))
         return;
-    char* tbl = (char*)kUberGrindAnim + self->CurrentGrind * 0x24;
+    tBEUberGrindAnim* tbl = (tBEUberGrindAnim*)((char*)kUberGrindAnim + self->CurrentGrind * 0x24);
     if (cRider_checkRailBoardCollisions((char*)self->mRider))
     {
         if (self->GrindState == 1)
-            cRiderAnimBase_play_i136508(self->mRider->mRiderAnim, *(int*)(tbl + 0x18), 0, -1.0f);
+            cRiderAnimBase_play_i136508(self->mRider->mRiderAnim, tbl->LandAnim, 0, -1.0f);
         return;
     }
     int w = *(int*)in;
@@ -10010,7 +10010,7 @@ extern "C" void cUberGrindControl_update(cUberGrindControl* self, void* in)
         rider0->mSlewed[6].rate = 0.05833333730697632f;
         if (cRiderAnimBase_isCurrentAnimEndFlag(self->mRider->mRiderAnim, 2))
         {
-            cRiderAnimBase_play_i136508(self->mRider->mRiderAnim, *(int*)(tbl + 0x10), 0, -1.0f);
+            cRiderAnimBase_play_i136508(self->mRider->mRiderAnim, tbl->CycleAnim, 0, -1.0f);
             *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = 1.0f;
             self->GrindState = 1;
         }
@@ -10019,11 +10019,11 @@ extern "C" void cUberGrindControl_update(cUberGrindControl* self, void* in)
     {
         if (((sAiBitsB_136508*)in)->v != self->CurrentGrind || cRider_getMotionState((char*)self->mRider) == 0)
         {
-            cRiderAnimBase_play_i136508(self->mRider->mRiderAnim, *(int*)(tbl + 0x1C), 0, -1.0f);
+            cRiderAnimBase_play_i136508(self->mRider->mRiderAnim, tbl->OutOfAnim, 0, -1.0f);
             *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = 1.0f;
             self->GrindState = 2;
         }
-        else if (cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2) != *(int*)(tbl + 0x18) ||
+        else if (cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2) != tbl->LandAnim ||
                  cRiderAnimBase_isCurrentAnimEndFlag(self->mRider->mRiderAnim, 2))
         {
             if (cRider_getMotionState((char*)self->mRider) != 4)
@@ -10041,9 +10041,9 @@ extern "C" void cUberGrindControl_update(cUberGrindControl* self, void* in)
             int cur = cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2);
             int desAnim;
             if (aiAbs_136508(self->mRider->mSlewed[6].cur) < 0.10000000149011612f)
-                desAnim = *(int*)(tbl + 0x10);
+                desAnim = tbl->CycleAnim;
             else
-                desAnim = *(int*)(tbl + 0x14);
+                desAnim = tbl->BalanceAnim;
             if (desAnim != cur)
                 cRiderAnimBase_play_i136508(self->mRider->mRiderAnim, desAnim, 0, -1.0f);
         }

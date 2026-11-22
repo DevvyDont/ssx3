@@ -2429,7 +2429,8 @@ extern "C" void cSplashManager_AddDrop_37A8(void *arg0, t2Vector *arg1, void *ar
  * @param basePos  the drop position (copied)
  * @param maxSize  the largest drop size
  */
-extern "C" void cSplashManager_AddDrop_37A8(void *vsplashManager, t2Vector *basePos, void *maxSize) {
+extern "C" void cSplashManager_AddDrop_37A8(void *vvsplashManager, t2Vector *basePos, void *maxSize) {
+    cSplashManager* vsplashManager = (cSplashManager*)vvsplashManager;
     cSplashManager* splashManager = (cSplashManager*)vsplashManager;
     int n = splashManager->mNumActiveDrops;
     if (n < cSplashToggles_m_NumDrops) {

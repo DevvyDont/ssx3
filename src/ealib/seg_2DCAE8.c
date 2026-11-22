@@ -2976,18 +2976,18 @@ extern char D_00519BF8_9BF8[] __asm__("freequeue");
  *
  * @param request  the request
  */
-void releaserequest(char *request) {
+void releaserequest(REQUESTSTRUCTtag* request) {
     unsigned int temp_4;
 
-    if (*(int *)(request + 0x10) != 0) {
-        temp_4 = *(unsigned int *)(request + 0x14);
+    if (request->cancelflag != 0) {
+        temp_4 = (unsigned int)request->loadaddr;
         if (temp_4 >= 2U) {
             D_00450C18_0C18[0](temp_4);
         }
     }
-    *(volatile int *)(request + 0x1C) = 0;
+    request->fop = 0;
     *(int *)request = *(unsigned char *)request;
-    queueadd_rr(D_00519BF8_9BF8, request);
+    queueadd_rr(D_00519BF8_9BF8, ((char*)request));
 }
 #endif
 
@@ -3008,23 +3008,23 @@ extern void releaserequest_F028(void *) __asm__("releaserequest");
  *
  * @param req  the request
  */
-void finishrequest(void *req) {
+void finishrequest(REQUESTSTRUCTtag* req) {
     int (*callback)(int);
     int cancelFlag;
     int waitFlag;
 
     MUTEX_lock_F028(D_00519C08_F028);
-    (*(volatile int *)((char*)(req) + (0x1C))) = 0;
-    cancelFlag = (*(int *)((char*)(req) + (0x10)));
-    callback = (*(int (**)(int))((char*)(req) + (0x18)));
-    waitFlag = (*(int *)((char*)(req) + (0xC)));
+    (req->fop) = 0;
+    cancelFlag = (req->cancelflag);
+    callback = ((int (*)(int))req->callback);
+    waitFlag = (req->releaseflag);
     MUTEX_unlock_F028(D_00519C08_F028);
     if (cancelFlag != 0) {
         if (waitFlag == 0) {
             releaserequest_F028(req);
         }
     } else if (callback != 0) {
-        callback((*(int *)((char*)(req) + (0))));
+        callback((req->id));
     }
 }
 #endif
@@ -3069,7 +3069,7 @@ void loadfileclosecallback_impl(int arg0, int arg1, struct sReq *s) __asm__("loa
  */
 void loadfileclosecallback_impl(int opHandle, int opStatus, struct sReq *request) {
     FILESYS_completeop_F0B8(request->f1C);
-    finishrequest(request);
+    finishrequest((REQUESTSTRUCTtag*)request);
 }
 #endif
 
@@ -3137,21 +3137,21 @@ extern char fF0F0_F1E0[] __asm__("loadfilereadcallback");
  * @param opStatus  unused (callback argument)
  * @param userdata  the load request (On Tour void* userdata)
  */
-void loadfilesizecallback(int opHandle, int opStatus, char *userdata) {
+void loadfilesizecallback(int opHandle, int opStatus, REQUESTSTRUCTtag* userdata) {
     int fileSize, buffer, readSize, old;
-    fileSize = fD310_F1E0(*(volatile int *)(userdata + 0x1C));
-    if (*(int *)(userdata + 0x10) != 0) {
-        *(volatile int *)(userdata + 0x1C) = fD5A0_F1E0(*(int *)(userdata + 0x20), 99, userdata);
-        if (*(volatile int *)(userdata + 0x1C) != 0) fCF70_F1E0(*(volatile int *)(userdata + 0x1C), fF0B8_F1E0);
+    fileSize = fD310_F1E0(userdata->fop);
+    if (userdata->cancelflag != 0) {
+        userdata->fop = fD5A0_F1E0(userdata->fhandle, 99, userdata);
+        if (userdata->fop != 0) fCF70_F1E0(userdata->fop, fF0B8_F1E0);
     } else {
-        old = *(int *)(userdata + 0x28);
-        *(int *)(userdata + 0x28) = fileSize;
+        old = userdata->readsize;
+        userdata->readsize = fileSize;
         buffer = D_0C14_F1E0[0](D_5DA8_F1E0, fileSize, old);
-        readSize = *(int *)(userdata + 0x28);
-        *(int *)(userdata + 0x14) = buffer;
-        *(int *)(userdata + 0x2C) = buffer;
-        *(volatile int *)(userdata + 0x1C) = fD648_F1E0(*(int *)(userdata + 0x20), *(int *)(userdata + 0x24), buffer, readSize <= 0x8000 ? readSize : 0x8000, 99, userdata);
-        if (*(volatile int *)(userdata + 0x1C) != 0) fCF70_F1E0(*(volatile int *)(userdata + 0x1C), fF0F0_F1E0);
+        readSize = userdata->readsize;
+        userdata->loadaddr = (char*)buffer;
+        userdata->destaddr = (char*)buffer;
+        userdata->fop = fD648_F1E0(userdata->fhandle, userdata->foffset, buffer, readSize <= 0x8000 ? readSize : 0x8000, 99, userdata);
+        if (userdata->fop != 0) fCF70_F1E0(userdata->fop, fF0F0_F1E0);
     }
 }
 #endif
@@ -3182,7 +3182,7 @@ void loadfileopencallback(int opHandle, int opStatus, struct sReq *request) {
     int n = FILESYS_completeop_F2C0(request->f1C);
     request->f20 = n;
     if (n == 0) {
-        finishrequest(request);
+        finishrequest((REQUESTSTRUCTtag*)request);
         return;
     }
     if (request->f10 != 0) {
@@ -3228,7 +3228,7 @@ void readfilereadcallback(int opHandle, int opStatus, struct Q_F3C0 *request) {
     request->f8 += n;
     request->f2c += n;
     if (n <= 0x7FFF || request->f10 != 0) {
-        finishrequest(request);
+        finishrequest((REQUESTSTRUCTtag*)request);
         return;
     }
     x = request->f28 - n;
@@ -3428,21 +3428,21 @@ extern char fF3C0_F808[] __asm__("readfilereadcallback");
  * @return the request id, or 0
  */
 int ASYNCFILE_read(int file, int offset, int buffer, int size) {
-    char *job = fEED8_F808(D_9BF8_F808);
-    if (job != 0) {
-        fEF40_F808(job);
-        *(int *)(job + 8) = 0;
-        *(int *)(job + 0xC) = 0;
-        *(int *)(job + 0x10) = 0;
-        *(int *)(job + 0x14) = 0;
-        *(int *)(job + 0x18) = 0;
-        *(int *)(job + 0x20) = file;
-        *(int *)(job + 0x24) = offset;
-        *(int *)(job + 0x28) = size;
-        *(int *)(job + 0x2C) = buffer;
-        *(volatile int *)(job + 0x1C) = fD648_F808(file, offset, buffer, size <= 0x8000 ? size : 0x8000, 100, job);
-        if (*(volatile int *)(job + 0x1C) != 0) {
-            fCF70_F808(*(volatile int *)(job + 0x1C), fF3C0_F808);
+    REQUESTSTRUCTtag* job = (REQUESTSTRUCTtag*)fEED8_F808(D_9BF8_F808);
+    if (((char*)job) != 0) {
+        fEF40_F808(((char*)job));
+        job->bytesread = 0;
+        job->releaseflag = 0;
+        job->cancelflag = 0;
+        job->loadaddr = 0;
+        job->callback = 0;
+        job->fhandle = file;
+        job->foffset = offset;
+        job->readsize = size;
+        job->destaddr = (char*)buffer;
+        job->fop = fD648_F808(file, offset, buffer, size <= 0x8000 ? size : 0x8000, 100, job);
+        if (job->fop != 0) {
+            fCF70_F808(job->fop, fF3C0_F808);
             return *(int *)job;
         }
         return 0;
@@ -3468,14 +3468,14 @@ void ASYNCFILE_setcallback_impl(int h, void (*fn)(int)) __asm__("ASYNCFILE_setca
  * @param fn  the callback, given the request id
  */
 void ASYNCFILE_setcallback_impl(int reqId, void (*fn)(int)) {
-    char *request = locaterequest_F8E8(reqId);
+    REQUESTSTRUCTtag* request = (REQUESTSTRUCTtag*)locaterequest_F8E8(reqId);
     int done;
-    if (request == 0 || *(int *)(request + 0x18) != 0) {
+    if (((char*)request) == 0 || (int)request->callback != 0) {
         return;
     }
     MUTEX_lock(D_00519C08_9C08);
-    done = *(volatile int *)(request + 0x1C) == 0;
-    *(void (**)(int))(request + 0x18) = fn;
+    done = request->fop == 0;
+    request->callback = fn;
     MUTEX_unlock_F8E8(D_00519C08_9C08);
     if (done) {
         fn(reqId);
@@ -3552,12 +3552,12 @@ int ASYNCFILE_release(int handle, int *address, int *size) {
     if (req->f10 != 0) {
         if (address != 0) *address = 0;
         if (size != 0) *size = 0;
-        releaserequest(req);
+        releaserequest((REQUESTSTRUCTtag*)req);
         return -1;
     }
     if (address != 0) *address = req->f2C - req->f08;
     if (size != 0) *size = req->f08;
-    releaserequest(req);
+    releaserequest((REQUESTSTRUCTtag*)req);
     return 1;
 }
 #endif
@@ -3581,24 +3581,24 @@ extern char D_9C08_FAF0[] __asm__("hlafile_mutex");
  */
 int ASYNCFILE_cancel(int handle) {
     int releaseFlag, fileOp, cancelFlag, lockState;
-    char *req;
+    REQUESTSTRUCTtag* req;
     fileOp = 0;
     cancelFlag = 0;
     mlock_FAF0(D_9C08_FAF0);
     releaseFlag = 0;
-    req = fEF70_FAF0(handle);
-    if (req != 0 && ((fileOp = *(volatile int *)(req + 0x1C), cancelFlag = *(int *)(req + 0x10), releaseFlag = *(int *)(req + 0xC), fileOp != 0) || releaseFlag == 0)) {
-        *(int *)(req + 0x10) = 1;
+    req = (REQUESTSTRUCTtag*)fEF70_FAF0(handle);
+    if (((char*)req) != 0 && ((fileOp = req->fop, cancelFlag = req->cancelflag, releaseFlag = req->releaseflag, fileOp != 0) || releaseFlag == 0)) {
+        req->cancelflag = 1;
     }
     munlock_FAF0(D_9C08_FAF0);
-    if (req != 0 && cancelFlag == 0) {
-        if (*(int *)(req + 0x10) != 0) {
+    if (((char*)req) != 0 && cancelFlag == 0) {
+        if (req->cancelflag != 0) {
             if (fileOp != 0) {
                 fD148_FAF0(fileOp);
                 return 1;
             }
             if (releaseFlag == 0) {
-                rel_FAF0(req);
+                rel_FAF0(((char*)req));
             }
             return 1;
         }

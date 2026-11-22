@@ -4735,8 +4735,9 @@ static inline t4Vector Scale_5750(const t4Vector& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy).
-static inline void LoadIdentity_5750(void* vself)
+static inline void LoadIdentity_5750(void* vvself)
 {
+    cPS2GraphicsMan* vself = (cPS2GraphicsMan*)vvself;
     cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -4756,8 +4757,9 @@ static inline void LoadIdentity_5750(void* vself)
 
 // Multiply the top of the matrix stack by a rotation of `angle` about `axis`.
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply).
-static inline void Rotate_5750(void* vself, float* axis, float angle)
+static inline void Rotate_5750(void* vvself, float* axis, float angle)
 {
+    cPS2GraphicsMan* vself = (cPS2GraphicsMan*)vvself;
     cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
     sMat_5750 r;
     float s;
@@ -4827,8 +4829,9 @@ static inline void Rotate_5750(void* vself, float* axis, float angle)
 }
 
 // PORT: PS2-only VU0 inline asm (matrix-vector product into row 3).
-static inline void Translate_5750(void* vself, void* v)
+static inline void Translate_5750(void* vvself, void* v)
 {
+    cPS2GraphicsMan* vself = (cPS2GraphicsMan*)vvself;
     cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
     __asm__ __volatile__(
         ".set noreorder\n"

@@ -876,8 +876,9 @@ struct sGmVE_AE20 {
     unsigned int (*fn)(void*);
 };
 
-static inline unsigned int gmCall_AE20(char* vself, int slot)
+static inline unsigned int gmCall_AE20(char* vvself, int slot)
 {
+    cPS2GraphicsMan* vself = (cPS2GraphicsMan*)vvself;
     cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
     sGmVE_AE20* vt = (sGmVE_AE20*)self->mVtbl;
     return vt[slot].fn(vthis(self, vt[slot]));

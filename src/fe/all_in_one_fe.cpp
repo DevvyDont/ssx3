@@ -2213,8 +2213,9 @@ extern "C" void cFont_text(void*, float, float, char*);
 
 // Inline copy of cOVStateHUD1P_renderGlow's body (the original helper was inlined here): colour/position/size by pointer, copied
 // locally.
-static inline void draw_ED48(char* vself, const Col_E7E0* colp, const V2_ED48* posp, const V2_ED48* sizep,
+static inline void draw_ED48(char* vvself, const Col_E7E0* colp, const V2_ED48* posp, const V2_ED48* sizep,
                              float t, float sx, float sy, float amin, float amax) {
+    cOVStateHUD1P* vself = (cOVStateHUD1P*)vvself;
     cOVStateHUD1P* self = (cOVStateHUD1P*)vself;
     Col_E7E0 col = *colp;
     V2_ED48 pos = *posp;

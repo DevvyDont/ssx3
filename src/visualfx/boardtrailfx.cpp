@@ -256,8 +256,9 @@ static inline float btLength_86F0(const t4Vector& v)
 }
 
 // Same test as cBoardTrailFX_shouldPlow's boardTrailCanDraw.
-static inline int boardTrailCanDraw_86F0(char* vr)
+static inline int boardTrailCanDraw_86F0(char* vvr)
 {
+    cRider* vr = (cRider*)vvr;
     cRider* r = (cRider*)vr;
     int ok = 0;
     if (r->mIsInNIS != 0 && r->unk_AD0 == 0) ok = r->unk_AFC != 0;
@@ -312,8 +313,9 @@ extern float cBoardTrail_m_LooseDepthScale;
 extern float cBoardTrail_m_PowderDepthScale;
 extern float cBoardTrail_m_DeepPowderDepthScale;
 
-static inline int boardTrailCanDraw(char* vr)
+static inline int boardTrailCanDraw(char* vvr)
 {
+    cRider* vr = (cRider*)vvr;
     cRider* r = (cRider*)vr;
     int ok = 0;
     if (r->mIsInNIS != 0 && r->unk_AD0 == 0) ok = r->unk_AFC != 0;
@@ -672,8 +674,9 @@ static inline t4Vector btBonePos(char* r, int off)
     return btBone(r, off)->row[3];
 }
 
-static inline int btCanDraw(char* vr)
+static inline int btCanDraw(char* vvr)
 {
+    cRider* vr = (cRider*)vvr;
     cRider* r = (cRider*)vr;
     int ok = 0;
     if (r->mIsInNIS != 0 && r->unk_AD0 == 0) ok = r->unk_AFC != 0;

@@ -9684,10 +9684,10 @@ extern "C" void func_00364CD0(cPS2DeferManager* vself, int type, int mode, unsig
             pk.p[27] = 1042;
             pk.p[0x1C] = 0;
             pk.p[29] = 0x6C2A020000000000;
-            char* bezierMan = cBezierMan_TheBezierMan;
-            pk.p[0x1E] = ((ulong)*(int*)(bezierMan + 0x1A0) << 32) | 0x30000012;
+            cPS2BezierMan* bezierMan = (cPS2BezierMan*)cBezierMan_TheBezierMan;
+            pk.p[0x1E] = ((ulong)(int)bezierMan->mPatchCache.unk_190[0] << 32) | 0x30000012;
             pk.p[0x1F] = 0;
-            ulong ref2 = ((ulong)*(int*)(bezierMan + 0x320) << 32) | 0x30000012;
+            ulong ref2 = ((ulong)(int)bezierMan->mPatchCache.unk_310[0] << 32) | 0x30000012;
             pk.p += 0x20;
             pk.p[0] = ref2;
             pk.p[1] = 0;

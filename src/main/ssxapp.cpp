@@ -2528,8 +2528,9 @@ struct sVisOwner_9FC8 {
     void *last;                   // 0x50A4
 };
 
-static inline int visOk_9FC8(sVisOwner_9FC8 *self, char *vnode)
+static inline int visOk_9FC8(sVisOwner_9FC8 *self, char *vvnode)
 {
+    tInstanceRecord* vnode = (tInstanceRecord*)vvnode;
     tInstanceRecord* node = (tInstanceRecord*)vnode;
     if ((node->m_iFlags & 3) != 3) {
         return 0;

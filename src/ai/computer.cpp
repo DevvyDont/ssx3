@@ -1141,8 +1141,9 @@ struct sRider_0010DBF0 {
     t4Vector vel;              // 0x1B0
 };
 
-static inline int id_0010DBF0(char* vself)
+static inline int id_0010DBF0(char* vvself)
 {
+    cComputer* vself = (cComputer*)vvself;
     cComputer* self = (cComputer*)vself;
     char* o = (char*)&self->RiderHandler.GroundMotion.mRider->mVtbl;
     sVE_0010DBF0* ve = &(*(sVE_0010DBF0**)o)[7];

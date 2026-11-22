@@ -555,8 +555,9 @@ static inline float vu0Dot_3F88(const t4Vector& a, const t4Vector& b)
 }
 
 // Steering flips when the board points backwards: |dir| within th while tilting back, or dir < -th while tilt < th.
-static inline float flipBackwards_3F88(float b, char *vself, float th)
+static inline float flipBackwards_3F88(float b, char *vvself, float th)
 {
+    cRider* vself = (cRider*)vvself;
     cRider* self = (cRider*)vself;
     if (Abs_3F88(self->mSlewed[3].cur) <= th && self->mSlewed[0].cur < 0.0f)
         return -b;

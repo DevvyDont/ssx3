@@ -2330,8 +2330,9 @@ static inline float deadzone_LP(float v, float k)
     return d;
 }
 
-static inline void LeanAbout_LP(char* vself, sXf_LP* xf, float a, float b, float ka, float kb)
+static inline void LeanAbout_LP(char* vvself, sXf_LP* xf, float a, float b, float ka, float kb)
 {
+    cRider* vself = (cRider*)vvself;
     cRider* self = (cRider*)vself;
     cAnimModel* trk = self->mAnimModel;
     sVec4XW* n = (sVec4XW*)((self->mBoneBoardRoot << 4) + (int)trk->localPos);
