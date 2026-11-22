@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uithing.h"
 #include "ui/uistatestack.h"
 #include "ui/uistate.h"
 
@@ -27,9 +28,9 @@ extern "C" void cUIState_hideObjSafe(cUIState* self, char* name)
     cListNode* n = cList_first((cList*)&self->mScreens);
     if (n != 0) {
         do {
-            void* obj = cUIScreen_getObjectByHashName(n, GetHashValue32(name));
-            if (obj != 0) {
-                sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)obj + 8);
+            cUIThing* obj = (cUIThing*)cUIScreen_getObjectByHashName(n, GetHashValue32(name));
+            if (((void*)obj) != 0) {
+                sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)obj->mVtbl;
                 vt[9].fn(vthis(obj, vt[9]), 0);
                 return;
             }
@@ -63,9 +64,9 @@ extern "C" void cUIState_showObjSafe(cUIState* self, char* name)
     cListNode* n = cList_first((cList*)&self->mScreens);
     if (n != 0) {
         do {
-            void* obj = cUIScreen_getObjectByHashName(n, GetHashValue32(name));
-            if (obj != 0) {
-                sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)obj + 8);
+            cUIThing* obj = (cUIThing*)cUIScreen_getObjectByHashName(n, GetHashValue32(name));
+            if (((void*)obj) != 0) {
+                sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)obj->mVtbl;
                 vt[9].fn(vthis(obj, vt[9]), 1);
                 return;
             }
@@ -526,11 +527,11 @@ INCLUDE_ASM("ui/uistate", cUIStateStack_pop1);
  *
  * @param node  the state to close
  */
-extern "C" void cUIStateStack_pop1(cUIStateStack* self, char* node)
+extern "C" void cUIStateStack_pop1(cUIStateStack* self, cUIState* node)
 {
-    int flags = *(int*)(node + 0x1C);
+    int flags = node->mAttrState;
     if (((flags >> 5) & 1) && (((unsigned int)flags >> 8) & 0x3F) == 5) {
-        *(int*)(node + 0x1C) = (flags & ~0x3F00) | 0x680;
+        node->mAttrState = (flags & ~0x3F00) | 0x680;
     }
 }
 #endif

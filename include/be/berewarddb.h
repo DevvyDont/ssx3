@@ -163,4 +163,38 @@ CHECK_OFFSET(tToyInfo, mStoreNum, 0xE);
 CHECK_OFFSET(tToyInfo, _mPad, 0xF);
 CHECK_SIZE(tToyInfo, 0x10);
 
+// One peak pass reward record (cBERewardDB::mpPeakPasses[mNumPeakPasses], 3 per character). [O] struct tPeakPassInfo
+// (0x8); [R] cBERewardDB_getRewardName (type 2) and cBERewardInterface_getPeakPass index the table with an 8-byte
+// stride (getRewardName returns the first word, the name).
+struct tPeakPassInfo {
+    char* mNameStringID;            // 0x0 [O]; [U] cBERewardDB_getRewardName (type 2) returns it
+    char* mpTextureFileName;        // 0x4 [O]; [U] cFEStateMountainRoom_loadPeakPass loads this file (func_0019DA10's
+                                    //     file name) for cFEStateMountainRoom::mpPeakPassInfo
+};
+
+CHECK_OFFSET(tPeakPassInfo, mNameStringID, 0x0);
+CHECK_OFFSET(tPeakPassInfo, mpTextureFileName, 0x4);
+CHECK_SIZE(tPeakPassInfo, 0x8);
+
+// One video reward record (cBERewardDB::mpVideos[mNumVideos]). [O] struct tVideoInfo (0x10), the store-item shape
+// above with the video file in place of the texture; [R] cBERewardDB_getRewardName (type 6) and
+// cBERewardInterface_buyVideo index the table with a 0x10 stride.
+struct tVideoInfo {
+    char* mNameStringID;            // 0x0 [O]; [U] cBERewardDB_getRewardName (type 6) returns it
+    char* mpVideoFileName;          // 0x4 [O]; [U] cFEStateRewardGalleryBase_showReward hands it to
+                                    //     cFEStateVideoPlayer_setVideoSourceFiles
+    char* mpIconName;               // 0x8 [O]; [U] cFEStateRewardGalleryVideos_getIconID copies its first 4 chars
+    short mCost;                    // 0xC [O]; [U] cBERewardInterface_buyVideo charges it (lh 0xC)
+    char mStoreNum;                 // 0xE [O]
+    char _mPad;                     // 0xF [O]
+};
+
+CHECK_OFFSET(tVideoInfo, mNameStringID, 0x0);
+CHECK_OFFSET(tVideoInfo, mpVideoFileName, 0x4);
+CHECK_OFFSET(tVideoInfo, mpIconName, 0x8);
+CHECK_OFFSET(tVideoInfo, mCost, 0xC);
+CHECK_OFFSET(tVideoInfo, mStoreNum, 0xE);
+CHECK_OFFSET(tVideoInfo, _mPad, 0xF);
+CHECK_SIZE(tVideoInfo, 0x10);
+
 #endif

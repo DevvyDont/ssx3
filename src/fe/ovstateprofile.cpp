@@ -987,7 +987,7 @@ extern "C" void cOVState_PROFILE_initGeneral(cOVState_PROFILE* self)
         sprintf(buf, D_004A2138, i);
         cUIText_setAsciiString((cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf)), buf);
         sprintf(buf, str_playerpct_d_b, i);
-        *(int*)((char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf)) + 0x18) = i - 1;
+        ((cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf)))->mMiscData = i - 1;
     }
 }
 #endif
@@ -1272,13 +1272,13 @@ extern "C" void cOVState_AUTOSAVE_onDestroyScreen(cOVState_AUTOSAVE* self)
         void* nextState = cFEStateLodge_cFEStateLodge(cMemMan_alloc(88, str_cFEStateLodge_b, 0, 0), self->mpEngine);
         cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
     } else if (parentScreen == 0) {
-        void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
+        cBENewRaceInterface* race = (cBENewRaceInterface*)cBE_getInterface_Fv(cBE_getBE(), 0);
         void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewRaceInterface_setGameMode(race, 4);
         cBENewRaceInterface_setGameEvent(race, 0xC);
         cBENewRaceInterface_newRace.iLocationIdx = cBENewPlayerInterface_getLastHub(player, 0);
         cBENewRaceInterface_bIsBamLocation = 1;
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)race + 0xC);
+        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)race->mVtbl;
         vt[1].fn(vthis(race, vt[1]));
         cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen_b, 0x100, 0)));
     }

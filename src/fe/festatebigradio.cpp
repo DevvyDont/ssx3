@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fe/festatenethelppopup.h"
+#include "ui/uimenu.h"
 #include "ui/uiengine.h"
 #include "fe/screenpopup.h"
 #include "ui/uiinput.h"
@@ -672,10 +674,10 @@ extern char str_kT_HELP65Cancel[];
  *
  * @param popup  the help popup (cFEStateNetHelpPopup)
  */
-extern "C" void func_00193C00(cFEStateBraggingRights* self, void* popup)
+extern "C" void func_00193C00(cFEStateBraggingRights* self, cFEStateNetHelpPopup* popup)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(popup, 4);
-    *(int*)((char*)popup + 0x54) = GetHashValue32(str_kT_HELP65BraggingRights);
+    popup->muiScreenName = GetHashValue32(str_kT_HELP65BraggingRights);
     cFEStateNetHelpPopup_setDescription(popup, 0, GetHashValue32(str_kT_HELP65BraggingRightsMessage));
     cFEStateNetHelpPopup_setDescription(popup, 1, GetHashValue32(str_kT_HELP65BraggingRightsMessage2));
     cFEStateNetHelpPopup_setOption(popup, 0, GetHashValue32(str_kT_HELPCmnToggleHighlight), 4);
@@ -708,17 +710,17 @@ static inline int isOn00193CF8()
  * @return 0x100, 1 or 0 as above, else 0x101
  */
 // Handles a menu event for one of the two radio list controls.
-extern "C" int cFEStateBraggingRights_onWidgetMenu(cFEStateBraggingRights* self, void* ctrl, int msg)
+extern "C" int cFEStateBraggingRights_onWidgetMenu(cFEStateBraggingRights* self, cUIMenu* ctrl, int msg)
 {
     int found = 0;
     void** item;
     void** menuSlot = (void**)(&self->mMenuCtrl[0]);
-    if (*menuSlot == ctrl) {
+    if (*menuSlot == ((void*)ctrl)) {
         item = menuSlot;
         found = 1;
     } else {
         item = (void**)(&self->mMenuCtrl[1]);
-        if (*item != ctrl) item = 0;
+        if (*item != ((void*)ctrl)) item = 0;
     }
     switch (msg) {
     case 8: case 9:

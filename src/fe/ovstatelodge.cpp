@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beintplayer.h"
+#include "be/berewarddb.h"
 #include "sound/ssxaudio.h"
 #include "fe/fereal.h"
 #include "fe/festatetrophyroom.h"
@@ -661,9 +663,9 @@ extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a
 extern "C" void cFEStateMountainRoom_loadPeakPass(cFEStateMountainRoom* self)
 {
     if (self->mTextureFileIndex < 0) {
-        void* item = self->mpPeakPassInfo;
+        tPeakPassInfo* item = self->mpPeakPassInfo;
         if (item != 0) {
-            self->mTextureFileIndex = func_0019DA10(SSXApp->RealFE->mBoltFileManager, self->mCharID, *(int*)((char*)item + 4), 10, 1, 0);
+            self->mTextureFileIndex = func_0019DA10(SSXApp->RealFE->mBoltFileManager, self->mCharID, (int)item->mpTextureFileName, 10, 1, 0);
         }
     }
 }
@@ -1215,9 +1217,9 @@ extern "C" int cFEStatePeakRoom_onWidgetMenu(cFEStatePeakRoom* self, cUIMenu* it
         return 0x100;
     case 6: {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
-        void* entry = cList_getByIndex((char*)&item->mList, id);
+        cUIThing* entry = (cUIThing*)cList_getByIndex((char*)&item->mList, id);
         if (cBERewardInterface_isTrophyOwned(iface, self->mUserNum, self->mCharID,
-                          self->mPeakNum, *(int*)((char*)entry + 0x18)) == 0) {
+                          self->mPeakNum, entry->mMiscData) == 0) {
             return 0x10;
         }
         break;
@@ -1419,9 +1421,9 @@ extern "C" void* cFEStateTrophyRoom_cFEStateTrophyRoom(cFEStateTrophyRoom* self,
     *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, idx);
     cFEStateTrophyRoom* trophyRoom = self;
     *(int*)&trophyRoom->mpBigIcon = 0;
-    void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
+    cBENewPlayerInterface* pi = (cBENewPlayerInterface*)cBE_getInterface_Fv(cBE_getBE(), 1);
     trophyRoom->mCharID = cBENewPlayerInterface_getPlayerCharID(pi, self->mUserNum);
-    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)pi + 0xC);
+    sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)pi->mVtbl;
     vt[2].fn(vthis(pi, vt[2]));
     trophyRoom->mPeakNum = peakNum;
     trophyRoom->mTrophyType = trophyType;

@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "util/menu.h"
+#include "ui/uistate.h"
 #include "ui/uiengine.h"
 #include "util/locale.h"
 #include "ui/uithing.h"
@@ -46,9 +48,9 @@ INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_handleEvent);
 extern "C" int cFEStateNetHelpPopup_handleEvent(cFEStateNetHelpPopup* self, int msg, int msgParam)
 {
     if (self->mbReferEventsToParent != 0) {
-        void* obj = self->mpParentState;
-        if (obj != 0) {
-            sVEntry<int(void*, int, int)>* vt = *(sVEntry<int(void*, int, int)>**)((char*)obj + 8);
+        cUIState* obj = self->mpParentState;
+        if (((void*)obj) != 0) {
+            sVEntry<int(void*, int, int)>* vt = (sVEntry<int (void*, int, int)>*)obj->mVtbl;
             return vt[24].fn(vthis(obj, vt[24]), msg, msgParam);
         }
     }
@@ -989,9 +991,9 @@ extern "C" void* ChatMenu_ChatMenu(ChatMenu* self, int* info)
     cMenu_addItem(self, &self->unk_150, -1);
     int j;
     for (j = 0; j < 0xE; j++) {
-        char* item = (char*)&self->unk_194[j];
-        *(int*)(item + 0x8) = j;
-        *(int*)(item + 0x14) = D_00467D70[j];
+        cCommandMenuItem* item = &self->unk_194[j];
+        item->ID = j;
+        item->Caption = (const char*)D_00467D70[j];
         cMenu_addItem(self, item, -1);
     }
     return ((void*)self);

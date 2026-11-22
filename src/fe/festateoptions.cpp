@@ -265,7 +265,7 @@ extern "C" int cFEStateOptions_onWidgetMenu(cFEStateOptions* self, cUIMenu* menu
         }
     }
     if (key == 6) {
-        int itemHash = *(int*)((char*)cList_getByIndex((char*)&menu->mList, index) + 0x38);
+        int itemHash = ((cUIThing*)cList_getByIndex((char*)&menu->mList, index))->mHashName;
         if (itemHash == GetHashValue32(D_004A1530)) {
             goto check;
         }
@@ -375,10 +375,10 @@ extern int D_004A14E0;
  */
 extern "C" void cFEStateOptions_saveOptionPrompt(cFEStateOptions* self)
 {
-    char* savePopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
+    cFEPopupOptionReset* savePopup = (cFEPopupOptionReset*)((char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0));
     cUIState_cUIState1(savePopup, self->mpEngine, self);
-    *(void***)(savePopup + 8) = cFEPopupOptionReset_vtbl;
-    *(char*)(savePopup + 0x48) = 0;
+    savePopup->mVtbl = cFEPopupOptionReset_vtbl;
+    savePopup->mAccept = 0;
     cUIStateStack_pushPopup(&self->mpEngine->mStateStack, savePopup);
     D_004A14D8 = 0;
     D_004A14E0 = 1;
@@ -2250,7 +2250,7 @@ extern "C" int cFEStateOptionsController_displayPadConfig_CCE0(void* self, int o
  * @param key  menu event code
  * @return 0x100, 0 or 0x101 (cUIMenu reply codes)
  */
-extern "C" int cFEStateOptionsController_onWidgetMenu(cFEStateOptionsController* self, char* menu, unsigned int key)
+extern "C" int cFEStateOptionsController_onWidgetMenu(cFEStateOptionsController* self, cUIMenu* menu, unsigned int key)
 {
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     switch (key) {
@@ -2258,7 +2258,7 @@ extern "C" int cFEStateOptionsController_onWidgetMenu(cFEStateOptionsController*
         return 0x100;
     case 5: {
         int which;
-        switch (*(unsigned char*)(menu + 0x95)) {
+        switch (menu->mScrollItemCurrent) {
         case 2:
             which = 0;
             break;
@@ -2820,7 +2820,7 @@ extern "C" void* cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect1(cFESta
     self->mIsHidden = 0;
     self->mbChoseToSave = 0;
     if (isSave == 0) {
-        *(int*)((char*)cSSXApp_getMCManager(SSXApp) + 0x11C) = 0;
+        ((cMCOverlayManager*)cSSXApp_getMCManager(SSXApp))->mPollForFullCard = 0;
     }
     return ((void*)self);
 }
@@ -3431,8 +3431,8 @@ extern "C" void cFEStateOptionsDeviceSelect_updateDone(cFEStateOptionsDeviceSele
         if (self->mbOnline != 0) {
             mode = 2;
         }
-        void* obj = *(void**)self->mpEngine;
-        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
+        cUICustomInterface* obj = (cUICustomInterface*)(*(void**)self->mpEngine);
+        sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)obj->mVtbl;
         void* nextState = vt[5].fn(vthis(obj, vt[5]), self, mode);
         if (nextState != 0) {
             cUIStateStack_pushCheck(&self->mpEngine->mStateStack, nextState);

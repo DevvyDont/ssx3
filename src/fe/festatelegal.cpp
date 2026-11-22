@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiengine.h"
 #include "fe/festatelegal.h"
 #include "fe/festateoptions.h"
 
@@ -47,7 +48,7 @@ extern "C" void cFEStateLegal_onUpdate(cFEStateLegal* self)
         if (frame != 0xFFFF) {
             cUIScreen_playFrame(self->mpScreen, frame, 1);
         }
-        cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
+        cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
     }
 }
 #endif

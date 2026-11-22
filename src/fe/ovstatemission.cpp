@@ -30,9 +30,9 @@ extern "C" void cFEStateMPCircuit_onCreateScreen(cFEStateMPCircuit* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ListBox));
-    if (obj != 0) {
-        *(int*)((char*)obj + 0x14) = (*(int*)((char*)obj + 0x14) & ~1) | 0x80;
+    cUIThing* obj = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ListBox));
+    if (((void*)obj) != 0) {
+        obj->mAttr = (obj->mAttr & ~1) | 0x80;
         cFEStateMPCircuit_initCircuitList_2(self, obj);
     }
 }
@@ -109,8 +109,8 @@ extern "C" void cFEStateMPCircuit_onWidgetEvent(cFEStateMPCircuit* self, cUIThin
     }
     switch (msg) {
     case 5: {
-        void* obj = *(void**)self->mpEngine;
-        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
+        cUICustomInterface* obj = (cUICustomInterface*)(*(void**)self->mpEngine);
+        sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)obj->mVtbl;
         void* nextState = vt[4].fn(vthis(obj, vt[4]), self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
@@ -118,8 +118,8 @@ extern "C" void cFEStateMPCircuit_onWidgetEvent(cFEStateMPCircuit* self, cUIThin
         break;
     }
     case 6: {
-        void* obj = *(void**)self->mpEngine;
-        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
+        cUICustomInterface* obj = (cUICustomInterface*)(*(void**)self->mpEngine);
+        sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)obj->mVtbl;
         void* nextState = vt[5].fn(vthis(obj, vt[5]), self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);

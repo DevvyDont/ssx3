@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uiengine.h"
+#include "ui/uistate.h"
 #include "ui/uiscreen.h"
 #include "ui/uithing.h"
 #include "ui/uilistbox.h"
@@ -85,7 +87,7 @@ extern char str_UILBStrID[];
  */
 extern "C" unsigned char cUIListBox_addEntryByStringID(cUIListBox* self, int id, int data)
 {
-    char* tbl = *(char**)(*(char**)((char*)self->mpScreen->mpState + 0x10) + 0x10);
+    char* tbl = (char*)self->mpScreen->mpState->mpEngine->mpLocaleInterface;
     if (tbl != 0) {
         sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(tbl + 4);
         unsigned short* str = vt[4].fn(vthis(tbl, vt[4]), id);
@@ -301,8 +303,8 @@ extern "C" void cUIListBox_setCallbackListBox(cUIListBox* self, int count)
     *(char*)&self->mNumEntries = count;
     *(char*)&self->mCurrentEntry = 0;
     *(int*)&self->mAttrListBox |= 0x10;
-    void* obj = self->mpScreen->mpState;
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)((char*)obj + 8);
+    cUIState* obj = self->mpScreen->mpState;
+    sVEntry<void(void*, void*, int)>* vt = (sVEntry<void (void*, void*, int)>*)obj->mVtbl;
     vt[19].fn(vthis(obj, vt[19]), self, 9);
 }
 #endif

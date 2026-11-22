@@ -146,7 +146,7 @@ extern int cUITemplate_MAP_mPeak;
 extern "C" void cUITemplate_MAP_init(void)
 {
     if (cUITemplate_MAP_mMapStyle >= 2) {
-        cUITemplate_MAP_mPeak = *(int*)((char*)cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)) + 0x54);
+        cUITemplate_MAP_mPeak = ((const tBELocationDB*)cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)))->segmentID;
     }
 }
 #endif

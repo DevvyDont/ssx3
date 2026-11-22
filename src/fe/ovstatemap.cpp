@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uistate.h"
 #include "ui/uimenu.h"
 #include "util/locale.h"
 #include "be/beintmission.h"
@@ -1104,10 +1105,10 @@ extern "C" void cOVState_MAP_showIndicators(cOVState_MAP* mapState)
     if (self->cursor != 0) {
         self->cursor->setVisible(1);
     }
-    void* list = *(void**)((char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_SessionViewPoints)) + 0xA0);
+    cUIThing* list = ((cUIMenu*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_SessionViewPoints)))->mpSelected;
     int sel = 1;
     if (list != 0) {
-        sel = *(int*)((char*)list + 0x18);
+        sel = list->mMiscData;
     }
     for (int i = 0; i < self->count; i++) {
         int cur = sel - 1;

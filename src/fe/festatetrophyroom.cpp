@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uistate.h"
 #include "movie/mcoverlaymanager.h"
 #include "sound/ssxaudio.h"
 #include "fe/fereal.h"
@@ -752,15 +753,15 @@ extern "C" void cFEStateRewardsRoom_onWidgetEvent(cFEStateRewardsRoom* self, cUI
     case 0:
         break;
     case 5: {
-        void* obj = *(void**)self->mpEngine;
-        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
+        cUICustomInterface* obj = (cUICustomInterface*)(*(void**)self->mpEngine);
+        sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)obj->mVtbl;
         void* nextState = vt[4].fn(vthis(obj, vt[4]), self, item->mMiscData);
         cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         break;
     }
     case 6: {
-        void* obj = *(void**)self->mpEngine;
-        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
+        cUICustomInterface* obj = (cUICustomInterface*)(*(void**)self->mpEngine);
+        sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)obj->mVtbl;
         void* nextState = vt[5].fn(vthis(obj, vt[5]), self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
@@ -969,10 +970,10 @@ extern "C" int cFEStateLogin_onPopupEvent(void* self, void* a1, int a2);
  * @param event  the popup event
  * @return the handler's result
  */
-extern "C" int cFEStateRelogin_onPopupEvent(cFEStateLogin* self, void* popup, int event)
+extern "C" int cFEStateRelogin_onPopupEvent(cFEStateLogin* self, cUIState* popup, int event)
 {
     int result;
-    if (*(int*)((char*)popup + 0x18) == 258) {
+    if (popup->miMiscData == 258) {
         result = func_001A9668(self, popup, event);
     } else {
         result = cFEStateLogin_onPopupEvent(self, popup, event);
@@ -1011,8 +1012,8 @@ extern "C" void func_001D5280(cFEStateLogin* self, void* item, int msg)
     if (msg == 0xF || msg == 20) {
         cFEStateNet_onPopupEvent(self, item, msg);
         cUIStateStack_popToState(&self->mpEngine->mStateStack);
-        void* state = cUIStateStack_getCurrentState(&self->mpEngine->mStateStack);
-        *(int*)((char*)state + 0x1C) |= 0x80;
+        cUIState* state = (cUIState*)cUIStateStack_getCurrentState(&self->mpEngine->mStateStack);
+        state->mAttrState |= 0x80;
         func_002636F0(func_002591B8(), 0);
         func_001A8A40(self, cFEStateNetConfig_cFEStateNetConfig(cMemMan_alloc(2332, str_cFEStateNetConfig, 0, 0), self->mpEngine));
     } else {
@@ -1377,8 +1378,8 @@ extern "C" void cFEMemCard_onDestroyScreen(cFEMemCard* self)
         self->mBufferState = 0;
     }
     cBESaveInterface_releaseBuffer(iface);
-    char* app = (char*)cSSXApp_getMCManager(SSXApp);
-    if (*(int*)(app + 0x434) != 0) {
+    cMCOverlayManager* app = (cMCOverlayManager*)((char*)cSSXApp_getMCManager(SSXApp));
+    if ((int)app->mpMemCard != 0) {
         cMCOverlayManager_cleanUp(app);
         cMCOverlayManager_ManagerLoseState(app);
         cMCOverlayManager_purge(app);

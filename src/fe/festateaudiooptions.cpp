@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uistate.h"
 #include "ui/uiengine.h"
 #include "ui/uiicon.h"
 #include "sound/ssxaudio.h"
@@ -522,9 +523,9 @@ extern "C" void cFEStateRequestLine_onCreateScreen(cFEStateRequestLine* self)
     if ((void*)SSXApp->Game != 0) {
         name = str_143radio_pda;
         void* list = (char*)&self->mpEngine->mStateStack;
-        char* obj = (char*)cUIStateStack_findState(list, GetHashValue32(str_hud));
-        if (obj != 0) {
-            sVEntry<int(void*, int, int)>* vt = *(sVEntry<int(void*, int, int)>**)(obj + 8);
+        cUIState* obj = (cUIState*)((char*)cUIStateStack_findState(list, GetHashValue32(str_hud)));
+        if (((char*)obj) != 0) {
+            sVEntry<int(void*, int, int)>* vt = (sVEntry<int (void*, int, int)>*)obj->mVtbl;
             vt[24].fn(vthis(obj, vt[24]), 3, 0);
         }
     }
@@ -552,9 +553,9 @@ extern char str_hud[];
 extern "C" void cFEStateRequestLine_onDestroyScreen(cFEStateRequestLine* self)
 {
     if ((int)SSXApp->Game != 0) {
-        void* obj = cUIStateStack_findState(&self->mpEngine->mStateStack, GetHashValue32(str_hud));
-        if (obj != 0) {
-            sVEntry<int(void*, int, int)>* vtEntry = &(*(sVEntry<int(void*, int, int)>**)((char*)obj + 8))[24];
+        cUIState* obj = (cUIState*)cUIStateStack_findState(&self->mpEngine->mStateStack, GetHashValue32(str_hud));
+        if (((void*)obj) != 0) {
+            sVEntry<int(void*, int, int)>* vtEntry = &((sVEntry<int (void*, int, int)>*)obj->mVtbl)[24];
             vtEntry->fn(vthis(obj, *vtEntry), 4, 0);
         }
     }

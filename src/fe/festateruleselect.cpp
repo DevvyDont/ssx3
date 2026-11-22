@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uipair.h"
 #include "ui/uitext.h"
 #include "ui/uithing.h"
 #include "ui/uilistbox.h"
@@ -442,9 +443,9 @@ extern char D_004A13A0[];
  * @param msg  the pair (On Tour cUIPair* pPair)
  * @return 0x101 for the pair named "0", otherwise 0x100
  */
-extern "C" int cFEStateRuleSelect_onWidgetPair(cFEStateRuleSelect* self, void* msg)
+extern "C" int cFEStateRuleSelect_onWidgetPair(cFEStateRuleSelect* self, cUIPair* msg)
 {
-    int id = *(int*)((char*)msg + 0x38);
+    int id = msg->mHashName;
     return (id == GetHashValue32(D_004A13A0)) ? 257 : 0x100;
 }
 #endif

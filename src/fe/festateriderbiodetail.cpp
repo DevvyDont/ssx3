@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beintplayer.h"
 #include "ui/uithing.h"
 #include "ui/uiengine.h"
 #include "fe/festateruleselect.h"
@@ -49,9 +50,9 @@ extern "C" void cFEStateRiderBio_onCreateScreen(cFEStateRiderBio* self)
         cUIListBox_addEntryByStringID(box, GetHashValue32(str_kT_14Heading3), 0);
         cUIListBox_addEntryByStringID(box, GetHashValue32(str_kT_14Heading4), 0);
     }
-    void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
+    cBENewPlayerInterface* iface = (cBENewPlayerInterface*)cBE_getInterface_Fv(cBE_getBE(), 1);
     self->mCharID = cBENewPlayerInterface_getPlayerCharID(iface, self->mUserNum);
-    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)iface + 0xC);
+    sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)iface->mVtbl;
     vt[2].fn(vthis(iface, vt[2]));
     self->mScreen = 0;
     cFEStateRiderBio_setupBioScreen(self);

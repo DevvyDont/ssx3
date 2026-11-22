@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uitext.h"
 #include "be/beintecon.h"
 #include "be/bedbprofile.h"
 #include "sound/ssxaudio.h"
@@ -316,7 +317,7 @@ extern "C" void cFEStateBuyAttrib_onInputAlways(cFEStateBuyAttrib* self, cUIInpu
     int changed = 0;
     cUIState_onInputAlways_2((self), ((char*)w));
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 11);
-    unsigned char idx = *((unsigned char*)cUIScreen_getObjectByHashName(self->mpAttribScreen, GetHashValue32(str_AttribMenu)) + 0x95);
+    unsigned char idx = ((cUIMenu*)cUIScreen_getObjectByHashName(self->mpAttribScreen, GetHashValue32(str_AttribMenu)))->mScrollItemCurrent;
     if (self->mBuyPrompt == 0) {
         sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)w->mVtbl;
         if (vt[19].fn(vthis(w, vt[19])) != 0) {
@@ -438,7 +439,7 @@ extern "C" void cFEStateBuyAttrib_updateCostPerLevel(cFEStateBuyAttrib* self)
         if (text != 0) {
             cUIText_setAsciiString(text, getDollarString(cBEEconInterface_getAttribCost(iface, *levels - 1)));
             if (*levels >= 11) {
-                sVE4FC0* vt = *(sVE4FC0**)((char*)text + 8);
+                sVE4FC0* vt = (sVE4FC0*)text->mVtbl;
                 vt[9].fn(vthis(text, vt[9]), 0);
             }
         }
@@ -791,8 +792,8 @@ extern "C" void cFEStateCareerStats_onWidgetEvent(cFEStateCareerStats* self, cUI
     case 5:
         break;
     case 6: {
-        void* obj = *(void**)self->mpEngine;
-        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
+        cUICustomInterface* obj = (cUICustomInterface*)(*(void**)self->mpEngine);
+        sVEntry<void*(void*, void*, int)>* vt = (sVEntry<void*(void*, void*, int)>*)obj->mVtbl;
         void* nextState = vt[5].fn(vthis(obj, vt[5]), self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);

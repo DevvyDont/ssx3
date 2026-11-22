@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uiengine.h"
+#include "ui/uistate.h"
 #include "ui/uiscreen.h"
 #include "ui/uiinput.h"
 #include "ui/uithing.h"
@@ -320,8 +322,8 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
     } else {
         return 0;
     }
-    char* owner = (char*)cUIThing_getEngine(((char*)self));
-    char* listener = *(char**)(owner + 0x14);
+    cUIEngine* owner = (cUIEngine*)((char*)cUIThing_getEngine(((char*)self)));
+    char* listener = (char*)owner->mpSound;
     if (listener == 0) {
         listener = gUISoundNull;
     }
@@ -518,7 +520,7 @@ static inline void cUIMenu_notify(char* vself, int ev, unsigned char v)
  */
 extern "C" void cUIMenu_setSelectedByIndex(cUIMenu* self, unsigned char idx)
 {
-    if (((self->mAttr >> 4) & 1) == 0 || ((*(int*)((char*)self->mpScreen->mpState + 0x1C) >> 5) & 1) == 0) {
+    if (((self->mAttr >> 4) & 1) == 0 || ((self->mpScreen->mpState->mAttrState >> 5) & 1) == 0) {
         self->mStoredIndex = idx;
         return;
     }
@@ -685,8 +687,8 @@ extern "C" void cUIPair_setFocus(cUIPair* self, int on)
         cUIThing* widgetObj = self->mpWidget;
         cUIPair_setFocus_sVEntryA* vc = (cUIPair_setFocus_sVEntryA*)widgetObj->mVtbl;
         vc[7].fn(vthis(widgetObj, vc[7]), 1);
-        char* screenState = (char*)self->mpScreen->mpState;
-        cUIPair_setFocus_sVEntryB* vo = *(cUIPair_setFocus_sVEntryB**)(screenState + 8);
+        cUIState* screenState = self->mpScreen->mpState;
+        cUIPair_setFocus_sVEntryB* vo = (cUIPair_setFocus_sVEntryB*)screenState->mVtbl;
         vo[19].fn(vthis(screenState, vo[19]), self->mpWidget, 1);
     } else {
         unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)widget, 1);
@@ -699,8 +701,8 @@ extern "C" void cUIPair_setFocus(cUIPair* self, int on)
         cUIThing* widgetObj = self->mpWidget;
         cUIPair_setFocus_sVEntryA* vc = (cUIPair_setFocus_sVEntryA*)widgetObj->mVtbl;
         vc[7].fn(vthis(widgetObj, vc[7]), 0);
-        char* screenState = (char*)self->mpScreen->mpState;
-        cUIPair_setFocus_sVEntryB* vo = *(cUIPair_setFocus_sVEntryB**)(screenState + 8);
+        cUIState* screenState = self->mpScreen->mpState;
+        cUIPair_setFocus_sVEntryB* vo = (cUIPair_setFocus_sVEntryB*)screenState->mVtbl;
         vo[19].fn(vthis(screenState, vo[19]), self->mpWidget, 2);
     }
 }
@@ -887,9 +889,9 @@ extern "C" int cUIPair_onInput(cUIPair* self, cUIInput* in)
 {
     int result = 0;
     char* listener = gUISoundNull;
-    char* owner = (char*)cUIThing_getEngine(((char*)self));
-    if (*(char**)(owner + 0x14) != 0) {
-        listener = *(char**)(owner + 0x14);
+    cUIEngine* owner = (cUIEngine*)((char*)cUIThing_getEngine(((char*)self)));
+    if ((char*)owner->mpSound != 0) {
+        listener = (char*)owner->mpSound;
     }
     int moveResult;
     if (inputIs_BED8(in, 5)) {

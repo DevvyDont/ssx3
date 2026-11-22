@@ -333,10 +333,10 @@ extern "C" void cOVState_REPLAY_onUpdate(cOVState_REPLAY* vself)
         cUIState_hideObjSafe(self, str_hidehelp);
         cUIState_hideObjSafe(self, str_showhelp);
     }
-    char* obj = (char*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_bottom));
-    t3Vector bottomPos = *(t3Vector*)(obj + 0x44);
+    cUIThing* obj = (cUIThing*)((char*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_bottom)));
+    t3Vector bottomPos = obj->mPosition;
     bottomPos.y = (float)self->mBottom_y;
-    *(t3Vector*)(obj + 0x44) = bottomPos;
+    obj->mPosition = bottomPos;
     if (self->mShowPopupMenu != 0) {
         cUIState_showObjSafe(self, str_ReplayMenuPopup);
     } else {

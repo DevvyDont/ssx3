@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beintplayer.h"
 #include "fe/festateoptions.h"
 #include "ui/uiengine.h"
 #include "fe/ovstatehud.h"
@@ -48,9 +49,9 @@ extern "C" void cFEStateRiderDetail_onCreateScreen(cFEStateRiderDetail* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     cFEStateCharSetup_updateWidget(self);
-    void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
+    cBENewPlayerInterface* pi = (cBENewPlayerInterface*)cBE_getInterface_Fv(cBE_getBE(), 1);
     int charID = cBENewPlayerInterface_getPlayerCharID(pi, self->mUserNum);
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)((char*)pi + 0xC);
+    sVEntry<int(void*)>* vt = (sVEntry<int (void*)>*)pi->mVtbl;
     vt[2].fn(vthis(pi, vt[2]));
     cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, self->mUserNum, 0);
     cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->mUserNum, charID, 0);

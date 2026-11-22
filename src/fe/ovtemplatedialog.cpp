@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uitext.h"
 #include "fe/ovstate.h"
 #include "ui/uiengine.h"
 #include "ui/uithing.h"
@@ -66,9 +67,9 @@ extern "C" void cPDATemplate_onCreateScreen(cPDATemplate* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 1);
     }
-    char* text = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_temperature));
-    if (text != 0) {
-        int fmt = Loc_PDA(*(int*)(text + 0xB0));
+    cUIText* text = (cUIText*)((char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_temperature)));
+    if (((char*)text) != 0) {
+        int fmt = Loc_PDA(text->mStringID);
         if (fmt != 0) {
             char buf[48];
             sprintf1_v(buf, fmt, -10 - div_PDA(SSXApp->Tick, 3600) % 15, 67);
@@ -1572,9 +1573,9 @@ struct sFlag_CFD0 {
 extern "C" void cOVStateManager_update(void)
 {
     cUIEngine* mgr = ((SSXApp)->Game)->UI;
-    char *st = 0;
+    cOVState* st = 0;
     if ((char*)&mgr->mStateStack) {
-        st = (char *)cUIStateStack_getCurrentState(&mgr->mStateStack);
+        st = (cOVState*)((char *)cUIStateStack_getCurrentState(&mgr->mStateStack));
     }
     switch (cOVStateManager_mStatus) {
     case 0:
@@ -1586,8 +1587,8 @@ extern "C" void cOVStateManager_update(void)
         cOVStateManager_mStatus = 0;
         cReplay_stopAutoReplay(((void*)((SSXApp)->Game)->Replay));
         ((sFlag_CFD0*)((SSXApp)->Game)->mCurrentState)->f8 = 1;
-        if (st != 0 && ((SSXApp)->Game)->mCurrentStateID == 2) {
-            if (*(int *)(st + 0x98) == 8) {
+        if (((char*)st) != 0 && ((SSXApp)->Game)->mCurrentStateID == 2) {
+            if (st->mOVID == 8) {
                 cBE_getInterface_Fv(((void*)(SSXApp)->BE), 7);
                 if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
                     cUIStateStack_purgeNormalStates(&mgr->mStateStack);
@@ -1809,8 +1810,8 @@ extern "C" void cOVTemplate_Dialog_onCreateScreen(cOVTemplate_Dialog* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     cOVState_onCreateScreen(((char*)self));
-    *(int*)((char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_yes_b)) + 0x18) = 0;
-    *(int*)((char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_no_b)) + 0x18) = 1;
+    ((cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_yes_b)))->mMiscData = 0;
+    ((cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_no_b)))->mMiscData = 1;
     cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_quit));
     switch ((unsigned int)self->mDialogType) {
     case 1: {

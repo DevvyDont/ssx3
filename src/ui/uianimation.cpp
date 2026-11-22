@@ -104,9 +104,9 @@ INCLUDE_ASM("ui/uianimation", cUIAnimationChannel_getAnimChanType);
  */
 extern "C" unsigned short cUIAnimationChannel_getAnimChanType(cUIAnimationChannel* self)
 {
-    void* anim = *(void**)self;
+    tUIAnimChannel* anim = self->mpAnimChan;
     if (anim != 0) {
-        return *(unsigned short*)((char*)anim + 0x2);
+        return anim->mType;
     }
     return 0;
 }
@@ -237,8 +237,8 @@ INCLUDE_ASM("ui/uianimation", cUIAnimation_getNumFrames);
  * @param anim  the animation
  * @return the number of frames
  */
-extern "C" short cUIAnimation_getNumFrames(void **anim) {
-    return (*(short *)((char*)(*anim) + (2)));
+extern "C" short cUIAnimation_getNumFrames(cUIAnimation* anim) {
+    return *(short*)&anim->mpAnimHeader->mNumFrames;
 }
 #endif
 
@@ -263,7 +263,7 @@ extern "C" void cUIAnimation_start(cUIAnimation* self, int mode, unsigned short 
     }
     if (mode == 2) {
         *(unsigned char*)&self->mFrameDirection = 1;
-        *(unsigned short*)&self->mFrameNum = *(unsigned short*)((char*)*(void**)self + 0x2) - 1;
+        *(unsigned short*)&self->mFrameNum = self->mpAnimHeader->mNumFrames - 1;
     } else {
         *(unsigned char*)&self->mFrameDirection = 0;
         *(unsigned short*)&self->mFrameNum = 0;

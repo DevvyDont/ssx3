@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beintbagt.h"
 #include "ui/uimenu.h"
 #include "bx/math3d.h"
 #include "fe/ferider.h"
@@ -479,9 +480,9 @@ extern "C" void cFEStateUberTrick_onPopupEvent(cFEStateUberTrick* self, cUIState
             cBEEconInterface_reduceMoney(cBE_getInterface_Fv(cBE_getBE(), 11), self->mUserNum, charID, ((cUIStateBuyPopup*)item)->mInfo.mCost);
             int entryIndex = *(signed char*)&self->mpMainMenu->mpSelected->mMiscData;
             int flagBit = *(signed char*)&self->mpTrickMenu->mpSelected->mMiscData;
-            void* pi = cBE_getInterface_Fv(cBE_getBE(), 6);
+            cBEBAGTInterface* pi = (cBEBAGTInterface*)cBE_getInterface_Fv(cBE_getBE(), 6);
             func_0014FE08(pi, self->mUserNum, entryIndex, flagBit);
-            sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)((char*)pi + 0xC);
+            sVEntry<int(void*)>* vt = (sVEntry<int (void*)>*)pi->mVtbl;
             vt[1].fn(vthis(pi, vt[1]));
             void* helpText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_custom));
             if (helpText != 0) {

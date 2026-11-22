@@ -3119,10 +3119,10 @@ extern char cFEStateCareerStats_vtbl[];
  * @param state  the object to construct
  * @return @p state
  */
-extern "C" void *func_00220E58(void *state) {
+extern "C" void *func_00220E58(cFEStateCareerStats* state) {
     cUIState_cUIState(state, 0);
-    (*(char **)((char*)(state) + (8))) = cFEStateCareerStats_vtbl;
-    return state;
+    ((char*)state->mVtbl) = cFEStateCareerStats_vtbl;
+    return ((void*)state);
 }
 #endif
 
@@ -3744,8 +3744,8 @@ extern char cOVState_vtbl[];
  *
  * @return whatever cUIState__cUIState returns
  */
-extern "C" void* func_002214D0(void *self) {
-    *(char**)((char*)self + 8) = cOVState_vtbl;
+extern "C" void* func_002214D0(cOVState* self) {
+    self->mVtbl = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
@@ -4685,8 +4685,8 @@ extern char cOVState_vtbl[];
  *
  * @return whatever cUIState__cUIState returns
  */
-extern "C" void* func_00221E80(void *self) {
-    *(char**)((char*)self + 8) = cOVState_vtbl;
+extern "C" void* func_00221E80(cOVState* self) {
+    self->mVtbl = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
@@ -4743,8 +4743,8 @@ extern char cOVState_vtbl[];
  *
  * @return whatever cUIState__cUIState returns
  */
-extern "C" void* func_00221F10(void *self) {
-    *(char**)((char*)self + 8) = cOVState_vtbl;
+extern "C" void* func_00221F10(cOVState* self) {
+    self->mVtbl = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
@@ -4801,8 +4801,8 @@ extern char cOVState_vtbl[];
  *
  * @return whatever cUIState__cUIState returns
  */
-extern "C" void* func_00221FA0(void *self) {
-    *(char**)((char*)self + 8) = cOVState_vtbl;
+extern "C" void* func_00221FA0(cOVState* self) {
+    self->mVtbl = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif

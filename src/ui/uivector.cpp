@@ -649,8 +649,8 @@ INCLUDE_ASM("ui/uivector", cUIAnimation_getHashName);
  * @param anim  the cUIAnimation
  * @return the header's hash id
  */
-extern "C" int cUIAnimation_getHashName(void **anim) {
-    return (*(int *)((char*)(*anim) + (8)));
+extern "C" int cUIAnimation_getHashName(cUIAnimation* anim) {
+    return anim->mpAnimHeader->mHashID;
 }
 #endif
 //100%

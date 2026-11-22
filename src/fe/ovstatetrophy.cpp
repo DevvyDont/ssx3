@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "render/font.h"
+#include "ui/uiengine.h"
 #include "bx/math3d.h"
 #include "bx/bxstring.h"
 #include "main/gamemode.h"
@@ -91,7 +93,7 @@ extern "C" void cOVStateTrophy_onWidgetEvent(cOVStateTrophy* self, cUIObj_20E9A0
             sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
             nextState = vt[4].fn(vthis(obj, vt[4]), self, 1);
         }
-        cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+        cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         break;
     }
     case 6: {
@@ -99,7 +101,7 @@ extern "C" void cOVStateTrophy_onWidgetEvent(cOVStateTrophy* self, cUIObj_20E9A0
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
         void* nextState = vt[5].fn(vthis(obj, vt[5]), self, *(int*)((char*)item + 0x18));
         if (nextState != 0) {
-            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
         break;
     }
@@ -200,12 +202,12 @@ extern sTex_20EB50 D_004C8C58[];
 extern "C" void func_0020EB50(cHUDRadar* self, tRect* screenRect, tRect* area)
 {
     if (D_004A2768 == 0) {
-        char* res = (char*)SSXApp->Game->UI;
+        cUIEngine* res = SSXApp->Game->UI;
         int i;
         for (i = 0; i < 11; i++) {
-            D_004C8C58[i].handle = cUITextureBank_getElementByHashname(res + 0x58, D_004C8C58[i].name);
+            D_004C8C58[i].handle = cUITextureBank_getElementByHashname(&res->mTextureBank, D_004C8C58[i].name);
         }
-        void* bank = *(void**)(res + 8);
+        void* bank = res->mpFontInterface;
         D_004A2764 = cUIFontInterface_getFontByHashName(bank, GetHashValue32(str_fefont));
         D_004A2768 = 1;
     }
@@ -240,8 +242,8 @@ extern "C" void func_0020EC18(cHUDRadar* self, tRect* screenRect, tRect* area)
 {
     float textHeight;
     if (D_004A2768 != 0) {
-        char* tex = (char*)D_004A2764;
-        textHeight = (float)*(int*)(tex + 0x14) * *(float*)(tex + 0x34) * 0.666700005531311f;
+        cFont* tex = (cFont*)((char*)D_004A2764);
+        textHeight = (float)tex->MaxCharHeight * tex->BaseScale[1] * 0.666700005531311f;
     } else {
         textHeight = 30.0f;
     }
@@ -1681,7 +1683,7 @@ INCLUDE_ASM("fe/ovstatetrophy", func_00210B58);
 #ifdef SKIP_ASM
 extern char D_004A2560[];
 extern "C" int cGameComm_getQueuedChat(int a, char* name, int len);
-extern "C" void func_00210BD8(void* self, char* name, int a);
+extern "C" void func_00210BD8(cOVState* self, char* name, int a);
 extern "C" void func_00210F40(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
 
 /**
@@ -1701,7 +1703,7 @@ extern "C" int func_00210B58(void* self, int ok)
     if (ok != 0) {
         char* name = (char*)self + 0x9C;
         if (cGameComm_getQueuedChat((int)cGameComm_mGameComm, name, 65) != 0) {
-            func_00210BD8(self, name, 0);
+            func_00210BD8((cOVState*)self, name, 0);
         } else {
             // PORT: func_00210F40's unit definition takes these string pointers as int.
             func_00210F40(self, 0, (int)D_004A2560, (int)D_004A2560, 0, 0, 61);
@@ -1738,9 +1740,9 @@ extern char str_colon_sp_b[];
  * @param name  the message text
  * @param ownMessage  nonzero for our own message, 0 for the opponent's
  */
-extern "C" void func_00210BD8(void* self, char* name, int ownMessage)
+extern "C" void func_00210BD8(cOVState* self, char* name, int ownMessage)
 {
-    cUITextScroll* obj = (cUITextScroll*)((char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_textScrollChat_b)));
+    cUITextScroll* obj = (cUITextScroll*)((char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_textScrollChat_b)));
     if (((char*)obj) == 0) {
         return;
     }
@@ -1774,7 +1776,7 @@ INCLUDE_ASM("fe/ovstatetrophy", func_00210D20);
 extern "C" void* cOVState_onUpdate(void* self);
 extern "C" void* cUIStateStack_popToState(void* list);
 extern "C" int cGameComm_getQueuedChat(int a, char* name, int len);
-extern "C" void func_00210BD8(void* self, char* name, int a);
+extern "C" void func_00210BD8(cOVState* self, char* name, int a);
 
 /**
  * Updates the chat overlay each frame: closes it when the online pause runs out and shows incoming messages.
@@ -1791,7 +1793,7 @@ extern "C" void func_00210D20(cOVState* self)
     if (gameComm != 0) {
         int ok = gameComm->mPauseTimeout == 0 || gameComm->mOverlayTimeout == 0;
         if (ok) {
-            cUIStateStack_popToState((char*)self->mpEngine + 0x18);
+            cUIStateStack_popToState(&self->mpEngine->mStateStack);
             self->mAttrState = (self->mAttrState & ~0x3F00) | 0x780;
         }
     }
@@ -1855,7 +1857,7 @@ extern "C" void func_00210DF0(cOVState* self, void* item, unsigned int key)
     switch (key) {
     case 6:
         if (*(int*)((char*)self + 0xE0) == 0) {
-            cUIStateStack_pop_r((char*)self->mpEngine + 0x18, 1);
+            cUIStateStack_pop_r(&self->mpEngine->mStateStack, 1);
             self->mAttrState = (self->mAttrState & ~0x3F00) | 0x780;
         }
         break;

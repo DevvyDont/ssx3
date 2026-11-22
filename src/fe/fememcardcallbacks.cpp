@@ -141,8 +141,8 @@ extern "C" void cFEMemCard_callbackConfirmOverwrite(void)
     char* memCard = (char*)mp->mpMemCard;
     sVEntry<void(void*, ...)>* svt = *(sVEntry<void(void*, ...)>**)memCard;
     svt[14].fn(vthis(memCard, svt[14]), mp->mFileCursor, name);
-    char* locale = (char*)SSXApp->FELocale;
-    sVEntry<void*(void*, ...)>* ovt = *(sVEntry<void*(void*, ...)>**)(locale + 4);
+    cFELocale* locale = SSXApp->FELocale;
+    sVEntry<void*(void*, ...)>* ovt = (sVEntry<void*(void*, ...)>*)locale->mVtbl;
     sprintf1(buf, (unsigned short*)ovt[4].fn(vthis(locale, ovt[4]), GetHashValue32(str_kT_MEMOVOverWriteFile)), name);
     cFEMemCard* fe = cFEMemCard_mInstance;
     fe->mPopupType = 1;
@@ -1893,9 +1893,9 @@ extern "C" void cFEMemCard_setMenuHighlight(cFEMemCard* self)
 {
     cUIMenu* menu = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
     if (((void*)menu) != 0) {
-        void* item = menu->mpSelected;
+        cUIThing* item = menu->mpSelected;
         int idx = menu->mScrollItemCurrent;
-        if (item == 0 || ((*(int*)((char*)item + 0x14) >> 5) & 1)) {
+        if (((void*)item) == 0 || ((item->mAttr >> 5) & 1)) {
             idx = cUIMenu_findFirstHighlightable(menu, 0);
         }
         if (idx != 0xFF) {
@@ -2223,9 +2223,9 @@ extern char str_text_box_message[];
 extern "C" void cFEMemCard_onGainFocus(cFEMemCard* self)
 {
     cUIState_onGainFocus(self);
-    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_text_box_message));
-    if (obj != 0) {
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)obj + 8);
+    cUIThing* obj = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_text_box_message));
+    if (((void*)obj) != 0) {
+        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)obj->mVtbl;
         vt[9].fn(vthis(obj, vt[9]), 0);
     }
 }

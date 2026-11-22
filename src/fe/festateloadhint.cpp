@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "util/locale.h"
 #include "ai/ridermetrix.h"
 #include "ui/uiicon.h"
 #include "ui/uistate.h"
@@ -1401,8 +1402,8 @@ extern "C" void cFELoadState_widgetCreateQP(cFELoadState* self, cUIThing* widget
         func_002C2540(text, cBECharacterInterface_getShortName(iface2, cBENewPlayerInterface_getHumanRider(iface1, 0)));
         cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_ranking)) {
-        char* locale = (char*)SSXApp->FELocale;
-        sVEnt_7AB0* vt = *(sVEnt_7AB0**)(locale + 4);
+        cFELocale* locale = SSXApp->FELocale;
+        sVEnt_7AB0* vt = (sVEnt_7AB0*)locale->mVtbl;
         strcpy1(fmtw, vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_OVRCMNLevelNum)));
         sprintf1(text, fmtw, cBEStatInterface_getStatLevel(iface3, cBENewPlayerInterface_getHumanRider(iface1, 0)));
         cUIText_setUnicodeString(widget, (char*)text);

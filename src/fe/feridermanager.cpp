@@ -956,9 +956,9 @@ typedef int cQuad128 __attribute__((mode(TI)));
  */
 extern "C" void cFERider_setBonePosition(cFERider* self, int slot, cQuad128* src)
 {
-    char* model = (char*)self->mpAnimModel;
+    cAnimModel* model = self->mpAnimModel;
     int bone = self->mBoneMap[slot];
-    sAnimModelBone* bones = *(sAnimModelBone**)(model + 0x2C);
+    sAnimModelBone* bones = model->bones;
     (*(cQuad128*)&bones[bone].pos) = *src;
 }
 #endif
@@ -990,9 +990,9 @@ typedef int cQuad128 __attribute__((mode(TI)));
  */
 extern "C" void cFERider_setBoneQuaternion(cFERider* self, int slot, cQuad128* src)
 {
-    char* model = (char*)self->mpAnimModel;
+    cAnimModel* model = self->mpAnimModel;
     int bone = self->mBoneMap[slot];
-    sAnimModelBone* bones = *(sAnimModelBone**)(model + 0x2C);
+    sAnimModelBone* bones = model->bones;
     (*(cQuad128*)&bones[bone].rot) = *src;
 }
 #endif
@@ -1803,8 +1803,8 @@ INCLUDE_ASM("fe/feridermanager", cFERiderManager_isHumanVisible);
  * @param index  the rider
  * @return the shown flag
  */
-extern "C" int cFERiderManager_isHumanVisible(int slots, int index) {
-    return (*(int *)((char*)(((index * 0xCE0) + slots)) + (0xCC8)));
+extern "C" int cFERiderManager_isHumanVisible(cFERiderManager* slots, int index) {
+    return slots->mHumans[index].mVisible;
 }
 #endif
 

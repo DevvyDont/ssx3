@@ -114,6 +114,18 @@ struct tUIAnimation {
     unsigned int mByteSize;         // 0x0C [O]
 };
 
+// One animation channel's record (cUIAnimationChannel::mpAnimChan, ui/uianimation.h); the channel records follow the
+// tUIAnimation header from 0x10, each mByteSize long, and a record's keys follow it from 0x8 ([O] tUIAnimLine
+// {unsigned short mFrames; short mValue}, the {dt, value} keys of cUIAnimationChannel_evalAtFrameFloat's view).
+// [O] struct tUIAnimChannel (0x8).
+struct tUIAnimChannel {
+    unsigned short mTag;            // 0x0 [O]
+    unsigned short mType;           // 0x2 [O]; [U] cUIAnimationChannel_getAnimChanType returns it (lhu 0x2), the
+                                    //     property cUIAnimation_updateThing hands to the object's setChannelData
+    unsigned short mByteSize;       // 0x4 [O]; [U] cUIAnimation_cUIAnimation steps to the next record by it
+    unsigned short mPoints;         // 0x6 [O]; [U] cUIAnimationChannel_evalAtFrameFloat: the key count (lhu 0x6)
+};
+
 // A keyframe's header; its key-channel packets follow from 0xC. [O] struct tUIFrameHeader (0xC).
 struct tUIFrameHeader {
     unsigned int mHashID;           // 0x00 [O]
@@ -218,6 +230,12 @@ CHECK_OFFSET(tUIAnimation, mNumChannels, 0x04);
 CHECK_OFFSET(tUIAnimation, mHashID, 0x08);
 CHECK_OFFSET(tUIAnimation, mByteSize, 0x0C);
 CHECK_SIZE(tUIAnimation, 0x10);
+
+CHECK_OFFSET(tUIAnimChannel, mTag, 0x0);
+CHECK_OFFSET(tUIAnimChannel, mType, 0x2);
+CHECK_OFFSET(tUIAnimChannel, mByteSize, 0x4);
+CHECK_OFFSET(tUIAnimChannel, mPoints, 0x6);
+CHECK_SIZE(tUIAnimChannel, 0x8);
 
 CHECK_OFFSET(tUIFrameHeader, mHashID, 0x00);
 CHECK_OFFSET(tUIFrameHeader, mByteSize, 0x04);

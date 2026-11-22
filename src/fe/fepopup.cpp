@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "online/usbkeyboard.h"
+#include "util/locale.h"
 #include "render/font.h"
 #include "render/2drender.h"
 #include "bx/math3d.h"
@@ -1551,8 +1553,8 @@ extern "C" void cScreenPopup_setTextString1(cScreenPopup* self, void* dst, int* 
         cBXString_operatorE1(dst, (const char*)info[1]);
         break;
     case 3: {
-        char* locale = (char*)SSXApp->FELocale;
-        sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(locale + 4);
+        cFELocale* locale = SSXApp->FELocale;
+        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)locale->mVtbl;
         unsigned short* str = vt[4].fn(vthis(locale, vt[4]), info[1]);
         if (str) {
             char* buf = (char*)operator_new_tag(USTR_length(str) + 1, str_setTextString, 0x100, 0);
@@ -2100,8 +2102,8 @@ extern "C" void cScreenPopup_getTextBoxSize(cScreenPopup* vself, int* item, floa
         cScreenPopup_getTextBoxSize1(vself, text, (unsigned short*)item[1], size);
         goto add;
     case 3: {
-        char* locale = (char*)SSXApp->FELocale;
-        sVEntry_8EF0* vt = *(sVEntry_8EF0**)(locale + 4);
+        cFELocale* locale = SSXApp->FELocale;
+        sVEntry_8EF0* vt = (sVEntry_8EF0*)locale->mVtbl;
         unsigned short* str = vt[4].fn(vthis(locale, vt[4]), item[1]);
         if (str) {
             cScreenPopup_getTextBoxSize1(vself, text, str, size);
@@ -2284,8 +2286,8 @@ extern "C" void cScreenPopup_getMessageLineWrapSize1(cScreenPopup* self, int* ms
         cScreenPopup_getMessageLineWrapSize2(self, self->mpMessageText, (void*)msg[1], out);
         break;
     case 3: {
-        char* locale = (char*)SSXApp->FELocale;
-        sVEntry<void*(void*, int)>* vt = *(sVEntry<void*(void*, int)>**)(locale + 4);
+        cFELocale* locale = SSXApp->FELocale;
+        sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)locale->mVtbl;
         void* str = vt[4].fn(vthis(locale, vt[4]), msg[1]);
         if (str) {
             cScreenPopup_getMessageLineWrapSize2(self, self->mpMessageText, str, out);
@@ -2492,8 +2494,8 @@ extern "C" void cScreenPopup_getTextBoxWrapSize(cScreenPopup* self, void* ptElem
         cScreenPopup_getTextBoxWrapSize1(self, text, (void*)info[1], out);
         break;
     case 3: {
-        char* locale = (char*)SSXApp->FELocale;
-        sVEntry<void*(void*, int)>* vt = *(sVEntry<void*(void*, int)>**)(locale + 4);
+        cFELocale* locale = SSXApp->FELocale;
+        sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)locale->mVtbl;
         void* str = vt[4].fn(vthis(locale, vt[4]), info[1]);
         if (str) {
             cScreenPopup_getTextBoxWrapSize1(self, text, str, out);
@@ -3725,7 +3727,7 @@ extern "C" void* cKeyboardPopup_cKeyboardPopup(cKeyboardPopup* self, cUIEngine* 
     self->mszStatic = (char*)defaultStr;
     self->miMaxCharacters = 0x3F;
     cBXString_Reset((char*)&self->mszStatic);
-    void* bx = Keyboard;
+    cUsbKeyboard* bx = (cUsbKeyboard*)Keyboard;
     self->meSkipState = 2;
     self->miLastKey = 43;
     self->meType = 1;
@@ -3736,8 +3738,8 @@ extern "C" void* cKeyboardPopup_cKeyboardPopup(cKeyboardPopup* self, cUIEngine* 
     self->mpBackCompact = 0;
     self->mpBackRegular = 0;
     self->mpBackExpand = 0;
-    if (bx != 0)
-        self->mbCapsOn = (*(unsigned int*)((char*)bx + 0x88) >> 1) & 1;
+    if (((void*)bx) != 0)
+        self->mbCapsOn = (bx->mSlots[0].mFlags >> 1) & 1;
     cKeyboardPopup_fillSelectableKeys(self);
     self->mbCallParentsUpdate = 0;
     self->mbAcceptText = 0;
@@ -6311,8 +6313,8 @@ extern "C" void cKeyboardPopup_handleQuickKeyPress(cKeyboardPopup* self, int key
     void* opt = cBE_getInterface_Fv(cBE_getBE(), 4);
     char* msg = cBEOptionInterface_getQuickKeyMessage(opt, key);
     if (msg == 0) {
-        char* locale = (char*)SSXApp->FELocale;
-        sVEntry<void*(void*, int)>* vt = *(sVEntry<void*(void*, int)>**)(locale + 4);
+        cFELocale* locale = SSXApp->FELocale;
+        sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)locale->mVtbl;
         void* str = vt[4].fn(vthis(locale, vt[4]), cBEOptionInterface_getDefaultQuickKeyMessageHashValue(opt, key));
         if (str)
             USTR_strcpyW(buf, str);

@@ -3743,7 +3743,7 @@ struct sEquipSlot_D3B0 {
  * @param bank  the bank (0-9)
  * @return the slot index, or -1 when no slot of the bank is idle
  */
-extern "C" int func_0019D3B0(void* self, int bank)
+extern "C" int func_0019D3B0(cFEBoltFileManager* self, int bank)
 {
     unsigned int best = 0;
     int bestIdx = -1;
@@ -4038,7 +4038,7 @@ struct sEquipTable_DC20;
 struct sEquipTable_D428;
 extern "C" void func_0019D4B8(sEquipTable_D4B8* self, int bank, int i);
 extern "C" void func_0019D8B8(sEquipTable_DC20* self, int bank, int i);
-extern "C" int func_0019D3B0(void* self, int bank);
+extern "C" int func_0019D3B0(cFEBoltFileManager* self, int bank);
 extern "C" int func_0019D428(cFEBoltFileManager* self, int bank, const char* name);
 extern "C" void ASYNCFILE_release(int handle, int a1, void* status);
 extern "C" char* strcpy(char* dst, const char* src);

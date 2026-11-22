@@ -442,9 +442,9 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_parseKeyframePause);
  * @param pKCP  the command (On Tour pKCP)
  * @param pThread  the animation thread being played (On Tour pThread)
  */
-extern "C" void cUIScreen_parseKeyframePause(cUIScreen* self, void* pFrame, void* pKCP, void* pThread)
+extern "C" void cUIScreen_parseKeyframePause(cUIScreen* self, void* pFrame, void* pKCP, cUIThread* pThread)
 {
-    *(unsigned int*)((char*)pThread + 0x10) &= 0xFEFFFFFFU;
+    *(unsigned int*)&pThread->mStopFrameNumber &= 0xFEFFFFFFU;
 }
 #endif
 
@@ -512,7 +512,7 @@ extern "C" void cUIThing_playAnimation(void* self, void* anim, unsigned char mod
  * @param pFrame  the frame header holding the command (On Tour pFrame)
  * @param msg  the command (On Tour pKCP)
  */
-extern "C" void cUIScreen_parseObjectAnim(cUIScreen* self, void* pFrame, tUIKCPObjectAnimate* msg)
+extern "C" void cUIScreen_parseObjectAnim(cUIScreen* self, tUIFrameHeader* pFrame, tUIKCPObjectAnimate* msg)
 {
     void* obj = cUIScreen_getObjectByHashName((cUIScreen*)self, (int)msg->mObjectHashID);
     if (obj != 0) {
@@ -520,7 +520,7 @@ extern "C" void cUIScreen_parseObjectAnim(cUIScreen* self, void* pFrame, tUIKCPO
             &self->mpState->mpEngine->mAnimBank,
             (int)msg->mAnimationID);
         if (anim != 0) {
-            cUIThing_playAnimation(obj, anim, *(unsigned char*)&msg->mPlaybackStatus, *(unsigned short*)((char*)pFrame + 8), 0);
+            cUIThing_playAnimation(obj, anim, *(unsigned char*)&msg->mPlaybackStatus, pFrame->mFrameNumber, 0);
         }
     }
 }
@@ -715,9 +715,9 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_parseScreenEnd);
  * @param pKCP  the command (On Tour pKCP)
  * @param pThread  the animation thread being played (On Tour pThread)
  */
-extern "C" void cUIScreen_parseScreenEnd(cUIScreen* self, void* pFrame, void* pKCP, void* pThread)
+extern "C" void cUIScreen_parseScreenEnd(cUIScreen* self, void* pFrame, void* pKCP, cUIThread* pThread)
 {
-    *(unsigned int*)((char*)pThread + 0x10) &= 0xFEFFFFFFU;
+    *(unsigned int*)&pThread->mStopFrameNumber &= 0xFEFFFFFFU;
     cUIState* state = self->mpState;
     if (state != 0) {
         ((sUIFlags1C*)&state->mAttrState)->mode = 7;
@@ -1160,9 +1160,9 @@ extern "C" void* cUIScreen_getObjectByHashName(cUIScreen* self, int hash)
     void** objs = (void**)self->mppObjectList;
     if (objs != 0) {
         for (unsigned int i = 0; i < *(unsigned int*)self->mpObjectBlock; i++) {
-            void* uiObj = objs[i];
-            if (uiObj != 0 && *(int*)((char*)uiObj + 0x38) == hash) {
-                return uiObj;
+            cUIThing* uiObj = (cUIThing*)objs[i];
+            if (((void*)uiObj) != 0 && uiObj->mHashName == hash) {
+                return ((void*)uiObj);
             }
         }
     }
@@ -1549,7 +1549,7 @@ struct cUISlider_onInput_sVEntryS {
  */
 extern "C" int cUISlider_onInput(cUISlider* self, cUIInput* input)
 {
-    char* customSnd = *(char**)((char*)cUIThing_getEngine(((char*)self)) + 0x14);
+    char* customSnd = (char*)((cUIEngine*)cUIThing_getEngine(((char*)self)))->mpSound;
     char* snd = &gUISoundNull;
     if (customSnd) snd = customSnd;
     cUISlider_onInput_sVEntryI* vi = (cUISlider_onInput_sVEntryI*)input->mVtbl;
@@ -1835,10 +1835,10 @@ void* cList_first(cList*);
  */
 extern "C" void cUIState_onGainFocus(cUIState* self)
 {
-    void* n = cList_first((cList*)&self->mScreens);
-    if (n != 0) {
+    cUIScreen* n = (cUIScreen*)cList_first((cList*)&self->mScreens);
+    if (((void*)n) != 0) {
         sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)self->mVtbl;
-        vt[13].fn(vthis(self, vt[13]), (char*)n + 0x40);
+        vt[13].fn(vthis(self, vt[13]), (char*)&n->mRootGroup);
     }
 }
 #endif
@@ -1901,28 +1901,28 @@ static inline int cUIState_onUpdate_padTest(char* pad, int slot)
 extern "C" void cUIState_onUpdate(cUIState* self)
 {
     int mask = *(signed char*)&self->mCtrlBits;
-    char* input = *(char**)&self->mpEngine->mpInput;
+    cUIInput* input = (cUIInput*)(*(char**)&self->mpEngine->mpInput);
     self->mCurrentCtrl = 0;
     do {
-        cUIState_onUpdate_sVEntryC* vc = *(cUIState_onUpdate_sVEntryC**)(input + 8);
+        cUIState_onUpdate_sVEntryC* vc = (cUIState_onUpdate_sVEntryC*)input->mVtbl;
         vc[44].fn(vthis(input, vc[44]), *(unsigned char*)&self->mCurrentCtrl);
-        if (cUIState_onUpdate_padTest(input, 45)) {
-            if (cUIState_onUpdate_padTest(input, 41) || (cUIState_onUpdate_padTest(input, 40) && (mask & 1))) {
+        if (cUIState_onUpdate_padTest(((char*)input), 45)) {
+            if (cUIState_onUpdate_padTest(((char*)input), 41) || (cUIState_onUpdate_padTest(((char*)input), 40) && (mask & 1))) {
                 cUIState_onUpdate_sVEntryP* vs = (cUIState_onUpdate_sVEntryP*)self->mVtbl;
-                if (!vs[8].fn(vthis(self, vs[8]), input)) {
+                if (!vs[8].fn(vthis(self, vs[8]), ((char*)input))) {
                     cUIScreen* n = (cUIScreen*)cList_first((cList*)(&self->mScreens));
                     if (((char*)n) != 0) {
                         do {
                             if (n->mAttrScreen & 1) {
                                 cUIState_onUpdate_sVEntryP* vn = (cUIState_onUpdate_sVEntryP*)n->mVtbl;
-                                if (vn[4].fn(vthis(n, vn[4]), input)) break;
+                                if (vn[4].fn(vthis(n, vn[4]), ((char*)input))) break;
                             }
                             n = (cUIScreen*)n->mpNext;
                         } while (!cListNode_isSentinel((cListNode*)n));
                     }
                 }
                 cUIState_onUpdate_sVEntryV* vs2 = (cUIState_onUpdate_sVEntryV*)self->mVtbl;
-                vs2[9].fn(vthis(self, vs2[9]), input);
+                vs2[9].fn(vthis(self, vs2[9]), ((char*)input));
                 break;
             }
         }
@@ -2097,11 +2097,11 @@ extern "C" void cUIScreen_update(cUIScreen*);
  */
 extern "C" void cUIState_updateScreens(cUIState* self)
 {
-    void* n = cList_first((cList*)&self->mScreens);
-    if (n != 0) {
+    cUIScreen* n = (cUIScreen*)cList_first((cList*)&self->mScreens);
+    if (((void*)n) != 0) {
         do {
             cUIScreen_update((cUIScreen*)n);
-            n = *(void**)((char*)n + 4);
+            n = (cUIScreen*)((void*)n->mpNext);
         } while (!cListNode_isSentinel((cListNode*)n));
     }
 }

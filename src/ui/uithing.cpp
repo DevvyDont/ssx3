@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uistate.h"
 #include "vtable.h"
 #include "ui/uidata.h"
 #include "ui/uiscreen.h"
@@ -277,10 +278,10 @@ INCLUDE_ASM("ui/uithing", cUIThing_getSound);
  * @param soundIndex  which of the two sounds (0 or 1)
  * @return the sound id stored there (the cUIThing constructor stores 4 and 6)
  */
-extern "C" int cUIThing_getSound(void* self, int soundIndex)
+extern "C" int cUIThing_getSound(cUIThing* self, int soundIndex)
 {
-    self = (char*)self + ((signed char)soundIndex << 2);
-    return *(int*)((char*)self + 0x6c);
+    self = (cUIThing*)((char*)self + ((signed char)soundIndex << 2));
+    return self->mSound[0];
 }
 #endif
 
@@ -296,10 +297,10 @@ INCLUDE_ASM("ui/uithing", cUIThing_setSound);
  * @param soundIndex  which of the two sounds (0 or 1)
  * @param sound  the sound id to store
  */
-extern "C" void cUIThing_setSound(void* self, int soundIndex, int sound)
+extern "C" void cUIThing_setSound(cUIThing* self, int soundIndex, int sound)
 {
-    self = (char*)self + ((signed char)soundIndex << 2);
-    *(int*)((char*)self + 0x6c) = sound;
+    self = (cUIThing*)((char*)self + ((signed char)soundIndex << 2));
+    self->mSound[0] = sound;
 }
 #endif
 
@@ -409,7 +410,7 @@ INCLUDE_ASM("ui/uithing", cUIText_getFont);
  */
 extern "C" int cUIText_getFont(cUIText* self)
 {
-    void* engine = *(void**)((char*)self->mpScreen->mpState + 0x10);
+    void* engine = self->mpScreen->mpState->mpEngine;
     if (engine != 0) {
         return *(int*)((char*)*(void**)((char*)engine + 0x8) + (*(unsigned char*)&self->mAttrText & 3) * 12 + 0xC);
     }

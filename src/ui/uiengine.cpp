@@ -405,8 +405,8 @@ extern "C" void cUITextureBank__cUITextureBank(cUITextureBank* self, int flags)
 {
     int i;
     for (i = 0; i < self->mNumTextureIDs; i++) {
-        char* obj = (char*)GrMan_uiengine;
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(obj + 0x10D8);
+        cPS2GraphicsMan* obj = (cPS2GraphicsMan*)((char*)GrMan_uiengine);
+        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)obj->mVtbl;
         vt[50].fn(vthis(obj, vt[50]), (self->mpTexturesIDs)[i]);
     }
     if (self->mpTexturesIDs != 0) {
@@ -803,15 +803,15 @@ extern "C" void* cUIGroup_getObjectByHashName(cUIGroup* self, int id)
     if (cUIThing_getObjectByHashName(self, id) != 0) {
         return ((void*)self);
     }
-    void* n = cList_first((cList*)&self->mList);
-    if (n != 0) {
+    cUIThing* n = (cUIThing*)cList_first((cList*)&self->mList);
+    if (((void*)n) != 0) {
         do {
-            cUIGroup_getObjectByHashName_sVEntry* vtEntry = &(*(cUIGroup_getObjectByHashName_sVEntry**)((char*)n + 8))[14];
+            cUIGroup_getObjectByHashName_sVEntry* vtEntry = &((cUIGroup_getObjectByHashName_sVEntry*)n->mVtbl)[14];
             void* found = vtEntry->fn(vthis(n, *vtEntry), id);
             if (found != 0) {
                 return found;
             }
-            n = *(void**)((char*)n + 4);
+            n = (cUIThing*)((void*)n->mpNext);
         } while (!cListNode_isSentinel((cListNode*)n));
     }
     return 0;
@@ -839,12 +839,12 @@ struct cUIGroup_updateLocale_sVEntry {
  */
 extern "C" void cUIGroup_updateLocale(cUIGroup* self)
 {
-    void* n = cList_first((cList*)&self->mList);
-    if (n != 0) {
+    cUIThing* n = (cUIThing*)cList_first((cList*)&self->mList);
+    if (((void*)n) != 0) {
         do {
-            cUIGroup_updateLocale_sVEntry* vt = *(cUIGroup_updateLocale_sVEntry**)((char*)n + 8);
+            cUIGroup_updateLocale_sVEntry* vt = (cUIGroup_updateLocale_sVEntry*)n->mVtbl;
             vt[16].fn(vthis(n, vt[16]));
-            n = *(void**)((char*)n + 4);
+            n = (cUIThing*)((void*)n->mpNext);
         } while (!cListNode_isSentinel((cListNode*)n));
     }
 }
@@ -901,12 +901,12 @@ struct cUIGroup_render3D_sVEntry {
  */
 extern "C" void cUIGroup_render3D(cUIGroup* self, int pRenCon)
 {
-    void* n = cList_first((cList*)&self->mList);
-    if (n != 0) {
+    cUIThing* n = (cUIThing*)cList_first((cList*)&self->mList);
+    if (((void*)n) != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
-            cUIGroup_render3D_sVEntry* vt = *(cUIGroup_render3D_sVEntry**)((char*)n + 8);
+            cUIGroup_render3D_sVEntry* vt = (cUIGroup_render3D_sVEntry*)n->mVtbl;
             vt[18].fn(vthis(n, vt[18]), pRenCon);
-            n = *(void**)((char*)n + 4);
+            n = (cUIThing*)((void*)n->mpNext);
         }
     }
 }
@@ -966,12 +966,12 @@ struct cUIGroup_update_sVEntry {
  */
 extern "C" void cUIGroup_update(cUIGroup* self, unsigned short ev)
 {
-    void* n = cList_first((cList*)&self->mList);
-    if (n != 0) {
+    cUIThing* n = (cUIThing*)cList_first((cList*)&self->mList);
+    if (((void*)n) != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
-            cUIGroup_update_sVEntry* vt = *(cUIGroup_update_sVEntry**)((char*)n + 8);
+            cUIGroup_update_sVEntry* vt = (cUIGroup_update_sVEntry*)n->mVtbl;
             vt[19].fn(vthis(n, vt[19]), ev);
-            n = *(void**)((char*)n + 4);
+            n = (cUIThing*)((void*)n->mpNext);
         }
     }
     cUIThing_update(self, ev);
@@ -1437,9 +1437,9 @@ struct cUIListBox_getFont_sEntry {
  */
 extern "C" int cUIListBox_getFont(cUIListBox* self)
 {
-    void* engine = cUIThing_getEngine(self);
-    if (engine != 0) {
-        cUIListBox_getFont_sEntry* fonts = *(cUIListBox_getFont_sEntry**)((char*)engine + 0x8);
+    cUIEngine* engine = (cUIEngine*)cUIThing_getEngine(self);
+    if (((void*)engine) != 0) {
+        cUIListBox_getFont_sEntry* fonts = (cUIListBox_getFont_sEntry*)engine->mpFontInterface;
         return fonts[(*(unsigned char*)&self->mAttrListBox & 3) + 1].a;
     }
     return 0;
@@ -1503,9 +1503,9 @@ extern "C" int cUIListBox_onInput(cUIListBox* self, cUIInput* in)
         return 0;
     int result = 0;
     char* listener = gUISoundNull;
-    char* owner = (char*)cUIThing_getEngine(((char*)self));
-    if (*(char**)(owner + 0x14) != 0) {
-        listener = *(char**)(owner + 0x14);
+    cUIEngine* owner = (cUIEngine*)((char*)cUIThing_getEngine(((char*)self)));
+    if ((char*)owner->mpSound != 0) {
+        listener = (char*)owner->mpSound;
     }
     int moveResult;
     if ((inputIs_9970(in, 19) && isClear_9970(self->mAttr))

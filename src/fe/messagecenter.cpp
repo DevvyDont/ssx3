@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "util/locale.h"
 #include "sound/ssxaudio.h"
 #include "fe/uistatebuypopup.h"
 #include "fe/festatebigradio.h"
@@ -829,8 +830,8 @@ extern char str_disconnected_from_serverErrorString[];
 extern "C" void cFEStateRequestLine_updatePlayListCounter(cFEStateRequestLine* requestLine)
 {
     cFEStateRequestLine* self = requestLine;
-    char* db = (char*)SSXApp->FELocale;
-    sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(db + 4);
+    cFELocale* db = SSXApp->FELocale;
+    sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)db->mVtbl;
     unsigned short* fmt = vt[4].fn(vthis(db, vt[4]), GetHashValue32(str_kT_OVRCMNSongsInList));
     unsigned short* buf = (unsigned short*)operator_new_tag((USTR_length(fmt) + 5) * 2, str_disconnected_from_serverErrorString, 0x100, 0);
     int n = 0;

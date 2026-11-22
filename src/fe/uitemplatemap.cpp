@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uiengine.h"
 #include "sound/ssxaudio.h"
 #include "fe/uitemplatemap.h"
 #include "ui/uistate.h"
@@ -3088,7 +3089,7 @@ extern "C" int cUIStateStack_pop_85B8(void* self, int a1) __asm__("cUIStateStack
 extern "C" void cOVState_TRANSPORT_onWidgetEvent(cOVState_TRANSPORT* self)
 {
     if (cUITemplate_MAP_onWidgetEvent(&self->mMap) == 1) {
-        cUIStateStack_pop_85B8((char*)self->mpEngine + 0x18, 1);
+        cUIStateStack_pop_85B8(&self->mpEngine->mStateStack, 1);
         self->mAttrState = (self->mAttrState & ~0x3F00) | 0x780;
     }
 }

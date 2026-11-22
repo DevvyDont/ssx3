@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beintscore.h"
+#include "ui/uiengine.h"
 #include "main/gamestate.h"
 #include "wscript/wscriptman.h"
 #include "main/game.h"
@@ -57,13 +59,13 @@ extern "C" void cUIState_onGainFocus(void* self, void* a1);
  */
 extern "C" void cOVState_ENTERLODGE_onGainFocus(cOVState_ENTERLODGE* self, cUIState* pPrevState)
 {
-    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_yes_b));
-    if (obj != 0) {
-        *(int*)((char*)obj + 0x18) = 0;
+    cUIThing* obj = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_yes_b));
+    if (((void*)obj) != 0) {
+        obj->mMiscData = 0;
     }
-    obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_no_b));
-    if (obj != 0) {
-        *(int*)((char*)obj + 0x18) = 1;
+    obj = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_no_b));
+    if (((void*)obj) != 0) {
+        obj->mMiscData = 1;
     }
     cUIState_onGainFocus(self, pPrevState);
 }
@@ -152,14 +154,14 @@ extern "C" void cOVState_ENTERLODGE_onWidgetEvent(cOVState_ENTERLODGE* self, cUI
                 break;
             case 1:
                 self->mRemovePDA = 1;
-                cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
+                cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
                 break;
             }
             break;
         case 6:
             self->mRemovePDA = 1;
             ((SSXApp->Game)->mCurrentState)->mOverlayDone = 1;
-            cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
+            cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
             break;
         }
     }
@@ -494,7 +496,7 @@ extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetEvent(cOVState_BIGCHALLENGE_F
         if (choice == 0) {
             ((cWScriptMan*)cWScriptMan_TheWScriptMan)->LocalMissionId = self->mMissionId;
             cWScriptMan_restartLocalMission(cWScriptMan_TheWScriptMan);
-            cUIStateStack_pop_r((char*)self->mpEngine + 0x18, 1);
+            cUIStateStack_pop_r(&self->mpEngine->mStateStack, 1);
             cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
             cSSXAudio_SetBigChallengeStarting(cAudioInterface_bxAudio());
             return;
@@ -516,7 +518,7 @@ extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetEvent(cOVState_BIGCHALLENGE_F
         return;
     }
     cWScriptMan_cancelLocalMission(cWScriptMan_TheWScriptMan);
-    cUIStateStack_pop_r((char*)self->mpEngine + 0x18, 1);
+    cUIStateStack_pop_r(&self->mpEngine->mStateStack, 1);
     cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
 }
 #endif
@@ -779,14 +781,14 @@ static inline void LoadRider1F7F08(void* self, int n)
 extern "C" void cOVState_TOPTIMES_onGainFocus(cOVState_TOPTIMES* self, cUIState* pPrevState)
 {
     cUIState_onGainFocus(self, pPrevState);
-    char* prof = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
+    cBEScoreInterface* prof = (cBEScoreInterface*)((char*)cBE_getInterface_Fv(cBE_getBE(), 8));
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    int id = *(int*)(prof + 0x18);
+    int id = prof->mNewTrackHighScoreIndex[0];
     if (id >= 0) {
         LoadRider1F7F08(self, id + 1);
     }
     if (cBENewRaceInterface_newRace.cGamePath == 2) {
-        int id2 = *(int*)(prof + 0x1C);
+        int id2 = prof->mNewTrackHighScoreIndex[1];
         if (id2 >= 0) {
             LoadRider1F7F08(self, id2 + 1);
         }

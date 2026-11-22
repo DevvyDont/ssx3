@@ -360,33 +360,33 @@ static inline int clamp_F050(int v, int lo, int hi)
  */
 extern "C" void cFEPopupScreenPos_onUpdate(cFEPopupScreenPos* self)
 {
-    char* in = *(char**)&self->mpEngine->mpInput;
+    cUIInput* in = (cUIInput*)(*(char**)&self->mpEngine->mpInput);
     for (int i = 0; i < 2; i++) {
-        sVEntry<void(void*, unsigned char)>* vt = *(sVEntry<void(void*, unsigned char)>**)(in + 8);
+        sVEntry<void(void*, unsigned char)>* vt = (sVEntry<void (void*, unsigned char)>*)in->mVtbl;
         vt[44].fn(vthis(in, vt[44]), i);
-        if (padCall_F050(in, 40) == 0) {
+        if (padCall_F050(((char*)in), 40) == 0) {
             continue;
         }
-        if (padCall_F050(in, 5)) {
+        if (padCall_F050(((char*)in), 5)) {
             sound_F050((self), 6);
             *(signed char*)&self->mAccept = 1;
             self->mAttrState |= 0x80;
             cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
-        } else if (padCall_F050(in, 6)) {
+        } else if (padCall_F050(((char*)in), 6)) {
             sound_F050((self), 3);
             *(signed char*)&self->mAccept = 0;
             self->mAttrState |= 0x80;
             cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
-        } else if (padCall_F050(in, 19)) {
+        } else if (padCall_F050(((char*)in), 19)) {
             self->mX--;
             playFrame_F050((self), str_hl_left);
-        } else if (padCall_F050(in, 20)) {
+        } else if (padCall_F050(((char*)in), 20)) {
             self->mX++;
             playFrame_F050((self), str_hl_right);
-        } else if (padCall_F050(in, 17)) {
+        } else if (padCall_F050(((char*)in), 17)) {
             self->mY++;
             playFrame_F050((self), str_hl_up);
-        } else if (padCall_F050(in, 18)) {
+        } else if (padCall_F050(((char*)in), 18)) {
             self->mY--;
             playFrame_F050((self), str_hl_down);
         }
@@ -843,8 +843,8 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF778);
  * @param netState  the state
  * @return the int at +0x6D0
  */
-extern "C" int func_001DF778(void *netState) {
-    return (*(int *)((char*)(netState) + (0x6D0)));
+extern "C" int func_001DF778(cFEStateNetQuickMessages* netState) {
+    return (netState->mbChanged);
 }
 #endif
 //100%
@@ -2366,8 +2366,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateMountainRoom_isPeakPassLoaded);
  * @param mountainRoom  the mountain-room state
  * @return 1 when the slot is -1, else 0
  */
-extern "C" int cFEStateMountainRoom_isPeakPassLoaded(void *mountainRoom) {
-    return ~(*(int *)((char*)(mountainRoom) + (0xBC))) == 0;
+extern "C" int cFEStateMountainRoom_isPeakPassLoaded(cFEStateMountainRoom* mountainRoom) {
+    return ~(mountainRoom->mTextureFileIndex) == 0;
 }
 #endif
 //100%
@@ -3434,8 +3434,8 @@ extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cF
 extern "C" void cFEStateChallengePopup__cFEStateChallengePopup(cFEStateChallengePopup* self, int flags)
 {
     self->mVtbl = cFEStateChallengePopup_vtbl;
-    void* obj = self->mpParentState;
-    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)obj + 8);
+    cUIState* obj = self->mpParentState;
+    sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)obj->mVtbl;
     vt[32].fn(vthis(obj, vt[32]));
     cFEStateNet__cFEStateNet_dtor(self, flags);
 }
@@ -3495,8 +3495,8 @@ extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cF
 extern "C" void cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup(cFEStateChallengeReceivedPopup* self, int flags)
 {
     self->mVtbl = cFEStateChallengeReceivedPopup_vtbl;
-    void* obj = self->mpParentState;
-    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)obj + 8);
+    cUIState* obj = self->mpParentState;
+    sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)obj->mVtbl;
     vt[32].fn(vthis(obj, vt[32]));
     cBXString__cBXString((char*)&self->mszChallenger, 2);
     cFEStateNet__cFEStateNet_dtor(self, flags);
@@ -6700,9 +6700,9 @@ extern "C" void func_001E2FE0(int id, unsigned char flag)
     messageList->mask &= ~(1 << messageList->count);
     cUIEngine* gameUi = SSXApp->Game->UI;
     if (((char*)gameUi) != 0) {
-        char* obj = (char*)cUIStateStack_findState(&gameUi->mStateStack, GetHashValue32(str_hud_b));
-        if (obj != 0) {
-            sVEntry<int(void*, int, int)>* vt = *(sVEntry<int(void*, int, int)>**)(obj + 8);
+        cUIState* obj = (cUIState*)((char*)cUIStateStack_findState(&gameUi->mStateStack, GetHashValue32(str_hud_b)));
+        if (((char*)obj) != 0) {
+            sVEntry<int(void*, int, int)>* vt = (sVEntry<int (void*, int, int)>*)obj->mVtbl;
             vt[24].fn(vthis(obj, vt[24]), 8, 0);
         }
     }

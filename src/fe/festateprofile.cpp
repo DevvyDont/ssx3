@@ -1362,7 +1362,7 @@ extern "C" void cFEStateProfileLoad_initLoadScreen(cFEStateProfileLoad* self)
     ((cUIObj_0670*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq)))->setVisible(0);
     (self)->mDeleteButtonActive = 0;
     (self)->mMainButtonActive = 1;
-    *(int*)((char*)cSSXApp_getMCManager(SSXApp) + 0x11C) = 0;
+    ((cMCOverlayManager*)cSSXApp_getMCManager(SSXApp))->mPollForFullCard = 0;
 }
 #endif
 

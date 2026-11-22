@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uimenu.h"
 #include "bx/math3d.h"
 #include "render/font.h"
 #include "fe/festate.h"
@@ -38,9 +39,9 @@ extern "C" void cFEStateCredits_onCreateScreen(cFEStateCredits* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    char* menu = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000));
-    if (menu != 0)
-        *(int*)(menu + 0x90) |= 8;
+    cUIMenu* menu = (cUIMenu*)((char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000)));
+    if (((char*)menu) != 0)
+        *(int*)&menu->mAttrMenu |= 8;
     cUIThing* bitmap = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Bitmap0000));
     self->mpDolbyIcon = (cUIIcon*)bitmap;
     if (((char*)bitmap) != 0) {
@@ -493,9 +494,9 @@ extern "C" void cFEState_onLoseFocus(cFEState* self)
 {
     void* screen = cList_first((cList*)(&self->mScreens));
     if (screen != 0) {
-        void* obj = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_Menu));
-        if (obj != 0) {
-            cFEFlowState_setValue(&gFlowState, *(signed char*)&self->mHashName, *(signed char*)((char*)obj + 0x95));
+        cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_Menu));
+        if (((void*)obj) != 0) {
+            cFEFlowState_setValue(&gFlowState, *(signed char*)&self->mHashName, *(signed char*)&obj->mScrollItemCurrent);
         }
     }
 }

@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uimenu.h"
 #include "ealib/shape.h"
 #include "be/berewarddb.h"
 #include "sound/ssxaudio.h"
@@ -1050,7 +1051,7 @@ extern "C" void cFEStateRewardGalleryBase_showReward(cFEStateRewardGalleryBase* 
 {
     void* nextState = 0;
     sVEntry<void*(void*)>* vt = (sVEntry<void*(void*)>*)self->mVtbl;
-    void* data = vt[34].fn(vthis(self, vt[34]));
+    tVideoInfo* data = (tVideoInfo*)vt[34].fn(vthis(self, vt[34]));
     switch (self->mRewardType) {
     case 3:
     case 4:
@@ -1063,7 +1064,7 @@ extern "C" void cFEStateRewardGalleryBase_showReward(cFEStateRewardGalleryBase* 
     case 6:
         nextState = cFEStateVideoPlayer_cFEStateVideoPlayer((cFEStateVideoPlayer*)cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0), self->mpEngine, (cUIState*)self,
                           self->mUserNum);
-        cFEStateVideoPlayer_setVideoSourceFiles((cFEStateVideoPlayer*)nextState, *(const char**)((char*)data + 4), 0);
+        cFEStateVideoPlayer_setVideoSourceFiles((cFEStateVideoPlayer*)nextState, ((const tVideoInfo*)data)->mpVideoFileName, 0);
         break;
     }
     if (nextState != 0) {
@@ -1182,8 +1183,8 @@ extern "C" void cFEStateRewardGalleryBase_updateHelpText(cFEStateRewardGalleryBa
         return;
     setVis_0648(txt, 0);
     sVEntry<char*(void*, int)>* vtp = (sVEntry<char*(void*, int)>*)self->mVtbl;
-    char* item = vtp[34].fn(vthis(self, vtp[34]), idx);
-    if (item == 0)
+    tCheatCharInfo* item = (tCheatCharInfo*)vtp[34].fn(vthis(self, vtp[34]), idx);
+    if (((char*)item) == 0)
         return;
     sVEntry<int(void*, int)>* vti = (sVEntry<int(void*, int)>*)self->mVtbl;
     int state = vti[36].fn(vthis(self, vti[36]), (int)item);
@@ -1193,7 +1194,7 @@ extern "C" void cFEStateRewardGalleryBase_updateHelpText(cFEStateRewardGalleryBa
         if (vt[38].fn(vthis(self, vt[38]), idx)) {
             setHelp_0648(((char*)self), str_kT_129HELPSelectCheatChar);
         } else if (state < 0) {
-            setHelp_0648(((char*)self), *(char**)(item + 8));
+            setHelp_0648(((char*)self), ((const tCheatCharInfo*)item)->mpHelpStringID);
         } else {
             int selected = self->mStoreNum;
             if (selected >= 0) {
@@ -1679,8 +1680,8 @@ extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
 extern "C" void cFEStateRewardGalleryPosters_getIconID(cFEStateRewardGalleryPosters* self, int i)
 {
     char buf[5];
-    void* reward = (void*)self->mpPosters[i];
-    strncpy(buf, *(const char**)((char*)reward + 8), 4);
+    tPosterInfo* reward = (tPosterInfo*)((void*)self->mpPosters[i]);
+    strncpy(buf, (const char*)reward->mpIconName, 4);
     buf[4] = 0;
     cFEStateRewardGalleryBase_getIconID(self, buf);
 }
@@ -1809,8 +1810,8 @@ extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
 extern "C" void cFEStateRewardGalleryTradingCards_getIconID(cFEStateRewardGalleryTradingCards* self, int i)
 {
     char buf[5];
-    void* reward = (void*)self->mpTradingCards[i];
-    strncpy(buf, *(const char**)((char*)reward + 8), 4);
+    tTradingCardInfo* reward = (tTradingCardInfo*)((void*)self->mpTradingCards[i]);
+    strncpy(buf, (const char*)reward->mpIconName, 4);
     buf[4] = 0;
     cFEStateRewardGalleryBase_getIconID(self, buf);
 }
@@ -1939,8 +1940,8 @@ extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
 extern "C" void cFEStateRewardGalleryConceptArts_getIconID(cFEStateRewardGalleryConceptArts* self, int i)
 {
     char buf[5];
-    void* reward = (void*)self->mpConceptArts[i];
-    strncpy(buf, *(const char**)((char*)reward + 8), 4);
+    tConceptArtInfo* reward = (tConceptArtInfo*)((void*)self->mpConceptArts[i]);
+    strncpy(buf, (const char*)reward->mpIconName, 4);
     buf[4] = 0;
     cFEStateRewardGalleryBase_getIconID(self, buf);
 }
@@ -2069,8 +2070,8 @@ extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
 extern "C" void cFEStateRewardGalleryVideos_getIconID(cFEStateRewardGalleryVideos* self, int i)
 {
     char buf[5];
-    void* reward = (void*)self->mpVideos[i];
-    strncpy(buf, *(const char**)((char*)reward + 8), 4);
+    tVideoInfo* reward = (tVideoInfo*)self->mpVideos[i];
+    strncpy(buf, (const char*)reward->mpIconName, 4);
     buf[4] = 0;
     cFEStateRewardGalleryBase_getIconID(self, buf);
 }
@@ -2199,8 +2200,8 @@ extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
 extern "C" void cFEStateRewardGalleryToys_getIconID(cFEStateRewardGalleryToys* self, int i)
 {
     char buf[5];
-    void* reward = (void*)self->mpToys[i];
-    strncpy(buf, *(const char**)((char*)reward + 8), 4);
+    tToyInfo* reward = (tToyInfo*)((void*)self->mpToys[i]);
+    strncpy(buf, (const char*)reward->mpIconName, 4);
     buf[4] = 0;
     cFEStateRewardGalleryBase_getIconID(self, buf);
 }
@@ -2370,8 +2371,8 @@ extern "C" void* cUITextureBank_getElementByHashname(void* self, int id);
 extern "C" void cFEStateRewardGalleryCheatChars_getTextureElement(cFEStateRewardGalleryCheatChars* self, int i)
 {
     cUIEngine* obj = self->mpEngine;
-    void* reward = (void*)self->mpCheatChars[i];
-    int textureHash = GetHashValue32(*(char**)((char*)reward + 4));
+    tCheatCharInfo* reward = (tCheatCharInfo*)((void*)self->mpCheatChars[i]);
+    int textureHash = GetHashValue32(reward->mpIconName);
     cUITextureBank_getElementByHashname(&obj->mTextureBank, textureHash);
 }
 #endif
@@ -2486,9 +2487,9 @@ extern "C" void cFEStatePreviewReward_onCreateScreen(cFEStatePreviewReward* self
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu));
-    if (obj != 0) {
-        *(int*)((char*)obj + 0x90) |= 8;
+    cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu));
+    if (((void*)obj) != 0) {
+        *(int*)&obj->mAttrMenu |= 8;
     }
 }
 #endif

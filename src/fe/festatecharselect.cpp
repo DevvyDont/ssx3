@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintplayer.h"
 #include "ui/uimenu.h"
 #include "ui/uiicon.h"
 #include "vtable.h"
@@ -156,8 +157,8 @@ extern "C" void cFEStateCharSelect_onGainFocus(cFEStateCharSelect* self, int pPr
         }
     }
     cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->mUserNum, D_00440F68[0], 0);
-    char* feRider = (char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
-    *(int*)(feRider + 0xCCC) = 0;
+    cFERider* feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
+    feRider->mAnimateBoard = 0;
     cFEStateCharSelect_updateCharacter3DPos(self);
     cUIState_onGainFocus(self, pPrevState);
 }
@@ -1023,9 +1024,9 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(cFEStateCheatCharSelect* s
             self->mCheatCharID = 0;
         else
             self->mCheatCharID = self->mCharIDs[sel];
-        char* pl = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
+        cBENewPlayerInterface* pl = (cBENewPlayerInterface*)((char*)cBE_getInterface_Fv(cBE_getBE(), 1));
         cBENewPlayerInterface_setPlayerCheatCharID(pl, self->mUserNum, self->mCheatCharID);
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(pl + 0xC);
+        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)pl->mVtbl;
         vt[1].fn(vthis(pl, vt[1]));
         self->mDone = 1;
         cUIStateStack_pop(&self->mpEngine->mStateStack, 1);

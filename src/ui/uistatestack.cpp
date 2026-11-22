@@ -615,13 +615,13 @@ int cListNode_isSentinel(cListNode*);
  */
 extern "C" void* cUIStateStack_getCurrentState(cUIStateStack* self)
 {
-    void* n = cList_first((cList*)self);
-    if (n != 0) {
+    cUIState* n = (cUIState*)cList_first((cList*)self);
+    if (((void*)n) != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
-            if ((*(int*)((char*)n + 0x1C) >> 5) & 1) {
-                return n;
+            if ((n->mAttrState >> 5) & 1) {
+                return ((void*)n);
             }
-            n = *(void**)((char*)n + 4);
+            n = (cUIState*)((void*)n->mpNext);
         }
     }
     return 0;
