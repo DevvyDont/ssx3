@@ -1071,8 +1071,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_callbackop);
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef void (*Fn_CF70)(int, int, int);
-struct E_CF70 { int f0; int f4; volatile int f8; int fC; int f10; int f14; char pad[0x10]; Fn_CF70 fn; int pad2; };
-extern struct E_CF70 *D_00519AD8_CF70 __asm__("D_00519AD8");
+extern struct FILEOPERATION_def *D_00519AD8_CF70 __asm__("D_00519AD8");
 
 void FILESYS_callbackop_impl(int h, Fn_CF70 fn) __asm__("FILESYS_callbackop");
 /**
@@ -1085,10 +1084,10 @@ void FILESYS_callbackop_impl(int h, Fn_CF70 fn) __asm__("FILESYS_callbackop");
  * @param fn  the completion callback
  */
 void FILESYS_callbackop_impl(int ophandle, Fn_CF70 fn) {
-    struct E_CF70 *fop = &D_00519AD8_CF70[((unsigned char *)&ophandle)[3]];
-    fop->fn = fn;
-    if (fop->f8 != 0) {
-        fn(ophandle, fop->f8, fop->f14);
+    struct FILEOPERATION_def *fop = &D_00519AD8_CF70[((unsigned char *)&ophandle)[3]];
+    fop->callback = fn;
+    if (fop->status != 0) {
+        fn(ophandle, fop->status, ((int)fop->userdata));
     }
 }
 #endif
@@ -1202,7 +1201,7 @@ void FILESYS_cancelop(struct H_D148 ophandle) {
    field names are their offsets. Several fields are also reached through their own splat symbols (declared
    below), which the functions that address them directly must keep using. */
 struct sFsHd {                      /* 0x110: an open file (gFileDevice.f2C[], reservehandle hands one out) */
-    int f00;                        /* handle, or the archive's sFsNode */
+    int f00;                        /* handle, or the archive's FILEBIG_def */
     int f04;                        /* size */
     int f08;                        /* offset in the archive */
     int f0C;
@@ -1230,14 +1229,6 @@ struct sFsCmd {                     /* 0x30: a command (gFileDevice.f28[], reser
     void (*f28)(int, int, int);     /* completion callback */
     struct sFsCmd *f2C;             /* next in the queue */
 };
-struct sFsNode {                    /* 0x18: an open archive (gFileDevice.f34 list) */
-    int f00;                        /* data */
-    int f04;                        /* size */
-    int f08;
-    struct sFsHd *f0C;
-    struct sFsCmd *f10;
-    struct sFsNode *f14;            /* next */
-};
 struct sAB0 {
     int f00;                        /* number of commands */
     int f04;                        /* number of open files */
@@ -1249,7 +1240,7 @@ struct sAB0 {
     struct sFsCmd *f28;             /* commands (also D_00519AD8) */
     struct sFsHd *f2C;              /* open files */
     struct sFsCmd *f30;             /* queue */
-    struct sFsNode *f34;            /* archives (also D_00519AE4) */
+    struct FILEBIG_def *f34;            /* archives (also D_00519AE4) */
     int f38;                        /* (also pFileDeviceMem) */
 };
 extern struct sAB0 gFileDevice;
@@ -1260,11 +1251,11 @@ struct sAB0Lock {                   /* gFileDevice from the mutex on (D_00519AC4
     struct sFsCmd *f14;
     struct sFsHd *f18;
     struct sFsCmd *f1C;             /* the queue (gFileDevice.f30) */
-    struct sFsNode *f20;
+    struct FILEBIG_def *f20;
     int f24;
 };
 extern struct sAB0Lock D_00519AC4;
-extern struct sFsNode *D_00519AE4;              /* gFileDevice.f34 */
+extern struct FILEBIG_def *D_00519AE4;              /* gFileDevice.f34 */
 #endif
 
 //100%
@@ -1321,20 +1312,8 @@ struct sHandle_D310 {
     unsigned char idx;
 };
 
-struct sSlot_D310 {
-    unsigned int flags;
-    int f4;
-    volatile int state;
-    int fC;
-    int f10;
-    int f14;
-    int f18;
-    int f1C;
-    int f20;
-    int *f24;
-};
 
-extern struct sSlot_D310 *D_00519AD8;
+extern struct FILEOPERATION_def *D_00519AD8;
 
 int FILESYS_completeop_a(struct sHandle_D310 h) __asm__("FILESYS_completeop");
 /**
@@ -1348,35 +1327,35 @@ int FILESYS_completeop_a(struct sHandle_D310 h) __asm__("FILESYS_completeop");
  */
 int FILESYS_completeop_a(struct sHandle_D310 ophandle) {
     int ret = 0;
-    struct sSlot_D310 *slot = (struct sSlot_D310 *)((char *)D_00519AD8 + ophandle.idx * 0x30);
+    struct FILEOPERATION_def *slot = (struct FILEOPERATION_def *)((char *)D_00519AD8 + ophandle.idx * 0x30);
     int sum;
     int *fileHandle;
 
-    switch (slot->state) {
+    switch (slot->status) {
     case 0:
         break;
     case 1:
-        switch ((slot->flags >> 20) & 0xF) {
+        switch (((*(unsigned int*)&slot->op) >> 20) & 0xF) {
         case 2:
         case 9:
-            ret = (int)slot->f24;
+            ret = (int)((int*)slot->handle);
             break;
         case 3:
         case 7:
         case 10:
-            ret = slot->state;
+            ret = slot->status;
             break;
         case 6:
         case 8:
-            ret = slot->f18;
+            ret = slot->value;
             break;
         case 4:
-            ret = slot->f1C;
+            ret = slot->amount;
             break;
         case 5:
-            fileHandle = slot->f24;
-            ret = slot->f1C;
-            sum = ret + slot->f18;
+            fileHandle = ((int*)slot->handle);
+            ret = slot->amount;
+            sum = ret + slot->value;
             if (fileHandle[1] < sum) {
                 fileHandle[1] = sum;
             }
@@ -1385,9 +1364,9 @@ int FILESYS_completeop_a(struct sHandle_D310 ophandle) {
         break;
     case -2:
     case -1: {
-        int type = (slot->flags >> 20) & 0xF;
+        int type = ((*(unsigned int*)&slot->op) >> 20) & 0xF;
         if (type == 2 || type == 9) {
-            freehandle_p(slot->f24);
+            freehandle_p(((int*)slot->handle));
         }
         break;
     }
@@ -1497,7 +1476,7 @@ int FILESYS_close_impl(int arg0, int arg1, int arg2) __asm__("FILESYS_close");
  */
 int FILESYS_close_impl(int filehandle, int priority, int userdata) {
     C_D5A0 *fop;
-    struct sFsNode *n;
+    struct FILEBIG_def *n;
 
     fop = reserveop_D5A0();
     n = D_00519AE4;
@@ -1505,8 +1484,8 @@ int FILESYS_close_impl(int filehandle, int priority, int userdata) {
     *(int*)((char*)fop + 0x10) = priority;
     *(int*)((char*)fop + 0x14) = userdata;
     *(int*)((char*)fop + 0x24) = filehandle;
-    for (; n != 0; n = n->f14) {
-        if ((int)n->f0C == filehandle) {
+    for (; n != 0; n = n->next) {
+        if ((int)((struct sFsHd*)n->handle) == filehandle) {
             *(int*)((char*)fop + 0xC) = 3;
             iFILE_perror_D5A0(fop);
             break;
@@ -1666,18 +1645,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", iFILE_addbigreadcallback);
 /* gFileSysOpts: the file system's settings (0x24 bytes: FILESYS_getopts hands out a copy, FILESYS_setopts takes one).
    Field names are their offsets; f04 / f08 are also reached through their own splat symbols. */
 struct sC10File { char *name; int a; int b; char *path; };   /* built-in file table entry (f20) */
-struct sC10 {
-    int f00;                        /* size */
-    void *(*f04)(char *, int, int); /* alloc (name, size, flags) */
-    int (*f08)(void *);             /* free */
-    int f0C;
-    int f10;
-    int f14;
-    char *f18;                      /* also D_00450C58.f00 */
-    char *f1C;                      /* also REAL_filedevice */
-    struct sC10File *f20;
-};
-extern struct sC10 gFileSysOpts;
+extern struct FILESYSOPTS gFileSysOpts;
 extern void *(*D_00450C14)(char *, int, int);   /* gFileSysOpts.f04 */
 extern int (*D_00450C18)(void *);               /* gFileSysOpts.f08 */
 /* gFileDevice: the file system's command manager (FILESYS_initadr sets it up). Layout from every use in this unit;
@@ -1704,31 +1672,31 @@ extern char iFILE_addbigreadcallback_D8E8[] __asm__("iFILE_addbigreadcallback");
  * @param opStatus  its status
  * @param bigNode  the archive record
  */
-void iFILE_addbigreadcallback(int opHandle, int opStatus, struct sFsNode *bigNode) {
+void iFILE_addbigreadcallback(int opHandle, int opStatus, struct FILEBIG_def *bigNode) {
     int n, k;
     struct sFsHd *fileHd;
-    struct sC10 *fs;
+    struct FILESYSOPTS *fs;
     struct sFsCmd *fileCmd = &gFileDevice.f28[((unsigned char *)&opHandle)[3]];
     fileHd = fileCmd->f24;
     k = fileCmd->f10;
-    bigNode->f0C = fileHd;
-    bigNode->f10->f24 = fileHd;
+    (*(struct sFsHd**)&bigNode->handle) = fileHd;
+    ((struct sFsCmd*)bigNode->fop)->f24 = fileHd;
     FILESYS_completeop_D8E8(opHandle);
-    if (BIG_typeofheader_D8E8(bigNode->f00) == 0) {
-        D_00450C18((void *)bigNode->f00);
+    if (BIG_typeofheader_D8E8(((int)bigNode->header)) == 0) {
+        D_00450C18((void *)((int)bigNode->header));
     }
-    n = BIG_sizeofheader_D8E8(bigNode->f00);
-    if (bigNode->f04 < n) {
+    n = BIG_sizeofheader_D8E8(((int)bigNode->header));
+    if (bigNode->headersize < n) {
         fs = &gFileSysOpts;
-        fs->f08((void *)bigNode->f00);
-        bigNode->f04 = n;
-        bigNode->f00 = (int)fs->f04(D_00495D68_D8E8, n, bigNode->f08);
-        opHandle = FILESYS_read(bigNode->f0C, 0, bigNode->f00, n, k, bigNode);
+        fs->free((void *)((int)bigNode->header));
+        bigNode->headersize = n;
+        (*(int*)&bigNode->header) = (int)fs->malloc(D_00495D68_D8E8, n, bigNode->memflags);
+        opHandle = FILESYS_read(((struct sFsHd*)bigNode->handle), 0, ((int)bigNode->header), n, k, bigNode);
         FILESYS_callbackop(opHandle, iFILE_addbigreadcallback_D8E8);
     } else {
-        bigNode->f14 = gFileDevice.f34;
+        bigNode->next = gFileDevice.f34;
         gFileDevice.f34 = bigNode;
-        iFILESYS_ExecCommand_D8E8(bigNode->f10);
+        iFILESYS_ExecCommand_D8E8(((struct sFsCmd*)bigNode->fop));
     }
 }
 #endif
@@ -2069,7 +2037,7 @@ void iFILESYS_ExecCommand_impl(struct sFsCmd *fileOp) {
     char file[256];
     int off;
     int x;
-    struct sFsNode *n;
+    struct FILEBIG_def *n;
     struct sFsHd *hd;
     int mode;
     int found;
@@ -2141,9 +2109,9 @@ void iFILESYS_ExecCommand_impl(struct sFsCmd *fileOp) {
             }
         }
         if (!found && (mode & 6)) {
-            for (n = gFileDevice.f34; n != 0 && !found; n = n->f14) {
-                if ((mode & 4) && strcmp_FX(n->f0C->f10, path)) continue;
-                if (BIG_locateentryz_FX(n->f00, file, 0, &x, &off)) {
+            for (n = gFileDevice.f34; n != 0 && !found; n = n->next) {
+                if ((mode & 4) && strcmp_FX(((struct sFsHd*)n->handle)->f10, path)) continue;
+                if (BIG_locateentryz_FX(((int)n->header), file, 0, &x, &off)) {
                     found = 1;
                     fileOp->f24->f00 = (int)n;
                     fileOp->f24->f04 = off;
@@ -2174,7 +2142,7 @@ void iFILESYS_ExecCommand_impl(struct sFsCmd *fileOp) {
     case 4:
         if (fileOp->f1C > 0) {
             if (fileOp->f24->f08 != 0) {
-                FILEDEV_readreq_FX(((struct sFsNode *)fileOp->f24->f00)->f0C->f00, fileOp->f20, fileOp->f24->f08 + fileOp->f18, fileOp->f1C);
+                FILEDEV_readreq_FX(((struct sFsHd*)((struct FILEBIG_def *)fileOp->f24->f00)->handle)->f00, fileOp->f20, fileOp->f24->f08 + fileOp->f18, fileOp->f1C);
             } else {
                 FILEDEV_readreq_FX(fileOp->f24->f00, fileOp->f20, fileOp->f18, fileOp->f1C);
             }
@@ -2201,10 +2169,7 @@ void iFILESYS_ExecCommand_impl(struct sFsCmd *fileOp) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", iFILESYS_CommandCompleteCallback);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct Cmd_IFS { int f0; int abort; volatile int status; char pad[8]; int f14; char pad2[0x10]; void (*cb)(int, int, int); };
-struct G_IFS { char pad[0x10]; volatile int busy; char pad2[0x10]; struct Cmd_IFS *cur; };
+struct G_IFS { char pad[0x10]; volatile int busy; char pad2[0x10]; struct FILEOPERATION_def *cur; };
 extern struct G_IFS gFileDevice_IFS __asm__("gFileDevice");
 extern void iFILESYS_ExecCommand_IFS(int) __asm__("iFILESYS_ExecCommand");
 
@@ -2220,20 +2185,20 @@ void iFILESYS_CommandCompleteCallback_impl(int ok) __asm__("iFILESYS_CommandComp
  * @param ok  nonzero if the command succeeded
  */
 void iFILESYS_CommandCompleteCallback_impl(int ok) {
-    struct Cmd_IFS *fileOp;
+    struct FILEOPERATION_def *fileOp;
     gFileDevice_IFS.busy++;
     fileOp = gFileDevice_IFS.cur;
     if (fileOp == 0) {
         return;
     }
-    if (fileOp->abort != 0) {
+    if (fileOp->cancelled != 0) {
         fileOp->status = -1;
     } else {
         fileOp->status = ok ? 1 : -2;
     }
     gFileDevice_IFS.cur = 0;
-    if (fileOp->cb != 0) {
-        fileOp->cb(fileOp->f0, fileOp->status, fileOp->f14);
+    if (fileOp->callback != 0) {
+        fileOp->callback(fileOp->op.id, fileOp->status, ((int)fileOp->userdata));
     }
     gFileDevice_IFS.busy--;
     if (gFileDevice_IFS.busy == 0) {
@@ -2251,9 +2216,7 @@ void func_003DE4C8(void) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_bypassqueuefileinfo);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct N_E4D0 { int f0; int pad[2]; char *fC; int pad2; struct N_E4D0 *next; };
-extern struct N_E4D0 *D_00519AE4_E4D0[] __asm__("D_00519AE4");
+extern struct FILEBIG_def *D_00519AE4_E4D0[] __asm__("D_00519AE4");
 extern char *strchr_E4D0(char *, int) __asm__("strchr");
 extern int FILEDEV_open_E4D0(char *, int, int *) __asm__("FILEDEV_open");
 extern int FILEDEV_getsize_E4D0(int) __asm__("FILEDEV_getsize");
@@ -2280,7 +2243,7 @@ int FILESYS_bypassqueuefileinfo(char *name, int flags, int *out) {
     int off;
     int found = 0;
     int mode;
-    struct N_E4D0 *n;
+    struct FILEBIG_def *n;
 
     *out = 0;
     file[0] = 0;
@@ -2308,8 +2271,8 @@ int FILESYS_bypassqueuefileinfo(char *name, int flags, int *out) {
     }
     if (!found && (mode & 6)) {
         for (n = D_00519AE4_E4D0[0]; n != 0 && !found; n = n->next) {
-            if ((mode & 4) && strcmp_E4D0(n->fC + 0x10, path)) continue;
-            if (BIG_locateentryz_E4D0(n->f0, file, 0, &x, &off)) {
+            if ((mode & 4) && strcmp_E4D0(n->handle->name, path)) continue;
+            if (BIG_locateentryz_E4D0(((int)n->header), file, 0, &x, &off)) {
                 found = 1;
                 *out = off;
             }
@@ -3028,23 +2991,8 @@ void finishrequest(REQUESTSTRUCTtag* req) {
 #endif
 
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct sReq {                       /* 0x30, a file request (hlafile_request[], numrequests of them) */
-    int f00;                        /* id: sequence << 8 | index */
-    struct sReq *f04;               /* next free */
-    int f08;
-    int f0C;
-    int f10;
-    unsigned int f14;
-    void (*f18)(int);               /* done callback (ASYNCFILE_setcallback) */
-    volatile int f1C;               /* busy */
-    int f20;
-    int f24;
-    int f28;
-    int f2C;
-};
-extern struct sReq *hlafile_request;
-struct sReqQueue { struct sReq *f00; struct sReq *f04; };  /* head, tail */
+extern struct REQUESTSTRUCTtag *hlafile_request;
+struct sReqQueue { struct REQUESTSTRUCTtag *f00; struct REQUESTSTRUCTtag *f04; };  /* head, tail */
 extern struct sReqQueue freequeue;             /* free requests */
 extern char hlafile_mutex[];                       /* request list mutex */
 #endif
@@ -3057,7 +3005,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", loadfileclosecallback);
 extern void FILESYS_completeop_F0B8(int) __asm__("FILESYS_completeop");
 
 /* Callback (third argument is the stream); later code takes its address as void (*)(void *). */
-void loadfileclosecallback_impl(int arg0, int arg1, struct sReq *s) __asm__("loadfileclosecallback");
+void loadfileclosecallback_impl(int arg0, int arg1, struct REQUESTSTRUCTtag *s) __asm__("loadfileclosecallback");
 /**
  * Close callback of an asynchronous file load: completes the close and finishes the request (finishrequest).
  *
@@ -3065,8 +3013,8 @@ void loadfileclosecallback_impl(int arg0, int arg1, struct sReq *s) __asm__("loa
  * @param opStatus  its status
  * @param request  the load request
  */
-void loadfileclosecallback_impl(int opHandle, int opStatus, struct sReq *request) {
-    FILESYS_completeop_F0B8(request->f1C);
+void loadfileclosecallback_impl(int opHandle, int opStatus, struct REQUESTSTRUCTtag *request) {
+    FILESYS_completeop_F0B8(request->fop);
     finishrequest((REQUESTSTRUCTtag*)request);
 }
 #endif
@@ -3176,28 +3124,28 @@ extern char loadfilesizecallback_F2C0[] __asm__("loadfilesizecallback");
  * @param opStatus  its status
  * @param request  the load request
  */
-void loadfileopencallback(int opHandle, int opStatus, struct sReq *request) {
-    int n = FILESYS_completeop_F2C0(request->f1C);
-    request->f20 = n;
+void loadfileopencallback(int opHandle, int opStatus, struct REQUESTSTRUCTtag *request) {
+    int n = FILESYS_completeop_F2C0(request->fop);
+    request->fhandle = n;
     if (n == 0) {
         finishrequest((REQUESTSTRUCTtag*)request);
         return;
     }
-    if (request->f10 != 0) {
-        request->f1C = FILESYS_close(n, 99, request);
-        if (request->f1C != 0) {
-            FILESYS_callbackop(request->f1C, loadfileclosecallback_F2C0);
+    if (request->cancelflag != 0) {
+        request->fop = FILESYS_close(n, 99, request);
+        if (request->fop != 0) {
+            FILESYS_callbackop(request->fop, loadfileclosecallback_F2C0);
         }
-    } else if (request->f14 == 0) {
-        int remaining = request->f28;
-        request->f1C = FILESYS_read(n, request->f24, request->f2C, remaining <= 0x8000 ? remaining : 0x8000, 99, request);
-        if (request->f1C != 0) {
-            FILESYS_callbackop(request->f1C, loadfilereadcallback_F2C0);
+    } else if (((unsigned int)request->loadaddr) == 0) {
+        int remaining = request->readsize;
+        request->fop = FILESYS_read(n, request->foffset, ((int)request->destaddr), remaining <= 0x8000 ? remaining : 0x8000, 99, request);
+        if (request->fop != 0) {
+            FILESYS_callbackop(request->fop, loadfilereadcallback_F2C0);
         }
     } else {
-        request->f1C = FILESYS_size_F2C0(n, 99, request);
-        if (request->f1C != 0) {
-            FILESYS_callbackop(request->f1C, loadfilesizecallback_F2C0);
+        request->fop = FILESYS_size_F2C0(n, 99, request);
+        if (request->fop != 0) {
+            FILESYS_callbackop(request->fop, loadfilesizecallback_F2C0);
         }
     }
 }
@@ -3208,7 +3156,6 @@ INCLUDE_ASM("ealib/seg_2DCAE8", readfilereadcallback);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int FILESYS_completeop_F3C0(int) __asm__("FILESYS_completeop");
-struct Q_F3C0 { int w0; int p1; int f8; int pc; int f10; int p14; int p18; volatile int h; int f20; int f24; int f28; int f2c; };
 
 /**
  * Read callback of an asynchronous read (ASYNCFILE_read): adds the chunk to the bytes read and the destination, and
@@ -3219,23 +3166,23 @@ struct Q_F3C0 { int w0; int p1; int f8; int pc; int f10; int p14; int p18; volat
  * @param opStatus  its status
  * @param request  the read request
  */
-void readfilereadcallback(int opHandle, int opStatus, struct Q_F3C0 *request) {
-    int n = FILESYS_completeop_F3C0(request->h);
+void readfilereadcallback(int opHandle, int opStatus, struct REQUESTSTRUCTtag *request) {
+    int n = FILESYS_completeop_F3C0(request->fop);
     int x;
     int chunkSize;
-    request->f8 += n;
-    request->f2c += n;
-    if (n <= 0x7FFF || request->f10 != 0) {
+    request->bytesread += n;
+    (*(int*)&request->destaddr) += n;
+    if (n <= 0x7FFF || request->cancelflag != 0) {
         finishrequest((REQUESTSTRUCTtag*)request);
         return;
     }
-    x = request->f28 - n;
+    x = request->readsize - n;
     chunkSize = x > 0x8000 ? 0x8000 : x;
-    request->f24 += n;
-    request->f28 = x;
-    request->h = FILESYS_read(request->f20, request->f24, request->f2c, chunkSize, 99, request);
-    if (request->h != 0) {
-        FILESYS_callbackop(request->h, readfilereadcallback);
+    request->foffset += n;
+    request->readsize = x;
+    request->fop = FILESYS_read(request->fhandle, request->foffset, ((int)request->destaddr), chunkSize, 99, request);
+    if (request->fop != 0) {
+        FILESYS_callbackop(request->fop, readfilereadcallback);
     }
 }
 #endif
@@ -3304,18 +3251,18 @@ void ASYNCFILE_restore(void) {
     if (hlafile_request != 0) {
         int i;
         for (i = 0; i < numrequests; i++) {
-            ASYNCFILE_cancel(hlafile_request[i].f00);
+            ASYNCFILE_cancel(hlafile_request[i].id);
         }
         for (;;) {
             int busy = 0;
             for (i = 0; i < numrequests; i++) {
-                if (hlafile_request[i].f1C != 0) busy = 1;
+                if (hlafile_request[i].fop != 0) busy = 1;
             }
             if (!busy) break;
             if (THREAD_iscurrent(0) != 0) SYNCTASK_run(0);
             THREAD_yield(0);
         }
-        gFileSysOpts.f08(hlafile_request);
+        gFileSysOpts.free(hlafile_request);
         MUTEX_destroy_F570(hlafile_mutex);
         hlafile_request = 0;
     }
@@ -3498,11 +3445,11 @@ extern void munlock_F980(char *) __asm__("MUTEX_unlock");
  * @return 1 when the request has no file-system command pending, 0 while one is, -1 for an invalid handle
  */
 int ASYNCFILE_getstatus(int handle) {
-    struct sReq *req;
+    struct REQUESTSTRUCTtag *req;
     int status;
     mlock_F980(hlafile_mutex);
     req = locaterequest(handle);
-    status = req ? req->f1C == 0 : -1;
+    status = req ? req->fop == 0 : -1;
     munlock_F980(hlafile_mutex);
     return status;
 }
@@ -3530,31 +3477,31 @@ int ASYNCFILE_release(int h, int *a, int *b);
  * @return 1 on success, -1 for an invalid or cancelled request
  */
 int ASYNCFILE_release(int handle, int *address, int *size) {
-    struct sReq *req;
+    struct REQUESTSTRUCTtag *req;
     int busy = 0;
     MUTEX_lock(hlafile_mutex);
     req = locaterequest(handle);
     if (req != 0) {
-        busy = req->f10;
+        busy = req->cancelflag;
         if (busy == 0) {
-            req->f0C = 1;
+            req->releaseflag = 1;
         }
     }
     MUTEX_unlock_AR(hlafile_mutex);
     if (req == 0 || busy != 0) {
         return -1;
     }
-    while (req->f1C != 0) {
-        FILESYS_waitop(req->f1C);
+    while (req->fop != 0) {
+        FILESYS_waitop(req->fop);
     }
-    if (req->f10 != 0) {
+    if (req->cancelflag != 0) {
         if (address != 0) *address = 0;
         if (size != 0) *size = 0;
         releaserequest((REQUESTSTRUCTtag*)req);
         return -1;
     }
-    if (address != 0) *address = req->f2C - req->f08;
-    if (size != 0) *size = req->f08;
+    if (address != 0) *address = ((int)req->destaddr) - req->bytesread;
+    if (size != 0) *size = req->bytesread;
     releaserequest((REQUESTSTRUCTtag*)req);
     return 1;
 }
@@ -5668,7 +5615,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", loadbigheaderatom);
 /* gFileSysOpts: the file system's settings (0x24 bytes: FILESYS_getopts hands out a copy, FILESYS_setopts takes one).
    Field names are their offsets; f04 / f08 are also reached through their own splat symbols. */
 /* built-in file table entry (f20) */
-extern struct sC10 gFileSysOpts;
+extern struct FILESYSOPTS gFileSysOpts;
 extern int FILESYS_opensync(int, int, int, void *);
 
 extern int FILESYS_closesync(int a, int b);
@@ -5689,25 +5636,25 @@ extern void MEM_copy_1D68(char *, char *, int) __asm__("MEM_copy");
 int loadbigheaderatom(int priority, int *loadArgs) {
     int fileHandle;
     if (FILESYS_opensync(loadArgs[0], 1, priority, &fileHandle)) {
-        char *hdr = gFileSysOpts.f04((char *)loadArgs[0], 2704, loadArgs[2]);
+        char *hdr = gFileSysOpts.malloc((char *)loadArgs[0], 2704, loadArgs[2]);
         if (hdr) {
             FILESYS_readsync(fileHandle, 0, (int)hdr, 2704, priority - 1);
             if (BIG_typeofheader_1D68(hdr) == 0) {
-                gFileSysOpts.f08(hdr);
+                gFileSysOpts.free(hdr);
                 FILESYS_closesync(fileHandle, priority - 1);
                 return 0;
             }
             {
                 int size = BIG_sizeofheader_1D68(hdr);
                 if (size > 2704) {
-                    char *buf = gFileSysOpts.f04((char *)loadArgs[0], size, loadArgs[2]);
+                    char *buf = gFileSysOpts.malloc((char *)loadArgs[0], size, loadArgs[2]);
                     if (buf == 0) {
-                        gFileSysOpts.f08(hdr);
+                        gFileSysOpts.free(hdr);
                         FILESYS_closesync(fileHandle, priority - 1);
                         return 0;
                     }
                     MEM_copy_1D68(buf, hdr, 2704);
-                    gFileSysOpts.f08(hdr);
+                    gFileSysOpts.free(hdr);
                     hdr = buf;
                     FILESYS_readsync(fileHandle, 2704, (int)(hdr + 0xA90), size - 2704, priority - 1);
                 }
@@ -5957,21 +5904,21 @@ int FILE_loadpackz_impl(int name, int size) {
     if (data == 0) return 0;
     buf = unpacksizez_2190(data);
     if (sz == 0 || buf == 0) return data;
-    packedCopy = (int)gFileSysOpts.f04((char *)name, sz, size ^ 0x100);
+    packedCopy = (int)gFileSysOpts.malloc((char *)name, sz, size ^ 0x100);
     if (packedCopy == 0) {
-        gFileSysOpts.f08((void *)data);
+        gFileSysOpts.free((void *)data);
         return 0;
     }
     func_003E6574_2190(packedCopy, data, sz);
-    gFileSysOpts.f08((void *)data);
-    data = (int)gFileSysOpts.f04((char *)name, buf, size);
+    gFileSysOpts.free((void *)data);
+    data = (int)gFileSysOpts.malloc((char *)name, buf, size);
     if (data != 0) {
         if (unpackz_2190(packedCopy, data) == 0) {
-            gFileSysOpts.f08((void *)data);
+            gFileSysOpts.free((void *)data);
             data = 0;
         }
     }
-    gFileSysOpts.f08((void *)packedCopy);
+    gFileSysOpts.free((void *)packedCopy);
     DCACHE_WB_ALL_2190();
     return data;
 }
@@ -6025,21 +5972,21 @@ int FILE_loadpackatz_pkz(int name, int dst, int max) {
     if (buffer == 0) return 0;
     n = unpacksizez_pkz(buffer);
     if (size > 0 && n > 0) {
-        buf = (int)gFileSysOpts.f04((char *)name, n, 0x100);
+        buf = (int)gFileSysOpts.malloc((char *)name, n, 0x100);
         if (buf != 0) {
             if (unpackz_pkz(buffer, buf) == 0) {
-                gFileSysOpts.f08((void *)buf);
+                gFileSysOpts.free((void *)buf);
                 buf = 0;
             }
         }
-        gFileSysOpts.f08((void *)buffer);
+        gFileSysOpts.free((void *)buffer);
         if (buf == 0) return 0;
         size = n;
         buffer = buf;
     }
     if (max > 0 && max < size) size = max;
     MEM_copy_pkz(dst, buffer, size);
-    gFileSysOpts.f08((void *)buffer);
+    gFileSysOpts.free((void *)buffer);
     /* PORT: hand-written data-cache writeback loop (see the PORT line above the function). */
     __asm__ __volatile__(
         ".set push\n\t"
@@ -6633,7 +6580,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILEDEV_resolvename);
 /* gFileSysOpts: the file system's settings (0x24 bytes: FILESYS_getopts hands out a copy, FILESYS_setopts takes one).
    Field names are their offsets; f04 / f08 are also reached through their own splat symbols. */
 /* built-in file table entry (f20) */
-extern struct sC10 gFileSysOpts;
+extern struct FILESYSOPTS gFileSysOpts;
 extern char *REAL_filedevice;
 extern char currentdirectory[0x100];                  /* the current directory */
 extern char *strchr_3098(char *, int) __asm__("strchr");
@@ -10967,7 +10914,6 @@ extern char str_ADDR_b[];
 extern char str_PING_b[];
 extern char str_pct_dms[];
 
-struct Ev_7C40 { int f0; int type; int f8; char *data; };
 struct Rec_7C40 {
     int f0;
     int tag;
@@ -10976,7 +10922,7 @@ struct Rec_7C40 {
     int f10;
     int f14;
     char name[0x20];
-    void (*fn)(char *, struct Ev_7C40 *, int);
+    void (*fn)(char *, struct LobbyApiMsgT *, int);
     int ctx;
     struct Rec_7C40 *next;
 };
@@ -10998,7 +10944,7 @@ void func_003E7C40(char *self) {
     char buf[0x100];
     char name[0x20];
     struct Rec_7C40 rec;
-    struct Ev_7C40 ev;
+    struct LobbyApiMsgT ev;
     char evbuf[0x200];
     int len;
     unsigned int addr;
@@ -11012,10 +10958,10 @@ void func_003E7C40(char *self) {
         addr = cDirtysock_tag_TagFieldGetAddr_7C40(cDirtysock_tag_TagFieldFind_7C40(buf, str_ORIG), info[1]);
         cDirtysock_tag_TagFieldGetString_7C40(cDirtysock_tag_TagFieldFind_7C40(buf, str_NAME_b), name, 0x20, D_004A4888);
         if (func_003E7918_7C40(self, &rec, name, addr, 0) != 0 && rec.fn != 0) {
-            ev.f0 = 0;
-            ev.type = 0x70696E67;
-            ev.f8 = 0;
-            ev.data = evbuf;
+            ev.unk_00 = 0;
+            ev.unk_04 = 0x70696E67;
+            ev.unk_08 = 0;
+            ev.unk_0C = evbuf;
             evbuf[0] = 0;
             cDirtysock_tag_TagFieldSetString_7C40(evbuf, 0x200, str_NAME_b, name);
             cDirtysock_tag_TagFieldSetNumber_7C40(evbuf, 0x200, str_ADDR_b, rec.id);
@@ -11048,10 +10994,10 @@ void func_003E7C40(char *self) {
     currentTick = func_003F5D88_7C40(*(int *)self);
     while (func_003E7918_7C40(self, &rec, name, -1, currentTick) != 0) {
         if (rec.fn != 0) {
-            ev.f0 = 0;
-            ev.type = 0x70696E67;
-            ev.f8 = -1;
-            ev.data = evbuf;
+            ev.unk_00 = 0;
+            ev.unk_04 = 0x70696E67;
+            ev.unk_08 = -1;
+            ev.unk_0C = evbuf;
             evbuf[0] = 0;
             cDirtysock_tag_TagFieldSetString_7C40(evbuf, 0x200, str_NAME_b, rec.name);
             cDirtysock_tag_TagFieldSetNumber_7C40(evbuf, 0x200, str_ADDR_b, rec.id);
