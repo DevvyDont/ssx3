@@ -2628,12 +2628,12 @@ struct sPair_8818 {
     int b;
 };
 
-extern sColour_8818 D_004D3B18;
-extern sColour_8818 D_004D3B28;
-extern sColour_8818 D_004D3B38;
-extern sColour_8818 D_004D3B48;
-extern sColour_8818 D_004D3B58;
-extern sColour_8818 D_004D3B68;
+extern sColour_8818 cfm_sav_Render_Halo_SUN_kSunColour_3;
+extern sColour_8818 cfm_sav_Render_Halo_SUN_LENS0_kLens0Colour_3;
+extern sColour_8818 cfm_sav_Render_Halo_SUN_LENS1_kLens1Colour_3;
+extern sColour_8818 cfm_sav_Render_Halo_SUN_LENS2_kLens2Colour_3;
+extern sColour_8818 cfm_sav_Render_Halo_SUN_LENS3_kLens3Colour_3;
+extern sColour_8818 cfm_sav_Render_Halo_SUN_LENS4_kLens4Colour_3;
 extern sColour_8818 D_004D3B78;
 extern sColour_8818 D_004D3B88;
 extern sColour_8818 D_004D3B98;
@@ -2685,20 +2685,20 @@ extern sColour_8818 D_004D3E68;
 extern sColour_8818 D_004D3E78;
 extern sColour_8818 D_004D3E88;
 extern sPair_8818 D_004A5260;
-extern sKey_8818 D_004A5268;
-extern sKey_8818 D_004A5270;
-extern sKey_8818 D_004A5278;
-extern sKey_8818 D_004A5280;
-extern sKey_8818 D_004A5288;
-extern sKey_8818 D_004A5290;
-extern sKey_8818 D_004A5298;
-extern sKey_8818 D_004A52A0;
-extern sKey_8818 D_004A52A8;
-extern sKey_8818 D_004A52B0;
-extern sKey_8818 D_004A52B8;
-extern sKey_8818 D_004A52C0;
-extern sKey_8818 D_004A52C8;
-extern sKey_8818 D_004A52D0;
+extern sKey_8818 kWPR_MusicTrigger_2;
+extern sKey_8818 kWPR_Mix_2;
+extern sKey_8818 kWPR_Ambience_2;
+extern sKey_8818 kWPR_Speech_2;
+extern sKey_8818 kWPR_Camera_2;
+extern sKey_8818 kWPR_Fog_2;
+extern sKey_8818 kWPR_LightGlow_2;
+extern sKey_8818 kWPR_ScreenTint_2;
+extern sKey_8818 kWPR_SkyBox_2;
+extern sKey_8818 kWPR_Sun_2;
+extern sKey_8818 kWPR_Surface_2;
+extern sKey_8818 kWPR_Lighting_2;
+extern sKey_8818 kWPR_Weather_2;
+extern sKey_8818 kWPR_Danger_2;
 
 static inline void Key_8818(sKey_8818* p, int i)
 {
@@ -2715,9 +2715,9 @@ static inline void Pair_8818(sPair_8818* p)
 extern "C" void __sti__all_in_one_sound_cpp_impl(int init, int prio) __asm__("__sti__all_in_one_sound_cpp");
 
 /**
- * Static initializer of the unit: fills the colour tables D_004D3B18.. and the 14 colour keys D_004A5268..
+ * Static initializer of the unit: fills the colour tables cfm_sav_Render_Halo_SUN_kSunColour_3.. and the 14 colour keys kWPR_MusicTrigger_2..
  *
- * Runs only for (1, 0xFFFF): sets the float colour tables, clears D_004A5260 and gives each key D_004A5268 + 8k index
+ * Runs only for (1, 0xFFFF): sets the float colour tables, clears D_004A5260 and gives each key kWPR_MusicTrigger_2 + 8k index
  * and id k (0..13). Listed in the global constructor table.
  *
  * @param init  nonzero to initialise
@@ -2726,30 +2726,30 @@ extern "C" void __sti__all_in_one_sound_cpp_impl(int init, int prio) __asm__("__
 extern "C" void __sti__all_in_one_sound_cpp_impl(int init, int prio)
 {
     if (prio == 0xFFFF && init) {
-        D_004D3B18.a = 1.0f;
-        D_004D3B18.b = 1.0f;
-        D_004D3B18.c = 1.0f;
-        D_004D3B18.d = 0.5f;
-        D_004D3B28.a = 0.4998680055141449f;
-        D_004D3B28.b = 1.0f;
-        D_004D3B28.c = 1.0f;
-        D_004D3B28.d = 0.0f;
-        D_004D3B38.a = 0.12951700389385223f;
-        D_004D3B38.b = 1.0f;
-        D_004D3B38.c = 1.0f;
-        D_004D3B38.d = 0.0f;
-        D_004D3B48.a = 0.22426900267601013f;
-        D_004D3B48.b = 0.9402310252189636f;
-        D_004D3B48.c = 0.5425059795379639f;
-        D_004D3B48.d = 0.0004030000127386302f;
-        D_004D3B58.a = 0.4652079939842224f;
-        D_004D3B58.b = 0.32170501351356506f;
-        D_004D3B58.c = 0.9943439960479736f;
-        D_004D3B58.d = 0.0f;
-        D_004D3B68.a = 0.17792600393295288f;
-        D_004D3B68.b = 1.0f;
-        D_004D3B68.c = 1.0f;
-        D_004D3B68.d = 0.0f;
+        cfm_sav_Render_Halo_SUN_kSunColour_3.a = 1.0f;
+        cfm_sav_Render_Halo_SUN_kSunColour_3.b = 1.0f;
+        cfm_sav_Render_Halo_SUN_kSunColour_3.c = 1.0f;
+        cfm_sav_Render_Halo_SUN_kSunColour_3.d = 0.5f;
+        cfm_sav_Render_Halo_SUN_LENS0_kLens0Colour_3.a = 0.4998680055141449f;
+        cfm_sav_Render_Halo_SUN_LENS0_kLens0Colour_3.b = 1.0f;
+        cfm_sav_Render_Halo_SUN_LENS0_kLens0Colour_3.c = 1.0f;
+        cfm_sav_Render_Halo_SUN_LENS0_kLens0Colour_3.d = 0.0f;
+        cfm_sav_Render_Halo_SUN_LENS1_kLens1Colour_3.a = 0.12951700389385223f;
+        cfm_sav_Render_Halo_SUN_LENS1_kLens1Colour_3.b = 1.0f;
+        cfm_sav_Render_Halo_SUN_LENS1_kLens1Colour_3.c = 1.0f;
+        cfm_sav_Render_Halo_SUN_LENS1_kLens1Colour_3.d = 0.0f;
+        cfm_sav_Render_Halo_SUN_LENS2_kLens2Colour_3.a = 0.22426900267601013f;
+        cfm_sav_Render_Halo_SUN_LENS2_kLens2Colour_3.b = 0.9402310252189636f;
+        cfm_sav_Render_Halo_SUN_LENS2_kLens2Colour_3.c = 0.5425059795379639f;
+        cfm_sav_Render_Halo_SUN_LENS2_kLens2Colour_3.d = 0.0004030000127386302f;
+        cfm_sav_Render_Halo_SUN_LENS3_kLens3Colour_3.a = 0.4652079939842224f;
+        cfm_sav_Render_Halo_SUN_LENS3_kLens3Colour_3.b = 0.32170501351356506f;
+        cfm_sav_Render_Halo_SUN_LENS3_kLens3Colour_3.c = 0.9943439960479736f;
+        cfm_sav_Render_Halo_SUN_LENS3_kLens3Colour_3.d = 0.0f;
+        cfm_sav_Render_Halo_SUN_LENS4_kLens4Colour_3.a = 0.17792600393295288f;
+        cfm_sav_Render_Halo_SUN_LENS4_kLens4Colour_3.b = 1.0f;
+        cfm_sav_Render_Halo_SUN_LENS4_kLens4Colour_3.c = 1.0f;
+        cfm_sav_Render_Halo_SUN_LENS4_kLens4Colour_3.d = 0.0f;
         D_004D3B78.a = 0.4411740005016327f;
         D_004D3B78.b = 0.41388601064682007f;
         D_004D3B78.c = 0.3211260139942169f;
@@ -2951,20 +2951,20 @@ extern "C" void __sti__all_in_one_sound_cpp_impl(int init, int prio)
         D_004D3E88.c = 0.0f;
         D_004D3E88.d = 0.0f;
         Pair_8818(&D_004A5260);
-        Key_8818(&D_004A5268, 0);
-        Key_8818(&D_004A5270, 1);
-        Key_8818(&D_004A5278, 2);
-        Key_8818(&D_004A5280, 3);
-        Key_8818(&D_004A5288, 4);
-        Key_8818(&D_004A5290, 5);
-        Key_8818(&D_004A5298, 6);
-        Key_8818(&D_004A52A0, 7);
-        Key_8818(&D_004A52A8, 8);
-        Key_8818(&D_004A52B0, 9);
-        Key_8818(&D_004A52B8, 10);
-        Key_8818(&D_004A52C0, 11);
-        Key_8818(&D_004A52C8, 12);
-        Key_8818(&D_004A52D0, 13);
+        Key_8818(&kWPR_MusicTrigger_2, 0);
+        Key_8818(&kWPR_Mix_2, 1);
+        Key_8818(&kWPR_Ambience_2, 2);
+        Key_8818(&kWPR_Speech_2, 3);
+        Key_8818(&kWPR_Camera_2, 4);
+        Key_8818(&kWPR_Fog_2, 5);
+        Key_8818(&kWPR_LightGlow_2, 6);
+        Key_8818(&kWPR_ScreenTint_2, 7);
+        Key_8818(&kWPR_SkyBox_2, 8);
+        Key_8818(&kWPR_Sun_2, 9);
+        Key_8818(&kWPR_Surface_2, 10);
+        Key_8818(&kWPR_Lighting_2, 11);
+        Key_8818(&kWPR_Weather_2, 12);
+        Key_8818(&kWPR_Danger_2, 13);
     }
 }
 #endif

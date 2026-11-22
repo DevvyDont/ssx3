@@ -1180,9 +1180,9 @@ extern "C" void cSSXAudio_StartEvent(cSSXAudio* self);
 extern "C" void func_002A4A78(void* self);
 struct cWorldPainterManArg;
 void* cWorldPainterMan_getQuery(void*, cWorldPainterManArg*);
-extern char D_004A5268;
-extern char D_004A5270;
-extern char D_004A5278;
+extern char kWPR_MusicTrigger_2;
+extern char kWPR_Mix_2;
+extern char kWPR_Ambience_2;
 
 static inline int sa_state_867E8()
 {
@@ -1230,9 +1230,9 @@ extern "C" void cSSXAudio_InGameInit(cSSXAudio* self)
         }
     }
     cSSXAudio_ResetLift(((char*)self));
-    cWorldPainterManArg* pa = (cWorldPainterManArg*)&D_004A5268;
-    cWorldPainterManArg* pb = (cWorldPainterManArg*)&D_004A5278;
-    cWorldPainterManArg* pc = (cWorldPainterManArg*)&D_004A5270;
+    cWorldPainterManArg* pa = (cWorldPainterManArg*)&kWPR_MusicTrigger_2;
+    cWorldPainterManArg* pb = (cWorldPainterManArg*)&kWPR_Ambience_2;
+    cWorldPainterManArg* pc = (cWorldPainterManArg*)&kWPR_Mix_2;
     void* painterMan = SSXApp->Game->World->m_pWorldPainterMan;
     self->unk_625C[0] = cWorldPainterMan_getQuery(painterMan, pa);
     self->unk_625C[1] = cWorldPainterMan_getQuery(painterMan, pa);

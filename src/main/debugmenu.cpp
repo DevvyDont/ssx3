@@ -2779,12 +2779,12 @@ static inline void cTubeMenu_dtor(void* vself)
     cMenu__cMenu(self, 2);
 }
 
-extern sV4_E8D8 D_004C9560;
-extern sV4_E8D8 D_004C9570;
-extern sV4_E8D8 D_004C9580;
-extern sV4_E8D8 D_004C9590;
-extern sV4_E8D8 D_004C95A0;
-extern sV4_E8D8 D_004C95B0;
+extern sV4_E8D8 cfm_sav_Render_Halo_SUN_kSunColour;
+extern sV4_E8D8 cfm_sav_Render_Halo_SUN_LENS0_kLens0Colour;
+extern sV4_E8D8 cfm_sav_Render_Halo_SUN_LENS1_kLens1Colour;
+extern sV4_E8D8 cfm_sav_Render_Halo_SUN_LENS2_kLens2Colour;
+extern sV4_E8D8 cfm_sav_Render_Halo_SUN_LENS3_kLens3Colour;
+extern sV4_E8D8 cfm_sav_Render_Halo_SUN_LENS4_kLens4Colour;
 extern sV4_E8D8 D_004C95C0;
 extern sV4_E8D8 D_004C95D0;
 extern sV4_E8D8 D_004C95E0;
@@ -2859,12 +2859,12 @@ extern "C" void __sti__visualeffectsmenu_cpp_impl(int init, int prio)
 {
     if (prio == 0xFFFF) {
         if (init != 0) {
-            new (&D_004C9560) sV4_E8D8(1.0f, 1.0f, 1.0f, 0.5f);
-            new (&D_004C9570) sV4_E8D8(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
-            new (&D_004C9580) sV4_E8D8(0.12951700389385223f, 1.0f, 1.0f, 0.0f);
-            new (&D_004C9590) sV4_E8D8(0.22426900267601013f, 0.9402310252189636f, 0.5425059795379639f, 0.0004030000127386302f);
-            new (&D_004C95A0) sV4_E8D8(0.4652079939842224f, 0.32170501351356506f, 0.9943439960479736f, 0.0f);
-            new (&D_004C95B0) sV4_E8D8(0.17792600393295288f, 1.0f, 1.0f, 0.0f);
+            new (&cfm_sav_Render_Halo_SUN_kSunColour) sV4_E8D8(1.0f, 1.0f, 1.0f, 0.5f);
+            new (&cfm_sav_Render_Halo_SUN_LENS0_kLens0Colour) sV4_E8D8(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
+            new (&cfm_sav_Render_Halo_SUN_LENS1_kLens1Colour) sV4_E8D8(0.12951700389385223f, 1.0f, 1.0f, 0.0f);
+            new (&cfm_sav_Render_Halo_SUN_LENS2_kLens2Colour) sV4_E8D8(0.22426900267601013f, 0.9402310252189636f, 0.5425059795379639f, 0.0004030000127386302f);
+            new (&cfm_sav_Render_Halo_SUN_LENS3_kLens3Colour) sV4_E8D8(0.4652079939842224f, 0.32170501351356506f, 0.9943439960479736f, 0.0f);
+            new (&cfm_sav_Render_Halo_SUN_LENS4_kLens4Colour) sV4_E8D8(0.17792600393295288f, 1.0f, 1.0f, 0.0f);
             new (&D_004C95C0) sV4_E8D8(0.4411740005016327f, 0.41388601064682007f, 0.3211260139942169f, 0.4398239850997925f);
             new (&D_004C95D0) sV4_E8D8(0.500997006893158f, 0.24849599599838257f, 1.0f, 1.0f);
             new (&D_004C95E0) sV4_E8D8(0.27687299251556396f, 0.6395620107650757f, 0.13423900306224823f, 0.0f);
@@ -4182,7 +4182,7 @@ struct sSlot_0CB0 {
 extern "C" void* cAvalancheMenu_cAvalancheMenu(cAvalancheMenu* self);
 extern "C" void cAvalancheMenu__cAvalancheMenu(cAvalancheMenu* self, int flags);
 
-extern char D_004D1908[], D_004D1918[], D_004D1928[], D_004D1938[], D_004D1948[], D_004D1958[], D_004D1968[], D_004D1978[], D_004D1988[], D_004D1998[], D_004D19A8[], D_004D19B8[], D_004D19C8[], D_004D19D8[], D_004D19E8[], D_004D19F8[], D_004D1A08[], D_004D1A18[], D_004D1A28[], D_004D1A38[], D_004D1A48[], D_004D1A58[], D_004D1A68[], D_004D1A78[], D_004D1A88[], D_004D1A98[], D_004D1AA8[], D_004D1AB8[], D_004D1AC8[], D_004D1AD8[], D_004D1AE8[], D_004D1AF8[], D_004D1B08[], D_004D1B18[], D_004D1B28[], D_004D1B38[], D_004D1B48[], D_004D1B58[], D_004D1B68[], D_004D1B78[], D_004D1B88[], D_004D1B98[], D_004D1BA8[], D_004D1BB8[], D_004D1BC8[], D_004D1BD8[], D_004D1BE8[], D_004D1BF8[], D_004D1C08[], D_004D1C18[], D_004D1C28[], D_004D1C38[], D_004D1C48[], D_004D1C58[], D_004D1C68[], D_004D1C78[];
+extern char cfm_sav_Render_Halo_SUN_kSunColour_2[], cfm_sav_Render_Halo_SUN_LENS0_kLens0Colour_2[], cfm_sav_Render_Halo_SUN_LENS1_kLens1Colour_2[], cfm_sav_Render_Halo_SUN_LENS2_kLens2Colour_2[], cfm_sav_Render_Halo_SUN_LENS3_kLens3Colour_2[], cfm_sav_Render_Halo_SUN_LENS4_kLens4Colour_2[], D_004D1968[], D_004D1978[], D_004D1988[], D_004D1998[], D_004D19A8[], D_004D19B8[], D_004D19C8[], D_004D19D8[], D_004D19E8[], D_004D19F8[], D_004D1A08[], D_004D1A18[], D_004D1A28[], D_004D1A38[], D_004D1A48[], D_004D1A58[], D_004D1A68[], D_004D1A78[], D_004D1A88[], D_004D1A98[], D_004D1AA8[], D_004D1AB8[], D_004D1AC8[], D_004D1AD8[], D_004D1AE8[], D_004D1AF8[], D_004D1B08[], D_004D1B18[], D_004D1B28[], D_004D1B38[], D_004D1B48[], D_004D1B58[], D_004D1B68[], D_004D1B78[], D_004D1B88[], D_004D1B98[], D_004D1BA8[], D_004D1BB8[], D_004D1BC8[], D_004D1BD8[], D_004D1BE8[], D_004D1BF8[], D_004D1C08[], D_004D1C18[], D_004D1C28[], D_004D1C38[], D_004D1C48[], D_004D1C58[], D_004D1C68[], D_004D1C78[];
 extern char __AvalancheMenu[];
 extern int D_004A5060;
 extern int D_004A5064;
@@ -4195,7 +4195,7 @@ extern "C" void __sti__aivisualeffectsmenu_cpp_impl(int init, int prio) __asm__(
  * destruction routine of aivisualeffectsmenu.cpp).
  *
  * Acts only for the default priority. With @p init set it builds the same 56 four-float constants as
- * __sti__visualeffectsmenu_cpp (its own copies at D_004D1908..D_004D1C78), zeroes D_004A5060 and D_004A5064,
+ * __sti__visualeffectsmenu_cpp (its own copies at cfm_sav_Render_Halo_SUN_kSunColour_2..D_004D1C78), zeroes D_004A5060 and D_004A5064,
  * numbers the 14 key objects D_004A5068..D_004A50D0 from 0 to 13 and constructs the static "Avalanche Menu" at
  * __AvalancheMenu. With @p init clear it destroys that menu with flags 2 (no free).
  *
@@ -4206,12 +4206,12 @@ extern "C" void __sti__aivisualeffectsmenu_cpp_impl(int init, int prio)
 {
     if (prio == 0xFFFF) {
         if (init != 0) {
-            new (D_004D1908) sV4_0CB0(1.0f, 1.0f, 1.0f, 0.5f);
-            new (D_004D1918) sV4_0CB0(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
-            new (D_004D1928) sV4_0CB0(0.12951700389385223f, 1.0f, 1.0f, 0.0f);
-            new (D_004D1938) sV4_0CB0(0.22426900267601013f, 0.9402310252189636f, 0.5425059795379639f, 0.0004030000127386302f);
-            new (D_004D1948) sV4_0CB0(0.4652079939842224f, 0.32170501351356506f, 0.9943439960479736f, 0.0f);
-            new (D_004D1958) sV4_0CB0(0.17792600393295288f, 1.0f, 1.0f, 0.0f);
+            new (cfm_sav_Render_Halo_SUN_kSunColour_2) sV4_0CB0(1.0f, 1.0f, 1.0f, 0.5f);
+            new (cfm_sav_Render_Halo_SUN_LENS0_kLens0Colour_2) sV4_0CB0(0.4998680055141449f, 1.0f, 1.0f, 0.0f);
+            new (cfm_sav_Render_Halo_SUN_LENS1_kLens1Colour_2) sV4_0CB0(0.12951700389385223f, 1.0f, 1.0f, 0.0f);
+            new (cfm_sav_Render_Halo_SUN_LENS2_kLens2Colour_2) sV4_0CB0(0.22426900267601013f, 0.9402310252189636f, 0.5425059795379639f, 0.0004030000127386302f);
+            new (cfm_sav_Render_Halo_SUN_LENS3_kLens3Colour_2) sV4_0CB0(0.4652079939842224f, 0.32170501351356506f, 0.9943439960479736f, 0.0f);
+            new (cfm_sav_Render_Halo_SUN_LENS4_kLens4Colour_2) sV4_0CB0(0.17792600393295288f, 1.0f, 1.0f, 0.0f);
             new (D_004D1968) sV4_0CB0(0.4411740005016327f, 0.41388601064682007f, 0.3211260139942169f, 0.4398239850997925f);
             new (D_004D1978) sV4_0CB0(0.500997006893158f, 0.24849599599838257f, 1.0f, 1.0f);
             new (D_004D1988) sV4_0CB0(0.27687299251556396f, 0.6395620107650757f, 0.13423900306224823f, 0.0f);
