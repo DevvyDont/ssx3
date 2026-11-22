@@ -28,7 +28,14 @@ struct cMenuSys {
     cFont* Font;                    // 0x058 [O]
     cInput* Input;                  // 0x05C [O]
     int BoxTexture;                 // 0x060 [O]
-    int MenuYOffset;                // 0x064 [O]
+    int MenuYOffset;                // 0x064 [O]; [U] cMenu's layout (util/menu) reads it with getDisplayHeight
+
+#ifdef __cplusplus
+    // [O] cMenuSys::getDisplayWidth / getDisplayHeight (On Tour: the screen size, height less MenuYOffset); [U] retail
+    // inlines them in cMenu's layout (util/menu: 640 and 480 - MenuYOffset, the unit's view cMenuSys_2CAD58).
+    int getDisplayWidth() { return 640; }
+    int getDisplayHeight() { return 480 - MenuYOffset; }
+#endif
 };
 
 CHECK_OFFSET(cMenuSys, MenuDepth, 0x000);

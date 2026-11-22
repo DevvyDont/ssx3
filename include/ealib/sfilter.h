@@ -20,6 +20,7 @@
 // functions and node sizes; [O] On Tour's DWARF; [U] retail use.
 
 #include "layout.h"
+#include "ealib/snd.h"         // MIXCONFIG (SNDMIXSTATE::mc)
 
 // C units (ealib/seg_2B4578.c, ealib/seg_2DCAE8.c) name these types without the struct keyword (views group D).
 // CMTBLKDecf's typedef is in ealib/mtdecf.h (pDecoder spells `struct CMTBLKDecf`), so both headers can be included.
@@ -51,6 +52,7 @@ typedef struct MIXERSTATE MIXERSTATE;
 typedef struct SNDFILTERDEF SNDFILTERDEF;
 typedef struct SNDMIXVOICE SNDMIXVOICE;
 typedef struct FT16STATE FT16STATE;
+typedef struct SNDMIXSTATE SNDMIXSTATE;
 typedef struct RSFSTATE RSFSTATE;
 #endif
 
@@ -650,5 +652,65 @@ CHECK_OFFSET(SNDMIXVOICE, unk_54, 0x54);
 CHECK_OFFSET(SNDMIXVOICE, unk_58, 0x58);
 CHECK_OFFSET(SNDMIXVOICE, phps, 0x5C);
 CHECK_SIZE(SNDMIXVOICE, 0x60);
+
+// SNDMIXSTATE, retail PS2 version (0x1E4; On Tour 0x200): the software mixer's state, sndmix [O] (On Tour `SNDMIXSTATE
+// sndmix`, smixer.c / sinit16.c / sfxrevc.c; retail D_00515B40, and D_00515D1C = smv). [O] member names and order;
+// retail has no pinterleavebuf, its unpacker tables are [6][3] instead of [3][7] and stoppedvoiceaccwet is one float in
+// place (On Tour a float*), which is exactly On Tour's 0x200 less 0x1C, so every member from punalignedtempbuf on sits
+// lower than On Tour's. [R] MIX_create (On Tour smixer.c: copies the MIXCONFIG to mc, takes two 0x2058-byte temp buffers
+// and outputchannels 0x840-byte mix buffers from the pool (punaligned* the raw pointers, ptempbuf / pmixbuf rounded
+// up to 64 bytes), allocates inputchannels * 0x60 bytes of SNDMIXVOICE for smv, then for each output channel clears
+// outputfilterhead[i], SFILTER_ft16init(&ft16s[i]) and SFILTER_add(&outputfilterhead[i], &ft16s[i])); [U] the unit's
+// views of sndmix (sB40, S_7D00, G_8158, G_85D0, G_8468, G_C630 ...).
+struct SNDMIXSTATE {
+    struct MIXCONFIG mc;                // 0x000 [O]; [R] MIX_create copies its argument (0xC bytes)
+    unsigned short outputframeincr;     // 0x00C [O]; [U] the per-slice output frame step (view H_8968::add)
+    unsigned char resamplequality;      // 0x00E [O]; [U] sB40::f0E
+    signed char unk_0F[1];              // 0x00F [U] MIX_create clears it; the effect send is on while it is set
+                                        //       (func_003CC630 sets it, view G_C630::fF); On Tour has a pad byte here
+    void (*fxadd)(int);                 // 0x010 [O]; [U] func_003CC630 installs the reverb's output hook
+                                        //       (func_003CBC58); MIX_audioslice calls it when set
+    int* wetbusactive;                  // 0x014 [O]; [U] sB40::f14
+    void (*filterunpackinit[6][3])(SNDMIXVOICE*, UNPACKINITPARAMS*); // 0x018 [O] ([3][7] there); [R]
+                                        //       MIXI_initunpack16 / initunpackxa / initunpackmt fill their rows;
+                                        //       [U] MIX_playinit calls one with UNPACKINITPARAMS (view G_8158)
+    int filterunpacksize[6][3];         // 0x060 [O] ([3][7] there); [R] the same init functions; [U] the node size
+    float* punalignedtempbuf[2];        // 0x0A8 [O]; [R] MIX_create: the raw pool pointer / SNDMEMI_alloc(0x2058)
+    float* ptempbuf[2];                 // 0x0B0 [O]; [R] MIX_create: rounded up to a 64-byte boundary
+    float* punalignedmixbuf[6];         // 0x0B8 [O]; [R] MIX_create: the raw 0x840-byte buffers, outputchannels of them
+    float* pmixbuf[6];                  // 0x0D0 [O]; [R] MIX_create: 64-byte aligned, cleared (0x800 bytes)
+    float stoppedvoiceaccdry[6];        // 0x0E8 [O] (0x104 there); [U] MIX_stop adds a stopped voice's last level per
+                                        //       output; MIXI_interpolateto0 fades it out (view G_8468::f)
+    float stoppedvoiceaccwet[1];        // 0x100 [O] (a float* at 0x11C there); [U] the same for the effect bus
+                                        //       (G_8468::g)
+    SFILTERNODE* outputfilterhead[6];   // 0x104 [O] (0x120 there); [R] MIX_create clears and SFILTER_adds ft16s[i]
+    LPFRCSTATE* plps[6];                // 0x11C [O] (0x138 there); [U] view G_85D0::objA
+    FT16STATE ft16s[6];                 // 0x134 [O] (0x150 there); [R] MIX_create: SFILTER_ft16init per output channel
+    SNDMIXVOICE* smv;                   // 0x1DC [O] (0x1F8 there); [R] MIX_create: inputchannels * 0x60 bytes, cleared
+                                        //       (also the splat symbol D_00515D1C)
+    void (*mix)(int, float*, float*, float); // 0x1E0 [O] (0x1FC there); [U] the mixing routine MIX_audioslice calls (views
+                                        //       G_85D0::set, sB40::f1E0)
+};
+
+CHECK_OFFSET(SNDMIXSTATE, mc, 0x000);
+CHECK_OFFSET(SNDMIXSTATE, outputframeincr, 0x00C);
+CHECK_OFFSET(SNDMIXSTATE, resamplequality, 0x00E);
+CHECK_OFFSET(SNDMIXSTATE, unk_0F, 0x00F);
+CHECK_OFFSET(SNDMIXSTATE, fxadd, 0x010);
+CHECK_OFFSET(SNDMIXSTATE, wetbusactive, 0x014);
+CHECK_OFFSET(SNDMIXSTATE, filterunpackinit, 0x018);
+CHECK_OFFSET(SNDMIXSTATE, filterunpacksize, 0x060);
+CHECK_OFFSET(SNDMIXSTATE, punalignedtempbuf, 0x0A8);
+CHECK_OFFSET(SNDMIXSTATE, ptempbuf, 0x0B0);
+CHECK_OFFSET(SNDMIXSTATE, punalignedmixbuf, 0x0B8);
+CHECK_OFFSET(SNDMIXSTATE, pmixbuf, 0x0D0);
+CHECK_OFFSET(SNDMIXSTATE, stoppedvoiceaccdry, 0x0E8);
+CHECK_OFFSET(SNDMIXSTATE, stoppedvoiceaccwet, 0x100);
+CHECK_OFFSET(SNDMIXSTATE, outputfilterhead, 0x104);
+CHECK_OFFSET(SNDMIXSTATE, plps, 0x11C);
+CHECK_OFFSET(SNDMIXSTATE, ft16s, 0x134);
+CHECK_OFFSET(SNDMIXSTATE, smv, 0x1DC);
+CHECK_OFFSET(SNDMIXSTATE, mix, 0x1E0);
+CHECK_SIZE(SNDMIXSTATE, 0x1E4);
 
 #endif /* EALIB_SFILTER_H */

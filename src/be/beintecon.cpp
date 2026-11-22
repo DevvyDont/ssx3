@@ -279,13 +279,6 @@ extern "C" int cBEEconInterface_getPeakPass(cBEEconInterface* self, int profileI
 //100%
 INCLUDE_ASM("be/beintecon", cBEEconInterface_buyAttribute);
 #ifdef SKIP_ASM
-struct sEconRec_0C20 {
-    char pad0[0xAC4];
-    int unk_AC4;
-    char pad1[0xBDF - 0xAC8];
-    signed char f[7];
-    char pad2[0xF88 - 0xBDF - 7];
-};
 class cBEIface_0C20 {
 public:
     char pad[0xC];
@@ -316,36 +309,36 @@ extern "C" int cBEEconInterface_buyAttribute(cBEEconInterface* self, int humanIn
     }
     {
         attribLevel = 0;
-        cur = ((sEconRec_0C20*)((humanIndex * 0x9B50 + characterId * 0xF88) + (char*)cBELibrary_profileLib))->unk_AC4;
+        cur = ((cBECharProfileDB*)((humanIndex * 0x9B50 + characterId * 0xF88) + (char*)cBELibrary_profileLib))->mMoney;
         switch (attribute) {
         case 0:
-            attribLevel = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[0];
+            attribLevel = &((signed char*)&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)[0];
             break;
         case 1:
-            attribLevel = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[1];
+            attribLevel = &((signed char*)&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)[1];
             break;
         case 2:
-            attribLevel = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[2];
+            attribLevel = &((signed char*)&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)[2];
             break;
         case 3:
-            attribLevel = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[3];
+            attribLevel = &((signed char*)&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)[3];
             break;
         case 4:
-            attribLevel = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[4];
+            attribLevel = &((signed char*)&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)[4];
             break;
         case 5:
-            attribLevel = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[5];
+            attribLevel = &((signed char*)&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)[5];
             break;
         case 6:
-            attribLevel = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[6];
+            attribLevel = &((signed char*)&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)[6];
             break;
         }
         cost = cBEEconInterface_getAttribCost(self, *attribLevel / 5 - 1);
         if (cur < cost || *attribLevel == 55) {
             return 0;
         }
-        sEconRec_0C20* charProfile = (sEconRec_0C20*)((characterId * 0xF88 + humanIndex * 0x9B50) + (char*)cBELibrary_profileLib);
-        charProfile->unk_AC4 = charProfile->unk_AC4 - cost;
+        cBECharProfileDB* charProfile = (cBECharProfileDB*)((characterId * 0xF88 + humanIndex * 0x9B50) + (char*)cBELibrary_profileLib);
+        charProfile->mMoney = charProfile->mMoney - cost;
         *attribLevel = (unsigned char)*attribLevel + 1;
         cBEStatInterface_getThis()->discard();
         return 1;
@@ -765,26 +758,26 @@ INCLUDE_ASM("be/beintecon", cBECharProfileDB_init);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sEconBits_1600 {
-    unsigned long b0 : 1;
-    unsigned long b1 : 1;
-    unsigned long b2 : 1;
-    unsigned long b3 : 1;
-    unsigned long b4 : 1;
-    unsigned long b5 : 1;
-    unsigned long b6 : 1;
-    unsigned long b7 : 1;
-    unsigned long b8 : 1;
-    unsigned long b9 : 1;
-    unsigned long b10 : 1;
-    unsigned long b11 : 1;
-    unsigned long b12 : 1;
-    unsigned long b13 : 1;
-    unsigned long b14 : 1;
-    unsigned long b15 : 1;
-    unsigned long b16 : 1;
-    unsigned long b17 : 1;
-    unsigned long b18 : 1;
-    unsigned long b19 : 1;
+    unsigned long bPeak1RivalPtsChallengePlayed : 1;
+    unsigned long bPeak2RivalPtsChallengePlayed : 1;
+    unsigned long bPeak3RivalPtsChallengePlayed : 1;
+    unsigned long bPeak1RivalTimeChallengePlayed : 1;
+    unsigned long bPeak2RivalTimeChallengePlayed : 1;
+    unsigned long bPeak3RivalTimeChallengePlayed : 1;
+    unsigned long bPeak1TimeRCLocked : 1;
+    unsigned long bPeak2TimeRCLocked : 1;
+    unsigned long bPeak3TimeRCLocked : 1;
+    unsigned long bPeak1FreeRCLocked : 1;
+    unsigned long bPeak2FreeRCLocked : 1;
+    unsigned long bPeak3FreeRCLocked : 1;
+    unsigned long bPeak2Locked : 1;
+    unsigned long bPeak3Locked : 1;
+    unsigned long bPeak1TCLocked : 1;
+    unsigned long bPeak2TCLocked : 1;
+    unsigned long bPeak3TCLocked : 1;
+    unsigned long bPeak1FCLocked : 1;
+    unsigned long bPeak2FCLocked : 1;
+    unsigned long bPeak3FCLocked : 1;
 };
 
 struct sEconSlot_1600 {
@@ -889,26 +882,26 @@ extern "C" void cBECharProfileDB_init(sEcon_1600* self, int k, int reload)
     if (reload) {
         func_00151A88((cBECharProfileDB*)((sEconItems_151A88*)self), k);
     }
-    self->bits.b0 = 0;
-    self->bits.b1 = 0;
-    self->bits.b2 = 0;
-    self->bits.b3 = 0;
-    self->bits.b4 = 0;
-    self->bits.b5 = 0;
-    self->bits.b12 = 1;
-    self->bits.b13 = 1;
-    self->bits.b6 = 1;
-    self->bits.b7 = 1;
-    self->bits.b8 = 1;
-    self->bits.b9 = 1;
-    self->bits.b10 = 1;
-    self->bits.b11 = 1;
-    self->bits.b14 = 1;
-    self->bits.b15 = 1;
-    self->bits.b16 = 1;
-    self->bits.b17 = 1;
-    self->bits.b18 = 1;
-    self->bits.b19 = 1;
+    self->bits.bPeak1RivalPtsChallengePlayed = 0;
+    self->bits.bPeak2RivalPtsChallengePlayed = 0;
+    self->bits.bPeak3RivalPtsChallengePlayed = 0;
+    self->bits.bPeak1RivalTimeChallengePlayed = 0;
+    self->bits.bPeak2RivalTimeChallengePlayed = 0;
+    self->bits.bPeak3RivalTimeChallengePlayed = 0;
+    self->bits.bPeak2Locked = 1;
+    self->bits.bPeak3Locked = 1;
+    self->bits.bPeak1TimeRCLocked = 1;
+    self->bits.bPeak2TimeRCLocked = 1;
+    self->bits.bPeak3TimeRCLocked = 1;
+    self->bits.bPeak1FreeRCLocked = 1;
+    self->bits.bPeak2FreeRCLocked = 1;
+    self->bits.bPeak3FreeRCLocked = 1;
+    self->bits.bPeak1TCLocked = 1;
+    self->bits.bPeak2TCLocked = 1;
+    self->bits.bPeak3TCLocked = 1;
+    self->bits.bPeak1FCLocked = 1;
+    self->bits.bPeak2FCLocked = 1;
+    self->bits.bPeak3FCLocked = 1;
     self->f0 = 1;
     self->h280 = 1;
     self->h284 = 1;

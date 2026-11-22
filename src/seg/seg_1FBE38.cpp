@@ -1,4 +1,5 @@
 #include "common.h"
+#include "wscript/wscriptman.h"
 #include "world/instancerecord.h"
 #include "world/worldcache.h"
 #include "wscript/wscriptmission.h"
@@ -4621,18 +4622,7 @@ struct sRefSet_1440 {
     char pad_0x0[0x1C];
     unsigned int* refs;     // 0x1C
 };
-// The script manager (cWScriptMan_1440 in the prototype, whose setBeing stores at 0x0); cWScriptMan_TheWScriptMan_1440 points at the
-// instance.
-struct cWScriptMan_1440 {
-    int being;              // 0x0: index of the current being (rider)
-    char pad_0x4[0x28C];
-    char* f290;             // 0x290: object of the reference id -1
-    void* f294;             // 0x294
-    int f298;               // 0x298
-    char pad_0x29C[0x8];
-    char* f2A4;             // 0x2A4
-};
-extern cWScriptMan_1440* cWScriptMan_TheWScriptMan_1440 __asm__("cWScriptMan_TheWScriptMan");
+extern cWScriptMan* cWScriptMan_TheWScriptMan_1440 __asm__("cWScriptMan_TheWScriptMan");
 struct sBindArg_1FBE38_1440 { int idx; int val; int pad; int type; };
 struct sBindEnd_1FBE38_1440 {};  // empty trailing member of a defaults record; value-init copies its byte through a
                                  //       stack temp
@@ -4685,7 +4675,7 @@ extern "C" cLunoValue_1440 MovieFunc(int n, sBindArg_1FBE38_1440* params) {
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
-        obj = cWScriptMan_TheWScriptMan_1440->f290;
+        obj = ((char*)cWScriptMan_TheWScriptMan_1440->Inst);
     } else {
         sRefSet_1440 *section = ((sRefSet_1440**)(cWorld_m_pTheWorld->m_pWorldCache)->m_pSectionCacheTable)[id & 0xFF];
         unsigned i;
@@ -6346,16 +6336,6 @@ extern "C" void* RiderSpeedFunc(void* self) {
 //100%
 INCLUDE_ASM("seg/seg_1FBE38", CurrentInstanceFunc);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct cWScriptMan {
-    int being;              // 0x0: index of the current being (rider)
-    char pad_0x4[0x28C];
-    char* f290;             // 0x290: object of the reference id -1
-    void* f294;             // 0x294
-    int f298;               // 0x298
-    char pad_0x29C[0x8];
-    char* f2A4;             // 0x2A4
-};
 extern cWScriptMan* cWScriptMan_TheWScriptMan;
 // A being: the script/AI-facing interface of a rider. Slot order of the prototype's vtable _vt$6cBeing; parameter
 // types from its mangled names (applyBoost__6cBeingRC8t4Vector, transport__6cBeingRC8t4Matrix, ...).
@@ -6375,7 +6355,7 @@ static inline void setInt_3430(cLunoValue* r, const unsigned& v) {
  * @return @p ret
  */
 extern "C" cLunoValue* CurrentInstanceFunc(cLunoValue* ret) {
-    tInstanceRecord* curInst = (tInstanceRecord *)cWScriptMan_TheWScriptMan->f290;
+    tInstanceRecord* curInst = (tInstanceRecord *)((char*)cWScriptMan_TheWScriptMan->Inst);
     unsigned instId;
     if (curInst)
         instId = curInst->m_RID;
@@ -7243,11 +7223,11 @@ extern "C" cLunoValue UpdateDisplayHeightFunc(int n, sBindArg_1FBE38* params) {
         else
             *slot = x->val;
     }
-    int gv = curProcess_4320()->being;
+    int gv = curProcess_4320()->Being;
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
-        obj = curProcess_4320()->f290;
+        obj = ((char*)curProcess_4320()->Inst);
     } else {
         sRefSet *section = ((sRefSet**)(cWorld_m_pTheWorld->m_pWorldCache)->m_pSectionCacheTable)[id & 0xFF];
         unsigned i;
@@ -8020,7 +8000,7 @@ extern "C" cLunoValue CameraShakeFunc(int n, sBindArg_1FBE38 *params) {
     if (buf->useObj) {
         unsigned id = buf->id;
         if (~id == 0) {
-            obj = cWScriptMan_TheWScriptMan->f290;
+            obj = ((char*)cWScriptMan_TheWScriptMan->Inst);
         } else {
             sRefSet *section = ((sRefSet**)(cWorld_m_pTheWorld->m_pWorldCache)->m_pSectionCacheTable)[id & 0xFF];
             char *r;
@@ -8031,7 +8011,7 @@ extern "C" cLunoValue CameraShakeFunc(int n, sBindArg_1FBE38 *params) {
             obj = r;
         }
     }
-    int being = cWScriptMan_TheWScriptMan->being;
+    int being = cWScriptMan_TheWScriptMan->Being;
     float scale = buf->scale;
     int keyword = buf->keyword;
     if (keyword == 0) {

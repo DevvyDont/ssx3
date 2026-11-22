@@ -15,16 +15,7 @@ extern sPad16 D_0043D984;
 
 extern sPad16 D_0043D954;
 
-// 0x64-byte array elements; arr[i].field indexing is what makes GCC emit the
-// target's base-first addu (manual pointer arithmetic reverses the operands)
-struct sRaceEntry {
-    char pad_0x00[0x54];
-    int field_0x54;
-    int field_0x58;
-    char pad_0x5c[4];
-    int field_0x60;
-};
-extern sRaceEntry cBELibrary_locationDB[];
+extern tBELocationDB cBELibrary_locationDB[];
 
 extern sPad16 D_0043E254;
 
@@ -277,7 +268,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationPeak);
  */
 extern "C" int cBENewRaceInterface_getLocationPeak(cBENewRaceInterface* self, int location)
 {
-    return cBELibrary_locationDB[location].field_0x54;
+    return cBELibrary_locationDB[location].segmentID;
 }
 #endif
 
@@ -291,7 +282,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationPeak1);
  */
 extern "C" int cBENewRaceInterface_getLocationPeak1()
 {
-    return cBELibrary_locationDB[cBENewRaceInterface_newRace.iLocationIdx].field_0x54;
+    return cBELibrary_locationDB[cBENewRaceInterface_newRace.iLocationIdx].segmentID;
 }
 #endif
 
@@ -308,7 +299,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationType);
  */
 extern "C" int cBENewRaceInterface_getLocationType(cBENewRaceInterface* self, int iLocation)
 {
-    return cBELibrary_locationDB[iLocation].field_0x58;
+    return cBELibrary_locationDB[iLocation].type;
 }
 #endif
 
@@ -352,7 +343,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationDifficulty);
  */
 extern "C" int cBENewRaceInterface_getLocationDifficulty(cBENewRaceInterface* self, int location)
 {
-    return cBELibrary_locationDB[location].field_0x60;
+    return cBELibrary_locationDB[location].difficulty;
 }
 #endif
 
@@ -783,16 +774,8 @@ extern "C" int cBENewRaceInterface_getTimeLimit(cBENewRaceInterface* self, int k
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getPeakGoal);
 #ifdef SKIP_ASM
-struct sRaceTableEntry_00440D18
-{
-    char pad_0x00[4];
-    unsigned short field_0x4;
-    unsigned short field_0x6;
-    unsigned short field_0x8[5];
-    unsigned short field_0x12;
-};
 
-extern sRaceTableEntry_00440D18 cBELibrary_peakDB[];
+extern tBEPeakDB cBELibrary_peakDB[];
 
 /**
  * Returns the goal of peak event @p gameEvent at tier @p tier: the halfword at +0x4 of cBELibrary_peakDB[(@p gameEvent - 6) * 3 + @p tier].
@@ -803,14 +786,14 @@ extern sRaceTableEntry_00440D18 cBELibrary_peakDB[];
  */
 extern "C" int cBENewRaceInterface_getPeakGoal(cBENewRaceInterface* self, int gameEvent, int tier)
 {
-    return cBELibrary_peakDB[tier + (gameEvent - 6) * 3].field_0x4;
+    return cBELibrary_peakDB[tier + (gameEvent - 6) * 3].goal;
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getPeakTimeLimit);
 #ifdef SKIP_ASM
-extern sRaceTableEntry_00440D18 cBELibrary_peakDB[];
+extern tBEPeakDB cBELibrary_peakDB[];
 
 /**
  * Returns the time limit of peak event @p gameEvent at tier @p tier: the halfword at +0x6 of
@@ -822,14 +805,14 @@ extern sRaceTableEntry_00440D18 cBELibrary_peakDB[];
  */
 extern "C" int cBENewRaceInterface_getPeakTimeLimit(cBENewRaceInterface* self, int gameEvent, int tier)
 {
-    return cBELibrary_peakDB[tier + (gameEvent - 6) * 3].field_0x6;
+    return cBELibrary_peakDB[tier + (gameEvent - 6) * 3].timeLimit;
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getPeakRewardAmount);
 #ifdef SKIP_ASM
-extern sRaceTableEntry_00440D18 cBELibrary_peakDB[];
+extern tBEPeakDB cBELibrary_peakDB[];
 
 /**
  * Returns the reward of peak event @p gameEvent at tier @p tier: the halfword at +0x12 of cBELibrary_peakDB[(@p gameEvent - 6) * 3 + @p tier],
@@ -841,14 +824,14 @@ extern sRaceTableEntry_00440D18 cBELibrary_peakDB[];
  */
 extern "C" int cBENewRaceInterface_getPeakRewardAmount(cBENewRaceInterface* self, int gameEvent, int tier)
 {
-    return cBELibrary_peakDB[tier + (gameEvent - 6) * 3].field_0x12 * 100;
+    return cBELibrary_peakDB[tier + (gameEvent - 6) * 3].prize * 100;
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getPeakSplitTimePoints);
 #ifdef SKIP_ASM
-extern sRaceTableEntry_00440D18 cBELibrary_peakDB[];
+extern tBEPeakDB cBELibrary_peakDB[];
 
 /**
  * Returns the bonus of checkpoint @p checkpoint in peak event @p gameEvent at tier @p tier: halfword @p checkpoint of the five at +0x8 of
@@ -861,7 +844,7 @@ extern sRaceTableEntry_00440D18 cBELibrary_peakDB[];
  */
 extern "C" int cBENewRaceInterface_getPeakSplitTimePoints(cBENewRaceInterface* self, int gameEvent, int tier, int checkpoint)
 {
-    return cBELibrary_peakDB[tier + (gameEvent - 6) * 3].field_0x8[checkpoint];
+    return cBELibrary_peakDB[tier + (gameEvent - 6) * 3].splitGoals[checkpoint];
 }
 #endif
 

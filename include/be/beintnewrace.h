@@ -182,6 +182,28 @@ CHECK_OFFSET(tBELocationDB, scriptID, 0x5C);
 CHECK_OFFSET(tBELocationDB, difficulty, 0x60);
 CHECK_SIZE(tBELocationDB, 0x64);
 
+// tBEPeakDB: one peak-event tier (the goals, time limit, checkpoint bonuses and prize of a race / freestyle event at one
+// of three tiers). [O] On Tour struct tBEPeakDB (0x14, the same layout) and the static cBELibrary::peakDB
+// (tBEPeakDB[18]); [R] retail's cBELibrary_peakDB (0x00440D18) is indexed (gameEvent - 6) * 3 + tier for the six
+// peak events 6..11 and three tiers (18 records of 0x14); [U] the cBENewRaceInterface_getPeak* getters in be/beintnewrace.
+// The table itself is not declared here (be/beintnewrace declares cBELibrary_peakDB with its own view).
+struct tBEPeakDB {
+    short eventID;                  // 0x00 [O]; no retail access seen
+    short round;                    // 0x02 [O]; no retail access seen
+    unsigned short goal;            // 0x04 [O]; [U] cBENewRaceInterface_getPeakGoal returns it
+    unsigned short timeLimit;       // 0x06 [O]; [U] cBENewRaceInterface_getPeakTimeLimit returns it
+    unsigned short splitGoals[5];   // 0x08 [O]; [U] cBENewRaceInterface_getPeakSplitTimePoints returns splitGoals[checkpoint]
+    unsigned short prize;           // 0x12 [O]; [U] cBENewRaceInterface_getPeakRewardAmount returns prize * 100
+};
+
+CHECK_OFFSET(tBEPeakDB, eventID, 0x00);
+CHECK_OFFSET(tBEPeakDB, round, 0x02);
+CHECK_OFFSET(tBEPeakDB, goal, 0x04);
+CHECK_OFFSET(tBEPeakDB, timeLimit, 0x06);
+CHECK_OFFSET(tBEPeakDB, splitGoals, 0x08);
+CHECK_OFFSET(tBEPeakDB, prize, 0x12);
+CHECK_SIZE(tBEPeakDB, 0x14);
+
 extern tBEPathDB cBELibrary_gamePathDB[3];      // [O] cBELibrary::gamePathDB; [R] 0x0043E700
 extern tBEEventDB cBELibrary_gameEventDB[];     // [O] cBELibrary::gameEventDB (tBEEventDB[15] in On Tour); [R] 0x0043E978
 

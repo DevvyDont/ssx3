@@ -1219,7 +1219,7 @@ struct sMbVE_AB30 {
 
 struct sMbOwner_AB30 {
     char pad_0x0[0x28];
-    sMbVE_AB30 vt5;     // 0x28
+    sMbVE_AB30 sync;     // 0x28
 };
 
 /**
@@ -1245,7 +1245,7 @@ extern "C" void cPS2ExecutionMan_halt(void* self)
         return;
     }
     sMbOwner_AB30* vtable = (sMbOwner_AB30*)man->mVtbl;
-    vtable->vt5.fn(vthis(man, vtable->vt5));
+    vtable->sync.fn(vthis(man, vtable->sync));
     cPS2ExecutionMan_waitHalt(self);
 }
 #endif

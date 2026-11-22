@@ -4422,18 +4422,9 @@ extern "C" void sprintf1_v(void* dst, void* fmt, ...) __asm__("sprintf1");
 extern char str_Total[];
 extern char str_pct_d_pct_s[];
 
-struct sMCDev {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    int f10;
-    int f14;
-    char pad[0xE0 - 0x18];
-};
 struct sMCOverlayMgr {
     char pad[0x344];
-    sMCDev dev[1];
+    cMCOverlayManager_sdevice dev[1];
 };
 
 /**
@@ -4449,11 +4440,11 @@ extern "C" void cMCOverlayManager_GetDeviceTotalString(sMCOverlayMgr* self, int 
 {
     unsigned short str[256];
     unsigned short fmt[256];
-    if (self->dev[idx].fC == 0) return;
-    if (self->dev[idx].f0 && self->dev[idx].f4 && self->dev[idx].f8) {
+    if (self->dev[idx].bPluggedIn == 0) return;
+    if (self->dev[idx].bValid && self->dev[idx].bFormatted && self->dev[idx].bCorrectEncoding) {
         func_002C2540_r(str, str_Total);
         func_002C2540_r(fmt, str_pct_d_pct_s);
-        sprintf1_v(dst, fmt, self->dev[idx].f14, str);
+        sprintf1_v(dst, fmt, self->dev[idx].iTotalSpace, str);
     }
 }
 #endif
@@ -5038,7 +5029,7 @@ extern "C" void* cMCOverlayManager_cMCOverlayManager(cMCOverlayManager* self)
 {
     int* w = (int*)self;
     void** callbacks = (void**)self;
-    sMCDev* dev = ((sMCOverlayMgr*)self)->dev;
+    cMCOverlayManager_sdevice* dev = ((sMCOverlayMgr*)self)->dev;
     w[45] = 2;
     w[47] = 0;
     w[0x30] = 0;

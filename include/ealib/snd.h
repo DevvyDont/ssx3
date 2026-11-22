@@ -3,7 +3,8 @@
 
 // EA SND's shared structures (the sound library linked into unit ealib/seg_2B4578 and called from sound/*): play options,
 // sample attributes / format / description, the tag reader, the bank patch header, the per-channel record CHANPUB, the
-// system options (SNDSYS_getopts / setopts), the mixer config and the sound-heap records. The file name is ours (the
+// system options (SNDSYS_getopts / setopts), the mixer config, the sound-heap records, the bank table entry, the global
+// state sndgs (SNDGLOBALSTATE) and the packet player's channels (sndpps). The file name is ours (the
 // types span many EA source files: snd/source/library/cmn/*.c, mix/smixer.c, psp|ps2 snddrv.c).
 //
 // Names, member order and kinds: SSX On Tour's DWARF ([O], snd 9.06.03-psp). Retail links an older SND: where its
@@ -35,6 +36,11 @@ typedef struct SNDMEMREC SNDMEMREC;
 typedef struct SNDMEMSTATE SNDMEMSTATE;
 typedef struct SNDIPACKETCALLBACK SNDIPACKETCALLBACK;
 typedef struct SNDREQUESTSTATUS SNDREQUESTSTATUS;
+typedef struct BANKLIST BANKLIST;
+typedef struct SNDGLOBALSTATE SNDGLOBALSTATE;
+typedef struct SNDPACKETENTRY SNDPACKETENTRY;
+typedef struct SNDPACKETCHAN SNDPACKETCHAN;
+typedef struct SNDPACKETSTATE SNDPACKETSTATE;
 #endif
 
 // SNDPLAYOPTS (0x18 [O]): how to play a sound (SNDBANK_play(int bhandle, int patnum, SNDPLAYOPTS* pspo) [O]). Moved here
@@ -662,5 +668,212 @@ CHECK_OFFSET(SNDREQUESTSTATUS, currenttime, 0x4);
 CHECK_OFFSET(SNDREQUESTSTATUS, timetoend, 0x8);
 CHECK_OFFSET(SNDREQUESTSTATUS, timebuffered, 0xC);
 CHECK_SIZE(SNDREQUESTSTATUS, 0x10);
+
+// BANKLIST, retail version (0x10 [R]: SNDSYSI_init allocates maxbanks * 16 bytes for sndgs.banklist; On Tour 0x8): one
+// slot of the loaded-bank table, indexed by the bank handle. [O] SNDGLOBALSTATE::banklist is BANKLIST* and BANKLIST is
+// {BANKVER5* phdr; signed char locked; char pad[3];}; retail keeps two more words between them ([U] SNDbankadd, view
+// Ent_6098 {hdr, buf1, buf2, busy}: the header pointer the SNDBANKI_* functions read, two buffers, the busy byte).
+struct BANKLIST {
+    struct BANKVER5* phdr;         // 0x0 [O]; [U] SNDbankadd stores the bank header; SNDBANKI_getppatch's bank
+    void* unk_04;                  // 0x4 [U] SNDbankadd (a buffer of the bank); retail-only
+    void* unk_08;                  // 0x8 [U] SNDbankadd (a buffer of the bank); retail-only
+    signed char locked;            // 0xC [O] (0x4 there); [U] the slot's busy byte (sA8E8Slot::f0C)
+    char pad[3];                   // 0xD [O]
+};
+
+CHECK_OFFSET(BANKLIST, phdr, 0x0);
+CHECK_OFFSET(BANKLIST, unk_04, 0x4);
+CHECK_OFFSET(BANKLIST, unk_08, 0x8);
+CHECK_OFFSET(BANKLIST, locked, 0xC);
+CHECK_OFFSET(BANKLIST, pad, 0xD);
+CHECK_SIZE(BANKLIST, 0x10);
+
+// SNDGLOBALSTATE, retail version (0x338 [R]: sndgs 0x0050A8E8 .. the next object D_0050AC20, a separate voice table;
+// On Tour 0x240): the sound system's global state, sndgs [O] (On Tour `SNDGLOBALSTATE sndgs`). [O] member names, order
+// and kinds; retail places them later than On Tour because its SNDSYSOPTS / SNDSYSSET are bigger (0xD4 / 0xA0, see
+// above) and it keeps retail-only blocks (the master volume byte, a variable-rate timer client list, three effect-bus
+// records, the speaker layout tables). [R] SNDSYS_getopts copies sso out (0xD4 bytes), SNDSYS_setopts copies set into
+// sso and keeps a 0xA0 copy in prevset (+0xD4); [U] the unit's views of sndgs (sA8E8 and the per-function G_* / S_*
+// views in ealib/seg_2B4578) and the splat symbols inside it (D_0050A908 = sso.set, D_0050A9A8 = sso.vec, D_0050AA5C =
+// installed, D_0050AA62 = cputypes, D_0050AAD0 = midirestore, D_0050AAD4 = streamrestore, D_0050AAD8 = chan,
+// D_0050AADC = banklist, D_0050AAE0 = the first bus record, D_0050AB1C = mm, D_0050AB20 = the speaker tables,
+// D_0050ABC8 = srcchancfg3d).
+struct SNDGLOBALSTATE {
+    struct SNDSYSOPTS sso;         // 0x000 [O]; [R] SNDSYS_getopts copies it out; SNDSYS_setopts writes set / vec
+    struct SNDSYSSET prevset;      // 0x0D4 [O]; [R] SNDSYS_setopts keeps the 0xA0-byte copy here (sA8E8::saved)
+    signed char installed;         // 0x174 [O]; [U] SNDSYSI_init returns at once when set and sets it; SNDSYS_restore
+                                   //       tests and clears it (view G_5320::f174)
+    signed char mastervol;         // 0x175 [R] SNDmastervol stores its argument (0..127) here and reapplies every
+                                   //       channel's volume; SNDSYSI_init 0x7F. [O] On Tour's SNDmastervol keeps it in
+                                   //       Snd::gMasterVol instead (smasterv.c), so On Tour has no member here
+    volatile unsigned char incritical; // 0x176 [O] (volatile signed char at 0x169); [U] SNDSYS_entercritical /
+                                   //       leavecritical count the nesting depth
+    signed char numserverclients100hz; // 0x177 [O]; [U] SNDSYS_add100hzclient / remove100hzclient: the entries used in
+                                   //       serverclient100hz[]; SNDSYSI_100hzserver calls them
+    signed char numserverclients;  // 0x178 [O]; [U] iSNDserveraddclient / iSNDserverremoveclient: entries used in
+                                   //       serverclient[]
+    signed char numuserdataclients; // 0x179 [O]; [U] SNDSYS_adduserdataclient / removeuserdataclient: entries used in
+                                   //       userdataclient[]
+    unsigned char cputypes;        // 0x17A [O]; [U] passed as UNPACKINITPARAMS::cpu and to SFILTER_rsfinit
+                                   //       (D_0050AA62)
+    char unk_17B[3];               // 0x17B alignment
+    short voicestotal;             // 0x17E [O]; [U] the CHANPUB count: SNDSYSI_init allocates voicestotal * 0x8C bytes
+                                   //       for chan; every channel loop runs to it
+    volatile unsigned int audiotick; // 0x180 [O]; [U] SNDSYSI_init 0; SNDSYSI_timerservice resets it on a new rate and
+                                   //       runs SNDSYSI_100hzserver until it catches up
+    void (*serverclient100hz[6])(void); // 0x184 [O]; [U] SNDSYS_add100hzclient appends, SNDSYSI_100hzserver calls
+    void (*serverclient[6])(void); // 0x19C [O]; [U] iSNDserveraddclient appends
+    void* unk_1B4;                 // 0x1B4 [U] a list of {next, ?, fn, arg} nodes SNDSYSI_variabletimerservice calls
+                                   //       when unk_1C0 changes; retail-only
+    int unk_1B8[2];                // 0x1B8
+    int unk_1C0;                   // 0x1C0 [U] SNDDRV_thread counts it; SNDSYSI_variabletimerservice compares it
+    float unk_1C4;                 // 0x1C4 [U] SNDPLATFORM_init stores the update period in ms (16.68 / 20 / 10.67)
+    void (*userdataclient[4])(void*); // 0x1C8 [O]; [U] SNDSYS_adduserdataclient appends
+    void (*unk_1D8)(void);         // 0x1D8 [U] SNDSYS_restore calls it when set; nothing in retail sets it. On Tour
+    void (*unk_1DC)(void);         // 0x1DC     has four hooks before bankremove (aemsrestore, aemsstopmodulebanks,
+    void (*unk_1E0)(void);         // 0x1E0     aemsstreamrestore, eventrestore) where retail has these three
+    void (*bankremove)(int);       // 0x1E4 [O]; [U] SNDbankadd installs SNDbankremove; SNDSYS_restore calls it with -1
+    void (*midirestore)(void);     // 0x1E8 [O]; [U] SNDmidiinit installs SNDmidirestore, which clears it again
+                                   //       (D_0050AAD0); SNDSYS_restore calls it
+    void (*streamrestore)(void);   // 0x1EC [O]; [U] SNDSTRMI_create installs SNDSTRMI_destroyall (D_0050AAD4);
+                                   //       SNDSYS_restore calls it
+    struct CHANPUB* chan;          // 0x1F0 [O]; [U] voicestotal entries of 0x8C (D_0050AAD8)
+    struct BANKLIST* banklist;     // 0x1F4 [O]; [U] maxbanks entries of 0x10, indexed by the bank handle (D_0050AADC)
+    char unk_1F8[0x14];            // 0x1F8 [U] three 0x14-byte effect-bus records {short; char; int; int; float pan[2]}
+    char unk_20C[0x14];            // 0x20C     for the render kinds 4 / 0x100 / 8 (func_003B8218 returns one,
+    char unk_220[0x14];            // 0x220     func_003B82B8 fills it; the unit's view sA8E8Bus); retail-only, no EA name
+    struct SNDMEMSTATE* mm;        // 0x234 [O]; [U] SNDMEMI_init points it at the heap (D_0050AB1C)
+    char unk_238[0xA8];            // 0x238 [U] the speaker layout tables func_003C7480 restores and func_003C38E0 pans
+                                   //       with (D_0050AB20); retail-only
+    unsigned short srcchancfg3d[6][6]; // 0x2E0 [O]; [U] SNDSYSI_init fills row n - 1 with n channel angles (D_0050ABC8)
+    void (*profileenter)(void);    // 0x328 [O]; [U] SNDDRV_thread calls it before a tick
+    void (*profileleave)(void);    // 0x32C [O]; [U] SNDDRV_thread calls it after the tick
+    volatile unsigned int servertick; // 0x330 [O]; [U] SNDSYSI_init 0; SNDSYSI_timerservice counts its calls (reset on
+                                   //       a new rate); SNDDRV_thread publishes it to the IOP
+    volatile unsigned short currenttimerhz; // 0x334 [O] (volatile short); [U] SNDSYSI_timerservice: the caller's rate
+    char unk_336[2];               // 0x336 tail padding
+};
+
+CHECK_OFFSET(SNDGLOBALSTATE, sso, 0x000);
+CHECK_OFFSET(SNDGLOBALSTATE, prevset, 0x0D4);
+CHECK_OFFSET(SNDGLOBALSTATE, installed, 0x174);
+CHECK_OFFSET(SNDGLOBALSTATE, mastervol, 0x175);
+CHECK_OFFSET(SNDGLOBALSTATE, incritical, 0x176);
+CHECK_OFFSET(SNDGLOBALSTATE, numserverclients100hz, 0x177);
+CHECK_OFFSET(SNDGLOBALSTATE, numserverclients, 0x178);
+CHECK_OFFSET(SNDGLOBALSTATE, numuserdataclients, 0x179);
+CHECK_OFFSET(SNDGLOBALSTATE, cputypes, 0x17A);
+CHECK_OFFSET(SNDGLOBALSTATE, unk_17B, 0x17B);
+CHECK_OFFSET(SNDGLOBALSTATE, voicestotal, 0x17E);
+CHECK_OFFSET(SNDGLOBALSTATE, audiotick, 0x180);
+CHECK_OFFSET(SNDGLOBALSTATE, serverclient100hz, 0x184);
+CHECK_OFFSET(SNDGLOBALSTATE, serverclient, 0x19C);
+CHECK_OFFSET(SNDGLOBALSTATE, unk_1B4, 0x1B4);
+CHECK_OFFSET(SNDGLOBALSTATE, unk_1B8, 0x1B8);
+CHECK_OFFSET(SNDGLOBALSTATE, unk_1C0, 0x1C0);
+CHECK_OFFSET(SNDGLOBALSTATE, unk_1C4, 0x1C4);
+CHECK_OFFSET(SNDGLOBALSTATE, userdataclient, 0x1C8);
+CHECK_OFFSET(SNDGLOBALSTATE, unk_1D8, 0x1D8);
+CHECK_OFFSET(SNDGLOBALSTATE, unk_1DC, 0x1DC);
+CHECK_OFFSET(SNDGLOBALSTATE, unk_1E0, 0x1E0);
+CHECK_OFFSET(SNDGLOBALSTATE, bankremove, 0x1E4);
+CHECK_OFFSET(SNDGLOBALSTATE, midirestore, 0x1E8);
+CHECK_OFFSET(SNDGLOBALSTATE, streamrestore, 0x1EC);
+CHECK_OFFSET(SNDGLOBALSTATE, chan, 0x1F0);
+CHECK_OFFSET(SNDGLOBALSTATE, banklist, 0x1F4);
+CHECK_OFFSET(SNDGLOBALSTATE, unk_1F8, 0x1F8);
+CHECK_OFFSET(SNDGLOBALSTATE, unk_20C, 0x20C);
+CHECK_OFFSET(SNDGLOBALSTATE, unk_220, 0x220);
+CHECK_OFFSET(SNDGLOBALSTATE, mm, 0x234);
+CHECK_OFFSET(SNDGLOBALSTATE, unk_238, 0x238);
+CHECK_OFFSET(SNDGLOBALSTATE, srcchancfg3d, 0x2E0);
+CHECK_OFFSET(SNDGLOBALSTATE, profileenter, 0x328);
+CHECK_OFFSET(SNDGLOBALSTATE, profileleave, 0x32C);
+CHECK_OFFSET(SNDGLOBALSTATE, servertick, 0x330);
+CHECK_OFFSET(SNDGLOBALSTATE, currenttimerhz, 0x334);
+CHECK_OFFSET(SNDGLOBALSTATE, unk_336, 0x336);
+CHECK_SIZE(SNDGLOBALSTATE, 0x338);
+
+// SNDPACKETENTRY (0x20 [O]): one queued packet of a packet-player channel (SNDPACKETCHAN::pe[]). [R] SNDPKTPLAY_create
+// sizes the entry table as (memsize - 0x9C) >> 5 more entries; [U] view E_6DE0 {int; int len:31; int flag:1; words[6]}
+// has the same members in the same order.
+struct SNDPACKETENTRY {
+    int handle;                    // 0x00 [O]
+    int numframes : 31;            // 0x04 [O]; [U] E_6DE0::len
+    int continuation : 1;          // 0x04 [O]; [U] E_6DE0::flag
+    void* psamples[6];             // 0x08 [O]; one per channel
+};
+
+CHECK_OFFSET(SNDPACKETENTRY, handle, 0x00);
+CHECK_OFFSET(SNDPACKETENTRY, psamples, 0x08);
+CHECK_SIZE(SNDPACKETENTRY, 0x20);
+
+// SNDPACKETCHAN, retail version (0x9C with one entry [R]: SNDPKTPLAY_create sets maxpackets = (memsize - 156) >> 5; On
+// Tour 0xA0): one packet-player channel (a stream's packet queue), sndpps.ppc[i]. [O] member names, order and volatile
+// qualifiers; retail has no outstandingplatformframes (On Tour 0x50), so pplatformmem and every later member sit 4
+// bytes lower: [R] SNDPKTPLAY_create(preleasefunc, pframesfunc, pclientdata, pmem, memsize) [O] stores pplatformmem
+// 0x50, preleasefunc 0x54, pframesfunc 0x58, pclientdata 0x5C and shandle -1; [U] SNDPKTPLAYI_flushcallbackdata calls
+// pframesfunc(chan, numframes, pclientdata) for a type-0 callback and preleasefunc(chan, pclientdata) otherwise (view
+// Q_7080); the channel count of sampleformat (0x62) bounds the per-channel arrays (view Q_6DE0, s7B8Queue).
+struct SNDPACKETCHAN {
+    volatile int shandle;          // 0x00 [O]; [R] SNDPKTPLAY_create -1
+    volatile int lastpackethandle; // 0x04 [O]
+    volatile unsigned int masterReleasePacket; // 0x08 [O]
+    volatile unsigned int masterCurrentPacket; // 0x0C [O]
+    volatile unsigned int numPacketsProcessed[6]; // 0x10 [O]
+    volatile short playpacket[6];  // 0x28 [O]
+    volatile short outstandingpackets[6]; // 0x34 [O]
+    volatile short maxpackets;     // 0x40 [O]; [R] SNDPKTPLAY_create
+    volatile signed char masterpacketchan; // 0x42 [O]
+    char pad;                      // 0x43 [O]
+    volatile short releasepacket;  // 0x44 [O]
+    volatile short submitpacket;   // 0x46 [O]
+    volatile unsigned int totalframes; // 0x48 [O]
+    volatile unsigned int outstandingframes; // 0x4C [O]
+    void* pplatformmem;            // 0x50 [O] (0x54 there); [R] SNDPKTPLAY_create
+    void (*preleasefunc)(int, int); // 0x54 [O] (0x58 there); [R] SNDPKTPLAY_create; [U] flushcallbackdata
+    void (*pframesfunc)(int, int, int); // 0x58 [O] (0x5C there); [R] SNDPKTPLAY_create; [U] flushcallbackdata
+    int pclientdata;               // 0x5C [O] (void* at 0x60 there); [R] SNDPKTPLAY_create; [U] passed to both callbacks
+    struct SNDSAMPLEFORMAT sampleformat; // 0x60 [O]; [U] channels (0x62) bounds the per-channel loops
+    void* ptsdata[6];              // 0x64 [O]
+    struct SNDPACKETENTRY pe[1];   // 0x7C [O]; maxpackets entries
+};
+
+CHECK_OFFSET(SNDPACKETCHAN, shandle, 0x00);
+CHECK_OFFSET(SNDPACKETCHAN, lastpackethandle, 0x04);
+CHECK_OFFSET(SNDPACKETCHAN, masterReleasePacket, 0x08);
+CHECK_OFFSET(SNDPACKETCHAN, masterCurrentPacket, 0x0C);
+CHECK_OFFSET(SNDPACKETCHAN, numPacketsProcessed, 0x10);
+CHECK_OFFSET(SNDPACKETCHAN, playpacket, 0x28);
+CHECK_OFFSET(SNDPACKETCHAN, outstandingpackets, 0x34);
+CHECK_OFFSET(SNDPACKETCHAN, maxpackets, 0x40);
+CHECK_OFFSET(SNDPACKETCHAN, masterpacketchan, 0x42);
+CHECK_OFFSET(SNDPACKETCHAN, pad, 0x43);
+CHECK_OFFSET(SNDPACKETCHAN, releasepacket, 0x44);
+CHECK_OFFSET(SNDPACKETCHAN, submitpacket, 0x46);
+CHECK_OFFSET(SNDPACKETCHAN, totalframes, 0x48);
+CHECK_OFFSET(SNDPACKETCHAN, outstandingframes, 0x4C);
+CHECK_OFFSET(SNDPACKETCHAN, pplatformmem, 0x50);
+CHECK_OFFSET(SNDPACKETCHAN, preleasefunc, 0x54);
+CHECK_OFFSET(SNDPACKETCHAN, pframesfunc, 0x58);
+CHECK_OFFSET(SNDPACKETCHAN, pclientdata, 0x5C);
+CHECK_OFFSET(SNDPACKETCHAN, sampleformat, 0x60);
+CHECK_OFFSET(SNDPACKETCHAN, ptsdata, 0x64);
+CHECK_OFFSET(SNDPACKETCHAN, pe, 0x7C);
+CHECK_SIZE(SNDPACKETCHAN, 0x9C);
+
+// SNDPACKETSTATE (0x384 [O]): the packet player's state, sndpps [O] (0x005157B8; retail symbol size 8, a splat
+// artefact). [U] SNDPKTPLAYI_flushcallbackdata walks spcb[0..callbackindex) and calls into ppc[chan] (view G_7080:
+// {count, ev[0x60], q[]}, the same layout); SNDPKTPLAY_create takes the first free ppc[] slot (s7B8).
+struct SNDPACKETSTATE {
+    int callbackindex;             // 0x000 [O]; [U] the queued callbacks
+    struct SNDIPACKETCALLBACK spcb[96]; // 0x004 [O]
+    struct SNDPACKETCHAN* ppc[32]; // 0x304 [O]; [R] SNDPKTPLAY_create
+};
+
+CHECK_OFFSET(SNDPACKETSTATE, callbackindex, 0x000);
+CHECK_OFFSET(SNDPACKETSTATE, spcb, 0x004);
+CHECK_OFFSET(SNDPACKETSTATE, ppc, 0x304);
+CHECK_SIZE(SNDPACKETSTATE, 0x384);
 
 #endif /* EALIB_SND_H */

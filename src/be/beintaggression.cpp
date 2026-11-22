@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "be/beintaggression.h"
 #include "replay/frameptr.h"
 
@@ -227,13 +228,7 @@ int cBELibrary_getCharacterID(int);
 extern "C" void func_001E2A08(int charID, int level);
 extern sAggrCharProfile cBELibrary_profileLib[][10];
 
-struct sRaceSettings_155E58 {
-    char pad_0x00[0x30];
-    int numPlayers;     // 0x30
-    char pad_0x34[0x15];
-    signed char b49;    // 0x49
-};
-extern sRaceSettings_155E58 cBELibrary_raceDB;
+extern cBERaceDB cBELibrary_raceDB;
 
 /**
  * Lets every rider's aggression cool down: each relation loses 3 ticks (not below 0) and its level is recomputed.
@@ -247,7 +242,7 @@ extern sRaceSettings_155E58 cBELibrary_raceDB;
 // Re-clamps every player's aggression level towards the other riders to the limits of its current state.
 extern "C" void cBEAggressionInterface_regressAggression(void)
 {
-    for (int i = 0; i < cBELibrary_raceDB.numPlayers; i++) {
+    for (int i = 0; i < cBELibrary_raceDB.iNumberRiders; i++) {
         int profile = cBELibrary_getProfileIndex(i);
         for (int j = 0; j < 10; j++) {
             int ca = cBELibrary_getCharacterID(i);
@@ -256,7 +251,7 @@ extern "C" void cBEAggressionInterface_regressAggression(void)
                 pts = 0;
             int st = cBELibrary_profileLib[profile][ca].aggression[j].v[0];
             int lvl = pts / 5;
-            if (cBELibrary_raceDB.b49 == 0) {
+            if (cBELibrary_raceDB.cGamePath == 0) {
                 func_001E2A08(j, pts);
             }
             switch (st) {

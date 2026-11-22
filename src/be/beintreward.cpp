@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "be/beprofilelib.h"
 #include "be/bedbprofile.h"
 #include "sound/ssxaudio.h"
@@ -3172,14 +3173,7 @@ extern "C" void cBERewardInterface_setBit(cBERewardInterface* self, int bit, uns
 }
 #endif
 
-// 0x64-byte array elements; arr[i].field indexing reproduces the target's
-// base-first addu
-struct sBERewardEntry {
-    char pad_0x00[0x54];
-    int field_0x54;
-    char pad_0x58[0xc];
-};
-extern sBERewardEntry cBELibrary_locationDB[];
+extern tBELocationDB cBELibrary_locationDB[];
 
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrackPeakID);
@@ -3192,7 +3186,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrackPeakID);
  */
 extern "C" int cBERewardInterface_getTrackPeakID(cBERewardInterface* self, int locationID)
 {
-    return cBELibrary_locationDB[locationID].field_0x54;
+    return cBELibrary_locationDB[locationID].segmentID;
 }
 #endif
 

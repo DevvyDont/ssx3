@@ -8939,10 +8939,10 @@ INCLUDE_ASM("ealib/seg_2DCAE8", SYNCTASK_run);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sSyncTask {                  /* 16 bytes, systemtasksubs[16]: a task SYNCTASK_run calls when it is due */
-    int (*f00)(int, int);
-    int f04;                        /* period */
-    int f08;                        /* due time (libticks) */
-    int f0C;                        /* running */
+    int (*func)(int, int);
+    int rate;                        /* period */
+    int next;                        /* due time (libticks) */
+    int exec;                        /* running */
 };
 extern struct sSyncTask systemtasksubs[16];
 extern int D_00450E04_5928 __asm__("D_00450E04");
@@ -8962,12 +8962,12 @@ int SYNCTASK_run(int mode) {
 
     D_00450E04_5928 = libticks_STA;
     for (i = 0; i < 16; i++) {
-        int (*fn)(int, int) = systemtasksubs[i].f00;
-        if (fn != 0 && libticks_STA >= systemtasksubs[i].f08 && systemtasksubs[i].f0C == 0) {
-            systemtasksubs[i].f0C = 1;
-            result |= fn(mode, libticks_STA - systemtasksubs[i].f08);
-            systemtasksubs[i].f0C = 0;
-            systemtasksubs[i].f08 = libticks_STA + systemtasksubs[i].f04;
+        int (*fn)(int, int) = systemtasksubs[i].func;
+        if (fn != 0 && libticks_STA >= systemtasksubs[i].next && systemtasksubs[i].exec == 0) {
+            systemtasksubs[i].exec = 1;
+            result |= fn(mode, libticks_STA - systemtasksubs[i].next);
+            systemtasksubs[i].exec = 0;
+            systemtasksubs[i].next = libticks_STA + systemtasksubs[i].rate;
         }
     }
     return result;

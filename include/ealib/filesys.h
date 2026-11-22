@@ -17,6 +17,8 @@
 typedef union OP_def OP_def;
 typedef struct FILEOPERATION_def FILEOPERATION_def;
 typedef struct HANDLE_def HANDLE_def;
+typedef struct FILESYSOPTS FILESYSOPTS;
+typedef struct FILEBIG_def FILEBIG_def;
 #endif
 
 // An open file, retail version (0x110 [R]: FILESYS_initadr / FILESYS_overhead size the handle table as maxopenfiles * 272;
@@ -81,5 +83,61 @@ CHECK_OFFSET(FILEOPERATION_def, handle, 0x24);
 CHECK_OFFSET(FILEOPERATION_def, callback, 0x28);
 CHECK_OFFSET(FILEOPERATION_def, next, 0x2C);
 CHECK_SIZE(FILEOPERATION_def, 0x30);
+
+// The file system's options, retail version (0x24 [R]: FILESYS_setopts clears 36 bytes for a short record and copies
+// the caller's; On Tour 0x1C): gFileSysOpts [O] (On Tour `FILESYSOPTS gFileSysOpts`; the unit's view sC10). [O] member
+// names for size / malloc / free / REAL_filedevice; retail orders the rest differently (On Tour: powercallback 0x0C,
+// REAL_filedevice 0x10, DemoCdRoot 0x14, UseDisc 0x18), so only the members with a retail use that matches On Tour's
+// meaning are named. [U] FILESYS_getopts / FILESYS_setopts mirror 0x0C / 0x10 / 0x14 / 0x18 into the live settings
+// D_00450C58 and 0x1C into the REAL_filedevice global; iFILE_addbigreadcallback allocates and frees the archive header
+// through malloc / free (also the splat symbols D_00450C14 / D_00450C18).
+struct FILESYSOPTS {
+    int size;                           // 0x00 [O]; [U] the record's byte count (getopts / setopts read it first)
+    void* (*malloc)(char*, int, int);   // 0x04 [O]; [U] iFILE_addbigreadcallback: (name, size, memflags)
+    int (*free)(void*);                 // 0x08 [O]; [U] iFILE_addbigreadcallback frees a header buffer
+    int unk_0C;                         // 0x0C [U] setopts: D_00450C58 + 0x8
+    int unk_10;                         // 0x10 [U] get / setopts: D_00450C58 + 0x4
+    int unk_14;                         // 0x14 [U] get / setopts: D_00450C58 + 0xC (getopts stores it as a 0 / 1 flag)
+    char* unk_18;                       // 0x18 [U] get / setopts: D_00450C58 + 0x0, the root prefix file names are
+                                        //       matched against
+    char* REAL_filedevice;              // 0x1C [O] (0x10 there); [U] getopts / setopts copy it to and from the global
+                                        //       REAL_filedevice (the host-device prefix)
+    void* unk_20;                       // 0x20 [U] the built-in file table ({name, ?, ?, path} records, a 0 name ends
+                                        //       it); retail-only
+};
+
+CHECK_OFFSET(FILESYSOPTS, malloc, 0x04);
+CHECK_OFFSET(FILESYSOPTS, free, 0x08);
+CHECK_OFFSET(FILESYSOPTS, unk_0C, 0x0C);
+CHECK_OFFSET(FILESYSOPTS, unk_10, 0x10);
+CHECK_OFFSET(FILESYSOPTS, unk_14, 0x14);
+CHECK_OFFSET(FILESYSOPTS, unk_18, 0x18);
+CHECK_OFFSET(FILESYSOPTS, REAL_filedevice, 0x1C);
+CHECK_OFFSET(FILESYSOPTS, unk_20, 0x20);
+CHECK_SIZE(FILESYSOPTS, 0x24);
+
+// A mounted BIG archive, retail version (0x18 [U]: the records iFILE_addbigopencallback / iFILE_addbigreadcallback fill;
+// On Tour 0x1C): [O] struct FILEBIG_def {header, data, headersize, memflags, handle, fop, next}, linked from the file
+// device's bigfilelist (On Tour FILE_FILEDEVICE + 0x34; retail gFileDevice + 0x34, also D_00519AE4). Retail has no
+// `data` word, so every later member sits 4 lower. [U] iFILE_addbigreadcallback: header is the buffer the BIG header is
+// read into (BIG_typeofheader / BIG_sizeofheader), headersize its size (regrown to BIG_sizeofheader), memflags the
+// allocation flags, handle the open archive (its name at +0x10 is what FILESYS_addbig / bypassqueuefileinfo compare),
+// fop the add operation run once the header is in, next the list link.
+struct FILEBIG_def {
+    void* header;                       // 0x00 [O]; [U] the header buffer
+    int headersize;                     // 0x04 [O] (0x08 there); [U] the buffer's size
+    int memflags;                       // 0x08 [O] (0x0C there); [U] passed to FILESYSOPTS::malloc
+    struct HANDLE_def* handle;          // 0x0C [O] (0x10 there); [U] the open archive file
+    struct FILEOPERATION_def* fop;      // 0x10 [O] (0x14 there); [U] the FILESYS_addbig operation
+    struct FILEBIG_def* next;           // 0x14 [O] (0x18 there); [U] the bigfilelist link
+};
+
+CHECK_OFFSET(FILEBIG_def, header, 0x00);
+CHECK_OFFSET(FILEBIG_def, headersize, 0x04);
+CHECK_OFFSET(FILEBIG_def, memflags, 0x08);
+CHECK_OFFSET(FILEBIG_def, handle, 0x0C);
+CHECK_OFFSET(FILEBIG_def, fop, 0x10);
+CHECK_OFFSET(FILEBIG_def, next, 0x14);
+CHECK_SIZE(FILEBIG_def, 0x18);
 
 #endif /* EALIB_FILESYS_H */

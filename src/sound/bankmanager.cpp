@@ -1464,10 +1464,6 @@ extern char str_Peak1_b[];
 extern char str_Peak2_b[];
 extern char str_Peak3_b[];
 
-struct sBmInfo_CF98 {
-    int f0;                 // 0x0
-    char pad_0x4[0x60];
-};
 
 
 static inline void bmLoad_CF98(void* self, char* name, int bank, int id)
@@ -1524,9 +1520,9 @@ extern "C" void func_0028CF98(cSSXAudio* self, int startEvent, int skipPeakTheme
         func_002B3C28(mon, 0x7F);
         return;
     }
-    sBmInfo_CF98 info = *(sBmInfo_CF98*)cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
+    tBELocationDB info = *(tBELocationDB*)cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
     char* mon = (char*)&self->MusicSys;
-    if (info.f0 >= 17 && skipPeakTheme == 0 && requestLine == 0 && func_002A42C8(self) == 0) {
+    if (info.locationID >= 17 && skipPeakTheme == 0 && requestLine == 0 && func_002A42C8(self) == 0) {
         int peakNumber = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
         if (peakNumber == 1) {
             bmLoad_CF98(self, str_Peak1_b, 1, 1);
@@ -1546,7 +1542,7 @@ extern "C" void func_0028CF98(cSSXAudio* self, int startEvent, int skipPeakTheme
     self->unk_62A4 = self->MusicSys.mCurrentSongNum;
     self->unk_5778 = func_002B4908(mon);
     func_002B3CC0(mon, 1);
-    if (requestLine != 0 && info.f0 >= 17) {
+    if (requestLine != 0 && info.locationID >= 17) {
         startEvent = 36;
     }
     sBmVtCD48* vt2 = (sBmVtCD48*)self->MusicSys.mVtbl;

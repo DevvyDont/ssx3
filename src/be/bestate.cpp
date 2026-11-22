@@ -12,10 +12,6 @@
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
-struct sStateSingleton {
-    void* field_0x0;
-    void* vtable;
-};
 
 extern const char str_BERace[];
 extern void* cBERaceState_vtbl[16];
@@ -35,9 +31,9 @@ INCLUDE_ASM("be/bestate", cBERaceState_getState__FPv);
 void* cBERaceState_getState(void* self)
 {
     if (cBERaceState_instance == 0) {
-        sStateSingleton* mem = (sStateSingleton*)cMemMan_alloc(8, str_BERace, 0, 0);
-        mem->field_0x0 = self;
-        mem->vtable = cBERaceState_vtbl;
+        cBERaceState* mem = (cBERaceState*)cMemMan_alloc(8, str_BERace, 0, 0);
+        (*(void**)&mem->nextState) = self;
+        (*(void**)&mem->mVtbl) = cBERaceState_vtbl;
         cBERaceState_instance = mem;
     }
     return cBERaceState_instance;
@@ -113,12 +109,7 @@ extern "C" void* cBERaceState_getInterface(cBERaceState* self, int kind)
 //100%
 INCLUDE_ASM("be/bestate", cBERaceState_onExit);
 #ifdef SKIP_ASM
-struct sStateObj153200 {
-    int f0;
-    int f4;
-    int f8;
-};
-extern sStateObj153200* cBEBoltInterface_instance;
+extern cBEInterface* cBEBoltInterface_instance;
 
 /**
  * Leaves the race back-end state: marks its interfaces inactive.
@@ -130,7 +121,7 @@ extern sStateObj153200* cBEBoltInterface_instance;
 extern "C" void cBERaceState_onExit(void) {
     cBEOptionInterface_instance->bIsActive = 0;
     cBEScoreInterface_instance->bIsActive = 0;
-    cBEBoltInterface_instance->f8 = 0;
+    cBEBoltInterface_instance->bIsActive = 0;
     cBENewPlayerInterface_instance->bIsActive = 0;
     cBENewRaceInterface_instance->bIsActive = 0;
     cBEMissionInterface_instance->bIsActive = 0;
@@ -144,7 +135,7 @@ extern "C" void cBERaceState_onExit(void) {
 //100%
 INCLUDE_ASM("be/bestate", cBERaceState_onEnter);
 #ifdef SKIP_ASM
-extern sStateObj153200* cBEBoltInterface_instance;
+extern cBEInterface* cBEBoltInterface_instance;
 
 /**
  * Enters the race back-end state: marks its interfaces active.
@@ -155,7 +146,7 @@ extern sStateObj153200* cBEBoltInterface_instance;
 extern "C" void cBERaceState_onEnter(void) {
     cBEOptionInterface_instance->bIsActive = 1;
     cBEScoreInterface_instance->bIsActive = 1;
-    cBEBoltInterface_instance->f8 = 1;
+    cBEBoltInterface_instance->bIsActive = 1;
     cBEMissionInterface_instance->bIsActive = 1;
     cBEEconInterface_instance->bIsActive = 1;
     cBEAggressionInterface_instance->bIsActive = 1;

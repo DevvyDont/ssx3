@@ -5018,18 +5018,11 @@ struct sSnd8D90Mgr {
     char pad0[0x1D8];
     sSnd8D90Sub sub;         // 0x1D8
 };
-struct sSnd8D90Sys {
-    sSnd8D90Mgr* mgr;
-    int* a4;                 // 0x4
-    int* a8;                 // 0x8
-    char padC[0x118 - 0xC];
-    sSnd8D90Mgr** p118;      // 0x118
-};
 
 static inline int snd8D90Add(void* vself, int a, int b)
 {
-    sSnd8D90Sys* self = (sSnd8D90Sys*)vself;
-    sSnd8D90Mgr* m = self->mgr;
+    cSSXAudio* self = (cSSXAudio*)vself;
+    sSnd8D90Mgr* m = ((sSnd8D90Mgr*)self->mpVBankManager);
     sSnd8D90Sub* s = &m->sub;
     m->sub.cur++;
     s->ch[m->sub.cur] = m->sub.def;
@@ -5051,18 +5044,18 @@ static inline int snd8D90Add(void* vself, int a, int b)
     s->p84[m->sub.cur] = 0;
     s->p78[m->sub.cur] = 0x7F;
     s->p7C[m->sub.cur] = 1;
-    self->a4[self->mgr->sub.cur] = a;
-    self->a8[self->mgr->sub.cur] = b;
-    sSnd8D90Mgr** pp = self->p118;
+    self->mBank[((sSnd8D90Mgr*)self->mpVBankManager)->sub.cur] = a;
+    self->mPatch[((sSnd8D90Mgr*)self->mpVBankManager)->sub.cur] = b;
+    sSnd8D90Mgr** pp = (*(sSnd8D90Mgr***)&self->MusicSys);
     int r = (int)cSSXAudio_GetCurrAppliedVolumePtr(self, 9, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
     return cBankSys_SFX_End((cBankSys*)self);
 }
 
-static inline void snd8D90Start(sSnd8D90Sys* self, int a, int b)
+static inline void snd8D90Start(cSSXAudio* self, int a, int b)
 {
     if (*(int*)((char*)self + 0x59E4) == 0) {
-        sSnd8D90Mgr* m = self->mgr;
+        sSnd8D90Mgr* m = ((sSnd8D90Mgr*)self->mpVBankManager);
         sSnd8D90Sub* s = &m->sub;
         m->sub.cur++;
         s->ch[m->sub.cur] = m->sub.def;
@@ -5084,9 +5077,9 @@ static inline void snd8D90Start(sSnd8D90Sys* self, int a, int b)
         s->p84[m->sub.cur] = 0;
         s->p78[m->sub.cur] = 0x7F;
         s->p7C[m->sub.cur] = 1;
-        self->a4[self->mgr->sub.cur] = a;
-        self->a8[self->mgr->sub.cur] = b;
-        sSnd8D90Mgr** pp = self->p118;
+        self->mBank[((sSnd8D90Mgr*)self->mpVBankManager)->sub.cur] = a;
+        self->mPatch[((sSnd8D90Mgr*)self->mpVBankManager)->sub.cur] = b;
+        sSnd8D90Mgr** pp = (*(sSnd8D90Mgr***)&self->MusicSys);
         int r = (int)cSSXAudio_GetCurrAppliedVolumePtr(self, 9, 0);
         (*pp)->sub.p3C[(*pp)->sub.cur] = r;
         *(int*)((char*)self + 0x59E0) = cBankSys_SFX_End((cBankSys*)self);
@@ -5109,12 +5102,12 @@ static inline void snd8D90Start(sSnd8D90Sys* self, int a, int b)
 // PORT: 64-bit long sound key
 extern "C" void cSSXAudio_TurboOn(cSSXAudio* vself, cRider* obj, int flag)
 {
-    sSnd8D90Sys* self = (sSnd8D90Sys*)vself;
+    cSSXAudio* self = vself;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     bool ok = obj->mIsHuman && obj->mIsLocal;
     if (!ok) return;
     const sSndKey8_8D90* key = D_004A36A8_8D90;
-    cMonitor_MONITOR_DestroyAll1_8D90(&(*self->p118)->sub, key->v);
+    cMonitor_MONITOR_DestroyAll1_8D90(&(*(*(sSnd8D90Mgr***)&self->MusicSys))->sub, key->v);
     snd8D90Start(self, 0, 122);
     if (flag != 0) {
         snd8D90Add(self, 0, 74);
@@ -6137,22 +6130,11 @@ struct sSndAB40Mgr {
     char pad0[0x1D8];
     sSndAB40Sub sub;         // 0x1D8
 };
-struct sSndAB40Sys {
-    sSndAB40Mgr* mgr;
-    int* a4;                 // 0x4
-    int* a8;                 // 0x8
-    char padC[0x118 - 0xC];
-    sSndAB40Mgr** p118;      // 0x118
-    char pad11C[0x5FE0 - 0x11C];
-    int arr1[2];             // 0x5FE0
-    unsigned short arr2[2];  // 0x5FE8
-    int arr3[2];             // 0x5FEC
-};
 
 static inline int sndAB40Add(void* vself, int a, int b, int type)
 {
-    sSndAB40Sys* self = (sSndAB40Sys*)vself;
-    sSndAB40Mgr* m = self->mgr;
+    cSSXAudio* self = (cSSXAudio*)vself;
+    sSndAB40Mgr* m = ((sSndAB40Mgr*)self->mpVBankManager);
     sSndAB40Sub* s = &m->sub;
     m->sub.cur++;
     s->ch[m->sub.cur] = m->sub.def;
@@ -6174,13 +6156,13 @@ static inline int sndAB40Add(void* vself, int a, int b, int type)
     s->p84[m->sub.cur] = 0;
     s->p78[m->sub.cur] = 0x7F;
     s->p7C[m->sub.cur] = 1;
-    self->a4[self->mgr->sub.cur] = a;
-    self->a8[self->mgr->sub.cur] = b;
-    sSndAB40Mgr* m2 = *self->p118;
+    self->mBank[((sSndAB40Mgr*)self->mpVBankManager)->sub.cur] = a;
+    self->mPatch[((sSndAB40Mgr*)self->mpVBankManager)->sub.cur] = b;
+    sSndAB40Mgr* m2 = *(*(sSndAB40Mgr***)&self->MusicSys);
     sSndAB40Sub* s2 = &m2->sub;
     s2->vals[m2->sub.cur] = 0x7F;
     s2->ch[m2->sub.cur].vol = SND_AB40_MAX(0, SND_AB40_MIN(s2->vals[s2->cur], 0x7F));
-    sSndAB40Mgr** pp = self->p118;
+    sSndAB40Mgr** pp = (*(sSndAB40Mgr***)&self->MusicSys);
     int r = (int)cSSXAudio_GetCurrAppliedVolumePtr(self, type, 0);
     (*pp)->sub.p3C[(*pp)->sub.cur] = r;
     return cBankSys_SFX_End((cBankSys*)self);
@@ -6203,7 +6185,7 @@ static inline int sndAB40Add(void* vself, int a, int b, int type)
 // PORT: 64-bit long sound key; PS2-only FPU asm
 extern "C" void cSSXAudio_UpdateBoostBar(cSSXAudio* vself)
 {
-    sSndAB40Sys* self = (sSndAB40Sys*)vself;
+    cSSXAudio* self = vself;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int n = 1;
@@ -6216,16 +6198,16 @@ extern "C" void cSSXAudio_UpdateBoostBar(cSSXAudio* vself)
         sMon1B0_AB40* mon = ((sMon790_AB40*)rider->mMetrix)->p1B0;
         sMon_AB40* mp = mon ? &mon->m : 0;
         int barTenths = (int)ffloor_AB40(mp->f8 / mp->f4 * 10.0f);
-        if (self->arr1[i] < barTenths && barTenths > 0) {
-            void* sub = &(*self->p118)->sub;
+        if (self->mBoostBarPreviousValue[i] < barTenths && barTenths > 0) {
+            void* sub = &(*(*(sSndAB40Mgr***)&self->MusicSys))->sub;
             int volControl = (int)cSSXAudio_GetCurrAppliedVolumePtr(self, 9, 0);
-            cMonitor_MONITOR_Create_AB40(sub, 150, D_004A36C0_AB40[0].v, volControl, 0, 101, 0x7F, self->arr2[rider->mViewIndex]);
-            self->arr2[rider->mViewIndex] += 0x100;
+            cMonitor_MONITOR_Create_AB40(sub, 150, D_004A36C0_AB40[0].v, volControl, 0, 101, 0x7F, self->mBoostBarPitchMult[rider->mViewIndex]);
+            self->mBoostBarPitchMult[rider->mViewIndex] += 0x100;
         }
-        self->arr1[i] = barTenths;
+        self->mBoostBarPreviousValue[i] = barTenths;
         int w = (int)ffloor_AB40(rider->mUberTimer * 2.0f);
         if (w > 0) {
-            if (w == self->arr3[i] - 1) {
+            if (w == self->mUberSecPreviousValue[i] - 1) {
                 if (w >= 13) {
                 } else if ((w & 1) && w >= 5) {
                 } else {
@@ -6240,7 +6222,7 @@ extern "C" void cSSXAudio_UpdateBoostBar(cSSXAudio* vself)
                 }
             }
         }
-        self->arr3[i] = w;
+        self->mUberSecPreviousValue[i] = w;
     }
 }
 #endif

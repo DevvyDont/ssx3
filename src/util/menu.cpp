@@ -774,21 +774,13 @@ public:
     virtual void render(sRect_2CAD58* r);
 };
 
-// cMenuSys (On Tour): getDisplayHeight() is `screen height - mF64` there (272 on PSP, 480 here).
-class cMenuSys_2CAD58 {
-public:
-    char pad[0x64];
-    int f64;                        // 0x64
-    int getDisplayWidth() { return 640; }
-    int getDisplayHeight() { return 480 - f64; }
-};
 
 struct sMenu_2CAD58 {
     int NumItems;                   // 0x0
     int FocusItem;                  // 0x4
     int TopItem;                    // 0x8
     cItem_2CAD58* Items[70];        // 0xC
-    cMenuSys_2CAD58* MenuSys;       // 0x124
+    cMenuSys* MenuSys;       // 0x124
 };
 
 static const float kScreenGapY = 53.0f;
@@ -826,7 +818,7 @@ extern "C" void cMenu_render(sMenu_2CAD58* self)
         }
     }
     total.x = (self->MenuSys->getDisplayWidth() - total.w) * 0.5f;
-    if (total.h > self->MenuSys->f64 + self->MenuSys->getDisplayHeight() - kScreenGapY * 2) {
+    if (total.h > self->MenuSys->MenuYOffset + self->MenuSys->getDisplayHeight() - kScreenGapY * 2) {
         if (self->FocusItem < self->TopItem) {
             self->TopItem = self->FocusItem;
         }
@@ -850,7 +842,7 @@ extern "C" void cMenu_render(sMenu_2CAD58* self)
                 break;
             }
             item[i].x = total.x;
-            item[i].y = self->MenuSys->f64 + total.y;
+            item[i].y = self->MenuSys->MenuYOffset + total.y;
             item[i].w = total.w;
             total.y += item[i].h;
             self->Items[i]->render(&item[i]);
@@ -858,7 +850,7 @@ extern "C" void cMenu_render(sMenu_2CAD58* self)
     }
     if (self->TopItem) {
         sRect_2CAD58 up;
-        up.y = self->MenuSys->f64 + kArrowEdgeOffset;
+        up.y = self->MenuSys->MenuYOffset + kArrowEdgeOffset;
         up.x = (self->MenuSys->getDisplayWidth() - kArrowWidth) * 0.5f;
         up.w = kArrowWidth;
         up.h = kArrowHeight;
@@ -867,7 +859,7 @@ extern "C" void cMenu_render(sMenu_2CAD58* self)
     if (i != self->NumItems) {
         sRect_2CAD58 down;
         down.x = (self->MenuSys->getDisplayWidth() - kArrowWidth) * 0.5f;
-        down.y = self->MenuSys->f64 + self->MenuSys->getDisplayHeight() - kArrowHeight - kArrowEdgeOffset;
+        down.y = self->MenuSys->MenuYOffset + self->MenuSys->getDisplayHeight() - kArrowHeight - kArrowEdgeOffset;
         down.w = kArrowWidth;
         down.h = kArrowHeight;
         cMenu_renderDownArrow_r(self, down);

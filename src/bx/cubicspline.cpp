@@ -11,11 +11,11 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern char str_cCSICubicSpline[];
 
 struct sCubicSplineFlags {
-    unsigned int b0 : 1;
-    unsigned int b1 : 1;
-    unsigned int b2 : 1;
-    unsigned int f3 : 8;
-    unsigned int count : 8;
+    unsigned int Type : 1;
+    unsigned int Initialized : 1;
+    unsigned int Loaded : 1;
+    unsigned int LoadingIndex : 8;
+    unsigned int NumSplines : 8;
 };
 
 struct sCubicSpline {
@@ -39,10 +39,10 @@ extern "C" void cCubicSplineInterpolant_initCommon_impl(sCubicSpline* self, int 
     if (self->data != 0) {
         cCubicSplineInterpolant_purge(self);
     }
-    self->flags.count = n - 1;
-    self->data = operator_new_tag(self->flags.count * 20, str_cCSICubicSpline, 0, 0);
-    self->flags.b1 = 1;
-    self->flags.f3 = 0;
+    self->flags.NumSplines = n - 1;
+    self->data = operator_new_tag(self->flags.NumSplines * 20, str_cCSICubicSpline, 0, 0);
+    self->flags.Initialized = 1;
+    self->flags.LoadingIndex = 0;
 }
 #endif
 
@@ -142,15 +142,15 @@ extern "C" void cCubicSplineInterpolant_calculateSplines(sCubicSpline* self);
  */
 extern "C" void cCubicSplineInterpolant_addPoint(sCubicSpline* self, float x, float y)
 {
-    if (self->flags.f3 == self->flags.count) {
-        ((sCubicSplineKeyK2*)self->data)[self->flags.f3 - 1].tx = x;
-        ((sCubicSplineKeyK2*)self->data)[self->flags.f3 - 1].ty = y;
+    if (self->flags.LoadingIndex == self->flags.NumSplines) {
+        ((sCubicSplineKeyK2*)self->data)[self->flags.LoadingIndex - 1].tx = x;
+        ((sCubicSplineKeyK2*)self->data)[self->flags.LoadingIndex - 1].ty = y;
         cCubicSplineInterpolant_calculateSplines(self);
-        self->flags.b2 = 1;
+        self->flags.Loaded = 1;
     } else {
-        ((sCubicSplineKeyK2*)self->data)[self->flags.f3].x = x;
-        ((sCubicSplineKeyK2*)self->data)[self->flags.f3].y = y;
-        self->flags.f3++;
+        ((sCubicSplineKeyK2*)self->data)[self->flags.LoadingIndex].x = x;
+        ((sCubicSplineKeyK2*)self->data)[self->flags.LoadingIndex].y = y;
+        self->flags.LoadingIndex++;
     }
 }
 #endif
@@ -184,7 +184,7 @@ extern "C" void cCubicSplineInterpolant_calculateSplines(sCubicSpline* self)
     float linCoefs[256];
     float quadCoefs[256];
     float cubicCoefs[256];
-    int n = self->flags.count;
+    int n = self->flags.NumSplines;
     int i;
     for (i = 0; i < n; i++) {
         x[i] = ((float*)self->data)[i * 5 + 0];
@@ -195,7 +195,7 @@ extern "C" void cCubicSplineInterpolant_calculateSplines(sCubicSpline* self)
     for (i = 0; i < n; i++) {
         spans[i] = x[i + 1] - x[i];
     }
-    switch (self->flags.b0) {
+    switch (self->flags.Type) {
     case 0:
         for (i = 1; i < n; i++) {
             alpha[i] = 3.0f / spans[i] * (yValues[i + 1] - yValues[i]) - 3.0f / spans[i - 1] * (yValues[i] - yValues[i - 1]);
@@ -371,7 +371,7 @@ extern "C" void cCubicSplineInterpolant_SpewGraphPoints(cCubicSplineInterpolant*
 INCLUDE_ASM("bx/cubicspline", cCubicSplineInterpolant_SpewSplineNumbers);
 #ifdef SKIP_ASM
 // Number of spline segments (flags.count, bits 11..18); the empty loop is a stripped debug walk.
-static inline int cCubicSpline_getCount(sCubicSpline* s) { return s->flags.count; }
+static inline int cCubicSpline_getCount(sCubicSpline* s) { return s->flags.NumSplines; }
 
 /**
  * Loops over a spline interpolant's segments (count in bits 11-18) doing nothing.

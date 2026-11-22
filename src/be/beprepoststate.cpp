@@ -15,10 +15,6 @@
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
-struct sStateSingleton {
-    void* field_0x0;
-    void* vtable;
-};
 
 extern const char str_BEPreRace[];
 extern void* cBEPostRaceState_vtbl[16];
@@ -39,9 +35,9 @@ INCLUDE_ASM("be/beprepoststate", cBEPostRaceState_getState__FPv);
 void* cBEPostRaceState_getState(void* self)
 {
     if (cBEPostRaceState_instance == 0) {
-        sStateSingleton* mem = (sStateSingleton*)cMemMan_alloc(8, str_BEPreRace, 0, 0);
-        mem->field_0x0 = self;
-        mem->vtable = cBEPostRaceState_vtbl;
+        cBEState* mem = (cBEState*)cMemMan_alloc(8, str_BEPreRace, 0, 0);
+        (*(void**)&mem->nextState) = self;
+        (*(void**)&mem->mVtbl) = cBEPostRaceState_vtbl;
         cBEPostRaceState_instance = mem;
     }
     return cBEPostRaceState_instance;
@@ -186,9 +182,9 @@ INCLUDE_ASM("be/beprepoststate", cBEPreRaceState_getState__FPv);
 void* cBEPreRaceState_getState(void* self)
 {
     if (cBEPreRaceState_instance == 0) {
-        sStateSingleton* mem = (sStateSingleton*)cMemMan_alloc(8, str_BEPreRace, 0, 0);
-        mem->field_0x0 = self;
-        mem->vtable = cBEPreRaceState_vtbl;
+        cBEState* mem = (cBEState*)cMemMan_alloc(8, str_BEPreRace, 0, 0);
+        (*(void**)&mem->nextState) = self;
+        (*(void**)&mem->mVtbl) = cBEPreRaceState_vtbl;
         cBEPreRaceState_instance = mem;
     }
     return cBEPreRaceState_instance;

@@ -2411,23 +2411,11 @@ struct sIniParser7FC8 {
     char pad[0x810 - 0xC];
 };
 
-struct sSfxEntry7FC8 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    int f10;
-    int f14;
-    int f18;
-    int f1C;
-    int f20;
-    float f24;
-};
 
 struct sAudio7FC8 {
     char pad[0x6478];
     int count;                      // 0x6478
-    sSfxEntry7FC8 entries[25];      // 0x647C
+    tAudioMix entries[25];      // 0x647C
 };
 
 /**
@@ -2445,50 +2433,50 @@ extern "C" void cSSXAudio_LoadMixes(sAudio7FC8* self)
     FileParser_FileParser_r(&parser, D_004A3560, 0x100);
     parser.cur = parser.start;
     for (int i = 0; i < 25; i++) {
-        self->entries[i].f0 = 100;
-        self->entries[i].f4 = 100;
-        self->entries[i].f8 = 100;
-        self->entries[i].fC = 100;
-        self->entries[i].f10 = 100;
-        self->entries[i].f14 = 100;
-        self->entries[i].f18 = 100;
-        self->entries[i].f1C = 100;
-        self->entries[i].f20 = 100;
-        self->entries[i].f24 = 0.0f;
+        self->entries[i].musicLevel = 100;
+        self->entries[i].djLevel = 100;
+        self->entries[i].paLevel = 100;
+        self->entries[i].characterLevel = 100;
+        self->entries[i].boardLevel = 100;
+        self->entries[i].collisionLevel = 100;
+        self->entries[i].ambientLevel = 100;
+        self->entries[i].arcadeSFXLevel = 100;
+        self->entries[i].arcadeSpeechLevel = 100;
+        self->entries[i].time = 0.0f;
     }
     while (self->count < 25 && FileParser_FindNextSection(&parser) != 0) {
         while (FileParser_IsEOF(&parser) == 0) {
             char* key = FileParser_GetName(&parser);
             if (strcasecmp(key, str_MUSIC) == 0) {
                 FileParser_AssignInt(&parser, str_MUSIC, &val);
-                self->entries[self->count].f0 = val;
+                self->entries[self->count].musicLevel = val;
             } else if (strcasecmp(key, str_DJ) == 0) {
                 FileParser_AssignInt(&parser, str_DJ, &val);
-                self->entries[self->count].f4 = val;
+                self->entries[self->count].djLevel = val;
             } else if (strcasecmp(key, str_PA) == 0) {
                 FileParser_AssignInt(&parser, str_PA, &val);
-                self->entries[self->count].f8 = val;
+                self->entries[self->count].paLevel = val;
             } else if (strcasecmp(key, str_CHARACTER) == 0) {
                 FileParser_AssignInt(&parser, str_CHARACTER, &val);
-                self->entries[self->count].fC = val;
+                self->entries[self->count].characterLevel = val;
             } else if (strcasecmp(key, str_BOARD) == 0) {
                 FileParser_AssignInt(&parser, str_BOARD, &val);
-                self->entries[self->count].f10 = val;
+                self->entries[self->count].boardLevel = val;
             } else if (strcasecmp(key, str_COLLISION) == 0) {
                 FileParser_AssignInt(&parser, str_COLLISION, &val);
-                self->entries[self->count].f14 = val;
+                self->entries[self->count].collisionLevel = val;
             } else if (strcasecmp(key, str_AMBIENT) == 0) {
                 FileParser_AssignInt(&parser, str_AMBIENT, &val);
-                self->entries[self->count].f18 = val;
+                self->entries[self->count].ambientLevel = val;
             } else if (strcasecmp(key, str_ARCADESFX) == 0) {
                 FileParser_AssignInt(&parser, str_ARCADESFX, &val);
-                self->entries[self->count].f1C = val;
+                self->entries[self->count].arcadeSFXLevel = val;
             } else if (strcasecmp(key, str_ARCADESPEECH) == 0) {
                 FileParser_AssignInt(&parser, str_ARCADESPEECH, &val);
-                self->entries[self->count].f20 = val;
+                self->entries[self->count].arcadeSpeechLevel = val;
             } else if (strcasecmp(key, str_TIME_b) == 0) {
                 FileParser_AssignInt(&parser, str_TIME_b, &val);
-                self->entries[self->count].f24 = (float)val * 0.0010000000474974513f;
+                self->entries[self->count].time = (float)val * 0.0010000000474974513f;
             }
         }
         self->count++;
@@ -2544,18 +2532,6 @@ struct sSaChan83B0 {
     float pad;
 };
 
-struct sSfxEntry83B0 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    int f10;
-    int f14;
-    int f18;
-    int f1C;
-    int f20;
-    float f24;
-};
 
 struct sSaMixOut83B0 {
     char pad0[0x636C];
@@ -2571,7 +2547,7 @@ struct sAudio83B0 {
     char pad6414[0x646C - 0x6414];
     int preset;             // 0x646C
     char pad6470[0x647C - 0x6470];
-    sSfxEntry83B0 entries[25];      // 0x647C
+    tAudioMix entries[25];      // 0x647C
 };
 
 /**
@@ -2594,16 +2570,16 @@ extern "C" void cSSXAudio_MixVolume(cSSXAudio* vself, int id)
         return;
     }
     self->preset = id;
-    float musicVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 1, self->entries[id].f0);
-    float djVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 2, self->entries[id].f4);
-    float paVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 3, self->entries[id].f8);
-    float characterVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 4, self->entries[id].fC);
-    float boardVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 6, self->entries[id].f10);
-    float collisionVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 7, self->entries[id].f14);
-    float ambientVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 8, self->entries[id].f18);
-    float arcadeSfxVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 9, self->entries[id].f1C);
-    float arcadeSpeechVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 10, self->entries[id].f20);
-    float fadeTime = self->entries[id].f24;
+    float musicVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 1, self->entries[id].musicLevel);
+    float djVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 2, self->entries[id].djLevel);
+    float paVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 3, self->entries[id].paLevel);
+    float characterVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 4, self->entries[id].characterLevel);
+    float boardVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 6, self->entries[id].boardLevel);
+    float collisionVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 7, self->entries[id].collisionLevel);
+    float ambientVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 8, self->entries[id].ambientLevel);
+    float arcadeSfxVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 9, self->entries[id].arcadeSFXLevel);
+    float arcadeSpeechVol = cSSXAudio_MixIntToFloat((cSSXAudio*)self, 10, self->entries[id].arcadeSpeechLevel);
+    float fadeTime = self->entries[id].time;
     if (fadeTime == 0.0f) {
         self->cur[1] = musicVol;
         self->cur[2] = djVol;
@@ -2631,15 +2607,15 @@ extern "C" void cSSXAudio_MixVolume(cSSXAudio* vself, int id)
         mixOut->mix[9] = characterOut * gDeiterScaling;
     } else {
         sAudioFade_87A8* fader = (sAudioFade_87A8*)self;
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 1, self->entries[id].f0 != -1, musicVol, fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 2, self->entries[id].f4 != -1, djVol, fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 3, self->entries[id].f8 != -1, paVol, fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 4, self->entries[id].fC != -1, characterVol, fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 6, self->entries[id].f10 != -1, boardVol, fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 7, self->entries[id].f14 != -1, collisionVol, fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 8, self->entries[id].f18 != -1, ambientVol, fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 9, self->entries[id].f1C != -1, arcadeSfxVol, fadeTime);
-        cSSXAudio_ChangeMixFinalAndStepValues(fader, 10, self->entries[id].f20 != -1, arcadeSpeechVol, fadeTime);
+        cSSXAudio_ChangeMixFinalAndStepValues(fader, 1, self->entries[id].musicLevel != -1, musicVol, fadeTime);
+        cSSXAudio_ChangeMixFinalAndStepValues(fader, 2, self->entries[id].djLevel != -1, djVol, fadeTime);
+        cSSXAudio_ChangeMixFinalAndStepValues(fader, 3, self->entries[id].paLevel != -1, paVol, fadeTime);
+        cSSXAudio_ChangeMixFinalAndStepValues(fader, 4, self->entries[id].characterLevel != -1, characterVol, fadeTime);
+        cSSXAudio_ChangeMixFinalAndStepValues(fader, 6, self->entries[id].boardLevel != -1, boardVol, fadeTime);
+        cSSXAudio_ChangeMixFinalAndStepValues(fader, 7, self->entries[id].collisionLevel != -1, collisionVol, fadeTime);
+        cSSXAudio_ChangeMixFinalAndStepValues(fader, 8, self->entries[id].ambientLevel != -1, ambientVol, fadeTime);
+        cSSXAudio_ChangeMixFinalAndStepValues(fader, 9, self->entries[id].arcadeSFXLevel != -1, arcadeSfxVol, fadeTime);
+        cSSXAudio_ChangeMixFinalAndStepValues(fader, 10, self->entries[id].arcadeSpeechLevel != -1, arcadeSpeechVol, fadeTime);
         self->faded = 1;
     }
 }
@@ -3955,10 +3931,10 @@ struct sAsync289DF0 {
     int slot;              // 0x8
     char names[6][0x40];   // 0xC
     char pad18C[0x18C - 0xC - 6 * 0x40];
-    sRing289DF0 q18C;      // 0x18C
-    sRing289DF0 q19C;      // 0x19C
-    sRing289DF0 q1AC;      // 0x1AC
-    sRing289DF0 q1BC;      // 0x1BC
+    sRing289DF0 mUserHandle;      // 0x18C
+    sRing289DF0 mFilenameIndex;      // 0x19C
+    sRing289DF0 mMemType;      // 0x1AC
+    sRing289DF0 mMainMemFlags;      // 0x1BC
     int pad1CC[2];
     // vptr at 0x1D4
     virtual void v01();
@@ -3984,44 +3960,44 @@ extern "C" void cAsyncSys_DoCancel(cAsyncSys* self, int flush)
     sAsync289DF0* asyncSys = (sAsync289DF0*)self;
     int id = -1;
     {
-        sRing289DF0* queue = &asyncSys->q18C;
-        if (asyncSys->q18C.head != asyncSys->q18C.tail) {
+        sRing289DF0* queue = &asyncSys->mUserHandle;
+        if (asyncSys->mUserHandle.head != asyncSys->mUserHandle.tail) {
             int frontValue = queue->data[queue->tail];
-            if (++asyncSys->q18C.tail >= asyncSys->q18C.size)
-                asyncSys->q18C.tail = 0;
+            if (++asyncSys->mUserHandle.tail >= asyncSys->mUserHandle.size)
+                asyncSys->mUserHandle.tail = 0;
             id = frontValue;
         }
     }
     int slot;
     {
-        sRing289DF0* queue = &asyncSys->q19C;
-        if (asyncSys->q19C.head == asyncSys->q19C.tail) {
+        sRing289DF0* queue = &asyncSys->mFilenameIndex;
+        if (asyncSys->mFilenameIndex.head == asyncSys->mFilenameIndex.tail) {
             slot = -1;
         } else {
             int frontValue = queue->data[queue->tail];
-            if (++asyncSys->q19C.tail >= asyncSys->q19C.size)
-                asyncSys->q19C.tail = 0;
+            if (++asyncSys->mFilenameIndex.tail >= asyncSys->mFilenameIndex.size)
+                asyncSys->mFilenameIndex.tail = 0;
             slot = frontValue;
         }
     }
     int kind;
     {
-        sRing289DF0* queue = &asyncSys->q1AC;
-        if (asyncSys->q1AC.head == asyncSys->q1AC.tail) {
+        sRing289DF0* queue = &asyncSys->mMemType;
+        if (asyncSys->mMemType.head == asyncSys->mMemType.tail) {
             kind = -1;
         } else {
             int frontValue = queue->data[queue->tail];
-            if (++asyncSys->q1AC.tail >= asyncSys->q1AC.size)
-                asyncSys->q1AC.tail = 0;
+            if (++asyncSys->mMemType.tail >= asyncSys->mMemType.size)
+                asyncSys->mMemType.tail = 0;
             kind = frontValue;
         }
     }
     {
-        sRing289DF0* queue = &asyncSys->q1BC;
-        if (asyncSys->q1BC.head != asyncSys->q1BC.tail) {
+        sRing289DF0* queue = &asyncSys->mMainMemFlags;
+        if (asyncSys->mMainMemFlags.head != asyncSys->mMainMemFlags.tail) {
             int frontValue = queue->data[queue->tail];
-            if (++asyncSys->q1BC.tail >= asyncSys->q1BC.size)
-                asyncSys->q1BC.tail = 0;
+            if (++asyncSys->mMainMemFlags.tail >= asyncSys->mMainMemFlags.size)
+                asyncSys->mMainMemFlags.tail = 0;
         }
     }
     if (asyncSys->busy) {
@@ -4044,10 +4020,10 @@ extern "C" void cAsyncSys_DoCancel(cAsyncSys* self, int flush)
         }
     }
     if (flush) {
-        asyncSys->q18C.tail = asyncSys->q18C.head;
-        asyncSys->q19C.tail = asyncSys->q19C.head;
-        asyncSys->q1AC.tail = asyncSys->q1AC.head;
-        asyncSys->q1BC.tail = asyncSys->q1BC.head;
+        asyncSys->mUserHandle.tail = asyncSys->mUserHandle.head;
+        asyncSys->mFilenameIndex.tail = asyncSys->mFilenameIndex.head;
+        asyncSys->mMemType.tail = asyncSys->mMemType.head;
+        asyncSys->mMainMemFlags.tail = asyncSys->mMainMemFlags.head;
     }
     cAsyncSys_ASYNCSYS_StartLoad(self);
 }
