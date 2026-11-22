@@ -3399,9 +3399,9 @@ extern "C" int FILE_loadpack(int, int);
  * @param pathSys  the path system
  * @param name  the path file name (passed as an int)
  */
-extern "C" void cPathSys_loadPaths(void *pathSys, int name) {
-    (*(int *)((char*)(pathSys) + (0x48))) = FILE_loadpack(name, 0);
-    (*(int *)((char*)(pathSys) + (0x4C))) = 1;
+extern "C" void cPathSys_loadPaths(cPathSys* pathSys, int name) {
+    pathSys->Data = (char*)FILE_loadpack(name, 0);
+    pathSys->m_bIsFileLoaded = 1;
     cPathSys_resolvePaths((cPathSys*)pathSys);
 }
 #endif
@@ -3458,7 +3458,7 @@ extern "C" void cPathSys_resolvePaths(cPathSys* self)
 INCLUDE_ASM("bx/bxstringctor", cPathSys_appendPaths);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
-extern "C" void cPathSys_loadPaths(void* self, int arg1);
+extern "C" void cPathSys_loadPaths(cPathSys* self, int arg1);
 extern "C" int FILE_loadpack(int, int);
 // PORT: pathREAD_tInt32 takes (dst, src); the unit declares it with one arg
 void pathREAD_tInt32_3(void* dst, void* src) __asm__("pathREAD_tInt32");

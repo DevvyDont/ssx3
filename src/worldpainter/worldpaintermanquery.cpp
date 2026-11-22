@@ -1276,20 +1276,20 @@ extern "C" void tQuadTreeNode_setLeafNode(int, int, int);
  * @param fparg2  the area's width (and height) in world units
  * @return @p quadTree
  */
-extern "C" void *cQuadTree_cQuadTree(void *quadTree, int defaultKey, int defaultData, float fparg0, float fparg1, float fparg2) {
-    (*(int *)((char*)(quadTree) + (0x24))) = 0;
-    (*(int *)((char*)(quadTree) + (0x20))) = 0;
-    (*(int *)((char*)(quadTree) + (0x10))) = 0;
-    (*(int *)((char*)(quadTree) + (0xC))) = 0;
-    (*(float *)((char*)(quadTree) + (4))) = fparg0;
-    (*(float *)((char*)(quadTree) + (8))) = fparg1;
-    (*(float *)((char*)(quadTree) + (0))) = (float) (32768.0f / fparg2);
-    (*(unsigned short *)((char*)(quadTree) + (0x14))) = cQuadTree_getFreeNode();
-    (*(short *)((char*)(quadTree) + (0x16))) = 0;
-    tQuadTreeNode_setLeafNode((*(int *)((char*)(quadTree) + (0x20))) + ((*(unsigned short *)((char*)(quadTree) + (0x14))) * 8), defaultKey, defaultData);
-    (*(int *)((char*)(quadTree) + (0x1C))) = defaultKey;
-    (*(int *)((char*)(quadTree) + (0x18))) = defaultData;
-    return quadTree;
+extern "C" void *cQuadTree_cQuadTree(cQuadTree* quadTree, int defaultKey, int defaultData, float fparg0, float fparg1, float fparg2) {
+    quadTree->m_freeNodes = 0;
+    quadTree->m_nodes = 0;
+    quadTree->m_numNodes = 0;
+    quadTree->m_numUsedNodes = 0;
+    quadTree->m_offsetX = fparg0;
+    quadTree->m_offsetY = fparg1;
+    quadTree->m_scale = (float) (32768.0f / fparg2);
+    quadTree->m_root = cQuadTree_getFreeNode();
+    (*(short*)&quadTree->m_pad) = 0;
+    tQuadTreeNode_setLeafNode(((int)quadTree->m_nodes) + ((quadTree->m_root) * 8), defaultKey, defaultData);
+    quadTree->m_defaultNode.m_key = defaultKey;
+    (*(int*)&quadTree->m_defaultNode) = defaultData;
+    return ((void*)quadTree);
 }
 #endif
 

@@ -1877,8 +1877,8 @@ INCLUDE_ASM("replay/replaycache", cReplayFramePtr_setReadPos);
  * @param framePtr  the frame pointer
  * @param readPos  the saved read position
  */
-extern "C" void cReplayFramePtr_setReadPos(void *framePtr, int *readPos) {
-    (*(int *)((char*)(framePtr) + (0xC))) = (int) *readPos;
+extern "C" void cReplayFramePtr_setReadPos(cReplayFramePtr* framePtr, int *readPos) {
+    framePtr->ReadData = (char*)((int) *readPos);
 }
 #endif
 //100%
@@ -1937,8 +1937,8 @@ INCLUDE_ASM("replay/replaycache", func_00272250);
  * @param framePtr  the object to write
  * @param block  the value to store
  */
-extern "C" void func_00272250(void *framePtr, int block) {
-    (*(int *)((char*)(framePtr) + (4))) = block;
+extern "C" void func_00272250(cReplayFramePtr* framePtr, int block) {
+    framePtr->Block = (char*)block;
 }
 #endif
 
@@ -4150,11 +4150,11 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_SetUserData);
  * @param userData  the new user data
  * @return the old mpUserData
  */
-extern "C" int cScriptPlayerEntity_SetUserData(void *entity, int userData) {
+extern "C" int cScriptPlayerEntity_SetUserData(cScriptPlayerEntity* entity, int userData) {
     int temp_2;
 
-    temp_2 = (*(int *)((char*)(entity) + (0xC)));
-    (*(int *)((char*)(entity) + (0xC))) = userData;
+    temp_2 = ((int)entity->mpUserData);
+    entity->mpUserData = (void*)userData;
     return temp_2;
 }
 #endif

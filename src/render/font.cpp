@@ -2863,8 +2863,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_PopDrawState);
  *
  * @param graphicsMan  the graphics manager
  */
-extern "C" void cGraphicsMan_PopDrawState(void *graphicsMan) {
-    (*(int *)((char*)(graphicsMan) + (0xE84))) = (int) ((*(int *)((char*)(graphicsMan) + (0xE84))) - 20);
+extern "C" void cGraphicsMan_PopDrawState(cGraphicsMan* graphicsMan) {
+    graphicsMan->m_pCurrentDrawState = (sDrawState*)((int) (((int)graphicsMan->m_pCurrentDrawState) - 20));
 }
 #endif
 //100%

@@ -289,8 +289,8 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_endGame);
  *
  * @param ssxApp  the application object
  */
-extern "C" void cSSXApp_endGame(void *ssxApp) {
-    (*(int *)((char*)(ssxApp) + (0x84))) = 0;
+extern "C" void cSSXApp_endGame(cSSXApp* ssxApp) {
+    ssxApp->Game = 0;
 }
 #endif
 //100%

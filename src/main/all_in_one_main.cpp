@@ -1337,8 +1337,8 @@ INCLUDE_ASM("main/all_in_one_main", cDebugFE_startlobby);
  *
  * @param debugFE  the debug front end
  */
-extern "C" void cDebugFE_startlobby(void *debugFE) {
-    (*(int *)((char*)(debugFE) + (0x14))) = (int) (*(int *)((char*)(debugFE) + (0x10)));
+extern "C" void cDebugFE_startlobby(cDebugFE* debugFE) {
+    debugFE->ActiveScreen = (cDebugScreen*)((int) ((int)debugFE->Screens[1]));
 }
 #endif
 
@@ -1757,10 +1757,10 @@ extern void* cFECustom_vtbl_CC60[] __asm__("cFECustom_vtbl");
  * @param feCustom  the object
  * @return @p feCustom
  */
-extern "C" void *cFECustom_cFECustom1(void *feCustom) {
-    (*(int *)((char*)(feCustom) + (0))) = 0;
-    (*(void ***)((char*)(feCustom) + (4))) = cFECustom_vtbl_CC60;
-    return feCustom;
+extern "C" void *cFECustom_cFECustom1(cFECustom* feCustom) {
+    feCustom->mpEngine = 0;
+    feCustom->mVtbl = cFECustom_vtbl_CC60;
+    return ((void*)feCustom);
 }
 #endif
 
@@ -2331,14 +2331,14 @@ extern void* cFEInput_vtbl_D508[] __asm__("cFEInput_vtbl");
  * @param self  the object
  * @return @p self
  */
-extern "C" void *cFEInput_cFEInput(void *self) {
-    (*(signed char *)((char*)(self) + (4))) = 0;
-    (*(void ***)((char*)(self) + (8))) = cFEInput_vtbl_D508;
-    (*(int *)((char*)(self) + (0x18))) = 0;
-    (*(int *)((char*)(self) + (0xC))) = 0;
-    (*(int *)((char*)(self) + (0x10))) = 0;
-    (*(int *)((char*)(self) + (0x14))) = 0;
-    return self;
+extern "C" void *cFEInput_cFEInput(cFEInput* self) {
+    (*(signed char*)&self->mPadNum) = 0;
+    self->mVtbl = cFEInput_vtbl_D508;
+    self->mpInput = 0;
+    self->mbKeyReady = 0;
+    self->miVKey = 0;
+    self->miAsciiKey = 0;
+    return ((void*)self);
 }
 #endif
 

@@ -2275,9 +2275,9 @@ INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_cWorldPainterMan);
  *
  * @return @p self
  */
-extern "C" void *cWorldPainterMan_cWorldPainterMan(void *self) {
-    (*(int *)((char*)(self) + (4))) = 0;
-    return self;
+extern "C" void *cWorldPainterMan_cWorldPainterMan(cWorldPainterMan* self) {
+    self->m_pCache = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -2317,7 +2317,7 @@ extern "C" void cWorldPainterMan__cWorldPainterMan(cWorldPainterMan* self, int f
 INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_init);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *cWorldPainterSection_cWorldPainterSection(void *arg0);
+extern "C" void *cWorldPainterSection_cWorldPainterSection(cWorldPainterSection* arg0);
 int operator_new_B1D0(unsigned int, void*, int, int) __asm__("operator_new__FUi");
 extern char str_cWorldPainterMan[];
 struct sArr_B1D0 { int n; cWorldPainterSection *arr; };
@@ -2393,7 +2393,7 @@ extern "C" void cWorldPainterMan_load(cWorldPainterMan* worldPainterMan, int sec
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_load1);
 #ifdef SKIP_ASM
-extern "C" void cWorldPainterSection_load1(void*, int, int);
+extern "C" void cWorldPainterSection_load1(cWorldPainterSection*, int, int);
 /**
  * Installs already-loaded world-painter data for a section: m_pCache[@p sectionId] gets it through cWorldPainterSection_load1.
  *
@@ -2416,12 +2416,12 @@ INCLUDE_ASM("bx/seg_1BA100", cWorldPainterSection_cWorldPainterSection);
  * @param section  the section
  * @return @p section
  */
-extern "C" void *cWorldPainterSection_cWorldPainterSection(void *section) {
-    (*(int *)((char*)(section) + (8))) = 0;
-    (*(int *)((char*)(section) + (4))) = -1;
-    (*(short *)((char*)(section) + (0))) = 0;
-    (*(short *)((char*)(section) + (2))) = 0;
-    return section;
+extern "C" void *cWorldPainterSection_cWorldPainterSection(cWorldPainterSection* section) {
+    section->m_pWPHeader = 0;
+    section->m_iAsyncHandle = -1;
+    section->m_iState = 0;
+    section->m_iStreamed = 0;
+    return ((void*)section);
 }
 #endif
 
@@ -2547,10 +2547,10 @@ extern "C" void cWorldPainterSection_resolve(cWorldPainterSection*);
  * @param sectionId  the section index (unused)
  * @param wpData  the world-painter data (a tWPHeader)
  */
-extern "C" void cWorldPainterSection_load1(void *section, int sectionId, int wpData) {
-    (*(short *)((char*)(section) + (2))) = 1;
-    (*(short *)((char*)(section) + (0))) = 2;
-    (*(int *)((char*)(section) + (8))) = wpData;
+extern "C" void cWorldPainterSection_load1(cWorldPainterSection* section, int sectionId, int wpData) {
+    section->m_iStreamed = 1;
+    section->m_iState = 2;
+    section->m_pWPHeader = (tWPHeader*)wpData;
     cWorldPainterSection_resolve((cWorldPainterSection*)section);
 }
 #endif
@@ -2565,17 +2565,17 @@ extern "C" void cMemMan_free__FPv(int);
  *
  * @param section  the section
  */
-extern "C" void cWorldPainterSection_unload(void *section) {
+extern "C" void cWorldPainterSection_unload(cWorldPainterSection* section) {
     int temp_4;
 
-    temp_4 = (*(int *)((char*)(section) + (8)));
+    temp_4 = ((int)section->m_pWPHeader);
     if (temp_4 != 0) {
-        if ((*(short *)((char*)(section) + (2))) == 0) {
+        if ((section->m_iStreamed) == 0) {
             cMemMan_free__FPv(temp_4);
         }
-        (*(int *)((char*)(section) + (8))) = 0;
+        section->m_pWPHeader = 0;
     }
-    (*(short *)((char*)(section) + (0))) = 0;
+    section->m_iState = 0;
 }
 #endif
 

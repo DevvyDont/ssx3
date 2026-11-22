@@ -2504,11 +2504,11 @@ extern "C" void cTexFlipModifier_setupMaterialRecords(cTexFlipModifier* self);
  */
 extern "C" void cTexFlipModifier_setTexIndex(cTexFlipModifier* self, int i)
 {
-    int n = *(int*)((char*)self + 0x20);
+    int n = self->NumTexFlipMaterials;
     if (i >= n) {
         i = n - 1;
     }
-    *(int*)((char*)self + 0x14) = i;
+    self->TexIndex = i;
     cTexFlipModifier_setupMaterialRecords(self);
 }
 #endif
@@ -2532,7 +2532,7 @@ extern "C" void cTexFlipModifier_setupMaterialRecords(cTexFlipModifier* self)
 {
     int i;
     for (i = 0; i < self->NumMaterials; i++) {
-        tMaterialBlockRecord* list = (tMaterialBlockRecord*)(*(char**)(((char*)self->Instance) + 0x94));
+        tMaterialBlockRecord* list = (tMaterialBlockRecord*)((char*)self->Instance->m_MaterialBlock);
         tMaterialRecord* item = (tMaterialRecord*)(*(char**)(((char*)list) + (i << 2) + 4));
         tTextureFlipRecord* table = (tTextureFlipRecord*)(*(char**)&item->m_TextureFlip);
         if (((char*)table) != 0) {
@@ -5800,8 +5800,8 @@ INCLUDE_ASM("object/railmodifier", cCamAnimFrame_setAnimRecord);
  * @param frame  the camera animation frame
  * @param source  the animation record
  */
-extern "C" void cCamAnimFrame_setAnimRecord(void *frame, int source) {
-    (*(int *)((char*)(frame) + (0x40))) = source;
+extern "C" void cCamAnimFrame_setAnimRecord(cCamAnimFrame* frame, int source) {
+    frame->AnimRecord = (const tAnimRecord*)source;
 }
 #endif
 //100%
@@ -6703,8 +6703,8 @@ INCLUDE_ASM("object/railmodifier", cParentModifier_setParent);
  * @param modifier  the parent modifier
  * @param parentInst  instance record to follow
  */
-extern "C" void cParentModifier_setParent(void *modifier, int parentInst) {
-    (*(int *)((char*)(modifier) + (0xA0))) = parentInst;
+extern "C" void cParentModifier_setParent(cParentModifier* modifier, int parentInst) {
+    modifier->ParentInst = (tInstanceRecord*)parentInst;
 }
 #endif
 

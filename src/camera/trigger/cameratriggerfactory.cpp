@@ -3515,8 +3515,8 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_setBoundAct
  * @param boundedAlgo  the bounded camera algorithm (this)
  * @param boundAction  the cCTActionBoundedCam to follow
  */
-extern "C" void cBoundedAlgorithm_setBoundAction(void *boundedAlgo, int boundAction) {
-    (*(int *)((char*)(boundedAlgo) + (0x80))) = boundAction;
+extern "C" void cBoundedAlgorithm_setBoundAction(cBoundedAlgorithm* boundedAlgo, int boundAction) {
+    boundedAlgo->BoundAction = (cCTActionBoundedCam*)boundAction;
 }
 #endif
 //100%

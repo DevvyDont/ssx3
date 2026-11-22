@@ -657,19 +657,19 @@ extern "C" void MEM_free(int);
  *
  * @param manager  the cWorldTriggerManager
  */
-extern "C" void cWorldTriggerManager_UnloadTriggerInfo(void *manager) {
+extern "C" void cWorldTriggerManager_UnloadTriggerInfo(cWorldTriggerManager* manager) {
     int temp_4;
     int temp_4_2;
 
-    temp_4 = (*(int *)((char*)(manager) + (0x338)));
+    temp_4 = ((int)manager->m_pcTriggerInfoFile);
     if (temp_4 != 0) {
         MEM_free(temp_4);
-        temp_4_2 = (*(int *)((char*)(manager) + (0x33C)));
-        (*(int *)((char*)(manager) + (0x338))) = 0;
+        temp_4_2 = ((int)manager->m_aTriggerInfo);
+        manager->m_pcTriggerInfoFile = 0;
         if (temp_4_2 != 0) {
             cMemMan_free__FPv(temp_4_2);
         }
-        (*(int *)((char*)(manager) + (0x340))) = 0;
+        manager->m_iNumTriggers = 0;
     }
 }
 #endif
@@ -793,7 +793,7 @@ extern "C" void cWorldTriggerManager_Update(cWorldTriggerInstance** self)
     for (int i = 0; i < 40; i++) {
         if ((*self)[i].m_bInUse == 1) {
             if ((*self)[i].m_bTouch == 0) {
-                if (strcmp((char*)&(*self)[i] + 0x40, D_004A35A8)) {
+                if (strcmp((&(*self)[i])->m_iSwapString, D_004A35A8)) {
                     // PORT: pointer arithmetic through int
                     cSSXAudio_SwapBankStopped_2(cAudioInterface_bxAudio(), (char*)(i * 0x70 + *(int*)self) + 0x40);
                 }
@@ -843,7 +843,7 @@ extern "C" void cWorldTriggerInstance_Stop(cWorldTriggerInstance* t);
 extern "C" void cWorldTriggerManager_StopTrigger(cWorldTriggerInstance** self, int id)
 {
     for (int i = 0; i < 40; i++) {
-        if ((*self)[i].m_bInUse == 1 && *(int*)((char*)&(*self)[i] + 0xC) == id) {
+        if ((*self)[i].m_bInUse == 1 && (&(*self)[i])->m_eAudioTrigger == id) {
             (*self)[i].m_bInUse = 0;
             cWorldTriggerInstance_Stop((cWorldTriggerInstance*)(&(*self)[i]));
         }
@@ -1188,8 +1188,8 @@ extern "C" int cWorldTriggerManager_SwapTriggerPlaying(cWorldTriggerInstance** s
 {
     int n = 0;
     for (int i = 0; i < 40; i++) {
-        if ((*self)[i].m_bInUse == 1 && strcmp((char*)&(*self)[i] + 0x40, D_004A35A8)) {
-            if (*(int*)((char*)&(*self)[i] + 0xC) != id) n++;
+        if ((*self)[i].m_bInUse == 1 && strcmp((&(*self)[i])->m_iSwapString, D_004A35A8)) {
+            if ((&(*self)[i])->m_eAudioTrigger != id) n++;
         }
     }
     return n;
@@ -1212,8 +1212,8 @@ extern "C" int cWorldTriggerManager_PlayingTriggerInstance(cWorldTriggerInstance
     for (int i = 0; i < 40; i++) {
         cWorldTriggerInstance* triggerInst = &(*self)[i];
         if (triggerInst->m_bInUse == 1 && triggerInst != except
-            && *(int*)((char*)triggerInst + 0x4) == objectRef
-            && *(int*)((char*)triggerInst + 0x8) == volNum) {
+            && triggerInst->m_iObjectRef == objectRef
+            && triggerInst->m_iVolNum == volNum) {
             return 1;
         }
     }

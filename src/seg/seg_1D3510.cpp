@@ -749,8 +749,8 @@ INCLUDE_ASM("seg/seg_1D3510", cMenuItem_setArg);
  * @param menuItem  the menu item
  * @param itemArg  the new value
  */
-extern "C" void cMenuItem_setArg(void *menuItem, int itemArg) {
-    (*(int *)((char*)(menuItem) + (0xC))) = itemArg;
+extern "C" void cMenuItem_setArg(cMenuItem* menuItem, int itemArg) {
+    menuItem->Arg = (void*)itemArg;
 }
 #endif
 
@@ -879,8 +879,8 @@ INCLUDE_ASM("seg/seg_1D3510", cBoolMenuItem_setValue);
  * @param menuItem  the on/off item
  * @param value  the flag's address
  */
-extern "C" void cBoolMenuItem_setValue(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x20))) = value;
+extern "C" void cBoolMenuItem_setValue(cBoolMenuItem* menuItem, int value) {
+    menuItem->Flag = (int*)value;
 }
 #endif
 
@@ -893,8 +893,8 @@ INCLUDE_ASM("seg/seg_1D3510", cBoolMenuItem_setCaption);
  * @param menuItem  the on/off item
  * @param value  the caption text
  */
-extern "C" void cBoolMenuItem_setCaption(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x14))) = value;
+extern "C" void cBoolMenuItem_setCaption(cBoolMenuItem* menuItem, int value) {
+    menuItem->Caption = (const char*)value;
 }
 #endif
 
@@ -925,9 +925,9 @@ INCLUDE_ASM("seg/seg_1D3510", cEnumMenuItem_setEnumTags);
  * @param numTags  the number of entries
  * @param tagTable  the entries, 8 bytes each
  */
-extern "C" void cEnumMenuItem_setEnumTags(void *menuItem, int numTags, int tagTable) {
-    (*(int *)((char*)(menuItem) + (0x18))) = numTags;
-    (*(int *)((char*)(menuItem) + (0x1C))) = tagTable;
+extern "C" void cEnumMenuItem_setEnumTags(cEnumMenuItem* menuItem, int numTags, int tagTable) {
+    menuItem->NumTags = numTags;
+    menuItem->Tags = (const tCFMEnumTag*)tagTable;
 }
 #endif
 
@@ -940,8 +940,8 @@ INCLUDE_ASM("seg/seg_1D3510", cEnumMenuItem_setEnum);
  * @param menuItem  the list-choice item
  * @param value  the int's address
  */
-extern "C" void cEnumMenuItem_setEnum(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x20))) = value;
+extern "C" void cEnumMenuItem_setEnum(cEnumMenuItem* menuItem, int value) {
+    menuItem->Enum = (int*)value;
 }
 #endif
 
@@ -954,8 +954,8 @@ INCLUDE_ASM("seg/seg_1D3510", cEnumMenuItem_setCaption);
  * @param menuItem  the list-choice item
  * @param value  the caption text
  */
-extern "C" void cEnumMenuItem_setCaption(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x14))) = value;
+extern "C" void cEnumMenuItem_setCaption(cEnumMenuItem* menuItem, int value) {
+    menuItem->Caption = (const char*)value;
 }
 #endif
 
@@ -998,8 +998,8 @@ INCLUDE_ASM("seg/seg_1D3510", cSubMenuItem_setMenu);
  * @param menuItem  the sub-menu item
  * @param value  the sub-menu
  */
-extern "C" void cSubMenuItem_setMenu(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x18))) = value;
+extern "C" void cSubMenuItem_setMenu(cSubMenuItem* menuItem, int value) {
+    menuItem->Sub = (cMenu*)value;
 }
 #endif
 
@@ -1042,8 +1042,8 @@ INCLUDE_ASM("seg/seg_1D3510", cPopMenuItem_setCaption);
  * @param menuItem  the "back" item
  * @param value  the caption text
  */
-extern "C" void cPopMenuItem_setCaption(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x14))) = value;
+extern "C" void cPopMenuItem_setCaption(cPopMenuItem* menuItem, int value) {
+    menuItem->Caption = (const char*)value;
 }
 #endif
 
@@ -1072,8 +1072,8 @@ INCLUDE_ASM("seg/seg_1D3510", cCommandMenuItem_setStateText);
  * @param menuItem  the command item
  * @param value  the text
  */
-extern "C" void cCommandMenuItem_setStateText(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x18))) = value;
+extern "C" void cCommandMenuItem_setStateText(cCommandMenuItem* menuItem, int value) {
+    menuItem->State = (const char*)value;
 }
 #endif
 
@@ -1086,8 +1086,8 @@ INCLUDE_ASM("seg/seg_1D3510", cCommandMenuItem_setCaption);
  * @param menuItem  the command item
  * @param value  the caption text
  */
-extern "C" void cCommandMenuItem_setCaption(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x14))) = value;
+extern "C" void cCommandMenuItem_setCaption(cCommandMenuItem* menuItem, int value) {
+    menuItem->Caption = (const char*)value;
 }
 #endif
 
@@ -1114,8 +1114,8 @@ INCLUDE_ASM("seg/seg_1D3510", cCommandMenuItem_setData);
  * @param menuItem  the command item
  * @param value  the data
  */
-extern "C" void cCommandMenuItem_setData(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x20))) = value;
+extern "C" void cCommandMenuItem_setData(cCommandMenuItem* menuItem, int value) {
+    menuItem->Data = (void*)value;
 }
 #endif
 
@@ -1158,8 +1158,8 @@ INCLUDE_ASM("seg/seg_1D3510", cCallbackMenuItem_setCaption);
  * @param menuItem  the callback item
  * @param value  the caption text
  */
-extern "C" void cCallbackMenuItem_setCaption(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x14))) = value;
+extern "C" void cCallbackMenuItem_setCaption(cCallbackMenuItem* menuItem, int value) {
+    menuItem->Caption = (const char*)value;
 }
 #endif
 
@@ -1200,8 +1200,8 @@ INCLUDE_ASM("seg/seg_1D3510", cNullMenuItem_setCaption);
  * @param menuItem  the text-only item
  * @param value  the text
  */
-extern "C" void cNullMenuItem_setCaption(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x14))) = value;
+extern "C" void cNullMenuItem_setCaption(cNullMenuItem* menuItem, int value) {
+    menuItem->Caption = (const char*)value;
 }
 #endif
 
@@ -1214,8 +1214,8 @@ INCLUDE_ASM("seg/seg_1D3510", cNullMenuItem_setStateText);
  * @param menuItem  the text-only item
  * @param value  the text
  */
-extern "C" void cNullMenuItem_setStateText(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x18))) = value;
+extern "C" void cNullMenuItem_setStateText(cNullMenuItem* menuItem, int value) {
+    menuItem->State = (const char*)value;
 }
 #endif
 
@@ -1258,8 +1258,8 @@ INCLUDE_ASM("seg/seg_1D3510", cCharMenuItem_setValue);
  * @param menuItem  the signed-byte item
  * @param value  the byte's address
  */
-extern "C" void cCharMenuItem_setValue(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x18))) = value;
+extern "C" void cCharMenuItem_setValue(cCharMenuItem* menuItem, int value) {
+    menuItem->Value = (signed char*)value;
 }
 #endif
 
@@ -1272,8 +1272,8 @@ INCLUDE_ASM("seg/seg_1D3510", cCharMenuItem_setCaption);
  * @param menuItem  the signed-byte item
  * @param value  the caption text
  */
-extern "C" void cCharMenuItem_setCaption(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x14))) = value;
+extern "C" void cCharMenuItem_setCaption(cCharMenuItem* menuItem, int value) {
+    menuItem->Caption = (const char*)value;
 }
 #endif
 
@@ -1302,8 +1302,8 @@ INCLUDE_ASM("seg/seg_1D3510", cIntMenuItem_setValue);
  * @param menuItem  the int item
  * @param value  the int's address
  */
-extern "C" void cIntMenuItem_setValue(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x18))) = value;
+extern "C" void cIntMenuItem_setValue(cIntMenuItem* menuItem, int value) {
+    menuItem->Value = (int*)value;
 }
 #endif
 
@@ -1316,8 +1316,8 @@ INCLUDE_ASM("seg/seg_1D3510", cIntMenuItem_setCaption);
  * @param menuItem  the int item
  * @param value  the caption text
  */
-extern "C" void cIntMenuItem_setCaption(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x14))) = value;
+extern "C" void cIntMenuItem_setCaption(cIntMenuItem* menuItem, int value) {
+    menuItem->Caption = (const char*)value;
 }
 #endif
 
@@ -1346,8 +1346,8 @@ INCLUDE_ASM("seg/seg_1D3510", cFloatMenuItem_setValue);
  * @param menuItem  the float item
  * @param value  the float's address
  */
-extern "C" void cFloatMenuItem_setValue(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x18))) = value;
+extern "C" void cFloatMenuItem_setValue(cFloatMenuItem* menuItem, int value) {
+    menuItem->Value = (float*)value;
 }
 #endif
 
@@ -1376,8 +1376,8 @@ INCLUDE_ASM("seg/seg_1D3510", cFloatMenuItem_setCaption);
  * @param menuItem  the float item
  * @param value  the caption text
  */
-extern "C" void cFloatMenuItem_setCaption(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x14))) = value;
+extern "C" void cFloatMenuItem_setCaption(cFloatMenuItem* menuItem, int value) {
+    menuItem->Caption = (const char*)value;
 }
 #endif
 
@@ -1453,8 +1453,8 @@ INCLUDE_ASM("seg/seg_1D3510", cAngleMenuItem_setValue);
  * @param menuItem  the angle item
  * @param value  the float's address
  */
-extern "C" void cAngleMenuItem_setValue(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x18))) = value;
+extern "C" void cAngleMenuItem_setValue(cAngleMenuItem* menuItem, int value) {
+    menuItem->Value = (float*)value;
 }
 #endif
 
@@ -1483,8 +1483,8 @@ INCLUDE_ASM("seg/seg_1D3510", cAngleMenuItem_setCaption);
  * @param menuItem  the angle item
  * @param value  the caption text
  */
-extern "C" void cAngleMenuItem_setCaption(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x14))) = value;
+extern "C" void cAngleMenuItem_setCaption(cAngleMenuItem* menuItem, int value) {
+    menuItem->Caption = (const char*)value;
 }
 #endif
 
@@ -1612,8 +1612,8 @@ INCLUDE_ASM("seg/seg_1D3510", cRGBTitleMenuItem_setCaption);
  * @param menuItem  the title row
  * @param value  the title text
  */
-extern "C" void cRGBTitleMenuItem_setCaption(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x18))) = value;
+extern "C" void cRGBTitleMenuItem_setCaption(cRGBTitleMenuItem* menuItem, int value) {
+    menuItem->Caption = (const char*)value;
 }
 #endif
 
@@ -1651,8 +1651,8 @@ INCLUDE_ASM("seg/seg_1D3510", cARGBMenuItem_setCaption);
  * @param menuItem  the colour editor item
  * @param value  the caption text
  */
-extern "C" void cARGBMenuItem_setCaption(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x658))) = value;
+extern "C" void cARGBMenuItem_setCaption(cARGBMenuItem* menuItem, int value) {
+    menuItem->TitleItem.Caption = (const char*)value;
 }
 #endif
 
@@ -1681,8 +1681,8 @@ INCLUDE_ASM("seg/seg_1D3510", cVectorTitleMenuItem_setCaption);
  * @param menuItem  the vector title item
  * @param value  the caption text
  */
-extern "C" void cVectorTitleMenuItem_setCaption(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x18))) = value;
+extern "C" void cVectorTitleMenuItem_setCaption(cVectorTitleMenuItem* menuItem, int value) {
+    menuItem->Caption = (const char*)value;
 }
 #endif
 
@@ -1718,8 +1718,8 @@ INCLUDE_ASM("seg/seg_1D3510", cVectorMenuItem_setCaption);
  * @param menuItem  the vector editor item
  * @param value  the caption text
  */
-extern "C" void cVectorMenuItem_setCaption(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x66C))) = value;
+extern "C" void cVectorMenuItem_setCaption(cVectorMenuItem* menuItem, int value) {
+    menuItem->TitleItem.Caption = (const char*)value;
 }
 #endif
 
@@ -1748,8 +1748,8 @@ INCLUDE_ASM("seg/seg_1D3510", cGraphMenuItem_setCaption);
  * @param menuItem  the graph item
  * @param value  the caption text
  */
-extern "C" void cGraphMenuItem_setCaption(void *menuItem, int value) {
-    (*(int *)((char*)(menuItem) + (0x14))) = value;
+extern "C" void cGraphMenuItem_setCaption(cGraphMenuItem* menuItem, int value) {
+    menuItem->Caption = (const char*)value;
 }
 #endif
 

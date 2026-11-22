@@ -1022,15 +1022,15 @@ extern char cDSockChannel_vtbl[];
  * @param channel  the channel
  * @return @p channel
  */
-extern "C" void *cDSockChannel_cDSockChannel(void *channel) {
+extern "C" void *cDSockChannel_cDSockChannel(cDSockChannel* channel) {
     cCommChannel_cCommChannel(channel);
-    (*(char **)((char*)(channel) + (8))) = cDSockChannel_vtbl;
-    (*(float *)((char*)(channel) + (0x10))) = 0.10000000149011612f;
-    (*(int *)((char*)(channel) + (0xC))) = 0;
-    (*(int *)((char*)(channel) + (0x18))) = 0;
-    (*(int *)((char*)(channel) + (0x1C))) = 0;
-    (*(int *)((char*)(channel) + (0x14))) = 0;
-    return channel;
+    channel->mVtbl = (void**)cDSockChannel_vtbl;
+    channel->mLatency = 0.10000000149011612f;
+    channel->mState = 0;
+    channel->mGameUtil = 0;
+    channel->mGameLink = 0;
+    channel->mPacketError = 0;
+    return ((void*)channel);
 }
 #endif
 
@@ -1039,7 +1039,7 @@ INCLUDE_ASM("seg/seg_156860", cDSockChannel__cDSockChannel);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cCommChannel__cCommChannel_66E8(void *, int) __asm__("cCommChannel__cCommChannel");
-extern "C" void cDSockChannel_disconnect(void *);
+extern "C" void cDSockChannel_disconnect(cDSockChannel*);
 extern char cDSockChannel_vtbl[];
 
 /**
@@ -1219,23 +1219,23 @@ extern "C" void NetGameUtilDestroy(int);
  *
  * @param channel  the channel (this, a cDSockChannel)
  */
-extern "C" void cDSockChannel_disconnect(void *channel) {
+extern "C" void cDSockChannel_disconnect(cDSockChannel* channel) {
     int temp_4;
     int temp_4_2;
 
-    if ((*(int *)((char*)(channel) + (0xC))) != 0) {
+    if ((channel->mState) != 0) {
         cCommChannel_channelClose();
-        temp_4 = (*(int *)((char*)(channel) + (0x1C)));
+        temp_4 = ((int)channel->mGameLink);
         if (temp_4 != 0) {
             NetGameLinkDestroy(temp_4);
-            (*(int *)((char*)(channel) + (0x1C))) = 0;
+            channel->mGameLink = 0;
         }
-        temp_4_2 = (*(int *)((char*)(channel) + (0x18)));
+        temp_4_2 = ((int)channel->mGameUtil);
         if (temp_4_2 != 0) {
             NetGameUtilDestroy(temp_4_2);
-            (*(int *)((char*)(channel) + (0x18))) = 0;
+            channel->mGameUtil = 0;
         }
-        (*(int *)((char*)(channel) + (0xC))) = 0;
+        channel->mState = 0;
     }
 }
 #endif
@@ -1244,7 +1244,7 @@ extern "C" void cDSockChannel_disconnect(void *channel) {
 INCLUDE_ASM("seg/seg_156860", cDSockChannel_update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void cDSockChannel_updateConnecting(void* self);
+extern "C" void cDSockChannel_updateConnecting(cDSockChannel* self);
 extern "C" void cDSockChannel_updateConnected(cDSockChannel* self);
 
 /**
@@ -1257,7 +1257,7 @@ extern "C" void cDSockChannel_update(cDSockChannel* self)
 {
     switch (self->mState) {
     case 1:
-        cDSockChannel_updateConnecting(((char*)self));
+        cDSockChannel_updateConnecting((cDSockChannel*)(((char*)self)));
         break;
     case 2:
         cDSockChannel_updateConnected(self);
@@ -1284,16 +1284,16 @@ extern "C" int NetGameUtilComplete(int);
  *
  * @param channel  the channel
  */
-extern "C" void cDSockChannel_updateConnecting(void *channel) {
+extern "C" void cDSockChannel_updateConnecting(cDSockChannel* channel) {
     int temp_2;
     int temp_2_2;
 
-    temp_2 = NetGameUtilComplete((*(int *)((char*)(channel) + (0x18))));
+    temp_2 = NetGameUtilComplete(((int)channel->mGameUtil));
     if (temp_2 != 0) {
         temp_2_2 = NetGameLinkCreate(temp_2, 0, 9084);
-        (*(int *)((char*)(channel) + (0x1C))) = temp_2_2;
+        channel->mGameLink = (NetGameLinkRefT*)temp_2_2;
         if (temp_2_2 != 0) {
-            (*(int *)((char*)(channel) + (0xC))) = 2;
+            channel->mState = 2;
         }
     }
 }
@@ -2700,9 +2700,9 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_asyncRead);
  * @param data  the buffer
  * @param size  bytes to read
  */
-extern "C" void cGameComm_asyncRead(void *gameComm, int data, int size) {
-    (*(int *)((char*)(gameComm) + (0x124))) = data;
-    (*(int *)((char*)(gameComm) + (0x128))) = size;
+extern "C" void cGameComm_asyncRead(cGameComm* gameComm, int data, int size) {
+    gameComm->mAsyncReadData = (char*)data;
+    gameComm->mAsyncReadSize = size;
 }
 #endif
 
@@ -2762,9 +2762,9 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_asyncWrite);
  * @param data  the buffer
  * @param size  bytes to send
  */
-extern "C" void cGameComm_asyncWrite(void *gameComm, int data, int size) {
-    (*(int *)((char*)(gameComm) + (0x12C))) = data;
-    (*(int *)((char*)(gameComm) + (0x130))) = size;
+extern "C" void cGameComm_asyncWrite(cGameComm* gameComm, int data, int size) {
+    gameComm->mAsyncWriteData = (char*)data;
+    gameComm->mAsyncWriteSize = size;
 }
 #endif
 

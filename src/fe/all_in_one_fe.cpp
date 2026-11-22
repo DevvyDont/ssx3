@@ -3806,18 +3806,18 @@ extern unsigned short str_sp_b[];
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *cOVTemplate_PauseMenu_cOVTemplate_PauseMenu(void *ovState, int engine, int overlayId) {
+extern "C" void *cOVTemplate_PauseMenu_cOVTemplate_PauseMenu(cOVTemplate_PauseMenu* ovState, int engine, int overlayId) {
     cUIState_cUIState_1558(ovState);
-    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
-    (*(int *)((char*)(ovState) + (0x48))) = 0;
-    (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
-    (*(int *)((char*)(ovState) + (0x4C))) = 0;
-    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    (*(char **)((char*)(ovState) + (8))) = cOVTemplate_PauseMenu_vtbl;
+    ovState->mVtbl = (void**)cOVTemplate_PauseMenu_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
-    (*(int *)((char*)(ovState) + (0xC4))) = 0;
-    return ovState;
+    ovState->mpThread = 0;
+    return ((void*)ovState);
 }
 #endif
 

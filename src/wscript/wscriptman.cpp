@@ -4294,8 +4294,8 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_setNext);
  * @param process  the process
  * @param nextProcess  the process to link after it (passed as an int), or 0
  */
-extern "C" void cWScriptProcess_setNext(void *process, int nextProcess) {
-    (*(int *)((char*)(process) + (0x18))) = nextProcess;
+extern "C" void cWScriptProcess_setNext(cWScriptProcess* process, int nextProcess) {
+    process->Next = (cWScriptProcess*)nextProcess;
 }
 #endif
 //100%
@@ -4325,7 +4325,7 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_setTrickDef);
  * @param trickDef  the trick definition (passed as an int), or 0
  */
 extern "C" void cWScriptProcess_setTrickDef(cWScriptProcess* process, int trickDef) {
-    (*(int *)((char*)((process->Manager)) + (0x29C))) = trickDef;
+    process->Manager->TrickDef = (tTrickNameDef*)trickDef;
 }
 #endif
 //100%

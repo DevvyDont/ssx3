@@ -10097,8 +10097,8 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_setRider);
  * @param cameraTarget  the target (a cRiderCameraTarget)
  * @param rider  the rider (a cRider*)
  */
-extern "C" void cRiderCameraTarget_setRider(void *cameraTarget, int rider) {
-    (*(int *)((char*)(cameraTarget) + (4))) = rider;
+extern "C" void cRiderCameraTarget_setRider(cRiderCameraTarget* cameraTarget, int rider) {
+    cameraTarget->Rider = (cRider*)rider;
 }
 #endif
 //100%

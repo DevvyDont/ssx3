@@ -413,8 +413,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptEntityCamera_SetCameraManager
  * @param entityCamera  the camera script entity
  * @param camManager  the camera manager (cScriptObjCameraManager)
  */
-extern "C" void cScriptEntityCamera_SetCameraManager(void *entityCamera, int camManager) {
-    (*(int *)((char*)(entityCamera) + (0x10))) = camManager;
+extern "C" void cScriptEntityCamera_SetCameraManager(cScriptEntityCamera* entityCamera, int camManager) {
+    entityCamera->mpCamManager = (cScriptObjCameraManager*)camManager;
 }
 #endif
 
@@ -853,8 +853,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_SetCameraAlgorithm)
  * @param cameraObj  the camera object
  * @param algorithm  the camera algorithm
  */
-extern "C" void cScriptObjCamera_SetCameraAlgorithm(void *cameraObj, int algorithm) {
-    (*(int *)((char*)(cameraObj) + (0x1C))) = algorithm;
+extern "C" void cScriptObjCamera_SetCameraAlgorithm(cScriptObjCamera* cameraObj, int algorithm) {
+    cameraObj->mpCameraAlgorithm = (cScriptAlgorithm*)algorithm;
 }
 #endif
 

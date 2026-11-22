@@ -784,8 +784,8 @@ INCLUDE_ASM("ui/uivector", cListNode_setNext);
  * @param node  the cListNode
  * @param next  the new next node
  */
-extern "C" void cListNode_setNext(void *node, int next) {
-    (*(int *)((char*)(node) + (4))) = next;
+extern "C" void cListNode_setNext(cListNode* node, int next) {
+    node->mpNext = (cListNode*)next;
 }
 #endif
 
@@ -1358,8 +1358,8 @@ INCLUDE_ASM("ui/uivector", cUIThing_setParent);
  * @param uiThing  the cUIThing
  * @param parent  the new parent thing
  */
-extern "C" void cUIThing_setParent(void *uiThing, int parent) {
-    (*(int *)((char*)(uiThing) + (0x40))) = parent;
+extern "C" void cUIThing_setParent(cUIThing* uiThing, int parent) {
+    uiThing->mpParent = (cUIThing*)parent;
 }
 #endif
 //100%
@@ -1833,9 +1833,9 @@ INCLUDE_ASM("ui/uivector", cUIIcon_setElement);
  * @param icon  the cUIIcon
  * @param textureElem  the cTextureElement to draw
  */
-extern "C" void cUIIcon_setElement(void *icon, int textureElem) {
-    (*(int *)((char*)(icon) + (0x7C))) = textureElem;
-    (*(int *)((char*)(icon) + (0x78))) = -1;
+extern "C" void cUIIcon_setElement(cUIIcon* icon, int textureElem) {
+    icon->mpTextureElem = (const cTextureElement*)textureElem;
+    icon->mTextureID = -1;
 }
 #endif
 //100%
@@ -1860,9 +1860,9 @@ INCLUDE_ASM("ui/uivector", cUIIcon_setTexture);
  * @param icon  the cUIIcon
  * @param textureId  the texture id
  */
-extern "C" void cUIIcon_setTexture(void *icon, int textureId) {
-    (*(int *)((char*)(icon) + (0x78))) = textureId;
-    (*(int *)((char*)(icon) + (0x7C))) = 0;
+extern "C" void cUIIcon_setTexture(cUIIcon* icon, int textureId) {
+    icon->mTextureID = textureId;
+    icon->mpTextureElem = 0;
 }
 #endif
 //100%
@@ -2590,7 +2590,7 @@ INCLUDE_ASM("ui/uivector", cUIListBox_cUIListBox1);
 #ifdef SKIP_ASM
 extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
 extern "C" unsigned char *tAttrListBox_tAttrListBox(unsigned char *arg0);
-extern "C" void *tListBoxEntry_tListBoxEntry(void *arg0);
+extern "C" void *tListBoxEntry_tListBoxEntry(tListBoxEntry* arg0);
 extern void* cUIListBox_vtbl[];
 
 /**
@@ -2610,7 +2610,7 @@ extern "C" void* cUIListBox_cUIListBox1(cUIListBox* self)
     tAttrListBox_tAttrListBox((unsigned char*)(&self->mAttrListBox));
     char* entry = (char*)&self->mpEntries[0];
     for (i = 0x1F; i != -1; i--) {
-        tListBoxEntry_tListBoxEntry(entry);
+        tListBoxEntry_tListBoxEntry((tListBoxEntry*)entry);
         entry += 0x14;
     }
     return ((char*)self);
@@ -3350,8 +3350,8 @@ INCLUDE_ASM("ui/uivector", cUIState_setParentState);
  * @param uiState  the cUIState
  * @param parentState  the new parent state
  */
-extern "C" void cUIState_setParentState(void *uiState, int parentState) {
-    (*(int *)((char*)(uiState) + (0x20))) = parentState;
+extern "C" void cUIState_setParentState(cUIState* uiState, int parentState) {
+    uiState->mpParentState = (cUIState*)parentState;
 }
 #endif
 //100%
@@ -4073,8 +4073,8 @@ INCLUDE_ASM("ui/uivector", cUIScrollBar_setBackgroundObject);
  * @param scrollBar  the cUIScrollBar
  * @param background  the background UI object
  */
-extern "C" void cUIScrollBar_setBackgroundObject(void *scrollBar, int background) {
-    (*(int *)((char*)(scrollBar) + (0x74))) = background;
+extern "C" void cUIScrollBar_setBackgroundObject(cUIScrollBar* scrollBar, int background) {
+    scrollBar->mpObjBackground = (cUIThing*)background;
 }
 #endif
 //100%
@@ -4086,8 +4086,8 @@ INCLUDE_ASM("ui/uivector", cUIScrollBar_setKnobObject);
  * @param scrollBar  the cUIScrollBar
  * @param knob  the knob UI object
  */
-extern "C" void cUIScrollBar_setKnobObject(void *scrollBar, int knob) {
-    (*(int *)((char*)(scrollBar) + (0x78))) = knob;
+extern "C" void cUIScrollBar_setKnobObject(cUIScrollBar* scrollBar, int knob) {
+    scrollBar->mpObjKnob = (cUIThing*)knob;
 }
 #endif
 //100%
@@ -4099,8 +4099,8 @@ INCLUDE_ASM("ui/uivector", cUIScrollBar_setUpArrowObject);
  * @param scrollBar  the cUIScrollBar
  * @param upArrow  the up-arrow UI object
  */
-extern "C" void cUIScrollBar_setUpArrowObject(void *scrollBar, int upArrow) {
-    (*(int *)((char*)(scrollBar) + (0x7C))) = upArrow;
+extern "C" void cUIScrollBar_setUpArrowObject(cUIScrollBar* scrollBar, int upArrow) {
+    scrollBar->mpUpArrow = (cUIThing*)upArrow;
 }
 #endif
 //100%
@@ -4112,8 +4112,8 @@ INCLUDE_ASM("ui/uivector", cUIScrollBar_setDownArrowObject);
  * @param scrollBar  the cUIScrollBar
  * @param downArrow  the down-arrow UI object
  */
-extern "C" void cUIScrollBar_setDownArrowObject(void *scrollBar, int downArrow) {
-    (*(int *)((char*)(scrollBar) + (0x80))) = downArrow;
+extern "C" void cUIScrollBar_setDownArrowObject(cUIScrollBar* scrollBar, int downArrow) {
+    scrollBar->mpDownArrow = (cUIThing*)downArrow;
 }
 #endif
 //100%
@@ -4125,8 +4125,8 @@ INCLUDE_ASM("ui/uivector", cUIScrollBar_setHideOnEmpty);
  * @param scrollBar  the cUIScrollBar
  * @param hideOnEmpty  the UI object to hide
  */
-extern "C" void cUIScrollBar_setHideOnEmpty(void *scrollBar, int hideOnEmpty) {
-    (*(int *)((char*)(scrollBar) + (0x84))) = hideOnEmpty;
+extern "C" void cUIScrollBar_setHideOnEmpty(cUIScrollBar* scrollBar, int hideOnEmpty) {
+    scrollBar->mpHideOnEmpty = (cUIThing*)hideOnEmpty;
 }
 #endif
 //100%
@@ -4265,8 +4265,8 @@ INCLUDE_ASM("ui/uivector", cUIProgress_setBackgroundObject);
  * @param progress  the cUIProgress
  * @param background  the background UI object
  */
-extern "C" void cUIProgress_setBackgroundObject(void *progress, int background) {
-    (*(int *)((char*)(progress) + (0x74))) = background;
+extern "C" void cUIProgress_setBackgroundObject(cUIProgress* progress, int background) {
+    progress->mpObjBackground = (cUIThing*)background;
 }
 #endif
 //100%
@@ -4278,8 +4278,8 @@ INCLUDE_ASM("ui/uivector", cUIProgress_setKnobObject);
  * @param progress  the cUIProgress
  * @param knob  the knob UI object
  */
-extern "C" void cUIProgress_setKnobObject(void *progress, int knob) {
-    (*(int *)((char*)(progress) + (0x78))) = knob;
+extern "C" void cUIProgress_setKnobObject(cUIProgress* progress, int knob) {
+    progress->mpObjKnob = (cUIThing*)knob;
 }
 #endif
 //100%
@@ -4416,8 +4416,8 @@ INCLUDE_ASM("ui/uivector", cUISlider_setBackgroundObject);
  * @param slider  the cUISlider
  * @param background  the background UI object
  */
-extern "C" void cUISlider_setBackgroundObject(void *slider, int background) {
-    (*(int *)((char*)(slider) + (0x88))) = background;
+extern "C" void cUISlider_setBackgroundObject(cUISlider* slider, int background) {
+    slider->mpObjBackground = (cUIThing*)background;
 }
 #endif
 //100%
@@ -4429,8 +4429,8 @@ INCLUDE_ASM("ui/uivector", cUISlider_setKnobObject);
  * @param slider  the cUISlider
  * @param knob  the knob UI object
  */
-extern "C" void cUISlider_setKnobObject(void *slider, int knob) {
-    (*(int *)((char*)(slider) + (0x8C))) = knob;
+extern "C" void cUISlider_setKnobObject(cUISlider* slider, int knob) {
+    slider->mpObjKnob = (cUIThing*)knob;
 }
 #endif
 //100%
@@ -4714,8 +4714,8 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_setScrollBar);
  * @param textScroll  the cUITextScroll
  * @param scrollBar  the cUIScrollBar
  */
-extern "C" void cUITextScroll_setScrollBar(void *textScroll, int scrollBar) {
-    (*(int *)((char*)(textScroll) + (0xB8))) = scrollBar;
+extern "C" void cUITextScroll_setScrollBar(cUITextScroll* textScroll, int scrollBar) {
+    textScroll->mpScrollBar = (cUIThing*)scrollBar;
 }
 #endif
 //100%
@@ -4893,13 +4893,13 @@ INCLUDE_ASM("ui/uivector", tListBoxEntry_tListBoxEntry);
  * @param entry  the tListBoxEntry
  * @return @p entry
  */
-extern "C" void *tListBoxEntry_tListBoxEntry(void *entry) {
-    (*(int *)((char*)(entry) + (0))) = 0;
-    (*(int *)((char*)(entry) + (4))) = 0;
-    (*(int *)((char*)(entry) + (8))) = 0;
-    (*(int *)((char*)(entry) + (0xC))) = 0;
-    (*(signed char *)((char*)(entry) + (0x10))) = 0;
-    return entry;
+extern "C" void *tListBoxEntry_tListBoxEntry(tListBoxEntry* entry) {
+    entry->mStringID = 0;
+    entry->mpString = 0;
+    entry->mpAsciiString = 0;
+    entry->mpData = 0;
+    (*(signed char*)&entry->mUnicodeBufferSize) = 0;
+    return ((void*)entry);
 }
 #endif
 //100%

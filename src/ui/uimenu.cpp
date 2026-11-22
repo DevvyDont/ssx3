@@ -407,8 +407,8 @@ INCLUDE_ASM("ui/uimenu", cUIMenu_setScrollBar);
  * @param menu  the menu
  * @param scrollBar  the scroll bar widget
  */
-extern "C" void cUIMenu_setScrollBar(void *menu, int scrollBar) {
-    (*(int *)((char*)(menu) + (0x9C))) = scrollBar;
+extern "C" void cUIMenu_setScrollBar(cUIMenu* menu, int scrollBar) {
+    menu->mpScrollBar = (cUIScrollBar*)scrollBar;
 }
 #endif
 

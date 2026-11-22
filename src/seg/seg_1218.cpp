@@ -3556,10 +3556,10 @@ INCLUDE_ASM("seg/seg_1218", cRiderAnim_linkToRider);
  * @param riderAnim  the rider animation object (this)
  * @param rider  the rider (cRider) to drive
  */
-extern "C" void cRiderAnim_linkToRider(void *riderAnim, cRider* rider) {
-    (*(int *)((char*)(riderAnim) + (0x64))) = 0;
-    (*(void **)((char*)(riderAnim) + (0x60))) = ((void*)rider);
-    (*(int *)((char*)(riderAnim) + (0x54))) = (int) ((int)rider->mAnimModel);
+extern "C" void cRiderAnim_linkToRider(cRiderAnim* riderAnim, cRider* rider) {
+    riderAnim->FERider = 0;
+    riderAnim->Rider = (cRider*)((void*)rider);
+    riderAnim->AnimModel = (cAnimModel*)((int) ((int)rider->mAnimModel));
 }
 #endif
 
@@ -3575,10 +3575,10 @@ INCLUDE_ASM("seg/seg_1218", cRiderAnim_linkToFERider);
  * @param riderAnim  the rider animation object
  * @param feRider  the front-end rider
  */
-extern "C" void cRiderAnim_linkToFERider(void *riderAnim, cFERider* feRider) {
-    (*(void **)((char*)(riderAnim) + (0x64))) = ((void*)feRider);
-    (*(int *)((char*)(riderAnim) + (0x60))) = 0;
-    (*(int *)((char*)(riderAnim) + (0x54))) = (int) ((int)feRider->mpAnimModel);
+extern "C" void cRiderAnim_linkToFERider(cRiderAnim* riderAnim, cFERider* feRider) {
+    riderAnim->FERider = (cFERider*)((void*)feRider);
+    riderAnim->Rider = 0;
+    riderAnim->AnimModel = (cAnimModel*)((int) ((int)feRider->mpAnimModel));
 }
 #endif
 

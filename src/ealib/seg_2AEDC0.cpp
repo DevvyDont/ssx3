@@ -1148,10 +1148,10 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_ARRAY_AV_SUBTITLE_ARRAY);
  * @param table  the array
  * @return table
  */
-extern "C" void *RCMP_AV_SUBTITLE_ARRAY_AV_SUBTITLE_ARRAY(void *table) {
-    (*(int *)((char*)(table) + (0))) = 0;
-    (*(int *)((char*)(table) + (4))) = 0;
-    return table;
+extern "C" void *RCMP_AV_SUBTITLE_ARRAY_AV_SUBTITLE_ARRAY(RCMP_AV_SUBTITLE_ARRAY* table) {
+    table->mSubTitle = 0;
+    table->mNumberOfSubtitle = 0;
+    return ((void*)table);
 }
 #endif
 //100%

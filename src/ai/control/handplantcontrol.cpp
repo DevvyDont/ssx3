@@ -6108,7 +6108,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setTrackPath);
  * @param value  the new path
  */
 extern "C" void cRider_setTrackPath(cRider* rider, int value) {
-    (*(int *)((char*)(rider) + (0xAB4))) = value;
+    rider->TrackPath = (cTrackPath*)value;
 }
 #endif
 //100%
@@ -6134,7 +6134,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setAIPath);
  * @param value  the new path
  */
 extern "C" void cRider_setAIPath(cRider* rider, int value) {
-    (*(int *)((char*)(rider) + (0xAB8))) = value;
+    rider->AIPath = (cAIPath*)value;
 }
 #endif
 //100%
@@ -7791,8 +7791,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cComputer_setInput);
  * @param computer  the cComputer
  * @param input  the cInput
  */
-extern "C" void cComputer_setInput(void *computer, int input) {
-    (*(int *)((char*)(computer) + (0xF40))) = input;
+extern "C" void cComputer_setInput(cComputer* computer, int input) {
+    computer->Input = (cInput*)input;
 }
 #endif
 //100%

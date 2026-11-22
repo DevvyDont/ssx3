@@ -114,12 +114,12 @@ INCLUDE_ASM("sound/streamsys", cStreamInstance_cStreamInstance2);
  * @param handle  the sound-driver stream handle
  * @return this
  */
-extern "C" void *cStreamInstance_cStreamInstance2(void *stream, int handle) {
-    (*(int *)((char*)(stream) + (8))) = handle;
-    (*(int *)((char*)(stream) + (0))) = 0;
-    (*(int *)((char*)(stream) + (0x74))) = 0;
-    (*(int *)((char*)(stream) + (0x78))) = 0;
-    return stream;
+extern "C" void *cStreamInstance_cStreamInstance2(cStreamInstance* stream, int handle) {
+    stream->mHandle = handle;
+    stream->mBuffer = 0;
+    stream->mBigHeader = 0;
+    stream->mBigHandle = 0;
+    return ((void*)stream);
 }
 #endif
 
