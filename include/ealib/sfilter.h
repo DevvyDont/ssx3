@@ -713,4 +713,6 @@ CHECK_OFFSET(SNDMIXSTATE, smv, 0x1DC);
 CHECK_OFFSET(SNDMIXSTATE, mix, 0x1E0);
 CHECK_SIZE(SNDMIXSTATE, 0x1E4);
 
+extern struct SNDMIXSTATE sndmix; // 0x00515B40: the software mixer's state [O] (On Tour `SNDMIXSTATE sndmix`)
+
 #endif /* EALIB_SFILTER_H */

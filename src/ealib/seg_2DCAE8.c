@@ -859,7 +859,6 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_init);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int FILESYS_initadr_CBD8(int, int, int, int) __asm__("FILESYS_initadr");
 extern int FILESYS_overhead_CBD8(int, int, int) __asm__("FILESYS_overhead");
-extern int (*gFileSysOpts_CBD8[])(char *, int, int) __asm__("gFileSysOpts");
 extern char str_File_Sys_CBD8[] __asm__("str_File_Sys");
 extern int gFileDevice_CBD8[] __asm__("gFileDevice");
 extern int pFileDeviceMem_CBD8[] __asm__("pFileDeviceMem");
@@ -880,7 +879,7 @@ extern int pFileDeviceMem_CBD8[] __asm__("pFileDeviceMem");
 int FILESYS_init(int maxopenfiles, int maxdirfiles, int maxfileops) {
     int workBuffer;
     if (gFileDevice_CBD8[0] == 0) {
-        workBuffer = gFileSysOpts_CBD8[1](str_File_Sys_CBD8, FILESYS_overhead_CBD8(maxopenfiles, maxdirfiles, maxfileops), 0x100);
+        workBuffer = ((int (*)(char*, int, int))gFileSysOpts.malloc)(str_File_Sys_CBD8, FILESYS_overhead_CBD8(maxopenfiles, maxdirfiles, maxfileops), 0x100);
         pFileDeviceMem_CBD8[0] = workBuffer;
         return FILESYS_initadr_CBD8(maxopenfiles, maxdirfiles, maxfileops, workBuffer);
     }
@@ -973,8 +972,6 @@ extern void func_003E44B0_CDE0(void) __asm__("func_003E44B0");
 extern void FILESYS_closesync_CDE0(int, int) __asm__("FILESYS_closesync");
 extern void MUTEX_destroy_CDE0(char *) __asm__("MUTEX_destroy");
 extern void MEM_clear_CDE0(char *, int) __asm__("MEM_clear");
-extern void (*gFileSysOpts_CDE0[])(int) __asm__("gFileSysOpts");
-extern void (*D_00450C18_CDE0[])(int) __asm__("D_00450C18");
 extern char D_00519AC4_CDE0[] __asm__("D_00519AC4");
 extern int *D_00519AE4_CDE0[] __asm__("D_00519AE4");
 extern int pFileDeviceMem_CDE0[] __asm__("pFileDeviceMem");
@@ -988,13 +985,13 @@ void FILESYS_restore(void) {
     int *n;
     func_003E44B0_CDE0();
     for (n = D_00519AE4_CDE0[0]; n != 0; n = (int *)n[5]) {
-        gFileSysOpts_CDE0[2](n[0]);
+        ((void (*)(int))gFileSysOpts.free)(n[0]);
         FILESYS_closesync_CDE0(*(int *)n[3], 0);
     }
     MUTEX_destroy_CDE0(D_00519AC4_CDE0);
     MEM_clear_CDE0(D_00519AC4_CDE0 - 0x14, 0x38);
     if (pFileDeviceMem_CDE0[0] != 0) {
-        D_00450C18_CDE0[0](pFileDeviceMem_CDE0[0]);
+        ((void (*)(int))gFileSysOpts.free)(pFileDeviceMem_CDE0[0]);
         pFileDeviceMem_CDE0[0] = 0;
     }
 }
@@ -1645,9 +1642,6 @@ INCLUDE_ASM("ealib/seg_2DCAE8", iFILE_addbigreadcallback);
 /* gFileSysOpts: the file system's settings (0x24 bytes: FILESYS_getopts hands out a copy, FILESYS_setopts takes one).
    Field names are their offsets; f04 / f08 are also reached through their own splat symbols. */
 struct sC10File { char *name; int a; int b; char *path; };   /* built-in file table entry (f20) */
-extern struct FILESYSOPTS gFileSysOpts;
-extern void *(*D_00450C14)(char *, int, int);   /* gFileSysOpts.f04 */
-extern int (*D_00450C18)(void *);               /* gFileSysOpts.f08 */
 /* gFileDevice: the file system's command manager (FILESYS_initadr sets it up). Layout from every use in this unit;
    field names are their offsets. Several fields are also reached through their own splat symbols (declared
    below), which the functions that address them directly must keep using. */
@@ -1683,7 +1677,7 @@ void iFILE_addbigreadcallback(int opHandle, int opStatus, struct FILEBIG_def *bi
     ((struct sFsCmd*)bigNode->fop)->f24 = fileHd;
     FILESYS_completeop_D8E8(opHandle);
     if (BIG_typeofheader_D8E8(((int)bigNode->header)) == 0) {
-        D_00450C18((void *)((int)bigNode->header));
+        gFileSysOpts.free((void *)((int)bigNode->header));
     }
     n = BIG_sizeofheader_D8E8(((int)bigNode->header));
     if (bigNode->headersize < n) {
@@ -1747,7 +1741,6 @@ extern C_DAC0 *reserveop_DAC0(void) __asm__("reserveop");
 extern void iFILESYS_ExecCommand_DAC0(C_DAC0 *) __asm__("iFILESYS_ExecCommand");
 extern Q_DAC0 *D_00519AE4_DAC0 __asm__("D_00519AE4");
 extern int strncmp_DAC0(char *, char *, int) __asm__("strncmp");
-extern void *(*gFileSysOpts_DAC0[])(char *, int, int) __asm__("gFileSysOpts");
 extern char str_bigfile_buf_DAC0[] __asm__("str_bigfile_buf");
 extern int FILESYS_open_DAC0(char *, int, int, R_DAC0 *) __asm__("FILESYS_open");
 extern void fCF70_DAC0(int, void *) __asm__("FILESYS_callbackop");
@@ -1780,11 +1773,11 @@ int FILESYS_addbig(char *name, int memFlags, int priority, int userData) {
             return (int)fileOp;
         }
     }
-    bigNode = gFileSysOpts_DAC0[1](name, 0x18, memFlags);
+    bigNode = gFileSysOpts.malloc(name, 0x18, memFlags);
     ((R_DAC0 *)bigNode)->cmd = fileOp;
     ((R_DAC0 *)bigNode)->size = 0x800;
     ((R_DAC0 *)bigNode)->b = memFlags;
-    ((R_DAC0 *)bigNode)->buf = (int)gFileSysOpts_DAC0[1](str_bigfile_buf_DAC0, 0x800, memFlags);
+    ((R_DAC0 *)bigNode)->buf = (int)gFileSysOpts.malloc(str_bigfile_buf_DAC0, 0x800, memFlags);
     fCF70_DAC0(FILESYS_open_DAC0(name, 1, priority, (R_DAC0 *)bigNode), iFILE_addbigopencallback_DAC0);
     return *(int *)fileOp;
 }
@@ -1822,7 +1815,6 @@ extern int FILESYS_close_DC30(char *, int, R_DC30 *) __asm__("FILESYS_close");
 extern void FILESYS_callbackop_DC30(int, void *) __asm__("FILESYS_callbackop");
 extern void iFILE_delbigclosecallback_DC30(int, int, int) __asm__("iFILE_delbigclosecallback");
 extern G_DC30 gFileDevice_DC30 __asm__("gFileDevice");
-extern int (*gFileSysOpts_DC30[])(void *) __asm__("gFileSysOpts");
 
 /**
  * Queues removing a BIG archive (type 10); returns the operation handle.
@@ -1872,8 +1864,8 @@ int FILESYS_delbig(char *bigHandle, int priority, int userData) {
     } else {
         gFileDevice_DC30.head = gFileDevice_DC30.head->next;
     }
-    gFileSysOpts_DC30[2]((void *)n->f0);
-    gFileSysOpts_DC30[2](n);
+    gFileSysOpts.free((void *)n->f0);
+    gFileSysOpts.free(n);
     FILESYS_callbackop_DC30(FILESYS_close_DC30(bigHandle, priority, fileOp), iFILE_delbigclosecallback_DC30);
     return *(int *)fileOp;
 }
@@ -2409,8 +2401,8 @@ void freehandle(int handle) {
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_setmemcallbacks);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int gFileSysOpts_E910[4] __asm__("gFileSysOpts");
 
+extern int gFileSysOpts_E910[4] __asm__("gFileSysOpts");
 /**
  * Sets the file system's allocate and free callbacks (gFileSysOpts +0x4 and +0x8).
  *
@@ -2429,12 +2421,12 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_getopts);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct A_E928 { int p0, p4, p8, pC, f10, f14, f18, f1C; };
 struct B_E928 { int f0, f4, f8, fC; };
-extern struct A_E928 gFileSysOpts_E928 __asm__("gFileSysOpts");
 extern struct B_E928 D_00450C58_E928 __asm__("D_00450C58");
 extern int REAL_filedevice_E928[] __asm__("REAL_filedevice");
 extern void MEM_clear_E928(int, int) __asm__("MEM_clear");
 extern void MEM_copy_E928(int *, void *, int) __asm__("MEM_copy");
 
+extern struct A_E928 gFileSysOpts_E928 __asm__("gFileSysOpts");
 /**
  * Copies the file system's options (gFileSysOpts) to the caller's record, whose first word is its size; a record of 37
  * bytes or more is cleared first. Refreshes the copied fields from the live settings first.
@@ -2460,7 +2452,6 @@ int FILESYS_getopts(int *opts) {
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_setopts);
 #ifdef SKIP_ASM
 struct B_E9B8 { int f0, f4, f8, fC; };
-extern struct FILESYSOPTS gFileSysOpts_E9B8 __asm__("gFileSysOpts");
 extern struct B_E9B8 D_00450C58_E9B8 __asm__("D_00450C58");
 extern int REAL_filedevice_E9B8[] __asm__("REAL_filedevice");
 extern void MEM_clear_E9B8(void *, int) __asm__("MEM_clear");
@@ -2475,14 +2466,14 @@ extern void MEM_copy_E9B8(void *, int *, int) __asm__("MEM_copy");
  */
 int FILESYS_setopts(int *opts) {
     if (*opts < 36) {
-        MEM_clear_E9B8(&gFileSysOpts_E9B8, 36);
+        MEM_clear_E9B8(&gFileSysOpts, 36);
     }
-    MEM_copy_E9B8(&gFileSysOpts_E9B8, opts, *opts);
-    D_00450C58_E9B8.f0 = ((int)gFileSysOpts_E9B8.unk_18);
-    D_00450C58_E9B8.f4 = gFileSysOpts_E9B8.unk_10;
-    D_00450C58_E9B8.f8 = gFileSysOpts_E9B8.unk_0C;
-    D_00450C58_E9B8.fC = gFileSysOpts_E9B8.unk_14;
-    REAL_filedevice_E9B8[0] = ((int)gFileSysOpts_E9B8.REAL_filedevice);
+    MEM_copy_E9B8(&gFileSysOpts, opts, *opts);
+    D_00450C58_E9B8.f0 = ((int)gFileSysOpts.unk_18);
+    D_00450C58_E9B8.f4 = gFileSysOpts.unk_10;
+    D_00450C58_E9B8.f8 = gFileSysOpts.unk_0C;
+    D_00450C58_E9B8.fC = gFileSysOpts.unk_14;
+    REAL_filedevice_E9B8[0] = ((int)gFileSysOpts.REAL_filedevice);
     return 1;
 }
 #endif
@@ -2927,7 +2918,6 @@ INCLUDE_ASM("ealib/seg_2DCAE8", releaserequest);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void queueadd_rr(char *, char *) __asm__("queueadd");
-extern void (*D_00450C18_0C18[])(unsigned int) __asm__("D_00450C18");
 extern char freequeue_9BF8[] __asm__("freequeue");
 
 /**
@@ -2943,7 +2933,7 @@ void releaserequest(REQUESTSTRUCTtag* request) {
     if (request->cancelflag != 0) {
         temp_4 = (unsigned int)request->loadaddr;
         if (temp_4 >= 2U) {
-            D_00450C18_0C18[0](temp_4);
+            ((void (*)(unsigned int))gFileSysOpts.free)(temp_4);
         }
     }
     request->fop = 0;
@@ -3068,7 +3058,6 @@ extern void fCF70_F1E0(int, char *) __asm__("FILESYS_callbackop");
 extern int fD310_F1E0(int) __asm__("FILESYS_completeop");
 extern int fD5A0_F1E0(int, int, void *) __asm__("FILESYS_close");
 extern int fD648_F1E0(int, int, int, int, int, void *) __asm__("FILESYS_read");
-extern int (*D_0C14_F1E0[])(char *, int, int) __asm__("D_00450C14");
 extern char D_5DA8_F1E0[] __asm__("D_00495DA8");
 extern char fF0B8_F1E0[] __asm__("loadfileclosecallback");
 extern char fF0F0_F1E0[] __asm__("loadfilereadcallback");
@@ -3092,7 +3081,7 @@ void loadfilesizecallback(int opHandle, int opStatus, REQUESTSTRUCTtag* userdata
     } else {
         old = userdata->readsize;
         userdata->readsize = fileSize;
-        buffer = D_0C14_F1E0[0](D_5DA8_F1E0, fileSize, old);
+        buffer = ((int (*)(char*, int, int))gFileSysOpts.malloc)(D_5DA8_F1E0, fileSize, old);
         readSize = userdata->readsize;
         userdata->loadaddr = (char*)buffer;
         userdata->destaddr = (char*)buffer;
@@ -3194,7 +3183,6 @@ INCLUDE_ASM("ealib/seg_2DCAE8", ASYNCFILE_init);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 typedef struct E_F488 { int id; struct E_F488 *next; int pad[5]; volatile int f1C; int pad2[4]; } E_F488;
 extern E_F488 *hlafile_request_F488 __asm__("hlafile_request");
-extern E_F488 *(*D_00450C14_F488)(char *, int, int) __asm__("D_00450C14");
 extern int numrequests_F488 __asm__("numrequests");
 extern E_F488 *freequeue_F488[2] __asm__("freequeue");
 extern char hlafile_mutex_F488[] __asm__("hlafile_mutex");
@@ -3214,7 +3202,7 @@ void ASYNCFILE_init(int n, int x) {
     int i;
     if (hlafile_request_F488 == 0 && n < 257) {
         numrequests_F488 = n;
-        reqs = D_00450C14_F488(D_00495DB8_F488, n * 0x30, x);
+        reqs = ((E_F488*(*)(char*, int, int))gFileSysOpts.malloc)(D_00495DB8_F488, n * 0x30, x);
         freequeue_F488[1] = &reqs[n - 1];
         freequeue_F488[0] = reqs;
         hlafile_request_F488 = reqs;
@@ -5228,7 +5216,6 @@ void FILE_sizez(int fileName) {
 INCLUDE_ASM("ealib/seg_2DCAE8", loadfileatom);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int (*D_00450C14_1810[])(int, int, int) __asm__("D_00450C14");
 
 /**
  * Whole-file load step for FILESYS_atomic: opens the file, allocates its size through the allocate callback
@@ -5244,7 +5231,7 @@ int loadfileatom(int priority, int *loadArgs) {
     if (FILESYS_opensync(loadArgs[0], 1, priority, &fileHandle)) {
         int subPriority = priority - 1;
         fileSize = FILESYS_sizesync(fileHandle, subPriority);
-        buffer = D_00450C14_1810[0](loadArgs[0], fileSize, loadArgs[4]);
+        buffer = ((int (*)(int, int, int))gFileSysOpts.malloc)(loadArgs[0], fileSize, loadArgs[4]);
         if (buffer) {
             FILESYS_readsync(fileHandle, 0, buffer, fileSize, subPriority);
             FILESYS_closesync(fileHandle, subPriority);
@@ -5318,7 +5305,6 @@ void FILE_loadz(int name, int flags) {
 INCLUDE_ASM("ealib/seg_2DCAE8", loadfilesizeatom);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int (*D_00450C14_1948[])(int, int, int) __asm__("D_00450C14");
 
 /**
  * Whole-file load step for FILESYS_atomic that also reports the size: like loadfileatom, storing the size in word 2 of
@@ -5334,7 +5320,7 @@ int loadfilesizeatom(int priority, int *loadArgs) {
     if (FILESYS_opensync(loadArgs[0], 1, priority, &fileHandle)) {
         int subPriority = priority - 1;
         fileSize = FILESYS_sizesync(fileHandle, subPriority);
-        buffer = D_00450C14_1948[0](loadArgs[0], fileSize, loadArgs[4]);
+        buffer = ((int (*)(int, int, int))gFileSysOpts.malloc)(loadArgs[0], fileSize, loadArgs[4]);
         if (buffer) {
             FILESYS_readsync(fileHandle, 0, buffer, fileSize, subPriority);
             FILESYS_closesync(fileHandle, subPriority);
@@ -5615,7 +5601,6 @@ INCLUDE_ASM("ealib/seg_2DCAE8", loadbigheaderatom);
 /* gFileSysOpts: the file system's settings (0x24 bytes: FILESYS_getopts hands out a copy, FILESYS_setopts takes one).
    Field names are their offsets; f04 / f08 are also reached through their own splat symbols. */
 /* built-in file table entry (f20) */
-extern struct FILESYSOPTS gFileSysOpts;
 extern int FILESYS_opensync(int, int, int, void *);
 
 extern int FILESYS_closesync(int a, int b);
@@ -6580,7 +6565,6 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILEDEV_resolvename);
 /* gFileSysOpts: the file system's settings (0x24 bytes: FILESYS_getopts hands out a copy, FILESYS_setopts takes one).
    Field names are their offsets; f04 / f08 are also reached through their own splat symbols. */
 /* built-in file table entry (f20) */
-extern struct FILESYSOPTS gFileSysOpts;
 extern char *REAL_filedevice;
 extern char currentdirectory[0x100];                  /* the current directory */
 extern char *strchr_3098(char *, int) __asm__("strchr");
@@ -7429,7 +7413,6 @@ struct ThreadParam_4040 { int status; void (*func)(void); void *stack; int stack
 struct SemaParam_4040 { int count; int max_count; int init_count; int wait_threads; unsigned int attr; unsigned int option; };
 
 extern struct CdState_4040 D_00519C40_4040 __asm__("D_00519C40");
-extern struct Alloc_4040 gFileSysOpts_4040 __asm__("gFileSysOpts");
 extern struct CdCfg_4040 D_00450C58_4040 __asm__("D_00450C58");
 extern struct IsoEntry_4040 *D_00450C68;
 extern unsigned int D_00450C6C;
@@ -7494,10 +7477,10 @@ unsigned int func_003E4040(unsigned int n, void *files) {
     D_00519C40_4040.mode[0] = 0;
     D_00519C40_4040.mode[2] = 0;
     FlushCache_4040(0);
-    D_00450C68 = gFileSysOpts_4040.alloc(str_Named_Dir, n * 264, 0);
+    D_00450C68 = gFileSysOpts.malloc(str_Named_Dir, n * 264, 0);
     MEM_clear_4040(D_00450C68, n * 264);
-    if (gFileSysOpts_4040.files != 0) {
-        builtinFile = gFileSysOpts_4040.files;
+    if ((struct EmbFile_4040*)gFileSysOpts.unk_20 != 0) {
+        builtinFile = (struct EmbFile_4040*)gFileSysOpts.unk_20;
         dirEntry = D_00450C68;
         while (*builtinFile->name != 0) {
             strcpy(path, builtinFile->path + 7);
@@ -7535,7 +7518,7 @@ unsigned int func_003E4040(unsigned int n, void *files) {
         }
     }
     if (n < D_00450C6C) {
-        gFileSysOpts_4040.free(D_00450C68);
+        ((void (*)(void*))gFileSysOpts.free)(D_00450C68);
         D_00450C68 = 0;
         D_00450C6C = 0;
         return 0;
@@ -7543,7 +7526,7 @@ unsigned int func_003E4040(unsigned int n, void *files) {
     D_00519C40_4040.files = files;
     D_00519C40_4040.count = D_00450C6C;
     D_00519C40_4040.sorted = func_003E39A8_4040(D_00450C68, files, D_00450C6C, D_00450C70);
-    gFileSysOpts_4040.free(D_00450C68);
+    ((void (*)(void*))gFileSysOpts.free)(D_00450C68);
     D_00450C6C = 0;
     sp.init_count = 0;
     sp.max_count = 0x20;

@@ -116,6 +116,8 @@ CHECK_OFFSET(FILESYSOPTS, REAL_filedevice, 0x1C);
 CHECK_OFFSET(FILESYSOPTS, unk_20, 0x20);
 CHECK_SIZE(FILESYSOPTS, 0x24);
 
+extern FILESYSOPTS gFileSysOpts; // 0x00450C10: the file system's options (FILESYS_getopts / FILESYS_setopts copy it)
+
 // A mounted BIG archive, retail version (0x18 [U]: the records iFILE_addbigopencallback / iFILE_addbigreadcallback fill;
 // On Tour 0x1C): [O] struct FILEBIG_def {header, data, headersize, memflags, handle, fop, next}, linked from the file
 // device's bigfilelist (On Tour FILE_FILEDEVICE + 0x34; retail gFileDevice + 0x34, also D_00519AE4). Retail has no
