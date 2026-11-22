@@ -1451,12 +1451,6 @@ struct sA8E8Bank {                  /* a loaded bank's header */
     int f10;                        /* size of the kind-0x100 data */
     int f14[1];                     /* self-relative offsets */
 };
-struct sA8E8Slot {                  /* 0x10, sndgs.f1F4[f08] (also D_0050AADC) */
-    struct sA8E8Bank *f00;
-    char *f04;
-    char *f08;
-    signed char f0C;                /* busy */
-};
 struct sA8E8Chan {                  /* 0x8C, sndgs.f1F0[f17E] (also D_0050AAD8) */
     int f00;
     short f04[7];
@@ -1548,7 +1542,7 @@ struct sA8E8 {
     void (*f1E8)(void);
     void (*f1EC)(void);
     struct sA8E8Chan *f1F0;
-    struct sA8E8Slot *f1F4;
+    struct BANKLIST *f1F4;
     struct sA8E8Bus f1F8[1];        /* kind 4 */
     struct sA8E8Bus f20C[1];        /* kind 0x100 */
     struct sA8E8Bus f220[1];        /* kind 8 */
@@ -1641,7 +1635,7 @@ int SNDSYSI_init_impl(void *buf, int size, int arg2) {
     sndgs.installed = 1;
     SNDSYS_entercritical();
     *(struct sA8E8Chan**)&sndgs.chan = SNDMEMI_alloc_5158(sndgs.voicestotal * 140);
-    *(struct sA8E8Slot**)&sndgs.banklist = SNDMEMI_alloc_5158(sndgs.sso.set.maxbanks << 4);
+    *(struct BANKLIST**)&sndgs.banklist = SNDMEMI_alloc_5158(sndgs.sso.set.maxbanks << 4);
     SNDSYS_leavecritical();
     sndgs.servertick = 0;
     sndgs.mastervol = 0x7F;
@@ -2636,13 +2630,13 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDBANKI_valid);
  * @return 0 when usable, -18 when the slot is busy, -8 otherwise
  */
 int SNDBANKI_valid(int bankHandle) {
-    struct sA8E8Slot *slot;
+    struct BANKLIST *slot;
     if (bankHandle < 0 || bankHandle >= sndgs.sso.set.maxbanks) {
         return -8;
     }
-    slot = (struct sA8E8Slot *)(bankHandle * 16 + (int)(struct sA8E8Slot*)sndgs.banklist);
-    if (slot->f00 != 0) {
-        return slot->f0C ? -18 : 0;
+    slot = (struct BANKLIST *)(bankHandle * 16 + (int)(struct BANKLIST*)sndgs.banklist);
+    if (((struct sA8E8Bank*)slot->phdr) != 0) {
+        return slot->locked ? -18 : 0;
     }
     return -8;
 }
@@ -2675,8 +2669,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDbankheadercopy);
 // Passes a and slot n's old data to func_0041610C, then stores a in the slot.
 extern int SNDbankheadersize_6548(int) __asm__("SNDbankheadersize");
 extern int func_0041610C_6548(int, int, int) __asm__("func_0041610C");
-struct E_6548 { int data; int p[3]; };
-struct G_6548 { char p[0x1F4]; struct E_6548 *slots; };
+struct G_6548 { char p[0x1F4]; struct BANKLIST *slots; };
 /**
  * Copies a bank's header to new memory and makes the bank use the copy.
  *
@@ -2693,8 +2686,8 @@ int SNDbankheadercopy(int destMem, int n) {
     if (x < 0) {
         result = x;
     } else {
-        func_0041610C_6548(destMem, ((struct E_6548*)sndgs.banklist)[n].data, x);
-        ((struct E_6548*)sndgs.banklist)[n].data = destMem;
+        func_0041610C_6548(destMem, ((int)((struct BANKLIST*)sndgs.banklist)[n].phdr), x);
+        (*(int*)&((struct BANKLIST*)sndgs.banklist)[n].phdr) = destMem;
     }
     return result;
 }
@@ -4399,8 +4392,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDmastervol);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void f_A7B0_8160(int) __asm__("func_003BA7B0");
 extern void f_2A50_8160(int) __asm__("func_003C2A50");
-struct T_8160 { int w0; char pad[0x65]; char c69; char pad2[0x22]; };
-struct G_8160 { char pad[0x175]; char c; char pad2[8]; short n; char pad3[0x6F]; struct T_8160 *tab; };
+struct G_8160 { char pad[0x175]; char c; char pad2[8]; short n; char pad3[0x6F]; struct CHANPUB *tab; };
 
 /**
  * Sets the sound system's master volume and reapplies it to every playing channel.
@@ -4413,12 +4405,12 @@ struct G_8160 { char pad[0x175]; char c; char pad2[8]; short n; char pad3[0x6F];
  */
 int SNDmastervol(int masterVol) {
     int i;
-    struct T_8160 *channel;
+    struct CHANPUB *channel;
     SNDSYS_entercritical();
     sndgs.mastervol = masterVol;
     for (i = 0; i < sndgs.voicestotal; i++) {
-        channel = (struct T_8160 *)((char *)(struct T_8160*)sndgs.chan + i * 0x8C);
-        if (channel->c69 == 1 && channel->w0 >= 0) {
+        channel = (struct CHANPUB *)((char *)(struct CHANPUB*)sndgs.chan + i * 0x8C);
+        if ((*(char*)&channel->status) == 1 && channel->handle >= 0) {
             f_A7B0_8160(i);
             f_2A50_8160(i);
         }
@@ -4936,11 +4928,7 @@ int SNDstop(void) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B8A38);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-// Between SNDSYS_entercritical and SNDSYS_leavecritical, calls SNDstop on each entry's handle.
-struct E_8A38 { int h; char p[0x88]; };
-struct G_8A38 { char p[0x17E]; short n; char p2[0x1F0 - 0x180]; struct E_8A38 *ents; };
+struct G_8A38 { char p[0x17E]; short n; char p2[0x1F0 - 0x180]; struct CHANPUB *ents; };
 extern int SNDstop_8A38(int) __asm__("SNDstop");
 extern void SNDSYS_entercritical_8A38(void) __asm__("SNDSYS_entercritical");
 extern void SNDSYS_leavecritical_8A38(void) __asm__("SNDSYS_leavecritical");
@@ -4950,7 +4938,7 @@ extern void SNDSYS_leavecritical_8A38(void) __asm__("SNDSYS_leavecritical");
 void func_003B8A38(void) {
     int i = 0;
     SNDSYS_entercritical_8A38();
-    for (; i < sndgs.voicestotal; i++) SNDstop_8A38(((struct E_8A38*)sndgs.chan)[i].h);
+    for (; i < sndgs.voicestotal; i++) SNDstop_8A38(((struct CHANPUB*)sndgs.chan)[i].handle);
     SNDSYS_leavecritical_8A38();
 }
 #endif
@@ -5028,9 +5016,7 @@ int SNDtimeremaining(void) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SND3dpos);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct E_8C00 { char p0[0x1C]; unsigned short s1c; unsigned short s1e; char p1[0x2C]; unsigned short s4c; char p2[0x8C - 0x4E]; };
-struct G_8C00 { char pad[0x1F0]; struct E_8C00 *tab; };
+struct G_8C00 { char pad[0x1F0]; struct CHANPUB *tab; };
 
 /**
  * Sets a sound's 3D position: azimuth relative to its built-in pan, and elevation.
@@ -5055,9 +5041,9 @@ int SND3dpos(int soundHandle, int azimuth, int elevation) {
     if (chanIndex >= 0) {
         setChan = -1;
         while (iSNDpatchkey(chanIndex, &setChan)) {
-            struct E_8C00 *channel = &((struct E_8C00*)sndgs.chan)[setChan];
-            channel->s1c = channel->s4c + azimuth;
-            channel->s1e = elevation;
+            struct CHANPUB *channel = &((struct CHANPUB*)sndgs.chan)[setChan];
+            channel->azimuth = channel->builtinazimuth + azimuth;
+            channel->elevation = elevation;
             func_003C38E0(setChan);
         }
     }
@@ -6393,9 +6379,7 @@ short SNDVOICEI_alloc(int n, int tag, unsigned int *out, int lo, int hi) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDVOICEI_free);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct E_A550 { int f0; char pad[0x22]; unsigned char f26; unsigned char f27; char pad2[4]; int f2C; char pad3[0x69 - 0x30]; signed char f69; char pad4[0x8C - 0x6A]; };
-struct G_A550 { char pad[0x17E]; short cnt; volatile int f180; char pad2[0x1F0 - 0x184]; struct E_A550 *tab; };
+struct G_A550 { char pad[0x17E]; short cnt; volatile int f180; char pad2[0x1F0 - 0x184]; struct CHANPUB *tab; };
 /**
  * Frees a channel, keeping a patch-key group's master until its last member goes.
  *
@@ -6408,52 +6392,52 @@ struct G_A550 { char pad[0x17E]; short cnt; volatile int f180; char pad2[0x1F0 -
  * @param u  unused
  */
 void SNDVOICEI_free(int i, unsigned char u) {
-    struct E_A550 *channel = &((struct E_A550*)sndgs.chan)[i];
-    unsigned char k = channel->f26;
+    struct CHANPUB *channel = &((struct CHANPUB*)sndgs.chan)[i];
+    unsigned char k = channel->patchkey;
     int n = 0;
     int sel = -1;
     int j;
     if (k != 0) {
         for (j = 0; j < sndgs.voicestotal; j++) {
-            struct E_A550 *otherChan = &((struct E_A550*)sndgs.chan)[j];
-            if (otherChan->f26 == k && otherChan->f0 >= 0 && otherChan->f69 != 0) {
+            struct CHANPUB *otherChan = &((struct CHANPUB*)sndgs.chan)[j];
+            if (otherChan->patchkey == k && otherChan->handle >= 0 && otherChan->status != 0) {
                 n++;
-                if (otherChan->f27) sel = j;
+                if (otherChan->ismaster) sel = j;
             }
         }
-        channel = &((struct E_A550*)sndgs.chan)[i];
+        channel = &((struct CHANPUB*)sndgs.chan)[i];
         if (n == 1) {
-            channel->f69 = 0;
-            channel->f26 = 0;
-            channel->f27 = 0;
-            channel->f2C = (volatile int)sndgs.audiotick;
+            channel->status = 0;
+            channel->patchkey = 0;
+            channel->ismaster = 0;
+            channel->timestamp = (volatile int)sndgs.audiotick;
             return;
         }
-        if (((struct E_A550*)sndgs.chan)[sel].f69 == 2 && i != sel && n == 2) {
-            channel->f69 = 0;
-            channel->f26 = 0;
-            channel->f27 = 0;
-            channel->f2C = (volatile int)sndgs.audiotick;
-            ((struct E_A550*)sndgs.chan)[sel].f69 = 0;
-            ((struct E_A550*)sndgs.chan)[sel].f26 = 0;
-            ((struct E_A550*)sndgs.chan)[sel].f27 = 0;
-            ((struct E_A550*)sndgs.chan)[sel].f2C = (volatile int)sndgs.audiotick;
+        if (((struct CHANPUB*)sndgs.chan)[sel].status == 2 && i != sel && n == 2) {
+            channel->status = 0;
+            channel->patchkey = 0;
+            channel->ismaster = 0;
+            channel->timestamp = (volatile int)sndgs.audiotick;
+            ((struct CHANPUB*)sndgs.chan)[sel].status = 0;
+            ((struct CHANPUB*)sndgs.chan)[sel].patchkey = 0;
+            ((struct CHANPUB*)sndgs.chan)[sel].ismaster = 0;
+            ((struct CHANPUB*)sndgs.chan)[sel].timestamp = (volatile int)sndgs.audiotick;
             return;
         }
-        if (((struct E_A550*)sndgs.chan)[sel].f69 == 1 && i == sel) {
-            ((struct E_A550*)sndgs.chan)[sel].f69 = 2;
+        if (((struct CHANPUB*)sndgs.chan)[sel].status == 1 && i == sel) {
+            ((struct CHANPUB*)sndgs.chan)[sel].status = 2;
             return;
         }
-        channel->f69 = 0;
-        channel->f26 = 0;
-        channel->f27 = 0;
-        channel->f2C = (volatile int)sndgs.audiotick;
+        channel->status = 0;
+        channel->patchkey = 0;
+        channel->ismaster = 0;
+        channel->timestamp = (volatile int)sndgs.audiotick;
         return;
     }
-    channel->f69 = 0;
-    channel->f26 = 0;
-    channel->f27 = 0;
-    channel->f2C = (volatile int)sndgs.audiotick;
+    channel->status = 0;
+    channel->patchkey = 0;
+    channel->ismaster = 0;
+    channel->timestamp = (volatile int)sndgs.audiotick;
 }
 #endif
 
@@ -6595,9 +6579,7 @@ void iSNDcalcpitch(int idx) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", iSNDpatchkey);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct E_AA00 { int w; char p0[0x22]; unsigned char type; char p1[0x42]; signed char b; char p2[0x22]; };
-struct G_AA00 { char pad[0x17E]; short cnt; char pad2[0x70]; struct E_AA00 *tab; };
+struct G_AA00 { char pad[0x17E]; short cnt; char pad2[0x70]; struct CHANPUB *tab; };
 
 /**
  * Steps through the channels of a sound's patch-key group.
@@ -6610,13 +6592,13 @@ struct G_AA00 { char pad[0x17E]; short cnt; char pad2[0x70]; struct E_AA00 *tab;
  * @return 1 while there is another channel, else 0
  */
 int iSNDpatchkey(int chanIndex, int *pos) {
-    struct E_AA00 *chanEntry = &((struct E_AA00*)sndgs.chan)[chanIndex];
-    unsigned char patchKey = chanEntry->type;
+    struct CHANPUB *chanEntry = &((struct CHANPUB*)sndgs.chan)[chanIndex];
+    unsigned char patchKey = chanEntry->patchkey;
     if (patchKey != 0) {
         (*pos)++;
         while (*pos < sndgs.voicestotal) {
-            chanEntry = &((struct E_AA00*)sndgs.chan)[*pos];
-            if (chanEntry->type == patchKey && chanEntry->b == 1 && chanEntry->w >= 0) return 1;
+            chanEntry = &((struct CHANPUB*)sndgs.chan)[*pos];
+            if (chanEntry->patchkey == patchKey && chanEntry->status == 1 && chanEntry->handle >= 0) return 1;
             (*pos)++;
         }
     } else if (*pos < 0) {
@@ -6897,8 +6879,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDBANKI_findfreekey);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern unsigned char freekey_B0C8 __asm__("freekey");
-struct E_B0C8 { char pad[0x26]; unsigned char id; char pad2[0x69 - 0x27]; signed char used; char pad3[0x8C - 0x6A]; };
-struct G_B0C8 { char pad[0x17E]; short n; char pad2[0x1F0 - 0x180]; struct E_B0C8 *ents; };
+struct G_B0C8 { char pad[0x17E]; short n; char pad2[0x1F0 - 0x180]; struct CHANPUB *ents; };
 
 /**
  * Returns a new patch key that no busy channel uses.
@@ -6913,7 +6894,7 @@ again:
     freekey_B0C8++;
     if (freekey_B0C8 == 0) freekey_B0C8++;
     for (i = 0; i < sndgs.voicestotal; i++) {
-        if (((struct E_B0C8*)sndgs.chan)[i].used && ((struct E_B0C8*)sndgs.chan)[i].id == freekey_B0C8) goto again;
+        if (((struct CHANPUB*)sndgs.chan)[i].status && ((struct CHANPUB*)sndgs.chan)[i].patchkey == freekey_B0C8) goto again;
     }
     return freekey_B0C8;
 }
@@ -11737,13 +11718,6 @@ struct Sub_0E28 {
     int w48;
     char pad4C[0xA0 - 0x4C];
 };
-struct Ch_0E28 {
-    char pad0[0x28];
-    short h28;
-    char pad2A[0x69 - 0x2A];
-    signed char b69;
-    char pad6A[0x8C - 0x6A];
-};
 struct G_0E28 {
     char pad0[4];
     unsigned char b4;
@@ -11760,7 +11734,7 @@ struct G_0E28 {
     char pad175[0x17E - 0x175];
     short h17E;
     char pad180[0x1F0 - 0x180];
-    struct Ch_0E28 *chans;
+    struct CHANPUB *chans;
 };
 struct O_0E28 { char pad[0x13]; unsigned char b13; };
 extern struct Sub_0E28 D_0050A908_0E28 __asm__("D_0050A908");
@@ -11856,7 +11830,7 @@ int SNDPLATFORM_outputset(void) {
         if (sndgs.prevset.outputchannels != requested.b27) {
             sndgs.sso.set.outputchannels = requested.b27;
             for (i = 0; i < sndgs.voicestotal; i++) {
-                if (((struct Ch_0E28*)sndgs.chan)[i].b69 == 1 && ((struct Ch_0E28*)sndgs.chan)[i].h28 < 0) {
+                if (((struct CHANPUB*)sndgs.chan)[i].status == 1 && ((struct CHANPUB*)sndgs.chan)[i].masterchan < 0) {
                     f38E0_0E28(i);
                 }
             }
@@ -13956,10 +13930,7 @@ void SNDPLATFORM_downloadcomplete(void) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_getcurframe);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct E_4318 { char pad[0x24]; unsigned short flags; char pad2[0x8C - 0x26]; };
-struct G_4318 { char pad[0x2F]; unsigned char b2F; unsigned char b30; char pad2[0x1F0 - 0x31]; struct E_4318 *e; };
+struct G_4318 { char pad[0x2F]; unsigned char b2F; unsigned char b30; char pad2[0x1F0 - 0x31]; struct CHANPUB *e; };
 struct P_4318 { int a; int b; };
 struct Q_4318 { char pad[0x18]; unsigned int v; char pad2[4]; };
 extern struct Q_4318 D_0050BB98_4318[] __asm__("D_0050BB98");
@@ -13976,12 +13947,12 @@ extern unsigned int MIX_getframe_4318(int) __asm__("MIX_getframe");
  * @return the position in samples
  */
 unsigned int SNDPLATFORM_getcurframe(int n) {
-    struct E_4318 *channel = &((struct E_4318*)sndgs.chan)[n];
+    struct CHANPUB *channel = &((struct CHANPUB*)sndgs.chan)[n];
     struct Q_4318 *speakerRecord = &D_0050BB98_4318[n];
-    if (channel->flags & 8) {
+    if (channel->rendermode & 8) {
         return ((((struct P_4318 *)D_0050BB98_4318)[n - 203].a - speakerRecord->v) * 0x1C) >> 4;
     }
-    if (channel->flags & 0x100) {
+    if (channel->rendermode & 0x100) {
         return ((struct P_4318 *)D_0050BB98_4318)[n - sndgs.sso.set.voicesspu - 155].a;
     }
     return MIX_getframe_4318(n - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu));
@@ -16305,9 +16276,7 @@ unsigned int func_003C64A8(U64_64A8 x, unsigned int divisor) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDBANKI_alloc);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct S_6500 { int used; int pad[3]; };
-struct G_6500 { char pad[0x28]; unsigned short count; char pad2[0x1F4 - 0x2A]; struct S_6500 *slots; };
+struct G_6500 { char pad[0x28]; unsigned short count; char pad2[0x1F4 - 0x2A]; struct BANKLIST *slots; };
 
 /**
  * Returns the first free bank slot: the index of the first unused 16-byte entry of the bank table (+0x1F4 of
@@ -16320,7 +16289,7 @@ struct G_6500 { char pad[0x28]; unsigned short count; char pad2[0x1F4 - 0x2A]; s
 int SNDBANKI_alloc(void) {
     int i;
     for (i = 0; i < sndgs.sso.set.maxbanks; i++) {
-        if (((struct S_6500*)sndgs.banklist)[i].used == 0) {
+        if (((int)((struct BANKLIST*)sndgs.banklist)[i].phdr) == 0) {
             return i;
         }
     }
