@@ -12160,7 +12160,7 @@ D_00519C40 = 0x00519C40; // size:0x24
 sndpps = 0x005157B8; // size:0x8
 // ealib/seg_2B4578: the 0x10-byte head of a struct (count +5, handler +8, bytes +0xE / +0xF); D_00515B50 (+0x10) stays
 // its own symbol because many functions name it.
-D_00515B40 = 0x00515B40; // size:0x10
+sndmix = 0x00515B40; // size:0x10
 // camera/camera: int[2] (cChaseCameraController_switchCamera_HardReset / cChaseCameraController_switchCamera_UserChange index it); D_004A4DD4 was element 1 (func_001673F8).
 persistentPlayerChoiceType = 0x004A4DD0; // size:0x8
 // .sdata 8-byte objects copied with ldl/ldr; splat named the ldl half (+7) separately (2026-10-26).
@@ -17596,3 +17596,28 @@ gHarddriveReadRequest = 0x00519C20;
 cFogParticleMan_mSortKey = 0x00537AC0;
 cGarbageMan_mCan = 0x0053AB40;
 __ti23PS2_SONY_CODEC_INTERNAL = 0x0053EA00;
+
+// SSX On Tour (PSP, ULKS-46038) dev-build global names, round 2026-11-22-globals3a (docs/ontour_globals.tsv)
+lastTick = 0x0044C468;
+gMutexLockFn = 0x0044C46C;
+sndcents = 0x0044C480;
+freekey = 0x0044C588;
+sndpantoazimuthtab = 0x0044C590;
+outputmode = 0x0044E1C4;
+bitmask = 0x0044E8C0;
+coeff_table = 0x0044E8E8;
+REAL_filedevice = 0x00450C50;
+exitfunctions = 0x00450C78;
+hTimerId = 0x00450DDC;
+bInTimerSubroutine = 0x00450DE4;
+crctab = 0x00451018;
+inctable = 0x00451218;
+RCMP_VIDEO_DRIVER_vtbl = 0x004802B0;
+sndss = 0x0050A0A0;
+sndvoicereserved = 0x0050AC20;
+SNDIrandseed = 0x0050AC50;
+CODANew = 0x00517604;
+CODADelete = 0x00517608;
+currentdirectory = 0x00519AF0;
+hashcollision = 0x0051ED80;
+systemtasksubs = 0x0051ED98;

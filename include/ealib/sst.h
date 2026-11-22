@@ -77,7 +77,7 @@ CHECK_SIZE(SNDSTREAMREQUEST, 0x28);
 
 // SNDSTREAMCHANNEL, retail version (0x138 [R]: SNDSTRMI_create clears 312 bytes at the start of the stream's memory and
 // puts the 40-byte requests after it; SNDSTRM_overheadtap = maxrequests * 40 + 312; On Tour 0x214): one stream channel,
-// D_0050A0A0[32] (On Tour SNDSTREAMSTATE::pssc[32]). [O] struct SNDSTREAMCHANNEL and SNDSTRMI_getstreamptr(int)
+// sndss[32] (On Tour SNDSTREAMSTATE::pssc[32]). [O] struct SNDSTREAMCHANNEL and SNDSTRMI_getstreamptr(int)
 // returning it; SNDSTRM_timemult / SNDSTRM_pitchmult keep it in `SNDSTREAMCHANNEL* pssc`. Retail lacks On Tour's
 // pFxVolume (0x104 there), so filter[] and the lists sit a word lower; [U] the unit's view sA0A0Strm (every use in
 // SNDSTRMI_*: f104 a 0x18 record, f11C / f128 the request lists, f134 the current request) has exactly this layout.

@@ -1674,7 +1674,7 @@ struct sC10 {
     int f10;
     int f14;
     char *f18;                      /* also D_00450C58.f00 */
-    char *f1C;                      /* also D_00450C50 */
+    char *f1C;                      /* also REAL_filedevice */
     struct sC10File *f20;
 };
 extern struct sC10 gFileSysOpts;
@@ -1971,18 +1971,18 @@ extern int strlen_DE78(char *) __asm__("strlen");
 extern char *strcpy_DE78(char *, char *) __asm__("strcpy");
 extern int strncmp_DE78(char *, char *, int) __asm__("strncmp");
 extern void strcat_DE78(char *, char *) __asm__("strcat");
-extern char *D_00450C50_DE78[] __asm__("D_00450C50");
+extern char *REAL_filedevice_DE78[] __asm__("REAL_filedevice");
 extern char *D_00450C08_DE78[] __asm__("D_00450C08");
 extern int D_00450C44_DE78[] __asm__("D_00450C44");
 extern int D_00450C48_DE78[] __asm__("D_00450C48");
-extern char D_00519AF0_DE78[] __asm__("D_00519AF0");
+extern char currentdirectory_DE78[] __asm__("currentdirectory");
 extern char D_00495D78_DE78[] __asm__("D_00495D78");
 
 /**
- * Sets the file system's current path (D_00519AF0) from @p path.
+ * Sets the file system's current path (currentdirectory) from @p path.
  *
  * With the 3-character device prefix (D_00450C08) the call is ignored when the device mode (D_00450C48 & 3) is 2, else
- * device 1 is selected (D_00450C44) and the prefix skipped; with the host root prefix (D_00450C50) it is ignored unless
+ * device 1 is selected (D_00450C44) and the prefix skipped; with the host root prefix (REAL_filedevice) it is ignored unless
  * mode bit 2 is set, else device 2 is selected. The rest is copied and, when it fits, ends with '/'. ps2main passes
  * "cd:".
  *
@@ -1990,21 +1990,21 @@ extern char D_00495D78_DE78[] __asm__("D_00495D78");
  */
 void FILESYS_setcurrentpath(char *path) {
     int n, len;
-    n = strlen_DE78(D_00450C50_DE78[0]);
+    n = strlen_DE78(REAL_filedevice_DE78[0]);
     if (strncmp_DE78(path, D_00450C08_DE78[0], 3) == 0) {
         if ((D_00450C48_DE78[0] & 3) == 2) return;
         D_00450C44_DE78[0] = 1;
         path += 3;
-    } else if (strncmp_DE78(path, D_00450C50_DE78[0], n) == 0) {
+    } else if (strncmp_DE78(path, REAL_filedevice_DE78[0], n) == 0) {
         if (!(D_00450C48_DE78[0] & 2)) return;
         D_00450C44_DE78[0] = 2;
         path += n;
     }
-    strcpy_DE78(D_00519AF0_DE78, path);
-    if (D_00519AF0_DE78[0xFF] == 0) {
-        len = strlen_DE78(D_00519AF0_DE78);
-        if (len > 0 && D_00519AF0_DE78[len - 1] != 47) {
-            strcat_DE78(D_00519AF0_DE78, D_00495D78_DE78);
+    strcpy_DE78(currentdirectory_DE78, path);
+    if (currentdirectory_DE78[0xFF] == 0) {
+        len = strlen_DE78(currentdirectory_DE78);
+        if (len > 0 && currentdirectory_DE78[len - 1] != 47) {
+            strcat_DE78(currentdirectory_DE78, D_00495D78_DE78);
         }
     }
 }
@@ -2014,15 +2014,15 @@ void FILESYS_setcurrentpath(char *path) {
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_getcurrentpath);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char D_00519AF0_DF80[] __asm__("D_00519AF0");
+extern char currentdirectory_DF80[] __asm__("currentdirectory");
 void strncpy_DF80(char *, char *, int) __asm__("strncpy");
 /**
- * Copies the file system's current path (D_00519AF0, up to 0x100 bytes) to @p dst.
+ * Copies the file system's current path (currentdirectory, up to 0x100 bytes) to @p dst.
  *
  * @param dst  the output buffer
  */
 void FILESYS_getcurrentpath(char *dst) {
-    strncpy_DF80(dst, D_00519AF0_DF80, 0x100);
+    strncpy_DF80(dst, currentdirectory_DF80, 0x100);
 }
 #endif
 
@@ -2468,7 +2468,7 @@ struct A_E928 { int p0, p4, p8, pC, f10, f14, f18, f1C; };
 struct B_E928 { int f0, f4, f8, fC; };
 extern struct A_E928 gFileSysOpts_E928 __asm__("gFileSysOpts");
 extern struct B_E928 D_00450C58_E928 __asm__("D_00450C58");
-extern int D_00450C50_E928[] __asm__("D_00450C50");
+extern int REAL_filedevice_E928[] __asm__("REAL_filedevice");
 extern void MEM_clear_E928(int, int) __asm__("MEM_clear");
 extern void MEM_copy_E928(int *, void *, int) __asm__("MEM_copy");
 
@@ -2487,7 +2487,7 @@ int FILESYS_getopts(int *opts) {
     gFileSysOpts_E928.f18 = D_00450C58_E928.f0;
     gFileSysOpts_E928.f10 = D_00450C58_E928.f4;
     gFileSysOpts_E928.f14 = D_00450C58_E928.fC != 0;
-    gFileSysOpts_E928.f1C = D_00450C50_E928[0];
+    gFileSysOpts_E928.f1C = REAL_filedevice_E928[0];
     MEM_copy_E928(opts, &gFileSysOpts_E928, n);
     return 1;
 }
@@ -2501,13 +2501,13 @@ struct A_E9B8 { int p0, p4, p8, pC, f10, f14, f18, f1C; };
 struct B_E9B8 { int f0, f4, f8, fC; };
 extern struct A_E9B8 gFileSysOpts_E9B8 __asm__("gFileSysOpts");
 extern struct B_E9B8 D_00450C58_E9B8 __asm__("D_00450C58");
-extern int D_00450C50_E9B8[] __asm__("D_00450C50");
+extern int REAL_filedevice_E9B8[] __asm__("REAL_filedevice");
 extern void MEM_clear_E9B8(void *, int) __asm__("MEM_clear");
 extern void MEM_copy_E9B8(void *, int *, int) __asm__("MEM_copy");
 
 /**
  * Takes the file system's options from the caller's record (size first; a short record clears the 36-byte options
- * first) and applies them to the live settings (D_00450C58, D_00450C50).
+ * first) and applies them to the live settings (D_00450C58, REAL_filedevice).
  *
  * @param opts  the options record (size first)
  * @return 1
@@ -2521,7 +2521,7 @@ int FILESYS_setopts(int *opts) {
     D_00450C58_E9B8.f4 = gFileSysOpts_E9B8.f10;
     D_00450C58_E9B8.f8 = gFileSysOpts_E9B8.pC;
     D_00450C58_E9B8.fC = gFileSysOpts_E9B8.f14;
-    D_00450C50_E9B8[0] = gFileSysOpts_E9B8.f1C;
+    REAL_filedevice_E9B8[0] = gFileSysOpts_E9B8.f1C;
     return 1;
 }
 #endif
@@ -5777,7 +5777,7 @@ void FILE_loadbigheaderz(int fileName, int memFlags) {
 INCLUDE_ASM("ealib/seg_2DCAE8", FILE_save);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_00450C50_1F48[] __asm__("D_00450C50");
+extern char *REAL_filedevice_1F48[] __asm__("REAL_filedevice");
 extern int strncmp_1F48(char *, char *, int) __asm__("strncmp");
 extern void strcat_1F48(char *, char *) __asm__("strcat");
 extern int sceOpen_1F48(char *, int) __asm__("sceOpen");
@@ -5785,7 +5785,7 @@ extern void sceClose_1F48(int) __asm__("sceClose");
 extern void sceWrite_1F48(int, char *, int) __asm__("sceWrite");
 
 /**
- * Writes @p len bytes to a host file (the host root D_00450C50 is prefixed unless the name has it), in 4 KB writes,
+ * Writes @p len bytes to a host file (the host root REAL_filedevice is prefixed unless the name has it), in 4 KB writes,
  * ignoring write errors; returns 1 when the file opened.
  *
  * @param name  the file name
@@ -5797,8 +5797,8 @@ unsigned int FILE_save(char *name, char *data, int len) {
     char buf[256];
     int fd;
     buf[0] = 0;
-    if (strncmp_1F48(name, D_00450C50_1F48[0], strlen(D_00450C50_1F48[0])) != 0) {
-        strcpy(buf, D_00450C50_1F48[0]);
+    if (strncmp_1F48(name, REAL_filedevice_1F48[0], strlen(REAL_filedevice_1F48[0])) != 0) {
+        strcpy(buf, REAL_filedevice_1F48[0]);
     }
     strcat_1F48(buf, name);
     fd = sceOpen_1F48(buf, 1538);
@@ -5823,7 +5823,7 @@ unsigned int FILE_save(char *name, char *data, int len) {
 INCLUDE_ASM("ealib/seg_2DCAE8", FILE_savez);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_00450C50_2030[] __asm__("D_00450C50");
+extern char *REAL_filedevice_2030[] __asm__("REAL_filedevice");
 extern int strncmp_2030(char *, char *, int) __asm__("strncmp");
 extern void strcat_2030(char *, char *) __asm__("strcat");
 extern int sceOpen_2030(char *, int) __asm__("sceOpen");
@@ -5842,8 +5842,8 @@ unsigned int FILE_savez(char *name, char *data, int len) {
     char buf[256];
     int fd;
     buf[0] = 0;
-    if (strncmp_2030(name, D_00450C50_2030[0], strlen(D_00450C50_2030[0])) != 0) {
-        strcpy(buf, D_00450C50_2030[0]);
+    if (strncmp_2030(name, REAL_filedevice_2030[0], strlen(REAL_filedevice_2030[0])) != 0) {
+        strcpy(buf, REAL_filedevice_2030[0]);
     }
     strcat_2030(buf, name);
     fd = sceOpen_2030(buf, 1538);
@@ -6636,8 +6636,8 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILEDEV_resolvename);
    Field names are their offsets; f04 / f08 are also reached through their own splat symbols. */
 /* built-in file table entry (f20) */
 extern struct sC10 gFileSysOpts;
-extern char *D_00450C50;
-extern char D_00519AF0[0x100];                  /* the current directory */
+extern char *REAL_filedevice;
+extern char currentdirectory[0x100];                  /* the current directory */
 extern char *strchr_3098(char *, int) __asm__("strchr");
 extern int strlen_3098(char *) __asm__("strlen");
 extern int strncmp_3098(char *, char *, int) __asm__("strncmp");
@@ -6650,9 +6650,9 @@ void FILEDEV_resolvename_i(char *path, char *out, int *kind) __asm__("FILEDEV_re
  * Turns a file name into a device path and says which device it is on (1 disc, 2 host).
  *
  * The default device is D_00450C44. A name with a ':' must start with "cd:" (disc; the prefix is dropped) or the host
- * root D_00450C50 ("host0:", host; dropped too); any other prefix is refused (empty @p out) on a disc default, or
+ * root REAL_filedevice ("host0:", host; dropped too); any other prefix is refused (empty @p out) on a disc default, or
  * unless its third character is the ':'. Host paths get the host root back in front; a name not starting with '\\', '/'
- * or '~' gets the current directory (D_00519AF0, set by FILESYS_setcurrentpath) in front. Backslashes become slashes. Quirk: a
+ * or '~' gets the current directory (currentdirectory, set by FILESYS_setcurrentpath) in front. Backslashes become slashes. Quirk: a
  * refused name returns before @p kind is written, so the caller's value stays uninitialised.
  *
  * @param path  the file name
@@ -6664,11 +6664,11 @@ void FILEDEV_resolvename_i(char *path, char *out, int *kind) {
     out[0] = 0;
     k = D_00450C44;
     if (strchr_3098(path, 58) != 0) {
-        int n = strlen_3098(D_00450C50);
+        int n = strlen_3098(REAL_filedevice);
         if (strncmp_3098(path, D_00450C3C, 3) == 0) {
             k = 1;
             path += 3;
-        } else if (strncmp_3098(path, D_00450C50, n) == 0) {
+        } else if (strncmp_3098(path, REAL_filedevice, n) == 0) {
             path += n;
             k = 2;
         } else {
@@ -6677,10 +6677,10 @@ void FILEDEV_resolvename_i(char *path, char *out, int *kind) {
         }
     }
     if (k == 2) {
-        strcat(out, D_00450C50);
+        strcat(out, REAL_filedevice);
     }
     if (path[0] != 92 && path[0] != 47 && path[0] != 0x7E) {
-        strcat(out, D_00519AF0);
+        strcat(out, currentdirectory);
     }
     strcat(out, path);
     for (; *out != 0; out++) {
@@ -7055,11 +7055,11 @@ INCLUDE_ASM("ealib/seg_2DCAE8", fi_cmp);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_0051ED80_3968[] __asm__("D_0051ED80");
+extern int hashcollision_3968[] __asm__("hashcollision");
 
 /**
  * Sort comparator of the CD file table: orders entries by their first word (the name hash), unsigned; equal hashes
- * return 0 and count a collision in D_0051ED80.
+ * return 0 and count a collision in hashcollision.
  *
  * @param lhs  the first entry
  * @param rhs  the second entry
@@ -7069,7 +7069,7 @@ int fi_cmp(unsigned int *lhs, unsigned int *rhs) {
     long diff = (long)*lhs - (long)*rhs;
     if (diff < 0) return -1;
     if (diff > 0) return 1;
-    D_0051ED80_3968[0]++;
+    hashcollision_3968[0]++;
     return 0;
 }
 #endif
@@ -7083,7 +7083,7 @@ extern void qsort_39A8(char *, int, int, void *) __asm__("qsort");
 extern char *strcpy_39A8(char *, char *) __asm__("strcpy");
 extern void fi_cmp_39A8(void) __asm__("fi_cmp");
 extern int D_00450C58_39A8[] __asm__("D_00450C58");
-extern int D_0051ED80_39A8[] __asm__("D_0051ED80");
+extern int hashcollision_39A8[] __asm__("hashcollision");
 
 /**
  * Builds the sorted CD file table from the raw directory list and returns the hash seed it settled on.
@@ -7122,9 +7122,9 @@ int func_003E39A8(char *src, char *dst, int n, int seed) {
                 dstEntry += sz + 0xC;
             } while (i != 0);
         }
-        D_0051ED80_39A8[0] = 0;
+        hashcollision_39A8[0] = 0;
         qsort_39A8(dst, n, D_00450C58_39A8[1] + 0xC, fi_cmp_39A8);
-        if (D_0051ED80_39A8[0] != 0) {
+        if (hashcollision_39A8[0] != 0) {
             seed = seed * 101 + 7;
         } else {
             done = 1;
@@ -7794,22 +7794,22 @@ int func_003E4968(int filePath) {
 INCLUDE_ASM("ealib/seg_2DCAE8", REAL_restore);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void (*D_00450C78_0C78[])(void) __asm__("D_00450C78");
+extern void (*exitfunctions_0C78[])(void) __asm__("exitfunctions");
 
 /**
  * Runs and clears every registered exit handler.
  *
- * Walks the 64-slot handler table (D_00450C78, filled by REAL_addexit) from the last slot to the first,
+ * Walks the 64-slot handler table (exitfunctions, filled by REAL_addexit) from the last slot to the first,
  * calling each non-null entry and then clearing its slot. REAL_exit() calls it before trapping.
  */
 void REAL_restore(void) {
     int i;
     for (i = 0x3F; i >= 0; i--) {
-        void (*fn)(void) = D_00450C78_0C78[i];
+        void (*fn)(void) = exitfunctions_0C78[i];
         if (fn != 0) {
             fn();
         }
-        D_00450C78_0C78[i] = 0;
+        exitfunctions_0C78[i] = 0;
     }
 }
 #endif
@@ -7832,12 +7832,12 @@ void REAL_exit(void) {
 INCLUDE_ASM("ealib/seg_2DCAE8", REAL_addexit);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00450C78_4A30[] __asm__("D_00450C78");
+extern int exitfunctions_4A30[] __asm__("exitfunctions");
 
 /**
  * Registers a routine to run at exit, once.
  *
- * Does nothing when @p exitFunc is already in the 64-entry exit table D_00450C78 (the routines REAL_restore runs); otherwise
+ * Does nothing when @p exitFunc is already in the 64-entry exit table exitfunctions (the routines REAL_restore runs); otherwise
  * stores it in the first empty slot, and drops it silently when the table is full. The timer setup TIMER_init
  * registers its teardown TIMER_restore here; the sound library (System_VectorToReal5) registers one too.
  *
@@ -7846,12 +7846,12 @@ extern int D_00450C78_4A30[] __asm__("D_00450C78");
 void REAL_addexit(int exitFunc) {
     int i;
     for (i = 0; i < 0x40; i++) {
-        if (D_00450C78_4A30[i] == exitFunc) return;
+        if (exitfunctions_4A30[i] == exitFunc) return;
     }
     i = 0;
     while (i < 0x40) {
-        if (D_00450C78_4A30[i] == 0) {
-            D_00450C78_4A30[i] = exitFunc;
+        if (exitfunctions_4A30[i] == 0) {
+            exitfunctions_4A30[i] = exitFunc;
             break;
         }
         i++;
@@ -7863,11 +7863,11 @@ void REAL_addexit(int exitFunc) {
 INCLUDE_ASM("ealib/seg_2DCAE8", REAL_removeexit);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern void (*D_00450C78[64])(void);     /* exit handlers (REAL_restore runs them) */
+extern void (*exitfunctions[64])(void);     /* exit handlers (REAL_restore runs them) */
 /**
  * Removes a routine from the exit table.
  *
- * Clears the first slot of the 64-entry table D_00450C78 (the routines REAL_restore runs) that holds @p exitFunc; does nothing
+ * Clears the first slot of the 64-entry table exitfunctions (the routines REAL_restore runs) that holds @p exitFunc; does nothing
  * when it isn't there. The counterpart of REAL_addexit. Nothing in the build calls it.
  *
  * @param exitFunc  the routine to remove
@@ -7875,8 +7875,8 @@ extern void (*D_00450C78[64])(void);     /* exit handlers (REAL_restore runs the
 void REAL_removeexit(void (*exitFunc)(void)) {
     int i;
     for (i = 0; i < 0x40; i++) {
-        if (D_00450C78[i] == exitFunc) {
-            D_00450C78[i] = 0;
+        if (exitfunctions[i] == exitFunc) {
+            exitfunctions[i] = 0;
             break;
         }
     }
@@ -7898,7 +7898,7 @@ extern int D_00450DA0;
 extern int TIMERhz;
 /* tick counter, incremented by the timer interrupt handler (tmrint) */
 extern volatile int D_00450DCC;
-extern int D_00450DDC;
+extern int hTimerId;
 extern unsigned short D_00450DE0;
 
 #define T0_COUNT_4AF0 (*(volatile int *)0x10000000)
@@ -7910,7 +7910,7 @@ extern unsigned short D_00450DE0;
 /**
  * Starts the library tick timer at a requested rate and returns the rate it actually runs at.
  *
- * When the interrupt handler is already installed (D_00450DDC) it only returns TIMERhz. A @p hz of 0 means 100. It
+ * When the interrupt handler is already installed (hTimerId) it only returns TIMERhz. A @p hz of 0 means 100. It
  * picks EE timer 1's clock for the rate (bus clock / 256 below 196 Hz, / 16 below 3150 Hz, / 1 above: 0x8CA00, 0x8CA000
  * or 0x8CA0000 counts a second), stores the compare period in D_00450DE0 and the resulting rate in TIMERhz, programs
  * T1 (count 0, the compare value, the clock mode | 0x180: compare interrupt and count enable), installs tmrint
@@ -7932,7 +7932,7 @@ int TIMER_init(int hz) {
     int end;
     int hblankCount;
 
-    if (D_00450DDC != 0) {
+    if (hTimerId != 0) {
         return TIMERhz;
     }
     if (hz == 0) {
@@ -7956,7 +7956,7 @@ int TIMER_init(int hz) {
     T1_COUNT_4AF0 = 0;
     T1_COMP_4AF0 = D_00450DE0;
     T1_MODE_4AF0 = mode | 0x180;
-    D_00450DDC = AddIntcHandler_4AF0(10, tmrint_4AF0, 0);
+    hTimerId = AddIntcHandler_4AF0(10, tmrint_4AF0, 0);
     EnableIntc_4AF0(10);
     if (D_00450DA0 == 0) {
         count = T0_COUNT_4AF0;
@@ -7992,23 +7992,23 @@ INCLUDE_ASM("ealib/seg_2DCAE8", TIMER_restore);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void RemoveIntcHandler(int, int);
 extern void DisableIntc(int);
-extern int D_00450DDC_0DDC[] __asm__("D_00450DDC");
+extern int hTimerId_0DDC[] __asm__("hTimerId");
 
 /**
  * Stops the library tick timer.
  *
- * When a handler is installed (D_00450DDC) it clears T1_MODE (0x10000810), disables INTC 10 with DisableIntc, removes
- * the handler with RemoveIntcHandler and clears D_00450DDC. TIMER_init registers it as an exit routine.
+ * When a handler is installed (hTimerId) it clears T1_MODE (0x10000810), disables INTC 10 with DisableIntc, removes
+ * the handler with RemoveIntcHandler and clears hTimerId. TIMER_init registers it as an exit routine.
  */
 void TIMER_restore(void) {
     volatile int *reg;
 
-    if (D_00450DDC_0DDC[0] != 0) {
+    if (hTimerId_0DDC[0] != 0) {
         reg = (volatile int *)0x10000810;
         *reg = 0;
         DisableIntc(10);
-        RemoveIntcHandler(10, D_00450DDC_0DDC[0]);
-        D_00450DDC_0DDC[0] = 0;
+        RemoveIntcHandler(10, hTimerId_0DDC[0]);
+        hTimerId_0DDC[0] = 0;
     }
 }
 #endif
@@ -8021,7 +8021,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", tmrint);
 extern unsigned short D_00450DE0;               /* compare period */
 extern volatile int D_00450DCC;                 /* ticks */
 extern volatile int libticks;                 /* libticks */
-extern int D_00450DE4;                          /* bInTimerSubroutine */
+extern int bInTimerSubroutine;                          /* bInTimerSubroutine */
 extern void (*tmrsub[8])(void);             /* tmrsub */
 
 #define T1_COUNT (*(volatile int *)0x10000800)
@@ -8033,7 +8033,7 @@ extern void (*tmrsub[8])(void);             /* tmrsub */
  *
  * Moves the compare value on by one period (D_00450DE0) from where the count stands, resets T1_COUNT and acknowledges
  * the interrupt (T1_MODE | 0x400), increments the tick counters D_00450DCC and libticks, then calls each of the 8
- * timer routines in tmrsub that is set, with D_00450DE4 set to 1 around the call (the thread and mutex code checks
+ * timer routines in tmrsub that is set, with bInTimerSubroutine set to 1 around the call (the thread and mutex code checks
  * it to pick the interrupt-safe kernel calls). Re-enables interrupts (sync.l, ei) before returning. Installed by
  * TIMER_init.
  *
@@ -8049,9 +8049,9 @@ int tmrint(void) {
     libticks++;
     for (i = 0; i < 8; i++) {
         if (tmrsub[i]) {
-            D_00450DE4 = 1;
+            bInTimerSubroutine = 1;
             tmrsub[i]();
-            D_00450DE4 = 0;
+            bInTimerSubroutine = 0;
         }
     }
     __asm__ volatile("sync.l\n\tei");
@@ -8380,14 +8380,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_destroy);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void iTerminateThread_51A0(int) __asm__("iTerminateThread");
-extern int D_00450DE4_51A0[] __asm__("D_00450DE4");
+extern int bInTimerSubroutine_51A0[] __asm__("bInTimerSubroutine");
 
 void THREAD_destroy_51A0(char *arg0) __asm__("THREAD_destroy");
 /**
  * Ends and deletes a thread.
  *
  * Takes the thread id from the record's +4, or the calling thread's when @p thread is -1, and reads its status
- * (iReferThreadStatus inside the timer interrupt, flag D_00450DE4, else ReferThreadStatus). A thread that is running,
+ * (iReferThreadStatus inside the timer interrupt, flag bInTimerSubroutine, else ReferThreadStatus). A thread that is running,
  * ready, waiting or suspended (status & 0xF) is terminated (iTerminateThread / TerminateThread) and deleted; a dormant
  * one (status & 0x10) is only deleted.
  *
@@ -8402,13 +8402,13 @@ void THREAD_destroy_51A0(char *thread) {
     } else {
         threadId = *(int*)(thread + 4);
     }
-    if (D_00450DE4_51A0[0] != 0) {
+    if (bInTimerSubroutine_51A0[0] != 0) {
         iReferThreadStatus(threadId, st);
     } else {
         ReferThreadStatus(threadId, st);
     }
     if (st[0] & 0xF) {
-        if (D_00450DE4_51A0[0] != 0) {
+        if (bInTimerSubroutine_51A0[0] != 0) {
             iTerminateThread_51A0(threadId);
         } else {
             TerminateThread(threadId);
@@ -8478,7 +8478,7 @@ extern void f3CB0_YT(int, int *) __asm__("iReferThreadStatus");
 extern void f3CC0_YT(void) __asm__("SleepThread");
 extern void f4CE8_YT(int) __asm__("iRotateThreadReadyQueue");
 extern int D_0DA0_YT[] __asm__("D_00450DA0");
-extern int D_0DE4_YT[] __asm__("D_00450DE4");
+extern int D_0DE4_YT[] __asm__("bInTimerSubroutine");
 extern char D_5E20_YT[] __asm__("D_00495E20");
 extern char fE5290_YT[] __asm__("func_003E5290");
 
@@ -8518,7 +8518,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_yield);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int TIMERhz_5398 __asm__("TIMERhz");
-extern int D_00450DE4_5398 __asm__("D_00450DE4");
+extern int bInTimerSubroutine_5398 __asm__("bInTimerSubroutine");
 extern void THREAD_yieldticks_5398(int) __asm__("THREAD_yieldticks");
 extern int GetThreadId_5398(void) __asm__("GetThreadId");
 extern void iReferThreadStatus_5398(int, void *) __asm__("iReferThreadStatus");
@@ -8532,7 +8532,7 @@ void THREAD_yield_impl(int ms) __asm__("THREAD_yield");
  *
  * With @p ms nonzero it converts the milliseconds to ticks (ms * TIMERhz / 1000, at least 1) and sleeps with
  * THREAD_yieldticks. With 0 it rotates the ready queue at the thread's current priority (inside the timer interrupt,
- * flag D_00450DE4, with iReferThreadStatus and iRotateThreadReadyQueue; else ReferThreadStatus and RotateThreadReadyQueue),
+ * flag bInTimerSubroutine, with iReferThreadStatus and iRotateThreadReadyQueue; else ReferThreadStatus and RotateThreadReadyQueue),
  * letting other threads of that priority run. Loading and streaming loops call it with 0 while they wait.
  *
  * @param ms  milliseconds to sleep, or 0 to yield once
@@ -8545,7 +8545,7 @@ void THREAD_yield_impl(int ms) {
             yieldTicks = 1;
         }
         THREAD_yieldticks_5398(yieldTicks);
-    } else if (D_00450DE4_5398 != 0) {
+    } else if (bInTimerSubroutine_5398 != 0) {
         iReferThreadStatus_5398(GetThreadId_5398(), info);
         iRotateThreadReadyQueue_5398(info[6]);
     } else {
@@ -8590,7 +8590,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_getpriority);
 extern int GetThreadId();
 extern void ReferThreadStatus(int, void *);
 extern void iReferThreadStatus(int, void *);
-extern int D_00450DE4_5498[] __asm__("D_00450DE4");
+extern int bInTimerSubroutine_5498[] __asm__("bInTimerSubroutine");
 extern int D_00450DFC_5498[] __asm__("D_00450DFC");
 
 /**
@@ -8613,7 +8613,7 @@ int THREAD_getpriority(int *thread) {
     } else {
         threadId = thread[1];
     }
-    if (D_00450DE4_5498[0] != 0) {
+    if (bInTimerSubroutine_5498[0] != 0) {
         iReferThreadStatus(threadId, sp);
     } else {
         ReferThreadStatus(threadId, sp);
@@ -8629,14 +8629,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_setpriority);
 extern void ChangeThreadPriority_5508(int, int) __asm__("ChangeThreadPriority");
 extern void iChangeThreadPriority_5508(int, int) __asm__("iChangeThreadPriority");
 extern int GetThreadId_5508(void) __asm__("GetThreadId");
-extern int D_00450DE4_5508[] __asm__("D_00450DE4");
+extern int bInTimerSubroutine_5508[] __asm__("bInTimerSubroutine");
 extern int D_00450DFC_5508[] __asm__("D_00450DFC");
 
 /**
  * Changes a thread's priority.
  *
  * Picks the id (0: main thread D_00450DFC, -1: calling thread, else the record's +4) and calls iChangeThreadPriority
- * inside the timer interrupt (flag D_00450DE4), ChangeThreadPriority otherwise.
+ * inside the timer interrupt (flag bInTimerSubroutine), ChangeThreadPriority otherwise.
  *
  * @param thread  the thread record, 0 for the main thread, or -1 for the calling thread
  * @param priority  the new kernel priority
@@ -8652,7 +8652,7 @@ int THREAD_setpriority(void *thread, int priority) {
     } else {
         var_4 = (*(int *)((char*)(thread) + (4)));
     }
-    if (D_00450DE4_5508[0] != 0) {
+    if (bInTimerSubroutine_5508[0] != 0) {
         iChangeThreadPriority_5508(var_4, priority);
     } else {
         ChangeThreadPriority_5508(var_4, priority);
@@ -8667,7 +8667,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_testexit);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void ReferThreadStatus(int, void *);
 extern void iReferThreadStatus(int, void *);
-extern int D_00450DE4_0DE4[] __asm__("D_00450DE4");
+extern int bInTimerSubroutine_0DE4[] __asm__("bInTimerSubroutine");
 typedef struct { int pad; int f4; } A_5580;
 
 /**
@@ -8683,7 +8683,7 @@ int THREAD_testexit(A_5580 *thread) {
     struct { int v; char rest[44]; } st;
     int finished;
 
-    if (D_00450DE4_0DE4[0] != 0) {
+    if (bInTimerSubroutine_0DE4[0] != 0) {
         iReferThreadStatus(thread->f4, &st);
     } else {
         ReferThreadStatus(thread->f4, &st);
@@ -8815,7 +8815,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", MUTEX_unlock);
 extern int GetThreadId();
 extern void SignalSema(int);
 extern void iSignalSema(int);
-extern int D_00450DE4_5760[] __asm__("D_00450DE4");
+extern int bInTimerSubroutine_5760[] __asm__("bInTimerSubroutine");
 
 void MUTEX_unlock_5760(void *arg0) __asm__("MUTEX_unlock");
 /**
@@ -8833,7 +8833,7 @@ void MUTEX_unlock_5760(void *mutex) {
         if (--mutexWords[2] != 0) return;
         mutexWords[1] = 0;
     }
-    if (D_00450DE4_5760[0] != 0) {
+    if (bInTimerSubroutine_5760[0] != 0) {
         iSignalSema(mutexWords[3]);
     } else {
         SignalSema(mutexWords[3]);
@@ -8845,15 +8845,15 @@ void MUTEX_unlock_5760(void *mutex) {
 INCLUDE_ASM("ealib/seg_2DCAE8", SYNCTASK_init);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char D_0051ED98_57D0[] __asm__("D_0051ED98");
+extern char systemtasksubs_57D0[] __asm__("systemtasksubs");
 void MEM_fill_57D0(char *, int, int) __asm__("MEM_fill");
 /**
  * Clears the synchronous task table.
  *
- * Zeroes all 16 entries (256 bytes) of D_0051ED98, the tasks SYNCTASK_run() calls.
+ * Zeroes all 16 entries (256 bytes) of systemtasksubs, the tasks SYNCTASK_run() calls.
  */
 void SYNCTASK_init(void) {
-    MEM_fill_57D0(D_0051ED98_57D0, 0, 0x100);
+    MEM_fill_57D0(systemtasksubs_57D0, 0, 0x100);
 }
 #endif
 
@@ -8862,7 +8862,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", SYNCTASK_add);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct T_STA { int fn; int mode; int due; int fC; };
-extern struct T_STA D_0051ED98_STA[16] __asm__("D_0051ED98");
+extern struct T_STA systemtasksubs_STA[16] __asm__("systemtasksubs");
 extern int D_00450E00_STA __asm__("D_00450E00");
 extern volatile int libticks_STA __asm__("libticks");
 
@@ -8891,9 +8891,9 @@ void SYNCTASK_add_impl(int fn, int mode, int delay) {
     }
     skip = D_00450E00_STA++;
     for (i = 0; i < 16; i++) {
-        if (D_0051ED98_STA[i].fn == fn) {
+        if (systemtasksubs_STA[i].fn == fn) {
             idx = i;
-        } else if (D_0051ED98_STA[i].fn == 0 && idx == -1) {
+        } else if (systemtasksubs_STA[i].fn == 0 && idx == -1) {
             if (skip != 0) {
                 skip--;
             } else {
@@ -8902,10 +8902,10 @@ void SYNCTASK_add_impl(int fn, int mode, int delay) {
         }
     }
     if (idx != -1) {
-        D_0051ED98_STA[idx].fn = fn;
-        D_0051ED98_STA[idx].mode = mode;
-        D_0051ED98_STA[idx].due = libticks_STA + delay;
-        D_0051ED98_STA[idx].fC = 0;
+        systemtasksubs_STA[idx].fn = fn;
+        systemtasksubs_STA[idx].mode = mode;
+        systemtasksubs_STA[idx].due = libticks_STA + delay;
+        systemtasksubs_STA[idx].fC = 0;
     }
     D_00450E00_STA--;
 }
@@ -8916,7 +8916,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", SYNCTASK_del);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { int fn; int b; int c; int d; } STsk_5924;
-extern STsk_5924 D_0051ED98_ED98[] __asm__("D_0051ED98");
+extern STsk_5924 systemtasksubs_ED98[] __asm__("systemtasksubs");
 
 /**
  * Removes a function from the synchronous task table.
@@ -8928,8 +8928,8 @@ extern STsk_5924 D_0051ED98_ED98[] __asm__("D_0051ED98");
 void SYNCTASK_del(int taskFunc) {
     int i = 0;
 
-    while (i < 16 && D_0051ED98_ED98[i].fn != taskFunc) i++;
-    if (i < 16 && D_0051ED98_ED98[i].fn == taskFunc) D_0051ED98_ED98[i].fn = 0;
+    while (i < 16 && systemtasksubs_ED98[i].fn != taskFunc) i++;
+    if (i < 16 && systemtasksubs_ED98[i].fn == taskFunc) systemtasksubs_ED98[i].fn = 0;
 }
 #endif
 
@@ -8938,13 +8938,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", SYNCTASK_run);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct sSyncTask {                  /* 16 bytes, D_0051ED98[16]: a task SYNCTASK_run calls when it is due */
+struct sSyncTask {                  /* 16 bytes, systemtasksubs[16]: a task SYNCTASK_run calls when it is due */
     int (*f00)(int, int);
     int f04;                        /* period */
     int f08;                        /* due time (libticks) */
     int f0C;                        /* running */
 };
-extern struct sSyncTask D_0051ED98[16];
+extern struct sSyncTask systemtasksubs[16];
 extern int D_00450E04_5928 __asm__("D_00450E04");
 
 /**
@@ -8962,12 +8962,12 @@ int SYNCTASK_run(int mode) {
 
     D_00450E04_5928 = libticks_STA;
     for (i = 0; i < 16; i++) {
-        int (*fn)(int, int) = D_0051ED98[i].f00;
-        if (fn != 0 && libticks_STA >= D_0051ED98[i].f08 && D_0051ED98[i].f0C == 0) {
-            D_0051ED98[i].f0C = 1;
-            result |= fn(mode, libticks_STA - D_0051ED98[i].f08);
-            D_0051ED98[i].f0C = 0;
-            D_0051ED98[i].f08 = libticks_STA + D_0051ED98[i].f04;
+        int (*fn)(int, int) = systemtasksubs[i].f00;
+        if (fn != 0 && libticks_STA >= systemtasksubs[i].f08 && systemtasksubs[i].f0C == 0) {
+            systemtasksubs[i].f0C = 1;
+            result |= fn(mode, libticks_STA - systemtasksubs[i].f08);
+            systemtasksubs[i].f0C = 0;
+            systemtasksubs[i].f08 = libticks_STA + systemtasksubs[i].f04;
         }
     }
     return result;
@@ -9582,12 +9582,12 @@ void func_003E62B0(void) {
 INCLUDE_ASM("ealib/seg_2DCAE8", MEM_crc16);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern unsigned short D_00451018_1018[] __asm__("D_00451018");
+extern unsigned short crctab_1018[] __asm__("crctab");
 
 /**
  * Computes a table-driven CRC-16 of a block of bytes.
  *
- * For each byte: crc = D_00451018[(crc ^ byte) & 0xFF] ^ (crc >> 8), starting from @p seed. Every caller uses seed
+ * For each byte: crc = crctab[(crc ^ byte) & 0xFF] ^ (crc >> 8), starting from @p seed. Every caller uses seed
  * 64490 (0xFBEA): the save-game and profile checks (cBESaveInterface, cBE_writeToData), the trophy-room memory card
  * read and memstd's block checks.
  *
@@ -9607,7 +9607,7 @@ int MEM_crc16(unsigned char *data, int byteCount, int seed) {
         do {
             unsigned char dataByte = *cursor;
             cursor += 1;
-            crc = D_00451018_1018[(dataByte ^ crc) & 0xFF] ^ (crc >> 8);
+            crc = crctab_1018[(dataByte ^ crc) & 0xFF] ^ (crc >> 8);
         } while (cursor < end);
     }
     return crc & 0xFFFF;
@@ -9617,12 +9617,12 @@ int MEM_crc16(unsigned char *data, int byteCount, int seed) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", SORT_shell);
 #ifdef SKIP_ASM
-extern int D_00451218[];
+extern int inctable[];
 
 /**
  * Shell-sorts an array of keys in descending order, moving a second array along with it.
  *
- * Starts at the largest gap in the table D_00451218 (the same as BXSORT_shell's) below @p n and works down to gap 1,
+ * Starts at the largest gap in the table inctable (the same as BXSORT_shell's) below @p n and works down to gap 1,
  * inserting each key / value pair among the earlier ones with larger or equal keys. cAI_UpdateRankingPlacement uses it
  * to order the riders.
  *
@@ -9634,11 +9634,11 @@ void SORT_shell(int n, int *keys, int *vals) {
     int k = 1;
     int gap;
     int i;
-    while (D_00451218[k] < n) {
+    while (inctable[k] < n) {
         k++;
     }
     for (;;) {
-        gap = D_00451218[--k];
+        gap = inctable[--k];
         for (i = gap; i < n; i++) {
             int key = keys[i];
             int val = vals[i];

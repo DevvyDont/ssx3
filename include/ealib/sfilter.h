@@ -606,7 +606,7 @@ CHECK_OFFSET(SNDFILTERDEF, filter, 0x10);
 CHECK_OFFSET(SNDFILTERDEF, filterrestore, 0x14);
 CHECK_SIZE(SNDFILTERDEF, 0x18);
 
-// SNDMIXVOICE, retail PS2 version (0x60 [R]: MIX_create allocates n * 0x60, the voice table at D_00515B40 + 0x1DC is
+// SNDMIXVOICE, retail PS2 version (0x60 [R]: MIX_create allocates n * 0x60, the voice table at sndmix + 0x1DC is
 // indexed with a 0x60 stride; On Tour 0x5C): one software-mixer voice. [O] MIX_sethighpass's local `SNDMIXVOICE*
 // psmv` and the member names; retail's views of it in ealib/seg_2B4578: Ent_8468, Ent_85D0, E_8560, E_8598, Ent_8158,
 // E_8B80. Retail has one wet bus, kept inline as floats (On Tour: float* to per-bus arrays), and its 0x50..0x5B differ

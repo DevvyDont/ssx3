@@ -2642,7 +2642,7 @@ INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD__SSX_VD_PS2_SINGLE_BUFFERD);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void* D_00480270[];
-extern void* D_004802B0[];
+extern void* RCMP_VIDEO_DRIVER_vtbl[];
 extern void* (*D_00509434[])(void*);
 
 struct sRVEntry_2547B8 {
@@ -2660,7 +2660,7 @@ struct sRCtx_2547B8 {
  * Destroys the tiled-texture video driver: removes each tile's texture (graphics manager slot 50,
  * cPS2GraphicsMan_RemoveTexture), marks it -1 and frees the tile through RCMP_rcmp_sys, frees the tile table
  * (cMemMan_free), returns a held frame (+0xC) to the decoder (RCMP_DECODER_ReleaseFrame), installs the base vtable
- * D_004802B0 and, when @p flags bit 0 is set, frees the object through the movie free hook.
+ * RCMP_VIDEO_DRIVER_vtbl and, when @p flags bit 0 is set, frees the object through the movie free hook.
  *
  * Vtable slot 1 of D_00480270.
  *
@@ -2685,7 +2685,7 @@ extern "C" void SSX_VD_PS2_SINGLE_BUFFERD__SSX_VD_PS2_SINGLE_BUFFERD(SSX_VD_PS2_
         RCMP_DECODER_ReleaseFrame(((void*)self->m_pdecoder), ((void*)self->mpCurrentFrame));
         (*(void**)&self->mpCurrentFrame) = 0;
     }
-    self->mVtbl = D_004802B0;
+    self->mVtbl = RCMP_VIDEO_DRIVER_vtbl;
     if (flags & 1) {
         D_00509434[0](self);
     }
@@ -3135,18 +3135,18 @@ extern "C" void func_00254E60_impl(int initialize, int priority)
 //100%
 INCLUDE_ASM("mem/memstd", VIDEO_DRIVER__VIDEO_DRIVER);
 #ifdef SKIP_ASM
-extern void* D_004802B0[];
+extern void* RCMP_VIDEO_DRIVER_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys a base video driver: installs the base vtable D_004802B0 and frees the object (operator_delete) when
+ * Destroys a base video driver: installs the base vtable RCMP_VIDEO_DRIVER_vtbl and frees the object (operator_delete) when
  * @p flags bit 0 is set.
  *
  * @param flags  bit 0 frees the memory
  */
 extern "C" void VIDEO_DRIVER__VIDEO_DRIVER(RCMP_VIDEO_DRIVER* self, int flags)
 {
-    self->mVtbl = D_004802B0;
+    self->mVtbl = RCMP_VIDEO_DRIVER_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3157,7 +3157,7 @@ extern "C" void VIDEO_DRIVER__VIDEO_DRIVER(RCMP_VIDEO_DRIVER* self, int flags)
 INCLUDE_ASM("mem/memstd", VIDEO_DRIVER_CompleteDraw__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the base video driver's default for vtable slot 6 of D_004802B0.
+ * Does nothing: the base video driver's default for vtable slot 6 of RCMP_VIDEO_DRIVER_vtbl.
  */
 void VIDEO_DRIVER_CompleteDraw(void* self)
 {
