@@ -105,23 +105,23 @@ extern "C" void cFEStateUberTrick_updateTrickMenu(cFEStateUberTrick* vself)
     for (int i = 0; i < 9; i++) {
         char name[0x10];
         sprintf(name, str_Trickpct_02d, i);
-        char* uiObj = (char*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
+        cUIThing* uiObj = (cUIThing*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
         char** lp = &labels[i];
-        if (uiObj != 0) {
-            *lp = uiObj;
-            uiCall_3DE0(uiObj, 8, 1);
-            uiCall_3DE0(uiObj, 9, 0);
-            *(int*)(uiObj + 0x18) = -1;
+        if (((char*)uiObj) != 0) {
+            *lp = ((char*)uiObj);
+            uiCall_3DE0(((char*)uiObj), 8, 1);
+            uiCall_3DE0(((char*)uiObj), 9, 0);
+            uiObj->mMiscData = -1;
         } else {
             *lp = 0;
         }
         sprintf(name, str_ckpct_02d, i);
-        uiObj = (char*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
+        uiObj = (cUIThing*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
         char** mp = &marks[i];
-        if (uiObj != 0) {
-            *mp = uiObj;
-            uiCall_3DE0(uiObj, 9, 0);
-            *(int*)(uiObj + 0x18) = -1;
+        if (((char*)uiObj) != 0) {
+            *mp = ((char*)uiObj);
+            uiCall_3DE0(((char*)uiObj), 9, 0);
+            uiObj->mMiscData = -1;
         } else {
             *mp = 0;
         }
@@ -139,22 +139,22 @@ extern "C" void cFEStateUberTrick_updateTrickMenu(cFEStateUberTrick* vself)
     cur = func_0014FEA8(iface, vself->mUserNum, slot, 1);
     for (int j = 0; j < count; j++) {
         if (func_00150048(iface, vself->mUserNum, slot, j)) {
-            char* uiObj = labels[shown];
-            if (uiObj != 0) {
+            cUIThing* uiObj = (cUIThing*)labels[shown];
+            if (((char*)uiObj) != 0) {
                 cUIText_setAsciiString((cUIText*)uiObj, func_00116938(tbl[j].name));
-                uiCall_3DE0(uiObj, 9, 1);
-                uiCall_3DE0(uiObj, 8, 0);
-                *(int*)(uiObj + 0x18) = j;
+                uiCall_3DE0(((char*)uiObj), 9, 1);
+                uiCall_3DE0(((char*)uiObj), 8, 0);
+                uiObj->mMiscData = j;
             }
-            uiObj = marks[shown];
-            if (uiObj != 0) {
-                uiCall_3DE0(uiObj, 9, 1);
+            uiObj = (cUIThing*)marks[shown];
+            if (((char*)uiObj) != 0) {
+                uiCall_3DE0(((char*)uiObj), 9, 1);
                 if (func_0014FFB8(iface, vself->mUserNum, slot, j))
-                    setHighlight_3DE0(uiObj, (int)vself->mpDollarSign);
+                    setHighlight_3DE0(((char*)uiObj), (int)vself->mpDollarSign);
                 else if (cur == j)
-                    setHighlight_3DE0(uiObj, (int)vself->mpCheckmark);
+                    setHighlight_3DE0(((char*)uiObj), (int)vself->mpCheckmark);
                 else
-                    setHighlight_3DE0(uiObj, (int)vself->mpCheckbox);
+                    setHighlight_3DE0(((char*)uiObj), (int)vself->mpCheckbox);
             }
             shown++;
         }

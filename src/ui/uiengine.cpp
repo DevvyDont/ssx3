@@ -937,14 +937,14 @@ struct cUIGroup_render2D_sVEntry {
  */
 extern "C" void cUIGroup_render2D(cUIGroup* self, float x, float y)
 {
-    void* n = cList_first((cList*)&self->mList);
-    if (n != 0) {
+    cUIThing* n = (cUIThing*)cList_first((cList*)&self->mList);
+    if (((void*)n) != 0) {
         do {
-            if ((*(int*)((char*)n + 0x14) >> 6) & 1) {
-                cUIGroup_render2D_sVEntry* vt = *(cUIGroup_render2D_sVEntry**)((char*)n + 8);
+            if ((n->mAttr >> 6) & 1) {
+                cUIGroup_render2D_sVEntry* vt = (cUIGroup_render2D_sVEntry*)n->mVtbl;
                 vt[17].fn(vthis(n, vt[17]), self->mPosition.x + x, self->mPosition.y + y);
             }
-            n = *(void**)((char*)n + 4);
+            n = (cUIThing*)((void*)n->mpNext);
         } while (!cListNode_isSentinel((cListNode*)n));
     }
 }

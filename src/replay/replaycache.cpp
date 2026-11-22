@@ -2560,10 +2560,10 @@ extern "C" void cScriptPlayerMain_UpdateFrame(cScriptPlayerMain* p);
  */
 extern "C" void cInSeq_UpdateFrame(cInSeq* self)
 {
-    char* n = (char*)self->mpScriptUsed;
-    while (n != 0) {
-        cScriptPlayerMain_UpdateFrame((cScriptPlayerMain*)(n + 8));
-        n = *(char**)(n + 0x50);
+    tScriptMainNode* n = self->mpScriptUsed;
+    while (((char*)n) != 0) {
+        cScriptPlayerMain_UpdateFrame((cScriptPlayerMain*)(&n->script));
+        n = (tScriptMainNode*)n->pNext;
     }
 }
 #endif
@@ -2720,14 +2720,14 @@ INCLUDE_ASM("replay/replaycache", cInSeq_PlayAll);
  * @param loopScript  non-zero to loop the scripts
  */
 extern "C" void cInSeq_PlayAll(cInSeq* inSeq, int loopScript) {
-    void *node;
+    tScriptMainNode* node;
 
-    node = ((void*)inSeq->mpScriptUsed);
-    if (node != 0) {
+    node = (tScriptMainNode*)((void*)inSeq->mpScriptUsed);
+    if (((void*)node) != 0) {
         do {
-            cInSeq_Play(inSeq, (*(int *)((char*)(node) + (4))), loopScript);
-            node = (*(void **)((char*)(node) + (0x50)));
-        } while (node != 0);
+            cInSeq_Play(inSeq, (node->index), loopScript);
+            node = (tScriptMainNode*)(((void*)node->pNext));
+        } while (((void*)node) != 0);
     }
 }
 #endif
@@ -3969,7 +3969,7 @@ extern "C" int cScriptPlayerEntity_SetupPlay(cScriptPlayerEntity* self)
         sRcVE2_273AA8* vt = *(sRcVE2_273AA8**)x;
         *(char**)&self->mpEntityComm = (char*)vt[6].fn(vthis(x, vt[6]), self, (self->mpSystemHeader)->type);
     }
-    if (((char*)self->mpEntityComm)) {
+    if (self->mpEntityComm) {
         char* pl = ((char*)self->mpEntityComm);
         sRcVE3_273AA8* vt = *(sRcVE3_273AA8**)pl;
         vt[1].fn(vthis(pl, vt[1]), self, (self->mpSystemHeader)->type);

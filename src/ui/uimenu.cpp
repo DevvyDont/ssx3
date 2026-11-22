@@ -360,14 +360,14 @@ extern "C" void cUIMenu_render2D(cUIMenu* self, float x, float y)
     if (scrollBar != 0) {
         cUIScrollBar_setValues(scrollBar, self->mScrollItemOffset, self->mScrollItemNumVisible, self->mScrollItemNum);
     }
-    void* n = cList_first((cList*)&self->mList);
-    if (n != 0) {
+    cUIThing* n = (cUIThing*)cList_first((cList*)&self->mList);
+    if (((void*)n) != 0) {
         do {
-            if ((*(int*)((char*)n + 0x14) >> 6) & 1) {
-                cUIMenu_render2D_sVEntry* vt = *(cUIMenu_render2D_sVEntry**)((char*)n + 8);
+            if ((n->mAttr >> 6) & 1) {
+                cUIMenu_render2D_sVEntry* vt = (cUIMenu_render2D_sVEntry*)n->mVtbl;
                 vt[17].fn(vthis(n, vt[17]), self->mPosition.x + x, self->mPosition.y + y);
             }
-            n = *(void**)((char*)n + 4);
+            n = (cUIThing*)((void*)n->mpNext);
         } while (!cListNode_isSentinel((cListNode*)n));
     }
 }

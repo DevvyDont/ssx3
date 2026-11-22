@@ -626,19 +626,19 @@ extern "C" void cRailManNode_disableRail(cRailManNode* self, int idx)
 {
     sMpRef_8780 ref = ((sMpRef_8780*)&self->RailInfo)[idx];
     sMpPart_8780* part = (sMpPart_8780*)ref.get(*cObjectInterface_getWorld_8780());
-    char* node = part->first;
+    tSplineSegmentRecord* node = (tSplineSegmentRecord*)part->first;
     for (int i = 0; i < part->count; i++) {
         tBoundBox box;
-        (*(sMpVec4_8780*)&box.MinPoint).x = *(float*)(node + 0x6C);
-        (*(sMpVec4_8780*)&box.MinPoint).y = *(float*)(node + 0x70);
-        (*(sMpVec4_8780*)&box.MinPoint).z = *(float*)(node + 0x74);
+        (*(sMpVec4_8780*)&box.MinPoint).x = node->m_fvMin.m[0];
+        (*(sMpVec4_8780*)&box.MinPoint).y = node->m_fvMin.m[1];
+        (*(sMpVec4_8780*)&box.MinPoint).z = node->m_fvMin.m[2];
         (*(sMpVec4_8780*)&box.MinPoint).w = 1.0f;
-        (*(sMpVec4_8780*)&box.MaxPoint).x = *(float*)(node + 0x78);
-        (*(sMpVec4_8780*)&box.MaxPoint).y = *(float*)(node + 0x7C);
-        (*(sMpVec4_8780*)&box.MaxPoint).z = *(float*)(node + 0x80);
+        (*(sMpVec4_8780*)&box.MaxPoint).x = node->m_fvMax.m[0];
+        (*(sMpVec4_8780*)&box.MaxPoint).y = node->m_fvMax.m[1];
+        (*(sMpVec4_8780*)&box.MaxPoint).z = node->m_fvMax.m[2];
         (*(sMpVec4_8780*)&box.MaxPoint).w = 1.0f;
         remove_8780(cObjectInterface_getNash(), node, &box);
-        node = *(char**)(node + 0x64);
+        node = (tSplineSegmentRecord*)node->m_NextSeg;
     }
 }
 #endif
@@ -733,19 +733,19 @@ extern "C" void cRailManNode_enableRail(cRailManNode* self, int idx)
 {
     sMpRef_8998 ref = ((sMpRef_8998*)&self->RailInfo)[idx];
     sMpPart_8998* part = (sMpPart_8998*)ref.get(*cObjectInterface_getWorld_8998());
-    char* node = part->first;
+    tSplineSegmentRecord* node = (tSplineSegmentRecord*)part->first;
     for (int i = 0; i < part->count; i++) {
         tBoundBox box;
-        (*(sMpVec4_8998*)&box.MinPoint).x = *(float*)(node + 0x6C);
-        (*(sMpVec4_8998*)&box.MinPoint).y = *(float*)(node + 0x70);
-        (*(sMpVec4_8998*)&box.MinPoint).z = *(float*)(node + 0x74);
+        (*(sMpVec4_8998*)&box.MinPoint).x = node->m_fvMin.m[0];
+        (*(sMpVec4_8998*)&box.MinPoint).y = node->m_fvMin.m[1];
+        (*(sMpVec4_8998*)&box.MinPoint).z = node->m_fvMin.m[2];
         (*(sMpVec4_8998*)&box.MinPoint).w = 1.0f;
-        (*(sMpVec4_8998*)&box.MaxPoint).x = *(float*)(node + 0x78);
-        (*(sMpVec4_8998*)&box.MaxPoint).y = *(float*)(node + 0x7C);
-        (*(sMpVec4_8998*)&box.MaxPoint).z = *(float*)(node + 0x80);
+        (*(sMpVec4_8998*)&box.MaxPoint).x = node->m_fvMax.m[0];
+        (*(sMpVec4_8998*)&box.MaxPoint).y = node->m_fvMax.m[1];
+        (*(sMpVec4_8998*)&box.MaxPoint).z = node->m_fvMax.m[2];
         (*(sMpVec4_8998*)&box.MaxPoint).w = 1.0f;
         insert_8998(cObjectInterface_getNash(), node, &box);
-        node = *(char**)(node + 0x64);
+        node = (tSplineSegmentRecord*)node->m_NextSeg;
     }
     ((unsigned int*)((char*)&self->RailInfo))[idx] = 0xFFFFFFFF;
 }

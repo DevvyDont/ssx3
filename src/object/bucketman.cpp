@@ -401,12 +401,12 @@ INCLUDE_ASM("object/bucketman", cBucketMan_updateBucket);
  */
 extern "C" void cBucketMan_updateBucket(cBucketMan* self, int index)
 {
-    void* node = cBucketMan_first(self, index);
-    while (node != 0) {
+    cObjNode* node = (cObjNode*)cBucketMan_first(self, index);
+    while (((void*)node) != 0) {
         void* next = cBucketMan_next(self, node, index);
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)node + 0xC);
+        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)node->mVtbl;
         vt[2].fn(vthis(node, vt[2]));
-        node = next;
+        node = (cObjNode*)next;
     }
     cBucketMan_first(self, index);
 }
@@ -423,11 +423,11 @@ INCLUDE_ASM("object/bucketman", cBucketMan_applyBucket);
  */
 extern "C" void cBucketMan_applyBucket(cBucketMan* self, int index)
 {
-    void* node = cBucketMan_first(self, index);
-    while (node != 0) {
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)node + 0xC);
+    cObjNode* node = (cObjNode*)cBucketMan_first(self, index);
+    while (((void*)node) != 0) {
+        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)node->mVtbl;
         vt[3].fn(vthis(node, vt[3]));
-        node = cBucketMan_next(self, node, index);
+        node = (cObjNode*)cBucketMan_next(self, node, index);
     }
 }
 #endif
@@ -443,11 +443,11 @@ INCLUDE_ASM("object/bucketman", cBucketMan_renderBucket);
  */
 extern "C" void cBucketMan_renderBucket(cBucketMan* self, int index)
 {
-    void* node = cBucketMan_first(self, index);
-    while (node != 0) {
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)node + 0xC);
+    cObjNode* node = (cObjNode*)cBucketMan_first(self, index);
+    while (((void*)node) != 0) {
+        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)node->mVtbl;
         vt[4].fn(vthis(node, vt[4]));
-        node = cBucketMan_next(self, node, index);
+        node = (cObjNode*)cBucketMan_next(self, node, index);
     }
 }
 #endif
@@ -468,14 +468,14 @@ struct sBucketVEntryPurge {
  */
 extern "C" void cBucketMan_purgeBucket(cBucketMan* self, int index)
 {
-    void* node = cBucketMan_first(self, index);
-    while (node != 0) {
+    cObjNode* node = (cObjNode*)cBucketMan_first(self, index);
+    while (((void*)node) != 0) {
         void* next = cBucketMan_next(self, node, index);
-        if (node != 0) {
-            sBucketVEntryPurge* vt = *(sBucketVEntryPurge**)((char*)node + 0xC);
+        if (((void*)node) != 0) {
+            sBucketVEntryPurge* vt = (sBucketVEntryPurge*)node->mVtbl;
             vt[1].fn(vthis(node, vt[1]), 3);
         }
-        node = next;
+        node = (cObjNode*)next;
     }
 }
 #endif
@@ -501,17 +501,17 @@ void* cBucketMan_next(cBucketMan* self, void* node, int index);
  */
 extern "C" void cBucketMan_purgeBucket1(cBucketMan* self, int index, int key)
 {
-    void* node = cBucketMan_first(self, index);
-    while (node != 0) {
+    cObjNode* node = (cObjNode*)cBucketMan_first(self, index);
+    while (((void*)node) != 0) {
         void* next = cBucketMan_next(self, node, index);
-        sVEntry<int(void*)>* sectionIdSlot = &(*(sVEntry<int(void*)>**)((char*)node + 0xC))[11];
+        sVEntry<int(void*)>* sectionIdSlot = &((sVEntry<int (void*)>*)node->mVtbl)[11];
         if (sectionIdSlot->fn(vthis(node, *sectionIdSlot)) == key) {
-            if (node != 0) {
-                sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)node + 0xC);
+            if (((void*)node) != 0) {
+                sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)node->mVtbl;
                 vt[1].fn(vthis(node, vt[1]), 3);
             }
         }
-        node = next;
+        node = (cObjNode*)next;
     }
 }
 #endif

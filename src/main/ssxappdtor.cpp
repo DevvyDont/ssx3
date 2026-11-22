@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ai/rider.h"
 #include "ai/ai.h"
 #include "world/worldcache.h"
 #include "ui/uistate.h"
@@ -3343,16 +3344,16 @@ INCLUDE_ASM("main/ssxappdtor", func_002451B0);
  */
 extern "C" void func_002451B0(cGame* self) {
     int i;
-    char *obj;
+    cRider* obj;
     char *vtbl;
 
     i = 0;
     if (self->AI->NumberOfRidersAllocated > 0) {
         do {
-            obj = (char*)self->AI->Riders[i];
+            obj = (cRider*)self->AI->Riders[i];
             i++;
-            vtbl = *(char **)(obj + 0x6C0);
-            (*(void (**)(void *))(vtbl + 0x9C))(obj + *(short *)(vtbl + 0x98));
+            vtbl = (char*)obj->mVtbl;
+            (*(void (**)(void *))(vtbl + 0x9C))(((char*)obj) + *(short *)(vtbl + 0x98));
         } while (i < self->AI->NumberOfRidersAllocated);
     }
 }

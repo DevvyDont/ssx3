@@ -2591,17 +2591,17 @@ struct sCtl00345430 {
 extern "C" void cSpline_draw(cSpline* self, int lineColour)
 {
     cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
-    tSplineRecord* list = (tSplineRecord*)(*(char**)((char*)self->Seg + 0x68));
+    tSplineRecord* list = (tSplineRecord*)self->Seg->m_Parent;
     int n = list->m_iNumSegments;
-    char* node = (char*)list->m_HeaderSeg;
+    tSplineSegmentRecord* node = list->m_HeaderSeg;
     (((sCtl00345430*)w->m_pCurrentDrawState))->f10 = -1;
     (((sCtl00345430*)w->m_pCurrentDrawState))->mode = 1;
     int i;
     for (i = 0; i < n; i++) {
         if (func_00345638(node) != 0) {
-            ((cWorld00345430*)w)->RenderSpline(node + 0x10, lineColour, 10);
+            ((cWorld00345430*)w)->RenderSpline(&node->m_fmBasisMat, lineColour, 10);
         }
-        node = *(char**)(node + 0x64);
+        node = (tSplineSegmentRecord*)node->m_NextSeg;
     }
 }
 #endif

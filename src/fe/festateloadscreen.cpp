@@ -379,16 +379,16 @@ extern "C" void cUIEngine_render2D(void* engine);
  */
 extern "C" int cFELoadScreen_render(cFELoadScreen* self)
 {
-    char* graphicsMan = (char*)GrMan;
-    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)(graphicsMan + 0x10D8);
+    cPS2GraphicsMan* graphicsMan = GrMan;
+    sVEntry<int(void*)>* vt = (sVEntry<int (void*)>*)graphicsMan->mVtbl;
     if (vt[17].fn(vthis(graphicsMan, vt[17])) == 0) {
         return 0;
     }
     if (cFadeScreen_drawFade(self) == 0) {
         cUIEngine_render2D(self->mpUI);
     }
-    graphicsMan = (char*)GrMan;
-    sVEntry<void(void*)>* vt2 = *(sVEntry<void(void*)>**)(graphicsMan + 0x10D8);
+    graphicsMan = (cPS2GraphicsMan*)GrMan;
+    sVEntry<void(void*)>* vt2 = (sVEntry<void (void*)>*)graphicsMan->mVtbl;
     vt2[20].fn(vthis(graphicsMan, vt2[20]));
     return 1;
 }

@@ -2118,11 +2118,11 @@ extern "C" void cCircle_TObj_Draw(cCircle_TObj* self, float amount)
         InitVertex_C060(((float*)&botBaseVert->u), (float*)(&self->mScreenColour), xs[i], 480.0f);
     }
 
-    char* obj = (char*)cGraphicsMan_TheGraphicsMan;
-    sBTVEntryDraw* drawEntry = &(*(sBTVEntryDraw**)(obj + 0x10D8))[71];
+    cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
+    sBTVEntryDraw* drawEntry = &((sBTVEntryDraw*)obj->mVtbl)[71];
     drawEntry->fn(vthis(obj, *drawEntry), 80, top, 0);
-    obj = (char*)cGraphicsMan_TheGraphicsMan;
-    drawEntry = &(*(sBTVEntryDraw**)(obj + 0x10D8))[71];
+    obj = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan;
+    drawEntry = &((sBTVEntryDraw*)obj->mVtbl)[71];
     drawEntry->fn(vthis(obj, *drawEntry), 80, bot, 0);
 }
 #endif

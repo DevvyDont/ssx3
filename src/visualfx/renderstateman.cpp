@@ -1523,10 +1523,10 @@ extern "C" void cAirStreamerFX_render(cAirStreamerFX* self)
     rsSetA_EF950(ctx, 0x7C, 2, 7);
     sRsVert_EF950 vertsL[52];
     sRsVert_EF950 vertsR[52];
-    char* rider = ((char*)self->mRider);
+    cRider* rider = self->mRider;
     float uvy = start;
     float invSq = 1.0f / (float)((self->mMaxStreamerSegments - 1) * (self->mMaxStreamerSegments - 1));
-    sRsVec4_EF950 off = rsScale_EF950(rsRow_EF950(*(char**)(*(char**)(rider + 0x780) + 0x30), *(int*)(rider + 0x89C), 0x30), 0.7f);
+    sRsVec4_EF950 off = rsScale_EF950(rsRow_EF950((char*)rider->mAnimModel->unk_030, rider->mBoneHips, 0x30), 0.7f);
     float dv = 1.0f / (float)self->StreamBufLen;
     float falloffT = 0.0f;
     int nverts = 0;
@@ -1537,8 +1537,8 @@ extern "C" void cAirStreamerFX_render(cAirStreamerFX* self)
     color.w = 1.0f;
     sRsVec4_EF950 leftPos;
     sRsVec4_EF950 rightPos;
-    rider = ((char*)self->mRider);
-    sRsVec4_EF950 col = rsRow_EF950(*(char**)(*(char**)(rider + 0x780) + 0x34), *(int*)(rider + 0x8A4), 0x20);
+    rider = (cRider*)self->mRider;
+    sRsVec4_EF950 col = rsRow_EF950((char*)rider->mAnimModel->unk_034, rider->mBoneBoardChild, 0x20);
     float size = 15.0f;
     if (glow) {
         float k = D_004A3B74;

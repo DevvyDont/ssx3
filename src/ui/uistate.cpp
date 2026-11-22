@@ -229,24 +229,24 @@ struct cUIStateStack_render2D_sVEntry {
  */
 extern "C" void cUIStateStack_render2D(cUIStateStack* self)
 {
-    char* n = (char*)cList_first((cList*)self);
-    if (n != 0) {
+    cUIState* n = (cUIState*)cList_first((cList*)self);
+    if (((char*)n) != 0) {
         do {
-            if ((*(int*)(n + 0x1C) >> 3) & 1) {
-                cUIStateStack_render2D_sVEntry* vt = *(cUIStateStack_render2D_sVEntry**)(n + 8);
+            if ((n->mAttrState >> 3) & 1) {
+                cUIStateStack_render2D_sVEntry* vt = (cUIStateStack_render2D_sVEntry*)n->mVtbl;
                 vt[15].fn(vthis(n, vt[15]));
             }
-            n = *(char**)(n + 4);
+            n = (cUIState*)n->mpNext;
         } while (!cListNode_isSentinel((cListNode*)n));
     }
-    n = (char*)cList_first((cList*)&self->mExplicitStack);
-    if (n != 0) {
+    n = (cUIState*)cList_first((cList*)&self->mExplicitStack);
+    if (((char*)n) != 0) {
         do {
-            if ((*(int*)(n + 0x1C) >> 3) & 1) {
-                cUIStateStack_render2D_sVEntry* vt = *(cUIStateStack_render2D_sVEntry**)(n + 8);
+            if ((n->mAttrState >> 3) & 1) {
+                cUIStateStack_render2D_sVEntry* vt = (cUIStateStack_render2D_sVEntry*)n->mVtbl;
                 vt[15].fn(vthis(n, vt[15]));
             }
-            n = *(char**)(n + 4);
+            n = (cUIState*)n->mpNext;
         } while (!cListNode_isSentinel((cListNode*)n));
     }
 }

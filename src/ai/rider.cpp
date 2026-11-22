@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ai/airpredictor.h"
 #include "ai/ridermetrix.h"
 #include "animation/animsequencer.h"
 #include "camera/camera.h"
@@ -788,9 +789,9 @@ void cRider_initAlways_impl(cRider* self)
         self->unk_5A4 = 0;
         self->unk_5A8 = 0;
         self->unk_5AC = 0;
-        self->mHasRival = 0;
-        self->mLastShoveFrame = 0;
-        self->mRivalIndex = -1;
+        self->PissedOff = 0;
+        self->LastPunchTick = 0;
+        self->PissedAIIndex = -1;
         self->unk_100 = 1;
         cRider_cancelRiderTransitions(self);
         self->unk_5B0 = 0;
@@ -3243,12 +3244,12 @@ extern "C" void cRider_updateSplit3(cRider* self)
     else if (cRider_getMotionState(self) == 1 ||
              (cRider_getMotionState(self) == 2 && self->mRiderHandler->WipeoutMotion.WipeoutMotionState == 1))
     {
-        char* obj = (char*)self->mAirPredictor;
+        cAirPredictor* obj = self->mAirPredictor;
         int ok = 0;
-        if (*(int*)(obj + 0xAC) == 1 || *(int*)(obj + 0xAC) == 3)
+        if (obj->SimState == 1 || obj->SimState == 3)
             ok = 1;
-        obj = (char*)self->mAirPredictor;
-        if ((ok && *(float*)(obj + 0x98) - *(float*)(obj + 0xA0) > 45.0f) || self->mImpactAccum2 > 5.0f)
+        obj = (cAirPredictor*)self->mAirPredictor;
+        if ((ok && obj->TotalAirTime - obj->CurAirTime > 45.0f) || self->mImpactAccum2 > 5.0f)
             cRider_checkForReset(self, 0, 2);
     }
     cRider_updateBoost(self);

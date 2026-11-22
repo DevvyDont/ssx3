@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ealib/filesys.h"
+#include "ealib/hlsfile.h"
 
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", getstringidbyindex);
@@ -1453,20 +1455,20 @@ extern void iFILE_perror();
  * @return the operation handle
  */
 int FILESYS_open(char *name, int modeflags, int priority, int userdata) {
-    char *fop = (char *)reserveop();
+    FILEOPERATION_def* fop = (FILEOPERATION_def*)reserveop();
     int fileHandle;
-    *(int *)(fop + 0x14) = userdata;
-    *(int *)(fop + 0x18) = modeflags;
-    *(int *)(fop + 0x10) = priority;
+    fop->userdata = (void*)userdata;
+    fop->value = modeflags;
+    fop->priority = priority;
     *(int *)fop = (*(int *)fop & 0xFF0FFFFF) | 0x200000;
     fileHandle = reservehandle();
-    *(int *)(fop + 0x24) = fileHandle;
+    fop->handle = (struct HANDLE_def*)fileHandle;
     if (fileHandle == 0) {
-        *(int *)(fop + 0xC) = 2;
-        iFILE_perror(fop);
+        fop->error = 2;
+        iFILE_perror(((char*)fop));
     }
-    strncpy(*(char **)(fop + 0x24) + 0x10, name, 0x100);
-    iFILESYS_ExecCommand(fop);
+    strncpy((char*)fop->handle + 0x10, name, 0x100);
+    iFILESYS_ExecCommand(((char*)fop));
     return *(int *)fop;
 }
 #endif
@@ -1580,19 +1582,19 @@ extern void iFILE_perror();
  * @return the operation handle
  */
 int FILESYS_write(int file, int offset, int buffer, int size, int priority, int userData) {
-    char *cmd = (char *)reserveop();
-    *(int *)(cmd + 0x14) = userData;
+    FILEOPERATION_def* cmd = (FILEOPERATION_def*)reserveop();
+    cmd->userdata = (void*)userData;
     *(int *)cmd = (*(int *)cmd & 0xFF0FFFFF) | 0x500000;
     if (file == 0) {
-        *(int *)(cmd + 0xC) = 6;
-        iFILE_perror(cmd);
+        cmd->error = 6;
+        iFILE_perror(((char*)cmd));
     }
-    *(int *)(cmd + 0x24) = file;
-    *(int *)(cmd + 0x10) = priority;
-    *(int *)(cmd + 0x1C) = size;
-    *(int *)(cmd + 0x18) = offset;
-    *(int *)(cmd + 0x20) = buffer;
-    iFILESYS_ExecCommand(cmd);
+    cmd->handle = (struct HANDLE_def*)file;
+    cmd->priority = priority;
+    cmd->amount = size;
+    cmd->value = offset;
+    cmd->data = (void*)buffer;
+    iFILESYS_ExecCommand(((char*)cmd));
     return *(int *)cmd;
 }
 #endif
@@ -5575,20 +5577,20 @@ extern int FILE_loadz_1C00(int, int) __asm__("FILE_loadz");
  * @param batch  {count, names, buffers, flags}
  * @return 1 when every file loaded, else 0
  */
-int func_003E1C00(void *priority, void *batch) {
+int func_003E1C00(void *priority, SCATTERREQUEST* batch) {
     int offset;
     int index;
     int allOk;
 
     index = 0;
     allOk = 1;
-    if ((*(int *)((char*)(batch) + (0))) > 0) {
+    if ((batch->num) > 0) {
         do {
             offset = index * 4;
             index += 1;
-            *(int *)(offset + (*(int *)((char*)(batch) + (8)))) = FILE_loadz_1C00(*(int *)(offset + (*(int *)((char*)(batch) + (4)))), (*(int *)((char*)(batch) + (0xC))));
-            allOk = (*(int *)(offset + (*(int *)((char*)(batch) + (8)))) == 0) ? 0 : allOk;
-        } while (index < (*(int *)((char*)(batch) + (0))));
+            *(int *)(offset + ((int)batch->buffers)) = FILE_loadz_1C00(*(int *)(offset + ((int)batch->names)), (batch->flags));
+            allOk = (*(int *)(offset + ((int)batch->buffers)) == 0) ? 0 : allOk;
+        } while (index < (batch->num));
     }
     return allOk;
 }

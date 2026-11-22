@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/bedbprofile.h"
 #include "ui/uiengine.h"
 #include "world/worldcache.h"
 #include "ui/uistate.h"
@@ -369,20 +370,20 @@ extern "C" void func_002ECCB8(cBoltOnFXInterface* vself)
         used[z] = 0;
     }
     void* lib = func_0014ABE0();
-    char* tbl = 0;
+    cBECharProfileDB* tbl = 0;
     int id = -1;
     cRider* rider = (cRider*)self->rider;
     if (((char*)rider) != 0) {
         char* being = (char*)&rider->mVtbl;
         sVEi_CCB8* vt = *(sVEi_CCB8**)being;
-        tbl = (char*)func_0014AD50(lib, vt[7].fn(vthis(being, vt[7])));
+        tbl = (cBECharProfileDB*)((char*)func_0014AD50(lib, vt[7].fn(vthis(being, vt[7]))));
         id = cRider_getCheatIdentity(self->rider);
         if (id < 10) {
             id = cRider_getIdentity(self->rider);
         }
     } else if (self->charId != 0) {
         cUIState* st = (cUIState*)cUIStateStack_getCurrentState(&SSXApp->RealFE->mpUI->mStateStack);
-        tbl = (char*)func_0014AD28(lib, st->mUserNum, *self->charId);
+        tbl = (cBECharProfileDB*)func_0014AD28(lib, st->mUserNum, *self->charId);
         id = *self->charId;
     }
     void* lib2 = func_0014BDB8_noarg();
@@ -395,14 +396,14 @@ extern "C" void func_002ECCB8(cBoltOnFXInterface* vself)
         if (k == -1) {
             continue;
         }
-        short tableIndex = (*(short**)(tbl + 0x288))[item->slot];
-        char* tableEntry;
+        short tableIndex = (tbl->mpBoltsMap)[item->slot];
+        tBEProfileBolt* tableEntry;
         if (tableIndex >= 0) {
-            tableEntry = tbl + (tableIndex * 4 + 656);
+            tableEntry = &tbl->mBolts[tableIndex];
         } else {
             tableEntry = 0;
         }
-        if (id < 10 && (*(unsigned short*)(tableEntry + 2) & 0x10) == 0) {
+        if (id < 10 && (tableEntry->flags & 0x10) == 0) {
             continue;
         }
         for (int j = 0; j < 2; j++) {

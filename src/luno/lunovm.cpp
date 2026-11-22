@@ -896,11 +896,11 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoTable_cLunoTable1);
  * @return @p dest
  */
 extern "C" void **luno_cLunoTable_cLunoTable1(void **dest, void **src) {
-    void *temp_6;
+    luno_cLunoTableData* temp_6;
 
-    temp_6 = *src;
-    *dest = temp_6;
-    (*(int *)((char*)(temp_6) + (8))) = (int) ((*(int *)((char*)(temp_6) + (8))) + 1);
+    temp_6 = (luno_cLunoTableData*)(*src);
+    *dest = ((void*)temp_6);
+    (temp_6->RefCount) = (int) ((temp_6->RefCount) + 1);
     return dest;
 }
 #endif

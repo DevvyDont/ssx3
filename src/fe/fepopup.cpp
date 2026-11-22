@@ -1721,15 +1721,15 @@ extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n,
 extern "C" void cScreenPopup_getStringSize1(cScreenPopup* self, void* text, const char* str, void* out)
 {
     sVec3_84A8 scale = *(sVec3_84A8*)((char*)text + 0x50);
-    char* font = (char*)cUIText_getFont(text);
-    float sx = *(float*)(font + 0x30) * scale.x;
-    float sy = *(float*)(font + 0x34) * scale.y;
-    *(float*)(font + 0x38) = sx;
-    *(float*)(font + 0x3C) = sy;
-    font = (char*)cUIText_getFont(text);
-    cFont_textExtent(font, str, out, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
-    font = (char*)cUIText_getFont(text);
-    *(float*)((char*)out + 0xC) = scale.y * ((float)*(int*)(font + 0x14) * *(float*)(font + 0x34));
+    cFont* font = (cFont*)cUIText_getFont(text);
+    float sx = font->BaseScale[0] * scale.x;
+    float sy = font->BaseScale[1] * scale.y;
+    font->Scale[0] = sx;
+    font->Scale[1] = sy;
+    font = (cFont*)cUIText_getFont(text);
+    cFont_textExtent(font, str, out, 0, font->Scale[0], font->Scale[1]);
+    font = (cFont*)cUIText_getFont(text);
+    *(float*)((char*)out + 0xC) = scale.y * ((float)font->MaxCharHeight * font->BaseScale[1]);
 }
 #endif
 
@@ -1753,15 +1753,15 @@ extern "C" float cFont_textExtent1(void* self, const char* str, void* out, int n
 extern "C" void cScreenPopup_getStringSize2(cScreenPopup* self, void* text, const char* str, void* out)
 {
     sVec3_8568 scale = *(sVec3_8568*)((char*)text + 0x50);
-    char* font = (char*)cUIText_getFont(text);
-    float sx = *(float*)(font + 0x30) * scale.x;
-    float sy = *(float*)(font + 0x34) * scale.y;
-    *(float*)(font + 0x38) = sx;
-    *(float*)(font + 0x3C) = sy;
-    font = (char*)cUIText_getFont(text);
-    cFont_textExtent1(font, str, out, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
-    font = (char*)cUIText_getFont(text);
-    *(float*)((char*)out + 0xC) = scale.y * ((float)*(int*)(font + 0x14) * *(float*)(font + 0x34));
+    cFont* font = (cFont*)cUIText_getFont(text);
+    float sx = font->BaseScale[0] * scale.x;
+    float sy = font->BaseScale[1] * scale.y;
+    font->Scale[0] = sx;
+    font->Scale[1] = sy;
+    font = (cFont*)cUIText_getFont(text);
+    cFont_textExtent1(font, str, out, 0, font->Scale[0], font->Scale[1]);
+    font = (cFont*)cUIText_getFont(text);
+    *(float*)((char*)out + 0xC) = scale.y * ((float)font->MaxCharHeight * font->BaseScale[1]);
 }
 #endif
 

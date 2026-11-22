@@ -5260,12 +5260,12 @@ INCLUDE_ASM("object/railmodifier", cMoveNode_hasTextureMat);
  */
 extern "C" int cMoveNode_hasTextureMat(cMoveNode* moveNode) {
     int var_2;
-    void *temp_3;
+    tModifierBlock* temp_3;
 
-    temp_3 = ((void*)moveNode->ModifierBlock);
+    temp_3 = (tModifierBlock*)((void*)moveNode->ModifierBlock);
     var_2 = 0;
-    if (temp_3 != 0) {
-        var_2 = (*(int *)((char*)(temp_3) + (4))) != 0;
+    if (((void*)temp_3) != 0) {
+        var_2 = ((int)temp_3->UVScroll) != 0;
     }
     return var_2;
 }
@@ -5283,12 +5283,12 @@ INCLUDE_ASM("object/railmodifier", cMoveNode_hasMaterialBlock);
  */
 extern "C" int cMoveNode_hasMaterialBlock(cMoveNode* moveNode) {
     int var_2;
-    void *temp_3;
+    tModifierBlock* temp_3;
 
-    temp_3 = ((void*)moveNode->ModifierBlock);
+    temp_3 = (tModifierBlock*)((void*)moveNode->ModifierBlock);
     var_2 = 0;
-    if (temp_3 != 0) {
-        var_2 = (*(int *)((char*)(temp_3) + (8))) != 0;
+    if (((void*)temp_3) != 0) {
+        var_2 = ((int)temp_3->TexFlip) != 0;
     }
     return var_2;
 }

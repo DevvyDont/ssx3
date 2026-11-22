@@ -4752,15 +4752,15 @@ extern "C" void cTextMenuItem_render(cTextMenuItem* self, float* rect)
     if (label) {
         cFont_text(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + 16.0f, rect[1] + 6.0f - 1.0f, label);
     }
-    char* font = *(char**)(*(char**)(*(char**)self + 0x124) + 0x58);
-    float w = cFont_textExtent(font, buf, 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
+    cFont* font = (cFont*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58));
+    float w = cFont_textExtent(font, buf, 0, 0, font->Scale[0], font->Scale[1]);
     cFont_text(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + (rect[2] - w) - 16.0f, rect[1] + 6.0f - 1.0f, buf);
     if (focused) {
-        font = *(char**)(*(char**)(*(char**)self + 0x124) + 0x58);
-        float w1 = cFont_textExtent(font, buf + self->CursorPos, 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
-        font = *(char**)(*(char**)(*(char**)self + 0x124) + 0x58);
+        font = (cFont*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58));
+        float w1 = cFont_textExtent(font, buf + self->CursorPos, 0, 0, font->Scale[0], font->Scale[1]);
+        font = (cFont*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58));
         char* next = buf + 1;
-        float w2 = cFont_textExtent(font, next + self->CursorPos, 0, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
+        float w2 = cFont_textExtent(font, next + self->CursorPos, 0, 0, font->Scale[0], font->Scale[1]);
         float x1 = rect[0] + (rect[2] - w1) - 16.0f;
         float bot = rect[1] + rect[3] - 6.0f;
         float x2 = rect[0] + (rect[2] - w2) - 16.0f;

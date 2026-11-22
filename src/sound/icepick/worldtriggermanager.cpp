@@ -754,23 +754,23 @@ extern "C" void cWorldTriggerManager_HandleTrigger(sWorldTrigger70** self, int o
 {
     sWtVec3 localPos = pos;
     if (*(int*)((char*)self + 0x334) != 0) {
-        char* triggerInst = (char*)cWorldTriggerManager_GetTriggerInstance(self, objectRef, volNum, viewPort);
-        if (triggerInst == 0) {
+        cWorldTriggerInstance* triggerInst = (cWorldTriggerInstance*)cWorldTriggerManager_GetTriggerInstance(self, objectRef, volNum, viewPort);
+        if (((char*)triggerInst) == 0) {
             sWtVec4 pos4;
             pos4 = sWtVec4(localPos.x, localPos.y, localPos.z, 1.0f);
-            triggerInst = (char*)cWorldTriggerManager_GetFreeInstance(self);
-            *(int*)(triggerInst + 0x0) = 1;
-            *(int*)(triggerInst + 0x4) = objectRef;
-            *(int*)(triggerInst + 0x8) = volNum;
-            *(int*)(triggerInst + 0x3C) = viewPort;
-            *(int*)(triggerInst + 0xC) = audioTrigger;
-            *(float*)(triggerInst + 0x10) = volume;
-            *(int*)(triggerInst + 0x14) = positional;
-            *(sWtVec4*)(triggerInst + 0x20) = pos4;
+            triggerInst = (cWorldTriggerInstance*)cWorldTriggerManager_GetFreeInstance(self);
+            triggerInst->m_bInUse = 1;
+            triggerInst->m_iObjectRef = objectRef;
+            triggerInst->m_iVolNum = volNum;
+            triggerInst->m_iViewPort = viewPort;
+            triggerInst->m_eAudioTrigger = audioTrigger;
+            triggerInst->m_fVolume = volume;
+            triggerInst->m_bPositional = positional;
+            *(sWtVec4*)&triggerInst->m_vPosition = pos4;
         } else {
-            *(float*)(triggerInst + 0x10) = volume;
+            triggerInst->m_fVolume = volume;
         }
-        *(int*)(triggerInst + 0x34) = 1;
+        triggerInst->m_bTouch = 1;
     }
 }
 #endif

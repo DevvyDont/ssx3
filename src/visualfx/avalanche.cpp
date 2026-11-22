@@ -994,10 +994,10 @@ extern "C" void tActiveAvalanche_end(tActiveAvalanche* self)
         self->m_activeNodeArray = 0;
     }
     if (*(int*)self != 0) {
-        char* n = (char*)self->m_activeNodeList;
-        while (n != 0) {
+        tActiveAvalancheNode* n = self->m_activeNodeList;
+        while (((char*)n) != 0) {
             tActiveAvalancheNode_end((tActiveAvalancheNode*)n, 1);
-            n = *(char**)(n + 0x2E4);
+            n = (tActiveAvalancheNode*)n->m_next;
         }
         *(int*)self = 0;
         cSSXAudio_Avalanche(cAudioInterface_bxAudio(), 0);
@@ -2012,10 +2012,10 @@ extern "C" void tAvalancheNode_calculate(void* node, void* self);
  */
 extern "C" void tAvalanche_calculate(tAvalanche* self)
 {
-    void* n = self->m_nodeList;
-    while (n != 0) {
+    tAvalancheNode* n = self->m_nodeList;
+    while (((void*)n) != 0) {
         tAvalancheNode_calculate(n, self);
-        n = *(void**)((char*)n + 0xF4);
+        n = (tAvalancheNode*)((void*)n->m_next);
     }
 }
 #endif
@@ -2348,11 +2348,11 @@ extern "C" void cAvalanche_reset(void* self)
     char* avalanche = (char*)cAvalanche_m_avalancheList;
     while (avalanche != 0) {
         char* cur = avalanche;
-        char* n = *(char**)(avalanche + 0x4);
-        while (n != 0) {
-            char* next = *(char**)(n + 0xF4);
+        tAvalancheNode* n = (tAvalancheNode*)(*(char**)(avalanche + 0x4));
+        while (((char*)n) != 0) {
+            char* next = (char*)n->m_next;
             operator_delete((int*)n);
-            n = next;
+            n = (tAvalancheNode*)next;
         }
         avalanche = *(char**)(avalanche + 0x8);
         operator_delete((int*)cur);

@@ -665,16 +665,16 @@ extern "C" void cRiderAnimBase_expireAnimation(cRiderAnimBase* self)
     int n = 0;
     for (int i = 0; i < 6; i++)
     {
-        cAnimSequenceNode* node = cAnimSequencer_getSequence(&(self->Sequencer)[i], 0);
+        cAnimSequence* node = (cAnimSequence*)cAnimSequencer_getSequence(&(self->Sequencer)[i], 0);
         while (node)
         {
-            if (tEventFlags_isSet1((char*)node + 0xB0, 0x3F) != 0)
+            if (tEventFlags_isSet1(&node->Events, 0x3F) != 0)
             {
-                (*(cAnimSequenceNode**)&list[n].seq) = node;
+                (*(cAnimSequenceNode**)&list[n].seq) = ((cAnimSequenceNode*)node);
                 list[n].seqr = &(self->Sequencer)[i];
                 n++;
             }
-            node = *(cAnimSequenceNode**)((char*)node + 0xC8);
+            node = (cAnimSequence*)((cAnimSequenceNode*)node->Next);
         }
     }
     for (int k = 0; k < n; k++)

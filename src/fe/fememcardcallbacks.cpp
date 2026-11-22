@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uithing.h"
 #include "ui/uitext.h"
 #include "ui/uimenu.h"
 #include "util/locale.h"
@@ -2128,19 +2129,19 @@ extern "C" void cFEMemCard_triggerDisplayState(cFEMemCard* self, int state)
     self->mScreenStatus = state;
     switch (state) {
     case 1: {
-        char* widget = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
+        cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
         if (widget) {
-            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
+            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)widget->mVtbl;
             vt[7].fn(vthis(widget, vt[7]), 0);
         }
-        widget = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_offmenu));
+        widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_offmenu));
         if (widget) {
-            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
+            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)widget->mVtbl;
             vt[7].fn(vthis(widget, vt[7]), 1);
         }
         frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_off));
         cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_text_box_message));
-        if (((char*)text)) {
+        if (text) {
             unsigned short* str = (unsigned short*)operator_new_tag(1600, str_Temp_String, 0x100, 0);
             cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
             cMCOverlayManager_getDeviceNumberString(mp, buf, mp->mSelectedDevice);
@@ -2157,19 +2158,19 @@ extern "C" void cFEMemCard_triggerDisplayState(cFEMemCard* self, int state)
     }
     case 2: {
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-        char* widget = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
+        cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
         if (widget) {
-            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
+            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)widget->mVtbl;
             vt[7].fn(vthis(widget, vt[7]), 0);
         }
-        widget = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_offmenu));
+        widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_offmenu));
         if (widget) {
-            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
+            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)widget->mVtbl;
             vt[7].fn(vthis(widget, vt[7]), 1);
         }
         frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_file_display));
         cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_text_box_message));
-        if (((char*)text)) {
+        if (text) {
             unsigned short* str = (unsigned short*)operator_new_tag(1600, str_Temp_String, 0x100, 0);
             cMCOverlayManager_getDeviceNumberString(mp, buf, mp->mSelectedDevice);
             cFELocale* locale = SSXApp->FELocale;
@@ -2184,14 +2185,14 @@ extern "C" void cFEMemCard_triggerDisplayState(cFEMemCard* self, int state)
         break;
     }
     case 3: {
-        char* widget = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
+        cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
         if (widget) {
-            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
+            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)widget->mVtbl;
             vt[7].fn(vthis(widget, vt[7]), 1);
         }
-        widget = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_offmenu));
+        widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_offmenu));
         if (widget) {
-            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
+            sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)widget->mVtbl;
             vt[7].fn(vthis(widget, vt[7]), 0);
         }
         frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_on));

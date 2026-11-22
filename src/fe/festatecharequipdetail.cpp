@@ -1209,19 +1209,19 @@ extern "C" void cFEStateCharEquip_initInventoryPreview(cFEStateCharEquip* self)
     if (self->mpTitleText != 0) {
         cUIText_setUnicodeStringByID(self->mpTitleText, GetHashValue32(str_kT_CMNEquipGear));
     }
-    char* widget = (char*)self->mpMoneyGroup;
-    if (widget != 0) {
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
+    cUIThing* widget = self->mpMoneyGroup;
+    if (((char*)widget) != 0) {
+        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)widget->mVtbl;
         vt[9].fn(vthis(widget, vt[9]), 0);
     }
-    widget = (char*)self->mpLargePreview;
-    if (widget != 0) {
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
+    widget = (cUIThing*)self->mpLargePreview;
+    if (((char*)widget) != 0) {
+        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)widget->mVtbl;
         vt[9].fn(vthis(widget, vt[9]), 0);
     }
-    widget = (char*)self->mpSmallIconPreviewGroup;
-    if (widget != 0) {
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
+    widget = (cUIThing*)self->mpSmallIconPreviewGroup;
+    if (((char*)widget) != 0) {
+        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)widget->mVtbl;
         vt[9].fn(vthis(widget, vt[9]), 1);
     }
     cFERider_setVisible((cFERider*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum), 1);
@@ -1249,20 +1249,20 @@ extern "C" void cFEStateCharEquip_initStorePreview(cFEStateCharEquip* self)
     if (self->mpTitleText != 0) {
         cUIText_setUnicodeStringByID(self->mpTitleText, GetHashValue32(str_kT_CMNBuyGear));
     }
-    char* widget = (char*)self->mpSmallIconPreviewGroup;
-    if (widget != 0) {
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
+    cUIThing* widget = self->mpSmallIconPreviewGroup;
+    if (((char*)widget) != 0) {
+        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)widget->mVtbl;
         vt[9].fn(vthis(widget, vt[9]), 0);
     }
-    widget = (char*)self->mpPointsGroup;
-    if (widget != 0) {
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
+    widget = (cUIThing*)self->mpPointsGroup;
+    if (((char*)widget) != 0) {
+        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)widget->mVtbl;
         vt[9].fn(vthis(widget, vt[9]), 0);
     }
     cFERider_setVisible((cFERider*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum), 0);
-    widget = (char*)self->mpMoneyGroup;
-    if (widget != 0) {
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
+    widget = (cUIThing*)self->mpMoneyGroup;
+    if (((char*)widget) != 0) {
+        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)widget->mVtbl;
         vt[9].fn(vthis(widget, vt[9]), 1);
     }
 }
@@ -1809,12 +1809,12 @@ struct sCharEquipDetail_19AD18 {
 
 static inline void copyRow_19AD18(sCharEquipDetail_19AD18* self, int dst, int src)
 {
-    char* o = self->a8C[dst];
-    sVEntry0019AD18a* vt = *(sVEntry0019AD18a**)(o + 8);
+    cUIThing* o = (cUIThing*)self->a8C[dst];
+    sVEntry0019AD18a* vt = (sVEntry0019AD18a*)o->mVtbl;
     vt[11].fn(vthis(o, vt[11]), self->a8C[src] + 0x1C);
     cUIText_setUnicodeString(self->a8C[dst], cUIText_getUnicodeString(self->a8C[src]));
-    o = self->aA4[dst];
-    sVEntry0019AD18b* vt2 = *(sVEntry0019AD18b**)(o + 8);
+    o = (cUIThing*)self->aA4[dst];
+    sVEntry0019AD18b* vt2 = (sVEntry0019AD18b*)o->mVtbl;
     vt2[9].fn(vthis(o, vt2[9]), (*(int*)(self->aA4[src] + 0x14) >> 6) & 1);
 }
 
@@ -2972,7 +2972,7 @@ extern "C" void cFEStateCharEquip_update3DPositions(cFEStateCharEquip* vself)
             VecAdd_BFE8(*(sQuat_BFE8*)&vself->mCharPos, *(sQuat_BFE8*)&vself->mCharPos, VecScale_BFE8(dPos, 0.2f));
             VecAdd_BFE8(*(sQuat_BFE8*)&vself->mBoardPos, *(sQuat_BFE8*)&vself->mBoardPos, VecScale_BFE8(dAt, 0.2f));
             if (VecDot_BFE8(dAt, dAt) < 0.2f) {
-                if (((char*)vself)) { // FAKEMATCH: identical arms, see header
+                if (vself) { // FAKEMATCH: identical arms, see header
                     vself->mCameraState = 2;
                 } else {
                     vself->mCameraState = 2;

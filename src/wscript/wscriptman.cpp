@@ -798,12 +798,12 @@ extern "C" void cWScriptMan_doOnCollideScript(cWScriptMan* self, void* collideIn
                 ret.type = 0;
                 ret.word0 = 0;
                 luno_cLunoVM_cLunoVM(&call);
-                char* process = (char*)self->CurrentTask;
-                if (process != 0)
-                    process = *(char**)(process + 0x3C);
+                cWScriptProcess* process = (cWScriptProcess*)self->CurrentTask;
+                if (((char*)process) != 0)
+                    process = (cWScriptProcess*)(process->EventScriptCode[2]);
                 else
-                    process = (char*)self->CurrentProcess;
-                void* table = *(void**)(process + 0x1C);
+                    process = (cWScriptProcess*)self->CurrentProcess;
+                void* table = process->Local;
                 if (table != 0) {
                     luno_cLunoVM_run(&call, &scriptFunc, table, &ret);
                 } else {
@@ -1020,24 +1020,24 @@ extern "C" void cWScriptMan_doOnLoseFocusScript(cWScriptMan* self, int id);
  * @param obj  the instance losing focus (On Tour inst)
  */
 // PORT: cWScriptMan_hasOnLoseFocusScript/cWScriptMan_doOnLoseFocusScript take the object pointer as an int id
-extern "C" void cWScriptMan_downFocusScript(cWScriptMan* self, void* obj)
+extern "C" void cWScriptMan_downFocusScript(cWScriptMan* self, tInstanceRecord* obj)
 {
-    cWScriptCtl* ctl = *(cWScriptCtl**)((char*)obj + 0xC);
+    cWScriptCtl* ctl = (cWScriptCtl*)obj->m_pActiveNode;
     if (ctl != 0) {
         if (ctl->hasFocusCount() != 0) {
-            (*(cWScriptCtl**)((char*)obj + 0xC))->decFocusCount(obj);
+            ((cWScriptCtl*)obj->m_pActiveNode)->decFocusCount(obj);
             return;
         }
-        ctl = *(cWScriptCtl**)((char*)obj + 0xC);
+        ctl = (cWScriptCtl*)obj->m_pActiveNode;
         if (*(short*)((char*)ctl + 0x10) == 6) {
             return;
         }
-        obj = *(void**)((char*)ctl + 0x18);
+        obj = (tInstanceRecord*)(*(void**)((char*)ctl + 0x18));
         if (cWScriptMan_hasOnLoseFocusScript(self, (int)obj) != 0) {
             cWScriptMan_doOnLoseFocusScript(self, (int)obj);
             return;
         }
-        (*(cWScriptCtl**)((char*)obj + 0xC))->loseFocus();
+        ((cWScriptCtl*)obj->m_pActiveNode)->loseFocus();
         return;
     }
     if (cWScriptMan_hasOnLoseFocusScript(self, (int)obj) != 0) {
@@ -2005,12 +2005,12 @@ INCLUDE_ASM("wscript/wscriptman", cProcessList_findProcess1);
  */
 extern "C" void* cProcessList_findProcess1(void* self, int id)
 {
-    void* process = *(void**)self;
-    while (process != 0) {
-        if (*(int*)((char*)process + 0x20) == id) {
-            return process;
+    cWScriptProcess* process = (cWScriptProcess*)(*(void**)self);
+    while (((void*)process) != 0) {
+        if ((int)process->ProcessId == id) {
+            return ((void*)process);
         }
-        process = *(void**)((char*)process + 0x18);
+        process = (cWScriptProcess*)((void*)process->Next);
     }
     return 0;
 }
@@ -2716,13 +2716,13 @@ extern "C" void cWScriptMan_writeReplayProcessList(cWScriptMan* self, void** lis
     int n = cProcessList_getCount((cWScriptListHead*)list);
     sVEntry<void(void*, void*, int)>* vtEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
     vtEntry->fn(vthis(stream, *vtEntry), &n, 4);
-    char* node = (char*)*list;
-    while (node != 0) {
-        int id = *(int*)(node + 0x20);
+    cWScriptProcess* node = (cWScriptProcess*)((char*)*list);
+    while (((char*)node) != 0) {
+        int id = (int)node->ProcessId;
         vtEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
         vtEntry->fn(vthis(stream, *vtEntry), &id, 4);
         cWScriptProcess_writeToReplayFrame(node, stream);
-        node = *(char**)(node + 0x18);
+        node = (cWScriptProcess*)node->Next;
     }
 }
 #endif

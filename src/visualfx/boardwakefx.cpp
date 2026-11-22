@@ -2247,18 +2247,18 @@ extern "C" void func_002DF920(sWakeFxF920* self)
         func_002DF4D0_F920(self);
     }
     self->f12C = 0.0f;
-    char* obj = self->obj;
-    if (*(int*)(obj + 0x330) != 0) {
-        int animId = cRiderAnimBase_getCurrentAnimID(*(void**)(obj + 0x784), 2);
+    cRider* obj = (cRider*)self->obj;
+    if (obj->PressMode != 0) {
+        int animId = cRiderAnimBase_getCurrentAnimID(obj->mRiderAnim, 2);
         if ((animId >= 23 && animId <= 28) || animId == 37 || animId == 38) {
             self->f12C = *(int*)(self->obj + 0x320) ? -1.0f : 1.0f;
         } else {
             self->f12C = *(int*)(self->obj + 0x320) ? 1.0f : -1.0f;
         }
     }
-    obj = self->obj;
-    self->fB4 = -*(float*)(obj + 0x1F0) * (1.0f - wakeAbsE398(*(float*)(obj + 0x214)));
-    if (*(int*)(obj + 0x320) != 0) {
+    obj = (cRider*)self->obj;
+    self->fB4 = -obj->mSlewed[0].cur * (1.0f - wakeAbsE398(obj->mSlewed[3].cur));
+    if (obj->IsRidingFakie != 0) {
         self->fB4 = -self->fB4;
     }
     char* sub = self->obj + 0x6C0;
@@ -3430,18 +3430,18 @@ extern "C" void func_002E2260(sWakeFx2260* self)
         sWakeVecE398 pos;
         sWakeVecE398 vel;
         sWakeVecE398 scaledVel;
-        char* obj;
+        cRider* obj;
         sWakeMtx2260* boneMats;
         int k;
         alpha = wakeClamp2260(self->f4 * 1.5f, zero, 1.0f);
         col = self->col;
         col.w = alpha;
         dt = 0.01666666753590107f;
-        obj = self->obj;
+        obj = (cRider*)self->obj;
         k = self->p7C[self->i78];
-        boneMats = *(sWakeMtx2260**)(*(char**)(obj + 0x780) + 0x30);
+        boneMats = (sWakeMtx2260*)obj->mAnimModel->unk_030;
         pos = ((sWakeMtx2260*)((char*)boneMats + (k << 6)))->row[3];
-        wakeScaleE398(scaledVel, *(sWakeVecE398*)(obj + 0x1E0), *(float*)(self->p2C + 0x900));
+        wakeScaleE398(scaledVel, *(sWakeVecE398*)&obj->mVelocity, *(float*)(self->p2C + 0x900));
         vel = scaledVel;
         cDynamicColourEmitter_update(em, &pos, &vel, &col, 1, dt);
         self->i78++;
@@ -3452,9 +3452,9 @@ extern "C" void func_002E2260(sWakeFx2260* self)
             self->f4 = (self->f4 - dt) >? zero;
         }
     } else {
-        char* obj = self->obj;
-        int k = *(int*)(obj + 0x89C);
-        sWakeMtx2260* boneMats = *(sWakeMtx2260**)(*(char**)(obj + 0x780) + 0x30);
+        cRider* obj = (cRider*)self->obj;
+        int k = obj->mBoneHips;
+        sWakeMtx2260* boneMats = (sWakeMtx2260*)obj->mAnimModel->unk_030;
         sWakeVecE398 pos = ((sWakeMtx2260*)((char*)boneMats + (k << 6)))->row[3];
         cDynamicColourEmitter_update(em, &pos, 0, 0, 0, 0.01666666753590107f);
     }
@@ -7240,8 +7240,8 @@ extern "C" void cSpeedBoostFX_update(sWake_66B8* self)
     int air = cRider_getMotionState(self->rider) == 1;
     int on = 0;
     if (!air) {
-        char* riderPtr = self->rider;
-        if (0.0f < *(float*)(riderPtr + 0x2FC) || 0.0f < *(float*)(riderPtr + 0x2E8)) {
+        cRider* riderPtr = (cRider*)self->rider;
+        if (0.0f < riderPtr->mBoostStrength || 0.0f < riderPtr->mPowerUpBoostTimer) {
             on = 1;
         }
     }
@@ -7251,13 +7251,13 @@ extern "C" void cSpeedBoostFX_update(sWake_66B8* self)
         self->f14 = 0;
     }
     self->air = air;
-    char* riderPtr = self->rider;
+    cRider* riderPtr = (cRider*)self->rider;
     float k = 0.002f;
-    int type = *(int*)(riderPtr + 0x2F4);
+    int type = riderPtr->mUberLevel;
     if (type == 11) {
         k = 0.01f;
         self->tex = 61;
-    } else if (0.01f < *(float*)(riderPtr + 0x2E8) || cPowerUpFXToggles_m_TestSpeedBoostRibbon != 0) {
+    } else if (0.01f < riderPtr->mPowerUpBoostTimer || cPowerUpFXToggles_m_TestSpeedBoostRibbon != 0) {
         k = 0.01f;
         self->tex = 60;
     } else if (type >= 10 || cPowerUpFXToggles_m_TestRedRibbon != 0) {
@@ -7269,12 +7269,12 @@ extern "C" void cSpeedBoostFX_update(sWake_66B8* self)
     } else {
         self->tex = 57;
     }
-    riderPtr = self->rider;
-    float speed = vu0Length(*(t4Vector*)(riderPtr + 0x1E0));
+    riderPtr = (cRider*)self->rider;
+    float speed = vu0Length(riderPtr->mVelocity);
     if (on) {
-        float boostAmt = Clamp_66B8(Max_66B8(*(float*)(riderPtr + 0x2E8), *(float*)(riderPtr + 0x2FC)), 0.0f, 1.0f);
+        float boostAmt = Clamp_66B8(Max_66B8(riderPtr->mPowerUpBoostTimer, riderPtr->mBoostStrength), 0.0f, 1.0f);
         self->f4 = (boostAmt * 400.0f + 400.0f) * (speed / 3333.3335f);
-        self->Width() = (*(int*)(riderPtr + 0x2F4) == 11) ? 50.0f : boostAmt * 9.0f + 6.0f;
+        self->Width() = (riderPtr->mUberLevel == 11) ? 50.0f : boostAmt * 9.0f + 6.0f;
         self->f8 = 1.0f;
     } else {
         self->f4 *= 0.95f;

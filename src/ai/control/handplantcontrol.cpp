@@ -2268,7 +2268,7 @@ extern "C" void cRailslideMotion_step(char* self)
     if (cOverlapList_splineIntersect(rider2->mOverlapList, pt, &hit, 1, 300.0f)) {
         if (hit.obj) {
             cInstanceNode* handler = (cInstanceNode*)(*(char**)(hit.obj + 0xC));
-            if (((char*)handler)) {
+            if (handler) {
                 sVE46_AF28* vt = (sVE46_AF28*)handler->mVtbl;
                 if (vt[46].fn(vthis(handler, vt[46])))
                     *(int*)(RIDER_AF28 + 0x5AC) = 1;
@@ -2280,7 +2280,7 @@ extern "C" void cRailslideMotion_step(char* self)
             *(unsigned int*)(self + 0x24) = 0xFFFFFFFF;
         if (hit.obj) {
             cInstanceNode* handler = (cInstanceNode*)(*(char**)(hit.obj + 0xC));
-            if (((char*)handler)) {
+            if (handler) {
                 sVE42_AF28* vt = (sVE42_AF28*)handler->mVtbl;
                 vt[42].fn(vthis(handler, vt[42]), &hit);
             }
@@ -2330,7 +2330,7 @@ extern "C" void cRailslideMotion_step(char* self)
                 AddEq_AF28(acc, Scale_AF28(hit.nrm, boostStrength * (dn > 0.0f ? 2450.0f : -2450.0f)));
             if (hit.obj) {
                 cInstanceNode* handler = (cInstanceNode*)(*(char**)(hit.obj + 0xC));
-                if (((char*)handler)) {
+                if (handler) {
                     sVE43_AF28* vt = (sVE43_AF28*)handler->mVtbl;
                     vt[43].fn(vthis(handler, vt[43]), &hit, Sub_AF28(cRailslideMotion_step_kRailGravity, Scale_AF28(nv, 0.0f)));
                 }

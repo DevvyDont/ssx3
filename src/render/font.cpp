@@ -2166,10 +2166,10 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetDrawLayer);
  * @param value  the draw layer (On Tour eGMDrawLayer; 5 bits)
  */
 extern "C" void cGraphicsMan_SetDrawLayer(cGraphicsMan* graphicsMan, int value) {
-    void *temp_6;
+    sDrawState* temp_6;
 
-    temp_6 = ((void*)graphicsMan->m_pCurrentDrawState);
-    (*(int *)((char*)(temp_6) + (8))) = (int) (((*(int *)((char*)(temp_6) + (8))) & ~0x3E0) | ((value << 5) & 0x3E0));
+    temp_6 = (sDrawState*)((void*)graphicsMan->m_pCurrentDrawState);
+    ((int)temp_6->unk_00[2]) = (int) ((((int)temp_6->unk_00[2]) & ~0x3E0) | ((value << 5) & 0x3E0));
 }
 #endif
 //100%
@@ -2226,12 +2226,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetBlendMode);
 extern "C" void cGraphicsMan_SetBlendMode(cGraphicsMan* graphicsMan, int mode, int context) {
     int temp_2;
     int temp_4;
-    void *temp_7;
+    sDrawState* temp_7;
 
-    temp_7 = ((void*)graphicsMan->m_pCurrentDrawState);
+    temp_7 = (sDrawState*)((void*)graphicsMan->m_pCurrentDrawState);
     temp_2 = (context * 5) + 2;
     temp_4 = 0x1F << temp_2;
-    (*(int *)((char*)(temp_7) + (4))) = (int) (((*(int *)((char*)(temp_7) + (4))) & ~temp_4) | ((mode << temp_2) & temp_4));
+    ((int)temp_7->unk_00[1]) = (int) ((((int)temp_7->unk_00[1]) & ~temp_4) | ((mode << temp_2) & temp_4));
 }
 #endif
 //100%
@@ -2248,13 +2248,13 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetAlphaSort);
  * @param sortKey  the sort key (19 bits)
  */
 extern "C" void cGraphicsMan_SetAlphaSort(cGraphicsMan* graphicsMan, int alphaSort, int sortKey) {
-    void *temp_3;
-    void *temp_8;
+    sDrawState* temp_3;
+    sDrawState* temp_8;
 
-    temp_8 = ((void*)graphicsMan->m_pCurrentDrawState);
-    (*(int *)((char*)(temp_8) + (4))) = (int) (((*(int *)((char*)(temp_8) + (4))) & ~3) | (alphaSort & 3));
-    temp_3 = ((void*)graphicsMan->m_pCurrentDrawState);
-    (*(int *)((char*)(temp_3) + (8))) = (int) (((*(int *)((char*)(temp_3) + (8))) & 0xE00003FF) | ((sortKey << 0xA) & 0x1FFFFC00));
+    temp_8 = (sDrawState*)((void*)graphicsMan->m_pCurrentDrawState);
+    ((int)temp_8->unk_00[1]) = (int) ((((int)temp_8->unk_00[1]) & ~3) | (alphaSort & 3));
+    temp_3 = (sDrawState*)((void*)graphicsMan->m_pCurrentDrawState);
+    ((int)temp_3->unk_00[2]) = (int) ((((int)temp_3->unk_00[2]) & 0xE00003FF) | ((sortKey << 0xA) & 0x1FFFFC00));
 }
 #endif
 //100%

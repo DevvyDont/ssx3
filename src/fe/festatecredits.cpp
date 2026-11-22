@@ -40,16 +40,16 @@ extern "C" void cFEStateCredits_onCreateScreen(cFEStateCredits* self)
     char* menu = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000));
     if (menu != 0)
         *(int*)(menu + 0x90) |= 8;
-    char* bitmap = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Bitmap0000));
+    cUIThing* bitmap = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Bitmap0000));
     self->mpDolbyIcon = (cUIIcon*)bitmap;
-    if (bitmap != 0) {
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(bitmap + 8);
+    if (((char*)bitmap) != 0) {
+        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)bitmap->mVtbl;
         vt[9].fn(vthis(bitmap, vt[9]), 0);
     }
-    bitmap = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Bitmap0001));
+    bitmap = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Bitmap0001));
     self->mpDolbyIcon = (cUIIcon*)bitmap;
-    if (bitmap != 0) {
-        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(bitmap + 8);
+    if (((char*)bitmap) != 0) {
+        sVEntry<void(void*, int)>* vt = (sVEntry<void (void*, int)>*)bitmap->mVtbl;
         vt[9].fn(vthis(bitmap, vt[9]), 0);
     }
 }

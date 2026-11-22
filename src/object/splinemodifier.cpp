@@ -1450,17 +1450,17 @@ extern "C" int cMultiSplineModifier_getAnimMats(cMultiSplineModifier* self, tIns
 {
     tInstanceRecord* cur = self->Instance;
     if (((void*)item) == ((void*)cur)) {
-        void* obj = item->m_pActiveNode;
-        sSmVEntryI_AB60* vtEntry = &(*(sSmVEntryI_AB60**)((char*)obj + 0xC))[26];
+        cInstanceNode* obj = item->m_pActiveNode;
+        sSmVEntryI_AB60* vtEntry = &((sSmVEntryI_AB60*)obj->mVtbl)[26];
         if (vtEntry->fn(vthis(obj, *vtEntry)) != 0) {
-            obj = (void*)self->Instance->m_pActiveNode;
-            vtEntry = &(*(sSmVEntryI_AB60**)((char*)obj + 0xC))[27];
+            obj = (cInstanceNode*)((void*)self->Instance->m_pActiveNode);
+            vtEntry = &((sSmVEntryI_AB60*)obj->mVtbl)[27];
             return vtEntry->fn(vthis(obj, *vtEntry));
         }
         return 0;
     }
-    void* obj = cur->m_pActiveNode;
-    sSmVEntryV_AB60* vt = *(sSmVEntryV_AB60**)((char*)obj + 0xC);
+    cInstanceNode* obj = cur->m_pActiveNode;
+    sSmVEntryV_AB60* vt = (sSmVEntryV_AB60*)obj->mVtbl;
     vt[33].fn(vthis(obj, vt[33]), (char*)&item->m_fmTransform, (int)self->AnimMats);
     return (int)self->AnimMats;
 }

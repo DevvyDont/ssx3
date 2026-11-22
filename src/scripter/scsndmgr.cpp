@@ -97,14 +97,14 @@ extern "C" void cBankManager_BANK_Attach(void* bank, int handle, void* data, int
  */
 extern "C" int cScriptSoundBankManager_LinkBank(cScriptSoundBankManager* self, int id, void* data, int dataSize)
 {
-    char* bankInfo = (char*)cScriptSoundBankManager_GetBankInfo(((sSndList*)self), id);
-    if (bankInfo == 0) {
-        bankInfo = (char*)cScriptSoundBankManager_GetEmptyBankInfo(((sSndList*)self));
-        *(int*)(bankInfo + 0x0) = id;
-        *(void**)(bankInfo + 0x8) = data;
-        cBankManager_BANK_Attach(**(void***)&cAudioInterface_bxAudio()->MusicSys, *(int*)(bankInfo + 0x4), data, dataSize);
+    tScriptSoundBankInfo* bankInfo = (tScriptSoundBankInfo*)((char*)cScriptSoundBankManager_GetBankInfo(((sSndList*)self), id));
+    if (((char*)bankInfo) == 0) {
+        bankInfo = (tScriptSoundBankInfo*)((char*)cScriptSoundBankManager_GetEmptyBankInfo(((sSndList*)self)));
+        bankInfo->userID = id;
+        bankInfo->pData = (char*)data;
+        cBankManager_BANK_Attach(**(void***)&cAudioInterface_bxAudio()->MusicSys, bankInfo->bankNum, data, dataSize);
     }
-    return *(int*)(bankInfo + 0x4);
+    return bankInfo->bankNum;
 }
 #endif
 

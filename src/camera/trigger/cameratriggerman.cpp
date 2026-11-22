@@ -755,8 +755,9 @@ struct sBox_D320 {
 };
 
 
-static inline void walk_D320(void* vnode, CameraCollisionCallback* ctx)
+static inline void walk_D320(void* vvnode, CameraCollisionCallback* ctx)
 {
+    nash_Cell* vnode = (nash_Cell*)vvnode;
     nash_Cell* node = (nash_Cell*)vnode;
     char* e;
     for (e = *(char**)&node->nodesinside[2]; e != 0; e = *(char**)e) {
@@ -868,9 +869,9 @@ extern "C" void cCameraTriggerMan_checkCollisions(cCameraTriggerMan* self, cRide
 
         int changed;
         int top;
-        char* n = *(char**)((char*)(idx * 4 + (int)self) + 0x14);
-        while (n != 0) {
-            if (*(int*)(n + 0xC) == 0) {
+        cActiveTriggerNode* n = (cActiveTriggerNode*)(*(char**)((char*)(idx * 4 + (int)self) + 0x14));
+        while (((char*)n) != 0) {
+            if (n->IsActiveFlag == 0) {
                 char* trigger = *(char**)n;
                 if (cCameraTriggerStack_recordExitGetNext((sCamTrigStack*)&self->CameraTriggerStack[idx], *(int*)trigger, &changed, &top)) {
                     doTriggerAction_D320(*(void**)(trigger + 0x10), ((char*)rider));
@@ -880,9 +881,9 @@ extern "C" void cCameraTriggerMan_checkCollisions(cCameraTriggerMan* self, cRide
                         doTriggerAction_D320(*(void**)(topActive + 0xC), ((char*)rider));
                     }
                 }
-                n = (char*)cActiveTriggerList_remove(&self->ActiveTriggerList[idx], n);
+                n = (cActiveTriggerNode*)cActiveTriggerList_remove(&self->ActiveTriggerList[idx], n);
             } else {
-                n = *(char**)(n + 4);
+                n = (cActiveTriggerNode*)n->Next;
             }
         }
         for (char* listNode = *(char**)((char*)(idx * 4 + (int)self) + 0x14); listNode != 0; listNode = *(char**)(listNode + 4)) {

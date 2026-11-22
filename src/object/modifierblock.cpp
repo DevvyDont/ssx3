@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "object/movenode.h"
 #include "world/worldrecords.h"
 #include "world/instancerecord.h"
 #include "replay/frameptr.h"
@@ -304,14 +305,14 @@ struct sMbVEntryV2DD0 {
 extern "C" void tModifierBlock_render(tModifierBlock* self)
 {
     if (self->Effect.Next != 0) {
-        void* effect = (void*)self->Effect.Next;
+        cEffectLink* effect = self->Effect.Next;
         void* next;
         do {
             next = *(void**)effect;
-            sMbVEntryV2DD0* vt = *(sMbVEntryV2DD0**)((char*)effect + 0x8);
+            sMbVEntryV2DD0* vt = (sMbVEntryV2DD0*)effect->mVtbl;
             vt[6].fn(vthis(effect, vt[6]));
-            effect = next;
-        } while (effect != 0);
+            effect = (cEffectLink*)next;
+        } while (((void*)effect) != 0);
     }
     sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
     if (node != 0) {
@@ -473,15 +474,15 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_applyForce);
 extern "C" void tModifierBlock_applyForce(tModifierBlock* self, int intInfo, int force)
 {
     sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
-    void* obj;
+    cMoveNode* obj;
     if (node != 0) {
         sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)node;
-        obj = vt[25].fn(vthis(node, vt[25]));
+        obj = (cMoveNode*)vt[25].fn(vthis(node, vt[25]));
     } else {
         obj = 0;
     }
-    if (obj != 0) {
-        sVEntry<void(void*, int, int)>* vt2 = *(sVEntry<void(void*, int, int)>**)((char*)obj + 0xC);
+    if (((void*)obj) != 0) {
+        sVEntry<void(void*, int, int)>* vt2 = (sVEntry<void (void*, int, int)>*)obj->mVtbl;
         vt2[43].fn(vthis(obj, vt2[43]), intInfo, force);
     }
 }
@@ -767,13 +768,13 @@ extern "C" void cEffectLink_append(void* pool, void* item);
  */
 extern "C" void tModifierBlock_transferEffectModifier(tModifierBlock* self, cEffectLink* list)
 {
-    void* effect = *(void**)list;
-    while (effect != 0) {
+    cEffectLink* effect = (cEffectLink*)(*(void**)list);
+    while (((void*)effect) != 0) {
         void* next = *(void**)effect;
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)effect + 0x8);
+        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)effect->mVtbl;
         vt[3].fn(vthis(effect, vt[3]));
         cEffectLink_append(&self->Effect, effect);
-        effect = next;
+        effect = (cEffectLink*)next;
     }
     *(void**)list = 0;
     list->Prev = 0;

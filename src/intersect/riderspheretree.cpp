@@ -2210,12 +2210,12 @@ extern "C" int SphereTree_isTreeCollision(SphereTree* self, SphereTree* other, t
  */
 extern "C" int SphereTree_IsTreeCollision(SphereTree* self, SphereTree* other, t4Vector* outPush, t4Vector* outContact)
 {
-    void* tree = self->treeInfo;
-    if (*(int*)((char*)tree + 0x8) != 0) {
+    tSphTreeInfo* tree = self->treeInfo;
+    if (tree->isCompressed != 0) {
         self->treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(tree);
     }
-    tree = (void*)other->treeInfo;
-    if (*(int*)((char*)tree + 0x8) != 0) {
+    tree = (tSphTreeInfo*)((void*)other->treeInfo);
+    if (tree->isCompressed != 0) {
         other->treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(tree);
     }
     return SphereTree_isTreeCollision(self, (SphereTree*)other, (t4Vector*)&self->transCenter, 0, 0, outPush, outContact);

@@ -27,6 +27,7 @@
 
 struct cStreamSys;
 struct cSongConfiguration;
+struct cSongInstance;  // sound/songinstance.h
 
 struct cMusicSys {
     cStreamSys* mpVStreamSys;                 // 0x0000 [R] g++ 2.95 virtual-base pointer to cStreamSys (= this + 0x5F20 in a complete object; cSSXAudio + 0x7768); [U] every method reaches cBankManager as **(this) and its cBankMonitor as **(this) + 0x1D8
@@ -40,7 +41,7 @@ struct cMusicSys {
     char unk_3F4[0x4];                        // 0x03F4 padding (mActiveMap is 8-aligned)
     unsigned long mActiveMap;                 // 0x03F8 PORT: 64-bit long on the EE. [P] MUSIC_StoreDefaultActiveMap (ld); [R] ctor sets bit n for song n; [U] func_002B3EE8/func_002B3FE8/func_002B4068/func_002B4AF0
     unsigned long mDefaultActiveMap;          // 0x0400 [P] MUSIC_StoreDefaultActiveMap (sd) / MUSIC_GetDefaultActiveMap (retail 0x2BACD8)
-    void* mCurrent;                           // 0x0408 [P] MUSIC_Current (retail 0x2BAC30), MUSIC_GetStreamHandle, MUSIC_SetDelay; [U] func_002B3838: func_002B1B98 = cMemMan_alloc(0xC4, "SongInstance") + ctor func_002B1C50; dtor func_002B1F78
+    cSongInstance* mCurrent;                  // 0x0408 [P] MUSIC_Current (retail 0x2BAC30), MUSIC_GetStreamHandle, MUSIC_SetDelay; [U] func_002B3838: func_002B1B98 = cMemMan_alloc(0xC4, "SongInstance") + ctor func_002B1C50; dtor func_002B1F78
     float unk_40C;                            // 0x040C [U] func_002B3D80: volume fade step per tick; func_002B3E20 (monitor callback) adds it
     float unk_410;                            // 0x0410 [U] func_002B3D80/func_002B3E20: current faded volume
     int unk_414;                              // 0x0414 [U] func_002B3D80/func_002B3E20: fade target volume

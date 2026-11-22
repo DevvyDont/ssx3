@@ -534,19 +534,19 @@ struct sUIStVtF8C8a { short delta; short index; void (*fn)(void*); };
 
 static inline void cUIStateStack_destroyStates_purge(cList* list)
 {
-    char* n = (char*)cList_first(list);
-    if (n != 0) {
+    cUIState* n = (cUIState*)cList_first(list);
+    if (((char*)n) != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
-            char* next = *(char**)(n + 4);
-            if (((*(int*)(n + 0x1C) >> 6) & 1) == 0) {
-                sUIStVtF8C8a* vt = *(sUIStVtF8C8a**)(n + 8);
+            char* next = (char*)n->mpNext;
+            if (((n->mAttrState >> 6) & 1) == 0) {
+                sUIStVtF8C8a* vt = (sUIStVtF8C8a*)n->mVtbl;
                 vt[5].fn(vthis(n, vt[5]));
-                if (n != 0) {
-                    sUIStVtF8C8* vt2 = *(sUIStVtF8C8**)(n + 8);
+                if (((char*)n) != 0) {
+                    sUIStVtF8C8* vt2 = (sUIStVtF8C8*)n->mVtbl;
                     vt2[1].fn(vthis(n, vt2[1]), 3);
                 }
             }
-            n = next;
+            n = (cUIState*)next;
         }
     }
 }
@@ -578,22 +578,22 @@ int cListNode_isSentinel(cListNode*);
  */
 extern "C" void* cUIStateStack_findState(cUIStateStack* self, int id)
 {
-    char* n = (char*)cList_first((cList*)self);
-    if (n != 0) {
+    cUIState* n = (cUIState*)cList_first((cList*)self);
+    if (((char*)n) != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
-            if (*(int*)(n + 0xC) == id) {
-                return n;
+            if (n->mHashName == id) {
+                return ((char*)n);
             }
-            n = *(char**)(n + 4);
+            n = (cUIState*)n->mpNext;
         }
     }
-    n = (char*)cList_first((cList*)&self->mExplicitStack);
-    if (n != 0) {
+    n = (cUIState*)cList_first((cList*)&self->mExplicitStack);
+    if (((char*)n) != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
-            if (*(int*)(n + 0xC) == id) {
-                return n;
+            if (n->mHashName == id) {
+                return ((char*)n);
             }
-            n = *(char**)(n + 4);
+            n = (cUIState*)n->mpNext;
         }
     }
     return 0;

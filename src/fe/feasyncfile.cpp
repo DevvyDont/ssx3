@@ -15565,7 +15565,7 @@ extern "C" int cFEStateAuthDNAS_onInputBegin(cFEStateAuthDNAS* self, cFEVObj_001
 {
     if (self->miState == 2) {
         if (obj->isNext() || obj->isPrevious()) {
-            *(int*)((char*)self->mpAuth + 0x14) = 1;
+            self->mpAuth->unk_014 = 1;
             self->miState = 4;
         }
     }
@@ -24478,7 +24478,7 @@ extern "C" int cFEStateOnlineAgreement_onGainTransition(cFEStateOnlineAgreement*
     x->mpScrollBar = (cUIThing*)scrollBar;
     cUITextScroll_setInputMap(x, 1);
     ((cFEVObj_001C0B20*)x)->setFocus(1);
-    if (((char*)scrollBar)) {
+    if (scrollBar) {
         ((cFEVObj_001C0B20*)scrollBar)->setVisible(1);
     }
     return 1;
@@ -27765,7 +27765,7 @@ extern "C" int cFEStateNetNews_onGainTransition(cFEStateNet* self, int on)
         cUITextScroll* x = (cUITextScroll*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextScroll_News));
         x->mpScrollBar = (cUIThing*)scrollBar;
         ((cFEVObj_001C5198*)x)->setFocus(1);
-        if (((char*)scrollBar)) {
+        if (scrollBar) {
             ((cFEVObj_001C5198*)scrollBar)->setVisible(1);
         }
     }

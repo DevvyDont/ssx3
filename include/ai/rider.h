@@ -268,10 +268,10 @@ struct cRider {
     /* 0x0E4 */ int mGlueStrengthLevel; // [O] cRiderState::mGlueStrengthLevel (+0x8C there); [U] cComputer_setupWarp: 0 = no warp, 2/3 = catch-up, 1/3 = slow-down, as On Tour's setupWarp tests rider+0x8C
     /* 0x0E8 */ int PrevRanking; // [O] cRiderState::PrevRanking (+0x90); [R] cRider_setPreviousRanking / getPreviousRanking (On Tour setPreviousRanking: sw a1,0x90); cRider_flagEventPathCheckpoint copies RaceRanking (On Tour RaceRanking, +0x94) into it
     /* 0x0EC */ int RaceRanking; // [O] cRiderState::RaceRanking (+0x94, after PrevRanking); [U] copied into PrevRanking; the place 0..5: func_002A34D0 switches it to 1,2,4,8,0x10,0x200; func_002A1E68 compares it 0..4
-    /* 0x0F0 */ int mHasRival; // [X] cleared on reset (cRider_initAlways)
-    /* 0x0F4 */ int mLastShoveFrame; // [X] cleared on reset (cRider_initAlways)
-    /* 0x0F8 */ int mRivalIndex; // [X] set to -1 on reset (cRider_initAlways)
-    /* 0x0FC */ int PissedOffType; // [O] cRiderState::PissedOffType (eBEAggLevel; +0xA4 there, right after PissedAIIndex = mRivalIndex); [U] cAI_UpdateAggression stores cBEAggressionInterface_getAggression's level here
+    /* 0x0F0 */ int PissedOff; // [O] cRiderState::PissedOff (bool at +0x98 there; a word here: cleared with sw on reset, cRider_initAlways); [U] cComputer_checkForAttack tests it before comparing PissedAIIndex
+    /* 0x0F4 */ int LastPunchTick; // [O] cRiderState::LastPunchTick (+0x9C there); [U] cleared on reset; the shove check stores the AI tick here and waits 120 ticks
+    /* 0x0F8 */ int PissedAIIndex; // [O] cRiderState::PissedAIIndex (+0xA0 there); [U] set to -1 on reset; indexes the AI's riders (the opponent this rider is after)
+    /* 0x0FC */ int PissedOffType; // [O] cRiderState::PissedOffType (eBEAggLevel; +0xA4 there, right after PissedAIIndex); [U] cAI_UpdateAggression stores cBEAggressionInterface_getAggression's level here
     /* 0x100 */ int unk_100; // cleared when the rider quits (cRider_doFinishEvent)
     /* 0x104 */ char unk_104[0xC];
     /* 0x110 */ t4Vector mPosition; // [R] getPosition (cRider_getPosition)
@@ -506,9 +506,9 @@ CHECK_OFFSET(cRider, mRubberBandAhead, 0xE0);
 CHECK_OFFSET(cRider, mGlueStrengthLevel, 0xE4);
 CHECK_OFFSET(cRider, PrevRanking, 0xE8);
 CHECK_OFFSET(cRider, RaceRanking, 0xEC);
-CHECK_OFFSET(cRider, mHasRival, 0xF0);
-CHECK_OFFSET(cRider, mLastShoveFrame, 0xF4);
-CHECK_OFFSET(cRider, mRivalIndex, 0xF8);
+CHECK_OFFSET(cRider, PissedOff, 0xF0);
+CHECK_OFFSET(cRider, LastPunchTick, 0xF4);
+CHECK_OFFSET(cRider, PissedAIIndex, 0xF8);
 CHECK_OFFSET(cRider, PissedOffType, 0xFC);
 CHECK_OFFSET(cRider, unk_100, 0x100);
 CHECK_OFFSET(cRider, mPosition, 0x110);

@@ -1949,15 +1949,15 @@ INCLUDE_ASM("main/gameload", cGame_cancelPreloadingState);
  * mPreloadingState.
  */
 extern "C" void cGame_cancelPreloadingState(cGame* self) {
-    void *obj;
+    cGameState* obj;
     void *vtbl;
 
     if (self->mPendingPreloadStateID != 0) {
         self->mPendingPreloadStateID = 0;
     }
     if (self->mPreloadStateID != 0) {
-        obj = (void*)self->mPreloadingState;
-        vtbl = *(void **)((char*)obj + 0xC);
+        obj = (cGameState*)((void*)self->mPreloadingState);
+        vtbl = (void*)obj->mVtbl;
         (*(void (**)(void *))((char*)vtbl + 0x24))((char*)obj + *(short *)((char*)vtbl + 0x20));
         self->mPreloadStateID = 0;
         self->mPreloadingState = 0;

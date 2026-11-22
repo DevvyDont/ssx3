@@ -8218,15 +8218,15 @@ extern "C" void cSpinControl_gainFocus(cSpinControl* self)
     self->mRider->mFlipRate = 0.0f;
     self->DesSpinInputSec = 0.0f;
     self->FlipSpinInputAng = 1.0000000150474662e+30f;
-    char* rider = (char*)self->mRider;
+    cRider* rider = self->mRider;
     self->DesFlipInputSec = 0.0f;
     self->NullFlipSpinInputSec = 0.0f;
-    if (*(float*)(rider + 0x2A4) != 0.0f || *(float*)(rider + 0x2B0) != 0.0f)
+    if (rider->mSlewed[15].cur != 0.0f || rider->mSlewed[16].cur != 0.0f)
     {
         self->SpinState = 0;
-        float x = *(float*)(rider + 0x2A4);
+        float x = rider->mSlewed[15].cur;
         float absSpin = __builtin_fabsf(x);
-        float absFlip = __builtin_fabsf(*(float*)(rider + 0x2B0));
+        float absFlip = __builtin_fabsf(rider->mSlewed[16].cur);
         float power;
         if (absFlip < absSpin)
             power = absSpin;
@@ -8236,14 +8236,14 @@ extern "C" void cSpinControl_gainFocus(cSpinControl* self)
         {
             float angVel = power * 7.00038480758667f >? lo;
             self->MaxSpinAngVel = angVel;
-            *(float*)(rider + 0x2DC) = angVel;
+            rider->mSpinRate = angVel;
         }
-        rider = (char*)self->mRider;
-        if (*(float*)(rider + 0x2B0) != 0.0f)
+        rider = (cRider*)self->mRider;
+        if (rider->mSlewed[16].cur != 0.0f)
         {
             float angVel = (power * 7.00038480758667f >? lo) * 0.6666666865348816f;
             self->MaxFlipAngVel = angVel;
-            *(float*)(rider + 0x2E0) = angVel;
+            rider->mFlipRate = angVel;
         }
         self->FlipAxisWeight = cSpinControl_calcFlipAxisWeight(self);
         cRider* rider2 = self->mRider;

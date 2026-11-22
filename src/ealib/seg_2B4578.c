@@ -1,4 +1,7 @@
 #include "common.h"
+#include "ealib/sballoc.h"
+#include "ealib/eaxadecf.h"
+#include "ealib/shape.h"
 #include "ealib/sst.h"
 #include "ealib/mtdecf.h"
 #include "ealib/sfilter.h"
@@ -368,7 +371,7 @@ extern int strlen_3BB0(char *) __asm__("strlen");
  * @param shp  the block
  * @return the size, or 0 when it cannot be worked out
  */
-int SHAPE_size(char *shp) {
+int SHAPE_size(SHAPE* shp) {
     int metalBinSize;
     int shapeSize = 0;
     int w;
@@ -377,14 +380,14 @@ int SHAPE_size(char *shp) {
     unsigned int shapeType = *(unsigned char *)shp;
     switch (shapeType) {
     case 0x70:
-        return strlen_3BB0(shp + 4) + 5;
+        return strlen_3BB0((char*)&shp->width) + 5;
     case 111:
-        return *(int *)(shp + 4) + 8;
+        return *(int*)&shp->width + 8;
     case 0x7C:
-        return (*(int *)(shp + 4) << 3) + 8;
+        return (*(int*)&shp->width << 3) + 8;
     case 105:
-        if (*(unsigned short *)(shp + 6) & 0x10) {
-            payloadSize = *(unsigned short *)(shp + 4);
+        if (*(unsigned short*)&shp->height & 0x10) {
+            payloadSize = *(unsigned short*)&shp->width;
             if (payloadSize == 0) payloadSize = 0xF0;
             return payloadSize + 0x10;
         }
@@ -392,17 +395,17 @@ int SHAPE_size(char *shp) {
     default:
         if (*(unsigned char *)shp & 0x80) {
             metalBinSize = 0;
-            if (*(int *)(shp + 0xC) & 0x1000) {
-                metalData = shp + *(int *)(shp + 0x10);
+            if (*(int *)(((char*)shp) + 0xC) & 0x1000) {
+                metalData = ((char*)shp) + *(int *)(((char*)shp) + 0x10);
             } else {
-                metalData = shp + 0x10;
+                metalData = ((char*)shp) + 0x10;
             }
             if (func_003B4D00_3BB0(metalData, &metalBinSize) != 0) {
                 shapeSize = metalBinSize + 0x10;
             }
         } else {
-            w = *(int *)(shp + 0xC);
-            shapeSize = SHAPE_size1_3BB0(*(unsigned char *)shp, *(short *)(shp + 4), *(short *)(shp + 6), (unsigned int)w >> 28, (w >> 13) & 1);
+            w = *(int *)(((char*)shp) + 0xC);
+            shapeSize = SHAPE_size1_3BB0(*(unsigned char *)shp, shp->width, shp->height, (unsigned int)w >> 28, (w >> 13) & 1);
         }
         return shapeSize;
     }
@@ -3832,7 +3835,7 @@ extern int SNDPKTPLAY_stop(int);
 extern void f_1110_78F8(int) __asm__("STREAM_kill");
 extern void f_5E98_78F8(int) __asm__("SNDMEMI_free");
 extern struct sA0A0Node *f_62E8_78F8(struct sA0A0List *) __asm__("SNDLINKI_pop");
-extern void SNDLINKI_push(void *, void *);
+extern void SNDLINKI_push(SNDLINKLIST*, void *);
 extern void f_6210_78F8(void *, int, int) __asm__("func_00416210");
 
 /**
@@ -3876,7 +3879,7 @@ int SNDSTRM_purge(int streamHandle) {
     do {
         request = f_62E8_78F8(&stream->f11C);
         if (request == 0) break;
-        SNDLINKI_push(&stream->f128, request);
+        SNDLINKI_push((SNDLINKLIST*)(&stream->f128), request);
     } while (1);
     stream->f134 = 0;
     stream->f10 = 0;
@@ -16338,10 +16341,10 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDLINKI_init);
  *
  * @param list  the list
  */
-void SNDLINKI_init(void *list) {
-    *(int *)((char *)list + 0) = 0;
-    *(int *)((char *)list + 4) = 0;
-    *(int *)((char *)list + 8) = 0;
+void SNDLINKI_init(SNDLINKLIST* list) {
+    list->phead = 0;
+    list->ptail = 0;
+    list->items = 0;
 }
 #endif
 
@@ -16357,19 +16360,19 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDLINKI_push);
  * @param list  the list
  * @param node  the node
  */
-void SNDLINKI_push(void *list, void *node) {
+void SNDLINKI_push(SNDLINKLIST* list, void *node) {
     void *temp_2;
 
-    (*(void **)((char*)(node) + (0))) = (void *) (*(void **)((char*)(list) + (0)));
+    (*(void **)((char*)(node) + (0))) = (void *) (list->phead);
     (*(int *)((char*)(node) + (4))) = 0;
-    temp_2 = (*(void **)((char*)(list) + (0)));
+    temp_2 = ((void*)list->phead);
     if (temp_2 != 0) {
         (*(void **)((char*)(temp_2) + (4))) = node;
     } else {
-        (*(void **)((char*)(list) + (4))) = node;
+        ((void*)list->ptail) = node;
     }
-    (*(void **)((char*)(list) + (0))) = node;
-    (*(int *)((char*)(list) + (8))) = (int) ((*(int *)((char*)(list) + (8))) + 1);
+    ((void*)list->phead) = node;
+    (list->items) = (int) ((list->items) + 1);
 }
 #endif
 
@@ -16384,19 +16387,19 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDLINKI_pushtail);
  * @param list  the list
  * @param node  the node
  */
-void SNDLINKI_pushtail(void *list, int *node) {
+void SNDLINKI_pushtail(SNDLINKLIST* list, int *node) {
     int *temp_2;
 
     (*(int **)((char*)(node) + (0))) = 0;
-    (*(int **)((char*)(node) + (4))) = (int *) (*(int **)((char*)(list) + (4)));
-    temp_2 = (*(int **)((char*)(list) + (4)));
+    (*(int **)((char*)(node) + (4))) = (int *) ((int*)list->ptail);
+    temp_2 = ((int*)list->ptail);
     if (temp_2 != 0) {
         *temp_2 = (int)node;
     } else {
-        (*(int **)((char*)(list) + (0))) = node;
+        ((int*)list->phead) = node;
     }
-    (*(int **)((char*)(list) + (4))) = node;
-    (*(int *)((char*)(list) + (8))) = (int) ((*(int *)((char*)(list) + (8))) + 1);
+    ((int*)list->ptail) = node;
+    (list->items) = (int) ((list->items) + 1);
 }
 #endif
 
@@ -16412,20 +16415,20 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDLINKI_pop);
  * @param list  the list
  * @return the node, or 0 when the list is empty
  */
-int *SNDLINKI_pop(void *list) {
+int *SNDLINKI_pop(SNDLINKLIST* list) {
     int *temp_2;
     int *temp_3;
 
-    temp_3 = (*(int **)((char*)(list) + (0)));
+    temp_3 = ((int*)list->phead);
     if (temp_3 != 0) {
         temp_2 = *temp_3;
-        (*(int **)((char*)(list) + (0))) = temp_2;
+        ((int*)list->phead) = temp_2;
         if (temp_2 == 0) {
-            (*(int *)((char*)(list) + (4))) = 0;
+            ((int)list->ptail) = 0;
         } else {
             (*(int *)((char*)(temp_2) + (4))) = 0;
         }
-        (*(int *)((char*)(list) + (8))) = (int) ((*(int *)((char*)(list) + (8))) - 1);
+        (list->items) = (int) ((list->items) - 1);
     }
     return temp_3;
 }
@@ -16442,25 +16445,25 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDLINKI_remove);
  * @param list  the list
  * @param node  the node, which must be in it
  */
-void SNDLINKI_remove(void *list, void *node) {
+void SNDLINKI_remove(SNDLINKLIST* list, SNDLINKNODE* node) {
     void **temp_3;
     void *temp_3_2;
 
-    if (node == (*(void **)((char*)(list) + (0)))) {
-        (*(void **)((char*)(list) + (0))) = (void *) (*(void **)((char*)(node) + (0)));
+    if (((void*)node) == ((void*)list->phead)) {
+        ((void*)list->phead) = (void *) (node->pnext);
     }
-    if (node == (*(void ***)((char*)(list) + (4)))) {
-        (*(void ***)((char*)(list) + (4))) = (void **) (*(void ***)((char*)(node) + (4)));
+    if (((void*)node) == ((void**)list->ptail)) {
+        ((void**)list->ptail) = (void **) ((void**)node->pprev);
     }
-    temp_3 = (*(void ***)((char*)(node) + (4)));
+    temp_3 = ((void**)node->pprev);
     if (temp_3 != 0) {
-        *temp_3 = (*(void **)((char*)(node) + (0)));
+        *temp_3 = ((void*)node->pnext);
     }
-    temp_3_2 = (*(void **)((char*)(node) + (0)));
+    temp_3_2 = ((void*)node->pnext);
     if (temp_3_2 != 0) {
-        (*(void ***)((char*)(temp_3_2) + (4))) = (void **) (*(void ***)((char*)(node) + (4)));
+        (*(void ***)((char*)(temp_3_2) + (4))) = (void **) ((void**)node->pprev);
     }
-    (*(int *)((char*)(list) + (8))) = (int) ((*(int *)((char*)(list) + (8))) - 1);
+    (list->items) = (int) ((list->items) - 1);
 }
 #endif
 
@@ -16580,17 +16583,17 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDBANKI_getppatch);
  * @param patchNum  the patch number
  * @return the patch, or 0 when the number is out of range or the entry is empty
  */
-void *SNDBANKI_getppatch(char *bank, int patchNum) {
+void *SNDBANKI_getppatch(BANKVER5* bank, int patchNum) {
     int temp_3;
 
-    if (patchNum >= *(unsigned short *)(bank + 6)) {
+    if (patchNum >= bank->numpatches) {
         return 0;
     }
-    temp_3 = *(int *)(bank + (patchNum << 2) + 0x14);
+    temp_3 = (int)bank->patch[patchNum];
     if (temp_3 == 0) {
         return 0;
     }
-    return bank + ((patchNum << 2) + 20) + temp_3;
+    return (char*)&bank->patch[patchNum] + temp_3;
 }
 #endif
 
@@ -18074,14 +18077,14 @@ extern struct G_83A0 D_00515B40_83A0 __asm__("D_00515B40");
 void MIX_play(int voice) {
     int i;
     int j;
-    char *voiceState;
+    SNDMIXVOICE* voiceState;
     float *sendGain;
     float *channelGain;
     i = 0;
-    voiceState = D_00515B40_83A0.tbl + voice * 0x60;
-    *(int *)(voiceState + 0x3C) = 0;
-    sendGain = (float *)(voiceState + 0x34);
-    voiceState[1] = 0;
+    voiceState = (SNDMIXVOICE*)(D_00515B40_83A0.tbl + voice * 0x60);
+    *(int*)&voiceState->lastmixed = 0;
+    sendGain = (float *)(&voiceState->wetbusgainprev[0]);
+    ((char*)voiceState)[1] = 0;
     do {
         i -= 1;
         sendGain[0] = sendGain[1];
@@ -18089,14 +18092,14 @@ void MIX_play(int voice) {
     } while (i >= 0);
     j = 0;
     if (D_00515B40_83A0.cnt != 0) {
-        channelGain = (float *)(voiceState + 4);
+        channelGain = (float *)(&voiceState->drybusgainprev[0]);
         do {
             j += 1;
             channelGain[0] = channelGain[6];
             channelGain++;
         } while (j < D_00515B40_83A0.cnt);
     }
-    voiceState[0] = 2;
+    ((char*)voiceState)[0] = 2;
 }
 #endif
 
@@ -18643,30 +18646,30 @@ extern void SFILTER_modifyHPFFIR8_8C30(void *, int *) __asm__("SFILTER_modifyHPF
  */
 void MIX_sethighpass(int voice, int cutoff) {
     int sp[2];
-    char *voiceState;
+    SNDMIXVOICE* voiceState;
     char *buf;
 
-    voiceState = D_00515D1C_8C30[0] + voice * 0x60;
+    voiceState = (SNDMIXVOICE*)(D_00515D1C_8C30[0] + voice * 0x60);
     if (cutoff > 0) {
-        if (*(char**)(voiceState + 0x5C) == 0) {
+        if ((char*)voiceState->phps == 0) {
             char *hpfState = func_003B5C60_8C30(288);
-            *(char**)(voiceState + 0x5C) = hpfState;
+            voiceState->phps = (HPFSTATE*)hpfState;
             *(int*)(hpfState + 4) = 0;
-            *(short*)(*(char**)(voiceState + 0x5C) + 0x18) = 80;
-            *(signed char*)(*(char**)(voiceState + 0x5C) + 0x1A) = 0;
-            SFILTER_createHPFFIR8_8C30(*(char**)(voiceState + 0x5C));
-            SFILTER_add_8C30(voiceState + 0x40, *(char**)(voiceState + 0x5C));
+            *(short*)&voiceState->phps->sfn.priority = 80;
+            voiceState->phps->sfn.requester = 0;
+            SFILTER_createHPFFIR8_8C30((char*)voiceState->phps);
+            SFILTER_add_8C30(&voiceState->filterhead, (char*)voiceState->phps);
         }
         sp[0] = cutoff << 8;
         sp[1] = D_0050A912_8C30[0] << 8;
-        SFILTER_modifyHPFFIR8_8C30(*(char**)(voiceState + 0x5C), sp);
+        SFILTER_modifyHPFFIR8_8C30((char*)voiceState->phps, sp);
         return;
     }
-    buf = *(char**)(voiceState + 0x5C);
+    buf = (char*)voiceState->phps;
     if (buf != 0) {
-        SFILTER_remove_8C30(voiceState + 0x40, buf);
-        SNDMEMI_free_8C30(*(char**)(voiceState + 0x5C));
-        *(char**)(voiceState + 0x5C) = 0;
+        SFILTER_remove_8C30(&voiceState->filterhead, buf);
+        SNDMEMI_free_8C30((char*)voiceState->phps);
+        voiceState->phps = 0;
     }
 }
 #endif
@@ -18692,19 +18695,19 @@ extern int D_00515D1C_8E28[] __asm__("D_00515D1C");
  * @param channelIndex  the voice's channel index within its sound
  * @param filterDesc  the filter descriptor
  */
-void func_003C8E28(int voice, int channelIndex, void *filterDesc) {
+void func_003C8E28(int voice, int channelIndex, SNDFILTERDEF* filterDesc) {
     int voiceState;
     int temp_7;
-    void *temp_2;
+    SFILTERNODE* temp_2;
 
     temp_7 = voice * 0x60;
     voiceState = D_00515D1C_8E28[0] + temp_7;
-    temp_2 = func_003B5C60_8E28((*(int *)((char*)(filterDesc) + (4))));
-    (*(int (**)(void *, int, int))((char*)(filterDesc) + (0xC)))(temp_2, (*(int *)((char*)(filterDesc) + (0))), channelIndex);
-    (*(unsigned short *)((char*)(temp_2) + (0x18))) = (unsigned short) (*(unsigned short *)((char*)(filterDesc) + (8)));
-    (*(int *)((char*)(temp_2) + (0))) = (int) (*(int *)((char*)(filterDesc) + (0x10)));
-    (*(int *)((char*)(temp_2) + (4))) = (int) (*(int *)((char*)(filterDesc) + (0x14)));
-    (*(signed char *)((char*)(temp_2) + (0x1A))) = 0;
+    temp_2 = (SFILTERNODE*)func_003B5C60_8E28((filterDesc->statesize));
+    ((int (*)(void*, int, int))filterDesc->filterinit)(temp_2, (filterDesc->id), channelIndex);
+    (temp_2->priority) = (unsigned short) (*(unsigned short*)&filterDesc->priority);
+    ((int)temp_2->filterfn) = (int) ((int)filterDesc->filter);
+    ((int)temp_2->restorefn) = (int) ((int)filterDesc->filterrestore);
+    (*(signed char*)&temp_2->requester) = 0;
     SFILTER_add_8E28(voiceState + 0x40, temp_2);
 }
 #endif
@@ -18728,20 +18731,20 @@ extern void SNDMEMI_free_8EC0(char *) __asm__("SNDMEMI_free");
  */
 void func_003C8EC0(int voice, int filterOrder) {
     char *rec = D_00515D1C_8EC0[0] + voice * 0x60;
-    char *node = *(char **)(rec + 0x40);
+    SFILTERNODE* node = (SFILTERNODE*)(*(char **)(rec + 0x40));
     void (*fn)(char *);
     do {
-        if (*(unsigned short *)(node + 0x18) == filterOrder) {
-            fn = *(void (**)(char *))(node + 4);
+        if (node->priority == filterOrder) {
+            fn = (void (*)(char*))node->restorefn;
             if (fn != 0) {
-                fn(node);
+                fn(((char*)node));
             }
-            SFILTER_remove_8EC0(rec + 0x40, node);
-            SNDMEMI_free_8EC0(node);
+            SFILTER_remove_8EC0(rec + 0x40, ((char*)node));
+            SNDMEMI_free_8EC0(((char*)node));
             return;
         }
-        node = *(char **)(node + 8);
-    } while (node != 0);
+        node = (SFILTERNODE*)node->pfnnext;
+    } while (((char*)node) != 0);
 }
 #endif
 
@@ -18757,25 +18760,25 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_add);
  * @param head  the chain's head pointer
  * @param node  the node
  */
-void SFILTER_add(char **head, char *node) {
-    char *cur;
+void SFILTER_add(char **head, SFILTERNODE* node) {
+    SFILTERNODE* cur;
     char *prev;
 
-    cur = *head;
+    cur = (SFILTERNODE*)(*head);
     prev = 0;
-    while (cur != 0 && *(unsigned short *)(cur + 0x18) < *(unsigned short *)(node + 0x18)) {
-        prev = cur;
-        cur = *(char **)(cur + 8);
+    while (((char*)cur) != 0 && cur->priority < node->priority) {
+        prev = ((char*)cur);
+        cur = (SFILTERNODE*)cur->pfnnext;
     }
-    *(char **)(node + 8) = cur;
-    if (cur != 0) {
-        *(char **)(cur + 0x10) = node;
+    node->pfnnext = (SFILTERNODE*)cur;
+    if (((char*)cur) != 0) {
+        cur->pfnprev1 = (SFILTERNODE*)node;
     }
     if (prev == 0) {
-        *head = node;
+        *head = ((char*)node);
     } else {
-        *(char **)(prev + 8) = node;
-        *(char **)(node + 0x10) = prev;
+        *(char **)(prev + 8) = ((char*)node);
+        node->pfnprev1 = (SFILTERNODE*)prev;
     }
 }
 #endif
@@ -18849,24 +18852,24 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_cleanup);
  *
  * @param node  the node to start from
  */
-void SFILTER_cleanup(void *node) {
+void SFILTER_cleanup(SFILTERNODE* node) {
     int (*temp_2)(void *);
     void *temp_4;
     void *temp_4_2;
 
-    temp_4 = (*(void **)((char*)(node) + (8)));
+    temp_4 = ((void*)node->pfnnext);
     if ((temp_4 != 0) && ((*(unsigned char *)((char*)(temp_4) + (0x1B))) == 0)) {
-        SFILTER_cleanup(temp_4);
+        SFILTER_cleanup((SFILTERNODE*)temp_4);
     }
-    temp_4_2 = (*(void **)((char*)(node) + (0xC)));
+    temp_4_2 = ((void*)node->pfnnext2);
     if ((temp_4_2 != 0) && ((*(unsigned char *)((char*)(temp_4_2) + (0x1B))) == 0)) {
-        SFILTER_cleanup(temp_4_2);
+        SFILTER_cleanup((SFILTERNODE*)temp_4_2);
     }
-    temp_2 = (*(int (**)(void *))((char*)(node) + (4)));
+    temp_2 = ((int (*)(void*))node->restorefn);
     if (temp_2 != 0) {
         temp_2(node);
     }
-    (*(signed char *)((char*)(node) + (0x1B))) = 1;
+    (*(signed char*)&node->clean) = 1;
 }
 #endif
 
@@ -18885,29 +18888,29 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_connect);
  * @param inSlot  the input slot (1 or 2)
  * @return 0, or -1 for a bad slot or a used input
  */
-int SFILTER_connect(char *source, char *dest, int outSlot, int inSlot) {
-    if (outSlot == 1 && inSlot == 1 && *(int*)(dest + 8) == 0) {
-        *(int*)(source + 0x10) = (int)dest;
-        *(int*)(dest + 8) = (int)source;
-        *(char*)(dest + 0x1A) = inSlot;
+int SFILTER_connect(SFILTERNODE* source, SFILTERNODE* dest, int outSlot, int inSlot) {
+    if (outSlot == 1 && inSlot == 1 && (int)dest->pfnnext == 0) {
+        source->pfnprev1 = (SFILTERNODE*)((int)dest);
+        dest->pfnnext = (SFILTERNODE*)((int)source);
+        *(char*)&dest->requester = inSlot;
         return 0;
     }
-    if (outSlot == 1 && inSlot == 2 && *(int*)(dest + 0xC) == 0) {
-        *(int*)(source + 0x10) = (int)dest;
-        *(int*)(dest + 0xC) = (int)source;
-        *(char*)(dest + 0x1A) = outSlot;
+    if (outSlot == 1 && inSlot == 2 && (int)dest->pfnnext2 == 0) {
+        source->pfnprev1 = (SFILTERNODE*)((int)dest);
+        dest->pfnnext2 = (SFILTERNODE*)((int)source);
+        *(char*)&dest->requester = outSlot;
         return 0;
     }
-    if (outSlot == 2 && inSlot == 1 && *(int*)(dest + 8) == 0) {
-        *(int*)(source + 0x14) = (int)dest;
-        *(int*)(dest + 8) = (int)source;
-        *(char*)(dest + 0x1A) = outSlot;
+    if (outSlot == 2 && inSlot == 1 && (int)dest->pfnnext == 0) {
+        source->pfnprev2 = (SFILTERNODE*)((int)dest);
+        dest->pfnnext = (SFILTERNODE*)((int)source);
+        *(char*)&dest->requester = outSlot;
         return 0;
     }
-    if (outSlot == 2 && inSlot == 2 && *(int*)(dest + 0xC) == 0) {
-        *(int*)(source + 0x14) = (int)dest;
-        *(int*)(dest + 0xC) = (int)source;
-        *(char*)(dest + 0x1A) = inSlot;
+    if (outSlot == 2 && inSlot == 2 && (int)dest->pfnnext2 == 0) {
+        source->pfnprev2 = (SFILTERNODE*)((int)dest);
+        dest->pfnnext2 = (SFILTERNODE*)((int)source);
+        *(char*)&dest->requester = inSlot;
         return 0;
     }
     return -1;
@@ -19089,16 +19092,16 @@ extern void func_00416210_9360(int *, int, int) __asm__("func_00416210");
  * @param buffer  the float destination
  * @return 1, or -1 when the sample has ended
  */
-int SFILTER_unpackmtf(void *node, int count, int srcBuffer, int *buffer) {
+int SFILTER_unpackmtf(UNPACKMTFSTATE* node, int count, int srcBuffer, int *buffer) {
     int *cursor;
     int temp_2;
 
     cursor = buffer;
-    if ((unsigned int) (*(unsigned int *)((char*)(node) + (0x20))) >= (unsigned int) (*(unsigned int *)((char*)(node) + (0x1C)))) {
+    if ((unsigned int) (node->curframe) >= (unsigned int) (node->totalframes)) {
         return -1;
     }
-    temp_2 = CMTBLKDecf_Decode_9360((*(int *)((char*)(node) + (0x28))), &cursor, count);
-    (*(unsigned int *)((char*)(node) + (0x20))) = (unsigned int) ((*(unsigned int *)((char*)(node) + (0x20))) + temp_2);
+    temp_2 = CMTBLKDecf_Decode_9360(((int)node->pDecoder), &cursor, count);
+    (node->curframe) = (unsigned int) ((node->curframe) + temp_2);
     cursor = cursor + temp_2;
     if (temp_2 < count) {
         func_00416210_9360(cursor, 0, (count -= temp_2) * 4);
@@ -19214,7 +19217,7 @@ extern void CMTBLKDecf_Feed_9520(int, int, int, int) __asm__("CMTBLKDecf_Feed");
  * @param buffer  the float destination
  * @return 1
  */
-int SFILTER_unpackmtlf(char *node, int count, int srcBuffer, int buffer) {
+int SFILTER_unpackmtlf(UNPACKMTLFSTATE* node, int count, int srcBuffer, int buffer) {
     Q_9520 state;
     int cursor;
     int n, loopLength;
@@ -19222,18 +19225,18 @@ int SFILTER_unpackmtlf(char *node, int count, int srcBuffer, int buffer) {
     cursor = buffer;
     if (count > 0) {
         do {
-            n = CMTBLKDecf_Decode_9520(*(int*)(node + 0x1C), &cursor, count);
+            n = CMTBLKDecf_Decode_9520((int)node->pDecoder, &cursor, count);
             count -= n;
             cursor += n * 4;
-            *(int*)(node + 0x20) = *(int*)(node + 0x20) + n;
+            node->curframe = node->curframe + n;
             if (n < count) {
-                *(int*)(node + 0x20) = *(int*)(node + 0x24);
+                node->curframe = node->loopstart;
                 state.b = 0;
                 state.a = 0;
                 state.c = 1;
-                CMTBLKDecf_SetState_9520(*(int*)(node + 0x1C), &state, 0);
-                loopLength = (*(int*)(node + 0x28) - *(int*)(node + 0x24)) + 1;
-                CMTBLKDecf_Feed_9520(*(int*)(node + 0x1C), *(int*)(node + 0x2C), loopLength * 4, loopLength);
+                CMTBLKDecf_SetState_9520((int)node->pDecoder, &state, 0);
+                loopLength = (node->loopend - node->loopstart) + 1;
+                CMTBLKDecf_Feed_9520((int)node->pDecoder, (int)node->ploop, loopLength * 4, loopLength);
             }
         } while (count > 0);
     }
@@ -19334,7 +19337,7 @@ extern void f_6210_96F0(int, int, int) __asm__("func_00416210");
  * @param buf  the float destination
  * @return the frames decoded
  */
-int SFILTER_unpackmtpf(char *self, int n, int srcBuffer, int buf) {
+int SFILTER_unpackmtpf(UNPACKMTPFSTATE* self, int n, int srcBuffer, int buf) {
     Q_96F0 newState;
     Q_96F0 curState;
     int last;
@@ -19342,54 +19345,54 @@ int SFILTER_unpackmtpf(char *self, int n, int srcBuffer, int buf) {
     int got;
 
     total = 0;
-    if (*(int *)(self + 0x28) != 0) {
-        f_7010_96F0(*(int *)(self + 0x24), *(unsigned char *)(self + 0x38), *(int *)(self + 0x28));
-        *(int *)(self + 0x28) = 0;
+    if ((int)self->prevframesunpacked != 0) {
+        f_7010_96F0(self->packetinstancehandle, self->samplechan, (int)self->prevframesunpacked);
+        self->prevframesunpacked = 0;
     }
     while (n > 0) {
-        got = f_DE68_96F0(*(int *)(self + 0x34), &buf, n);
-        *(unsigned short *)(self + 0x2C) += got;
+        got = f_DE68_96F0((int)self->pDecoder, &buf, n);
+        self->curframe += got;
         total += got;
         buf += got * 4;
-        *(int *)(self + 0x28) += got;
+        *(int*)&self->prevframesunpacked += got;
         if (got < n) {
             n -= got;
-            *(int *)(self + 0x1C) = f_6DE0_96F0(*(int *)(self + 0x24), *(unsigned char *)(self + 0x38), self + 0x20, &last);
-            if (*(int *)(self + 0x1C) != 0) {
-                *(unsigned short *)(self + 0x2C) = 0;
-                if (*(int *)(self + 0x30) < 3) {
+            self->psample = (unsigned char*)f_6DE0_96F0(self->packetinstancehandle, self->samplechan, (char*)&self->totalframes, &last);
+            if ((int)self->psample != 0) {
+                self->curframe = 0;
+                if (self->platformver < 3) {
                     if (last == 0) {
-                        curState = f_E078_96F0(*(int *)(self + 0x34));
+                        curState = f_E078_96F0((int)self->pDecoder);
                         newState = curState;
                         newState.c = 1;
-                        f_E0B8_96F0(*(int *)(self + 0x34), &newState, 0);
+                        f_E0B8_96F0((int)self->pDecoder, &newState, 0);
                     } else {
-                        curState = f_E078_96F0(*(int *)(self + 0x34));
+                        curState = f_E078_96F0((int)self->pDecoder);
                         newState = curState;
                         newState.c = 0;
-                        f_E0B8_96F0(*(int *)(self + 0x34), &newState, 0);
+                        f_E0B8_96F0((int)self->pDecoder, &newState, 0);
                     }
-                    f_E0D8_96F0(*(int *)(self + 0x34), 0);
+                    f_E0D8_96F0((int)self->pDecoder, 0);
                 } else {
                     if (last == 0) {
-                        curState = f_E078_96F0(*(int *)(self + 0x34));
+                        curState = f_E078_96F0((int)self->pDecoder);
                         newState = curState;
                         newState.b = 0;
                         newState.c = 1;
                     } else {
-                        curState = f_E078_96F0(*(int *)(self + 0x34));
+                        curState = f_E078_96F0((int)self->pDecoder);
                         newState = curState;
                         newState.c = 0;
                     }
-                    f_E0B8_96F0(*(int *)(self + 0x34), &newState, 0);
-                    f_E0D8_96F0(*(int *)(self + 0x34), 1);
+                    f_E0B8_96F0((int)self->pDecoder, &newState, 0);
+                    f_E0D8_96F0((int)self->pDecoder, 1);
                 }
-                f_DDE8_96F0(*(int *)(self + 0x34), *(int *)(self + 0x1C) + 1, *(int *)(self + 0x20) * 4, *(int *)(self + 0x20));
+                f_DDE8_96F0((int)self->pDecoder, (int)self->psample + 1, self->totalframes * 4, self->totalframes);
             } else {
-                if (n > 0 && *(int *)(self + 0x28) != 0) {
+                if (n > 0 && (int)self->prevframesunpacked != 0) {
                     f_6210_96F0(buf, 0, n * 4);
                 }
-                *(int *)(self + 0x20) = 0;
+                self->totalframes = 0;
                 n = 0;
             }
         } else {
@@ -19443,17 +19446,17 @@ extern int CMTBLKDecf_CMTBLKDecf_9960(int) __asm__("CMTBLKDecf_CMTBLKDecf");
  * @param node  the node
  * @param source  the init block from MIX_playinit
  */
-void SFILTER_unpackmtpfinit(void *node, void *source) {
-    (*(int **)((char*)(node) + (0))) = SFILTER_unpackmtpf_9960;
-    (*(int *)((char*)(node) + (0x24))) = SNDPKTPLAYI_voicetopackethandle_9960(SNDDRV_getmastervoice_9960((*(int *)((char*)(source) + (0x1C)))));
-    (*(signed char *)((char*)(node) + (0x38))) = SNDDRV_getsamplechan_9960((*(int *)((char*)(source) + (0x1C))));
-    (*(int *)((char*)(node) + (0x1C))) = 0;
-    (*(short *)((char*)(node) + (0x2C))) = 0;
-    (*(int *)((char*)(node) + (0x30))) = (*(int *)((char*)(source) + (0x24)));
-    (*(int *)((char*)(node) + (0x20))) = (*(int *)((char*)(source) + (0xC)));
-    (*(int **)((char*)(node) + (4))) = SFILTER_unpackmtpfrestore_9960;
-    (*(int *)((char*)(node) + (0x34))) = CMTBLKDecf_CMTBLKDecf_9960(func_003CD1A8_9960(3432));
-    (*(int *)((char*)(node) + (0x28))) = 0;
+void SFILTER_unpackmtpfinit(UNPACKMTPFSTATE* node, UNPACKINITPARAMS* source) {
+    (*(int**)&node->sfn) = SFILTER_unpackmtpf_9960;
+    (node->packetinstancehandle) = SNDPKTPLAYI_voicetopackethandle_9960(SNDDRV_getmastervoice_9960((source->voice)));
+    (*(signed char*)&node->samplechan) = SNDDRV_getsamplechan_9960((source->voice));
+    ((int)node->psample) = 0;
+    (*(short*)&node->curframe) = 0;
+    (node->platformver) = (source->platformver);
+    (node->totalframes) = (source->totalframes);
+    ((int*)node->sfn.restorefn) = SFILTER_unpackmtpfrestore_9960;
+    ((int)node->pDecoder) = CMTBLKDecf_CMTBLKDecf_9960(func_003CD1A8_9960(3432));
+    ((int)node->prevframesunpacked) = 0;
 }
 #endif
 
@@ -19524,15 +19527,15 @@ void SFILTER_unpackf_9AC8(void) __asm__("SFILTER_unpackf");
  * @param node  the node
  * @param source  the init block from MIX_playinit
  */
-void SFILTER_unpackfinit(char *node, char *source) {
+void SFILTER_unpackfinit(char *node, UNPACKINITPARAMS* source) {
     int dataPtr;
     *(void (**)(void))(node + 0) = SFILTER_unpackf_9AC8;
-    dataPtr = *(int *)(source + 0);
+    dataPtr = (int)source->psample;
     *(int *)(node + 0x20) = 0;
     *(int *)(node + 0x1C) = dataPtr;
-    *(int *)(node + 0x24) = *(int *)(source + 0xC);
-    *(int *)(node + 0x28) = *(int *)(source + 0x18);
-    *(void (**)(void))(source + 0x28) = SFILTER_unpackfgetframe_9AC8;
+    *(int *)(node + 0x24) = source->totalframes;
+    *(int *)(node + 0x28) = source->bits16;
+    source->unpackgetframe = (void*)SFILTER_unpackfgetframe_9AC8;
     *(int *)(node + 4) = 0;
 }
 #endif
@@ -19637,36 +19640,37 @@ int SFILTER_unpackpf_9C08(char *o, int n, int unused, int *buf) __asm__("SFILTER
  * @param buf  the float destination
  * @return the frames produced since the report (0 when nothing was available)
  */
-int SFILTER_unpackpf_9C08(char *node, int n, int srcBuffer, int *buf) {
+int SFILTER_unpackpf_9C08(char *vnode, int n, int srcBuffer, int *buf) {
+    UNPACKPFSTATE* node = (UNPACKPFSTATE*)vnode;
     int blockLen, last;
     int runLength;
-    if (*(int *)(node + 0x2C) != 0) {
-        SNDPKTPLAYI_freeframes_9C08(*(int *)(node + 0x28), *(unsigned char *)(node + 0x31), *(int *)(node + 0x2C));
-        *(int *)(node + 0x2C) = 0;
+    if ((int)node->prevframesunpacked != 0) {
+        SNDPKTPLAYI_freeframes_9C08(node->packetinstancehandle, node->samplechan, (int)node->prevframesunpacked);
+        node->prevframesunpacked = 0;
     }
     while (n > 0) {
-        if (*(int *)(node + 0x24) >= *(int *)(node + 0x20)) {
-            *(int *)(node + 0x1C) = SNDPKTPLAYI_get_9C08(*(int *)(node + 0x28), *(unsigned char *)(node + 0x31), &blockLen, &last);
-            if (*(int *)(node + 0x1C) == 0) {
-                if (*(int *)(node + 0x2C) != 0) {
+        if (node->curframe >= node->totalframes) {
+            node->psample = (signed char*)SNDPKTPLAYI_get_9C08(node->packetinstancehandle, node->samplechan, &blockLen, &last);
+            if ((int)node->psample == 0) {
+                if ((int)node->prevframesunpacked != 0) {
                     func_00416210_9C08(buf, 0, n * 4);
                 }
-                return *(int *)(node + 0x2C);
+                return (int)node->prevframesunpacked;
             }
-            *(int *)(node + 0x24) = 0;
-            *(int *)(node + 0x20) = blockLen;
+            node->curframe = 0;
+            node->totalframes = blockLen;
         }
-        runLength = *(int *)(node + 0x20) - *(int *)(node + 0x24);
+        runLength = node->totalframes - node->curframe;
         if (n < runLength) runLength = n;
-        if (*(unsigned char *)(node + 0x30) != 0) {
-            func_003C9E50_9C08(runLength, *(int *)(node + 0x1C) + *(int *)(node + 0x24) * 2, buf);
+        if (node->bits16 != 0) {
+            func_003C9E50_9C08(runLength, (int)node->psample + node->curframe * 2, buf);
         }
         buf += runLength;
         n -= runLength;
-        *(int *)(node + 0x24) += runLength;
-        *(int *)(node + 0x2C) += runLength;
+        node->curframe += runLength;
+        *(int*)&node->prevframesunpacked += runLength;
     }
-    return *(int *)(node + 0x2C);
+    return (int)node->prevframesunpacked;
 }
 #endif
 
@@ -19688,15 +19692,15 @@ extern void SFILTER_unpackpf(void);
  * @param node  the node
  * @param source  the init block from MIX_playinit
  */
-void SFILTER_unpackpfinit(void *node, void *source) {
-    (*(int **)((char*)(node) + (0))) = (int*)&SFILTER_unpackpf;
-    (*(int *)((char*)(node) + (0x28))) = SNDPKTPLAYI_voicetopackethandle(SNDDRV_getmastervoice((*(int *)((char*)(source) + (0x1C)))));
-    (*(signed char *)((char*)(node) + (0x31))) = SNDDRV_getsamplechan((*(int *)((char*)(source) + (0x1C))));
-    (*(int *)((char*)(node) + (0x20))) = -1;
-    (*(int *)((char*)(node) + (0x1C))) = 0;
-    (*(int *)((char*)(node) + (0x24))) = 0;
-    (*(unsigned char *)((char*)(node) + (0x30))) = (*(unsigned char *)((char*)(source) + (0x18)));
-    (*(int *)((char*)(node) + (0x2C))) = 0;
+void SFILTER_unpackpfinit(UNPACKPFSTATE* node, UNPACKINITPARAMS* source) {
+    (*(int**)&node->sfn) = (int*)&SFILTER_unpackpf;
+    (node->packetinstancehandle) = SNDPKTPLAYI_voicetopackethandle(SNDDRV_getmastervoice((source->voice)));
+    (*(signed char*)&node->samplechan) = SNDDRV_getsamplechan((source->voice));
+    (node->totalframes) = -1;
+    ((int)node->psample) = 0;
+    (node->curframe) = 0;
+    (node->bits16) = (*(unsigned char*)&source->bits16);
+    ((int)node->prevframesunpacked) = 0;
 }
 #endif
 
@@ -19842,16 +19846,16 @@ extern void func_00416210_9F58(char *, int, int) __asm__("func_00416210");
  * @param buffer  the float destination
  * @return the frames written (always @p count), or -1 when the sample has ended
  */
-int SFILTER_unpackxaf(void *node, int count, int srcBuffer, int buffer) {
+int SFILTER_unpackxaf(UNPACKXAFSTATE* node, int count, int srcBuffer, int buffer) {
     char *cursor;
     char *zeroFrom;
     int n;
     cursor = (char *)buffer;
-    if (*(int *)((char *)node + 0x28) >= *(int *)((char *)node + 0x24)) {
+    if (node->curframe >= node->totalframes) {
         return -1;
     }
-    n = CEAXABLKDecf_Decode_9F58(*(int *)((char *)node + 0x1C), &cursor, count);
-    *(int *)((char *)node + 0x28) += n;
+    n = CEAXABLKDecf_Decode_9F58((int)node->pDecoder, &cursor, count);
+    node->curframe += n;
     cursor += n * 4;
     zeroFrom = cursor;
     if (n < count) {
@@ -19918,17 +19922,17 @@ extern void CEAXABLKDecf_Feed_A028(int, int, int, int) __asm__("CEAXABLKDecf_Fee
  * @param node  the node
  * @param source  the init block from MIX_playinit
  */
-void SFILTER_unpackxafinit(char *node, char *source) {
+void SFILTER_unpackxafinit(UNPACKXAFSTATE* node, UNPACKINITPARAMS* source) {
     int n;
-    *(char **)(node + 0) = SFILTER_unpackxaf_A028;
-    *(char **)(node + 4) = SFILTER_unpackxafrestore_A028;
-    *(int *)(node + 0x20) = *(int *)(source + 0);
-    *(int *)(node + 0x24) = *(int *)(source + 0xC);
-    *(int *)(node + 0x28) = 0;
-    *(int *)(node + 0x1C) = CEAXABLKDecf_CEAXABLKDecf_A028(func_003CCEF0_A028(168));
-    *(char **)(source + 0x28) = SFILTER_unpackgetframexaf_A028;
-    n = *(int *)(node + 0x24);
-    CEAXABLKDecf_Feed_A028(*(int *)(node + 0x1C), *(int *)(node + 0x20), n * 4, n);
+    *(char**)&node->sfn = SFILTER_unpackxaf_A028;
+    node->sfn.restorefn = (void (*)(void*))SFILTER_unpackxafrestore_A028;
+    node->psample = (unsigned char*)((int)source->psample);
+    node->totalframes = source->totalframes;
+    node->curframe = 0;
+    node->pDecoder = (struct CEAXABLKDecf*)CEAXABLKDecf_CEAXABLKDecf_A028(func_003CCEF0_A028(168));
+    source->unpackgetframe = (void*)SFILTER_unpackgetframexaf_A028;
+    n = node->totalframes;
+    CEAXABLKDecf_Feed_A028((int)node->pDecoder, (int)node->psample, n * 4, n);
 }
 #endif
 
@@ -19958,7 +19962,7 @@ extern void CEAXABLKDecf_SetState_A0B8(int, V2_A0B8 *) __asm__("CEAXABLKDecf_Set
  * @param buf  the float destination
  * @return the frames decoded
  */
-int SFILTER_unpackxalf(char *node, int n, int srcBuffer, int *buf) {
+int SFILTER_unpackxalf(UNPACKXALFSTATE* node, int n, int srcBuffer, int *buf) {
     int used = 0;
     int got;
     int *dst = buf;
@@ -19966,44 +19970,44 @@ int SFILTER_unpackxalf(char *node, int n, int srcBuffer, int *buf) {
     struct { int hdr[2]; int samples[30]; } scratch;
     int *scratchCursor;
 
-    if (*(int *)(node + 0x30) < 3) {
+    if (node->platformver < 3) {
         int k;
-        if (*(int *)(node + 0x40) == 0) {
-            k = *(int *)(node + 0x44) / 0x1C;
+        if (node->feddatabeforess == 0) {
+            k = node->sustainstart / 0x1C;
             k = k * 0x1C;
-            CEAXABLKDecf_Feed_A0B8(*(int *)(node + 0x1C), *(int *)(node + 0x34), k * 4, k);
-            *(int *)(node + 0x40) = 1;
+            CEAXABLKDecf_Feed_A0B8((int)node->pDecoder, (int)node->psample, k * 4, k);
+            node->feddatabeforess = 1;
         }
         while (n != 0) {
-            got = CEAXABLKDecf_Decode_A0B8(*(int *)(node + 0x1C), &dst, n);
+            got = CEAXABLKDecf_Decode_A0B8((int)node->pDecoder, &dst, n);
             dst += got;
             used += got;
-            *(int *)(node + 0x20) += got;
+            node->curframe += got;
             if (got < n) {
                 int rem;
                 int cnt;
                 n -= got;
-                rem = *(int *)(node + 0x44) % 0x1C;
-                *(int *)(node + 0x20) = *(int *)(node + 0x44) - rem;
-                cnt = *(int *)(node + 0x48) - *(int *)(node + 0x20) + 1;
-                CEAXABLKDecf_Feed_A0B8(*(int *)(node + 0x1C), *(int *)(node + 0x34) + (*(int *)(node + 0x20) / 0x1C) * 15, cnt * 4, cnt);
-                if (*(int *)(node + 0x3C) == 0) {
-                    history = CEAXABLKDecf_GetState_A0B8(*(int *)(node + 0x1C));
-                    *(float *)(node + 0x4C) = history.x;
-                    *(float *)(node + 0x50) = history.y;
-                    got = CEAXABLKDecf_Decode_A0B8(*(int *)(node + 0x1C), &dst, n);
+                rem = node->sustainstart % 0x1C;
+                node->curframe = node->sustainstart - rem;
+                cnt = node->sustainend - node->curframe + 1;
+                CEAXABLKDecf_Feed_A0B8((int)node->pDecoder, (int)node->psample + (node->curframe / 0x1C) * 15, cnt * 4, cnt);
+                if (node->startblockmet == 0) {
+                    history = CEAXABLKDecf_GetState_A0B8((int)node->pDecoder);
+                    node->sustainstarts1 = history.x;
+                    node->sustainstarts2 = history.y;
+                    got = CEAXABLKDecf_Decode_A0B8((int)node->pDecoder, &dst, n);
                     dst += got;
-                    *(int *)(node + 0x20) += got;
-                    *(int *)(node + 0x3C) = 1;
+                    node->curframe += got;
+                    node->startblockmet = 1;
                     used += got;
                     n -= got;
                 } else {
-                    history.x = *(float *)(node + 0x4C);
-                    history.y = *(float *)(node + 0x50);
-                    CEAXABLKDecf_SetState_A0B8(*(int *)(node + 0x1C), &history);
+                    history.x = node->sustainstarts1;
+                    history.y = node->sustainstarts2;
+                    CEAXABLKDecf_SetState_A0B8((int)node->pDecoder, &history);
                     scratchCursor = scratch.samples;
-                    got = CEAXABLKDecf_Decode_A0B8(*(int *)(node + 0x1C), &scratchCursor, rem);
-                    *(int *)(node + 0x20) += got;
+                    got = CEAXABLKDecf_Decode_A0B8((int)node->pDecoder, &scratchCursor, rem);
+                    node->curframe += got;
                 }
             } else {
                 n -= got;
@@ -20012,15 +20016,15 @@ int SFILTER_unpackxalf(char *node, int n, int srcBuffer, int *buf) {
         return used;
     }
     while (n > 0) {
-        got = CEAXABLKDecf_Decode_A0B8(*(int *)(node + 0x1C), &dst, n);
+        got = CEAXABLKDecf_Decode_A0B8((int)node->pDecoder, &dst, n);
         dst += got;
         n -= got;
-        *(int *)(node + 0x20) += got;
+        node->curframe += got;
         used += got;
         if (got < n) {
-            int cnt = *(int *)(node + 0x28) - *(int *)(node + 0x24) + 1;
-            *(int *)(node + 0x20) = *(int *)(node + 0x24);
-            CEAXABLKDecf_Feed_A0B8(*(int *)(node + 0x1C), *(int *)(node + 0x2C), cnt * 4, cnt);
+            int cnt = node->loopend - node->loopstart + 1;
+            node->curframe = node->loopstart;
+            CEAXABLKDecf_Feed_A0B8((int)node->pDecoder, (int)node->ploop, cnt * 4, cnt);
         }
     }
     return used;
@@ -20220,17 +20224,17 @@ extern int SFILTER_unpackxapfrestore_A610[] __asm__("SFILTER_unpackxapfrestore")
  * @param node  the node
  * @param source  the init block from MIX_playinit
  */
-void SFILTER_unpackxapfinit(void *node, void *source) {
-    (*(int **)((char*)(node) + (0))) = SFILTER_unpackxapf_A610;
-    (*(int **)((char*)(node) + (4))) = SFILTER_unpackxapfrestore_A610;
-    (*(int *)((char*)(node) + (0x30))) = SNDPKTPLAYI_voicetopackethandle_A610(SNDDRV_getmastervoice_A610((*(int *)((char*)(source) + (0x1C)))));
-    (*(signed char *)((char*)(node) + (0x38))) = SNDDRV_getsamplechan_A610((*(int *)((char*)(source) + (0x1C))));
-    (*(int *)((char*)(node) + (0x2C))) = (int) (*(int *)((char*)(source) + (0x24)));
-    (*(int *)((char*)(node) + (0x20))) = 0;
-    (*(int *)((char*)(node) + (0x24))) = (int) (*(int *)((char*)(source) + (0xC)));
-    (*(int *)((char*)(node) + (0x28))) = 0;
-    (*(int *)((char*)(node) + (0x34))) = 0;
-    (*(int *)((char*)(node) + (0x1C))) = CEAXABLKDecf_CEAXABLKDecf_A610(func_003CCEF0_A610(168));
+void SFILTER_unpackxapfinit(UNPACKXAPFSTATE* node, UNPACKINITPARAMS* source) {
+    (*(int**)&node->sfn) = SFILTER_unpackxapf_A610;
+    ((int*)node->sfn.restorefn) = SFILTER_unpackxapfrestore_A610;
+    (node->packetinstancehandle) = SNDPKTPLAYI_voicetopackethandle_A610(SNDDRV_getmastervoice_A610((source->voice)));
+    (*(signed char*)&node->samplechan) = SNDDRV_getsamplechan_A610((source->voice));
+    (node->platformver) = (int) (source->platformver);
+    ((int)node->psample) = 0;
+    (node->totalframes) = (int) (source->totalframes);
+    (node->curframe) = 0;
+    ((int)node->prevframesunpacked) = 0;
+    ((int)node->pDecoder) = CEAXABLKDecf_CEAXABLKDecf_A610(func_003CCEF0_A610(168));
 }
 #endif
 
@@ -20346,13 +20350,14 @@ int SFILTER_lpfRC_A7B8(char *, int, float *, float *) __asm__("SFILTER_lpfRC");
  * @param out  the output samples
  * @return n, or the feeding node's result when it is 0 or less
  */
-int SFILTER_lpfRC_A7B8(char *self, int n, float *in, float *out) {
-    void **upstream = *(void ***)(self + 8);
+int SFILTER_lpfRC_A7B8(char *vself, int n, float *in, float *out) {
+    LPFRCSTATE* self = (LPFRCSTATE*)vself;
+    void **upstream = (void**)self->sfn.pfnnext;
     int result;
     float *st;
     int i;
-    if (upstream == 0 || (result = ((vfn_A7B8)(*(void **)upstream))(upstream, n, out, in, *(unsigned char *)(self + 0x1A))) > 0) {
-        st = (float *)(self + 0x1C);
+    if (upstream == 0 || (result = ((vfn_A7B8)(*(void **)upstream))(upstream, n, out, in, self->sfn.requester)) > 0) {
+        st = (float *)(&self->lpf);
         for (i = 0; i < n; i++) {
             st[0] = st[0] * st[1] + st[2] * in[i];
             out[i] = st[0];
@@ -20400,16 +20405,16 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_modifyLPFRC);
  * @param node  the node
  * @param params  {cutoff, rate (both in the same fixed point), gain (256 = 1.0)}
  */
-void SFILTER_modifyLPFRC(void *node, void *params) {
+void SFILTER_modifyLPFRC(LPFRCSTATE* node, void *params) {
     float temp_f1;
     float temp_f2;
 
     temp_f1 = (2.0f * (float) (*(int *)((char*)(params) + (0)))) / (float) (*(int *)((char*)(params) + (4)));
     temp_f2 = 1.0f - temp_f1;
-    (*(float *)((char*)(node) + (0x24))) = temp_f1;
-    (*(float *)((char*)(node) + (0x20))) = temp_f2;
-    (*(float *)((char*)(node) + (0x24))) = (float) (temp_f1 * ((float) (*(int *)((char*)(params) + (8))) * 0.00390625f));
-    (*(float *)((char*)(node) + (0x20))) = (float) (temp_f2 * ((float) (*(int *)((char*)(params) + (8))) * 0.00390625f));
+    (node->lpf.inverse) = temp_f1;
+    (node->lpf.leakage) = temp_f2;
+    (node->lpf.inverse) = (float) (temp_f1 * ((float) (*(int *)((char*)(params) + (8))) * 0.00390625f));
+    (node->lpf.leakage) = (float) (temp_f2 * ((float) (*(int *)((char*)(params) + (8))) * 0.00390625f));
 }
 #endif
 
@@ -20431,19 +20436,19 @@ extern void SNDI_fir8_A900(void *, int, int, int) __asm__("SNDI_fir8");
  * @param dst  the output samples
  * @return the frames filtered, or the feeding node's result when it is 0 or less
  */
-int SFILTER_hpfFIR8(char *node, int count, int src, int dst) {
+int SFILTER_hpfFIR8(HPFSTATE* node, int count, int src, int dst) {
     int (**obj)(void *, int, int, int, int);
     int n;
-    obj = *(int (***)(void *, int, int, int, int))(node + 8);
+    obj = (int (**)(void*, int, int, int, int))node->sfn.pfnnext;
     if (obj != 0) {
-        n = (*obj)(obj, count, dst, src, *(unsigned char *)(node + 0x1A));
+        n = (*obj)(obj, count, dst, src, node->sfn.requester);
         if (n <= 0) {
             return n;
         }
     } else {
         n = count;
     }
-    SNDI_fir8_A900(node + 0x20, n, src, dst);
+    SNDI_fir8_A900(&node->fir, n, src, dst);
     return n;
 }
 #endif
@@ -20453,7 +20458,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_createHPFFIR8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { void *vt; int f4; int f8; int fc; int f10; int f14; char pad18[3]; char f1b; int pad1c; char sub[1]; } S_A990;
-extern void SNDI_fir8init(void *);
+extern void SNDI_fir8init(SNDFIRSTATE*);
 extern void SFILTER_hpfFIR8_x(void) __asm__("SFILTER_hpfFIR8");
 
 /**
@@ -20472,7 +20477,7 @@ int SFILTER_createHPFFIR8(S_A990 *self) {
     self->f14 = 0;
     self->f1b = 0;
     self->f4 = 0;
-    SNDI_fir8init(&self->sub);
+    SNDI_fir8init((SNDFIRSTATE*)(&self->sub));
     return 0;
 }
 #endif
@@ -20601,43 +20606,43 @@ extern void crossfade_AC88(void *, void *, void *, int, int) __asm__("crossfade"
  * @param cursor  in/out: the input samples
  * @param shift  the shift from determineaction (0 keeps the window)
  */
-void applyaction(char *stretcher, char **cursor, int shift) {
+void applyaction(TIMESTRETCHSTATE* stretcher, char **cursor, int shift) {
     char *prevBlock;
     char *nextBlock;
-    if (*(int *)(stretcher + 0x34) > 0) {
-        prevBlock = stretcher + 0x40;
+    if (stretcher->inputsamples > 0) {
+        prevBlock = (char*)&stretcher->input[0];
         nextBlock = *cursor;
     } else {
         prevBlock = *cursor;
-        nextBlock = prevBlock + *(int *)(stretcher + 0x2C) * 4;
+        nextBlock = prevBlock + stretcher->windowsize * 4;
     }
     if (shift == 0) {
-        func_003C51E8_AC88(stretcher + 0x838, prevBlock, *(int *)(stretcher + 0x2C) * 4);
-        *(int *)(stretcher + 0x30) = *(int *)(stretcher + 0x30) - *(int *)(stretcher + 0x2C);
-        *(int *)(stretcher + 0x38) = *(int *)(stretcher + 0x2C);
+        func_003C51E8_AC88(&stretcher->output[0], prevBlock, stretcher->windowsize * 4);
+        stretcher->framesleft = stretcher->framesleft - stretcher->windowsize;
+        stretcher->outputsamples = stretcher->windowsize;
         *cursor = nextBlock;
     } else {
         if (shift > 0) {
             int shiftBytes = shift * 4;
-            func_003C51E8_AC88(stretcher + 0x838, prevBlock, shiftBytes);
-            crossfade_AC88(prevBlock, nextBlock, stretcher + (shiftBytes + 2104), *(int *)(stretcher + 0x2C), shift);
-            *(int *)(stretcher + 0x30) = *(int *)(stretcher + 0x30) - *(int *)(stretcher + 0x2C);
-            *(int *)(stretcher + 0x38) = *(int *)(stretcher + 0x2C) + shift;
+            func_003C51E8_AC88(&stretcher->output[0], prevBlock, shiftBytes);
+            crossfade_AC88(prevBlock, nextBlock, ((char*)stretcher) + (shiftBytes + 2104), stretcher->windowsize, shift);
+            stretcher->framesleft = stretcher->framesleft - stretcher->windowsize;
+            stretcher->outputsamples = stretcher->windowsize + shift;
             *cursor = nextBlock;
         } else {
             int blockLen, consumed, n;
-            crossfade_AC88(prevBlock, nextBlock, stretcher + 0x838, *(int *)(stretcher + 0x2C), shift);
-            blockLen = *(int *)(stretcher + 0x2C);
-            func_003C51E8_AC88(stretcher + ((blockLen * 4) + 2104), nextBlock - shift * 4, (blockLen + shift) * 4);
-            n = *(int *)(stretcher + 0x2C);
+            crossfade_AC88(prevBlock, nextBlock, &stretcher->output[0], stretcher->windowsize, shift);
+            blockLen = stretcher->windowsize;
+            func_003C51E8_AC88(&stretcher->output[blockLen], nextBlock - shift * 4, (blockLen + shift) * 4);
+            n = stretcher->windowsize;
             consumed = n * 2;
-            *(int *)(stretcher + 0x30) = *(int *)(stretcher + 0x30) - consumed;
-            *(int *)(stretcher + 0x38) = consumed + shift;
+            stretcher->framesleft = stretcher->framesleft - consumed;
+            stretcher->outputsamples = consumed + shift;
             *cursor = nextBlock + n * 4;
         }
     }
-    *(int *)(stretcher + 0x34) = 0;
-    *(int *)(stretcher + 0x3C) = 0;
+    stretcher->inputsamples = 0;
+    stretcher->outputstart = 0;
 }
 #endif
 
@@ -20657,20 +20662,20 @@ extern void func_003C51E8_ADF0(int, void *, int) __asm__("func_003C51E8");
  * @param outCursor  in/out: the output position
  * @return the frames copied
  */
-int transferframes(void *stretcher, int *remaining, int *outCursor) {
+int transferframes(TIMESTRETCHSTATE* stretcher, int *remaining, int *outCursor) {
     int copied;
     int temp_16_2;
     int byteCount;
     int temp_3;
 
-    temp_16_2 = (*(int *)((char*)(stretcher) + (0x38)));
+    temp_16_2 = (stretcher->outputsamples);
     temp_3 = *remaining;
     copied = temp_16_2;
     if (temp_16_2 >= temp_3) copied = temp_3;
     byteCount = copied * 4;
-    func_003C51E8_ADF0(*outCursor, stretcher + (((*(int *)((char*)(stretcher) + (0x3C))) * 4) + 2104), byteCount);
-    (*(int *)((char*)(stretcher) + (0x3C))) = (int) ((*(int *)((char*)(stretcher) + (0x3C))) + copied);
-    (*(int *)((char*)(stretcher) + (0x38))) = (int) ((*(int *)((char*)(stretcher) + (0x38))) - copied);
+    func_003C51E8_ADF0(*outCursor, &stretcher->output[stretcher->outputstart], byteCount);
+    (stretcher->outputstart) = (int) ((stretcher->outputstart) + copied);
+    (stretcher->outputsamples) = (int) ((stretcher->outputsamples) - copied);
     *remaining -= copied;
     *outCursor += byteCount;
     return copied;
@@ -20753,34 +20758,34 @@ extern void f51E8_AFD0(void *, void *, int) __asm__("func_003C51E8");
  * @param dst  the output samples
  * @return the frames produced
  */
-int stretch(char *self, int cnt, char *buf, char *dst) {
+int stretch(TIMESTRETCHSTATE* self, int cnt, char *buf, char *dst) {
     int total = fADF0_AFD0(self, &cnt, (int *)&dst);
     long shift;
     if (cnt == 0) return total;
     shift = 0;
     while (cnt > 0) {
-        int hi = *(int *)(self + 0x30);
-        int lo = *(int *)(self + 0x2C);
+        int hi = self->framesleft;
+        int lo = self->windowsize;
         if (hi < lo)
             break;
         shift = 0;
-        if (*(int *)(self + 0x30) >= *(int *)(self + 0x2C) * 2)
-            shift = fAB28_AFD0(*(float *)(self + 0x24), *(int *)(self + 0x2C), self + 0x1C, self + 0x28);
+        if (self->framesleft >= self->windowsize * 2)
+            shift = fAB28_AFD0(self->stretchratio, self->windowsize, &self->psideband, &self->sampleerror);
         fAC88_AFD0(self, &buf, shift);
         total += fADF0_AFD0(self, &cnt, (int *)&dst);
     }
     if (shift > 0) {
-        f51E8_AFD0(self + 0x40, buf, *(int *)(self + 0x2C) * 4);
-        *(int *)(self + 0x34) = *(int *)(self + 0x2C);
-        buf += *(int *)(self + 0x2C) * 4;
+        f51E8_AFD0(&self->input[0], buf, self->windowsize * 4);
+        self->inputsamples = self->windowsize;
+        buf += self->windowsize * 4;
     }
     if (cnt > 0) {
-        int n = *(int *)(self + 0x30);
+        int n = self->framesleft;
         if (n >= cnt)
             n = cnt;
         total += n;
         f51E8_AFD0(dst, buf, n * 4);
-        *(int *)(self + 0x30) -= n;
+        self->framesleft -= n;
     }
     return total;
 }
@@ -20868,22 +20873,22 @@ extern char SFILTER_timestretch_B280[] __asm__("SFILTER_timestretch");
  * @param voice  the voice, or -1
  * @return 0
  */
-int SFILTER_timestretchinit(void *node, void *header, int voice) {
-    (*(char **)((char*)(node) + (0))) = SFILTER_timestretch_B280;
-    (*(int *)((char*)(node) + (4))) = 0;
+int SFILTER_timestretchinit(TIMESTRETCHSTATE* node, void *header, int voice) {
+    (*(char**)&node->sfn) = SFILTER_timestretch_B280;
+    ((int)node->sfn.restorefn) = 0;
     if (voice >= 0) {
-        (*(int *)((char*)(node) + (0x20))) = SNDPKTPLAYI_voicetopackethandle(SNDDRV_getmastervoice(voice));
+        (node->packetinstancehandle) = SNDPKTPLAYI_voicetopackethandle(SNDDRV_getmastervoice(voice));
     } else {
-        (*(int *)((char*)(node) + (0x20))) = -1;
+        (node->packetinstancehandle) = -1;
     }
-    (*(int *)((char*)(node) + (0x1C))) = (int) (header + 6);
-    (*(float *)((char*)(node) + (0x24))) = 1.0f;
-    (*(int *)((char*)(node) + (0x28))) = 0;
-    (*(int *)((char*)(node) + (0x2C))) = (int) ((*(unsigned char *)((char*)(header) + (1))) * 2);
-    (*(int *)((char*)(node) + (0x30))) = SNDI_getb(header + 2, 4);
-    (*(int *)((char*)(node) + (0x34))) = 0;
-    (*(int *)((char*)(node) + (0x38))) = 0;
-    (*(int *)((char*)(node) + (0x3C))) = 0;
+    ((int)node->psideband) = (int) (header + 6);
+    (node->stretchratio) = 1.0f;
+    (*(int*)&node->sampleerror) = 0;
+    (node->windowsize) = (int) ((*(unsigned char *)((char*)(header) + (1))) * 2);
+    (node->framesleft) = SNDI_getb(header + 2, 4);
+    (node->inputsamples) = 0;
+    (node->outputsamples) = 0;
+    (node->outputstart) = 0;
     return 0;
 }
 #endif
@@ -21325,7 +21330,7 @@ void func_003CC070(int rate) {
             params[1] = rate << 8;
             params[2] = f_72F8_C070(nodeRecord + 6, 2);
             SFILTER_createLPFRC(obj);
-            SFILTER_modifyLPFRC(obj, params);
+            SFILTER_modifyLPFRC((LPFRCSTATE*)obj, params);
             break;
         case 2:
             obj = D_00515D44[i];
@@ -21392,7 +21397,7 @@ void func_003CC070(int rate) {
     }
     link = D_00515D50;
     for (i = 0; i < f_72F8_C070(&D_00515D40->len[last], 4); i++) {
-        SFILTER_connect(D_00515D44[f_72F8_C070(link, 4)], D_00515D44[f_72F8_C070(link + 4, 4)], link[8], link[9]);
+        SFILTER_connect((SFILTERNODE*)D_00515D44[f_72F8_C070(link, 4)], (SFILTERNODE*)D_00515D44[f_72F8_C070(link + 4, 4)], link[8], link[9]);
         link += 12;
     }
     D_00515D80_C070[0x1800 / 4] = 3000;
@@ -22040,13 +22045,13 @@ INCLUDE_ASM("ealib/seg_2B4578", CEAXABLKDecf_CEAXABLKDecf);
  * @param decoder  the decoder
  * @return the decoder
  */
-void *CEAXABLKDecf_CEAXABLKDecf(void *decoder) {
-    (*(int *)((char*)(decoder) + (0xC))) = 0;
-    (*(int *)((char*)(decoder) + (8))) = 0;
-    (*(int *)((char*)(decoder) + (4))) = 0;
-    (*(int *)((char*)(decoder) + (0x98))) = 0;
-    (*(int *)((char*)(decoder) + (0x9C))) = 0;
-    return decoder;
+void *CEAXABLKDecf_CEAXABLKDecf(CEAXABLKDecf* decoder) {
+    (decoder->xav.sampledatasize) = 0;
+    (decoder->xav.numsamples) = 0;
+    (decoder->xav.residual) = 0;
+    (*(int*)&decoder->xap.sample1) = 0;
+    (*(int*)&decoder->xap.sample2) = 0;
+    return ((void*)decoder);
 }
 #endif
 
@@ -22062,16 +22067,16 @@ INCLUDE_ASM("ealib/seg_2B4578", CEAXABLKDecf_Feed);
  * @param sampleCount  the frames it holds
  * @return 0, or -1 for null data or while the decoder still has frames left
  */
-int CEAXABLKDecf_Feed(void *decoder, int data, int byteSize, int sampleCount) {
+int CEAXABLKDecf_Feed(CEAXABLKDecf* decoder, int data, int byteSize, int sampleCount) {
     if (data == 0) {
         return -1;
     }
-    if ((*(int *)((char*)(decoder) + (8))) != 0) {
+    if ((decoder->xav.numsamples) != 0) {
         return -1;
     }
-    (*(int *)((char*)(decoder) + (8))) = sampleCount;
-    (*(int *)((char*)(decoder) + (0xC))) = byteSize;
-    (*(int *)((char*)(decoder) + (0xA0))) = data;
+    (decoder->xav.numsamples) = sampleCount;
+    (decoder->xav.sampledatasize) = byteSize;
+    ((int)decoder->xap.psrc) = data;
     return 0;
 }
 #endif
@@ -22446,11 +22451,11 @@ extern void func_003CE410(int, void *, char *, char *);
  * @param sampleIndex  the first sample
  * @param blockCount  the number of 12-sample blocks
  */
-void filter(char *utkState, int sampleIndex, int blockCount) {
+void filter(UTALKSTATE_CODA* utkState, int sampleIndex, int blockCount) {
     char buf[0x30];
 
-    reftolpc(utkState + 0x114, buf);
-    func_003CE410(blockCount, buf, utkState + 0x144, utkState + (sampleIndex * 4 + 1668));
+    reftolpc((char*)&utkState->coeff[0], buf);
+    func_003CE410(blockCount, buf, (char*)&utkState->output[0], (char*)&utkState->data[sampleIndex]);
 }
 #endif
 
@@ -22591,16 +22596,16 @@ void decodemut(sUTK_D878 *ctx) {
 
     for (j = 0; j < 12; j++)
         ctx->rc[j] += delta[j];
-    filter((char *)ctx, 0, 1);
+    filter((UTALKSTATE_CODA*)ctx, 0, 1);
     for (j = 0; j < 12; j++)
         ctx->rc[j] += delta[j];
-    filter((char *)ctx, 12, 1);
+    filter((UTALKSTATE_CODA*)ctx, 12, 1);
     for (j = 0; j < 12; j++)
         ctx->rc[j] += delta[j];
-    filter((char *)ctx, 24, 1);
+    filter((UTALKSTATE_CODA*)ctx, 24, 1);
     for (j = 0; j < 12; j++)
         ctx->rc[j] += delta[j];
-    filter((char *)ctx, 36, 33);
+    filter((UTALKSTATE_CODA*)ctx, 36, 33);
 }
 #endif
 
@@ -22614,16 +22619,16 @@ INCLUDE_ASM("ealib/seg_2B4578", CMTBLKDecf_CMTBLKDecf);
  * @param decoder  the decoder
  * @return the decoder
  */
-void *CMTBLKDecf_CMTBLKDecf(void *decoder) {
-    (*(int *)((char*)(decoder) + (0xD44))) = 0;
-    (*(int *)((char*)(decoder) + (0xD64))) = 1;
-    (*(int *)((char*)(decoder) + (0xD54))) = 0;
-    (*(int *)((char*)(decoder) + (0xD58))) = 0;
-    (*(short *)((char*)(decoder) + (0xD50))) = 0;
-    (*(short *)((char*)(decoder) + (0xD52))) = 0;
-    (*(int *)((char*)(decoder) + (0xD5C))) = 0;
-    (*(int *)((char*)(decoder) + (0xD60))) = 0;
-    return decoder;
+void *CMTBLKDecf_CMTBLKDecf(CMTBLKDecf* decoder) {
+    ((int)decoder->mbufframes) = 0;
+    (decoder->mCodecVersion) = 1;
+    (decoder->mRemainingSamples) = 0;
+    (decoder->mSampleDataSize) = 0;
+    (decoder->mRawframes) = 0;
+    (decoder->mOffset) = 0;
+    (decoder->mdoWholeInit) = 0;
+    (decoder->mHasPCMData) = 0;
+    return ((void*)decoder);
 }
 #endif
 
@@ -22644,25 +22649,25 @@ extern void CMTBLKDecf_initmut(char *, unsigned char *, char *, int);
  * @param sampleCount  the frames it holds
  * @return 0, or -1 for null data or while the decoder still has frames left
  */
-int CMTBLKDecf_Feed(char *decoder, unsigned char *data, int byteSize, int sampleCount) {
+int CMTBLKDecf_Feed(CMTBLKDecf* decoder, unsigned char *data, int byteSize, int sampleCount) {
     int temp_8;
 
     if (data == 0) return -1;
-    if (*(int *)(decoder + 0xD54) != 0) return -1;
-    temp_8 = *(int *)(decoder + 0xD64);
-    *(int *)(decoder + 0xD54) = sampleCount;
-    *(int *)(decoder + 0xD58) = byteSize;
-    *(int *)(decoder + 0xD44) = 0;
-    *(unsigned char **)(decoder + 0xD48) = data;
+    if (decoder->mRemainingSamples != 0) return -1;
+    temp_8 = decoder->mCodecVersion;
+    decoder->mRemainingSamples = sampleCount;
+    decoder->mSampleDataSize = byteSize;
+    decoder->mbufframes = 0;
+    decoder->mpSrc = data;
     if (temp_8 == 1) {
         if (*data == 238) {
-            *(int *)(decoder + 0xD60) = temp_8;
+            decoder->mHasPCMData = temp_8;
         } else {
-            *(int *)(decoder + 0xD60) = 0;
+            decoder->mHasPCMData = 0;
         }
-        CMTBLKDecf_initmut(decoder, data + 1, decoder, *(int *)(decoder + 0xD5C));
+        CMTBLKDecf_initmut(((char*)decoder), data + 1, ((char*)decoder), decoder->mdoWholeInit);
     } else {
-        CMTBLKDecf_initmut(decoder, data, decoder, *(int *)(decoder + 0xD5C));
+        CMTBLKDecf_initmut(((char*)decoder), data, ((char*)decoder), decoder->mdoWholeInit);
     }
     return 0;
 }
@@ -22791,10 +22796,10 @@ INCLUDE_ASM("ealib/seg_2B4578", CMTBLKDecf_SetState);
  * @param decoder  the decoder
  * @param snapshot  the 12-byte state from CMTBLKDecf_GetState
  */
-void CMTBLKDecf_SetState(void *decoder, void *snapshot) {
-    (*(int *)((char*)(decoder) + (4))) = (int) (*(int *)((char*)(snapshot) + (0)));
-    (*(int *)((char*)(decoder) + (0xD5C))) = (int) (*(int *)((char*)(snapshot) + (8)));
-    (*(int *)((char*)(decoder) + (0xD44))) = (int) (*(int *)((char*)(snapshot) + (4)));
+void CMTBLKDecf_SetState(CMTBLKDecf* decoder, MTFSTATE* snapshot) {
+    ((int)decoder->mutstate.shiftreg) = (int) ((int)snapshot->shiftreg);
+    (decoder->mdoWholeInit) = (int) (snapshot->doWholeInit);
+    ((int)decoder->mbufframes) = (int) ((int)snapshot->bufframes);
 }
 #endif
 
@@ -23403,7 +23408,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDI_fir8init);
  *
  * @param firState  the FIR state
  */
-void SNDI_fir8init(void *firState) {
+void SNDI_fir8init(SNDFIRSTATE* firState) {
     (*(int *)((char*)(firState) + (0xC0))) = 0;
     (*(int *)((char*)(firState) + (0xC4))) = 0;
     (*(int *)((char*)(firState) + (0xC8))) = 0;
@@ -23444,8 +23449,8 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDI_fir8);
  * @param dst  the output floats (16-byte aligned)
  */
 // PORT: PS2-only VU0 inline asm (FIR filter over 4-float blocks: 12x4 banded matrix times sliding window).
-void SNDI_fir8(char *filter, int n, int src, int dst) {
-    if (*(signed char *)(filter + 0xFC) != 0) {
+void SNDI_fir8(SNDFIRSTATE* filter, int n, int src, int dst) {
+    if (*(signed char*)&filter->unk_FC != 0) {
         float *matrix = (float *)filter;
         float coef0 = matrix[0xE0 / 4];
         float coef1 = matrix[228 / 4];
@@ -23488,7 +23493,7 @@ void SNDI_fir8(char *filter, int n, int src, int dst) {
         matrix[37] = coef0;
         matrix[42] = coef0;
         matrix[47] = coef0;
-        *(signed char *)(filter + 0xFC) = 0;
+        *(signed char*)&filter->unk_FC = 0;
     }
     __asm__ volatile(
         ".set push\n"
@@ -23580,7 +23585,7 @@ void SNDI_fir8(char *filter, int n, int src, int dst) {
         "sqc2         $vf21, 0x10($5)\n"
         ".set pop\n"
         :
-        : "r"(filter), "r"(n), "r"(filter + 0xC0), "r"(src), "r"(dst)
+        : "r"(((char*)filter)), "r"(n), "r"(((char*)filter) + 0xC0), "r"(src), "r"(dst)
         : "$4", "$5", "$6", "$7", "$8", "memory");
 }
 #endif
@@ -23588,7 +23593,7 @@ void SNDI_fir8(char *filter, int n, int src, int dst) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SFILTER_lpfFIR8);
 #ifdef SKIP_ASM
-extern void SNDI_fir8(char *, int, int, int);
+extern void SNDI_fir8(SNDFIRSTATE*, int, int, int);
 /**
  * Filter-graph callback of the low-pass FIR node: pulls @p count frames from its input node and low-passes them.
  *
@@ -23603,11 +23608,11 @@ extern void SNDI_fir8(char *, int, int, int);
  * @param dst  the output buffer
  * @return @p count, or the input's result when it is 0 or less
  */
-int SFILTER_lpfFIR8(char *node, int count, int src, int dst) {
-    int **obj = *(int ***)(node + 8);
+int SFILTER_lpfFIR8(LPFSTATE* node, int count, int src, int dst) {
+    int **obj = (int**)node->sfn.pfnnext;
     int result;
-    if (obj == 0 || (result = ((int (*)(int **, int, int, int, unsigned char))(*obj))(obj, count, dst, src, *(unsigned char *)(node + 0x1A)), result > 0)) {
-        SNDI_fir8(node + 0x20, count, src, dst);
+    if (obj == 0 || (result = ((int (*)(int **, int, int, int, unsigned char))(*obj))(obj, count, dst, src, node->sfn.requester), result > 0)) {
+        SNDI_fir8((SNDFIRSTATE*)(&node->fir), count, src, dst);
         result = count;
     }
     return result;
@@ -23619,7 +23624,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_createLPFFIR8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { void *vt; int f4; int f8; int fc; int f10; int f14; char pad18[3]; char f1b; int pad1c; char sub[1]; } S_EE88;
-extern void SNDI_fir8init(void *);
+extern void SNDI_fir8init(SNDFIRSTATE*);
 extern void SFILTER_lpfFIR8_x(void) __asm__("SFILTER_lpfFIR8");
 
 /**
@@ -23638,7 +23643,7 @@ int SFILTER_createLPFFIR8(S_EE88 *self) {
     self->f14 = 0;
     self->f1b = 0;
     self->f4 = 0;
-    SNDI_fir8init(&self->sub);
+    SNDI_fir8init((SNDFIRSTATE*)(&self->sub));
     return 0;
 }
 #endif
@@ -23684,19 +23689,19 @@ extern void SNDI_fir8_EF20(void *, int, int, int) __asm__("SNDI_fir8");
  * @param dst  the output buffer
  * @return the frames produced, or the input's result when it is 0 or less
  */
-int SFILTER_bpfFIR8(char *node, int count, int src, int dst) {
+int SFILTER_bpfFIR8(BPFSTATE* node, int count, int src, int dst) {
     int (**obj)(void *, int, int, int, int);
     int n;
-    obj = *(int (***)(void *, int, int, int, int))(node + 8);
+    obj = (int (**)(void*, int, int, int, int))node->sfn.pfnnext;
     if (obj != 0) {
-        n = (*obj)(obj, count, dst, src, *(unsigned char *)(node + 0x1A));
+        n = (*obj)(obj, count, dst, src, node->sfn.requester);
         if (n <= 0) {
             return n;
         }
     } else {
         n = count;
     }
-    SNDI_fir8_EF20(node + 0x20, n, src, dst);
+    SNDI_fir8_EF20(&node->fir, n, src, dst);
     return n;
 }
 #endif
@@ -23706,7 +23711,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_createBPFFIR8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { void *vt; int f4; int f8; int fc; int f10; int f14; char pad18[3]; char f1b; int pad1c; char sub[1]; } S_EFB0;
-extern void SNDI_fir8init(void *);
+extern void SNDI_fir8init(SNDFIRSTATE*);
 extern void SFILTER_bpfFIR8_x(void) __asm__("SFILTER_bpfFIR8");
 
 /**
@@ -23725,7 +23730,7 @@ int SFILTER_createBPFFIR8(S_EFB0 *self) {
     self->f14 = 0;
     self->f1b = 0;
     self->f4 = 0;
-    SNDI_fir8init(&self->sub);
+    SNDI_fir8init((SNDFIRSTATE*)(&self->sub));
     return 0;
 }
 #endif
@@ -23745,11 +23750,11 @@ extern void calcFIRCoeffs_A9D8(void *, int) __asm__("calcFIRCoeffs");
  *
  * @param params  [0] low frequency << 8, [1] high frequency << 8, [2] sample rate << 8
  */
-void SFILTER_modifyBPFFIR8(char *self, int *params) {
+void SFILTER_modifyBPFFIR8(BPFSTATE* self, int *params) {
     float x = (float)(params[0] >> 7), y = (float)(params[1] >> 7), divisor = (float)(params[2] >> 8);
-    *(float *)(self + 0x114) = x / divisor;
-    *(float *)(self + 0x118) = y / divisor;
-    calcFIRCoeffs_A9D8(self + 0x20, 4);
+    self->fir.cutLow = x / divisor;
+    self->fir.cutHigh = y / divisor;
+    calcFIRCoeffs_A9D8(&self->fir, 4);
 }
 #endif
 
@@ -24110,7 +24115,7 @@ extern float f_FA98_F4D0(float) __asm__("SNDI_rootof1plusx");
  * @param effect  the resonator node
  * @param params  [0] centre frequency << 8, [1] sample rate << 8, [2] bandwidth << 8, [3] gain in 24.8
  */
-void SFILTER_modifyRESON(void *effect, void *params) {
+void SFILTER_modifyRESON(RESONSTATE* effect, void *params) {
     float fa, fb, fc, fd, radiusSq, radius, cosCoef;
     int ia = (*(int *)((char*)params + 0)) >> 8;
     int ib = (*(int *)((char*)params + 4)) >> 8;
@@ -24119,16 +24124,16 @@ void SFILTER_modifyRESON(void *effect, void *params) {
     fd = (float)(*(int *)((char*)params + 0xC));
     fc = (float)ic;
     fb = (float)ib;
-    *(int *)((char*)effect + 0x1C) = ib;
-    *(float *)((char*)effect + 0x20) = fa;
+    effect->samplerate = ib;
+    effect->resonfreq = fa;
     fd = fd * 0.00390625f;
-    *(float *)((char*)effect + 0x24) = fc;
+    effect->bw = fc;
     radius = 1.0f - (fc * 3.1415927f) / fb;
-    *(float *)((char*)effect + 0x28) = radius;
+    effect->r = radius;
     radiusSq = radius * radius;
-    cosCoef = (2.0f * *(float *)((char*)effect + 0x28)) / (radiusSq + 1.0f) * f_C840_F4D0((fa * 6.2831855f) / fb);
-    *(float *)((char*)effect + 0x2C) = cosCoef;
-    *(float *)((char*)effect + 0x30) = (1.0f - radiusSq) * fd * f_FA98_F4D0(-cosCoef * cosCoef);
+    cosCoef = (2.0f * effect->r) / (radiusSq + 1.0f) * f_C840_F4D0((fa * 6.2831855f) / fb);
+    effect->costheta = cosCoef;
+    effect->a0 = (1.0f - radiusSq) * fd * f_FA98_F4D0(-cosCoef * cosCoef);
 }
 #endif
 
@@ -24154,34 +24159,34 @@ extern void func_003C51E8_F5D0(char *, char *, int) __asm__("func_003C51E8");
  * @param dst  the output buffer
  * @return @p n, or the input's result when it is 0 or less
  */
-int SFILTER_splitter(char *self, int n, char *workBuf, char *dst) {
+int SFILTER_splitter(SPLITSTATE* self, int n, char *workBuf, char *dst) {
     int bytes, oldBuf, result;
     int *obj;
-    if (*(short *)(self + 0x24) != 0) {
-        *(short *)(self + 0x24) = 0;
-        *(short *)(self + 0x26) = 1;
+    if (self->mustempty != 0) {
+        self->mustempty = 0;
+        self->isempty = 1;
     }
     bytes = n * 4;
-    if (*(int *)(self + 0x20) < n) {
-        oldBuf = *(int *)(self + 0x1C);
+    if (self->sizebuf < n) {
+        oldBuf = (int)self->pdatabuf;
         if (oldBuf != 0) {
             SNDMEMI_free_F5D0(oldBuf);
         }
-        *(int *)(self + 0x1C) = func_003B5C60_F5D0(bytes);
-        *(int *)(self + 0x20) = n;
+        self->pdatabuf = (void*)func_003B5C60_F5D0(bytes);
+        self->sizebuf = n;
     }
-    if (*(short *)(self + 0x26) != 0) {
-        int (**vt)(void *, int, char *, char *, int) = *(int (***)(void *, int, char *, char *, int))(self + 8);
+    if (self->isempty != 0) {
+        int (**vt)(void *, int, char *, char *, int) = (int (**)(void*, int, char*, char*, int))self->sfn.pfnnext;
         result = (*vt)(vt, n, dst, workBuf, 1);
         if (result <= 0) {
             return result;
         }
         func_003C51E8_F5D0(dst, workBuf, bytes);
-        func_003C51E8_F5D0(*(char **)(self + 0x1C), workBuf, bytes);
-        *(short *)(self + 0x26) = 0;
+        func_003C51E8_F5D0((char*)self->pdatabuf, workBuf, bytes);
+        self->isempty = 0;
     } else {
-        func_003C51E8_F5D0(dst, *(char **)(self + 0x1C), bytes);
-        *(short *)(self + 0x24) = 1;
+        func_003C51E8_F5D0(dst, (char*)self->pdatabuf, bytes);
+        self->mustempty = 1;
     }
     return n;
 }
@@ -24297,13 +24302,13 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_createSOURCE);
  * @param effect  the source node
  * @return 0
  */
-int SFILTER_createSOURCE(void *effect) {
-    (*(int *)((char*)(effect) + (8))) = 0;
-    (*(int *)((char*)(effect) + (0xC))) = 0;
-    (*(int *)((char*)(effect) + (0x10))) = 0;
-    (*(int *)((char*)(effect) + (0x14))) = 0;
-    (*(signed char *)((char*)(effect) + (0x1B))) = 0;
-    (*(int *)((char*)(effect) + (0x1C))) = 0;
+int SFILTER_createSOURCE(SRCSTATE* effect) {
+    ((int)effect->sfn.pfnnext) = 0;
+    ((int)effect->sfn.pfnnext2) = 0;
+    ((int)effect->sfn.pfnprev1) = 0;
+    ((int)effect->sfn.pfnprev2) = 0;
+    (*(signed char*)&effect->sfn.clean) = 0;
+    ((int)effect->pdata) = 0;
     return 0;
 }
 #endif
@@ -24425,14 +24430,14 @@ void SNDMEMI_free(int);
  *
  * @param effect  the echo node
  */
-void SFILTER_echorestore(char *effect) {
+void SFILTER_echorestore(ECHOSTATE* effect) {
     int temp_4;
 
-    temp_4 = *(int *)(effect + 0x20);
+    temp_4 = (int)effect->punaligneddelaybuf;
     if (temp_4 != 0) {
         SNDMEMI_free(temp_4);
-        *(int *)(effect + 0x20) = 0;
-        *(int *)(effect + 0x1C) = 0;
+        effect->punaligneddelaybuf = 0;
+        effect->pdelaybuf = 0;
     }
 }
 #endif
@@ -24485,7 +24490,7 @@ extern void f_6210_F9D8(char *, int, int) __asm__("func_00416210");
  * @param effect  the echo node
  * @param params  [0] feedback level (0..254), [1] sample rate << 8, [2] delay in ms << 8
  */
-void SFILTER_modifyECHO(void *effect, void *params) {
+void SFILTER_modifyECHO(ECHOSTATE* effect, void *params) {
     float temp_f0;
     int gain;
     int temp_16_2;
@@ -24500,17 +24505,17 @@ void SFILTER_modifyECHO(void *effect, void *params) {
     delayMs = (*(int *)((char*)(params) + (8))) >> 8;
     f_F958_F9D8();
     temp_f0 = (float) gain * 0.007874016f;
-    (*(float *)((char*)(effect) + (0x30))) = temp_f0;
-    (*(float *)((char*)(effect) + (0x34))) = -temp_f0;
+    (effect->fblevels) = temp_f0;
+    (effect->fbneglevels) = -temp_f0;
     temp_2 = f_FB38_F9D8(rate, delayMs);
     temp_16_2 = temp_2 * 4;
-    (*(int *)((char*)(effect) + (0x28))) = temp_2;
+    (effect->bufsamples) = temp_2;
     temp_2_2 = f_5C60_F9D8(temp_16_2 + 0x10);
-    (*(char **)((char*)(effect) + (0x20))) = temp_2_2;
+    ((char*)effect->punaligneddelaybuf) = temp_2_2;
     temp_3 = ((unsigned int) ((int)temp_2_2 + 0xF) >> 4) * 0x10;
-    (*(int *)((char*)(effect) + (0x1C))) = temp_3;
+    ((int)effect->pdelaybuf) = temp_3;
     f_6210_F9D8((char*)temp_3, 0, temp_16_2);
-    (*(int *)((char*)(effect) + (0x24))) = 0;
+    (effect->sampleindex) = 0;
 }
 #endif
 

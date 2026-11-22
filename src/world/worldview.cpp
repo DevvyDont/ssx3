@@ -1750,11 +1750,11 @@ extern "C" void* cPS2ChunkResolve_resolve(cPS2ChunkResolve* self, int msg, unsig
         break;
     case 8: {
         CALL1_AE68(self, 144, obj);
-        char* child = *(char**)(obj + 0x24);
+        tSplineSegmentRecord* child = (tSplineSegmentRecord*)(*(char**)(obj + 0x24));
         for (int i = 0; i < *(int*)(obj + 0x20); i++) {
-            *(int*)(child + 8) = 1;
-            insert_AE68(self, 2, child, 108);
-            child = *(char**)(child + 0x64);
+            child->m_iIntersect[2] = 1;
+            insert_AE68(self, 2, ((char*)child), 108);
+            child = (tSplineSegmentRecord*)child->m_NextSeg;
         }
         break;
     }

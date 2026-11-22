@@ -878,7 +878,7 @@ extern "C" float cComputer_scorePath(cComputer* self, cAIPath* tgt)
     }
     sc[0] = distScore * 0.22727273404598236f;
     cRider* rider2 = self->mRider;
-    if (rider2->mHasRival != 0 && *(char**)(((sAi_10D410*)ai)->riders[rider2->mRivalIndex] + 0xAB8) == ((char*)tgt)) {
+    if (rider2->PissedOff != 0 && *(char**)(((sAi_10D410*)ai)->riders[rider2->PissedAIIndex] + 0xAB8) == ((char*)tgt)) {
         return 100.0f;
     }
     float zero = 0.0f;
@@ -1052,14 +1052,14 @@ INCLUDE_ASM("ai/computer", cComputer_checkForAttack);
  * Tells whether another rider is this computer rider's rival, the one it attacks rather than avoids.
  *
  * @param oppID  index of the other rider
- * @return 1 when the rider has a rival (mHasRival) and mRivalIndex equals @p oppID, otherwise 0
+ * @return 1 when the rider is after an opponent (PissedOff) and PissedAIIndex equals @p oppID, otherwise 0
  */
 extern "C" int cComputer_checkForAttack(cComputer* self, int oppID)
 {
     cRider* rider = self->mRider;
     int shouldAttack = 0;
-    if (rider->mHasRival != 0) {
-        shouldAttack = rider->mRivalIndex == oppID;
+    if (rider->PissedOff != 0) {
+        shouldAttack = rider->PissedAIIndex == oppID;
     }
     return shouldAttack;
 }
@@ -1198,8 +1198,8 @@ static inline bool isAggr_0010DBF0(void* agg, int a, int b)
  * Runs only every 6th AI tick. For each other rider i (by rider index, skipping its own getAIIndex) whose
  * mRelations[i].mDistance is under 200 and whose bearing (mRelations[i].mAngle) is 30 to 150 degrees off the rider's
  * facing (mMatrix front row), and towards whom the aggression interface (cBEAggressionInterface_getAggression on
- * cBEAggressionInterface_getThis) gives 3 or more, it takes the first one when mLastShoveFrame + 120 is before the
- * current AI tick, sets @p side and stores the tick in mLastShoveFrame.
+ * cBEAggressionInterface_getThis) gives 3 or more, it takes the first one when LastPunchTick + 120 is before the
+ * current AI tick, sets @p side and stores the tick in LastPunchTick.
  *
  * @param side  receives 1 when the rider is on the side of a positive angle difference, else 0
  * @return 1 when a target was found, else 0

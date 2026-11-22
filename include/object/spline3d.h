@@ -10,12 +10,14 @@
 
 #include "layout.h"
 
+struct tSplineSegmentRecord;  // world/worldrecords.h
+
 struct cSpline {
     unsigned int SplineId;          // 0x00 [R] owners' ctors store -1; [U] readFromReplayFrame resolves it (low 8 bits:
                                     //      resource set, >> 8: index) to the spline whose +0x24 is the first segment
     int SegIndex;                   // 0x04 [R] ctors store 0; [U] readFromReplayFrame steps Seg = Seg->next (+0x64) this
                                     //      many times
-    void* Seg;                      // 0x08 [O] Seg (cSplineSegment*); [U] calcLength walks it
+    tSplineSegmentRecord* Seg;      // 0x08 [O] Seg (tSplineSegmentRecord*); [U] calcLength walks it; cSpline_draw reads Seg->m_Parent
     float Length;                   // 0x0C [O]; [U] readFromReplayFrame stores calcLength()
 };
 

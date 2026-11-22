@@ -125,9 +125,9 @@ struct sTrackRef5570 {
 extern "C" void cSpline_readFromReplayFrame(cSpline* self, cStream_5570* stream)
 {
     stream->read((self), 8);
-    self->Seg = (void*)(*(sTrackRef5570*)&self->SplineId).get()->node;
+    self->Seg = (tSplineSegmentRecord*)(*(sTrackRef5570*)&self->SplineId).get()->node;
     for (int i = 0; i < self->SegIndex; i++) {
-        self->Seg = (void*)(*(sSplineNode**)((char*)(sSplineNode*)self->Seg + 0x64));
+        self->Seg = self->Seg->m_NextSeg;
     }
     self->Length = cSpline_calcLength((cSpline*)self);
 }
