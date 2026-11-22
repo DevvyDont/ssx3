@@ -1072,7 +1072,7 @@ extern "C" void cFlexBridgeNode__cFlexBridgeNode(cFlexBridgeNode* self, int flag
         cMemMan_free(self->Verts);
     }
     tBoundBox* box = ((&self->BoundBox));
-    ((sVEntry<void(void*, void*)>*)cGraphicsMan_TheGraphicsMan->mVtbl)[77].fn((char*)cGraphicsMan_TheGraphicsMan + ((sVEntry<void(void*, void*)>*)cGraphicsMan_TheGraphicsMan->mVtbl)[77].delta, self->GridMesh);
+    ((sVEntry<void(void*, void*)>*)cGraphicsMan_TheGraphicsMan->mVtbl)[77].fn(vthis(cGraphicsMan_TheGraphicsMan, ((sVEntry<void(void*, void*)>*)cGraphicsMan_TheGraphicsMan->mVtbl)[77]), self->GridMesh);
     tBoundBox old = *(&self->BoundBox);
     tInstanceRecord* inst = self->Instance;
     sVec4_346568 corner;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "ui/uiengine.h"
 #include "main/ssxapp.h"
 
@@ -51,7 +52,7 @@ static inline int Loc_CE758(char* key)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry_CE758* vt = *(sVEntry_CE758**)(obj + 4);
-    return vt[4].fn(obj + vt[4].delta, GetHashValue32(key));
+    return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(key));
 }
 
 /**
@@ -405,7 +406,7 @@ extern "C" sChallenge_1CEEA0* cFEStateRewardGalleryBase_cFEStateRewardGalleryBas
         self->f8F0 = -1;
     }
     sVEntry_1CEEA0* vt = *(sVEntry_1CEEA0**)(iface + 0xC);
-    vt[2].fn(iface + vt[2].delta);
+    vt[2].fn(vthis(iface, vt[2]));
     self->f54 = cBEEconInterface_getMoney(cBE_getInterface_ED90(cBE_getBE(), 11), self->player, self->charId);
     return self;
 }

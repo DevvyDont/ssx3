@@ -301,8 +301,8 @@ extern "C" void cOVState_MAP_onGainFocus(cOVState_MAP* self, int pPrevState)
     cUIState_onGainFocus(self, pPrevState);
     confirmMenu = (cUIThing*)cUIScreen_getObjectByHashName(self->mpMapScreen, GetHashValue32(str_ConfirmMenu));
     if (confirmMenu != 0) {
-        ((sVEntry00208B00*)confirmMenu->mVtbl)[7].fn((char*)confirmMenu + ((sVEntry00208B00*)confirmMenu->mVtbl)[7].delta, 0);
-        ((sVEntry00208B00*)confirmMenu->mVtbl)[9].fn((char*)confirmMenu + ((sVEntry00208B00*)confirmMenu->mVtbl)[9].delta, 0);
+        ((sVEntry00208B00*)confirmMenu->mVtbl)[7].fn(vthis(confirmMenu, ((sVEntry00208B00*)confirmMenu->mVtbl)[7]), 0);
+        ((sVEntry00208B00*)confirmMenu->mVtbl)[9].fn(vthis(confirmMenu, ((sVEntry00208B00*)confirmMenu->mVtbl)[9]), 0);
     }
 }
 #endif
@@ -351,11 +351,11 @@ extern "C" void cOVState_MAP_setupScreenExit(cOVState_MAP* self)
     self->mMapTextureSet = 0;
     popupWidget = (cUIThing*)self->mpMap;
     if (popupWidget != 0) {
-        ((sVEntry00208BB8*)popupWidget->mVtbl)[9].fn((char*)popupWidget + ((sVEntry00208BB8*)popupWidget->mVtbl)[9].delta, 0);
+        ((sVEntry00208BB8*)popupWidget->mVtbl)[9].fn(vthis(popupWidget, ((sVEntry00208BB8*)popupWidget->mVtbl)[9]), 0);
     }
     popupWidget = (cUIThing*)self->mpPlayerIcon;
     if (popupWidget != 0) {
-        ((sVEntry00208BB8*)popupWidget->mVtbl)[9].fn((char*)popupWidget + ((sVEntry00208BB8*)popupWidget->mVtbl)[9].delta, 0);
+        ((sVEntry00208BB8*)popupWidget->mVtbl)[9].fn(vthis(popupWidget, ((sVEntry00208BB8*)popupWidget->mVtbl)[9]), 0);
     }
 }
 #endif
@@ -687,7 +687,7 @@ extern "C" void cOVState_MAP_showIndicators(cOVState_MAP* self);
  */
 extern "C" void cOVState_MAP_onInputAlways(cOVState_MAP* self, cUIThing* pInput)
 {
-    if (((sVEntry00209300*)pInput->mVtbl)[17].fn((char*)pInput + ((sVEntry00209300*)pInput->mVtbl)[17].delta) != 0 || ((sVEntry00209300*)pInput->mVtbl)[18].fn((char*)pInput + ((sVEntry00209300*)pInput->mVtbl)[18].delta) != 0) {
+    if (((sVEntry00209300*)pInput->mVtbl)[17].fn(vthis(pInput, ((sVEntry00209300*)pInput->mVtbl)[17])) != 0 || ((sVEntry00209300*)pInput->mVtbl)[18].fn(vthis(pInput, ((sVEntry00209300*)pInput->mVtbl)[18])) != 0) {
         cOVState_MAP_showIndicators(self);
     }
 }
@@ -1386,7 +1386,7 @@ extern "C" void cOVState_onCreateScreen(cOVState* self)
     char* obj = (char*)cUIStateStack_findState(&self->mpEngine->mStateStack, GetHashValue32(str_hud_b));
     if (obj != 0) {
         sVEntry<int(void*, int, int)>* vtEntry = &(*(sVEntry<int(void*, int, int)>**)(obj + 8))[24];
-        vtEntry->fn(obj + vtEntry->delta, 3, 0);
+        vtEntry->fn(vthis(obj, *vtEntry), 3, 0);
     }
 }
 #endif
@@ -1419,7 +1419,7 @@ extern "C" void cOVState_onDestroyScreen(cOVState* self)
     char* obj = (char*)cUIStateStack_findState(&self->mpEngine->mStateStack, GetHashValue32(str_hud_b));
     if (obj != 0) {
         sVEntry<int(void*, int, int)>* vtEntry = &(*(sVEntry<int(void*, int, int)>**)(obj + 8))[24];
-        vtEntry->fn(obj + vtEntry->delta, 4, 0);
+        vtEntry->fn(vthis(obj, *vtEntry), 4, 0);
     }
     if (self->mRemovePDA != 0) {
         cOVStateManager_removePDATemplate();
@@ -1460,7 +1460,7 @@ struct sVE_A4E0 {
 static inline void show_A4E0(char* o, int on)
 {
     sVE_A4E0* vt = *(sVE_A4E0**)(o + 8);
-    vt[9].fn(o + vt[9].delta, on);
+    vt[9].fn(vthis(o, vt[9]), on);
 }
 
 /**

@@ -234,7 +234,7 @@ extern "C" void cUIStateStack_render2D(cUIStateStack* self)
         do {
             if ((*(int*)(n + 0x1C) >> 3) & 1) {
                 cUIStateStack_render2D_sVEntry* vt = *(cUIStateStack_render2D_sVEntry**)(n + 8);
-                vt[15].fn(n + vt[15].delta);
+                vt[15].fn(vthis(n, vt[15]));
             }
             n = *(char**)(n + 4);
         } while (!cListNode_isSentinel((cListNode*)n));
@@ -244,7 +244,7 @@ extern "C" void cUIStateStack_render2D(cUIStateStack* self)
         do {
             if ((*(int*)(n + 0x1C) >> 3) & 1) {
                 cUIStateStack_render2D_sVEntry* vt = *(cUIStateStack_render2D_sVEntry**)(n + 8);
-                vt[15].fn(n + vt[15].delta);
+                vt[15].fn(vthis(n, vt[15]));
             }
             n = *(char**)(n + 4);
         } while (!cListNode_isSentinel((cListNode*)n));

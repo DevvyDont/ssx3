@@ -850,7 +850,7 @@ int tNISList_Play_impl(char* vself, int fade, int notify)
     char* hudState = (char*)cUIStateStack_findState(table, GetHashValue32(str_hud_e));
     if (hudState != 0) {
         sDmVEntry_6388* vtEntry = &(*(sDmVEntry_6388**)(hudState + 0x8))[24];
-        vtEntry->fn(hudState + vtEntry->delta, 0, 0);
+        vtEntry->fn(vthis(hudState, *vtEntry), 0, 0);
     }
     if (tNISList_IsVideo((tNISList*)self, item) == 0) {
         cSSXScriptEngine_PlayRequestScript_i(*(void**)self, self->mViewIndex, item->id, 0, (item->flags >> 3) & 1);
@@ -899,7 +899,7 @@ int tNISList_Play_impl(char* vself, int fade, int notify)
         if (notify) {
             char* eng = *(char**)self;
             sDmVEntry2_6388* vtEntry = &(*(sDmVEntry2_6388**)(eng + 0x2A8))[6];
-            vtEntry->fn(eng + vtEntry->delta, item->id);
+            vtEntry->fn(vthis(eng, *vtEntry), item->id);
         }
     } else {
         if (self->mIsCutSceneHandler != 0) {
@@ -1071,7 +1071,7 @@ extern "C" void tNISList_Reset(tNISList* nisList, int resetTransition)
         char* hudState = (char*)cUIStateStack_findState(table, GetHashValue32(str_hud_e));
         if (hudState != 0) {
             sVEntry<int(void*, int, int)>* vtEntry = &(*(sVEntry<int(void*, int, int)>**)(hudState + 0x8))[24];
-            vtEntry->fn(hudState + vtEntry->delta, 1, 0);
+            vtEntry->fn(vthis(hudState, *vtEntry), 1, 0);
         }
     }
     tNISList_RemoveFromHead(nisList, 5);
@@ -1860,7 +1860,7 @@ extern "C" void tNISList_RemoveFromHead(tNISList* selfp, int n)
                         char* soundMan = (char*)cAudioInterface_bxAudio();
                         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(soundMan + 0x5558);
                         char* sys = soundMan + 0x118;
-                        vt[4].fn(sys + vt[4].delta, snd);
+                        vt[4].fn(vthis(sys, vt[4]), snd);
                     }
                 }
                 cVidEngine_ResetVideoEngine(*(char**)selfp + 0x500);
@@ -1993,7 +1993,7 @@ extern "C" void tNISList_PlayNextScript(tNISList* selfp)
             cSSXScriptEngine_PlayRequestScript(*(void**)selfp, selfp->mViewIndex, cmd->scriptHandle, 0, (cmd->controlBits >> 3) & 1);
             char* eng = *(char**)selfp;
             sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)(eng + 0x2A8);
-            vt[6].fn(eng + vt[6].delta, cmd->scriptHandle);
+            vt[6].fn(vthis(eng, vt[6]), cmd->scriptHandle);
         } else {
             cVidEngine_PlayVideo(*(char**)selfp + 0x500);
         }

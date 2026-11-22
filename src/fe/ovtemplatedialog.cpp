@@ -36,7 +36,7 @@ static inline int Loc_PDA(int hash)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry_PDA* vt = *(sVEntry_PDA**)(obj + 4);
-    return vt[4].fn(obj + vt[4].delta, hash);
+    return vt[4].fn(vthis(obj, vt[4]), hash);
 }
 
 static inline int div_PDA(int a, int b)
@@ -2015,7 +2015,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUITh
                     cBENewRaceInterface_newRace.iLocationIdx = mode;
                     sVV_D5A8* vt = *(sVV_D5A8**)(iface + 0xC);
                     cBENewRaceInterface_bIsBamLocation = 1;
-                    vt[1].fn(iface + vt[1].delta);
+                    vt[1].fn(vthis(iface, vt[1]));
                     cGameModeMan_initGameMode(gm, cBENewRaceInterface_newRace.cGameEvent);
                     cGame_exit(SSXApp->Game, 1);
                 } else if (cOVStateManager_mIsPauseDialog) {
@@ -2075,7 +2075,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUITh
                 cBENewRaceInterface_setGameEvent(iface, 0xC);
                 cBENewRaceInterface_setGameMode(iface, 4);
                 sVE_20D5A8* vt = *(sVE_20D5A8**)(iface + 0xC);
-                vt[1].fn(iface + vt[1].delta);
+                vt[1].fn(vthis(iface, vt[1]));
                 cGameModeMan_initGameMode(SSXApp->GameModeMan, 0xC);
                 cAI_initFreeride(SSXApp->Game->AI);
                 ((sI10_D5A8*)missionIface)->f10 = 1;
@@ -2223,9 +2223,9 @@ extern "C" void cOVState_REPLAY_onCreateScreen(cOVState_REPLAY* self)
         char* saveReplayOption = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_option_savereplay));
         if (saveReplayOption != 0) {
             sVEntry<void(void*, int)>* vtEntry = &(*(sVEntry<void(void*, int)>**)(saveReplayOption + 8))[9];
-            vtEntry->fn(saveReplayOption + vtEntry->delta, 0);
+            vtEntry->fn(vthis(saveReplayOption, *vtEntry), 0);
             vtEntry = &(*(sVEntry<void(void*, int)>**)(saveReplayOption + 8))[8];
-            vtEntry->fn(saveReplayOption + vtEntry->delta, 0);
+            vtEntry->fn(vthis(saveReplayOption, *vtEntry), 0);
         }
     }
 }

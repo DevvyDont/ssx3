@@ -180,13 +180,13 @@ extern "C" void cScreenPopup_onGainFocus(cScreenPopup* self)
         {
             char* menu = (char*)self->mpMenu;
             sVEntry<void>* vt = *(sVEntry<void>**)(menu + 8);
-            ((void (*)(void*, int))vt[8].fn)(menu + vt[8].delta, 0);
+            ((void (*)(void*, int))vt[8].fn)(vthis(menu, vt[8]), 0);
         }
         cScreenPopup_setPrivateDefaultOption(self, self->mpMenu, self->miDefaultOption, self->meType);
         {
             char* menu = (char*)self->mpMenu;
             sVEntry<void>* vt = *(sVEntry<void>**)(menu + 8);
-            ((void (*)(void*, int))vt[7].fn)(menu + vt[7].delta, 1);
+            ((void (*)(void*, int))vt[7].fn)(vthis(menu, vt[7]), 1);
         }
         {
             sVEntry<void>* vt = (sVEntry<void>*)self->mVtbl;
@@ -320,7 +320,7 @@ static inline void Call9_5E58(char* o, int a)
 {
     if (o != 0) {
         sVEntry_5E58* vt = *(sVEntry_5E58**)(o + 8);
-        vt[9].fn(o + vt[9].delta, a);
+        vt[9].fn(vthis(o, vt[9]), a);
     }
 }
 
@@ -362,7 +362,7 @@ static inline void SetAlpha_5F20(char* o, float t)
         sColor_5F20 c = *(sColor_5F20*)(o + 0x1C);
         c.a = t;
         sVEntry_5F20* vt = *(sVEntry_5F20**)(o + 8);
-        vt[11].fn(o + vt[11].delta, &c);
+        vt[11].fn(vthis(o, vt[11]), &c);
     }
 }
 
@@ -554,7 +554,7 @@ static inline void SetColor_C66E8(char* o, sQuad_58E8* c)
 {
     if (o != 0) {
         sVEp_C66E8* vt = *(sVEp_C66E8**)(o + 8);
-        vt[11].fn(o + vt[11].delta, c);
+        vt[11].fn(vthis(o, vt[11]), c);
     }
 }
 
@@ -585,28 +585,28 @@ extern "C" void cScreenPopup_setupBackgroundType_impl(char* vself)
             char* frameWidget = (char*)self->mpMessageText;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
-                vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
+                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupBlack);
             }
         }
         {
             char* frameWidget = (char*)self->mpPostText;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
-                vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
+                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupBlack);
             }
         }
         {
             char* frameWidget = (char*)self->mpTitleText;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
-                vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
+                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupBlack);
             }
         }
         {
             char* frameWidget = (char*)self->mpEnterBox;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
-                vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
+                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupBlack);
             }
         }
         *(sQuad_58E8*)&self->mtHighlightedColor[0] = gPopupWhite;
@@ -626,28 +626,28 @@ extern "C" void cScreenPopup_setupBackgroundType_impl(char* vself)
             char* frameWidget = (char*)self->mpMessageText;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
-                vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
+                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupBlack);
             }
         }
         {
             char* frameWidget = (char*)self->mpPostText;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
-                vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
+                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupBlack);
             }
         }
         {
             char* frameWidget = (char*)self->mpTitleText;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
-                vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
+                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupBlack);
             }
         }
         {
             char* frameWidget = (char*)self->mpEnterBox;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
-                vt[11].fn(frameWidget + vt[11].delta, &gPopupBlack);
+                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupBlack);
             }
         }
         *(sQuad_58E8*)&self->mtHighlightedColor[0] = gPopupWhite;
@@ -667,28 +667,28 @@ extern "C" void cScreenPopup_setupBackgroundType_impl(char* vself)
             char* frameWidget = (char*)self->mpMessageText;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
-                vt[11].fn(frameWidget + vt[11].delta, &gPopupWhite);
+                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupWhite);
             }
         }
         {
             char* frameWidget = (char*)self->mpPostText;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
-                vt[11].fn(frameWidget + vt[11].delta, &gPopupWhite);
+                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupWhite);
             }
         }
         {
             char* frameWidget = (char*)self->mpTitleText;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
-                vt[11].fn(frameWidget + vt[11].delta, &gPopupWhite);
+                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupWhite);
             }
         }
         {
             char* frameWidget = (char*)self->mpEnterBox;
             if (frameWidget != 0) {
                 sVEp_C66E8* vt = *(sVEp_C66E8**)(frameWidget + 8);
-                vt[11].fn(frameWidget + vt[11].delta, &gPopupWhite);
+                vt[11].fn(vthis(frameWidget, vt[11]), &gPopupWhite);
             }
         }
         *(sQuad_58E8*)&self->mtHighlightedColor[0] = gPopupBlue;
@@ -1451,13 +1451,13 @@ extern "C" void cScreenPopup_FillTextEntryBox(cScreenPopup* self)
     sVec2_7EB0 size;
     {
         sVE_7EB0* vt = *(sVE_7EB0**)(enterBox + 8);
-        vt[20].fn(enterBox + vt[20].delta, &size);
+        vt[20].fn(vthis(enterBox, vt[20]), &size);
     }
     size.x = self->mvCurSize[0] - (enterPos.x - staticPos.x) - 10.0f;
     {
         char* box = (char*)self->mpEnterBox;
         sVE_7EB0* vt = *(sVE_7EB0**)(box + 8);
-        vt[21].fn(box + vt[21].delta, &size);
+        vt[21].fn(vthis(box, vt[21]), &size);
     }
     sVec3_7EB0 scale;
     scale.x = (size.x + 6.0f) / self->mvSizeBackEnterBox[0];
@@ -1561,7 +1561,7 @@ extern "C" void cScreenPopup_setTextString1(cScreenPopup* self, void* dst, int* 
     case 3: {
         char* locale = (char*)SSXApp->FELocale;
         sVEntry_80E8* vt = *(sVEntry_80E8**)(locale + 4);
-        unsigned short* str = vt[4].fn(locale + vt[4].delta, info[1]);
+        unsigned short* str = vt[4].fn(vthis(locale, vt[4]), info[1]);
         if (str) {
             char* buf = (char*)operator_new_tag(USTR_length(str) + 1, str_setTextString, 0x100, 0);
             strcpy2(buf, str);
@@ -1678,7 +1678,7 @@ extern "C" void cScreenPopup_getStringSize(cScreenPopup* self, cUIText* text, in
     case 3: {
         char* feLocale = (char*)SSXApp->FELocale;
         sVEntry_8320* vt = *(sVEntry_8320**)(feLocale + 4);
-        char* str = vt[4].fn(feLocale + vt[4].delta, info[1]);
+        char* str = vt[4].fn(vthis(feLocale, vt[4]), info[1]);
         if (str) {
             measureFont = (char*)cUIText_getFont(text);
             cFont_textExtent1(measureFont, str, out, 0, *(float*)(measureFont + 0x38), *(float*)(measureFont + 0x3C));
@@ -1820,7 +1820,7 @@ extern "C" void cScreenPopup_createTitleBar(cScreenPopup* self, cPopupInfo* pInf
             {
                 char* titleText = (char*)self->mpTitleText;
                 sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(titleText + 8);
-                vt[9].fn(titleText + vt[9].delta, 1);
+                vt[9].fn(vthis(titleText, vt[9]), 1);
             }
             cScreenPopup_getStringSize(self, self->mpTitleText, info, item);
             cScreenPopup_increaseBoxSize(self, (float*)&self->mvCurSize, item);
@@ -2110,7 +2110,7 @@ extern "C" void cScreenPopup_getTextBoxSize(cScreenPopup* vself, int* item, floa
     case 3: {
         char* locale = (char*)SSXApp->FELocale;
         sVEntry_8EF0* vt = *(sVEntry_8EF0**)(locale + 4);
-        unsigned short* str = vt[4].fn(locale + vt[4].delta, item[1]);
+        unsigned short* str = vt[4].fn(vthis(locale, vt[4]), item[1]);
         if (str) {
             cScreenPopup_getTextBoxSize1(vself, text, str, size);
             goto add;
@@ -2294,7 +2294,7 @@ extern "C" void cScreenPopup_getMessageLineWrapSize1(cScreenPopup* self, int* ms
     case 3: {
         char* locale = (char*)SSXApp->FELocale;
         sVEntry<void*(void*, int)>* vt = *(sVEntry<void*(void*, int)>**)(locale + 4);
-        void* str = vt[4].fn(locale + vt[4].delta, msg[1]);
+        void* str = vt[4].fn(vthis(locale, vt[4]), msg[1]);
         if (str) {
             cScreenPopup_getMessageLineWrapSize2(self, self->mpMessageText, str, out);
         } else {
@@ -2502,7 +2502,7 @@ extern "C" void cScreenPopup_getTextBoxWrapSize(cScreenPopup* self, void* ptElem
     case 3: {
         char* locale = (char*)SSXApp->FELocale;
         sVEntry<void*(void*, int)>* vt = *(sVEntry<void*(void*, int)>**)(locale + 4);
-        void* str = vt[4].fn(locale + vt[4].delta, info[1]);
+        void* str = vt[4].fn(vthis(locale, vt[4]), info[1]);
         if (str) {
             cScreenPopup_getTextBoxWrapSize1(self, text, str, out);
         } else {
@@ -2774,9 +2774,9 @@ extern "C" void cScreenPopup_setStatic(cScreenPopup* self, int idx, int bStatic)
     char* option = (char*)self->mpOptions[idx];
     if (option != 0) {
         sVEntry_A0F0* vt = *(sVEntry_A0F0**)(option + 8);
-        vt[8].fn(option + vt[8].delta, bStatic);
+        vt[8].fn(vthis(option, vt[8]), bStatic);
         sVEntry_A0F0* vt2 = *(sVEntry_A0F0**)(option + 8);
-        vt2[25].fn(option + vt2[25].delta, 1);
+        vt2[25].fn(vthis(option, vt2[25]), 1);
     }
 }
 #endif
@@ -2821,7 +2821,7 @@ struct sVE1CA180 {
 static inline void SetColour1CA180(char* obj, void* colour)
 {
     sVE1CA180* vt = *(sVE1CA180**)(obj + 8);
-    vt[11].fn(obj + vt[11].delta, colour);
+    vt[11].fn(vthis(obj, vt[11]), colour);
 }
 
 /**
@@ -2886,7 +2886,7 @@ struct sPopupVE_1CA298 {
 
 static inline void Notify_1CA298(cUIState* o, int vi, void* self, int v)
 {
-    ((sPopupVE_1CA298*)o->mVtbl)[vi].fn((char*)o + ((sPopupVE_1CA298*)o->mVtbl)[vi].delta, self, v);
+    ((sPopupVE_1CA298*)o->mVtbl)[vi].fn(vthis(o, ((sPopupVE_1CA298*)o->mVtbl)[vi]), self, v);
 }
 
 /**
@@ -2954,7 +2954,7 @@ extern "C" void cScreenPopup_onWidgetEvent(cScreenPopup* self, int id, int ev)
     default:
         {
             cUIState* parentState = self->mpParentState;
-            ((void (*)(void*, int, int))((sPopupVE_1CA298*)parentState->mVtbl)[19].fn)((char*)parentState + ((sPopupVE_1CA298*)parentState->mVtbl)[19].delta, id, ev);
+            ((void (*)(void*, int, int))((sPopupVE_1CA298*)parentState->mVtbl)[19].fn)(vthis(parentState, ((sPopupVE_1CA298*)parentState->mVtbl)[19]), id, ev);
         }
         break;
     }
@@ -5191,7 +5191,7 @@ extern "C" void cKeyboardPopup_updateCursor(cKeyboardPopup* self)
     char* uiObj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterValue));
     if (uiObj != 0) {
         sVEntry_CC30* vt = *(sVEntry_CC30**)(uiObj + 8);
-        vt[20].fn(uiObj + vt[20].delta, (char*)&self->mvSizeEnter[0]);
+        vt[20].fn(vthis(uiObj, vt[20]), (char*)&self->mvSizeEnter[0]);
         *(sVec3_CC30*)&self->mvPosEnter[0] = *(sVec3_CC30*)(uiObj + 0x44);
     }
     self->mvPosCursor[1] = self->mvSizeEnter[1] + self->mvPosEnter[1] - self->mvSizeCursor[1] - 2.0f;
@@ -5214,7 +5214,7 @@ extern "C" void cKeyboardPopup_updateCursor(cKeyboardPopup* self)
     }
     uiObj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_CharacterCursor));
     sVEntry_CC30* vt = *(sVEntry_CC30**)(uiObj + 8);
-    vt[21].fn(uiObj + vt[21].delta, &pos);
+    vt[21].fn(vthis(uiObj, vt[21]), &pos);
     char buf[0x40];
     if (self->mbPassword != 0) {
         cKeyboardPopup_setPasswordText((sPwd_CCE98*)self, self->mszViewableString);
@@ -5553,7 +5553,7 @@ struct sVEp_D348 {
 static inline void SetVis_D348(char* o, int on)
 {
     sVEi_D348* vt = *(sVEi_D348**)(o + 8);
-    vt[9].fn(o + vt[9].delta, on);
+    vt[9].fn(vthis(o, vt[9]), on);
 }
 
 /**
@@ -5622,13 +5622,13 @@ extern "C" int cKeyboardPopup_onGainTransition(cKeyboardPopup* self, int first)
         char* charCursor = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_CharacterCursor));
         if (charCursor != 0) {
             sVEp_D348* vt = *(sVEp_D348**)(charCursor + 8);
-            vt[20].fn(charCursor + vt[20].delta, (char*)&self->mvSizeCursor[0]);
+            vt[20].fn(vthis(charCursor, vt[20]), (char*)&self->mvSizeCursor[0]);
             *(sVec3_D348*)&self->mvPosCursor[0] = *(sVec3_D348*)(charCursor + 0x44);
         }
         char* enterValue = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterValue));
         if (enterValue != 0) {
             sVEp_D348* vt = *(sVEp_D348**)(enterValue + 8);
-            vt[20].fn(enterValue + vt[20].delta, (char*)&self->mvSizeEnter[0]);
+            vt[20].fn(vthis(enterValue, vt[20]), (char*)&self->mvSizeEnter[0]);
             *(sVec3_D348*)&self->mvPosEnter[0] = *(sVec3_D348*)(enterValue + 0x44);
             self->mvPosCursor[1] = self->mvSizeEnter[1] + self->mvPosEnter[1];
         }
@@ -5747,19 +5747,19 @@ extern "C" void cKeyboardPopup_redrawScreen(cKeyboardPopup* self)
             if (self->meType == 1) {
                 if (i >= 0 && i < 0xE) {
                     sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(uiObj + 8);
-                    vt[9].fn(uiObj + vt[9].delta, (void*)0);
+                    vt[9].fn(vthis(uiObj, vt[9]), (void*)0);
                 } else {
                     sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(uiObj + 8);
-                    vt[9].fn(uiObj + vt[9].delta, (void*)1);
+                    vt[9].fn(vthis(uiObj, vt[9]), (void*)1);
                 }
             } else {
                 {
                     sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(uiObj + 8);
-                    vt[11].fn(uiObj + vt[11].delta, gtNonSelectedKey);
+                    vt[11].fn(vthis(uiObj, vt[11]), gtNonSelectedKey);
                 }
                 {
                     sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(uiObj + 8);
-                    vt[9].fn(uiObj + vt[9].delta, (void*)1);
+                    vt[9].fn(vthis(uiObj, vt[9]), (void*)1);
                 }
             }
         }
@@ -5768,7 +5768,7 @@ extern "C" void cKeyboardPopup_redrawScreen(cKeyboardPopup* self)
     char* uiObj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
     if (uiObj != 0) {
         sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(uiObj + 8);
-        vt[11].fn(uiObj + vt[11].delta, gtSelectedKey);
+        vt[11].fn(vthis(uiObj, vt[11]), gtSelectedKey);
     }
 }
 #endif
@@ -5946,7 +5946,7 @@ typedef int (*FnIK1CDB98)(void*);
 static inline int InputK1CDB98(char* ev, int slot)
 {
     sVEntryK1CDB98* vt = *(sVEntryK1CDB98**)(ev + 8);
-    return ((FnIK1CDB98)vt[slot].fn)(ev + vt[slot].delta);
+    return ((FnIK1CDB98)vt[slot].fn)(vthis(ev, vt[slot]));
 }
 
 static inline int isOnK1CDB98()
@@ -6020,7 +6020,7 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, cUIInput* ev)
             cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
             char* o = (char*)self->mpParentState;
             sVEntryK1CDB98* vt = *(sVEntryK1CDB98**)(o + 8);
-            ((void (*)(void*, int, int))vt[19].fn)(o + vt[19].delta, 0, 0xE);
+            ((void (*)(void*, int, int))vt[19].fn)(vthis(o, vt[19]), 0, 0xE);
         } else if (InputK1CDB98(((char*)ev), 25)) {
             changed = 1;
             self->mbCapsOn ^= 1;
@@ -6331,7 +6331,7 @@ extern "C" void cKeyboardPopup_handleQuickKeyPress(cKeyboardPopup* self, int key
     if (msg == 0) {
         char* locale = (char*)SSXApp->FELocale;
         sVEntry<void*(void*, int)>* vt = *(sVEntry<void*(void*, int)>**)(locale + 4);
-        void* str = vt[4].fn(locale + vt[4].delta, cBEOptionInterface_getDefaultQuickKeyMessageHashValue(opt, key));
+        void* str = vt[4].fn(vthis(locale, vt[4]), cBEOptionInterface_getDefaultQuickKeyMessageHashValue(opt, key));
         if (str)
             USTR_strcpyW(buf, str);
         else

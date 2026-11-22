@@ -581,7 +581,7 @@ extern "C" void cBoardSparkFX_update(sSparkFx_ABC8* self)
         } else {
             char* sub = self->rider + 0x6C0;
             sRiderVE_ABC8* vt = *(sRiderVE_ABC8**)sub;
-            sCol_ABC8 c = ((sEnt_ABC8*)(cRenderStateMan_m_state + 0x28))[vt[7].fn(sub + vt[7].delta)].col;
+            sCol_ABC8 c = ((sEnt_ABC8*)(cRenderStateMan_m_state + 0x28))[vt[7].fn(vthis(sub, vt[7]))].col;
             groundColour = sV4_ABC8(c.r, c.g, c.b, c.a);
             ScaleTo_ABC8(groundColour, groundColour, 2.0f);
             groundColour.w = 1.0f;

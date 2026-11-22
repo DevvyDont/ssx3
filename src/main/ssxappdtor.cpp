@@ -3243,7 +3243,7 @@ extern "C" void cGame_updateAI(cGame* self)
         {
             char* aiMan = (char*)self->AI;
             sVEntry<void>* vt = *(sVEntry<void>**)(aiMan + 0xCC);
-            ((void (*)(void*))vt[3].fn)(aiMan + vt[3].delta);
+            ((void (*)(void*))vt[3].fn)(vthis(aiMan, vt[3]));
         }
         if ((cPauseState_Flags & 0x10) == 0)
             cBucketMan_updateBucket(obj, 2);
@@ -3473,7 +3473,7 @@ extern "C" void func_002452D8(void* self, char* msg, int type)
     if (isHash_2452D8(*(int*)(msg + 0x38), str_yes_c)) {
         sUIObj_2452D8* newState = newUIObj_2452D8(self, 0);
         cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, newState);
-        ((sRVEntry_2452D8*)cGraphicsMan_TheGraphicsMan->mVtbl)[8].fn((char*)cGraphicsMan_TheGraphicsMan + ((sRVEntry_2452D8*)cGraphicsMan_TheGraphicsMan->mVtbl)[8].delta, 1);
+        ((sRVEntry_2452D8*)cGraphicsMan_TheGraphicsMan->mVtbl)[8].fn(vthis(cGraphicsMan_TheGraphicsMan, ((sRVEntry_2452D8*)cGraphicsMan_TheGraphicsMan->mVtbl)[8]), 1);
     } else {
         sUIObj_2452D8* newState = newUIObj_2452D8(self, 1);
         cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, newState);

@@ -2782,7 +2782,7 @@ extern "C" void func_002547B8(sTexCache_2547B8* self, int flags)
     for (int i = 0; i < self->count; i++) {
         int* tileEntry = self->texs[i];
         if (tileEntry != 0) {
-            ((sRVEntry_2547B8*)cGraphicsMan_TheGraphicsMan->mVtbl)[50].fn((char*)cGraphicsMan_TheGraphicsMan + ((sRVEntry_2547B8*)cGraphicsMan_TheGraphicsMan->mVtbl)[50].delta, *tileEntry);
+            ((sRVEntry_2547B8*)cGraphicsMan_TheGraphicsMan->mVtbl)[50].fn(vthis(cGraphicsMan_TheGraphicsMan, ((sRVEntry_2547B8*)cGraphicsMan_TheGraphicsMan->mVtbl)[50]), *tileEntry);
             *tileEntry = -1;
             RCMP_rcmp_sys.free(tileEntry);
         }

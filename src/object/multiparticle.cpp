@@ -1403,7 +1403,7 @@ extern "C" int cAnimDeltaNode_updateNode(cAnimDeltaNode* self)
             if (self->AnimComplete != 0) {
                 char* obj = (char*)&self->unk_030;
                 sVEntry_3592D0* vtEntry = &((sVEntry_3592D0*)self->mVtbl)[34];
-                vtEntry->fn(obj + vtEntry->delta, 1);
+                vtEntry->fn(vthis(obj, *vtEntry), 1);
                 return 0;
             }
         }

@@ -720,7 +720,7 @@ extern "C" void cFEStateCharEquip_onUpdate(cFEStateCharEquip* self)
             on ^= 1;
         }
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(obj + 8);
-        vt[9].fn(obj + vt[9].delta, on);
+        vt[9].fn(vthis(obj, vt[9]), on);
     }
     cFEStateCharEquip_updatePreviewLoad(self);
     cFEStateCharEquip_update3DPositions(self);
@@ -972,7 +972,7 @@ extern "C" void cFEStateCharEquip_onWidgetEvent(cFEStateCharEquip* selfv, cUIThi
             *(int*)(feRider + 0xC1C) = 1;
             char* obj = *(char**)self->menu;
             sVE_9C28* vt = *(sVE_9C28**)(obj + 4);
-            void* x = vt[5].fn(obj + vt[5].delta, self, 0);
+            void* x = vt[5].fn(vthis(obj, vt[5]), self, 0);
             if (x)
                 cUIStateStack_push(self->menu + 0x18, x);
         }
@@ -1211,17 +1211,17 @@ extern "C" void cFEStateCharEquip_initInventoryPreview(cFEStateCharEquip* self)
     char* widget = (char*)self->mpMoneyGroup;
     if (widget != 0) {
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
-        vt[9].fn(widget + vt[9].delta, 0);
+        vt[9].fn(vthis(widget, vt[9]), 0);
     }
     widget = (char*)self->mpLargePreview;
     if (widget != 0) {
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
-        vt[9].fn(widget + vt[9].delta, 0);
+        vt[9].fn(vthis(widget, vt[9]), 0);
     }
     widget = (char*)self->mpSmallIconPreviewGroup;
     if (widget != 0) {
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
-        vt[9].fn(widget + vt[9].delta, 1);
+        vt[9].fn(vthis(widget, vt[9]), 1);
     }
     cFERider_setVisible((cFERider*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum), 1);
     self->mCameraState = 1;
@@ -1251,18 +1251,18 @@ extern "C" void cFEStateCharEquip_initStorePreview(cFEStateCharEquip* self)
     char* widget = (char*)self->mpSmallIconPreviewGroup;
     if (widget != 0) {
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
-        vt[9].fn(widget + vt[9].delta, 0);
+        vt[9].fn(vthis(widget, vt[9]), 0);
     }
     widget = (char*)self->mpPointsGroup;
     if (widget != 0) {
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
-        vt[9].fn(widget + vt[9].delta, 0);
+        vt[9].fn(vthis(widget, vt[9]), 0);
     }
     cFERider_setVisible((cFERider*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum), 0);
     widget = (char*)self->mpMoneyGroup;
     if (widget != 0) {
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
-        vt[9].fn(widget + vt[9].delta, 1);
+        vt[9].fn(vthis(widget, vt[9]), 1);
     }
 }
 #endif
@@ -1640,7 +1640,7 @@ struct sVEK19AA08 {
 static inline void showK19AA08(char* o, int on)
 {
     sVEK19AA08* vt = *(sVEK19AA08**)(o + 8);
-    vt[9].fn(o + vt[9].delta, on);
+    vt[9].fn(vthis(o, vt[9]), on);
 }
 
 /**
@@ -1810,11 +1810,11 @@ static inline void copyRow_19AD18(sCharEquipDetail_19AD18* self, int dst, int sr
 {
     char* o = self->a8C[dst];
     sVEntry0019AD18a* vt = *(sVEntry0019AD18a**)(o + 8);
-    vt[11].fn(o + vt[11].delta, self->a8C[src] + 0x1C);
+    vt[11].fn(vthis(o, vt[11]), self->a8C[src] + 0x1C);
     cUIText_setUnicodeString(self->a8C[dst], cUIText_getUnicodeString(self->a8C[src]));
     o = self->aA4[dst];
     sVEntry0019AD18b* vt2 = *(sVEntry0019AD18b**)(o + 8);
-    vt2[9].fn(o + vt2[9].delta, (*(int*)(self->aA4[src] + 0x14) >> 6) & 1);
+    vt2[9].fn(vthis(o, vt2[9]), (*(int*)(self->aA4[src] + 0x14) >> 6) & 1);
 }
 
 /**

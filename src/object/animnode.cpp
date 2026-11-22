@@ -414,7 +414,7 @@ extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
     char* obj = (char*)&self->unk_014;
     if (self->Flags & 1) {
         sVE_E798* vt = (sVE_E798*)self->mVtbl;
-        ((void (*)(void*))vt[51].fn)(obj + vt[51].delta);
+        ((void (*)(void*))vt[51].fn)(vthis(obj, vt[51]));
     }
     char* info = *(char**)(*(char**)(obj + 0x18) + 0x80);
     int k = 0;

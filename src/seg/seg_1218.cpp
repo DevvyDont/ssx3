@@ -1227,7 +1227,7 @@ extern "C" void cDangerMan_Update(cDangerMan* self)
         do {
             sVEntry<int(void*, sObj_13A8*)>* vt = *(sVEntry<int(void*, sObj_13A8*)>**)&pRider->mVtbl;
             int (**pf)(void*, sObj_13A8*) = &vt[kRiderVt_isIntersecting].fn;
-            if ((*pf)(sub + vt[kRiderVt_isIntersecting].delta, lookup_13A8(pCurrDangerZone->id))) {
+            if ((*pf)(vthis(sub, vt[kRiderVt_isIntersecting]), lookup_13A8(pCurrDangerZone->id))) {
                 if (baseDangerZoneLevel < pCurrDangerZone->val)
                     baseDangerZoneLevel = pCurrDangerZone->val;
             }
@@ -4454,9 +4454,9 @@ extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, s
         }
         char* sub = (char*)&rider->mVtbl;
         sVEv_57B8* vt2 = *(sVEv_57B8**)sub;
-        t4Vector* pos = vt2[kRiderVt_getPosition].fn(sub + vt2[kRiderVt_getPosition].delta);
+        t4Vector* pos = vt2[kRiderVt_getPosition].fn(vthis(sub, vt2[kRiderVt_getPosition]));
         sVEv_57B8* vt3 = *(sVEv_57B8**)sub;
-        t4Vector* vel = vt3[kRiderVt_getVelocity].fn(sub + vt3[kRiderVt_getVelocity].delta);
+        t4Vector* vel = vt3[kRiderVt_getVelocity].fn(vthis(sub, vt3[kRiderVt_getVelocity]));
         cAirPredictor_startLaunchIntoAir_57B8(rider->mAirPredictor, pos, vel, rider->unk_2E4);
         return;
     }
@@ -4616,9 +4616,9 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
     if (cRider_getMotionState(self) == 2) {
         if (self->mRiderHandler->WipeoutMotion.WipeoutMotionState == 1) {
             sVEv_5D98* vt2 = *(sVEv_5D98**)sub;
-            t4Vector* pos = vt2[kRiderVt_getPosition].fn(sub + vt2[kRiderVt_getPosition].delta);
+            t4Vector* pos = vt2[kRiderVt_getPosition].fn(vthis(sub, vt2[kRiderVt_getPosition]));
             sVEv_5D98* vt3 = *(sVEv_5D98**)sub;
-            t4Vector* vel = vt3[kRiderVt_getVelocity].fn(sub + vt3[kRiderVt_getVelocity].delta);
+            t4Vector* vel = vt3[kRiderVt_getVelocity].fn(vthis(sub, vt3[kRiderVt_getVelocity]));
             cAirPredictor_startLaunchIntoAir_5D98(self->mAirPredictor, pos, vel, self->unk_2E4);
         }
         char* h = (char*)self->mRiderHandler;
@@ -4628,9 +4628,9 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
     }
     if (cRider_getMotionState(self) == 1) {
         sVEv_5D98* vt2 = *(sVEv_5D98**)sub;
-        t4Vector* pos = vt2[kRiderVt_getPosition].fn(sub + vt2[kRiderVt_getPosition].delta);
+        t4Vector* pos = vt2[kRiderVt_getPosition].fn(vthis(sub, vt2[kRiderVt_getPosition]));
         sVEv_5D98* vt3 = *(sVEv_5D98**)sub;
-        t4Vector* vel = vt3[kRiderVt_getVelocity].fn(sub + vt3[kRiderVt_getVelocity].delta);
+        t4Vector* vel = vt3[kRiderVt_getVelocity].fn(vthis(sub, vt3[kRiderVt_getVelocity]));
         cAirPredictor_startLaunchIntoAir_5D98(self->mAirPredictor, pos, vel, self->unk_2E4);
     }
     float sideDot = Dot_5D98(Get_5D98((char*)&self->RiderRoot), info->off);
@@ -5213,7 +5213,7 @@ extern "C" int cRider_checkRailBoardCollisions(cRider* self)
         char* landInst = *(char**)(land.obj + 0xC);
         if (landInst != 0) {
             sVEH_6848* vt = *(sVEH_6848**)(landInst + 0xC);
-            vt[43].fn(landInst + vt[43].delta, &land, Scale_6848(dv, -1.0f));
+            vt[43].fn(vthis(landInst, vt[43]), &land, Scale_6848(dv, -1.0f));
         }
     }
     sAnimModelBone* bone = &self->mAnimModel->bones[self->mBoneBoardRoot];
@@ -5570,7 +5570,7 @@ extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self)
         char* handler = *(char**)(((char*)hit.Inst) + 0xC);
         if (handler != 0) {
             sVEntry<void(void*, tIntersectInfo*)>* vt = *(sVEntry<void(void*, tIntersectInfo*)>**)(handler + 0xC);
-            vt[42].fn(handler + vt[42].delta, &hit);
+            vt[42].fn(vthis(handler, vt[42]), &hit);
         }
     }
     sInfo_6F78 info;
@@ -5601,7 +5601,7 @@ extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self)
         char* handler = *(char**)(((char*)hit.Inst) + 0xC);
         if (handler != 0) {
             sVEhv_6F78* vt = *(sVEhv_6F78**)(handler + 0xC);
-            vt[43].fn(handler + vt[43].delta, &hit, &imp);
+            vt[43].fn(vthis(handler, vt[43]), &hit, &imp);
         }
     }
     if (cRider_getMotionState(self) == 0) {

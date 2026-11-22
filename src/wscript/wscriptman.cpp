@@ -458,7 +458,7 @@ extern "C" float cWScriptMan_getHeightCurr(cWScriptMan* self)
     char* obj = *(char**)(list + (self->MissionHeightBeing << 2) + 0x28);
     char* sub = obj + 0x6C0;
     cWScriptMan_getHeightCurr_sVEntry* vt = *(cWScriptMan_getHeightCurr_sVEntry**)sub;
-    cWScriptMan_getHeightCurr_sPos* riderPos = vt[5].fn(sub + vt[5].delta);
+    cWScriptMan_getHeightCurr_sPos* riderPos = vt[5].fn(vthis(sub, vt[5]));
     float z = riderPos->z;
     cWScriptMan_getHeightCurr_sVec pos = *(cWScriptMan_getHeightCurr_sVec*)(node + 0x40);
     float height = z - pos.z;
@@ -819,7 +819,7 @@ extern "C" void cWScriptMan_doOnCollideScript(cWScriptMan* self, void* collideIn
         char* instObj = *(char**)((char*)self->Inst + 0xC);
         if (instObj != 0) {
             sVEF_30A060* vt = *(sVEF_30A060**)(instObj + 0xC);
-            vt[41].fn(instObj + vt[41].delta, 0.5f);
+            vt[41].fn(vthis(instObj, vt[41]), 0.5f);
         }
     }
     self->Being = saved;
@@ -2982,11 +2982,11 @@ extern "C" int cWScriptMan_checkGate(int* who, unsigned int id0, unsigned int id
     char* rider = ((sAi_BFC0*)(char*)SSXApp->Game->AI)->riders[*who];
     char* obj = rider + 0x6C0;
     sVE_BFC0* vt = *(sVE_BFC0**)obj;
-    if (vt[3].fn(obj + vt[3].delta, inst) != 0) {
+    if (vt[3].fn(vthis(obj, vt[3]), inst) != 0) {
         return 1;
     }
     sVEp_BFC0* vtp = *(sVEp_BFC0**)obj;
-    sVec4_BFC0* pos = vtp[5].fn(obj + vtp[5].delta);
+    sVec4_BFC0* pos = vtp[5].fn(vthis(obj, vtp[5]));
     float dist;
     float seg;
     if (prevInst != 0) {
@@ -3156,7 +3156,7 @@ static inline void respawn_C4A8(unsigned int id)
     char* o = *(char**)(obj + 0xC);
     if (o != 0) {
         sVE_C4A8* vt = *(sVE_C4A8**)(o + 0xC);
-        vt[1].fn(o + vt[1].delta, 3);
+        vt[1].fn(vthis(o, vt[1]), 3);
     }
     cDeadNode_cDeadNode(cMemMan_alloc(0x1C, str_DeadNode, 0x20000000, 0), obj);
 }
@@ -4681,7 +4681,7 @@ extern "C" void cAnimModel__cAnimModel(sWSMan_D540* self, int flags)
                     if (self->grps[j].s[k].arr[variant].fC != 0) {
                         cMemMan_free(self->grps[j].s[k].arr[variant].fC);
                     }
-                    ((sWSVE_D540*)gfx->mVtbl)[0x380 / 8].fn((char*)gfx + ((sWSVE_D540*)gfx->mVtbl)[0x380 / 8].delta, (int)self->grps[j].s[k].arr[variant].f0);
+                    ((sWSVE_D540*)gfx->mVtbl)[0x380 / 8].fn(vthis(gfx, ((sWSVE_D540*)gfx->mVtbl)[0x380 / 8]), (int)self->grps[j].s[k].arr[variant].f0);
                     if (self->grps[j].s[k].arr[variant].f0 != 0) {
                         cMemMan_free(self->grps[j].s[k].arr[variant].f0);
                     }
@@ -4696,7 +4696,7 @@ extern "C" void cAnimModel__cAnimModel(sWSMan_D540* self, int flags)
         for (i = 0; i < self->f12C; i++) {
             textureId = self->f130[i].id;
             if (textureId >= 0) {
-                ((sWSVE_D540*)gfx->mVtbl)[0x190 / 8].fn((char*)gfx + ((sWSVE_D540*)gfx->mVtbl)[0x190 / 8].delta, textureId);
+                ((sWSVE_D540*)gfx->mVtbl)[0x190 / 8].fn(vthis(gfx, ((sWSVE_D540*)gfx->mVtbl)[0x190 / 8]), textureId);
             }
         }
     }

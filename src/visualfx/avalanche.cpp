@@ -778,7 +778,7 @@ extern "C" void tActiveAvalancheNode_end(tActiveAvalancheNode* self, int force)
             char* obj = *(char**)(inst + 0xC);
             if (obj != 0) {
                 sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(obj + 0xC);
-                vt[1].fn(obj + vt[1].delta, 3);
+                vt[1].fn(vthis(obj, vt[1]), 3);
             }
         }
         self->m_node->m_activeNode = 0;
@@ -1547,7 +1547,7 @@ extern "C" void tActiveAvalancheNode_renderLines(tActiveAvalancheNode* nodep)
             D_004D5B70_8A00[i].b = ((node->m_node)->m_history)[i].m_b;
             D_004D5B70_8A00[i].pos = pos;
         }
-        ((sVE_8A00*)GrMan->mVtbl)[0x248 / 8].fn((char*)GrMan + ((sVE_8A00*)GrMan->mVtbl)[0x248 / 8].delta, (int)(node->m_node)->m_life, D_004D5B70_8A00, 0);
+        ((sVE_8A00*)GrMan->mVtbl)[0x248 / 8].fn(vthis(GrMan, ((sVE_8A00*)GrMan->mVtbl)[0x248 / 8]), (int)(node->m_node)->m_life, D_004D5B70_8A00, 0);
     }
     (*(sDrawState**)&GrMan->m_pCurrentDrawState)--;
 }

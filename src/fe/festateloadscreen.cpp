@@ -379,7 +379,7 @@ extern "C" int cFELoadScreen_render(cFELoadScreen* self)
 {
     char* graphicsMan = (char*)GrMan;
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)(graphicsMan + 0x10D8);
-    if (vt[17].fn(graphicsMan + vt[17].delta) == 0) {
+    if (vt[17].fn(vthis(graphicsMan, vt[17])) == 0) {
         return 0;
     }
     if (cFadeScreen_drawFade(self) == 0) {
@@ -387,7 +387,7 @@ extern "C" int cFELoadScreen_render(cFELoadScreen* self)
     }
     graphicsMan = (char*)GrMan;
     sVEntry<void(void*)>* vt2 = *(sVEntry<void(void*)>**)(graphicsMan + 0x10D8);
-    vt2[20].fn(graphicsMan + vt2[20].delta);
+    vt2[20].fn(vthis(graphicsMan, vt2[20]));
     return 1;
 }
 #endif
@@ -735,7 +735,7 @@ static inline sVec4_233CD8* riderPos_233CD8(char* rider)
 {
     char* obj = rider + 0x6C0;
     sVEntry_233CD8* vt = *(sVEntry_233CD8**)obj;
-    return vt[2].fn(obj + vt[2].delta);
+    return vt[2].fn(vthis(obj, vt[2]));
 }
 
 class cFEVObj_233CD8 {
@@ -1041,7 +1041,7 @@ extern "C" void cGFEventStartState_gainFocus(cGFEventStartState* self, int mode)
     cBENewRaceInterface_setNumberAI(race, n);
     {
         sVE_2341D0* vt = *(sVE_2341D0**)(race + 0xC);
-        vt[1].fn(race + vt[1].delta);
+        vt[1].fn(vthis(race, vt[1]));
     }
     for (; i < n; i++) {
         cBENewPlayerInterface_setRiderCharID(player, i + base, gm->iCharacters[base + i]);
@@ -1049,7 +1049,7 @@ extern "C" void cGFEventStartState_gainFocus(cGFEventStartState* self, int mode)
     }
     {
         sVE_2341D0* vt = *(sVE_2341D0**)(player + 0xC);
-        vt[1].fn(player + vt[1].delta);
+        vt[1].fn(vthis(player, vt[1]));
     }
     switch (mode) {
     case 0:
@@ -1304,7 +1304,7 @@ extern "C" void cGFEventStartState_loseFocus(cGFEventStartState* self)
     if (mode != 4) {
         char* aiMan = *(char**)((char*)cGameState_mpGame + 0xC);
         sVE_234750* vt = *(sVE_234750**)(aiMan + 0xCC);
-        vt[5].fn(aiMan + vt[5].delta, 3);
+        vt[5].fn(vthis(aiMan, vt[5]), 3);
         *(int*)(*(char**)((char*)cGameState_mpGame + 0xC) + 0x14) = 1;
     }
     cAI_setRaceRankType(*(void**)((char*)cGameState_mpGame + 0xC), 0);

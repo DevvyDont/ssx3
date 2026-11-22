@@ -73,7 +73,7 @@ struct sVE_1388 {
 static inline void SetVisible_1388(char* o, int on)
 {
     sVE_1388* vt = *(sVE_1388**)(o + 0x8);
-    vt[9].fn(o + vt[9].delta, on);
+    vt[9].fn(vthis(o, vt[9]), on);
 }
 
 
@@ -403,7 +403,7 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(cFEStateRuleSelect* self, sMsg_
         if (msg->info[6] == 0) {
             char* custom = *(char**)self->mpEngine;
             sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(custom + 0x4);
-            void* st = vt[4].fn(custom + vt[4].delta, ((char*)self), msg->id);
+            void* st = vt[4].fn(vthis(custom, vt[4]), ((char*)self), msg->id);
             if (st) {
                 cUIStateStack_push(&self->mpEngine->mStateStack, st);
             }
@@ -412,7 +412,7 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(cFEStateRuleSelect* self, sMsg_
     case 6: {
         char* custom = *(char**)self->mpEngine;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(custom + 0x4);
-        void* st = vt[5].fn(custom + vt[5].delta, ((char*)self), msg->id);
+        void* st = vt[5].fn(vthis(custom, vt[5]), ((char*)self), msg->id);
         if (st) {
             cUIStateStack_push(&self->mpEngine->mStateStack, st);
         }
@@ -484,7 +484,7 @@ struct sVE_1E48 {
 static inline void SetVisible_1E48(char* o, int on)
 {
     sVE_1E48* vt = *(sVE_1E48**)(o + 0x8);
-    vt[9].fn(o + vt[9].delta, on);
+    vt[9].fn(vthis(o, vt[9]), on);
 }
 
 /**
@@ -844,7 +844,7 @@ extern "C" void cBraggingRightsMenu_setConfirmed(cBraggingRightsMenu* self, int 
     for (i = 0; i < 8; i++) {
         cUIThing* item = ((cUIThing**)(&self->mpListBox[0]))[i];
         if (item != 0) {
-            ((sVEntry00192740*)item->mVtbl)[8].fn((char*)item + ((sVEntry00192740*)item->mVtbl)[8].delta, enabled);
+            ((sVEntry00192740*)item->mVtbl)[8].fn(vthis(item, ((sVEntry00192740*)item->mVtbl)[8]), enabled);
         }
     }
 }

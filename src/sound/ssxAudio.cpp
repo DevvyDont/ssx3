@@ -995,7 +995,7 @@ extern "C" void func_002861D0(cSSXAudio* self)
 {
     char* mon = (char*)&self->MusicSys;
     sSaVt61D0* vt = (sSaVt61D0*)self->MusicSys.mVtbl;
-    vt[4].fn(mon + vt[4].delta, 1);
+    vt[4].fn(vthis(mon, vt[4]), 1);
 }
 #endif
 
@@ -1027,7 +1027,7 @@ extern "C" void cSSXAudio_FrontEndPurge(cSSXAudio* self)
     char* in = *(char**)self->MusicSys.mpVStreamSys;
     char* obj = in + 0x1D8;
     cSSXAudio_FrontEndPurge_vte* vt = *(cSSXAudio_FrontEndPurge_vte**)(in + 0xAB0);
-    vt[2].fn(obj + vt[2].delta);
+    vt[2].fn(vthis(obj, vt[2]));
     cBankManager_BANK_UnLoad(*(void**)self->MusicSys.mpVStreamSys, 0);
 }
 #endif
@@ -1285,7 +1285,7 @@ static inline void saDeleteObj(void** slot)
     char* p = (char*)*slot;
     if (p) {
         sSaDelVt6A80* vt = *(sSaDelVt6A80**)(p + 4);
-        vt[1].fn(p + vt[1].delta, 3);
+        vt[1].fn(vthis(p, vt[1]), 3);
     }
     *slot = 0;
 }
@@ -1319,7 +1319,7 @@ extern "C" void cSSXAudio_InGameDeInit(cSSXAudio* self)
     char* in = *(char**)self->MusicSys.mpVStreamSys;
     char* obj = in + 0x1D8;
     cSSXAudio_FrontEndPurge_vte* vt = *(cSSXAudio_FrontEndPurge_vte**)(in + 0xAB0);
-    vt[2].fn(obj + vt[2].delta);
+    vt[2].fn(vthis(obj, vt[2]));
     func_002B11B0((char*)&self->SpeechSys, 0);
 }
 #endif
@@ -1535,7 +1535,7 @@ extern "C" void cSSXAudio_OnFinishEvent(cSSXAudio* self, cRider* rider)
         if (func_0028D960(((char*)self))) {
             char* mon = (char*)&self->MusicSys;
             sSaVt6EA0* vt = (sSaVt6EA0*)self->MusicSys.mVtbl;
-            vt[4].fn(mon + vt[4].delta, 36);
+            vt[4].fn(vthis(mon, vt[4]), 36);
             flag = 0;
             self->unk_627C = 0;
         }
@@ -1544,7 +1544,7 @@ extern "C" void cSSXAudio_OnFinishEvent(cSSXAudio* self, cRider* rider)
         if (func_0028D960(((char*)self))) {
             char* mon = (char*)&self->MusicSys;
             sSaVt6EA0* vt = (sSaVt6EA0*)self->MusicSys.mVtbl;
-            vt[4].fn(mon + vt[4].delta, 10);
+            vt[4].fn(vthis(mon, vt[4]), 10);
         }
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1691,7 +1691,7 @@ extern "C" void func_002872A8(cSSXAudio* self)
     char* mon = (char*)&self->MusicSys;
     if (self->MusicSys.mSongPlaying != 0) {
         sSaVt72A8* vt = (sSaVt72A8*)self->MusicSys.mVtbl;
-        vt[4].fn(mon + vt[4].delta, 0);
+        vt[4].fn(vthis(mon, vt[4]), 0);
     } else {
         func_0028D488(self);
         func_0028CF98(self, 0, 0, -1, 0);
@@ -2847,7 +2847,7 @@ extern "C" int cSSXAudio_GetClosestCamera1(cSSXAudio* self, cRider* obj)
     }
     char* being = (char*)&obj->mVtbl;
     sAudVtEnt* entry = &(*(sAudVtEnt**)being)[5];
-    return cSSXAudio_GetClosestCamera(self, entry->fn(being + entry->delta));
+    return cSSXAudio_GetClosestCamera(self, entry->fn(vthis(being, *entry)));
 }
 #endif
 
@@ -3575,22 +3575,22 @@ extern "C" void cSSXAudio_UpdateAudioWorldPainter(cSSXAudio* self, cRider* rider
     {
         char* being = (char*)&rider->mVtbl;
         sVEntry<t4Vector*(void*)>* vt = *(sVEntry<t4Vector*(void*)>**)being;
-        pos = *vt[5].fn(being + vt[5].delta);
+        pos = *vt[5].fn(vthis(being, vt[5]));
     }
     if (func_0028D960(self) != 0) {
         float k = -99999.0f;
         char* painterQuery = ((sSaObjs98A8*)self)->a[idx];
         sVEntry<void*(void*, float, float, float)>* va = *(sVEntry<void*(void*, float, float, float)>**)(painterQuery + 4);
-        func_0028D988(self, ((char*)rider), va[2].fn(painterQuery + va[2].delta, pos.x, pos.y, k));
+        func_0028D988(self, ((char*)rider), va[2].fn(vthis(painterQuery, va[2]), pos.x, pos.y, k));
         char* mixQuery = ((sSaObjs98A8*)self)->b[idx];
         sVEntry<void*(void*, float, float, float)>* vb = *(sVEntry<void*(void*, float, float, float)>**)(mixQuery + 4);
         // PORT: cSSXAudio_ReactToWPMixEvent's unit declaration takes the rider as int
-        cSSXAudio_ReactToWPMixEvent(self, (int)rider, (tWPInGameData*)vb[2].fn(mixQuery + vb[2].delta, pos.x, pos.y, k));
+        cSSXAudio_ReactToWPMixEvent(self, (int)rider, (tWPInGameData*)vb[2].fn(vthis(mixQuery, vb[2]), pos.x, pos.y, k));
     }
     if (cSSXAudio_NeedWPAmbience(self) != 0) {
         char* ambienceQuery = ((sSaObjs98A8*)self)->c[idx];
         sVEntry<void*(void*, float, float, float)>* vc = *(sVEntry<void*(void*, float, float, float)>**)(ambienceQuery + 4);
-        cSSXAudio_ReactToWPAmbienceEvent(self, rider, (tWPInGameData*)vc[2].fn(ambienceQuery + vc[2].delta, pos.x, pos.y, -99999.0f));
+        cSSXAudio_ReactToWPAmbienceEvent(self, rider, (tWPInGameData*)vc[2].fn(vthis(ambienceQuery, vc[2]), pos.x, pos.y, -99999.0f));
     }
 }
 #endif
@@ -3648,7 +3648,7 @@ extern "C" void cSSXAudio_ReactToWPAmbienceEvent(cSSXAudio* self, cRider* rider,
     } else if (id != 33) {
         char* mon = (char*)&self->MusicSys;
         sVEntry<int(void*, int)>* vb = (sVEntry<int(void*, int)>*)self->MusicSys.mVtbl;
-        vb[4].fn(mon + vb[4].delta, id);
+        vb[4].fn(vthis(mon, vb[4]), id);
     }
 }
 #endif
@@ -3786,7 +3786,7 @@ extern "C" int cSSXAudio_GetCharacterLevel(cSSXAudio* self, cRider* src)
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
     char* obj = (char*)&src->mVtbl;
     sSsxAudioVEntryI* vt = *(sSsxAudioVEntryI**)obj;
-    int n = cBEStatInterface_getStatLevel(iface, vt[7].fn(obj + vt[7].delta));
+    int n = cBEStatInterface_getStatLevel(iface, vt[7].fn(vthis(obj, vt[7])));
     if (n < 4) {
         return 0;
     }

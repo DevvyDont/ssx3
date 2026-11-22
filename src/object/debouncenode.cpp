@@ -1640,7 +1640,7 @@ extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
     }
     for (i = 0; i < self->nActive; i++) {
         sDbMesh_43A8* slotIds = (sDbMesh_43A8*)(i * 0xD0 + (int)self->meshes);
-        ((sDbVEntry_43A8*)slotIds->vtable)[2].fn((char*)slotIds + ((sDbVEntry_43A8*)slotIds->vtable)[2].delta, self->time);
+        ((sDbVEntry_43A8*)slotIds->vtable)[2].fn(vthis(slotIds, ((sDbVEntry_43A8*)slotIds->vtable)[2]), self->time);
     }
     func_00344AA0_43A8(self);
     self->first = 0;

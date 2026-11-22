@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "worldpainter/worldpainterquery.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -217,12 +218,12 @@ static inline int valid_0778(sEntry_0778* e)
 
 static inline void end_0778(tWPInGameData* o)
 {
-    ((tEnd_0778)((sOutVt_0778*)o->mVtbl)[69].fn)((char*)o + ((sOutVt_0778*)o->mVtbl)[69].delta);
+    ((tEnd_0778)((sOutVt_0778*)o->mVtbl)[69].fn)(vthis(o, ((sOutVt_0778*)o->mVtbl)[69]));
 }
 
 static inline void set_0778(tWPInGameData* o, float* d, float v)
 {
-    ((tSet_0778)((sOutVt_0778*)o->mVtbl)[66].fn)((char*)o + ((sOutVt_0778*)o->mVtbl)[66].delta, d, v);
+    ((tSet_0778)((sOutVt_0778*)o->mVtbl)[66].fn)(vthis(o, ((sOutVt_0778*)o->mVtbl)[66]), d, v);
 }
 
 /**

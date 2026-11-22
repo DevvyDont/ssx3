@@ -79,7 +79,7 @@ struct sVE_05E8 { short delta; short index; void (*fn)(void*); };
 extern "C" void cUIText_render2D(cUIText* self, float x, float y)
 {
     if (self->mpString == 0 || ((self->mAttr >> 2) & 1) == 0) {
-        ((sVE_05E8*)self->mVtbl)[16].fn((char*)self + ((sVE_05E8*)self->mVtbl)[16].delta);
+        ((sVE_05E8*)self->mVtbl)[16].fn(vthis(self, ((sVE_05E8*)self->mVtbl)[16]));
     }
     int* ov = *(int**)(*(char**)(*(char**)(((char*)self->mpScreen) + 0xD0) + 0x10) + 0x10);
     if (ov != 0 && ((*ov >> 27) & 1)) {
@@ -774,7 +774,7 @@ struct sUIInputVE13E0 {
 static inline int pressed13E0(char* input, int key)
 {
     sUIInputVE13E0* e = &(*(sUIInputVE13E0**)(input + 8))[2];
-    return e->fn(input + e->delta, key);
+    return e->fn(vthis(input, *e), key);
 }
 
 /**
@@ -1158,8 +1158,8 @@ extern "C" void cUITextScroll_setAsciiString(cUITextScroll* self, char* str)
 {
     cUITextScroll_clearBuffer_1(self);
     self->mStringID = (unsigned int)0;
-    ((sVEntry<void(void*, int)>*)self->mVtbl)[5].fn((char*)self + ((sVEntry<void(void*, int)>*)self->mVtbl)[5].delta, 1);
-    ((sVEntry<void(void*, int)>*)self->mVtbl)[24].fn((char*)self + ((sVEntry<void(void*, int)>*)self->mVtbl)[24].delta, 0);
+    ((sVEntry<void(void*, int)>*)self->mVtbl)[5].fn(vthis(self, ((sVEntry<void(void*, int)>*)self->mVtbl)[5]), 1);
+    ((sVEntry<void(void*, int)>*)self->mVtbl)[24].fn(vthis(self, ((sVEntry<void(void*, int)>*)self->mVtbl)[24]), 0);
     cUITextScroll_addAsciiString(self, str);
 }
 #endif

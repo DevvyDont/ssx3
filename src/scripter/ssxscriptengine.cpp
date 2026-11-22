@@ -3050,7 +3050,7 @@ extern "C" void cSSXScriptEngine_FillOrientationFromStartPointInfo(cSSXScriptEng
 {
     char* sub = (char*)&obj->mVtbl;
     sVEntry<int(void*)>* vtEntry = &(*(sVEntry<int(void*)>**)sub)[7];
-    tPathStartpoint* startPoint = (tPathStartpoint*)cPathSys_getStartpoint(gPaths, 1, vtEntry->fn(sub + vtEntry->delta));
+    tPathStartpoint* startPoint = (tPathStartpoint*)cPathSys_getStartpoint(gPaths, 1, vtEntry->fn(vthis(sub, *vtEntry)));
     *pos = sVec4_27B750(startPoint->Pos.x, startPoint->Pos.y, startPoint->Pos.z, 1.0f);
     *yaw = Atan2_27B750(startPoint->Dir.y, startPoint->Dir.x);
     float z = startPoint->Dir.z;
@@ -3122,7 +3122,7 @@ extern "C" void cSSXScriptEngine_FillOrientationFromRiderOrientationInfo(cSSXScr
 {
     char* sub = (char*)&obj->mVtbl;
     sVEntry<t4Vector*(void*)>* vtEntry = &(*(sVEntry<t4Vector*(void*)>**)sub)[5];
-    *pos = *vtEntry->fn(sub + vtEntry->delta);
+    *pos = *vtEntry->fn(vthis(sub, *vtEntry));
     t4Vector dir = *(&obj->mMatrix.row[1]);
     *yaw = Atan2_27B948(dir.y, dir.x);
     sVec2_27B948 horiz(dir.x, dir.y);
@@ -4644,7 +4644,7 @@ extern "C" void cScriptDatabaseObject_MarkEntityAsUsed(sScrOwnerD400* self, int*
     if (vt[4].fn(vthis(self, vt[4]), record->objID, value) == 0) {
         char* obj = (char*)self->objs[record->objID];
         sScrVEntryD400b* vt2 = *(sScrVEntryD400b**)(obj + 0xC);
-        vt2[4].fn(obj + vt2[4].delta, value);
+        vt2[4].fn(vthis(obj, vt2[4]), value);
     }
     record->playerID = value;
     record->relation = 1;
@@ -4698,7 +4698,7 @@ extern "C" void cScriptDatabaseObject_MarkEntityAsFree(sScrOwnerD4A0* self, int*
     if (vt[4].fn(vthis(self, vt[4]), record->id, old) == 0) {
         char* obj = (char*)self->objs[record->id];
         sScrVEntryD4A0b* vt2 = *(sScrVEntryD4A0b**)(obj + 0xC);
-        vt2[5].fn(obj + vt2[5].delta, old);
+        vt2[5].fn(vthis(obj, vt2[5]), old);
     }
 }
 #endif

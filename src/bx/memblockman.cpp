@@ -1245,7 +1245,7 @@ extern "C" void cPS2ExecutionMan_halt(void* self)
         return;
     }
     sMbOwner_AB30* vtable = *(sMbOwner_AB30**)(selfBytes + 0x8);
-    vtable->vt5.fn(selfBytes + vtable->vt5.delta);
+    vtable->vt5.fn(vthis(selfBytes, vtable->vt5));
     cPS2ExecutionMan_waitHalt(self);
 }
 #endif

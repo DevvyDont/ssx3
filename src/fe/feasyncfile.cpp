@@ -596,7 +596,7 @@ extern "C" void cFEStateNetMessenger__cFEStateNetMessenger(cFEStateNetMessenger*
     self->mVtbl = (void**)cFEStateNetMessenger_vtbl;
     char* child = (char*)self->mpParentState;
     sVE1A3EA0* vt = *(sVE1A3EA0**)(child + 0x8);
-    vt[32].fn(child + vt[32].delta);
+    vt[32].fn(vthis(child, vt[32]));
     func_001A5450(self);
     tFEStringPtrVector* feStringPtrVector = &(*(&self->mNames));
     Dealloc1A3EA0(((void**)feStringPtrVector->mpStart), (void**)self->mNames.mpEndOfStorage - (void**)self->mNames.mpStart);
@@ -1474,7 +1474,7 @@ extern "C" void func_001A4E28(cFEStateNetMessenger* self, void* msg)
         int three = 3;
         char* obj = (char*)SSXApp->FELocale;
         sVEntry_001A4E28* vt = *(sVEntry_001A4E28**)(obj + 4);
-        sprintf1(buf, vt[4].fn(obj + vt[4].delta, GetHashValue32(str_kT_POPUP279InvalidName)), self->mszSearchName);
+        sprintf1(buf, vt[4].fn(vthis(obj, vt[4]), GetHashValue32(str_kT_POPUP279InvalidName)), self->mszSearchName);
         cScreenPopup* popup = (cScreenPopup*)func_001A9C50((cFEStateNet*)self);
         popup->info.meType = one;
         cPopupInfo* sub = &popup->info;
@@ -2875,7 +2875,7 @@ static inline int Loc1A7390(char* name)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry_001A7390* vt = *(sVEntry_001A7390**)(obj + 4);
-    return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
+    return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
 /**
@@ -3076,7 +3076,7 @@ extern "C" void cFEStateReadMessagePopup__cFEStateReadMessagePopup(cFEStateReadM
         cPrivateMessage* message = ((cPrivateMessage**)(*(&self->mMessages)).mpFinish)[-1];
         (*(cPrivateMessage***)&(*(&self->mMessages)).mpFinish)--;
         if (message) {
-            ((sVE1A7848*)message->mVtbl)[1].fn((char*)message + ((sVE1A7848*)message->mVtbl)[1].delta, 3);
+            ((sVE1A7848*)message->mVtbl)[1].fn(vthis(message, ((sVE1A7848*)message->mVtbl)[1]), 3);
         }
     }
     tFEPrivateMessageVector* messages = (&self->mMessages);
@@ -3621,7 +3621,7 @@ static inline int Loc1A81F0(char* name)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry_001A81F0* vt = *(sVEntry_001A81F0**)(obj + 4);
-    return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
+    return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
 struct sEntry1A81F0 {
@@ -4593,7 +4593,7 @@ extern "C" int func_001A8E40_impl(void* self, int msg, void* data)
         char* child = *(char**)(obj + 0x20);
         if (child != 0) {
             sVE1A8E40* vt = *(sVE1A8E40**)(child + 0x8);
-            vt[24].fn(child + vt[24].delta, msg, data);
+            vt[24].fn(vthis(child, vt[24]), msg, data);
         }
         break;
     }
@@ -4847,7 +4847,7 @@ extern "C" void func_001A92D8(cFEStateNet* self, int popup, unsigned int kind)
         if (self->unk_6BC == 0) {
             char* obj = (char*)self->mpParentState;
             sVE1A92D8b* vt2 = *(sVE1A92D8b**)(obj + 0x8);
-            vt2[17].fn(obj + vt2[17].delta, self, 0xF);
+            vt2[17].fn(vthis(obj, vt2[17]), self, 0xF);
         }
         func_001A93D0_3(self, popup, 22);
         break;
@@ -5820,7 +5820,7 @@ extern "C" void func_001A9CC0(cFEStateNet* self, void** popup, void* owner, void
             char* obj = (char*)SSXApp->FELocale;
             const char* name = *(const char**)((char*)data + 0xC);
             sVEntry_1A9CC0* vt = *(sVEntry_1A9CC0**)(obj + 4);
-            void* text = vt[4].fn(obj + vt[4].delta, GetHashValue32(str_kT_POPUPCMNLocked));
+            void* text = vt[4].fn(vthis(obj, vt[4]), GetHashValue32(str_kT_POPUPCMNLocked));
             int len = USTR_length(text) + strlen(who) + strlen(name) + 7;
             if (self->unk_6B8 != 0) {
                 cMemMan_free(self->unk_6B8);
@@ -6632,7 +6632,7 @@ static inline int Text_001AB478(char* name)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry_001AB478* vt = *(sVEntry_001AB478**)(obj + 4);
-    return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
+    return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
 /**
@@ -7770,7 +7770,7 @@ struct sVE1ACDD0 {
 static inline void Show1ACDD0(char* o, int on)
 {
     sVE1ACDD0* vt = *(sVE1ACDD0**)(o + 0x8);
-    vt[8].fn(o + vt[8].delta, on);
+    vt[8].fn(vthis(o, vt[8]), on);
 }
 
 /**
@@ -8658,7 +8658,7 @@ extern "C" void cFEStateChallengePopup_onCreateScreen(cFEStateChallengePopup* se
         char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
         cBENewRaceInterface_setNumberAI(iface, D_004A4E88_w[1]);
         sVE1ADE88i* ivt = *(sVE1ADE88i**)(iface + 0xC);
-        ivt[1].fn(iface + ivt[1].delta);
+        ivt[1].fn(vthis(iface, ivt[1]));
         func_001AF728(self, iface, self->mpScreen);
         func_001AF688(self);
         func_0025E6D0(LobbyMan_mLobbyMan, ((const char*)LobbyMan_mLobbyMan->mOpponent));
@@ -9029,7 +9029,7 @@ extern "C" void func_001AE680(cFEStateChallengePopup* self)
         char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
         cBENetworkInterface_networkOpt.bIsRankedGame = cUIListBox_getCurrentEntryData(self->mpLBRankedGame) != 0;
         sVE1AE680* vt = *(sVE1AE680**)(iface + 0xC);
-        vt[1].fn(iface + vt[1].delta);
+        vt[1].fn(vthis(iface, vt[1]));
         int multipliers = cUIListBox_getCurrentEntryData(self->mpLBMultipliers);
         sOpts1AE680* raceOptions = (sOpts1AE680*)((char*)&cBERules_mRules);
         raceOptions->b6 = multipliers;
@@ -9038,7 +9038,7 @@ extern "C" void func_001AE680(cFEStateChallengePopup* self)
         char* nr = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
         cBENewRaceInterface_setNumberAI(nr, cUIListBox_getCurrentEntryData(self->mpLBCPURiders));
         sVE1AE680i* nvt = *(sVE1AE680i**)(nr + 0xC);
-        nvt[1].fn(nr + nvt[1].delta);
+        nvt[1].fn(vthis(nr, nvt[1]));
     }
 }
 #endif
@@ -9083,7 +9083,7 @@ struct sIVE_E7A0 {
 static inline void commit_E7A0(char* iface)
 {
     sIVE_E7A0* ivt = *(sIVE_E7A0**)(iface + 0xC);
-    ivt[1].fn(iface + ivt[1].delta);
+    ivt[1].fn(vthis(iface, ivt[1]));
 }
 
 
@@ -9407,7 +9407,7 @@ extern "C" void func_001AF098(cFEStateChallengePopup* self, int all)
     if (cBENewRaceInterface_newRace.cGameEvent != 0) {
         cBENewRaceInterface_setNumberAI(iface, 0);
         sVE1ADE88i* ivt = *(sVE1ADE88i**)(iface + 0xC);
-        ivt[1].fn(iface + ivt[1].delta);
+        ivt[1].fn(vthis(iface, ivt[1]));
         cUIListBox_setCurrentEntryByIndex(self->mpLBCPURiders, 0);
     } else {
         cUIListBox_setCurrentEntryByIndex(self->mpLBCPURiders, D_004A4E88_AF098[4]);
@@ -9925,7 +9925,7 @@ static inline int Loc1AFA60(char* name)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry_001AFA60* vt = *(sVEntry_001AFA60**)(obj + 4);
-    return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
+    return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
 struct sBXString1AFA60 {
@@ -10935,7 +10935,7 @@ extern "C" void func_001B0E10(cFEStateChallengeReceivedPopup* self)
     }
     char* obj = (char*)self->mpParentState;
     sVE1B0E10* vt = *(sVE1B0E10**)(obj + 0x8);
-    vt[17].fn(obj + vt[17].delta, self, 20);
+    vt[17].fn(vthis(obj, vt[17]), self, 20);
 }
 #endif
 
@@ -11233,7 +11233,7 @@ extern "C" void cFEStateOnlineCharacterSelect_onWidgetEvent(cFEStateOnlineCharac
             char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 1);
             cBENewPlayerInterface_setPlayerCheatCharID(iface, 0, 0);
             sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(iface + 0xC);
-            vt[1].fn(iface + vt[1].delta);
+            vt[1].fn(vthis(iface, vt[1]));
         }
         {
             void* mgr = cSetupMan_mSetupMan;
@@ -11491,7 +11491,7 @@ static inline int Loc1B1808(char* name)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry_001B1808* vt = *(sVEntry_001B1808**)(obj + 4);
-    return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
+    return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
 class cFEVObj_001B1808 {
@@ -12194,7 +12194,7 @@ static inline int Loc1B25E0(char* name)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry_001B25E0* vt = *(sVEntry_001B25E0**)(obj + 4);
-    return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
+    return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
 /**
@@ -13561,7 +13561,7 @@ static inline int VCall1B41A8(int slot)
 {
     char* obj = D_004A1B78_p;
     sVE1B41A8* vt = *(sVE1B41A8**)obj;
-    return vt[slot].fn(obj + vt[slot].delta);
+    return vt[slot].fn(vthis(obj, vt[slot]));
 }
 
 /**
@@ -13580,7 +13580,7 @@ extern "C" void cFEStateNetConfig_onUpdate(cFEStateNetConfig* self)
     if (D_004A1B78_p != 0) {
         char* obj = D_004A1B78_p;
         sVEv1B41A8* vt = *(sVEv1B41A8**)obj;
-        vt[3].fn(obj + vt[3].delta);
+        vt[3].fn(vthis(obj, vt[3]));
     }
     switch (self->miState) {
     case 1:
@@ -13615,7 +13615,7 @@ extern "C" void cFEStateNetConfig_onUpdate(cFEStateNetConfig* self)
         if (VCall1B41A8(11) == 0) {
             char* obj = D_004A1B78_p;
             sVEv1B41A8* vt = *(sVEv1B41A8**)obj;
-            vt[5].fn(obj + vt[5].delta, D_004A1B80);
+            vt[5].fn(vthis(obj, vt[5]), D_004A1B80);
         }
         break;
     case 6:
@@ -13833,7 +13833,7 @@ static inline int Loc1B45E8(char* name)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry_001B45E8* vt = *(sVEntry_001B45E8**)(obj + 4);
-    return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
+    return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
 class cFEVObj_001B45E8 {
@@ -14013,7 +14013,7 @@ static inline int Loc1B4888(char* name)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry_001B4888* vt = *(sVEntry_001B4888**)(obj + 4);
-    return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
+    return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
 /**
@@ -15080,7 +15080,7 @@ static inline int Loc1B5E28(char* name)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry_001B5E28* vt = *(sVEntry_001B5E28**)(obj + 4);
-    return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
+    return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
 /**
@@ -15341,7 +15341,7 @@ extern "C" cFEStateAuthDNAS* cFEStateAuthDNAS_cFEStateAuthDNAS(cFEStateAuthDNAS*
     self->mpustrText = 0;
     char* locale = (char*)SSXApp->FELocale;
     sVE_001B6288* vt = *(sVE_001B6288**)(locale + 4);
-    int n = USTR_length(vt[4].fn(locale + vt[4].delta, GetHashValue32(str_kT_205Authenticating)));
+    int n = USTR_length(vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_205Authenticating)));
     if (self->mpustrText != 0) {
         cMemMan_free(self->mpustrText);
         self->mpustrText = 0;
@@ -16277,7 +16277,7 @@ static inline int Loc1B70D0(char* name)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry_001B70D0* vt = *(sVEntry_001B70D0**)(obj + 4);
-    return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
+    return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
 struct sFEState_001B70D0 {
@@ -17017,7 +17017,7 @@ static inline int Loc_B7E40(char* name)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)(obj + 4);
-    return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
+    return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
 static inline bool IsMode_001B7E40(int m)
@@ -17166,7 +17166,7 @@ static inline int Loc_001B8238(char* key)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry_001B8238* vt = *(sVEntry_001B8238**)(obj + 4);
-    return vt[4].fn(obj + vt[4].delta, GetHashValue32(key));
+    return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(key));
 }
 extern char str_kT_POPUPCMNEABigLogin[];
 extern char str_kT_MEMFENotDetectedFile[];
@@ -17230,7 +17230,7 @@ static inline int Loc_001B83C0(char* key)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry_001B83C0* vt = *(sVEntry_001B83C0**)(obj + 4);
-    return vt[4].fn(obj + vt[4].delta, GetHashValue32(key));
+    return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(key));
 }
 
 // Formats the localized string for key into the dialog's text buffer at 0x702.
@@ -21734,7 +21734,7 @@ extern "C" void func_001BD8C8(cFEStateLobbyMenu* self, int msgPtr)
             char* name = self->mszRoomName;
             char* obj = (char*)SSXApp->FELocale;
             sVEntry_001BD8C8* vt = *(sVEntry_001BD8C8**)(obj + 4);
-            sprintf1(buf, vt[4].fn(obj + vt[4].delta, GetHashValue32(str_kT_POPUP231RoomPassword)), name);
+            sprintf1(buf, vt[4].fn(vthis(obj, vt[4]), GetHashValue32(str_kT_POPUP231RoomPassword)), name);
             cScreenPopup* popup = (cScreenPopup*)func_001A9C50((cFEStateNet*)self);
             popup->info.mtMessage.pustr = (const unsigned short*)buf;
             popup->info.meType = 2;
@@ -22434,7 +22434,7 @@ static inline int Loc1BE540(char* name)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry_001BE540* vt = *(sVEntry_001BE540**)(obj + 4);
-    return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
+    return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
 class cFEVObj_001BE540 {
@@ -23048,7 +23048,7 @@ static inline int Loc_001BEF60(char* name)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry_001BEF60* vt = *(sVEntry_001BEF60**)(obj + 4);
-    return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
+    return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
 static inline int IsHash_001BEF60(int id, char* name) { return id == GetHashValue32(name); }
@@ -23519,7 +23519,7 @@ static inline int Loc1BF758(char* name)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry_001BF758* vt = *(sVEntry_001BF758**)(obj + 4);
-    return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
+    return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
 /**
@@ -24972,7 +24972,7 @@ extern "C" void cFEStateNetQuickPlayPopup_onWidgetEvent(cFEStateNetQuickPlayPopu
                 char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
                 cBENetworkInterface_networkOpt.bIsRankedGame = cUIListBox_getCurrentEntryData(self->mpLBRanked) != 0;
                 sVE_001C1560* vt = *(sVE_001C1560**)(iface + 0xC);
-                vt[1].fn(iface + vt[1].delta);
+                vt[1].fn(vthis(iface, vt[1]));
                 cBENewRaceInterface_setNumberAI(cBE_getInterface_Fv(SSXApp->BE, 0), 0);
                 feStateNetQuickPlayPopup->miSearchOptions[0] = cUIListBox_getCurrentEntryData(self->mpLBRanked);
                 feStateNetQuickPlayPopup->miSearchOptions[1] = cUIListBox_getCurrentEntryData(self->mpLBRace);
@@ -26053,7 +26053,7 @@ extern "C" void func_001C2A18(cFEStateNetQuickMessages* self)
         }
         self->mbChanged = 1;
         sVE1C2A18* vt = *(sVE1C2A18**)(iface + 0xC);
-        vt[1].fn(iface + vt[1].delta);
+        vt[1].fn(vthis(iface, vt[1]));
         func_001C2468(self, idx);
     }
 }
@@ -27380,7 +27380,7 @@ struct sVE1C4BD8 {
 static inline int Pad1C4BD8(char* pad, int slot)
 {
     sVE1C4BD8* vt = *(sVE1C4BD8**)(pad + 0x8);
-    return vt[slot].fn(pad + vt[slot].delta);
+    return vt[slot].fn(vthis(pad, vt[slot]));
 }
 
 /**
@@ -27445,7 +27445,7 @@ struct sVE1C4D28 {
 static inline void Show1C4D28(char* o, int on)
 {
     sVE1C4D28* vt = *(sVE1C4D28**)(o + 0x8);
-    vt[7].fn(o + vt[7].delta, on);
+    vt[7].fn(vthis(o, vt[7]), on);
 }
 
 /**
@@ -27463,7 +27463,7 @@ extern "C" void func_001C4D28(cFEStateStats* self)
     if (snd == 0) snd = &gUISoundNull;
     if (snd != 0) {
         sVE1C4D28* vt = *(sVE1C4D28**)snd;
-        vt[2].fn(snd + vt[2].delta, 1);
+        vt[2].fn(vthis(snd, vt[2]), 1);
     }
     if (self->miFocusMenu != 3) {
         Show1C4D28((char*)self->mpMenus[self->miFocusMenu], 0);
@@ -27500,7 +27500,7 @@ struct sVE1C4E40 {
 static inline void Show1C4E40(char* o, int on)
 {
     sVE1C4E40* vt = *(sVE1C4E40**)(o + 0x8);
-    vt[7].fn(o + vt[7].delta, on);
+    vt[7].fn(vthis(o, vt[7]), on);
 }
 
 /**
@@ -27515,7 +27515,7 @@ extern "C" void func_001C4E40(cFEStateStats* self)
     if (snd == 0) snd = &gUISoundNull;
     if (snd != 0) {
         sVE1C4E40* vt = *(sVE1C4E40**)snd;
-        vt[2].fn(snd + vt[2].delta, 1);
+        vt[2].fn(vthis(snd, vt[2]), 1);
     }
     if (self->miFocusMenu != 3) {
         Show1C4E40((char*)self->mpMenus[self->miFocusMenu], 0);

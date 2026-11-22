@@ -316,7 +316,7 @@ struct sVEi_F050 {
 static inline int padCall_F050(char* in, int slot)
 {
     sVEi_F050* vt = *(sVEi_F050**)(in + 8);
-    return vt[slot].fn(in + vt[slot].delta);
+    return vt[slot].fn(vthis(in, vt[slot]));
 }
 
 static inline void sound_F050(cFEPopupScreenPos* s, int msg)
@@ -360,7 +360,7 @@ extern "C" void cFEPopupScreenPos_onUpdate(cFEPopupScreenPos* self)
     char* in = *(char**)&self->mpEngine->mpInput;
     for (int i = 0; i < 2; i++) {
         sVEntry<void(void*, unsigned char)>* vt = *(sVEntry<void(void*, unsigned char)>**)(in + 8);
-        vt[44].fn(in + vt[44].delta, i);
+        vt[44].fn(vthis(in, vt[44]), i);
         if (padCall_F050(in, 40) == 0) {
             continue;
         }
@@ -584,7 +584,7 @@ extern "C" void cFEStateBraggingRights__cFEStateBraggingRights(cFEStateBraggingR
         while ((char*)&self->mMenuCtrl[0] != panel) {
             panel -= 0x34;
             sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(panel + 0x30);
-            vt[1].fn(panel + vt[1].delta, 0);
+            vt[1].fn(vthis(panel, vt[1]), 0);
         }
     }
     cFEStateNet__cFEStateNet_dtor(self, flags);
@@ -6703,7 +6703,7 @@ extern "C" void func_001E2FE0(int id, unsigned char flag)
         char* obj = (char*)cUIStateStack_findState(&gameUi->mStateStack, GetHashValue32(str_hud_b));
         if (obj != 0) {
             sVEntryK1E2FE0* vt = *(sVEntryK1E2FE0**)(obj + 8);
-            vt[24].fn(obj + vt[24].delta, 8, 0);
+            vt[24].fn(vthis(obj, vt[24]), 8, 0);
         }
     }
     messageList->count++;
@@ -7970,11 +7970,11 @@ extern "C" void func_001E4658(cOVState_MESSAGECENTER* self)
     if (self->mScrollOffset == 0) {
         char* arrowWidget = (char*)self->mpArrowUp;
         sVEntryK1E4658* vt = *(sVEntryK1E4658**)(arrowWidget + 8);
-        vt[9].fn(arrowWidget + vt[9].delta, 0);
+        vt[9].fn(vthis(arrowWidget, vt[9]), 0);
     } else {
         char* arrowWidget = (char*)self->mpArrowUp;
         sVEntryK1E4658* vt = *(sVEntryK1E4658**)(arrowWidget + 8);
-        vt[9].fn(arrowWidget + vt[9].delta, 1);
+        vt[9].fn(vthis(arrowWidget, vt[9]), 1);
     }
     int n;
     if (D_004A20C4 != 0) {
@@ -7987,11 +7987,11 @@ extern "C" void func_001E4658(cOVState_MESSAGECENTER* self)
     if (self->mScrollOffset + 8 >= n) {
         char* arrowWidget = (char*)self->mpArrowDown;
         sVEntryK1E4658* vt = *(sVEntryK1E4658**)(arrowWidget + 8);
-        vt[9].fn(arrowWidget + vt[9].delta, 0);
+        vt[9].fn(vthis(arrowWidget, vt[9]), 0);
     } else {
         char* arrowWidget = (char*)self->mpArrowDown;
         sVEntryK1E4658* vt = *(sVEntryK1E4658**)(arrowWidget + 8);
-        vt[9].fn(arrowWidget + vt[9].delta, 1);
+        vt[9].fn(vthis(arrowWidget, vt[9]), 1);
     }
 }
 #endif
@@ -8025,14 +8025,14 @@ extern "C" void func_001E4758(cOVState_MESSAGECENTER* self)
     if (self->mpTotalMessagesLabel != 0) {
         char* locale = (char*)SSXApp->FELocale;
         sVEntry001E4758* vt = *(sVEntry001E4758**)(locale + 4);
-        unsigned short* fmt = vt[4].fn(locale + vt[4].delta, GetHashValue32(str_kT_OVRCMNTotalMsg));
+        unsigned short* fmt = vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_OVRCMNTotalMsg));
         sprintf1(buf, fmt, func_001E33E8_noarg());
         cUIText_setUnicodeString(self->mpTotalMessagesLabel, buf);
     }
     if (self->mpUnreadMessagesLabel != 0) {
         char* locale = (char*)SSXApp->FELocale;
         sVEntry001E4758* vt = *(sVEntry001E4758**)(locale + 4);
-        unsigned short* fmt = vt[4].fn(locale + vt[4].delta, GetHashValue32(str_kT_OVRCMNUnread));
+        unsigned short* fmt = vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_OVRCMNUnread));
         sprintf1(buf, fmt, func_001E3408());
         cUIText_setUnicodeString(self->mpUnreadMessagesLabel, buf);
     }
@@ -8478,7 +8478,7 @@ extern "C" void func_001E4F70(cOVState_MESSAGECENTER* self, int slot, int id, un
         cUIText_setUnicodeStringByID(view->texts[slot], GetHashValue32(buf));
         char* textObj = (char*)view->texts[slot];
         sVE1E4F70* vt = *(sVE1E4F70**)(textObj + 8);
-        vt[9].fn(textObj + vt[9].delta, 1);
+        vt[9].fn(vthis(textObj, vt[9]), 1);
     }
 }
 #endif
@@ -8769,7 +8769,7 @@ extern "C" void func_001E5428(cOVState_ViewPopup* self)
             unsigned short buf[0x18];
             char* mgr = (char*)SSXApp->FELocale;
             sVEntryS1E5428* vt = *(sVEntryS1E5428**)(mgr + 4);
-            unsigned short* fmt = vt[4].fn(mgr + vt[4].delta, GetHashValue32(str_kT_MSGFAQNumber));
+            unsigned short* fmt = vt[4].fn(vthis(mgr, vt[4]), GetHashValue32(str_kT_MSGFAQNumber));
             sprintf1(buf, fmt, func_001E2DC0(self->miMessage));
             cUIText_setUnicodeString(self->mpNumber, buf);
         } else {
@@ -8952,13 +8952,13 @@ extern "C" void cOVState_ViewPopup_onWidgetEvent(cOVState_ViewPopup* self, void*
     case 5: {
         char* parentState = (char*)self->mpParentState;
         sVE5800* vt = *(sVE5800**)(parentState + 8);
-        vt[17].fn(parentState + vt[17].delta, self, 20);
+        vt[17].fn(vthis(parentState, vt[17]), self, 20);
         break;
     }
     case 6: {
         char* parentState = (char*)self->mpParentState;
         sVE5800* vt = *(sVE5800**)(parentState + 8);
-        vt[17].fn(parentState + vt[17].delta, self, 20);
+        vt[17].fn(vthis(parentState, vt[17]), self, 20);
         break;
     }
     }
@@ -8994,7 +8994,7 @@ extern "C" void func_001E58E0(cOVState_ViewPopup* self)
         if (n == -1) {
             char* parentState = (char*)self->mpParentState;
             sVE5800* vt = *(sVE5800**)(parentState + 8);
-            vt[17].fn(parentState + vt[17].delta, self, 20);
+            vt[17].fn(vthis(parentState, vt[17]), self, 20);
             return;
         }
         self->miMessage = n;
@@ -9010,7 +9010,7 @@ extern "C" void func_001E58E0(cOVState_ViewPopup* self)
     } else {
         char* parentState = (char*)self->mpParentState;
         sVE5800* vt = *(sVE5800**)(parentState + 8);
-        vt[17].fn(parentState + vt[17].delta, self, 20);
+        vt[17].fn(vthis(parentState, vt[17]), self, 20);
     }
 }
 #endif
@@ -9204,19 +9204,19 @@ extern "C" void cOVState_HEAT_STANDINGS_onCreateScreen(cOVState_HEAT_STANDINGS* 
     case 1: {
         char* object = (char*)SSXApp->FELocale;
         sVEntry5B80* vt = *(sVEntry5B80**)(object + 4);
-        fmt = vt[4].fn(object + vt[4].delta, GetHashValue32(str_kT_cmnSlopeCaps));
+        fmt = vt[4].fn(vthis(object, vt[4]), GetHashValue32(str_kT_cmnSlopeCaps));
         break;
     }
     case 2: {
         char* object = (char*)SSXApp->FELocale;
         sVEntry5B80* vt = *(sVEntry5B80**)(object + 4);
-        fmt = vt[4].fn(object + vt[4].delta, GetHashValue32(str_kT_cmnBigAirCaps));
+        fmt = vt[4].fn(vthis(object, vt[4]), GetHashValue32(str_kT_cmnBigAirCaps));
         break;
     }
     case 3: {
         char* object = (char*)SSXApp->FELocale;
         sVEntry5B80* vt = *(sVEntry5B80**)(object + 4);
-        fmt = vt[4].fn(object + vt[4].delta, GetHashValue32(str_kT_cmnPipeCaps));
+        fmt = vt[4].fn(vthis(object, vt[4]), GetHashValue32(str_kT_cmnPipeCaps));
         break;
     }
     }
@@ -9636,7 +9636,7 @@ static inline unsigned short* Loc1E6718(char* name)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(obj + 4);
-    return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
+    return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
 /**
@@ -10567,7 +10567,7 @@ extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen(cOVState_BASSSP_QUA
     screenWidget = (cUIObj_8200*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pointstotal));
     char* loc = (char*)SSXApp->FELocale;
     sVEntry8200* vt = *(sVEntry8200**)(loc + 4);
-    strcpy1(fmt, vt[4].fn(loc + vt[4].delta, GetHashValue32(str_kT_OVRCMNPointstotal)));
+    strcpy1(fmt, vt[4].fn(vthis(loc, vt[4]), GetHashValue32(str_kT_OVRCMNPointstotal)));
     sprintf1(text, fmt, *(unsigned int*)((char*)D_00536640 + off));
     cUIText_setUnicodeString(screenWidget, text);
     screenWidget = (cUIObj_8200*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_new_record));

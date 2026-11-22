@@ -162,7 +162,7 @@ extern "C" void cGFGateState_update(cGFGateState* self)
         char* obj = (char*)cUIStateStack_findState(*(char**)(cGameState_mpGame + 0x48) + 0x18, GetHashValue32(str_hud_c));
         if (obj != 0) {
             sVEntry<int(void*, int, int)>* vtEntry = &(*(sVEntry<int(void*, int, int)>**)(obj + 8))[24];
-            vtEntry->fn(obj + vtEntry->delta, 6, 0);
+            vtEntry->fn(vthis(obj, *vtEntry), 6, 0);
         }
         cSSXAudio_CountdownGateDrop(cAudioInterface_bxAudio());
         func_0028C8C0(cAudioInterface_bxAudio(), 0x78);
@@ -373,7 +373,7 @@ extern "C" void cGFTrackStartState_preloadInit(cGFTrackStartState* self)
             void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
             char* sub = *(char**)(*(char**)(*(char**)(cGameState_mpGame + 0xC) + 0x40) + 0x18) + 0x6C0;
             sVEntry_234F40* vt = *(sVEntry_234F40**)sub;
-            if (cBENewPlayerInterface_isFirstTimeOnTrack(iface, vt[7].fn(sub + vt[7].delta), locationId) != 0) {
+            if (cBENewPlayerInterface_isFirstTimeOnTrack(iface, vt[7].fn(vthis(sub, vt[7])), locationId) != 0) {
                 char* audio = (char*)cAudioInterface_bxAudio();
                 *(int*)(audio + 0x5790) = 0;
                 *(int*)(audio + 0x578C) = 1;
@@ -574,7 +574,7 @@ extern "C" void cGFTrackStartState_preloadUpdate(cGFTrackStartState* self)
         cBENewRaceInterface_setNumberAI(newRace, numAI);
         {
             sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(newRace + 0xC);
-            vt[1].fn(newRace + vt[1].delta);
+            vt[1].fn(vthis(newRace, vt[1]));
         }
         for (; i < numAI; i++) {
             cBENewPlayerInterface_setRiderCharID(newPlayer, i + base, gm->iCharacters[base + i]);
@@ -582,7 +582,7 @@ extern "C" void cGFTrackStartState_preloadUpdate(cGFTrackStartState* self)
         }
         {
             sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(newPlayer + 0xC);
-            vt[1].fn(newPlayer + vt[1].delta);
+            vt[1].fn(vthis(newPlayer, vt[1]));
         }
         cBERaceDB* raceDB = &(*(&cBENewRaceInterface_newRace));
         int quick = 0;
@@ -747,7 +747,7 @@ extern "C" void cGFTrackStartState_gainFocus(cGFTrackStartState* self)
         char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setLastHub(player, 0, cBENewRaceInterface_getLocationID(race));
         sVE_2355C0* vt = *(sVE_2355C0**)(player + 0xC);
-        vt[1].fn(player + vt[1].delta);
+        vt[1].fn(vthis(player, vt[1]));
     }
     (*(sRaceMan_2355C0**)(cGameState_mpGame + 0xC))->f14 = mode != 4;
     cBXLoadIndicator_Hide(SSXApp->Game->LoadIndicator, 0);
@@ -977,7 +977,7 @@ extern "C" void cGFNextHeatState_gainFocus(cGFNextHeatState* self)
     cBENewRaceInterface_setNumberAI(race, n);
     {
         sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(race + 0xC);
-        vt[1].fn(race + vt[1].delta);
+        vt[1].fn(vthis(race, vt[1]));
     }
     for (; i < n; i++) {
         cBENewPlayerInterface_setRiderCharID(player, i + base, gm->iCharacters[base + i]);
@@ -985,7 +985,7 @@ extern "C" void cGFNextHeatState_gainFocus(cGFNextHeatState* self)
     }
     {
         sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(player + 0xC);
-        vt[1].fn(player + vt[1].delta);
+        vt[1].fn(vthis(player, vt[1]));
     }
     cAI_prepareToPurgeComputerRiders(SSXApp->Game->AI);
     if (n >= 2)

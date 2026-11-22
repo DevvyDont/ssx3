@@ -72,7 +72,7 @@ extern "C" void cFEStateProfileSelect_onWidgetEvent(cFEStateProfileSelect* self,
         ((cUIObjK18EB40*)menu)->setColor(sColorK18EB40(1.0f, 1.0f, 0.0f, 0.0f));
         char* custom = *(char**)self->mpEngine;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(custom + 4);
-        void* nextState = vt[4].fn(custom + vt[4].delta, self, menu->mMiscData);
+        void* nextState = vt[4].fn(vthis(custom, vt[4]), self, menu->mMiscData);
         if (nextState != 0)
             cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         break;
@@ -80,7 +80,7 @@ extern "C" void cFEStateProfileSelect_onWidgetEvent(cFEStateProfileSelect* self,
     case 6: {
         char* custom = *(char**)self->mpEngine;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(custom + 4);
-        void* nextState = vt[5].fn(custom + vt[5].delta, self, menu->mMiscData);
+        void* nextState = vt[5].fn(vthis(custom, vt[5]), self, menu->mMiscData);
         if (nextState != 0)
             cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         break;
@@ -877,7 +877,7 @@ extern "C" void cFEStateProfileLoad_updateDone(cFEStateProfileLoad* self)
         if (sel == 0) {
             char* frontEnd = *(char**)self->mpEngine;
             sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(frontEnd + 4);
-            void* nextState = vt[5].fn(frontEnd + vt[5].delta, self, self->mType);
+            void* nextState = vt[5].fn(vthis(frontEnd, vt[5]), self, self->mType);
             if (nextState != 0)
                 cUIStateStack_pushCheck((char*)self->mpEngine + 0x18, nextState);
         } else if (sel == 1) {
@@ -889,7 +889,7 @@ extern "C" void cFEStateProfileLoad_updateDone(cFEStateProfileLoad* self)
             cBENewRaceInterface_bIsBamLocation = 1;
             cBENewRaceInterface_newRace.iLocationIdx = x;
             sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(race + 0xC);
-            vt[1].fn(race + vt[1].delta);
+            vt[1].fn(vthis(race, vt[1]));
             cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
         } else if (sel == 2) {
             gInLodge = 0;
@@ -1064,7 +1064,7 @@ static inline void* GetText_K18FD90(char* key)
 {
     char* db = (char*)SSXApp->FELocale;
     sVEntryK18FD90* vt = *(sVEntryK18FD90**)(db + 4);
-    return vt[4].fn(db + vt[4].delta, GetHashValue32(key));
+    return vt[4].fn(vthis(db, vt[4]), GetHashValue32(key));
 }
 
 /**

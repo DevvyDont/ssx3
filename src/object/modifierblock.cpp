@@ -231,7 +231,7 @@ extern "C" void tModifierBlock_preUpdate(tModifierBlock* self)
     }
     cPhysicsModifier* physicsModifier = self->Physics;
     if (physicsModifier != 0) {
-        ((sVEntry<void(void*)>*)physicsModifier->mVtbl)[2].fn((char*)physicsModifier + ((sVEntry<void(void*)>*)physicsModifier->mVtbl)[2].delta);
+        ((sVEntry<void(void*)>*)physicsModifier->mVtbl)[2].fn(vthis(physicsModifier, ((sVEntry<void(void*)>*)physicsModifier->mVtbl)[2]));
         physicsModifier = self->Physics;
         sMbVEntryI2C70* vt2 = (sMbVEntryI2C70*)((sVEntry<void(void*)>*)physicsModifier->mVtbl);
         if (vt2[4].fn(vthis(physicsModifier, vt2[4])) == 0) {
@@ -440,7 +440,7 @@ extern "C" void tModifierBlock_signal(tModifierBlock* self, int id, float value)
     }
     cPhysicsModifier* physicsModifier = self->Physics;
     if (physicsModifier != 0) {
-        ((sVEntry<void(void*, int, float)>*)physicsModifier->mVtbl)[3].fn((char*)physicsModifier + ((sVEntry<void(void*, int, float)>*)physicsModifier->mVtbl)[3].delta, id, value);
+        ((sVEntry<void(void*, int, float)>*)physicsModifier->mVtbl)[3].fn(vthis(physicsModifier, ((sVEntry<void(void*, int, float)>*)physicsModifier->mVtbl)[3]), id, value);
     }
     sMbLink2F40* firstEffect = (sMbLink2F40*)self->Effect.Next;
     if (firstEffect != 0) {
@@ -822,13 +822,13 @@ struct sVEv_353448 { short delta; short index; void (*fn)(void*, void*); };
 static inline int VCall0_353448(char* o, int voff, int slot)
 {
     sVE_353448* e = &(*(sVE_353448**)(o + voff))[slot];
-    return e->fn(o + e->delta);
+    return e->fn(vthis(o, *e));
 }
 
 static inline void VCall1_353448(char* o, int voff, int slot, void* arg)
 {
     sVEv_353448* e = &(*(sVEv_353448**)(o + voff))[slot];
-    e->fn(o + e->delta, arg);
+    e->fn(vthis(o, *e), arg);
 }
 
 /**
@@ -882,7 +882,7 @@ extern "C" void tModifierBlock_writeToReplayFrame(tModifierBlock* self, char* st
     }
     {
         sVEntry<void(void*, void*, int)>* writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-        writeEntry->fn(stream + writeEntry->delta, &info, 52);
+        writeEntry->fn(vthis(stream, *writeEntry), &info, 52);
     }
     char* w0 = (char*)self->RootTransform;
     if (w0 != 0) {
@@ -981,7 +981,7 @@ extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, cReplay
     self->UVScroll = 0;
     self->TexFlip = 0;
     self->Physics = 0;
-    ((sMbStreamVEntry36D8*)stream->mVtbl)[2].fn((char*)stream + ((sMbStreamVEntry36D8*)stream->mVtbl)[2].delta, &hdr, 52);
+    ((sMbStreamVEntry36D8*)stream->mVtbl)[2].fn(vthis(stream, ((sMbStreamVEntry36D8*)stream->mVtbl)[2]), &hdr, 52);
 
     if (hdr.flags & 1) {
         if (hdr.type == 1) {

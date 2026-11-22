@@ -539,10 +539,10 @@ static inline void cUIStateStack_destroyStates_purge(cList* list)
             char* next = *(char**)(n + 4);
             if (((*(int*)(n + 0x1C) >> 6) & 1) == 0) {
                 sUIStVtF8C8a* vt = *(sUIStVtF8C8a**)(n + 8);
-                vt[5].fn(n + vt[5].delta);
+                vt[5].fn(vthis(n, vt[5]));
                 if (n != 0) {
                     sUIStVtF8C8* vt2 = *(sUIStVtF8C8**)(n + 8);
-                    vt2[1].fn(n + vt2[1].delta, 3);
+                    vt2[1].fn(vthis(n, vt2[1]), 3);
                 }
             }
             n = next;

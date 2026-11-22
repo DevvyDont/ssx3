@@ -97,7 +97,7 @@ struct sFlVEntry_34EF40 {
 static inline t4Vector nodePos_34EF40(char* self)
 {
     sFlVEntry_34EF40* vt = *(sFlVEntry_34EF40**)(self + 0xC);
-    return *(t4Vector*)(vt[24].fn(self + vt[24].delta) + 0x30);
+    return *(t4Vector*)(vt[24].fn(vthis(self, vt[24])) + 0x30);
 }
 
 /**

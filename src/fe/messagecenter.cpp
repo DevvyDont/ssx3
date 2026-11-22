@@ -138,7 +138,7 @@ extern "C" void cFEStateRequestLine_onWidgetCreate(sReqLine_6F98* self, sWidget_
     } else if (hash == GetHashValue32(str_song_list)) {
         char* db = (char*)SSXApp->FELocale;
         sVEs_6F98* vt = *(sVEs_6F98**)(db + 4);
-        unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(str_kT_OVRCMNSongsInList));
+        unsigned short* fmt = vt[4].fn(vthis(db, vt[4]), GetHashValue32(str_kT_OVRCMNSongsInList));
         int len = USTR_length(fmt) + 5;
         unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, str_cFEStateRequestLine, 0x100, 0);
         sprintf1(buf, fmt, countBits_6F98(self->done));
@@ -350,7 +350,7 @@ extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, cUIThing* i
             char* pl = (char*)cAudioInterface_bxAudio();
             sVE_7500* vt = *(sVE_7500**)(pl + 0x5558);
             char* obj = pl + 0x118;
-            vt[3].fn(obj + vt[3].delta, 10);
+            vt[3].fn(vthis(obj, vt[3]), 10);
         }
         if ((int)SSXApp->Game != 0) {
             cUIStateStack_pop(self->engine + 0x18, 1);
@@ -793,7 +793,7 @@ extern "C" void cFEStateRequestLine_updateCurrentlyPlaying(cFEStateRequestLine* 
             ((cMsgWidget_197E70*)self->mpCurSongTitle)->show(1);
             char* db = (char*)SSXApp->FELocale;
             sVtEntry_197E70* vt = *(sVtEntry_197E70**)(db + 4);
-            unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(str_kT_16NowPlaying));
+            unsigned short* fmt = vt[4].fn(vthis(db, vt[4]), GetHashValue32(str_kT_16NowPlaying));
             int len = USTR_length(fmt) + strlen(name) + 1;
             unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, str_cFEStateRequestLine, 0x100, 0);
             // PORT: the format argument is a string pointer passed through an int parameter
@@ -809,7 +809,7 @@ extern "C" void cFEStateRequestLine_updateCurrentlyPlaying(cFEStateRequestLine* 
             ((cMsgWidget_197E70*)self->mpCurSongArtist)->show(1);
             char* db = (char*)SSXApp->FELocale;
             sVtEntry_197E70* vt = *(sVtEntry_197E70**)(db + 4);
-            unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(str_kT_16Artist));
+            unsigned short* fmt = vt[4].fn(vthis(db, vt[4]), GetHashValue32(str_kT_16Artist));
             int len = USTR_length(fmt) + strlen(artist) + 1;
             unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, str_cFEStateRequestLine, 0x100, 0);
             // PORT: the format argument is a string pointer passed through an int parameter
@@ -854,7 +854,7 @@ extern "C" void cFEStateRequestLine_updatePlayListCounter(cFEStateRequestLine* r
     cFEStateRequestLine* self = requestLine;
     char* db = (char*)SSXApp->FELocale;
     sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(db + 4);
-    unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(str_kT_OVRCMNSongsInList));
+    unsigned short* fmt = vt[4].fn(vthis(db, vt[4]), GetHashValue32(str_kT_OVRCMNSongsInList));
     unsigned short* buf = (unsigned short*)operator_new_tag((USTR_length(fmt) + 5) * 2, str_disconnected_from_serverErrorString, 0x100, 0);
     int n = 0;
     int j;
@@ -1173,7 +1173,7 @@ extern "C" void cFEStateRequestLine_updateHilightedSongInfo(cFEStateRequestLine*
     if (((cMsgWidget_1986D0*)self->mpArtist) != 0) {
         char* db = (char*)SSXApp->FELocale;
         sVtEntry_001986D0* vt = *(sVtEntry_001986D0**)(db + 4);
-        unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(str_kT_OVRCMNSongBy));
+        unsigned short* fmt = vt[4].fn(vthis(db, vt[4]), GetHashValue32(str_kT_OVRCMNSongBy));
         char* name = (char*)cFEStateRequestLine_getSongArtist((cFEStateRequestLine*)self, idx);
         int len = USTR_length(fmt) + strlen(name) + 1;
         unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, str_disconnected_from_serverErrorString, 0x100, 0);

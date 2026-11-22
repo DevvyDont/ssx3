@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "be/beintnewrace.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -485,7 +486,7 @@ extern "C" int cBENewRaceInterface_setGameMode(cBENewRaceInterface* self, int mo
         char* playerInterface = (char*)cBENewPlayerInterface_getThis();
         cBENewPlayerInterface_setToMissionMan(1);
         sVE_144DF0* vt = *(sVE_144DF0**)(playerInterface + 0xC);
-        vt[1].fn(playerInterface + vt[1].delta);
+        vt[1].fn(vthis(playerInterface, vt[1]));
     } else if (*((signed char*)Race_144DF0() + 0x48) == 4) {
         cBENewRaceInterface_setNumberHumans(self, humans);
         cBENewRaceInterface_setNumberAI(self, 0);
@@ -494,7 +495,7 @@ extern "C" int cBENewRaceInterface_setGameMode(cBENewRaceInterface* self, int mo
         if (cBENewPlayerInterface_isMissionMan(1) != 0) {
             cBENewPlayerInterface_resetFromMissionMan(playerInterface, 1);
             sVE_144DF0* vt = *(sVE_144DF0**)(playerInterface + 0xC);
-            vt[1].fn(playerInterface + vt[1].delta);
+            vt[1].fn(vthis(playerInterface, vt[1]));
         }
     }
     *((signed char*)Race_144DF0() + 0x48) = mode;

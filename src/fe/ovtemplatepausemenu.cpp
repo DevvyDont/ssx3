@@ -97,7 +97,7 @@ extern "C" void cOVTemplate_PauseMenu_onCreateScreen(cOVTemplate_PauseMenu* stat
                 int nameHash = GetHashValue32(str_H_J[self->mPauseMenuOptions[i]]);
                 char* mgr = *(char**)((char*)((void*)self->mpEngine) + 0x10);
                 sVEntry<void*(void*, int)>* vt = *(sVEntry<void*(void*, int)>**)(mgr + 4);
-                if (vt[4].fn(mgr + vt[4].delta, nameHash) != 0) {
+                if (vt[4].fn(vthis(mgr, vt[4]), nameHash) != 0) {
                     cUIText_setUnicodeStringByID((cUIText*)textObj, nameHash);
                 } else {
                     cUIText_setAsciiString((cUIText*)textObj, str_H_J[self->mPauseMenuOptions[i]]);
@@ -169,7 +169,7 @@ extern "C" int cOVTemplate_PauseMenu_onGainTransition(cOVTemplate_PauseMenu* sel
             char* obj = (char*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(buf));
             if (obj != 0) {
                 sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(obj + 8);
-                vt[9].fn(obj + vt[9].delta, 0);
+                vt[9].fn(vthis(obj, vt[9]), 0);
             }
         }
         for (int i = 0; i < 8; i++) {
@@ -178,7 +178,7 @@ extern "C" int cOVTemplate_PauseMenu_onGainTransition(cOVTemplate_PauseMenu* sel
                 char* obj = (char*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(buf));
                 if (obj != 0) {
                     sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(obj + 8);
-                    vt[9].fn(obj + vt[9].delta, 1);
+                    vt[9].fn(vthis(obj, vt[9]), 1);
                     sVec3_001F8448 itemPos;
                     itemPos.x = 0.0f;
                     itemPos.z = 0.0f;
@@ -211,7 +211,7 @@ struct sVEnt_001F85C0 { short delta; short index; void (*fn)(void*, void*); };
 static inline void setColor_001F85C0(char* obj, void* c)
 {
     sVEnt_001F85C0* vt = *(sVEnt_001F85C0**)(obj + 8);
-    vt[11].fn(obj + vt[11].delta, c);
+    vt[11].fn(vthis(obj, vt[11]), c);
 }
 
 /**
@@ -317,7 +317,7 @@ extern "C" void cOVTemplate_PauseMenu_onUpdate(cOVTemplate_PauseMenu* self)
             sColor_1F8728 color = *(sColor_1F8728*)(uiObj + 0x1C);
             color.r = self->mNewMailAlpha;
             sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(uiObj + 8);
-            vt[11].fn(uiObj + vt[11].delta, &color);
+            vt[11].fn(vthis(uiObj, vt[11]), &color);
         }
     }
     cOVState_onUpdate(self);

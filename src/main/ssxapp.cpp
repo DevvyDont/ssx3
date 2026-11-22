@@ -958,7 +958,7 @@ extern "C" void cSSXApp_purge(sSSXAppPurge* self)
         char* consoleConfig = self->f9C;
         if (consoleConfig) {
             sVEPurge* vt = *(sVEPurge**)(consoleConfig + 0x34);
-            vt[1].fn(consoleConfig + vt[1].delta, 3);
+            vt[1].fn(vthis(consoleConfig, vt[1]), 3);
         }
     }
     SSXApp = 0;

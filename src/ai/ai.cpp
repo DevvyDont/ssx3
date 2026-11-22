@@ -733,7 +733,7 @@ extern "C" void* cAI_commonInit(cAI* aiManager, int flag)
     {
         char* obj = self->mRiders[i] + 0x6C0;
         sVEntry1297C8* vt = *(sVEntry1297C8**)obj;
-        if (vt[9].fn(obj + vt[9].delta) != 0 || flag != 0)
+        if (vt[9].fn(vthis(obj, vt[9])) != 0 || flag != 0)
         {
             func_00154A58(i, *(int*)(self->mRiders[i] + 0x790) + 0xFC);
             cRider_initAlways(self->mRiders[i]);
@@ -1175,7 +1175,7 @@ extern "C" void cAI_initComputerActors(cAI* aiManager)
         cBENewPlayerInterface_setRiderCharID(iface, idx, ch);
         cBENewPlayerInterface_setRiderCheatCharID(iface, idx, 0);
         sVEntryCA* vt = *(sVEntryCA**)(iface + 0xC);
-        vt[1].fn(iface + vt[1].delta);
+        vt[1].fn(vthis(iface, vt[1]));
         sRiderCA* slotRider = self->mRiders[idx];
         int noController = -1;
         slotRider->mCtrl = noController;
@@ -1185,7 +1185,7 @@ extern "C" void cAI_initComputerActors(cAI* aiManager)
         idx++;
     }
     sVEntryCA* vt = *(sVEntryCA**)(iface + 0xC);
-    vt[1].fn(iface + vt[1].delta);
+    vt[1].fn(vthis(iface, vt[1]));
     self->mCount = idx;
 }
 #endif
@@ -1715,7 +1715,7 @@ extern "C" void func_0012A998(cAI* self)
         {
             char* sub = (char*)&rider->mVtbl;
             sVEntry0012A998* vt = *(sVEntry0012A998**)sub;
-            if (func_0012A1F0(self, vt[kRiderVt_getAIIndex].fn(sub + vt[kRiderVt_getAIIndex].delta)) != 0)
+            if (func_0012A1F0(self, vt[kRiderVt_getAIIndex].fn(vthis(sub, vt[kRiderVt_getAIIndex]))) != 0)
             {
                 cRider* hiddenRider = *(cRider**)(list[i] + 0x18);
                 hiddenRider->mRenderFlag = 0;
@@ -1766,7 +1766,7 @@ extern "C" int func_0012AA78(sOwner_0012AA78* self) {
         if (cRider_isSafeToDelete(self->ent[i]->rider) == 0) {
             char* obj = (char*)&self->ent[i]->rider->mVtbl;
             sVE_0012AA78* vt = *(sVE_0012AA78**)obj;
-            if (func_0012A1F0((cAI*)self, vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta)) != 0)
+            if (func_0012A1F0((cAI*)self, vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex]))) != 0)
                 ok = 0;
         }
     }
@@ -2014,7 +2014,7 @@ extern "C" void cAI_purgeComputerRiders(cAI* aiManager)
         {
             char* obj = *(char**)((char*)computer + 0x18) + 0x6C0;
             sAiMissionVEntry* vt = *(sAiMissionVEntry**)obj;
-            vt[1].fn(obj + vt[1].delta, 3);
+            vt[1].fn(vthis(obj, vt[1]), 3);
         }
         self->mListA[i] = 0;
     }
@@ -2046,7 +2046,7 @@ extern "C" void cAI_purgeComputerActors(cAI* aiManager)
         {
             char* obj = *(char**)((char*)actor + 0x18) + 0x6C0;
             sAiMissionVEntry* vt = *(sAiMissionVEntry**)obj;
-            vt[1].fn(obj + vt[1].delta, 3);
+            vt[1].fn(vthis(obj, vt[1]), 3);
         }
         self->mListB[i] = 0;
     }
@@ -2078,7 +2078,7 @@ extern "C" void cAI_purgeMissionRiders(cAI* aiManager)
         {
             char* obj = *(char**)((char*)missionRider + 0x18) + 0x6C0;
             sAiMissionVEntry* vt = *(sAiMissionVEntry**)obj;
-            vt[1].fn(obj + vt[1].delta, 3);
+            vt[1].fn(vthis(obj, vt[1]), 3);
         }
         self->mListC[i] = 0;
     }
@@ -2179,7 +2179,7 @@ extern "C" void cAI_shutdown(cAI* aiManager)
         {
             char* obj = *(char**)((char*)player + 0x18) + 0x6C0;
             sAiMissionVEntry* vt = *(sAiMissionVEntry**)obj;
-            vt[1].fn(obj + vt[1].delta, 3);
+            vt[1].fn(vthis(obj, vt[1]), 3);
         }
         self->mList[i] = 0;
     }
@@ -2526,7 +2526,7 @@ static inline void replayWriteObj(char* obj, void* frame)
 {
     char* x = *(char**)(*(char**)(obj + 0x18) + 0x77C);
     sVEntryWF2* vt = *(sVEntryWF2**)(x + 0xDE8);
-    vt[2].fn(x + vt[2].delta, frame);
+    vt[2].fn(vthis(x, vt[2]), frame);
 }
 
 /**
@@ -2573,7 +2573,7 @@ static inline void replayReadObj(char* obj, void* frame)
 {
     char* x = *(char**)(*(char**)(obj + 0x18) + 0x77C);
     sVEntryRF2* vt = *(sVEntryRF2**)(x + 0xDE8);
-    vt[3].fn(x + vt[3].delta, frame);
+    vt[3].fn(vthis(x, vt[3]), frame);
 }
 
 /**
@@ -4747,7 +4747,7 @@ extern "C" void cWipeoutControl_loseFocus(cWipeoutControl* self)
     {
         char* sub = (char*)&self->mRider->mVtbl;
         sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
-        if (vt[8].fn(sub + vt[8].delta))
+        if (vt[8].fn(vthis(sub, vt[8])))
         {
             cRider_flagEventReaction(self->mRider, 4, 0.0f);
         }

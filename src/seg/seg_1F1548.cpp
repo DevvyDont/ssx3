@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "ui/uithing.h"
 #include "main/gameviewman.h"
 #include "bx/math3d.h"
@@ -1128,7 +1129,7 @@ extern "C" void func_002F1A08(sFxMgr_1A08* self)
     if (self->rider != 0) {
         char* sub = self->rider + 0x6C0;
         sFxVE_1A08* vt = *(sFxVE_1A08**)sub;
-        vel = *vt[2].fn(sub + vt[2].delta);
+        vel = *vt[2].fn(vthis(sub, vt[2]));
         nrm = groundNormal_1A08(self->rider);
     }
     float speed = len_1A08(vel);
@@ -1328,7 +1329,7 @@ extern "C" void func_002F2218(char* self, int idx)
     char* emitter = *slot;
     if (emitter != 0) {
         sVE_2F2218* vt = *(sVE_2F2218**)(emitter + 0x1F8);
-        vt[4].fn(emitter + vt[4].delta, 3);
+        vt[4].fn(vthis(emitter, vt[4]), 3);
     }
     *slot = 0;
 }

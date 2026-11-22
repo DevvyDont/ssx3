@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "fe/festateubertrick.h"
 
 //100%
@@ -55,7 +56,7 @@ struct sUIVtP_3DE0 { short delta; short index; void (*fn)(void*, void*); };
 static inline void uiCall_3DE0(char* o, int slot, int a)
 {
     sUIVt_3DE0* vt = *(sUIVt_3DE0**)(o + 8);
-    vt[slot].fn(o + vt[slot].delta, a);
+    vt[slot].fn(vthis(o, vt[slot]), a);
 }
 
 static inline int lookup_3DE0(char* self, char* name)
@@ -207,11 +208,11 @@ extern "C" void cFEStateUberTrick_updateTrickMenu(cFEStateUberTrick* vself)
     btnPos1 = *(sGateVec_3DE0*)(instBtn1 + 0x44);
     btnPos2 = *(sGateVec_3DE0*)(instBtn2 + 0x44);
     sUIVtP_3DE0* vt0 = *(sUIVtP_3DE0**)(instBtn0 + 8);
-    vt0[20].fn(instBtn0 + vt0[20].delta, &btnSize0);
+    vt0[20].fn(vthis(instBtn0, vt0[20]), &btnSize0);
     sUIVtP_3DE0* vt1 = *(sUIVtP_3DE0**)(instBtn1 + 8);
-    vt1[20].fn(instBtn1 + vt1[20].delta, &btnSize1);
+    vt1[20].fn(vthis(instBtn1, vt1[20]), &btnSize1);
     sUIVtP_3DE0* vt2 = *(sUIVtP_3DE0**)(instBtn2 + 8);
-    vt2[20].fn(instBtn2 + vt2[20].delta, &btnSize2);
+    vt2[20].fn(vthis(instBtn2, vt2[20]), &btnSize2);
     float x = instPos0.x + textSize0.x;
     btnPos0.x = x;
     btnPos1.x = x;

@@ -105,7 +105,7 @@ extern sDrawState sDrawState_s_defaultDrawState;
 extern "C" void cObjectInterface_renderSimpleLightHalo(void* obj, float* src, int kind, float size, float angle)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    if (((IsHiddenFn_1D10)((sVEntry<void>*)ps2GraphicsMan->mVtbl)[91].fn)((char*)ps2GraphicsMan + ((sVEntry<void>*)ps2GraphicsMan->mVtbl)[91].delta, obj) != 0) {
+    if (((IsHiddenFn_1D10)((sVEntry<void>*)ps2GraphicsMan->mVtbl)[91].fn)(vthis(ps2GraphicsMan, ((sVEntry<void>*)ps2GraphicsMan->mVtbl)[91]), obj) != 0) {
         return;
     }
     sCol_1D10 col;
@@ -127,12 +127,12 @@ extern "C" void cObjectInterface_renderSimpleLightHalo(void* obj, float* src, in
     setA_1D10((ctx->m_pCurrentDrawState), 20, 0xFF, 12);
     (ctx->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex_1D10((sRCtx_1D10*)ctx, kind + 37);
     if (angle != 0.0f) {
-        ((DrawRotFn_1D10)((sVEntry<void>*)ctx->mVtbl)[79].fn)((char*)ctx + ((sVEntry<void>*)ctx->mVtbl)[79].delta, angle * 0.01745329424738884f, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col, 1);
+        ((DrawRotFn_1D10)((sVEntry<void>*)ctx->mVtbl)[79].fn)(vthis(ctx, ((sVEntry<void>*)ctx->mVtbl)[79]), angle * 0.01745329424738884f, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col, 1);
         if (kind == 1 || kind == 4) {
-            ((DrawRotFn_1D10)((sVEntry<void>*)ctx->mVtbl)[79].fn)((char*)ctx + ((sVEntry<void>*)ctx->mVtbl)[79].delta, -angle * 0.01745329424738884f, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col, 1);
+            ((DrawRotFn_1D10)((sVEntry<void>*)ctx->mVtbl)[79].fn)(vthis(ctx, ((sVEntry<void>*)ctx->mVtbl)[79]), -angle * 0.01745329424738884f, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col, 1);
         }
     } else {
-        ((DrawFn_1D10)((sVEntry<void>*)ctx->mVtbl)[78].fn)((char*)ctx + ((sVEntry<void>*)ctx->mVtbl)[78].delta, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col);
+        ((DrawFn_1D10)((sVEntry<void>*)ctx->mVtbl)[78].fn)(vthis(ctx, ((sVEntry<void>*)ctx->mVtbl)[78]), obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col);
     }
     (*(sDrawState**)&ctx->m_pCurrentDrawState)--;
 }

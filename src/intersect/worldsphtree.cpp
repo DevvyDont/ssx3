@@ -1341,7 +1341,7 @@ extern "C" float cOverlapList_terrainIntersect1(cOverlapList* self, char* query,
     }
     int best = 0;
     sVEntry<float(void*)>* vt = *(sVEntry<float(void*)>**)(query + 0x50);
-    float ref = vt[3].fn(query + vt[3].delta);
+    float ref = vt[3].fn(vthis(query, vt[3]));
     float bestDiff = absf_003342D0(hits[0].dist - ref);
     for (int i = 1; i < n; i++) {
         float diff = absf_003342D0(hits[i].dist - ref);
@@ -2736,7 +2736,7 @@ extern "C" float cBXNash_terrainIntersect1(cBXNash* self, char* intersectType, s
     }
     int best = 0;
     sVEntry<float(void*)>* vt = *(sVEntry<float(void*)>**)(intersectType + 0x50);
-    float ref = vt[3].fn(intersectType + vt[3].delta);
+    float ref = vt[3].fn(vthis(intersectType, vt[3]));
     float bestDiff = absf_00336850(hits[0].dist - ref);
     for (int i = 1; i < n; i++) {
         float paramDiff = absf_00336850(hits[i].dist - ref);
@@ -3170,7 +3170,7 @@ extern "C" float cBXNash_staticObjectIntersect1(cBXNash* self, char* query, sHit
     }
     int best = 0;
     sVEntry<float(void*)>* vt = *(sVEntry<float(void*)>**)(query + 0x50);
-    float ref = vt[3].fn(query + vt[3].delta);
+    float ref = vt[3].fn(vthis(query, vt[3]));
     float bestDiff = absf_003378C0(hits[0].dist - ref);
     for (int i = 1; i < n; i++) {
         float diff = absf_003378C0(hits[i].dist - ref);
@@ -5903,7 +5903,7 @@ extern "C" void* cAnimObjectNode_cAnimObjectNode(cAnimObjectNode* self, int buck
 {
     cAnimNode_cAnimNode1((char*)&self->CurrTime, bucket, stream);
     self->mVtbl = cAnimObjectNode_vtbl;
-    (*stream)[2].fn((char*)stream + (*stream)[2].delta, self, 0x1C);
+    (*stream)[2].fn(vthis(stream, (*stream)[2]), self, 0x1C);
     self->Flags |= 1;
     return ((void*)self);
 }
@@ -5999,7 +5999,7 @@ extern "C" int cAnimObjectNode_updateNode(cAnimObjectNode* self)
         return 1;
     }
     sVEntry_00341D48* vt = (sVEntry_00341D48*)self->mVtbl;
-    vt[34].fn(obj + vt[34].delta, 1);
+    vt[34].fn(vthis(obj, vt[34]), 1);
     return 0;
 }
 #endif
@@ -6363,7 +6363,7 @@ extern "C" void* cAnimTeeterNode_cAnimTeeterNode(cAnimTeeterNode* self, int buck
 {
     cAnimNode_cAnimNode1(&self->CurrTime, bucket, stream);
     self->mVtbl = cAnimTeeterNode_vtbl;
-    (*stream)[2].fn((char*)stream + (*stream)[2].delta, self, 0x30);
+    (*stream)[2].fn(vthis(stream, (*stream)[2]), self, 0x30);
     self->Flags |= 1;
     return ((void*)self);
 }
@@ -6787,8 +6787,8 @@ extern "C" void* cBoostModifier_cBoostModifier1(cBoostModifier* self, sVEntry<vo
 {
     self->Active = 1;
     self->mVtbl = cBoostModifier_vtbl;
-    ((ReadFn00342808)(*stream)[2].fn)((char*)stream + (*stream)[2].delta, (char*)&self->Boost, 0x30);
-    self->Instance = (tInstanceRecord*)((ReadIntFn00342808)(*stream)[3].fn)((char*)stream + (*stream)[3].delta);
+    ((ReadFn00342808)(*stream)[2].fn)(vthis(stream, (*stream)[2]), (char*)&self->Boost, 0x30);
+    self->Instance = (tInstanceRecord*)((ReadIntFn00342808)(*stream)[3].fn)(vthis(stream, (*stream)[3]));
     return ((void*)self);
 }
 #endif

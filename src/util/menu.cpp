@@ -444,7 +444,7 @@ extern "C" void cMenuItem_textRender_impl(char* item, tRect* rect, const char* l
 {
     char* menu = *(char**)item;
     sVEntry<void(void*, tRect*, char*)>* vt = *(sVEntry<void(void*, tRect*, char*)>**)(menu + 0x12C);
-    vt[8].fn(menu + vt[8].delta, rect, style);
+    vt[8].fn(vthis(menu, vt[8]), rect, style);
     *(tARGB*)(font_2CA768(item) + 0x40) = *color;
     char* font = font_2CA768(item);
     sVec2_2CA768 sc(2.0f, 2.0f);
@@ -2039,7 +2039,7 @@ extern "C" void cMenuSys_input(sMenu2CC0C0* self)
     }
     char* item = self->items[self->depth - 1];
     sVE2CC0C0* vt = *(sVE2CC0C0**)(item + 0x12C);
-    switch (vt[2].fn(item + vt[2].delta)) {
+    switch (vt[2].fn(vthis(item, vt[2]))) {
     case 1:
         cMenuSys_popMenu((cMenuSys*)self);
         break;
@@ -3617,7 +3617,7 @@ extern "C" int cCharMenuItem_input(cCharMenuItem* self)
         *valuePtr = newValue;
         char* menu = *(char**)self;
         sVEntry<void(void*, void*)>* entry = &(*(sVEntry<void(void*, void*)>**)(menu + 0x12C))[4];
-        entry->fn(menu + entry->delta, self);
+        entry->fn(vthis(menu, *entry), self);
     }
     return result;
 }
@@ -3905,7 +3905,7 @@ extern "C" int cIntMenuItem_input(cIntMenuItem* self)
         *valuePtr = newValue;
         char* menu = *(char**)self;
         sVEntry<void(void*, void*)>* vtEntry = &(*(sVEntry<void(void*, void*)>**)(menu + 0x12C))[4];
-        vtEntry->fn(menu + vtEntry->delta, self);
+        vtEntry->fn(vthis(menu, *vtEntry), self);
     }
     return result;
 }
@@ -4121,7 +4121,7 @@ extern "C" int cFloatMenuItem_input(cFloatMenuItem* self)
         *self->Value = (value - self->ValueOffset) / self->ValueScale;
         char* menu = *(char**)self;
         sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(menu + 0x12C);
-        vt[4].fn(menu + vt[4].delta, self);
+        vt[4].fn(vthis(menu, vt[4]), self);
     }
     return result;
 }
@@ -4360,7 +4360,7 @@ extern "C" int cAngleMenuItem_input(cAngleMenuItem* self)
         }
         char* menu = *(char**)self;
         sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(menu + 0x12C);
-        vt[4].fn(menu + vt[4].delta, self);
+        vt[4].fn(vthis(menu, vt[4]), self);
     }
     return result;
 }
@@ -4737,7 +4737,7 @@ extern "C" void cTextMenuItem_render(cTextMenuItem* self, float* rect)
         char* menu = *(char**)self;
         sVEntry2CB880* vt = *(sVEntry2CB880**)(menu + 0x12C);
         fn2CB880* drawBoxFn = &vt[8].fn;
-        (*drawBoxFn)(menu + vt[8].delta, rect, focused ? kBoxSelectedColor : kBoxUnselectedColor);
+        (*drawBoxFn)(vthis(menu, vt[8]), rect, focused ? kBoxSelectedColor : kBoxUnselectedColor);
     }
     cMenuItem_textRender1_sVec3* col = ((void*)self) == cMenu_getFocusItem((cMenu*)(*(void**)self)) ? &kTextSelectedColor : &kTextUnselectedColor;
     cMenuItem_textRender1_sColor textColor;
@@ -4891,7 +4891,7 @@ extern "C" int cColorMenuItem_input(cColorMenuItem* self)
         *chanPtr = value;
         char* menu = *(char**)self;
         sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(menu + 0x12C);
-        vt[4].fn(menu + vt[4].delta, self);
+        vt[4].fn(vthis(menu, vt[4]), self);
     }
     return result;
 }
@@ -6759,7 +6759,7 @@ extern "C" void cGraphMenuItem_render(cGraphMenuItem_D0EF8* self, float* rect)
     {
         char* menu = (char*)self->owner;
         sVEntry<void(void*, float*, int)>* vt = *(sVEntry<void(void*, float*, int)>**)(menu + 0x12C);
-        vt[9].fn(menu + vt[9].delta, rect, focused);
+        vt[9].fn(vthis(menu, vt[9]), rect, focused);
     }
     char* font = *(char**)(*(char**)(*(char**)self + 0x124) + 0x58);
     float lineH = (float)*(int*)(font + 0x14) * *(float*)(font + 0x34);

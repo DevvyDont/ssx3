@@ -130,7 +130,7 @@ static inline int riderV_2D4C08(char* rider, int n)
 {
     char* obj = rider + 0x6C0;
     sVE_2D4C08* vt = *(sVE_2D4C08**)obj;
-    return vt[n].fn(obj + vt[n].delta);
+    return vt[n].fn(vthis(obj, vt[n]));
 }
 
 static inline float approach_2D4C08(float x, float target, float step)

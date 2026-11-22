@@ -879,7 +879,7 @@ struct sGmVE_AE20 {
 static inline unsigned int gmCall_AE20(char* self, int slot)
 {
     sGmVE_AE20* vt = *(sGmVE_AE20**)(self + 0x10D8);
-    return vt[slot].fn(self + vt[slot].delta);
+    return vt[slot].fn(vthis(self, vt[slot]));
 }
 
 /**

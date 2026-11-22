@@ -1171,7 +1171,7 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
     void* stats = cBE_getInterface_Fv(cBE_getBE(), 11);
     char* obj = (char*)&self->Rider->mVtbl;
     sVE_117FE0* vt = *(sVE_117FE0**)obj;
-    int moneyTotal = cBEEconInterface_getMoney1(stats, vt[7].fn(obj + vt[7].delta));
+    int moneyTotal = cBEEconInterface_getMoney1(stats, vt[7].fn(vthis(obj, vt[7])));
     cHUDFX_setAsync_f(&self->HUDfx[25], 25, moneyTotal, 0.0f, 0);
     if (!slotFree_117FE0(&self->HUDfx[4])) {
         int have = self->HUDfx[4].DisplayInt;
@@ -1502,12 +1502,12 @@ extern "C" float cRiderMetrix_evCheckpoint(cRiderMetrix* self, int timeBonusSec)
 {
     char* sub = (char*)&self->Rider->mVtbl;
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
-    if (vt[8].fn(sub + vt[8].delta) != 0)
+    if (vt[8].fn(vthis(sub, vt[8])) != 0)
     {
         void* mgr = SSXApp->GameModeMan;
         char* sub2 = (char*)&self->Rider->mVtbl;
         sVEntry<int(void*)>* vt2 = *(sVEntry<int(void*)>**)sub2;
-        if (cGameModeMan_riderCheckpointHit(mgr, vt2[7].fn(sub2 + vt2[7].delta), timeBonusSec) != 0)
+        if (cGameModeMan_riderCheckpointHit(mgr, vt2[7].fn(vthis(sub2, vt2[7])), timeBonusSec) != 0)
         {
             cRiderMetrix_addHUDfx1(((char*)self), 41, timeBonusSec, 0, 2.5f);
             if (rmRiderFlags_1194C0((char*)self->Rider))
@@ -2178,7 +2178,7 @@ static inline int GetId119EF8(char* self)
 {
     char* obj = *(char**)(self + 0x1AC) + 0x6C0;
     sVE119EF8* vt = *(sVE119EF8**)obj;
-    return vt[7].fn(obj + vt[7].delta);
+    return vt[7].fn(vthis(obj, vt[7]));
 }
 
 // PORT: callers in this unit declare it void; the function returns 0.0f.

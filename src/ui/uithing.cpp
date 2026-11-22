@@ -442,7 +442,7 @@ extern "C" void cUIText_updateLocale(cUIText* self)
         char* loc = *(char**)((char*)engine + 0x10);
         if (loc != 0) {
             cUIText_updateLocale_sVEntry* vt = *(cUIText_updateLocale_sVEntry**)(loc + 4);
-            unsigned short* str = ((unsigned short* (*)(void*, int))vt[4].fn)(loc + vt[4].delta, id);
+            unsigned short* str = ((unsigned short* (*)(void*, int))vt[4].fn)(vthis(loc, vt[4]), id);
             if (str != 0) {
                 int attrBits = self->mAttr >> 7;
                 if ((attrBits & 1) || ((self->mAttrText >> 6) & 1)) {

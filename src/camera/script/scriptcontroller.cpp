@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "scripter/scriptentitycam.h"
 #include "bx/math3d.h"
 #include "camera/script/scriptalgorithms.h"
@@ -1317,7 +1318,7 @@ extern "C" void cScriptTargetAlgorithm_update(cScriptTargetAlgorithm* algorithm)
     (*(sVec4_16A510*)&self->Position) = sVec4_16A510((*(&self->FrameInfo)).posX, (*(&self->FrameInfo)).posY, (*(&self->FrameInfo)).posZ, (*(sVec4_16A510*)&self->Position).w);
     (*(sVec4_16A510*)&self->Position) = mtxMulVec_16A510(baseTransform, (*(sVec4_16A510*)&self->Position));
     sVEp_16A510* vt = *(sVEp_16A510**)obj;
-    sVec4_16A510* rp = vt[5].fn(obj + vt[5].delta);
+    sVec4_16A510* rp = vt[5].fn(vthis(obj, vt[5]));
     (*(sVec4_16A510*)&self->Target) = Add_16A510(Add_16A510(*rp, Scale_16A510(vec_16A510(rider + 0x1B0), (*(&self->FrameInfo)).targetLeadDistance * rot.y)),
                                Scale_16A510(vec_16A510(rider + 0x1C0), (*(&self->FrameInfo)).targetLeadHeight * rot.x));
     sVec4_16A510 look = Sub_16A510((*(sVec4_16A510*)&self->Target), (*(sVec4_16A510*)&self->Position));
@@ -1715,7 +1716,7 @@ extern "C" void cScriptRelativeAlgorithm_snap(cScriptRelativeAlgorithm* algorith
     char* obj = rider + 0x6C0;
     sVec4_16AD98 rot = *(sVec4_16AD98*)(*(char**)(rider + 0x780) + 0x140);
     sVEp_16AD98* vt = *(sVEp_16AD98**)obj;
-    sVec4_16AD98* rp = vt[5].fn(obj + vt[5].delta);
+    sVec4_16AD98* rp = vt[5].fn(vthis(obj, vt[5]));
     (*(sVec4_16AD98*)&self->Target) = Add_16AD98(Add_16AD98(*rp, Scale_16AD98(vec_16AD98(rider + 0x1B0), (*(&self->FrameInfo)).targetLeadDistance * rot.y)),
                            Scale_16AD98(vec_16AD98(rider + 0x1C0), (*(&self->FrameInfo)).targetLeadHeight * rot.x));
     float pitchAngle;
@@ -1990,7 +1991,7 @@ extern "C" void cScriptRelativeAlgorithm_update(cScriptRelativeAlgorithm* algori
     headingAngle += scriptObj->mBaseRotZ;
     sVec4_B180 rot = *(sVec4_B180*)(*(char**)(rider + 0x780) + 0x140);
     sVEp_B180* vt = *(sVEp_B180**)obj;
-    sVec4_B180* rp = vt[5].fn(obj + vt[5].delta);
+    sVec4_B180* rp = vt[5].fn(vthis(obj, vt[5]));
     (*(sVec4_B180*)&self->Target) = Add_B180(Add_B180(*rp, Scale_B180(vec_B180(rider + 0x1B0), (*(&self->FrameInfo)).targetLeadDistance * rot.y)),
                          Scale_B180(vec_B180(rider + 0x1C0), (*(&self->FrameInfo)).targetLeadHeight * rot.x));
     float sinHead, cosHead, sinPitch, cosPitch;

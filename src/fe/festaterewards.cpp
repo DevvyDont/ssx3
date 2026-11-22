@@ -166,19 +166,19 @@ extern sSnd_F270 D_004A5A58_F270 __asm__("gUISoundNull");
 static inline int Test_F270(char* o, int slot)
 {
     sVEi_F270* vt = *(sVEi_F270**)(o + 8);
-    return vt[slot].fn(o + vt[slot].delta);
+    return vt[slot].fn(vthis(o, vt[slot]));
 }
 
 static inline int Call_F270(char* o, int slot, int a)
 {
     sVEii_F270* vt = *(sVEii_F270**)(o + 8);
-    return vt[slot].fn(o + vt[slot].delta, a);
+    return vt[slot].fn(vthis(o, vt[slot]), a);
 }
 
 static inline void CallV_F270(char* o, int slot, int a)
 {
     sVEv_F270* vt = *(sVEv_F270**)(o + 8);
-    vt[slot].fn(o + vt[slot].delta, a);
+    vt[slot].fn(vthis(o, vt[slot]), a);
 }
 
 static inline void Play_F270(sSnd_F270* snd, int id)
@@ -232,14 +232,14 @@ extern "C" int cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase*
                 char* w = ((sGallery_F270*)self)->cells[i][j];
                 if (w != 0) {
                     sVEv_F270* vt = *(sVEv_F270**)(w + 8);
-                    vt[9].fn(w + vt[9].delta, 0);
+                    vt[9].fn(vthis(w, vt[9]), 0);
                 }
             }
         }
         cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut)), 1);
         char* mgr = *(char**)self->mpEngine;
         sVEr_F270* vt = *(sVEr_F270**)(mgr + 4);
-        void* backState = vt[5].fn(mgr + vt[5].delta, ((char*)self), self->mStoreNum >= 0);
+        void* backState = vt[5].fn(vthis(mgr, vt[5]), ((char*)self), self->mStoreNum >= 0);
         cUIStateStack_push(&self->mpEngine->mStateStack, backState);
         return 1;
     }
@@ -1178,7 +1178,7 @@ struct sVE_0648v {
 static inline void setVis_0648(char* o, int on)
 {
     sVE_0648v* vt = *(sVE_0648v**)(o + 8);
-    vt[9].fn(o + vt[9].delta, on);
+    vt[9].fn(vthis(o, vt[9]), on);
 }
 
 static inline void setHelp_0648(char* self, char* key)
@@ -2829,7 +2829,7 @@ extern "C" int cFEStatePreviewReward_onInputBegin(cFEStatePreviewReward* self, c
         char* bitmap = ((char**)((char*)&self->mpIcon))[i];
         if (bitmap != 0) {
             sVE_1FF0b* vt2 = *(sVE_1FF0b**)(bitmap + 8);
-            vt2[9].fn(bitmap + vt2[9].delta, 0);
+            vt2[9].fn(vthis(bitmap, vt2[9]), 0);
         }
     }
     cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut)), 1);
@@ -2958,7 +2958,7 @@ extern "C" void cFEStatePreviewReward_updateTextureLoad(cFEStatePreviewReward* s
         *(int*)(bitmapWidget + 0x7C) = 0;
         char* frameWidget = previewState->a54[previewState->kind];
         sVEK1D2198* vt = *(sVEK1D2198**)(frameWidget + 8);
-        vt[9].fn(frameWidget + vt[9].delta, 1);
+        vt[9].fn(vthis(frameWidget, vt[9]), 1);
     }
 }
 #endif

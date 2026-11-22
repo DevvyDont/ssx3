@@ -178,7 +178,7 @@ extern "C" void func_00186C98(void)
     cMCOverlayManager_getDeviceNumberString(mp, &loc, *(int*)((char*)mp + 0x428));
     char* locale = (char*)SSXApp->FELocale;
     sVtEntK186C98* vt = *(sVtEntK186C98**)(locale + 4);
-    unsigned short* formatText = vt[4].fn(locale + vt[4].delta, GetHashValue32(str_kT_MEMOVNotFormattedPS2));
+    unsigned short* formatText = vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_MEMOVNotFormattedPS2));
     sprintf1(buf, formatText, &loc);
     cFEMemCardStateK186C98* st = D_004A14B8_K186C98;
     *(int*)((char*)st + 0x19C) = 4;
@@ -239,7 +239,7 @@ extern "C" void func_00186D60(void)
     char* st = D_004A14B8_86D60;
     *(int*)(st + 0x19C) = 9;
     sVtB_86D60* svt = *(sVtB_86D60**)(st + 8);
-    svt[36].fn(st + svt[36].delta, popupText, 0, 0, 0, 0, 0);
+    svt[36].fn(vthis(st, svt[36]), popupText, 0, 0, 0, 0, 0);
 
     {
         char* w = *(char**)(D_004A14B8_86D60 + 0x218);
@@ -261,7 +261,7 @@ extern "C" void func_00186D60(void)
     }
     char* w2 = *(char**)(D_004A14B8_86D60 + 0x218);
     sVtV_86D60* vvt = *(sVtV_86D60**)(w2 + 8);
-    vvt[25].fn(w2 + vvt[25].delta, 1);
+    vvt[25].fn(vthis(w2, vvt[25]), 1);
 }
 #endif
 
@@ -991,13 +991,13 @@ struct sMcFlags_87A38 { unsigned b0 : 1; unsigned b1 : 1; unsigned b2 : 1; unsig
 static inline int cardCall_87A38(char* o, int slot)
 {
     sVt0_87A38* vt = *(sVt0_87A38**)o;
-    return vt[slot].fn(o + vt[slot].delta);
+    return vt[slot].fn(vthis(o, vt[slot]));
 }
 
 static inline void mpNotify_87A38(char* mp, int msg)
 {
     sVtV_87A38* vt = *(sVtV_87A38**)(mp + 0x748);
-    vt[1].fn(mp + vt[1].delta, msg);
+    vt[1].fn(vthis(mp, vt[1]), msg);
 }
 
 /**

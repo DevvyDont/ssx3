@@ -87,7 +87,7 @@ extern "C" void cFEStateCharSetup_onCreateScreen(cFEStateCharSetup* self)
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
     int charId = cBENewPlayerInterface_getPlayerCharID(iface, self->mUserNum);
     sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(iface + 0xC);
-    vt[2].fn(iface + vt[2].delta);
+    vt[2].fn(vthis(iface, vt[2]));
     cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, self->mUserNum, 0);
     cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->mUserNum, charId, 0);
     func_0028F140(cAudioInterface_bxAudio(), 1);
@@ -209,7 +209,7 @@ extern "C" void cFEStateCharSetup_onWidgetEvent(cFEStateCharSetup* self, cUIThin
     case 5: {
         char* factory = *(char**)self->mpEngine;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(factory + 4);
-        void* nextState = vt[4].fn(factory + vt[4].delta, self, item->mMiscData);
+        void* nextState = vt[4].fn(vthis(factory, vt[4]), self, item->mMiscData);
         if (nextState != 0)
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         cFEStateCharSetup_show3DCharacter(self, 0);
@@ -218,7 +218,7 @@ extern "C" void cFEStateCharSetup_onWidgetEvent(cFEStateCharSetup* self, cUIThin
     case 6: {
         char* factory = *(char**)self->mpEngine;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(factory + 4);
-        void* nextState = vt[5].fn(factory + vt[5].delta, self, item->mMiscData);
+        void* nextState = vt[5].fn(vthis(factory, vt[5]), self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
             cFEStateCharSetup_show3DCharacter(self, 0);

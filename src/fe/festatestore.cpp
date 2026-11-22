@@ -215,7 +215,7 @@ extern "C" void cFEStateUberTrick_onCreateScreen(cFEStateUberTrick* self)
     signed char charID = cBENewPlayerInterface_getPlayerCharID(player, self->mUserNum);
     {
         sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(player + 0xC);
-        vt[2].fn(player + vt[2].delta);
+        vt[2].fn(vthis(player, vt[2]));
     }
     cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->mUserNum, charID, 0);
     cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, self->mUserNum, 0);
@@ -327,11 +327,11 @@ extern "C" void cFEStateUberTrick_onGainFocus(cFEStateUberTrick* self, int prevS
     cFEStateUberTrick_activateMainMenu(self);
     menu = (cUIThing*)self->mpMainMenu;
     if (menu != 0) {
-        ((sVEntry00184BE0*)menu->mVtbl)[7].fn((char*)menu + ((sVEntry00184BE0*)menu->mVtbl)[7].delta, 1);
+        ((sVEntry00184BE0*)menu->mVtbl)[7].fn(vthis(menu, ((sVEntry00184BE0*)menu->mVtbl)[7]), 1);
     }
     menu = (cUIThing*)self->mpTrickMenu;
     if (menu != 0) {
-        ((sVEntry00184BE0*)menu->mVtbl)[7].fn((char*)menu + ((sVEntry00184BE0*)menu->mVtbl)[7].delta, 0);
+        ((sVEntry00184BE0*)menu->mVtbl)[7].fn(vthis(menu, ((sVEntry00184BE0*)menu->mVtbl)[7]), 0);
     }
     cUIState_onGainFocus(self, prevState);
 }
@@ -676,7 +676,7 @@ static inline int Is_185268(int id, char* s)
 static inline void SetActive_185268(char* menu, int on)
 {
     sVE_185268* vt = *(sVE_185268**)(menu + 8);
-    ((void (*)(void*, int))vt[7].fn)(menu + vt[7].delta, on);
+    ((void (*)(void*, int))vt[7].fn)(vthis(menu, vt[7]), on);
 }
 
 static inline void PlaySound_185268(char* self, int id)
@@ -692,7 +692,7 @@ static inline void Back_185268(char* self)
 {
     char* mgr = **(char***)(self + 0x10);
     sVE_185268* vt = *(sVE_185268**)(mgr + 4);
-    void* r = ((void* (*)(void*, void*, int))vt[5].fn)(mgr + vt[5].delta, self, 0);
+    void* r = ((void* (*)(void*, void*, int))vt[5].fn)(vthis(mgr, vt[5]), self, 0);
     if (r != 0)
         cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
 }
@@ -754,7 +754,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
                 if (func_00150048(pi, self->mUserNum, ai, bi) && !func_0014FFB8(pi, self->mUserNum, ai, bi)) {
                     func_0014FD80(pi, self->mUserNum, ai, bi);
                     sVE_185268* vt = *(sVE_185268**)(pi + 0xC);
-                    ((int (*)(void*))vt[1].fn)(pi + vt[1].delta);
+                    ((int (*)(void*))vt[1].fn)(vthis(pi, vt[1]));
                     cFEStateUberTrick_updateTrickMenu(((char*)self));
                 } else if (cBENewRaceInterface_newRace.cGamePath != 0) {
                     PlaySound_185268(((char*)self), 4);
@@ -763,7 +763,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
                     signed char charID = cBENewPlayerInterface_getPlayerCharID(player, self->mUserNum);
                     {
                         sVE_185268* vt = *(sVE_185268**)(player + 0xC);
-                        ((void (*)(void*))vt[2].fn)(player + vt[2].delta);
+                        ((void (*)(void*))vt[2].fn)(vthis(player, vt[2]));
                     }
                     int points = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), self->mUserNum, charID);
                     int n;
@@ -846,7 +846,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
                         signed char charID = cBENewPlayerInterface_getPlayerCharID(player, self->mUserNum);
                         {
                             sVE_185268* vt = *(sVE_185268**)(player + 0xC);
-                            ((void (*)(void*))vt[2].fn)(player + vt[2].delta);
+                            ((void (*)(void*))vt[2].fn)(vthis(player, vt[2]));
                         }
                         int points = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), self->mUserNum, charID);
                         int n;

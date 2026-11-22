@@ -2891,7 +2891,7 @@ extern "C" void cPadCache_purge(cPadCache* self)
     for (i = 0; i < self->NumPadDevices; i++) {
         cPadDevice* inputPad = ((cPadDevice**)&self->PadDevices[0])[i];
         if (inputPad != 0) {
-            ((sVEntry00326A68*)inputPad->mVtbl)[1].fn((char*)inputPad + ((sVEntry00326A68*)inputPad->mVtbl)[1].delta, 3);
+            ((sVEntry00326A68*)inputPad->mVtbl)[1].fn(vthis(inputPad, ((sVEntry00326A68*)inputPad->mVtbl)[1]), 3);
         }
     }
 }
@@ -3089,8 +3089,8 @@ extern "C" void cPadDevice_clearAllVibrations(void* inputPad)
 {
     sVEntry<void>** self = (sVEntry<void>**)inputPad;
     int i;
-    for (i = 0; i < ((CountFn00326CF0)(*self)[3].fn)((char*)self + (*self)[3].delta); i++) {
-        ((SetFn00326CF0)(*self)[4].fn)((char*)self + (*self)[4].delta, i, 0.0f);
+    for (i = 0; i < ((CountFn00326CF0)(*self)[3].fn)(vthis(self, (*self)[3])); i++) {
+        ((SetFn00326CF0)(*self)[4].fn)(vthis(self, (*self)[4]), i, 0.0f);
     }
 }
 #endif

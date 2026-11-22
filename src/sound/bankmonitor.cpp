@@ -3693,7 +3693,7 @@ extern "C" int func_002B04D8_impl(sBankList* self, sBmArgs_04D8* speechEvent)
             if (cStreamSys_STREAM_Playing(D_004A37B4->mpVStreamSys, self->id) != 0) {
                 speechBase = (char*)D_004A37B4;
                 vt = *(sSndVtSlot**)(speechBase + 0x1BC);
-                playHandle = ((Fn1_04D8)vt[1].fn)(speechBase + vt[1].delta, self->id, buf, speechEvent->f4, *(int*)((char*)self + 0x8CC), -1, *(int*)((char*)self + 0x8D0), *(float*)((char*)self + 0x8F4), *(int*)((char*)self + 0x8F8), *(int*)((char*)self + 0x8FC));
+                playHandle = ((Fn1_04D8)vt[1].fn)(vthis(speechBase, vt[1]), self->id, buf, speechEvent->f4, *(int*)((char*)self + 0x8CC), -1, *(int*)((char*)self + 0x8D0), *(float*)((char*)self + 0x8F4), *(int*)((char*)self + 0x8F8), *(int*)((char*)self + 0x8FC));
                 if (playHandle >= 0) {
                     cMonitor_MONITOR_Create_c(&(*((cBankManager**)D_004A37B4->mpVStreamSys))->sub, remainingMs, D_004A37D8[0], (int)self, playHandle, volumeId, 0, 0);
                 }
@@ -3701,7 +3701,7 @@ extern "C" int func_002B04D8_impl(sBankList* self, sBmArgs_04D8* speechEvent)
             }
             speechBase = (char*)D_004A37B4;
             vt = *(sSndVtSlot**)(speechBase + 0x1BC);
-            playHandle = ((Fn1_04D8)vt[1].fn)(speechBase + vt[1].delta, self->id, buf, speechEvent->f4, *(int*)((char*)self + 0x8CC), -1, *(int*)((char*)self + 0x8D0), *(float*)((char*)self + 0x8F4), *(int*)((char*)self + 0x8F8), *(int*)((char*)self + 0x8FC));
+            playHandle = ((Fn1_04D8)vt[1].fn)(vthis(speechBase, vt[1]), self->id, buf, speechEvent->f4, *(int*)((char*)self + 0x8CC), -1, *(int*)((char*)self + 0x8D0), *(float*)((char*)self + 0x8F4), *(int*)((char*)self + 0x8F8), *(int*)((char*)self + 0x8FC));
             if (playHandle >= 0) {
                 cMonitor_MONITOR_Create_c(&(*((cBankManager**)D_004A37B4->mpVStreamSys))->sub, 200, D_004A37E0[0], (int)self, playHandle, volumeId, 0, 0);
             }
@@ -3709,7 +3709,7 @@ extern "C" int func_002B04D8_impl(sBankList* self, sBmArgs_04D8* speechEvent)
         }
         speechBase = (char*)D_004A37B4;
         vt = *(sSndVtSlot**)(speechBase + 0x1BC);
-        int w = ((int (*)(void*, int, int, int))vt[3].fn)(speechBase + vt[3].delta, self->f0, volumeId, *(int*)((char*)self + 0x8D0));
+        int w = ((int (*)(void*, int, int, int))vt[3].fn)(vthis(speechBase, vt[3]), self->f0, volumeId, *(int*)((char*)self + 0x8D0));
         if (w != 0) {
             cStreamSys_STREAM_SetVolControl(D_004A37B4->mpVStreamSys, self->id, w);
         }
@@ -5994,7 +5994,7 @@ extern "C" void func_002B3398(cMusicSys* self, int flags)
         char* songConfig = ((char**)(&self->mSongConfig[0]))[i];
         if (songConfig != 0) {
             sBmonVcall3398* dtorSlot = &(*(sBmonVcall3398**)(songConfig + 0xA8))[1];
-            dtorSlot->fn(songConfig + dtorSlot->delta, 3);
+            dtorSlot->fn(vthis(songConfig, *dtorSlot), 3);
         }
     }
     if (self->mMPFFile != 0) {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "be/beintaggression.h"
 #include "be/beintscore.h"
 #include "be/beintnewrace.h"
@@ -577,7 +578,7 @@ struct sVEntry_149A88
 static inline void vreset_149A88(char* o)
 {
     sVEntry_149A88* vt = *(sVEntry_149A88**)(o + 0xC);
-    vt[2].fn(o + vt[2].delta);
+    vt[2].fn(vthis(o, vt[2]));
 }
 
 /**
@@ -601,7 +602,7 @@ extern "C" void cBELibrary_newProfile(void* self, signed char idx)
     playerEntry->cCharacterID = 4;
     char* locale = (char*)SSXApp->FELocale;
     sVEntry_149A88* vt = *(sVEntry_149A88**)(locale + 4);
-    strcpy2(buf, vt[4].fn(locale + vt[4].delta, GetHashValue32(str_kT_MEMPlayerName)));
+    strcpy2(buf, vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_MEMPlayerName)));
     sprintf(playerEntry->strUserName, buf, idx + 1);
     cBEProfileLib_init(cBELibrary_profileLib + idx * 39760, 1);
     vreset_149A88((char*)cBENewPlayerInterface_getThis());

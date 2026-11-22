@@ -369,7 +369,7 @@ extern "C" void func_002ECCB8(cBoltOnFXInterface* vself)
     if (rider != 0) {
         char* being = rider + 0x6C0;
         sVEi_CCB8* vt = *(sVEi_CCB8**)being;
-        tbl = (char*)func_0014AD50(lib, vt[7].fn(being + vt[7].delta));
+        tbl = (char*)func_0014AD50(lib, vt[7].fn(vthis(being, vt[7])));
         id = cRider_getCheatIdentity(self->rider);
         if (id < 10) {
             id = cRider_getIdentity(self->rider);
@@ -476,7 +476,7 @@ extern "C" void cRenderStateMan_purge(void)
                 char* queryObj = D_lensRows_CFA0[i].objs[j];
                 if (queryObj != 0) {
                     sLensVE_CFA0* vt = *(sLensVE_CFA0**)(queryObj + 4);
-                    vt[1].fn(queryObj + vt[1].delta, 3);
+                    vt[1].fn(vthis(queryObj, vt[1]), 3);
                 }
             }
         }

@@ -305,9 +305,9 @@ extern "C" void cFEStateMainMenu_onCreateScreen(cFEStateMainMenu* self)
     *(unsigned char*)&self->mNumOfCtrl = 0;
     for (int i = 0; i < 2; i++) {
         sVEntry<void(void*, unsigned char)>* vt1 = *(sVEntry<void(void*, unsigned char)>**)(obj + 8);
-        vt1[44].fn(obj + vt1[44].delta, i);
+        vt1[44].fn(vthis(obj, vt1[44]), i);
         sVEnt2_00194AA8* vt2 = *(sVEnt2_00194AA8**)(obj + 8);
-        if (vt2[45].fn(obj + vt2[45].delta) != 0) {
+        if (vt2[45].fn(vthis(obj, vt2[45])) != 0) {
             (*(unsigned char*)&self->mNumOfCtrl)++;
         }
     }
@@ -561,7 +561,7 @@ static inline void setWidgetHidden_194EB0(char* self, char* name)
     char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name));
     if (o != 0) {
         sVEntry<void>* vt = *(sVEntry<void>**)(o + 0x8);
-        ((void (*)(void*, int))vt[9].fn)(o + vt[9].delta, 0);
+        ((void (*)(void*, int))vt[9].fn)(vthis(o, vt[9]), 0);
     }
 }
 
@@ -570,7 +570,7 @@ static inline void setWidgetVisible_194EB0(char* self, char* name)
     char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name));
     if (o != 0) {
         sVEntry<void>* vt = *(sVEntry<void>**)(o + 0x8);
-        ((void (*)(void*, int))vt[8].fn)(o + vt[8].delta, 0);
+        ((void (*)(void*, int))vt[8].fn)(vthis(o, vt[8]), 0);
     }
 }
 
@@ -625,7 +625,7 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(cFEStateMainMenu* self_, cUIThing
             break;
         }
         sVEntry<void>* ivt = *(sVEntry<void>**)(iface + 0xC);
-        ((void (*)(void*))ivt[1].fn)(iface + ivt[1].delta);
+        ((void (*)(void*))ivt[1].fn)(vthis(iface, ivt[1]));
         if (item_->mMiscData == 22 && self_->mGoToNextState == 0) {
             self_->mSaveCurrentCtrl = self_->mCurrentCtrl;
             char* popup = (char*)operator new(76, str_cFEPopupSelectMultiplayerMode, 0, 0);
@@ -715,7 +715,7 @@ static inline void Show195328(void* self, char* name)
     char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
     if (o != 0) {
         sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)(o + 8);
-        vt[9].fn(o + vt[9].delta, 1);
+        vt[9].fn(vthis(o, vt[9]), 1);
     }
 }
 

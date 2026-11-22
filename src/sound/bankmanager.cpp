@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "sound/ssxaudio.h"
 #include "sound/bankmanager.h"
 #include "be/beintnewrace.h"
@@ -1321,7 +1322,7 @@ have:
                 if (play) {
                     char* mon = self->mon;
                     if (func_002B4620(mon) && func_0028D960((cSSXAudio*)self))
-                        self->monVt[3].fn(mon + self->monVt[3].delta, 7);
+                        self->monVt[3].fn(vthis(mon, self->monVt[3]), 7);
                 }
             }
             return;
@@ -1332,7 +1333,7 @@ have:
         cSSXAudio_EndWind(self);
         if (func_002B46E8(mon)) {
             if (func_0028D960((cSSXAudio*)self))
-                self->monVt[3].fn(mon + self->monVt[3].delta, 8);
+                self->monVt[3].fn(vthis(mon, self->monVt[3]), 8);
             func_002B4708(mon);
         }
     }
@@ -1369,10 +1370,10 @@ extern "C" void func_0028CD48(cSSXAudio* self)
 {
     char* mon = (char*)&self->MusicSys;
     sBmVtCD48* vt = (sBmVtCD48*)self->MusicSys.mVtbl;
-    ((tBmLoadCD48)vt[2].fn)(mon + vt[2].delta, str_pktrans, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0), 1);
+    ((tBmLoadCD48)vt[2].fn)(vthis(mon, vt[2]), str_pktrans, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0), 1);
     func_002B49C0(mon, 401);
     sBmVtCD48* vt2 = (sBmVtCD48*)self->MusicSys.mVtbl;
-    ((tBmSetCD48)vt2[4].fn)(mon + vt2[4].delta, 1);
+    ((tBmSetCD48)vt2[4].fn)(vthis(mon, vt2[4]), 1);
     func_002B3C28(mon, 0x7F);
 }
 #endif
@@ -1436,10 +1437,10 @@ extern "C" void func_0028CDF8(cSSXAudio* self)
     char* mon = (char*)&self->MusicSys;
     *(int*)(((char*)self) + 0x62AC) = self->MusicSys.mCurrentSongNum;
     sBmVtCD48* vt = (sBmVtCD48*)self->MusicSys.mVtbl;
-    ((tBmLoadCD48)vt[2].fn)(mon + vt[2].delta, str_chartune, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0), 0);
+    ((tBmLoadCD48)vt[2].fn)(vthis(mon, vt[2]), str_chartune, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0), 0);
     func_002B49C0(mon, 201);
     sBmVtCD48* vt2 = (sBmVtCD48*)self->MusicSys.mVtbl;
-    ((tBmSetCD48)vt2[4].fn)(mon + vt2[4].delta, track);
+    ((tBmSetCD48)vt2[4].fn)(vthis(mon, vt2[4]), track);
     func_002B4A08(mon, 1);
     func_002B3C28(mon, 0x7F);
 }
@@ -1476,7 +1477,7 @@ static inline void bmLoad_CF98(void* self, char* name, int bank, int id)
 {
     char* mon = (char*)self + 0x118;
     sBmVtCD48* vt = *(sBmVtCD48**)((char*)self + 0x5558);
-    ((tBmLoadCD48)vt[2].fn)(mon + vt[2].delta, name, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, bank, 0), 0);
+    ((tBmLoadCD48)vt[2].fn)(vthis(mon, vt[2]), name, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, bank, 0), 0);
     func_002B49C0(mon, id);
 }
 
@@ -1539,12 +1540,12 @@ extern "C" void func_0028CF98(cSSXAudio* self, int startEvent, int skipPeakTheme
         }
         func_002B3CC0(mon, 1);
         sBmVtCD48* vt2 = (sBmVtCD48*)self->MusicSys.mVtbl;
-        ((tBmSetCD48)vt2[4].fn)(mon + vt2[4].delta, 0xC);
+        ((tBmSetCD48)vt2[4].fn)(vthis(mon, vt2[4]), 0xC);
         func_002B3C28(mon, 0x7F);
         return;
     }
     sBmVtCD48* vt = (sBmVtCD48*)self->MusicSys.mVtbl;
-    ((tBmLoadCD48)vt[2].fn)(mon + vt[2].delta, 0, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0), 0);
+    ((tBmLoadCD48)vt[2].fn)(vthis(mon, vt[2]), 0, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0), 0);
     self->unk_62A4 = self->MusicSys.mCurrentSongNum;
     self->unk_5778 = func_002B4908(mon);
     func_002B3CC0(mon, 1);
@@ -1552,7 +1553,7 @@ extern "C" void func_0028CF98(cSSXAudio* self, int startEvent, int skipPeakTheme
         startEvent = 36;
     }
     sBmVtCD48* vt2 = (sBmVtCD48*)self->MusicSys.mVtbl;
-    ((tBmSetCD48)vt2[4].fn)(mon + vt2[4].delta, startEvent);
+    ((tBmSetCD48)vt2[4].fn)(vthis(mon, vt2[4]), startEvent);
     func_0028F108(self, cSSXAudio_GetFocusRider(self, -1));
 }
 #endif
@@ -1664,25 +1665,25 @@ extern "C" void func_0028D630(cSSXAudio* self, int id, void* obj)
             char* subObj = (char*)obj + 0x6C0;
             sBmVt630* vtEntry = &(*(sBmVt630**)subObj)[7];
             ok = 1;
-            *(int*)((char*)self + 0x62A0) = vtEntry->fn(subObj + vtEntry->delta);
+            *(int*)((char*)self + 0x62A0) = vtEntry->fn(vthis(subObj, *vtEntry));
         }
     } else {
         char* subObj = (char*)obj + 0x6C0;
         sBmVt630* vtEntry = &(*(sBmVt630**)subObj)[7];
-        ok = vtEntry->fn(subObj + vtEntry->delta) == *(int*)((char*)self + 0x62A0);
+        ok = vtEntry->fn(vthis(subObj, *vtEntry)) == *(int*)((char*)self + 0x62A0);
     }
     if (ok) {
         int n = self->unk_623C;
         char* mon = (char*)&self->MusicSys;
         if (n != 0) {
             sBmVt630b* vt = (sBmVt630b*)self->MusicSys.mVtbl;
-            vt[4].fn(mon + vt[4].delta, n + 1);
+            vt[4].fn(vthis(mon, vt[4]), n + 1);
         }
         self->unk_623C = id;
         self->unk_6240 = 0;
         {
             sBmVt630b* vt = (sBmVt630b*)self->MusicSys.mVtbl;
-            vt[4].fn(mon + vt[4].delta, id);
+            vt[4].fn(vthis(mon, vt[4]), id);
         }
     }
 }
@@ -1715,7 +1716,7 @@ extern "C" void func_0028D740(cSSXAudio* self, int id, void* obj)
     if (*(int*)((char*)self + 0x62A0) != -1) {
         char* subObj = (char*)obj + 0x6C0;
         sVtEnt* vtEntry = &(*(sVtEnt**)subObj)[7];
-        ok = vtEntry->fn(subObj + vtEntry->delta) == *(int*)((char*)self + 0x62A0);
+        ok = vtEntry->fn(vthis(subObj, *vtEntry)) == *(int*)((char*)self + 0x62A0);
     }
     if (ok) {
         if (self->unk_623C == id) {
@@ -1760,7 +1761,7 @@ int func_0028D7D8_impl(void* self, void* obj)
         if (*(int*)((char*)self + 0x62A0) != none) {
             char* subObj = (char*)obj + 0x6C0;
             sVtEnt* vtEntry = &(*(sVtEnt**)subObj)[7];
-            if (vtEntry->fn(subObj + vtEntry->delta) == *(int*)((char*)self + 0x62A0)) {
+            if (vtEntry->fn(vthis(subObj, *vtEntry)) == *(int*)((char*)self + 0x62A0)) {
                 *(int*)((char*)self + 0x62A0) = none;
                 ok = 1;
             }
@@ -1771,7 +1772,7 @@ int func_0028D7D8_impl(void* self, void* obj)
         if (n != 0) {
             char* mon = (char*)self + 0x118;
             sBmVtD7D8* vt = *(sBmVtD7D8**)((char*)self + 0x5558);
-            vt[4].fn(mon + vt[4].delta, n + 1);
+            vt[4].fn(vthis(mon, vt[4]), n + 1);
             *(int*)((char*)self + 0x623C) = 0;
             *(int*)((char*)self + 0x6240) = 0;
         }
@@ -1940,7 +1941,7 @@ extern "C" int func_0028DF18(cSSXAudio* self, int quiet)
         }
         sBmVtDF18* vt = (sBmVtDF18*)self->MusicSys.mVtbl;
         ok = 1;
-        ((tBmSetDF18)vt[4].fn)(mon + vt[4].delta, 18);
+        ((tBmSetDF18)vt[4].fn)(vthis(mon, vt[4]), 18);
         func_0028D488(self);
         cMonitor_MONITOR_Create_DF18(**(char***)&self->MusicSys + 0x1D8, 2000, D_004A3648_DF18->v, 0, 1, 1, 0, 0);
         char* bankMonitor = **(char***)&self->MusicSys + 0x1D8;
@@ -2034,7 +2035,7 @@ static inline void bmLoad_E100(char* self, char* bank, int n)
 {
     char* mon = self + 0x118;
     sBmVtE100* vt = *(sBmVtE100**)(self + 0x5558);
-    ((tBmLoadE100)vt[2].fn)(mon + vt[2].delta, bank, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0), 0);
+    ((tBmLoadE100)vt[2].fn)(vthis(mon, vt[2]), bank, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0), 0);
     func_002B49C0(mon, n);
 }
 
@@ -2049,7 +2050,7 @@ static inline void bmLoadBank_E100(char* self, int t)
     }
     char* mon = self + 0x118;
     sBmVtE100* vt2 = *(sBmVtE100**)(self + 0x5558);
-    ((tBmSetE100)vt2[4].fn)(mon + vt2[4].delta, 0xC);
+    ((tBmSetE100)vt2[4].fn)(vthis(mon, vt2[4]), 0xC);
     func_002B3C28(mon, 0x7F);
 }
 
@@ -2128,7 +2129,7 @@ extern "C" int func_0028E510(cSSXAudio* self, char* ev)
 {
     char* mon = (char*)&self->MusicSys;
     sBmVtE510* vt = (sBmVtE510*)self->MusicSys.mVtbl;
-    vt[4].fn(mon + vt[4].delta, *(int*)(ev + 0x1C));
+    vt[4].fn(vthis(mon, vt[4]), *(int*)(ev + 0x1C));
     return 1;
 }
 #endif
@@ -2344,7 +2345,7 @@ extern "C" void func_0028E8C0(cSSXAudio* vself, int id, int transportCall)
                     }
                     char* mon = (char*)&vself->MusicSys;
                     sBmVtE8C0* vt = (sBmVtE8C0*)vself->MusicSys.mVtbl;
-                    ((tBmSetE8C0)vt[4].fn)(mon + vt[4].delta, 0);
+                    ((tBmSetE8C0)vt[4].fn)(vthis(mon, vt[4]), 0);
                 }
             }
         } else if (vself->unk_578C != 0) {
@@ -2422,14 +2423,14 @@ extern "C" void func_0028E8C0(cSSXAudio* vself, int id, int transportCall)
                         func_002B11B0(&vself->SpeechSys, 0);
                     }
                     sBmVtE8C0* vt = (sBmVtE8C0*)vself->MusicSys.mVtbl;
-                    ((tBmLoadE8C0)vt[2].fn)(mon2 + vt[2].delta, str_pktrans, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(((char*)vself), 1, 0), 1);
+                    ((tBmLoadE8C0)vt[2].fn)(vthis(mon2, vt[2]), str_pktrans, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(((char*)vself), 1, 0), 1);
                     func_002B49C0(mon2, 401);
                     if (func_002A1E20(((char*)vself), vself->unk_6284) == 2) {
                         sBmVtE8C0* vt2 = (sBmVtE8C0*)vself->MusicSys.mVtbl;
-                        ((tBmSetE8C0)vt2[4].fn)(mon2 + vt2[4].delta, 2);
+                        ((tBmSetE8C0)vt2[4].fn)(vthis(mon2, vt2[4]), 2);
                     } else {
                         sBmVtE8C0* vt2 = (sBmVtE8C0*)vself->MusicSys.mVtbl;
-                        ((tBmSetE8C0)vt2[4].fn)(mon2 + vt2[4].delta, 3);
+                        ((tBmSetE8C0)vt2[4].fn)(vthis(mon2, vt2[4]), 3);
                     }
                     func_002B3C28(mon2, 0x7F);
                     func_002B3A70(mon2);
@@ -2437,7 +2438,7 @@ extern "C" void func_0028E8C0(cSSXAudio* vself, int id, int transportCall)
             } else {
                 func_0028D5A0(vself, vself->unk_6284);
                 sBmVtE8C0* vt = (sBmVtE8C0*)vself->MusicSys.mVtbl;
-                ((tBmSetE8C0)vt[4].fn)(mon + vt[4].delta, 0x1E);
+                ((tBmSetE8C0)vt[4].fn)(vthis(mon, vt[4]), 0x1E);
             }
             vself->unk_627C = 1;
         }
@@ -2450,7 +2451,7 @@ extern "C" void func_0028E8C0(cSSXAudio* vself, int id, int transportCall)
     } else {
         char* mon = (char*)&vself->MusicSys;
         sBmVtE8C0* vt = (sBmVtE8C0*)vself->MusicSys.mVtbl;
-        ((tBmSetE8C0)vt[4].fn)(mon + vt[4].delta, id);
+        ((tBmSetE8C0)vt[4].fn)(vthis(mon, vt[4]), id);
     }
 }
 #endif
@@ -2576,7 +2577,7 @@ extern "C" void func_0028F140(cSSXAudio* self, int mode)
     if (bank >= 0) {
         char* mon = (char*)&self->MusicSys;
         sBmVtF140* vt = (sBmVtF140*)self->MusicSys.mVtbl;
-        ((tBmSetF140)vt[4].fn)(mon + vt[4].delta, bank);
+        ((tBmSetF140)vt[4].fn)(vthis(mon, vt[4]), bank);
     }
 }
 #endif
@@ -2644,7 +2645,7 @@ extern "C" void func_0028F2C0(cSSXAudio* self)
     } else if (self->unk_6298 != 0) {
         char* obj = (char*)&self->MusicSys;
         sBankMgrVEntry* vt = (sBankMgrVEntry*)self->MusicSys.mVtbl;
-        vt[4].fn(obj + vt[4].delta, 36);
+        vt[4].fn(vthis(obj, vt[4]), 36);
     }
     self->unk_6294 = 0;
     self->unk_6298 = 0;
@@ -2869,7 +2870,7 @@ extern "C" void func_0028F5B8(cSSXAudio* self)
         func_002B3D48(mon, 1.0f);
         func_0028F768(self);
         sBmVtF5B8* vt = (sBmVtF5B8*)self->MusicSys.mVtbl;
-        vt[4].fn(mon + vt[4].delta, 0);
+        vt[4].fn(vthis(mon, vt[4]), 0);
         func_002B3C28(mon, 0x7F);
     }
 }
@@ -3157,10 +3158,10 @@ extern "C" void func_0028FC58(cSSXAudio* self)
 {
     char* mon = (char*)&self->MusicSys;
     sBmVtFC58* vt = (sBmVtFC58*)self->MusicSys.mVtbl;
-    ((tBmLoadFC58)vt[2].fn)(mon + vt[2].delta, str_charsel, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0), 1);
+    ((tBmLoadFC58)vt[2].fn)(vthis(mon, vt[2]), str_charsel, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0), 1);
     func_002B49C0(mon, 301);
     sBmVtFC58* vt2 = (sBmVtFC58*)self->MusicSys.mVtbl;
-    ((tBmSetFC58)vt2[4].fn)(mon + vt2[4].delta, self->unk_6290);
+    ((tBmSetFC58)vt2[4].fn)(vthis(mon, vt2[4]), self->unk_6290);
 }
 #endif
 

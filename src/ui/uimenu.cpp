@@ -53,12 +53,12 @@ extern "C" void cUIMenu_setSelected(cUIMenu* self, cUIThing* item, int play)
         va[7].fn(vthis(oldSelected, va[7]), 0);
         char* screenState = (char*)self->mpScreen->mpState;
         cUIMenu_sVEntryB* vb = *(cUIMenu_sVEntryB**)(screenState + 8);
-        vb[19].fn(screenState + vb[19].delta, self->mpSelected, 2);
+        vb[19].fn(vthis(screenState, vb[19]), self->mpSelected, 2);
     }
     self->mpSelected = (cUIThing*)item;
     char* selState = (char*)self->mpScreen->mpState;
     cUIMenu_sVEntryB* vb2 = *(cUIMenu_sVEntryB**)(selState + 8);
-    vb2[19].fn(selState + vb2[19].delta, ((char*)item), 1);
+    vb2[19].fn(vthis(selState, vb2[19]), ((char*)item), 1);
     cUIThing* newSelected = self->mpSelected;
     cUIMenu_sVEntryA* va2 = (cUIMenu_sVEntryA*)newSelected->mVtbl;
     va2[7].fn(vthis(newSelected, va2[7]), 1);
@@ -95,7 +95,7 @@ static inline void cUIMenu_onInputChangeItem_notify(char* vself, int ev, unsigne
     cUIMenu* self = (cUIMenu*)vself;
     char* mgr = (char*)self->mpScreen->mpState;
     cUIMenu_onInputChangeItem_sVEntry* vt = *(cUIMenu_onInputChangeItem_sVEntry**)(mgr + 8);
-    vt[20].fn(mgr + vt[20].delta, ((char*)self), ev, v);
+    vt[20].fn(vthis(mgr, vt[20]), ((char*)self), ev, v);
 }
 
 /**
@@ -164,14 +164,14 @@ static inline void focusNotify_B000(char* self, void* item, int what)
 {
     char* o = *(char**)(*(char**)(self + 0x5C) + 0xD0);
     sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)(o + 8);
-    vt[19].fn(o + vt[19].delta, item, what);
+    vt[19].fn(vthis(o, vt[19]), item, what);
 }
 
 static inline int focusMove_B000(char* self, int dir, int idx)
 {
     char* o = *(char**)(*(char**)(self + 0x5C) + 0xD0);
     sVEntry<int(void*, ...)>* vt = *(sVEntry<int(void*, ...)>**)(o + 8);
-    return vt[20].fn(o + vt[20].delta, self, dir, idx);
+    return vt[20].fn(vthis(o, vt[20]), self, dir, idx);
 }
 
 static inline int bit_B000(char* p, int off, int bit)
@@ -327,7 +327,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
     }
     if (listener != 0) {
         sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)listener;
-        vt[2].fn(listener + vt[2].delta, result);
+        vt[2].fn(vthis(listener, vt[2]), result);
     }
     return 1;
 }
@@ -438,7 +438,7 @@ extern "C" unsigned char cUIMenu_findFirstHighlightable(cUIMenu* self, unsigned 
         if (*(int*)&self->mAttrMenu & 4) {
             char* mgr = (char*)self->mpScreen->mpState;
             cUIMenu_findFirstHighlightable_sVEntry* vt = *(cUIMenu_findFirstHighlightable_sVEntry**)(mgr + 8);
-            if (vt[20].fn(mgr + vt[20].delta, self, 1, i)) {
+            if (vt[20].fn(vthis(mgr, vt[20]), self, 1, i)) {
                 return i;
             }
         } else {
@@ -507,7 +507,7 @@ static inline void cUIMenu_notify(char* vself, int ev, unsigned char v)
     cUIMenu* self = (cUIMenu*)vself;
     char* mgr = (char*)self->mpScreen->mpState;
     cUIMenu_findFirstHighlightable_sVEntry* vt = *(cUIMenu_findFirstHighlightable_sVEntry**)(mgr + 8);
-    vt[20].fn(mgr + vt[20].delta, ((char*)self), ev, v);
+    vt[20].fn(vthis(mgr, vt[20]), ((char*)self), ev, v);
 }
 
 /**
@@ -687,7 +687,7 @@ extern "C" void cUIPair_setFocus(cUIPair* self, int on)
         vc[7].fn(vthis(widgetObj, vc[7]), 1);
         char* screenState = (char*)self->mpScreen->mpState;
         cUIPair_setFocus_sVEntryB* vo = *(cUIPair_setFocus_sVEntryB**)(screenState + 8);
-        vo[19].fn(screenState + vo[19].delta, self->mpWidget, 1);
+        vo[19].fn(vthis(screenState, vo[19]), self->mpWidget, 1);
     } else {
         unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)widget, 1);
         if (ev != 0xFFFF) {
@@ -701,7 +701,7 @@ extern "C" void cUIPair_setFocus(cUIPair* self, int on)
         vc[7].fn(vthis(widgetObj, vc[7]), 0);
         char* screenState = (char*)self->mpScreen->mpState;
         cUIPair_setFocus_sVEntryB* vo = *(cUIPair_setFocus_sVEntryB**)(screenState + 8);
-        vo[19].fn(screenState + vo[19].delta, self->mpWidget, 2);
+        vo[19].fn(vthis(screenState, vo[19]), self->mpWidget, 2);
     }
 }
 #endif
@@ -866,14 +866,14 @@ static inline void focusNotify_BED8(char* self, int what)
 {
     char* o = *(char**)(*(char**)(self + 0x5C) + 0xD0);
     sVEv_BED8* vt = *(sVEv_BED8**)(o + 8);
-    vt[19].fn(o + vt[19].delta, self, what);
+    vt[19].fn(vthis(o, vt[19]), self, what);
 }
 
 static inline int focusMove_BED8(char* self, int dir)
 {
     char* o = *(char**)(*(char**)(self + 0x5C) + 0xD0);
     sVE_BED8* vt = *(sVE_BED8**)(o + 8);
-    return vt[21].fn(o + vt[21].delta, self, dir);
+    return vt[21].fn(vthis(o, vt[21]), self, dir);
 }
 
 /**
@@ -908,7 +908,7 @@ extern "C" int cUIPair_onInput(cUIPair* self, cUIInput* in)
         }
         if (listener != 0) {
             sVEv_BED8* vt = *(sVEv_BED8**)listener;
-            vt[2].fn(listener + vt[2].delta, result);
+            vt[2].fn(vthis(listener, vt[2]), result);
         }
     } else if (inputIs_BED8(in, 6)) {
         focusNotify_BED8(((char*)self), 6);
@@ -926,7 +926,7 @@ extern "C" int cUIPair_onInput(cUIPair* self, cUIInput* in)
         }
         if (listener != 0) {
             sVEv_BED8* vt = *(sVEv_BED8**)listener;
-            vt[2].fn(listener + vt[2].delta, result);
+            vt[2].fn(vthis(listener, vt[2]), result);
         }
     } else if (inputIs_BED8(in, 4)) {
         focusNotify_BED8(((char*)self), 4);

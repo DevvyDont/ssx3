@@ -159,7 +159,7 @@ extern "C" void cScriptSoundBankManager_UnlinkBanksAll(cScriptSoundBankManager* 
     int i;
     for (i = 0; i < self->mMaxBanks; i++) {
         if (((int)(self->mpBankInfo)[i].pData) != 0) {
-            ((sVEntry<void(void*, tScriptSoundBankInfo*)>*)self->mVtbl)[2].fn((char*)self + ((sVEntry<void(void*, tScriptSoundBankInfo*)>*)self->mVtbl)[2].delta, &(self->mpBankInfo)[i]);
+            ((sVEntry<void(void*, tScriptSoundBankInfo*)>*)self->mVtbl)[2].fn(vthis(self, ((sVEntry<void(void*, tScriptSoundBankInfo*)>*)self->mVtbl)[2]), &(self->mpBankInfo)[i]);
         }
     }
 }

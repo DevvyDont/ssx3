@@ -184,21 +184,21 @@ extern "C" void cMCOverlayManager_readSetFileType(cMCOverlayManager* self, int m
         self->mMaxFiles = 4;
         char* memCard = (char*)self->mpMemCard;
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)memCard;
-        vt[19].fn(memCard + vt[19].delta, 0x80000);
+        vt[19].fn(vthis(memCard, vt[19]), 0x80000);
     } else if (fileType == 1) {
         self->mMaxFiles = 6;
         cBE_getInterface_Fv(cBE_getBE(), 5);
         int fileSize = cBESaveInterface_getSaveProfileSize();
         char* memCard = (char*)self->mpMemCard;
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)memCard;
-        vt[19].fn(memCard + vt[19].delta, fileSize);
+        vt[19].fn(vthis(memCard, vt[19]), fileSize);
     } else {
         self->mMaxFiles = 1;
         cBE_getInterface_Fv(cBE_getBE(), 5);
         int fileSize = cBESaveInterface_getSaveGameSize_r();
         char* memCard = (char*)self->mpMemCard;
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)memCard;
-        vt[19].fn(memCard + vt[19].delta, fileSize);
+        vt[19].fn(vthis(memCard, vt[19]), fileSize);
     }
     func_002C2540(fmt, str_pct_s_pct_s_e);
     func_00241AA0_r(desc, 0x200);
@@ -325,21 +325,21 @@ extern "C" void cMCOverlayManager_writeSetFileType(cMCOverlayManager* self, int 
         self->mMaxFiles = 4;
         char* memCard = (char*)self->mpMemCard;
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)memCard;
-        vt[19].fn(memCard + vt[19].delta, 0x80000);
+        vt[19].fn(vthis(memCard, vt[19]), 0x80000);
     } else if (fileType == 1) {
         self->mMaxFiles = 6;
         cBE_getInterface_Fv(cBE_getBE(), 5);
         int fileSize = cBESaveInterface_getSaveProfileSize();
         char* memCard = (char*)self->mpMemCard;
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)memCard;
-        vt[19].fn(memCard + vt[19].delta, fileSize);
+        vt[19].fn(vthis(memCard, vt[19]), fileSize);
     } else {
         self->mMaxFiles = 1;
         cBE_getInterface_Fv(cBE_getBE(), 5);
         int fileSize = cBESaveInterface_getSaveGameSize_r();
         char* memCard = (char*)self->mpMemCard;
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)memCard;
-        vt[19].fn(memCard + vt[19].delta, fileSize);
+        vt[19].fn(vthis(memCard, vt[19]), fileSize);
     }
     func_002C2540(fmt, str_pct_s_pct_s_e);
     func_00241AA0_r(desc, 0x200);
@@ -618,11 +618,11 @@ extern "C" void cMCOverlayManager_managerDeviceSelectUpdate(cMCOverlayManager* s
 {
     char* memCard = (char*)self->mpMemCard;
     sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)memCard;
-    vt[3].fn(memCard + vt[3].delta);
+    vt[3].fn(vthis(memCard, vt[3]));
     if (self->mCheckCard != 0) {
         memCard = (char*)self->mpMemCard;
         sVEntry<int(void*)>* ivt = *(sVEntry<int(void*)>**)memCard;
-        if (ivt[11].fn(memCard + ivt[11].delta) != 0) {
+        if (ivt[11].fn(vthis(memCard, ivt[11])) != 0) {
             return;
         }
         self->mCheckCard = 0;
@@ -632,7 +632,7 @@ extern "C" void cMCOverlayManager_managerDeviceSelectUpdate(cMCOverlayManager* s
     }
     memCard = (char*)self->mpMemCard;
     sVEntry<int(void*)>* ivt = *(sVEntry<int(void*)>**)memCard;
-    if (ivt[11].fn(memCard + ivt[11].delta) == 0) {
+    if (ivt[11].fn(vthis(memCard, ivt[11])) == 0) {
         cMCOverlayManager_SetAction((cMCOverlayManager*)self, 0);
         int ok = !(isState_23D660(((char*)self), 49) || isState_23D660(((char*)self), 50) || isState_23D660(((char*)self), 51) || isState_23D660(((char*)self), 52) || isState_23D660(((char*)self), 54));
         if (ok) {
@@ -745,25 +745,25 @@ static inline int call0_7D8(char* s, int n)
 {
     char* o = DEC_7D8(s);
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)o;
-    return vt[n].fn(o + vt[n].delta);
+    return vt[n].fn(vthis(o, vt[n]));
 }
 static inline int callI_7D8(char* s, int n, int a)
 {
     char* o = DEC_7D8(s);
     sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)o;
-    return vt[n].fn(o + vt[n].delta, a);
+    return vt[n].fn(vthis(o, vt[n]), a);
 }
 static inline void callV_7D8(char* s, int n, int a)
 {
     char* o = DEC_7D8(s);
     sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)o;
-    vt[n].fn(o + vt[n].delta, a);
+    vt[n].fn(vthis(o, vt[n]), a);
 }
 static inline void callN_7D8(char* s, int n)
 {
     char* o = DEC_7D8(s);
     sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)o;
-    vt[n].fn(o + vt[n].delta);
+    vt[n].fn(vthis(o, vt[n]));
 }
 static inline int isBusy_7D8(char* s) { return call0_7D8(s, 11); }
 // Release-build assert: compiles to an empty do { } while (0) (its loop notes still shape the code).
@@ -1435,13 +1435,13 @@ static inline int vq_E8A0(char* s, int k)
 {
     char* o = *(char**)(s + 0x434);
     sMovieVEntry_E8A0* vt = *(sMovieVEntry_E8A0**)o;
-    return vt[k].fn(o + vt[k].delta);
+    return vt[k].fn(vthis(o, vt[k]));
 }
 
 static inline void notify_E8A0(char* s, int v)
 {
     sMovieDelegate_E8A0* d = *(sMovieDelegate_E8A0**)(s + 0x748);
-    d->fn(s + d->delta, v);
+    d->fn(vthis(s, *d), v);
 }
 
 /**
@@ -1655,7 +1655,7 @@ static inline int ovCall_EC00(char* s, int slot)
 static inline void post_EC00(char* s, int code)
 {
     sMovieVEntryEC00b* vt = *(sMovieVEntryEC00b**)(s + 0x748);
-    vt[1].fn(s + vt[1].delta, code);
+    vt[1].fn(vthis(s, vt[1]), code);
 }
 
 /**
@@ -2305,7 +2305,7 @@ static inline void ovCallIP_F698(char* s, int slot, int a, void* p)
 static inline void post_F698(char* s, int code)
 {
     sMovieVEntryF698b* vt = *(sMovieVEntryF698b**)(s + 0x748);
-    vt[1].fn(s + vt[1].delta, code);
+    vt[1].fn(vthis(s, vt[1]), code);
 }
 
 /**
@@ -2643,7 +2643,7 @@ struct sMovieVEntry_23FD40 {
 static inline void setState_23FD40(char* self, int s)
 {
     sMovieVEntry_23FD40* vt = *(sMovieVEntry_23FD40**)(self + 0x748);
-    vt[1].fn(self + vt[1].delta, s);
+    vt[1].fn(vthis(self, vt[1]), s);
 }
 
 /**
@@ -3061,7 +3061,7 @@ extern "C" void cMCOverlayManager_UpdateLoad(cMCOverlayManager* self)
             return;
         char* memCard;
         sVEntry<int(void*, ...)>* vt = Pad_02D0(self, &memCard);
-        ((void (*)(void*, int, char*))vt[14].fn)(memCard + vt[14].delta, self->mFileCursor, S_02D0 + 0x234);
+        ((void (*)(void*, int, char*))vt[14].fn)(vthis(memCard, vt[14]), self->mFileCursor, S_02D0 + 0x234);
         Post_02D0(self, 0x18);
         return;
     }
@@ -3265,7 +3265,7 @@ struct sMovieVEntry_240860 {
 static inline void setState_240860(char* self, int s)
 {
     sMovieVEntry_240860* vt = *(sMovieVEntry_240860**)(self + 0x748);
-    vt[1].fn(self + vt[1].delta, s);
+    vt[1].fn(vthis(self, vt[1]), s);
 }
 
 /**
@@ -3566,7 +3566,7 @@ struct sMovieVEntry_240D90 {
 static inline void setState_240D90(char* self, int s)
 {
     sMovieVEntry_240D90* vt = *(sMovieVEntry_240D90**)(self + 0x748);
-    vt[1].fn(self + vt[1].delta, s);
+    vt[1].fn(vthis(self, vt[1]), s);
 }
 
 /**
@@ -3771,12 +3771,12 @@ extern "C" int cMCOverlayManager_GetMaxFiles(cMCOverlayManager* self)
 {
     char* memCard = (char*)self->mpMemCard;
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)memCard;
-    if (self->mMaxFiles < vt[68].fn(memCard + vt[68].delta)) {
+    if (self->mMaxFiles < vt[68].fn(vthis(memCard, vt[68]))) {
         return self->mMaxFiles;
     }
     char* memCardAgain = (char*)self->mpMemCard;
     sVEntry<int(void*)>* vt2 = *(sVEntry<int(void*)>**)memCardAgain;
-    return vt2[68].fn(memCardAgain + vt2[68].delta);
+    return vt2[68].fn(vthis(memCardAgain, vt2[68]));
 }
 #endif
 
@@ -4734,7 +4734,7 @@ static inline int Loc_00241E18(char* key)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry_00241E18* vt = *(sVEntry_00241E18**)(obj + 4);
-    return vt[4].fn(obj + vt[4].delta, GetHashValue32(key));
+    return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(key));
 }
 
 static inline void SetText_00241E18(void* out, char* key, void* arg)
@@ -5380,7 +5380,7 @@ static inline sVec4_25C0 mulT_25C0(const t4Matrix* m, const sVec4_25C0& v)
 static inline t4Matrix* camMtx_25C0()
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    return ((tCamMtxP_25C0)((sCamVt_25C0*)ps2GraphicsMan->mVtbl)[0x23].fn)((char*)ps2GraphicsMan + ((sCamVt_25C0*)ps2GraphicsMan->mVtbl)[0x23].delta);
+    return ((tCamMtxP_25C0)((sCamVt_25C0*)ps2GraphicsMan->mVtbl)[0x23].fn)(vthis(ps2GraphicsMan, ((sCamVt_25C0*)ps2GraphicsMan->mVtbl)[35]));
 }
 
 /**
@@ -5404,7 +5404,7 @@ extern "C" void cOcclusionMan_updateView(sVisMgr_25C0* self, tBoundBox* bb)
     if (self->enabled == 0)
         return;
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    t4Matrix mtx = ((tCamMtx_25C0)((sCamVt_25C0*)ps2GraphicsMan->mVtbl)[0x2B].fn)((char*)ps2GraphicsMan + ((sCamVt_25C0*)ps2GraphicsMan->mVtbl)[0x2B].delta);
+    t4Matrix mtx = ((tCamMtx_25C0)((sCamVt_25C0*)ps2GraphicsMan->mVtbl)[0x2B].fn)(vthis(ps2GraphicsMan, ((sCamVt_25C0*)ps2GraphicsMan->mVtbl)[43]));
     sVec4_25C0 eye = vu0Scale_25C0(rowPos_25C0(camMtx_25C0()), -1.0f);
     eye = mulT_25C0(camMtx_25C0(), eye);
     self->count = 0;
@@ -5427,7 +5427,7 @@ extern "C" void cOcclusionMan_updateView(sVisMgr_25C0* self, tBoundBox* bb)
               && bb->MinPoint.z <= box.max.z && box.min.z <= bb->MaxPoint.z;
         if (ov) {
             cPS2GraphicsMan* graphics = GrMan;
-            bool vis = !((tCamCull_25C0)((sCamVt_25C0*)graphics->mVtbl)[0x5D].fn)((char*)graphics + ((sCamVt_25C0*)graphics->mVtbl)[0x5D].delta, &box.min, &box.max, &mtx);
+            bool vis = !((tCamCull_25C0)((sCamVt_25C0*)graphics->mVtbl)[0x5D].fn)(vthis(graphics, ((sCamVt_25C0*)graphics->mVtbl)[93]), &box.min, &box.max, &mtx);
             if (vis) {
                 if (!(0.0f < vu0Dot_25C0(eye, candidate->normal))) {
                     float distSq = vu0DistSq_25C0(eye, candidate->pos);

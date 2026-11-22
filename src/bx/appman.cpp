@@ -73,7 +73,7 @@ struct sVt1_6D60 { short delta; short index; void (*fn)(void*, int); };
 static inline int call0_6D60(char* o, int vtoff, int slot)
 {
     sVt0_6D60* vt = *(sVt0_6D60**)(o + vtoff);
-    return vt[slot].fn(o + vt[slot].delta);
+    return vt[slot].fn(vthis(o, vt[slot]));
 }
 
 struct sVtV_6D60 { short delta; short index; void (*fn)(void*); };
@@ -81,13 +81,13 @@ struct sVtV_6D60 { short delta; short index; void (*fn)(void*); };
 static inline void callv_6D60(char* o, int vtoff, int slot)
 {
     sVtV_6D60* vt = *(sVtV_6D60**)(o + vtoff);
-    vt[slot].fn(o + vt[slot].delta);
+    vt[slot].fn(vthis(o, vt[slot]));
 }
 
 static inline void call1_6D60(char* o, int vtoff, int slot, int a)
 {
     sVt1_6D60* vt = *(sVt1_6D60**)(o + vtoff);
-    vt[slot].fn(o + vt[slot].delta, a);
+    vt[slot].fn(vthis(o, vt[slot]), a);
 }
 
 /**
@@ -168,13 +168,13 @@ struct sVtV1_6F00 { short delta; short index; void (*fn)(void*, int); };
 static inline int calli_6F00(char* o, int vtoff, int slot)
 {
     sVtI_6F00* vt = *(sVtI_6F00**)(o + vtoff);
-    return vt[slot].fn(o + vt[slot].delta);
+    return vt[slot].fn(vthis(o, vt[slot]));
 }
 
 static inline void call1_6F00(char* o, int vtoff, int slot, int a)
 {
     sVtV1_6F00* vt = *(sVtV1_6F00**)(o + vtoff);
-    vt[slot].fn(o + vt[slot].delta, a);
+    vt[slot].fn(vthis(o, vt[slot]), a);
 }
 
 /**
@@ -385,11 +385,11 @@ struct sVEntry00317400 {
 extern "C" void cAppMan_loadexecpurge(cAppMan* self)
 {
     cExecutionMan* execMan = self->ExecutionMan;
-    ((void (*)(void*))((sVEntry00317400*)execMan->mVtbl)[3].fn)((char*)execMan + ((sVEntry00317400*)execMan->mVtbl)[3].delta);
+    ((void (*)(void*))((sVEntry00317400*)execMan->mVtbl)[3].fn)(vthis(execMan, ((sVEntry00317400*)execMan->mVtbl)[3]));
     cExecutionMan* execMan2 = self->ExecutionMan;
     if (execMan2 != 0)
     {
-        ((void (*)(void*, int))((sVEntry00317400*)execMan2->mVtbl)[1].fn)((char*)execMan2 + ((sVEntry00317400*)execMan2->mVtbl)[1].delta, 3);
+        ((void (*)(void*, int))((sVEntry00317400*)execMan2->mVtbl)[1].fn)(vthis(execMan2, ((sVEntry00317400*)execMan2->mVtbl)[1]), 3);
     }
 }
 #endif

@@ -1199,7 +1199,7 @@ struct sLoadInfo_72C0 {
 static inline void Activate_72C0(char* obj)
 {
     sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(obj + 8);
-    vt[9].fn(obj + vt[9].delta, 1);
+    vt[9].fn(vthis(obj, vt[9]), 1);
 }
 
 // The player index is a char parameter (the caller in onCreateScreen declares it int); bound by asm label.
@@ -1272,7 +1272,7 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* vself, char player)
         unsigned short text[100];
         char* o = (char*)SSXApp->FELocale;
         sVEntry<void*(void*, int)>* vt = *(sVEntry<void*(void*, int)>**)(o + 4);
-        strcpy1(fmtw, vt[4].fn(o + vt[4].delta, GetHashValue32(str_kT_OVRCMNLevelNum)));
+        strcpy1(fmtw, vt[4].fn(vthis(o, vt[4]), GetHashValue32(str_kT_OVRCMNLevelNum)));
         sprintf1(text, fmtw, rank);
         cUIText_setUnicodeString(obj, (char*)text);
     }
@@ -1409,7 +1409,7 @@ extern "C" void cFELoadState_widgetCreateQP(cFELoadState* self, cUIThing* widget
     } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_ranking)) {
         char* locale = (char*)SSXApp->FELocale;
         sVEnt_7AB0* vt = *(sVEnt_7AB0**)(locale + 4);
-        strcpy1(fmtw, vt[4].fn(locale + vt[4].delta, GetHashValue32(str_kT_OVRCMNLevelNum)));
+        strcpy1(fmtw, vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_OVRCMNLevelNum)));
         sprintf1(text, fmtw, cBEStatInterface_getStatLevel(iface3, cBENewPlayerInterface_getHumanRider(iface1, 0)));
         cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_knockdown)) {

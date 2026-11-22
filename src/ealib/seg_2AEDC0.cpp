@@ -308,7 +308,7 @@ extern "C" void func_003AE300(char* self, int flags)
     char* decoder = *(char**)(self + 0x64);
     if (decoder != 0) {
         sWSVtE300* vt = *(sWSVtE300**)(decoder + 0x18);
-        vt[1].fn(decoder + vt[1].delta, 3);
+        vt[1].fn(vthis(decoder, vt[1]), 3);
         *(void**)(self + 0x64) = 0;
     }
     if (*(void**)(self + 0x0) != 0) {

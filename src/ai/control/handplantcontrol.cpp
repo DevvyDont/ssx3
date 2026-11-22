@@ -1339,7 +1339,7 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
             char* handler = *(char**)(hit.obj50 + 0xC);
             if (handler != 0) {
                 sVEnt_139C88* vt = *(sVEnt_139C88**)(handler + 0xC);
-                vt[43].fn(handler + vt[43].delta, &hit, vu0Scale_139C88(vu0Scale_139C88(imp, -1.0f), (float)SSXApp->TimerHz));
+                vt[43].fn(vthis(handler, vt[43]), &hit, vu0Scale_139C88(vu0Scale_139C88(imp, -1.0f), (float)SSXApp->TimerHz));
             }
         }
         int anim = 438;
@@ -1537,7 +1537,7 @@ extern "C" float cAirMotion_intersectBoard(cAirMotion* self, char* hit)
             if (handler)
             {
                 sVEntry_13A7B0* vt = *(sVEntry_13A7B0**)(handler + 0xC);
-                vt[42].fn(handler + vt[42].delta, hit);
+                vt[42].fn(vthis(handler, vt[42]), hit);
             }
         }
     }
@@ -1727,7 +1727,7 @@ static inline bool riderFlag_AA48(char* r)
 {
     char* sub = r + 0x6C0;
     sVEnt_AA48* vt = *(sVEnt_AA48**)sub;
-    return vt[8].fn(sub + vt[8].delta);
+    return vt[8].fn(vthis(sub, vt[8]));
 }
 
 static inline t4Vector riderVec_AA48(char* r, int off)
@@ -2267,7 +2267,7 @@ extern "C" void cRailslideMotion_step(char* self)
             char* handler = *(char**)(hit.obj + 0xC);
             if (handler) {
                 sVE46_AF28* vt = *(sVE46_AF28**)(handler + 0xC);
-                if (vt[46].fn(handler + vt[46].delta))
+                if (vt[46].fn(vthis(handler, vt[46])))
                     *(int*)(RIDER_AF28 + 0x5AC) = 1;
             }
         }
@@ -2279,7 +2279,7 @@ extern "C" void cRailslideMotion_step(char* self)
             char* handler = *(char**)(hit.obj + 0xC);
             if (handler) {
                 sVE42_AF28* vt = *(sVE42_AF28**)(handler + 0xC);
-                vt[42].fn(handler + vt[42].delta, &hit);
+                vt[42].fn(vthis(handler, vt[42]), &hit);
             }
         }
         *(int*)(RIDER_AF28 + 0x438) = hit.mat;
@@ -2329,7 +2329,7 @@ extern "C" void cRailslideMotion_step(char* self)
                 char* handler = *(char**)(hit.obj + 0xC);
                 if (handler) {
                     sVE43_AF28* vt = *(sVE43_AF28**)(handler + 0xC);
-                    vt[43].fn(handler + vt[43].delta, &hit, Sub_AF28(cRailslideMotion_step_kRailGravity, Scale_AF28(nv, 0.0f)));
+                    vt[43].fn(vthis(handler, vt[43]), &hit, Sub_AF28(cRailslideMotion_step_kRailGravity, Scale_AF28(nv, 0.0f)));
                 }
             }
             AddEq_AF28(*(t4Vector*)(RIDER_AF28 + 0x1E0), Scale_AF28(acc, dt));
@@ -2840,7 +2840,7 @@ static inline bool riderFlag_13C140(char* r)
 {
     char* sub = r + 0x6C0;
     sVEnt_13C140* vt = *(sVEnt_13C140**)sub;
-    return vt[8].fn(sub + vt[8].delta);
+    return vt[8].fn(vthis(sub, vt[8]));
 }
 
 #define RIDER (*(char**)((char*)self + 0x50))
@@ -3772,7 +3772,7 @@ extern "C" int cGroundMotion_setupGroundVectors(cGroundMotion* self, sHit_13D1B8
         char* handler = *(char**)(out->obj + 0xC);
         if (handler) {
             sVEnt_13D1B8* vt = *(sVEnt_13D1B8**)(handler + 0xC);
-            vt[42].fn(handler + vt[42].delta, out);
+            vt[42].fn(vthis(handler, vt[42]), out);
         }
     }
     *(int*)(RIDER + 0x438) = out->m4C;
@@ -4363,7 +4363,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
         char* handler = *(char**)(hit.obj + 0xC);
         if (handler) {
             sVEnt_13D818* vt = *(sVEnt_13D818**)(handler + 0xC);
-            vt[43].fn(handler + vt[43].delta, &hit, &diff);
+            vt[43].fn(vthis(handler, vt[43]), &hit, &diff);
         }
     }
 
@@ -4796,7 +4796,7 @@ static inline bool riderFlag_13F488(char* r)
 {
     char* sub = r + 0x6C0;
     sVEnt_13F488* vt = *(sVEnt_13F488**)sub;
-    return vt[8].fn(sub + vt[8].delta);
+    return vt[8].fn(vthis(sub, vt[8]));
 }
 
 #define RIDER (*(char**)((char*)self + 0x18))
@@ -4834,7 +4834,7 @@ extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
         char* handler = *(char**)(hit.obj + 0xC);
         if (handler) {
             sVEntH_13F488* vt = *(sVEntH_13F488**)(handler + 0xC);
-            vt[42].fn(handler + vt[42].delta, &hit);
+            vt[42].fn(vthis(handler, vt[42]), &hit);
         }
     }
     {
@@ -8383,7 +8383,7 @@ extern "C" int cDangerMan_CalcAppliedDangerLevel(cDangerMan* self, int pl)
     }
     char* riderObj = rider + 0x6C0;
     sVEntry<float*(void*)>* vt = *(sVEntry<float*(void*)>**)riderObj;
-    float* pos = vt[5].fn(riderObj + vt[5].delta);
+    float* pos = vt[5].fn(vthis(riderObj, vt[5]));
     if (self->mNumActiveAvalanche != 0) {
         tAvalanchePositionalData ground;
         t3Vector probe;

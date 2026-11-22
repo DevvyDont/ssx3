@@ -43,13 +43,13 @@ extern "C" void cFEStateCredits_onCreateScreen(cFEStateCredits* self)
     self->mpDolbyIcon = (cUIIcon*)bitmap;
     if (bitmap != 0) {
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(bitmap + 8);
-        vt[9].fn(bitmap + vt[9].delta, 0);
+        vt[9].fn(vthis(bitmap, vt[9]), 0);
     }
     bitmap = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Bitmap0001));
     self->mpDolbyIcon = (cUIIcon*)bitmap;
     if (bitmap != 0) {
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(bitmap + 8);
-        vt[9].fn(bitmap + vt[9].delta, 0);
+        vt[9].fn(vthis(bitmap, vt[9]), 0);
     }
 }
 #endif

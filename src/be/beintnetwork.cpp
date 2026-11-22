@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "be/beintplayer.h"
 #include "be/beintoption.h"
 #include "be/beintreward.h"
@@ -320,9 +321,9 @@ void func_0014EB08_self(void* self) __asm__("func_0014EB08");
 extern "C" void cBENetworkInterface_postInitBE(cBENetworkInterface* self)
 {
     cBEInterface* statInterface = (cBEInterface*)cBE_getInterface_Fv(cBE_getBE(), 3);
-    ((sVEntry0014EA90*)statInterface->mVtbl)[2].fn((char*)statInterface + ((sVEntry0014EA90*)statInterface->mVtbl)[2].delta);
+    ((sVEntry0014EA90*)statInterface->mVtbl)[2].fn(vthis(statInterface, ((sVEntry0014EA90*)statInterface->mVtbl)[2]));
     cBEInterface* aggressionInterface = (cBEInterface*)cBE_getInterface_Fv(cBE_getBE(), 0xC);
-    ((sVEntry0014EA90*)aggressionInterface->mVtbl)[2].fn((char*)aggressionInterface + ((sVEntry0014EA90*)aggressionInterface->mVtbl)[2].delta);
+    ((sVEntry0014EA90*)aggressionInterface->mVtbl)[2].fn(vthis(aggressionInterface, ((sVEntry0014EA90*)aggressionInterface->mVtbl)[2]));
     func_0014EB08_self(self);
 }
 #endif
@@ -452,9 +453,9 @@ extern "C" void cBENetworkInterface_restoreCharProfile(cBENetworkInterface* self
         cBELibrary_playerDB[i] = cBENetworkInterface_BackupPlayerDB[i];
     }
     cBEInterface* playerInterface = (cBEInterface*)cBE_getInterface_Fv(cBE_getBE(), 1);
-    ((sVEntry0014EA90*)playerInterface->mVtbl)[2].fn((char*)playerInterface + ((sVEntry0014EA90*)playerInterface->mVtbl)[2].delta);
+    ((sVEntry0014EA90*)playerInterface->mVtbl)[2].fn(vthis(playerInterface, ((sVEntry0014EA90*)playerInterface->mVtbl)[2]));
     cBEInterface* grabTable = (cBEInterface*)cBE_getInterface_Fv(cBE_getBE(), 6);
-    ((sVEntry0014EA90*)grabTable->mVtbl)[2].fn((char*)grabTable + ((sVEntry0014EA90*)grabTable->mVtbl)[2].delta);
+    ((sVEntry0014EA90*)grabTable->mVtbl)[2].fn(vthis(grabTable, ((sVEntry0014EA90*)grabTable->mVtbl)[2]));
 }
 #endif
 

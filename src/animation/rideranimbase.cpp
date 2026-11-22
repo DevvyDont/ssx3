@@ -860,7 +860,7 @@ int cRiderAnimBase_play_impl(char* vself, int anim, int flags, float blend)
 {
     cRiderAnimBase* self = (cRiderAnimBase*)vself;
     sVEntry<int(void*, int)>* vt = (sVEntry<int (void*, int)>*)self->mVtbl;
-    int id = vt[4].fn(((char*)self) + vt[4].delta, anim);
+    int id = vt[4].fn(vthis(self, vt[4]), anim);
     if (id == 519)
         return 438;
     if (blend < 0.0f)

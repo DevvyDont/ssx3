@@ -298,7 +298,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUI
         } else {
             char* obj = *(char**)self->mpEngine;
             sVE_3710* vt = *(sVE_3710**)(obj + 4);
-            void* nextState = vt[4].fn(obj + vt[4].delta, ((char*)self), sub);
+            void* nextState = vt[4].fn(vthis(obj, vt[4]), ((char*)self), sub);
             if (nextState != 0) {
                 cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
             }
@@ -309,7 +309,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUI
     case 6: {
         char* obj = *(char**)self->mpEngine;
         sVE_3710* vt = *(sVE_3710**)(obj + 4);
-        void* nextState = vt[5].fn(obj + vt[5].delta, ((char*)self), item->mMiscData);
+        void* nextState = vt[5].fn(vthis(obj, vt[5]), ((char*)self), item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
             cFEStateCharSetup_show3DCharacter(((char*)self), 0);

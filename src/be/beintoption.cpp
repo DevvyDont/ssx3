@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "be/beintoption.h"
 #include "main/ssxapp.h"
 

@@ -673,7 +673,7 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
             char* o = *(char**)(hit.obj + 0xC);
             if (o != 0) {
                 sVEntH_137138* vt = *(sVEntH_137138**)(o + 0xC);
-                vt[43].fn(o + vt[43].delta, &hit,
+                vt[43].fn(vthis(o, vt[43]), &hit,
                           vu0Scale_137138(impulse, (float)SSXApp->TimerHz * -0.05000000074505806f));
             }
         }
@@ -693,7 +693,7 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
             char* o = *(char**)(hit.obj + 0xC);
             if (o != 0) {
                 sVEntH_137138* vt = *(sVEntH_137138**)(o + 0xC);
-                vt[43].fn(o + vt[43].delta, &hit,
+                vt[43].fn(vthis(o, vt[43]), &hit,
                           vu0Scale_137138(self->BoardVelocity, (float)SSXApp->TimerHz * 0.05000000074505806f));
             }
         }
@@ -981,7 +981,7 @@ static inline bool isHuman_137860(cRider* rider)
 {
     char* sub = (char*)&rider->mVtbl;
     sVEntR_137860* vt = *(sVEntR_137860**)sub;
-    return vt[kRiderVt_isHuman].fn(sub + vt[kRiderVt_isHuman].delta);
+    return vt[kRiderVt_isHuman].fn(vthis(sub, vt[kRiderVt_isHuman]));
 }
 
 #define RIDER (*(cRider**)(self + 0x40))
@@ -1044,7 +1044,7 @@ extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
                 if (hitOwner != 0)
                 {
                     sVEntH_137860* vt = *(sVEntH_137860**)(hitOwner + 0xC);
-                    vt[43].fn(hitOwner + vt[43].delta, &hitB,
+                    vt[43].fn(vthis(hitOwner, vt[43]), &hitB,
                               vu0Scale_137860(vu0Scale_137860(impulse, -1.0f), (float)SSXApp->TimerHz));
                 }
             }
@@ -1417,7 +1417,7 @@ extern "C" void cWipeoutMotion_stepGroundMotion(void* vself)
             char* hitOwner = *(char**)(hit.obj + 0xC);
             if (hitOwner != 0) {
                 sVEntH_137D18* vt = *(sVEntH_137D18**)(hitOwner + 0xC);
-                vt[43].fn(hitOwner + vt[43].delta, &hit,
+                vt[43].fn(vthis(hitOwner, vt[43]), &hit,
                           vu0Div_137D18(vu0Add_137D18(vu0Sub_137D18(netVelocity, RIDER->mVelocity), RIDER->GroundVelocity), dt));
             }
         }
@@ -1613,7 +1613,7 @@ extern "C" void cWipeoutMotion_resolveGroundMotion(void* vself)
                 char* hitOwner = *(char**)(hit.obj + 0xC);
                 if (hitOwner != 0) {
                     sVEntH_138640* vt = *(sVEntH_138640**)(hitOwner + 0xC);
-                    vt[42].fn(hitOwner + vt[42].delta, &hit);
+                    vt[42].fn(vthis(hitOwner, vt[42]), &hit);
                 }
             }
             t4Vector push = vu0Scale_138640(vu0Scale_138640(hit.normal, 1.100000023841858f), depth);
@@ -1735,7 +1735,7 @@ extern "C" float cWipeoutMotion_intersectGround(cWipeoutMotion* self, char* hit,
             if (hitOwner)
             {
                 sVEntry_138960* vt = *(sVEntry_138960**)(hitOwner + 0xC);
-                vt[42].fn(hitOwner + vt[42].delta, hit);
+                vt[42].fn(vthis(hitOwner, vt[42]), hit);
             }
         }
     }

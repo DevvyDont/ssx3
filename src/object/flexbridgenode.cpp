@@ -848,7 +848,7 @@ extern "C" int cFlexBridgeNode_intersect(cFlexBridgeNode* self, sFTester_7268* t
     mesh.indices = ((void*)self->Faces);
     mesh.verts = ((sFV_7268*)self->Verts);
     mesh.normals = ((sFV_7268*)self->FaceNorms);
-    sFM_7268* matrix = ((GetMtxFn_7268)((sFVE_7268*)self->mVtbl)[24].fn)((char*)self + ((sFVE_7268*)self->mVtbl)[24].delta);
+    sFM_7268* matrix = ((GetMtxFn_7268)((sFVE_7268*)self->mVtbl)[24].fn)(vthis(self, ((sFVE_7268*)self->mVtbl)[24]));
     sFM_7268 inv;
     Copy_7268(&inv, matrix);
     TransposeInverse_7268(&inv);
@@ -1111,7 +1111,7 @@ extern "C" void cFlexBridgeNode_updateGrid(cFlexBridgeNode* vself)
     sV3_75D8 pos[32];
     float minX = 1e10f, minY = 1e10f, minZ = 1e10f;
     float maxX = -1e10f, maxY = -1e10f, maxZ = -1e10f;
-    sMat_75D8* matrix = (sMat_75D8*)((sVE_75D8*)self->mVtbl)[24].fn((char*)self + ((sVE_75D8*)self->mVtbl)[24].delta);
+    sMat_75D8* matrix = (sMat_75D8*)((sVE_75D8*)self->mVtbl)[24].fn(vthis(self, ((sVE_75D8*)self->mVtbl)[24]));
     for (int vertexIndex = 0; vertexIndex < nverts; vertexIndex++) {
         pos[vertexIndex] = ((sV4_75D8*)self->Verts)[vertexIndex];
         sV4_75D8 w = MulMat_75D8(matrix, ((sV4_75D8*)self->Verts)[vertexIndex]);
@@ -1409,7 +1409,7 @@ extern "C" void cFlexRailNode_updateSpaceHash(cFlexRailNode* node)
     cFlexRailNode* self = node;
     tBoundBox* box = (&self->BoundBox);
     tBoundBox old = *(&self->BoundBox);
-    ((sVEntry<void(void*)>*)self->mVtbl)[50].fn((char*)self + ((sVEntry<void(void*)>*)self->mVtbl)[50].delta);
+    ((sVEntry<void(void*)>*)self->mVtbl)[50].fn(vthis(self, ((sVEntry<void(void*)>*)self->mVtbl)[50]));
     nash_Nash_movenode(cObjectInterface_getNash(), 2, ((int)self->Node), box, &old);
 }
 #endif

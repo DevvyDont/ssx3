@@ -670,7 +670,7 @@ extern "C" void cReplay__cReplay(int* self, int flags)
         while (replay + 0x2C != element) {
             element -= 0x38;
             sVEntry<void(void*, int)>* vt = ((sVEntry<void (void*, int)>*)((cReplayFrame*)element)->mVtbl);
-            vt[7].fn(element + vt[7].delta, 0);
+            vt[7].fn(vthis(element, vt[7]), 0);
         }
     }
     if (flags & 1) {
@@ -1484,7 +1484,7 @@ extern "C" void cReplay_processInput(cReplay* self)
         char* controller = *(char**)(*(char**)(views + 4) + 0xA8);
         cChaseCameraController_switchCamera_Chapter(controller);
         sVE_26FE50* vt = *(sVE_26FE50**)(controller + 0x14);
-        vt[4].fn(controller + vt[4].delta);
+        vt[4].fn(vthis(controller, vt[4]));
         cGameViewMan_updateAll(views);
     }
 }

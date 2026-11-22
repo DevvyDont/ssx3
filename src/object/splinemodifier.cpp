@@ -1320,7 +1320,7 @@ static inline void setMax_A918(sSmInst_A918* in, const sSmVec4_A918& v)
 extern "C" void cMultiSplineModifier_updateOverlapSystem(cMultiSplineModifier* self)
 {
     if (self->RootTransformDirty != 0) {
-        ((sVEntry<void(void*)>*)self->mVtbl)[3].fn((char*)self + ((sVEntry<void(void*)>*)self->mVtbl)[3].delta);
+        ((sVEntry<void(void*)>*)self->mVtbl)[3].fn(vthis(self, ((sVEntry<void(void*)>*)self->mVtbl)[3]));
     }
     for (int i = 1; i < self->NumModels; i++) {
         tBoundBox old = ((sSmElem_A918*)self->Nodes)[i].box;

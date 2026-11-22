@@ -208,7 +208,7 @@ extern "C" void cGameModeMan_initGameMode(cGameModeMan* self, unsigned int type)
     cBE_getInterface_Fv(cBE_getBE(), 0);
     char* gm = (char*)cGameModeMan_aHandler[self->iCurrModeHandler];
     sVE_initGameMode* vt = *(sVE_initGameMode**)gm;
-    vt[3].fn(gm + vt[3].delta);
+    vt[3].fn(vthis(gm, vt[3]));
     self->iCurrentGameEvent = (int)type;
     int net = cBENewRaceInterface_newRace.cGamePath;
     self->iCurrentGamePath = net;
@@ -1881,7 +1881,7 @@ extern "C" void cGameModeMan_sortTimes_A760(void* self, int n) __asm__("cGameMod
 static inline int vcall_23A760(char* obj, int slot)
 {
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
-    return vt[slot].fn(obj + vt[slot].delta);
+    return vt[slot].fn(vthis(obj, vt[slot]));
 }
 
 /**
@@ -2153,7 +2153,7 @@ static inline sRace_23AE00* race_23AE00()
 static inline int subActive_23AE00(char* obj)
 {
     sVEnt_23AE00* vt = *(sVEnt_23AE00**)obj;
-    return vt[9].fn(obj + vt[9].delta);
+    return vt[9].fn(vthis(obj, vt[9]));
 }
 
 static inline int finished_23AE00(sRider_23AE00* r)

@@ -374,7 +374,7 @@ extern "C" void cMoveNode_onCollide(cMoveNode* self, int tc, int ti, int pBeing)
             obj->collide(tc, ti);
             char* transformModifier = *(char**)((void*)self->ModifierBlock);
             sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)transformModifier;
-            if (vt[9].fn(transformModifier + vt[9].delta, cObjectInterface_getAIIndex(pBeing)) == 0) {
+            if (vt[9].fn(vthis(transformModifier, vt[9]), cObjectInterface_getAIIndex(pBeing)) == 0) {
                 return;
             }
         }
@@ -865,7 +865,7 @@ struct sMnVEntryP_6078 {
 static inline void* VCall18_6078(char*& o)
 {
     sMnVEntryP_6078* vt = *(sMnVEntryP_6078**)o;
-    return vt[18].fn(o + vt[18].delta);
+    return vt[18].fn(vthis(o, vt[18]));
 }
 /**
  * Returns the node's world transform: its root transform modifier's (slot 18), or the object's own matrix.
@@ -894,7 +894,7 @@ struct sMnVEntryI2_60C0 {
 static inline int VCall23_60C0(char*& o, int a)
 {
     sMnVEntryI2_60C0* vt = *(sMnVEntryI2_60C0**)o;
-    return vt[23].fn(o + vt[23].delta, a);
+    return vt[23].fn(vthis(o, vt[23]), a);
 }
 /**
  * Returns the animation matrices for an instance: the root transform modifier's (slot 23), else the node's
@@ -929,7 +929,7 @@ struct sMnVEntryP_6128 {
 static inline void* VCall_6128(char*& o, int i)
 {
     sMnVEntryP_6128* vt = *(sMnVEntryP_6128**)o;
-    return vt[i].fn(o + vt[i].delta);
+    return vt[i].fn(vthis(o, vt[i]));
 }
 /**
  * Returns the transform for an instance: the root transform modifier's slot 19 or else slot 18, or the
@@ -1473,13 +1473,13 @@ static inline void vu0Add_68B0(t4Vector& out, const t4Vector& a, const t4Vector&
 static inline t4Vector pos_68B0(char* self)
 {
     sMnVEntM_68B0* vt = *(sMnVEntM_68B0**)(self + 0xC);
-    return vt[24].fn(self + vt[24].delta)[3];
+    return vt[24].fn(vthis(self, vt[24]))[3];
 }
 
 static inline void VCall24_68B0(char*& o)
 {
     sMnVEnt_68B0* vt = *(sMnVEnt_68B0**)o;
-    vt[24].fn(o + vt[24].delta);
+    vt[24].fn(vthis(o, vt[24]));
 }
 
 /**
@@ -1718,7 +1718,7 @@ struct sMnVEntryI_6BF0 {
 static inline int VCall_6BF0(char* o, int i)
 {
     sMnVEntryI_6BF0* vt = *(sMnVEntryI_6BF0**)o;
-    return vt[i].fn(o + vt[i].delta);
+    return vt[i].fn(vthis(o, vt[i]));
 }
 /**
  * Tells whether the node keeps a focus count, which only a type-2 root transform modifier does.
@@ -2213,9 +2213,9 @@ extern "C" void cParentModifier_updateRootTransform(cParentModifier* self)
     char* parentNode = *(char**)((char*)self->ParentInst + 0xC);
     if (parentNode != 0) {
         sVEntry<int(void*)>* vi = *(sVEntry<int(void*)>**)(parentNode + 0xC);
-        if (vi[26].fn(parentNode + vi[26].delta) != 0) {
+        if (vi[26].fn(vthis(parentNode, vi[26])) != 0) {
             sVEntry<t4Matrix*(void*, int)>* vm = *(sVEntry<t4Matrix*(void*, int)>**)(parentNode + 0xC);
-            vu0CopyMtx_357108(&self->Transform, vm[29].fn(parentNode + vm[29].delta, self->Mesh));
+            vu0CopyMtx_357108(&self->Transform, vm[29].fn(vthis(parentNode, vm[29]), self->Mesh));
         } else {
             cInstanceNode_buildMeshMat(self->ParentInst, self->Mesh, ((&self->Transform)));
         }

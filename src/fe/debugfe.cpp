@@ -2198,7 +2198,7 @@ extern "C" void cDebugFE_purge(cDebugFE* self)
         if (screen != 0)
         {
             sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)screen;
-            vt[1].fn(screen + vt[1].delta, 3);
+            vt[1].fn(vthis(screen, vt[1]), 3);
         }
     }
     cSSXApp* app = SSXApp;

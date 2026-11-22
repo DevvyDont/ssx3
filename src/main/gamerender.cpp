@@ -238,7 +238,7 @@ extern "C" void cGameViewMan__cGameViewMan(cGameViewMan* self, int flags)
     for (i = 0; i < self->m_uiNumPlayers; i++) {
         cCamera* it = ((cCamera**)&self->PlayerCamera[0])[i];
         if (it != 0) {
-            ((sVEntry0022E730*)it->mVtbl)[1].fn((char*)it + ((sVEntry0022E730*)it->mVtbl)[1].delta, 3);
+            ((sVEntry0022E730*)it->mVtbl)[1].fn(vthis(it, ((sVEntry0022E730*)it->mVtbl)[1]), 3);
         }
     }
     self->m_uiNumView = 0;

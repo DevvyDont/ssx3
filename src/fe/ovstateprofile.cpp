@@ -844,7 +844,7 @@ static inline void* GetText_K211BC8(char* key)
 {
     char* db = (char*)SSXApp->FELocale;
     sVEntryK211BC8* vt = *(sVEntryK211BC8**)(db + 4);
-    return vt[4].fn(db + vt[4].delta, GetHashValue32(key));
+    return vt[4].fn(vthis(db, vt[4]), GetHashValue32(key));
 }
 
 /**
@@ -1153,7 +1153,7 @@ extern "C" void cOVState_AUTOSAVE_displayStatus(cOVState_AUTOSAVE* self)
         cOVState_AUTOSAVE_displayOn(self);
     } else {
         cUIThing* autosaveText = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_autosave_text));
-        ((sVEntry002122E8*)autosaveText->mVtbl)[9].fn((char*)autosaveText + ((sVEntry002122E8*)autosaveText->mVtbl)[9].delta, 0);
+        ((sVEntry002122E8*)autosaveText->mVtbl)[9].fn(vthis(autosaveText, ((sVEntry002122E8*)autosaveText->mVtbl)[9]), 0);
     }
 }
 #endif

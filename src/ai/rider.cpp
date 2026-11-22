@@ -195,7 +195,7 @@ extern void* cBeing_vtbl[];
 static inline void vdel_11B978(char* o, int off)
 {
     sVE_11B978* vt = *(sVE_11B978**)(o + off);
-    vt[1].fn(o + vt[1].delta, 3);
+    vt[1].fn(vthis(o, vt[1]), 3);
 }
 
 /**
@@ -1235,7 +1235,7 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
         {
             char* viewHandler = *(char**)(*(char**)(views + (self->mViewIndex << 2) + 4) + 0xA8);
             sVE_D660* hv = *(sVE_D660**)(viewHandler + 0x14);
-            hv[4].fn(viewHandler + hv[4].delta);
+            hv[4].fn(vthis(viewHandler, hv[4]));
         }
     }
 }
@@ -2541,7 +2541,7 @@ extern "C" void cRider_getControlCmd(cRider* self, void* out)
 {
     char* obj = (char*)self->mRiderHandler;
     sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(obj + 0xDE8);
-    vt[1].fn(obj + vt[1].delta, out);
+    vt[1].fn(vthis(obj, vt[1]), out);
 }
 #endif
 
@@ -2697,7 +2697,7 @@ extern "C" void cRider_updateBoost(cRider* self)
     }
     char* sub = (char*)&self->mVtbl;
     sVt_1200D0* vtEntry = &(*(sVt_1200D0**)sub)[kRiderVt_isComputer];
-    vtEntry->fn(sub + vtEntry->delta);
+    vtEntry->fn(vthis(sub, *vtEntry));
     if ((cRider_getMotionState(self) == 1 || cRider_getControlState(self) == 12) && 0.0f < self->mUberTimer && self->mUberTimer <= 0.01666666753590107f) {
         self->mUberTimer = 0.01666666753590107f;
     } else if (0.0f < self->mUberTimer) {
@@ -3186,7 +3186,7 @@ extern "C" void cRider_updateSplit2(cRider* self)
     int buf[4];
     char* obj = (char*)self->mRiderHandler;
     sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(obj + 0xDE8);
-    vt[1].fn(obj + vt[1].delta, buf);
+    vt[1].fn(vthis(obj, vt[1]), buf);
     cRiderHandler_updateControl(self->mRiderHandler, buf);
 }
 #endif
@@ -3438,7 +3438,7 @@ extern "C" void cRider_updateSplit10(cRider* self)
         if (obj != 0)
         {
             sVEntry00121818* vt = *(sVEntry00121818**)(obj + 0xC);
-            vt[40].fn(obj + vt[40].delta, self->unk_A60, self->unk_9E0, (char*)&self->mVtbl);
+            vt[40].fn(vthis(obj, vt[40]), self->unk_A60, self->unk_9E0, (char*)&self->mVtbl);
         }
         else
         {
@@ -3481,7 +3481,7 @@ extern "C" void cRider_updateSplit11(cRider* self)
         self->mGroundMaterial = cSectionMan_getBESectionIDFromWorldSectionID(SSXApp->Game->SectionMan, (unsigned char)self->mGroundPolyId);
     char* obj = (char*)&self->mVtbl;
     sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)obj;
-    cRenderStateMan_update(vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta), self->mGroundContactPoint.x, self->mGroundContactPoint.y, -99999.0f);
+    cRenderStateMan_update(vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex])), self->mGroundContactPoint.x, self->mGroundContactPoint.y, -99999.0f);
     char* handler = (char*)self->mRiderHandler;
     cPlayerLights_Clear(handler ? handler + 0xD30 : 0);
 }
@@ -3802,7 +3802,7 @@ extern "C" void func_00121F30(cRider* self)
     sVec4_121F30* viewMtx = (sVec4_121F30*)gvt[35].fn(vthis(ps2GraphicsMan, gvt[35]));
     char* obj = (char*)&self->mVtbl;
     sVEntryP_121F30* vt = *(sVEntryP_121F30**)obj;
-    sVec4_121F30* pos = (sVec4_121F30*)vt[kRiderVt_getPosition].fn(obj + vt[kRiderVt_getPosition].delta);
+    sVec4_121F30* pos = (sVec4_121F30*)vt[kRiderVt_getPosition].fn(vthis(obj, vt[kRiderVt_getPosition]));
     sVec4_121F30 viewPos = mtxMulVec_121F30(viewMtx, pos);
     float z = viewPos.z;
     cPS2GraphicsMan* graphicsMan = GrMan;
@@ -3987,14 +3987,14 @@ extern "C" void cRider_SetRiderLights(cRider* self)
     {
         char* obj = (char*)&self->mVtbl;
         sVE_20D8* vt = *(sVE_20D8**)obj;
-        *(sXf_20D8*)&self->unk_7C0[0] = *(sXf_20D8*)cRenderStateMan_getIrradiance(vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta));
+        *(sXf_20D8*)&self->unk_7C0[0] = *(sXf_20D8*)cRenderStateMan_getIrradiance(vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex])));
     }
     cRider_getHipPosition(&hipPos, self);
     char* lightState = self->unk_7C0;
     {
         char* obj = (char*)&self->mVtbl;
         sVE_20D8* vt = *(sVE_20D8**)obj;
-        func_00389CB8(lightState, &hipPos, cRenderStateMan_RimLightIntensityOffset(vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta)));
+        func_00389CB8(lightState, &hipPos, cRenderStateMan_RimLightIntensityOffset(vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex]))));
     }
     for (int i = 0; i < 8; i++) {
         void* light = self->unk_794[i];
@@ -4689,10 +4689,10 @@ extern "C" int cRider_estimateFinishTick(cRider* self)
     int n = SSXApp->Game->AI->EventTimerTick;
     float rate = (cRider_getTotalPathDistance(self) - self->mDistToFinish) / (float)n;
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
-    if (rate < 30.0f - (float)vt[kRiderVt_getAIIndex].fn(sub + vt[kRiderVt_getAIIndex].delta))
+    if (rate < 30.0f - (float)vt[kRiderVt_getAIIndex].fn(vthis(sub, vt[kRiderVt_getAIIndex])))
     {
         sVEntry<int(void*)>* vt2 = *(sVEntry<int(void*)>**)sub;
-        rate = 30.0f - (float)vt2[kRiderVt_getAIIndex].fn(sub + vt2[kRiderVt_getAIIndex].delta);
+        rate = 30.0f - (float)vt2[kRiderVt_getAIIndex].fn(vthis(sub, vt2[kRiderVt_getAIIndex]));
     }
     return n + (int)(self->mDistToFinish / rate);
 }
@@ -5094,7 +5094,7 @@ extern "C" void cRider_initForMission(cRider* self, t4Matrix* mat)
     if ((unsigned int)self->mViewIndex < 2) {
         char* obj = *(char**)((char*)SSXApp->Game->ViewMan->PlayerCamera[self->mViewIndex] + 0xA8);
         sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(obj + 0x14);
-        vt[4].fn(obj + vt[4].delta);
+        vt[4].fn(vthis(obj, vt[4]));
     }
 }
 #endif
@@ -6009,7 +6009,7 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
 {
     char* vtObj = (char*)&self->mVtbl;
     sVE_42B0* ve = &(*(sVE_42B0**)vtObj)[kRiderVt_getVelocity];
-    float speed = Length_42B0(*ve->fn(vtObj + ve->delta));
+    float speed = Length_42B0(*ve->fn(vthis(vtObj, *ve)));
     float sideOffset = self->mAnimModel->unk_140.x * (self->mSlewed[0].cur * 45.0f);
     t4Vector probeBase = Add_42B0(*(t4Vector*)pRiderPos, Scale_42B0(*(&self->mGroundSide), sideOffset));
     t4Vector lo = Add_42B0(probeBase, Scale_42B0(*(&self->mGroundNormal), -100.0f));
@@ -6545,7 +6545,7 @@ extern "C" void cRider_doFinishEvent(cRider* self)
     if (self->mFinishTime < 0.0f) self->mFinishTime = 0.0f;
     char* obj = (char*)&self->mVtbl;
     sVEntry125108* vt = *(sVEntry125108**)obj;
-    cGameModeMan_raceFinish(getC0_125108(), vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta), (int)self->mMetrix + 0xFC);
+    cGameModeMan_raceFinish(getC0_125108(), vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex])), (int)self->mMetrix + 0xFC);
     unsigned int k = *(unsigned int*)&self->mViewIndex;
     if (k < 2)
     {
@@ -6588,7 +6588,7 @@ extern "C" int cRider_updateFinishTest(cRider* self)
 {
     char* obj = (char*)&self->mVtbl;
     sVE_125228* vt = *(sVE_125228**)obj;
-    if (vt[kRiderVt_isHuman].fn(obj + vt[kRiderVt_isHuman].delta)) {
+    if (vt[kRiderVt_isHuman].fn(vthis(obj, vt[kRiderVt_isHuman]))) {
         float finishTime = self->mFinishTime;
         float zeroF = 0.0f;
         int done = finishTime >= zeroF;
@@ -6642,7 +6642,7 @@ extern "C" void cRider_quitEvent(cRider* self)
         self->mDidNotFinish = 1;
         char* sub = (char*)&self->mVtbl;
         sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
-        cGameModeMan_bGiveUp[vt[kRiderVt_getAIIndex].fn(sub + vt[kRiderVt_getAIIndex].delta)] = 1;
+        cGameModeMan_bGiveUp[vt[kRiderVt_getAIIndex].fn(vthis(sub, vt[kRiderVt_getAIIndex]))] = 1;
     }
 }
 #endif
@@ -6929,7 +6929,7 @@ extern "C" void cRider_updateWind(cRider* self)
             t4Vector imp = Scale_125970(Scale_125970(dir, speedDeficit), 0.015000000596046448f);
             char* obj = (char*)&self->mVtbl;
             sVEntry<void(void*, t4Vector*)>* vt = *(sVEntry<void(void*, t4Vector*)>**)obj;
-            vt[kRiderVt_applyBoost].fn(obj + vt[kRiderVt_applyBoost].delta, &imp);
+            vt[kRiderVt_applyBoost].fn(vthis(obj, vt[kRiderVt_applyBoost]), &imp);
         }
     }
 }
@@ -7354,7 +7354,7 @@ extern "C" void cPlayer_vibrationUpdate(void* self)
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
         char* sub = *(char**)(player + 0x18) + 0x6C0;
         sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
-        if (cBENewPlayerInterface_getUseDualShock(iface, vt[7].fn(sub + vt[7].delta)) != 0)
+        if (cBENewPlayerInterface_getUseDualShock(iface, vt[7].fn(vthis(sub, vt[7]))) != 0)
         {
             flag = !riderInRange_1278E8(*(int*)SSXApp->Game->Replay);
         }

@@ -244,17 +244,17 @@ extern "C" void cFERider_purge(cFERider* self)
     char* ownedObject = (char*)self->mpRiderAnim;
     if (ownedObject != 0) {
         sVE_EBA0* vt = *(sVE_EBA0**)(ownedObject + 0x58);
-        vt[1].fn(ownedObject + vt[1].delta, 3);
+        vt[1].fn(vthis(ownedObject, vt[1]), 3);
     }
     ownedObject = (char*)self->mpBoltOnFX;
     if (ownedObject != 0) {
         sVE_EBA0* vt = *(sVE_EBA0**)(ownedObject + 0xC4);
-        vt[1].fn(ownedObject + vt[1].delta, 3);
+        vt[1].fn(vthis(ownedObject, vt[1]), 3);
     }
     ownedObject = (char*)self->mpAttachedEmitterFX;
     if (ownedObject != 0) {
         sVE_EBA0* vt = *(sVE_EBA0**)(ownedObject + 0xA4);
-        vt[1].fn(ownedObject + vt[1].delta, 3);
+        vt[1].fn(vthis(ownedObject, vt[1]), 3);
     }
     self->mpAnimModel = 0;
     self->mpRiderAnim = 0;

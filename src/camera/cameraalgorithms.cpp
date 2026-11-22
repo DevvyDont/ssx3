@@ -557,11 +557,11 @@ extern "C" void cCamera_snapChaseControllers(void)
     int count = *(int*)ctx;
     char* firstController = *(char**)(*(char**)(ctx + 4) + 0xA8);
     cCamera_snapChaseControllers_VE* firstSlot = &(*(cCamera_snapChaseControllers_VE**)(firstController + 0x14))[4];
-    firstSlot->fn(firstController + firstSlot->delta);
+    firstSlot->fn(vthis(firstController, *firstSlot));
     if (count >= 2) {
         char* secondController = *(char**)(*(char**)(ctx + 8) + 0xA8);
         cCamera_snapChaseControllers_VE* secondSlot = &(*(cCamera_snapChaseControllers_VE**)(secondController + 0x14))[4];
-        secondSlot->fn(secondController + secondSlot->delta);
+        secondSlot->fn(vthis(secondController, *secondSlot));
     }
 }
 #endif
@@ -591,7 +591,7 @@ extern "C" void cCamera_onRestart(void)
     cChaseCameraController_switchCamera_Restart(*(void**)(*(char**)(riders + 4) + 0xA8));
     char* cam = *(char**)(*(char**)(riders + 4) + 0xA8);
     sVEntry<void(void*)>* snapEntry = &(*(sVEntry<void(void*)>**)(cam + 0x14))[4];
-    snapEntry->fn(cam + snapEntry->delta);
+    snapEntry->fn(vthis(cam, *snapEntry));
     *(int*)(*(char**)(riders + 4) + 0x460) = 0;
     *(int*)(*(char**)(riders + 4) + 0x4A4) = 1;
     if (n >= 2)
@@ -599,7 +599,7 @@ extern "C" void cCamera_onRestart(void)
         cChaseCameraController_switchCamera_Restart(*(void**)(*(char**)(riders + 8) + 0xA8));
         char* cam2 = *(char**)(*(char**)(riders + 8) + 0xA8);
         sVEntry<void(void*)>* snapEntry2 = &(*(sVEntry<void(void*)>**)(cam2 + 0x14))[4];
-        snapEntry2->fn(cam2 + snapEntry2->delta);
+        snapEntry2->fn(vthis(cam2, *snapEntry2));
         *(int*)(*(char**)(riders + 8) + 0x460) = 0;
     }
 }

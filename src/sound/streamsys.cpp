@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "sound/controller.h"
 #include "sound/bankmonitor.h"
 #include "sound/streaminstance.h"
@@ -1783,7 +1784,7 @@ extern "C" void cController_Update(cController* self, float frameTime)
     char* bankMan = *(char**)*sys;
     char* bankMon = bankMan + 0x1D8;
     sStrmVtEntF* entry = &(*(sStrmVtEntF**)(bankMan + 0xAB0))[5];
-    entry->fn(bankMon + entry->delta, frameTime);
+    entry->fn(vthis(bankMon, *entry), frameTime);
     func_002B4388(sys);
     func_002B0C78(&self->SpeechSys);
     cStreamSys_STREAM_Update((cStreamSys*)(*sys));

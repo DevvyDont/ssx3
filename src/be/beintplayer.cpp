@@ -1068,7 +1068,7 @@ extern "C" char* cBENewPlayerInterface_getPlayerName(cBENewPlayerInterface* self
         unsigned short buf[104];
         char* db = (char*)SSXApp->FELocale;
         sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(db + 4);
-        sprintf1(buf, vt[4].fn(db + vt[4].delta, GetHashValue32(str_kT_MEMPlayerName)), idx + 1);
+        sprintf1(buf, vt[4].fn(vthis(db, vt[4]), GetHashValue32(str_kT_MEMPlayerName)), idx + 1);
         strcpy2(name, buf);
     }
     return name;

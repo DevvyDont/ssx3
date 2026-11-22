@@ -206,13 +206,13 @@ struct sPadVtF_1450 { short delta; short index; float (*fn)(void*); };
 static inline int padBtn_1450(char* pad, int slot)
 {
     sPadVtI_1450* vt = *(sPadVtI_1450**)(pad + 8);
-    return vt[slot].fn(pad + vt[slot].delta);
+    return vt[slot].fn(vthis(pad, vt[slot]));
 }
 
 static inline float padAxis_1450(char* pad, int slot)
 {
     sPadVtF_1450* vt = *(sPadVtF_1450**)(pad + 8);
-    return vt[slot].fn(pad + vt[slot].delta);
+    return vt[slot].fn(vthis(pad, vt[slot]));
 }
 
 static inline float wrapHi_1450(float a)
@@ -1037,7 +1037,7 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(cFEStateCheatCharSelect* s
         char* pl = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setPlayerCheatCharID(pl, self->mUserNum, self->mCheatCharID);
         sVEK182690b* vt = *(sVEK182690b**)(pl + 0xC);
-        vt[1].fn(pl + vt[1].delta);
+        vt[1].fn(vthis(pl, vt[1]));
         self->mDone = 1;
         cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
         break;

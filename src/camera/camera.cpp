@@ -683,10 +683,10 @@ extern "C" void cCamera_applyCameraShake(cCamera* self)
 {
     char* tgt = (char*)self->ChaseController->Target;
     sVEntry<float(void*)>* vf = *(sVEntry<float(void*)>**)tgt;
-    float spd = vf[17].fn(tgt + vf[17].delta);
+    float spd = vf[17].fn(vthis(tgt, vf[17]));
     if (((cPauseState_Flags & 1) ^ 1) != 0 && spd > 0.10000000149011612f) {
         sVEntry<t4Vector(void*)>* vv = *(sVEntry<t4Vector(void*)>**)tgt;
-        t4Vector velocity = vv[3].fn(tgt + vv[3].delta);
+        t4Vector velocity = vv[3].fn(vthis(tgt, vv[3]));
         float speedKmh = Length_15E460(velocity) * 0.035999998450279236f;
         float k;
         if (60.0f <= speedKmh) {
@@ -2906,7 +2906,7 @@ extern "C" void cManualChaseAlgorithm_snap(cManualChaseAlgorithm* self, int id)
 {
     char* obj = (char*)&self->Target->Rider->mVtbl;
     sCamVEntryIntA* vt = *(sCamVEntryIntA**)obj;
-    if (id == vt[7].fn(obj + vt[7].delta))
+    if (id == vt[7].fn(vthis(obj, vt[7])))
     {
         cLookAtChaseAlgorithm_snap(((cLookAtChaseAlgorithm*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cLookAtChaseAlgorithm*)self), 100.0f, 100.0f);
@@ -3121,7 +3121,7 @@ static inline t4Vector cmGet_001607E0(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
     sVEv_001607E0* e = &(*(sVEv_001607E0**)o)[slot];
-    return e->fn(o + e->delta);
+    return e->fn(vthis(o, *e));
 }
 
 /**
@@ -3183,7 +3183,7 @@ extern "C" void cMatrixChaseAlgorithm_snap(cMatrixChaseAlgorithm* self, int id)
 {
     char* obj = (char*)&self->Target->Rider->mVtbl;
     sCamVEntryIntA* vt = *(sCamVEntryIntA**)obj;
-    if (id == vt[7].fn(obj + vt[7].delta))
+    if (id == vt[7].fn(vthis(obj, vt[7])))
     {
         cLookAtChaseAlgorithm_snap(self, id);
         cLookAtChaseAlgorithm_setupInitialCamDir((cLookAtChaseAlgorithm*)self, 100.0f, 100.0f);
@@ -3360,7 +3360,7 @@ extern "C" void cRelativeChaseAlgorithm_snap(cRelativeChaseAlgorithm* self, int 
 {
     char* obj = (char*)&self->Target->Rider->mVtbl;
     sCamVEntryIntA* vt = *(sCamVEntryIntA**)obj;
-    if (id == vt[7].fn(obj + vt[7].delta))
+    if (id == vt[7].fn(vthis(obj, vt[7])))
     {
         cLookAtChaseAlgorithm_snap(self, id);
         cLookAtChaseAlgorithm_setupInitialCamDir((cLookAtChaseAlgorithm*)self, 100.0f, 100.0f);
@@ -3657,7 +3657,7 @@ static inline sVec4R Get_13F0(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
     sVEntry<sVec4R(void*)>* vEntry = &(*(sVEntry<sVec4R(void*)>**)o)[slot];
-    return vEntry->fn(o + vEntry->delta);
+    return vEntry->fn(vthis(o, *vEntry));
 }
 
 /**
@@ -3720,7 +3720,7 @@ extern "C" void cSplineCamAlgorithm_snap(cSplineCamAlgorithm* self, int id)
 {
     char* obj = (char*)&self->Target->Rider->mVtbl;
     sCamVEntryInt* vt = *(sCamVEntryInt**)obj;
-    if (id == vt[7].fn(obj + vt[7].delta))
+    if (id == vt[7].fn(vthis(obj, vt[7])))
     {
         cLookAtChaseAlgorithm_snap(self, id);
         sCamVEntryVoid* vt2 = (sCamVEntryVoid*)self->mVtbl;
@@ -3877,7 +3877,7 @@ static inline t4Vector cmGet_001607E0_1728(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
     sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[slot];
-    return vEntry->fn(o + vEntry->delta);
+    return vEntry->fn(vthis(o, *vEntry));
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
@@ -3971,7 +3971,7 @@ static inline t4Vector cmGet_001607E0_1848(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
     sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[slot];
-    return vEntry->fn(o + vEntry->delta);
+    return vEntry->fn(vthis(o, *vEntry));
 }
 
 extern "C" void cLookAtChaseAlgorithm_snap(void* self, int id);
@@ -4025,13 +4025,13 @@ extern "C" void cIdleChaseAlgorithm_snap_v(char* vself, int id)
     cIdleChaseAlgorithm* self = (cIdleChaseAlgorithm*)vself;
     char* obj = (char*)&self->Target->Rider->mVtbl;
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
-    if (id == vt[7].fn(obj + vt[7].delta))
+    if (id == vt[7].fn(vthis(obj, vt[7])))
     {
         self->Position = cmAddP_1848(cmAdd_001607E0_1848(cmGet_001607E0_1848(((char*)self), 1), cmScaleP_1848b(&D_004FF160_1848, 100.05000305175781f)), &t4vect_XAxis);
         cLookAtChaseAlgorithm_snap(self, id);
         cLookAtChaseAlgorithm_setupInitialCamDir((cLookAtChaseAlgorithm*)self, 559.7440185546875f, 300.0f);
         sVEntry<void(void*)>* vt2 = (sVEntry<void (void*)>*)self->mVtbl;
-        vt2[5].fn(((char*)self) + vt2[5].delta);
+        vt2[5].fn(vthis(self, vt2[5]));
     }
 }
 #endif
@@ -4924,14 +4924,14 @@ static inline int cmGetI_162568(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
     sVEi_162568* e = &(*(sVEi_162568**)o)[slot];
-    return e->fn(o + e->delta);
+    return e->fn(vthis(o, *e));
 }
 
 static inline float cmGetF_162568(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
     sVEf_162568* e = &(*(sVEf_162568**)o)[slot];
-    return e->fn(o + e->delta);
+    return e->fn(vthis(o, *e));
 }
 
 static inline t4Vector cmLerp_162568(const t4Vector& a, const t4Vector& b, float t)
@@ -4944,7 +4944,7 @@ static inline t4Vector cmGetR_162568(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
     sVEv_001607E0* e = &(*(sVEv_001607E0**)o)[slot];
-    t4Vector r = e->fn(o + e->delta);
+    t4Vector r = e->fn(vthis(o, *e));
     return r;
 }
 
@@ -5472,7 +5472,7 @@ static inline sV_162C78 Get_162C78(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
     sVE_162C78* e = &(*(sVE_162C78**)o)[slot];
-    return e->fn(o + e->delta);
+    return e->fn(vthis(o, *e));
 }
 
 static inline sV_162C78 Lerp_162C78(const sV_162C78& p, const sV_162C78& q, float t)
@@ -6256,14 +6256,14 @@ static inline int CallI_1635F8(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
     sVE_1635F8* e = &(*(sVE_1635F8**)o)[slot];
-    return ((int (*)(void*))e->fn)(o + e->delta);
+    return ((int (*)(void*))e->fn)(vthis(o, *e));
 }
 
 static inline float CallF_1635F8(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
     sVE_1635F8* e = &(*(sVE_1635F8**)o)[slot];
-    return ((float (*)(void*))e->fn)(o + e->delta);
+    return ((float (*)(void*))e->fn)(vthis(o, *e));
 }
 
 #define S_1635F8 ((char*)self)
@@ -6662,7 +6662,7 @@ extern "C" void cLookAtChaseAlgorithm_updateViewCam_v(char* self, float side, fl
 {
     char* target = *(char**)(self + 0x30);
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)target;
-    int onFlexRail = vt[24].fn(target + vt[24].delta);
+    int onFlexRail = vt[24].fn(vthis(target, vt[24]));
     t4Vector eyeOffset = Sub_41C0(*(t4Vector*)(self + 0x40), *(t4Vector*)(self + 0x20));
     float wantedFactor = 0.0f;
     if (onFlexRail) {
@@ -7346,21 +7346,21 @@ static inline int CallI_164878(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
     sVE_164878* e = &(*(sVE_164878**)o)[slot];
-    return ((int (*)(void*))e->fn)(o + e->delta);
+    return ((int (*)(void*))e->fn)(vthis(o, *e));
 }
 
 static inline float CallF_164878(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
     sVE_164878* e = &(*(sVE_164878**)o)[slot];
-    return ((float (*)(void*))e->fn)(o + e->delta);
+    return ((float (*)(void*))e->fn)(vthis(o, *e));
 }
 
 static inline sVec_164878* CallV_164878(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
     sVE_164878* e = &(*(sVE_164878**)o)[slot];
-    return ((sVec_164878* (*)(void*))e->fn)(o + e->delta);
+    return ((sVec_164878* (*)(void*))e->fn)(vthis(o, *e));
 }
 
 #define S_164878 ((char*)self)
@@ -8087,7 +8087,7 @@ static inline t4Vector Get_1662A0(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
     sVEv_1662A0* e = &(*(sVEv_1662A0**)o)[slot];
-    return e->fn(o + e->delta);
+    return e->fn(vthis(o, *e));
 }
 
 #define S_1662A0 ((char*)self)
@@ -8243,7 +8243,7 @@ static inline t4Vector Get_166550(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
     sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[slot];
-    return vEntry->fn(o + vEntry->delta);
+    return vEntry->fn(vthis(o, *vEntry));
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract into destination).
@@ -8678,7 +8678,7 @@ static inline sVec4 getVec_6C60(char* self, int slot)
 {
     char* cam = *(char**)(self + 0x30);
     sVEntry<void>* cvt = *(sVEntry<void>**)cam;
-    return ((VecFn_6C60)cvt[slot].fn)(cam + cvt[slot].delta);
+    return ((VecFn_6C60)cvt[slot].fn)(vthis(cam, cvt[slot]));
 }
 
 /**
@@ -8699,7 +8699,7 @@ extern "C" void f_6C60_def(void* algorithm, long id)
     char* self = (char*)algorithm;
     char* mgr = *(char**)(*(char**)(self + 0x30) + 4) + 0x6C0;
     sVEntry<void>* mvt = *(sVEntry<void>**)mgr;
-    if (id == ((LongFn_6C60)mvt[7].fn)(mgr + mvt[7].delta)) {
+    if (id == ((LongFn_6C60)mvt[7].fn)(vthis(mgr, mvt[7]))) {
         sVec4 front = getVec_6C60(self, 4);
         sVec4 velocity = getVec_6C60(self, 3);
         sVec4 vecCopy;
@@ -8716,7 +8716,7 @@ extern "C" void f_6C60_def(void* algorithm, long id)
         *(t4Vector*)(self + 0xE0) = D_004FF120_6C60;
         *(sVec4*)(self + 0x80) = front;
         sVEntry<void>* svt1 = *(sVEntry<void>**)(self + 0x10);
-        *(float*)(self + 0x1D4) = ((FloatFn_6C60)svt1[13].fn)(self + svt1[13].delta);
+        *(float*)(self + 0x1D4) = ((FloatFn_6C60)svt1[13].fn)(vthis(self, svt1[13]));
         *(int*)(self + 0x1E8) = 0;
         *(int*)(self + 0x1EC) = 0;
         Cross_6C60(scratchVec, (const sVec4&)D_004FF160_6C60, front);
@@ -8755,7 +8755,7 @@ extern "C" void f_6C60_def(void* algorithm, long id)
         {
             char* cam = *(char**)(self + 0x30);
             sVEntry<void>* cvt = *(sVEntry<void>**)cam;
-            ((VecFn2_6C60)cvt[4].fn)(&vecCopy, cam + cvt[4].delta);
+            ((VecFn2_6C60)cvt[4].fn)(&vecCopy, vthis(cam, cvt[4]));
         }
         *(int*)(self + 0x2EC) = 0;
         *(sVec4*)(self + 0x1B0) = vecCopy;
@@ -8774,7 +8774,7 @@ extern "C" void f_6C60_def(void* algorithm, long id)
         {
             char* cam = *(char**)(self + 0x30);
             sVEntry<void>* cvt = *(sVEntry<void>**)cam;
-            ((VecFn2_6C60)cvt[4].fn)(&scratchVec, cam + cvt[4].delta);
+            ((VecFn2_6C60)cvt[4].fn)(&scratchVec, vthis(cam, cvt[4]));
         }
         Scale_6C60(directionVel, scratchVec, 2.0f);
         vecCopy = directionVel;
@@ -8782,9 +8782,9 @@ extern "C" void f_6C60_def(void* algorithm, long id)
         *(sVec4*)(self + 0x100) = velocity;
         *(int*)(self + 0x108) = 0;
         sVEntry<void>* svt2 = *(sVEntry<void>**)(self + 0x10);
-        ((VoidFn_6C60)svt2[5].fn)(self + svt2[5].delta);
+        ((VoidFn_6C60)svt2[5].fn)(vthis(self, svt2[5]));
         sVEntry<void>* svt3 = *(sVEntry<void>**)(self + 0x10);
-        ((IntFn_6C60)svt3[8].fn)(self + svt3[8].delta, 1);
+        ((IntFn_6C60)svt3[8].fn)(vthis(self, svt3[8]), 1);
     }
 }
 #endif
@@ -8806,7 +8806,7 @@ extern "C" void* cLookAtChaseAlgorithm_snapCurrent(cLookAtChaseAlgorithm* self)
     sVEntry<void*(void*, void*)>* vt = (sVEntry<void*(void*, void*)>*)self->mVtbl;
     char* targetMgr = (char*)&self->Target->Rider->mVtbl;
     sVEntry<void*(void*)>* vt2 = *(sVEntry<void*(void*)>**)targetMgr;
-    return vt[3].fn(vthis(self, vt[3]), vt2[7].fn(targetMgr + vt2[7].delta));
+    return vt[3].fn(vthis(self, vt[3]), vt2[7].fn(vthis(targetMgr, vt2[7])));
 }
 #endif
 
@@ -10373,7 +10373,7 @@ extern "C" void cLookAtChaseAlgorithm_verify_def(char* self)
         char* riderTarget = *(char**)(self + 0x30);
         t4Vector x = *(t4Vector*)(*(char**)(riderTarget + 4) + 0x1B0);
         sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)riderTarget)[1];
-        t4Vector targetPos = vEntry->fn(riderTarget + vEntry->delta);
+        t4Vector targetPos = vEntry->fn(vthis(riderTarget, *vEntry));
         int one = 1;
         float liftHeight = 50.0f;
         t4Vector np = cmAdd_168150(cmSub2_168150(targetPos, cmScale_168150(x, 200.0f)), cmScaleP_168150(&D_004FF160_8150, liftHeight));
@@ -10673,7 +10673,7 @@ static inline t4Vector cmGet_001607E0_8508(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
     sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[slot];
-    return vEntry->fn(o + vEntry->delta);
+    return vEntry->fn(vthis(o, *vEntry));
 }
 
 // PORT: PS2-only VU0 inline asm (vector at pointer times scalar).
@@ -10702,14 +10702,14 @@ extern "C" void cLazyChaseAlgorithm_snap_v(char* vself, long id)
     cLazyChaseAlgorithm* self = (cLazyChaseAlgorithm*)vself;
     char* obj = (char*)&self->Target->Rider->mVtbl;
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
-    if (id == vt[7].fn(obj + vt[7].delta))
+    if (id == vt[7].fn(vthis(obj, vt[7])))
     {
         t4Vector nv = cmSub_168150(cmAdd_001607E0_8508(cmGet_001607E0_8508(((char*)self), 1), cmScaleP_1848(&D_004FF160_8508, 100.0f)), cmScale_001607E0_8508(cmGet_001607E0_8508(((char*)self), 4), 200.0f));
         self->Position = nv;
         f_6C60_8508(self, id);
         cLookAtChaseAlgorithm_setupInitialCamDir((cLookAtChaseAlgorithm*)self, 100.0f, 100.0f);
         sVEntry<void(void*)>* vt2 = (sVEntry<void (void*)>*)self->mVtbl;
-        vt2[5].fn(((char*)self) + vt2[5].delta);
+        vt2[5].fn(vthis(self, vt2[5]));
     }
 }
 #endif
@@ -10913,7 +10913,7 @@ static inline t4Vector Get_1686D0(char* self, int slot)
 {
     char* o = *(char**)(self + 0x30);
     sVEv_1686D0* e = &(*(sVEv_1686D0**)o)[slot];
-    return e->fn(o + e->delta);
+    return e->fn(vthis(o, *e));
 }
 
 /**

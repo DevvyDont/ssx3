@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "sound/ssxaudio.h"
 #include "fe/festateaudiooptions.h"
 #include "util/locale.h"
@@ -596,7 +597,7 @@ struct cFEStateAudioOptions_onGainTransition_sVEntry {
 static inline void cFEStateAudioOptions_onGainTransition_show(char* o, int on)
 {
     cFEStateAudioOptions_onGainTransition_sVEntry* vt = *(cFEStateAudioOptions_onGainTransition_sVEntry**)(o + 8);
-    vt[9].fn(o + vt[9].delta, on);
+    vt[9].fn(vthis(o, vt[9]), on);
 }
 
 /**
@@ -644,13 +645,13 @@ extern "C" void cFEState_onGainFocus(void* self, int a1);
 static inline void cFEStateAudioOptions_onGainFocus_call(char* o, int slot, int a)
 {
     cFEStateAudioOptions_onGainFocus_sVEntry* vt = *(cFEStateAudioOptions_onGainFocus_sVEntry**)(o + 8);
-    vt[slot].fn(o + vt[slot].delta, a);
+    vt[slot].fn(vthis(o, vt[slot]), a);
 }
 
 static inline void cFEStateAudioOptions_onGainFocus_callp(char* o, int slot, void* a)
 {
     cFEStateAudioOptions_onGainFocus_sVEntryP* vt = *(cFEStateAudioOptions_onGainFocus_sVEntryP**)(o + 8);
-    vt[slot].fn(o + vt[slot].delta, a);
+    vt[slot].fn(vthis(o, vt[slot]), a);
 }
 
 /**

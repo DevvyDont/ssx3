@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "render/irradiance.h"
 #include "world/worldcache.h"
 #include "visualfx/worldlightman.h"
@@ -309,7 +310,7 @@ static inline void Link_5400(sNode_5400** heads, int slot, sNode_5400* node)
 static inline sLightRef_5400* GetRef_5400(char* o, int slot)
 {
     sVEr_5400* vt = *(sVEr_5400**)(o + 4);
-    return vt[slot].fn(o + vt[slot].delta);
+    return vt[slot].fn(vthis(o, vt[slot]));
 }
 
 /**
@@ -411,7 +412,7 @@ extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(sMan_5400* self, char* 
             } else {
                 char* world = self->world;
                 sVEf_5400* vt = *(sVEf_5400**)(world + 4);
-                vt[2].fn(world + vt[2].delta, node->pos.x, node->pos.y, -99999.0f);
+                vt[2].fn(vthis(world, vt[2]), node->pos.x, node->pos.y, -99999.0f);
                 sLightRef_5400* ref = GetRef_5400(*(char**)self->world, 40);
                 if (*(signed char*)ref != 0) {
                     node->target = *Resolve_5400(ref);
@@ -1114,7 +1115,7 @@ extern "C" void cCheatFX_update(sWLCode6518* self)
 {
     char* sub = (char*)self->rider + 0x6C0;
     sVEsub6518* vt = *(sVEsub6518**)sub;
-    if (vt[9].fn(sub + vt[9].delta) != 0) {
+    if (vt[9].fn(vthis(sub, vt[9])) != 0) {
         return;
     }
     if (cCheatFX_m_resetStates >= 2) {

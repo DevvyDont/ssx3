@@ -1719,7 +1719,7 @@ extern "C" void cScriptObject_InitScriptObject(cScriptObject* self)
 {
     char* mgr = (char*)cScriptDatabaseObject_GetDatabaseObject();
     sBxsVEntryA* vt = *(sBxsVEntryA**)(mgr + 0x2A8);
-    self->mObjID = vt[2].fn(mgr + vt[2].delta, self);
+    self->mObjID = vt[2].fn(vthis(mgr, vt[2]), self);
 }
 #endif
 
@@ -1743,7 +1743,7 @@ extern "C" void cScriptObject_DeInitScriptObject(cScriptObject* self)
 {
     char* mgr = (char*)cScriptDatabaseObject_GetDatabaseObject();
     sBxsVEntryB* vt = *(sBxsVEntryB**)(mgr + 0x2A8);
-    vt[3].fn(mgr + vt[3].delta, self->mObjID);
+    vt[3].fn(vthis(mgr, vt[3]), self->mObjID);
     self->mObjID = -1;
 }
 #endif

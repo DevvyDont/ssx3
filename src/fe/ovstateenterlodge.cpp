@@ -592,7 +592,7 @@ static inline int Loc1F7958(char* name)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry_1F7958* vt = *(sVEntry_1F7958**)(obj + 4);
-    return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
+    return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
 /**

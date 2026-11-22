@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "intersect/bxnash.h"
 #include "camera/trigger/cameratriggerman.h"
 #include "ai/rider.h"
@@ -799,7 +800,7 @@ static inline void collect_D320(nash_Octant* r, char* hits, int k, CameraCollisi
 static inline t4Vector* getPos_D320(char* sub)
 {
     sVEnt_D320* vt = *(sVEnt_D320**)sub;
-    return (t4Vector*)vt[5].fn(sub + vt[5].delta);
+    return (t4Vector*)vt[5].fn(vthis(sub, vt[5]));
 }
 
 static inline int active_D320(char* rider)

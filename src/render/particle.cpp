@@ -3074,7 +3074,7 @@ extern "C" void cPlayerShadow__cPlayerShadow(cPlayerShadow* self, int flags)
         func_00367B60(*(void**)(cGraphicsMan_TheGraphicsMan_particle + 0x18F4), tex);
         char* mgr = cGraphicsMan_TheGraphicsMan_particle;
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(mgr + 0x10D8);
-        vt[50].fn(mgr + vt[50].delta, self->mLockTexture);
+        vt[50].fn(vthis(mgr, vt[50]), self->mLockTexture);
         self->mLockTexture = -1;
     }
     if (flags & 1) {
@@ -3108,7 +3108,7 @@ extern "C" void func_00375990(void* self)
     if (*(int*)(shadow + 0x170) < 0) {
         char* mgr = cGraphicsMan_TheGraphicsMan_particle;
         sPtVEntry_5990* vt = *(sPtVEntry_5990**)(mgr + 0x10D8);
-        *(int*)(shadow + 0x170) = vt[52].fn(mgr + vt[52].delta, *(int*)(shadow + 0x174), *(int*)(shadow + 0x178), 2);
+        *(int*)(shadow + 0x170) = vt[52].fn(vthis(mgr, vt[52]), *(int*)(shadow + 0x174), *(int*)(shadow + 0x178), 2);
     }
 }
 #endif
@@ -5943,7 +5943,7 @@ extern "C" void cPS2GraphicsMan_DrawCharModel(cPS2GraphicsMan* self, sMdl_A610* 
     if (cRenderToggles_m_DisablePlayerStrips == 0) {
         (self->m_pCurrentDrawState)[1] = *(self->m_pCurrentDrawState);
         (*(sDrawState**)&self->m_pCurrentDrawState)++;
-        ((sPtVtVF_A610*)self->mVtbl)[124].fn((char*)self + ((sPtVtVF_A610*)self->mVtbl)[124].delta, 1.0f);
+        ((sPtVtVF_A610*)self->mVtbl)[124].fn(vthis(self, ((sPtVtVF_A610*)self->mVtbl)[124]), 1.0f);
         if (self->mMatricesValid == 0) {
             func_0037D968((cPS2GraphicsMan*)self);
         }
@@ -14001,7 +14001,7 @@ extern "C" void func_00389CB8(sPartVec4* out, void* sunp, float scale)
     prm[9].w = 0.0f;
     char* mgr = D_004A5B80_9CB8;
     sVEnt_9CB8* vt = *(sVEnt_9CB8**)(mgr + 0x10D8);
-    sMat_9CB8 cam = *vt[35].fn(mgr + vt[35].delta);
+    sMat_9CB8 cam = *vt[35].fn(vthis(mgr, vt[35]));
     sV_9CB8 eye = Scale_9CB8(GetPos_9CB8(cam), -1.0f);
     MMI_TRANSPOSE4(&cam);
     eye = MulVec_9CB8(&cam, eye);

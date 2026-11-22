@@ -853,7 +853,7 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
     self->strip[5][prev].pos = btAdd(btAdd(btAdd(botEdge, outerWidth), h), h);
     char* being = self->rider + 0x6C0;
     sBTVEnt_8938* vt = *(sBTVEnt_8938**)being;
-    sBTCol_8938 c = ((sBTRSRow_8938*)(cRenderStateMan_m_state + 0x28))[vt[7].fn(being + vt[7].delta)].col;
+    sBTCol_8938 c = ((sBTRSRow_8938*)(cRenderStateMan_m_state + 0x28))[vt[7].fn(vthis(being, vt[7]))].col;
     for (int i = 0; i < 6; i++) {
         self->strip[i][self->head].a = self->strip[i][prev].a = (int)btClamp(c.a * 255.0f, 0.0f, 255.0f);
         self->strip[i][self->head].r = self->strip[i][prev].r = (int)btClamp(c.r * 255.0f, 0.0f, 255.0f);
@@ -2115,10 +2115,10 @@ extern "C" void cCircle_TObj_Draw(cCircle_TObj* self, float amount)
 
     char* obj = (char*)cGraphicsMan_TheGraphicsMan;
     sBTVEntryDraw* drawEntry = &(*(sBTVEntryDraw**)(obj + 0x10D8))[71];
-    drawEntry->fn(obj + drawEntry->delta, 80, top, 0);
+    drawEntry->fn(vthis(obj, *drawEntry), 80, top, 0);
     obj = (char*)cGraphicsMan_TheGraphicsMan;
     drawEntry = &(*(sBTVEntryDraw**)(obj + 0x10D8))[71];
-    drawEntry->fn(obj + drawEntry->delta, 80, bot, 0);
+    drawEntry->fn(vthis(obj, *drawEntry), 80, bot, 0);
 }
 #endif
 

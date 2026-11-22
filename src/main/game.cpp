@@ -69,12 +69,12 @@ extern "C" void cGame_renderModels(cGame* self, void* world)
     int n = *(int*)((char*)world + 0x209C);
     int* items = (int*)((char*)world + 0x20A0);
     for (int i = 0; i < n; i++) {
-        ((sRVEntry_C078*)GrMan->mVtbl)[0x60].fn((char*)GrMan + ((sRVEntry_C078*)GrMan->mVtbl)[0x60].delta, items[i], 0, 0, flag);
+        ((sRVEntry_C078*)GrMan->mVtbl)[0x60].fn(vthis(GrMan, ((sRVEntry_C078*)GrMan->mVtbl)[96]), items[i], 0, 0, flag);
     }
     int secondCount = *(int*)((char*)world + 0x40A0);
     items = (int*)((char*)world + 0x40A4);
     for (int i = 0; i < secondCount; i++) {
-        ((sRVEntry_C078*)GrMan->mVtbl)[0x60].fn((char*)GrMan + ((sRVEntry_C078*)GrMan->mVtbl)[0x60].delta, items[i], 0, 0, flag | 0x20);
+        ((sRVEntry_C078*)GrMan->mVtbl)[0x60].fn(vthis(GrMan, ((sRVEntry_C078*)GrMan->mVtbl)[96]), items[i], 0, 0, flag | 0x20);
     }
 }
 #endif
@@ -146,7 +146,7 @@ static inline sVec_C1B0 MulVec_C1B0(const sMat_C1B0* m, const sVec_C1B0& v)
 static inline sMat_C1B0* viewMat_C1B0()
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    return ((sVEm_C1B0*)ps2GraphicsMan->mVtbl)[35].fn((char*)ps2GraphicsMan + ((sVEm_C1B0*)ps2GraphicsMan->mVtbl)[35].delta);
+    return ((sVEm_C1B0*)ps2GraphicsMan->mVtbl)[35].fn(vthis(ps2GraphicsMan, ((sVEm_C1B0*)ps2GraphicsMan->mVtbl)[35]));
 }
 
 // PORT: the unit declares func_0022C1B0 as void(void*); the body returns self, bound by asm label.
@@ -1239,7 +1239,7 @@ extern "C" void cSectionMan_eventbegin(cSectionMan* self, int mode)
         }
     }
     sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(race + 0xC);
-    vt[1].fn(race + vt[1].delta);
+    vt[1].fn(vthis(race, vt[1]));
     cGameModeMan_initGameMode(SSXApp->GameModeMan, cBENewRaceInterface_newRace.cGameEvent);
     cGame_setState(self->mpGame, 1, 1, 0);
 }

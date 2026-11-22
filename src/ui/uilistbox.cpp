@@ -88,7 +88,7 @@ extern "C" unsigned char cUIListBox_addEntryByStringID(cUIListBox* self, int id,
     char* tbl = *(char**)(*(char**)((char*)self->mpScreen->mpState + 0x10) + 0x10);
     if (tbl != 0) {
         sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(tbl + 4);
-        unsigned short* str = vt[4].fn(tbl + vt[4].delta, id);
+        unsigned short* str = vt[4].fn(vthis(tbl, vt[4]), id);
         if (str != 0) {
             unsigned short* wide = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, str_UILBStrID, 0x100, 0);
             USTR_copy(wide, str);
@@ -358,7 +358,7 @@ extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
             va[7].fn(vthis(selected, va[7]), 1);
             char* owner = (char*)self->mpScreen->mpState;
             sVEntry<void(void*, void*, int)>* vb = *(sVEntry<void(void*, void*, int)>**)(owner + 8);
-            vb[19].fn(owner + vb[19].delta, self->mpSelected, 1);
+            vb[19].fn(vthis(owner, vb[19]), self->mpSelected, 1);
         }
     } else {
         cUIThing* cur = self->mpSelected;
@@ -375,7 +375,7 @@ extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
             va[7].fn(vthis(selected, va[7]), 0);
             char* owner = (char*)self->mpScreen->mpState;
             sVEntry<void(void*, void*, int)>* vb = *(sVEntry<void(void*, void*, int)>**)(owner + 8);
-            vb[19].fn(owner + vb[19].delta, self->mpSelected, 2);
+            vb[19].fn(vthis(owner, vb[19]), self->mpSelected, 2);
         }
     }
 }
@@ -451,7 +451,7 @@ extern "C" unsigned char cUIMenu_getNext(cUIMenu* self)
             if (*(int*)&self->mAttrMenu & 4) {
                 char* owner = (char*)self->mpScreen->mpState;
                 sUIVtAB50* vt = *(sUIVtAB50**)(owner + 8);
-                if (vt[20].fn(owner + vt[20].delta, self, 1, i) != 0) return i;
+                if (vt[20].fn(vthis(owner, vt[20]), self, 1, i) != 0) return i;
             } else {
                 char* item = (char*)cList_getByIndex((char*)&self->mList, i);
                 int bits = *(int*)(item + 0x14) >> 5;
@@ -497,7 +497,7 @@ extern "C" unsigned char cUIMenu_getPrev(cUIMenu* self)
             if (*(int*)&self->mAttrMenu & 4) {
                 char* mgr = (char*)self->mpScreen->mpState;
                 cUIMenu_getPrev_sVEntry* vt = *(cUIMenu_getPrev_sVEntry**)(mgr + 8);
-                if (vt[20].fn(mgr + vt[20].delta, self, 1, i)) {
+                if (vt[20].fn(vthis(mgr, vt[20]), self, 1, i)) {
                     return i;
                 }
             } else {

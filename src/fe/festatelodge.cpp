@@ -181,7 +181,7 @@ extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, cUIThing* w, in
     if (w->mMiscData == 0 && self->bToNextState == 0) {
         char* mgr = (char*)SSXApp->FELocale;
         sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(mgr + 4);
-        unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(str_kT_CMNSaveProgress));
+        unsigned short* text = vt[4].fn(vthis(mgr, vt[4]), GetHashValue32(str_kT_CMNSaveProgress));
         void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm_b, 0x100, 0);
         void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);
         self->mPathToSaveProfile = 0x10;
@@ -192,7 +192,7 @@ extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, cUIThing* w, in
     if (k == 6 && self->bToNextState == 0) {
         char* mgr = (char*)SSXApp->FELocale;
         sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(mgr + 4);
-        unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(str_kT_OVRCMNQuitTitlePrompt));
+        unsigned short* text = vt[4].fn(vthis(mgr, vt[4]), GetHashValue32(str_kT_OVRCMNQuitTitlePrompt));
         void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm_b, 0x100, 0);
         void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);
         self->mPathToSaveProfile = k;
@@ -209,7 +209,7 @@ extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, cUIThing* w, in
     cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b)), 1);
     char* obj = *(char**)self->mpEngine;
     sVE_1F3A38p* vt = *(sVE_1F3A38p**)(obj + 4);
-    void* nextState = vt[4].fn(obj + vt[4].delta, ((char*)self), w->mMiscData);
+    void* nextState = vt[4].fn(vthis(obj, vt[4]), ((char*)self), w->mMiscData);
     if (nextState != 0) {
         cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
     }
@@ -308,7 +308,7 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, u
             cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b)), 1);
             char* obj = *(char**)self->mpEngine;
             sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
-            void* nextState = vt[4].fn(obj + vt[4].delta, ((char*)self), 6);
+            void* nextState = vt[4].fn(vthis(obj, vt[4]), ((char*)self), 6);
             if (nextState != 0) {
                 cUIStateStack_pushCheck(&self->mpEngine->mStateStack, nextState);
             }
@@ -345,7 +345,7 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, u
         case 6: {
             char* mgr = (char*)SSXApp->FELocale;
             sVE_1F3CF0s* vt = *(sVE_1F3CF0s**)(mgr + 4);
-            unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(str_kT_CMNSaveBeforeQuit));
+            unsigned short* text = vt[4].fn(vthis(mgr, vt[4]), GetHashValue32(str_kT_CMNSaveBeforeQuit));
             void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm_b, 0x100, 0);
             void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);
             self->mPathToSaveProfile = 17;
@@ -677,7 +677,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail*
         cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b)), 1);
         char* obj = *(char**)self->mpEngine;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
-        void* nextState = vt[4].fn(obj + vt[4].delta, ((char*)self), w->mMiscData);
+        void* nextState = vt[4].fn(vthis(obj, vt[4]), ((char*)self), w->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
@@ -686,7 +686,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail*
     case 6: {
         char* obj = *(char**)self->mpEngine;
         sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
-        void* nextState = vt[5].fn(obj + vt[5].delta, ((char*)self), 0);
+        void* nextState = vt[5].fn(vthis(obj, vt[5]), ((char*)self), 0);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }

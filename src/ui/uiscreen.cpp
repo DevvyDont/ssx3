@@ -837,14 +837,14 @@ struct sUIVtDel_D078 { short delta; short index; void (*fn)(void*, int); };
 static inline void initFromRec_D078(char* o, char* rec)
 {
     sUIVtRec_D078* vt = *(sUIVtRec_D078**)(o + 8);
-    vt[10].fn(o + vt[10].delta, rec);
+    vt[10].fn(vthis(o, vt[10]), rec);
 }
 
 // slot 1: deleting destructor
 static inline void deleteObj_D078(char* o)
 {
     sUIVtDel_D078* vt = *(sUIVtDel_D078**)(o + 8);
-    vt[1].fn(o + vt[1].delta, 3);
+    vt[1].fn(vthis(o, vt[1]), 3);
 }
 
 static inline char* alloc_D078(unsigned int size, const char* tag)
@@ -1431,7 +1431,7 @@ struct cUIScrollBar_setScrollVisibile_sVEntry {
 static inline void cUIScrollBar_setScrollVisibile_call(char* o, int a)
 {
     cUIScrollBar_setScrollVisibile_sVEntry* vt = *(cUIScrollBar_setScrollVisibile_sVEntry**)(o + 8);
-    vt[9].fn(o + vt[9].delta, a);
+    vt[9].fn(vthis(o, vt[9]), a);
 }
 
 /**
@@ -1556,7 +1556,7 @@ extern "C" int cUISlider_onInput(cUISlider* self, cUIInput* input)
             cUISlider_onInput_sVEntryM* vm = (cUISlider_onInput_sVEntryM*)mgr->mVtbl;
             vm[19].fn(vthis(mgr, vm[19]), ((char*)self), 9);
             cUISlider_onInput_sVEntryS* vs = *(cUISlider_onInput_sVEntryS**)snd;
-            vs[2].fn(snd + vs[2].delta, 1);
+            vs[2].fn(vthis(snd, vs[2]), 1);
         }
         return 1;
     }
@@ -1572,7 +1572,7 @@ extern "C" int cUISlider_onInput(cUISlider* self, cUIInput* input)
             cUISlider_onInput_sVEntryM* vm = (cUISlider_onInput_sVEntryM*)mgr->mVtbl;
             vm[19].fn(vthis(mgr, vm[19]), ((char*)self), 9);
             cUISlider_onInput_sVEntryS* vs = *(cUISlider_onInput_sVEntryS**)snd;
-            vs[2].fn(snd + vs[2].delta, 1);
+            vs[2].fn(vthis(snd, vs[2]), 1);
         }
         return 1;
     }
@@ -1878,7 +1878,7 @@ struct cUIState_onUpdate_sVEntryP {
 static inline int cUIState_onUpdate_padTest(char* pad, int slot)
 {
     cUIState_onUpdate_sVEntryI* vt = *(cUIState_onUpdate_sVEntryI**)(pad + 8);
-    return vt[slot].fn(pad + vt[slot].delta);
+    return vt[slot].fn(vthis(pad, vt[slot]));
 }
 
 /**
@@ -1897,7 +1897,7 @@ extern "C" void cUIState_onUpdate(cUIState* self)
     self->mCurrentCtrl = 0;
     do {
         cUIState_onUpdate_sVEntryC* vc = *(cUIState_onUpdate_sVEntryC**)(input + 8);
-        vc[44].fn(input + vc[44].delta, *(unsigned char*)&self->mCurrentCtrl);
+        vc[44].fn(vthis(input, vc[44]), *(unsigned char*)&self->mCurrentCtrl);
         if (cUIState_onUpdate_padTest(input, 45)) {
             if (cUIState_onUpdate_padTest(input, 41) || (cUIState_onUpdate_padTest(input, 40) && (mask & 1))) {
                 cUIState_onUpdate_sVEntryP* vs = (cUIState_onUpdate_sVEntryP*)self->mVtbl;
@@ -1907,7 +1907,7 @@ extern "C" void cUIState_onUpdate(cUIState* self)
                         do {
                             if (*(int*)(n + 0x14) & 1) {
                                 cUIState_onUpdate_sVEntryP* vn = *(cUIState_onUpdate_sVEntryP**)(n + 8);
-                                if (vn[4].fn(n + vn[4].delta, input)) break;
+                                if (vn[4].fn(vthis(n, vn[4]), input)) break;
                             }
                             n = *(char**)(n + 4);
                         } while (!cListNode_isSentinel((cListNode*)n));
@@ -1983,7 +1983,7 @@ extern "C" void cUIState_onRender2D(cUIState* self)
             char* obj = (char*)n + 0x40;
             if ((*(int*)((char*)n + 0x54) >> 6) & 1) {
                 sVEntry39E6B8b* vt2 = *(sVEntry39E6B8b**)((char*)n + 0x48);
-                vt2[17].fn(obj + vt2[17].delta, 0.0f, 0.0f);
+                vt2[17].fn(vthis(obj, vt2[17]), 0.0f, 0.0f);
             }
             n = *(void**)((char*)n + 4);
         } while (!cListNode_isSentinel((cListNode*)n));
@@ -2037,7 +2037,7 @@ extern "C" void cUIState_hideScreens(cUIState* self)
             char* obj = (char*)n + 0x40;
             if ((*(int*)((char*)n + 0x54) >> 6) & 1) {
                 sVEntry_cUIState_hideScreens* vt = *(sVEntry_cUIState_hideScreens**)((char*)n + 0x48);
-                vt[9].fn(obj + vt[9].delta, 0);
+                vt[9].fn(vthis(obj, vt[9]), 0);
             }
             n = *(void**)((char*)n + 4);
         } while (!cListNode_isSentinel((cListNode*)n));
@@ -2072,7 +2072,7 @@ extern "C" void cUIState_showScreens(cUIState* self)
             char* obj = (char*)n + 0x40;
             if ((*(int*)((char*)n + 0x54) >> 6) & 1) {
                 sVEntry_cUIState_showScreens* vt = *(sVEntry_cUIState_showScreens**)((char*)n + 0x48);
-                vt[9].fn(obj + vt[9].delta, 1);
+                vt[9].fn(vthis(obj, vt[9]), 1);
             }
             n = *(void**)((char*)n + 4);
         } while (!cListNode_isSentinel((cListNode*)n));

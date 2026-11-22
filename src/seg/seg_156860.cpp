@@ -3372,7 +3372,7 @@ static inline int gcNoNISPlaying_8CB0()
 static inline void gcSend_8CB0(char* item, int msg, char* arg)
 {
     sVEntM_8CB0* vt = *(sVEntM_8CB0**)(item + 8);
-    vt[24].fn(item + vt[24].delta, msg, arg);
+    vt[24].fn(vthis(item, vt[24]), msg, arg);
 }
 
 // Looks up the string table entry for `name` (vtable slot 4 of the global string table at SSXApp+0x8C).
@@ -3380,7 +3380,7 @@ static inline const char* gcString_8CB0(char* name)
 {
     char* tbl = (char*)SSXApp->FELocale;
     sVEntS_8CB0* vt = *(sVEntS_8CB0**)(tbl + 4);
-    return vt[4].fn(tbl + vt[4].delta, GetHashValue32(name));
+    return vt[4].fn(vthis(tbl, vt[4]), GetHashValue32(name));
 }
 
 /**

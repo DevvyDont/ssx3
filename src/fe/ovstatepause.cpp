@@ -2075,7 +2075,7 @@ static inline int sendHash_1FD190(char* name)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEnt_1FD190* vt = *(sVEnt_1FD190**)(obj + 4);
-    return vt[4].fn(obj + vt[4].delta, GetHashValue32(name));
+    return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 /**
  * Returns the localized name of a peak challenge event.

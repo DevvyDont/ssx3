@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "replay/frame.h"
 #include "ai/rider.h"
 #include "inseq/scriptplayerchannel.h"
@@ -340,7 +341,7 @@ extern "C" void cReplay_stepFrame(cReplay* self, int reset)
             char* obj = *(char**)(*(char**)((char*)list + 0x4) + 0xA8);
             cChaseCameraController_switchCamera_Chapter(obj);
             sRcVEntry03F0* vt = *(sRcVEntry03F0**)(obj + 0x14);
-            vt[4].fn(obj + vt[4].delta);
+            vt[4].fn(vthis(obj, vt[4]));
             cGameViewMan_updateAll(list);
         } else {
             self->PlaybackTick = self->EndRecordTick;
@@ -3954,7 +3955,7 @@ extern "C" int cScriptPlayerEntity_SetupPlay(cScriptPlayerEntity* self)
             int* pd = &self->mSetupScriptHasKeysLeft;
             int keysLeft = 0;
             cScriptPlayerChannel* channel = ((cScriptPlayerChannel**)self->mpChannelPlayers)[i];
-            if (((sRcVE_273AA8*)channel->mVtbl)[1].fn((char*)channel + ((sRcVE_273AA8*)channel->mVtbl)[1].delta, channelData, self, &flag) || self->mSetupScriptHasKeysLeft)
+            if (((sRcVE_273AA8*)channel->mVtbl)[1].fn(vthis(channel, ((sRcVE_273AA8*)channel->mVtbl)[1]), channelData, self, &flag) || self->mSetupScriptHasKeysLeft)
                 keysLeft = 1;
             *pd = keysLeft;
             self->mSetupScriptInitialEventBits |= flag;
@@ -3965,12 +3966,12 @@ extern "C" int cScriptPlayerEntity_SetupPlay(cScriptPlayerEntity* self)
     char* x = (char*)cScriptPlayerMain_GetInSeqCommInterface((cScriptPlayerMain*)((char*)self->mpOwner));
     if (x) {
         sRcVE2_273AA8* vt = *(sRcVE2_273AA8**)x;
-        *(char**)&self->mpEntityComm = (char*)vt[6].fn(x + vt[6].delta, self, (self->mpSystemHeader)->type);
+        *(char**)&self->mpEntityComm = (char*)vt[6].fn(vthis(x, vt[6]), self, (self->mpSystemHeader)->type);
     }
     if (((char*)self->mpEntityComm)) {
         char* pl = ((char*)self->mpEntityComm);
         sRcVE3_273AA8* vt = *(sRcVE3_273AA8**)pl;
-        vt[1].fn(pl + vt[1].delta, self, (self->mpSystemHeader)->type);
+        vt[1].fn(vthis(pl, vt[1]), self, (self->mpSystemHeader)->type);
     }
     self->mWaitingPlayExec = 1;
     return self->mIsPlaying;

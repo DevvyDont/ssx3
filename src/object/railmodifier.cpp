@@ -5607,7 +5607,7 @@ extern "C" t4Matrix* cAnimNode_getAnimMat(cAnimNode* self, int i)
     char* obj = (char*)&self->unk_014;
     if (self->Flags & 1) {
         sVEntry003610E0* vt = (sVEntry003610E0*)self->mVtbl;
-        vt[51].fn(obj + vt[51].delta);
+        vt[51].fn(vthis(obj, vt[51]));
     }
     return &(self->AnimMats)[i];
 }

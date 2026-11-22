@@ -478,7 +478,7 @@ extern "C" int cFEStateMountainRoom_onInputBegin(cFEStateMountainRoom* self, cUI
             snd = &gUISoundNull;
         }
         sVEntry<void(void*, int)>* svt = *(sVEntry<void(void*, int)>**)snd;
-        svt[2].fn(snd + svt[2].delta, 3);
+        svt[2].fn(vthis(snd, svt[2]), 3);
         cUIGroup* w = self->mpPassGroup;
         sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)w->mVtbl;
         vt[9].fn(vthis(w, vt[9]), 0);
@@ -1170,7 +1170,7 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, cUIThing*
         for (int i = 0; i < 4; i++) {
             cUIThing* listItem = ((cUIThing**)&self->mpTrophyIcons)[i];
             if (listItem != 0) {
-                ((sVEntB_001D3C80*)listItem->mVtbl)[9].fn((char*)listItem + ((sVEntB_001D3C80*)listItem->mVtbl)[9].delta, 0);
+                ((sVEntB_001D3C80*)listItem->mVtbl)[9].fn(vthis(listItem, ((sVEntB_001D3C80*)listItem->mVtbl)[9]), 0);
             }
         }
         void* obj = *(void**)self->mpEngine;

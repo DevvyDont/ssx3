@@ -199,7 +199,7 @@ struct sVE_003078C0 {
 static inline void VCall_003078C0(char* self, int slot)
 {
     sVE_003078C0* vt = *(sVE_003078C0**)(self + 0x5C);
-    vt[slot].fn(self + vt[slot].delta);
+    vt[slot].fn(vthis(self, vt[slot]));
 }
 
 /**
@@ -1048,7 +1048,7 @@ struct sVE_003083A0 {
 static inline void VCall_003083A0(char* self, int slot)
 {
     sVE_003083A0* vt = *(sVE_003083A0**)(self + 0x40);
-    vt[slot].fn(self + vt[slot].delta);
+    vt[slot].fn(vthis(self, vt[slot]));
 }
 
 /**

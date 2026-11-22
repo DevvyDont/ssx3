@@ -3216,7 +3216,7 @@ static inline t4Vector* wakeVel1A80(sWakeFx1A80* self)
 {
     char* sub = self->obj + 0x6C0;
     sVEntry<t4Vector*(void*)>* vt = *(sVEntry<t4Vector*(void*)>**)sub;
-    return vt[2].fn(sub + vt[2].delta);
+    return vt[2].fn(vthis(sub, vt[2]));
 }
 
 /**
@@ -3320,7 +3320,7 @@ static inline sWakeVecE398* wakeVel1F70(sWakeFx1F70* self)
 {
     char* sub = self->obj + 0x6C0;
     sWakeVt1F70* vt = *(sWakeVt1F70**)sub;
-    return vt[2].fn(sub + vt[2].delta);
+    return vt[2].fn(vthis(sub, vt[2]));
 }
 
 /**
@@ -3715,13 +3715,13 @@ extern "C" void func_002E26B8(cDynamicSprayFX* vself)
         char* emitters = *(char**)(((char*)vself) + 0x28);
         char* emitter = emitters + 0xA50;
         sWakeVt26B8* vt = *(sWakeVt26B8**)(emitters + 0xC48);
-        vt[3].fn(emitter + vt[3].delta, *(char**)(((char*)vself) + 0x2C) + 0x488, *(float*)(emitters + 0xAA8));
+        vt[3].fn(vthis(emitter, vt[3]), *(char**)(((char*)vself) + 0x2C) + 0x488, *(float*)(emitters + 0xAA8));
     }
     {
         char* emitters = *(char**)(((char*)vself) + 0x28);
         char* emitter = emitters + 0xC60;
         sWakeVt26B8* vt = *(sWakeVt26B8**)(emitters + 0xE58);
-        vt[3].fn(emitter + vt[3].delta, *(char**)(((char*)vself) + 0x2C) + 0x570, *(float*)(emitters + 0xCB8));
+        vt[3].fn(vthis(emitter, vt[3]), *(char**)(((char*)vself) + 0x2C) + 0x570, *(float*)(emitters + 0xCB8));
     }
 }
 #endif
@@ -4048,14 +4048,14 @@ extern "C" void cLightHalo_Process(cLightHalo* vself, void* vrect)
     pos.z = ((sPart_2868*)self->mpHalo)->pos.z;
     pos.w = 1.0f;
     sVEntry<int(void*, t4Vector*)>* vEntry = &(*(sVEntry<int(void*, t4Vector*)>**)(obj + 0x10D8))[91];
-    if (vEntry->fn(obj + vEntry->delta, &pos)) {
+    if (vEntry->fn(vthis(obj, *vEntry), &pos)) {
         self->mbOnScreen = 0;
         self->mbRequestZSample = 0;
     } else {
         self->mbOnScreen = 1;
         t4Vector scr;
         sVEntry<void(t4Vector*, void*, t4Vector*)>* projectSlot = &(*(sVEntry<void(t4Vector*, void*, t4Vector*)>**)(obj + 0x10D8))[92];
-        projectSlot->fn(&scr, obj + projectSlot->delta, &pos);
+        projectSlot->fn(&scr, vthis(obj, *projectSlot), &pos);
         float depth = scr.z * 5.960465188081798e-08f;
         if (depth <= 0.005f) {
             return;
@@ -4095,7 +4095,7 @@ extern "C" void cLightHalo_Process(cLightHalo* vself, void* vrect)
             t4Vector lp = Sub_2B00(pos, sV4c_2B00(sV3c_2B00(viewDir.x * pullBack, viewDir.y * pullBack, viewDir.z * pullBack), 0.0f));
             t4Vector sc;
             sVEntry<void(t4Vector*, void*, t4Vector*)>* projectSlot2 = &(*(sVEntry<void(t4Vector*, void*, t4Vector*)>**)(obj + 0x10D8))[92];
-            projectSlot2->fn(&sc, obj + projectSlot2->delta, &lp);
+            projectSlot2->fn(&sc, vthis(obj, *projectSlot2), &lp);
             self->mZDist = sc.z;
             // screen x mapped to -1..1, then to an angle
             float screenFrac = scr.x - rect[0];
@@ -4183,7 +4183,7 @@ extern "C" void* cLensFxMan_cLensFxMan(cLensFxMan* self)
     {
         char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
         sVEntry<void(void*, void*, void*)>* setPhase2Slot = &(*(sVEntry<void(void*, void*, void*)>**)(obj + 0x10D8))[117];
-        setPhase2Slot->fn(obj + setPhase2Slot->delta, (void*)cLensFxMan__drawFrameCallBack, self);
+        setPhase2Slot->fn(vthis(obj, *setPhase2Slot), (void*)cLensFxMan__drawFrameCallBack, self);
     }
     cLensFxMan_mbDrawSun = 1;
     return ((void*)self);
@@ -4295,7 +4295,7 @@ extern "C" void cLensFxMan__cLensFxMan(cLensFxMan* self, int flags)
     char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
     self->mVtbl = cLensFxMan_vtbl;
     sBWVEntry2* setPhase2Slot = &(*(sBWVEntry2**)(obj + 0x10D8))[117];
-    setPhase2Slot->fn(obj + setPhase2Slot->delta, 0, 0);
+    setPhase2Slot->fn(vthis(obj, *setPhase2Slot), 0, 0);
     cLensFxMan_mbDrawSun = 0;
     if (flags & 1) {
         operator_delete((int*)self);
@@ -4504,17 +4504,17 @@ extern "C" void cLensFxMan_ProcessLens(cLensFxMan* vself, int idx)
     sWkRect3338 viewRect;
     {
         sWkVtR3338* vt = *(sWkVtR3338**)(ctx + 0x10D8);
-        vt[28].fn(&viewRect, ctx + vt[28].delta);
+        vt[28].fn(&viewRect, vthis(ctx, vt[28]));
     }
     self->view = viewRect;
     {
         sWkVtM3338* vt = *(sWkVtM3338**)(ctx + 0x10D8);
-        vu0CopyMatrix3338(&self->mtx, vt[35].fn(ctx + vt[35].delta));
+        vu0CopyMatrix3338(&self->mtx, vt[35].fn(vthis(ctx, vt[35])));
     }
     int i = 0;
     {
         sWkVtP3338* vt = *(sWkVtP3338**)(ctx + 0x10D8);
-        vt[30].fn(ctx + vt[30].delta, &self->f50, &self->f54, &self->f58);
+        vt[30].fn(vthis(ctx, vt[30]), &self->f50, &self->f54, &self->f58);
     }
     sWkEmit3338* em = self->emit;
     cSunHalo_Process(&em[idx], self, idx);
@@ -4810,7 +4810,7 @@ extern "C" void cPlayerIndicatorFX_update(sWkCol39D8* self)
 {
     char* riderVptr = self->rider + 0x6C0;
     sWkVt39D8* vt = *(sWkVt39D8**)riderVptr;
-    if (vt[8].fn(riderVptr + vt[8].delta) == 0) return;
+    if (vt[8].fn(vthis(riderVptr, vt[8])) == 0) return;
     float half = 0.5f;
     float newPhase = self->phase + D_004A55AC * 0.01666666753590107f;
     float turns = newPhase * 0.15915493667125702f + half;
@@ -5010,7 +5010,7 @@ static inline int IsHuman_3AF8(cRider* rider)
 {
     char* obj = (char*)&rider->mVtbl;
     sWkVt39D8* vt = *(sWkVt39D8**)obj;
-    return vt[kRiderVt_isHuman].fn(obj + vt[kRiderVt_isHuman].delta);
+    return vt[kRiderVt_isHuman].fn(vthis(obj, vt[kRiderVt_isHuman]));
 }
 
 static inline int ShouldDraw_3AF8(sWake_3AF8* self)
@@ -5256,7 +5256,7 @@ extern "C" void cTransitionMan__cTransitionMan(cTransitionMan* self, int flags)
     if (self->mRequestingDelete != 0) {
         char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
         sBWVEntry1* removeScreenGrab = &(*(sBWVEntry1**)(obj + 0x10D8))[60];
-        removeScreenGrab->fn(obj + removeScreenGrab->delta, (char*)&self->mScreenGrabHandle);
+        removeScreenGrab->fn(vthis(obj, *removeScreenGrab), (char*)&self->mScreenGrabHandle);
         self->mRequestingDelete = 0;
     }
     cScriptObject_DeInitScriptObject(scriptObj);
@@ -5321,7 +5321,7 @@ extern "C" int cTransitionMan_StartTransition_def(void* vself, int initiator, vo
         if (~self->mScreenGrabHandle.mTextureId == 0) {
             char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
             sBWVEntry4370* vtblEntry = &(*(sBWVEntry4370**)(obj + 0x10D8))[59];
-            vtblEntry->fn(obj + vtblEntry->delta, ref, 0x100, 0x100);
+            vtblEntry->fn(vthis(obj, *vtblEntry), ref, 0x100, 0x100);
             if (~self->mScreenGrabHandle.mTextureId == 0) {
                 if (transitionIn != 0) {
                     sBWVEntryI4370* vt = *(sBWVEntryI4370**)transitionIn;
@@ -5446,13 +5446,13 @@ extern "C" void cTransitionMan_EndTransition(cTransitionMan* self)
         char* object = (char*)self->mTransitionIn;
         if (object != 0) {
             sVEntry<void(void*, int)>* entry = &(*(sVEntry<void(void*, int)>**)object)[1];
-            entry->fn(object + entry->delta, 3);
+            entry->fn(vthis(object, *entry), 3);
         }
         self->mTransitionIn = 0;
         object = (char*)self->mTransitionOut;
         if (object != 0) {
             sVEntry<void(void*, int)>* entry = &(*(sVEntry<void(void*, int)>**)object)[1];
-            entry->fn(object + entry->delta, 3);
+            entry->fn(vthis(object, *entry), 3);
         }
         self->mTransitionOut = 0;
         self->mExternalTimePercentage = 0;
@@ -5460,7 +5460,7 @@ extern "C" void cTransitionMan_EndTransition(cTransitionMan* self)
             char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
             self->mRequestingDelete = 1;
             sVEntry<int(void*)>* entry = &(*(sVEntry<int(void*)>**)(obj + 0x10D8))[114];
-            self->mRequestDeleteFrame = entry->fn(obj + entry->delta);
+            self->mRequestDeleteFrame = entry->fn(vthis(obj, *entry));
             self->mRequestingScreenGrab = 0;
             self->mUsingScreenGrab = 0;
         }
@@ -5539,9 +5539,9 @@ extern "C" void cTransitionMan_update(cTransitionMan* self)
     char* ctx = cGraphicsMan_TheGraphicsMan_boardwakefx;
     if (self->mRequestingDelete != 0) {
         sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)(ctx + 0x10D8);
-        if (vt[114].fn(ctx + vt[114].delta) - self->mRequestDeleteFrame >= 3) {
+        if (vt[114].fn(vthis(ctx, vt[114])) - self->mRequestDeleteFrame >= 3) {
             sVEntry<void(void*, void*)>* vt2 = *(sVEntry<void(void*, void*)>**)(ctx + 0x10D8);
-            vt2[60].fn(ctx + vt2[60].delta, (char*)&self->mScreenGrabHandle);
+            vt2[60].fn(vthis(ctx, vt2[60]), (char*)&self->mScreenGrabHandle);
             self->mRequestingDelete = 0;
         }
     }
@@ -5679,9 +5679,9 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
     }
     ((sRsState47E8*)ctx->m_pCurrentDrawState)[1] = ((sRsState47E8*)ctx->m_pCurrentDrawState)[0];
     (*(sRsState47E8**)&ctx->m_pCurrentDrawState)++;
-    ((sRsVt47E8*)ctx->mVtbl)[21].fn((char*)ctx + ((sRsVt47E8*)ctx->mVtbl)[21].delta);
-    ((sRsVt47E8*)ctx->mVtbl)[31].fn((char*)ctx + ((sRsVt47E8*)ctx->mVtbl)[31].delta);
-    ((sRsVt47E8*)ctx->mVtbl)[37].fn((char*)ctx + ((sRsVt47E8*)ctx->mVtbl)[37].delta);
+    ((sRsVt47E8*)ctx->mVtbl)[21].fn(vthis(ctx, ((sRsVt47E8*)ctx->mVtbl)[21]));
+    ((sRsVt47E8*)ctx->mVtbl)[31].fn(vthis(ctx, ((sRsVt47E8*)ctx->mVtbl)[31]));
+    ((sRsVt47E8*)ctx->mVtbl)[37].fn(vthis(ctx, ((sRsVt47E8*)ctx->mVtbl)[37]));
     sRsVtV47E8* vv = (sRsVtV47E8*)((sRsVt47E8*)ctx->mVtbl);
     vv[26].fn(vthis(ctx, vv[26]), 0, 0, 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f);
     rsSetB47E8(ctx, 0x3E0, 5, 8);
@@ -5700,10 +5700,10 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
     }
     if (self->mUsingScreenGrab == 0 || self->mRequestingScreenGrab == 0) {
         sFadeVt47E8* ov = *(sFadeVt47E8**)transition;
-        ov[2].fn(transition + ov[2].delta, clamped);
+        ov[2].fn(vthis(transition, ov[2]), clamped);
     }
-    ((sRsVt47E8*)ctx->mVtbl)[32].fn((char*)ctx + ((sRsVt47E8*)ctx->mVtbl)[32].delta);
-    ((sRsVt47E8*)ctx->mVtbl)[22].fn((char*)ctx + ((sRsVt47E8*)ctx->mVtbl)[22].delta);
+    ((sRsVt47E8*)ctx->mVtbl)[32].fn(vthis(ctx, ((sRsVt47E8*)ctx->mVtbl)[32]));
+    ((sRsVt47E8*)ctx->mVtbl)[22].fn(vthis(ctx, ((sRsVt47E8*)ctx->mVtbl)[22]));
     (*(sRsState47E8**)&ctx->m_pCurrentDrawState)--;
 }
 #endif
@@ -6507,12 +6507,12 @@ extern "C" void cSnowBox_render(int* snowBox, sMat_6008* snowMatrix, float x, fl
     switch (self->type) {
     case 0: {
         sVt55D8* vt = *(sVt55D8**)(GrMan_boardwakefx + 0x10D8);
-        vt[85].fn(GrMan_boardwakefx + vt[85].delta, &info);
+        vt[85].fn(vthis(GrMan_boardwakefx, vt[85]), &info);
         break;
     }
     case 1: {
         sVt55D8* vt = *(sVt55D8**)(GrMan_boardwakefx + 0x10D8);
-        vt[86].fn(GrMan_boardwakefx + vt[86].delta, &info);
+        vt[86].fn(vthis(GrMan_boardwakefx, vt[86]), &info);
         break;
     }
     }
@@ -7490,7 +7490,7 @@ extern "C" void cSpeedBoostFX_UpdateSpeedBoostTrail(sTrailE6C08* self)
             self->head = (self->head + 29) % 30;
             char* sub = (char*)&self->rider->mVtbl;
             sVtE6C08* vt = *(sVtE6C08**)sub;
-            t4Vector pos = *vt[5].fn(sub + vt[5].delta);
+            t4Vector pos = *vt[5].fn(vthis(sub, vt[5]));
             t4Vector boardPos = wakeRowE6C08(self->rider, 3);
             t4Vector boardSide = wakeRowE6C08(self->rider, 2);
             t4Vector boardFwd = wakeRowE6C08(self->rider, 0);

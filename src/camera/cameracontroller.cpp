@@ -220,12 +220,12 @@ extern "C" void cManualCameraController__cManualCameraController(cManualCameraCo
     char* manualAlgo = (char*)self->ManualAlgo;
     if (manualAlgo != 0) {
         sCamCtrlVEDtor* vt = *(sCamCtrlVEDtor**)(manualAlgo + 0x10);
-        vt[1].fn(manualAlgo + vt[1].delta, 3);
+        vt[1].fn(vthis(manualAlgo, vt[1]), 3);
     }
     char* editorAlgo = (char*)self->EditorAlgo;
     if (editorAlgo != 0) {
         sCamCtrlVEDtor* vt = *(sCamCtrlVEDtor**)(editorAlgo + 0x10);
-        vt[1].fn(editorAlgo + vt[1].delta, 3);
+        vt[1].fn(vthis(editorAlgo, vt[1]), 3);
     }
     cCameraController__cCameraController((cCameraController*)self, flags);
 }

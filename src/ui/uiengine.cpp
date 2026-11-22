@@ -404,7 +404,7 @@ extern "C" void cUITextureBank__cUITextureBank(cUITextureBank* self, int flags)
     for (i = 0; i < self->mNumTextureIDs; i++) {
         char* obj = (char*)GrMan_uiengine;
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(obj + 0x10D8);
-        vt[50].fn(obj + vt[50].delta, (self->mpTexturesIDs)[i]);
+        vt[50].fn(vthis(obj, vt[50]), (self->mpTexturesIDs)[i]);
     }
     if (self->mpTexturesIDs != 0) {
         cMemMan_free(self->mpTexturesIDs);
@@ -514,7 +514,7 @@ extern "C" void cUITextureBank_setData(cUITextureBank* vbank, int id, void* vdat
         char* shape = (char*)fsh + fsh->dir[i].offset;
         if (shape != 0) {
             sUIVE_8138* vt = *(sUIVE_8138**)(D_004A289C_8138 + 0x10D8);
-            self->mpTexturesIDs[i] = vt[46].fn(D_004A289C_8138 + vt[46].delta, shape, str_UITPage, 0, 1, -1);
+            self->mpTexturesIDs[i] = vt[46].fn(vthis(D_004A289C_8138, vt[46]), shape, str_UITPage, 0, 1, -1);
         }
     }
     MEM_free(fsh);
@@ -1484,14 +1484,14 @@ static inline void focusNotify_9970(char* self, int what)
 {
     char* o = *(char**)(*(char**)(self + 0x5C) + 0xD0);
     sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)(o + 8);
-    vt[19].fn(o + vt[19].delta, self, what);
+    vt[19].fn(vthis(o, vt[19]), self, what);
 }
 
 static inline int focusMove_9970(char* self, int dir)
 {
     char* o = *(char**)(*(char**)(self + 0x5C) + 0xD0);
     sVE_9970* vt = *(sVE_9970**)(o + 8);
-    return vt[22].fn(o + vt[22].delta, self, dir);
+    return vt[22].fn(vthis(o, vt[22]), self, dir);
 }
 
 static inline int isClear_9970(int flags)
@@ -1553,7 +1553,7 @@ extern "C" int cUIListBox_onInput(cUIListBox* self, cUIInput* in)
         }
         if (listener != 0) {
             sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)listener;
-            vt[2].fn(listener + vt[2].delta, result);
+            vt[2].fn(vthis(listener, vt[2]), result);
         }
         return 1;
     } else if ((inputIs_9970(in, 20) && isClear_9970(self->mAttr))
@@ -1586,7 +1586,7 @@ extern "C" int cUIListBox_onInput(cUIListBox* self, cUIInput* in)
         }
         if (listener != 0) {
             sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)listener;
-            vt[2].fn(listener + vt[2].delta, result);
+            vt[2].fn(vthis(listener, vt[2]), result);
         }
         return 1;
     } else if (inputIs_9970(in, 6)) {
@@ -1605,7 +1605,7 @@ extern "C" int cUIListBox_onInput(cUIListBox* self, cUIInput* in)
         }
         if (listener != 0) {
             sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)listener;
-            vt[2].fn(listener + vt[2].delta, result);
+            vt[2].fn(vthis(listener, vt[2]), result);
         }
         return 1;
     }
@@ -1695,7 +1695,7 @@ extern "C" void cUIListBox_updateLocale(cUIListBox_updateLocale_sObj* self)
             int id = self->entries[i].id;
             if (id != 0) {
                 cUIListBox_updateLocale_sVEntry* vt = *(cUIListBox_updateLocale_sVEntry**)(loc + 4);
-                unsigned short* unicodeStr = ((unsigned short* (*)(void*, int))vt[4].fn)(loc + vt[4].delta, id);
+                unsigned short* unicodeStr = ((unsigned short* (*)(void*, int))vt[4].fn)(vthis(loc, vt[4]), id);
                 if (unicodeStr != 0) {
                     cUIListBox_setUnicodePrivate((cUIListBox*)self, i, unicodeStr);
                 }
@@ -1858,7 +1858,7 @@ extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
             verts[2].pos.y += self->mSize.y;
             verts[3].pos.y += self->mSize.y;
             sVE_9F00* vt = *(sVE_9F00**)(D_004A289C_9F00 + 0x10D8);
-            vt[73].fn(D_004A289C_9F00 + vt[73].delta, 5, verts, 0);
+            vt[73].fn(vthis(D_004A289C_9F00, vt[73]), 5, verts, 0);
         } else {
             *(short*)(*(char**)(D_004A289C_9F00 + 0xE84) + 0x10) = -1;
             for (i = 0; i < 4; i++) {
@@ -1881,7 +1881,7 @@ extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
             verts[3].pos.x += self->mSize.x;
             verts[3].pos.y += self->mSize.y;
             sVE_9F00* vt = *(sVE_9F00**)(D_004A289C_9F00 + 0x10D8);
-            vt[71].fn(D_004A289C_9F00 + vt[71].delta, 4, verts, 0);
+            vt[71].fn(vthis(D_004A289C_9F00, vt[71]), 4, verts, 0);
         }
     }
 }

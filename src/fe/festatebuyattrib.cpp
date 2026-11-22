@@ -249,7 +249,7 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(cFEStateBuyAttrib* self, char* o
             if (sound == 0)
                 sound = &gUISoundNull;
             if (sound != 0)
-                ((sVE_4A90*)sound->mVtbl)[2].fn((char*)sound + ((sVE_4A90*)sound->mVtbl)[2].delta, 4);
+                ((sVE_4A90*)sound->mVtbl)[2].fn(vthis(sound, ((sVE_4A90*)sound->mVtbl)[2]), 4);
         }
         break;
     case 6:
@@ -262,7 +262,7 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(cFEStateBuyAttrib* self, char* o
         } else {
             char* mgr = *(char**)self->mpEngine;
             sVEr_4A90* vt = *(sVEr_4A90**)(mgr + 4);
-            void* nextState = vt[5].fn(mgr + vt[5].delta, ((char*)self), *(void**)(obj + 0x18));
+            void* nextState = vt[5].fn(vthis(mgr, vt[5]), ((char*)self), *(void**)(obj + 0x18));
             if (nextState != 0) {
                 int frame = cUIScreen_getFrameByLabel(self->mpAttribScreen, GetHashValue32(str_TransitionOut_b));
                 if (frame != 0xFFFF)
@@ -296,7 +296,7 @@ static inline void defaultMsg_4C30(cFEStateBuyAttrib* s, int msg)
     if (p == 0)
         p = &gUISoundNull;
     if (p != 0)
-        ((sVE_4A90*)p->mVtbl)[2].fn((char*)p + ((sVE_4A90*)p->mVtbl)[2].delta, msg);
+        ((sVE_4A90*)p->mVtbl)[2].fn(vthis(p, ((sVE_4A90*)p->mVtbl)[2]), msg);
 }
 
 static inline void playFrame_4C30(cFEStateBuyAttrib* s, char* name)
@@ -491,9 +491,9 @@ extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(cFEStateBuyAttrib* buy
             barSize.x = (float)self->mExperience[i] * 3.3636362552642822f;
             barSize.z = 0.0f;
             sVEK1F50B0a* vt = *(sVEK1F50B0a**)(bar + 8);
-            vt[21].fn(bar + vt[21].delta, &barSize);
+            vt[21].fn(vthis(bar, vt[21]), &barSize);
             sVEntry<void(void*, int)>* vt2 = *(sVEntry<void(void*, int)>**)(bar + 8);
-            vt2[9].fn(bar + vt2[9].delta, 1);
+            vt2[9].fn(vthis(bar, vt2[9]), 1);
         }
         sprintf(name, str_underpct_d, i);
         bar = (char*)cUIScreen_getObjectByHashName(((void*)self->mpAttribScreen), GetHashValue32(name));
@@ -503,9 +503,9 @@ extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(cFEStateBuyAttrib* buy
             barSize.y = 12.0f;
             barSize.z = 0.0f;
             sVEK1F50B0a* vt = *(sVEK1F50B0a**)(bar + 8);
-            vt[21].fn(bar + vt[21].delta, &barSize);
+            vt[21].fn(vthis(bar, vt[21]), &barSize);
             sVEntry<void(void*, int)>* vt2 = *(sVEntry<void(void*, int)>**)(bar + 8);
-            vt2[9].fn(bar + vt2[9].delta, 1);
+            vt2[9].fn(vthis(bar, vt2[9]), 1);
         }
     }
 }
@@ -612,7 +612,7 @@ extern "C" void cFEStateBuyAttrib_buyExperience(cFEStateBuyAttrib* buyState)
     self->mBuyPrompt = 0;
     cUIState_hideObjSafe(self, str_PopupGroup);
     cUIMenu* attribMenu = (self->pAttribMenu);
-    ((sVE_5300*)attribMenu->mVtbl)[7].fn((char*)attribMenu + ((sVE_5300*)attribMenu->mVtbl)[7].delta, 1);
+    ((sVE_5300*)attribMenu->mVtbl)[7].fn(vthis(attribMenu, ((sVE_5300*)attribMenu->mVtbl)[7]), 1);
     sIface_5300* iface = (sIface_5300*)cBE_getInterface_Fv(cBE_getBE(), 11);
     int* bought = self->mPotentialExperience;
     for (int i = 0; i < 7; i++) {
@@ -847,7 +847,7 @@ struct sVEi_56C8 {
 static inline int wantCall_56C8(char* w, int slot)
 {
     sVEi_56C8* vt = *(sVEi_56C8**)(w + 8);
-    return vt[slot].fn(w + vt[slot].delta);
+    return vt[slot].fn(vthis(w, vt[slot]));
 }
 
 static inline void playFrame_56C8(cFEStateCareerStats* s, char* name)
@@ -963,7 +963,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
     if (sound == 0)
         sound = &gUISoundNull;
     if (sound != 0)
-        ((sVE_4A90*)sound->mVtbl)[2].fn((char*)sound + ((sVE_4A90*)sound->mVtbl)[2].delta, msg);
+        ((sVE_4A90*)sound->mVtbl)[2].fn(vthis(sound, ((sVE_4A90*)sound->mVtbl)[2]), msg);
     return handled;
 }
 #endif
@@ -1015,12 +1015,12 @@ extern "C" void cFEStateCareerStats_setupLayout(cFEStateCareerStats* self)
     char* dashObj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_horizontal_dash_b));
     if (dashObj != 0) {
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(dashObj + 8);
-        vt[9].fn(dashObj + vt[9].delta, show);
+        vt[9].fn(vthis(dashObj, vt[9]), show);
     }
     dashObj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_vertical_dash_b));
     if (dashObj != 0) {
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(dashObj + 8);
-        vt[9].fn(dashObj + vt[9].delta, show);
+        vt[9].fn(vthis(dashObj, vt[9]), show);
     }
 }
 #endif
@@ -1047,7 +1047,7 @@ struct sVE_5BA8 {
 static inline void setFocus_5BA8(char* o, int on)
 {
     sVE_5BA8* vt = *(sVE_5BA8**)(o + 8);
-    vt[7].fn(o + vt[7].delta, on);
+    vt[7].fn(vthis(o, vt[7]), on);
 }
 
 /**

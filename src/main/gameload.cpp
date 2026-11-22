@@ -648,7 +648,7 @@ static inline void VDelete_FA98(char* p, int vptr, int ent)
 {
     if (p != 0) {
         sVEnt_FA98* e = (sVEnt_FA98*)(*(char**)(p + vptr) + ent);
-        e->fn(p + e->delta, 3);
+        e->fn(vthis(p, *e), 3);
     }
 }
 
@@ -713,7 +713,7 @@ extern "C" void cGame_purge(char* self)
         *(sRec_FA98*)((char*)&cBENetworkInterface_networkOpt + 0x330) = *(sRec_FA98*)(*(char**)(GetRider_FA98(which == 0) + 0x790) + 0xFC);
         (*(sRec_FA98*)&cBENetworkInterface_networkOpt.OpponentStats) = *(sRec_FA98*)(*(char**)(GetRider_FA98(other) + 0x790) + 0xFC);
         sVEnt0_FA98* vtEntry = (sVEnt0_FA98*)(*(char**)(iface + 0xC) + 8);
-        vtEntry->fn(iface + vtEntry->delta);
+        vtEntry->fn(vthis(iface, *vtEntry));
     }
     cCameraTriggerMan_cleanupOnExit(((char*)&gCamTriggerMan));
     {
@@ -949,7 +949,7 @@ extern "C" void cGame_partialRestart(cGame* self)
     char* hudState = (char*)cUIStateStack_findState(list, GetHashValue32(str_hud_c));
     if (hudState != 0) {
         sVEntry_230180b* vt2 = *(sVEntry_230180b**)(hudState + 8);
-        vt2[24].fn(hudState + vt2[24].delta, 7, 0);
+        vt2[24].fn(vthis(hudState, vt2[24]), 7, 0);
     }
     cWScriptMan_runGlobalScripts(cWScriptMan_TheWScriptMan);
     cWScriptMan_setupMissions(self->WScriptMan);
@@ -1599,7 +1599,7 @@ extern "C" void cGame_update(cGame* self)
                 for (i = 0; i < (((sRiderList_2306B8*)(char*)self->AI))->getCount(); i++) {
                     char* rider = (((sRiderList_2306B8*)(char*)self->AI))->getRider(i);
                     sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(rider + 0x6C0);
-                    vt[19].fn(rider + vt[19].delta);
+                    vt[19].fn(vthis(rider, vt[19]));
                 }
             }
         }

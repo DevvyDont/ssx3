@@ -417,7 +417,7 @@ struct sVEntry_313DD0 {
 static inline void Ser_313DD0(char* s, void* p, int n)
 {
     sVEntry_313DD0* e = &(*(sVEntry_313DD0**)s)[1];
-    e->fn(s + e->delta, p, n);
+    e->fn(vthis(s, *e), p, n);
 }
 
 class cAsStream;
@@ -485,7 +485,7 @@ struct sVEntry_314050 {
 static inline void Read_314050(char* s, void* p, int n)
 {
     sVEntry_314050* e = &(*(sVEntry_314050**)s)[2];
-    e->fn(s + e->delta, p, n);
+    e->fn(vthis(s, *e), p, n);
 }
 
 /**

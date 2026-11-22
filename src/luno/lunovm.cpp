@@ -801,9 +801,9 @@ extern "C" void luno_cLunoFunc_writeToReplayFrame(luno_cLunoFunc* self, sVEntry<
     int off;
     int secondWord;
     off = (int)self->Chunk - base;
-    (*stream)[1].fn((char*)stream + (*stream)[1].delta, &off, 4);
+    (*stream)[1].fn(vthis(stream, (*stream)[1]), &off, 4);
     secondWord = self->FuncNum;
-    (*stream)[1].fn((char*)stream + (*stream)[1].delta, &secondWord, 4);
+    (*stream)[1].fn(vthis(stream, (*stream)[1]), &secondWord, 4);
 }
 #endif
 
@@ -824,9 +824,9 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoFunc_readFromReplayFrame);
 extern "C" void luno_cLunoFunc_readFromReplayFrame(luno_cLunoFunc* self, sVEntry<void(void*, void*, int)>** stream, int base)
 {
     int buf[2];
-    (*stream)[2].fn((char*)stream + (*stream)[2].delta, &buf[0], 4);
+    (*stream)[2].fn(vthis(stream, (*stream)[2]), &buf[0], 4);
     self->Chunk = (const char*)(base + buf[0]);
-    (*stream)[2].fn((char*)stream + (*stream)[2].delta, &buf[1], 4);
+    (*stream)[2].fn(vthis(stream, (*stream)[2]), &buf[1], 4);
     self->FuncNum = buf[1];
 }
 #endif
@@ -1355,7 +1355,7 @@ extern "C" void luno_cLunoVar_writeToReplayFrame(cLunoValue* self, sVEntry<void(
 extern "C" void luno_cLunoTable_writeToReplayFrame(void* vself, sVEntry<void(void*, void*, int)>** stream, int base)
 {
     cLunoTableRef* self = (cLunoTableRef*)vself;
-    (*stream)[1].fn((char*)stream + (*stream)[1].delta, self->table, 8);
+    (*stream)[1].fn(vthis(stream, (*stream)[1]), self->table, 8);
     int cnt = 0;
     cLunoTable* hashTable = self->table;
     cLunoNode* n = (cLunoNode*)hashTable->nodes;
@@ -1371,7 +1371,7 @@ extern "C" void luno_cLunoTable_writeToReplayFrame(void* vself, sVEntry<void(voi
         }
         n = next;
     }
-    (*stream)[1].fn((char*)stream + (*stream)[1].delta, &cnt, 4);
+    (*stream)[1].fn(vthis(stream, (*stream)[1]), &cnt, 4);
     if (cnt > 0) {
         cLunoNode* n = (cLunoNode*)self->table->nodes;
         for (int i = 0; i <= self->table->modulus; i++) {
@@ -1441,14 +1441,14 @@ extern "C" void luno_cLunoTable_readFromReplayFrame(cLunoTableRef* self, sVEntry
         }
         cMemMan_free((char*)self->table->nodes - 0x10);
     }
-    (*stream)[2].fn((char*)stream + (*stream)[2].delta, self->table, 8);
+    (*stream)[2].fn(vthis(stream, (*stream)[2]), self->table, 8);
     cLunoTableEntry** slot = &self->table->nodes;
     *slot = (cLunoTableEntry*)new (str_TableData, 0xA0000000, 0) cLunoNode_9A8[self->table->modulus + 1];
     int i;
     int cnt;
     cLunoValue key;
     cLunoValue val;
-    (*stream)[2].fn((char*)stream + (*stream)[2].delta, &cnt, 4);
+    (*stream)[2].fn(vthis(stream, (*stream)[2]), &cnt, 4);
     for (i = 0; i < cnt; i++) {
         key.type = 0;
         key.word0 = 0;
@@ -1502,13 +1502,13 @@ extern "C" void luno_cLunoTable_writeToReplayFrame(void* self, sVEntry<void(void
  */
 extern "C" void luno_cLunoVar_writeToReplayFrame(cLunoValue* self, sVEntry<void(void*, void*, int)>** stream, int base)
 {
-    (*stream)[1].fn((char*)stream + (*stream)[1].delta, &self->type, 4);
+    (*stream)[1].fn(vthis(stream, (*stream)[1]), &self->type, 4);
     if (self->type == 5) {
         luno_cLunoFunc_writeToReplayFrame((luno_cLunoFunc*)self, stream, base);
     } else if (self->type == 4) {
         luno_cLunoTable_writeToReplayFrame(self, stream, base);
     } else {
-        (*stream)[1].fn((char*)stream + (*stream)[1].delta, self, 4);
+        (*stream)[1].fn(vthis(stream, (*stream)[1]), self, 4);
     }
 }
 #endif
@@ -1524,7 +1524,7 @@ extern "C" void luno_cLunoTable_readFromReplayFrame(cLunoTableRef* self, sVEntry
 static inline int lunoReadInt_225CA0(sVEntry<void(void*, void*, int)>** stream)
 {
     int v;
-    (*stream)[2].fn((char*)stream + (*stream)[2].delta, &v, 4);
+    (*stream)[2].fn(vthis(stream, (*stream)[2]), &v, 4);
     return v;
 }
 
@@ -1567,7 +1567,7 @@ extern "C" void luno_cLunoVar_readFromReplayFrame(cLunoValue* self, sVEntry<void
         luno_cLunoTable__cLunoTable((cLunoTableRef*)&ref, 2);
     } else {
         self->type = type;
-        (*stream)[2].fn((char*)stream + (*stream)[2].delta, self, 4);
+        (*stream)[2].fn(vthis(stream, (*stream)[2]), self, 4);
     }
 }
 #endif

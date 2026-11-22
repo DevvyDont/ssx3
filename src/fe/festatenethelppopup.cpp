@@ -228,7 +228,7 @@ extern "C" void cFEStateNetHelpPopup_createAndSetDescriptionString(cFEStateNetHe
             break;
         }
         cFELocale* locale = SSXApp->FELocale;
-        strs[i] = ((sVE_A110*)locale->mVtbl)[4].fn((char*)locale + ((sVE_A110*)locale->mVtbl)[4].delta, ids[i]);
+        strs[i] = ((sVE_A110*)locale->mVtbl)[4].fn(vthis(locale, ((sVE_A110*)locale->mVtbl)[4]), ids[i]);
         count++;
         total += USTR_length(strs[i]) + 1;
         i++;

@@ -53,7 +53,7 @@ extern "C" void* cFECustom_cFECustom(cFECustom* self, cUIEngine* owner)
     *(sVE0720**)(transition + 0x8) = cFEStateTransition_vtbl;
     self->mpTransitionState = (cFEStateTransition*)transition;
     if (transition != 0) {
-        cFEStateTransition_vtbl[4].fn(transition + cFEStateTransition_vtbl[4].delta);
+        cFEStateTransition_vtbl[4].fn(vthis(transition, cFEStateTransition_vtbl[4]));
         cUIStateStack_pushExplicit(&self->mpEngine->mStateStack, self->mpTransitionState);
     }
     return ((void*)self);
@@ -1428,7 +1428,7 @@ noh:
         }
         sVE_27A0* vt = (sVE_27A0*)self->mCamera.mVtbl;
         char* obj = (char*)&self->mCamera;
-        vt[3].fn(obj + vt[3].delta);
+        vt[3].fn(vthis(obj, vt[3]));
         func_0019D250(self->mBoltFileManager);
         cFERiderManager_update(&self->mRiderManager);
         if ((void*)SSXApp->mFEAsyncManager != 0) {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "ui/uithing.h"
 #include "ui/uiengine.h"
 #include "fe/festatebonusmaterial.h"
@@ -136,7 +137,7 @@ extern "C" void cFEStateBonusMaterial_onWidgetEvent(cFEStateBonusMaterial* self,
     case 6: {
         char* factory = *(char**)self->mpEngine;
         sVEntryK195600* vt = *(sVEntryK195600**)(factory + 4);
-        void* nextState = vt[5].fn(factory + vt[5].delta, self, item->mMiscData);
+        void* nextState = vt[5].fn(vthis(factory, vt[5]), self, item->mMiscData);
         if (nextState != 0)
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         break;

@@ -63,7 +63,7 @@ extern "C" int cBackgroundMan_loadImages(cBackgroundMan* self)
     for (int i = 0; i < self->miNumImage; i++) {
         char* shape = (char*)file + file->shapes[i].offset;
         void* img = SHAPE_unpack(shape);
-        self->mpiImageTID[i] = ((sVEntry<int(void*, void*, const char*, int, int, int)>*)GrMan->mVtbl)[46].fn((char*)GrMan + ((sVEntry<int(void*, void*, const char*, int, int, int)>*)GrMan->mVtbl)[46].delta, img, str_back, 0, 1, -1);
+        self->mpiImageTID[i] = ((sVEntry<int(void*, void*, const char*, int, int, int)>*)GrMan->mVtbl)[46].fn(vthis(GrMan, ((sVEntry<int(void*, void*, const char*, int, int, int)>*)GrMan->mVtbl)[46]), img, str_back, 0, 1, -1);
         if (img != shape && img != 0) {
             cMemMan_free(img);
         }

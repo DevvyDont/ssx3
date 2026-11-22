@@ -976,7 +976,7 @@ extern "C" void LobbyMan_onplaymsg(LobbyMan* self, char* msg)
             *(int*)(cfg + 0x18) |= 0x1C0;
             cBENewRaceInterface_setNumberAI(ri, 0);
             sVEntryA1D0* vt = *(sVEntryA1D0**)(ri + 0xC);
-            vt[1].fn(ri + vt[1].delta);
+            vt[1].fn(vthis(ri, vt[1]));
         }
     }
     int type = 239;
@@ -8296,7 +8296,7 @@ extern "C" void func_00263018(BuddyMan* self, void* name)
         --*(void***)&self->mChallengersFinish;
         if (obj != 0) {
             sTagsUnkVEntry18* vt = *(sTagsUnkVEntry18**)(obj + 0x3C);
-            vt[1].fn(obj + vt[1].delta, 3);
+            vt[1].fn(vthis(obj, vt[1]), 3);
         }
         if (func_00262438(self, (int)name)) {
             if (func_00262A38(self, name) == 0) {
@@ -8581,7 +8581,7 @@ extern "C" void func_00263500(BuddyMan* self, void* obj)
             --*(void***)&self->mMessagesFinish;
             if (message != 0) {
                 sTagsUnkVEntry18* vt = *(sTagsUnkVEntry18**)(message + 0xC);
-                vt[1].fn(message + vt[1].delta, 3);
+                vt[1].fn(vthis(message, vt[1]), 3);
             }
             break;
         }
@@ -8631,7 +8631,7 @@ extern "C" void func_002635A8(BuddyMan* self, int idx)
     --*(void***)&self->mMessagesFinish;
     if (obj != 0) {
         sTagsUnkVEntry* vt = *(sTagsUnkVEntry**)(obj + 0xC);
-        vt[1].fn(obj + vt[1].delta, 3);
+        vt[1].fn(vthis(obj, vt[1]), 3);
     }
 }
 #endif
@@ -9252,7 +9252,7 @@ extern "C" void func_00263CF0(int* self)
             char* bi1 = (char*)cBE_getInterface_Fv(SSXApp->BE, 1);
             cBENewPlayerInterface_setRiderCharID(bi1, 0, cBENetworkInterface_networkOpt.MyCharacterID);
             sVEntry_263CF0* vt = *(sVEntry_263CF0**)(bi1 + 0xC);
-            vt[1].fn(bi1 + vt[1].delta);
+            vt[1].fn(vthis(bi1, vt[1]));
             cBENetworkInterface_backupCharProfile(bi7, 0);
             if (cGameComm_mGameComm != 0)
                 cGameComm_destroy();

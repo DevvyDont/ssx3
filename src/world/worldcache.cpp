@@ -743,7 +743,7 @@ extern "C" int cWorldCache_init(cWorldCache* self, const char* name, int pNash)
     char* x = (char*)cChunkResolve_construct();
     self->mp_ChunkResolve = (cChunkResolve*)x;
     sVE_7FC0* vt = *(sVE_7FC0**)(x + 8);
-    vt[2].fn(x + vt[2].delta, pNash);
+    vt[2].fn(vthis(x, vt[2]), pNash);
     if (cStreamMan_init((char*)&self->m_StreamMan, name, self) == 0)
         return 0;
     int viewOk = cWorldView_init_p((char*)&self->m_WorldView, self->mp_DataHeader, self);
@@ -1606,10 +1606,10 @@ extern "C" void rel_8E20(cWorldCache* self, int cell, int type, unsigned int key
     if (chunk != 0) {
         if (chunk == (char*)&cStreamMan_NULLCHUNK) {
             cChunkResolve* callbackObj = (self->mp_ChunkResolve);
-            chunk = (char*)((sWCVt_8E20*)callbackObj->mVtbl)[4].fn((char*)callbackObj + ((sWCVt_8E20*)callbackObj->mVtbl)[4].delta, type, key, 0);
+            chunk = (char*)((sWCVt_8E20*)callbackObj->mVtbl)[4].fn(vthis(callbackObj, ((sWCVt_8E20*)callbackObj->mVtbl)[4]), type, key, 0);
         } else {
             cChunkResolve* callbackObj = (self->mp_ChunkResolve);
-            chunk = (char*)((sWCVt_8E20*)callbackObj->mVtbl)[4].fn((char*)callbackObj + ((sWCVt_8E20*)callbackObj->mVtbl)[4].delta, type, key, chunk);
+            chunk = (char*)((sWCVt_8E20*)callbackObj->mVtbl)[4].fn(vthis(callbackObj, ((sWCVt_8E20*)callbackObj->mVtbl)[4]), type, key, chunk);
         }
         if (chunk != 0 && bank == 0xFF)
             cMemMan_free(chunk);

@@ -118,7 +118,7 @@ extern "C" void cFlagSet_CreateMesh(cFlagSet* flagSet, void* item)
     sFsCol_CM qcol[4];
     sFsV3_CM pos[4];
     sFsQuadVE_CM* vt = *(sFsQuadVE_CM**)(mgr + 0x10D8);
-    vt[97].fn(mgr + vt[97].delta, item, 0, pos, quv, qcol);
+    vt[97].fn(vthis(mgr, vt[97]), item, 0, pos, quv, qcol);
     if (self->windX < 0.01f && self->windY < 0.01f) {
         self->cols = 8;
         self->rows = 2;
@@ -129,7 +129,7 @@ extern "C" void cFlagSet_CreateMesh(cFlagSet* flagSet, void* item)
     self->colScale = (float)(self->cols - 1);
     self->rowScale = (float)(self->rows - 1);
     sFsVE_CM* vtEntry = &(*(sFsVE_CM**)(mgr + 0x10D8))[76];
-    self->mesh = (sFsMesh_CM*)vtEntry->fn(mgr + vtEntry->delta, self->cols, self->rows, 0x60000000u);
+    self->mesh = (sFsMesh_CM*)vtEntry->fn(vthis(mgr, *vtEntry), self->cols, self->rows, 0x60000000u);
     if (self->mesh == 0) {
         return;
     }
@@ -183,7 +183,7 @@ extern "C" void cFlagSet_PurgeMesh(cFlagSet* self)
     if (mesh != 0) {
         char* mgr = cGraphicsMan_TheGraphicsMan;
         sFlagSetVEntryB7B8* vt = *(sFlagSetVEntryB7B8**)(mgr + 0x10D8);
-        vt[77].fn(mgr + vt[77].delta, mesh);
+        vt[77].fn(vthis(mgr, vt[77]), mesh);
         self->mGridMesh = 0;
     }
     void* verts = self->mVerts;
@@ -1205,7 +1205,7 @@ extern "C" void cFenceNode__cFenceNode(cFenceNode* self, int flags)
     if (gridMesh != 0) {
         char* mgr = cGraphicsMan_TheGraphicsMan;
         sFlagSetVEntryCB80* vt = *(sFlagSetVEntryCB80**)(mgr + 0x10D8);
-        vt[77].fn(mgr + vt[77].delta, gridMesh);
+        vt[77].fn(vthis(mgr, vt[77]), gridMesh);
     }
     cInstanceNode__cInstanceNode(self, flags);
 }
@@ -1642,12 +1642,12 @@ extern "C" void cFenceNode_setupFence(cFenceNode* fenceNode)
     self->node->flags = (self->node->flags & ~2u) | 4;
     char* mgr = cGraphicsMan_TheGraphicsMan;
     sFsVE_D1E8* createSlot = &(*(sFsVE_D1E8**)(mgr + 0x10D8))[76];
-    self->mesh = (sFsMesh_D1E8*)createSlot->fn(mgr + createSlot->delta, 8, 2, 0x60000000u);
+    self->mesh = (sFsMesh_D1E8*)createSlot->fn(vthis(mgr, *createSlot), 8, 2, 0x60000000u);
     sFsV3_D1E8 pos[4];
     sFsV2_D1E8 quv[4];
     sFsCol_D1E8 qcol[4];
     sFsQuadVE_D1E8* vt = *(sFsQuadVE_D1E8**)(mgr + 0x10D8);
-    vt[97].fn(mgr + vt[97].delta, self->node, 0, pos, quv, qcol);
+    vt[97].fn(vthis(mgr, vt[97]), self->node, 0, pos, quv, qcol);
     sFsV2_D1E8 uv[16];
     sFsCol_D1E8 col[16];
     for (int i = 0; i < 8; i++) {
@@ -2030,8 +2030,8 @@ extern "C" void cAnimNode_updateRootTransform(cAnimNode* self)
     vt[52].fn(vthis(self, vt[52]));
     char* sub = (char*)&self->unk_014;
     sFlagSetVEntry_DC90c* vt2 = (sFlagSetVEntry_DC90c*)self->mVtbl;
-    void* objB = sub + vt2[33].delta;
-    void* rootTransform = ((sFlagSetVEntry_DC90b*)vt2)[24].fn(sub + vt2[24].delta);
+    void* objB = vthis(sub, vt2[33]);
+    void* rootTransform = ((sFlagSetVEntry_DC90b*)vt2)[24].fn(vthis(sub, vt2[24]));
     vt2[33].fn(objB, rootTransform, (int)self->AnimMats);
     self->Flags &= ~1;
 }
@@ -2254,7 +2254,7 @@ extern "C" void cAnimNode_cacheFrame(cAnimNode* self)
         for (i = 0; i < self->NumAnimMeshes; i++) {
             // PORT: pointer arithmetic done in int (gives the target's offset-first addu).
             cMeshAnimFrame* animFrame = (cMeshAnimFrame*)(i * 0xD0 + (int)self->AnimFrames);
-            ((sFlagSetVEntry_E348*)animFrame->mVtbl)[2].fn((char*)animFrame + ((sFlagSetVEntry_E348*)animFrame->mVtbl)[2].delta, self->CacheTime);
+            ((sFlagSetVEntry_E348*)animFrame->mVtbl)[2].fn(vthis(animFrame, ((sFlagSetVEntry_E348*)animFrame->mVtbl)[2]), self->CacheTime);
         }
     }
     self->MeshVelocityDirty = 1;

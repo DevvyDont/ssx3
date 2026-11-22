@@ -1,4 +1,5 @@
 #include "common.h"
+#include "vtable.h"
 #include "camera/cameraalgolist.h"
 
 //100%
@@ -97,7 +98,7 @@ static inline void sAlgoNodeK2b_delete(sAlgoNodeK2b* n)
         char* algo = n->algo;
         if (algo != 0 && n->owned != 0) {
             sAlgoVEntryK2* vt = *(sAlgoVEntryK2**)(algo + 0x10);
-            vt[1].fn(algo + vt[1].delta, 3);
+            vt[1].fn(vthis(algo, vt[1]), 3);
         }
         n->algo = 0;
         n->owned = 0;
@@ -160,7 +161,7 @@ static inline void sAlgoNode_delete(sAlgoNode* n)
         char* algo = n->algo;
         if (algo != 0 && n->owned != 0) {
             sAlgoVEntry* vt = *(sAlgoVEntry**)(algo + 0x10);
-            vt[1].fn(algo + vt[1].delta, 3);
+            vt[1].fn(vthis(algo, vt[1]), 3);
         }
         n->algo = 0;
         n->owned = 0;
