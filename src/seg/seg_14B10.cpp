@@ -223,9 +223,9 @@ INCLUDE_ASM("seg/seg_14B10", cPreRaceHandler_OnGainState);
  * @param stateHandler  the handler
  * @param aiObj  the AI
  */
-extern "C" void cPreRaceHandler_OnGainState(void *stateHandler, cAI* aiObj) {
+extern "C" void cPreRaceHandler_OnGainState(cPreRaceHandler* stateHandler, cAI* aiObj) {
     (aiObj->EventTimerTick) = 0;
-    (*(int *)((char*)(stateHandler) + (4))) = 0;
+    (stateHandler->unk_04) = 0;
 }
 #endif
 

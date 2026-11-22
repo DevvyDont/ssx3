@@ -1331,8 +1331,8 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_ARRAY_GetNumberOfSubtitle);
  * @param table  the array
  * @return the count (+0x4)
  */
-extern "C" int RCMP_AV_SUBTITLE_ARRAY_GetNumberOfSubtitle(void *table) {
-    return (*(int *)((char*)(table) + (4)));
+extern "C" int RCMP_AV_SUBTITLE_ARRAY_GetNumberOfSubtitle(RCMP_AV_SUBTITLE_ARRAY* table) {
+    return ((int)table->mNumberOfSubtitle);
 }
 #endif
 //100%
@@ -1597,8 +1597,8 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetPosY);
  * @param entry  the AV_SUBTITLE entry
  * @param value  the y position
  */
-extern "C" void RCMP_AV_SUBTITLE_SetPosY(void *entry, int value) {
-    (*(int *)((char*)(entry) + (4))) = value;
+extern "C" void RCMP_AV_SUBTITLE_SetPosY(RCMP_AV_SUBTITLE* entry, int value) {
+    (entry->mPosY) = value;
 }
 #endif
 //100%
@@ -1613,8 +1613,8 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetWidth);
  * @param entry  the AV_SUBTITLE entry
  * @param value  the width
  */
-extern "C" void RCMP_AV_SUBTITLE_SetWidth(void *entry, int value) {
-    (*(int *)((char*)(entry) + (8))) = value;
+extern "C" void RCMP_AV_SUBTITLE_SetWidth(RCMP_AV_SUBTITLE* entry, int value) {
+    ((int)entry->mWidth) = value;
 }
 #endif
 //100%
@@ -1629,8 +1629,8 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetHeight);
  * @param entry  the AV_SUBTITLE entry
  * @param value  the height
  */
-extern "C" void RCMP_AV_SUBTITLE_SetHeight(void *entry, int value) {
-    (*(int *)((char*)(entry) + (0xC))) = value;
+extern "C" void RCMP_AV_SUBTITLE_SetHeight(RCMP_AV_SUBTITLE* entry, int value) {
+    ((int)entry->mHeight) = value;
 }
 #endif
 //100%
@@ -1645,8 +1645,8 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetStrID);
  * @param entry  the AV_SUBTITLE entry
  * @param index  the string id (RCMP_AV_SUBTITLE_ARRAY_Init passes the entry index)
  */
-extern "C" void RCMP_AV_SUBTITLE_SetStrID(void *entry, int index) {
-    (*(int *)((char*)(entry) + (0x10))) = index;
+extern "C" void RCMP_AV_SUBTITLE_SetStrID(RCMP_AV_SUBTITLE* entry, int index) {
+    ((int)entry->mStrID) = index;
 }
 #endif
 //100%
@@ -1661,8 +1661,8 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetFrameNumber);
  * @param entry  the AV_SUBTITLE entry
  * @param value  the frame number from which it shows
  */
-extern "C" void RCMP_AV_SUBTITLE_SetFrameNumber(void *entry, int value) {
-    (*(int *)((char*)(entry) + (0x14))) = value;
+extern "C" void RCMP_AV_SUBTITLE_SetFrameNumber(RCMP_AV_SUBTITLE* entry, int value) {
+    ((int)entry->mFrameNumber) = value;
 }
 #endif
 //100%
@@ -1677,8 +1677,8 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetJustifyX);
  * @param entry  the AV_SUBTITLE entry
  * @param value  the justification (0 RIGHT, 1 TOP, 2 CENTER, 3 LEFT, 4 BOTTOM)
  */
-extern "C" void RCMP_AV_SUBTITLE_SetJustifyX(void *entry, int value) {
-    (*(int *)((char*)(entry) + (0x18))) = value;
+extern "C" void RCMP_AV_SUBTITLE_SetJustifyX(RCMP_AV_SUBTITLE* entry, int value) {
+    (entry->mJustifyX) = value;
 }
 #endif
 //100%
@@ -1693,8 +1693,8 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetJustifyY);
  * @param entry  the AV_SUBTITLE entry
  * @param value  the justification (0 RIGHT, 1 TOP, 2 CENTER, 3 LEFT, 4 BOTTOM)
  */
-extern "C" void RCMP_AV_SUBTITLE_SetJustifyY(void *entry, int value) {
-    (*(int *)((char*)(entry) + (0x1C))) = value;
+extern "C" void RCMP_AV_SUBTITLE_SetJustifyY(RCMP_AV_SUBTITLE* entry, int value) {
+    (entry->mJustifyY) = value;
 }
 #endif
 //100%
@@ -1708,8 +1708,8 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetShapeIndex);
  * @param entry  the AV_SUBTITLE entry
  * @param value  the shape index
  */
-extern "C" void RCMP_AV_SUBTITLE_SetShapeIndex(void *entry, int value) {
-    (*(int *)((char*)(entry) + (0x20))) = value;
+extern "C" void RCMP_AV_SUBTITLE_SetShapeIndex(RCMP_AV_SUBTITLE* entry, int value) {
+    ((int)entry->mShapeIndex) = value;
 }
 #endif
 //100%
@@ -1723,8 +1723,8 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetA);
  * @param entry  the AV_SUBTITLE entry
  * @param value  the alpha value (low byte stored)
  */
-extern "C" void RCMP_AV_SUBTITLE_SetA(void *entry, signed char value) {
-    (*(signed char *)((char*)(entry) + (0x24))) = value;
+extern "C" void RCMP_AV_SUBTITLE_SetA(RCMP_AV_SUBTITLE* entry, signed char value) {
+    (*(signed char*)&entry->mA) = value;
 }
 #endif
 //100%
@@ -1738,8 +1738,8 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetR);
  * @param entry  the AV_SUBTITLE entry
  * @param value  the red value (low byte stored)
  */
-extern "C" void RCMP_AV_SUBTITLE_SetR(void *entry, signed char value) {
-    (*(signed char *)((char*)(entry) + (0x25))) = value;
+extern "C" void RCMP_AV_SUBTITLE_SetR(RCMP_AV_SUBTITLE* entry, signed char value) {
+    (*(signed char*)&entry->mR) = value;
 }
 #endif
 //100%
@@ -1753,8 +1753,8 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetG);
  * @param entry  the AV_SUBTITLE entry
  * @param value  the green value (low byte stored)
  */
-extern "C" void RCMP_AV_SUBTITLE_SetG(void *entry, signed char value) {
-    (*(signed char *)((char*)(entry) + (0x26))) = value;
+extern "C" void RCMP_AV_SUBTITLE_SetG(RCMP_AV_SUBTITLE* entry, signed char value) {
+    (*(signed char*)&entry->mG) = value;
 }
 #endif
 //100%
@@ -1768,8 +1768,8 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetB);
  * @param entry  the AV_SUBTITLE entry
  * @param value  the blue value (low byte stored)
  */
-extern "C" void RCMP_AV_SUBTITLE_SetB(void *entry, signed char value) {
-    (*(signed char *)((char*)(entry) + (0x27))) = value;
+extern "C" void RCMP_AV_SUBTITLE_SetB(RCMP_AV_SUBTITLE* entry, signed char value) {
+    (*(signed char*)&entry->mB) = value;
 }
 #endif
 

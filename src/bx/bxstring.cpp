@@ -831,11 +831,11 @@ INCLUDE_ASM("bx/bxstring", cBXString_unlockBuffer);
  * @param bxString  the string
  */
 extern "C" void cBXString_unlockBuffer(void **bxString) {
-    void *temp_4;
+    tStringData* temp_4;
 
-    temp_4 = *bxString;
-    if (temp_4 != &D_0048DCD4) {
-        (*(int *)((char*)(temp_4) + (-0xC))) = 1;
+    temp_4 = (tStringData *)*bxString;
+    if ((void *)temp_4 != &D_0048DCD4) {
+        temp_4[-1].NumRefs = 1;
     }
 }
 #endif

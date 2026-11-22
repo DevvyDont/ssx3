@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "main/gameviewman.h"
 #include "render/font.h"
 #include "bx/math3d.h"
 #include "render/2drender.h"
@@ -207,7 +208,7 @@ int cMenuSys_getKey(void* self);
  */
 extern "C" int cMenuItem_getKey(void** self)
 {
-    return cMenuSys_getKey(*(void**)((char*)*self + 0x124));
+    return cMenuSys_getKey(((cMenu*)*self)->MenuSys);
 }
 #endif
 
@@ -1864,8 +1865,8 @@ struct s2CBFD0Menu {
 extern "C" void cMenu_onLoseFocus(cMenu* menu)
 {
     s2CBFD0Menu* self = (s2CBFD0Menu*)menu;
-    void* item = self->items[self->selected];
-    sVEntry2CBFD0* vt = *(sVEntry2CBFD0**)((char*)item + 0x10);
+    cMenuItem* item = (cMenuItem*)self->items[self->selected];
+    sVEntry2CBFD0* vt = (sVEntry2CBFD0*)item->mVtbl;
     vt[7].fn(vthis(item, vt[7]));
     self->wrap = 0;
 }
@@ -2780,7 +2781,7 @@ extern "C" int cSubMenuItem_input(cSubMenuItem* self)
 {
     int result = cMenuItem_input((cMenuItem*)self);
     if (cMenuItem_isLocked((cMenuItem*)self) == 0 && result == 0 && cMenuItem_getKey((void**)self) == 6) {
-        cMenuSys_pushMenu((cMenuSys*)(*(void**)((char*)*(void**)self + 0x124)), (cMenu*)(self->Sub));
+        cMenuSys_pushMenu(self->Menu->MenuSys, (cMenu*)(self->Sub));
     }
     return result;
 }
@@ -2882,7 +2883,7 @@ extern "C" int cPopMenuItem_input(cPopMenuItem* self)
 {
     int result = cMenuItem_input((cMenuItem*)self);
     if (cMenuItem_isLocked((cMenuItem*)self) == 0 && result == 0 && cMenuItem_getKey((void**)self) == 6) {
-        cMenuSys_popMenu((cMenuSys*)(*(void**)((char*)*(void**)self + 0x124)));
+        cMenuSys_popMenu(self->Menu->MenuSys);
     }
     return result;
 }
@@ -3616,8 +3617,8 @@ extern "C" int cCharMenuItem_input(cCharMenuItem* self)
         }
         self->Fraction = step + (float)(cur - newValue);
         *valuePtr = newValue;
-        char* menu = *(char**)self;
-        sVEntry<void(void*, void*)>* entry = &(*(sVEntry<void(void*, void*)>**)(menu + 0x12C))[4];
+        cMenu* menu = (cMenu*)(*(char**)self);
+        sVEntry<void(void*, void*)>* entry = &((sVEntry<void (void*, void*)>*)menu->mVtbl)[4];
         entry->fn(vthis(menu, *entry), self);
     }
     return result;
@@ -3904,8 +3905,8 @@ extern "C" int cIntMenuItem_input(cIntMenuItem* self)
         }
         self->Fraction = side + (float)(cur - newValue);
         *valuePtr = newValue;
-        char* menu = *(char**)self;
-        sVEntry<void(void*, void*)>* vtEntry = &(*(sVEntry<void(void*, void*)>**)(menu + 0x12C))[4];
+        cMenu* menu = (cMenu*)(*(char**)self);
+        sVEntry<void(void*, void*)>* vtEntry = &((sVEntry<void (void*, void*)>*)menu->mVtbl)[4];
         vtEntry->fn(vthis(menu, *vtEntry), self);
     }
     return result;
@@ -4120,8 +4121,8 @@ extern "C" int cFloatMenuItem_input(cFloatMenuItem* self)
             value = self->Max;
         }
         *self->Value = (value - self->ValueOffset) / self->ValueScale;
-        char* menu = *(char**)self;
-        sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(menu + 0x12C);
+        cMenu* menu = (cMenu*)(*(char**)self);
+        sVEntry<void(void*, void*)>* vt = (sVEntry<void (void*, void*)>*)menu->mVtbl;
         vt[4].fn(vthis(menu, vt[4]), self);
     }
     return result;
@@ -4359,8 +4360,8 @@ extern "C" int cAngleMenuItem_input(cAngleMenuItem* self)
         if (self->Max < *self->Value) {
             *self->Value = self->Max;
         }
-        char* menu = *(char**)self;
-        sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(menu + 0x12C);
+        cMenu* menu = (cMenu*)(*(char**)self);
+        sVEntry<void(void*, void*)>* vt = (sVEntry<void (void*, void*)>*)menu->mVtbl;
         vt[4].fn(vthis(menu, vt[4]), self);
     }
     return result;
@@ -5742,7 +5743,7 @@ extern "C" void cExpandMenuItem_gainFocus(cExpandMenuItem* self, int mode)
         cMenu_setFocus_v(&self->ExpandMenu, -1);
         break;
     }
-    cMenu_onGainFocus((cMenu*)(&self->ExpandMenu), *(int*)(*(char**)self + 0x124));
+    cMenu_onGainFocus((cMenu*)(&self->ExpandMenu), (int)self->Menu->MenuSys);
 }
 #endif
 
@@ -7327,7 +7328,7 @@ INCLUDE_ASM("util/menu", cObjectInterface_getNumCameras);
  * @return the number of views (cameras)
  */
 extern "C" int cObjectInterface_getNumCameras(void) {
-    return (*(int *)((char*)(((void*)SSXApp->Game->ViewMan)) + (0x10)));
+    return SSXApp->Game->ViewMan->m_uiNumView;
 }
 #endif
 
@@ -7344,7 +7345,7 @@ INCLUDE_ASM("util/menu", cObjectInterface_getCurrentCameraNum);
  */
 extern "C" void* cObjectInterface_getCurrentCameraNum()
 {
-    return *(void**)((char*)SSXApp->Game->ViewMan + 0x14);
+    return (void*)SSXApp->Game->ViewMan->m_uiCurrentView;
 }
 #endif
 

@@ -1,4 +1,6 @@
 #include "common.h"
+#include "world/instancerecord.h"
+#include "animation/animsequencer.h"
 #include "ai/rider.h"
 #include "animation/animmodel.h"
 #include "vtable.h"
@@ -428,7 +430,7 @@ INCLUDE_ASM("seg/seg_1F1548", cPunchFX_update);
 #ifdef SKIP_ASM
 int cRiderAnimBase_getCurrentAnimID(void* self, int i);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
-extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
+extern "C" cAnimSequence* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" int tEventFlags_isSet1(void*, int);
 extern int D_004A3AFC;
 
@@ -540,8 +542,8 @@ extern "C" void cPunchFX_update(sFx_1150* self)
     int a = cRiderAnimBase_getCurrentAnimID(*(void**)(self->owner + 0x784), 0);
     int layer1Anim = cRiderAnimBase_getCurrentAnimID(*(void**)(self->owner + 0x784), 1);
     if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(self->owner + 0x784), 1) == 13) {
-        if (tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self->owner + 0x784), 1) + 0xB0, 1) == 0) {
-            flag = tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self->owner + 0x784), 1) + 0xB0, 0) != 0;
+        if (tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(*(void**)(self->owner + 0x784), 1)->Events, 1) == 0) {
+            flag = tEventFlags_isSet1(&cRiderAnimBase_getCurrentAnimSequence(*(void**)(self->owner + 0x784), 1)->Events, 0) != 0;
         }
     }
     if (a == 326 || (layer1Anim == 323 && flag)) {
@@ -3589,8 +3591,8 @@ extern "C" void cWorldLightMan_getRealTimeLights(int, void *, int);
  *
  * @param litObject  the object being lit
  */
-extern "C" void getRealTimeLights(void *litObject) {
-    cWorldLightMan_getRealTimeLights(((int)SSXApp->Game->WorldLightMan), litObject, ((int) (*(int *)((char*)(litObject) + (8))) >> 0xC) & 1);
+extern "C" void getRealTimeLights(tInstanceRecord* litObject) {
+    cWorldLightMan_getRealTimeLights(((int)SSXApp->Game->WorldLightMan), litObject, ((int) (litObject->m_iFlags) >> 0xC) & 1);
 }
 #endif
 

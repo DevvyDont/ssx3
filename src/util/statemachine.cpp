@@ -307,7 +307,7 @@ extern "C" int sceScfGetTimeNotation(void);
 extern "C" int sceCdReadClock(unsigned char* clock);
 extern "C" void sceScfGetLocalTimefromRTC(unsigned char* clock);
 extern char cPS2ConsoleConfig_vtbl[];
-extern void* D_004A28A8_7478 __asm__("SSXApp");
+
 
 /**
  * Constructs the PS2 console configuration object from the system settings and clock.
@@ -413,7 +413,7 @@ extern "C" void* cPS2ConsoleConfig_cPS2ConsoleConfig(cPS2ConsoleConfig* self_)
         self[3] = 0;
         self[4] = 0;
     }
-    self[8] = *(int*)((char*)D_004A28A8_7478 + 0x18);
+    self[8] = SSXApp->TimerTick;
     return self;
 }
 #endif

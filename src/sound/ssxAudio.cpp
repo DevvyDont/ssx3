@@ -1,5 +1,8 @@
 #include "vtable.h"
 #include "common.h"
+#include "main/gamemode.h"
+#include "world/world.h"
+#include "sound/streamsys.h"
 #include "sound/bankmanager.h"
 #include "bx/math3d.h"
 #include "bx/appman.h"
@@ -421,7 +424,7 @@ extern "C" int cSoundSys_SetMode_2(void* bank, int a1) __asm__("cSoundSys_SetMod
  */
 extern "C" int cSSXAudio_SetMode(cSSXAudio* self, int value)
 {
-    int retVal = cSoundSys_SetMode_2(*(void**)(**(char***)&self->MusicSys + 0x1D8), value);
+    int retVal = cSoundSys_SetMode_2(self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys, value);
     if (retVal == 2) {
         self->mAudioMode = value;
     }
@@ -863,8 +866,8 @@ extern "C" void cBankMonitor_BANKMONITOR_DestroyAll(void*);
 extern "C" void cSSXAudio_BANKMONITOR_DestroyAll(cSSXAudio* self)
 {
     func_002A7718(self);
-    void* inner = *(void**)self->MusicSys.mpVStreamSys;
-    cBankMonitor_BANKMONITOR_DestroyAll((char*)inner + 0x1D8);
+    cBankManager* inner = self->MusicSys.mpVStreamSys->mpVBankManager;
+    cBankMonitor_BANKMONITOR_DestroyAll(&inner->BankMonitor);
 }
 #endif
 
@@ -889,8 +892,8 @@ extern "C" void cBankMonitor_BANKMONITOR_DestroyAll1(void* obj, ...);
  */
 extern "C" void cSSXAudio_BANKMONITOR_DestroyAll1(cSSXAudio* self, cSSXAudio_BANKMONITOR_DestroyAll1_sPair key)
 {
-    void* inner = *(void**)self->MusicSys.mpVStreamSys;
-    cBankMonitor_BANKMONITOR_DestroyAll1((char*)inner + 0x1D8, key);
+    cBankManager* inner = self->MusicSys.mpVStreamSys->mpVBankManager;
+    cBankMonitor_BANKMONITOR_DestroyAll1(&inner->BankMonitor, key);
 }
 #endif
 
@@ -1230,7 +1233,7 @@ extern "C" void cSSXAudio_InGameInit(cSSXAudio* self)
     cWorldPainterManArg* pa = (cWorldPainterManArg*)&D_004A5268;
     cWorldPainterManArg* pb = (cWorldPainterManArg*)&D_004A5278;
     cWorldPainterManArg* pc = (cWorldPainterManArg*)&D_004A5270;
-    void* painterMan = *(void**)((char*)SSXApp->Game->World + 8);
+    void* painterMan = SSXApp->Game->World->m_pWorldPainterMan;
     self->unk_625C[0] = cWorldPainterMan_getQuery(painterMan, pa);
     self->unk_625C[1] = cWorldPainterMan_getQuery(painterMan, pa);
     self->mpAmbienceQuery[0] = cWorldPainterMan_getQuery(painterMan, pb);
@@ -1526,9 +1529,9 @@ extern "C" void cSSXAudio_OnFinishEvent(cSSXAudio* self, cRider* rider)
     cSSXAudio_WipeoutSlideEnd(((char*)self), (int)rider);
     cSSXAudio_WipeoutTumbleEnd(((char*)self), (int)rider);
     cSSXAudio_EndUberSpin(((char*)self), (int)rider);
-    char* cfg = (char*)SSXApp->GameModeMan;
-    int nextHeat = *(int*)(cfg + 0x70);
-    int heatNum = *(int*)(cfg + 0x0);
+    cGameModeMan* cfg = SSXApp->GameModeMan;
+    int nextHeat = cfg->iNextHeat;
+    int heatNum = cfg->iHeatNum;
     cBE_getInterface_Fv(cBE_getBE(), 0);
     signed char* raceDb = (signed char*)&cBENewRaceInterface_newRace;
     int mode = raceDb[0x48];
@@ -1611,7 +1614,7 @@ extern "C" void cSSXAudio_PartialRestart(cSSXAudio* self)
     cSSXAudio_ResetAudioVariables(self);
     if (func_002A4168(self) != 0 || func_002A41D8(self) != 0) {
         if (func_002A4040(self) == 0
-            && self->unk_5824 >= *(int*)((char*)SSXApp->GameModeMan + 0x70)
+            && self->unk_5824 >= SSXApp->GameModeMan->iNextHeat
             && cSSXAudio_PlayHistoryExists(self, 0, 0) == 0) {
             cSSXAudio_PlayHistoryAdd(self, 0, 0, -1, 0, 0);
         }
@@ -1812,7 +1815,7 @@ extern "C" void func_00287520(cSSXAudio* self)
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_SetDJSpeech);
 #ifdef SKIP_ASM
 extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio*, float, int);
-extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int a1);
+extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int a1);
 
 /**
  * Turns the arcade sound effects on or off.
@@ -1839,7 +1842,7 @@ extern "C" void cSSXAudio_SetDJSpeech(cSSXAudio* self, int on)
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_SetArcadeSFX);
 #ifdef SKIP_ASM
 extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio*, float, int);
-extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int a1);
+extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int a1);
 
 /**
  * Turns the arcade sound effects and speech on or off: controls 9 and 10 get the SFX level (control 5) or 0.
@@ -1864,7 +1867,7 @@ extern "C" void cSSXAudio_SetArcadeSFX(cSSXAudio* self, int on)
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00287670);
 #ifdef SKIP_ASM
-extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int a1);
+extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int a1);
 
 /**
  * Returns the music volume setting 0..11: the set level of control 1 (Music) times 11, truncated.
@@ -1873,14 +1876,14 @@ extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int a1);
  */
 extern "C" int func_00287670(void* self)
 {
-    return (int)(cSSXAudio_GetCurrSetVolume(self, 1) * 11.0f);
+    return (int)(cSSXAudio_GetCurrSetVolume((cSSXAudio*)self, 1) * 11.0f);
 }
 #endif
 
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetSFXVolume);
 #ifdef SKIP_ASM
-extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int a1);
+extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int a1);
 
 /**
  * Returns the sound-effect volume setting 0..11: the set level of control 5 (SFX) times 11, truncated.
@@ -1896,7 +1899,7 @@ extern "C" int cSSXAudio_GetSFXVolume(cSSXAudio* self)
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_002876D0);
 #ifdef SKIP_ASM
-extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int a1);
+extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int a1);
 
 /**
  * Returns the character speech volume setting 0..11: the set level of control 4 (Character) times 11, truncated.
@@ -1905,7 +1908,7 @@ extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int a1);
  */
 extern "C" int func_002876D0(void* self)
 {
-    return (int)(cSSXAudio_GetCurrSetVolume(self, 4) * 11.0f);
+    return (int)(cSSXAudio_GetCurrSetVolume((cSSXAudio*)self, 4) * 11.0f);
 }
 #endif
 
@@ -2038,10 +2041,10 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetCurrSetVolume);
  * @param volumeIndex  the volume control (eVolumeControl)
  * @return the level, 0.0..1.0
  */
-extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int volumeIndex)
+extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int volumeIndex)
 {
-    self = (char*)self + (volumeIndex << 4);
-    return *(float*)((char*)self + 0x62bc);
+    cSSXAudio* audio = (cSSXAudio*)self;
+    return audio->mSoundVolume[volumeIndex].setVolume;
 }
 #endif
 
@@ -3045,7 +3048,7 @@ extern float gRocoScaling;
 extern float gPsymonScaling;
 extern float gDeiterScaling;
 extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio*, float, int);
-extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int a1);
+extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int a1);
 
 /**
  * Sets the fixed level scales for the front end or the mountain and reapplies every volume control.

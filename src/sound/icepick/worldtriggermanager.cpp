@@ -1278,8 +1278,8 @@ extern "C" int cWorldTriggerManager_AfterCollisionTrigger(cWorldTriggerManager* 
     if (i < 2) {
         return 0;
     }
-    sTriggerRef* refs = (sTriggerRef*)self->m_aTriggerInfo;
-    return *(int*)((char*)refs[i].obj + 0x4) == 1;
+    tTriggerTypePointer* refs = self->m_aTriggerInfo;
+    return refs[i].m_pTriggerTypeStruct->m_HitObjectTrigger == 1;
 }
 #endif
 
@@ -1437,8 +1437,8 @@ extern "C" int cWorldTriggerManager_SyncToAnimationTrigger(cWorldTriggerManager*
     if (i < 2) {
         return 0;
     }
-    sTriggerRef* refs = (sTriggerRef*)self->m_aTriggerInfo;
-    return *(int*)((char*)refs[i].obj + 0x8) == 1;
+    tTriggerTypePointer* refs = self->m_aTriggerInfo;
+    return refs[i].m_pTriggerTypeStruct->m_SyncToAnimation == 1;
 }
 #endif
 

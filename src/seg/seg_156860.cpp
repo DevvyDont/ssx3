@@ -1,4 +1,5 @@
 #include "common.h"
+#include "online/commchannel.h"
 #include "vtable.h"
 #include "online/dnasman.h"
 #include "online/buddyman.h"
@@ -440,7 +441,7 @@ extern "C" int cCommSystem_getError(cCommSystem* commSystem, int channelIndex) {
     if ((commSystem->mNetConnError) != 0) {
         return 1;
     }
-    return *(int *)((char*)((void*)commSystem->mChannels[channelIndex]) + 4);
+    return commSystem->mChannels[channelIndex]->mError;
 }
 #endif
 
@@ -2427,15 +2428,15 @@ extern "C" void cGameComm_updateWriteQueue(cGameComm* self) {
         do {
             if (self->mError != 0) return;
             int idx = self->mWriteQueue.mTail;
-            char *item;
+            tGameCommPacket* item;
             if (idx < self->mWriteQueue.mHead) {
-                item = ((S7DC0 *)self)->arr[idx % 32];
+                item = self->mWriteQueue.mQueue[idx % 32];
             } else {
                 item = 0;
             }
-            if (cCommSystem_writePacket_7DC0((int)cCommSystem_mCommSystem, self->unk_06C, item, *(unsigned short *)(item + 2)) == 0) return;
+            if (cCommSystem_writePacket_7DC0((int)cCommSystem_mCommSystem, self->unk_06C, (char *)item, item->mSize) == 0) return;
             self->mWriteQueue.mTail = self->mWriteQueue.mTail + 1;
-            cGameComm_freePacket_7DC0(((char*)self), item);
+            cGameComm_freePacket_7DC0(((char*)self), (char *)item);
         } while (self->mWriteQueue.mTail != self->mWriteQueue.mHead);
     }
 }

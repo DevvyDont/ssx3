@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/world.h"
 #include "vtable.h"
 #include "worldpainter/quadtree.h"
 #include "bx/math3d.h"
@@ -193,7 +194,7 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetAzimuth);
  * @return the azimuth
  */
 extern "C" unsigned short cSndPlayOpts_OPTS_GetAzimuth(cSndPlayOpts* opts) {
-    return (*(unsigned short *)((char*)((((opts->mInst) * 0x18) + ((int)opts->mCurrent))) + (8)));
+    return opts->mCurrent[opts->mInst].azimuth;
 }
 #endif
 
@@ -207,7 +208,7 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetElevation);
  * @return the elevation
  */
 extern "C" short cSndPlayOpts_OPTS_GetElevation(cSndPlayOpts* opts) {
-    return (*(short *)((char*)((((opts->mInst) * 0x18) + ((int)opts->mCurrent))) + (0xA)));
+    return opts->mCurrent[opts->mInst].elevation;
 }
 #endif
 
@@ -373,7 +374,7 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_SetDefault);
  * Copies the current level's SNDPLAYOPTS (mCurrent[mInst]) into mDefault, the record each push starts from.
  */
 extern "C" void cSndPlayOpts_OPTS_SetDefault(cSndPlayOpts* self) {
-    *(&self->mDefault) = *(SNDPLAYOPTS*)((char*)((int)self->mCurrent) + self->mInst * 0x18);
+    self->mDefault = self->mCurrent[self->mInst];
 }
 #endif
 
@@ -523,7 +524,7 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Key);
  * @param value  the key number
  */
 extern "C" void cSndPlayOpts_OPTS_Key(cSndPlayOpts* opts, signed char value) {
-    (*(signed char *)((char*)((((opts->mInst) * 0x18) + ((int)opts->mCurrent))) + (2))) = value;
+    opts->mCurrent[opts->mInst].keynum = value;
 }
 #endif
 
@@ -537,7 +538,7 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Velocity);
  * @param value  the velocity
  */
 extern "C" void cSndPlayOpts_OPTS_Velocity(cSndPlayOpts* opts, signed char value) {
-    (*(signed char *)((char*)((((opts->mInst) * 0x18) + ((int)opts->mCurrent))) + (3))) = value;
+    opts->mCurrent[opts->mInst].velocity = value;
 }
 #endif
 
@@ -627,7 +628,7 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Bend);
  * @param value  the bend
  */
 extern "C" void cSndPlayOpts_OPTS_Bend(cSndPlayOpts* opts, signed char value) {
-    (*(signed char *)((char*)((((opts->mInst) * 0x18) + ((int)opts->mCurrent))) + (1))) = value;
+    opts->mCurrent[opts->mInst].bend = value;
 }
 #endif
 
@@ -641,7 +642,7 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_PitchMult);
  * @param value  the pitch multiplier
  */
 extern "C" void cSndPlayOpts_OPTS_PitchMult(cSndPlayOpts* opts, short value) {
-    (*(short *)((char*)((((opts->mInst) * 0x18) + ((int)opts->mCurrent))) + (0xC))) = value;
+    opts->mCurrent[opts->mInst].pitchmult = value;
 }
 #endif
 
@@ -655,7 +656,7 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_DelayCount);
  * @param value  the new count
  */
 extern "C" void cSndPlayOpts_OPTS_DelayCount(cSndPlayOpts* opts, int value) {
-    (*(int *)((char*)((((opts->mInst) * 0x10) + ((int)opts->mDelay))) + (4))) = value;
+    opts->mDelay[opts->mInst].mCount = value;
 }
 #endif
 
@@ -684,7 +685,7 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_DelayFeedback);
  * @param value  the new feedback
  */
 extern "C" void cSndPlayOpts_OPTS_DelayFeedback(cSndPlayOpts* opts, int value) {
-    (*(int *)((char*)((((opts->mInst) * 0x10) + ((int)opts->mDelay))) + (8))) = value;
+    opts->mDelay[opts->mInst].mFeedback = value;
 }
 #endif
 
@@ -698,7 +699,7 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_DelayLevel);
  * @param value  the new level
  */
 extern "C" void cSndPlayOpts_OPTS_DelayLevel(cSndPlayOpts* opts, int value) {
-    (*(int *)((char*)((((opts->mInst) * 0x10) + ((int)opts->mDelay))) + (0xC))) = value;
+    opts->mDelay[opts->mInst].mLevel = value;
 }
 #endif
 
@@ -712,7 +713,7 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Azimuth);
  * @param value  the azimuth
  */
 extern "C" void cSndPlayOpts_OPTS_Azimuth(cSndPlayOpts* opts, short value) {
-    (*(short *)((char*)((((opts->mInst) * 0x18) + ((int)opts->mCurrent))) + (8))) = value;
+    opts->mCurrent[opts->mInst].azimuth = value;
 }
 #endif
 
@@ -726,7 +727,7 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Elevation);
  * @param value  the elevation
  */
 extern "C" void cSndPlayOpts_OPTS_Elevation(cSndPlayOpts* opts, short value) {
-    (*(short *)((char*)((((opts->mInst) * 0x18) + ((int)opts->mCurrent))) + (0xA))) = value;
+    opts->mCurrent[opts->mInst].elevation = value;
 }
 #endif
 
@@ -782,7 +783,7 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_LowPassCutOffFrequency);
  */
 extern "C" void cSndPlayOpts_OPTS_LowPassCutOffFrequency(cSndPlayOpts* self, int value) {
     int clamped = (value <= 0xFFFF) ? value : 0xFFFF;
-    *(short*)((char*)(self->mInst * 0x18 + (int)self->mCurrent) + 0x14) = (clamped <= -1) ? 0 : clamped;
+    self->mCurrent[self->mInst].lowpasscutoff = (clamped <= -1) ? 0 : clamped;
 }
 #endif
 
@@ -1203,7 +1204,7 @@ extern "C" int SNDbankinuse(int);
 extern "C" int cBankManager_BANK_InUse(cBankManager* self, int idx) {
     int ready = 0;
     SNDSYS_entercritical();
-    bool ok = *(int *)((char*)((int)self->mBank) + idx * 0x60) != 1;
+    bool ok = self->mBank[idx].mBankStatus != 1;
     if (!ok) {
         ready = SNDbankinuse(cBankManager_BANK_Handle(self, idx)) == 1;
     }
@@ -1245,7 +1246,7 @@ INCLUDE_ASM("bx/seg_1BA100", cBankSys_SFX_Bank);
  */
 extern "C" void cBankSys_SFX_Bank(cBankSys* bankSys, int bank) {
     int *base = bankSys->mBank;
-    base[*(int *)(*(char **)bankSys + 0x1F4)] = bank;
+    base[bankSys->mpVBankManager->BankMonitor.mInst] = bank;
 }
 #endif
 
@@ -1262,7 +1263,7 @@ INCLUDE_ASM("bx/seg_1BA100", cBankSys_SFX_Patch);
  */
 extern "C" void cBankSys_SFX_Patch(cBankSys* bankSys, int patch) {
     int *base = bankSys->mPatch;
-    base[*(int *)(*(char **)bankSys + 0x1F4)] = patch;
+    base[bankSys->mpVBankManager->BankMonitor.mInst] = patch;
 }
 #endif
 
@@ -1848,8 +1849,8 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BAD48);
  * @param audio  the cSSXAudio
  * @return unk_578C
  */
-extern "C" int func_002BAD48(void *audio) {
-    return (*(int *)((char*)(audio) + (0x578C)));
+extern "C" int func_002BAD48(cSSXAudio* audio) {
+    return (audio->unk_578C);
 }
 #endif
 
@@ -1862,8 +1863,8 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BAD50);
  * @param audio  the cSSXAudio
  * @return unk_5790
  */
-extern "C" int func_002BAD50(void *audio) {
-    return (*(int *)((char*)(audio) + (0x5790)));
+extern "C" int func_002BAD50(cSSXAudio* audio) {
+    return (audio->unk_5790);
 }
 #endif
 
@@ -1890,8 +1891,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetSFXPaused);
  * @param audio  the cSSXAudio
  * @return mSFXPaused
  */
-extern "C" int cSSXAudio_GetSFXPaused(void *audio) {
-    return (*(int *)((char*)(audio) + (0x5FB0)));
+extern "C" int cSSXAudio_GetSFXPaused(cSSXAudio* audio) {
+    return (audio->mSFXPaused);
 }
 #endif
 
@@ -1904,8 +1905,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetRadioModeID);
  * @param audio  the cSSXAudio
  * @return unk_608C
  */
-extern "C" int cSSXAudio_GetRadioModeID(void *audio) {
-    return (*(int *)((char*)(audio) + (0x608C)));
+extern "C" int cSSXAudio_GetRadioModeID(cSSXAudio* audio) {
+    return (audio->unk_608C);
 }
 #endif
 
@@ -1977,8 +1978,8 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BADA0);
  * @param audio  the cSSXAudio
  * @return unk_6280
  */
-extern "C" int func_002BADA0(void *audio) {
-    return (*(int *)((char*)(audio) + (0x6280)));
+extern "C" int func_002BADA0(cSSXAudio* audio) {
+    return (audio->unk_6280);
 }
 #endif
 
@@ -1991,8 +1992,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetMode);
  * @param audio  the cSSXAudio
  * @return mAudioMode
  */
-extern "C" int cSSXAudio_GetMode(void *audio) {
-    return (*(int *)((char*)(audio) + (0x62B0)));
+extern "C" int cSSXAudio_GetMode(cSSXAudio* audio) {
+    return (audio->mAudioMode);
 }
 #endif
 
@@ -2005,8 +2006,8 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BADB0);
  * @param audio  the cSSXAudio
  * @return unk_62B8
  */
-extern "C" int func_002BADB0(void *audio) {
-    return (*(int *)((char*)(audio) + (0x62B8)));
+extern "C" int func_002BADB0(cSSXAudio* audio) {
+    return (audio->unk_62B8);
 }
 #endif
 
@@ -2019,8 +2020,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetArcadeSFX);
  * @param audio  the cSSXAudio
  * @return mArcadeSFX
  */
-extern "C" int cSSXAudio_GetArcadeSFX(void *audio) {
-    return (*(int *)((char*)(audio) + (0x62B4)));
+extern "C" int cSSXAudio_GetArcadeSFX(cSSXAudio* audio) {
+    return (audio->mArcadeSFX);
 }
 #endif
 
@@ -2136,7 +2137,7 @@ extern "C" void cWorldPainterLayer_resolve(cWorldPainterLayer* self) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cWorldPainterLayer_getQuadTreeContents);
 #ifdef SKIP_ASM
-extern "C" void *cQuadTree_getLeaf(int);
+extern "C" tQuadTreeLeafNode *cQuadTree_getLeaf(int);
 
 /**
  * Returns the contents word of the quad-tree leaf at a position in a world-painter layer.
@@ -2149,7 +2150,7 @@ extern "C" void *cQuadTree_getLeaf(int);
  * @return the leaf's contents (a region index, or -1)
  */
 extern "C" int cWorldPainterLayer_getQuadTreeContents(int *layer) {
-    return (*(int *)((char*)(cQuadTree_getLeaf(*layer)) + (4)));
+    return cQuadTree_getLeaf(*layer)->m_key;
 }
 #endif
 
@@ -2258,11 +2259,11 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BB100);
  * @param rhs  the name field to compare with
  * @return 1 when they differ, else 0
  */
-extern "C" int func_002BB100(tWPNameField* wpNameField, void *rhs) {
+extern "C" int func_002BB100(tWPNameField* wpNameField, tWPNameField* rhs) {
     int var_6;
 
     var_6 = 0;
-    if (((wpNameField->m_nameId[0]) != (*(int *)((char*)(rhs) + (0)))) || ((wpNameField->m_nameId[1]) != (*(int *)((char*)(rhs) + (4))))) {
+    if (((wpNameField->m_nameId[0]) != (rhs->m_nameId[0])) || ((wpNameField->m_nameId[1]) != (rhs->m_nameId[1]))) {
         var_6 = 1;
     }
     return var_6;
@@ -2645,10 +2646,10 @@ extern "C" void cWorldPainterMan_render(int, void *);
  * Calls cWorldPainterMan_render (cWorldPainterMan::render) on the painter manager stored at +0x8 of SSXApp->Game->World.
  */
 extern "C" void cWorldPainterManRender(void) {
-    void *temp_5;
+    cWorld* temp_5;
 
-    temp_5 = ((void*)SSXApp->Game->World);
-    cWorldPainterMan_render((*(int *)((char*)(temp_5) + (8))), temp_5);
+    temp_5 = (cWorld*)((void*)SSXApp->Game->World);
+    cWorldPainterMan_render(((int)temp_5->m_pWorldPainterMan), temp_5);
 }
 #endif
 
@@ -4278,7 +4279,7 @@ extern "C" void* tWPInGameData_Lighting_tWPInGameData_Lighting(tWPInGameData_Lig
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Weather_tWPInGameData_Weather);
 #ifdef SKIP_ASM
 extern char tWPInGameData_Weather_vtbl[];
-#define F_CAF8(o) (*(float*)(self + (o)))
+
 /**
  * Constructs a tWPInGameData_Weather: vtable tWPInGameData_Weather_vtbl, m_wpTravelDistance -99999.0f (no position yet), and both the
  * current and the last value of each weather field: m_SnowIntensity 0, m_FlakeSize 6, m_WindIntensity, m_WindRotation
@@ -4288,28 +4289,28 @@ extern char tWPInGameData_Weather_vtbl[];
  *
  * @return @p self (0xA0 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Weather")
  */
-extern "C" void* tWPInGameData_Weather_tWPInGameData_Weather(char *self) {
-    *(char**)(self + 4) = tWPInGameData_Weather_vtbl;
-    F_CAF8(0) = -99999.0f;
-    F_CAF8(0x8) = F_CAF8(0xC) = 0.0f;
-    F_CAF8(0x10) = F_CAF8(20) = 6.0f;
-    F_CAF8(0x18) = F_CAF8(0x1C) = 0.0f;
-    F_CAF8(0x20) = F_CAF8(36) = 0.0f;
-    F_CAF8(40) = F_CAF8(44) = 0.0f;
-    F_CAF8(0x30) = F_CAF8(52) = 10.0f;
-    F_CAF8(0x38) = F_CAF8(0x3C) = 1.0f;
-    F_CAF8(0x40) = F_CAF8(68) = 1.0f;
-    F_CAF8(72) = F_CAF8(76) = 0.0f;
-    F_CAF8(80) = F_CAF8(84) = 0.0f;
-    F_CAF8(88) = F_CAF8(92) = 0.0f;
-    F_CAF8(0x60) = F_CAF8(100) = 1.0f;
-    F_CAF8(104) = F_CAF8(108) = 1.0f;
-    F_CAF8(0x70) = F_CAF8(116) = 1.0f;
-    F_CAF8(0x78) = F_CAF8(0x7C) = 1.0f;
-    F_CAF8(0x80) = F_CAF8(132) = 0.05999999865889549f;
-    F_CAF8(136) = F_CAF8(140) = 1.0f;
-    F_CAF8(144) = F_CAF8(148) = 1.0f;
-    F_CAF8(152) = F_CAF8(156) = 1.0f;
+extern "C" void* tWPInGameData_Weather_tWPInGameData_Weather(tWPInGameData_Weather* self) {
+    self->mVtbl = (void**)tWPInGameData_Weather_vtbl;
+    self->m_wpTravelDistance = -99999.0f;
+    self->m_SnowIntensity = self->m_lastSnowIntensity = 0.0f;
+    self->m_FlakeSize = self->m_lastFlakeSize = 6.0f;
+    self->m_WindIntensity = self->m_lastWindIntensity = 0.0f;
+    self->m_WindRotation = self->m_lastWindRotation = 0.0f;
+    self->m_PlayerWindIntensity = self->m_lastPlayerWindIntensity = 0.0f;
+    self->m_Temperature = self->m_lastTemperature = 10.0f;
+    self->m_SnowFlurries = self->m_lastSnowFlurries = 1.0f;
+    self->m_SnowGravityMultiplier = self->m_lastSnowGravityMultiplier = 1.0f;
+    self->m_SnowFluffItensity = self->m_lastSnowFluffItensity = 0.0f;
+    self->m_SnowFluffWindIntensity = self->m_lastSnowFluffWindIntensity = 0.0f;
+    self->m_LightningChance = self->m_lastLightningChance = 0.0f;
+    self->m_SnowFlakeColourA = self->m_lastSnowFlakeColourA = 1.0f;
+    self->m_SnowFlakeColourR = self->m_lastSnowFlakeColourR = 1.0f;
+    self->m_SnowFlakeColourG = self->m_lastSnowFlakeColourG = 1.0f;
+    self->m_SnowFlakeColourB = self->m_lastSnowFlakeColourB = 1.0f;
+    self->m_SnowFluffColourA = self->m_lastSnowFluffColourA = 0.05999999865889549f;
+    self->m_SnowFluffColourR = self->m_lastSnowFluffColourR = 1.0f;
+    self->m_SnowFluffColourG = self->m_lastSnowFluffColourG = 1.0f;
+    self->m_SnowFluffColourB = self->m_lastSnowFluffColourB = 1.0f;
     return self;
 }
 #undef F_CAF8

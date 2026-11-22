@@ -117,7 +117,7 @@ extern "C" cBERewardDB* cBERewardInterface_getDB(cBERewardInterface* self);
  */
 extern "C" char* cBERewardInterface_getTrophy(cBERewardInterface* self, int peakId, int trophyId)
 {
-    return (char*)cBERewardInterface_getDB(self)->mpTrophies + (trophyId * 3 + peakId) * 0xC;
+    return (char*)&cBERewardInterface_getDB(self)->mpTrophies[trophyId * 3 + peakId];
 }
 #endif
 
@@ -136,7 +136,7 @@ extern "C" cBERewardDB* cBERewardInterface_getDB(cBERewardInterface* self);
  */
 extern "C" char* cBERewardInterface_getMedal(cBERewardInterface* self, int trophyId, int medalId)
 {
-    return (char*)cBERewardInterface_getDB(self)->mpMedals + (trophyId * 4 + medalId) * 0xC;
+    return (char*)&cBERewardInterface_getDB(self)->mpMedals[trophyId * 4 + medalId];
 }
 #endif
 
@@ -155,7 +155,7 @@ extern "C" cBERewardDB* cBERewardInterface_getDB(cBERewardInterface* self);
  */
 extern "C" char* cBERewardInterface_getPeakPass(cBERewardInterface* self, int peakId, int charId)
 {
-    return (char*)cBERewardInterface_getDB(self)->mpPeakPasses + (charId * 3 + peakId) * 8;
+    return (char*)&cBERewardInterface_getDB(self)->mpPeakPasses[charId * 3 + peakId];
 }
 #endif
 
@@ -1949,7 +1949,7 @@ extern "C" void cBERewardInterface_setPlayList(cBERewardInterface* self, int pro
 }
 #endif
 
-extern int gCollectiblesMedalLevel[];
+extern int gCollectiblesMedalLevel[][4];
 
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getCollectibleMedalTarget);
@@ -1963,11 +1963,11 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getCollectibleMedalTarget);
  */
 extern "C" int cBERewardInterface_getCollectibleMedalTarget(cBERewardInterface* self, int peakID, int medal)
 {
-    return *(int*)((char*)gCollectiblesMedalLevel + ((medal << 2) + (peakID << 4)));
+    return gCollectiblesMedalLevel[peakID][medal];
 }
 #endif
 
-extern int gBigChallengesMedalLevel[];
+extern int gBigChallengesMedalLevel[][4];
 
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getChallengesMedalTarget);
@@ -1981,11 +1981,11 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getChallengesMedalTarget);
  */
 extern "C" int cBERewardInterface_getChallengesMedalTarget(cBERewardInterface* self, int peakID, int medal)
 {
-    return *(int*)((char*)gBigChallengesMedalLevel + ((medal << 2) + (peakID << 4)));
+    return gBigChallengesMedalLevel[peakID][medal];
 }
 #endif
 
-extern void* gEarningsMedalLevel[];
+extern unsigned int gEarningsMedalLevel[];
 
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getEarningsTarget__FPvi);
@@ -1998,7 +1998,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getEarningsTarget__FPvi);
  */
 int cBERewardInterface_getEarningsTarget(void* self, int peakID)
 {
-    return *(int*)((char*)(void*)gEarningsMedalLevel + peakID * 4);
+    return gEarningsMedalLevel[peakID];
 }
 #endif
 
@@ -2020,7 +2020,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateCollectibleMedal);
  */
 extern "C" int cBERewardInterface_calculateCollectibleMedal(cBERewardInterface* self, int idx, int numCollected)
 {
-    int* row = gCollectiblesMedalLevel + idx * 4;
+    int* row = gCollectiblesMedalLevel[idx];
     for (int i = 0; i < 4; i++) {
         if (numCollected >= row[i]) return i;
     }
@@ -2100,7 +2100,7 @@ extern "C" int cBEMissionInterface_getCurrentCollectForPeakByChar(void* iface, i
 extern "C" int cBERewardInterface_getCollectiblesMedal(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int kind)
 {
     int collected = cBEMissionInterface_getCurrentCollectForPeakByChar(cBE_getInterface_Fv(cBE_getBE(), 10), iProfileIndex, iCharacterID, kind);
-    int* thresholds = gCollectiblesMedalLevel + kind * 4;
+    int* thresholds = gCollectiblesMedalLevel[kind];
     for (int i = 0; i < 4; i++)
     {
         if (collected >= thresholds[i])
@@ -2131,7 +2131,7 @@ extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(void* 
 extern "C" int cBERewardInterface_getBigChallengesMedal(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int kind)
 {
     int completed = cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(cBE_getInterface_Fv(cBE_getBE(), 10), iProfileIndex, iCharacterID, kind);
-    int* thresholds = gBigChallengesMedalLevel + kind * 4;
+    int* thresholds = gBigChallengesMedalLevel[kind];
     for (int i = 0; i < 4; i++)
     {
         if (completed >= thresholds[i])
@@ -2160,7 +2160,7 @@ int cBEEconInterface_getTotalMoneyEarned(void* self, int a, int b);
 extern "C" int cBERewardInterface_getEarningsMedal(cBERewardInterface* self, int iProfileIndex, int iCharacterID, int medal)
 {
     unsigned int earned = cBEEconInterface_getTotalMoneyEarned(cBE_getInterface_Fv(cBE_getBE(), 11), iProfileIndex, iCharacterID);
-    if (earned >= *(unsigned int*)((char*)(void*)gEarningsMedalLevel + medal * 4))
+    if (earned >= gEarningsMedalLevel[medal])
         return 1;
     return -1;
 }
@@ -2181,7 +2181,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateBigChallengeMedal);
  */
 extern "C" int cBERewardInterface_calculateBigChallengeMedal(cBERewardInterface* self, int idx, int numCompleted)
 {
-    int* row = gBigChallengesMedalLevel + idx * 4;
+    int* row = gBigChallengesMedalLevel[idx];
     for (int i = 0; i < 4; i++) {
         if (numCompleted >= row[i]) return i;
     }
@@ -2202,7 +2202,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateEarningMedal);
  */
 extern "C" int cBERewardInterface_calculateEarningMedal(cBERewardInterface* self, int idx, unsigned int totalCash)
 {
-    return (totalCash < (unsigned int)gEarningsMedalLevel[idx]) ? -1 : 1;
+    return (totalCash < gEarningsMedalLevel[idx]) ? -1 : 1;
 }
 #endif
 
@@ -2226,7 +2226,7 @@ extern "C" void* cBERewardInterface_calculateNextEarningsLevel(cBERewardInterfac
     for (int i = 0; i < 3; i++)
     {
         if (!cBERewardInterface_isBetterMedal(self, -1, cBERewardInterface_getEarningsMedal(self, iProfileIndex, iCharacterID, i)))
-            return gEarningsMedalLevel[i];
+            return (void*)gEarningsMedalLevel[i];
     }
     return 0;
 }

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "seg/newlib_stat.h"
 
 // PORT: PS2 kernel syscall stub: the syscall number goes in $3. Defined under a second C name with an
 // asm label because this file declares these symbols with their argument lists elsewhere.
@@ -456,9 +457,9 @@ INCLUDE_ASM("seg/seg_325220", _fstat);
  * @param statBuf   the stat buffer
  * @return 0
  */
-long _fstat(int fileDesc, char *statBuf) {
-    *(int *)(statBuf + 4) = 0x2000;
-    *(long *)(statBuf + 0x48) = 0;
+long _fstat(int fileDesc, struct stat *statBuf) {
+    statBuf->st_mode = 0x2000;
+    statBuf->st_blksize = 0;
     return 0;
 }
 #endif

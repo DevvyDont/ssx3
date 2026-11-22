@@ -197,4 +197,35 @@ CHECK_OFFSET(tVideoInfo, mStoreNum, 0xE);
 CHECK_OFFSET(tVideoInfo, _mPad, 0xF);
 CHECK_SIZE(tVideoInfo, 0x10);
 
+
+// ---- The trophy / medal / peak pass records behind mpTrophies / mpMedals / mpPeakPasses (types round 3) ----
+//
+// [O] On Tour's tTrophyInfo and tMedalInfo are {char* mNameStringID; char* mpTextureFileName; char* mpIconName;}
+// (0xC, with getName / getTextureFileName / getIconName) and tPeakPassInfo is {char* mNameStringID;
+// char* mpTextureFileName;} (0x8, getName / getTextureFileName; defined above); cBERewardInterface::getTrophy / getMedal /
+// getPeakPass return const tTrophyInfo* / tMedalInfo* / tPeakPassInfo*. [R] retail's cBERewardInterface_getTrophy /
+// getMedal / getPeakPass (be/beintreward) index the tables with a 0xC / 0xC / 0x8 stride.
+
+struct tTrophyInfo {
+    char* mNameStringID;            // 0x0 [O]
+    char* mpTextureFileName;        // 0x4 [O]
+    char* mpIconName;               // 0x8 [O]
+};
+
+CHECK_OFFSET(tTrophyInfo, mNameStringID, 0x0);
+CHECK_OFFSET(tTrophyInfo, mpTextureFileName, 0x4);
+CHECK_OFFSET(tTrophyInfo, mpIconName, 0x8);
+CHECK_SIZE(tTrophyInfo, 0xC);
+
+struct tMedalInfo {
+    char* mNameStringID;            // 0x0 [O]
+    char* mpTextureFileName;        // 0x4 [O]
+    char* mpIconName;               // 0x8 [O]
+};
+
+CHECK_OFFSET(tMedalInfo, mNameStringID, 0x0);
+CHECK_OFFSET(tMedalInfo, mpTextureFileName, 0x4);
+CHECK_OFFSET(tMedalInfo, mpIconName, 0x8);
+CHECK_SIZE(tMedalInfo, 0xC);
+
 #endif

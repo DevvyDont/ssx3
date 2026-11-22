@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "main/gameviewman.h"
 #include "sound/bankmanager.h"
 #include "sound/asyncsys.h"
 #include "sound/ssxaudio.h"
@@ -956,7 +957,7 @@ INCLUDE_ASM("sound/asyncsys", cAudioInterface_getNumGameView);
  */
 extern "C" void* cAudioInterface_getNumGameView()
 {
-    return *(void**)((char*)SSXApp->Game->ViewMan + 0x10);
+    return (void*)SSXApp->Game->ViewMan->m_uiNumView;
 }
 #endif
 
@@ -1077,8 +1078,8 @@ extern "C" void cBankInstance_Unload(cBankInstance* self);
 extern "C" void cBankInstance_SharedUnload(cBankInstance* self)
 {
     if (self->mpNext != 0) {
-        for (void* node = self->mpNext; node != ((void*)self); node = *(void**)((char*)node + 0x18)) {
-            cBankInstance_Unload((cBankInstance*)node);
+        for (cBankInstance* node = self->mpNext; node != self; node = node->mpNext) {
+            cBankInstance_Unload(node);
         }
     }
 }

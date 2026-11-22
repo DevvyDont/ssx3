@@ -1290,9 +1290,9 @@ extern "C" void iSignalSema(int);
  */
 extern "C" void func_0031ABD0(void)
 {
-    char* app = (char*)getTheExecutionMan();
-    if (*(volatile int*)(app + 0x4038) == 0) {
-        iSignalSema(*(int*)(app + 0x4034));
+    cPS2ExecutionMan* app = (cPS2ExecutionMan*)((char*)getTheExecutionMan());
+    if ((volatile int)app->mTimerHalted == 0) {
+        iSignalSema(app->mTimerSema);
     }
 }
 #endif

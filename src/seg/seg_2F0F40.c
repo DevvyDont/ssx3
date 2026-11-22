@@ -399,15 +399,15 @@ extern int func_003F5478(int);
  * @return the new state, or 0 when the allocation fails
  */
 int* func_003F0710(const char* product, const char* version) {
-    int* buddyApi = (int*)func_002591E8(1292);
+    BuddyApiRefT* buddyApi = (BuddyApiRefT*)func_002591E8(1292);
     if (buddyApi) {
         memset_a(buddyApi, 0, 1292);
-        cDirtysock_tag_TagFieldDupl((char*)buddyApi + 0x314, 0x40, product);
-        cDirtysock_tag_TagFieldDupl((char*)buddyApi + 0x354, 0x40, version);
-        buddyApi[1] = func_003F5478(0x8000);
-        buddyApi[5] = 100;
+        cDirtysock_tag_TagFieldDupl(buddyApi->mProduct, 0x40, product);
+        cDirtysock_tag_TagFieldDupl(buddyApi->mVersion, 0x40, version);
+        buddyApi->mpSession = (void*)func_003F5478(0x8000);
+        buddyApi->mRequestSeq = 100;
     }
-    return buddyApi;
+    return (int*)buddyApi;
 }
 #endif
 
@@ -1447,7 +1447,7 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F2220);
 #define MD5_H(x, y, z) ((x) ^ (y) ^ (z))
 #define MD5_I(x, y, z) ((y) ^ ((x) | ~(z)))
 #define MD5_STEP(f, a, b, c, d, x, s, ac)     { (a) += f((b), (c), (d)) + (x) + (unsigned int)(ac);       (a) = ((a) << (s)) | ((a) >> (32 - (s)));       (a) += (b); }
-struct Md5Ctx;
+struct Md5Ctx { unsigned int count; unsigned int state[4]; unsigned char buf[64]; };
 /**
  * Runs the MD5 compression function on the 64-byte block buffered in an MD5 context.
  *
@@ -1458,14 +1458,14 @@ struct Md5Ctx;
  * @param ctx  the MD5 context: byte count, four state words, 64-byte block
  */
 void func_003F2220(struct Md5Ctx* ctx) {
-    unsigned int* st = (unsigned int*)ctx;
+    struct Md5Ctx* st = ctx;
     unsigned int x[16];
     unsigned int a, b, c, d;
     unsigned char* srcByte;
     unsigned int* dstWord;
     dstWord = x + 16;
     a = 16;
-    srcByte = (unsigned char*)st + 0x54;
+    srcByte = st->buf + 64;
     do {
         dstWord--;
         b = *--srcByte;
@@ -1475,10 +1475,10 @@ void func_003F2220(struct Md5Ctx* ctx) {
         b = (b << 8) + *--srcByte;
         *dstWord = b;
     } while (a);
-    a = st[1];
-    b = st[2];
-    c = st[3];
-    d = st[4];
+    a = st->state[0];
+    b = st->state[1];
+    c = st->state[2];
+    d = st->state[3];
     MD5_STEP(MD5_F, a, b, c, d, x[0], 7, 0xD76AA478U);
     MD5_STEP(MD5_F, d, a, b, c, x[1], 12, 0xE8C7B756U);
     MD5_STEP(MD5_F, c, d, a, b, x[2], 17, 0x242070DBU);
@@ -1543,10 +1543,10 @@ void func_003F2220(struct Md5Ctx* ctx) {
     MD5_STEP(MD5_I, d, a, b, c, x[11], 10, 0xBD3AF235U);
     MD5_STEP(MD5_I, c, d, a, b, x[2], 15, 0x2AD7D2BBU);
     MD5_STEP(MD5_I, b, c, d, a, x[9], 21, 0xEB86D391U);
-    st[1] += a;
-    st[2] += b;
-    st[3] += c;
-    st[4] += d;
+    st->state[0] += a;
+    st->state[1] += b;
+    st->state[2] += c;
+    st->state[3] += d;
 }
 #endif
 
@@ -1572,11 +1572,11 @@ void func_003F30F0(unsigned int* md5Ctx) {
 INCLUDE_ASM("seg/seg_2F0F40", func_003F3128);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct Md5Ctx {
-    unsigned int count;
-    unsigned int state[4];
-    unsigned char buf[64];
-};
+
+
+
+
+
 extern void func_003F2220(struct Md5Ctx*);
 /**
  * Feeds bytes into an MD5 context.

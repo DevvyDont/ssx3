@@ -220,9 +220,9 @@ extern char cFogParticleMan_vtbl[];
  *
  * @return the object
  */
-extern "C" void *cFogParticleMan_cFogParticleMan(int *self) {
-    self[0] = 0;
-    *(char**)((char*)self + 4) = cFogParticleMan_vtbl;
+extern "C" void *cFogParticleMan_cFogParticleMan(cFogParticleMan* self) {
+    self->miNumSphere = 0;
+    self->mVtbl = (void**)cFogParticleMan_vtbl;
     return self;
 }
 #endif

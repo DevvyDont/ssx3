@@ -154,9 +154,9 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_configToRegister);
  * @param varIndex  the config index (On Tour config)
  * @return the register number
  */
-extern "C" void* cInputMapParser_configToRegister(cInputMapParser* self, void* varIndex)
+extern "C" int cInputMapParser_configToRegister(cInputMapParser* self, int varIndex)
 {
-    return (char*)varIndex + 0x40;
+    return varIndex + 0x40;
 }
 #endif
 
