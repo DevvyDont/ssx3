@@ -16,7 +16,7 @@
 //                                          play, 3 removePDATemplate + purge, 4 cGame_setState(0xE)); each case clears it
 //   0x004A2700 cOVStateManager_mMiscData   int [O]; [U] gotoNextOverlay switches on it after a results overlay
 //                                          (the results/pause menus store the chosen option)
-//   0x004A2704 D_004A2704                  [O] mShowPeakPassOverlay (bool, a word in retail); [U] gotoOverlay(2) clears it
+//   0x004A2704 cOVStateManager_mShowPeakPassOverlay                  [O] mShowPeakPassOverlay (bool, a word in retail); [U] gotoOverlay(2) clears it
 //                                          before testing cBESaveInterface_bDoReplay, as On Tour's gotoOverlay does
 //   0x004A2708 cOVStateManager_mIsPauseDialog                  [O] mIsPauseDialog (bool, a word); [U] the pause menu sets it to 1 before opening
 //                                          the quit dialog (overlay 23), gotoNextOverlay clears it before reopening it
@@ -25,7 +25,7 @@
 //                                          "PDATemplate" cUIState (vtable cPDATemplate_vtbl) and pushes it once;
 //                                          removePDATemplate unlinks and deletes it, then clears the pointer
 // Every unit declares these with the types used below (14x int mStatus, 8x int mMiscData, 3x void* mpPDATemplate,
-// int D_004A2704 / cOVStateManager_mIsPauseDialog), so the declarations here are compatible with all of them.
+// int cOVStateManager_mShowPeakPassOverlay / cOVStateManager_mIsPauseDialog), so the declarations here are compatible with all of them.
 
 // [O] On Tour enum tOVManagerStatus (values match retail cOVStateManager_update's cases).
 enum tOVManagerStatus {

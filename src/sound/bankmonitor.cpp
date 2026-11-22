@@ -3143,7 +3143,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002AFB38);
 #ifdef SKIP_ASM
 extern "C" void cStreamSys_STREAM_Destroy(void* self, int i);
 extern "C" void cSpeechBank__cSpeechBank(int* self, int flags);
-extern int D_004A37B8;
+extern int cSpeechInstance_mNumTotalBanks;
 
 struct sBmVoiceFB38 {
     void* handle;           // 0x0
@@ -3168,7 +3168,7 @@ struct sBankMonFB38 {
 /**
  * Destroys a cSpeechInstance: its speech banks, event files and header data, then closes its stream.
  *
- * Destroys each speech bank (cSpeechBank__cSpeechBank with 3) and subtracts their count (unk_0F0) from D_004A37B8; for each event
+ * Destroys each speech bank (cSpeechBank__cSpeechBank with 3) and subtracts their count (unk_0F0) from cSpeechInstance_mNumTotalBanks; for each event
  * file frees both header blocks (unk_8D4) and the separately loaded event data; closes the stream (cStreamSys_STREAM_Destroy on
  * cStreamSys). Deletes the object when bit 0 of flags is set. func_002B0DA0 calls it with 3.
  *
@@ -3184,7 +3184,7 @@ extern "C" void func_002AFB38(cSpeechInstance* selfp, int flags)
             cSpeechBank__cSpeechBank(self->streams[i], 3);
         }
     }
-    D_004A37B8 -= self->streamCount;
+    cSpeechInstance_mNumTotalBanks -= self->streamCount;
     for (i = 0; i < self->voiceCount; i++) {
         for (int j = 0; j < 2; j++) {
             if (self->pairs[i].p[j] != 0) {
@@ -3551,7 +3551,7 @@ extern "C" void func_002B0320(cSpeechInstance* speechInstance)
 INCLUDE_ASM("sound/bankmonitor", func_002B0348);
 #ifdef SKIP_ASM
 extern "C" int func_002AF960(int a, int b, int c);
-extern int D_004A37B8;
+extern int cSpeechInstance_mNumTotalBanks;
 
 struct sBankList_0348 {
     char pad[0xF0];
@@ -3562,7 +3562,7 @@ struct sBankList_0348 {
 /**
  * Creates a speech bank (func_002AF960) and appends it to the instance's bank list when it loaded.
  *
- * On success increments the bank count (unk_0F0) and the global bank count D_004A37B8. Called by func_002AFD40 and
+ * On success increments the bank count (unk_0F0) and the global bank count cSpeechInstance_mNumTotalBanks. Called by func_002AFD40 and
  * func_002B0088.
  *
  * @param bankPath  the bank path without extension
@@ -3574,7 +3574,7 @@ extern "C" void func_002B0348(sBankList_0348* self, int bankPath, int shortName,
     self->ids[self->count] = func_002AF960(bankPath, shortName, headerData);
     if (self->ids[self->count] != 0) {
         self->count++;
-        D_004A37B8++;
+        cSpeechInstance_mNumTotalBanks++;
     }
 }
 #endif

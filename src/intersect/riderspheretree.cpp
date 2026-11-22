@@ -2944,27 +2944,27 @@ extern "C" void SphereTree_checkTriCollision_v(void* selfp, sSphereVec4* point1,
 //100%
 INCLUDE_ASM("intersect/riderspheretree", BXSORT_shell);
 #ifdef SKIP_ASM
-extern int D_0044AF98[];
+extern int BXSORT_shell_inctable[];
 
 /**
  * Shell-sorts an array of keys into descending order, moving a parallel value array with them.
  *
- * Gaps come from the table D_0044AF98, starting with the largest gap below @p n.
+ * Gaps come from the table BXSORT_shell_inctable, starting with the largest gap below @p n.
  *
  * @param n     number of entries
  * @param keys  the sort keys (On Tour value)
  * @param vals  the values carried along (On Tour index)
  */
-// Shell sort of keys[] (descending) carrying vals[] along, gap table D_0044AF98.
+// Shell sort of keys[] (descending) carrying vals[] along, gap table BXSORT_shell_inctable.
 extern "C" void BXSORT_shell(int n, int* keys, int* vals)
 {
     int k = 1;
-    while (D_0044AF98[k] < n) {
+    while (BXSORT_shell_inctable[k] < n) {
         k++;
     }
     int gap;
     for (;;) {
-        gap = D_0044AF98[--k];
+        gap = BXSORT_shell_inctable[--k];
         for (int i = gap; i < n; i++) {
             int key = keys[i];
             int val = vals[i];

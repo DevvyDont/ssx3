@@ -115,7 +115,7 @@ extern "C" void cOVStateManager_triggerOverlay(int state);
 int cBERewardInterface_getTotalNumUserAwards(void* self);
 extern "C" void cReplay_startAutoReplay(void* p);
 extern int cOVStateManager_mStatus;
-extern int D_004A2704;
+extern int cOVStateManager_mShowPeakPassOverlay;
 extern int cOVStateManager_mMiscData;
 extern int cBESaveInterface_bDoReplay;
 
@@ -149,7 +149,7 @@ extern "C" void cOVStateManager_gotoOverlay(int mode)
     int kind = newRace[0x4A];
     switch (mode) {
     case 2:
-        D_004A2704 = 0;
+        cOVStateManager_mShowPeakPassOverlay = 0;
         if (cBESaveInterface_bDoReplay != 0) {
             state = 17;
         } else if (sub == 4) {

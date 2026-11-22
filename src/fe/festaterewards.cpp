@@ -1252,7 +1252,7 @@ int GetHashValue32(char* str);
 extern "C" void* cUITextureBank_getElementByHashname(void* self, int id);
 extern char str_dollar_sign[];
 extern char str_questmark[];
-extern char D_004C6818[];
+extern char gFadedColour[];
 
 struct sVEv_08A0 {
     short delta;
@@ -1336,7 +1336,7 @@ extern "C" void cFEStateRewardGalleryBase_updateRow(sGallery_08A0* self, int row
             }
             cUIIcon* cell = self->cells[row][col];
             sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)((void*)cell->mVtbl);
-            vt[11].fn(vthis(cell, vt[11]), D_004C6818);
+            vt[11].fn(vthis(cell, vt[11]), gFadedColour);
         } else {
             show_08A0(self->cells[row][col], 0);
             show_08A0(self->frames[row][col], 0);
@@ -1529,7 +1529,7 @@ extern "C" void cFEStateRewardGalleryBase_updateCounter(cFEStateRewardGalleryBas
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updateHighlither);
 #ifdef SKIP_ASM
-extern char D_004C6808[];
+extern char gSolidColour[];
 
 
 /**
@@ -1540,7 +1540,7 @@ extern char D_004C6808[];
  * current cell, for the reward at first visible row (+0x64) * columns (+0x5C) + the cell's mMiscData: when it is owned
  * (vtable slot 38), the cell's mTextureID becomes the icon id from slot 26 (the per-gallery icon lookup) with
  * mpTextureElem 0, or, when that id is negative, mTextureID -1 and mpTextureElem from slot 27 (the texture-element
- * lookup the cheat-character gallery fills in). Finally sets the cell's colour (setColour) to D_004C6808.
+ * lookup the cheat-character gallery fills in). Finally sets the cell's colour (setColour) to gSolidColour.
  */
 extern "C" void cFEStateRewardGalleryBase_updateHighlither(cFEStateRewardGalleryBase* self)
 {
@@ -1584,7 +1584,7 @@ extern "C" void cFEStateRewardGalleryBase_updateHighlither(cFEStateRewardGallery
     }
     cUIIcon* curCell = self->mpSelected;
     sVEntry<void(void*, void*)>* vt4 = (sVEntry<void(void*, void*)>*)curCell->mVtbl;
-    vt4[11].fn(vthis(curCell, vt4[11]), D_004C6808);
+    vt4[11].fn(vthis(curCell, vt4[11]), gSolidColour);
 }
 #endif
 

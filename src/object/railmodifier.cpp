@@ -3077,7 +3077,7 @@ struct sV4_FE10 {
     void* operator new(unsigned int, void* p) { return p; }
 };
 
-// D_004FFAC0: a Catmull-Rom basis matrix
+// CatmullRom: a Catmull-Rom basis matrix
 struct sMat_FE10 {
     float m[16];
     // arguments are the rows of the basis; stored transposed (column-major)
@@ -3156,12 +3156,12 @@ extern sV4_FE10 D_004FFA80_v __asm__("D_004FFA80");
 extern sV4_FE10 D_004FFA90_v __asm__("D_004FFA90");
 extern sV4_FE10 D_004FFAA0_v __asm__("D_004FFAA0");
 extern sV4_FE10 D_004FFAB0_v __asm__("D_004FFAB0");
-extern sMat_FE10 D_004FFAC0_m __asm__("D_004FFAC0");
+extern sMat_FE10 CatmullRom_m __asm__("CatmullRom");
 extern sV4_FE10 D_004FFB00_v __asm__("D_004FFB00");
 extern sV4_FE10 D_004FFB10_v __asm__("D_004FFB10");
 extern char gBucketMan;
 
-// Static initialisation of the unit's colour globals D_004FF740..D_004FFAB0, the spline basis D_004FFAC0,
+// Static initialisation of the unit's colour globals D_004FF740..D_004FFAB0, the spline basis CatmullRom,
 // D_004FFB00/D_004FFB10 and the list gBucketMan (g++ __static_initialization_and_destruction_0).
 // The unit declares func_0035FE10 returning void*; bind this definition by asm label.
 extern "C" void func_0035FE10_init(int initialize, int priority) __asm__("func_0035FE10");
@@ -3169,7 +3169,7 @@ extern "C" void func_0035FE10_init(int initialize, int priority) __asm__("func_0
  * Runs the railmodifier unit's static initialisation: builds its global vectors and matrices and the bucket manager.
  *
  * Only for priority 0xFFFF with initialize set. Constructs the colour/parameter vectors D_004FF740..D_004FFAB0, the
- * Catmull-Rom basis D_004FFAC0 used for rail segment matrices, D_004FFB00/D_004FFB10, and gBucketMan (cBucketMan_cBucketMan).
+ * Catmull-Rom basis CatmullRom used for rail segment matrices, D_004FFB00/D_004FFB10, and gBucketMan (cBucketMan_cBucketMan).
  *
  * @param initialize  nonzero for construction
  * @param priority  init priority; only 0xFFFF does anything
@@ -3233,7 +3233,7 @@ extern "C" void func_0035FE10_init(int initialize, int priority)
         new (&D_004FFA90_v) sV4_FE10(1.0f, 0.7843739986419678f, 0.06132800132036209f, 0.03945299983024597f);
         new (&D_004FFAA0_v) sV4_FE10(1.0f, 0.0f, 1.0f, 0.0f);
         new (&D_004FFAB0_v) sV4_FE10(1.0f, 1.0f, 0.0f, 0.0f);
-        new (&D_004FFAC0_m) sMat_FE10(-0.5f, 1.5f, -1.5f, 0.5f,
+        new (&CatmullRom_m) sMat_FE10(-0.5f, 1.5f, -1.5f, 0.5f,
                                       1.0f, -2.5f, 2.0f, -0.5f,
                                       -0.5f, 0.0f, 0.5f, 0.0f,
                                       0.0f, 1.0f, 0.0f, 0.0f);
@@ -6241,7 +6241,7 @@ extern "C" int cSpringRailNode_getMesh(cSpringRailNode* self, int segIndex)
 INCLUDE_ASM("object/railmodifier", cFlexRailNode_updateMat);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern float D_004FFAC0[16];
+extern float CatmullRom[16];
 
 
 
@@ -6296,7 +6296,7 @@ typedef int tMmiQuad __attribute__((mode(TI)));
 /**
  * Builds a rail segment's cubic coefficient matrix from four control points.
  *
- * For each axis (x, y, z) multiplies the four control points' components by the Catmull-Rom basis D_004FFAC0, giving
+ * For each axis (x, y, z) multiplies the four control points' components by the Catmull-Rom basis CatmullRom, giving
  * the x, y and z coefficient rows 0-2 with (0, 0, 0, 1) as row 3, then transposes out in place. Nothing in retail calls
  * it.
  *
@@ -6314,13 +6314,13 @@ extern "C" void cFlexRailNode_updateMat(cFlexRailNode* self, t4Matrix* out, cons
     t4Matrix coeffMat;
     t4Vector zCoeffs;
     coeffMat.row[1].x = ctrlPoint0[0]; coeffMat.row[1].y = ctrlPoint1[0]; coeffMat.row[1].z = ctrlPoint2[0]; coeffMat.row[1].w = ctrlPoint3[0];
-    vu0BasisMul_15D8(coeffMat.row[2], coeffMat.row[1], D_004FFAC0);
+    vu0BasisMul_15D8(coeffMat.row[2], coeffMat.row[1], CatmullRom);
     coeffMat.row[0] = coeffMat.row[2];
     coeffMat.row[2].x = ctrlPoint0[1]; coeffMat.row[2].y = ctrlPoint1[1]; coeffMat.row[2].z = ctrlPoint2[1]; coeffMat.row[2].w = ctrlPoint3[1];
-    vu0BasisMul_15D8(coeffMat.row[3], coeffMat.row[2], D_004FFAC0);
+    vu0BasisMul_15D8(coeffMat.row[3], coeffMat.row[2], CatmullRom);
     coeffMat.row[1] = coeffMat.row[3];
     coeffMat.row[3].x = ctrlPoint0[2]; coeffMat.row[3].y = ctrlPoint1[2]; coeffMat.row[3].z = ctrlPoint2[2]; coeffMat.row[3].w = ctrlPoint3[2];
-    vu0BasisMul_15D8(zCoeffs, coeffMat.row[3], D_004FFAC0);
+    vu0BasisMul_15D8(zCoeffs, coeffMat.row[3], CatmullRom);
     coeffMat.row[2] = zCoeffs;
     coeffMat.row[3].x = 0.0f; coeffMat.row[3].y = 0.0f; coeffMat.row[3].z = 0.0f; coeffMat.row[3].w = 1.0f;
     *out = coeffMat;

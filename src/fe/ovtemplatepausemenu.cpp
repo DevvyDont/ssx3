@@ -652,13 +652,13 @@ extern "C" void cOVTemplate_PauseMenu_setPDAIconColor(cOVTemplate_PauseMenu* sel
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVState_PAUSE_COMPETE_onCreateScreen);
 #ifdef SKIP_ASM
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(cOVTemplate_PauseMenu* self);
-extern int D_00478160[];
+extern int gPauseCompeteMenu[];
 
 /**
- * Builds pause overlay 1's screen: sets its 6 menu options from D_00478160, then runs the shared pause-menu screen
+ * Builds pause overlay 1's screen: sets its 6 menu options from gPauseCompeteMenu, then runs the shared pause-menu screen
  * setup.
  *
- * Sets +0xBC (On Tour mPauseMenuNumOptions) to 6, copies that many option ids from D_00478160 into the array at +0x9C
+ * Sets +0xBC (On Tour mPauseMenuNumOptions) to 6, copies that many option ids from gPauseCompeteMenu into the array at +0x9C
  * (On Tour mPauseMenuOptions), sets the menu type +0x110 (On Tour mPauseMenuType) to 1 and calls
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of cOVState_PAUSE_COMPETE_vtbl, the vtable
  * cOVStateManager_triggerOverlay gives overlay 1 (the career (game path 0) event pause that cOVStateManager_triggerPauseMenu opens).
@@ -668,7 +668,7 @@ extern "C" void cOVState_PAUSE_COMPETE_onCreateScreen(cOVTemplate_PauseMenu* sel
     int i;
     self->mPauseMenuNumOptions = 6;
     for (i = 0; i < self->mPauseMenuNumOptions; i++) {
-        ((int*)&self->mPauseMenuOptions)[i] = D_00478160[i];
+        ((int*)&self->mPauseMenuOptions)[i] = gPauseCompeteMenu[i];
     }
     self->mPauseMenuType = 1;
     cOVTemplate_PauseMenu_onCreateScreen(self);
@@ -679,13 +679,13 @@ extern "C" void cOVState_PAUSE_COMPETE_onCreateScreen(cOVTemplate_PauseMenu* sel
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVState_PAUSE_BIGCHAL_onCreateScreen);
 #ifdef SKIP_ASM
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(cOVTemplate_PauseMenu* self);
-extern int D_00478178[];
+extern int gPauseBigChallengeMenu[];
 
 /**
- * Builds pause overlay 2's screen: sets its 6 menu options from D_00478178, then runs the shared pause-menu screen
+ * Builds pause overlay 2's screen: sets its 6 menu options from gPauseBigChallengeMenu, then runs the shared pause-menu screen
  * setup.
  *
- * Sets +0xBC (On Tour mPauseMenuNumOptions) to 6, copies that many option ids from D_00478178 into the array at +0x9C
+ * Sets +0xBC (On Tour mPauseMenuNumOptions) to 6, copies that many option ids from gPauseBigChallengeMenu into the array at +0x9C
  * (On Tour mPauseMenuOptions), sets the menu type +0x110 (On Tour mPauseMenuType) to 2 and calls
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of cOVState_PAUSE_BIGCHAL_vtbl, the vtable
  * cOVStateManager_triggerOverlay gives overlay 2 (the local-mission pause that cOVStateManager_triggerPauseMenu opens).
@@ -695,7 +695,7 @@ extern "C" void cOVState_PAUSE_BIGCHAL_onCreateScreen(cOVTemplate_PauseMenu* sel
     int i;
     self->mPauseMenuNumOptions = 6;
     for (i = 0; i < self->mPauseMenuNumOptions; i++) {
-        ((int*)&self->mPauseMenuOptions)[i] = D_00478178[i];
+        ((int*)&self->mPauseMenuOptions)[i] = gPauseBigChallengeMenu[i];
     }
     self->mPauseMenuType = 2;
     cOVTemplate_PauseMenu_onCreateScreen(self);
@@ -706,13 +706,13 @@ extern "C" void cOVState_PAUSE_BIGCHAL_onCreateScreen(cOVTemplate_PauseMenu* sel
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVState_PAUSE_FREERIDE_onCreateScreen);
 #ifdef SKIP_ASM
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(cOVTemplate_PauseMenu* self);
-extern int D_00478140[];
+extern int gPauseFreerideMenu[];
 
 /**
- * Builds pause overlay 3's screen: sets its 7 menu options from D_00478140, then runs the shared pause-menu screen
+ * Builds pause overlay 3's screen: sets its 7 menu options from gPauseFreerideMenu, then runs the shared pause-menu screen
  * setup.
  *
- * Sets +0xBC (On Tour mPauseMenuNumOptions) to 7, copies that many option ids from D_00478140 into the array at +0x9C
+ * Sets +0xBC (On Tour mPauseMenuNumOptions) to 7, copies that many option ids from gPauseFreerideMenu into the array at +0x9C
  * (On Tour mPauseMenuOptions), sets the menu type +0x110 (On Tour mPauseMenuType) to 3 and calls
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of cOVState_PAUSE_FREERIDE_vtbl, the vtable
  * cOVStateManager_triggerOverlay gives overlay 3 (the freeride (cGameMode 4) pause that cOVStateManager_triggerPauseMenu opens).
@@ -722,7 +722,7 @@ extern "C" void cOVState_PAUSE_FREERIDE_onCreateScreen(cOVTemplate_PauseMenu* se
     int i;
     self->mPauseMenuNumOptions = 7;
     for (i = 0; i < self->mPauseMenuNumOptions; i++) {
-        ((int*)&self->mPauseMenuOptions)[i] = D_00478140[i];
+        ((int*)&self->mPauseMenuOptions)[i] = gPauseFreerideMenu[i];
     }
     self->mPauseMenuType = 3;
     cOVTemplate_PauseMenu_onCreateScreen(self);
@@ -733,13 +733,13 @@ extern "C" void cOVState_PAUSE_FREERIDE_onCreateScreen(cOVTemplate_PauseMenu* se
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVState_PAUSE_SPOKE_onCreateScreen);
 #ifdef SKIP_ASM
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(cOVTemplate_PauseMenu* self);
-extern int D_00478190[];
+extern int gPauseSpokeMenu[];
 
 /**
- * Builds pause overlay 4's screen: sets its 5 menu options from D_00478190, then runs the shared pause-menu screen
+ * Builds pause overlay 4's screen: sets its 5 menu options from gPauseSpokeMenu, then runs the shared pause-menu screen
  * setup.
  *
- * Sets +0xBC (On Tour mPauseMenuNumOptions) to 5, copies that many option ids from D_00478190 into the array at +0x9C
+ * Sets +0xBC (On Tour mPauseMenuNumOptions) to 5, copies that many option ids from gPauseSpokeMenu into the array at +0x9C
  * (On Tour mPauseMenuOptions), sets the menu type +0x110 (On Tour mPauseMenuType) to 4 and calls
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of cOVState_PAUSE_SPOKE_vtbl, the vtable
  * cOVStateManager_triggerOverlay gives overlay 4 (the game-state-11 pause that cOVStateManager_triggerPauseMenu opens).
@@ -749,7 +749,7 @@ extern "C" void cOVState_PAUSE_SPOKE_onCreateScreen(cOVTemplate_PauseMenu* self)
     int i;
     self->mPauseMenuNumOptions = 5;
     for (i = 0; i < self->mPauseMenuNumOptions; i++) {
-        ((int*)&self->mPauseMenuOptions)[i] = D_00478190[i];
+        ((int*)&self->mPauseMenuOptions)[i] = gPauseSpokeMenu[i];
     }
     self->mPauseMenuType = 4;
     cOVTemplate_PauseMenu_onCreateScreen(self);
@@ -760,13 +760,13 @@ extern "C" void cOVState_PAUSE_SPOKE_onCreateScreen(cOVTemplate_PauseMenu* self)
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVState_PAUSE_QUICKPLAY_onCreateScreen);
 #ifdef SKIP_ASM
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(cOVTemplate_PauseMenu* self);
-extern int D_004781A8[];
+extern int gQuickPlayMenu[];
 
 /**
- * Builds pause overlay 5's screen: sets its 5 menu options from D_004781A8, then runs the shared pause-menu screen
+ * Builds pause overlay 5's screen: sets its 5 menu options from gQuickPlayMenu, then runs the shared pause-menu screen
  * setup.
  *
- * Sets +0xBC (On Tour mPauseMenuNumOptions) to 5, copies that many option ids from D_004781A8 into the array at +0x9C
+ * Sets +0xBC (On Tour mPauseMenuNumOptions) to 5, copies that many option ids from gQuickPlayMenu into the array at +0x9C
  * (On Tour mPauseMenuOptions), sets the menu type +0x110 (On Tour mPauseMenuType) to 5 and calls
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of cOVState_PAUSE_QUICKPLAY_vtbl, the vtable
  * cOVStateManager_triggerOverlay gives overlay 5 (the fallback pause that cOVStateManager_triggerPauseMenu opens).
@@ -776,7 +776,7 @@ extern "C" void cOVState_PAUSE_QUICKPLAY_onCreateScreen(cOVTemplate_PauseMenu* s
     int i;
     self->mPauseMenuNumOptions = 5;
     for (i = 0; i < self->mPauseMenuNumOptions; i++) {
-        ((int*)&self->mPauseMenuOptions)[i] = D_004781A8[i];
+        ((int*)&self->mPauseMenuOptions)[i] = gQuickPlayMenu[i];
     }
     self->mPauseMenuType = 5;
     cOVTemplate_PauseMenu_onCreateScreen(self);
@@ -788,22 +788,22 @@ INCLUDE_ASM("fe/ovtemplatepausemenu", cOVState_PAUSE_ONLINE_onCreateScreen);
 #ifdef SKIP_ASM
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(cOVTemplate_PauseMenu* self);
 extern "C" int cGame_canUserActivatePauseMenu(void* game);
-extern int D_004781C0[];
-extern int D_004A2868[2];
+extern int gOnlinePauseMenu[];
+extern int gSystemInitiatedPauseMenu[2];
 
 /**
  * Online pause overlay: fills in its menu items before the pause menu screen is built.
  *
- * Uses the three items of D_004781C0 (On Tour gOnlinePauseMenu), or the two of D_004A2868 (gSystemInitiatedPauseMenu)
+ * Uses the three items of gOnlinePauseMenu (On Tour gOnlinePauseMenu), or the two of gSystemInitiatedPauseMenu (gSystemInitiatedPauseMenu)
  * when cGame_canUserActivatePauseMenu (On Tour cGame::canUserActivatePauseMenu) returns 0; copies them to +0x9C with the count at
  * +0xBC, sets +0x110 to 6 and runs cOVTemplate_PauseMenu_onCreateScreen.
  */
 extern "C" void cOVState_PAUSE_ONLINE_onCreateScreen(cOVTemplate_PauseMenu* self)
 {
-    int* items = D_004781C0;
+    int* items = gOnlinePauseMenu;
     self->mPauseMenuNumOptions = 3;
     if (cGame_canUserActivatePauseMenu(SSXApp->Game) == 0) {
-        items = D_004A2868;
+        items = gSystemInitiatedPauseMenu;
         self->mPauseMenuNumOptions = 2;
     }
     int i;

@@ -238,12 +238,12 @@ struct md5_state_K4 {
 };
 
 extern "C" void md5_append(md5_ctx* ctx, const unsigned char* data, int nbytes);
-extern unsigned char D_0048DAF8[];
+extern unsigned char md5_finish_pad[];
 
 /**
  * Finishes an MD5 computation and writes the 16-byte digest.
  *
- * Appends the 0x80 padding (D_0048DAF8) up to 56 bytes mod 64, then the 64-bit bit count in little-endian
+ * Appends the 0x80 padding (md5_finish_pad) up to 56 bytes mod 64, then the 64-bit bit count in little-endian
  * order, and stores a, b, c and d little-endian. The structure matches L. Peter Deutsch's md5.c.
  *
  * @param ctx     the MD5 state
@@ -258,7 +258,7 @@ extern "C" void md5_finish(md5_ctx* ctx, unsigned char* digest)
     for (i = 0; i < 8; ++i) {
         data[i] = (unsigned char)(pms->count[i >> 2] >> ((i & 3) << 3));
     }
-    md5_append(ctx, D_0048DAF8, ((55 - (pms->count[0] >> 3)) & 63) + 1);
+    md5_append(ctx, md5_finish_pad, ((55 - (pms->count[0] >> 3)) & 63) + 1);
     md5_append(ctx, data, 8);
     for (i = 0; i < 16; ++i) {
         digest[i] = (unsigned char)(pms->abcd[i >> 2] >> ((i & 3) << 3));

@@ -363,7 +363,7 @@ extern "C" void func_00156810(cBEProfileLib* self)
 INCLUDE_ASM("be/beprepoststate", cBEProfileLib_copy);
 #ifdef SKIP_ASM
 extern "C" void MEM_copy(void* dst, void* src, int n);
-extern int D_004A11E8;
+extern int kBolt_Num;
 
 struct sEnt_156858
 {
@@ -381,7 +381,7 @@ struct sProfile_156858
  * Copies a profile's ten character records over another profile's, keeping the destination's bolt lookup tables.
  *
  * For each character, copies the 0xF88-byte record but puts back the destination's lookup pointer (+0x288), then
- * rebuilds that lookup: all D_004A11E8 ids are set to -1, and each of the 525 bolt entries (+0x290) with an id of 0 or
+ * rebuilds that lookup: all kBolt_Num ids are set to -1, and each of the 525 bolt entries (+0x290) with an id of 0 or
  * more maps its id to its index.
  *
  * @param dst  the destination profile (10 character records)
@@ -396,7 +396,7 @@ extern "C" void cBEProfileLib_copy(char* dst, char* src)
         MEM_copy(charRecord, src + i * 3976, 3976);
         ((sProfile_156858*)charRecord)->index = index;
         int j;
-        for (j = 0; j < D_004A11E8; j++)
+        for (j = 0; j < kBolt_Num; j++)
             index[j] = -1;
         sEnt_156858* boltEntry = (sEnt_156858*)(dst + i * 0xF88 + 0x290);
         int n;

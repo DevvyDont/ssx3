@@ -425,7 +425,7 @@ struct sFrV4_92A8 {
 
 
 
-extern float D_004FFAC0[16];
+extern float CatmullRom[16];
 
 // PORT: PS2-only VU0 inline asm (vector * 4x4 basis matrix, row-vector convention).
 static inline void vu0BasisMul_92A8(sFrV4_92A8& dst, const sFrV4_92A8& g, const float* b)
@@ -486,13 +486,13 @@ static inline void updateMat_92A8(t4Matrix& out, const sFrV4_92A8& a, const sFrV
     t4Matrix L;
     sFrV4_92A8 v;
     set4_92A8(((sFrV4_92A8*)&L.row[0])[1], a[0], b[0], c[0], d[0]);
-    vu0BasisMul_92A8(((sFrV4_92A8*)&L.row[0])[2], ((sFrV4_92A8*)&L.row[0])[1], D_004FFAC0);
+    vu0BasisMul_92A8(((sFrV4_92A8*)&L.row[0])[2], ((sFrV4_92A8*)&L.row[0])[1], CatmullRom);
     ((sFrV4_92A8*)&L.row[0])[0] = ((sFrV4_92A8*)&L.row[0])[2];
     set4_92A8(((sFrV4_92A8*)&L.row[0])[2], a[1], b[1], c[1], d[1]);
-    vu0BasisMul_92A8(((sFrV4_92A8*)&L.row[0])[3], ((sFrV4_92A8*)&L.row[0])[2], D_004FFAC0);
+    vu0BasisMul_92A8(((sFrV4_92A8*)&L.row[0])[3], ((sFrV4_92A8*)&L.row[0])[2], CatmullRom);
     ((sFrV4_92A8*)&L.row[0])[1] = ((sFrV4_92A8*)&L.row[0])[3];
     set4_92A8(((sFrV4_92A8*)&L.row[0])[3], a[2], b[2], c[2], d[2]);
-    vu0BasisMul_92A8(v, ((sFrV4_92A8*)&L.row[0])[3], D_004FFAC0);
+    vu0BasisMul_92A8(v, ((sFrV4_92A8*)&L.row[0])[3], CatmullRom);
     ((sFrV4_92A8*)&L.row[0])[2] = v;
     ((sFrV4_92A8*)&out.row[0])[0] = ((sFrV4_92A8*)&L.row[0])[0]; ((sFrV4_92A8*)&out.row[0])[1] = ((sFrV4_92A8*)&L.row[0])[1]; ((sFrV4_92A8*)&out.row[0])[2] = ((sFrV4_92A8*)&L.row[0])[2];
     ((sFrV4_92A8*)&L.row[0])[3].x = 0.0f; ((sFrV4_92A8*)&L.row[0])[3].y = 0.0f; ((sFrV4_92A8*)&L.row[0])[3].z = 0.0f; ((sFrV4_92A8*)&L.row[0])[3].w = 1.0f;
@@ -504,7 +504,7 @@ static inline void updateMat_92A8(t4Matrix& out, const sFrV4_92A8& a, const sFrV
  * Rebuilds a float rail's segment matrices from its node positions.
  *
  * Each segment matrix (+0x50) is the cubic for that segment built from the four surrounding node positions with the
- * basis D_004FFAC0; the first and last segments repeat the end node as the missing control point.
+ * basis CatmullRom; the first and last segments repeat the end node as the missing control point.
  *
  * @param selfv  the float rail
  */
@@ -1018,7 +1018,7 @@ struct sFrNode_A0B0 {
     sFrElem_A0B0* elems;    // 0x70
 };
 
-extern float D_004FFAC0[16];
+extern float CatmullRom[16];
 
 // PORT: PS2-only VU0 inline asm (vector * 4x4 basis matrix, row-vector convention).
 static inline void vu0BasisMul_A0B0(sFrV4_A0B0& dst, const sFrV4_A0B0& g, const float* b)
@@ -1079,13 +1079,13 @@ static inline void updateMatSeg_A0B0(sFrM4_A0B0& out, const sFrV4_A0B0& a, const
     sFrM4_A0B0 L;
     sFrV4_A0B0 v;
     set4_A0B0(L.r[1], a.x, e[0].pos.x, e[1].pos.x, e[2].pos.x);
-    vu0BasisMul_A0B0(L.r[2], L.r[1], D_004FFAC0);
+    vu0BasisMul_A0B0(L.r[2], L.r[1], CatmullRom);
     L.r[0] = L.r[2];
     set4_A0B0(L.r[2], a.y, e[0].pos.y, e[1].pos.y, e[2].pos.y);
-    vu0BasisMul_A0B0(L.r[3], L.r[2], D_004FFAC0);
+    vu0BasisMul_A0B0(L.r[3], L.r[2], CatmullRom);
     L.r[1] = L.r[3];
     set4_A0B0(L.r[3], a.z, e[0].pos.z, e[1].pos.z, e[2].pos.z);
-    vu0BasisMul_A0B0(v, L.r[3], D_004FFAC0);
+    vu0BasisMul_A0B0(v, L.r[3], CatmullRom);
     L.r[2] = v;
     out.r[0] = L.r[0]; out.r[1] = L.r[1]; out.r[2] = L.r[2];
     L.r[3].x = 0.0f; L.r[3].y = 0.0f; L.r[3].z = 0.0f; L.r[3].w = 1.0f;
@@ -1099,13 +1099,13 @@ static inline void updateMatEnd_A0B0(sFrM4_A0B0& out, const sFrV4_A0B0& a, const
     sFrM4_A0B0 L;
     sFrV4_A0B0 v;
     set4_A0B0(L.r[1], a.x, e[0].pos.x, e[1].pos.x, e[1].pos.x);
-    vu0BasisMul_A0B0(L.r[2], L.r[1], D_004FFAC0);
+    vu0BasisMul_A0B0(L.r[2], L.r[1], CatmullRom);
     L.r[0] = L.r[2];
     set4_A0B0(L.r[2], a.y, e[0].pos.y, e[1].pos.y, e[1].pos.y);
-    vu0BasisMul_A0B0(L.r[3], L.r[2], D_004FFAC0);
+    vu0BasisMul_A0B0(L.r[3], L.r[2], CatmullRom);
     L.r[1] = L.r[3];
     set4_A0B0(L.r[3], a.z, e[0].pos.z, e[1].pos.z, e[1].pos.z);
-    vu0BasisMul_A0B0(v, L.r[3], D_004FFAC0);
+    vu0BasisMul_A0B0(v, L.r[3], CatmullRom);
     L.r[2] = v;
     out.r[0] = L.r[0]; out.r[1] = L.r[1]; out.r[2] = L.r[2];
     L.r[3].x = 0.0f; L.r[3].y = 0.0f; L.r[3].z = 0.0f; L.r[3].w = 1.0f;
@@ -1116,7 +1116,7 @@ static inline void updateMatEnd_A0B0(sFrM4_A0B0& out, const sFrV4_A0B0& a, const
 /**
  * Rebuilds a spring rail's segment matrices from its node positions.
  *
- * Same scheme as cFloatRailNode_updateMats: each segment cubic comes from the surrounding four P values with basis D_004FFAC0,
+ * Same scheme as cFloatRailNode_updateMats: each segment cubic comes from the surrounding four P values with basis CatmullRom,
  * repeating the end node for the first and last segments.
  *
  * @param selfv  the spring rail

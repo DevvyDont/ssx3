@@ -109,7 +109,7 @@ extern int cRenderToggles_m_DebugInfo;
 extern int cRenderToggles_m_DebugNISMemInfo;
 extern int cRenderToggles_m_DebugGameModeInfo;
 extern int cRenderToggles_m_ProfileIndividualFX;
-extern int D_004A4578;
+extern int cRenderToggles_m_ShowSurfaceTypes;
 
 /**
  * Builds the "Render Toggles Menu" debug menu: a title, a spacer and 47 int and float items bound to render
@@ -170,7 +170,7 @@ extern "C" void* cRenderTogglesMenu_cRenderTogglesMenu(cRenderTogglesMenu* self)
     cIntMenuItem_cIntMenuItem(&self->DebugNISMemInfoItem, 43, &cRenderToggles_m_DebugNISMemInfo, 0, 1, str_Enable_NIS_Mem_Usage_Info);
     cIntMenuItem_cIntMenuItem(&self->DebugGameModeInfoItem, 44, &cRenderToggles_m_DebugGameModeInfo, 0, 1, str_Enable_Gameflow_Info);
     cIntMenuItem_cIntMenuItem(&self->ProfileIndividualFXItem, 45, &cRenderToggles_m_ProfileIndividualFX, 0, 1, str_Profile_Individual_Effects);
-    cIntMenuItem_cIntMenuItem(&self->ShowSurfaceTypesItem, 46, &D_004A4578, 0, 1, str_Show_Surface_Types);
+    cIntMenuItem_cIntMenuItem(&self->ShowSurfaceTypesItem, 46, &cRenderToggles_m_ShowSurfaceTypes, 0, 1, str_Show_Surface_Types);
     cMenu_addItem(self, &self->TitleItem, -1);
     cMenu_addItem(self, &self->SpaceItem, -1);
     cMenu_addItem(self, &self->AIUpdatesPerRenderItem, -1);
@@ -4037,7 +4037,7 @@ extern "C" void* cSubMenuItem_cSubMenuItem(void* self, void* a1, void* a2);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
 extern void* cAIVisualEffectsMainMenu_vtbl[];
 extern char str_AIVisual_Effects_Main_Menu[];
-extern char D_004D1C88[];
+extern char __AvalancheMenu[];
 extern char str_Avalanche_Effects[];
 
 /**
@@ -4051,7 +4051,7 @@ extern "C" void* cAIVisualEffectsMainMenu_cAIVisualEffectsMainMenu(cAIVisualEffe
     self->mVtbl = cAIVisualEffectsMainMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->TitleItem), str_AIVisual_Effects_Main_Menu);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->SpaceItem), (void*)40);
-    cSubMenuItem_cSubMenuItem(&self->AvalancheItem, D_004D1C88, str_Avalanche_Effects);
+    cSubMenuItem_cSubMenuItem(&self->AvalancheItem, __AvalancheMenu, str_Avalanche_Effects);
     cMenu_addItem(self, &self->AvalancheItem, -1);
     return ((void*)self);
 }
@@ -4183,7 +4183,7 @@ extern "C" void* cAvalancheMenu_cAvalancheMenu(cAvalancheMenu* self);
 extern "C" void cAvalancheMenu__cAvalancheMenu(cAvalancheMenu* self, int flags);
 
 extern char D_004D1908[], D_004D1918[], D_004D1928[], D_004D1938[], D_004D1948[], D_004D1958[], D_004D1968[], D_004D1978[], D_004D1988[], D_004D1998[], D_004D19A8[], D_004D19B8[], D_004D19C8[], D_004D19D8[], D_004D19E8[], D_004D19F8[], D_004D1A08[], D_004D1A18[], D_004D1A28[], D_004D1A38[], D_004D1A48[], D_004D1A58[], D_004D1A68[], D_004D1A78[], D_004D1A88[], D_004D1A98[], D_004D1AA8[], D_004D1AB8[], D_004D1AC8[], D_004D1AD8[], D_004D1AE8[], D_004D1AF8[], D_004D1B08[], D_004D1B18[], D_004D1B28[], D_004D1B38[], D_004D1B48[], D_004D1B58[], D_004D1B68[], D_004D1B78[], D_004D1B88[], D_004D1B98[], D_004D1BA8[], D_004D1BB8[], D_004D1BC8[], D_004D1BD8[], D_004D1BE8[], D_004D1BF8[], D_004D1C08[], D_004D1C18[], D_004D1C28[], D_004D1C38[], D_004D1C48[], D_004D1C58[], D_004D1C68[], D_004D1C78[];
-extern char D_004D1C88[];
+extern char __AvalancheMenu[];
 extern int D_004A5060;
 extern int D_004A5064;
 extern sSlot_0CB0 D_004A5068, D_004A5070, D_004A5078, D_004A5080, D_004A5088, D_004A5090, D_004A5098, D_004A50A0, D_004A50A8, D_004A50B0, D_004A50B8, D_004A50C0, D_004A50C8, D_004A50D0;
@@ -4197,7 +4197,7 @@ extern "C" void __sti__aivisualeffectsmenu_cpp_impl(int init, int prio) __asm__(
  * Acts only for the default priority. With @p init set it builds the same 56 four-float constants as
  * __sti__visualeffectsmenu_cpp (its own copies at D_004D1908..D_004D1C78), zeroes D_004A5060 and D_004A5064,
  * numbers the 14 key objects D_004A5068..D_004A50D0 from 0 to 13 and constructs the static "Avalanche Menu" at
- * D_004D1C88. With @p init clear it destroys that menu with flags 2 (no free).
+ * __AvalancheMenu. With @p init clear it destroys that menu with flags 2 (no free).
  *
  * @param init  nonzero to construct the static objects, 0 to destroy them
  * @param prio  initialisation priority; nothing happens unless it is 0xFFFF (the default)
@@ -4278,9 +4278,9 @@ extern "C" void __sti__aivisualeffectsmenu_cpp_impl(int init, int prio)
             new (&D_004A50C0) sSlot_0CB0(11);
             new (&D_004A50C8) sSlot_0CB0(12);
             new (&D_004A50D0) sSlot_0CB0(13);
-            cAvalancheMenu_cAvalancheMenu((cAvalancheMenu*)D_004D1C88);
+            cAvalancheMenu_cAvalancheMenu((cAvalancheMenu*)__AvalancheMenu);
         } else {
-            cAvalancheMenu__cAvalancheMenu((cAvalancheMenu*)D_004D1C88, 2);
+            cAvalancheMenu__cAvalancheMenu((cAvalancheMenu*)__AvalancheMenu, 2);
         }
     }
 }

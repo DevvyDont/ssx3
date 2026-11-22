@@ -49,7 +49,7 @@ int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_Menu0000[];
 extern char str_tReal[];
-extern int D_004A17C0;
+extern int gTitleScreenDelay;
 
 class cUIObj_1947F8 {
 public:
@@ -68,14 +68,14 @@ public:
 /**
  * Holds the title's first appearance for 300 calls, then focuses its menu and shows "tReal".
  *
- * The countdown D_004A17C0 is global and stays 0 afterwards, so later visits finish at once. "Menu0000" gets
+ * The countdown gTitleScreenDelay is global and stays 0 afterwards, so later visits finish at once. "Menu0000" gets
  * setFocus(1) (slot 7) and "tReal" (the Press START text) becomes visible.
  *
  * @return 1 when the transition is done, 0 while waiting
  */
 extern "C" int cFEStateTitle_onGainTransition(cFEStateTitle* self)
 {
-    if (D_004A17C0 == 0 || --D_004A17C0 == 0) {
+    if (gTitleScreenDelay == 0 || --gTitleScreenDelay == 0) {
         cUIObj_1947F8* uiObj = (cUIObj_1947F8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000));
         if (uiObj != 0) {
             uiObj->setFocus(1);

@@ -1025,7 +1025,7 @@ extern "C" void* func_0014D998(void* self, int i);
 extern "C" void func_001513B8(cBECharProfileDB* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern int D_004A11E8;
+extern int kBolt_Num;
 extern const char str_Profile_Bolts_Map[];
 extern char D_004A6750[];
 
@@ -1051,7 +1051,7 @@ struct sEconItems_151A88
  * Rebuilds a character profile's item list for character @p k from the item database and applies the starting
  * ownership.
  *
- * Sets the kind (+0xBC0) and count (+0x28C) from D_004A6750; allocates the id-to-slot lookup (+0x288, D_004A11E8
+ * Sets the kind (+0xBC0) and count (+0x28C) from D_004A6750; allocates the id-to-slot lookup (+0x288, kBolt_Num
  * shorts, "Profile_Bolts_Map") on first use and fills it with -1; gives each item a slot with flags 0 and clears the
  * rest of the 525 slots to id -1. Ends with func_001513B8.
  *
@@ -1065,9 +1065,9 @@ extern "C" void func_00151A88(cBECharProfileDB* self, int k)
     self->unk_BC0 = k;
     self->mNumBolts = n;
     if (self->mpBoltsMap == 0)
-        self->mpBoltsMap = (short*)operator_new_tag(D_004A11E8 * 2, str_Profile_Bolts_Map, 0, 0);
+        self->mpBoltsMap = (short*)operator_new_tag(kBolt_Num * 2, str_Profile_Bolts_Map, 0, 0);
     int i;
-    for (i = 0; i < D_004A11E8; i++)
+    for (i = 0; i < kBolt_Num; i++)
         self->mpBoltsMap[i] = -1;
     for (i = 0; i < n; i++, itemDef++)
     {

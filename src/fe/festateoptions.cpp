@@ -222,19 +222,19 @@ extern "C" void cFEStateOptions_onWidgetEvent(cFEStateOptions* self, cUIThing* w
 //100%
 INCLUDE_ASM("fe/festateoptions", cFEStateOptions_onInputBegin);
 #ifdef SKIP_ASM
-extern int D_004A3484;
+extern int gReplayPadNum;
 
 /**
  * Records which controller started input on the options menu.
  *
- * Stores the input's byte at +4 (probably the controller port) in D_004A3484.
+ * Stores the input's byte at +4 (probably the controller port) in gReplayPadNum.
  *
  * @param pInput  the UI input object
  * @return always 0
  */
 extern "C" int cFEStateOptions_onInputBegin(cFEStateOptions* self, cUIInput* pInput)
 {
-    D_004A3484 = pInput->mPadNum;
+    gReplayPadNum = pInput->mPadNum;
     return 0;
 }
 #endif

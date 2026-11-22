@@ -1323,7 +1323,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int strlen(const char* s);
-extern char D_004C6310[];
+extern char getDollarString_FinalString[];
 extern char str_pct_d_b[];
 
 struct sOptions_8AF0 {
@@ -1342,7 +1342,7 @@ struct cBEOptionInterface_8AF0 {
  * Formats a money amount with the currency sign and thousands separator chosen in the options.
  *
  * Money format 0 gives "$ 1,234", 2 gives "$ 1.234", and 1 and 3 give "1 234 $". Negative amounts get a '-'.
- * The text is built in the static buffer D_004C6310, which the next call overwrites.
+ * The text is built in the static buffer getDollarString_FinalString, which the next call overwrites.
  *
  * @param amount_  the amount, passed as void*
  * @return the formatted string
@@ -1371,12 +1371,12 @@ extern "C" const char* getDollarString(void* amount_)
     }
     n = 0;
     if (prefix) {
-        D_004C6310[0] = '$';
-        D_004C6310[1] = ' ';
+        getDollarString_FinalString[0] = '$';
+        getDollarString_FinalString[1] = ' ';
         n = 2;
     }
     if (amount < 0) {
-        D_004C6310[n++] = '-';
+        getDollarString_FinalString[n++] = '-';
         amount = -amount;
     }
     char valueStr[32];
@@ -1384,17 +1384,17 @@ extern "C" const char* getDollarString(void* amount_)
     char len = strlen(valueStr);
     char i;
     for (i = 0; i != len; i++) {
-        D_004C6310[n++] = valueStr[i];
+        getDollarString_FinalString[n++] = valueStr[i];
         char left = len - i - 1;
         if (left != 0 && left % 3 == 0)
-            D_004C6310[n++] = sep;
+            getDollarString_FinalString[n++] = sep;
     }
     if (!prefix) {
-        D_004C6310[n++] = ' ';
-        D_004C6310[n++] = '$';
+        getDollarString_FinalString[n++] = ' ';
+        getDollarString_FinalString[n++] = '$';
     }
-    D_004C6310[n] = 0;
-    return D_004C6310;
+    getDollarString_FinalString[n] = 0;
+    return getDollarString_FinalString;
 }
 #endif
 

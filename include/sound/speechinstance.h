@@ -42,7 +42,7 @@ struct cSpeechInstance {
     char mBasePath[0x60];              // 0x06C [R] speech.inf BASEPATH (func_002B0088 AssignString); [U] func_002AFD40 / func_002B0088 sprintf the .big / events / bank paths from it
     tSpeechEventFile mEventFile[4];    // 0x0CC [R] ctor zeroes 4; [U] func_002AFD40 fills [unk_0EC]; dtor frees
     int unk_0EC;                       // 0x0EC [R] ctor 0; [U] number of event files loaded (func_002B0088 ++ per speech.inf BASEPATH entry); dtor loop bound
-    int unk_0F0;                       // 0x0F0 [R] ctor 0; [U] number of speech banks in unk_0F4 (func_002B0348 ++, D_004A37B8 counts them all); dtor / func_002B04D8 loop bound
+    int unk_0F0;                       // 0x0F0 [R] ctor 0; [U] number of speech banks in unk_0F4 (func_002B0348 ++, cSpeechInstance_mNumTotalBanks counts them all); dtor / func_002B04D8 loop bound
     cSpeechBank* unk_0F4[500];         // 0x0F4 [U] func_002B0348 appends func_002AF960(...); func_002B04D8 searches by bank id; dtor destroys them (cSpeechBank__cSpeechBank)
     int unk_8C4;                       // 0x8C4 [R] ctor 0; [U] set by func_002B07E8 (cSpeechSys func_002B0FE8)
     int unk_8C8;                       // 0x8C8 [R] ctor 0; [U] set by func_002B07F0 (cSpeechSys func_002B1020); func_002B04D8 passes it to cSpeechSys's play slot

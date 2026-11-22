@@ -36,7 +36,7 @@ extern "C" char* func_0014B700(void* iface, int rider);
 extern "C" int cBENewPlayerInterface_getLastHub(void* iface, int a1);
 extern "C" void func_0019B180(void* self, int id);
 extern "C" int func_0019DA10(void* self, int bank, void* name, int a3, int a4, int a5);
-extern const int D_004A11D0_c __asm__("D_004A11D0");
+extern const int kBolt_None_c __asm__("kBolt_None");
 extern void* cFEStateCharEquip_vtbl[];
 extern char str_dollargreen[];
 extern char str_dollarred[];
@@ -187,7 +187,7 @@ extern "C" void* cFEStateCharEquip_cFEStateCharEquip(cFEStateCharEquip* mem, cUI
     self->fA70 = -1;
     self->fA74 = -1;
     self->fAE0 = 1;
-    MEM_fill(self->bufD0, D_004A11D0_c, 80);
+    MEM_fill(self->bufD0, kBolt_None_c, 80);
     self->f120 = 0;
     for (int i = 0; i < 6; i++) {
         self->a8C[i] = 0;
@@ -244,7 +244,7 @@ extern "C" void* cFEStateCharEquip_cFEStateCharEquip(cFEStateCharEquip* mem, cUI
     } else {
         self->fCC = -1;
     }
-    func_0019B180(self, D_004A11D0_c);
+    func_0019B180(self, kBolt_None_c);
     char* name = func_0014B700(shop, self->slot);
     self->fA64 = func_0019DA10(SSXApp->RealFE->mBoltFileManager, self->slot, name, 9, 1, 0);
     return self;
@@ -437,7 +437,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onWidgetCreate);
 
 int GetHashValue32(char* str);
 
-extern const int D_004A11D0_eate __asm__("D_004A11D0");
+extern const int kBolt_None_eate __asm__("kBolt_None");
 
 extern "C" void cFEStateCharEquip_updateHeading_eate(void* self, int id) __asm__("cFEStateCharEquip_updateHeading");
 
@@ -560,7 +560,7 @@ extern "C" void cFEStateCharEquip_onWidgetCreate(sCharEquip_FE* self, cUIThing* 
         }
     } else if (id == GetHashValue32(str_heading)) {
         self->mpHeading = ((void*)w);
-        cFEStateCharEquip_updateHeading_eate(self, D_004A11D0_eate);
+        cFEStateCharEquip_updateHeading_eate(self, kBolt_None_eate);
     } else if (id == GetHashValue32(str_MnuGroups)) {
         self->mpMenu = ((void*)w);
         cUIMenu_setScrollableMenu_FE(self->mpMenu, self->mNumItems);
@@ -1279,7 +1279,7 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void MEM_fill(void* dst, unsigned int value, int size);
 extern "C" void cFEStateCharEquip_updateHeading(cFEStateCharEquip* self, int id);
 extern "C" void func_0019B180(void* self, int id);
-extern int D_004A11D0;
+extern int kBolt_None;
 extern char str_kT_CMNBuyGear[];
 extern char str_kT_CMNEquipGear[];
 
@@ -1294,7 +1294,7 @@ static inline int isDetailK19A3D0(void* self)
  *
  * Flips +0xC8, sets the screen up for the new mode (cFEStateCharEquip_initInventoryPreview or cFEStateCharEquip_initStorePreview) and labels the button help (+0x50)
  * with the other mode (kT_CMNBuyGear in the inventory, kT_CMNEquipGear in the store). Then empties the category stack
- * (depth +0x120 = 0, the 80 bytes at +0xD0 filled with D_004A11D0), updates the heading and rebuilds and redraws the
+ * (depth +0x120 = 0, the 80 bytes at +0xD0 filled with kBolt_None), updates the heading and rebuilds and redraws the
  * list (func_0019B180, func_0019B618 with 1, 1).
  */
 extern "C" void cFEStateCharEquip_switchEquipMode(cFEStateCharEquip* self)
@@ -1313,9 +1313,9 @@ extern "C" void cFEStateCharEquip_switchEquipMode(cFEStateCharEquip* self)
         }
     }
     (self)->mCurrentStackPos = 0;
-    MEM_fill(&self->mCategoryStack[0], D_004A11D0, 80);
-    cFEStateCharEquip_updateHeading((cFEStateCharEquip*)self, D_004A11D0);
-    func_0019B180(self, D_004A11D0);
+    MEM_fill(&self->mCategoryStack[0], kBolt_None, 80);
+    cFEStateCharEquip_updateHeading((cFEStateCharEquip*)self, kBolt_None);
+    func_0019B180(self, kBolt_None);
     func_0019B618((cFEStateCharEquip*)self, 1, 1);
 }
 #endif
@@ -2223,7 +2223,7 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" int func_0019B518(cFEStateCharEquip* self);
 extern "C" int func_0019B598(cFEStateCharEquip* self);
 extern "C" void cUIMenu_setScrollableMenu(void* menu, int n);
-extern char D_004C6708[];
+extern char kColourEnabled[];
 extern char str_kT_FEEmpty[];
 
 static inline int isMode1_B618(void* self)
@@ -2236,7 +2236,7 @@ static inline int isMode1_B618(void* self)
  *
  * Hides the six name (+0x8C) and check (+0xA4) widgets, sets the menu's item count when @p reset is set (the count, or
  * 1 for an empty list) and draws the rows for the mode. With nothing drawn shows kT_FEEmpty in the first row (colour
- * D_004C6708) and resets the menu to one row. The visible row is clamped (0 when @p reset is set) and selected when @p
+ * kColourEnabled) and resets the menu to one row. The visible row is clamped (0 when @p reset is set) and selected when @p
  * select is set.
  *
  * @param reset   nonzero to reset the menu to the top of a new list
@@ -2266,7 +2266,7 @@ extern "C" void func_0019B618(cFEStateCharEquip* self, int reset, int select)
     int visibleRow;
     if (n == 0) {
         ((cUIObj_B618*)self->mpBoltNameWidgets[0])->setVisible(1);
-        ((cUIObj_B618*)self->mpBoltNameWidgets[0])->setColor(D_004C6708);
+        ((cUIObj_B618*)self->mpBoltNameWidgets[0])->setColor(kColourEnabled);
         cUIText_setUnicodeStringByID(self->mpBoltNameWidgets[0], GetHashValue32(str_kT_FEEmpty));
         (self->mpMenu)->mScrollItemNum = 1;
         (self->mpMenu)->mScrollItemOffset = 0;
@@ -2512,7 +2512,7 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
 // PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
 void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
 extern "C" int func_0014D448(void* self, int g, int key);
-extern int D_004A11D0;
+extern int kBolt_None;
 extern char str_kT_FECategories[];
 
 struct sBEEntry38K19BBE0 {
@@ -2537,7 +2537,7 @@ static inline sBEEntry38K19BBE0* findEntryK19BBE0(sBETableK19BBE0* t, int g, int
 /**
  * Shows the current category in the heading text: kT_FECategories at the root, else the category's name.
  *
- * For an @p id other than -1 (D_004A11D0), looks the category up for the character (0xBC) with
+ * For an @p id other than -1 (kBolt_None), looks the category up for the character (0xBC) with
  * func_0014D448() in the equip table from func_0014BDB8() and shows the string whose ID is the hash of its
  * name (+0x14); a missing entry is not checked. Nothing happens without a heading widget (0x58).
  *
@@ -2546,7 +2546,7 @@ static inline sBEEntry38K19BBE0* findEntryK19BBE0(sBETableK19BBE0* t, int g, int
 extern "C" void cFEStateCharEquip_updateHeading(cFEStateCharEquip* self, int id)
 {
     if (self->mpHeading != 0) {
-        if (id == D_004A11D0) {
+        if (id == kBolt_None) {
             cUIText_setUnicodeStringByID(self->mpHeading, GetHashValue32(str_kT_FECategories));
         } else {
             sBEEntry38K19BBE0* entry = findEntryK19BBE0((sBETableK19BBE0*)func_0014BDB8_noarg(), self->mCharID, id);
@@ -2592,8 +2592,8 @@ extern "C" void cFEStateCharEquip_updatePolyBar(cFEStateCharEquip* self)
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_updatePolyEquipPreviewBar);
 #ifdef SKIP_ASM
 extern int D_004A18D8;
-extern char D_004C66E8[];
-extern char D_004C66F8[];
+extern char kInvalidColour[];
+extern char kOriginalColour[];
 
 struct sVec3K19BD48 {
     float x, y, z;
@@ -2606,7 +2606,7 @@ struct sVec3K19BD48 {
  * Shows the equip points preview bar (+0x74) for the current points plus @p delta.
  *
  * Scales it (+0x50) to (1, -t, 1) with t = (points + delta - 1500) / (D_004A18D8 - 1500) clamped to 0-1, and colours it
- * (vtable entry 11) D_004C66E8 when the total would pass D_004A18D8, else D_004C66F8.
+ * (vtable entry 11) kInvalidColour when the total would pass D_004A18D8, else kOriginalColour.
  *
  * @param delta  the selected item's points
  */
@@ -2622,11 +2622,11 @@ extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(cFEStateCharEquip* s
     if (D_004A18D8 < self->mCurrentPolyCount + delta) {
         cUIThing* equipBar = self->mpPointsEquipBar;
         sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)equipBar->mVtbl;
-        vt[11].fn(vthis(equipBar, vt[11]), D_004C66E8);
+        vt[11].fn(vthis(equipBar, vt[11]), kInvalidColour);
     } else {
         cUIThing* equipBar = self->mpPointsEquipBar;
         sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)equipBar->mVtbl;
-        vt[11].fn(vthis(equipBar, vt[11]), D_004C66F8);
+        vt[11].fn(vthis(equipBar, vt[11]), kOriginalColour);
     }
     {
         cUIThing* equipBar = self->mpPointsEquipBar;

@@ -115,7 +115,7 @@ extern "C" void* cAIVisualEffectsMan_construct();
 extern "C" void* cVisualEffectsMan_construct();
 extern "C" void* cSSXStatsMan_construct();
 extern int cBESaveInterface_bDoReplay;
-extern int D_004A3484;
+extern int gReplayPadNum;
 extern void* cGameState_mpGame;
 extern char gBucketMan_gl __asm__("gBucketMan");
 extern char cIrradianceDataBase_TheDataBase[];
@@ -386,7 +386,7 @@ extern "C" void cGame_load(cGame* self)
     self->mPendingStateStartupFlag = 0;
     cGameState_mpGame = (self);
     if (replay != 0) {
-        cReplay_setReplayPadNum(self->Replay, D_004A3484);
+        cReplay_setReplayPadNum(self->Replay, gReplayPadNum);
         cGame_setState((self), 0x10, 0, 0);
     } else {
         cGame_setPreloadState((self), 10);
@@ -1200,10 +1200,10 @@ INCLUDE_ASM("main/gameload", cGame_renderBuckets);
 #ifdef SKIP_ASM
 extern "C" void cBucketMan_renderBucket(void* mgr, int id);
 extern cBucketMan gBucketMan; // target: raw $gp+0x2898 (splat doesn't symbolize it)
-extern int D_004428D8[];
+extern int gRenderBuckets[];
 
 /**
- * Renders the six game buckets listed in D_004428D8, in order, with cBucketMan_renderBucket on gBucketMan.
+ * Renders the six game buckets listed in gRenderBuckets, in order, with cBucketMan_renderBucket on gBucketMan.
  *
  * cGame_render calls it in each of its three render paths.
  */
@@ -1212,7 +1212,7 @@ extern "C" void cGame_renderBuckets(void)
     int i;
     cBucketMan* mgr = &gBucketMan;
     for (i = 0; i < 6; i++) {
-        cBucketMan_renderBucket(mgr, D_004428D8[i]);
+        cBucketMan_renderBucket(mgr, gRenderBuckets[i]);
     }
 }
 #endif

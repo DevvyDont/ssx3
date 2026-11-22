@@ -108,7 +108,7 @@ extern char str_loadicon[];
 extern char str_LoadIndicator[];
 extern char str_PreStartScreen[];
 extern char str_FEAsyncManager[];
-extern char D_0047AB40[];
+extern char loadicon[];
 extern char str_load[];
 extern "C" void* cConsoleConfig_construct();
 extern "C" void* cGraphicsMan_construct();
@@ -170,7 +170,7 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     cPS2GraphicsMan* gfxMan = GrMan;
     sVEntry<void>* vt3 = (sVEntry<void>*)gfxMan->mVtbl;
     char* gfxThis = (char*)gfxMan + vt3[46].delta;
-    void* loadShape = SHAPE_locate(D_0047AB40, str_load);
+    void* loadShape = SHAPE_locate(loadicon, str_load);
     ((sApp_6900*)SSXApp)->shape = ((LoadFn_6900)vt3[46].fn)(gfxThis, loadShape, str_loadicon, 0, 1, -1);
     cGraphicsMan_UploadTextures(GrMan);
     *(sTint_6900**)&self->LoadIndicator = new (str_LoadIndicator, 0, 0) sTint_6900;

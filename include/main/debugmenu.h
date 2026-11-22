@@ -142,7 +142,7 @@ struct cRenderTogglesMenu {
                                                      //       0..1)
     cIntMenuItem ProfileIndividualFXItem;            // 0x9E8 [O]; [R] ctor (45, "Profile Individual Effects",
                                                      //       &cRenderToggles_m_ProfileIndividualFX, 0..1)
-    cIntMenuItem ShowSurfaceTypesItem;               // 0xA18 [O]; [R] ctor (46, "Show Surface Types", &D_004A4578,
+    cIntMenuItem ShowSurfaceTypesItem;               // 0xA18 [O]; [R] ctor (46, "Show Surface Types", &cRenderToggles_m_ShowSurfaceTypes,
                                                      //       0..1)
 };
 
@@ -1360,7 +1360,7 @@ CHECK_SIZE(cTubeMenu, 0x28C);
 
 // cPathArrowMenu (0x488): the "PathArrow Menu" debug menu: a title, a spacer and 16 editing rows.
 // Size: [R] the constructor's last row, cIntMenuItem MaxTickItem, is at 0x458 and ends at 0x488; the static instance
-// D_004D1480 (built by __sti__visualeffectsmenu_cpp) ends at the next object, D_004D1C88 (+0x808); [O] size 0x488.
+// D_004D1480 (built by __sti__visualeffectsmenu_cpp) ends at the next object, __AvalancheMenu (+0x808); [O] size 0x488.
 // Base cMenu. Vtable cPathArrowMenu_vtbl (0x0047F708); destructor cPathArrowMenu__cPathArrowMenu. EA source:
 // main/visualeffectsmenu.cpp.
 struct cPathArrowMenu {
@@ -1503,7 +1503,7 @@ CHECK_SIZE(cVisualEffectsMainMenu, 0x340);
 
 // cAvalancheMenu (0x7B0): the "Avalanche Menu" debug menu: a title, a spacer and 32 editing rows.
 // Size: [R] the constructor's last row, cFloatMenuItem SeedItem, is at 0x77C and ends at 0x7B0; the static instance
-// D_004D1C88 (built by __sti__aivisualeffectsmenu_cpp) ends at the next object, D_004D2438 (+0x7B0); [O] size 0x7B0.
+// __AvalancheMenu (built by __sti__aivisualeffectsmenu_cpp) ends at the next object, D_004D2438 (+0x7B0); [O] size 0x7B0.
 // Base cMenu. Vtable cAvalancheMenu_vtbl (0x00480040); destructor cAvalancheMenu__cAvalancheMenu. EA source:
 // main/aivisualeffectsmenu.cpp.
 struct cAvalancheMenu {
@@ -1635,7 +1635,7 @@ struct cAIVisualEffectsMainMenu {
     // cAIVisualEffectsMainMenu's rows (0x130-0x17F)
     cNullMenuItem TitleItem;         // 0x130 [O]; [R] ctor ("AIVisual Effects Main Menu"); not added to the menu
     cSpaceMenuItem SpaceItem;        // 0x14C [O]; [R] ctor (space 40); not added to the menu
-    cSubMenuItem AvalancheItem;      // 0x164 [O]; [R] ctor ("Avalanche Effects", Sub = &D_004D1C88, the static
+    cSubMenuItem AvalancheItem;      // 0x164 [O]; [R] ctor ("Avalanche Effects", Sub = &__AvalancheMenu, the static
                                      //       cAvalancheMenu)
 };
 

@@ -94,7 +94,7 @@ struct cFEStateCharEquip {
                                     //       switchEquipMode flips it
     int mStoreNum;                  // 0x0CC [O]; [R] the last hub's peak (1/2/3) with a store or mode switch, else -1;
                                     //       [U] the store lists only items of this store number (func_0019B180)
-    int mCategoryStack[20];         // 0x0D0 [U] (no On Tour member) MEM_fill(.., D_004A11D0, 80) in the ctor and
+    int mCategoryStack[20];         // 0x0D0 [U] (no On Tour member) MEM_fill(.., kBolt_None, 80) in the ctor and
                                     //       switchEquipMode; onWidgetEvent pushes the opened category id at
                                     //       [mCurrentStackPos], back pops it
     int mCurrentStackPos;           // 0x120 [O] (On Tour's member after mStoreNum); [R] 0; [U] the depth into

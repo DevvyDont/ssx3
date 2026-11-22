@@ -63,7 +63,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEAsyncManager_Load3PeakPic);
 struct cFEAsyncManager;
 void cFEAsyncManager_SetFileStatus(cFEAsyncManager* self, int index, int status);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char* D_004A19F0;
+extern char* gMap_3PeakFilename;
 extern char str_pct_spct_s[];
 extern char str_ssh[];
 
@@ -88,7 +88,7 @@ struct sFE3PeakPicFiles {
 extern "C" void cFEAsyncManager_Load3PeakPic(cFEAsyncManager* self, int slot, int useAsync)
 {
     sFE3PeakPicFiles* files = (sFE3PeakPicFiles*)self;
-    sprintf(files->mFiles[slot].mName, str_pct_spct_s, D_004A19F0, str_ssh);
+    sprintf(files->mFiles[slot].mName, str_pct_spct_s, gMap_3PeakFilename, str_ssh);
     files->mFiles[slot].mParam = useAsync;
     cFEAsyncManager_SetFileStatus(self, slot, 1);
 }
@@ -100,7 +100,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEAsyncManager_Load1PeakPic);
 struct cFEAsyncManager;
 void cFEAsyncManager_SetFileStatus(cFEAsyncManager* self, int index, int status);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern char* D_00441258[];
+extern char* gMap_1PeakFilenames[];
 extern char str_pct_spct_s[];
 extern char str_ssh[];
 
@@ -126,7 +126,7 @@ struct sFEPeakPicFiles {
 extern "C" void cFEAsyncManager_Load1PeakPic(cFEAsyncManager* self, int pic, int slot, int useAsync)
 {
     sFEPeakPicFiles* files = (sFEPeakPicFiles*)self;
-    sprintf(files->mFiles[slot].mName, str_pct_spct_s, D_00441258[pic], str_ssh);
+    sprintf(files->mFiles[slot].mName, str_pct_spct_s, gMap_1PeakFilenames[pic], str_ssh);
     files->mFiles[slot].mParam = useAsync;
     cFEAsyncManager_SetFileStatus(self, slot, 1);
 }

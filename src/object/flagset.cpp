@@ -1443,7 +1443,7 @@ extern "C" void cFenceNode_update(cFenceNode* self)
 //100%
 INCLUDE_ASM("object/flagset", cFenceNode_updateGrid);
 #ifdef SKIP_ASM
-extern float D_0044AFD0[];
+extern float cFenceNode_updateGrid_bendtable[];
 
 struct sFsVec4_CF98 {
     float x, y, z, w;
@@ -1519,7 +1519,7 @@ struct sFlagSet_CF98 {
  * Bends a fence's grid mesh by its current force.
  *
  * Does nothing without a grid mesh (+0x40). The sway vector is (200, 0, 0) * Force (+0x2C) * Flexibility (+0x24); each
- * of the 8 columns gets it scaled by the weight table D_0044AFD0. The top row (+0x44) always moves; the bottom row
+ * of the 8 columns gets it scaled by the weight table cFenceNode_updateGrid_bendtable. The top row (+0x44) always moves; the bottom row
  * (+0xA4) moves too when the fence Type (+0x20) is 1, otherwise it stays at rest. The 16 points go to the mesh's vtable
  * entry 3.
  *
@@ -1537,7 +1537,7 @@ extern "C" void cFenceNode_updateGrid(cFenceNode* fenceNode)
     sFsVec4_CF98 offs[8];
     sFsVec4_CF98* offsetIter = offs;
     for (int i = 0; i < 8; i++) {
-        *offsetIter++ = fsScale_CF98(dir, D_0044AFD0[i]);
+        *offsetIter++ = fsScale_CF98(dir, cFenceNode_updateGrid_bendtable[i]);
     }
     sFsVec3_CF98 pts[16];
     if (self->mode == 1) {

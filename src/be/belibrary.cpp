@@ -1418,7 +1418,7 @@ extern "C" int FILE_loadatz(const char* name, void* buf, int size);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern const char* D_004A11CC;
-extern int D_004A11E8;
+extern int kBolt_Num;
 extern const char str_BoltsFile[];
 
 struct sBEEnt_14BE70 {
@@ -1449,7 +1449,7 @@ struct sBELib_14BE70 {
  * Loads the bolts file and sets up the bolt database's tables and string pointers.
  *
  * Reads the whole file named by D_004A11CC (BXFILE_sizez, FILE_loadatz) into a "BoltsFile" block kept at +0x0. The file
- * holds the id count (stored in D_004A11E8, rounded up to even), then four counted tables: the 0x38-byte bolt
+ * holds the id count (stored in kBolt_Num, rounded up to even), then four counted tables: the 0x38-byte bolt
  * definitions (+0x4, count +0x1C), 12-byte records (+0x8, +0x20), 8-byte records (+0xC, +0x24) and 8-byte records
  * (+0x10, +0x28), then one word and the string pool (+0x14).
  *
@@ -1466,7 +1466,7 @@ extern "C" void func_0014BE70(void* vself)
     self->buf = buf;
     FILE_loadatz(D_004A11CC, buf, size);
     char* fileData = self->buf;
-    D_004A11E8 = *(int*)fileData;
+    kBolt_Num = *(int*)fileData;
     int numBolts = *(int*)(fileData + 4);
     self->entries = (sBEEnt_14BE70*)(fileData + 8);
     self->n0 = numBolts;
@@ -1488,7 +1488,7 @@ extern "C" void func_0014BE70(void* vself)
     off += numGroups * 8;
     off += 4;
     self->strings = fileData + off;
-    if (D_004A11E8 & 1) D_004A11E8++;
+    if (kBolt_Num & 1) kBolt_Num++;
     for (int i = 0; i < self->n0; i++) {
         if (self->entries[i].name) self->entries[i].name = self->strings + ((int)self->entries[i].name - 1);
         if (self->entries[i].f28) self->entries[i].f28 = self->strings + ((int)self->entries[i].f28 - 1);
@@ -1532,38 +1532,38 @@ struct sBELib_14C068 {
  * Builds the bolt database's per-group child tables: id to definition index, and each parent's child count and first
  * child.
  *
- * Allocates a "child bolts data" block of 90 * D_004A11E8 shorts (D_004A11E8 is the number of bolt ids) and carves 30
+ * Allocates a "child bolts data" block of 90 * kBolt_Num shorts (kBolt_Num is the number of bolt ids) and carves 30
  * count tables (+0x11C), 30 first-child tables (+0x194) and 30 index tables (+0x4DC) out of it, one per group. The
  * index tables map each definition's id (+0x4) to its index; the count and first tables are keyed by the parent id
- * (+0x6, -1 for none). The run tracker that sets the first child starts at D_004A11E8 instead of -1 and is shared
+ * (+0x6, -1 for none). The run tracker that sets the first child starts at kBolt_Num instead of -1 and is shared
  * across groups. Nothing in the C calls it.
  */
 extern "C" void func_0014C068(sBELib_14C068* self)
 {
-    int last = D_004A11E8;
+    int last = kBolt_Num;
     unsigned short* cursor;
 
     self->table = new (str_child_bolts_data, 0, 0) unsigned short[last * 90];
     cursor = self->table;
     for (int i = 0; i < 30; i++) {
         self->count[i] = cursor;
-        cursor += D_004A11E8;
+        cursor += kBolt_Num;
     }
     for (int i = 0; i < 30; i++) {
         self->first[i] = cursor;
-        cursor += D_004A11E8;
+        cursor += kBolt_Num;
     }
     for (int i = 0; i < 30; i++) {
         self->index[i] = cursor;
-        cursor += D_004A11E8;
-        MEM_fill(self->index[i], 0, D_004A11E8 * 2);
+        cursor += kBolt_Num;
+        MEM_fill(self->index[i], 0, kBolt_Num * 2);
     }
     for (int i = 0; i < self->n0; i++) {
         self->index[self->entries[i].type][self->entries[i].slot] = i;
     }
     for (int i = 0; i < 30; i++) {
-        MEM_fill(self->first[i], 0, D_004A11E8 * 2);
-        MEM_fill(self->count[i], 0, D_004A11E8 * 2);
+        MEM_fill(self->first[i], 0, kBolt_Num * 2);
+        MEM_fill(self->count[i], 0, kBolt_Num * 2);
     }
     for (int i = 0; i < self->n0; i++) {
         int parentId = self->entries[i].group;

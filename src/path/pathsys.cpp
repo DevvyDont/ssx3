@@ -380,7 +380,7 @@ INCLUDE_ASM("path/pathsys", cPathSys_loadStartpoints);
 extern "C" void pathREAD_tInt32(void* dst, void* src);
 extern "C" void pathREAD_t3Vector(void* dst, void* src);
 
-extern int D_00445428[];
+extern int kPathStartToUID[];
 
 
 
@@ -389,7 +389,7 @@ extern int D_00445428[];
  *
  * Reads the count into +0x0, then for each 0x28-byte startpoint its arg (+0x0), a type code, its position (+0x8) and
  * direction (+0x14) with pathREAD_t3Vector, and an AI path index and a track path index. The type (+0x4) becomes the
- * position of the code in D_00445428 {-1, 0, 1} (else 0), and the indices become pointers into the AI path array
+ * position of the code in kPathStartToUID {-1, 0, 1} (else 0), and the indices become pointers into the AI path array
  * (+0xC, 0x40 bytes each; stored at +0x24) and the track path array (+0x14, 0x3C bytes each; stored at +0x20), so it
  * must run after those are loaded. cPathSys_resolvePaths calls it last.
  *
@@ -421,7 +421,7 @@ extern "C" int cPathSys_loadStartpoints(cPathSys* self, char* cursor)
         cursor += 4;
         (self->Startpoints)[i].Type = 0;
         for (int j = 0; j < 3; j++) {
-            if (D_00445428[j] == fileWord) {
+            if (kPathStartToUID[j] == fileWord) {
                 (self->Startpoints)[i].Type = j;
                 break;
             }

@@ -270,12 +270,12 @@ struct sMat00391C48 {
     float m[4][4];
 } __attribute__((aligned(16)));
 
-extern sMat00391C48 D_00500CA0;
+extern sMat00391C48 cFont_vtextf_buf;
 extern "C" void vsprintf(sMat00391C48* m);
 extern "C" void cFont_text(cFont* self, float x, float y, sMat00391C48* m);
 
 /**
- * Formats text into a shared static buffer (D_00500CA0) and draws it at a position.
+ * Formats text into a shared static buffer (cFont_vtextf_buf) and draws it at a position.
  *
  * The C declaration drops the format and va_list arguments (On Tour fmt, va); they reach the vsprintf
  * (vsprintf) in the untouched argument registers.
@@ -285,8 +285,8 @@ extern "C" void cFont_text(cFont* self, float x, float y, sMat00391C48* m);
  */
 extern "C" void cFont_vtextf(cFont* self, float x, float y)
 {
-    vsprintf(&D_00500CA0);
-    cFont_text(self, x, y, &D_00500CA0);
+    vsprintf(&cFont_vtextf_buf);
+    cFont_text(self, x, y, &cFont_vtextf_buf);
 }
 #endif
 
@@ -6218,18 +6218,18 @@ extern "C" int *cRenderToggles_ProfileIndividualFX(void) {
 //100%
 INCLUDE_ASM("render/font", cRenderToggles_ShowSurfaceTypes);
 #ifdef SKIP_ASM
-extern int D_004A4578;
+extern int cRenderToggles_m_ShowSurfaceTypes;
 
 /**
- * Returns &D_004A4578, the int that item 46 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Show Surface Types" (0
+ * Returns &cRenderToggles_m_ShowSurfaceTypes, the int that item 46 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Show Surface Types" (0
  * to 1).
  *
  * No caller: the menu takes the variable's address itself.
  *
- * @return &D_004A4578
+ * @return &cRenderToggles_m_ShowSurfaceTypes
  */
 extern "C" int *cRenderToggles_ShowSurfaceTypes(void) {
-    return &D_004A4578;
+    return &cRenderToggles_m_ShowSurfaceTypes;
 }
 #endif
 
@@ -8461,129 +8461,129 @@ extern "C" void cScreenTint_Fill(float value) {
 //100%
 INCLUDE_ASM("render/font", cScreenTint_OldGammaEnable);
 #ifdef SKIP_ASM
-extern int D_004A4678;
+extern int cScreenTint_m_OldGammaEnable;
 
 /**
- * Returns &D_004A4678.
+ * Returns &cScreenTint_m_OldGammaEnable.
  *
  * No caller, and no debug-menu item edits the variable.
  *
- * @return &D_004A4678
+ * @return &cScreenTint_m_OldGammaEnable
  */
 extern "C" int *cScreenTint_OldGammaEnable(void) {
-    return &D_004A4678;
+    return &cScreenTint_m_OldGammaEnable;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_OldGammaPower);
 #ifdef SKIP_ASM
-extern int D_004A467C;
+extern int cScreenTint_m_OldGammaPower;
 
 /**
- * Returns &D_004A467C.
+ * Returns &cScreenTint_m_OldGammaPower.
  *
  * No caller, and no debug-menu item edits the variable.
  *
- * @return &D_004A467C
+ * @return &cScreenTint_m_OldGammaPower
  */
 extern "C" int *cScreenTint_OldGammaPower(void) {
-    return &D_004A467C;
+    return &cScreenTint_m_OldGammaPower;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_OldGammaColourR);
 #ifdef SKIP_ASM
-extern int D_004A4680;
+extern int cScreenTint_m_OldGammaColourR;
 
 /**
- * Returns &D_004A4680.
+ * Returns &cScreenTint_m_OldGammaColourR.
  *
  * No caller, and no debug-menu item edits the variable.
  *
- * @return &D_004A4680
+ * @return &cScreenTint_m_OldGammaColourR
  */
 extern "C" int *cScreenTint_OldGammaColourR(void) {
-    return &D_004A4680;
+    return &cScreenTint_m_OldGammaColourR;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_OldGammaColourG);
 #ifdef SKIP_ASM
-extern int D_004A4684;
+extern int cScreenTint_m_OldGammaColourG;
 
 /**
- * Returns &D_004A4684.
+ * Returns &cScreenTint_m_OldGammaColourG.
  *
  * No caller, and no debug-menu item edits the variable.
  *
- * @return &D_004A4684
+ * @return &cScreenTint_m_OldGammaColourG
  */
 extern "C" int *cScreenTint_OldGammaColourG(void) {
-    return &D_004A4684;
+    return &cScreenTint_m_OldGammaColourG;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_OldGammaColourB);
 #ifdef SKIP_ASM
-extern int D_004A4688;
+extern int cScreenTint_m_OldGammaColourB;
 
 /**
- * Returns &D_004A4688.
+ * Returns &cScreenTint_m_OldGammaColourB.
  *
  * No caller, and no debug-menu item edits the variable.
  *
- * @return &D_004A4688
+ * @return &cScreenTint_m_OldGammaColourB
  */
 extern "C" int *cScreenTint_OldGammaColourB(void) {
-    return &D_004A4688;
+    return &cScreenTint_m_OldGammaColourB;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_OldGammaFillR);
 #ifdef SKIP_ASM
-extern int D_004A468C;
+extern int cScreenTint_m_OldGammaFillR;
 
 /**
- * Returns &D_004A468C.
+ * Returns &cScreenTint_m_OldGammaFillR.
  *
  * No caller, and no debug-menu item edits the variable.
  *
- * @return &D_004A468C
+ * @return &cScreenTint_m_OldGammaFillR
  */
 extern "C" int *cScreenTint_OldGammaFillR(void) {
-    return &D_004A468C;
+    return &cScreenTint_m_OldGammaFillR;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_OldGammaFillG);
 #ifdef SKIP_ASM
-extern int D_004A4690;
+extern int cScreenTint_m_OldGammaFillG;
 
 /**
- * Returns &D_004A4690.
+ * Returns &cScreenTint_m_OldGammaFillG.
  *
  * No caller, and no debug-menu item edits the variable.
  *
- * @return &D_004A4690
+ * @return &cScreenTint_m_OldGammaFillG
  */
 extern "C" int *cScreenTint_OldGammaFillG(void) {
-    return &D_004A4690;
+    return &cScreenTint_m_OldGammaFillG;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cScreenTint_OldGammaFillB);
 #ifdef SKIP_ASM
-extern int D_004A4694;
+extern int cScreenTint_m_OldGammaFillB;
 
 /**
- * Returns &D_004A4694.
+ * Returns &cScreenTint_m_OldGammaFillB.
  *
  * No caller, and no debug-menu item edits the variable.
  *
- * @return &D_004A4694
+ * @return &cScreenTint_m_OldGammaFillB
  */
 extern "C" int *cScreenTint_OldGammaFillB(void) {
-    return &D_004A4694;
+    return &cScreenTint_m_OldGammaFillB;
 }
 #endif
 
