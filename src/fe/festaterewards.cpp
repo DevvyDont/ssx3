@@ -154,7 +154,7 @@ struct sVEr_F270 {
     void* (*fn)(void*, void*, int);
 };
 // $gp-relative default sound player (the unit declares it later as sDefObj_1FF0).
-extern cUISoundInterface D_004A5A58_F270 __asm__("gUISoundNull");
+extern cUISoundInterface gUISoundNull_F270 __asm__("gUISoundNull");
 
 static inline int Test_F270(char* o, int slot)
 {
@@ -212,7 +212,7 @@ struct sGallery_F270 {
  */
 extern "C" int cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase* self, cUIInput* in)
 {
-    cUISoundInterface* snd = &D_004A5A58_F270;
+    cUISoundInterface* snd = &gUISoundNull_F270;
     if (*(cUISoundInterface**)&self->mpEngine->mpSound != 0) {
         snd = *(cUISoundInterface**)&self->mpEngine->mpSound;
     }

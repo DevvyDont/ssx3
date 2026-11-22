@@ -209,9 +209,9 @@ struct tFrameData_5778 {
 
 extern float cAvalanche_m_UpdateTimeStep;
 extern float cAvalanche_m_PatchColourScale2;
-extern sV4_5778 D_004FF120_5778 __asm__("t4vect_Zero");
-extern sV4_5778 D_004FF130_5778 __asm__("t4vect_Origin");
-extern sMat_5778 D_004FF1A0_5778 __asm__("t4mat_Identity");
+extern sV4_5778 t4vect_Zero_5778 __asm__("t4vect_Zero");
+extern sV4_5778 t4vect_Origin_5778 __asm__("t4vect_Origin");
+extern sMat_5778 t4mat_Identity_5778 __asm__("t4mat_Identity");
 extern "C" void tActiveAvalancheNode_calculateScale_Data(void* self, float t) __asm__("tActiveAvalancheNode_calculateScale");
 // PORT: sine/cosine; the angle is set up first at both calls here (other units declare it (s, c, angle),
 // which uses the same registers), so it is declared angle-first under its own name.
@@ -226,7 +226,7 @@ static inline void RotateFrame_5778(T* obj, const sV4_5778& axis, float angle)
     sMat_5778& m = obj->mat;
     sMat_5778 saved = m;
     sV4_5778 trans = saved.r3;
-    saved.r3 = D_004FF130_5778;
+    saved.r3 = t4vect_Origin_5778;
     float s;
     float c;
     fSinCos_5778(angle, &s, &c);
@@ -269,7 +269,7 @@ static inline void Reset_5778(sAvAct_5778* self)
 {
     self->frame = 0;
     self->pos = self->data->pos;
-    self->mat = D_004FF1A0_5778;
+    self->mat = t4mat_Identity_5778;
 }
 
 /**
@@ -332,7 +332,7 @@ extern "C" tFrameData_5778 tActiveAvalancheNode_getFrameData(sAvAct_5778* self, 
                                                             self->fB4),
                                                    cAvalanche_m_PatchColourScale2);
                         self->f1FC = self->fB4;
-                        cDynamicColourEmitter_update_Data(1.0f / 60.0f, self->emitter, &pos, &D_004FF120_5778, &col, ft < self->data->length);
+                        cDynamicColourEmitter_update_Data(1.0f / 60.0f, self->emitter, &pos, &t4vect_Zero_5778, &col, ft < self->data->length);
                     }
                 }
                 vAddEq_5778(self->pos, sV4_5778(self->data->frames[self->frame * kAvFrameSize_5778 + kAvVel_5778] * 2.0f,
@@ -693,7 +693,7 @@ struct sAvNodeCA8 {
 
 extern "C" void tActiveAvalancheNode_end(tActiveAvalancheNode* self, int force);
 extern "C" void cDynamicColourEmitter_update(void* em, void* pos, void* d, void* vel, int alive, float dt);
-extern sAvVec4CA8 D_004FF120_7CA8 __asm__("t4vect_Zero");
+extern sAvVec4CA8 t4vect_Zero_7CA8 __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
 static inline void vu0CopyMatrixCA8(sAvMatrixCA8* dst, sAvMatrixCA8* src)
@@ -737,7 +737,7 @@ extern "C" int tActiveAvalancheNode_update(sAvNodeCA8* self, float currTime)
         sAvDataCA8* nodeData = self->data;
         sAvVec4CA8* vel = &self->vel;
         if (nodeData->type != 2 && nodeData->emit != 0) {
-            void* org = &D_004FF120_7CA8;
+            void* org = &t4vect_Zero_7CA8;
             void* em = self->emitter;
             self->f1FC = self->fB4;
             int alive = currTime < nodeData->duration;
@@ -1365,9 +1365,9 @@ struct sVE_8A00 {
 
 
 extern int cAvalanche_m_RenderLines;
-extern sOut_8A00 D_004D5B70_8A00[] __asm__("vertlist");
-extern t4Matrix D_004FF1A0_8A00 __asm__("t4mat_Identity");
-extern sRow_8A00 D_004FF130_8A00 __asm__("t4vect_Origin");
+extern sOut_8A00 vertlist_8A00[] __asm__("vertlist");
+extern t4Matrix t4mat_Identity_8A00 __asm__("t4mat_Identity");
+extern sRow_8A00 t4vect_Origin_8A00 __asm__("t4vect_Origin");
 extern "C" void fSinCos(float* s, float* c, float angle);
 
 // PORT: PS2-only VU0 inline asm (matrix copy).
@@ -1452,7 +1452,7 @@ static inline void Rotate_8A00(t4Matrix& m, const sRow_8A00& axis, float angle)
     float c;
     CopyMat_8A00(&old, &m);
     sRow_8A00 trans = ((sRow_8A00*)&old.row[0])[3];
-    ((sRow_8A00*)&old.row[0])[3] = D_004FF130_8A00;
+    ((sRow_8A00*)&old.row[0])[3] = t4vect_Origin_8A00;
     fSinCos(&s, &c, angle);
     float t = 1.0f - c;
     float x = axis.x;
@@ -1511,7 +1511,7 @@ extern "C" void tActiveAvalancheNode_renderLines(tActiveAvalancheNode* nodep)
         return;
     }
     t4Matrix matrix;
-    CopyMat_8A00(&matrix, &D_004FF1A0_8A00);
+    CopyMat_8A00(&matrix, &t4mat_Identity_8A00);
     PushRS_8A00(GrMan);
     SetBits_8A00(((int)(GrMan->m_pCurrentDrawState)->unk_00[1]), 0x7C, 2, 1);
     if (cAvalanche_m_RenderLines != 0) {
@@ -1527,12 +1527,12 @@ extern "C" void tActiveAvalancheNode_renderLines(tActiveAvalancheNode* nodep)
             scratchVec.w = 0.0f;
             Rotate_8A00(matrix, scratchVec, ((node->m_node)->m_history)[i].m_rs * 0.008213315159082413f);
             ((sRow_8A00*)&matrix.row[0])[3] = pos;
-            D_004D5B70_8A00[i].r = ((node->m_node)->m_history)[i].m_r;
-            D_004D5B70_8A00[i].g = ((node->m_node)->m_history)[i].m_g;
-            D_004D5B70_8A00[i].b = ((node->m_node)->m_history)[i].m_b;
-            D_004D5B70_8A00[i].pos = pos;
+            vertlist_8A00[i].r = ((node->m_node)->m_history)[i].m_r;
+            vertlist_8A00[i].g = ((node->m_node)->m_history)[i].m_g;
+            vertlist_8A00[i].b = ((node->m_node)->m_history)[i].m_b;
+            vertlist_8A00[i].pos = pos;
         }
-        ((sVE_8A00*)GrMan->mVtbl)[0x248 / 8].fn(vthis(GrMan, ((sVE_8A00*)GrMan->mVtbl)[0x248 / 8]), (int)(node->m_node)->m_life, D_004D5B70_8A00, 0);
+        ((sVE_8A00*)GrMan->mVtbl)[0x248 / 8].fn(vthis(GrMan, ((sVE_8A00*)GrMan->mVtbl)[0x248 / 8]), (int)(node->m_node)->m_life, vertlist_8A00, 0);
     }
     (*(sDrawState**)&GrMan->m_pCurrentDrawState)--;
 }
@@ -2103,7 +2103,7 @@ struct sVec_D97A8 {
 struct sMat_D97A8 {
     sVec_D97A8 row[4];
 };
-extern sMat_D97A8 D_004FF1A0_D97A8 __asm__("t4mat_Identity");
+extern sMat_D97A8 t4mat_Identity_D97A8 __asm__("t4mat_Identity");
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
 static inline void CopyMatrix_D97A8(sMat_D97A8* dst, sMat_D97A8* src)
@@ -2205,13 +2205,13 @@ extern "C" int cAvalanche_triggerAvalanche(int id)
                         (*(sAvAct_D97A8**)&slot->m_activeNodeList) = act;
                         act->f0 = 0;
                         act->pos = n->pos;
-                        CopyMatrix_D97A8(&act->m20, &D_004FF1A0_D97A8);
+                        CopyMatrix_D97A8(&act->m20, &t4mat_Identity_D97A8);
                         act->f2EC = 0;
                         {
                             sVec_D97A8 objPosition = *(sVec_D97A8*)(n->obj + 0x40);
                             act->objPos = objPosition;
                         }
-                        CopyMatrix_D97A8(&act->m70, &D_004FF1A0_D97A8);
+                        CopyMatrix_D97A8(&act->m70, &t4mat_Identity_D97A8);
                         act->scale = sVec_D97A8(1.0f, 1.0f, 1.0f, 1.0f);
                         tActiveAvalancheNode_calculateScale((tActiveAvalancheNode*)act, 0.0f);
                         if (n->emit) {
@@ -2434,7 +2434,7 @@ struct cAvalanche_writeToReplayFrame_sSlot {
     float t;
     int isActive() { return av != 0; }
 };
-extern cAvalanche_writeToReplayFrame_sSlot D_00538938_9CB0[16] __asm__("cAvalanche_m_activeAvalanches");
+extern cAvalanche_writeToReplayFrame_sSlot cAvalanche_m_activeAvalanches_9CB0[16] __asm__("cAvalanche_m_activeAvalanches");
 
 struct cAvalanche_writeToReplayFrame_sSave {
     int ids[16];
@@ -2461,8 +2461,8 @@ extern "C" void cAvalanche_writeToReplayFrame(cAvalanche_writeToReplayFrame_cStr
 {
     cAvalanche_writeToReplayFrame_sSave state;
     for (int i = 0; i < 16; i++) {
-        state.ids[i] = D_00538938_9CB0[i].isActive() ? *D_00538938_9CB0[i].av : -1;
-        state.times[i] = D_00538938_9CB0[i].isActive() ? D_00538938_9CB0[i].t : 0.0f;
+        state.ids[i] = cAvalanche_m_activeAvalanches_9CB0[i].isActive() ? *cAvalanche_m_activeAvalanches_9CB0[i].av : -1;
+        state.times[i] = cAvalanche_m_activeAvalanches_9CB0[i].isActive() ? cAvalanche_m_activeAvalanches_9CB0[i].t : 0.0f;
     }
     stream->write(&state, 0x80);
 }

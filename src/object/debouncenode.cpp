@@ -642,7 +642,7 @@ typedef sDfMat_343588 (*DfViewFn_343588)(void*);
 typedef int (*DfCullFn_343588)(void*, t4Vector*, t4Vector*, const sDfMat_343588&);
 typedef void (*DfDrawFn_343588)(void*, void*, void*, void*, int);
 
-extern sDfMat_343588 D_004FF1A0_343588 __asm__("t4mat_Identity");
+extern sDfMat_343588 t4mat_Identity_343588 __asm__("t4mat_Identity");
 
 #define OBJ_343588(s) (*(sDfObj_343588**)((char*)(s) + 0x18))
 
@@ -712,7 +712,7 @@ extern "C" void cConveyorNode_render(cConveyorNode* self)
         }
     }
     sDfMat_343588 xf;
-    MatCopy_343588(&xf, &D_004FF1A0_343588);
+    MatCopy_343588(&xf, &t4mat_Identity_343588);
     xf.r[3].x = self->UV[0];
     xf.r[3].y = self->UV[1];
     ((DfDrawFn_343588)((sVEntry<void>*)gfx->mVtbl)[96].fn)((char*)gfx + ((sVEntry<void>*)gfx->mVtbl)[96].delta, OBJ_343588(self), 0, &xf, 2);
@@ -935,7 +935,7 @@ INCLUDE_ASM("object/debouncenode", cCrowdMan3d_cCrowdMan3d);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sDebounceState;
 extern "C" void func_003442E0(sDebounceState* self);
-extern void* D_004A3FF0_p __asm__("TheCrowdMan3d");
+extern void* TheCrowdMan3d_p __asm__("TheCrowdMan3d");
 
 struct sSlot00343A68 {
     unsigned int id;
@@ -974,7 +974,7 @@ extern "C" sState00343A68* cCrowdMan3d_cCrowdMan3d(sState00343A68* self)
         func_003442E0((sDebounceState*)crowdBlock);
         crowdBlock = next;
     }
-    D_004A3FF0_p = self;
+    TheCrowdMan3d_p = self;
     for (i = 0; i < 5; i++) {
         func_003442E0((sDebounceState*)&self[i]);
     }

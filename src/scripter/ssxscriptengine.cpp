@@ -5207,9 +5207,9 @@ char* GetSSXCameraTargetHeader_D970(void* self) __asm__("GetSSXCameraTargetHeade
 char* GetSSXCameraSubjectHeader_D970(void* self) __asm__("GetSSXCameraSubjectHeader__FPv");
 char* GetSSXCameraAlgorithmicHeader_D970(void* self) __asm__("GetSSXCameraAlgorithmicHeader__FPv");
 extern char t4mat_Identity[];
-extern float D_004FF140_D970[] __asm__("t4vect_XAxis");
-extern float D_004FF150_D970[] __asm__("t4vect_YAxis");
-extern float D_004FF160_D970[] __asm__("t4vect_ZAxis");
+extern float t4vect_XAxis_D970[] __asm__("t4vect_XAxis");
+extern float t4vect_YAxis_D970[] __asm__("t4vect_YAxis");
+extern float t4vect_ZAxis_D970[] __asm__("t4vect_ZAxis");
 extern "C" void cSSXScriptEngine_GetAnchorOrientation_f(void* self, int type, void* a2, sVec4_SE* out, float* roll, float* pitch, float* yaw) __asm__("cSSXScriptEngine_GetAnchorOrientation");
 
 // One camera case: offset + euler angles from the record, then the player's frame on top.
@@ -5224,18 +5224,18 @@ extern "C" void cSSXScriptEngine_GetAnchorOrientation_f(void* self, int type, vo
         sRotMat_SE* m = &M; \
         CopyMat_SE(m, t4mat_Identity); \
         Translate_SE(m, &v); \
-        ROTATE_SE(m, D_004FF160_D970, -(SELF)->rz); \
-        ROTATE_SE(m, D_004FF150_D970, (SELF)->ry); \
-        ROTATE_SE(m, D_004FF140_D970, (SELF)->rx); \
+        ROTATE_SE(m, t4vect_ZAxis_D970, -(SELF)->rz); \
+        ROTATE_SE(m, t4vect_YAxis_D970, (SELF)->ry); \
+        ROTATE_SE(m, t4vect_XAxis_D970, (SELF)->rx); \
         sVec4_SE out; \
         float roll; \
         float pitch; \
         float yaw; \
         cSSXScriptEngine_GetAnchorOrientation_f(ScriptEngine, *(char*)((REC) + 0x20), *(void**)((OWNER) + 8), &out, &roll, &pitch, &yaw); \
         Translate_SE(&(SELF)->mat, &out); \
-        ROTATE_SE(&(SELF)->mat, D_004FF160_D970, -yaw); \
-        ROTATE_SE(&(SELF)->mat, D_004FF150_D970, pitch); \
-        ROTATE_SE(&(SELF)->mat, D_004FF140_D970, roll); \
+        ROTATE_SE(&(SELF)->mat, t4vect_ZAxis_D970, -yaw); \
+        ROTATE_SE(&(SELF)->mat, t4vect_YAxis_D970, pitch); \
+        ROTATE_SE(&(SELF)->mat, t4vect_XAxis_D970, roll); \
         MulMat_SE(&(SELF)->mat, m); \
         (SELF)->rx = (SELF)->rx + roll; \
         (SELF)->ry = (SELF)->ry + pitch; \
@@ -5288,9 +5288,9 @@ extern "C" void cScriptObjCamera_CalculateBaseTransform_SE(sScrCam_SE* self, sSc
         self->rx = *(float*)(rec + 0x10) * 0.01745329424738884f;
         self->ry = *(float*)(rec + 0xC) * 0.01745329424738884f;
         self->rz = *(float*)(rec + 8) * 0.01745329424738884f;
-        ROTATE_SE(mat, D_004FF160_D970, -self->rz);
-        ROTATE_SE(mat, D_004FF150_D970, self->ry);
-        ROTATE_SE(mat, D_004FF140_D970, self->rx);
+        ROTATE_SE(mat, t4vect_ZAxis_D970, -self->rz);
+        ROTATE_SE(mat, t4vect_YAxis_D970, self->ry);
+        ROTATE_SE(mat, t4vect_XAxis_D970, self->rx);
         break;
     }
     }

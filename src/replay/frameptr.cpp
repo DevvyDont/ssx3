@@ -889,7 +889,7 @@ struct sApp_F4A8 {
     void* players[4];       // 0xB0
 };
 // PORT: typed view of the app global
-extern sApp_F4A8* D_004A28A8_F4A8 __asm__("SSXApp");
+extern sApp_F4A8* SSXApp_F4A8 __asm__("SSXApp");
 
 
 static inline void addFrame_F4A8(cReplay* self, short type)
@@ -978,7 +978,7 @@ extern "C" void cReplay_update(cReplay* self)
         self->RecordTick++;
         return;
     case 3: {
-        void* input = D_004A28A8_F4A8->players[self->PadNum];
+        void* input = SSXApp_F4A8->players[self->PadNum];
         if (input != 0 && cInput_getState(input, 107))
             cReplay_updateInput((self), 0);
         cReplay_processInput(self);

@@ -307,7 +307,7 @@ struct sNetCfg_D0A8 {
     int host;               // 0x8
     unsigned short port;    // 0xC
 };
-extern sNetCfg_D0A8 D_00534B30_D0A8 __asm__("cBENetworkInterface_networkOpt");
+extern sNetCfg_D0A8 cBENetworkInterface_networkOpt_D0A8 __asm__("cBENetworkInterface_networkOpt");
 
 /**
  * Opens the debug direct link to a fixed partner console when a network game is set, then starts the game comm on it.
@@ -327,7 +327,7 @@ extern sNetCfg_D0A8 D_00534B30_D0A8 __asm__("cBENetworkInterface_networkOpt");
 extern "C" void func_0017D0A8(void)
 {
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (D_00534B30_D0A8.active == 0) {
+    if (cBENetworkInterface_networkOpt_D0A8.active == 0) {
         return;
     }
     char addr[32];
@@ -339,17 +339,17 @@ extern "C" void func_0017D0A8(void)
         __builtin_memcpy(addr, D_0045D028, 12);
     }
     int ch;
-    if (D_00534B30_D0A8.host) {
-        ch = cCommSystem_openDSockChannel(cCommSystem_mCommSystem, addr, D_00534B30_D0A8.port, 1);
+    if (cBENetworkInterface_networkOpt_D0A8.host) {
+        ch = cCommSystem_openDSockChannel(cCommSystem_mCommSystem, addr, cBENetworkInterface_networkOpt_D0A8.port, 1);
     } else {
-        ch = cCommSystem_openDSockChannel(cCommSystem_mCommSystem, addr, D_00534B30_D0A8.port, 0);
+        ch = cCommSystem_openDSockChannel(cCommSystem_mCommSystem, addr, cBENetworkInterface_networkOpt_D0A8.port, 0);
     }
     while (cCommSystem_isChannelConnected(cCommSystem_mCommSystem, ch) == 0) {
         cCommSystem_update(cCommSystem_mCommSystem);
         SYNCTASK_run(0);
         THREAD_yieldticks(1);
     }
-    cGameComm_construct(ch, D_00534B30_D0A8.host);
+    cGameComm_construct(ch, cBENetworkInterface_networkOpt_D0A8.host);
     func_00266D58(VoipMan, info[0]);
     func_00266E30(VoipMan);
 }
@@ -1114,7 +1114,7 @@ struct sNetCfg_17DE70 {
     int host;
     unsigned short port;
 };
-extern sNetCfg_17DE70 D_00534B30_cfg __asm__("cBENetworkInterface_networkOpt");
+extern sNetCfg_17DE70 cBENetworkInterface_networkOpt_cfg __asm__("cBENetworkInterface_networkOpt");
 
 struct sVEnt_17DE70 { short delta; short index; void (*fn)(void*); };
 
@@ -1154,8 +1154,8 @@ extern "C" void func_0017DE70(cDebugLobbyScreen* self)
     cBENewPlayerInterface_setPlayerCtrlID(player, 1, -1);
     vcall1_17DE70(player);
     void* net = cBE_getInterface_Fv(SSXApp->BE, 7);
-    sNetCfg_17DE70* cfg = &D_00534B30_cfg;
-    D_00534B30_cfg.active = 1;
+    sNetCfg_17DE70* cfg = &cBENetworkInterface_networkOpt_cfg;
+    cBENetworkInterface_networkOpt_cfg.active = 1;
     cfg->host = LobbyMan_mLobbyMan->mIsHost;
     vcall1_17DE70(net);
     unsigned int ip;
@@ -1166,7 +1166,7 @@ extern "C" void func_0017DE70(cDebugLobbyScreen* self)
     }
     char buf[256];
     sprintf(buf, str_pct_d_pct_d_pct_d_pct_d, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
-    self->mGameChannel = cCommSystem_openDSockChannel(cCommSystem_mCommSystem, buf, D_00534B30_cfg.port, D_00534B30_cfg.host);
+    self->mGameChannel = cCommSystem_openDSockChannel(cCommSystem_mCommSystem, buf, cBENetworkInterface_networkOpt_cfg.port, cBENetworkInterface_networkOpt_cfg.host);
     self->mState = 0x10;
 }
 #endif

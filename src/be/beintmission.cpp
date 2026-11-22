@@ -138,7 +138,7 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCurrentCollectForMnt);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
-extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
+extern char cBELibrary_profileLib_raw[] __asm__("cBELibrary_profileLib");
 
 /**
  * Returns how many collectibles @p rider has found in 17 consecutive sections starting at @p idx.
@@ -156,7 +156,7 @@ extern "C" int cBEMissionInterface_getCurrentCollectForMnt(cBEMissionInterface* 
     int characterId = cBELibrary_getCharacterID(rider);
     int sum = 0;
     int off = idx * 12 + characterId * 3976 + profile * 39760;
-    char* record = D_004A6CA8_raw + off;
+    char* record = cBELibrary_profileLib_raw + off;
     for (int i = 0; i < 17; i++)
     {
         sum += *(signed char*)(record + 4);
@@ -174,7 +174,7 @@ int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 extern int D_005305F0[];
 // Byte view of the profile table; the unit declares cBELibrary_profileLib later with a struct type.
-extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
+extern char cBELibrary_profileLib_raw[] __asm__("cBELibrary_profileLib");
 
 /**
  * Returns how many collectibles @p rider has found in section @p idx + the race's location (D_005305F0): the count
@@ -189,7 +189,7 @@ extern "C" int cBEMissionInterface_getCurrentCollectByType(cBEMissionInterface* 
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
     int off = (idx + D_005305F0[0]) * 12 + characterId * 3976 + profile * 39760;
-    char* record = D_004A6CA8_raw + off;
+    char* record = cBELibrary_profileLib_raw + off;
     return *(signed char*)(record + 4);
 }
 #endif
@@ -201,7 +201,7 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCurrentCollectForSection);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 // Byte view of the profile table; the unit declares cBELibrary_profileLib later with a struct type.
-extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
+extern char cBELibrary_profileLib_raw[] __asm__("cBELibrary_profileLib");
 
 /**
  * Returns how many collectibles @p rider has found in location @p idx: the count byte of its collect record (a
@@ -217,7 +217,7 @@ extern "C" int cBEMissionInterface_getCurrentCollectForSection(cBEMissionInterfa
     int characterId = cBELibrary_getCharacterID(rider);
     int sum = 0;
     int off = idx * 12 + characterId * 3976 + profile * 39760;
-    char* record = D_004A6CA8_raw + off;
+    char* record = cBELibrary_profileLib_raw + off;
     for (int i = 0; i < 1; i++)
     {
         sum += *(signed char*)(record + i * 12 + 4);
@@ -248,7 +248,7 @@ struct sEconChar_001535C0
 };
 
 extern sMissionEntry_0043D950 cBELibrary_locationDB[];
-extern sEconChar_001535C0 D_004A6CA8_econ[][10] __asm__("cBELibrary_profileLib");
+extern sEconChar_001535C0 cBELibrary_profileLib_econ[][10] __asm__("cBELibrary_profileLib");
 
 /**
  * Counts the collectibles a rider's character has picked up across all locations of one peak.
@@ -271,7 +271,7 @@ extern "C" int cBEMissionInterface_getCurrentCollectForPeak(cBEMissionInterface*
         {
             if (cBELibrary_locationDB[j].owner == owner)
             {
-                sum += D_004A6CA8_econ[profile][character].records[i + j].count;
+                sum += cBELibrary_profileLib_econ[profile][character].records[i + j].count;
             }
         }
     }
@@ -389,7 +389,7 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCollectBits);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 extern int D_005305F0[];
-extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
+extern char cBELibrary_profileLib_raw[] __asm__("cBELibrary_profileLib");
 
 /**
  * Returns the address of the found-collectible bits (two words) of @p rider's collect record for section @p idx + the
@@ -403,7 +403,7 @@ extern "C" char* cBEMissionInterface_getCollectBits(cBEMissionInterface* self, i
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
-    char* characterBase = D_004A6CA8_raw + characterId * 3976;
+    char* characterBase = cBELibrary_profileLib_raw + characterId * 3976;
     // PORT: pointer held as int (index-first addu)
     char* charProfile = (char*)(profile * 0x9B50 + (int)characterBase);
     char* currentRecord = charProfile + (D_005305F0[0] * 12 + 4);
@@ -456,7 +456,7 @@ struct sCfg_1539A8 {
 };
 extern sCfg_1539A8 cBELibrary_raceDB;
 extern char D_004A6CB0_raw[] __asm__("D_004A6CB0");
-extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
+extern char cBELibrary_profileLib_raw[] __asm__("cBELibrary_profileLib");
 
 /**
  * Replaces the found-collectible bits of @p rider's collect record for section @p idx + the race's location
@@ -482,7 +482,7 @@ extern "C" void cBEMissionInterface_setBits(cBEMissionInterface* self, int rider
         if (*(unsigned int*)(D_004A6CB0_raw + off) & (1 << i))
             count++;
     }
-    char* record = D_004A6CA8_raw + ((idx + cBELibrary_raceDB.base) * 12 + characterId * 3976 + profile * 39760);
+    char* record = cBELibrary_profileLib_raw + ((idx + cBELibrary_raceDB.base) * 12 + characterId * 3976 + profile * 39760);
     *(signed char*)(record + 4) = count;
 }
 #endif
@@ -492,7 +492,7 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_setBit);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
-extern int D_005305B0_3B00[] __asm__("cBELibrary_raceDB");
+extern int cBELibrary_raceDB_3B00[] __asm__("cBELibrary_raceDB");
 
 struct sEconRecord_00153B00
 {
@@ -507,7 +507,7 @@ struct sEconChar_00153B00
     sEconRecord_00153B00 records[22];
     char pad[0xF88 - 22 * 12];
 };
-extern sEconChar_00153B00 D_004A6CA8_econ153B00[][10] __asm__("cBELibrary_profileLib");
+extern sEconChar_00153B00 cBELibrary_profileLib_econ153B00[][10] __asm__("cBELibrary_profileLib");
 
 // Bit-set view of the same records, based at D_004A6CAC (record + 4).
 struct sEconBits_00153B00
@@ -534,7 +534,7 @@ extern "C" void cBEMissionInterface_setBit(cBEMissionInterface* self, int rider,
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
-    int off = profile * 39760 + characterId * 3976 + D_005305B0_3B00[16] * 12;
+    int off = profile * 39760 + characterId * 3976 + cBELibrary_raceDB_3B00[16] * 12;
     // PORT: address accumulated in an int (base symbol unknown to alias analysis).
     int addr = idx * 12 + off;
     addr += (int)D_004A6CAC_bits153B00;
@@ -544,10 +544,10 @@ extern "C" void cBEMissionInterface_setBit(cBEMissionInterface* self, int rider,
     int n = 0;
     for (int scanBit = 0; scanBit < 64; scanBit++)
     {
-        if (D_004A6CAC_bits153B00[profile][characterId].recs[D_005305B0_3B00[16]][idx].bits[scanBit / 32] & (1 << scanBit))
+        if (D_004A6CAC_bits153B00[profile][characterId].recs[cBELibrary_raceDB_3B00[16]][idx].bits[scanBit / 32] & (1 << scanBit))
             n++;
     }
-    D_004A6CA8_econ153B00[profile][characterId].records[idx + D_005305B0_3B00[16]].count = n;
+    cBELibrary_profileLib_econ153B00[profile][characterId].records[idx + cBELibrary_raceDB_3B00[16]].count = n;
 }
 #endif
 
@@ -561,7 +561,7 @@ struct sMissionDefView_00153C88
     int f4;
     char pad_0x08[0x1C];
 };
-extern sMissionDefView_00153C88 D_0043EE10_v00153C88[] __asm__("cBELibrary_missionInfo");
+extern sMissionDefView_00153C88 cBELibrary_missionInfo_v00153C88[] __asm__("cBELibrary_missionInfo");
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
 class cMissionObj_00153C88
@@ -584,7 +584,7 @@ public:
 extern "C" void cBEMissionInterface_getMissionName(cBEMissionInterface* self, int id)
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
-    ((cMissionObj_00153C88*)(void*)SSXApp->FELocale)->getStringByHash(D_0043EE10_v00153C88[i].f4);
+    ((cMissionObj_00153C88*)(void*)SSXApp->FELocale)->getStringByHash(cBELibrary_missionInfo_v00153C88[i].f4);
 }
 #endif
 
@@ -599,7 +599,7 @@ struct sMissionDefView_00153CD8
     int f8;
     char pad_0x0C[0x18];
 };
-extern sMissionDefView_00153CD8 D_0043EE10_v00153CD8[] __asm__("cBELibrary_missionInfo");
+extern sMissionDefView_00153CD8 cBELibrary_missionInfo_v00153CD8[] __asm__("cBELibrary_missionInfo");
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
 class cMissionObj_00153CD8
@@ -623,7 +623,7 @@ public:
 extern "C" void cBEMissionInterface_getMissionShortDesc(cBEMissionInterface* self, int id)
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
-    ((cMissionObj_00153CD8*)(void*)SSXApp->FELocale)->getStringByHash(D_0043EE10_v00153CD8[i].f8);
+    ((cMissionObj_00153CD8*)(void*)SSXApp->FELocale)->getStringByHash(cBELibrary_missionInfo_v00153CD8[i].f8);
 }
 #endif
 
@@ -639,7 +639,7 @@ struct sMissionDefView_00153D28
     int fC;
     char pad_0x10[0x14];
 };
-extern sMissionDefView_00153D28 D_0043EE10_v00153D28[] __asm__("cBELibrary_missionInfo");
+extern sMissionDefView_00153D28 cBELibrary_missionInfo_v00153D28[] __asm__("cBELibrary_missionInfo");
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
 class cMissionObj_00153D28
@@ -662,7 +662,7 @@ public:
 extern "C" void cBEMissionInterface_getMissionLongDesc(cBEMissionInterface* self, int id)
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
-    ((cMissionObj_00153D28*)(void*)SSXApp->FELocale)->getStringByHash(D_0043EE10_v00153D28[i].fC);
+    ((cMissionObj_00153D28*)(void*)SSXApp->FELocale)->getStringByHash(cBELibrary_missionInfo_v00153D28[i].fC);
 }
 #endif
 
@@ -793,7 +793,7 @@ struct sMissionDefView_00153F30
     int f14;
     char pad_0x18[0xC];
 };
-extern sMissionDefView_00153F30 D_0043EE10_v00153F30[] __asm__("cBELibrary_missionInfo");
+extern sMissionDefView_00153F30 cBELibrary_missionInfo_v00153F30[] __asm__("cBELibrary_missionInfo");
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
 /**
@@ -805,7 +805,7 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
 extern "C" int cBEMissionInterface_getLocationID(cBEMissionInterface* self, int id)
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
-    return D_0043EE10_v00153F30[i].f10;
+    return cBELibrary_missionInfo_v00153F30[i].f10;
 }
 #endif
 //100%
@@ -820,7 +820,7 @@ struct sMissionDefView_00153F68
     int f14;
     char pad_0x18[0xC];
 };
-extern sMissionDefView_00153F68 D_0043EE10_v00153F68[] __asm__("cBELibrary_missionInfo");
+extern sMissionDefView_00153F68 cBELibrary_missionInfo_v00153F68[] __asm__("cBELibrary_missionInfo");
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
 /**
@@ -832,7 +832,7 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
 extern "C" int cBEMissionInterface_getPoints(cBEMissionInterface* self, int id)
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
-    return D_0043EE10_v00153F68[i].f14;
+    return cBELibrary_missionInfo_v00153F68[i].f14;
 }
 #endif
 
@@ -854,7 +854,7 @@ struct sMissionDefView_0043EE10
     char pad_0x20[0x2];
     short value;        // 0x22
 };
-extern sMissionDefView_0043EE10 D_0043EE10_view[] __asm__("cBELibrary_missionInfo");
+extern sMissionDefView_0043EE10 cBELibrary_missionInfo_view[] __asm__("cBELibrary_missionInfo");
 
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
@@ -868,7 +868,7 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
 extern "C" short cBEMissionInterface_getDiffLevel(cBEMissionInterface* self, int id)
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
-    return D_0043EE10_view[i].field_0x18;
+    return cBELibrary_missionInfo_view[i].field_0x18;
 }
 #endif
 
@@ -878,7 +878,7 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNextMissionID);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // The unit's sMissionDef_0043EE10 is defined later (with cBEMissionInterface_getMissionIdx) and lacks
 // the fields at 0x18/0x1C; this local view of the same table binds to cBELibrary_missionInfo.
-extern sMissionDefView_0043EE10 D_0043EE10_view[] __asm__("cBELibrary_missionInfo");
+extern sMissionDefView_0043EE10 cBELibrary_missionInfo_view[] __asm__("cBELibrary_missionInfo");
 
 extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int id);
 
@@ -895,7 +895,7 @@ extern "C" int cBEMissionInterface_getMissionIdx(cBEMissionInterface* self, int 
 extern "C" int cBEMissionInterface_getNextMissionID(cBEMissionInterface* self, int id)
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
-    return D_0043EE10_view[i].field_0x1C;
+    return cBELibrary_missionInfo_view[i].field_0x1C;
 }
 #endif
 
@@ -1126,7 +1126,7 @@ struct sMissionDef_00154368
 };
 
 extern sMissionEntry_0043D950 cBELibrary_locationDB[];
-extern sMissionDef_00154368 D_0043EE10_00154368[] __asm__("cBELibrary_missionInfo");
+extern sMissionDef_00154368 cBELibrary_missionInfo_00154368[] __asm__("cBELibrary_missionInfo");
 
 /**
  * Counts the missions set on any location of one peak.
@@ -1143,7 +1143,7 @@ extern "C" int cBEMissionInterface_getNumberMissionsOnPeak(cBEMissionInterface* 
         {
             if (cBELibrary_locationDB[j].owner == owner)
             {
-                if (D_0043EE10_00154368[i].group == j)
+                if (cBELibrary_missionInfo_00154368[i].group == j)
                 {
                     n++;
                 }
@@ -1210,7 +1210,7 @@ struct sEconFlags_001544D0
     unsigned int flags[88];
     char pad_0x278[0xF88 - 0x118 - 88 * 4];
 };
-extern sEconFlags_001544D0 D_004A6CA8_flags[][10] __asm__("cBELibrary_profileLib");
+extern sEconFlags_001544D0 cBELibrary_profileLib_flags[][10] __asm__("cBELibrary_profileLib");
 
 /**
  * Counts the missions one profile's character has completed on a peak.
@@ -1235,7 +1235,7 @@ extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(cBEMis
     {
         if (D_0043D9A4[cBELibrary_missionInfo[i].group].owner == owner)
         {
-            n += (D_004A6CA8_flags[profile][character].flags[i] >> 3) & 1;
+            n += (cBELibrary_profileLib_flags[profile][character].flags[i] >> 3) & 1;
         }
     }
     return n;

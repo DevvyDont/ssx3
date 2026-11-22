@@ -1560,7 +1560,7 @@ struct sSmMat_AC20 {
     }
 } __attribute__((aligned(16)));
 
-extern sSmVec4_AC20 D_004FF160_AC20 __asm__("t4vect_ZAxis");
+extern sSmVec4_AC20 t4vect_ZAxis_AC20 __asm__("t4vect_ZAxis");
 extern void cSpline_getPos_AC20(void* out, sSmVec4_AC20* pos, sSmVec4_AC20* dir, sSmVec4_AC20* c, float t) __asm__("cSpline_getPos");
 extern "C" float func_0031C228(float);
 extern "C" void fSinCos(float* s, float* c, float angle);
@@ -1738,7 +1738,7 @@ extern "C" void* cMultiSplineModifier_updateNodes(cMultiSplineModifier* multiSpl
         }
     }
     if (self->HeadTweak != 0.0f) {
-        rot.setAxisRot(D_004FF160_AC20, *(float*)&sub->OrientType);
+        rot.setAxisRot(t4vect_ZAxis_AC20, *(float*)&sub->OrientType);
     }
     tMultiNode* pt = (self->Nodes);
     for (i = 0; i < self->NumModels; i++, pt++) {

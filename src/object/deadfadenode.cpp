@@ -355,7 +355,7 @@ typedef sDfMat_350CB8 (*DfViewFn_350CB8)(void*);
 typedef int (*DfCullFn_350CB8)(void*, sDfVec_350CB8*, sDfVec_350CB8*, const sDfMat_350CB8&);
 typedef void (*DfDrawFn_350CB8)(void*, void*, void*, void*, float, void*, void*, int);
 
-extern sDfMat_350CB8 D_004FF1A0_350CB8 __asm__("t4mat_Identity");
+extern sDfMat_350CB8 t4mat_Identity_350CB8 __asm__("t4mat_Identity");
 
 #define OBJ_350CB8(s) (*(sDfObj_350CB8**)((char*)(s) + 0x18))
 
@@ -425,7 +425,7 @@ extern "C" void cDeadFadeNode_render(cDeadFadeNode* self)
         }
     }
     sDfMat_350CB8 xf;
-    MatCopy_350CB8(&xf, &D_004FF1A0_350CB8);
+    MatCopy_350CB8(&xf, &t4mat_Identity_350CB8);
     sDfVec_350CB8 offset;
     offset.x = 0.0f;
     offset.y = 0.0f;

@@ -47,7 +47,7 @@ struct sWPQueryType {
 };
 
 
-extern cWorldPainterQuery* D_004A3880_0410 __asm__("cWorldPainterQuery_m_queryListStart");
+extern cWorldPainterQuery* cWorldPainterQuery_m_queryListStart_0410 __asm__("cWorldPainterQuery_m_queryListStart");
 
 /**
  * Constructs a world painter query for a region type, creates the matching query implementation and links the
@@ -113,8 +113,8 @@ extern "C" cWorldPainterQuery* cWorldPainterQuery_cWorldPainterQuery(cWorldPaint
         self->m_data = (tWPInGameData*)tWPInGameData_Danger_tWPInGameData_Danger(cMemMan_alloc(0x18, str_tWPIGD_Danger, 0, 0));
         break;
     }
-    self->m_next = (cWorldPainterQuery*)D_004A3880_0410;
-    D_004A3880_0410 = (self);
+    self->m_next = (cWorldPainterQuery*)cWorldPainterQuery_m_queryListStart_0410;
+    cWorldPainterQuery_m_queryListStart_0410 = (self);
     return (self);
 }
 #endif

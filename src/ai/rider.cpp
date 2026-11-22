@@ -797,9 +797,9 @@ extern "C" void cRider_updateActiveLights(cRider*);
 extern "C" void func_002105B0(int);
 
 // The unit declares these later with their own vector types; bind them by asm label.
-extern const t4Vector D_004FF120_D660 __asm__("t4vect_Zero");
-extern const t4Vector D_004FF130_D660 __asm__("t4vect_Origin");
-extern const t4Vector D_004FF160_D660 __asm__("t4vect_ZAxis");
+extern const t4Vector t4vect_Zero_D660 __asm__("t4vect_Zero");
+extern const t4Vector t4vect_Origin_D660 __asm__("t4vect_Origin");
+extern const t4Vector t4vect_ZAxis_D660 __asm__("t4vect_ZAxis");
 
 
 
@@ -1095,13 +1095,13 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
     ClearCache_D660((char*)self->mLineHint);
     ClearCache_D660((char*)self->mWallHint);
     t4Vector placePos = *pos;
-    t4Vector n = D_004FF160_D660;
+    t4Vector n = t4vect_ZAxis_D660;
     float angle = Atan2_D660(dir[1], dir[0]);
     self->mVisitedIds = 0xFFFFFFFF;
     if (drop >= 0.0f)
     {
-        t4Vector lo = Add_D660(*pos, Scale_D660(D_004FF160_D660, -7000.0f));
-        t4Vector hi = Add_D660(*pos, Scale_D660(D_004FF160_D660, 200.0f));
+        t4Vector lo = Add_D660(*pos, Scale_D660(t4vect_ZAxis_D660, -7000.0f));
+        t4Vector hi = Add_D660(*pos, Scale_D660(t4vect_ZAxis_D660, 200.0f));
         tIntersectInfo hit;
         cWorldLine ray;
         cWorldLine_cWorldLine_D660(&ray, lo, hi, 2, 0.9791666865348816f);
@@ -1110,12 +1110,12 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
             placePos = hit.Ipos;
             n = hit.Inorm;
         }
-        AddEq_D660(placePos, Scale_D660(D_004FF160_D660, drop));
+        AddEq_D660(placePos, Scale_D660(t4vect_ZAxis_D660, drop));
     }
     self->mPosition = placePos;
-    *(sQuat_D660*)&self->mRotation = AxisAngle_D660(D_004FF160_D660, angle - 1.5707963705062866f);
+    *(sQuat_D660*)&self->mRotation = AxisAngle_D660(t4vect_ZAxis_D660, angle - 1.5707963705062866f);
     self->mUseRootPoseOverride = 0;
-    t4Vector axis = Cross_D660(D_004FF160_D660, n);
+    t4Vector axis = Cross_D660(t4vect_ZAxis_D660, n);
     float len = Length_D660(axis);
     if (len > 0.0010000000474974513f)
     {
@@ -1126,14 +1126,14 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
     }
     cRider_updateOrientationImplicit(self);
     self->mGroundNormal = n;
-    self->GroundVelocity = D_004FF120_D660;
+    self->GroundVelocity = t4vect_Zero_D660;
     self->mGroundForward = Normalize_D660(SubV_D660(self->mMatrix.row[1], Scale_D660(self->mGroundNormal, DotV_D660(self->mMatrix.row[1], self->mGroundNormal))));
     self->mGroundSide = Cross_D660(self->mGroundNormal, self->mGroundForward);
-    self->mVelocity = D_004FF120_D660;
+    self->mVelocity = t4vect_Zero_D660;
     self->mGroundContactPoint = self->mPosition;
     self->mSurfaceType = 0;
     self->unk_454 = 0.0f;
-    self->mImpulse = D_004FF120_D660;
+    self->mImpulse = t4vect_Zero_D660;
     self->mImpactAccum = 0.0f;
     self->mImpactAccum2 = 0.0f;
     InitChannel_D660(self, 0, 0.0f, 0.0f);
@@ -1164,7 +1164,7 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
     self->RailslideMode = 0;
     self->HandplantMode = 0;
     self->PressMode = 0;
-    self->PunchVect = D_004FF120_D660;
+    self->PunchVect = t4vect_Zero_D660;
     self->PunchStrength = 0.0f;
     self->ReactionEventTick = -1;
     self->ReactionEventType = 0;
@@ -1176,8 +1176,8 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
     if (self->IsRidingFakie != 0)
         yaw = 3.1415927410125732f;
     cRiderAnim* riderAnim = self->mRiderAnim;
-    riderAnim->OrientationOffset.P = D_004FF130_D660;
-    *(sQuat_D660*)&riderAnim->OrientationOffset.Q = AxisAngle_D660(D_004FF160_D660, -yaw);
+    riderAnim->OrientationOffset.P = t4vect_Origin_D660;
+    *(sQuat_D660*)&riderAnim->OrientationOffset.Q = AxisAngle_D660(t4vect_ZAxis_D660, -yaw);
     cRiderAnimBase_play(self->mRiderAnim, anim, 0, -1.0f);
     cRiderAnimBase_setupAnimation(self->mRiderAnim, 0);
     cRider_updateAnimation(self, 1.0f);
@@ -3070,7 +3070,7 @@ extern "C" void cRider_SetNISGroundVectors(void* self, void* p);
 extern "C" void cRider_updateTerminalVelocity(void* self);
 
 // t4vect_Zero is declared later in the unit as a 4-aligned sVec4; this view gives the lq/sq copy.
-extern t4Vector D_004FF120_q120F20 __asm__("t4vect_Zero");
+extern t4Vector t4vect_Zero_q120F20 __asm__("t4vect_Zero");
 
 static inline int IsState1_120F20(void* obj)
 {
@@ -3117,7 +3117,7 @@ skip:
             refPos = (char*)&self->mAnimModel->bones[self->mBoneBoardRoot];
         cRider_SetNISGroundVectors(self, refPos);
     }
-    *(&self->mModelOffset) = D_004FF120_q120F20;
+    *(&self->mModelOffset) = t4vect_Zero_q120F20;
     self->CollideIntersectInfo.Inst = 0;
     self->mVisitedIds = 0xFFFFFFFF;
     cRider_updateTerminalVelocity(self);
@@ -3529,7 +3529,7 @@ INCLUDE_ASM("ai/rider", cRider_alignRiderAxis);
 // caller (merging them changes code), so they are kept apart.
 // sVec4 stores x, y, z, w.
 // sVec4W stores w first, then x, y, z.
-extern t4Vector D_004FF120_1AA0 __asm__("t4vect_Zero");
+extern t4Vector t4vect_Zero_1AA0 __asm__("t4vect_Zero");
 extern t4Vector t4vect_XAxis;
 extern "C" void tquat_prerotateto(void* q, const void* a, const void* b);
 extern "C" float func_0031C128(float x);
@@ -3678,7 +3678,7 @@ extern "C" void cRider_alignRiderAxis(cRider* self, const sVec4* up, const sVec4
                     1.0f - 2.0f * (ROT_1AA0.x * ROT_1AA0.x + ROT_1AA0.y * ROT_1AA0.y), 0.0f);
         tquat_prerotateto(&targetRot, &cur, up);
     }
-    if (neq_1AA0(fwd, D_004FF120_1AA0)) {
+    if (neq_1AA0(fwd, t4vect_Zero_1AA0)) {
         sVec4 rotatedFwd = QuatRot_1AA0(targetRot, *fwd);
         float heading = -Atan2_1AA0(rotatedFwd.x, rotatedFwd.y);
         Rotate_1AA0(targetRot, *up, heading);
@@ -4057,7 +4057,7 @@ extern "C" void func_00121F30(cRider* self);
 extern "C" void cAnimModel_render(void* model, int lod, int a, int b);
 
 struct sVec4_122448 { float v[4]; };
-extern sVec4_122448 D_004FF120_v122448 __asm__("t4vect_Zero");
+extern sVec4_122448 t4vect_Zero_v122448 __asm__("t4vect_Zero");
 
 
 /**
@@ -4093,7 +4093,7 @@ extern "C" void cRider_renderBody(cRider* self)
         cAnimModel_render(self->mAnimModel, self->mLOD, additiveBoard, additivePlayer);
         cPS2GraphicsMan* grManReset = GrMan;
         sVEntry<void(void*, float, void*)>* vt3 = (sVEntry<void(void*, float, void*)>*)grManReset->mVtbl;
-        vt3[27].fn(vthis(grManReset, vt3[27]), 0.0f, &D_004FF120_v122448);
+        vt3[27].fn(vthis(grManReset, vt3[27]), 0.0f, &t4vect_Zero_v122448);
     }
     if ((int)SSXApp->Game->ViewMan->m_uiCurrentView == 0 || self->unk_B1C)
     {
@@ -5078,8 +5078,8 @@ struct sV_3640
     sV_3640(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-extern sV_3640 D_004FF120_3640 __asm__("t4vect_Zero");
-extern sV_3640 D_004FF160_3640 __asm__("t4vect_ZAxis");
+extern sV_3640 t4vect_Zero_3640 __asm__("t4vect_Zero");
+extern sV_3640 t4vect_ZAxis_3640 __asm__("t4vect_ZAxis");
 
 static inline sV_3640 AxisAngle_3640(const sV_3640& axis, float angle)
 {
@@ -5218,10 +5218,10 @@ extern "C" void cRider_OnStartObjectUse(cRider* self)
                   self->unk_AF4 + ry,
                   self->unk_AF0 + rz);
     float rx = self->unk_748;
-    *(sV_3640*)&self->mRotation = AxisAngle_3640(D_004FF160_3640, self->unk_AF8 + rx - 1.5707963705062866f);
+    *(sV_3640*)&self->mRotation = AxisAngle_3640(t4vect_ZAxis_3640, self->unk_AF8 + rx - 1.5707963705062866f);
     *(sV_3640*)&self->mRotation = QuatMul_3640(poseVec, *(sV_3640*)&self->mRotation);
     cRider_updateOrientationImplicit(self);
-    *(sV_3640*)&self->mVelocity = D_004FF120_3640;
+    *(sV_3640*)&self->mVelocity = t4vect_Zero_3640;
     self->unk_B04 = zeroF;
     cRiderHandler_resetRiderFX(self->mRiderHandler);
     initTrack_3640(self, 0x1F0, zeroF, zeroF);
@@ -5495,7 +5495,7 @@ extern char gPaths[];
 int GetSSXActorHeader(void* self);
 
 
-extern t4Vector D_004FF160_3F38 __asm__("t4vect_ZAxis");
+extern t4Vector t4vect_ZAxis_3F38 __asm__("t4vect_ZAxis");
 
 
 
@@ -5647,14 +5647,14 @@ extern "C" t4Vector cRider_GetNISEndPosition(cRider* self)
         lift = 2999.942626953125f;
         break;
     }
-    t4Vector lo = Add_3F38(pos, Scale_3F38(D_004FF160_3F38, -7000.0f));
-    t4Vector hi = Add_3F38(pos, Scale_3F38(D_004FF160_3F38, 200.0f));
+    t4Vector lo = Add_3F38(pos, Scale_3F38(t4vect_ZAxis_3F38, -7000.0f));
+    t4Vector hi = Add_3F38(pos, Scale_3F38(t4vect_ZAxis_3F38, 200.0f));
     tIntersectInfo hit;
     cWorldLine ray;
     cWorldLine_cWorldLine_3F38(&ray, lo, hi, 2, 0.9791666865348816f);
     if (cBXNash_terrainIntersect1(SSXApp->Game->BXNash, &ray, &hit, 0) >= 0.0f)
         pos = hit.Ipos;
-    AddTo_3F38(pos, Scale_3F38(D_004FF160_3F38, lift));
+    AddTo_3F38(pos, Scale_3F38(t4vect_ZAxis_3F38, lift));
     return pos;
 }
 #endif
@@ -5697,8 +5697,8 @@ extern "C" void cRider_EulerToQuat(cRider* self, tQuaternion* out, float rx, flo
 INCLUDE_ASM("ai/rider", cRider_SetNISGroundVectors);
 #ifdef SKIP_ASM
 
-extern t4Vector D_004FF120_42B0 __asm__("t4vect_Zero");
-extern t4Vector D_004FF160_42B0 __asm__("t4vect_ZAxis");
+extern t4Vector t4vect_Zero_42B0 __asm__("t4vect_Zero");
+extern t4Vector t4vect_ZAxis_42B0 __asm__("t4vect_ZAxis");
 
 
 
@@ -5898,8 +5898,8 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
     }
     if (hitDist < 0.0f) {
         self->unk_B00 = 0;
-        *(&self->mGroundNormal) = D_004FF160_42B0;
-        *(&self->GroundVelocity) = D_004FF120_42B0;
+        *(&self->mGroundNormal) = t4vect_ZAxis_42B0;
+        *(&self->GroundVelocity) = t4vect_Zero_42B0;
         *(&self->mGroundForward) = Normalize_42B0(SubV_42B0(*(&self->mMatrix.row[1]), Scale_42B0(*(&self->mGroundNormal), DotV_42B0(*(&self->mMatrix.row[1]), *(&self->mGroundNormal)))));
         *(&self->mGroundSide) = Cross_42B0(*(&self->mGroundNormal), *(&self->mGroundForward));
         self->mSurfaceType = 0;
@@ -5983,7 +5983,7 @@ struct sQ_124788
     sQ_124788(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-extern sQ_124788 D_004FF130_124788 __asm__("t4vect_Origin");
+extern sQ_124788 t4vect_Origin_124788 __asm__("t4vect_Origin");
 
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
@@ -6133,7 +6133,7 @@ static inline tPose Invert_124788(const tPose& a)
 {
     tPose r;
     (*(sQ_124788*)&r.Q) = Conj_124788(a);
-    (*(sQ_124788*)&r.P) = Add_124788(Scale_124788(Rot_124788((*(sQ_124788*)&r.Q), Sub_124788((*(sQ_124788*)&a.P), D_004FF130_124788)), -1.0f), D_004FF130_124788);
+    (*(sQ_124788*)&r.P) = Add_124788(Scale_124788(Rot_124788((*(sQ_124788*)&r.Q), Sub_124788((*(sQ_124788*)&a.P), t4vect_Origin_124788)), -1.0f), t4vect_Origin_124788);
     return r;
 }
 
@@ -6141,7 +6141,7 @@ static inline tPose Combine_124788(const tPose& a, const tPose& b)
 {
     tPose r;
     (*(sQ_124788*)&r.Q) = QuatMul_124788((*(sQ_124788*)&a.Q), (*(sQ_124788*)&b.Q));
-    (*(sQ_124788*)&r.P) = Add_124788(Rot_124788((*(sQ_124788*)&a.Q), Sub_124788((*(sQ_124788*)&b.P), D_004FF130_124788)), (*(sQ_124788*)&a.P));
+    (*(sQ_124788*)&r.P) = Add_124788(Rot_124788((*(sQ_124788*)&a.Q), Sub_124788((*(sQ_124788*)&b.P), t4vect_Origin_124788)), (*(sQ_124788*)&a.P));
     return r;
 }
 

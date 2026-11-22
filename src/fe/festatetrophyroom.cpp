@@ -1507,7 +1507,7 @@ struct sTrophyRoom_001D5C28 {
     int state;          // 0x228
 };
 // PORT: cFEMemCard_mInstance holds the trophy room state pointer.
-extern sTrophyRoom_001D5C28* D_004A2028_tr __asm__("cFEMemCard_mInstance");
+extern sTrophyRoom_001D5C28* cFEMemCard_mInstance_tr __asm__("cFEMemCard_mInstance");
 
 /**
  * Memory card read progress callback: checks and loads a replay as it arrives.
@@ -1522,7 +1522,7 @@ extern sTrophyRoom_001D5C28* D_004A2028_tr __asm__("cFEMemCard_mInstance");
  */
 extern "C" int cFEMemCard_callbackReadUpdate(int size)
 {
-    sTrophyRoom_001D5C28* memCard = D_004A2028_tr;
+    sTrophyRoom_001D5C28* memCard = cFEMemCard_mInstance_tr;
     int mode = memCard->mode;
     if (mode != 1) {
         return 1;
@@ -1531,15 +1531,15 @@ extern "C" int cFEMemCard_callbackReadUpdate(int size)
         memCard->pending = 0;
         char* base = memCard->cur;
         int crc = MEM_crc16(memCard->cur, cBE_getDataSize(cBE_getBE()) - 4, 64490);
-        D_004A2028_tr->cur += cBE_getDataSize(cBE_getBE()) - 4;
+        cFEMemCard_mInstance_tr->cur += cBE_getDataSize(cBE_getBE()) - 4;
         int stored = 0;
-        memcpy(&stored, D_004A2028_tr->cur, 4);
-        D_004A2028_tr->cur += 4;
+        memcpy(&stored, cFEMemCard_mInstance_tr->cur, 4);
+        cFEMemCard_mInstance_tr->cur += 4;
         if (crc != stored) {
             cBESaveInterface_releaseReplayBuffer(cBE_getInterface_Fv(cBE_getBE(), 5));
-            D_004A2028_tr->buf = 0;
-            D_004A2028_tr->cur = 0;
-            D_004A2028_tr->state = 0;
+            cFEMemCard_mInstance_tr->buf = 0;
+            cFEMemCard_mInstance_tr->cur = 0;
+            cFEMemCard_mInstance_tr->state = 0;
             return 0;
         }
         gWeHaveToClearTheBackEnd = mode;
@@ -1549,8 +1549,8 @@ extern "C" int cFEMemCard_callbackReadUpdate(int size)
         if (size > 0x4000) {
             size = 0x4000;
         }
-        cMCOverlayManager_ReadData(cSSXApp_getMCManager(SSXApp), D_004A2028_tr->cur, size);
-        D_004A2028_tr->cur += size;
+        cMCOverlayManager_ReadData(cSSXApp_getMCManager(SSXApp), cFEMemCard_mInstance_tr->cur, size);
+        cFEMemCard_mInstance_tr->cur += size;
     }
     return 1;
 }
@@ -1604,7 +1604,7 @@ extern "C" void cMCOverlayManager_readFile(void* self, int a, int b, int c);
 
 
 // PORT: cFEMemCard_mInstance holds the trophy room state pointer.
-extern cFEMemCard* D_004A2028_tr5 __asm__("cFEMemCard_mInstance");
+extern cFEMemCard* cFEMemCard_mInstance_tr5 __asm__("cFEMemCard_mInstance");
 extern "C" int cBESaveInterface_getReplayBuffer(void* iface);
 extern "C" void cFEMemCard_createReadBuffer(cFEMemCard* self, int size);
 
@@ -1620,7 +1620,7 @@ extern "C" void cFEMemCard_readStart()
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
     cMCOverlayManager* app = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-    cFEMemCard* memCard = D_004A2028_tr5;
+    cFEMemCard* memCard = cFEMemCard_mInstance_tr5;
     memCard->mIsLoadWait = 1;
     memCard->mIsLoadDoneOK = 0;
     app->mFileCursor = memCard->mSlot;
@@ -1628,23 +1628,23 @@ extern "C" void cFEMemCard_readStart()
     switch (mode) {
     case 2: {
         int n = cBESaveInterface_getSaveGameSize_r();
-        cFEMemCard_createReadBuffer(D_004A2028_tr5, n);
-        cMCOverlayManager_readFile(app, D_004A2028_tr5->mSlot, ((int)D_004A2028_tr5->mpReadBuffer), n);
+        cFEMemCard_createReadBuffer(cFEMemCard_mInstance_tr5, n);
+        cMCOverlayManager_readFile(app, cFEMemCard_mInstance_tr5->mSlot, ((int)cFEMemCard_mInstance_tr5->mpReadBuffer), n);
         break;
     }
     case 1: {
-        D_004A2028_tr5->mBufferState = 2;
+        cFEMemCard_mInstance_tr5->mBufferState = 2;
         int replayBuffer = cBESaveInterface_getReplayBuffer(iface);
-        cFEMemCard* memCardInst = D_004A2028_tr5;
+        cFEMemCard* memCardInst = cFEMemCard_mInstance_tr5;
         (*(int*)&memCardInst->mpStartReadBuffer) = (*(int*)&memCardInst->mpReadBuffer) = replayBuffer;
         cMCOverlayManager_readFile(app, memCardInst->mSlot, ((int)memCardInst->mpReadBuffer), cBE_getDataSize(cBE_getBE()));
-        D_004A2028_tr5->mLoadBEData = mode;
+        cFEMemCard_mInstance_tr5->mLoadBEData = mode;
         break;
     }
     case 0: {
         int n = cBESaveInterface_getSaveProfileSize();
-        cFEMemCard_createReadBuffer(D_004A2028_tr5, n);
-        cMCOverlayManager_readFile(app, D_004A2028_tr5->mSlot, ((int)D_004A2028_tr5->mpReadBuffer), n);
+        cFEMemCard_createReadBuffer(cFEMemCard_mInstance_tr5, n);
+        cMCOverlayManager_readFile(app, cFEMemCard_mInstance_tr5->mSlot, ((int)cFEMemCard_mInstance_tr5->mpReadBuffer), n);
         break;
     }
     }
@@ -1690,11 +1690,11 @@ struct sSndCfg_1D5F40 {
     char rest[0x288 - 4];
 };
 // PORT: cBEOptionInterface_mOption is viewed with different types across the program; view bound by asm label
-extern sSndCfg_1D5F40 D_00535610_1D5F40 __asm__("cBEOptionInterface_mOption");
+extern sSndCfg_1D5F40 cBEOptionInterface_mOption_1D5F40 __asm__("cBEOptionInterface_mOption");
 
 static inline sSndCfg_1D5F40 Cfg_1D5F40()
 {
-    return D_00535610_1D5F40;
+    return cBEOptionInterface_mOption_1D5F40;
 }
 
 

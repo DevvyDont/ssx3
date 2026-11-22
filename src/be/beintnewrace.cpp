@@ -687,7 +687,7 @@ struct sPrizeRow_1453D0
     short prize[6];
 };
 // Typed view of cBELibrary_simDB (declared later in this unit with another layout).
-extern sPrizeRow_1453D0 D_00440B38_1453D0[] __asm__("cBELibrary_simDB");
+extern sPrizeRow_1453D0 cBELibrary_simDB_1453D0[] __asm__("cBELibrary_simDB");
 
 /**
  * Returns a simulated rider's score for round @p kind: the cBELibrary_simDB row of the race's location and that round,
@@ -712,9 +712,9 @@ extern "C" int cBENewRaceInterface_getSimThreshold(cBENewRaceInterface* self, in
     int key = cBENewRaceInterface_newRace.iLocationIdx;
     for (int i = 0; i < 30; i++)
     {
-        if (D_00440B38_1453D0[i].key == key && D_00440B38_1453D0[i].kind == k)
+        if (cBELibrary_simDB_1453D0[i].key == key && cBELibrary_simDB_1453D0[i].kind == k)
         {
-            int base = (int)(D_00440B38_1453D0[i].prize[place] * 100 * difficultyScale);
+            int base = (int)(cBELibrary_simDB_1453D0[i].prize[place] * 100 * difficultyScale);
             int jitter = GMrand() % 200;
             base += (int)(base * (jitter - 100) * 0.0005000000237487257f);
             return base - base % 20;

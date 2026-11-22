@@ -450,7 +450,7 @@ struct sPtCtx1380 {
 };
 
 extern char* cGraphicsMan_TheGraphicsMan_particle __asm__("cGraphicsMan_TheGraphicsMan");
-extern sPtCtx1380* D_004A5B80_ctx __asm__("cGraphicsMan_TheGraphicsMan");
+extern sPtCtx1380* cGraphicsMan_TheGraphicsMan_ctx __asm__("cGraphicsMan_TheGraphicsMan");
 extern int gBlendTable[];
 
 
@@ -470,7 +470,7 @@ extern "C" void cDynamicEmitter_render(cDynamicEmitter* self, int blend)
     if (self->m_enabled == 0) {
         return;
     }
-    sPtCtx1380* ctx = D_004A5B80_ctx;
+    sPtCtx1380* ctx = cGraphicsMan_TheGraphicsMan_ctx;
     if (self->m_enabledCount == 0) {
         return;
     }
@@ -626,7 +626,7 @@ struct sPtCtx1688 {
 };
 
 extern char* cGraphicsMan_TheGraphicsMan_particle __asm__("cGraphicsMan_TheGraphicsMan");
-extern sPtCtx1688* D_004A5B80_ctx1688 __asm__("cGraphicsMan_TheGraphicsMan");
+extern sPtCtx1688* cGraphicsMan_TheGraphicsMan_ctx1688 __asm__("cGraphicsMan_TheGraphicsMan");
 extern int gBlendTable[];
 
 
@@ -645,7 +645,7 @@ extern "C" void cDynamicColourEmitter_render(cDynamicColourEmitter* self, int bl
     if (self->m_enabled == 0) {
         return;
     }
-    sPtCtx1688* ctx = D_004A5B80_ctx1688;
+    sPtCtx1688* ctx = cGraphicsMan_TheGraphicsMan_ctx1688;
     if (self->m_enabledCount == 0) {
         return;
     }
@@ -1435,9 +1435,9 @@ extern int cTube_m_Enable;
 extern float cTube_m_ScaleWidth;
 extern float cTube_m_ScaleHeight;
 extern t4Vector t4vect_ZAxis;
-extern sPtVtx_26C8 D_00501440_v26C8[] __asm__("cSimpleTube_m_vertices");
-extern sPtRS_26C8 D_00501420_rs26C8 __asm__("sDrawState_s_defaultDrawState");
-extern cPS2GraphicsMan* D_004A5B80_ctx26C8 __asm__("cGraphicsMan_TheGraphicsMan");
+extern sPtVtx_26C8 cSimpleTube_m_vertices_v26C8[] __asm__("cSimpleTube_m_vertices");
+extern sPtRS_26C8 sDrawState_s_defaultDrawState_rs26C8 __asm__("sDrawState_s_defaultDrawState");
+extern cPS2GraphicsMan* cGraphicsMan_TheGraphicsMan_ctx26C8 __asm__("cGraphicsMan_TheGraphicsMan");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline t4Vector Sub_26C8(const t4Vector& a, const t4Vector& b)
@@ -1563,24 +1563,24 @@ extern "C" void cSimpleTube_render(cSimpleTube* self)
     SubEq_26C8(sideOffset, Scale_26C8(t4vect_ZAxis, cTube_m_ScaleHeight));
     SubEq_26C8(otherSideOffset, Scale_26C8(t4vect_ZAxis, cTube_m_ScaleHeight));
     for (int i = 0; i < self->m_numSegments + 1; i++) {
-        D_00501440_v26C8[2 * i].pos = Add_26C8((self->m_positions)[i], otherSideOffset);
-        D_00501440_v26C8[2 * i + 1].pos = (self->m_positions)[i];
-        D_00501440_v26C8[2 * (i + self->m_numSegments + 2)].pos = (self->m_positions)[i];
-        D_00501440_v26C8[((self->m_numSegments + i) << 1) + 5].pos = Add_26C8((self->m_positions)[i], sideOffset);
+        cSimpleTube_m_vertices_v26C8[2 * i].pos = Add_26C8((self->m_positions)[i], otherSideOffset);
+        cSimpleTube_m_vertices_v26C8[2 * i + 1].pos = (self->m_positions)[i];
+        cSimpleTube_m_vertices_v26C8[2 * (i + self->m_numSegments + 2)].pos = (self->m_positions)[i];
+        cSimpleTube_m_vertices_v26C8[((self->m_numSegments + i) << 1) + 5].pos = Add_26C8((self->m_positions)[i], sideOffset);
     }
-    D_00501440_v26C8[2 * self->m_numSegments + 2] = D_00501440_v26C8[2 * self->m_numSegments + 1];
-    D_00501440_v26C8[2 * self->m_numSegments + 3] = D_00501440_v26C8[2 * self->m_numSegments + 4];
-    cPS2GraphicsMan* ctx = D_004A5B80_ctx26C8;
+    cSimpleTube_m_vertices_v26C8[2 * self->m_numSegments + 2] = cSimpleTube_m_vertices_v26C8[2 * self->m_numSegments + 1];
+    cSimpleTube_m_vertices_v26C8[2 * self->m_numSegments + 3] = cSimpleTube_m_vertices_v26C8[2 * self->m_numSegments + 4];
+    cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan_ctx26C8;
     ((sPtRS_26C8*)ctx->m_pCurrentDrawState)[1] = ((sPtRS_26C8*)ctx->m_pCurrentDrawState)[0];
     (*(sPtRS_26C8**)&ctx->m_pCurrentDrawState)++;
-    *((sPtRS_26C8*)ctx->m_pCurrentDrawState) = D_00501420_rs26C8;
+    *((sPtRS_26C8*)ctx->m_pCurrentDrawState) = sDrawState_s_defaultDrawState_rs26C8;
     sPtVEntry_26C8* vt = ((sPtVEntry_26C8*)ctx->mVtbl);
-    vt[71].fn(vthis(ctx, vt[71]), ((self->m_numSegments + 1) << 2) | 2, D_00501440_v26C8, 0);
+    vt[71].fn(vthis(ctx, vt[71]), ((self->m_numSegments + 1) << 2) | 2, cSimpleTube_m_vertices_v26C8, 0);
     for (int i = 0; i < self->m_numSegments + 1; i++) {
-        D_00501440_v26C8[i].pos = (self->m_positions)[i];
+        cSimpleTube_m_vertices_v26C8[i].pos = (self->m_positions)[i];
     }
     vt = ((sPtVEntry_26C8*)ctx->mVtbl);
-    vt[73].fn(vthis(ctx, vt[73]), self->m_numSegments + 1, D_00501440_v26C8, 0);
+    vt[73].fn(vthis(ctx, vt[73]), self->m_numSegments + 1, cSimpleTube_m_vertices_v26C8, 0);
     (*(sPtRS_26C8**)&ctx->m_pCurrentDrawState)--;
 }
 #endif
@@ -4288,7 +4288,7 @@ struct sRect_7A10 {
 };
 
 
-extern sDrawState D_00501420_rs7A10 __asm__("sDrawState_s_defaultDrawState");
+extern sDrawState sDrawState_s_defaultDrawState_rs7A10 __asm__("sDrawState_s_defaultDrawState");
 extern char D_005059D8[];
 extern "C" void func_00363490(void* ring, unsigned int* a, int* x, unsigned int* b, int* y);
 extern "C" void* WaitSema(int sema);  // WaitSema (returns in $2: the call clobbers v0)
@@ -4412,7 +4412,7 @@ void cGfx_7A10::EndFrame_impl()
     gfxBase->mGifCursor = gfxBase->mGifHalfStart = gfxBase->mGifBuffBase + gfxBase->mGifBuildIndex * 0x26600;
     InvalidDCache(gfxBase->mVifCursor, gfxBase->mVifCursor + 0xCCC80);
     InvalidDCache(gfxBase->mGifCursor, gfxBase->mGifCursor + 0x26600);
-    *gfxBase->m_pCurrentDrawState = D_00501420_rs7A10;
+    *gfxBase->m_pCurrentDrawState = sDrawState_s_defaultDrawState_rs7A10;
     func_00362CC8(gfxBase->mpDeferMan);
     func_003673D0(gfxBase->mpTextureMan);
     ResetViewport();
@@ -10563,7 +10563,7 @@ struct sPktBuilder_4E50 {
     int open;                       // 0xC
 };
 
-extern sPtGfx_4E50* D_004A5B80_4E50 __asm__("cGraphicsMan_TheGraphicsMan");
+extern sPtGfx_4E50* cGraphicsMan_TheGraphicsMan_4E50 __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" void func_00384DC0(void* self);
 void operator_delete(int*);
 
@@ -10596,7 +10596,7 @@ extern "C" void func_00384E50(sPktBuilder_4E50* self, int flags)
         unsigned int next = self->cur & 0x0FFFFFFF;
         self->cur = next;
         self->start = buf;
-        sPtGfx_4E50* graphicsMan = D_004A5B80_4E50;
+        sPtGfx_4E50* graphicsMan = cGraphicsMan_TheGraphicsMan_4E50;
         sPtRing_4E50* ring = graphicsMan->ring;
         sPtRS_4E50* rs = graphicsMan->top;
         if (ring->count < 2600) {
@@ -12019,7 +12019,7 @@ struct sShadowOpt_6E78 {
 };
 extern sShadowOpt_6E78 D_004A45CC;
 extern int D_004A5B84;
-extern sRS_6E78 D_00501420_rs6E78 __asm__("sDrawState_s_defaultDrawState");
+extern sRS_6E78 sDrawState_s_defaultDrawState_rs6E78 __asm__("sDrawState_s_defaultDrawState");
 
 static inline void DmaBegin_6E78(sPkt_6E78* pkt, unsigned int addr)
 {
@@ -12126,7 +12126,7 @@ static inline void DmaEnd_6E78(sPkt_6E78* pkt, sGfx_6E78* self)
  */
 extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(sGfx_6E78* self, BoardTrailInfoT* strips, int n)
 {
-    *self->top = D_00501420_rs6E78;
+    *self->top = sDrawState_s_defaultDrawState_rs6E78;
     self->top->f8 = (self->top->f8 & ~0x3E0) | 0x60;
     self->top->f0 = (self->top->f0 & ~0x3C0) | 0xC0;
     self->top->fC &= 0xC0000000;
@@ -12269,7 +12269,7 @@ extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(sGfx_6E78* self, Board
     self->bufAddr += 0x10;
     self->top->f0 &= ~0x3C0;
     self->top->fC &= 0xC0000000;
-    *self->top = D_00501420_rs6E78;
+    *self->top = sDrawState_s_defaultDrawState_rs6E78;
 }
 #endif
 
@@ -12464,7 +12464,7 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_RenderBoardWake);
 
 
 extern int D_004A5B84;
-extern sDrawState D_00501420_rs __asm__("sDrawState_s_defaultDrawState");
+extern sDrawState sDrawState_s_defaultDrawState_rs __asm__("sDrawState_s_defaultDrawState");
 
 extern "C" void func_0037D968(cPS2GraphicsMan* self);
 extern "C" void func_003885E0(void* self, void* a, void* b, void* c, void* d, int i0, int i1, float f0, float f1);
@@ -12514,7 +12514,7 @@ extern "C" void cPS2GraphicsMan_RenderBoardWake(cPS2GraphicsMan* self, void* ver
     self->mVifCursor += 0x10;
     (*(int*)&(self->m_pCurrentDrawState)->unk_00[0]) &= ~0x3C0;
     (*(int*)&(self->m_pCurrentDrawState)->unk_00[3]) &= 0xC0000000;
-    *(self->m_pCurrentDrawState) = D_00501420_rs;
+    *(self->m_pCurrentDrawState) = sDrawState_s_defaultDrawState_rs;
 }
 #endif
 
@@ -13223,12 +13223,12 @@ struct sVEnt_9CB8 {
 
 extern float D_004A43C0[];
 extern int D_004A59A4;
-extern char* D_004A5B80_9CB8 __asm__("cGraphicsMan_TheGraphicsMan");
+extern char* cGraphicsMan_TheGraphicsMan_9CB8 __asm__("cGraphicsMan_TheGraphicsMan");
 extern sV_9CB8 t4vect_Origin;
-extern sV_9CB8 D_004FF140_9CB8 __asm__("t4vect_XAxis");
-extern sV_9CB8 D_004FF150_9CB8 __asm__("t4vect_YAxis");
-extern sV_9CB8 D_004FF160_9CB8 __asm__("t4vect_ZAxis");
-extern sMat_9CB8 D_004FF1A0_9CB8 __asm__("t4mat_Identity");
+extern sV_9CB8 t4vect_XAxis_9CB8 __asm__("t4vect_XAxis");
+extern sV_9CB8 t4vect_YAxis_9CB8 __asm__("t4vect_YAxis");
+extern sV_9CB8 t4vect_ZAxis_9CB8 __asm__("t4vect_ZAxis");
+extern sMat_9CB8 t4mat_Identity_9CB8 __asm__("t4mat_Identity");
 extern sMat_9CB8 D_00500C60;
 
 extern "C" void fSinCos(float* s, float* c, float angle);
@@ -13587,7 +13587,7 @@ extern "C" void func_00389CB8(sPartVec4* out, void* sunp, float scale)
     prm[7].w = 0.20466558635234833f;
     prm[8].w = 0.0f;
     prm[9].w = 0.0f;
-    cPS2GraphicsMan* mgr = (cPS2GraphicsMan*)D_004A5B80_9CB8;
+    cPS2GraphicsMan* mgr = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_9CB8;
     sVEnt_9CB8* vt = (sVEnt_9CB8*)mgr->mVtbl;
     sMat_9CB8 cam = *vt[35].fn(vthis(mgr, vt[35]));
     sV_9CB8 eye = Scale_9CB8(GetPos_9CB8(cam), -1.0f);
@@ -13601,11 +13601,11 @@ extern "C" void func_00389CB8(sPartVec4* out, void* sunp, float scale)
     float elev = -func_0031C228(z / len);
     float azim;
     if (0.0f < len) {
-        float normProduct = Sqrt_9CB8(Dot_9CB8(sunDir, sunDir) * Dot_9CB8(D_004FF140_9CB8, D_004FF140_9CB8));
+        float normProduct = Sqrt_9CB8(Dot_9CB8(sunDir, sunDir) * Dot_9CB8(t4vect_XAxis_9CB8, t4vect_XAxis_9CB8));
         if (normProduct < 0.0010000000474974513f) {
             azim = 0.0f;
         } else {
-            azim = 1.5707963705062866f - func_0031C128(Clamp_9CB8(Dot_9CB8(sunDir, D_004FF140_9CB8) / normProduct, -1.0f, 1.0f));
+            azim = 1.5707963705062866f - func_0031C128(Clamp_9CB8(Dot_9CB8(sunDir, t4vect_XAxis_9CB8) / normProduct, -1.0f, 1.0f));
         }
         if (sunDir.y < 0.0f) {
             azim = 6.2831854820251465f - azim;
@@ -13613,10 +13613,10 @@ extern "C" void func_00389CB8(sPartVec4* out, void* sunp, float scale)
     } else {
         azim = 0.0f;
     }
-    sMat_9CB8 R = D_004FF1A0_9CB8;
+    sMat_9CB8 R = t4mat_Identity_9CB8;
     Translate_9CB8(&R, eye);
-    RotateAxis_9CB8(&R, &D_004FF150_9CB8, -elev);
-    RotateAxis_9CB8(&R, &D_004FF160_9CB8, -azim);
+    RotateAxis_9CB8(&R, &t4vect_YAxis_9CB8, -elev);
+    RotateAxis_9CB8(&R, &t4vect_ZAxis_9CB8, -azim);
     MMI_TRANSPOSE4(&R);
     // NOTE: D_00500C60 is a function-static matrix and D_004A59A4 its first-use guard.
     if (D_004A59A4 == 0) {

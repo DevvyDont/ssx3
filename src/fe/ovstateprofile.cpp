@@ -425,7 +425,7 @@ struct sCol_1380 {
     float r, g, b, a;
 };
 
-extern sCol_1380 D_004C66C8_1380 __asm__("gStaticColour");
+extern sCol_1380 gStaticColour_1380 __asm__("gStaticColour");
 
 static inline cUIObj_1380* getObj_1380(cState_1380* self, char* name)
 {
@@ -475,7 +475,7 @@ extern "C" void cOVState_PROFILE_displayOn(cOVState_PROFILE* profileState)
         *(int*)((char*)self + 0x21C) = mp->mSelectedDevice;
         self->setMenuHighlight();
         cUIObj_1380* textWidget = getObj_1380(self, str_1percentage_b);
-        *(sCol_1380*)((char*)textWidget + 0x88) = D_004C66C8_1380;
+        *(sCol_1380*)((char*)textWidget + 0x88) = gStaticColour_1380;
         ((cMCSub_1380*)mp->mpMemCard)->GetStatus1(buf);
         cUIText_setUnicodeString(textWidget, buf);
         textWidget->setVisible(0);

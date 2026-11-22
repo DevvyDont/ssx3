@@ -179,7 +179,7 @@ struct sApp {
     char pad_0x88[0x38];
     char* fC0;                  // 0xC0 (ai/ai: p)
 };
-extern sApp* D_004A28A8_UR __asm__("SSXApp");
+extern sApp* SSXApp_UR __asm__("SSXApp");
 struct sAiTune {
     char pad0[0xDC];
     float accel;     // 0xDC
@@ -230,7 +230,7 @@ void cComputer_updateRiderDifficulty_UR(sCompSkill* self) __asm__("cComputer_upd
 void cComputer_updateRiderDifficulty_UR(sCompSkill* self)
 {
     char* rider = *(char**)((char*)self + 0x18);
-    int mode = *(int*)D_004A28A8_UR->fC0;
+    int mode = *(int*)SSXApp_UR->fC0;
     char* obj = rider + 0x6C0;
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
     int aiIndex = vt[7].fn(vthis(obj, vt[7]));
@@ -1849,8 +1849,8 @@ struct sQuat_EB30
     sQuat_EB30(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-extern sQuat_EB30 D_004FF130_EB30 __asm__("t4vect_Origin");
-extern sQuat_EB30 D_004FF160_EB30 __asm__("t4vect_ZAxis");
+extern sQuat_EB30 t4vect_Origin_EB30 __asm__("t4vect_Origin");
+extern sQuat_EB30 t4vect_ZAxis_EB30 __asm__("t4vect_ZAxis");
 
 static inline sQuat_EB30 AxisAngle_EB30(const sQuat_EB30& axis, float angle)
 {
@@ -1865,8 +1865,8 @@ static inline t4Vector GetUp_EB30(cRider* rider) { return rider->mMatrix.row[2];
 static inline void ResetAnimOrientation_EB30(char* vra, float angle)
 {
     cRiderAnim* ra = (cRiderAnim*)vra;
-    *(sQuat_EB30*)&ra->OrientationOffset = D_004FF130_EB30;
-    *(sQuat_EB30*)&ra->OrientationOffset.Q = AxisAngle_EB30(D_004FF160_EB30, -angle);
+    *(sQuat_EB30*)&ra->OrientationOffset = t4vect_Origin_EB30;
+    *(sQuat_EB30*)&ra->OrientationOffset.Q = AxisAngle_EB30(t4vect_ZAxis_EB30, -angle);
 }
 
 struct sVE_EB30 { short delta; short index; void (*fn)(void*, float); };
@@ -1988,7 +1988,7 @@ static inline sXf_EB30 Invert_EB30(const sXf_EB30& a)
 {
     sXf_EB30 r;
     r.rot = Conj_EB30(a);
-    r.pos = Add_EB30(Scale_EB30(Rot_EB30(r.rot, Sub_EB30(a.pos, D_004FF130_EB30)), -1.0f), D_004FF130_EB30);
+    r.pos = Add_EB30(Scale_EB30(Rot_EB30(r.rot, Sub_EB30(a.pos, t4vect_Origin_EB30)), -1.0f), t4vect_Origin_EB30);
     return r;
 }
 
@@ -1996,7 +1996,7 @@ static inline sXf_EB30 Combine_EB30(const sXf_EB30& a, const sXf_EB30& b)
 {
     sXf_EB30 r;
     r.rot = QuatMul_EB30(a.rot, b.rot);
-    r.pos = Add_EB30(Rot_EB30(a.rot, Sub_EB30(b.pos, D_004FF130_EB30)), a.pos);
+    r.pos = Add_EB30(Rot_EB30(a.rot, Sub_EB30(b.pos, t4vect_Origin_EB30)), a.pos);
     return r;
 }
 

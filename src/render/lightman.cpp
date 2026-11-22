@@ -2162,13 +2162,13 @@ struct sGs_0F20 {
 
 
 
-extern sGs_0F20 D_00501420_0F20 __asm__("sDrawState_s_defaultDrawState");
-extern int D_004A460C_i __asm__("cScreenTint_m_LightningEnable");
-extern float D_004A469C_f __asm__("cScreenTint_m_lightningBrightness");
-extern float D_004A46A0_f __asm__("cScreenTint_m_redColour");
-extern float D_004A46A4_f __asm__("cScreenTint_m_greenColour");
-extern float D_004A46A8_f __asm__("cScreenTint_m_blueColour");
-extern int D_004A46AC_i __asm__("cScreenTint_m_blendMode");
+extern sGs_0F20 sDrawState_s_defaultDrawState_0F20 __asm__("sDrawState_s_defaultDrawState");
+extern int cScreenTint_m_LightningEnable_i __asm__("cScreenTint_m_LightningEnable");
+extern float cScreenTint_m_lightningBrightness_f __asm__("cScreenTint_m_lightningBrightness");
+extern float cScreenTint_m_redColour_f __asm__("cScreenTint_m_redColour");
+extern float cScreenTint_m_greenColour_f __asm__("cScreenTint_m_greenColour");
+extern float cScreenTint_m_blueColour_f __asm__("cScreenTint_m_blueColour");
+extern int cScreenTint_m_blendMode_i __asm__("cScreenTint_m_blendMode");
 
 class cGfx_0F20 {
 public:
@@ -2213,8 +2213,8 @@ public:
 extern "C" void cScreenTint_render()
 {
     int flag = 0;
-    if (D_004A460C_i != 0) {
-        if (D_004A469C_f != 0.0f) {
+    if (cScreenTint_m_LightningEnable_i != 0) {
+        if (cScreenTint_m_lightningBrightness_f != 0.0f) {
             flag = 1;
         }
     }
@@ -2237,13 +2237,13 @@ extern "C" void cScreenTint_render()
             }
         }
         ((cGfx_0F20*)ps2GraphicsMan)->SetViewportOrthographic(quadLeft, 0.0f, quadWidth, 480.0f, 0.0f, 1.0f, 0, 0);
-        *((cGfx_0F20*)ps2GraphicsMan)->stateTop = D_00501420_0F20;
+        *((cGfx_0F20*)ps2GraphicsMan)->stateTop = sDrawState_s_defaultDrawState_0F20;
         ((cGfx_0F20*)ps2GraphicsMan)->stateTop->f8_5 = 5;
         ((cGfx_0F20*)ps2GraphicsMan)->stateTop->SetF22(1);
         ((cGfx_0F20*)ps2GraphicsMan)->stateTop->f4_23 = 2;
         ((cGfx_0F20*)ps2GraphicsMan)->stateTop->f4_20 = 0;
         ((cGfx_0F20*)ps2GraphicsMan)->stateTop->f4_12 = 20;
-        ((cGfx_0F20*)ps2GraphicsMan)->stateTop->SetF2(D_004A46AC_i);
+        ((cGfx_0F20*)ps2GraphicsMan)->stateTop->SetF2(cScreenTint_m_blendMode_i);
         *(short*)((char*)((cGfx_0F20*)ps2GraphicsMan)->stateTop + 0x10) = -1;
         tBxVertex verts[4];
         t4Vector corner;
@@ -2265,10 +2265,10 @@ extern "C" void cScreenTint_render()
         corner.y = 480.0f;
         (*(&verts[3].p)) = corner;
         if (flag) {
-            float al = D_004A469C_f;
-            int red = (int)(al * D_004A46A0_f * 255.0f);
-            int gg = (int)(al * D_004A46A4_f * 255.0f);
-            int bb = (int)(al * D_004A46A8_f * 255.0f);
+            float al = cScreenTint_m_lightningBrightness_f;
+            int red = (int)(al * cScreenTint_m_redColour_f * 255.0f);
+            int gg = (int)(al * cScreenTint_m_greenColour_f * 255.0f);
+            int bb = (int)(al * cScreenTint_m_blueColour_f * 255.0f);
             int aa = (int)(al * 255.0f);
             for (int i = 0; i < 4; i++) {
                 verts[i].r = red;

@@ -109,7 +109,7 @@ struct sOptBits_0014F458
     unsigned int w1a : 2;
     unsigned int rest1 : 30;
 };
-extern sOptBits_0014F458 D_00535610_v0014F458[] __asm__("cBEOptionInterface_mOption");
+extern sOptBits_0014F458 cBEOptionInterface_mOption_v0014F458[] __asm__("cBEOptionInterface_mOption");
 
 class cBEOptionInterfaceV_0014F458
 {
@@ -127,7 +127,7 @@ public:
  */
 extern "C" void cBEOptionInterface_defaultSound(cBEOptionInterface* self)
 {
-    sOptBits_0014F458* options = D_00535610_v0014F458;
+    sOptBits_0014F458* options = cBEOptionInterface_mOption_v0014F458;
     options->a = 10;
     options->b = 10;
     options->c = 10;
@@ -160,7 +160,7 @@ struct sOptBits_0014F4F8
     unsigned char b6;
     unsigned char b7;
 };
-extern sOptBits_0014F4F8 D_00535610_v0014F4F8[] __asm__("cBEOptionInterface_mOption");
+extern sOptBits_0014F4F8 cBEOptionInterface_mOption_v0014F4F8[] __asm__("cBEOptionInterface_mOption");
 
 class cBEOptionInterfaceV_0014F4F8
 {
@@ -181,22 +181,22 @@ extern "C" void cBEOptionInterface_defaultGame(cBEOptionInterface* self)
     switch (*(int*)((char*)SSXApp->ConsoleConfig + 0x24))
     {
     case 1:
-        D_00535610_v0014F4F8[0].j = 2;
+        cBEOptionInterface_mOption_v0014F4F8[0].j = 2;
         break;
     case 2:
-        D_00535610_v0014F4F8[0].j = 1;
+        cBEOptionInterface_mOption_v0014F4F8[0].j = 1;
         break;
     case 0:
     default:
-        D_00535610_v0014F4F8[0].j = 0;
+        cBEOptionInterface_mOption_v0014F4F8[0].j = 0;
         break;
     }
-    D_00535610_v0014F4F8[0].k = 0;
-    D_00535610_v0014F4F8[0].i = 0;
-    D_00535610_v0014F4F8[0].m = 0;
-    D_00535610_v0014F4F8[0].l = 9;
-    D_00535610_v0014F4F8[0].b5 = 0;
-    D_00535610_v0014F4F8[0].b6 = 0;
+    cBEOptionInterface_mOption_v0014F4F8[0].k = 0;
+    cBEOptionInterface_mOption_v0014F4F8[0].i = 0;
+    cBEOptionInterface_mOption_v0014F4F8[0].m = 0;
+    cBEOptionInterface_mOption_v0014F4F8[0].l = 9;
+    cBEOptionInterface_mOption_v0014F4F8[0].b5 = 0;
+    cBEOptionInterface_mOption_v0014F4F8[0].b6 = 0;
     ((cBEOptionInterfaceV_0014F4F8*)cBEOptionInterface_instance)->apply();
 }
 #endif
@@ -210,7 +210,7 @@ struct sOptBits_0014F600
     unsigned int pad : 30;
     unsigned int top : 2;
 };
-extern sOptBits_0014F600 D_00535610_v0014F600[] __asm__("cBEOptionInterface_mOption");
+extern sOptBits_0014F600 cBEOptionInterface_mOption_v0014F600[] __asm__("cBEOptionInterface_mOption");
 
 class cBEOptionInterfaceV_0014F600
 {
@@ -224,7 +224,7 @@ public:
  */
 extern "C" void cBEOptionInterface_defaultHUD(cBEOptionInterface* self)
 {
-    D_00535610_v0014F600[0].top = 0;
+    cBEOptionInterface_mOption_v0014F600[0].top = 0;
     ((cBEOptionInterfaceV_0014F600*)cBEOptionInterface_instance)->apply();
 }
 #endif

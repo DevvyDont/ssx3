@@ -1097,10 +1097,10 @@ struct sCtmM_E560 {
     }
 } __attribute__((aligned(16)));
 
-extern sCtmM_E560 D_004FF1A0_E560 __asm__("t4mat_Identity");
-extern sCtmV_E560 D_004FF140_E560 __asm__("t4vect_XAxis");
-extern sCtmV_E560 D_004FF150_E560 __asm__("t4vect_YAxis");
-extern sCtmV_E560 D_004FF160_E560 __asm__("t4vect_ZAxis");
+extern sCtmM_E560 t4mat_Identity_E560 __asm__("t4mat_Identity");
+extern sCtmV_E560 t4vect_XAxis_E560 __asm__("t4vect_XAxis");
+extern sCtmV_E560 t4vect_YAxis_E560 __asm__("t4vect_YAxis");
+extern sCtmV_E560 t4vect_ZAxis_E560 __asm__("t4vect_ZAxis");
 extern "C" void fSinCos(float* s, float* c, float angle);
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
@@ -1288,12 +1288,12 @@ static inline sCtmV_E560 ctmNormalize_E560(const sCtmV_E560& v)
 // (inverse of cCTBoundObjLine_worldPoint1's transform), normalize, and back to world space.
 extern "C" void cCTBoundObjEllipse_limitPoint(cCTBoundObjEllipse* src, sCtmV_E560* point)
 {
-    sCtmM_E560 xform(D_004FF1A0_E560);
+    sCtmM_E560 xform(t4mat_Identity_E560);
     float one = 1.0f;
     xform = ctmScaleMtx_E560(&xform, sCtmV_E560(one / src->Scale.x, one / src->Scale.y, one / src->Scale.z, one));
-    ctmRotAxis_E560(&xform, D_004FF160_E560, -src->Heading);
-    ctmRotAxis_E560(&xform, D_004FF150_E560, -src->Roll);
-    ctmRotAxis_E560(&xform, D_004FF140_E560, -src->Pitch);
+    ctmRotAxis_E560(&xform, t4vect_ZAxis_E560, -src->Heading);
+    ctmRotAxis_E560(&xform, t4vect_YAxis_E560, -src->Roll);
+    ctmRotAxis_E560(&xform, t4vect_XAxis_E560, -src->Pitch);
     ctmTransMtx_E560(&xform, sCtmV_E560(-*(sCtmV3_E560*)&src->Pos, one));
     sCtmV_E560 localPt = ctmApplyMtx_E560(&xform, *point);
     localPt.w = 0.0f;
@@ -1302,11 +1302,11 @@ extern "C" void cCTBoundObjEllipse_limitPoint(cCTBoundObjEllipse* src, sCtmV_E56
     }
     localPt = ctmNormalize_E560(localPt);
     localPt.w = one;
-    xform = D_004FF1A0_E560;
+    xform = t4mat_Identity_E560;
     ctmTransMtx_E560(&xform, sCtmV_E560(src->Pos.x, src->Pos.y, src->Pos.z, one));
-    ctmRotAxis_E560(&xform, D_004FF140_E560, src->Pitch);
-    ctmRotAxis_E560(&xform, D_004FF150_E560, src->Roll);
-    ctmRotAxis_E560(&xform, D_004FF160_E560, src->Heading);
+    ctmRotAxis_E560(&xform, t4vect_XAxis_E560, src->Pitch);
+    ctmRotAxis_E560(&xform, t4vect_YAxis_E560, src->Roll);
+    ctmRotAxis_E560(&xform, t4vect_ZAxis_E560, src->Heading);
     xform = ctmScaleMtx_E560(&xform, sCtmV_E560(src->Scale.x, src->Scale.y, src->Scale.z, one));
     *point = ctmApplyMtx_E560(&xform, localPt);
     point->w = one;
@@ -1320,10 +1320,10 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", cCTBoundObjBox_limitPoint);
 #include "bx/math3d.h"
 extern "C" void fSinCos(float* sout, float* cout, float x);
 
-extern t4Vector D_004FF140_F068 __asm__("t4vect_XAxis");
-extern t4Vector D_004FF150_F068 __asm__("t4vect_YAxis");
-extern t4Vector D_004FF160_F068 __asm__("t4vect_ZAxis");
-extern t4Matrix D_004FF1A0_F068 __asm__("t4mat_Identity");
+extern t4Vector t4vect_XAxis_F068 __asm__("t4vect_XAxis");
+extern t4Vector t4vect_YAxis_F068 __asm__("t4vect_YAxis");
+extern t4Vector t4vect_ZAxis_F068 __asm__("t4vect_ZAxis");
+extern t4Matrix t4mat_Identity_F068 __asm__("t4mat_Identity");
 
 struct sVec3_F068 {
     float x, y, z;
@@ -1573,23 +1573,23 @@ extern t4Vector D_004C5450[3];      // static local: the three box axes
 // cCTBoundObjBox: move p to the closest point of the (rotated) box.
 extern "C" void cCTBoundObjBox_limitPoint(const sXform_F068* t, t4Vector* point)
 {
-    sMtx_F068 xform = (const sMtx_F068&)D_004FF1A0_F068;
+    sMtx_F068 xform = (const sMtx_F068&)t4mat_Identity_F068;
     {
         sMtx_F068* xformPtr = &xform;
         sMtx_F068 R;
-        ROT_F068(R, &D_004FF160_F068.x, -t->rot[0]);
+        ROT_F068(R, &t4vect_ZAxis_F068.x, -t->rot[0]);
         *xformPtr *= R;
     }
     {
         sMtx_F068* xformPtr = &xform;
         sMtx_F068 R;
-        ROT_F068(R, &D_004FF150_F068.x, -t->rot[2]);
+        ROT_F068(R, &t4vect_YAxis_F068.x, -t->rot[2]);
         *xformPtr *= R;
     }
     {
         sMtx_F068* xformPtr = &xform;
         sMtx_F068 R;
-        ROT_F068(R, &D_004FF140_F068.x, -t->rot[1]);
+        ROT_F068(R, &t4vect_XAxis_F068.x, -t->rot[1]);
         *xformPtr *= R;
     }
     vu0MulVecRow3_F068(&xform, sVec4_F068(sVec3_F068(-t->pos.x, -t->pos.y, -t->pos.z), 1.0f));
@@ -1598,9 +1598,9 @@ extern "C" void cCTBoundObjBox_limitPoint(const sXform_F068* t, t4Vector* point)
     t4Vector dmin = Sub_F068(localPt, sVec4_F068(sVec3_F068(-t->size.x, -t->size.y, -t->size.z), 1.0f));
     t4Vector dmax = Sub_F068(localPt, sVec4_F068(t->size.x, t->size.y, t->size.z, 1.0f));
     if (D_004A4DE8 == 0) {
-        D_004C5450[0] = D_004FF140_F068;
-        D_004C5450[1] = D_004FF150_F068;
-        D_004C5450[2] = D_004FF160_F068;
+        D_004C5450[0] = t4vect_XAxis_F068;
+        D_004C5450[1] = t4vect_YAxis_F068;
+        D_004C5450[2] = t4vect_ZAxis_F068;
         D_004A4DE8 = 1;
     }
     for (int i = 0; i < 3; i++) {
@@ -1614,24 +1614,24 @@ extern "C" void cCTBoundObjBox_limitPoint(const sXform_F068* t, t4Vector* point)
             SubEq_F068(localPt, Scale_F068(D_004C5450[i], planeDist));
         }
     }
-    xform = (const sMtx_F068&)D_004FF1A0_F068;
+    xform = (const sMtx_F068&)t4mat_Identity_F068;
     vu0MulVecRow3_F068(&xform, sVec4_F068(t->pos, 1.0f));
     {
         sMtx_F068* xformPtr = &xform;
         sMtx_F068 R;
-        ROT_F068(R, &D_004FF140_F068.x, t->rot[1]);
+        ROT_F068(R, &t4vect_XAxis_F068.x, t->rot[1]);
         *xformPtr *= R;
     }
     {
         sMtx_F068* xformPtr = &xform;
         sMtx_F068 R;
-        ROT_F068(R, &D_004FF150_F068.x, t->rot[2]);
+        ROT_F068(R, &t4vect_YAxis_F068.x, t->rot[2]);
         *xformPtr *= R;
     }
     {
         sMtx_F068* xformPtr = &xform;
         sMtx_F068 R;
-        ROT_F068(R, &D_004FF160_F068.x, t->rot[0]);
+        ROT_F068(R, &t4vect_ZAxis_F068.x, t->rot[0]);
         *xformPtr *= R;
     }
     *point = vu0MulVec2_F068(&xform, localPt);
@@ -1690,10 +1690,10 @@ struct sCtmM_FBB8 {
     }
 } __attribute__((aligned(16)));
 
-extern sCtmM_FBB8 D_004FF1A0_FBB8 __asm__("t4mat_Identity");
-extern sCtmV_FBB8 D_004FF140_FBB8 __asm__("t4vect_XAxis");
-extern sCtmV_FBB8 D_004FF150_FBB8 __asm__("t4vect_YAxis");
-extern sCtmV_FBB8 D_004FF160_FBB8 __asm__("t4vect_ZAxis");
+extern sCtmM_FBB8 t4mat_Identity_FBB8 __asm__("t4mat_Identity");
+extern sCtmV_FBB8 t4vect_XAxis_FBB8 __asm__("t4vect_XAxis");
+extern sCtmV_FBB8 t4vect_YAxis_FBB8 __asm__("t4vect_YAxis");
+extern sCtmV_FBB8 t4vect_ZAxis_FBB8 __asm__("t4vect_ZAxis");
 extern "C" void fSinCos(float* s, float* c, float angle);
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
@@ -1925,12 +1925,12 @@ static inline sCtmV_FBB8 ctmScale_FBB8(const sCtmV_FBB8& v, float s)
 // (transform as in cCTBoundObjLine_worldPoint1).
 extern "C" void cCTBoundObjLine_limitPoint(cCTBoundObjLine* src, sCtmV_FBB8* point)
 {
-    sCtmM_FBB8 xform(D_004FF1A0_FBB8);
+    sCtmM_FBB8 xform(t4mat_Identity_FBB8);
     float one = 1.0f;
     ctmTransMtx_FBB8(&xform, sCtmV_FBB8(src->Pos.x, src->Pos.y, src->Pos.z, one));
-    ctmRotAxis_FBB8(&xform, D_004FF140_FBB8, src->Pitch);
-    ctmRotAxis_FBB8(&xform, D_004FF150_FBB8, src->Roll);
-    ctmRotAxis_FBB8(&xform, D_004FF160_FBB8, src->Heading);
+    ctmRotAxis_FBB8(&xform, t4vect_XAxis_FBB8, src->Pitch);
+    ctmRotAxis_FBB8(&xform, t4vect_YAxis_FBB8, src->Roll);
+    ctmRotAxis_FBB8(&xform, t4vect_ZAxis_FBB8, src->Heading);
     xform = ctmScaleMtx_FBB8(&xform, sCtmV_FBB8(src->Scale.x, src->Scale.y, src->Scale.z, one));
     sCtmV_FBB8 pts[2];
     float w1 = 1.0f;
@@ -2261,10 +2261,10 @@ struct sCtmM_0D20 {
     }
 } __attribute__((aligned(16)));
 
-extern sCtmM_0D20 D_004FF1A0_0D20 __asm__("t4mat_Identity");
-extern sCtmV_0D20 D_004FF140_0D20 __asm__("t4vect_XAxis");
-extern sCtmV_0D20 D_004FF150_0D20 __asm__("t4vect_YAxis");
-extern sCtmV_0D20 D_004FF160_0D20 __asm__("t4vect_ZAxis");
+extern sCtmM_0D20 t4mat_Identity_0D20 __asm__("t4mat_Identity");
+extern sCtmV_0D20 t4vect_XAxis_0D20 __asm__("t4vect_XAxis");
+extern sCtmV_0D20 t4vect_YAxis_0D20 __asm__("t4vect_YAxis");
+extern sCtmV_0D20 t4vect_ZAxis_0D20 __asm__("t4vect_ZAxis");
 extern "C" void fSinCos(float* s, float* c, float angle);
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
@@ -2433,12 +2433,12 @@ struct sCtmSrc_0D20 {
 // World position of corner `corner` (the 3-float points at src+0x28): translate(src+0x0) * rotations(0x10, 0x14, 0xC) * scale(src+0x18).
 extern "C" sCtmV_0D20 cCTSpline_worldPoint(char* src, int corner)
 {
-    sCtmM_0D20 xform(D_004FF1A0_0D20);
+    sCtmM_0D20 xform(t4mat_Identity_0D20);
     float one = 1.0f;
     ctmTransMtx_0D20(&xform, sCtmV_0D20(*(float*)(src + 0x0), *(float*)(src + 0x4), *(float*)(src + 0x8), one));
-    ctmRotAxis_0D20(&xform, D_004FF140_0D20, *(float*)(src + 0x10));
-    ctmRotAxis_0D20(&xform, D_004FF150_0D20, *(float*)(src + 0x14));
-    ctmRotAxis_0D20(&xform, D_004FF160_0D20, *(float*)(src + 0xC));
+    ctmRotAxis_0D20(&xform, t4vect_XAxis_0D20, *(float*)(src + 0x10));
+    ctmRotAxis_0D20(&xform, t4vect_YAxis_0D20, *(float*)(src + 0x14));
+    ctmRotAxis_0D20(&xform, t4vect_ZAxis_0D20, *(float*)(src + 0xC));
     xform = ctmScaleMtx_0D20(&xform, sCtmV_0D20(*(float*)(src + 0x18), *(float*)(src + 0x1C), *(float*)(src + 0x20), one));
     return ctmApplyMtx_0D20(&xform, sCtmV_0D20(((sCtmSrc_0D20*)src)->corners[corner], one));
 }

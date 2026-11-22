@@ -678,8 +678,8 @@ struct sV4_4298 {
     sV4_4298(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-extern sV4_4298 D_004FF140_4298 __asm__("t4vect_XAxis");
-extern sV4_4298 D_004FF160_4298 __asm__("t4vect_ZAxis");
+extern sV4_4298 t4vect_XAxis_4298 __asm__("t4vect_XAxis");
+extern sV4_4298 t4vect_ZAxis_4298 __asm__("t4vect_ZAxis");
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float Len_4298(const sV4_4298& v)
@@ -975,7 +975,7 @@ extern "C" void cRider_applyJumpPop(char* self, float speedFactor)
     if (Abs_4298(headingDir.x) > 0.0f || Abs_4298(headingDir.y) > 0.0f)
         DivEq_4298(headingDir, Len_4298(headingDir));
     else
-        headingDir = D_004FF140_4298;
+        headingDir = t4vect_XAxis_4298;
     *(sV4_4298*)(self + 0x3C0) = headingDir;
     if (slope < 0.05000000074505806f && slope > -0.05000000074505806f) {
         sV4_4298 lat = Scale_4298(headingDir, Dot_4298(VEL_4298, headingDir) / Dot_4298(headingDir, headingDir));
@@ -998,7 +998,7 @@ extern "C" void cRider_applyJumpPop(char* self, float speedFactor)
         }
         ScaleEq_4298(VEL_4298, k);
     }
-    sV4_4298 velCross = Cross_4298(D_004FF160_4298, VEL_4298);
+    sV4_4298 velCross = Cross_4298(t4vect_ZAxis_4298, VEL_4298);
     float cl = Len_4298(velCross);
     if (cl > 0.0f) {
         ScaleEq_4298(velCross, 1.0f / cl);
@@ -1122,7 +1122,7 @@ extern "C" void cRider_updateOrientationImplicit(cRider* self);
 extern "C" void cRider_doChangeFakie(cRider* s);
 extern "C" void cAirPredictor_startLaunchIntoAir(cAirPredictor* ap, t4Vector* pos, t4Vector* vel, float t);
 extern float D_004A0EA8[];
-extern t4Vector D_004FF130_4DB8 __asm__("t4vect_Origin");
+extern t4Vector t4vect_Origin_4DB8 __asm__("t4vect_Origin");
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float Dot_4DB8(const t4Vector& a, const t4Vector& b)
@@ -1319,7 +1319,7 @@ extern "C" int cRider_isChangeFakieAir(cRider* rider)
     cAnimModel* animModel = rider->mAnimModel;
     float* hipBone = (float*)((rider->mBoneHips << 4) + (int)animModel->localPos);
     {
-        const t4Vector& origin = D_004FF130_4DB8;
+        const t4Vector& origin = t4vect_Origin_4DB8;
         t4Vector off = SubO_4DB8(sV4_4DB8(hipBone[0] * animModel->unk_140.x, hipBone[1] * animModel->unk_140.y,
                                          hipBone[2] * animModel->unk_140.z, hipBone[3] * animModel->unk_140.w),
                                 origin);
@@ -1515,8 +1515,8 @@ extern "C" void cRider_rotateOrientation(void* self, Q_5640 dir, float angle);
 // PORT: the unit defines cRider_verifyRailslideModeDEBUG with no parameters; this caller passes the rider.
 extern "C" void cRider_verifyRailslideModeDEBUG_p(void* self) __asm__("cRider_verifyRailslideModeDEBUG");
 int cRider_getMotionState(void* self);
-extern Q_5640 D_004FF130_5640 __asm__("t4vect_Origin");
-extern Q_5640 D_004FF160_5640 __asm__("t4vect_ZAxis");
+extern Q_5640 t4vect_Origin_5640 __asm__("t4vect_Origin");
+extern Q_5640 t4vect_ZAxis_5640 __asm__("t4vect_ZAxis");
 
 static inline Q_5640 AxisAngle_5640(const Q_5640& axis, float angle)
 {
@@ -1527,8 +1527,8 @@ static inline Q_5640 AxisAngle_5640(const Q_5640& axis, float angle)
 
 static inline void SetHeading_5640(char* a, float angle)
 {
-    *(Q_5640*)(a + 0x30) = D_004FF130_5640;
-    *(Q_5640*)(a + 0x40) = AxisAngle_5640(D_004FF160_5640, -angle);
+    *(Q_5640*)(a + 0x30) = t4vect_Origin_5640;
+    *(Q_5640*)(a + 0x40) = AxisAngle_5640(t4vect_ZAxis_5640, -angle);
 }
 
 /**

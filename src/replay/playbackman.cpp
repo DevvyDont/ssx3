@@ -1400,9 +1400,9 @@ extern "C" void cFocusMan_writeToReplayFrame(void* self, cPbStream* s);
 
 extern int cSortObjNode_ObjNodeSortIndex;
 extern int cSortObjNode_ObjNodeNoSortIndex;
-extern sPbApp* D_004A28A8_D818 __asm__("SSXApp");
+extern sPbApp* SSXApp_D818 __asm__("SSXApp");
 extern void* cWScriptMan_TheWScriptMan;
-extern void* D_004A2A00_D818 __asm__("TheCrowdMan2d");
+extern void* TheCrowdMan2d_D818 __asm__("TheCrowdMan2d");
 extern void* TheCrowdMan3d;
 extern void* cMultiParticleMan_TheMultiParticleMan;
 
@@ -1435,16 +1435,16 @@ extern "C" void cReplay_saveFrame(cReplay* self, void* stream)
     id = cSortObjNode_ObjNodeNoSortIndex;
     out->write(&id, 4);
     cBE_writeToReplayFrame(cBE_getBE(), out);
-    D_004A28A8_D818->objs->save(out);
-    pbWorld(D_004A28A8_D818->objs)->save(out);
+    SSXApp_D818->objs->save(out);
+    pbWorld(SSXApp_D818->objs)->save(out);
     cAvalanche_writeToReplayFrame(out);
     cWScriptMan_writeToReplayFrame(cWScriptMan_TheWScriptMan, out);
-    func_00229E20(D_004A2A00_D818, out);
+    func_00229E20(TheCrowdMan2d_D818, out);
     func_003441A8(TheCrowdMan3d, out);
     cMultiParticleMan_writeToReplayFrame(cMultiParticleMan_TheMultiParticleMan, out);
     cReplay_saveBucket(self, out, 1);
     cReplay_saveDeadBucket(self, out);
-    cFocusMan_writeToReplayFrame(*(void**)((char*)pbWorld(D_004A28A8_D818->objs) + 0xA4), out);
+    cFocusMan_writeToReplayFrame(*(void**)((char*)pbWorld(SSXApp_D818->objs) + 0xA4), out);
 }
 #endif
 

@@ -158,10 +158,10 @@ struct sMgr_20DF38 {
     void* pads[8];          // 0xB0
 };
 // Typed view of the game manager (the unit declares SSXApp as void*).
-extern sMgr_20DF38* D_004A28A8_20DF38 __asm__("SSXApp");
+extern sMgr_20DF38* SSXApp_20DF38 __asm__("SSXApp");
 
 
-static inline char* replay_20DF38() { return *(char**)(D_004A28A8_20DF38->game + 0x28); }
+static inline char* replay_20DF38() { return *(char**)(SSXApp_20DF38->game + 0x28); }
 
 /**
  * Handles replay input before the menu does: slides the help panel, runs the replay menu, toggles the
@@ -186,14 +186,14 @@ extern "C" int cOVState_REPLAY_onInputBegin(cOVState_REPLAY* self, cPad_20DF38* 
     if (pInput->port != *(int*)(replay_20DF38() + 0x28)) {
         return 1;
     }
-    if (self->mShowPopupMenu == 0 && cInput_getState(D_004A28A8_20DF38->pads[pInput->port], 202)) {
+    if (self->mShowPopupMenu == 0 && cInput_getState(SSXApp_20DF38->pads[pInput->port], 202)) {
         if (self->mBottom_y == self->mMaxBottom_y || self->mBottom_ydiff == 4) {
             snd->play(2);
         }
         self->mBottom_ydiff = -4;
         return 1;
     }
-    if (self->mShowPopupMenu == 0 && cInput_getState(D_004A28A8_20DF38->pads[pInput->port], 203)) {
+    if (self->mShowPopupMenu == 0 && cInput_getState(SSXApp_20DF38->pads[pInput->port], 203)) {
         if (self->mBottom_y == self->mMinBottom_y || self->mBottom_ydiff == -4) {
             snd->play(2);
         }
@@ -231,7 +231,7 @@ extern "C" int cOVState_REPLAY_onInputBegin(cOVState_REPLAY* self, cPad_20DF38* 
                 cReplay_startAutoReplay(replay_20DF38());
             }
             if (*(int*)(replay_20DF38() + 0x608) != 0) {
-                cGame_exit(D_004A28A8_20DF38->game, 0);
+                cGame_exit(SSXApp_20DF38->game, 0);
             }
             cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
             break;
@@ -251,7 +251,7 @@ extern "C" int cOVState_REPLAY_onInputBegin(cOVState_REPLAY* self, cPad_20DF38* 
         *(int*)&obj->mAttrMenu |= 8;
         return 1;
     }
-    if (self->mShowPopupMenu == 0 && cInput_getState(D_004A28A8_20DF38->pads[pInput->port], 204)) {
+    if (self->mShowPopupMenu == 0 && cInput_getState(SSXApp_20DF38->pads[pInput->port], 204)) {
         snd->play(6);
         self->mTimeLineHidden ^= 1;
         if (self->mTimeLineHidden != 0) {

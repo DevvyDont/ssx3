@@ -6649,7 +6649,7 @@ extern sColor D_004D53C0;
 extern sColor D_004D53D0;
 extern sColor D_004D53E0;
 // The focused-row style passed to the menu's frame draw is the line colour of the graph's axis.
-extern sColor D_004D5380_c __asm__("kBoxSelectedColor");
+extern sColor kBoxSelectedColor_c __asm__("kBoxSelectedColor");
 
 // The font scale (font + 0x28), built from references like sVec4_2D0008: with the unit's by-value sVec2 the
 // second store keeps the temporary's address in a register (the target stores both straight to the frame).
@@ -6757,10 +6757,10 @@ extern "C" void cGraphMenuItem_render(cGraphMenuItem* self, float* rect)
     if ((self->MinPoint[1] >= 0.0f) != (self->MaxPoint[1] > 0.0f)) {
         SetDepth_D0EF8(((cRenderCtx*)GrMan)->top, old, 1);
         for (i = 0; i < 2; i++) {
-            quadVerts[i].a = (int)(D_004D5380_c.a * 128.0f);
-            quadVerts[i].r = (int)(D_004D5380_c.r * 128.0f);
-            quadVerts[i].g = (int)(D_004D5380_c.g * 128.0f);
-            quadVerts[i].b = (int)(D_004D5380_c.b * 128.0f);
+            quadVerts[i].a = (int)(kBoxSelectedColor_c.a * 128.0f);
+            quadVerts[i].r = (int)(kBoxSelectedColor_c.r * 128.0f);
+            quadVerts[i].g = (int)(kBoxSelectedColor_c.g * 128.0f);
+            quadVerts[i].b = (int)(kBoxSelectedColor_c.b * 128.0f);
         }
         sVec4 vertexPos;
         vertexPos.x = gr.x;

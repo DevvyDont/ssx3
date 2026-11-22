@@ -2811,7 +2811,7 @@ struct sGfxCtx_708C0 {
     sVEntry<void>* vtable;   // 0x10D8
 };
 
-extern sGfxCtx_708C0* D_004A5B80_708C0 __asm__("cGraphicsMan_TheGraphicsMan");
+extern sGfxCtx_708C0* cGraphicsMan_TheGraphicsMan_708C0 __asm__("cGraphicsMan_TheGraphicsMan");
 extern int gBlendTable[];
 
 typedef sGfxMat_708C0 (*tGetMat_708C0)(void*);
@@ -2821,7 +2821,7 @@ typedef void (*tDraw_708C0)(void*, void*);
 
 static inline int GetTexId_708C0(int i)
 {
-    return D_004A5B80_708C0->texIds[i];
+    return cGraphicsMan_TheGraphicsMan_708C0->texIds[i];
 }
 
 /**
@@ -2835,7 +2835,7 @@ static inline int GetTexId_708C0(int i)
  */
 extern "C" void cStaticEmitter_render1(cStaticEmitter* selfp)
 {
-    sGfxCtx_708C0* gfx = D_004A5B80_708C0;
+    sGfxCtx_708C0* gfx = cGraphicsMan_TheGraphicsMan_708C0;
     sVEntry<void>* vt = gfx->vtable;
     if (((tCull_708C0)vt[93].fn)(vthis(gfx, vt[93]), (char*)&selfp->BoundBox, (char*)&selfp->BoundBox.MaxPoint,
                                  ((tGetMat_708C0)vt[43].fn)(vthis(gfx, vt[43]))) == 1) {

@@ -2381,7 +2381,7 @@ struct sOptView_12B498
 };
 
 // The unit declares cBERules_mRules later with its own type; bind this view by asm label.
-extern sOptView_12B498 D_005308B8_12B498 __asm__("cBERules_mRules");
+extern sOptView_12B498 cBERules_mRules_12B498 __asm__("cBERules_mRules");
 
 static inline int OptBit_12B498(sOptView_12B498* o, int b)
 {
@@ -2403,24 +2403,24 @@ static inline int OptBit_12B498(sOptView_12B498* o, int b)
 extern "C" void cAI_applyPlayerRulesCustom(cAI* self, cPlayer* obj, int i)
 {
     int boostMode = 1;
-    if (OptBit_12B498(&D_005308B8_12B498, 3))
+    if (OptBit_12B498(&cBERules_mRules_12B498, 3))
         boostMode = 3;
-    else if (OptBit_12B498(&D_005308B8_12B498, 0))
+    else if (OptBit_12B498(&cBERules_mRules_12B498, 0))
         boostMode = 0;
     else
-        if ((D_005308B8_12B498.e[i].f0 >> 5) & 1) boostMode = 2;
+        if ((cBERules_mRules_12B498.e[i].f0 >> 5) & 1) boostMode = 2;
     cRider* playerRider = obj->mRider;
     playerRider->mBoostMode = boostMode;
     cRider_initBoost(playerRider);
-    if ((D_005308B8_12B498.e[i].f0 >> 3) & 1)
+    if ((cBERules_mRules_12B498.e[i].f0 >> 3) & 1)
         obj->mRider->mBoostMeterStart = 1.0f;
-    if (OptBit_12B498(&D_005308B8_12B498, 4))
+    if (OptBit_12B498(&cBERules_mRules_12B498, 4))
         obj->mRider->mBoostSourceMask = 2;
-    if ((D_005308B8_12B498.e[i].f0 >> 4) & 1)
+    if ((cBERules_mRules_12B498.e[i].f0 >> 4) & 1)
         cRider_setUbersAllowed(obj->mRider, 0);
-    else if (OptBit_12B498(&D_005308B8_12B498, 1))
+    else if (OptBit_12B498(&cBERules_mRules_12B498, 1))
         cRider_setUbersAllowed(obj->mRider, 1);
-    if (D_005308B8_12B498.e[i].f0 & 1)
+    if (cBERules_mRules_12B498.e[i].f0 & 1)
         obj->mRider->unk_B20 = 2;
     (obj->mRider)->mStartHandicap = cBERules_getPlayerStartDelaySecs(i);
     cBE_getInterface_Fv(SSXApp->BE, 7);
@@ -2429,12 +2429,12 @@ extern "C" void cAI_applyPlayerRulesCustom(cAI* self, cPlayer* obj, int i)
         if (cBENetworkInterface_networkOpt.bIsRankedGame != 0)
             obj->mRider->mStatsIndex = 8;
     }
-    else if ((D_005308B8_12B498.e[i].f0 >> 1) & 1)
+    else if ((cBERules_mRules_12B498.e[i].f0 >> 1) & 1)
         obj->mRider->mStatsIndex = 1;
     cRiderMetrix* riderMetrix = obj->mRider->mMetrix;
-    if ((D_005308B8_12B498.e[i].f0 >> 2) & 1)
+    if ((cBERules_mRules_12B498.e[i].f0 >> 2) & 1)
         riderMetrix->mPointsMultiplier = 0.5f;
-    cRiderMetrix_setInitialPointsTotal(riderMetrix, D_005308B8_12B498.e[i].x);
+    cRiderMetrix_setInitialPointsTotal(riderMetrix, cBERules_mRules_12B498.e[i].x);
 }
 #endif
 
@@ -2770,8 +2770,8 @@ struct sQuat_12BE20
     sQuat_12BE20(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-extern sQuat_12BE20 D_004FF130_12BE20 __asm__("t4vect_Origin");
-extern sQuat_12BE20 D_004FF160_12BE20 __asm__("t4vect_ZAxis");
+extern sQuat_12BE20 t4vect_Origin_12BE20 __asm__("t4vect_Origin");
+extern sQuat_12BE20 t4vect_ZAxis_12BE20 __asm__("t4vect_ZAxis");
 
 static inline sQuat_12BE20 AxisAngle_12BE20(const sQuat_12BE20& axis, float angle)
 {
@@ -2799,8 +2799,8 @@ extern "C" void cGateControl_gainFocus(cGateControl* self)
     float fakieAngle = 0.0f;
     if (rider->IsRidingFakie != 0) fakieAngle = 3.1415927410125732f;
     cRiderAnim* anim = rider->mRiderAnim;
-    *(sQuat_12BE20*)&anim->OrientationOffset = D_004FF130_12BE20;
-    *(sQuat_12BE20*)&anim->OrientationOffset.Q = AxisAngle_12BE20(D_004FF160_12BE20, -fakieAngle);
+    *(sQuat_12BE20*)&anim->OrientationOffset = t4vect_Origin_12BE20;
+    *(sQuat_12BE20*)&anim->OrientationOffset.Q = AxisAngle_12BE20(t4vect_ZAxis_12BE20, -fakieAngle);
     if (*(int*)self == 2)
     {
         cRiderAnimBase_play(self->mRider->mRiderAnim, 1, 0, -1.0f);
@@ -4593,7 +4593,7 @@ static inline tPose Invert_12E010(const tPose& a)
 {
     tPose r;
     (*(sQuat_12BE20*)&r.Q) = Conj_12E010(a);
-    (*(sQuat_12BE20*)&r.P) = Add_12E010(Scale_12E010(Rot_12E010((*(sQuat_12BE20*)&r.Q), Sub_12E010((*(sQuat_12BE20*)&a.P), D_004FF130_12BE20)), -1.0f), D_004FF130_12BE20);
+    (*(sQuat_12BE20*)&r.P) = Add_12E010(Scale_12E010(Rot_12E010((*(sQuat_12BE20*)&r.Q), Sub_12E010((*(sQuat_12BE20*)&a.P), t4vect_Origin_12BE20)), -1.0f), t4vect_Origin_12BE20);
     return r;
 }
 
@@ -4601,7 +4601,7 @@ static inline tPose Combine_12E010(const tPose& a, const tPose& b)
 {
     tPose r;
     (*(sQuat_12BE20*)&r.Q) = QuatMul_12E010((*(sQuat_12BE20*)&a.Q), (*(sQuat_12BE20*)&b.Q));
-    (*(sQuat_12BE20*)&r.P) = Add_12E010(Rot_12E010((*(sQuat_12BE20*)&a.Q), Sub_12E010((*(sQuat_12BE20*)&b.P), D_004FF130_12BE20)), (*(sQuat_12BE20*)&a.P));
+    (*(sQuat_12BE20*)&r.P) = Add_12E010(Rot_12E010((*(sQuat_12BE20*)&a.Q), Sub_12E010((*(sQuat_12BE20*)&b.P), t4vect_Origin_12BE20)), (*(sQuat_12BE20*)&a.P));
     return r;
 }
 
@@ -5039,8 +5039,8 @@ extern "C" void cPrewindControl_update(cPrewindControl* self, tPrewindCmd* in)
         {
             float fakieAngle = 0.0f;
             cRiderAnim* anim = (cRiderAnim*)rider->mRiderAnim;
-            *(sQuat_12BE20*)&anim->OrientationOffset = D_004FF130_12BE20;
-            *(sQuat_12BE20*)&anim->OrientationOffset.Q = AxisAngle_12BE20(D_004FF160_12BE20, -fakieAngle);
+            *(sQuat_12BE20*)&anim->OrientationOffset = t4vect_Origin_12BE20;
+            *(sQuat_12BE20*)&anim->OrientationOffset.Q = AxisAngle_12BE20(t4vect_ZAxis_12BE20, -fakieAngle);
         }
         cPrewindControl_playFromTable(self, kAnimIntoAirTable);
         *(int*)(*(char**)self + 0x328) = 0;
@@ -7468,8 +7468,8 @@ struct sQuat_2060
     sQuat_2060(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-extern sQuat_2060 D_004FF130_2060 __asm__("t4vect_Origin");
-extern sQuat_2060 D_004FF160_2060 __asm__("t4vect_ZAxis");
+extern sQuat_2060 t4vect_Origin_2060 __asm__("t4vect_Origin");
+extern sQuat_2060 t4vect_ZAxis_2060 __asm__("t4vect_ZAxis");
 
 static inline sQuat_2060 AxisAngle_2060(const sQuat_2060& axis, float angle)
 {
@@ -7483,8 +7483,8 @@ static inline sQuat_2060 AxisAngle_2060(const sQuat_2060& axis, float angle)
 static inline void setRot_2060(char* vanim, float a)
 {
     cRiderAnim* anim = (cRiderAnim*)vanim;
-    *(sQuat_2060*)&anim->OrientationOffset = D_004FF130_2060;
-    *(sQuat_2060*)&anim->OrientationOffset.Q = AxisAngle_2060(D_004FF160_2060, -a);
+    *(sQuat_2060*)&anim->OrientationOffset = t4vect_Origin_2060;
+    *(sQuat_2060*)&anim->OrientationOffset.Q = AxisAngle_2060(t4vect_ZAxis_2060, -a);
 }
 
 static inline void flip_2060(void* self, int f)
@@ -8046,7 +8046,7 @@ struct sAnimEntry_132FB8
     int flip;
 };
 // Typed view of kHandplantAnim (cHandplantControl_gainFocus reads it as raw bytes); bound by asm label.
-extern sAnimEntry_132FB8 D_00459FC8_tbl[][2] __asm__("kHandplantAnim");
+extern sAnimEntry_132FB8 kHandplantAnim_tbl[][2] __asm__("kHandplantAnim");
 
 
 struct sVec3_132FB8
@@ -8096,7 +8096,7 @@ static inline sQuat_132FB8 QuatMul_132FB8(const sQuat_132FB8& a, const sQuat_132
  */
 extern "C" void cHandplantControl_playHandplantAnim(cHandplantControl* self, int mode, int type)
 {
-    if (D_00459FC8_tbl[mode][type].flip != 0)
+    if (kHandplantAnim_tbl[mode][type].flip != 0)
     {
         cRider* rider = self->mRider;
         sQuat_132FB8 newRotation = QuatMul_132FB8(sQuat_132FB8(sVec3_132FB8(*(&rider->mMatrix.row[2])), 0.0f), *(sQuat_132FB8*)&rider->mRotation);
@@ -8104,7 +8104,7 @@ extern "C" void cHandplantControl_playHandplantAnim(cHandplantControl* self, int
         cRider_updateOrientationImplicit(self->mRider);
         cRiderAnimBase_changeHeadingOffset(self->mRider->mRiderAnim, 3.1415927410125732f);
     }
-    cRiderAnimBase_play(self->mRider->mRiderAnim, D_00459FC8_tbl[mode][type].anim, 0, -1.0f);
+    cRiderAnimBase_play(self->mRider->mRiderAnim, kHandplantAnim_tbl[mode][type].anim, 0, -1.0f);
 }
 #endif
 
@@ -8988,10 +8988,10 @@ struct sXf
     sVec4 pos;
     sVec4 rot;
 };
-extern t4Vector D_004FF130_4DD0 __asm__("t4vect_Origin");
+extern t4Vector t4vect_Origin_4DD0 __asm__("t4vect_Origin");
 extern t4Vector t4vect_XAxis;
 extern t4Vector t4vect_YAxis;
-extern t4Vector D_004FF160_4DD0 __asm__("t4vect_ZAxis");
+extern t4Vector t4vect_ZAxis_4DD0 __asm__("t4vect_ZAxis");
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
 static inline sVec4 QuatMul_12E010_4DD0(const sVec4& a, const sVec4& b)
 {
@@ -9246,11 +9246,11 @@ extern "C" void cSpinControl_applyFlipSpinAngle_x(void* vself, sXf* xf)
     float flipAngle = self->TrickFlip + self->AirAdjFlip;
     sVec4 pivot = SubO_134DD0(sVec4(n->x * trk->unk_140.x, n->y * trk->unk_140.y,
                                               n->z * trk->unk_140.z, n->w * trk->unk_140.w),
-                                 D_004FF130_4DD0);
+                                 t4vect_Origin_4DD0);
     {
         sVec4 rotPivot = Rot_12E010_4DD0(xf->rot, pivot);
         AddToL_134DD0(xf->pos, rotPivot);
-        xf->rot *= AxisAngle2_134DD0(D_004FF160_4DD0, spinAngle);
+        xf->rot *= AxisAngle2_134DD0(t4vect_ZAxis_4DD0, spinAngle);
     }
     float cur = cSpinControl_calcFlipAxisWeight((cSpinControl*)self);
     float old = self->FlipAxisWeight;

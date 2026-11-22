@@ -316,7 +316,7 @@ extern "C" void* cFEMemCard_cFEMemCard2(void* self, void* a1, int a2);
 extern "C" void* cSSXApp_getMCManager(void* p);
 extern void* cFEStateMemCard_vtbl[];
 // cFEStateMemCard_mInstance holds the active load state (the unit declares it as int elsewhere).
-extern void* D_004A14B8_K186A08 __asm__("cFEStateMemCard_mInstance");
+extern void* cFEStateMemCard_mInstance_K186A08 __asm__("cFEStateMemCard_mInstance");
 extern int cFEStateMemCard_mProfileFile;
 extern int cFEStateMemCard_mStage;
 extern "C" void cFEStateMemCard_callbackLoadReady();
@@ -349,7 +349,7 @@ extern "C" cFEStateMemCard* func_00186A08(cFEStateMemCard* self, void* engine)
     cFEMemCard_cFEMemCard2((self), engine, 2);
     int one = 1;
     self->mVtbl = cFEStateMemCard_vtbl;
-    D_004A14B8_K186A08 = (self);
+    cFEStateMemCard_mInstance_K186A08 = (self);
     cFEStateMemCard_mProfileFile = 0;
     cFEStateMemCard_mStage = 0;
     self->mAutoLoadOn = one;

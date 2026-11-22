@@ -357,8 +357,8 @@ extern "C" void cFloatingNode_makeAnimMats(cFloatingNode* self, t4Matrix* mat, t
 INCLUDE_ASM("object/floatingnode", cFloatingNode_applyForce);
 #ifdef SKIP_ASM
 
-extern t4Vector D_004FF140_F600[] __asm__("t4vect_XAxis");
-extern t4Vector D_004FF150_F600[] __asm__("t4vect_YAxis");
+extern t4Vector t4vect_XAxis_F600[] __asm__("t4vect_XAxis");
+extern t4Vector t4vect_YAxis_F600[] __asm__("t4vect_YAxis");
 
 // PORT: PS2-only VU0 inline asm (a - b).
 static inline t4Vector vu0Sub_F600(const t4Vector& a, const t4Vector& b)
@@ -469,8 +469,8 @@ extern "C" void cFloatingNode_applyForce(cFloatingNode* self, t4Vector* intInfo,
     sFlVE_F600* vt = (sFlVE_F600*)self->mVtbl;
     t4Vector* transform = vt[24].fn(vthis(self, vt[24]));
     t4Vector arm = vu0Sub_F600(intInfo[0], pos_F600(transform));
-    t4Vector axisX = vu0MtxMul_F600(transform, &D_004FF140_F600[0]);
-    t4Vector axisY = vu0MtxMul_F600(transform, &D_004FF150_F600[0]);
+    t4Vector axisX = vu0MtxMul_F600(transform, &t4vect_XAxis_F600[0]);
+    t4Vector axisY = vu0MtxMul_F600(transform, &t4vect_YAxis_F600[0]);
     self->Force += vu0Dot_F600(*force, intInfo[1]);
     t4Vector torque = vu0Cross_F600(*force, arm);
     self->TX += vu0Dot_F600(torque, axisX);
@@ -488,8 +488,8 @@ struct sV4_F790 {
     sV4_F790(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
-extern sV4_F790 D_004FF140_F790[] __asm__("t4vect_XAxis");
-extern sV4_F790 D_004FF150_F790[] __asm__("t4vect_YAxis");
+extern sV4_F790 t4vect_XAxis_F790[] __asm__("t4vect_XAxis");
+extern sV4_F790 t4vect_YAxis_F790[] __asm__("t4vect_YAxis");
 extern "C" void cMoveNode_updateIntersectInfo(void* self, void* a);
 
 // PORT: PS2-only VU0 inline asm (a - b).
@@ -618,8 +618,8 @@ extern "C" void cFloatingNode_updateIntersectInfo(cFloatingNode* self, sV4_F790*
     sV4_F790* transform = vt[24].fn(vthis(self, vt[24]));
     cFloatingNodeState* base = (cFloatingNodeState*)&self->ZSpring;
     sV4_F790 arm = vu0Sub_F790(intInfo[0], pos_F790(transform));
-    sV4_F790 axisX = vu0MtxMul_F790(transform, &D_004FF140_F790[0]);
-    sV4_F790 axisY = vu0MtxMul_F790(transform, &D_004FF150_F790[0]);
+    sV4_F790 axisX = vu0MtxMul_F790(transform, &t4vect_XAxis_F790[0]);
+    sV4_F790 axisY = vu0MtxMul_F790(transform, &t4vect_YAxis_F790[0]);
     sV4_F790 angVel = vu0Add_F790(vu0Scale_F790(axisX, base->WX), vu0Scale_F790(axisY, base->WY));
     vu0AddEq_F790(intInfo[2], vu0Add_F790(sV4_F790(0.0f, 0.0f, base->Vel, 0.0f), vu0Cross_F790(arm, angVel)));
     vu0AddEq_F790(intInfo[3], angVel);

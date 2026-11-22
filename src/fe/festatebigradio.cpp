@@ -742,7 +742,7 @@ struct sPlayerOpts_193DE0 {
     int f4;     // 0x4
     int f8;     // 0x8
 };
-extern sPlayerOpts_193DE0 D_005308B8_193DE0[] __asm__("cBERules_mRules");
+extern sPlayerOpts_193DE0 cBERules_mRules_193DE0[] __asm__("cBERules_mRules");
 
 static inline int other_193DE0(int p)
 {
@@ -763,14 +763,14 @@ static inline int other_193DE0(int p)
 extern "C" void cFEStateBraggingRights_updateBE(cFEStateBraggingRights* self, int player, int which, int value)
 {
     switch (which) {
-    case 0: D_005308B8_193DE0[other_193DE0(player)].f8 = value; break;
-    case 1: D_005308B8_193DE0[other_193DE0(player)].b3 = value; break;
-    case 2: D_005308B8_193DE0[other_193DE0(player)].b0 = value; break;
-    case 3: D_005308B8_193DE0[player].b4 = value; break;
-    case 4: D_005308B8_193DE0[player].b5 = value; break;
-    case 5: D_005308B8_193DE0[player].b1 = value; break;
-    case 6: D_005308B8_193DE0[player].b2 = value; break;
-    case 7: D_005308B8_193DE0[other_193DE0(player)].f4 = value; break;
+    case 0: cBERules_mRules_193DE0[other_193DE0(player)].f8 = value; break;
+    case 1: cBERules_mRules_193DE0[other_193DE0(player)].b3 = value; break;
+    case 2: cBERules_mRules_193DE0[other_193DE0(player)].b0 = value; break;
+    case 3: cBERules_mRules_193DE0[player].b4 = value; break;
+    case 4: cBERules_mRules_193DE0[player].b5 = value; break;
+    case 5: cBERules_mRules_193DE0[player].b1 = value; break;
+    case 6: cBERules_mRules_193DE0[player].b2 = value; break;
+    case 7: cBERules_mRules_193DE0[other_193DE0(player)].f4 = value; break;
     }
 }
 #endif
@@ -791,7 +791,7 @@ struct sRadioChan_3F38 {
     int f4;
     int f8;
 };
-extern sRadioChan_3F38 D_005308B8_a[] __asm__("cBERules_mRules");
+extern sRadioChan_3F38 cBERules_mRules_a[] __asm__("cBERules_mRules");
 
 /**
  * Returns the value of one bragging-rights rule for a player from the rule records cBERules_mRules.
@@ -806,21 +806,21 @@ extern sRadioChan_3F38 D_005308B8_a[] __asm__("cBERules_mRules");
 extern "C" int cFEStateBraggingRights_getBEData(void *self, int chan, int kind) {
     switch (kind) {
     case 0:
-        return D_005308B8_a[other_3F38(chan)].f8;
+        return cBERules_mRules_a[other_3F38(chan)].f8;
     case 1:
-        return D_005308B8_a[other_3F38(chan)].b3;
+        return cBERules_mRules_a[other_3F38(chan)].b3;
     case 2:
-        return D_005308B8_a[other_3F38(chan)].b0;
+        return cBERules_mRules_a[other_3F38(chan)].b0;
     case 3:
-        return D_005308B8_a[chan].b4;
+        return cBERules_mRules_a[chan].b4;
     case 4:
-        return D_005308B8_a[chan].b5;
+        return cBERules_mRules_a[chan].b5;
     case 5:
-        return D_005308B8_a[chan].b1;
+        return cBERules_mRules_a[chan].b1;
     case 6:
-        return D_005308B8_a[chan].b2;
+        return cBERules_mRules_a[chan].b2;
     case 7:
-        return D_005308B8_a[other_3F38(chan)].f4;
+        return cBERules_mRules_a[other_3F38(chan)].f4;
     default:
         return -1;
     }

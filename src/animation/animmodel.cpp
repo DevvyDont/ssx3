@@ -1128,8 +1128,8 @@ struct sAnimNode_310F18
 };
 
 // Typed views of the pool tables (declared as int[] later in this unit).
-extern sAnimNode_310F18* D_004FE7A0_310F18[] __asm__("gChanCache");
-extern sAnimNode_310F18* D_004FE860_310F18[] __asm__("gChanCacheLRU");
+extern sAnimNode_310F18* gChanCache_310F18[] __asm__("gChanCache");
+extern sAnimNode_310F18* gChanCacheLRU_310F18[] __asm__("gChanCacheLRU");
 
 /**
  * Allocates one channel-cache bucket: 20 nodes in a circular list, each with room for n channels.
@@ -1143,17 +1143,17 @@ extern sAnimNode_310F18* D_004FE860_310F18[] __asm__("gChanCacheLRU");
  */
 extern "C" sAnimNode_310F18* gGenCacheBucket(int bank, int n)
 {
-    D_004FE7A0_310F18[bank] = new (str_AnimChanCache, 0x20000000, 0) sAnimNode_310F18[20];
+    gChanCache_310F18[bank] = new (str_AnimChanCache, 0x20000000, 0) sAnimNode_310F18[20];
     for (int i = 0; i < 20; i++)
     {
-        D_004FE7A0_310F18[bank][i].next = &D_004FE7A0_310F18[bank][i] + 1;
-        D_004FE7A0_310F18[bank][i].prev = &D_004FE7A0_310F18[bank][i] - 1;
-        D_004FE7A0_310F18[bank][i].used = 0;
-        D_004FE7A0_310F18[bank][i].data = new (str_AnimChanCache, 0x20000000, 0) tCmpChannel[n];
+        gChanCache_310F18[bank][i].next = &gChanCache_310F18[bank][i] + 1;
+        gChanCache_310F18[bank][i].prev = &gChanCache_310F18[bank][i] - 1;
+        gChanCache_310F18[bank][i].used = 0;
+        gChanCache_310F18[bank][i].data = new (str_AnimChanCache, 0x20000000, 0) tCmpChannel[n];
     }
-    D_004FE7A0_310F18[bank][0].prev = &D_004FE7A0_310F18[bank][19];
-    D_004FE7A0_310F18[bank][19].next = D_004FE7A0_310F18[bank];
-    return D_004FE860_310F18[bank] = D_004FE7A0_310F18[bank];
+    gChanCache_310F18[bank][0].prev = &gChanCache_310F18[bank][19];
+    gChanCache_310F18[bank][19].next = gChanCache_310F18[bank];
+    return gChanCacheLRU_310F18[bank] = gChanCache_310F18[bank];
 }
 #endif
 
@@ -1247,8 +1247,8 @@ struct sAnimNode_311110
 };
 
 // Typed views of the pool tables (declared as int[] in this unit).
-extern sAnimNode_311110* D_004FE7A0_311110[] __asm__("gChanCache");
-extern sAnimNode_311110* D_004FE860_311110[] __asm__("gChanCacheLRU");
+extern sAnimNode_311110* gChanCache_311110[] __asm__("gChanCache");
+extern sAnimNode_311110* gChanCacheLRU_311110[] __asm__("gChanCacheLRU");
 
 /**
  * Frees the animation channel cache: every allocated bucket of gChanCache, its nodes' data and the bucket itself.
@@ -1262,25 +1262,25 @@ extern "C" void cAnimDataBase_purgeChanCache(void)
 {
     for (int bank = 0; bank < 48; bank++)
     {
-        if (D_004FE7A0_311110[bank] != 0)
+        if (gChanCache_311110[bank] != 0)
         {
             for (int i = 0; i < 20; i++)
             {
-                if (D_004FE7A0_311110[bank][i].owner != 0)
+                if (gChanCache_311110[bank][i].owner != 0)
                 {
-                    D_004FE7A0_311110[bank][i].owner[5] = 0xFF;
+                    gChanCache_311110[bank][i].owner[5] = 0xFF;
                 }
-                if (D_004FE7A0_311110[bank][i].data != 0)
+                if (gChanCache_311110[bank][i].data != 0)
                 {
-                    cMemMan_free(D_004FE7A0_311110[bank][i].data);
+                    cMemMan_free(gChanCache_311110[bank][i].data);
                 }
             }
-            if (D_004FE7A0_311110[bank] != 0)
+            if (gChanCache_311110[bank] != 0)
             {
-                cMemMan_free(D_004FE7A0_311110[bank]);
+                cMemMan_free(gChanCache_311110[bank]);
             }
-            D_004FE7A0_311110[bank] = 0;
-            D_004FE860_311110[bank] = 0;
+            gChanCache_311110[bank] = 0;
+            gChanCacheLRU_311110[bank] = 0;
         }
     }
 }

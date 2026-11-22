@@ -386,7 +386,7 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_sellAttribute);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct sProf0E68 { char s[0xF88]; };
 struct sEcon0E68 { int a; int b; };
-extern sEcon0E68 D_00440550_0E68[] __asm__("cBELibrary_attribCost");
+extern sEcon0E68 cBELibrary_attribCost_0E68[] __asm__("cBELibrary_attribCost");
 
 /**
  * Refunds one point of attribute @p kind for character @p characterId of slot @p profile, unless the attribute is at 5.
@@ -415,7 +415,7 @@ extern "C" int cBEEconInterface_sellAttribute(cBEEconInterface* self, int profil
     }
     if (*attribLevel == 5) return 0;
     {
-        int refund = D_00440550_0E68[(*attribLevel - 1) / 5].b;
+        int refund = cBELibrary_attribCost_0E68[(*attribLevel - 1) / 5].b;
         int off = characterId * 3976 + profile * 39760;
         char* charProfile = (char*)cBELibrary_profileLib + off;
         *(int*)(charProfile + 0xAC4) += refund;
@@ -868,7 +868,7 @@ struct sEcon_001519E0;
 extern "C" void func_00151A88(cBECharProfileDB* self, int k);
 extern "C" void func_001519E0(sEcon_001519E0* self, int k);
 extern "C" void func_00150558(int kind, void* dst);
-extern sEconDef_1600 D_0043EE10_v1600[] __asm__("cBELibrary_missionInfo");
+extern sEconDef_1600 cBELibrary_missionInfo_v1600[] __asm__("cBELibrary_missionInfo");
 extern sEconColRec_1600 D_005308D9[];
 
 /**
@@ -932,7 +932,7 @@ extern "C" void cBECharProfileDB_init(sEcon_1600* self, int k, int reload)
         }
     }
     for (i = 0; i < 88; i++) {
-        sEconDef_1600* missionDef = &D_0043EE10_v1600[i];
+        sEconDef_1600* missionDef = &cBELibrary_missionInfo_v1600[i];
         self->flags[i].f0 = missionDef->a;
         self->flags[i].f1 = 1;
         self->flags[i].f2 = 0;

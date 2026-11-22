@@ -41,7 +41,7 @@ struct sCharWeightEntryView {
     int field_0x44;     // 0x44
     char pad_0x48[0x88 - 0x48];
 };
-extern sCharWeightEntryView D_00530970_view[] __asm__("cBELibrary_characterDB");
+extern sCharWeightEntryView cBELibrary_characterDB_view[] __asm__("cBELibrary_characterDB");
 
 /**
  * Tells whether a rider's character rides goofy (right foot forward).
@@ -55,7 +55,7 @@ extern sCharWeightEntryView D_00530970_view[] __asm__("cBELibrary_characterDB");
 extern "C" bool cBECharacterInterface_getIsGoofyFoot(cBECharacterInterface* self, int riderIndex)
 {
     int charID = cBELibrary_getCharacterID(riderIndex);
-    return D_00530970_view[charID].field_0x44 != 0;
+    return cBELibrary_characterDB_view[charID].field_0x44 != 0;
 }
 #endif
 
@@ -75,7 +75,7 @@ struct sCharScaleEntry_EFA8 {
     int mScale;         // 0x48, percent
     char pad_0x4C[0x88 - 0x4C];
 };
-extern sCharScaleEntry_EFA8 D_00530970_EFA8[] __asm__("cBELibrary_characterDB");
+extern sCharScaleEntry_EFA8 cBELibrary_characterDB_EFA8[] __asm__("cBELibrary_characterDB");
 
 /**
  * Returns the size a rider's model is drawn at.
@@ -127,7 +127,7 @@ extern "C" float cBECharacterInterface_getScale(cBECharacterInterface* self, int
     if (cBENewPlayerInterface_isMissionMan(riderIndex)) {
         return 0.8f;
     }
-    return D_00530970_EFA8[charID].mScale * 0.01f;
+    return cBELibrary_characterDB_EFA8[charID].mScale * 0.01f;
 }
 #endif
 
@@ -173,7 +173,7 @@ struct sCharEntryView {
     char pad_0x64[0x84 - 0x64];
     int field_0x84;
 };
-extern sCharEntryView D_00530970_flags[] __asm__("cBELibrary_characterDB");
+extern sCharEntryView cBELibrary_characterDB_flags[] __asm__("cBELibrary_characterDB");
 
 /**
  * Tests the word at +0x5C of @p riderIndex's character record (cBELibrary_characterDB, 0x88-byte entries).
@@ -183,14 +183,14 @@ extern sCharEntryView D_00530970_flags[] __asm__("cBELibrary_characterDB");
  */
 extern "C" bool cBECharacterInterface_getIsFemale(cBECharacterInterface* self, int riderIndex)
 {
-    return D_00530970_flags[cBELibrary_getCharacterID(riderIndex)].field_0x5C != 0;
+    return cBELibrary_characterDB_flags[cBELibrary_getCharacterID(riderIndex)].field_0x5C != 0;
 }
 #endif
 //100%
 INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getAge);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern sCharEntryView D_00530970_flags[] __asm__("cBELibrary_characterDB");
+extern sCharEntryView cBELibrary_characterDB_flags[] __asm__("cBELibrary_characterDB");
 
 /**
  * Returns the word at +0x60 of @p riderIndex's character record (cBELibrary_characterDB, 0x88-byte entries).
@@ -200,7 +200,7 @@ extern sCharEntryView D_00530970_flags[] __asm__("cBELibrary_characterDB");
  */
 extern "C" int cBECharacterInterface_getAge(cBECharacterInterface* self, int riderIndex)
 {
-    return D_00530970_flags[cBELibrary_getCharacterID(riderIndex)].field_0x60;
+    return cBELibrary_characterDB_flags[cBELibrary_getCharacterID(riderIndex)].field_0x60;
 }
 #endif
 //100%
@@ -241,7 +241,7 @@ extern "C" void* cBECharacterInterface_getNationality(cBECharacterInterface* sel
 INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getVoiceID);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern sCharEntryView D_00530970_flags[] __asm__("cBELibrary_characterDB");
+extern sCharEntryView cBELibrary_characterDB_flags[] __asm__("cBELibrary_characterDB");
 
 /**
  * Returns the word at +0x84 (the last) of @p riderIndex's character record (cBELibrary_characterDB, 0x88-byte entries).
@@ -251,6 +251,6 @@ extern sCharEntryView D_00530970_flags[] __asm__("cBELibrary_characterDB");
  */
 extern "C" int cBECharacterInterface_getVoiceID(cBECharacterInterface* self, int riderIndex)
 {
-    return D_00530970_flags[cBELibrary_getCharacterID(riderIndex)].field_0x84;
+    return cBELibrary_characterDB_flags[cBELibrary_getCharacterID(riderIndex)].field_0x84;
 }
 #endif

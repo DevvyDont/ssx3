@@ -28,7 +28,7 @@ struct sSpNode_53EF0 {
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern const char str_SpringNodes[];
-extern sSpVec_53EF0 D_004FF120_53EF0 __asm__("t4vect_Zero");
+extern sSpVec_53EF0 t4vect_Zero_53EF0 __asm__("t4vect_Zero");
 /**
  * Allocates the spring's chain of nodes ("SpringNodes") with zero position, velocity, force, angle and
  * torque.
@@ -40,9 +40,9 @@ extern "C" void cSpring_setupNodes(cSpring* self)
     *dst = new (str_SpringNodes, 0x20000000, 0) sSpNode_53EF0[self->Width];
     sSpNode_53EF0* nd = ((sSpNode_53EF0*)self->Nodes);
     for (i = 0; i < self->Width; i++, nd++) {
-        nd->p = D_004FF120_53EF0;
-        nd->v = D_004FF120_53EF0;
-        nd->f = D_004FF120_53EF0;
+        nd->p = t4vect_Zero_53EF0;
+        nd->v = t4vect_Zero_53EF0;
+        nd->f = t4vect_Zero_53EF0;
         nd->av = 0;
         nd->a = 0;
         nd->t = 0;
@@ -61,7 +61,7 @@ struct sSpVec_53FC0 {
 
 
 
-extern sSpVec_53FC0 D_004FF120_sp __asm__("t4vect_Zero");
+extern sSpVec_53FC0 t4vect_Zero_sp __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline sSpVec_53FC0 spSub_53FC0(const sSpVec_53FC0& a, const sSpVec_53FC0& b)
@@ -208,7 +208,7 @@ extern "C" void cSpring_update(cSpring* self)
     float dt = 1.0f / (float)cAppMan_TheAppMan->TimerHz;
     sSpVec_53FC0 forces[16];
     float torques[16];
-    forces[0] = forces[self->Width - 1] = D_004FF120_sp;
+    forces[0] = forces[self->Width - 1] = t4vect_Zero_sp;
     torques[0] = torques[self->Width - 1] = 0.0f;
     for (int i = 1; i < self->Width - 1; i++) {
         sSpVec_53FC0 toPrev = spSub_53FC0((*(sSpVec_53FC0*)&self->Nodes[i - 1].P), (*(sSpVec_53FC0*)&self->Nodes[i].P));
@@ -238,7 +238,7 @@ extern "C" void cSpring_update(cSpring* self)
         self->Nodes[i].O += dt * self->Nodes[i].W;
     }
     for (int i = 0; i < self->Width; i++) {
-        (*(sSpVec_53FC0*)&self->Nodes[i].F) = D_004FF120_sp;
+        (*(sSpVec_53FC0*)&self->Nodes[i].F) = t4vect_Zero_sp;
         self->Nodes[i].T = 0.0f;
     }
 }

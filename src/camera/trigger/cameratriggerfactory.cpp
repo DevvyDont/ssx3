@@ -37,7 +37,7 @@ struct sCTActVec3A {
     float x, y, z;
 };
 
-extern sCTActVec3A D_004FF0D8_act __asm__("t3vect_Zero");     // zero vector
+extern sCTActVec3A t3vect_Zero_act __asm__("t3vect_Zero");     // zero vector
 extern void* D_0045C2E8[];      // cCTAction vtable
 extern void* D_0045C1D0[];      // bounded cam
 extern void* D_0045C1B8[];      // spline
@@ -93,7 +93,7 @@ struct sCTActBoundedA : sCTActA {
         f1C = 25.0f;
         f18 = 70.0f;
         f24 = 0;
-        f28 = D_004FF0D8_act;
+        f28 = t3vect_Zero_act;
         f20 = 0;
     }
 };
@@ -879,10 +879,10 @@ struct sM_172278 {
     sM_172278& operator=(const sM_172278& o) { vu0CopyMtx_172278(this, &o); return *this; }
 } __attribute__((aligned(16)));
 
-extern sM_172278 D_004FF1A0_v172278 __asm__("t4mat_Identity");
-extern sV_172278 D_004FF140_v172278 __asm__("t4vect_XAxis");
-extern sV_172278 D_004FF150_v172278 __asm__("t4vect_YAxis");
-extern sV_172278 D_004FF160_v172278 __asm__("t4vect_ZAxis");
+extern sM_172278 t4mat_Identity_v172278 __asm__("t4mat_Identity");
+extern sV_172278 t4vect_XAxis_v172278 __asm__("t4vect_XAxis");
+extern sV_172278 t4vect_YAxis_v172278 __asm__("t4vect_YAxis");
+extern sV_172278 t4vect_ZAxis_v172278 __asm__("t4vect_ZAxis");
 extern "C" void fSinCos(float* sout, float* cout, float x);
 
 // PORT: PS2-only VU0 inline asm (scale the rows of m by s.x, s.y, s.z, s.w).
@@ -1049,12 +1049,12 @@ static inline void RotAxis_172278(sM_172278* m, const sV_172278& axis, float ang
 // Ellipsoid volume test: is p inside the unit sphere after the inverse transform?
 extern "C" int cCTVolumeEllipse_containsPoint(cCTVolumeEllipse* self, sV_172278* point)
 {
-    sM_172278 toLocal(D_004FF1A0_v172278);
+    sM_172278 toLocal(t4mat_Identity_v172278);
     float one = 1.0f;
     toLocal = vu0ScaleMtx_172278(toLocal, sV_172278(one / self->Scale.x, one / self->Scale.y, one / self->Scale.z, one));
-    RotAxis_172278(&toLocal, D_004FF160_v172278, -self->Heading);
-    RotAxis_172278(&toLocal, D_004FF150_v172278, -self->Roll);
-    RotAxis_172278(&toLocal, D_004FF140_v172278, -self->Pitch);
+    RotAxis_172278(&toLocal, t4vect_ZAxis_v172278, -self->Heading);
+    RotAxis_172278(&toLocal, t4vect_YAxis_v172278, -self->Roll);
+    RotAxis_172278(&toLocal, t4vect_XAxis_v172278, -self->Pitch);
     vu0TransMtx_172278(&toLocal, sV_172278(-*(sV3_172278*)self, one));
     sV_172278 localPt = vu0MulVec_172278(toLocal, *point);
     return localPt.x * localPt.x + localPt.y * localPt.y + localPt.z * localPt.z <= one;
@@ -1122,11 +1122,11 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTVolumeBox_containsPoint);
 
 extern t4Vector t4vect_XAxis;
 
-extern t4Vector D_004FF150_28F8 __asm__("t4vect_YAxis");
+extern t4Vector t4vect_YAxis_28F8 __asm__("t4vect_YAxis");
 
-extern t4Vector D_004FF160_28F8 __asm__("t4vect_ZAxis");
+extern t4Vector t4vect_ZAxis_28F8 __asm__("t4vect_ZAxis");
 
-extern t4Matrix D_004FF1A0_28F8 __asm__("t4mat_Identity");
+extern t4Matrix t4mat_Identity_28F8 __asm__("t4mat_Identity");
 
 extern "C" void fSinCos(float* sout, float* cout, float x);
 
@@ -1369,7 +1369,7 @@ extern t4Vector D_004C5480[3];      // static local: the three box axes
 // cCTVolumeBox: is pt inside the (rotated) box?
 extern "C" int cCTVolumeBox_containsPoint(const sXform_28F8* t, const t4Vector* pt)
 {
-    sMtx_28F8 toLocal = (const sMtx_28F8&)D_004FF1A0_28F8;
+    sMtx_28F8 toLocal = (const sMtx_28F8&)t4mat_Identity_28F8;
     {
         sMtx_28F8* toLocalPtr = &toLocal;
         sMtx_28F8 R;
@@ -1379,7 +1379,7 @@ extern "C" int cCTVolumeBox_containsPoint(const sXform_28F8* t, const t4Vector* 
     {
         sMtx_28F8* toLocalPtr = &toLocal;
         sMtx_28F8 R;
-        ROT_28F8(R, &D_004FF160_28F8.x, -t->rot[0]);
+        ROT_28F8(R, &t4vect_ZAxis_28F8.x, -t->rot[0]);
         *toLocalPtr *= R;
     }
     vu0MulVecRow3_28F8(&toLocal, sVec4_28F8(sVec3_28F8(-t->pos.x, -t->pos.y, -t->pos.z), 1.0f));
@@ -1389,8 +1389,8 @@ extern "C" int cCTVolumeBox_containsPoint(const sXform_28F8* t, const t4Vector* 
     t4Vector dmax = Sub_28F8(localPt, sVec4_28F8(t->size.x, t->size.y, t->size.z, 1.0f));
     if (D_004A4DEC == 0) {
         D_004C5480[0] = t4vect_XAxis;
-        D_004C5480[1] = D_004FF150_28F8;
-        D_004C5480[2] = D_004FF160_28F8;
+        D_004C5480[1] = t4vect_YAxis_28F8;
+        D_004C5480[2] = t4vect_ZAxis_28F8;
         D_004A4DEC = 1;
     }
     for (int i = 0; i < 3; i++) {
@@ -1583,7 +1583,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTriggerAlgorithm_cTriggerAlg
 extern "C" void* cChaseAlgorithm_cChaseAlgorithm(void* self);
 extern void* cTriggerAlgorithm_vtbl[];
 
-extern t4Vector D_004FF130_00173208 __asm__("t4vect_Origin");
+extern t4Vector t4vect_Origin_00173208 __asm__("t4vect_Origin");
 
 /**
  * Constructs a trigger camera algorithm: a chase camera that follows the rider from a configurable distance and angle.
@@ -1611,7 +1611,7 @@ extern "C" void* cTriggerAlgorithm_cTriggerAlgorithm(cTriggerAlgorithm* self)
     self->IdealDist = 400.0f;
     *(int*)&self->LeadDistance = 0;
     self->PitchOffset = 20.0f;
-    *(&self->Position) = D_004FF130_00173208;
+    *(&self->Position) = t4vect_Origin_00173208;
     self->AlgorithmType = 90;
     *(int*)&self->Pitch = 0;
     *(int*)&self->Heading = 0;
@@ -1662,7 +1662,7 @@ struct sVec2 {
     sVec2(float ax, float ay) : x(ax), y(ay) {}
 };
 
-extern t4Vector D_004FF160_32E8 __asm__("t4vect_ZAxis");
+extern t4Vector t4vect_ZAxis_32E8 __asm__("t4vect_ZAxis");
 
 extern "C" float func_0031C228(float x);
 extern "C" void fSinCos(float* sout, float* cout, float x);
@@ -1792,7 +1792,7 @@ extern "C" void cTriggerAlgorithm_snap_x(char* vself, long key)
         sVEntry<t4Vector(void*)>* frontSlot = &(*(sVEntry<t4Vector(void*)>**)frontTarget)[4];
         riderFront = frontSlot->fn(vthis(frontTarget, *frontSlot));
     }
-    AddEq_1732E8(focusPos, Scale_1732E8(D_004FF160_32E8, self->HeightOffset));
+    AddEq_1732E8(focusPos, Scale_1732E8(t4vect_ZAxis_32E8, self->HeightOffset));
     AddEq_1732E8(focusPos, Scale_1732E8(riderFront, self->LeadDistance));
     self->Heading = wrap_1732E8(Atan2_1732E8(riderFront.y, riderFront.x));
     float frontPitch = Atan2_1732E8(riderFront.z, Len2_1732E8(sVec2(riderFront.x, riderFront.y)));
@@ -1844,7 +1844,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTriggerAlgorithm_update);
 // 2-float vector (the horizontal part of a direction, for pitch = atan2(z, |xy|)).
 
 
-extern t4Vector D_004FF160_36E0 __asm__("t4vect_ZAxis");
+extern t4Vector t4vect_ZAxis_36E0 __asm__("t4vect_ZAxis");
 
 extern "C" float func_0031C228(float x);
 extern "C" void fSinCos(float* s, float* c, float angle);
@@ -2012,7 +2012,7 @@ extern "C" void cTriggerAlgorithm_update(cTriggerAlgorithm* self)
     ((void (*)(void*, void*))vEntry->fn)(&riderFront, vthis(riderTarget, *vEntry));
     {
         t4Vector scaledVec;
-        ScaleTo_1736E0(scaledVec, D_004FF160_36E0, self->HeightOffset);
+        ScaleTo_1736E0(scaledVec, t4vect_ZAxis_36E0, self->HeightOffset);
         AddEq_1736E0(focusPos, scaledVec);
         ScaleTo_1736E0(scaledVec, riderFront, self->LeadDistance);
         AddEq_1736E0(focusPos, scaledVec);
@@ -2079,7 +2079,7 @@ struct sM_173E40 {
 
 extern sM_173E40 t4mat_Identity;
 extern t4Vector t4vect_YAxis;
-extern t4Vector D_004FF160_v173E40 __asm__("t4vect_ZAxis");
+extern t4Vector t4vect_ZAxis_v173E40 __asm__("t4vect_ZAxis");
 extern "C" void fSinCos(float* sout, float* cout, float x);
 extern "C" tPose tPose_tPose(sM_173E40* m);
 
@@ -2219,7 +2219,7 @@ extern "C" tPose cTriggerAlgorithm_getPose(cTriggerAlgorithm* src)
     vu0CopyMtx_173E40(&poseMtx, &t4mat_Identity);
     vu0TransMtx_173E40(&poseMtx, *(&src->Position));
     RotAxis_173E40(&poseMtx, t4vect_YAxis, -src->Pitch);
-    RotAxis_173E40(&poseMtx, D_004FF160_v173E40, src->Heading);
+    RotAxis_173E40(&poseMtx, t4vect_ZAxis_v173E40, src->Heading);
     return tPose_tPose(&poseMtx);
 }
 #endif
@@ -2286,7 +2286,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_update);
 // 2-float vector (the horizontal part of a direction, for pitch = atan2(z, |xy|)).
 
 
-extern t4Vector D_004FF160_4200 __asm__("t4vect_ZAxis");
+extern t4Vector t4vect_ZAxis_4200 __asm__("t4vect_ZAxis");
 
 extern "C" float func_0031C228(float x);
 
@@ -2438,7 +2438,7 @@ extern "C" void cBoundedAlgorithm_update(cBoundedAlgorithm* self)
         ScaleTo_174200(leadOffset, riderFront, k);
         AddTo_174200(leadPos, riderPos, leadOffset);
         t4Vector heightLift;
-        ScaleTo_174200(heightLift, D_004FF160_4200, self->HeightOffset);
+        ScaleTo_174200(heightLift, t4vect_ZAxis_4200, self->HeightOffset);
         AddTo_174200(lookTarget, leadPos, heightLift);
     }
     self->CamTargetPos = lookTarget;
@@ -2466,7 +2466,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_snap);
 // 2-float vector (the horizontal part of a direction, for pitch = atan2(z, |xy|)).
 
 
-extern t4Vector D_004FF160_44B0 __asm__("t4vect_ZAxis");
+extern t4Vector t4vect_ZAxis_44B0 __asm__("t4vect_ZAxis");
 
 extern "C" float func_0031C228(float x);
 
@@ -2625,7 +2625,7 @@ extern "C" void cBoundedAlgorithm_snap(cBoundedAlgorithm* self, long subjectId)
         ScaleTo_1744B0(leadOffset, riderFront, k);
         AddTo_1744B0(leadPos, riderPos, leadOffset);
         t4Vector heightLift;
-        ScaleTo_1744B0(heightLift, D_004FF160_44B0, self->HeightOffset);
+        ScaleTo_1744B0(heightLift, t4vect_ZAxis_44B0, self->HeightOffset);
         AddTo_1744B0(lookTarget, leadPos, heightLift);
     }
     cCTActionBoundedCam* act2 = self->BoundAction;
@@ -4967,7 +4967,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSPOKEChaseAlgorithm_getDesir
 // sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
 
 
-extern t4Vector D_004FF160_7FC0 __asm__("t4vect_ZAxis");
+extern t4Vector t4vect_ZAxis_7FC0 __asm__("t4vect_ZAxis");
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline t4Vector ctScale_00177EF8_7FC0(const t4Vector& v, float s)
@@ -5120,7 +5120,7 @@ extern "C" t4Vector cSPOKEChaseAlgorithm_getDesiredPosition(cSPOKEChaseAlgorithm
     else
         ctDivEq_7FC0(lookDir, len);
     self->LastLookDir = lookDir;
-    t4Vector desiredPos = ctSub_7FC0(ctAdd_00177EF8_7FC0(cSPOKEChaseAlgorithm_getRiderPosition_7FC0(self), ctScaleP_7FC0(&D_004FF160_7FC0, 30.0f)), ctScale_00177EF8_7FC0(lookDir, 250.0f));
+    t4Vector desiredPos = ctSub_7FC0(ctAdd_00177EF8_7FC0(cSPOKEChaseAlgorithm_getRiderPosition_7FC0(self), ctScaleP_7FC0(&t4vect_ZAxis_7FC0, 30.0f)), ctScale_00177EF8_7FC0(lookDir, 250.0f));
     return desiredPos;
 }
 #endif
@@ -5131,7 +5131,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSPOKEChaseAlgorithm_update);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
 
-extern t4Vector D_004FF160_8208 __asm__("t4vect_ZAxis");
+extern t4Vector t4vect_ZAxis_8208 __asm__("t4vect_ZAxis");
 
 // The per-frame camera input record (0x70 bytes) that cLookAtChaseAlgorithm_setupChaseData_8208 (camera/camera) fills from the target.
 struct sCamInfo {
@@ -5305,7 +5305,7 @@ extern "C" void cSPOKEChaseAlgorithm_update_v(char* vself)
         AddD_8208(scratchVec, keptEye, Scale_8208(f_177FC0_8208(self, info.dir), newWeight));
         self->Position = scratchVec;
     }
-    AddD_8208(scratchVec, f_177EF8_8208(self), ScaleP_8208(&D_004FF160_8208, 37.0f));
+    AddD_8208(scratchVec, f_177EF8_8208(self), ScaleP_8208(&t4vect_ZAxis_8208, 37.0f));
     self->CamTargetPos = scratchVec;
 }
 #endif
@@ -5320,7 +5320,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSPOKEChaseAlgorithm_snap);
 // sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
 
 
-extern t4Vector D_004FF160_83E0 __asm__("t4vect_ZAxis");
+extern t4Vector t4vect_ZAxis_83E0 __asm__("t4vect_ZAxis");
 
 // A being: the script/AI-facing interface of a rider, at rider + 0x6C0 (seg/seg_1FBE38; slot order of the
 // prototype's vtable _vt$6cBeing).
@@ -5414,7 +5414,7 @@ extern "C" void cSPOKEChaseAlgorithm_snap(cSPOKEChaseAlgorithm* self, long id)
         subject = (char*)self->Target;
         vEntry = &(*(sVEntry<t4Vector(void*)>**)subject)[3];
         self->Position = f_177FC0_1783E0(((cCameraAlgorithm_cVirt*)self), vEntry->fn(vthis(subject, *vEntry)));
-        self->CamTargetPos = Add_1783E0(f_177EF8_1783E0(((cCameraAlgorithm_cVirt*)self)), ScaleP_1783E0(&D_004FF160_83E0, 37.0f));
+        self->CamTargetPos = Add_1783E0(f_177EF8_1783E0(((cCameraAlgorithm_cVirt*)self)), ScaleP_1783E0(&t4vect_ZAxis_83E0, 37.0f));
         f_166C60_1783E0(((cCameraAlgorithm_cVirt*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cCameraAlgorithm_cVirt*)self), 559.7440185546875f, 300.0f);
         ((cCameraAlgorithm_cVirt*)self)->update();
@@ -5642,7 +5642,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSUPERPIPEChaseAlgorithm_getI
 // sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
 
 
-extern t4Vector D_004FF160_8758 __asm__("t4vect_ZAxis");
+extern t4Vector t4vect_ZAxis_8758 __asm__("t4vect_ZAxis");
 
 
 // PORT: PS2-only VU0 inline asm (a + b).
@@ -5692,7 +5692,7 @@ extern "C" t4Vector f_178758(char* self) __asm__("cSUPERPIPEChaseAlgorithm_getId
  */
 extern "C" t4Vector f_178758(char* self)
 {
-    return Add_178758(CallA_178758(self), ScaleP_178758(&D_004FF160_8758, -100.0f));
+    return Add_178758(CallA_178758(self), ScaleP_178758(&t4vect_ZAxis_8758, -100.0f));
 }
 #endif
 
@@ -5990,7 +5990,7 @@ static inline float Dot_1789E8(const t4Vector& a, const t4Vector& b)
     return r;
 }
 
-extern t4Vector D_004FF140_v1789E8 __asm__("t4vect_XAxis");
+extern t4Vector t4vect_XAxis_v1789E8 __asm__("t4vect_XAxis");
 extern void* cPOST_RACE_1ChaseAlgorithm_vtbl[];
 extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(void* self);
 
@@ -6025,7 +6025,7 @@ extern "C" void* cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm(cPOST_RAC
     if (len > 0.009999999776482582f)
         DivEq_1789E8(*(&self->StartDir), len);
     else
-        *(&self->StartDir) = D_004FF140_v1789E8;
+        *(&self->StartDir) = t4vect_XAxis_v1789E8;
     return ((char*)self);
 }
 #endif

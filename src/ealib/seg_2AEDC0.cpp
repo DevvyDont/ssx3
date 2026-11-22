@@ -133,7 +133,7 @@ struct sAlloc_ADEC8 {
     int flags;
 };
 // PORT: the unit declares RCMP_rcmp_sys as char[] later; view bound by asm label
-extern sAlloc_ADEC8 D_00509430_ADEC8 __asm__("RCMP_rcmp_sys");
+extern sAlloc_ADEC8 RCMP_rcmp_sys_ADEC8 __asm__("RCMP_rcmp_sys");
 extern char str_AV_VideoStreamBuffer[];
 extern char str_AV_AudioStreamBuffer[];
 extern "C" signed char func_003B5440();
@@ -198,14 +198,14 @@ extern "C" void func_003ADEC8(void* selfp, int videoSource, int videoDataSize, i
     *(int*)(self + 0x74) = 0;
     *(int*)(self + 0xC) = videoSource;
     *(int*)(self + 0x10) = audioSource;
-    if (!wsCanAlloc_ADEC8(&D_00509430_ADEC8)) {
+    if (!wsCanAlloc_ADEC8(&RCMP_rcmp_sys_ADEC8)) {
         func_003E62B0();
         return;
     }
     if (audioSource != 0) {
         *(int*)(self + 0x14) = 1;
-        *(void**)(self + 0x4) = D_00509430_ADEC8.alloc(str_AV_VideoStreamBuffer, videoBufferSize, 0, 0, D_00509430_ADEC8.flags);
-        *(void**)(self + 0x8) = D_00509430_ADEC8.alloc(str_AV_AudioStreamBuffer, audioBufferSize, 0, 0, D_00509430_ADEC8.flags);
+        *(void**)(self + 0x4) = RCMP_rcmp_sys_ADEC8.alloc(str_AV_VideoStreamBuffer, videoBufferSize, 0, 0, RCMP_rcmp_sys_ADEC8.flags);
+        *(void**)(self + 0x8) = RCMP_rcmp_sys_ADEC8.alloc(str_AV_AudioStreamBuffer, audioBufferSize, 0, 0, RCMP_rcmp_sys_ADEC8.flags);
         *(int*)(self + 0x30) = STREAM_create(2, 2, 1, *(void**)(self + 0x4), videoBufferSize);
         *(int*)(self + 0x34) = STREAM_create(2, 2, 1, *(void**)(self + 0x8), audioBufferSize);
         STREAM_setpriority(*(int*)(self + 0x34), 152, 52);
@@ -220,8 +220,8 @@ extern "C" void func_003ADEC8(void* selfp, int videoSource, int videoDataSize, i
         STREAM_setfilter(*(int*)(self + 0x34), 2, 0, 0, -2);
         int type = *(int*)(self + 0x18);
         if (type == 1) {
-            *(int*)(self + 0x2C) = ASYNCFILE_load(audioSource, D_00509430_ADEC8.flags);
-            *(int*)(self + 0x24) = ASYNCFILE_load(videoSource, D_00509430_ADEC8.flags);
+            *(int*)(self + 0x2C) = ASYNCFILE_load(audioSource, RCMP_rcmp_sys_ADEC8.flags);
+            *(int*)(self + 0x24) = ASYNCFILE_load(videoSource, RCMP_rcmp_sys_ADEC8.flags);
         } else if (type == 0) {
             *(int*)(self + 0x3C) = STREAM_queuefile(*(int*)(self + 0x34), audioSource, 0, 0);
             *(int*)(self + 0x38) = STREAM_queuefile(*(int*)(self + 0x30), videoSource, 0, 0);
@@ -231,7 +231,7 @@ extern "C" void func_003ADEC8(void* selfp, int videoSource, int videoDataSize, i
         }
     } else {
         *(int*)(self + 0x14) = 0;
-        *(void**)(self + 0x4) = D_00509430_ADEC8.alloc(str_AV_VideoStreamBuffer, videoBufferSize, 0, 0, D_00509430_ADEC8.flags);
+        *(void**)(self + 0x4) = RCMP_rcmp_sys_ADEC8.alloc(str_AV_VideoStreamBuffer, videoBufferSize, 0, 0, RCMP_rcmp_sys_ADEC8.flags);
         *(void**)(self + 0x8) = 0;
         *(int*)(self + 0x30) = STREAM_create(2, 3, 2, *(void**)(self + 0x4), videoBufferSize);
         *(int*)(self + 0x34) = STREAM_taphandle(*(int*)(self + 0x30), 2);
@@ -246,7 +246,7 @@ extern "C" void func_003ADEC8(void* selfp, int videoSource, int videoDataSize, i
         }
         int type = *(int*)(self + 0x18);
         if (type == 1) {
-            *(int*)(self + 0x24) = ASYNCFILE_load(videoSource, D_00509430_ADEC8.flags);
+            *(int*)(self + 0x24) = ASYNCFILE_load(videoSource, RCMP_rcmp_sys_ADEC8.flags);
         } else if (type == 0) {
             *(int*)(self + 0x38) = STREAM_queuefile(*(int*)(self + 0x30), videoSource, 0, 0);
         } else if (type == 2) {
@@ -369,7 +369,7 @@ struct sAlloc_AE450 {
     int flags;
 };
 // PORT: the unit declares RCMP_rcmp_sys as char[] later; view bound by asm label
-extern sAlloc_AE450 D_00509430_AE450 __asm__("RCMP_rcmp_sys");
+extern sAlloc_AE450 RCMP_rcmp_sys_AE450 __asm__("RCMP_rcmp_sys");
 extern char D_00495210[];
 
 struct sTimer_AE450 {
@@ -447,21 +447,21 @@ extern "C" int func_003AE450(char* self, int framesToBuffer, int timeOffsetMs)
         *(int*)(self + 0x3C) = *(int*)(self + 0x38);
     }
     if (*(int*)(self + 0x1C) == 0) {
-        char* audioObj = (char*)func_003AED40(wsAlloc_AE450(&D_00509430_AE450, 20), *(int*)(self + 0x34), *(int*)(self + 0x3C));
+        char* audioObj = (char*)func_003AED40(wsAlloc_AE450(&RCMP_rcmp_sys_AE450, 20), *(int*)(self + 0x34), *(int*)(self + 0x3C));
         *(char**)(self + 0x0) = audioObj;
         *(unsigned int*)(self + 0x54) = *(int*)(audioObj + 0xC) >= 0;
     } else {
         *(unsigned int*)(self + 0x54) = 0;
     }
     *(void**)(self + 0x64) = 0;
-    if (wsCanAlloc_AE450(&D_00509430_AE450)) {
+    if (wsCanAlloc_AE450(&RCMP_rcmp_sys_AE450)) {
         char key[0x10];
         *(char**)(self + 0x60) = self;
         RCMP_CODEC_IDATA_CODEC_IDATA1_AE450(key, self + 0x60, (void*)func_003AECB8, (void*)func_003AED20, framesToBuffer);
-        *(RCMP_DECODER**)(self + 0x64) = RCMP_DECODER_DECODER((RCMP_DECODER*)wsAlloc_AE450(&D_00509430_AE450, 0x1C), (RCMP_DECODER_DECODER_sKey*)key);
+        *(RCMP_DECODER**)(self + 0x64) = RCMP_DECODER_DECODER((RCMP_DECODER*)wsAlloc_AE450(&RCMP_rcmp_sys_AE450, 0x1C), (RCMP_DECODER_DECODER_sKey*)key);
     }
     *(int*)(self + 0x74) = RCMP_DECODER_GetFrame(*(void**)(self + 0x64), 0);
-    sTimer_AE450* msTimer = (sTimer_AE450*)wsAlloc_AE450(&D_00509430_AE450, 0x18);
+    sTimer_AE450* msTimer = (sTimer_AE450*)wsAlloc_AE450(&RCMP_rcmp_sys_AE450, 0x18);
     msTimer->ticks = 0;
     msTimer->start = TIMER_gettick();
     msTimer->period = 0x1000;
@@ -781,7 +781,7 @@ struct sAlloc_AEAD0 {
     int flags;
 };
 // PORT: the unit declares RCMP_rcmp_sys as char[] later; view bound by asm label
-extern sAlloc_AEAD0 D_00509430_AEAD0 __asm__("RCMP_rcmp_sys");
+extern sAlloc_AEAD0 RCMP_rcmp_sys_AEAD0 __asm__("RCMP_rcmp_sys");
 extern char D_00495210[];
 
 extern "C" unsigned char* STREAM_get(void* q);
@@ -838,7 +838,7 @@ extern "C" void func_003AEAD0_impl(char* self, char* ctx, sChunk_AEAD0** out)
             if (func_003B11F0(tag))
                 kind = 3;
             if (kind != 0) {
-                sChunk_AEAD0* newChunk = (sChunk_AEAD0*)RCMP_CHUNK_CHUNK(D_00509430_AEAD0.alloc(D_00495210, 0xC, 0, 0, D_00509430_AEAD0.flags));
+                sChunk_AEAD0* newChunk = (sChunk_AEAD0*)RCMP_CHUNK_CHUNK(RCMP_rcmp_sys_AEAD0.alloc(D_00495210, 0xC, 0, 0, RCMP_rcmp_sys_AEAD0.flags));
                 *out = newChunk;
                 newChunk->data = blockData;
                 if (kind == 2) {
@@ -945,7 +945,7 @@ struct func_003AED40_sAlloc {
     int flags;
 };
 // PORT: the unit declares RCMP_rcmp_sys as char[] later; view bound by asm label
-extern func_003AED40_sAlloc D_00509430_v __asm__("RCMP_rcmp_sys");
+extern func_003AED40_sAlloc RCMP_rcmp_sys_v __asm__("RCMP_rcmp_sys");
 extern char str_AV_audiobuff[];
 
 extern "C" signed char func_003B5440();
@@ -978,7 +978,7 @@ extern "C" void* func_003AED40(void* self, int sourceStream, int sourceHandle)
         *(int*)((char*)self + 0xC) = -1;
         SNDplaysetdef(desc);
         int size = SNDSTRM_overheadtap(1, 0x1E);
-        void* mem = D_00509430_v.alloc(str_AV_audiobuff, size, 0, 0, D_00509430_v.flags);
+        void* mem = RCMP_rcmp_sys_v.alloc(str_AV_audiobuff, size, 0, 0, RCMP_rcmp_sys_v.flags);
         *(void**)((char*)self + 0x4) = mem;
         int streamHandle = func_003B7E38(sourceStream, desc, 1, 0x1E, mem, size);
         *(int*)((char*)self + 0xC) = streamHandle;
@@ -1166,8 +1166,8 @@ struct sElem_AF020 {
     // PORT: the constructor is RCMP_AV_SUBTITLE_AV_SUBTITLE, defined later in this unit as a C function.
     sElem_AF020() __asm__("RCMP_AV_SUBTITLE_AV_SUBTITLE");
     ~sElem_AF020() {}
-    void* operator new[](unsigned int size) { return D_00509430_ADEC8.alloc(D_00495260, size, 0, 0, D_00509430_ADEC8.flags); }
-    void operator delete[](void* p) { D_00509430_ADEC8.free(p); }
+    void* operator new[](unsigned int size) { return RCMP_rcmp_sys_ADEC8.alloc(D_00495260, size, 0, 0, RCMP_rcmp_sys_ADEC8.flags); }
+    void operator delete[](void* p) { RCMP_rcmp_sys_ADEC8.free(p); }
 };
 
 /**
@@ -1205,7 +1205,7 @@ struct sAlloc_F0C8 {
     int flags;
 };
 // PORT: the unit declares RCMP_rcmp_sys as char[] later; view bound by asm label
-extern sAlloc_F0C8 D_00509430_F0C8 __asm__("RCMP_rcmp_sys");
+extern sAlloc_F0C8 RCMP_rcmp_sys_F0C8 __asm__("RCMP_rcmp_sys");
 
 struct sElem_F0C8 { char pad[0x34]; };
 struct sSelf_F0C8 { sElem_F0C8* arr; unsigned int count; };
@@ -1235,7 +1235,7 @@ extern "C" void RCMP_AV_SUBTITLE_ARRAY_Init(void* vself, unsigned int count, int
     unsigned int k;
 
     i = count - 1;
-    raw = (unsigned int*)D_00509430_F0C8.alloc(D_00495260, count * 52 + 0x10, 0, 0, D_00509430_F0C8.flags);
+    raw = (unsigned int*)RCMP_rcmp_sys_F0C8.alloc(D_00495260, count * 52 + 0x10, 0, 0, RCMP_rcmp_sys_F0C8.flags);
     arr = (char*)raw + 0x10;
     *raw = count;
     subtitle = arr;
@@ -2483,7 +2483,7 @@ struct sAlloc_B0C58 {
     int flags;
 };
 // PORT: the unit declares RCMP_rcmp_sys as char[] later; view bound by asm label
-extern sAlloc_B0C58 D_00509430_B0C58 __asm__("RCMP_rcmp_sys");
+extern sAlloc_B0C58 RCMP_rcmp_sys_B0C58 __asm__("RCMP_rcmp_sys");
 // mpeg2decode: struct layer_data *ld (current layer), outside small data like the other MPEG globals
 struct layer_data;
 extern layer_data* ld __asm__("D_0050A088") __attribute__((section(".bss")));
@@ -2549,11 +2549,11 @@ extern "C" int PS2_SONY_CODEC_INTERNAL_Init(PS2_SONY_CODEC_INTERNAL* self, RCMP_
     self->mCurrentFrameNumber = 0;
     self->unk_14 = 0;
     if (self->mpWorkBuffer != 0) {
-        D_00509430_B0C58.free(self->mpWorkBuffer);
+        RCMP_rcmp_sys_B0C58.free(self->mpWorkBuffer);
         self->mpWorkBuffer = 0;
     }
     if (self->mpChunkBuffer != 0) {
-        D_00509430_B0C58.free(self->mpChunkBuffer);
+        RCMP_rcmp_sys_B0C58.free(self->mpChunkBuffer);
         self->mpChunkBuffer = 0;
     }
     self->unk_04 = 1;
@@ -2583,7 +2583,7 @@ extern "C" int PS2_SONY_CODEC_INTERNAL_Init(PS2_SONY_CODEC_INTERNAL* self, RCMP_
     for (int i = 0; i < n; i++) {
         int cw = self->mWidth;
         int ch = self->mHeight;
-        char* newFrame = (char*)func_003B07F8((RCMP_FRAME*)D_00509430_B0C58.alloc(D_004953E8, 20, 0, 0, D_00509430_B0C58.flags), cw, ch);
+        char* newFrame = (char*)func_003B07F8((RCMP_FRAME*)RCMP_rcmp_sys_B0C58.alloc(D_004953E8, 20, 0, 0, RCMP_rcmp_sys_B0C58.flags), cw, ch);
         sWSNode_B0C58* node = newFrame ? (sWSNode_B0C58*)(newFrame + 8) : 0;
         sWSNode_B0C58* head = &(*(sWSNode_B0C58*)&self->mFreeFrames);
         sWSNode_B0C58* old = head->next;
@@ -2592,8 +2592,8 @@ extern "C" int PS2_SONY_CODEC_INTERNAL_Init(PS2_SONY_CODEC_INTERNAL* self, RCMP_
         node->next = old;
         node->prev = head;
     }
-    self->mpWorkBuffer = D_00509430_B0C58.alloc(str_RCMP_mpegbuff, self->mWidth * self->mHeight * 9 / 2 + 5996, 0, 0, D_00509430_B0C58.flags | 0x400);
-    self->mpChunkBuffer = D_00509430_B0C58.alloc(str_RCMP_chunkbuff, 0x32000, 0, 0, D_00509430_B0C58.flags | 0x400);
+    self->mpWorkBuffer = RCMP_rcmp_sys_B0C58.alloc(str_RCMP_mpegbuff, self->mWidth * self->mHeight * 9 / 2 + 5996, 0, 0, RCMP_rcmp_sys_B0C58.flags | 0x400);
+    self->mpChunkBuffer = RCMP_rcmp_sys_B0C58.alloc(str_RCMP_chunkbuff, 0x32000, 0, 0, RCMP_rcmp_sys_B0C58.flags | 0x400);
     (*(void**)&self->mpChunkBufferUncached) = (void*)(((unsigned int)self->mpChunkBuffer & 0x0FFFFFFF) | 0x30000000);
     sceMpegInit();
     sceMpegCreate(self->mMpeg, self->mpWorkBuffer, self->mWidth * self->mHeight * 9 / 2 + 5996);
@@ -2808,7 +2808,7 @@ struct sAlloc_11A0 {
     int flags;
 };
 // PORT: the unit declares RCMP_rcmp_sys as char[] later; view bound by asm label
-extern sAlloc_11A0 D_00509430_11A0 __asm__("RCMP_rcmp_sys");
+extern sAlloc_11A0 RCMP_rcmp_sys_11A0 __asm__("RCMP_rcmp_sys");
 /**
  * Allocates and constructs a Sony MPEG codec object (0x80 bytes).
  *
@@ -2819,7 +2819,7 @@ extern sAlloc_11A0 D_00509430_11A0 __asm__("RCMP_rcmp_sys");
  */
 extern "C" void* func_003B11A0(void)
 {
-    return PS2_SONY_CODEC_INTERNAL_PS2_SONY_CODEC_INTERNAL((PS2_SONY_CODEC_INTERNAL*)D_00509430_11A0.alloc(D_004953E8, 0x80, 0, 0, D_00509430_11A0.flags));
+    return PS2_SONY_CODEC_INTERNAL_PS2_SONY_CODEC_INTERNAL((PS2_SONY_CODEC_INTERNAL*)RCMP_rcmp_sys_11A0.alloc(D_004953E8, 0x80, 0, 0, RCMP_rcmp_sys_11A0.flags));
 }
 #endif
 

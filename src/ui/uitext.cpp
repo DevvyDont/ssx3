@@ -1304,7 +1304,7 @@ struct sGfx_20A0 {
     sDrawState* top;          // 0xE84
 };
 // The unit declares GrMan as char*; typed view by asm label.
-extern int D_004A28AC_20A0 __asm__("G2D");
+extern int G2D_20A0 __asm__("G2D");
 extern "C" void c2DRender_drawRect(int ctx, tBxVertex* v, tRect* r);
 extern "C" void c2DRender_drawRotRect(int ctx, tBxVertex* v, tRect* r);
 
@@ -1357,9 +1357,9 @@ extern "C" void cTextureElement_render(cTextureElement* element, tRect rect, tAR
     quadVerts[3].u = rightU;
     quadVerts[3].v = bottomV;
     if (flags & 4) {
-        c2DRender_drawRotRect(D_004A28AC_20A0, quadVerts, &rect);
+        c2DRender_drawRotRect(G2D_20A0, quadVerts, &rect);
     } else {
-        c2DRender_drawRect(D_004A28AC_20A0, quadVerts, &rect);
+        c2DRender_drawRect(G2D_20A0, quadVerts, &rect);
     }
 }
 #endif
@@ -1371,7 +1371,7 @@ struct sGfx_2220 {
     sDrawState* top;          // 0xE84
 };
 // The unit declares GrMan as char*; typed views by asm label.
-extern int D_004A28AC_2220 __asm__("G2D");
+extern int G2D_2220 __asm__("G2D");
 extern void c2DRender_drawRect_2220(int ctx, tBxVertex* v, tRect* r) __asm__("c2DRender_drawRect");
 extern void c2DRender_drawRotRect_2220(int ctx, tBxVertex* v, tRect* r) __asm__("c2DRender_drawRotRect");
 
@@ -1418,9 +1418,9 @@ extern "C" void cTextureElement_render2(cTextureElement* element, tRect rect, tA
     quadVerts[3].u = rightU;
     quadVerts[3].v = bottomV;
     if (flags & 4) {
-        c2DRender_drawRotRect_2220(D_004A28AC_2220, quadVerts, &rect);
+        c2DRender_drawRotRect_2220(G2D_2220, quadVerts, &rect);
     } else {
-        c2DRender_drawRect_2220(D_004A28AC_2220, quadVerts, &rect);
+        c2DRender_drawRect_2220(G2D_2220, quadVerts, &rect);
     }
 }
 #endif
@@ -1437,7 +1437,7 @@ struct sGfx_23B8 {
     char pad[0xE84];
     sDrawState* top;          // 0xE84
 };
-extern int D_004A28AC_23B8 __asm__("G2D");
+extern int G2D_23B8 __asm__("G2D");
 extern "C" void c2DRender_drawRect2(int ctx, tBxVertex* v, sRect_23B8* dst, sRect_23B8* uv);
 extern "C" void c2DRender_drawRotRect2(int ctx, tBxVertex* v, sRect_23B8* dst, sRect_23B8* uv);
 
@@ -1510,25 +1510,25 @@ extern "C" void cTextureElement_renderTiled(cTextureElement* element, sRect_23B8
                 for (int i = 0; i < nx; i++) {
                     sRect_23B8 dst(x, y, w, tileHeight);
                     sRect_23B8 uv(leftU, topV, rightU - leftU, bottomV - topV);
-                    c2DRender_drawRotRect2(D_004A28AC_23B8, quadVerts, &dst, &uv);
+                    c2DRender_drawRotRect2(G2D_23B8, quadVerts, &dst, &uv);
                     x += w;
                 }
                 if ((float)nx != tx) {
                     sRect_23B8 dst(x, y, (x0 + destRect.w) - x, tileHeight);
                     sRect_23B8 uv(leftU, topV, rightU - leftU, (topV + (bottomV - topV) * (tx - (float)nx)) - topV);
-                    c2DRender_drawRotRect2(D_004A28AC_23B8, quadVerts, &dst, &uv);
+                    c2DRender_drawRotRect2(G2D_23B8, quadVerts, &dst, &uv);
                 }
             } else {
                 for (int i = 0; i < nx; i++) {
                     sRect_23B8 dst(x, y, w, tileHeight);
                     sRect_23B8 uv(leftU, topV, rightU - leftU, bottomV - topV);
-                    c2DRender_drawRect2(D_004A28AC_23B8, quadVerts, &dst, &uv);
+                    c2DRender_drawRect2(G2D_23B8, quadVerts, &dst, &uv);
                     x += w;
                 }
                 if ((float)nx != tx) {
                     sRect_23B8 dst(x, y, (x0 + destRect.w) - x, tileHeight);
                     sRect_23B8 uv(leftU, topV, (leftU + (rightU - leftU) * (tx - (float)nx)) - leftU, bottomV - topV);
-                    c2DRender_drawRect2(D_004A28AC_23B8, quadVerts, &dst, &uv);
+                    c2DRender_drawRect2(G2D_23B8, quadVerts, &dst, &uv);
                 }
             }
             y += tileHeight;
@@ -1542,13 +1542,13 @@ extern "C" void cTextureElement_renderTiled(cTextureElement* element, sRect_23B8
             for (int i = 0; i < nx; i++) {
                 sRect_23B8 dst(x, y, w, hh);
                 sRect_23B8 uv(u0b, topV, rightU - u0b, bottomV - topV);
-                c2DRender_drawRotRect2(D_004A28AC_23B8, quadVerts, &dst, &uv);
+                c2DRender_drawRotRect2(G2D_23B8, quadVerts, &dst, &uv);
                 x += w;
             }
             if ((float)nx != tx) {
                 sRect_23B8 dst(x, y, (x0 + destRect.w) - x, hh);
                 sRect_23B8 uv(u0b, topV, rightU - u0b, (topV + (bottomV - topV) * (tx - (float)nx)) - topV);
-                c2DRender_drawRotRect2(D_004A28AC_23B8, quadVerts, &dst, &uv);
+                c2DRender_drawRotRect2(G2D_23B8, quadVerts, &dst, &uv);
             }
         } else {
             float v1b = topV + (bottomV - topV) * (ty - fny);
@@ -1556,13 +1556,13 @@ extern "C" void cTextureElement_renderTiled(cTextureElement* element, sRect_23B8
             for (int i = 0; i < nx; i++) {
                 sRect_23B8 dst(x, y, w, hh);
                 sRect_23B8 uv(leftU, topV, rightU - leftU, v1b - topV);
-                c2DRender_drawRect2(D_004A28AC_23B8, quadVerts, &dst, &uv);
+                c2DRender_drawRect2(G2D_23B8, quadVerts, &dst, &uv);
                 x += w;
             }
             if ((float)nx != tx) {
                 sRect_23B8 dst(x, y, (x0 + destRect.w) - x, hh);
                 sRect_23B8 uv(leftU, topV, (leftU + (rightU - leftU) * (tx - (float)nx)) - leftU, v1b - topV);
-                c2DRender_drawRect2(D_004A28AC_23B8, quadVerts, &dst, &uv);
+                c2DRender_drawRect2(G2D_23B8, quadVerts, &dst, &uv);
             }
         }
     }
@@ -1584,7 +1584,7 @@ struct sQuadVtx_2A00 {
     sQuadVtx_2A00() {}
 };
 // The unit declares GrMan as char*; typed views by asm label.
-extern int D_004A28AC_2A00 __asm__("G2D");
+extern int G2D_2A00 __asm__("G2D");
 extern "C" void c2DRender_drawRect1(int ctx, sQuadVtx_2A00* v, tRect* r, t3Matrix* m);
 extern "C" void c2DRender_drawRotRect1(int ctx, sQuadVtx_2A00* v, tRect* r, t3Matrix* m);
 
@@ -1638,9 +1638,9 @@ extern "C" void cTextureElement_renderRot(cTextureElement* element, tRect destRe
     quadVerts[3].s = rightU;
     quadVerts[3].t = bottomV;
     if (flags & 4) {
-        c2DRender_drawRotRect1(D_004A28AC_2A00, quadVerts, &destRect, &transform);
+        c2DRender_drawRotRect1(G2D_2A00, quadVerts, &destRect, &transform);
     } else {
-        c2DRender_drawRect1(D_004A28AC_2A00, quadVerts, &destRect, &transform);
+        c2DRender_drawRect1(G2D_2A00, quadVerts, &destRect, &transform);
     }
 }
 #endif
@@ -1679,7 +1679,7 @@ struct sSprite_2BC8 {
     float u1;               // 0x14
     float v1;               // 0x18
 };
-extern int D_004A28AC_2BC8 __asm__("G2D");
+extern int G2D_2BC8 __asm__("G2D");
 extern "C" void c2DRender_drawRect3(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* dst, sRect_2BC8* uv, sMat3_2BC8* m);
 extern "C" void c2DRender_drawRotRect3(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* dst, sRect_2BC8* uv, sMat3_2BC8* m);
 
@@ -1750,25 +1750,25 @@ extern "C" void cTextureElement_renderRotTiled(sSprite_2BC8* element, sRect_2BC8
                 for (int i = 0; i < nx; i++) {
                     sRect_2BC8 dst(x, y, w, tileHeight);
                     sRect_2BC8 uv(leftU, topV, rightU - leftU, bottomV - topV);
-                    c2DRender_drawRotRect3(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
+                    c2DRender_drawRotRect3(G2D_2BC8, quadVerts, &dst, &uv, &transform);
                     x += w;
                 }
                 if ((float)nx != tx) {
                     sRect_2BC8 dst(x, y, (x0 + destRect.w) - x, tileHeight);
                     sRect_2BC8 uv(leftU, topV, rightU - leftU, (topV + (bottomV - topV) * (tx - (float)nx)) - topV);
-                    c2DRender_drawRotRect3(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
+                    c2DRender_drawRotRect3(G2D_2BC8, quadVerts, &dst, &uv, &transform);
                 }
             } else {
                 for (int i = 0; i < nx; i++) {
                     sRect_2BC8 dst(x, y, w, tileHeight);
                     sRect_2BC8 uv(leftU, topV, rightU - leftU, bottomV - topV);
-                    c2DRender_drawRect3(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
+                    c2DRender_drawRect3(G2D_2BC8, quadVerts, &dst, &uv, &transform);
                     x += w;
                 }
                 if ((float)nx != tx) {
                     sRect_2BC8 dst(x, y, (x0 + destRect.w) - x, tileHeight);
                     sRect_2BC8 uv(leftU, topV, (leftU + (rightU - leftU) * (tx - (float)nx)) - leftU, bottomV - topV);
-                    c2DRender_drawRect3(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
+                    c2DRender_drawRect3(G2D_2BC8, quadVerts, &dst, &uv, &transform);
                 }
             }
             y += tileHeight;
@@ -1782,13 +1782,13 @@ extern "C" void cTextureElement_renderRotTiled(sSprite_2BC8* element, sRect_2BC8
             for (int i = 0; i < nx; i++) {
                 sRect_2BC8 dst(x, y, w, hh);
                 sRect_2BC8 uv(u0b, topV, rightU - u0b, bottomV - topV);
-                c2DRender_drawRotRect3(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
+                c2DRender_drawRotRect3(G2D_2BC8, quadVerts, &dst, &uv, &transform);
                 x += w;
             }
             if ((float)nx != tx) {
                 sRect_2BC8 dst(x, y, (x0 + destRect.w) - x, hh);
                 sRect_2BC8 uv(u0b, topV, rightU - u0b, (topV + (bottomV - topV) * (tx - (float)nx)) - topV);
-                c2DRender_drawRotRect3(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
+                c2DRender_drawRotRect3(G2D_2BC8, quadVerts, &dst, &uv, &transform);
             }
         } else {
             float v1b = topV + (bottomV - topV) * (ty - (float)ny);
@@ -1796,13 +1796,13 @@ extern "C" void cTextureElement_renderRotTiled(sSprite_2BC8* element, sRect_2BC8
             for (int i = 0; i < nx; i++) {
                 sRect_2BC8 dst(x, y, w, hh);
                 sRect_2BC8 uv(leftU, topV, rightU - leftU, v1b - topV);
-                c2DRender_drawRect3(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
+                c2DRender_drawRect3(G2D_2BC8, quadVerts, &dst, &uv, &transform);
                 x += w;
             }
             if ((float)nx != tx) {
                 sRect_2BC8 dst(x, y, (x0 + destRect.w) - x, hh);
                 sRect_2BC8 uv(leftU, topV, (leftU + (rightU - leftU) * (tx - (float)nx)) - leftU, v1b - topV);
-                c2DRender_drawRect3(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
+                c2DRender_drawRect3(G2D_2BC8, quadVerts, &dst, &uv, &transform);
             }
         }
     }

@@ -145,7 +145,7 @@ public:
     virtual void loadexecpurge();
 };
 // Typed view of cAppMan_TheAppMan (main() in this unit declares it as void*).
-extern cAppManB008* D_004A5B64_B008 __asm__("cAppMan_TheAppMan");
+extern cAppManB008* cAppMan_TheAppMan_B008 __asm__("cAppMan_TheAppMan");
 extern "C" void sceCdMmode(int);
 extern "C" void sceCdInit(int);
 extern "C" void sceSifExitCmd(void);
@@ -165,7 +165,7 @@ extern "C" void LoadExecPS2(int, int, int);
  */
 extern "C" void func_0031B008(int path, int argc, int argv)
 {
-    D_004A5B64_B008->loadexecpurge();
+    cAppMan_TheAppMan_B008->loadexecpurge();
     sceCdMmode(2);
     sceCdInit(0);
     sceCdInit(5);

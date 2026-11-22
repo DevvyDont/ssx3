@@ -8799,7 +8799,7 @@ struct sSsOpts9F198 {
     unsigned int w0;
     int data[0x288 / 4 - 1];
 };
-extern sSsOpts9F198 D_00535610_ss9F198 __asm__("cBEOptionInterface_mOption");
+extern sSsOpts9F198 cBEOptionInterface_mOption_ss9F198 __asm__("cBEOptionInterface_mOption");
 
 /**
  * Returns the speech language chosen in the options as a bit: 1 English, 2 French, 4 German, 8 Spanish.
@@ -8812,7 +8812,7 @@ extern sSsOpts9F198 D_00535610_ss9F198 __asm__("cBEOptionInterface_mOption");
 extern "C" int func_0029F198(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 4);
-    sSsOpts9F198 optionCopy = D_00535610_ss9F198;
+    sSsOpts9F198 optionCopy = cBEOptionInterface_mOption_ss9F198;
     unsigned languageIndex = optionCopy.w0 >> 22;
     languageIndex &= 7;
     switch (languageIndex) {

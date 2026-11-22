@@ -2481,7 +2481,7 @@ struct sGs_31E0 {
     unsigned int f10hi : 16;
 };
 
-extern sGs_31E0 D_00501420_31E0 __asm__("sDrawState_s_defaultDrawState");
+extern sGs_31E0 sDrawState_s_defaultDrawState_31E0 __asm__("sDrawState_s_defaultDrawState");
 extern char t4mat_Identity[];
 extern int D_004A4EB0;
 extern sV2_31E0 D_004A4EA8;
@@ -2575,7 +2575,7 @@ extern "C" void cBXLoadIndicator_Render(cBXLoadIndicator* self)
     ((cGfx_31E0*)ps2GraphicsMan)->stateTop++;
     ((cGfx_31E0*)GrMan)->PushViewport();
     ((cGfx_31E0*)GrMan)->PushView();
-    *((cGfx_31E0*)GrMan)->stateTop = D_00501420_31E0;
+    *((cGfx_31E0*)GrMan)->stateTop = sDrawState_s_defaultDrawState_31E0;
     ((cGfx_31E0*)GrMan)->stateTop->f4_23 = 2;
     ((cGfx_31E0*)GrMan)->stateTop->f4_20 = 0;
     ((cGfx_31E0*)GrMan)->stateTop->f4_12 = 20;

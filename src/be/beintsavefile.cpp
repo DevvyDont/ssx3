@@ -212,7 +212,7 @@ cBEIface_2950* cBEStatInterface_getThis_2950() __asm__("cBEStatInterface_getThis
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
 struct sProfSub_2950 { char pad[0xF88]; };
 struct sProfile_2950 { sProfSub_2950 sub[10]; };
-extern sProfile_2950 D_004A6CA8_2950[] __asm__("cBELibrary_profileLib");
+extern sProfile_2950 cBELibrary_profileLib_2950[] __asm__("cBELibrary_profileLib");
 struct sCharFlag_2950 { unsigned char f; char pad[0x1B]; };
 extern sCharFlag_2950 D_00535B31_2950[] __asm__("D_00535B31");
 
@@ -238,7 +238,7 @@ extern "C" void* cBESaveInterface_generateSaveProfile(cBESaveInterface* self, in
     char* dataPtr = (char*)cBESaveInterface_buffer;
     strncpy(dataPtr, cBELibrary_playerDB[idx].strUserName, 0xC);
     dataPtr += 0xC;
-    *(sProfile_2950*)dataPtr = D_004A6CA8_2950[idx];
+    *(sProfile_2950*)dataPtr = cBELibrary_profileLib_2950[idx];
     dataPtr += sizeof(sProfile_2950);
     *dataPtr++ = D_00535B31_2950[idx].f;
     iface = cBENewPlayerInterface_getThis_2950();
@@ -343,7 +343,7 @@ extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
 extern "C" void func_001515B8(void* p);
 struct sProfSub_2DE0 { char pad[0x288]; int keep; char pad28C[0xF88 - 0x28C]; };
 struct sProfile_2DE0 { sProfSub_2DE0 sub[10]; };
-extern sProfile_2DE0 D_004A6CA8_2DE0[] __asm__("cBELibrary_profileLib");
+extern sProfile_2DE0 cBELibrary_profileLib_2DE0[] __asm__("cBELibrary_profileLib");
 struct sCharFlag_2DE0 { unsigned char f; char pad[0x1B]; };
 extern sCharFlag_2DE0 D_00535B31[];
 
@@ -371,20 +371,20 @@ extern "C" int cBESaveInterface_loadSaveProfile(cBESaveInterface* self, char* bu
     }
     int keep[10];
     for (int i = 0; i < 10; i++) {
-        keep[i] = D_004A6CA8_2DE0[idx].sub[i].keep;
+        keep[i] = cBELibrary_profileLib_2DE0[idx].sub[i].keep;
     }
     char* cursor = buf;
     strncpy(cBELibrary_playerDB[idx].strUserName, cursor, 0xC);
     cursor += 0xC;
-    D_004A6CA8_2DE0[idx] = *(sProfile_2DE0*)cursor;
+    cBELibrary_profileLib_2DE0[idx] = *(sProfile_2DE0*)cursor;
     cursor += sizeof(sProfile_2DE0);
     D_00535B31[idx].f = *cursor;
     cBENewPlayerInterface_getThis()->onLoad();
     cBEStatInterface_getThis_2DE0()->onLoad();
     cBEBAGTInterface_getThis_2DE0()->onLoad();
     for (int i = 0; i < 10; i++) {
-        D_004A6CA8_2DE0[idx].sub[i].keep = keep[i];
-        func_001515B8(&D_004A6CA8_2DE0[idx].sub[i]);
+        cBELibrary_profileLib_2DE0[idx].sub[i].keep = keep[i];
+        func_001515B8(&cBELibrary_profileLib_2DE0[idx].sub[i]);
     }
     return 1;
 }

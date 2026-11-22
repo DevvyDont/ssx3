@@ -132,7 +132,7 @@ struct sVEm_EC68 {
 struct sDefObj_EC68 {
     sVEm_EC68* vt;
 };
-extern sDefObj_EC68 D_004A5A58_EC68 __asm__("gUISoundNull");
+extern sDefObj_EC68 gUISoundNull_EC68 __asm__("gUISoundNull");
 
 struct sPopup_EC68 {
     char pad0[0x10];
@@ -182,7 +182,7 @@ extern "C" int cFEPopupVideoCalibration_onInputBegin(cFEPopupVideoCalibration* s
         }
         sDefObj_EC68* uiSound = *(sDefObj_EC68**)&self->mpEngine->mpSound;
         if (uiSound == 0)
-            uiSound = &D_004A5A58_EC68;
+            uiSound = &gUISoundNull_EC68;
         if (uiSound != 0)
             uiSound->vt[2].fn(vthis(uiSound, uiSound->vt[2]), 6);
     }
@@ -231,7 +231,7 @@ struct sOptions_EE10 {
     int pad_7 : 8;
     int data[(0x288 - 8) / 4];
 };
-extern sOptions_EE10 D_00535610_EE10 __asm__("cBEOptionInterface_mOption");
+extern sOptions_EE10 cBEOptionInterface_mOption_EE10 __asm__("cBEOptionInterface_mOption");
 
 static inline int optB6_EE10(sOptions_EE10 o)
 {
@@ -258,9 +258,9 @@ extern "C" void cFEPopupScreenPos_onCreateScreen(cFEPopupScreenPos* self)
     void* be = cBE_getBE();
     cBE_getInterface_Fv(be, 4);
     int* offsetX = (int*)&self->mX;
-    *offsetX = optB6_EE10(D_00535610_EE10);
+    *offsetX = optB6_EE10(cBEOptionInterface_mOption_EE10);
     int* p4C = (int*)&self->mY;
-    *p4C = optB5_EE10(D_00535610_EE10);
+    *p4C = optB5_EE10(cBEOptionInterface_mOption_EE10);
 }
 #endif
 

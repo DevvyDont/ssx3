@@ -795,7 +795,7 @@ public:
     virtual void setStatic(int v);
     virtual void setVisible(int v);
 };
-extern sVec3_6D30 D_004FF0D8_6D30 __asm__("t3vect_Zero");
+extern sVec3_6D30 t3vect_Zero_6D30 __asm__("t3vect_Zero");
 extern "C" void cScreenPopup_setTextString1(cScreenPopup* self, void* dst, int* info);
 extern "C" void cScreenPopup_setTextString2(cScreenPopup* self, cUIText* text, int* info);
 extern "C" void cScreenPopup_getStringSize3(cScreenPopup* self, void* obj, tRect* out);
@@ -819,7 +819,7 @@ extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, cPopupInfo* infop
     cScreenPopup* screenPopup = self;
     float size[4];
     if (info[0] == -1) {
-        sVec3_6D30 pos = D_004FF0D8_6D30;
+        sVec3_6D30 pos = t3vect_Zero_6D30;
         float w = 0.0f;
         if (((cUIObj_6D30*)screenPopup->mpStaticBox) != 0) {
             float item[4];
@@ -1954,7 +1954,7 @@ struct sVec3_8A38 {
     sVec3_8A38(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
 };
 struct sVec3_7258;
-extern sVec3_8A38 D_004FF0D8_8A38 __asm__("t3vect_Zero");
+extern sVec3_8A38 t3vect_Zero_8A38 __asm__("t3vect_Zero");
 extern "C" void cScreenPopup_setTextObjectSize(cScreenPopup* self, sVec3_7258* v);
 extern "C" void cScreenPopup_changePivot(cScreenPopup* self, void* obj, unsigned char state, float t);
 extern "C" void cScreenPopup_adjustLayer(void* self, int v);
@@ -2039,7 +2039,7 @@ extern "C" void cScreenPopup_restoreElements(cScreenPopup* self)
             cScreenPopup_changePivot(self, option, 10, self->mvLargestOption[0] * 0.5f);
         }
     }
-    sVec3_8A38 textSize = D_004FF0D8_8A38;
+    sVec3_8A38 textSize = t3vect_Zero_8A38;
     textSize.x = 472.0f;
     cScreenPopup_setTextObjectSize(self, (sVec3_7258*)&textSize);
     sVec3_8A38 one;

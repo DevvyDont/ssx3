@@ -505,7 +505,7 @@ extern "C" void cFlexBridgeNode_applyForce(cFlexBridgeNode* self, tIntersectInfo
 INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_updateIntersectInfo);
 #ifdef SKIP_ASM
 
-extern t4Vector D_004FF140_70D0 __asm__("t4vect_XAxis");
+extern t4Vector t4vect_XAxis_70D0 __asm__("t4vect_XAxis");
 
 // PORT: PS2-only VU0 inline asm (a - b).
 static inline t4Vector vu0Sub_70D0(const t4Vector& a, const t4Vector& b)
@@ -631,7 +631,7 @@ extern "C" void cFlexBridgeNode_updateIntersectInfo(cFlexBridgeNode* self, tInte
         sFlVE_70D0* vt = (sFlVE_70D0*)self->mVtbl;
         t4Vector* matrix = vt[24].fn(vthis(self, vt[24]));
         tSpringNode* entry = (tSpringNode*)(pairIndex * 0x50 + (int)ents);
-        t4Vector axisVec = vu0MtxMul_70D0(matrix, vu0ScaleP_70D0(&D_004FF140_70D0, entry->W));
+        t4Vector axisVec = vu0MtxMul_70D0(matrix, vu0ScaleP_70D0(&t4vect_XAxis_70D0, entry->W));
         t4Vector arm = vu0Sub_70D0(((&intInfo->Ipos))[0], vu0MtxMul_70D0(matrix, (*(&entry->P))));
         t4Vector pointVelocity = vu0Add_70D0(vu0MtxMul_70D0(matrix, (*(&entry->V))), vu0Cross_70D0(arm, axisVec));
         vu0AddEq_70D0(((&intInfo->Ipos))[2], pointVelocity);
@@ -657,7 +657,7 @@ struct sFM_7268 {
     sFRow_7268 r[4];
 } __attribute__((aligned(16)));
 
-extern sFV_7268 D_004FF120_v7268 __asm__("t4vect_Zero");
+extern sFV_7268 t4vect_Zero_v7268 __asm__("t4vect_Zero");
 
 
 
@@ -752,8 +752,8 @@ static inline void Reset_7268(tIntersectInfo* h)
     h->Seg = -1;
     h->HitType = 2;
     h->Stype = -1;
-    (*(sFV_7268*)&h->Ivel) = D_004FF120_v7268;
-    (*(sFV_7268*)&h->Iangvel) = D_004FF120_v7268;
+    (*(sFV_7268*)&h->Ivel) = t4vect_Zero_v7268;
+    (*(sFV_7268*)&h->Iangvel) = t4vect_Zero_v7268;
     (*(int*)&h->T) = 0;
     (*(int*)&h->u) = 0;
     (*(int*)&h->v) = 0;
@@ -816,8 +816,8 @@ extern "C" int cFlexBridgeNode_intersect(cFlexBridgeNode* self, cWorldIntersectT
         int k = ((sFList_7268*)(self->Instance)->m_Model)->count - 1;
         (*(int*)&hit->SphTree) = 0;
         hit->Mesh = k;
-        (*(sFV_7268*)&hit->Ivel) = D_004FF120_v7268;
-        (*(sFV_7268*)&hit->Iangvel) = D_004FF120_v7268;
+        (*(sFV_7268*)&hit->Ivel) = t4vect_Zero_v7268;
+        (*(sFV_7268*)&hit->Iangvel) = t4vect_Zero_v7268;
         hit->Stype = *(short*)(((char*)(self->Instance)->m_pCollideRecord) + k * 12 + 0x1A);
     }
     return n;

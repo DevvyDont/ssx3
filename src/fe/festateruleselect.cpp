@@ -544,7 +544,7 @@ INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_updateBE);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern int D_005308B8_2088[] __asm__("cBERules_mRules");
+extern int cBERules_mRules_2088[] __asm__("cBERules_mRules");
 extern int D_005308D4_2088[] __asm__("D_005308D4");
 
 /**
@@ -561,46 +561,46 @@ extern "C" void cFEStateRuleSelect_updateBE(cFEStateRuleSelect* self, int idx, i
 {
     switch (idx) {
     case 4:
-        D_005308B8_2088[6] = (D_005308B8_2088[6] & -2) | ((ruleValue & 1) << 0);
+        cBERules_mRules_2088[6] = (cBERules_mRules_2088[6] & -2) | ((ruleValue & 1) << 0);
         break;
     case 3:
-        D_005308B8_2088[0] = (D_005308B8_2088[0] & -9) | ((ruleValue & 1) << 3);
+        cBERules_mRules_2088[0] = (cBERules_mRules_2088[0] & -9) | ((ruleValue & 1) << 3);
         break;
     case 5:
-        D_005308B8_2088[6] = (D_005308B8_2088[6] & -9) | ((ruleValue & 1) << 3);
+        cBERules_mRules_2088[6] = (cBERules_mRules_2088[6] & -9) | ((ruleValue & 1) << 3);
         break;
     case 14:
-        D_005308B8_2088[0] = (D_005308B8_2088[0] & -33) | ((ruleValue & 1) << 5);
+        cBERules_mRules_2088[0] = (cBERules_mRules_2088[0] & -33) | ((ruleValue & 1) << 5);
         break;
     case 7:
-        D_005308B8_2088[0] = (D_005308B8_2088[0] & -17) | ((ruleValue & 1) << 4);
+        cBERules_mRules_2088[0] = (cBERules_mRules_2088[0] & -17) | ((ruleValue & 1) << 4);
         break;
     case 8:
-        D_005308B8_2088[6] = (D_005308B8_2088[6] & -3) | ((ruleValue & 1) << 1);
+        cBERules_mRules_2088[6] = (cBERules_mRules_2088[6] & -3) | ((ruleValue & 1) << 1);
         break;
     case 1:
-        D_005308B8_2088[6] = (D_005308B8_2088[6] & -5) | ((ruleValue & 1) << 2);
+        cBERules_mRules_2088[6] = (cBERules_mRules_2088[6] & -5) | ((ruleValue & 1) << 2);
         break;
     case 2:
         D_005308D4_2088[0] = ruleValue;
         break;
     case 6:
-        D_005308B8_2088[6] = (D_005308B8_2088[6] & -17) | ((ruleValue & 1) << 4);
+        cBERules_mRules_2088[6] = (cBERules_mRules_2088[6] & -17) | ((ruleValue & 1) << 4);
         break;
     case 9:
-        D_005308B8_2088[6] = (D_005308B8_2088[6] & -33) | ((ruleValue & 1) << 5);
+        cBERules_mRules_2088[6] = (cBERules_mRules_2088[6] & -33) | ((ruleValue & 1) << 5);
         break;
     case 10:
-        D_005308B8_2088[6] = (D_005308B8_2088[6] & -65) | ((ruleValue & 1) << 6);
+        cBERules_mRules_2088[6] = (cBERules_mRules_2088[6] & -65) | ((ruleValue & 1) << 6);
         break;
     case 11:
-        D_005308B8_2088[6] = (D_005308B8_2088[6] & -129) | ((ruleValue & 1) << 7);
+        cBERules_mRules_2088[6] = (cBERules_mRules_2088[6] & -129) | ((ruleValue & 1) << 7);
         break;
     case 12:
-        D_005308B8_2088[6] = (D_005308B8_2088[6] & -257) | ((ruleValue & 1) << 8);
+        cBERules_mRules_2088[6] = (cBERules_mRules_2088[6] & -257) | ((ruleValue & 1) << 8);
         break;
     case 13:
-        D_005308B8_2088[6] = (D_005308B8_2088[6] & -513) | ((ruleValue & 1) << 9);
+        cBERules_mRules_2088[6] = (cBERules_mRules_2088[6] & -513) | ((ruleValue & 1) << 9);
         break;
     }
 }
@@ -611,7 +611,7 @@ INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_getBEData);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern unsigned int D_005308B8_192240[] __asm__("cBERules_mRules");
+extern unsigned int cBERules_mRules_192240[] __asm__("cBERules_mRules");
 extern int D_005308D0[];
 extern int D_005308D4[];
 
@@ -631,13 +631,13 @@ extern "C" int cFEStateRuleSelect_getBEData(cFEStateRuleSelect* self, int rule)
     case 4:
         return D_005308D0[0] & 1;
     case 3:
-        return (D_005308B8_192240[0] >> 3) & 1;
+        return (cBERules_mRules_192240[0] >> 3) & 1;
     case 5:
         return (D_005308D0[0] >> 3) & 1;
     case 14:
-        return (D_005308B8_192240[0] >> 5) & 1;
+        return (cBERules_mRules_192240[0] >> 5) & 1;
     case 7:
-        return (D_005308B8_192240[0] >> 4) & 1;
+        return (cBERules_mRules_192240[0] >> 4) & 1;
     case 8:
         return (D_005308D0[0] >> 1) & 1;
     case 1:

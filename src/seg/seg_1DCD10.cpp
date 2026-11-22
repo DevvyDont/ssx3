@@ -483,7 +483,7 @@ struct sKey_C190 {
 };
 
 extern sCtx_C190* D_C190 __asm__("cGraphicsMan_TheGraphicsMan");
-extern sKey_C190 D_00537AC0_C190[] __asm__("cFogParticleMan_mSortKey");
+extern sKey_C190 cFogParticleMan_mSortKey_C190[] __asm__("cFogParticleMan_mSortKey");
 extern "C" void func_0037D968(void* self);
 
 static inline sV3_C190 operator*(const sV3_C190& a, float s)
@@ -621,8 +621,8 @@ extern "C" void cPS2FogParticleMan_addFogInstance(cPS2FogParticleMan* out, sObj_
                         if (alpha != 0.0f) {
                             viewPos.w = 1.0f / viewPos.w;
                             unsigned short id = out->miNumSphere;
-                            D_00537AC0_C190[id].idx = id;
-                            D_00537AC0_C190[id].depth = depth;
+                            cFogParticleMan_mSortKey_C190[id].idx = id;
+                            cFogParticleMan_mSortKey_C190[id].depth = depth;
                             viewPos.x *= viewPos.w;
                             viewPos.y *= viewPos.w;
                             float spriteSize = vertex->size * viewPos.w;
@@ -694,7 +694,7 @@ struct sSort_C7B0 { int idx; int key; };
 // PORT: asm-label aliases; these globals and calls are declared with other types elsewhere.
 // GS packet words are 64-bit `unsigned long`, and uncached (0x30000000) pointers are held in int.
 extern sDma_C7B0* D_004A4474_C7B0 __asm__("D_004A4474");
-extern sGfx_C7B0* D_004A5B80_C7B0 __asm__("cGraphicsMan_TheGraphicsMan");
+extern sGfx_C7B0* cGraphicsMan_TheGraphicsMan_C7B0 __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" unsigned long* func_0038F460_C7B0(sDma_C7B0* dma, unsigned int buf, int a2, int a3) __asm__("func_0038F460");
 extern "C" unsigned int func_0038F668_C7B0(sDma_C7B0* dma, unsigned long* p, int a2) __asm__("func_0038F668");
 
@@ -724,7 +724,7 @@ extern "C" void cPS2FogParticleMan_platformrender(cPS2FogParticleMan* list)
     int left = list->miNumSphere;
     int start = 0;
     int max = (D_004A4474_C7B0->size - 4) * 2 / 5 - 1;
-    sGfx_C7B0* graphicsMan = D_004A5B80_C7B0;
+    sGfx_C7B0* graphicsMan = cGraphicsMan_TheGraphicsMan_C7B0;
     if (left <= 0) return;
     float one = 1.0f;
     do {

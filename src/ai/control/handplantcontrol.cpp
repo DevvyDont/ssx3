@@ -80,9 +80,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_init);
 #include "bx/math3d.h"
 
 // Global vectors and a matrix in .bss read by the handplant code (set up elsewhere at startup).
-extern t4Vector D_004FF120_8BA0 __asm__("t4vect_Zero");
+extern t4Vector t4vect_Zero_8BA0 __asm__("t4vect_Zero");
 
-extern t4Vector D_004FF160_8BA0 __asm__("t4vect_ZAxis");
+extern t4Vector t4vect_ZAxis_8BA0 __asm__("t4vect_ZAxis");
 
 extern "C" float func_0031C128(float x);
 extern "C" float fSin(float x);
@@ -338,7 +338,7 @@ extern "C" void cHandplantMotion_init(cHandplantMotion* self, sHit_8BA0* hit, fl
 {
     cRider* rider = self->mRider;
     *(sQ_8BA0*)&self->InitPos = *(sQ_8BA0*)&rider->mPosition;
-    *(sQ_8BA0*)&self->ExitVel = (const sQ_8BA0&)D_004FF120_8BA0;
+    *(sQ_8BA0*)&self->ExitVel = (const sQ_8BA0&)t4vect_Zero_8BA0;
     *(sQ_8BA0*)&self->SplineDir = hit->normal;
     *(sQ_8BA0*)&self->SplinePos = hit->pos;
     *(sQ_8BA0*)&self->ApproachDir = Normalize_8BA0(Sub_8BA0(*(sQ_8BA0*)&self->SplinePos, *(sQ_8BA0*)((char*)rider->mAnimModel->bones + (rider->mBoneHead << 5))));
@@ -352,7 +352,7 @@ extern "C" void cHandplantMotion_init(cHandplantMotion* self, sHit_8BA0* hit, fl
     sQ_8BA0 idealOrientation = *(sQ_8BA0*)&self->mRider->mRotation;
     sQ_8BA0 deltaRot;
     sQ_8BA0 axis;
-    axis = Cross_8BA0(up_8BA0((char*)self->mRider), (const sQ_8BA0&)D_004FF160_8BA0);
+    axis = Cross_8BA0(up_8BA0((char*)self->mRider), (const sQ_8BA0&)t4vect_ZAxis_8BA0);
     float len = Len_8BA0(axis);
     if (0.001f < len) {
         DivEq_8BA0(axis, len);
@@ -426,8 +426,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_step);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
-extern t4Vector D_004FF120_91A8 __asm__("t4vect_Zero");
-extern t4Vector D_004FF160_91A8 __asm__("t4vect_ZAxis");
+extern t4Vector t4vect_Zero_91A8 __asm__("t4vect_Zero");
+extern t4Vector t4vect_ZAxis_91A8 __asm__("t4vect_ZAxis");
 extern "C" void cRider_updateOrientationImplicit(void*);
 extern "C" void cAirPredictor_startLaunchIntoAir(void* self, void* a, void* b, float t);
 extern "C" void cAirPredictor_updateFlightPath(void* ap, void* pos, void* vel, float dt);
@@ -599,10 +599,10 @@ extern "C" void cHandplantMotion_step(cHandplantMotion* self)
         *(sQ_91A8*)&self->mRider->mRotation = QuatMul_91A8(deltaRot, *(sQ_91A8*)&self->mRider->mRotation);
     } else {
         *(sQ_91A8*)&self->mRider->mPosition = *(sQ_91A8*)&self->SplinePos;
-        *(sQ_91A8*)&self->mRider->mVelocity = (const sQ_91A8&)D_004FF120_91A8;
-        if (eq_91A8((self), (const sQ_91A8&)D_004FF120_91A8)) {
+        *(sQ_91A8*)&self->mRider->mVelocity = (const sQ_91A8&)t4vect_Zero_91A8;
+        if (eq_91A8((self), (const sQ_91A8&)t4vect_Zero_91A8)) {
             if (cHandplantMotion_calcExitVel((self))) {
-                *(sQ_91A8*)&self->AirPredictorPos = vu0Add_91A8(*(sQ_91A8*)&self->SplinePos, vu0ScaleP_91A8((const sQ_91A8*)&D_004FF160_91A8, 5.0f));
+                *(sQ_91A8*)&self->AirPredictorPos = vu0Add_91A8(*(sQ_91A8*)&self->SplinePos, vu0ScaleP_91A8((const sQ_91A8*)&t4vect_ZAxis_91A8, 5.0f));
                 *(sQ_91A8*)&self->AirPredictorVel = *(sQ_91A8*)&self->ExitVel;
                 cAirPredictor_startLaunchIntoAir(self->mRider->mAirPredictor, (sQ_91A8*)&self->AirPredictorPos, (sQ_91A8*)&self->AirPredictorVel,
                                                  3333.33349609375f);
@@ -647,8 +647,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_calcExitVel);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
-extern t4Vector D_004FF120_9548 __asm__("t4vect_Zero");
-extern t4Vector D_004FF160_9548 __asm__("t4vect_ZAxis");
+extern t4Vector t4vect_Zero_9548 __asm__("t4vect_Zero");
+extern t4Vector t4vect_ZAxis_9548 __asm__("t4vect_ZAxis");
 
 
 static inline int neq_9548(cHandplantMotion* a, const t4Vector& b)
@@ -775,13 +775,13 @@ extern "C" int cHandplantMotion_calcExitVel_x(cHandplantMotion* s) __asm__("cHan
  */
 extern "C" int cHandplantMotion_calcExitVel_x(cHandplantMotion* handplant)
 {
-    if (neq_9548(handplant, D_004FF120_9548))
+    if (neq_9548(handplant, t4vect_Zero_9548))
         return 1;
     int kind = handplant->mRider->HandplantMode;
     t4Vector n;
     if (kind == 3) {
         t4Vector exitVel;
-        vu0CrossTo_9548(exitVel, D_004FF160_9548, handplant->SplineDir);
+        vu0CrossTo_9548(exitVel, t4vect_ZAxis_9548, handplant->SplineDir);
         vu0NormTo_9548(n, exitVel);
         float tangentSpeed = handplant->InitTangentSpeed * 0.699999988079071f;
         float k = 2.0f;
@@ -805,7 +805,7 @@ extern "C" int cHandplantMotion_calcExitVel_x(cHandplantMotion* handplant)
     }
     if (kind == 4) {
         t4Vector exitVel;
-        vu0CrossTo_9548(exitVel, handplant->SplineDir, D_004FF160_9548);
+        vu0CrossTo_9548(exitVel, handplant->SplineDir, t4vect_ZAxis_9548);
         vu0NormTo_9548(n, exitVel);
         float z = 0.0f;
         float approachDot = vu0Dot_9548(n, handplant->ApproachDir);
@@ -825,7 +825,7 @@ extern "C" int cHandplantMotion_calcExitVel_x(cHandplantMotion* handplant)
     }
     if (kind == 5) {
         t4Vector exitVel;
-        vu0CrossTo_9548(exitVel, handplant->SplineDir, D_004FF160_9548);
+        vu0CrossTo_9548(exitVel, handplant->SplineDir, t4vect_ZAxis_9548);
         vu0NormTo_9548(n, exitVel);
         float z = 0.0f;
         float approachDot = vu0Dot_9548(n, handplant->ApproachDir);
@@ -2413,7 +2413,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_getRailUpNorm);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
-extern t4Vector D_004FF160_BD80 __asm__("t4vect_ZAxis");
+extern t4Vector t4vect_ZAxis_BD80 __asm__("t4vect_ZAxis");
 extern "C" void fSinCos(float* s, float* c, float angle);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
@@ -2550,7 +2550,7 @@ extern "C" t4Vector cRailslideMotion_getRailUpNorm_BD80(char* railslide, const t
     bool steep = absf_BD80(n.z) > 0.92f;
     t4Vector railUp;
     if (!steep) {
-        railUp = vu0Normalize_BD80(vu0Sub_BD80(D_004FF160_BD80, vu0Scale_BD80(n, n.z)));
+        railUp = vu0Normalize_BD80(vu0Sub_BD80(t4vect_ZAxis_BD80, vu0Scale_BD80(n, n.z)));
         if (vu0Dot_BD80(railUp, up_BD80(railslide)) < 0.0f)
             vu0ScaleEq_BD80(railUp, -1.0f);
     } else {
@@ -3460,7 +3460,7 @@ struct sHit_13D1B8 {
 
 extern "C" int cOverlapList_terrainIntersect(void* world, void* seg, sHit_13D1B8* hits, int max, int flags);
 extern sVec4HP t4vect_ZAxis;
-extern sVec4HP D_004FF120_v __asm__("t4vect_Zero");
+extern sVec4HP t4vect_Zero_v __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline sVec4HP vu0Scale_13D1B8(const sVec4HP& v, float s)
@@ -3675,7 +3675,7 @@ extern "C" int cGroundMotion_setupGroundVectors(cGroundMotion* self, sHit_13D1B8
     int n = cOverlapList_terrainIntersect(*(void**)(RIDER + 0x860), seg, hits, 0x40, *(int*)(RIDER + 0x864));
     if (n == 0) {
         RV(880) = t4vect_ZAxis;
-        RV(976) = D_004FF120_v;
+        RV(976) = t4vect_Zero_v;
         RV(928) = vu0Normalize_13D1B8(vu0SubV_13D1B8(RV(432), vu0Scale_13D1B8(RV(880), vu0DotV_13D1B8(RV(432), RV(880)))));
         RV(944) = vu0Cross_13D1B8(RV(880), RV(928));
         *(int*)(RIDER + 0x438) = 0;
@@ -3767,8 +3767,8 @@ extern "C" float fCos(float a);
 extern "C" float func_0031C128(float x);
 int cRiderAnimBase_getCurrentAnimID(void* anim, int layer);
 
-extern t4Vector D_004FF120_13D818 __asm__("t4vect_Zero");
-extern t4Vector D_004FF160_13D818 __asm__("t4vect_ZAxis");
+extern t4Vector t4vect_Zero_13D818 __asm__("t4vect_Zero");
+extern t4Vector t4vect_ZAxis_13D818 __asm__("t4vect_ZAxis");
 
 struct sVEnt_13D818 { short delta; short index; void (*fn)(void*, sHit_13D1B8*, t4Vector*); };
 
@@ -4178,7 +4178,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
                 damp = 0.0f;
             vu0ScaleEq_13D818(rel, damp);
             self->mRider->mVelocity = vu0Add_13D818(self->mRider->GroundVelocity, rel);
-            force = D_004FF120_13D818;
+            force = t4vect_Zero_13D818;
         }
     }
 
@@ -4217,7 +4217,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
         float rate = (snow->TurnHeadAdjustRate * (relSpeed * 9.999999974752427e-07f) * relSpeed * dt) <? 1.0f;
         float lowSpd = 555.5555419921875f; // kph2cps(20)
         t4Vector dir;
-        t4Vector side = vu0Cross_13D818(self->mRider->mGroundNormal, D_004FF160_13D818);
+        t4Vector side = vu0Cross_13D818(self->mRider->mGroundNormal, t4vect_ZAxis_13D818);
         float sl = vu0Len_13D818(side);
         if (0.0010000000474974513f < sl) {
             vu0DivEq_13D818(side, sl);

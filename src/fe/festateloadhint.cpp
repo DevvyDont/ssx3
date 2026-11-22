@@ -985,7 +985,7 @@ extern "C" void cUIProgress_setValue(void* self, int pos);
 extern char str_100[];
 extern char D_004A2C18[];
 extern char str_00pb[];
-extern char D_004A2C28_6CF8[] __asm__("str_pct_d_g");
+extern char str_pct_d_g_6CF8[] __asm__("str_pct_d_g");
 extern char str_ranking00[];
 extern char str_ranking01[];
 extern char str_kT_CMNLvNum[];
@@ -1078,7 +1078,7 @@ extern "C" void func_00246CF8(cGameLoadState* self, char player)
         }
         // fmt stays in $18 across both GetHashValue32/getObjectByHashName calls: the target computes
         // the full address before the player test (a literal is rematerialised at the sprintf).
-        char* fmt = D_004A2C28_6CF8;
+        char* fmt = str_pct_d_g_6CF8;
         void* obj;
         if (player == 0) {
             obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ranking00));

@@ -97,16 +97,16 @@ struct sOptionsU_PO {
     int data[0x288 / 4 - 1];
 };
 // PORT: cBEOptionInterface_mOption is viewed with different types across the program; view bound by asm label
-extern sOptions_PO D_00535610_PO __asm__("cBEOptionInterface_mOption");
+extern sOptions_PO cBEOptionInterface_mOption_PO __asm__("cBEOptionInterface_mOption");
 
 struct cBEOptionInterface_PO {
     // PORT: reinterprets the settings global with unsigned flag bits
-    sOptionsU_PO getOptions() { return *(sOptionsU_PO*)&D_00535610_PO; }
+    sOptionsU_PO getOptions() { return *(sOptionsU_PO*)&cBEOptionInterface_mOption_PO; }
 };
 
 static inline sOptions_PO Cfg_PO()
 {
-    return D_00535610_PO;
+    return cBEOptionInterface_mOption_PO;
 }
 
 struct sSlider_PO {
@@ -118,7 +118,7 @@ struct sSlider_PO {
 struct sColor_PO {
     float r, g, b, a;
 };
-extern sColor_PO D_004C66C8_PO __asm__("gStaticColour");
+extern sColor_PO gStaticColour_PO __asm__("gStaticColour");
 
 class cUIObj_PO {
 public:
@@ -335,7 +335,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(cOVState_PAUSE_OPTIONS* se
         cUIObj_PO* eaTalk = (cUIObj_PO*)find_PO(self, str_EATalk);
         if (eaTalk != 0) {
             eaTalk->setUseStaticColour(1);
-            *(sColor_PO*)((char*)eaTalk + 0x88) = D_004C66C8_PO;
+            *(sColor_PO*)((char*)eaTalk + 0x88) = gStaticColour_PO;
             eaTalk->setStatic(1);
             eaTalk->setVisible(0);
         }
@@ -458,7 +458,7 @@ struct sOptions_A238 {
     int data[0x288 / 4 - 1];
 };
 // PORT: cBEOptionInterface_mOption is viewed with different types across the program; view bound by asm label
-extern sOptions_A238 D_00535610_A238 __asm__("cBEOptionInterface_mOption");
+extern sOptions_A238 cBEOptionInterface_mOption_A238 __asm__("cBEOptionInterface_mOption");
 
 struct sVE_A238 {
     short delta;
@@ -470,12 +470,12 @@ struct sVE_A238 {
 struct cBEOptionInterface_A238 {
     char pad[0xC];
     sVE_A238* vtbl;
-    sOptions_A238 getOptions() { return D_00535610_A238; }
+    sOptions_A238 getOptions() { return cBEOptionInterface_mOption_A238; }
 };
 
-static inline void SetF0_A238(unsigned char v) { D_00535610_A238.f0 = v; }
-static inline void SetF4_A238(unsigned char v) { D_00535610_A238.f4 = v; }
-static inline void SetF8_A238(unsigned char v) { D_00535610_A238.f8 = v; }
+static inline void SetF0_A238(unsigned char v) { cBEOptionInterface_mOption_A238.f0 = v; }
+static inline void SetF4_A238(unsigned char v) { cBEOptionInterface_mOption_A238.f4 = v; }
+static inline void SetF8_A238(unsigned char v) { cBEOptionInterface_mOption_A238.f8 = v; }
 
 static inline bool IsId_A238(char* obj, char* key)
 {
@@ -525,7 +525,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(cOVState_PAUSE_OPTIONS* sel
         break;
     case 9:
         if (IsId_A238(obj, str_0lb)) {
-            D_00535610_A238.f30 = *(unsigned char*)(obj + 0x319);
+            cBEOptionInterface_mOption_A238.f30 = *(unsigned char*)(obj + 0x319);
         } else if (IsId_A238(obj, str_1lb_b)) {
             int on = cUIListBox_getCurrentEntryData(obj);
             char* camera = (char*)Sound_A238(4);
@@ -544,10 +544,10 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(cOVState_PAUSE_OPTIONS* sel
             SetF4_A238(*(int*)(obj + 0x74));
             func_00287520(cAudioInterface_bxAudio(), iface->getOptions().f4);
         } else if (IsId_A238(obj, str_7lb_b)) {
-            D_00535610_A238.iUseDJSpeech = cUIListBox_getCurrentEntryData(obj) != 0;
+            cBEOptionInterface_mOption_A238.iUseDJSpeech = cUIListBox_getCurrentEntryData(obj) != 0;
             cSSXAudio_SetDJSpeech(cAudioInterface_bxAudio(), iface->getOptions().iUseDJSpeech != 0);
         } else if (IsId_A238(obj, str_8lb)) {
-            D_00535610_A238.iUseArcadeSFX = cUIListBox_getCurrentEntryData(obj) != 0;
+            cBEOptionInterface_mOption_A238.iUseArcadeSFX = cUIListBox_getCurrentEntryData(obj) != 0;
             cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), iface->getOptions().iUseArcadeSFX != 0);
         }
         cBE_getInterface_Fv(SSXApp->BE, 7);

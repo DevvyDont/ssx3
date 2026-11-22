@@ -1332,10 +1332,10 @@ struct sOptions_8AF0 {
     unsigned int pad1 : 7;
     int data[0x288 / 4 - 1];
 };
-extern sOptions_8AF0 D_00535610_8AF0 __asm__("cBEOptionInterface_mOption");
+extern sOptions_8AF0 cBEOptionInterface_mOption_8AF0 __asm__("cBEOptionInterface_mOption");
 
 struct cBEOptionInterface_8AF0 {
-    sOptions_8AF0 getOptions() { return D_00535610_8AF0; }
+    sOptions_8AF0 getOptions() { return cBEOptionInterface_mOption_8AF0; }
 };
 
 /**

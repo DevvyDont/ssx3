@@ -4237,7 +4237,7 @@ extern "C" void *tWPInGameData_Surface_tWPInGameData_Surface(tWPInGameData_Surfa
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Lighting_tWPInGameData_Lighting);
 #ifdef SKIP_ASM
-extern tWPNameField D_004A53D0_2BC9B0 __asm__("kNullNameField");
+extern tWPNameField kNullNameField_2BC9B0 __asm__("kNullNameField");
 extern char tWPInGameData_Lighting_vtbl[];
 /**
  * Constructs a tWPInGameData_Lighting: vtable tWPInGameData_Lighting_vtbl, m_wpTravelDistance -99999.0f (no position yet), the four
@@ -4260,10 +4260,10 @@ extern "C" void* tWPInGameData_Lighting_tWPInGameData_Lighting(tWPInGameData_Lig
     ((&lighting->m_LightIrradianceName))[5].m_nameId[0] = ((&lighting->m_LightIrradianceName))[5].m_nameId[1] = 0;
     ((&lighting->m_LightIrradianceName))[6].m_nameId[0] = ((&lighting->m_LightIrradianceName))[6].m_nameId[1] = 0;
     ((&lighting->m_LightIrradianceName))[7].m_nameId[0] = ((&lighting->m_LightIrradianceName))[7].m_nameId[1] = 0;
-    { tWPNameField nullName = D_004A53D0_2BC9B0; ((&lighting->m_LightIrradianceName))[0] = ((&lighting->m_LightIrradianceName))[1] = nullName; }
-    { tWPNameField nullName = D_004A53D0_2BC9B0; ((&lighting->m_LightIrradianceName))[2] = ((&lighting->m_LightIrradianceName))[3] = nullName; }
-    { tWPNameField nullName = D_004A53D0_2BC9B0; ((&lighting->m_LightIrradianceName))[4] = ((&lighting->m_LightIrradianceName))[5] = nullName; }
-    { tWPNameField nullName = D_004A53D0_2BC9B0; ((&lighting->m_LightIrradianceName))[6] = ((&lighting->m_LightIrradianceName))[7] = nullName; }
+    { tWPNameField nullName = kNullNameField_2BC9B0; ((&lighting->m_LightIrradianceName))[0] = ((&lighting->m_LightIrradianceName))[1] = nullName; }
+    { tWPNameField nullName = kNullNameField_2BC9B0; ((&lighting->m_LightIrradianceName))[2] = ((&lighting->m_LightIrradianceName))[3] = nullName; }
+    { tWPNameField nullName = kNullNameField_2BC9B0; ((&lighting->m_LightIrradianceName))[4] = ((&lighting->m_LightIrradianceName))[5] = nullName; }
+    { tWPNameField nullName = kNullNameField_2BC9B0; ((&lighting->m_LightIrradianceName))[6] = ((&lighting->m_LightIrradianceName))[7] = nullName; }
     lighting->m_lastAmbientLightIntensityOffset = 1.0f;
     lighting->m_lastRimLightIntensityOffset = 0.75f;
     lighting->m_AmbientLightIntensityOffset = 1.0f;

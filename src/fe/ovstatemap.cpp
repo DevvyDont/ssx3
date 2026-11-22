@@ -1253,7 +1253,7 @@ struct sGameSettings_A1A8 {
     unsigned int flags;     // 0x0, bits 22..24 = language
     int pad[0x288 / 4 - 1];
 };
-extern sGameSettings_A1A8 D_00535610_A1A8 __asm__("cBEOptionInterface_mOption");
+extern sGameSettings_A1A8 cBEOptionInterface_mOption_A1A8 __asm__("cBEOptionInterface_mOption");
 
 /**
  * Formats a time in seconds as minutes and seconds in a static buffer, with the separator the language setting asks
@@ -1273,7 +1273,7 @@ extern "C" char* func_0020A1A8(int secs)
     cBE_getInterface_Fv(cBE_getBE(), 4);
     int minuteCount = secs / 60;
     int secondCount = secs % 60;
-    sGameSettings_A1A8 set = D_00535610_A1A8;
+    sGameSettings_A1A8 set = cBEOptionInterface_mOption_A1A8;
     switch ((set.flags >> 22) & 7) {
     case 0:
     case 2:

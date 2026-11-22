@@ -610,7 +610,7 @@ struct sDefer2_B370 {
     sSortKey_B370 keys[1];          // 0x67CA8
 };
 
-extern sGfx_B370* D_004A5B80_B370 __asm__("cGraphicsMan_TheGraphicsMan");
+extern sGfx_B370* cGraphicsMan_TheGraphicsMan_B370 __asm__("cGraphicsMan_TheGraphicsMan");
 extern float cDetailSystem_m_SpinScale;
 extern float cDetailSystem_m_PS2SparkleSize;
 extern float cDetailSystem_m_PS2MinSparkleSize;
@@ -619,7 +619,7 @@ extern float D_004A4440;
 extern float t4vect_XAxis[4];
 extern float t4vect_YAxis[4];
 extern float t4vect_ZAxis[4];
-extern sM4_B370 D_004FF1A0_B370 __asm__("t4mat_Identity");
+extern sM4_B370 t4mat_Identity_B370 __asm__("t4mat_Identity");
 extern sM4_B370 D_005049C0;
 extern char* str_at_HP[];
 extern "C" void func_0037D968_B370(void* gm) __asm__("func_0037D968");
@@ -665,7 +665,7 @@ static inline sBucket_B370* GetBucket_B370(sDefer2_B370* dm, int state, int key,
 // PORT: uncached (0x30000000) packet pointers held in int; VU0 inline asm.
 static inline void Render_B370(sBezMan_B370* self)
 {
-    sGfx_B370* gm = D_004A5B80_B370;
+    sGfx_B370* gm = cGraphicsMan_TheGraphicsMan_B370;
     self->nDefer = 0;
     unsigned int* cursor = &gm->cursor;
     gm->top->f0 &= ~0xC;
@@ -715,7 +715,7 @@ static inline void Render_B370(sBezMan_B370* self)
     fSinCos(ry, &s3, &c3);
     fSinCos(rx, &s4, &c4);
     fSinCos(rz, &s5, &c5);
-    self->fx = D_004FF1A0_B370;
+    self->fx = t4mat_Identity_B370;
     {
         sM4_B370 r;
         ROTATE_B370(&self->fx, r, t4vect_XAxis, ry)
@@ -885,7 +885,7 @@ struct sGmVE_C590 {
     void (*fn)(void*, int, tBxVertex*, int);
 };
 
-extern char* D_004A5B80_C590 __asm__("cGraphicsMan_TheGraphicsMan");
+extern char* cGraphicsMan_TheGraphicsMan_C590 __asm__("cGraphicsMan_TheGraphicsMan");
 
 static inline void setVert_C590(tBxVertex* v, const t3Vector& p, const t2Vector& uv)
 {
@@ -911,7 +911,7 @@ static inline void setVert_C590(tBxVertex* v, const t3Vector& p, const t2Vector&
 extern "C" void func_0038C590(t3Vector* pts, t2Vector* uvs, int n)
 {
     tBxVertex verts[64];
-    cPS2GraphicsMan* gfx = (cPS2GraphicsMan*)D_004A5B80_C590;
+    cPS2GraphicsMan* gfx = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_C590;
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             setVert_C590(&verts[j], pts[i * n + j], uvs[i * n + j]);
@@ -1111,7 +1111,7 @@ struct sBezMan_CA70 {
     int nDefer;                     // 0x5364
     sDefer_CA70 defer[1];           // 0x5368
 };
-extern sGfx_CA70* D_004A5B80_CA70 __asm__("cGraphicsMan_TheGraphicsMan");
+extern sGfx_CA70* cGraphicsMan_TheGraphicsMan_CA70 __asm__("cGraphicsMan_TheGraphicsMan");
 extern int cRenderToggles_m_DisablePatchReflection;
 extern int cRenderToggles_m_DisablePatchShadow;
 extern char* str_at_HP[];
@@ -1145,7 +1145,7 @@ extern "C" void func_0038CA70(sBezMan_CA70* self, int kind, int sub, sPatch_CA70
     int draw = 0;
     int cacheEntry = self->base28[kind] + sub * 12;
     tPatchRecord* patchCopy = (tPatchRecord*)func_0038F708(patch->obj, 432, 2);
-    sGfx_CA70* gfx = D_004A5B80_CA70;
+    sGfx_CA70* gfx = cGraphicsMan_TheGraphicsMan_CA70;
     unsigned int addr = self->base44C[kind] + (sub << 8);
     unsigned int n = kind * 2 + 4;
     int doA = (patchCopy->m_iFlags & 0x600000) && n;
@@ -1267,7 +1267,7 @@ struct sBezMan_CE20 {
     int base28[(0x44C - 0x28) / 4]; // 0x28
     unsigned int base44C[(0x5364 - 0x44C) / 4]; // 0x44C
 };
-extern sGfx_CE20* D_004A5B80_CE20 __asm__("cGraphicsMan_TheGraphicsMan");
+extern sGfx_CE20* cGraphicsMan_TheGraphicsMan_CE20 __asm__("cGraphicsMan_TheGraphicsMan");
 extern int cRenderToggles_m_DisablePatchReflection;
 extern int cRenderToggles_m_DisablePatchShadow;
 struct sTex_CE20 {
@@ -1302,7 +1302,7 @@ extern "C" void func_0038CE20(sBezMan_CE20* self, int sub, sPatch_CE20* patch, i
 {
     int cacheEntry = self->base28[2] + sub * 12;
     tPatchRecord* patchCopy = (tPatchRecord*)func_0038F708(patch->obj, 432, 2);
-    sGfx_CE20* gfx = D_004A5B80_CE20;
+    sGfx_CE20* gfx = cGraphicsMan_TheGraphicsMan_CE20;
     unsigned int addr = self->base44C[2] + (sub << 8);
     int doA = (patchCopy->m_iFlags & 0x600000) != 0;
     if (doA) {
@@ -1411,7 +1411,7 @@ static inline void CopyMat_D168(void* d, const void* src)
 
 struct sProg_D168 { int addr; int size; };
 struct sPatch_D168 { void* obj; int extra; };
-extern cPS2GraphicsMan* D_004A5B80_D168 __asm__("cGraphicsMan_TheGraphicsMan");
+extern cPS2GraphicsMan* cGraphicsMan_TheGraphicsMan_D168 __asm__("cGraphicsMan_TheGraphicsMan");
 
 static inline void QueueRecord_D168(cPS2GraphicsMan* gfx, unsigned int buf, unsigned int next, int flag)
 {
@@ -1458,7 +1458,7 @@ extern "C" void func_0038D168_impl(void* self, void* patch, void* obj, int type,
 extern "C" void func_0038D168_impl(void* self, void* patch, void* obj, int type, char* progs, void* prog, unsigned int* handle)
 {
     char* manager = (char*)self;
-    cPS2GraphicsMan* gfx = D_004A5B80_D168;
+    cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan_D168;
     (gfx->m_pCurrentDrawState)[1] = (gfx->m_pCurrentDrawState)[0];
     (*(sDrawState**)&gfx->m_pCurrentDrawState)++;
     int idx = *(int*)((char*)patch + 8);
@@ -1541,7 +1541,7 @@ struct sTex_D448 {
     int addr;
     int pad;
 };
-extern cPS2GraphicsMan* D_004A5B80_D448 __asm__("cGraphicsMan_TheGraphicsMan");
+extern cPS2GraphicsMan* cGraphicsMan_TheGraphicsMan_D448 __asm__("cGraphicsMan_TheGraphicsMan");
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy).
 static inline void CopyMat_D448(void* d, const void* s)
@@ -1600,7 +1600,7 @@ static inline void QueueRecord_D448(cPS2GraphicsMan* gfx, unsigned int buf, unsi
 // One projector pass per light whose bit is set in mask: UNPACK the light matrix, then MSCAL the patch program.
 extern "C" void func_0038D448(void* self, int kind, void* tbl, void* patch, int mask, unsigned int* handle)
 {
-    cPS2GraphicsMan* gfx = D_004A5B80_D448;
+    cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan_D448;
     sTex_D448* programTable = (sTex_D448*)tbl;
     int extra = ((sPatch_D448*)patch)->extra;
     unsigned int i;
@@ -1722,7 +1722,7 @@ struct sRing_D690 {
 };
 extern float cDetailSystem_m_PS2SparkleCount;
 extern void* D_004A4474;
-extern cPS2GraphicsMan* D_004A5B80_D690 __asm__("cGraphicsMan_TheGraphicsMan");
+extern cPS2GraphicsMan* cGraphicsMan_TheGraphicsMan_D690 __asm__("cGraphicsMan_TheGraphicsMan");
 extern char D_1460[];
 extern "C" char* func_0038F460(void* self, unsigned int addr, int size, int flags);
 extern "C" unsigned int func_0038F668(void* self, char* end, int arg);
@@ -1763,7 +1763,7 @@ extern "C" void func_0038D690(void* self, void* obj, tBezierPatchEntry* patch, u
     }
     t3Vector boxDiagonal;
     boxDiagonal.z = patchRec->m_fvMin.m[2] - patchRec->m_fvMax.m[2];
-    cPS2GraphicsMan* gfx = D_004A5B80_D690;
+    cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan_D690;
     boxDiagonal.x = patchRec->m_fvMin.m[0] - patchRec->m_fvMax.m[0];
     boxDiagonal.y = patchRec->m_fvMin.m[1] - patchRec->m_fvMax.m[1];
     int n = (int)((boxDiagonal.x * boxDiagonal.x + boxDiagonal.y * boxDiagonal.y + boxDiagonal.z * boxDiagonal.z) * (cDetailSystem_m_PS2SparkleCount * 3.3333333249174757e-07f) * gfx->m_SnowSparkleDensity[6]);
@@ -1826,7 +1826,7 @@ struct sBezMixPatch_D968 {
     unsigned char types[4];
 };
 extern int cRenderToggles_m_DisableSparkles;
-extern sCtx_D968* D_004A5B80_D968 __asm__("cGraphicsMan_TheGraphicsMan");
+extern sCtx_D968* cGraphicsMan_TheGraphicsMan_D968 __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" void func_0037D968(sCtx_D968* ctx);
 extern "C" void* func_0038F708(void* obj, int a1, int a2);
 extern "C" void func_0038D690(void* self, void* obj, tBezierPatchEntry* patch, unsigned int* handle);
@@ -1846,7 +1846,7 @@ extern "C" void func_0038D968(cPS2BezierMan* self, unsigned int* packetHandle)
     if (cRenderToggles_m_DisableSparkles != 0) {
         return;
     }
-    sCtx_D968* ctx = D_004A5B80_D968;
+    sCtx_D968* ctx = cGraphicsMan_TheGraphicsMan_D968;
     ctx->top[1] = ctx->top[0];
     sDrawState* savedState = ctx->top;
     ctx->top = savedState + 1;

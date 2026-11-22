@@ -186,7 +186,7 @@ struct sProfChar_E5C8 {
     char d[0xF88];
 };
 
-extern sProfChar_E5C8 D_004A6CA8_E5C8[][10] __asm__("cBELibrary_profileLib");
+extern sProfChar_E5C8 cBELibrary_profileLib_E5C8[][10] __asm__("cBELibrary_profileLib");
 
 class cBEIface_E5C8 {
 public:
@@ -223,10 +223,10 @@ extern "C" void cBENetworkInterface_setSyncData(cBENetworkInterface* self, int p
     if (cBENetworkInterface_networkOpt.bIsHost == 0)
         *(sNetPair_E2C8*)D_005308D0 = in->pair;
     ((sNetTrip_E2C8*)&cBERules_mRules)[player] = (&in->t0)[player];
-    cBECharProfileDB_init(&D_004A6CA8_E5C8[player][characterId], characterId, 1);
-    func_00156810(D_004A6CA8_E5C8[player]);
+    cBECharProfileDB_init(&cBELibrary_profileLib_E5C8[player][characterId], characterId, 1);
+    func_00156810(cBELibrary_profileLib_E5C8[player]);
     for (int k = 0; k < 525; k++)
-        ((sNetHW_E2C8*)((char*)D_004A6CA8_E5C8 + 0x290 + (characterId * 0xF88 + player * 0x9B50)))[k] = in->blob[k];
+        ((sNetHW_E2C8*)((char*)cBELibrary_profileLib_E5C8 + 0x290 + (characterId * 0xF88 + player * 0x9B50)))[k] = in->blob[k];
     for (int k = 0; k < 26; k++)
         ((sNetDW_E2C8*)(D_004A7778 + (characterId * 0xF88 + player * 0x9B50)))[k] = in->moves[k];
     *(sNetTag_E2C8*)(D_004A7887 + (characterId * 0xF88 + player * 0x9B50)) = in->tag;

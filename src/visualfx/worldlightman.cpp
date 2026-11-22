@@ -1485,7 +1485,7 @@ extern sWlAvElem vertlist[];
 extern sWlAvElem collisionvertlist[];
 extern sWlFx cAvalanche_m_activeNodes[];
 // one past the end of cAvalanche_m_activeNodes[64] (the linker names that address cRenderStateMan_m_state)
-extern sWlFx D_004FA370_end[] __asm__("cRenderStateMan_m_state");
+extern sWlFx cRenderStateMan_m_state_end[] __asm__("cRenderStateMan_m_state");
 extern sWlRsm cRenderStateMan_m_state[];
 static inline void initE(int* p, int n)
 {
@@ -1845,8 +1845,8 @@ void sti_002F6B88(int init, int prio)
             __builtin_memcpy(D_004FAC80, D_004D5840, 16);
         } else {
             if (cAvalanche_m_activeNodes != 0) {
-                sWlFx* avalancheNode = D_004FA370_end;
-                if (cAvalanche_m_activeNodes != D_004FA370_end) {
+                sWlFx* avalancheNode = cRenderStateMan_m_state_end;
+                if (cAvalanche_m_activeNodes != cRenderStateMan_m_state_end) {
                     do {
                         avalancheNode--;
                         tActiveAvalancheNode__tActiveAvalancheNode(avalancheNode, 0);
@@ -4667,7 +4667,7 @@ struct sAttachedEmitterType_9838 {
     float unk_10C;
 };
 
-extern sAttachedEmitterType_9838* D_004A3BB0_9838 __asm__("cAttachedEmitterFX_mEmitterDataArray");
+extern sAttachedEmitterType_9838* cAttachedEmitterFX_mEmitterDataArray_9838 __asm__("cAttachedEmitterFX_mEmitterDataArray");
 
 /**
  * Fills attached-emitter types 10 to 19 of the table cAttachedEmitterFX_mEmitterDataArray (0x110-byte particle data records).
@@ -4676,7 +4676,7 @@ extern sAttachedEmitterType_9838* D_004A3BB0_9838 __asm__("cAttachedEmitterFX_mE
  */
 extern "C" void func_002F9838(void)
 {
-    sAttachedEmitterType_9838* emitterTypes = D_004A3BB0_9838;
+    sAttachedEmitterType_9838* emitterTypes = cAttachedEmitterFX_mEmitterDataArray_9838;
     emitterTypes[10].unk_0 = 5;
     emitterTypes[10].unk_4 = 0;
     emitterTypes[10].unk_8 = -1.0f;

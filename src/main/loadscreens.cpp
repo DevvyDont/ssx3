@@ -491,7 +491,7 @@ struct sApp_B4E0 {
     char pad84[0xB0 - 0x84];
     void* input;                 // 0xB0
 };
-extern sApp_B4E0* D_004A28A8_b4 __asm__("SSXApp");
+extern sApp_B4E0* SSXApp_b4 __asm__("SSXApp");
 
 
 struct sVE_B4E0 {
@@ -564,16 +564,16 @@ static inline int bgCount_B4E0(cBackgroundMan* bg)
  */
 extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
 {
-    if (cInput_getState(D_004A28A8_b4->input, 101)) {
+    if (cInput_getState(SSXApp_b4->input, 101)) {
         func_0017D0A8(self);
         if (self->f8C1C == 14) {
-            D_004A28A8_b4->f60 = 1;
-            cAppMan_setNextModule((cAppMan*)D_004A28A8_b4, (unsigned int)cPreFELoadScreen_cPreFELoadScreen(cMemMan_alloc(8, str_cPreFELoadScreen, 0x100, 0)));
+            SSXApp_b4->f60 = 1;
+            cAppMan_setNextModule((cAppMan*)SSXApp_b4, (unsigned int)cPreFELoadScreen_cPreFELoadScreen(cMemMan_alloc(8, str_cPreFELoadScreen, 0x100, 0)));
         } else {
-            cAppMan_setNextModule((cAppMan*)D_004A28A8_b4, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
+            cAppMan_setNextModule((cAppMan*)SSXApp_b4, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
         }
     }
-    int dir = (int)cInput_getValue(D_004A28A8_b4->input, 61);
+    int dir = (int)cInput_getValue(SSXApp_b4->input, 61);
     if (dir == 0 && self->f8C30 == -1) {
         self->f8C1C = (self->f8C1C + 15 - 1) % 15;
         if (self->f8C1C == 13) {
@@ -599,7 +599,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
     }
     switch (self->f8C1C) {
     case 0: {
-        void* race = cBE_getInterface_B1B0(D_004A28A8_b4->be, 0);
+        void* race = cBE_getInterface_B1B0(SSXApp_b4->be, 0);
         cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
         int quick = beRaceDB->cGamePath;
         if (dir == 3) {
@@ -673,7 +673,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         break;
     }
     case 1: {
-        void* race = cBE_getInterface_B1B0(D_004A28A8_b4->be, 0);
+        void* race = cBE_getInterface_B1B0(SSXApp_b4->be, 0);
         cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
         if (beRaceDB->cGamePath == 0) {
             cBENewRaceInterface_setGameMode_b4(race, 4);
@@ -728,7 +728,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         break;
     }
     case 2: {
-        void* race = cBE_getInterface_B1B0(D_004A28A8_b4->be, 0);
+        void* race = cBE_getInterface_B1B0(SSXApp_b4->be, 0);
         cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
         int ev = beRaceDB->cGameEvent;
         if (beRaceDB->cGamePath == 0) {
@@ -753,8 +753,8 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         break;
     }
     case 3: {
-        cBE_getInterface_B1B0(D_004A28A8_b4->be, 0);
-        void* player = cBE_getInterface_B1B0(D_004A28A8_b4->be, 1);
+        cBE_getInterface_B1B0(SSXApp_b4->be, 0);
+        void* player = cBE_getInterface_B1B0(SSXApp_b4->be, 1);
         int firstTimeOnTrack = cBENewPlayerInterface_isFirstTimeWC(player, 0);
         if (cBENewRaceInterface_newRace.cGamePath != 0) {
             break;
@@ -773,7 +773,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         break;
     }
     case 4: {
-        void* race = cBE_getInterface_B1B0(D_004A28A8_b4->be, 0);
+        void* race = cBE_getInterface_B1B0(SSXApp_b4->be, 0);
         if (dir != 2 && dir != 3) {
             return;
         }
@@ -820,7 +820,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         } else if (dir == 2) {
             self->f8C24 = (self->f8C24 + 1 - 1) % 1;
         }
-        *D_004A28A8_b4->be = self->f8C24;
+        *SSXApp_b4->be = self->f8C24;
         break;
     case 5: {
         void* player = cBE_getInterface_B1B0(cBE_getBE(), 1);
@@ -843,7 +843,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         break;
     }
     case 8: {
-        void* race = cBE_getInterface_B1B0(D_004A28A8_b4->be, 0);
+        void* race = cBE_getInterface_B1B0(SSXApp_b4->be, 0);
         int numAI = cBENewRaceInterface_newRace.iNumberAI;
         int maxAI = cDebugMenuScreen_getMaxAIRiders(self, cBENewRaceInterface_newRace.cGamePath, cBENewRaceInterface_newRace.cGameMode, cBENewRaceInterface_newRace.cGameEvent);
         if (maxAI < numAI) {
@@ -920,7 +920,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         if (self->f8C44 < 0) {
             self->f8C44 = 4;
         }
-        void* net = cBE_getInterface_B1B0(D_004A28A8_b4->be, 7);
+        void* net = cBE_getInterface_B1B0(SSXApp_b4->be, 7);
         cBENetworkInterface_networkOpt.bIsNetworkGame = netOn_B4E0(self->f8C44);
         cBENetworkInterface_networkOpt.bIsHost = self->f8C44 == 1;
         update_B4E0(net);
@@ -950,7 +950,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
             return;
         }
         if (dir == 6) {
-            D_004A28A8_b4->f80->f14 = D_004A28A8_b4->f80->f10;
+            SSXApp_b4->f80->f14 = SSXApp_b4->f80->f10;
         }
         break;
     case 14:
@@ -958,7 +958,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
     }
     if (dir == 2 || dir == 3) {
         void* player = cBE_getInterface_B1B0(cBE_getBE(), 1);
-        self->f8C24 = *D_004A28A8_b4->be;
+        self->f8C24 = *SSXApp_b4->be;
         self->f8C28 = cBENewPlayerInterface_getPlayerCharID(player, 0);
     }
 }

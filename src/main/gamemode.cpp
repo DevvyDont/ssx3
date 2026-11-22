@@ -1806,7 +1806,7 @@ struct sGame {
     int* f28;                   // 0x28
 };
 
-// The game singleton (D_004A28A8_A760).
+// The game singleton (SSXApp_A760).
 struct sApp {
     char pad_0x0[0x78];
     void* f78;                  // 0x78
@@ -1814,7 +1814,7 @@ struct sApp {
     sGame* game;                // 0x84
 };
 
-extern sApp* D_004A28A8_A760 __asm__("SSXApp");
+extern sApp* SSXApp_A760 __asm__("SSXApp");
 
 // Race settings (D_00535BC8_A760: cBENewRaceInterface_newRace, be/beintnewrace.h; ai/ai's sRaceSettings); 0x49 / 0x4A
 // are its cGamePath / cGameEvent.
@@ -1828,7 +1828,7 @@ struct sRaceSettings {
 // The race handler (cGMRaceHandler, vtable D_0047CF38, 0xD0 bytes).
 static inline sRace* GetRace()
 {
-    return D_004A28A8_A760->game->race;
+    return SSXApp_A760->game->race;
 }
 
 static inline int Finished(cRider* rider)

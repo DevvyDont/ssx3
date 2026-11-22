@@ -1081,7 +1081,7 @@ extern "C" void cOverlapList_geteverything(cOverlapList* self, tBoundBox* box)
 INCLUDE_ASM("intersect/worldsphtree", cOverlapList_terrainIntersect);
 #ifdef SKIP_ASM
 
-extern t4Vector D_004FF120_333EF8[] __asm__("t4vect_Zero");
+extern t4Vector t4vect_Zero_333EF8[] __asm__("t4vect_Zero");
 
 
 
@@ -1161,8 +1161,8 @@ static inline void reset_333EF8(tIntersectInfo* h)
     h->Face = -1;
     h->Seg = -1;
     h->Stype = -1;
-    (*(&h->Ivel)) = *D_004FF120_333EF8;
-    (*(&h->Iangvel)) = *D_004FF120_333EF8;
+    (*(&h->Ivel)) = *t4vect_Zero_333EF8;
+    (*(&h->Iangvel)) = *t4vect_Zero_333EF8;
     (*(int*)&h->T) = 0;
     h->u = 0;
     h->v = 0;
@@ -1548,7 +1548,7 @@ struct sWsVtSlot { short delta; short index; void* fn; };
 
 
 // Constant vector table (0x004FF120; 00341388 also reads it through its ctor vector type).
-extern t4Vector D_004FF120_4888[] __asm__("t4vect_Zero");
+extern t4Vector t4vect_Zero_4888[] __asm__("t4vect_Zero");
 
 struct t4Vector;
 
@@ -1936,8 +1936,8 @@ extern "C" int func_4888(cWorldIntersectType* intersectType, tInstanceRecord* no
             buf[n].bone = i;
             buf[n].id = -1;
             buf[n].tri = tri;
-            buf[n].v20 = *D_004FF120_4888;
-            buf[n].v30 = *D_004FF120_4888;
+            buf[n].v20 = *t4vect_Zero_4888;
+            buf[n].v30 = *t4vect_Zero_4888;
             buf[n].obj = 0;
             if (GetPart_4888(((sWsInstDef_4888*)node->m_pCollideRecord), i)->id != -1)
                 buf[n].id = GetPart_4888(((sWsInstDef_4888*)node->m_pCollideRecord), i)->id;
@@ -1963,7 +1963,7 @@ struct sV_335128
     float& W() { return w; }
 } __attribute__((aligned(16)));
 
-extern sV_335128 D_004FF120_335128 __asm__("t4vect_Zero");
+extern sV_335128 t4vect_Zero_335128 __asm__("t4vect_Zero");
 
 struct sF5_335128 {
     float v[5];
@@ -2151,8 +2151,8 @@ static inline void reset_335128(tIntersectInfo* h)
     h->Face = -1;
     h->Seg = -1;
     h->Stype = -1;
-    (*(sV_335128*)&h->Ivel) = D_004FF120_335128;
-    (*(sV_335128*)&h->Iangvel) = D_004FF120_335128;
+    (*(sV_335128*)&h->Ivel) = t4vect_Zero_335128;
+    (*(sV_335128*)&h->Iangvel) = t4vect_Zero_335128;
     h->T = 0;
     h->u = 0;
     h->v = 0;
@@ -4594,7 +4594,7 @@ struct sCorners_3400D8 {
         v[31] = 0.0f;
     }
 };
-extern sCorners_3400D8 D_004FF640_c __asm__("gSphTreeAlignAxis");
+extern sCorners_3400D8 gSphTreeAlignAxis_c __asm__("gSphTreeAlignAxis");
 
 
 // Static initialisation of the unit's vector globals D_004FF2C0..D_004FF630 and the corner table gSphTreeAlignAxis
@@ -4671,7 +4671,7 @@ extern "C" void func_003400D8_init(int initialize, int priority)
         new (&D_004FF610_v) sV4_3400D8(1.0f, 0.7843739986419678f, 0.06132800132036209f, 0.03945299983024597f);
         new (&D_004FF620_v) sV4_3400D8(1.0f, 0.0f, 1.0f, 0.0f);
         new (&D_004FF630_v) sV4_3400D8(1.0f, 1.0f, 0.0f, 0.0f);
-        D_004FF640_c.init();
+        gSphTreeAlignAxis_c.init();
     }
 }
 #endif
@@ -5088,8 +5088,8 @@ struct sVec4_341388 {
 
 
 extern void* cBoostNode_vtbl[];
-extern sVec4_341388 D_004FF120_341388[] __asm__("t4vect_Zero");
-extern sVec4_341388 D_004FF150_341388[] __asm__("t4vect_YAxis");
+extern sVec4_341388 t4vect_Zero_341388[] __asm__("t4vect_Zero");
+extern sVec4_341388 t4vect_YAxis_341388[] __asm__("t4vect_YAxis");
 extern "C" void* cInstanceNode_cInstanceNode1(void* self, void* a1, int type, void* a3);
 
 // PORT: PS2-only VU0 inline asm (v / |v|).
@@ -5180,9 +5180,9 @@ extern "C" cBoostNode* cBoostNode_cBoostNode1(cBoostNode* self, void* bucket, in
     self->BoostTime = (int)(def->BoostTime * (float)cAppMan_TheAppMan->TimerHz);
     if (def->BoostX == 0.0f && def->BoostY == 0.0f && def->BoostZ == 0.0f) {
         if (type == 2) {
-            *(sVec4_341388*)&self->Boost = *D_004FF150_341388;
+            *(sVec4_341388*)&self->Boost = *t4vect_YAxis_341388;
         } else {
-            *(sVec4_341388*)&self->Boost = *D_004FF120_341388;
+            *(sVec4_341388*)&self->Boost = *t4vect_Zero_341388;
         }
     } else {
         *(sVec4_341388*)&self->Boost = vu0Normalize_341388(sVec4_341388(def->BoostX, def->BoostY, def->BoostZ, 0.0f));
@@ -6269,7 +6269,7 @@ struct sSelf_342538 {
 };
 
 
-extern t4Vector D_004FF150_342538[] __asm__("t4vect_YAxis");
+extern t4Vector t4vect_YAxis_342538[] __asm__("t4vect_YAxis");
 
 // PORT: PS2-only VU0 inline asm (vector length via vsqrt).
 static inline float vu0Length_342538(const t4Vector& v)
@@ -6417,7 +6417,7 @@ extern "C" void cAnimTeeterNode_applyForce(cAnimTeeterNode* self, tIntersectInfo
                     a = vuResult;
                     leverArm = vuResult;
                 }
-                vu0Xform_342538(vuResult, D_004FF150_342538[0], pivotMat);
+                vu0Xform_342538(vuResult, t4vect_YAxis_342538[0], pivotMat);
                 a = vuResult;
                 vu0Cross_342538(torqueVec, leverArm, *force);
                 vuResult = torqueVec;

@@ -359,7 +359,7 @@ public:
     virtual void v66(); virtual void v67(); virtual void v68(); virtual void v69();
     virtual void RenderTriStrip(int n, sVert_EDA0* v, int flags);
 };
-extern sGs_EDA0 D_00501420_EDA0 __asm__("sDrawState_s_defaultDrawState");
+extern sGs_EDA0 sDrawState_s_defaultDrawState_EDA0 __asm__("sDrawState_s_defaultDrawState");
 extern char t4mat_Identity[];
 
 // The rider's cBeing interface (rider + 0x6C0), slots in the prototype's order (as in seg/seg_1FBE38).
@@ -551,7 +551,7 @@ extern "C" void func_0020EDA0(cHUDRadar* self, cRider* rider)
     }
     ((cGfx_EDA0*)GrMan)->PushView();
     ((cGfx_EDA0*)GrMan)->PushState();
-    *((cGfx_EDA0*)GrMan)->stateTop = D_00501420_EDA0;
+    *((cGfx_EDA0*)GrMan)->stateTop = sDrawState_s_defaultDrawState_EDA0;
     ((cGfx_EDA0*)GrMan)->stateTop->f4_23 = 2;
     ((cGfx_EDA0*)GrMan)->stateTop->f4_20 = 0;
     ((cGfx_EDA0*)GrMan)->stateTop->f4_12 = 20;
@@ -931,7 +931,7 @@ public:
     virtual void v66(); virtual void v67(); virtual void v68(); virtual void v69();
     virtual void RenderTriStrip(int n, sVert_FB40* v, int flags);
 };
-extern sGs_FB40 D_00501420_FB40 __asm__("sDrawState_s_defaultDrawState");
+extern sGs_FB40 sDrawState_s_defaultDrawState_FB40 __asm__("sDrawState_s_defaultDrawState");
 extern char t4mat_Identity[];
 
 // The rider's cBeing interface (rider + 0x6C0), slots in the prototype's order (as in seg/seg_1FBE38).
@@ -1075,7 +1075,7 @@ extern "C" void func_0020FB40(cHUDRadar* self, cRider* rider, int right)
         x += self->unk_020.W;
     ((cGfx_FB40*)GrMan)->PushView();
     ((cGfx_FB40*)GrMan)->PushState();
-    *((cGfx_FB40*)GrMan)->stateTop = D_00501420_FB40;
+    *((cGfx_FB40*)GrMan)->stateTop = sDrawState_s_defaultDrawState_FB40;
     ((cGfx_FB40*)GrMan)->stateTop->f4_23 = 2;
     ((cGfx_FB40*)GrMan)->stateTop->f4_20 = 0;
     ((cGfx_FB40*)GrMan)->stateTop->f4_12 = 20;

@@ -295,7 +295,7 @@ struct sViews_2D5048 {
 };
 
 extern char* GrMan_angerfx __asm__("GrMan");
-extern sRState_2D5048 D_00501420_2D5048 __asm__("sDrawState_s_defaultDrawState");
+extern sRState_2D5048 sDrawState_s_defaultDrawState_2D5048 __asm__("sDrawState_s_defaultDrawState");
 
 static inline sViews_2D5048* views_2D5048()
 {
@@ -434,7 +434,7 @@ extern "C" void func_002D5048(sAnger_2D4C08* self)
     sGfx_2D5048* gx = (sGfx_2D5048*)GrMan_angerfx;
     gx->top[1] = gx->top[0];
     gx->top++;
-    *((sGfx_2D5048*)GrMan_angerfx)->top = D_00501420_2D5048;
+    *((sGfx_2D5048*)GrMan_angerfx)->top = sDrawState_s_defaultDrawState_2D5048;
     sGfx_2D5048* gs = (sGfx_2D5048*)GrMan_angerfx;
     rsSetA_2D5048(gs, 0x400000, 22, 1);
     rsSetA_2D5048(gs, 0x3, 0, 2);

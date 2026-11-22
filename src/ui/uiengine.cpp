@@ -309,9 +309,9 @@ public:
 };
 
 // Typed view of the render context (the unit declares GrMan as void* later).
-extern cUICtx_7DF8* D_004A289C_7df8 __asm__("GrMan");
+extern cUICtx_7DF8* GrMan_7df8 __asm__("GrMan");
 extern char t4mat_Identity[];
-extern sUIRS_7DF8 D_00501420_7df8 __asm__("sDrawState_s_defaultDrawState");
+extern sUIRS_7DF8 sDrawState_s_defaultDrawState_7df8 __asm__("sDrawState_s_defaultDrawState");
 extern "C" void cUIStateStack_render2D(void* p);
 
 static inline void setF4_22_7DF8(sUIRS_7DF8* rs, int v) { rs->f4_22 = v; }
@@ -330,24 +330,24 @@ static inline void setF4_2_7DF8(sUIRS_7DF8* rs, int v) { rs->f4_2 = v; }
  */
 extern "C" void cUIEngine_render2D(cUIEngine* self)
 {
-    cUICtx_7DF8* ctx = D_004A289C_7df8;
+    cUICtx_7DF8* ctx = GrMan_7df8;
     ctx->top[1] = ctx->top[0];
     ctx->top++;
-    *D_004A289C_7df8->top = D_00501420_7df8;
-    D_004A289C_7df8->PushView();
-    D_004A289C_7df8->PushViewport();
-    D_004A289C_7df8->SetViewportOrthographic(0, 1, 0.0f, 0.0f, 640.0f, 480.0f, -1.0f, 1.0f);
-    D_004A289C_7df8->SetView1(t4mat_Identity);
-    setF4_22_7DF8(D_004A289C_7df8->top, 1);
-    setF4_23_7DF8(D_004A289C_7df8->top, 2);
-    setF4_20_7DF8(D_004A289C_7df8->top, 0);
-    setF4_12_7DF8(D_004A289C_7df8->top, 20);
-    setF4_2_7DF8(D_004A289C_7df8->top, 5);
-    D_004A289C_7df8->top->f0_2 = 3;
+    *GrMan_7df8->top = sDrawState_s_defaultDrawState_7df8;
+    GrMan_7df8->PushView();
+    GrMan_7df8->PushViewport();
+    GrMan_7df8->SetViewportOrthographic(0, 1, 0.0f, 0.0f, 640.0f, 480.0f, -1.0f, 1.0f);
+    GrMan_7df8->SetView1(t4mat_Identity);
+    setF4_22_7DF8(GrMan_7df8->top, 1);
+    setF4_23_7DF8(GrMan_7df8->top, 2);
+    setF4_20_7DF8(GrMan_7df8->top, 0);
+    setF4_12_7DF8(GrMan_7df8->top, 20);
+    setF4_2_7DF8(GrMan_7df8->top, 5);
+    GrMan_7df8->top->f0_2 = 3;
     cUIStateStack_render2D((char*)&self->mStateStack);
-    D_004A289C_7df8->PopViewport();
-    D_004A289C_7df8->PopView();
-    D_004A289C_7df8->top--;
+    GrMan_7df8->PopViewport();
+    GrMan_7df8->PopView();
+    GrMan_7df8->top--;
 }
 #endif
 
@@ -473,7 +473,7 @@ extern char str_pct_s_1_ssh[];
 extern char str_UITextureIDs[];
 extern char str_UITextureELs[];
 extern char str_UITPage[];
-extern char* D_004A289C_8138 __asm__("GrMan");
+extern char* GrMan_8138 __asm__("GrMan");
 extern "C" SHAPEFILE* FILE_loadpack(char* name, int flags);
 extern "C" void MEM_free(void* p);
 extern "C" void* memset(void* dst, int c, int n);
@@ -505,8 +505,8 @@ extern "C" void cUITextureBank_setData(cUITextureBank* vbank, int id, void* vdat
     for (; i < self->mNumTextureIDs; i++) {
         char* shape = (char*)fsh + ((sUIFshDir8138*)&fsh->tbl[0].offset)[i].offset;
         if (shape != 0) {
-            sVEntry<int(void*, void*, void*, int, int, int)>* vt = *(sVEntry<int(void*, void*, void*, int, int, int)>**)(D_004A289C_8138 + 0x10D8);
-            self->mpTexturesIDs[i] = vt[46].fn(vthis(D_004A289C_8138, vt[46]), shape, str_UITPage, 0, 1, -1);
+            sVEntry<int(void*, void*, void*, int, int, int)>* vt = *(sVEntry<int(void*, void*, void*, int, int, int)>**)(GrMan_8138 + 0x10D8);
+            self->mpTexturesIDs[i] = vt[46].fn(vthis(GrMan_8138, vt[46]), shape, str_UITPage, 0, 1, -1);
         }
     }
     MEM_free(fsh);
@@ -1108,8 +1108,8 @@ struct cUIIcon_8A78 {
     int texId;               // 0x78
     sUITex_8A78* tex;        // 0x7C
 };
-extern cUICtx_8A78* D_004A289C_8a78 __asm__("GrMan");
-extern sM33_8A78 D_004FF170_8a78 __asm__("t3mat_Identity");
+extern cUICtx_8A78* GrMan_8a78 __asm__("GrMan");
+extern sM33_8A78 t3mat_Identity_8a78 __asm__("t3mat_Identity");
 
 // PORT: PS2-only VU0 inline asm (a += b).
 static inline void vu0AddEq_8A78(sV4_8A78& a, const sV4_8A78& b)
@@ -1139,14 +1139,14 @@ static inline int GetTurns_8A78(cUIIcon_8A78* self)
 // Pushes a copy of the current render state.
 static inline void PushRS_8A78()
 {
-    cUICtx_8A78* ctx = D_004A289C_8a78;
+    cUICtx_8A78* ctx = GrMan_8a78;
     ctx->top[1] = ctx->top[0];
     ctx->top++;
 }
 
 static inline void PopRS_8A78()
 {
-    D_004A289C_8a78->top--;
+    GrMan_8a78->top--;
 }
 
 // m = r * m for a rotation of `angle` about `axis`.
@@ -1211,7 +1211,7 @@ static inline sV4_8A78 Xform_8A78(const sM33_8A78& m, const sV4_8A78& v)
 extern "C" void cUIIcon_render2D(cUIIcon_8A78* self, float x, float y)
 {
     tBxVertex verts[4];
-    cUICtx_8A78* ctx = D_004A289C_8a78;
+    cUICtx_8A78* ctx = GrMan_8a78;
     if (self->tex != 0) {
         SetTexture_8A78(ctx, self->tex->id);
         verts[0].u = self->tex->u0;
@@ -1262,7 +1262,7 @@ extern "C" void cUIIcon_render2D(cUIIcon_8A78* self, float x, float y)
     cUIThing_applyPivot(self, &pos, &size);
     pos.x += x;
     pos.y += y;
-    sM33_8A78 rotMat = D_004FF170_8a78;
+    sM33_8A78 rotMat = t3mat_Identity_8a78;
     if (self->rot.x != 0.0f) {
         sV3_8A78 axis(1.0f, 0.0f, 0.0f);
         Rotate_8A78(rotMat, axis, self->rot.x);
@@ -1300,7 +1300,7 @@ extern "C" void cUIIcon_render2D(cUIIcon_8A78* self, float x, float y)
         verts[i].one = 1.0f;
     }
     PushRS_8A78();
-    cUICtx_8A78* rc = D_004A289C_8a78;
+    cUICtx_8A78* rc = GrMan_8a78;
     rc->top->f0 |= 0xC;
     int* w = &rc->top->f8;
     *w = (*w & ~0x3E0) | ((((self->f15 & 0x1F) + 9) << 5) & 0x3E0);
@@ -1699,7 +1699,7 @@ INCLUDE_ASM("ui/uiengine", cUIListBox_render2D);
 extern "C" float cFont_textExtent1(void* font, int str, void* out, int flags, float sx, float sy);
 extern "C" void cUIThing_applyPivot(void* self, void* pos, void* size);
 extern "C" void cFont_text1(void* font, float x, float y, int str);
-extern char* D_004A289C_9F00 __asm__("GrMan");
+extern char* GrMan_9F00 __asm__("GrMan");
 
 struct sV3_9F00 {
     float x, y, z;
@@ -1738,7 +1738,7 @@ struct sVE_9F00 { short delta; short index; void (*fn)(void*, int, void*, int); 
 
 static inline void setLayer_9F00(cUIListBox* self)
 {
-    int* d = (int*)(*(char**)(D_004A289C_9F00 + 0xE84) + 8);
+    int* d = (int*)(*(char**)(GrMan_9F00 + 0xE84) + 8);
     *d = (*d & ~0x3E0) | (((((sLayerBits_9F00*)&self->mAttr)->layer + 9) << 5) & 0x3E0);
 }
 
@@ -1827,10 +1827,10 @@ extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
             verts[2].pos.x += self->mSize.x;
             verts[2].pos.y += self->mSize.y;
             verts[3].pos.y += self->mSize.y;
-            sVE_9F00* vt = *(sVE_9F00**)(D_004A289C_9F00 + 0x10D8);
-            vt[73].fn(vthis(D_004A289C_9F00, vt[73]), 5, verts, 0);
+            sVE_9F00* vt = *(sVE_9F00**)(GrMan_9F00 + 0x10D8);
+            vt[73].fn(vthis(GrMan_9F00, vt[73]), 5, verts, 0);
         } else {
-            *(short*)(*(char**)(D_004A289C_9F00 + 0xE84) + 0x10) = -1;
+            *(short*)(*(char**)(GrMan_9F00 + 0xE84) + 0x10) = -1;
             for (i = 0; i < 4; i++) {
                 verts[i].q = 1.0f;
                 verts[i].u = 0.0f;
@@ -1850,8 +1850,8 @@ extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
             verts[2].pos.y += self->mSize.y;
             verts[3].pos.x += self->mSize.x;
             verts[3].pos.y += self->mSize.y;
-            sVE_9F00* vt = *(sVE_9F00**)(D_004A289C_9F00 + 0x10D8);
-            vt[71].fn(vthis(D_004A289C_9F00, vt[71]), 4, verts, 0);
+            sVE_9F00* vt = *(sVE_9F00**)(GrMan_9F00 + 0x10D8);
+            vt[71].fn(vthis(GrMan_9F00, vt[71]), 4, verts, 0);
         }
     }
 }

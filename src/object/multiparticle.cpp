@@ -754,7 +754,7 @@ struct sMPRef8B28 {
 
 
 extern void* cRailManNode_ActiveNode;
-extern cRailManNode* D_004A4040_mgr8B28 __asm__("cRailManNode_ActiveNode");
+extern cRailManNode* cRailManNode_ActiveNode_mgr8B28 __asm__("cRailManNode_ActiveNode");
 extern char str_RailMan_b[];
 extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
 extern "C" void* cRailManNode_cRailManNode1(cRailManNode* self, void* a1);
@@ -779,16 +779,16 @@ extern "C" void cRailManNode_addRail(sMPRef8B28 key, int add)
     sMPRef8B28 kFree;
     int idx = -1;
     for (int i = 0; i < 128; i++) {
-        if (idx == -1 && ((sMPRef8B28*)&D_004A4040_mgr8B28->RailInfo[0])[i].id == kFree.id) {
+        if (idx == -1 && ((sMPRef8B28*)&cRailManNode_ActiveNode_mgr8B28->RailInfo[0])[i].id == kFree.id) {
             idx = i;
         }
-        if (((sMPRef8B28*)&D_004A4040_mgr8B28->RailInfo[0])[i].id == key.id) {
+        if (((sMPRef8B28*)&cRailManNode_ActiveNode_mgr8B28->RailInfo[0])[i].id == key.id) {
             idx = i;
             goto found;
         }
     }
 found:
-    cRailManNode* mgr = D_004A4040_mgr8B28;
+    cRailManNode* mgr = cRailManNode_ActiveNode_mgr8B28;
     if (idx != -1) {
         sMPRef8B28& railSlot = ((sMPRef8B28*)&mgr->RailInfo[0])[idx];
         if (railSlot.id == key.id) {

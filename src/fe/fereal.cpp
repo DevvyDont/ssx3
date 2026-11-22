@@ -1444,7 +1444,7 @@ extern void* D_004A19C0[1];
 struct sAnimTableK1A2B00 {
     void* anims[1];
 };
-extern sAnimTableK1A2B00* D_004A3DF8_K1A2B00 __asm__("cAnimDataBase_TheAnimDataBase");
+extern sAnimTableK1A2B00* cAnimDataBase_TheAnimDataBase_K1A2B00 __asm__("cAnimDataBase_TheAnimDataBase");
 extern void* cGameAnimMap_TheGameAnimMap;
 
 /**
@@ -1461,7 +1461,7 @@ extern "C" void cRealFE_loadCharAnimations(void)
     FILESYS_addbigsync(str_data_char_anm_big_b, 0, 100, &handle);
     for (i = 0; i < 1; i++) {
         void* anim = cAdfDataSource_cAdfDataSource(cMemMan_alloc(0x18, str_AdfDataSourceFE, 0, 0), D_004A19C0[i]);
-        D_004A3DF8_K1A2B00->anims[(unsigned char)i] = anim;
+        cAnimDataBase_TheAnimDataBase_K1A2B00->anims[(unsigned char)i] = anim;
         cGameAnimMap_addSource(cGameAnimMap_TheGameAnimMap, i, anim);
     }
     cGameAnimMap_testResolve_p(cGameAnimMap_TheGameAnimMap);

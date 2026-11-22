@@ -472,7 +472,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetMessenger_cFEStateNetMessenger);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* cFEStateNet_cFEStateNet_3(void* self, int a1, int a2) __asm__("cFEStateNet_cFEStateNet");
 extern void* cFEStateNetMessenger_vtbl[];
-extern void* D_004A3E90_v __asm__("cBXString_EmptyString");
+extern void* cBXString_EmptyString_v __asm__("cBXString_EmptyString");
 
 /**
  * Constructs the online messenger (buddy list) screen state.
@@ -492,7 +492,7 @@ extern "C" void* cFEStateNetMessenger_cFEStateNetMessenger(cFEStateNetMessenger*
     // An unused 16-byte local is needed to reproduce the 0x30-byte frame.
     int framePad[4];
     cFEStateNet_cFEStateNet_3(self, (int)pEngine, (int)pParentState);
-    void* empty = D_004A3E90_v;
+    void* empty = cBXString_EmptyString_v;
     self->mVtbl = cFEStateNetMessenger_vtbl;
     self->mszFoundName = (char*)empty;
     self->mszSearchName = (char*)empty;
@@ -11918,7 +11918,7 @@ extern "C" void cUIMenu_setScrollableMenu(void* self, unsigned char a1);
 extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 struct sFEObj_001BCB58;
 extern "C" sFEObj_001BCB58* cFEStateLobbyMenu_cFEStateLobbyMenu(sFEObj_001BCB58* self, int a1);
-extern char* D_004A3E90_p __asm__("cBXString_EmptyString");
+extern char* cBXString_EmptyString_p __asm__("cBXString_EmptyString");
 extern char str_PlayerListMenu[];
 extern char str_PlayerListItempct_02d[];
 extern char str_cFEStateLobbyMenu[];
@@ -11928,7 +11928,7 @@ extern sName_001B2378 D_00463A48;
 
 struct sBXString_001B2378 {
     char* p;
-    sBXString_001B2378() { p = D_004A3E90_p; }
+    sBXString_001B2378() { p = cBXString_EmptyString_p; }
     sBXString_001B2378(const sBXString_001B2378& o);
 };
 
@@ -21955,7 +21955,7 @@ extern "C" int func_0025F180(void* self, int idx);
 extern "C" void cBXString_right(void* ret, void* src, int n);
 extern "C" void cUIListBox_deleteAllEntries(void* self);
 extern "C" int strcmp(const char* a, const char* b);
-extern char* D_004A3E90_p __asm__("cBXString_EmptyString");
+extern char* cBXString_EmptyString_p __asm__("cBXString_EmptyString");
 extern const char* D_004A1A60;
 extern const char* D_004A1A64;
 extern const char* D_004A1A68;
@@ -21964,7 +21964,7 @@ extern char str_kT_231NoAvailableRooms[];
 
 struct sBXStr_001BE0A8 {
     char* p;
-    sBXStr_001BE0A8() { p = D_004A3E90_p; }
+    sBXStr_001BE0A8() { p = cBXString_EmptyString_p; }
     sBXStr_001BE0A8(const sBXStr_001BE0A8& o);
 };
 
@@ -26238,7 +26238,7 @@ extern "C" void func_001C4F58(cFEStateStats* self, char* buf, int v);
 extern char str_personaItem0pct_i[];
 extern char str_resultsItem0pct_i[];
 extern char str_pointsItem0pct_i[];
-extern char D_004A1390_s __asm__("str_sp");
+extern char str_sp_s __asm__("str_sp");
 extern char str_pct_3d[];
 
 /**
@@ -26306,9 +26306,9 @@ extern "C" void func_001C3310(cFEStateStats* self_)
                     cUIText_setAsciiString(resultsText, txt);
                 }
             } else {
-                cUIText_setAsciiString(resultsText, &D_004A1390_s);
-                cUIText_setAsciiString(pointsText, &D_004A1390_s);
-                cUIText_setAsciiString(uiText, &D_004A1390_s);
+                cUIText_setAsciiString(resultsText, &str_sp_s);
+                cUIText_setAsciiString(pointsText, &str_sp_s);
+                cUIText_setAsciiString(uiText, &str_sp_s);
             }
         }
     }

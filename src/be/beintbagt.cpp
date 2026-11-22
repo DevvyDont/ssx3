@@ -239,7 +239,7 @@ struct sBagInfo_FF90 {
     short pad2;
     int value;             // 0x10
 };
-extern sBagInfo_FF90 D_0045AEB8_FF90[] __asm__("kGrabDB");
+extern sBagInfo_FF90 kGrabDB_FF90[] __asm__("kGrabDB");
 
 // Release-build assert: expands to an empty do { } while (0); its loop notes keep the target's register choice.
 #define ASSERT_FF90(cond) do { } while (0)
@@ -257,9 +257,9 @@ extern sBagInfo_FF90 D_0045AEB8_FF90[] __asm__("kGrabDB");
  */
 extern "C" int func_0014FF90(cBEBAGTInterface* self, int rider, int idx, int* count)
 {
-    int uberTable = D_0045AEB8_FF90[idx].value;
+    int uberTable = kGrabDB_FF90[idx].value;
     unsigned short uberCount;
-    uberCount = D_0045AEB8_FF90[idx].count;
+    uberCount = kGrabDB_FF90[idx].count;
     *count = uberCount;
     ASSERT_FF90(count != 0);
     return uberTable;
@@ -455,7 +455,7 @@ struct sBagtCat_150198
     sBagtAnim_150198* anims;    // 0x10
 };
 // Typed view of kGrabDB (declared as sPad20 in this unit).
-extern sBagtCat_150198 D_0045AEB8_150198[] __asm__("kGrabDB");
+extern sBagtCat_150198 kGrabDB_150198[] __asm__("kGrabDB");
 
 /**
  * Returns the uber animation of grab @p idx for @p rider: the anim of the chosen variant (cBEBAGTInterface_chooseUberVar) in the grab's
@@ -489,7 +489,7 @@ extern "C" int cBEBAGTInterface_getUberAnim(cBEBAGTInterface* self, int rider, i
     }
     int k = cBEBAGTInterface_chooseUberVar(self, rider, idx, second);
     if (k < 0) return 438;
-    return D_0045AEB8_150198[idx].anims[k].anim;
+    return kGrabDB_150198[idx].anims[k].anim;
 }
 #endif
 
@@ -516,7 +516,7 @@ struct sBagtCat_1502C8
     sBagtAnim_1502C8* anims;    // 0x10
 };
 // Typed view of kGrabDB (declared as sPad20 in this unit).
-extern sBagtCat_1502C8 D_0045AEB8_1502C8[] __asm__("kGrabDB");
+extern sBagtCat_1502C8 kGrabDB_1502C8[] __asm__("kGrabDB");
 
 /**
  * Returns the held uber animation of grab @p idx for @p rider: the cycle anim of the chosen variant
@@ -550,7 +550,7 @@ extern "C" int cBEBAGTInterface_getUberCycleAnim(cBEBAGTInterface* self, int rid
     }
     int k = cBEBAGTInterface_chooseUberVar(self, rider, idx, second);
     if (k < 0) return 438;
-    return D_0045AEB8_1502C8[idx].anims[k].anim2;
+    return kGrabDB_1502C8[idx].anims[k].anim2;
 }
 #endif
 
@@ -577,7 +577,7 @@ struct sBagtCat_1503F8
     sBagtAnim_1503F8* anims;    // 0x10
 };
 // Typed view of kGrabDB (declared as sPad20 in this unit).
-extern sBagtCat_1503F8 D_0045AEB8_1503F8[] __asm__("kGrabDB");
+extern sBagtCat_1503F8 kGrabDB_1503F8[] __asm__("kGrabDB");
 
 /**
  * Returns the trick id of grab @p idx's chosen uber variant for @p rider (cBEBAGTInterface_chooseUberVar), or 0 when the grab has none.
@@ -610,7 +610,7 @@ extern "C" int cBEBAGTInterface_getUberName(cBEBAGTInterface* self, int rider, i
     }
     int k = cBEBAGTInterface_chooseUberVar(self, rider, idx, second);
     if (k < 0) return 0;
-    return D_0045AEB8_1503F8[idx].anims[k].anim3;
+    return kGrabDB_1503F8[idx].anims[k].anim3;
 }
 #endif
 
@@ -676,7 +676,7 @@ struct sBagtDef0558 {
     unsigned short pad_0x0E;
     int pad_0x10;
 };
-extern const sBagtDef0558 D_0045AEB8_bagt[] __asm__("kGrabDB");
+extern const sBagtDef0558 kGrabDB_bagt[] __asm__("kGrabDB");
 extern "C" void MEM_fill(void*, int, int);
 
 /**
@@ -740,7 +740,7 @@ extern "C" void func_00150558(int mode, sBagtSlot0558* entries)
         int j;
         entries[i].c = 0;
         entries[i].d = 0;
-        for (j = 0; j < D_0045AEB8_bagt[i].count; j++) {
+        for (j = 0; j < kGrabDB_bagt[i].count; j++) {
             entries[i].c |= 1 << j;
             entries[i].d |= 1 << j;
         }

@@ -628,7 +628,7 @@ struct sGs_1510 {
     void SetF22(int v) { f4_22 = v; }
 };
 
-extern sGs_1510 D_00501420_1510 __asm__("sDrawState_s_defaultDrawState");
+extern sGs_1510 sDrawState_s_defaultDrawState_1510 __asm__("sDrawState_s_defaultDrawState");
 
 class cGfx_1510 {
 public:
@@ -674,7 +674,7 @@ extern "C" void cPunchFX_render(sFx_1150* self)
     if (self->active == 0)
         return;
     ((cGfx_1510*)GrMan)->PushState();
-    *((cGfx_1510*)GrMan)->stateTop = D_00501420_1510;
+    *((cGfx_1510*)GrMan)->stateTop = sDrawState_s_defaultDrawState_1510;
     // Raw char** read of the stack top (as in ovstatehud) so the global is re-read afterwards.
     *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = ((cGfx_1510*)GrMan)->GetFB0();
     ((cGfx_1510*)GrMan)->stateTop->w0 |= 0xC;
@@ -1507,7 +1507,7 @@ struct sTun_2598 {
 };
 extern sTun_2598 D_004A428C_2598 __asm__("D_004A428C");
 extern sTun_2598 D_004A4290_2598 __asm__("D_004A4290");
-extern sTun_2598 D_004A4294_2598 __asm__("cSplashToggles_m_DropMinSize");
+extern sTun_2598 cSplashToggles_m_DropMinSize_2598 __asm__("cSplashToggles_m_DropMinSize");
 extern sTun_2598 D_004A429C_2598 __asm__("D_004A429C");
 extern sTun_2598 D_004A42CC_2598 __asm__("D_004A42CC");
 
@@ -1580,9 +1580,9 @@ extern "C" void tDrop_init_2598(sPart_2598* drop, const sV2_2598& pos, sV2_2598*
 {
     float maxY = range->y;
     float maxX = range->x;
-    float x = randRange_2598(D_004A4294_2598.v, maxX);
+    float x = randRange_2598(cSplashToggles_m_DropMinSize_2598.v, maxX);
     float rawHeight = x + randRange_2598(-D_004A429C_2598.v, D_004A429C_2598.v);
-    float y = (rawHeight >= D_004A4294_2598.v) ? (rawHeight <? maxY) : D_004A4294_2598.v; // PORT: g++ <? operator
+    float y = (rawHeight >= cSplashToggles_m_DropMinSize_2598.v) ? (rawHeight <? maxY) : cSplashToggles_m_DropMinSize_2598.v; // PORT: g++ <? operator
     drop->age = 0;
     drop->life = randRange_2598(D_004A428C_2598.v, D_004A4290_2598.v);
     drop->active = 1;
@@ -1935,7 +1935,7 @@ struct sV4_2D70 {
 
 extern sV4_2D70 D_00504700;
 extern sV4_2D70 D_00504710;
-extern sV2_2D70 D_004A5960_2D70[] __asm__("t2vect_Zero"); // PORT: 8-byte object, declared unsized so it is not $gp-addressed
+extern sV2_2D70 t2vect_Zero_2D70[] __asm__("t2vect_Zero"); // PORT: 8-byte object, declared unsized so it is not $gp-addressed
 
 struct sPart_2D70 {
     int dead;
@@ -2014,7 +2014,7 @@ extern "C" void tCrystal_init_2D70(sPart_2D70* crystal, const sV2_2D70& pos, int
     crystal->active = 1;
     crystal->size = sV2_2D70(x, y);
     crystal->pos = pos;
-    crystal->vel = D_004A5960_2D70[0];
+    crystal->vel = t2vect_Zero_2D70[0];
     float tintMix = randf_2D70();
     crystal->color = D_00504700 * (1.0f - tintMix) + D_00504710 * tintMix;
     crystal->angle = randf_2D70() * 360.0f;
@@ -2535,7 +2535,7 @@ extern int cSplashToggles_m_MaxSpawnPerCrystal;
 struct sTun_39E0 {
     float v;
 };
-extern sTun_39E0 D_004A4294_39E0 __asm__("cSplashToggles_m_DropMinSize");
+extern sTun_39E0 cSplashToggles_m_DropMinSize_39E0 __asm__("cSplashToggles_m_DropMinSize");
 unsigned int BXrand();
 
 struct sV4_39E0 {
@@ -2688,7 +2688,7 @@ extern "C" void cSplashManager_update(sEmitter_39E0* self)
             if (pick == i && self->parts[i].bursts < cSplashToggles_m_MaxSpawnPerCrystal) {
                 self->parts[i].bursts++;
                 sV2_39E0 sz = part->size * 0.6000000238418579f;
-                if (sz.X() > D_004A4294_39E0.v && sz.Y() > D_004A4294_39E0.v)
+                if (sz.X() > cSplashToggles_m_DropMinSize_39E0.v && sz.Y() > cSplashToggles_m_DropMinSize_39E0.v)
                     cSplashManager_AddDrop_39E0(self, &self->parts[i].pos, &sz);
             }
             i++;
@@ -3289,7 +3289,7 @@ struct sGsState_4A08 {
     void SetF22(int v) { f4_22 = v; }
 };
 
-extern sGsState_4A08 D_00501420_4A08 __asm__("sDrawState_s_defaultDrawState");
+extern sGsState_4A08 sDrawState_s_defaultDrawState_4A08 __asm__("sDrawState_s_defaultDrawState");
 
 class cGfx_4A08 {
 public:
@@ -3360,7 +3360,7 @@ extern "C" void cSunHalo_Render(cSunHalo* self, sV4_4A08* vp, int flag)
     cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
     ((cGfx_4A08*)gfx)->stateTop[1] = ((cGfx_4A08*)gfx)->stateTop[0];
     ((cGfx_4A08*)gfx)->stateTop++;
-    *((cGfx_4A08*)gfx)->stateTop = D_00501420_4A08;
+    *((cGfx_4A08*)gfx)->stateTop = sDrawState_s_defaultDrawState_4A08;
     ((cGfx_4A08*)gfx)->PushViewport();
     ((cGfx_4A08*)gfx)->SetViewportOrthographic(vp->x, vp->y, vp->z, vp->w, 1, 0, 0.0f, 1.0f);
     ((cGfx_4A08*)gfx)->PushView();

@@ -23,7 +23,7 @@ struct sReq_CE758
     signed char type;
     signed char track;
 };
-extern sReq_CE758 D_0045AAD8_CE758[][4][5] __asm__("gMedalsInfo");
+extern sReq_CE758 gMedalsInfo_CE758[][4][5] __asm__("gMedalsInfo");
 
 extern char str_kT_OVRCMNEarnings[];
 extern char str_kT_OVRCMNCollectibles[];
@@ -83,8 +83,8 @@ extern "C" void setChallengeName(cUIText* text, int peak, int kind, int idx)
         return;
     }
     void* iface = cBE_getInterface_CE758(cBE_getBE(), 0);
-    int type = D_0045AAD8_CE758[peak][kind][idx].type;
-    int track = D_0045AAD8_CE758[peak][kind][idx].track;
+    int type = gMedalsInfo_CE758[peak][kind][idx].type;
+    int track = gMedalsInfo_CE758[peak][kind][idx].track;
     if (type == 4) {
         unsigned short buf[200];
         unsigned short fmt[32];
@@ -203,8 +203,8 @@ extern "C" void setChallengeStats(cUIText* text, int profileIndex, int character
             }
         }
     } else if (kind == 0) {
-        int track = D_0045AAD8_CE758[peak][kind][idx].track;
-        int type = D_0045AAD8_CE758[peak][kind][idx].type;
+        int track = gMedalsInfo_CE758[peak][kind][idx].track;
+        int type = gMedalsInfo_CE758[peak][kind][idx].type;
         unsigned int time = cBERewardInterface_getTrackHighScore(reward, profileIndex, characterID, type, track);
         unsigned int min = udiv_CE758(time, 60);
         unsigned int sec = umod_CE758(time, 60);
@@ -215,8 +215,8 @@ extern "C" void setChallengeStats(cUIText* text, int profileIndex, int character
             cUIText_setUnicodeString(text, buf);
         }
     } else if (kind == 1) {
-        int track = D_0045AAD8_CE758[peak][kind][idx].track;
-        int type = D_0045AAD8_CE758[peak][kind][idx].type;
+        int track = gMedalsInfo_CE758[peak][kind][idx].track;
+        int type = gMedalsInfo_CE758[peak][kind][idx].type;
         int current = cBERewardInterface_getTrackHighScore(reward, profileIndex, characterID, type, track);
         int fmt = Loc_CE758(str_kT_OVRCMNYourBestScore);
         if (fmt != 0) {
@@ -242,7 +242,7 @@ struct sReq_ED90
     signed char track;
     signed char kind;
 };
-extern sReq_ED90 D_0045AAD8_ED90[][4][5] __asm__("gMedalsInfo");
+extern sReq_ED90 gMedalsInfo_ED90[][4][5] __asm__("gMedalsInfo");
 
 /**
  * Returns the medal a profile's character has earned in one challenge of a peak's trophy list.
@@ -275,8 +275,8 @@ extern "C" void getChallengeMedal(int profileIndex, int charId, int peakNum, int
     }
     if (trophyType != 3)
     {
-        int kind = D_0045AAD8_ED90[peakNum][trophyType][challengeIndex].kind;
-        int track = D_0045AAD8_ED90[peakNum][trophyType][challengeIndex].track;
+        int kind = gMedalsInfo_ED90[peakNum][trophyType][challengeIndex].kind;
+        int track = gMedalsInfo_ED90[peakNum][trophyType][challengeIndex].track;
         cBERewardInterface_getTrackMedal(rewardIface, profileIndex, charId, track, kind);
         return;
     }

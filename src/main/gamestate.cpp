@@ -422,7 +422,7 @@ public:
 };
 
 
-// The game (D_004A2C68_date, also D_004A28A8_date->game).
+// The game (cGameState_mpGame_date, also SSXApp_date->game).
 struct sGame {
     char pad_0x0[0xC];
     cRace* race;                // 0xC
@@ -441,9 +441,9 @@ struct sGame {
     void* f94;                  // 0x94 (the HUD for func_001F36D8 / cBXLoadIndicator_Show)
 };
 
-extern sGame* D_004A2C68_date __asm__("cGameState_mpGame");
+extern sGame* cGameState_mpGame_date __asm__("cGameState_mpGame");
 
-// The game singleton (D_004A28A8_date).
+// The game singleton (SSXApp_date).
 struct sApp {
     char pad_0x0[0x78];
     void* f78;                  // 0x78
@@ -453,7 +453,7 @@ struct sApp {
     cGameModeMan* gm;           // 0xC0
 };
 
-extern sApp* D_004A28A8_date __asm__("SSXApp");
+extern sApp* SSXApp_date __asm__("SSXApp");
 
 extern "C" void* cBE_getBE();
 
@@ -519,7 +519,7 @@ extern "C" void cGFTrackStartState_preloadUpdate(cGFTrackStartState* self)
         if (cSSXScriptEngine_IsLoadTrackComplete(ScriptEngine) == 0)
             break;
         cSSXScriptEngine_ReadyNISList(ScriptEngine, 0);
-        cSectionMan* sectionMan = (cSectionMan*)D_004A28A8_date->game->f78;
+        cSectionMan* sectionMan = (cSectionMan*)SSXApp_date->game->f78;
         int locationId = sectionMan->mBELocationID;
         int range = locationId >= 14 && locationId <= 16;
         if (self->mPlayFirstTimeBCVideo != 0) {
@@ -555,19 +555,19 @@ extern "C" void cGFTrackStartState_preloadUpdate(cGFTrackStartState* self)
     case 2: {
         // Modes first..last are already set up; anything else needs initGameMode.
         int first = 6, last = 11;
-        if (cAI_isReadyToPurgeComputerRiders(D_004A2C68_date->race) == 0)
+        if (cAI_isReadyToPurgeComputerRiders(cGameState_mpGame_date->race) == 0)
             break;
-        if (cAI_isReadyToPurgeComputerActors(D_004A2C68_date->race) == 0)
+        if (cAI_isReadyToPurgeComputerActors(cGameState_mpGame_date->race) == 0)
             break;
         char* newRace = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
         char* newPlayer = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
         cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
-        cGameModeMan* gm = D_004A28A8_date->gm;
+        cGameModeMan* gm = SSXApp_date->gm;
         int mode = beRaceDB->cGameEvent;
         if (mode < first || mode > last)
             cGameModeMan_initGameMode(gm, mode);
         int numAI = gm->iNumberAI - gm->iSimAI;
-        int base = D_004A2C68_date->race->numPlayers;
+        int base = cGameState_mpGame_date->race->numPlayers;
         int i = 0;
         cBENewRaceInterface_setNumberAI(newRace, numAI);
         {
@@ -584,40 +584,40 @@ extern "C" void cGFTrackStartState_preloadUpdate(cGFTrackStartState* self)
         }
         cBERaceDB* raceDB = &(*(&cBENewRaceInterface_newRace));
         int quick = 0;
-        cAI_cleanupAfterRace(D_004A2C68_date->race);
-        cAI_cleanupActors(D_004A2C68_date->race);
+        cAI_cleanupAfterRace(cGameState_mpGame_date->race);
+        cAI_cleanupActors(cGameState_mpGame_date->race);
         if (raceDB->cGameMode == 0)
             quick = raceDB->cGamePath == 0;
-        cAI_initAIRiders(D_004A2C68_date->race);
+        cAI_initAIRiders(cGameState_mpGame_date->race);
         if (numAI == 0 && quick) {
             if (raceDB->cGameMode == 0)
-                cAI_initAIActors(D_004A2C68_date->race, 0);
+                cAI_initAIActors(cGameState_mpGame_date->race, 0);
             else
-                cAI_initAIActors(D_004A2C68_date->race, 2);
+                cAI_initAIActors(cGameState_mpGame_date->race, 2);
         }
         self->mPreLoadState = 3;
         break;
     }
     case 3: {
-        if (cAI_isAILoadedAndReady(D_004A2C68_date->race)) {
+        if (cAI_isAILoadedAndReady(cGameState_mpGame_date->race)) {
             cBE_getInterface_Fv(cBE_getBE(), 0);
             cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
             int gameMode = beRaceDB->cGameMode;
             if (gameMode == 0) {
-                cAI_resolveRace(D_004A2C68_date->race);
-                if (D_004A2C68_date->race->f80 > 0)
-                    D_004A2C68_date->race->f14 = 1;
-                if (D_004A2C68_date->race->f84 > 0)
-                    D_004A2C68_date->race->f8C = 1;
+                cAI_resolveRace(cGameState_mpGame_date->race);
+                if (cGameState_mpGame_date->race->f80 > 0)
+                    cGameState_mpGame_date->race->f14 = 1;
+                if (cGameState_mpGame_date->race->f84 > 0)
+                    cGameState_mpGame_date->race->f8C = 1;
             }
             if (gameMode == 5) {
                 cBERaceDB* raceDB = &(*(&cBENewRaceInterface_newRace));
                 if (raceDB->cGamePath == 0)
-                    cAI_initFreeride(D_004A2C68_date->race);
+                    cAI_initFreeride(cGameState_mpGame_date->race);
             }
             self->mPreLoadState = 4;
         } else {
-            cAI_loadRiders(D_004A2C68_date->race);
+            cAI_loadRiders(cGameState_mpGame_date->race);
         }
         break;
     }
@@ -1880,7 +1880,7 @@ struct sApp_6BB0 {
     char pad0[0x84];
     sMgr_6BB0* mgr; // 0x84
 };
-extern sApp_6BB0* D_004A28A8_s __asm__("SSXApp");
+extern sApp_6BB0* SSXApp_s __asm__("SSXApp");
 extern int cPauseState_Flags;
 extern int cPauseState_StackIdx;
 extern int cPauseState_Stack[];
@@ -1903,14 +1903,14 @@ extern "C" void cGFPreEventState_gainFocus(cGFPreEventState* self)
 {
     self->mOverlayDone = 0;
     if (cGameComm_mGameComm != 0 && cGameComm_mGameComm->mError != 0) {
-        cCutSceneTransitionMan_ForceToRegularMode(D_004A28A8_s->mgr->world);
+        cCutSceneTransitionMan_ForceToRegularMode(SSXApp_s->mgr->world);
         cBE_setState(0);
         return;
     }
     cOVStateManager_gotoOverlay(2);
     cPauseState_Stack[++cPauseState_StackIdx] = 1;
     cPauseState_Flags = D_004428F4[0];
-    cCutSceneTransitionMan_ForceToRegularMode(D_004A28A8_s->mgr->world);
+    cCutSceneTransitionMan_ForceToRegularMode(SSXApp_s->mgr->world);
     cBE_setState(0);
 }
 #endif

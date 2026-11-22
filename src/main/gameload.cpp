@@ -117,7 +117,7 @@ extern "C" void* cSSXStatsMan_construct();
 extern int cBESaveInterface_bDoReplay;
 extern int D_004A3484;
 extern void* cGameState_mpGame;
-extern char D_004A5988_gl __asm__("gBucketMan");
+extern char gBucketMan_gl __asm__("gBucketMan");
 extern char cIrradianceDataBase_TheDataBase[];
 extern char str_Nash[];
 extern char str_DebugFont_b[];
@@ -235,7 +235,7 @@ extern "C" void cGame_load(cGame* self)
 {
     sGridGL** pGrid = (sGridGL**)&self->BXNash;
     void** worlds = ((void**)&self->TransitionMan[0]);
-    void* bm = &D_004A5988_gl;
+    void* bm = &gBucketMan_gl;
     void** lights = ((void**)&self->SplashManager[0]);
     cLoadTimer_startload(&cAppMan_TheAppMan->LoadTimer, 13.199999809265137f);
     cLoadTimer_setnextpercent(&cAppMan_TheAppMan->LoadTimer, 43.5f);
@@ -630,7 +630,7 @@ extern int cPauseState_StackIdx;
 extern char gPaths[];
 extern char cIrradianceDataBase_TheDataBase[];
 // The unit declares gBucketMan later as sGp2898 (8 bytes); bind a small-data alias here.
-extern char D_004A5988_gl __asm__("gBucketMan");
+extern char gBucketMan_gl __asm__("gBucketMan");
 
 // g++ 2.95 vtable entry: this-adjust, index, function.
 struct sVEnt_FA98 {
@@ -742,7 +742,7 @@ extern "C" void cGame_purge(char* self)
     cPathSys_purgePaths(gPaths);
     cBXNash_purgeTheAIFwdDiffCache(*(void**)(self + 0x20));
     if (*(void**)(self + 0xA4) != 0) cMenuSys__cMenuSys(*(void**)(self + 0xA4), 3);
-    void* bm = &D_004A5988_gl;
+    void* bm = &gBucketMan_gl;
     cBucketMan_mergeBucket(bm, 1);
     cBucketMan_purge(bm);
     VDelete_FA98(*(char**)(self + 0x30), 1172, 8);
@@ -874,7 +874,7 @@ extern "C" void cWScriptMan_runGlobalScripts(void* a);
 extern "C" void cWScriptMan_setupMissions(void* a);
 extern cWScriptMan* cWScriptMan_TheWScriptMan;
 // The unit declares gBucketMan later as sGp2898 (8 bytes); bind a small-data alias here.
-extern char D_004A5988_bm __asm__("gBucketMan");
+extern char gBucketMan_bm __asm__("gBucketMan");
 
 /**
  * Resets the world for a new run: playback, missions, update buckets 1 and 8, the AI focus, avalanches and
@@ -884,7 +884,7 @@ extern char D_004A5988_bm __asm__("gBucketMan");
  */
 extern "C" void cGame_resetWorld(cGame* self)
 {
-    void* bm = &D_004A5988_bm;
+    void* bm = &gBucketMan_bm;
     cPlaybackMan_restart(self->PlaybackMan);
     cWScriptMan_initMissions(self->WScriptMan);
     cBucketMan_mergeBucket(bm, 1);
@@ -925,7 +925,7 @@ extern char str_hud_c[];
  */
 extern "C" void cGame_partialRestart(cGame* self)
 {
-    void* bm = &D_004A5988_bm;
+    void* bm = &gBucketMan_bm;
     cPlaybackMan_restart(self->PlaybackMan);
     cWScriptMan_initMissions(self->WScriptMan);
     cBucketMan_mergeBucket(bm, 1);
@@ -1039,7 +1039,7 @@ extern void* cMultiParticleMan_TheMultiParticleMan;
  */
 extern "C" void cGame_sectionUnloading(cGame* self, int id)
 {
-    void* bm = &D_004A5988_bm;
+    void* bm = &gBucketMan_bm;
     cRailManNode_unloadSection(id);
     func_00229408(TheCrowdMan2d, id);
     func_00343C08(TheCrowdMan3d, id);
@@ -2749,7 +2749,7 @@ struct sGs_1FC0 {
     void SetF10(int v) { f10 = v; }
 };
 
-extern sGs_1FC0 D_00501420_1FC0 __asm__("sDrawState_s_defaultDrawState");
+extern sGs_1FC0 sDrawState_s_defaultDrawState_1FC0 __asm__("sDrawState_s_defaultDrawState");
 
 class cGfx_1FC0 {
 public:
@@ -2794,7 +2794,7 @@ struct sVE_1FC0 {
     void (*fn)(void*, float, float, float, float, int);
 };
 
-extern char* D_004A28A8_1FC0 __asm__("SSXApp");
+extern char* SSXApp_1FC0 __asm__("SSXApp");
 
 /**
  * Draws the load indicator: a pulsing sprite at (599, 445) in a full-screen 2D pass.
@@ -2812,7 +2812,7 @@ extern "C" void cLoadIndicator_render(sFade_1FC0* self)
     ((cGfx_1FC0*)ps2GraphicsMan)->stateTop++;
     ((cGfx_1FC0*)GrMan)->PushViewport();
     ((cGfx_1FC0*)GrMan)->PushView();
-    *((cGfx_1FC0*)GrMan)->stateTop = D_00501420_1FC0;
+    *((cGfx_1FC0*)GrMan)->stateTop = sDrawState_s_defaultDrawState_1FC0;
     ((cGfx_1FC0*)GrMan)->stateTop->f4_23 = 2;
     ((cGfx_1FC0*)GrMan)->stateTop->f4_20 = 0;
     ((cGfx_1FC0*)GrMan)->stateTop->f4_12 = 20;
@@ -2829,7 +2829,7 @@ extern "C" void cLoadIndicator_render(sFade_1FC0* self)
     float pulse = fCos(self->t * 6.2831854820251465f);
     sV2_1FC0 size((pulse + 1.0f) * 9.0f, 18.0f);
     sV4_1FC0 pos(599.0f, 445.0f, 0.0f, 1.0f);
-    int f10v = *(int*)(D_004A28A8_1FC0 + 0xA0);
+    int f10v = *(int*)(SSXApp_1FC0 + 0xA0);
     *(short*)((char*)((cGfx_1FC0*)GrMan)->stateTop + 0x10) = f10v;
     self->col.r = self->f4;
     sV2_1FC0 uv0(0.0f, 0.0f);

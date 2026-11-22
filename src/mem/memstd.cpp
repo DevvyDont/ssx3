@@ -1871,7 +1871,7 @@ struct sMemAllocFuncs_2534A8 {
     int field_0x8;
 };
 // Typed view of the allocator table (the unit defines sMemAllocFuncs later).
-extern sMemAllocFuncs_2534A8 D_00509430_2534A8 __asm__("RCMP_rcmp_sys");
+extern sMemAllocFuncs_2534A8 RCMP_rcmp_sys_2534A8 __asm__("RCMP_rcmp_sys");
 extern char D_004A2E98[];
 extern "C" void* func_003ADE08(void* mem, int a1, int a2, char* name, int a4, int a5, int a6);
 extern "C" void* func_003ADDC0(void* mem, int a1, int a2, int a3, int a4);
@@ -1906,10 +1906,10 @@ extern "C" int cMoviePlayer_init_impl(void* vself, tMoviePlayOptions* cfg)
     self->m_fSpeed = self->m_PlayOp.fPlaySpeed;
     char* name = (char*)self->m_PlayOp.sAudioFileName;
     if (name != 0 && *name != 0) {
-        void* mem = D_00509430_2534A8.alloc(D_004A2E98, 0x78, 0, 0, D_00509430_2534A8.field_0x8);
+        void* mem = RCMP_rcmp_sys_2534A8.alloc(D_004A2E98, 0x78, 0, 0, RCMP_rcmp_sys_2534A8.field_0x8);
         self->m_pPlayer = func_003ADE08(mem, *(int*)&self->m_PlayOp, 0x60000, (char*)self->m_PlayOp.sAudioFileName, 0x20000, optionSet, soundOff);
     } else {
-        void* mem = D_00509430_2534A8.alloc(D_004A2E98, 0x78, 0, 0, D_00509430_2534A8.field_0x8);
+        void* mem = RCMP_rcmp_sys_2534A8.alloc(D_004A2E98, 0x78, 0, 0, RCMP_rcmp_sys_2534A8.field_0x8);
         self->m_pPlayer = func_003ADDC0(mem, *(int*)&self->m_PlayOp, 0x80000, optionSet, soundOff);
     }
     return 1;
@@ -2510,7 +2510,7 @@ struct sMemAlloc_4410 {
     void* (*free)(void* p);
     int flags;
 };
-extern sMemAlloc_4410 D_00509430_4410 __asm__("RCMP_rcmp_sys");
+extern sMemAlloc_4410 RCMP_rcmp_sys_4410 __asm__("RCMP_rcmp_sys");
 extern void* D_00480270[];
 extern char str_VD_VD_TEXTURE_POINTER[];
 extern char D_004A2EA0[];
@@ -2555,7 +2555,7 @@ struct sTile_4410 {
     int tex;        // 0x0
     int w;          // 0x4
     int h;          // 0x8
-    static void* operator new(unsigned int size) { return D_00509430_4410.alloc(D_004A2EA0, size, 0, 0, D_00509430_4410.flags); }
+    static void* operator new(unsigned int size) { return RCMP_rcmp_sys_4410.alloc(D_004A2EA0, size, 0, 0, RCMP_rcmp_sys_4410.flags); }
     sTile_4410(char* pixels, int height)
     {
         w = 16;
@@ -2616,7 +2616,7 @@ extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD_body(SSX_VD
         rem -= self->mRowHeights[self->mNumRows++];
     }
     self->mNumTiles = self->mNumColumns * self->mNumRows;
-    (*(sTile_4410***)&self->mppTiles) = (sTile_4410**)D_00509430_4410.alloc(str_VD_VD_TEXTURE_POINTER, self->mNumTiles * 12, 0, 0, D_00509430_4410.flags);
+    (*(sTile_4410***)&self->mppTiles) = (sTile_4410**)RCMP_rcmp_sys_4410.alloc(str_VD_VD_TEXTURE_POINTER, self->mNumTiles * 12, 0, 0, RCMP_rcmp_sys_4410.flags);
     float fh = (float)frameHeight;
     float fw = (float)w;
     int k = 0;

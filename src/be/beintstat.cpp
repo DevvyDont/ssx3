@@ -30,8 +30,8 @@ struct sCharStat_getCollisionAttrib
 {
     signed char v[15];
 };
-extern sPlayerStatRow_getCollisionAttrib D_00535538_getCollisionAttrib[] __asm__("cBEStatInterface_currentStat");
-extern sCharStat_getCollisionAttrib D_005308D8_getCollisionAttrib[] __asm__("cBELibrary_statDefault");
+extern sPlayerStatRow_getCollisionAttrib cBEStatInterface_currentStat_getCollisionAttrib[] __asm__("cBEStatInterface_currentStat");
+extern sCharStat_getCollisionAttrib cBELibrary_statDefault_getCollisionAttrib[] __asm__("cBELibrary_statDefault");
 
 /**
  * Returns a rider's collision attribute as a fraction of the character's maximum.
@@ -54,8 +54,8 @@ extern "C" float cBEStatInterface_getCollisionAttrib(cBEStatInterface* self, int
     if (value > 0)
         attribLevel = value;
     else
-        attribLevel = D_00535538_getCollisionAttrib[profile].e[charID][5] / 5;
-    return (float)attribLevel / (float)D_005308D8_getCollisionAttrib[charID].v[0xD];
+        attribLevel = cBEStatInterface_currentStat_getCollisionAttrib[profile].e[charID][5] / 5;
+    return (float)attribLevel / (float)cBELibrary_statDefault_getCollisionAttrib[charID].v[0xD];
 }
 #endif
 
@@ -75,8 +75,8 @@ struct sCharStat_cBEStatInterface_getStrikingAttrib
 {
     signed char v[15];
 };
-extern sPlayerStatRow_cBEStatInterface_getStrikingAttrib D_00535538_cBEStatInterface_getStrikingAttrib[] __asm__("cBEStatInterface_currentStat");
-extern sCharStat_cBEStatInterface_getStrikingAttrib D_005308D8_cBEStatInterface_getStrikingAttrib[] __asm__("cBELibrary_statDefault");
+extern sPlayerStatRow_cBEStatInterface_getStrikingAttrib cBEStatInterface_currentStat_cBEStatInterface_getStrikingAttrib[] __asm__("cBEStatInterface_currentStat");
+extern sCharStat_cBEStatInterface_getStrikingAttrib cBELibrary_statDefault_cBEStatInterface_getStrikingAttrib[] __asm__("cBELibrary_statDefault");
 
 /**
  * Returns how hard a rider hits, as a fraction of the character's best.
@@ -99,8 +99,8 @@ extern "C" float cBEStatInterface_getStrikingAttrib(cBEStatInterface* self, int 
     if (value > 0)
         level = value;
     else
-        level = D_00535538_cBEStatInterface_getStrikingAttrib[profile].e[character][5] / 5;
-    return (float)level / (float)D_005308D8_cBEStatInterface_getStrikingAttrib[character].v[0xD];
+        level = cBEStatInterface_currentStat_cBEStatInterface_getStrikingAttrib[profile].e[character][5] / 5;
+    return (float)level / (float)cBELibrary_statDefault_cBEStatInterface_getStrikingAttrib[character].v[0xD];
 }
 #endif
 
@@ -120,8 +120,8 @@ struct sCharStat_cBEStatInterface_getLandingAttrib
 {
     signed char v[15];
 };
-extern sPlayerStatRow_cBEStatInterface_getLandingAttrib D_00535538_cBEStatInterface_getLandingAttrib[] __asm__("cBEStatInterface_currentStat");
-extern sCharStat_cBEStatInterface_getLandingAttrib D_005308D8_cBEStatInterface_getLandingAttrib[] __asm__("cBELibrary_statDefault");
+extern sPlayerStatRow_cBEStatInterface_getLandingAttrib cBEStatInterface_currentStat_cBEStatInterface_getLandingAttrib[] __asm__("cBEStatInterface_currentStat");
+extern sCharStat_cBEStatInterface_getLandingAttrib cBELibrary_statDefault_cBEStatInterface_getLandingAttrib[] __asm__("cBELibrary_statDefault");
 
 /**
  * Returns how well a rider lands, as a fraction of the character's best.
@@ -143,8 +143,8 @@ extern "C" float cBEStatInterface_getLandingAttrib(cBEStatInterface* self, int r
     if (value > 0)
         level = value;
     else
-        level = D_00535538_cBEStatInterface_getLandingAttrib[profile].e[character][6] / 5;
-    return (float)level / (float)D_005308D8_cBEStatInterface_getLandingAttrib[character].v[0xE];
+        level = cBEStatInterface_currentStat_cBEStatInterface_getLandingAttrib[profile].e[character][6] / 5;
+    return (float)level / (float)cBELibrary_statDefault_cBEStatInterface_getLandingAttrib[character].v[0xE];
 }
 #endif
 
@@ -164,8 +164,8 @@ struct sCharStat_cBEStatInterface_getBalanceAttrib
 {
     signed char v[15];
 };
-extern sPlayerStatRow_cBEStatInterface_getBalanceAttrib D_00535538_cBEStatInterface_getBalanceAttrib[] __asm__("cBEStatInterface_currentStat");
-extern sCharStat_cBEStatInterface_getBalanceAttrib D_005308D8_cBEStatInterface_getBalanceAttrib[] __asm__("cBELibrary_statDefault");
+extern sPlayerStatRow_cBEStatInterface_getBalanceAttrib cBEStatInterface_currentStat_cBEStatInterface_getBalanceAttrib[] __asm__("cBEStatInterface_currentStat");
+extern sCharStat_cBEStatInterface_getBalanceAttrib cBELibrary_statDefault_cBEStatInterface_getBalanceAttrib[] __asm__("cBELibrary_statDefault");
 
 /**
  * Returns a rider's balance attribute as a fraction of the character's maximum stability level.
@@ -189,8 +189,8 @@ extern "C" float cBEStatInterface_getBalanceAttrib(cBEStatInterface* self, int r
     if (value > 0)
         attribLevel = value;
     else
-        attribLevel = D_00535538_cBEStatInterface_getBalanceAttrib[profile].e[charID][6] / 5;
-    return (float)attribLevel / (float)D_005308D8_cBEStatInterface_getBalanceAttrib[charID].v[0xE];
+        attribLevel = cBEStatInterface_currentStat_cBEStatInterface_getBalanceAttrib[profile].e[charID][6] / 5;
+    return (float)attribLevel / (float)cBELibrary_statDefault_cBEStatInterface_getBalanceAttrib[charID].v[0xE];
 }
 #endif
 
@@ -219,8 +219,8 @@ extern "C" float cBEStatInterface_getRecoveryAttrib(cBEStatInterface* self, int 
     if (value > 0)
         attribLevel = value;
     else
-        attribLevel = D_00535538_cBEStatInterface_getStrikingAttrib[profile].e[charID][6] / 5;
-    return (float)attribLevel / (float)D_005308D8_cBEStatInterface_getStrikingAttrib[charID].v[0xE];
+        attribLevel = cBEStatInterface_currentStat_cBEStatInterface_getStrikingAttrib[profile].e[charID][6] / 5;
+    return (float)attribLevel / (float)cBELibrary_statDefault_cBEStatInterface_getStrikingAttrib[charID].v[0xE];
 }
 #endif
 
@@ -240,8 +240,8 @@ struct sCharStat_cBEStatInterface_getAccelerationAttrib
 {
     signed char v[15];
 };
-extern sPlayerStatRow_cBEStatInterface_getAccelerationAttrib D_00535538_cBEStatInterface_getAccelerationAttrib[] __asm__("cBEStatInterface_currentStat");
-extern sCharStat_cBEStatInterface_getAccelerationAttrib D_005308D8_cBEStatInterface_getAccelerationAttrib[] __asm__("cBELibrary_statDefault");
+extern sPlayerStatRow_cBEStatInterface_getAccelerationAttrib cBEStatInterface_currentStat_cBEStatInterface_getAccelerationAttrib[] __asm__("cBEStatInterface_currentStat");
+extern sCharStat_cBEStatInterface_getAccelerationAttrib cBELibrary_statDefault_cBEStatInterface_getAccelerationAttrib[] __asm__("cBELibrary_statDefault");
 
 /**
  * Returns a rider's acceleration attribute as a fraction of the character's maximum acceleration level.
@@ -264,8 +264,8 @@ extern "C" float cBEStatInterface_getAccelerationAttrib(cBEStatInterface* self, 
     if (value > 0)
         attribLevel = value;
     else
-        attribLevel = D_00535538_cBEStatInterface_getAccelerationAttrib[profile].e[charID][1] / 5;
-    return (float)attribLevel / (float)D_005308D8_cBEStatInterface_getAccelerationAttrib[charID].v[0x9];
+        attribLevel = cBEStatInterface_currentStat_cBEStatInterface_getAccelerationAttrib[profile].e[charID][1] / 5;
+    return (float)attribLevel / (float)cBELibrary_statDefault_cBEStatInterface_getAccelerationAttrib[charID].v[0x9];
 }
 #endif
 
@@ -285,8 +285,8 @@ struct sCharStat_cBEStatInterface_getSpeedAttrib
 {
     signed char v[15];
 };
-extern sPlayerStatRow_cBEStatInterface_getSpeedAttrib D_00535538_cBEStatInterface_getSpeedAttrib[] __asm__("cBEStatInterface_currentStat");
-extern sCharStat_cBEStatInterface_getSpeedAttrib D_005308D8_cBEStatInterface_getSpeedAttrib[] __asm__("cBELibrary_statDefault");
+extern sPlayerStatRow_cBEStatInterface_getSpeedAttrib cBEStatInterface_currentStat_cBEStatInterface_getSpeedAttrib[] __asm__("cBEStatInterface_currentStat");
+extern sCharStat_cBEStatInterface_getSpeedAttrib cBELibrary_statDefault_cBEStatInterface_getSpeedAttrib[] __asm__("cBELibrary_statDefault");
 
 /**
  * Returns a rider's speed attribute as a fraction of the character's maximum speed level.
@@ -309,8 +309,8 @@ extern "C" float cBEStatInterface_getSpeedAttrib(cBEStatInterface* self, int rid
     if (value > 0)
         attribLevel = value;
     else
-        attribLevel = D_00535538_cBEStatInterface_getSpeedAttrib[profile].e[charID][0] / 5;
-    return (float)attribLevel / (float)D_005308D8_cBEStatInterface_getSpeedAttrib[charID].v[0x8];
+        attribLevel = cBEStatInterface_currentStat_cBEStatInterface_getSpeedAttrib[profile].e[charID][0] / 5;
+    return (float)attribLevel / (float)cBELibrary_statDefault_cBEStatInterface_getSpeedAttrib[charID].v[0x8];
 }
 #endif
 
@@ -330,8 +330,8 @@ struct sCharStat_cBEStatInterface_getSpinAttrib
 {
     signed char v[15];
 };
-extern sPlayerStatRow_cBEStatInterface_getSpinAttrib D_00535538_cBEStatInterface_getSpinAttrib[] __asm__("cBEStatInterface_currentStat");
-extern sCharStat_cBEStatInterface_getSpinAttrib D_005308D8_cBEStatInterface_getSpinAttrib[] __asm__("cBELibrary_statDefault");
+extern sPlayerStatRow_cBEStatInterface_getSpinAttrib cBEStatInterface_currentStat_cBEStatInterface_getSpinAttrib[] __asm__("cBEStatInterface_currentStat");
+extern sCharStat_cBEStatInterface_getSpinAttrib cBELibrary_statDefault_cBEStatInterface_getSpinAttrib[] __asm__("cBELibrary_statDefault");
 
 /**
  * Returns how fast a rider spins, as a fraction of the character's best.
@@ -353,8 +353,8 @@ extern "C" float cBEStatInterface_getSpinAttrib(cBEStatInterface* self, int ride
     if (value > 0)
         level = value;
     else
-        level = D_00535538_cBEStatInterface_getSpinAttrib[profile].e[character][4] / 5;
-    return (float)level / (float)D_005308D8_cBEStatInterface_getSpinAttrib[character].v[0xC];
+        level = cBEStatInterface_currentStat_cBEStatInterface_getSpinAttrib[profile].e[character][4] / 5;
+    return (float)level / (float)cBELibrary_statDefault_cBEStatInterface_getSpinAttrib[character].v[0xC];
 }
 #endif
 
@@ -374,8 +374,8 @@ struct sCharStat_cBEStatInterface_getTrickAttrib
 {
     signed char v[15];
 };
-extern sPlayerStatRow_cBEStatInterface_getTrickAttrib D_00535538_cBEStatInterface_getTrickAttrib[] __asm__("cBEStatInterface_currentStat");
-extern sCharStat_cBEStatInterface_getTrickAttrib D_005308D8_cBEStatInterface_getTrickAttrib[] __asm__("cBELibrary_statDefault");
+extern sPlayerStatRow_cBEStatInterface_getTrickAttrib cBEStatInterface_currentStat_cBEStatInterface_getTrickAttrib[] __asm__("cBEStatInterface_currentStat");
+extern sCharStat_cBEStatInterface_getTrickAttrib cBELibrary_statDefault_cBEStatInterface_getTrickAttrib[] __asm__("cBELibrary_statDefault");
 
 /**
  * Returns a rider's trick skill, as a fraction of the character's best.
@@ -397,8 +397,8 @@ extern "C" float cBEStatInterface_getTrickAttrib(cBEStatInterface* self, int rid
     if (value > 0)
         level = value;
     else
-        level = D_00535538_cBEStatInterface_getTrickAttrib[profile].e[character][2] / 5;
-    return (float)level / (float)D_005308D8_cBEStatInterface_getTrickAttrib[character].v[0xA];
+        level = cBEStatInterface_currentStat_cBEStatInterface_getTrickAttrib[profile].e[character][2] / 5;
+    return (float)level / (float)cBELibrary_statDefault_cBEStatInterface_getTrickAttrib[character].v[0xA];
 }
 #endif
 

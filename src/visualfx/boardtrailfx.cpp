@@ -1261,7 +1261,7 @@ struct sFade_A900 {
     float to[4];        // 0x38
 };
 
-extern char* D_004A5B64_A900 __asm__("cAppMan_TheAppMan");
+extern char* cAppMan_TheAppMan_A900 __asm__("cAppMan_TheAppMan");
 
 /**
  * Blends the TV display format between regular and cut-scene mode.
@@ -1278,7 +1278,7 @@ extern "C" void cCutSceneTransitionMan_update(cCutSceneTransitionMan* self)
     int mode = self->mCurrentState;
     if (mode != 2 && mode != 3)
         return;
-    self->mfCurrentTime += 1.0f / (float)*(int*)(D_004A5B64_A900 + 0x10);
+    self->mfCurrentTime += 1.0f / (float)*(int*)(cAppMan_TheAppMan_A900 + 0x10);
     if (self->mfLengthOfTime < self->mfCurrentTime) {
         if (mode == 2)
             cCutSceneTransitionMan_ForceToRegularMode(self);
@@ -1595,7 +1595,7 @@ struct sRctx_B198 {
     sRctxVE_B198* vtable;       // 0x10D8
 };
 
-extern sRS_B198 D_00501420_B198 __asm__("sDrawState_s_defaultDrawState");
+extern sRS_B198 sDrawState_s_defaultDrawState_B198 __asm__("sDrawState_s_defaultDrawState");
 
 
 struct sTrailCol_B198 {
@@ -1635,7 +1635,7 @@ extern "C" void cTrickBoostFX_render(sTrail_2EADD0* self)
         return;
     }
     push_B198((sRctx_B198*)GrMan);
-    *((sRS_B198*)GrMan->m_pCurrentDrawState) = D_00501420_B198;
+    *((sRS_B198*)GrMan->m_pCurrentDrawState) = sDrawState_s_defaultDrawState_B198;
     int tex = GrMan->_EffectTexMap[62];
     *(short*)((char*)(sRS_B198*)GrMan->m_pCurrentDrawState + 0x10) = tex;
     ((sRS_B198*)GrMan->m_pCurrentDrawState)->f0 |= 0xC;

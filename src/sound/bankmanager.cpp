@@ -829,7 +829,7 @@ struct sCfg_BF78 {
     int flags;
     int v[(0x288 - 4) / 4];
 };
-extern sCfg_BF78 D_00535610_BF78 __asm__("cBEOptionInterface_mOption");
+extern sCfg_BF78 cBEOptionInterface_mOption_BF78 __asm__("cBEOptionInterface_mOption");
 
 /**
  * Switches the radio mode (unk_608C) to @p state and restarts the music when the current song no longer fits it.
@@ -859,7 +859,7 @@ extern "C" void func_0028BF78(cSSXAudio* self, int state)
     case 0: {
         func_002B4070_BF78(&self->MusicSys, *(long*)&self->MusicSys.mDefaultActiveMap);
         cBE_getInterface_Fv(cBE_getBE(), 4);
-        sCfg_BF78 cfg = D_00535610_BF78;
+        sCfg_BF78 cfg = cBEOptionInterface_mOption_BF78;
         cSSXAudio_SetDJSpeech(self, (cfg.flags >> 17) & 1);
         if (cAudioInterface_isInGame() == 0)
             return;
@@ -875,7 +875,7 @@ extern "C" void func_0028BF78(cSSXAudio* self, int state)
     case 3: {
         func_002B4070_BF78(&self->MusicSys, *(long*)&self->mRadioPlayList);
         cBE_getInterface_Fv(cBE_getBE(), 4);
-        sCfg_BF78 cfg = D_00535610_BF78;
+        sCfg_BF78 cfg = cBEOptionInterface_mOption_BF78;
         cSSXAudio_SetDJSpeech(self, (cfg.flags >> 17) & 1);
         if (*(long*)&self->mRadioPlayList == 0)
             return;

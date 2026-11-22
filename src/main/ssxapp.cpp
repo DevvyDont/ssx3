@@ -1087,11 +1087,11 @@ struct sSndCfg_82D0 {
     char rest[0x288 - 4];
 };
 // PORT: cBEOptionInterface_mOption is viewed with different types across the program; view bound by asm label
-extern sSndCfg_82D0 D_00535610_82D0 __asm__("cBEOptionInterface_mOption");
+extern sSndCfg_82D0 cBEOptionInterface_mOption_82D0 __asm__("cBEOptionInterface_mOption");
 
 static inline sSndCfg_82D0 Cfg_82D0()
 {
-    return D_00535610_82D0;
+    return cBEOptionInterface_mOption_82D0;
 }
 
 struct sFontEntry_82D0 {
@@ -1188,7 +1188,7 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
     cGameAnimMap_initMap(self->f94);
     self->f90 = cAnimDataBase_cAnimDataBase(cMemMan_alloc(0x3FC, str_AnimDataBase, 0, 0));
     cBE_getInterface_Fv(cBE_getBE(), 4);
-    SSXAUDIO_Init(cSSXAudio_BEAudioModeToAudioMode(cAudioInterface_bxAudio(), D_00535610_82D0.output));
+    SSXAUDIO_Init(cSSXAudio_BEAudioModeToAudioMode(cAudioInterface_bxAudio(), cBEOptionInterface_mOption_82D0.output));
     func_0031A6B8();
     func_00287410(cAudioInterface_bxAudio(), Cfg_82D0().sfxVol);
     cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), Cfg_82D0().speechVol);
@@ -1219,7 +1219,7 @@ struct sOptions_228A78 {
     unsigned int pad25 : 7;
     int data[0x284 / 4];
 };
-extern sOptions_228A78 D_00535610_228A78 __asm__("cBEOptionInterface_mOption");
+extern sOptions_228A78 cBEOptionInterface_mOption_228A78 __asm__("cBEOptionInterface_mOption");
 
 
 static inline int optLanguage_228A78(sOptions_228A78 o)
@@ -1243,7 +1243,7 @@ extern "C" void cSSXApp_initLocale(cSSXApp* self)
     sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(loc + 4);
     char* thisp = loc + vt[3].delta;
     void (**pfn)(void*, int) = &vt[3].fn;
-    (*pfn)(thisp, optLanguage_228A78(D_00535610_228A78));
+    (*pfn)(thisp, optLanguage_228A78(cBEOptionInterface_mOption_228A78));
     cFELocale_loadCommon(self->FELocale);
 }
 #endif
@@ -1298,11 +1298,11 @@ struct sOptions_228C08 {
     int pad_7 : 8;
     int data[(0x288 - 8) / 4];
 };
-extern sOptions_228C08 D_00535610_228C08 __asm__("cBEOptionInterface_mOption");
+extern sOptions_228C08 cBEOptionInterface_mOption_228C08 __asm__("cBEOptionInterface_mOption");
 
 static inline sOptions_228C08 GetOptions_228C08()
 {
-    return D_00535610_228C08;
+    return cBEOptionInterface_mOption_228C08;
 }
 
 class cGfx_228C08 {
@@ -2239,7 +2239,7 @@ struct sDrawState_229BA8 {
     short f12;
 };
 
-extern sDrawState_229BA8 D_00501420_229BA8 __asm__("sDrawState_s_defaultDrawState");
+extern sDrawState_229BA8 sDrawState_s_defaultDrawState_229BA8 __asm__("sDrawState_s_defaultDrawState");
 
 class cGfx_229BA8 {
 public:
@@ -2324,7 +2324,7 @@ extern "C" void func_00229BA8(cCrowdMan2d* crowdMan)
                 pushed = 1;
                 ((cGfx_229BA8*)ps2GraphicsMan)->top[1] = ((cGfx_229BA8*)ps2GraphicsMan)->top[0];
                 ((cGfx_229BA8*)ps2GraphicsMan)->top++;
-                *((cGfx_229BA8*)ps2GraphicsMan)->top = D_00501420_229BA8;
+                *((cGfx_229BA8*)ps2GraphicsMan)->top = sDrawState_s_defaultDrawState_229BA8;
                 ((cGfx_229BA8*)ps2GraphicsMan)->top->f10 = GetTexId_229BA8((cGfx_229BA8*)ps2GraphicsMan, 14);
                 set0_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0xC, 2, 3);
                 SetBits_229BA8(&((cGfx_229BA8*)ps2GraphicsMan)->top->f4, 0x400000, 0x400000);
@@ -3643,8 +3643,8 @@ struct sDrawState_22B008 {
     int f10;
 };
 
-extern sDrawState_22B008 D_00501420_22B008 __asm__("sDrawState_s_defaultDrawState");
-extern sMat_22B008 D_004FF1A0_22B008 __asm__("t4mat_Identity");
+extern sDrawState_22B008 sDrawState_s_defaultDrawState_22B008 __asm__("sDrawState_s_defaultDrawState");
+extern sMat_22B008 t4mat_Identity_22B008 __asm__("t4mat_Identity");
 
 class cGfx_22B008 {
 public:
@@ -4000,7 +4000,7 @@ extern "C" int cGame_render(cGame* self)
         (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_22B008*)GrMan)->GetScreenWidth(), (float)((cGfx_22B008*)GrMan)->GetScreenHeight(), 1);
     }
     ((cGfx_22B008*)GrMan)->SetViewportOrthographic(0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f, 0, 0);
-    ((cGfx_22B008*)GrMan)->SetView1(&D_004FF1A0_22B008);
+    ((cGfx_22B008*)GrMan)->SetView1(&t4mat_Identity_22B008);
     ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x300;
     ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & ~0x7C) | 0x14;
     sHud_22B008* hud = ((sHud_22B008*)self->DebugFont);
@@ -4013,7 +4013,7 @@ extern "C" int cGame_render(cGame* self)
         ((sHud_22B008*)self->DebugFont)->scale = sScale_22B008(2.0f, 2.0f);
         ((sHud_22B008*)self->DebugFont)->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);
     }
-    *((cGfx_22B008*)GrMan)->top = D_00501420_22B008;
+    *((cGfx_22B008*)GrMan)->top = sDrawState_s_defaultDrawState_22B008;
     ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x300;
     ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & ~0x7C) | 0x14;
     ((sHud_22B008*)self->DebugFont)->scale = sScale_22B008(2.0f, 2.0f);

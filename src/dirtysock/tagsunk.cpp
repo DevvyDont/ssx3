@@ -236,7 +236,7 @@ extern "C" void* cBXString_cBXString2(void* self, const char* s);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_00260F10(LobbyMan* self);
 // The shared empty-string pointer is read as const so one load serves several string inits.
-extern void* const D_004A3E90_94D0 __asm__("cBXString_EmptyString");
+extern void* const cBXString_EmptyString_94D0 __asm__("cBXString_EmptyString");
 extern char str_ps2ssx04_ea_com[];
 extern char str_StlBlock_b[];
 
@@ -284,8 +284,8 @@ extern "C" void* LobbyMan_LobbyMan(LobbyMan* self_)
     self_->unk_014 = 0;
     self_->mHaveCPAT = 0;
     self_->mFindingPlayer = 0;
-    self_->mUserName = (char*)D_004A3E90_94D0;
-    self_->mPassword = (char*)D_004A3E90_94D0;
+    self_->mUserName = (char*)cBXString_EmptyString_94D0;
+    self_->mPassword = (char*)cBXString_EmptyString_94D0;
     self_->mpLobbyApi = 0;
     self_->mpHostLookup = 0;
     self_->mpRoomList = 0;
@@ -294,16 +294,16 @@ extern "C" void* LobbyMan_LobbyMan(LobbyMan* self_)
     self_->mNumPersonas = 0;
     sBXStr_94D0* persona = (sBXStr_94D0*)(&self_->mPersonas[0]);
     for (int i = 3; i != -1; i--, persona++) {
-        persona->str = D_004A3E90_94D0;
+        persona->str = cBXString_EmptyString_94D0;
     }
-    self_->mPersona = (char*)D_004A3E90_94D0;
-    self_->mRoomName = (char*)D_004A3E90_94D0;
-    self_->mGameName = (char*)D_004A3E90_94D0;
-    self_->unk_08C = (char*)D_004A3E90_94D0;
-    self_->mHostName = (char*)D_004A3E90_94D0;
-    self_->mOppoName = (char*)D_004A3E90_94D0;
-    self_->mOpponent = (char*)D_004A3E90_94D0;
-    self_->mAuth = (char*)D_004A3E90_94D0;
+    self_->mPersona = (char*)cBXString_EmptyString_94D0;
+    self_->mRoomName = (char*)cBXString_EmptyString_94D0;
+    self_->mGameName = (char*)cBXString_EmptyString_94D0;
+    self_->unk_08C = (char*)cBXString_EmptyString_94D0;
+    self_->mHostName = (char*)cBXString_EmptyString_94D0;
+    self_->mOppoName = (char*)cBXString_EmptyString_94D0;
+    self_->mOpponent = (char*)cBXString_EmptyString_94D0;
+    self_->mAuth = (char*)cBXString_EmptyString_94D0;
     cBXString_cBXString2(&self_->mServerName, str_ps2ssx04_ea_com);
     sList_94D0* lst = (sList_94D0*)(&self_->mEventList);
     self_->mEventList.mpHead = (void*)((sListNode_94D0*)cMemMan_alloc(0xC, str_StlBlock_b, 0x20000000, 0));
@@ -2659,7 +2659,7 @@ extern char str_SPAM[];
 extern char D_004A30F0[];
 extern char str_DATE[];
 extern char str_INTRO[];
-extern void* D_004811D0_C8A8[] __asm__("online_AcctLockedEvent_vtbl");
+extern void* online_AcctLockedEvent_vtbl_C8A8[] __asm__("online_AcctLockedEvent_vtbl");
 extern void* online_ErrorEvent_vtbl[];
 static inline void post_C8A8(char* self, void* msg)
 {
@@ -2756,7 +2756,7 @@ extern "C" void LobbyMan_onauthentication(LobbyMan* self, LobbyApiMsgT* msg)
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->unk_0C, str_INTRO), intro, 0x100, D_004A2F40);
     int *event = (int *) operator new(20, str_NetEvent, 0x20000000, 0);
     event[0] = 258;
-    *((void ***) (((char *) event) + 0x4)) = D_004811D0_C8A8;
+    *((void ***) (((char *) event) + 0x4)) = online_AcctLockedEvent_vtbl_C8A8;
     event[2] = 0x6C6F636B;
     cBXString_cBXString2(event + 3, lockDate);
     cBXString_cBXString2(event + 4, intro);

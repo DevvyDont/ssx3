@@ -75,7 +75,7 @@ struct sUIVec48_34C0 {
 };
 
 // The unit declares t3vect_Zero later as a plain vec3; bind this view by asm label.
-extern sUIVec3_34C0 D_004FF0D8_34C0 __asm__("t3vect_Zero");
+extern sUIVec3_34C0 t3vect_Zero_34C0 __asm__("t3vect_Zero");
 
 
 
@@ -109,7 +109,7 @@ extern "C" void cUIVector_setUIData(cUIVector* uiVector, void* pUIBase)
         sUIVec3b_34C0** pc = (sUIVec3b_34C0**)&self->mpVertexPositionRender;
         *pc = new (str_UIVectorVtxRdr, 0x100, 0) sUIVec3b_34C0[pIYFVector->mNumVertices];
         for (int i = 0; i < pIYFVector->mNumVertices; i++)
-            ((sUIVec3_34C0*)self->mpVertexPosition)[i] = D_004FF0D8_34C0;
+            ((sUIVec3_34C0*)self->mpVertexPosition)[i] = t3vect_Zero_34C0;
     }
     if (!(*(sUIVecFlags_34C0*)&self->mAttrVector).mFill)
     {

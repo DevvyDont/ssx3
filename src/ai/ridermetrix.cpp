@@ -338,7 +338,7 @@ struct sRaceSettings_117718 {
     signed char mode;       // 0x48
     signed char online;     // 0x49
 };
-extern sRaceSettings_117718 D_00535BC8_117718 __asm__("cBENewRaceInterface_newRace");
+extern sRaceSettings_117718 cBENewRaceInterface_newRace_117718 __asm__("cBENewRaceInterface_newRace");
 
 /**
  * Cashes in the current combo chain: adds its points to the run totals and shows it, then resets the chain.
@@ -370,8 +370,8 @@ extern "C" void cRiderMetrix_earnComboChain(cRiderMetrix* self_)
                 self_->Totals.LongestCombo = self_->NumCombos;
             cBE_getInterface_Fv(cBE_getBE(), 0);
             int offline = 0;
-            if (D_00535BC8_117718.mode == 4)
-                offline = D_00535BC8_117718.online == 0;
+            if (cBENewRaceInterface_newRace_117718.mode == 4)
+                offline = cBENewRaceInterface_newRace_117718.online == 0;
             if (!offline) {
                 cRiderMetrix_addHUDfx1_f(((char*)self_), 38, self_->ComboPoints, 1.5f, self_->NumCombos);
                 cRiderMetrix_addHUDfx1_f(((char*)self_), 0x18, self_->ComboPoints, 0.7f, 0);
@@ -1566,7 +1566,7 @@ struct sGameSettings_119608 {
     signed char eventKind; // 0x48: 4 = free ride
     signed char gameType;  // 0x49: 0 = Conquer the Mountain
 };
-extern sGameSettings_119608 D_00535BC8_119608 __asm__("cBENewRaceInterface_newRace");
+extern sGameSettings_119608 cBENewRaceInterface_newRace_119608 __asm__("cBENewRaceInterface_newRace");
 
 /**
  * Adds trick points to the score (+0x198), or turns them into cash in a career free ride.
@@ -1582,7 +1582,7 @@ extern "C" float cRiderMetrix_evAddPoints(cRiderMetrix* self, int pts)
 {
     int points = (int)(pts * self->mPointsMultiplier + 0.5f);
     cBE_getInterface(cBE_getBE(), 0);
-    int career = D_00535BC8_119608.eventKind == 4 && D_00535BC8_119608.gameType == 0;
+    int career = cBENewRaceInterface_newRace_119608.eventKind == 4 && cBENewRaceInterface_newRace_119608.gameType == 0;
     if (!career)
     {
         cRiderMetrix_addHUDfx1(self, 35, points, 0, 2.5f);

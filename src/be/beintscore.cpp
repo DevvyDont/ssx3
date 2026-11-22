@@ -162,7 +162,7 @@ extern "C" char* strcpy(char* dst, const char* src);
 
 struct sProfileChar_154AB8 { char data[0xF88]; };
 extern "C" int cBECharProfileDB_updateScoreStats(sProfileChar_154AB8* self, int event, int mode, unsigned int value);
-extern sProfileChar_154AB8 D_004A6CA8_154AB8[][10] __asm__("cBELibrary_profileLib");
+extern sProfileChar_154AB8 cBELibrary_profileLib_154AB8[][10] __asm__("cBELibrary_profileLib");
 
 struct sRaceStats_154AB8 { int w[0xAC / 4]; };
 struct sScoreSlot_154AB8 {
@@ -185,7 +185,7 @@ struct sRaceSettings_154AB8 {
     signed char b48;    // 0x48
     signed char b49;    // 0x49
 };
-extern sRaceSettings_154AB8 D_005305B0_154AB8 __asm__("cBELibrary_raceDB");
+extern sRaceSettings_154AB8 cBELibrary_raceDB_154AB8 __asm__("cBELibrary_raceDB");
 struct sRaceGlobal_154AB8 {
     char pad_0x00[0x34];
     int numHumans;      // 0x34
@@ -196,7 +196,7 @@ struct sEvent_154AB8 {
     int id;
     char pad_0x4[0x60];
 };
-extern sEvent_154AB8 D_0043D950_154AB8[] __asm__("cBELibrary_locationDB");
+extern sEvent_154AB8 cBELibrary_locationDB_154AB8[] __asm__("cBELibrary_locationDB");
 
 /**
  * Records a human rider's finished-event stats and score: keeps the stats, enters the score in the event's top-5 table,
@@ -232,13 +232,13 @@ extern "C" void cBEScoreInterface_processEventRiderStats(sScore_154AB8* self, in
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int charID = cBELibrary_getCharacterID(rider);
     mode = cBENewRaceInterface_newRace.cGameEvent;
-    int event = D_0043D950_154AB8[D_005305B0_154AB8.event].id;
-    pc = &D_004A6CA8_154AB8[profile][charID];
+    int event = cBELibrary_locationDB_154AB8[cBELibrary_raceDB_154AB8.event].id;
+    pc = &cBELibrary_profileLib_154AB8[profile][charID];
     self->best[profile] = 0;
     self->rank[profile] = -1;
     if (event == 22)
         event = 0;
-    if (D_005305B0_154AB8.b48 == 0 || D_005305B0_154AB8.b48 == 5) {
+    if (cBELibrary_raceDB_154AB8.b48 == 0 || cBELibrary_raceDB_154AB8.b48 == 5) {
         timed = 1;
         score = (int)(score * (1.0f / 60.0f));
     }
@@ -274,7 +274,7 @@ extern "C" void cBEScoreInterface_processEventRiderStats(sScore_154AB8* self, in
         cBEScoreInterface_processRiderBest(rider, (int)stats, -1, score);
     else
         cBEScoreInterface_processRiderBest(rider, (int)stats, score, -1);
-    if (D_005305B0_154AB8.b49 == 0)
+    if (cBELibrary_raceDB_154AB8.b49 == 0)
         self->best[profile] = cBECharProfileDB_updateScoreStats(pc, event, mode, score);
 }
 #endif
@@ -653,13 +653,13 @@ struct sRaceSettings_155420 {
     signed char b49;    // 0x49
     signed char mode;   // 0x4A
 };
-extern sRaceSettings_155420 D_005305B0_r155420 __asm__("cBELibrary_raceDB");
+extern sRaceSettings_155420 cBELibrary_raceDB_r155420 __asm__("cBELibrary_raceDB");
 
 struct sEvent_155420 {
     int id;
     char pad_0x4[0x60];
 };
-extern sEvent_155420 D_0043D950_r155420[] __asm__("cBELibrary_locationDB");
+extern sEvent_155420 cBELibrary_locationDB_r155420[] __asm__("cBELibrary_locationDB");
 
 struct sRaceStats_155420 {
     char pad_0x00[0x18];
@@ -705,7 +705,7 @@ struct sRecord_155420 {
 extern "C" void cBEScoreInterface_processRiderBest(int rider, int statsArg, int eventPoints, int eventTime)
 {
     sRaceStats_155420* stats = (sRaceStats_155420*)statsArg;
-    sRaceSettings_155420* rs = &D_005305B0_r155420;
+    sRaceSettings_155420* rs = &cBELibrary_raceDB_r155420;
     if (rs->b49 != 0)
         return;
     int profile = cBELibrary_getProfileIndex(rider);
@@ -713,7 +713,7 @@ extern "C" void cBEScoreInterface_processRiderBest(int rider, int statsArg, int 
         return;
     int charID = cBELibrary_getCharacterID(rider);
     char* rec = (char*)cBELibrary_profileLib + profile * 0x9B50 + charID * 3976;
-    int event = D_0043D950_r155420[rs->event].id;
+    int event = cBELibrary_locationDB_r155420[rs->event].id;
     int kind = rs->b48;
     int mode = rs->mode;
     if (event == 22)

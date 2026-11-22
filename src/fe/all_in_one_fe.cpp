@@ -2790,7 +2790,7 @@ struct sSettings_00C0 {
     unsigned int pad1 : 12;
     int rest[0xA1];
 };
-extern sSettings_00C0 D_00535610_00C0 __asm__("cBEOptionInterface_mOption");
+extern sSettings_00C0 cBEOptionInterface_mOption_00C0 __asm__("cBEOptionInterface_mOption");
 extern char str_KM_H[];
 extern char str_MPH[];
 extern char D_004A2138[];
@@ -2882,7 +2882,7 @@ extern "C" void cOVStateHUD1P_renderSpeed(cOVStateHUD1P* self, char* obj, cRider
     t2Vector drawPos;
     t2Vector size;
     cBE_getInterface_Fv(cBE_getBE(), 4);
-    settings = D_00535610_00C0;
+    settings = cBEOptionInterface_mOption_00C0;
     // Both unit labels are taken up front: the target computes "MPH" before the velocity call and keeps it in
     // $30 across that call (a literal in the branch would be materialised inside it).
     char* kmh = str_KM_H;

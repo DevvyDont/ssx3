@@ -522,7 +522,7 @@ struct sRmF5_C698 {
 
 extern "C" sRmWorld_C698** cObjectInterface_getWorld();
 extern "C" void cRailModifier_getInvMat_C698(void* self, sRmMat44* m) __asm__("cRailModifier_getInvMat");
-extern t4Vector D_004FF120_C698 __asm__("t4vect_Zero");
+extern t4Vector t4vect_Zero_C698 __asm__("t4vect_Zero");
 extern const sRmF5_C698 D_0048E7D8;
 extern const sRmF5_C698 D_0048E7F0;
 
@@ -731,8 +731,8 @@ static inline void resetHit_C698(tIntersectInfo* h)
     h->Face = -1;
     h->Seg = -1;
     h->Stype = -1;
-    h->Ivel = D_004FF120_C698;
-    h->Iangvel = D_004FF120_C698;
+    h->Ivel = t4vect_Zero_C698;
+    h->Iangvel = t4vect_Zero_C698;
     h->T = 0;
     h->u = 0;
     h->v = 0;
@@ -2960,7 +2960,7 @@ struct sRmMtx_35FC20 {
     float m[4][4];
 } __attribute__((aligned(16)));
 
-extern sRmMtx_35FC20 D_004FF1A0_35FC20[] __asm__("t4mat_Identity");
+extern sRmMtx_35FC20 t4mat_Identity_35FC20[] __asm__("t4mat_Identity");
 
 /**
  * Builds the texture matrix of a UV-scroll modifier: a rotation by Angle about Axis (identity when Angle is 0) whose
@@ -3014,7 +3014,7 @@ extern "C" sRmMtx_35FC20* cUVScrollModifier_getTextureMat(cUVScrollModifier* sel
             "sqc2      $vf4, 0x30(%0)\n"
             ".set reorder\n"
             :
-            : "r"(mat), "r"(D_004FF1A0_35FC20)
+            : "r"(mat), "r"(t4mat_Identity_35FC20)
             : "memory");
     }
     mat->m[3][0] = self->UV[0];
@@ -8409,8 +8409,8 @@ extern "C" void func_00362CC8(cPS2DeferManager* self);
 
 
 
-extern cPS2GraphicsMan* D_004A5B80_29B8 __asm__("cGraphicsMan_TheGraphicsMan");
-extern sDrawState D_00501420_29B8 __asm__("sDrawState_s_defaultDrawState");
+extern cPS2GraphicsMan* cGraphicsMan_TheGraphicsMan_29B8 __asm__("cGraphicsMan_TheGraphicsMan");
+extern sDrawState sDrawState_s_defaultDrawState_29B8 __asm__("sDrawState_s_defaultDrawState");
 
 static inline void set0_29B8(cPS2GraphicsMan* ctx, unsigned int mask, int shift, unsigned int v)
 {
@@ -8447,8 +8447,8 @@ extern "C" void func_003629B8(cPS2DeferManager* self)
 {
     self->mNumStaticStates = 0;
     func_00362CC8(self);
-    cPS2GraphicsMan* ctx = D_004A5B80_29B8;
-    *ctx->m_pCurrentDrawState = D_00501420_29B8;
+    cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan_29B8;
+    *ctx->m_pCurrentDrawState = sDrawState_s_defaultDrawState_29B8;
     set1_29B8(ctx, 0x3, 0, 0);
     set2_29B8(ctx, 0x1FFFFC00, 10, 0);
     set1_29B8(ctx, 0x1800000, 23, 1);

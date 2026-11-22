@@ -1747,7 +1747,7 @@ extern "C" int cUILocaleInterface_getStringByHash(void) {
 INCLUDE_ASM("main/all_in_one_main", cFECustom_cFECustom1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void* D_0046D810_CC60[] __asm__("cFECustom_vtbl");
+extern void* cFECustom_vtbl_CC60[] __asm__("cFECustom_vtbl");
 
 /**
  * Constructs an object with cFECustom's vtable: zeroes the word at +0x0 and stores cFECustom_vtbl at +0x4.
@@ -1759,7 +1759,7 @@ extern void* D_0046D810_CC60[] __asm__("cFECustom_vtbl");
  */
 extern "C" void *cFECustom_cFECustom1(void *feCustom) {
     (*(int *)((char*)(feCustom) + (0))) = 0;
-    (*(void ***)((char*)(feCustom) + (4))) = D_0046D810_CC60;
+    (*(void ***)((char*)(feCustom) + (4))) = cFECustom_vtbl_CC60;
     return feCustom;
 }
 #endif
@@ -2320,7 +2320,7 @@ extern "C" void AbortMenu__AbortMenu(int menu, int flags) {
 INCLUDE_ASM("main/all_in_one_main", cFEInput_cFEInput);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void* D_0046D1D0_D508[] __asm__("cFEInput_vtbl");
+extern void* cFEInput_vtbl_D508[] __asm__("cFEInput_vtbl");
 
 /**
  * Constructs a front-end input reader: no key ready, no keys, no input device.
@@ -2333,7 +2333,7 @@ extern void* D_0046D1D0_D508[] __asm__("cFEInput_vtbl");
  */
 extern "C" void *cFEInput_cFEInput(void *self) {
     (*(signed char *)((char*)(self) + (4))) = 0;
-    (*(void ***)((char*)(self) + (8))) = D_0046D1D0_D508;
+    (*(void ***)((char*)(self) + (8))) = cFEInput_vtbl_D508;
     (*(int *)((char*)(self) + (0x18))) = 0;
     (*(int *)((char*)(self) + (0xC))) = 0;
     (*(int *)((char*)(self) + (0x10))) = 0;
@@ -4026,7 +4026,7 @@ extern "C" int cFEMemCard_callbackIsRetryPressed(void) {
 INCLUDE_ASM("main/all_in_one_main", cFEMemCard_isInstance);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_004A2028_DDC8 __asm__("cFEMemCard_mInstance");
+extern int cFEMemCard_mInstance_DDC8 __asm__("cFEMemCard_mInstance");
 
 /**
  * Tells whether a memory-card screen exists: returns cFEMemCard_mInstance != 0.
@@ -4034,7 +4034,7 @@ extern int D_004A2028_DDC8 __asm__("cFEMemCard_mInstance");
  * @return 1 when cFEMemCard_mInstance is set, otherwise 0
  */
 extern "C" int cFEMemCard_isInstance(void) {
-    return D_004A2028_DDC8 != 0;
+    return cFEMemCard_mInstance_DDC8 != 0;
 }
 #endif
 
@@ -4162,7 +4162,7 @@ INCLUDE_ASM("main/all_in_one_main", cFEPopupConfirm__cFEPopupConfirm);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cScreenPopup__cScreenPopup_DEB8(void*) __asm__("cScreenPopup__cScreenPopup");
-extern void* D_0046C890_DEB8[] __asm__("cFEPopupConfirm_vtbl");
+extern void* cFEPopupConfirm_vtbl_DEB8[] __asm__("cFEPopupConfirm_vtbl");
 
 /**
  * Destroys a confirm popup: restores the cFEPopupConfirm vtable and runs the cScreenPopup destructor.
@@ -4171,7 +4171,7 @@ extern void* D_0046C890_DEB8[] __asm__("cFEPopupConfirm_vtbl");
  * cScreenPopup__cScreenPopup.
  */
 extern "C" void cFEPopupConfirm__cFEPopupConfirm(cFEPopupConfirm* self) {
-    self->mVtbl = D_0046C890_DEB8;
+    self->mVtbl = cFEPopupConfirm_vtbl_DEB8;
     cScreenPopup__cScreenPopup_DEB8(self);
 }
 #endif
@@ -4485,7 +4485,7 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsDeviceSelect_cFEStateOptionsD
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *cFEMemCard_cFEMemCard_E178(void *, int, int) __asm__("cFEMemCard_cFEMemCard2");
-extern int D_0046C228_E178[] __asm__("cFEStateOptionsDeviceSelect_vtbl");
+extern int cFEStateOptionsDeviceSelect_vtbl_E178[] __asm__("cFEStateOptionsDeviceSelect_vtbl");
 
 /**
  * Constructs the memory-card device select state with no engine: runs cFEMemCard_cFEMemCard2 with null engine and type
@@ -4495,7 +4495,7 @@ extern int D_0046C228_E178[] __asm__("cFEStateOptionsDeviceSelect_vtbl");
  */
 extern "C" void *cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect(cFEStateOptionsDeviceSelect* self) {
     cFEMemCard_cFEMemCard_E178(self, 0, 0);
-    self->mVtbl = (void**)D_0046C228_E178;
+    self->mVtbl = (void**)cFEStateOptionsDeviceSelect_vtbl_E178;
     return ((void*)self);
 }
 #endif
@@ -4568,7 +4568,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE240);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *cFEMemCard_cFEMemCard_E240(void *, int, int) __asm__("cFEMemCard_cFEMemCard2");
-extern int D_0046BFD0_E240[] __asm__("cFEStateProfileLoad_vtbl");
+extern int cFEStateProfileLoad_vtbl_E240[] __asm__("cFEStateProfileLoad_vtbl");
 
 /**
  * Constructs the profile load/save state with no engine: runs cFEMemCard_cFEMemCard2 with null engine and type 0, then
@@ -4580,7 +4580,7 @@ extern int D_0046BFD0_E240[] __asm__("cFEStateProfileLoad_vtbl");
  */
 extern "C" void *func_001DE240(cFEStateProfileLoad* self) {
     cFEMemCard_cFEMemCard_E240(self, 0, 0);
-    self->mVtbl = (void**)D_0046BFD0_E240;
+    self->mVtbl = (void**)cFEStateProfileLoad_vtbl_E240;
     return ((void*)self);
 }
 #endif
@@ -5103,7 +5103,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE558);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *cUIState_cUIState_E558(void *, int) __asm__("cUIState_cUIState");
-extern int D_0046BC58_E558[] __asm__("cFEStateBackground_vtbl");
+extern int cFEStateBackground_vtbl_E558[] __asm__("cFEStateBackground_vtbl");
 
 /**
  * Constructs the front-end background state with no engine (the default constructor): runs cUIState's constructor
@@ -5113,7 +5113,7 @@ extern int D_0046BC58_E558[] __asm__("cFEStateBackground_vtbl");
  */
 extern "C" void *func_001DE558(cFEStateBackground* self) {
     cUIState_cUIState_E558(self, 0);
-    self->mVtbl = (void**)D_0046BC58_E558;
+    self->mVtbl = (void**)cFEStateBackground_vtbl_E558;
     return ((void*)self);
 }
 #endif
@@ -5166,7 +5166,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE5F0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *cUIState_cUIState_E5F0(void *, int) __asm__("cUIState_cUIState");
-extern int D_0046BB88_E5F0[] __asm__("cFEStateTransition_vtbl");
+extern int cFEStateTransition_vtbl_E5F0[] __asm__("cFEStateTransition_vtbl");
 
 /**
  * Constructs the screen transition state with no engine (the default constructor): runs cUIState's constructor
@@ -5178,7 +5178,7 @@ extern int D_0046BB88_E5F0[] __asm__("cFEStateTransition_vtbl");
  */
 extern "C" void *func_001DE5F0(cFEStateTransition* self) {
     cUIState_cUIState_E5F0(self, 0);
-    self->mVtbl = (void**)D_0046BB88_E5F0;
+    self->mVtbl = (void**)cFEStateTransition_vtbl_E5F0;
     return ((void*)self);
 }
 #endif
@@ -5188,7 +5188,7 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateTransition_cFEStateTransition);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *cUIState_cUIState_E628(void *) __asm__("cUIState_cUIState");
-extern int D_0046BB88_E628[] __asm__("cFEStateTransition_vtbl");
+extern int cFEStateTransition_vtbl_E628[] __asm__("cFEStateTransition_vtbl");
 
 /**
  * Constructs the screen transition state for a UI engine.
@@ -5200,7 +5200,7 @@ extern int D_0046BB88_E628[] __asm__("cFEStateTransition_vtbl");
  */
 extern "C" void *cFEStateTransition_cFEStateTransition(cFEStateTransition* self) {
     cUIState_cUIState_E628(self);
-    self->mVtbl = (void**)D_0046BB88_E628;
+    self->mVtbl = (void**)cFEStateTransition_vtbl_E628;
     self->mpSnow = 0;
     self->mpWhite = 0;
     return ((void*)self);
@@ -5361,7 +5361,7 @@ extern "C" void* cUIState_cUIState1_E7B0(void* self, int a1, int a2) __asm__("cU
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
 extern void* cFEStateNet_vtbl[];
-extern char D_004A1390_E7B0[] __asm__("str_sp");
+extern char str_sp_E7B0[] __asm__("str_sp");
 extern char str_StlBlock[];
 
 struct sListNode_E7B0 {
@@ -5400,7 +5400,7 @@ extern "C" void* cFEStateNet_cFEStateNet1(cFEStateNet* self)
     self->unk_6B8 = 0;
     self->unk_6BC = 2;
     self->mVtbl = cFEStateNet_vtbl;
-    cBXString_cBXString2(&self->unk_6C0, D_004A1390_E7B0);
+    cBXString_cBXString2(&self->unk_6C0, str_sp_E7B0);
     self->mMsgList.mpNode = (void*)((sListNode_E7B0*)cMemMan_alloc(0xC, str_StlBlock, 0x20000000, 0));
     msgList->head->next = (sListNode_E7B0*)self->mMsgList.mpNode;
     msgList->head->prev = (sListNode_E7B0*)self->mMsgList.mpNode;
@@ -5533,7 +5533,7 @@ INCLUDE_ASM("main/all_in_one_main", cFEBlankPopup_cFEBlankPopup1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *cFEStateNet_cFEStateNet_E8C8(void *, int, int) __asm__("cFEStateNet_cFEStateNet");
-extern int D_0046B6F8_E8C8[] __asm__("cFEBlankPopup_vtbl");
+extern int cFEBlankPopup_vtbl_E8C8[] __asm__("cFEBlankPopup_vtbl");
 
 /**
  * Constructs a blank online popup with no engine and no parent (the default constructor): runs cFEStateNet_cFEStateNet
@@ -5543,7 +5543,7 @@ extern int D_0046B6F8_E8C8[] __asm__("cFEBlankPopup_vtbl");
  */
 extern "C" void *cFEBlankPopup_cFEBlankPopup1(cFEStateNet* self) {
     cFEStateNet_cFEStateNet_E8C8(self, 0, 0);
-    self->mVtbl = (void**)D_0046B6F8_E8C8;
+    self->mVtbl = (void**)cFEBlankPopup_vtbl_E8C8;
     return ((void*)self);
 }
 #endif
@@ -5626,7 +5626,7 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateLegal_cFEStateLegal);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *cUIState_cUIState_E990(void *, int) __asm__("cUIState_cUIState");
-extern int D_0046B4A0_E990[] __asm__("cFEStateLegal_vtbl");
+extern int cFEStateLegal_vtbl_E990[] __asm__("cFEStateLegal_vtbl");
 
 /**
  * Constructs the legal screen state with no engine: runs cUIState's constructor (cUIState_cUIState) with a null engine,
@@ -5636,7 +5636,7 @@ extern int D_0046B4A0_E990[] __asm__("cFEStateLegal_vtbl");
  */
 extern "C" void *cFEStateLegal_cFEStateLegal(cFEStateLegal* self) {
     cUIState_cUIState_E990(self, 0);
-    self->mVtbl = (void**)D_0046B4A0_E990;
+    self->mVtbl = (void**)cFEStateLegal_vtbl_E990;
     return ((void*)self);
 }
 #endif

@@ -621,7 +621,7 @@ INCLUDE_ASM("object/flexrailnode", cFloatRailNode_updateNodes);
 extern "C" float cObjectInterface_getUpdateTime();
 extern "C" void cFloatRailNode_getPosition(cFloatRailNode* self, tFloatRailNode* node);
 // View (cFloatRailNode_cFloatRailNode earlier in this unit declares it with its own type).
-extern t4Vector D_004FF120_98E8 __asm__("t4vect_Zero");
+extern t4Vector t4vect_Zero_98E8 __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline t4Vector vu0Sub_98E8(const t4Vector& a, const t4Vector& b)
@@ -703,7 +703,7 @@ extern "C" void cFloatRailNode_updateNodes(cFloatRailNode* self)
         vu0AddEq_98E8(acc, vu0Scale_98E8((*(&n->Vel)), -self->LDamp));
         vu0AddEq_98E8((*(&n->Pos)), vu0Scale_98E8((*(&n->Vel)), dt));
         vu0AddEq_98E8((*(&n->Vel)), vu0Scale_98E8(acc, dt));
-        (*(&n->Force)) = D_004FF120_98E8;
+        (*(&n->Force)) = t4vect_Zero_98E8;
     }
 }
 #endif
@@ -750,7 +750,7 @@ extern char cSpringRailNode_vtbl[];
 extern char str_SpringRailNodes[];
 
 struct sFrV_9B48 { float x, y, z, w; } __attribute__((aligned(16)));
-extern sFrV_9B48 D_004FF120_9B48 __asm__("t4vect_Zero");
+extern sFrV_9B48 t4vect_Zero_9B48 __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (a - b).
 static inline sFrV_9B48 Sub_9B48(const sFrV_9B48& a, const sFrV_9B48& b)
@@ -820,10 +820,10 @@ extern "C" void* cSpringRailNode_cSpringRailNode(cSpringRailNode* self, void* in
     for (int j = 0; j < self->NumNodes; j++) {
         ((sFlexElem_9B48*)self->Nodes)[j].link.id = refs[j].id;
         ((sFlexElem_9B48*)self->Nodes)[j].bone = bones[j];
-        ((sFlexElem_9B48*)self->Nodes)[j].v30 = D_004FF120_9B48;
-        ((sFlexElem_9B48*)self->Nodes)[j].v40 = D_004FF120_9B48;
-        ((sFlexElem_9B48*)self->Nodes)[j].v20 = D_004FF120_9B48;
-        ((sFlexElem_9B48*)self->Nodes)[j].dir = D_004FF120_9B48;
+        ((sFlexElem_9B48*)self->Nodes)[j].v30 = t4vect_Zero_9B48;
+        ((sFlexElem_9B48*)self->Nodes)[j].v40 = t4vect_Zero_9B48;
+        ((sFlexElem_9B48*)self->Nodes)[j].v20 = t4vect_Zero_9B48;
+        ((sFlexElem_9B48*)self->Nodes)[j].dir = t4vect_Zero_9B48;
         cSpringRailNode_getPosition(self, (tSpringRailNode*)&((sFlexElem_9B48*)self->Nodes)[j]);
     }
     for (int k = 0; k < self->NumNodes - 1; k++) {
@@ -1368,7 +1368,7 @@ struct sV4Slot_A8C8 {
 };
 
 // PORT: the unit declares t4vect_Zero with another vector type; alias it here.
-extern sV4_A8C8 D_004FF120_A8C8 __asm__("t4vect_Zero");
+extern sV4_A8C8 t4vect_Zero_A8C8 __asm__("t4vect_Zero");
 
 struct sFrElem_A8C8 {
     sV4_A8C8 pos;               // 0x00
@@ -1515,7 +1515,7 @@ extern "C" void cSpringRailNode_updateNodes(sFrRailA8C8* self)
         vu0AddEq_A8C8(self->elems[i].posA, vu0Scale_A8C8(self->elems[i].posB, dt));
         vu0AddEq_A8C8(self->elems[i].posB, angVelStep);
     }
-    sV4_A8C8 acc = D_004FF120_A8C8;
+    sV4_A8C8 acc = t4vect_Zero_A8C8;
     for (int i = 0; i < self->count - 1; i++) {
         vu0AddEq_A8C8(acc, self->elems[i].posA);
         float len = vu0Len_A8C8(self->elems[i].vel);
@@ -1523,7 +1523,7 @@ extern "C" void cSpringRailNode_updateNodes(sFrRailA8C8* self)
         self->elems[i + 1].pos = vu0Add_A8C8(self->elems[i].pos, segVec);
     }
     for (int i = 0; i < self->count; i++) {
-        self->elems[i].force = D_004FF120_A8C8;
+        self->elems[i].force = t4vect_Zero_A8C8;
     }
 }
 #endif

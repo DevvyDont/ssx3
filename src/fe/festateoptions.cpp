@@ -462,10 +462,10 @@ struct sGameCfg_188F28 {
     char pad7[0x288 - 7];
 };
 // PORT: cBEOptionInterface_mOption is viewed with different types across the unit; view bound by asm label
-extern sGameCfg_188F28 D_00535610_188F28 __asm__("cBEOptionInterface_mOption");
+extern sGameCfg_188F28 cBEOptionInterface_mOption_188F28 __asm__("cBEOptionInterface_mOption");
 
 struct sOptionIface_188F28 {
-    sGameCfg_188F28 getOptions() { return D_00535610_188F28; }
+    sGameCfg_188F28 getOptions() { return cBEOptionInterface_mOption_188F28; }
 };
 
 class cUIObj_188F28 {
@@ -621,7 +621,7 @@ struct sGameCfg_189610 {
     char pad7[0x288 - 7];
 };
 // PORT: cBEOptionInterface_mOption is viewed with different types across the unit; view bound by asm label
-extern sGameCfg_189610 D_00535610_189610 __asm__("cBEOptionInterface_mOption");
+extern sGameCfg_189610 cBEOptionInterface_mOption_189610 __asm__("cBEOptionInterface_mOption");
 
 struct sVE_189610a {
     short delta;
@@ -642,7 +642,7 @@ static inline int GetOpt_189610(char* w, int i)
 
 static inline sGameCfg_189610 Cfg_189610()
 {
-    return D_00535610_189610;
+    return cBEOptionInterface_mOption_189610;
 }
 
 /**
@@ -681,7 +681,7 @@ extern "C" void cFEStateOptionsGame_onPopupEvent(cFEStateOptionsGame* self, cUIS
             if (GetOpt_189610(((char*)popup), 2)) {
                 int hzOffset = GetOpt_189610(((char*)popup), 0);
                 int vtOffset = GetOpt_189610(((char*)popup), 1);
-                sGameCfg_189610* gameOptions = &D_00535610_189610;
+                sGameCfg_189610* gameOptions = &cBEOptionInterface_mOption_189610;
                 D_004A14D0 = 1;
                 gameOptions->f6 = hzOffset;
                 gameOptions->f5 = vtOffset;
@@ -778,7 +778,7 @@ struct sGameCfg_189980 {
     char rest[0x288 - 4];
 };
 // PORT: cBEOptionInterface_mOption is viewed with different types across the unit; view bound by asm label
-extern sGameCfg_189980 D_00535610_189980 __asm__("cBEOptionInterface_mOption");
+extern sGameCfg_189980 cBEOptionInterface_mOption_189980 __asm__("cBEOptionInterface_mOption");
 
 struct sVE_189980a {
     short delta;
@@ -866,7 +866,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cUI
         {
             char* locale = (char*)SSXApp->FELocale;
             sVE_189980b* vt = *(sVE_189980b**)(locale + 4);
-            vt[3].fn(locale + vt[3].delta, D_00535610_189980.iLanguage);
+            vt[3].fn(locale + vt[3].delta, cBEOptionInterface_mOption_189980.iLanguage);
         }
         Refresh_189980((self));
         char* eng = *(char**)(char*)self->mpEngine;
@@ -879,7 +879,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cUI
     }
     case 9:
         if (((signed char*)&self->mLanguageSlot)[0] >= 0 && Is_189980(widget->mHashName, D_00440FD8[((signed char*)&self->mLanguageSlot)[0]])) {
-            D_00535610_189980.iLanguage = cUIListBox_getCurrentEntryData(((char*)widget));
+            cBEOptionInterface_mOption_189980.iLanguage = cUIListBox_getCurrentEntryData(((char*)widget));
             char* locale = (char*)SSXApp->FELocale;
             sVE_189980b* vt = *(sVE_189980b**)(locale + 4);
             char* thisp = locale + vt[3].delta;
@@ -889,10 +889,10 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cUI
         }
         if (((signed char*)&self->mLanguageSlot)[1] >= 0 && Is_189980(widget->mHashName, D_00440FD8[((signed char*)&self->mLanguageSlot)[1]])) {
             bool on = *(unsigned char*)(((char*)widget) + 0x319);
-            D_00535610_189980.iUseMetricUnits = on;
+            cBEOptionInterface_mOption_189980.iUseMetricUnits = on;
         }
         if (((signed char*)&self->mLanguageSlot)[2] >= 0 && Is_189980(widget->mHashName, D_00440FD8[((signed char*)&self->mLanguageSlot)[2]])) {
-            D_00535610_189980.iUseWidescreen = *(unsigned char*)(((char*)widget) + 0x319);
+            cBEOptionInterface_mOption_189980.iUseWidescreen = *(unsigned char*)(((char*)widget) + 0x319);
         }
         cSSXApp_activateBEOptions(SSXApp);
         D_004A14D0 = 1;
@@ -926,10 +926,10 @@ struct sGameCfg_189D60 {
     char pad7[0x288 - 7];
 };
 // PORT: cBEOptionInterface_mOption is viewed with different types across the unit; view bound by asm label
-extern sGameCfg_189D60 D_00535610_189D60 __asm__("cBEOptionInterface_mOption");
+extern sGameCfg_189D60 cBEOptionInterface_mOption_189D60 __asm__("cBEOptionInterface_mOption");
 
 struct sOptionIface_189D60 {
-    sGameCfg_189D60 getOptions() { return D_00535610_189D60; }
+    sGameCfg_189D60 getOptions() { return cBEOptionInterface_mOption_189D60; }
 };
 
 struct sVE_189D60a {
@@ -1118,7 +1118,7 @@ struct sSndCfg_18A3D8 {
     char rest[0x288 - 4];
 };
 // PORT: cBEOptionInterface_mOption is viewed with different types across the unit; view bound by asm label
-extern sSndCfg_18A3D8 D_00535610_18A3D8 __asm__("cBEOptionInterface_mOption");
+extern sSndCfg_18A3D8 cBEOptionInterface_mOption_18A3D8 __asm__("cBEOptionInterface_mOption");
 
 struct sVE_18A3D8 {
     short delta;
@@ -1139,7 +1139,7 @@ static inline int GetOpt_18A3D8(char* w, int i)
 
 static inline sSndCfg_18A3D8 Cfg_18A3D8()
 {
-    return D_00535610_18A3D8;
+    return cBEOptionInterface_mOption_18A3D8;
 }
 
 /**
@@ -1167,7 +1167,7 @@ extern "C" void cFEStateOptionsSound_onPopupEvent(cFEStateOptionsSound* self, cU
         if (Is_18A3D8(popup->mHashName, str_111resetopts)) {
             if (GetOpt_18A3D8(((char*)popup), 2)) {
                 cBEOptionInterface_defaultSound(iface);
-                cFEStateOptionsSound_setSoundMode(self, D_00535610_18A3D8.output);
+                cFEStateOptionsSound_setSoundMode(self, cBEOptionInterface_mOption_18A3D8.output);
                 func_00287410(cAudioInterface_bxAudio(), Cfg_18A3D8().sfxVol);
                 cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), Cfg_18A3D8().speechVol);
                 func_00287520(cAudioInterface_bxAudio(), Cfg_18A3D8().musicVol);
@@ -1280,7 +1280,7 @@ struct sSndCfg_18A8D0 {
     char rest[0x288 - 4];
 };
 // PORT: cBEOptionInterface_mOption is viewed with different types across the unit; view bound by asm label
-extern sSndCfg_18A8D0 D_00535610_18A8D0 __asm__("cBEOptionInterface_mOption");
+extern sSndCfg_18A8D0 cBEOptionInterface_mOption_18A8D0 __asm__("cBEOptionInterface_mOption");
 
 
 
@@ -1291,7 +1291,7 @@ static inline int Is_18A8D0(int id, char* s)
 
 static inline sSndCfg_18A8D0 Cfg_18A8D0()
 {
-    return D_00535610_18A8D0;
+    return cBEOptionInterface_mOption_18A8D0;
 }
 
 
@@ -1348,35 +1348,35 @@ extern "C" void cFEStateOptionsSound_onWidgetEvent(cFEStateOptionsSound* self, c
     }
     case 9:
         if (Is_18A8D0(widget->mHashName, str_1lb)) {
-            D_00535610_18A8D0.output = cUIListBox_getCurrentEntryData(((char*)widget));
+            cBEOptionInterface_mOption_18A8D0.output = cUIListBox_getCurrentEntryData(((char*)widget));
             cFEStateOptionsSound_setSoundMode(self, cUIListBox_getCurrentEntryData(((char*)widget)));
         }
         else if (Is_18A8D0(widget->mHashName, str_2sl)) {
             unsigned char vol = *(unsigned char*)(((char*)widget) + 0x74);
-            D_00535610_18A8D0.sfxVol = vol;
+            cBEOptionInterface_mOption_18A8D0.sfxVol = vol;
             func_00287410(cAudioInterface_bxAudio(), Cfg_18A8D0().sfxVol);
         }
         else if (Is_18A8D0(widget->mHashName, str_3sl)) {
             unsigned char vol = *(unsigned char*)(((char*)widget) + 0x74);
-            D_00535610_18A8D0.speechVol = vol;
+            cBEOptionInterface_mOption_18A8D0.speechVol = vol;
             cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), Cfg_18A8D0().speechVol);
         }
         else if (Is_18A8D0(widget->mHashName, str_4sl)) {
             unsigned char vol = *(unsigned char*)(((char*)widget) + 0x74);
-            D_00535610_18A8D0.musicVol = vol;
+            cBEOptionInterface_mOption_18A8D0.musicVol = vol;
             func_00287520(cAudioInterface_bxAudio(), Cfg_18A8D0().musicVol);
         }
         else if (Is_18A8D0(widget->mHashName, str_5lb)) {
-            D_00535610_18A8D0.iUseDJSpeech = cUIListBox_getCurrentEntryData(((char*)widget)) != 0;
+            cBEOptionInterface_mOption_18A8D0.iUseDJSpeech = cUIListBox_getCurrentEntryData(((char*)widget)) != 0;
             cSSXAudio_SetDJSpeech(cAudioInterface_bxAudio(), Cfg_18A8D0().iUseDJSpeech != 0);
         }
         else if (Is_18A8D0(widget->mHashName, str_6lb)) {
-            D_00535610_18A8D0.iUseArcadeSFX = cUIListBox_getCurrentEntryData(((char*)widget)) != 0;
+            cBEOptionInterface_mOption_18A8D0.iUseArcadeSFX = cUIListBox_getCurrentEntryData(((char*)widget)) != 0;
             cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_18A8D0().iUseArcadeSFX != 0);
         }
         bool on = D_004A1A70 == 1;
         if (on && Is_18A8D0(widget->mHashName, str_7lb))
-            D_00535610_18A8D0.f18 = cUIListBox_getCurrentEntryData(((char*)widget)) != 0;
+            cBEOptionInterface_mOption_18A8D0.f18 = cUIListBox_getCurrentEntryData(((char*)widget)) != 0;
         D_004A14D4 = 1;
         break;
     }
@@ -1429,7 +1429,7 @@ struct sSndCfg_18B380 {
     char rest[0x288 - 4];
 };
 // PORT: cBEOptionInterface_mOption is viewed with different types across the unit; view bound by asm label
-extern sSndCfg_18B380 D_00535610_18B380 __asm__("cBEOptionInterface_mOption");
+extern sSndCfg_18B380 cBEOptionInterface_mOption_18B380 __asm__("cBEOptionInterface_mOption");
 
 // The options interface's view of the same settings word (unsigned flags).
 struct sSndOpts_18B380 {
@@ -1447,12 +1447,12 @@ struct sSndOpts_18B380 {
 
 struct sOptionIface_18B380 {
     // PORT: reinterprets the settings global with unsigned flag bits
-    sSndOpts_18B380 getOptions() { return *(sSndOpts_18B380*)&D_00535610_18B380; }
+    sSndOpts_18B380 getOptions() { return *(sSndOpts_18B380*)&cBEOptionInterface_mOption_18B380; }
 };
 
 static inline sSndCfg_18B380 Cfg_18B380()
 {
-    return D_00535610_18B380;
+    return cBEOptionInterface_mOption_18B380;
 }
 
 
@@ -1787,7 +1787,7 @@ struct sOptions_C2A0 {
     unsigned int mode : 2;
     int data[(0x288 - 4) / 4];
 };
-extern sOptions_C2A0 D_00535610_C2A0 __asm__("cBEOptionInterface_mOption");
+extern sOptions_C2A0 cBEOptionInterface_mOption_C2A0 __asm__("cBEOptionInterface_mOption");
 
 struct sVE_18C2A0 {
     short delta;
@@ -1848,7 +1848,7 @@ extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, cUITh
         sVE_18C2A0* vt = (sVE_18C2A0*)widget->mVtbl;
         vt[9].fn(vthis(widget, vt[9]), 1);
         D_004A14D8 = 1;
-        D_00535610_C2A0.mode = *(unsigned char*)&widget->mMiscData;
+        cBEOptionInterface_mOption_C2A0.mode = *(unsigned char*)&widget->mMiscData;
         break;
     }
     case 2:
@@ -1881,7 +1881,7 @@ struct sOptions_C478 {
     unsigned int mode : 2;
     int data[(0x288 - 4) / 4];
 };
-extern sOptions_C478 D_00535610_C478 __asm__("cBEOptionInterface_mOption");
+extern sOptions_C478 cBEOptionInterface_mOption_C478 __asm__("cBEOptionInterface_mOption");
 
 static inline int optMode_C478(sOptions_C478 o)
 {
@@ -1915,7 +1915,7 @@ extern "C" void cFEStateOptionsHUD_updateWidget(cFEStateOptionsHUD* vself)
             cUIThing* item = (cUIThing*)vt[14].fn(vthis(menu, vt[14]), GetHashValue32(name.s));
             if (((char*)item) != 0) {
                 item->mMiscData = i;
-                if (i == optMode_C478(D_00535610_C478)) {
+                if (i == optMode_C478(cBEOptionInterface_mOption_C478)) {
                     sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)item->mVtbl;
                     vt2[9].fn(vthis(item, vt2[9]), 1);
                     cUIMenu_setSelectedByIndex(menu, i);

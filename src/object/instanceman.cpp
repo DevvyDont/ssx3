@@ -1341,7 +1341,7 @@ struct sRCtx_352810 {
     char pad0[0x10D8];
     sVE_352810* vt;         // 0x10D8
 };
-extern char D_004FF1A0_2810[] __asm__("t4mat_Identity");
+extern char t4mat_Identity_2810[] __asm__("t4mat_Identity");
 
 // cMeshAnimNode (On Tour: cMeshAnimNode::render).
 struct sDebris_352810 {
@@ -1436,7 +1436,7 @@ extern "C" void cMeshAnimNode_render(cMeshAnimNode* self)
         fade = self->Life;
     }
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-    ((sVE_352810*)ps2GraphicsMan->mVtbl)[95].fn(vthis(ps2GraphicsMan, ((sVE_352810*)ps2GraphicsMan->mVtbl)[95]), (char*)self->Instance, self->Instance->m_MaterialBlock, D_004FF1A0_2810, animMats, 0, 1056, fade);
+    ((sVE_352810*)ps2GraphicsMan->mVtbl)[95].fn(vthis(ps2GraphicsMan, ((sVE_352810*)ps2GraphicsMan->mVtbl)[95]), (char*)self->Instance, self->Instance->m_MaterialBlock, t4mat_Identity_2810, animMats, 0, 1056, fade);
 }
 #endif
 

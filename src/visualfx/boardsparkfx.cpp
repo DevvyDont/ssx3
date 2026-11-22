@@ -291,7 +291,7 @@ struct sRS_AA78 {
     short pad;
 };
 extern sV4_AA78 t4vect_Origin;
-extern sRS_AA78 D_00501420_AA78 __asm__("sDrawState_s_defaultDrawState");
+extern sRS_AA78 sDrawState_s_defaultDrawState_AA78 __asm__("sDrawState_s_defaultDrawState");
 
 // Render-state field setters (mask, shift, value), as the unit's other effects write them.
 #define RS_SETA_AA78(rs, mask, shift, v) ((rs).flagsA = ((rs).flagsA & ~(mask)) | (((v) << (shift)) & (mask)))
@@ -322,7 +322,7 @@ extern "C" void cBoardSparkFX_reset(cBoardSparkFX* vself)
     self->f70 = 0;
     self->f74 = 0;
     self->f78 = 0;
-    self->rsA = D_00501420_AA78;
+    self->rsA = sDrawState_s_defaultDrawState_AA78;
     RS_SETB_AA78(self->rsA, 0x3E0, 5, 7);
     RS_SETA_AA78(self->rsA, 0x400000, 22, 1);
     RS_SETA_AA78(self->rsA, 0x1800000, 23, 0);
@@ -332,7 +332,7 @@ extern "C" void cBoardSparkFX_reset(cBoardSparkFX* vself)
     RS_SETA_AA78(self->rsA, 0x7C, 2, 7);
     int texA = GrMan->_EffectTexMap[22];
     self->rsA.tex = texA;
-    self->rsB = D_00501420_AA78;
+    self->rsB = sDrawState_s_defaultDrawState_AA78;
     RS_SETB_AA78(self->rsB, 0x3E0, 5, 7);
     RS_SETA_AA78(self->rsB, 0x400000, 22, 1);
     RS_SETA_AA78(self->rsB, 0x1800000, 23, 0);

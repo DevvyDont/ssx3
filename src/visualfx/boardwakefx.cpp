@@ -622,7 +622,7 @@ struct sGs_DAB8 {
     void SetF22(int v) { f4_22 = v; }
 };
 
-extern sGs_DAB8 D_00501420_DAB8 __asm__("sDrawState_s_defaultDrawState");
+extern sGs_DAB8 sDrawState_s_defaultDrawState_DAB8 __asm__("sDrawState_s_defaultDrawState");
 
 struct sWakeVtx_DAB8 {
     char pad0[0x64];
@@ -742,7 +742,7 @@ extern "C" void cBoardWakeFX_render(cBoardWakeFX* self)
     if (cRenderToggles_m_DisableBoardWake != 0 || self->mNumWakeLines == 0)
         return;
     ((cGfx_DAB8*)GrMan_boardwakefx)->PushState();
-    *((cGfx_DAB8*)GrMan_boardwakefx)->stateTop = D_00501420_DAB8;
+    *((cGfx_DAB8*)GrMan_boardwakefx)->stateTop = sDrawState_s_defaultDrawState_DAB8;
     *(short*)(*(char**)(GrMan_boardwakefx + 0xE84) + 0x10) = ((cGfx_DAB8*)GrMan_boardwakefx)->Get1030();
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f0_2 = 0;
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->SetF22(1);
@@ -809,7 +809,7 @@ struct sWakeDD30 {
     int n;                      // 0xB4
 };
 
-extern sVecDD30 D_004FF120_DD30 __asm__("t4vect_Zero");
+extern sVecDD30 t4vect_Zero_DD30 __asm__("t4vect_Zero");
 extern "C" float perlinNoise(int n, float x);
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
@@ -902,7 +902,7 @@ extern "C" void cBoardWakeFX_fillCurrentSeg(sWakeDD30* self, sVecDD30* pos, floa
     float w = self->f90 * (perlinNoise(3, self->phase) * 0.25f + 1.0f);
     sElemDD30* wakeLine = &self->elems[self->head];
     wakeLine->i64 = 0;
-    wakeLine->pts[0] = D_004FF120_DD30;
+    wakeLine->pts[0] = t4vect_Zero_DD30;
     sVecDD30 dir = wakeScaleDD30(wakeScaleDD30(self->v80, -1.0f), wakeLenDD30(*(sVecDD30*)(self->obj + 0x1E0)));
     sVecDD30 neg = wakeScaleDD30(*(sVecDD30*)(self->obj + 0x1E0), -1.0f);
     {
@@ -2649,7 +2649,7 @@ struct sMat1120 {
     }
 } __attribute__((aligned(16)));
 
-extern sRow1120 D_004FF130_1120 __asm__("t4vect_Origin");
+extern sRow1120 t4vect_Origin_1120 __asm__("t4vect_Origin");
 
 struct sWakeFx1120 {
     char* obj;                  // 0x00
@@ -2820,7 +2820,7 @@ extern "C" void func_002E1120(sWakeFx1120* self)
             self->rate += ((wakeRandE398()) * 6.0f + 18.0f) * dt;
             if (1.0f < self->rate) {
                 self->rate -= 1.0f;
-                mat.v[3] = D_004FF130_1120;
+                mat.v[3] = t4vect_Origin_1120;
                 char* sub2 = self->obj + 0x6C0;
                 sWakeVtV1120* vv = *(sWakeVtV1120**)sub2;
                 sVec1120* riderVel = vv[2].fn(sub2 + vv[2].delta);
@@ -3849,7 +3849,7 @@ struct sPart_2868 {
 };
 
 
-extern sRsCtx_2868* D_004A5B80_2868 __asm__("cGraphicsMan_TheGraphicsMan");
+extern sRsCtx_2868* cGraphicsMan_TheGraphicsMan_2868 __asm__("cGraphicsMan_TheGraphicsMan");
 
 // PORT: PS2 sqrt.s asm helper; use sqrtf on PC.
 static inline float Sqrt_2868(float x)
@@ -3912,7 +3912,7 @@ extern "C" void cLightHalo_Render(cLightHalo* self, int idx)
     (*(t3Vector*)&col.R).x = n.x;
     (*(t3Vector*)&col.R).y = n.y;
     (*(t3Vector*)&col.R).z = n.z;
-    sRsCtx_2868* ctx = D_004A5B80_2868;
+    sRsCtx_2868* ctx = cGraphicsMan_TheGraphicsMan_2868;
     if (self->mbRequestZSample != 0) {
         col.A = ((sPart_2868*)self->mpHalo)->alpha[idx];
         rsSetA_2868(ctx, 0x1800000, 23, 2);
@@ -4791,7 +4791,7 @@ struct sWkColor_3AF8 {
 };
 
 
-extern sRsState_2868 D_00501420_3AF8 __asm__("sDrawState_s_defaultDrawState");
+extern sRsState_2868 sDrawState_s_defaultDrawState_3AF8 __asm__("sDrawState_s_defaultDrawState");
 
 // Render context (GrMan): state stack at 0xE84, vtable at 0x10D8.
 struct sRCtx_3AF8 {
@@ -4994,7 +4994,7 @@ extern "C" void cPlayerIndicatorFX_render(cPlayerIndicatorFX* self)
         renderCtx->top[1] = renderCtx->top[0];
         renderCtx->top++;
     }
-    *((sRCtx_3AF8*)GrMan_boardwakefx)->top = D_00501420_3AF8;
+    *((sRCtx_3AF8*)GrMan_boardwakefx)->top = sDrawState_s_defaultDrawState_3AF8;
     {
         sRCtx_3AF8* renderCtx = (sRCtx_3AF8*)GrMan_boardwakefx;
         rsSetA_3AF8(renderCtx, 0x400000, 22, 1);
@@ -5973,7 +5973,7 @@ struct t4Vec_4F50 : sWakeVecE398 {
     t4Vec_4F50(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 };
 
-extern sWakeVecE398 D_004FF160_4F50 __asm__("t4vect_ZAxis");     // t4vect::ZAxis
+extern sWakeVecE398 t4vect_ZAxis_4F50 __asm__("t4vect_ZAxis");     // t4vect::ZAxis
 extern float cSinCosTable_gSinCosTable[];                                      // cSinCosTable::gSinCosTable
 
 static inline float FXRand_4F50(float lo, float hi)
@@ -6081,7 +6081,7 @@ extern "C" void cSnowBox_update_4F50(cSnowBox* self, const tWorldPainterSnowfall
     }
     windBlend = self->mCurrentTimeToWindChange / self->mTotalTimeToWindChange;
     wakeAddE398(*(sWakeVecE398*)&self->mOffset, wakeScale0EE8(wakeAdd0EE8(wakeScale0EE8(*(sWakeVecE398*)&self->mWindNext, 1.0f - windBlend), wakeScale0EE8(*(sWakeVecE398*)&self->mWindLast, windBlend)), kTimeDiff));
-    wakeAddE398(*(sWakeVecE398*)&self->mOffset, Scale_4F50(self->mGravity * params->f[7] * kTimeDiff, D_004FF160_4F50));
+    wakeAddE398(*(sWakeVecE398*)&self->mOffset, Scale_4F50(self->mGravity * params->f[7] * kTimeDiff, t4vect_ZAxis_4F50));
     x = (*(sWakeVecE398*)&self->mOffset).x;
     y = (*(sWakeVecE398*)&self->mOffset).y;
     z = (*(sWakeVecE398*)&self->mOffset).z;
@@ -6655,8 +6655,8 @@ struct sWakeFx_6008 {
 
 extern int cRenderToggles_m_DisableSnowFall;
 extern int cSnowfallToggles_m_TestAdditive[1];
-extern sRsCtx_6008* D_004A5B80_6008 __asm__("cGraphicsMan_TheGraphicsMan");
-extern sRsState_6008 D_00501420_6008[] __asm__("sDrawState_s_defaultDrawState");
+extern sRsCtx_6008* cGraphicsMan_TheGraphicsMan_6008 __asm__("cGraphicsMan_TheGraphicsMan");
+extern sRsState_6008 sDrawState_s_defaultDrawState_6008[] __asm__("sDrawState_s_defaultDrawState");
 extern sV4_6008 t4vect_Origin;
 extern "C" void cSnowBox_render(int* p, sMat_6008* m, float r, float g, float b);
 
@@ -6712,10 +6712,10 @@ extern "C" void cSnowFall_render(sWakeFx_6008* self)
     sWakeVec5430 camPos = *(sWakeVec5430*)(rs->riders[k] + 0x20);
     sWakeVec5430 camDiff = sub_6008(camPos, self->last[k]);
     self->last[k] = camPos;
-    sRsCtx_6008* ctx = D_004A5B80_6008;
+    sRsCtx_6008* ctx = cGraphicsMan_TheGraphicsMan_6008;
     ctx->top[1] = ctx->top[0];
     ctx->top++;
-    *ctx->top = D_00501420_6008[0];
+    *ctx->top = sDrawState_s_defaultDrawState_6008[0];
     rsSetA_6008(ctx, 0x400000, 22, 1);
     rsSetB_6008(ctx, 0x3E0, 5, 7);
     if (cSnowfallToggles_m_TestAdditive[0] != 0) {
@@ -7667,7 +7667,7 @@ extern "C" void cSpeedBoostFX_render(sBoardWake_7A10* self)
     if (self->npts == 0 || self->f4 < 3.0f || self->alpha < 0.05f || cPowerUpFXToggles_m_EnableSpeedBoostFX == 0)
         return;
     ((cGfx_DAB8*)GrMan_boardwakefx)->PushState();
-    *((cGfx_DAB8*)GrMan_boardwakefx)->stateTop = D_00501420_DAB8;
+    *((cGfx_DAB8*)GrMan_boardwakefx)->stateTop = sDrawState_s_defaultDrawState_DAB8;
     *(short*)(*(char**)(GrMan_boardwakefx + 0xE84) + 0x10) = texId_7A10(self->tex);
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f0_2 = 0;
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->SetF22(1);

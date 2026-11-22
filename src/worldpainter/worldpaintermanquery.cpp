@@ -98,7 +98,7 @@ struct sColor_2C0B70 {
 
 
 
-extern int D_004A53D0_w[2] __asm__("kNullNameField");
+extern int kNullNameField_w[2] __asm__("kNullNameField");
 extern tWorldPainterRegionType D_004A53D8;
 extern tWorldPainterRegionType D_004A53E0;
 extern tWorldPainterRegionType D_004A53E8;
@@ -244,8 +244,8 @@ extern "C" void func_002C0B70_impl(int initialize, int priority)
         new (&D_004D4988) sColor_2C0B70(1.0f, 0.7843739986419678f, 0.06132800132036209f, 0.03945299983024597f);
         new (&D_004D4998) sColor_2C0B70(1.0f, 0.0f, 1.0f, 0.0f);
         new (&D_004D49A8) sColor_2C0B70(1.0f, 1.0f, 0.0f, 0.0f);
-        D_004A53D0_w[1] = 0;
-        D_004A53D0_w[0] = 0;
+        kNullNameField_w[1] = 0;
+        kNullNameField_w[0] = 0;
         new (&D_004A53D8) tWorldPainterRegionType(0, 0);
         new (&D_004A53E0) tWorldPainterRegionType(1, 1);
         new (&D_004A53E8) tWorldPainterRegionType(2, 2);

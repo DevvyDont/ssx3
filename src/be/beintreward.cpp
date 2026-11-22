@@ -1053,7 +1053,7 @@ struct sRewardReq_157920
     signed char track;
     signed char kind;
 };
-extern sRewardReq_157920 D_0045AAD8_v157920[][4][5] __asm__("gMedalsInfo");
+extern sRewardReq_157920 gMedalsInfo_v157920[][4][5] __asm__("gMedalsInfo");
 
 /**
  * Tells whether a character has conquered a peak: top medals in all of its events.
@@ -1073,8 +1073,8 @@ extern "C" int cBERewardInterface_isPeakConquered(cBERewardInterface* self, int 
     {
         for (int j = 0; j < 5; j++)
         {
-            int track = D_0045AAD8_v157920[k][i][j].track;
-            int kind = D_0045AAD8_v157920[k][i][j].kind;
+            int track = gMedalsInfo_v157920[k][i][j].track;
+            int kind = gMedalsInfo_v157920[k][i][j].kind;
             if (track < 0)
                 break;
             if (i == 3)
@@ -1205,7 +1205,7 @@ struct sRewardReq_157BF0
     signed char track;
     signed char kind;
 };
-extern sRewardReq_157BF0 D_0045AAD8_v157BF0[][4][5] __asm__("gMedalsInfo");
+extern sRewardReq_157BF0 gMedalsInfo_v157BF0[][4][5] __asm__("gMedalsInfo");
 
 /**
  * Tells whether a character owns one of a peak's four trophies.
@@ -1228,8 +1228,8 @@ extern "C" int cBERewardInterface_isTrophyOwned(cBERewardInterface* self, int iP
     case 1:
         for (int j = 0; j < 5; j++)
         {
-            int track = D_0045AAD8_v157BF0[k][i][j].track;
-            int kind = D_0045AAD8_v157BF0[k][i][j].kind;
+            int track = gMedalsInfo_v157BF0[k][i][j].track;
+            int kind = gMedalsInfo_v157BF0[k][i][j].kind;
             if (track < 0)
                 break;
             if (!cBERewardInterface_isBetterMedal(self, -1, cBERewardInterface_getTrackMedal(self, iProfileIndex, iCharacterID, track, kind)))
@@ -2237,7 +2237,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateNextCollectiblesLevel)
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cBERewardInterface_getCollectiblesMedal(cBERewardInterface* self, int a, int b, int kind);
-extern int D_0045AFE8_2d[][4] __asm__("gCollectiblesMedalLevel");
+extern int gCollectiblesMedalLevel_2d[][4] __asm__("gCollectiblesMedalLevel");
 
 /**
  * Returns the collectibles count needed for the next better medal on a peak.
@@ -2258,8 +2258,8 @@ extern "C" int cBERewardInterface_calculateNextCollectiblesLevel(cBERewardInterf
     {
         if (cBERewardInterface_isBetterMedal(self, medal, i))
         {
-            if (best == 0 || D_0045AFE8_2d[kind][i] < best)
-                best = D_0045AFE8_2d[kind][i];
+            if (best == 0 || gCollectiblesMedalLevel_2d[kind][i] < best)
+                best = gCollectiblesMedalLevel_2d[kind][i];
         }
     }
     return best;
@@ -2271,7 +2271,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_calculateNextBigChallengesLevel
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cBERewardInterface_getBigChallengesMedal(cBERewardInterface* self, int a, int b, int kind);
-extern int D_0045B018_2d[][4] __asm__("gBigChallengesMedalLevel");
+extern int gBigChallengesMedalLevel_2d[][4] __asm__("gBigChallengesMedalLevel");
 
 /**
  * Returns the completed big-challenge count needed for the next better medal on a peak.
@@ -2292,8 +2292,8 @@ extern "C" int cBERewardInterface_calculateNextBigChallengesLevel(cBERewardInter
     {
         if (cBERewardInterface_isBetterMedal(self, medal, i))
         {
-            if (best == 0 || D_0045B018_2d[kind][i] < best)
-                best = D_0045B018_2d[kind][i];
+            if (best == 0 || gBigChallengesMedalLevel_2d[kind][i] < best)
+                best = gBigChallengesMedalLevel_2d[kind][i];
         }
     }
     return best;
@@ -2545,7 +2545,7 @@ struct sProfileChar_1591E8 {
     long flags;     // 0x278
     char pad280[0xF88 - 0x280];
 };
-extern sProfileChar_1591E8 D_004A6CA8_1591E8[][10] __asm__("cBELibrary_profileLib");
+extern sProfileChar_1591E8 cBELibrary_profileLib_1591E8[][10] __asm__("cBELibrary_profileLib");
 extern "C" int cBECharProfileDB_updateMedalStats(sProfileChar_1591E8* pc, int event, int mode, int medal);
 
 struct sScoreStat_1591E8 {
@@ -2560,13 +2560,13 @@ struct sRewardReq_1591E8
     signed char track;
     signed char kind;
 };
-extern sRewardReq_1591E8 D_0045AAD8_1591E8[][4][5] __asm__("gMedalsInfo");
+extern sRewardReq_1591E8 gMedalsInfo_1591E8[][4][5] __asm__("gMedalsInfo");
 
 struct sRaceSettings_1591E8 {
     char pad_0x00[0x49];
     signed char b49;    // 0x49
 };
-extern sRaceSettings_1591E8 D_005305B0_1591E8 __asm__("cBELibrary_raceDB");
+extern sRaceSettings_1591E8 cBELibrary_raceDB_1591E8 __asm__("cBELibrary_raceDB");
 extern signed char D_005305F9[];
 
 
@@ -2599,7 +2599,7 @@ extern signed char D_005305F9[];
  */
 extern "C" void cBERewardInterface_calculateUserTrackMedalRewards(cBERewardInterface* self, int profile, int charID, int mode, int event, int medal)
 {
-    sProfileChar_1591E8* pc = &D_004A6CA8_1591E8[profile][charID];
+    sProfileChar_1591E8* pc = &cBELibrary_profileLib_1591E8[profile][charID];
     int bit = -1;
     void* score = cBE_getInterface_Fv(cBE_getBE(), 11);
     sScoreStat_1591E8* stats = cBECharProfileDB_getScoreStats_1591E8(pc, event, mode);
@@ -2671,10 +2671,10 @@ extern "C" void cBERewardInterface_calculateUserTrackMedalRewards(cBERewardInter
     int okA = 1;
     int okB = 1;
     for (int i = 0; i < 5; i++) {
-        int kind = D_0045AAD8_1591E8[group][tier][i].kind;
-        int track = D_0045AAD8_1591E8[group][tier][i].track;
+        int kind = gMedalsInfo_1591E8[group][tier][i].kind;
+        int track = gMedalsInfo_1591E8[group][tier][i].track;
         if (track == -1) {
-            if (D_005305B0_1591E8.b49 == 0)
+            if (cBELibrary_raceDB_1591E8.b49 == 0)
                 func_001E1C10(group);
             break;
         }
@@ -2687,7 +2687,7 @@ extern "C" void cBERewardInterface_calculateUserTrackMedalRewards(cBERewardInter
         } else {
             if (!cBERewardInterface_isBetterMedal(self, -1, cBERewardInterface_getTrackMedal(self, profile, charID, track, kind))) {
                 if (!any) {
-                    if (D_005305B0_1591E8.b49 == 0)
+                    if (cBELibrary_raceDB_1591E8.b49 == 0)
                         func_001E1C10(group);
                     okA = 0;
                     okB = 0;
@@ -2824,7 +2824,7 @@ extern "C" void cBERewardInterface_awardUserTrophy(cBERewardInterface* self, int
 extern "C" int cBERewardInterface_isAwardReceived(cBERewardInterface* self, int a1, int a2, int bit);
 extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int a1, int a2, int bit);
 extern int gNextCollectiblesLimit[];
-extern int D_0045AFE8_2d[][4] __asm__("gCollectiblesMedalLevel");
+extern int gCollectiblesMedalLevel_2d[][4] __asm__("gCollectiblesMedalLevel");
 
 /**
  * Checks a rider's collectibles count on a peak against the next target and awards what it unlocks.
@@ -2848,7 +2848,7 @@ extern "C" void cBERewardInterface_awardUserCollectible(cBERewardInterface* self
     int ch = cBELibrary_getCharacterID(rider);
     int was = cBERewardInterface_isTrophyOwned(self, prof, ch, k, 2);
     *nextLevel = cBERewardInterface_calculateNextCollectiblesLevel(self, prof, ch, k);
-    if (was && cur == D_0045AFE8_2d[k][3])
+    if (was && cur == gCollectiblesMedalLevel_2d[k][3])
         cBERewardInterface_awardUserTrophy(self, prof, ch, k, 2);
     if (cBERewardInterface_isMountainConquered(self, prof, ch))
     {
@@ -2874,7 +2874,7 @@ extern "C" void cBERewardInterface_awardUserTrophy(cBERewardInterface* self, int
 extern "C" int cBERewardInterface_isAwardReceived(cBERewardInterface* self, int a1, int a2, int bit);
 extern "C" void cBERewardInterface_awardUser(cBERewardInterface* self, int a1, int a2, int bit);
 extern int gNextBigChallengesLimit[];
-extern int D_0045B018_2d[][4] __asm__("gBigChallengesMedalLevel");
+extern int gBigChallengesMedalLevel_2d[][4] __asm__("gBigChallengesMedalLevel");
 
 /**
  * Checks a peak's completed big challenges after a mission and hands out the trophy and awards they earn.
@@ -2901,7 +2901,7 @@ extern "C" void cBERewardInterface_awardUserBigChallenge(cBERewardInterface* sel
     int ch = cBELibrary_getCharacterID(rider);
     int was = cBERewardInterface_isTrophyOwned((cBERewardInterface*)self, prof, ch, k, 2);
     *nextLimit = cBERewardInterface_calculateNextBigChallengesLevel((cBERewardInterface*)self, prof, ch, k);
-    if (was && cur == D_0045B018_2d[k][3])
+    if (was && cur == gBigChallengesMedalLevel_2d[k][3])
         cBERewardInterface_awardUserTrophy((cBERewardInterface*)self, prof, ch, k, 2);
     if (cBERewardInterface_isMountainConquered((cBERewardInterface*)self, prof, ch))
     {

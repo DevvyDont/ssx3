@@ -1612,7 +1612,7 @@ extern "C" void cOcclusionMan_addVisCurtain(void* self, void* obj);
 // PORT: the unit declares this later returning void*; bind this char* view by symbol.
 char* cAudioInterface_getGame_AE68() __asm__("cAudioInterface_getGame");
 extern "C" void cWorldSound_InitWorldAudioFile(void* self, void* obj, unsigned int arg);
-extern char* D_004A28A8_AE68 __asm__("SSXApp");
+extern char* SSXApp_AE68 __asm__("SSXApp");
 extern "C" int cAI_swaploadInjectedPathFile(void* self, int a, unsigned int b, void* obj);
 void cMemMan_free(void* p);
 extern "C" void cWorldPainterMan_load1(void* self, int a, void* obj);
@@ -1763,7 +1763,7 @@ extern "C" void* cPS2ChunkResolve_resolve(cPS2ChunkResolve* self, int msg, unsig
         cOcclusionMan_addVisCurtain(getOcclusionMan(), obj);
         break;
     case 14:
-        if (!cAI_swaploadInjectedPathFile(*(void**)(*(char**)(D_004A28A8_AE68 + 0x84) + 0xC), RID & 0xFF, RID >> 8, obj)) {
+        if (!cAI_swaploadInjectedPathFile(*(void**)(*(char**)(SSXApp_AE68 + 0x84) + 0xC), RID & 0xFF, RID >> 8, obj)) {
             if (obj) {
                 cMemMan_free(obj);
             }

@@ -178,7 +178,7 @@ struct sBlk4C_14A5E0 { char d[0x4C]; };
 struct sBlkF88_14A5E0 { char d[0xF88]; };
 struct sBlk9B50_14A5E0 { char d[0x9B50]; };
 
-extern sBlkF88_14A5E0 D_004A6CA8_14A5E0[] __asm__("cBELibrary_profileLib");
+extern sBlkF88_14A5E0 cBELibrary_profileLib_14A5E0[] __asm__("cBELibrary_profileLib");
 extern sBlkF88_14A5E0 D_004B07F8[];
 extern sBlk9B50_14A5E0 D_004BA348;
 
@@ -206,7 +206,7 @@ extern "C" void cBELibrary_readFromData(char* data)
     cBENewPlayerInterface_getThis()->onLoad();
     data += 0xA8;
     idx = cBELibrary_playerDB[0].cCharacterID;
-    D_004A6CA8_14A5E0[idx] = *(sBlkF88_14A5E0*)data;
+    cBELibrary_profileLib_14A5E0[idx] = *(sBlkF88_14A5E0*)data;
     data += 0xF88;
     idx = cBELibrary_playerDB[1].cCharacterID;
     if (idx >= 0) {
@@ -517,7 +517,7 @@ struct sBEProfileChar {
     sBEFlagEntryPC* getEntries() { return entries; }
 };
 
-extern sBEProfileChar D_004A6CA8_pc[][10] __asm__("cBELibrary_profileLib");
+extern sBEProfileChar cBELibrary_profileLib_pc[][10] __asm__("cBELibrary_profileLib");
 
 /**
  * Returns a character's bolt entries (+0x290 of the character record (cBELibrary_profileLib + profile * 0x9B50 +
@@ -530,8 +530,8 @@ extern sBEProfileChar D_004A6CA8_pc[][10] __asm__("cBELibrary_profileLib");
  */
 extern "C" void* func_0014AE28(void* self, int profileIndex, int characterId, int* out)
 {
-    *out = D_004A6CA8_pc[profileIndex][characterId].getCount();
-    return D_004A6CA8_pc[profileIndex][characterId].getEntries();
+    *out = cBELibrary_profileLib_pc[profileIndex][characterId].getCount();
+    return cBELibrary_profileLib_pc[profileIndex][characterId].getEntries();
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -768,7 +768,7 @@ INCLUDE_ASM("be/belibrary", func_0014B218);
 // From peak3project's fork (github.com/peak3project/ssx3).
 // One character's flag table inside a profile record: cBELibrary_profileLib is
 // [profile][character] of these (0x9B50 = 10 * 0xF88).
-extern sBEProfileChar D_004A6CA8_pc[][10] __asm__("cBELibrary_profileLib");
+extern sBEProfileChar cBELibrary_profileLib_pc[][10] __asm__("cBELibrary_profileLib");
 
 /**
  * Copies every bolt entry of a character whose flags contain all of @p mask to @p out and returns how many.
@@ -784,8 +784,8 @@ extern sBEProfileChar D_004A6CA8_pc[][10] __asm__("cBELibrary_profileLib");
  */
 extern "C" int func_0014B218(void* self, int profileIndex, int characterId, unsigned int mask, sBEFlagEntryPC* out)
 {
-    int count = D_004A6CA8_pc[profileIndex][characterId].getCount();
-    sBEFlagEntryPC* flagEntry = D_004A6CA8_pc[profileIndex][characterId].getEntries();
+    int count = cBELibrary_profileLib_pc[profileIndex][characterId].getCount();
+    sBEFlagEntryPC* flagEntry = cBELibrary_profileLib_pc[profileIndex][characterId].getEntries();
     int n = 0;
     int i;
     for (i = 0; i < count; i++, flagEntry++) {
@@ -804,7 +804,7 @@ INCLUDE_ASM("be/belibrary", func_0014B290);
 // From peak3project's fork (github.com/peak3project/ssx3).
 // One character's flag table inside a profile record: cBELibrary_profileLib is
 // [profile][character] of these (0x9B50 = 10 * 0xF88).
-extern sBEProfileChar D_004A6CA8_pc[][10] __asm__("cBELibrary_profileLib");
+extern sBEProfileChar cBELibrary_profileLib_pc[][10] __asm__("cBELibrary_profileLib");
 
 /**
  * Counts the bolt entries of a character whose flags contain all of @p mask.
@@ -819,8 +819,8 @@ extern sBEProfileChar D_004A6CA8_pc[][10] __asm__("cBELibrary_profileLib");
  */
 extern "C" int func_0014B290(void* self, int profileIndex, int characterId, unsigned int mask)
 {
-    int count = D_004A6CA8_pc[profileIndex][characterId].getCount();
-    sBEFlagEntryPC* flagEntry = D_004A6CA8_pc[profileIndex][characterId].getEntries();
+    int count = cBELibrary_profileLib_pc[profileIndex][characterId].getCount();
+    sBEFlagEntryPC* flagEntry = cBELibrary_profileLib_pc[profileIndex][characterId].getEntries();
     int n = 0;
     int i;
     for (i = 0; i < count; i++, flagEntry++) {

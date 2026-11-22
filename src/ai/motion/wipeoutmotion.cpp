@@ -507,7 +507,7 @@ extern "C" float cBXNash_terrainIntersect1_137138(void* self, void* q, void* out
 extern "C" void cRiderSphereTree_ApplyOffset_137138(void* tree, const t4Vector* d) __asm__("cRiderSphereTree_ApplyOffset");
 extern "C" void fSinCos(float* s, float* c, float angle);
 float AIrandf(float lo, float hi);
-extern t4Vector D_004FF120_137138 __asm__("t4vect_Zero");
+extern t4Vector t4vect_Zero_137138 __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float vu0Dot_137138(const t4Vector& a, const t4Vector& b)
@@ -671,8 +671,8 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
                           vu0Scale_137138(self->BoardVelocity, (float)SSXApp->TimerHz * 0.05000000074505806f));
             }
         }
-        self->BoardVelocity = D_004FF120_137138;
-        self->BoardAngVelocity = D_004FF120_137138;
+        self->BoardVelocity = t4vect_Zero_137138;
+        self->BoardAngVelocity = t4vect_Zero_137138;
     }
     cWorldRider__cWorldRider(&sph, 2);
 }
@@ -1386,7 +1386,7 @@ extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hi
 extern "C" void cRider_moveFromCollision(void* rider, const t4Vector& v);
 extern "C" void cRider_checkObjectCollisions(void* rider, int a1);
 extern "C" void cRider_checkOpponentCollisions(void* rider);
-extern t4Vector D_004FF120_138640 __asm__("t4vect_Zero");
+extern t4Vector t4vect_Zero_138640 __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float vu0Dot_138640(const t4Vector& a, const t4Vector& b)
@@ -1555,7 +1555,7 @@ extern "C" void cWipeoutMotion_resolveGroundMotion(void* vself)
         *(int*)self = 1;
     }
     if (vu0Length_138640(RIDER->mVelocity) < 50.0f)
-        RIDER->mVelocity = D_004FF120_138640;
+        RIDER->mVelocity = t4vect_Zero_138640;
     cWorldRider__cWorldRider(&sph, 2);
 }
 

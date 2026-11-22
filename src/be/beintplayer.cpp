@@ -2123,7 +2123,7 @@ extern "C" int cBEStatInterface_getStatFromProfile(cBEStatInterface* self, int p
 //100%
 INCLUDE_ASM("be/beintplayer", func_001482D0);
 #ifdef SKIP_ASM
-extern tBEStatDefault D_005308D8_001482D0[] __asm__("cBELibrary_statDefault");
+extern tBEStatDefault cBELibrary_statDefault_001482D0[] __asm__("cBELibrary_statDefault");
 
 /**
  * Copies record @p character of cBELibrary_statDefault, the 15-byte per-character default-stat table, into @p dst.
@@ -2138,7 +2138,7 @@ extern tBEStatDefault D_005308D8_001482D0[] __asm__("cBELibrary_statDefault");
  */
 extern "C" tBEStatDefault* func_001482D0(tBEStatDefault* dst, int iface, int character)
 {
-    *dst = D_005308D8_001482D0[character];
+    *dst = cBELibrary_statDefault_001482D0[character];
     return dst;
 }
 #endif
@@ -2148,7 +2148,7 @@ INCLUDE_ASM("be/beintplayer", func_00148328);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getCharacterID(int);
 
-extern tBEStatDefault D_005308D8_00148328[] __asm__("cBELibrary_statDefault");
+extern tBEStatDefault cBELibrary_statDefault_00148328[] __asm__("cBELibrary_statDefault");
 
 /**
  * Copies a rider's record of cBELibrary_statDefault, the 15-byte per-character default-stat table, into @p dst.
@@ -2164,7 +2164,7 @@ extern tBEStatDefault D_005308D8_00148328[] __asm__("cBELibrary_statDefault");
 extern "C" tBEStatDefault* func_00148328(tBEStatDefault* dst, int iface, int rider)
 {
     int charId = cBELibrary_getCharacterID(rider);
-    *dst = D_005308D8_00148328[charId];
+    *dst = cBELibrary_statDefault_00148328[charId];
     return dst;
 }
 #endif
@@ -2183,7 +2183,7 @@ struct sPlayerStat7View_001483A0 {
 struct sPlayerStatRowView_001483A0 {
     sPlayerStat7View_001483A0 e[10];
 };
-extern sPlayerStatRowView_001483A0 D_00535538_view001483A0[] __asm__("cBEStatInterface_currentStat");
+extern sPlayerStatRowView_001483A0 cBEStatInterface_currentStat_view001483A0[] __asm__("cBEStatInterface_currentStat");
 
 /**
  * Sets a rider's speed stat: byte 0 of its 7-byte record in cBEStatInterface_currentStat.
@@ -2198,7 +2198,7 @@ extern "C" void cBEStatInterface_setSpeed(cBEStatInterface* self, int rider, int
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
-    D_00535538_view001483A0[profile].e[charId].v[0] = value;
+    cBEStatInterface_currentStat_view001483A0[profile].e[charId].v[0] = value;
 }
 #endif
 
@@ -2215,7 +2215,7 @@ struct sPlayerStat7View_00148410 {
 struct sPlayerStatRowView_00148410 {
     sPlayerStat7View_00148410 e[10];
 };
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
+extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
  * Returns a rider's speed stat: byte 0 of its 7-byte record in cBEStatInterface_currentStat.
@@ -2230,7 +2230,7 @@ extern "C" signed char cBEStatInterface_getSpeed(cBEStatInterface* self, int rid
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
-    return D_00535538_view[profile].e[charId].v[0];
+    return cBEStatInterface_currentStat_view[profile].e[charId].v[0];
 }
 #endif
 
@@ -2241,7 +2241,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setAccel);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
+extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
  * Sets a rider's acceleration stat: byte 1 of its 7-byte record in cBEStatInterface_currentStat.
@@ -2256,7 +2256,7 @@ extern "C" void cBEStatInterface_setAccel(cBEStatInterface* self, int rider, int
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
-    D_00535538_view[profile].e[charId].v[1] = value;
+    cBEStatInterface_currentStat_view[profile].e[charId].v[1] = value;
 }
 #endif
 
@@ -2267,7 +2267,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getAccel);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
+extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
  * Returns a rider's acceleration stat: byte 1 of its 7-byte record in cBEStatInterface_currentStat.
@@ -2282,7 +2282,7 @@ extern "C" signed char cBEStatInterface_getAccel(cBEStatInterface* self, int rid
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
-    return D_00535538_view[profile].e[charId].v[1];
+    return cBEStatInterface_currentStat_view[profile].e[charId].v[1];
 }
 #endif
 
@@ -2293,7 +2293,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setTrick);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
+extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
  * Sets a rider's trick stat: byte 2 of its 7-byte record in cBEStatInterface_currentStat.
@@ -2308,7 +2308,7 @@ extern "C" void cBEStatInterface_setTrick(cBEStatInterface* self, int rider, int
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
-    D_00535538_view[profile].e[charId].v[2] = value;
+    cBEStatInterface_currentStat_view[profile].e[charId].v[2] = value;
 }
 #endif
 
@@ -2319,7 +2319,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getTrick);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
+extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
  * Returns a rider's trick stat: byte 2 of its 7-byte record in cBEStatInterface_currentStat.
@@ -2334,7 +2334,7 @@ extern "C" signed char cBEStatInterface_getTrick(cBEStatInterface* self, int rid
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
-    return D_00535538_view[profile].e[charId].v[2];
+    return cBEStatInterface_currentStat_view[profile].e[charId].v[2];
 }
 #endif
 
@@ -2345,7 +2345,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setEdging);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
+extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
  * Sets a rider's edging stat: byte 3 of its 7-byte record in cBEStatInterface_currentStat.
@@ -2360,7 +2360,7 @@ extern "C" void cBEStatInterface_setEdging(cBEStatInterface* self, int rider, in
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
-    D_00535538_view[profile].e[charId].v[3] = value;
+    cBEStatInterface_currentStat_view[profile].e[charId].v[3] = value;
 }
 #endif
 
@@ -2371,7 +2371,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getEdging);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
+extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
  * Returns a rider's edging stat: byte 3 of its 7-byte record in cBEStatInterface_currentStat.
@@ -2386,7 +2386,7 @@ extern "C" signed char cBEStatInterface_getEdging(cBEStatInterface* self, int ri
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
-    return D_00535538_view[profile].e[charId].v[3];
+    return cBEStatInterface_currentStat_view[profile].e[charId].v[3];
 }
 #endif
 
@@ -2397,7 +2397,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setSpin);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
+extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
  * Sets a rider's spin stat: byte 4 of its 7-byte record in cBEStatInterface_currentStat.
@@ -2412,7 +2412,7 @@ extern "C" void cBEStatInterface_setSpin(cBEStatInterface* self, int rider, int 
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
-    D_00535538_view[profile].e[charId].v[4] = value;
+    cBEStatInterface_currentStat_view[profile].e[charId].v[4] = value;
 }
 #endif
 
@@ -2423,7 +2423,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getSpin);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
+extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
  * Returns a rider's spin stat: byte 4 of its 7-byte record in cBEStatInterface_currentStat.
@@ -2438,7 +2438,7 @@ extern "C" signed char cBEStatInterface_getSpin(cBEStatInterface* self, int ride
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
-    return D_00535538_view[profile].e[charId].v[4];
+    return cBEStatInterface_currentStat_view[profile].e[charId].v[4];
 }
 #endif
 
@@ -2449,7 +2449,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setToughness);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
+extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
  * Sets a rider's toughness stat: byte 5 of its 7-byte record in cBEStatInterface_currentStat.
@@ -2464,7 +2464,7 @@ extern "C" void cBEStatInterface_setToughness(cBEStatInterface* self, int rider,
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
-    D_00535538_view[profile].e[charId].v[5] = value;
+    cBEStatInterface_currentStat_view[profile].e[charId].v[5] = value;
 }
 #endif
 
@@ -2475,7 +2475,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getToughness);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
+extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
  * Returns a rider's toughness stat: byte 5 of its 7-byte record in cBEStatInterface_currentStat.
@@ -2490,7 +2490,7 @@ extern "C" signed char cBEStatInterface_getToughness(cBEStatInterface* self, int
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
-    return D_00535538_view[profile].e[charId].v[5];
+    return cBEStatInterface_currentStat_view[profile].e[charId].v[5];
 }
 #endif
 
@@ -2501,7 +2501,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setStability);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
+extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
  * Sets a rider's stability stat (the seventh entry of its character's stat record) in the current-stat table.
@@ -2517,7 +2517,7 @@ extern "C" void cBEStatInterface_setStability(cBEStatInterface* self, int rider,
 {
     int profileIndex = cBELibrary_getProfileIndex(rider);
     int charID = cBELibrary_getCharacterID(rider);
-    D_00535538_view[profileIndex].e[charID].v[6] = value;
+    cBEStatInterface_currentStat_view[profileIndex].e[charID].v[6] = value;
 }
 #endif
 
@@ -2528,7 +2528,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_getStability);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("cBEStatInterface_currentStat");
+extern sPlayerStatRowView_00148410 cBEStatInterface_currentStat_view[] __asm__("cBEStatInterface_currentStat");
 
 /**
  * Returns a rider's stability stat (the seventh entry of its character's stat record) from the current-stat table.
@@ -2543,7 +2543,7 @@ extern "C" signed char cBEStatInterface_getStability(cBEStatInterface* self, int
 {
     int profileIndex = cBELibrary_getProfileIndex(rider);
     int charID = cBELibrary_getCharacterID(rider);
-    return D_00535538_view[profileIndex].e[charID].v[6];
+    return cBEStatInterface_currentStat_view[profileIndex].e[charID].v[6];
 }
 #endif
 
@@ -2630,7 +2630,7 @@ struct sPlayerStat7View_00148B50 {
 struct sPlayerStatRowView_00148B50 {
     sPlayerStat7View_00148B50 e[10];
 };
-extern sPlayerStatRowView_00148B50 D_00535538_view00148B50[] __asm__("cBEStatInterface_currentStat");
+extern sPlayerStatRowView_00148B50 cBEStatInterface_currentStat_view00148B50[] __asm__("cBEStatInterface_currentStat");
 
 /**
  * Stores a profile's speed stat for one character (byte 0 of the character's stat record) in the current-stat table.
@@ -2644,7 +2644,7 @@ extern sPlayerStatRowView_00148B50 D_00535538_view00148B50[] __asm__("cBEStatInt
  */
 extern "C" void cBEStatInterface_setHumanSpeed(cBEStatInterface* self, int humanIndex, int value, int charType)
 {
-    D_00535538_view00148B50[humanIndex].e[charType].v[0] = value;
+    cBEStatInterface_currentStat_view00148B50[humanIndex].e[charType].v[0] = value;
 }
 #endif
 
@@ -2951,7 +2951,7 @@ struct sCharStat_00148E68
 {
     signed char v[15];
 };
-extern sCharStat_00148E68 D_005308D8_00148E68[] __asm__("cBELibrary_statDefault");
+extern sCharStat_00148E68 cBELibrary_statDefault_00148E68[] __asm__("cBELibrary_statDefault");
 
 /**
  * Returns a rider's edging attribute as a fraction of the character's maximum edging level.
@@ -2976,7 +2976,7 @@ extern "C" float cBEStatInterface_getEdgingAttrib(cBEStatInterface* self, int ri
         attribLevel = value;
     else
         attribLevel = cBEStatInterface_currentStat[profile].e[charID].v[3] / 5;
-    return (float)attribLevel / (float)D_005308D8_00148E68[charID].v[0xB];
+    return (float)attribLevel / (float)cBELibrary_statDefault_00148E68[charID].v[0xB];
 }
 #endif
 

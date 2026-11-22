@@ -65,7 +65,7 @@ struct sVEnt_B6D0 {
 typedef int (*tRegister_B6D0)(void*, char*, char*, int, int, int);
 typedef void (*tRelease_B6D0)(void*, int);
 
-extern sCrowdAnimDef_B6D0 D_00445D38_B6D0[] __asm__("cCrowdRender2D_mAnimTable");
+extern sCrowdAnimDef_B6D0 cCrowdRender2D_mAnimTable_B6D0[] __asm__("cCrowdRender2D_mAnimTable");
 extern char str_data_textures_crwd_ssh[];
 extern "C" int FILE_load(const char* name, int flags);
 extern "C" char* SHAPE_locate(int file, const char* name);
@@ -87,14 +87,14 @@ extern "C" void cCrowdRender2D_init_impl(int* self)
     self[0] = FILE_load(str_data_textures_crwd_ssh, 0x5000000);
     for (i = 0; i < 1; i++) {
         int j;
-        for (j = 0; j < D_00445D38_B6D0[i].count; j++) {
-            char* shape = SHAPE_locate(self[0], D_00445D38_B6D0[i].names[j]);
-            D_00445D38_B6D0[i].shapes[j] = shape;
+        for (j = 0; j < cCrowdRender2D_mAnimTable_B6D0[i].count; j++) {
+            char* shape = SHAPE_locate(self[0], cCrowdRender2D_mAnimTable_B6D0[i].names[j]);
+            cCrowdRender2D_mAnimTable_B6D0[i].shapes[j] = shape;
             sVEnt_B6D0* vt = (sVEnt_B6D0*)cGraphicsMan_TheGraphicsMan->mVtbl;
-            D_00445D38_B6D0[i].handles[j] = ((tRegister_B6D0)vt[46].fn)(vthis(cGraphicsMan_TheGraphicsMan, vt[46]), shape, D_00445D38_B6D0[i].names[j], 0, 0, -1);
+            cCrowdRender2D_mAnimTable_B6D0[i].handles[j] = ((tRegister_B6D0)vt[46].fn)(vthis(cGraphicsMan_TheGraphicsMan, vt[46]), shape, cCrowdRender2D_mAnimTable_B6D0[i].names[j], 0, 0, -1);
         }
     }
-    SHAPE* first = (SHAPE*)D_00445D38_B6D0[0].shapes[0];
+    SHAPE* first = (SHAPE*)cCrowdRender2D_mAnimTable_B6D0[0].shapes[0];
     self[1] = first->width;
     self[2] = first->height;
     self[3] = *(unsigned char*)first;
@@ -122,10 +122,10 @@ int cCrowdRender2D_purge(int* param_1)
     int i;
     for (i = 0; i < 1; i++) {
         int j;
-        for (j = 0; j < D_00445D38_B6D0[i].count; j++) {
+        for (j = 0; j < cCrowdRender2D_mAnimTable_B6D0[i].count; j++) {
             cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
             sCrowdVEntry2D* vt = (sCrowdVEntry2D*)obj->mVtbl;
-            vt[50].fn(vthis(obj, vt[50]), D_00445D38_B6D0[i].handles[j]);
+            vt[50].fn(vthis(obj, vt[50]), cCrowdRender2D_mAnimTable_B6D0[i].handles[j]);
         }
     }
     return MEM_free(*param_1);
@@ -170,7 +170,7 @@ struct sCrowdAnim2D {
 
 // cCrowdRender2D_mAnimTable is one 0xD8-byte crowd anim def (sCrowdAnimDef_BAC0 below); its frames[] start at +0x98.
 struct sCrowdAnimDefFrames_ctor { char pad_0x0[0x98]; int frames[16]; };
-extern sCrowdAnimDefFrames_ctor D_00445D38_ctor __asm__("cCrowdRender2D_mAnimTable");
+extern sCrowdAnimDefFrames_ctor cCrowdRender2D_mAnimTable_ctor __asm__("cCrowdRender2D_mAnimTable");
 
 /**
  * Constructs a 2D crowd animation: type and animation 0 at frame 0, advancing every 3 ticks from now.
@@ -186,7 +186,7 @@ void* cCrowdAnim2D_cCrowdAnim2D(void* memory, void* param_1)
     anim->f8 = 4;
     anim->f4 = 0;
     anim->fC = 0;
-    anim->f10 = D_00445D38_ctor.frames[0];
+    anim->f10 = cCrowdRender2D_mAnimTable_ctor.frames[0];
     anim->f0 = 0;
     anim->f18 = cAppMan_TheAppMan->Tick;
     anim->f14 = 3;

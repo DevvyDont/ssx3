@@ -3649,7 +3649,7 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldLine_IsBoxInt);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A5978;
 extern sSphereVec4 D_004FF260[];
-extern sSphereVec4 D_004FF120_E690[] __asm__("t4vect_Zero");
+extern sSphereVec4 t4vect_Zero_E690[] __asm__("t4vect_Zero");
 
 
 static inline void reset_E690(tIntersectInfo* h)
@@ -3662,8 +3662,8 @@ static inline void reset_E690(tIntersectInfo* h)
     h->Face = -1;
     h->Seg = -1;
     h->Stype = -1;
-    (*(sSphereVec4*)&h->Ivel) = *D_004FF120_E690;
-    (*(sSphereVec4*)&h->Iangvel) = *D_004FF120_E690;
+    (*(sSphereVec4*)&h->Ivel) = *t4vect_Zero_E690;
+    (*(sSphereVec4*)&h->Iangvel) = *t4vect_Zero_E690;
     h->T = 0;
     h->u = 0;
     h->v = 0;

@@ -1548,7 +1548,7 @@ struct sGcGlobals_6C78 {
     char pad1C[0x5C];
     void* be;               // 0x78
 };
-extern sGcGlobals_6C78* D_004A28A8_6C78 __asm__("SSXApp");
+extern sGcGlobals_6C78* SSXApp_6C78 __asm__("SSXApp");
 
 /**
  * Constructs the online game link: the handshake state, timers, counters and empty packet queues.
@@ -1577,7 +1577,7 @@ extern "C" int cGameComm_cGameComm(int vself, int port, int isServer)
     self->unk_6C = port;
     self->unk_44 = isServer;
     cGameComm_setState_6C78(self, 0);
-    self->bufSize = cBENetworkInterface_getSyncDataSize(cBE_getInterface_6C78(D_004A28A8_6C78->be, 7));
+    self->bufSize = cBENetworkInterface_getSyncDataSize(cBE_getInterface_6C78(SSXApp_6C78->be, 7));
     self->unk_60 = 30;
     self->unk_0 = 1;
     self->buf = 0;
@@ -1612,9 +1612,9 @@ extern "C" int cGameComm_cGameComm(int vself, int port, int isServer)
     self->unk_124 = 0;
     self->unk_12C = 0;
     self->unk_128 = 0;
-    self->unk_114 = D_004A28A8_6C78->unk_14;
-    self->unk_118 = D_004A28A8_6C78->unk_14;
-    self->unk_11C = D_004A28A8_6C78->unk_14;
+    self->unk_114 = SSXApp_6C78->unk_14;
+    self->unk_118 = SSXApp_6C78->unk_14;
+    self->unk_11C = SSXApp_6C78->unk_14;
     self->unk_120 = 3;
     self->unk_4 = 0;
     self->unk_8 = 0;
@@ -1634,7 +1634,7 @@ extern "C" int cGameComm_cGameComm(int vself, int port, int isServer)
     for (int j = 3; j >= 0; j--) {
         self->unk_C4[j] = 0;
     }
-    self->unk_34 = D_004A28A8_6C78->unk_18 / D_004A28A8_6C78->unk_10;
+    self->unk_34 = SSXApp_6C78->unk_18 / SSXApp_6C78->unk_10;
     self->unk_38 = 0;
     self->unk_3C = 0;
     self->unk_138 = 0;
