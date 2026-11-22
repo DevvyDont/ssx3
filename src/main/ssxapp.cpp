@@ -3218,12 +3218,9 @@ extern char D_00442130[];
 
 
 
-struct sVisNode_A830 {
-    sVisNode_A830* child[8];
-};
 
 struct sVisEntry_A830 {
-    sVisNode_A830* node;
+    nash_Cell* node;
     int mask;
 };
 
@@ -3316,7 +3313,7 @@ static inline void boxResult_A830(int* r)
 extern "C" void FrustumCallback_operatorCall(void* vctx, void* vnode, void* vcfg)
 {
     FrustumCallback* ctx = (FrustumCallback*)vctx;
-    sVisNode_A830* node = (sVisNode_A830*)vnode;
+    nash_Cell* node = (nash_Cell*)vnode;
     nash_CellKey* cfg = (nash_CellKey*)vcfg;
     int vec[4] __attribute__((aligned(16)));
     t4Vector sphere;
@@ -3373,21 +3370,21 @@ extern "C" void FrustumCallback_operatorCall(void* vctx, void* vnode, void* vcfg
             n.x = cfg->x * 2;
             n.y = cfg->y * 2;
             n.z = cfg->z * 2;
-            if (node->child[0]) FrustumCallback_operatorCall(&childCtx, node->child[0], &n);
+            if (((nash_Cell**)&node->children[0][0][0])[0]) FrustumCallback_operatorCall(&childCtx, ((nash_Cell**)&node->children[0][0][0])[0], &n);
             n.x++;
-            if (node->child[4]) FrustumCallback_operatorCall(&childCtx, node->child[4], &n);
+            if (((nash_Cell**)&node->children[0][0][0])[4]) FrustumCallback_operatorCall(&childCtx, ((nash_Cell**)&node->children[0][0][0])[4], &n);
             n.y++;
-            if (node->child[6]) FrustumCallback_operatorCall(&childCtx, node->child[6], &n);
+            if (((nash_Cell**)&node->children[0][0][0])[6]) FrustumCallback_operatorCall(&childCtx, ((nash_Cell**)&node->children[0][0][0])[6], &n);
             n.x--;
-            if (node->child[2]) FrustumCallback_operatorCall(&childCtx, node->child[2], &n);
+            if (((nash_Cell**)&node->children[0][0][0])[2]) FrustumCallback_operatorCall(&childCtx, ((nash_Cell**)&node->children[0][0][0])[2], &n);
             n.z++;
-            if (node->child[3]) FrustumCallback_operatorCall(&childCtx, node->child[3], &n);
+            if (((nash_Cell**)&node->children[0][0][0])[3]) FrustumCallback_operatorCall(&childCtx, ((nash_Cell**)&node->children[0][0][0])[3], &n);
             n.x++;
-            if (node->child[7]) FrustumCallback_operatorCall(&childCtx, node->child[7], &n);
+            if (((nash_Cell**)&node->children[0][0][0])[7]) FrustumCallback_operatorCall(&childCtx, ((nash_Cell**)&node->children[0][0][0])[7], &n);
             n.y--;
-            if (node->child[5]) FrustumCallback_operatorCall(&childCtx, node->child[5], &n);
+            if (((nash_Cell**)&node->children[0][0][0])[5]) FrustumCallback_operatorCall(&childCtx, ((nash_Cell**)&node->children[0][0][0])[5], &n);
             n.x--;
-            if (node->child[1]) FrustumCallback_operatorCall(&childCtx, node->child[1], &n);
+            if (((nash_Cell**)&node->children[0][0][0])[1]) FrustumCallback_operatorCall(&childCtx, ((nash_Cell**)&node->children[0][0][0])[1], &n);
         }
     } else if (cullResult == 2) {
         ((sVisOwner_A830*)ctx->intersector)->part[((sVisOwner_A830*)ctx->intersector)->countPart].node = node;
@@ -3404,21 +3401,21 @@ extern "C" void FrustumCallback_operatorCall(void* vctx, void* vnode, void* vcfg
             n.x = cfg->x * 2;
             n.y = cfg->y * 2;
             n.z = cfg->z * 2;
-            if (node->child[0]) FrustumCallback_operatorCall(&childCtx, node->child[0], &n);
+            if (((nash_Cell**)&node->children[0][0][0])[0]) FrustumCallback_operatorCall(&childCtx, ((nash_Cell**)&node->children[0][0][0])[0], &n);
             n.x++;
-            if (node->child[4]) FrustumCallback_operatorCall(&childCtx, node->child[4], &n);
+            if (((nash_Cell**)&node->children[0][0][0])[4]) FrustumCallback_operatorCall(&childCtx, ((nash_Cell**)&node->children[0][0][0])[4], &n);
             n.y++;
-            if (node->child[6]) FrustumCallback_operatorCall(&childCtx, node->child[6], &n);
+            if (((nash_Cell**)&node->children[0][0][0])[6]) FrustumCallback_operatorCall(&childCtx, ((nash_Cell**)&node->children[0][0][0])[6], &n);
             n.x--;
-            if (node->child[2]) FrustumCallback_operatorCall(&childCtx, node->child[2], &n);
+            if (((nash_Cell**)&node->children[0][0][0])[2]) FrustumCallback_operatorCall(&childCtx, ((nash_Cell**)&node->children[0][0][0])[2], &n);
             n.z++;
-            if (node->child[3]) FrustumCallback_operatorCall(&childCtx, node->child[3], &n);
+            if (((nash_Cell**)&node->children[0][0][0])[3]) FrustumCallback_operatorCall(&childCtx, ((nash_Cell**)&node->children[0][0][0])[3], &n);
             n.x++;
-            if (node->child[7]) FrustumCallback_operatorCall(&childCtx, node->child[7], &n);
+            if (((nash_Cell**)&node->children[0][0][0])[7]) FrustumCallback_operatorCall(&childCtx, ((nash_Cell**)&node->children[0][0][0])[7], &n);
             n.y--;
-            if (node->child[5]) FrustumCallback_operatorCall(&childCtx, node->child[5], &n);
+            if (((nash_Cell**)&node->children[0][0][0])[5]) FrustumCallback_operatorCall(&childCtx, ((nash_Cell**)&node->children[0][0][0])[5], &n);
             n.x--;
-            if (node->child[1]) FrustumCallback_operatorCall(&childCtx, node->child[1], &n);
+            if (((nash_Cell**)&node->children[0][0][0])[1]) FrustumCallback_operatorCall(&childCtx, ((nash_Cell**)&node->children[0][0][0])[1], &n);
         }
     }
 }

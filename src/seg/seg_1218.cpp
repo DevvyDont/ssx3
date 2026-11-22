@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "intersect/bxnash.h"
 #include "animation/rideranimbase.h"
 #include "world/instancerecord.h"
 #include "animation/animsequencer.h"
@@ -1585,10 +1586,6 @@ struct sLink_1A28 {
     sLink_1A28* next;
 };
 
-struct sNode_1A28 {
-    sNode_1A28* kids[8];
-    sLink_1A28* items;
-};
 
 struct sList_1A28 {
     int n;
@@ -1609,22 +1606,22 @@ extern "C" int cWScriptMan_isFocusInstance(int, sLink_1A28*);
  * @param node  the cell (eight child pointers, then the instance list)
  * @param recurse  nonzero to take the instances of all cells below too
  */
-extern "C" void FocusQuery_addcell(sList_1A28* list, sNode_1A28* node, int recurse)
+extern "C" void FocusQuery_addcell(sList_1A28* list, nash_Cell* node, int recurse)
 {
     sLink_1A28* item;
-    for (item = node->items; item; item = item->next) {
+    for (item = (*(sLink_1A28**)&node->nodesinside[0]); item; item = item->next) {
         if (cWScriptMan_isFocusInstance(cWScriptMan_TheWScriptMan, item))
             list->items[list->n++] = item;
     }
     if (recurse) {
-        if (node->kids[0]) FocusQuery_addcell(list, node->kids[0], 1);
-        if (node->kids[1]) FocusQuery_addcell(list, node->kids[1], 1);
-        if (node->kids[2]) FocusQuery_addcell(list, node->kids[2], 1);
-        if (node->kids[3]) FocusQuery_addcell(list, node->kids[3], 1);
-        if (node->kids[4]) FocusQuery_addcell(list, node->kids[4], 1);
-        if (node->kids[5]) FocusQuery_addcell(list, node->kids[5], 1);
-        if (node->kids[6]) FocusQuery_addcell(list, node->kids[6], 1);
-        if (node->kids[7]) FocusQuery_addcell(list, node->kids[7], 1);
+        if (((nash_Cell**)&node->children[0][0][0])[0]) FocusQuery_addcell(list, ((nash_Cell**)&node->children[0][0][0])[0], 1);
+        if (((nash_Cell**)&node->children[0][0][0])[1]) FocusQuery_addcell(list, ((nash_Cell**)&node->children[0][0][0])[1], 1);
+        if (((nash_Cell**)&node->children[0][0][0])[2]) FocusQuery_addcell(list, ((nash_Cell**)&node->children[0][0][0])[2], 1);
+        if (((nash_Cell**)&node->children[0][0][0])[3]) FocusQuery_addcell(list, ((nash_Cell**)&node->children[0][0][0])[3], 1);
+        if (((nash_Cell**)&node->children[0][0][0])[4]) FocusQuery_addcell(list, ((nash_Cell**)&node->children[0][0][0])[4], 1);
+        if (((nash_Cell**)&node->children[0][0][0])[5]) FocusQuery_addcell(list, ((nash_Cell**)&node->children[0][0][0])[5], 1);
+        if (((nash_Cell**)&node->children[0][0][0])[6]) FocusQuery_addcell(list, ((nash_Cell**)&node->children[0][0][0])[6], 1);
+        if (((nash_Cell**)&node->children[0][0][0])[7]) FocusQuery_addcell(list, ((nash_Cell**)&node->children[0][0][0])[7], 1);
     }
 }
 #endif
@@ -1707,7 +1704,7 @@ struct sNashKey {
 // instance list).
 struct sNashRoot {
     sNashKey key;
-    sNode_1A28* cell;
+    nash_Cell* cell;
 };
 
 struct sNashTree {
@@ -1755,7 +1752,7 @@ struct InstanceCompare {
 };
 
 extern t4Vector D_004A61E0;
-extern "C" void FocusQuery_addcell_1B60(sFocusList* list, const sNode_1A28* node, int recurse) __asm__("FocusQuery_addcell");
+extern "C" void FocusQuery_addcell_1B60(sFocusList* list, const nash_Cell* node, int recurse) __asm__("FocusQuery_addcell");
 extern "C" void MEM_copy(void* dst, void* src, int size);
 extern "C" void func_0013FAD8(tFocusRec** first, tFocusRec** last, tFocusRec** out, const InstanceCompare& cmp);
 extern "C" void cWScriptMan_downFocusScript(int, tFocusRec*);
@@ -1764,7 +1761,7 @@ extern "C" void cWScriptMan_upFocusScript(int, tFocusRec*);
 struct FocusCallbackInline;
 // Retail's out-of-line copy of FocusCallback::operator() (matched in ai/control/handplantcontrol); the
 // recursion inside the inline operator goes to it.
-extern "C" void func_00144368_1B60(const FocusCallbackInline* cb, const sNode_1A28* cell, const sNashKey* key) __asm__("func_00144368");
+extern "C" void func_00144368_1B60(const FocusCallbackInline* cb, const nash_Cell* cell, const sNashKey* key) __asm__("func_00144368");
 
 // FocusCallback (ai/focusbox.h) as cFocusMan_update inlines it: collects the instances of every cell that touches
 // one of the focus boxes. A local copy because its inline operator() and members use this unit's views of the
@@ -1774,7 +1771,7 @@ struct FocusCallbackInline {
     sFocusBox* boxes;
     int count;
 
-    void operator()(const sNode_1A28& cell, const sNashKey& key) const
+    void operator()(const nash_Cell& cell, const sNashKey& key) const
     {
         int i = 0;
         for (;;) {
@@ -1808,21 +1805,21 @@ struct FocusCallbackInline {
         k.x = key.x * 2;
         k.y = key.y * 2;
         k.z = key.z * 2;
-        if (cell.kids[0]) func_00144368_1B60(this, cell.kids[0], &k);
+        if (((nash_Cell**)&cell.children[0][0][0])[0]) func_00144368_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[0], &k);
         k.x++;
-        if (cell.kids[4]) func_00144368_1B60(this, cell.kids[4], &k);
+        if (((nash_Cell**)&cell.children[0][0][0])[4]) func_00144368_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[4], &k);
         k.y++;
-        if (cell.kids[6]) func_00144368_1B60(this, cell.kids[6], &k);
+        if (((nash_Cell**)&cell.children[0][0][0])[6]) func_00144368_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[6], &k);
         k.x--;
-        if (cell.kids[2]) func_00144368_1B60(this, cell.kids[2], &k);
+        if (((nash_Cell**)&cell.children[0][0][0])[2]) func_00144368_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[2], &k);
         k.z++;
-        if (cell.kids[3]) func_00144368_1B60(this, cell.kids[3], &k);
+        if (((nash_Cell**)&cell.children[0][0][0])[3]) func_00144368_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[3], &k);
         k.x++;
-        if (cell.kids[7]) func_00144368_1B60(this, cell.kids[7], &k);
+        if (((nash_Cell**)&cell.children[0][0][0])[7]) func_00144368_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[7], &k);
         k.y--;
-        if (cell.kids[5]) func_00144368_1B60(this, cell.kids[5], &k);
+        if (((nash_Cell**)&cell.children[0][0][0])[5]) func_00144368_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[5], &k);
         k.x--;
-        if (cell.kids[1]) func_00144368_1B60(this, cell.kids[1], &k);
+        if (((nash_Cell**)&cell.children[0][0][0])[1]) func_00144368_1B60(this, ((nash_Cell**)&cell.children[0][0][0])[1], &k);
     }
 };
 

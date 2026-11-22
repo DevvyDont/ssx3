@@ -2695,11 +2695,6 @@ struct sVEnt_4848 {
     int (*fn)(void*, ...);
 };
 
-struct sOctNode_4848 {
-    sOctNode_4848* child[8];        // 0x00
-    char pad_0x20[0x8];
-    char* list;                     // 0x28 trigger entries
-};
 
 
 
@@ -2730,17 +2725,17 @@ static inline void WalkList_4848(char* e, void* ctx)
     }
 }
 
-static inline void Subtree_4848(sOctNode_4848* node, void* ctx)
+static inline void Subtree_4848(nash_Cell* node, void* ctx)
 {
-    WalkList_4848(node->list, ctx);
-    if (node->child[0]) descend((nash_Cell*)node->child[0], ctx);
-    if (node->child[1]) descend((nash_Cell*)node->child[1], ctx);
-    if (node->child[2]) descend((nash_Cell*)node->child[2], ctx);
-    if (node->child[3]) descend((nash_Cell*)node->child[3], ctx);
-    if (node->child[4]) descend((nash_Cell*)node->child[4], ctx);
-    if (node->child[5]) descend((nash_Cell*)node->child[5], ctx);
-    if (node->child[6]) descend((nash_Cell*)node->child[6], ctx);
-    if (node->child[7]) descend((nash_Cell*)node->child[7], ctx);
+    WalkList_4848((*(char**)&node->nodesinside[2]), ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[0]) descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[0], ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[1]) descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[1], ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[2]) descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[2], ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[3]) descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[3], ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[4]) descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[4], ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[5]) descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[5], ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[6]) descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[6], ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[7]) descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[7], ctx);
 }
 
 /**
@@ -2767,12 +2762,12 @@ static inline void Subtree_4848(sOctNode_4848* node, void* ctx)
  * @param node  the octree cell (On Tour Cell: children[2][2][2], node lists from +0x20)
  * @param cell  the cell's key: level and x, y, z cell coordinates (On Tour CellKey)
  */
-extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, tBoundBox* box, sOctNode_4848* node, nash_CellKey* cell)
+extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, tBoundBox* box, nash_Cell* node, nash_CellKey* cell)
 {
     nash_CellKey childCell;
-    sOctNode_4848* ch;
+    nash_Cell* ch;
 
-    WalkList_4848(node->list, ctx1);
+    WalkList_4848((*(char**)&node->nodesinside[2]), ctx1);
     if (cell->level == 11) {
         return;
     }
@@ -2826,7 +2821,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, tB
     int iw1 = 0;
     if (box->MinPoint.z < wlo1 && whi1 < box->MaxPoint.z) iw1 = 1;
 
-    ch = node->child[0];
+    ch = ((nash_Cell**)&node->children[0][0][0])[0];
     if (ch != 0 && fu0 && fv0 && fw0) {
         if (iu0 && iv0 && iw0) {
             Subtree_4848(ch, ctx2);
@@ -2835,7 +2830,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, tB
         }
     }
     childCell.z++;
-    ch = node->child[1];
+    ch = ((nash_Cell**)&node->children[0][0][0])[1];
     if (ch != 0 && fu0 && fv0 && fw1) {
         if (iu0 && iv0 && iw1) {
             Subtree_4848(ch, ctx2);
@@ -2844,7 +2839,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, tB
         }
     }
     childCell.y++;
-    ch = node->child[3];
+    ch = ((nash_Cell**)&node->children[0][0][0])[3];
     if (ch != 0 && fu0 && fv1 && fw1) {
         if (iu0 && iv1 && iw1) {
             Subtree_4848(ch, ctx2);
@@ -2853,7 +2848,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, tB
         }
     }
     childCell.z--;
-    ch = node->child[2];
+    ch = ((nash_Cell**)&node->children[0][0][0])[2];
     if (ch != 0 && fu0 && fv1 && fw0) {
         if (iu0 && iv1 && iw0) {
             Subtree_4848(ch, ctx2);
@@ -2862,7 +2857,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, tB
         }
     }
     childCell.x++;
-    ch = node->child[6];
+    ch = ((nash_Cell**)&node->children[0][0][0])[6];
     if (ch != 0 && fu1 && fv1 && fw0) {
         if (iu1 && iv1 && iw0) {
             Subtree_4848(ch, ctx2);
@@ -2871,7 +2866,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, tB
         }
     }
     childCell.z++;
-    ch = node->child[7];
+    ch = ((nash_Cell**)&node->children[0][0][0])[7];
     if (ch != 0 && fu1 && fv1 && fw1) {
         if (iu1 && iv1 && iw1) {
             Subtree_4848(ch, ctx2);
@@ -2880,7 +2875,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, tB
         }
     }
     childCell.y--;
-    ch = node->child[5];
+    ch = ((nash_Cell**)&node->children[0][0][0])[5];
     if (ch != 0 && fu1 && fv0 && fw1) {
         if (iu1 && iv0 && iw1) {
             Subtree_4848(ch, ctx2);
@@ -2889,7 +2884,7 @@ extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, tB
         }
     }
     childCell.z--;
-    ch = node->child[4];
+    ch = ((nash_Cell**)&node->children[0][0][0])[4];
     if (ch != 0 && fu1 && fv0 && fw0) {
         if (iu1 && iv0 && iw0) {
             Subtree_4848(ch, ctx2);

@@ -533,23 +533,14 @@ struct sObj_3309D8 {
     sVEntry<void>* vt;
 };
 
-struct sNode_3309D8 {
-    sNode_3309D8* next;
-    int pad04;
-    int flags;
-    sObj_3309D8* obj;
-    int pad10[20];
-    float bmin[3];
-    float bmax[3];
-};
 
 
-static inline int overlapNode_3309D8(const tBoundBox* b, const sNode_3309D8* n)
+static inline int overlapNode_3309D8(const tBoundBox* b, const tInstanceRecord* n)
 {
     int r = 0;
-    if (((float*)&b->MinPoint)[0] <= n->bmax[0] && ((float*)&b->MaxPoint)[0] >= n->bmin[0] &&
-        ((float*)&b->MinPoint)[1] <= n->bmax[1] && ((float*)&b->MaxPoint)[1] >= n->bmin[1] &&
-        ((float*)&b->MinPoint)[2] <= n->bmax[2] && ((float*)&b->MaxPoint)[2] >= n->bmin[2]) {
+    if (((float*)&b->MinPoint)[0] <= n->m_fvMax.m[0] && ((float*)&b->MaxPoint)[0] >= n->m_fvMin.m[0] &&
+        ((float*)&b->MinPoint)[1] <= n->m_fvMax.m[1] && ((float*)&b->MaxPoint)[1] >= n->m_fvMin.m[1] &&
+        ((float*)&b->MinPoint)[2] <= n->m_fvMax.m[2] && ((float*)&b->MaxPoint)[2] >= n->m_fvMin.m[2]) {
         r = 1;
     }
     return r;
@@ -581,24 +572,24 @@ static inline int overlapBox_3309D8(const tBoundBox* b, const tBoundBox* o)
  */
 extern "C" void OverlapInstancesCallback_operatorCall(OverlapInstancesCallback* ctx, nash_Cell* tree)
 {
-    for (sNode_3309D8* node = *(sNode_3309D8**)&tree->nodesinside[0]; node != 0; node = node->next) {
-        int flags = node->flags;
+    for (tInstanceRecord* node = *(tInstanceRecord**)&tree->nodesinside[0]; node != 0; node = (*(tInstanceRecord**)&node->m_iIntersect)) {
+        int flags = node->m_iFlags;
         if (flags & 0x20) {
             if (overlapNode_3309D8(((tBoundBox*)ctx->box), node)) {
                 int* cnt = ((int*)ctx->number);
                 int n = *cnt;
-                ((sNode_3309D8**)ctx->instances)[n] = node;
+                ((tInstanceRecord**)ctx->instances)[n] = node;
                 *cnt = n + 1;
             }
         } else if (flags & 0x40) {
-            sVEntry<void>* vt = node->obj->vt;
-            if (((Test_3309D8)vt[44].fn)(vthis(node->obj, vt[44]))) {
-                sVEntry<void>* vt2 = node->obj->vt;
-                tBoundBox* objBox = ((GetBox_3309D8)vt2[45].fn)(vthis(node->obj, vt2[45]));
+            sVEntry<void>* vt = ((sObj_3309D8*)node->m_pActiveNode)->vt;
+            if (((Test_3309D8)vt[44].fn)(vthis(((sObj_3309D8*)node->m_pActiveNode), vt[44]))) {
+                sVEntry<void>* vt2 = ((sObj_3309D8*)node->m_pActiveNode)->vt;
+                tBoundBox* objBox = ((GetBox_3309D8)vt2[45].fn)(vthis(((sObj_3309D8*)node->m_pActiveNode), vt2[45]));
                 if (overlapBox_3309D8(((tBoundBox*)ctx->box), objBox)) {
                     int* cnt = ((int*)ctx->number);
                     int n = *cnt;
-                    ((sNode_3309D8**)ctx->instances)[n] = node;
+                    ((tInstanceRecord**)ctx->instances)[n] = node;
                     *cnt = n + 1;
                 }
             }
@@ -631,7 +622,7 @@ struct sQuery_330BA8 {
     sGrid_330BA8* grid;             // 0x0
     int unk04;                      // 0x4
     int count;                      // 0x8
-    sNode_3309D8* items[0x40];      // 0xC
+    tInstanceRecord* items[0x40];      // 0xC
     unsigned int ntris;             // 0x10C
     void* tris[0x40];               // 0x110
     unsigned int nobjs;             // 0x210
@@ -685,7 +676,7 @@ extern "C" void cOverlapList_getinstances(cOverlapList* self, tBoundBox* box)
     sGrid_330BA8* grid = (sGrid_330BA8*)self->nash;
     OverlapInstancesCallback* pctx = &ctx;
     self->deletecount = (unsigned int)grid->unkA0;
-    (*(sNode_3309D8***)&ctx.instances) = ((sNode_3309D8**)&self->instances[0]);
+    (*(tInstanceRecord***)&ctx.instances) = ((tInstanceRecord**)&self->instances[0]);
     (*(int**)&ctx.number) = (int*)&self->numinstances;
     ctx.maximum = 0x40;
     (*(tBoundBox**)&ctx.box) = box;
@@ -740,7 +731,7 @@ static inline void collect_331450(nash_Cell* node, OverlapInstancesCallback* ctx
 {
     void** p;
     for (p = (*(void***)&node->nodesinside[2]); p != 0; p = (void**)*p) {
-        ((sNode_3309D8**)ctx->instances)[(*((int*)ctx->number))++] = (sNode_3309D8*)p;
+        ((tInstanceRecord**)ctx->instances)[(*((int*)ctx->number))++] = (tInstanceRecord*)p;
     }
     if (((void**)&node->children[0][0][0])[0] != 0) nash_Cell_descend1((nash_Cell*)((void**)&node->children[0][0][0])[0], (sOctCollect*)ctx);
     if (((void**)&node->children[0][0][0])[1] != 0) nash_Cell_descend1((nash_Cell*)((void**)&node->children[0][0][0])[1], (sOctCollect*)ctx);
@@ -790,7 +781,7 @@ extern "C" void cOverlapList_gettyped(cOverlapList* self, tBoundBox* box)
     sGrid_331450* grid = (sGrid_331450*)self->nash;
     OverlapInstancesCallback* pctx = &ctx;
     self->deletecount = (unsigned int)grid->unkA0;
-    (*(sNode_3309D8***)&ctx.instances) = (sNode_3309D8**)((void**)&self->typed[0]);
+    (*(tInstanceRecord***)&ctx.instances) = (tInstanceRecord**)((void**)&self->typed[0]);
     (*(int**)&ctx.number) = (int*)&self->numtyped;
     ctx.maximum = 0x200;
     (*(tBoundBox**)&ctx.box) = box;
@@ -860,7 +851,7 @@ static inline void collect_331E90(sTree_331E90* tree, OverlapInstancesCallback* 
         if (overlapObj_331E90(((tBoundBox*)q->box), p)) {
             int* cnt = ((int*)q->number);
             int n = *cnt;
-            ((sNode_3309D8**)q->instances)[n] = (sNode_3309D8*)p;
+            ((tInstanceRecord**)q->instances)[n] = (tInstanceRecord*)p;
             *cnt = n + 1;
         }
     }
@@ -909,11 +900,11 @@ extern "C" void cOverlapList_getpatchesandinstances(cOverlapList* self, tBoundBo
 {
     OverlapPatchesAndInstancesCallback ctx;
     self->deletecount = ((sGrid_331E90*)self->nash)->unkA0;
-    (*(sNode_3309D8***)&ctx.instancecallback.instances) = ((sNode_3309D8**)&self->instances[0]);
+    (*(tInstanceRecord***)&ctx.instancecallback.instances) = ((tInstanceRecord**)&self->instances[0]);
     (*(int**)&ctx.instancecallback.number) = (int*)&self->numinstances;
     ctx.instancecallback.maximum = 0x40;
     (*(tBoundBox**)&ctx.instancecallback.box) = box;
-    (*(sNode_3309D8***)&(*(OverlapInstancesCallback*)&ctx.patchescallback).instances) = ((sNode_3309D8**)&self->patches[0]);
+    (*(tInstanceRecord***)&(*(OverlapInstancesCallback*)&ctx.patchescallback).instances) = ((tInstanceRecord**)&self->patches[0]);
     (*(int**)&(*(OverlapInstancesCallback*)&ctx.patchescallback).number) = (int*)&self->numpatches;
     (*(OverlapInstancesCallback*)&ctx.patchescallback).maximum = 0x40;
     (*(tBoundBox**)&(*(OverlapInstancesCallback*)&ctx.patchescallback).box) = box;
@@ -987,7 +978,7 @@ static inline void add_332DB8(OverlapInstancesCallback* s, void* p)
 {
     int* cnt = ((int*)s->number);
     int n = *cnt;
-    ((sNode_3309D8**)s->instances)[n] = (sNode_3309D8*)p;
+    ((tInstanceRecord**)s->instances)[n] = (tInstanceRecord*)p;
     *cnt = n + 1;
 }
 
@@ -1047,18 +1038,18 @@ extern "C" void cOverlapList_geteverything(cOverlapList* self, tBoundBox* box)
 {
     OverlapEverythingCallback ctx;
     self->deletecount = ((sGrid_332DB8*)self->nash)->unkA0;
-    (*(sNode_3309D8***)&ctx.instancecallback.instances) = ((sNode_3309D8**)&self->instances[0]);
+    (*(tInstanceRecord***)&ctx.instancecallback.instances) = ((tInstanceRecord**)&self->instances[0]);
     (*(int**)&ctx.instancecallback.number) = (int*)&self->numinstances;
     ctx.instancecallback.maximum = 0x40;
     (*(tBoundBox**)&ctx.instancecallback.box) = box;
-    (*(sNode_3309D8***)&(*(OverlapInstancesCallback*)&ctx.patchescallback).instances) = ((sNode_3309D8**)&self->patches[0]);
+    (*(tInstanceRecord***)&(*(OverlapInstancesCallback*)&ctx.patchescallback).instances) = ((tInstanceRecord**)&self->patches[0]);
     (*(int**)&(*(OverlapInstancesCallback*)&ctx.patchescallback).number) = (int*)&self->numpatches;
     (*(OverlapInstancesCallback*)&ctx.patchescallback).maximum = 0x40;
     (*(tBoundBox**)&(*(OverlapInstancesCallback*)&ctx.patchescallback).box) = box;
     OverlapInstancesCallback* objs = &(*(OverlapInstancesCallback*)&ctx.patchescallback);
     self->numinstances = 0;
     *((int*)objs->number) = 0;
-    (*(sNode_3309D8***)&(*(OverlapInstancesCallback*)&ctx.typedcallback).instances) = ((sNode_3309D8**)&self->typed[0]);
+    (*(tInstanceRecord***)&(*(OverlapInstancesCallback*)&ctx.typedcallback).instances) = ((tInstanceRecord**)&self->typed[0]);
     (*(int**)&(*(OverlapInstancesCallback*)&ctx.typedcallback).number) = (int*)&self->numtyped;
     (*(OverlapInstancesCallback*)&ctx.typedcallback).maximum = 0x200;
     (*(tBoundBox**)&(*(OverlapInstancesCallback*)&ctx.typedcallback).box) = box;
@@ -3315,7 +3306,7 @@ extern "C" void nash_privy_QueryHelper_helpX2(char* flag, OverlapInstancesCallba
     nash_CellKey* cell = (nash_CellKey*)vcell;
     void** objNode;
     for (objNode = (*(void***)&node->nodesinside[2]); objNode != 0; objNode = (void**)*objNode) {
-        ((sNode_3309D8**)ctx->instances)[(*((int*)ctx->number))++] = (sNode_3309D8*)objNode;
+        ((tInstanceRecord**)ctx->instances)[(*((int*)ctx->number))++] = (tInstanceRecord*)objNode;
     }
     if (cell->level == 11) {
         return;
@@ -3438,11 +3429,6 @@ struct sObj_33A3D8 {
     float bmax[3];              // 0x164
 };
 
-struct sTree_33A3D8 {
-    sTree_33A3D8* child[8];
-    int pad20;
-    sObj_33A3D8* objs;          // 0x24
-};
 
 static inline int overlapObj_33A3D8(const tBoundBox* b, const sObj_33A3D8* n)
 {
@@ -3455,31 +3441,31 @@ static inline int overlapObj_33A3D8(const tBoundBox* b, const sObj_33A3D8* n)
     return r;
 }
 
-static inline void collectObjs_33A3D8(sTree_33A3D8* tree, OverlapInstancesCallback* ctx)
+static inline void collectObjs_33A3D8(nash_Cell* tree, OverlapInstancesCallback* ctx)
 {
     OverlapInstancesCallback_operatorCall(ctx, (nash_Cell*)tree);
     OverlapInstancesCallback* q = (OverlapInstancesCallback*)((char*)ctx + 0x10);
-    for (sObj_33A3D8* p = tree->objs; p != 0; p = p->next) {
+    for (sObj_33A3D8* p = (*(sObj_33A3D8**)&tree->nodesinside[1]); p != 0; p = p->next) {
         if (overlapObj_33A3D8(((tBoundBox*)q->box), p)) {
             int* cnt = ((int*)q->number);
             int n = *cnt;
-            ((sNode_3309D8**)q->instances)[n] = (sNode_3309D8*)p;
+            ((tInstanceRecord**)q->instances)[n] = (tInstanceRecord*)p;
             *cnt = n + 1;
         }
     }
 }
 
-static inline void collect_33A3D8(sTree_33A3D8* tree, OverlapInstancesCallback* ctx)
+static inline void collect_33A3D8(nash_Cell* tree, OverlapInstancesCallback* ctx)
 {
     collectObjs_33A3D8(tree, ctx);
-    if (tree->child[0] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->child[0]), ctx);
-    if (tree->child[1] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->child[1]), ctx);
-    if (tree->child[2] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->child[2]), ctx);
-    if (tree->child[3] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->child[3]), ctx);
-    if (tree->child[4] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->child[4]), ctx);
-    if (tree->child[5] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->child[5]), ctx);
-    if (tree->child[6] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->child[6]), ctx);
-    if (tree->child[7] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->child[7]), ctx);
+    if (((nash_Cell**)&tree->children[0][0][0])[0] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)((nash_Cell**)&tree->children[0][0][0])[0]), ctx);
+    if (((nash_Cell**)&tree->children[0][0][0])[1] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)((nash_Cell**)&tree->children[0][0][0])[1]), ctx);
+    if (((nash_Cell**)&tree->children[0][0][0])[2] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)((nash_Cell**)&tree->children[0][0][0])[2]), ctx);
+    if (((nash_Cell**)&tree->children[0][0][0])[3] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)((nash_Cell**)&tree->children[0][0][0])[3]), ctx);
+    if (((nash_Cell**)&tree->children[0][0][0])[4] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)((nash_Cell**)&tree->children[0][0][0])[4]), ctx);
+    if (((nash_Cell**)&tree->children[0][0][0])[5] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)((nash_Cell**)&tree->children[0][0][0])[5]), ctx);
+    if (((nash_Cell**)&tree->children[0][0][0])[6] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)((nash_Cell**)&tree->children[0][0][0])[6]), ctx);
+    if (((nash_Cell**)&tree->children[0][0][0])[7] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)((nash_Cell**)&tree->children[0][0][0])[7]), ctx);
 }
 
 
@@ -3504,7 +3490,7 @@ static inline void collect_33A3D8(sTree_33A3D8* tree, OverlapInstancesCallback* 
 extern "C" void nash_privy_QueryHelper_helpX3(char* flag, OverlapInstancesCallback* ctx, OverlapInstancesCallback* ctx2, void* vbox, void* vnode, void* vcell)
 {
     tBoundBox* box = (tBoundBox*)vbox;
-    sTree_33A3D8* node = (sTree_33A3D8*)vnode;
+    nash_Cell* node = (nash_Cell*)vnode;
     nash_CellKey* cell = (nash_CellKey*)vcell;
     collectObjs_33A3D8(node, ctx);
     if (cell->level == 11) {
@@ -3564,50 +3550,50 @@ extern "C" void nash_privy_QueryHelper_helpX3(char* flag, OverlapInstancesCallba
     int cz1 = 0;
     if (((float*)&box->MinPoint)[2] < z1lo && z1hi < ((float*)&box->MaxPoint)[2]) cz1 = 1;
 
-    sTree_33A3D8* subNode;
-    subNode = node->child[0];
+    nash_Cell* subNode;
+    subNode = ((nash_Cell**)&node->children[0][0][0])[0];
     if (subNode && ox0 && oy0 && oz0) {
         if (cx0 && cy0 && cz0) collect_33A3D8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX3(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    subNode = node->child[1];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[1];
     if (subNode && ox0 && oy0 && oz1) {
         if (cx0 && cy0 && cz1) collect_33A3D8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX3(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y++;
-    subNode = node->child[3];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[3];
     if (subNode && ox0 && oy1 && oz1) {
         if (cx0 && cy1 && cz1) collect_33A3D8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX3(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    subNode = node->child[2];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[2];
     if (subNode && ox0 && oy1 && oz0) {
         if (cx0 && cy1 && cz0) collect_33A3D8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX3(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.x++;
-    subNode = node->child[6];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[6];
     if (subNode && ox1 && oy1 && oz0) {
         if (cx1 && cy1 && cz0) collect_33A3D8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX3(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    subNode = node->child[7];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[7];
     if (subNode && ox1 && oy1 && oz1) {
         if (cx1 && cy1 && cz1) collect_33A3D8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX3(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y--;
-    subNode = node->child[5];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[5];
     if (subNode && ox1 && oy0 && oz1) {
         if (cx1 && cy0 && cz1) collect_33A3D8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX3(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    subNode = node->child[4];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[4];
     if (subNode && ox1 && oy0 && oz0) {
         if (cx1 && cy0 && cz0) collect_33A3D8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX3(flag, ctx, ctx2, box, subNode, &sub);
@@ -3638,16 +3624,10 @@ struct sObjNode_33B748 {
     float bmax[3];
 };
 
-struct sTree_33B748 {
-    sTree_33B748* child[8];
-    void* nodes;
-    sObjNode_33B748* objs;
-    void** all;
-};
 
 
 // PORT: alias; the unit defines nash_Cell_descend3 later with its own struct types.
-extern "C" void nash_Cell_descend3_33B748(sTree_33B748* self, OverlapEverythingCallback* ctx) __asm__("nash_Cell_descend3");
+extern "C" void nash_Cell_descend3_33B748(nash_Cell* self, OverlapEverythingCallback* ctx) __asm__("nash_Cell_descend3");
 
 static inline void add_33B748(sSub_33B748* s, void* p)
 {
@@ -3668,32 +3648,32 @@ static inline int overlap_33B748(const sBox_33B748* b, const sObjNode_33B748* n)
     return r;
 }
 
-static inline void visit_33B748(sTree_33B748* self, OverlapEverythingCallback* ctx)
+static inline void visit_33B748(nash_Cell* self, OverlapEverythingCallback* ctx)
 {
     OverlapInstancesCallback_operatorCall((OverlapInstancesCallback*)ctx, (nash_Cell*)self);
     sSub_33B748* s = &(*(sSub_33B748*)&ctx->patchescallback);
-    for (sObjNode_33B748* p = self->objs; p != 0; p = p->next) {
+    for (sObjNode_33B748* p = (*(sObjNode_33B748**)&self->nodesinside[1]); p != 0; p = p->next) {
         if (overlap_33B748(s->box, p)) {
             add_33B748(s, p);
         }
     }
     s = &(*(sSub_33B748*)&ctx->typedcallback);
-    for (void** q = self->all; q != 0; q = (void**)*q) {
+    for (void** q = (*(void***)&self->nodesinside[2]); q != 0; q = (void**)*q) {
         add_33B748(s, q);
     }
 }
 
-static inline void collect_33B748(sTree_33B748* self, OverlapEverythingCallback* ctx)
+static inline void collect_33B748(nash_Cell* self, OverlapEverythingCallback* ctx)
 {
     visit_33B748(self, ctx);
-    if (self->child[0]) nash_Cell_descend3_33B748(self->child[0], ctx);
-    if (self->child[1]) nash_Cell_descend3_33B748(self->child[1], ctx);
-    if (self->child[2]) nash_Cell_descend3_33B748(self->child[2], ctx);
-    if (self->child[3]) nash_Cell_descend3_33B748(self->child[3], ctx);
-    if (self->child[4]) nash_Cell_descend3_33B748(self->child[4], ctx);
-    if (self->child[5]) nash_Cell_descend3_33B748(self->child[5], ctx);
-    if (self->child[6]) nash_Cell_descend3_33B748(self->child[6], ctx);
-    if (self->child[7]) nash_Cell_descend3_33B748(self->child[7], ctx);
+    if (((nash_Cell**)&self->children[0][0][0])[0]) nash_Cell_descend3_33B748(((nash_Cell**)&self->children[0][0][0])[0], ctx);
+    if (((nash_Cell**)&self->children[0][0][0])[1]) nash_Cell_descend3_33B748(((nash_Cell**)&self->children[0][0][0])[1], ctx);
+    if (((nash_Cell**)&self->children[0][0][0])[2]) nash_Cell_descend3_33B748(((nash_Cell**)&self->children[0][0][0])[2], ctx);
+    if (((nash_Cell**)&self->children[0][0][0])[3]) nash_Cell_descend3_33B748(((nash_Cell**)&self->children[0][0][0])[3], ctx);
+    if (((nash_Cell**)&self->children[0][0][0])[4]) nash_Cell_descend3_33B748(((nash_Cell**)&self->children[0][0][0])[4], ctx);
+    if (((nash_Cell**)&self->children[0][0][0])[5]) nash_Cell_descend3_33B748(((nash_Cell**)&self->children[0][0][0])[5], ctx);
+    if (((nash_Cell**)&self->children[0][0][0])[6]) nash_Cell_descend3_33B748(((nash_Cell**)&self->children[0][0][0])[6], ctx);
+    if (((nash_Cell**)&self->children[0][0][0])[7]) nash_Cell_descend3_33B748(((nash_Cell**)&self->children[0][0][0])[7], ctx);
 }
 
 struct sCtx_340DC0;
@@ -3722,7 +3702,7 @@ extern "C" void nash_privy_QueryHelper_helpX4(char* flag, OverlapEverythingCallb
     OverlapEverythingCallback* ctx = vctx;
     OverlapEverythingCallback* ctx2 = vctx2;
     tBoundBox* box = (tBoundBox*)vbox;
-    sTree_33B748* node = (sTree_33B748*)vnode;
+    nash_Cell* node = (nash_Cell*)vnode;
     nash_CellKey* cell = (nash_CellKey*)vcell;
     visit_33B748(node, ctx);
     if (cell->level == 11) {
@@ -3782,50 +3762,50 @@ extern "C" void nash_privy_QueryHelper_helpX4(char* flag, OverlapEverythingCallb
     int cz1 = 0;
     if (((float*)&box->MinPoint)[2] < z1lo && z1hi < ((float*)&box->MaxPoint)[2]) cz1 = 1;
 
-    sTree_33B748* subNode;
-    subNode = node->child[0];
+    nash_Cell* subNode;
+    subNode = ((nash_Cell**)&node->children[0][0][0])[0];
     if (subNode && ox0 && oy0 && oz0) {
         if (cx0 && cy0 && cz0) collect_33B748(subNode, ctx2);
         else nash_privy_QueryHelper_helpX4(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.z++;
-    subNode = node->child[1];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[1];
     if (subNode && ox0 && oy0 && oz1) {
         if (cx0 && cy0 && cz1) collect_33B748(subNode, ctx2);
         else nash_privy_QueryHelper_helpX4(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.y++;
-    subNode = node->child[3];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[3];
     if (subNode && ox0 && oy1 && oz1) {
         if (cx0 && cy1 && cz1) collect_33B748(subNode, ctx2);
         else nash_privy_QueryHelper_helpX4(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.z--;
-    subNode = node->child[2];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[2];
     if (subNode && ox0 && oy1 && oz0) {
         if (cx0 && cy1 && cz0) collect_33B748(subNode, ctx2);
         else nash_privy_QueryHelper_helpX4(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.x++;
-    subNode = node->child[6];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[6];
     if (subNode && ox1 && oy1 && oz0) {
         if (cx1 && cy1 && cz0) collect_33B748(subNode, ctx2);
         else nash_privy_QueryHelper_helpX4(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.z++;
-    subNode = node->child[7];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[7];
     if (subNode && ox1 && oy1 && oz1) {
         if (cx1 && cy1 && cz1) collect_33B748(subNode, ctx2);
         else nash_privy_QueryHelper_helpX4(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.y--;
-    subNode = node->child[5];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[5];
     if (subNode && ox1 && oy0 && oz1) {
         if (cx1 && cy0 && cz1) collect_33B748(subNode, ctx2);
         else nash_privy_QueryHelper_helpX4(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.z--;
-    subNode = node->child[4];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[4];
     if (subNode && ox1 && oy0 && oz0) {
         if (cx1 && cy0 && cz0) collect_33B748(subNode, ctx2);
         else nash_privy_QueryHelper_helpX4(flag, vctx, vctx2, vbox, subNode, &sub);
@@ -4131,27 +4111,23 @@ extern "C" void nash_privy_QueryHelper_help(char* flag, TerrainCallback* query, 
 INCLUDE_ASM("intersect/worldsphtree", nash_privy_QueryHelper_helpX6);
 #ifdef SKIP_ASM
 
-struct sOct_33DFD8 {
-    sOct_33DFD8* child[8];
-    void* list;         // 0x20
-};
 
 extern "C" void nash_Cell_descend5(nash_Cell* self, void* ctx);
 
-static inline void collect_33DFD8(sOct_33DFD8* node, StaticObjectCallback* ctx)
+static inline void collect_33DFD8(nash_Cell* node, StaticObjectCallback* ctx)
 {
     void** p;
-    for (p = (void**)node->list; p != 0; p = (void**)*p) {
+    for (p = (void**)(*(void**)&node->nodesinside[0]); p != 0; p = (void**)*p) {
         StaticObjectCallback_intersectinstance(ctx, p);
     }
-    if (node->child[0] != 0) nash_Cell_descend5((nash_Cell*)node->child[0], ctx);
-    if (node->child[1] != 0) nash_Cell_descend5((nash_Cell*)node->child[1], ctx);
-    if (node->child[2] != 0) nash_Cell_descend5((nash_Cell*)node->child[2], ctx);
-    if (node->child[3] != 0) nash_Cell_descend5((nash_Cell*)node->child[3], ctx);
-    if (node->child[4] != 0) nash_Cell_descend5((nash_Cell*)node->child[4], ctx);
-    if (node->child[5] != 0) nash_Cell_descend5((nash_Cell*)node->child[5], ctx);
-    if (node->child[6] != 0) nash_Cell_descend5((nash_Cell*)node->child[6], ctx);
-    if (node->child[7] != 0) nash_Cell_descend5((nash_Cell*)node->child[7], ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[0] != 0) nash_Cell_descend5((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[0], ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[1] != 0) nash_Cell_descend5((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[1], ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[2] != 0) nash_Cell_descend5((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[2], ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[3] != 0) nash_Cell_descend5((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[3], ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[4] != 0) nash_Cell_descend5((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[4], ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[5] != 0) nash_Cell_descend5((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[5], ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[6] != 0) nash_Cell_descend5((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[6], ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[7] != 0) nash_Cell_descend5((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[7], ctx);
 }
 
 /**
@@ -4173,10 +4149,10 @@ static inline void collect_33DFD8(sOct_33DFD8* node, StaticObjectCallback* ctx)
 extern "C" void nash_privy_QueryHelper_helpX6(char* flag, StaticObjectCallback* ctx, StaticObjectCallback* ctx2, void* vbox, void* vnode, void* vcell)
 {
     tBoundBox* box = (tBoundBox*)vbox;
-    sOct_33DFD8* node = (sOct_33DFD8*)vnode;
+    nash_Cell* node = (nash_Cell*)vnode;
     nash_CellKey* cell = (nash_CellKey*)vcell;
     void** objNode;
-    for (objNode = (void**)node->list; objNode != 0; objNode = (void**)*objNode) {
+    for (objNode = (void**)(*(void**)&node->nodesinside[0]); objNode != 0; objNode = (void**)*objNode) {
         StaticObjectCallback_intersectinstance(ctx, objNode);
     }
     if (cell->level == 11) {
@@ -4236,50 +4212,50 @@ extern "C" void nash_privy_QueryHelper_helpX6(char* flag, StaticObjectCallback* 
     int cz1 = 0;
     if (((float*)&box->MinPoint)[2] < z1lo && z1hi < ((float*)&box->MaxPoint)[2]) cz1 = 1;
 
-    sOct_33DFD8* subNode;
-    subNode = node->child[0];
+    nash_Cell* subNode;
+    subNode = ((nash_Cell**)&node->children[0][0][0])[0];
     if (subNode && ox0 && oy0 && oz0) {
         if (cx0 && cy0 && cz0) collect_33DFD8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX6(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    subNode = node->child[1];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[1];
     if (subNode && ox0 && oy0 && oz1) {
         if (cx0 && cy0 && cz1) collect_33DFD8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX6(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y++;
-    subNode = node->child[3];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[3];
     if (subNode && ox0 && oy1 && oz1) {
         if (cx0 && cy1 && cz1) collect_33DFD8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX6(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    subNode = node->child[2];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[2];
     if (subNode && ox0 && oy1 && oz0) {
         if (cx0 && cy1 && cz0) collect_33DFD8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX6(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.x++;
-    subNode = node->child[6];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[6];
     if (subNode && ox1 && oy1 && oz0) {
         if (cx1 && cy1 && cz0) collect_33DFD8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX6(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    subNode = node->child[7];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[7];
     if (subNode && ox1 && oy1 && oz1) {
         if (cx1 && cy1 && cz1) collect_33DFD8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX6(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y--;
-    subNode = node->child[5];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[5];
     if (subNode && ox1 && oy0 && oz1) {
         if (cx1 && cy0 && cz1) collect_33DFD8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX6(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    subNode = node->child[4];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[4];
     if (subNode && ox1 && oy0 && oz0) {
         if (cx1 && cy0 && cz0) collect_33DFD8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX6(flag, ctx, ctx2, box, subNode, &sub);
@@ -4292,14 +4268,9 @@ INCLUDE_ASM("intersect/worldsphtree", nash_privy_QueryHelper_helpX7);
 #ifdef SKIP_ASM
 
 
-struct sOct_33ED60 {
-    sOct_33ED60* child[8];
-    int pad20[2];
-    char* objs;                 // 0x28
-};
 
 // PORT: alias; the unit defines nash_Cell_descend6 later with its own struct types.
-extern "C" void nash_Cell_descend6_33ED60(sOct_33ED60* tree, SplineCallback* q) __asm__("nash_Cell_descend6");
+extern "C" void nash_Cell_descend6_33ED60(nash_Cell* tree, SplineCallback* q) __asm__("nash_Cell_descend6");
 
 static inline void objs_33ED60(char* o, SplineCallback* q)
 {
@@ -4317,17 +4288,17 @@ static inline void objs_33ED60(char* o, SplineCallback* q)
     }
 }
 
-static inline void collect_33ED60(sOct_33ED60* node, SplineCallback* q)
+static inline void collect_33ED60(nash_Cell* node, SplineCallback* q)
 {
-    objs_33ED60(node->objs, q);
-    if (node->child[0] != 0) nash_Cell_descend6_33ED60(node->child[0], q);
-    if (node->child[1] != 0) nash_Cell_descend6_33ED60(node->child[1], q);
-    if (node->child[2] != 0) nash_Cell_descend6_33ED60(node->child[2], q);
-    if (node->child[3] != 0) nash_Cell_descend6_33ED60(node->child[3], q);
-    if (node->child[4] != 0) nash_Cell_descend6_33ED60(node->child[4], q);
-    if (node->child[5] != 0) nash_Cell_descend6_33ED60(node->child[5], q);
-    if (node->child[6] != 0) nash_Cell_descend6_33ED60(node->child[6], q);
-    if (node->child[7] != 0) nash_Cell_descend6_33ED60(node->child[7], q);
+    objs_33ED60((*(char**)&node->nodesinside[2]), q);
+    if (((nash_Cell**)&node->children[0][0][0])[0] != 0) nash_Cell_descend6_33ED60(((nash_Cell**)&node->children[0][0][0])[0], q);
+    if (((nash_Cell**)&node->children[0][0][0])[1] != 0) nash_Cell_descend6_33ED60(((nash_Cell**)&node->children[0][0][0])[1], q);
+    if (((nash_Cell**)&node->children[0][0][0])[2] != 0) nash_Cell_descend6_33ED60(((nash_Cell**)&node->children[0][0][0])[2], q);
+    if (((nash_Cell**)&node->children[0][0][0])[3] != 0) nash_Cell_descend6_33ED60(((nash_Cell**)&node->children[0][0][0])[3], q);
+    if (((nash_Cell**)&node->children[0][0][0])[4] != 0) nash_Cell_descend6_33ED60(((nash_Cell**)&node->children[0][0][0])[4], q);
+    if (((nash_Cell**)&node->children[0][0][0])[5] != 0) nash_Cell_descend6_33ED60(((nash_Cell**)&node->children[0][0][0])[5], q);
+    if (((nash_Cell**)&node->children[0][0][0])[6] != 0) nash_Cell_descend6_33ED60(((nash_Cell**)&node->children[0][0][0])[6], q);
+    if (((nash_Cell**)&node->children[0][0][0])[7] != 0) nash_Cell_descend6_33ED60(((nash_Cell**)&node->children[0][0][0])[7], q);
 }
 
 struct sQry_337A48;
@@ -4363,9 +4334,9 @@ extern "C" void nash_privy_QueryHelper_helpX7(char* flag, SplineCallback* vctx, 
     SplineCallback* ctx = (SplineCallback*)vctx;
     SplineCallback* ctx2 = (SplineCallback*)vctx2;
     tBoundBox* box = (tBoundBox*)vbox;
-    sOct_33ED60* node = (sOct_33ED60*)vnode;
+    nash_Cell* node = (nash_Cell*)vnode;
     nash_CellKey* cell = (nash_CellKey*)vcell;
-    objs_33ED60(node->objs, ctx);
+    objs_33ED60((*(char**)&node->nodesinside[2]), ctx);
     if (cell->level == 11) {
         return;
     }
@@ -4423,50 +4394,50 @@ extern "C" void nash_privy_QueryHelper_helpX7(char* flag, SplineCallback* vctx, 
     int cz1 = 0;
     if (((float*)&box->MinPoint)[2] < z1lo && z1hi < ((float*)&box->MaxPoint)[2]) cz1 = 1;
 
-    sOct_33ED60* subNode;
-    subNode = node->child[0];
+    nash_Cell* subNode;
+    subNode = ((nash_Cell**)&node->children[0][0][0])[0];
     if (subNode && ox0 && oy0 && oz0) {
         if (cx0 && cy0 && cz0) collect_33ED60(subNode, ctx2);
         else nash_privy_QueryHelper_helpX7(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.z++;
-    subNode = node->child[1];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[1];
     if (subNode && ox0 && oy0 && oz1) {
         if (cx0 && cy0 && cz1) collect_33ED60(subNode, ctx2);
         else nash_privy_QueryHelper_helpX7(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.y++;
-    subNode = node->child[3];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[3];
     if (subNode && ox0 && oy1 && oz1) {
         if (cx0 && cy1 && cz1) collect_33ED60(subNode, ctx2);
         else nash_privy_QueryHelper_helpX7(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.z--;
-    subNode = node->child[2];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[2];
     if (subNode && ox0 && oy1 && oz0) {
         if (cx0 && cy1 && cz0) collect_33ED60(subNode, ctx2);
         else nash_privy_QueryHelper_helpX7(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.x++;
-    subNode = node->child[6];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[6];
     if (subNode && ox1 && oy1 && oz0) {
         if (cx1 && cy1 && cz0) collect_33ED60(subNode, ctx2);
         else nash_privy_QueryHelper_helpX7(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.z++;
-    subNode = node->child[7];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[7];
     if (subNode && ox1 && oy1 && oz1) {
         if (cx1 && cy1 && cz1) collect_33ED60(subNode, ctx2);
         else nash_privy_QueryHelper_helpX7(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.y--;
-    subNode = node->child[5];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[5];
     if (subNode && ox1 && oy0 && oz1) {
         if (cx1 && cy0 && cz1) collect_33ED60(subNode, ctx2);
         else nash_privy_QueryHelper_helpX7(flag, vctx, vctx2, vbox, subNode, &sub);
     }
     sub.z--;
-    subNode = node->child[4];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[4];
     if (subNode && ox1 && oy0 && oz0) {
         if (cx1 && cy0 && cz0) collect_33ED60(subNode, ctx2);
         else nash_privy_QueryHelper_helpX7(flag, vctx, vctx2, vbox, subNode, &sub);
@@ -4851,7 +4822,7 @@ extern "C" void nash_Cell_descend2(nash_Cell* tree, OverlapInstancesCallback* ct
         if (overlapObj_340C20(((tBoundBox*)objCtx->box), obj)) {
             int* cnt = ((int*)objCtx->number);
             int n = *cnt;
-            ((sNode_3309D8**)objCtx->instances)[n] = (sNode_3309D8*)obj;
+            ((tInstanceRecord**)objCtx->instances)[n] = (tInstanceRecord*)obj;
             *cnt = n + 1;
         }
     }

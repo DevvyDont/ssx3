@@ -8334,11 +8334,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00144368);
 
 
 
-struct sNode_144368 {
-    sNode_144368* child[8];
-};
 
-extern "C" void FocusQuery_addcell(void* a, sNode_144368* node, int leaf);
+extern "C" void FocusQuery_addcell(void* a, nash_Cell* node, int leaf);
 
 /**
  * Walks a focus octree node and its children, calling FocusQuery_addcell for every cell that overlaps one of the boxes.
@@ -8351,7 +8348,7 @@ extern "C" void FocusQuery_addcell(void* a, sNode_144368* node, int leaf);
  * @param node  the cell node (eight child pointers)
  * @param key  the cell's level and coordinates
  */
-extern "C" void func_00144368(FocusCallback* self, sNode_144368* node, nash_CellKey* key)
+extern "C" void func_00144368(FocusCallback* self, nash_Cell* node, nash_CellKey* key)
 {
     int n = self->numboxes;
     int i = 0;
@@ -8385,21 +8382,21 @@ extern "C" void func_00144368(FocusCallback* self, sNode_144368* node, nash_Cell
     k.x = key->x * 2;
     k.y = key->y * 2;
     k.z = key->z * 2;
-    if (node->child[0]) func_00144368(self, node->child[0], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[0]) func_00144368(self, ((nash_Cell**)&node->children[0][0][0])[0], &k);
     k.x++;
-    if (node->child[4]) func_00144368(self, node->child[4], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[4]) func_00144368(self, ((nash_Cell**)&node->children[0][0][0])[4], &k);
     k.y++;
-    if (node->child[6]) func_00144368(self, node->child[6], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[6]) func_00144368(self, ((nash_Cell**)&node->children[0][0][0])[6], &k);
     k.x--;
-    if (node->child[2]) func_00144368(self, node->child[2], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[2]) func_00144368(self, ((nash_Cell**)&node->children[0][0][0])[2], &k);
     k.z++;
-    if (node->child[3]) func_00144368(self, node->child[3], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[3]) func_00144368(self, ((nash_Cell**)&node->children[0][0][0])[3], &k);
     k.x++;
-    if (node->child[7]) func_00144368(self, node->child[7], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[7]) func_00144368(self, ((nash_Cell**)&node->children[0][0][0])[7], &k);
     k.y--;
-    if (node->child[5]) func_00144368(self, node->child[5], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[5]) func_00144368(self, ((nash_Cell**)&node->children[0][0][0])[5], &k);
     k.x--;
-    if (node->child[1]) func_00144368(self, node->child[1], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[1]) func_00144368(self, ((nash_Cell**)&node->children[0][0][0])[1], &k);
 }
 #endif
 
