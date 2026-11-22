@@ -596,9 +596,6 @@ extern "C" int cRiderMetrix_allocHUDfx(cRiderMetrix* self_, int type)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_addHUDfx);
 #ifdef SKIP_ASM
-struct sMetrixSlotAE8 {
-    char pad_0x00[0x9C];
-};
 
 extern "C" void cHUDFX_set(void* slot, int a, const char* b, float c, int d);
 
@@ -621,10 +618,10 @@ int cRiderMetrix_addHUDfx_impl(void* self, int a, const char* b, float c, int d)
 int cRiderMetrix_addHUDfx_impl(void* vself, int hfx, const char* displayStr, float decayTime, int data)
 {
     cRiderMetrix* self = (cRiderMetrix*)vself;
-    if ((sMetrixSlotAE8*)self->HUDfx == 0)
+    if (self->HUDfx == 0)
         return -1;
     int idx = cRiderMetrix_allocHUDfx((cRiderMetrix*)self, hfx);
-    cHUDFX_set(&((sMetrixSlotAE8*)self->HUDfx)[idx], hfx, displayStr, decayTime, data);
+    cHUDFX_set(&(self->HUDfx)[idx], hfx, displayStr, decayTime, data);
     return idx;
 }
 #endif
@@ -632,9 +629,6 @@ int cRiderMetrix_addHUDfx_impl(void* vself, int hfx, const char* displayStr, flo
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_addHUDfx1);
 #ifdef SKIP_ASM
-struct sMetrixSlotB88 {
-    char pad_0x00[0x9C];
-};
 
 extern "C" void cHUDFX_set1(void* slot, int type, int value, float duration, int arg);
 
@@ -657,10 +651,10 @@ int cRiderMetrix_addHUDfx1_impl(void* self, int type, int value, int arg, float 
 int cRiderMetrix_addHUDfx1_impl(void* vself, int type, int value, int data, float duration)
 {
     cRiderMetrix* self = (cRiderMetrix*)vself;
-    if ((sMetrixSlotB88*)self->HUDfx == 0)
+    if (self->HUDfx == 0)
         return -1;
     int idx = cRiderMetrix_allocHUDfx((cRiderMetrix*)self, type);
-    cHUDFX_set1(&((sMetrixSlotB88*)self->HUDfx)[idx], type, value, duration, data);
+    cHUDFX_set1(&(self->HUDfx)[idx], type, value, duration, data);
     return idx;
 }
 #endif

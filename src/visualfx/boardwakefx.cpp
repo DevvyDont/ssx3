@@ -630,16 +630,6 @@ struct sWakeVtx_DAB8 {
     char pad68[0x8];
 };
 
-struct sWake_DAB8 {
-    char pad0[0x4];
-    int count;               // 0x04
-    int first;               // 0x08
-    sWakeVtx_DAB8* verts;    // 0x0C
-    char verts10[0xB4 - 0x10]; // 0x10
-    int tex;                 // 0xB4
-    int max;                 // 0xB8
-    float life;              // 0xBC
-};
 
 class cGfx_DAB8 {
 public:
@@ -747,9 +737,9 @@ public:
  *
  * Skipped when cRenderToggles_m_DisableBoardWake is set or there are no segments; at most max - 2 segments are drawn.
  */
-extern "C" void cBoardWakeFX_render(sWake_DAB8* self)
+extern "C" void cBoardWakeFX_render(cBoardWakeFX* self)
 {
-    if (cRenderToggles_m_DisableBoardWake != 0 || self->count == 0)
+    if (cRenderToggles_m_DisableBoardWake != 0 || self->mNumWakeLines == 0)
         return;
     ((cGfx_DAB8*)GrMan_boardwakefx)->PushState();
     *((cGfx_DAB8*)GrMan_boardwakefx)->stateTop = D_00501420_DAB8;
@@ -764,19 +754,19 @@ extern "C" void cBoardWakeFX_render(sWake_DAB8* self)
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f8_5 = 7;
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop->f4_2 = 5;
     float k = 1.25f;
-    int draw = self->count;
+    int draw = self->mNumWakeLines;
     int n = draw;
-    int over = draw + 2; over -= self->max;
+    int over = draw + 2; over -= self->mWakeMaxNumLines;
     if (over >= 1)
         draw -= over;
-    int last = (self->first + n - 1) % self->max;
-    float ageRatio = (self->life - self->verts[last].age) / self->life;
+    int last = (self->mCurrentWakeLine + n - 1) % self->mWakeMaxNumLines;
+    float ageRatio = (self->mWakeLife - ((sWakeVtx_DAB8*)self->mWakeLines)[last].age) / self->mWakeLife;
     float alphaStart = 1.0f;
     if (ageRatio <= 0.8f)
         alphaStart = ageRatio * k;
     float da = (alphaStart - k) / (float)n;
     if (draw >= 2)
-        ((cGfx_DAB8*)GrMan_boardwakefx)->DrawStrip(self->verts10, self->tex, self->first, self->max, draw, k, da);
+        ((cGfx_DAB8*)GrMan_boardwakefx)->DrawStrip(((char*)&self->mWakeVerts[0]), self->mWakeLineSegs, self->mCurrentWakeLine, self->mWakeMaxNumLines, draw, k, da);
     ((cGfx_DAB8*)GrMan_boardwakefx)->stateTop--;
 }
 #endif
@@ -4800,13 +4790,6 @@ struct sWkColor_3AF8 {
     float a, r, g, b;
 };
 
-struct sWake_3AF8 {
-    cRider* rider;              // 0x0
-    float phase;                // 0x4
-    float c0[4];                // 0x8
-    float c1[4];                // 0x18
-    sWkColor_3AF8 color;        // 0x28
-};
 
 extern sRsState_2868 D_00501420_3AF8 __asm__("sDrawState_s_defaultDrawState");
 
@@ -4967,28 +4950,28 @@ static inline int IsHuman_3AF8(cRider* rider)
     return vt[kRiderVt_isHuman].fn(vthis(obj, vt[kRiderVt_isHuman]));
 }
 
-static inline int ShouldDraw_3AF8(sWake_3AF8* self)
+static inline int ShouldDraw_3AF8(cPlayerIndicatorFX* self)
 {
     int vis = 0;
     if (SSXApp->Game->AI->NumberOfPlayersAllocated >= 2) {
-        if (IsHuman_3AF8(self->rider)) {
+        if (IsHuman_3AF8(self->mRider)) {
             cGameViewMan* views = SSXApp->Game->ViewMan;
             if (views->m_uiNumView >= 2) {
-                vis = (int)views->m_uiCurrentView != self->rider->mViewIndex;
+                vis = (int)views->m_uiCurrentView != self->mRider->mViewIndex;
             }
         }
         cBE_getInterface_Fv(SSXApp->BE, 7);
         if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
-            vis = self->rider->mIsLocal == 0;
+            vis = self->mRider->mIsLocal == 0;
         }
-    } else if (!IsHuman_3AF8(self->rider)) {
+    } else if (!IsHuman_3AF8(self->mRider)) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         if ((unsigned int)(cBENewRaceInterface_newRace.cGameEvent - 4) < 2) {
             int mode = SSXApp->Game->SectionMan->mBELocationID;
             if ((unsigned int)(mode - 14) < 3) vis = 1;
         }
     }
-    if (self->rider->mIsInNIS) {
+    if (self->mRider->mIsInNIS) {
         vis = 0;
     }
     return vis;
@@ -5001,7 +4984,7 @@ static inline int ShouldDraw_3AF8(sWake_3AF8* self)
  * other player's rider seen from the other view, for remote riders in network games, and for AI riders in
  * some event modes. It is never drawn during an in-game cutscene (mIsInNIS).
  */
-extern "C" void cPlayerIndicatorFX_render(sWake_3AF8* self)
+extern "C" void cPlayerIndicatorFX_render(cPlayerIndicatorFX* self)
 {
     if (!ShouldDraw_3AF8(self)) {
         return;
@@ -5026,7 +5009,7 @@ extern "C" void cPlayerIndicatorFX_render(sWake_3AF8* self)
     Set4_3AF8(side, viewMat[0], viewMat[4], viewMat[8], 0.0f);
     t4Vector up;
     Set4_3AF8(up, viewMat[1], viewMat[5], viewMat[9], 0.0f);
-    t4Vector pos = *(t4Vector*)((char*)self->rider->mAnimModel->unk_030 + (self->rider->mBoneHead << 6) + 0x30);
+    t4Vector pos = *(t4Vector*)((char*)self->mRider->mAnimModel->unk_030 + (self->mRider->mBoneHead << 6) + 0x30);
     const t4Vector* base = &pos;
     t4Vector beamTip = Add_3AF8(*base, Scale_3AF8(up, 20260.0f));
     t4Vector beamUpper = Add_3AF8(*base, Scale_3AF8(up, 20130.0f));
@@ -5034,9 +5017,9 @@ extern "C" void cPlayerIndicatorFX_render(sWake_3AF8* self)
     t4Vector off = Scale_3AF8(side, 85.0f);
     sWkColor_3AF8 fade;
     fade.a = 0.0f;
-    fade.r = self->color.r;
-    fade.g = self->color.g;
-    fade.b = self->color.b;
+    fade.r = (*(sWkColor_3AF8*)&self->CurColor).r;
+    fade.g = (*(sWkColor_3AF8*)&self->CurColor).g;
+    fade.b = (*(sWkColor_3AF8*)&self->CurColor).b;
     sVtx_3AF8 verts[8];
     {
         t4Vector vertPos = Sub_3AF8(*base, off);
@@ -5062,10 +5045,10 @@ extern "C" void cPlayerIndicatorFX_render(sWake_3AF8* self)
     }
     {
         t4Vector vertPos = Sub_3AF8(beamLower, off);
-        verts[2].r = (int)(self->color.r * 255.0f);
-        verts[2].g = (int)(self->color.g * 255.0f);
-        verts[2].b = (int)(self->color.b * 255.0f);
-        verts[2].a = (int)(self->color.a * 128.0f);
+        verts[2].r = (int)((*(sWkColor_3AF8*)&self->CurColor).r * 255.0f);
+        verts[2].g = (int)((*(sWkColor_3AF8*)&self->CurColor).g * 255.0f);
+        verts[2].b = (int)((*(sWkColor_3AF8*)&self->CurColor).b * 255.0f);
+        verts[2].a = (int)((*(sWkColor_3AF8*)&self->CurColor).a * 128.0f);
         verts[2].q = 1.0f;
         verts[2].pos = vertPos;
         verts[2].s = 0.0f;
@@ -5073,10 +5056,10 @@ extern "C" void cPlayerIndicatorFX_render(sWake_3AF8* self)
     }
     {
         t4Vector vertPos = Add_3AF8(beamLower, off);
-        verts[3].r = (int)(self->color.r * 255.0f);
-        verts[3].g = (int)(self->color.g * 255.0f);
-        verts[3].b = (int)(self->color.b * 255.0f);
-        verts[3].a = (int)(self->color.a * 128.0f);
+        verts[3].r = (int)((*(sWkColor_3AF8*)&self->CurColor).r * 255.0f);
+        verts[3].g = (int)((*(sWkColor_3AF8*)&self->CurColor).g * 255.0f);
+        verts[3].b = (int)((*(sWkColor_3AF8*)&self->CurColor).b * 255.0f);
+        verts[3].a = (int)((*(sWkColor_3AF8*)&self->CurColor).a * 128.0f);
         verts[3].q = 1.0f;
         verts[3].pos = vertPos;
         verts[3].s = 1.0f;
@@ -5084,10 +5067,10 @@ extern "C" void cPlayerIndicatorFX_render(sWake_3AF8* self)
     }
     {
         t4Vector vertPos = Sub_3AF8(beamUpper, off);
-        verts[4].r = (int)(self->color.r * 255.0f);
-        verts[4].g = (int)(self->color.g * 255.0f);
-        verts[4].b = (int)(self->color.b * 255.0f);
-        verts[4].a = (int)(self->color.a * 128.0f);
+        verts[4].r = (int)((*(sWkColor_3AF8*)&self->CurColor).r * 255.0f);
+        verts[4].g = (int)((*(sWkColor_3AF8*)&self->CurColor).g * 255.0f);
+        verts[4].b = (int)((*(sWkColor_3AF8*)&self->CurColor).b * 255.0f);
+        verts[4].a = (int)((*(sWkColor_3AF8*)&self->CurColor).a * 128.0f);
         verts[4].q = 1.0f;
         verts[4].pos = vertPos;
         verts[4].s = 0.0f;
@@ -5095,10 +5078,10 @@ extern "C" void cPlayerIndicatorFX_render(sWake_3AF8* self)
     }
     {
         t4Vector vertPos = Add_3AF8(beamUpper, off);
-        verts[5].r = (int)(self->color.r * 255.0f);
-        verts[5].g = (int)(self->color.g * 255.0f);
-        verts[5].b = (int)(self->color.b * 255.0f);
-        verts[5].a = (int)(self->color.a * 128.0f);
+        verts[5].r = (int)((*(sWkColor_3AF8*)&self->CurColor).r * 255.0f);
+        verts[5].g = (int)((*(sWkColor_3AF8*)&self->CurColor).g * 255.0f);
+        verts[5].b = (int)((*(sWkColor_3AF8*)&self->CurColor).b * 255.0f);
+        verts[5].a = (int)((*(sWkColor_3AF8*)&self->CurColor).a * 128.0f);
         verts[5].q = 1.0f;
         verts[5].pos = vertPos;
         verts[5].s = 1.0f;
@@ -7197,19 +7180,6 @@ struct sV3E6C08 {
 };
 
 
-struct sTrailE6C08 {
-    cRider* rider;              // 0x00
-    float maxLen;               // 0x04
-    char pad8[0xC];             // 0x08
-    int count;                  // 0x14
-    float total;                // 0x18
-    char pad1C[0x4];            // 0x1C
-    t4Vector last;              // 0x20
-    int head;                   // 0x30
-    char pad34[0xC];            // 0x34
-    t4Vector side;              // 0x40
-    tSpeedBoostTrailSeg ring[30];    // 0x50
-};
 
 
 int cRiderAnimBase_getCurrentAnimID(void*, int);
@@ -7348,9 +7318,9 @@ static inline t4Vector wakeRowE6C08(cRider* rider, int k)
 }
 
 // Pull a corner down onto the ground plane, 10 units below.
-static inline t4Vector wakeDropE6C08(sTrailE6C08* self, const t4Vector& c, const t4Vector& d)
+static inline t4Vector wakeDropE6C08(cSpeedBoostFX* self, const t4Vector& c, const t4Vector& d)
 {
-    return wakeSubE6C08(c, wakeScaleE6C08(self->rider->mGroundNormal, wakeDotE6C08(self->rider->mGroundNormal, d) - 10.0f));
+    return wakeSubE6C08(c, wakeScaleE6C08(self->mRider->mGroundNormal, wakeDotE6C08(self->mRider->mGroundNormal, d) - 10.0f));
 }
 
 /**
@@ -7365,45 +7335,45 @@ static inline t4Vector wakeDropE6C08(sTrailE6C08* self, const t4Vector& c, const
  * (10 units above mGroundContactPoint) and stored as the sample's edges. Then the oldest samples are dropped while the
  * total exceeds the maximum, keeping at least 3 when the maximum is above 1. cSpeedBoostFX_update calls it.
  */
-extern "C" void cSpeedBoostFX_UpdateSpeedBoostTrail(sTrailE6C08* self)
+extern "C" void cSpeedBoostFX_UpdateSpeedBoostTrail(cSpeedBoostFX* self)
 {
-    if (0.0f < self->maxLen || 0.0f < self->total) {
-        if (0.0f < wakeLenE6C08(self->rider->mVelocity)) {
+    if (0.0f < self->mTrailLength || 0.0f < self->mSpeedBoostTrailCurrentLength) {
+        if (0.0f < wakeLenE6C08(self->mRider->mVelocity)) {
             tSpeedBoostTrailSeg* ring;
-            if (self->count == 30) {
-                self->total -= self->ring[(self->head + 29) % 30].mLength;
-                ring = self->ring;
+            if (self->mSpeedBoostTrailNumSegs == 30) {
+                self->mSpeedBoostTrailCurrentLength -= self->mSpeedBoostTrail[(self->mSpeedBoostTrailCurrentSeg + 29) % 30].mLength;
+                ring = self->mSpeedBoostTrail;
             } else {
-                ring = self->ring;
-                self->count++;
+                ring = self->mSpeedBoostTrail;
+                self->mSpeedBoostTrailNumSegs++;
             }
-            self->head = (self->head + 29) % 30;
-            char* sub = (char*)&self->rider->mVtbl;
+            self->mSpeedBoostTrailCurrentSeg = (self->mSpeedBoostTrailCurrentSeg + 29) % 30;
+            char* sub = (char*)&self->mRider->mVtbl;
             sVEntry<t4Vector*(void*)>* vt = *(sVEntry<t4Vector*(void*)>**)sub;
             t4Vector pos = *vt[5].fn(vthis(sub, vt[5]));
-            t4Vector boardPos = wakeRowE6C08(self->rider, 3);
-            t4Vector boardSide = wakeRowE6C08(self->rider, 2);
-            t4Vector boardFwd = wakeRowE6C08(self->rider, 0);
-            if (self->rider->IsRidingFakie != 0) {
+            t4Vector boardPos = wakeRowE6C08(self->mRider, 3);
+            t4Vector boardSide = wakeRowE6C08(self->mRider, 2);
+            t4Vector boardFwd = wakeRowE6C08(self->mRider, 0);
+            if (self->mRider->IsRidingFakie != 0) {
                 boardFwd = wakeScaleE6C08(boardFwd, -1.0f);
             }
             float dist;
-            if (self->count >= 2) {
-                dist = wakeLenE6C08(wakeSubE6C08(pos, self->last));
+            if (self->mSpeedBoostTrailNumSegs >= 2) {
+                dist = wakeLenE6C08(wakeSubE6C08(pos, self->mSpeedBoostTrailLastPos));
             } else {
                 dist = 0.0f;
             }
-            self->last = pos;
-            ring[self->head].mLength = 0.0f;
-            ring[(self->head + 1) % 30].mLength = dist;
-            self->total += dist;
+            self->mSpeedBoostTrailLastPos = pos;
+            ring[self->mSpeedBoostTrailCurrentSeg].mLength = 0.0f;
+            ring[(self->mSpeedBoostTrailCurrentSeg + 1) % 30].mLength = dist;
+            self->mSpeedBoostTrailCurrentLength += dist;
             t4Vector noseNeg = wakeSubE6C08(wakeAddE6C08(boardPos, wakeScaleE6C08(boardFwd, 75.0f)), wakeScaleE6C08(boardSide, 17.5f));
             t4Vector nosePos = wakeAddE6C08(wakeAddE6C08(boardPos, wakeScaleE6C08(boardFwd, 75.0f)), wakeScaleE6C08(boardSide, 17.5f));
             t4Vector tailNeg = wakeSubE6C08(wakeSubE6C08(boardPos, wakeScaleE6C08(boardFwd, 75.0f)), wakeScaleE6C08(boardSide, 17.5f));
             t4Vector tailPos = wakeAddE6C08(wakeSubE6C08(boardPos, wakeScaleE6C08(boardFwd, 75.0f)), wakeScaleE6C08(boardSide, 17.5f));
             float lean = 0.0f;
-            if (self->rider->PressMode != 0) {
-                int s = cRiderAnimBase_getCurrentAnimID(self->rider->mRiderAnim, 2);
+            if (self->mRider->PressMode != 0) {
+                int s = cRiderAnimBase_getCurrentAnimID(self->mRider->mRiderAnim, 2);
                 if ((s >= 23 && s <= 28) || s == 37 || s == 38) {
                     lean = 1.0f;
                 } else {
@@ -7417,15 +7387,15 @@ extern "C" void cSpeedBoostFX_UpdateSpeedBoostTrail(sTrailE6C08* self)
                 wakeAddEqE6C08(noseNeg, wakeScaleE6C08(wakeScaleE6C08(boardFwd, 150.0f), lean));
                 wakeAddEqE6C08(nosePos, wakeScaleE6C08(wakeScaleE6C08(boardFwd, 150.0f), lean));
             }
-            t4Vector n = wakeCrossE6C08(self->rider->mVelocity, self->rider->mGroundNormal);
-            if (wakeDotE6C08(n, self->side) < 0.0f) {
+            t4Vector n = wakeCrossE6C08(self->mRider->mVelocity, self->mRider->mGroundNormal);
+            if (wakeDotE6C08(n, self->mLastSide) < 0.0f) {
                 n = wakeScaleE6C08(n, -1.0f);
             }
-            self->side = n;
-            t4Vector noseNegOff = wakeSubE6C08(noseNeg, self->rider->mGroundContactPoint);
-            t4Vector nosePosOff = wakeSubE6C08(nosePos, self->rider->mGroundContactPoint);
-            t4Vector tailNegOff = wakeSubE6C08(tailNeg, self->rider->mGroundContactPoint);
-            t4Vector tailPosOff = wakeSubE6C08(tailPos, self->rider->mGroundContactPoint);
+            self->mLastSide = n;
+            t4Vector noseNegOff = wakeSubE6C08(noseNeg, self->mRider->mGroundContactPoint);
+            t4Vector nosePosOff = wakeSubE6C08(nosePos, self->mRider->mGroundContactPoint);
+            t4Vector tailNegOff = wakeSubE6C08(tailNeg, self->mRider->mGroundContactPoint);
+            t4Vector tailPosOff = wakeSubE6C08(tailPos, self->mRider->mGroundContactPoint);
             float h0 = wakeDotE6C08(noseNegOff, n);
             float h1 = wakeDotE6C08(nosePosOff, n);
             float h2 = wakeDotE6C08(tailNegOff, n);
@@ -7455,17 +7425,17 @@ extern "C" void cSpeedBoostFX_UpdateSpeedBoostTrail(sTrailE6C08* self)
             } else {
                 hi = wakeDropE6C08(self, tailPos, tailPosOff);
             }
-            (*(sV3E6C08*)&self->ring[self->head].mLeft) = sV3E6C08(lo.x, lo.y, lo.z);
-            (*(sV3E6C08*)&self->ring[self->head].mRight) = sV3E6C08(hi.x, hi.y, hi.z);
+            (*(sV3E6C08*)&self->mSpeedBoostTrail[self->mSpeedBoostTrailCurrentSeg].mLeft) = sV3E6C08(lo.x, lo.y, lo.z);
+            (*(sV3E6C08*)&self->mSpeedBoostTrail[self->mSpeedBoostTrailCurrentSeg].mRight) = sV3E6C08(hi.x, hi.y, hi.z);
         }
     }
     int keep = 0;
-    if (1.0f < self->maxLen) {
+    if (1.0f < self->mTrailLength) {
         keep = 3;
     }
-    while (keep < self->count && self->maxLen < self->total) {
-        self->total -= self->ring[(self->head + self->count - 1) % 30].mLength;
-        self->count--;
+    while (keep < self->mSpeedBoostTrailNumSegs && self->mTrailLength < self->mSpeedBoostTrailCurrentLength) {
+        self->mSpeedBoostTrailCurrentLength -= self->mSpeedBoostTrail[(self->mSpeedBoostTrailCurrentSeg + self->mSpeedBoostTrailNumSegs - 1) % 30].mLength;
+        self->mSpeedBoostTrailNumSegs--;
     }
 }
 #endif

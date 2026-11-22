@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "main/gamestate.h"
 #include "ui/uitext.h"
 #include "fe/ovstate.h"
 #include "ui/uiengine.h"
@@ -1555,11 +1556,6 @@ INCLUDE_ASM("fe/ovtemplatedialog", cOVStateManager_update);
 extern "C" void cOVStateManager_removePDATemplate(void);
 extern "C" void cUIStateStack_purgeNormalStates(void *);
 
-struct sFlag_CFD0 {
-    int f0;
-    int f4;
-    int f8;
-};
 
 
 
@@ -1586,7 +1582,7 @@ extern "C" void cOVStateManager_update(void)
     case 2:
         cOVStateManager_mStatus = 0;
         cReplay_stopAutoReplay(((void*)((SSXApp)->Game)->Replay));
-        ((sFlag_CFD0*)((SSXApp)->Game)->mCurrentState)->f8 = 1;
+        (((SSXApp)->Game)->mCurrentState)->mOverlayDone = 1;
         if (((char*)st) != 0 && ((SSXApp)->Game)->mCurrentStateID == 2) {
             if (st->mOVID == 8) {
                 cBE_getInterface_Fv(((void*)(SSXApp)->BE), 7);
@@ -1942,7 +1938,6 @@ extern char str_TransitionOut_b[];
 extern char str_Save_Profile[];
 
 struct sI10_D5A8 { char pad[0x10]; int f10; };
-struct sSelf_D5A8 { char pad[0x54]; int f54; };
 // Same vtable entry; the void/int return only changes v0/v1 choice around the call.
 struct sVV_D5A8 { short delta; short index; void (*fn)(void*); };
 struct sGame_D5A8 { char pad[0xC]; char* f0C; };
@@ -2091,7 +2086,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUITh
                 cRider_quitEvent(Rider_D5A8());
                 break;
             case 6: {
-                ((sSelf_D5A8*)self)->f54 = 0;
+                (self)->mRemovePDA = 0;
                 char* ui = (char*)SSXApp->Game->UI;
                 sStFlags_20D5A8* st = (sStFlags_20D5A8*)cOVState_PROFILE_cOVState_PROFILE(cMemMan_alloc(636, str_Save_Profile, 0x100, 0), self->mpEngine, *(unsigned char*)&self->mCurrentCtrl, 0x18);
                 st->mode = 1;
@@ -2104,7 +2099,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUITh
             if (self->mDialogType != 6) {
                 cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
             } else {
-                ((sSelf_D5A8*)self)->f54 = 1;
+                (self)->mRemovePDA = 1;
                 cGame_exit(SSXApp->Game, 0);
             }
             break;

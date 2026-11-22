@@ -6101,19 +6101,6 @@ struct sMon790_AB40 {
     char pad[0x1B0];
     sMon1B0_AB40* p1B0;
 };
-struct sRider_AB40 {
-    char pad0[0x2F0];
-    float f2F0;
-    char pad2F4[0x470 - 0x2F4];
-    float f470;
-    char pad474[0x790 - 0x474];
-    sMon790_AB40* p790;
-    char pad794[0x870 - 0x794];
-    int f870;
-    int f874;
-    int f878;
-    int f87C;
-};
 
 struct sSndAB40Ch {
     signed char vol;
@@ -6222,28 +6209,28 @@ extern "C" void cSSXAudio_UpdateBoostBar(cSSXAudio* vself)
     int n = 1;
     if (cBENewRaceInterface_newRace.cGamePath == 2) n = 2;
     for (int i = 0; i < n; i++) {
-        sRider_AB40* viewRider = (sRider_AB40*)((cAI*)cAudioInterface_getAI())->Riders[i];
-        bool ok = viewRider->f874 && viewRider->f87C;
+        cRider* viewRider = ((cAI*)cAudioInterface_getAI())->Riders[i];
+        bool ok = viewRider->mIsHuman && viewRider->mIsLocal;
         if (!ok) continue;
-        sRider_AB40* rider = (sRider_AB40*)((cAI*)cAudioInterface_getAI())->Riders[i];
-        sMon1B0_AB40* mon = rider->p790->p1B0;
+        cRider* rider = ((cAI*)cAudioInterface_getAI())->Riders[i];
+        sMon1B0_AB40* mon = ((sMon790_AB40*)rider->mMetrix)->p1B0;
         sMon_AB40* mp = mon ? &mon->m : 0;
         int barTenths = (int)ffloor_AB40(mp->f8 / mp->f4 * 10.0f);
         if (self->arr1[i] < barTenths && barTenths > 0) {
             void* sub = &(*self->p118)->sub;
             int volControl = (int)cSSXAudio_GetCurrAppliedVolumePtr(self, 9, 0);
-            cMonitor_MONITOR_Create_AB40(sub, 150, D_004A36C0_AB40[0].v, volControl, 0, 101, 0x7F, self->arr2[rider->f870]);
-            self->arr2[rider->f870] += 0x100;
+            cMonitor_MONITOR_Create_AB40(sub, 150, D_004A36C0_AB40[0].v, volControl, 0, 101, 0x7F, self->arr2[rider->mViewIndex]);
+            self->arr2[rider->mViewIndex] += 0x100;
         }
         self->arr1[i] = barTenths;
-        int w = (int)ffloor_AB40(rider->f2F0 * 2.0f);
+        int w = (int)ffloor_AB40(rider->mUberTimer * 2.0f);
         if (w > 0) {
             if (w == self->arr3[i] - 1) {
                 if (w >= 13) {
                 } else if ((w & 1) && w >= 5) {
                 } else {
                     int playBeep = 1;
-                    int pos = rider->f470 >= 0.0f;
+                    int pos = rider->mFinishTime >= 0.0f;
                     if (pos) playBeep = 0;
                     if ((cPauseState_Flags & 1) || cReplay_isPauseAI(cAudioInterface_getGame()->Replay) != 0) playBeep = 0;
                     if (cAudioInterface_getGame()->mCurrentStateID != 4) playBeep = 0;

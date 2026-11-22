@@ -1096,10 +1096,6 @@ struct sBox_333EF8 {
     float max[4];
 };
 
-struct sObj_333EF8 {
-    int pad00[3];
-    sVEnt_333EF8* vt;
-};
 
 
 struct sOwner_333EF8 {
@@ -1236,13 +1232,13 @@ extern "C" int cOverlapList_terrainIntersect(cOverlapList* vself, void* vq, sHit
                 n += intersect_instanceIntersect(query, node, &hits[n], cap - n, 2);
             }
         } else if (flags & 0x40) {
-            if (((sObj_333EF8*)node->m_pActiveNode) == 0) {
+            if ((node->m_pActiveNode) == 0) {
                 continue;
             }
-            sVEnt_333EF8* vt = ((sObj_333EF8*)node->m_pActiveNode)->vt;
-            if (((Test_333EF8)vt[44].fn)(vthis(((sObj_333EF8*)node->m_pActiveNode), vt[44]))) {
-                sVEnt_333EF8* vt2 = ((sObj_333EF8*)node->m_pActiveNode)->vt;
-                sBox_333EF8* objBox = ((GetBox_333EF8)vt2[45].fn)(vthis(((sObj_333EF8*)node->m_pActiveNode), vt2[45]));
+            sVEnt_333EF8* vt = ((sVEnt_333EF8*)(node->m_pActiveNode)->mVtbl);
+            if (((Test_333EF8)vt[44].fn)(vthis((node->m_pActiveNode), vt[44]))) {
+                sVEnt_333EF8* vt2 = ((sVEnt_333EF8*)(node->m_pActiveNode)->mVtbl);
+                sBox_333EF8* objBox = ((GetBox_333EF8)vt2[45].fn)(vthis((node->m_pActiveNode), vt2[45]));
                 if (overlapBox_333EF8(query, objBox)) {
                     n += intersect_instanceIntersect(query, node, &hits[n], cap - n, 2);
                 }
@@ -1550,11 +1546,6 @@ INCLUDE_ASM("intersect/worldsphtree", intersect_instanceIntersect);
 // g++ 2.95 vtable entry with an untyped function slot (cast at the call).
 struct sWsVtSlot { short delta; short index; void* fn; };
 
-// A polymorphic world object as the list walkers see it (vtable pointer at 0xC).
-struct sWsVObj {
-    int pad00[3];
-    sWsVtSlot* vt;
-};
 
 // Constant vector table (0x004FF120; 00341388 also reads it through its ctor vector type).
 extern t4Vector D_004FF120_4888[] __asm__("t4vect_Zero");
@@ -1591,11 +1582,6 @@ struct sWsBone_4888 {
     sWsMat_4888* mat;   // 0xC
 };
 
-struct sWsBoneTbl_4888 {
-    int pad00;
-    int count;              // 0x4
-    sWsBone_4888* bones;    // 0x8
-};
 
 // Per-bone part record of an instance definition (12 bytes).
 struct sWsPart_4888 {
@@ -1816,34 +1802,34 @@ extern "C" int func_4888(cWorldIntersectType* q, tInstanceRecord* node, sWsHit_4
  */
 extern "C" int func_4888(cWorldIntersectType* intersectType, tInstanceRecord* node, sWsHit_4888* buf, int cap, int mode)
 {
-    if (((sWsVObj*)node->m_pActiveNode) != 0) {
-        sWsVtSlot* vt = ((sWsVObj*)node->m_pActiveNode)->vt;
-        if (((Test_4888)vt[38].fn)(vthis(((sWsVObj*)node->m_pActiveNode), vt[38]))) {
-            sWsVtSlot* vt2 = ((sWsVObj*)node->m_pActiveNode)->vt;
-            return ((Query_4888)vt2[39].fn)(vthis(((sWsVObj*)node->m_pActiveNode), vt2[39]), intersectType, buf, cap, mode);
+    if ((node->m_pActiveNode) != 0) {
+        sWsVtSlot* vt = ((sWsVtSlot*)(node->m_pActiveNode)->mVtbl);
+        if (((Test_4888)vt[38].fn)(vthis((node->m_pActiveNode), vt[38]))) {
+            sWsVtSlot* vt2 = ((sWsVtSlot*)(node->m_pActiveNode)->mVtbl);
+            return ((Query_4888)vt2[39].fn)(vthis((node->m_pActiveNode), vt2[39]), intersectType, buf, cap, mode);
         }
     }
     int type = ((sWsInstDef_4888*)node->m_pCollideRecord)->type;
     if (type != 3 && type != 1 && type != 2)
         return 0;
-    sWsVObj* obj = ((sWsVObj*)node->m_pActiveNode);
+    cInstanceNode* obj = (node->m_pActiveNode);
     sWsMat_4888 mats[24];
     sWsMat_4888* pMat = &(*(sWsMat_4888*)&node->m_fmTransform);
     int useLocal = 1;
     sWsMat_4888* boneMats = mats;
     if (obj != 0) {
-        sWsVtSlot* vt = obj->vt;
+        sWsVtSlot* vt = ((sWsVtSlot*)obj->mVtbl);
         if (((Test_4888)vt[26].fn)(vthis(obj, vt[26]))) {
             useLocal = 0;
-            sWsVtSlot* vt2 = obj->vt;
+            sWsVtSlot* vt2 = ((sWsVtSlot*)obj->mVtbl);
             boneMats = ((GetMat_4888)vt2[28].fn)(vthis(obj, vt2[28]), node);
         } else {
-            sWsVtSlot* vt2 = obj->vt;
+            sWsVtSlot* vt2 = ((sWsVtSlot*)obj->mVtbl);
             pMat = ((GetMat_4888)vt2[25].fn)(vthis(obj, vt2[25]), node);
         }
     }
-    sWsBoneTbl_4888* tbl = ((sWsBoneTbl_4888*)node->m_Model);
-    sWsBone_4888* bone = tbl->bones;
+    tModelRecord* tbl = (node->m_Model);
+    sWsBone_4888* bone = ((sWsBone_4888*)tbl->m_MeshHeirarchy);
     float instScale = node->m_fScale;
     t4Vector scl;
     scl.x = instScale;
@@ -1852,7 +1838,7 @@ extern "C" int func_4888(cWorldIntersectType* intersectType, tInstanceRecord* no
     scl.w = 1.0f;
     int n = 0;
     sWsMat_4888* boneMat = boneMats;
-    for (int i = 0, k = 0; i < tbl->count; i++, bone++, boneMat++) {
+    for (int i = 0, k = 0; i < tbl->m_iNumMeshes; i++, bone++, boneMat++) {
         if (useLocal) {
             int parent = bone->parent;
             if (parent != -1) {
@@ -5560,24 +5546,6 @@ extern "C" float cAnimFrame_getStartTime(void* inst);
 float AIrandf(float lo, float hi);
 float AIrangernd(float a, float b);
 
-struct sSphFloat_1AA0 {
-    unsigned short id;  // 0x00
-    char pad02[0x2];
-    int active;         // 0x04
-    int atLimit;        // 0x08
-    int fC;             // 0x0C
-    float speed;        // 0x10
-    float min;          // 0x14
-    float max;          // 0x18
-    float value;        // 0x1C
-    float start;        // 0x20
-    char pad24[0x18];
-    void** vt;          // 0x3C
-    char pad40[0x2];
-    unsigned short flags; // 0x42
-    char pad44[0x20];
-    void* inst;         // 0x64
-};
 
 struct sSphFloatDef_1AA0 {
     int f0;
@@ -5684,7 +5652,7 @@ extern "C" void* cAnimObjectNode_cAnimObjectNode1(cAnimObjectNode* self, int buc
     self->Flags |= 1;
     self->Delay = 0;
     self->AnimComplete = 0;
-    return ((sSphFloat_1AA0*)self);
+    return (self);
 }
 #endif
 
@@ -6289,7 +6257,6 @@ INCLUDE_ASM("intersect/worldsphtree", cAnimTeeterNode_applyForce);
 typedef char* (*GetMat_342538)(void*, int);
 
 struct sBodyTbl_342538 { char pad00[8]; char* ents; };
-struct sBodyInf_342538 { char pad00[0x80]; sBodyTbl_342538* tbl; };
 
 struct sSelf_342538 {
     float sum;                      // 0x00
@@ -6298,7 +6265,7 @@ struct sSelf_342538 {
     char pad0C[0x20];
     int mask;                       // 0x2C
     char pad30[0x2C];
-    sBodyInf_342538* inf;            // 0x5C
+    tInstanceRecord* inf;            // 0x5C
 };
 
 
@@ -6427,7 +6394,7 @@ extern "C" void cAnimTeeterNode_applyForce(cAnimTeeterNode* self, tIntersectInfo
     int idx = intInfo->Mesh;
     if (idx >= 0) {
         cMoveNode* sub = (cMoveNode*)(&self->unk_044);
-        tMeshHeirarchyRecord* ents = (tMeshHeirarchyRecord*)((sBodyInf_342538*)sub->Instance)->tbl->ents;
+        tMeshHeirarchyRecord* ents = (tMeshHeirarchyRecord*)((sBodyTbl_342538*)(sub->Instance)->m_Model)->ents;
         if ((int)ents[idx].m_MeshAnim != 0) {
             sWsVtSlot* vt = (sWsVtSlot*)self->mVtbl;
             char* animMat = ((GetMat_342538)vt[29].fn)(vthis(sub, vt[29]), idx);

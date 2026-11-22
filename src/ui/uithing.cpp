@@ -315,19 +315,6 @@ struct cUIText_cUIText_sQuad {
 };
 extern cUIText_cUIText_sQuad gStaticColour;
 
-struct cUIText_cUIText_sObj {
-    char base[0x74];
-    unsigned char flags;
-    char pad75[0x88 - 0x75];
-    cUIText_cUIText_sQuad q88;
-    cUIText_cUIText_sQuad q98;
-    int fA8;
-    int fAC;
-    int fB0;
-    int fB4;
-    short fB8;
-    short fBA;
-};
 
 /**
  * Constructs a cUIText in place and returns it.
@@ -340,19 +327,19 @@ struct cUIText_cUIText_sObj {
  *
  * @return the object
  */
-extern "C" cUIText_cUIText_sObj* cUIText_cUIText(cUIText_cUIText_sObj* self)
+extern "C" cUIText* cUIText_cUIText(cUIText* self)
 {
     cUIThing_cUIThing(self);
     *(void***)((char*)self + 8) = cUIText_vtbl;
-    self->flags = (self->flags | 4) & 0x87;
-    self->fA8 = 0;
-    self->fAC = 0;
-    self->fB0 = 0;
-    self->fB4 = 0;
-    self->fB8 = 0;
-    self->fBA = 0;
-    self->q88 = gStaticColour;
-    self->q98 = gStaticColour;
+    (*(unsigned char*)&self->mAttrText) = ((*(unsigned char*)&self->mAttrText) | 4) & 0x87;
+    self->mNumLines = 0;
+    (*(int*)&self->mpLineOffset) = 0;
+    self->mStringID = 0;
+    (*(int*)&self->mpString) = 0;
+    self->mStringSize = 0;
+    self->mLineSize = 0;
+    (*(cUIText_cUIText_sQuad*)&self->mStaticColour) = gStaticColour;
+    (*(cUIText_cUIText_sQuad*)&self->mDisabledColour) = gStaticColour;
     return self;
 }
 #endif

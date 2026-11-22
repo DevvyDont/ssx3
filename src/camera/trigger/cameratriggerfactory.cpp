@@ -6954,21 +6954,10 @@ extern "C" void cTrackFileMan_scanTrackIndex(cTrackFileMan* selfp, const char* f
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_scanLocations);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-// The track file manager's location table (0x8C0C bytes; the structs keep their old sCam* names): up to 0x100 named
-// track locations with their tag, index and flags; cTrackFileMan_scanLocations builds it, cTrackFileMan_getNextWCBAMStartLocation / cTrackFileMan_getPrevWCBAMStartLocation step through the valid ones.
-struct sCamEntry {
-    char name[0x40];    // 0x00
-    char tag[4];        // 0x40
-    char pad44[0x3C];
-    int idx;            // 0x80
-    int active;         // 0x84
-    int valid;          // 0x88
-};
 
 struct sCamMgr {
     int count;                  // 0x0000
-    sCamEntry entries[0x100];   // 0x0004
+    tLocationInfo entries[0x100];   // 0x0004
     int numActive;              // 0x8C04
     int numValid;               // 0x8C08
 };
@@ -7004,7 +6993,7 @@ extern "C" void cTrackFileMan_scanLocations(cTrackFileMan* self)
     self->NumLocations = 0;
     self->NumBAMLocations = 0;
     self->NumWCBAMStartLocations = 0;
-    MEM_fill(((sCamEntry*)&self->LocationInfo[0]), 0, 35840);
+    MEM_fill(((&self->LocationInfo[0])), 0, 35840);
     void* iface = cBE_getInterface_17A638(cBE_getBE(), 0);
     for (i = 0; i < 22; i++)
         names[i].name = cBENewRaceInterface_getLocationFile(iface, i);
@@ -7012,9 +7001,9 @@ extern "C" void cTrackFileMan_scanLocations(cTrackFileMan* self)
         int j;
         for (j = 0; j < 22 && self->NumLocations < 0x100; j++) {
             if (names[j].ok) {
-                int* ip = &((sCamEntry*)&self->LocationInfo[0])[0].idx;
-                int* ap = &((sCamEntry*)&self->LocationInfo[0])[0].active;
-                strcpy(((sCamEntry*)&self->LocationInfo[0])[self->NumLocations].name, cBENewRaceInterface_getLocationFile(iface, j));
+                int* ip = &((&self->LocationInfo[0]))[0].locationID;
+                int* ap = &((&self->LocationInfo[0]))[0].bIsBAM;
+                strcpy(((&self->LocationInfo[0]))[self->NumLocations].File, cBENewRaceInterface_getLocationFile(iface, j));
                 *(char**)&self->LocationInfo[self->NumLocations].BigFile[0] = str_BAM_b[0];
                 ip[self->NumLocations * 35] = j;
                 ap[self->NumLocations * 35] = 1;

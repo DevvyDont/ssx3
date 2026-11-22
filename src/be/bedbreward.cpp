@@ -156,7 +156,6 @@ INCLUDE_ASM("be/bedbreward", cBERewardDB_getRewardName);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sRec12_AF40 { int id; int f4; int f8; };
-struct sRec8_AF40 { int id; int f4; };
 struct sRec16_AF40 { int id; int f4; int f8; int fC; };
 
 struct sRewardDB_AF40 {
@@ -164,7 +163,7 @@ struct sRewardDB_AF40 {
     int f4;
     sRec12_AF40* t0;    // 0x8
     sRec12_AF40* t1;    // 0xC
-    sRec8_AF40* t2;     // 0x10
+    tPeakPassInfo* t2;     // 0x10
     sRec16_AF40* t3;    // 0x14
     sRec16_AF40* t4;    // 0x18
     sRec16_AF40* t5;    // 0x1C
@@ -189,7 +188,7 @@ extern "C" int cBERewardDB_getRewardName(cBERewardDB* self, int type, int idx)
     switch (type) {
     case 0: { int off = idx * 12; return *(int*)((char*)(sRec12_AF40*)self->mpTrophies + off); }
     case 1: { int off = idx * 12; return *(int*)((char*)(sRec12_AF40*)self->mpMedals + off); }
-    case 2: { int off = idx * 8; return *(int*)((char*)(sRec8_AF40*)self->mpPeakPasses + off); }
+    case 2: { int off = idx * 8; return *(int*)((char*)self->mpPeakPasses + off); }
     case 3: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)self->mpPosters + off); }
     case 4: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)self->mpTradingCards + off); }
     case 5: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)self->mpConceptArts + off); }

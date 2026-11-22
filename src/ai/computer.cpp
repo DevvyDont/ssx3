@@ -33,13 +33,6 @@ struct sAiTune_SIRD {
     int boost;       // 0xE4
 };
 
-struct cComputer_SIRD {
-    char pad0[0x18];
-    sAiTune_SIRD* tune;     // 0x18
-    char pad1C[0xDF8 - 0x1C];
-    float skillA;           // 0xDF8
-    float skillB;           // 0xDFC
-};
 
 /**
  * Applies the AI tuning for one difficulty level to this computer rider.
@@ -54,103 +47,103 @@ struct cComputer_SIRD {
  */
 // Applies the per-level AI tuning; mode 0 and mode 2 override the skill values with their own tables.
 // skillB is stored as a percentage and scaled to 0..1 at the end.
-extern "C" void cComputer_setIndividualRiderDifficulty(cComputer_SIRD* self, int level, int mode)
+extern "C" void cComputer_setIndividualRiderDifficulty(cComputer* self, int level, int mode)
 {
     switch (level) {
     case 1:
-        self->skillA = 100.0f;
-        self->skillB = 86.9153976f;
-        self->tune->accel = -49670.1406f;
-        self->tune->speed = 47500.0f;
-        self->tune->boost = 0;
+        self->mRiderDifficulty = 100.0f;
+        self->mTrickDifficulty = 86.9153976f;
+        ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->accel = -49670.1406f;
+        ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->speed = 47500.0f;
+        ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->boost = 0;
         break;
     case 2:
-        self->skillA = 80.3891449f;
-        self->skillB = 79.5998383f;
-        self->tune->accel = -70000.0f;
-        self->tune->speed = 45000.0f;
-        self->tune->boost = 1;
+        self->mRiderDifficulty = 80.3891449f;
+        self->mTrickDifficulty = 79.5998383f;
+        ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->accel = -70000.0f;
+        ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->speed = 45000.0f;
+        ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->boost = 1;
         break;
     case 3:
-        self->skillA = 51.007576f;
-        self->skillB = 68.9012375f;
-        self->tune->accel = -81571.1797f;
-        self->tune->speed = 40000.0f;
-        self->tune->boost = 1;
+        self->mRiderDifficulty = 51.007576f;
+        self->mTrickDifficulty = 68.9012375f;
+        ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->accel = -81571.1797f;
+        ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->speed = 40000.0f;
+        ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->boost = 1;
         break;
     case 4:
-        self->skillA = 46.6018982f;
-        self->skillB = 56.8430748f;
-        self->tune->accel = -80321.1797f;
-        self->tune->speed = 37500.0f;
-        self->tune->boost = 1;
+        self->mRiderDifficulty = 46.6018982f;
+        self->mTrickDifficulty = 56.8430748f;
+        ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->accel = -80321.1797f;
+        ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->speed = 37500.0f;
+        ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->boost = 1;
         break;
     case 5:
-        self->skillA = 14.000701f;
-        self->skillB = 42.4410439f;
-        self->tune->accel = -92500.0f;
-        self->tune->speed = 32500.0f;
-        self->tune->boost = 1;
+        self->mRiderDifficulty = 14.000701f;
+        self->mTrickDifficulty = 42.4410439f;
+        ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->accel = -92500.0f;
+        ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->speed = 32500.0f;
+        ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->boost = 1;
         break;
     }
     if (mode == 0) {
         switch (level) {
         case 1:
-            self->skillA = 100.0f;
-            self->skillB = 83.8930817f;
-            self->tune->speed = 45000.0f;
+            self->mRiderDifficulty = 100.0f;
+            self->mTrickDifficulty = 83.8930817f;
+            ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->speed = 45000.0f;
             break;
         case 2:
-            self->skillA = 55.8049736f;
-            self->skillB = 64.6436768f;
-            self->tune->speed = 42500.0f;
+            self->mRiderDifficulty = 55.8049736f;
+            self->mTrickDifficulty = 64.6436768f;
+            ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->speed = 42500.0f;
             break;
         case 3:
-            self->skillA = 40.2501869f;
-            self->skillB = 60.0044975f;
-            self->tune->speed = 37500.0f;
+            self->mRiderDifficulty = 40.2501869f;
+            self->mTrickDifficulty = 60.0044975f;
+            ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->speed = 37500.0f;
             break;
         case 4:
-            self->skillA = 15.5423021f;
-            self->skillB = 52.0049553f;
-            self->tune->speed = 32500.0f;
+            self->mRiderDifficulty = 15.5423021f;
+            self->mTrickDifficulty = 52.0049553f;
+            ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->speed = 32500.0f;
             break;
         case 5:
-            self->skillA = 7.95483208f;
-            self->skillB = 35.0202637f;
-            self->tune->speed = 30000.0f;
+            self->mRiderDifficulty = 7.95483208f;
+            self->mTrickDifficulty = 35.0202637f;
+            ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->speed = 30000.0f;
             break;
         }
     } else if (mode == 2) {
         switch (level) {
         case 1:
-            self->skillA = 100.0f;
-            self->skillB = 100.0f;
-            self->tune->speed = 50000.0f;
+            self->mRiderDifficulty = 100.0f;
+            self->mTrickDifficulty = 100.0f;
+            ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->speed = 50000.0f;
             break;
         case 2:
-            self->skillA = 84.9981003f;
-            self->skillB = 82.6824875f;
-            self->tune->speed = 47500.0f;
+            self->mRiderDifficulty = 84.9981003f;
+            self->mTrickDifficulty = 82.6824875f;
+            ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->speed = 47500.0f;
             break;
         case 3:
-            self->skillA = 74.9987259f;
-            self->skillB = 70.8223801f;
-            self->tune->speed = 40000.0f;
+            self->mRiderDifficulty = 74.9987259f;
+            self->mTrickDifficulty = 70.8223801f;
+            ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->speed = 40000.0f;
             break;
         case 4:
-            self->skillA = 54.9958344f;
-            self->skillB = 59.9440651f;
-            self->tune->speed = 37500.0f;
+            self->mRiderDifficulty = 54.9958344f;
+            self->mTrickDifficulty = 59.9440651f;
+            ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->speed = 37500.0f;
             break;
         case 5:
-            self->skillA = 29.9814339f;
-            self->skillB = 46.9987717f;
-            self->tune->speed = 32500.0f;
+            self->mRiderDifficulty = 29.9814339f;
+            self->mTrickDifficulty = 46.9987717f;
+            ((sAiTune_SIRD*)self->RiderHandler.GroundMotion.mRider)->speed = 32500.0f;
             break;
         }
     }
-    self->skillB *= 0.01f;
+    self->mTrickDifficulty *= 0.01f;
 }
 #endif
 

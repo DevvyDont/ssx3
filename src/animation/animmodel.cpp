@@ -1407,20 +1407,13 @@ struct sNodeAM {
     sNodeAM* prev;                  // 0x1C
     sNodeAM* next;                  // 0x20
 };
-struct sModelAM {
-    char pad_0x0[0x8];
-    char* seqs;                     // 0x8
-    char* ents;                     // 0xC
-    char pad_0x10[4];
-    char* data;                     // 0x14
-};
 extern sNodeAM* D_pool_AM[] __asm__("gChanCache");
 extern sNodeAM* D_head_AM[] __asm__("gChanCacheLRU");
 sNodeAM* gGenCacheBucket_AM(int kind, long n) __asm__("gGenCacheBucket");
 extern "C" void dcmpInitFrameAccessor(void* dst, void* src, int len);
 extern "C" void dcmpGetFrame(void* node, float t, void* a, long b, void* c);
 
-void cAdfDataSource_getFramePartData_AM(sModelAM* self, void* p2, unsigned int* p3, int p4, void* p5, long p6) __asm__("cAdfDataSource_getFramePartData");
+void cAdfDataSource_getFramePartData_AM(cAdfDataSource* self, void* p2, unsigned int* p3, int p4, void* p5, long p6) __asm__("cAdfDataSource_getFramePartData");
 /**
  * Decodes one animation frame's channels for a part, through a cache of unpacked channel blocks.
  *
@@ -1437,10 +1430,10 @@ void cAdfDataSource_getFramePartData_AM(sModelAM* self, void* p2, unsigned int* 
  * @param startChan  first channel to decode (On Tour: start)
  * @param numChans  number of channels, clamped to the block's channel count (On Tour: len)
  */
-void cAdfDataSource_getFramePartData_AM(sModelAM* self, void* dest, unsigned int* frame, int part, void* startChan, long numChans)
+void cAdfDataSource_getFramePartData_AM(cAdfDataSource* self, void* dest, unsigned int* frame, int part, void* startChan, long numChans)
 {
     float findex = *(float*)(frame + 1) * 30.0f;
-    sSeqAM* seq = (sSeqAM*)(self->seqs + (frame[0] >> 8) * 0x14);
+    sSeqAM* seq = (sSeqAM*)(((char*)self->Anims) + (frame[0] >> 8) * 0x14);
     float lim = (float)(seq->n - 1);
     int idx;
     int numChunks;
@@ -1456,9 +1449,9 @@ void cAdfDataSource_getFramePartData_AM(sModelAM* self, void* dest, unsigned int
         numChunks = seq->a;
     }
     sNodeAM* node;
-    sEntAM* ent = (sEntAM*)(self->ents + seq->base * 8 + part * numChunks * 8 + idx * 8);
+    sEntAM* ent = (sEntAM*)(((char*)self->Chunks) + seq->base * 8 + part * numChunks * 8 + idx * 8);
     findex = findex - (float)(idx * (chunkFrames - 1));
-    long chunkChans = *(unsigned char*)(self->data + ent->off);
+    long chunkChans = *(unsigned char*)(((char*)self->ChannelData) + ent->off);
     int kind = ent->kind;
     if (chunkChans < numChans) {
         numChans = chunkChans;
@@ -1493,7 +1486,7 @@ have_slot:
         node->owner = ent;
         D_head_AM[kind] = node->next;
         char* np = (char*)node + 4;
-        dcmpInitFrameAccessor(np, self->data + ent->off, ent->len);
+        dcmpInitFrameAccessor(np, ((char*)self->ChannelData) + ent->off, ent->len);
         dcmpGetFrame(np, findex, startChan, numChans, dest);
     }
 }

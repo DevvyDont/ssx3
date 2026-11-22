@@ -1876,12 +1876,6 @@ struct sEquipEntry_AFD0 {
     unsigned short f0;
     unsigned short flags;
 };
-struct sEquipDb_AFD0 {
-    char pad_0x0[0x288];
-    short* map;     // 0x288
-    char pad_0x28c[4];
-    sEquipEntry_AFD0 entries[1];  // 0x290
-};
 struct sEquipItem_AFD0 {
     int f0;
     short id;       // 0x4
@@ -1890,11 +1884,11 @@ struct sEquipItem_AFD0 {
 };
 extern "C" int func_0014D7E8(int a0, int a1, int a2, void* out, int a4, int a5);
 
-static inline sEquipEntry_AFD0* getEntry_AFD0(sEquipDb_AFD0* db, int id)
+static inline sEquipEntry_AFD0* getEntry_AFD0(cBECharProfileDB* db, int id)
 {
-    short idx = db->map[id];
+    short idx = db->mpBoltsMap[id];
     if (idx >= 0) {
-        return &db->entries[idx];
+        return &((sEquipEntry_AFD0*)&db->mBolts[0])[idx];
     }
     return 0;
 }
@@ -1910,7 +1904,7 @@ static inline sEquipEntry_AFD0* getEntry_AFD0(sEquipDb_AFD0* db, int id)
  * @param itemId   the category
  * @return 1 when there is one, else 0
  */
-extern "C" int func_0019AFD0(cFEStateCharEquip* self, int library, sEquipDb_AFD0* db, int itemId)
+extern "C" int func_0019AFD0(cFEStateCharEquip* self, int library, cBECharProfileDB* db, int itemId)
 {
     sEquipItem_AFD0* items[528];
     int n = func_0014D7E8(library, self->mCharID, itemId, items, -1, 1);
@@ -1932,10 +1926,6 @@ extern "C" int func_0019AFD0(cFEStateCharEquip* self, int library, sEquipDb_AFD0
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019B098);
 #ifdef SKIP_ASM
-struct sEquipEntry_B098 {
-    unsigned short f0;
-    unsigned short flags;
-};
 struct sEquipItem_B098 {
     short f0;
     signed char slot;   // 0x2
@@ -1946,11 +1936,11 @@ struct sEquipItem_B098 {
 };
 extern "C" int func_0014D7E8(int a0, int a1, int a2, void* out, int a4, int a5);
 
-static inline sEquipEntry_B098* getEntry_B098(cBECharProfileDB* db, int id)
+static inline tBEProfileBolt* getEntry_B098(cBECharProfileDB* db, int id)
 {
     short idx = db->mpBoltsMap[id];
     if (idx >= 0) {
-        return &((sEquipEntry_B098*)&db->mBolts[0])[idx];
+        return &((&db->mBolts[0]))[idx];
     }
     return 0;
 }
@@ -2093,7 +2083,7 @@ extern "C" int func_0019B180_impl(void* selfv, int cat)
             }
             tBEProfileBolt* entry = getEntry_B180(db, it->id);
             if ((!(it->flags & 0x20) && (entry->flags & 2))
-                || ((it->flags & 0x20) && func_0019AFD0((cFEStateCharEquip*)self, lib, (sEquipDb_AFD0*)db, it->id) != 0)) {
+                || ((it->flags & 0x20) && func_0019AFD0((cFEStateCharEquip*)self, lib, db, it->id) != 0)) {
                 self->items[self->count] = it;
                 self->count++;
             }
@@ -3577,7 +3567,7 @@ extern char cMemMan_m_mutex[];
  * @param bank  the slot's bank (0-9), passed to the eviction helpers
  * @param rawSlot  the slot
  */
-extern "C" void func_0019D000(sEquipTable_DC20* self, int bank, sEquipSlot_DC20* rawSlot)
+extern "C" void func_0019D000(sEquipTable_DC20* self, int bank, tBoltFile* rawSlot)
 {
     tBoltFile* slot = (tBoltFile*)rawSlot;
     if (slot == 0)
@@ -3669,7 +3659,7 @@ struct sEquipTable_DC20;
 struct sEquipSlot_DC20;
 extern "C" int ASYNCFILE_getstatus(int handle);
 extern "C" void ASYNCFILE_release(int handle, int a1, void* status);
-extern "C" void func_0019D000(sEquipTable_DC20* self, int bank, sEquipSlot_DC20* slot);
+extern "C" void func_0019D000(sEquipTable_DC20* self, int bank, tBoltFile* slot);
 extern "C" void func_0019D140(void* self, int bank);
 extern "C" void func_0019D8B8(sEquipTable_DC20* self, int bank, int i);
 
@@ -3706,7 +3696,7 @@ extern "C" void func_0019D250(void* table)
                 if (asyncStatus == 1) {
                     int status[4];
                     ASYNCFILE_release(slot->asyncFileHandle, 0, status);
-                    func_0019D000((sEquipTable_DC20*)self, i, (sEquipSlot_DC20*)slot);
+                    func_0019D000((sEquipTable_DC20*)self, i, slot);
                     if (slot->refCount == 0)
                         slot->flags = 0;
                     else
@@ -4121,24 +4111,13 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019DC20);
 #ifdef SKIP_ASM
 extern "C" void ASYNCFILE_release(int handle, int a1, void* status);
 extern "C" int ASYNCFILE_getstatus(int handle);
-struct sEquipSlot_DC20 {
-    int state;
-    char name[0x100];
-    void* data;     // 0x104
-    int handle;     // 0x108
-    int pending;    // 0x10C
-    int f110;
-    int timer;      // 0x114
-    int size;       // 0x118
-    int f11C;
-};
 struct sEquipRow_DC20 {
-    sEquipSlot_DC20 slots[0x100];
+    tBoltFile slots[0x100];
 };
 struct sEquipTable_DC20 {
     sEquipRow_DC20 rows[1];
 };
-extern "C" void func_0019D000(sEquipTable_DC20* self, int bank, sEquipSlot_DC20* slot);
+extern "C" void func_0019D000(sEquipTable_DC20* self, int bank, tBoltFile* slot);
 struct sEquipTable_D4B8;
 extern "C" void func_0019D4B8(sEquipTable_D4B8* self, int bank, int i);
 
@@ -4156,24 +4135,24 @@ extern "C" void func_0019D4B8(sEquipTable_D4B8* self, int bank, int i);
 extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i)
 {
     int status;
-    sEquipSlot_DC20* slot = &self->rows[bank].slots[i];
-    if (--slot->timer > 0) {
+    tBoltFile* slot = &self->rows[bank].slots[i];
+    if (--slot->refCount > 0) {
         return;
     }
-    if (slot->state == 2) {
-        if (ASYNCFILE_getstatus(slot->handle) != 1) {
+    if (slot->flags == 2) {
+        if (ASYNCFILE_getstatus(slot->asyncFileHandle) != 1) {
             return;
         }
-        ASYNCFILE_release(slot->handle, 0, &status);
+        ASYNCFILE_release(slot->asyncFileHandle, 0, &status);
         func_0019D000(self, bank, slot);
-        slot->pending = 0;
-        slot->state = 0;
+        slot->async = 0;
+        slot->flags = 0;
         *(int*)((char*)self + 0xB4004) -= 1;
     }
-    if (slot->data == 0) {
+    if (slot->dataPtr == 0) {
         func_0019D4B8((sEquipTable_D4B8*)self, bank, i);
     } else {
-        slot->state = 0;
+        slot->flags = 0;
     }
 }
 #endif
@@ -4571,16 +4550,6 @@ struct sSlotEntryCE {
     char pad[7];
 };
 
-struct sRiderSlotCE {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    int f10;
-    int f14;
-    int f18;
-    sSlotEntryCE entries[256];  // 0x1C
-};
 
 /**
  * Constructs a front-end rider (0xCE0 bytes; the rider manager holds two).
@@ -4592,22 +4561,22 @@ struct sRiderSlotCE {
  *
  * @return @p self
  */
-extern "C" void* cFERider_cFERider(sRiderSlotCE* self)
+extern "C" void* cFERider_cFERider(cFERider* self)
 {
     int i;
     char* riderBytes = (char*)self;
     sSlotEntryCE* textureEntry;
     *(int*)(riderBytes + 0xC70) = 0;
     *(int*)(riderBytes + 0xC74) = 0;
-    self->f0 = -1;
-    self->f4 = -1;
+    self->mCharID = -1;
+    self->mProfileIndex = -1;
     int none = -1;
-    textureEntry = self->entries;
-    self->f8 = 0;
-    self->fC = 0;
-    self->f10 = 0;
-    self->f14 = 0;
-    self->f18 = 0;
+    textureEntry = ((sSlotEntryCE*)&self->mTextureRefs[0]);
+    (*(int*)&self->mpAnimModel) = 0;
+    (*(int*)&self->mpRiderAnim) = 0;
+    self->mLoadAll = 0;
+    self->mRiderIsPosed = 0;
+    self->mNumTextureRefs = 0;
     for (i = 0; i < 256; i++) {
         textureEntry->flag = 0;
         textureEntry->id = none;

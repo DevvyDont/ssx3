@@ -19,10 +19,6 @@ struct sSplineHeader {
     sSplinePoint* first; // 0x24
 };
 
-struct sSplineNode {
-    char pad_0x00[0x68];
-    sSplineHeader* header; // 0x68
-};
 
 
 //100%
@@ -38,7 +34,7 @@ INCLUDE_ASM("object/spline3d", cSpline_calcLength__FP7cSpline);
  */
 float cSpline_calcLength(cSpline* self)
 {
-    sSplineHeader* header = ((sSplineNode*)self->Seg)->header;
+    sSplineHeader* header = ((sSplineHeader*)(self->Seg)->m_Parent);
     sSplinePoint* cur = header->first;
     for (int i = 1; i < header->numPoints; i++) {
         cur = cur->next;
@@ -79,7 +75,7 @@ public:
 
 struct sTrackNode5570 {
     char pad_0x0[0x24];
-    sSplineNode* node;      // 0x24
+    tSplineSegmentRecord* node;      // 0x24
 };
 
 struct sTrackSet5570 {

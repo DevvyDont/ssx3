@@ -790,7 +790,6 @@ struct cRider;
 void cRider_addRiderMetrix(cRider* rider);
 void cBENewRaceInterface_assignPlayer(void*, int, int);
 
-struct sRiderIP { char pad[0x86C]; int mIndex; int mCtrl; char pad874[8]; int f87C; };
 class cBEIfaceIP {
 public:
     int pad[3];
@@ -800,7 +799,7 @@ public:
 struct sAiObjIP
 {
     char pad0[0x28];
-    sRiderIP* mRiders[6];
+    cRider* mRiders[6];
     char* mPlayers[2];
     char pad48[0x30];
     int mCount;
@@ -854,9 +853,9 @@ extern "C" void cAI_InitPlayers(cAI* aiManager)
     for (; i < n; i++) {
         int ch = cBENewPlayerInterface_getRiderCtrlID(iface, i);
         cPlayer* obj = (cPlayer*)cPlayer_cPlayer_IP(cMemMan_alloc_IP(6480, str_Player, 0x80000000, 0), 1);
-        self->mRiders[i] = ((char*)obj) ? (sRiderIP*)obj->mRider : 0;
-        self->mRiders[i]->mIndex = idx;
-        self->mRiders[i]->mCtrl = idx;
+        self->mRiders[i] = ((char*)obj) ? obj->mRider : 0;
+        self->mRiders[i]->mAIIndex = idx;
+        self->mRiders[i]->mViewIndex = idx;
         int ctrl = cBENewPlayerInterface_getControllerMapping(iface, idx);
         if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
             if ((cBENetworkInterface_networkOpt.bIsHost != 0 && i != 1) || (cBENetworkInterface_networkOpt.bIsHost == 0 && i != 0)) {
@@ -869,7 +868,7 @@ extern "C" void cAI_InitPlayers(cAI* aiManager)
                 SetHud_IP(((char*)obj), cInputSync_createlocalinput(app->Game->InputSync, *box), HudTab_IP(ch));
             } else {
                 cSSXApp* app = SSXApp;
-                ((sRiderIP*)obj->mRider)->f87C = 0;
+                (obj->mRider)->mIsLocal = 0;
                 int* inputBase = (int*)app;
                 inputBase += ctrl;
                 SetHud_IP(((char*)obj), cInputSync_createremoteinput(app->Game->InputSync, (void*)inputBase[46]), 0);
@@ -884,7 +883,7 @@ extern "C" void cAI_InitPlayers(cAI* aiManager)
             hud += ch;
             *(int*)(*box + 4) = inputBase[46];
             SetHud_IP(((char*)obj), (int)*box, hud[3003]);
-            self->mRiders[i]->mCtrl = idx;
+            self->mRiders[i]->mViewIndex = idx;
         }
         cRider_addFocusBox(obj->mRider);
         nPlayers++;
@@ -898,11 +897,11 @@ extern "C" void cAI_InitPlayers(cAI* aiManager)
     }
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
         if (cBENetworkInterface_networkOpt.bIsHost != 0) {
-            (*(sRiderIP**)(self->mPlayers[0] + 0x18))->mCtrl = 0;
-            (*(sRiderIP**)(self->mPlayers[1] + 0x18))->mCtrl = -2;
+            (*(cRider**)(self->mPlayers[0] + 0x18))->mViewIndex = 0;
+            (*(cRider**)(self->mPlayers[1] + 0x18))->mViewIndex = -2;
         } else {
-            (*(sRiderIP**)(self->mPlayers[0] + 0x18))->mCtrl = -2;
-            (*(sRiderIP**)(self->mPlayers[1] + 0x18))->mCtrl = 0;
+            (*(cRider**)(self->mPlayers[0] + 0x18))->mViewIndex = -2;
+            (*(cRider**)(self->mPlayers[1] + 0x18))->mViewIndex = 0;
         }
     }
     ((cBEIfaceIP*)rm)->update();
@@ -995,12 +994,11 @@ static inline char* cMissionRider_ctor(char* vself, int inChrg)
     return ((char*)self);
 }
 
-struct sRiderMR { char pad[0x86C]; int mIndex; int mCtrl; };
 
 struct sAiObjMR
 {
     char pad0[0x28];
-    sRiderMR* mRiders[18];
+    cRider* mRiders[18];
     char* mMission[2];
     int mCount;
     char pad7C[0xC];
@@ -1030,9 +1028,9 @@ extern "C" void cAI_initMissionRiders(cAI* aiManager)
     obj->Pad = 0;
     cAnimModel_setScale(obj->mRider->mAnimModel, 0.5f, 0.5f);
     cBEStatInterface_setStatLevel(cBE_getInterface_Fv(cBE_getBE(), 3), idx, 5);
-    self->mRiders[idx] = ((char*)obj) ? (sRiderMR*)obj->mRider : 0;
-    self->mRiders[idx]->mIndex = idx;
-    self->mRiders[idx]->mCtrl = 0;
+    self->mRiders[idx] = ((char*)obj) ? obj->mRider : 0;
+    self->mRiders[idx]->mAIIndex = idx;
+    self->mRiders[idx]->mViewIndex = 0;
     cRider_addFocusBox(obj->mRider);
     cRider_addRiderMetrix(obj->mRider);
     cRider_initOnce(self->mRiders[idx], 0);
@@ -1060,7 +1058,6 @@ void cBENewRaceInterface_assignPlayer(void*, int, int);
 extern char str_ComputerRider[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
-struct sRiderCR { char pad[0x86C]; int mIndex; int mCtrl; };
 struct sVEntryCR { short delta; short index; void (*fn)(void*); };
 class cBEIfaceCR {
 public:
@@ -1073,7 +1070,7 @@ struct sAiObjCR
     char pad0[0x10];
     int f10;
     char pad14[0x14];
-    sRiderCR* mRiders[8];
+    cRider* mRiders[8];
     char* mObjs[12];
     int mCount;
     char pad7C[4];
@@ -1101,16 +1098,16 @@ extern "C" void cAI_initComputerRiders(cAI* aiManager)
     {
         int ch = cBENewPlayerInterface_getRiderCharID(iface, idx);
         cComputer* obj = (cComputer*)cComputer_cComputer(cMemMan_alloc(6800, str_ComputerRider, 0x80000000, 0), 1, 0);
-        sRiderCR** slot = &self->mRiders[idx];
-        sRiderCR* rider = ((char*)obj) ? (sRiderCR*)obj->RiderHandler.GroundMotion.mRider : 0;
+        cRider** slot = &self->mRiders[idx];
+        cRider* rider = ((char*)obj) ? obj->RiderHandler.GroundMotion.mRider : 0;
         *slot = rider;
-        rider->mIndex = idx;
+        rider->mAIIndex = idx;
         cBENewPlayerInterface_setRiderCtrlID(iface, idx, -1);
         cBENewPlayerInterface_setRiderCharID(iface, idx, ch);
         ((cBEIfaceCR*)iface)->update();
-        sRiderCR* slotRider = *slot;
+        cRider* slotRider = *slot;
         int noController = -1;
-        slotRider->mCtrl = noController;
+        slotRider->mViewIndex = noController;
         cRider_addRiderMetrix(obj->RiderHandler.GroundMotion.mRider);
         cComputer_setAttributeLevels(obj);
         cComputer_updateRiderDifficulty(obj);
@@ -1141,14 +1138,13 @@ void cRider_addRiderMetrix(cRider* rider);
 extern char str_ComputerActorRider[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
-struct sRiderCA { char pad[0x86C]; int mIndex; int mCtrl; };
 struct sVEntryCA { short delta; short index; void (*fn)(void*); };
 
 struct sAiObj129FF8
 {
     char pad0[0x20];
     int mCharIds[2];
-    sRiderCA* mRiders[13];
+    cRider* mRiders[13];
     char* mObjs[7];
     int mCount;
     char pad7C[8];
@@ -1177,17 +1173,17 @@ extern "C" void cAI_initComputerActors(cAI* aiManager)
     {
         int ch = self->mCharIds[self->mNumActors];
         cComputer* obj = (cComputer*)cComputer_cComputer(cMemMan_alloc(6800, str_ComputerActorRider, 0x80000000, 0), 1, 1);
-        sRiderCA* rider = ((char*)obj) ? (sRiderCA*)obj->RiderHandler.GroundMotion.mRider : 0;
+        cRider* rider = ((char*)obj) ? obj->RiderHandler.GroundMotion.mRider : 0;
         self->mRiders[idx] = rider;
-        rider->mIndex = idx;
+        rider->mAIIndex = idx;
         cBENewPlayerInterface_setRiderCtrlID(iface, idx, -1);
         cBENewPlayerInterface_setRiderCharID(iface, idx, ch);
         cBENewPlayerInterface_setRiderCheatCharID(iface, idx, 0);
         sVEntryCA* vt = (sVEntryCA*)iface->mVtbl;
         vt[1].fn(vthis(iface, vt[1]));
-        sRiderCA* slotRider = self->mRiders[idx];
+        cRider* slotRider = self->mRiders[idx];
         int noController = -1;
-        slotRider->mCtrl = noController;
+        slotRider->mViewIndex = noController;
         cRider_addRiderMetrix(obj->RiderHandler.GroundMotion.mRider);
         self->mObjs[self->mNumActors] = ((char*)obj);
         self->mNumActors++;

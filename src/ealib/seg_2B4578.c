@@ -18109,12 +18109,6 @@ void MIXI_stop(int voice) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", MIX_stop);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct Node_8468 {
-    int pad0;
-    void (*fn)(struct Node_8468 *);
-    struct Node_8468 *next;
-};
 struct G_8468 {
     char pad0[5];
     unsigned char n;
@@ -18125,7 +18119,7 @@ struct G_8468 {
     char *tab;
 };
 extern struct G_8468 D_00515B40_8468 __asm__("D_00515B40");
-extern void SNDMEMI_free_8468(struct Node_8468 *) __asm__("SNDMEMI_free");
+extern void SNDMEMI_free_8468(struct SFILTERNODE *) __asm__("SNDMEMI_free");
 
 /**
  * Stops a mixer voice.
@@ -18139,8 +18133,8 @@ extern void SNDMEMI_free_8468(struct Node_8468 *) __asm__("SNDMEMI_free");
 void MIX_stop(int idx) {
     struct SNDMIXVOICE *voiceState = (struct SNDMIXVOICE *)(D_00515B40_8468.tab + idx * 0x60);
     int i;
-    struct Node_8468 *nd;
-    struct Node_8468 *next;
+    struct SFILTERNODE *nd;
+    struct SFILTERNODE *next;
     for (i = 0; i < 1; i++) {
         D_00515B40_8468.g[i] += ((float*)&voiceState->wetbusgainprev[0])[i] * voiceState->lastmixed;
     }
@@ -18148,13 +18142,13 @@ void MIX_stop(int idx) {
         D_00515B40_8468.f[i] += ((float*)&voiceState->drybusgainprev[0])[i] * voiceState->lastmixed;
     }
     do {
-        if (((struct Node_8468*)voiceState->filterhead)->fn != 0) {
-            ((struct Node_8468*)voiceState->filterhead)->fn(((struct Node_8468*)voiceState->filterhead));
+        if (((void (*)(struct Node_8468*))((struct SFILTERNODE*)voiceState->filterhead)->restorefn) != 0) {
+            ((void (*)(struct Node_8468*))((struct SFILTERNODE*)voiceState->filterhead)->restorefn)(((struct SFILTERNODE*)voiceState->filterhead));
         }
-        nd = ((struct Node_8468*)voiceState->filterhead);
-        next = nd->next;
+        nd = ((struct SFILTERNODE*)voiceState->filterhead);
+        next = ((struct Node_8468*)nd->pfnnext);
         SNDMEMI_free_8468(nd);
-        (*(struct Node_8468**)&voiceState->filterhead) = next;
+        (*(struct SFILTERNODE**)&voiceState->filterhead) = next;
     } while (next != 0);
     voiceState->status = 0;
 }
@@ -18227,10 +18221,6 @@ void SNDMIX_setwetgain(int idx, int k, float gain) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", MIX_audioslice);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct Obj_85D0 {
-    int (*fn)(struct Obj_85D0 *self, int n, int b, float *snd, int d);
-};
 struct G_85D0 {
     char pad000[0x4];
     unsigned char cnt;
@@ -18245,8 +18235,8 @@ struct G_85D0 {
     float *names[6];
     float f[6];
     float g[1];
-    struct Obj_85D0 *objB[6];
-    struct Obj_85D0 *objA[6];
+    struct SFILTERNODE *objB[6];
+    struct SFILTERNODE *objA[6];
     char pad134[0x1DC - 0x134];
     struct SNDMIXVOICE *tab;
     void (*set)(int a, float *snd, float *name, float v);
@@ -18300,7 +18290,7 @@ void MIX_audioslice(int *outs, int n) {
                 framesLeft = n;
             }
             if (framesLeft != 0) {
-                framesMixed = ((struct Obj_85D0*)voiceState->filterhead)->fn(((struct Obj_85D0*)voiceState->filterhead), framesLeft, D_00515B40_85D0.fB0, D_00515B40_85D0.snd, 0);
+                framesMixed = ((int (*)(struct Obj_85D0*, int, int, float*, int))((struct SFILTERNODE*)voiceState->filterhead)->filterfn)(((struct SFILTERNODE*)voiceState->filterhead), framesLeft, D_00515B40_85D0.fB0, D_00515B40_85D0.snd, 0);
                 if (framesMixed < 0) {
                     f8430_85D0(j);
                 } else if (framesMixed != 0) {
@@ -18325,10 +18315,10 @@ void MIX_audioslice(int *outs, int n) {
     }
     for (i = 0; i < D_00515B40_85D0.n; i++) {
         if (D_00515B40_85D0.objA[i] != 0) {
-            D_00515B40_85D0.objA[i]->fn(D_00515B40_85D0.objA[i], n, (int)D_00515B40_85D0.names[i], (float *)D_00515B40_85D0.fB0, 0);
-            D_00515B40_85D0.objB[i]->fn(D_00515B40_85D0.objB[i], n, D_00515B40_85D0.fB0, (float *)outs[i], 0);
+            ((int (*)(struct Obj_85D0*, int, int, float*, int))D_00515B40_85D0.objA[i]->filterfn)(D_00515B40_85D0.objA[i], n, (int)D_00515B40_85D0.names[i], (float *)D_00515B40_85D0.fB0, 0);
+            ((int (*)(struct Obj_85D0*, int, int, float*, int))D_00515B40_85D0.objB[i]->filterfn)(D_00515B40_85D0.objB[i], n, D_00515B40_85D0.fB0, (float *)outs[i], 0);
         } else {
-            D_00515B40_85D0.objB[i]->fn(D_00515B40_85D0.objB[i], n, (int)D_00515B40_85D0.names[i], (float *)outs[i], 0);
+            ((int (*)(struct Obj_85D0*, int, int, float*, int))D_00515B40_85D0.objB[i]->filterfn)(D_00515B40_85D0.objB[i], n, (int)D_00515B40_85D0.names[i], (float *)outs[i], 0);
         }
     }
 }

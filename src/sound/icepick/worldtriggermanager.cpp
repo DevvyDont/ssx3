@@ -151,8 +151,8 @@ extern "C" int cWorldTriggerInstance_CrowdTrigger(void* self, int idx);
 extern "C" int cWorldTriggerInstance_TriggerToPatch(void* self, int idx, int* type, int* a, int* b, int c, int d);
 extern "C" int cWorldTriggerInstance_SwapTriggerToString(void* self, int idx, char* dst);
 extern "C" void cWorldTriggerInstance_Reset(cWorldTriggerInstance* self);
-extern "C" int cWorldTriggerManager_PlayingTriggerInstance(sWorldTrigger70** self, int a1, int a2, sWorldTrigger70* except);
-extern "C" int cWorldTriggerManager_SwapTriggerPlaying(sWorldTrigger70** self, int id);
+extern "C" int cWorldTriggerManager_PlayingTriggerInstance(cWorldTriggerInstance** self, int a1, int a2, cWorldTriggerInstance* except);
+extern "C" int cWorldTriggerManager_SwapTriggerPlaying(cWorldTriggerInstance** self, int id);
 extern "C" int cWorldTriggerManager_AfterCollisionTrigger(cWorldTriggerManager* self, unsigned int i);
 extern "C" int cWorldTriggerManager_ObjectHit(cWorldTriggerManager* self, int id);
 extern "C" int cWorldTriggerManager_SyncToAnimationTrigger(cWorldTriggerManager* self, unsigned int i);
@@ -305,7 +305,7 @@ extern "C" void cWorldTriggerInstance_Update(cWorldTriggerInstance* tt)
         else
             instance->f38 = 0;
         if (instance->f38 == 0) {
-            if (cWorldTriggerManager_PlayingTriggerInstance((sWorldTrigger70**)gWorldTriggerManager, instance->f4, instance->f8, ((sWorldTrigger70*)tt)) != 0) {
+            if (cWorldTriggerManager_PlayingTriggerInstance((cWorldTriggerInstance**)gWorldTriggerManager, instance->f4, instance->f8, (tt)) != 0) {
                 cWorldTriggerInstance_Reset((cWorldTriggerInstance*)instance);
                 return;
             }
@@ -329,7 +329,7 @@ extern "C" void cWorldTriggerInstance_Update(cWorldTriggerInstance* tt)
                 cWorldTriggerInstance_Reset((cWorldTriggerInstance*)instance);
                 return;
             }
-            swapResult = cWorldTriggerManager_SwapTriggerPlaying((sWorldTrigger70**)gWorldTriggerManager, instance->fC);
+            swapResult = cWorldTriggerManager_SwapTriggerPlaying((cWorldTriggerInstance**)gWorldTriggerManager, instance->fC);
             if (swapResult > 0) {
                 cWorldTriggerInstance_Reset((cWorldTriggerInstance*)instance);
                 return;
@@ -342,11 +342,11 @@ extern "C" void cWorldTriggerInstance_Update(cWorldTriggerInstance* tt)
             }
             swapResult = func_0029B818(cAudioInterface_bxAudio(), instance->f40, rec);
         }
-        if (cWorldTriggerManager_AfterCollisionTrigger(gWorldTriggerManager, instance->fC) == 0 || cWorldTriggerManager_ObjectHit((cWorldTriggerManager*)((sTriggerIdCache*)gWorldTriggerManager), instance->f4) != 0) {
+        if (cWorldTriggerManager_AfterCollisionTrigger(gWorldTriggerManager, instance->fC) == 0 || cWorldTriggerManager_ObjectHit((cWorldTriggerManager*)(gWorldTriggerManager), instance->f4) != 0) {
             if (rec[0] == 3 && swapResult != 1)
                 return;
             if (cWorldTriggerManager_SyncToAnimationTrigger(gWorldTriggerManager, instance->fC) != 0) {
-                if (cWorldTriggerManager_ObjectRefFirstFrame(gWorldTriggerManager, (void*)instance->f4, (cWorldTriggerInstance*)(((sWorldTrigger70*)tt))) == 0) {
+                if (cWorldTriggerManager_ObjectRefFirstFrame(gWorldTriggerManager, (void*)instance->f4, (cWorldTriggerInstance*)((tt))) == 0) {
                     instance->f30 = -9999;
                     return;
                 }
@@ -365,7 +365,7 @@ extern "C" void cWorldTriggerInstance_Update(cWorldTriggerInstance* tt)
         cWorldTriggerInstance_Reset((cWorldTriggerInstance*)instance);
         return;
     }
-    if (cWorldTriggerManager_SyncToAnimationTrigger(gWorldTriggerManager, instance->fC) != 0 && cWorldTriggerManager_ObjectRefFirstFrame(gWorldTriggerManager, (void*)instance->f4, (cWorldTriggerInstance*)(((sWorldTrigger70*)tt))) != 0) {
+    if (cWorldTriggerManager_SyncToAnimationTrigger(gWorldTriggerManager, instance->fC) != 0 && cWorldTriggerManager_ObjectRefFirstFrame(gWorldTriggerManager, (void*)instance->f4, (cWorldTriggerInstance*)((tt))) != 0) {
         if (instance->f30 != -9999)
             cBankMonitor_BANKMONITOR_StopHandle(&(*((struct sSnd4C38Sys*)cAudioInterface_bxAudio())->p118)->sub, instance->f30, 1, 0.1f);
         sfxBegin_4C38((struct sSnd4C38Sys*)cAudioInterface_bxAudio(), instance->f60, instance->f64);
@@ -677,22 +677,16 @@ extern "C" void cWorldTriggerManager_UnloadTriggerInfo(void *manager) {
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_GetFreeInstance);
 #ifdef SKIP_ASM
-struct sWorldTrigger70 {
-    int active;
-    char pad[0x30];
-    int unk34;
-    char pad2[0x38];
-};
 
 /**
  * Returns the first unused world trigger instance of the 40, or 0 when all are in use.
  *
  * @return the free instance, or 0
  */
-extern "C" sWorldTrigger70* cWorldTriggerManager_GetFreeInstance(sWorldTrigger70** self)
+extern "C" cWorldTriggerInstance* cWorldTriggerManager_GetFreeInstance(cWorldTriggerInstance** self)
 {
     for (int i = 0; i < 40; i++) {
-        if ((*self)[i].active == 0) {
+        if ((*self)[i].m_bInUse == 0) {
             return &(*self)[i];
         }
     }
@@ -713,10 +707,10 @@ extern "C" int cWorldTriggerInstance_SameTriggerInstance(cWorldTriggerInstance* 
  * @param viewPort  the viewport
  * @return the instance, or 0
  */
-extern "C" sWorldTrigger70* cWorldTriggerManager_GetTriggerInstance(sWorldTrigger70** self, int objectRef, int volNum, int viewPort)
+extern "C" cWorldTriggerInstance* cWorldTriggerManager_GetTriggerInstance(cWorldTriggerInstance** self, int objectRef, int volNum, int viewPort)
 {
     for (int i = 0; i < 40; i++) {
-        if ((*self)[i].active != 0 && cWorldTriggerInstance_SameTriggerInstance((cWorldTriggerInstance*)(&(*self)[i]), objectRef, volNum, viewPort)) {
+        if ((*self)[i].m_bInUse != 0 && cWorldTriggerInstance_SameTriggerInstance((cWorldTriggerInstance*)(&(*self)[i]), objectRef, volNum, viewPort)) {
             return &(*self)[i];
         }
     }
@@ -750,7 +744,7 @@ struct sWtVec4 {
  * @param volume  the volume (0..1)
  * @param pos  the sound position
  */
-extern "C" void cWorldTriggerManager_HandleTrigger(sWorldTrigger70** self, int objectRef, int volNum, int viewPort, int audioTrigger, int positional, float volume, const sWtVec3& pos)
+extern "C" void cWorldTriggerManager_HandleTrigger(cWorldTriggerInstance** self, int objectRef, int volNum, int viewPort, int audioTrigger, int positional, float volume, const sWtVec3& pos)
 {
     sWtVec3 localPos = pos;
     if (*(int*)((char*)self + 0x334) != 0) {
@@ -793,22 +787,22 @@ extern unsigned char D_004A35A8[];
  * string (cSSXAudio_SwapBankStopped), marks it unused and stops it (cWorldTriggerInstance_Stop); when touched it runs
  * cWorldTriggerInstance_Update. Called every frame from the game (func_0022C830).
  */
-extern "C" void cWorldTriggerManager_Update(sWorldTrigger70** self)
+extern "C" void cWorldTriggerManager_Update(cWorldTriggerInstance** self)
 {
     if (cAudioInterface_bxAudio()->mSFXPaused != 0) return;
     for (int i = 0; i < 40; i++) {
-        if ((*self)[i].active == 1) {
-            if ((*self)[i].unk34 == 0) {
+        if ((*self)[i].m_bInUse == 1) {
+            if ((*self)[i].m_bTouch == 0) {
                 if (strcmp((char*)&(*self)[i] + 0x40, D_004A35A8)) {
                     // PORT: pointer arithmetic through int
                     cSSXAudio_SwapBankStopped_2(cAudioInterface_bxAudio(), (char*)(i * 0x70 + *(int*)self) + 0x40);
                 }
-                (*self)[i].active = 0;
+                (*self)[i].m_bInUse = 0;
                 cWorldTriggerInstance_Stop((cWorldTriggerInstance*)(&(*self)[i]));
             } else {
                 cWorldTriggerInstance_Update((cWorldTriggerInstance*)(&(*self)[i]));
             }
-            (*self)[i].unk34 = 0;
+            (*self)[i].m_bTouch = 0;
         }
     }
 }
@@ -828,9 +822,9 @@ extern "C" void cWorldTriggerInstance_Stop(cWorldTriggerInstance* t);
 extern "C" void cWorldTriggerManager_StopAllTriggers(cWorldTriggerManager* self)
 {
     for (int i = 0; i < 40; i++) {
-        if ((*(sWorldTrigger70**)self)[i].active == 1) {
-            (*(sWorldTrigger70**)self)[i].active = 0;
-            cWorldTriggerInstance_Stop((cWorldTriggerInstance*)(&(*(sWorldTrigger70**)self)[i]));
+        if ((*(cWorldTriggerInstance**)self)[i].m_bInUse == 1) {
+            (*(cWorldTriggerInstance**)self)[i].m_bInUse = 0;
+            cWorldTriggerInstance_Stop((cWorldTriggerInstance*)(&(*(cWorldTriggerInstance**)self)[i]));
         }
     }
 }
@@ -846,11 +840,11 @@ extern "C" void cWorldTriggerInstance_Stop(cWorldTriggerInstance* t);
  *
  * @param id  the trigger number
  */
-extern "C" void cWorldTriggerManager_StopTrigger(sWorldTrigger70** self, int id)
+extern "C" void cWorldTriggerManager_StopTrigger(cWorldTriggerInstance** self, int id)
 {
     for (int i = 0; i < 40; i++) {
-        if ((*self)[i].active == 1 && *(int*)((char*)&(*self)[i] + 0xC) == id) {
-            (*self)[i].active = 0;
+        if ((*self)[i].m_bInUse == 1 && *(int*)((char*)&(*self)[i] + 0xC) == id) {
+            (*self)[i].m_bInUse = 0;
             cWorldTriggerInstance_Stop((cWorldTriggerInstance*)(&(*self)[i]));
         }
     }
@@ -1190,11 +1184,11 @@ extern unsigned char D_004A35A8[];
  * @param id  the trigger to leave out
  * @return the count
  */
-extern "C" int cWorldTriggerManager_SwapTriggerPlaying(sWorldTrigger70** self, int id)
+extern "C" int cWorldTriggerManager_SwapTriggerPlaying(cWorldTriggerInstance** self, int id)
 {
     int n = 0;
     for (int i = 0; i < 40; i++) {
-        if ((*self)[i].active == 1 && strcmp((char*)&(*self)[i] + 0x40, D_004A35A8)) {
+        if ((*self)[i].m_bInUse == 1 && strcmp((char*)&(*self)[i] + 0x40, D_004A35A8)) {
             if (*(int*)((char*)&(*self)[i] + 0xC) != id) n++;
         }
     }
@@ -1213,11 +1207,11 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_PlayingTri
  * @param except  the instance to ignore
  * @return 1 when one exists, else 0
  */
-extern "C" int cWorldTriggerManager_PlayingTriggerInstance(sWorldTrigger70** self, int objectRef, int volNum, sWorldTrigger70* except)
+extern "C" int cWorldTriggerManager_PlayingTriggerInstance(cWorldTriggerInstance** self, int objectRef, int volNum, cWorldTriggerInstance* except)
 {
     for (int i = 0; i < 40; i++) {
-        sWorldTrigger70* triggerInst = &(*self)[i];
-        if (triggerInst->active == 1 && triggerInst != except
+        cWorldTriggerInstance* triggerInst = &(*self)[i];
+        if (triggerInst->m_bInUse == 1 && triggerInst != except
             && *(int*)((char*)triggerInst + 0x4) == objectRef
             && *(int*)((char*)triggerInst + 0x8) == volNum) {
             return 1;
@@ -1286,14 +1280,6 @@ extern "C" int cWorldTriggerManager_AfterCollisionTrigger(cWorldTriggerManager* 
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_ObjectHit);
 #ifdef SKIP_ASM
-struct sTriggerIdCache {
-    int unk0;
-    int ids[200];       // 0x4
-    int count;          // 0x324
-    int unk328;
-    int lastId;         // 0x32C
-    int lastResult;     // 0x330
-};
 
 /**
  * Returns whether an object is in the hit-object list (+0x4, count +0x324), caching the last answer.
@@ -1508,11 +1494,11 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_TouchAllUs
  *
  * Called by cSSXAudio_ResumeSFX.
  */
-extern "C" void cWorldTriggerManager_TouchAllUsed(sWorldTrigger70** self)
+extern "C" void cWorldTriggerManager_TouchAllUsed(cWorldTriggerInstance** self)
 {
     for (int i = 0; i < 40; i++) {
-        if ((*self)[i].active == 1) {
-            (*self)[i].unk34 = 1;
+        if ((*self)[i].m_bInUse == 1) {
+            (*self)[i].m_bTouch = 1;
         }
     }
 }
@@ -1527,14 +1513,9 @@ struct sQuad6AA0 {
 
 extern sQuad6AA0 t4vect_Zero;
 
-struct sTriggerSlot120 {
-    int unk0;
-    char pad[0x10c];
-    sQuad6AA0 q;        // 0x110
-};
 
 struct sTriggerSlots {
-    sTriggerSlot120 slots[2];
+    cAudioOverlapList slots[2];
 };
 
 /**
@@ -1547,10 +1528,10 @@ struct sTriggerSlots {
  */
 extern "C" sTriggerSlots* cWorldSound_cWorldSound(cWorldSound* self)
 {
-    sTriggerSlot120* overlapList = ((sTriggerSlot120*)&self->m_OverlapLists[0]);
+    cAudioOverlapList* overlapList = ((&self->m_OverlapLists[0]));
     for (int i = 1; i != -1; i--, overlapList++) {
-        overlapList->unk0 = 0;
-        overlapList->q = t4vect_Zero;
+        overlapList->numoverlaps = 0;
+        (*(sQuad6AA0*)&overlapList->lastposition) = t4vect_Zero;
     }
     return ((sTriggerSlots*)self);
 }

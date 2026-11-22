@@ -357,15 +357,6 @@ struct sHalfED80 {
 extern sHalfED80 tPose_Identity;
 extern "C" void cAnimModel_transform(void* model, void* pose);
 
-struct sFERiderED80 {
-    char pad_0x0[0x8];
-    void* model;        // 0x8
-    void* anim;         // 0xC
-    char pad_0x10[0x8];
-    int count;          // 0x18
-    char bones[0xCB4 - 0x1C];  // 0x1C
-    int fCB4;           // 0xCB4
-};
 
 /**
  * Compiles the front-end rider's model and starts its animation.
@@ -387,7 +378,7 @@ extern "C" void cFERider_compileModel(cFERider* self)
     *(int*)(anim + 0x60) = 0;
     self->mpRiderAnim = (cRiderAnim*)anim;
     *(int*)(anim + 0x64) = 0;
-    cRiderAnim_linkToFERider(anim, ((sFERiderED80*)self));
+    cRiderAnim_linkToFERider(anim, (self));
     cRiderAnimBase_play(self->mpRiderAnim, 434, 0, -1.0f);
     cRiderAnimBase_setupAnimation(self->mpRiderAnim, 0);
     sHalfED80 identityPose[2];
@@ -435,20 +426,6 @@ struct sModel_EE88 {
     sVec4_EE88* bones;  // 0x2C
 };
 
-struct sFERider_EE88 {
-    int type;           // 0x0
-    char pad4[0x8 - 0x4];
-    sModel_EE88* model; // 0x8
-    char padC[0x14 - 0xC];
-    int f14;            // 0x14
-    char pad18[0xC2C - 0x18];
-    int layer;          // 0xC2C
-    char padC30[0xC70 - 0xC30];
-    void* fC70;         // 0xC70
-    char padC74[0xCD0 - 0xC74];
-    int fCD0;           // 0xCD0
-    int pending;        // 0xCD4
-};
 
 struct sVE_EE88 {
     short delta;
@@ -470,18 +447,18 @@ struct sVE_EE88 {
  */
 extern "C" void cFERider_render(cFERider* selfp)
 {
-    sFERider_EE88* self = (sFERider_EE88*)selfp;
+    cFERider* self = selfp;
     sMtx_EE88 worldMatrix;
     sVec4_EE88 pos;
-    if (self->pending >= 0)
+    if (self->mSafeRenderCount >= 0)
         return;
-    if (self->model == 0)
+    if (((sModel_EE88*)self->mpAnimModel) == 0)
         return;
-    if (self->f14 == 0)
+    if (self->mRiderIsPosed == 0)
         return;
     cIrradiance_Clear(&worldMatrix);
-    int type = self->type;
-    if (self->fCD0 != 0) {
+    int type = self->mCharID;
+    if (self->mUberIrradiance != 0) {
         switch (type) {
         case 0:
         case 7:
@@ -531,8 +508,8 @@ extern "C" void cFERider_render(cFERider* selfp)
         func_00389590(&worldMatrix, cIrradianceDataBase_Get1(cIrradianceDataBase_TheDataBase, str_fe_map), cIrradiance_kv4White, 1.0f);
         break;
     }
-    int idx = cAnimModel_getBoneSkelIndex(self->model, 0, str_hips);
-    pos = self->model->bones[idx * 2];
+    int idx = cAnimModel_getBoneSkelIndex(((sModel_EE88*)self->mpAnimModel), 0, str_hips);
+    pos = ((sModel_EE88*)self->mpAnimModel)->bones[idx * 2];
     func_00389CB8(&worldMatrix, &pos, 1.0f);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
@@ -541,10 +518,10 @@ extern "C" void cFERider_render(cFERider* selfp)
     }
     int* fl = (int*)(&GrMan->m_pCurrentDrawState->unk_00[2]);
     unsigned int old = (unsigned int)(*fl & 0x3E0) >> 5;
-    if (self->layer >= 0)
-        *fl = (*fl & ~0x3E0) | ((self->layer << 5) & 0x3E0);
-    cAnimModel_render(self->model, 0, 0, 0);
-    func_002F2088(self->fC70);
+    if (self->mDrawLayer >= 0)
+        *fl = (*fl & ~0x3E0) | ((self->mDrawLayer << 5) & 0x3E0);
+    cAnimModel_render(((sModel_EE88*)self->mpAnimModel), 0, 0, 0);
+    func_002F2088(self->mpAttachedEmitterFX);
     fl = (int*)(&GrMan->m_pCurrentDrawState->unk_00[2]);
     *fl = (*fl & ~0x3E0) | (old << 5);
 }
@@ -597,7 +574,7 @@ extern "C" void cFERider_update(cFERider* selfp)
             if (self->mDoneLoadingTextures == 0 && cFERider_isDoneLoadingTextures((int*)self)) {
                 self->mDoneLoadingTextures = 1;
                 if (self->mCompiledModel == 0) {
-                    cFERider_compileModel((cFERider*)((sFERiderED80*)self));
+                    cFERider_compileModel((cFERider*)(self));
                 }
             } else if (self->mDoneLoadingModels != 0 && self->mDoneLoadingTextures != 0 && self->mCompiledModel != 0 && self->mDoneUpdatingModelParts == 0) {
                 cFERider_updateAnimModelParts((int*)self);

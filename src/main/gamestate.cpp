@@ -2317,17 +2317,11 @@ INCLUDE_ASM("main/gamestate", cInputSync__cInputSync);
 void cMemMan_free(void*);
 void operator_delete(int*);
 
-struct sEntry_cInputSync__cInputSync {
-    void* buf;
-    int pad[3];
-    int* a;
-    int* b;
-};
 
 struct sObj_cInputSync__cInputSync {
     char pad[0x10];
     int count;
-    sEntry_cInputSync__cInputSync entries[1];
+    cInputSync_SyncedPad entries[1];
 };
 
 /**
@@ -2342,11 +2336,11 @@ extern "C" void cInputSync__cInputSync(cInputSync* self, int flags)
 {
     int i;
     for (i = 0; i < self->numsyncedpads; i++) {
-        sEntry_cInputSync__cInputSync* entry = &((sEntry_cInputSync__cInputSync*)&self->syncedpads[0])[i];
-        if (entry->buf)
-            cMemMan_free(entry->buf);
-        operator_delete(entry->a);
-        operator_delete(entry->b);
+        cInputSync_SyncedPad* entry = &((&self->syncedpads[0]))[i];
+        if (((void*)entry->samples))
+            cMemMan_free(((void*)entry->samples));
+        operator_delete(((int*)entry->destinationpad));
+        operator_delete(((int*)entry->input));
     }
     if (flags & 1)
         operator_delete((int*)self);

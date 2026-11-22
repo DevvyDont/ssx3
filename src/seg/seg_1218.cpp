@@ -6500,10 +6500,6 @@ struct sV4_86B8
     sV4_86B8(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-struct sNode_86B8 {
-    sV4_86B8 pos;
-    float qx, qy, qz, qw;
-};
 
 
 struct sHit_86B8 {
@@ -6628,11 +6624,11 @@ static inline float Lerp_86B8(float a, float b, float t)
     return t * a + (1.0f - t) * b;
 }
 
-static inline sV4_86B8 Fwd_86B8(const sNode_86B8* n)
+static inline sV4_86B8 Fwd_86B8(const sAnimModelBone* n)
 {
-    return sV4_86B8(1.0f - (n->qy * n->qy + n->qz * n->qz) * 2.0f,
-                    (n->qx * n->qy + n->qw * n->qz) * 2.0f,
-                    (n->qx * n->qz - n->qw * n->qy) * 2.0f,
+    return sV4_86B8(1.0f - (n->rot.y * n->rot.y + n->rot.z * n->rot.z) * 2.0f,
+                    (n->rot.x * n->rot.y + n->rot.w * n->rot.z) * 2.0f,
+                    (n->rot.x * n->rot.z - n->rot.w * n->rot.y) * 2.0f,
                     0.0f);
 }
 
@@ -6654,9 +6650,9 @@ extern "C" int cRider_isRailBoardIntersect_86B8(char* self, sV4_86B8* tgt, sV4_8
 extern "C" int cRider_isRailBoardIntersect_86B8(char* vself, sV4_86B8* tgt, sV4_86B8* dir)
 {
     cRider* self = (cRider*)vself;
-    sNode_86B8* n = &((sNode_86B8*)(self->mAnimModel)->bones)[self->mBoneBoardRoot];
+    sAnimModelBone* n = &((self->mAnimModel)->bones)[self->mBoneBoardRoot];
     const sV4_86B8& fwd = Fwd_86B8(n);
-    sV4_86B8 pos = Add_86B8(n->pos, *(sV4_86B8*)&self->mModelOffset);
+    sV4_86B8 pos = Add_86B8((*(sV4_86B8*)&n->pos), *(sV4_86B8*)&self->mModelOffset);
     float blend = self->mSlewed[9].cur;
     float nearR = Lerp_86B8(50.0f, 30.0f, blend);
     float farR;

@@ -1006,12 +1006,6 @@ INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_setupOverlapSystem);
 // An axis-aligned bounding box (min and max corners).
 struct sBoundBox { t4Vector min, max; };
 
-// One 0x60-byte multi-spline element: its bounding box at 0x30.
-struct sSmElem {
-    char pad_0x00[0x30];
-    sBoundBox box;              // 0x30
-    char pad_0x50[0x10];
-};
 
 // An octree hash-cell key: depth level and integer cell coordinates.
 struct sSmCell { int level; int x, y, z; };
@@ -1147,13 +1141,13 @@ extern "C" void cMultiSplineModifier_setupOverlapSystem(cMultiSplineModifier* vs
         {
             t4Vector corner;
             vu0Sub_A5F8(corner, instPos_A5F8(self, i), ext);
-            ((sSmElem*)self->Nodes)[i].box.min = corner;
+            (*(sBoundBox*)&(self->Nodes)[i].BoundBox).min = corner;
             vu0Add_A5F8(corner, instPos_A5F8(self, i), ext);
-            ((sSmElem*)self->Nodes)[i].box.max = corner;
+            (*(sBoundBox*)&(self->Nodes)[i].BoundBox).max = corner;
         }
         void* item = ((sSmInst_A5F8**)self->NodeInst)[i];
         char* w = (char*)cObjectInterface_getNash();
-        insert_A5F8(w, item, &((sSmElem*)self->Nodes)[i].box.min);
+        insert_A5F8(w, item, &(*(sBoundBox*)&(self->Nodes)[i].BoundBox).min);
     }
 }
 #endif
@@ -1704,15 +1698,6 @@ inline void sSmMat_AC20::setAxisRot(const sSmVec4_AC20& axis, float angle)
 
 
 
-struct sSplinePt_AC20 {
-    sSmVec4_AC20 pos;       // 0x00
-    sSmVec4_AC20 dir;       // 0x10
-    sSmVec4_AC20 f20;       // 0x20
-    char pad_0x30[0x20];
-    float f50;              // 0x50
-    float f54;              // 0x54
-    char pad_0x58[0x8];
-};
 
 struct sSplineInst_AC20 {
     char pad_0x0[0x10];
@@ -1755,19 +1740,19 @@ extern "C" void* cMultiSplineModifier_updateNodes(cMultiSplineModifier* multiSpl
     if (self->HeadTweak != 0.0f) {
         rot.setAxisRot(D_004FF160_AC20, *(float*)&sub->OrientType);
     }
-    sSplinePt_AC20* pt = ((sSplinePt_AC20*)self->Nodes);
+    tMultiNode* pt = (self->Nodes);
     for (i = 0; i < self->NumModels; i++, pt++) {
         float rx = 0.0f;
         float ry = rx;
         float rz = rx;
-        cSpline_getPos_AC20((char*)&self->Spline, &pt->pos, &pt->dir, &pt->f20, offsets[i]);
-        pt->f50 = pt->dir.x * pt->dir.x;
-        pt->f54 = pt->dir.y * pt->dir.y;
+        cSpline_getPos_AC20((char*)&self->Spline, &(*(sSmVec4_AC20*)&pt->Pos), &(*(sSmVec4_AC20*)&pt->Dir), &(*(sSmVec4_AC20*)&pt->DDir), offsets[i]);
+        pt->X2 = (*(sSmVec4_AC20*)&pt->Dir).x * (*(sSmVec4_AC20*)&pt->Dir).x;
+        pt->Y2 = (*(sSmVec4_AC20*)&pt->Dir).y * (*(sSmVec4_AC20*)&pt->Dir).y;
         if (self->OrientType == 2 || self->OrientType == 3) {
-            rz -= atan2_AC20(pt->dir.y, pt->dir.x);
+            rz -= atan2_AC20((*(sSmVec4_AC20*)&pt->Dir).y, (*(sSmVec4_AC20*)&pt->Dir).x);
         }
         if (self->OrientType == 1 || self->OrientType == 3) {
-            ry += atan2_AC20(pt->dir.z, Sqrt_AC20(pt->f50 + pt->f54));
+            ry += atan2_AC20((*(sSmVec4_AC20*)&pt->Dir).z, Sqrt_AC20(pt->X2 + pt->Y2));
         }
         ang.x = rx;
         ang.y = ry;
@@ -1792,9 +1777,9 @@ extern "C" void* cMultiSplineModifier_updateNodes(cMultiSplineModifier* multiSpl
         node->mat.r[2].y = cxsz * sy + sx * cz;
         node->mat.r[2].z = cx * cy;
         node->mat.r[2].w = 0.0f;
-        node->mat.r[3].x = pt->pos.x;
-        node->mat.r[3].y = pt->pos.y;
-        node->mat.r[3].z = pt->pos.z;
+        node->mat.r[3].x = (*(sSmVec4_AC20*)&pt->Pos).x;
+        node->mat.r[3].y = (*(sSmVec4_AC20*)&pt->Pos).y;
+        node->mat.r[3].z = (*(sSmVec4_AC20*)&pt->Pos).z;
         node->mat.r[3].w = 1.0f;
         if (self->HeadTweak != 0.0f) {
             *nodeMat = mulMat_AC20(*nodeMat, rot);

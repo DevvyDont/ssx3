@@ -616,14 +616,6 @@ INCLUDE_ASM("visualfx/avalanche", tAvalancheNode_calculate);
 //100%
 INCLUDE_ASM("visualfx/avalanche", tActiveAvalancheNode_calculateScale);
 #ifdef SKIP_ASM
-struct sAvalancheData {
-    char pad[0xF0];
-    unsigned short type;
-    char padF2[0xE];
-    float f100;
-    float f104;
-    float f108;
-};
 
 /**
  * Computes an active node's object scale (+0xB0) and emitter alpha (+0xB4) for a time.
@@ -636,20 +628,20 @@ struct sAvalancheData {
  */
 extern "C" void tActiveAvalancheNode_calculateScale(tActiveAvalancheNode* self, float currTime)
 {
-    sAvalancheData* avData = (sAvalancheData*)self->m_node;
+    tAvalancheNode* avData = self->m_node;
     float x = currTime * 30.0f;
-    if (x < avData->f104) {
+    if (x < avData->m_fadein) {
         self->m_objectScale = 1.0f;
-        self->m_emitterAlphaScale = x / avData->f104;
+        self->m_emitterAlphaScale = x / avData->m_fadein;
         return;
     }
-    if (x < avData->f100 - avData->f108) {
+    if (x < avData->m_life - avData->m_fadeout) {
         self->m_emitterAlphaScale = 1.0f;
         self->m_objectScale = 1.0f;
         return;
     }
-    if (avData->type != 2) {
-        float fadeOut = (avData->f100 - x) / avData->f108;
+    if (avData->m_baseType != 2) {
+        float fadeOut = (avData->m_life - x) / avData->m_fadeout;
         self->m_emitterAlphaScale = fadeOut;
         self->m_objectScale = fadeOut;
         if (fadeOut > 0.0f) {
@@ -867,15 +859,6 @@ struct sAvNode_7EF8 {
     sAvNode_7EF8* next;     // 0x2E4
 };
 
-struct sAvActive_7EF8 {
-    sAvData_7EF8* data;         // 0x0
-    sAvNode_7EF8* nodes;        // 0x4
-    sAvObj_7EF8** objs;         // 0x8
-    int pad_0xC;
-    int nextEvent;              // 0x10
-    int nextSound;              // 0x14
-    float time;                 // 0x18
-};
 
 struct sAvEnd_7EF8 {};  // empty trailing member of the defaults record; its value-init copies a byte through a stack temp
 
@@ -910,9 +893,9 @@ extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void tActiveAvalanche_end_7EF8(void* self) __asm__("tActiveAvalanche_end");
 void cSSXAudio_AvalancheGroundHit_7EF8(void* snd, const sAvV4_7EF8& pos) __asm__("cSSXAudio_AvalancheGroundHit__FPv");
 
-static inline unsigned short soundFrame_7EF8(const sAvActive_7EF8* a)
+static inline unsigned short soundFrame_7EF8(const tActiveAvalanche* a)
 {
-    return a->data->sounds[a->nextSound].frame;
+    return ((sAvData_7EF8*)a->m_avalanche)->sounds[a->m_nextGroundCollision].frame;
 }
 
 static inline float toFrames_7EF8(float t)
@@ -925,7 +908,7 @@ static inline sAvV4_7EF8 pos_7EF8(const sAvObj_7EF8* o)
     return o->pos;
 }
 
-extern "C" void tActiveAvalanche_update_7EF8(sAvActive_7EF8* self) __asm__("tActiveAvalanche_update");
+extern "C" void tActiveAvalanche_update_7EF8(tActiveAvalanche* self) __asm__("tActiveAvalanche_update");
 /**
  * Runs one update step of an active avalanche.
  *
@@ -934,39 +917,39 @@ extern "C" void tActiveAvalanche_update_7EF8(sAvActive_7EF8* self) __asm__("tAct
  * if it has none, and play a ground-hit sound at its position. Sound cues whose frame has been reached play at their
  * object's sound position. When no node is active any more the avalanche ends (tActiveAvalanche_end).
  */
-extern "C" void tActiveAvalanche_update_7EF8(sAvActive_7EF8* self)
+extern "C" void tActiveAvalanche_update_7EF8(tActiveAvalanche* self)
 {
-    if (self->data == 0) {
+    if (((sAvData_7EF8*)self->m_avalanche) == 0) {
         return;
     }
     bool alive = false;
-    self->time += cAvalanche_m_UpdateTimeStep;
+    self->m_currTime += cAvalanche_m_UpdateTimeStep;
     int i = 0;
-    for (sAvNode_7EF8* n = self->nodes; n != 0; n = n->next, i++) {
-        bool ok = tActiveAvalancheNode_update_7EF8(n, self->time);
+    for (sAvNode_7EF8* n = ((sAvNode_7EF8*)self->m_activeNodeList); n != 0; n = n->next, i++) {
+        bool ok = tActiveAvalancheNode_update_7EF8(n, self->m_currTime);
         alive = ok | alive;
         if (!ok) {
-            self->objs[i] = 0;
+            ((sAvObj_7EF8**)self->m_activeNodeArray)[i] = 0;
         }
     }
-    while (self->nextEvent < self->data->nEvents && self->data->events[self->nextEvent].time <= self->time) {
-        if (self->data->events[self->nextEvent].obj->spawned == 0) {
+    while (self->m_nextCollision < ((sAvData_7EF8*)self->m_avalanche)->nEvents && ((sAvData_7EF8*)self->m_avalanche)->events[self->m_nextCollision].time <= self->m_currTime) {
+        if (((sAvData_7EF8*)self->m_avalanche)->events[self->m_nextCollision].obj->spawned == 0) {
             // NOTE: function-local static of the original (guard D_004A54C8), written out as its guarded in-place construction.
             if (D_004A54C8 == 0) {
                 new (&D_004D5770) sAvFloatDef_7EF8();
                 D_004A54C8 = 1;
             }
-            cAnimObjectNode_cAnimObjectNode1(cMemMan_alloc(108, str_AnimObject_b, 0x20000000, 0), 1, 1, self->data->events[self->nextEvent].obj, &D_004D5770);
+            cAnimObjectNode_cAnimObjectNode1(cMemMan_alloc(108, str_AnimObject_b, 0x20000000, 0), 1, 1, ((sAvData_7EF8*)self->m_avalanche)->events[self->m_nextCollision].obj, &D_004D5770);
         }
-        cSSXAudio_AvalancheGroundHit_7EF8(cAudioInterface_bxAudio(), pos_7EF8(self->data->events[self->nextEvent].obj));
-        self->nextEvent++;
+        cSSXAudio_AvalancheGroundHit_7EF8(cAudioInterface_bxAudio(), pos_7EF8(((sAvData_7EF8*)self->m_avalanche)->events[self->m_nextCollision].obj));
+        self->m_nextCollision++;
     }
-    while (self->nextSound < self->data->nSounds && (float)soundFrame_7EF8(self) <= toFrames_7EF8(self->time)) {
-        sAvObj_7EF8* cueObj = self->objs[self->data->sounds[self->nextSound].obj];
+    while (self->m_nextGroundCollision < ((sAvData_7EF8*)self->m_avalanche)->nSounds && (float)soundFrame_7EF8(self) <= toFrames_7EF8(self->m_currTime)) {
+        sAvObj_7EF8* cueObj = ((sAvObj_7EF8**)self->m_activeNodeArray)[((sAvData_7EF8*)self->m_avalanche)->sounds[self->m_nextGroundCollision].obj];
         if (cueObj != 0) {
             cSSXAudio_AvalancheGroundHit_7EF8(cAudioInterface_bxAudio(), cueObj->sndPos);
         }
-        self->nextSound++;
+        self->m_nextGroundCollision++;
     }
     if (!alive) {
         tActiveAvalanche_end_7EF8(self);
@@ -1592,12 +1575,6 @@ struct sAvActive_D8EA8 {
     sAvActive_D8EA8* next;      // 0x2E4
 };
 
-struct sAvSlot_D8EA8 {
-    sAvGroup_D8EA8* group;      // 0x0
-    sAvActive_D8EA8* active;    // 0x4
-    char pad8[0x18 - 0x8];
-    float limit;                // 0x18
-};
 
 struct sRState_D8EA8 {
     int f0;
@@ -1705,12 +1682,12 @@ public:
  */
 extern "C" void tActiveAvalanche_render(tActiveAvalanche* slotv)
 {
-    sAvSlot_D8EA8* slot = (sAvSlot_D8EA8*)slotv;
+    tActiveAvalanche* slot = slotv;
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
-    if (slot->group == 0)
+    if (((sAvGroup_D8EA8*)slot->m_avalanche) == 0)
         return;
     int i = 0;
-    for (sAvActive_D8EA8* n = slot->active; n != 0; n = n->next, i++) {
+    for (sAvActive_D8EA8* n = ((sAvActive_D8EA8*)slot->m_activeNodeList); n != 0; n = n->next, i++) {
         if (n->data) {
             if (i < cAvalanche_m_RenderLines)
                 tActiveAvalancheNode_renderLines((tActiveAvalancheNode*)n);
@@ -1720,21 +1697,21 @@ extern "C" void tActiveAvalanche_render(tActiveAvalanche* slotv)
     }
     if (cAvalanche_m_RenderLines == 0)
         return;
-    for (int j = 0; j < slot->group->nPairs; j++) {
-        sAvVec4_D8EA8 nodePos = *(sAvVec4_D8EA8*)(slot->group->pairs[j].node + 0x40);
+    for (int j = 0; j < ((sAvGroup_D8EA8*)slot->m_avalanche)->nPairs; j++) {
+        sAvVec4_D8EA8 nodePos = *(sAvVec4_D8EA8*)(((sAvGroup_D8EA8*)slot->m_avalanche)->pairs[j].node + 0x40);
         D_vtx_D8EA8[2 * j].pos = nodePos;
-        D_vtx_D8EA8[2 * j].r = slot->group->pairs[j].v < slot->limit ? 0xFF : 0;
-        D_vtx_D8EA8[2 * j].g = slot->group->pairs[j].v >= slot->limit ? 0xFF : 0;
+        D_vtx_D8EA8[2 * j].r = ((sAvGroup_D8EA8*)slot->m_avalanche)->pairs[j].v < slot->m_currTime ? 0xFF : 0;
+        D_vtx_D8EA8[2 * j].g = ((sAvGroup_D8EA8*)slot->m_avalanche)->pairs[j].v >= slot->m_currTime ? 0xFF : 0;
         cRider* rider = SSXApp->Game->AI->Riders[0];
         D_vtx_D8EA8[2 * j + 1].pos = *((cRiderPos_D8EA8*)(&rider->mVtbl))->getPos();
-        D_vtx_D8EA8[2 * j + 1].r = slot->group->pairs[j].v < slot->limit ? 0xFF : 0;
-        D_vtx_D8EA8[2 * j + 1].g = slot->group->pairs[j].v >= slot->limit ? 0xFF : 0;
+        D_vtx_D8EA8[2 * j + 1].r = ((sAvGroup_D8EA8*)slot->m_avalanche)->pairs[j].v < slot->m_currTime ? 0xFF : 0;
+        D_vtx_D8EA8[2 * j + 1].g = ((sAvGroup_D8EA8*)slot->m_avalanche)->pairs[j].v >= slot->m_currTime ? 0xFF : 0;
     }
     sRState_D8EA8* top = ((cRCtx_D8EA8*)ctx)->top;
     unsigned int w = top->f4;
     top->f4 = (w & 0xFE7FFFFF) | 0x1000000;
     int saved = (w & 0x1800000) >> 23;
-    ((cRCtx_D8EA8*)ctx)->drawLines(slot->group->nPairs, D_vtx_D8EA8, 0);
+    ((cRCtx_D8EA8*)ctx)->drawLines(((sAvGroup_D8EA8*)slot->m_avalanche)->nPairs, D_vtx_D8EA8, 0);
     ((cRCtx_D8EA8*)ctx)->top->f4 = (((cRCtx_D8EA8*)ctx)->top->f4 & 0xFE7FFFFF) | ((saved << 23) & 0x1800000);
 }
 #endif

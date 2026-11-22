@@ -1466,13 +1466,6 @@ struct sDbPad_43A8 {
 };
 
 
-struct sDbDef_43A8 {
-    int pad_0x0;
-    int count;                      // 0x4
-    tMeshHeirarchyRecord* entries;         // 0x8
-    int pad_0xC[2];
-    float period;                   // 0x14
-};
 
 struct sDbItem_43A8 {
     char pad_0x0[0xC];
@@ -1546,7 +1539,7 @@ struct sDbOwner_43A8 {
     float step;                     // 0x1E4
     sDbPad_43A8* buf;               // 0x1E8
     sDbMesh_43A8* meshes;           // 0x1EC
-    sDbDef_43A8* def;               // 0x1F0
+    tModelRecord* def;               // 0x1F0
 };
 
 extern "C" void func_00344AA0_43A8(void* self) __asm__("func_00344AA0");
@@ -1572,13 +1565,13 @@ extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
 {
     tInstanceRecord* animModel = self->model.get();
     int i;
-    self->def = ((sDbDef_43A8*)animModel->m_Model);
-    self->period = self->def->period;
+    self->def = (animModel->m_Model);
+    self->period = self->def->m_fAnimTime;
     sDbPad_43A8*& buf = self->buf;
-    buf = new (str_AnimMats, 0x20000000, 0) sDbPad_43A8[self->def->count];
-    tMeshHeirarchyRecord* entry = self->def->entries;
+    buf = new (str_AnimMats, 0x20000000, 0) sDbPad_43A8[self->def->m_iNumMeshes];
+    tMeshHeirarchyRecord* entry = self->def->m_MeshHeirarchy;
     self->nActive = 0;
-    for (i = 0; i < self->def->count; i++, entry++) {
+    for (i = 0; i < self->def->m_iNumMeshes; i++, entry++) {
         if (((void*)entry->m_MeshAnim) != 0)
             self->nActive++;
     }
@@ -1588,9 +1581,9 @@ extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
     } else {
         self->meshes = 0;
     }
-    entry = self->def->entries;
+    entry = self->def->m_MeshHeirarchy;
     int k = 0;
-    for (i = 0; i < self->def->count; i++, entry++) {
+    for (i = 0; i < self->def->m_iNumMeshes; i++, entry++) {
         if (((void*)entry->m_MeshAnim) != 0) {
             cAnimFrame_setAnimRecord(&self->meshes[k++], ((void*)entry->m_MeshAnim));
         }

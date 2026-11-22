@@ -187,11 +187,6 @@ struct sVec4_F120 {
 } __attribute__((aligned(16)));
 
 
-struct sSkel_F120 {
-    int pad0;
-    int count;          // 0x4
-    tMeshHeirarchyRecord* bones;  // 0x8
-};
 
 
 struct sFloatingNode_F120 {
@@ -335,12 +330,12 @@ extern "C" void cFloatingNode_makeAnimMats(cFloatingNode* self, t4Matrix* mat, t
     tiltMat.row[3].y = pos[1];
     tiltMat.row[3].z = pos[2];
     tiltMat.row[3].w = 1.0f;
-    sSkel_F120* skel = (sSkel_F120*)self->Instance->m_Model;
+    tModelRecord* skel = self->Instance->m_Model;
     float sc4 = self->Instance->m_fScale;
-    tMeshHeirarchyRecord* bone = skel->bones;
+    tMeshHeirarchyRecord* bone = skel->m_MeshHeirarchy;
     sVec4_F120 scale(sc4, sc4, sc4, 1.0f);
     int i;
-    for (i = 0; i < skel->count; i++, bone++) {
+    for (i = 0; i < skel->m_iNumMeshes; i++, bone++) {
         t4Matrix boneMat;
         if (bone->m_iParentID != -1) {
             Pose_F120(&boneMat, &out[bone->m_iParentID], ((t4Matrix*)bone->m_pMeshMatrix), scale);

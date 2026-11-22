@@ -185,15 +185,6 @@ struct sModel_C0E8 {
     float scale;            // 0x84
 };
 
-struct cRailModifier_C0E8 {
-    char pad_0x0[0x34];
-    int idx;                // 0x34
-    char pad_0x38[0x8];
-    sModel_C0E8* model;     // 0x40
-    void* node;             // 0x44
-    char pad_0x48[0x8];
-    t4Matrix mat;          // 0x50
-};
 
 extern char str_RailNode[];
 extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
@@ -226,13 +217,13 @@ static inline t4Matrix scaled_C0E8(const t4Matrix* src, const t4Vector& s)
  * (transposed rotation, rotated negative translation) is stored at +0x50. Then allocates a 0x10-byte
  * "RailNode" (type 2, pointing back here) at +0x44.
  */
-extern "C" void cRailModifier_buildXform(cRailModifier_C0E8* self)
+extern "C" void cRailModifier_buildXform(cRailModifier* self)
 {
-    sModel_C0E8* model = self->model;
+    sModel_C0E8* model = ((sModel_C0E8*)self->Instance);
     sLink_C0E8* links = model->tbl->links;
     t4Matrix* xform;
-    if (self->idx < 0) {
-        t4Matrix* selfMat = &self->mat;
+    if (self->Mesh < 0) {
+        t4Matrix* selfMat = &self->XForm;
         vu0CopyMat_C0E8(selfMat, &model->mat);
         xform = selfMat;
     } else {
@@ -242,18 +233,18 @@ extern "C" void cRailModifier_buildXform(cRailModifier_C0E8* self)
         scl.y = modelScale;
         scl.z = modelScale;
         scl.w = 1.0f;
-        t4Matrix* selfMat = &self->mat;
-        sLink_C0E8* link = (sLink_C0E8*)(self->idx * 16 + (int)links);
+        t4Matrix* selfMat = &self->XForm;
+        sLink_C0E8* link = (sLink_C0E8*)(self->Mesh * 16 + (int)links);
         vu0CopyMat_C0E8(selfMat, link->mat);
         xform = selfMat;
         {
         t4Vector rr;
-        t4Vector origin = self->mat.row[3];
+        t4Vector origin = self->XForm.row[3];
         rr.x = origin.x * scl.x;
         rr.y = origin.y * scl.y;
         rr.z = origin.z * scl.z;
         rr.w = origin.w * scl.w;
-        self->mat.row[3] = rr;
+        self->XForm.row[3] = rr;
         int i = link->next;
         while (i != -1) {
             sLink_C0E8* nextLink = (sLink_C0E8*)(i * 16 + (int)links);
@@ -288,29 +279,29 @@ extern "C" void cRailModifier_buildXform(cRailModifier_C0E8* self)
         t4Matrix worldProduct;
         t4Matrix* pt3 = &worldProduct;
         t4Matrix* pt4 = &worldCopy;
-        vu0MulMat_C0E8(pt3, &self->model->mat, xform);
+        vu0MulMat_C0E8(pt3, &((sModel_C0E8*)self->Instance)->mat, xform);
         vu0CopyMat_C0E8(pt4, &worldProduct);
         vu0CopyMat_C0E8(xform, pt4);
     }
     float swapValue;
-    swapValue = self->mat.row[0].y;
-    self->mat.row[0].y = self->mat.row[1].x;
-    self->mat.row[1].x = swapValue;
-    swapValue = self->mat.row[0].z;
-    self->mat.row[0].z = self->mat.row[2].x;
-    self->mat.row[2].x = swapValue;
-    swapValue = self->mat.row[1].z;
-    self->mat.row[1].z = self->mat.row[2].y;
-    self->mat.row[2].y = swapValue;
-    t4Vector invTranslation = vu0Scale(row_C0E8(&self->mat, 3), -1.0f);
+    swapValue = self->XForm.row[0].y;
+    self->XForm.row[0].y = self->XForm.row[1].x;
+    self->XForm.row[1].x = swapValue;
+    swapValue = self->XForm.row[0].z;
+    self->XForm.row[0].z = self->XForm.row[2].x;
+    self->XForm.row[2].x = swapValue;
+    swapValue = self->XForm.row[1].z;
+    self->XForm.row[1].z = self->XForm.row[2].y;
+    self->XForm.row[2].y = swapValue;
+    t4Vector invTranslation = vu0Scale(row_C0E8(&self->XForm, 3), -1.0f);
     invTranslation.w = 0.0f;
     invTranslation = vu0MtxMul_C0E8(xform, invTranslation);
     invTranslation.w = 1.0f;
-    self->mat.row[3] = invTranslation;
+    self->XForm.row[3] = invTranslation;
     void* n = cMemMan_alloc(0x10, str_RailNode, 0x20000000, 0);
     ((void**)n)[3] = self;
     ((int*)n)[2] = 2;
-    self->node = n;
+    (*(void**)&self->Node) = n;
 }
 #endif
 
@@ -904,14 +895,6 @@ struct sMat33CFF0 {
     float m[3][3];
 };
 
-struct sBodyCFF0 {
-    char pad_0x00[0x30];
-    sVec4CFF0 pos;      // 0x30
-    char pad_0x40[0x10];
-    sMat33CFF0 rot;     // 0x50
-    char pad_0x74[0x1C];
-    sVec4CFF0 outPos;   // 0x90
-};
 
 static inline sMat33CFF0 scaleCFF0(const sMat33CFF0& a, float s)
 {
@@ -945,16 +928,16 @@ static inline void invertCFF0(sMat33CFF0& a)
     a = scaleCFF0(adj, inv);
 }
 
-static inline sVec4CFF0 xformCFF0(const sMat33CFF0& m, sBodyCFF0* b)
+static inline sVec4CFF0 xformCFF0(const sMat33CFF0& m, cRigidBody* b)
 {
     sVec4CFF0 r;
-    float x = b->outPos.x;
-    float y = b->outPos.y;
-    float z = b->outPos.z;
+    float x = (*(sVec4CFF0*)&b->W).x;
+    float y = (*(sVec4CFF0*)&b->W).y;
+    float z = (*(sVec4CFF0*)&b->W).z;
     r.x = m.m[0][0] * x + m.m[1][0] * y + m.m[2][0] * z;
     r.y = m.m[0][1] * x + m.m[1][1] * y + m.m[2][1] * z;
     r.z = m.m[0][2] * x + m.m[1][2] * y + m.m[2][2] * z;
-    r.w = b->outPos.w;
+    r.w = (*(sVec4CFF0*)&b->W).w;
     return r;
 }
 
@@ -966,12 +949,12 @@ static inline sVec4CFF0 xformCFF0(const sMat33CFF0& m, sBodyCFF0* b)
  *
  * @param newPos  new angular velocity W
  */
-extern "C" void cRigidBody_setW(sBodyCFF0* self, const sVec4CFF0* newPos)
+extern "C" void cRigidBody_setW(cRigidBody* self, const sVec4CFF0* newPos)
 {
-    self->outPos = *newPos;
-    sMat33CFF0 invRot = self->rot;
+    (*(sVec4CFF0*)&self->W) = *newPos;
+    sMat33CFF0 invRot = (*(sMat33CFF0*)&self->InvMOI[0][0]);
     invertCFF0(invRot);
-    self->pos = xformCFF0(invRot, self);
+    (*(sVec4CFF0*)&self->L) = xformCFF0(invRot, self);
 }
 #endif
 
@@ -1800,21 +1783,6 @@ struct sRmSrcDF70 {
     sRmMat33DF70 rot;       // 0x5C
 };
 
-struct sRailDF70 {
-    void** vt;              // 0x00
-    char data[0x28];        // 0x04
-    char pad_0x2C[0x4];
-    char body[0xA0];        // 0x30
-    int id;                 // 0xD0
-    char pad_0xD4[0xC];
-    char mover[0x98];       // 0xE0
-    sRmSrcDF70* src;        // 0x178
-    char pad_0x17C[0x240 - 0x17C];
-    sRmMat44DF70 xf;        // 0x240
-    sRmMat33DF70 rot;       // 0x280
-    char pad_0x2A4[0xC];
-    sRmVec4 off;            // 0x2B0
-};
 
 /**
  * Constructs a roller modifier from a replay frame.
@@ -1828,39 +1796,39 @@ struct sRailDF70 {
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" sRailDF70* cRollerModifier_cRollerModifier1(sRailDF70* self, cStreamDF70* stream)
+extern "C" cRollerModifier* cRollerModifier_cRollerModifier1(cRollerModifier* self, cStreamDF70* stream)
 {
-    self->vt = cTransformModifier_vtbl;
-    cRigidBody_cRigidBody(self->body);
-    self->vt = cRollerModifier_vtbl;
-    SphereTree_SphereTree(self->mover);
-    cRigidBody_readFromReplayFrame(self->body, (cRigidBody_readFromReplayFrame_cObj*)stream);
-    stream->read(self->data, 40);
-    self->id = stream->readReplayInstance();
-    void* meshTree = tSphTreeList_getMeshTree(cWorld_getPolyModelInfo(cObjectInterface_getWorld_DF70(), (void*)self->id), 0);
-    bxSphereTree_operatorE(self->mover, meshTree);
-    sRmSrcDF70* src = self->src;
+    self->mVtbl = cTransformModifier_vtbl;
+    cRigidBody_cRigidBody(((char*)&self->Pose));
+    self->mVtbl = cRollerModifier_vtbl;
+    SphereTree_SphereTree(((char*)&self->SphTree));
+    cRigidBody_readFromReplayFrame(((char*)&self->Pose), (cRigidBody_readFromReplayFrame_cObj*)stream);
+    stream->read(((char*)&self->mKineticEnergy), 40);
+    (*(int*)&self->m_pInstance) = stream->readReplayInstance();
+    void* meshTree = tSphTreeList_getMeshTree(cWorld_getPolyModelInfo(cObjectInterface_getWorld_DF70(), (void*)((int)self->m_pInstance)), 0);
+    bxSphereTree_operatorE(((char*)&self->SphTree), meshTree);
+    sRmSrcDF70* src = ((sRmSrcDF70*)self->SphTree.treeInfo);
     sRmVec4 off;
     off.x = src->x;
     off.y = src->y;
     off.z = src->z;
     off.w = 0.0f;
-    self->off = off;
-    self->rot = src->rot;
-    self->rot.m[0] *= 0.5f;
-    self->rot.m[1] *= 0.5f;
-    self->rot.m[2] *= 0.5f;
-    self->rot.m[3] *= 0.5f;
-    self->rot.m[4] *= 0.5f;
-    self->rot.m[5] *= 0.5f;
-    self->rot.m[6] *= 0.5f;
-    self->rot.m[7] *= 0.5f;
-    self->rot.m[8] *= 0.5f;
+    (*(sRmVec4*)&self->COMOffset) = off;
+    (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]) = src->rot;
+    (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]).m[0] *= 0.5f;
+    (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]).m[1] *= 0.5f;
+    (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]).m[2] *= 0.5f;
+    (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]).m[3] *= 0.5f;
+    (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]).m[4] *= 0.5f;
+    (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]).m[5] *= 0.5f;
+    (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]).m[6] *= 0.5f;
+    (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]).m[7] *= 0.5f;
+    (*(sRmMat33DF70*)&self->InvBodyMOI[0][0]).m[8] *= 0.5f;
     tPose x = cRollerModifier_getBodyPose_DA70(self);
-    QuatPosToMtx_DA70(&self->xf, *(sRmVec4*)&x.Q, *(sRmVec4*)&x.P);
-    SphereTree_TransformAbs(self->mover, &self->xf, 1.0f);
+    QuatPosToMtx_DA70(&(*(sRmMat44DF70*)&self->Transform), *(sRmVec4*)&x.Q, *(sRmVec4*)&x.P);
+    SphereTree_TransformAbs(((char*)&self->SphTree), &(*(sRmMat44DF70*)&self->Transform), 1.0f);
     cRollerModifier_updateMOI((cRollerModifier*)self);
-    cRigidBody_updateImplicit((sRmBody*)self->body);
+    cRigidBody_updateImplicit((sRmBody*)((char*)&self->Pose));
     return self;
 }
 #endif
@@ -2535,7 +2503,7 @@ extern "C" void cTexFlipModifier_setupTexFlip(cTexFlipModifier* selfv)
 INCLUDE_ASM("object/railmodifier", cTexFlipModifier_setTexIndex);
 #ifdef SKIP_ASM
 struct sRailModSelect;
-extern "C" void cTexFlipModifier_setupMaterialRecords(sRailModSelect* self);
+extern "C" void cTexFlipModifier_setupMaterialRecords(cTexFlipModifier* self);
 
 /**
  * Selects which texture a texture-flip modifier shows.
@@ -2545,7 +2513,7 @@ extern "C" void cTexFlipModifier_setupMaterialRecords(sRailModSelect* self);
  *
  * @param i  the texture index (On Tour texindex)
  */
-extern "C" void cTexFlipModifier_setTexIndex(sRailModSelect* self, int i)
+extern "C" void cTexFlipModifier_setTexIndex(cTexFlipModifier* self, int i)
 {
     int n = *(int*)((char*)self + 0x20);
     if (i >= n) {
@@ -2564,14 +2532,6 @@ struct sRailOut14 {
     char pad_0x2[0x12];
 };
 
-struct sRailModSelect {
-    char pad_0x0[0x14];
-    int index;              // 0x14
-    char* owner;            // 0x18
-    int count;              // 0x1c
-    char pad_0x20[0x28];
-    sRailOut14 out[1];      // 0x48
-};
 
 /**
  * Points every flipping material of a texture-flip modifier at the texture for TexIndex.
@@ -2579,15 +2539,15 @@ struct sRailModSelect {
  * For each of the materials (count +0x20) it reads the instance model's material list (+0x94) and, where an entry has a
  * texture table (+0x10), copies the u16 for TexIndex (+0x14) into that material's record in MaterialBlock.
  */
-extern "C" void cTexFlipModifier_setupMaterialRecords(sRailModSelect* self)
+extern "C" void cTexFlipModifier_setupMaterialRecords(cTexFlipModifier* self)
 {
     int i;
-    for (i = 0; i < self->count; i++) {
-        tMaterialBlockRecord* list = (tMaterialBlockRecord*)(*(char**)(self->owner + 0x94));
+    for (i = 0; i < self->NumMaterials; i++) {
+        tMaterialBlockRecord* list = (tMaterialBlockRecord*)(*(char**)(((char*)self->Instance) + 0x94));
         tMaterialRecord* item = (tMaterialRecord*)(*(char**)(((char*)list) + (i << 2) + 4));
         tTextureFlipRecord* table = (tTextureFlipRecord*)(*(char**)&item->m_TextureFlip);
         if (((char*)table) != 0) {
-            self->out[i].value = *(unsigned short*)(((char*)table) + (self->index << 2) + 4);
+            ((sRailOut14*)&self->MaterialBlock.MaterialRecords[0])[i].value = *(unsigned short*)(((char*)table) + (self->TexIndex << 2) + 4);
         }
     }
 }
@@ -2641,7 +2601,7 @@ extern "C" void cTexFlipModifier_update(cTexFlipModifier* self)
             self->TexIndex = 0;
         }
     }
-    cTexFlipModifier_setTexIndex((sRailModSelect*)self, self->TexIndex);
+    cTexFlipModifier_setTexIndex(self, self->TexIndex);
 }
 #endif
 
@@ -2649,7 +2609,7 @@ extern "C" void cTexFlipModifier_update(cTexFlipModifier* self)
 INCLUDE_ASM("object/railmodifier", cTexFlipModifier_signal);
 #ifdef SKIP_ASM
 struct sRailModSelect;
-extern "C" void cTexFlipModifier_setTexIndex(sRailModSelect* self, int i);
+extern "C" void cTexFlipModifier_setTexIndex(cTexFlipModifier* self, int i);
 
 struct sRailModSel_F598 {
     int field_0x0;
@@ -2693,7 +2653,7 @@ extern "C" void cTexFlipModifier_signal(cTexFlipModifier* self, int id, float va
             }
             int n = (int)ceilVal;
             self->TexIndex = n;
-            cTexFlipModifier_setTexIndex((sRailModSelect*)self, n);
+            cTexFlipModifier_setTexIndex(self, n);
         }
         break;
     case 302:
@@ -2701,7 +2661,7 @@ extern "C" void cTexFlipModifier_signal(cTexFlipModifier* self, int id, float va
         if (self->TexIndex >= self->NumTexFlipMaterials) {
             self->TexIndex = 1;
         }
-        cTexFlipModifier_setTexIndex((sRailModSelect*)self, self->TexIndex);
+        cTexFlipModifier_setTexIndex(self, self->TexIndex);
         break;
     }
 }
@@ -6241,13 +6201,6 @@ int cFlexRailNode_isFlexRail(void* self)
 }
 #endif
 
-// 0x50-byte elements reached through a pointer at self+0x70; indexing the
-// real element type is what reproduces the target's addu operand order
-struct sRailEntry50 {
-    char pad_0x00[0x44];
-    int field_0x44;
-    char pad_0x48[8];
-};
 
 //100%
 INCLUDE_ASM("object/railmodifier", cFloatRailNode_getMesh);
@@ -6261,16 +6214,11 @@ INCLUDE_ASM("object/railmodifier", cFloatRailNode_getMesh);
  */
 extern "C" int cFloatRailNode_getMesh(cFloatRailNode* self, int segIndex)
 {
-    sRailEntry50* railNodes = (sRailEntry50*)self->Nodes;
-    return railNodes[segIndex].field_0x44;
+    tFloatRailNode* railNodes = self->Nodes;
+    return railNodes[segIndex].Mesh;
 }
 #endif
 
-struct sRailEntry60 {
-    char pad_0x00[0x54];
-    int field_0x54;
-    char pad_0x58[8];
-};
 
 //100%
 INCLUDE_ASM("object/railmodifier", cSpringRailNode_getMesh);
@@ -6284,8 +6232,8 @@ INCLUDE_ASM("object/railmodifier", cSpringRailNode_getMesh);
  */
 extern "C" int cSpringRailNode_getMesh(cSpringRailNode* self, int segIndex)
 {
-    sRailEntry60* railNodes = (sRailEntry60*)self->Nodes;
-    return railNodes[segIndex].field_0x54;
+    tSpringRailNode* railNodes = self->Nodes;
+    return railNodes[segIndex].Mesh;
 }
 #endif
 
@@ -9574,12 +9522,6 @@ struct sMtxRec_4CD0 {
     sVec_4CD0 screenOffset; // 0x170
 };
 
-struct sDefer_4CD0 {
-    char pad_0x0[0x69CC0];
-    int curMtx;                 // 0x69CC0
-    char pad_0x69CC4[0xC];
-    sMtxRec_4CD0 mtx[1];        // 0x69CD0
-};
 
 // Bias matrix for the context-2 texture projection (a guarded function-local static in the original).
 extern sMtx_4CD0 D_004FFB80_4CD0 __asm__("D_004FFB80");
@@ -9624,9 +9566,9 @@ static inline void putQw_4CD0(ulong*& p, const void* src, int n)
 // PORT: 64-bit DMA/VIF/GIF words (ulong), 128-bit copies (cQuad128), addresses held in int.
 extern "C" void func_00364CD0(cPS2DeferManager* vself, int type, int mode, unsigned int w3, ulong** pp)
 {
-    sDefer_4CD0* self = (sDefer_4CD0*)vself;
+    cPS2DeferManager* self = vself;
     sPkt_4CD0 pk(*pp);
-    sMtxRec_4CD0* mtxRec = &self->mtx[self->curMtx];
+    sMtxRec_4CD0* mtxRec = &((sMtxRec_4CD0*)&self->mViewStates[0])[self->unk_69CC0];
     switch (type) {
     case 0:
         break;

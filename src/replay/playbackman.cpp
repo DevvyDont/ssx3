@@ -128,13 +128,6 @@ struct sPlaybackEntry_C5F8 {
     int size;       // 0x8
 };
 
-struct cPlaybackMan_C5F8 {
-    char pad_0x0[0x58];
-    sPlaybackEntry_C5F8* entries;   // 0x58
-    char pad_0x5c[0x18];
-    int cur;                        // 0x74
-    int handle;                     // 0x78
-};
 
 /**
  * Finishes a pending playback-file load by copying the file into the current entry.
@@ -143,21 +136,21 @@ struct cPlaybackMan_C5F8 {
  * result into a new "PlaybackFile" buffer stored with its size in entries[cur], frees the loaded buffer and
  * sets the handle to -1. cPlaybackMan_load starts these loads.
  */
-extern "C" void cPlaybackMan_update(cPlaybackMan_C5F8* self)
+extern "C" void cPlaybackMan_update(cPlaybackMan* self)
 {
-    if (self->handle >= 0 && ASYNCFILE_getstatus(self->handle) == 1) {
+    if (self->AsyncHandle >= 0 && ASYNCFILE_getstatus(self->AsyncHandle) == 1) {
         void* data = 0;
         int size = 0;
-        ASYNCFILE_release(self->handle, &data, &size);
+        ASYNCFILE_release(self->AsyncHandle, &data, &size);
         if (data != 0 && size > 0) {
             // PORT: pointer held in int for the entry address (index-first addu); not 64-bit safe.
-            sPlaybackEntry_C5F8* curEntry = (sPlaybackEntry_C5F8*)(self->cur * 12 + (int)self->entries);
+            sPlaybackEntry_C5F8* curEntry = (sPlaybackEntry_C5F8*)(self->AsyncFileNum * 12 + (int)((sPlaybackEntry_C5F8*)self->PlaybackFiles));
             curEntry->buf = operator_new_tag(size, str_PlaybackFile, 0x20000000, 0);
-            self->entries[self->cur].size = size;
-            MEM_copy(self->entries[self->cur].buf, data, size);
+            ((sPlaybackEntry_C5F8*)self->PlaybackFiles)[self->AsyncFileNum].size = size;
+            MEM_copy(((sPlaybackEntry_C5F8*)self->PlaybackFiles)[self->AsyncFileNum].buf, data, size);
             MEM_free(data);
         }
-        self->handle = -1;
+        self->AsyncHandle = -1;
     }
 }
 #endif
@@ -187,20 +180,6 @@ struct sPbEntry_C6E8 {
     int size;       // 0x8
 };
 
-struct cPlaybackMan_C6E8 {
-    void* file;                 // 0x0
-    unsigned int* hdr;          // 0x4
-    char name[8];               // 0x8
-    int field_0x10;             // 0x10
-    char pad_0x14[0x38];
-    void* field_0x4C;           // 0x4C
-    int count2;                 // 0x50
-    int count;                  // 0x54
-    sPbEntry_C6E8* entries;     // 0x58
-    char pad_0x5c[0x18];
-    int cur;                    // 0x74
-    int handle;                 // 0x78
-};
 
 /**
  * Prepares the playback manager for a location: frame buffers and one playback-file entry per mission.
@@ -214,31 +193,31 @@ struct cPlaybackMan_C6E8 {
  * @param name  location name (cWScriptMan_setupMissions passes the BE location record + 0x34)
  */
 // PORT: entry addresses formed as i*12 + (int)entries (pointer held in int) for the index-first addu.
-extern "C" void cPlaybackMan_initLocation(cPlaybackMan_C6E8* self, const char* name)
+extern "C" void cPlaybackMan_initLocation(cPlaybackMan* self, const char* name)
 {
-    strcpy(self->name, name);
-    self->field_0x10 = 0;
-    self->cur = -1;
-    self->handle = -1;
-    self->field_0x4C = operator_new_tag(0x14000, str_SaveFrameData, 0, 0);
+    strcpy(self->Location, name);
+    self->SaveFrame = 0;
+    self->AsyncFileNum = -1;
+    self->AsyncHandle = -1;
+    (*(void**)&self->SaveFrameData) = operator_new_tag(0x14000, str_SaveFrameData, 0, 0);
     cReplayFrame_clearFrame((cReplayFrame*)((char*)self + 0x14));
-    cReplayFramePtr_setBlock((char*)self + 0x14, self->field_0x4C, 0);
+    cReplayFramePtr_setBlock((char*)self + 0x14, ((void*)self->SaveFrameData), 0);
     unsigned int* hdr = (unsigned int*)cMemMan_alloc(0x1C22C, str_CurrentFrame, 0, 0);
-    self->hdr = hdr;
+    (*(unsigned int**)&self->CurrentFrame) = hdr;
     MEM_fill(hdr, 0, 0x1C22C);
-    int n = self->count;
+    int n = self->MaxPlaybackFiles;
     hdr[0] = 0xDBAC0101;
     hdr[1] = 0x1C200;
-    self->entries = (sPbEntry_C6E8*)operator_new_tag(n * 12, str_tPlaybackFile, 0x20000000, 0);
-    for (int i = 0; i < self->count; i++) {
-        ((sPbEntry_C6E8*)(i * 12 + (int)self->entries))->id = 0xFFFFFFFF;
-        ((sPbEntry_C6E8*)(i * 12 + (int)self->entries))->buf = 0;
-        ((sPbEntry_C6E8*)(i * 12 + (int)self->entries))->size = 0;
+    (*(sPbEntry_C6E8**)&self->PlaybackFiles) = (sPbEntry_C6E8*)operator_new_tag(n * 12, str_tPlaybackFile, 0x20000000, 0);
+    for (int i = 0; i < self->MaxPlaybackFiles; i++) {
+        ((sPbEntry_C6E8*)(i * 12 + (int)((sPbEntry_C6E8*)self->PlaybackFiles)))->id = 0xFFFFFFFF;
+        ((sPbEntry_C6E8*)(i * 12 + (int)((sPbEntry_C6E8*)self->PlaybackFiles)))->buf = 0;
+        ((sPbEntry_C6E8*)(i * 12 + (int)((sPbEntry_C6E8*)self->PlaybackFiles)))->size = 0;
     }
     void* iface = cBE_getInterface_C6E8(cBE_getBE(), 10);
-    self->count2 = cBEMissionInterface_getNumberMissions(iface);
-    for (int j = 0; j < self->count2; j++)
-        ((sPbEntry_C6E8*)(j * 12 + (int)self->entries))->id = cBEMissionInterface_getMissionID(iface, j);
+    self->NumPlaybackFiles = cBEMissionInterface_getNumberMissions(iface);
+    for (int j = 0; j < self->NumPlaybackFiles; j++)
+        ((sPbEntry_C6E8*)(j * 12 + (int)((sPbEntry_C6E8*)self->PlaybackFiles)))->id = cBEMissionInterface_getMissionID(iface, j);
 }
 #endif
 
@@ -433,7 +412,7 @@ extern "C" int cPlaybackMan_setupPreview(cPlaybackMan* self, int fileId)
     int idx;
     if (self->State == 0 && (idx = cPlaybackMan_findFileById()) >= 0 && cPlaybackMan_load(self, fileId) != 0) {
         while (cPlaybackMan_isLoaded(self, fileId) == 0) {
-            cPlaybackMan_update((cPlaybackMan_C5F8*)self);
+            cPlaybackMan_update(self);
             SYNCTASK_run(0);
             THREAD_yieldticks(1);
         }

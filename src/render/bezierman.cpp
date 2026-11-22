@@ -1379,16 +1379,8 @@ extern "C" void func_0038CE20(sBezMan_CE20* self, int sub, sPatch_CE20* patch, i
 INCLUDE_ASM("render/bezierman", func_0038D168);
 #ifdef SKIP_ASM
 #include "fakematch.h"
-struct sRS_D168 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    short tex;
-    short tex2;
-};
 struct sEnt_D168 {
-    sRS_D168 rs;                    // 0x00
+    sDrawState rs;                    // 0x00
     unsigned int buf;               // 0x14
     unsigned int next;              // 0x18
     short key;                      // 0x1C
@@ -1424,10 +1416,10 @@ extern cPS2GraphicsMan* D_004A5B80_D168 __asm__("cGraphicsMan_TheGraphicsMan");
 static inline void QueueRecord_D168(cPS2GraphicsMan* gfx, unsigned int buf, unsigned int next, int flag)
 {
     sRing_D168* ring = ((sRing_D168*)gfx->mpDeferMan);
-    sRS_D168* rs = ((sRS_D168*)gfx->m_pCurrentDrawState);
+    sDrawState* rs = (gfx->m_pCurrentDrawState);
     if (ring->count < 0xA28) {
         int lyr = *(int*)((char*)ring + 0x69CC4) & 0x1F;
-        rs->f8 = (rs->f8 & ~0x1F) | lyr;
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | lyr;
         int key = *(int*)((char*)ring + 0x69CC0);
         sEnt_D168* e = (sEnt_D168*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
         e->rs = *rs;
@@ -1467,8 +1459,8 @@ extern "C" void func_0038D168_impl(void* self, void* patch, void* obj, int type,
 {
     char* manager = (char*)self;
     cPS2GraphicsMan* gfx = D_004A5B80_D168;
-    ((sRS_D168*)gfx->m_pCurrentDrawState)[1] = ((sRS_D168*)gfx->m_pCurrentDrawState)[0];
-    (*(sRS_D168**)&gfx->m_pCurrentDrawState)++;
+    (gfx->m_pCurrentDrawState)[1] = (gfx->m_pCurrentDrawState)[0];
+    (*(sDrawState**)&gfx->m_pCurrentDrawState)++;
     int idx = *(int*)((char*)patch + 8);
     int vecDataAddr;
     switch (type) {
@@ -1485,17 +1477,17 @@ extern "C" void func_0038D168_impl(void* self, void* patch, void* obj, int type,
         vecDataAddr = 0;
         break;
     }
-    ((sRS_D168*)gfx->m_pCurrentDrawState)->tex = -1;
+    (gfx->m_pCurrentDrawState)->m_textureState.m_texid[0] = -1;
     int tex = *(short*)((char*)obj + 0x1A4);
     if (tex < 0) {
         tex = gfx->mSpecTexID;
     }
-    ((sRS_D168*)gfx->m_pCurrentDrawState)->tex2 = tex;
-    ((sRS_D168*)gfx->m_pCurrentDrawState)->f0 |= 0x30;
+    (gfx->m_pCurrentDrawState)->m_textureState.m_texid[1] = tex;
+    (*(int*)&(gfx->m_pCurrentDrawState)->unk_00[0]) |= 0x30;
     if (*(int*)((char*)obj + 0xC) & 0x400000) {
-        ((sRS_D168*)gfx->m_pCurrentDrawState)->f4 = (((sRS_D168*)gfx->m_pCurrentDrawState)->f4 & ~0xF80) | 0x880;
+        (gfx->m_pCurrentDrawState)->unk_00[1] = (((int)(gfx->m_pCurrentDrawState)->unk_00[1]) & ~0xF80) | 0x880;
     } else {
-        ((sRS_D168*)gfx->m_pCurrentDrawState)->f4 = (((sRS_D168*)gfx->m_pCurrentDrawState)->f4 & ~0xF80) | 0x100;
+        (gfx->m_pCurrentDrawState)->unk_00[1] = (((int)(gfx->m_pCurrentDrawState)->unk_00[1]) & ~0xF80) | 0x100;
     }
     int n = type * 2 + 4;
     int nn = n * n;
@@ -1521,23 +1513,15 @@ extern "C" void func_0038D168_impl(void* self, void* patch, void* obj, int type,
     *handle = next;
     QueueRecord_D168(gfx, buf, next, 1);
     *handle += 0x10;
-    (*(sRS_D168**)&gfx->m_pCurrentDrawState)--;
+    (*(sDrawState**)&gfx->m_pCurrentDrawState)--;
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/bezierman", func_0038D448);
 #ifdef SKIP_ASM
-struct sRS_D448 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    short tex;
-    short tex2;
-};
 struct sEnt_D448 {
-    sRS_D448 rs;                    // 0x00
+    sDrawState rs;                    // 0x00
     unsigned int buf;               // 0x14
     unsigned int next;              // 0x18
     short key;                      // 0x1C
@@ -1549,9 +1533,6 @@ struct sRing_D448 {
     char pad_0x4[0x7C];
     sEnt_D448 ents[1];              // 0x80
 };
-struct sMat_D448 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 struct sPatch_D448 {
     void* obj;
     int extra;
@@ -1587,10 +1568,10 @@ static inline int Tex_D448(tProjTexInfo* l)
 static inline void QueueRecord_D448(cPS2GraphicsMan* gfx, unsigned int buf, unsigned int next, int flag)
 {
     sRing_D448* ring = ((sRing_D448*)gfx->mpDeferMan);
-    sRS_D448* rs = ((sRS_D448*)gfx->m_pCurrentDrawState);
+    sDrawState* rs = (gfx->m_pCurrentDrawState);
     if (ring->count < 0xA28) {
         int lyr = *(int*)((char*)ring + 0x69CC4) & 0x1F;
-        rs->f8 = (rs->f8 & ~0x1F) | lyr;
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | lyr;
         int key = *(int*)((char*)ring + 0x69CC0);
         sEnt_D448* e = (sEnt_D448*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
         e->rs = *rs;
@@ -1627,14 +1608,14 @@ extern "C" void func_0038D448(void* self, int kind, void* tbl, void* patch, int 
         tProjTexInfo* projTex = &((&gfx->mProjTextures[0]))[i];
         if ((mask >> i) & 1) {
             unsigned int buf = *handle;
-            ((sRS_D448*)gfx->m_pCurrentDrawState)->tex2 = Tex_D448(projTex);
+            (gfx->m_pCurrentDrawState)->m_textureState.m_texid[1] = Tex_D448(projTex);
             long* packetCursor = (long*)(buf | 0x30000000);
-            ((sRS_D448*)gfx->m_pCurrentDrawState)->f0 = (((sRS_D448*)gfx->m_pCurrentDrawState)->f0 & ~0x30) | 0x30;
+            (gfx->m_pCurrentDrawState)->unk_00[0] = (((int)(gfx->m_pCurrentDrawState)->unk_00[0]) & ~0x30) | 0x30;
             packetCursor[0] = 0x10000006;
             packetCursor[1] = 0;
             packetCursor[2] = 0x20000000;
             packetCursor[3] = (long)0x6C048080 << 32;
-            CopyMat_D448(packetCursor + 4, &(*(sMat_D448*)&projTex->unk_50));
+            CopyMat_D448(packetCursor + 4, &(*(&projTex->unk_50)));
             packetCursor[12] = 0;
             packetCursor[13] = (long)(programTable[extra + 6].addr | 0x14000000) << 32;
             packetCursor += 14;
@@ -1726,16 +1707,8 @@ extern "C" void func_0038D668(float* seed)
 INCLUDE_ASM("render/bezierman", func_0038D690);
 #ifdef SKIP_ASM
 struct sQuad_D690 { long lo; long hi; } __attribute__((aligned(16)));
-struct sRS_D690 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    short tex;
-    short pad;
-};
 struct sEnt_D690 {
-    sRS_D690 rs;                    // 0x00
+    sDrawState rs;                    // 0x00
     unsigned int buf;               // 0x14
     unsigned int next;              // 0x18
     short key;                      // 0x1C
@@ -1817,9 +1790,9 @@ extern "C" void func_0038D690(void* self, void* obj, tBezierPatchEntry* patch, u
     unsigned int next = func_0038F668(D_004A4474, packetCursor, 4);
     *handle = next;
     sRing_D690* ring = ((sRing_D690*)gfx->mpDeferMan);
-    sRS_D690* rs = ((sRS_D690*)gfx->m_pCurrentDrawState);
+    sDrawState* rs = (gfx->m_pCurrentDrawState);
     if (ring->count < 2600) {
-        rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
         sEnt_D690* ringEntry = (sEnt_D690*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
         ringEntry->rs = *rs;

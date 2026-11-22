@@ -2293,7 +2293,7 @@ struct sBXVec4K2 {
 } __attribute__((aligned(16)));
 struct sBXPath;
 // sBXVec4 (defined later in the unit) has this layout.
-sBXVec4K2 cPath_getPathPos_K2(sBXPath* self, int* inRange, float t) __asm__("cPath_getPathPos");
+sBXVec4K2 cPath_getPathPos_K2(cPath* self, int* inRange, float t) __asm__("cPath_getPathPos");
 
 struct sBXRangeK2 {
     int type;   // 0x0
@@ -2320,7 +2320,7 @@ struct sBXRangeListK2 {
  * @return the reset point on the path
  */
 // PORT: >? and <? (g++ min/max operators).
-extern "C" sBXVec4K2 cAIPath_getResetPos(sBXPath* path, float* pathParam)
+extern "C" sBXVec4K2 cAIPath_getResetPos(cPath* path, float* pathParam)
 {
     sBXRangeListK2* list = (sBXRangeListK2*)path;
     float hi = *pathParam + 50.0f;
@@ -2994,12 +2994,6 @@ extern "C" float cPath_intersectPath1(cPath* self, const sBXVec4_A638& cursor, s
 //100%
 INCLUDE_ASM("bx/bxstringctor", cPath_getPathHeading);
 #ifdef SKIP_ASM
-struct sBXSeg16 {
-    float f0;
-    float f4;
-    float f8;
-    float fC;
-};
 
 /**
  * Returns the direction of the path at a given position along it.
@@ -3011,19 +3005,19 @@ struct sBXSeg16 {
  * @param pathParam  the position along the path (On Tour param)
  * @return @p out
  */
-extern "C" sBXSeg16* cPath_getPathHeading(sBXSeg16* out, cPath* self, float pathParam)
+extern "C" tPathNode* cPath_getPathHeading(tPathNode* out, cPath* self, float pathParam)
 {
     int i = 0;
     for (;;) {
-        sBXSeg16* segment = &((sBXSeg16*)self->Nodes)[i];
-        if (i == self->NumNodes - 1 || pathParam <= segment->fC) {
-            out->f0 = segment->f0;
-            out->f4 = segment->f4;
-            out->f8 = segment->f8;
-            *(int*)&out->fC = 0;
+        tPathNode* segment = &(self->Nodes)[i];
+        if (i == self->NumNodes - 1 || pathParam <= segment->Len) {
+            out->Dir[0] = segment->Dir[0];
+            out->Dir[1] = segment->Dir[1];
+            out->Dir[2] = segment->Dir[2];
+            *(int*)&out->Len = 0;
             goto done;
         }
-        pathParam -= segment->fC;
+        pathParam -= segment->Len;
         i++;
     }
 done:
@@ -3184,12 +3178,6 @@ struct sBXPathSeg {
     float len;       // 0xC
 };
 
-struct sBXPath {
-    char pad_0x00[8];
-    int count;          // 0x8
-    float x, y, z;      // 0xC start
-    sBXPathSeg* segs;   // 0x18
-};
 
 // PORT: PS2-only VU0 inline asm (direction times scalar).
 static inline sBXVec4 bxVu0ScaleDir(const sBXPathSeg& seg, float s)
@@ -3250,19 +3238,19 @@ static inline sBXVec4 bxVu0Add(const sBXVec4& a, sBXVec4 b)
  * @param pathParam  the distance along the path (On Tour param)
  * @return the position (w = 1)
  */
-extern "C" sBXVec4 cPath_getPathPos(sBXPath* self, int* inRange, float pathParam)
+extern "C" sBXVec4 cPath_getPathPos(cPath* self, int* inRange, float pathParam)
 {
     sBXVec4 pos;
-    pos.x = self->x;
-    pos.y = self->y;
-    pos.z = self->z;
+    pos.x = self->Start[0];
+    pos.y = self->Start[1];
+    pos.z = self->Start[2];
     pos.w = 1.0f;
     if (inRange) {
         *inRange = 1;
     }
     for (int i = 0;; ) {
-        sBXPathSeg* seg = &self->segs[i];
-        if (i == self->count) {
+        sBXPathSeg* seg = &((sBXPathSeg*)self->Nodes)[i];
+        if (i == self->NumNodes) {
             if (inRange) {
                 *inRange = 0;
             }
@@ -3282,12 +3270,6 @@ extern "C" sBXVec4 cPath_getPathPos(sBXPath* self, int* inRange, float pathParam
 //100%
 INCLUDE_ASM("bx/bxstringctor", cPath_getLength);
 #ifdef SKIP_ASM
-struct sBXElem16 {
-    float f0;
-    float f4;
-    float f8;
-    float fC;
-};
 
 /**
  * Returns the total length of the path.
@@ -3302,7 +3284,7 @@ extern "C" float cPath_getLength(cPath* self)
     float sum = 0.0f;
     int i;
     for (i = 0; i < n; i++) {
-        sum += ((sBXElem16*)self->Nodes)[i].fC;
+        sum += (self->Nodes)[i].Len;
     }
     return sum;
 }

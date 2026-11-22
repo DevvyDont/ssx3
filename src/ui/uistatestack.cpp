@@ -692,26 +692,6 @@ struct cUIThing_cUIThing_sFlags {
     unsigned int align : 6;
 };
 
-struct cUIThing_cUIThing_sUIObj {
-    void* prev;
-    void* next;
-    void* vtbl;
-    int unkC;
-    char unk10;
-    cUIThing_cUIThing_sFlags flags;
-    int unk18;
-    float color[4];
-    cUIThing_cUIThing_sVec3 pos;
-    int unk38;
-    int unk3C;
-    int unk40;
-    cUIThing_cUIThing_sVec3 rot;
-    cUIThing_cUIThing_sVec3 scale;
-    int unk5C;
-    cUIThing_cUIThing_sVec3 offs;
-    int unk6C;
-    int unk70;
-};
 
 /**
  * Constructs the base UI widget object.
@@ -724,7 +704,7 @@ struct cUIThing_cUIThing_sUIObj {
  * @param pParent  the parent widget, or 0 (On Tour pParent)
  * @return this
  */
-extern "C" cUIThing_cUIThing_sUIObj* cUIThing_cUIThing(cUIThing* self, int pScreen, int pParent)
+extern "C" cUIThing* cUIThing_cUIThing(cUIThing* self, int pScreen, int pParent)
 {
     self->mVtbl = (void**)cUIThing_vtbl;
     (*(cUIThing_cUIThing_sFlags*)&self->mAttr).b0 = 1;
@@ -737,8 +717,8 @@ extern "C" cUIThing_cUIThing_sUIObj* cUIThing_cUIThing(cUIThing* self, int pScre
     (*(cUIThing_cUIThing_sFlags*)&self->mAttr).b3 = 1;
     (*(cUIThing_cUIThing_sFlags*)&self->mAttr).b6 = 1;
     (*(cUIThing_cUIThing_sFlags*)&self->mAttr).align = 9;
-    self->mpNext = (cListNode*)((cUIThing_cUIThing_sUIObj*)self);
-    self->mpPrev = (cListNode*)((cUIThing_cUIThing_sUIObj*)self);
+    self->mpNext = (cListNode*)(self);
+    self->mpPrev = (cListNode*)(self);
     self->mpAnim = 0;
     *(char*)&self->mAnimPlaybackStatus = 0;
     self->mMiscData = 0;
@@ -758,7 +738,7 @@ extern "C" cUIThing_cUIThing_sUIObj* cUIThing_cUIThing(cUIThing* self, int pScre
     (*(cUIThing_cUIThing_sVec3*)&self->mSize) = t3vect_Zero;
     self->mSound[0] = 4;
     self->mSound[1] = 6;
-    return ((cUIThing_cUIThing_sUIObj*)self);
+    return (self);
 }
 #endif
 

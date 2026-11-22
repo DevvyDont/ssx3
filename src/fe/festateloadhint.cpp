@@ -999,10 +999,6 @@ struct sNetState_6CF8 {
 };
 // Inline copy of the BE stat-block getter (cBENetworkInterface_getOpponentAttributes).
 static inline unsigned char* GetStats_6CF8() { return cBENetworkInterface_networkOpt.oppCharacterAttributes; }
-struct sLoadInfo_6CF8 {
-    char pad0[0x10];
-    int image[2];                   // 0x10: per-player image
-};
 // PORT: the widget name templates are splat-named literals; copied from the symbols as char-array structs.
 struct sName4_6CF8 { char c[4]; };
 struct sName2_6CF8 { char c[2]; };
@@ -1113,9 +1109,9 @@ extern "C" void func_00246CF8(cGameLoadState* self, char player)
             }
         }
         cUIIcon* pic = (cUIIcon*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(picName.c));
-        sLoadInfo_6CF8* loadScreen = (sLoadInfo_6CF8*)self->mpParentModule;
+        cGameLoadScreen* loadScreen = self->mpParentModule;
         if (loadScreen != 0 && ((char*)pic) != 0) {
-            int portraitTexture = loadScreen->image[player];
+            int portraitTexture = loadScreen->mTexID[player];
             if (portraitTexture != 0) {
                 pic->mTextureID = portraitTexture;
                 pic->mpTextureElem = 0;

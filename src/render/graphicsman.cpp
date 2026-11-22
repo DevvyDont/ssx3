@@ -33,11 +33,6 @@ struct sBlendMatrix {
     int pad_0x8;
 };
 
-struct sGfxManBlend {
-    char pad_0x000[0xF48];
-    sBlendMatrix* blend;    // 0xF48
-    int nBlend;             // 0xF4C
-};
 
 extern "C" int areBlendedMatricesEqual(void* a, void* b, int tol0, int tol1, int tol2);
 
@@ -51,19 +46,19 @@ extern "C" int areBlendedMatricesEqual(void* a, void* b, int tol0, int tol1, int
  *
  * @param blendedMatrix  the bone weights to add (On Tour tMdfBlendedMatrix*)
  */
-extern "C" void cGraphicsMan_AddBlendedMatrix(sGfxManBlend* self, sBlendMatrix* blendedMatrix)
+extern "C" void cGraphicsMan_AddBlendedMatrix(cGraphicsMan* self, sBlendMatrix* blendedMatrix)
 {
-    if (self->blend == 0) {
+    if (((sBlendMatrix*)self->m_blendedMatrixHistory) == 0) {
         sBlendMatrix* mem = (sBlendMatrix*)operator_new_tag(0x3000, str_BlendedMatrixHistory, 0x100, 0);
-        self->blend = mem;
+        (*(sBlendMatrix**)&self->m_blendedMatrixHistory) = mem;
         sBlendWeight* w = (sBlendWeight*)(mem + 0x200);
         for (int k = 0; k < 0x200; k++) {
-            self->blend[k].weights = w;
+            ((sBlendMatrix*)self->m_blendedMatrixHistory)[k].weights = w;
             w += 3;
         }
     }
-    sBlendMatrix* existing = self->blend;
-    for (int i = 0; i < self->nBlend; i++, existing++) {
+    sBlendMatrix* existing = ((sBlendMatrix*)self->m_blendedMatrixHistory);
+    for (int i = 0; i < self->m_blendedMatrixHistorySize; i++, existing++) {
         if (areBlendedMatricesEqual(existing, blendedMatrix, 10, 20, 20)) {
             for (int j = 0; j < existing->count; j++) {
                 blendedMatrix->weights[j].bone = existing->weights[j].bone;
@@ -71,11 +66,11 @@ extern "C" void cGraphicsMan_AddBlendedMatrix(sGfxManBlend* self, sBlendMatrix* 
             return;
         }
     }
-    self->blend[self->nBlend].count = blendedMatrix->count;
+    ((sBlendMatrix*)self->m_blendedMatrixHistory)[self->m_blendedMatrixHistorySize].count = blendedMatrix->count;
     for (int j = 0; j < blendedMatrix->count; j++) {
-        self->blend[self->nBlend].weights[j] = blendedMatrix->weights[j];
+        ((sBlendMatrix*)self->m_blendedMatrixHistory)[self->m_blendedMatrixHistorySize].weights[j] = blendedMatrix->weights[j];
     }
-    self->nBlend++;
+    self->m_blendedMatrixHistorySize++;
 }
 #endif
 

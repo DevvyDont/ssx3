@@ -5145,10 +5145,6 @@ static inline void initTrack_3640(cRider* self, int off, float v, float z)
     *(float*)((char*)self + off + 4) = z;
 }
 
-struct sItem_3640 {
-    short a;
-    unsigned short flags;
-};
 
 
 struct sEnt_3640 {
@@ -5160,11 +5156,11 @@ struct sEnt_3640 {
     int flags;                  // 0x34
 };
 
-static inline sItem_3640* lookup_3640(cBECharProfileDB* d, int i)
+static inline tBEProfileBolt* lookup_3640(cBECharProfileDB* d, int i)
 {
     short k = d->mpBoltsMap[i];
     if (k >= 0) {
-        return &((sItem_3640*)&d->mBolts[0])[k];
+        return &((&d->mBolts[0]))[k];
     }
     return 0;
 }
@@ -5294,10 +5290,6 @@ int func_0014D988(void* tbl, int g);
 extern "C" void* func_0014D998(void* tbl, int g);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, float f);
 
-struct sItem_123B48 {
-    short a;
-    unsigned short flags;
-};
 
 
 struct sEnt_123B48 {
@@ -5309,11 +5301,11 @@ struct sEnt_123B48 {
     int flags;                  // 0x34
 };
 
-static inline sItem_123B48* lookup_123B48(cBECharProfileDB* d, int i)
+static inline tBEProfileBolt* lookup_123B48(cBECharProfileDB* d, int i)
 {
     short k = d->mpBoltsMap[i];
     if (k >= 0) {
-        return &((sItem_123B48*)&d->mBolts[0])[k];
+        return &((&d->mBolts[0]))[k];
     }
     return 0;
 }

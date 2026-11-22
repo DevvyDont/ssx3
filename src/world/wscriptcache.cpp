@@ -129,11 +129,8 @@ extern "C" void cWScriptCache_load(cWScriptCache* cache, int index, int fileNum)
 //100%
 INCLUDE_ASM("world/wscriptcache", cWScriptCache_load1);
 #ifdef SKIP_ASM
-struct sWScriptCacheItem {
-    char pad_0x00[0xC];
-};
 
-extern "C" void cWScriptCacheEntry_load1(sWScriptCacheItem* e, int index, int value);
+extern "C" void cWScriptCacheEntry_load1(cWScriptCacheEntry* e, int index, int value);
 
 /**
  * Hands section @p index's script data to its cache entry (cWScriptCacheEntry_load1), which resolves it.
@@ -145,16 +142,11 @@ extern "C" void cWScriptCacheEntry_load1(sWScriptCacheItem* e, int index, int va
  */
 extern "C" void cWScriptCache_load1(cWScriptCache* self, int index, int value)
 {
-    sWScriptCacheItem* items = (sWScriptCacheItem*)self->mpCache;
+    cWScriptCacheEntry* items = self->mpCache;
     cWScriptCacheEntry_load1(&items[index], index, value);
 }
 #endif
 
-// 0xc-byte elements reached through a pointer at self+0x4
-struct sWScriptCacheEntry {
-    char pad_0x00[0x8];
-    int field_0x8;
-};
 
 //100%
 INCLUDE_ASM("world/wscriptcache", cWScriptCache_getScriptBase);
@@ -169,8 +161,8 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCache_getScriptBase);
  */
 extern "C" int cWScriptCache_getScriptBase(cWScriptCache* self, int sectionId)
 {
-    sWScriptCacheEntry* entries = (sWScriptCacheEntry*)self->mpCache;
-    return entries[sectionId].field_0x8;
+    cWScriptCacheEntry* entries = self->mpCache;
+    return ((int)entries[sectionId].mpScriptHeader);
 }
 #endif
 
@@ -310,7 +302,7 @@ struct sWSCItemFields {
     int value;    // 0x8
 };
 
-extern "C" void cWScriptCacheEntry_resolve(sWScriptCacheItem* e, cWorld* world, int index);
+extern "C" void cWScriptCacheEntry_resolve(cWScriptCacheEntry* e, cWorld* world, int index);
 
 /**
  * Gives an entry the script data that came with the stream: stores @p value, marks it streamed (mStreamed 1, not freed
@@ -320,7 +312,7 @@ extern "C" void cWScriptCacheEntry_resolve(sWScriptCacheItem* e, cWorld* world, 
  * @param index  the section id
  * @param value  the script file header
  */
-extern "C" void cWScriptCacheEntry_load1(sWScriptCacheItem* item, int index, int value)
+extern "C" void cWScriptCacheEntry_load1(cWScriptCacheEntry* item, int index, int value)
 {
     sWSCItemFields* fields = (sWSCItemFields*)item;
     fields->value = value;
@@ -423,7 +415,7 @@ static inline void* resolve_CCD8(char* w, sRef_CCD8 ref, int tblOff)
  * @param world  the cWorld
  * @param index  the section id
  */
-extern "C" void cWScriptCacheEntry_resolve(sWScriptCacheItem* ep, cWorld* world, int index)
+extern "C" void cWScriptCacheEntry_resolve(cWScriptCacheEntry* ep, cWorld* world, int index)
 {
     char* e = (char*)ep;
     char** wp = (char**)world;

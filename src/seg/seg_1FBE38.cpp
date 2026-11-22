@@ -7166,10 +7166,6 @@ struct sRefSet {
     char pad_0x0[0x1C];
     unsigned int* refs;     // 0x1C
 };
-struct sRefWorld {
-    char pad_0x0[0x8];
-    sRefSet** sets;         // 0x8
-};
 // The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); cWScriptMan_TheWScriptMan points at
 // the instance.
 extern cWScriptMan* cWScriptMan_TheWScriptMan;
@@ -7253,7 +7249,7 @@ extern "C" cLunoValue UpdateDisplayHeightFunc(int n, sBindArg_1FBE38* params) {
     if (~id == 0) {
         obj = curProcess_4320()->f290;
     } else {
-        sRefSet *section = ((sRefWorld*)cWorld_m_pTheWorld->m_pWorldCache)->sets[id & 0xFF];
+        sRefSet *section = ((sRefSet**)(cWorld_m_pTheWorld->m_pWorldCache)->m_pSectionCacheTable)[id & 0xFF];
         unsigned i;
         char *inst;
         if (!section)
@@ -8026,7 +8022,7 @@ extern "C" cLunoValue CameraShakeFunc(int n, sBindArg_1FBE38 *params) {
         if (~id == 0) {
             obj = cWScriptMan_TheWScriptMan->f290;
         } else {
-            sRefSet *section = ((sRefWorld*)cWorld_m_pTheWorld->m_pWorldCache)->sets[id & 0xFF];
+            sRefSet *section = ((sRefSet**)(cWorld_m_pTheWorld->m_pWorldCache)->m_pSectionCacheTable)[id & 0xFF];
             char *r;
             if (!section)
                 r = 0;
@@ -8389,7 +8385,7 @@ extern "C" cLunoValue MiniAvalancheFunc(int n, sBindArg_1FBE38* params) {
     for (int i = 0; i < 8; i++) {
         unsigned id = vp->id[i];
         if (id != 0xFFFFFFFF) {
-            sRefSet *section = ((sRefWorld*)cWorld_m_pTheWorld->m_pWorldCache)->sets[id & 0xFF];
+            sRefSet *section = ((sRefSet**)(cWorld_m_pTheWorld->m_pWorldCache)->m_pSectionCacheTable)[id & 0xFF];
             char *inst;
             if (!section)
                 inst = 0;

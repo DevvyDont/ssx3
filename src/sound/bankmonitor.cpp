@@ -106,16 +106,13 @@ struct sBmVtblE40 {
 } __attribute__((aligned(8)));
 extern const sBmVtblE40 D_00483B88_E40 __asm__("D_00483B88");
 
-struct sBmVoiceE40 {
-    char pad_0x0[0xC0];
-};
 
 struct sBankMonitorE40 {
     char* vbase;                // 0x0
     char pad_0x4[0x8D8 - 0x4];
     void** vtbl;                // 0x8D8
     char pad_0x8DC[0x8EC - 0x8DC];
-    sBmVoiceE40* voices;        // 0x8EC
+    cBankMonitorInstance* voices;        // 0x8EC
 };
 
 /**
@@ -137,13 +134,13 @@ extern "C" void cBankMonitor__cBankMonitor(cBankMonitor* self, int flags)
         int thisAdjust = (char*)self - base;
         vt.e[1].delta = D_00483B88_E40.e[1].delta + thisAdjust;
     }
-    if ((sBmVoiceE40*)self->mBankMonitorInstance != 0) {
-        sBmVoiceE40* bankInstance = (sBmVoiceE40*)self->mBankMonitorInstance + ((int*)(sBmVoiceE40*)self->mBankMonitorInstance)[-4];
-        while ((sBmVoiceE40*)self->mBankMonitorInstance != bankInstance) {
+    if (self->mBankMonitorInstance != 0) {
+        cBankMonitorInstance* bankInstance = self->mBankMonitorInstance + ((int*)self->mBankMonitorInstance)[-4];
+        while (self->mBankMonitorInstance != bankInstance) {
             bankInstance--;
             cBankMonitorInstance__cBankMonitorInstance(bankInstance, 0);
         }
-        cMemMan_free((char*)(sBmVoiceE40*)self->mBankMonitorInstance - 0x10);
+        cMemMan_free((char*)self->mBankMonitorInstance - 0x10);
     }
     cMonitor__cMonitor((cMonitor*)((sSndPlayerDAC8*)self), 0);
     if (flags & 2) {
@@ -555,7 +552,6 @@ extern "C" void cBankMonitor_BANKMONITOR_DestroyAllWithPtr(cBankMonitor* self, i
 //100%
 INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_GetHandle);
 #ifdef SKIP_ASM
-struct sVoiceC0 { int key; int idx; char pad[0xC0 - 8]; };
 
 /**
  * Finds the active bank-sound instance with a given handle and monitor type.
@@ -568,9 +564,9 @@ extern "C" void* cBankMonitor_BANKMONITOR_GetHandle(cBankMonitor* self, int idx,
 {
     for (int i = 0; i < 64; i++) {
         if (cBankMonitorInstance_IsFree(&self->mBankMonitorInstance[i]) == 0
-            && ((sVoiceC0*)self->mBankMonitorInstance)[i].key == key
-            && ((sVoiceC0*)self->mBankMonitorInstance)[i].idx == idx) {
-            return &((sVoiceC0*)self->mBankMonitorInstance)[i];
+            && (self->mBankMonitorInstance)[i].mMonitorType == key
+            && (self->mBankMonitorInstance)[i].mHandle == idx) {
+            return &(self->mBankMonitorInstance)[i];
         }
     }
     return 0;
@@ -693,11 +689,6 @@ extern "C" int cBankMonitor_BANKMONITOR_Used(cBankMonitor* self)
 //100%
 INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_CameraChange);
 #ifdef SKIP_ASM
-struct sBankVoice {
-    char pad[0x5c];
-    float value;
-    char pad2[0xc0 - 0x60];
-};
 
 /**
  * Forgets every instance's last listener distance (+0x5C = -1) after a camera cut, so no Doppler jump is
@@ -706,7 +697,7 @@ struct sBankVoice {
 extern "C" void cBankMonitor_BANKMONITOR_CameraChange(cBankMonitor* self)
 {
     for (int i = 0; i < 64; i++) {
-        ((sBankVoice*)self->mBankMonitorInstance)[i].value = -1.0f;
+        (self->mBankMonitorInstance)[i].mLastDist = -1.0f;
     }
 }
 #endif

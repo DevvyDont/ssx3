@@ -503,11 +503,6 @@ struct sInMat44_0288 {
 
 
 
-struct sInSkel_0288 {
-    int f0;
-    int count;                  // 0x4
-    tMeshHeirarchyRecord* bones;        // 0x8
-};
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, d = b * a).
 static inline void vu0MulMat_0288(sInMat44_0288* d, const sInMat44_0288* a, const sInMat44_0288* b)
@@ -599,15 +594,15 @@ static inline void buildBone_0288(sInMat44_0288* d, const sInMat44_0288* parent,
 extern "C" void cInstanceNode_makeAnimMats(cInstanceNode* self, sInMat44_0288* parent, sInMat44_0288* out)
 {
     tInstanceRecord* instance = self->Instance;
-    sInSkel_0288* sk = (sInSkel_0288*)instance->m_Model;
+    tModelRecord* sk = instance->m_Model;
     float uniformScale = instance->m_fScale;
-    tMeshHeirarchyRecord* bone = sk->bones;
+    tMeshHeirarchyRecord* bone = sk->m_MeshHeirarchy;
     t4Vector scale;
     scale.x = uniformScale;
     scale.y = uniformScale;
     scale.z = uniformScale;
     scale.w = 1.0f;
-    for (int i = 0; i < sk->count; i++, bone++) {
+    for (int i = 0; i < sk->m_iNumMeshes; i++, bone++) {
         sInMat44_0288 boneMat;
         if (bone->m_iParentID != -1) {
             buildBone_0288(&boneMat, &out[bone->m_iParentID], ((sInMat44_0288*)bone->m_pMeshMatrix), scale);
@@ -723,11 +718,6 @@ struct sInstNodeEntry {
     int field_0xc;
 };
 
-struct sInstNodeList {
-    int field_0x0;
-    int count;                // 0x4
-    sInstNodeEntry* entries;  // 0x8
-};
 
 /**
  * Returns whether any mesh of an instance's model is animated.
@@ -739,10 +729,10 @@ struct sInstNodeList {
  */
 extern "C" int hasAnimationChannels(tInstanceRecord* self)
 {
-    sInstNodeList* list = (sInstNodeList*)self->m_Model;
+    tModelRecord* list = self->m_Model;
     int i;
-    int count = list->count;
-    sInstNodeEntry* meshEntry = list->entries;
+    int count = list->m_iNumMeshes;
+    sInstNodeEntry* meshEntry = ((sInstNodeEntry*)list->m_MeshHeirarchy);
     for (i = 0; i < count; i++, meshEntry++) {
         if (meshEntry->field_0x8 != 0) {
             return 1;

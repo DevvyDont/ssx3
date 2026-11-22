@@ -382,7 +382,7 @@ struct sTimer_AE450 {
 
 struct RCMP_DECODER_DECODER_sObj;
 struct RCMP_DECODER_DECODER_sKey;
-extern "C" RCMP_DECODER_DECODER_sObj* RCMP_DECODER_DECODER(RCMP_DECODER_DECODER_sObj* self, RCMP_DECODER_DECODER_sKey* key);
+extern "C" RCMP_DECODER* RCMP_DECODER_DECODER(RCMP_DECODER* self, RCMP_DECODER_DECODER_sKey* key);
 // PORT: the unit declares RCMP_CODEC_IDATA_CODEC_IDATA1 with int params; it stores pointers.
 extern "C" void* RCMP_CODEC_IDATA_CODEC_IDATA1_AE450(void* self, void* a1, void* a2, void* a3, int a4) __asm__("RCMP_CODEC_IDATA_CODEC_IDATA1");
 void* func_003AECB8(void* self, void* a1);
@@ -458,7 +458,7 @@ extern "C" int func_003AE450(char* self, int framesToBuffer, int timeOffsetMs)
         char key[0x10];
         *(char**)(self + 0x60) = self;
         RCMP_CODEC_IDATA_CODEC_IDATA1_AE450(key, self + 0x60, (void*)func_003AECB8, (void*)func_003AED20, framesToBuffer);
-        *(RCMP_DECODER_DECODER_sObj**)(self + 0x64) = RCMP_DECODER_DECODER((RCMP_DECODER_DECODER_sObj*)wsAlloc_AE450(&D_00509430_AE450, 0x1C), (RCMP_DECODER_DECODER_sKey*)key);
+        *(RCMP_DECODER**)(self + 0x64) = RCMP_DECODER_DECODER((RCMP_DECODER*)wsAlloc_AE450(&D_00509430_AE450, 0x1C), (RCMP_DECODER_DECODER_sKey*)key);
     }
     *(int*)(self + 0x74) = RCMP_DECODER_GetFrame(*(void**)(self + 0x64), 0);
     sTimer_AE450* msTimer = (sTimer_AE450*)wsAlloc_AE450(&D_00509430_AE450, 0x18);
@@ -1806,12 +1806,6 @@ struct RCMP_DECODER_DECODER_sKey {
     int v[4];
 };
 
-struct RCMP_DECODER_DECODER_sObj {
-    int field_0x0;
-    RCMP_DECODER_DECODER_sKey key;   // 0x4
-    int field_0x14;
-    void** vtable;            // 0x18
-};
 
 /**
  * Constructs an RCMP DECODER from its input description.
@@ -1825,13 +1819,13 @@ struct RCMP_DECODER_DECODER_sObj {
  * @param key  the CODEC_IDATA to copy
  * @return self
  */
-extern "C" RCMP_DECODER_DECODER_sObj* RCMP_DECODER_DECODER(RCMP_DECODER_DECODER_sObj* self, RCMP_DECODER_DECODER_sKey* key)
+extern "C" RCMP_DECODER* RCMP_DECODER_DECODER(RCMP_DECODER* self, RCMP_DECODER_DECODER_sKey* key)
 {
-    self->vtable = RCMP_DECODER_vtbl;
-    RCMP_CODEC_IDATA_CODEC_IDATA(&self->key);
-    self->key = *key;
-    self->field_0x14 = 0;
-    self->field_0x0 = 0;
+    self->mVtbl = RCMP_DECODER_vtbl;
+    RCMP_CODEC_IDATA_CODEC_IDATA(&(*(RCMP_DECODER_DECODER_sKey*)&self->m_IData));
+    (*(RCMP_DECODER_DECODER_sKey*)&self->m_IData) = *key;
+    (*(int*)&self->m_codec) = 0;
+    (*(int*)&self->m_FirstChunk) = 0;
     return self;
 }
 #endif
@@ -2652,7 +2646,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", PS2_SONY_CODEC_INTERNAL_DecodeFrame);
 #ifdef SKIP_ASM
 struct sWSPool;
 struct sWSItem;
-extern "C" sWSItem* func_003B10D0(sWSPool* self);
+extern "C" sWSItem* func_003B10D0(PS2_SONY_CODEC_INTERNAL* self);
 extern "C" void sceMpegGetPicture(void* dma, void* data, int qwc);
 
 /**
@@ -2667,7 +2661,7 @@ extern "C" void sceMpegGetPicture(void* dma, void* data, int qwc);
  */
 extern "C" void* PS2_SONY_CODEC_INTERNAL_DecodeFrame(PS2_SONY_CODEC_INTERNAL* self)
 {
-    sWSItem* item = func_003B10D0((sWSPool*)self);
+    sWSItem* item = func_003B10D0(self);
     char* hdr = *(char**)((char*)item + 0x4);
     char* data;
     if (*(int*)(hdr + 0xC) & 0x1000) {
@@ -2762,11 +2756,6 @@ struct sWSItem : sWSItemBase, sWSNode {
     int refs; // 0x10
 };
 
-struct sWSPool {
-    char pad00[0x18];
-    sWSList used; // 0x18
-    sWSList free; // 0x20
-};
 
 /**
  * Moves the first frame of the codec's free list to its used list and returns it.
@@ -2775,14 +2764,14 @@ struct sWSPool {
  *
  * @return the frame, or 0 when the free list (+0x20) is empty
  */
-extern "C" sWSItem* func_003B10D0(sWSPool* self)
+extern "C" sWSItem* func_003B10D0(PS2_SONY_CODEC_INTERNAL* self)
 {
-    sWSNode* n = self->free.head.next;
-    if (n != &self->free.head) {
+    sWSNode* n = (*(sWSList*)&self->mFreeFrames).head.next;
+    if (n != &(*(sWSList*)&self->mFreeFrames).head) {
         sWSItem* item;
         n->unlink();
         item = static_cast<sWSItem*>(n);
-        self->used.addTail(item);
+        (*(sWSList*)&self->mUsedFrames).addTail(item);
         item->refs = 1;
         return item;
     }
@@ -2800,13 +2789,13 @@ INCLUDE_ASM("ealib/seg_2AEDC0", PS2_SONY_CODEC_INTERNAL_ReleaseFrame);
  *
  * @param item  the frame
  */
-extern "C" void PS2_SONY_CODEC_INTERNAL_ReleaseFrame(sWSPool* self, sWSItem* item)
+extern "C" void PS2_SONY_CODEC_INTERNAL_ReleaseFrame(PS2_SONY_CODEC_INTERNAL* self, sWSItem* item)
 {
     if (--item->refs > 0) {
         return;
     }
     item->unlink();
-    self->free.addTail(item);
+    (*(sWSList*)&self->mFreeFrames).addTail(item);
 }
 #endif
 

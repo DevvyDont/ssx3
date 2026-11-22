@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "world/worldview.h"
 #include "world/worldcache.h"
 #include "world/worldrecords.h"
 #include "bx/math3d.h"
@@ -1310,24 +1311,16 @@ struct sCacheType_352810 {
     unsigned int* entries;  // +0x4 + type * 8
     unsigned int count;     // +0x8 + type * 8
 };
-struct cWorldCacheTable_352810 {
-    int f0;
-    sCacheType_352810 type[16];
-};
-struct sCacheInfo_352810 {
-    char pad0[8];
-    unsigned int count;     // 0x8
-};
 struct cWorld_352810 {
     cWorldCache* cache;          // 0x0
 };
 
-static inline bool tableValid_352810(cWorldCacheTable_352810* t, int type, unsigned int uid)
+static inline bool tableValid_352810(cWorldCacheTable* t, int type, unsigned int uid)
 {
-    if (t->type[type].count < uid) {
+    if (((sCacheType_352810*)&t->m_pCacheTable[0])[type].count < uid) {
         return false;
     }
-    return (t->type[type].entries[uid] & 0xFFFFFF00) != 0;
+    return (((sCacheType_352810*)&t->m_pCacheTable[0])[type].entries[uid] & 0xFFFFFF00) != 0;
 }
 
 static inline bool cacheValid_352810(cWorldCache* c, int type, tResourceID_352810 rid)
@@ -1335,10 +1328,10 @@ static inline bool cacheValid_352810(cWorldCache* c, int type, tResourceID_35281
     unsigned int uiSection = rid.sid;
     unsigned int uiUID = rid.uid;
     if (uiSection == 0xFF) {
-        return tableValid_352810(((cWorldCacheTable_352810*)c->m_pSharedCacheTable), type, uiUID);
+        return tableValid_352810((c->m_pSharedCacheTable), type, uiUID);
     }
-    if (uiSection < ((sCacheInfo_352810*)c->mp_DataHeader)->count && ((cWorldCacheTable_352810**)c->m_pSectionCacheTable)[uiSection] != 0) {
-        return tableValid_352810(((cWorldCacheTable_352810**)c->m_pSectionCacheTable)[uiSection], type, uiUID);
+    if (uiSection < (c->mp_DataHeader)->m_uiNumSections && ((cWorldCacheTable**)c->m_pSectionCacheTable)[uiSection] != 0) {
+        return tableValid_352810(((cWorldCacheTable**)c->m_pSectionCacheTable)[uiSection], type, uiUID);
     }
     return false;
 }

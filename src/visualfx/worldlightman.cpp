@@ -659,7 +659,7 @@ extern "C" float cWorldLightMan_GetIntensity(void* a, t4Vector* b, void* light);
 
 struct cWorldLightMan_CalcLightDist_sVec3;
 struct cWorldLightMan_CalcLightDist_sLight;
-extern "C" int cWorldLightMan_CalcLightDist(void* self, cWorldLightMan_CalcLightDist_sVec3* p, cWorldLightMan_CalcLightDist_sLight* light,
+extern "C" int cWorldLightMan_CalcLightDist(void* self, cWorldLightMan_CalcLightDist_sVec3* p, tLightRecord* light,
                              float* outDist, float* outInvDist, float* outDot);
 
 
@@ -753,7 +753,7 @@ extern "C" float cWorldLightMan_GetIntensity(void* lightMan, t4Vector* point, vo
     case 0:
         return light->m_fRGBIntensity;
     case 1:
-        if (cWorldLightMan_CalcLightDist(lightMan, (cWorldLightMan_CalcLightDist_sVec3*)point, (cWorldLightMan_CalcLightDist_sLight*)light, &dist, &inv, &dot)) {
+        if (cWorldLightMan_CalcLightDist(lightMan, (cWorldLightMan_CalcLightDist_sVec3*)point, light, &dist, &inv, &dot)) {
             if (dot >= light->unk_060) {
                 att = Atten_5D30(light, dist);
                 amount = Fall_5D30(light, inv) * light->m_fIntensity * att;
@@ -768,7 +768,7 @@ extern "C" float cWorldLightMan_GetIntensity(void* lightMan, t4Vector* point, vo
         }
         break;
     case 2:
-        if (cWorldLightMan_CalcLightDist(lightMan, (cWorldLightMan_CalcLightDist_sVec3*)point, (cWorldLightMan_CalcLightDist_sLight*)light, &dist, &inv, 0)) {
+        if (cWorldLightMan_CalcLightDist(lightMan, (cWorldLightMan_CalcLightDist_sVec3*)point, light, &dist, &inv, 0)) {
             att = Atten_5D30(light, dist);
             amount = Fall_5D30(light, inv) * light->m_fIntensity * att;
             return light->m_fRGBIntensity * amount;
@@ -790,13 +790,6 @@ struct cWorldLightMan_CalcLightDist_sVec3 {
     float z;
 };
 
-struct cWorldLightMan_CalcLightDist_sLight {
-    char pad[0x1C];
-    float radius;               // 0x1C
-    char pad20[0x2C - 0x20];
-    cWorldLightMan_CalcLightDist_sVec3 dir;    // 0x2C
-    cWorldLightMan_CalcLightDist_sVec3 pos;    // 0x38
-};
 
 /**
  * Measures a point against a light: fails outside the light's radius, else returns the distance, its inverse and the
@@ -812,16 +805,16 @@ struct cWorldLightMan_CalcLightDist_sLight {
  * @param outDot  receives the cosine, or null
  * @return 1 when the point is within the radius, else 0
  */
-extern "C" int cWorldLightMan_CalcLightDist(void* self, cWorldLightMan_CalcLightDist_sVec3* point, cWorldLightMan_CalcLightDist_sLight* light,
+extern "C" int cWorldLightMan_CalcLightDist(void* self, cWorldLightMan_CalcLightDist_sVec3* point, tLightRecord* light,
                              float* outDist, float* outInvDist, float* outDot)
 {
-    float dx = light->pos.x - point->x;
-    float dy = light->pos.y - point->y;
-    float dz = light->pos.z - point->z;
+    float dx = (*(cWorldLightMan_CalcLightDist_sVec3*)&light->m_fvWorldPos[0]).x - point->x;
+    float dy = (*(cWorldLightMan_CalcLightDist_sVec3*)&light->m_fvWorldPos[0]).y - point->y;
+    float dz = (*(cWorldLightMan_CalcLightDist_sVec3*)&light->m_fvWorldPos[0]).z - point->z;
     float distSq = dx * dx + dy * dy + dz * dz;
     float dist;
     float inv;
-    if (light->radius * light->radius < distSq) {
+    if (light->m_fMaxDistance * light->m_fMaxDistance < distSq) {
         return 0;
     }
     if (distSq != 0.0f) {
@@ -833,7 +826,7 @@ extern "C" int cWorldLightMan_CalcLightDist(void* self, cWorldLightMan_CalcLight
         dist = 1.0f;
     }
     if (outDot != 0) {
-        *outDot = -(dx * light->dir.x + dy * light->dir.y + dz * light->dir.z) * inv;
+        *outDot = -(dx * (*(cWorldLightMan_CalcLightDist_sVec3*)&light->m_fvDirection[0]).x + dy * (*(cWorldLightMan_CalcLightDist_sVec3*)&light->m_fvDirection[0]).y + dz * (*(cWorldLightMan_CalcLightDist_sVec3*)&light->m_fvDirection[0]).z) * inv;
     }
     *outDist = dist;
     *outInvDist = inv;
@@ -981,25 +974,6 @@ struct sVE6518 {
     int (*fn)(void*);
 };
 
-struct sRider6518 {
-    char pad0[0x1E0];
-    sVec6518 vel;               // 0x1E0
-    char pad1F0[0xF8];          // 0x1F0
-    float f2E8;                 // 0x2E8
-    float f2EC;                 // 0x2EC
-    float f2F0;                 // 0x2F0
-    int mode;                   // 0x2F4
-    float f2F8;                 // 0x2F8
-    float f2FC;                 // 0x2FC
-    char pad300[0x4];           // 0x300
-    int f304;                   // 0x304
-    int f308;                   // 0x308
-    float maxSpeed;             // 0x30C
-    float steer;                // 0x310
-    float blend;                // 0x314
-    char pad318[0x88];          // 0x318
-    sVec6518 dir;               // 0x3A0
-};
 
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
@@ -1104,7 +1078,7 @@ static inline sVec6518 add6518(const sVec6518& a, const sVec6518& b)
  */
 extern "C" void cCheatFX_update(cCheatFX* self)
 {
-    char* sub = (char*)((sRider6518*)self->mRider) + 0x6C0;
+    char* sub = (char*)(self->mRider) + 0x6C0;
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
     if (vt[9].fn(vthis(sub, vt[9])) != 0) {
         return;
@@ -1119,53 +1093,53 @@ extern "C" void cCheatFX_update(cCheatFX* self)
         (*(signed char*)&self->m_cheatState) = 0;
     }
     if ((*(signed char*)&self->m_cheatState) == 1) {
-        ((sRider6518*)self->mRider)->mode = 11;
-        ((sRider6518*)self->mRider)->f308 = ((*(unsigned char*)&self->m_cheatState.m_misc) >> 1) & 1;
-        ((sRider6518*)self->mRider)->f2F8 = 1.0f;
-        ((sRider6518*)self->mRider)->f2F0 = 60.0f;
-        ((sRider6518*)self->mRider)->f2EC = 60.0f;
-        ((sRider6518*)self->mRider)->f2E8 = 60.0f;
-        ((sRider6518*)self->mRider)->f304 = 0;
+        (self->mRider)->mUberLevel = 11;
+        (self->mRider)->unk_308 = ((*(unsigned char*)&self->m_cheatState.m_misc) >> 1) & 1;
+        (self->mRider)->unk_2F8 = 1.0f;
+        (self->mRider)->mUberTimer = 60.0f;
+        (self->mRider)->mPowerUpTrickTimer = 60.0f;
+        (self->mRider)->mPowerUpBoostTimer = 60.0f;
+        (self->mRider)->mBoostMode = 0;
     } else {
-        ((sRider6518*)self->mRider)->f308 = 1;
-        if (((sRider6518*)self->mRider)->mode != 11) {
+        (self->mRider)->unk_308 = 1;
+        if ((self->mRider)->mUberLevel != 11) {
             return;
         }
-        ((sRider6518*)self->mRider)->mode = 0;
-        ((sRider6518*)self->mRider)->f2F8 = 0.0f;
-        ((sRider6518*)self->mRider)->f2F0 = 0.0f;
-        ((sRider6518*)self->mRider)->f2EC = 0.0f;
-        ((sRider6518*)self->mRider)->f2E8 = 0.0f;
-        ((sRider6518*)self->mRider)->f304 = 1;
+        (self->mRider)->mUberLevel = 0;
+        (self->mRider)->unk_2F8 = 0.0f;
+        (self->mRider)->mUberTimer = 0.0f;
+        (self->mRider)->mPowerUpTrickTimer = 0.0f;
+        (self->mRider)->mPowerUpBoostTimer = 0.0f;
+        (self->mRider)->mBoostMode = 1;
     }
-    sRider6518* curRider = ((sRider6518*)self->mRider);
-    if (curRider->mode != 11) {
+    cRider* curRider = (self->mRider);
+    if (curRider->mUberLevel != 11) {
         return;
     }
-    if (!(0.0f < curRider->f2FC)) {
+    if (!(0.0f < curRider->mBoostStrength)) {
         return;
     }
-    float len = len6518(curRider->vel);
-    if (len < curRider->maxSpeed && len != 0.0f) {
-        curRider->vel = norm6518(curRider->vel);
-        scaleEq6518(((sRider6518*)self->mRider)->vel, ((sRider6518*)self->mRider)->maxSpeed * ((sRider6518*)self->mRider)->blend + len * (1.0f - ((sRider6518*)self->mRider)->blend));
-        len = len6518(((sRider6518*)self->mRider)->vel);
+    float len = len6518((*(sVec6518*)&curRider->mVelocity));
+    if (len < curRider->mBoostMaxSpeed && len != 0.0f) {
+        (*(sVec6518*)&curRider->mVelocity) = norm6518((*(sVec6518*)&curRider->mVelocity));
+        scaleEq6518((*(sVec6518*)&(self->mRider)->mVelocity), (self->mRider)->mBoostMaxSpeed * (self->mRider)->mCheatSpeedLerp + len * (1.0f - (self->mRider)->mCheatSpeedLerp));
+        len = len6518((*(sVec6518*)&(self->mRider)->mVelocity));
     }
-    curRider = ((sRider6518*)self->mRider);
-    if (curRider->steer == 0.0f) {
+    curRider = (self->mRider);
+    if (curRider->mCheatSteerAlign == 0.0f) {
         return;
     }
-    if (!(0.0010000000474974513f < len6518(curRider->dir))) {
+    if (!(0.0010000000474974513f < len6518((*(sVec6518*)&curRider->mGroundForward)))) {
         return;
     }
-    if (!(9.999999747378752e-05f < len6518(curRider->vel))) {
+    if (!(9.999999747378752e-05f < len6518((*(sVec6518*)&curRider->mVelocity)))) {
         return;
     }
-    curRider->vel = add6518(scale6518(norm6518(curRider->dir), len * ((sRider6518*)self->mRider)->steer),
-                     scale6518(norm6518(((sRider6518*)self->mRider)->vel), len * (1.0f - ((sRider6518*)self->mRider)->steer)));
-    curRider = ((sRider6518*)self->mRider);
-    if (curRider->vel.x < 0.0f && curRider->vel.x >= 0.0f) {
-        curRider->vel = t4vect_Origin;
+    (*(sVec6518*)&curRider->mVelocity) = add6518(scale6518(norm6518((*(sVec6518*)&curRider->mGroundForward)), len * (self->mRider)->mCheatSteerAlign),
+                     scale6518(norm6518((*(sVec6518*)&(self->mRider)->mVelocity)), len * (1.0f - (self->mRider)->mCheatSteerAlign)));
+    curRider = (self->mRider);
+    if ((*(sVec6518*)&curRider->mVelocity).x < 0.0f && (*(sVec6518*)&curRider->mVelocity).x >= 0.0f) {
+        (*(sVec6518*)&curRider->mVelocity) = t4vect_Origin;
     }
 }
 #endif

@@ -9767,14 +9767,6 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00264B20);
 extern "C" int cCommSystem_writePacket(void* mgr, int idx, void* buf, int len);
 
 
-struct sDsSendQueue_00264B20 {
-    char pad_0x00[0x90];
-    int tail;                          // 0x90
-    int head;                          // 0x94
-    tGameCommPacket* slots[32];     // 0x98
-    char pad_0x118[0x120 - 0x118];
-    int chan;                          // 0x120
-};
 
 /**
  * Sends the setup manager's queued outgoing packets until the queue is empty or the channel refuses one.
@@ -9787,18 +9779,18 @@ struct sDsSendQueue_00264B20 {
 // Sends queued packets until the queue is empty or the channel refuses one.
 extern "C" void func_00264B20(cSetupMan* setupMan)
 {
-    sDsSendQueue_00264B20* self = (sDsSendQueue_00264B20*)setupMan;
-    while (self->head != self->tail)
+    cSetupMan* self = setupMan;
+    while (self->mWriteQueue.mTail != self->mWriteQueue.mHead)
     {
         tGameCommPacket* pkt;
-        int head = self->head;
-        if (head < self->tail)
-            pkt = self->slots[head % 32];
+        int head = self->mWriteQueue.mTail;
+        if (head < self->mWriteQueue.mHead)
+            pkt = self->mWriteQueue.mQueue[head % 32];
         else
             pkt = 0;
-        if (cCommSystem_writePacket(cCommSystem_mCommSystem, self->chan, pkt, pkt->mSize) == 0)
+        if (cCommSystem_writePacket(cCommSystem_mCommSystem, self->mChannel, pkt, pkt->mSize) == 0)
             return;
-        self->head++;
+        self->mWriteQueue.mTail++;
         func_00264990((cSetupMan*)self, (int*)pkt);
     }
 }

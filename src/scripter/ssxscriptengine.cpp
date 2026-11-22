@@ -1516,10 +1516,6 @@ extern "C" void* cScriptPlayerMain_GetEntity(void* self, int i);
 extern "C" void cScriptPlayerEntity_SetEntityVariation(void* self, int idx);
 extern int D_00482608[];
 
-struct sScriptHdr_9A70 {
-    char pad_0x0;
-    unsigned char numEvents;        // 0x1
-};
 
 
 
@@ -1549,7 +1545,7 @@ extern "C" void cSSXScriptEngine_OnStartScript(cSSXScriptEngine* self, cScriptPl
         for (j = 0; j < 21; j++)
             all |= flags[j];
     }
-    for (i = 0; i < ((sScriptHdr_9A70*)script->mpSystemHeader)->numEvents; i++) {
+    for (i = 0; i < (script->mpSystemHeader)->numEntities; i++) {
         void* ev = cScriptPlayerMain_GetEntity(script, i);
         if (cScriptPlayerEntity_GetType(ev) == 5) {
             int cnt = cScriptPlayerEntity_GetNumVariations(ev);
@@ -1676,9 +1672,6 @@ public:
     virtual int v09();
 };
 
-struct sScrSlot9DA8 {
-    char pad[0x120];
-};
 
 
 /**
@@ -1693,9 +1686,9 @@ extern "C" void cSSXScriptEngine_RemoveObject(cSSXScriptEngine* self, int idx)
     // PORT: cScriptDatabaseObject_GetObject returns a table pointer as int
     cScriptOwner9DA8* obj = (cScriptOwner9DA8*)cScriptDatabaseObject_GetObject((self), idx);
     if (obj->state == 1) {
-        cScriptObjCameraManager_RemoveCameraObject(&((sScrSlot9DA8*)&self->mObjectCameraManager[0])[*(int*)((char*)obj + 0x7C)], obj);
+        cScriptObjCameraManager_RemoveCameraObject(&((&self->mObjectCameraManager[0]))[*(int*)((char*)obj + 0x7C)], obj);
     } else if (obj->state == 2) {
-        cScriptObjCameraManager_SetTransitionObject((cScriptObjCameraManager*)(&((sScrSlot9DA8*)&self->mObjectCameraManager[0])[obj->v09()]), 0);
+        cScriptObjCameraManager_SetTransitionObject((cScriptObjCameraManager*)(&((&self->mObjectCameraManager[0]))[obj->v09()]), 0);
     }
     cScriptDatabaseObject_RemoveObject((cScriptDatabaseObject*)(self), idx);
 }
@@ -2479,11 +2472,6 @@ struct sScTbl_AC60 {
     int v[4];
 };
 
-struct sScBlk_AC60 {
-    int w[0x54 / 4];
-    int kind;                       // 0x54
-    int w2[(0x64 - 0x58) / 4];
-};
 
 extern int cGameModeMan_iRanking[];
 extern int cGameModeMan_iCharRank[];
@@ -2561,15 +2549,15 @@ done:
         return;
     }
     void* players = cBE_getInterface_Fv(cBE_getBE(), 1);
-    sScBlk_AC60 blk = *(sScBlk_AC60*)cBENewRaceInterface_getLocation(econ);
+    tBELocationDB blk = *cBENewRaceInterface_getLocation(econ);
     int first = mode == 0;
     int idx = cBENewPlayerInterface_getHumanRider(players, 0);
-    int result = cBENewPlayerInterface_isRivalChallengePlayed(players, idx, blk.kind, first);
+    int result = cBENewPlayerInterface_isRivalChallengePlayed(players, idx, blk.segmentID, first);
     if ((unsigned)(cBELibrary_getCheatCharacterID(idx) - 10) < 11) {
         return;
     }
     int rc = cBENewPlayerInterface_getRiderCharID(players, idx);
-    if (cBENewPlayerInterface_isRivalEventLocked(players, idx, rc, blk.kind, first)) {
+    if (cBENewPlayerInterface_isRivalEventLocked(players, idx, rc, blk.segmentID, first)) {
         return;
     }
     if (result != 0) {
@@ -2583,7 +2571,7 @@ done:
     }
     cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 0, 0x18, 1, 0, aiIndex, -1, -1);
     cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 0, 25, 3, 0, aiIndex, -1, -1);
-    cBENewPlayerInterface_setRivalChallengePlayed(players, idx, blk.kind, first, 1);
+    cBENewPlayerInterface_setRivalChallengePlayed(players, idx, blk.segmentID, first, 1);
 }
 #endif
 

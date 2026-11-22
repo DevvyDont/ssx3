@@ -2566,22 +2566,9 @@ struct sTile_4410 {
     }
 };
 
-struct sTexSheet_4410 {
-    void* owner;            // 0x00
-    void** vt;              // 0x04
-    cRend_4410* rend;       // 0x08
-    int fC;                 // 0x0C
-    char* hdr;              // 0x10
-    sTile_4410** tiles;     // 0x14
-    int count;              // 0x18
-    int cols;               // 0x1C
-    int rows;               // 0x20
-    int heights[6];         // 0x24
-    int f3C;                // 0x3C
-};
 
 // PORT: the unit declares this as (void*, void*, int, int, int); typed body bound by asm label.
-extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD_body(sTexSheet_4410* self, void* owner, char* res, cRend_4410* rend, int a3) __asm__("SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD");
+extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD_body(SSX_VD_PS2_SINGLE_BUFFERD* self, void* owner, char* res, cRend_4410* rend, int a3) __asm__("SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD");
 
 /**
  * Constructs the movie's tiled-texture video driver over the first frame and uploads the frame as textures.
@@ -2600,52 +2587,52 @@ extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD_body(sTexSh
  * @param drawLayer  the draw layer
  * @return @p self
  */
-extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD_body(sTexSheet_4410* self, void* owner, char* res, cRend_4410* rend, int drawLayer)
+extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD_body(SSX_VD_PS2_SINGLE_BUFFERD* self, void* owner, char* res, cRend_4410* rend, int drawLayer)
 {
-    self->owner = owner;
-    self->vt = D_00480270;
-    self->rend = rend;
+    (*(void**)&self->m_pdecoder) = owner;
+    self->mVtbl = D_00480270;
+    (*(cRend_4410**)&self->m_pGrMan) = rend;
     char* hdr = *(char**)(res + 0x4);
-    self->hdr = hdr;
+    self->mpImageHeader = hdr;
     char* data;
     if (*(int*)(hdr + 0xC) & 0x1000) {
         data = hdr + *(int*)(hdr + 0x10);
     } else {
         data = hdr + 0x10;
     }
-    int w = *(short*)(self->hdr + 4);
-    int frameHeight = *(short*)(self->hdr + 6);
-    self->rows = 0;
-    self->cols = w / 16;
+    int w = *(short*)(self->mpImageHeader + 4);
+    int frameHeight = *(short*)(self->mpImageHeader + 6);
+    self->mNumRows = 0;
+    self->mNumColumns = w / 16;
     int rem = frameHeight;
     for (;;) {
         int stripHeight = 1 << func_00254350(rem);
         if (rem == stripHeight) {
-            self->heights[self->rows] = rem;
-            self->rows++;
+            self->mRowHeights[self->mNumRows] = rem;
+            self->mNumRows++;
             break;
         }
-        self->heights[self->rows] = stripHeight;
-        rem -= self->heights[self->rows++];
+        self->mRowHeights[self->mNumRows] = stripHeight;
+        rem -= self->mRowHeights[self->mNumRows++];
     }
-    self->count = self->cols * self->rows;
-    self->tiles = (sTile_4410**)D_00509430_4410.alloc(str_VD_VD_TEXTURE_POINTER, self->count * 12, 0, 0, D_00509430_4410.flags);
+    self->mNumTiles = self->mNumColumns * self->mNumRows;
+    (*(sTile_4410***)&self->mppTiles) = (sTile_4410**)D_00509430_4410.alloc(str_VD_VD_TEXTURE_POINTER, self->mNumTiles * 12, 0, 0, D_00509430_4410.flags);
     float fh = (float)frameHeight;
     float fw = (float)w;
     int k = 0;
-    for (int i = 0; i < self->cols; i++) {
+    for (int i = 0; i < self->mNumColumns; i++) {
         int y = 0;
-        for (int j = 0; j < self->rows; j++) {
-            self->tiles[k++] = new sTile_4410(data + ((y << 6) + frameHeight * (i << 6)), self->heights[j]);
-            y += self->heights[j];
+        for (int j = 0; j < self->mNumRows; j++) {
+            ((sTile_4410**)self->mppTiles)[k++] = new sTile_4410(data + ((y << 6) + frameHeight * (i << 6)), self->mRowHeights[j]);
+            y += self->mRowHeights[j];
         }
     }
-    self->fC = 0;
-    float sw = (float)self->rend->width();
-    float sh = (float)self->rend->height() - fh;
+    (*(int*)&self->mpCurrentFrame) = 0;
+    float sw = (float)((cRend_4410*)self->m_pGrMan)->width();
+    float sh = (float)((cRend_4410*)self->m_pGrMan)->height() - fh;
     SSX_VD_PS2_SINGLE_BUFFERD_SetPosition((SSX_VD_PS2_SINGLE_BUFFERD*)self, (sw - fw) * 0.5f, sh * 0.5f, D_004A2EB0[0]);
     SSX_VD_PS2_SINGLE_BUFFERD_SetScale(self, 1.0f, 1.0f);
-    self->f3C = drawLayer;
+    self->mDrawLayer = drawLayer;
     return self;
 }
 #endif
@@ -2668,15 +2655,6 @@ struct sRCtx_2547B8 {
     sRVEntry_2547B8* vt;
 };
 
-struct sTexCache_2547B8 {
-    void* owner;
-    void** vt;
-    int f8;
-    void* fC;
-    int f10;
-    int** texs;
-    int count;
-};
 
 /**
  * Destroys the tiled-texture video driver: removes each tile's texture (graphics manager slot 50,
@@ -2688,26 +2666,26 @@ struct sTexCache_2547B8 {
  *
  * @param flags  bit 0 frees the memory
  */
-extern "C" void SSX_VD_PS2_SINGLE_BUFFERD__SSX_VD_PS2_SINGLE_BUFFERD(sTexCache_2547B8* self, int flags)
+extern "C" void SSX_VD_PS2_SINGLE_BUFFERD__SSX_VD_PS2_SINGLE_BUFFERD(SSX_VD_PS2_SINGLE_BUFFERD* self, int flags)
 {
-    self->vt = D_00480270;
-    for (int i = 0; i < self->count; i++) {
-        int* tileEntry = self->texs[i];
+    self->mVtbl = D_00480270;
+    for (int i = 0; i < self->mNumTiles; i++) {
+        int* tileEntry = self->mppTiles[i];
         if (tileEntry != 0) {
             ((sRVEntry_2547B8*)cGraphicsMan_TheGraphicsMan->mVtbl)[50].fn(vthis(cGraphicsMan_TheGraphicsMan, ((sRVEntry_2547B8*)cGraphicsMan_TheGraphicsMan->mVtbl)[50]), *tileEntry);
             *tileEntry = -1;
             RCMP_rcmp_sys.FreeMemFunc(tileEntry);
         }
     }
-    if (self->texs != 0) {
-        cMemMan_free(self->texs);
+    if (self->mppTiles != 0) {
+        cMemMan_free(self->mppTiles);
     }
-    self->texs = 0;
-    if (self->fC != 0) {
-        RCMP_DECODER_ReleaseFrame(self->owner, self->fC);
-        self->fC = 0;
+    self->mppTiles = 0;
+    if (((void*)self->mpCurrentFrame) != 0) {
+        RCMP_DECODER_ReleaseFrame(((void*)self->m_pdecoder), ((void*)self->mpCurrentFrame));
+        (*(void**)&self->mpCurrentFrame) = 0;
     }
-    self->vt = D_004802B0;
+    self->mVtbl = D_004802B0;
     if (flags & 1) {
         D_00509434[0](self);
     }
@@ -2969,18 +2947,6 @@ public:
 };
 extern "C" void* func_002548D0(void* self);
 
-struct sMesh_254C48 {
-    int f0;
-    int f4;
-    int f8;
-    void* res;
-    char* hdr;
-    char** items;
-    int f18;
-    int rows;
-    int cols;
-    int widths[1];
-};
 
 /**
  * Draws a new movie frame: uploads the frame's pixels (@p res + 4 header, data as in SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD) into each tile's
@@ -2990,13 +2956,13 @@ struct sMesh_254C48 {
  *
  * @param res  the frame
  */
-extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_Draw(sMesh_254C48* self, void* res)
+extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_Draw(SSX_VD_PS2_SINGLE_BUFFERD* self, void* res)
 {
     if (res != 0) {
-        self->res = res;
+        (*(void**)&self->mpCurrentFrame) = res;
     }
     char* hdr = *(char**)((char*)res + 4);
-    self->hdr = hdr;
+    self->mpImageHeader = hdr;
     char* data;
     if (*(int*)(hdr + 0xC) & 0x1000) {
         data = hdr + *(int*)(hdr + 0x10);
@@ -3004,14 +2970,14 @@ extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_Draw(sMesh_254C48* self, void* res)
         data = hdr + 0x10;
     }
     int k = 0;
-    short stride = *(short*)(self->hdr + 6);
-    for (int i = 0; i < self->rows; i++) {
+    short stride = *(short*)(self->mpImageHeader + 6);
+    for (int i = 0; i < self->mNumColumns; i++) {
         int off = 0;
-        for (int j = 0; j < self->cols; j++) {
-            int* tileEntry = ((int**)self->items)[k];
+        for (int j = 0; j < self->mNumRows; j++) {
+            int* tileEntry = ((int**)((char**)self->mppTiles))[k];
             ((cWorld_254C48*)cGraphicsMan_TheGraphicsMan)->SetNewTextureData1(tileEntry[0], data + ((off << 6) + stride * (i << 6)), tileEntry[1], tileEntry[2], 0, 0, 0, 0, 0);
             k++;
-            off += self->widths[j];
+            off += ((int*)&self->mRowHeights[0])[j];
         }
     }
     func_002548D0(self);

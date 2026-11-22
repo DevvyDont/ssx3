@@ -2732,12 +2732,6 @@ cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cM
 
 extern void* cSubMenuItem_vtbl[];
 
-struct cSubMenuItem_sItem {
-    char pad_0x00[0x10];
-    void* vtable;    // 0x10
-    void* field_0x14;
-    void* field_0x18;
-};
 
 /**
  * Constructs a menu item that opens a sub-menu.
@@ -2750,13 +2744,13 @@ struct cSubMenuItem_sItem {
  * @param cap  the item's label text, stored at +0x14
  * @return @p self
  */
-extern "C" cSubMenuItem_sItem* cSubMenuItem_cSubMenuItem(cSubMenuItem* self, cMenu* sub, void* cap)
+extern "C" cSubMenuItem* cSubMenuItem_cSubMenuItem(cSubMenuItem* self, cMenu* sub, void* cap)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     self->Caption = (const char*)cap;
     self->Sub = (cMenu*)((void*)sub);
     self->mVtbl = (void**)cSubMenuItem_vtbl;
-    return ((cSubMenuItem_sItem*)self);
+    return (self);
 }
 #endif
 
@@ -2842,11 +2836,6 @@ cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cM
 
 extern void* cPopMenuItem_vtbl[];
 
-struct s2CCDF0Item {
-    char pad_0x00[0x10];
-    void* vtable;
-    void* field_0x14;
-};
 
 /**
  * Constructs a "back" menu item with ID -1 and caption (+0x14) @p text; selecting it closes the menu (cPopMenuItem_input).
@@ -2857,12 +2846,12 @@ struct s2CCDF0Item {
  * @param text  caption
  * @return @p self
  */
-extern "C" s2CCDF0Item* cPopMenuItem_cPopMenuItem(cPopMenuItem* self, void* text)
+extern "C" cPopMenuItem* cPopMenuItem_cPopMenuItem(cPopMenuItem* self, void* text)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     self->Caption = (const char*)text;
     self->mVtbl = (void**)cPopMenuItem_vtbl;
-    return ((s2CCDF0Item*)self);
+    return (self);
 }
 #endif
 
@@ -2985,14 +2974,6 @@ INCLUDE_ASM("util/menu", cCommandMenuItem_cCommandMenuItem2);
 #ifdef SKIP_ASM
 extern void* cCommandMenuItem_vtbl[];
 
-struct cCommandMenuItem_cCommandMenuItem2_sItem {
-    char pad_0x00[0x10];
-    void* vtable;    // 0x10
-    int field_0x14;
-    int field_0x18;
-    int field_0x1C;
-    int field_0x20;
-};
 
 /**
  * Constructs a command item: ID @p text, caption (+0x14) @p caption and argument (+0x1C) @p commandArg, which selecting the item
@@ -3006,7 +2987,7 @@ struct cCommandMenuItem_cCommandMenuItem2_sItem {
  * @param commandArg  argument for onCommand
  * @return @p self
  */
-extern "C" cCommandMenuItem_cCommandMenuItem2_sItem* cCommandMenuItem_cCommandMenuItem2(cCommandMenuItem* self, void* text, int caption, int commandArg)
+extern "C" cCommandMenuItem* cCommandMenuItem_cCommandMenuItem2(cCommandMenuItem* self, void* text, int caption, int commandArg)
 {
     cMenuItem_cMenuItem((cMenuItem*)self, text);
     self->Caption = (const char*)caption;
@@ -3014,7 +2995,7 @@ extern "C" cCommandMenuItem_cCommandMenuItem2_sItem* cCommandMenuItem_cCommandMe
     self->CmdArg = commandArg;
     self->Data = 0;
     self->State = 0;
-    return ((cCommandMenuItem_cCommandMenuItem2_sItem*)self);
+    return (self);
 }
 #endif
 
@@ -4425,13 +4406,6 @@ cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cM
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
 extern void* cTextMenuItem_vtbl[];
 
-struct cTextMenuItem_cTextMenuItem_sItem {
-    char pad_0x00[0x10];
-    void* vtable;    // 0x10
-    int field_0x14;
-    char name[0x10]; // 0x18
-    int field_0x28;
-};
 
 /**
  * Constructs a text-entry item: ID -1, caption (+0x14) @p caption, the text (+0x18, 16 bytes) copied from @p name (at most
@@ -4444,14 +4418,14 @@ struct cTextMenuItem_cTextMenuItem_sItem {
  * @param name  initial text
  * @return @p self
  */
-extern "C" cTextMenuItem_cTextMenuItem_sItem* cTextMenuItem_cTextMenuItem(cTextMenuItem_cTextMenuItem_sItem* self, int caption, const char* name)
+extern "C" cTextMenuItem* cTextMenuItem_cTextMenuItem(cTextMenuItem* self, int caption, const char* name)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
-    self->field_0x14 = caption;
-    self->field_0x28 = 0;
-    self->vtable = cTextMenuItem_vtbl;
-    strncpy(self->name, name, 0xF);
-    self->name[0xF] = 0;
+    (*(int*)&self->Caption) = caption;
+    self->CursorPos = 0;
+    (*(void**)&self->mVtbl) = cTextMenuItem_vtbl;
+    strncpy(self->Text, name, 0xF);
+    self->Text[0xF] = 0;
     return self;
 }
 #endif
@@ -4805,12 +4779,6 @@ cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cM
 
 extern void* cColorMenuItem_vtbl[];
 
-struct sColorMenuItem {
-    char pad_0x00[0x10];
-    void* vtable;    // 0x10
-    void* field_0x14;
-    void* field_0x18;
-};
 
 /**
  * Constructs a menu item that edits one channel of a colour.
@@ -4822,13 +4790,13 @@ struct sColorMenuItem {
  * @param adjust  channel index 0 to 3, stored at +0x18
  * @return @p self
  */
-extern "C" sColorMenuItem* cColorMenuItem_cColorMenuItem(cColorMenuItem* self, tARGB* color, void* adjust)
+extern "C" cColorMenuItem* cColorMenuItem_cColorMenuItem(cColorMenuItem* self, tARGB* color, void* adjust)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     self->Color = (tARGB*)((void*)color);
     self->Adjust = (int)adjust;
     self->mVtbl = (void**)cColorMenuItem_vtbl;
-    return ((sColorMenuItem*)self);
+    return (self);
 }
 #endif
 
@@ -5485,10 +5453,6 @@ public:
     virtual int input();
 };
 
-struct cExpandMenuItem_input_sOwner {
-    char pad[0x18];
-    cMenu_setFocus_sMenu menu;
-};
 
 /**
  * Handles input for an expandable menu item by passing it to the focused item of its embedded menu.
@@ -5503,27 +5467,27 @@ struct cExpandMenuItem_input_sOwner {
 // PORT: returns a key code (int) through the unit's void* declaration.
 extern "C" void* cExpandMenuItem_input(cExpandMenuItem* expandItem)
 {
-    cExpandMenuItem_input_sOwner* self = (cExpandMenuItem_input_sOwner*)expandItem;
-    cMenu_checkFocus((cMenu*)(&self->menu));
-    int prev = self->menu.selected;
-    int key = ((cExpandMenuItem_input_cItem*)self->menu.items[prev])->input();
+    cExpandMenuItem* self = expandItem;
+    cMenu_checkFocus((cMenu*)(&(*(cMenu_setFocus_sMenu*)&self->ExpandMenu)));
+    int prev = (*(cMenu_setFocus_sMenu*)&self->ExpandMenu).selected;
+    int key = ((cExpandMenuItem_input_cItem*)(*(cMenu_setFocus_sMenu*)&self->ExpandMenu).items[prev])->input();
     if (cMenuItem_isLocked((cMenuItem*)self) != 0) {
         return (void*)key;
     }
     switch (key) {
     case 3:
-        cMenu_nextFocus((cMenu*)(&self->menu));
-        if (prev < self->menu.selected) {
+        cMenu_nextFocus((cMenu*)(&(*(cMenu_setFocus_sMenu*)&self->ExpandMenu)));
+        if (prev < (*(cMenu_setFocus_sMenu*)&self->ExpandMenu).selected) {
             return 0;
         }
-        cMenu_setFocus(&self->menu, prev);
+        cMenu_setFocus(&(*(cMenu_setFocus_sMenu*)&self->ExpandMenu), prev);
         return (void*)3;
     case 4:
-        cMenu_prevFocus((cMenu*)(&self->menu));
-        if (self->menu.selected < prev) {
+        cMenu_prevFocus((cMenu*)(&(*(cMenu_setFocus_sMenu*)&self->ExpandMenu)));
+        if ((*(cMenu_setFocus_sMenu*)&self->ExpandMenu).selected < prev) {
             return 0;
         }
-        cMenu_setFocus(&self->menu, prev);
+        cMenu_setFocus(&(*(cMenu_setFocus_sMenu*)&self->ExpandMenu), prev);
         return (void*)4;
     }
     return (void*)key;
@@ -5772,12 +5736,6 @@ cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cM
 
 extern void* cRGBTitleMenuItem_vtbl[];
 
-struct cRGBTitleMenuItem_sItem {
-    char pad_0x00[0x10];
-    void* vtable;    // 0x10
-    void* field_0x14;
-    void* field_0x18;
-};
 
 /**
  * Constructs the title row of a colour editor menu item.
@@ -5789,13 +5747,13 @@ struct cRGBTitleMenuItem_sItem {
  * @param color  the colour the row shows, stored at +0x14
  * @return @p self
  */
-extern "C" cRGBTitleMenuItem_sItem* cRGBTitleMenuItem_cRGBTitleMenuItem(cRGBTitleMenuItem* self, void* cap, tARGB* color)
+extern "C" cRGBTitleMenuItem* cRGBTitleMenuItem_cRGBTitleMenuItem(cRGBTitleMenuItem* self, void* cap, tARGB* color)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     self->Color = (tARGB*)((void*)color);
     self->Caption = (const char*)cap;
     self->mVtbl = (void**)cRGBTitleMenuItem_vtbl;
-    return ((cRGBTitleMenuItem_sItem*)self);
+    return (self);
 }
 #endif
 
@@ -6044,11 +6002,11 @@ extern "C" void* cARGBMenuItem_cARGBMenuItem(cARGBMenuItem* self, void* name, vo
     self->Color = (tARGB*)((void*)color);
     self->mVtbl = cARGBMenuItem_vtbl;
     // PORT: the channel index is passed in the unit's void* parameter
-    cColorMenuItem_cColorMenuItem((cColorMenuItem*)((sColorMenuItem*)(&self->Alpha)), color, (void*)0);
-    cColorMenuItem_cColorMenuItem((cColorMenuItem*)((sColorMenuItem*)(&self->Red)), color, (void*)1);
-    cColorMenuItem_cColorMenuItem((cColorMenuItem*)((sColorMenuItem*)(&self->Green)), color, (void*)2);
-    cColorMenuItem_cColorMenuItem((cColorMenuItem*)((sColorMenuItem*)(&self->Blue)), color, (void*)3);
-    cRGBTitleMenuItem_cRGBTitleMenuItem((cRGBTitleMenuItem*)((cRGBTitleMenuItem_sItem*)(&self->TitleItem)), title, (tARGB*)color);
+    cColorMenuItem_cColorMenuItem((cColorMenuItem*)(((&self->Alpha))), color, (void*)0);
+    cColorMenuItem_cColorMenuItem((cColorMenuItem*)(((&self->Red))), color, (void*)1);
+    cColorMenuItem_cColorMenuItem((cColorMenuItem*)(((&self->Green))), color, (void*)2);
+    cColorMenuItem_cColorMenuItem((cColorMenuItem*)(((&self->Blue))), color, (void*)3);
+    cRGBTitleMenuItem_cRGBTitleMenuItem((cRGBTitleMenuItem*)(((&self->TitleItem))), title, (tARGB*)color);
     cExpandMenuItem_addItem3(self, &self->Alpha, -1);
     cExpandMenuItem_addItem3(self, &self->Red, -1);
     cExpandMenuItem_addItem3(self, &self->Green, -1);
@@ -6672,22 +6630,6 @@ struct sGraphPt_D0EF8 {
     float x, y;
 };
 
-// cGraphMenuItem: a menu item that plots a point list in a box at the right of its row.
-struct cGraphMenuItem_D0EF8 {
-    void* owner;                // 0x00
-    char pad04[0x10];
-    char* label;                // 0x14
-    int count;                  // 0x18
-    char pad1C[0x8];
-    int cur;                    // 0x24
-    sGraphPt_D0EF8* pts;        // 0x28
-    float minX;                 // 0x2C
-    float maxY;                 // 0x30
-    float maxX;                 // 0x34
-    float minY;                 // 0x38
-    char pad3C[0x4];
-    int showCur;                // 0x40
-};
 
 // cBXString as a value class (one pointer); the operators are the game's out-of-line functions.
 // PORT: asm labels are not accepted on destructors, so the dtor forwards to the out-of-line one (in-charge flag 2).
@@ -6755,17 +6697,17 @@ static inline void SetDepth_D0EF8(sRenderState* rs, int base, int layer)
  *
  * @param rect  the row's rect (x, y, w, h)
  */
-extern "C" void cGraphMenuItem_render(cGraphMenuItem_D0EF8* self, float* rect)
+extern "C" void cGraphMenuItem_render(cGraphMenuItem* self, float* rect)
 {
-    int focused = self == cMenu_getFocusItem((cMenu*)self->owner);
+    int focused = self == cMenu_getFocusItem((cMenu*)((void*)self->Menu));
     {
-        char* menu = (char*)self->owner;
+        char* menu = (char*)((void*)self->Menu);
         sVEntry<void(void*, float*, int)>* vt = *(sVEntry<void(void*, float*, int)>**)(menu + 0x12C);
         vt[9].fn(vthis(menu, vt[9]), rect, focused);
     }
     char* font = *(char**)(*(char**)(*(char**)self + 0x124) + 0x58);
     float lineH = (float)*(int*)(font + 0x14) * *(float*)(font + 0x34);
-    cMenuItem_textRender1_sVec3* col = self == cMenu_getFocusItem((cMenu*)self->owner) ? &kTextSelectedColor : &kTextUnselectedColor;
+    cMenuItem_textRender1_sVec3* col = self == cMenu_getFocusItem((cMenu*)((void*)self->Menu)) ? &kTextSelectedColor : &kTextUnselectedColor;
     sColor textColor;
     textColor.a = 1.0f;
     textColor.r = col->x;
@@ -6773,13 +6715,13 @@ extern "C" void cGraphMenuItem_render(cGraphMenuItem_D0EF8* self, float* rect)
     textColor.b = col->z;
     *(sColor*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x40) = textColor;
     *(sVec2r_D0EF8*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x28) = sVec2r_D0EF8(2.0f, 2.0f);
-    cFont_text(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + 16.0f, rect[1] + 6.0f - 1.0f, self->label);
-    if (self->showCur && focused) {
-        cBXStr_D0EF8 str = FormatValue_D0EF8(self->pts[self->cur].x) + str_comma + FormatValue_D0EF8(self->pts[self->cur].y);
+    cFont_text(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + 16.0f, rect[1] + 6.0f - 1.0f, ((char*)self->Caption));
+    if (self->IsEditMode && focused) {
+        cBXStr_D0EF8 str = FormatValue_D0EF8(((sGraphPt_D0EF8*)self->Points)[self->OnPoint].x) + str_comma + FormatValue_D0EF8(((sGraphPt_D0EF8*)self->Points)[self->OnPoint].y);
         cFont_text(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + 32.0f, rect[1] + 12.0f - 1.0f + lineH, str.str);
     }
     float graphHeight;
-    if (focused && self->showCur) {
+    if (focused && self->IsEditMode) {
         graphHeight = rect[3] - 24.0f;
     } else {
         graphHeight = rect[3] - 12.0f;
@@ -6808,11 +6750,11 @@ extern "C" void cGraphMenuItem_render(cGraphMenuItem_D0EF8* self, float* rect)
         fullUv[3] = 1.0f;
         func_002CB350_0EF8((func_002CB350_sVtx*)quadVerts, &gr.x, fullUv);
     }
-    float sx = gr.w / (self->maxX - self->minX);
-    float sy = gr.h / (self->maxY - self->minY);
-    float ox = gr.x - self->minX * sx;
-    float oy = gr.y - self->minY * sy;
-    if ((self->maxY >= 0.0f) != (self->minY > 0.0f)) {
+    float sx = gr.w / (self->MaxPoint[0] - self->MinPoint[0]);
+    float sy = gr.h / (self->MinPoint[1] - self->MaxPoint[1]);
+    float ox = gr.x - self->MinPoint[0] * sx;
+    float oy = gr.y - self->MaxPoint[1] * sy;
+    if ((self->MinPoint[1] >= 0.0f) != (self->MaxPoint[1] > 0.0f)) {
         SetDepth_D0EF8(((cRenderCtx*)GrMan)->top, old, 1);
         for (i = 0; i < 2; i++) {
             quadVerts[i].a = (int)(D_004D5380_c.a * 128.0f);
@@ -6840,11 +6782,11 @@ extern "C" void cGraphMenuItem_render(cGraphMenuItem_D0EF8* self, float* rect)
         quadVerts[i].g = (int)(D_004D53D0.g * 128.0f);
         quadVerts[i].b = (int)(D_004D53D0.b * 128.0f);
     }
-    for (i = 1; i < self->count; i++) {
-        float x0 = GraphX_D0EF8(self->pts[i - 1], sx, ox);
-        float y0 = GraphY_D0EF8(self->pts[i - 1], sy, oy);
-        float x1 = GraphX_D0EF8(self->pts[i], sx, ox);
-        float y1 = GraphY_D0EF8(self->pts[i], sy, oy);
+    for (i = 1; i < self->NumPoints; i++) {
+        float x0 = GraphX_D0EF8(((sGraphPt_D0EF8*)self->Points)[i - 1], sx, ox);
+        float y0 = GraphY_D0EF8(((sGraphPt_D0EF8*)self->Points)[i - 1], sy, oy);
+        float x1 = GraphX_D0EF8(((sGraphPt_D0EF8*)self->Points)[i], sx, ox);
+        float y1 = GraphY_D0EF8(((sGraphPt_D0EF8*)self->Points)[i], sy, oy);
         sVec4 vertexPos;
         vertexPos.x = x0;
         vertexPos.y = y0;
@@ -6858,7 +6800,7 @@ extern "C" void cGraphMenuItem_render(cGraphMenuItem_D0EF8* self, float* rect)
         *(sVec4*)quadVerts[1].pos = vertexPos;
         ((cRenderCtx*)cGraphicsMan_TheGraphicsMan)->RenderLineStrip(2, quadVerts, 0);
     }
-    if (self->showCur) {
+    if (self->IsEditMode) {
         SetDepth_D0EF8(((cRenderCtx*)GrMan)->top, old, 3);
         for (i = 0; i < 4; i++) {
             quadVerts[i].a = (int)(D_004D53E0.a * 128.0f);
@@ -6868,8 +6810,8 @@ extern "C" void cGraphMenuItem_render(cGraphMenuItem_D0EF8* self, float* rect)
         }
         float markerRect[4];
         float tt[4];
-        float px = GraphX_D0EF8(self->pts[self->cur], sx, ox);
-        float py = GraphY_D0EF8(self->pts[self->cur], sy, oy);
+        float px = GraphX_D0EF8(((sGraphPt_D0EF8*)self->Points)[self->OnPoint], sx, ox);
+        float py = GraphY_D0EF8(((sGraphPt_D0EF8*)self->Points)[self->OnPoint], sy, oy);
         markerRect[0] = px - 2.0f;
         markerRect[1] = py - 2.0f;
         markerRect[2] = 5.0f;
@@ -6908,7 +6850,7 @@ extern "C" void* cErrorMenu_cErrorMenu(cErrorMenu* self)
     self->mVtbl = cErrorMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)nullItem, 0);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)spaceItem, (void*)10);
-    cPopMenuItem_cPopMenuItem((cPopMenuItem*)((s2CCDF0Item*)item3), 0);
+    cPopMenuItem_cPopMenuItem((cPopMenuItem*)((cPopMenuItem*)item3), 0);
     cMenu_addItem((cMenuList*)self, (void**)nullItem, -1);
     cMenu_addItem((cMenuList*)self, (void**)spaceItem, -1);
     cMenu_addItem((cMenuList*)self, (void**)item3, -1);
@@ -6938,7 +6880,7 @@ extern "C" void* cErrorMenu_cErrorMenu1(cErrorMenu* self, void* nullText, void* 
     char* spaceItem = (char*)&self->Space;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)nullItem, nullText);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)spaceItem, (void*)0x1E);
-    cPopMenuItem_cPopMenuItem((cPopMenuItem*)((s2CCDF0Item*)item3), text3);
+    cPopMenuItem_cPopMenuItem((cPopMenuItem*)((cPopMenuItem*)item3), text3);
     cMenu_addItem((cMenuList*)self, (void**)nullItem, -1);
     cMenu_addItem((cMenuList*)self, (void**)spaceItem, -1);
     cMenu_addItem((cMenuList*)self, (void**)item3, -1);

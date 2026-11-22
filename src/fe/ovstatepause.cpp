@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "main/gamestate.h"
 #include "ui/uiengine.h"
 #include "movie/mcoverlaymanager.h"
 #include "fe/ovstate.h"
@@ -2356,10 +2357,6 @@ extern "C" int func_001FDB78(void* self, int menu, int event)
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FDB88);
 #ifdef SKIP_ASM
-struct sPauseMgr_DB88 {
-    char pad[0x8];
-    int f8;
-};
 
 extern "C" void cSSXAudio_StartEventWithNoStartGate(void* snd);
 
@@ -2378,7 +2375,7 @@ extern "C" void func_001FDB88(void* self, int widget, int event)
 {
     if (widget != 0 && event == 5) {
         cOVStateManager_mStatus = 3;
-        ((sPauseMgr_DB88*)((SSXApp)->Game)->mCurrentState)->f8 = 1;
+        (((SSXApp)->Game)->mCurrentState)->mOverlayDone = 1;
         cSSXAudio_StartEventWithNoStartGate(cAudioInterface_bxAudio());
         cUIStateStack_pop(*(char**)((char*)self + 0x10) + 0x18, 1);
     }

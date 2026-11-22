@@ -38,11 +38,6 @@ struct sMeshInst_E448 {
 };
 
 
-struct sAnimEntry_E448 {
-    int pad_0x0[2];
-    void* src;              // 0x8
-    int pad_0xC;
-};
 
 
 
@@ -58,11 +53,11 @@ struct sAnimEntry_E448 {
 extern "C" void cAnimNode_setAnimMeshCache(cAnimNode* self)
 {
     tModelRecord* def = self->Instance->m_Model;
-    sAnimEntry_E448* entry = ((sAnimEntry_E448*)def->m_MeshHeirarchy);
+    tMeshHeirarchyRecord* entry = (def->m_MeshHeirarchy);
     int i;
     self->NumAnimMeshes = 0;
     for (i = 0; i < def->m_iNumMeshes; i++, entry++) {
-        if (entry->src != 0)
+        if (((void*)entry->m_MeshAnim) != 0)
             self->NumAnimMeshes++;
     }
     if (self->NumAnimMeshes != 0) {
@@ -73,11 +68,11 @@ extern "C" void cAnimNode_setAnimMeshCache(cAnimNode* self)
     }
     tMeshVelocity*& refs = (self->MeshVelocity);
     refs = new (str_MeshVelocity, 0x20000000, 0) tMeshVelocity[def->m_iNumMeshes];
-    entry = ((sAnimEntry_E448*)def->m_MeshHeirarchy);
+    entry = (def->m_MeshHeirarchy);
     int k = 0;
     for (i = 0; i < def->m_iNumMeshes; i++, entry++) {
-        if (entry->src != 0) {
-            cAnimFrame_setAnimRecord(&((sMeshInst_E448*)self->AnimFrames)[k++], entry->src);
+        if (((void*)entry->m_MeshAnim) != 0) {
+            cAnimFrame_setAnimRecord(&((sMeshInst_E448*)self->AnimFrames)[k++], ((void*)entry->m_MeshAnim));
         }
     }
 }
@@ -445,15 +440,11 @@ struct sAnimLinkList_EBA0;
 
 struct sAnimLink_EBA0 {
     char pad_0x00[0x18];
-    sAnimLinkList_EBA0* list; // 0x18
+    tInstanceRecord* list; // 0x18
 };
 
-struct sAnimLinkList_EBA0 {
-    char pad_0x00[0xC];
-    sAnimLink_EBA0* head; // 0x0C
-};
 
-extern "C" void cObjectInterface_runFrameUpdateScript(sAnimLinkList_EBA0* list);
+extern "C" void cObjectInterface_runFrameUpdateScript(tInstanceRecord* list);
 
 struct sAnimNode_EBA0 {
     char pad_0x00[0x14];
@@ -475,8 +466,8 @@ struct sAnimNode_EBA0 {
 extern "C" int cAnimNode_frameUpdate(cAnimNode* self)
 {
     sAnimLink_EBA0* link = (sAnimLink_EBA0*)&self->unk_014;
-    cObjectInterface_runFrameUpdateScript((sAnimLinkList_EBA0*)self->Instance);
-    return link->list->head == link;
+    cObjectInterface_runFrameUpdateScript(self->Instance);
+    return ((sAnimLink_EBA0*)link->list->m_pActiveNode) == link;
 }
 #endif
 

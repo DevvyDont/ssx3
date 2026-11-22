@@ -484,9 +484,6 @@ struct sBmVtblBB10 {
 } __attribute__((aligned(8)));
 extern const sBmVtblBB10 D_00483AB8_BB10 __asm__("D_00483AB8");
 
-struct sBmBankBB10 {
-    char pad_0x0[0x60];
-};
 
 struct sBankManagerBB10 {
     char pad_0x0[0x1D4];
@@ -496,7 +493,7 @@ struct sBankManagerBB10 {
     void** vtbl2;               // 0xAB0
     char pad_0xAB4[0xAC8 - 0xAB4];
     int count;                  // 0xAC8
-    sBmBankBB10* banks;         // 0xACC
+    cBankInstance* banks;         // 0xACC
 };
 
 /**
@@ -525,13 +522,13 @@ extern "C" void cBankManager__cBankManager(cBankManager* self, int flags)
         vt.e[1].delta = D_00483AB8_BB10.e[1].delta + soundSysAdjust;
     }
     gpBankManager = 0;
-    if ((sBmBankBB10*)self->mBank != 0) {
-        sBmBankBB10* bankInstance = (sBmBankBB10*)self->mBank + ((int*)(sBmBankBB10*)self->mBank)[-4];
-        while ((sBmBankBB10*)self->mBank != bankInstance) {
+    if (self->mBank != 0) {
+        cBankInstance* bankInstance = self->mBank + ((int*)self->mBank)[-4];
+        while (self->mBank != bankInstance) {
             bankInstance--;
             cBankInstance__cBankInstance(bankInstance, 0);
         }
-        cMemMan_free((char*)(sBmBankBB10*)self->mBank - 0x10);
+        cMemMan_free((char*)self->mBank - 0x10);
     }
     cBankMonitor__cBankMonitor((char**)&self->BankMonitor, 0);
     cAsyncSys__cAsyncSys(((sBankManagerBB10*)self), 0);
@@ -594,7 +591,6 @@ INCLUDE_ASM("sound/bankmanager", cBankManager_BANK_AsyncLoad);
 extern "C" void cAsyncSys_ASYNCSYS_Cancel(void* self, int i);
 extern "C" void cAsyncSys_ASYNCSYS_QueueLoad(void* self, int i, void* id, int a3, int a4);
 
-struct sBankInst60 { char pad0[8]; int f8; char pad1[0x60 - 0xC]; };
 
 /**
  * Queues an asynchronous load of bank file @p id into bank slot @p i, unless that slot already holds it.
@@ -612,7 +608,7 @@ extern "C" void cBankManager_BANK_AsyncLoad(cBankManager* self, int i, void* id,
 {
     if (cBankInstance_IsBankLoaded(&self->mBank[i], id) == 0) {
         cAsyncSys_ASYNCSYS_Cancel(self, i);
-        cAsyncSys_ASYNCSYS_QueueLoad(self, i, id, ((sBankInst60*)self->mBank)[i].f8, mainMemFlag);
+        cAsyncSys_ASYNCSYS_QueueLoad(self, i, id, (self->mBank)[i].mAllocLocation, mainMemFlag);
     }
 }
 #endif

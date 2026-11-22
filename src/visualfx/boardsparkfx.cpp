@@ -128,18 +128,6 @@ struct sBsEmitter {
     sBsVE* vt;          // 0x1F8
 };
 
-struct sBoardSparkFXView {  // this unit's view of cBoardSparkFX (ai/riderhandler.h, where the FX parts are not yet mapped)
-    char* vbase;            // 0x00
-    char pad04[0x1C];
-    sBsEmitter* emitter;    // 0x20
-    sBsParams* params;      // 0x24
-    void* gfx;              // 0x28
-    char pad2C[0x40];
-    int active;             // 0x6C
-    char pad70[0xC];
-    sBsSlot slotA;          // 0x7C
-    sBsSlot slotB;          // 0x90
-};
 
 /**
  * Constructs a rider's board spark effect: a particle emitter for grit, a glow and three spark points.
@@ -156,107 +144,107 @@ struct sBoardSparkFXView {  // this unit's view of cBoardSparkFX (ai/riderhandle
  */
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0xB0): vtable copies with delta fixups when not in charge.
-extern "C" void* cBoardSparkFX_cBoardSparkFX(sBoardSparkFXView* self, int inChrg)
+extern "C" void* cBoardSparkFX_cBoardSparkFX(cBoardSparkFX* self, int inChrg)
 {
     sVt9_BS vtbl1;
     sVt22_BS vtbl2;
     if (inChrg) {
-        self->vbase = (char*)self + 0xB0;
+        (*(char**)&self->mRider) = (char*)self + 0xB0;
         cRider_cRider((char*)self + 0xB0);
     }
-    *(const void**)(self->vbase + 0x6E8) = &D_00488CB0;
-    *(void**)(self->vbase + 0x6D0) = D_00459B90;
-    *(const void**)(self->vbase + 0x6C0) = &D_00488CF8;
+    *(const void**)(((char*)self->mRider) + 0x6E8) = &D_00488CB0;
+    *(void**)(((char*)self->mRider) + 0x6D0) = D_00459B90;
+    *(const void**)(((char*)self->mRider) + 0x6C0) = &D_00488CF8;
     if (inChrg == 0) {
         int vc;
         vtbl1 = D_00488CB0;
-        *(void**)(self->vbase + 0x6E8) = &vtbl1;
+        *(void**)(((char*)self->mRider) + 0x6E8) = &vtbl1;
         {
-            char* vbo = self->vbase - 0xB0;
+            char* vbo = ((char*)self->mRider) - 0xB0;
             vc = (char*)self - vbo;
         }
         vtbl1.e[1].delta = D_00488CB0.e[1].delta + vc;
         vtbl2 = D_00488CF8;
-        *(void**)(self->vbase + 0x6C0) = &vtbl2;
+        *(void**)(((char*)self->mRider) + 0x6C0) = &vtbl2;
         vtbl2.e[1].delta = D_00488CF8.e[1].delta + vc;
     }
     new ((char*)self + 0x2C) sBsElem[3];
-    self->active = 1;
-    new (&self->slotA) sBsSlot;
-    new (&self->slotB) sBsSlot;
+    self->mSetupEmitters = 1;
+    new (&(*(sBsSlot*)&self->mSparkDrawState)) sBsSlot;
+    new (&(*(sBsSlot*)&self->mSparkFlashDrawState)) sBsSlot;
     float zeroF = 0.0f;
-    self->emitter = (sBsEmitter*)cDynamicColourEmitter_cDynamicColourEmitter(cMemMan_alloc(528, str_mEmitter, 0, 0));
-    self->params = (sBsParams*)cMemMan_alloc(216, str_mEmitterData, 0, 0);
-    self->gfx = tParticleEmitter_tParticleEmitter(cMemMan_alloc(336, str_Board_Spark_Emitter, 0, 0));
-    tParticleEmitter_randomize(self->gfx);
+    (*(sBsEmitter**)&self->mEmitter) = (sBsEmitter*)cDynamicColourEmitter_cDynamicColourEmitter(cMemMan_alloc(528, str_mEmitter, 0, 0));
+    (*(sBsParams**)&self->mEmitterData) = (sBsParams*)cMemMan_alloc(216, str_mEmitterData, 0, 0);
+    (*(void**)&self->mSparkEmitter) = tParticleEmitter_tParticleEmitter(cMemMan_alloc(336, str_Board_Spark_Emitter, 0, 0));
+    tParticleEmitter_randomize(((void*)self->mSparkEmitter));
     sBsVec4 force;
     force.x = zeroF;
     force.y = zeroF;
     force.z = -3000.0f;
     force.w = zeroF;
-    tParticleEmitter_init(self->gfx, 0x1E, 8, 0.4000000059604645f, 0.012000000104308128f, 1.5f, &force);
-    tParticleEmitter_setSize(self->gfx, 7.5f, zeroF, 7.5f);
-    tParticleEmitter_setLife(self->gfx, 0.10000000149011612f, 0.1940000057220459f);
-    tParticleEmitter_stopMotion(self->gfx);
-    tParticleEmitter_setTime(self->gfx, zeroF);
-    self->params->mode = 1;
-    self->params->f04 = 0;
-    self->params->f08 = -1.0f;
-    self->params->f0C = 1.0f;
-    self->params->f10 = 6.0f;
-    self->params->f14 = 4.0f;
-    self->params->f18 = 6.0f;
-    self->params->f1C[0] = zeroF;
-    self->params->f1C[1] = zeroF;
-    self->params->f1C[2] = zeroF;
-    self->params->f1C[3] = zeroF;
-    self->params->f1C[4] = zeroF;
-    self->params->f1C[5] = zeroF;
-    self->params->f1C[6] = zeroF;
-    self->params->f1C[7] = zeroF;
-    self->params->f1C[8] = zeroF;
-    self->params->f1C[9] = zeroF;
-    self->params->f1C[10] = zeroF;
-    self->params->f1C[11] = zeroF;
-    self->params->f1C[12] = zeroF;
-    self->params->f50 = 600.0f;
-    self->params->f54 = 200.0f;
-    self->params->f58 = zeroF;
-    self->params->f5C = zeroF;
-    self->params->f60 = zeroF;
-    self->params->f64 = 200.0f;
-    self->params->f68 = zeroF;
-    self->params->f6C = zeroF;
-    self->params->f70 = zeroF;
-    self->params->f74 = 100.0f;
-    self->params->f78 = zeroF;
-    self->params->f7C = zeroF;
-    self->params->f80 = -800.0f;
-    self->params->f84 = 1.0f;
-    self->params->f88 = 1.0f;
-    self->params->f8C = 1.0f;
-    self->params->f90 = 1.0f;
-    self->params->f94 = zeroF;
-    self->params->f98 = 0.21559999883174896f;
-    self->params->f9C = 0.18000000715255737f;
-    self->params->fA0 = 0.13699999451637268f;
-    self->params->fA4[0] = zeroF;
-    self->params->fA4[1] = zeroF;
-    self->params->fA4[2] = zeroF;
-    self->params->fA4[3] = zeroF;
-    self->params->fA4[4] = zeroF;
-    self->params->fA4[5] = zeroF;
-    self->params->fA4[6] = zeroF;
-    self->params->fA4[7] = zeroF;
-    self->params->fC8 = 1;
-    self->params->fCC = 6.0f;
-    self->params->count = 5;
-    self->params->fD0 = 8;
-    self->params->fD4 = 27.0f;
-    self->params->count = 14;
-    sBsEmitter* em = self->emitter;
-    em->vt[3].fn(vthis(em, em->vt[3]), self->params, em->rate);
-    self->active = 0;
+    tParticleEmitter_init(((void*)self->mSparkEmitter), 0x1E, 8, 0.4000000059604645f, 0.012000000104308128f, 1.5f, &force);
+    tParticleEmitter_setSize(((void*)self->mSparkEmitter), 7.5f, zeroF, 7.5f);
+    tParticleEmitter_setLife(((void*)self->mSparkEmitter), 0.10000000149011612f, 0.1940000057220459f);
+    tParticleEmitter_stopMotion(((void*)self->mSparkEmitter));
+    tParticleEmitter_setTime(((void*)self->mSparkEmitter), zeroF);
+    ((sBsParams*)self->mEmitterData)->mode = 1;
+    ((sBsParams*)self->mEmitterData)->f04 = 0;
+    ((sBsParams*)self->mEmitterData)->f08 = -1.0f;
+    ((sBsParams*)self->mEmitterData)->f0C = 1.0f;
+    ((sBsParams*)self->mEmitterData)->f10 = 6.0f;
+    ((sBsParams*)self->mEmitterData)->f14 = 4.0f;
+    ((sBsParams*)self->mEmitterData)->f18 = 6.0f;
+    ((sBsParams*)self->mEmitterData)->f1C[0] = zeroF;
+    ((sBsParams*)self->mEmitterData)->f1C[1] = zeroF;
+    ((sBsParams*)self->mEmitterData)->f1C[2] = zeroF;
+    ((sBsParams*)self->mEmitterData)->f1C[3] = zeroF;
+    ((sBsParams*)self->mEmitterData)->f1C[4] = zeroF;
+    ((sBsParams*)self->mEmitterData)->f1C[5] = zeroF;
+    ((sBsParams*)self->mEmitterData)->f1C[6] = zeroF;
+    ((sBsParams*)self->mEmitterData)->f1C[7] = zeroF;
+    ((sBsParams*)self->mEmitterData)->f1C[8] = zeroF;
+    ((sBsParams*)self->mEmitterData)->f1C[9] = zeroF;
+    ((sBsParams*)self->mEmitterData)->f1C[10] = zeroF;
+    ((sBsParams*)self->mEmitterData)->f1C[11] = zeroF;
+    ((sBsParams*)self->mEmitterData)->f1C[12] = zeroF;
+    ((sBsParams*)self->mEmitterData)->f50 = 600.0f;
+    ((sBsParams*)self->mEmitterData)->f54 = 200.0f;
+    ((sBsParams*)self->mEmitterData)->f58 = zeroF;
+    ((sBsParams*)self->mEmitterData)->f5C = zeroF;
+    ((sBsParams*)self->mEmitterData)->f60 = zeroF;
+    ((sBsParams*)self->mEmitterData)->f64 = 200.0f;
+    ((sBsParams*)self->mEmitterData)->f68 = zeroF;
+    ((sBsParams*)self->mEmitterData)->f6C = zeroF;
+    ((sBsParams*)self->mEmitterData)->f70 = zeroF;
+    ((sBsParams*)self->mEmitterData)->f74 = 100.0f;
+    ((sBsParams*)self->mEmitterData)->f78 = zeroF;
+    ((sBsParams*)self->mEmitterData)->f7C = zeroF;
+    ((sBsParams*)self->mEmitterData)->f80 = -800.0f;
+    ((sBsParams*)self->mEmitterData)->f84 = 1.0f;
+    ((sBsParams*)self->mEmitterData)->f88 = 1.0f;
+    ((sBsParams*)self->mEmitterData)->f8C = 1.0f;
+    ((sBsParams*)self->mEmitterData)->f90 = 1.0f;
+    ((sBsParams*)self->mEmitterData)->f94 = zeroF;
+    ((sBsParams*)self->mEmitterData)->f98 = 0.21559999883174896f;
+    ((sBsParams*)self->mEmitterData)->f9C = 0.18000000715255737f;
+    ((sBsParams*)self->mEmitterData)->fA0 = 0.13699999451637268f;
+    ((sBsParams*)self->mEmitterData)->fA4[0] = zeroF;
+    ((sBsParams*)self->mEmitterData)->fA4[1] = zeroF;
+    ((sBsParams*)self->mEmitterData)->fA4[2] = zeroF;
+    ((sBsParams*)self->mEmitterData)->fA4[3] = zeroF;
+    ((sBsParams*)self->mEmitterData)->fA4[4] = zeroF;
+    ((sBsParams*)self->mEmitterData)->fA4[5] = zeroF;
+    ((sBsParams*)self->mEmitterData)->fA4[6] = zeroF;
+    ((sBsParams*)self->mEmitterData)->fA4[7] = zeroF;
+    ((sBsParams*)self->mEmitterData)->fC8 = 1;
+    ((sBsParams*)self->mEmitterData)->fCC = 6.0f;
+    ((sBsParams*)self->mEmitterData)->count = 5;
+    ((sBsParams*)self->mEmitterData)->fD0 = 8;
+    ((sBsParams*)self->mEmitterData)->fD4 = 27.0f;
+    ((sBsParams*)self->mEmitterData)->count = 14;
+    sBsEmitter* em = ((sBsEmitter*)self->mEmitter);
+    em->vt[3].fn(vthis(em, em->vt[3]), ((sBsParams*)self->mEmitterData), em->rate);
+    self->mSetupEmitters = 0;
     cBoardSparkFX_reset((cBoardSparkFX*)self);
     return self;
 }

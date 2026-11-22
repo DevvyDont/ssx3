@@ -117,13 +117,6 @@ struct sBucketLink {
     sBucketLink* next; // 0x8
 };
 
-struct sBucketLists {
-    int flags;              // 0x00
-    sBucketLink head0;      // 0x04
-    char pad_0x10[0x14];    // 0x10
-    sBucketLink head1;      // 0x24
-    char pad_0x30[0x14];    // 0x30
-};
 
 /**
  * Appends a scene node to the end of one of a bucket's two node lists.
@@ -136,16 +129,16 @@ struct sBucketLists {
  */
 extern "C" void cBucketMan_add(cBucketMan* self, sBucketLink* node, int index)
 {
-    if (((sBucketLists*)self->Buckets)[index].flags & 1) {
-        node->prev = ((sBucketLists*)self->Buckets)[index].head1.prev;
-        ((sBucketLists*)self->Buckets)[index].head1.prev->next = node;
+    if ((self->Buckets)[index].Flags & 1) {
+        node->prev = (*(sBucketLink*)&(self->Buckets)[index].AddHead).prev;
+        (*(sBucketLink*)&(self->Buckets)[index].AddHead).prev->next = node;
         node->next = (sBucketLink*)&self->Buckets[index].AddHead;
-        ((sBucketLists*)self->Buckets)[index].head1.prev = node;
+        (*(sBucketLink*)&(self->Buckets)[index].AddHead).prev = node;
     } else {
-        node->prev = ((sBucketLists*)self->Buckets)[index].head0.prev;
-        ((sBucketLists*)self->Buckets)[index].head0.prev->next = node;
+        node->prev = (*(sBucketLink*)&(self->Buckets)[index].Head).prev;
+        (*(sBucketLink*)&(self->Buckets)[index].Head).prev->next = node;
         node->next = (sBucketLink*)&self->Buckets[index].Head;
-        ((sBucketLists*)self->Buckets)[index].head0.prev = node;
+        (*(sBucketLink*)&(self->Buckets)[index].Head).prev = node;
     }
 }
 #endif
@@ -516,11 +509,6 @@ extern "C" void cBucketMan_purgeBucket1(cBucketMan* self, int index, int key)
 }
 #endif
 
-// 0x44-byte elements reached through a pointer at self+0x4
-struct sBucketEntry {
-    int flags;
-    char pad_0x04[0x40];
-};
 
 //100%
 INCLUDE_ASM("object/bucketman", cBucketMan_setsortflag);
@@ -535,8 +523,8 @@ INCLUDE_ASM("object/bucketman", cBucketMan_setsortflag);
  */
 extern "C" void cBucketMan_setsortflag(cBucketMan* self, int bucket)
 {
-    sBucketEntry* buckets = (sBucketEntry*)self->Buckets;
-    buckets[bucket].flags |= 1;
+    tBucketHeader* buckets = self->Buckets;
+    buckets[bucket].Flags |= 1;
 }
 #endif
 

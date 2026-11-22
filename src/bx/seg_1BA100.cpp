@@ -1134,7 +1134,6 @@ extern "C" void cAsyncSys_ASYNCSYS_CancelAll(cAsyncSys* asyncSys) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cBankManager_BANK_Status);
 #ifdef SKIP_ASM
-struct S9EB0 { int a; char pad[0x5C]; };
 /**
  * Returns bank @p bankId's status (the first word of its 0x60-byte record in the cBankManager's bank array at +0xACC).
  *
@@ -1145,15 +1144,14 @@ struct S9EB0 { int a; char pad[0x5C]; };
  * @return the bank status
  */
 extern "C" int cBankManager_BANK_Status(cBankManager* bankManager, int bankId) {
-    S9EB0 *base = (S9EB0*)bankManager->mBank;
-    return base[bankId].a;
+    cBankInstance *base = bankManager->mBank;
+    return base[bankId].mBankStatus;
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cBankManager_BANK_Used);
 #ifdef SKIP_ASM
-struct S9EC8 { int a; char pad[0x5C]; };
 /**
  * Returns whether bank @p bankId is loaded: its status (cBankManager +0xACC record) is 1.
  *
@@ -1162,15 +1160,14 @@ struct S9EC8 { int a; char pad[0x5C]; };
  * @return 1 when the bank's status is 1 (used), else 0
  */
 extern "C" int cBankManager_BANK_Used(cBankManager* bankManager, int bankId) {
-    S9EC8 *base = (S9EC8*)bankManager->mBank;
-    return base[bankId].a == 1;
+    cBankInstance *base = bankManager->mBank;
+    return base[bankId].mBankStatus == 1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cBankManager_BANK_Loading);
 #ifdef SKIP_ASM
-struct S9EE8 { int a; char pad[0x5C]; };
 /**
  * Returns whether bank @p bankId is loading: its status (cBankManager +0xACC record) is 2.
  *
@@ -1179,8 +1176,8 @@ struct S9EE8 { int a; char pad[0x5C]; };
  * @return 1 when the bank's status is 2 (loading), else 0
  */
 extern "C" int cBankManager_BANK_Loading(cBankManager* bankManager, int bankId) {
-    S9EE8 *base = (S9EE8*)bankManager->mBank;
-    return base[bankId].a == 2;
+    cBankInstance *base = bankManager->mBank;
+    return base[bankId].mBankStatus == 2;
 }
 #endif
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "seg/dirtynet.h"
 #include "seg/buddyapi.h"
 
 //100%
@@ -414,11 +415,6 @@ int* func_003F0710(const char* product, const char* version) {
 //100%
 INCLUDE_ASM("seg/seg_2F0F40", func_003F07A0);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct S07A0Obj {
-    int pad[3];
-    void (*fn)(struct S07A0Obj*);
-};
 extern int func_003F0B50(struct BuddyApiRefT*);
 extern void func_003F0BE0(struct BuddyApiRefT*);
 extern void func_003F55B8(int);
@@ -432,9 +428,9 @@ extern void func_00259210(void*);
  * @param buddyRef  the BuddyApi state
  */
 void func_003F07A0(struct BuddyApiRefT* buddyRef) {
-    if (((struct S07A0Obj*)buddyRef->mpHostLookup)) {
-        ((struct S07A0Obj*)buddyRef->mpHostLookup)->fn(((struct S07A0Obj*)buddyRef->mpHostLookup));
-        (*(struct S07A0Obj**)&buddyRef->mpHostLookup) = 0;
+    if (((struct HostentT*)buddyRef->mpHostLookup)) {
+        ((void (*)(struct S07A0Obj*))((struct HostentT*)buddyRef->mpHostLookup)->Free)(((struct HostentT*)buddyRef->mpHostLookup));
+        (*(struct HostentT**)&buddyRef->mpHostLookup) = 0;
     }
     func_003F0B50(buddyRef);
     func_003F0BE0(buddyRef);
@@ -636,9 +632,9 @@ extern int func_003F5738(int);
  * @return 0
  */
 int func_003F0B50(struct BuddyApiRefT* buddyRef) {
-    if (((struct S07A0Obj*)buddyRef->mpHostLookup)) {
-        ((struct S07A0Obj*)buddyRef->mpHostLookup)->fn(((struct S07A0Obj*)buddyRef->mpHostLookup));
-        (*(struct S07A0Obj**)&buddyRef->mpHostLookup) = 0;
+    if (((struct HostentT*)buddyRef->mpHostLookup)) {
+        ((void (*)(struct S07A0Obj*))((struct HostentT*)buddyRef->mpHostLookup)->Free)(((struct HostentT*)buddyRef->mpHostLookup));
+        (*(struct HostentT**)&buddyRef->mpHostLookup) = 0;
     }
     func_003F00D8_0B50((int*)buddyRef, 0x44495343, (int)D_004A4AE8);
     func_003F5738(((int)buddyRef->mpSession));

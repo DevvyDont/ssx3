@@ -602,10 +602,6 @@ struct sWV_A028 {
     sWVCam_A028 cams[4]; // 0x240
 };
 
-struct sSecInfo_A028 {
-    short f0;
-    unsigned short id;  // 0x02
-};
 
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
@@ -658,20 +654,20 @@ extern "C" void cWorldView_recursiveTreeFocus(void* self_, void* sec_, int cam, 
 {
     if (!overlap_A028(&((sWV_A028*)self_)->cams[cam].bmin, (tBxBSPNode*)sec_))
         return;
-    if (((sSecInfo_A028*)((tBxBSPNode*)sec_)->m_pHull) != 0) {
+    if ((((tBxBSPNode*)sec_)->m_pHull) != 0) {
         float dist = cWorldView_getDistanceToBox(self_, &((sWV_A028*)self_)->cams[cam].pos, sec_, ((tBxBSPNode*)sec_)->m_v4BoxMax.m);
         float safeRadius = ((sWV_A028*)self_)->cams[cam].near;
         float w;
         if (dist < 0.0f) {
             w = 0.800000011920929f;
-            if (cWorldCache_isPageLoaded(((sWV_A028*)self_)->world, ((sSecInfo_A028*)((tBxBSPNode*)sec_)->m_pHull)->id) == 0)
+            if (cWorldCache_isPageLoaded(((sWV_A028*)self_)->world, (((tBxBSPNode*)sec_)->m_pHull)->m_uiHullIndex) == 0)
                 safeRadius = 0.0f;
         } else {
             if (((sWV_A028*)self_)->cams[cam].range < dist)
                 return;
             w = (1.0f - dist / ((sWV_A028*)self_)->cams[cam].range) * 0.800000011920929f;
             if (dist < safeRadius) {
-                if (cWorldCache_isPageLoaded(((sWV_A028*)self_)->world, ((sSecInfo_A028*)((tBxBSPNode*)sec_)->m_pHull)->id) == 0)
+                if (cWorldCache_isPageLoaded(((sWV_A028*)self_)->world, (((tBxBSPNode*)sec_)->m_pHull)->m_uiHullIndex) == 0)
                     safeRadius = dist;
             }
         }
@@ -679,7 +675,7 @@ extern "C" void cWorldView_recursiveTreeFocus(void* self_, void* sec_, int cam, 
             ((sWV_A028*)self_)->cams[cam].near = safeRadius;
         if (safeRadius < ((sWV_A028*)self_)->cams[cam].best)
             ((sWV_A028*)self_)->cams[cam].best = safeRadius;
-        cWorldCache_touchPage(((sWV_A028*)self_)->world, ((sSecInfo_A028*)((tBxBSPNode*)sec_)->m_pHull)->id, w);
+        cWorldCache_touchPage(((sWV_A028*)self_)->world, (((tBxBSPNode*)sec_)->m_pHull)->m_uiHullIndex, w);
     }
     if (((void*)((tBxBSPNode*)sec_)->m_pInChild) != 0) {
         if (Dot_A028((*(sV4_A028*)&((tBxBSPNode*)sec_)->m_v4SplitPlaneIn), ((sWV_A028*)self_)->cams[cam].bmin) < 0.0f)
@@ -829,12 +825,6 @@ public:
     virtual int resolveAnimation(void* p, void* base);
 };
 
-struct cChunkResolve_resolveModelHeirarchy_sEnt {
-    int f0;
-    int f4;
-    int f8;
-    unsigned int fC;
-};
 
 extern char t4mat_Identity[];
 
@@ -852,21 +842,21 @@ extern char t4mat_Identity[];
 extern "C" int cChunkResolve_resolveModelHeirarchy(cChunkResolve* self, tModelRecord* pModel)
 {
     int n = pModel->m_iNumMeshes;
-    cChunkResolve_resolveModelHeirarchy_sEnt* meshHierarchy = (cChunkResolve_resolveModelHeirarchy_sEnt*)pModel->m_MeshHeirarchy;
+    tMeshHeirarchyRecord* meshHierarchy = pModel->m_MeshHeirarchy;
     int i;
     for (i = 0; i < n; i++, meshHierarchy++) {
-        if (meshHierarchy->f4 != 0) {
-            meshHierarchy->f4 += (int)pModel;
-            ((cChunkResolve_resolveModelHeirarchy_cObj*)self)->resolveMesh((void*)meshHierarchy->f4, pModel);
+        if (((int)meshHierarchy->m_Mesh) != 0) {
+            (*(int*)&meshHierarchy->m_Mesh) += (int)pModel;
+            ((cChunkResolve_resolveModelHeirarchy_cObj*)self)->resolveMesh((void*)((int)meshHierarchy->m_Mesh), pModel);
         }
-        if (meshHierarchy->fC == 0xFFFFFFFF) {
-            meshHierarchy->fC = (unsigned int)t4mat_Identity;
+        if (((unsigned int)meshHierarchy->m_pMeshMatrix) == 0xFFFFFFFF) {
+            (*(unsigned int*)&meshHierarchy->m_pMeshMatrix) = (unsigned int)t4mat_Identity;
         } else {
-            meshHierarchy->fC += (int)pModel;
+            (*(unsigned int*)&meshHierarchy->m_pMeshMatrix) += (int)pModel;
         }
-        if (meshHierarchy->f8 != 0) {
-            meshHierarchy->f8 += (int)pModel;
-            ((cChunkResolve_resolveModelHeirarchy_cObj*)self)->resolveAnimation((void*)meshHierarchy->f8, pModel);
+        if (((int)meshHierarchy->m_MeshAnim) != 0) {
+            (*(int*)&meshHierarchy->m_MeshAnim) += (int)pModel;
+            ((cChunkResolve_resolveModelHeirarchy_cObj*)self)->resolveAnimation((void*)((int)meshHierarchy->m_MeshAnim), pModel);
         }
     }
     return 1;
@@ -2279,16 +2269,12 @@ struct cPS2ChunkResolve_resolveInstance_sView {
     int f0;
     int f4;
 };
-struct cPS2ChunkResolve_resolveInstance_cObj {
-    cPS2ChunkResolve_resolveInstance_sLib** f0;
-    cPS2ChunkResolve_resolveInstance_sView* f4;
-};
 
 extern "C" int func_003AC358(cPS2ChunkResolve* self, tInstanceRecord* a1);
 
-static inline cPS2ChunkResolve_resolveInstance_sRes* cPS2ChunkResolve_resolveInstance_lookup(cPS2ChunkResolve_resolveInstance_cObj* self, unsigned int id)
+static inline cPS2ChunkResolve_resolveInstance_sRes* cPS2ChunkResolve_resolveInstance_lookup(cPS2ChunkResolve* self, unsigned int id)
 {
-    cPS2ChunkResolve_resolveInstance_sTab* t = (*self->f0)->tables[id & 0xFF];
+    cPS2ChunkResolve_resolveInstance_sTab* t = (*((cPS2ChunkResolve_resolveInstance_sLib**)self->mp_World))->tables[id & 0xFF];
     unsigned int v;
     if (t == 0 || (v = t->entries[id >> 8] >> 8) == 0) {
         return 0;
@@ -2307,14 +2293,14 @@ static inline cPS2ChunkResolve_resolveInstance_sRes* cPS2ChunkResolve_resolveIns
  * @return always 1
  */
 // PORT: stores pointers in int fields; not 64-bit safe.
-extern "C" int cPS2ChunkResolve_resolveInstance(cPS2ChunkResolve_resolveInstance_cObj* self, tInstanceRecord* pInstance)
+extern "C" int cPS2ChunkResolve_resolveInstance(cPS2ChunkResolve* self, tInstanceRecord* pInstance)
 {
     cPS2ChunkResolve_resolveInstance_sRes* resolved = cPS2ChunkResolve_resolveInstance_lookup(self, (unsigned int)pInstance->m_Model);
     pInstance->m_Model = (tModelRecord*)resolved;
     pInstance->m_MaterialBlock = (tMaterialBlockRecord*)resolved->fC;
     pInstance->m_pInstanceAudio = 0;
-    pInstance->m_pCollideRecord = (tCollideRecord*)self->f4;
-    int x = self->f4->f4 & 0xFFFF0000;
+    pInstance->m_pCollideRecord = (tCollideRecord*)((cPS2ChunkResolve_resolveInstance_sView*)self->m_pDummyCollideRecord);
+    int x = ((cPS2ChunkResolve_resolveInstance_sView*)self->m_pDummyCollideRecord)->f4 & 0xFFFF0000;
     pInstance->m_iFlags = x | (x >> 16) | 2;
     func_003AC358((cPS2ChunkResolve*)self, pInstance);
     return 1;

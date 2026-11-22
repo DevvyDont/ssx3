@@ -2052,8 +2052,7 @@ INCLUDE_ASM("main/all_in_one_main", DeletePersonaMenu__DeletePersonaMenu);
 #ifdef SKIP_ASM
 struct VEnt { short delta; short idx; void (*fn)(void*, int); };
 struct VTab { int a; int b; VEnt dtor; };
-struct Elem { char pad[0x10]; VTab *vt; char pad2[0x24 - 0x14]; };
-struct Obj { char pad[0x168]; Elem elems[4]; };
+struct Obj { char pad[0x168]; cCommandMenuItem elems[4]; };
 extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
@@ -2068,12 +2067,12 @@ extern "C" void cMenu__cMenu(int, int);
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
 extern "C" void DeletePersonaMenu__DeletePersonaMenu(DeletePersonaMenu* self, int flags) {
-    if (((Elem*)&self->unk_168[0]) != 0) {
-        Elem *end = ((Elem*)&self->unk_168[0]) + 4;
-        Elem *elem = end;
-        while (((Elem*)&self->unk_168[0]) != elem) {
+    if (((&self->unk_168[0])) != 0) {
+        cCommandMenuItem *end = ((&self->unk_168[0])) + 4;
+        cCommandMenuItem *elem = end;
+        while (((&self->unk_168[0])) != elem) {
             elem--;
-            elem->vt->dtor.fn(vthis(elem, elem->vt->dtor), 0);
+            ((VTab*)elem->mVtbl)->dtor.fn(vthis(elem, ((VTab*)elem->mVtbl)->dtor), 0);
         }
     }
     cMenuItem__cMenuItem((int)self + 336, 2);
@@ -2212,8 +2211,7 @@ INCLUDE_ASM("main/all_in_one_main", RoomMenu__RoomMenu);
 #ifdef SKIP_ASM
 struct VEnt_D2F0 { short delta; short idx; void (*fn)(void*, int); };
 struct VTab_D2F0 { int a; int b; VEnt_D2F0 dtor; };
-struct Elem_D2F0 { char pad[0x10]; VTab_D2F0 *vt; char pad2[0x24 - 0x14]; };
-struct Obj_D2F0 { char pad[0x16C]; Elem_D2F0 elems[24]; };
+struct Obj_D2F0 { char pad[0x16C]; cCommandMenuItem elems[24]; };
 
 /**
  * Destroys the debug lobby's "Room Occupants" menu (vtable D_0046D480, built by RoomMenu_RoomMenu).
@@ -2226,11 +2224,11 @@ struct Obj_D2F0 { char pad[0x16C]; Elem_D2F0 elems[24]; };
  */
 extern "C" void RoomMenu__RoomMenu(RoomMenu* self, int flags) {
     cMenuItem__cMenuItem((int)self + 1228, 2);
-    if (((Elem_D2F0*)&self->unk_16C[0]) != 0) {
-        Elem_D2F0 *elem = ((Elem_D2F0*)&self->unk_16C[0]) + 24;
-        while (((Elem_D2F0*)&self->unk_16C[0]) != elem) {
+    if (((&self->unk_16C[0])) != 0) {
+        cCommandMenuItem *elem = ((&self->unk_16C[0])) + 24;
+        while (((&self->unk_16C[0])) != elem) {
             elem--;
-            elem->vt->dtor.fn(vthis(elem, elem->vt->dtor), 0);
+            ((VTab_D2F0*)elem->mVtbl)->dtor.fn(vthis(elem, ((VTab_D2F0*)elem->mVtbl)->dtor), 0);
         }
     }
     cMenuItem__cMenuItem((int)self + 340, 2);
@@ -3623,13 +3621,6 @@ extern "C" void cPopupInfo_cPopupInfo_DBD0(void *) __asm__("cPopupInfo_cPopupInf
 extern int cScreenPopup_vtbl[];
 extern int cBXString_EmptyString;
 
-struct S_DBD0 {
-    int pad0[2];
-    int *vt;
-    char pad1[0x2A4];
-    int v2B0;
-    int v2B4;
-};
 /**
  * Constructs a screen popup with no engine and no parent (the default constructor).
  *
@@ -3639,13 +3630,13 @@ struct S_DBD0 {
  *
  * @return @p self
  */
-extern "C" S_DBD0 *cScreenPopup_cScreenPopup1(cScreenPopup* self) {
-    cUIState_cUIState1_DBD0(((S_DBD0*)self), 0, 0);
+extern "C" cScreenPopup *cScreenPopup_cScreenPopup1(cScreenPopup* self) {
+    cUIState_cUIState1_DBD0((self), 0, 0);
     self->mVtbl = (void**)cScreenPopup_vtbl;
     cPopupInfo_cPopupInfo_DBD0((char*)&self->info);
     self->mszInputText = (char*)cBXString_EmptyString;
     self->mszStaticText = (char*)cBXString_EmptyString;
-    return ((S_DBD0*)self);
+    return (self);
 }
 #endif
 

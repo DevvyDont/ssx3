@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "fe/backgroundman.h"
 #include "ealib/shape.h"
 #include "online/onlineevent.h"
 #include "render/font.h"
@@ -105,14 +106,10 @@ struct sDbgVEntry {
     int (*fn)(void*);
 };
 
-struct sDbgPopup {
-    char pad0[0x8];
-    int active;                 // 0x8
-};
 
 struct sDebugMenuScreen {
     char pad0[0x8C10];
-    sDbgPopup popup;            // 0x8C10
+    cBackgroundMan popup;            // 0x8C10
     int cursor;                 // 0x8C1C
     int pad8C20;
     int optFlag;                // 0x8C24
@@ -132,8 +129,8 @@ struct sDebugMenuScreen {
  */
 extern "C" void cDebugMenuScreen_draw(cDebugMenuScreen* self)
 {
-    sDbgPopup* popup = &(*(sDbgPopup*)&self->BackgroundMan);
-    if (popup->active >= 0) {
+    cBackgroundMan* popup = &(*(&self->BackgroundMan));
+    if (popup->miActiveImage >= 0) {
         cBackgroundMan_renderImage(popup);
         return;
     }

@@ -2125,11 +2125,6 @@ struct sRcBlock {
     sRcBlock* next;
 };
 
-struct sRcHeap {
-    int field_0x0;
-    int field_0x4;
-    sRcBlock* freeList;
-};
 
 /**
  * Returns a block to the script heap, merging it with free neighbours.
@@ -2264,7 +2259,7 @@ extern "C" void func_002724E8_impl(void* p) __asm__("func_002724E8");
 extern "C" void func_002724E8_impl(void* userBlock)
 {
     char* allocBase = (char*)userBlock - kScriptHeapPointerSize;
-    cScriptHeap_FreeMem((cScriptHeap*)(*(sRcHeap**)allocBase), allocBase);
+    cScriptHeap_FreeMem((cScriptHeap*)(*(cScriptHeap**)allocBase), allocBase);
 }
 #endif
 
@@ -2996,7 +2991,7 @@ extern "C" void cScriptPlayerChannelBlock_Stop(cScriptPlayerChannelBlock* self)
     if (((char*)owner) != 0) {
         void* heapBlock = self->mpBlockArray;
         if (heapBlock != 0) {
-            cScriptHeap_FreeMem((cScriptHeap*)((sRcHeap*)(&owner->mpOwner->mpManager->mHeap)), heapBlock);
+            cScriptHeap_FreeMem((cScriptHeap*)(((&owner->mpOwner->mpManager->mHeap))), heapBlock);
         }
         self->mpData = 0;
         self->mpOwner = 0;
@@ -3235,7 +3230,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_Play);
 struct sCacheRec;
 struct sCacheRef;
 extern "C" void* cScriptHeap_AllocMem(void* heap, int size);
-extern "C" sCacheRef* cScriptPlayerChannelEvent_AddActiveKey(cScriptPlayerChannelEvent* self, sCacheRec* rec);
+extern "C" sCacheRef* cScriptPlayerChannelEvent_AddActiveKey(cScriptPlayerChannelEvent* self, tInSeqEventChannelKey* rec);
 extern "C" void cScriptPlayerChannelEvent_LoadNextScriptKey(cScriptPlayerChannelEvent* self);
 
 /**
@@ -3264,7 +3259,7 @@ extern "C" int cScriptPlayerChannelEvent_Play(cScriptPlayerChannelEvent* self, u
         self->mpNextKey = (tInSeqEventChannelKey*)(((char*)base) + 4);
         if (((char*)base) + 4 != 0 && *(unsigned short*)(((char*)base) + 6) == 0) do {
             *flags |= 0x10;
-            cScriptPlayerChannelEvent_AddActiveKey((cScriptPlayerChannelEvent*)self, (sCacheRec*)self->mpNextKey);
+            cScriptPlayerChannelEvent_AddActiveKey((cScriptPlayerChannelEvent*)self, self->mpNextKey);
             cScriptPlayerChannelEvent_LoadNextScriptKey((cScriptPlayerChannelEvent*)self);
             *(int*)&self->mEventFrame = 0;
         } while ((char*)self->mpNextKey != 0 &&
@@ -3287,7 +3282,7 @@ extern "C" void cScriptPlayerChannelEvent_Stop(cScriptPlayerChannelEvent* self)
     if (((char*)owner) != 0) {
         void* heapBlock = self->mpEventArray;
         if (heapBlock != 0) {
-            cScriptHeap_FreeMem((cScriptHeap*)((sRcHeap*)(&owner->mpOwner->mpManager->mHeap)), heapBlock);
+            cScriptHeap_FreeMem((cScriptHeap*)(((&owner->mpOwner->mpManager->mHeap))), heapBlock);
         }
         self->mpData = 0;
         self->mpOwner = 0;
@@ -3306,7 +3301,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_Update);
 #ifdef SKIP_ASM
 struct sCacheRec;
 struct sCacheRef;
-extern "C" sCacheRef* cScriptPlayerChannelEvent_AddActiveKey(cScriptPlayerChannelEvent* self, sCacheRec* rec);
+extern "C" sCacheRef* cScriptPlayerChannelEvent_AddActiveKey(cScriptPlayerChannelEvent* self, tInSeqEventChannelKey* rec);
 extern "C" void cScriptPlayerChannelEvent_LoadNextScriptKey(cScriptPlayerChannelEvent* self);
 
 /**
@@ -3328,7 +3323,7 @@ extern "C" int cScriptPlayerChannelEvent_Update(cScriptPlayerChannelEvent* self,
         float keyFrameNum = (float)self->mpNextKey->frameNum;
         if (currFrameNum < keyFrameNum) break;
         *flags |= 0x10;
-        cScriptPlayerChannelEvent_AddActiveKey((cScriptPlayerChannelEvent*)self, (sCacheRec*)self->mpNextKey);
+        cScriptPlayerChannelEvent_AddActiveKey((cScriptPlayerChannelEvent*)self, self->mpNextKey);
         self->mEventFrame = keyFrameNum;
         cScriptPlayerChannelEvent_LoadNextScriptKey((cScriptPlayerChannelEvent*)self);
     }
@@ -3369,11 +3364,6 @@ struct sCacheRef {
     void* data;
 };
 
-struct sCacheRec {
-    unsigned short size;
-    unsigned short pad;
-    int key;
-};
 
 /**
  * Fires an event key: fills mpEventArray[mNumActiveEvents] with the key's id and its payload (the bytes after the
@@ -3382,12 +3372,12 @@ struct sCacheRec {
  * @param rec  the key (On Tour tInSeqEventChannelKey* pKey)
  * @return the entry (On Tour tEventEntry*)
  */
-extern "C" sCacheRef* cScriptPlayerChannelEvent_AddActiveKey(cScriptPlayerChannelEvent* self, sCacheRec* rec)
+extern "C" sCacheRef* cScriptPlayerChannelEvent_AddActiveKey(cScriptPlayerChannelEvent* self, tInSeqEventChannelKey* rec)
 {
     sCacheRef* newKey = &((sCacheRef*)self->mpEventArray)[self->mNumActiveEvents];
-    newKey->key = rec->key;
+    newKey->key = rec->enumVal;
     newKey->data = 0;
-    if (rec->size > 8) {
+    if (rec->keySize > 8) {
         newKey->data = (char*)rec + 8;
     }
     self->mNumActiveEvents += 1;
@@ -3522,7 +3512,7 @@ extern "C" void cScriptPlayerChannelObject_Stop(cScriptPlayerChannelObject* self
     if (((char*)owner) != 0) {
         void* heapBlock = self->mpObjectArray;
         if (heapBlock != 0) {
-            cScriptHeap_FreeMem((cScriptHeap*)((sRcHeap*)(&owner->mpOwner->mpManager->mHeap)), heapBlock);
+            cScriptHeap_FreeMem((cScriptHeap*)(((&owner->mpOwner->mpManager->mHeap))), heapBlock);
         }
         self->mpData = 0;
         self->mpOwner = 0;
@@ -4088,7 +4078,7 @@ extern "C" void cScriptPlayerEntity_Stop(cScriptPlayerEntity* self)
             }
             }
         }
-        cScriptHeap_FreeMem((cScriptHeap*)((sRcHeap*)(&self->mpOwner->mpManager->mHeap)), self->mpChannelPlayers);
+        cScriptHeap_FreeMem((cScriptHeap*)(((&self->mpOwner->mpManager->mHeap))), self->mpChannelPlayers);
         self->mpChannelPlayers = 0;
     }
     self->mIsPlaying = 0;
@@ -5256,10 +5246,6 @@ public:
     virtual int OnInSeqLoop(void* src);
 };
 
-struct sRcPlayHdr_4DE0 {
-    char pad[1];
-    unsigned char count;
-};
 
 extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* self) __asm__("cScriptPlayerMain_DoUpdateFrame");
 /**
@@ -5319,10 +5305,10 @@ extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* vself)
             hit = 1;
         }
         self->mEntityUpdateInProgress = 1;
-        for (int i = 0; i < ((sRcPlayHdr_4DE0*)self->mpSystemHeader)->count; i++) {
+        for (int i = 0; i < (self->mpSystemHeader)->numEntities; i++) {
             cScriptPlayerEntity_SetupPlay_4DE0(&self->mpEntityPlayers[i]);
         }
-        for (int i = 0; i < ((sRcPlayHdr_4DE0*)self->mpSystemHeader)->count; i++) {
+        for (int i = 0; i < (self->mpSystemHeader)->numEntities; i++) {
             int anyChanged = 0;
             if (cScriptPlayerEntity_ExecutePlay_4DE0(&self->mpEntityPlayers[i]) != 0 || changed != 0) {
                 anyChanged = 1;
@@ -5341,7 +5327,7 @@ extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* vself)
     }
     if (hit != 0 && self->mLoopScript != 0) {
         int changed2 = 0;
-        for (int i = 0; i < ((sRcPlayHdr_4DE0*)self->mpSystemHeader)->count; i++) {
+        for (int i = 0; i < (self->mpSystemHeader)->numEntities; i++) {
             int anyChanged = 0;
             if (cScriptPlayerEntity_Restart_4DE0(&self->mpEntityPlayers[i]) != 0 || changed2 != 0) {
                 anyChanged = 1;

@@ -22,16 +22,10 @@ struct cLunoTableEntry {
     cLunoVtEntry* vtable;
 };
 
-struct cLunoTable {
-    char pad_0x00[0x8];
-    int refCount;
-    int modulus;
-    cLunoTableEntry* nodes;
-};
 
 // Table reference: word0 of a type-4 value.
 struct cLunoTableRef {
-    cLunoTable* table;
+    luno_cLunoTableData* table;
 };
 
 void operator_delete(int* ptr);
@@ -69,7 +63,7 @@ struct cLunoFunc {
 // luno::cLunoTable: reference-counted table handle.
 class cLunoTab {
 public:
-    cLunoTable* m_pTable;
+    luno_cLunoTableData* m_pTable;
     cLunoTab& operator=(const cLunoTab& o) __asm__("luno_cLunoTable_operatorE");
     void set(const cLunoVar& key, const cLunoVar& val) __asm__("luno_cLunoTable_set");
     cLunoVar& get(const cLunoVar& key) __asm__("luno_cLunoTable_get1");
@@ -844,18 +838,18 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoTableData__cLunoTableData);
  *
  * @param flags  destructor flags; bit 0 frees the object
  */
-extern "C" void luno_cLunoTableData__cLunoTableData(cLunoTable* self, int flags)
+extern "C" void luno_cLunoTableData__cLunoTableData(luno_cLunoTableData* self, int flags)
 {
-    cLunoTableEntry* nodes = self->nodes;
+    cLunoTableEntry* nodes = ((cLunoTableEntry*)self->Entries);
 
     if (nodes != 0) {
         cLunoTableEntry* entry = nodes + ((int*)nodes)[-4];
 
-        while (self->nodes != entry) {
+        while (((cLunoTableEntry*)self->Entries) != entry) {
             entry--;
             entry->vtable[1].func(vthis(entry, entry->vtable[1]), 0);
         }
-        cMemMan_free((char*)self->nodes - 0x10);
+        cMemMan_free((char*)((cLunoTableEntry*)self->Entries) - 0x10);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -917,7 +911,7 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoTable__cLunoTable);
  */
 extern "C" void luno_cLunoTable__cLunoTable(cLunoTableRef* self, int flags)
 {
-    if (--self->table->refCount == 0) {
+    if (--self->table->RefCount == 0) {
         luno_cLunoTable_destroyTable(self);
     }
     if (flags & 1) {
@@ -967,22 +961,22 @@ extern "C" void luno_cLunoTable_constructTable_n(cLunoTableRef* ref, int n) __as
  */
 extern "C" void luno_cLunoTable_constructTable_n(cLunoTableRef* ref, int n)
 {
-    cLunoTable* newTable = (cLunoTable*)new (str_LunoTable, 0xA0000000, 0) cLunoTable;
-    cLunoTableEntry** slot = &newTable->nodes;
-    newTable->nodes = 0;
-    newTable->refCount = 0;
-    newTable->modulus = 0;
+    luno_cLunoTableData* newTable = (luno_cLunoTableData*)new (str_LunoTable, 0xA0000000, 0) luno_cLunoTableData;
+    cLunoTableEntry** slot = &(*(cLunoTableEntry**)&newTable->Entries);
+    (*(cLunoTableEntry**)&newTable->Entries) = 0;
+    newTable->RefCount = 0;
+    newTable->Modulus = 0;
     ref->table = newTable;
     *slot = (cLunoTableEntry*)new (str_TableData, 0xA0000000, 0) cLunoNode_ct[n];
-    ref->table->modulus = n - 1;
-    ref->table->refCount = 1;
+    ref->table->Modulus = n - 1;
+    ref->table->RefCount = 1;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("luno/lunovm", luno_cLunoTable_destroyTable);
 #ifdef SKIP_ASM
-extern "C" void luno_cLunoTableData__cLunoTableData(cLunoTable* table, int flags);
+extern "C" void luno_cLunoTableData__cLunoTableData(luno_cLunoTableData* table, int flags);
 
 /**
  * Destroys the table data a Luno table handle points at and clears the handle.
@@ -994,7 +988,7 @@ extern "C" void luno_cLunoTableData__cLunoTableData(cLunoTable* table, int flags
  */
 extern "C" void luno_cLunoTable_destroyTable(cLunoTableRef* ref)
 {
-    cLunoTable* ownedTable = ref->table;
+    luno_cLunoTableData* ownedTable = ref->table;
     if (ownedTable != 0) {
         luno_cLunoTableData__cLunoTableData(ownedTable, 3);
     }
@@ -1039,16 +1033,16 @@ struct cLunoNode_224F68 {
  */
 extern "C" void luno_cLunoTable_emptyTable(cLunoTableRef* ref)
 {
-    if (ref->table->nodes != 0) {
-        cLunoTableEntry* entry = ref->table->nodes + *(int*)((char*)ref->table->nodes - 0x10);
-        while (ref->table->nodes != entry) {
+    if (((cLunoTableEntry*)ref->table->Entries) != 0) {
+        cLunoTableEntry* entry = ((cLunoTableEntry*)ref->table->Entries) + *(int*)((char*)((cLunoTableEntry*)ref->table->Entries) - 0x10);
+        while (((cLunoTableEntry*)ref->table->Entries) != entry) {
             entry--;
             entry->vtable[1].func(vthis(entry, entry->vtable[1]), 0);
         }
-        cMemMan_free((char*)ref->table->nodes - 0x10);
+        cMemMan_free((char*)((cLunoTableEntry*)ref->table->Entries) - 0x10);
     }
-    cLunoTableEntry** slot = &ref->table->nodes;
-    *slot = (cLunoTableEntry*)new (str_TableData, 0xA0000000, 0) cLunoNode_224F68[ref->table->modulus + 1];
+    cLunoTableEntry** slot = &(*(cLunoTableEntry**)&ref->table->Entries);
+    *slot = (cLunoTableEntry*)new (str_TableData, 0xA0000000, 0) cLunoNode_224F68[ref->table->Modulus + 1];
 }
 #endif
 
@@ -1070,12 +1064,12 @@ extern "C" cLunoTableRef* luno_cLunoTable_operatorE(cLunoTableRef* self, cLunoTa
 {
     if (self->table != other->table) {
         if (self->table != 0) {
-            if (--self->table->refCount == 0) {
+            if (--self->table->RefCount == 0) {
                 luno_cLunoTable_destroyTable(self);
             }
         }
         self->table = other->table;
-        self->table->refCount++;
+        self->table->RefCount++;
     }
     return self;
 }
@@ -1125,8 +1119,8 @@ static inline int lunoKeyEquals_50E0(cLunoValue* a, cLunoValue* b)
  */
 extern "C" cLunoValue* luno_cLunoTable_get(cLunoTableRef* self, unsigned int intKey)
 {
-    cLunoTable* hashTable = self->table;
-    cLunoNode_50E0* n = (cLunoNode_50E0*)hashTable->nodes + intKey % (unsigned int)hashTable->modulus;
+    luno_cLunoTableData* hashTable = self->table;
+    cLunoNode_50E0* n = (cLunoNode_50E0*)((cLunoTableEntry*)hashTable->Entries) + intKey % (unsigned int)hashTable->Modulus;
     if (n->value.type != 0) {
         do {
             cLunoValue key;
@@ -1189,8 +1183,8 @@ static inline int lunoKeyEquals(cLunoValue* a, cLunoValue* b)
  */
 extern "C" cLunoValue* luno_cLunoTable_get1(cLunoTableRef* self, cLunoValue* key)
 {
-    cLunoTable* hashTable = self->table;
-    cLunoNode* n = (cLunoNode*)hashTable->nodes + (unsigned int)key->word0 % (unsigned int)hashTable->modulus;
+    luno_cLunoTableData* hashTable = self->table;
+    cLunoNode* n = (cLunoNode*)((cLunoTableEntry*)hashTable->Entries) + (unsigned int)key->word0 % (unsigned int)hashTable->Modulus;
     if (n->value.type != 0) {
         do {
             if (lunoKeyEquals(&n->key, key)) {
@@ -1276,8 +1270,8 @@ extern "C" void luno_cLunoTable_set(cLunoTableRef* self, cLunoValue* key, cLunoV
     if (key->type == 0) {
         return;
     }
-    cLunoTable* lunoTable = self->table;
-    cLunoNode_set* n = (cLunoNode_set*)lunoTable->nodes + (unsigned int)key->word0 % (unsigned int)lunoTable->modulus;
+    luno_cLunoTableData* lunoTable = self->table;
+    cLunoNode_set* n = (cLunoNode_set*)((cLunoTableEntry*)lunoTable->Entries) + (unsigned int)key->word0 % (unsigned int)lunoTable->Modulus;
     if (n->value.type == 0) {
         LUNO_ASSIGN_SET(n->key, key)
         LUNO_ASSIGN_SET(n->value, val)
@@ -1357,9 +1351,9 @@ extern "C" void luno_cLunoTable_writeToReplayFrame(void* vself, sVEntry<void(voi
     cLunoTableRef* self = (cLunoTableRef*)vself;
     (*stream)[1].fn(vthis(stream, (*stream)[1]), self->table, 8);
     int cnt = 0;
-    cLunoTable* hashTable = self->table;
-    cLunoNode* n = (cLunoNode*)hashTable->nodes;
-    for (int i = 0; i <= hashTable->modulus; i++) {
+    luno_cLunoTableData* hashTable = self->table;
+    cLunoNode* n = (cLunoNode*)((cLunoTableEntry*)hashTable->Entries);
+    for (int i = 0; i <= hashTable->Modulus; i++) {
         if (n->value.type != 0) {
             cnt++;
         }
@@ -1373,8 +1367,8 @@ extern "C" void luno_cLunoTable_writeToReplayFrame(void* vself, sVEntry<void(voi
     }
     (*stream)[1].fn(vthis(stream, (*stream)[1]), &cnt, 4);
     if (cnt > 0) {
-        cLunoNode* n = (cLunoNode*)self->table->nodes;
-        for (int i = 0; i <= self->table->modulus; i++) {
+        cLunoNode* n = (cLunoNode*)((cLunoTableEntry*)self->table->Entries);
+        for (int i = 0; i <= self->table->Modulus; i++) {
             cLunoValue* nodeValue = &n->value;
             if (n->value.type != 0) {
                 cnt--;
@@ -1433,17 +1427,17 @@ struct cLunoNode_9A8 {
  */
 extern "C" void luno_cLunoTable_readFromReplayFrame(cLunoTableRef* self, sVEntry<void(void*, void*, int)>** stream, int base)
 {
-    if (self->table->nodes != 0) {
-        cLunoTableEntry* node = self->table->nodes + *(int*)((char*)self->table->nodes - 0x10);
-        while (self->table->nodes != node) {
+    if (((cLunoTableEntry*)self->table->Entries) != 0) {
+        cLunoTableEntry* node = ((cLunoTableEntry*)self->table->Entries) + *(int*)((char*)((cLunoTableEntry*)self->table->Entries) - 0x10);
+        while (((cLunoTableEntry*)self->table->Entries) != node) {
             node--;
             node->vtable[1].func(vthis(node, node->vtable[1]), 0);
         }
-        cMemMan_free((char*)self->table->nodes - 0x10);
+        cMemMan_free((char*)((cLunoTableEntry*)self->table->Entries) - 0x10);
     }
     (*stream)[2].fn(vthis(stream, (*stream)[2]), self->table, 8);
-    cLunoTableEntry** slot = &self->table->nodes;
-    *slot = (cLunoTableEntry*)new (str_TableData, 0xA0000000, 0) cLunoNode_9A8[self->table->modulus + 1];
+    cLunoTableEntry** slot = &(*(cLunoTableEntry**)&self->table->Entries);
+    *slot = (cLunoTableEntry*)new (str_TableData, 0xA0000000, 0) cLunoNode_9A8[self->table->Modulus + 1];
     int i;
     int cnt;
     cLunoValue key;

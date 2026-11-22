@@ -1331,9 +1331,6 @@ extern "C" void cAirStreamerFX_update(sTrail_EF6D0* self)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cAirStreamerFX_render);
 #ifdef SKIP_ASM
-struct sRsVec4_EF950 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sRsColor_EF950 {
     float x, y, z, w;
@@ -1381,9 +1378,9 @@ extern int cPowerUpFXToggles_m_TestTrickBoost;
 extern float D_004A3B74;
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sRsVec4_EF950 rsScale_EF950(const sRsVec4_EF950& v, float s)
+static inline t4Vector rsScale_EF950(const t4Vector& v, float s)
 {
-    sRsVec4_EF950 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1398,9 +1395,9 @@ static inline sRsVec4_EF950 rsScale_EF950(const sRsVec4_EF950& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sRsVec4_EF950 rsAdd_EF950(const sRsVec4_EF950& a, const sRsVec4_EF950& b)
+static inline t4Vector rsAdd_EF950(const t4Vector& a, const t4Vector& b)
 {
-    sRsVec4_EF950 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1413,9 +1410,9 @@ static inline sRsVec4_EF950 rsAdd_EF950(const sRsVec4_EF950& a, const sRsVec4_EF
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sRsVec4_EF950 rsSub_EF950(const sRsVec4_EF950& a, const sRsVec4_EF950& b)
+static inline t4Vector rsSub_EF950(const t4Vector& a, const t4Vector& b)
 {
-    sRsVec4_EF950 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1458,19 +1455,19 @@ static inline void rsSetB_EF950(sRsCtx_EF950* ctx, int mask, int shift, int v)
     ctx->top->flagsB = (ctx->top->flagsB & ~mask) | ((v << shift) & mask);
 }
 
-static inline sRsVec4_EF950 rsRow_EF950(char* base, int idx, int off)
+static inline t4Vector rsRow_EF950(char* base, int idx, int off)
 {
-    return *(sRsVec4_EF950*)(base + (idx << 6) + off);
+    return *(t4Vector*)(base + (idx << 6) + off);
 }
 
-static inline void rsVert_EF950(tBxVertex* v, float u, float w, const sRsColor_EF950& c, const sRsVec4_EF950& p)
+static inline void rsVert_EF950(tBxVertex* v, float u, float w, const sRsColor_EF950& c, const t4Vector& p)
 {
     v->r = (int)(c.y * 255.0f);
     v->g = (int)(c.z * 255.0f);
     v->b = (int)(c.w * 255.0f);
     v->a = (int)(c.x * 128.0f);
     (*(sRsVertUV_EF950*)&v->u).z = 1.0f;
-    (*(sRsVec4_EF950*)&v->p) = p;
+    (*(&v->p)) = p;
     (*(sRsVertUV_EF950*)&v->u).x = u;
     (*(sRsVertUV_EF950*)&v->u).y = w;
 }
@@ -1518,7 +1515,7 @@ extern "C" void cAirStreamerFX_render(cAirStreamerFX* self)
     cRider* rider = self->mRider;
     float uvy = start;
     float invSq = 1.0f / (float)((self->mMaxStreamerSegments - 1) * (self->mMaxStreamerSegments - 1));
-    sRsVec4_EF950 off = rsScale_EF950(rsRow_EF950((char*)rider->mAnimModel->unk_030, rider->mBoneHips, 0x30), 0.7f);
+    t4Vector off = rsScale_EF950(rsRow_EF950((char*)rider->mAnimModel->unk_030, rider->mBoneHips, 0x30), 0.7f);
     float dv = 1.0f / (float)self->StreamBufLen;
     float falloffT = 0.0f;
     int nverts = 0;
@@ -1527,17 +1524,17 @@ extern "C" void cAirStreamerFX_render(cAirStreamerFX* self)
     color.y = 1.0f;
     color.z = 1.0f;
     color.w = 1.0f;
-    sRsVec4_EF950 leftPos;
-    sRsVec4_EF950 rightPos;
+    t4Vector leftPos;
+    t4Vector rightPos;
     rider = (cRider*)self->mRider;
-    sRsVec4_EF950 col = rsRow_EF950((char*)rider->mAnimModel->unk_034, rider->mBoneBoardChild, 0x20);
+    t4Vector col = rsRow_EF950((char*)rider->mAnimModel->unk_034, rider->mBoneBoardChild, 0x20);
     float size = 15.0f;
     if (glow) {
         float k = D_004A3B74;
         color = sRsColor_EF950(1.0f, k, k, k);
         size = 37.5f;
     }
-    sRsVec4_EF950 half = rsScale_EF950(col, size * 0.5f);
+    t4Vector half = rsScale_EF950(col, size * 0.5f);
     int j = self->StreamBufHead;
     int k = 0;
     for (int i = 0; i < self->StreamBufLen; i++) {
@@ -1548,8 +1545,8 @@ extern "C" void cAirStreamerFX_render(cAirStreamerFX* self)
         if (color.x < 0.0f) {
             color.x = 0.0f;
         }
-        leftPos = rsAdd_EF950((*(sRsVec4_EF950*)&(self->StreamBuf)[j].l), off);
-        rightPos = rsAdd_EF950((*(sRsVec4_EF950*)&(self->StreamBuf)[j].r), off);
+        leftPos = rsAdd_EF950((*(&(self->StreamBuf)[j].l)), off);
+        rightPos = rsAdd_EF950((*(&(self->StreamBuf)[j].r)), off);
         rsVert_EF950(&vertsL[k], 0.0f, uvy, color, rsSub_EF950(leftPos, half));
         rsVert_EF950(&vertsR[k], 0.0f, uvy, color, rsSub_EF950(rightPos, half));
         k++;

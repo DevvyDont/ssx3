@@ -4037,14 +4037,6 @@ int cPS2GraphicsMan_GetDisplayMode1(void* vself)
 }
 #endif
 
-// 0xa4-byte elements reached through a pointer at self+0x59cc, indexed by
-// the counter at self+0x59c8
-struct sFontEntry {
-    char pad_0x00[0x88];
-    int field_0x88;
-    int field_0x8c;
-    char pad_0x90[0x14];
-};
 
 //100%
 INCLUDE_ASM("render/font", cPS2GraphicsMan_GetScreenWidth);
@@ -4057,8 +4049,8 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetScreenWidth);
 extern "C" int cPS2GraphicsMan_GetScreenWidth(cPS2GraphicsMan* self)
 {
     int i = self->CurrentDisplayMode;
-    sFontEntry* modes = (sFontEntry*)self->DisplayModes;
-    return modes[i].field_0x88;
+    tDisplayMode* modes = self->DisplayModes;
+    return modes[i].unk_088;
 }
 #endif
 
@@ -4073,8 +4065,8 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetScreenHeight);
 extern "C" int cPS2GraphicsMan_GetScreenHeight(cPS2GraphicsMan* self)
 {
     int i = self->CurrentDisplayMode;
-    sFontEntry* modes = (sFontEntry*)self->DisplayModes;
-    return modes[i].field_0x8c;
+    tDisplayMode* modes = self->DisplayModes;
+    return modes[i].unk_08C;
 }
 #endif
 

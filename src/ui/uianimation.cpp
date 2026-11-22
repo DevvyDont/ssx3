@@ -279,13 +279,6 @@ struct cUIAnimation_updateFrame_sData {
     unsigned short count;
 };
 
-struct cUIAnimation_updateFrame_sAnim {
-    cUIAnimation_updateFrame_sData* data;
-    char pad4[6];
-    short frame;
-    short padc;
-    signed char dir;
-};
 
 /**
  * Steps the animation's frame once according to the play-mode flags.
@@ -296,9 +289,9 @@ struct cUIAnimation_updateFrame_sAnim {
  *
  * @param flags  play mode in bits 0-2, wrap flag in bit 3
  */
-extern "C" void cUIAnimation_updateFrame(cUIAnimation_updateFrame_sAnim* self, unsigned char flags)
+extern "C" void cUIAnimation_updateFrame(cUIAnimation* self, unsigned char flags)
 {
-    cUIAnimation_updateFrame_sData* data = self->data;
+    cUIAnimation_updateFrame_sData* data = ((cUIAnimation_updateFrame_sData*)self->mpAnimHeader);
     int mode;
     if (data == 0) {
         return;
@@ -309,41 +302,41 @@ extern "C" void cUIAnimation_updateFrame(cUIAnimation_updateFrame_sAnim* self, u
     }
     switch (mode) {
     case 2:
-        self->frame--;
-        if (self->frame < 0) {
+        self->mFrameNum--;
+        if (self->mFrameNum < 0) {
             if (flags & 8) {
-                self->frame = data->count - 1;
+                self->mFrameNum = data->count - 1;
             } else {
-                self->frame = 0;
+                self->mFrameNum = 0;
             }
         }
         break;
     case 1:
-        self->frame++;
-        if (self->frame >= data->count) {
+        self->mFrameNum++;
+        if (self->mFrameNum >= data->count) {
             if (!(flags & 8)) {
-                self->frame = data->count - 1;
+                self->mFrameNum = data->count - 1;
             } else {
-                self->frame = 0;
+                self->mFrameNum = 0;
             }
         }
         break;
     case 3:
-        if (self->dir == 0) {
-            self->frame++;
+        if ((*(signed char*)&self->mFrameDirection) == 0) {
+            self->mFrameNum++;
         } else {
-            self->frame--;
+            self->mFrameNum--;
         }
-        if (self->dir == 0) {
-            if (self->frame >= self->data->count) {
-                self->dir = 1;
-                self->frame = self->data->count - 1;
+        if ((*(signed char*)&self->mFrameDirection) == 0) {
+            if (self->mFrameNum >= ((cUIAnimation_updateFrame_sData*)self->mpAnimHeader)->count) {
+                self->mFrameDirection = 1;
+                self->mFrameNum = ((cUIAnimation_updateFrame_sData*)self->mpAnimHeader)->count - 1;
                 return;
             }
         }
-        if (self->dir == 1 && self->frame < 0) {
-            self->dir = 0;
-            self->frame = 0;
+        if ((*(signed char*)&self->mFrameDirection) == 1 && self->mFrameNum < 0) {
+            self->mFrameDirection = 0;
+            self->mFrameNum = 0;
         }
         break;
     }

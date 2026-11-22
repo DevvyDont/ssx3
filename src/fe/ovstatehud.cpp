@@ -398,20 +398,7 @@ extern void cFont_text1_95A0(void* self, float x, float y, void* m) __asm__("cFo
 
 
 
-struct sFont_E95A0 {
-    char pad[0x30];
-    float baseW;            // 0x30
-    float baseH;            // 0x34
-    float scaleW;           // 0x38
-    float scaleH;           // 0x3C
-    tARGB color;       // 0x40
-    tARGB shadow;      // 0x50
-};
 
-struct sHudEntry_E95A0 {
-    float w;
-    void* p;
-};
 
 struct sHudImg_E95A0 {
     int f0;
@@ -426,19 +413,16 @@ struct sHudImg_E95A0 {
 };
 
 
-struct sPos_E95A0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
 static inline int texOf_E95A0(sHudImg_E95A0* i) { return i->tex; }
 
 struct sVEnt_E95A0 { short delta; short index; void (*fn)(void*, int, tBxVertex*, int); };
 
-static inline void setScale_E95A0(sFont_E95A0* f, const t2Vector& s)
+static inline void setScale_E95A0(cFont* f, const t2Vector& s)
 {
-    f->scaleW = f->baseW * s.x;
-    f->scaleH = f->baseH * s.y;
+    f->Scale[0] = f->BaseScale[0] * s.x;
+    f->Scale[1] = f->BaseScale[1] * s.y;
 }
 
 /**
@@ -465,16 +449,16 @@ extern "C" void drawTextPictLine(tTextPictLine* self, float* pos, float* scale, 
         return;
     }
     float alpha = color->A;
-    tARGB saved = ((sFont_E95A0*)self->pFont)->shadow;
+    tARGB saved = (*(tARGB*)&(self->pFont)->ShadowColor[0]);
     tARGB shadow = saved;
     t2Vector sz;
     float sx0 = scale[0];
     sz.x = self->fontScaleBase[0] * sx0;
     sz.y = self->fontScaleBase[1] * scale[1];
     shadow.A *= alpha;
-    setScale_E95A0(((sFont_E95A0*)self->pFont), sz);
-    ((sFont_E95A0*)self->pFont)->color = *color;
-    ((sFont_E95A0*)self->pFont)->shadow = shadow;
+    setScale_E95A0((self->pFont), sz);
+    (*(tARGB*)&(self->pFont)->Color[0]) = *color;
+    (*(tARGB*)&(self->pFont)->ShadowColor[0]) = shadow;
     if (alignX == 0) {
         float axisScale = scale[0];
         pos[0] -= self->width * axisScale * 0.5f;
@@ -499,17 +483,17 @@ extern "C" void drawTextPictLine(tTextPictLine* self, float* pos, float* scale, 
         verts[i].b = (int)(color->B * 128.0f);
         verts[i].one = 1.0f;
     }
-    sHudEntry_E95A0* entry = ((sHudEntry_E95A0*)&self->elems[0]);
+    tTextPictElemSpec* entry = ((&self->elems[0]));
     for (int i = 0; i < self->numElems; i++, entry++) {
         if (!(i & 1)) {
-            unsigned short* str = (unsigned short*)entry->p;
+            unsigned short* str = (unsigned short*)entry->unk_04;
             if (*str != 0) {
-                cFont_text1_95A0(((sFont_E95A0*)self->pFont), pos[0], pos[1] + lineOff, str);
+                cFont_text1_95A0((self->pFont), pos[0], pos[1] + lineOff, str);
                 float sx = scale[0];
-                pos[0] += entry->w * sx;
+                pos[0] += entry->width * sx;
             }
         } else {
-            sHudImg_E95A0* img = (sHudImg_E95A0*)entry->p;
+            sHudImg_E95A0* img = (sHudImg_E95A0*)entry->unk_04;
             t2Vector wh;
             float w = img->w * scale[0];
             float scaledHeight = img->h * scale[1];
@@ -527,38 +511,38 @@ extern "C" void drawTextPictLine(tTextPictLine* self, float* pos, float* scale, 
             verts[2].v = img->v1;
             verts[3].u = img->u1;
             verts[3].v = img->v1;
-            sPos_E95A0 corner;
+            t4Vector corner;
             corner.x = x0;
             corner.y = y0;
             corner.z = 0.0f;
             corner.w = 1.0f;
-            (*(sPos_E95A0*)&verts[0].p) = corner;
+            (*(&verts[0].p)) = corner;
             corner.x = x1;
             corner.y = y0;
             corner.z = 0.0f;
             corner.w = 1.0f;
-            (*(sPos_E95A0*)&verts[1].p) = corner;
+            (*(&verts[1].p)) = corner;
             corner.x = x0;
             corner.y = y1;
             corner.z = 0.0f;
             corner.w = 1.0f;
-            (*(sPos_E95A0*)&verts[2].p) = corner;
+            (*(&verts[2].p)) = corner;
             corner.x = x1;
             corner.y = y1;
             corner.z = 0.0f;
             corner.w = 1.0f;
-            (*(sPos_E95A0*)&verts[3].p) = corner;
+            (*(&verts[3].p)) = corner;
             *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = texOf_E95A0(img);
             sVEnt_E95A0* vt = (sVEnt_E95A0*)GrMan->mVtbl;
             vt[71].fn((char*)GrMan + vt[71].delta, 4, verts, 0);
             pos[0] += wh.x;
         }
     }
-    ((sFont_E95A0*)self->pFont)->shadow = saved;
+    (*(tARGB*)&(self->pFont)->ShadowColor[0]) = saved;
     t2Vector one;
     one.x = 1.0f;
     one.y = 1.0f;
-    setScale_E95A0(((sFont_E95A0*)self->pFont), one);
+    setScale_E95A0((self->pFont), one);
 }
 #endif
 

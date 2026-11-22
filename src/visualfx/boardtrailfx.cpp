@@ -1312,11 +1312,6 @@ struct sBTState {
     float d;
 };
 
-struct sBTFx {
-    char pad[0x20];
-    sBTState saved;
-    sBTState cur;
-};
 
 struct sBTVEntryGet {
     short delta;
@@ -1334,24 +1329,24 @@ struct sBTVEntryGet {
  */
 extern "C" void cCutSceneTransitionMan_FindTVParameters(cCutSceneTransitionMan* self)
 {
-    sBTFx* transMan = (sBTFx*)self;
+    cCutSceneTransitionMan* transMan = self;
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
     sBTVEntryGet* vtEntry = &(((sBTVEntryGet*)obj->mVtbl))[42];
-    transMan->saved = *vtEntry->fn(vthis(obj, *vtEntry));
+    (*(sBTState*)&transMan->mRegularTVFormat) = *vtEntry->fn(vthis(obj, *vtEntry));
     float xAspectAngle = 0.75f;
     float yAspectAngle = 0.6299999952316284f;
-    if (transMan->saved.mode == 2) {
-        transMan->cur.d = yAspectAngle;
-        transMan->cur.mode = 2;
-        transMan->cur.b = 1.0f;
-        transMan->cur.c = xAspectAngle;
-        transMan->cur.a = 0.0f;
+    if ((*(sBTState*)&transMan->mRegularTVFormat).mode == 2) {
+        (*(sBTState*)&transMan->mCutSceneTVFormat).d = yAspectAngle;
+        (*(sBTState*)&transMan->mCutSceneTVFormat).mode = 2;
+        (*(sBTState*)&transMan->mCutSceneTVFormat).b = 1.0f;
+        (*(sBTState*)&transMan->mCutSceneTVFormat).c = xAspectAngle;
+        (*(sBTState*)&transMan->mCutSceneTVFormat).a = 0.0f;
     } else {
-        transMan->cur.mode = 1;
-        transMan->cur.a = 0.125f;
-        transMan->cur.b = xAspectAngle;
-        transMan->cur.c = xAspectAngle;
-        transMan->cur.d = yAspectAngle;
+        (*(sBTState*)&transMan->mCutSceneTVFormat).mode = 1;
+        (*(sBTState*)&transMan->mCutSceneTVFormat).a = 0.125f;
+        (*(sBTState*)&transMan->mCutSceneTVFormat).b = xAspectAngle;
+        (*(sBTState*)&transMan->mCutSceneTVFormat).c = xAspectAngle;
+        (*(sBTState*)&transMan->mCutSceneTVFormat).d = yAspectAngle;
     }
 }
 #endif
