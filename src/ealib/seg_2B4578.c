@@ -15387,9 +15387,9 @@ INCLUDE_ASM("ealib/seg_2B4578", System_Init);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int SNDSYS_setopts_i(void *) __asm__("SNDSYS_setopts");
 extern int SNDSYSI_init(int, int, int);
-extern int D_0044E1C0;
+extern int pheap;
 extern unsigned int outputmode;
-extern int D_005157B0;
+extern int heapsize;
 
 struct sInfo_5C30 {
     char pad0[0x2A];
@@ -15414,8 +15414,8 @@ struct sInfo_5C30 {
  * Builds the render-mode list (options +0x4C count, +0x4E list): 0x24 and 0x28 always, 0x120 when there are kind-0x100
  * voices (+0x2F), and 0x44, 0x140, 0x48 for Dolby Pro Logic II (mode 8, outputmode). Output channels +0x47: 1 for mono,
  * 4 / 5 for DTS 4.0 / 5.1 (option bits +0x49 = 2, DTS), 2 otherwise; +0x48 is cleared. The second device rate +0x2C
- * follows the first unless they are equal or 36000 / 24000. Then SNDSYS_setopts and SNDSYSI_init(D_0044E1C0,
- * D_005157B0, @p headerVersion).
+ * follows the first unless they are equal or 36000 / 24000. Then SNDSYS_setopts and SNDSYSI_init(pheap,
+ * heapsize, @p headerVersion).
  *
  * @param headerVersion  passed to SNDSYSI_init as its third argument
  * @return 0
@@ -15472,7 +15472,7 @@ int System_Init(int headerVersion) {
         info.w2C = ia;
     }
     SNDSYS_setopts_i(&info);
-    SNDSYSI_init(D_0044E1C0, D_005157B0, headerVersion);
+    SNDSYSI_init(pheap, heapsize, headerVersion);
     return 0;
 }
 #endif
@@ -15496,11 +15496,11 @@ int System_IsInited(void) {
 INCLUDE_ASM("ealib/seg_2B4578", System_Restore);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_0044E1C0_5E08[] __asm__("D_0044E1C0");
+extern int pheap_5E08[] __asm__("pheap");
 void SNDSYS_restore_5E08(void) __asm__("SNDSYS_restore");
 int System_Restore_5E08(void) __asm__("System_Restore");
 /**
- * Shuts the sound system down (SNDSYS_restore) and clears the heap pointer D_0044E1C0.
+ * Shuts the sound system down (SNDSYS_restore) and clears the heap pointer pheap.
  *
  * SNDREAL_exithandler calls it at program exit.
  *
@@ -15508,7 +15508,7 @@ int System_Restore_5E08(void) __asm__("System_Restore");
  */
 int System_Restore_5E08(void) {
     SNDSYS_restore_5E08();
-    D_0044E1C0_5E08[0] = 0;
+    pheap_5E08[0] = 0;
     return 0;
 }
 #endif
@@ -15517,10 +15517,10 @@ int System_Restore_5E08(void) {
 INCLUDE_ASM("ealib/seg_2B4578", Memory_SetHeap);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_0044E1C0_5E30[] __asm__("D_0044E1C0");
-extern int D_005157B0_5E30[] __asm__("D_005157B0");
+extern int pheap_5E30[] __asm__("pheap");
+extern int heapsize_5E30[] __asm__("heapsize");
 /**
- * Sets the heap the sound system starts in: D_0044E1C0 and D_005157B0 for device 0.
+ * Sets the heap the sound system starts in: pheap and heapsize for device 0.
  *
  * System_Init passes them to SNDSYSI_init. No callers in the game.
  *
@@ -15531,8 +15531,8 @@ extern int D_005157B0_5E30[] __asm__("D_005157B0");
  */
 int Memory_SetHeap(int device, int heap, int heapSize) {
     if (device == 0) {
-        D_0044E1C0_5E30[0] = heap;
-        D_005157B0_5E30[0] = heapSize;
+        pheap_5E30[0] = heap;
+        heapsize_5E30[0] = heapSize;
         return 0;
     }
     return -5;
@@ -15544,11 +15544,11 @@ INCLUDE_ASM("ealib/seg_2B4578", Memory_GetHeap);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int System_IsInited();
-extern int D_0044E1C0_5E58[] __asm__("D_0044E1C0");
-extern int D_005157B0_5E58[] __asm__("D_005157B0");
+extern int pheap_5E58[] __asm__("pheap");
+extern int heapsize_5E58[] __asm__("heapsize");
 
 /**
- * Returns the sound heap of device 0 (D_0044E1C0, D_005157B0), once the system is started (System_IsInited).
+ * Returns the sound heap of device 0 (pheap, heapsize), once the system is started (System_IsInited).
  *
  * Both outputs are cleared first. No callers in the game.
  *
@@ -15564,8 +15564,8 @@ int Memory_GetHeap(int device, int *outHeap, int *outSize) {
         if (System_IsInited() == 0) {
             return -4;
         }
-        *outHeap = D_0044E1C0_5E58[0];
-        *outSize = D_005157B0_5E58[0];
+        *outHeap = pheap_5E58[0];
+        *outSize = heapsize_5E58[0];
     } else {
         return -5;
     }

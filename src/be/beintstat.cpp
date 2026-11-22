@@ -647,7 +647,7 @@ extern sCharSlot_149BB8 cBELibrary_raceDB;
 extern const char str_data_be_charDB_dbl[];
 extern char cBELibrary_characterDB[];
 extern sCharStat_149BB8 cBELibrary_statDefault[10];
-extern sCharSrc_149BB8 D_00440F00[10];
+extern sCharSrc_149BB8 cBELibrary_IPCharacterStats[10];
 extern char cBELibrary_optionDB[];
 
 extern int cBELibrary_grabPointsDB[0x2A8 / 4];
@@ -657,7 +657,7 @@ extern int cBELibrary_grabPointsDB[0x2A8 / 4];
  *
  * func_0014C6A0 and cBERewardDB_init first; the race DB gets riders 0-5 in order and the 6 player entries are cleared
  * (character slot flag set, byte +0x11 = 4). The character file is copied into cBELibrary_characterDB (0x550 bytes) and freed;
- * cBELibrary_statDefault gets each character's id, its 7 base stats from D_00440F00 plus 5, and 11 for the maxima. cBELibrary_optionDB is
+ * cBELibrary_statDefault gets each character's id, its 7 base stats from cBELibrary_IPCharacterStats plus 5, and 11 for the maxima. cBELibrary_optionDB is
  * cleared, the profiles of the 3 profile slots are initialised (cBEProfileLib_init with reload), and cBELibrary_grabPointsDB
  * is filled with the {points, points per second} pairs.
  */
@@ -687,13 +687,13 @@ extern "C" void cBELibrary_loadData(void)
     }
     for (i = 0; i < 10; i++) {
         cBELibrary_statDefault[i].v[0] = i;
-        cBELibrary_statDefault[i].v[1] = D_00440F00[i].v[0] + 5;
-        cBELibrary_statDefault[i].v[2] = D_00440F00[i].v[1] + 5;
-        cBELibrary_statDefault[i].v[3] = D_00440F00[i].v[2] + 5;
-        cBELibrary_statDefault[i].v[4] = D_00440F00[i].v[3] + 5;
-        cBELibrary_statDefault[i].v[5] = D_00440F00[i].v[4] + 5;
-        cBELibrary_statDefault[i].v[6] = D_00440F00[i].v[5] + 5;
-        cBELibrary_statDefault[i].v[7] = D_00440F00[i].v[6] + 5;
+        cBELibrary_statDefault[i].v[1] = cBELibrary_IPCharacterStats[i].v[0] + 5;
+        cBELibrary_statDefault[i].v[2] = cBELibrary_IPCharacterStats[i].v[1] + 5;
+        cBELibrary_statDefault[i].v[3] = cBELibrary_IPCharacterStats[i].v[2] + 5;
+        cBELibrary_statDefault[i].v[4] = cBELibrary_IPCharacterStats[i].v[3] + 5;
+        cBELibrary_statDefault[i].v[5] = cBELibrary_IPCharacterStats[i].v[4] + 5;
+        cBELibrary_statDefault[i].v[6] = cBELibrary_IPCharacterStats[i].v[5] + 5;
+        cBELibrary_statDefault[i].v[7] = cBELibrary_IPCharacterStats[i].v[6] + 5;
         cBELibrary_statDefault[i].v[9] = 11;
         cBELibrary_statDefault[i].v[11] = 11;
         cBELibrary_statDefault[i].v[8] = 11;

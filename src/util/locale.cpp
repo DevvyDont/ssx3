@@ -14,7 +14,7 @@ INCLUDE_ASM("util/locale", cFELocale_addFile);
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void cLocaleFile_loadFile(void* file, const char* name, signed char lang);
 extern char str_LocaleFile[];
-extern const char* D_00441138[];
+extern const char* gLocaleFilenames[];
 extern signed char D_00441188[];
 
 struct cFELocale_sFile {
@@ -49,7 +49,7 @@ extern "C" void cFELocale_addFile(cFELocale* self, int lang)
             file->lang = -1;
             file->f4 = 0;
             file->fC = 0;
-            cLocaleFile_loadFile(file, D_00441138[i], D_00441188[i]);
+            cLocaleFile_loadFile(file, gLocaleFilenames[i], D_00441188[i]);
         }
     }
 }
