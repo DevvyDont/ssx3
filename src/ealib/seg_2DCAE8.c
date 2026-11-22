@@ -2496,10 +2496,8 @@ int FILESYS_getopts(int *opts) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_setopts);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct A_E9B8 { int p0, p4, p8, pC, f10, f14, f18, f1C; };
 struct B_E9B8 { int f0, f4, f8, fC; };
-extern struct A_E9B8 gFileSysOpts_E9B8 __asm__("gFileSysOpts");
+extern struct FILESYSOPTS gFileSysOpts_E9B8 __asm__("gFileSysOpts");
 extern struct B_E9B8 D_00450C58_E9B8 __asm__("D_00450C58");
 extern int REAL_filedevice_E9B8[] __asm__("REAL_filedevice");
 extern void MEM_clear_E9B8(void *, int) __asm__("MEM_clear");
@@ -2517,11 +2515,11 @@ int FILESYS_setopts(int *opts) {
         MEM_clear_E9B8(&gFileSysOpts_E9B8, 36);
     }
     MEM_copy_E9B8(&gFileSysOpts_E9B8, opts, *opts);
-    D_00450C58_E9B8.f0 = gFileSysOpts_E9B8.f18;
-    D_00450C58_E9B8.f4 = gFileSysOpts_E9B8.f10;
-    D_00450C58_E9B8.f8 = gFileSysOpts_E9B8.pC;
-    D_00450C58_E9B8.fC = gFileSysOpts_E9B8.f14;
-    REAL_filedevice_E9B8[0] = gFileSysOpts_E9B8.f1C;
+    D_00450C58_E9B8.f0 = ((int)gFileSysOpts_E9B8.unk_18);
+    D_00450C58_E9B8.f4 = gFileSysOpts_E9B8.unk_10;
+    D_00450C58_E9B8.f8 = gFileSysOpts_E9B8.unk_0C;
+    D_00450C58_E9B8.fC = gFileSysOpts_E9B8.unk_14;
+    REAL_filedevice_E9B8[0] = ((int)gFileSysOpts_E9B8.REAL_filedevice);
     return 1;
 }
 #endif

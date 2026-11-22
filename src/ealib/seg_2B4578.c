@@ -17465,18 +17465,6 @@ struct Snd_7AB0 {
     char pad00[0x3C];
     float f3C;
 };
-struct G_7AB0 {
-    char pad000[0x5];
-    unsigned char n;
-    char pad006[0xF - 0x6];
-    signed char on[1];
-    char pad010[0xB0 - 0x10];
-    int fB0;
-    struct Snd_7AB0 *snd;
-    char pad0B8[0xD0 - 0xB8];
-    void *names[(0x1E0 - 0xD0) / 4];
-    void (*set)(int a, struct Snd_7AB0 *snd, void *name, float v);
-};
 struct S_7AB0 {
     char pad00[0x4];
     float cur[6];
@@ -17486,7 +17474,7 @@ struct S_7AB0 {
     float f3C;
     struct Obj_7AB0 *obj;
 };
-extern struct G_7AB0 sndmix_7AB0 __asm__("sndmix");
+extern struct SNDMIXSTATE sndmix_7AB0 __asm__("sndmix");
 extern char D_00515D80_7AB0[] __asm__("D_00515D80");
 extern void MIXI_interpolatemix_7AB0(struct Snd_7AB0 *snd, void *name, float from, float to) __asm__("MIXI_interpolatemix");
 
@@ -17504,32 +17492,32 @@ extern void MIXI_interpolatemix_7AB0(struct Snd_7AB0 *snd, void *name, float fro
 int SNDMIXI_volramp(struct S_7AB0 *mixVoice) {
     int i;
 
-    if (mixVoice->obj->fn(mixVoice->obj, 0x10, sndmix_7AB0.fB0, sndmix_7AB0.snd, 0) <= 0) {
+    if (mixVoice->obj->fn(mixVoice->obj, 0x10, ((int)sndmix_7AB0.ptempbuf[0]), ((struct Snd_7AB0*)sndmix_7AB0.ptempbuf[1]), 0) <= 0) {
         for (i = 0; i < 1; i++) {
             mixVoice->a[i] = mixVoice->b[i];
         }
-        for (i = 0; i < sndmix_7AB0.n; i++) {
+        for (i = 0; i < sndmix_7AB0.mc.outputchannels; i++) {
             mixVoice->cur[i] = mixVoice->want[i];
         }
         return 0;
     }
-    mixVoice->f3C = sndmix_7AB0.snd->f3C;
+    mixVoice->f3C = ((struct Snd_7AB0*)sndmix_7AB0.ptempbuf[1])->f3C;
     for (i = 0; i < 1; i++) {
-        if (sndmix_7AB0.on[i] != 0) {
+        if (sndmix_7AB0.unk_0F[i] != 0) {
             if (mixVoice->a[i] != mixVoice->b[i]) {
-                MIXI_interpolatemix_7AB0(sndmix_7AB0.snd, D_00515D80_7AB0, mixVoice->a[i], mixVoice->b[i]);
+                MIXI_interpolatemix_7AB0(((struct Snd_7AB0*)sndmix_7AB0.ptempbuf[1]), D_00515D80_7AB0, mixVoice->a[i], mixVoice->b[i]);
                 mixVoice->a[i] = mixVoice->b[i];
             } else if (mixVoice->b[i] != 0.0f) {
-                sndmix_7AB0.set(0x10, sndmix_7AB0.snd, D_00515D80_7AB0, mixVoice->b[i]);
+                ((void (*)(int, struct Snd_7AB0*, void*, float))sndmix_7AB0.mix)(0x10, ((struct Snd_7AB0*)sndmix_7AB0.ptempbuf[1]), D_00515D80_7AB0, mixVoice->b[i]);
             }
         }
     }
-    for (i = 0; i < sndmix_7AB0.n; i++) {
+    for (i = 0; i < sndmix_7AB0.mc.outputchannels; i++) {
         if (mixVoice->cur[i] != mixVoice->want[i]) {
-            MIXI_interpolatemix_7AB0(sndmix_7AB0.snd, sndmix_7AB0.names[i], mixVoice->cur[i], mixVoice->want[i]);
+            MIXI_interpolatemix_7AB0(((struct Snd_7AB0*)sndmix_7AB0.ptempbuf[1]), sndmix_7AB0.pmixbuf[i], mixVoice->cur[i], mixVoice->want[i]);
             mixVoice->cur[i] = mixVoice->want[i];
         } else if (mixVoice->want[i] != 0.0f) {
-            sndmix_7AB0.set(0x10, sndmix_7AB0.snd, sndmix_7AB0.names[i], mixVoice->want[i]);
+            ((void (*)(int, struct Snd_7AB0*, void*, float))sndmix_7AB0.mix)(0x10, ((struct Snd_7AB0*)sndmix_7AB0.ptempbuf[1]), sndmix_7AB0.pmixbuf[i], mixVoice->want[i]);
         }
     }
     return 0x10;
@@ -17674,9 +17662,7 @@ void MIX_create(struct Cfg_7D00 *cfg) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", MIX_destroy);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct G_8018 { char p0[5]; unsigned char f5; char p6[0xA8-6]; int fA8[4]; int fB8[8]; char pc[0x1DC-0xD8]; int f1DC; };
-extern struct G_8018 sndmix_8018 __asm__("sndmix");
+extern struct SNDMIXSTATE sndmix_8018 __asm__("sndmix");
 extern void f_58A0_8018(void) __asm__("SNDSYS_entercritical");
 extern void f_58D8_8018(void) __asm__("SNDSYS_leavecritical");
 extern void f_5E98_8018(int) __asm__("SNDMEMI_free");
@@ -17692,26 +17678,26 @@ void MIX_destroy(void) {
     int i;
     int buffer;
     f_58A0_8018();
-    if (sndmix_8018.f1DC) {
-        f_5E98_8018(sndmix_8018.f1DC);
-        sndmix_8018.f1DC = 0;
+    if (((int)sndmix_8018.smv)) {
+        f_5E98_8018(((int)sndmix_8018.smv));
+        (*(int*)&sndmix_8018.smv) = 0;
     }
     for (i = 0; i < 2; i++) {
-        buffer = sndmix_8018.fA8[i];
+        buffer = (int)sndmix_8018.punalignedtempbuf[i];
         if ((buffer & 0x70000000) == 0x70000000) {
-            sndmix_8018.fA8[i] = 0;
+            sndmix_8018.punalignedtempbuf[i] = 0;
         } else if (buffer != 0) {
             f_5E98_8018(buffer);
-            sndmix_8018.fA8[i] = 0;
+            sndmix_8018.punalignedtempbuf[i] = 0;
         }
     }
-    for (i = 0; i < sndmix_8018.f5; i++) {
-        buffer = sndmix_8018.fB8[i];
+    for (i = 0; i < sndmix_8018.mc.outputchannels; i++) {
+        buffer = (int)sndmix_8018.punalignedmixbuf[i];
         if ((buffer & 0x70000000) == 0x70000000) {
-            sndmix_8018.fB8[i] = 0;
+            sndmix_8018.punalignedmixbuf[i] = 0;
         } else if (buffer != 0) {
             f_5E98_8018(buffer);
-            sndmix_8018.fB8[i] = 0;
+            sndmix_8018.punalignedmixbuf[i] = 0;
         }
     }
     f_7AA8_8018(2.0f);
@@ -17937,16 +17923,7 @@ void MIXI_stop(int voice) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", MIX_stop);
 #ifdef SKIP_ASM
-struct G_8468 {
-    char pad0[5];
-    unsigned char n;
-    char pad1[0xE8 - 6];
-    float f[6];
-    float g[1];
-    char pad2[0x1DC - 0x104];
-    char *tab;
-};
-extern struct G_8468 sndmix_8468 __asm__("sndmix");
+extern struct SNDMIXSTATE sndmix_8468 __asm__("sndmix");
 extern void SNDMEMI_free_8468(struct SFILTERNODE *) __asm__("SNDMEMI_free");
 
 /**
@@ -17959,15 +17936,15 @@ extern void SNDMEMI_free_8468(struct SFILTERNODE *) __asm__("SNDMEMI_free");
  * @param idx  the mixer voice
  */
 void MIX_stop(int idx) {
-    struct SNDMIXVOICE *voiceState = (struct SNDMIXVOICE *)(sndmix_8468.tab + idx * 0x60);
+    struct SNDMIXVOICE *voiceState = (struct SNDMIXVOICE *)(((char*)sndmix_8468.smv) + idx * 0x60);
     int i;
     struct SFILTERNODE *nd;
     struct SFILTERNODE *next;
     for (i = 0; i < 1; i++) {
-        sndmix_8468.g[i] += ((float*)&voiceState->wetbusgainprev[0])[i] * voiceState->lastmixed;
+        sndmix_8468.stoppedvoiceaccwet[i] += ((float*)&voiceState->wetbusgainprev[0])[i] * voiceState->lastmixed;
     }
-    for (i = 0; i < sndmix_8468.n; i++) {
-        sndmix_8468.f[i] += ((float*)&voiceState->drybusgainprev[0])[i] * voiceState->lastmixed;
+    for (i = 0; i < sndmix_8468.mc.outputchannels; i++) {
+        sndmix_8468.stoppedvoiceaccdry[i] += ((float*)&voiceState->drybusgainprev[0])[i] * voiceState->lastmixed;
     }
     do {
         if (((void (*)(struct Node_8468*))((struct SFILTERNODE*)voiceState->filterhead)->restorefn) != 0) {
@@ -18265,34 +18242,8 @@ struct sB40Ent {                    /* 0x60, sndmix_8A88.f1DC[] (one per mixer v
     struct sB40Node *f5C;
 };
 
-struct sB40 {
-    char pad00[0x4];
-    unsigned char f04;              /* number of f1DC entries */
-    unsigned char f05;              /* number of channels (also D_00515B45) */
-    char pad06[0x8 - 0x6];
-    int (*f08)(int);                /* also D_00515B48 */
-    unsigned short f0C;
-    unsigned char f0E;              /* also D_00515B4E */
-    signed char f0F[1];             /* effect send on (also D_00515B4F) */
-    void (*f10)(int);               /* output hook (also D_00515B50) */
-    int *f14;                       /* output buffer (also D_00515B54) */
-    void (*f18[6][3])(struct sB40Node *, struct sB40Init *);   /* filter factories by kind and variant */
-    int f60[6][3];                  /* their node sizes */
-    int fA8[2];
-    int fB0;
-    float *fB4;                     /* mix buffer */
-    int fB8[6];
-    float *fD0[6];                  /* channel buffers */
-    float fE8[6];                   /* channel gains */
-    float f100[1];                  /* effect send gain */
-    struct sB40Node *f104[6];
-    struct sB40Node *f11C[6];
-    char pad134[0x1DC - 0x134];
-    struct sB40Ent *f1DC;           /* also D_00515D1C */
-    void (*f1E0)(int, float *, float *, float);                 /* add a voice into a buffer */
-};
 
-extern struct sB40 sndmix_8A88 __asm__("sndmix");
+extern struct SNDMIXSTATE sndmix_8A88 __asm__("sndmix");
 
 extern struct sB40Node *SNDMEMI_alloc_8A88(int) __asm__("SNDMEMI_alloc");
 extern void SFILTER_rsfinit_8A88(struct sB40Node *, int, int) __asm__("SFILTER_rsfinit");
@@ -18313,11 +18264,11 @@ extern void SFILTER_rsfsetpitch_8A88(struct sB40Node *, int) __asm__("SFILTER_rs
 void MIX_setpitch(int idx, int n) {
     struct sB40Ent *voiceState;
     if (n > 0x20000) n = 0x20000;
-    voiceState = &sndmix_8A88.f1DC[idx];
+    voiceState = (struct sB40Ent*)&sndmix_8A88.smv[idx];
     if (voiceState->f50 == 0) {
         int big;
         voiceState->f50 = SNDMEMI_alloc_8A88(0x38);
-        big = sndmix_8A88.f0E >= 50;
+        big = sndmix_8A88.resamplequality >= 50;
         voiceState->f50->f04 = 0;
         voiceState->f50->f18 = 160;
         voiceState->f50->f1A = 0;
@@ -20917,19 +20868,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CBC58);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Q_BC58 { int x; int arr[1]; };
 struct Obj_BC58 { int (*fn)(struct Obj_BC58 *, int, int, int, int); };
-struct G_BC58 {
-    char pad0[5];
-    unsigned char n;
-    char pad6[0x14 - 6];
-    int h;
-    char pad18[0xB0 - 0x18];
-    int a;
-    int b;
-    char padB8[0xD0 - 0xB8];
-    int vals[(0x1E0 - 0xD0) / 4];
-    void (*set)(int, int, int, float);
-};
-extern struct G_BC58 sndmix_BC58 __asm__("sndmix");
+extern struct SNDMIXSTATE sndmix_BC58 __asm__("sndmix");
 extern char D_00515D80_BC58[] __asm__("D_00515D80");
 extern int D_00515D40_BC58 __asm__("D_00515D40");
 extern int *D_00515D44_BC58 __asm__("D_00515D44");
@@ -20962,31 +20901,31 @@ void func_003CBC58(int n) {
     char *buf;
 
     f_6210_BC58(done, 0, 0x18);
-    if (sndmix_BC58.h != 0) {
-        f_51E8_BC58(sndmix_BC58.h, D_00515D80_BC58, n * 4);
+    if (((int)sndmix_BC58.wetbusactive) != 0) {
+        f_51E8_BC58(((int)sndmix_BC58.wetbusactive), D_00515D80_BC58, n * 4);
         f_6210_BC58(D_00515D80_BC58, 0, n * 4);
         return;
     }
     buf = D_00515D80_BC58;
-    scratchBuffer = sndmix_BC58.a;
-    wetBuffer = sndmix_BC58.b;
+    scratchBuffer = ((int)sndmix_BC58.ptempbuf[0]);
+    wetBuffer = ((int)sndmix_BC58.ptempbuf[1]);
     if (++*(int *)(buf + 0x1800) >= 3000) {
         return;
     }
     if (f_72F8_BC58((int)&((struct Q_BC58 *)D_00515D40_BC58)->arr[D_00515D58_BC58], 4) != 0) {
         f_F798_BC58(D_00515D44_BC58[D_00517600_BC58], buf);
-        for (i = 0; i < sndmix_BC58.n; i++) {
+        for (i = 0; i < sndmix_BC58.mc.outputchannels; i++) {
             if (done[i] != 0) continue;
             obj = D_00515D48_BC58[i + 1];
             if (obj == 0) continue;
             obj->fn(obj, n, scratchBuffer, wetBuffer, i + 1);
-            sndmix_BC58.set(n, wetBuffer, sndmix_BC58.vals[i], 1.0f);
+            ((void (*)(int, int, int, float))sndmix_BC58.mix)(n, wetBuffer, (int)sndmix_BC58.pmixbuf[i], 1.0f);
             done[i] = 1;
             routeTable = (signed char *)D_0044E164_BC58[D_00515D58_BC58];
-            routeEntry = routeTable + sndmix_BC58.n * 36 + i * 6;
-            for (j = 0; j < sndmix_BC58.n; j++, routeEntry++) {
+            routeEntry = routeTable + sndmix_BC58.mc.outputchannels * 36 + i * 6;
+            for (j = 0; j < sndmix_BC58.mc.outputchannels; j++, routeEntry++) {
                 if (*routeEntry >= 0) {
-                    sndmix_BC58.set(n, wetBuffer, sndmix_BC58.vals[*routeEntry], 1.0f);
+                    ((void (*)(int, int, int, float))sndmix_BC58.mix)(n, wetBuffer, (int)sndmix_BC58.pmixbuf[*routeEntry], 1.0f);
                     done[*routeEntry] = 1;
                 }
             }
@@ -21011,10 +20950,6 @@ struct Hdr_C070 {
     int cnt[6];
     int len[6];
 };
-struct G_C070 {
-    char pad00[0x5];
-    unsigned char n;
-};
 extern struct Hdr_C070 *D_00515D40;
 extern void **D_00515D44;
 extern void **D_00515D48;
@@ -21028,7 +20963,7 @@ extern unsigned char *D_005175FC;
 extern int D_00517600;
 extern int D_0044E848[];
 extern int D_0044E870_C070[] __asm__("D_0044E870");
-extern struct G_C070 sndmix_C070 __asm__("sndmix");
+extern struct SNDMIXSTATE sndmix_C070 __asm__("sndmix");
 extern void *f_5C60_C070(int) __asm__("SNDMEMI_alloc");
 extern void *memset_C070(void *, int, unsigned int) __asm__("memset");
 extern int f_72F8_C070(void *, int) __asm__("SNDI_getb");
@@ -21147,10 +21082,10 @@ void func_003CC070(int rate) {
         if (nodeRecord[1] != 0) {
             if (nodeRecord[0] == 9 && D_00515D40->ver >= 11) {
                 unsigned char ch = nodeRecord[1];
-                D_00515D48[func_003CBC20(D_00515D58, sndmix_C070.n, ch & 0xF)] = D_00515D44[i];
-                D_00515D48[func_003CBC20(D_00515D58, sndmix_C070.n, ch >> 4)] = D_00515D44[i];
+                D_00515D48[func_003CBC20(D_00515D58, sndmix_C070.mc.outputchannels, ch & 0xF)] = D_00515D44[i];
+                D_00515D48[func_003CBC20(D_00515D58, sndmix_C070.mc.outputchannels, ch >> 4)] = D_00515D44[i];
             } else {
-                D_00515D48[func_003CBC20(D_00515D58, sndmix_C070.n, nodeRecord[1])] = D_00515D44[i];
+                D_00515D48[func_003CBC20(D_00515D58, sndmix_C070.mc.outputchannels, nodeRecord[1])] = D_00515D44[i];
             }
         }
         nodeRecord += D_0044E870_C070[*nodeRecord];
