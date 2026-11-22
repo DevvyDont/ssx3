@@ -444,14 +444,6 @@ struct sRmMat44 {
     float m[4][4];
 } __attribute__((aligned(16)));
 
-// PORT: PS2-only VU0 inline asm (v * s).
-// A spline segment: cubic coefficient matrix (rows t^3, t^2, t, 1), next segment.
-struct sRmSeg_C698 {
-    char pad_0x00[0x10];
-    sRmMat44 coef;          // 0x10
-    char pad_0x50[0x14];
-    sRmSeg_C698* next;      // 0x64
-};
 
 
 struct sRmSet_C698 {
@@ -765,8 +757,8 @@ extern "C" void cRailModifier_splineIntersect(cRailModifier* self, t4Vector* box
     }
     sRmMat44 mat;
     cRailModifier_getInvMat_C698((self), &mat);
-    sRmSeg_C698* seg = ((sRmSeg_C698*)spline->m_HeaderSeg);
-    for (int i = 0; i < spline->m_iNumSegments; i++, seg = seg->next) {
+    tSplineSegmentRecord* seg = (spline->m_HeaderSeg);
+    for (int i = 0; i < spline->m_iNumSegments; i++, seg = seg->m_NextSeg) {
         float tLo = 0.0f;
         float tHi = 1.0f;
         t4Vector pos;
@@ -775,7 +767,7 @@ extern "C" void cRailModifier_splineIntersect(cRailModifier* self, t4Vector* box
         sRmMat44 segMat;
         {
             sRmMat44 t;
-            vu0MulMat_C698(&t, &mat, &seg->coef);
+            vu0MulMat_C698(&t, &mat, &(*(sRmMat44*)&seg->m_fmBasisMat));
             vu0CopyMat_C698(&segMat, &t);
         }
         pos = evalSeg_C698(&segMat, tLo);
@@ -1866,12 +1858,9 @@ extern "C" void cRollerModifier_writeToReplayFrame(cRollerModifier* self, cRolle
 //100%
 INCLUDE_ASM("object/railmodifier", cRollerModifier_updateMOI);
 #ifdef SKIP_ASM
-struct sM44_E248 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (unit quaternion -> 4x4 rotation matrix, row 3 = (0,0,0,1)).
-static inline void QuatToMtx_E248(sM44_E248& m, const sRmVec4& q)
+static inline void QuatToMtx_E248(t4Matrix& m, const sRmVec4& q)
 {
     __asm__ __volatile__(
         "lqc2       $vf4, %1\n"
@@ -1912,18 +1901,18 @@ static inline void QuatToMtx_E248(sM44_E248& m, const sRmVec4& q)
 }
 
 // The 3x3 rotation part of a 4x4 matrix.
-static inline sRmMat33 Get33_E248(const sM44_E248& m)
+static inline sRmMat33 Get33_E248(const t4Matrix& m)
 {
     sRmMat33 r;
-    r.m[0][0] = m.m[0][0];
-    r.m[0][1] = m.m[0][1];
-    r.m[0][2] = m.m[0][2];
-    r.m[1][0] = m.m[1][0];
-    r.m[1][1] = m.m[1][1];
-    r.m[1][2] = m.m[1][2];
-    r.m[2][0] = m.m[2][0];
-    r.m[2][1] = m.m[2][1];
-    r.m[2][2] = m.m[2][2];
+    r.m[0][0] = ((float (*)[4])&m.row[0])[0][0];
+    r.m[0][1] = ((float (*)[4])&m.row[0])[0][1];
+    r.m[0][2] = ((float (*)[4])&m.row[0])[0][2];
+    r.m[1][0] = ((float (*)[4])&m.row[0])[1][0];
+    r.m[1][1] = ((float (*)[4])&m.row[0])[1][1];
+    r.m[1][2] = ((float (*)[4])&m.row[0])[1][2];
+    r.m[2][0] = ((float (*)[4])&m.row[0])[2][0];
+    r.m[2][1] = ((float (*)[4])&m.row[0])[2][1];
+    r.m[2][2] = ((float (*)[4])&m.row[0])[2][2];
     return r;
 }
 
@@ -1976,7 +1965,7 @@ static inline sRmMat33 MulI_E248(const sRmMat33& a, const cRollerModifier* body)
  */
 extern "C" void cRollerModifier_updateMOI(cRollerModifier* self)
 {
-    sM44_E248 rotMat4;
+    t4Matrix rotMat4;
     QuatToMtx_E248(rotMat4, *(sRmVec4*)&self->Pose.Q);
     sRmMat33 rot;
     sRmMat33 rotT;
@@ -2956,11 +2945,8 @@ struct sRmAxisRot_35FC20 {
     float tx, ty;       // 0x30
 };
 
-struct sRmMtx_35FC20 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
-extern sRmMtx_35FC20 t4mat_Identity_35FC20[] __asm__("t4mat_Identity");
+extern t4Matrix t4mat_Identity_35FC20[] __asm__("t4mat_Identity");
 
 /**
  * Builds the texture matrix of a UV-scroll modifier: a rotation by Angle about Axis (identity when Angle is 0) whose
@@ -2969,7 +2955,7 @@ extern sRmMtx_35FC20 t4mat_Identity_35FC20[] __asm__("t4mat_Identity");
  * @param mat  receives the matrix (On Tour t4Matrix& mat)
  * @return @p mat
  */
-extern "C" sRmMtx_35FC20* cUVScrollModifier_getTextureMat(cUVScrollModifier* self, sRmMtx_35FC20* mat)
+extern "C" t4Matrix* cUVScrollModifier_getTextureMat(cUVScrollModifier* self, t4Matrix* mat)
 {
     float zeroF = 0.0f;
     if (self->Angle != zeroF) {
@@ -2984,22 +2970,22 @@ extern "C" sRmMtx_35FC20* cUVScrollModifier_getTextureMat(cUVScrollModifier* sel
         float sx = sinA * self->Axis.x;
         float ty = oneMinusCos * self->Axis.y;
         float tz = oneMinusCos * self->Axis.z;
-        mat->m[0][0] = tx * self->Axis.x + cosA;
-        mat->m[1][0] = tx * self->Axis.y + sz;
-        mat->m[2][0] = tx * self->Axis.z - sy;
-        mat->m[3][0] = zeroF;
-        mat->m[0][1] = ty * self->Axis.x - sz;
-        mat->m[1][1] = ty * self->Axis.y + cosA;
-        mat->m[2][1] = ty * self->Axis.z + sx;
-        mat->m[3][1] = zeroF;
-        mat->m[0][2] = tz * self->Axis.x + sy;
-        mat->m[1][2] = tz * self->Axis.y - sx;
-        mat->m[2][2] = tz * self->Axis.z + cosA;
-        mat->m[3][2] = zeroF;
-        mat->m[0][3] = zeroF;
-        mat->m[1][3] = zeroF;
-        mat->m[2][3] = zeroF;
-        mat->m[3][3] = one;
+        ((float (*)[4])&mat->row[0])[0][0] = tx * self->Axis.x + cosA;
+        ((float (*)[4])&mat->row[0])[1][0] = tx * self->Axis.y + sz;
+        ((float (*)[4])&mat->row[0])[2][0] = tx * self->Axis.z - sy;
+        ((float (*)[4])&mat->row[0])[3][0] = zeroF;
+        ((float (*)[4])&mat->row[0])[0][1] = ty * self->Axis.x - sz;
+        ((float (*)[4])&mat->row[0])[1][1] = ty * self->Axis.y + cosA;
+        ((float (*)[4])&mat->row[0])[2][1] = ty * self->Axis.z + sx;
+        ((float (*)[4])&mat->row[0])[3][1] = zeroF;
+        ((float (*)[4])&mat->row[0])[0][2] = tz * self->Axis.x + sy;
+        ((float (*)[4])&mat->row[0])[1][2] = tz * self->Axis.y - sx;
+        ((float (*)[4])&mat->row[0])[2][2] = tz * self->Axis.z + cosA;
+        ((float (*)[4])&mat->row[0])[3][2] = zeroF;
+        ((float (*)[4])&mat->row[0])[0][3] = zeroF;
+        ((float (*)[4])&mat->row[0])[1][3] = zeroF;
+        ((float (*)[4])&mat->row[0])[2][3] = zeroF;
+        ((float (*)[4])&mat->row[0])[3][3] = one;
         } else {
         // PORT: PS2-only VU0 inline asm (4x4 matrix copy, identity -> m).
         __asm__ __volatile__(
@@ -3017,8 +3003,8 @@ extern "C" sRmMtx_35FC20* cUVScrollModifier_getTextureMat(cUVScrollModifier* sel
             : "r"(mat), "r"(t4mat_Identity_35FC20)
             : "memory");
     }
-    mat->m[3][0] = self->UV[0];
-    mat->m[3][1] = self->UV[1];
+    ((float (*)[4])&mat->row[0])[3][0] = self->UV[0];
+    ((float (*)[4])&mat->row[0])[3][1] = self->UV[1];
     return mat;
 }
 #endif
@@ -8718,21 +8704,10 @@ extern "C" void func_0036AC00(void* gs, int i, ulong** pp, int* path);
 extern "C" void func_0036C790(void* gs, int i, ulong** pp, int* path);
 extern "C" void func_003904A0(void* gs, int i, ulong** pp, int* path);
 
-// A batch node: one (state, texture, layer) combination with its DMA chain (0x20 bytes).
-struct sRmNode_3490 {
-    unsigned int* state;    // 0x0
-    int key;                // 0x4
-    int layer;              // 0x8
-    int packet;             // 0xC
-    int tail;               // 0x10
-    int linked;             // 0x14
-    sRmNode_3490* link;     // 0x18
-    sRmNode_3490* next;     // 0x1C
-};
 
 struct sRmSortItem_3490 {
     unsigned int key;
-    sRmNode_3490* node;
+    tDeferBucket* node;
 };
 
 struct sRmBatch_3490 {
@@ -8805,13 +8780,13 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
         int idx = 0;
         int pass;
         for (int i = 0; i < self->nItems; i++) {
-            for (sRmNode_3490* n = self->items[i].node; n != 0; n = n->link) {
-                short primaryTex = ((short*)&n->key)[0];
+            for (tDeferBucket* n = self->items[i].node; n != 0; n = n->mpLink) {
+                short primaryTex = ((short*)&n->mTexKey)[0];
                 if (primaryTex >= 0) {
                     D_0053AB80_3490[primaryTex].first = idx;
                     D_0053AB80_3490[primaryTex].count++;
                 }
-                short secondaryTex = ((short*)&n->key)[1];
+                short secondaryTex = ((short*)&n->mTexKey)[1];
                 if (secondaryTex >= 0) {
                     D_0053AB80_3490[secondaryTex].first = idx;
                     D_0053AB80_3490[secondaryTex].count++;
@@ -8827,7 +8802,7 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
             while (hi - lo >= 2) {
                 int mid = (lo + hi) >> 1;
                 bounds[j] = mid;
-                if ((int)((self->items[mid].node->state[2] & 0x3E0) >> 5) >= split.v[j])
+                if ((int)((((unsigned int*)self->items[mid].node->mpState)[2] & 0x3E0) >> 5) >= split.v[j])
                     hi = mid;
                 else
                     lo = mid;
@@ -8842,25 +8817,25 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
             int start = (pass == 0) ? 0 : bounds[pass - 1];
             int end = bounds[pass];
             for (int i = start; i < end; i++) {
-                sRmNode_3490* n = self->items[i].node;
+                tDeferBucket* n = self->items[i].node;
                 if (n != 0) {
                     do {
-                        unsigned int* st = n->state;
+                        unsigned int* st = ((unsigned int*)n->mpState);
                         if (st != prev) {
-                            func_00363C20(self, st, n->layer, &pkt);
+                            func_00363C20(self, st, n->mViewIndex, &pkt);
                             prev = st;
                         }
-                        int key = n->key;
+                        int key = n->mTexKey;
                         func_00368660(obj, ((short*)&key)[0], ((short*)&key)[1], idx++, &pkt, path);
-                        if (n->packet != 0) {
-                            pkt[0] = ((ulong)(unsigned int)n->packet << 32) | 0x50000000;
+                        if (n->mPacket != 0) {
+                            pkt[0] = ((ulong)(unsigned int)n->mPacket << 32) | 0x50000000;
                             pkt[1] = 0;
                             pkt += 2;
-                            ulong* tailTag = (ulong*)(n->tail | 0x30000000);
+                            ulong* tailTag = (ulong*)(n->mTail | 0x30000000);
                             tailTag[0] = 0x60000000;
                             tailTag[1] = 0;
                         }
-                        n = n->link;
+                        n = n->mpLink;
                     } while (n != 0);
                 }
             }

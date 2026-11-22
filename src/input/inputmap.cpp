@@ -510,13 +510,6 @@ extern "C" void* cInputMapParser_newParseNode(cInputMapParser* self)
 //100%
 INCLUDE_ASM("input/inputmap", cInputMapParser_freeParseNode);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct sMapNode_1638 {
-    int type;                   // 0x0
-    sMapNode_1638* a;           // 0x4, also the free-list link
-    sMapNode_1638* b;           // 0x8
-    sMapNode_1638* c;           // 0xC
-};
 
 /**
  * Returns a parse node and all of its child nodes to the parser's free node list.
@@ -528,33 +521,33 @@ struct sMapNode_1638 {
  * @param node  the node to free, or 0
  */
 // Frees an expression node and its children back onto the map's node free list.
-extern "C" void cInputMapParser_freeParseNode(cInputMapParser* self, sMapNode_1638* node)
+extern "C" void cInputMapParser_freeParseNode(cInputMapParser* self, tParseNode* node)
 {
     if (node == 0) {
         return;
     }
-    switch (node->type) {
+    switch (node->Type) {
     case 18: case 19:
     case 24: case 25: case 26: case 27: case 28:
     case 29: case 30: case 31: case 32: case 33:
-        cInputMapParser_freeParseNode(self, node->a);
+        cInputMapParser_freeParseNode(self, node->unk_04);
         break;
     case 6: case 7: case 8: case 9: case 10: case 11:
     case 12: case 13: case 14: case 15: case 16: case 17:
     case 20: case 21:
-        cInputMapParser_freeParseNode(self, node->a);
-        cInputMapParser_freeParseNode(self, node->b);
+        cInputMapParser_freeParseNode(self, node->unk_04);
+        cInputMapParser_freeParseNode(self, node->unk_08);
         break;
     case 5:
-        cInputMapParser_freeParseNode(self, node->a);
-        cInputMapParser_freeParseNode(self, node->b);
-        cInputMapParser_freeParseNode(self, node->c);
+        cInputMapParser_freeParseNode(self, node->unk_04);
+        cInputMapParser_freeParseNode(self, node->unk_08);
+        cInputMapParser_freeParseNode(self, node->unk_0C);
         break;
     case 0: case 1: case 2: case 3: case 4:
     case 22: case 23:
         break;
     }
-    node->a = (sMapNode_1638*)self->FreeParseNodes;
+    node->unk_04 = self->FreeParseNodes;
     self->FreeParseNodes = (tParseNode*)node;
 }
 #endif

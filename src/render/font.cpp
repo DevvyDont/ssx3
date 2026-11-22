@@ -3815,20 +3815,10 @@ extern "C" sGlyphEntry* cPS2DeferManager_Find(sGlyphCache* self, sGlyphKey* key,
 //100%
 INCLUDE_ASM("render/font", cPS2DeferManager_Find1);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct sNode5000 {
-    int mpState;
-    int mTexKey;
-    int mViewIndex;
-    int padC[2];
-    int busy;
-    int pad18;
-    sNode5000* next;
-};
 
 struct sCache5000 {
     char pad0[0x678A0];
-    sNode5000* buckets[256];
+    tDeferBucket* buckets[256];
 };
 
 /**
@@ -3844,14 +3834,14 @@ struct sCache5000 {
  * @param matrixIndex  the matrix index
  * @return the bucket, or 0 if none matches
  */
-extern "C" sNode5000* cPS2DeferManager_Find1(sCache5000* self, int stateEntry, int texKey, unsigned char hash, int matrixIndex)
+extern "C" tDeferBucket* cPS2DeferManager_Find1(sCache5000* self, int stateEntry, int texKey, unsigned char hash, int matrixIndex)
 {
-    sNode5000** pp = &self->buckets[hash];
+    tDeferBucket** pp = &self->buckets[hash];
     while (*pp != 0) {
-        sNode5000* node;
+        tDeferBucket* node;
         int hit = 0;
-        if ((*pp)->busy == 0) {
-            int keysMatch = (*pp)->mTexKey == texKey && (*pp)->mViewIndex == matrixIndex && (*pp)->mpState == stateEntry;
+        if ((*pp)->mLinked == 0) {
+            int keysMatch = (*pp)->mTexKey == texKey && (*pp)->mViewIndex == matrixIndex && ((int)(*pp)->mpState) == stateEntry;
             if (keysMatch) hit = 1;
         }
         node = *pp;
@@ -3859,12 +3849,12 @@ extern "C" sNode5000* cPS2DeferManager_Find1(sCache5000* self, int stateEntry, i
             if ((*pp) == self->buckets[hash]) {
                 return node;
             }
-            *pp = node->next;
-            node->next = self->buckets[hash];
+            *pp = node->mpNext;
+            node->mpNext = self->buckets[hash];
             self->buckets[hash] = node;
             return node;
         }
-        pp = &node->next;
+        pp = &node->mpNext;
     }
     return 0;
 }

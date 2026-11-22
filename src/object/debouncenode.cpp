@@ -2311,29 +2311,22 @@ extern "C" void cSpline_init(cSpline* self, unsigned int id)
 //100%
 INCLUDE_ASM("object/debouncenode", cSpline_getPos);
 #ifdef SKIP_ASM
-struct sDebKey5248 {
-    char pad_0x00[0x60];
-    sDebKey5248* prev;  // 0x60
-    sDebKey5248* next;  // 0x64
-    char pad_0x68[0x1C];
-    float t0;           // 0x84
-};
 
 struct sDebTrack5248 {
     int field_0x0;
     int index;          // 0x4
-    sDebKey5248* key;   // 0x8
+    tSplineSegmentRecord* key;   // 0x8
     float length;       // 0xC
 
     void back()
     {
-        sDebKey5248* p = key->prev;
+        tSplineSegmentRecord* p = key->m_PrevSeg;
         index--;
         key = p;
     }
     void forward()
     {
-        sDebKey5248* n = key->next;
+        tSplineSegmentRecord* n = key->m_NextSeg;
         index++;
         key = n;
     }
@@ -2369,13 +2362,13 @@ extern "C" void cSpline_getPos(sDebTrack5248* self, float distance, sDebVec4* po
         wholeLaps -= 1.0f;
     }
     distance -= wholeLaps * len;
-    while (distance < self->key->t0 && self->key->prev != 0) {
+    while (distance < self->key->m_fDistance && self->key->m_PrevSeg != 0) {
         self->back();
     }
-    sDebKey5248* next = self->key->next;
-    while (next != 0 && next->t0 <= distance) {
+    tSplineSegmentRecord* next = self->key->m_NextSeg;
+    while (next != 0 && next->m_fDistance <= distance) {
         self->forward();
-        next = self->key->next;
+        next = self->key->m_NextSeg;
     }
     cSplineSegment_getPos((sDebCurve*)self->key, distance, pos, vel, acc);
 }

@@ -5521,14 +5521,6 @@ void cBeing_flagEventTrickMultiplier(void* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cRiderState_cRiderState);
 #ifdef SKIP_ASM
-struct sHPC140738 {
-    char pad0[0x1F0];
-    int v[19][3];           // 0x1F0
-    char pad2D4[0x430 - 0x2D4];
-    unsigned int mGroundPolyId;      // 0x430
-    char pad434[0x5B8 - 0x434];
-    unsigned int arr[64];   // 0x5B8
-};
 
 /**
  * Constructs the rider's base state: clears the 19 mSlewed channels, sets mGroundPolyId to -1 and fills the 64 words
@@ -5538,67 +5530,67 @@ struct sHPC140738 {
  *
  * @return the rider
  */
-extern "C" sHPC140738* cRiderState_cRiderState(sHPC140738* self)
+extern "C" cRider* cRiderState_cRiderState(cRider* self)
 {
-    self->v[0][2] = 0;
-    self->v[0][0] = 0;
-    self->v[0][1] = 0;
-    self->v[1][2] = 0;
-    self->v[1][0] = 0;
-    self->v[1][1] = 0;
-    self->v[2][2] = 0;
-    self->v[2][0] = 0;
-    self->v[2][1] = 0;
-    self->v[3][2] = 0;
-    self->v[3][0] = 0;
-    self->v[3][1] = 0;
-    self->v[4][2] = 0;
-    self->v[4][0] = 0;
-    self->v[4][1] = 0;
-    self->v[5][2] = 0;
-    self->v[5][0] = 0;
-    self->v[5][1] = 0;
-    self->v[6][2] = 0;
-    self->v[6][0] = 0;
-    self->v[6][1] = 0;
-    self->v[7][2] = 0;
-    self->v[7][0] = 0;
-    self->v[7][1] = 0;
-    self->v[8][2] = 0;
-    self->v[8][0] = 0;
-    self->v[8][1] = 0;
-    self->v[9][2] = 0;
-    self->v[9][0] = 0;
-    self->v[9][1] = 0;
-    self->v[10][2] = 0;
-    self->v[10][0] = 0;
-    self->v[10][1] = 0;
-    self->v[11][2] = 0;
-    self->v[11][0] = 0;
-    self->v[11][1] = 0;
-    self->v[12][2] = 0;
-    self->v[12][0] = 0;
-    self->v[12][1] = 0;
-    self->v[13][2] = 0;
-    self->v[13][0] = 0;
-    self->v[13][1] = 0;
-    self->v[14][2] = 0;
-    self->v[14][0] = 0;
-    self->v[14][1] = 0;
-    self->v[15][2] = 0;
-    self->v[15][0] = 0;
-    self->v[15][1] = 0;
-    self->v[16][2] = 0;
-    self->v[16][0] = 0;
-    self->v[16][1] = 0;
-    self->v[17][2] = 0;
-    self->v[17][0] = 0;
-    self->v[17][1] = 0;
-    self->v[18][2] = 0;
-    self->v[18][0] = 0;
-    self->v[18][1] = 0;
+    ((int (*)[3])&self->mSlewed[0])[0][2] = 0;
+    ((int (*)[3])&self->mSlewed[0])[0][0] = 0;
+    ((int (*)[3])&self->mSlewed[0])[0][1] = 0;
+    ((int (*)[3])&self->mSlewed[0])[1][2] = 0;
+    ((int (*)[3])&self->mSlewed[0])[1][0] = 0;
+    ((int (*)[3])&self->mSlewed[0])[1][1] = 0;
+    ((int (*)[3])&self->mSlewed[0])[2][2] = 0;
+    ((int (*)[3])&self->mSlewed[0])[2][0] = 0;
+    ((int (*)[3])&self->mSlewed[0])[2][1] = 0;
+    ((int (*)[3])&self->mSlewed[0])[3][2] = 0;
+    ((int (*)[3])&self->mSlewed[0])[3][0] = 0;
+    ((int (*)[3])&self->mSlewed[0])[3][1] = 0;
+    ((int (*)[3])&self->mSlewed[0])[4][2] = 0;
+    ((int (*)[3])&self->mSlewed[0])[4][0] = 0;
+    ((int (*)[3])&self->mSlewed[0])[4][1] = 0;
+    ((int (*)[3])&self->mSlewed[0])[5][2] = 0;
+    ((int (*)[3])&self->mSlewed[0])[5][0] = 0;
+    ((int (*)[3])&self->mSlewed[0])[5][1] = 0;
+    ((int (*)[3])&self->mSlewed[0])[6][2] = 0;
+    ((int (*)[3])&self->mSlewed[0])[6][0] = 0;
+    ((int (*)[3])&self->mSlewed[0])[6][1] = 0;
+    ((int (*)[3])&self->mSlewed[0])[7][2] = 0;
+    ((int (*)[3])&self->mSlewed[0])[7][0] = 0;
+    ((int (*)[3])&self->mSlewed[0])[7][1] = 0;
+    ((int (*)[3])&self->mSlewed[0])[8][2] = 0;
+    ((int (*)[3])&self->mSlewed[0])[8][0] = 0;
+    ((int (*)[3])&self->mSlewed[0])[8][1] = 0;
+    ((int (*)[3])&self->mSlewed[0])[9][2] = 0;
+    ((int (*)[3])&self->mSlewed[0])[9][0] = 0;
+    ((int (*)[3])&self->mSlewed[0])[9][1] = 0;
+    ((int (*)[3])&self->mSlewed[0])[10][2] = 0;
+    ((int (*)[3])&self->mSlewed[0])[10][0] = 0;
+    ((int (*)[3])&self->mSlewed[0])[10][1] = 0;
+    ((int (*)[3])&self->mSlewed[0])[11][2] = 0;
+    ((int (*)[3])&self->mSlewed[0])[11][0] = 0;
+    ((int (*)[3])&self->mSlewed[0])[11][1] = 0;
+    ((int (*)[3])&self->mSlewed[0])[12][2] = 0;
+    ((int (*)[3])&self->mSlewed[0])[12][0] = 0;
+    ((int (*)[3])&self->mSlewed[0])[12][1] = 0;
+    ((int (*)[3])&self->mSlewed[0])[13][2] = 0;
+    ((int (*)[3])&self->mSlewed[0])[13][0] = 0;
+    ((int (*)[3])&self->mSlewed[0])[13][1] = 0;
+    ((int (*)[3])&self->mSlewed[0])[14][2] = 0;
+    ((int (*)[3])&self->mSlewed[0])[14][0] = 0;
+    ((int (*)[3])&self->mSlewed[0])[14][1] = 0;
+    ((int (*)[3])&self->mSlewed[0])[15][2] = 0;
+    ((int (*)[3])&self->mSlewed[0])[15][0] = 0;
+    ((int (*)[3])&self->mSlewed[0])[15][1] = 0;
+    ((int (*)[3])&self->mSlewed[0])[16][2] = 0;
+    ((int (*)[3])&self->mSlewed[0])[16][0] = 0;
+    ((int (*)[3])&self->mSlewed[0])[16][1] = 0;
+    ((int (*)[3])&self->mSlewed[0])[17][2] = 0;
+    ((int (*)[3])&self->mSlewed[0])[17][0] = 0;
+    ((int (*)[3])&self->mSlewed[0])[17][1] = 0;
+    ((int (*)[3])&self->mSlewed[0])[18][2] = 0;
+    ((int (*)[3])&self->mSlewed[0])[18][0] = 0;
+    ((int (*)[3])&self->mSlewed[0])[18][1] = 0;
     self->mGroundPolyId = 0xFFFFFFFF;
-    unsigned int* visited = self->arr;
+    unsigned int* visited = ((unsigned int*)&self->mVisitedIds);
     for (int i = 63; i != -1; i--, visited++) {
         *visited = 0xFFFFFFFF;
     }

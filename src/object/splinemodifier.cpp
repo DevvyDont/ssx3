@@ -211,9 +211,6 @@ extern "C" void cSpline_getPos(void* follow, float t, void* pos, void* vel, void
 
 
 
-struct sSmM44_9830 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 
 extern t3Vector t4vect_ZAxis;
@@ -240,7 +237,7 @@ static inline float Atan2_9830(float y, float x)
 
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, d = b * a).
-static inline void vu0MulMat_9830(sSmM44_9830* d, const sSmM44_9830* a, const sSmM44_9830* b)
+static inline void vu0MulMat_9830(t4Matrix* d, const t4Matrix* a, const t4Matrix* b)
 {
     __asm__ __volatile__(
         "lqc2      $vf4, 0x0(%1)\n"
@@ -277,7 +274,7 @@ static inline void vu0MulMat_9830(sSmM44_9830* d, const sSmM44_9830* a, const sS
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
-static inline void vu0CopyMat_9830(sSmM44_9830* d, const sSmM44_9830* s)
+static inline void vu0CopyMat_9830(t4Matrix* d, const t4Matrix* s)
 {
     __asm__ __volatile__(
         "lqc2      $vf1, 0x0(%1)\n"
@@ -325,10 +322,10 @@ extern "C" void cSplineModifier_updateRootTransform(cSplineModifier* self)
     pos.x = self->Pos.x;
     pos.y = self->Pos.y;
     pos.z = self->Pos.z;
-    sSmM44_9830 rotMat;
-    sSmM44_9830 copyMat;
-    sSmM44_9830 product;
-    sSmM44_9830* rootMat = (sSmM44_9830*)&self->Transform;
+    t4Matrix rotMat;
+    t4Matrix copyMat;
+    t4Matrix product;
+    t4Matrix* rootMat = (&self->Transform);
     float sc[4][2];
     fSinCos(&sc[0][0], &sc[0][1], rot.x);
     fSinCos(&sc[1][0], &sc[1][1], rot.y);
@@ -342,22 +339,22 @@ extern "C" void cSplineModifier_updateRootTransform(cSplineModifier* self)
     float sxsy = sx * sy;
     float cxsy = cx * sy;
     float cxsz = cx * sz;
-    (*(sSmM44_9830*)&self->Transform).m[0][0] = cy * cz;
-    (*(sSmM44_9830*)&self->Transform).m[0][1] = -cy * sz;
-    (*(sSmM44_9830*)&self->Transform).m[0][2] = sy;
-    (*(sSmM44_9830*)&self->Transform).m[0][3] = 0.0f;
-    (*(sSmM44_9830*)&self->Transform).m[1][0] = sxsy * cz + cxsz;
-    (*(sSmM44_9830*)&self->Transform).m[1][1] = cx * cz - sxsy * sz;
-    (*(sSmM44_9830*)&self->Transform).m[1][2] = -sx * cy;
-    (*(sSmM44_9830*)&self->Transform).m[1][3] = 0.0f;
-    (*(sSmM44_9830*)&self->Transform).m[2][0] = sx * sz - cxsy * cz;
-    (*(sSmM44_9830*)&self->Transform).m[2][1] = cxsz * sy + sx * cz;
-    (*(sSmM44_9830*)&self->Transform).m[2][2] = cx * cy;
-    (*(sSmM44_9830*)&self->Transform).m[2][3] = 0.0f;
-    (*(sSmM44_9830*)&self->Transform).m[3][0] = pos.x;
-    (*(sSmM44_9830*)&self->Transform).m[3][1] = pos.y;
-    (*(sSmM44_9830*)&self->Transform).m[3][2] = pos.z;
-    (*(sSmM44_9830*)&self->Transform).m[3][3] = 1.0f;
+    ((float (*)[4])&(*(&self->Transform)).row[0])[0][0] = cy * cz;
+    ((float (*)[4])&(*(&self->Transform)).row[0])[0][1] = -cy * sz;
+    ((float (*)[4])&(*(&self->Transform)).row[0])[0][2] = sy;
+    ((float (*)[4])&(*(&self->Transform)).row[0])[0][3] = 0.0f;
+    ((float (*)[4])&(*(&self->Transform)).row[0])[1][0] = sxsy * cz + cxsz;
+    ((float (*)[4])&(*(&self->Transform)).row[0])[1][1] = cx * cz - sxsy * sz;
+    ((float (*)[4])&(*(&self->Transform)).row[0])[1][2] = -sx * cy;
+    ((float (*)[4])&(*(&self->Transform)).row[0])[1][3] = 0.0f;
+    ((float (*)[4])&(*(&self->Transform)).row[0])[2][0] = sx * sz - cxsy * cz;
+    ((float (*)[4])&(*(&self->Transform)).row[0])[2][1] = cxsz * sy + sx * cz;
+    ((float (*)[4])&(*(&self->Transform)).row[0])[2][2] = cx * cy;
+    ((float (*)[4])&(*(&self->Transform)).row[0])[2][3] = 0.0f;
+    ((float (*)[4])&(*(&self->Transform)).row[0])[3][0] = pos.x;
+    ((float (*)[4])&(*(&self->Transform)).row[0])[3][1] = pos.y;
+    ((float (*)[4])&(*(&self->Transform)).row[0])[3][2] = pos.z;
+    ((float (*)[4])&(*(&self->Transform)).row[0])[3][3] = 1.0f;
     tBoundBox* sub = &self->BoundBox;
     if (self->HeadTweak != 0.0f) {
         const t3Vector* axis = &t4vect_ZAxis;
@@ -369,23 +366,23 @@ extern "C" void cSplineModifier_updateRootTransform(cSplineModifier* self)
         float sX = sc[3][0] * axis->x;
         float sY = sc[3][0] * axis->y;
         float sZ = sc[3][0] * axis->z;
-        rotMat.m[0][0] = kx * axis->x + sc[3][1];
-        rotMat.m[1][0] = kx * axis->y + sZ;
-        rotMat.m[2][0] = kx * axis->z - sY;
-        rotMat.m[3][0] = 0.0f;
-        rotMat.m[0][1] = ky * axis->x - sZ;
-        rotMat.m[1][1] = ky * axis->y + sc[3][1];
-        rotMat.m[2][1] = ky * axis->z + sX;
-        rotMat.m[3][1] = 0.0f;
-        rotMat.m[0][2] = kz * axis->x + sY;
-        rotMat.m[1][2] = kz * axis->y - sX;
-        rotMat.m[2][2] = kz * axis->z + sc[3][1];
-        rotMat.m[3][2] = 0.0f;
-        rotMat.m[0][3] = 0.0f;
-        rotMat.m[1][3] = 0.0f;
-        rotMat.m[2][3] = 0.0f;
-        rotMat.m[3][3] = 1.0f;
-        sSmM44_9830* tp = &copyMat;
+        ((float (*)[4])&rotMat.row[0])[0][0] = kx * axis->x + sc[3][1];
+        ((float (*)[4])&rotMat.row[0])[1][0] = kx * axis->y + sZ;
+        ((float (*)[4])&rotMat.row[0])[2][0] = kx * axis->z - sY;
+        ((float (*)[4])&rotMat.row[0])[3][0] = 0.0f;
+        ((float (*)[4])&rotMat.row[0])[0][1] = ky * axis->x - sZ;
+        ((float (*)[4])&rotMat.row[0])[1][1] = ky * axis->y + sc[3][1];
+        ((float (*)[4])&rotMat.row[0])[2][1] = ky * axis->z + sX;
+        ((float (*)[4])&rotMat.row[0])[3][1] = 0.0f;
+        ((float (*)[4])&rotMat.row[0])[0][2] = kz * axis->x + sY;
+        ((float (*)[4])&rotMat.row[0])[1][2] = kz * axis->y - sX;
+        ((float (*)[4])&rotMat.row[0])[2][2] = kz * axis->z + sc[3][1];
+        ((float (*)[4])&rotMat.row[0])[3][2] = 0.0f;
+        ((float (*)[4])&rotMat.row[0])[0][3] = 0.0f;
+        ((float (*)[4])&rotMat.row[0])[1][3] = 0.0f;
+        ((float (*)[4])&rotMat.row[0])[2][3] = 0.0f;
+        ((float (*)[4])&rotMat.row[0])[3][3] = 1.0f;
+        t4Matrix* tp = &copyMat;
         vu0MulMat_9830(&product, rootMat, &rotMat);
         vu0CopyMat_9830(tp, &product);
         vu0CopyMat_9830(rootMat, tp);

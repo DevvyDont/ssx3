@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "object/railmodifier.h"
 #include "bx/math3d.h"
 #include "object/movenode.h"
 #include "world/worldrecords.h"
@@ -244,11 +245,6 @@ extern "C" void tModifierBlock_preUpdate(tModifierBlock* self)
 INCLUDE_ASM("object/modifierblock", tModifierBlock_postUpdate);
 #ifdef SKIP_ASM
 
-struct sMbLink2D20 {
-    sMbLink2D20* next;      // 0x0
-    int field_0x4;
-    sVEntry<void(void*)>* vt;     // 0x8
-};
 
 /**
  * Runs a modifier block's post-update pass: updates its effects and rails, then its root transform modifier.
@@ -259,21 +255,21 @@ struct sMbLink2D20 {
  */
 extern "C" void tModifierBlock_postUpdate(tModifierBlock* self)
 {
-    sMbLink2D20* head = (sMbLink2D20*)self->Effect.Next;
+    cEffectLink* head = self->Effect.Next;
     if (head != 0) {
-        sMbLink2D20* link = head;
+        cEffectLink* link = head;
         do {
-            sMbLink2D20* next = link->next;
-            link->vt[5].fn(vthis(link, link->vt[5]));
+            cEffectLink* next = link->Next;
+            ((sVEntry<void (void*)>*)link->mVtbl)[5].fn(vthis(link, ((sVEntry<void (void*)>*)link->mVtbl)[5]));
             link = next;
         } while (link != 0);
     }
-    head = (sMbLink2D20*)self->Rail.Next;
+    head = (cEffectLink*)self->Rail.Next;
     if (head != 0) {
-        sMbLink2D20* link = head;
+        cEffectLink* link = head;
         do {
-            sMbLink2D20* next = link->next;
-            link->vt[3].fn(vthis(link, link->vt[3]));
+            cEffectLink* next = link->Next;
+            ((sVEntry<void (void*)>*)link->mVtbl)[3].fn(vthis(link, ((sVEntry<void (void*)>*)link->mVtbl)[3]));
             link = next;
         } while (link != 0);
     }
@@ -406,11 +402,6 @@ INCLUDE_ASM("object/modifierblock", tModifierBlock_signal);
 #ifdef SKIP_ASM
 
 
-struct sMbLink2F40 {
-    sMbLink2F40* next;      // 0x0
-    int field_0x4;
-    sVEntry<void(void*, int, float)>* vt;     // 0x8
-};
 
 extern "C" void cUVScrollModifier_signal(void* self, int id, float v);
 extern "C" void cTexFlipModifier_signal(void* self, int id, float v);
@@ -441,12 +432,12 @@ extern "C" void tModifierBlock_signal(tModifierBlock* self, int id, float value)
     if (physicsModifier != 0) {
         ((sVEntry<void(void*, int, float)>*)physicsModifier->mVtbl)[3].fn(vthis(physicsModifier, ((sVEntry<void(void*, int, float)>*)physicsModifier->mVtbl)[3]), id, value);
     }
-    sMbLink2F40* firstEffect = (sMbLink2F40*)self->Effect.Next;
+    cEffectLink* firstEffect = self->Effect.Next;
     if (firstEffect != 0) {
-        sMbLink2F40* effect = firstEffect;
+        cEffectLink* effect = firstEffect;
         do {
-            sMbLink2F40* next = effect->next;
-            effect->vt[7].fn(vthis(effect, effect->vt[7]), id, value);
+            cEffectLink* next = effect->Next;
+            ((sVEntry<void (void*, int, float)>*)effect->mVtbl)[7].fn(vthis(effect, ((sVEntry<void (void*, int, float)>*)effect->mVtbl)[7]), id, value);
             effect = next;
         } while (effect != 0);
     }
@@ -632,11 +623,6 @@ struct sModBlockVEntry3228 {
     void (*fn)(void*);
 };
 
-struct sModBlockLink3228 {
-    sModBlockLink3228* next;      // 0x0
-    int field_0x4;
-    sModBlockVEntry3228* vt;      // 0x8
-};
 
 /**
  * Tells every effect on a modifier block to fade out.
@@ -646,12 +632,12 @@ struct sModBlockLink3228 {
  */
 extern "C" void tModifierBlock_fadeEffectModifier(tModifierBlock* self)
 {
-    sModBlockLink3228* head = *(sModBlockLink3228**)&self->Effect;
+    cEffectLink* head = *(cEffectLink**)&self->Effect;
     if (head != 0) {
-        sModBlockLink3228* link = head;
+        cEffectLink* link = head;
         do {
-            sModBlockLink3228* next = link->next;
-            link->vt[3].fn(vthis(link, link->vt[3]));
+            cEffectLink* next = link->Next;
+            ((sModBlockVEntry3228*)link->mVtbl)[3].fn(vthis(link, ((sModBlockVEntry3228*)link->mVtbl)[3]));
             link = next;
         } while (link != 0);
     }
@@ -667,11 +653,6 @@ struct sModBlockVEntry3278 {
     void* fn;
 };
 
-struct sModBlockLink3278 {
-    sModBlockLink3278* next;      // 0x0
-    int field_0x4;
-    sModBlockVEntry3278* vt;      // 0x8
-};
 
 /**
  * Removes every halo effect from a modifier block.
@@ -681,14 +662,14 @@ struct sModBlockLink3278 {
  */
 extern "C" void tModifierBlock_remHaloModifier(tModifierBlock* self)
 {
-    sModBlockLink3278* head = *(sModBlockLink3278**)&self->Effect;
+    cEffectLink* head = *(cEffectLink**)&self->Effect;
     if (head != 0) {
-        sModBlockLink3278* link = head;
+        cEffectLink* link = head;
         do {
-            sModBlockLink3278* next = link->next;
-            if (((int (*)(void*))link->vt[2].fn)(vthis(link, link->vt[2])) == 3) {
+            cEffectLink* next = link->Next;
+            if (((int (*)(void*))((sModBlockVEntry3278*)link->mVtbl)[2].fn)(vthis(link, ((sModBlockVEntry3278*)link->mVtbl)[2])) == 3) {
                 if (link != 0) {
-                    ((void (*)(void*, int))link->vt[1].fn)(vthis(link, link->vt[1]), 3);
+                    ((void (*)(void*, int))((sModBlockVEntry3278*)link->mVtbl)[1].fn)(vthis(link, ((sModBlockVEntry3278*)link->mVtbl)[1]), 3);
                 }
             }
             link = next;
@@ -706,13 +687,6 @@ struct sModBlockDtorVEntry3300 {
     void (*fn)(void*, int);
 };
 
-struct sModBlockLink3300 {
-    sModBlockLink3300* next;          // 0x0
-    int field_0x4;
-    sModBlockDtorVEntry3300* vt;      // 0x8
-    char pad_0xC[0x30 - 0xC];
-    unsigned int id;                       // 0x30
-};
 
 /**
  * Removes and deletes one rail modifier of a modifier block, or all of them.
@@ -724,23 +698,23 @@ struct sModBlockLink3300 {
  */
 extern "C" void tModifierBlock_remRailModifier(tModifierBlock* self, unsigned int id)
 {
-    sModBlockLink3300* head = *(sModBlockLink3300**)&self->Rail;
+    cRailModifier* head = *(cRailModifier**)&self->Rail;
     if (head == 0) return;
-    sModBlockLink3300* rail = head;
+    cRailModifier* rail = head;
     if (~id) {
     loop:
         if (rail == 0) return;
-        if (rail->id == id) {
-            rail->vt[1].fn(vthis(rail, rail->vt[1]), 3);
+        if (rail->SplineId == id) {
+            ((sModBlockDtorVEntry3300*)rail->mVtbl)[1].fn(vthis(rail, ((sModBlockDtorVEntry3300*)rail->mVtbl)[1]), 3);
             return;
         }
-        rail = rail->next;
+        rail = ((cRailModifier*)rail->Next);
         goto loop;
     } else {
         do {
-            sModBlockLink3300* next = rail->next;
+            cRailModifier* next = ((cRailModifier*)rail->Next);
             if (rail != 0) {
-                rail->vt[1].fn(vthis(rail, rail->vt[1]), 3);
+                ((sModBlockDtorVEntry3300*)rail->mVtbl)[1].fn(vthis(rail, ((sModBlockDtorVEntry3300*)rail->mVtbl)[1]), 3);
             }
             rail = next;
         } while (rail != 0);

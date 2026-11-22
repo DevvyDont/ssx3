@@ -2209,10 +2209,9 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDMEMI_alloc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 /* SNDMEMI_alloc (EA snd library, smemman.c; On Tour's SNDMEMI_allocz minus its debug checks) */
-struct SNDMEMREC_5C60 { unsigned int addr; int size; };
 struct SNDMEMSTATE_5C60 {
     char *pheap;
-    struct SNDMEMREC_5C60 *r;   /* grows down from endaddr; indexed 0, -1, -2, ... */
+    struct SNDMEMREC *r;   /* grows down from endaddr; indexed 0, -1, -2, ... */
     int heapsize;
     unsigned int endaddr;
     int lowmark;
@@ -2233,8 +2232,8 @@ void *SNDMEMI_alloc_5C60(int size) __asm__("SNDMEMI_alloc");
  * @return the block, or 0 when nothing fits
  */
 void *SNDMEMI_alloc_5C60(int size) {
-    struct SNDMEMREC_5C60 *pcurrec;
-    struct SNDMEMREC_5C60 *pprevrec;
+    struct SNDMEMREC *pcurrec;
+    struct SNDMEMREC *pprevrec;
     void *allocated;
     unsigned int freeaddr;
     int freespace;
@@ -2282,7 +2281,7 @@ alloc:
     pcurrec->addr = freeaddr;
     pcurrec->size = size;
     ((struct SNDMEMSTATE_5C60*)sndgs.mm)->nummallocs--;
-    ((struct SNDMEMSTATE_5C60*)sndgs.mm)->endaddr -= sizeof(struct SNDMEMREC_5C60);
+    ((struct SNDMEMSTATE_5C60*)sndgs.mm)->endaddr -= sizeof(struct SNDMEMREC);
     allocated = ((struct SNDMEMSTATE_5C60*)sndgs.mm)->pheap + freeaddr;
     lowmark = ((struct SNDMEMSTATE_5C60*)sndgs.mm)->endaddr - (freeaddr + size);
     if (lowmark < ((struct SNDMEMSTATE_5C60*)sndgs.mm)->lowmark) {
@@ -2299,9 +2298,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDMEMI_free);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void SNDMEMI_free_5E98(int) __asm__("SNDMEMI_free");
-struct E_5E98 { int key; int val; };
-struct S_5E98 { int base; struct E_5E98 *arr; int p2; int x; int p4; int cnt; };
-struct G_5E98 { char pad[0x234]; struct S_5E98 *s; };
+struct G_5E98 { char pad[0x234]; struct SNDMEMSTATE *s; };
 
 /**
  * Frees a block from the sound heap.
@@ -2313,22 +2310,22 @@ struct G_5E98 { char pad[0x234]; struct S_5E98 *s; };
  */
 void SNDMEMI_free_5E98(int address) {
     int i = 0;
-    int heapOffset = address - ((struct S_5E98*)sndgs.mm)->base;
-    if (((struct S_5E98*)sndgs.mm)->cnt >= 0) return;
+    int heapOffset = address - ((int)((struct SNDMEMSTATE*)sndgs.mm)->pheap);
+    if (((struct SNDMEMSTATE*)sndgs.mm)->nummallocs >= 0) return;
     while (1) {
-        struct S_5E98 *memState = (struct S_5E98*)sndgs.mm;
-        if (((struct E_5E98 *)((char *)memState->arr + (i << 3)))->key == heapOffset) {
-            memState->cnt++;
-            ((struct S_5E98*)sndgs.mm)->x += 8;
-            if (!(((struct S_5E98*)sndgs.mm)->cnt < i)) return;
+        struct SNDMEMSTATE *memState = (struct SNDMEMSTATE*)sndgs.mm;
+        if (((int)((struct SNDMEMREC *)((char *)((struct SNDMEMREC*)memState->r) + (i << 3)))->addr) == heapOffset) {
+            memState->nummallocs++;
+            (*(int*)&((struct SNDMEMSTATE*)sndgs.mm)->endaddr) += 8;
+            if (!(((struct SNDMEMSTATE*)sndgs.mm)->nummallocs < i)) return;
             do {
-                ((struct S_5E98*)sndgs.mm)->arr[i] = ((struct S_5E98*)sndgs.mm)->arr[i - 1];
+                ((struct SNDMEMREC*)((struct SNDMEMSTATE*)sndgs.mm)->r)[i] = ((struct SNDMEMREC*)((struct SNDMEMSTATE*)sndgs.mm)->r)[i - 1];
                 i--;
-            } while (((struct S_5E98*)sndgs.mm)->cnt < i);
+            } while (((struct SNDMEMSTATE*)sndgs.mm)->nummallocs < i);
             return;
         }
         i--;
-        if (!(memState->cnt < i)) return;
+        if (!(memState->nummallocs < i)) return;
     }
 }
 #endif
@@ -2479,13 +2476,6 @@ fail:
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", SNDbankremove);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct E_6300 {
-    void *p;
-    char pad04[0xE];
-    short f12;
-    char pad14[0x8C - 0x14];
-};
 struct R_6300 {
     void *p0;
     int p4;
@@ -2530,9 +2520,9 @@ int SNDbankremove(int bankHandle) {
     SNDSYS_entercritical_6300();
     obj = ((struct R_6300*)(struct BANKLIST*)sndgs.banklist)[bankHandle].p0;
     for (i = 0; i < sndgs.voicestotal; i++) {
-        struct E_6300 *channel = &((struct E_6300*)(struct CHANPUB*)sndgs.chan)[i];
-        if (channel->f12 == bankHandle) {
-            SNDstop_6300(channel->p);
+        struct CHANPUB *channel = &((struct CHANPUB*)(struct CHANPUB*)sndgs.chan)[i];
+        if (channel->bhandle == bankHandle) {
+            SNDstop_6300(((void*)channel->handle));
         }
     }
     for (i = 0; i < *(unsigned short *)((char *)obj + 6); i++) {
@@ -5211,27 +5201,11 @@ int SNDI_midiseqover(int seqIndex) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDI_midiparsenoteon);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// FAKEMATCH: cc.b17 read into a temp `t17` between the two azimuth statements (stored to parm.bend at its original
-// place), so its extraction precedes azimuth's zero-extension in insn order and wins sched's tie; plain form 99.81%.
-// Byte-identical and behaves like the plain form; landed marked under the 2026-11-14 ruling (portable,
-// behaviour-preserving steering only); replace it when an honest spelling matches.
-struct sNoteParm_8F78 {             /* 0x20: note parameters for SNDBANK_play (SNDplaysetdef sets defaults) */
-    unsigned char vol;              /* field names from On Tour's SNDPLAYOPTS, which starts the same way */
-    unsigned char bend;
-    unsigned char keynum;
-    unsigned char velocity;
-    int pad4;
-    unsigned short azimuth;
-    short padA;
-    unsigned short pitchmult;
-    char padE[0x20 - 0xE];
-};
 struct sSongHandle_8F78 { int id; };
 extern int D_0044C474;              /* last voice slot handed out */
 extern int SNDVOICEI_get_8F78(int) __asm__("SNDVOICEI_get");
-extern void SNDplaysetdef_8F78(struct sNoteParm_8F78 *) __asm__("SNDplaysetdef");
-extern int SNDBANK_play_8F78(int, int, struct sNoteParm_8F78 *) __asm__("SNDBANK_play");
+extern void SNDplaysetdef_8F78(struct SNDPLAYOPTS *) __asm__("SNDplaysetdef");
+extern int SNDBANK_play_8F78(int, int, struct SNDPLAYOPTS *) __asm__("SNDBANK_play");
 
 /**
  * Plays a MIDI note-on: picks a free note voice and plays the channel's patch.
@@ -5254,7 +5228,7 @@ extern int SNDBANK_play_8F78(int, int, struct sNoteParm_8F78 *) __asm__("SNDBANK
  * @param key  the key
  */
 void SNDI_midiparsenoteon(struct sSongHandle_8F78 seqSlot, struct sA120Chan *midiChan, int ch, int key) {
-    struct sNoteParm_8F78 parm;
+    struct SNDPLAYOPTS parm;
     struct sA120Song *seqInst = &sndms.f000[seqSlot.id];
     struct sA120Voice *voiceSlot = 0;
     int found = 0;
@@ -6845,23 +6819,6 @@ again:
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDBANKI_playtimbre);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct P_B140 {
-    signed char b0;
-    signed char b1;
-    char pad2[2];
-    unsigned char b4;
-    signed char b5;
-    char pad6[2];
-    unsigned short h8;
-    unsigned short hA;
-    unsigned short hC;
-    unsigned short hE;
-    char pad10[2];
-    unsigned short h12;
-    unsigned short h14;
-    unsigned short h16;
-};
 struct Smp_B140 { int w0; int w4; };
 struct Ch_B140 {
     char pad0[4];
@@ -6954,7 +6911,7 @@ extern void fA550_B140(int) __asm__("SNDVOICEI_free");
  * @param masterranddetune  a detune shared by all timbres of the note (cents)
  * @return the sound handle, or -9
  */
-int SNDBANKI_playtimbre(int bhandle, int patnum, void *psampledata, struct P_B140 *pspo, struct SNDIPATCHHEADER *pph, int keynum, int velocity, int masterranddetune) {
+int SNDBANKI_playtimbre(int bhandle, int patnum, void *psampledata, struct SNDPLAYOPTS *pspo, struct SNDIPATCHHEADER *pph, int keynum, int velocity, int masterranddetune) {
     struct Ch_B140 *pv;
     int rendermodeindex;
     int rendermode;
@@ -6972,9 +6929,9 @@ int SNDBANKI_playtimbre(int bhandle, int patnum, void *psampledata, struct P_B14
 
     handle = -9;
     done = 0;
-    vol = pspo->b0;
-    bend = pspo->b1;
-    fxlevel0 = pspo->b5;
+    vol = pspo->vol;
+    bend = pspo->bend;
+    fxlevel0 = pspo->fxlevel0;
     rendermodeindex = 0;
     while (!done) {
         rendermode = f6158_B140(&rendermodeindex, pph);
@@ -7048,14 +7005,14 @@ int SNDBANKI_playtimbre(int bhandle, int patnum, void *psampledata, struct P_B14
         } else {
             pv->b68 = 0;
         }
-        pv->h6A = pspo->hE;
-        pv->h88 = pspo->hC;
+        pv->h6A = pspo->timemult;
+        pv->h88 = pspo->pitchmult;
         pv->h86 = 0;
         fA938_B140(voice);
         pv->h12 = bhandle;
         pv->h10 = patnum;
-        pv->h1C = pv->h4C + pspo->h8;
-        pv->h1E = pspo->hA;
+        pv->h1C = pv->h4C + pspo->azimuth;
+        pv->h1E = (*(unsigned short*)&pspo->elevation);
         pv->w18 = pph->sustainend;
         pv->w14 = pph->totalframes;
         pv->h20 = pph->samplerate;
@@ -7065,12 +7022,12 @@ int SNDBANKI_playtimbre(int bhandle, int patnum, void *psampledata, struct P_B14
         for (i = 0; i < pph->numchan; i++) {
             pv->h50[i] = pph->azimuth[i];
         }
-        pv->b5F = pspo->b4;
+        pv->b5F = (*(unsigned char*)&pspo->drylevel);
         pv->b60 = (*(unsigned char*)&pph->fxlevel0);
         pv->b61 = fxlevel0;
         fA740_B140(0, voice);
         fA7B0_B140(voice);
-        if (f3EE0_B140(pph, (int)psampledata, voice, pspo->hE, pspo->h12, pspo->h14, pspo->h16) >= 0) {
+        if (f3EE0_B140(pph, (int)psampledata, voice, pspo->timemult, pspo->pad2, pspo->lowpasscutoff, pspo->highpasscutoff) >= 0) {
             return handle;
         }
         for (i = 0; i < pph->numchan; i++) {
@@ -7085,22 +7042,12 @@ int SNDBANKI_playtimbre(int bhandle, int patnum, void *psampledata, struct P_B14
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", SNDBANKI_playpatch);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct Rec_B588 {
-    short id;
-    char pad2[6];
-    unsigned char x0;
-    unsigned char x1;
-    unsigned char y0;
-    unsigned char y1;
-    char padC[0xD0 - 0xC];
-};
 struct G_B588 { char pad[0x1F0]; char *ents; };
 extern int f_B0C8_B588(void) __asm__("SNDBANKI_findfreekey");
-extern int f_AAC0_B588(int **, struct Rec_B588 *) __asm__("SNDI_parsetimbre");
+extern int f_AAC0_B588(int **, struct SNDIPATCHHEADER *) __asm__("SNDI_parsetimbre");
 extern int f_72A0_B588(int) __asm__("randrange");
-extern int f_B140_B588(int, int, int *, signed char *, struct Rec_B588 *, int, int, int) __asm__("SNDBANKI_playtimbre");
-extern void f_5F98_B588(struct Rec_B588 *, int) __asm__("SNDBANKI_userdatacallback");
+extern int f_B140_B588(int, int, int *, signed char *, struct SNDIPATCHHEADER *, int, int, int) __asm__("SNDBANKI_playtimbre");
+extern void f_5F98_B588(struct SNDIPATCHHEADER *, int) __asm__("SNDBANKI_userdatacallback");
 extern int f_8AB8_B588(int) __asm__("SNDover");
 extern int f_A6E8_B588(int) __asm__("SNDVOICEI_get");
 extern void f_89E0_B588(int) __asm__("SNDstop");
@@ -7123,7 +7070,7 @@ int SNDBANKI_playpatch_impl(int *self, int *cur, int a2, int a3, signed char *po
  * @return the last sound handle, -9 when nothing played, or -8
  */
 int SNDBANKI_playpatch_impl(int *self, int *cur, int bankHandle, int patchNum, signed char *pos) {
-    struct Rec_B588 rec;
+    struct SNDIPATCHHEADER rec;
     int ids[12];
     int n;
     int startedCount;
@@ -7156,12 +7103,12 @@ int SNDBANKI_playpatch_impl(int *self, int *cur, int bankHandle, int patchNum, s
     do {
         more = f_AAC0_B588(&cur, &rec);
         if (!first) {
-            if (rec.id) {
-                masterDetune = f_72A0_B588(rec.id);
+            if (rec.masterranddetune) {
+                masterDetune = f_72A0_B588(rec.masterranddetune);
             }
             first = 1;
         }
-        if (x >= (signed char)rec.x0 && x <= (signed char)rec.x1 && y >= (signed char)rec.y0 && y <= (signed char)rec.y1) {
+        if (x >= (signed char)(*(unsigned char*)&rec.velmin) && x <= (signed char)(*(unsigned char*)&rec.velmax) && y >= (signed char)(*(unsigned char*)&rec.keymin) && y <= (signed char)(*(unsigned char*)&rec.keymax)) {
             ret = f_B140_B588(bankHandle, patchNum, self, pos, &rec, y, x, masterDetune);
             if (ret < 0) {
                 goto fail;
@@ -7213,8 +7160,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDI_patchtohdr);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 /* PT / GSTR sound header parser */
-struct Rec_B820 { unsigned char *p; int id; int v1; int v2; int v3; };
-struct Hdr_B820 { unsigned short rate; unsigned char channels; unsigned char f3; };
 struct Out_B820 {
     char pad0[2];
     unsigned char f2;
@@ -7239,10 +7184,10 @@ struct G_B820 {
 };
 extern void f_6210_B820(void *, int, int) __asm__("memset");
 extern int f_7218_B820(struct Out_B820 *) __asm__("SND_attrsetdef");
-extern int f_7388_B820(struct Rec_B820 *) __asm__("SNDI_gettag");
+extern int f_7388_B820(struct SNDTAGINFO *) __asm__("SNDI_gettag");
 extern void *f_5C60_B820(int) __asm__("SNDMEMI_alloc");
 extern void f_51E8_B820(void *, void *, int) __asm__("Util_MemCpy");
-extern void f_BDA0_B820(int, unsigned char *, struct Hdr_B820 *, struct Out_B820 *, struct Extra_B820 *) __asm__("SNDI_patchtohdrgen");
+extern void f_BDA0_B820(int, unsigned char *, struct SNDSAMPLEFORMAT *, struct Out_B820 *, struct Extra_B820 *) __asm__("SNDI_patchtohdrgen");
 
 extern struct G_B820 sndgs_B820 __asm__("sndgs");
 /**
@@ -7264,9 +7209,9 @@ extern struct G_B820 sndgs_B820 __asm__("sndgs");
  * @param extra  receives the sample description (frames, offsets)
  * @param isGstr  if not null, receives 1 for a GSTR patch, else 0
  */
-void SNDI_patchtohdr(int base, unsigned char *src, struct Hdr_B820 *hdr, struct Out_B820 *out,
+void SNDI_patchtohdr(int base, unsigned char *src, struct SNDSAMPLEFORMAT *hdr, struct Out_B820 *out,
                    struct Extra_B820 *extra, char *isGstr) {
-    struct Rec_B820 rec;
+    struct SNDTAGINFO rec;
     int vals[6];
     int n;
     int flags;
@@ -7291,83 +7236,83 @@ void SNDI_patchtohdr(int base, unsigned char *src, struct Hdr_B820 *hdr, struct 
         *isGstr = 0;
     }
     f_7218_B820(out);
-    rec.p = src + 4;
-    hdr->rate = 22050;
+    rec.ptag = src + 4;
+    hdr->samplerate = 22050;
     hdr->channels = 1;
-    hdr->f3 = 5;
+    hdr->samplerep = 5;
     extra->f0 = 0;
     while (f_7388_B820(&rec)) {
-        if (rec.id == 160) {
-            hdr->f3 = rec.v1;
-        } else if (rec.id == 156) {
-            vals[0] = rec.v1;
-        } else if (rec.id == 157) {
-            vals[1] = rec.v1;
-        } else if (rec.id == 158) {
-            vals[2] = rec.v1;
-        } else if (rec.id == 159) {
-            vals[3] = rec.v1;
-        } else if (rec.id == 166) {
-            vals[4] = rec.v1;
-        } else if (rec.id == 167) {
-            vals[5] = rec.v1;
-        } else if (rec.id == 152) {
-            out->data[0] = f_5C60_B820(rec.v3);
-            f_51E8_B820(out->data[0], (void *)rec.v2, rec.v3);
-            out->size[0] = rec.v3;
-        } else if (rec.id == 153) {
-            out->data[1] = f_5C60_B820(rec.v3);
-            f_51E8_B820(out->data[1], (void *)rec.v2, rec.v3);
-            out->size[1] = rec.v3;
-        } else if (rec.id == 154) {
-            out->data[2] = f_5C60_B820(rec.v3);
-            f_51E8_B820(out->data[2], (void *)rec.v2, rec.v3);
-            out->size[2] = rec.v3;
-        } else if (rec.id == 155) {
-            out->data[3] = f_5C60_B820(rec.v3);
-            f_51E8_B820(out->data[3], (void *)rec.v2, rec.v3);
-            out->size[3] = rec.v3;
-        } else if (rec.id == 164) {
-            out->data[4] = f_5C60_B820(rec.v3);
-            f_51E8_B820(out->data[4], (void *)rec.v2, rec.v3);
-            out->size[4] = rec.v3;
-        } else if (rec.id == 165) {
-            out->data[5] = f_5C60_B820(rec.v3);
-            f_51E8_B820(out->data[5], (void *)rec.v2, rec.v3);
-            out->size[5] = rec.v3;
-        } else if (rec.id == 0x80) {
-            out->f7 = rec.v1;
-        } else if (rec.id == 130) {
-            hdr->channels = rec.v1;
-        } else if (rec.id == 132) {
-            hdr->rate = rec.v1;
-        } else if (rec.id == 133) {
-            extra->f0 = rec.v1;
-        } else if (rec.id == 138) {
-            ref = (int *)rec.v2;
-        } else if (rec.id == 19) {
-            out->f5 = rec.v1;
-        } else if (rec.id == 10) {
-            out->f6 = rec.v1;
-        } else if (rec.id == 0x06) {
-            out->f2 = rec.v1;
-        } else if (rec.id == 140) {
-            flags = rec.v1;
-        } else if (rec.id == 136) {
-            extra->offs[0] = rec.v1;
-        } else if (rec.id == 137) {
-            extra->offs[1] = rec.v1;
-        } else if (rec.id == 148) {
-            extra->offs[2] = rec.v1;
-        } else if (rec.id == 149) {
-            extra->offs[3] = rec.v1;
-        } else if (rec.id == 162) {
-            extra->offs[4] = rec.v1;
-        } else if (rec.id == 163) {
-            extra->offs[5] = rec.v1;
-        } else if (rec.id == 20) {
-            out->a48[n] = rec.v2;
-            out->a58[n] = rec.v3;
+        if (rec.tagtype == 160) {
+            hdr->samplerep = rec.tagval;
+        } else if (rec.tagtype == 156) {
+            vals[0] = rec.tagval;
+        } else if (rec.tagtype == 157) {
+            vals[1] = rec.tagval;
+        } else if (rec.tagtype == 158) {
+            vals[2] = rec.tagval;
+        } else if (rec.tagtype == 159) {
+            vals[3] = rec.tagval;
+        } else if (rec.tagtype == 166) {
+            vals[4] = rec.tagval;
+        } else if (rec.tagtype == 167) {
+            vals[5] = rec.tagval;
+        } else if (rec.tagtype == 152) {
+            out->data[0] = f_5C60_B820(((int)rec.tagsize));
+            f_51E8_B820(out->data[0], (void *)((int)rec.tagptr), ((int)rec.tagsize));
+            out->size[0] = ((int)rec.tagsize);
+        } else if (rec.tagtype == 153) {
+            out->data[1] = f_5C60_B820(((int)rec.tagsize));
+            f_51E8_B820(out->data[1], (void *)((int)rec.tagptr), ((int)rec.tagsize));
+            out->size[1] = ((int)rec.tagsize);
+        } else if (rec.tagtype == 154) {
+            out->data[2] = f_5C60_B820(((int)rec.tagsize));
+            f_51E8_B820(out->data[2], (void *)((int)rec.tagptr), ((int)rec.tagsize));
+            out->size[2] = ((int)rec.tagsize);
+        } else if (rec.tagtype == 155) {
+            out->data[3] = f_5C60_B820(((int)rec.tagsize));
+            f_51E8_B820(out->data[3], (void *)((int)rec.tagptr), ((int)rec.tagsize));
+            out->size[3] = ((int)rec.tagsize);
+        } else if (rec.tagtype == 164) {
+            out->data[4] = f_5C60_B820(((int)rec.tagsize));
+            f_51E8_B820(out->data[4], (void *)((int)rec.tagptr), ((int)rec.tagsize));
+            out->size[4] = ((int)rec.tagsize);
+        } else if (rec.tagtype == 165) {
+            out->data[5] = f_5C60_B820(((int)rec.tagsize));
+            f_51E8_B820(out->data[5], (void *)((int)rec.tagptr), ((int)rec.tagsize));
+            out->size[5] = ((int)rec.tagsize);
+        } else if (rec.tagtype == 0x80) {
+            out->f7 = rec.tagval;
+        } else if (rec.tagtype == 130) {
+            hdr->channels = rec.tagval;
+        } else if (rec.tagtype == 132) {
+            hdr->samplerate = rec.tagval;
+        } else if (rec.tagtype == 133) {
+            extra->f0 = rec.tagval;
+        } else if (rec.tagtype == 138) {
+            ref = (int *)((int)rec.tagptr);
+        } else if (rec.tagtype == 19) {
+            out->f5 = rec.tagval;
+        } else if (rec.tagtype == 10) {
+            out->f6 = rec.tagval;
+        } else if (rec.tagtype == 0x06) {
+            out->f2 = rec.tagval;
+        } else if (rec.tagtype == 140) {
+            flags = rec.tagval;
+        } else if (rec.tagtype == 136) {
+            extra->offs[0] = rec.tagval;
+        } else if (rec.tagtype == 137) {
+            extra->offs[1] = rec.tagval;
+        } else if (rec.tagtype == 148) {
+            extra->offs[2] = rec.tagval;
+        } else if (rec.tagtype == 149) {
+            extra->offs[3] = rec.tagval;
+        } else if (rec.tagtype == 162) {
+            extra->offs[4] = rec.tagval;
+        } else if (rec.tagtype == 163) {
+            extra->offs[5] = rec.tagval;
+        } else if (rec.tagtype == 20) {
+            out->a48[n] = ((int)rec.tagptr);
+            out->a58[n] = ((int)rec.tagsize);
             n++;
         }
     }
@@ -11600,28 +11545,6 @@ int SNDPLATFORM_outputcaps(void) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_outputset);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct Sub_0E28 {
-    char pad00[0xA];
-    unsigned short hA;
-    unsigned short hC;
-    unsigned char bE;
-    unsigned char bF;
-    unsigned char b10;
-    char pad11[0x20 - 0x11];
-    unsigned char b20;
-    unsigned char b21;
-    char pad22[0x26 - 0x22];
-    unsigned char b26;
-    unsigned char b27;
-    unsigned char b28;
-    unsigned char b29;
-    unsigned char b2A;
-    char pad2B[0x44 - 0x2B];
-    unsigned int w44;
-    int w48;
-    char pad4C[0xA0 - 0x4C];
-};
 struct G_0E28 {
     char pad0[4];
     unsigned char b4;
@@ -11630,9 +11553,9 @@ struct G_0E28 {
     unsigned char b7;
     unsigned char b8;
     char pad9[0x20 - 9];
-    struct Sub_0E28 sub;
+    struct SNDSYSSET sub;
     char padC0[0xD4 - 0xC0];
-    struct Sub_0E28 saved;
+    struct SNDSYSSET saved;
     char pad174[0x174 - 0x174];
     signed char f174;
     char pad175[0x17E - 0x175];
@@ -11641,7 +11564,7 @@ struct G_0E28 {
     struct CHANPUB *chans;
 };
 struct O_0E28 { char pad[0x13]; unsigned char b13; };
-extern struct Sub_0E28 D_0050A908_0E28 __asm__("D_0050A908");
+extern struct SNDSYSSET D_0050A908_0E28 __asm__("D_0050A908");
 extern struct O_0E28 *D_0050B9B0_0E28 __asm__("D_0050B9B0");
 extern void f8148_0E28(int) __asm__("MIX_setresamplequality");
 extern void f38E0_0E28(int) __asm__("func_003C38E0");
@@ -11661,78 +11584,78 @@ extern void f38E0_0E28(int) __asm__("func_003C38E0");
  * @return 0
  */
 int SNDPLATFORM_outputset(void) {
-    struct Sub_0E28 requested;
+    struct SNDSYSSET requested;
     int i;
 
     requested = D_0050A908_0E28;
     if (sndgs.installed) {
-        *(struct Sub_0E28*)&sndgs.sso.set = *(struct Sub_0E28*)&sndgs.prevset;
-        if (sndgs.prevset.outputspdifmode != requested.b29) {
+        *(struct SNDSYSSET*)&sndgs.sso.set = *(struct SNDSYSSET*)&sndgs.prevset;
+        if (sndgs.prevset.outputspdifmode != requested.outputspdifmode) {
             return 0;
         }
     }
-    if (requested.hA <= 24000) {
-        requested.hA = 24000;
-    } else if (requested.hA <= 36000) {
-        requested.hA = 36000;
+    if (requested.outputrate <= 24000) {
+        requested.outputrate = 24000;
+    } else if (requested.outputrate <= 36000) {
+        requested.outputrate = 36000;
     } else {
-        requested.hA = 48000;
+        requested.outputrate = 48000;
     }
-    if (requested.hC <= 24000) {
-        requested.hC = 24000;
-    } else if (requested.hC <= 36000) {
-        requested.hC = 36000;
+    if (requested.outputrateiopcpu <= 24000) {
+        requested.outputrateiopcpu = 24000;
+    } else if (requested.outputrateiopcpu <= 36000) {
+        requested.outputrateiopcpu = 36000;
     } else {
-        requested.hC = 48000;
+        requested.outputrateiopcpu = 48000;
     }
-    if (requested.b29 & 2) {
-        requested.b10 = 0x18;
-        if (requested.b27 < 4) {
-            requested.b27 = 4;
+    if (requested.outputspdifmode & 2) {
+        requested.voicesspu = 0x18;
+        if (requested.outputchannels < 4) {
+            requested.outputchannels = 4;
         }
     }
-    if (requested.b29 & 1) {
-        if (requested.b27 > 2) {
-            requested.b27 = 2;
+    if (requested.outputspdifmode & 1) {
+        if (requested.outputchannels > 2) {
+            requested.outputchannels = 2;
         }
-        requested.b28 = 0;
+        requested.outputlfe = 0;
     }
-    if (requested.b2A > 100) {
-        requested.b2A = 100;
+    if (requested.dtsquality > 100) {
+        requested.dtsquality = 100;
     }
-    if (requested.b27 < sndgs.sso.cap.outputchannelsmin) {
-        requested.b27 = sndgs.sso.cap.outputchannelsmin;
-    } else if (requested.b27 > sndgs.sso.cap.outputchannelsmax) {
-        requested.b27 = sndgs.sso.cap.outputchannelsmax;
+    if (requested.outputchannels < sndgs.sso.cap.outputchannelsmin) {
+        requested.outputchannels = sndgs.sso.cap.outputchannelsmin;
+    } else if (requested.outputchannels > sndgs.sso.cap.outputchannelsmax) {
+        requested.outputchannels = sndgs.sso.cap.outputchannelsmax;
     }
-    if (requested.b27 == 5) {
-        requested.b28 = 1;
+    if (requested.outputchannels == 5) {
+        requested.outputlfe = 1;
     } else {
-        requested.b28 = 0;
+        requested.outputlfe = 0;
     }
-    if (requested.bE > sndgs.sso.cap.voicesmaincpumax) {
-        requested.bE = sndgs.sso.cap.voicesmaincpumax;
+    if (requested.voicesmaincpu > sndgs.sso.cap.voicesmaincpumax) {
+        requested.voicesmaincpu = sndgs.sso.cap.voicesmaincpumax;
     }
-    if (requested.bF > sndgs.sso.cap.voicesiopcpumax) {
-        requested.bF = sndgs.sso.cap.voicesiopcpumax;
+    if (requested.voicesiopcpu > sndgs.sso.cap.voicesiopcpumax) {
+        requested.voicesiopcpu = sndgs.sso.cap.voicesiopcpumax;
     }
-    if (requested.b10 > sndgs.sso.cap.voicesspumax) {
-        requested.b10 = sndgs.sso.cap.voicesspumax;
+    if (requested.voicesspu > sndgs.sso.cap.voicesspumax) {
+        requested.voicesspu = sndgs.sso.cap.voicesspumax;
     }
-    if (requested.b26 > 0x20) {
-        requested.b26 = 0x20;
+    if (requested.maxstreams > 0x20) {
+        requested.maxstreams = 0x20;
     }
-    f8148_0E28(requested.b20);
-    if ((unsigned int)sndgs.sso.set.fastramaddr != 0 && (requested.w44 & 0xF)) {
-        requested.w44 = ((requested.w44 + 0xF) >> 4) << 4;
-        requested.w48 -= 0x10;
+    f8148_0E28(requested.resamplequality);
+    if ((unsigned int)sndgs.sso.set.fastramaddr != 0 && (((unsigned int)requested.fastramaddr) & 0xF)) {
+        (*(unsigned int*)&requested.fastramaddr) = ((((unsigned int)requested.fastramaddr) + 0xF) >> 4) << 4;
+        requested.fastramsize -= 0x10;
     }
     if (sndgs.installed) {
-        sndgs.sso.set.resamplequality = requested.b20;
-        sndgs.sso.set.iopcpuresamplequality = requested.b21;
-        D_0050B9B0_0E28->b13 = requested.b21;
-        if (sndgs.prevset.outputchannels != requested.b27) {
-            sndgs.sso.set.outputchannels = requested.b27;
+        sndgs.sso.set.resamplequality = requested.resamplequality;
+        sndgs.sso.set.iopcpuresamplequality = requested.iopcpuresamplequality;
+        D_0050B9B0_0E28->b13 = requested.iopcpuresamplequality;
+        if (sndgs.prevset.outputchannels != requested.outputchannels) {
+            sndgs.sso.set.outputchannels = requested.outputchannels;
             for (i = 0; i < sndgs.voicestotal; i++) {
                 if (sndgs.chan[i].status == 1 && sndgs.chan[i].masterchan < 0) {
                     f38E0_0E28(i);
@@ -11741,8 +11664,8 @@ int SNDPLATFORM_outputset(void) {
         }
         return 0;
     }
-    sndgs.voicestotal = requested.bE + requested.bF + requested.b10;
-    *(struct Sub_0E28*)&sndgs.sso.set = requested;
+    sndgs.voicestotal = requested.voicesmaincpu + requested.voicesiopcpu + requested.voicesspu;
+    *(struct SNDSYSSET*)&sndgs.sso.set = requested;
     return 0;
 }
 #endif
@@ -14985,10 +14908,7 @@ int System_GetOutputMode(int *outMode) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", System_CapOutputSampleRate);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct Cfg_5660 { char pad[0xD4]; };
-extern int SNDSYS_getopts_5660(struct Cfg_5660 *) __asm__("SNDSYS_getopts");
+extern int SNDSYS_getopts_5660(struct SNDSYSOPTS *) __asm__("SNDSYS_getopts");
 
 /**
  * Returns the supported output rate closest to a requested one for a device.
@@ -15002,7 +14922,7 @@ extern int SNDSYS_getopts_5660(struct Cfg_5660 *) __asm__("SNDSYS_getopts");
  * @return 0, or -5 for an unknown device
  */
 int System_CapOutputSampleRate(int mode, int rate, int *out) {
-    struct Cfg_5660 cfg;
+    struct SNDSYSOPTS cfg;
     SNDSYS_getopts_5660(&cfg);
     switch (mode) {
     case 0:
@@ -16341,26 +16261,9 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDPKTPLAY_start);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct SNDSAMPLEATTR SNDSAMPLEATTR_6760;
-typedef struct SNDPLAYOPTS_6760 SNDPLAYOPTS_6760;
-struct SNDPLAYOPTS_6760 {
-    signed char c0;
-    unsigned char b1;
-    char pad2[2];
-    unsigned char b4;
-    unsigned char b5;
-    char pad6[2];
-    unsigned short h8;
-    char padA[2];
-    unsigned short hC;
-    unsigned short hE;
-    char pad10[2];
-    unsigned short h12;
-    unsigned short h14;
-    unsigned short h16;
-};
+typedef struct SNDPLAYOPTS SNDPLAYOPTS_6760;
 /* The packet channel is the unit's struct s7B8Queue (sndpps.f304[], same volatile fields). */
-typedef struct SNDIPATCHHEADER_6760 SNDIPATCHHEADER_6760;
-struct SNDIPATCHHEADER_6760 { char pad0[3]; unsigned char n; char pad4[0x14]; unsigned short h18; char pad1A[0xD0 - 0x1A]; };
+typedef struct SNDIPATCHHEADER SNDIPATCHHEADER_6760;
 extern int f_6158_6760(int *, SNDIPATCHHEADER_6760 *) __asm__("SNDI_validrendermode");
 extern void f_0C18_6760(int, int *, int *) __asm__("SNDPLATFORM_getvoicerange");
 extern int f_A0B0_6760(int, int, int *, int, int) __asm__("SNDVOICEI_alloc");
@@ -16406,8 +16309,8 @@ int SNDPKTPLAY_start_impl(int packetinstancehandle, SNDSAMPLEFORMAT *pssf, SNDSA
     voicesneeded = pssf->channels;
     ppchan = sndpps.f304[packetinstancehandle];
     rendermodeindex = 0;
-    ph.n = pssf->channels;
-    ph.h18 = pssa->rendermode;
+    ph.numchan = pssf->channels;
+    ph.rendermode = pssa->rendermode;
     ppchan->f60 = *pssf;
     ppchan->f04 = 0;
     ppchan->f48 = 0;
@@ -16436,23 +16339,23 @@ int SNDPKTPLAY_start_impl(int packetinstancehandle, SNDSAMPLEFORMAT *pssf, SNDSA
             ppchan->f42 = f_6580_6760(voice, pssf->channels);
             pVoice = &sndgs.chan[voice];
             pVoice->builtinazimuth = 0;
-            pVoice->azimuth = pspo->h8;
+            pVoice->azimuth = pspo->azimuth;
             pVoice->bhandle = -1;
             pVoice->initialdetune = (*(unsigned short*)&pssa->detune);
-            pVoice->progpitch = pspo->hC;
+            pVoice->progpitch = pspo->pitchmult;
             pVoice->fadePer100Hz = 0;
-            pVoice->programmedVol = pspo->c0 << 16;
+            pVoice->programmedVol = pspo->vol << 16;
             pVoice->envduration = 0x7FFFFFFF;
             pVoice->envvol = 0x7F0000;
             pVoice->envpertick = 0;
             pVoice->builtinvol = (*(unsigned char*)&pssa->vol);
-            pVoice->pitchbend = pspo->b1;
+            pVoice->pitchbend = (*(unsigned char*)&pspo->bend);
             pVoice->numenvelopes = 1;
             pVoice->curenvelope = 0;
             pVoice->releaseenvelope = 0;
             pVoice->progfxlevel[0] = (*(unsigned char*)&pssa->fxlevel0);
-            pVoice->drylevel = pspo->b4;
-            pVoice->unk_61[0] = pspo->b5;
+            pVoice->drylevel = (*(unsigned char*)&pspo->drylevel);
+            pVoice->unk_61[0] = (*(unsigned char*)&pspo->fxlevel0);
             pVoice->bendrange = pssa->bendrange * 100;
             pVoice->patchkey = 0;
             pVoice->ismaster = 0;
@@ -16474,7 +16377,7 @@ int SNDPKTPLAY_start_impl(int packetinstancehandle, SNDSAMPLEFORMAT *pssf, SNDSA
             f_A938_6760(voice);
             f_A7B0_6760(voice);
             f_A740_6760(0, voice);
-            ret = f_E1B0_6760(packetinstancehandle, voice, pspo->hE, pspo->h12, pspo->h14, pspo->h16, pssf, pssa);
+            ret = f_E1B0_6760(packetinstancehandle, voice, pspo->timemult, pspo->pad2, pspo->lowpasscutoff, pspo->highpasscutoff, pssf, pssa);
             if (ret >= 0) {
                 break;
             }
@@ -16836,8 +16739,7 @@ void SNDPKTPLAYI_freeframes(int id, int channel, int frames)
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDPKTPLAYI_flushcallbackdata);
 #ifdef SKIP_ASM
-struct Ev_7080 { unsigned short type; unsigned short id; int val; };
-struct G_7080 { int count; struct Ev_7080 ev[0x60]; struct SNDPACKETCHAN *q[1]; };
+struct G_7080 { int count; struct SNDIPACKETCALLBACK ev[0x60]; struct SNDPACKETCHAN *q[1]; };
 extern struct G_7080 sndpps_7080 __asm__("sndpps");
 
 /**
@@ -16850,12 +16752,12 @@ extern struct G_7080 sndpps_7080 __asm__("sndpps");
 void SNDPKTPLAYI_flushcallbackdata(void) {
     int i;
     for (i = 0; i < sndpps_7080.count; i++) {
-        struct Ev_7080 *ev = &sndpps_7080.ev[i];
-        struct SNDPACKETCHAN *instance = sndpps_7080.q[ev->id];
+        struct SNDIPACKETCALLBACK *ev = &sndpps_7080.ev[i];
+        struct SNDPACKETCHAN *instance = sndpps_7080.q[ev->chan];
         if (ev->type == 0) {
-            instance->pframesfunc(ev->id, ev->val, instance->pclientdata);
+            instance->pframesfunc(ev->chan, ev->u, instance->pclientdata);
         } else {
-            instance->preleasefunc(ev->val, instance->pclientdata);
+            instance->preleasefunc(ev->u, instance->pclientdata);
         }
     }
     sndpps_7080.count = 0;
@@ -17265,12 +17167,10 @@ void SNDI_Delete(void) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", MIX_create);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct Cfg_7D00 { int a; unsigned char n4; unsigned char n5; short pad6; int c; };
 /* 28-byte mixer record handed to SFILTER_ft16init: word-aligned (int members), which keeps d[i].h at base+28*i+0x14C */
 struct D_7D00 { int w[6]; short h; char b; char pad1B; };
 struct S_7D00 {
-    struct Cfg_7D00 cfg;
+    struct MIXCONFIG cfg;
     char padC[3];
     char clr[1];
     char pad10[0xA8 - 0x10];
@@ -17305,7 +17205,7 @@ extern void f_8F48_7D00(int *, struct D_7D00 *) __asm__("SFILTER_add");
 
 /* MIX_create (On Tour smixer.c, PSP debug 0x00354D18): allocation statements in On Tour's `a[i] = alloc(); b[i] = a[i];` form. */
 extern struct S_7D00 sndmix_7D00 __asm__("sndmix");
-void MIX_create(struct Cfg_7D00 *cfg) {
+void MIX_create(struct MIXCONFIG *cfg) {
     int i;
     char *pool;
 
@@ -17332,7 +17232,7 @@ void MIX_create(struct Cfg_7D00 *cfg) {
             sndmix_7D00.a2[i] += 4;
         }
     }
-    for (i = 0; i < sndmix_7D00.cfg.n5; i++) {
+    for (i = 0; i < sndmix_7D00.cfg.outputchannels; i++) {
         if (D_00515D24_7D00 >= 2112) {
             D_00515D24_7D00 -= 2112;
             sndmix_7D00.b1[i] = pool;
@@ -17346,16 +17246,16 @@ void MIX_create(struct Cfg_7D00 *cfg) {
             sndmix_7D00.b2[i] += 4;
         }
     }
-    if (sndmix_7D00.cfg.n4 != 0) {
-        sndmix_7D00.p1DC = f_5C60_7D00(sndmix_7D00.cfg.n4 * 0x60);
-        memset_7D00(sndmix_7D00.p1DC, 0, sndmix_7D00.cfg.n4 * 0x60);
+    if (sndmix_7D00.cfg.inputchannels != 0) {
+        sndmix_7D00.p1DC = f_5C60_7D00(sndmix_7D00.cfg.inputchannels * 0x60);
+        memset_7D00(sndmix_7D00.p1DC, 0, sndmix_7D00.cfg.inputchannels * 0x60);
     }
     f_58D8_7D00();
     f_9268_7D00();
     f_92B0_7D00();
     f_92F8_7D00();
     f_8128_7D00();
-    for (i = 0; i < sndmix_7D00.cfg.n5; i++) {
+    for (i = 0; i < sndmix_7D00.cfg.outputchannels; i++) {
         sndmix_7D00.c[i] = 0;
         f_A7A0_7D00(&sndmix_7D00.d[i]);
         sndmix_7D00.d[i].h = 0;

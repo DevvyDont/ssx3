@@ -2118,20 +2118,16 @@ extern "C" void func_003739D0(sPtPools39D0* self)
 INCLUDE_ASM("render/particle", func_00373C28);
 #ifdef SKIP_ASM
 
-// One bone matrix: 4 rows of 4 floats; column j of each row is used for output component j.
-struct sPtMtx_3C28 {
-    float m[4][4];
-};
 
-static inline float ptBlend_3C28(t3Vector* p, sPtMtx_3C28* mt, float* w, int j)
+static inline float ptBlend_3C28(t3Vector* p, t4Matrix* mt, float* w, int j)
 {
     float x = p->x;
     float y = p->y;
     float z = p->z;
-    return (mt[0].m[0][j] * x + mt[0].m[1][j] * y + mt[0].m[2][j] * z + mt[0].m[3][j]) * w[0]
-         + (mt[1].m[0][j] * x + mt[1].m[1][j] * y + mt[1].m[2][j] * z + mt[1].m[3][j]) * w[1]
-         + (mt[2].m[0][j] * x + mt[2].m[1][j] * y + mt[2].m[2][j] * z + mt[2].m[3][j]) * w[2]
-         + (mt[3].m[0][j] * x + mt[3].m[1][j] * y + mt[3].m[2][j] * z + mt[3].m[3][j]);
+    return (((float (*)[4])&mt[0].row[0])[0][j] * x + ((float (*)[4])&mt[0].row[0])[1][j] * y + ((float (*)[4])&mt[0].row[0])[2][j] * z + ((float (*)[4])&mt[0].row[0])[3][j]) * w[0]
+         + (((float (*)[4])&mt[1].row[0])[0][j] * x + ((float (*)[4])&mt[1].row[0])[1][j] * y + ((float (*)[4])&mt[1].row[0])[2][j] * z + ((float (*)[4])&mt[1].row[0])[3][j]) * w[1]
+         + (((float (*)[4])&mt[2].row[0])[0][j] * x + ((float (*)[4])&mt[2].row[0])[1][j] * y + ((float (*)[4])&mt[2].row[0])[2][j] * z + ((float (*)[4])&mt[2].row[0])[3][j]) * w[2]
+         + (((float (*)[4])&mt[3].row[0])[0][j] * x + ((float (*)[4])&mt[3].row[0])[1][j] * y + ((float (*)[4])&mt[3].row[0])[2][j] * z + ((float (*)[4])&mt[3].row[0])[3][j]);
 }
 
 /**
@@ -2146,7 +2142,7 @@ static inline float ptBlend_3C28(t3Vector* p, sPtMtx_3C28* mt, float* w, int j)
  * @param w  the blend weights (only w[0] to w[2] are read)
  * @param out  receives x, y, z
  */
-extern "C" void func_00373C28(void* self, t3Vector* points, sPtMtx_3C28* mt, float* w, float* out)
+extern "C" void func_00373C28(void* self, t3Vector* points, t4Matrix* mt, float* w, float* out)
 {
     out[0] = ptBlend_3C28(points, mt, w, 0);
     out[1] = ptBlend_3C28(points, mt, w, 1);
@@ -4626,9 +4622,6 @@ struct sV_81A0 {
     sV_81A0(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
-struct sMat_81A0 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 struct sVEnt_81A0 {
     short delta;
@@ -4687,12 +4680,12 @@ static inline sV_81A0 Sub_81A0(const sV_81A0& a, const sV_81A0& b)
     return r;
 }
 
-static inline void Rot_81A0(sV_81A0* out, const sMat_81A0* m, const sV_81A0& v)
+static inline void Rot_81A0(sV_81A0* out, const t4Matrix* m, const sV_81A0& v)
 {
-    float x = v.x * m->m[0][0] + v.y * m->m[0][1];
-    float y = v.x * m->m[1][0] + v.y * m->m[1][1];
-    float z = v.x * m->m[2][0] + v.y * m->m[2][1];
-    float w = v.x * m->m[3][0] + v.y * m->m[3][1];
+    float x = v.x * ((float (*)[4])&m->row[0])[0][0] + v.y * ((float (*)[4])&m->row[0])[0][1];
+    float y = v.x * ((float (*)[4])&m->row[0])[1][0] + v.y * ((float (*)[4])&m->row[0])[1][1];
+    float z = v.x * ((float (*)[4])&m->row[0])[2][0] + v.y * ((float (*)[4])&m->row[0])[2][1];
+    float w = v.x * ((float (*)[4])&m->row[0])[3][0] + v.y * ((float (*)[4])&m->row[0])[3][1];
     out->x = x;
     out->y = y;
     out->z = z;
@@ -4736,8 +4729,8 @@ extern "C" void cPS2GraphicsMan_DrawRotatedSprite(cPS2GraphicsMan* self, sV_81A0
     fSinCos(&sinAngle, &cosAngle, angle);
     sV_81A0 axisU;
     sV_81A0 axisV(cosAngle, sinAngle, 0.0f, 0.0f);
-    Rot_81A0(&axisU, ((sMat_81A0*)self->mCurrentView), axisV);
-    Rot_81A0(&axisV, ((sMat_81A0*)self->mCurrentView), sV_81A0(-axisV.y, axisV.x, axisV.z, axisV.w));
+    Rot_81A0(&axisU, (self->mCurrentView), axisV);
+    Rot_81A0(&axisV, (self->mCurrentView), sV_81A0(-axisV.y, axisV.x, axisV.z, axisV.w));
     sV_81A0 edgeU = Add_81A0(*pos, Scale_81A0(axisU, size[0]));
     sV_81A0 edgeV = Add_81A0(*pos, Scale_81A0(axisV, size[1]));
     edgeU.w = gsQ;

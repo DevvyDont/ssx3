@@ -772,17 +772,9 @@ struct cCameraAlgorithm_E668 {
     virtual t4Vector getTarget();
 };
 
-struct cCameraAlgoListNode_E668 {
-    cCameraAlgorithm_E668* algo;    // 0x0
-    float lensWeight;               // 0x4
-    int pad8;
-    float weight;                   // 0xC
-    int pad10;
-    cCameraAlgoListNode_E668* next; // 0x14
-};
 
 struct cCameraAlgoList_E668 {
-    cCameraAlgoListNode_E668* head;
+    cCameraAlgoListNode* head;
     int length;
 };
 
@@ -972,13 +964,13 @@ extern "C" void cCamera_updateCamMat_E668(cCamera* self) __asm__("cCamera_update
  */
 extern "C" void cCamera_updateCamMat_E668(cCamera* self)
 {
-    cCameraAlgoListNode_E668* algoNode;
+    cCameraAlgoListNode* algoNode;
     tPose_E668 tempPose;
     float totalWeight = 0.0f;
 
     (*(tPose_E668*)&self->Pose).setIdentity();
     algoNode = ((cCameraController_E668*)self->Controller)->list->head;
-    cCameraAlgorithm_E668* algo = algoNode->algo;
+    cCameraAlgorithm_E668* algo = ((cCameraAlgorithm_E668*)algoNode->Algorithm);
     bool listLengthOne = ((cCameraController_E668*)self->Controller)->list->length == 1;
     if (listLengthOne || algo->type == 74) {
         (*(tPose_E668*)&self->Pose) = algo->getPose();
@@ -989,15 +981,15 @@ extern "C" void cCamera_updateCamMat_E668(cCamera* self)
     } else {
         self->ResultAlgorithm.CamTargetPos = t4vect_Zero_E668;
         self->ResultAlgorithm.Position = t4vect_Zero_E668;
-        for (algoNode = ((cCameraController_E668*)self->Controller)->list->head; algoNode; algoNode = algoNode->next) {
-            if (algoNode->weight > 0.0001f) {
-                totalWeight += algoNode->weight;
-                float weightFactor = algoNode->weight / totalWeight;
-                tempPose = algoNode->algo->getPose();
+        for (algoNode = ((cCameraController_E668*)self->Controller)->list->head; algoNode; algoNode = algoNode->Next) {
+            if (algoNode->SmoothWeight > 0.0001f) {
+                totalWeight += algoNode->SmoothWeight;
+                float weightFactor = algoNode->SmoothWeight / totalWeight;
+                tempPose = ((cCameraAlgorithm_E668*)algoNode->Algorithm)->getPose();
                 t4Vector tempPosePos = tempPose.pos;
                 t4Vector tempAlgoPos = self->ResultAlgorithm.Position;
                 self->ResultAlgorithm.Position = weightFactor * tempPosePos + (1.0f - weightFactor) * tempAlgoPos;
-                t4Vector algoTargetPos = algoNode->algo->getTarget();
+                t4Vector algoTargetPos = ((cCameraAlgorithm_E668*)algoNode->Algorithm)->getTarget();
                 t4Vector tempAlgoTargetPos = self->ResultAlgorithm.CamTargetPos;
                 self->ResultAlgorithm.CamTargetPos = weightFactor * algoTargetPos + (1.0f - weightFactor) * tempAlgoTargetPos;
             }
@@ -1025,13 +1017,13 @@ extern "C" void cCamera_updateCamMat_E668(cCamera* self)
     self->Near = 0.0f;
     self->Far = 0.0f;
     totalWeight = 0.0f;
-    for (algoNode = ((cCameraController_E668*)self->Controller)->list->head; algoNode; algoNode = algoNode->next) {
-        if (algoNode->lensWeight != 0.0f) {
-            totalWeight += algoNode->lensWeight;
-            float weightFactor = algoNode->lensWeight / totalWeight;
-            self->View = weightFactor * algoNode->algo->fov + (1.0f - weightFactor) * self->View;
-            self->Near = weightFactor * algoNode->algo->nearZ + (1.0f - weightFactor) * self->Near;
-            self->Far = weightFactor * algoNode->algo->farZ + (1.0f - weightFactor) * self->Far;
+    for (algoNode = ((cCameraController_E668*)self->Controller)->list->head; algoNode; algoNode = algoNode->Next) {
+        if (algoNode->Weight != 0.0f) {
+            totalWeight += algoNode->Weight;
+            float weightFactor = algoNode->Weight / totalWeight;
+            self->View = weightFactor * ((cCameraAlgorithm_E668*)algoNode->Algorithm)->fov + (1.0f - weightFactor) * self->View;
+            self->Near = weightFactor * ((cCameraAlgorithm_E668*)algoNode->Algorithm)->nearZ + (1.0f - weightFactor) * self->Near;
+            self->Far = weightFactor * ((cCameraAlgorithm_E668*)algoNode->Algorithm)->farZ + (1.0f - weightFactor) * self->Far;
         }
     }
     cRenderStateMan_update(self->ViewIndex + 6, (*(tPose_E668*)&self->Pose).pos.x, (*(tPose_E668*)&self->Pose).pos.y, -99999.0f);
@@ -2012,19 +2004,16 @@ extern "C" void* cBasicCameraAlgorithm_cBasicCameraAlgorithm(cBasicCameraAlgorit
 INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_getPose);
 #ifdef SKIP_ASM
 
-struct sM_15F9B8 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 
-extern sM_15F9B8 t4mat_Identity_15F9B8 __asm__("t4mat_Identity");
+extern t4Matrix t4mat_Identity_15F9B8 __asm__("t4mat_Identity");
 extern t4Vector t4vect_YAxis_15F9B8 __asm__("t4vect_YAxis");
 extern t4Vector t4vect_ZAxis_v15F9B8 __asm__("t4vect_ZAxis");
 extern "C" void fSinCos(float* sout, float* cout, float x);
-extern "C" tPose tPose_tPose_15F9B8(sM_15F9B8* m) __asm__("tPose_tPose");
+extern "C" tPose tPose_tPose_15F9B8(t4Matrix* m) __asm__("tPose_tPose");
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
-static inline void vu0CopyMtx_15F9B8(sM_15F9B8* dst, const sM_15F9B8* src)
+static inline void vu0CopyMtx_15F9B8(t4Matrix* dst, const t4Matrix* src)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -2043,7 +2032,7 @@ static inline void vu0CopyMtx_15F9B8(sM_15F9B8* dst, const sM_15F9B8* src)
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
-static inline void vu0MulMtx_15F9B8(sM_15F9B8* dst, const sM_15F9B8* a, const sM_15F9B8* b)
+static inline void vu0MulMtx_15F9B8(t4Matrix* dst, const t4Matrix* a, const t4Matrix* b)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -2082,7 +2071,7 @@ static inline void vu0MulMtx_15F9B8(sM_15F9B8* dst, const sM_15F9B8* a, const sM
 }
 
 // PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
-static inline void vu0TransMtx_15F9B8(sM_15F9B8* m, const t4Vector& v)
+static inline void vu0TransMtx_15F9B8(t4Matrix* m, const t4Vector& v)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -2107,9 +2096,9 @@ static inline void SinCos_15F9B8(float* s, float* c, float angle)
     fSinCos(s, c, angle);
 }
 
-static inline void RotAxis_15F9B8(sM_15F9B8* m, const t4Vector& axis, float angle)
+static inline void RotAxis_15F9B8(t4Matrix* m, const t4Vector& axis, float angle)
 {
-    sM_15F9B8 r;
+    t4Matrix r;
     float s;
     float c;
     float one = 1.0f;
@@ -2124,22 +2113,22 @@ static inline void RotAxis_15F9B8(sM_15F9B8* m, const t4Vector& axis, float angl
     float sx = s * x;
     float sy = s * y;
     float sz = s * z;
-    r.m[0][0] = tx * x + c;
-    r.m[1][0] = tx * y + sz;
-    r.m[2][0] = tx * z - sy;
-    r.m[0][1] = ty * x - sz;
-    r.m[1][1] = ty * y + c;
-    r.m[2][1] = ty * z + sx;
-    r.m[0][2] = tz * x + sy;
-    r.m[1][2] = tz * y - sx;
-    r.m[2][2] = tz * z + c;
-    r.m[3][0] = 0.0f;
-    r.m[3][1] = 0.0f;
-    r.m[3][2] = 0.0f;
-    r.m[0][3] = 0.0f;
-    r.m[1][3] = 0.0f;
-    r.m[2][3] = 0.0f;
-    r.m[3][3] = one;
+    ((float (*)[4])&r.row[0])[0][0] = tx * x + c;
+    ((float (*)[4])&r.row[0])[1][0] = tx * y + sz;
+    ((float (*)[4])&r.row[0])[2][0] = tx * z - sy;
+    ((float (*)[4])&r.row[0])[0][1] = ty * x - sz;
+    ((float (*)[4])&r.row[0])[1][1] = ty * y + c;
+    ((float (*)[4])&r.row[0])[2][1] = ty * z + sx;
+    ((float (*)[4])&r.row[0])[0][2] = tz * x + sy;
+    ((float (*)[4])&r.row[0])[1][2] = tz * y - sx;
+    ((float (*)[4])&r.row[0])[2][2] = tz * z + c;
+    ((float (*)[4])&r.row[0])[3][0] = 0.0f;
+    ((float (*)[4])&r.row[0])[3][1] = 0.0f;
+    ((float (*)[4])&r.row[0])[3][2] = 0.0f;
+    ((float (*)[4])&r.row[0])[0][3] = 0.0f;
+    ((float (*)[4])&r.row[0])[1][3] = 0.0f;
+    ((float (*)[4])&r.row[0])[2][3] = 0.0f;
+    ((float (*)[4])&r.row[0])[3][3] = one;
     vu0MulMtx_15F9B8(m, m, &r);
 }
 
@@ -2152,7 +2141,7 @@ static inline void RotAxis_15F9B8(sM_15F9B8* m, const t4Vector& axis, float angl
  */
 extern "C" tPose cBasicCameraAlgorithm_getPose(cBasicCameraAlgorithm* src)
 {
-    sM_15F9B8 poseMatrix;
+    t4Matrix poseMatrix;
     vu0CopyMtx_15F9B8(&poseMatrix, &t4mat_Identity_15F9B8);
     vu0TransMtx_15F9B8(&poseMatrix, *(&src->Position));
     RotAxis_15F9B8(&poseMatrix, t4vect_YAxis_15F9B8, -src->Pitch);
@@ -4188,17 +4177,9 @@ public:
     virtual void updateAlgorithm(int on);
 };
 
-struct sAlgoNode_161BB8 {
-    cCamAlgo_161BB8* algo;    // 0x0
-    float weight;             // 0x4
-    float rate;               // 0x8
-    float blend;              // 0xC
-    sAlgoNode_161BB8* prev;   // 0x10
-    sAlgoNode_161BB8* next;   // 0x14
-};
 
 
-extern "C" sAlgoNode_161BB8* cCameraAlgoList_remove(cCameraAlgoList* list, sAlgoNode_161BB8* n);
+extern "C" cCameraAlgoListNode* cCameraAlgoList_remove(cCameraAlgoList* list, cCameraAlgoListNode* n);
 
 static inline float Approach_161BB8(float cur, float target, float rate)
 {
@@ -4218,14 +4199,14 @@ static inline float ApproachZero_161BB8(float cur, float rate)
     return 0.0f;
 }
 
-static inline void Smooth_161BB8(sAlgoNode_161BB8* n, float u)
+static inline void Smooth_161BB8(cCameraAlgoListNode* n, float u)
 {
     float u2 = u * u;
     float s = u2 * 3.0f - (u2 + u2) * u;
-    n->weight = u;
+    n->Weight = u;
     if (s > 1.0f)
         s = 1.0f;
-    n->blend = s;
+    n->SmoothWeight = s;
 }
 
 static inline int InRace_161BB8(int* st)
@@ -4246,20 +4227,20 @@ extern "C" void cChaseCameraController_update(cChaseCameraController* self)
 {
     if ((cPauseState_Flags & 1) == 0) {
         cChaseCameraController_processInput(self);
-        sAlgoNode_161BB8* n = ((sAlgoNode_161BB8*)(self->AlgorithmList)->Head);
-        n->algo->updateAlgorithm(0);
-        float rate = n->rate;
-        Smooth_161BB8(n, Approach_161BB8(n->weight, 1.0f, rate));
-        n = n->next;
+        cCameraAlgoListNode* n = ((self->AlgorithmList)->Head);
+        ((cCamAlgo_161BB8*)n->Algorithm)->updateAlgorithm(0);
+        float rate = n->BlendRate;
+        Smooth_161BB8(n, Approach_161BB8(n->Weight, 1.0f, rate));
+        n = n->Next;
         while (n) {
-            Smooth_161BB8(n, ApproachZero_161BB8(n->weight, rate));
-            if (n->algo->type == 74)
-                n->weight = 0.0f;
-            if (n->weight <= 0.0f || n->blend <= 0.0f) {
+            Smooth_161BB8(n, ApproachZero_161BB8(n->Weight, rate));
+            if (((cCamAlgo_161BB8*)n->Algorithm)->type == 74)
+                n->Weight = 0.0f;
+            if (n->Weight <= 0.0f || n->SmoothWeight <= 0.0f) {
                 n = cCameraAlgoList_remove(self->AlgorithmList, n);
             } else {
-                n->algo->updateAlgorithm(1);
-                n = n->next;
+                ((cCamAlgo_161BB8*)n->Algorithm)->updateAlgorithm(1);
+                n = n->Next;
             }
         }
     }
@@ -8330,19 +8311,16 @@ extern "C" void cLookAtChaseAlgorithm_calcPitchHeading_def(char* self)
 INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading);
 #ifdef SKIP_ASM
 
-struct sM_1668B8 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 
-extern sM_1668B8 t4mat_Identity_1668B8 __asm__("t4mat_Identity");
+extern t4Matrix t4mat_Identity_1668B8 __asm__("t4mat_Identity");
 extern t4Vector t4vect_YAxis_1668B8 __asm__("t4vect_YAxis");
 extern t4Vector t4vect_ZAxis_v1668B8 __asm__("t4vect_ZAxis");
 extern t4Vector t4vect_Origin_v1668B8 __asm__("t4vect_Origin");
 extern "C" void fSinCos(float* sout, float* cout, float x);
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
-static inline void vu0CopyMtx_1668B8(sM_1668B8* dst, const sM_1668B8* src)
+static inline void vu0CopyMtx_1668B8(t4Matrix* dst, const t4Matrix* src)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -8361,7 +8339,7 @@ static inline void vu0CopyMtx_1668B8(sM_1668B8* dst, const sM_1668B8* src)
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
-static inline void vu0MulMtx_1668B8(sM_1668B8* dst, const sM_1668B8* a, const sM_1668B8* b)
+static inline void vu0MulMtx_1668B8(t4Matrix* dst, const t4Matrix* a, const t4Matrix* b)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -8400,7 +8378,7 @@ static inline void vu0MulMtx_1668B8(sM_1668B8* dst, const sM_1668B8* a, const sM
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply in place, m = m * b).
-static inline void vu0MulEqMtx_1668B8(sM_1668B8* m, const sM_1668B8* b)
+static inline void vu0MulEqMtx_1668B8(t4Matrix* m, const t4Matrix* b)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -8439,7 +8417,7 @@ static inline void vu0MulEqMtx_1668B8(sM_1668B8* m, const sM_1668B8* b)
 }
 
 // PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
-static inline void vu0TransMtx_1668B8(sM_1668B8* m, const t4Vector& v)
+static inline void vu0TransMtx_1668B8(t4Matrix* m, const t4Vector& v)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -8464,12 +8442,12 @@ static inline void SinCos_1668B8(float* s, float* c, float angle)
     fSinCos(s, c, angle);
 }
 
-static inline void Rotate_1668B8(sM_1668B8* m, const t4Vector& axis, float angle)
+static inline void Rotate_1668B8(t4Matrix* m, const t4Vector& axis, float angle)
 {
-    sM_1668B8 tm;
+    t4Matrix tm;
     vu0CopyMtx_1668B8(&tm, m);
-    t4Vector pos = *(t4Vector*)tm.m[3];
-    *(t4Vector*)tm.m[3] = t4vect_Origin_v1668B8;
+    t4Vector pos = *(t4Vector*)((float (*)[4])&tm.row[0])[3];
+    *(t4Vector*)((float (*)[4])&tm.row[0])[3] = t4vect_Origin_v1668B8;
     float s;
     float c;
     SinCos_1668B8(&s, &c, angle);
@@ -8484,29 +8462,29 @@ static inline void Rotate_1668B8(sM_1668B8* m, const t4Vector& axis, float angle
     float sx = s * x;
     float sy = s * y;
     float sz = s * z;
-    m->m[0][0] = tx * x + c;
-    m->m[1][0] = tx * y + sz;
-    m->m[2][0] = tx * z - sy;
-    m->m[0][1] = ty * x - sz;
-    m->m[1][1] = ty * y + c;
-    m->m[2][1] = ty * z + sx;
-    m->m[0][2] = tz * x + sy;
-    m->m[1][2] = tz * y - sx;
-    m->m[2][2] = tz * z + c;
-    m->m[3][0] = 0.0f;
-    m->m[3][1] = 0.0f;
-    m->m[3][2] = 0.0f;
-    m->m[3][3] = one;
-    m->m[0][3] = 0.0f;
-    m->m[1][3] = 0.0f;
-    m->m[2][3] = 0.0f;
-    *(t4Vector*)m->m[3] = pos;
+    ((float (*)[4])&m->row[0])[0][0] = tx * x + c;
+    ((float (*)[4])&m->row[0])[1][0] = tx * y + sz;
+    ((float (*)[4])&m->row[0])[2][0] = tx * z - sy;
+    ((float (*)[4])&m->row[0])[0][1] = ty * x - sz;
+    ((float (*)[4])&m->row[0])[1][1] = ty * y + c;
+    ((float (*)[4])&m->row[0])[2][1] = ty * z + sx;
+    ((float (*)[4])&m->row[0])[0][2] = tz * x + sy;
+    ((float (*)[4])&m->row[0])[1][2] = tz * y - sx;
+    ((float (*)[4])&m->row[0])[2][2] = tz * z + c;
+    ((float (*)[4])&m->row[0])[3][0] = 0.0f;
+    ((float (*)[4])&m->row[0])[3][1] = 0.0f;
+    ((float (*)[4])&m->row[0])[3][2] = 0.0f;
+    ((float (*)[4])&m->row[0])[3][3] = one;
+    ((float (*)[4])&m->row[0])[0][3] = 0.0f;
+    ((float (*)[4])&m->row[0])[1][3] = 0.0f;
+    ((float (*)[4])&m->row[0])[2][3] = 0.0f;
+    *(t4Vector*)((float (*)[4])&m->row[0])[3] = pos;
     vu0MulEqMtx_1668B8(m, &tm);
 }
 
-static inline t4Vector Row_1668B8(const sM_1668B8& m, int i)
+static inline t4Vector Row_1668B8(const t4Matrix& m, int i)
 {
-    return *(const t4Vector*)m.m[i];
+    return *(const t4Vector*)((float (*)[4])&m.row[0])[i];
 }
 
 extern "C" void cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading_impl(char* self, t4Vector* out) __asm__("cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading");
@@ -8518,7 +8496,7 @@ extern "C" void cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading_impl(cha
  */
 extern "C" void cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading_impl(char* self, t4Vector* out)
 {
-    sM_1668B8 lookMatrix;
+    t4Matrix lookMatrix;
     vu0CopyMtx_1668B8(&lookMatrix, &t4mat_Identity_1668B8);
     Rotate_1668B8(&lookMatrix, t4vect_YAxis_1668B8, -*(float*)(self + 0x54));
     Rotate_1668B8(&lookMatrix, t4vect_ZAxis_v1668B8, -*(float*)(self + 0x50));
@@ -8723,12 +8701,9 @@ extern "C" void* cLookAtChaseAlgorithm_snapCurrent(cLookAtChaseAlgorithm* self)
 INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_calcPose);
 #ifdef SKIP_ASM
 
-struct sM_166F90 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 
-extern sM_166F90 t4mat_Identity_166F90 __asm__("t4mat_Identity");
+extern t4Matrix t4mat_Identity_166F90 __asm__("t4mat_Identity");
 extern t4Vector t4vect_YAxis_166F90 __asm__("t4vect_YAxis");
 extern t4Vector t4vect_ZAxis_v166F90 __asm__("t4vect_ZAxis");
 extern t4Vector t4vect_Origin_v166F90 __asm__("t4vect_Origin");
@@ -8745,10 +8720,10 @@ struct sCamXf_166F90 {
 };
 
 // tPose_tPose (bx/ps2main) fills *out from the matrix and returns out.
-extern "C" sPair_166F90* tPose_tPose_166F90(sPair_166F90* out, sM_166F90* m) __asm__("tPose_tPose");
+extern "C" sPair_166F90* tPose_tPose_166F90(sPair_166F90* out, t4Matrix* m) __asm__("tPose_tPose");
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
-static inline void vu0CopyMtx_166F90(sM_166F90* dst, const sM_166F90* src)
+static inline void vu0CopyMtx_166F90(t4Matrix* dst, const t4Matrix* src)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -8767,7 +8742,7 @@ static inline void vu0CopyMtx_166F90(sM_166F90* dst, const sM_166F90* src)
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
-static inline void vu0MulMtx_166F90(sM_166F90* dst, const sM_166F90* a, const sM_166F90* b)
+static inline void vu0MulMtx_166F90(t4Matrix* dst, const t4Matrix* a, const t4Matrix* b)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -8806,7 +8781,7 @@ static inline void vu0MulMtx_166F90(sM_166F90* dst, const sM_166F90* a, const sM
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply in place, m = m * b).
-static inline void vu0MulEqMtx_166F90(sM_166F90* m, const sM_166F90* b)
+static inline void vu0MulEqMtx_166F90(t4Matrix* m, const t4Matrix* b)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -8845,7 +8820,7 @@ static inline void vu0MulEqMtx_166F90(sM_166F90* m, const sM_166F90* b)
 }
 
 // PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
-static inline void vu0TransMtx_166F90(sM_166F90* m, const t4Vector* v)
+static inline void vu0TransMtx_166F90(t4Matrix* m, const t4Vector* v)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -8870,12 +8845,12 @@ static inline void SinCos_166F90(float* s, float* c, float angle)
     fSinCos(s, c, angle);
 }
 
-static inline void Rotate_166F90(sM_166F90* m, const t4Vector& axis, float angle)
+static inline void Rotate_166F90(t4Matrix* m, const t4Vector& axis, float angle)
 {
-    sM_166F90 tm;
+    t4Matrix tm;
     vu0CopyMtx_166F90(&tm, m);
-    t4Vector pos = *(t4Vector*)tm.m[3];
-    *(t4Vector*)tm.m[3] = t4vect_Origin_v166F90;
+    t4Vector pos = *(t4Vector*)((float (*)[4])&tm.row[0])[3];
+    *(t4Vector*)((float (*)[4])&tm.row[0])[3] = t4vect_Origin_v166F90;
     float s;
     float c;
     SinCos_166F90(&s, &c, angle);
@@ -8890,23 +8865,23 @@ static inline void Rotate_166F90(sM_166F90* m, const t4Vector& axis, float angle
     float sx = s * x;
     float sy = s * y;
     float sz = s * z;
-    m->m[0][0] = tx * x + c;
-    m->m[1][0] = tx * y + sz;
-    m->m[2][0] = tx * z - sy;
-    m->m[0][1] = ty * x - sz;
-    m->m[1][1] = ty * y + c;
-    m->m[2][1] = ty * z + sx;
-    m->m[0][2] = tz * x + sy;
-    m->m[1][2] = tz * y - sx;
-    m->m[2][2] = tz * z + c;
-    m->m[3][0] = 0.0f;
-    m->m[3][1] = 0.0f;
-    m->m[3][2] = 0.0f;
-    m->m[3][3] = one;
-    m->m[0][3] = 0.0f;
-    m->m[1][3] = 0.0f;
-    m->m[2][3] = 0.0f;
-    *(t4Vector*)m->m[3] = pos;
+    ((float (*)[4])&m->row[0])[0][0] = tx * x + c;
+    ((float (*)[4])&m->row[0])[1][0] = tx * y + sz;
+    ((float (*)[4])&m->row[0])[2][0] = tx * z - sy;
+    ((float (*)[4])&m->row[0])[0][1] = ty * x - sz;
+    ((float (*)[4])&m->row[0])[1][1] = ty * y + c;
+    ((float (*)[4])&m->row[0])[2][1] = ty * z + sx;
+    ((float (*)[4])&m->row[0])[0][2] = tz * x + sy;
+    ((float (*)[4])&m->row[0])[1][2] = tz * y - sx;
+    ((float (*)[4])&m->row[0])[2][2] = tz * z + c;
+    ((float (*)[4])&m->row[0])[3][0] = 0.0f;
+    ((float (*)[4])&m->row[0])[3][1] = 0.0f;
+    ((float (*)[4])&m->row[0])[3][2] = 0.0f;
+    ((float (*)[4])&m->row[0])[3][3] = one;
+    ((float (*)[4])&m->row[0])[0][3] = 0.0f;
+    ((float (*)[4])&m->row[0])[1][3] = 0.0f;
+    ((float (*)[4])&m->row[0])[2][3] = 0.0f;
+    *(t4Vector*)((float (*)[4])&m->row[0])[3] = pos;
     vu0MulEqMtx_166F90(m, &tm);
 }
 
@@ -8932,7 +8907,7 @@ extern "C" void cLookAtChaseAlgorithm_calcPose_impl(char* self)
 {
     *(float*)(self + 0x4C) = 1.0f;
     t4Vector* pos = (t4Vector*)(self + 0x40);
-    sM_166F90 poseMatrix;
+    t4Matrix poseMatrix;
     vu0CopyMtx_166F90(&poseMatrix, &t4mat_Identity_166F90);
     vu0TransMtx_166F90(&poseMatrix, pos);
     Rotate_166F90(&poseMatrix, t4vect_YAxis_166F90, -*(float*)(self + 0x54));

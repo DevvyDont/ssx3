@@ -1082,12 +1082,6 @@ extern "C" void luno_cLunoVar__cLunoVar(cLunoValue* self, int flags);
 extern cLunoValue luno_gLunoNil;
 void* luno_cLunoVar_castIndex(void* self);
 
-struct cLunoNode_50E0 {
-    cLunoValue key;     // 0x00
-    cLunoValue value;   // 0x0C
-    cLunoNode_50E0* next;    // 0x18
-    void* vtable;       // 0x1C
-};
 
 static inline int lunoKeyEquals_50E0(cLunoValue* a, cLunoValue* b)
 {
@@ -1120,18 +1114,18 @@ static inline int lunoKeyEquals_50E0(cLunoValue* a, cLunoValue* b)
 extern "C" cLunoValue* luno_cLunoTable_get(cLunoTableRef* self, unsigned int intKey)
 {
     luno_cLunoTableData* hashTable = self->table;
-    cLunoNode_50E0* n = (cLunoNode_50E0*)((cLunoTableEntry*)hashTable->Entries) + intKey % (unsigned int)hashTable->Modulus;
-    if (n->value.type != 0) {
+    luno_cLunoTableEntry* n = (luno_cLunoTableEntry*)((cLunoTableEntry*)hashTable->Entries) + intKey % (unsigned int)hashTable->Modulus;
+    if ((*(cLunoValue*)&n->Value).type != 0) {
         do {
             cLunoValue key;
             key.type = 3;
             *(int*)luno_cLunoVar_castIndex(&key) = intKey;
-            int eq = lunoKeyEquals_50E0(&n->key, &key);
+            int eq = lunoKeyEquals_50E0(&(*(cLunoValue*)&n->Index), &key);
             luno_cLunoVar__cLunoVar(&key, 2);
             if (eq) {
-                return &n->value;
+                return &(*(cLunoValue*)&n->Value);
             }
-            n = n->next;
+            n = n->Next;
         } while (n != 0);
     }
     return &luno_gLunoNil;

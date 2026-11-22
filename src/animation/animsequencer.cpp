@@ -54,13 +54,6 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequence_addTrigger);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_AnimTrigger[];
 
-struct sSeqNode313A70
-{
-    int key;
-    int active;
-    float weight;
-    sSeqNode313A70* next;
-};
 
 /**
  * Adds a timed trigger to the sequence: an event to fire when playback reaches a time.
@@ -72,13 +65,13 @@ struct sSeqNode313A70
  */
 extern "C" void cAnimSequence_addTrigger(cAnimSequence* self, int key, float weight)
 {
-    sSeqNode313A70* n = (sSeqNode313A70*)cMemMan_alloc(0x10, str_AnimTrigger, 0x20000000, 0);
-    sSeqNode313A70* old = (sSeqNode313A70*)self->Triggers;
+    tTrigger* n = (tTrigger*)cMemMan_alloc(0x10, str_AnimTrigger, 0x20000000, 0);
+    tTrigger* old = self->Triggers;
     self->Triggers = (tTrigger*)n;
-    n->key = key;
-    n->weight = weight;
-    n->next = old;
-    n->active = 0;
+    n->ID = key;
+    n->TriggerTime = weight;
+    n->Next = old;
+    n->IsEndTrigger = 0;
 }
 #endif
 
@@ -88,13 +81,6 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequence_addEndTrigger);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_AnimTrigger[];
 
-struct sSeqNode313AD8
-{
-    int key;
-    int active;
-    int unk8;
-    sSeqNode313AD8* next;
-};
 
 /**
  * Adds a trigger that fires when the sequence ends.
@@ -105,13 +91,13 @@ struct sSeqNode313AD8
  */
 extern "C" void cAnimSequence_addEndTrigger(cAnimSequence* self, int key)
 {
-    sSeqNode313AD8* n = (sSeqNode313AD8*)cMemMan_alloc(0x10, str_AnimTrigger, 0x20000000, 0);
-    sSeqNode313AD8* old = (sSeqNode313AD8*)self->Triggers;
+    tTrigger* n = (tTrigger*)cMemMan_alloc(0x10, str_AnimTrigger, 0x20000000, 0);
+    tTrigger* old = self->Triggers;
     self->Triggers = (tTrigger*)n;
-    n->key = key;
-    n->active = 1;
-    n->next = old;
-    n->unk8 = 0;
+    n->ID = key;
+    n->IsEndTrigger = 1;
+    n->Next = old;
+    (*(int*)&n->TriggerTime) = 0;
 }
 #endif
 
@@ -119,12 +105,6 @@ extern "C" void cAnimSequence_addEndTrigger(cAnimSequence* self, int key)
 INCLUDE_ASM("animation/animsequencer", cAnimSequence_removeTrigger);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-struct sNode_00313B38 {
-    int id;
-    int refs;
-    float time;
-    sNode_00313B38* next;
-};
 
 /**
  * Removes the sequence's first timed trigger with event id @p id and time @p time.
@@ -137,11 +117,11 @@ struct sNode_00313B38 {
  * @param time  the time the trigger fires at
  */
 extern "C" void cAnimSequence_removeTrigger(cAnimSequence* self, int id, float time) {
-    sNode_00313B38** link;
-    for (link = (sNode_00313B38**)(&self->Triggers); *link != 0; link = &(*link)->next) {
-        sNode_00313B38* n = *link;
-        if (n->id == id && n->time == time && n->refs == 0) {
-            *link = n->next;
+    tTrigger** link;
+    for (link = (tTrigger**)(&self->Triggers); *link != 0; link = &(*link)->Next) {
+        tTrigger* n = *link;
+        if (n->ID == id && n->TriggerTime == time && n->IsEndTrigger == 0) {
+            *link = n->Next;
             operator_delete((int*)n);
             return;
         }
@@ -153,13 +133,6 @@ extern "C" void cAnimSequence_removeTrigger(cAnimSequence* self, int id, float t
 INCLUDE_ASM("animation/animsequencer", cAnimSequence_removeEndTrigger);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-struct sSeqNode313BA8
-{
-    int key;
-    int active;
-    int unk8;
-    sSeqNode313BA8* next;
-};
 
 /**
  * Removes the sequence's first end trigger with the given id.
@@ -170,15 +143,15 @@ struct sSeqNode313BA8
  */
 extern "C" void cAnimSequence_removeEndTrigger(cAnimSequence* self, int key)
 {
-    sSeqNode313BA8** pp;
-    for (pp = (sSeqNode313BA8**)&self->Triggers; *pp != 0; pp = &(*pp)->next)
+    tTrigger** pp;
+    for (pp = (tTrigger**)&self->Triggers; *pp != 0; pp = &(*pp)->Next)
     {
-        if ((*pp)->key == key)
+        if ((*pp)->ID == key)
         {
-            sSeqNode313BA8* n = *pp;
-            if (n->active != 0)
+            tTrigger* n = *pp;
+            if (n->IsEndTrigger != 0)
             {
-                *pp = n->next;
+                *pp = n->Next;
                 operator_delete((int*)n);
                 return;
             }
@@ -557,10 +530,6 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequencer_newSequence);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_AnimSequence[];
 
-struct sSeqNode_003142F8 {
-    char pad_0x00[0xC8];
-    sSeqNode_003142F8* next; // 0xC8
-};
 
 
 extern "C" void* cAnimSequence_cAnimSequence(void* mem, int arg);
@@ -578,9 +547,9 @@ extern "C" void* cAnimSequence_cAnimSequence(void* mem, int arg);
 extern "C" void* cAnimSequencer_newSequence(cAnimSequencer* seq, int sequenceID)
 {
     cAnimSequencer* self = seq;
-    sSeqNode_003142F8* node = (sSeqNode_003142F8*)cAnimSequence_cAnimSequence(cMemMan_alloc(208, str_AnimSequence, 0x20000000, 0), sequenceID);
-    node->next = ((sSeqNode_003142F8*)self->PlayList);
-    *(sSeqNode_003142F8**)&self->PlayList = node;
+    cAnimSequence* node = (cAnimSequence*)cAnimSequence_cAnimSequence(cMemMan_alloc(208, str_AnimSequence, 0x20000000, 0), sequenceID);
+    node->Next = (self->PlayList);
+    *(cAnimSequence**)&self->PlayList = node;
     self->NumPlaying++;
     return node;
 }
@@ -589,15 +558,10 @@ extern "C" void* cAnimSequencer_newSequence(cAnimSequencer* seq, int sequenceID)
 //100%
 INCLUDE_ASM("animation/animsequencer", cAnimSequencer_appendSequence);
 #ifdef SKIP_ASM
-// Same layout as the unit's cAnimSequenceNode / cAnimSequencer (declared later in the unit).
-struct sSeqNode_00314368 {
-    char pad_0x00[0xC8];
-    sSeqNode_00314368* next; // 0xC8
-};
 
 struct sSequencer_00314368 {
     int mCount;                      // 0x0
-    sSeqNode_00314368* mFirstSequence; // 0x4
+    cAnimSequence* mFirstSequence; // 0x4
 };
 
 /**
@@ -608,22 +572,22 @@ struct sSequencer_00314368 {
  *
  * @param node  the sequence to append
  */
-extern "C" void cAnimSequencer_appendSequence(cAnimSequencer* self, sSeqNode_00314368* node)
+extern "C" void cAnimSequencer_appendSequence(cAnimSequencer* self, cAnimSequence* node)
 {
-    if ((sSeqNode_00314368*)self->PlayList != 0)
+    if (self->PlayList != 0)
     {
-        sSeqNode_00314368* tail = (sSeqNode_00314368*)self->PlayList;
-        while (tail->next != 0)
+        cAnimSequence* tail = self->PlayList;
+        while (tail->Next != 0)
         {
-            tail = tail->next;
+            tail = tail->Next;
         }
-        tail->next = node;
+        tail->Next = node;
     }
     else
     {
         self->PlayList = (cAnimSequence*)node;
     }
-    node->next = 0;
+    node->Next = 0;
     self->NumPlaying++;
 }
 #endif
@@ -631,15 +595,10 @@ extern "C" void cAnimSequencer_appendSequence(cAnimSequencer* self, sSeqNode_003
 //100%
 INCLUDE_ASM("animation/animsequencer", cAnimSequencer_removeSequence);
 #ifdef SKIP_ASM
-// Same layout as the unit's cAnimSequenceNode / cAnimSequencer (declared later in the unit).
-struct sSeqNode_003143C8 {
-    char pad_0x00[0xC8];
-    sSeqNode_003143C8* next; // 0xC8
-};
 
 struct sSequencer_003143C8 {
     int mCount;                        // 0x0
-    sSeqNode_003143C8* mFirstSequence; // 0x4
+    cAnimSequence* mFirstSequence; // 0x4
 };
 
 /**
@@ -650,21 +609,21 @@ struct sSequencer_003143C8 {
  *
  * @param node  the sequence to unlink
  */
-extern "C" void cAnimSequencer_removeSequence(cAnimSequencer* self, sSeqNode_003143C8* node)
+extern "C" void cAnimSequencer_removeSequence(cAnimSequencer* self, cAnimSequence* node)
 {
-    if ((sSeqNode_003143C8*)self->PlayList == node) {
-        self->PlayList = (cAnimSequence*)node->next;
+    if (self->PlayList == node) {
+        self->PlayList = (cAnimSequence*)node->Next;
     } else {
-        sSeqNode_003143C8* cur = (sSeqNode_003143C8*)self->PlayList;
+        cAnimSequence* cur = self->PlayList;
         while (cur != 0) {
-            if (cur->next == node) {
+            if (cur->Next == node) {
                 break;
             }
-            cur = cur->next;
+            cur = cur->Next;
         }
-        cur->next = node->next;
+        cur->Next = node->Next;
     }
-    node->next = 0;
+    node->Next = 0;
     self->NumPlaying--;
 }
 #endif
@@ -795,14 +754,10 @@ extern "C" void* cAnimSequencer_playAndLoop(cAnimSequencer* self, int sequenceID
 //100%
 INCLUDE_ASM("animation/animsequencer", cAnimSequencer_expire);
 #ifdef SKIP_ASM
-struct sSeqNode_003145F8 {
-    char pad_0x00[0xC8];
-    sSeqNode_003145F8* next; // 0xC8
-};
 
 struct sSequencer_003145F8 {
     int mCount;                        // 0x0
-    sSeqNode_003145F8* mFirstSequence; // 0x4
+    cAnimSequence* mFirstSequence; // 0x4
 };
 
 /**
@@ -813,15 +768,15 @@ struct sSequencer_003145F8 {
  *
  * @param node  the sequence to remove (On Tour seq)
  */
-extern "C" void cAnimSequencer_expire(cAnimSequencer* self, sSeqNode_003145F8* node)
+extern "C" void cAnimSequencer_expire(cAnimSequencer* self, cAnimSequence* node)
 {
-    sSeqNode_003145F8** pp;
-    for (pp = (sSeqNode_003145F8**)&self->PlayList; *pp != 0; pp = &(*pp)->next)
+    cAnimSequence** pp;
+    for (pp = (cAnimSequence**)&self->PlayList; *pp != 0; pp = &(*pp)->Next)
     {
-        sSeqNode_003145F8* n = *pp;
+        cAnimSequence* n = *pp;
         if (n == node)
         {
-            *pp = n->next;
+            *pp = n->Next;
             if (n != 0)
             {
                 cAnimSequence_removeAllTriggers((cAnimSequence*)n);
@@ -837,14 +792,10 @@ extern "C" void cAnimSequencer_expire(cAnimSequencer* self, sSeqNode_003145F8* n
 //100%
 INCLUDE_ASM("animation/animsequencer", cAnimSequencer_expireAll);
 #ifdef SKIP_ASM
-struct sSeqNode_00314668 {
-    char pad_0x00[0xC8];
-    sSeqNode_00314668* next; // 0xC8
-};
 
 struct sSequencer_00314668 {
     int mCount;                        // 0x0
-    sSeqNode_00314668* mFirstSequence; // 0x4
+    cAnimSequence* mFirstSequence; // 0x4
 };
 
 /**
@@ -855,10 +806,10 @@ struct sSequencer_00314668 {
  */
 extern "C" void cAnimSequencer_expireAll(cAnimSequencer* self)
 {
-    while ((sSeqNode_00314668*)self->PlayList != 0)
+    while (self->PlayList != 0)
     {
-        sSeqNode_00314668* n = (sSeqNode_00314668*)self->PlayList;
-        self->PlayList = (cAnimSequence*)n->next;
+        cAnimSequence* n = self->PlayList;
+        self->PlayList = (cAnimSequence*)n->Next;
         if (n != 0)
         {
             cAnimSequence_removeAllTriggers((cAnimSequence*)n);
@@ -983,10 +934,6 @@ public:
     virtual void serialize(void* data, int size);
 };
 
-struct sSeqNode_003147F0 {
-    char pad_0x00[0xC8];
-    sSeqNode_003147F0* next; // 0xC8
-};
 
 
 extern "C" void cAnimSequence_writeToReplayFrame(void* node, cAsStream* s);
@@ -1002,11 +949,11 @@ extern "C" void cAnimSequence_writeToReplayFrame(void* node, cAsStream* s);
 extern "C" void cAnimSequencer_writeToReplayFrame(cAnimSequencer* self, cAsStream* stream)
 {
     stream->serialize((self), 4);
-    sSeqNode_003147F0* n = (sSeqNode_003147F0*)self->PlayList;
+    cAnimSequence* n = self->PlayList;
     for (int i = 0; i < self->NumPlaying; i++)
     {
         cAnimSequence_writeToReplayFrame(n, stream);
-        n = n->next;
+        n = n->Next;
     }
 }
 #endif
@@ -1055,7 +1002,7 @@ extern "C" void cAnimSequencer_readFromReplayFrame(cAnimSequencer* self, void* s
         sSeqNode_314880* node = new (str_AnimSequence, 0x20000000, 0) sSeqNode_314880;
         MEM_fill(node, 0, 208);
         cAnimSequence_readFromReplayFrame(node, stream);
-        cAnimSequencer_appendSequence(self, (sSeqNode_00314368*)node);
+        cAnimSequencer_appendSequence(self, (cAnimSequence*)node);
     }
 }
 #endif

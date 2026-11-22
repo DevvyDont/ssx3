@@ -4337,10 +4337,6 @@ struct sLensHaloBanks3130 {
     sHalo3130 halos[2][2][256]; // 0x68
 };
 
-struct sLensSunBanks3130 {
-    char pad0[0x6070];
-    sSun3130 suns[2][2];        // 0x6070
-};
 
 /**
  * Samples the z-buffer visibility of the sun and of every active light halo, per view.
@@ -4372,7 +4368,7 @@ extern "C" void cLensFxMan_SampleLens(cLensFxMan* selfp)
                     if (vEntry->fn(vthis(self, *vEntry), &self->suns[bufferId][viewIdx], &visibility)) {
                         self->suns[bufferId][viewIdx].vis = visibility;
                     } else {
-                        self->suns[bufferId][viewIdx].vis = ((sLensSunBanks3130*)self)->suns[prev][viewIdx].vis;
+                        self->suns[bufferId][viewIdx].vis = ((sSun3130 (*)[2])&((cLensFxMan*)self)->mSunHalo[0])[prev][viewIdx].vis;
                     }
                 }
             }

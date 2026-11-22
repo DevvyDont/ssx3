@@ -2072,19 +2072,16 @@ extern "C" void cTriggerAlgorithm_update(cTriggerAlgorithm* self)
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTriggerAlgorithm_getPose);
 #ifdef SKIP_ASM
 
-struct sM_173E40 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 
-extern sM_173E40 t4mat_Identity;
+extern t4Matrix t4mat_Identity;
 extern t4Vector t4vect_YAxis;
 extern t4Vector t4vect_ZAxis_v173E40 __asm__("t4vect_ZAxis");
 extern "C" void fSinCos(float* sout, float* cout, float x);
-extern "C" tPose tPose_tPose(sM_173E40* m);
+extern "C" tPose tPose_tPose(t4Matrix* m);
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
-static inline void vu0CopyMtx_173E40(sM_173E40* dst, const sM_173E40* src)
+static inline void vu0CopyMtx_173E40(t4Matrix* dst, const t4Matrix* src)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -2103,7 +2100,7 @@ static inline void vu0CopyMtx_173E40(sM_173E40* dst, const sM_173E40* src)
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
-static inline void vu0MulMtx_173E40(sM_173E40* dst, const sM_173E40* a, const sM_173E40* b)
+static inline void vu0MulMtx_173E40(t4Matrix* dst, const t4Matrix* a, const t4Matrix* b)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -2142,7 +2139,7 @@ static inline void vu0MulMtx_173E40(sM_173E40* dst, const sM_173E40* a, const sM
 }
 
 // PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
-static inline void vu0TransMtx_173E40(sM_173E40* m, const t4Vector& v)
+static inline void vu0TransMtx_173E40(t4Matrix* m, const t4Vector& v)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -2167,9 +2164,9 @@ static inline void SinCos_173E40(float* s, float* c, float angle)
     fSinCos(s, c, angle);
 }
 
-static inline void RotAxis_173E40(sM_173E40* m, const t4Vector& axis, float angle)
+static inline void RotAxis_173E40(t4Matrix* m, const t4Vector& axis, float angle)
 {
-    sM_173E40 r;
+    t4Matrix r;
     float s;
     float c;
     float one = 1.0f;
@@ -2184,22 +2181,22 @@ static inline void RotAxis_173E40(sM_173E40* m, const t4Vector& axis, float angl
     float sx = s * x;
     float sy = s * y;
     float sz = s * z;
-    r.m[0][0] = tx * x + c;
-    r.m[1][0] = tx * y + sz;
-    r.m[2][0] = tx * z - sy;
-    r.m[0][1] = ty * x - sz;
-    r.m[1][1] = ty * y + c;
-    r.m[2][1] = ty * z + sx;
-    r.m[0][2] = tz * x + sy;
-    r.m[1][2] = tz * y - sx;
-    r.m[2][2] = tz * z + c;
-    r.m[3][0] = 0.0f;
-    r.m[3][1] = 0.0f;
-    r.m[3][2] = 0.0f;
-    r.m[0][3] = 0.0f;
-    r.m[1][3] = 0.0f;
-    r.m[2][3] = 0.0f;
-    r.m[3][3] = one;
+    ((float (*)[4])&r.row[0])[0][0] = tx * x + c;
+    ((float (*)[4])&r.row[0])[1][0] = tx * y + sz;
+    ((float (*)[4])&r.row[0])[2][0] = tx * z - sy;
+    ((float (*)[4])&r.row[0])[0][1] = ty * x - sz;
+    ((float (*)[4])&r.row[0])[1][1] = ty * y + c;
+    ((float (*)[4])&r.row[0])[2][1] = ty * z + sx;
+    ((float (*)[4])&r.row[0])[0][2] = tz * x + sy;
+    ((float (*)[4])&r.row[0])[1][2] = tz * y - sx;
+    ((float (*)[4])&r.row[0])[2][2] = tz * z + c;
+    ((float (*)[4])&r.row[0])[3][0] = 0.0f;
+    ((float (*)[4])&r.row[0])[3][1] = 0.0f;
+    ((float (*)[4])&r.row[0])[3][2] = 0.0f;
+    ((float (*)[4])&r.row[0])[0][3] = 0.0f;
+    ((float (*)[4])&r.row[0])[1][3] = 0.0f;
+    ((float (*)[4])&r.row[0])[2][3] = 0.0f;
+    ((float (*)[4])&r.row[0])[3][3] = one;
     vu0MulMtx_173E40(m, m, &r);
 }
 
@@ -2215,7 +2212,7 @@ static inline void RotAxis_173E40(sM_173E40* m, const t4Vector& axis, float angl
  */
 extern "C" tPose cTriggerAlgorithm_getPose(cTriggerAlgorithm* src)
 {
-    sM_173E40 poseMtx;
+    t4Matrix poseMtx;
     vu0CopyMtx_173E40(&poseMtx, &t4mat_Identity);
     vu0TransMtx_173E40(&poseMtx, *(&src->Position));
     RotAxis_173E40(&poseMtx, t4vect_YAxis, -src->Pitch);

@@ -20,15 +20,6 @@ extern char str_pct_s_LOW[];
 extern char str_pct_s_HIGH[];
 extern void* D_004D2438[];
 
-struct sMemNode_251718 {
-    unsigned short tag;
-    unsigned short flags;
-    int size;
-    char* end;
-    void* fC;
-    sMemNode_251718* next;
-    sMemNode_251718* prev;
-};
 
 
 /**
@@ -67,7 +58,7 @@ extern "C" int MEMCLASS_create(int id, char* name, MEMCLASS* mem, int size, int 
     char* end = ((char*)mem) + size;
     end -= hdr + 0x30;
     sprintf(buf, str_pct_s_LOW, name);
-    sMemNode_251718* blk = (sMemNode_251718*)(data - 0x10);
+    FREEBLOCK* blk = (FREEBLOCK*)(data - 0x10);
     MEMCLASS* cls = (MEMCLASS*)(&mem->freehead);
     MEM_initblock(mem, buf, 80, hdr, flags | 0x8000, 0, blk);
     MEM_initblock(blk, 0, end - (char*)blk - 0x10, hdr, flags, mem, end);
@@ -78,39 +69,39 @@ extern "C" int MEMCLASS_create(int id, char* name, MEMCLASS* mem, int size, int 
     strcpy(cls->name, name);
     mem->freehead.prev = (struct MEMBLOCK*)end;
     mem->freehead.next = (struct MEMBLOCK*)((char*)mem);
-    ((sMemNode_251718*)cls->bottomblock)->tag = 16979;
-    ((sMemNode_251718*)cls->topblock)->tag = 16979;
+    ((FREEBLOCK*)cls->bottomblock)->signature = 16979;
+    ((FREEBLOCK*)cls->topblock)->signature = 16979;
     *(unsigned short*)&mem->freehead.nextfree = 16979;
     mem->freehead.prevfree = (struct FREEBLOCK*)0x7FFFFFFF;
     mem->hasmutex = sizeAlign;
     mem->mutex.reserved[0] = align;
     mem->mutex.reserved[1] = hdr;
     mem->mutex.reserved[2] = flags;
-    sMemNode_251718* head = (sMemNode_251718*)(&mem->freehead.nextfree);
+    FREEBLOCK* head = (FREEBLOCK*)(&mem->freehead.nextfree);
     mem->infosize = (int)head;
     mem->flags = (int)head;
     mem->mutex.reserved[3] = 0;
-    sMemNode_251718* nextNode = head;
-    sMemNode_251718* prevNode = nextNode;
+    FREEBLOCK* nextNode = head;
+    FREEBLOCK* prevNode = nextNode;
     int sz = *(char**)(data - 8) - (char*)blk;
     if ((char*)mem->infosize + ((char*)mem->flags - (char*)mem->infosize) / 2 < (char*)blk) {
         do
-            prevNode = prevNode->prev;
+            prevNode = prevNode->prevfree;
         while (blk < prevNode);
-        nextNode = prevNode->next;
+        nextNode = prevNode->nextfree;
     } else {
         do
-            nextNode = nextNode->next;
+            nextNode = nextNode->nextfree;
         while (nextNode < blk);
-        prevNode = nextNode->prev;
+        prevNode = nextNode->prevfree;
     }
     blk->size = sz;
-    blk->next = nextNode;
-    blk->prev = prevNode;
-    prevNode->next = blk;
-    nextNode->prev = blk;
-    blk->tag = 16966;
-    blk->flags |= 0x4000;
+    blk->nextfree = nextNode;
+    blk->prevfree = prevNode;
+    prevNode->nextfree = blk;
+    nextNode->prevfree = blk;
+    blk->signature = 16966;
+    blk->type |= 0x4000;
     if (lock) {
         MUTEX_create(((int*)&cls->mutex));
         cls->hasmutex = 1;
@@ -153,12 +144,6 @@ extern "C" int MEMCLASS_remove(int id)
 INCLUDE_ASM("mem/memstd", MEMCLASS_purge);
 #ifdef SKIP_ASM
 extern "C" void* MEM_free(void* self);
-struct sMemNode_251A08 {
-    unsigned short tag;
-    unsigned short flags;
-    int size;
-    sMemNode_251A08* next;
-};
 
 
 /**
@@ -174,8 +159,8 @@ extern "C" void* MEMCLASS_purge(int id)
 {
     MEMCLASS* cls = (MEMCLASS*)D_004D2438[id & 0x3F];
     void* freeResult = (void*)1;
-    for (sMemNode_251A08* n = ((sMemNode_251A08*)cls->bottomblock); n != 0 && freeResult != 0; n = n->next) {
-        if (!(n->flags & 0xC000)) {
+    for (MEMBLOCK* n = (cls->bottomblock); n != 0 && freeResult != 0; n = n->next) {
+        if (!(n->type & 0xC000)) {
             freeResult = MEM_free((char*)n + 0x10);
         }
     }
@@ -224,18 +209,18 @@ extern "C" int MEM_largestunused(int id)
         id = D_004A2E78_1AC0;
     }
     MEMCLASS* cls = (MEMCLASS*)D_004D2438[id & 0x3F];
-    sMemNode_251718* n = (*(sMemNode_251718*)&cls->freehead).next;
-    sMemNode_251718* best = 0;
+    FREEBLOCK* n = (*(&cls->freehead)).nextfree;
+    FREEBLOCK* best = 0;
     int largestData = 0;
     for (;;) {
         if (largestData < n->size - 0x10) {
-            if (n->tag == 16979) {
+            if (n->signature == 16979) {
                 break;
             }
             best = n;
             largestData = best->size - 0x10;
         }
-        n = n->next;
+        n = n->nextfree;
     }
     ASSERT_1AC0(best != 0);
     return best != 0 ? best->size : 0;
@@ -268,11 +253,11 @@ extern "C" int MEM_totalunused(int id)
     }
     MEMCLASS* cls = (MEMCLASS*)D_004D2438[id & 0x3F];
     int total = 0;
-    sMemNode_251718* n = (*(sMemNode_251718*)&cls->freehead).next;
-    while (n->tag != 16979) {
+    FREEBLOCK* n = (*(&cls->freehead)).nextfree;
+    while (n->signature != 16979) {
         ASSERT_1B50(n != 0);
         total += n->size - 0x10;
-        n = n->next;
+        n = n->nextfree;
     }
     return total;
 }
@@ -280,12 +265,6 @@ extern "C" int MEM_totalunused(int id)
 //100%
 INCLUDE_ASM("mem/memstd", MEM_findcontaining);
 #ifdef SKIP_ASM
-struct sMemNode_251BB0 {
-    unsigned short tag;
-    unsigned short flags;
-    int size;
-    sMemNode_251BB0* next;
-};
 
 
 /**
@@ -301,7 +280,7 @@ extern "C" void* MEM_findcontaining(unsigned int addr)
     for (i = 0; i < 0x40; i++) {
         MEMCLASS* cls = (MEMCLASS*)D_004D2438[i & 0x3F];
         if (cls != 0) {
-            sMemNode_251BB0* n = ((sMemNode_251BB0*)cls->bottomblock);
+            MEMBLOCK* n = (cls->bottomblock);
             unsigned int data;
             while (1) {
                 n = n->next;
@@ -309,7 +288,7 @@ extern "C" void* MEM_findcontaining(unsigned int addr)
                 data = (unsigned int)n + 0x10;
                 if (addr >= data && addr < data + n->size) break;
             }
-            if (n != 0 && !(n->flags & 0xC000)) {
+            if (n != 0 && !(n->type & 0xC000)) {
                 return (void*)data;
             }
         }
@@ -320,12 +299,6 @@ extern "C" void* MEM_findcontaining(unsigned int addr)
 //100%
 INCLUDE_ASM("mem/memstd", MEM_find);
 #ifdef SKIP_ASM
-struct sMemNode_251C38 {
-    unsigned short tag;
-    unsigned short flags;
-    int size;
-    sMemNode_251C38* next;
-};
 
 
 int MEM_name(void* self);
@@ -346,7 +319,7 @@ extern "C" void* MEM_find(int name)
     for (i = 0; i < 0x40; i++) {
         MEMCLASS* cls = (MEMCLASS*)D_004D2438[i & 0x3F];
         if (cls != 0) {
-            sMemNode_251C38* n = ((sMemNode_251C38*)cls->bottomblock);
+            MEMBLOCK* n = (cls->bottomblock);
             void* data = (char*)n + 0x10;
             do {
                 int blockName = MEM_name(data);
@@ -425,15 +398,6 @@ extern "C" void* MEM_initblock(void* self, const char* name, int size, int hdr, 
 extern char str_pct_s_LINK[];
 extern char str_pct_s_HIGH[];
 
-struct sMemNode_251D50 {
-    unsigned short tag;
-    unsigned short flags;
-    int size;
-    char* end;
-    void* fC;
-    sMemNode_251D50* next;
-    sMemNode_251D50* prev;
-};
 
 
 extern void* D_004D2438[];
@@ -463,7 +427,7 @@ extern "C" int MEMCLASS_link(int id, char* mem, int size)
     data = (char*)((int)data & -align);
     end -= hdr + 0x30;
     int flags = cls->flags;
-    sMemNode_251D50* blk = (sMemNode_251D50*)(data - 0x10);
+    FREEBLOCK* blk = (FREEBLOCK*)(data - 0x10);
     char* last = ((char*)cls->topblock);
     sprintf(buf, str_pct_s_LINK, cls);
     MEM_initblock(last, buf, 0, hdr, flags | 0x8000, *(void**)(last + 0xC), mem);
@@ -472,27 +436,27 @@ extern "C" int MEMCLASS_link(int id, char* mem, int size)
     sprintf(buf, str_pct_s_HIGH, cls);
     MEM_initblock(end, buf, 0, hdr, flags | 0x8100, blk, 0);
     (*(char**)&cls->topblock) = end;
-    sMemNode_251D50* nextNode = &(*(sMemNode_251D50*)&cls->freehead);
-    sMemNode_251D50* prevNode = nextNode;
+    FREEBLOCK* nextNode = &(*(&cls->freehead));
+    FREEBLOCK* prevNode = nextNode;
     int sz = *(char**)(data - 8) - (char*)blk;
-    if ((char*)(*(sMemNode_251D50*)&cls->freehead).next + ((char*)(*(sMemNode_251D50*)&cls->freehead).prev - (char*)(*(sMemNode_251D50*)&cls->freehead).next) / 2 < (char*)blk) {
+    if ((char*)(*(&cls->freehead)).nextfree + ((char*)(*(&cls->freehead)).prevfree - (char*)(*(&cls->freehead)).nextfree) / 2 < (char*)blk) {
         do
-            prevNode = prevNode->prev;
+            prevNode = prevNode->prevfree;
         while (blk < prevNode);
-        nextNode = prevNode->next;
+        nextNode = prevNode->nextfree;
     } else {
         do
-            nextNode = nextNode->next;
+            nextNode = nextNode->nextfree;
         while (nextNode < blk);
-        prevNode = nextNode->prev;
+        prevNode = nextNode->prevfree;
     }
     blk->size = sz;
-    blk->next = nextNode;
-    blk->prev = prevNode;
-    prevNode->next = blk;
-    nextNode->prev = blk;
-    blk->tag = 16966;
-    blk->flags |= 0x4000;
+    blk->nextfree = nextNode;
+    blk->prevfree = prevNode;
+    prevNode->nextfree = blk;
+    nextNode->prevfree = blk;
+    blk->signature = 16966;
+    blk->type |= 0x4000;
     return 1;
 }
 #endif
@@ -759,25 +723,16 @@ extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
 extern "C" int MEM_tailsize(int unused, int id);
 
-struct sMemNode_2523D0 {
-    unsigned short tag;         // 0x0
-    unsigned short flags;       // 0x2
-    int size;                   // 0x4
-    sMemNode_2523D0* end;       // 0x8 (next block in memory)
-    sMemNode_2523D0* back;      // 0xC (previous block in memory)
-    sMemNode_2523D0* next;      // 0x10 (free list)
-    sMemNode_2523D0* prev;      // 0x14 (free list)
-};
 
 
 extern void* D_004D2438[];
 
-static inline void Unlink_2523D0(sMemNode_2523D0* b)
+static inline void Unlink_2523D0(FREEBLOCK* b)
 {
-    sMemNode_2523D0* p = b->prev;
-    sMemNode_2523D0* n = b->next;
-    p->next = n;
-    n->prev = p;
+    FREEBLOCK* p = b->prevfree;
+    FREEBLOCK* n = b->nextfree;
+    p->nextfree = n;
+    n->prevfree = p;
 }
 
 /**
@@ -796,77 +751,77 @@ static inline void Unlink_2523D0(sMemNode_2523D0* b)
 extern "C" int _MEM_free(void* mem)
 {
     MEMCLASS* cls;
-    sMemNode_2523D0* blk;
-    sMemNode_2523D0* back;
-    sMemNode_2523D0* fwd;
-    sMemNode_2523D0* split;
-    sMemNode_2523D0* prevFree;
-    sMemNode_2523D0* nextFree;
+    FREEBLOCK* blk;
+    FREEBLOCK* back;
+    FREEBLOCK* fwd;
+    FREEBLOCK* split;
+    FREEBLOCK* prevFree;
+    FREEBLOCK* nextFree;
 
     int size;
     int sz;
 
     if (mem != 0) {
         cls = (MEMCLASS*)D_004D2438[*(unsigned short*)((int)mem - 0xE) & 0x3F];
-        blk = (sMemNode_2523D0*)((int)mem - 0x10);
+        blk = (FREEBLOCK*)((int)mem - 0x10);
         if (cls->hasmutex) {
             MUTEX_lock(((char*)&cls->mutex));
         }
-        back = *(sMemNode_2523D0**)((int)mem - 4);
-        fwd = *(sMemNode_2523D0**)((int)mem - 8);
-        if (back->flags & 0x4000) {
+        back = *(FREEBLOCK**)((int)mem - 4);
+        fwd = *(FREEBLOCK**)((int)mem - 8);
+        if (back->type & 0x4000) {
             Unlink_2523D0(back);
-            back->tag = 16975;
-            back->flags &= ~0x4000;
+            back->signature = 16975;
+            back->type &= ~0x4000;
             blk = back;
-            back = blk->back;
-            blk->end = fwd;
-            back->end = blk;
-            fwd->back = blk;
+            back = ((FREEBLOCK*)blk->prev);
+            (*(FREEBLOCK**)&blk->next) = fwd;
+            (*(FREEBLOCK**)&back->next) = blk;
+            (*(FREEBLOCK**)&fwd->prev) = blk;
         }
-        if (fwd->flags & 0x4000) {
+        if (fwd->type & 0x4000) {
             Unlink_2523D0(fwd);
-            fwd->tag = 16975;
-            fwd->flags &= ~0x4000;
-            fwd = fwd->end;
-            blk->back = back;
-            blk->end = fwd;
-            fwd->back = blk;
+            fwd->signature = 16975;
+            fwd->type &= ~0x4000;
+            fwd = ((FREEBLOCK*)fwd->next);
+            (*(FREEBLOCK**)&blk->prev) = back;
+            (*(FREEBLOCK**)&blk->next) = fwd;
+            (*(FREEBLOCK**)&fwd->prev) = blk;
         }
-        size = back->size + MEM_tailsize(MEM_name(&back->next), back->flags);
+        size = back->size + MEM_tailsize(MEM_name(&back->nextfree), back->type);
         if (size <= 7) {
             size = 8;
         }
-        split = (sMemNode_2523D0*)((char*)back + ((size + cls->defaultalign + 0xF) & -cls->defaultalign));
+        split = (FREEBLOCK*)((char*)back + ((size + cls->defaultalign + 0xF) & -cls->defaultalign));
         if (blk != split) {
-            split->flags = blk->flags;
+            split->type = blk->type;
             blk = split;
-            blk->end = fwd;
-            blk->back = back;
-            back->end = blk;
-            fwd->back = blk;
+            (*(FREEBLOCK**)&blk->next) = fwd;
+            (*(FREEBLOCK**)&blk->prev) = back;
+            (*(FREEBLOCK**)&back->next) = blk;
+            (*(FREEBLOCK**)&fwd->prev) = blk;
         }
-        nextFree = &(*(sMemNode_2523D0*)&cls->freehead);
+        nextFree = &(*(&cls->freehead));
         prevFree = nextFree;
-        sz = (char*)blk->end - (char*)blk;
-        if ((char*)(*(sMemNode_2523D0*)&cls->freehead).next + ((char*)(*(sMemNode_2523D0*)&cls->freehead).prev - (char*)(*(sMemNode_2523D0*)&cls->freehead).next) / 2 < (char*)blk) {
+        sz = (char*)((FREEBLOCK*)blk->next) - (char*)blk;
+        if ((char*)(*(&cls->freehead)).nextfree + ((char*)(*(&cls->freehead)).prevfree - (char*)(*(&cls->freehead)).nextfree) / 2 < (char*)blk) {
             do
-                prevFree = prevFree->prev;
+                prevFree = prevFree->prevfree;
             while (blk < prevFree);
-            nextFree = prevFree->next;
+            nextFree = prevFree->nextfree;
         } else {
             do
-                nextFree = nextFree->next;
+                nextFree = nextFree->nextfree;
             while (nextFree < blk);
-            prevFree = nextFree->prev;
+            prevFree = nextFree->prevfree;
         }
         blk->size = sz;
-        blk->next = nextFree;
-        blk->prev = prevFree;
-        prevFree->next = blk;
-        nextFree->prev = blk;
-        blk->tag = 16966;
-        blk->flags |= 0x4000;
+        blk->nextfree = nextFree;
+        blk->prevfree = prevFree;
+        prevFree->nextfree = blk;
+        nextFree->prevfree = blk;
+        blk->signature = 16966;
+        blk->type |= 0x4000;
         if (cls->hasmutex) {
             MUTEX_unlock(((char*)&cls->mutex));
         }
@@ -1027,25 +982,16 @@ extern "C" void* MEM_initblock(void* self, const char* name, int size, int hdr, 
 extern "C" int MEM_tailsize(int unused, int id);
 extern "C" void MEM_move(void* a, void* b);
 
-struct sMemNode_252718 {
-    unsigned short tag;         // 0x0
-    unsigned short flags;       // 0x2
-    int size;                   // 0x4
-    sMemNode_252718* end;       // 0x8 (next block in memory)
-    sMemNode_252718* back;      // 0xC (previous block in memory)
-    sMemNode_252718* next;      // 0x10 (free list)
-    sMemNode_252718* prev;      // 0x14 (free list)
-};
 
 
 extern void* D_004D2438[];
 
-static inline void Unlink_252718(sMemNode_252718* b)
+static inline void Unlink_252718(FREEBLOCK* b)
 {
-    sMemNode_252718* p = b->prev;
-    sMemNode_252718* n = b->next;
-    p->next = n;
-    n->prev = p;
+    FREEBLOCK* p = b->prevfree;
+    FREEBLOCK* n = b->nextfree;
+    p->nextfree = n;
+    n->prevfree = p;
 }
 
 /**
@@ -1066,11 +1012,11 @@ extern "C" void* _MEM_resize(void* mem, int size)
 {
     int id = *(unsigned short*)((int)mem - 0xE);
     MEMCLASS* cls = (MEMCLASS*)D_004D2438[id & 0x3F];
-    sMemNode_252718* blk = (sMemNode_252718*)((int)mem - 0x10);
-    sMemNode_252718* fwd;
-    sMemNode_252718* nb;
-    sMemNode_252718* prevFree;
-    sMemNode_252718* nextFree;
+    FREEBLOCK* blk = (FREEBLOCK*)((int)mem - 0x10);
+    FREEBLOCK* fwd;
+    FREEBLOCK* nb;
+    FREEBLOCK* prevFree;
+    FREEBLOCK* nextFree;
     int want;
     int avail;
     int hdr;
@@ -1079,14 +1025,14 @@ extern "C" void* _MEM_resize(void* mem, int size)
     if (cls->hasmutex) {
         MUTEX_lock(((char*)&cls->mutex));
     }
-    fwd = *(sMemNode_252718**)((int)mem - 8);
-    if (fwd->flags & 0x4000) {
+    fwd = *(FREEBLOCK**)((int)mem - 8);
+    if (fwd->type & 0x4000) {
         Unlink_252718(fwd);
-        fwd->tag = 16975;
-        fwd->flags &= ~0x4000;
-        fwd = fwd->end;
-        *(sMemNode_252718**)((int)mem - 8) = fwd;
-        fwd->back = blk;
+        fwd->signature = 16975;
+        fwd->type &= ~0x4000;
+        fwd = ((FREEBLOCK*)fwd->next);
+        *(FREEBLOCK**)((int)mem - 8) = fwd;
+        (*(FREEBLOCK**)&fwd->prev) = blk;
     }
     want = size;
     if (want < 8) {
@@ -1106,31 +1052,31 @@ extern "C" void* _MEM_resize(void* mem, int size)
     MEM_move((char*)mem + size, (char*)mem + blk->size);
     blk->size = size;
     if (avail - want > 0x40) {
-        nb = (sMemNode_252718*)((char*)mem + (want + 0x10));
+        nb = (FREEBLOCK*)((char*)mem + (want + 0x10));
         MEM_initblock(nb, 0, 0, 0, 0, blk, fwd);
-        nextFree = &(*(sMemNode_252718*)&cls->freehead);
+        nextFree = &(*(&cls->freehead));
         prevFree = nextFree;
-        sz = (char*)nb->end - (char*)nb;
-        if ((char*)(*(sMemNode_252718*)&cls->freehead).next + ((char*)(*(sMemNode_252718*)&cls->freehead).prev - (char*)(*(sMemNode_252718*)&cls->freehead).next) / 2 < (char*)nb) {
+        sz = (char*)((FREEBLOCK*)nb->next) - (char*)nb;
+        if ((char*)(*(&cls->freehead)).nextfree + ((char*)(*(&cls->freehead)).prevfree - (char*)(*(&cls->freehead)).nextfree) / 2 < (char*)nb) {
             do
-                prevFree = prevFree->prev;
+                prevFree = prevFree->prevfree;
             while (nb < prevFree);
-            nextFree = prevFree->next;
+            nextFree = prevFree->nextfree;
         } else {
             do
-                nextFree = nextFree->next;
+                nextFree = nextFree->nextfree;
             while (nextFree < nb);
-            prevFree = nextFree->prev;
+            prevFree = nextFree->prevfree;
         }
         nb->size = sz;
-        nb->next = nextFree;
-        nb->prev = prevFree;
-        prevFree->next = nb;
-        nextFree->prev = nb;
-        nb->tag = 16966;
-        nb->flags |= 0x4000;
-        fwd->back = nb;
-        blk->end = nb;
+        nb->nextfree = nextFree;
+        nb->prevfree = prevFree;
+        prevFree->nextfree = nb;
+        nextFree->prevfree = nb;
+        nb->signature = 16966;
+        nb->type |= 0x4000;
+        (*(FREEBLOCK**)&fwd->prev) = nb;
+        (*(FREEBLOCK**)&blk->next) = nb;
     }
     if (cls->hasmutex) {
         MUTEX_unlock(((char*)&cls->mutex));
@@ -1191,24 +1137,13 @@ extern "C" void* MEM_allocaligna(void*);
 //100%
 INCLUDE_ASM("mem/memstd", _MEM_allocaligna);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct sMemNode_2A10 {
-    unsigned short tag;
-    unsigned short flags;
-    int size;
-    sMemNode_2A10* pnext;       // 0x8
-    sMemNode_2A10* pprev;       // 0xC
-    sMemNode_2A10* fnext;       // 0x10
-    sMemNode_2A10* fprev;       // 0x14
-};
 
 struct sMemHdr_2A10 {
     unsigned short tag;
     unsigned short flags;
     int size;
-    sMemNode_2A10* pnext;       // 0x8
-    sMemNode_2A10* pprev;       // 0xC
+    FREEBLOCK* pnext;       // 0x8
+    FREEBLOCK* pprev;       // 0xC
 };
 
 
@@ -1216,93 +1151,93 @@ extern int D_004A2E78_2A10 __asm__("D_004A2E78");
 extern int (*D_004A2E7C_2A10)(int, int, int) __asm__("D_004A2E7C");
 
 // First free block of at least size bytes (same body as FREE_find).
-static inline sMemNode_2A10* FirstFit_2A10(MEMCLASS* cls, int size, int back)
+static inline FREEBLOCK* FirstFit_2A10(MEMCLASS* cls, int size, int back)
 {
-    sMemNode_2A10* n = &(*(sMemNode_2A10*)&cls->freehead);
+    FREEBLOCK* n = &(*(&cls->freehead));
     if (back == 0) {
         do {
-            n = n->fnext;
+            n = n->nextfree;
         } while (n->size < size);
     } else {
         do {
-            n = n->fprev;
+            n = n->prevfree;
         } while (n->size < size);
     }
-    return n->tag != 0x4253 ? n : 0;
+    return n->signature != 0x4253 ? n : 0;
 }
 
 // Largest free block holding min bytes (same body as FREE_findlargest).
-static inline sMemNode_2A10* BestFit_2A10(MEMCLASS* cls, int min, int back)
+static inline FREEBLOCK* BestFit_2A10(MEMCLASS* cls, int min, int back)
 {
     int v = min - 1;
     if (v < 0) {
         v = 0;
     }
-    sMemNode_2A10* best = 0;
-    sMemNode_2A10* n = &(*(sMemNode_2A10*)&cls->freehead);
+    FREEBLOCK* best = 0;
+    FREEBLOCK* n = &(*(&cls->freehead));
     if (back == 0) {
-        n = (*(sMemNode_2A10*)&cls->freehead).fnext;
+        n = (*(&cls->freehead)).nextfree;
         for (;;) {
             if (v < n->size - 0x10) {
-                if (n->tag == 0x4253) {
+                if (n->signature == 0x4253) {
                     break;
                 }
                 best = n;
                 v = best->size - 0x10;
             }
-            n = n->fnext;
+            n = n->nextfree;
         }
     } else {
-        n = (*(sMemNode_2A10*)&cls->freehead).fprev;
+        n = (*(&cls->freehead)).prevfree;
         for (;;) {
             if (v < n->size - 0x10) {
-                if (n->tag == 0x4253) {
+                if (n->signature == 0x4253) {
                     break;
                 }
                 best = n;
                 v = best->size - 0x10;
             }
-            n = n->fprev;
+            n = n->prevfree;
         }
     }
     return best;
 }
 
 // Inserts a block into the address-sorted free list (same body as FREE_add).
-static inline void InsertFree_2A10(MEMCLASS* cls, sMemNode_2A10* blk)
+static inline void InsertFree_2A10(MEMCLASS* cls, FREEBLOCK* blk)
 {
-    sMemNode_2A10* q = &(*(sMemNode_2A10*)&cls->freehead);
-    sMemNode_2A10* p = q;
-    int sz = (char*)blk->pnext - (char*)blk;
-    if ((char*)(*(sMemNode_2A10*)&cls->freehead).fnext + ((char*)(*(sMemNode_2A10*)&cls->freehead).fprev - (char*)(*(sMemNode_2A10*)&cls->freehead).fnext) / 2 < (char*)blk) {
+    FREEBLOCK* q = &(*(&cls->freehead));
+    FREEBLOCK* p = q;
+    int sz = (char*)((FREEBLOCK*)blk->next) - (char*)blk;
+    if ((char*)(*(&cls->freehead)).nextfree + ((char*)(*(&cls->freehead)).prevfree - (char*)(*(&cls->freehead)).nextfree) / 2 < (char*)blk) {
         do
-            p = p->fprev;
+            p = p->prevfree;
         while (blk < p);
-        q = p->fnext;
+        q = p->nextfree;
     } else {
         do
-            q = q->fnext;
+            q = q->nextfree;
         while (q < blk);
-        p = q->fprev;
+        p = q->prevfree;
     }
     blk->size = sz;
-    blk->fnext = q;
-    blk->fprev = p;
-    p->fnext = blk;
-    q->fprev = blk;
-    blk->tag = 0x4246;
-    blk->flags |= 0x4000;
+    blk->nextfree = q;
+    blk->prevfree = p;
+    p->nextfree = blk;
+    q->prevfree = blk;
+    blk->signature = 0x4246;
+    blk->type |= 0x4000;
 }
 
 // Takes a block off the free list (same body as FREE_remove).
-static inline void RemoveFree_2A10(sMemNode_2A10* blk)
+static inline void RemoveFree_2A10(FREEBLOCK* blk)
 {
-    sMemNode_2A10* prev = blk->fprev;
-    sMemNode_2A10* next = blk->fnext;
-    prev->fnext = next;
-    next->fprev = prev;
-    blk->tag = 0x424F;
-    blk->flags &= 0xBFFF;
+    FREEBLOCK* prev = blk->prevfree;
+    FREEBLOCK* next = blk->nextfree;
+    prev->nextfree = next;
+    next->prevfree = prev;
+    blk->signature = 0x424F;
+    blk->type &= 0xBFFF;
 }
 
 // Allocates size bytes from the class picked by flags, aligned so that (p + offset) is aligned;
@@ -1357,46 +1292,46 @@ extern "C" char* _MEM_allocaligna_impl(void* name, int size, int align, int offs
             n = 8;
         int alignSlack = mask + 0x10;
         int need = n + alignSlack;
-        sMemNode_2A10* blk;
+        FREEBLOCK* blk;
         if (top)
             blk = BestFit_2A10(cls, need, back);
         else
             blk = FirstFit_2A10(cls, need, back);
         if (blk != 0) {
-            sMemNode_2A10* rest = 0;
+            FREEBLOCK* rest = 0;
             int bsize = blk->size;
             RemoveFree_2A10(blk);
-            save.pnext = blk->pnext;
-            save.pprev = blk->pprev;
+            save.pnext = ((FREEBLOCK*)blk->next);
+            save.pprev = ((FREEBLOCK*)blk->prev);
             if (back) {
                 allocation = (char*)(((int)blk + bsize - n + offset) & ~mask) - offset;
                 rest = blk;
             } else {
                 allocation = (char*)(((int)((char*)blk + (mask + 0x10)) + offset) & ~mask) - offset;
             }
-            blk = (sMemNode_2A10*)(allocation - 0x10);
+            blk = (FREEBLOCK*)(allocation - 0x10);
             ((sMemHdr_2A10*)((int)allocation - 0x10))->pnext = save.pnext;
             ((sMemHdr_2A10*)((int)allocation - 0x10))->pprev = save.pprev;
             if (amask + 0x30 < bsize - need) {
                 if (back) {
-                    rest->pnext->pprev = blk;
-                    ((sMemHdr_2A10*)((int)allocation - 0x10))->pnext = rest->pnext;
+                    (*(FREEBLOCK**)&((FREEBLOCK*)rest->next)->prev) = blk;
+                    ((sMemHdr_2A10*)((int)allocation - 0x10))->pnext = ((FREEBLOCK*)rest->next);
                     ((sMemHdr_2A10*)((int)allocation - 0x10))->pprev = rest;
-                    MEM_initblock(rest, 0, 0, 0, 0, rest->pprev, blk);
+                    MEM_initblock(rest, 0, 0, 0, 0, ((FREEBLOCK*)rest->prev), blk);
                     InsertFree_2A10(cls, rest);
                 } else {
-                    rest = (sMemNode_2A10*)(((int)allocation + n + amask) & ~amask);
-                    blk->pnext->pprev = rest;
-                    blk->pprev->pnext = blk;
+                    rest = (FREEBLOCK*)(((int)allocation + n + amask) & ~amask);
+                    (*(FREEBLOCK**)&((FREEBLOCK*)blk->next)->prev) = rest;
+                    (*(FREEBLOCK**)&((FREEBLOCK*)blk->prev)->next) = blk;
                     MEM_initblock(rest, 0, 0, 0, 0, blk, ((sMemHdr_2A10*)((int)allocation - 0x10))->pnext);
                     InsertFree_2A10(cls, rest);
-                    blk->pnext = rest;
+                    (*(FREEBLOCK**)&blk->next) = rest;
                 }
             } else {
-                blk->pnext->pprev = blk;
-                blk->pprev->pnext = blk;
+                (*(FREEBLOCK**)&((FREEBLOCK*)blk->next)->prev) = blk;
+                (*(FREEBLOCK**)&((FREEBLOCK*)blk->prev)->next) = blk;
             }
-            MEM_initblock((sMemNode_2A10*)(allocation - 0x10), 0, size, cls->infosize, flags, blk->pprev, blk->pnext);
+            MEM_initblock((FREEBLOCK*)(allocation - 0x10), 0, size, cls->infosize, flags, ((FREEBLOCK*)blk->prev), ((FREEBLOCK*)blk->next));
         } else if (D_004A2E7C_2A10 != 0) {
             retry = D_004A2E7C_2A10(0, size, flags);
         }
@@ -1596,19 +1531,19 @@ INCLUDE_ASM("mem/memstd", FREE_find);
  * @param back  nonzero to search from the top of memory down
  * @return the block, or 0
  */
-extern "C" sMemNode_251718* FREE_find(MEMCLASS* cls, int size, int back)
+extern "C" FREEBLOCK* FREE_find(MEMCLASS* cls, int size, int back)
 {
-    sMemNode_251718* n = &(*(sMemNode_251718*)&cls->freehead);
+    FREEBLOCK* n = &(*(&cls->freehead));
     if (back == 0) {
         do {
-            n = n->next;
+            n = n->nextfree;
         } while (n->size < size);
     } else {
         do {
-            n = n->prev;
+            n = n->prevfree;
         } while (n->size < size);
     }
-    return n->tag != 16979 ? n : 0;
+    return n->signature != 16979 ? n : 0;
 }
 #endif
 //100%
@@ -1628,37 +1563,37 @@ INCLUDE_ASM("mem/memstd", FREE_findlargest);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Largest block in the class whose payload exceeds size - 1, walking forward
 // (dir 0) or backward; 0 if none.
-extern "C" sMemNode_251718* FREE_findlargest(MEMCLASS* cls, int size, int dir)
+extern "C" FREEBLOCK* FREE_findlargest(MEMCLASS* cls, int size, int dir)
 {
     int best = size - 1;
     if (best < 0) {
         best = 0;
     }
-    sMemNode_251718* bestNode = 0;
-    sMemNode_251718* node;
+    FREEBLOCK* bestNode = 0;
+    FREEBLOCK* node;
     if (dir == 0) {
-        node = (*(sMemNode_251718*)&cls->freehead).next;
+        node = (*(&cls->freehead)).nextfree;
         for (;;) {
             if (best < node->size - 0x10) {
-                if (node->tag == 16979) {
+                if (node->signature == 16979) {
                     break;
                 }
                 bestNode = node;
                 best = bestNode->size - 0x10;
             }
-            node = node->next;
+            node = node->nextfree;
         }
     } else {
-        node = (*(sMemNode_251718*)&cls->freehead).prev;
+        node = (*(&cls->freehead)).prevfree;
         for (;;) {
             if (best < node->size - 0x10) {
-                if (node->tag == 16979) {
+                if (node->signature == 16979) {
                     break;
                 }
                 bestNode = node;
                 best = bestNode->size - 0x10;
             }
-            node = node->prev;
+            node = node->prevfree;
         }
     }
     return bestNode;
@@ -1681,19 +1616,19 @@ extern "C" int FREE_gettotalfree(MEMCLASS* cls, int back)
 {
     int total = 0;
     if (back == 0) {
-        sMemNode_251718* n = (*(sMemNode_251718*)&cls->freehead).next;
-        while (n->tag != 16979) {
+        FREEBLOCK* n = (*(&cls->freehead)).nextfree;
+        while (n->signature != 16979) {
             int size = n->size;
             int rest = total - 0x10;
-            n = n->next;
+            n = n->nextfree;
             total = rest + size;
         }
     } else {
-        sMemNode_251718* n = (*(sMemNode_251718*)&cls->freehead).prev;
-        while (n->tag != 16979) {
+        FREEBLOCK* n = (*(&cls->freehead)).prevfree;
+        while (n->signature != 16979) {
             int size = n->size;
             int rest = total - 0x10;
-            n = n->prev;
+            n = n->prevfree;
             total = rest + size;
         }
     }
@@ -1712,29 +1647,29 @@ INCLUDE_ASM("mem/memstd", FREE_add);
  * @param cls  the memory class
  * @param blk  the block to insert
  */
-extern "C" void FREE_add(MEMCLASS* cls, sMemNode_251D50* blk)
+extern "C" void FREE_add(MEMCLASS* cls, FREEBLOCK* blk)
 {
-    sMemNode_251D50* nextNode = &(*(sMemNode_251D50*)&cls->freehead);
-    sMemNode_251D50* prevNode = nextNode;
-    int sz = blk->end - (char*)blk;
-    if ((char*)(*(sMemNode_251D50*)&cls->freehead).next + ((char*)(*(sMemNode_251D50*)&cls->freehead).prev - (char*)(*(sMemNode_251D50*)&cls->freehead).next) / 2 < (char*)blk) {
+    FREEBLOCK* nextNode = &(*(&cls->freehead));
+    FREEBLOCK* prevNode = nextNode;
+    int sz = ((char*)blk->next) - (char*)blk;
+    if ((char*)(*(&cls->freehead)).nextfree + ((char*)(*(&cls->freehead)).prevfree - (char*)(*(&cls->freehead)).nextfree) / 2 < (char*)blk) {
         do
-            prevNode = prevNode->prev;
+            prevNode = prevNode->prevfree;
         while (blk < prevNode);
-        nextNode = prevNode->next;
+        nextNode = prevNode->nextfree;
     } else {
         do
-            nextNode = nextNode->next;
+            nextNode = nextNode->nextfree;
         while (nextNode < blk);
-        prevNode = nextNode->prev;
+        prevNode = nextNode->prevfree;
     }
     blk->size = sz;
-    blk->next = nextNode;
-    blk->prev = prevNode;
-    prevNode->next = blk;
-    nextNode->prev = blk;
-    blk->tag = 16966;
-    blk->flags |= 0x4000;
+    blk->nextfree = nextNode;
+    blk->prevfree = prevNode;
+    prevNode->nextfree = blk;
+    nextNode->prevfree = blk;
+    blk->signature = 16966;
+    blk->type |= 0x4000;
 }
 #endif
 //100%

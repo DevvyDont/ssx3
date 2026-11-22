@@ -1118,18 +1118,10 @@ void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm
 extern char str_AnimChanCache[];
 
 
-struct sAnimNode_310F18
-{
-    int used;                   // 0x00
-    tCmpChannel* data;     // 0x04
-    char pad8[0x14];
-    sAnimNode_310F18* prev;     // 0x1C
-    sAnimNode_310F18* next;     // 0x20
-};
 
 // Typed views of the pool tables (declared as int[] later in this unit).
-extern sAnimNode_310F18* gChanCache_310F18[] __asm__("gChanCache");
-extern sAnimNode_310F18* gChanCacheLRU_310F18[] __asm__("gChanCacheLRU");
+extern tCmpChanCache* gChanCache_310F18[] __asm__("gChanCache");
+extern tCmpChanCache* gChanCacheLRU_310F18[] __asm__("gChanCacheLRU");
 
 /**
  * Allocates one channel-cache bucket: 20 nodes in a circular list, each with room for n channels.
@@ -1141,15 +1133,15 @@ extern sAnimNode_310F18* gChanCacheLRU_310F18[] __asm__("gChanCacheLRU");
  * @param n  number of channels per node (On Tour: numChan)
  * @return the first node, which is also the new head
  */
-extern "C" sAnimNode_310F18* gGenCacheBucket(int bank, int n)
+extern "C" tCmpChanCache* gGenCacheBucket(int bank, int n)
 {
-    gChanCache_310F18[bank] = new (str_AnimChanCache, 0x20000000, 0) sAnimNode_310F18[20];
+    gChanCache_310F18[bank] = new (str_AnimChanCache, 0x20000000, 0) tCmpChanCache[20];
     for (int i = 0; i < 20; i++)
     {
         gChanCache_310F18[bank][i].next = &gChanCache_310F18[bank][i] + 1;
         gChanCache_310F18[bank][i].prev = &gChanCache_310F18[bank][i] - 1;
-        gChanCache_310F18[bank][i].used = 0;
-        gChanCache_310F18[bank][i].data = new (str_AnimChanCache, 0x20000000, 0) tCmpChannel[n];
+        (*(int*)&gChanCache_310F18[bank][i].animChunk) = 0;
+        gChanCache_310F18[bank][i].cmpAccess.mChannels = new (str_AnimChanCache, 0x20000000, 0) tCmpChannel[n];
     }
     gChanCache_310F18[bank][0].prev = &gChanCache_310F18[bank][19];
     gChanCache_310F18[bank][19].next = gChanCache_310F18[bank];

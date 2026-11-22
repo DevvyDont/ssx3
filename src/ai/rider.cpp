@@ -3453,11 +3453,6 @@ extern "C" void cSSXAudio_UpdateAudioWorldPainter(void* mgr, void* rider);
 extern "C" float func_0031C228(float x);
 extern "C" void cRider_updateDangerLevel(cRider* self);
 
-struct sVec2_121950
-{
-    float x, y;
-    sVec2_121950(float a, float b) : x(a), y(b) {}
-};
 
 // PORT: PS2 sqrt.s asm helper; use sqrtf on PC.
 static inline float Sqrt_121950(float x)
@@ -3467,7 +3462,7 @@ static inline float Sqrt_121950(float x)
     return r;
 }
 
-static inline float Length_121950(const sVec2_121950& v)
+static inline float Length_121950(const t2Vector& v)
 {
     return Sqrt_121950(v.x * v.x + v.y * v.y);
 }
@@ -3505,7 +3500,7 @@ extern "C" void cRider_updateSplit12(cRider* self)
     cSSXAudio_UpdateAudioWorldPainter(cAudioInterface_bxAudio(), self);
     if (cRider_isGroundNormalValid(self))
     {
-        sVec2_121950 normalXY(self->mGroundNormal.x, self->mGroundNormal.y);
+        t2Vector normalXY(self->mGroundNormal.x, self->mGroundNormal.y);
         float z = self->mGroundNormal.z;
         float ang = Atan2_121950(Length_121950(normalXY), z);
         float headingDelta = ang - self->mSmoothedHeading;
@@ -6542,15 +6537,6 @@ struct sWtTrack_5448 {
 };
 
 
-struct sSfxEnt_5448 {
-    int id;                  // 0x0
-    int when;                // 0x4
-    char pad8[0xC - 0x8];
-    int slot;                // 0xC
-    char pad10[0x1C - 0x10];
-    signed char* vol;        // 0x1C
-    sSfxEnt_5448* next;      // 0x20
-};
 
 
 #define MIN_5448(a, b) ((a) < (b) ? (a) : (b))
@@ -6586,14 +6572,14 @@ extern "C" void cRider_DoInSeqSoundUpdate(cRider* vself, void* vobj, float when,
         }
     }
     if (flags & 1) {
-        sSfxEnt_5448* curSound = *(sSfxEnt_5448**)(obj + 0xC);
+        tSound* curSound = *(tSound**)(obj + 0xC);
         if (curSound != 0) {
         char* rp = (char*)&self->mPosition;
         do {
-            if ((float)curSound->when != when)
+            if ((float)curSound->data.scriptStartFrame != when)
                 return;
             int gameSoundIndex, type;
-            cScriptObjRider_ScriptSoundIDToGameSoundInfo(&self->mScriptObjRiderVtbl, curSound->id, &gameSoundIndex, &type);
+            cScriptObjRider_ScriptSoundIDToGameSoundInfo(&self->mScriptObjRiderVtbl, curSound->data.objectID, &gameSoundIndex, &type);
             int tp = type;
             int ar = gameSoundIndex;
             sWtTrack_5448* curTrack = ((sWtTrack_5448*)snd->mpVBankManager);
@@ -6623,7 +6609,7 @@ extern "C" void cRider_DoInSeqSoundUpdate(cRider* vself, void* vobj, float when,
             {
                 sWtTrack_5448* volTrack = *(*(sWtTrack_5448***)&snd->MusicSys);
                 sWtSub_5448* s2 = &volTrack->sub;
-                s2->p38[volTrack->sub.cur] = *curSound->vol;
+                s2->p38[volTrack->sub.cur] = *((signed char*)curSound->pCustom);
                 s2->ents[volTrack->sub.cur].b0 = MAX_5448(MIN_5448(s2->p38[s2->cur], 0x7F), 0);
             }
             {
@@ -6638,8 +6624,8 @@ extern "C" void cRider_DoInSeqSoundUpdate(cRider* vself, void* vobj, float when,
                 int h = cSSXAudio_GetClosestCamera1(snd, self);
                 (*pt)->sub.p64[(*pt)->sub.cur] = h;
             }
-            *(int*)((char*)ids + (curSound->slot << 2)) = cBankSys_SFX_End(snd);
-            curSound = curSound->next;
+            *(int*)((char*)ids + (curSound->data.trackIndex << 2)) = cBankSys_SFX_End(snd);
+            curSound = curSound->pNext;
         } while (curSound != 0);
         }
     } else if (flags & 2) {
@@ -6647,9 +6633,9 @@ extern "C" void cRider_DoInSeqSoundUpdate(cRider* vself, void* vobj, float when,
         int on = 1;
         for (i = 3; i >= 0; i--)
             keep[i] = on;
-        sSfxEnt_5448* curSound;
-        for (curSound = *(sSfxEnt_5448**)(obj + 0xC); curSound != 0; curSound = curSound->next)
-            keep[curSound->slot] = 0;
+        tSound* curSound;
+        for (curSound = *(tSound**)(obj + 0xC); curSound != 0; curSound = curSound->pNext)
+            keep[curSound->data.trackIndex] = 0;
         for (i = 0; i < 4; i++) {
             if (keep[i] != 0) {
                 if (ids[i] >= 0) {

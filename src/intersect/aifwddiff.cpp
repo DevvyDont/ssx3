@@ -18,12 +18,6 @@ extern "C" void tAIFwdDiff_tAIFwdDiff(void* self);
 extern char str_AIFwdDiffCache[];
 extern char str_AIFwdDiffHash[];
 
-struct sCacheEntry_7890 {
-    unsigned int key;
-    sCacheEntry_7890* next;
-    sCacheEntry_7890* prev;
-    char pad[0x1CD0 - 0xC];
-};
 
 /**
  * Sets up the AI forward-difference cache: a ring of empty entries ("AIFwdDiffCache") and a hash table of
@@ -33,22 +27,22 @@ struct sCacheEntry_7890 {
  */
 extern "C" void cAIFwdDiffCache_Init(cAIFwdDiffCache* self, int n)
 {
-    sCacheEntry_7890* mem = (sCacheEntry_7890*)operator_new_tag(n * sizeof(sCacheEntry_7890), str_AIFwdDiffCache, 0, 0);
-    sCacheEntry_7890* entry = mem;
+    tAIFwdDiff* mem = (tAIFwdDiff*)operator_new_tag(n * sizeof(tAIFwdDiff), str_AIFwdDiffCache, 0, 0);
+    tAIFwdDiff* entry = mem;
     for (int k = n - 1; k != -1; k--, entry++) {
         tAIFwdDiff_tAIFwdDiff(entry);
     }
-    *(sCacheEntry_7890**)&self->mCache = mem;
+    *(tAIFwdDiff**)&self->mCache = mem;
     for (int i = 0; i < n; i++) {
-        ((sCacheEntry_7890*)self->mCache)[i].next = &((sCacheEntry_7890*)self->mCache)[i] + 1;
-        ((sCacheEntry_7890*)self->mCache)[i].prev = &((sCacheEntry_7890*)self->mCache)[i] - 1;
-        ((sCacheEntry_7890*)self->mCache)[i].key = 0xFFFFFFFF;
+        (self->mCache)[i].mNext = &(self->mCache)[i] + 1;
+        (self->mCache)[i].mPrev = &(self->mCache)[i] - 1;
+        (self->mCache)[i].mKey = 0xFFFFFFFF;
     }
-    ((sCacheEntry_7890*)self->mCache)[0].prev = ((sCacheEntry_7890*)self->mCache) + n - 1;
-    ((sCacheEntry_7890*)self->mCache)[n - 1].next = ((sCacheEntry_7890*)self->mCache);
+    (self->mCache)[0].mPrev = (self->mCache) + n - 1;
+    (self->mCache)[n - 1].mNext = (self->mCache);
     self->mHashSize = n * 2 + 13;
-    *(sCacheEntry_7890**)&self->mAgeQueue = ((sCacheEntry_7890*)self->mCache);
-    *(sCacheEntry_7890***)&self->mPatchHash = (sCacheEntry_7890**)operator_new_tag(((int)self->mHashSize) * 4, str_AIFwdDiffHash, 0x80000000, 0);
+    *(tAIFwdDiff**)&self->mAgeQueue = (self->mCache);
+    *(tAIFwdDiff***)&self->mPatchHash = (tAIFwdDiff**)operator_new_tag(((int)self->mHashSize) * 4, str_AIFwdDiffHash, 0x80000000, 0);
 }
 #endif
 
@@ -64,12 +58,6 @@ extern "C" void cAIFwdDiffCache_RemoveFromHash(void* self, void* node);
 extern "C" void cAIFwdDiffCache_AddToHash(sFwdDiffTable* table, sFwdDiffNode* node);
 extern "C" void cAIFwdDiffCache_TesselatePatch(cAIFwdDiffCache* self, void* src, cAIFwdDiffCache* node);
 
-struct sCacheNode_279D0 {
-    unsigned int key;           // 0x0
-    sCacheNode_279D0* lruNext;  // 0x4
-    sCacheNode_279D0* lruPrev;  // 0x8
-    sCacheNode_279D0* next;     // 0xC
-};
 
 
 static inline int cAIFwdDiffCache_GetFwdDiff_less(unsigned int a, unsigned int b) { return a < b; }
@@ -85,23 +73,23 @@ static inline int cAIFwdDiffCache_GetFwdDiff_less(unsigned int a, unsigned int b
  * @param src  the terrain patch record (On Tour const tPatchRecord&)
  * @param out  receives the cache node (On Tour ppFwdDiff)
  */
-extern "C" void cAIFwdDiffCache_GetFwdDiff(cAIFwdDiffCache* self, void* src, sCacheNode_279D0** out)
+extern "C" void cAIFwdDiffCache_GetFwdDiff(cAIFwdDiffCache* self, void* src, tAIFwdDiff** out)
 {
     unsigned int key = *(unsigned int*)((char*)src + 0x150);
-    sCacheNode_279D0* n = ((sCacheNode_279D0**)self->mPatchHash)[key % self->mHashSize];
-    while (n != 0 && !cAIFwdDiffCache_GetFwdDiff_less(key, n->key)) {
-        if (n->key == key) {
+    tAIFwdDiff* n = ((tAIFwdDiff**)self->mPatchHash)[key % self->mHashSize];
+    while (n != 0 && !cAIFwdDiffCache_GetFwdDiff_less(key, n->mKey)) {
+        if (n->mKey == key) {
             cAIFwdDiffCache_MoveToAgeQueueTail((sFwdDiffList*)self, (sFwdDiffLink*)n);
             *out = n;
             return;
         }
-        n = n->next;
+        n = n->mHashLink;
     }
-    n = ((sCacheNode_279D0*)self->mAgeQueue);
+    n = (self->mAgeQueue);
     cAIFwdDiffCache_RemoveFromHash(self, n);
-    n->key = key;
+    n->mKey = key;
     cAIFwdDiffCache_AddToHash((sFwdDiffTable*)self, (sFwdDiffNode*)n);
-    *(sCacheNode_279D0**)&self->mAgeQueue = n->lruNext;
+    *(tAIFwdDiff**)&self->mAgeQueue = n->mNext;
     cAIFwdDiffCache_TesselatePatch((cAIFwdDiffCache*)self, src, (cAIFwdDiffCache*)n);
     *out = n;
 }
@@ -151,19 +139,11 @@ extern "C" void cAIFwdDiffCache_MoveToAgeQueueTail(sFwdDiffList* list, sFwdDiffL
 //100%
 INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_RemoveFromHash);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct sCacheNode_7B30 {
-    unsigned int key;
-    sCacheNode_7B30* lruNext;
-    sCacheNode_7B30* lruPrev;
-    sCacheNode_7B30* next;
-};
 
 
 static inline int less_7B30(unsigned int a, unsigned int b) { return a < b; }
 
-extern "C" void cAIFwdDiffCache_RemoveFromHash_7B30(cAIFwdDiffCache* self, sCacheNode_7B30* node) __asm__("cAIFwdDiffCache_RemoveFromHash");
+extern "C" void cAIFwdDiffCache_RemoveFromHash_7B30(cAIFwdDiffCache* self, tAIFwdDiff* node) __asm__("cAIFwdDiffCache_RemoveFromHash");
 /**
  * Removes an AI forward-difference cache node from the patch hash table.
  *
@@ -172,21 +152,21 @@ extern "C" void cAIFwdDiffCache_RemoveFromHash_7B30(cAIFwdDiffCache* self, sCach
  *
  * @param node  the node (On Tour node)
  */
-extern "C" void cAIFwdDiffCache_RemoveFromHash_7B30(cAIFwdDiffCache* self, sCacheNode_7B30* node)
+extern "C" void cAIFwdDiffCache_RemoveFromHash_7B30(cAIFwdDiffCache* self, tAIFwdDiff* node)
 {
-    unsigned int key = node->key;
+    unsigned int key = node->mKey;
     if (key == 0xFFFFFFFF)
         return;
-    sCacheNode_7B30** link = &((sCacheNode_7B30**)self->mPatchHash)[key % self->mHashSize];
+    tAIFwdDiff** link = &((tAIFwdDiff**)self->mPatchHash)[key % self->mHashSize];
     if (*link == 0)
         return;
-    sCacheNode_7B30* n = *link;
-    while (n != 0 && !less_7B30(key, n->key)) {
-        if (n->key == key) {
-            *link = n->next;
+    tAIFwdDiff* n = *link;
+    while (n != 0 && !less_7B30(key, n->mKey)) {
+        if (n->mKey == key) {
+            *link = n->mHashLink;
             return;
         }
-        link = &(*link)->next;
+        link = &(*link)->mHashLink;
         n = *link;
     }
 }
@@ -698,13 +678,9 @@ INCLUDE_ASM("intersect/aifwddiff", nash_Cell_remnode);
 #ifdef SKIP_ASM
 void operator_delete(int* p);
 
-struct sItem_003284B8 {
-    sItem_003284B8* next;   // 0x0
-    sItem_003284B8* prev;   // 0x4
-};
 struct sList_003284B8 {
-    sItem_003284B8* head;
-    void remove(sItem_003284B8* it)
+    nash_Node* head;
+    void remove(nash_Node* it)
     {
         if (it->next) it->next->prev = it->prev;
         if (it->prev) {
@@ -742,7 +718,7 @@ struct sNode_003284B8 {
  * @param target  the node's cell key
  * @param cur     this cell's key
  */
-extern "C" void nash_Cell_remnode(sNode_003284B8* node, int idx, sItem_003284B8* item, const nash_CellKey* target,
+extern "C" void nash_Cell_remnode(sNode_003284B8* node, int idx, nash_Node* item, const nash_CellKey* target,
                               const nash_CellKey* cur)
 {
     int lv = cur->level;
@@ -776,14 +752,10 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void MEM_fill(void* p, int v, int n);
 extern char str_Cell[];
 
-struct sItem_00328660 {
-    sItem_00328660* next;   // 0x0
-    sItem_00328660* prev;   // 0x4
-};
 struct sList_00328660 {
-    sItem_00328660* head;
+    nash_Node* head;
     sList_00328660() : head(0) {}
-    void push(sItem_00328660* it)
+    void push(nash_Node* it)
     {
         if (head) head->prev = it;
         it->next = head;
@@ -810,7 +782,7 @@ struct sNode_00328660 {
  * @param target  the cell key the node belongs in
  * @param mykey   this cell's key
  */
-extern "C" void nash_Cell_addnode(sNode_00328660* node, int idx, sItem_00328660* item, nash_CellKey* target, const nash_CellKey* mykey)
+extern "C" void nash_Cell_addnode(sNode_00328660* node, int idx, nash_Node* item, nash_CellKey* target, const nash_CellKey* mykey)
 {
     nash_CellKey cur = *mykey;
     while (cur.level != target->level) {
@@ -851,16 +823,16 @@ INCLUDE_ASM("intersect/aifwddiff", nash_Cell_movenode);
  * @param newkey  the cell key it moves to
  * @param mykey   this cell's key
  */
-extern "C" void nash_Cell_movenode(sNode_003284B8* node, int type, sItem_00328660* item, nash_CellKey* oldkey,
+extern "C" void nash_Cell_movenode(sNode_003284B8* node, int type, nash_Node* item, nash_CellKey* oldkey,
                               nash_CellKey* newkey, nash_CellKey* mykey)
 {
     if (newkey->level == mykey->level) {
-        nash_Cell_remnode(node, type, (sItem_003284B8*)item, oldkey, mykey);
+        nash_Cell_remnode(node, type, (nash_Node*)item, oldkey, mykey);
         ((sList_00328660*)&node->lists[type])->push(item);
         return;
     }
     if (oldkey->level == mykey->level) {
-        node->lists[type].remove((sItem_003284B8*)item);
+        node->lists[type].remove((nash_Node*)item);
         nash_Cell_addnode((sNode_00328660*)node, type, item, newkey, mykey);
         return;
     }
@@ -888,7 +860,7 @@ extern "C" void nash_Cell_movenode(sNode_003284B8* node, int type, sItem_0032866
     oldchildkey.y = mykey->y * 2 + oldcy;
     oldchildkey.z = mykey->z * 2 + oldcz;
     sNode_003284B8*& oldchild = node->child[oldcx][oldcy][oldcz];
-    nash_Cell_remnode(oldchild, type, (sItem_003284B8*)item, oldkey, (&oldchildkey));
+    nash_Cell_remnode(oldchild, type, (nash_Node*)item, oldkey, (&oldchildkey));
     if (oldchild->empty()) {
         operator_delete((int*)oldchild);
         oldchild = 0;
@@ -958,7 +930,7 @@ static inline nash_CellKey Parent_8C20(const nash_CellKey& c)
  * @param item  the node to add
  * @param cell  the node's cell key
  */
-extern "C" void nash_Octant_addnode(nash_Octant* root, int idx, sItem_00328660* item, nash_CellKey* cell)
+extern "C" void nash_Octant_addnode(nash_Octant* root, int idx, nash_Node* item, nash_CellKey* cell)
 {
     sNode_8C20** pn = &(*(sNode_8C20**)&root->rootcell);
     if (((sNode_8C20*)root->rootcell) == 0) {
@@ -1109,7 +1081,7 @@ extern "C" void nash_Nash_findkey(nash_CellKey* key, tBoundBox* box)
 INCLUDE_ASM("intersect/aifwddiff", nash_Nash_movenode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void nash_Cell_movenode_91E0(sNode_003284B8* node, int idx, sItem_00328660* item, nash_CellKey* from,
+extern "C" void nash_Cell_movenode_91E0(sNode_003284B8* node, int idx, nash_Node* item, nash_CellKey* from,
                               nash_CellKey* to, nash_Octant* root) __asm__("nash_Cell_movenode");
 
 static inline int Equal_91E0(const nash_CellKey& a, const nash_CellKey& b)
@@ -1117,9 +1089,9 @@ static inline int Equal_91E0(const nash_CellKey& a, const nash_CellKey& b)
     return a.level == b.level && a.x == b.x && a.y == b.y && a.z == b.z;
 }
 
-static inline void Remove_91E0(nash_Octant* root, int idx, sItem_00328660* item, nash_CellKey* from)
+static inline void Remove_91E0(nash_Octant* root, int idx, nash_Node* item, nash_CellKey* from)
 {
-    nash_Cell_remnode((sNode_003284B8*)((sNode_8C20*)root->rootcell), idx, (sItem_003284B8*)item, from,
+    nash_Cell_remnode((sNode_003284B8*)((sNode_8C20*)root->rootcell), idx, (nash_Node*)item, from,
                   (nash_CellKey*)root);
     if (((sNode_003284B8*)((sNode_8C20*)root->rootcell))->empty()) {
         operator_delete((int*)((sNode_8C20*)root->rootcell));
@@ -1127,7 +1099,7 @@ static inline void Remove_91E0(nash_Octant* root, int idx, sItem_00328660* item,
     }
 }
 
-static inline void Move_91E0(nash_Octant* root, int idx, sItem_00328660* item, nash_CellKey* from, nash_CellKey* to)
+static inline void Move_91E0(nash_Octant* root, int idx, nash_Node* item, nash_CellKey* from, nash_CellKey* to)
 {
     if (!Contains_8C20(root->rootkey, *(nash_CellKey*)to)) {
         Remove_91E0(root, idx, item, from);
@@ -1150,7 +1122,7 @@ static inline void Move_91E0(nash_Octant* root, int idx, sItem_00328660* item, n
  * @param box     the node's new bounding box
  * @param oldBox  the node's previous bounding box
  */
-extern "C" void nash_Nash_movenode(nash_Octant (*roots)[2][2], int idx, sItem_00328660* item, tBoundBox* box,
+extern "C" void nash_Nash_movenode(nash_Octant (*roots)[2][2], int idx, nash_Node* item, tBoundBox* box,
                               tBoundBox* oldBox)
 {
     nash_CellKey oc;

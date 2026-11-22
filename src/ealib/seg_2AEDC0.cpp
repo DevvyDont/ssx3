@@ -2052,16 +2052,9 @@ extern "C" int RCMP_DECODER_GetChunk(RCMP_DECODER_GetChunk_sReq* self)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_DECODER_ReleaseChunk);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sWSCb06F8 {
-    int pad0;
-    void* ctx;
-    int pad8;
-    void (*fn)(sWSCb06F8* self, void* ctx, int arg);
-};
 
 // The unit later declares RCMP_DECODER_ReleaseChunk(void*, void*) for its caller; bind this definition by asm label.
-void RCMP_DECODER_ReleaseChunk_impl(sWSCb06F8* self, int arg) __asm__("RCMP_DECODER_ReleaseChunk");
+void RCMP_DECODER_ReleaseChunk_impl(RCMP_DECODER* self, int arg) __asm__("RCMP_DECODER_ReleaseChunk");
 /**
  * Gives a CHUNK back through the decoder's release function.
  *
@@ -2069,9 +2062,9 @@ void RCMP_DECODER_ReleaseChunk_impl(sWSCb06F8* self, int arg) __asm__("RCMP_DECO
  *
  * @param chunk  the CHUNK
  */
-void RCMP_DECODER_ReleaseChunk_impl(sWSCb06F8* self, int chunk)
+void RCMP_DECODER_ReleaseChunk_impl(RCMP_DECODER* self, int chunk)
 {
-    self->fn(self, self->ctx, chunk);
+    ((void (*)(RCMP_DECODER*, void*, int))self->m_IData.m_ReleaseDataFunc)(self, (*(void**)&self->m_IData), chunk);
 }
 #endif
 

@@ -1547,13 +1547,6 @@ extern "C" int cAnimSequence_updateWeight(cAnimSequence* self, float dt)
 //100%
 INCLUDE_ASM("animation/rideranimbase", cAnimSequence_checkTriggers);
 #ifdef SKIP_ASM
-struct sAnimEvent_00313868
-{
-    int bit;                        // 0x0
-    int kind;                       // 0x4
-    float time;                     // 0x8
-    sAnimEvent_00313868* next;      // 0xC
-};
 
 
 /**
@@ -1575,11 +1568,11 @@ extern "C" void cAnimSequence_checkTriggers(cAnimSequence* self, float from, flo
         return;
     }
     int forward = from <= to;
-    for (sAnimEvent_00313868* event = ((sAnimEvent_00313868*)self->Triggers); event != 0; event = event->next)
+    for (tTrigger* event = (self->Triggers); event != 0; event = event->Next)
     {
-        if (event->kind == 0)
+        if (event->IsEndTrigger == 0)
         {
-            float eventTime = event->time;
+            float eventTime = event->TriggerTime;
             if (forward)
             {
                 if (!(from < eventTime && eventTime <= to))
@@ -1590,7 +1583,7 @@ extern "C" void cAnimSequence_checkTriggers(cAnimSequence* self, float from, flo
                 if (!(to <= eventTime && eventTime < from))
                     continue;
             }
-            ulong bit = (ulong)1 << event->bit;
+            ulong bit = (ulong)1 << event->ID;
             ulong old = self->Events.IsSet;
             self->Events.IsSet = old | bit;
             self->Events.IsJustChanged |= bit & ~old;
@@ -1602,13 +1595,6 @@ extern "C" void cAnimSequence_checkTriggers(cAnimSequence* self, float from, flo
 //100%
 INCLUDE_ASM("animation/rideranimbase", cAnimSequence_checkTriggersAtTime);
 #ifdef SKIP_ASM
-struct sAnimEvent_00313938
-{
-    int bit;                        // 0x0
-    int kind;                       // 0x4
-    float time;                     // 0x8
-    sAnimEvent_00313938* next;      // 0xC
-};
 
 
 /**
@@ -1621,11 +1607,11 @@ struct sAnimEvent_00313938
 // PORT: ulong is 64-bit here
 extern "C" void cAnimSequence_checkTriggersAtTime(cAnimSequence* self, float time)
 {
-    for (sAnimEvent_00313938* event = ((sAnimEvent_00313938*)self->Triggers); event != 0; event = event->next)
+    for (tTrigger* event = (self->Triggers); event != 0; event = event->Next)
     {
-        if (event->kind == 0 && event->time == time)
+        if (event->IsEndTrigger == 0 && event->TriggerTime == time)
         {
-            ulong bit = (ulong)1 << event->bit;
+            ulong bit = (ulong)1 << event->ID;
             ulong old = self->Events.IsSet;
             self->Events.IsSet = old | bit;
             self->Events.IsJustChanged |= bit & ~old;
@@ -1646,11 +1632,11 @@ INCLUDE_ASM("animation/rideranimbase", cAnimSequence_setEndTriggers);
 extern "C" void cAnimSequence_setEndTriggers(cAnimSequence* self)
 {
     self->EndEvent = 1;
-    for (sAnimEvent_00313938* event = ((sAnimEvent_00313938*)self->Triggers); event != 0; event = event->next)
+    for (tTrigger* event = (self->Triggers); event != 0; event = event->Next)
     {
-        if (event->kind != 0)
+        if (event->IsEndTrigger != 0)
         {
-            ulong bit = (ulong)1 << event->bit;
+            ulong bit = (ulong)1 << event->ID;
             ulong old = self->Events.IsSet;
             self->Events.IsSet = old | bit;
             self->Events.IsJustChanged |= bit & ~old;

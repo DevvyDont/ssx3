@@ -1702,26 +1702,9 @@ INCLUDE_ASM("seg/seg_316FB8", sscanf);
 #define sscanf_va_start(ap) \
     (ap = (char*)__builtin_next_arg() \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
-struct F178B0 {
-    char *p;
-    int r;
-    int w;
-    short flags, file;
-    char *base;
-    int size;
-    int lbfsize;
-    int cookie;
-    int (*read)(void);
-    int pad1[3];
-    int ubbase;
-    int pad2[0x44 / 4 - 0x34 / 4];
-    int lbbase;
-    int pad3[0x54 / 4 - 0x48 / 4];
-    int ent;
-};
 extern int strlen(char *);
 extern int D_00454944;
-extern int __svfscanf(struct F178B0 *, int, char *);
+extern int __svfscanf(struct __sFILE *, int, char *);
 /**
  * Scans formatted input from a string and returns the number of fields assigned.
  *
@@ -1735,15 +1718,15 @@ extern int __svfscanf(struct F178B0 *, int, char *);
  */
 int sscanf(char *str, int fmt, ...) {
     char *ap;
-    struct F178B0 strStream;
-    strStream.flags = 4;
-    strStream.p = str;
-    strStream.base = str;
-    strStream.size = strStream.r = strlen(str);
-    strStream.read = eofread;
-    strStream.ubbase = 0;
-    strStream.lbbase = 0;
-    strStream.ent = D_00454944;
+    struct __sFILE strStream;
+    strStream._flags = 4;
+    (*(char**)&strStream._p) = str;
+    (*(char**)&strStream._bf) = str;
+    strStream._bf._size = strStream._r = strlen(str);
+    (*(int (**)(void))&strStream._read) = eofread;
+    (*(int*)&strStream._ub) = 0;
+    (*(int*)&strStream._lb) = 0;
+    (*(int*)&strStream._data) = D_00454944;
     sscanf_va_start(ap);
     return __svfscanf(&strStream, fmt, ap);
 }

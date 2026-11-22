@@ -47,14 +47,6 @@ extern char str_SetupInfoHeap[];
 extern char str_NISLists[];
 extern char str_IdleLists[];
 
-struct sLink_278358
-{
-    int a;
-    int b;
-    int c;
-    int d;
-    sLink_278358* next;
-};
 
 struct sRider_278358
 {
@@ -68,20 +60,6 @@ struct sRider_278358
     void operator delete[](void* p, unsigned int size);
 };
 
-struct sSse278358
-{
-    char pad_0x0[0x544];
-    sLink_278358* links;            // 0x544
-    sLink_278358* freeLink;         // 0x548
-    sRider_278358* objsA;           // 0x54C
-    char pad_0x550[0x624 - 0x550];
-    sRider_278358* objsB;           // 0x624
-    char pad_0x628[0x6D0 - 0x628];
-    char rigs[2][0x120];            // 0x6D0
-    char pad_0x910[0xC];
-    char rigC[0x1C];                // 0x91C
-    char rigD[0x1C];                // 0x938
-};
 
 /**
  * Sets up the script engine for a game: setup-info pool, main script bank, script objects and the NIS/idle
@@ -91,36 +69,36 @@ struct sSse278358
  * data/scripts/scdat.big|data/scripts/scdat_main.big, initialises the four built-in script objects
  * (cScriptObject_InitScriptObject) and creates two NIS lists ("NISLists") and two idle lists ("IdleLists", one per viewport).
  */
-extern "C" void cSSXScriptEngine_Load(sSse278358* self)
+extern "C" void cSSXScriptEngine_Load(cSSXScriptEngine* self)
 {
-    self->links = (sLink_278358*)operator_new_tag(200, str_SetupInfoHeap, 0, 0);
+    self->mpSetupInfoHeap = (tSSXScriptSetupInfoLinked*)operator_new_tag(200, str_SetupInfoHeap, 0, 0);
     for (int i = 0; i < 10; i++)
     {
-        self->links[i].a = -1;
-        self->links[i].b = -1;
-        self->links[i].c = -1;
-        self->links[i].d = -1;
-        self->links[i].next = &self->links[i + 1];
+        self->mpSetupInfoHeap[i].mainCharAIIndex = -1;
+        self->mpSetupInfoHeap[i].supportChar0AIIndex = -1;
+        self->mpSetupInfoHeap[i].supportChar1AIIndex = -1;
+        self->mpSetupInfoHeap[i].viewIndex = -1;
+        self->mpSetupInfoHeap[i].pNext = &self->mpSetupInfoHeap[i + 1];
     }
-    self->links[9].next = 0;
-    self->freeLink = self->links;
+    self->mpSetupInfoHeap[9].pNext = 0;
+    self->mpSetupInfoUnused = self->mpSetupInfoHeap;
     cSSXScriptEngine_SyncLoadScriptBank_7(self, 0, D_004A349C, 0, -1, 0, 0);
     for (int i = 0; i < 2; i++)
-        cScriptObject_InitScriptObject(self->rigs[i]);
-    cScriptObject_InitScriptObject(self->rigC);
-    cScriptObject_InitScriptObject(self->rigD);
-    sRider_278358** pa = &self->objsA;
+        cScriptObject_InitScriptObject(((char (*)[288])&self->mObjectCameraManager[0])[i]);
+    cScriptObject_InitScriptObject(((char*)&self->mObjectGameState.mObjType));
+    cScriptObject_InitScriptObject(((char*)&self->mObjectEvent.mObjType));
+    sRider_278358** pa = &(*(sRider_278358**)&self->mpNISLists);
     *pa = new (str_NISLists, 0, 0) sRider_278358[2];
     int i;
     for (i = 0; i < 2; i++)
-        self->objsA[i].owner = self;
-    sRider_278358** pb = &self->objsB;
+        ((sRider_278358*)self->mpNISLists)[i].owner = self;
+    sRider_278358** pb = &(*(sRider_278358**)&self->mpIdleLists);
     *pb = new (str_IdleLists, 0, 0) sRider_278358[2];
     for (i = 0; i < 2; i++)
     {
-        self->objsB[i].owner = self;
-        self->objsB[i].f4 = 0;
-        self->objsB[i].f8 = i;
+        ((sRider_278358*)self->mpIdleLists)[i].owner = self;
+        ((sRider_278358*)self->mpIdleLists)[i].f4 = 0;
+        ((sRider_278358*)self->mpIdleLists)[i].f8 = i;
     }
 }
 #endif
@@ -141,21 +119,6 @@ extern "C" void cVidEngine_ResetVideoEngine(void* p);
 extern "C" void cRenderStateMan_setInNIS(int);
 
 
-struct sSseEngine8590 {
-    char pad_0x0[0x500];
-    char snd[0x1C];                 // 0x500
-    char anims[0x544 - 0x51C];      // 0x51C
-    void* buf;                      // 0x544
-    int mpSetupInfoUnused;                // 0x548
-    tNISList* objsA;             // 0x54C
-    char pad_0x550[0x624 - 0x550];
-    tNISList* objsB;             // 0x624
-    char pad_0x628[0x6D0 - 0x628];
-    char rigs[2][0x120];            // 0x6D0
-    char pad_0x910[0xC];
-    char rigC[0x1C];                // 0x91C
-    char rigD[0x1C];                // 0x938
-};
 
 /**
  * Tears down what Load() and the track loads set up: ends all scripts and frees banks, lists and objects.
@@ -166,46 +129,46 @@ struct sSseEngine8590 {
  * the
  * setup-info pool and clears the NIS play state.
  */
-extern "C" void cSSXScriptEngine_Purge(sSseEngine8590* self)
+extern "C" void cSSXScriptEngine_Purge(cSSXScriptEngine* self)
 {
     cSSXScriptEngine_ForceEndScriptsAll((cSSXScriptEngine*)self);
     cBXScriptEngine_ReleaseRequestAll(self);
     for (int i = 0; i < 2; i++) {
-        cScriptObject_DeInitScriptObject(self->rigs[i]);
+        cScriptObject_DeInitScriptObject(((char (*)[288])&self->mObjectCameraManager[0])[i]);
     }
-    cScriptObject_DeInitScriptObject(self->rigC);
-    cScriptObject_DeInitScriptObject(self->rigD);
+    cScriptObject_DeInitScriptObject(((char*)&self->mObjectGameState.mObjType));
+    cScriptObject_DeInitScriptObject(((char*)&self->mObjectEvent.mObjType));
     cSSXScriptEngine_PurgeTrack((cSSXScriptEngine*)self);
     for (int i = 0; i < 10; i++) {
         cSSXScriptEngine_PurgeScriptBank((cSSXScriptEngine*)self, i);
     }
-    cDataManager_DetachAll(self->anims);
-    cVidEngine_ResetVideoEngine(self->snd);
-    if (self->objsA != 0) {
-        tNISList* objPtr = self->objsA + ((int*)self->objsA)[-4];
-        while (self->objsA != objPtr) {
+    cDataManager_DetachAll(((char*)&self->mMaxDataInstances));
+    cVidEngine_ResetVideoEngine(((char*)&self->mpPlayer));
+    if (self->mpNISLists != 0) {
+        tNISList* objPtr = self->mpNISLists + ((int*)self->mpNISLists)[-4];
+        while (self->mpNISLists != objPtr) {
             objPtr--;
             tNISList__tNISList((int*)objPtr, 0);
         }
-        cMemMan_free((char*)self->objsA - 0x10);
+        cMemMan_free((char*)self->mpNISLists - 0x10);
     }
-    if (self->buf != 0) {
-        cMemMan_free(self->buf);
+    if (((void*)self->mpSetupInfoHeap) != 0) {
+        cMemMan_free(((void*)self->mpSetupInfoHeap));
     }
-    if (self->objsB != 0) {
-        tNISList* objPtr = self->objsB + ((int*)self->objsB)[-4];
-        while (self->objsB != objPtr) {
+    if (self->mpIdleLists != 0) {
+        tNISList* objPtr = self->mpIdleLists + ((int*)self->mpIdleLists)[-4];
+        while (self->mpIdleLists != objPtr) {
             objPtr--;
             tNISList__tNISList((int*)objPtr, 0);
         }
-        cMemMan_free((char*)self->objsB - 0x10);
+        cMemMan_free((char*)self->mpIdleLists - 0x10);
     }
     cRenderStateMan_setInNIS(0);
     cSSXScriptEngine_ClearNISPlayListState((cSSXScriptEngine*)self);
-    self->objsA = 0;
-    self->buf = 0;
-    self->mpSetupInfoUnused = 0;
-    self->objsB = 0;
+    self->mpNISLists = 0;
+    (*(void**)&self->mpSetupInfoHeap) = 0;
+    (*(int*)&self->mpSetupInfoUnused) = 0;
+    self->mpIdleLists = 0;
 }
 #endif
 

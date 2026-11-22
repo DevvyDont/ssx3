@@ -497,15 +497,12 @@ extern "C" void cInstanceNode_buildMeshMat(sInInst_FED8* self, int mesh, sInMat_
 //100%
 INCLUDE_ASM("object/instancenode", cInstanceNode_makeAnimMats);
 #ifdef SKIP_ASM
-struct sInMat44_0288 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 
 
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, d = b * a).
-static inline void vu0MulMat_0288(sInMat44_0288* d, const sInMat44_0288* a, const sInMat44_0288* b)
+static inline void vu0MulMat_0288(t4Matrix* d, const t4Matrix* a, const t4Matrix* b)
 {
     __asm__ __volatile__(
         "lqc2      $vf4, 0x0(%1)\n"
@@ -542,7 +539,7 @@ static inline void vu0MulMat_0288(sInMat44_0288* d, const sInMat44_0288* a, cons
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy through VU0 registers).
-static inline void vu0CopyMat_0288(sInMat44_0288* d, const sInMat44_0288* s)
+static inline void vu0CopyMat_0288(t4Matrix* d, const t4Matrix* s)
 {
     __asm__ __volatile__(
         "lqc2      $vf1, 0x0(%1)\n"
@@ -558,24 +555,24 @@ static inline void vu0CopyMat_0288(sInMat44_0288* d, const sInMat44_0288* s)
         : "memory");
 }
 
-static inline void buildBone_0288(sInMat44_0288* d, const sInMat44_0288* parent, const sInMat44_0288* m, const t4Vector& scale)
+static inline void buildBone_0288(t4Matrix* d, const t4Matrix* parent, const t4Matrix* m, const t4Vector& scale)
 {
-    sInMat44_0288 local;
+    t4Matrix local;
     t4Vector v;
     t4Vector tr;
-    sInMat44_0288 t;
-    v = *(t4Vector*)m->m[0];
-    *(t4Vector*)local.m[0] = v;
-    v = *(t4Vector*)m->m[1];
-    *(t4Vector*)local.m[1] = v;
-    v = *(t4Vector*)m->m[2];
-    *(t4Vector*)local.m[2] = v;
-    tr = *(t4Vector*)m->m[3];
+    t4Matrix t;
+    v = *(t4Vector*)((float (*)[4])&m->row[0])[0];
+    *(t4Vector*)((float (*)[4])&local.row[0])[0] = v;
+    v = *(t4Vector*)((float (*)[4])&m->row[0])[1];
+    *(t4Vector*)((float (*)[4])&local.row[0])[1] = v;
+    v = *(t4Vector*)((float (*)[4])&m->row[0])[2];
+    *(t4Vector*)((float (*)[4])&local.row[0])[2] = v;
+    tr = *(t4Vector*)((float (*)[4])&m->row[0])[3];
     v.x = tr.x * scale.x;
     v.y = tr.y * scale.y;
     v.z = tr.z * scale.z;
     v.w = tr.w * scale.w;
-    *(t4Vector*)local.m[3] = v;
+    *(t4Vector*)((float (*)[4])&local.row[0])[3] = v;
     vu0MulMat_0288(&t, parent, &local);
     vu0CopyMat_0288(d, &t);
 }
@@ -591,7 +588,7 @@ static inline void buildBone_0288(sInMat44_0288* d, const sInMat44_0288* parent,
  * @param parent  root transform for meshes without a parent (On Tour root)
  * @param out     receives one matrix per mesh (On Tour animMats)
  */
-extern "C" void cInstanceNode_makeAnimMats(cInstanceNode* self, sInMat44_0288* parent, sInMat44_0288* out)
+extern "C" void cInstanceNode_makeAnimMats(cInstanceNode* self, t4Matrix* parent, t4Matrix* out)
 {
     tInstanceRecord* instance = self->Instance;
     tModelRecord* sk = instance->m_Model;
@@ -603,12 +600,12 @@ extern "C" void cInstanceNode_makeAnimMats(cInstanceNode* self, sInMat44_0288* p
     scale.z = uniformScale;
     scale.w = 1.0f;
     for (int i = 0; i < sk->m_iNumMeshes; i++, bone++) {
-        sInMat44_0288 boneMat;
+        t4Matrix boneMat;
         if (bone->m_iParentID != -1) {
-            buildBone_0288(&boneMat, &out[bone->m_iParentID], ((sInMat44_0288*)bone->m_pMeshMatrix), scale);
+            buildBone_0288(&boneMat, &out[bone->m_iParentID], ((t4Matrix*)bone->m_pMeshMatrix), scale);
             vu0CopyMat_0288(&out[i], &boneMat);
         } else {
-            buildBone_0288(&boneMat, parent, ((sInMat44_0288*)bone->m_pMeshMatrix), scale);
+            buildBone_0288(&boneMat, parent, ((t4Matrix*)bone->m_pMeshMatrix), scale);
             vu0CopyMat_0288(&out[i], &boneMat);
         }
     }

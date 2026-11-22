@@ -2880,21 +2880,16 @@ extern "C" void FrustumIntersector_AddAllPatchesCrossing(FrustumIntersector* sel
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/ssxapp", FrustumIntersector_AddAllTypedCrossing);
 #ifdef SKIP_ASM
-struct sNode_22A4A8 {
-    sNode_22A4A8* next;
-    int f4;
-    int type;
-};
 
 
-extern "C" void FrustumIntersector_crossingfogvolume(void* self, sNode_22A4A8* node, int arg);
+extern "C" void FrustumIntersector_crossingfogvolume(void* self, cTypedSpaceNode* node, int arg);
 
 struct sWorld_22A4A8 {
     char pad[0x7AB8];
     int f7AB8;
     char pad7ABC[0x7BC0 - 0x7ABC];
     int count;
-    sNode_22A4A8* nodes[1];
+    cTypedSpaceNode* nodes[1];
 };
 
 /**
@@ -2911,7 +2906,7 @@ struct sWorld_22A4A8 {
 extern "C" void FrustumIntersector_AddAllTypedCrossing(sWorld_22A4A8* self, CellClipT* items, int n)
 {
     for (; n > 0; n--, items++) {
-        for (sNode_22A4A8* object = *(sNode_22A4A8**)(((char*)items->pCell) + 0x28); object != 0; object = object->next) {
+        for (cTypedSpaceNode* object = *(cTypedSpaceNode**)(((char*)items->pCell) + 0x28); object != 0; object = ((cTypedSpaceNode*)object->next)) {
             if (object->type == 7) {
                 FrustumIntersector_crossingfogvolume(self, object, ((int)items->uVisMask));
             } else if (object->type == 8) {

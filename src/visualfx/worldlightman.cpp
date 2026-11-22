@@ -177,26 +177,13 @@ struct sBox_5400 {
     void* cell;         // 0x30
 };
 
-struct sNode_5400 {
-    unsigned int id;          // 0x0
-    int priority;             // 0x4
-    char pad08[0x8];
-    cIrradiance cur;       // 0x10
-    sVec_5400 pos;            // 0xB0
-    sBox_5400* box;           // 0xC0
-    char padC4[0xC];
-    cIrradiance target;    // 0xD0
-    sNode_5400* next;         // 0x170
-    sNode_5400* prev;         // 0x174
-    char pad178[8];
-};
 
 struct sMan_5400 {
     char pad000[0x4];
     char* world;              // 0x4
     char pad008[0x210 - 0x8];
-    sNode_5400 nodes[32];     // 0x210
-    sNode_5400* heads[32];    // 0x3210
+    tLightCacheEntry nodes[32];     // 0x210
+    tLightCacheEntry* heads[32];    // 0x3210
     unsigned int count;       // 0x3290
 };
 
@@ -218,7 +205,7 @@ struct sVEr_5400 {
 };
 
 // The unit defines cWorldLightMan_evictHashTableEntry later with its own node type.
-extern "C" sNode_5400* cWorldLightMan_evictHashTableEntry_n(sMan_5400* self, int priority) __asm__("cWorldLightMan_evictHashTableEntry");
+extern "C" tLightCacheEntry* cWorldLightMan_evictHashTableEntry_n(sMan_5400* self, int priority) __asm__("cWorldLightMan_evictHashTableEntry");
 extern "C" sBox_5400* cWorldLightMan_evictOverlapNode(sMan_5400* self, int priority);
 extern "C" void cWorldLightMan_IntersectLights1(void* self, void* a1, void* a2, void* a3, int count);
 extern "C" void cInstanceNode_buildMeshMat(void* obj, int a1, t4Matrix* out);
@@ -297,14 +284,14 @@ static inline cIrradiance* Resolve_5400(sLightRef_5400* ref)
 }
 
 // Pushes node onto the front of hash chain heads[slot].
-static inline void Link_5400(sNode_5400** heads, int slot, sNode_5400* node)
+static inline void Link_5400(tLightCacheEntry** heads, int slot, tLightCacheEntry* node)
 {
-    sNode_5400** p = heads + slot;
-    sNode_5400* old = *p;
-    node->prev = 0;
-    node->next = old;
+    tLightCacheEntry** p = heads + slot;
+    tLightCacheEntry* old = *p;
+    node->pPrev = 0;
+    node->pNext = old;
     if (old != 0) {
-        old->prev = node;
+        old->pPrev = node;
     }
     *p = node;
 }
@@ -342,9 +329,9 @@ extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(sMan_5400* self, tInsta
     unsigned int key = obj->m_RID;
     int slot = (key >> 8) & 0x1F;
     int found = 0;
-    sNode_5400* node;
-    for (node = self->heads[slot]; node != 0; node = node->next) {
-        if (node->id == obj->m_RID) {
+    tLightCacheEntry* node;
+    for (node = self->heads[slot]; node != 0; node = node->pNext) {
+        if (node->RID == obj->m_RID) {
             found = 1;
             break;
         }
@@ -356,10 +343,10 @@ extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(sMan_5400* self, tInsta
         } else {
             node = cWorldLightMan_evictHashTableEntry_n(self, prio);
         }
-        node->id = obj->m_RID;
+        node->RID = obj->m_RID;
         Link_5400(self->heads, slot, node);
     }
-    node->priority = prio;
+    node->iTick = prio;
     int reload = 0;
     int moved = 0;
     sVec_5400 pos;
@@ -381,58 +368,58 @@ extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(sMan_5400* self, tInsta
         } else {
             pos = ObjPos_5400(((char*)obj));
         }
-        float moveDist = Length_5400(Sub_5400(pos, node->pos));
+        float moveDist = Length_5400(Sub_5400(pos, (*(sVec_5400*)&node->pos)));
         if (10.0f < moveDist) moved = 1;
         if (500.0f < moveDist) reload = 1;
     }
     if (moved) {
-        node->pos = pos;
+        (*(sVec_5400*)&node->pos) = pos;
         int rebuild = 0;
-        if (node->box == 0 || node->box->id != node->id) {
-            node->box = cWorldLightMan_evictOverlapNode(self, node->priority);
-            node->box->id = node->id;
+        if (((sBox_5400*)node->pOverlapNode) == 0 || ((sBox_5400*)node->pOverlapNode)->id != node->RID) {
+            (*(sBox_5400**)&node->pOverlapNode) = cWorldLightMan_evictOverlapNode(self, node->iTick);
+            ((sBox_5400*)node->pOverlapNode)->id = node->RID;
             rebuild = 1;
         }
-        node->box->priority = node->priority;
+        ((sBox_5400*)node->pOverlapNode)->priority = node->iTick;
         if (!rebuild) {
-            sBox_5400* overlapBox = node->box;
+            sBox_5400* overlapBox = ((sBox_5400*)node->pOverlapNode);
             int inside = 0;
-            if (overlapBox->bounds.min.x < node->pos.x && node->pos.x < overlapBox->bounds.max.x && overlapBox->bounds.min.y < node->pos.y && node->pos.y < overlapBox->bounds.max.y &&
-                overlapBox->bounds.min.z < node->pos.z && node->pos.z < overlapBox->bounds.max.z) {
+            if (overlapBox->bounds.min.x < (*(sVec_5400*)&node->pos).x && (*(sVec_5400*)&node->pos).x < overlapBox->bounds.max.x && overlapBox->bounds.min.y < (*(sVec_5400*)&node->pos).y && (*(sVec_5400*)&node->pos).y < overlapBox->bounds.max.y &&
+                overlapBox->bounds.min.z < (*(sVec_5400*)&node->pos).z && (*(sVec_5400*)&node->pos).z < overlapBox->bounds.max.z) {
                 inside = 1;
             }
             if (!inside) rebuild = 1;
         }
         if (rebuild) {
             float extent = 1000.0f;
-            node->box->bounds = sAABox_5400(Sub_5400(node->pos, sVec_5400(extent, extent, extent, 0.0f)),
-                                            Add_5400(node->pos, sVec_5400(extent, extent, extent, 0.0f)));
-            cOverlapList_gettyped(node->box->cell, &node->box->bounds);
+            ((sBox_5400*)node->pOverlapNode)->bounds = sAABox_5400(Sub_5400((*(sVec_5400*)&node->pos), sVec_5400(extent, extent, extent, 0.0f)),
+                                            Add_5400((*(sVec_5400*)&node->pos), sVec_5400(extent, extent, extent, 0.0f)));
+            cOverlapList_gettyped(((sBox_5400*)node->pOverlapNode)->cell, &((sBox_5400*)node->pOverlapNode)->bounds);
         }
         if (reload) {
             if (cRenderStateMan_m_hasCustomIrradiance != 0) {
-                node->target = *cRenderStateMan_getCustomIrradiance();
+                node->ObjIrradiance = *cRenderStateMan_getCustomIrradiance();
             } else {
                 tWorldPainterQuery* world = (tWorldPainterQuery*)self->world;
                 sVEf_5400* vt = (sVEf_5400*)world->mVtbl;
-                vt[2].fn(vthis(world, vt[2]), node->pos.x, node->pos.y, -99999.0f);
+                vt[2].fn(vthis(world, vt[2]), (*(sVec_5400*)&node->pos).x, (*(sVec_5400*)&node->pos).y, -99999.0f);
                 sLightRef_5400* ref = GetRef_5400(*(char**)self->world, 40);
                 if (*(signed char*)ref != 0) {
-                    node->target = *Resolve_5400(ref);
+                    node->ObjIrradiance = *Resolve_5400(ref);
                 } else {
                     ref = GetRef_5400(*(char**)self->world, 37);
                     if (*(signed char*)ref != 0) {
-                        node->target = *Resolve_5400(ref);
+                        node->ObjIrradiance = *Resolve_5400(ref);
                     } else {
-                        node->target = *cIrradianceDataBase_Get(cIrradianceDataBase_TheDataBase, cIrradianceDataBase_mDefaultId);
+                        node->ObjIrradiance = *cIrradianceDataBase_Get(cIrradianceDataBase_TheDataBase, cIrradianceDataBase_mDefaultId);
                     }
                 }
             }
         }
-        node->cur = node->target;
-        cWorldLightMan_IntersectLights1(self, &node->pos, node->box->cell, &node->cur, 4);
+        node->RTlightInfo = node->ObjIrradiance;
+        cWorldLightMan_IntersectLights1(self, &(*(sVec_5400*)&node->pos), ((sBox_5400*)node->pOverlapNode)->cell, &node->RTlightInfo, 4);
     }
-    return &node->cur;
+    return &node->RTlightInfo;
 }
 #endif
 

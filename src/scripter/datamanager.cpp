@@ -77,7 +77,7 @@ INCLUDE_ASM("scripter/datamanager", cDataManager_AttachData);
 void* cDataManager_GetEmptyInstance(void* self);
 extern "C" int BIG_sizeofheader(void* data);
 struct sDmNode5B98;
-extern "C" sDmNode5B98* cDataManager_AttachDataFromBigfile(cDataManager* self, char* big, sDmNode5B98* prev);
+extern "C" tDataInstanceInfo* cDataManager_AttachDataFromBigfile(cDataManager* self, char* big, tDataInstanceInfo* prev);
 extern int REALabortflag[];
 
 
@@ -110,7 +110,7 @@ extern "C" tDataInstanceInfo* cDataManager_AttachData(cDataManager* self, int pN
     if (big != 0) {
         sVEntry<void(void*, int, void*, int, void*, void*)>* vt = (sVEntry<void(void*, int, void*, int, void*, void*)>*)self->mVtbl;
         vt[4].fn(vthis(self, vt[4]), pName, data, size, n, &(*(int*)&n->pUserData2));
-        cDataManager_AttachDataFromBigfile(self, (char*)data, (sDmNode5B98*)n);
+        cDataManager_AttachDataFromBigfile(self, (char*)data, n);
     } else {
         sVEntry<void(void*, int, void*, int, void*, void*)>* vt = (sVEntry<void(void*, int, void*, int, void*, void*)>*)self->mVtbl;
         vt[2].fn(vthis(self, vt[2]), pName, data, size, n, &(*(int*)&n->pUserData2));
@@ -124,14 +124,6 @@ INCLUDE_ASM("scripter/datamanager", cDataManager_DetachData);
 #ifdef SKIP_ASM
 void cDataManager_AddToEmptyInstanceList(void* self, void* node);
 
-struct sDmNode5A20 {
-    int a;              // 0x0
-    int b;              // 0x4
-    int key;            // 0x8
-    int c;              // 0xC
-    int pad_10;         // 0x10
-    sDmNode5A20* next;  // 0x14
-};
 
 class cDataManager5A20 {
 public:
@@ -147,7 +139,7 @@ public:
 };
 
 // PORT: the unit declares cDataManager_DetachData as returning void; it really returns the entry's key.
-int cDataManager_DetachData_impl(cDataManager5A20* self, sDmNode5A20* entry) __asm__("cDataManager_DetachData");
+int cDataManager_DetachData_impl(cDataManager5A20* self, tDataInstanceInfo* entry) __asm__("cDataManager_DetachData");
 
 /**
  * Detaches an attached data handle and every instance linked to it, recycling their records.
@@ -159,22 +151,22 @@ int cDataManager_DetachData_impl(cDataManager5A20* self, sDmNode5A20* entry) __a
  * @param entry  the data handle returned by the attach
  * @return the detached data pointer, the handle's first word (On Tour returns void* pData)
  */
-int cDataManager_DetachData_impl(cDataManager5A20* self, sDmNode5A20* entry)
+int cDataManager_DetachData_impl(cDataManager5A20* self, tDataInstanceInfo* entry)
 {
-    sDmNode5A20* first = entry->next;
+    tDataInstanceInfo* first = entry->pNext;
     if (first != 0) {
-        sDmNode5A20* n = first;
+        tDataInstanceInfo* n = first;
         do {
-            sDmNode5A20* next = n->next;
-            self->OnDetachData(n->key, n->c, n->a, n->b);
+            tDataInstanceInfo* next = n->pNext;
+            self->OnDetachData(((int)n->pData), n->dataSize, ((int)n->pUserData1), ((int)n->pUserData2));
             cDataManager_AddToEmptyInstanceList(self, n);
             n = next;
         } while (n != 0);
-        self->OnDetachDataBigFile(entry->key, entry->c, entry->a, entry->b);
+        self->OnDetachDataBigFile(((int)entry->pData), entry->dataSize, ((int)entry->pUserData1), ((int)entry->pUserData2));
     } else {
-        self->OnDetachData(entry->key, entry->c, entry->a, entry->b);
+        self->OnDetachData(((int)entry->pData), entry->dataSize, ((int)entry->pUserData1), ((int)entry->pUserData2));
     }
-    int key = entry->key;
+    int key = ((int)entry->pData);
     cDataManager_AddToEmptyInstanceList(self, entry);
     return key;
 }
@@ -241,14 +233,6 @@ extern "C" char* BIG_locateentryz(void* big, int a1, int index, int* offset, int
 extern int REALabortflag[];
 
 
-struct sDmNode5B98 {
-    int field_0x0;
-    int field_0x4;          // 0x4
-    char* data;             // 0x8
-    int size;               // 0xC
-    int refs;               // 0x10
-    sDmNode5B98* next;      // 0x14
-};
 
 /**
  * Attaches every member of a BIG archive to the data manager as a chain of instance records, recursing into nested
@@ -266,7 +250,7 @@ struct sDmNode5B98 {
  * @param prev  the record to chain the new records after
  * @return the last record of the chain
  */
-extern "C" sDmNode5B98* cDataManager_AttachDataFromBigfile(cDataManager* self, char* big, sDmNode5B98* prev)
+extern "C" tDataInstanceInfo* cDataManager_AttachDataFromBigfile(cDataManager* self, char* big, tDataInstanceInfo* prev)
 {
     int ent[2];
     ent[0] = 0;
@@ -282,13 +266,13 @@ extern "C" sDmNode5B98* cDataManager_AttachDataFromBigfile(cDataManager* self, c
         if (headerSize != 0) {
             prev = cDataManager_AttachDataFromBigfile(self, sub, prev);
         } else {
-            sDmNode5B98* n = (sDmNode5B98*)cDataManager_GetEmptyInstance(self);
-            n->data = sub;
-            n->size = ent[1];
-            prev->next = n;
+            tDataInstanceInfo* n = (tDataInstanceInfo*)cDataManager_GetEmptyInstance(self);
+            (*(char**)&n->pData) = sub;
+            n->dataSize = ent[1];
+            prev->pNext = n;
             prev = n;
             sVEntry<void(void*, char*, char*, int, void*, void*)>* vt = (sVEntry<void(void*, char*, char*, int, void*, void*)>*)self->mVtbl;
-            vt[2].fn(vthis(self, vt[2]), name, sub, ent[1], prev, &prev->field_0x4);
+            vt[2].fn(vthis(self, vt[2]), name, sub, ent[1], prev, &(*(int*)&prev->pUserData2));
         }
         name = BIG_locateentryz(big, 0, i++, &ent[0], 0);
     }

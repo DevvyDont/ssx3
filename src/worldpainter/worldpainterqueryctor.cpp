@@ -126,14 +126,8 @@ void operator_delete(int* p);
 extern char cWorldPainterQuery_vtbl[];
 extern char tWorldPainterQuery_vtbl[];
 
-struct sWPQuery_06C0 {
-    int* buf;
-    void* vtbl;
-    char pad8[0xC];
-    sWPQuery_06C0* next;
-};
 
-extern sWPQuery_06C0* cWorldPainterQuery_m_queryListStart;
+extern cWorldPainterQuery* cWorldPainterQuery_m_queryListStart;
 
 /**
  * Destroys a world painter query: frees its data and unlinks it from the global query list (cWorldPainterQuery_m_queryListStart).
@@ -148,15 +142,15 @@ extern "C" void cWorldPainterQuery__cWorldPainterQuery(cWorldPainterQuery* self,
 {
     self->mVtbl = (void**)cWorldPainterQuery_vtbl;
     operator_delete((int*)self->m_data);
-    sWPQuery_06C0* query = cWorldPainterQuery_m_queryListStart;
-    if (query == ((sWPQuery_06C0*)self)) {
-        cWorldPainterQuery_m_queryListStart = (sWPQuery_06C0*)self->m_next;
+    cWorldPainterQuery* query = cWorldPainterQuery_m_queryListStart;
+    if (query == (self)) {
+        cWorldPainterQuery_m_queryListStart = self->m_next;
     } else {
-        while (query->next != ((sWPQuery_06C0*)self)) {
-            query = query->next;
+        while (query->m_next != (self)) {
+            query = query->m_next;
         }
         if (query != 0) {
-            query->next = (sWPQuery_06C0*)self->m_next;
+            query->m_next = self->m_next;
         }
     }
     self->mVtbl = (void**)tWorldPainterQuery_vtbl;

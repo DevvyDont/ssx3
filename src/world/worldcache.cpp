@@ -219,24 +219,16 @@ INCLUDE_ASM("world/worldcache", cSectionBlockAllocator_allocate);
 #ifdef SKIP_ASM
 void* cWorldBlockAllocator_getFreeBlock(void* self);
 
-struct sWCBlock_7878 {
-    char* pBaseMem;
-    int iBaseSize;
-    int iOffset;
-    int iPad;
-    int bActive;
-    sWCBlock_7878* pNext;
-};
 
 
 static inline void NewBlock_7878(cSectionBlockAllocator* self)
 {
-    sWCBlock_7878* b = (sWCBlock_7878*)cWorldBlockAllocator_getFreeBlock(((void*)self->m_pBlockAllocator));
+    tWorldMemBlock* b = (tWorldMemBlock*)cWorldBlockAllocator_getFreeBlock(((void*)self->m_pBlockAllocator));
     b->iOffset = 0;
     b->iPad = 0;
-    b->pNext = ((sWCBlock_7878*)self->m_pAllocBlocks);
-    *(sWCBlock_7878**)&self->m_pAllocBlocks = b;
-    *(sWCBlock_7878**)&self->m_pMRUBlock = b;
+    b->pNext = (self->m_pAllocBlocks);
+    *(tWorldMemBlock**)&self->m_pAllocBlocks = b;
+    *(tWorldMemBlock**)&self->m_pMRUBlock = b;
     self->m_uiNumBlocks++;
 }
 
@@ -257,7 +249,7 @@ extern "C" char* cSectionBlockAllocator_allocate(cSectionBlockAllocator* self, i
 {
     if (self->m_uiNumBlocks == 0)
         NewBlock_7878(self);
-    sWCBlock_7878* first = ((sWCBlock_7878*)self->m_pMRUBlock);
+    tWorldMemBlock* first = (self->m_pMRUBlock);
     int align = 4 << ((flags >> 24) & 0xF);
     int pos = first->iOffset;
     int rem = pos % align;
@@ -269,17 +261,17 @@ extern "C" char* cSectionBlockAllocator_allocate(cSectionBlockAllocator* self, i
         first->iOffset = pos + (alignPad + size);
         char* allocPtr = first->pBaseMem + pos;
         allocPtr += alignPad;
-        ((sWCBlock_7878*)self->m_pMRUBlock)->iPad += alignPad;
+        (self->m_pMRUBlock)->iPad += alignPad;
         return allocPtr;
     }
     if (self->m_uiNumBlocks >= 2)
     {
-        *(sWCBlock_7878**)&self->m_pMRUBlock = ((sWCBlock_7878*)self->m_pAllocBlocks);
-        if (((sWCBlock_7878*)self->m_pMRUBlock))
+        *(tWorldMemBlock**)&self->m_pMRUBlock = (self->m_pAllocBlocks);
+        if ((self->m_pMRUBlock))
         {
             do
             {
-                sWCBlock_7878* block = ((sWCBlock_7878*)self->m_pMRUBlock);
+                tWorldMemBlock* block = (self->m_pMRUBlock);
                 if (block != first)
                 {
                     int bpos = block->iOffset;
@@ -292,17 +284,17 @@ extern "C" char* cSectionBlockAllocator_allocate(cSectionBlockAllocator* self, i
                         block->iOffset = bpos + (alignPad + size);
                         char* allocPtr = block->pBaseMem + bpos;
                         allocPtr += alignPad;
-                        ((sWCBlock_7878*)self->m_pMRUBlock)->iPad += alignPad;
+                        (self->m_pMRUBlock)->iPad += alignPad;
                         return allocPtr;
                     }
                 }
-                *(sWCBlock_7878**)&self->m_pMRUBlock = ((sWCBlock_7878*)self->m_pMRUBlock)->pNext;
-            } while (((sWCBlock_7878*)self->m_pMRUBlock));
+                *(tWorldMemBlock**)&self->m_pMRUBlock = (self->m_pMRUBlock)->pNext;
+            } while ((self->m_pMRUBlock));
         }
     }
     NewBlock_7878(self);
-    ((sWCBlock_7878*)self->m_pMRUBlock)->iOffset += size;
-    return ((sWCBlock_7878*)self->m_pMRUBlock)->pBaseMem;
+    (self->m_pMRUBlock)->iOffset += size;
+    return (self->m_pMRUBlock)->pBaseMem;
 }
 #endif
 

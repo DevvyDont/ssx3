@@ -1266,22 +1266,6 @@ struct sVEi_08A0 {
 };
 
 
-struct sGallery_08A0 {
-    char pad0[0x8];
-    sVEi_08A0* vt;              // 0x8
-    char padC[0x10 - 0xC];
-    char* ui;                   // 0x10
-    char pad14[0x5C - 0x14];
-    int cols;                   // 0x5C
-    int f60;
-    int scroll;                 // 0x64
-    int count;                  // 0x68
-    char pad6C[0x8F0 - 0x6C];
-    int selected;               // 0x8F0
-    char pad8F4[0x924 - 0x8F4];
-    cUIIcon* cells[4][8];  // 0x924
-    cUIIcon* frames[4][8]; // 0x9A4
-};
 
 static inline void show_08A0(cUIIcon* c, int on)
 {
@@ -1297,49 +1281,49 @@ static inline void show_08A0(cUIIcon* c, int on)
  *
  * @param row  grid row on screen (On Tour rowNum)
  */
-extern "C" void cFEStateRewardGalleryBase_updateRow(sGallery_08A0* self, int row)
+extern "C" void cFEStateRewardGalleryBase_updateRow(cFEStateRewardGalleryBase* self, int row)
 {
-    int idx = (self->scroll + row) * self->cols;
-    for (int col = 0; col < self->cols; col++, idx++) {
-        if (idx < self->count) {
-            show_08A0(self->cells[row][col], 1);
-            show_08A0(self->frames[row][col], 1);
-            if (self->vt[38].fn(vthis(self, self->vt[38]), idx) != 0) {
-                int rewardIndex = self->vt[26].fn(vthis(self, self->vt[26]), idx);
+    int idx = (self->mFirstVisibleRow + row) * self->mMaxRewardColumns;
+    for (int col = 0; col < self->mMaxRewardColumns; col++, idx++) {
+        if (idx < self->mNumTotalRewards) {
+            show_08A0(self->mpIcons[row][col], 1);
+            show_08A0(((cUIIcon* (*)[8])&self->mpIconBacks[0][0])[row][col], 1);
+            if (((sVEi_08A0*)self->mVtbl)[38].fn(vthis(self, ((sVEi_08A0*)self->mVtbl)[38]), idx) != 0) {
+                int rewardIndex = ((sVEi_08A0*)self->mVtbl)[26].fn(vthis(self, ((sVEi_08A0*)self->mVtbl)[26]), idx);
                 if (rewardIndex >= 0) {
-                    cUIIcon* cell = self->cells[row][col];
+                    cUIIcon* cell = self->mpIcons[row][col];
                     cell->mTextureID = rewardIndex;
                     (*(void**)&cell->mpTextureElem) = 0;
                 } else {
-                    int texture = self->vt[27].fn(vthis(self, self->vt[27]), idx);
+                    int texture = ((sVEi_08A0*)self->mVtbl)[27].fn(vthis(self, ((sVEi_08A0*)self->mVtbl)[27]), idx);
                     if (texture != 0) {
-                        cUIIcon* cell = self->cells[row][col];
+                        cUIIcon* cell = self->mpIcons[row][col];
                         (*(void**)&cell->mpTextureElem) = (void*)texture;
                         cell->mTextureID = -1;
                     }
                 }
             } else {
-                int rewardItem = self->vt[34].fn(vthis(self, self->vt[34]), idx);
+                int rewardItem = ((sVEi_08A0*)self->mVtbl)[34].fn(vthis(self, ((sVEi_08A0*)self->mVtbl)[34]), idx);
                 void* icon;
-                if (self->selected >= 0 && self->vt[36].fn(vthis(self, self->vt[36]), rewardItem) == self->selected) {
-                    char* ui = self->ui;
+                if (self->mStoreNum >= 0 && ((sVEi_08A0*)self->mVtbl)[36].fn(vthis(self, ((sVEi_08A0*)self->mVtbl)[36]), rewardItem) == self->mStoreNum) {
+                    char* ui = ((char*)self->mpEngine);
                     int iconHash = GetHashValue32(str_dollar_sign);
                     icon = cUITextureBank_getElementByHashname(ui + 0x58, iconHash);
                 } else {
-                    char* ui = self->ui;
+                    char* ui = ((char*)self->mpEngine);
                     int iconHash = GetHashValue32(str_questmark);
                     icon = cUITextureBank_getElementByHashname(ui + 0x58, iconHash);
                 }
-                cUIIcon* cell = self->cells[row][col];
+                cUIIcon* cell = self->mpIcons[row][col];
                 (*(void**)&cell->mpTextureElem) = icon;
                 cell->mTextureID = -1;
             }
-            cUIIcon* cell = self->cells[row][col];
+            cUIIcon* cell = self->mpIcons[row][col];
             sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)((void*)cell->mVtbl);
             vt[11].fn(vthis(cell, vt[11]), gFadedColour);
         } else {
-            show_08A0(self->cells[row][col], 0);
-            show_08A0(self->frames[row][col], 0);
+            show_08A0(self->mpIcons[row][col], 0);
+            show_08A0(((cUIIcon* (*)[8])&self->mpIconBacks[0][0])[row][col], 0);
         }
     }
 }

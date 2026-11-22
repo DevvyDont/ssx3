@@ -150,10 +150,6 @@ int cSectionMan_freeEvent(void* vself, void* node)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/sectionman", cSectionMan_addActiveEvent);
 #ifdef SKIP_ASM
-struct sSectionNode_E298 {
-    int id;
-    sSectionNode_E298* next; // 0x4
-};
 
 void* cSectionMan_allocEvent(void* self);
 extern "C" void cSectionMan_removeActiveEvent(cSectionMan* self, tSectionManEvent* prev, tSectionManEvent* node);
@@ -167,23 +163,23 @@ extern "C" void cSectionMan_removeActiveEvent(cSectionMan* self, tSectionManEven
  */
 extern "C" void cSectionMan_addActiveEvent(cSectionMan* self, int id)
 {
-    sSectionNode_E298* n = (sSectionNode_E298*)self->m_pActiveEventList;
-    sSectionNode_E298* prev = 0;
+    tSectionManEvent* n = self->m_pActiveEventList;
+    tSectionManEvent* prev = 0;
     while (n != 0) {
-        if (n->id == id) {
-            sSectionNode_E298* cur = n;
-            n = n->next;
+        if (n->SectionID == id) {
+            tSectionManEvent* cur = n;
+            n = n->pNext;
             cSectionMan_removeActiveEvent(self, (tSectionManEvent*)prev, (tSectionManEvent*)cur);
         } else {
             prev = n;
-            n = n->next;
+            n = n->pNext;
         }
     }
-    n = (sSectionNode_E298*)cSectionMan_allocEvent(self);
-    n->id = id;
-    n->next = 0;
+    n = (tSectionManEvent*)cSectionMan_allocEvent(self);
+    n->SectionID = id;
+    n->pNext = 0;
     if (prev != 0) {
-        prev->next = n;
+        prev->pNext = n;
     } else {
         self->m_pActiveEventList = (tSectionManEvent*)n;
     }

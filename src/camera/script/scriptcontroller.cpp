@@ -502,12 +502,8 @@ static inline float Atan2_169570(float y, float x)
     return r;
 }
 
-struct sVec2_169570 {
-    float x, y;
-    sVec2_169570(float ax, float ay) : x(ax), y(ay) {}
-};
 
-static inline float Length_169570(const sVec2_169570& v)
+static inline float Length_169570(const t2Vector& v)
 {
     return Sqrt_169570(v.x * v.x + v.y * v.y);
 }
@@ -545,7 +541,7 @@ extern "C" void cScriptManualAlgorithm_update(cScriptManualAlgorithm* algorithm)
     (*(sVec4_169570*)&self->Target) = mtxMulVec_169570(baseTransform, sVec4_169570((*(&self->FrameInfo)).targetX, (*(&self->FrameInfo)).targetY, (*(&self->FrameInfo)).targetZ, 1.0f));
     sVec4_169570 delta = Sub_169570((*(sVec4_169570*)&self->Target), (*(sVec4_169570*)&self->Position));
     self->Heading = Atan2_169570(delta.y, delta.x);
-    float horizontalLen = Length_169570(sVec2_169570(delta.x, delta.y));
+    float horizontalLen = Length_169570(t2Vector(delta.x, delta.y));
     self->Pitch = Atan2_169570(delta.z, horizontalLen);
     cCameraJitterer_updatePositionalJitter(&algorithm->Jitterer, (*(&self->FrameInfo)).jitterFocus);
     cCameraJitterer_updateRollJitter(&algorithm->Jitterer, (*(&self->FrameInfo)).jitterRoll);
@@ -556,22 +552,19 @@ extern "C" void cScriptManualAlgorithm_update(cScriptManualAlgorithm* algorithm)
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptManualAlgorithm_getPose);
 #ifdef SKIP_ASM
 
-struct sM_9828 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 
-extern sM_9828 t4mat_Identity_9828 __asm__("t4mat_Identity");
+extern t4Matrix t4mat_Identity_9828 __asm__("t4mat_Identity");
 extern t4Vector t4vect_XAxis_9828 __asm__("t4vect_XAxis");
 extern t4Vector t4vect_YAxis_9828 __asm__("t4vect_YAxis");
 extern t4Vector t4vect_ZAxis_9828 __asm__("t4vect_ZAxis");
 extern "C" void fSinCos(float* s, float* c, float angle);
-extern "C" tPose tPose_tPose_9828(sM_9828* m) __asm__("tPose_tPose");
+extern "C" tPose tPose_tPose_9828(t4Matrix* m) __asm__("tPose_tPose");
 extern "C" t4Vector cCameraJitterer_getPositionalJitter_9828(char* p, float a, float b) __asm__("cCameraJitterer_getPositionalJitter");
 extern "C" float cCameraJitterer_getRollJitter(void* self);
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
-static inline void vu0CopyMtx_9828(sM_9828* dst, const sM_9828* src)
+static inline void vu0CopyMtx_9828(t4Matrix* dst, const t4Matrix* src)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -590,7 +583,7 @@ static inline void vu0CopyMtx_9828(sM_9828* dst, const sM_9828* src)
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
-static inline void vu0MulMtx_9828(sM_9828* dst, const sM_9828* a, const sM_9828* b)
+static inline void vu0MulMtx_9828(t4Matrix* dst, const t4Matrix* a, const t4Matrix* b)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -629,7 +622,7 @@ static inline void vu0MulMtx_9828(sM_9828* dst, const sM_9828* a, const sM_9828*
 }
 
 // PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
-static inline void vu0TransMtx_9828(sM_9828* m, const t4Vector& v)
+static inline void vu0TransMtx_9828(t4Matrix* m, const t4Vector& v)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -669,9 +662,9 @@ static inline void SinCos_9828(float* s, float* c, float angle)
     fSinCos(s, c, angle);
 }
 
-static inline void RotAxis_9828(sM_9828* m, const t4Vector& axis, float angle)
+static inline void RotAxis_9828(t4Matrix* m, const t4Vector& axis, float angle)
 {
-    sM_9828 r;
+    t4Matrix r;
     float s;
     float c;
     float one = 1.0f;
@@ -686,22 +679,22 @@ static inline void RotAxis_9828(sM_9828* m, const t4Vector& axis, float angle)
     float sx = s * x;
     float sy = s * y;
     float sz = s * z;
-    r.m[0][0] = tx * x + c;
-    r.m[1][0] = tx * y + sz;
-    r.m[2][0] = tx * z - sy;
-    r.m[0][1] = ty * x - sz;
-    r.m[1][1] = ty * y + c;
-    r.m[2][1] = ty * z + sx;
-    r.m[0][2] = tz * x + sy;
-    r.m[1][2] = tz * y - sx;
-    r.m[2][2] = tz * z + c;
-    r.m[3][0] = 0.0f;
-    r.m[3][1] = 0.0f;
-    r.m[3][2] = 0.0f;
-    r.m[0][3] = 0.0f;
-    r.m[1][3] = 0.0f;
-    r.m[2][3] = 0.0f;
-    r.m[3][3] = one;
+    ((float (*)[4])&r.row[0])[0][0] = tx * x + c;
+    ((float (*)[4])&r.row[0])[1][0] = tx * y + sz;
+    ((float (*)[4])&r.row[0])[2][0] = tx * z - sy;
+    ((float (*)[4])&r.row[0])[0][1] = ty * x - sz;
+    ((float (*)[4])&r.row[0])[1][1] = ty * y + c;
+    ((float (*)[4])&r.row[0])[2][1] = ty * z + sx;
+    ((float (*)[4])&r.row[0])[0][2] = tz * x + sy;
+    ((float (*)[4])&r.row[0])[1][2] = tz * y - sx;
+    ((float (*)[4])&r.row[0])[2][2] = tz * z + c;
+    ((float (*)[4])&r.row[0])[3][0] = 0.0f;
+    ((float (*)[4])&r.row[0])[3][1] = 0.0f;
+    ((float (*)[4])&r.row[0])[3][2] = 0.0f;
+    ((float (*)[4])&r.row[0])[0][3] = 0.0f;
+    ((float (*)[4])&r.row[0])[1][3] = 0.0f;
+    ((float (*)[4])&r.row[0])[2][3] = 0.0f;
+    ((float (*)[4])&r.row[0])[3][3] = one;
     vu0MulMtx_9828(m, m, &r);
 }
 
@@ -719,7 +712,7 @@ static inline void RotAxis_9828(sM_9828* m, const t4Vector& axis, float angle)
  */
 extern "C" tPose cScriptManualAlgorithm_getPose(cScriptManualAlgorithm* algorithm)
 {
-    sM_9828 mat;
+    t4Matrix mat;
     vu0CopyMtx_9828(&mat, &t4mat_Identity_9828);
     vu0TransMtx_9828(&mat, Add_9828(*(&algorithm->Position), cCameraJitterer_getPositionalJitter_9828((char*)&algorithm->Jitterer, algorithm->Heading, algorithm->Pitch)));
     RotAxis_9828(&mat, t4vect_XAxis_9828, algorithm->Roll + cCameraJitterer_getRollJitter(&algorithm->Jitterer));
@@ -907,22 +900,19 @@ extern "C" void cScriptPointAlgorithm_update(cScriptPointAlgorithm* algorithm)
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptPointAlgorithm_getPose);
 #ifdef SKIP_ASM
 
-struct sM_9F88 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 
-extern sM_9F88 t4mat_Identity_9F88 __asm__("t4mat_Identity");
+extern t4Matrix t4mat_Identity_9F88 __asm__("t4mat_Identity");
 extern t4Vector t4vect_XAxis_9F88 __asm__("t4vect_XAxis");
 extern t4Vector t4vect_YAxis_9F88 __asm__("t4vect_YAxis");
 extern t4Vector t4vect_ZAxis_9F88 __asm__("t4vect_ZAxis");
 extern "C" void fSinCos(float* s, float* c, float angle);
-extern "C" tPose tPose_tPose_9F88(sM_9F88* m) __asm__("tPose_tPose");
+extern "C" tPose tPose_tPose_9F88(t4Matrix* m) __asm__("tPose_tPose");
 extern "C" t4Vector cCameraJitterer_getPositionalJitter_9F88(char* p, float a, float b) __asm__("cCameraJitterer_getPositionalJitter");
 extern "C" float cCameraJitterer_getRollJitter(void* self);
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
-static inline void vu0CopyMtx_9F88(sM_9F88* dst, const sM_9F88* src)
+static inline void vu0CopyMtx_9F88(t4Matrix* dst, const t4Matrix* src)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -941,7 +931,7 @@ static inline void vu0CopyMtx_9F88(sM_9F88* dst, const sM_9F88* src)
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
-static inline void vu0MulMtx_9F88(sM_9F88* dst, const sM_9F88* a, const sM_9F88* b)
+static inline void vu0MulMtx_9F88(t4Matrix* dst, const t4Matrix* a, const t4Matrix* b)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -980,7 +970,7 @@ static inline void vu0MulMtx_9F88(sM_9F88* dst, const sM_9F88* a, const sM_9F88*
 }
 
 // PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
-static inline void vu0TransMtx_9F88(sM_9F88* m, const t4Vector& v)
+static inline void vu0TransMtx_9F88(t4Matrix* m, const t4Vector& v)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -1020,9 +1010,9 @@ static inline void SinCos_9F88(float* s, float* c, float angle)
     fSinCos(s, c, angle);
 }
 
-static inline void RotAxis_9F88(sM_9F88* m, const t4Vector& axis, float angle)
+static inline void RotAxis_9F88(t4Matrix* m, const t4Vector& axis, float angle)
 {
-    sM_9F88 r;
+    t4Matrix r;
     float s;
     float c;
     float one = 1.0f;
@@ -1037,22 +1027,22 @@ static inline void RotAxis_9F88(sM_9F88* m, const t4Vector& axis, float angle)
     float sx = s * x;
     float sy = s * y;
     float sz = s * z;
-    r.m[0][0] = tx * x + c;
-    r.m[1][0] = tx * y + sz;
-    r.m[2][0] = tx * z - sy;
-    r.m[0][1] = ty * x - sz;
-    r.m[1][1] = ty * y + c;
-    r.m[2][1] = ty * z + sx;
-    r.m[0][2] = tz * x + sy;
-    r.m[1][2] = tz * y - sx;
-    r.m[2][2] = tz * z + c;
-    r.m[3][0] = 0.0f;
-    r.m[3][1] = 0.0f;
-    r.m[3][2] = 0.0f;
-    r.m[0][3] = 0.0f;
-    r.m[1][3] = 0.0f;
-    r.m[2][3] = 0.0f;
-    r.m[3][3] = one;
+    ((float (*)[4])&r.row[0])[0][0] = tx * x + c;
+    ((float (*)[4])&r.row[0])[1][0] = tx * y + sz;
+    ((float (*)[4])&r.row[0])[2][0] = tx * z - sy;
+    ((float (*)[4])&r.row[0])[0][1] = ty * x - sz;
+    ((float (*)[4])&r.row[0])[1][1] = ty * y + c;
+    ((float (*)[4])&r.row[0])[2][1] = ty * z + sx;
+    ((float (*)[4])&r.row[0])[0][2] = tz * x + sy;
+    ((float (*)[4])&r.row[0])[1][2] = tz * y - sx;
+    ((float (*)[4])&r.row[0])[2][2] = tz * z + c;
+    ((float (*)[4])&r.row[0])[3][0] = 0.0f;
+    ((float (*)[4])&r.row[0])[3][1] = 0.0f;
+    ((float (*)[4])&r.row[0])[3][2] = 0.0f;
+    ((float (*)[4])&r.row[0])[0][3] = 0.0f;
+    ((float (*)[4])&r.row[0])[1][3] = 0.0f;
+    ((float (*)[4])&r.row[0])[2][3] = 0.0f;
+    ((float (*)[4])&r.row[0])[3][3] = one;
     vu0MulMtx_9F88(m, m, &r);
 }
 
@@ -1070,7 +1060,7 @@ static inline void RotAxis_9F88(sM_9F88* m, const t4Vector& axis, float angle)
  */
 extern "C" tPose cScriptPointAlgorithm_getPose(cScriptPointAlgorithm* algorithm)
 {
-    sM_9F88 mat;
+    t4Matrix mat;
     vu0CopyMtx_9F88(&mat, &t4mat_Identity_9F88);
     vu0TransMtx_9F88(&mat, Add_9F88(*(&algorithm->Position), cCameraJitterer_getPositionalJitter_9F88((char*)&algorithm->Jitterer, algorithm->Heading, algorithm->Pitch)));
     RotAxis_9F88(&mat, t4vect_XAxis_9F88, algorithm->Roll + cCameraJitterer_getRollJitter(&algorithm->Jitterer));
@@ -1326,22 +1316,19 @@ extern "C" void cScriptTargetAlgorithm_update(cScriptTargetAlgorithm* algorithm)
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptTargetAlgorithm_getPose);
 #ifdef SKIP_ASM
 
-struct sM_A868 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 
-extern sM_A868 t4mat_Identity_A868 __asm__("t4mat_Identity");
+extern t4Matrix t4mat_Identity_A868 __asm__("t4mat_Identity");
 extern t4Vector t4vect_XAxis_A868 __asm__("t4vect_XAxis");
 extern t4Vector t4vect_YAxis_A868 __asm__("t4vect_YAxis");
 extern t4Vector t4vect_ZAxis_A868 __asm__("t4vect_ZAxis");
 extern "C" void fSinCos(float* s, float* c, float angle);
-extern "C" tPose tPose_tPose_A868(sM_A868* m) __asm__("tPose_tPose");
+extern "C" tPose tPose_tPose_A868(t4Matrix* m) __asm__("tPose_tPose");
 extern "C" t4Vector cCameraJitterer_getPositionalJitter_A868(char* p, float a, float b) __asm__("cCameraJitterer_getPositionalJitter");
 extern "C" float cCameraJitterer_getRollJitter(void* self);
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
-static inline void vu0CopyMtx_A868(sM_A868* dst, const sM_A868* src)
+static inline void vu0CopyMtx_A868(t4Matrix* dst, const t4Matrix* src)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -1360,7 +1347,7 @@ static inline void vu0CopyMtx_A868(sM_A868* dst, const sM_A868* src)
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
-static inline void vu0MulMtx_A868(sM_A868* dst, const sM_A868* a, const sM_A868* b)
+static inline void vu0MulMtx_A868(t4Matrix* dst, const t4Matrix* a, const t4Matrix* b)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -1399,7 +1386,7 @@ static inline void vu0MulMtx_A868(sM_A868* dst, const sM_A868* a, const sM_A868*
 }
 
 // PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
-static inline void vu0TransMtx_A868(sM_A868* m, const t4Vector& v)
+static inline void vu0TransMtx_A868(t4Matrix* m, const t4Vector& v)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -1439,9 +1426,9 @@ static inline void SinCos_A868(float* s, float* c, float angle)
     fSinCos(s, c, angle);
 }
 
-static inline void RotAxis_A868(sM_A868* m, const t4Vector& axis, float angle)
+static inline void RotAxis_A868(t4Matrix* m, const t4Vector& axis, float angle)
 {
-    sM_A868 r;
+    t4Matrix r;
     float s;
     float c;
     float one = 1.0f;
@@ -1456,22 +1443,22 @@ static inline void RotAxis_A868(sM_A868* m, const t4Vector& axis, float angle)
     float sx = s * x;
     float sy = s * y;
     float sz = s * z;
-    r.m[0][0] = tx * x + c;
-    r.m[1][0] = tx * y + sz;
-    r.m[2][0] = tx * z - sy;
-    r.m[0][1] = ty * x - sz;
-    r.m[1][1] = ty * y + c;
-    r.m[2][1] = ty * z + sx;
-    r.m[0][2] = tz * x + sy;
-    r.m[1][2] = tz * y - sx;
-    r.m[2][2] = tz * z + c;
-    r.m[3][0] = 0.0f;
-    r.m[3][1] = 0.0f;
-    r.m[3][2] = 0.0f;
-    r.m[0][3] = 0.0f;
-    r.m[1][3] = 0.0f;
-    r.m[2][3] = 0.0f;
-    r.m[3][3] = one;
+    ((float (*)[4])&r.row[0])[0][0] = tx * x + c;
+    ((float (*)[4])&r.row[0])[1][0] = tx * y + sz;
+    ((float (*)[4])&r.row[0])[2][0] = tx * z - sy;
+    ((float (*)[4])&r.row[0])[0][1] = ty * x - sz;
+    ((float (*)[4])&r.row[0])[1][1] = ty * y + c;
+    ((float (*)[4])&r.row[0])[2][1] = ty * z + sx;
+    ((float (*)[4])&r.row[0])[0][2] = tz * x + sy;
+    ((float (*)[4])&r.row[0])[1][2] = tz * y - sx;
+    ((float (*)[4])&r.row[0])[2][2] = tz * z + c;
+    ((float (*)[4])&r.row[0])[3][0] = 0.0f;
+    ((float (*)[4])&r.row[0])[3][1] = 0.0f;
+    ((float (*)[4])&r.row[0])[3][2] = 0.0f;
+    ((float (*)[4])&r.row[0])[0][3] = 0.0f;
+    ((float (*)[4])&r.row[0])[1][3] = 0.0f;
+    ((float (*)[4])&r.row[0])[2][3] = 0.0f;
+    ((float (*)[4])&r.row[0])[3][3] = one;
     vu0MulMtx_A868(m, m, &r);
 }
 
@@ -1489,7 +1476,7 @@ static inline void RotAxis_A868(sM_A868* m, const t4Vector& axis, float angle)
  */
 extern "C" tPose cScriptTargetAlgorithm_getPose(cScriptTargetAlgorithm* algorithm)
 {
-    sM_A868 mat;
+    t4Matrix mat;
     vu0CopyMtx_A868(&mat, &t4mat_Identity_A868);
     vu0TransMtx_A868(&mat, Add_A868(*(&algorithm->Position), cCameraJitterer_getPositionalJitter_A868((char*)&algorithm->Jitterer, algorithm->Heading, algorithm->Pitch)));
     RotAxis_A868(&mat, t4vect_XAxis_A868, algorithm->Roll + cCameraJitterer_getRollJitter(&algorithm->Jitterer));

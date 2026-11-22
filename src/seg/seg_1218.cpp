@@ -1485,8 +1485,7 @@ extern "C" void cDangerMan_RemoveDangerElem(cDangerMan* self, unsigned int* idp)
 //100%
 INCLUDE_ASM("seg/seg_1218", cDangerMan_AddDangerVolume);
 #ifdef SKIP_ASM
-struct N_1900 { int key; int val; int refs; N_1900 *next; };
-struct P_1900 { char pad[0xB54]; N_1900 *freelist; N_1900 *used; };
+struct P_1900 { char pad[0xB54]; tDangerZoneTrack *freelist; tDangerZoneTrack *used; };
 
 /**
  * Adds a danger zone for an instance, or one more reference to it.
@@ -1500,21 +1499,21 @@ struct P_1900 { char pad[0xB54]; N_1900 *freelist; N_1900 *used; };
  * @param level  the zone's danger level
  */
 extern "C" void cDangerMan_AddDangerVolume(cDangerMan* dangerMan, int *instId, int level) {
-    N_1900 *currActiveZone;
-    N_1900 *n;
+    tDangerZoneTrack *currActiveZone;
+    tDangerZoneTrack *n;
 
-    for (currActiveZone = (N_1900*)dangerMan->mpActiveList; currActiveZone != 0; currActiveZone = currActiveZone->next) {
-        if (currActiveZone->key == *instId) {
-            currActiveZone->refs++;
+    for (currActiveZone = dangerMan->mpActiveList; currActiveZone != 0; currActiveZone = currActiveZone->pNext) {
+        if (((int)currActiveZone->rID) == *instId) {
+            currActiveZone->refCount++;
             return;
         }
     }
-    n = (N_1900*)dangerMan->mpInactiveList;
-    dangerMan->mpInactiveList = (tDangerZoneTrack*)n->next;
-    n->key = *instId;
-    n->val = level;
-    n->refs = 1;
-    n->next = (N_1900*)dangerMan->mpActiveList;
+    n = dangerMan->mpInactiveList;
+    dangerMan->mpInactiveList = (tDangerZoneTrack*)n->pNext;
+    n->rID = *instId;
+    n->level = level;
+    n->refCount = 1;
+    n->pNext = dangerMan->mpActiveList;
     dangerMan->mpActiveList = (tDangerZoneTrack*)n;
 }
 #endif
@@ -1522,15 +1521,14 @@ extern "C" void cDangerMan_AddDangerVolume(cDangerMan* dangerMan, int *instId, i
 //100%
 INCLUDE_ASM("seg/seg_1218", cDangerMan_RemoveDangerVolume);
 #ifdef SKIP_ASM
-struct sNode_1970 { int key; int pad; int ref; sNode_1970* next; };
 struct sC_1970 { int x, a, b; };
 struct sSelf_1970 {
     char pad0[0x708];
     sC_1970 arrC[6];
     char pad1[0x754 - 0x750];
     char pad2[0xB54 - 0x754];
-    sNode_1970* freeList;
-    sNode_1970* used;
+    tDangerZoneTrack* freeList;
+    tDangerZoneTrack* used;
 };
 /**
  * Drops one reference to an instance's danger zone, and frees the zone at zero.
@@ -1541,14 +1539,14 @@ struct sSelf_1970 {
  * @param key  the zone's instance id
  */
 extern "C" void cDangerMan_RemoveDangerVolume(sSelf_1970* self, int* key) {
-    sNode_1970* prev = 0;
-    sNode_1970* n = self->used;
+    tDangerZoneTrack* prev = 0;
+    tDangerZoneTrack* n = self->used;
     while (n) {
-        if (n->key == *key) {
-            if (--n->ref == 0) {
-                if (prev) prev->next = n->next;
-                else self->used = n->next;
-                n->next = self->freeList;
+        if (((int)n->rID) == *key) {
+            if (--n->refCount == 0) {
+                if (prev) prev->pNext = n->pNext;
+                else self->used = n->pNext;
+                n->pNext = self->freeList;
                 self->freeList = n;
                 if (self->used == 0) {
                     for (int k = 0; k < 6; k++) { self->arrC[k].a = 0; self->arrC[k].b = 0; }
@@ -1557,7 +1555,7 @@ extern "C" void cDangerMan_RemoveDangerVolume(sSelf_1970* self, int* key) {
             return;
         }
         prev = n;
-        n = n->next;
+        n = n->pNext;
     }
 }
 #endif
@@ -1582,18 +1580,15 @@ extern "C" int cDangerMan_GetRiderDangerLevel(cDangerMan* dangerMan, int aiIndex
 //100%
 INCLUDE_ASM("seg/seg_1218", FocusQuery_addcell);
 #ifdef SKIP_ASM
-struct sLink_1A28 {
-    sLink_1A28* next;
-};
 
 
 struct sList_1A28 {
     int n;
-    sLink_1A28* items[1];
+    nash_Node* items[1];
 };
 
 extern int cWScriptMan_TheWScriptMan;
-extern "C" int cWScriptMan_isFocusInstance(int, sLink_1A28*);
+extern "C" int cWScriptMan_isFocusInstance(int, nash_Node*);
 
 /**
  * Adds a world cell's focus instances to a list, and optionally those of every cell below it.
@@ -1608,8 +1603,8 @@ extern "C" int cWScriptMan_isFocusInstance(int, sLink_1A28*);
  */
 extern "C" void FocusQuery_addcell(sList_1A28* list, nash_Cell* node, int recurse)
 {
-    sLink_1A28* item;
-    for (item = (*(sLink_1A28**)&node->nodesinside[0]); item; item = item->next) {
+    nash_Node* item;
+    for (item = (*(nash_Node**)&node->nodesinside[0]); item; item = item->next) {
         if (cWScriptMan_isFocusInstance(cWScriptMan_TheWScriptMan, item))
             list->items[list->n++] = item;
     }

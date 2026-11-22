@@ -3030,10 +3030,6 @@ struct sInputSlot_00326CC8 {
     char data[0x60];
 };
 
-struct sInputParse_00326CC8 {
-    sInputSlot_00326CC8 slots[30][4];
-    int bank;
-};
 
 /**
  * Returns the button values a pad delivered in the pad cache's current input frame.
@@ -3045,8 +3041,8 @@ struct sInputParse_00326CC8 {
  */
 extern "C" void* cPadCache_buttonValues(cPadCache* self, int i)
 {
-    sInputParse_00326CC8* controllerCache = (sInputParse_00326CC8*)self;
-    return controllerCache->slots[controllerCache->bank][i].data;
+    cPadCache* controllerCache = self;
+    return ((sInputSlot_00326CC8 (*)[4])&controllerCache->InputCache[0][0])[((int)controllerCache->CacheReadPos)][i].data;
 }
 #endif
 

@@ -158,12 +158,6 @@ struct sSortVE_4C98 {
 };
 
 
-struct sSortNode_4C98 {
-    int f0;
-    sSortNode_4C98* prev;   // 0x4
-    sSortNode_4C98* next;   // 0x8
-    sSortVE_4C98* vt;       // 0xC
-};
 
 
 
@@ -180,39 +174,39 @@ struct sSortNode_4C98 {
 // Moves every node of the bucket's pending list into its sorted list.
 extern "C" void cBucketMan_mergeBucket(cBucketMan* self, int index)
 {
-    sSortNode_4C98* n = (sSortNode_4C98*)cBucketMan_addfirst(self, index);
+    cObjNode* n = (cObjNode*)cBucketMan_addfirst(self, index);
     while (n) {
-        sSortNode_4C98* nextN = (sSortNode_4C98*)cBucketMan_addnext(self, (cObjNode*)n, index);
-        n->next->prev = n->prev;
-        n->prev->next = n->next;
-        sSortNode_4C98* other;
-        for (other = (sSortNode_4C98*)cBucketMan_last(self, index); other; other = (sSortNode_4C98*)cBucketMan_prev(self, (cObjNode*)other, index)) {
-            if (n->vt[6].fn(vthis(n, n->vt[6]), other)) {
-                if (n->vt[7].fn(vthis(n, n->vt[7]), other)) {
-                    n->prev = other->prev;
-                    other->prev->next = n;
-                    n->next = other->next;
-                    other->next->prev = n;
-                    other->prev = 0;
-                    other->next = 0;
+        cObjNode* nextN = (cObjNode*)cBucketMan_addnext(self, (cObjNode*)n, index);
+        n->Prev->Next = n->Next;
+        n->Next->Prev = n->Prev;
+        cObjNode* other;
+        for (other = (cObjNode*)cBucketMan_last(self, index); other; other = (cObjNode*)cBucketMan_prev(self, (cObjNode*)other, index)) {
+            if (((sSortVE_4C98*)n->mVtbl)[6].fn(vthis(n, ((sSortVE_4C98*)n->mVtbl)[6]), other)) {
+                if (((sSortVE_4C98*)n->mVtbl)[7].fn(vthis(n, ((sSortVE_4C98*)n->mVtbl)[7]), other)) {
+                    n->Next = other->Next;
+                    other->Next->Prev = n;
+                    n->Prev = other->Prev;
+                    other->Prev->Next = n;
+                    other->Next = 0;
+                    other->Prev = 0;
                     if (other) {
-                        sVEntry<void(void*, int)>* dv = (sVEntry<void(void*, int)>*)other->vt;
+                        sVEntry<void(void*, int)>* dv = (sVEntry<void(void*, int)>*)((sSortVE_4C98*)other->mVtbl);
                         dv[1].fn(vthis(other, dv[1]), 3);
                     }
                 } else {
-                    n->prev = other->prev;
-                    other->prev->next = n;
-                    n->next = other;
-                    other->prev = n;
+                    n->Next = other->Next;
+                    other->Next->Prev = n;
+                    n->Prev = other;
+                    other->Next = n;
                 }
                 break;
             }
         }
         if (other == 0) {
-            n->prev = ((sSortNode_4C98*)(*(&((tBucketHeader*)self->Buckets)[index].Head)).Next);
-            ((sSortNode_4C98*)(*(&((tBucketHeader*)self->Buckets)[index].Head)).Next)->next = n;
-            n->next = (sSortNode_4C98*)&self->Buckets[index].Head;
-            (*(sSortNode_4C98**)&(*(&((tBucketHeader*)self->Buckets)[index].Head)).Next) = n;
+            n->Next = ((*(&((tBucketHeader*)self->Buckets)[index].Head)).Next);
+            ((*(&((tBucketHeader*)self->Buckets)[index].Head)).Next)->Prev = n;
+            n->Prev = (&self->Buckets[index].Head);
+            (*(cObjNode**)&(*(&((tBucketHeader*)self->Buckets)[index].Head)).Next) = n;
         }
         n = nextN;
     }
