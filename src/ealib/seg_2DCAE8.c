@@ -860,7 +860,6 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_init);
 extern int FILESYS_initadr_CBD8(int, int, int, int) __asm__("FILESYS_initadr");
 extern int FILESYS_overhead_CBD8(int, int, int) __asm__("FILESYS_overhead");
 extern char str_File_Sys_CBD8[] __asm__("str_File_Sys");
-extern int gFileDevice_CBD8[] __asm__("gFileDevice");
 extern int pFileDeviceMem_CBD8[] __asm__("pFileDeviceMem");
 
 /**
@@ -878,7 +877,7 @@ extern int pFileDeviceMem_CBD8[] __asm__("pFileDeviceMem");
  */
 int FILESYS_init(int maxopenfiles, int maxdirfiles, int maxfileops) {
     int workBuffer;
-    if (gFileDevice_CBD8[0] == 0) {
+    if (gFileDevice.maxfileops == 0) {
         workBuffer = ((int (*)(char*, int, int))gFileSysOpts.malloc)(str_File_Sys_CBD8, FILESYS_overhead_CBD8(maxopenfiles, maxdirfiles, maxfileops), 0x100);
         pFileDeviceMem_CBD8[0] = workBuffer;
         return FILESYS_initadr_CBD8(maxopenfiles, maxdirfiles, maxfileops, workBuffer);
@@ -892,7 +891,6 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_initadr);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern int gFileDevice_CC88[] __asm__("gFileDevice");
 extern int D_00450C60_CC88 __asm__("D_00450C60");
 extern void MUTEX_create_CC88(void *) __asm__("MUTEX_create");
 extern int FILESYS_overhead_CC88(int, int, int) __asm__("FILESYS_overhead");
@@ -918,16 +916,16 @@ int FILESYS_initadr(int maxopenfiles, int maxdirfiles, int maxfileops, int mem) 
     if (maxopenfiles == 0) maxopenfiles = 0x10;
     if (maxdirfiles == 0) maxdirfiles = 1000;
     if (maxfileops == 0) maxfileops = 0x20;
-    if (gFileDevice_CC88[0] == 0) {
-        gFileDevice_CC88[2] = 0xFF;
-        gFileDevice_CC88[0] = maxfileops;
-        gFileDevice_CC88[1] = maxopenfiles;
-        MUTEX_create_CC88(&gFileDevice_CC88[5]);
-        gFileDevice_CC88[10] = mem;
-        MEM_fill_CC88(gFileDevice_CC88[10], 0, FILESYS_overhead_CC88(maxopenfiles, maxdirfiles, maxfileops));
-        gFileDevice_CC88[11] = gFileDevice_CC88[10] + gFileDevice_CC88[0] * 0x30;
+    if (gFileDevice.maxfileops == 0) {
+        gFileDevice.minpriority = 0xFF;
+        gFileDevice.maxfileops = maxfileops;
+        gFileDevice.maxopen = maxopenfiles;
+        MUTEX_create_CC88(&gFileDevice.mutex[0]);
+        *(int*)&gFileDevice.oplist = mem;
+        MEM_fill_CC88(((int)gFileDevice.oplist), 0, FILESYS_overhead_CC88(maxopenfiles, maxdirfiles, maxfileops));
+        *(int*)&gFileDevice.handlelist = (int)gFileDevice.oplist + gFileDevice.maxfileops * 0x30;
         if (D_00450C60_CC88 != 0) {
-            alignedDir = func_003E4040_CC88(maxdirfiles, gFileDevice_CC88[1] * 272 + gFileDevice_CC88[11]);
+            alignedDir = func_003E4040_CC88(maxdirfiles, gFileDevice.maxopen * 272 + (int)gFileDevice.handlelist);
         } else {
             alignedDir = 0;
         }
@@ -972,8 +970,6 @@ extern void func_003E44B0_CDE0(void) __asm__("func_003E44B0");
 extern void FILESYS_closesync_CDE0(int, int) __asm__("FILESYS_closesync");
 extern void MUTEX_destroy_CDE0(char *) __asm__("MUTEX_destroy");
 extern void MEM_clear_CDE0(char *, int) __asm__("MEM_clear");
-extern char D_00519AC4_CDE0[] __asm__("D_00519AC4");
-extern int *D_00519AE4_CDE0[] __asm__("D_00519AE4");
 extern int pFileDeviceMem_CDE0[] __asm__("pFileDeviceMem");
 
 /**
@@ -984,12 +980,12 @@ extern int pFileDeviceMem_CDE0[] __asm__("pFileDeviceMem");
 void FILESYS_restore(void) {
     int *n;
     func_003E44B0_CDE0();
-    for (n = D_00519AE4_CDE0[0]; n != 0; n = (int *)n[5]) {
+    for (n = (int*)gFileDevice.bigfilelist; n != 0; n = (int *)n[5]) {
         ((void (*)(int))gFileSysOpts.free)(n[0]);
         FILESYS_closesync_CDE0(*(int *)n[3], 0);
     }
-    MUTEX_destroy_CDE0(D_00519AC4_CDE0);
-    MEM_clear_CDE0(D_00519AC4_CDE0 - 0x14, 0x38);
+    MUTEX_destroy_CDE0(((char*)&gFileDevice.mutex[0]));
+    MEM_clear_CDE0((char*)&gFileDevice, 0x38);
     if (pFileDeviceMem_CDE0[0] != 0) {
         ((void (*)(int))gFileSysOpts.free)(pFileDeviceMem_CDE0[0]);
         pFileDeviceMem_CDE0[0] = 0;
@@ -1003,7 +999,6 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_opstatus);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct H_CE90 { unsigned int v; };
-extern char *D_00519AD8_CE90[] __asm__("D_00519AD8");
 
 /**
  * Returns the status (+0x8) of a file operation, or -3 when the handle is stale (its low 20 bits no longer match the
@@ -1018,11 +1013,11 @@ int FILESYS_opstatus(struct H_CE90 opHandle) {
     int ok = 0;
     handleCopy.v = handleBits;
     if (handleBits != 0) {
-        ok = ((*(unsigned int *)(((unsigned char *)&handleCopy)[3] * 0x30 + D_00519AD8_CE90[0]) ^ handleBits) & 0xFFFFF) == 0;
+        ok = ((*(unsigned int *)(((unsigned char *)&handleCopy)[3] * 0x30 + (char*)gFileDevice.oplist) ^ handleBits) & 0xFFFFF) == 0;
     }
     if (ok == 0) return -3;
     // volatile (table entry, not a global): retail keeps this load out of the b delay slot
-    return *(volatile int *)(((unsigned char *)&opHandle)[3] * 0x30 + D_00519AD8_CE90[0] + 8);
+    return *(volatile int *)(((unsigned char *)&opHandle)[3] * 0x30 + (char*)gFileDevice.oplist + 8);
 }
 #endif
 
@@ -1030,7 +1025,6 @@ int FILESYS_opstatus(struct H_CE90 opHandle) {
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_operror);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern FILEOPERATION_def *D_00519AD8_CF10 __asm__("D_00519AD8"); /* gFileDevice.oplist ([O] FILE_FILEDEVICE::oplist, gFileDevice + 0x28) */
 typedef struct { unsigned char a, b, c, d; } T_CF10;
 
 /**
@@ -1040,7 +1034,7 @@ typedef struct { unsigned char a, b, c, d; } T_CF10;
  * @return the error code
  */
 int FILESYS_operror(T_CF10 opHandle) {
-    return D_00519AD8_CF10[opHandle.d].error;
+    return gFileDevice.oplist[opHandle.d].error;
 }
 #endif
 
@@ -1048,7 +1042,6 @@ int FILESYS_operror(T_CF10 opHandle) {
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_opuserdata);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern FILEOPERATION_def *D_00519AD8_CF40 __asm__("D_00519AD8"); /* gFileDevice.oplist */
 typedef struct { unsigned char a, b, c, d; } T_CF40;
 
 /**
@@ -1058,7 +1051,7 @@ typedef struct { unsigned char a, b, c, d; } T_CF40;
  * @return the user data
  */
 int FILESYS_opuserdata(T_CF40 opHandle) {
-    return (int)D_00519AD8_CF40[opHandle.d].userdata;
+    return (int)gFileDevice.oplist[opHandle.d].userdata;
 }
 #endif
 
@@ -1068,7 +1061,6 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_callbackop);
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef void (*Fn_CF70)(int, int, int);
-extern struct FILEOPERATION_def *D_00519AD8_CF70 __asm__("D_00519AD8");
 
 void FILESYS_callbackop_impl(int h, Fn_CF70 fn) __asm__("FILESYS_callbackop");
 /**
@@ -1081,7 +1073,7 @@ void FILESYS_callbackop_impl(int h, Fn_CF70 fn) __asm__("FILESYS_callbackop");
  * @param fn  the completion callback
  */
 void FILESYS_callbackop_impl(int ophandle, Fn_CF70 fn) {
-    struct FILEOPERATION_def *fop = &D_00519AD8_CF70[((unsigned char *)&ophandle)[3]];
+    struct FILEOPERATION_def *fop = &gFileDevice.oplist[((unsigned char *)&ophandle)[3]];
     fop->callback = fn;
     if (fop->status != 0) {
         fn(ophandle, fop->status, ((int)fop->userdata));
@@ -1111,12 +1103,12 @@ typedef struct Sys_CFC0 {
     int f2C;
     Ent_CFC0 *head;
 } Sys_CFC0;
-extern Sys_CFC0 gFileDevice_CFC0 __asm__("gFileDevice");
-extern char D_00519AC4_CFC0[] __asm__("D_00519AC4");
 extern void MUTEX_lock_CFC0(void *) __asm__("MUTEX_lock");
 extern void MUTEX_unlock_CFC0(void *) __asm__("MUTEX_unlock");
 
 void FILESYS_priorityop_impl(struct H_CFC0 h, int prio) __asm__("FILESYS_priorityop");
+extern Sys_CFC0 gFileDevice_CFC0 __asm__("gFileDevice");
+extern char D_00519AC4_CFC0[] __asm__("D_00519AC4");
 /**
  * Changes a pending file operation's priority (+0x10) and moves it to its place in the priority-ordered queue.
  *
@@ -1164,7 +1156,6 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_cancelop);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct H_D148 { unsigned int v; };
-extern char *D_00519AD8_D148[] __asm__("D_00519AD8");
 
 /**
  * Asks the file system to cancel a pending operation.
@@ -1181,12 +1172,12 @@ void FILESYS_cancelop(struct H_D148 ophandle) {
     int ok = 0;
     handleCopy.v = handleBits;
     if (handleBits != 0) {
-        ok = ((*(unsigned int *)(((unsigned char *)&handleCopy)[3] * 0x30 + D_00519AD8_D148[0]) ^ handleBits) & 0xFFFFF) == 0;
+        ok = ((*(unsigned int *)(((unsigned char *)&handleCopy)[3] * 0x30 + (char*)gFileDevice.oplist) ^ handleBits) & 0xFFFFF) == 0;
     }
     if (ok != 0) {
         opType = (handleBits >> 20) & 0xF;
         if (opType != 3 && opType != 10) {
-            *(int *)(((unsigned char *)&ophandle)[3] * 0x30 + D_00519AD8_D148[0] + 4) = 1;
+            *(int *)(((unsigned char *)&ophandle)[3] * 0x30 + (char*)gFileDevice.oplist + 4) = 1;
         }
     }
 }
@@ -1216,8 +1207,6 @@ struct sAB0 {
     struct FILEBIG_def *f34;            /* archives (also D_00519AE4) */
     int f38;                        /* (also pFileDeviceMem) */
 };
-extern struct sAB0 gFileDevice;
-extern int D_00519AB8;                          /* gFileDevice.f08 */
 struct sAB0Lock {                   /* gFileDevice from the mutex on (D_00519AC4) */
     int f00[4];                     /* the mutex */
     struct FILEOPERATION_def *f10;
@@ -1227,8 +1216,6 @@ struct sAB0Lock {                   /* gFileDevice from the mutex on (D_00519AC4
     struct FILEBIG_def *f20;
     int f24;
 };
-extern struct sAB0Lock D_00519AC4;
-extern struct FILEBIG_def *D_00519AE4;              /* gFileDevice.f34 */
 #endif
 
 //100%
@@ -1239,10 +1226,12 @@ extern int THREAD_iscurrent(char *);
 extern void THREAD_yield(int);
 extern int SYNCTASK_run(int);
 
+extern struct sAB0 gFileDevice_D1D8 __asm__("gFileDevice");
 static inline int hValid_D1D8(int h) {
-    return h != 0 && ((h & 0xFFFFF) == (((unsigned int)gFileDevice.f28[((unsigned char *)&h)[3]].op.id) & 0xFFFFF));
+    return h != 0 && ((h & 0xFFFFF) == (((unsigned int)gFileDevice_D1D8.f28[((unsigned char *)&h)[3]].op.id) & 0xFFFFF));
 }
 
+extern struct sAB0 gFileDevice_D1D8 __asm__("gFileDevice");
 /**
  * Blocks until a file operation completes and returns its result.
  *
@@ -1253,7 +1242,7 @@ static inline int hValid_D1D8(int h) {
  * @return the operation's result, or -3 for an invalid handle
  */
 int FILESYS_waitop(int ophandle) {
-    struct FILEOPERATION_def *fop = &gFileDevice.f28[((unsigned char *)&ophandle)[3]];
+    struct FILEOPERATION_def *fop = &gFileDevice_D1D8.f28[((unsigned char *)&ophandle)[3]];
     if (!hValid_D1D8(ophandle)) {
         return -3;
     }
@@ -1286,7 +1275,6 @@ struct sHandle_D310 {
 };
 
 
-extern struct FILEOPERATION_def *D_00519AD8;
 
 int FILESYS_completeop_a(struct sHandle_D310 h) __asm__("FILESYS_completeop");
 /**
@@ -1300,7 +1288,7 @@ int FILESYS_completeop_a(struct sHandle_D310 h) __asm__("FILESYS_completeop");
  */
 int FILESYS_completeop_a(struct sHandle_D310 ophandle) {
     int ret = 0;
-    struct FILEOPERATION_def *slot = &D_00519AD8[ophandle.idx];
+    struct FILEOPERATION_def *slot = &gFileDevice.oplist[ophandle.idx];
     int sum;
     int *fileHandle;
 
@@ -1452,7 +1440,7 @@ int FILESYS_close_impl(int filehandle, int priority, int userdata) {
     struct FILEBIG_def *n;
 
     fop = reserveop_D5A0();
-    n = D_00519AE4;
+    n = (struct FILEBIG_def*)gFileDevice.bigfilelist;
     fop->f = 3;
     *(int*)((char*)fop + 0x10) = priority;
     *(int*)((char*)fop + 0x14) = userdata;
@@ -1621,9 +1609,6 @@ struct sC10File { char *name; int a; int b; char *path; };   /* built-in file ta
 /* gFileDevice: the file system's command manager (FILESYS_initadr sets it up). Layout from every use in this unit;
    field names are their offsets. Several fields are also reached through their own splat symbols (declared
    below), which the functions that address them directly must keep using. */
-extern struct sAB0 gFileDevice;
-extern int D_00519AB8;                          /* gFileDevice.f08 */
-extern struct sAB0Lock D_00519AC4;
 extern int FILESYS_completeop_D8E8(int) __asm__("FILESYS_completeop");
 extern int BIG_typeofheader_D8E8(int) __asm__("BIG_typeofheader");
 extern int BIG_sizeofheader_D8E8(int) __asm__("BIG_sizeofheader");
@@ -1646,7 +1631,7 @@ void iFILE_addbigreadcallback(int opHandle, int opStatus, struct FILEBIG_def *bi
     int n, k;
     struct HANDLE_def *fileHd;
     struct FILESYSOPTS *fs;
-    struct FILEOPERATION_def *fileCmd = &gFileDevice.f28[((unsigned char *)&opHandle)[3]];
+    struct FILEOPERATION_def *fileCmd = &gFileDevice.oplist[((unsigned char *)&opHandle)[3]];
     fileHd = fileCmd->handle;
     k = fileCmd->priority;
     bigNode->handle = fileHd;
@@ -1664,8 +1649,8 @@ void iFILE_addbigreadcallback(int opHandle, int opStatus, struct FILEBIG_def *bi
         opHandle = FILESYS_read(bigNode->handle, 0, ((int)bigNode->header), n, k, bigNode);
         FILESYS_callbackop(opHandle, iFILE_addbigreadcallback_D8E8);
     } else {
-        bigNode->next = gFileDevice.f34;
-        gFileDevice.f34 = bigNode;
+        bigNode->next = (struct FILEBIG_def*)gFileDevice.bigfilelist;
+        gFileDevice.bigfilelist = bigNode;
         iFILESYS_ExecCommand_D8E8(((struct FILEOPERATION_def*)bigNode->fop));
     }
 }
@@ -1677,7 +1662,6 @@ INCLUDE_ASM("ealib/seg_2DCAE8", iFILE_addbigopencallback);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct H_DA10 { unsigned int v; };
-extern char *D_00519AD8_DA10[] __asm__("D_00519AD8");
 extern int FILESYS_completeop_DA10(unsigned int) __asm__("FILESYS_completeop");
 extern int FILESYS_read_DA10(int, int, int, int, int, int *) __asm__("FILESYS_read");
 extern void FILESYS_callbackop_DA10(unsigned int, void *) __asm__("FILESYS_callbackop");
@@ -1693,7 +1677,7 @@ extern char iFILE_addbigreadcallback_DA10[] __asm__("iFILE_addbigreadcallback");
  * @param bigRec  the archive record
  */
 void iFILE_addbigopencallback(struct H_DA10 opHandle, int opStatus, int *bigRec) {
-    int x = *(int *)(((unsigned char *)&opHandle)[3] * 0x30 + D_00519AD8_DA10[0] + 0x10);
+    int x = *(int *)(((unsigned char *)&opHandle)[3] * 0x30 + (char*)gFileDevice.oplist + 0x10);
     int fileHandle = FILESYS_completeop_DA10(opHandle.v);
     if (opStatus != 1) {
         *(int *)(bigRec[4] + 0xC) = 4;
@@ -1715,7 +1699,6 @@ typedef struct Q_DAC0 { int pad[3]; char *name; int p10; struct Q_DAC0 *next; } 
 typedef struct { int buf; int size; int b; int pad; C_DAC0 *cmd; } R_DAC0;
 extern C_DAC0 *reserveop_DAC0(void) __asm__("reserveop");
 extern void iFILESYS_ExecCommand_DAC0(C_DAC0 *) __asm__("iFILESYS_ExecCommand");
-extern Q_DAC0 *D_00519AE4_DAC0 __asm__("D_00519AE4");
 extern int strncmp_DAC0(char *, char *, int) __asm__("strncmp");
 extern char str_bigfile_buf_DAC0[] __asm__("str_bigfile_buf");
 extern int FILESYS_open_DAC0(char *, int, int, R_DAC0 *) __asm__("FILESYS_open");
@@ -1736,7 +1719,7 @@ extern char iFILE_addbigopencallback_DAC0[] __asm__("iFILE_addbigopencallback");
  * @return the operation handle
  */
 int FILESYS_addbig(char *name, int memFlags, int priority, int userData) {
-    Q_DAC0 *bigNode = D_00519AE4_DAC0;
+    Q_DAC0 *bigNode = (Q_DAC0*)gFileDevice.bigfilelist;
     C_DAC0 *fileOp = reserveop_DAC0();
     R_DAC0 *bigRec;
     fileOp->f = 9;
@@ -1790,8 +1773,8 @@ extern R_DC30 *reserveop_DC30(void) __asm__("reserveop");
 extern int FILESYS_close_DC30(char *, int, R_DC30 *) __asm__("FILESYS_close");
 extern void FILESYS_callbackop_DC30(int, void *) __asm__("FILESYS_callbackop");
 extern void iFILE_delbigclosecallback_DC30(int, int, int) __asm__("iFILE_delbigclosecallback");
-extern G_DC30 gFileDevice_DC30 __asm__("gFileDevice");
 
+extern G_DC30 gFileDevice_DC30 __asm__("gFileDevice");
 /**
  * Queues removing a BIG archive (type 10); returns the operation handle.
  *
@@ -1852,7 +1835,6 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_atomic);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void iFILESYS_ExecCommand(int);
-extern int gFileDevice_9AB0[] __asm__("gFileDevice");
 
 int FILESYS_atomic_DDF0(int (*arg0)(int, int), int arg1, int arg2, int arg3) __asm__("FILESYS_atomic");
 /**
@@ -1872,10 +1854,10 @@ int FILESYS_atomic_DDF0(int (*func)(int, int), int fileDevice, int priority, int
     int prevMinPriority;
     int temp_2;
 
-    prevMinPriority = gFileDevice_9AB0[2];
-    gFileDevice_9AB0[2] = priority;
+    prevMinPriority = gFileDevice.minpriority;
+    gFileDevice.minpriority = priority;
     temp_2 = func(priority, userData);
-    gFileDevice_9AB0[2] = prevMinPriority;
+    gFileDevice.minpriority = prevMinPriority;
     iFILESYS_ExecCommand(0);
     return temp_2;
 }
@@ -1885,7 +1867,6 @@ int FILESYS_atomic_DDF0(int (*func)(int, int), int fileDevice, int priority, int
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_setminpriority);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00519AB8_DE50[] __asm__("D_00519AB8");
 void iFILESYS_ExecCommand_DE50(int) __asm__("iFILESYS_ExecCommand");
 /**
  * Sets the file system's run limit (gFileDevice +0x8: queued operations run only while their priority is at most this)
@@ -1894,7 +1875,7 @@ void iFILESYS_ExecCommand_DE50(int) __asm__("iFILESYS_ExecCommand");
  * @param priorityLimit  the priority limit
  */
 void FILESYS_setminpriority(int priorityLimit) {
-    D_00519AB8_DE50[0] = priorityLimit;
+    gFileDevice.minpriority = priorityLimit;
     iFILESYS_ExecCommand_DE50(0);
 }
 #endif
@@ -1970,9 +1951,6 @@ INCLUDE_ASM("ealib/seg_2DCAE8", iFILESYS_ExecCommand);
 /* gFileDevice: the file system's command manager (FILESYS_initadr sets it up). Layout from every use in this unit;
    field names are their offsets. Several fields are also reached through their own splat symbols (declared
    below), which the functions that address them directly must keep using. */
-extern struct sAB0 gFileDevice;
-extern int D_00519AB8;                          /* gFileDevice.f08 */
-extern struct sAB0Lock D_00519AC4;
 extern void MUTEX_lock_FX(void *) __asm__("MUTEX_lock");
 extern void MUTEX_unlock_FX(void *) __asm__("MUTEX_unlock");
 extern char *strchr_FX(char *, int) __asm__("strchr");
@@ -1988,6 +1966,8 @@ extern void freehandle_FX(void *) __asm__("freehandle");
 extern void iFILESYS_CommandCompleteCallback_FX(int) __asm__("iFILESYS_CommandCompleteCallback");
 
 void iFILESYS_ExecCommand_impl(struct FILEOPERATION_def *c) __asm__("iFILESYS_ExecCommand");
+extern struct sAB0Lock D_00519AC4;
+extern struct sAB0 gFileDevice_DFA8 __asm__("gFileDevice");
 /**
  * Queues a file-system command and, when the device is idle, starts the next queued command.
  *
@@ -2020,23 +2000,23 @@ void iFILESYS_ExecCommand_impl(struct FILEOPERATION_def *fileOp) {
         if (prev != 0) {
             prev->next = fileOp;
         } else {
-            gFileDevice.f30 = fileOp;
+            gFileDevice_DFA8.f30 = fileOp;
         }
-        gFileDevice.f0C++;
+        gFileDevice_DFA8.f0C++;
     }
-    if (gFileDevice.f24 != 0 || gFileDevice.f10 != 0) {
-        MUTEX_unlock_FX(gFileDevice.f14);
+    if (gFileDevice_DFA8.f24 != 0 || gFileDevice_DFA8.f10 != 0) {
+        MUTEX_unlock_FX(gFileDevice_DFA8.f14);
         return;
     }
-    fileOp = gFileDevice.f30;
-    if (fileOp != 0 && fileOp->priority <= gFileDevice.f08) {
-        gFileDevice.f30 = fileOp->next;
-        gFileDevice.f0C--;
+    fileOp = gFileDevice_DFA8.f30;
+    if (fileOp != 0 && fileOp->priority <= gFileDevice_DFA8.f08) {
+        gFileDevice_DFA8.f30 = fileOp->next;
+        gFileDevice_DFA8.f0C--;
     } else {
         fileOp = 0;
     }
-    gFileDevice.f24 = fileOp;
-    MUTEX_unlock_FX(gFileDevice.f14);
+    gFileDevice_DFA8.f24 = fileOp;
+    MUTEX_unlock_FX(gFileDevice_DFA8.f14);
     if (fileOp == 0) return;
     if (fileOp->cancelled != 0) {
         iFILESYS_CommandCompleteCallback_FX(0);
@@ -2077,7 +2057,7 @@ void iFILESYS_ExecCommand_impl(struct FILEOPERATION_def *fileOp) {
             }
         }
         if (!found && (mode & 6)) {
-            for (n = gFileDevice.f34; n != 0 && !found; n = n->next) {
+            for (n = gFileDevice_DFA8.f34; n != 0 && !found; n = n->next) {
                 if ((mode & 4) && strcmp_FX(n->handle->name, path)) continue;
                 if (BIG_locateentryz_FX(((int)n->header), file, 0, &x, &off)) {
                     found = 1;
@@ -2138,10 +2118,10 @@ void iFILESYS_ExecCommand_impl(struct FILEOPERATION_def *fileOp) {
 INCLUDE_ASM("ealib/seg_2DCAE8", iFILESYS_CommandCompleteCallback);
 #ifdef SKIP_ASM
 struct G_IFS { char pad[0x10]; volatile int busy; char pad2[0x10]; struct FILEOPERATION_def *cur; };
-extern struct G_IFS gFileDevice_IFS __asm__("gFileDevice");
 extern void iFILESYS_ExecCommand_IFS(int) __asm__("iFILESYS_ExecCommand");
 
 void iFILESYS_CommandCompleteCallback_impl(int ok) __asm__("iFILESYS_CommandCompleteCallback");
+extern struct G_IFS gFileDevice_IFS __asm__("gFileDevice");
 /**
  * Finishes the current file-system command: sets its status, runs its callback and starts the next one.
  *
@@ -2184,7 +2164,6 @@ void func_003DE4C8(void) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_bypassqueuefileinfo);
 #ifdef SKIP_ASM
-extern struct FILEBIG_def *D_00519AE4_E4D0[] __asm__("D_00519AE4");
 extern char *strchr_E4D0(char *, int) __asm__("strchr");
 extern int FILEDEV_open_E4D0(char *, int, int *) __asm__("FILEDEV_open");
 extern int FILEDEV_getsize_E4D0(int) __asm__("FILEDEV_getsize");
@@ -2238,7 +2217,7 @@ int FILESYS_bypassqueuefileinfo(char *name, int flags, int *out) {
         FILEDEV_close_E4D0(handle);
     }
     if (!found && (mode & 6)) {
-        for (n = D_00519AE4_E4D0[0]; n != 0 && !found; n = n->next) {
+        for (n = (struct FILEBIG_def*)gFileDevice.bigfilelist; n != 0 && !found; n = n->next) {
             if ((mode & 4) && strcmp_E4D0(n->handle->name, path)) continue;
             if (BIG_locateentryz_E4D0(((int)n->header), file, 0, &x, &off)) {
                 found = 1;
@@ -2274,13 +2253,13 @@ struct FILEOPERATION_def *reserveop_impl(void) __asm__("reserveop");
 struct FILEOPERATION_def *reserveop_impl(void) {
     int i = 0;
     int nextId;
-    MUTEX_lock(gFileDevice.f14);
-    for (; i < gFileDevice.f00; i++) {
-        if (((struct sFsCmdId*)&gFileDevice.f28[i].op)->type == 0) {
-            ((struct sFsCmdId*)&gFileDevice.f28[i].op)->type = 1;
-            ((struct sFsCmdId*)&gFileDevice.f28[i].op)->idx = i;
+    MUTEX_lock(gFileDevice.mutex);
+    for (; i < gFileDevice.maxfileops; i++) {
+        if (((struct sFsCmdId*)&gFileDevice.oplist[i].op)->type == 0) {
+            ((struct sFsCmdId*)&gFileDevice.oplist[i].op)->type = 1;
+            ((struct sFsCmdId*)&gFileDevice.oplist[i].op)->idx = i;
             nextId = D_00450C0C_E670;
-            ((struct sFsCmdId*)&gFileDevice.f28[i].op)->id = nextId;
+            ((struct sFsCmdId*)&gFileDevice.oplist[i].op)->id = nextId;
             D_00450C0C_E670 = nextId + 1;
             if (nextId + 1 > 0xFFFFF) {
                 D_00450C0C_E670 = 1;
@@ -2288,12 +2267,12 @@ struct FILEOPERATION_def *reserveop_impl(void) {
             break;
         }
     }
-    MUTEX_unlock_E670(gFileDevice.f14);
-    if (i == gFileDevice.f00) {
+    MUTEX_unlock_E670(gFileDevice.mutex);
+    if (i == gFileDevice.maxfileops) {
         while (1) {
         }
     }
-    return &gFileDevice.f28[i];
+    return &gFileDevice.oplist[i];
 }
 #endif
 
@@ -2301,7 +2280,6 @@ struct FILEOPERATION_def *reserveop_impl(void) {
 INCLUDE_ASM("ealib/seg_2DCAE8", freeop);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00519AC4_9AC4[] __asm__("D_00519AC4");
 extern void MUTEX_unlock(int *);
 
 /**
@@ -2312,9 +2290,9 @@ extern void MUTEX_unlock(int *);
  * @param fop  the operation
  */
 void freeop(int fop) {
-    MUTEX_lock(D_00519AC4_9AC4);
+    MUTEX_lock(gFileDevice.mutex);
     MEM_fill(fop, 0, 0x30);
-    MUTEX_unlock(D_00519AC4_9AC4);
+    MUTEX_unlock(gFileDevice.mutex);
 }
 #endif
 
@@ -2323,10 +2301,8 @@ INCLUDE_ASM("ealib/seg_2DCAE8", reservehandle);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void MUTEX_unlock_E800(void *) __asm__("MUTEX_unlock");
-extern char D_00519AC4_E800[] __asm__("D_00519AC4");
 struct Slot_E800 { int used; char pad[0x10C]; };
 struct G_E800 { int f0; int count; char pad[0xC]; char mutex[0x18]; struct Slot_E800 *slots; };
-extern struct G_E800 gFileDevice_E800 __asm__("gFileDevice");
 
 struct Slot_E800 *reservehandle_impl(void) __asm__("reservehandle");
 /**
@@ -2336,19 +2312,19 @@ struct Slot_E800 *reservehandle_impl(void) __asm__("reservehandle");
  */
 struct Slot_E800 *reservehandle_impl(void) {
     int i;
-    MUTEX_lock(D_00519AC4_E800);
-    for (i = 0; i < gFileDevice_E800.count; i++) {
-        if (gFileDevice_E800.slots[i].used == 0) {
-            gFileDevice_E800.slots[i].used = 1;
+    MUTEX_lock(((char*)&gFileDevice.mutex[0]));
+    for (i = 0; i < gFileDevice.maxopen; i++) {
+        if (((struct Slot_E800*)gFileDevice.handlelist)[i].used == 0) {
+            ((struct Slot_E800*)gFileDevice.handlelist)[i].used = 1;
             break;
         }
     }
-    MUTEX_unlock_E800(gFileDevice_E800.mutex);
-    if (i == gFileDevice_E800.count) {
+    MUTEX_unlock_E800(((char*)&gFileDevice.mutex[0]));
+    if (i == gFileDevice.maxopen) {
         for (;;) {
         }
     }
-    return &gFileDevice_E800.slots[i];
+    return &((struct Slot_E800*)gFileDevice.handlelist)[i];
 }
 #endif
 
@@ -2356,7 +2332,6 @@ struct Slot_E800 *reservehandle_impl(void) {
 INCLUDE_ASM("ealib/seg_2DCAE8", freehandle);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00519AC4_9AC4[] __asm__("D_00519AC4");
 extern void MUTEX_unlock(int *);
 
 /**
@@ -2367,9 +2342,9 @@ extern void MUTEX_unlock(int *);
  * @param handle  the handle
  */
 void freehandle(int handle) {
-    MUTEX_lock(D_00519AC4_9AC4);
+    MUTEX_lock(gFileDevice.mutex);
     MEM_fill(handle, 0, 272);
-    MUTEX_unlock(D_00519AC4_9AC4);
+    MUTEX_unlock(gFileDevice.mutex);
 }
 #endif
 

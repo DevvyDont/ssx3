@@ -134,7 +134,7 @@ struct FILE_FILEDEVICE {
     FILEOPERATION_def* oplist;          // 0x28 [O]; [U] the operation records (reserveop hands one out)
     HANDLE_def* handlelist;             // 0x2C [O]; [U] the open-file records (reservehandle hands one out)
     FILEOPERATION_def* opqhead;         // 0x30 [O]; [U] the queue of pending operations
-    FILEBIG_def* bigfilelist;           // 0x34 [O]; [U] the mounted BIG archives
+    struct FILEBIG_def* bigfilelist;    // 0x34 [O]; [U] the mounted BIG archives
 };
 
 CHECK_OFFSET(FILE_FILEDEVICE, maxfileops, 0x00);
@@ -149,6 +149,8 @@ CHECK_OFFSET(FILE_FILEDEVICE, handlelist, 0x2C);
 CHECK_OFFSET(FILE_FILEDEVICE, opqhead, 0x30);
 CHECK_OFFSET(FILE_FILEDEVICE, bigfilelist, 0x34);
 CHECK_SIZE(FILE_FILEDEVICE, 0x38);
+
+extern struct FILE_FILEDEVICE gFileDevice; // 0x00519AB0 [O] (On Tour `FILE_FILEDEVICE gFileDevice`)
 
 
 // A mounted BIG archive, retail version (0x18 [U]: the records iFILE_addbigopencallback / iFILE_addbigreadcallback fill;
