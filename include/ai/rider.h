@@ -141,8 +141,8 @@ struct tIntersectInfo {
     int Face;                   // 0x60 [O]
     int Seg;                    // 0x64 [O]
     float T;                    // 0x68 [O]
-    float u;                    // 0x6C [O]; [U] cRider_SetNISGroundVectors (hit f6C -> unk_AAC)
-    float v;                    // 0x70 [O]; [U] cRider_SetNISGroundVectors (hit f70 -> unk_AB0)
+    float u;                    // 0x6C [O]; [U] cRider_SetNISGroundVectors (hit f6C -> PatchUV.x)
+    float v;                    // 0x70 [O]; [U] cRider_SetNISGroundVectors (hit f70 -> PatchUV.y)
 };
 
 // A collision response (On Tour struct tCollideInfo, size 0x40). [U] sInfo_5398 {pos, dir, normal, speed}
@@ -396,7 +396,7 @@ struct cRider {
     /* 0x4DC */ tPathEventNode PathEventsCur[12]; // [O] (+0x10EC, tPathEventNode[12]); [U] cRider_checkTrackPathEvents has the path's getEventsInRange fill up to 0xC entries here and stores the count at 0x59C (NumPathEventsCur = On Tour NumPathEventsCur); cRider_updateTrackPath copies count << 4 bytes
     /* 0x59C */ int NumPathEventsCur; // [O] NumPathEventsCur, PathEventsCur's count (max 12); [U] set by cRider_checkTrackPathEvents, cleared on reset (cRider_initAlways)
     /* 0x5A0 */ int ConsecutiveAirFrames; // cleared on reset (cRider_initAlways)
-    /* 0x5A4 */ int VerticalJump; // cleared on reset (cRider_initAlways)
+    /* 0x5A4 */ float VerticalJump; // cleared on reset (cRider_initAlways); [U] read with lwc1 (cRider_getVerticalJump)
     /* 0x5A8 */ int DidPop; // cleared on reset (cRider_initAlways)
     /* 0x5AC */ int RidingFlexRail; // cleared on reset (cRider_initAlways)
     /* 0x5B0 */ int DangerLevel;
@@ -421,10 +421,10 @@ struct cRider {
     /* 0x754 */ float mAudioEdging; // [P] getAudioEdging_0_to_1
     /* 0x758 */ float mAudioPressure; // [P] getAudioPressure_0_to_1
     /* 0x75C */ float mAudioSpeed; // [P] getAudioSpeed_0_to_1
-    /* 0x760 */ int unk_760; // sound state = cRider_getMotionState(rider), written when it changes (cSSXAudio_HandleAIGlide, cSSXAudio_HandleGlide)
-    /* 0x764 */ int unk_764; // written with the same value as 0x760 (cSSXAudio_BeginRiderSound)
-    /* 0x768 */ int unk_768; // sound id from cSSXAudio_Surface(self, rider) (cSSXAudio_HandleAIGlide, cSSXAudio_HandleGlide)
-    /* 0x76C */ int unk_76C; // like 0x768; set to 9 on one cSSXAudio_GetSurfaceProgramType result (cSSXAudio_HandleCarve)
+    /* 0x760 */ int LastMotionType[2]; // [O] (On Tour cRider, the same order); [U] [0] = cRider_getMotionState(rider) when it
+                                    //   changes (cSSXAudio_HandleAIGlide / HandleGlide), [1] written with it (cSSXAudio_BeginRiderSound)
+    /* 0x768 */ int LastSnowType[2]; // [O]; [U] [0] the surface sound id from cSSXAudio_Surface (HandleAIGlide / HandleGlide),
+                                    //   [1] HandleCarve's (9 on one cSSXAudio_GetSurfaceProgramType result)
     /* 0x770 */ float LastLandSpeed; // fed to curve D_00482D30 for the sound volume (cSSXAudio_Land)
     /* 0x774 */ int mWipeoutSlideHandle; // [P] GetWipeoutSlideHandle (bracketed +0x40)
     /* 0x778 */ int mWipeoutTumbleHandle; // [P] GetWipeoutTumbleHandle
@@ -474,8 +474,8 @@ struct cRider {
     /* 0xAA0 */ cRiderSphereTree* mSphereTree; // [P] getSphereTree (seen); [O] cRider::SphereTree (cRiderSphereTree*); [U] the motions set its sphMask (+0x28, kInAirSphereMask)
     /* 0xAA4 */ int unk_AA4; // shadow drawn this frame (cRider_RenderShadow)
     /* 0xAA8 */ void* mShadow; // [P] getShadow (seen); drawn by cRider_RenderShadow
-    /* 0xAAC */ float unk_AAC; // hit f6C (cRider_SetNISGroundVectors); the ctor copies 8 bytes here from t2vect_Zero
-    /* 0xAB0 */ float unk_AB0; // hit f70 (cRider_SetNISGroundVectors)
+    /* 0xAAC */ t2Vector PatchUV; // [O]; [U] cRider_getPatchUV returns its address; the hit's u / v (cRider_SetNISGroundVectors,
+                                 //   the wipeout motion); the ctor copies t2vect_Zero
     /* 0xAB4 */ cTrackPath* TrackPath; // [R] cRider_getTrackPath returns it; [O] cRider::TrackPath (On Tour: TrackPath,
                                      //     AIPath, then the two intersect infos, as here); [U] the lowest track path wins
     /* 0xAB8 */ cAIPath* AIPath;       // [R] cRider_getAIPath returns it; [O] cRider::AIPath (getAIPath -> cAIPath*);
@@ -611,10 +611,8 @@ CHECK_OFFSET(cRider, mAudioBraking, 0x750);
 CHECK_OFFSET(cRider, mAudioEdging, 0x754);
 CHECK_OFFSET(cRider, mAudioPressure, 0x758);
 CHECK_OFFSET(cRider, mAudioSpeed, 0x75C);
-CHECK_OFFSET(cRider, unk_760, 0x760);
-CHECK_OFFSET(cRider, unk_764, 0x764);
-CHECK_OFFSET(cRider, unk_768, 0x768);
-CHECK_OFFSET(cRider, unk_76C, 0x76C);
+CHECK_OFFSET(cRider, LastMotionType, 0x760);
+CHECK_OFFSET(cRider, LastSnowType, 0x768);
 CHECK_OFFSET(cRider, LastLandSpeed, 0x770);
 CHECK_OFFSET(cRider, mWipeoutSlideHandle, 0x774);
 CHECK_OFFSET(cRider, mWipeoutTumbleHandle, 0x778);
@@ -655,8 +653,7 @@ CHECK_OFFSET(cRider, CollideInfo, 0xA60);
 CHECK_OFFSET(cRider, mSphereTree, 0xAA0);
 CHECK_OFFSET(cRider, unk_AA4, 0xAA4);
 CHECK_OFFSET(cRider, mShadow, 0xAA8);
-CHECK_OFFSET(cRider, unk_AAC, 0xAAC);
-CHECK_OFFSET(cRider, unk_AB0, 0xAB0);
+CHECK_OFFSET(cRider, PatchUV, 0xAAC);
 CHECK_OFFSET(cRider, TrackPath, 0xAB4);
 CHECK_OFFSET(cRider, AIPath, 0xAB8);
 CHECK_OFFSET(cRider, mAIPathHint, 0xABC);

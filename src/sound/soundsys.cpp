@@ -1843,19 +1843,19 @@ extern "C" void cSSXAudio_HandleGlide(cSSXAudio* self, cBankMonitorInstance* obj
     int bend;
     cRider* rider = (cRider*)obj->mPtr;
     int st = cRider_getMotionState(rider);
-    if (st != rider->unk_760) {
-        rider->unk_760 = st;
+    if (st != rider->LastMotionType[0]) {
+        rider->LastMotionType[0] = st;
     }
     volume = 0;
     bend = 0x40;
     if (st == 1 || st == 5) {
-        if (cSSXAudio_GetSurfaceProgramType(self, rider->unk_768, rider) == 2) {
-            rider->unk_768 = 9;
+        if (cSSXAudio_GetSurfaceProgramType(self, rider->LastSnowType[0], rider) == 2) {
+            rider->LastSnowType[0] = 9;
         }
     } else {
         int id = cSSXAudio_Surface(self, (int)rider);
-        if (id != rider->unk_768) {
-            rider->unk_768 = id;
+        if (id != rider->LastSnowType[0]) {
+            rider->LastSnowType[0] = id;
             cBankMonitorInstance_Reset(obj);
             cSSXAudio_BeginGlide(self, (int)rider, id);
         } else {
@@ -1898,15 +1898,15 @@ extern "C" void cSSXAudio_HandleAIGlide(cSSXAudio* self, cBankMonitorInstance* o
     int bend;
     cRider* rider = (cRider*)obj->mPtr;
     int st = cRider_getMotionState(rider);
-    if (st != rider->unk_760) {
-        rider->unk_760 = st;
+    if (st != rider->LastMotionType[0]) {
+        rider->LastMotionType[0] = st;
     }
     volume = 0;
     bend = 0x40;
     if (st == 0 || st == 4) {
         int id = cSSXAudio_Surface(self, (int)rider);
-        if (id != rider->unk_768) {
-            rider->unk_768 = id;
+        if (id != rider->LastSnowType[0]) {
+            rider->LastSnowType[0] = id;
             cBankMonitorInstance_Reset(obj);
             cSSXAudio_BeginGlide(self, (int)rider, cSSXAudio_Surface(self, (int)rider));
         }
@@ -1951,13 +1951,13 @@ extern "C" void cSSXAudio_HandleCarve(cSSXAudio* self, cBankMonitorInstance* obj
     volume = 0;
     int st = cRider_getMotionState(rider);
     if (st == 1 || st == 5) {
-        if (cSSXAudio_GetSurfaceProgramType(self, rider->unk_76C, rider) == 2) {
-            rider->unk_76C = 9;
+        if (cSSXAudio_GetSurfaceProgramType(self, rider->LastSnowType[1], rider) == 2) {
+            rider->LastSnowType[1] = 9;
         }
     } else {
         int id = cSSXAudio_Surface(self, (int)rider);
-        if (id != rider->unk_76C) {
-            rider->unk_76C = id;
+        if (id != rider->LastSnowType[1]) {
+            rider->LastSnowType[1] = id;
             cBankMonitorInstance_Reset(obj);
             cSSXAudio_BeginCarve(self, (int)rider, cSSXAudio_Surface(self, (int)rider));
         } else {

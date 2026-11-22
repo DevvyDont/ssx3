@@ -77,7 +77,7 @@ struct cAnimModel {
     /* 0x030 */ t4Matrix* SkelMatrices;          // numBones bone matrices, row 3 = position (rider bone lookups); translated with the model
     /* 0x034 */ t4Matrix* SkelMatricesScaled;          // numBones, translated with the model (cAnimModel_applyOffset)
     /* 0x038 */ t4Matrix* InvDefaultMatrices;          // numBones; palette[i] = SkelMatrices[i] or SkelMatricesScaled[i] times this (cAnimModel_rendershadow, cAnimModel_render)
-    /* 0x03C */ int MorphChannels;
+    /* 0x03C */ float* MorphChannels; // [O] float*; [R] cAnimModel_compile allocates it ("MorphChannels")
     /* 0x040 */ sAnimModelLodInfo lodInfo[4];
     /* 0x060 */ int NumTextureFiles;        // [O] cAnimModel::NumTextureFiles; [R] cAnimModel_init zeroes it (view
                                             //     cAnimModel_init_sPool field_0x60); [U] cAnimModel_addTextureFile appends at

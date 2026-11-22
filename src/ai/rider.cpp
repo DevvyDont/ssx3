@@ -112,7 +112,7 @@ extern "C" void* cRider_cRider_impl(cRider* self)
     self->mSphereTree = 0;
     self->InTunnel = 0;
     self->mGroundPolyId = none;
-    *(t2Vector*)&self->unk_AAC = t2vect_Zero[0];
+    self->PatchUV = t2vect_Zero[0];
     self->mTrackPathHint = (tPathIntersectInfo*)cMemMan_alloc(0x20, str_Track_path_intersect_info, 0, 0);
     self->mAIPathHint = (tPathIntersectInfo*)cMemMan_alloc(0x20, str_AI_path_intersect_info, 0, 0);
     cOverlapList* aux = new (str_OverlapList, 0, 0) cOverlapList;
@@ -5860,7 +5860,7 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* p) __asm__("
  * The probe base is @p pRiderPos moved along mGroundSide by mAnimModel->unk_140.x * mSlewed[0].cur * 45; a line from 100 below
  * to 200 above it (along mGroundNormal) is built with cWorldLine_cWorldLine and intersected with the terrain through
  * mOverlapList (cOverlapList_terrainIntersect1). The speed is the length of the virtual getVelocity, and LastGroundNormal keeps the previous
- * mGroundNormal. A hit object sets mGroundPolyId (object +0x150), unk_AAC / unk_AB0 (the hit's +0x6C / +0x70) and
+ * mGroundNormal. A hit object sets mGroundPolyId (object +0x150), PatchUV (the hit's +0x6C / +0x70) and
  * SurfaceFlags (the object's half-word +0xA); otherwise mGroundPolyId becomes -1.
  *
  * On a miss (negative distance): unk_B00 = 0, mGroundNormal = the Z axis, GroundVelocity = zero, mSurfaceType and the four
@@ -5890,8 +5890,8 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
     *(&self->LastGroundNormal) = *(&self->mGroundNormal);
     if (hitDist > 0.0f && ((char*)hit.Patch) != 0) {
         self->mGroundPolyId = *(int*)(((char*)hit.Patch) + 0x150);
-        self->unk_AAC = hit.u;
-        self->unk_AB0 = hit.v;
+        self->PatchUV.x = hit.u;
+        self->PatchUV.y = hit.v;
         self->SurfaceFlags = *(unsigned short*)(((char*)hit.Patch) + 0xA);
     } else {
         *(unsigned int*)&self->mGroundPolyId = 0xFFFFFFFF;

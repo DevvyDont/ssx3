@@ -1814,7 +1814,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getVerticalJump__FPv);
 float cRiderCameraTarget_getVerticalJump(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return *(float*)&self->Rider->VerticalJump;
+    return self->Rider->VerticalJump;
 }
 #endif
 

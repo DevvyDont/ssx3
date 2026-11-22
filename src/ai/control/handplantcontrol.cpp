@@ -5642,7 +5642,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getVerticalJump);
  * @return the float at +0x5A4
  */
 extern "C" float cRider_getVerticalJump(cRider* rider) {
-    return *(float*)&rider->VerticalJump;
+    return rider->VerticalJump;
 }
 #endif
 //100%
@@ -6058,7 +6058,7 @@ extern "C" int cRider_isOnHalfPipeCourse(cRider* rider) {
 INCLUDE_ASM("ai/control/handplantcontrol", cRider_getPatchUV);
 #ifdef SKIP_ASM
 /**
- * Returns the address of the rider's ground patch UV pair (+0xAAC, unk_AAC / unk_AB0).
+ * Returns the address of the rider's ground patch UV pair (+0xAAC, PatchUV).
  *
  * @param rider  the cRider
  * @return rider + 0xAAC

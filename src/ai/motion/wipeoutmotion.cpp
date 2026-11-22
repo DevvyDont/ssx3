@@ -1620,7 +1620,7 @@ struct sVEntry_138960 { short delta; short index; void (*fn)(void*, void*); };
  *
  * Builds a capsule (cWorldLine_cWorldLine, radius 0.575) from mPosition - 200 x @p dir to mPosition + 200 x @p dir and tests it
  * against the rider's mOverlapList with mLineHint (cOverlapList_terrainIntersect1). On a hit with a patch object it stores the patch's
- * resource id (+0x150) in mGroundPolyId, the hit's u/v in unk_AAC / unk_AB0 and the patch's flags (+0xA) in SurfaceFlags
+ * resource id (+0x150) in mGroundPolyId, the hit's u/v in PatchUV and the patch's flags (+0xA) in SurfaceFlags
  * (else mGroundPolyId = -1), and calls the hit object's owner's virtual slot 42 with the hit.
  *
  * @param hit  receives the intersection
@@ -1641,8 +1641,8 @@ extern "C" float cWipeoutMotion_intersectGround(cWipeoutMotion* self, tIntersect
         if (obj)
         {
             self->mRider->mGroundPolyId = *(int*)(obj + 0x150);
-            self->mRider->unk_AAC = hit->u;
-            self->mRider->unk_AB0 = hit->v;
+            self->mRider->PatchUV.x = hit->u;
+            self->mRider->PatchUV.y = hit->v;
             self->mRider->SurfaceFlags = *(unsigned short*)((char*)hit->Patch + 0xA);
         }
         else
