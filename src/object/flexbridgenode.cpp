@@ -12,6 +12,7 @@
 #include "object/flexrailnode.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
+#include "replay/bxreplayframe.h"
 
 //100%
 INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_setupGrid);
@@ -1183,12 +1184,11 @@ extern "C" void cSpring_writeToReplayFrame(void* p, void* stream);
  *
  * @param stream  the replay frame stream to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cFlexBridgeNode_writeToReplayFrame(cFlexBridgeNode* self, void* stream)
+extern "C" void cFlexBridgeNode_writeToReplayFrame(cFlexBridgeNode* self, cBxReplayFrame* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     cSpring_writeToReplayFrame((char*)&self->Mesh, stream);
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[1].fn(vthis(stream, vt[1]), (char*)&self->BottomLeftOffset, 0x30);
+    stream->write((const char*)&self->BottomLeftOffset, 0x30);
 }
 #endif
 
@@ -1797,11 +1797,10 @@ extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cFlexRailNode_writeToReplayFrame(cFlexRailNode* self, void* stream)
+extern "C" void cFlexRailNode_writeToReplayFrame(cFlexRailNode* self, cBxReplayFrame* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[1].fn(vthis(stream, vt[1]), (char*)&self->NumNodes, 0x30);
+    stream->write((const char*)&self->NumNodes, 0x30);
 }
 #endif
 

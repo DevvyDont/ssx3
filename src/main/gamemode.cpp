@@ -9,6 +9,7 @@
 #include "main/ssxapp.h"
 #include "ai/rider.h"
 #include "ai/ai.h"
+#include "replay/bxreplayframe.h"
 
 //100%
 INCLUDE_ASM("main/gamemode", cGameModeMan_getGM);
@@ -1239,12 +1240,6 @@ extern "C" int cGMBigAirHandler_getHeatScore(sScoreTable239CE0* self, int col, i
 INCLUDE_ASM("main/gamemode", cGMBigAirHandler_writeToReplayFrame);
 #ifdef SKIP_ASM
 // Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
-class cGameModeStream {
-public:
-    virtual void write(void* buf, int size);
-    virtual void read(void* buf, int size);
-};
-
 /**
  * Saves the scored event handler's 160-byte table (+0x4) to a replay frame with the stream's write (its first virtual).
  *
@@ -1252,7 +1247,7 @@ public:
  *
  * @param stream  the replay stream
  */
-extern "C" void cGMBigAirHandler_writeToReplayFrame(void* self, cGameModeStream* stream)
+extern "C" void cGMBigAirHandler_writeToReplayFrame(void* self, cBxReplayFrame* stream)
 {
     stream->write((char*)self + 0x4, 160);
 }
@@ -1270,7 +1265,7 @@ INCLUDE_ASM("main/gamemode", cGMBigAirHandler_readFromReplayFrame);
  * @param stream  the replay stream
  */
 // Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
-extern "C" void cGMBigAirHandler_readFromReplayFrame(void* self, cGameModeStream* stream)
+extern "C" void cGMBigAirHandler_readFromReplayFrame(void* self, cBxReplayFrame* stream)
 {
     stream->read((char*)self + 0x4, 160);
 }
@@ -1978,9 +1973,9 @@ INCLUDE_ASM("main/gamemode", cGMRaceHandler_writeToReplayFrame);
  * @param stream  the replay stream
  */
 // Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
-extern "C" void cGMRaceHandler_writeToReplayFrame(void* self, cGameModeStream* stream)
+extern "C" void cGMRaceHandler_writeToReplayFrame(void* self, cBxReplayFrame* stream)
 {
-    stream->write(self, 208);
+    stream->write((const char*)self, 208);
 }
 #endif
 
@@ -1995,9 +1990,9 @@ INCLUDE_ASM("main/gamemode", cGMRaceHandler_readFromReplayFrame);
  * @param stream  the replay stream
  */
 // Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
-extern "C" void cGMRaceHandler_readFromReplayFrame(void* self, cGameModeStream* stream)
+extern "C" void cGMRaceHandler_readFromReplayFrame(void* self, cBxReplayFrame* stream)
 {
-    stream->read(self, 208);
+    stream->read((char*)self, 208);
 }
 #endif
 
@@ -2188,9 +2183,9 @@ INCLUDE_ASM("main/gamemode", cGMMPRaceHandler_writeToReplayFrame);
  * @param stream  the replay stream
  */
 // Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
-extern "C" void cGMMPRaceHandler_writeToReplayFrame(void* self, cGameModeStream* stream)
+extern "C" void cGMMPRaceHandler_writeToReplayFrame(void* self, cBxReplayFrame* stream)
 {
-    stream->write(self, 44);
+    stream->write((const char*)self, 44);
 }
 #endif
 
@@ -2206,9 +2201,9 @@ INCLUDE_ASM("main/gamemode", cGMMPRaceHandler_readFromReplayFrame);
  * @param stream  the replay stream
  */
 // Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
-extern "C" void cGMMPRaceHandler_readFromReplayFrame(void* self, cGameModeStream* stream)
+extern "C" void cGMMPRaceHandler_readFromReplayFrame(void* self, cBxReplayFrame* stream)
 {
-    stream->read(self, 44);
+    stream->read((char*)self, 44);
 }
 #endif
 

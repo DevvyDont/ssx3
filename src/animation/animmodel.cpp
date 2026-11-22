@@ -5,6 +5,7 @@
 #include "animation/adfdatasource.h"
 #include "render/ps2graphicsman.h"
 #include "animation/animmodel.h"
+#include "replay/bxreplayframe.h"
 
 //100%
 INCLUDE_ASM("animation/animmodel", cAnimModel_addModelPartLOD);
@@ -1086,9 +1087,9 @@ public:
  *
  * @param data  the replay frame stream (On Tour: cBxReplayFrame*)
  */
-extern "C" void cAnimModel_writeToReplayFrame(cAnimModel* self, cAmStream* data)
+extern "C" void cAnimModel_writeToReplayFrame(cAnimModel* self, cBxReplayFrame* data)
 {
-    data->read(self->bones, self->numBones << 5);
+    data->write((const char*)self->bones, self->numBones << 5);
 }
 #endif
 
@@ -1103,9 +1104,9 @@ INCLUDE_ASM("animation/animmodel", cAnimModel_readFromReplayFrame);
  *
  * @param data  the replay frame stream (On Tour: cBxReplayFrame*)
  */
-extern "C" void cAnimModel_readFromReplayFrame(cAnimModel* self, cAmStream* data)
+extern "C" void cAnimModel_readFromReplayFrame(cAnimModel* self, cBxReplayFrame* data)
 {
-    data->write(self->bones, self->numBones << 5);
+    data->read((char*)self->bones, self->numBones << 5);
 }
 #endif
 

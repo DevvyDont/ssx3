@@ -9,6 +9,7 @@
 #include "object/effectmodifier.h"
 #include "render/ps2graphicsman.h"
 #include "object/effectlink.h"
+#include "replay/bxreplayframe.h"
 
 struct sEffectLinkView {  // this unit's view of cEffectLink (object/effectlink.h); typed members schedule differently
     sEffectLinkView* next; // 0x0
@@ -406,16 +407,13 @@ extern "C" void cStaticEmitter_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cParticleModifier_writeToReplayFrame(cParticleModifier* self, void* stream)
+extern "C" void cParticleModifier_writeToReplayFrame(cParticleModifier* self, cBxReplayFrame* stream)
 {
     cEffectModifier_writeToReplayFrame((cEffectModifier*)self, stream);
-    sEffectLinkVEntry5BF0* writeEntry = &(*(sEffectLinkVEntry5BF0**)stream)[1];
-    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->Complete, 4);
+    stream->write((const char*)&self->Complete, 4);
     if (self->Complete == 0) {
-        writeEntry = &(*(sEffectLinkVEntry5BF0**)stream)[1];
-        writeEntry->fn(vthis(stream, *writeEntry), self->ParticleData, 216);
-        writeEntry = &(*(sEffectLinkVEntry5BF0**)stream)[1];
-        writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->Transform, 0x40);
+        stream->write((const char*)self->ParticleData, 216);
+        stream->write((const char*)&self->Transform, 0x40);
         cStaticEmitter_writeToReplayFrame((char*)&self->Emitter, stream);
     }
 }
@@ -710,14 +708,12 @@ extern "C" void cBaseClass_DynamicEmitter_writeToReplayFrame(void* self, void* s
  *
  * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cDynamicParticleModifier_writeToReplayFrame(cDynamicParticleModifier* self, void* stream)
+extern "C" void cDynamicParticleModifier_writeToReplayFrame(cDynamicParticleModifier* self, cBxReplayFrame* stream)
 {
     cEffectModifier_writeToReplayFrame((cEffectModifier*)self, stream);
-    sVEntry<void(void*, void*, int)>* writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->Mesh, 80);
+    stream->write((const char*)&self->Mesh, 80);
     if (self->Complete == 0) {
-        writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-        writeEntry->fn(vthis(stream, *writeEntry), self->ParticleData, 216);
+        stream->write((const char*)self->ParticleData, 216);
         cBaseClass_DynamicEmitter_writeToReplayFrame((char*)&self->Emitter, stream);
     }
 }
@@ -883,11 +879,10 @@ extern "C" void cEffectModifier_writeToReplayFrame(cEffectModifier* self, void* 
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cHaloModifier_writeToReplayFrame(cHaloModifier* self, void* stream)
+extern "C" void cHaloModifier_writeToReplayFrame(cHaloModifier* self, cBxReplayFrame* stream)
 {
     cEffectModifier_writeToReplayFrame((cEffectModifier*)self, stream);
-    sEffectLinkVEntry* vt = *(sEffectLinkVEntry**)stream;
-    vt[1].fn(vthis(stream, vt[1]), (char*)&self->Color, 0x30);
+    stream->write((const char*)&self->Color, 0x30);
 }
 #endif
 

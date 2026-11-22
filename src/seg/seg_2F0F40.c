@@ -642,7 +642,7 @@ int func_003F0B50(struct BuddyApiRefT* buddyRef) {
         func_003F0610_0B50((int*)buddyRef, 6);
     }
     func_003F0610_0B50((int*)buddyRef, 0);
-    ((int*)buddyRef)[0x4C4 / 4] = 0;
+    buddyRef->mpConnectProc = 0;
     func_003F0BE0(buddyRef);
     return 0;
 }

@@ -8,6 +8,7 @@
 #include "ai/ridermetrix.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "replay/bxreplayframe.h"
 
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_linkToRider);
@@ -127,10 +128,9 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_writeToReplayFrame);
  *
  * @param obj  the replay frame
  */
-extern "C" void cRiderMetrix_writeToReplayFrame(cRiderMetrix* self, void* obj)
+extern "C" void cRiderMetrix_writeToReplayFrame(cRiderMetrix* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn(vthis(obj, vt[1]), self, 428);
+    obj->write((const char*)self, 428);
 }
 #endif
 
@@ -145,10 +145,9 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_readFromReplayFrame);
  *
  * @param obj  the replay frame
  */
-extern "C" void cRiderMetrix_readFromReplayFrame(cRiderMetrix* self, void* obj)
+extern "C" void cRiderMetrix_readFromReplayFrame(cRiderMetrix* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn(vthis(obj, vt[2]), self, 428);
+    obj->read((char*)self, 428);
 }
 #endif
 

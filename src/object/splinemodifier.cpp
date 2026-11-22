@@ -999,6 +999,7 @@ INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_setupOverlapSystem);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
+#include "replay/bxreplayframe.h"
 
 // An axis-aligned bounding box (min and max corners).
 struct sBoundBox { t4Vector min, max; };
@@ -1863,16 +1864,6 @@ extern "C" void cMultiSplineModifier_render(cMultiSplineModifier* self)
 //100%
 INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
-class cStream0035B5A8 {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void write(void* buf, int size);
-    virtual void v02(void* buf, int size);
-    virtual void v03();
-    virtual void v04();
-    virtual void writeReplayInstance(void* obj);
-};
-
 class cStream00359F30;
 extern "C" void cSpline_writeToReplayFrame(void* self, cStream00359F30* stream);
 
@@ -1885,13 +1876,13 @@ extern "C" void cSpline_writeToReplayFrame(void* self, cStream00359F30* stream);
  *
  * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cMultiSplineModifier_writeToReplayFrame(cMultiSplineModifier* self, cStream0035B5A8* stream)
+extern "C" void cMultiSplineModifier_writeToReplayFrame(cMultiSplineModifier* self, cBxReplayFrame* stream)
 {
-    stream->write((char*)&self->NumModels, 52);
+    stream->write((const char*)&self->NumModels, 52);
     cSpline_writeToReplayFrame((char*)&self->Spline, (cStream00359F30*)stream);
-    stream->writeReplayInstance(self->Instance);
+    stream->writeReplayInstance((const tInstanceRecord*)self->Instance);
     for (int i = 0; i < self->NumModels; i++) {
-        stream->write(&self->NodeInst[i]->m_RID, 4);
+        stream->write((const char*)&self->NodeInst[i]->m_RID, 4);
     }
 }
 #endif

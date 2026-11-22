@@ -3,6 +3,7 @@
 #include "be/beintnewrace.h"
 #include "be/beintaggression.h"
 #include "replay/frameptr.h"
+#include "replay/bxreplayframe.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BEAggressionInt[];
@@ -313,19 +314,17 @@ struct sStreamVE_1560A0 { short delta; short index; void (*fn)(void*, void*, int
  *
  * @param stream  the replay frame stream
  */
-extern "C" void cBEAggressionInterface_writeToReplayFrame(cBEAggressionInterface* self, cReplayFramePtr* stream)
+extern "C" void cBEAggressionInterface_writeToReplayFrame(cBEAggressionInterface* self, cBxReplayFrame* stream)
 {
     int n = D_005305E0[0];
-    sStreamVE_1560A0* vt = *(sStreamVE_1560A0**)stream;
-    vt[1].fn(vthis(stream, vt[1]), &n, 4);
+    stream->write((const char*)&n, 4);
     for (int i = 0; i < n; i++)
     {
         int profile = cBELibrary_getProfileIndex(i);
         for (int j = 0; j < 10; j++)
         {
             int characterId = cBELibrary_getCharacterID(i);
-            sStreamVE_1560A0* vt2 = *(sStreamVE_1560A0**)stream;
-            vt2[1].fn(vthis(stream, vt2[1]), &cBELibrary_profileLib[profile][characterId].aggression[j], 3);
+            stream->write((const char*)&cBELibrary_profileLib[profile][characterId].aggression[j], 3);
         }
     }
 }
@@ -346,19 +345,17 @@ int cBELibrary_getCharacterID(int);
  *
  * @param stream  the replay frame stream
  */
-extern "C" void cBEAggressionInterface_readFromReplayFrame(cBEAggressionInterface* self, cReplayFramePtr* stream)
+extern "C" void cBEAggressionInterface_readFromReplayFrame(cBEAggressionInterface* self, cBxReplayFrame* stream)
 {
     int n;
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[2].fn(vthis(stream, vt[2]), &n, 4);
+    stream->read((char*)&n, 4);
     for (int i = 0; i < n; i++)
     {
         int profile = cBELibrary_getProfileIndex(i);
         for (int j = 0; j < 10; j++)
         {
             int charId = cBELibrary_getCharacterID(i);
-            sVEntry<void(void*, void*, int)>* vt2 = *(sVEntry<void(void*, void*, int)>**)stream;
-            vt2[2].fn(vthis(stream, vt2[2]), &cBELibrary_profileLib[profile][charId].aggression[j], 3);
+            stream->read((char*)&cBELibrary_profileLib[profile][charId].aggression[j], 3);
         }
     }
 }

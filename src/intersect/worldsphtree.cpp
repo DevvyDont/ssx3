@@ -45,36 +45,36 @@ struct sSphV4 { float x, y, z, w; } __attribute__((aligned(16)));
  * @param isLow  nonzero for a low-detail wrapper: +0x0 is then 0 and cWorldSphTree_GetIdealParam() returns -1
  * @return @p self
  */
-extern "C" void* cWorldSphTree_cWorldSphTree(void* self, bxSphereTree* ast, int isLow)
+extern "C" void* cWorldSphTree_cWorldSphTree(cWorldSphTree* self, bxSphereTree* ast, int isLow)
 {
-    *(void***)((char*)self + 0x50) = cWorldSphTree_vtbl;
-    *(int*)((char*)self + 0x8) = 0;
-    *(int*)((char*)self + 0x4) = 0;
+    self->mVtbl = cWorldSphTree_vtbl;
+    self->useRejectNormal = 0;
+    self->isTransformed = 0;
     if (isLow != 0) {
         *(int*)self = 0;
     } else {
         *(int*)self = 1;
     }
-    *(void**)((char*)self + 0x64) = ((void*)ast);
-    *(void**)((char*)self + 0x60) = ((void*)ast);
+    self->origSt = (bxSphereTree*)((void*)ast);
+    self->st = (bxSphereTree*)((void*)ast);
     sSphV4 center = *(sSphV4*)&ast->transCenter;
     float radius = SphereTree_GetRadius(ast);
     sSphV4 corner;
-    *(sSphV4*)((char*)self + 0x40) = center;
+    *(sSphV4*)&self->boxCenter = center;
     corner.x = center.x + radius;
     corner.y = center.y + radius;
     corner.z = center.z + radius;
     corner.w = 1.0f;
-    *(sSphV4*)((char*)self + 0x20) = corner;
+    *(sSphV4*)&self->boxMax = corner;
     corner.x = center.x - radius;
     corner.y = center.y - radius;
     corner.z = center.z - radius;
     corner.w = 1.0f;
-    *(sSphV4*)((char*)self + 0x30) = corner;
+    *(sSphV4*)&self->boxMin = corner;
     void* localTree = cMemMan_alloc(320, str_SphereTree, 0, 0);
     SphereTree_SphereTree(localTree);
-    *(void**)((char*)self + 0x68) = localTree;
-    return self;
+    self->localTree = (bxSphereTree*)localTree;
+    return ((void*)self);
 }
 #endif
 
@@ -6587,6 +6587,7 @@ INCLUDE_ASM("intersect/worldsphtree", cBoostModifier_applyBoost);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
+#include "replay/bxreplayframe.h"
 
 // Interface of a moving object (getVelocity / applyBoost at slots 2 and 4).
 class cWsMover {
@@ -6693,17 +6694,6 @@ extern "C" void cBoostModifier_signal(cBoostModifier* self, int signal)
 INCLUDE_ASM("intersect/worldsphtree", cBoostModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
 extern "C" void cPhysicsModifier_writeToReplayFrame(void* self, void* stream);
-struct sVEntry_cBoostModifier_writeToReplayFrame {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
-struct sVEntry1_cBoostModifier_writeToReplayFrame {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-
 /**
  * Writes the boost modifier to a replay frame: the physics-modifier part, the 0x30-byte boost state and the
  * instance.
@@ -6713,13 +6703,11 @@ struct sVEntry1_cBoostModifier_writeToReplayFrame {
  *
  * @param stream  the replay frame to write to (On Tour cBxReplayFrame* data)
  */
-extern "C" void cBoostModifier_writeToReplayFrame(cBoostModifier* self, void* stream)
+extern "C" void cBoostModifier_writeToReplayFrame(cBoostModifier* self, cBxReplayFrame* stream)
 {
     cPhysicsModifier_writeToReplayFrame(self, stream);
-    sVEntry_cBoostModifier_writeToReplayFrame* vt = *(sVEntry_cBoostModifier_writeToReplayFrame**)stream;
-    vt[1].fn(vthis(stream, vt[1]), (char*)&self->Boost, 0x30);
-    sVEntry1_cBoostModifier_writeToReplayFrame* vt1 = *(sVEntry1_cBoostModifier_writeToReplayFrame**)stream;
-    vt1[5].fn(vthis(stream, vt1[5]), (int)self->Instance);
+    stream->write((const char*)&self->Boost, 0x30);
+    stream->writeReplayInstance((const tInstanceRecord*)self->Instance);
 }
 #endif
 

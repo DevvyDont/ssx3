@@ -13,6 +13,7 @@
 #include "object/debouncenode.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
+#include "replay/bxreplayframe.h"
 
 //100%
 INCLUDE_ASM("object/debouncenode", cDebounceNode_cDebounceNode);
@@ -194,13 +195,11 @@ extern "C" void cMoveNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cDebounceNode_writeToReplayFrame(cDebounceNode* self, void* stream)
+extern "C" void cDebounceNode_writeToReplayFrame(cDebounceNode* self, cBxReplayFrame* stream)
 {
     cMoveNode_writeToReplayFrame(self, stream);
-    sDebounceVEntry2FA8* writeEntry = &(*(sDebounceVEntry2FA8**)stream)[1];
-    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->Life, 4);
-    writeEntry = &(*(sDebounceVEntry2FA8**)stream)[1];
-    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->Type, 4);
+    stream->write((const char*)&self->Life, 4);
+    stream->write((const char*)&self->Type, 4);
 }
 #endif
 
@@ -738,11 +737,10 @@ extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cConveyorNode_writeToReplayFrame(cConveyorNode* self, void* stream)
+extern "C" void cConveyorNode_writeToReplayFrame(cConveyorNode* self, cBxReplayFrame* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
-    sDebounceVEntry* vt = *(sDebounceVEntry**)stream;
-    vt[1].fn(vthis(stream, vt[1]), (char*)&self->Vel, 44);
+    stream->write((const char*)&self->Vel, 44);
 }
 #endif
 
@@ -921,11 +919,10 @@ extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cCounterNode_writeToReplayFrame(cCounterNode* self, void* stream)
+extern "C" void cCounterNode_writeToReplayFrame(cCounterNode* self, cBxReplayFrame* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
-    sDebounceVEntryA18* vt = *(sDebounceVEntryA18**)stream;
-    vt[1].fn(vthis(stream, vt[1]), (char*)&self->Count, 0x8);
+    stream->write((const char*)&self->Count, 0x8);
 }
 #endif
 

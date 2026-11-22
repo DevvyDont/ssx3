@@ -4,6 +4,7 @@
 #include "vtable.h"
 #include "animation/mdfarchive.h"
 #include "animation/animsequencer.h"
+#include "replay/bxreplayframe.h"
 
 
 //100%
@@ -991,11 +992,10 @@ struct sSeqNode_314880
  *
  * @param stream  the input stream
  */
-extern "C" void cAnimSequencer_readFromReplayFrame(cAnimSequencer* self, void* stream)
+extern "C" void cAnimSequencer_readFromReplayFrame(cAnimSequencer* self, cBxReplayFrame* stream)
 {
     int n;
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[2].fn(vthis(stream, vt[2]), &n, 4);
+    stream->read((char*)&n, 4);
     *(int*)self = 0;
     for (int i = 0; i < n; i++)
     {

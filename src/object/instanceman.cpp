@@ -10,6 +10,7 @@
 #include "object/meshanimnode.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
+#include "replay/bxreplayframe.h"
 
 extern "C" void MEM_copy(void* dst, void* src, int size);
 
@@ -172,8 +173,8 @@ public:
  * @param src  the animation frame
  * @param sink  replay stream to write to
  */
-extern "C" void cAnimFrame_writeToReplayFrame(cAnimFrame* src, cInstSink *sink) {
-    sink->write(src, 0x40);
+extern "C" void cAnimFrame_writeToReplayFrame(cAnimFrame* src, cBxReplayFrame* sink) {
+    sink->write((const char*)src, 0x40);
 }
 #endif
 //100%
@@ -185,8 +186,8 @@ INCLUDE_ASM("object/instanceman", cAnimFrame_readFromReplayFrame);
  * @param src  the animation frame
  * @param sink  replay stream to read from
  */
-extern "C" void cAnimFrame_readFromReplayFrame(cAnimFrame* src, cInstSink *sink) {
-    sink->read(src, 0x40);
+extern "C" void cAnimFrame_readFromReplayFrame(cAnimFrame* src, cBxReplayFrame* sink) {
+    sink->read((char*)src, 0x40);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -1446,11 +1447,10 @@ extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  the replay frame stream to write to
  */
-extern "C" void cMeshAnimNode_writeToReplayFrame(cMeshAnimNode* self, void* stream)
+extern "C" void cMeshAnimNode_writeToReplayFrame(cMeshAnimNode* self, cBxReplayFrame* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[1].fn(vthis(stream, vt[1]), (char*)&self->Life, 0xC);
+    stream->write((const char*)&self->Life, 0xC);
 }
 #endif
 

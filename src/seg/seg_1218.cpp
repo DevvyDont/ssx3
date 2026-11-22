@@ -7001,6 +7001,7 @@ INCLUDE_ASM("seg/seg_1218", cComputer__cComputer);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "seg/seg_1218_classes.h"
+#include "replay/bxreplayframe.h"
 
 /**
  * Destroys a computer rider (compiler-generated destructor).
@@ -7157,10 +7158,6 @@ INCLUDE_ASM("seg/seg_1218", cComputer_writeToReplayFrame);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cRiderHandler_writeToReplayFrame_A898(char*, void*) __asm__("cRiderHandler_writeToReplayFrame");
 
-struct C_A898 {
-    virtual void m0(char*, int);
-};
-
 /**
  * Writes the AI rider into a replay frame: the rider handler state, then the computer state.
  *
@@ -7171,9 +7168,9 @@ struct C_A898 {
  * @param computer  the AI rider (this)
  * @param data      the replay frame stream written to (On Tour cReplayFramePtr* data)
  */
-extern "C" void cComputer_writeToReplayFrame(cComputer* computer, C_A898 *data) {
+extern "C" void cComputer_writeToReplayFrame(cComputer* computer, cBxReplayFrame* data) {
     cRiderHandler_writeToReplayFrame_A898(((char*)computer), data);
-    data->m0((char*)&computer->mDesiredSpeed, 336);
+    data->write((const char*)&computer->mDesiredSpeed, 336);
 }
 #endif
 
@@ -7186,12 +7183,6 @@ typedef void (cObj_A8E8::*Fn_A8E8)();
 extern "C" Fn_A8E8 cComputer_mCruiseLogic_A8E8[4] __asm__("cComputer_mCruiseLogic");
 extern "C" void cRiderHandler_readFromReplayFrame(void* self, void* src);
 
-class cStream_A8E8 {
-public:
-    virtual void v1();
-    virtual void read(void* dst, int size);
-};
-
 /**
  * Reads the AI rider back from a replay frame: the rider handler state, then the computer state.
  *
@@ -7201,10 +7192,10 @@ public:
  *
  * @param data  the replay frame stream read from (On Tour cReplayFramePtr* data)
  */
-extern "C" void cComputer_readFromReplayFrame(cComputer* self, cStream_A8E8* data)
+extern "C" void cComputer_readFromReplayFrame(cComputer* self, cBxReplayFrame* data)
 {
     cRiderHandler_readFromReplayFrame(((char*)self), data);
-    data->read(&self->mDesiredSpeed, 336);
+    data->read((char*)&self->mDesiredSpeed, 336);
     short state = self->mCruiseLogicID;
     *(Fn_A8E8*)&self->cruiseLogic = cComputer_mCruiseLogic_A8E8[state];
     self->mCruiseLogicID = state;

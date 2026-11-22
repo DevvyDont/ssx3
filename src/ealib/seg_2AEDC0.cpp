@@ -2126,13 +2126,13 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_CODEC_IDATA_CODEC_IDATA1);
  * @param framesToBuffer  number of frames the codec keeps
  * @return self
  */
-extern "C" void* RCMP_CODEC_IDATA_CODEC_IDATA1(void* self, int context, int fetchFn, int releaseFn, int framesToBuffer)
+extern "C" void* RCMP_CODEC_IDATA_CODEC_IDATA1(RCMP_CODEC_IDATA* self, int context, int fetchFn, int releaseFn, int framesToBuffer)
 {
-    *(int*)((char*)self + 0xc) = framesToBuffer;
+    self->m_MaxFramesOutstanding = framesToBuffer;
     *(int*)self = context;
-    *(int*)((char*)self + 0x4) = fetchFn;
-    *(int*)((char*)self + 0x8) = releaseFn;
-    return self;
+    self->m_GetDataFunc = (void (*)(RCMP_DECODER*, RCMP_STREAMER*, RCMP_CHUNK**))fetchFn;
+    self->m_ReleaseDataFunc = (void (*)(RCMP_DECODER*, RCMP_STREAMER*, RCMP_CHUNK*))releaseFn;
+    return ((void*)self);
 }
 #endif
 

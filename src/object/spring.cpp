@@ -3,6 +3,7 @@
 #include "bx/appman.h"
 #include "object/flexbridgenode.h"
 #include "object/objnode.h"
+#include "replay/bxreplayframe.h"
 
 //100%
 INCLUDE_ASM("object/spring", cSpring_setupNodes);
@@ -256,12 +257,10 @@ INCLUDE_ASM("object/spring", cSpring_writeToReplayFrame);
  *
  * @param stream  the replay frame to write to (On Tour data)
  */
-extern "C" void cSpring_writeToReplayFrame(cSpring* self, void* stream)
+extern "C" void cSpring_writeToReplayFrame(cSpring* self, cBxReplayFrame* stream)
 {
-    sVEntry<void(void*, void*, int)>* writeSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeSlot->fn(vthis(stream, *writeSlot), self, 36);
-    writeSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeSlot->fn(vthis(stream, *writeSlot), self->Nodes, *(int*)self * 80);
+    stream->write((const char*)self, 36);
+    stream->write((const char*)self->Nodes, *(int*)self * 80);
 }
 #endif
 

@@ -10,6 +10,7 @@
 #include "world/worldview.h"
 #include "render/particle.h"
 #include "render/ps2graphicsman.h"
+#include "replay/bxreplayframe.h"
 
 // R5900 128-bit GPR quadword, for functions that copy a 16-byte block via a
 // single lq/sq pair instead of word-by-word.
@@ -2888,26 +2889,19 @@ struct sGmSer12 {
  *
  * @param out  replay stream to write to
  */
-extern "C" void cStaticEmitter_writeToReplayFrame(cStaticEmitter* self, sGmSerObj* out)
+extern "C" void cStaticEmitter_writeToReplayFrame(cStaticEmitter* self, cBxReplayFrame* out)
 {
     sGmSer12 buf;
     buf.a = self->Duration;
     buf.b = self->Emitter.EndTime;
     buf.c = self->m_initialized;
-    out->vt[1].fn(vthis(out, out->vt[1]), &buf, 12);
+    out->write((const char*)&buf, 12);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/graphicsman", cStaticEmitter_readFromReplayFrame);
 #ifdef SKIP_ASM
-class cStream00370AF8 {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* buf, int size);
-    virtual void read(void* buf, int size);
-};
-
 extern "C" void tParticleEmitter_calcBoundBox(void* a, void* b);
 
 /**
@@ -2916,14 +2910,14 @@ extern "C" void tParticleEmitter_calcBoundBox(void* a, void* b);
  *
  * @param stream  the replay frame to read from (On Tour data)
  */
-extern "C" void cStaticEmitter_readFromReplayFrame(cStaticEmitter* self, cStream00370AF8* stream)
+extern "C" void cStaticEmitter_readFromReplayFrame(cStaticEmitter* self, cBxReplayFrame* stream)
 {
     struct {
         float a;
         float b;
         int c;
     } buf;
-    stream->read(&buf, 0xC);
+    stream->read((char*)&buf, 0xC);
     self->Duration = buf.a;
     self->Emitter.EndTime = buf.b;
     tParticleEmitter_calcBoundBox((char*)&self->Emitter, (char*)&self->BoundBox);

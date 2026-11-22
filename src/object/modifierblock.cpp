@@ -12,6 +12,7 @@
 #include "object/effectlink.h"
 #include "render/ps2graphicsman.h"
 #include "object/modifierblock.h"
+#include "replay/bxreplayframe.h"
 
 struct sBoundBoxTarget {
     char pad_0x00[0x68];
@@ -814,7 +815,7 @@ static inline void VCall1_353448(char* o, int voff, int slot, void* arg)
  *
  * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void tModifierBlock_writeToReplayFrame(tModifierBlock* self, char* stream)
+extern "C" void tModifierBlock_writeToReplayFrame(tModifierBlock* self, cBxReplayFrame* stream)
 {
     tModifierBlockInfo info;
     info.Flags = 0;
@@ -854,8 +855,7 @@ extern "C" void tModifierBlock_writeToReplayFrame(tModifierBlock* self, char* st
         info.Flags |= 0x20;
     }
     {
-        sVEntry<void(void*, void*, int)>* writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-        writeEntry->fn(vthis(stream, *writeEntry), &info, 52);
+        stream->write((const char*)&info, 52);
     }
     char* w0 = (char*)self->RootTransform;
     if (w0 != 0) {

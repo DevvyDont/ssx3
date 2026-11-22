@@ -14,6 +14,7 @@
 #include "object/multiparticle.h"
 #include "object/splinemodifier.h"
 #include "object/physicsmodifier.h"
+#include "replay/bxreplayframe.h"
 
 //100%
 INCLUDE_ASM("object/multiparticle", cMultiParticle_setupMultiParticle);
@@ -289,22 +290,16 @@ extern "C" void cStaticEmitter_writeToReplayFrame(void* desc, void* stream);
  *
  * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cMultiParticle_writeToReplayFrame(cMultiParticle* self, void* stream)
+extern "C" void cMultiParticle_writeToReplayFrame(cMultiParticle* self, cBxReplayFrame* stream)
 {
-    sVEntry<void(void*, void*, int)>* writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeEntry->fn(vthis(stream, *writeEntry), (self), 4);
-    writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeEntry->fn(vthis(stream, *writeEntry), &self->NumInst, 4);
-    writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeEntry->fn(vthis(stream, *writeEntry), self->Particle, 216);
+    stream->write((const char*)self, 4);
+    stream->write((const char*)&self->NumInst, 4);
+    stream->write((const char*)self->Particle, 216);
     cStaticEmitter_writeToReplayFrame(self->Emitter, stream);
-    writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->Offset, 0x10);
-    writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->BoundBox, 0x20);
+    stream->write((const char*)&self->Offset, 0x10);
+    stream->write((const char*)&self->BoundBox, 0x20);
     if (self->NumInst > 0) {
-        writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-        writeEntry->fn(vthis(stream, *writeEntry), (int*)self->InstIds, self->NumInst << 2);
+        stream->write((const char*)self->InstIds, self->NumInst << 2);
     }
 }
 #endif
@@ -349,9 +344,9 @@ public:
  *
  * @param obj  the replay frame to write to (On Tour cBxReplayFrame* data)
  */
-extern "C" void cPhysicsModifier_writeToReplayFrame(cPhysicsModifier* self, cPhysicsModifier_writeToReplayFrame_cObj* obj)
+extern "C" void cPhysicsModifier_writeToReplayFrame(cPhysicsModifier* self, cBxReplayFrame* obj)
 {
-    obj->write(self, 4);
+    obj->write((const char*)self, 4);
 }
 #endif
 
@@ -815,11 +810,10 @@ extern "C" void cSortObjNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cRailManNode_writeToReplayFrame(cRailManNode* self, void* stream)
+extern "C" void cRailManNode_writeToReplayFrame(cRailManNode* self, cBxReplayFrame* stream)
 {
     cSortObjNode_writeToReplayFrame(self, stream);
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[1].fn(vthis(stream, vt[1]), (char*)&self->RailInfo, 0x200);
+    stream->write((const char*)&self->RailInfo, 0x200);
 }
 #endif
 
@@ -1193,11 +1187,10 @@ extern "C" void cAnimObjectNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param obj  replay stream to write to
  */
-extern "C" void cAnimComboNode_writeToReplayFrame(cAnimComboNode* self, void* obj)
+extern "C" void cAnimComboNode_writeToReplayFrame(cAnimComboNode* self, cBxReplayFrame* obj)
 {
     cAnimObjectNode_writeToReplayFrame((char*)&self->AnimType, obj);
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn(vthis(obj, vt[1]), self, 0x18);
+    obj->write((const char*)self, 0x18);
 }
 #endif
 
@@ -1403,11 +1396,10 @@ extern "C" void cAnimObjectNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cAnimDeltaNode_writeToReplayFrame(cAnimDeltaNode* self, void* stream)
+extern "C" void cAnimDeltaNode_writeToReplayFrame(cAnimDeltaNode* self, cBxReplayFrame* stream)
 {
     cAnimObjectNode_writeToReplayFrame(self, stream);
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[1].fn(vthis(stream, vt[1]), (char*)&self->Delta, 0x4);
+    stream->write((const char*)&self->Delta, 0x4);
 }
 #endif
 

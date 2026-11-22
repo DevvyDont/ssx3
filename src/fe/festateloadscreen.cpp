@@ -135,6 +135,7 @@ int cBENewPlayerInterface_getPlayerCharID(void* self, int idx);
 int cBENewPlayerInterface_getRiderCharID(void* self, int idx);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* player, int idx);
 #include "bx/bigfile.h"
+#include "replay/bxreplayframe.h"
 // PORT: cBigFile_cBigFile1 really takes (self, path, flags); bound by asm label.
 cBigFile* cBigFile_cBigFile1_3640(cBigFile* self, const char* path, int flags) __asm__("cBigFile_cBigFile1__FP8cBigFile");
 void cBigFile__cBigFile(cBigFile* self, int flags);
@@ -889,12 +890,6 @@ extern "C" void cGFFinishlineState_loseFocus(cGFFinishlineState* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festateloadscreen", cGFFinishlineState_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry_cGFFinishlineState_writeToReplayFrame {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
-
 /**
  * Finish-line state: saves its replay data.
  *
@@ -903,25 +898,17 @@ struct sVEntry_cGFFinishlineState_writeToReplayFrame {
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFFinishlineState_writeToReplayFrame(cGFFinishlineState* self, cReplayFramePtr* stream)
+extern "C" void cGFFinishlineState_writeToReplayFrame(cGFFinishlineState* self, cBxReplayFrame* stream)
 {
     cGameState_writeToReplayFrame_2(self, stream);
-    sVEntry_cGFFinishlineState_writeToReplayFrame* writeEntry = &(*(sVEntry_cGFFinishlineState_writeToReplayFrame**)stream)[1];
-    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->mSubState, 4);
-    writeEntry = &(*(sVEntry_cGFFinishlineState_writeToReplayFrame**)stream)[1];
-    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->mShowEventResultsDelay, 4);
+    stream->write((const char*)&self->mSubState, 4);
+    stream->write((const char*)&self->mShowEventResultsDelay, 4);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festateloadscreen", cGFFinishlineState_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry_cGFFinishlineState_readFromReplayFrame {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
-
 /**
  * Finish-line state: restores its replay data.
  *
@@ -930,13 +917,11 @@ struct sVEntry_cGFFinishlineState_readFromReplayFrame {
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFFinishlineState_readFromReplayFrame(cGFFinishlineState* self, cReplayFramePtr* stream)
+extern "C" void cGFFinishlineState_readFromReplayFrame(cGFFinishlineState* self, cBxReplayFrame* stream)
 {
     cGameState_readFromReplayFrame_2(self, stream);
-    sVEntry_cGFFinishlineState_readFromReplayFrame* readEntry = &(*(sVEntry_cGFFinishlineState_readFromReplayFrame**)stream)[2];
-    readEntry->fn(vthis(stream, *readEntry), (char*)&self->mSubState, 4);
-    readEntry = &(*(sVEntry_cGFFinishlineState_readFromReplayFrame**)stream)[2];
-    readEntry->fn(vthis(stream, *readEntry), (char*)&self->mShowEventResultsDelay, 4);
+    stream->read((char*)&self->mSubState, 4);
+    stream->read((char*)&self->mShowEventResultsDelay, 4);
 }
 #endif
 
@@ -1344,12 +1329,6 @@ INCLUDE_ASM("fe/festateloadscreen", cGFEventStartState_writeToReplayFrame);
 // PORT: the unit declares cGameState_writeToReplayFrame as `void* (void*)`; the body also uses $a1 (obj).
 void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState_writeToReplayFrame");
 
-struct sVEntry_cGFEventStartState_writeToReplayFrame {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
-
 /**
  * Event-start state: saves its replay data.
  *
@@ -1358,17 +1337,13 @@ struct sVEntry_cGFEventStartState_writeToReplayFrame {
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFEventStartState_writeToReplayFrame(cGFEventStartState* self, cReplayFramePtr* stream)
+extern "C" void cGFEventStartState_writeToReplayFrame(cGFEventStartState* self, cBxReplayFrame* stream)
 {
     cGameState_writeToReplayFrame_2(self, stream);
-    sVEntry_cGFEventStartState_writeToReplayFrame* writeEntry = &(*(sVEntry_cGFEventStartState_writeToReplayFrame**)stream)[1];
-    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->mPurgeCPURiders, 4);
-    writeEntry = &(*(sVEntry_cGFEventStartState_writeToReplayFrame**)stream)[1];
-    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->mHasTransitionNIS, 4);
-    writeEntry = &(*(sVEntry_cGFEventStartState_writeToReplayFrame**)stream)[1];
-    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->mSubState, 4);
-    writeEntry = &(*(sVEntry_cGFEventStartState_writeToReplayFrame**)stream)[1];
-    writeEntry->fn(vthis(stream, *writeEntry), (char*)&self->mOverlayDone, 4);
+    stream->write((const char*)&self->mPurgeCPURiders, 4);
+    stream->write((const char*)&self->mHasTransitionNIS, 4);
+    stream->write((const char*)&self->mSubState, 4);
+    stream->write((const char*)&self->mOverlayDone, 4);
 }
 #endif
 
@@ -1378,12 +1353,6 @@ INCLUDE_ASM("fe/festateloadscreen", cGFEventStartState_readFromReplayFrame);
 // PORT: the unit declares cGameState_readFromReplayFrame as `void* (void*)`; the body also uses $a1 (obj).
 void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameState_readFromReplayFrame");
 
-struct sVEntry_cGFEventStartState_readFromReplayFrame {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
-
 /**
  * Event-start state: restores its replay data.
  *
@@ -1392,17 +1361,13 @@ struct sVEntry_cGFEventStartState_readFromReplayFrame {
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFEventStartState_readFromReplayFrame(cGFEventStartState* self, cReplayFramePtr* stream)
+extern "C" void cGFEventStartState_readFromReplayFrame(cGFEventStartState* self, cBxReplayFrame* stream)
 {
     cGameState_readFromReplayFrame_2(self, stream);
-    sVEntry_cGFEventStartState_readFromReplayFrame* readEntry = &(*(sVEntry_cGFEventStartState_readFromReplayFrame**)stream)[2];
-    readEntry->fn(vthis(stream, *readEntry), (char*)&self->mPurgeCPURiders, 4);
-    readEntry = &(*(sVEntry_cGFEventStartState_readFromReplayFrame**)stream)[2];
-    readEntry->fn(vthis(stream, *readEntry), (char*)&self->mHasTransitionNIS, 4);
-    readEntry = &(*(sVEntry_cGFEventStartState_readFromReplayFrame**)stream)[2];
-    readEntry->fn(vthis(stream, *readEntry), (char*)&self->mSubState, 4);
-    readEntry = &(*(sVEntry_cGFEventStartState_readFromReplayFrame**)stream)[2];
-    readEntry->fn(vthis(stream, *readEntry), (char*)&self->mOverlayDone, 4);
+    stream->read((char*)&self->mPurgeCPURiders, 4);
+    stream->read((char*)&self->mHasTransitionNIS, 4);
+    stream->read((char*)&self->mSubState, 4);
+    stream->read((char*)&self->mOverlayDone, 4);
 }
 #endif
 

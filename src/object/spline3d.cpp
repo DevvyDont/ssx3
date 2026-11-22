@@ -3,6 +3,7 @@
 #include "vtable.h"
 #include "object/spline3d.h"
 #include "render/ps2graphicsman.h"
+#include "replay/bxreplayframe.h"
 
 struct sSplinePoint {
     char pad_0x00[0xC];
@@ -46,33 +47,20 @@ float cSpline_calcLength(cSpline* self)
 //100%
 INCLUDE_ASM("object/spline3d", cSpline_writeToReplayFrame);
 #ifdef SKIP_ASM
-class cSpline_writeToReplayFrame_cObj {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void write(void* buf, int size);
-};
-
 /**
  * Writes the spline's first 8 bytes to a replay frame through the stream's write virtual (slot 1).
  *
  * @param obj  replay stream to write to
  */
-extern "C" void cSpline_writeToReplayFrame(cSpline* self, cSpline_writeToReplayFrame_cObj* obj)
+extern "C" void cSpline_writeToReplayFrame(cSpline* self, cBxReplayFrame* obj)
 {
-    obj->write(self, 8);
+    obj->write((const char*)self, 8);
 }
 #endif
 
 //100%
 INCLUDE_ASM("object/spline3d", cSpline_readFromReplayFrame);
 #ifdef SKIP_ASM
-class cStream_5570 {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* buf, int size);
-    virtual void read(void* buf, int size);
-};
-
 struct sTrackNode5570 {
     char pad_0x0[0x24];
     tSplineSegmentRecord* node;      // 0x24
@@ -118,9 +106,9 @@ struct sTrackRef5570 {
  *
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
  */
-extern "C" void cSpline_readFromReplayFrame(cSpline* self, cStream_5570* stream)
+extern "C" void cSpline_readFromReplayFrame(cSpline* self, cBxReplayFrame* stream)
 {
-    stream->read((self), 8);
+    stream->read((char*)self, 8);
     self->Seg = (tSplineSegmentRecord*)(*(sTrackRef5570*)&self->SplineId).get()->node;
     for (int i = 0; i < self->SegIndex; i++) {
         self->Seg = self->Seg->m_NextSeg;

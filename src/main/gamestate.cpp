@@ -19,6 +19,7 @@
 #include "main/ssxapp.h"
 #include "ai/ai.h"
 #include "ai/player.h"
+#include "replay/bxreplayframe.h"
 
 //100%
 INCLUDE_ASM("main/gamestate", cGFGateState_gainFocus);
@@ -850,12 +851,6 @@ extern "C" void cGFTrackStartState_loseFocus(cGFTrackStartState* self)
 //100%
 INCLUDE_ASM("main/gamestate", cGFTrackStartState_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry_cGFTrackStartState_writeToReplayFrame {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
-
 // PORT: cGameState_writeToReplayFrame also reads $a1 (the stream); bound with its real arity.
 void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState_writeToReplayFrame");
 
@@ -867,27 +862,18 @@ void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFTrackStartState_writeToReplayFrame(cGFTrackStartState* self, cReplayFramePtr* stream)
+extern "C" void cGFTrackStartState_writeToReplayFrame(cGFTrackStartState* self, cBxReplayFrame* stream)
 {
     cGameState_writeToReplayFrame_2(self, stream);
-    sVEntry_cGFTrackStartState_writeToReplayFrame* writeSlot = &(*(sVEntry_cGFTrackStartState_writeToReplayFrame**)stream)[1];
-    writeSlot->fn(vthis(stream, *writeSlot), (char*)&self->mPreLoadState, 4);
-    writeSlot = &(*(sVEntry_cGFTrackStartState_writeToReplayFrame**)stream)[1];
-    writeSlot->fn(vthis(stream, *writeSlot), (char*)&self->mPlayFirstTimeBCVideo, 4);
-    writeSlot = &(*(sVEntry_cGFTrackStartState_writeToReplayFrame**)stream)[1];
-    writeSlot->fn(vthis(stream, *writeSlot), (char*)&self->mPreLoadTicks, 4);
+    stream->write((const char*)&self->mPreLoadState, 4);
+    stream->write((const char*)&self->mPlayFirstTimeBCVideo, 4);
+    stream->write((const char*)&self->mPreLoadTicks, 4);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/gamestate", cGFTrackStartState_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry_cGFTrackStartState_readFromReplayFrame {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
-
 // PORT: cGameState_readFromReplayFrame also reads $a1 (the stream); bound with its real arity.
 void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameState_readFromReplayFrame");
 
@@ -899,15 +885,12 @@ void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameStat
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFTrackStartState_readFromReplayFrame(cGFTrackStartState* self, cReplayFramePtr* stream)
+extern "C" void cGFTrackStartState_readFromReplayFrame(cGFTrackStartState* self, cBxReplayFrame* stream)
 {
     cGameState_readFromReplayFrame_2(self, stream);
-    sVEntry_cGFTrackStartState_readFromReplayFrame* readSlot = &(*(sVEntry_cGFTrackStartState_readFromReplayFrame**)stream)[2];
-    readSlot->fn(vthis(stream, *readSlot), (char*)&self->mPreLoadState, 4);
-    readSlot = &(*(sVEntry_cGFTrackStartState_readFromReplayFrame**)stream)[2];
-    readSlot->fn(vthis(stream, *readSlot), (char*)&self->mPlayFirstTimeBCVideo, 4);
-    readSlot = &(*(sVEntry_cGFTrackStartState_readFromReplayFrame**)stream)[2];
-    readSlot->fn(vthis(stream, *readSlot), (char*)&self->mPreLoadTicks, 4);
+    stream->read((char*)&self->mPreLoadState, 4);
+    stream->read((char*)&self->mPlayFirstTimeBCVideo, 4);
+    stream->read((char*)&self->mPreLoadTicks, 4);
 }
 #endif
 
@@ -1128,12 +1111,6 @@ extern "C" void cGFNextHeatState_loseFocus(void)
 //100%
 INCLUDE_ASM("main/gamestate", cGFNextHeatState_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry_cGFNextHeatState_writeToReplayFrame {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
-
 // PORT: cGameState_writeToReplayFrame also reads $a1 (the stream); bound with its real arity.
 void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState_writeToReplayFrame");
 
@@ -1145,27 +1122,18 @@ void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFNextHeatState_writeToReplayFrame(cGFNextHeatState* self, cReplayFramePtr* stream)
+extern "C" void cGFNextHeatState_writeToReplayFrame(cGFNextHeatState* self, cBxReplayFrame* stream)
 {
     cGameState_writeToReplayFrame_2(self, stream);
-    sVEntry_cGFNextHeatState_writeToReplayFrame* writeSlot = &(*(sVEntry_cGFNextHeatState_writeToReplayFrame**)stream)[1];
-    writeSlot->fn(vthis(stream, *writeSlot), (char*)&self->CurrentNextHeatState, 4);
-    writeSlot = &(*(sVEntry_cGFNextHeatState_writeToReplayFrame**)stream)[1];
-    writeSlot->fn(vthis(stream, *writeSlot), (char*)&self->WaitTicks, 4);
-    writeSlot = &(*(sVEntry_cGFNextHeatState_writeToReplayFrame**)stream)[1];
-    writeSlot->fn(vthis(stream, *writeSlot), (char*)&self->PlayTransport, 4);
+    stream->write((const char*)&self->CurrentNextHeatState, 4);
+    stream->write((const char*)&self->WaitTicks, 4);
+    stream->write((const char*)&self->PlayTransport, 4);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/gamestate", cGFNextHeatState_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry_cGFNextHeatState_readFromReplayFrame {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
-
 // PORT: cGameState_readFromReplayFrame also reads $a1 (the stream); bound with its real arity.
 void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameState_readFromReplayFrame");
 
@@ -1177,15 +1145,12 @@ void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameStat
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFNextHeatState_readFromReplayFrame(cGFNextHeatState* self, cReplayFramePtr* stream)
+extern "C" void cGFNextHeatState_readFromReplayFrame(cGFNextHeatState* self, cBxReplayFrame* stream)
 {
     cGameState_readFromReplayFrame_2(self, stream);
-    sVEntry_cGFNextHeatState_readFromReplayFrame* readSlot = &(*(sVEntry_cGFNextHeatState_readFromReplayFrame**)stream)[2];
-    readSlot->fn(vthis(stream, *readSlot), (char*)&self->CurrentNextHeatState, 4);
-    readSlot = &(*(sVEntry_cGFNextHeatState_readFromReplayFrame**)stream)[2];
-    readSlot->fn(vthis(stream, *readSlot), (char*)&self->WaitTicks, 4);
-    readSlot = &(*(sVEntry_cGFNextHeatState_readFromReplayFrame**)stream)[2];
-    readSlot->fn(vthis(stream, *readSlot), (char*)&self->PlayTransport, 4);
+    stream->read((char*)&self->CurrentNextHeatState, 4);
+    stream->read((char*)&self->WaitTicks, 4);
+    stream->read((char*)&self->PlayTransport, 4);
 }
 #endif
 
@@ -1544,12 +1509,6 @@ extern "C" void cGFUserSelectState_update(void* self)
 //100%
 INCLUDE_ASM("main/gamestate", cGFUserSelectState_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry_cGFUserSelectState_writeToReplayFrame {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
-
 // PORT: cGameState_writeToReplayFrame also reads $a1 (the stream); bound with its real arity.
 void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState_writeToReplayFrame");
 
@@ -1561,29 +1520,19 @@ void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFUserSelectState_writeToReplayFrame(cGFUserSelectState* self, cReplayFramePtr* stream)
+extern "C" void cGFUserSelectState_writeToReplayFrame(cGFUserSelectState* self, cBxReplayFrame* stream)
 {
     cGameState_writeToReplayFrame_2(self, stream);
-    sVEntry_cGFUserSelectState_writeToReplayFrame* writeSlot = &(*(sVEntry_cGFUserSelectState_writeToReplayFrame**)stream)[1];
-    writeSlot->fn(vthis(stream, *writeSlot), (char*)&self->mCurrState, 4);
-    writeSlot = &(*(sVEntry_cGFUserSelectState_writeToReplayFrame**)stream)[1];
-    writeSlot->fn(vthis(stream, *writeSlot), (char*)&self->mMode, 4);
-    writeSlot = &(*(sVEntry_cGFUserSelectState_writeToReplayFrame**)stream)[1];
-    writeSlot->fn(vthis(stream, *writeSlot), (char*)&self->mOverlayDone, 4);
-    writeSlot = &(*(sVEntry_cGFUserSelectState_writeToReplayFrame**)stream)[1];
-    writeSlot->fn(vthis(stream, *writeSlot), (char*)&self->mNextLocation, 4);
+    stream->write((const char*)&self->mCurrState, 4);
+    stream->write((const char*)&self->mMode, 4);
+    stream->write((const char*)&self->mOverlayDone, 4);
+    stream->write((const char*)&self->mNextLocation, 4);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/gamestate", cGFUserSelectState_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry_cGFUserSelectState_readFromReplayFrame {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
-
 // PORT: cGameState_readFromReplayFrame also reads $a1 (the stream); bound with its real arity.
 void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameState_readFromReplayFrame");
 
@@ -1595,17 +1544,13 @@ void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameStat
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFUserSelectState_readFromReplayFrame(cGFUserSelectState* self, cReplayFramePtr* stream)
+extern "C" void cGFUserSelectState_readFromReplayFrame(cGFUserSelectState* self, cBxReplayFrame* stream)
 {
     cGameState_readFromReplayFrame_2(self, stream);
-    sVEntry_cGFUserSelectState_readFromReplayFrame* readSlot = &(*(sVEntry_cGFUserSelectState_readFromReplayFrame**)stream)[2];
-    readSlot->fn(vthis(stream, *readSlot), (char*)&self->mCurrState, 4);
-    readSlot = &(*(sVEntry_cGFUserSelectState_readFromReplayFrame**)stream)[2];
-    readSlot->fn(vthis(stream, *readSlot), (char*)&self->mMode, 4);
-    readSlot = &(*(sVEntry_cGFUserSelectState_readFromReplayFrame**)stream)[2];
-    readSlot->fn(vthis(stream, *readSlot), (char*)&self->mOverlayDone, 4);
-    readSlot = &(*(sVEntry_cGFUserSelectState_readFromReplayFrame**)stream)[2];
-    readSlot->fn(vthis(stream, *readSlot), (char*)&self->mNextLocation, 4);
+    stream->read((char*)&self->mCurrState, 4);
+    stream->read((char*)&self->mMode, 4);
+    stream->read((char*)&self->mOverlayDone, 4);
+    stream->read((char*)&self->mNextLocation, 4);
 }
 #endif
 

@@ -11,6 +11,7 @@
 #include "object/springrailnode.h"
 #include "object/floatrailnode.h"
 #include "object/flexrailnode.h"
+#include "replay/bxreplayframe.h"
 
 //100%
 INCLUDE_ASM("object/flexrailnode", cFlexRailNode_addSpaceHash);
@@ -727,13 +728,11 @@ extern "C" void cFlexRailNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cFloatRailNode_writeToReplayFrame(cFloatRailNode* self, void* stream)
+extern "C" void cFloatRailNode_writeToReplayFrame(cFloatRailNode* self, cBxReplayFrame* stream)
 {
     cFlexRailNode_writeToReplayFrame(self, stream);
-    sFlexRailVEntry9AD0* writeFn = &(*(sFlexRailVEntry9AD0**)stream)[1];
-    writeFn->fn(vthis(stream, *writeFn), (char*)&self->LSpring, 0xC);
-    writeFn = &(*(sFlexRailVEntry9AD0**)stream)[1];
-    writeFn->fn(vthis(stream, *writeFn), self->Nodes, self->NumNodes * 80);
+    stream->write((const char*)&self->LSpring, 0xC);
+    stream->write((const char*)self->Nodes, self->NumNodes * 80);
 }
 #endif
 
@@ -1547,13 +1546,11 @@ extern "C" void cFlexRailNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cSpringRailNode_writeToReplayFrame(cSpringRailNode* self, void* stream)
+extern "C" void cSpringRailNode_writeToReplayFrame(cSpringRailNode* self, cBxReplayFrame* stream)
 {
     cFlexRailNode_writeToReplayFrame(self, stream);
-    sFlexRailVEntryAC10* writeFn = &(*(sFlexRailVEntryAC10**)stream)[1];
-    writeFn->fn(vthis(stream, *writeFn), (char*)&self->ASpring, 0xC);
-    writeFn = &(*(sFlexRailVEntryAC10**)stream)[1];
-    writeFn->fn(vthis(stream, *writeFn), self->Nodes, self->NumNodes * 0x60);
+    stream->write((const char*)&self->ASpring, 0xC);
+    stream->write((const char*)self->Nodes, self->NumNodes * 0x60);
 }
 #endif
 

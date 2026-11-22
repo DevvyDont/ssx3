@@ -36,16 +36,7 @@ struct tFramePtrSave {
 CHECK_OFFSET(tFramePtrSave, Type, 0x0);
 CHECK_SIZE(tFramePtrSave, 0x4);
 
-// cBxReplayFrame: the replay stream interface every writeToReplayFrame / readFromReplayFrame takes ([P] the preview's
-// linkonce names, e.g. writeToReplayFrame__8cObjNodeP14cBxReplayFrame; [O] On Tour class cBxReplayFrame, size 0x4: a
-// vptr only, virtuals write(const char* data, int len), read(char* data, int len), readReplayInstance() /
-// readReplayInstance(cInstanceNode*), writeReplayInstance(const tInstanceRecord*) / writeReplayInstance(cInstanceNode*)).
-// g++ 2.95 vtable slots (8-byte entries, sVEntry in vtable.h; entry 0 unused): 1 write, 2 read, 3 / 4
-// readReplayInstance, 5 / 6 writeReplayInstance ([U] the Luno, emitter and static-emitter replay functions call slot 1
-// to write and slot 2 to read; cReplayFramePtr_vtbl implements them in that order). No data, so the vptr is at 0.
-struct cBxReplayFrame {
-    void** mVtbl;           // 0x00 [O] (vptr only); [U] writeToReplayFrame calls slot 1, readFromReplayFrame slot 2
-};
+#include "replay/bxreplayframe.h" /* cBxReplayFrame: the stream interface cReplayFramePtr implements */
 
 // A saved read position (On Tour tFramePos, 0x4); getReadPos/setReadPos copy it to/from ReadData.
 struct tFramePos {
@@ -70,8 +61,6 @@ struct cReplayFramePtr {
                             //      ctor 0; [U] write adds len; setBlock stores size; writeRewind / purgeBlock 0
 };
 
-CHECK_OFFSET(cBxReplayFrame, mVtbl, 0x00);
-CHECK_SIZE(cBxReplayFrame, 0x4);
 
 CHECK_OFFSET(tFramePos, Data, 0x0);
 CHECK_SIZE(tFramePos, 0x4);

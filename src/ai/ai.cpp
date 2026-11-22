@@ -2530,10 +2530,9 @@ static inline void replayWriteObj(char* vobj, void* frame)
  *
  * @param frame  the replay frame (On Tour cReplayFramePtr)
  */
-extern "C" void cAI_writeToReplayFrame(cAI* self, cReplayFramePtr* frame)
+extern "C" void cAI_writeToReplayFrame(cAI* self, cBxReplayFrame* frame)
 {
-    sVEntryWF* vt = *(sVEntryWF**)frame;
-    vt[1].fn(vthis(frame, vt[1]), (self), 40);
+    frame->write((const char*)self, 40);
     for (int i = 0; i < self->NumberOfPlayersAllocated; i++)
     {
         replayWriteObj(((char*)self->Players[i]), frame);
@@ -2578,10 +2577,9 @@ static inline void replayReadObj(char* vobj, void* frame)
  *
  * @param frame  the replay frame (On Tour cReplayFramePtr)
  */
-extern "C" void cAI_readFromReplayFrame(cAI* self, cReplayFramePtr* frame)
+extern "C" void cAI_readFromReplayFrame(cAI* self, cBxReplayFrame* frame)
 {
-    sVEntryRF* vt = *(sVEntryRF**)frame;
-    vt[2].fn(vthis(frame, vt[2]), (self), 40);
+    frame->read((char*)self, 40);
     int state = self->CurrentAIState;
     cAI_forceAIState((self), self->PreviousAIState);
     self->PreviousAIStateHandler = (cAIStateHandler*)(int)self->CurrentAIStateHandler;
@@ -3138,10 +3136,9 @@ INCLUDE_ASM("ai/ai", cGateControl_writeToReplayFrame);
  *
  * @param obj  the replay frame (On Tour cReplayFramePtr); its virtual write (slot 1) does the copy
  */
-extern "C" void cGateControl_writeToReplayFrame(cGateControl* self, cReplayFramePtr* obj)
+extern "C" void cGateControl_writeToReplayFrame(cGateControl* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn(vthis(obj, vt[1]), self, 20);
+    obj->write((const char*)self, 20);
 }
 #endif
 
@@ -3154,10 +3151,9 @@ INCLUDE_ASM("ai/ai", cGateControl_readFromReplayFrame);
  *
  * @param obj  the replay frame (On Tour cReplayFramePtr); its virtual read (slot 2) does the copy
  */
-extern "C" void cGateControl_readFromReplayFrame(cGateControl* self, cReplayFramePtr* obj)
+extern "C" void cGateControl_readFromReplayFrame(cGateControl* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn(vthis(obj, vt[2]), self, 20);
+    obj->read((char*)self, 20);
 }
 #endif
 
@@ -3394,10 +3390,9 @@ INCLUDE_ASM("ai/ai", cFinishLineControl_writeToReplayFrame);
  *
  * @param obj  the replay frame (On Tour cReplayFramePtr); its virtual write (slot 1) does the copy
  */
-extern "C" void cFinishLineControl_writeToReplayFrame(cFinishLineControl* self, cReplayFramePtr* obj)
+extern "C" void cFinishLineControl_writeToReplayFrame(cFinishLineControl* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn(vthis(obj, vt[1]), self, 0x4);
+    obj->write((const char*)self, 0x4);
 }
 #endif
 
@@ -3410,10 +3405,9 @@ INCLUDE_ASM("ai/ai", cFinishLineControl_readFromReplayFrame);
  *
  * @param obj  the replay frame (On Tour cReplayFramePtr); its virtual read (slot 2) does the copy
  */
-extern "C" void cFinishLineControl_readFromReplayFrame(cFinishLineControl* self, cReplayFramePtr* obj)
+extern "C" void cFinishLineControl_readFromReplayFrame(cFinishLineControl* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn(vthis(obj, vt[2]), self, 0x4);
+    obj->read((char*)self, 0x4);
 }
 #endif
 
@@ -4763,10 +4757,9 @@ INCLUDE_ASM("ai/ai", cWipeoutControl_writeToReplayFrame);
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr)
  */
-extern "C" void cWipeoutControl_writeToReplayFrame(cWipeoutControl* self, cReplayFramePtr* obj)
+extern "C" void cWipeoutControl_writeToReplayFrame(cWipeoutControl* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn(vthis(obj, vt[1]), self, 0x80);
+    obj->write((const char*)self, 0x80);
 }
 #endif
 
@@ -4782,10 +4775,9 @@ INCLUDE_ASM("ai/ai", cWipeoutControl_readFromReplayFrame);
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr)
  */
-extern "C" void cWipeoutControl_readFromReplayFrame(cWipeoutControl* self, cReplayFramePtr* obj)
+extern "C" void cWipeoutControl_readFromReplayFrame(cWipeoutControl* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn(vthis(obj, vt[2]), self, 0x80);
+    obj->read((char*)self, 0x80);
 }
 #endif
 
@@ -5412,10 +5404,9 @@ INCLUDE_ASM("ai/ai", cResetControl_writeToReplayFrame);
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr)
  */
-extern "C" void cResetControl_writeToReplayFrame(cResetControl* self, cReplayFramePtr* obj)
+extern "C" void cResetControl_writeToReplayFrame(cResetControl* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn(vthis(obj, vt[1]), self, 0x8);
+    obj->write((const char*)self, 0x8);
 }
 #endif
 
@@ -5430,10 +5421,9 @@ INCLUDE_ASM("ai/ai", cResetControl_readFromReplayFrame);
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr)
  */
-extern "C" void cResetControl_readFromReplayFrame(cResetControl* self, cReplayFramePtr* obj)
+extern "C" void cResetControl_readFromReplayFrame(cResetControl* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn(vthis(obj, vt[2]), self, 0x8);
+    obj->read((char*)self, 0x8);
 }
 #endif
 
@@ -5712,10 +5702,9 @@ INCLUDE_ASM("ai/ai", cNaturalAirControl_writeToReplayFrame);
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr)
  */
-extern "C" void cNaturalAirControl_writeToReplayFrame(cNaturalAirControl* self, cReplayFramePtr* obj)
+extern "C" void cNaturalAirControl_writeToReplayFrame(cNaturalAirControl* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn(vthis(obj, vt[1]), self, 20);
+    obj->write((const char*)self, 20);
 }
 #endif
 
@@ -5730,10 +5719,9 @@ INCLUDE_ASM("ai/ai", cNaturalAirControl_readFromReplayFrame);
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr)
  */
-extern "C" void cNaturalAirControl_readFromReplayFrame(cNaturalAirControl* self, cReplayFramePtr* obj)
+extern "C" void cNaturalAirControl_readFromReplayFrame(cNaturalAirControl* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn(vthis(obj, vt[2]), self, 20);
+    obj->read((char*)self, 20);
 }
 #endif
 
@@ -6917,10 +6905,9 @@ INCLUDE_ASM("ai/ai", cBoardPressControl_writeToReplayFrame);
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cBoardPressControl_writeToReplayFrame(cBoardPressControl* self, cReplayFramePtr* obj)
+extern "C" void cBoardPressControl_writeToReplayFrame(cBoardPressControl* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn(vthis(obj, vt[1]), self, 20);
+    obj->write((const char*)self, 20);
 }
 #endif
 
@@ -6935,10 +6922,9 @@ INCLUDE_ASM("ai/ai", cBoardPressControl_readFromReplayFrame);
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cBoardPressControl_readFromReplayFrame(cBoardPressControl* self, cReplayFramePtr* obj)
+extern "C" void cBoardPressControl_readFromReplayFrame(cBoardPressControl* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn(vthis(obj, vt[2]), self, 20);
+    obj->read((char*)self, 20);
 }
 #endif
 
@@ -7698,10 +7684,9 @@ INCLUDE_ASM("ai/ai", cRailslideControl_writeToReplayFrame);
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cRailslideControl_writeToReplayFrame(cRailslideControl* self, cReplayFramePtr* obj)
+extern "C" void cRailslideControl_writeToReplayFrame(cRailslideControl* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn(vthis(obj, vt[1]), self, 0x8);
+    obj->write((const char*)self, 0x8);
 }
 #endif
 
@@ -7716,10 +7701,9 @@ INCLUDE_ASM("ai/ai", cRailslideControl_readFromReplayFrame);
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cRailslideControl_readFromReplayFrame(cRailslideControl* self, cReplayFramePtr* obj)
+extern "C" void cRailslideControl_readFromReplayFrame(cRailslideControl* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn(vthis(obj, vt[2]), self, 0x8);
+    obj->read((char*)self, 0x8);
 }
 #endif
 
@@ -8108,10 +8092,9 @@ INCLUDE_ASM("ai/ai", cHandplantControl_writeToReplayFrame);
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cHandplantControl_writeToReplayFrame(cHandplantControl* self, cReplayFramePtr* obj)
+extern "C" void cHandplantControl_writeToReplayFrame(cHandplantControl* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn(vthis(obj, vt[1]), self, 20);
+    obj->write((const char*)self, 20);
 }
 #endif
 
@@ -8126,10 +8109,9 @@ INCLUDE_ASM("ai/ai", cHandplantControl_readFromReplayFrame);
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cHandplantControl_readFromReplayFrame(cHandplantControl* self, cReplayFramePtr* obj)
+extern "C" void cHandplantControl_readFromReplayFrame(cHandplantControl* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn(vthis(obj, vt[2]), self, 20);
+    obj->read((char*)self, 20);
 }
 #endif
 
@@ -9839,10 +9821,9 @@ INCLUDE_ASM("ai/ai", cSpinControl_writeToReplayFrame);
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cSpinControl_writeToReplayFrame(cSpinControl* self, cReplayFramePtr* obj)
+extern "C" void cSpinControl_writeToReplayFrame(cSpinControl* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn(vthis(obj, vt[1]), self, 88);
+    obj->write((const char*)self, 88);
 }
 #endif
 
@@ -9857,10 +9838,9 @@ INCLUDE_ASM("ai/ai", cSpinControl_readFromReplayFrame);
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cSpinControl_readFromReplayFrame(cSpinControl* self, cReplayFramePtr* obj)
+extern "C" void cSpinControl_readFromReplayFrame(cSpinControl* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn(vthis(obj, vt[2]), self, 88);
+    obj->read((char*)self, 88);
 }
 #endif
 
@@ -10078,10 +10058,9 @@ INCLUDE_ASM("ai/ai", cUberGrindControl_writeToReplayFrame);
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cUberGrindControl_writeToReplayFrame(cUberGrindControl* self, cReplayFramePtr* obj)
+extern "C" void cUberGrindControl_writeToReplayFrame(cUberGrindControl* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn(vthis(obj, vt[1]), self, 0x8);
+    obj->write((const char*)self, 0x8);
 }
 #endif
 
@@ -10096,10 +10075,9 @@ INCLUDE_ASM("ai/ai", cUberGrindControl_readFromReplayFrame);
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cUberGrindControl_readFromReplayFrame(cUberGrindControl* self, cReplayFramePtr* obj)
+extern "C" void cUberGrindControl_readFromReplayFrame(cUberGrindControl* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn(vthis(obj, vt[2]), self, 0x8);
+    obj->read((char*)self, 0x8);
 }
 #endif
 
@@ -10186,6 +10164,7 @@ INCLUDE_ASM("ai/ai", cWipeoutMotion__cWipeoutMotion);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/ai_classes.h"
+#include "replay/bxreplayframe.h"
 
 /**
  * Destroys the wipeout motion part: deletes its board sphere tree and, as the flags ask, the cRider and self.

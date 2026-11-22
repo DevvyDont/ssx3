@@ -7,6 +7,7 @@
 #include "replay/frameptr.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "replay/bxreplayframe.h"
 
 //100%
 INCLUDE_ASM("ai/airpredictor", cAirPredictor_reset);
@@ -569,10 +570,9 @@ INCLUDE_ASM("ai/airpredictor", cAirPredictor_writeToReplayFrame);
  *
  * @param obj  the replay frame (cReplayFramePtr)
  */
-extern "C" void cAirPredictor_writeToReplayFrame(cAirPredictor* self, cReplayFramePtr* obj)
+extern "C" void cAirPredictor_writeToReplayFrame(cAirPredictor* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn(vthis(obj, vt[1]), self, 176);
+    obj->write((const char*)self, 176);
 }
 #endif
 
@@ -585,10 +585,9 @@ INCLUDE_ASM("ai/airpredictor", cAirPredictor_readFromReplayFrame);
  *
  * @param obj  the replay frame (cReplayFramePtr)
  */
-extern "C" void cAirPredictor_readFromReplayFrame(cAirPredictor* self, cReplayFramePtr* obj)
+extern "C" void cAirPredictor_readFromReplayFrame(cAirPredictor* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn(vthis(obj, vt[2]), self, 176);
+    obj->read((char*)self, 176);
 }
 #endif
 

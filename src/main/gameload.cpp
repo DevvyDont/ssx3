@@ -2002,10 +2002,6 @@ struct cSerObj_00231348 {
     virtual void v11();
     virtual void serialize(void* stream);
 };
-struct cStream_00231348 {
-    virtual void write(void* p, int n);
-};
-
 // PORT: these serializers take (self, stream); their mangled names say (void*).
 void cGFEndState_writeToReplayFrame_s(void* p, void* s) __asm__("cGFEndState_writeToReplayFrame__FPv");
 void cGFEndWaitState_writeToReplayFrame_s(void* p, void* s) __asm__("cGFEndWaitState_writeToReplayFrame__FPv");
@@ -2031,14 +2027,14 @@ extern "C" void cGFUserSelectState_writeToReplayFrame(void* p, void* s);
  *
  * @param stream  the replay frame (On Tour cReplayFramePtr*)
  */
-extern "C" void cGame_writeToReplayFrame(cGame* self, cStream_00231348* stream)
+extern "C" void cGame_writeToReplayFrame(cGame* self, cBxReplayFrame* stream)
 {
     ((cSerObj_00231348*)self->FlagManager)->serialize(stream);
     ((cSerObj_00231348*)self->SnowFall)->serialize(stream);
-    stream->write((char*)&self->mCurrentStateID, 4);
-    stream->write((char*)&self->mPrevStateID, 4);
-    stream->write((char*)&self->mPendingStateID, 4);
-    stream->write((char*)&self->mPendingStateStartupFlag, 4);
+    stream->write((const char*)&self->mCurrentStateID, 4);
+    stream->write((const char*)&self->mPrevStateID, 4);
+    stream->write((const char*)&self->mPendingStateID, 4);
+    stream->write((const char*)&self->mPendingStateStartupFlag, 4);
     cGFEventStartState_writeToReplayFrame((char*)&self->mEventStartState, stream);
     cGFPreEventState_writeToReplayFrame_s((char*)&self->mPreEventState, stream);
     cGFGateState_writeToReplayFrame_s((char*)&self->mGateState, stream);
@@ -2401,6 +2397,7 @@ extern "C" int cGame_canUserActivatePauseMenu(cGame* self)
 INCLUDE_ASM("main/gameload", cLoadScreen_drawSplash);
 #ifdef SKIP_ASM
 #include "bx/math3d.h"
+#include "replay/bxreplayframe.h"
 
 struct sQuadVtx {
     sQuadVtx() {}

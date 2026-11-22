@@ -2,6 +2,7 @@
 #include "common.h"
 #include "object/bucketman.h"
 #include "object/objnode.h"
+#include "replay/bxreplayframe.h"
 
 extern "C" void cBucketMan_add(void* mgr, void* node, void* param);
 extern void* cObjNode_vtbl[16];
@@ -218,20 +219,14 @@ void* cSortObjNode__cSortObjNode(void* vself)
 //100%
 INCLUDE_ASM("object/objnode", cTypeObjNode_writeToReplayFrame);
 #ifdef SKIP_ASM
-class cTypeObjNode_writeToReplayFrame_cObj {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void write(void* buf, int size);
-};
-
 /**
  * Writes a typed object node's type and flags to a replay frame.
  *
  * @param obj  the replay frame (On Tour cBxReplayFrame* data)
  */
-extern "C" void cTypeObjNode_writeToReplayFrame(cTypeObjNode* self, cTypeObjNode_writeToReplayFrame_cObj* obj)
+extern "C" void cTypeObjNode_writeToReplayFrame(cTypeObjNode* self, cBxReplayFrame* obj)
 {
-    obj->write((char*)&self->ObjNodeType, 4);
+    obj->write((const char*)&self->ObjNodeType, 4);
 }
 #endif
 
@@ -243,10 +238,10 @@ INCLUDE_ASM("object/objnode", cSortObjNode_writeToReplayFrame);
  *
  * @param obj  the replay frame (On Tour cBxReplayFrame* data)
  */
-extern "C" void cSortObjNode_writeToReplayFrame(cSortObjNode* self, cTypeObjNode_writeToReplayFrame_cObj* obj)
+extern "C" void cSortObjNode_writeToReplayFrame(cSortObjNode* self, cBxReplayFrame* obj)
 {
     cTypeObjNode_writeToReplayFrame((cTypeObjNode*)self, obj);
-    obj->write((char*)&self->SortIndex, 4);
+    obj->write((const char*)&self->SortIndex, 4);
 }
 #endif
 

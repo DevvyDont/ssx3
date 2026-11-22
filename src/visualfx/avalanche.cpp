@@ -12,6 +12,7 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/ai.h"
+#include "replay/bxreplayframe.h"
 
 //100%
 INCLUDE_ASM("visualfx/avalanche", tActiveAvalancheNode_getFrameData);
@@ -2357,12 +2358,6 @@ struct cAvalanche_writeToReplayFrame_sSave {
     float times[16];
 };
 
-class cAvalanche_writeToReplayFrame_cStream {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void write(void* data, int size);
-};
-
 /**
  * Writes the avalanche replay state to a replay stream: the id and current time of each of the 16 active-avalanche
  * slots.
@@ -2373,14 +2368,14 @@ public:
  *
  * @param stream  the replay stream
  */
-extern "C" void cAvalanche_writeToReplayFrame(cAvalanche_writeToReplayFrame_cStream* stream)
+extern "C" void cAvalanche_writeToReplayFrame(cBxReplayFrame* stream)
 {
     cAvalanche_writeToReplayFrame_sSave state;
     for (int i = 0; i < 16; i++) {
         state.ids[i] = cAvalanche_m_activeAvalanches_9CB0[i].isActive() ? *cAvalanche_m_activeAvalanches_9CB0[i].av : -1;
         state.times[i] = cAvalanche_m_activeAvalanches_9CB0[i].isActive() ? cAvalanche_m_activeAvalanches_9CB0[i].t : 0.0f;
     }
-    stream->write(&state, 0x80);
+    stream->write((const char*)&state, 0x80);
 }
 #endif
 
@@ -2448,7 +2443,7 @@ static inline void clearSlot_RR(sSlotRR* s)
  * frames are recomputed (emitter nodes re-emit) and the slot's collision cursors (+0x10, +0x14) skip events
  * already past.
  */
-extern "C" void cAvalanche_readFromReplayFrame(int* self)
+extern "C" void cAvalanche_readFromReplayFrame(cBxReplayFrame* self)
 {
     struct {
         int ids[16];
@@ -2459,8 +2454,7 @@ extern "C" void cAvalanche_readFromReplayFrame(int* self)
         clearSlot_RR(&slots_RR()[i]);
     }
     {
-        sVEntry_RR* vtEntry = &(*(sVEntry_RR**)self)[2];
-        vtEntry->fn(vthis(self, *vtEntry), buf.ids, 0x80);
+        self->read((char*)buf.ids, 0x80);
     }
     for (i = 0; i < 16; i++) {
         if (buf.ids[i] >= 0) {

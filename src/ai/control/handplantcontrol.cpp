@@ -864,10 +864,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_writeToReplayFrame);
  *
  * @param obj  replay stream to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cHandplantMotion_writeToReplayFrame(cHandplantMotion* self, cReplayFramePtr* obj)
+extern "C" void cHandplantMotion_writeToReplayFrame(cHandplantMotion* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn(vthis(obj, vt[1]), self, 160);
+    obj->write((const char*)self, 160);
 }
 #endif
 
@@ -882,10 +881,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cHandplantMotion_readFromReplayFrame)
  *
  * @param obj  replay stream to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cHandplantMotion_readFromReplayFrame(cHandplantMotion* self, cReplayFramePtr* obj)
+extern "C" void cHandplantMotion_readFromReplayFrame(cHandplantMotion* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn(vthis(obj, vt[2]), self, 160);
+    obj->read((char*)self, 160);
 }
 #endif
 
@@ -1778,10 +1776,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_writeToReplayFrame);
  *
  * @param obj  replay stream to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cAirMotion_writeToReplayFrame(cAirMotion* self, cReplayFramePtr* obj)
+extern "C" void cAirMotion_writeToReplayFrame(cAirMotion* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn(vthis(obj, vt[1]), self, 0x4);
+    obj->write((const char*)self, 0x4);
 }
 #endif
 
@@ -1796,10 +1793,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_readFromReplayFrame);
  *
  * @param obj  replay stream to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cAirMotion_readFromReplayFrame(cAirMotion* self, cReplayFramePtr* obj)
+extern "C" void cAirMotion_readFromReplayFrame(cAirMotion* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn(vthis(obj, vt[2]), self, 0x4);
+    obj->read((char*)self, 0x4);
 }
 #endif
 
@@ -2904,10 +2900,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_writeToReplayFrame);
  *
  * @param obj  replay stream to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cRailslideMotion_writeToReplayFrame(cRailslideMotion* self, cReplayFramePtr* obj)
+extern "C" void cRailslideMotion_writeToReplayFrame(cRailslideMotion* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn(vthis(obj, vt[1]), self, 80);
+    obj->write((const char*)self, 80);
 }
 #endif
 
@@ -2922,10 +2917,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_readFromReplayFrame)
  *
  * @param obj  replay stream to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cRailslideMotion_readFromReplayFrame(cRailslideMotion* self, cReplayFramePtr* obj)
+extern "C" void cRailslideMotion_readFromReplayFrame(cRailslideMotion* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn(vthis(obj, vt[2]), self, 80);
+    obj->read((char*)self, 80);
 }
 #endif
 
@@ -4787,10 +4781,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_writeToReplayFrame);
  *
  * @param obj  replay stream to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cGroundMotion_writeToReplayFrame(cGroundMotion* self, cReplayFramePtr* obj)
+extern "C" void cGroundMotion_writeToReplayFrame(cGroundMotion* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn(vthis(obj, vt[1]), self, 0x18);
+    obj->write((const char*)self, 0x18);
 }
 #endif
 
@@ -4805,10 +4798,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_readFromReplayFrame);
  *
  * @param obj  replay stream to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cGroundMotion_readFromReplayFrame(cGroundMotion* self, cReplayFramePtr* obj)
+extern "C" void cGroundMotion_readFromReplayFrame(cGroundMotion* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn(vthis(obj, vt[2]), self, 0x18);
+    obj->read((char*)self, 0x18);
 }
 #endif
 
@@ -8534,6 +8526,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cMissionRider__cMissionRider);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "ai/control/handplantcontrol_classes.h"
+#include "replay/bxreplayframe.h"
 
 /**
  * Destroys a mission rider; the source body is empty, so all the work is compiler-generated.

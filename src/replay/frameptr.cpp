@@ -14,6 +14,7 @@
 #include "main/ssxapp.h"
 #include "ai/ai.h"
 #include "camera/camera.h"
+#include "replay/bxreplayframe.h"
 //100%
 INCLUDE_ASM("replay/frameptr", cReplayFramePtr_initBlock);
 #ifdef SKIP_ASM
@@ -235,13 +236,6 @@ struct sRefWorld_EB48 {
 
 extern "C" void* func_003512C0(void* table, unsigned int id);
 
-class cStream_EB48 {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* buf, int size);
-    virtual void read(void* buf, int size);
-};
-
 static inline void* refToPtr_EB48(unsigned int p)
 {
     return (void*)(p << 2);
@@ -276,11 +270,11 @@ struct sRefH_EB48 {
  * @param stream  the frame pointer to read from
  * @return the instance record, or 0 for no id or an unknown one
  */
-extern "C" void* cReplayFramePtr_readReplayInstance(cReplayFramePtr* stream)
+extern "C" void* cReplayFramePtr_readReplayInstance(cBxReplayFrame* stream)
 {
     void* instRecord = 0;
     sRefH_EB48 savedId;
-    ((cStream_EB48*)stream)->read(&savedId, 4);
+    stream->read((char*)&savedId, 4);
     if (~savedId.id != 0) {
         instRecord = func_003512C0(SSXApp->Game->InstanceMan, savedId.id);
         if (instRecord == 0) {
@@ -307,13 +301,6 @@ struct sRefWorld_EC08 {
 };
 
 // asm-label view: cReplayFramePtr_readReplayInstance declares cWorld_m_pTheWorld with its own struct type in this unit
-
-class cStream_EC08 {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* buf, int size);
-    virtual void read(void* buf, int size);
-};
 
 struct sRec_EC08 {
     unsigned int id;
@@ -357,11 +344,11 @@ static inline void* lookup_EC08(unsigned int id)
  * @param owner  the node that becomes the record's owner (stored at +0xC)
  * @return the instance record, or 0 for no id
  */
-extern "C" void* cReplayFramePtr_readReplayInstance1(cReplayFramePtr* stream, void* owner)
+extern "C" void* cReplayFramePtr_readReplayInstance1(cBxReplayFrame* stream, void* owner)
 {
     sNode_EC08* instRecord = 0;
     sRec_EC08 rec;
-    ((cStream_EC08*)stream)->read(&rec, 8);
+    stream->read((char*)&rec, 8);
     if (~rec.id != 0) {
         void* cachedRecord = lookup_EC08(rec.id);
         instRecord = (sNode_EC08*)cachedRecord;
@@ -393,13 +380,13 @@ struct sFpSerObj {
  * @param out  the frame pointer to write to
  * @param obj  the instance record, or null
  */
-extern "C" void cReplayFramePtr_writeReplayInstance(sFpSerObj* out, tInstanceRecord* obj)
+extern "C" void cReplayFramePtr_writeReplayInstance(cBxReplayFrame* out, tInstanceRecord* obj)
 {
     unsigned int id = 0xFFFFFFFF;
     if (((void*)obj) != 0) {
         id = obj->m_RID;
     }
-    out->vt[1].fn(vthis(out, out->vt[1]), &id, 4);
+    out->write((const char*)&id, 4);
 }
 #endif
 
@@ -416,7 +403,7 @@ INCLUDE_ASM("replay/frameptr", cReplayFramePtr_writeReplayInstance1);
  * @param out  the frame pointer to write to
  * @param obj  the node whose instance is written
  */
-extern "C" void cReplayFramePtr_writeReplayInstance1(sFpSerObj* out, cInstanceNode* obj)
+extern "C" void cReplayFramePtr_writeReplayInstance1(cBxReplayFrame* out, cInstanceNode* obj)
 {
     struct {
         unsigned int id;
@@ -430,7 +417,7 @@ extern "C" void cReplayFramePtr_writeReplayInstance1(sFpSerObj* out, cInstanceNo
     } else {
         rec.type = 0;
     }
-    out->vt[1].fn(vthis(out, out->vt[1]), &rec, 8);
+    out->write((const char*)&rec, 8);
 }
 #endif
 

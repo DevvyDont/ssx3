@@ -36,20 +36,20 @@ extern char str_ScriptObjCam[];
  * @param camera  the owning cCamera
  * @return self
  */
-extern "C" void* cScriptCameraController_cScriptCameraController(void* self, void* script, cCamera* camera)
+extern "C" void* cScriptCameraController_cScriptCameraController(cScriptCameraController* self, void* script, cCamera* camera)
 {
     int i;
     cCameraController_cCameraController(self, camera);
-    *(void***)((char*)self + 0x14) = cScriptCameraController_vtbl;
+    self->mVtbl = cScriptCameraController_vtbl;
     *(int*)self = 3;
-    *(void***)((char*)self + 0x1C) = (void**)operator_new_K2(8, str_ScriptObjCamArray, 0, 0);
+    self->ScriptObj = (cScriptObjCamera**)((void**)operator_new_K2(8, str_ScriptObjCamArray, 0, 0));
     for (i = 0; i < 2; i++) {
-        void** slot = (void**)((i << 2) + *(int*)((char*)self + 0x1C));
+        void** slot = (void**)((i << 2) + (int)self->ScriptObj);
         *slot = cScriptObjCamera_cScriptObjCamera(cMemMan_alloc(0x80, str_ScriptObjCam, 0, 0), script);
-        cScriptObject_InitScriptObject((*(void***)((char*)self + 0x1C))[i]);
+        cScriptObject_InitScriptObject(self->ScriptObj[i]);
     }
-    *(int*)((char*)self + 0x18) = 0;
-    return self;
+    self->IsActive = 0;
+    return ((void*)self);
 }
 #endif
 

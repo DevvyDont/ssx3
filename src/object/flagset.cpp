@@ -13,6 +13,7 @@
 #include "ui/uithing.h"
 #include "bx/math3d.h"
 #include "world/world.h"
+#include "replay/bxreplayframe.h"
 
 //100%
 INCLUDE_ASM("object/flagset", cFlagSet_CreateMesh);
@@ -1814,11 +1815,10 @@ extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
  */
-extern "C" void cFenceNode_writeToReplayFrame(cFenceNode* self, void* stream)
+extern "C" void cFenceNode_writeToReplayFrame(cFenceNode* self, cBxReplayFrame* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[1].fn(vthis(stream, vt[1]), (char*)&self->FenceData, 36);
+    stream->write((const char*)&self->FenceData, 36);
 }
 #endif
 
@@ -2269,14 +2269,12 @@ extern "C" void cMoveNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cAnimNode_writeToReplayFrame(cAnimNode* self, void* stream)
+extern "C" void cAnimNode_writeToReplayFrame(cAnimNode* self, cBxReplayFrame* stream)
 {
     int dummy;
     cMoveNode_writeToReplayFrame(&self->unk_014, stream);
-    sVEntry<void(void*, void*, int)>* writeFn = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeFn->fn(vthis(stream, *writeFn), self, 20);
-    writeFn = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
-    writeFn->fn(vthis(stream, *writeFn), &dummy, 4);
+    stream->write((const char*)self, 20);
+    stream->write((const char*)&dummy, 4);
 }
 #endif
 

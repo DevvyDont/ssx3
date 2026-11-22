@@ -10,6 +10,7 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
+#include "replay/bxreplayframe.h"
 
 //100%
 INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_gainFocus);
@@ -1676,10 +1677,9 @@ INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_writeToReplayFrame);
  *
  * @param obj  the replay frame pointer to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cWipeoutMotion_writeToReplayFrame(cWipeoutMotion* self, cReplayFramePtr* obj)
+extern "C" void cWipeoutMotion_writeToReplayFrame(cWipeoutMotion* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[1].fn(vthis(obj, vt[1]), self, 0x40);
+    obj->write((const char*)self, 0x40);
 }
 #endif
 
@@ -1695,10 +1695,9 @@ INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_readFromReplayFrame);
  *
  * @param obj  the replay frame pointer to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cWipeoutMotion_readFromReplayFrame(cWipeoutMotion* self, cReplayFramePtr* obj)
+extern "C" void cWipeoutMotion_readFromReplayFrame(cWipeoutMotion* self, cBxReplayFrame* obj)
 {
-    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
-    vt[2].fn(vthis(obj, vt[2]), self, 0x40);
+    obj->read((char*)self, 0x40);
 }
 #endif
 

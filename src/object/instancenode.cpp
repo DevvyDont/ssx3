@@ -5,6 +5,7 @@
 #include "vtable.h"
 #include "object/deadnode.h"
 #include "object/instancenode.h"
+#include "replay/bxreplayframe.h"
 
 //100%
 INCLUDE_ASM("object/instancenode", cInstanceNode_cInstanceNode);
@@ -292,11 +293,10 @@ extern "C" void cSortObjNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  the replay frame stream to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cInstanceNode_writeToReplayFrame(cInstanceNode* self, void* stream)
+extern "C" void cInstanceNode_writeToReplayFrame(cInstanceNode* self, cBxReplayFrame* stream)
 {
     cSortObjNode_writeToReplayFrame(self, stream);
-    sInstNodeVEntry* vt = *(sInstNodeVEntry**)stream;
-    vt[6].fn(vthis(stream, vt[6]), self);
+    stream->writeReplayInstance((cInstanceNode*)self);
 }
 #endif
 

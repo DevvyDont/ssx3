@@ -9,16 +9,11 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/ai.h"
+#include "replay/bxreplayframe.h"
 
 //100%
 INCLUDE_ASM("replay/replay", cReplay_restoreFrame);
 #ifdef SKIP_ASM
-class cStreamRF {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* buf, int size);
-    virtual void read(void* buf, int size);
-};
 class cStreamRB;
 class cStreamRDB;
 struct cReplayFramePtr;
@@ -61,7 +56,7 @@ struct sVtS_DBF0 { short delta; short index; void (*fn)(void*, void*); };
  *
  * @param stream  the frame's stream (On Tour cReplayFramePtr* framePtr)
  */
-extern "C" void cReplay_restoreFrame(cReplay* self, cStreamRF* stream)
+extern "C" void cReplay_restoreFrame(cReplay* self, cBxReplayFrame* stream)
 {
     void* bm = &gBucketMan;
     cBucketMan_mergeBucket(bm, (void*)1);
@@ -70,12 +65,12 @@ extern "C" void cReplay_restoreFrame(cReplay* self, cStreamRF* stream)
     cWorld_resetMap(cWorld_m_pTheWorld);
     cReplayFramePtr_readRewind((cReplayFramePtr*)stream);
     char buf[0x18];
-    stream->read(buf, 0x18);
+    stream->read((char*)buf, 0x18);
     AIsetseed(buf);
     int savedValue;
-    stream->read(&savedValue, 4);
+    stream->read((char*)&savedValue, 4);
     cSortObjNode_ObjNodeSortIndex = savedValue;
-    stream->read(&savedValue, 4);
+    stream->read((char*)&savedValue, 4);
     cSortObjNode_ObjNodeNoSortIndex = savedValue;
     cWorldPainterMan_reset_0();
     cBE_readFromReplayFrame(cBE_getBE(), stream);

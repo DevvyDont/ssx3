@@ -7,6 +7,7 @@
 #include "bx/appman.h"
 #include "object/floatingnode.h"
 #include "object/instancenode.h"
+#include "replay/bxreplayframe.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cInstanceNode_getBoundBoxInfo(void* self, void* out);
@@ -708,15 +709,13 @@ extern "C" void cMoveNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cFloatingNode_writeToReplayFrame(cFloatingNode* self, void* stream)
+extern "C" void cFloatingNode_writeToReplayFrame(cFloatingNode* self, cBxReplayFrame* stream)
 {
     int has;
     cMoveNode_writeToReplayFrame(self, stream);
     has = ((void*)self->Info) != 0;
-    sFloatingVEntryFA88* vtEntry = &(*(sFloatingVEntryFA88**)stream)[1];
-    vtEntry->fn(vthis(stream, *vtEntry), &has, 4);
-    vtEntry = &(*(sFloatingVEntryFA88**)stream)[1];
-    vtEntry->fn(vthis(stream, *vtEntry), (char*)&self->ZSpring, 72);
+    stream->write((const char*)&has, 4);
+    stream->write((const char*)&self->ZSpring, 72);
 }
 #endif
 

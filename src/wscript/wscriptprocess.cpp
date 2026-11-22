@@ -10,6 +10,7 @@
 #include "main/ssxapp.h"
 #include "ai/ai.h"
 #include "world/worldcache.h"
+#include "replay/bxreplayframe.h"
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_cWScriptProcess);
 #ifdef SKIP_ASM
@@ -837,12 +838,6 @@ void* cWScriptProcess_getScriptCode(void* vself)
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_writeToReplayFrame);
 #ifdef SKIP_ASM
-class cWScriptProcess_writeToReplayFrame_cStream {
-public:
-    // slot N at vtable offset N*8
-    virtual void write(void* data, int size);
-};
-
 class cWScriptTask_writeToReplayFrame_cObj;
 extern "C" int cWScriptTask_writeToReplayFrame(cWScriptTask* a, cWScriptTask_writeToReplayFrame_cObj* obj);
 extern "C" int cWScriptCache_getScriptBase(void* map, int id);
@@ -858,12 +853,12 @@ extern "C" void luno_cLunoTable_writeToReplayFrame(void* obj, void* stream, int 
  *
  * @param stream  the replay frame
  */
-extern "C" void cWScriptProcess_writeToReplayFrame(cWScriptProcess* self, cWScriptProcess_writeToReplayFrame_cStream* stream)
+extern "C" void cWScriptProcess_writeToReplayFrame(cWScriptProcess* self, cBxReplayFrame* stream)
 {
-    stream->write(self, 0x10);
+    stream->write((const char*)self, 0x10);
     int x = cWScriptCache_getScriptBase(cWorld_m_pTheWorld->m_pWScriptCache, (int)self->SectionId);
     int has = self->Local != 0;
-    stream->write(&has, 4);
+    stream->write((const char*)&has, 4);
     if (has) {
         luno_cLunoTable_writeToReplayFrame(self->Local, stream, x);
     }
