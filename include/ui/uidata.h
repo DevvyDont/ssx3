@@ -7,7 +7,8 @@
 // 0x20-byte tUIBaseObject and continues with the kind's own fields from 0x20.
 //
 // Names and layouts: SSX On Tour's DWARF ([O] tUIBaseObject, tUIText, tUITextScroll, tUIIcon, tUIListBox, tUIARGB,
-// tUIAnimation, tUIFrameHeader, tUIKCPBase), placed by retail use ([U], the setUIData functions in ui/uithing,
+// tUIAnimation, tUIFrameHeader, tUIKCPBase, tUIKCPObjectAnimate, tUIHeaderBlock, tUIScreenHeader, tUIKeyframeBlock),
+// placed by retail use ([U], the setUIData functions in ui/uithing,
 // ui/uitext and ui/uiengine; cUIScreen_createObjectByHashName / playFrameByThread in ui/uiscreen; cUIAnimation_updateThing
 // in ui/uianimation). The records are byte data, so On Tour's sizes and offsets hold unchanged (no bools, no vptrs).
 // The derived records repeat tUIBaseObject's members (flat, like main/game.h).
@@ -113,6 +114,44 @@ struct tUIKCPBase {
     unsigned short mPacketSize;     // 0x2 [O]; [U] playFrameByThread steps to the next packet by it
 };
 
+// The object-animate key-channel packet: plays an animation on an object. [O] struct tUIKCPObjectAnimate : tUIKCPBase
+// (0x10) and On Tour cUIScreen::parseObjectAnim's local tUIKCPObjectAnimate * pPacket. tUIKCPBase repeated flat.
+struct tUIKCPObjectAnimate {
+    unsigned char mTag;             // 0x0 [O] tUIKCPBase
+    unsigned char mPad1_tUIKCPBase; // 0x1 [O]
+    unsigned short mPacketSize;     // 0x2 [O]
+    unsigned int mAnimationID;      // 0x4 [O]; [U] cUIScreen_parseObjectAnim: cUIAnimationBank_getAnimationByHashName's hash
+    unsigned int mObjectHashID;     // 0x8 [O]; [U] cUIScreen_parseObjectAnim: cUIScreen_getObjectByHashName's hash
+    unsigned int mPlaybackStatus;   // 0xC [O]; [U] cUIScreen_parseObjectAnim passes it (read as a byte) to
+                                    //     cUIThing_playAnimation
+};
+
+// The UI file's header: offsets (from the file start) of its blocks. [O] struct tUIHeaderBlock (0x18) and On Tour
+// cUIEngine::loadFile's local const tUIHeaderBlock * pHeaderBlock.
+struct tUIHeaderBlock {
+    char unk_000[4];                // 0x00 [O] mSignature; no retail access seen
+    int unk_004;                    // 0x04 [O] mCookie (float); no retail access seen
+    unsigned int mAnimBlockOffset;  // 0x08 [O]; [U] cUIEngine_loadFile hands file + it to cUIAnimationBank_setData
+    unsigned int mScreenBlockOffset; // 0x0C [O]; [U] cUIEngine_addScreenByHashName finds the screen table at file + it
+    unsigned int mTextureBlockOffset; // 0x10 [O]; [U] cUIEngine_loadFile hands file + it to cUITextureBank_setData
+    unsigned int unk_014;           // 0x14 [O] mFontBlockOffset; no retail access seen
+};
+
+// A screen's header: its hash and the offsets (from the header) of its blocks. [O] struct tUIScreenHeader (0x10) and
+// On Tour cUIScreen::setData(tUIScreenHeader * pScreenHeader); cUIScreen::mpScreenHeader (ui/uiscreen.h).
+struct tUIScreenHeader {
+    unsigned int mHashID;           // 0x0 [O]; [U] cUIScreen_getHashName returns it
+    unsigned int mObjectBlockOffset; // 0x4 [O]; [U] cUIScreen_setData: mpObjectBlock = header + it
+    unsigned int mFrameBlockOffset; // 0x8 [O]; [U] cUIScreen_setData: mpKeyframeBlock = header + it
+    unsigned int unk_00C;           // 0xC [O] mAnimBlockOffset; no retail access seen
+};
+
+// A screen's keyframe block: the frame count, then the frames (tUIFrameHeader, each mByteSize long) from 0x4.
+// [O] struct tUIKeyframeBlock (0x4); cUIScreen::mpKeyframeBlock (ui/uiscreen.h).
+struct tUIKeyframeBlock {
+    unsigned int mNumFrames;        // 0x0 [O]; [U] cUIScreen_getFrameByIndex loops over this many frames from +0x4
+};
+
 CHECK_OFFSET(tUIARGB, a, 0x0);
 CHECK_OFFSET(tUIARGB, r, 0x1);
 CHECK_OFFSET(tUIARGB, g, 0x2);
@@ -171,5 +210,30 @@ CHECK_OFFSET(tUIKCPBase, mTag, 0x0);
 CHECK_OFFSET(tUIKCPBase, mPad1_tUIKCPBase, 0x1);
 CHECK_OFFSET(tUIKCPBase, mPacketSize, 0x2);
 CHECK_SIZE(tUIKCPBase, 0x4);
+
+CHECK_OFFSET(tUIKCPObjectAnimate, mTag, 0x0);
+CHECK_OFFSET(tUIKCPObjectAnimate, mPad1_tUIKCPBase, 0x1);
+CHECK_OFFSET(tUIKCPObjectAnimate, mPacketSize, 0x2);
+CHECK_OFFSET(tUIKCPObjectAnimate, mAnimationID, 0x4);
+CHECK_OFFSET(tUIKCPObjectAnimate, mObjectHashID, 0x8);
+CHECK_OFFSET(tUIKCPObjectAnimate, mPlaybackStatus, 0xC);
+CHECK_SIZE(tUIKCPObjectAnimate, 0x10);
+
+CHECK_OFFSET(tUIHeaderBlock, unk_000, 0x00);
+CHECK_OFFSET(tUIHeaderBlock, unk_004, 0x04);
+CHECK_OFFSET(tUIHeaderBlock, mAnimBlockOffset, 0x08);
+CHECK_OFFSET(tUIHeaderBlock, mScreenBlockOffset, 0x0C);
+CHECK_OFFSET(tUIHeaderBlock, mTextureBlockOffset, 0x10);
+CHECK_OFFSET(tUIHeaderBlock, unk_014, 0x14);
+CHECK_SIZE(tUIHeaderBlock, 0x18);
+
+CHECK_OFFSET(tUIScreenHeader, mHashID, 0x0);
+CHECK_OFFSET(tUIScreenHeader, mObjectBlockOffset, 0x4);
+CHECK_OFFSET(tUIScreenHeader, mFrameBlockOffset, 0x8);
+CHECK_OFFSET(tUIScreenHeader, unk_00C, 0xC);
+CHECK_SIZE(tUIScreenHeader, 0x10);
+
+CHECK_OFFSET(tUIKeyframeBlock, mNumFrames, 0x0);
+CHECK_SIZE(tUIKeyframeBlock, 0x4);
 
 #endif /* UI_UIDATA_H */

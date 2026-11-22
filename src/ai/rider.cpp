@@ -109,8 +109,8 @@ extern "C" void* cRider_cRider_impl(cRider* self)
     self->InTunnel = 0;
     self->mGroundPolyId = none;
     *(sKey8_B698*)&self->unk_AAC = t2vect_Zero[0];
-    self->mTrackPathHint = (int*)cMemMan_alloc(0x20, str_Track_path_intersect_info, 0, 0);
-    self->mAIPathHint = (int*)cMemMan_alloc(0x20, str_AI_path_intersect_info, 0, 0);
+    self->mTrackPathHint = (tPathIntersectInfo*)cMemMan_alloc(0x20, str_Track_path_intersect_info, 0, 0);
+    self->mAIPathHint = (tPathIntersectInfo*)cMemMan_alloc(0x20, str_AI_path_intersect_info, 0, 0);
     sRiderAux_B698* aux = new (str_OverlapList, 0, 0) sRiderAux_B698;
     int nash = (int)SSXApp->Game->BXNash;  // the overlap list queries the game's Nash collision grid
     aux->f0 = nash;
@@ -121,8 +121,8 @@ extern "C" void* cRider_cRider_impl(cRider* self)
     self->mOverlapList = aux;
     self->mAttachedEmitterFX = func_002F1850(cMemMan_alloc(168, str_AttachedEmitterFX, 0, 0), self);
     self->mBoltOnFX = cBoltOnFXInterface_cBoltOnFXInterface(cMemMan_alloc(200, str_cBoltOnFXInterface, 0, 0), (int)self, (int)self->mAttachedEmitterFX);
-    self->mLineHint = cMemMan_alloc(0x10, str_Line_Intersect_Hint, 0, 0);
-    self->mWallHint = cMemMan_alloc(0x10, str_Wall_Intersect_Hint, 0, 0);
+    self->mLineHint = (tIntHint*)cMemMan_alloc(0x10, str_Line_Intersect_Hint, 0, 0);
+    self->mWallHint = (tIntHint*)cMemMan_alloc(0x10, str_Wall_Intersect_Hint, 0, 0);
     MEM_fill_v(self->unk_794, 0, 0x20);
     self->mFocusBox = 0;
     self->unk_5B0 = 0;
@@ -225,8 +225,8 @@ extern "C" void cRider__cRider(cRider* self, int flags)
     member = self->mSphereTree;
     if (member != 0)
         cRiderSphereTree__cRiderSphereTree(member, 3);
-    operator_delete(self->mTrackPathHint);
-    operator_delete(self->mAIPathHint);
+    operator_delete((int*)self->mTrackPathHint);
+    operator_delete((int*)self->mAIPathHint);
     member = self->mAirPredictor;
     if (member != 0)
         cAirPredictor__cAirPredictor(member, 3);

@@ -4338,7 +4338,7 @@ INCLUDE_ASM("ai/computer", cRider_checkTrackPathEvents);
 // FAKEMATCH: an extra `dist` read and the `cp` pointer (cp->DistanceLeft re-read) keep jump.c under its duplicate-insn
 // limit; plain form 97.81%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
 // ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
-extern float cPath_intersectPath1_2FB0(void* track, void* pos, void* iPos, float* iDistXY, int* pi, int is2D) __asm__("cPath_intersectPath1");
+extern float cPath_intersectPath1_2FB0(void* track, void* pos, void* iPos, float* iDistXY, tPathIntersectInfo* pi, int is2D) __asm__("cPath_intersectPath1");
 extern char gPaths[];
 
 // cTrackPath's vtable entry (g++ 2.95 layout: this-delta, index, fn).

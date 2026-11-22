@@ -30,6 +30,25 @@ struct cWScriptProcess;
 struct cWScriptTask;
 struct cLunoTable;
 
+// A collect pool: the instances a mission collects (On Tour class cCollectPool : cCollectPoolState, 0x10C; no vptr).
+// FLAT: cCollectPoolState's members. [R] cWScriptMan_cWScriptMan sets the 64 ids to -1 per 0x10C pool and runs
+// cCollectPool_init (PoolId -1, Size / NumInstIds 0, ids -1). The unit's views cWScriptIdTable,
+// cWScriptMan_collectPool_sSlot, sWSSlot_B9A0, cCollectPool_collect_sTable, sEntry_C4A8 (src/wscript/wscriptman.cpp)
+// are this type.
+struct cCollectPool {
+    unsigned int PoolId;            // 0x000 [O]; [U] cWScriptMan_collectPool stores the id (-1 = unused);
+                                    //       cCollectPool_collect / collectCount pass it to the BE mission interface
+    int Size;                       // 0x004 [O]; [U] cWScriptMan_collectPool stores its size argument
+    int NumInstIds;                 // 0x008 [O]; [U] cCollectPool_collect's loop bound; collectInst appends at it
+    unsigned int InstIds[64];       // 0x00C [O] tResourceID[64]; [U] collect compares, collectInst appends
+};
+
+CHECK_OFFSET(cCollectPool, PoolId, 0x000);
+CHECK_OFFSET(cCollectPool, Size, 0x004);
+CHECK_OFFSET(cCollectPool, NumInstIds, 0x008);
+CHECK_OFFSET(cCollectPool, InstIds, 0x00C);
+CHECK_SIZE(cCollectPool, 0x10C);
+
 // A process list: the head of a singly linked cWScriptProcess list (On Tour cProcessList, 4 bytes).
 struct cProcessList {
     cWScriptProcess* List;  // 0x0 [O]
@@ -94,7 +113,7 @@ struct cWScriptMan {
     cProcessList IdleList;             // 0x2B4 [O]; [R] cProcessList_cProcessList; [U] addProcess takes from it
     cProcessList ActiveList;           // 0x2B8 [O]; [R] cProcessList_cProcessList
     cProcessList AddList;              // 0x2BC [O]; [R] cProcessList_cProcessList; [U] addProcess appends to it
-    char CollectPools[1][0x10C];       // 0x2C0 [O] cCollectPool[1]; [R] the ctor's one-pass loop, cCollectPool_init
+    cCollectPool CollectPools[1];      // 0x2C0 [O]; [R] the ctor's one-pass loop, cCollectPool_init
     cLunoTable* GlobalTables[50];      // 0x3CC [O] (60 in On Tour); [R] ctor MEM_fill(+0x3CC, 0, 200); [U] isFunc,
                                        //       purgeGlobalTables
     void* mVtbl;                       // 0x494 [R] ctor = cWScriptMan_vtbl

@@ -98,6 +98,8 @@ struct tInstanceRecord;
 struct tPatchRecord;
 struct tSplineRecord;
 struct bxSphereTree;
+struct cRiderSphereTree;      // intersect/riderspheretree.h
+struct tPathIntersectInfo;    // path/basepath.h
 
 // One path event in range (On Tour struct tPathEventNode, size 0x10; path/basepath.h only forward-declares it). cRider
 // keeps 12 of them at 0x4DC (PathEventsCur). Layout [O]; [U] the path's getEventsInRange fills 16-byte entries
@@ -150,6 +152,26 @@ struct tCollideInfo {
     t4Vector Reflect;           // 0x20 [O] [U]
     float Vel;                  // 0x30 [O] [U]
 };
+
+// A ray-cast cache: the patch and triangle the last line / wall test hit (On Tour struct tIntHint, size 0x10, with an
+// inline Clear()). cRider owns two (mLineHint, mWallHint). [R] cRider's ctor allocates each with
+// cMemMan_alloc(0x10, "Line Intersect Hint" / "Wall Intersect Hint"); [U] cRider_putAt's inline clear (ClearCache_D660
+// in ai/rider.cpp, On Tour tIntHint::Clear) zeroes exactly these widths: word 0x0, halves 0x4 / 0x6, words 0x8 / 0xC.
+struct tIntHint {
+    tPatchRecord* mPatch;       // 0x0 [O]; [U] the clear zeroes it; cRiderHandler_writeToReplayFrame reads the patch's
+                                //      id (+0x150) through it, cRiderHandler_readFromReplayFrame stores the patch back
+    unsigned short mU;          // 0x4 [O]; [U] the clear (sh 0x4)
+    unsigned short mV;          // 0x6 [O]; [U] the clear (sh 0x6)
+    int mFirstTri;              // 0x8 [O] bool (a word in retail); [U] the clear (sw 0x8)
+    int mPrecision;             // 0xC [O] tIntPrecision; [U] the clear (sw 0xC)
+};
+
+CHECK_OFFSET(tIntHint, mPatch, 0x0);
+CHECK_OFFSET(tIntHint, mU, 0x4);
+CHECK_OFFSET(tIntHint, mV, 0x6);
+CHECK_OFFSET(tIntHint, mFirstTri, 0x8);
+CHECK_OFFSET(tIntHint, mPrecision, 0xC);
+CHECK_SIZE(tIntHint, 0x10);
 
 // One snow surface's physics and effects settings (On Tour struct tSurfData, 0xB0). [Staged by views group A.]
 // cGroundMotion_getSlipForce (On Tour getSlipForce(const tSurfData* snow, float v, float gforce)) reads SlipFriction at
@@ -249,7 +271,7 @@ struct cRider {
     /* 0x0F0 */ int mHasRival; // [X] cleared on reset (cRider_initAlways)
     /* 0x0F4 */ int mLastShoveFrame; // [X] cleared on reset (cRider_initAlways)
     /* 0x0F8 */ int mRivalIndex; // [X] set to -1 on reset (cRider_initAlways)
-    /* 0x0FC */ char unk_0FC[0x4];
+    /* 0x0FC */ int PissedOffType; // [O] cRiderState::PissedOffType (eBEAggLevel; +0xA4 there, right after PissedAIIndex = mRivalIndex); [U] cAI_UpdateAggression stores cBEAggressionInterface_getAggression's level here
     /* 0x100 */ int unk_100; // cleared when the rider quits (cRider_doFinishEvent)
     /* 0x104 */ char unk_104[0xC];
     /* 0x110 */ t4Vector mPosition; // [R] getPosition (cRider_getPosition)
@@ -390,8 +412,8 @@ struct cRider {
     /* 0x7B4 */ char unk_7B4[0xC];
     /* 0x7C0 */ char unk_7C0[0xA0] __attribute__((aligned(16))); // copied as one 0xA0-byte block (cRider_SetRiderLights)
     /* 0x860 */ void* mOverlapList; // [X]
-    /* 0x864 */ void* mLineHint; // [X]
-    /* 0x868 */ void* mWallHint; // [X]
+    /* 0x864 */ tIntHint* mLineHint; // [O] cRider::LineHint (tIntHint*); [R] ctor: cMemMan_alloc(0x10, "Line Intersect Hint")
+    /* 0x868 */ tIntHint* mWallHint; // [O] cRider::WallHint (tIntHint*); [R] ctor: cMemMan_alloc(0x10, "Wall Intersect Hint")
     /* 0x86C */ int mAIIndex; // [R] getAIIndex (cRider_getAIIndex); also the character/stat lookup index
     /* 0x870 */ int mViewIndex; // [P] getViewIndex (bracketed +0x114); < 2 = has a split-screen view
     /* 0x874 */ int mIsHuman; // [R] isHuman (cRider_isHuman); isComputer = !mIsHuman
@@ -444,7 +466,7 @@ struct cRider {
         tCollideInfo CollideInfo; // [O] cRider::CollideInfo (+0x1580, before SphereTree = mSphereTree); [U] cRider_checkObjectCollisions stores the collision response here with the hit (On Tour: this+0x1580); cRider_updateSplit10 passes it to doOnCollideScript
         char unk_A60[0x40];
     };
-    /* 0xAA0 */ void* mSphereTree; // [P] getSphereTree (seen)
+    /* 0xAA0 */ cRiderSphereTree* mSphereTree; // [P] getSphereTree (seen); [O] cRider::SphereTree (cRiderSphereTree*); [U] the motions set its sphMask (+0x28, kInAirSphereMask)
     /* 0xAA4 */ int unk_AA4; // shadow drawn this frame (cRider_RenderShadow)
     /* 0xAA8 */ void* mShadow; // [P] getShadow (seen); drawn by cRider_RenderShadow
     /* 0xAAC */ float unk_AAC; // hit f6C (cRider_SetNISGroundVectors); the ctor copies 8 bytes here from t2vect_Zero
@@ -453,8 +475,8 @@ struct cRider {
                                      //     AIPath, then the two intersect infos, as here); [U] the lowest track path wins
     /* 0xAB8 */ cAIPath* AIPath;       // [R] cRider_getAIPath returns it; [O] cRider::AIPath (getAIPath -> cAIPath*);
                                      //     [U] the AI intersects it with mAIPathHint; replay frames store its index
-    /* 0xABC */ int* mAIPathHint; // [X]
-    /* 0xAC0 */ int* mTrackPathHint; // [X]
+    /* 0xABC */ tPathIntersectInfo* mAIPathHint; // [O] cRider::AIPathIntersect (tPathIntersectInfo*, after AIPath); [R] ctor: cMemMan_alloc(0x20, "AI path intersect info"); [U] NodeID (+0x14) = -1 before cPath_intersectPath
+    /* 0xAC0 */ tPathIntersectInfo* mTrackPathHint; // [O] cRider::TrackPathIntersect (tPathIntersectInfo*); [R] ctor: cMemMan_alloc(0x20, "Track path intersect info"); [U] NodeID (+0x14) = -1
     /* 0xAC4 */ int mIsInNIS; // [P] IsInNIS (seen); most updates are skipped while set
     /* 0xAC8 */ int unk_AC8; // set when an anim event fires
     /* 0xACC */ char unk_ACC[0x4];
@@ -487,6 +509,7 @@ CHECK_OFFSET(cRider, RaceRanking, 0xEC);
 CHECK_OFFSET(cRider, mHasRival, 0xF0);
 CHECK_OFFSET(cRider, mLastShoveFrame, 0xF4);
 CHECK_OFFSET(cRider, mRivalIndex, 0xF8);
+CHECK_OFFSET(cRider, PissedOffType, 0xFC);
 CHECK_OFFSET(cRider, unk_100, 0x100);
 CHECK_OFFSET(cRider, mPosition, 0x110);
 CHECK_OFFSET(cRider, mRotation, 0x120);

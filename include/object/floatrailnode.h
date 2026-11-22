@@ -63,6 +63,48 @@ CHECK_OFFSET(tFloatRailNode, InstId, 0x40);
 CHECK_OFFSET(tFloatRailNode, Mesh, 0x44);
 CHECK_SIZE(tFloatRailNode, 0x50);
 
+// World-script data that makes a floating rail (On Tour tMakeFloatRailData, 0x58; same layout). [O] On Tour's
+// cFloatRailNode(tInstanceRecord* pInst, const tMakeFloatRailData* data); [U] cFloatRailNode_cFloatRailNode
+// (src/object/flexrailnode.cpp) reads the 8 instance ids and the 8 meshes and stores LSpring / LDamp / ForceScale into
+// the members of the same names; the cFlexRailNode base ctor (src/object/flexbridgenode.cpp, view sFlexDef_347D90)
+// counts the ids that are not -1 and stores Flags as RailFlags.
+struct tMakeFloatRailData {
+    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read)
+    unsigned int InstId1;           // 0x04 [O] tResourceID; [U] the rail nodes' instance ids, read as an array of 8
+    unsigned int InstId2;           // 0x08 [O]
+    unsigned int InstId3;           // 0x0C [O]
+    unsigned int InstId4;           // 0x10 [O]
+    unsigned int InstId5;           // 0x14 [O]
+    unsigned int InstId6;           // 0x18 [O]
+    unsigned int InstId7;           // 0x1C [O]
+    unsigned int InstId8;           // 0x20 [O]
+    int Mesh1;                      // 0x24 [O]; [U] the nodes' mesh numbers, read as an array of 8
+    int Mesh2;                      // 0x28 [O]
+    int Mesh3;                      // 0x2C [O]
+    int Mesh4;                      // 0x30 [O]
+    int Mesh5;                      // 0x34 [O]
+    int Mesh6;                      // 0x38 [O]
+    int Mesh7;                      // 0x3C [O]
+    int Mesh8;                      // 0x40 [O]
+    int Flags;                      // 0x44 [O]; [U] cFlexRailNode_cFlexRailNode: RailFlags = Flags
+    float LSpring;                  // 0x48 [O]; [U] -> LSpring
+    float LDamp;                    // 0x4C [O]; [U] -> LDamp
+    float ForceScale;               // 0x50 [O]; [U] -> ForceScale
+    char unk_054[0x4];              // 0x54 [O] WScriptNullType null (1 byte) + padding
+};
+
+CHECK_OFFSET(tMakeFloatRailData, unk_000, 0x00);
+CHECK_OFFSET(tMakeFloatRailData, InstId1, 0x04);
+CHECK_OFFSET(tMakeFloatRailData, InstId8, 0x20);
+CHECK_OFFSET(tMakeFloatRailData, Mesh1, 0x24);
+CHECK_OFFSET(tMakeFloatRailData, Mesh8, 0x40);
+CHECK_OFFSET(tMakeFloatRailData, Flags, 0x44);
+CHECK_OFFSET(tMakeFloatRailData, LSpring, 0x48);
+CHECK_OFFSET(tMakeFloatRailData, LDamp, 0x4C);
+CHECK_OFFSET(tMakeFloatRailData, ForceScale, 0x50);
+CHECK_OFFSET(tMakeFloatRailData, unk_054, 0x54);
+CHECK_SIZE(tMakeFloatRailData, 0x58);
+
 struct cFloatRailNode {
     // --- cFlexRailNode (0x60; object/flexrailnode.h): cInstanceNode 0x00-0x1C (object/instancenode.h)
     int unk_00;                     // 0x000 cObjNode's leading word; no ctor writes it (see object/objnode.h)

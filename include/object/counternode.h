@@ -29,6 +29,23 @@
 struct cObjNode;
 struct tInstanceRecord;
 
+// World-script data that makes a counter (On Tour tMakeCounterData, 0xC). [O] On Tour's cCounterNode(bucket,
+// tInstanceRecord* pInst, tMakeCounterData* cdata); [U] cCounterNode_cCounterNode1 (src/object/debouncenode.cpp):
+// Count = StartCount. Retail reads StartCount as a signed halfword (lh +0x4), On Tour declares an int: typed short here
+// so the ctor's load keeps its width.
+struct tMakeCounterData {
+    unsigned int unk_000;           // 0x0 [O] tResourceID InstId (no retail read)
+    short StartCount;               // 0x4 [O] (int there); [U] -> Count (lh)
+    char unk_006[0x2];              // 0x6 [O] StartCount's high half (no retail read)
+    char unk_008[0x4];              // 0x8 [O] WScriptNullType null (1 byte) + padding
+};
+
+CHECK_OFFSET(tMakeCounterData, unk_000, 0x0);
+CHECK_OFFSET(tMakeCounterData, StartCount, 0x4);
+CHECK_OFFSET(tMakeCounterData, unk_006, 0x6);
+CHECK_OFFSET(tMakeCounterData, unk_008, 0x8);
+CHECK_SIZE(tMakeCounterData, 0xC);
+
 struct cCounterNode {
     // --- cInstanceNode (0x1C; object/instancenode.h): cObjNode / cTypeObjNode / cSortObjNode first
     int unk_00;                     // 0x00 cObjNode's leading word; no ctor writes it (see object/objnode.h)

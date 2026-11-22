@@ -29,7 +29,39 @@
 
 struct cPS2DeferManager;
 struct cTextureMan;
-struct tDisplayMode;
+
+// One display mode of cPS2GraphicsMan::DisplayModes (EA's name: [O] tDisplayMode, the type of cPSPGraphicsMan's
+// DisplayModes; On Tour's PSP record is 0x54 and only its leading name lines up). Size 0xA4: [P] GetScreenWidth /
+// GetScreenHeight index DisplayModes[CurrentDisplayMode] by 0xA4; [U] cPS2GraphicsMan_GetDisplayModeName returns
+// DisplayModes + mode * 0xA4, cPS2GraphicsMan_GetDisplayMode walks NumDisplayModes records of 0xA4.
+struct tDisplayMode {
+    char m_name[64];                // 0x00 [O] char m_name[64]; [U] GetDisplayModeName returns the record's start ([O]
+                                    //      const char* GetDisplayModeName(int mode))
+    char unk_040[0x40];             // 0x40 no retail access seen
+    int unk_080;                    // 0x80 [U] SetDisplayMode1 passes it to func_0037BD98 as the display width
+    int unk_084;                    // 0x84 [U] SetDisplayMode1: the display height
+    int unk_088;                    // 0x88 [P] GetScreenWidth; [U] GetDisplayMode matches the width; func_0037BD98's
+                                    //      frame-buffer width
+    int unk_08C;                    // 0x8C [P] GetScreenHeight; [U] GetDisplayMode matches the height
+    int unk_090;                    // 0x90 [U] the display pixel format (GetDisplayMode: 32 -> 0, 24 -> 1, 16 -> 2)
+    int unk_094;                    // 0x94 [U] the frame-buffer pixel format (GetDisplayMode, SetDisplayMode1)
+    int unk_098;                    // 0x98 [U] the z-buffer format (GetDisplayMode: 49 = PSMZ24)
+    int unk_09C;                    // 0x9C [U] SetDisplayMode1: a flag passed with its inverse
+    int unk_0A0;                    // 0xA0 [U] the mode id GetDisplayMode matches; SetDisplayMode1's last argument
+};
+
+CHECK_OFFSET(tDisplayMode, m_name, 0x00);
+CHECK_OFFSET(tDisplayMode, unk_040, 0x40);
+CHECK_OFFSET(tDisplayMode, unk_080, 0x80);
+CHECK_OFFSET(tDisplayMode, unk_084, 0x84);
+CHECK_OFFSET(tDisplayMode, unk_088, 0x88);
+CHECK_OFFSET(tDisplayMode, unk_08C, 0x8C);
+CHECK_OFFSET(tDisplayMode, unk_090, 0x90);
+CHECK_OFFSET(tDisplayMode, unk_094, 0x94);
+CHECK_OFFSET(tDisplayMode, unk_098, 0x98);
+CHECK_OFFSET(tDisplayMode, unk_09C, 0x9C);
+CHECK_OFFSET(tDisplayMode, unk_0A0, 0xA0);
+CHECK_SIZE(tDisplayMode, 0xA4);
 
 // One weighted matrix of a blended (skinning) matrix (On Tour struct tMdfBlendedMatrixComponent, 0x4).
 // [U] cPS2GraphicsMan_ResolveCharModel rebases m_iMatrixId by the part's bone offset (w[j*4+2] += tbl[w[j*4+3]]);
@@ -289,7 +321,10 @@ struct cPS2GraphicsMan {
     char mIrradianceInfo[0xA0];     // 0x6BB0 [P] Get/SetIrradiance (tIrradianceInfo, copied as 10 qwords)
     int unk_6C50;                   // 0x6C50 [R] Init zeroes it
     int unk_6C54[4];                // 0x6C54 [R] Init zeroes them
-    char unk_6C64[0x70];            // 0x6C64 [U] per-view depth-fog entries, 0x20 each (func_0036ABA0, func_0036A428)
+    char unk_6C64[0x40];            // 0x6C64 [U] per-view depth-fog entries, 0x20 each (func_0036ABA0, func_0036A428)
+    float unk_6CA4[2][6];           // 0x6CA4 [U] per-view screen-tint entries (colour r, g, b, fill r, g, b): func_00390458
+                                    //        writes cScreenTint_m_ColourR..m_FillB at +0x6CA4 + view * 0x18; func_003904A0
+                                    //        reads the six floats (skips the neutral 1, 1, 1 / 0, 0, 0)
     float unk_6CD4[2][7];           // 0x6CD4 [U] per-view bloom parameters (func_0036C740, func_0036C790)
     void (*mPhase2Callback)(int);   // 0x6D0C [X] phase2Callback; [U] cPS2GraphicsMan_SetLensFXCallBack sets, func_00382760 calls
     int mPhase2CallbackArg;         // 0x6D10 [X]
@@ -503,6 +538,7 @@ CHECK_OFFSET(cPS2GraphicsMan, mIrradianceInfo, 0x6BB0);
 CHECK_OFFSET(cPS2GraphicsMan, unk_6C50, 0x6C50);
 CHECK_OFFSET(cPS2GraphicsMan, unk_6C54, 0x6C54);
 CHECK_OFFSET(cPS2GraphicsMan, unk_6C64, 0x6C64);
+CHECK_OFFSET(cPS2GraphicsMan, unk_6CA4, 0x6CA4);
 CHECK_OFFSET(cPS2GraphicsMan, unk_6CD4, 0x6CD4);
 CHECK_OFFSET(cPS2GraphicsMan, mPhase2Callback, 0x6D0C);
 CHECK_OFFSET(cPS2GraphicsMan, mPhase2CallbackArg, 0x6D10);

@@ -22,6 +22,24 @@
 
 struct cActiveTriggerNode;
 
+// One trigger a view's rider is inside (On Tour class cActiveTriggerNode, 0xC with two bools; retail's bools are
+// words, so 0x10). [R] cActiveTriggerList_add: cMemMan_alloc(0x10, "Active Camera Trigger"), Trigger = the item, Next =
+// the old head, IsNewFlag = IsActiveFlag = 1; [U] cCameraTriggerMan_checkCollisions plays the enter action of nodes
+// whose IsNewFlag is set and the exit action (then cActiveTriggerList_remove) of nodes whose IsActiveFlag is clear.
+struct cActiveTriggerNode {
+    tCameraTrigger* Trigger;        // 0x0 [O]; [R] add stores the item; [U] checkCollisions reads its TriggerID (+0x0)
+                                    //       and Enter / Exit actions (+0xC / +0x10)
+    cActiveTriggerNode* Next;       // 0x4 [O]; [R] add links the old head; [U] checkCollisions walks it
+    int IsNewFlag;                  // 0x8 [O] bool (word); [R] add = 1; [U] checkCollisions: enter when set
+    int IsActiveFlag;               // 0xC [O] bool (word); [R] add = 1; [U] checkCollisions: exit when clear
+};
+
+CHECK_OFFSET(cActiveTriggerNode, Trigger, 0x0);
+CHECK_OFFSET(cActiveTriggerNode, Next, 0x4);
+CHECK_OFFSET(cActiveTriggerNode, IsNewFlag, 0x8);
+CHECK_OFFSET(cActiveTriggerNode, IsActiveFlag, 0xC);
+CHECK_SIZE(cActiveTriggerNode, 0x10);
+
 // The triggers a view's rider is currently inside (On Tour class cActiveTriggerList, 0x4): a singly linked node list
 // (methods cActiveTriggerList_* in camera/trigger/triggeralgorithms and cameratriggervolumes).
 struct cActiveTriggerList {

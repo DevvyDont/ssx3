@@ -31,6 +31,38 @@
 struct cCTBoundObj;
 struct cCTSpline;
 
+// cCTAction (retail and On Tour 0x8): the base of every action, and the type a trigger's EnterAction / ExitAction and
+// cChaseCameraController_createChaseAlgorithmBlend's action argument have ([O] createChaseAlgorithmBlend(...,
+// cCTAction* action, float blendRate)). [R] get_camaction stores D_0045C2E8 first in every action it builds, then Type;
+// the "Camera Action None" action is a bare cCTAction (cMemMan_alloc(0x8)).
+struct cCTAction {
+    int Type;                   // 0x00 [O] eCTActionType; [R] get_camaction stores 0..3 per kind; [U] doTriggerAction
+                                //      switches on it
+    void** mVtbl;               // 0x04 [R] D_0045C2E8 (slot 1 purge)
+};
+
+CHECK_OFFSET(cCTAction, Type, 0x00);
+CHECK_OFFSET(cCTAction, mVtbl, 0x04);
+CHECK_SIZE(cCTAction, 0x8);
+
+// cCTActionSwitchCam (retail and On Tour 0x10): base cCTAction. Switches the chase camera.
+// [R] get_camaction: cMemMan_alloc(0x10, "Camera Switch Action"), Type 0; [U] get_cCTActionSwitchCam stores Type 0 and
+// reads SwitchType (get_uint, +0x8) and BlendTime (get_float, +0xC) from the stream.
+struct cCTActionSwitchCam {
+    // --- cCTAction (0x8)
+    int Type;                   // 0x00 [O] eCTActionType; [R] 0 = eCTActionSwitchCam; [U] get_cCTActionSwitchCam (sw $0)
+    void** mVtbl;               // 0x04 [R] D_0045C2E8, then the derived vtable
+    // --- cCTActionSwitchCam
+    int SwitchType;             // 0x08 [O] eCTSwitchType; [U] get_cCTActionSwitchCam (get_uint)
+    float BlendTime;            // 0x0C [O]; [U] get_cCTActionSwitchCam (get_float)
+};
+
+CHECK_OFFSET(cCTActionSwitchCam, Type, 0x00);
+CHECK_OFFSET(cCTActionSwitchCam, mVtbl, 0x04);
+CHECK_OFFSET(cCTActionSwitchCam, SwitchType, 0x08);
+CHECK_OFFSET(cCTActionSwitchCam, BlendTime, 0x0C);
+CHECK_SIZE(cCTActionSwitchCam, 0x10);
+
 // cCTActionBoundedCam (retail and On Tour 0x34): base cCTAction. A free trigger camera kept inside a bound object.
 struct cCTActionBoundedCam {
     // --- cCTAction (0x8)

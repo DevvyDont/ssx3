@@ -103,4 +103,107 @@ CHECK_OFFSET(cCTVolumeEllipse, mVtbl, 0x24);
 CHECK_OFFSET(cCTVolumeEllipse, Type, 0x28);
 CHECK_SIZE(cCTVolumeEllipse, 0x2C);
 
+// cCTBoundObj (retail and On Tour 0x2C): base cCTObject. The shape a bounded trigger camera (cCTActionBoundedCam::
+// BoundObj) is kept inside. [R] get_camboundobj (camera/trigger/cameratriggerfactory) allocates each kind with its tag
+// ("Camera Ellipse BoundObj" 0x2C Type 0, "Camera Box BoundObj" 0x2C Type 1, "Camera Line BoundObj" 0x44,
+// "Camera Point BoundObj"), the cCTObject defaults and cCTObject_vtbl then the kind's vtable (cCTBoundObjEllipse_vtbl,
+// cCTBoundObjBox_vtbl, cCTBoundObjLine_vtbl); [U] createChaseAlgorithmBlend tests Type == 2 for a line.
+struct cCTBoundObj {
+    // --- cCTObject (0x28)
+    t3Vector Pos;               // 0x00 [O]; [R] = t3vect_Zero (get_camboundobj); [U] limitPoint / worldPoint translate by it
+    float Heading;              // 0x0C [O]; [R] 0; [U] worldPoint rotates by it
+    float Pitch;                // 0x10 [O]; [R] 0; [U] worldPoint rotates by it
+    float Roll;                 // 0x14 [O]; [R] 0; [U] worldPoint rotates by it
+    t3Vector Scale;             // 0x18 [O]; [R] (1, 1, 1); [U] worldPoint scales by it
+    void** mVtbl;               // 0x24 [R] cCTObject_vtbl, then the derived vtable
+    // --- cCTBoundObj
+    int Type;                   // 0x28 [O] eCTBoundObjType; [R] get_camboundobj stores the kind (ellipse 0, box 1);
+                                //      [U] createChaseAlgorithmBlend: 2 = line
+};
+
+CHECK_OFFSET(cCTBoundObj, Pos, 0x00);
+CHECK_OFFSET(cCTBoundObj, Heading, 0x0C);
+CHECK_OFFSET(cCTBoundObj, Pitch, 0x10);
+CHECK_OFFSET(cCTBoundObj, Roll, 0x14);
+CHECK_OFFSET(cCTBoundObj, Scale, 0x18);
+CHECK_OFFSET(cCTBoundObj, mVtbl, 0x24);
+CHECK_OFFSET(cCTBoundObj, Type, 0x28);
+CHECK_SIZE(cCTBoundObj, 0x2C);
+
+// cCTBoundObjEllipse (retail and On Tour 0x2C): base cCTBoundObj <- cCTObject; no members of its own.
+// [R] get_camboundobj: cMemMan_alloc(0x2C, "Camera Ellipse BoundObj"), Type 0; [O] limitPoint(cCTBoundObjEllipse*,
+// t4Vector&) = retail cCTBoundObjEllipse_limitPoint (reads Pos, Heading/Pitch/Roll, Scale).
+struct cCTBoundObjEllipse {
+    // --- cCTObject (0x28)
+    t3Vector Pos;               // 0x00 [O]; [R] = t3vect_Zero (get_camboundobj); [U] limitPoint / worldPoint translate by it
+    float Heading;              // 0x0C [O]; [R] 0; [U] worldPoint rotates by it
+    float Pitch;                // 0x10 [O]; [R] 0; [U] worldPoint rotates by it
+    float Roll;                 // 0x14 [O]; [R] 0; [U] worldPoint rotates by it
+    t3Vector Scale;             // 0x18 [O]; [R] (1, 1, 1); [U] worldPoint scales by it
+    void** mVtbl;               // 0x24 [R] cCTObject_vtbl, then the derived vtable
+    // --- cCTBoundObj (0x2C)
+    int Type;                   // 0x28 [O] eCTBoundObjType; [R] 0 (sw $0)
+};
+
+CHECK_OFFSET(cCTBoundObjEllipse, Pos, 0x00);
+CHECK_OFFSET(cCTBoundObjEllipse, Heading, 0x0C);
+CHECK_OFFSET(cCTBoundObjEllipse, Pitch, 0x10);
+CHECK_OFFSET(cCTBoundObjEllipse, Roll, 0x14);
+CHECK_OFFSET(cCTBoundObjEllipse, Scale, 0x18);
+CHECK_OFFSET(cCTBoundObjEllipse, mVtbl, 0x24);
+CHECK_OFFSET(cCTBoundObjEllipse, Type, 0x28);
+CHECK_SIZE(cCTBoundObjEllipse, 0x2C);
+
+// cCTBoundObjLine (retail and On Tour 0x44): base cCTBoundObj <- cCTObject. A segment between two local points.
+// [R] get_camboundobj: cMemMan_alloc(0x44, "Camera Line BoundObj"); [O] worldPoint1 / worldPoint2 / limitPoint
+// (cCTBoundObjLine*) = retail cCTBoundObjLine_worldPoint1 / _worldPoint2 / _limitPoint (Point[0] at 0x2C, Point[1] at 0x38).
+struct cCTBoundObjLine {
+    // --- cCTObject (0x28)
+    t3Vector Pos;               // 0x00 [O]; [R] = t3vect_Zero (get_camboundobj); [U] limitPoint / worldPoint translate by it
+    float Heading;              // 0x0C [O]; [R] 0; [U] worldPoint rotates by it
+    float Pitch;                // 0x10 [O]; [R] 0; [U] worldPoint rotates by it
+    float Roll;                 // 0x14 [O]; [R] 0; [U] worldPoint rotates by it
+    t3Vector Scale;             // 0x18 [O]; [R] (1, 1, 1); [U] worldPoint scales by it
+    void** mVtbl;               // 0x24 [R] cCTObject_vtbl, then the derived vtable
+    // --- cCTBoundObj (0x2C)
+    int Type;                   // 0x28 [O] eCTBoundObjType; [U] createChaseAlgorithmBlend: 2 = line
+    // --- cCTBoundObjLine
+    t3Vector Point[2];          // 0x2C [O]; [U] worldPoint1 transforms Point[0] (lwc1 0x2C/0x30/0x34), worldPoint2
+                                //      Point[1] (0x38/0x3C/0x40)
+};
+
+CHECK_OFFSET(cCTBoundObjLine, Pos, 0x00);
+CHECK_OFFSET(cCTBoundObjLine, Heading, 0x0C);
+CHECK_OFFSET(cCTBoundObjLine, Pitch, 0x10);
+CHECK_OFFSET(cCTBoundObjLine, Roll, 0x14);
+CHECK_OFFSET(cCTBoundObjLine, Scale, 0x18);
+CHECK_OFFSET(cCTBoundObjLine, mVtbl, 0x24);
+CHECK_OFFSET(cCTBoundObjLine, Type, 0x28);
+CHECK_OFFSET(cCTBoundObjLine, Point, 0x2C);
+CHECK_SIZE(cCTBoundObjLine, 0x44);
+
+// cCTSpline (retail and On Tour 0x58): base cCTObject. The 4 control points of a spline trigger camera
+// (cCTActionSpline::Spline). [R] get_camspline: cMemMan_alloc(0x58, ...); [O] worldPoint(cCTSpline*, int i) = retail
+// cCTSpline_worldPoint (transforms Point[i], view sCtmSrc_0D20 corners[4] at 0x28).
+struct cCTSpline {
+    // --- cCTObject (0x28)
+    t3Vector Pos;               // 0x00 [O]; [R] = t3vect_Zero (get_camboundobj); [U] limitPoint / worldPoint translate by it
+    float Heading;              // 0x0C [O]; [R] 0; [U] worldPoint rotates by it
+    float Pitch;                // 0x10 [O]; [R] 0; [U] worldPoint rotates by it
+    float Roll;                 // 0x14 [O]; [R] 0; [U] worldPoint rotates by it
+    t3Vector Scale;             // 0x18 [O]; [R] (1, 1, 1); [U] worldPoint scales by it
+    void** mVtbl;               // 0x24 [R] cCTObject_vtbl, then the derived vtable
+    // --- cCTSpline
+    t3Vector Point[4];          // 0x28 [O]; [U] cCTSpline_worldPoint reads Point[i] (createChaseAlgorithmBlend asks for 0..3)
+};
+
+CHECK_OFFSET(cCTSpline, Pos, 0x00);
+CHECK_OFFSET(cCTSpline, Heading, 0x0C);
+CHECK_OFFSET(cCTSpline, Pitch, 0x10);
+CHECK_OFFSET(cCTSpline, Roll, 0x14);
+CHECK_OFFSET(cCTSpline, Scale, 0x18);
+CHECK_OFFSET(cCTSpline, mVtbl, 0x24);
+CHECK_OFFSET(cCTSpline, Point, 0x28);
+CHECK_SIZE(cCTSpline, 0x58);
+
 #endif /* CAMERA_TRIGGER_CAMERATRIGGERVOLUMES_H */

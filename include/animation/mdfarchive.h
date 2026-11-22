@@ -12,6 +12,22 @@
 struct tMdfArchive;
 struct tMdfModelHeader;
 
+// The header of a loaded MDF (model) archive (On Tour struct tMdfArchive, 0xC). [O] cMdfArchive::linkArchive(const
+// tMdfArchive* archive); [U] cMdfArchive_linkArchive: ModelHeaders = archive + mHeaderOffset (lh +0x6), Data = archive +
+// mBodyOffset (lw +0x8); cMdfArchive_findModelPart / getModelPartPtr loop over mNumModels (lh +0x4).
+struct tMdfArchive {
+    int unk_00;                     // 0x0 [O] mCookie (not read in retail)
+    short mNumModels;               // 0x4 [O]; [U] findModelPart / getModelPartPtr loop bound
+    short mHeaderOffset;            // 0x6 [O]; [U] linkArchive: ModelHeaders = archive + it
+    int mBodyOffset;                // 0x8 [O]; [U] linkArchive: Data = archive + it
+};
+
+CHECK_OFFSET(tMdfArchive, unk_00, 0x0);
+CHECK_OFFSET(tMdfArchive, mNumModels, 0x4);
+CHECK_OFFSET(tMdfArchive, mHeaderOffset, 0x6);
+CHECK_OFFSET(tMdfArchive, mBodyOffset, 0x8);
+CHECK_SIZE(tMdfArchive, 0xC);
+
 struct cMdfArchive {
     void* Archive;                  // 0x000 [O]
     tMdfArchive* ArchiveHeader;     // 0x004 [O]

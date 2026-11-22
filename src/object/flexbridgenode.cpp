@@ -1213,7 +1213,7 @@ extern "C" void cFlexBridgeNode_render(cFlexBridgeNode* self)
     char* renderer = (char*)self->GridMesh;
     if (renderer != 0) {
         sVE7_7B80* hv = *(sVE7_7B80**)(renderer + 4);
-        hv[7].fn(renderer + hv[7].delta, mtx, (self->Instance)->unk_094, 0);
+        hv[7].fn(renderer + hv[7].delta, mtx, (self->Instance)->m_MaterialBlock, 0);
     } else {
         sVE96_7B80* ctxVtbl = *(sVE96_7B80**)(ctx + 0x10D8);
         ctxVtbl[96].fn(ctx + ctxVtbl[96].delta, self->Instance, 0, 0, 0);

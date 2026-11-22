@@ -43,7 +43,6 @@ struct tSSXHiveScriptMasterTableHeader;
 struct tSSXHiveScriptMaster;
 struct tSSXHiveScriptFilterTableHeader;
 struct tSSXHiveScriptFilterCategory;
-struct tSSXScriptSetupInfoLinked;
 struct tNISList;
 
 // One script data bank (On Tour struct tSSXScriptBankInfo, 0x10; retail clears it with tSSXScriptBankInfo_Clear).
@@ -129,6 +128,102 @@ CHECK_OFFSET(tSSXScriptHeader, endFadeFromTransitionFrames, 0x16);
 CHECK_OFFSET(tSSXScriptHeader, scriptIndex, 0x18);
 CHECK_OFFSET(tSSXScriptHeader, bankNum, 0x1C);
 CHECK_SIZE(tSSXScriptHeader, 0x20);
+
+// tSSXScriptSetupInfo (0x10): a script request's cast and view (On Tour tSSXScriptSetupInfo; same layout). [U]
+// cSSXScriptEngine_RequestScriptByCategory fills the three AI indexes from its parameters of the same names;
+// cSSXScriptEngine_GetSubjectRider reads them for subjects 0..2 (a negative index = no rider);
+// cSSXScriptEngine_ReleaseScriptSetupInfo sets all four words to -1; PlayRequestScript stores the view index and
+// cScriptObjCameraManager_IsMatchingEntity compares it.
+struct tSSXScriptSetupInfo {
+    int mainCharAIIndex;            // 0x0 [O]; [U] subject 0
+    int supportChar0AIIndex;        // 0x4 [O]; [U] subject 1
+    int supportChar1AIIndex;        // 0x8 [O]; [U] subject 2
+    int viewIndex;                  // 0xC [O]; [U] PlayRequestScript / IsMatchingEntity
+};
+
+CHECK_OFFSET(tSSXScriptSetupInfo, mainCharAIIndex, 0x0);
+CHECK_OFFSET(tSSXScriptSetupInfo, supportChar0AIIndex, 0x4);
+CHECK_OFFSET(tSSXScriptSetupInfo, supportChar1AIIndex, 0x8);
+CHECK_OFFSET(tSSXScriptSetupInfo, viewIndex, 0xC);
+CHECK_SIZE(tSSXScriptSetupInfo, 0x10);
+
+// tSSXScriptSetupInfoLinked (0x14): a setup info on the engine's free list (On Tour : tSSXScriptSetupInfo + pNext).
+// [R] Load allocates 10 x 0x14 ("SetupInfoHeap", mpSetupInfoHeap). FLAT: the base's members are written out.
+struct tSSXScriptSetupInfoLinked {
+    // --- tSSXScriptSetupInfo
+    int mainCharAIIndex;            // 0x00 [O]
+    int supportChar0AIIndex;        // 0x04 [O]
+    int supportChar1AIIndex;        // 0x08 [O]
+    int viewIndex;                  // 0x0C [O]
+    // --- tSSXScriptSetupInfoLinked
+    tSSXScriptSetupInfoLinked* pNext; // 0x10 [O]; [U] AllocScriptSetupInfo pops mpSetupInfoUnused through it and
+                                    //      clears it; ReleaseScriptSetupInfo pushes the record back
+};
+
+CHECK_OFFSET(tSSXScriptSetupInfoLinked, mainCharAIIndex, 0x00);
+CHECK_OFFSET(tSSXScriptSetupInfoLinked, viewIndex, 0x0C);
+CHECK_OFFSET(tSSXScriptSetupInfoLinked, pNext, 0x10);
+CHECK_SIZE(tSSXScriptSetupInfoLinked, 0x14);
+
+// tSSXHeaderActor: the SSX header of an actor entity's script data (GetSSXActorHeader; On Tour tSSXHeaderActor, 0x30
+// there). Retail has no 64-bit `character` word at 0x8: its base position and rotation sit 0xC lower than On Tour's
+// (0x8.. here, 0x14.. there); what retail keeps of On Tour's 0x2..0x13 (character, hidden, scriptEndLocation,
+// hideIllegalBoltOn, isRidingBoard) is in 0x2..0x7 and not placed (cSSXScriptEngine_OnStartScript reads a short at
+// 0x2 as a character mask, view sScriptOpt_9A70). Laid out through the last member retail reads.
+struct tSSXHeaderActor {
+    signed char role;               // 0x00 [O]; [U] cSSXScriptEngine_OnStartScript maps it to a character slot through
+                                    //      D_00482608 (view sScriptOpt_9A70 slot)
+    signed char anchorPos;          // 0x01 [O]; [U] cScriptObjRider_OnStartObjectUse passes it to GetAnchorOrientation
+    char unk_002[0x6];              // 0x02 see above
+    float basePosX;                 // 0x08 [O] (0x14 there); [U] OnStartObjectUse's base offset x
+    float basePosY;                 // 0x0C [O]; [U] ... y
+    float basePosZ;                 // 0x10 [O]; [U] ... z
+    float baseRotZ;                 // 0x14 [O]; [U] OnStartObjectUse: degrees -> rz (+0x78), applied negated about Z
+    float baseRotY;                 // 0x18 [O]; [U] ... ry (+0x74), about Y
+    float baseRotX;                 // 0x1C [O]; [U] ... rx (+0x70), about X
+};
+
+CHECK_OFFSET(tSSXHeaderActor, role, 0x00);
+CHECK_OFFSET(tSSXHeaderActor, anchorPos, 0x01);
+CHECK_OFFSET(tSSXHeaderActor, unk_002, 0x02);
+CHECK_OFFSET(tSSXHeaderActor, basePosX, 0x08);
+CHECK_OFFSET(tSSXHeaderActor, basePosY, 0x0C);
+CHECK_OFFSET(tSSXHeaderActor, basePosZ, 0x10);
+CHECK_OFFSET(tSSXHeaderActor, baseRotZ, 0x14);
+CHECK_OFFSET(tSSXHeaderActor, baseRotY, 0x18);
+CHECK_OFFSET(tSSXHeaderActor, baseRotX, 0x1C);
+CHECK_SIZE(tSSXHeaderActor, 0x20);
+
+// tSSXHeaderCameraAlgorithmic (0x20): the SSX header of an algorithmic camera entity's script data
+// (GetSSXCameraAlgorithmicHeader; On Tour tSSXHeaderCameraAlgorithmic, same offsets). [U]
+// cScriptObjCamera_CalculateBaseTransform_SE reads the three rotations (degrees) at On Tour's offsets;
+// cScriptEntityCamera_OnInSeqLock reads the sub type at +0x1C (src/scripter/bxscriptengine.cpp).
+struct tSSXHeaderCameraAlgorithmic {
+    float unk_000;                  // 0x00 [O] nearPlane
+    float unk_004;                  // 0x04 [O] farPlane
+    float baseRotZ;                 // 0x08 [O]; [U] -> rz
+    float baseRotY;                 // 0x0C [O]; [U] -> ry
+    float baseRotX;                 // 0x10 [O]; [U] -> rx
+    float unk_014;                  // 0x14 [O] stickiness
+    float unk_018;                  // 0x18 [O] maxSpeed
+    signed char subType;            // 0x1C [O]; [U] OnInSeqLock: mSubType = this byte (entity type 3)
+    signed char unk_01D;            // 0x1D [O] subject
+    signed char unk_01E;            // 0x1E [O] areAnglesWorldRelative
+    signed char unk_01F;            // 0x1F [O] padding
+};
+
+CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, unk_000, 0x00);
+CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, unk_004, 0x04);
+CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, baseRotZ, 0x08);
+CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, baseRotY, 0x0C);
+CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, baseRotX, 0x10);
+CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, unk_014, 0x14);
+CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, unk_018, 0x18);
+CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, subType, 0x1C);
+CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, unk_01D, 0x1D);
+CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, unk_01E, 0x1E);
+CHECK_OFFSET(tSSXHeaderCameraAlgorithmic, unk_01F, 0x1F);
+CHECK_SIZE(tSSXHeaderCameraAlgorithmic, 0x20);
 
 struct tSSXScriptBankInfo {
     void* dataBankHandle; // 0x0 [O]; [R] cDataManager attach handle (SyncLoadScriptBank); [U] detached by PurgeScriptBank

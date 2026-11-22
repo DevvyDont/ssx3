@@ -11,6 +11,48 @@
 #include "layout.h"
 
 struct tCameraTrigger;
+struct cCTVolume;               // camera/trigger/cameratriggervolumes.h
+struct cCTAction;               // camera/trigger/cameratriggeractions.h
+
+// A trigger's node in the world's space hash (On Tour cCTNode : cTypedSpaceNode : Node, 0x10; the same shape as
+// object/railspacenode.h's cRailSpaceNode). [R] the trigger ctor inlined in cCameraTriggerList_loadFromBuffer sets
+// type 4 (tCameraTrigger +0x1C); [U] the hash walks (descend / WalkList_4848 in cameratriggerfactory, walk_D320 in
+// cameratriggerman) follow next, keep the nodes whose type is 4 and take their Trigger (+0xC).
+struct cCTNode {
+    cCTNode* next;                  // 0x00 [O] nash Node::next; [U] the walks follow it (lw 0x0)
+    cCTNode* prev;                  // 0x04 [O] nash Node::prev
+    int type;                       // 0x08 [O] cTypedSpaceNode::type (eSpaceNodeType); [R] 4 for a camera trigger;
+                                    //      [U] the walks compare it with 4
+    tCameraTrigger* Trigger;        // 0x0C [O]; [U] the walks read the trigger through it
+};
+
+CHECK_OFFSET(cCTNode, next, 0x00);
+CHECK_OFFSET(cCTNode, prev, 0x04);
+CHECK_OFFSET(cCTNode, type, 0x08);
+CHECK_OFFSET(cCTNode, Trigger, 0x0C);
+CHECK_SIZE(cCTNode, 0x10);
+
+// One camera trigger (On Tour struct tCameraTrigger, 0x24): a volume, the actions played on entering / leaving it and
+// its space-hash node. [R] cCameraTriggerList_loadFromBuffer: new (0x24, "Camera Trigger") with the inline ctor
+// (view tCameraTrigger_K3: TriggerID 0, GameMode 3, Volume / EnterAction / ExitAction 0, SpaceNode.type 4), one per
+// Triggers[] entry; [U] cCameraTriggerMan_checkCollisions records TriggerID on the trigger stack and plays EnterAction /
+// ExitAction (doTriggerAction_D320).
+struct tCameraTrigger {
+    unsigned int TriggerID;         // 0x00 [O]; [R] ctor 0; [U] checkCollisions: recordEnter / recordExit key
+    unsigned int GameMode;          // 0x04 [O]; [R] ctor 3
+    cCTVolume* Volume;              // 0x08 [O]; [R] ctor 0
+    cCTAction* EnterAction;         // 0x0C [O]; [R] ctor 0; [U] checkCollisions plays it on entry
+    cCTAction* ExitAction;          // 0x10 [O]; [R] ctor 0; [U] checkCollisions plays it on exit
+    cCTNode SpaceNode;              // 0x14 [O]; [R] ctor: type (0x1C) = 4
+};
+
+CHECK_OFFSET(tCameraTrigger, TriggerID, 0x00);
+CHECK_OFFSET(tCameraTrigger, GameMode, 0x04);
+CHECK_OFFSET(tCameraTrigger, Volume, 0x08);
+CHECK_OFFSET(tCameraTrigger, EnterAction, 0x0C);
+CHECK_OFFSET(tCameraTrigger, ExitAction, 0x10);
+CHECK_OFFSET(tCameraTrigger, SpaceNode, 0x14);
+CHECK_SIZE(tCameraTrigger, 0x24);
 
 struct cCameraTriggerList {
     tCameraTrigger** Triggers;      // 0x00 [O]; [U] loadFromBuffer allocates it (NumTriggers entries)

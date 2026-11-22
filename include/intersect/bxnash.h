@@ -53,6 +53,25 @@ CHECK_OFFSET(nash_Node, next, 0x000);
 CHECK_OFFSET(nash_Node, prev, 0x004);
 CHECK_SIZE(nash_Node, 0x8);
 
+// A typed object filed in the nash (On Tour class cTypedSpaceNode : Node, 0xC): the link plus its eSpaceNodeType
+// (kSNT_SplineSegment 1, kSNT_Rail 2, kSNT_FlexRail 3, kSNT_CameraTrigger 4, kSNT_AudioVolume 5, kSNT_Light 6,
+// kSNT_FogVol 7, kSNT_Halo 8). cOverlapList::typed[] (intersect/overlaplist.h) holds these; the concrete records start
+// with the same three words (cRailSpaceNode / cFlexRailSpaceNode in object/railspacenode.h, tSplineSegmentRecord's
+// m_iIntersect[3] in world/worldrecords.h), so a query casts by type to reach their members (+0xC Rail / FlexNode,
+// +0x68 m_Parent).
+struct cTypedSpaceNode {
+    nash_Node* next;                // 0x000 [O] Node::next; [U] the nash cell walks (as nash_Node)
+    nash_Node* prev;                // 0x004 [O] Node::prev
+    int type;                       // 0x008 [O] eSpaceNodeType; [U] cOverlapList_splineIntersect, collect_337A48,
+                                    //       objs_33ED60, nash_Cell_descend6 switch on it; cPS2ChunkResolve_resolve /
+                                    //       unresolve store 1 / 6 / 7 / 8 when filing segments, lights, fog, halos
+};
+
+CHECK_OFFSET(cTypedSpaceNode, next, 0x000);
+CHECK_OFFSET(cTypedSpaceNode, prev, 0x004);
+CHECK_OFFSET(cTypedSpaceNode, type, 0x008);
+CHECK_SIZE(cTypedSpaceNode, 0xC);
+
 // nash::NodeList (On Tour class NodeList, 0x4): the head of one per-type list of a Cell.
 struct nash_NodeList {
     nash_Node* head;                // 0x000 [O]; [U] nash_Cell_addnode pushes, remnode unlinks (sList_003284B8::head)

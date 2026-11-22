@@ -130,4 +130,29 @@ CHECK_OFFSET(LobbyApiRefT, mpDebugProc, 0x548);
 CHECK_OFFSET(LobbyApiRefT, mRequestId, 0x54C);
 CHECK_SIZE(LobbyApiRefT, 0x550);
 
+// LobbyApiMsgT (0x10): the event LobbyApi hands to the routines LobbyMan installs (func_003E8248): the routine is
+// called as (LobbyApiRefT*, LobbyApiMsgT*, context). Name: DirtySock's, from the July 2003 preview's mangled LobbyMan
+// callbacks (on*__8LobbyManP12LobbyApiMsgT, e.g. onauthentication / onchatmsg / onplaymsg / onPingReceived, and
+// LobbyFunctor's invoke(LobbyApiRefT*, LobbyApiMsgT*, void*)); [R] LobbyApi builds it as four words on the stack
+// (func_003E7F70: {3, 'disc', reason, 0}); [U] every LobbyMan handler reads the reply's tag text at 0xC (TagFieldFind),
+// onchatmsg switches on 0x4, most handlers test the status at 0x8. Member names are not known (no DirtySock source or
+// On Tour LobbyApi here).
+#ifndef __cplusplus
+typedef struct LobbyApiMsgT LobbyApiMsgT;
+#endif
+
+struct LobbyApiMsgT {
+    int unk_00;                         // 0x0 [R] func_003E7F70: 3 (the event type)
+    int unk_04;                         // 0x4 [R] the event kind, a FourCC ('disc'); [U] onchatmsg switches on it
+    int unk_08;                         // 0x8 [R] func_003E7F70: the reason code; [U] the handlers' status test
+    char* unk_0C;                       // 0xC [U] the reply's tag text (cDirtysock_tag_TagFieldFind's source); 0 in
+                                        //     func_003E7F70's event
+};
+
+CHECK_OFFSET(LobbyApiMsgT, unk_00, 0x0);
+CHECK_OFFSET(LobbyApiMsgT, unk_04, 0x4);
+CHECK_OFFSET(LobbyApiMsgT, unk_08, 0x8);
+CHECK_OFFSET(LobbyApiMsgT, unk_0C, 0xC);
+CHECK_SIZE(LobbyApiMsgT, 0x10);
+
 #endif /* EALIB_LOBBYAPI_H */

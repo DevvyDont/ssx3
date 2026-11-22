@@ -14,6 +14,7 @@
 #ifndef __cplusplus
 typedef struct SNDLINKNODE SNDLINKNODE;
 typedef struct SNDSTREAMREQUEST SNDSTREAMREQUEST;
+typedef struct SNDLINKLIST SNDLINKLIST;
 #endif
 
 // [O] struct SNDLINKNODE {SNDLINKNODE* pnext; SNDLINKNODE* pprev;} (0x8): the link of EA SND's intrusive lists.
@@ -25,6 +26,20 @@ struct SNDLINKNODE {
 CHECK_OFFSET(SNDLINKNODE, pnext, 0x0);
 CHECK_OFFSET(SNDLINKNODE, pprev, 0x4);
 CHECK_SIZE(SNDLINKNODE, 0x8);
+
+// [O] struct SNDLINKLIST {SNDLINKNODE* phead; SNDLINKNODE* ptail; int items;} (0xC) and the list functions
+// SNDLINKI_push(SNDLINKLIST* plist, SNDLINKNODE* pnode) / pushtail / pop / remove / init; [U] the retail SNDLINKI_*
+// functions (unit ealib/seg_2B4578) read and write phead 0x0, ptail 0x4 and the count 0x8.
+struct SNDLINKLIST {
+    struct SNDLINKNODE* phead;      // 0x0 [O]; [U] push / pop / remove
+    struct SNDLINKNODE* ptail;      // 0x4 [O]; [U] pushtail / remove
+    int items;                      // 0x8 [O]; [U] incremented by push / pushtail, decremented by pop / remove
+};
+
+CHECK_OFFSET(SNDLINKLIST, phead, 0x0);
+CHECK_OFFSET(SNDLINKLIST, ptail, 0x4);
+CHECK_OFFSET(SNDLINKLIST, items, 0x8);
+CHECK_SIZE(SNDLINKLIST, 0xC);
 
 // [O] struct SNDSTREAMREQUEST (0x28) and SNDSTRMI_framescallback(int pktchan, int numframes, void* pclientdata),
 // SNDSTRMI_removerequest(int sndrequesthandle); [U] the retail frames callback (view Q_6B10) passes sndrequesthandle

@@ -398,7 +398,7 @@ extern "C" void cFlagSet_render(cFlagSet* flagSet)
             char* gridMesh = (char*)flagSet->mGridMesh;
             if (gridMesh != 0) {
                 sVE7_34B9B0* hv = *(sVE7_34B9B0**)(gridMesh + 4);
-                hv[7].fn(gridMesh + hv[7].delta, pos, instRecord->unk_094, &mat);
+                hv[7].fn(gridMesh + hv[7].delta, pos, instRecord->m_MaterialBlock, &mat);
             } else {
                 sVE96_34B9B0* drawSlot = *(sVE96_34B9B0**)(ctx + 0x10D8);
                 drawSlot[96].fn(ctx + drawSlot[96].delta, instRecord, 0, 0, 0);
@@ -1795,7 +1795,7 @@ extern "C" void cFenceNode_render(cFenceNode* self)
     char* gridMesh = (char*)self->GridMesh;
     if (gridMesh != 0) {
         sVE7_34B9B0* hv = *(sVE7_34B9B0**)(gridMesh + 4);
-        hv[7].fn(gridMesh + hv[7].delta, pos, model->unk_094, 0);
+        hv[7].fn(gridMesh + hv[7].delta, pos, model->m_MaterialBlock, 0);
     } else {
         sVE96_34B9B0* vt96 = *(sVE96_34B9B0**)(ctx + 0x10D8);
         vt96[96].fn(ctx + vt96[96].delta, model, 0, 0, 0);

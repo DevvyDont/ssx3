@@ -1424,7 +1424,7 @@ extern "C" void* cWScriptMan_cWScriptMan(cWScriptMan* self)
     cProcessList_cProcessList((char*)&self->IdleList);
     cProcessList_cProcessList((char*)&self->ActiveList);
     cProcessList_cProcessList((char*)&self->AddList);
-    char* collectPool = self->CollectPools[0];
+    char* collectPool = (char*)self->CollectPools;
     int i;
     for (i = 0; i != -1; i--) {
         char* next = collectPool + 0x10C;
@@ -1466,10 +1466,10 @@ extern "C" void cWScriptMan__cWScriptMan(cWScriptMan* self, int flags)
     self->mVtbl = cWScriptMan_vtbl;
     cWScriptMan_purgeGlobalTables(self);
     cWScriptMan_TheWScriptMan = 0;
-    if (self->CollectPools[0] != 0) {
-        char* collectPool = self->CollectPools[0] + 0x10C;
-        while (self->CollectPools[0] != collectPool) {
-            collectPool -= 0x10C;
+    if (self->CollectPools != 0) {
+        cCollectPool* collectPool = self->CollectPools + 1;
+        while (self->CollectPools != collectPool) {
+            collectPool--;
         }
     }
     cProcessList__cProcessList((char*)&self->AddList, 2);

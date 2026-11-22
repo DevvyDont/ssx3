@@ -36,9 +36,10 @@
 
 #include "layout.h"
 #include "bx/math3d.h"
+#include "world/instancerecord.h"   // tf4Vector (tBxBSPNode)
 
 struct cWorldCache;
-struct tBxBSPNode; // 0x60 bytes: box min/max, three split planes, then child/child/hull words fixed up to pointers
+struct tBxBSPNode;
 
 // The .sdb section database header (On Tour: tStreamDataHeader_PSP; the PS2 tStreamDataHeader has the same 0x50 size).
 struct tStreamDataHeader {
@@ -108,6 +109,44 @@ CHECK_OFFSET(tBxBSPHull, m_iStreamOffset, 0x04);
 CHECK_OFFSET(tBxBSPHull, m_uiTotalDataSize, 0x08);
 CHECK_OFFSET(tBxBSPHull, m_usNumData, 0x0C);
 CHECK_SIZE(tBxBSPHull, 0x44);
+
+// One BSP tree node (On Tour tBxBSPNode, 0x60; same layout). The three words at 0x50 are node / hull indices in the
+// file that cWorldView_init fixes up to pointers (cWorldView::mp_Nodes / mp_Hulls). Union member names from the prx
+// DIEs. [U] the tree walks (cWorldView_recursiveIsValid / recursiveTreeFocus in world/worldview,
+// cWorldView_recursiveFlushPages / recursiveIsEmptyPages in world/worldcache; views sSection_9BB8, sSection_A028,
+// cWorldView_recursiveFlushPages_sNode) skip a node whose box misses theirs, touch / test its hull page, and visit
+// the in child when the in plane's dot with the box minimum is negative, the out child likewise with the maximum.
+struct tBxBSPNode {
+    tf4Vector m_v4BoxMin;           // 0x00 [O]; [U] the overlap test's minimum
+    tf4Vector m_v4BoxMax;           // 0x10 [O]; [U] the overlap test's maximum; recursiveTreeFocus's distance box
+    tf4Vector m_v4SplitPlaneIn;     // 0x20 [O]; [U] dotted with the box minimum to visit the in child
+    tf4Vector m_v4SplitPlaneOut;    // 0x30 [O]; [U] dotted with the box maximum to visit the out child
+    tf4Vector unk_040;              // 0x40 [O] m_v4SplitPlane (no retail read seen)
+    union {
+        tBxBSPNode* m_pInChild;     // 0x50 [O]; [U] the first child the walks visit
+        int m_iInChild;             // 0x50 [O]; [R] the index before cWorldView_init's fix-up
+    };
+    union {
+        tBxBSPNode* m_pOutChild;    // 0x54 [O]; [U] the second child
+        int m_iOutChild;            // 0x54 [O]; [R] ditto
+    };
+    union {
+        tBxBSPHull* m_pHull;        // 0x58 [O]; [U] the node's hull page (m_uiHullIndex is the page id), 0 = none
+        int m_iHull;                // 0x58 [O]; [R] ditto
+    };
+    unsigned int unk_05C;           // 0x5C [O] pad
+};
+
+CHECK_OFFSET(tBxBSPNode, m_v4BoxMin, 0x00);
+CHECK_OFFSET(tBxBSPNode, m_v4BoxMax, 0x10);
+CHECK_OFFSET(tBxBSPNode, m_v4SplitPlaneIn, 0x20);
+CHECK_OFFSET(tBxBSPNode, m_v4SplitPlaneOut, 0x30);
+CHECK_OFFSET(tBxBSPNode, unk_040, 0x40);
+CHECK_OFFSET(tBxBSPNode, m_pInChild, 0x50);
+CHECK_OFFSET(tBxBSPNode, m_pOutChild, 0x54);
+CHECK_OFFSET(tBxBSPNode, m_pHull, 0x58);
+CHECK_OFFSET(tBxBSPNode, unk_05C, 0x5C);
+CHECK_SIZE(tBxBSPNode, 0x60);
 
 // Per-section load state (On Tour tSectionState).
 struct tSectionState {

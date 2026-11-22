@@ -679,7 +679,7 @@ extern "C" void cWScriptMan_runGlobalScripts(cWScriptMan* self)
     {
         int k;
         for (k = 0; k < 1; k++) {
-            cCollectPool_init((cWScriptIdTable*)self->CollectPools[k]);
+            cCollectPool_init((cWScriptIdTable*)&self->CollectPools[k]);
         }
     }
     saved = self->Being;
@@ -2486,7 +2486,7 @@ struct cWScriptMan_collectPool_sSlot {
  */
 extern "C" void cWScriptMan_collectPool(cWScriptMan* self, unsigned int id, int size)
 {
-    cWScriptMan_collectPool_sSlot* pool = (cWScriptMan_collectPool_sSlot*)(self->CollectPools[0]);
+    cWScriptMan_collectPool_sSlot* pool = (cWScriptMan_collectPool_sSlot*)self->CollectPools;
     int i;
     for (i = 0; i < 1; i++, pool++) {
         if (pool->id == id) {
@@ -2533,7 +2533,7 @@ struct sWSSlot_B9A0 {
  */
 extern "C" void cWScriptMan_collect(cWScriptMan* self, int rider, int id, int instId)
 {
-    sWSSlot_B9A0* slots = (sWSSlot_B9A0*)(self->CollectPools[0]);
+    sWSSlot_B9A0* slots = (sWSSlot_B9A0*)self->CollectPools;
     int i;
     for (i = 0; i < 1; i++) {
         if (slots[i].id == id) {

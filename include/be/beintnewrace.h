@@ -142,6 +142,46 @@ CHECK_OFFSET(tBEEventDB, iValidMode, 0x00);
 CHECK_OFFSET(tBEEventDB, strEventName, 0x04);
 CHECK_SIZE(tBEEventDB, 0x54);
 
+// tBELocationDB: one race location (17 tracks, 5 stations and the debug track). [O] On Tour struct tBELocationDB
+// {eBELocationID locationID; char locationName[32]; char shortName[16]; char fileName[16]; char bigfileName[32];
+// eBEPeakID segmentID; eBELocationType type; int scriptID; eLocationDifficulty difficulty;} (0x74) and the static
+// cBELibrary::locationDB; [O] On Tour `const tBELocationDB & cBENewRaceInterface::getLocation()`. Retail's
+// cBELibrary_locationDB (0x0043D950) holds 23 records of 0x64 ([R] cBENewRaceInterface_getLocation indexes it by
+// iLocationIdx * 0x64; the data: 0, "Snow Jam", "Snow Jam", "ARA1", "BAM" ... 22, "Debug Track", "DEBUG", "dbg", "DBG"),
+// so bigfileName is 16 bytes in retail (On Tour 32). The enum members are words (int) here.
+// The table itself is not declared here: be/bedbprofile, be/beintreward, be/beintplayer and be/beintnewrace still
+// declare cBELibrary_locationDB with their own views.
+struct tBELocationDB {
+    int locationID;                 // 0x00 [O] eBELocationID; [R] each record holds its own index (0..22); [U]
+                                    //      cBENewRaceInterface_getLocationIDFromScript returns it
+    char locationName[32];          // 0x04 [O]; [R] "Snow Jam", "Metro-City", ...; [U] cBENewRaceInterface_getLocationName1
+                                    //      returns this + 0x4; debugfe prints it
+    char shortName[16];             // 0x24 [O]; [R] the short forms ("Metro", "Ridge", "Intimid", "DEBUG")
+    char fileName[16];              // 0x34 [O]; [R] "ARA1", "BRA2", ... "dbg"; [U] setLocationFile strcpys the name here;
+                                    //      debugfe prints it
+    char bigfileName[16];           // 0x44 [O] (On Tour [32]); [R] "BAM" / "DBG"; [U] setLocationFile strcpys here (+0x10
+                                    //      from fileName); debugfe prints it
+    int segmentID;                  // 0x54 [O] eBEPeakID; [R] 0, 0, 1, 1, 2 ... (the location's peak); [U]
+                                    //      cBERewardInterface_getTrackPeakID returns it; the map screen reads it as the peak
+    int type;                       // 0x58 [O] eBELocationType; [R] 0 for the 17 tracks, 1 for the five stations; [U]
+                                    //      cBENewRaceInterface_getLocationType returns it
+    int scriptID;                   // 0x5C [O]; [R] 0..22 (-1 for the debug track); [U]
+                                    //      cBENewRaceInterface_getLocationIDFromScript searches it
+    int difficulty;                 // 0x60 [O] eLocationDifficulty; [R] 0..2 rising within each peak; [U]
+                                    //      cBENewRaceInterface_getLocationDifficulty returns it
+};
+
+CHECK_OFFSET(tBELocationDB, locationID, 0x00);
+CHECK_OFFSET(tBELocationDB, locationName, 0x04);
+CHECK_OFFSET(tBELocationDB, shortName, 0x24);
+CHECK_OFFSET(tBELocationDB, fileName, 0x34);
+CHECK_OFFSET(tBELocationDB, bigfileName, 0x44);
+CHECK_OFFSET(tBELocationDB, segmentID, 0x54);
+CHECK_OFFSET(tBELocationDB, type, 0x58);
+CHECK_OFFSET(tBELocationDB, scriptID, 0x5C);
+CHECK_OFFSET(tBELocationDB, difficulty, 0x60);
+CHECK_SIZE(tBELocationDB, 0x64);
+
 extern tBEPathDB cBELibrary_gamePathDB[3];      // [O] cBELibrary::gamePathDB; [R] 0x0043E700
 extern tBEEventDB cBELibrary_gameEventDB[];     // [O] cBELibrary::gameEventDB (tBEEventDB[15] in On Tour); [R] 0x0043E978
 

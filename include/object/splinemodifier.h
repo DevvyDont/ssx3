@@ -18,6 +18,38 @@
 #include "world/worldview.h"
 #include "object/spline3d.h"
 
+// World-script data that adds a spline modifier (On Tour tAddSplineData, 0x30; same layout). [O] On Tour's
+// cSplineModifier(const tAddSplineData& sdata); [U] cSplineModifier_cSplineModifier1 (src/object/multiparticle.cpp)
+// reads every member from SplineId to ForceTime at these offsets and widths.
+struct tAddSplineData {
+    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read)
+    unsigned int SplineId;          // 0x04 [O] tResourceID; [U] cSpline_init(&Spline, SplineId)
+    int Sequence;                   // 0x08 [O]; [U] -> SequenceType
+    int Orient;                     // 0x0C [O]; [U] -> OrientType
+    float Speed;                    // 0x10 [O]; [U] cSplineModifier_setSpeed; its sign picks the direction
+    float Heading;                  // 0x14 [O]; [U] degrees -> HeadTweak (radians)
+    float StartDistance;            // 0x18 [O]; [U] -> OffsetDistance when non-zero
+    float RandomDistance;           // 0x1C [O]; [U] OffsetDistance += AIrandf(-1, 1) * RandomDistance
+    int Start;                      // 0x20 [O]; [U] Start = Start != 0
+    float Force;                    // 0x24 [O]; [U] -> Force (x 100)
+    float ForceTime;                // 0x28 [O]; [U] -> ForceTime
+    char unk_02C[0x4];              // 0x2C [O] WScriptNullType null (1 byte) + padding
+};
+
+CHECK_OFFSET(tAddSplineData, unk_000, 0x00);
+CHECK_OFFSET(tAddSplineData, SplineId, 0x04);
+CHECK_OFFSET(tAddSplineData, Sequence, 0x08);
+CHECK_OFFSET(tAddSplineData, Orient, 0x0C);
+CHECK_OFFSET(tAddSplineData, Speed, 0x10);
+CHECK_OFFSET(tAddSplineData, Heading, 0x14);
+CHECK_OFFSET(tAddSplineData, StartDistance, 0x18);
+CHECK_OFFSET(tAddSplineData, RandomDistance, 0x1C);
+CHECK_OFFSET(tAddSplineData, Start, 0x20);
+CHECK_OFFSET(tAddSplineData, Force, 0x24);
+CHECK_OFFSET(tAddSplineData, ForceTime, 0x28);
+CHECK_OFFSET(tAddSplineData, unk_02C, 0x2C);
+CHECK_SIZE(tAddSplineData, 0x30);
+
 struct cSplineModifier {
     // --- cTransformModifier (vptr only)
     void** mVtbl;                   // 0x00 [R] ctors store cSplineModifier_vtbl; the dtor stores it, then the base

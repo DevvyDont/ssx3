@@ -308,4 +308,87 @@ CHECK_OFFSET(tObjectEntry, pCustom, 0x1C);
 CHECK_OFFSET(tObjectEntry, pNext, 0x20);
 CHECK_SIZE(tObjectEntry, 0x24);
 
+// The channel data headers and the spline / event keys (On Tour tInSeq*ChannelHeader, 8 bytes each;
+// tInSeqSplineChannelKey 0x18; tInSeqEventChannelKey 0xC; same layouts). A channel's script data starts with its
+// header; the first key is at &keyStart (+0x4) and each key's keySize steps to the next. [U] the four Play functions
+// (src/replay/replaycache.cpp) store the data as mpHeader, read the key count and the per-channel array count from
+// the header and set mpNextKey (or mpCurrKey) to header + 4; Update / LoadNextScriptKey step keys by keySize.
+// dummyPad bytes have no retail use (unk_005 / unk_009 / unk_015).
+struct tInSeqSplineChannelHeader {
+    unsigned int numKeys;           // 0x0 [O]; [U] cScriptPlayerChannelSpline_Play / Update read data[0] as a word
+    char keyStart;                  // 0x4 [O]; [U] Play: mpCurrKey = data + 4
+    char unk_005[3];                // 0x5 [O] dummyPad
+};
+
+CHECK_OFFSET(tInSeqSplineChannelHeader, numKeys, 0x0);
+CHECK_OFFSET(tInSeqSplineChannelHeader, keyStart, 0x4);
+CHECK_SIZE(tInSeqSplineChannelHeader, 0x8);
+
+struct tInSeqSplineChannelKey {
+    unsigned short keySize;         // 0x00 [O]; [U] Play / Update step to the next key by it; > 0x14 means custom data
+    unsigned short frameNum;        // 0x02 [O]; [U] Update compares it with the current frame and subtracts it
+    float splineCoef[4];            // 0x04 [O]; [U] passed to GetCubicSplineValue
+    char customDataStart;           // 0x14 [O]; [U] mpCurrKeyCustom = key + 0x14 when keySize > 0x14
+    char unk_015[3];                // 0x15 [O] dummyPad
+};
+
+CHECK_OFFSET(tInSeqSplineChannelKey, keySize, 0x00);
+CHECK_OFFSET(tInSeqSplineChannelKey, frameNum, 0x02);
+CHECK_OFFSET(tInSeqSplineChannelKey, splineCoef, 0x04);
+CHECK_OFFSET(tInSeqSplineChannelKey, customDataStart, 0x14);
+CHECK_SIZE(tInSeqSplineChannelKey, 0x18);
+
+struct tInSeqEventChannelHeader {
+    unsigned short numKeys;         // 0x0 [O]; [U] cScriptPlayerChannelEvent_Play tests data[0]; LoadNextScriptKey
+                                    //      compares the index with numKeys - 1
+    unsigned short maxSimultaneousEvents; // 0x2 [O]; [U] Play allocates data[1] x 8 event entries
+    char keyStart;                  // 0x4 [O]; [U] Play: mpNextKey = header + 4
+    char unk_005[3];                // 0x5 [O] dummyPad
+};
+
+CHECK_OFFSET(tInSeqEventChannelHeader, numKeys, 0x0);
+CHECK_OFFSET(tInSeqEventChannelHeader, maxSimultaneousEvents, 0x2);
+CHECK_OFFSET(tInSeqEventChannelHeader, keyStart, 0x4);
+CHECK_SIZE(tInSeqEventChannelHeader, 0x8);
+
+struct tInSeqEventChannelKey {
+    unsigned short keySize;         // 0x0 [O]; [U] LoadNextScriptKey steps by it; AddActiveKey: > 8 means custom data
+    unsigned short frameNum;        // 0x2 [O]; [U] Play / Update compare it with the frame (header + 6 = first key's)
+    int enumVal;                    // 0x4 [O]; [U] AddActiveKey copies it into the event entry
+    char customDataStart;           // 0x8 [O]; [U] AddActiveKey: the entry's data = key + 8 when keySize > 8
+    char unk_009[3];                // 0x9 [O] dummyPad
+};
+
+CHECK_OFFSET(tInSeqEventChannelKey, keySize, 0x0);
+CHECK_OFFSET(tInSeqEventChannelKey, frameNum, 0x2);
+CHECK_OFFSET(tInSeqEventChannelKey, enumVal, 0x4);
+CHECK_OFFSET(tInSeqEventChannelKey, customDataStart, 0x8);
+CHECK_SIZE(tInSeqEventChannelKey, 0xC);
+
+struct tInSeqBlockChannelHeader {
+    unsigned short numKeys;         // 0x0 [O]; [U] cScriptPlayerChannelBlock_Play tests data[0]; the key loaders
+                                    //      compare the index with it
+    unsigned short numTracks;       // 0x2 [O]; [U] Play allocates data[1] x 0x1C block entries (tBlockEntry)
+    char keyStart;                  // 0x4 [O]; [U] Play: mpNextKey = header + 4
+    char unk_005[3];                // 0x5 [O] dummyPad
+};
+
+CHECK_OFFSET(tInSeqBlockChannelHeader, numKeys, 0x0);
+CHECK_OFFSET(tInSeqBlockChannelHeader, numTracks, 0x2);
+CHECK_OFFSET(tInSeqBlockChannelHeader, keyStart, 0x4);
+CHECK_SIZE(tInSeqBlockChannelHeader, 0x8);
+
+struct tInSeqObjectChannelHeader {
+    unsigned short numKeys;         // 0x0 [O]; [U] cScriptPlayerChannelObject_Play tests data[0]; the key loaders
+                                    //      compare the index with it
+    unsigned short numTracks;       // 0x2 [O]; [U] Play allocates data[1] x 0x24 object entries (tObjectEntry)
+    char keyStart;                  // 0x4 [O]; [U] Play: mpNextKey = header + 4
+    char unk_005[3];                // 0x5 [O] dummyPad
+};
+
+CHECK_OFFSET(tInSeqObjectChannelHeader, numKeys, 0x0);
+CHECK_OFFSET(tInSeqObjectChannelHeader, numTracks, 0x2);
+CHECK_OFFSET(tInSeqObjectChannelHeader, keyStart, 0x4);
+CHECK_SIZE(tInSeqObjectChannelHeader, 0x8);
+
 #endif /* INSEQ_SCRIPTPLAYERCHANNEL_H */

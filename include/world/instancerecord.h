@@ -9,8 +9,9 @@
 // tInstanceManRecord adds m_PadBytes[4] for 0xB0; [R] cInstanceMan's records are 0xB0 apart. Its vectors are the
 // float-array tf* types ([O]), not the 16-byte t4Vector.
 // Member order: On Tour's, except where retail places a member elsewhere (m_pActiveNode at 0x0C, m_fScale at 0x84);
-// unplaced On Tour members (ambient / diffuse / light dir / audio / light cache / render flags / material) are
-// somewhere in 0x8C..0xAB and stay raw.
+// the tail follows On Tour's order (m_pCollideRecord, m_pInstanceAudio, m_sLightCacheID / m_sRenderFlags,
+// m_MaterialBlock at 0x88 / 0x8C / 0x90 / 0x94); unplaced On Tour members (ambient / diffuse / light dir / light
+// cache / render flags) stay raw. The model, material and collide records are in world/worldrecords.h.
 // EA's header: unknown (On Tour's DWARF has no file). Users: intersect/worldsphtree (the nash / overlap queries),
 // object/instancenode, object/movenode, object/floatingnode, object/effectlink, object/flagset, object/multiparticle,
 // object/instanceman, wscript.
@@ -23,6 +24,9 @@
 
 struct cInstanceNode;
 struct tCollideRecord;
+struct tModelRecord;            // world/worldrecords.h
+struct tMaterialBlockRecord;    // world/worldrecords.h
+struct tInstanceAudio;          // [O] (not laid out)
 
 struct tf4Vector {
     float m[4];                     // [O]
@@ -66,13 +70,19 @@ struct tInstanceRecord {
     unsigned int m_RID;             // 0x78 [O] tResourceID (by order); [U] cInstanceMan_allocInstance writes the section
                                     //      byte at +0x78; view sFrRider_B168 id (cFlagSet_RemoveFlag)
     tStreamMap m_SMap;              // 0x7C [O]; [U] section +0x7D, hull +0x7E (cMoveNode_render)
-    void* m_Model;                  // 0x80 [O] (by order); [U] the model / bone table {?, count +4, bones +8}
-                                    //      (views sWsInst_4888, sFrRider_B168 track)
+    tModelRecord* m_Model;          // 0x80 [O] (by order; tModelID); [U] the model {m_RID, m_iNumMeshes +4,
+                                    //      m_MeshHeirarchy +8, m_MaterialBlock +0xC} (views sWsInst_4888,
+                                    //      sFrRider_B168 track); resolveInstance resolves it
     float m_fScale;                 // 0x84 [O] (name); [U] worldsphtree's instance sphere scale (sWsInst_4888)
     tCollideRecord* m_pCollideRecord; // 0x88 [O] (by order); [U] collide method at +0 (the terrain/static queries
                                     //      skip a 0 record)
-    char unk_08C[0x8];              // 0x8C
-    void* unk_094;                  // 0x94 [U] cMoveNode_render reads it (a light pointer)
+    tInstanceAudio* m_pInstanceAudio; // 0x8C [O] (by order: after m_pCollideRecord); [U] cChunkResolve_resolveInstance
+                                    //      zeroes it, as resolveParticleInstance zeroes the particle's m_pInstanceAudio
+    char unk_090[0x4];              // 0x90 [O] short m_sLightCacheID, unsigned short m_sRenderFlags (by order; no
+                                    //      retail access confirmed)
+    tMaterialBlockRecord* m_MaterialBlock; // 0x94 [O] (by order: the last member; tMaterialBlockID); [U]
+                                    //      resolveInstance copies the model's m_MaterialBlock here; cMoveNode_render,
+                                    //      cMoveNode_getMaterialBlock, cMeshAnimNode_render, the tex-flip setup read it
     char unk_098[0x14];             // 0x98
 };
 
@@ -88,8 +98,9 @@ CHECK_OFFSET(tInstanceRecord, m_SMap, 0x7C);
 CHECK_OFFSET(tInstanceRecord, m_Model, 0x80);
 CHECK_OFFSET(tInstanceRecord, m_fScale, 0x84);
 CHECK_OFFSET(tInstanceRecord, m_pCollideRecord, 0x88);
-CHECK_OFFSET(tInstanceRecord, unk_08C, 0x8C);
-CHECK_OFFSET(tInstanceRecord, unk_094, 0x94);
+CHECK_OFFSET(tInstanceRecord, m_pInstanceAudio, 0x8C);
+CHECK_OFFSET(tInstanceRecord, unk_090, 0x90);
+CHECK_OFFSET(tInstanceRecord, m_MaterialBlock, 0x94);
 CHECK_OFFSET(tInstanceRecord, unk_098, 0x98);
 CHECK_SIZE(tInstanceRecord, 0xAC);
 

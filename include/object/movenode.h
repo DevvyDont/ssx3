@@ -23,6 +23,48 @@ struct cObjNode;
 struct tInstanceRecord;
 struct tModifierBlock;
 
+// World-script data that the cMoveNode add* functions take (On Tour tAddFadeData / tAddDebounceData 0xC,
+// tAddRailData 0x10; same layouts). [O] On Tour's cMoveNode::addFade(const tAddFadeData&), addDebounce(const
+// tAddDebounceData&), addRail(const tAddRailData&) (cRailModifier(const tAddRailData&, ...)); [U] cMoveNode_addFade /
+// addDebounce / addRail (src/object/movenode.cpp) and cRailModifier_cRailModifier (src/object/splinemodifier.cpp)
+// read the members below.
+struct tAddFadeData {
+    unsigned int unk_000;           // 0x0 [O] tResourceID InstId (no retail read)
+    float Fade;                     // 0x4 [O]; [U] cMoveNode_addFade's fade value
+    char unk_008[0x4];              // 0x8 [O] WScriptNullType null (1 byte) + padding
+};
+
+CHECK_OFFSET(tAddFadeData, unk_000, 0x0);
+CHECK_OFFSET(tAddFadeData, Fade, 0x4);
+CHECK_OFFSET(tAddFadeData, unk_008, 0x8);
+CHECK_SIZE(tAddFadeData, 0xC);
+
+struct tAddDebounceData {
+    unsigned int unk_000;           // 0x0 [O] tResourceID InstId (no retail read)
+    float Time;                     // 0x4 [O]; [U] cMoveNode_addDebounce passes it to the node's debounce setter
+                                    //      (virtual slot 41)
+    char unk_008[0x4];              // 0x8 [O] WScriptNullType null (1 byte) + padding
+};
+
+CHECK_OFFSET(tAddDebounceData, unk_000, 0x0);
+CHECK_OFFSET(tAddDebounceData, Time, 0x4);
+CHECK_OFFSET(tAddDebounceData, unk_008, 0x8);
+CHECK_SIZE(tAddDebounceData, 0xC);
+
+struct tAddRailData {
+    unsigned int unk_000;           // 0x0 [O] tResourceID InstId (no retail read)
+    unsigned int SplineId;          // 0x4 [O] tResourceID; [U] addRail: tModifierBlock_findRail(block, SplineId);
+                                    //      cRailModifier_cRailModifier stores it as SplineId
+    int Mesh;                       // 0x8 [O]; [U] cRailModifier_cRailModifier stores it as Mesh
+    char unk_00C[0x4];              // 0xC [O] WScriptNullType null (1 byte) + padding
+};
+
+CHECK_OFFSET(tAddRailData, unk_000, 0x0);
+CHECK_OFFSET(tAddRailData, SplineId, 0x4);
+CHECK_OFFSET(tAddRailData, Mesh, 0x8);
+CHECK_OFFSET(tAddRailData, unk_00C, 0xC);
+CHECK_SIZE(tAddRailData, 0x10);
+
 struct cMoveNode {
     // --- cObjNode (0x10)
     int unk_00;                     // 0x00 never written by any node ctor (see object/instancenode.h)

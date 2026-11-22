@@ -41,6 +41,37 @@ struct tModifierBlock;
 struct cMeshAnimFrame;
 struct tMeshVelocity;
 
+// World-script data that makes an animated teeter (On Tour tMakeAnimTeeterData, 0x2C; same layout). [O] On Tour's
+// cAnimTeeterNode(bucket, tInstanceRecord* pInstance, const tMakeAnimTeeterData* adata); [U]
+// cAnimTeeterNode_cAnimTeeterNode1 (src/intersect/worldsphtree.cpp) reads every member from TorqueScale to ToTime into the node members of the same
+// names (MaxSpeed into MaxAnimSpeed).
+struct tMakeAnimTeeterData {
+    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read)
+    float TorqueScale;              // 0x04 [O]; [U] -> TorqueScale (x 1e-6)
+    float BounceFactor;             // 0x08 [O]; [U] -> BounceFactor
+    float MaxSpeed;                 // 0x0C [O]; [U] -> MaxAnimSpeed (/ 30 / TimerHz)
+    float Spring;                   // 0x10 [O]; [U] -> Spring
+    float PivotTime;                // 0x14 [O]; [U] -> PivotTime (/ 30)
+    float Damp;                     // 0x18 [O]; [U] -> Damp
+    int AnimSign;                   // 0x1C [O]; [U] -> AnimSign
+    float FromTime;                 // 0x20 [O]; [U] FromTime's rate setup
+    float ToTime;                   // 0x24 [O]; [U] ToTime's rate setup
+    char unk_028[0x4];              // 0x28 [O] WScriptNullType null (1 byte) + padding
+};
+
+CHECK_OFFSET(tMakeAnimTeeterData, unk_000, 0x00);
+CHECK_OFFSET(tMakeAnimTeeterData, TorqueScale, 0x04);
+CHECK_OFFSET(tMakeAnimTeeterData, BounceFactor, 0x08);
+CHECK_OFFSET(tMakeAnimTeeterData, MaxSpeed, 0x0C);
+CHECK_OFFSET(tMakeAnimTeeterData, Spring, 0x10);
+CHECK_OFFSET(tMakeAnimTeeterData, PivotTime, 0x14);
+CHECK_OFFSET(tMakeAnimTeeterData, Damp, 0x18);
+CHECK_OFFSET(tMakeAnimTeeterData, AnimSign, 0x1C);
+CHECK_OFFSET(tMakeAnimTeeterData, FromTime, 0x20);
+CHECK_OFFSET(tMakeAnimTeeterData, ToTime, 0x24);
+CHECK_OFFSET(tMakeAnimTeeterData, unk_028, 0x28);
+CHECK_SIZE(tMakeAnimTeeterData, 0x2C);
+
 struct cAnimTeeterNode {
     // --- cAnimTeeterNodeState (On Tour 0x30, same offsets; [R] the replay ctor reads 0x30 bytes at +0x0)
     float TorqueSum;                // 0x00 [O]; [P]; [R] ctor1 0 (sw $0); [U] applyForce adds each push's torque,

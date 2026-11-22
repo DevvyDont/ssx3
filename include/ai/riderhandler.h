@@ -46,7 +46,6 @@ struct cRiderSphereTree;
 struct cDynamicColourEmitter; // render/particle.h
 struct tParticleData;         // render/particle.h (On Tour 0xD8; retail copies 0xD8)
 struct tParticleEmitter;      // render/particle.h
-struct tWakeLine;             // On Tour 0x60 (mVel[4], ...); retail 0x70 (five row vectors: cBoardWakeFX_update's view)
 struct tBoardWakeVertex;      // On Tour 0x20; retail 0x30 (cBoardWakeFX_reset's view)
 struct tBxVertex;             // render/2drender.h (cBoardTrailFX's strips)
 
@@ -514,6 +513,31 @@ CHECK_SIZE(cVoidControl, 0x10);
 // "mWakeLineSegs %d kMaxWakeLineSegs %d" / "mWakeMaxNumLines %d kMaxWakeNumLines %d" (d:/ssx/code/source/visualfx/
 // boardwakefx.cpp). [U] the unit's views (cBoardWakeFX_reset sWakeDCF28, cBoardWakeFX_update sWakeD0B8,
 // cBoardWakeFX_createSeg sWake_E058).
+// One wake line of cBoardWakeFX (On Tour struct tWakeLine, 0x60 with mVel[4]; retail 0x70 with five rows, like
+// mWakeVerts[5]). [R] cBoardWakeFX_cBoardWakeFX: operator new[](32 x 0x70, "WakeLines_cBoardWakeFX"); [P] the preview's
+// GetChunkySprayVelocity__12cBoardWakeFX steps mWakeLines by 0x70 and returns mVel[mWakeLineSegs - 1] (retail
+// func_002F7A80); [U] cBoardWakeFX_fillCurrentSeg fills one, cBoardWakeFX_update ages and drifts them.
+struct tWakeLine {
+    t4Vector mVel[5];                    // 0x00 [O] mVel[4] (retail 5 rows); [P] GetChunkySprayVelocity returns row
+                                         //      mWakeLineSegs - 1; [U] fillCurrentSeg: row i = (side * t * t * 0.75 + up
+                                         //      * t) * the wake speed
+    t4Vector mAngleCorrection;           // 0x50 [O] (On Tour 0x40, after mVel); [U] fillCurrentSeg: 0.85 * (mVelocity
+                                         //      - forward * |mVelocity|); update drifts the line by it, fading with age
+    float mExtraInitalVelocityFactor;    // 0x60 [O] (EA's spelling; On Tour 0x50); [U] fillCurrentSeg stores its last
+                                         //      argument ([O] fillCurrentSeg(..., float extraInitialVelocity)); update
+                                         //      scales a young line's growth by it
+    float mAge;                          // 0x64 [O] (On Tour 0x54); [U] fillCurrentSeg zeroes it; update adds 1/60 a
+                                         //      frame and drops the line once it passes mWakeLife
+    char unk_068[0x8];                   // 0x68 padding to the 16-aligned size
+};
+
+CHECK_OFFSET(tWakeLine, mVel, 0x00);
+CHECK_OFFSET(tWakeLine, mAngleCorrection, 0x50);
+CHECK_OFFSET(tWakeLine, mExtraInitalVelocityFactor, 0x60);
+CHECK_OFFSET(tWakeLine, mAge, 0x64);
+CHECK_OFFSET(tWakeLine, unk_068, 0x68);
+CHECK_SIZE(tWakeLine, 0x70);
+
 struct cBoardWakeFX {
     cRider* mRider;                           // 0x00 [R] virtual-base pointer to the shared cRider; [R] cBoardWakeFX_cBoardWakeFX
     int mNumWakeLines;                        // 0x04 [O]; [P] IsWakeActive (preview lw 0x4, > 0); [U] reset 0, createSeg

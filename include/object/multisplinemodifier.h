@@ -44,6 +44,40 @@ CHECK_OFFSET(tMultiNode, X2, 0x50);
 CHECK_OFFSET(tMultiNode, Y2, 0x54);
 CHECK_SIZE(tMultiNode, 0x60);
 
+// World-script data that adds a multi-spline modifier (On Tour tAddMultiSplineData, 0x34; same layout). [O] On Tour's
+// cMultiSplineModifier(const tAddMultiSplineData& sdata, tInstanceRecord* inst); [U]
+// cMultiSplineModifier_cMultiSplineModifier (src/object/splinemodifier.cpp) reads every member from SplineId to NumModels at these offsets and widths.
+struct tAddMultiSplineData {
+    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read)
+    unsigned int SplineId;          // 0x04 [O] tResourceID; [U] cSpline_init(&Spline, SplineId)
+    int Orient;                     // 0x08 [O]; [U] -> OrientType
+    float Speed;                    // 0x0C [O]; [U] cMultiSplineModifier_setSpeed; its sign picks the direction
+    float Heading;                  // 0x10 [O]; [U] degrees -> HeadTweak (radians)
+    float StartDistance;            // 0x14 [O]; [U] -> OffsetDistance when non-zero
+    float ColourA;                  // 0x18 [O]; [U] Colour's first component
+    float ColourR;                  // 0x1C [O]; [U] Colour's second
+    float ColourG;                  // 0x20 [O]; [U] Colour's third
+    float ColourB;                  // 0x24 [O]; [U] Colour's fourth
+    int DrawSpline;                 // 0x28 [O]; [U] DrawPath = DrawSpline != 0
+    int NumModels;                  // 0x2C [O]; [U] -> NumModels
+    char unk_030[0x4];              // 0x30 [O] WScriptNullType null (1 byte) + padding
+};
+
+CHECK_OFFSET(tAddMultiSplineData, unk_000, 0x00);
+CHECK_OFFSET(tAddMultiSplineData, SplineId, 0x04);
+CHECK_OFFSET(tAddMultiSplineData, Orient, 0x08);
+CHECK_OFFSET(tAddMultiSplineData, Speed, 0x0C);
+CHECK_OFFSET(tAddMultiSplineData, Heading, 0x10);
+CHECK_OFFSET(tAddMultiSplineData, StartDistance, 0x14);
+CHECK_OFFSET(tAddMultiSplineData, ColourA, 0x18);
+CHECK_OFFSET(tAddMultiSplineData, ColourR, 0x1C);
+CHECK_OFFSET(tAddMultiSplineData, ColourG, 0x20);
+CHECK_OFFSET(tAddMultiSplineData, ColourB, 0x24);
+CHECK_OFFSET(tAddMultiSplineData, DrawSpline, 0x28);
+CHECK_OFFSET(tAddMultiSplineData, NumModels, 0x2C);
+CHECK_OFFSET(tAddMultiSplineData, unk_030, 0x30);
+CHECK_SIZE(tAddMultiSplineData, 0x34);
+
 struct cMultiSplineModifier {
     // --- cTransformModifier (vptr only)
     void** mVtbl;                   // 0x00 [R] ctors store the 0x0048F168 vtable; the dtor stores it, then cTransformModifier_vtbl

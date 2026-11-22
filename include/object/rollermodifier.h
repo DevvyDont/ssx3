@@ -60,6 +60,24 @@ CHECK_OFFSET(bxSphereTree, unk_0BC, 0x0BC);
 CHECK_OFFSET(bxSphereTree, staticInfo, 0x0C0);
 CHECK_SIZE(bxSphereTree, 0x140);
 
+// World-script data that adds a roller modifier (On Tour tAddRollerData, 0x14; same layout). [O] On Tour's
+// cRollerModifier(const tAddRollerData& rdata, ...); [U] cRollerModifier_cRollerModifier (src/object/railmodifier.cpp)
+// stores Mass and Elast into mMass / mElast.
+struct tAddRollerData {
+    unsigned int unk_000;           // 0x00 [O] tResourceID InstId (no retail read)
+    float Mass;                     // 0x04 [O]; [U] -> mMass
+    float Elast;                    // 0x08 [O]; [U] -> mElast
+    float unk_00C;                  // 0x0C [O] Friction (no retail read)
+    char unk_010[0x4];              // 0x10 [O] WScriptNullType null (1 byte) + padding
+};
+
+CHECK_OFFSET(tAddRollerData, unk_000, 0x00);
+CHECK_OFFSET(tAddRollerData, Mass, 0x04);
+CHECK_OFFSET(tAddRollerData, Elast, 0x08);
+CHECK_OFFSET(tAddRollerData, unk_00C, 0x0C);
+CHECK_OFFSET(tAddRollerData, unk_010, 0x10);
+CHECK_SIZE(tAddRollerData, 0x14);
+
 struct cRollerModifier {
     // --- cTransformModifier (On Tour 0x4: the vptr)
     void** mVtbl;                 // 0x000 [R] ctors store cTransformModifier_vtbl (cTransformModifier) then cRollerModifier_vtbl;
