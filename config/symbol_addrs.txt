@@ -11384,6 +11384,39 @@ _sbrk = 0x004244A0; //type:func
 _fstat = 0x00424558; //type:func
 SetTLBEntry = 0x0042CCC8; //type:func
 
+// fn_names4b: names by evidence (docs/function_names.tsv)
+terminate = 0x00412800; //type:func
+__start_cp_handler = 0x004128A8; //type:func
+__eh_alloc = 0x004128E0; //type:func
+__cp_push_exception = 0x00412998; //type:func
+__cp_pop_exception = 0x00412A28; //type:func
+__tf13bad_exception = 0x00412E80; //type:func
+__tf9exception = 0x00412F18; //type:func
+__pack_f = 0x00412F58; //type:func
+__unpack_f = 0x00413068; //type:func
+__fpcmp_parts_f = 0x00413748; //type:func
+decode_uleb128 = 0x00413B38; //type:func
+decode_sleb128 = 0x00413B80; //type:func
+fde_merge = 0x00413BD0; //type:func
+end_fde_sort = 0x00413CD0; //type:func
+frame_init = 0x00414008; //type:func
+extract_cie_info = 0x00414230; //type:func
+fde_split = 0x004149F0; //type:func
+__tf17__class_type_info = 0x00414F00; //type:func
+__tf14__si_type_info = 0x00414F90; //type:func
+__tf16__user_type_info = 0x00415018; //type:func
+__tf9type_info = 0x004151F8; //type:func
+__throw_type_match_rtti = 0x00415260; //type:func
+__dynamic_cast = 0x00415840; //type:func
+__tfv = 0x004158F0; //type:func
+__tf17__array_type_info = 0x00415CA8; //type:func
+__tf16__ptmd_type_info = 0x00415D18; //type:func
+__tf16__ptmf_type_info = 0x00415D88; //type:func
+__tf16__func_type_info = 0x00415DF8; //type:func
+__tf19__builtin_type_info = 0x00415E68; //type:func
+__tf16__attr_type_info = 0x00415ED8; //type:func
+__tf19__pointer_type_info = 0x00415F48; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func

@@ -14,17 +14,17 @@
 extern "C" {
 
 //100%
-INCLUDE_ASM("seg/seg_313800_exception", func_00412800);
+INCLUDE_ASM("seg/seg_313800_exception", terminate);
 #ifdef SKIP_ASM
 // __terminate_func / __unexpected_func (retail data D_00453440 / D_00453A38); never return
 typedef void (*sVfpNoRet)(void) __attribute__((__noreturn__));
 extern sVfpNoRet D_00453440_f __asm__("D_00453440");
 // terminate()
-void terminate_800(void) __asm__("func_00412800") __attribute__((__noreturn__));
+void terminate_800(void) __asm__("terminate") __attribute__((__noreturn__));
 /**
  * Calls the current terminate handler D_00453440 (never returns).
  *
- * __default_unexpected__Fv, the C++ exception helpers and func_004128E0 call it.
+ * __default_unexpected__Fv, the C++ exception helpers and __eh_alloc call it.
  */
 void terminate_800(void)
 {
@@ -38,7 +38,7 @@ INCLUDE_ASM("seg/seg_313800_exception", __default_unexpected__Fv);
 // __default_unexpected(): unexpected() falls back to terminate()
 void unexpected_dflt_818(void) __asm__("__default_unexpected__Fv") __attribute__((__noreturn__));
 /**
- * Default unexpected-exception handler: calls func_00412800 (never returns).
+ * Default unexpected-exception handler: calls terminate (never returns).
  *
  * The unexpected-handler pointer D_00453A38 starts out pointing here.
  */
@@ -137,9 +137,10 @@ int __cp_eh_info(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313800_exception", func_004128A8);
+INCLUDE_ASM("seg/seg_313800_exception", __start_cp_handler);
 #ifdef SKIP_ASM
 extern int *__get_eh_info_a(void) __asm__("__get_eh_info");
+int *start_cp_handler_8a8(void) __asm__("__start_cp_handler");
 /**
  * Marks the current C++ exception as caught and counts one more active handler.
  *
@@ -147,7 +148,7 @@ extern int *__get_eh_info_a(void) __asm__("__get_eh_info");
  *
  * @return the record
  */
-int *func_004128A8(void) {
+int *start_cp_handler_8a8(void) {
     int *ehInfo = (int *)*__get_eh_info_a();
     ehInfo[5] = 1;
     *(long *)(ehInfo + 8) += 1;
@@ -156,21 +157,22 @@ int *func_004128A8(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313800_exception", func_004128E0);
+INCLUDE_ASM("seg/seg_313800_exception", __eh_alloc);
 #ifdef SKIP_ASM
 extern int malloc_a(void) __asm__("malloc");
-extern int func_00412800(void) __attribute__((noreturn));
+extern int term_8e0(void) __asm__("terminate") __attribute__((noreturn));
+int eh_alloc_8e0(void) __asm__("__eh_alloc");
 /**
  * Allocates memory for a thrown object, terminating the program when none is left.
  *
  * The size arrives in the argument register and goes straight to malloc (the C definition declares no
- * parameter). A null result calls func_00412800.
+ * parameter). A null result calls terminate.
  *
  * @return the block
  */
-int func_004128E0(void) {
+int eh_alloc_8e0(void) {
     if (malloc_a() == 0)
-        return func_00412800();
+        return term_8e0();
 }
 #endif
 
@@ -193,14 +195,14 @@ int __eh_free(void) {
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", __cplus_type_matcher);
 #ifdef SKIP_ASM
-extern int func_00415260(int, int, int);
+extern int type_match_rtti_928(int, int, int) __asm__("__throw_type_match_rtti");
 /**
  * Tests the current C++ exception against one catch clause and returns the object pointer to bind on a match.
  *
- * It is the match function func_00412998 stores in every C++ exception record (cp_eh_info). With an exception table
+ * It is the match function __cp_push_exception stores in every C++ exception record (cp_eh_info). With an exception table
  * whose language halfword (+4) is not 4 (the DWARF code for C++) it returns 0. A catch-all clause (fn == -1) returns
  * the record's value (info[2]) unchanged. Otherwise it calls fn for the catch type's type_info and passes it, the
- * thrown type (info[3]) and the original object (info[10]) to func_00415260, the RTTI matcher; a nonzero result (the
+ * thrown type (info[3]) and the original object (info[10]) to __throw_type_match_rtti, the RTTI matcher; a nonzero result (the
  * object pointer adjusted to the caught base) is stored back into info[2].
  *
  * @param info            the C++ exception record (value at +8, type_info at +0xC, original object at +0x28)
@@ -214,7 +216,7 @@ int __cplus_type_matcher(int *info, int (*fn)(void), short *exceptionTable) {
         return 0;
     if (fn == (int (*)(void))-1)
         return info[2];
-    matchedValue = func_00415260(fn(), info[3], info[10]);
+    matchedValue = type_match_rtti_928(fn(), info[3], info[10]);
     if (matchedValue)
         info[2] = matchedValue;
     return matchedValue;
@@ -222,14 +224,15 @@ int __cplus_type_matcher(int *info, int (*fn)(void), short *exceptionTable) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313800_exception", func_00412998);
+INCLUDE_ASM("seg/seg_313800_exception", __cp_push_exception);
 #ifdef SKIP_ASM
-extern int *func_004128E0_a(int) __asm__("func_004128E0");
+extern int *eh_alloc_998(int) __asm__("__eh_alloc");
 extern int *__get_eh_info_l(void) __asm__("__get_eh_info");
+void cp_push_exception_998(int value, int type, int cleanup) __asm__("__cp_push_exception");
 /**
  * Pushes a new C++ exception record for a throw onto the exception chain.
  *
- * Allocates the 0x30-byte record with func_004128E0 (allocates, terminates on failure) and stores the thrown object as
+ * Allocates the 0x30-byte record with __eh_alloc (allocates, terminates on failure) and stores the thrown object as
  * both value (+8) and original value (+0x28), the type_info (+0xC) and the cleanup (+0x10); clears the caught flag
  * (+0x14) and the 64-bit handler count (+0x20); sets the match function to __cplus_type_matcher with language 4 (C++) and
  * version 1; then links the record in front of the chain whose head __get_eh_info returns.
@@ -238,8 +241,8 @@ extern int *__get_eh_info_l(void) __asm__("__get_eh_info");
  * @param type     the thrown object's type_info
  * @param cleanup  the object's destructor, called with (value, 2) when the record is popped; null for none
  */
-void func_00412998(int value, int type, int cleanup) {
-    int *ehInfo = func_004128E0_a(0x30);
+void cp_push_exception_998(int value, int type, int cleanup) {
+    int *ehInfo = eh_alloc_998(0x30);
     int *infoChain;
     ehInfo[3] = type;
     ehInfo[4] = cleanup;
@@ -257,18 +260,19 @@ void func_00412998(int value, int type, int cleanup) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313800_exception", func_00412A28);
+INCLUDE_ASM("seg/seg_313800_exception", __cp_pop_exception);
 #ifdef SKIP_ASM
 struct sCpEh { int (*match)(void); short lang, ver; int value; int type; void (*cleanup)(int, int); int caught; sCpEh *next; long handlers; int orig; };
 extern sCpEh **eh_get_a28(void) __asm__("__get_eh_info");
 extern int ptr_type_a28(int) __asm__("__is_pointer");
 extern void eh_free_a28(void *) __asm__("__eh_free");
-extern int term_a28(void) __asm__("func_00412800") __attribute__((noreturn));
+extern int term_a28(void) __asm__("terminate") __attribute__((noreturn));
+void cp_pop_exception_a28(sCpEh *ehInfo) __asm__("__cp_pop_exception");
 /**
  * Releases one catch handler's hold on a C++ exception record and frees the record once nothing uses it.
  *
  * Decrements handlers and returns while it is nonzero, or while the record is the newest one on the chain
- * (__get_eh_info) and not caught (a rethrow in progress). Otherwise it unlinks the record, calling func_00412800
+ * (__get_eh_info) and not caught (a rethrow in progress). Otherwise it unlinks the record, calling terminate
  * (terminate) if it is not on the chain, calls cleanup(value, 2) when set, frees the thrown object (original value)
  * with __eh_free unless __is_pointer says the type is a pointer type, and frees the record.
  *
@@ -277,7 +281,7 @@ extern int term_a28(void) __asm__("func_00412800") __attribute__((noreturn));
  *
  * @param ehInfo  the exception record whose catch block is ending
  */
-void func_00412A28(sCpEh *ehInfo) {
+void cp_pop_exception_a28(sCpEh *ehInfo) {
     sCpEh **chainLink = eh_get_a28();
     if (--ehInfo->handlers != 0)
         return;
@@ -300,17 +304,17 @@ void func_00412A28(sCpEh *ehInfo) {
 INCLUDE_ASM("seg/seg_313800_exception", __uncatch_exception);
 #ifdef SKIP_ASM
 extern int *__get_eh_info_a(void) __asm__("__get_eh_info");
-extern int func_00412800(void) __attribute__((noreturn));
+extern int term_af0(void) __asm__("terminate") __attribute__((noreturn));
 /**
  * Marks the current C++ exception as uncaught again, as a rethrow requires.
  *
- * Takes the newest record from the chain head __get_eh_info returns; with none it calls func_00412800 (terminate),
+ * Takes the newest record from the chain head __get_eh_info returns; with none it calls terminate (terminate),
  * otherwise it clears the record's caught flag (+0x14). __check_eh_spec calls it before each rethrow (__throw).
  */
 void __uncatch_exception(void) {
     int *ehInfo = (int *)*__get_eh_info_a();
     if (ehInfo == 0) {
-        func_00412800();
+        term_af0();
     }
     ehInfo[5] = 0;
 }
@@ -329,16 +333,10 @@ INCLUDE_ASM("seg/seg_313800_exception", __check_eh_spec);
    each name to the retail symbol (assembler assignments: the relocations then name the retail symbols). __throw
    is libgcc2.c's (emitted by the back end), __throw_type_match_rtti tinfo2.cc's, the vtables, out-of-line
    destructors and typeid functions those of exception.cc's #pragma implementation "exception". */
-__asm__("terminate__Fv = func_00412800\n"
-        "__start_cp_handler = func_004128A8\n"
-        "__eh_alloc = func_004128E0\n"
-        "__cp_push_exception = func_00412998\n"
-        "__cp_pop_exception = func_00412A28\n"
-        "__throw_type_match_rtti = func_00415260\n"
+__asm__("terminate__Fv = terminate\n"
         "_vt$9exception = D_004998B8\n"
         "_vt$13bad_exception = D_004998A0\n"
         "_$_13bad_exception = bad_exception__bad_exception\n"
-        "__tf13bad_exception = func_00412E80\n"
         "_vt$8bad_cast = D_00499A30\n"
         "_$_8bad_cast = bad_cast__bad_cast\n"
         "_vt$10bad_typeid = D_00499A18\n"
@@ -412,7 +410,7 @@ extern "C" cp_eh_info **__get_eh_info (); 	// actually void **
 
 #define CP_EH_INFO ((cp_eh_info *) *__get_eh_info ())
 
-/* Defined earlier in exception.cc (func_004128A8, func_004128E0, func_00412998, func_00412A28, __uncatch_exception);
+/* Defined earlier in exception.cc (__start_cp_handler, __eh_alloc, __cp_push_exception, __cp_pop_exception, __uncatch_exception);
    declared here under their source names and signatures, so the code g++ generates for catch, throw and rethrow
    uses them as in the original file. */
 extern "C" cp_eh_info *__start_cp_handler (void);
@@ -438,10 +436,10 @@ extern "C" void __check_eh_spec (int n, const void **spec) __asm__("__check_eh_s
 /**
  * Enforces a function's exception specification against the exception currently leaving it; never returns.
  *
- * Rethrows when the current exception's type matches one of the n allowed type_infos (func_00415260). Otherwise it
+ * Rethrows when the current exception's type matches one of the n allowed type_infos (__throw_type_match_rtti). Otherwise it
  * calls unexpected__Fv (unexpected); if that throws a different exception, the new one is checked against the list the
- * same way and rethrown on a match. Failing that it throws a new bad_exception (vtable D_004998A0, type func_00412E80,
- * destructor bad_exception__bad_exception) when bad_exception's type_info matches an entry, and calls func_00412800 (terminate)
+ * same way and rethrown on a match. Failing that it throws a new bad_exception (vtable D_004998A0, type __tf13bad_exception,
+ * destructor bad_exception__bad_exception) when bad_exception's type_info matches an entry, and calls terminate (terminate)
  * otherwise.
  *
  * @param n     number of entries in spec
@@ -495,7 +493,7 @@ extern "C" void __throw_bad_cast (void) __asm__("__throw_bad_cast");
 /**
  * Throws a new bad_cast; never returns.
  *
- * Allocates the object with func_004128E0, gives it bad_cast's vtable (D_00499A30), pushes it with func_00412998 (type
+ * Allocates the object with __eh_alloc, gives it bad_cast's vtable (D_00499A30), pushes it with __cp_push_exception (type
  * from the vtable's type_info function, destructor bad_cast__bad_cast) and throws with __throw. g++ calls this for a
  * failed dynamic_cast to a reference type.
  */
@@ -514,7 +512,7 @@ extern "C" void __throw_bad_typeid (void) __asm__("__throw_bad_typeid");
 /**
  * Throws a new bad_typeid; never returns.
  *
- * Allocates the object with func_004128E0, gives it bad_typeid's vtable (D_00499A18), pushes it with func_00412998
+ * Allocates the object with __eh_alloc, gives it bad_typeid's vtable (D_00499A18), pushes it with __cp_push_exception
  * (type from the vtable's type_info function, destructor bad_typeid__bad_typeid) and throws with __throw. g++ calls this
  * when typeid is applied to a dereferenced null pointer.
  */
@@ -603,25 +601,26 @@ void *bad_exception_bad_exception(void **excObject) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313800_exception", func_00412E80);
+INCLUDE_ASM("seg/seg_313800_exception", __tf13bad_exception);
 #ifdef SKIP_ASM
 extern int D_0053EA10[];
 extern int D_004998D0[];
 extern int D_004A5BA8[];
-extern int *func_00412F18(void);
+extern int *__tf9exception_a(void) __asm__("__tf9exception");
 extern void __rtti_si(int *, int, int);
+int *__tf13bad_exception_a(void) __asm__("__tf13bad_exception");
 /**
  * Returns the type_info object of class bad_exception, building it on first use.
  *
- * When D_0053EA10 is still zero, builds the base's type_info first (func_00412F18) and then constructs a
+ * When D_0053EA10 is still zero, builds the base's type_info first (__tf9exception) and then constructs a
  * single-inheritance type_info in D_0053EA10 with __rtti_si, name "13bad_exception" (D_004998D0) and base
  * D_004A5BA8 (exception's).
  *
  * @return the type_info object D_0053EA10
  */
-int *func_00412E80(void) {
+int *__tf13bad_exception_a(void) {
     if (D_0053EA10[0] == 0) {
-        func_00412F18();
+        __tf9exception_a();
         __rtti_si(D_0053EA10, (int)D_004998D0, (int)D_004A5BA8);
     }
     return D_0053EA10;
@@ -666,11 +665,12 @@ int *exception_exception(int **excObject) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313800_exception", func_00412F18);
+INCLUDE_ASM("seg/seg_313800_exception", __tf9exception);
 #ifdef SKIP_ASM
 extern int D_004998E0[];
 extern int D_004A5BA8[];
 extern void __rtti_user(int *, int);
+int *__tf9exception_a(void) __asm__("__tf9exception");
 /**
  * Returns the type_info object of class exception, building it on first use.
  *
@@ -679,7 +679,7 @@ extern void __rtti_user(int *, int);
  *
  * @return the type_info object D_004A5BA8
  */
-int *func_00412F18(void) {
+int *__tf9exception_a(void) {
     if (D_004A5BA8[0] == 0)
         __rtti_user(D_004A5BA8, (int)D_004998E0);
     return D_004A5BA8;

@@ -116,7 +116,7 @@ INCLUDE_ASM("seg/seg_3113A0_eh", __get_eh_info);
  * Returns the address of the current exception's language-specific info pointer.
  *
  * Gets the EH context from the getter D_00453444 and returns the address of its info word (+0x8). The C++ runtime
- * (func_004128A8, __cp_exception_info and others) reads the current exception's record through it.
+ * (__start_cp_handler, __cp_exception_info and others) reads the current exception's record through it.
  *
  * @return the address of the context's info word
  */

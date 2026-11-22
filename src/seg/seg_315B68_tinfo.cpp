@@ -183,14 +183,7 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __class_type_info_dcast);
    g++ calls these under fixed names (type_info::operator==, the typeinfo functions typeid and dynamic_cast use,
    __dynamic_cast); bind each to the retail symbol (assembler assignments: the relocations then name the retail
    symbols). All of them are defined in this unit. */
-__asm__("__eq__C9type_infoRC9type_info = func_00414B98\n"
-        "__tf16__user_type_info = func_00415018\n"
-        "__tf9type_info = func_004151F8\n"
-        "__dynamic_cast = func_00415840\n"
-        "__tfv = func_004158F0\n"
-        "__tf16__func_type_info = func_00415DF8\n"
-        "__tf16__attr_type_info = func_00415ED8\n"
-        "__tf19__pointer_type_info = func_00415F48");
+__asm__("__eq__C9type_infoRC9type_info = func_00414B98");
 
 /* tinfo.cc __class_type_info::dcast (GCC runtime, GPL v2+ with the runtime linking exception) */
 }  // extern "C"  (a member function definition cannot have C linkage)
@@ -291,24 +284,25 @@ int *__class_type_info___class_type_info(int *typeInfo, int typeName, int baseLi
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_315B68_tinfo", func_00414F00);
+INCLUDE_ASM("seg/seg_315B68_tinfo", __tf17__class_type_info);
 #ifdef SKIP_ASM
 extern int D_0053EA60[];
 extern int D_00499A58[];
 extern int D_0053EA40[];
-extern int *func_00415018(void);
+extern int *__tf16__user_type_info_a(void) __asm__("__tf16__user_type_info");
 extern void __rtti_si(int *, int, int);
+int *__tf17__class_type_info_a(void) __asm__("__tf17__class_type_info");
 /**
  * Returns the type_info object of class __class_type_info, building it on first use.
  *
- * When D_0053EA60 is still zero, builds the base's type_info (func_00415018) and constructs a single-inheritance
+ * When D_0053EA60 is still zero, builds the base's type_info (__tf16__user_type_info) and constructs a single-inheritance
  * type_info in D_0053EA60 with __rtti_si, name "17__class_type_info" (D_00499A58) and base D_0053EA40.
  *
  * @return the type_info object D_0053EA60
  */
-int *func_00414F00(void) {
+int *__tf17__class_type_info_a(void) {
     if (D_0053EA60[0] == 0) {
-        func_00415018();
+        __tf16__user_type_info_a();
         __rtti_si(D_0053EA60, (int)D_00499A58, (int)D_0053EA40);
     }
     return D_0053EA60;
@@ -349,24 +343,25 @@ int *__si_type_info___si_type_info(int *typeInfo, int typeName, int baseType) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_315B68_tinfo", func_00414F90);
+INCLUDE_ASM("seg/seg_315B68_tinfo", __tf14__si_type_info);
 #ifdef SKIP_ASM
 extern int D_0053EA50[];
 extern int D_00499A70[];
 extern int D_0053EA40[];
-extern int *func_00415018(void);
+extern int *__tf16__user_type_info_a(void) __asm__("__tf16__user_type_info");
 extern void __rtti_si(int *, int, int);
+int *__tf14__si_type_info_a(void) __asm__("__tf14__si_type_info");
 /**
  * Returns the type_info object of class __si_type_info, building it on first use.
  *
- * When D_0053EA50 is still zero, builds the base's type_info (func_00415018) and constructs a single-inheritance
+ * When D_0053EA50 is still zero, builds the base's type_info (__tf16__user_type_info) and constructs a single-inheritance
  * type_info in D_0053EA50 with __rtti_si, name "14__si_type_info" (D_00499A70) and base D_0053EA40.
  *
  * @return the type_info object D_0053EA50
  */
-int *func_00414F90(void) {
+int *__tf14__si_type_info_a(void) {
     if (D_0053EA50[0] == 0) {
-        func_00415018();
+        __tf16__user_type_info_a();
         __rtti_si(D_0053EA50, (int)D_00499A70, (int)D_0053EA40);
     }
     return D_0053EA50;
@@ -405,24 +400,25 @@ int *__user_type_info___user_type_info(int *typeInfo, int typeName) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415018);
+INCLUDE_ASM("seg/seg_315B68_tinfo", __tf16__user_type_info);
 #ifdef SKIP_ASM
 extern int D_0053EA40[];
 extern int D_00499A88[];
 extern int D_004A5BB0[];
-extern int *func_004151F8(void);
+extern int *__tf9type_info_a(void) __asm__("__tf9type_info");
 extern void __rtti_si(int *, int, int);
+int *__tf16__user_type_info_a(void) __asm__("__tf16__user_type_info");
 /**
  * Returns the type_info object of class __user_type_info, building it on first use.
  *
- * When D_0053EA40 is still zero, builds type_info's own type_info (func_004151F8) and constructs a single-inheritance
+ * When D_0053EA40 is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
  * type_info in D_0053EA40 with __rtti_si, name "16__user_type_info" (D_00499A88) and base D_004A5BB0.
  *
  * @return the type_info object D_0053EA40
  */
-int *func_00415018(void) {
+int *__tf16__user_type_info_a(void) {
     if (D_0053EA40[0] == 0) {
-        func_004151F8();
+        __tf9type_info_a();
         __rtti_si(D_0053EA40, (int)D_00499A88, (int)D_004A5BB0);
     }
     return D_0053EA40;
@@ -485,19 +481,19 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __tf10bad_typeid);
 extern int D_0053EA20[];
 extern int D_00499AA0[];
 extern int D_004A5BA8[];
-extern int *func_00412F18(void);
+extern int *__tf9exception(void);
 extern void __rtti_si(int *, int, int);
 /**
  * Returns the type_info object of class bad_typeid, building it on first use.
  *
- * When D_0053EA20 is still zero, builds exception's type_info (func_00412F18) and constructs a single-inheritance
+ * When D_0053EA20 is still zero, builds exception's type_info (__tf9exception) and constructs a single-inheritance
  * type_info in D_0053EA20 with __rtti_si, name "10bad_typeid" (D_00499AA0) and base D_004A5BA8.
  *
  * @return the type_info object D_0053EA20
  */
 int *__tf10bad_typeid(void) {
     if (D_0053EA20[0] == 0) {
-        func_00412F18();
+        __tf9exception();
         __rtti_si(D_0053EA20, (int)D_00499AA0, (int)D_004A5BA8);
     }
     return D_0053EA20;
@@ -547,19 +543,19 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __tf8bad_cast);
 extern int D_0053EA30[];
 extern int D_00499AB0[];
 extern int D_004A5BA8[];
-extern int *func_00412F18(void);
+extern int *__tf9exception(void);
 extern void __rtti_si(int *, int, int);
 /**
  * Returns the type_info object of class bad_cast, building it on first use.
  *
- * When D_0053EA30 is still zero, builds exception's type_info (func_00412F18) and constructs a single-inheritance
+ * When D_0053EA30 is still zero, builds exception's type_info (__tf9exception) and constructs a single-inheritance
  * type_info in D_0053EA30 with __rtti_si, name "8bad_cast" (D_00499AB0) and base D_004A5BA8.
  *
  * @return the type_info object D_0053EA30
  */
 int *__tf8bad_cast(void) {
     if (D_0053EA30[0] == 0) {
-        func_00412F18();
+        __tf9exception();
         __rtti_si(D_0053EA30, (int)D_00499AB0, (int)D_004A5BA8);
     }
     return D_0053EA30;
@@ -614,11 +610,12 @@ int *type_info_type_info(int *typeInfo, int typeName) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_315B68_tinfo", func_004151F8);
+INCLUDE_ASM("seg/seg_315B68_tinfo", __tf9type_info);
 #ifdef SKIP_ASM
 extern int D_00499AC0[];
 extern int D_004A5BB0[];
 extern void __rtti_user(int *, int);
+int *__tf9type_info_a(void) __asm__("__tf9type_info");
 /**
  * Returns the type_info object of class type_info itself, building it on first use.
  *
@@ -627,7 +624,7 @@ extern void __rtti_user(int *, int);
  *
  * @return the type_info object D_004A5BB0
  */
-int *func_004151F8(void) {
+int *__tf9type_info_a(void) {
     if (D_004A5BB0[0] == 0)
         __rtti_user(D_004A5BB0, (int)D_00499AC0);
     return D_004A5BB0;
@@ -651,7 +648,7 @@ int type_info_before(int *lhs, int *rhs) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415260);
+INCLUDE_ASM("seg/seg_315B68_tinfo", __throw_type_match_rtti);
 #ifdef SKIP_ASM
 /* tinfo2.cc __throw_type_match_rtti (GCC runtime, GPL v2+ with the runtime linking exception) */
 /* Low level match routine used by compiler to match types of catch
@@ -659,7 +656,7 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415260);
 
 extern "C" void*
 __throw_type_match_rtti (const void *catch_type_r, const void *throw_type_r,
-			 void *objptr) __asm__ ("func_00415260");
+			 void *objptr) __asm__ ("__throw_type_match_rtti");
 /**
  * Tests whether a thrown object can be caught by a handler of another type and returns the object pointer to bind.
  *
@@ -668,7 +665,7 @@ __throw_type_match_rtti (const void *catch_type_r, const void *throw_type_r,
  * the catch side may not drop const or volatile; equal pointees match, a void pointee catches any non-function pointee,
  * a class pointee is cast with dcast, and multi-level pointers are compared level by level with the
  * qualification-conversion rule (a level may add const only when every outer level is const). The type tests are
- * dynamic_casts through func_00415840. __cplus_type_matcher and __check_eh_spec call it.
+ * dynamic_casts through __dynamic_cast. __cplus_type_matcher and __check_eh_spec call it.
  *
  * @param catch_type_r  the handler's type_info
  * @param throw_type_r  the thrown object's type_info
@@ -814,15 +811,15 @@ __throw_type_match_rtti (const void *catch_type_r, const void *throw_type_r,
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", __is_pointer);
 #ifdef SKIP_ASM
-extern int *func_004151F8(void);
-extern int *func_00415F48(void);
-extern int func_00415840(int, char *, int, char *, char *, void *);
+extern int *__tf9type_info_a(void) __asm__("__tf9type_info");
+extern int *__tf19__pointer_type_info_a(void) __asm__("__tf19__pointer_type_info");
+extern int __dynamic_cast_a(int, char *, int, char *, char *, void *) __asm__("__dynamic_cast");
 /**
  * Returns whether a type_info describes a pointer type.
  *
- * Null gives false. Otherwise it dynamic_casts the type_info to the pointer type_info class with func_00415840:
- * from-type is the object's own type_info function (vtable slot 0), to-type func_00415F48, public only, the address
- * adjusted by the slot's delta, sub-type func_004151F8. func_00412A28 uses it to decide whether the thrown object is
+ * Null gives false. Otherwise it dynamic_casts the type_info to the pointer type_info class with __dynamic_cast:
+ * from-type is the object's own type_info function (vtable slot 0), to-type __tf19__pointer_type_info, public only, the address
+ * adjusted by the slot's delta, sub-type __tf9type_info. __cp_pop_exception uses it to decide whether the thrown object is
  * freed.
  *
  * @param typePtr  the type_info to test, or null
@@ -832,7 +829,7 @@ int __is_pointer(int *typePtr) {
     int pointerType = 0;
     if (typePtr) {
         short *vt = (short *)typePtr[1];
-        pointerType = func_00415840(((int *)vt)[1], (char *)func_00415F48, 1, (char *)typePtr + vt[0], (char *)func_004151F8, typePtr);
+        pointerType = __dynamic_cast_a(((int *)vt)[1], (char *)__tf19__pointer_type_info_a, 1, (char *)typePtr + vt[0], (char *)__tf9type_info_a, typePtr);
     }
     return pointerType != 0;
 }
@@ -967,8 +964,9 @@ void __rtti_array(int *storage, int typeName) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415840);
+INCLUDE_ASM("seg/seg_315B68_tinfo", __dynamic_cast);
 #ifdef SKIP_ASM
+int __dynamic_cast_a(int fromFn, char *toFn, int requirePublic, char *address, char *subFn, void *subPtr) __asm__("__dynamic_cast");
 /**
  * Performs a run-time checked cast: asks the source object's dynamic type to find the target type in it.
  *
@@ -983,7 +981,7 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415840);
  * @param subPtr         the source pointer
  * @return the adjusted pointer, or 0 when the cast fails
  */
-int func_00415840(int fromFn, char *toFn, int requirePublic, char *address, char *subFn, void *subPtr) {
+int __dynamic_cast_a(int fromFn, char *toFn, int requirePublic, char *address, char *subFn, void *subPtr) {
     char *fromType = ((char *(*)(void))fromFn)();
     int *vt = *(int **)(fromType + 4);
     char *th = fromType + *(short *)((char *)vt + 0x10);
@@ -1059,8 +1057,10 @@ public:
     }
 
 //100%
-INCLUDE_ASM("seg/seg_315B68_tinfo", func_004158F0);
+INCLUDE_ASM("seg/seg_315B68_tinfo", __tfv);
 #ifdef SKIP_ASM
+/* g++ declares __tfv itself (const type_info &) once typeid (void) is used above: define it under a local name */
+extern "C" const __builtin_ti& __tfv_a(void) __asm__("__tfv");
 /**
  * Returns the type_info object of the builtin type void, building it on first use.
  *
@@ -1069,7 +1069,7 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", func_004158F0);
  *
  * @return the type_info object D_00454158
  */
-BUILTIN(func_004158F0, D_00454158, D_00499AE0)
+BUILTIN(__tfv_a, D_00454158, D_00499AE0)
 #endif
 
 //100%
@@ -1299,24 +1299,25 @@ BUILTIN(__tfSc, D_004541D8, D_00499B60)
 extern "C" {
 
 //100%
-INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415CA8);
+INCLUDE_ASM("seg/seg_315B68_tinfo", __tf17__array_type_info);
 #ifdef SKIP_ASM
 extern int D_0053EAA0[];
 extern int D_00499BD8[];
 extern int D_004A5BB0[];
-extern int *func_004151F8(void);
+extern int *__tf9type_info_a(void) __asm__("__tf9type_info");
 extern void __rtti_si(int *, int, int);
+int *__tf17__array_type_info_a(void) __asm__("__tf17__array_type_info");
 /**
  * Returns the type_info object of class __array_type_info, building it on first use.
  *
- * When D_0053EAA0 is still zero, builds type_info's own type_info (func_004151F8) and constructs a single-inheritance
+ * When D_0053EAA0 is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
  * type_info in D_0053EAA0 with __rtti_si, name "17__array_type_info" (D_00499BD8) and base D_004A5BB0.
  *
  * @return the type_info object D_0053EAA0
  */
-int *func_00415CA8(void) {
+int *__tf17__array_type_info_a(void) {
     if (D_0053EAA0[0] == 0) {
-        func_004151F8();
+        __tf9type_info_a();
         __rtti_si(D_0053EAA0, (int)D_00499BD8, (int)D_004A5BB0);
     }
     return D_0053EAA0;
@@ -1337,24 +1338,25 @@ void __array_type_info____array_type_info(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415D18);
+INCLUDE_ASM("seg/seg_315B68_tinfo", __tf16__ptmd_type_info);
 #ifdef SKIP_ASM
 extern int D_0053EAC0[];
 extern int D_00499BF0[];
 extern int D_004A5BB0[];
-extern int *func_004151F8(void);
+extern int *__tf9type_info_a(void) __asm__("__tf9type_info");
 extern void __rtti_si(int *, int, int);
+int *__tf16__ptmd_type_info_a(void) __asm__("__tf16__ptmd_type_info");
 /**
  * Returns the type_info object of class __ptmd_type_info, building it on first use.
  *
- * When D_0053EAC0 is still zero, builds type_info's own type_info (func_004151F8) and constructs a single-inheritance
+ * When D_0053EAC0 is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
  * type_info in D_0053EAC0 with __rtti_si, name "16__ptmd_type_info" (D_00499BF0) and base D_004A5BB0.
  *
  * @return the type_info object D_0053EAC0
  */
-int *func_00415D18(void) {
+int *__tf16__ptmd_type_info_a(void) {
     if (D_0053EAC0[0] == 0) {
-        func_004151F8();
+        __tf9type_info_a();
         __rtti_si(D_0053EAC0, (int)D_00499BF0, (int)D_004A5BB0);
     }
     return D_0053EAC0;
@@ -1375,24 +1377,25 @@ void __ptmd_type_info____ptmd_type_info(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415D88);
+INCLUDE_ASM("seg/seg_315B68_tinfo", __tf16__ptmf_type_info);
 #ifdef SKIP_ASM
 extern int D_0053EA90[];
 extern int D_00499C08[];
 extern int D_004A5BB0[];
-extern int *func_004151F8(void);
+extern int *__tf9type_info_a(void) __asm__("__tf9type_info");
 extern void __rtti_si(int *, int, int);
+int *__tf16__ptmf_type_info_a(void) __asm__("__tf16__ptmf_type_info");
 /**
  * Returns the type_info object of class __ptmf_type_info, building it on first use.
  *
- * When D_0053EA90 is still zero, builds type_info's own type_info (func_004151F8) and constructs a single-inheritance
+ * When D_0053EA90 is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
  * type_info in D_0053EA90 with __rtti_si, name "16__ptmf_type_info" (D_00499C08) and base D_004A5BB0.
  *
  * @return the type_info object D_0053EA90
  */
-int *func_00415D88(void) {
+int *__tf16__ptmf_type_info_a(void) {
     if (D_0053EA90[0] == 0) {
-        func_004151F8();
+        __tf9type_info_a();
         __rtti_si(D_0053EA90, (int)D_00499C08, (int)D_004A5BB0);
     }
     return D_0053EA90;
@@ -1413,24 +1416,25 @@ void __ptmf_type_info____ptmf_type_info(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415DF8);
+INCLUDE_ASM("seg/seg_315B68_tinfo", __tf16__func_type_info);
 #ifdef SKIP_ASM
 extern int D_0053EA70[];
 extern int D_00499C20[];
 extern int D_004A5BB0[];
-extern int *func_004151F8(void);
+extern int *__tf9type_info_a(void) __asm__("__tf9type_info");
 extern void __rtti_si(int *, int, int);
+int *__tf16__func_type_info_a(void) __asm__("__tf16__func_type_info");
 /**
  * Returns the type_info object of class __func_type_info, building it on first use.
  *
- * When D_0053EA70 is still zero, builds type_info's own type_info (func_004151F8) and constructs a single-inheritance
+ * When D_0053EA70 is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
  * type_info in D_0053EA70 with __rtti_si, name "16__func_type_info" (D_00499C20) and base D_004A5BB0.
  *
  * @return the type_info object D_0053EA70
  */
-int *func_00415DF8(void) {
+int *__tf16__func_type_info_a(void) {
     if (D_0053EA70[0] == 0) {
-        func_004151F8();
+        __tf9type_info_a();
         __rtti_si(D_0053EA70, (int)D_00499C20, (int)D_004A5BB0);
     }
     return D_0053EA70;
@@ -1451,24 +1455,25 @@ void __func_type_info____func_type_info(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415E68);
+INCLUDE_ASM("seg/seg_315B68_tinfo", __tf19__builtin_type_info);
 #ifdef SKIP_ASM
 extern int D_0053EAD0[];
 extern int D_00499C38[];
 extern int D_004A5BB0[];
-extern int *func_004151F8(void);
+extern int *__tf9type_info_a(void) __asm__("__tf9type_info");
 extern void __rtti_si(int *, int, int);
+int *__tf19__builtin_type_info_a(void) __asm__("__tf19__builtin_type_info");
 /**
  * Returns the type_info object of class __builtin_type_info, building it on first use.
  *
- * When D_0053EAD0 is still zero, builds type_info's own type_info (func_004151F8) and constructs a single-inheritance
+ * When D_0053EAD0 is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
  * type_info in D_0053EAD0 with __rtti_si, name "19__builtin_type_info" (D_00499C38) and base D_004A5BB0.
  *
  * @return the type_info object D_0053EAD0
  */
-int *func_00415E68(void) {
+int *__tf19__builtin_type_info_a(void) {
     if (D_0053EAD0[0] == 0) {
-        func_004151F8();
+        __tf9type_info_a();
         __rtti_si(D_0053EAD0, (int)D_00499C38, (int)D_004A5BB0);
     }
     return D_0053EAD0;
@@ -1489,24 +1494,25 @@ void __builtin_type_info____builtin_type_info(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415ED8);
+INCLUDE_ASM("seg/seg_315B68_tinfo", __tf16__attr_type_info);
 #ifdef SKIP_ASM
 extern int D_0053EA80[];
 extern int D_00499C50[];
 extern int D_004A5BB0[];
-extern int *func_004151F8(void);
+extern int *__tf9type_info_a(void) __asm__("__tf9type_info");
 extern void __rtti_si(int *, int, int);
+int *__tf16__attr_type_info_a(void) __asm__("__tf16__attr_type_info");
 /**
  * Returns the type_info object of class __attr_type_info, building it on first use.
  *
- * When D_0053EA80 is still zero, builds type_info's own type_info (func_004151F8) and constructs a single-inheritance
+ * When D_0053EA80 is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
  * type_info in D_0053EA80 with __rtti_si, name "16__attr_type_info" (D_00499C50) and base D_004A5BB0.
  *
  * @return the type_info object D_0053EA80
  */
-int *func_00415ED8(void) {
+int *__tf16__attr_type_info_a(void) {
     if (D_0053EA80[0] == 0) {
-        func_004151F8();
+        __tf9type_info_a();
         __rtti_si(D_0053EA80, (int)D_00499C50, (int)D_004A5BB0);
     }
     return D_0053EA80;
@@ -1527,24 +1533,25 @@ void __attr_type_info____attr_type_info(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415F48);
+INCLUDE_ASM("seg/seg_315B68_tinfo", __tf19__pointer_type_info);
 #ifdef SKIP_ASM
 extern int D_0053EAB0[];
 extern int D_00499C68[];
 extern int D_004A5BB0[];
-extern int *func_004151F8(void);
+extern int *__tf9type_info_a(void) __asm__("__tf9type_info");
 extern void __rtti_si(int *, int, int);
+int *__tf19__pointer_type_info_a(void) __asm__("__tf19__pointer_type_info");
 /**
  * Returns the type_info object of class __pointer_type_info, building it on first use.
  *
- * When D_0053EAB0 is still zero, builds type_info's own type_info (func_004151F8) and constructs a single-inheritance
+ * When D_0053EAB0 is still zero, builds type_info's own type_info (__tf9type_info) and constructs a single-inheritance
  * type_info in D_0053EAB0 with __rtti_si, name "19__pointer_type_info" (D_00499C68) and base D_004A5BB0.
  *
  * @return the type_info object D_0053EAB0
  */
-int *func_00415F48(void) {
+int *__tf19__pointer_type_info_a(void) {
     if (D_0053EAB0[0] == 0) {
-        func_004151F8();
+        __tf9type_info_a();
         __rtti_si(D_0053EAB0, (int)D_00499C68, (int)D_004A5BB0);
     }
     return D_0053EAB0;

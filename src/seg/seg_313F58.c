@@ -14,7 +14,7 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00412F58);
+INCLUDE_ASM("seg/seg_313F58", __pack_f);
 #ifdef SKIP_ASM
 /* fp-bit.c (GCC runtime, GPL v2+ with the libgcc linking exception): shared header part, single-precision copy.
    libgcc built this copy with FLOAT and US_SOFTWARE_GOFAST, plus FLOAT_BIT_ORDER_MISMATCH (the mips t-* makefile
@@ -165,9 +165,9 @@ flip_sign ( fp_number_type *  x)
 }
 
 /* Entry points, under the unit's retail labels (asm-label aliases). */
-extern FLO_type pack_d ( fp_number_type * ) __asm__("func_00412F58");
-extern void unpack_d (FLO_union_type *, fp_number_type *) __asm__("func_00413068");
-int __fpcmp_parts (fp_number_type * a, fp_number_type *b) __asm__("func_00413748");
+extern FLO_type pack_d ( fp_number_type * ) __asm__("__pack_f");
+extern void unpack_d (FLO_union_type *, fp_number_type *) __asm__("__unpack_f");
+int __fpcmp_parts (fp_number_type * a, fp_number_type *b) __asm__("__fpcmp_parts_f");
 
 /* frame.c (GCC runtime, GPL v2+ with the libgcc linking exception): shared header part. Built with
    DWARF2_UNWIND_INFO, inhibit_libc (no libc headers: the libc calls below are declared with asm labels to the
@@ -373,13 +373,13 @@ extern void *memset (void *, int, size_t) __asm__("memset");
 /* frame.c functions, under the unit's retail labels (asm-label aliases). The ones whose bodies are landed under
    their func_ names are declared extern here (static in frame.c; fde_split is a static inline that is too big to
    inline, so retail calls an out-of-line copy). */
-extern void *decode_uleb128 (unsigned char *buf, unsigned *r) __asm__("func_00413B38");
-extern void *decode_sleb128 (unsigned char *buf, int *r) __asm__("func_00413B80");
-extern void fde_split (fde_vector *linear, fde_vector *erratic) __asm__("func_004149F0");
-extern void fde_merge (fde_vector *v1, const fde_vector *v2) __asm__("func_00413BD0");
-extern void frame_init (struct object* ob) __asm__("func_00414008");
-extern void *extract_cie_info (fde *f, struct cie_info *c) __asm__("func_00414230");
-static fde **end_fde_sort (fde_accumulator *accu, size_t count) __asm__("func_00413CD0");
+extern void *decode_uleb128 (unsigned char *buf, unsigned *r) __asm__("decode_uleb128");
+extern void *decode_sleb128 (unsigned char *buf, int *r) __asm__("decode_sleb128");
+extern void fde_split (fde_vector *linear, fde_vector *erratic) __asm__("fde_split");
+extern void fde_merge (fde_vector *v1, const fde_vector *v2) __asm__("fde_merge");
+extern void frame_init (struct object* ob) __asm__("frame_init");
+extern void *extract_cie_info (fde *f, struct cie_info *c) __asm__("extract_cie_info");
+static fde **end_fde_sort (fde_accumulator *accu, size_t count) __asm__("end_fde_sort");
 static fde *find_fde (void *pc) __asm__("find_fde");
 static void *execute_cfa_insn (void *p, struct frame_state_internal *state,
 			       struct cie_info *info, void **pc) __asm__("execute_cfa_insn");
@@ -479,13 +479,14 @@ pack_d ( fp_number_type *  src)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00413068);
+INCLUDE_ASM("seg/seg_313F58", __unpack_f);
 #ifdef SKIP_ASM
 struct FB {
     unsigned m : 23;
     unsigned e : 8;
     unsigned s : 1;
 };
+void __unpack_f_a(float *src, int *dst) __asm__("__unpack_f");
 /**
  * Splits an IEEE float into the unpacked fp-bit form (class, sign, exponent, guarded fraction).
  *
@@ -498,7 +499,7 @@ struct FB {
  * @param src  the float to split (read through a pointer)
  * @param dst  the four-word unpacked result
  */
-void func_00413068(float *src, int *dst) {
+void __unpack_f_a(float *src, int *dst) {
     struct FB *bits = (struct FB *)src;
     unsigned fraction = bits->m;
     int exponent = bits->e;
@@ -693,18 +694,18 @@ _fpadd_parts (fp_number_type * lhs,
 //100%
 INCLUDE_ASM("seg/seg_313F58", fpadd);
 #ifdef SKIP_ASM
-extern void func_00413068(float *, int *);
+extern void __unpack_f_a(float *, int *) __asm__("__unpack_f");
 extern int *func_004130F8(int *, int *, int *);
-extern int func_00412F58(int *);
+extern int __pack_f_a(int *) __asm__("__pack_f");
 
 /**
  * Adds two floats in software.
  *
- * Unpacks both operands (func_00413068), adds the parts (func_004130F8) and packs the result (func_00412F58).
+ * Unpacks both operands (__unpack_f), adds the parts (func_004130F8) and packs the result (__pack_f).
  *
  * @param x  first operand
  * @param y  second operand
- * @return the sum, as func_00412F58 leaves it in the float return register (the C declaration says int)
+ * @return the sum, as __pack_f leaves it in the float return register (the C declaration says int)
  */
 int fpadd(float x, float y) {
     int unpackedX[4];
@@ -712,28 +713,28 @@ int fpadd(float x, float y) {
     int sum[4];
     float fx = x;
     float fy = y;
-    func_00413068(&fx, unpackedX);
-    func_00413068(&fy, unpackedY);
-    return func_00412F58(func_004130F8(unpackedX, unpackedY, sum));
+    __unpack_f_a(&fx, unpackedX);
+    __unpack_f_a(&fy, unpackedY);
+    return __pack_f_a(func_004130F8(unpackedX, unpackedY, sum));
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_313F58", fpsub);
 #ifdef SKIP_ASM
-extern void func_00413068(float *, int *);
+extern void __unpack_f_a(float *, int *) __asm__("__unpack_f");
 extern int *func_004130F8(int *, int *, int *);
-extern int func_00412F58(int *);
+extern int __pack_f_a(int *) __asm__("__pack_f");
 
 /**
  * Subtracts one float from another in software.
  *
- * Unpacks both operands (func_00413068), flips the second one's sign, adds the parts (func_004130F8) and packs the
- * result (func_00412F58).
+ * Unpacks both operands (__unpack_f), flips the second one's sign, adds the parts (func_004130F8) and packs the
+ * result (__pack_f).
  *
  * @param x  minuend
  * @param y  subtrahend
- * @return x - y, as func_00412F58 leaves it in the float return register (the C declaration says int)
+ * @return x - y, as __pack_f leaves it in the float return register (the C declaration says int)
  */
 int fpsub(float x, float y) {
     int unpackedX[4];
@@ -741,10 +742,10 @@ int fpsub(float x, float y) {
     int difference[4];
     float fx = x;
     float fy = y;
-    func_00413068(&fx, unpackedX);
-    func_00413068(&fy, unpackedY);
+    __unpack_f_a(&fx, unpackedX);
+    __unpack_f_a(&fy, unpackedY);
     unpackedY[1] ^= 1;
-    return func_00412F58(func_004130F8(unpackedX, unpackedY, difference));
+    return __pack_f_a(func_004130F8(unpackedX, unpackedY, difference));
 }
 #endif
 
@@ -864,7 +865,7 @@ multiply (FLO_type arg_a, FLO_type arg_b) __asm__("fpmul");
  * times zero gives the shared NaN D_0052ADD8; an infinite or zero operand is returned with the XOR sign. Otherwise the
  * 32-bit fractions are multiplied into 64 bits, the exponent is the sum plus 2, the high word is normalised into [1 <<
  * 30, 1 << 31) (low bits carried along) and rounded to nearest even with the low word as sticky bits. The result is
- * packed with func_00412F58.
+ * packed with __pack_f.
  *
  * @param arg_a  first factor
  * @param arg_b  second factor
@@ -890,19 +891,19 @@ multiply (FLO_type arg_a, FLO_type arg_b)
 //100%
 INCLUDE_ASM("seg/seg_313F58", fpdiv);
 #ifdef SKIP_ASM
-extern void func_00413068(float *, int *);
-extern float func_00412F58_f(int *) __asm__("func_00412F58");
+extern void __unpack_f_a(float *, int *) __asm__("__unpack_f");
+extern float func_00412F58_f(int *) __asm__("__pack_f");
 extern int D_0052ADD8[];
 
 /**
  * Divides one float by another in software.
  *
- * Unpacks both operands (func_00413068). A NaN dividend, else a NaN divisor, is returned as is. The sign is the XOR of
+ * Unpacks both operands (__unpack_f). A NaN dividend, else a NaN divisor, is returned as is. The sign is the XOR of
  * both. Infinity / infinity and zero / zero give the shared NaN D_0052ADD8; an infinite or zero dividend is returned; a
  * finite value over infinity becomes zero (fraction and exponent cleared); a finite value over zero becomes infinity.
  * Otherwise the exponents are subtracted (one less when the dividend's fraction is the smaller, which is then doubled),
  * 31 quotient bits are produced by shift-and-subtract from bit 30 down, and the quotient is rounded to nearest even
- * (+0x40 at a guard pattern of 0x40 when bit 7 is set or a remainder is left). The result is packed with func_00412F58.
+ * (+0x40 at a guard pattern of 0x40 when bit 7 is set or a remainder is left). The result is packed with __pack_f.
  *
  * @param x  dividend
  * @param y  divisor
@@ -916,8 +917,8 @@ float fpdiv(float x, float y) {
     int *result;
     unsigned n, divisorFraction, quotient, bit;
     int *quotientParts;
-    func_00413068(&fx, dividend);
-    func_00413068(&fy, divisor);
+    __unpack_f_a(&fx, dividend);
+    __unpack_f_a(&fy, divisor);
     quotientParts = dividend;
     if ((unsigned)dividend[0] < 2) {
         result = dividend;
@@ -968,7 +969,7 @@ float fpdiv(float x, float y) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00413748);
+INCLUDE_ASM("seg/seg_313F58", __fpcmp_parts_f);
 #ifdef SKIP_ASM
 /* according to the demo, fpcmp returns a comparison with 0... thus
    a<b -> -1
@@ -1060,13 +1061,13 @@ __fpcmp_parts (fp_number_type * lhs, fp_number_type * rhs)
 //100%
 INCLUDE_ASM("seg/seg_313F58", fpcmp);
 #ifdef SKIP_ASM
-extern void func_00413068(float *, int *);
-extern int func_00413748(int *, int *);
+extern void __unpack_f_a(float *, int *) __asm__("__unpack_f");
+extern int __fpcmp_parts_f_a(int *, int *) __asm__("__fpcmp_parts_f");
 
 /**
  * Compares two floats in software.
  *
- * Unpacks both operands (func_00413068) and compares the parts with func_00413748.
+ * Unpacks both operands (__unpack_f) and compares the parts with __fpcmp_parts_f.
  *
  * @param x  first operand
  * @param y  second operand
@@ -1077,22 +1078,22 @@ int fpcmp(float x, float y) {
     int unpackedY[4];
     float fx = x;
     float fy = y;
-    func_00413068(&fx, unpackedX);
-    func_00413068(&fy, unpackedY);
-    return func_00413748(unpackedX, unpackedY);
+    __unpack_f_a(&fx, unpackedX);
+    __unpack_f_a(&fy, unpackedY);
+    return __fpcmp_parts_f_a(unpackedX, unpackedY);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_313F58", sitofp);
 #ifdef SKIP_ASM
-extern float func_00412F58_f(int *) __asm__("func_00412F58");
+extern float func_00412F58_f(int *) __asm__("__pack_f");
 
 /**
  * Converts an int to a float in software.
  *
  * Zero gives class zero. -2147483648 returns -2147483648.0f directly. Otherwise the magnitude becomes the fraction with
- * exponent 30, shifted left until bit 30 is set (decrementing the exponent), and is packed with func_00412F58.
+ * exponent 30, shifted left until bit 30 is set (decrementing the exponent), and is packed with __pack_f.
  *
  * @param x  the integer
  * @return the float value
@@ -1147,7 +1148,7 @@ int fptosi(float x) {
     float value = x;
     unsigned fpClass;
     unsigned magnitude;
-    func_00413068(&value, unpacked);
+    __unpack_f_a(&value, unpacked);
     fpClass = unpacked[0];
     if ((fpClass ^ 2) == 0)
         return 0;
@@ -1182,7 +1183,7 @@ unsigned fptoui(float x) {
     int unpacked[4];
     float value = x;
     unsigned fpClass;
-    func_00413068(&value, unpacked);
+    __unpack_f_a(&value, unpacked);
     fpClass = unpacked[0];
     if ((fpClass ^ 2) == 0)
         return 0;
@@ -1207,25 +1208,25 @@ sat:
 //100%
 INCLUDE_ASM("seg/seg_313F58", __negsf2);
 #ifdef SKIP_ASM
-extern void func_00413068(float *, int *);
-extern int func_00412F58(int *);
+extern void __unpack_f_a(float *, int *) __asm__("__unpack_f");
+extern int __pack_f_a(int *) __asm__("__pack_f");
 /**
  * Negates a float in software.
  *
- * Unpacks it (func_00413068), sets sign = !sign and packs it again (func_00412F58).
+ * Unpacks it (__unpack_f), sets sign = !sign and packs it again (__pack_f).
  *
- * The C reconstruction declares its parts buffer as int obj[2] although func_00413068 writes four words; retail
+ * The C reconstruction declares its parts buffer as int obj[2] although __unpack_f writes four words; retail
  * reserves 16 bytes there, so a port must widen it.
  *
  * @param x  the value
- * @return -x, as func_00412F58 leaves it in the float return register (the C declaration says int)
+ * @return -x, as __pack_f leaves it in the float return register (the C declaration says int)
  */
 int __negsf2(float x) {
     int obj[2];
     float value = x;
-    func_00413068(&value, obj);
+    __unpack_f_a(&value, obj);
     obj[1] = obj[1] == 0;
-    return func_00412F58(obj);
+    return __pack_f_a(obj);
 }
 #endif
 
@@ -1235,7 +1236,7 @@ INCLUDE_ASM("seg/seg_313F58", __make_fp);
 /**
  * Builds a float from its unpacked fields: class, sign, exponent and guarded fraction.
  *
- * Stores the four arguments into an fp_number_type on the stack and packs it with func_00412F58. Declared void, but the
+ * Stores the four arguments into an fp_number_type on the stack and packs it with __pack_f. Declared void, but the
  * packed float is left in the float return register for the caller; dptofp (the double-to-float conversion) calls it
  * that way.
  *
@@ -1250,19 +1251,19 @@ void __make_fp(int fpClass, int sign, int exponent, int fraction) {
     parts[1] = sign;
     parts[2] = exponent;
     parts[3] = fraction;
-    func_00412F58(parts);
+    __pack_f_a(parts);
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_313F58", fptodp);
 #ifdef SKIP_ASM
-extern void func_00413068(float *, int *);
+extern void __unpack_f_a(float *, int *) __asm__("__unpack_f");
 extern int __make_dp(int, int, int, unsigned long long);
 /**
  * Converts a float to a double in software (fp-bit.c's GOFAST fptodp).
  *
- * Unpacks the float (func_00413068, unpack_d) and packs the parts as a double (__make_dp), shifting the
+ * Unpacks the float (__unpack_f, unpack_d) and packs the parts as a double (__make_dp), shifting the
  * fraction into the double's position.
  *
  * @param x  the value to convert
@@ -1271,14 +1272,15 @@ extern int __make_dp(int, int, int, unsigned long long);
 int fptodp(float x) {
     int unpacked[4];
     float value = x;
-    func_00413068(&value, unpacked);
+    __unpack_f_a(&value, unpacked);
     return __make_dp(unpacked[0], unpacked[1], unpacked[2], ((unsigned long long)(long long)unpacked[3] << 32) >> 2);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00413B38);
+INCLUDE_ASM("seg/seg_313F58", decode_uleb128);
 #ifdef SKIP_ASM
+unsigned char *decode_uleb128_a(unsigned char *buf, unsigned *out) __asm__("decode_uleb128");
 /**
  * Decodes an unsigned LEB128 value and returns the address after it.
  *
@@ -1288,7 +1290,7 @@ INCLUDE_ASM("seg/seg_313F58", func_00413B38);
  * @param out  receives the value
  * @return the first byte after the value
  */
-unsigned char *func_00413B38(unsigned char *buf, unsigned *out) {
+unsigned char *decode_uleb128_a(unsigned char *buf, unsigned *out) {
     unsigned curByte = *buf++;
     unsigned value = curByte & 0x7F;
     int shift = 0;
@@ -1305,8 +1307,9 @@ unsigned char *func_00413B38(unsigned char *buf, unsigned *out) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00413B80);
+INCLUDE_ASM("seg/seg_313F58", decode_sleb128);
 #ifdef SKIP_ASM
+unsigned char *decode_sleb128_a(unsigned char *buf, int *out) __asm__("decode_sleb128");
 /**
  * Decodes a signed LEB128 value and returns the address after it.
  *
@@ -1317,7 +1320,7 @@ INCLUDE_ASM("seg/seg_313F58", func_00413B80);
  * @param out  receives the value
  * @return the first byte after the value
  */
-unsigned char *func_00413B80(unsigned char *buf, int *out) {
+unsigned char *decode_sleb128_a(unsigned char *buf, int *out) {
     unsigned shift = 0;
     int value = 0;
     unsigned curByte;
@@ -1334,21 +1337,22 @@ unsigned char *func_00413B80(unsigned char *buf, int *out) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00413BD0);
+INCLUDE_ASM("seg/seg_313F58", fde_merge);
 #ifdef SKIP_ASM
 struct K13BD0 { int f0; int f4; int key; };
 struct L13BD0 { struct K13BD0 **items; unsigned n; };
+void fde_merge_a(struct L13BD0 *dstVec, struct L13BD0 *srcVec) __asm__("fde_merge");
 /**
  * Merges a sorted vector of FDE pointers into another sorted vector in place, from the back.
  *
  * For each source entry from the last one down, moves the destination entries whose pc_begin (+8) is larger up by the
  * number of source entries still to place, then stores the source entry; finally adds the source count to the
- * destination count. The destination array must already have room for both (func_00414008 allocates it for every FDE).
+ * destination count. The destination array must already have room for both (frame_init allocates it for every FDE).
  *
  * @param dstVec  the linear (sorted) vector, extended in place
  * @param srcVec  the sorted erratic entries
  */
-void func_00413BD0(struct L13BD0 *dstVec, struct L13BD0 *srcVec) {
+void fde_merge_a(struct L13BD0 *dstVec, struct L13BD0 *srcVec) {
     unsigned srcCount = srcVec->n;
     unsigned n;
     unsigned j;
@@ -1373,7 +1377,7 @@ void func_00413BD0(struct L13BD0 *dstVec, struct L13BD0 *srcVec) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00413CD0);
+INCLUDE_ASM("seg/seg_313F58", end_fde_sort);
 #ifdef SKIP_ASM
 /* This is O(n log(n)).  BSD/OS defines heapsort in stdlib.h, so we must
    use a name that does not conflict.  */
@@ -1444,8 +1448,8 @@ frame_heapsort (fde_vector *erratic)
  * Finishes sorting an FDE accumulator and returns the sorted array.
  *
  * Aborts (abort) unless the linear vector holds count entries, splits the out-of-order entries into the erratic
- * vector (func_004149F0), aborts again unless both together still hold count, heapsorts the erratic entries by pc_begin
- * (inline), merges them back into the linear vector (func_00413BD0) and frees the erratic array (free).
+ * vector (fde_split), aborts again unless both together still hold count, heapsorts the erratic entries by pc_begin
+ * (inline), merges them back into the linear vector (fde_merge) and frees the erratic array (free).
  *
  * @param accu   the accumulator (linear and erratic vectors)
  * @param count  the number of FDEs added
@@ -1541,7 +1545,7 @@ void add_fdes(struct N13F80 *n, struct L13F80 *accumulator, unsigned *lo, unsign
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00414008);
+INCLUDE_ASM("seg/seg_313F58", frame_init);
 #ifdef SKIP_ASM
 struct N14008 {
     unsigned lo;
@@ -1557,18 +1561,19 @@ struct LL14008 {
     int nb;
 };
 extern int *malloc_a(int) __asm__("malloc");
-extern struct N13F80 **func_00413CD0(struct LL14008 *, int);
+extern struct N13F80 **end_fde_sort_a(struct LL14008 *, int) __asm__("end_fde_sort");
+void frame_init_a(struct N14008 *n) __asm__("frame_init");
 /**
  * Builds an unwind object's sorted FDE table and its covered address range on first use.
  *
  * Counts the FDEs (count_fdes) of every section in the object's fde_array list (+0xC, null-terminated) when it is
  * set, else of the single section at fde_begin (+8), and stores the count (+0x10). Allocates the linear and erratic
- * arrays (malloc, 4 bytes per FDE), adds every FDE (add_fdes), sorts (func_00413CD0) and stores the sorted
+ * arrays (malloc, 4 bytes per FDE), adds every FDE (add_fdes), sorts (end_fde_sort) and stores the sorted
  * array in fde_array and the range in pc_begin (+0) and pc_end (+4).
  *
  * @param n  the registered unwind object
  */
-void func_00414008(struct N14008 *n) {
+void frame_init_a(struct N14008 *n) {
     struct N13F80 **pp;
     int cnt, bytes;
     struct LL14008 accumulator;
@@ -1600,7 +1605,7 @@ void func_00414008(struct N14008 *n) {
     } else {
         add_fdes(n->root, (struct L13F80 *)&accumulator, &lo, &hi);
     }
-    n->roots = func_00413CD0(&accumulator, cnt);
+    n->roots = end_fde_sort_a(&accumulator, cnt);
     n->lo = lo;
     n->hi = hi;
 }
@@ -1614,7 +1619,7 @@ INCLUDE_ASM("seg/seg_313F58", find_fde);
 /**
  * Finds the FDE describing the function that contains a code address.
  *
- * Walks the registered objects (D_0052ADE8), initialising each not yet sorted one (pc_begin 0) with func_00414008,
+ * Walks the registered objects (D_0052ADE8), initialising each not yet sorted one (pc_begin 0) with frame_init,
  * until one's [pc_begin, pc_end) contains pc, then binary-searches its sorted FDE array for the entry with pc_begin <=
  * pc < pc_begin + pc_range.
  *
@@ -1662,7 +1667,7 @@ find_fde (void *pc)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00414230);
+INCLUDE_ASM("seg/seg_313F58", extract_cie_info);
 #ifdef SKIP_ASM
 extern int D_004998F0[];
 extern int D_004998F8[];
@@ -1678,6 +1683,7 @@ struct U14230 {
     int v;
 } __attribute__((packed));
 extern int strlen(char *);
+unsigned char *extract_cie_info_a(int *cie, struct C14230 *cieInfo) __asm__("extract_cie_info");
 /**
  * Reads the CIE that an FDE refers to into a cie_info and returns the address of its first instruction.
  *
@@ -1691,7 +1697,7 @@ extern int strlen(char *);
  * @param cieInfo    receives the CIE fields (augmentation string at +0)
  * @return the CIE's first call-frame instruction, or 0 for an unknown augmentation
  */
-unsigned char *func_00414230(int *cie, struct C14230 *cieInfo) {
+unsigned char *extract_cie_info_a(int *cie, struct C14230 *cieInfo) {
     char *augmentationEnd;
     unsigned char *cursor;
     unsigned augDataLength;
@@ -1705,11 +1711,11 @@ unsigned char *func_00414230(int *cie, struct C14230 *cieInfo) {
         } else {
             cieInfo->f4 = 0;
         }
-        cursor = func_00413B38(cursor, &cieInfo->f8);
-        cursor = func_00413B80(cursor, &cieInfo->fC);
+        cursor = decode_uleb128_a(cursor, &cieInfo->f8);
+        cursor = decode_sleb128_a(cursor, &cieInfo->fC);
         cieInfo->f10 = *cursor++;
         if (*cieInfo->aug == 'z')
-            cursor = func_00413B38(cursor, &augDataLength) + augDataLength;
+            cursor = decode_uleb128_a(cursor, &augDataLength) + augDataLength;
         return cursor;
     }
     return 0;
@@ -1909,7 +1915,7 @@ extern int *D_0052ADE8;
 /**
  * Registers a null-terminated table of .eh_frame sections for unwinding, using an object record the caller supplies.
  *
- * Like __register_frame_info but also stores the table in fde_array (+0xC), so func_00414008 walks every listed section. crt0
+ * Like __register_frame_info but also stores the table in fde_array (+0xC), so frame_init walks every listed section. crt0
  * (func_001001D0) calls it at startup with D_0043CE00 and the object D_004A5D48.
  *
  * @param begin  the table of section pointers
@@ -2008,7 +2014,7 @@ extern struct frame_state *__frame_state_for (void *, struct frame_state *) __as
 /**
  * Computes the register save state at a code address from its DWARF 2 unwind info.
  *
- * Finds the FDE (find_fde) and its CIE (func_00414230); returns 0 when either is missing. Starts from a zeroed
+ * Finds the FDE (find_fde) and its CIE (extract_cie_info); returns 0 when either is missing. Starts from a zeroed
  * state with the CIE's return-address column and eh_ptr, runs the CIE's instructions, skips a 'z' augmentation block,
  * then runs the FDE's instructions up to the target address (execute_cfa_insn) and copies the resulting frame_state (0x2F0
  * bytes) to state_in. __throw (the throw) and the other unwinders call it.
@@ -2063,11 +2069,12 @@ __frame_state_for (void *pc_target, struct frame_state *state_in)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_004149F0);
+INCLUDE_ASM("seg/seg_313F58", fde_split);
 #ifdef SKIP_ASM
 struct K { int f0; int f4; int key; };
 struct L { struct K **items; unsigned n; };
 struct M { struct K **arr; int n; };
+void fde_split_a(struct L *linear, struct M *out) __asm__("fde_split");
 /**
  * Splits an FDE vector into a sorted run and the out-of-order entries.
  *
@@ -2078,7 +2085,7 @@ struct M { struct K **arr; int n; };
  * @param linear  the FDE vector to split; keeps the sorted run
  * @param out     receives the out-of-order FDEs
  */
-void func_004149F0(struct L *linear, struct M *out) {
+void fde_split_a(struct L *linear, struct M *out) {
     unsigned n = linear->n;
     unsigned link[n];
     unsigned top = -1;
