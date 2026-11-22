@@ -1451,7 +1451,6 @@ struct sA8E8Bank {                  /* a loaded bank's header */
     int f10;                        /* size of the kind-0x100 data */
     int f14[1];                     /* self-relative offsets */
 };
-struct sA8E8Env { int f00; int f04; };
 struct sA8E8Pan { float l; float r; };
 struct sA8E8Bus {                   /* 0x14, at +0x1F8 / +0x20C / +0x220, indexed by id */
     short f00;
@@ -1837,7 +1836,7 @@ void SNDSYSI_100hzserver(void) {
     int i;
     int dirty;
     struct CHANPUB *channel;
-    struct sA8E8Env *envStep;
+    struct ENVELOPE *envStep;
 
     sndgs.audiotick++;
     iSNDserve();
@@ -1891,12 +1890,12 @@ void SNDSYSI_100hzserver(void) {
                 f_89E0_55F0(channel->handle);
                 continue;
             }
-            envStep = &((struct sA8E8Env*)channel->paenvelope)[channel->curenvelope];
-            channel->envduration = envStep->f00;
+            envStep = &channel->paenvelope[channel->curenvelope];
+            channel->envduration = envStep->duration;
             if (channel->envduration < 0) {
                 channel->envduration = 0x7FFFFFFF;
             }
-            channel->envpertick = ((envStep->f04 << 16) - channel->envvol) / channel->envduration;
+            channel->envpertick = ((envStep->targetvol << 16) - channel->envvol) / channel->envduration;
         }
         if (dirty) {
             f_A7B0_55F0(i);
@@ -2591,8 +2590,6 @@ int SNDBANKI_valid(int bankHandle) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDbankheadersize);
 #ifdef SKIP_ASM
-typedef struct { int a; int b; int c; } B6528_inner;
-typedef struct { B6528_inner *p; int pad[3]; } B6528_ent;
 
 /**
  * Returns the header size of a loaded bank.
@@ -2603,7 +2600,7 @@ typedef struct { B6528_inner *p; int pad[3]; } B6528_ent;
  * @return the header size in bytes
  */
 int SNDbankheadersize(int bankHandle) {
-    return ((B6528_ent*)sndgs.banklist)[bankHandle].p->c;
+    return sndgs.banklist[bankHandle].phdr->hdrsize;
 }
 #endif
 
@@ -2762,7 +2759,6 @@ int func_003B6788(int renderMask, char *taggedPatch, int sampleData, int firstOf
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDBANK_play);
 #ifdef SKIP_ASM
-typedef struct { struct BANKVER5 *p; int pad[3]; } Ent_6820;
 extern int SNDBANKI_valid_6820(int) __asm__("SNDBANKI_valid");
 extern int SNDBANKI_getppatch_6820(void *, int) __asm__("SNDBANKI_getppatch");
 extern int SNDBANKI_playpatch_6820(void *, int, int, int, int) __asm__("SNDBANKI_playpatch");
@@ -2780,7 +2776,7 @@ extern int SNDBANKI_playpatch_6820(void *, int, int, int, int) __asm__("SNDBANKI
 int SNDBANK_play(int bankHandle, int patchNum, int playOpts) {
     struct BANKVER5 *ch;
     if (SNDBANKI_valid_6820(bankHandle) < 0) return -8;
-    ch = ((Ent_6820*)sndgs.banklist)[bankHandle].p;
+    ch = sndgs.banklist[bankHandle].phdr;
     if (patchNum < 0 || patchNum >= ch->numpatches) return -8;
     return SNDBANKI_playpatch_6820(ch, SNDBANKI_getppatch_6820(ch, patchNum), bankHandle, patchNum, playOpts);
 }
@@ -11806,15 +11802,6 @@ struct H_1298 {
     int padCAC;
     struct T_1298 *tbl;
 };
-struct Ent_1298 {
-    char pad0[4];
-    short list[15];
-    char pad22;
-    unsigned char n;
-    char pad24[4];
-    short f28;
-    char pad2A[0x8C - 0x2A];
-};
 struct G_1298 {
     char pad0[0x2F];
     unsigned char cnt2;
@@ -11822,7 +11809,7 @@ struct G_1298 {
     char pad31[0x49 - 0x31];
     unsigned char mode;
     char pad4A[0x1F0 - 0x4A];
-    struct Ent_1298 *ents;
+    struct CHANPUB *ents;
 };
 extern struct H_1298 D_0050AD00_1298 __asm__("D_0050AD00");
 extern void f_A550_1298(int) __asm__("SNDVOICEI_free");
@@ -11842,13 +11829,13 @@ void SNDDRV_getEndedVoices(void) {
     int groupVoice;
 
     for (i = 0; i < sndgs.sso.set.voicesspu; i++) {
-        if (D_0050AD00_1298.tbl->e[i].key != 0 && ((struct Ent_1298*)sndgs.chan)[i].f28 == -1) {
+        if (D_0050AD00_1298.tbl->e[i].key != 0 && sndgs.chan[i].masterchan == -1) {
             if (D_0050AD00_1298.k[i].key != D_0050AD00_1298.tbl->e[i].key) {
                 D_0050AD00_1298.k[i].val = D_0050AD00_1298.tbl->e[i].key & 0x7FFFFF;
             }
             if (D_0050AD00_1298.k[i].val == 0) {
-                for (j = 0; j < ((struct Ent_1298*)sndgs.chan)[i].n; j++) {
-                    groupVoice = ((struct Ent_1298*)sndgs.chan)[i].list[j];
+                for (j = 0; j < sndgs.chan[i].numchan; j++) {
+                    groupVoice = sndgs.chan[i].voices[j];
                     D_0050AD00_1298.tbl->e[groupVoice].key = 0;
                     f_A550_1298(groupVoice);
                     if (sndgs.sso.set.outputspdifmode == 2) {
@@ -11859,13 +11846,13 @@ void SNDDRV_getEndedVoices(void) {
         }
     }
     for (i = 0; i < sndgs.sso.set.voicesiopcpu; i++) {
-        if (D_0050AD00_1298.tbl->f[i].a != 0 && ((struct Ent_1298*)sndgs.chan)[i + sndgs.sso.set.voicesspu].f28 == -1) {
+        if (D_0050AD00_1298.tbl->f[i].a != 0 && sndgs.chan[i + sndgs.sso.set.voicesspu].masterchan == -1) {
             if (D_0050AD00_1298.k2[i].key != D_0050AD00_1298.tbl->f[i].a) {
                 D_0050AD00_1298.k2[i].val = 0;
             }
             if (D_0050AD00_1298.k2[i].val == -1) {
-                for (j = 0; j < ((struct Ent_1298*)sndgs.chan)[i + sndgs.sso.set.voicesspu].n; j++) {
-                    groupVoice = ((struct Ent_1298*)sndgs.chan)[i + sndgs.sso.set.voicesspu].list[j];
+                for (j = 0; j < sndgs.chan[i + sndgs.sso.set.voicesspu].numchan; j++) {
+                    groupVoice = sndgs.chan[i + sndgs.sso.set.voicesspu].voices[j];
                     D_0050AD00_1298.tbl->f[groupVoice - sndgs.sso.set.voicesspu].a = 0;
                     f_A550_1298(groupVoice);
                 }
@@ -12731,10 +12718,7 @@ void iSNDserve(void) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_stop);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct E_2440 { char pad[4]; short ch[15]; char pad22; unsigned char n; unsigned short flags; char pad3[0x5F - 0x26]; signed char on; char pad4[0x8C - 0x60]; };
-struct G_2440 { char pad[0x2F]; unsigned char b2F; unsigned char b30; char pad1[0x49 - 0x31]; unsigned char mode; char pad2[0x1F0 - 0x4A]; struct E_2440 *ents; };
+struct G_2440 { char pad[0x2F]; unsigned char b2F; unsigned char b30; char pad1[0x49 - 0x31]; unsigned char mode; char pad2[0x1F0 - 0x4A]; struct CHANPUB *ents; };
 struct P_2440 { int v; int pad; };
 struct Q_2440 { int v; int pad[3]; };
 struct V_2440 { char pad[0x20]; struct P_2440 a[0x30]; };
@@ -12757,24 +12741,24 @@ extern void f_8468_2440(int) __asm__("MIX_stop");
  * @return 0
  */
 int SNDPLATFORM_stop(int idx) {
-    struct E_2440 *channel = &((struct E_2440*)sndgs.chan)[idx];
+    struct CHANPUB *channel = &sndgs.chan[idx];
     int i;
-    if (channel->flags & 8) {
-        for (i = 0; i < channel->n; i++) {
-            D_0050AD00_2440.m->a[channel->ch[i]].v = 0;
-            f_A550_2440(channel->ch[i]);
+    if (channel->rendermode & 8) {
+        for (i = 0; i < channel->numchan; i++) {
+            D_0050AD00_2440.m->a[channel->voices[i]].v = 0;
+            f_A550_2440(channel->voices[i]);
             if (sndgs.sso.set.outputspdifmode == 2)
-                D_0050AD00_2440.m->a[channel->ch[i] + 0x18].v = 0;
+                D_0050AD00_2440.m->a[channel->voices[i] + 0x18].v = 0;
         }
-    } else if (channel->flags & 0x100) {
-        for (i = 0; i < channel->n; i++) {
-            ((struct V2_2440 *)D_0050AD00_2440.m)->a[channel->ch[i] - sndgs.sso.set.voicesspu].v = 0;
-            f_A550_2440(channel->ch[i]);
+    } else if (channel->rendermode & 0x100) {
+        for (i = 0; i < channel->numchan; i++) {
+            ((struct V2_2440 *)D_0050AD00_2440.m)->a[channel->voices[i] - sndgs.sso.set.voicesspu].v = 0;
+            f_A550_2440(channel->voices[i]);
         }
     } else {
-        for (i = 0; i < channel->n; i++) {
-            f_8468_2440(channel->ch[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu));
-            f_A550_2440(channel->ch[i]);
+        for (i = 0; i < channel->numchan; i++) {
+            f_8468_2440(channel->voices[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu));
+            f_A550_2440(channel->voices[i]);
         }
     }
     return 0;
@@ -12784,17 +12768,6 @@ int SNDPLATFORM_stop(int idx) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_setpitch);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct E_25E0 {
-    char pad00[0x4];
-    short h[14];
-    unsigned short f20;
-    char pad22;
-    unsigned char n;
-    unsigned short flags;
-    char pad26[0x8A - 0x26];
-    unsigned short f8A;
-};
 struct G_25E0 {
     char pad000[0x2A];
     unsigned short f2A;
@@ -12805,7 +12778,7 @@ struct G_25E0 {
     char pad031[0x49 - 0x31];
     unsigned char f49;
     char pad04A[0x1F0 - 0x4A];
-    struct E_25E0 *f1F0;
+    struct CHANPUB *f1F0;
 };
 struct A8_25E0 {
     int a;
@@ -12842,30 +12815,30 @@ extern void MIX_setpitch_25E0(int a, unsigned int v) __asm__("MIX_setpitch");
  * @return 0
  */
 int SNDPLATFORM_setpitch(int idx) {
-    struct E_25E0 *channel = &((struct E_25E0*)sndgs.chan)[idx];
+    struct CHANPUB *channel = &sndgs.chan[idx];
     unsigned int hwPitch;
     int i;
 
-    if (channel->flags & 8) {
-        hwPitch = (unsigned int)((channel->f20 << 12) / 48000 * channel->f8A) >> 12;
+    if (channel->rendermode & 8) {
+        hwPitch = (unsigned int)((channel->samplerate << 12) / 48000 * channel->finalpitch) >> 12;
         if (hwPitch >= 0x4000) {
             hwPitch = 0x3FFF;
         }
-        for (i = 0; i < channel->n; i++) {
-            D_0050AD00_25E0.tbl->a[channel->h[i]].v = hwPitch;
+        for (i = 0; i < channel->numchan; i++) {
+            D_0050AD00_25E0.tbl->a[channel->voices[i]].v = hwPitch;
             if (sndgs.sso.set.outputspdifmode == 2) {
-                D_0050AD00_25E0.tbl->a[channel->h[i] + 0x18].v = hwPitch;
+                D_0050AD00_25E0.tbl->a[channel->voices[i] + 0x18].v = hwPitch;
             }
         }
-    } else if (channel->flags & 0x100) {
-        hwPitch = (unsigned int)((channel->f20 << 12) / sndgs.sso.set.outputrateiopcpu * channel->f8A) >> 12;
-        for (i = 0; i < channel->n; i++) {
-            D_0050AD00_25E0.tbl->b[channel->h[i] - sndgs.sso.set.voicesspu].v = hwPitch;
+    } else if (channel->rendermode & 0x100) {
+        hwPitch = (unsigned int)((channel->samplerate << 12) / sndgs.sso.set.outputrateiopcpu * channel->finalpitch) >> 12;
+        for (i = 0; i < channel->numchan; i++) {
+            D_0050AD00_25E0.tbl->b[channel->voices[i] - sndgs.sso.set.voicesspu].v = hwPitch;
         }
     } else {
-        hwPitch = (unsigned int)((channel->f20 << 12) / sndgs.sso.set.outputrate * channel->f8A) >> 8;
-        for (i = 0; i < channel->n; i++) {
-            MIX_setpitch_25E0(channel->h[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), hwPitch);
+        hwPitch = (unsigned int)((channel->samplerate << 12) / sndgs.sso.set.outputrate * channel->finalpitch) >> 8;
+        for (i = 0; i < channel->numchan; i++) {
+            MIX_setpitch_25E0(channel->voices[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), hwPitch);
         }
     }
     return 0;
@@ -12875,21 +12848,8 @@ int SNDPLATFORM_setpitch(int idx) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_setfxlevel);
 #ifdef SKIP_ASM
-// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct Ch_27E0 {
-    int pad0;
-    short ids[15];
-    char pad22;
-    unsigned char n;
-    unsigned short flags;
-    char pad26[0x48 - 0x26];
-    float vol;
-    char pad4C[0x62 - 0x4C];
-    short vals[1];
-};
 struct V_27E0 { char pad[0x1AC]; char v[1][16]; };
-struct G_27E0 { char pad[0x2F]; unsigned char base2; unsigned char base; char pad31[0x49 - 0x31]; unsigned char mode; char pad4A[0x1F0 - 0x4A]; struct Ch_27E0 *chans; };
+struct G_27E0 { char pad[0x2F]; unsigned char base2; unsigned char base; char pad31[0x49 - 0x31]; unsigned char mode; char pad4A[0x1F0 - 0x4A]; struct CHANPUB *chans; };
 struct A_27E0 { char pad[0xCB0]; long *mask; };
 extern struct A_27E0 D_0050AD00_27E0 __asm__("D_0050AD00");
 extern void f_8598_27E0(int, int, float) __asm__("SNDMIX_setwetgain");
@@ -12907,35 +12867,35 @@ extern void f_8598_27E0(int, int, float) __asm__("SNDMIX_setwetgain");
  * @return 0
  */
 int SNDPLATFORM_setfxlevel(int id, int k) {
-    struct Ch_27E0 *ch;
+    struct CHANPUB *ch;
     int i, sendLevel;
     float sendGain;
 
-    ch = (struct Ch_27E0 *)((char *)(struct Ch_27E0*)sndgs.chan + id * 0x8C);
-    if (ch->flags & 8) {
-        for (i = 0; i < ch->n; i++) {
-            if (ch->vals[0] != 0) {
-                *D_0050AD00_27E0.mask |= 1L << ch->ids[i];
+    ch = (struct CHANPUB *)((char *)(struct CHANPUB*)sndgs.chan + id * 0x8C);
+    if (ch->rendermode & 8) {
+        for (i = 0; i < ch->numchan; i++) {
+            if (ch->unk_62[0] != 0) {
+                *D_0050AD00_27E0.mask |= 1L << ch->voices[i];
             } else {
-                *D_0050AD00_27E0.mask &= ~(1L << ch->ids[i]);
+                *D_0050AD00_27E0.mask &= ~(1L << ch->voices[i]);
             }
             if (sndgs.sso.set.outputspdifmode == 2) {
-                if (ch->vals[0] != 0) {
-                    *D_0050AD00_27E0.mask |= 1L << (ch->ids[i] + 0x18);
+                if (ch->unk_62[0] != 0) {
+                    *D_0050AD00_27E0.mask |= 1L << (ch->voices[i] + 0x18);
                 } else {
-                    *D_0050AD00_27E0.mask &= ~(1L << (ch->ids[i] + 0x18));
+                    *D_0050AD00_27E0.mask &= ~(1L << (ch->voices[i] + 0x18));
                 }
             }
         }
-    } else if (ch->flags & 0x100) {
-        sendLevel = ch->vol * ch->vals[k] * 0.003875850699841976f;
-        for (i = 0; i < ch->n; i++) {
-            ((struct V_27E0 *)D_0050AD00_27E0.mask)->v[ch->ids[i] - sndgs.sso.set.voicesspu][k] = sendLevel;
+    } else if (ch->rendermode & 0x100) {
+        sendLevel = ch->finalvol * ch->unk_62[k] * 0.003875850699841976f;
+        for (i = 0; i < ch->numchan; i++) {
+            ((struct V_27E0 *)D_0050AD00_27E0.mask)->v[ch->voices[i] - sndgs.sso.set.voicesspu][k] = sendLevel;
         }
     } else {
-        sendGain = ch->vol * ch->vals[k] / 32767.0f;
-        for (i = 0; i < ch->n; i++) {
-            f_8598_27E0(ch->ids[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), k, sendGain);
+        sendGain = ch->finalvol * ch->unk_62[k] / 32767.0f;
+        for (i = 0; i < ch->numchan; i++) {
+            f_8598_27E0(ch->voices[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), k, sendGain);
         }
     }
     return 0;
@@ -12945,19 +12905,6 @@ int SNDPLATFORM_setfxlevel(int id, int k) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C2A50);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct Ch_2A50 {
-    int pad0;
-    short ids[15];
-    char pad22;
-    unsigned char n;
-    unsigned short flags;
-    char pad26[0x48 - 0x26];
-    float vol;
-    char pad4C[0x5F - 0x4C];
-    signed char b5F;
-    char pad60[0x8C - 0x60];
-};
 struct G_2A50 {
     char pad0[0x2F];
     unsigned char base2;
@@ -12967,7 +12914,7 @@ struct G_2A50 {
     unsigned char b48;
     unsigned char mode;
     char pad4A[0x1F0 - 0x4A];
-    struct Ch_2A50 *chans;
+    struct CHANPUB *chans;
 };
 struct W8_2A50 { char pad[6]; signed char l; signed char r; };
 struct W16_2A50 { char pad[6]; signed char c[10]; };
@@ -13000,46 +12947,46 @@ extern void f8560_2A50(int, int, float) __asm__("SNDMIX_setdrygain");
  * @param id  the channel index
  */
 void func_003C2A50(int id) {
-    struct Ch_2A50 *ch;
+    struct CHANPUB *ch;
     float sc;
     int i;
     int j;
     int outputCount;
 
-    ch = (struct Ch_2A50 *)((char *)(struct Ch_2A50*)sndgs.chan + id * 0x8C);
-    if (ch->flags & 8) {
-        for (i = 0; i < ch->n; i++) {
+    ch = (struct CHANPUB *)((char *)(struct CHANPUB*)sndgs.chan + id * 0x8C);
+    if (ch->rendermode & 8) {
+        for (i = 0; i < ch->numchan; i++) {
             if (sndgs.sso.set.outputspdifmode != 2) {
-                D_0050AD00_2A50.tbl->a[ch->ids[i]].l = D_0050AD00_2A50.spk[ch->ids[i]].p[1] * ch->vol * 127.0f;
-                D_0050AD00_2A50.tbl->a[ch->ids[i]].r = D_0050AD00_2A50.spk[ch->ids[i]].p[0] * ch->vol * 127.0f;
+                D_0050AD00_2A50.tbl->a[ch->voices[i]].l = D_0050AD00_2A50.spk[ch->voices[i]].p[1] * ch->finalvol * 127.0f;
+                D_0050AD00_2A50.tbl->a[ch->voices[i]].r = D_0050AD00_2A50.spk[ch->voices[i]].p[0] * ch->finalvol * 127.0f;
             } else {
                 if (sndgs.sso.set.outputchannels == 4) {
-                    D_0050AD00_2A50.tbl->a[ch->ids[i]].l = D_0050AD00_2A50.spk[ch->ids[i]].p[3] * ch->vol * 127.0f;
-                    D_0050AD00_2A50.tbl->a[ch->ids[i]].r = D_0050AD00_2A50.spk[ch->ids[i]].p[0] * ch->vol * 127.0f;
-                    D_0050AD00_2A50.tbl->a[ch->ids[i] + 0x18].l = D_0050AD00_2A50.spk[ch->ids[i]].p[2] * ch->vol * 127.0f;
-                    D_0050AD00_2A50.tbl->a[ch->ids[i] + 0x18].r = D_0050AD00_2A50.spk[ch->ids[i]].p[1] * ch->vol * 127.0f;
+                    D_0050AD00_2A50.tbl->a[ch->voices[i]].l = D_0050AD00_2A50.spk[ch->voices[i]].p[3] * ch->finalvol * 127.0f;
+                    D_0050AD00_2A50.tbl->a[ch->voices[i]].r = D_0050AD00_2A50.spk[ch->voices[i]].p[0] * ch->finalvol * 127.0f;
+                    D_0050AD00_2A50.tbl->a[ch->voices[i] + 0x18].l = D_0050AD00_2A50.spk[ch->voices[i]].p[2] * ch->finalvol * 127.0f;
+                    D_0050AD00_2A50.tbl->a[ch->voices[i] + 0x18].r = D_0050AD00_2A50.spk[ch->voices[i]].p[1] * ch->finalvol * 127.0f;
                 } else {
-                    D_0050AD00_2A50.tbl->a[ch->ids[i]].l = D_0050AD00_2A50.spk[ch->ids[i]].p[4] * ch->vol * 127.0f;
-                    D_0050AD00_2A50.tbl->a[ch->ids[i]].r = D_0050AD00_2A50.spk[ch->ids[i]].p[1] * ch->vol * 127.0f;
-                    D_0050AD00_2A50.tbl->a[ch->ids[i] + 0x18].l = D_0050AD00_2A50.spk[ch->ids[i]].p[3] * ch->vol * 127.0f;
-                    D_0050AD00_2A50.tbl->a[ch->ids[i] + 0x18].r = D_0050AD00_2A50.spk[ch->ids[i]].p[2] * ch->vol * 127.0f;
+                    D_0050AD00_2A50.tbl->a[ch->voices[i]].l = D_0050AD00_2A50.spk[ch->voices[i]].p[4] * ch->finalvol * 127.0f;
+                    D_0050AD00_2A50.tbl->a[ch->voices[i]].r = D_0050AD00_2A50.spk[ch->voices[i]].p[1] * ch->finalvol * 127.0f;
+                    D_0050AD00_2A50.tbl->a[ch->voices[i] + 0x18].l = D_0050AD00_2A50.spk[ch->voices[i]].p[3] * ch->finalvol * 127.0f;
+                    D_0050AD00_2A50.tbl->a[ch->voices[i] + 0x18].r = D_0050AD00_2A50.spk[ch->voices[i]].p[2] * ch->finalvol * 127.0f;
                 }
             }
         }
-    } else if (ch->flags & 0x100) {
+    } else if (ch->rendermode & 0x100) {
         outputCount = sndgs.sso.set.outputchannels + sndgs.sso.set.outputlfe;
-        sc = ch->vol * (float)ch->b5F * 0.0078740157186985016f;
-        for (i = 0; i < ch->n; i++) {
+        sc = ch->finalvol * (float)ch->drylevel * 0.0078740157186985016f;
+        for (i = 0; i < ch->numchan; i++) {
             for (j = 0; j < outputCount; j++) {
-                D_0050AD00_2A50.tbl->b[ch->ids[i] - sndgs.sso.set.voicesspu].c[j] = sc * D_0050AD00_2A50.spk[ch->ids[i]].p[j] * 127.0f;
+                D_0050AD00_2A50.tbl->b[ch->voices[i] - sndgs.sso.set.voicesspu].c[j] = sc * D_0050AD00_2A50.spk[ch->voices[i]].p[j] * 127.0f;
             }
         }
     } else {
         outputCount = sndgs.sso.set.outputchannels + sndgs.sso.set.outputlfe;
-        sc = ch->vol * (float)ch->b5F * 0.0078740157186985016f;
-        for (i = 0; i < ch->n; i++) {
+        sc = ch->finalvol * (float)ch->drylevel * 0.0078740157186985016f;
+        for (i = 0; i < ch->numchan; i++) {
             for (j = 0; j < outputCount; j++) {
-                f8560_2A50(ch->ids[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), j, sc * D_0050BB98_2A50[ch->ids[i]].p[j]);
+                f8560_2A50(ch->voices[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), j, sc * D_0050BB98_2A50[ch->voices[i]].p[j]);
             }
         }
     }
@@ -13049,11 +12996,7 @@ void func_003C2A50(int id) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C2EC8);
 #ifdef SKIP_ASM
-// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-struct E_2EC8 { char pad[4]; short ch[15]; char pad22; unsigned char n; unsigned short flags; char pad3[0x5F - 0x26]; signed char on; char pad4[0x8C - 0x60]; };
-struct G_2EC8 { char pad[0x49]; unsigned char mode; char pad2[0x1F0 - 0x4A]; struct E_2EC8 *ents; };
+struct G_2EC8 { char pad[0x49]; unsigned char mode; char pad2[0x1F0 - 0x4A]; struct CHANPUB *ents; };
 struct M_2EC8 { char pad[8]; long mask; };
 struct H_2EC8 { char pad[0xCB0]; struct M_2EC8 *m; };
 extern struct H_2EC8 D_0050AD00_2EC8 __asm__("D_0050AD00");
@@ -13069,18 +13012,18 @@ extern void f_2A50_2EC8(int) __asm__("func_003C2A50");
  * @param idx  the channel index
  */
 void func_003C2EC8(int idx) {
-    struct E_2EC8 *channel = &((struct E_2EC8*)sndgs.chan)[idx];
+    struct CHANPUB *channel = &sndgs.chan[idx];
     int i;
-    if (channel->flags & 8) {
-        for (i = 0; i < channel->n; i++) {
-            if (channel->on) D_0050AD00_2EC8.m->mask |= 1L << channel->ch[i];
-            else D_0050AD00_2EC8.m->mask &= ~(1L << channel->ch[i]);
+    if (channel->rendermode & 8) {
+        for (i = 0; i < channel->numchan; i++) {
+            if (channel->drylevel) D_0050AD00_2EC8.m->mask |= 1L << channel->voices[i];
+            else D_0050AD00_2EC8.m->mask &= ~(1L << channel->voices[i]);
             if (sndgs.sso.set.outputspdifmode == 2) {
-                if (channel->on) D_0050AD00_2EC8.m->mask |= 1L << (channel->ch[i] + 0x18);
-                else D_0050AD00_2EC8.m->mask &= ~(1L << (channel->ch[i] + 0x18));
+                if (channel->drylevel) D_0050AD00_2EC8.m->mask |= 1L << (channel->voices[i] + 0x18);
+                else D_0050AD00_2EC8.m->mask &= ~(1L << (channel->voices[i] + 0x18));
             }
         }
-    } else if (channel->flags & 0x100) {
+    } else if (channel->rendermode & 0x100) {
         f_2A50_2EC8(idx);
     } else {
         f_2A50_2EC8(idx);
@@ -13723,14 +13666,6 @@ int SNDPLATFORM_asyncresolvetimbre(void *patchHeader, int sampleData, int *first
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_playtimbre);
 #ifdef SKIP_ASM
-struct Ch_3EE0 {
-    int pad0;
-    short ids[15];
-    char pad22;
-    unsigned char n;
-    unsigned short flags;
-    char pad26[0x8C - 0x26];
-};
 struct G_3EE0 {
     char pad0[0x2F];
     unsigned char base2;
@@ -13738,7 +13673,7 @@ struct G_3EE0 {
     char pad31[0x49 - 0x31];
     unsigned char mode;
     char pad4A[0x1F0 - 0x4A];
-    struct Ch_3EE0 *chans;
+    struct CHANPUB *chans;
 };
 struct W8_3EE0 { int w; int pad; };
 struct W16_3EE0 { int w; char pad[12]; };
@@ -13786,50 +13721,50 @@ extern void f8158_3EE0(int, int, int, int, int, int, int, int, int, int, int, in
  * @return 0
  */
 int SNDPLATFORM_playtimbre(struct SNDIPATCHHEADER *patchHeader, int base, int id, int timeMult, int filterAmount, int lowPassCutoff, int highPassCutoff) {
-    struct Ch_3EE0 *ch;
+    struct CHANPUB *ch;
     int i;
 
-    ch = (struct Ch_3EE0 *)((char *)(struct Ch_3EE0*)sndgs.chan + id * 0x8C);
-    if (ch->flags & 8) {
+    ch = (struct CHANPUB *)((char *)(struct CHANPUB*)sndgs.chan + id * 0x8C);
+    if (ch->rendermode & 8) {
         SNDPLATFORM_setpitch(id);
         f38E0_3EE0(id);
         f2EC8_3EE0(id);
         SNDPLATFORM_setfxlevel(id, 0);
-        for (i = 0; i < ch->n; i++) {
-            D_0050AD00_3EE0.e[ch->ids[i]].w = *patchHeader->paudioramaddr + (patchHeader->sampleoffset[i] - patchHeader->sampleoffset[0]);
+        for (i = 0; i < ch->numchan; i++) {
+            D_0050AD00_3EE0.e[ch->voices[i]].w = *patchHeader->paudioramaddr + (patchHeader->sampleoffset[i] - patchHeader->sampleoffset[0]);
             D_0050AD00_3EE0.x1AB8 += 0x800000;
-            D_0050AD00_3EE0.tbl->a[ch->ids[i]].w = D_0050AD00_3EE0.e[ch->ids[i]].w | D_0050AD00_3EE0.x1AB8;
-            D_0050AD00_3EE0.x840[ch->ids[i]].w = D_0050AD00_3EE0.e[ch->ids[i]].w;
+            D_0050AD00_3EE0.tbl->a[ch->voices[i]].w = D_0050AD00_3EE0.e[ch->voices[i]].w | D_0050AD00_3EE0.x1AB8;
+            D_0050AD00_3EE0.x840[ch->voices[i]].w = D_0050AD00_3EE0.e[ch->voices[i]].w;
             if (sndgs.sso.set.outputspdifmode == 2) {
-                D_0050AD00_3EE0.tbl->a[ch->ids[i] + 0x18].w = D_0050AD00_3EE0.e[ch->ids[i]].w | D_0050AD00_3EE0.x1AB8;
-                D_0050AD00_3EE0.x840[ch->ids[i] + 0x18].w = D_0050AD00_3EE0.e[ch->ids[i]].w;
+                D_0050AD00_3EE0.tbl->a[ch->voices[i] + 0x18].w = D_0050AD00_3EE0.e[ch->voices[i]].w | D_0050AD00_3EE0.x1AB8;
+                D_0050AD00_3EE0.x840[ch->voices[i] + 0x18].w = D_0050AD00_3EE0.e[ch->voices[i]].w;
             }
         }
-    } else if (ch->flags & 0x100) {
+    } else if (ch->rendermode & 0x100) {
         SNDPLATFORM_setpitch(id);
         f38E0_3EE0(id);
         SNDPLATFORM_setfxlevel(id, 0);
-        for (i = 0; i < ch->n; i++) {
-            D_0050AD00_3EE0.e[ch->ids[i]].w = *patchHeader->paudioramaddr + (patchHeader->sampleoffset[i] - patchHeader->sampleoffset[0]);
+        for (i = 0; i < ch->numchan; i++) {
+            D_0050AD00_3EE0.e[ch->voices[i]].w = *patchHeader->paudioramaddr + (patchHeader->sampleoffset[i] - patchHeader->sampleoffset[0]);
             D_0050AD00_3EE0.x1AB8 += 0x800000;
-            D_0050AD00_3EE0.tbl->b[ch->ids[i] - sndgs.sso.set.voicesspu].w = D_0050AD00_3EE0.e[ch->ids[i]].w | D_0050AD00_3EE0.x1AB8;
-            D_0050AD00_3EE0.x9C0[ch->ids[i] - sndgs.sso.set.voicesspu].w = 0;
+            D_0050AD00_3EE0.tbl->b[ch->voices[i] - sndgs.sso.set.voicesspu].w = D_0050AD00_3EE0.e[ch->voices[i]].w | D_0050AD00_3EE0.x1AB8;
+            D_0050AD00_3EE0.x9C0[ch->voices[i] - sndgs.sso.set.voicesspu].w = 0;
         }
     } else {
-        for (i = 0; i < ch->n; i++) {
-            f8158_3EE0(ch->ids[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), patchHeader->samplerep, 1,
-                       base + patchHeader->sampleoffset[i], base + patchHeader->sampleoffset[0] + patchHeader->loopoffset[i], ((int*)&patchHeader->ptimestretchdata[0])[i], ch->n, *(int *)((char *)ch + 0x14),
+        for (i = 0; i < ch->numchan; i++) {
+            f8158_3EE0(ch->voices[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), patchHeader->samplerep, 1,
+                       base + patchHeader->sampleoffset[i], base + patchHeader->sampleoffset[0] + patchHeader->loopoffset[i], ((int*)&patchHeader->ptimestretchdata[0])[i], ch->numchan, *(int *)((char *)ch + 0x14),
                        patchHeader->sustainstart, patchHeader->sustainend, 0, 0, patchHeader->platformver, i);
         }
-        SNDPLATFORM_setpitch(ch->ids[0]);
-        f38E0_3EE0(ch->ids[0]);
-        SNDPLATFORM_setfxlevel(ch->ids[0], 0);
-        SNDPLATFORM_timemult(ch->ids[0], timeMult);
-        func_003C30C8(ch->ids[0], filterAmount);
-        f3178_3EE0(ch->ids[0], lowPassCutoff);
-        SNDPLATFORM_highpass(ch->ids[0], highPassCutoff);
-        for (i = 0; i < ch->n; i++) {
-            f83A0_3EE0(ch->ids[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu));
+        SNDPLATFORM_setpitch(ch->voices[0]);
+        f38E0_3EE0(ch->voices[0]);
+        SNDPLATFORM_setfxlevel(ch->voices[0], 0);
+        SNDPLATFORM_timemult(ch->voices[0], timeMult);
+        func_003C30C8(ch->voices[0], filterAmount);
+        f3178_3EE0(ch->voices[0], lowPassCutoff);
+        SNDPLATFORM_highpass(ch->voices[0], highPassCutoff);
+        for (i = 0; i < ch->numchan; i++) {
+            f83A0_3EE0(ch->voices[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu));
         }
     }
     return 0;
@@ -16273,10 +16208,6 @@ void *SNDBANKI_getppatch(BANKVER5* bank, int patchNum) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDPKTPLAYI_gethighchannel);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-// Index of the largest of the first n shorts at entry a + 4; -1 if none.
-struct E_6580 { int f0; short v[0x44]; };
 
 /**
  * Returns which of a voice's channels runs on the highest hardware voice.
@@ -16293,8 +16224,8 @@ int SNDPKTPLAYI_gethighchannel(int voice, int n) {
     int idx = -1;
     int i;
     for (i = 0; i < n; i++) {
-        if (best < ((struct E_6580*)sndgs.chan)[voice].v[i]) {
-            best = ((struct E_6580*)sndgs.chan)[voice].v[i];
+        if (best < sndgs.chan[voice].voices[i]) {
+            best = sndgs.chan[voice].voices[i];
             idx = i;
         }
     }
@@ -16581,7 +16512,7 @@ int SNDPKTPLAY_start_impl(int packetinstancehandle, SNDSAMPLEFORMAT *pssf, SNDSA
             pVoice->bendrange = pssa->c6 * 100;
             pVoice->patchkey = 0;
             pVoice->ismaster = 0;
-            (*(struct sA8E8Env**)&pVoice->paenvelope) = 0;
+            (*(struct ENVELOPE**)&pVoice->paenvelope) = 0;
             (*(int*)&pVoice->pvoltable) = 0;
             pVoice->pbendtable = 0;
             pVoice->pvollfo = 0;
@@ -17789,17 +17720,9 @@ void MIX_stop(int idx) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDMIX_setdrygain);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct E_8560 {
-    char pad0[1];
-    char flag;
-    char pad1[0x1A];
-    float v[1];
-    char pad2[0x40];
-};
 struct G_8560 {
     char pad[0x1DC];
-    struct E_8560 *tab;
+    struct SNDMIXVOICE *tab;
 };
 
 /**
@@ -17812,25 +17735,17 @@ struct G_8560 {
  * @param gain  the gain
  */
 void SNDMIX_setdrygain(int idx, int k, float gain) {
-    ((struct E_8560*)sndmix.smv)[idx].v[k] = gain;
-    ((struct E_8560*)sndmix.smv)[idx].flag = 1;
+    sndmix.smv[idx].drybusgain[k] = gain;
+    sndmix.smv[idx].gainchanged = 1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDMIX_setwetgain);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct E_8598 {
-    char pad0[1];
-    char flag;
-    char pad1[0x36];
-    float v[1];
-    char pad2[0x24];
-};
 struct G_8598 {
     char pad[0x1DC];
-    struct E_8598 *tab;
+    struct SNDMIXVOICE *tab;
 };
 
 /**
@@ -17843,8 +17758,8 @@ struct G_8598 {
  * @param gain  the gain
  */
 void SNDMIX_setwetgain(int idx, int k, float gain) {
-    ((struct E_8598*)sndmix.smv)[idx].v[k] = gain;
-    ((struct E_8598*)sndmix.smv)[idx].flag = 1;
+    sndmix.smv[idx].wetbusgain[k] = gain;
+    sndmix.smv[idx].gainchanged = 1;
 }
 #endif
 
@@ -22438,22 +22353,12 @@ int SNDPLATFORM_packetplaydestroy(void) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_packetplay);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-typedef struct {
-    char pad0[4];
-    short h[8];
-    int f14;
-    char pad18[0x23 - 0x18];
-    unsigned char f23;
-    unsigned short f24;
-    char pad26[0x8C - 0x26];
-} E_E1B0;
 typedef struct {
     char pad0[0x2F];
     unsigned char f2F;
     unsigned char f30;
     char pad31[0x1F0 - 0x31];
-    E_E1B0 *ents;
+    CHANPUB *ents;
 } G_E1B0;
 typedef struct { char pad0[3]; unsigned char b3; } A6_E1B0;
 typedef struct { char pad0[7]; unsigned char b7; char pad8[0x18 - 8]; int arr[8]; } A7_E1B0;
@@ -22489,25 +22394,25 @@ extern void MIX_play_E1B0(int) __asm__("MIX_play");
  * @return 0
  */
 int SNDPLATFORM_packetplay(int pktChan, int idx, int timeMult, int arg3, int lowpassCutoff, int highpassCutoff, A6_E1B0 *sampleFormat, A7_E1B0 *sampleAttr) {
-    E_E1B0 *chanEntry;
+    CHANPUB *chanEntry;
     int i;
 
-    chanEntry = &((E_E1B0*)sndgs.chan)[idx];
-    if (!(chanEntry->f24 & 8)) {
-    if (chanEntry->f24 & 4) {
-    for (i = 0; i < chanEntry->f23; i++) {
-        MIX_playinit_E1B0(chanEntry->h[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), sampleFormat->b3, 0, 0, 0xFFFFFFFF,
-                           sampleAttr->arr[i], chanEntry->f23, chanEntry->f14, -1, -1, 0, 0, sampleAttr->b7, i);
+    chanEntry = &sndgs.chan[idx];
+    if (!(chanEntry->rendermode & 8)) {
+    if (chanEntry->rendermode & 4) {
+    for (i = 0; i < chanEntry->numchan; i++) {
+        MIX_playinit_E1B0(chanEntry->voices[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), sampleFormat->b3, 0, 0, 0xFFFFFFFF,
+                           sampleAttr->arr[i], chanEntry->numchan, ((int)chanEntry->frames), -1, -1, 0, 0, sampleAttr->b7, i);
     }
-    SNDPLATFORM_setpitch_E1B0(chanEntry->h[0]);
-    func_003C38E0_E1B0(chanEntry->h[0]);
-    SNDPLATFORM_setfxlevel_E1B0(chanEntry->h[0], 0);
-    SNDPLATFORM_timemult_E1B0(chanEntry->h[0], timeMult);
-    func_003C30C8_E1B0(chanEntry->h[0], arg3);
-    SNDPLATFORM_lowpass_E1B0(chanEntry->h[0], lowpassCutoff);
-    SNDPLATFORM_highpass_E1B0(chanEntry->h[0], highpassCutoff);
-    for (i = 0; i < chanEntry->f23; i++) {
-        MIX_play_E1B0(chanEntry->h[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu));
+    SNDPLATFORM_setpitch_E1B0(chanEntry->voices[0]);
+    func_003C38E0_E1B0(chanEntry->voices[0]);
+    SNDPLATFORM_setfxlevel_E1B0(chanEntry->voices[0], 0);
+    SNDPLATFORM_timemult_E1B0(chanEntry->voices[0], timeMult);
+    func_003C30C8_E1B0(chanEntry->voices[0], arg3);
+    SNDPLATFORM_lowpass_E1B0(chanEntry->voices[0], lowpassCutoff);
+    SNDPLATFORM_highpass_E1B0(chanEntry->voices[0], highpassCutoff);
+    for (i = 0; i < chanEntry->numchan; i++) {
+        MIX_play_E1B0(chanEntry->voices[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu));
     }
     }
     }
