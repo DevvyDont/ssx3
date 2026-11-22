@@ -809,9 +809,6 @@ extern "C" float fSin(float a);
 extern "C" float fCos(float a);
 extern "C" void fSinCos(float* s, float* c, float angle);
 
-struct sLmMat_EE78 {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 struct sLmVEntry_EE78 {
     short delta;
@@ -824,8 +821,8 @@ struct sLmCtx_EE78 {
     sLmVEntry_EE78* vtable;      // 0x10D8
 };
 
-extern sLmMat_EE78 cPlants_m_meshDeformationMatrixList_EE78[] __asm__("cPlants_m_meshDeformationMatrixList");
-extern sLmMat_EE78 t4mat_Identity;
+extern t4Matrix cPlants_m_meshDeformationMatrixList[];
+extern t4Matrix t4mat_Identity;
 extern float t4vect_ZAxis[3];
 extern int cPlants_m_SwayFrequency;
 extern float cPlants_m_SwayAmplitude;
@@ -951,9 +948,9 @@ static inline void lmMulIn_EE78(void* m, const void* b)
  */
 extern "C" void cPlants_update(void)
 {
-    sLmMat_EE78 branchMat;
-    sLmMat_EE78 rotMat;
-    sLmMat_EE78 product;
+    t4Matrix branchMat;
+    t4Matrix rotMat;
+    t4Matrix product;
     float sinAngle;
     float cosAngle;
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
@@ -961,7 +958,7 @@ extern "C" void cPlants_update(void)
     float frameClock = (float)vt[114].fn(vthis(ps2GraphicsMan, vt[114]));
     int i;
     for (i = 0; i < 8; i++) {
-        sLmMat_EE78* pm = &branchMat;
+        t4Matrix* pm = &branchMat;
         float fi = (float)i * 0.125f;
         float amp = cPlants_m_SwayAmplitude * fSin(fi + frameClock * (float)cPlants_m_SwayFrequency * 0.0016666667f) + cPlants_m_SwayOffset;
         float branchPhase = fSin(fi + frameClock * cPlants_m_BranchFrequency * 0.0016666667f);
@@ -979,29 +976,29 @@ extern "C" void cPlants_update(void)
         float sx = sinAngle * x;
         float sy = sinAngle * y;
         float sz = sinAngle * z;
-        rotMat.m[0][0] = tx * x + cosAngle;
-        rotMat.m[1][0] = tx * y + sz;
-        rotMat.m[2][0] = tx * z - sy;
-        rotMat.m[0][1] = ty * x - sz;
-        rotMat.m[1][1] = ty * y + cosAngle;
-        rotMat.m[2][1] = ty * z + sx;
-        rotMat.m[0][2] = tz * x + sy;
-        rotMat.m[1][2] = tz * y - sx;
-        rotMat.m[2][2] = tz * z + cosAngle;
-        rotMat.m[3][0] = 0.0f;
-        rotMat.m[3][1] = 0.0f;
-        rotMat.m[3][2] = 0.0f;
-        rotMat.m[0][3] = 0.0f;
-        rotMat.m[1][3] = 0.0f;
-        rotMat.m[2][3] = 0.0f;
-        rotMat.m[3][3] = 1.0f;
+        ((float (*)[4])&rotMat.row[0])[0][0] = tx * x + cosAngle;
+        ((float (*)[4])&rotMat.row[0])[1][0] = tx * y + sz;
+        ((float (*)[4])&rotMat.row[0])[2][0] = tx * z - sy;
+        ((float (*)[4])&rotMat.row[0])[0][1] = ty * x - sz;
+        ((float (*)[4])&rotMat.row[0])[1][1] = ty * y + cosAngle;
+        ((float (*)[4])&rotMat.row[0])[2][1] = ty * z + sx;
+        ((float (*)[4])&rotMat.row[0])[0][2] = tz * x + sy;
+        ((float (*)[4])&rotMat.row[0])[1][2] = tz * y - sx;
+        ((float (*)[4])&rotMat.row[0])[2][2] = tz * z + cosAngle;
+        ((float (*)[4])&rotMat.row[0])[3][0] = 0.0f;
+        ((float (*)[4])&rotMat.row[0])[3][1] = 0.0f;
+        ((float (*)[4])&rotMat.row[0])[3][2] = 0.0f;
+        ((float (*)[4])&rotMat.row[0])[0][3] = 0.0f;
+        ((float (*)[4])&rotMat.row[0])[1][3] = 0.0f;
+        ((float (*)[4])&rotMat.row[0])[2][3] = 0.0f;
+        ((float (*)[4])&rotMat.row[0])[3][3] = 1.0f;
         lmMulIn_EE78(pm, &rotMat);
-        sLmMat_EE78* cell = &cPlants_m_meshDeformationMatrixList_EE78[i];
+        t4Matrix* cell = &cPlants_m_meshDeformationMatrixList[i];
         lmCopy_EE78(cell, &t4mat_Identity);
-        cell->m[2][0] += fSin(cPlants_m_SwayDirection * 0.017453294f) * amp;
-        cell->m[2][1] += fCos(cPlants_m_SwayDirection * 0.017453294f) * amp;
-        branchMat.m[0][2] += amp2 * fSin(cPlants_m_BranchDirection * 0.017453294f);
-        branchMat.m[1][2] += amp2 * fCos(cPlants_m_BranchDirection * 0.017453294f);
+        ((float (*)[4])&cell->row[0])[2][0] += fSin(cPlants_m_SwayDirection * 0.017453294f) * amp;
+        ((float (*)[4])&cell->row[0])[2][1] += fCos(cPlants_m_SwayDirection * 0.017453294f) * amp;
+        ((float (*)[4])&branchMat.row[0])[0][2] += amp2 * fSin(cPlants_m_BranchDirection * 0.017453294f);
+        ((float (*)[4])&branchMat.row[0])[1][2] += amp2 * fCos(cPlants_m_BranchDirection * 0.017453294f);
         lmMul_EE78(&product, cell, &branchMat);
         lmCopy_EE78(&rotMat, &product);
         lmCopy_EE78(cell, &rotMat);
@@ -1014,11 +1011,6 @@ INCLUDE_ASM("render/lightman", cPlants_getDeformationMatrix);
 #ifdef SKIP_ASM
 extern float cPlants_m_PositionScale;
 
-struct sLmCell_F2A8 {
-    char data[0x40];
-};
-extern sLmCell_F2A8 cPlants_m_meshDeformationMatrixList[];
-
 /**
  * Picks the plant sway matrix for a position: cPlants_m_meshDeformationMatrixList[(int)(cPlants_m_PositionScale * sqrt(x * x + y * y)) % 8].
  *
@@ -1027,7 +1019,7 @@ extern sLmCell_F2A8 cPlants_m_meshDeformationMatrixList[];
  * @param pos  the position (x and y are used)
  * @return the address of one of the eight matrices cPlants_update builds
  */
-extern "C" sLmCell_F2A8* cPlants_getDeformationMatrix(float* pos)
+extern "C" t4Matrix* cPlants_getDeformationMatrix(float* pos)
 {
     float distSq = pos[0] * pos[0] + pos[1] * pos[1];
     float dist;

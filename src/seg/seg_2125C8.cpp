@@ -1,12 +1,10 @@
 #include "common.h"
+#include "animation/rideranimbase.h"
 
 //100%
 INCLUDE_ASM("seg/seg_2125C8", cAIAnimEventMap_getAnimPlayAttr);
 #ifdef SKIP_ASM
-struct sEntry_15C8 {
-    char b[0x1C];
-};
-extern sEntry_15C8 cAIAnimEventMap_AnimPlayAttr[];
+extern tAIAnimPlayAttr cAIAnimEventMap_AnimPlayAttr[];
 
 /**
  * Returns an animation's play attributes: its 0x1C-byte entry of cAIAnimEventMap_AnimPlayAttr (On Tour's getAnimPlayAttr; this was
