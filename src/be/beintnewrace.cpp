@@ -158,7 +158,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocation);
  */
 extern "C" void* cBENewRaceInterface_getLocation()
 {
-    return (char*)&cBELibrary_locationDB[0] + cBENewRaceInterface_newRace.iLocationIdx * 0x64;
+    return (char*)&cBELibrary_locationDB[cBENewRaceInterface_newRace.iLocationIdx];
 }
 #endif
 

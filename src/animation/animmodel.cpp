@@ -1425,7 +1425,7 @@ void cAdfDataSource_getFramePartData_AM(cAdfDataSource* self, void* p2, unsigned
 void cAdfDataSource_getFramePartData_AM(cAdfDataSource* self, void* dest, unsigned int* frame, int part, void* startChan, long numChans)
 {
     float findex = *(float*)(frame + 1) * 30.0f;
-    sSeqAM* seq = (sSeqAM*)(((char*)self->Anims) + (frame[0] >> 8) * 0x14);
+    sSeqAM* seq = (sSeqAM*)&self->Anims[frame[0] >> 8];
     float lim = (float)(seq->n - 1);
     int idx;
     int numChunks;
@@ -1441,7 +1441,7 @@ void cAdfDataSource_getFramePartData_AM(cAdfDataSource* self, void* dest, unsign
         numChunks = seq->a;
     }
     sNodeAM* node;
-    sEntAM* ent = (sEntAM*)(((char*)self->Chunks) + seq->base * 8 + part * numChunks * 8 + idx * 8);
+    sEntAM* ent = (sEntAM*)((char*)&self->Chunks[seq->base] + part * numChunks * 8 + idx * 8);
     findex = findex - (float)(idx * (chunkFrames - 1));
     long chunkChans = *(unsigned char*)(((char*)self->ChannelData) + ent->off);
     int kind = ent->kind;
