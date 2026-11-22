@@ -812,13 +812,13 @@ struct sGmVEntry_AC00 {
  *
  * Returns at once unless cDepthFog_m_Enable. When cDepthFog_m_OverrideWP is set it first refreshes the view's fog entry
  * (func_0036ABA0); it skips the view when the entry's density is 0.0 and its exponent is non-zero. func_0036A428 fills
- * the 1 KB table at D_00507B80 + @p idx * 0x400; func_00366CE0 on mpTextureMan + 0x1F60 reserves 0x400 bytes of GS
- * memory, whose address is the record word at *(mpTextureMan + 0x3F50) + slot * 0x1C, shifted right 8.
+ * the 1 KB table at D_00507B80 + @p idx * 0x400; func_00366CE0 on mTexMan + 0x1F60 reserves 0x400 bytes of GS
+ * memory, whose address is the record word at *(mTexMan + 0x3F50) + slot * 0x1C, shifted right 8.
  *
  * Three packets then go out through D_004A4474 (each opened with func_0038F460 and closed with func_0038F668, which
  * updates *@p handle): func_0036AA60 uploads the table, func_0036AE20 runs over mCurrentZBufferPage and
  * mCurrentFrameBufferPage with twice the slot 11 GetScreenHeight value, and func_0036B158 finishes with the uploaded
- * table. Finally func_003663D8 releases the GS slot and func_00368138(mpTextureMan, @p pkt2) runs. Caller:
+ * table. Finally func_003663D8 releases the GS slot and func_00368138(mTexMan, @p pkt2) runs. Caller:
  * func_00363490.
  *
  * @param idx  the view index
@@ -841,8 +841,8 @@ extern "C" void func_0036AC00(cPS2GraphicsMan* self, int idx, void* pkt2, int* h
     func_0036A428(((char*)self), mat, idx);
     void* dma = D_004A4474;
     char* pkt = func_0038F460(dma, *handle, -1, 0);
-    int slot = func_00366CE0(self->mpTextureMan->mMainHeap, 0x400, 0x7FFFFFFF, 0, 0, 1);
-    int* rec = (int*)(*(char**)((char*)self->mpTextureMan + 0x3F50) + slot * 0x1C);
+    int slot = func_00366CE0(self->mTexMan->mMainHeap, 0x400, 0x7FFFFFFF, 0, 0, 1);
+    int* rec = (int*)(*(char**)((char*)self->mTexMan + 0x3F50) + slot * 0x1C);
     // PORT: the packet builder takes the matrix block's address as an int.
     func_0036AA60(((char*)self), (int)mat, *rec >> 8, &pkt);
     *handle = func_0038F668(dma, pkt, 4);
@@ -856,8 +856,8 @@ extern "C" void func_0036AC00(cPS2GraphicsMan* self, int idx, void* pkt2, int* h
     pkt = func_0038F460(dma, *handle, -1, 0);
     func_0036B158(((char*)self), idx, *rec >> 8, &pkt);
     *handle = func_0038F668(dma, pkt, 4);
-    func_003663D8(self->mpTextureMan->mMainHeap, slot);
-    func_00368138((char*)self->mpTextureMan, pkt2);
+    func_003663D8(self->mTexMan->mMainHeap, slot);
+    func_00368138((char*)self->mTexMan, pkt2);
 }
 #endif
 
@@ -1496,7 +1496,7 @@ struct sGmViews_C790 {
  * entry). For three levels it composites the current buffer with func_0036C398 when that level's strength is set
  * (FrameDstScale as the scale), then blurs it into the other buffer at half size with four passes of func_0036B9D8
  * (CopyIntensity, offset cLightGlow_m_PS2JitterTex "PS2 Texture Jitter" * 16). The fourth strength composites the last level. It then
- * restores FRAME and XYOFFSET for the screen and calls func_00368138(mpTextureMan, @p pkt2). Caller: func_00363490.
+ * restores FRAME and XYOFFSET for the screen and calls func_00368138(mTexMan, @p pkt2). Caller: func_00363490.
  *
  * @param vself  the graphics manager (cPS2GraphicsMan)
  * @param idx  the view index
@@ -1568,7 +1568,7 @@ extern "C" void func_0036C790(cPS2GraphicsMan* vself, int idx, void* pkt2, int* 
     gsPacket[7] = 0x18;
     gsPacket += 8;
     *handle = (int)gsPacket & 0x0FFFFFFF;
-    func_00368138((char*)vself->mpTextureMan, pkt2);
+    func_00368138((char*)vself->mTexMan, pkt2);
 }
 #endif
 

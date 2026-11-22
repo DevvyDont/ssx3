@@ -23,7 +23,7 @@ struct cTexSlots367150 {
  *
  * Pops the head of the free list (+0x1F48, a pointer into the 2000-slot array at +0x8; each free slot holds
  * the next free pointer), counts it at +0x4 and stores a new 0x58-byte "NBTexInfo" in the slot. The free list
- * is not checked for empty. Despite the On Tour class name, self is the graphics manager's mpTextureMan
+ * is not checked for empty. Despite the On Tour class name, self is the graphics manager's mTexMan
  * (cTextureMan_AddTexture).
  *
  * @return the new texture id (its slot index)
@@ -188,7 +188,7 @@ void cPSPGraphicsMan_PurgeBindTexIDs_1(void* self) __asm__("cTextureMan_PurgeBin
  *
  * Runs the two id purges (cTextureMan_PurgeNonBindTexIDs, cTextureMan_PurgeBindTexIDs), frees the unlocked blocks of both GS memory heaps (+0x1F60 and
  * +0x4350, func_00366548), and sets the per-context bound texture ids (+0x1F4C, two words) and the loaded-CLUT texture
- * (+0x1F54) to -1. cPS2GraphicsMan_Purge calls it on mpTextureMan.
+ * (+0x1F54) to -1. cPS2GraphicsMan_Purge calls it on mTexMan.
  */
 extern "C" void func_00367360(cTextureMan* self)
 {
@@ -208,7 +208,7 @@ extern "C" void func_00367360(cTextureMan* self)
 INCLUDE_ASM("render/ps2graphicsman", func_003673D0__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: an empty texture manager hook that the frame-end code calls on mpTextureMan.
+ * Does nothing: an empty texture manager hook that the frame-end code calls on mTexMan.
  */
 void func_003673D0(void* vself)
 {
@@ -534,7 +534,7 @@ INCLUDE_ASM("render/ps2graphicsman", func_00367B60);
  *
  * When the texture has a block (+0x28 not -1) it clears flag bit 1 of that block's node (+0x30) in the main heap
  * (+0x1F60), or the second heap (+0x4350) for texel format 9. cPS2GraphicsMan_RemoveScreenGrabTexture and
- * cPlayerShadow__cPlayerShadow call it on mpTextureMan.
+ * cPlayerShadow__cPlayerShadow call it on mTexMan.
  *
  * @param i  the texture id
  */
@@ -656,7 +656,7 @@ extern "C" void func_00369098(cTextureMan* self, int idx);
  *
  * When @p upload is set, copies @p data over the texture's pixel buffer (+0x1C, size +0x10) and @p clut over its CLUT
  * buffer (+0x20, 4 << bits-per-pixel bytes), each only when given. Then calls func_00369098 on the texture. @p width,
- * @p height and the format arguments are not used. cPS2GraphicsMan_SetNewTextureData1 calls it on mpTextureMan.
+ * @p height and the format arguments are not used. cPS2GraphicsMan_SetNewTextureData1 calls it on mTexMan.
  *
  * @param idx  the texture id
  * @param data  the new pixels, or null
@@ -1405,7 +1405,7 @@ struct sGfxTexTable1 {
 /**
  * Sets the filtering fields of texture @p idx's GS TEX1 register value (+0x40): MMIN, MMAG, L and K.
  *
- * Only those four bit fields change. func_0037D090__FPv calls it on mpTextureMan.
+ * Only those four bit fields change. func_0037D090__FPv calls it on mTexMan.
  *
  * @param idx  the texture id
  * @param mmin  the minification filter (TEX1.MMIN)
@@ -1458,7 +1458,7 @@ struct sGfxTexTable {
  * Sets the texture function (TEX0.TFX: modulate, decal, highlight, highlight 2) of texture @p idx.
  *
  * Changes only that field of the stored TEX0 value (+0x38); an @p idx of -1 is ignored. func_0037CBC8__FPv calls it on
- * mpTextureMan.
+ * mTexMan.
  *
  * @param idx  the texture id, or -1
  * @param tfx  the TFX value (0-3)

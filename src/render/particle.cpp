@@ -3168,7 +3168,7 @@ extern char D_005059D8[];
  *
  * Calls DisableIntc(2) and removes the INTC 2 handler (mIntcHandlerId), calls DisableDmac(1) and removes the DMAC 0
  * handler (mDmacHandlerId), terminates and deletes the kick thread (mKickThreadId), deletes mKickSema and mQueueMutex,
- * deletes the defer manager (mpDeferMan), purges and deletes the texture manager (func_00367360, mpTextureMan), and
+ * deletes the defer manager (mpDeferMan), purges and deletes the texture manager (func_00367360, mTexMan), and
  * finally calls func_00361F40 on the render queue D_005059D8.
  */
 extern "C" void cPS2GraphicsMan_Purge(cPS2GraphicsMan* self)
@@ -3182,8 +3182,8 @@ extern "C" void cPS2GraphicsMan_Purge(cPS2GraphicsMan* self)
     DeleteSema(self->mKickSema);
     DeleteSema(self->mQueueMutex);
     operator_delete((int*)self->mpDeferMan);
-    func_00367360(self->mpTextureMan);
-    operator_delete((int*)self->mpTextureMan);
+    func_00367360(self->mTexMan);
+    operator_delete((int*)self->mTexMan);
     func_00361F40(D_005059D8);
 }
 #endif
@@ -4414,7 +4414,7 @@ void cGfx_7A10::EndFrame_impl()
     InvalidDCache(gfxBase->mGifCursor, gfxBase->mGifCursor + 0x26600);
     *gfxBase->m_pCurrentDrawState = sDrawState_s_defaultDrawState_rs7A10;
     func_00362CC8(gfxBase->mpDeferMan);
-    func_003673D0(gfxBase->mpTextureMan);
+    func_003673D0(gfxBase->mTexMan);
     ResetViewport();
     func_00361F90(D_005059D8);
 }
@@ -6406,7 +6406,7 @@ extern "C" int func_0037BD98(cPS2GraphicsMan* self, unsigned int displayWidth, u
         break;
     }
 
-    int gs = (int)self->mpTextureMan;
+    int gs = (int)self->mTexMan;
     func_00367078(gs);
     self->unk_5A78 = func_003673D8(gs, self->unk_5A6C << 13);
     self->unk_5A7C = func_003673D8(gs, self->unk_5A68 << 13);
@@ -6414,11 +6414,11 @@ extern "C" int func_0037BD98(cPS2GraphicsMan* self, unsigned int displayWidth, u
 
     // PORT: reads psm and psm2 as one 64-bit word.
     if (*(long*)(unsigned int*)&self->unk_5A38 == 0x100000001L)
-        func_00367340((void*)(int)self->mpTextureMan, self->unk_5A78 << 11, (unsigned int)self->unk_5A54 * (unsigned int)self->unk_5A58 + (unsigned int)self->mFBWidth * (unsigned int)self->mFBHeight * 2);
+        func_00367340((void*)(int)self->mTexMan, self->unk_5A78 << 11, (unsigned int)self->unk_5A54 * (unsigned int)self->unk_5A58 + (unsigned int)self->mFBWidth * (unsigned int)self->mFBHeight * 2);
     else if ((unsigned int)self->unk_5A38 == 1)
-        func_00367340((void*)(int)self->mpTextureMan, self->unk_5A7C << 11, (unsigned int)self->unk_5A54 * (unsigned int)self->unk_5A58 + (unsigned int)self->mFBWidth * (unsigned int)self->mFBHeight);
+        func_00367340((void*)(int)self->mTexMan, self->unk_5A7C << 11, (unsigned int)self->unk_5A54 * (unsigned int)self->unk_5A58 + (unsigned int)self->mFBWidth * (unsigned int)self->mFBHeight);
     else
-        func_00367340((void*)(int)self->mpTextureMan, self->mCurrentZBufferPage << 11, (unsigned int)self->mFBWidth * (unsigned int)self->mFBHeight);
+        func_00367340((void*)(int)self->mTexMan, self->mCurrentZBufferPage << 11, (unsigned int)self->mFBWidth * (unsigned int)self->mFBHeight);
 
     FlushCache(0);
     *(volatile long*)0x12001000 = 8;
@@ -6628,7 +6628,7 @@ void cTextureMan_SetTextureMemType(void* p, int a1);
 extern "C" void cPS2GraphicsMan_InitTextures(cPS2GraphicsMan* self, int memtype)
 {
     MEM_fill(&self->unk_3838[0], 0, 8000);
-    cTextureMan_SetTextureMemType(self->mpTextureMan, memtype);
+    cTextureMan_SetTextureMemType(self->mTexMan, memtype);
 }
 #endif
 
@@ -6686,7 +6686,7 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetTextureMemType);
  */
 extern "C" void cPS2GraphicsMan_SetTextureMemType(cPS2GraphicsMan* self)
 {
-    cTextureMan_SetTextureMemType__FPvi(self->mpTextureMan);
+    cTextureMan_SetTextureMemType__FPvi(self->mTexMan);
 }
 #endif
 
@@ -6826,7 +6826,7 @@ extern "C" int cTextureMan_AddTexture(void* mgr, int a1, int a2, int a3, int a4,
                              int a8, int a9, int a10, int a11);
 
 /**
- * Creates a texture in the texture manager (cTextureMan_AddTexture on mpTextureMan) and marks its id in unk_3838.
+ * Creates a texture in the texture manager (cTextureMan_AddTexture on mTexMan) and marks its id in unk_3838.
  *
  * All eleven arguments go through unchanged; unk_3838[id] is set to 1. Slot 47 of cPS2GraphicsMan_vtbl;
  * cPS2GraphicsMan_AddTexture calls it through the vtable.
@@ -6847,7 +6847,7 @@ extern "C" int cTextureMan_AddTexture(void* mgr, int a1, int a2, int a3, int a4,
 extern "C" int cPS2GraphicsMan_AddTexture1(cPS2GraphicsMan* self, int pixels, int name, int width, int height, int mipmapCount, int texelFormat, int clutFormat,
                               int clutData, int lockType, int copyMem, int bindId)
 {
-    int i = cTextureMan_AddTexture(self->mpTextureMan, pixels, name, width, height, mipmapCount, texelFormat, clutFormat, clutData, lockType, copyMem, bindId);
+    int i = cTextureMan_AddTexture(self->mTexMan, pixels, name, width, height, mipmapCount, texelFormat, clutFormat, clutData, lockType, copyMem, bindId);
     self->unk_3838[i] = 1;
     return i;
 }
@@ -6865,7 +6865,7 @@ extern "C" void cTextureMan_RemoveTexture(void* tbl, int idx);
  */
 extern "C" void cPS2GraphicsMan_RemoveTexture(cPS2GraphicsMan* self, int idx)
 {
-    cTextureMan_RemoveTexture(self->mpTextureMan, idx);
+    cTextureMan_RemoveTexture(self->mTexMan, idx);
     self->unk_18F8[idx] = 0;
 }
 #endif
@@ -6908,7 +6908,7 @@ struct sPartTexTable {
  */
 extern "C" int cPS2GraphicsMan_IsValidTexture(cPS2GraphicsMan* self, int idx)
 {
-    sPartTexTable* texTable = (sPartTexTable*)self->mpTextureMan;
+    sPartTexTable* texTable = (sPartTexTable*)self->mTexMan;
     int valid;
     if (idx >= 0) {
         if (idx < 2000) {
@@ -6929,7 +6929,7 @@ extern "C" void* func_003691B0(int);
 INCLUDE_ASM("render/particle", func_0037CBC8__FPv);
 #ifdef SKIP_ASM
 /**
- * Sets a texture's texture function (TEX0.TFX): forwards to func_003691B0 on mpTextureMan.
+ * Sets a texture's texture function (TEX0.TFX): forwards to func_003691B0 on mTexMan.
  *
  * The definition declares only self; the caller's texture id and TFX value pass through untouched in the second and
  * third argument registers. cPS2GraphicsMan_DrawCharModel calls it with TFX 3 (highlight 2).
@@ -6939,7 +6939,7 @@ INCLUDE_ASM("render/particle", func_0037CBC8__FPv);
 void* func_0037CBC8(void* vself)
 {
     cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    return func_003691B0((int)self->mpTextureMan);
+    return func_003691B0((int)self->mTexMan);
 }
 #endif
 
@@ -6982,7 +6982,7 @@ extern "C" void func_00367B60(void* mgr, int id);
 extern "C" void cPS2GraphicsMan_RemoveScreenGrabTexture(cPS2GraphicsMan* self, tScreenGrabHandle* item)
 {
     if (item->mTextureId != -1) {
-        func_00367B60(self->mpTextureMan, item->mTextureId);
+        func_00367B60(self->mTexMan, item->mTextureId);
         sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
         vt[50].fn(vthis(self, vt[50]), item->mTextureId);
         item->mTextureId = -1;
@@ -7139,7 +7139,7 @@ extern "C" void* func_00369130(int);
 INCLUDE_ASM("render/particle", func_0037D090__FPv);
 #ifdef SKIP_ASM
 /**
- * Sets a texture's filtering (TEX1 MMIN, MMAG, L and K): forwards to func_00369130 on mpTextureMan.
+ * Sets a texture's filtering (TEX1 MMIN, MMAG, L and K): forwards to func_00369130 on mTexMan.
  *
  * The definition declares only self; the caller's texture id and four filter values pass through untouched in the
  * argument registers. cPS2GraphicsMan_AddTexture calls it with MMIN 5, MMAG 1, L 0 and a K it computes; the tile
@@ -7150,7 +7150,7 @@ INCLUDE_ASM("render/particle", func_0037D090__FPv);
 void* func_0037D090(void* vself)
 {
     cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    return func_00369130((int)self->mpTextureMan);
+    return func_00369130((int)self->mTexMan);
 }
 #endif
 
@@ -7281,7 +7281,7 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetNewTextureData1);
 extern "C" void cTextureMan_SetNewTextureData(void* gm, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9);
 
 /**
- * Replaces a texture's pixels and CLUT from raw data: forwards all arguments to cTextureMan_SetNewTextureData on mpTextureMan.
+ * Replaces a texture's pixels and CLUT from raw data: forwards all arguments to cTextureMan_SetNewTextureData on mTexMan.
  *
  * cTextureMan_SetNewTextureData copies @p pixels and @p clutData into the texture's own buffers when @p copyData is set and drops its VRAM copy so
  * it is uploaded again; the size and format arguments are not used there.
@@ -7298,7 +7298,7 @@ extern "C" void cTextureMan_SetNewTextureData(void* gm, int a1, int a2, int a3, 
  */
 extern "C" void cPS2GraphicsMan_SetNewTextureData1(cPS2GraphicsMan* self, int texId, int pixels, int width, int height, int mipCount, int texelFormat, int clutFormat, int clutData, int copyData)
 {
-    cTextureMan_SetNewTextureData(self->mpTextureMan, texId, pixels, width, height, mipCount, texelFormat, clutFormat, clutData, copyData);
+    cTextureMan_SetNewTextureData(self->mTexMan, texId, pixels, width, height, mipCount, texelFormat, clutFormat, clutData, copyData);
 }
 #endif
 
@@ -7326,7 +7326,7 @@ extern "C" int cPS2GraphicsMan_LockFrameToTexture(cPS2GraphicsMan* self, int idx
 {
     unsigned int buf = self->mVifCursor;
     unsigned int packetAddr = buf | 0x30000000;
-    cTextureMan_LockFrameToTexture_D348(((void*)self->mpTextureMan), idx, &packetAddr);
+    cTextureMan_LockFrameToTexture_D348(((void*)self->mTexMan), idx, &packetAddr);
     unsigned int next = packetAddr & 0x0FFFFFFF;
     self->mVifCursor = next;
     cPS2DeferManager* ring = (self->mpDeferMan);
@@ -7465,7 +7465,7 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_AddLockedFrameTexture__FPv);
 /**
  * Creates a texture the frame can later be rendered into.
  *
- * Calls cTextureMan_AddLockedFrameTexture on the texture manager (mpTextureMan, +0x18F4), which allocates the "LockTex" texture. The C
+ * Calls cTextureMan_AddLockedFrameTexture on the texture manager (mTexMan, +0x18F4), which allocates the "LockTex" texture. The C
  * declaration has only self: the width, height and texel format arrive in a1-a3 and pass through to cTextureMan_AddLockedFrameTexture
  * unchanged.
  *
@@ -7474,7 +7474,7 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_AddLockedFrameTexture__FPv);
 void* cPS2GraphicsMan_AddLockedFrameTexture(void* vself)
 {
     cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    return cTextureMan_AddLockedFrameTexture((int)self->mpTextureMan);
+    return cTextureMan_AddLockedFrameTexture((int)self->mTexMan);
 }
 #endif
 
@@ -7514,7 +7514,7 @@ static inline void vu0CopyMtxP(sPartMtx* dst, sPartMtx* src)
 }
 
 /**
- * Appends a projected texture to mProjTextures and increments mNumProjTextures (On Tour AddProjectiveTexture(pos,
+ * Appends a projected texture to mProjTextures and increments mNumShdw (On Tour AddProjectiveTexture(pos,
  * clipMat, projMat, intensity, texid)). There is no bound check on the 8-entry array.
  *
  * @param pos  the projector position (unk_00)
@@ -7525,12 +7525,12 @@ static inline void vu0CopyMtxP(sPartMtx* dst, sPartMtx* src)
  */
 extern "C" void cPS2GraphicsMan_AddProjectiveTexture(cPS2GraphicsMan* self, sPartQ16* pos, sPartMtx* clipMat, sPartMtx* projMat, float intensity, int i)
 {
-    (*(sPartQ16*)&((&self->mProjTextures[0]))[self->mNumProjTextures].mShdwProjPos) = *pos;
-    vu0CopyMtxP(&(*(sPartMtx*)&((&self->mProjTextures[0]))[self->mNumProjTextures].mShdwClipMat), clipMat);
-    vu0CopyMtxP(&(*(sPartMtx*)&((&self->mProjTextures[0]))[self->mNumProjTextures].mShdwProjMat), projMat);
-    ((&self->mProjTextures[0]))[self->mNumProjTextures].unk_90 = intensity;
-    ((&self->mProjTextures[0]))[self->mNumProjTextures].mShdwTexID = i;
-    self->mNumProjTextures++;
+    (*(sPartQ16*)&((&self->mProjTextures[0]))[self->mNumShdw].mShdwProjPos) = *pos;
+    vu0CopyMtxP(&(*(sPartMtx*)&((&self->mProjTextures[0]))[self->mNumShdw].mShdwClipMat), clipMat);
+    vu0CopyMtxP(&(*(sPartMtx*)&((&self->mProjTextures[0]))[self->mNumShdw].mShdwProjMat), projMat);
+    ((&self->mProjTextures[0]))[self->mNumShdw].unk_90 = intensity;
+    ((&self->mProjTextures[0]))[self->mNumShdw].mShdwTexID = i;
+    self->mNumShdw++;
 }
 #endif
 
@@ -7561,7 +7561,7 @@ extern "C" void cPS2GraphicsMan_ShadowClearLockTexture(cPS2GraphicsMan* self, in
 {
     unsigned int buf = self->mVifCursor;
     unsigned int packetAddr = buf | 0x30000000;
-    cTextureMan_ShadowClearLockTexture_D800(((void*)self->mpTextureMan), idx, color, &packetAddr);
+    cTextureMan_ShadowClearLockTexture_D800(((void*)self->mTexMan), idx, color, &packetAddr);
     unsigned int next = packetAddr & 0x0FFFFFFF;
     self->mVifCursor = next;
     cPS2DeferManager* ring = (self->mpDeferMan);
@@ -7593,7 +7593,7 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetTextureWidth);
 // PORT: 64-bit `ulong` bitfield (GS TEX0 register layout)
 extern "C" int cPS2GraphicsMan_GetTextureWidth(cPS2GraphicsMan* self, int idx)
 {
-    sPartTexTable* texTable = (sPartTexTable*)self->mpTextureMan;
+    sPartTexTable* texTable = (sPartTexTable*)self->mTexMan;
     return 1 << texTable->entries[idx]->tex0.TW;
 }
 #endif
@@ -7610,7 +7610,7 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetTextureHeight);
 // PORT: 64-bit `ulong` bitfield (GS TEX0 register layout)
 extern "C" int cPS2GraphicsMan_GetTextureHeight(cPS2GraphicsMan* self, int idx)
 {
-    sPartTexTable* texTable = (sPartTexTable*)self->mpTextureMan;
+    sPartTexTable* texTable = (sPartTexTable*)self->mTexMan;
     return 1 << texTable->entries[idx]->tex0.TH;
 }
 #endif
@@ -8018,7 +8018,7 @@ struct sPartSys_DF88 {
 /**
  * Returns a bit mask of the projective textures whose clip volume a box is not classified 1 against.
  *
- * For each of the mNumProjTextures entries of mProjTextures it calls virtual slot 93 (cPS2GraphicsMan_ClipBoundBox)
+ * For each of the mNumShdw entries of mProjTextures it calls virtual slot 93 (cPS2GraphicsMan_ClipBoundBox)
  * with @p boxMin, @p boxMax and the entry's clip matrix (tProjTexInfo +0x10) and sets bit i when the result is not 1.
  * func_0038CA08 in render/bezierman calls it.
  *

@@ -1,7 +1,7 @@
 #ifndef RENDER_BXPS2TEX_H
 #define RENDER_BXPS2TEX_H
 
-// cTextureMan: the PS2 renderer's texture manager (cPS2GraphicsMan::mpTextureMan, one instance). It owns the texture
+// cTextureMan: the PS2 renderer's texture manager (cPS2GraphicsMan::mTexMan, one instance). It owns the texture
 // id table (ids 0..1499 are "bound" ids the caller picks, 1500..1999 "non-bound" ids taken from a free list), one
 // tTexInfo record per id, the GS register state of the two drawing contexts, and two GS-memory block heaps the
 // textures are uploaded into on demand. No vtable, no base class.
@@ -12,13 +12,13 @@
 // The preview's render/ps2graphicsman.cpp names the owner's member mTexMan ("mTexMan->GetTextureWidth(iTexId) ==
 // pShp->width"); its accessor is cPS2GraphicsMan::GetTextureMan (preview mangled GetTextureMan__15cPS2GraphicsMan).
 // CLASS NAME: EA's identifier is not attested. "cTextureMan" follows the accessor (GetTextureMan) and the allocation tag
-// ("TEX MAN"), and is the name render/ps2graphicsman.h already forward-declares for mpTextureMan. (SSX Tricky's
+// ("TEX MAN"), and is the name render/ps2graphicsman.h already forward-declares for mTexMan. (SSX Tricky's
 // symbol list, refs/ssxdvd, has a cPS2TexMan of a different layout; Tricky also allocates "TEX MAN".)
 //
 // Size 0x6740 [R]: cPS2GraphicsMan_Init does cMemMan_alloc(0x6740, "TEX MAN"), stores this + 0x1F60 at +0x3F50 and
 // this + 0x4350 at +0x6340 (each heap's block-table pointer, i.e. the heaps' inlined constructors), calls func_00366FE8
 // (the init: TexMemType 0, cTextureMan_InitTexInfo, bound ids -1, both heaps set up by func_00365E40) and stores the object in
-// cPS2GraphicsMan::mpTextureMan (+0x18F4). cPS2GraphicsMan_Shutdown purges it (func_00367360) and deletes it.
+// cPS2GraphicsMan::mTexMan (+0x18F4). cPS2GraphicsMan_Shutdown purges it (func_00367360) and deletes it.
 // Retail methods: render/ps2graphicsman 0x367150..0x369230 (the six cPSPGraphicsMan_* functions there are this class's
 // NewNonBindTexID .. PurgeBindTexIDs, named after On Tour, where the PSP port folded them into cPSPGraphicsMan), the
 // tail of object/railmodifier 0x366E90..0x367138 (init / purge / reset), and func_00396128 (render/font).

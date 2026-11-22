@@ -1585,7 +1585,7 @@ static inline void QueueRecord_D448(cPS2GraphicsMan* gfx, unsigned int buf, unsi
 /**
  * Adds one projector pass per projective texture whose bit is set in @p mask.
  *
- * For each projective texture i below mNumProjTextures with bit i set, binds its texture id (tProjTexInfo unk_94) as
+ * For each projective texture i below mNumShdw with bit i set, binds its texture id (tProjTexInfo unk_94) as
  * texture 1, sets bits 0x30 of the draw state's word 0, and writes a packet that unpacks the info's unk_50 matrix to VU
  * address 0x80 and runs the program from @p tbl[extra + 6] (MSCAL), registering it in the draw ring with flag 1 (fewer
  * than 2600 records).
@@ -1604,7 +1604,7 @@ extern "C" void func_0038D448(void* self, int kind, void* tbl, void* patch, int 
     sTex_D448* programTable = (sTex_D448*)tbl;
     int extra = ((sPatch_D448*)patch)->extra;
     unsigned int i;
-    for (i = 0; i < ((unsigned int)gfx->mNumProjTextures); i++) {
+    for (i = 0; i < ((unsigned int)gfx->mNumShdw); i++) {
         tProjTexInfo* projTex = &((&gfx->mProjTextures[0]))[i];
         if ((mask >> i) & 1) {
             unsigned int buf = *handle;

@@ -220,13 +220,13 @@ struct cPS2GraphicsMan {
     // --- cPS2GraphicsMan
     int mViewportDepth;             // 0x10DC [U] index into mViewportStack (cPS2GraphicsMan_PushViewport/cPS2GraphicsMan_PopViewport); [X] viewDepth
     t4Matrix mViewStack[12];        // 0x10E0 [R] ctor's first array loop (12); [U] PushView/PopView step 0x40
-    int mViewDepth;                 // 0x13E0 [U] PushView (cPS2GraphicsMan_PushView) +1, PopView -1; [X] matrixDepth
+    int mViewStackIdx;                 // 0x13E0 [P] asserts "mViewStackIdx < kViewMatrixStackSize", "mViewStackIdx > 0"; [U] PushView (cPS2GraphicsMan_PushView) +1, PopView -1; [X] matrixDepth
     t4Matrix* mCurrentView;         // 0x13E4 [P] GetView; [R] Init points it at mViewStack
     void* mpScratchpad;             // 0x13E8 [R] Init stores 0x70000000; [X] spad
-    int mNumProjTextures;           // 0x13EC [P] GetNumProjTextures / ClearProjTextures
+    int mNumShdw;           // 0x13EC [P] assert "Index < mNumShdw"; GetNumProjTextures / ClearProjTextures
     tProjTexInfo mProjTextures[8];  // 0x13F0 [P] GetProjTexInfo; [R] ctor's second array loop (8)
     cPS2DeferManager* mpDeferMan;   // 0x18F0 [P] GetDeferMan (cPS2GraphicsMan_GetDeferMan); [X] "DEFER MAN" (0x6B100)
-    cTextureMan* mpTextureMan;      // 0x18F4 [P] GetTextureMan (cPS2GraphicsMan_GetTextureMan); [X] "TEX MAN" (0x6740)
+    cTextureMan* mTexMan;      // 0x18F4 [P] asserts "mTexMan->GetTextureWidth(iTexId) == ..."; GetTextureMan (cPS2GraphicsMan_GetTextureMan); [X] "TEX MAN" (0x6740)
     int unk_18F8[2000];             // 0x18F8 [U] per texture id: cPS2GraphicsMan_PlatformPurgeTextures frees each non-zero one, cPS2GraphicsMan_RemoveTexture clears it
     int unk_3838[2000];             // 0x3838 [U] per texture id: cPS2GraphicsMan_AddTexture1 sets 1 after creating it
     char unk_5778[0x8];             // 0x5778 padding to 16
@@ -436,13 +436,13 @@ CHECK_OFFSET(cPS2GraphicsMan, mCharSpecTexID, 0x10B0);
 CHECK_OFFSET(cPS2GraphicsMan, mVtbl, 0x10D8);
 CHECK_OFFSET(cPS2GraphicsMan, mViewportDepth, 0x10DC);
 CHECK_OFFSET(cPS2GraphicsMan, mViewStack, 0x10E0);
-CHECK_OFFSET(cPS2GraphicsMan, mViewDepth, 0x13E0);
+CHECK_OFFSET(cPS2GraphicsMan, mViewStackIdx, 0x13E0);
 CHECK_OFFSET(cPS2GraphicsMan, mCurrentView, 0x13E4);
 CHECK_OFFSET(cPS2GraphicsMan, mpScratchpad, 0x13E8);
-CHECK_OFFSET(cPS2GraphicsMan, mNumProjTextures, 0x13EC);
+CHECK_OFFSET(cPS2GraphicsMan, mNumShdw, 0x13EC);
 CHECK_OFFSET(cPS2GraphicsMan, mProjTextures, 0x13F0);
 CHECK_OFFSET(cPS2GraphicsMan, mpDeferMan, 0x18F0);
-CHECK_OFFSET(cPS2GraphicsMan, mpTextureMan, 0x18F4);
+CHECK_OFFSET(cPS2GraphicsMan, mTexMan, 0x18F4);
 CHECK_OFFSET(cPS2GraphicsMan, unk_18F8, 0x18F8);
 CHECK_OFFSET(cPS2GraphicsMan, unk_3838, 0x3838);
 CHECK_OFFSET(cPS2GraphicsMan, unk_5778, 0x5778);

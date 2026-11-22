@@ -2353,7 +2353,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_ClearProjTextures__FPv);
 /**
  * Base-class default for forgetting the projected textures of the frame: does nothing.
  *
- * cPS2GraphicsMan overrides slot 66 with cPS2GraphicsMan_ClearProjTextures__FPv, which zeroes mNumProjTextures.
+ * cPS2GraphicsMan overrides slot 66 with cPS2GraphicsMan_ClearProjTextures__FPv, which zeroes mNumShdw.
  */
 void cGraphicsMan_ClearProjTextures(void* self)
 {
@@ -4162,12 +4162,12 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_ClearProjTextures__FPv);
 /**
  * Forgets the projected textures queued for the frame.
  *
- * Sets mNumProjTextures (+0x13EC) to 0; cPS2GraphicsMan_AddProjectiveTexture() adds them again.
+ * Sets mNumShdw (+0x13EC) to 0; cPS2GraphicsMan_AddProjectiveTexture() adds them again.
  */
 void cPS2GraphicsMan_ClearProjTextures(void* vself)
 {
     cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    self->mNumProjTextures = 0;
+    self->mNumShdw = 0;
 }
 #endif
 
@@ -4175,13 +4175,13 @@ void cPS2GraphicsMan_ClearProjTextures(void* vself)
 INCLUDE_ASM("render/font", cPS2GraphicsMan_GetNumProjTextures);
 #ifdef SKIP_ASM
 /**
- * Returns the number of projective textures (mNumProjTextures).
+ * Returns the number of projective textures (mNumShdw).
  *
  * @param pS2GraphicsMan  the graphics manager
- * @return mNumProjTextures
+ * @return mNumShdw
  */
 extern "C" int cPS2GraphicsMan_GetNumProjTextures(cPS2GraphicsMan* pS2GraphicsMan) {
-    return (pS2GraphicsMan->mNumProjTextures);
+    return (pS2GraphicsMan->mNumShdw);
 }
 #endif
 //100%
@@ -4377,13 +4377,13 @@ extern "C" int cPS2GraphicsMan_GetCurrentZBFormat(cPS2GraphicsMan* graphicsMan) 
 INCLUDE_ASM("render/font", cPS2GraphicsMan_GetTextureMan);
 #ifdef SKIP_ASM
 /**
- * Returns the texture manager (mpTextureMan).
+ * Returns the texture manager (mTexMan).
  *
  * @param pS2GraphicsMan  the graphics manager
- * @return mpTextureMan
+ * @return mTexMan
  */
 extern "C" int cPS2GraphicsMan_GetTextureMan(cPS2GraphicsMan* pS2GraphicsMan) {
-    return ((int)pS2GraphicsMan->mpTextureMan);
+    return ((int)pS2GraphicsMan->mTexMan);
 }
 #endif
 //100%
@@ -4649,7 +4649,7 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_PushView);
 #ifdef SKIP_ASM
 /**
  * Pushes the view matrix stack: copies the top matrix (mCurrentView) into the next 0x40-byte slot with VU0, advances
- * mCurrentView to it and increments mViewDepth. No overflow check.
+ * mCurrentView to it and increments mViewStackIdx. No overflow check.
  */
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
 extern "C" void cPS2GraphicsMan_PushView(cPS2GraphicsMan* self)
@@ -4670,7 +4670,7 @@ extern "C" void cPS2GraphicsMan_PushView(cPS2GraphicsMan* self)
         : "r"(((char*)top) + 0x40), "r"(((char*)top))
         : "memory");
     *(char**)&self->mCurrentView += 0x40;
-    self->mViewDepth += 1;
+    self->mViewStackIdx += 1;
 }
 #endif
 
@@ -4680,7 +4680,7 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_PopView__FPv);
 /**
  * Pops the view-matrix stack.
  *
- * Moves mCurrentView (+0x13E4) back by one 0x40-byte matrix, decrements mViewDepth (+0x13E0) and clears mMatricesValid
+ * Moves mCurrentView (+0x13E4) back by one 0x40-byte matrix, decrements mViewStackIdx (+0x13E0) and clears mMatricesValid
  * (+0x6B90) so the combined matrices are rebuilt. No underflow check (the preview asserted).
  */
 void cPS2GraphicsMan_PopView(void* vself)
@@ -4688,7 +4688,7 @@ void cPS2GraphicsMan_PopView(void* vself)
     cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
     self->mMatricesValid = 0;
     *(char**)&self->mCurrentView -= 0x40;
-    self->mViewDepth -= 1;
+    self->mViewStackIdx -= 1;
 }
 #endif
 
@@ -5340,7 +5340,7 @@ INCLUDE_ASM("render/font", func_00396128);
 /**
  * Resets three cached ids of the texture manager to -1: the words at +0x1F4C, +0x1F50 and +0x1F54.
  *
- * The first two in a two-pass loop. func_00363490 calls it on mpTextureMan before building the frame's chains.
+ * The first two in a two-pass loop. func_00363490 calls it on mTexMan before building the frame's chains.
  */
 extern "C" void func_00396128(cTextureMan* self)
 {

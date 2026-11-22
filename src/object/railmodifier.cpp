@@ -8798,7 +8798,7 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
     int saved = *(int*)ring;
     func_0038F300(ring, 5);
     cPS2GraphicsMan* gs = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_railmodifier;
-    cTextureMan* obj = gs->mpTextureMan;
+    cTextureMan* obj = gs->mTexMan;
     func_00396128(obj);
     func_00365F68(obj->mMainHeap);
     if (self->nItems != 0) {

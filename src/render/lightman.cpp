@@ -1894,7 +1894,7 @@ extern "C" void func_00368138(void* self, void* pkt);
  * Returns at once unless cScreenTint_m_Enable; refreshes the entry first (func_00390458) when cScreenTint_m_OverrideWP
  * is set, and skips the neutral setting colour (1, 1, 1) with fill (0, 0, 0). Otherwise it claims a buffer
  * (func_0038F460), lets func_003905E8 write the pass, flushes it (func_0038F668, result into *@p addr) and calls
- * func_00368138(mpTextureMan, @p pkt). Caller: func_00363490.
+ * func_00368138(mTexMan, @p pkt). Caller: func_00363490.
  *
  * @param idx  the view index
  * @param pkt  passed to func_00368138
@@ -1916,7 +1916,7 @@ extern "C" void func_003904A0(cPS2GraphicsMan* self, int idx, void* pkt, int* ad
     int mark = func_0038F460(ring, *addr, -1, 0);
     func_003905E8(self, idx, &mark);
     *addr = func_0038F668_r(ring, mark, 4);
-    func_00368138(self->mpTextureMan, pkt);
+    func_00368138(self->mTexMan, pkt);
 }
 #endif
 
