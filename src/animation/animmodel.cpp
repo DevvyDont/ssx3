@@ -1,4 +1,5 @@
 #include "common.h"
+#include "animation/animdatabase.h"
 #include "vtable.h"
 #include "animation/adfdatasource.h"
 #include "render/ps2graphicsman.h"
@@ -1171,7 +1172,6 @@ extern "C" sAnimNode_310F18* gGenCacheBucket(int bank, int n)
 //100%
 INCLUDE_ASM("animation/animmodel", cAnimDataBase_cAnimDataBase);
 #ifdef SKIP_ASM
-extern void* cAnimDataBase_TheAnimDataBase;
 extern "C" void func_00416210(void* dst, int c, int n);
 // PORT: prototype mismatch. cAnimDataBase_initChanCache is defined later in the unit as (void), but this
 // caller passes the model in $4.
@@ -1187,7 +1187,7 @@ void cAnimDataBase_initChanCache_1(void* self) __asm__("cAnimDataBase_initChanCa
  */
 extern "C" void* cAnimDataBase_cAnimDataBase(void* self)
 {
-    cAnimDataBase_TheAnimDataBase = self;
+    cAnimDataBase_TheAnimDataBase = (cAnimDataBase*)(self);
     func_00416210(self, 0, 0x3FC);
     cAnimDataBase_initChanCache_1(self);
     return self;

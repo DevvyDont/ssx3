@@ -1,4 +1,5 @@
 #include "common.h"
+#include "animation/animdatabase.h"
 #include "animation/adfdatasource.h"
 #include "bx/math3d.h"
 #include "vtable.h"
@@ -447,7 +448,6 @@ extern "C" void cAnimSequence_addTrigger(void* node, int key, float t);
 extern "C" void cAnimSequence_setSubAnim(void* node, int i, int anim);
 extern "C" void cAnimSequence_setSubAnimTime(void* node, int i, float t);
 extern "C" void cAnimSequence_setSubAnimWeight(void* node, int i, float speed);
-extern char** cAnimDataBase_TheAnimDataBase;
 
 // A sequence node: three tracks, then the clip state (raw offsets from cRiderAnimBase_onInput's uses).
 struct sSeqTrack_1F00 {
@@ -541,10 +541,10 @@ extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* vself, void* vseq, int ani
     nd->blendIn = ((float*)cAIAnimEventMap_getAnimPlayAttr(anim))[6];
     nd->m84 = priority;
     // PORT: (int) address arithmetic for the clip header (index-first addu).
-    int n = *(unsigned short*)((char*)(((unsigned int)animid >> 8) * 0x14 + *(int*)(*(char**)((char*)cAnimDataBase_TheAnimDataBase + (((unsigned int)animid & 0xFF) << 2)) + 0x8)) + 0x12);
+    int n = *(unsigned short*)((char*)(((unsigned int)animid >> 8) * 0x14 + *(int*)((char*)cAnimDataBase_TheAnimDataBase->DataSources[(unsigned int)animid & 0xFF] + 0x8)) + 0x12);
     for (int i = 0; i < n; i++)
     {
-        cAdfDataSource* bank = (cAdfDataSource*)(*(char**)((char*)cAnimDataBase_TheAnimDataBase + (((unsigned int)animid & 0xFF) << 2)));
+        cAdfDataSource* bank = (cAdfDataSource*)((char*)cAnimDataBase_TheAnimDataBase->DataSources[(unsigned int)animid & 0xFF]);
         char* clip = (char*)(((unsigned int)animid >> 8) * 0x14 + (int)bank->Anims);
         unsigned short* keys = (unsigned short*)bank->Tags;
         cAnimSequence_addTrigger(node, i, keys[(*(unsigned short*)(clip + 0x10) + i) * 2] * 0.03333333507180214f);
@@ -761,7 +761,6 @@ extern "C" tAnimBlendFrame cRiderAnimBase_getAIAnimFrame(cRiderAnimBase* self, i
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getAIAnimDuration);
 #ifdef SKIP_ASM
 extern char* cGameAnimMap_TheGameAnimMap;
-extern char** cAnimDataBase_TheAnimDataBase;
 
 /**
  * Returns how long the clip behind an AI animation lasts, in seconds.
@@ -780,7 +779,7 @@ extern "C" float cRiderAnimBase_getAIAnimDuration(cRiderAnimBase* self, int aid)
     if (id == 519)
         return 0.0f;
     unsigned int animId = *(unsigned int*)(id * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
-    char* clip = *(char**)((char*)cAnimDataBase_TheAnimDataBase + ((animId & 0xFF) << 2));
+    char* clip = (char*)cAnimDataBase_TheAnimDataBase->DataSources[animId & 0xFF];
     char* clipEntry = (char*)((animId >> 8) * 0x14 + *(int*)(clip + 0x8));
     return (*(unsigned short*)(clipEntry + 0xC) - 1) * 0.03333333507180214f;
 }
@@ -814,7 +813,7 @@ extern "C" float cRiderAnimBase_getAIAnimEventTime(cRiderAnimBase* self, int ani
     if (id == 519)
         return 0.0f;
     unsigned int mapEntry = *(unsigned int*)(id * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
-    cAdfDataSource* clip = (cAdfDataSource*)(*(char**)((char*)cAnimDataBase_TheAnimDataBase + ((mapEntry & 0xFF) << 2)));
+    cAdfDataSource* clip = (cAdfDataSource*)cAnimDataBase_TheAnimDataBase->DataSources[mapEntry & 0xFF];
     tAdfAnimHeader* animRec = (tAdfAnimHeader*)((char*)((mapEntry >> 8) * 0x14 + (int)clip->Anims));
     float frameTime;
     if (frame < animRec->mNumTags)

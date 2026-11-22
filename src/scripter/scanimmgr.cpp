@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "animation/animdatabase.h"
 #include "scripter/scanimmgr.h"
 
 //100%
@@ -81,7 +82,6 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cAdfDataSource_cAdfDataSource1(void* mem, void* data);
 extern const char str_cAdfDataSource[];
 extern const char str_pTableAnimID[];
-extern void** cAnimDataBase_TheAnimDataBase;
 
 struct sScLinkEntry {
     int id;             // 0x0
@@ -153,8 +153,8 @@ extern "C" int cScriptAnimBankManager_LinkBank(cScriptAnimBankManager* self, int
                 }
             }
         }
-        void** tbl = cAnimDataBase_TheAnimDataBase;
-        void** slot = &tbl[*(unsigned char*)&bankInfo->slot];
+        cAnimDataBase* tbl = cAnimDataBase_TheAnimDataBase;
+        void** slot = &((void**)tbl)[*(unsigned char*)&bankInfo->slot];
         *slot = bank;
     }
     return bankInfo->slot;
@@ -261,7 +261,6 @@ INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_UnlinkBank1);
 extern "C" void cAnimDataBase_purgeChanCache(void** tbl);
 extern "C" void cAdfDataSource__cAdfDataSource(void* self, int flags);
 void cMemMan_free(void*);
-extern void** cAnimDataBase_TheAnimDataBase;
 
 /**
  * Unlinks animation bank record @p bankInfo: removes its data source from the anim database and clears the record.
@@ -274,11 +273,11 @@ extern void** cAnimDataBase_TheAnimDataBase;
  */
 extern "C" void cScriptAnimBankManager_UnlinkBank1(cScriptAnimBankManager* self, sAnimEntry* bankInfo)
 {
-    void** tbl = cAnimDataBase_TheAnimDataBase;
-    void** slot = &tbl[*(unsigned char*)&bankInfo->unk4];
+    cAnimDataBase* tbl = cAnimDataBase_TheAnimDataBase;
+    void** slot = &((void**)tbl)[*(unsigned char*)&bankInfo->unk4];
     void* obj = *slot;
     *slot = 0;
-    cAnimDataBase_purgeChanCache(tbl);
+    cAnimDataBase_purgeChanCache((void**)tbl);
     if (obj != 0) {
         cAdfDataSource__cAdfDataSource(obj, 3);
     }

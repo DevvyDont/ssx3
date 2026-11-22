@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/ubergrindanim.h"
 #include "camera/camera.h"
 #include "main/gameviewman.h"
 #include "main/gamemode.h"
@@ -9913,12 +9914,6 @@ INCLUDE_ASM("ai/ai", cUberGrindControl_gainFocus);
 #ifdef SKIP_ASM
 float cRiderMetrix_evUberGrindStart(void* self, int a1, int a2);
 
-struct sAnimSet_00136268 {
-    int anims[4];       // 0x00
-    char pad10[0x10];
-    int x20;            // 0x20
-};
-extern sAnimSet_00136268 kUberGrindAnim[];
 
 /**
  * Starts an uber grind: plays the entry anim of grind CurrentGrind for the rail stance and scores the trick.
@@ -9929,31 +9924,31 @@ extern sAnimSet_00136268 kUberGrindAnim[];
  */
 extern "C" void cUberGrindControl_gainFocus(cUberGrindControl* self)
 {
-    sAnimSet_00136268* grind = &kUberGrindAnim[self->CurrentGrind];
+    tBEUberGrindAnim* grind = &kUberGrindAnim[self->CurrentGrind];
     cRider* rider = self->mRider;
     int railStyle = rider->RailslideMode;
     if (railStyle == 4) {
         cRiderAnim* anim = rider->mRiderAnim;
         *(sQuat_12FEC8*)&anim->OrientationOffset = t4vect_Origin;
         *(sQuat_12FEC8*)&anim->OrientationOffset.Q = AxisAngle_12FEC8(t4vect_ZAxis, 1.5707963705062866f);
-        cRiderAnimBase_play(self->mRider->mRiderAnim, grind->anims[0], 0, -1.0f);
+        cRiderAnimBase_play(self->mRider->mRiderAnim, grind->BSIntoAnim, 0, -1.0f);
     } else if (railStyle == 3) {
-        cRiderAnimBase_play(rider->mRiderAnim, grind->anims[1], 0, -1.0f);
+        cRiderAnimBase_play(rider->mRiderAnim, grind->FSIntoAnim, 0, -1.0f);
     } else if (railStyle == 2) {
         rider->IsRidingFakie = 0;
         self->mRider->mRiderAnim->IsFlipped = 0;
         cRiderAnim* anim = self->mRider->mRiderAnim;
         *(sQuat_12FEC8*)&anim->OrientationOffset = t4vect_Origin;
         *(sQuat_12FEC8*)&anim->OrientationOffset.Q = AxisAngle_12FEC8(t4vect_ZAxis, 1.5707963705062866f);
-        cRiderAnimBase_play(self->mRider->mRiderAnim, grind->anims[2], 0, -1.0f);
+        cRiderAnimBase_play(self->mRider->mRiderAnim, grind->FakieIntoAnim, 0, -1.0f);
     } else {
         cRiderAnim* anim = rider->mRiderAnim;
         *(sQuat_12FEC8*)&anim->OrientationOffset = t4vect_Origin;
         *(sQuat_12FEC8*)&anim->OrientationOffset.Q = AxisAngle_12FEC8(t4vect_ZAxis, 1.5707963705062866f);
-        cRiderAnimBase_play(self->mRider->mRiderAnim, grind->anims[3], 0, -1.0f);
+        cRiderAnimBase_play(self->mRider->mRiderAnim, grind->RegIntoAnim, 0, -1.0f);
     }
     float k = 0.33000001311302185f;
-    cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evUberGrindStart(self->mRider->mMetrix, grind->x20, self->mRider->RailslideMode));
+    cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evUberGrindStart(self->mRider->mMetrix, grind->GrindName, self->mRider->RailslideMode));
     self->mRider->RailslideMode = 3;
     *(int*)self = 0;
     cRider_verifyRailslideModeDEBUG(self->mRider);

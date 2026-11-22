@@ -1,4 +1,5 @@
 #include "common.h"
+#include "animation/animdatabase.h"
 #include "vtable.h"
 #include "animation/mdfarchive.h"
 #include "animation/animsequencer.h"
@@ -209,7 +210,6 @@ extern "C" void cAnimSequence_removeAllTriggers(cAnimSequence* self)
 //100%
 INCLUDE_ASM("animation/animsequencer", cAnimSequence_setSubAnim);
 #ifdef SKIP_ASM
-extern void** cAnimDataBase_TheAnimDataBase;
 
 struct sSeqEntry_00313C50
 {
@@ -244,7 +244,7 @@ extern "C" void cAnimSequence_setSubAnim(cAnimSequence* self, int i, int anim)
 {
     sSeq_00313C50* sequence = (sSeq_00313C50*)self;
     (sequence->e + i)->anim = anim;
-    char* clip = *(char**)((char*)cAnimDataBase_TheAnimDataBase + ((anim & 0xFF) << 2));
+    char* clip = (char*)cAnimDataBase_TheAnimDataBase->DataSources[anim & 0xFF];
     char* clipEntry = (char*)(((unsigned)anim >> 8) * 0x14 + *(int*)(clip + 0x8));
     sequence->e[i].len = (*(unsigned short*)(clipEntry + 0xC) - 1) * 0.03333333507180214f;
     if (sequence->e[i].active == 0)
