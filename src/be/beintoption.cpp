@@ -363,7 +363,6 @@ extern "C" int cBERules_getPlayerStartDelaySecs(int i)
 INCLUDE_ASM("be/beintoption", cBERules_getAIStartDelaySecs);
 #ifdef SKIP_ASM
 extern "C" int cBERules_getMaxDelaySecs();
-extern int D_005308D4[]; // cBERules_mRules + 0x1C, addressed through its own symbol
 
 /**
  * Returns how long the AI riders are held at the start: the largest head start (cBERules_getMaxDelaySecs) minus the AI head start
@@ -373,7 +372,7 @@ extern int D_005308D4[]; // cBERules_mRules + 0x1C, addressed through its own sy
  */
 extern "C" int cBERules_getAIStartDelaySecs(void* self)
 {
-    return cBERules_getMaxDelaySecs() - D_005308D4[0];
+    return cBERules_getMaxDelaySecs() - cBERules_mRules.MyRules.AIHeadStartSecs;
 }
 #endif
 
