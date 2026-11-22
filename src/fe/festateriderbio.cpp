@@ -243,11 +243,6 @@ extern const char str_cKeyboardPopup[];
 extern const char str_cFEStateCheatCharSelect[];
 extern const char str_FEOptions[];
 
-struct sVE_3710 {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
 struct sBits_3710 {
     unsigned lo : 8;
     unsigned mode : 6;
@@ -300,7 +295,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUI
             }
         } else {
             char* obj = *(char**)self->mpEngine;
-            sVE_3710* vt = *(sVE_3710**)(obj + 4);
+            sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
             void* nextState = vt[4].fn(vthis(obj, vt[4]), ((char*)self), sub);
             if (nextState != 0) {
                 cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
@@ -311,7 +306,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUI
     }
     case 6: {
         char* obj = *(char**)self->mpEngine;
-        sVE_3710* vt = *(sVE_3710**)(obj + 4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
         void* nextState = vt[5].fn(vthis(obj, vt[5]), ((char*)self), item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
@@ -470,7 +465,6 @@ extern "C" void cFEStateUberTrick_activateTrickMenu(cFEStateUberTrick* self)
 //100%
 INCLUDE_ASM("fe/festateriderbio", func_00183D08);
 #ifdef SKIP_ASM
-struct sVec2_00183D08 { float x, y; };
 
 class cWidget_00183D08 {
 public:
@@ -495,8 +489,8 @@ public:
     virtual void v17();
     virtual void v18();
     virtual void v19();
-    virtual void getSize(sVec2_00183D08* p);
-    virtual void setSize(sVec2_00183D08* p);
+    virtual void getSize(t3Vector* p);
+    virtual void setSize(t3Vector* p);
 };
 
 /**
@@ -513,7 +507,7 @@ public:
 extern "C" void func_00183D08(cWidget_00183D08* self, cTextureElement* rect, float scale)
 {
     if (((void*)rect)) {
-        sVec2_00183D08 pos;
+        t3Vector pos;
         self->getSize(&pos);
         float k = scale * 256.0f;
         pos.x = (rect->mRight - rect->mLeft) * k;

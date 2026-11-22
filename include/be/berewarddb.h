@@ -11,7 +11,27 @@
 
 #include "layout.h"
 
-struct tCheatCharInfo;
+// One cheat character's reward record (cBERewardDB::mpCheatChars[mNumCheatChars]). [O] struct tCheatCharInfo (0x10);
+// [U] cFEStateCheatCharSelect_cFEStateCheatCharSelect walks mpCheatChars with a 0x10 stride: mCheatCharID (the byte at
+// 0xF) goes to cBERewardInterface_isCheatCharOwned and mCharIDs, mpIconName is hashed into the texture bank,
+// mNameStringID becomes the entry's name (fe/festatecharselect's view sCharEnt_2220).
+struct tCheatCharInfo {
+    char* mNameStringID;            // 0x000 [O]; [U] the character's name string id
+    char* mpIconName;               // 0x004 [O]; [U] the icon element's name (GetHashValue32)
+    char* mpHelpStringID;           // 0x008 [O]
+    short mCost;                    // 0x00C [O]
+    char mStoreNum;                 // 0x00E [O]
+    signed char mCheatCharID;       // 0x00F [O] (char); [U] read with lb (the view's signed char id)
+};
+
+CHECK_OFFSET(tCheatCharInfo, mNameStringID, 0x000);
+CHECK_OFFSET(tCheatCharInfo, mpIconName, 0x004);
+CHECK_OFFSET(tCheatCharInfo, mpHelpStringID, 0x008);
+CHECK_OFFSET(tCheatCharInfo, mCost, 0x00C);
+CHECK_OFFSET(tCheatCharInfo, mStoreNum, 0x00E);
+CHECK_OFFSET(tCheatCharInfo, mCheatCharID, 0x00F);
+CHECK_SIZE(tCheatCharInfo, 0x10);
+
 struct tConceptArtInfo;
 struct tMedalInfo;
 struct tPeakPassInfo;

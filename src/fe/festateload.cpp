@@ -1,4 +1,5 @@
 #include "common.h"
+#include "movie/mcoverlaymanager.h"
 #include "fe/fecustom.h"
 #include "ui/uiengine.h"
 #include "fe/festatememcard.h"
@@ -329,29 +330,6 @@ extern "C" void cFEStateMemCard_callbackAcknowledgeCardStatusChange();
 extern "C" void cFEStateMemCard_callbackConfirmNoFreeBlocks();
 
 
-struct sMemCardK186A08 {
-    char pad_0x0[0x38];
-    void* cb38;         // 0x38
-    void* cb3C;         // 0x3C
-    char pad_0x40[0x8];
-    void* cb48;         // 0x48
-    char pad_0x4C[0x10];
-    void* cb5C;         // 0x5C
-    char pad_0x60[0x30];
-    void* cb90;         // 0x90
-    void* cb94;         // 0x94
-    char pad_0x98[0xC];
-    void* cbA4;         // 0xA4
-    char pad_0xA8[0x4];
-    void* cbAC;         // 0xAC
-    void* cbB0;         // 0xB0
-    char pad_0xB4[0x11C - 0xB4];
-    int f11C;           // 0x11C
-    int f120;           // 0x120
-    int f124;           // 0x124
-    int f128;           // 0x128
-    int f12C;           // 0x12C
-};
 
 /**
  * Constructs the memory-card load state and points the memory-card manager's callbacks at the load handlers.
@@ -384,21 +362,21 @@ extern "C" cFEStateMemCard* func_00186A08(cFEStateMemCard* self, void* engine)
     self->mPopupType = 26;
     self->mMissingSavedFileTypeFlags = -1;
     self->mCard1MissingSavedFileTypeFlags = -1;
-    sMemCardK186A08* mc = (sMemCardK186A08*)cSSXApp_getMCManager(SSXApp);
-    mc->f12C = one;
-    mc->f124 = one;
-    mc->f120 = one;
-    mc->cbA4 = (void*)cFEStateMemCard_callbackLoadReady;
-    mc->cb38 = (void*)cFEStateMemCard_callbackFileNotFound;
-    mc->cb94 = (void*)cFEStateMemCard_callbackFileChecked;
-    mc->cbAC = (void*)cFEStateMemCard_callbackSysRecheckFile;
-    mc->cb90 = (void*)cFEStateMemCard_callbackCardsChecked;
-    mc->cb48 = (void*)func_00186C98;
-    mc->cb3C = (void*)func_00186D60;
-    mc->cbB0 = (void*)cFEStateMemCard_callbackAcknowledgeCardStatusChange;
-    mc->cb5C = (void*)cFEStateMemCard_callbackConfirmNoFreeBlocks;
-    mc->f128 = 0;
-    mc->f11C = 0;
+    cMCOverlayManager* mc = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
+    mc->mRetryToInit = one;
+    mc->mPollForNoCard = one;
+    mc->mPollForUnformatted = one;
+    (*(void**)&mc->callbackLoadReady) = (void*)cFEStateMemCard_callbackLoadReady;
+    (*(void**)&mc->callbackFileNotFound) = (void*)cFEStateMemCard_callbackFileNotFound;
+    (*(void**)&mc->callbackFileChecked) = (void*)cFEStateMemCard_callbackFileChecked;
+    (*(void**)&mc->callbackSysRecheckFile) = (void*)cFEStateMemCard_callbackSysRecheckFile;
+    (*(void**)&mc->callbackCardsChecked) = (void*)cFEStateMemCard_callbackCardsChecked;
+    (*(void**)&mc->callbackConfirmFormat) = (void*)func_00186C98;
+    (*(void**)&mc->callbackConfirmNoCards) = (void*)func_00186D60;
+    (*(void**)&mc->callbackAcknowledgeCardStatusChange) = (void*)cFEStateMemCard_callbackAcknowledgeCardStatusChange;
+    (*(void**)&mc->callbackConfirmNoFreeBlocks) = (void*)cFEStateMemCard_callbackConfirmNoFreeBlocks;
+    mc->mShowCardChangeNotify = 0;
+    mc->mPollForFullCard = 0;
     return (self);
 }
 #endif

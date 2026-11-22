@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "ai/ridermetrix.h"
 #include "ui/uiicon.h"
@@ -452,11 +453,6 @@ extern char str_The_display_mode_has_been_switched_to_Pr[];
 extern char str_The_display_mode_has_been_set_to_interla[];
 extern char str_kT_CMNContinue_c[];
 
-struct sVEK245F50 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Creates the display-mode popup's "supopup" screen and fills in its message and buttons (onCreateScreen slot of
@@ -489,9 +485,9 @@ extern "C" void func_00245F50(cUIState* self)
     }
     cUIThing* noButton = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_no_c));
     if (((char*)noButton) != 0) {
-        sVEK245F50* vt = (sVEK245F50*)noButton->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)noButton->mVtbl;
         vt[9].fn(((char*)noButton) + vt[9].delta, 0);
-        sVEK245F50* vt2 = (sVEK245F50*)noButton->mVtbl;
+        sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)noButton->mVtbl;
         vt2[8].fn(((char*)noButton) + vt2[8].delta, 1);
     }
     *(int*)((char*)self + 0x4C) = 300;
@@ -1132,7 +1128,6 @@ extern "C" void func_00246CF8(cGameLoadState* self, char player)
 INCLUDE_ASM("fe/festateloadhint", cFELoadState_InitwidgetMultiP);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-#include "vtable.h"
 
 // Declarations shared by the functions of this unit.
 struct cUIText;

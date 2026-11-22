@@ -123,11 +123,6 @@ extern int D_004A14DC;
 extern int D_004A14E0;
 extern char gUISoundNull;
 
-struct sVE_188980p {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
 
 class cListener_188980 {
 public:
@@ -186,7 +181,7 @@ extern "C" void cFEStateOptions_onWidgetEvent(cFEStateOptions* self, cUIThing* w
         }
         {
             char* obj = *(char**)(char*)self->mpEngine;
-            sVE_188980p* vt = *(sVE_188980p**)(obj + 4);
+            sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
             void* r = vt[4].fn(vthis(obj, vt[4]), (self), widget->mMiscData);
             if (r != 0)
                 cUIStateStack_push(&self->mpEngine->mStateStack, r);
@@ -299,16 +294,6 @@ extern char str_kT_FESaveOptionsQuesPS2[];
 extern char str_111resetopts[];
 extern char D_004A1530[];
 
-struct sVEK188D08a {
-    short delta;
-    short index;
-    int (*fn)(void*, int);
-};
-struct sVEK188D08b {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 static inline int IsK188D08(int id, char* s)
 {
@@ -339,19 +324,19 @@ extern "C" void cFEStateOptions_onPopupEvent(cFEStateOptions* self, cUIState* po
     case 22:
         if (IsK188D08(popup->mHashName, str_111resetopts)) {
             void* uiObj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1530));
-            sVEK188D08a* vt = (sVEK188D08a*)popup->mVtbl;
+            sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)popup->mVtbl;
             if (vt[23].fn(vthis(popup, vt[23]), 0)) {
                 if (uiObj != 0) {
                     self->mbToSaveOptionScreen = 1;
                     self->mbLetFrameGo = 1;
-                    sVEK188D08b* vt2 = (sVEK188D08b*)self->mVtbl;
+                    sVEntry<void(void*, void*, int)>* vt2 = (sVEntry<void(void*, void*, int)>*)self->mVtbl;
                     vt2[19].fn(vthis(self, vt2[19]), uiObj, 5);
                 }
             } else {
                 if (uiObj != 0) {
                     self->mbToSaveOptionScreen = 0;
                     self->mbLetFrameGo = 1;
-                    sVEK188D08b* vt2 = (sVEK188D08b*)self->mVtbl;
+                    sVEntry<void(void*, void*, int)>* vt2 = (sVEntry<void(void*, void*, int)>*)self->mVtbl;
                     vt2[19].fn(vthis(self, vt2[19]), uiObj, 6);
                 }
             }
@@ -643,16 +628,6 @@ struct sVE_189610a {
     short index;
     int (*fn)(void*, int);
 };
-struct sVE_189610b {
-    short delta;
-    short index;
-    void (*fn)(void*, int, int);
-};
-struct sVE_189610c {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 static inline int Is_189610(int id, char* s)
 {
@@ -712,7 +687,7 @@ extern "C" void cFEStateOptionsGame_onPopupEvent(cFEStateOptionsGame* self, cUIS
                 gameOptions->f5 = vtOffset;
             } else {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-                sVE_189610b* vt = (sVE_189610b*)ps2GraphicsMan->mVtbl;
+                sVEntry<void(void*, int, int)>* vt = (sVEntry<void(void*, int, int)>*)ps2GraphicsMan->mVtbl;
                 char* thisp = (char*)ps2GraphicsMan + vt[12].delta;
                 void (**pf)(void*, int, int) = &vt[12].fn;
                 (*pf)(thisp, Cfg_189610().f6, Cfg_189610().f5);
@@ -725,7 +700,7 @@ extern "C" void cFEStateOptionsGame_onPopupEvent(cFEStateOptionsGame* self, cUIS
             }
         }
         {
-            sVE_189610c* vt = *(sVE_189610c**)(iface + 0xC);
+            sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(iface + 0xC);
             vt[1].fn(iface + vt[1].delta);
         }
         break;
@@ -962,11 +937,6 @@ struct sVE_189D60a {
     short index;
     void (*fn)(void*);
 };
-struct sVE_189D60b {
-    short delta;
-    short index;
-    void (*fn)(void*, char);
-};
 struct sVE_189D60c {
     short delta;
     short index;
@@ -1003,7 +973,7 @@ extern "C" void cFEStateOptionsGame_updateWidget(cFEStateOptionsGame* self_)
         if (w != 0) {
             cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().iLanguage);
             char* locale = (char*)SSXApp->FELocale;
-            sVE_189D60b* vt = *(sVE_189D60b**)(locale + 4);
+            sVEntry<void(void*, char)>* vt = *(sVEntry<void(void*, char)>**)(locale + 4);
             vt[3].fn(locale + vt[3].delta, cUIListBox_getCurrentEntryData(w));
             char* scr = ((char*)self->mpScreen);
             sVE_189D60a* vt2 = *(sVE_189D60a**)(scr + 0x48);
@@ -1312,17 +1282,7 @@ struct sSndCfg_18A8D0 {
 // PORT: cBEOptionInterface_mOption is viewed with different types across the unit; view bound by asm label
 extern sSndCfg_18A8D0 D_00535610_18A8D0 __asm__("cBEOptionInterface_mOption");
 
-struct sVE_18A8D0a {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
-struct sVE_18A8D0c {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
 
 static inline int Is_18A8D0(int id, char* s)
 {
@@ -1371,7 +1331,7 @@ extern "C" void cFEStateOptionsSound_onWidgetEvent(cFEStateOptionsSound* self, c
     }
     case 6: {
         {
-            sVE_18A8D0a* vt = *(sVE_18A8D0a**)(iface + 0xC);
+            sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(iface + 0xC);
             vt[1].fn(vthis(iface, vt[1]));
         }
         func_00287410(cAudioInterface_bxAudio(), Cfg_18A8D0().sfxVol);
@@ -1380,7 +1340,7 @@ extern "C" void cFEStateOptionsSound_onWidgetEvent(cFEStateOptionsSound* self, c
         cSSXAudio_SetDJSpeech(cAudioInterface_bxAudio(), Cfg_18A8D0().iUseDJSpeech != 0);
         cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_18A8D0().iUseArcadeSFX != 0);
         char* eng = *(char**)(char*)self->mpEngine;
-        sVE_18A8D0c* vt = *(sVE_18A8D0c**)(eng + 4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(eng + 4);
         void* nextState = vt[5].fn(vthis(eng, vt[5]), (self), widget->mMiscData);
         if (nextState != 0)
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
@@ -1610,11 +1570,6 @@ extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
 extern "C" void cSSXAudio_FrontEndLoad(void* snd);
 
 
-struct sVE_18BEF8v {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Switches the audio output mode and, when the audio device accepts it, restarts the audio system in that mode.
@@ -1669,7 +1624,7 @@ extern "C" void cFEStateOptionsSound_setSoundMode(cFEStateOptionsSound* self, un
         cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), arcadeSfx);
         cSSXAudio_FrontEndLoad(cAudioInterface_bxAudio());
         char* snd = (char*)cAudioInterface_bxAudio();
-        sVE_18BEF8v* vt2 = *(sVE_18BEF8v**)(snd + 0x5558);
+        sVEntry<void(void*, int)>* vt2 = *(sVEntry<void(void*, int)>**)(snd + 0x5558);
         char* sub = snd + 0x118;
         vt2[4].fn(vthis(sub, vt2[4]), saved534);
     }
@@ -1748,11 +1703,6 @@ void* cFEStateOptionsHUD_onGainFocus(void* self)
 //100%
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsHUD_onPopupEvent);
 #ifdef SKIP_ASM
-struct sVE_18C1B8 {
-    short delta;
-    short index;
-    int (*fn)(void*, int);
-};
 int GetHashValue32(char* str);
 extern char str_111resetopts[];
 extern int D_004A14D8;
@@ -1781,7 +1731,7 @@ extern "C" void cFEStateOptionsHUD_onPopupEvent(cFEStateOptionsHUD* self, cUISta
     case 22: {
         int popupHash = widget->mHashName;
         if (popupHash == GetHashValue32(str_111resetopts)) {
-            sVE_18C1B8* getDataEntry = &((sVE_18C1B8*)widget->mVtbl)[23];
+            sVEntry<int(void*, int)>* getDataEntry = &((sVEntry<int(void*, int)>*)widget->mVtbl)[23];
             if (getDataEntry->fn(vthis(widget, *getDataEntry), 2) != 0) {
                 cBEOptionInterface_defaultHUD(iface);
                 cFEStateOptionsHUD_updateWidget(self);
@@ -1845,11 +1795,6 @@ struct sVE_18C2A0 {
     void (*fn)(void*, int);
 };
 
-struct sVE_18C2A0n {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 struct sVE_18C2A0p {
     short delta;
@@ -1889,7 +1834,7 @@ extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, cUITh
         break;
     }
     case 6: {
-        sVE_18C2A0n* vt = *(sVE_18C2A0n**)(iface + 0xC);
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(iface + 0xC);
         vt[1].fn(vthis(iface, vt[1]));
         char* obj = *(char**)self->mpEngine;
         sVE_18C2A0p* vt2 = *(sVE_18C2A0p**)(obj + 4);
@@ -1943,17 +1888,7 @@ static inline int optMode_C478(sOptions_C478 o)
     return o.mode;
 }
 
-struct sVE_18C478h {
-    short delta;
-    short index;
-    char* (*fn)(void*, int);
-};
 
-struct sVE_18C478v {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Fills the HUD options menu: tags items "1" to "3" with their index and shows and selects the one for the current HUD
@@ -1976,16 +1911,16 @@ extern "C" void cFEStateOptionsHUD_updateWidget(cFEStateOptionsHUD* vself)
         int i;
         for (i = 0; i < 3; i++) {
             name.s[0] = '1' + i;
-            sVE_18C478h* vt = *(sVE_18C478h**)(menu + 8);
+            sVEntry<char*(void*, int)>* vt = *(sVEntry<char*(void*, int)>**)(menu + 8);
             cUIThing* item = (cUIThing*)vt[14].fn(vthis(menu, vt[14]), GetHashValue32(name.s));
             if (((char*)item) != 0) {
                 item->mMiscData = i;
                 if (i == optMode_C478(D_00535610_C478)) {
-                    sVE_18C478v* vt2 = (sVE_18C478v*)item->mVtbl;
+                    sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)item->mVtbl;
                     vt2[9].fn(vthis(item, vt2[9]), 1);
                     cUIMenu_setSelectedByIndex(menu, i);
                 } else {
-                    sVE_18C478v* vt2 = (sVE_18C478v*)item->mVtbl;
+                    sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)item->mVtbl;
                     vt2[9].fn(vthis(item, vt2[9]), 0);
                 }
             }
@@ -2211,11 +2146,6 @@ extern char str_3lb[];
 extern char str_4lb[];
 extern int D_004A14DC;
 
-struct sVE_18CA10n {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 struct sVE_18CA10p {
     short delta;
@@ -2257,7 +2187,7 @@ extern "C" void cFEStateOptionsController_onWidgetEvent(cFEStateOptionsControlle
         break;
     }
     case 6: {
-        sVE_18CA10n* vt = *(sVE_18CA10n**)(iface + 0xC);
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(iface + 0xC);
         vt[1].fn(vthis(iface, vt[1]));
         char* obj = *(char**)self->mpEngine;
         sVE_18CA10p* vt2 = *(sVE_18CA10p**)(obj + 4);
@@ -2723,17 +2653,7 @@ int cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern char D_004A1408[];
 extern char str_TransitionOut[];
 
-struct sVE_18D460n {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
-struct sVE_18D460p {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
 
 /**
  * Handles the new-game confirmation popup on the save/load menu.
@@ -2770,7 +2690,7 @@ extern "C" void cFEStateOptionsSaveLoad_onPopupEvent(cFEStateOptionsSaveLoad* se
         }
         char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setPlayerName(iface, sel, D_004A1408);
-        sVE_18D460n* vt = *(sVE_18D460n**)(iface + 0xC);
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(iface + 0xC);
         vt[1].fn(vthis(iface, vt[1]));
         cBE_newProfile(cBE_getBE(), sel);
         void* feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, 0);
@@ -2780,7 +2700,7 @@ extern "C" void cFEStateOptionsSaveLoad_onPopupEvent(cFEStateOptionsSaveLoad* se
         cFERider_purge(feRider);
         cFERider_init(feRider, 1, 0, 0);
         char* obj = *(char**)self->mpEngine;
-        sVE_18D460p* vt2 = *(sVE_18D460p**)(obj + 4);
+        sVEntry<void*(void*, void*, int)>* vt2 = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
         void* x = vt2[4].fn(vthis(obj, vt2[4]), ((char*)self), (1 << self->mSaveLoadCurrentCtrl) | 0x100);
         if (x != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, x);
@@ -2807,11 +2727,6 @@ extern char str_kT_HELPCreateNewFilePrompt[];
 extern char str_cFEPopupConfirm[];
 
 
-struct sVE_18D648p {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
 
 
 /**
@@ -2852,7 +2767,7 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(cFEStateOptionsSaveLoad* s
                 widgetId |= 1 << self->mCurrentCtrl;
             }
             char* obj = *(char**)self->mpEngine;
-            sVE_18D648p* vt = *(sVE_18D648p**)(obj + 4);
+            sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
             void* nextState = vt[4].fn(vthis(obj, vt[4]), ((char*)self), widgetId);
             if (nextState != 0) {
                 cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
@@ -2862,7 +2777,7 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(cFEStateOptionsSaveLoad* s
     }
     case 6: {
         char* obj = *(char**)self->mpEngine;
-        sVE_18D648p* vt = *(sVE_18D648p**)(obj + 4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
         void* nextState = vt[5].fn(vthis(obj, vt[5]), ((char*)self), widget->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
@@ -3168,11 +3083,6 @@ extern "C" void cMCOverlayManager_writeSetFileType(void* app, int a1, int a2);
 extern "C" void cMCOverlayManager_readSetFileType(void* app, int a1);
 extern "C" void cMCOverlayManager_SetAction(void* app, int a1);
 
-struct sVE_18DEA0n {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 struct sVE_18DEA0i {
     short delta;
@@ -3302,20 +3212,20 @@ extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(cFEStateOptionsDeviceS
             self->mIsSavePressed = 1;
             self->mIsProcessing = 1;
             self->mState = st;
-            ((sVE_18DEA0n*)self->mVtbl)[47].fn(vthis(self, ((sVE_18DEA0n*)self->mVtbl)[47]));
+            ((sVEntry<void(void*)>*)self->mVtbl)[47].fn(vthis(self, ((sVEntry<void(void*)>*)self->mVtbl)[47]));
         } else if (self->mType == 1) {
             if (((cDev_18DEA0*)app->mpMemCard)->HasFileName(self->mSlot)) {
                 cMCOverlayManager_readSetFileType(app, 0);
-                ((sVE_18DEA0n*)self->mVtbl)[44].fn(vthis(self, ((sVE_18DEA0n*)self->mVtbl)[44]));
+                ((sVEntry<void(void*)>*)self->mVtbl)[44].fn(vthis(self, ((sVEntry<void(void*)>*)self->mVtbl)[44]));
             } else {
-                ((sVE_18DEA0n*)self->mVtbl)[47].fn(vthis(self, ((sVE_18DEA0n*)self->mVtbl)[47]));
+                ((sVEntry<void(void*)>*)self->mVtbl)[47].fn(vthis(self, ((sVEntry<void(void*)>*)self->mVtbl)[47]));
             }
         } else {
             if (((cDev_18DEA0*)app->mpMemCard)->HasFileName(self->mSlot)) {
                 cMCOverlayManager_readSetFileType(app, 2);
-                ((sVE_18DEA0n*)self->mVtbl)[44].fn(vthis(self, ((sVE_18DEA0n*)self->mVtbl)[44]));
+                ((sVEntry<void(void*)>*)self->mVtbl)[44].fn(vthis(self, ((sVEntry<void(void*)>*)self->mVtbl)[44]));
             } else {
-                ((sVE_18DEA0n*)self->mVtbl)[47].fn(vthis(self, ((sVE_18DEA0n*)self->mVtbl)[47]));
+                ((sVEntry<void(void*)>*)self->mVtbl)[47].fn(vthis(self, ((sVEntry<void(void*)>*)self->mVtbl)[47]));
             }
         }
         break;

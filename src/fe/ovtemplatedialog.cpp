@@ -1949,7 +1949,6 @@ struct sP40_D5A8 { char pad[0x40]; char* f40; };
 struct sP18_D5A8 { char pad[0x18]; char* f18; };
 static inline char* Game_D5A8() { return ((char*)(SSXApp)->Game); }
 static inline char* Rider_D5A8() { return ((sP18_D5A8*)((sP40_D5A8*)((sGame_D5A8*)Game_D5A8())->f0C)->f40)->f18; }
-struct sVE_20D5A8 { short delta; short index; int (*fn)(void*); };
 struct sStFlags_20D5A8 { char pad[0x1C]; unsigned int lo : 8; unsigned int mode : 6; };
 
 static inline void Play_20D5A8(char* self)
@@ -2075,7 +2074,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUITh
                 cBE_setState(0);
                 cBENewRaceInterface_setGameEvent(iface, 0xC);
                 cBENewRaceInterface_setGameMode(iface, 4);
-                sVE_20D5A8* vt = *(sVE_20D5A8**)(iface + 0xC);
+                sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)(iface + 0xC);
                 vt[1].fn(vthis(iface, vt[1]));
                 cGameModeMan_initGameMode(SSXApp->GameModeMan, 0xC);
                 cAI_initFreeride(SSXApp->Game->AI);

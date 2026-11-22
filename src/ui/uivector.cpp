@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uidata.h"
 #include "bx/math3d.h"
 #include "ui/uianimation.h"
 #include "ui/uitextscroll.h"
@@ -76,14 +77,6 @@ struct sUIVec48_34C0 {
 // The unit declares t3vect_Zero later as a plain vec3; bind this view by asm label.
 extern sUIVec3_34C0 D_004FF0D8_34C0 __asm__("t3vect_Zero");
 
-// On Tour: tUIVector (a tUIBaseObject header, then the counts; triangle data follows).
-struct sUIVecData_34C0 {
-    char pad0[0x20];
-    char mNumVertices;          // 0x20
-    char mNumTriangles;         // 0x21
-    char mFlags;                // 0x22
-    char mPad;                  // 0x23
-};
 
 
 /**
@@ -100,7 +93,7 @@ extern "C" void cUIVector_setUIData(cUIVector* uiVector, void* pUIBase)
 {
     cUIVector* self = uiVector;
     cUIThing_setUIData(self, pUIBase);
-    sUIVecData_34C0* pIYFVector = (sUIVecData_34C0*)pUIBase;
+    tUIVector* pIYFVector = (tUIVector*)pUIBase;
     (*(sUIVecFlags_34C0*)&self->mAttrVector).mFill = pIYFVector->mFlags & 1;
     (*(sUIVecFlags_34C0*)&self->mAttrVector).mLoop = pIYFVector->mFlags & 2;
     (*(sUIVecFlags_34C0*)&self->mAttrVector).mNumTriangles = pIYFVector->mNumTriangles;
@@ -488,11 +481,7 @@ void* cUISoundInterface_cUISoundInterface(void* self);
 extern void* cUISoundInterface_vtbl[];
 extern void* gUISoundNull;
 
-struct sV2_3A3F48 {
-    float x, y;
-    sV2_3A3F48(float ax, float ay) : x(ax), y(ay) {}
-};
-extern sV2_3A3F48 D_004A5A60;
+extern t2Vector D_004A5A60;
 
 extern sColor_3A3F48 D_005083D0;
 extern sColor_3A3F48 D_005083E0;
@@ -627,7 +616,7 @@ extern "C" void func_003A3F48_impl(int initialize, int priority)
         new (&D_00508730) sColor_3A3F48(1.0f, 0.0f, 1.0f, 0.0f);
         new (&D_00508740) sColor_3A3F48(1.0f, 1.0f, 0.0f, 0.0f);
             cUISoundInterface_cUISoundInterface(&gUISoundNull);
-            new (&D_004A5A60) sV2_3A3F48(2.0f, 2.0f);
+            new (&D_004A5A60) t2Vector(2.0f, 2.0f);
         } else {
             gUISoundNull = cUISoundInterface_vtbl;
         }

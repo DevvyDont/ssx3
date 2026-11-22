@@ -454,10 +454,6 @@ extern "C" void* ChatMenu_ChatMenu(void* self, void* a);
 extern "C" void* ChallengeResponseMenu_ChallengeResponseMenu(void* self, void* a, void* b);
 extern "C" void* AbortMenu_AbortMenu(void* self, void* a);
 
-// Owner reference handed to each debug sub-menu (a one-pointer functor).
-struct sDbgOwner17D298 {
-    void* owner;
-};
 
 /**
  * Constructs the debug front end's lobby screen (cDebugLobbyScreen in the July 2003 preview) with its eight menus.
@@ -482,37 +478,37 @@ extern "C" void* cDebugLobbyScreen_cDebugLobbyScreen(cDebugLobbyScreen* self)
     *(void***)self = cDebugLobbyScreen_vtbl;
     self->mState = 0;
     cMenuSys_cMenuSys(&self->mMenuSys);
-    sDbgOwner17D298 onCreate;
-    onCreate.owner = ((char*)self);
-    sDbgOwner17D298 onLogin;
-    onLogin.owner = ((char*)self);
+    cDebugLobbyScreen::OnCreate onCreate;
+    (*(void**)&onCreate.unk_0) = ((char*)self);
+    cDebugLobbyScreen::OnCreate onLogin;
+    (*(void**)&onLogin.unk_0) = ((char*)self);
     AccountMenu_AccountMenu(&self->mLoginMenu, &onCreate, &onLogin);
     ContinueMenu_ContinueMenu(&self->mContinueMenu);
-    sDbgOwner17D298 onSelectPersona;
-    onSelectPersona.owner = ((char*)self);
-    sDbgOwner17D298 onCreatePersona;
-    onCreatePersona.owner = ((char*)self);
-    sDbgOwner17D298 onDeletePersona;
-    onDeletePersona.owner = ((char*)self);
+    cDebugLobbyScreen::OnCreate onSelectPersona;
+    (*(void**)&onSelectPersona.unk_0) = ((char*)self);
+    cDebugLobbyScreen::OnCreate onCreatePersona;
+    (*(void**)&onCreatePersona.unk_0) = ((char*)self);
+    cDebugLobbyScreen::OnCreate onDeletePersona;
+    (*(void**)&onDeletePersona.unk_0) = ((char*)self);
     PersonaMenu_PersonaMenu(&self->mPersonaMenu, &onSelectPersona, &onCreatePersona, &onDeletePersona);
-    sDbgOwner17D298 onSelectRoom;
-    onSelectRoom.owner = ((char*)self);
+    cDebugLobbyScreen::OnCreate onSelectRoom;
+    (*(void**)&onSelectRoom.unk_0) = ((char*)self);
     LobbyMenu_LobbyMenu(&self->mRoomMenu, &onSelectRoom);
-    sDbgOwner17D298 onSelectUser;
-    onSelectUser.owner = ((char*)self);
-    sDbgOwner17D298 onChat;
-    onChat.owner = ((char*)self);
+    cDebugLobbyScreen::OnCreate onSelectUser;
+    (*(void**)&onSelectUser.unk_0) = ((char*)self);
+    cDebugLobbyScreen::OnCreate onChat;
+    (*(void**)&onChat.unk_0) = ((char*)self);
     RoomMenu_RoomMenu(&self->mOccupantsMenu, &onSelectUser, &onChat);
-    sDbgOwner17D298 onMessage;
-    onMessage.owner = ((char*)self);
+    cDebugLobbyScreen::OnCreate onMessage;
+    (*(void**)&onMessage.unk_0) = ((char*)self);
     ChatMenu_ChatMenu(&self->mChatMenu, &onMessage);
-    sDbgOwner17D298 onAcceptChallenge;
-    onAcceptChallenge.owner = ((char*)self);
-    sDbgOwner17D298 onDeclineChallenge;
-    onDeclineChallenge.owner = ((char*)self);
+    cDebugLobbyScreen::OnCreate onAcceptChallenge;
+    (*(void**)&onAcceptChallenge.unk_0) = ((char*)self);
+    cDebugLobbyScreen::OnCreate onDeclineChallenge;
+    (*(void**)&onDeclineChallenge.unk_0) = ((char*)self);
     ChallengeResponseMenu_ChallengeResponseMenu(&self->mChallengedMenu, &onAcceptChallenge, &onDeclineChallenge);
-    sDbgOwner17D298 onAbortChallenge;
-    onAbortChallenge.owner = ((char*)self);
+    cDebugLobbyScreen::OnCreate onAbortChallenge;
+    (*(void**)&onAbortChallenge.unk_0) = ((char*)self);
     AbortMenu_AbortMenu(&self->mAbortMenu, &onAbortChallenge);
     int emptyText = cBXString_EmptyString;
     cSSXApp* app = SSXApp;
@@ -1186,11 +1182,6 @@ extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern "C" void func_0025B9C8(void* mgr, void* req);
 extern char str_pleaseat_get_lost[];
 
-struct sDebugFEState17E030 {
-    int f0;
-    int state; // 0x4
-    int list;  // 0x8
-};
 
 struct sDsReq17E030 {
     char pad_0x000[0x260];
@@ -1220,15 +1211,15 @@ struct sDsReq17E030 {
  * @param userName  account name
  * @param password  password
  */
-extern "C" void func_0017E030(sDebugFEState17E030* self, const char* userName, const char* password)
+extern "C" void func_0017E030(cDebugLobbyScreen* self, const char* userName, const char* password)
 {
-    int* list = &self->list;
+    int* list = &self->mMenuSys.MenuDepth;
     while (*list != 0) {
         cMenuSys_popMenu(list);
     }
-    cBXString_operatorE1((char*)self + 0x1C04, userName);
-    cBXString_operatorE1((char*)self + 0x1C08, password);
-    self->state = 0x4;
+    cBXString_operatorE1(&self->mUserName, userName);
+    cBXString_operatorE1(&self->mPassword, password);
+    self->mState = 0x4;
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     cBXString_operatorE1(&lobbyMan->mNewAccount.mName, userName);
     cBXString_operatorE1(&lobbyMan->mNewAccount.mPassword, password);
@@ -1251,14 +1242,6 @@ extern "C" void cMenuSys_popMenu(void* list);
 extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern "C" void func_0025C610(void* mgr);
 
-struct sDebugFEState17E118 {
-    int f0;
-    int state; // 0x4
-    int list;  // 0x8
-    char pad_0x0C[0x1C04 - 0xC];
-    char* user;  // 0x1C04
-    char* pass;  // 0x1C08
-};
 
 /**
  * Logs in from the debug "Login" menu: keeps the typed name and password and sends the lobby login.
@@ -1270,17 +1253,17 @@ struct sDebugFEState17E118 {
  * @param userName  account name
  * @param password  password
  */
-extern "C" void func_0017E118(sDebugFEState17E118* self, const char* userName, const char* password)
+extern "C" void func_0017E118(cDebugLobbyScreen* self, const char* userName, const char* password)
 {
-    int* list = &self->list;
+    int* list = &self->mMenuSys.MenuDepth;
     while (*list != 0) {
         cMenuSys_popMenu(list);
     }
-    cBXString_operatorE1(&self->user, userName);
-    cBXString_operatorE1(&self->pass, password);
-    self->state = 0x5;
-    cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, self->user);
-    cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, self->pass);
+    cBXString_operatorE1(&self->mUserName, userName);
+    cBXString_operatorE1(&self->mPassword, password);
+    self->mState = 0x5;
+    cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, self->mUserName);
+    cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, self->mPassword);
     func_0025C610(LobbyMan_mLobbyMan);
 }
 #endif
@@ -1288,11 +1271,6 @@ extern "C" void func_0017E118(sDebugFEState17E118* self, const char* userName, c
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E1C0);
 #ifdef SKIP_ASM
-struct sDebugFEState17E1C0 {
-    int f0;
-    int state; // 0x4
-    int list;  // 0x8
-};
 extern "C" void cMenuSys_popMenu(void* list);
 extern "C" void func_0025D1B8(void* a, int b);
 
@@ -1304,13 +1282,13 @@ extern "C" void func_0025D1B8(void* a, int b);
  *
  * @param persona  the new persona's name (a char pointer)
  */
-extern "C" void func_0017E1C0(sDebugFEState17E1C0* self, int persona)
+extern "C" void func_0017E1C0(cDebugLobbyScreen* self, int persona)
 {
-    int* list = &self->list;
+    int* list = &self->mMenuSys.MenuDepth;
     while (*list != 0) {
         cMenuSys_popMenu(list);
     }
-    self->state = 0x8;
+    self->mState = 0x8;
     func_0025D1B8(LobbyMan_mLobbyMan, persona);
 }
 #endif
@@ -1318,11 +1296,6 @@ extern "C" void func_0017E1C0(sDebugFEState17E1C0* self, int persona)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E228);
 #ifdef SKIP_ASM
-struct sDebugFEState17E228 {
-    int f0;
-    int state; // 0x4
-    int list;  // 0x8
-};
 extern "C" void cMenuSys_popMenu(void* list);
 extern "C" void func_0025D428(void* a, int b);
 
@@ -1334,13 +1307,13 @@ extern "C" void func_0025D428(void* a, int b);
  *
  * @param persona  index of the persona in LobbyMan's list
  */
-extern "C" void func_0017E228(sDebugFEState17E228* self, int persona)
+extern "C" void func_0017E228(cDebugLobbyScreen* self, int persona)
 {
-    int* list = &self->list;
+    int* list = &self->mMenuSys.MenuDepth;
     while (*list != 0) {
         cMenuSys_popMenu(list);
     }
-    self->state = 0x9;
+    self->mState = 0x9;
     func_0025D428(LobbyMan_mLobbyMan, persona);
 }
 #endif
@@ -1348,11 +1321,6 @@ extern "C" void func_0017E228(sDebugFEState17E228* self, int persona)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E290);
 #ifdef SKIP_ASM
-struct sDebugFEState17E290 {
-    int f0;
-    int state; // 0x4
-    int list;  // 0x8
-};
 extern "C" void cMenuSys_popMenu(void* list);
 void func_0025CD28(void* a, int b);
 
@@ -1364,13 +1332,13 @@ void func_0025CD28(void* a, int b);
  *
  * @param persona  index of the persona in LobbyMan's list
  */
-extern "C" void func_0017E290(sDebugFEState17E290* self, int persona)
+extern "C" void func_0017E290(cDebugLobbyScreen* self, int persona)
 {
-    int* list = &self->list;
+    int* list = &self->mMenuSys.MenuDepth;
     while (*list != 0) {
         cMenuSys_popMenu(list);
     }
-    self->state = 0x7;
+    self->mState = 0x7;
     func_0025CD28(LobbyMan_mLobbyMan, persona);
 }
 #endif
@@ -1378,11 +1346,6 @@ extern "C" void func_0017E290(sDebugFEState17E290* self, int persona)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E2F8);
 #ifdef SKIP_ASM
-struct sDebugFEState17E2F8 {
-    int f0;
-    int state; // 0x4
-    int list;  // 0x8
-};
 extern "C" void cMenuSys_popMenu(void* list);
 extern "C" void func_0025D800(void* a, int b, int c);
 
@@ -1394,13 +1357,13 @@ extern "C" void func_0025D800(void* a, int b, int c);
  *
  * @param room  index in the lobby's room list
  */
-extern "C" void func_0017E2F8(sDebugFEState17E2F8* self, int room)
+extern "C" void func_0017E2F8(cDebugLobbyScreen* self, int room)
 {
-    int* list = &self->list;
+    int* list = &self->mMenuSys.MenuDepth;
     while (*list != 0) {
         cMenuSys_popMenu(list);
     }
-    self->state = 11;
+    self->mState = 11;
     func_0025D800(LobbyMan_mLobbyMan, room, 0);
 }
 #endif
@@ -1451,11 +1414,6 @@ extern "C" void func_0017E3B8(cDebugLobbyScreen* self)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E418);
 #ifdef SKIP_ASM
-struct sDebugFEState17E418 {
-    int f0;
-    int state; // 0x4
-    int list;  // 0x8
-};
 extern "C" void cMenuSys_popMenu(void* list);
 extern "C" void cMenuSys_pushMenu(void* list, void* item);
 extern "C" void func_0025AAE0(void* a, int b);
@@ -1468,14 +1426,14 @@ extern "C" void func_0025AAE0(void* a, int b);
  *
  * @param messageText  the line to send (a char pointer, declared int)
  */
-extern "C" void func_0017E418(sDebugFEState17E418* self, int messageText)
+extern "C" void func_0017E418(cDebugLobbyScreen* self, int messageText)
 {
-    int* list = &self->list;
+    int* list = &self->mMenuSys.MenuDepth;
     while (*list != 0) {
         cMenuSys_popMenu(list);
     }
-    cMenuSys_pushMenu((char*)self + 0x8, (char*)self + 0x1044);
-    self->state = 0xC;
+    cMenuSys_pushMenu(&self->mMenuSys, &self->mOccupantsMenu);
+    self->mState = 0xC;
     func_0025AAE0(LobbyMan_mLobbyMan, messageText);
 }
 #endif
@@ -1483,11 +1441,6 @@ extern "C" void func_0017E418(sDebugFEState17E418* self, int messageText)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E490);
 #ifdef SKIP_ASM
-struct sDebugFEState17E490 {
-    int f0;
-    int state; // 0x4
-    int list;  // 0x8
-};
 extern "C" void cMenuSys_popMenu(void* list);
 extern "C" void func_0025FB58(void* a, int b, int c);
 
@@ -1498,25 +1451,20 @@ extern "C" void func_0025FB58(void* a, int b, int c);
  * (func_0025FB58, match type 0). func_0017DB18 then shows the Abort menu. Called by the challenge menu's command
  * handler ChallengeResponseMenu_onCommand.
  */
-extern "C" void func_0017E490(sDebugFEState17E490* self)
+extern "C" void func_0017E490(cDebugLobbyScreen* self)
 {
-    int* list = &self->list;
+    int* list = &self->mMenuSys.MenuDepth;
     while (*list != 0) {
         cMenuSys_popMenu(list);
     }
-    self->state = 13;
-    func_0025FB58(LobbyMan_mLobbyMan, *(int*)((char*)self + 0x1C0C), 0);
+    self->mState = 13;
+    func_0025FB58(LobbyMan_mLobbyMan, (int)self->mChallenger, 0);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E4F0);
 #ifdef SKIP_ASM
-struct sDebugFEState17E4F0 {
-    int f0;
-    int state; // 0x4
-    int list;  // 0x8
-};
 extern "C" void cMenuSys_popMenu(void* list);
 extern "C" void cMenuSys_pushMenu(void* list, void* item);
 void func_0025FC28(void* a, int b);
@@ -1527,26 +1475,21 @@ void func_0025FC28(void* a, int b);
  * Closes all menus, pushes Room Occupants (+0x1044), sets state 12 and sends "decline" to the challenger named in
  * +0x1C0C (func_0025FC28). Called by the challenge menu's command handler ChallengeResponseMenu_onCommand.
  */
-extern "C" void func_0017E4F0(sDebugFEState17E4F0* self)
+extern "C" void func_0017E4F0(cDebugLobbyScreen* self)
 {
-    int* list = &self->list;
+    int* list = &self->mMenuSys.MenuDepth;
     while (*list != 0) {
         cMenuSys_popMenu(list);
     }
-    cMenuSys_pushMenu((char*)self + 0x8, (char*)self + 0x1044);
-    self->state = 0xC;
-    func_0025FC28(LobbyMan_mLobbyMan, *(int*)((char*)self + 0x1C0C));
+    cMenuSys_pushMenu(&self->mMenuSys, &self->mOccupantsMenu);
+    self->mState = 0xC;
+    func_0025FC28(LobbyMan_mLobbyMan, (int)self->mChallenger);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E558);
 #ifdef SKIP_ASM
-struct sDebugFEState17E558 {
-    int f0;
-    int state; // 0x4
-    int list;  // 0x8
-};
 extern "C" void cMenuSys_popMenu(void* list);
 extern "C" void cMenuSys_pushMenu(void* list, void* item);
 extern "C" void func_0025F628(void* a, int b, int c);
@@ -1558,14 +1501,14 @@ extern "C" void func_0025F628(void* a, int b, int c);
  * 0): a type-238 event is posted and no "abortChal" is sent to the opponent. Called by the Abort menu's command handler
  * AbortMenu_onCommand.
  */
-extern "C" void func_0017E558(sDebugFEState17E558* self)
+extern "C" void func_0017E558(cDebugLobbyScreen* self)
 {
-    int* list = &self->list;
+    int* list = &self->mMenuSys.MenuDepth;
     while (*list != 0) {
         cMenuSys_popMenu(list);
     }
-    cMenuSys_pushMenu((char*)self + 0x8, (char*)self + 0x1044);
-    self->state = 0xC;
+    cMenuSys_pushMenu(&self->mMenuSys, &self->mOccupantsMenu);
+    self->mState = 0xC;
     func_0025F628(LobbyMan_mLobbyMan, 1, 0);
 }
 #endif
@@ -2066,10 +2009,6 @@ struct sVEnt_17F868 { short delta; short index; void* fn; };
 typedef void (*Fn1_17F868)(void*, int);
 typedef int (*Load_17F868)(void*, void*, const char*, int, int, int);
 
-struct sVec2_17F868 {
-    float x, y;
-    sVec2_17F868(float ax, float ay) : x(ax), y(ay) {}
-};
 
 struct sDebugFE_17F868 {
     char pad_0x00[0xC];
@@ -2091,9 +2030,9 @@ extern "C" void cDebugFE_load(sDebugFE_17F868* self)
     sVEnt_17F868* vt = (sVEnt_17F868*)ps2GraphicsMan->mVtbl;
     ((Fn1_17F868)vt[44].fn)(vthis(ps2GraphicsMan, vt[44]), 0);
     self->font = (char*)cFont_cFont(cMemMan_alloc(132, str_DebugFont, 0, 0), str_data_fonts_debugfnt_sfn, 0);
-    sVec2_17F868 sc(1.600000023841858f, 1.600000023841858f);
-    *(sVec2_17F868*)(self->font + 0x30) = sc;
-    *(sVec2_17F868*)(self->font + 0x38) = *(sVec2_17F868*)(self->font + 0x30);
+    t2Vector sc(1.600000023841858f, 1.600000023841858f);
+    *(t2Vector*)(self->font + 0x30) = sc;
+    *(t2Vector*)(self->font + 0x38) = *(t2Vector*)(self->font + 0x30);
     self->snd1C = -1;
     int* data = FILE_loadz(str_data_textures_dot_ssh, 0x100);
     if (data) {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "bx/math3d.h"
 #include "render/font.h"
 #include "fe/fememcard.h"
@@ -2338,13 +2339,11 @@ extern "C" void cOVStateHUD1P_renderUberChar(cOVStateHUD1P* self, int elems, tHU
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", cOVStateHUD1P_renderTrickLevel);
 #ifdef SKIP_ASM
-struct V2_F338 { float x, y; };
-struct V4_F338 { float x, y, z, w; };
-extern V4_F338 D_004C8568;
-extern V4_F338 D_004C8588;
-extern V4_F338 D_004C85A8;
-extern V4_F338 D_004C85C8;
-extern V4_F338 D_004C85E8;
+extern tARGB D_004C8568;
+extern tARGB D_004C8588;
+extern tARGB D_004C85A8;
+extern tARGB D_004C85C8;
+extern tARGB D_004C85E8;
 extern "C" void tHUDDef_getPos(void*, void*);
 extern "C" void tHUDDef_getSize(void*, void*, int);
 void tHUDDef_getScale(void*, void*);
@@ -2368,15 +2367,15 @@ extern "C" void cOVStateHUD1P_renderBitmap(void*, int, void*, void*, void*, void
  * @param scale  optional x / y scale multiplier
  * @param alpha  opacity multiplier
  */
-extern "C" void cOVStateHUD1P_renderTrickLevel(cOVStateHUD1P* self, char* obj, int n, int x, V2_F338* pos, V2_F338* scale, float alpha) {
+extern "C" void cOVStateHUD1P_renderTrickLevel(cOVStateHUD1P* self, char* obj, int n, int x, t2Vector* pos, t2Vector* scale, float alpha) {
     if (n > 0) {
-        V4_F338 cols[5];
-        V4_F338 elemPos;
-        V2_F338 starPos;
-        V2_F338 size;
-        V2_F338 sc;
-        V2_F338 dim;
-        V4_F338 col;
+        tARGB cols[5];
+        tARGB elemPos;
+        t2Vector starPos;
+        t2Vector size;
+        t2Vector sc;
+        t2Vector dim;
+        tARGB col;
         float step;
         int i;
         cols[0] = D_004C8568;
@@ -2404,7 +2403,7 @@ extern "C" void cOVStateHUD1P_renderTrickLevel(cOVStateHUD1P* self, char* obj, i
         *w = (*w & ~0x3E0) | ((obj[0x262] << 5) & 0x3E0);
         step = (size.x + 2.0f) * sc.x;
         col = cols[n - 1];
-        col.x *= alpha;
+        col.A *= alpha;
         for (i = 0; i < n; i++) {
             cOVStateHUD1P_renderBitmap(((char*)self), (int)self->mpGenTexElem[3], &starPos, &size, &sc, &col);
             starPos.x += step;
@@ -2416,8 +2415,6 @@ extern "C" void cOVStateHUD1P_renderTrickLevel(cOVStateHUD1P* self, char* obj, i
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", cOVStateHUD1P_renderFinishMessage);
 #ifdef SKIP_ASM
-struct V2_F660 { float x, y; };
-struct V4_F660 { float x, y, z, w; };
 struct Obj_F660 {
     virtual void v01();
     virtual void v02();
@@ -2430,7 +2427,7 @@ struct Obj_F660 {
 extern int D_00536640[];
 extern char str_pct_02d_pct_02d_pct_02d_b[];
 extern char D_004A2138[];
-extern V4_F660 D_004C8808;
+extern tARGB D_004C8808;
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void tHUDDef_getPos(void*, void*);
@@ -2462,14 +2459,14 @@ extern "C" void cFont_centertext(void*, float, float, char*);
  * @param flag  nonzero: out of time, draw "timeup" and no value
  */
 extern "C" void cOVStateHUD1P_renderFinishMessage(cOVStateHUD1P* self, int elems, int* rider, int x, int flag) {
-    V2_F660 scale;
-    V2_F660 drawPos;
-    V4_F660 elemPos;
-    V2_F660 size;
-    V2_F660 sc;
-    V4_F660 spriteColour;
+    t2Vector scale;
+    t2Vector drawPos;
+    tARGB elemPos;
+    t2Vector size;
+    t2Vector sc;
+    tARGB spriteColour;
     char buf[64];
-    V4_F660 col;
+    tARGB col;
     int idx = 66;
     cRider* panelRider = SSXApp->Game->AI->Riders[*rider];
     int sz = (int)self->mpGenTexElem[8];
@@ -2511,7 +2508,7 @@ extern "C" void cOVStateHUD1P_renderFinishMessage(cOVStateHUD1P* self, int elems
         *(float*)(t + 0x38) = *(float*)(t + 0x30) * sc.x;
         *(float*)(t + 0x3C) = *(float*)(t + 0x34) * sc.y;
         col = D_004C8808;
-        *(V4_F660*)&self->mpHUDFont->Color[0] = col;
+        *(tARGB*)&self->mpHUDFont->Color[0] = col;
         cFont_centertext((char*)self->mpHUDFont, drawPos.x, drawPos.y, buf);
         t = (char*)self->mpHUDFont;
         *(float*)(t + 0x38) = *(float*)(t + 0x30) * scale.x;
@@ -2792,14 +2789,6 @@ struct sSettings_00C0 {
     unsigned int pad1 : 12;
     int rest[0xA1];
 };
-struct sVec4_00C0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
-struct sV2_00C0 {
-    float x, y;
-    sV2_00C0() {}
-    sV2_00C0(const float& ax, const float& ay) : x(ax), y(ay) {}
-};
 extern sSettings_00C0 D_00535610_00C0 __asm__("cBEOptionInterface_mOption");
 extern char str_KM_H[];
 extern char str_MPH[];
@@ -2808,10 +2797,10 @@ extern "C" void cFont_textExtent(void* self, const char* str, float* rect, int n
 extern "C" void cFont_text(void*, float, float, char*);
 extern "C" void cFont_centertext(void*, float, float, char*);
 extern "C" unsigned int strlen(const char*);
-void cOVStateHUD1P_calcElemPos_00C0(void*, t2Vector*, void*, t2Vector*, const sV2_00C0&, int, int, int) __asm__("cOVStateHUD1P_calcElemPos");
+void cOVStateHUD1P_calcElemPos_00C0(void*, t2Vector*, void*, t2Vector*, const t2Vector&, int, int, int) __asm__("cOVStateHUD1P_calcElemPos");
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float vu0Length_00C0(const sVec4_00C0& v)
+static inline float vu0Length_00C0(const t4Vector& v)
 {
     float r;
     int t;
@@ -2831,7 +2820,7 @@ static inline float vu0Length_00C0(const sVec4_00C0& v)
     return r;
 }
 
-static inline void ScaleV2_00C0(sV2_00C0& v, float s)
+static inline void ScaleV2_00C0(t2Vector& v, float s)
 {
     v.x *= s;
     v.y *= s;
@@ -2853,7 +2842,7 @@ static inline sFont_00C0* font_00C0(char* self)
     return *(sFont_00C0**)(self + 0x42C);
 }
 
-static inline void SetScale_00C0(sFont_00C0* f, const sV2_00C0& s)
+static inline void SetScale_00C0(sFont_00C0* f, const t2Vector& s)
 {
     f->drawScaleX = f->scaleX * s.x;
     f->drawScaleY = f->scaleY * s.y;
@@ -2886,7 +2875,7 @@ extern "C" void cOVStateHUD1P_renderSpeed(cOVStateHUD1P* self, char* obj, cRider
 {
     sSettings_00C0 settings;
     t2Vector elemPos;
-    sV2_00C0 sc;
+    t2Vector sc;
     sColour col;
     float rect[4];
     t2Vector drawPos;
@@ -2899,7 +2888,7 @@ extern "C" void cOVStateHUD1P_renderSpeed(cOVStateHUD1P* self, char* obj, cRider
     char* mph = str_MPH;
     char* units = kmh;
     cBeing* being = (cBeing*)(&rider->mVtbl);
-    float speed = vu0Length_00C0(*(const sVec4_00C0*)being->getVelocity()) * 0.035999998450279236f;
+    float speed = vu0Length_00C0(*(const t4Vector*)being->getVelocity()) * 0.035999998450279236f;
     if (!settings.metric) {
         speed *= 0.6209999918937683f;
         units = mph;
@@ -2911,7 +2900,7 @@ extern "C" void cOVStateHUD1P_renderSpeed(cOVStateHUD1P* self, char* obj, cRider
     font_00C0(((char*)self))->colour = col;
     SetScale_00C0(font_00C0(((char*)self)), sc);
     TextSize_00C0(font_00C0(((char*)self)), units, rect, size);
-    cOVStateHUD1P_calcElemPos_00C0(((char*)self), &drawPos, &elemPos, &size, sV2_00C0(1.0f, 1.0f), obj[0x3A4], obj[0x3A5], x);
+    cOVStateHUD1P_calcElemPos_00C0(((char*)self), &drawPos, &elemPos, &size, t2Vector(1.0f, 1.0f), obj[0x3A4], obj[0x3A5], x);
     cFont_text(font_00C0(((char*)self)), drawPos.x, drawPos.y, units);
     char buf[8];
     sprintf(buf, D_004A2138, (int)(speed + 0.5f));
@@ -2923,7 +2912,7 @@ extern "C" void cOVStateHUD1P_renderSpeed(cOVStateHUD1P* self, char* obj, cRider
     drawPos.x += size.x * 0.5f;
     drawPos.y -= (float)font_00C0(((char*)self))->lineHeight * font_00C0(((char*)self))->scaleY * sc.y * 0.5f + 14.003287315368652f;
     cFont_centertext(font_00C0(((char*)self)), drawPos.x, drawPos.y, buf);
-    SetScale_00C0(font_00C0(((char*)self)), sV2_00C0(1.0f, 1.0f));
+    SetScale_00C0(font_00C0(((char*)self)), t2Vector(1.0f, 1.0f));
 }
 #endif
 

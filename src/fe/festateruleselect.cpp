@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uitext.h"
 #include "ui/uithing.h"
 #include "ui/uilistbox.h"
 #include "ui/uiscreen.h"
@@ -232,12 +233,6 @@ struct sVE_19188 {
     void (*fn)(void*, int);
 };
 
-struct sUIObj_19188 {
-    char pad0[0x8];
-    sVE_19188* vt;                  // 0x8
-    char padC[0x8];
-    int flags;                      // 0x14
-};
 
 struct sRuleSel_19188 {
     char pad0[0x10];
@@ -311,9 +306,9 @@ extern "C" void cFEStateRuleSelect_onCreateScreen(sRuleSel_19188* self)
     self->count = count;
     MEM_fill(cBERules_mRules, 0, 0x20);
     cFEStateRuleSelect_setupMenu((cFEStateRuleSelect*)self, 0);
-    sUIObj_19188* menu = (sUIObj_19188*)find_19188(self, str_Menu);
+    cUIThing* menu = (cUIThing*)find_19188(self, str_Menu);
     if (menu != 0) {
-        menu->flags |= 0x80;
+        menu->mAttr |= 0x80;
         cUIMenu_setScrollableMenu(menu, count);
         cUIMenu_setSelectedByIndex(menu, 0);
         cUIText* help = (cUIText*)find_19188(self, str_rule_help);
@@ -324,12 +319,12 @@ extern "C" void cFEStateRuleSelect_onCreateScreen(sRuleSel_19188* self)
     name = *(sStr3_19188*)str_0b;
     label = *(sStr2_19188*)D_004A13A0;
     for (signed char i = 0; i < 11; i++) {
-        sUIObj_19188* rowListBox = (sUIObj_19188*)find_19188(self, name.c);
-        rowListBox->flags &= ~1;
-        sUIObj_19188* rowItem = (sUIObj_19188*)find_19188(self, lp);
+        cUIThing* rowListBox = (cUIThing*)find_19188(self, name.c);
+        rowListBox->mAttr &= ~1;
+        cUIThing* rowItem = (cUIThing*)find_19188(self, lp);
         if (i >= count) {
-            rowItem->vt[9].fn(vthis(rowItem, rowItem->vt[9]), 0);
-            rowItem->vt[8].fn(vthis(rowItem, rowItem->vt[8]), 1);
+            ((sVE_19188*)rowItem->mVtbl)[9].fn(vthis(rowItem, ((sVE_19188*)rowItem->mVtbl)[9]), 0);
+            ((sVE_19188*)rowItem->mVtbl)[8].fn(vthis(rowItem, ((sVE_19188*)rowItem->mVtbl)[8]), 1);
         }
         if (i < 9) {
             label.c[0]++;
@@ -735,14 +730,6 @@ struct sQuad_2488 {
 };
 extern sQuad_2488 gStaticColour;
 
-struct sObj_2488 {
-    char pad0[0x8];
-    sVE_2488* vt;
-    char padC[0x18 - 0xC];
-    int idx;
-    char pad1C[0x88 - 0x1C];
-    sQuad_2488 q88;
-};
 
 // PORT: the names are built with the builtin block move (the original likely used
 // strcpy on string literals); the two strings live at these symbols.
@@ -762,21 +749,21 @@ extern "C" void cFEStateRuleSelect_updateMenuColor(cFEStateRuleSelect* selfp)
     __builtin_memcpy(name1, str_0t, 3);
     signed char n = *(signed char*)&selfp->mcArraySize < 12 ? *(signed char*)&selfp->mcArraySize : 11;
     for (signed char i = 0; i < n; i++) {
-        sObj_2488* listBox = (sObj_2488*)cUIScreen_getObjectByHashName(selfp->mpScreen, GetHashValue32(name0));
-        sObj_2488* textBox = (sObj_2488*)cUIScreen_getObjectByHashName(selfp->mpScreen, GetHashValue32(name1));
+        cUIText* listBox = (cUIText*)cUIScreen_getObjectByHashName(selfp->mpScreen, GetHashValue32(name0));
+        cUIText* textBox = (cUIText*)cUIScreen_getObjectByHashName(selfp->mpScreen, GetHashValue32(name1));
         if (listBox && textBox) {
-            if (*(signed char*)(((char*)selfp) + listBox->idx + 0x51) > 0) {
-                textBox->vt[25].fn(vthis(textBox, textBox->vt[25]), 1);
-                textBox->q88 = gStaticColour;
-                textBox->vt[8].fn(vthis(textBox, textBox->vt[8]), 1);
-                listBox->vt[24].fn(vthis(listBox, listBox->vt[24]), 1);
-                listBox->q88 = gStaticColour;
-                listBox->vt[8].fn(vthis(listBox, listBox->vt[8]), 1);
+            if (*(signed char*)(((char*)selfp) + listBox->mMiscData + 0x51) > 0) {
+                ((sVE_2488*)textBox->mVtbl)[25].fn(vthis(textBox, ((sVE_2488*)textBox->mVtbl)[25]), 1);
+                (*(sQuad_2488*)&textBox->mStaticColour) = gStaticColour;
+                ((sVE_2488*)textBox->mVtbl)[8].fn(vthis(textBox, ((sVE_2488*)textBox->mVtbl)[8]), 1);
+                ((sVE_2488*)listBox->mVtbl)[24].fn(vthis(listBox, ((sVE_2488*)listBox->mVtbl)[24]), 1);
+                (*(sQuad_2488*)&listBox->mStaticColour) = gStaticColour;
+                ((sVE_2488*)listBox->mVtbl)[8].fn(vthis(listBox, ((sVE_2488*)listBox->mVtbl)[8]), 1);
             } else {
-                textBox->vt[25].fn(vthis(textBox, textBox->vt[25]), 0);
-                textBox->vt[8].fn(vthis(textBox, textBox->vt[8]), 0);
-                listBox->vt[24].fn(vthis(listBox, listBox->vt[24]), 0);
-                listBox->vt[8].fn(vthis(listBox, listBox->vt[8]), 0);
+                ((sVE_2488*)textBox->mVtbl)[25].fn(vthis(textBox, ((sVE_2488*)textBox->mVtbl)[25]), 0);
+                ((sVE_2488*)textBox->mVtbl)[8].fn(vthis(textBox, ((sVE_2488*)textBox->mVtbl)[8]), 0);
+                ((sVE_2488*)listBox->mVtbl)[24].fn(vthis(listBox, ((sVE_2488*)listBox->mVtbl)[24]), 0);
+                ((sVE_2488*)listBox->mVtbl)[8].fn(vthis(listBox, ((sVE_2488*)listBox->mVtbl)[8]), 0);
             }
         }
         if (i < 9) {
@@ -821,11 +808,6 @@ extern "C" void* cBraggingRightsMenu_cBraggingRightsMenu(cBraggingRightsMenu* se
 //100%
 INCLUDE_ASM("fe/festateruleselect", cBraggingRightsMenu_setConfirmed);
 #ifdef SKIP_ASM
-struct sVEntry00192740 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 
 /**
@@ -844,7 +826,7 @@ extern "C" void cBraggingRightsMenu_setConfirmed(cBraggingRightsMenu* self, int 
     for (i = 0; i < 8; i++) {
         cUIThing* item = ((cUIThing**)(&self->mpListBox[0]))[i];
         if (item != 0) {
-            ((sVEntry00192740*)item->mVtbl)[8].fn(vthis(item, ((sVEntry00192740*)item->mVtbl)[8]), enabled);
+            ((sVEntry<void(void*, int)>*)item->mVtbl)[8].fn(vthis(item, ((sVEntry<void(void*, int)>*)item->mVtbl)[8]), enabled);
         }
     }
 }

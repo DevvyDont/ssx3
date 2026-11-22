@@ -28,8 +28,20 @@
 #include "fe/backgroundman.h" // cBackgroundMan (cDebugMenuScreen)
 #include "fe/debuglobbymenus.h" // the debug lobby menus (cDebugLobbyScreen)
 
-struct cDebugScreen;
 struct cFont;
+
+// cDebugScreen: the debug front end's screen base (cDebugFE::Screens / ActiveScreen); cDebugMenuScreen and
+// cDebugLobbyScreen below derive from it. Size 0x4: [O] On Tour class cDebugScreen (0x4: the vptr only; virtual ~,
+// update() = 0, draw() = 0); [R] cDebugScreen_vtbl (D_0046D948, 3 slots: 1 dtor, 2 / 3 the pure-virtual stub
+// func_00411530), stored back by the derived destructors; cDebugFE_update calls slot 2 (update) on ActiveScreen.
+// A FLAT layout (the vptr only).
+struct cDebugScreen {
+    void** mVtbl;                   // 0x000 [R] cDebugScreen_vtbl (the derived dtors), cDebugMenuScreen_vtbl /
+                                    //       cDebugLobbyScreen_vtbl (the derived ctors)
+};
+
+CHECK_OFFSET(cDebugScreen, mVtbl, 0x000);
+CHECK_SIZE(cDebugScreen, 0x4);
 
 struct cDebugFE {
     // --- cAppModule / cFadeScreen (0xC; main/fadescreen.h)
@@ -280,6 +292,30 @@ struct cDebugLobbyScreen {
                                     //       on it
     int mErrorCode;                 // 0x1C14 [U] func_0017DA30 stores the lobby error code; draw prints its text
                                     //       (func_00260E50) in the error states
+
+    // The menu callbacks (C++ only; no data in the screen). [P] the preview's template instances name them:
+    // AccountMenu<cDebugLobbyScreen::OnCreate, cDebugLobbyScreen::OnLogin>, PersonaMenu<::OnSelectPersona,
+    // ::OnCreatePersona, ::OnDeletePersona>, LobbyMenu<::OnSelectRoom>, RoomMenu<::OnSelectUser, ::OnChat>,
+    // ChatMenu<::OnMessage>, ChallengeResponseMenu<::OnAcceptChallenge, ::OnDeclineChallenge>,
+    // AbortMenu<::OnAbortChallenge> (linkonce _$_t9AbortMenu1ZQ217cDebugLobbyScreen16OnAbortChallenge ..., and the
+    // ctors take them by const reference: __t9AbortMenu1Z..RCQ217cDebugLobbyScreen16OnAbortChallenge).
+    // Each is one word: [R] cDebugLobbyScreen_cDebugLobbyScreen builds each on the stack holding this screen and passes
+    // its address; the menu ctors copy the first word (fe/debuglobbymenus.h: the menus' unk_130 / unk_4E0 ...).
+    // The member's name is not in evidence.
+#ifdef __cplusplus
+    struct OnCreate { cDebugLobbyScreen* unk_0; };          // 0x0 [R] the owning screen
+    struct OnLogin { cDebugLobbyScreen* unk_0; };
+    struct OnSelectPersona { cDebugLobbyScreen* unk_0; };
+    struct OnCreatePersona { cDebugLobbyScreen* unk_0; };
+    struct OnDeletePersona { cDebugLobbyScreen* unk_0; };
+    struct OnSelectRoom { cDebugLobbyScreen* unk_0; };
+    struct OnSelectUser { cDebugLobbyScreen* unk_0; };
+    struct OnChat { cDebugLobbyScreen* unk_0; };
+    struct OnMessage { cDebugLobbyScreen* unk_0; };
+    struct OnAcceptChallenge { cDebugLobbyScreen* unk_0; };
+    struct OnDeclineChallenge { cDebugLobbyScreen* unk_0; };
+    struct OnAbortChallenge { cDebugLobbyScreen* unk_0; };
+#endif
 };
 
 CHECK_OFFSET(cDebugLobbyScreen, mVtbl, 0x0000);
@@ -299,5 +335,10 @@ CHECK_OFFSET(cDebugLobbyScreen, mChallenger, 0x1C0C);
 CHECK_OFFSET(cDebugLobbyScreen, mGameChannel, 0x1C10);
 CHECK_OFFSET(cDebugLobbyScreen, mErrorCode, 0x1C14);
 CHECK_SIZE(cDebugLobbyScreen, 0x1C18);
+// CHECK_SIZE cannot paste a qualified name, so the functor checks are spelled out.
+#if defined(__cplusplus) && !defined(DECOMP_NO_LAYOUT_CHECKS)
+typedef char check_cDebugLobbyScreen_OnCreate_size[(sizeof(cDebugLobbyScreen::OnCreate) == 0x4) ? 1 : -1];
+typedef char check_cDebugLobbyScreen_OnAbortChallenge_size[(sizeof(cDebugLobbyScreen::OnAbortChallenge) == 0x4) ? 1 : -1];
+#endif
 
 #endif /* FE_DEBUGFE_H */

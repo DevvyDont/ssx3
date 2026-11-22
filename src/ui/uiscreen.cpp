@@ -1969,11 +1969,6 @@ struct cListNode;
 void* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
 
-struct sVEntry39E6B8b {
-    short delta;
-    short index;
-    void (*fn)(void*, float, float);
-};
 
 /**
  * Base 2D render of a UI state: draws each of its visible screens.
@@ -1990,7 +1985,7 @@ extern "C" void cUIState_onRender2D(cUIState* self)
         do {
             char* obj = (char*)&n->mRootGroup;
             if ((n->mRootGroup.mAttr >> 6) & 1) {
-                sVEntry39E6B8b* vt2 = (sVEntry39E6B8b*)n->mRootGroup.mVtbl;
+                sVEntry<void(void*, float, float)>* vt2 = (sVEntry<void(void*, float, float)>*)n->mRootGroup.mVtbl;
                 vt2[17].fn(vthis(obj, vt2[17]), 0.0f, 0.0f);
             }
             n = (cUIScreen*)((void*)n->mpNext);

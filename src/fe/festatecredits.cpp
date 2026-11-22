@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "bx/math3d.h"
 #include "render/font.h"
 #include "fe/festate.h"
 #include "fe/festateload.h"
@@ -182,9 +183,6 @@ extern "C" unsigned short* cUITextScroll_getStringByIndex(void* self, int idx);
 
 
 
-struct sV2_185F40 {
-    float x, y;
-};
 
 struct sRect_185F40 {
     float x0, y0, x1, y1;
@@ -222,13 +220,13 @@ struct sRS_185F40 {
     int mode : 5;
 };
 
-static inline void DrawText_185F40(char* vfont, unsigned short* s, float x, float y, const sV2_185F40& sc)
+static inline void DrawText_185F40(char* vfont, unsigned short* s, float x, float y, const t2Vector& sc)
 {
     cFont* font = (cFont*)vfont;
     font->Scale[0] = font->BaseScale[0] * sc.x;
     font->Scale[1] = font->BaseScale[1] * sc.y;
     cFont_text1(font, x, y, s);
-    *(sV2_185F40*)&font->Scale[0] = *(sV2_185F40*)&font->BaseScale[0];
+    *(t2Vector*)&font->Scale[0] = *(t2Vector*)&font->BaseScale[0];
 }
 
 /**
@@ -294,7 +292,7 @@ extern "C" void cFEStateCredits_onRender2D(cFEStateCredits* self)
                     }
                     else
                     {
-                        sV2_185F40 sz;
+                        t2Vector sz;
                         sz.x = size.x;
                         sz.y = size.y;
                         if (*line == '^')

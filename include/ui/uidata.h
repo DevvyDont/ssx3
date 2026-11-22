@@ -90,6 +90,21 @@ struct tUIListBox {
     tUIARGB mSColour;               // 0x24 [O]; [U] the static colour (bytes / 255)
 };
 
+// A vector (polygon) object's record. [O] struct tUIVector : tUIBaseObject (0x24); [U] cUIVector_setUIData reads
+// mNumVertices / mNumTriangles / mFlags (bit 0 fill, bit 1 loop) into tAttrVector and allocates mNumVertices
+// vertices and colours (ui/uivector's view sUIVecData_34C0, which keeps these names).
+struct tUIVector {
+    unsigned short mTag;            // 0x00 [O] tUIBaseObject
+    unsigned short mByteSize;       // 0x02 [O]
+    unsigned int mHashID;           // 0x04 [O]
+    unsigned int mBaseFlags;        // 0x08 [O]
+    unsigned short mEventAnims[10]; // 0x0C [O]
+    char mNumVertices;              // 0x20 [O]; [U] tAttrVector::mNumVertices, the vertex / colour array lengths
+    char mNumTriangles;             // 0x21 [O]; [U] tAttrVector::mNumTriangles
+    char mFlags;                    // 0x22 [O]; [U] bit 0 -> mFill, bit 1 -> mLoop
+    char mPad;                      // 0x23 [O]
+};
+
 // An animation's header. [O] struct tUIAnimation (0x10).
 struct tUIAnimation {
     unsigned short mTag;            // 0x00 [O]
@@ -192,6 +207,10 @@ CHECK_OFFSET(tUIListBox, mNumEntries, 0x21);
 CHECK_OFFSET(tUIListBox, mFlags, 0x22);
 CHECK_OFFSET(tUIListBox, mSColour, 0x24);
 CHECK_SIZE(tUIListBox, 0x28);
+CHECK_OFFSET(tUIVector, mNumVertices, 0x20);
+CHECK_OFFSET(tUIVector, mNumTriangles, 0x21);
+CHECK_OFFSET(tUIVector, mFlags, 0x22);
+CHECK_SIZE(tUIVector, 0x24);
 
 CHECK_OFFSET(tUIAnimation, mTag, 0x00);
 CHECK_OFFSET(tUIAnimation, mNumFrames, 0x02);

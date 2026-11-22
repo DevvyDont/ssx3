@@ -1420,11 +1420,6 @@ void cMemMan_free(void* p);
 extern char str_pct_s_pct_spct_04d[];
 extern char str_Temp_String[];
 
-struct sVE_59A0 {
-    short delta;
-    short index;
-    void (*fn)(void*, char*, int, int, int, int, int);
-};
 
 /**
  * Memory card callback: starts writing the current save (settings, replay or profile).
@@ -1474,7 +1469,7 @@ extern "C" void cFEMemCard_writeStart(void)
         fe->mPopupType = 22;
         char* buf = (char*)operator_new_tag(1600, str_Temp_String, 0x100, 0);
         cMCOverlayManager_GetMessage(app, buf, 800);
-        sVE_59A0* vt = (sVE_59A0*)cFEMemCard_mInstance->mVtbl;
+        sVEntry<void(void*, char*, int, int, int, int, int)>* vt = (sVEntry<void(void*, char*, int, int, int, int, int)>*)cFEMemCard_mInstance->mVtbl;
         vt[36].fn(vthis(cFEMemCard_mInstance, vt[36]), buf, 1, 1, 0, 0, 1);
         cFEMemCard_mInstance->mIsStatusPopupOn = 1;
         if (buf != 0) {
@@ -1606,31 +1601,11 @@ int cBESaveInterface_getSaveGameSize_r() __asm__("cBESaveInterface_getSaveGameSi
 extern "C" int cBESaveInterface_getSaveProfileSize();
 extern "C" void cMCOverlayManager_readFile(void* self, int a, int b, int c);
 
-struct sMoviePlayer_001D5DF0 {
-    char pad0[0xF8];
-    int fF8;            // 0xF8
-};
 
-struct sTrophyRoom_001D5DF0 {
-    char pad0[0x1B0];
-    int f1B0;           // 0x1B0
-    int f1B4;           // 0x1B4
-    char pad1B8[0x4];
-    int mode;           // 0x1BC
-    char pad1C0[0x4];
-    int size;           // 0x1C4
-    char pad1C8[0x8];
-    int cur;            // 0x1D0
-    int buf;            // 0x1D4
-    char pad1D8[0x28];
-    int pending;        // 0x200
-    char pad204[0x24];
-    int state;          // 0x228
-};
 // PORT: cFEMemCard_mInstance holds the trophy room state pointer.
-extern sTrophyRoom_001D5DF0* D_004A2028_tr5 __asm__("cFEMemCard_mInstance");
+extern cFEMemCard* D_004A2028_tr5 __asm__("cFEMemCard_mInstance");
 extern "C" int cBESaveInterface_getReplayBuffer(void* iface);
-extern "C" void cFEMemCard_createReadBuffer(sTrophyRoom_001D5DF0* self, int size);
+extern "C" void cFEMemCard_createReadBuffer(cFEMemCard* self, int size);
 
 /**
  * Memory card callback: starts reading a save (settings, replay or profile) into a buffer.
@@ -1643,32 +1618,32 @@ extern "C" void cFEMemCard_createReadBuffer(sTrophyRoom_001D5DF0* self, int size
 extern "C" void cFEMemCard_readStart()
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
-    sMoviePlayer_001D5DF0* app = (sMoviePlayer_001D5DF0*)cSSXApp_getMCManager(SSXApp);
-    sTrophyRoom_001D5DF0* memCard = D_004A2028_tr5;
-    memCard->f1B0 = 1;
-    memCard->f1B4 = 0;
-    app->fF8 = memCard->size;
-    int mode = memCard->mode;
+    cMCOverlayManager* app = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
+    cFEMemCard* memCard = D_004A2028_tr5;
+    memCard->mIsLoadWait = 1;
+    memCard->mIsLoadDoneOK = 0;
+    app->mFileCursor = memCard->mSlot;
+    int mode = memCard->mType;
     switch (mode) {
     case 2: {
         int n = cBESaveInterface_getSaveGameSize_r();
         cFEMemCard_createReadBuffer(D_004A2028_tr5, n);
-        cMCOverlayManager_readFile(app, D_004A2028_tr5->size, D_004A2028_tr5->cur, n);
+        cMCOverlayManager_readFile(app, D_004A2028_tr5->mSlot, ((int)D_004A2028_tr5->mpReadBuffer), n);
         break;
     }
     case 1: {
-        D_004A2028_tr5->state = 2;
+        D_004A2028_tr5->mBufferState = 2;
         int replayBuffer = cBESaveInterface_getReplayBuffer(iface);
-        sTrophyRoom_001D5DF0* memCardInst = D_004A2028_tr5;
-        memCardInst->buf = memCardInst->cur = replayBuffer;
-        cMCOverlayManager_readFile(app, memCardInst->size, memCardInst->cur, cBE_getDataSize(cBE_getBE()));
-        D_004A2028_tr5->pending = mode;
+        cFEMemCard* memCardInst = D_004A2028_tr5;
+        (*(int*)&memCardInst->mpStartReadBuffer) = (*(int*)&memCardInst->mpReadBuffer) = replayBuffer;
+        cMCOverlayManager_readFile(app, memCardInst->mSlot, ((int)memCardInst->mpReadBuffer), cBE_getDataSize(cBE_getBE()));
+        D_004A2028_tr5->mLoadBEData = mode;
         break;
     }
     case 0: {
         int n = cBESaveInterface_getSaveProfileSize();
         cFEMemCard_createReadBuffer(D_004A2028_tr5, n);
-        cMCOverlayManager_readFile(app, D_004A2028_tr5->size, D_004A2028_tr5->cur, n);
+        cMCOverlayManager_readFile(app, D_004A2028_tr5->mSlot, ((int)D_004A2028_tr5->mpReadBuffer), n);
         break;
     }
     }

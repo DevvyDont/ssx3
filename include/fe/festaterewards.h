@@ -2,7 +2,7 @@
 #define FE_FESTATEREWARDS_H
 
 // cFEStateRewardGalleryBase: the reward gallery and store screens' shared state (a cUIState): a grid of reward icons
-// (up to 8 rows of 4 visible) with a hilighter, page and cost texts and up/down arrows. Methods in fe/festaterewards.
+// (up to 4 rows of 8 visible; On Tour 8 rows of 4) with a hilighter, page and cost texts and up/down arrows. Methods in fe/festaterewards.
 // Subclasses add their reward lists from 0xA24: cFEStateRewardGalleryPosters, TradingCards, ConceptArts, Toys,
 // Videos and CheatChars (cFEReal creates them: cMemMan_alloc(2772, "cFEStateRewardGalleryPosters"), ...).
 //
@@ -76,8 +76,9 @@ struct cFEStateRewardGalleryBase {
     cUIText* mpTotalRewards;        // 0x918 [O]
     cUIIcon* mpArrowUp;             // 0x91C [O]
     cUIIcon* mpArrowDown;           // 0x920 [O]
-    cUIIcon* mpIcons[8][4];         // 0x924 [O]
-    cUIThing* mpIconBacks[8][4];    // 0x9A4 [O]
+    cUIIcon* mpIcons[4][8];         // 0x924 [O] ([8][4] in On Tour); [U] retail indexes [row][col] with a 0x20 row stride
+                                    //       (cFEStateRewardGalleryBase_updateRow: sll row, 5; onWidgetCreate fills [row][col])
+    cUIThing* mpIconBacks[4][8];    // 0x9A4 [O] ([8][4] in On Tour); [U] [row][col], 0x20 row stride (as mpIcons)
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryBase, mpPrev, 0x000);
@@ -206,8 +207,9 @@ struct cFEStateRewardGalleryPosters {
     cUIText* mpTotalRewards;        // 0x918 [O]
     cUIIcon* mpArrowUp;             // 0x91C [O]
     cUIIcon* mpArrowDown;           // 0x920 [O]
-    cUIIcon* mpIcons[8][4];         // 0x924 [O]
-    cUIThing* mpIconBacks[8][4];    // 0x9A4 [O]
+    cUIIcon* mpIcons[4][8];         // 0x924 [O] ([8][4] in On Tour); [U] retail indexes [row][col] with a 0x20 row stride
+                                    //       (cFEStateRewardGalleryBase_updateRow: sll row, 5; onWidgetCreate fills [row][col])
+    cUIThing* mpIconBacks[4][8];    // 0x9A4 [O] ([8][4] in On Tour); [U] [row][col], 0x20 row stride (as mpIcons)
     // --- cFEStateRewardGalleryPosters
     const tPosterInfo* mpDBPosters; // 0xA24 [O]; [R] 0; [U] allocRewards stores the database array, purgeRewards clears it
     const tPosterInfo* mpPosters[43];// 0xA28 [O]; [R] all 0; [U] allocRewards fills mNumTotalRewards entries
@@ -312,8 +314,9 @@ struct cFEStateRewardGalleryTradingCards {
     cUIText* mpTotalRewards;        // 0x918 [O]
     cUIIcon* mpArrowUp;             // 0x91C [O]
     cUIIcon* mpArrowDown;           // 0x920 [O]
-    cUIIcon* mpIcons[8][4];         // 0x924 [O]
-    cUIThing* mpIconBacks[8][4];    // 0x9A4 [O]
+    cUIIcon* mpIcons[4][8];         // 0x924 [O] ([8][4] in On Tour); [U] retail indexes [row][col] with a 0x20 row stride
+                                    //       (cFEStateRewardGalleryBase_updateRow: sll row, 5; onWidgetCreate fills [row][col])
+    cUIThing* mpIconBacks[4][8];    // 0x9A4 [O] ([8][4] in On Tour); [U] [row][col], 0x20 row stride (as mpIcons)
     // --- cFEStateRewardGalleryTradingCards
     const tTradingCardInfo* mpDBTradingCards;// 0xA24 [O]; [R] 0; [U] allocRewards stores the database array, purgeRewards clears it
     const tTradingCardInfo* mpTradingCards[116];// 0xA28 [O]; [R] all 0; [U] allocRewards fills mNumTotalRewards entries
@@ -418,8 +421,9 @@ struct cFEStateRewardGalleryConceptArts {
     cUIText* mpTotalRewards;        // 0x918 [O]
     cUIIcon* mpArrowUp;             // 0x91C [O]
     cUIIcon* mpArrowDown;           // 0x920 [O]
-    cUIIcon* mpIcons[8][4];         // 0x924 [O]
-    cUIThing* mpIconBacks[8][4];    // 0x9A4 [O]
+    cUIIcon* mpIcons[4][8];         // 0x924 [O] ([8][4] in On Tour); [U] retail indexes [row][col] with a 0x20 row stride
+                                    //       (cFEStateRewardGalleryBase_updateRow: sll row, 5; onWidgetCreate fills [row][col])
+    cUIThing* mpIconBacks[4][8];    // 0x9A4 [O] ([8][4] in On Tour); [U] [row][col], 0x20 row stride (as mpIcons)
     // --- cFEStateRewardGalleryConceptArts
     const tConceptArtInfo* mpDBConceptArts;// 0xA24 [O]; [R] 0; [U] allocRewards stores the database array, purgeRewards clears it
     const tConceptArtInfo* mpConceptArts[100];// 0xA28 [O]; [R] all 0; [U] allocRewards fills mNumTotalRewards entries
@@ -524,8 +528,9 @@ struct cFEStateRewardGalleryVideos {
     cUIText* mpTotalRewards;        // 0x918 [O]
     cUIIcon* mpArrowUp;             // 0x91C [O]
     cUIIcon* mpArrowDown;           // 0x920 [O]
-    cUIIcon* mpIcons[8][4];         // 0x924 [O]
-    cUIThing* mpIconBacks[8][4];    // 0x9A4 [O]
+    cUIIcon* mpIcons[4][8];         // 0x924 [O] ([8][4] in On Tour); [U] retail indexes [row][col] with a 0x20 row stride
+                                    //       (cFEStateRewardGalleryBase_updateRow: sll row, 5; onWidgetCreate fills [row][col])
+    cUIThing* mpIconBacks[4][8];    // 0x9A4 [O] ([8][4] in On Tour); [U] [row][col], 0x20 row stride (as mpIcons)
     // --- cFEStateRewardGalleryVideos
     const tVideoInfo* mpDBVideos;   // 0xA24 [O]; [R] 0; [U] allocRewards stores the database array, purgeRewards clears it
     const tVideoInfo* mpVideos[2];  // 0xA28 [O]; [R] all 0; [U] allocRewards fills mNumTotalRewards entries
@@ -630,8 +635,9 @@ struct cFEStateRewardGalleryToys {
     cUIText* mpTotalRewards;        // 0x918 [O]
     cUIIcon* mpArrowUp;             // 0x91C [O]
     cUIIcon* mpArrowDown;           // 0x920 [O]
-    cUIIcon* mpIcons[8][4];         // 0x924 [O]
-    cUIThing* mpIconBacks[8][4];    // 0x9A4 [O]
+    cUIIcon* mpIcons[4][8];         // 0x924 [O] ([8][4] in On Tour); [U] retail indexes [row][col] with a 0x20 row stride
+                                    //       (cFEStateRewardGalleryBase_updateRow: sll row, 5; onWidgetCreate fills [row][col])
+    cUIThing* mpIconBacks[4][8];    // 0x9A4 [O] ([8][4] in On Tour); [U] [row][col], 0x20 row stride (as mpIcons)
     // --- cFEStateRewardGalleryToys
     const tToyInfo* mpDBToys;       // 0xA24 [O]; [R] 0; [U] allocRewards stores the database array, purgeRewards clears it
     const tToyInfo* mpToys[28];     // 0xA28 [O]; [R] all 0; [U] allocRewards fills mNumTotalRewards entries
@@ -736,8 +742,9 @@ struct cFEStateRewardGalleryCheatChars {
     cUIText* mpTotalRewards;        // 0x918 [O]
     cUIIcon* mpArrowUp;             // 0x91C [O]
     cUIIcon* mpArrowDown;           // 0x920 [O]
-    cUIIcon* mpIcons[8][4];         // 0x924 [O]
-    cUIThing* mpIconBacks[8][4];    // 0x9A4 [O]
+    cUIIcon* mpIcons[4][8];         // 0x924 [O] ([8][4] in On Tour); [U] retail indexes [row][col] with a 0x20 row stride
+                                    //       (cFEStateRewardGalleryBase_updateRow: sll row, 5; onWidgetCreate fills [row][col])
+    cUIThing* mpIconBacks[4][8];    // 0x9A4 [O] ([8][4] in On Tour); [U] [row][col], 0x20 row stride (as mpIcons)
     // --- cFEStateRewardGalleryCheatChars
     const tCheatCharInfo* mpDBCheatChars;// 0xA24 [O]; [R] 0; [U] allocRewards stores the database array, purgeRewards clears it
     const tCheatCharInfo* mpCheatChars[28];// 0xA28 [O]; [R] all 0; [U] allocRewards fills mNumTotalRewards entries

@@ -6675,11 +6675,6 @@ struct sPopupEntry18_2FE0 {
 };
 extern sPopupEntry18_2FE0 D_004C6C08_2FE0[] __asm__("D_004C6C08");
 
-struct sVEntryK1E2FE0 {
-    short delta;
-    short index;
-    int (*fn)(void*, int, int);
-};
 
 /**
  * Adds a message to the human rider's message list as unread and notifies the HUD.
@@ -6706,7 +6701,7 @@ extern "C" void func_001E2FE0(int id, unsigned char flag)
     if (((char*)gameUi) != 0) {
         char* obj = (char*)cUIStateStack_findState(&gameUi->mStateStack, GetHashValue32(str_hud_b));
         if (obj != 0) {
-            sVEntryK1E2FE0* vt = *(sVEntryK1E2FE0**)(obj + 8);
+            sVEntry<int(void*, int, int)>* vt = *(sVEntry<int(void*, int, int)>**)(obj + 8);
             vt[24].fn(vthis(obj, vt[24]), 8, 0);
         }
     }
@@ -7546,11 +7541,6 @@ extern char str_Frompct_d[];
 extern char str_Subjectpct_d[];
 extern char str_Numberpct_d[];
 
-struct sVEntry_1E3EC0 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 struct sPopup_1E3EC0 {
     char pad0[0x9C];
@@ -7606,7 +7596,7 @@ extern "C" void cOVState_MESSAGECENTER_onWidgetCreate(sPopup_1E3EC0* self, void*
         return;
     }
     if (widgetHash == GetHashValue32(str_MessageView)) {
-        sVEntry_1E3EC0* vt = *(sVEntry_1E3EC0**)((char*)w + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)w + 8);
         vt[9].fn(vthis(w, vt[9]), 0);
         return;
     }
@@ -7624,7 +7614,7 @@ extern "C" void cOVState_MESSAGECENTER_onWidgetCreate(sPopup_1E3EC0* self, void*
     }
     if (widgetHash == GetHashValue32(str_NoMessage)) {
         self->f148 = w;
-        sVEntry_1E3EC0* vt = *(sVEntry_1E3EC0**)((char*)w + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)w + 8);
         vt[9].fn(vthis(w, vt[9]), 0);
         return;
     }
@@ -7647,7 +7637,7 @@ extern "C" void cOVState_MESSAGECENTER_onWidgetCreate(sPopup_1E3EC0* self, void*
         sprintf(buf, str_Subjectpct_d, i);
         if (widgetHash == GetHashValue32(buf)) {
             self->aFC[i] = w;
-            sVEntry_1E3EC0* vt = *(sVEntry_1E3EC0**)((char*)w + 8);
+            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)w + 8);
             vt[27].fn(vthis(w, vt[27]), 1);
             return;
         }
@@ -7957,11 +7947,6 @@ unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
 extern "C" int func_001E2BB8(int type, int all);
 extern int D_004A20C4;
 
-struct sVEntryK1E4658 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Shows or hides the message center's scroll arrows.
@@ -7973,11 +7958,11 @@ extern "C" void func_001E4658(cOVState_MESSAGECENTER* self)
 {
     if (self->mScrollOffset == 0) {
         char* arrowWidget = (char*)self->mpArrowUp;
-        sVEntryK1E4658* vt = *(sVEntryK1E4658**)(arrowWidget + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(arrowWidget + 8);
         vt[9].fn(vthis(arrowWidget, vt[9]), 0);
     } else {
         char* arrowWidget = (char*)self->mpArrowUp;
-        sVEntryK1E4658* vt = *(sVEntryK1E4658**)(arrowWidget + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(arrowWidget + 8);
         vt[9].fn(vthis(arrowWidget, vt[9]), 1);
     }
     int n;
@@ -7990,11 +7975,11 @@ extern "C" void func_001E4658(cOVState_MESSAGECENTER* self)
     }
     if (self->mScrollOffset + 8 >= n) {
         char* arrowWidget = (char*)self->mpArrowDown;
-        sVEntryK1E4658* vt = *(sVEntryK1E4658**)(arrowWidget + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(arrowWidget + 8);
         vt[9].fn(vthis(arrowWidget, vt[9]), 0);
     } else {
         char* arrowWidget = (char*)self->mpArrowDown;
-        sVEntryK1E4658* vt = *(sVEntryK1E4658**)(arrowWidget + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(arrowWidget + 8);
         vt[9].fn(vthis(arrowWidget, vt[9]), 1);
     }
 }
@@ -8010,11 +7995,6 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
 extern char str_kT_OVRCMNTotalMsg[];
 extern char str_kT_OVRCMNUnread[];
 
-struct sVEntry001E4758 {
-    short delta;
-    short index;
-    unsigned short* (*fn)(void*, int);
-};
 
 /**
  * Prints the message center's total and unread counts.
@@ -8028,14 +8008,14 @@ extern "C" void func_001E4758(cOVState_MESSAGECENTER* self)
     unsigned short buf[0x38];
     if (self->mpTotalMessagesLabel != 0) {
         cFELocale* locale = SSXApp->FELocale;
-        sVEntry001E4758* vt = (sVEntry001E4758*)locale->mVtbl;
+        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)locale->mVtbl;
         unsigned short* fmt = vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_OVRCMNTotalMsg));
         sprintf1(buf, fmt, func_001E33E8_noarg());
         cUIText_setUnicodeString(self->mpTotalMessagesLabel, buf);
     }
     if (self->mpUnreadMessagesLabel != 0) {
         cFELocale* locale = SSXApp->FELocale;
-        sVEntry001E4758* vt = (sVEntry001E4758*)locale->mVtbl;
+        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)locale->mVtbl;
         unsigned short* fmt = vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_OVRCMNUnread));
         sprintf1(buf, fmt, func_001E3408());
         cUIText_setUnicodeString(self->mpUnreadMessagesLabel, buf);
@@ -8046,11 +8026,6 @@ extern "C" void func_001E4758(cOVState_MESSAGECENTER* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E4840);
 #ifdef SKIP_ASM
-struct sVEntry_func_001E4840 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Hides a widget (vtable entry 9, setVisible, with 0); does nothing for null.
@@ -8060,7 +8035,7 @@ struct sVEntry_func_001E4840 {
 extern "C" void func_001E4840(cOVState_MESSAGECENTER* self, void* obj)
 {
     if (obj != 0) {
-        sVEntry_func_001E4840* vt = *(sVEntry_func_001E4840**)((char*)obj + 0x8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)obj + 0x8);
         vt[9].fn(vthis(obj, vt[9]), 0);
     }
 }
@@ -8069,11 +8044,6 @@ extern "C" void func_001E4840(cOVState_MESSAGECENTER* self, void* obj)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E4878);
 #ifdef SKIP_ASM
-struct sVEntry_func_001E4878 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Shows a widget (vtable entry 9, setVisible, with 1); does nothing for null.
@@ -8083,7 +8053,7 @@ struct sVEntry_func_001E4878 {
 extern "C" void func_001E4878(cOVState_MESSAGECENTER* self, void* obj)
 {
     if (obj != 0) {
-        sVEntry_func_001E4878* vt = *(sVEntry_func_001E4878**)((char*)obj + 0x8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)obj + 0x8);
         vt[9].fn(vthis(obj, vt[9]), 1);
     }
 }
@@ -8440,11 +8410,6 @@ struct sPopup1E4F70 {
     cUIText* texts[4];  // 0xFC
 };
 
-struct sVE1E4F70 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Sets a message-center row's subject to the text for a message's variant.
@@ -8481,7 +8446,7 @@ extern "C" void func_001E4F70(cOVState_MESSAGECENTER* self, int slot, int id, un
     if (view->texts[slot] != 0) {
         cUIText_setUnicodeStringByID(view->texts[slot], GetHashValue32(buf));
         char* textObj = (char*)view->texts[slot];
-        sVE1E4F70* vt = *(sVE1E4F70**)(textObj + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(textObj + 8);
         vt[9].fn(vthis(textObj, vt[9]), 1);
     }
 }
@@ -8658,11 +8623,6 @@ extern char str_MV_DeleteMessage[];
 extern char str_MessageLine0[];
 extern char str_MenuDummy[];
 
-struct sVEntryK1E52F8 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Shows each of the message view's widgets as it is created and binds the ones it fills.
@@ -8676,7 +8636,7 @@ struct sVEntryK1E52F8 {
 extern "C" void cOVState_ViewPopup_onWidgetCreate(cOVState_ViewPopup* self, void* widget)
 {
     int nameHash = *(int*)((char*)widget + 0x38);
-    sVEntryK1E52F8* vt = *(sVEntryK1E52F8**)((char*)widget + 8);
+    sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)widget + 8);
     vt[9].fn(vthis(widget, vt[9]), 1);
     if (nameHash == GetHashValue32(str_From)) {
         self->mpFrom = (cUIText*)widget;
@@ -8719,11 +8679,6 @@ struct sPopupEntry14_5428 {
 };
 extern sPopupEntry14_5428 D_00441630_5428[] __asm__("D_00441630");
 
-struct sVEntryK1E5428 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 struct sVEntryS1E5428 {
     short delta;
@@ -8756,12 +8711,12 @@ extern "C" void func_001E5428(cOVState_ViewPopup* self)
     if (groupEntry->type == 4) {
         void* buttonWidget = self->mpButtonSquare;
         if (buttonWidget != 0) {
-            sVEntryK1E5428* vt = *(sVEntryK1E5428**)((char*)buttonWidget + 8);
+            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)buttonWidget + 8);
             vt[9].fn(vthis(buttonWidget, vt[9]), 0);
         }
         buttonWidget = (void*)self->mpDeleteMessage;
         if (buttonWidget != 0) {
-            sVEntryK1E5428* vt = *(sVEntryK1E5428**)((char*)buttonWidget + 8);
+            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)buttonWidget + 8);
             vt[9].fn(vthis(buttonWidget, vt[9]), 0);
         }
         if (self->mpKeepMessage != 0) {
@@ -8878,11 +8833,6 @@ extern "C" void func_001E5638(cOVState_ViewPopup* self, int id)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", func_001E5780);
 #ifdef SKIP_ASM
-struct sVEntry001E5780 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Sets and shows the view popup's body text for messages of kind 0 or 1.
@@ -8902,7 +8852,7 @@ extern "C" void func_001E5780(cOVState_ViewPopup* self, int idx)
             *(int*)(lineWidget + 0x14) |= 0x80;
             cUIText_setUnicodeStringByID(self->mpMessageLine0, *(int*)(messageEntry + 0x14));
             void* obj = self->mpMessageLine0;
-            sVEntry001E5780* vt = *(sVEntry001E5780**)((char*)obj + 8);
+            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)obj + 8);
             vt[9].fn(vthis(obj, vt[9]), 1);
         }
     }
@@ -8925,11 +8875,6 @@ struct sEntry14_5800 {
 };
 extern sEntry14_5800 D_00441630_5800[] __asm__("D_00441630");
 extern "C" void func_001E3268(int id);
-struct sVE5800 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Handles the message view's widget events: delete the message, or close the popup.
@@ -8955,13 +8900,13 @@ extern "C" void cOVState_ViewPopup_onWidgetEvent(cOVState_ViewPopup* self, void*
     }
     case 5: {
         cUIState* parentState = self->mpParentState;
-        sVE5800* vt = (sVE5800*)parentState->mVtbl;
+        sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)parentState->mVtbl;
         vt[17].fn(vthis(parentState, vt[17]), self, 20);
         break;
     }
     case 6: {
         cUIState* parentState = self->mpParentState;
-        sVE5800* vt = (sVE5800*)parentState->mVtbl;
+        sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)parentState->mVtbl;
         vt[17].fn(vthis(parentState, vt[17]), self, 20);
         break;
     }
@@ -8997,7 +8942,7 @@ extern "C" void func_001E58E0(cOVState_ViewPopup* self)
         int n = func_001E34D8(id);
         if (n == -1) {
             cUIState* parentState = self->mpParentState;
-            sVE5800* vt = (sVE5800*)parentState->mVtbl;
+            sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)parentState->mVtbl;
             vt[17].fn(vthis(parentState, vt[17]), self, 20);
             return;
         }
@@ -9013,7 +8958,7 @@ extern "C" void func_001E58E0(cOVState_ViewPopup* self)
         func_001E5428(self);
     } else {
         cUIState* parentState = self->mpParentState;
-        sVE5800* vt = (sVE5800*)parentState->mVtbl;
+        sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)parentState->mVtbl;
         vt[17].fn(vthis(parentState, vt[17]), self, 20);
     }
 }
@@ -9147,11 +9092,6 @@ struct sIdx5_5B80 {
 };
 extern sIdx5_5B80 D_0046E488;
 
-struct sVEntry5B80 {
-    short delta;
-    short index;
-    unsigned short* (*fn)(void*, int);
-};
 
 class cUIObj_5B80 {
 public:
@@ -9207,19 +9147,19 @@ extern "C" void cOVState_HEAT_STANDINGS_onCreateScreen(cOVState_HEAT_STANDINGS* 
     switch (event) {
     case 1: {
         cFELocale* object = SSXApp->FELocale;
-        sVEntry5B80* vt = (sVEntry5B80*)object->mVtbl;
+        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)object->mVtbl;
         fmt = vt[4].fn(vthis(object, vt[4]), GetHashValue32(str_kT_cmnSlopeCaps));
         break;
     }
     case 2: {
         cFELocale* object = SSXApp->FELocale;
-        sVEntry5B80* vt = (sVEntry5B80*)object->mVtbl;
+        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)object->mVtbl;
         fmt = vt[4].fn(vthis(object, vt[4]), GetHashValue32(str_kT_cmnBigAirCaps));
         break;
     }
     case 3: {
         cFELocale* object = SSXApp->FELocale;
-        sVEntry5B80* vt = (sVEntry5B80*)object->mVtbl;
+        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)object->mVtbl;
         fmt = vt[4].fn(vthis(object, vt[4]), GetHashValue32(str_kT_cmnPipeCaps));
         break;
     }
@@ -10463,11 +10403,6 @@ public:
     virtual void setVisible(int on);
 };
 
-struct sVEntry8200 {
-    short delta;
-    short index;
-    unsigned short* (*fn)(void*, int);
-};
 
 /**
  * Builds the event finish overlay for scored runs (overlay 13, vtable cOVState_BASSSP_QUAL_FINISHOV_vtbl, entry 4 onCreateScreen).
@@ -10561,7 +10496,7 @@ extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen(cOVState_BASSSP_QUA
     }
     screenWidget = (cUIObj_8200*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pointstotal));
     char* loc = (char*)SSXApp->FELocale;
-    sVEntry8200* vt = *(sVEntry8200**)(loc + 4);
+    sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(loc + 4);
     strcpy1(fmt, vt[4].fn(vthis(loc, vt[4]), GetHashValue32(str_kT_OVRCMNPointstotal)));
     sprintf1(text, fmt, *(unsigned int*)((char*)D_00536640 + off));
     cUIText_setUnicodeString(screenWidget, text);

@@ -53,20 +53,7 @@ struct sVEi_6F98 {
     short index;
     void (*fn)(void*, int);
 };
-struct sVEs_6F98 {
-    short delta;
-    short index;
-    unsigned short* (*fn)(void*, int);
-};
 
-struct sWidget_6F98 {
-    char pad0[0x8];
-    sVEi_6F98* vt;      // 0x8
-    char padC[0x18 - 0xC];
-    int index;          // 0x18
-    char pad1C[0x38 - 0x1C];
-    int hash;           // 0x38
-};
 
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 struct sReqLine_6F98 {
@@ -75,29 +62,29 @@ struct sReqLine_6F98 {
     ulong sel;                   // 0x160
     int count;                   // 0x168
     int f16C;                    // 0x16C
-    sWidget_6F98* w170;          // 0x170
-    sWidget_6F98* slotA[8];      // 0x174
-    sWidget_6F98* slotB[8];      // 0x194
-    sWidget_6F98* title;         // 0x1B4
-    sWidget_6F98* artist;        // 0x1B8
-    sWidget_6F98* opts[6];       // 0x1BC
-    sWidget_6F98* w1D4;          // 0x1D4
-    sWidget_6F98* w1D8;          // 0x1D8
-    sWidget_6F98* w1DC;          // 0x1DC
-    sWidget_6F98* w1E0;          // 0x1E0
-    sWidget_6F98* w1E4;          // 0x1E4
-    sWidget_6F98* text;          // 0x1E8
-    sWidget_6F98* w1EC;          // 0x1EC
-    sWidget_6F98* w1F0;          // 0x1F0
-    sWidget_6F98* w1F4;          // 0x1F4
-    sWidget_6F98* w1F8;          // 0x1F8
-    sWidget_6F98* w1FC;          // 0x1FC
-    sWidget_6F98* w200;          // 0x200
+    cUIThing* w170;          // 0x170
+    cUIThing* slotA[8];      // 0x174
+    cUIThing* slotB[8];      // 0x194
+    cUIThing* title;         // 0x1B4
+    cUIThing* artist;        // 0x1B8
+    cUIThing* opts[6];       // 0x1BC
+    cUIThing* w1D4;          // 0x1D4
+    cUIThing* w1D8;          // 0x1D8
+    cUIThing* w1DC;          // 0x1DC
+    cUIThing* w1E0;          // 0x1E0
+    cUIThing* w1E4;          // 0x1E4
+    cUIThing* text;          // 0x1E8
+    cUIThing* w1EC;          // 0x1EC
+    cUIThing* w1F0;          // 0x1F0
+    cUIThing* w1F4;          // 0x1F4
+    cUIThing* w1F8;          // 0x1F8
+    cUIThing* w1FC;          // 0x1FC
+    cUIThing* w200;          // 0x200
 };
 
-static inline void show_6F98(sWidget_6F98* w, int on)
+static inline void show_6F98(cUIThing* w, int on)
 {
-    w->vt[9].fn(vthis(w, w->vt[9]), on);
+    ((sVEi_6F98*)w->mVtbl)[9].fn(vthis(w, ((sVEi_6F98*)w->mVtbl)[9]), on);
 }
 
 static inline int countBits_6F98(ulong v)
@@ -118,9 +105,9 @@ static inline int countBits_6F98(ulong v)
  *
  * @param w  the widget being created; matched by its hash name
  */
-extern "C" void cFEStateRequestLine_onWidgetCreate(sReqLine_6F98* self, sWidget_6F98* w)
+extern "C" void cFEStateRequestLine_onWidgetCreate(sReqLine_6F98* self, cUIThing* w)
 {
-    int hash = w->hash;
+    int hash = w->mHashName;
     if (hash == GetHashValue32(str_CurrentSong)) {
         self->title = w;
         cUIText_setAsciiString((cUIText*)w, D_004A1408);
@@ -137,7 +124,7 @@ extern "C" void cFEStateRequestLine_onWidgetCreate(sReqLine_6F98* self, sWidget_
         show_6F98(w, 0);
     } else if (hash == GetHashValue32(str_song_list)) {
         char* db = (char*)SSXApp->FELocale;
-        sVEs_6F98* vt = *(sVEs_6F98**)(db + 4);
+        sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(db + 4);
         unsigned short* fmt = vt[4].fn(vthis(db, vt[4]), GetHashValue32(str_kT_OVRCMNSongsInList));
         int len = USTR_length(fmt) + 5;
         unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, str_cFEStateRequestLine, 0x100, 0);
@@ -206,7 +193,7 @@ extern "C" void cFEStateRequestLine_onWidgetCreate(sReqLine_6F98* self, sWidget_
             }
         }
         if (i < 8) {
-            w->index = i;
+            w->mMiscData = i;
             return;
         }
         for (i = 0; i < 6; i++) {
@@ -264,11 +251,6 @@ struct sReqLine_7500 {
     int f16C;               // 0x16C
 };
 
-struct sVE_7500 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 static inline int isSet_7500(unsigned long m, int i)
 {
@@ -348,7 +330,7 @@ extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, cUIThing* i
         func_0028C2D0(cAudioInterface_bxAudio(), self->done);
         if (self->f16C != 0) {
             char* pl = (char*)cAudioInterface_bxAudio();
-            sVE_7500* vt = *(sVE_7500**)(pl + 0x5558);
+            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(pl + 0x5558);
             char* obj = pl + 0x118;
             vt[3].fn(vthis(obj, vt[3]), 10);
         }
@@ -745,11 +727,6 @@ extern char str_cFEStateRequestLine[];
 extern char str_kT_16NowPlaying[];
 extern char str_kT_16Artist[];
 
-struct sVtEntry_197E70 {
-    short delta;
-    short index;
-    unsigned short* (*fn)(void*, int);
-};
 
 class cMsgWidget_197E70 {
 public:
@@ -792,7 +769,7 @@ extern "C" void cFEStateRequestLine_updateCurrentlyPlaying(cFEStateRequestLine* 
         if (strlen(name) != 0) {
             ((cMsgWidget_197E70*)self->mpCurSongTitle)->show(1);
             char* db = (char*)SSXApp->FELocale;
-            sVtEntry_197E70* vt = *(sVtEntry_197E70**)(db + 4);
+            sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(db + 4);
             unsigned short* fmt = vt[4].fn(vthis(db, vt[4]), GetHashValue32(str_kT_16NowPlaying));
             int len = USTR_length(fmt) + strlen(name) + 1;
             unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, str_cFEStateRequestLine, 0x100, 0);
@@ -808,7 +785,7 @@ extern "C" void cFEStateRequestLine_updateCurrentlyPlaying(cFEStateRequestLine* 
         if (strlen(artist) != 0) {
             ((cMsgWidget_197E70*)self->mpCurSongArtist)->show(1);
             char* db = (char*)SSXApp->FELocale;
-            sVtEntry_197E70* vt = *(sVtEntry_197E70**)(db + 4);
+            sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(db + 4);
             unsigned short* fmt = vt[4].fn(vthis(db, vt[4]), GetHashValue32(str_kT_16Artist));
             int len = USTR_length(fmt) + strlen(artist) + 1;
             unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, str_cFEStateRequestLine, 0x100, 0);
@@ -1136,11 +1113,6 @@ extern char str_kT_OVRCMNFree[];
 extern char str_disconnected_from_serverErrorString[];
 extern char D_004A1408[];
 
-struct sVtEntry_001986D0 {
-    short delta;
-    short index;
-    unsigned short* (*fn)(void*, int);
-};
 
 class cMsgWidget_1986D0 {
 public:
@@ -1172,7 +1144,7 @@ extern "C" void cFEStateRequestLine_updateHilightedSongInfo(cFEStateRequestLine*
     cFEStateRequestLine* self = vself;
     if (((cMsgWidget_1986D0*)self->mpArtist) != 0) {
         char* db = (char*)SSXApp->FELocale;
-        sVtEntry_001986D0* vt = *(sVtEntry_001986D0**)(db + 4);
+        sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(db + 4);
         unsigned short* fmt = vt[4].fn(vthis(db, vt[4]), GetHashValue32(str_kT_OVRCMNSongBy));
         char* name = (char*)cFEStateRequestLine_getSongArtist((cFEStateRequestLine*)self, idx);
         int len = USTR_length(fmt) + strlen(name) + 1;

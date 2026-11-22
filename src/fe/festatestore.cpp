@@ -304,11 +304,6 @@ extern "C" int cFEStateUberTrick_onGainTransition(cFEStateUberTrick* self, int o
 //100%
 INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onGainFocus);
 #ifdef SKIP_ASM
-struct sVEntry00184BE0 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 
 extern "C" void cFEStateUberTrick_activateMainMenu(void* self);
@@ -328,11 +323,11 @@ extern "C" void cFEStateUberTrick_onGainFocus(cFEStateUberTrick* self, int prevS
     cFEStateUberTrick_activateMainMenu(self);
     menu = (cUIThing*)self->mpMainMenu;
     if (menu != 0) {
-        ((sVEntry00184BE0*)menu->mVtbl)[7].fn(vthis(menu, ((sVEntry00184BE0*)menu->mVtbl)[7]), 1);
+        ((sVEntry<void(void*, int)>*)menu->mVtbl)[7].fn(vthis(menu, ((sVEntry<void(void*, int)>*)menu->mVtbl)[7]), 1);
     }
     menu = (cUIThing*)self->mpTrickMenu;
     if (menu != 0) {
-        ((sVEntry00184BE0*)menu->mVtbl)[7].fn(vthis(menu, ((sVEntry00184BE0*)menu->mVtbl)[7]), 0);
+        ((sVEntry<void(void*, int)>*)menu->mVtbl)[7].fn(vthis(menu, ((sVEntry<void(void*, int)>*)menu->mVtbl)[7]), 0);
     }
     cUIState_onGainFocus(self, prevState);
 }
@@ -354,16 +349,11 @@ struct sQuat_184C60
     sQuat_184C60(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-struct sXform_184C60
-{
-    sQuat_184C60 pos;
-    sQuat_184C60 rot;
-};
 
 extern sQuat_184C60 t4vect_XAxis;
 extern sQuat_184C60 t4vect_YAxis;
 extern sQuat_184C60 t4vect_ZAxis;
-extern "C" void cFERider_setPose(void* rider, sXform_184C60* xf);
+extern "C" void cFERider_setPose(void* rider, tPose* xf);
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
 static inline sQuat_184C60 QuatMul_184C60(const sQuat_184C60& a, const sQuat_184C60& b)
@@ -420,7 +410,7 @@ extern "C" void cFEStateUberTrick_onUpdate(cFEStateUberTrick* self)
                 cRiderAnimBase_play(anim, 436, 0, -1.0f);
             }
             sQuat_184C60 pos;
-            sXform_184C60 xf;
+            tPose xf;
             {
                 sQuat_184C60 position;
                 position.x = -228.0f;
@@ -428,16 +418,16 @@ extern "C" void cFEStateUberTrick_onUpdate(cFEStateUberTrick* self)
                 position.z = 63.0f;
                 position.w = 1.0f;
                 pos = position;
-                xf.pos = position;
+                (*(sQuat_184C60*)&xf.P) = position;
                 self->mbModelVisible = 1;
-                xf.rot.x = 0.0f;
-                xf.rot.y = 0.0f;
-                xf.rot.z = 0.0f;
-                xf.rot.w = 1.0f;
-                xf.rot = QuatMul_184C60(xf.rot, AxisAngle_184C60(t4vect_XAxis, 0.0f));
+                (*(sQuat_184C60*)&xf.Q).x = 0.0f;
+                (*(sQuat_184C60*)&xf.Q).y = 0.0f;
+                (*(sQuat_184C60*)&xf.Q).z = 0.0f;
+                (*(sQuat_184C60*)&xf.Q).w = 1.0f;
+                (*(sQuat_184C60*)&xf.Q) = QuatMul_184C60((*(sQuat_184C60*)&xf.Q), AxisAngle_184C60(t4vect_XAxis, 0.0f));
             }
-            xf.rot = QuatMul_184C60(xf.rot, AxisAngle_184C60(t4vect_YAxis, 0.0f));
-            xf.rot = QuatMul_184C60(xf.rot, AxisAngle_184C60(t4vect_ZAxis, 1.082104206085205f));
+            (*(sQuat_184C60*)&xf.Q) = QuatMul_184C60((*(sQuat_184C60*)&xf.Q), AxisAngle_184C60(t4vect_YAxis, 0.0f));
+            (*(sQuat_184C60*)&xf.Q) = QuatMul_184C60((*(sQuat_184C60*)&xf.Q), AxisAngle_184C60(t4vect_ZAxis, 1.082104206085205f));
             cFERider_setPose(rider, &xf);
             cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, self->mUserNum, 1);
         }
@@ -632,13 +622,8 @@ extern char str_kT_FEHELPTrickAvailBuy[];
 extern char str_kT_OVRCMNSaveCashUber[];
 extern char str_kT_FEHELPTrickBuyCTM[];
 
-struct sVE_185268 {
-    short delta;
-    short index;
-    void* fn;
-};
 struct sSnd_185268 {
-    sVE_185268* vt;
+    sVEntry<void>* vt;
 };
 extern sSnd_185268 gUISoundNull;
 
@@ -676,7 +661,7 @@ static inline int Is_185268(int id, char* s)
 
 static inline void SetActive_185268(char* menu, int on)
 {
-    sVE_185268* vt = *(sVE_185268**)(menu + 8);
+    sVEntry<void>* vt = *(sVEntry<void>**)(menu + 8);
     ((void (*)(void*, int))vt[7].fn)(vthis(menu, vt[7]), on);
 }
 
@@ -692,7 +677,7 @@ static inline void PlaySound_185268(char* self, int id)
 static inline void Back_185268(char* self)
 {
     char* mgr = **(char***)(self + 0x10);
-    sVE_185268* vt = *(sVE_185268**)(mgr + 4);
+    sVEntry<void>* vt = *(sVEntry<void>**)(mgr + 4);
     void* r = ((void* (*)(void*, void*, int))vt[5].fn)(vthis(mgr, vt[5]), self, 0);
     if (r != 0)
         cUIStateStack_push(*(char**)(self + 0x10) + 0x18, r);
@@ -754,7 +739,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
                 cBE_getInterface_Fv(cBE_getBE(), 0);
                 if (func_00150048(pi, self->mUserNum, ai, bi) && !func_0014FFB8(pi, self->mUserNum, ai, bi)) {
                     func_0014FD80(pi, self->mUserNum, ai, bi);
-                    sVE_185268* vt = *(sVE_185268**)(pi + 0xC);
+                    sVEntry<void>* vt = *(sVEntry<void>**)(pi + 0xC);
                     ((int (*)(void*))vt[1].fn)(vthis(pi, vt[1]));
                     cFEStateUberTrick_updateTrickMenu(((char*)self));
                 } else if (cBENewRaceInterface_newRace.cGamePath != 0) {
@@ -763,7 +748,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
                     char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
                     signed char charID = cBENewPlayerInterface_getPlayerCharID(player, self->mUserNum);
                     {
-                        sVE_185268* vt = *(sVE_185268**)(player + 0xC);
+                        sVEntry<void>* vt = *(sVEntry<void>**)(player + 0xC);
                         ((void (*)(void*))vt[2].fn)(vthis(player, vt[2]));
                     }
                     int points = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), self->mUserNum, charID);
@@ -846,7 +831,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
                         char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
                         signed char charID = cBENewPlayerInterface_getPlayerCharID(player, self->mUserNum);
                         {
-                            sVE_185268* vt = *(sVE_185268**)(player + 0xC);
+                            sVEntry<void>* vt = *(sVEntry<void>**)(player + 0xC);
                             ((void (*)(void*))vt[2].fn)(vthis(player, vt[2]));
                         }
                         int points = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), self->mUserNum, charID);

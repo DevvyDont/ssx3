@@ -1,5 +1,8 @@
 #include "vtable.h"
 #include "common.h"
+#include "animation/mdfarchive.h"
+#include "be/bedbprofile.h"
+#include "ealib/shape.h"
 #include "sound/ssxaudio.h"
 #include "bx/math3d.h"
 #include "animation/animmodel.h"
@@ -944,11 +947,6 @@ INCLUDE_ASM("fe/feridermanager", cFERider_setBonePosition);
 // R5900 128-bit GPR quadword (single lq/sq pair); same typedef as ai/rider.cpp.
 typedef int cQuad128 __attribute__((mode(TI)));
 
-// 0x20-byte bone element, quadword at offset 0 and 0x10 (cAnimModel::bones layout)
-struct sFeBone_19F6C8 {
-    cQuad128 q0;
-    cQuad128 q1;
-};
 
 /**
  * Sets a bone's position in the front-end rider's model (the mapped bone's first quadword).
@@ -960,8 +958,8 @@ extern "C" void cFERider_setBonePosition(cFERider* self, int slot, cQuad128* src
 {
     char* model = (char*)self->mpAnimModel;
     int bone = self->mBoneMap[slot];
-    sFeBone_19F6C8* bones = *(sFeBone_19F6C8**)(model + 0x2C);
-    bones[bone].q0 = *src;
+    sAnimModelBone* bones = *(sAnimModelBone**)(model + 0x2C);
+    (*(cQuad128*)&bones[bone].pos) = *src;
 }
 #endif
 //100%
@@ -983,10 +981,6 @@ INCLUDE_ASM("fe/feridermanager", cFERider_setBoneQuaternion);
 #ifdef SKIP_ASM
 typedef int cQuad128 __attribute__((mode(TI)));
 
-struct sFeBone_19F718 {
-    cQuad128 q0;
-    cQuad128 q1;
-};
 
 /**
  * Sets a bone's rotation in the front-end rider's model (the mapped bone's second quadword).
@@ -998,8 +992,8 @@ extern "C" void cFERider_setBoneQuaternion(cFERider* self, int slot, cQuad128* s
 {
     char* model = (char*)self->mpAnimModel;
     int bone = self->mBoneMap[slot];
-    sFeBone_19F718* bones = *(sFeBone_19F718**)(model + 0x2C);
-    bones[bone].q1 = *src;
+    sAnimModelBone* bones = *(sAnimModelBone**)(model + 0x2C);
+    (*(cQuad128*)&bones[bone].rot) = *src;
 }
 #endif
 //100%
@@ -1048,15 +1042,6 @@ extern "C" int func_0014D448(void* self, int g, int key);
 extern "C" void func_0030EB60(void* model);
 extern "C" void cAnimModel_setModelPartVariant(void* model, int i, int param);
 
-struct sItemF780 {
-    short id;
-    unsigned short flags;
-};
-struct sItemListF780 {
-    char pad_0x0[0x28C];
-    int count;              // 0x28C
-    sItemF780 items[1];     // 0x290
-};
 struct sBoneEntF780 {
     char f0;
     char f1;
@@ -1087,9 +1072,9 @@ extern "C" void cFERider_updateAnimModelParts(int* self)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     sBoneDbF780* db = (sBoneDbF780*)func_0014BDB8_noarg();
-    sItemListF780* list = (sItemListF780*)func_0014AD28(iface, self[1], self[0]);
-    int n = list->count;
-    sItemF780* it = list->items;
+    cBECharProfileDB* list = (cBECharProfileDB*)func_0014AD28(iface, self[1], self[0]);
+    int n = list->mNumBolts;
+    tBEProfileBolt* it = ((&list->mBolts[0]));
     func_0030EB60(*(void**)((char*)self + 0x8));
     int i;
     for (i = 0; i < n; i++) {
@@ -1109,11 +1094,6 @@ INCLUDE_ASM("fe/feridermanager", cFERider_getTextureID);
 extern "C" int strcmp(const void* a, const void* b);
 
 
-struct sRiderTable_F878 {
-    char pad_0x0[0x18];
-    int count;
-    tTextureRef entries[1];
-};
 
 /**
  * Looks up a texture by name in the front-end rider's texture table.
@@ -1146,14 +1126,6 @@ struct sPkgEnt_F908 {
     int off;
     int f4;
 };
-struct sPkg_F908 {
-    int f0;
-    int f4;
-    int count;      // 0x8
-    int fC;
-    int f10;
-    sPkgEnt_F908 ents[1];   // 0x14
-};
 struct sName2_F908 { char c[2]; };
 struct sVE_F908a {
     short delta;
@@ -1176,12 +1148,12 @@ struct sVE_F908b {
  * @param pkg      the loaded shape package
  * @param replace  nonzero to refresh textures already in the table
  */
-extern "C" void cFERider_addTextureFile(cFERider* self, sPkg_F908* pkg, int replace)
+extern "C" void cFERider_addTextureFile(cFERider* self, SHAPEFILE* pkg, int replace)
 {
-    int n = pkg->count;
+    int n = pkg->num;
     int i;
     for (i = 0; i < n; i++) {
-        sPkgEnt_F908* imageEntry = &pkg->ents[i];
+        sPkgEnt_F908* imageEntry = &((sPkgEnt_F908*)&pkg->tbl[0].offset)[i];
         char* data = (char*)pkg + imageEntry->off;
         char name[8];
         *(sName2_F908*)name = *(sName2_F908*)D_004A19A8;
@@ -1431,9 +1403,9 @@ extern "C" int cFERider_isDoneLoadingTextures(int* self)
             int fileSlot = func_0019CCE8(D_004A1968, self[1], it->id);
             if (fileSlot >= 0) {
                 if (func_0019E2B0(mgr, self[0], fileSlot) && used[fileSlot] == 0) {
-                    sPkg_F908* pkg = (sPkg_F908*)func_0019E2B0(mgr, self[0], fileSlot);
+                    SHAPEFILE* pkg = (SHAPEFILE*)func_0019E2B0(mgr, self[0], fileSlot);
                     int fl = it->flags & 0x10;
-                    cFERider_addTextureFile((cFERider*)((sRiderTable_F878*)self), pkg, fl != 0);
+                    cFERider_addTextureFile((cFERider*)((cFERider*)self), pkg, fl != 0);
                 }
                 used[fileSlot] = 1;
                 func_0019DC20(mgr, self[0], fileSlot);
@@ -1557,15 +1529,6 @@ extern "C" void* cMdfArchive_getModelPart(void* self, const char* name);
 extern "C" void cAnimModel_addModelPartLOD(void* model, int lod, void* part, int a3);
 extern void* D_004A1968;
 
-struct sItem_A0100 {
-    short id;
-    unsigned short flags;
-};
-struct sItemList_A0100 {
-    char pad_0x0[0x28C];
-    int count;              // 0x28C
-    sItem_A0100 items[1];   // 0x290
-};
 struct sBoneEnt_A0100 {
     char f0;
     signed char lod;        // 0x1
@@ -1576,9 +1539,6 @@ struct sBoneEnt_A0100 {
 struct sBoneDb_A0100 {
     int f0;
     sBoneEnt_A0100* entries;    // 0x4
-};
-struct sMdfArchive_A0100 {
-    int a[4];
 };
 
 static inline sBoneEnt_A0100* getEntK_A0100(sBoneDb_A0100* db, int i)
@@ -1614,11 +1574,11 @@ extern "C" int cFERider_isDoneLoadingModels(int* self)
     }
     int ok = 1;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
-    sItemList_A0100* list = (sItemList_A0100*)func_0014AD28(iface, self[1], self[0]);
-    int n = list->count;
+    cBECharProfileDB* list = (cBECharProfileDB*)func_0014AD28(iface, self[1], self[0]);
+    int n = list->mNumBolts;
     char* mgr = SSXApp->RealFE->mBoltFileManager;
     for (int i = 0; i < n; i++) {
-        sItem_A0100* it = &list->items[i];
+        tBEProfileBolt* it = &((&list->mBolts[0]))[i];
         int fileSlot = func_0019CBE0(D_004A1968, self[1], it->id);
         if (fileSlot >= 0) {
             if (func_0019E238(mgr, self[0], fileSlot) == 0) {
@@ -1629,17 +1589,17 @@ extern "C" int cFERider_isDoneLoadingModels(int* self)
     if (ok) {
         for (int i = 0; i < n;) {
             int next = i + 1;
-            sItem_A0100* it = &list->items[i];
+            tBEProfileBolt* it = &((&list->mBolts[0]))[i];
             int fileSlot = func_0019CBE0(D_004A1968, self[1], it->id);
             if (fileSlot >= 0) {
-                sMdfArchive_A0100 arc;
+                cMdfArchive arc;
                 cMdfArchive_cMdfArchive(&arc);
                 void* pkg = func_0019E2B0(mgr, self[0], fileSlot);
                 if (pkg) {
                     cMdfArchive_attachConstArchive_data(&arc, pkg);
                 }
                 for (int j = i; j < n; j++) {
-                    sItem_A0100* jt = &list->items[j];
+                    tBEProfileBolt* jt = &((&list->mBolts[0]))[j];
                     void* slotTable;
                     if (self) {
                         slotTable = D_004A1968;
@@ -1749,11 +1709,6 @@ extern "C" void cFERiderManager__cFERiderManager(cFERiderManager* self, int flag
 //100%
 INCLUDE_ASM("fe/feridermanager", cFERiderManager_init);
 #ifdef SKIP_ASM
-struct sRiderSlot_001A0498 {
-    int field_0x0;
-    int index;
-    char pad[0xce0 - 8];
-};
 
 /**
  * Numbers the front end's two riders: sets each one's profile index (+0x4) to its slot (0, 1).
@@ -1763,9 +1718,9 @@ struct sRiderSlot_001A0498 {
 extern "C" void cFERiderManager_init(cFERiderManager* self)
 {
     int i;
-    sRiderSlot_001A0498* slot = ((sRiderSlot_001A0498*)self);
+    cFERider* slot = ((cFERider*)self);
     for (i = 0; i < 2; i++) {
-        slot->index = i;
+        slot->mProfileIndex = i;
         slot++;
     }
 }

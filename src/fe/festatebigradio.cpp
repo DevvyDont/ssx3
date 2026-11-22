@@ -1072,11 +1072,6 @@ INCLUDE_ASM("fe/festatebigradio", DisableTextWidget);
 #ifdef SKIP_ASM
 
 
-struct sVEntry00194498b {
-    short delta;
-    short index;
-    void (*fn)(void*, tARGB*);
-};
 
 /**
  * Greys out a text widget.
@@ -1093,7 +1088,7 @@ extern "C" void DisableTextWidget(cUIThing* self)
     tARGB colour = self->mColour;
     if (colour.A > 0.5f) {
         colour.A = 0.5f;
-        sVEntry00194498b* vt2 = (sVEntry00194498b*)self->mVtbl;
+        sVEntry<void(void*, tARGB*)>* vt2 = (sVEntry<void(void*, tARGB*)>*)self->mVtbl;
         vt2[11].fn(vthis(self, vt2[11]), &colour);
     }
 }

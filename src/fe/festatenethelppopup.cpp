@@ -198,11 +198,6 @@ extern "C" void func_002C2688(unsigned short* dst, unsigned short* src);
 extern "C" void cUIText_setUnicodeStringWrap(void* text, unsigned short* str);
 extern char str_cFEStateNetHelpPopup[];
 
-struct sVE_A110 {
-    short delta;
-    short index;
-    unsigned short* (*fn)(void*, int);
-};
 
 
 /**
@@ -229,7 +224,7 @@ extern "C" void cFEStateNetHelpPopup_createAndSetDescriptionString(cFEStateNetHe
             break;
         }
         cFELocale* locale = SSXApp->FELocale;
-        strs[i] = ((sVE_A110*)locale->mVtbl)[4].fn(vthis(locale, ((sVE_A110*)locale->mVtbl)[4]), ids[i]);
+        strs[i] = ((sVEntry<unsigned short*(void*, int)>*)locale->mVtbl)[4].fn(vthis(locale, ((sVEntry<unsigned short*(void*, int)>*)locale->mVtbl)[4]), ids[i]);
         count++;
         total += USTR_length(strs[i]) + 1;
         i++;
@@ -258,13 +253,12 @@ extern "C" void cFEStateNetHelpPopup_createAndSetDescriptionString(cFEStateNetHe
 extern char D_004A1408[];
 
 struct sVEnt_1DA238 { short delta; short index; void (*fn)(void*, int); };
-struct sVec3_1DA238 { float x, y, z; };
 
 struct sWidget_1DA238 {
     char pad00[8];
     sVEnt_1DA238* vt;
     char pad0C[0x38];
-    sVec3_1DA238 pos;
+    t3Vector pos;
 };
 
 struct sNetHelp_1DA238 {
@@ -325,7 +319,7 @@ extern "C" int cFEStateNetHelpPopup_onGainTransition(sNetHelp_1DA238* self, int 
             if (i < self->state) {
                 show_1DA238(self->rows[i], 1);
                 show_1DA238(self->icons[self->b[i]], 1);
-                sVec3_1DA238 objectPos = self->icons[self->b[i]]->pos;
+                t3Vector objectPos = self->icons[self->b[i]]->pos;
                 objectPos.y += (float)i * 22.0f;
                 self->icons[self->b[i]]->pos = objectPos;
                 if (self->a[i]) {

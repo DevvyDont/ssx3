@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "fe/feinput.h"
 #include "ai/ai.h"
 #include "ealib/shape.h"
 #include "main/gamemode.h"
@@ -41,11 +42,6 @@ extern void* cFELoadStateInLodge_vtbl[];
 extern void* cFELoadHintState_vtbl[];
 extern void* cFELoadState_vtbl[];
 
-struct sVE_233438 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 struct sEngine_233438 {
     char pad0[0x8];
@@ -54,15 +50,6 @@ struct sEngine_233438 {
     int f10;
 };
 
-struct sObj_233438 {
-    int f0;
-    char f4;
-    void** vt;
-    int fC;
-    int f10;
-    int f14;
-    int f18;
-};
 
 static inline char* newScreenA_233438(void* self)
 {
@@ -104,7 +91,7 @@ extern "C" void cFELoadScreen_load(cFELoadScreen* self)
 {
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVE_233438* vt = (sVE_233438*)ps2GraphicsMan->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)ps2GraphicsMan->mVtbl;
         vt[44].fn(vthis(ps2GraphicsMan, vt[44]), 0x100);
     }
     void* eng = cUIEngine_cUIEngine(cMemMan_alloc(0x70, str_UIEngine_b, 0x100, 0));
@@ -113,13 +100,13 @@ extern "C" void cFELoadScreen_load(cFELoadScreen* self)
     ((sEngine_233438*)self->mpUI)->f8 = (int)SSXApp->Fonts;
     ((sEngine_233438*)self->mpUI)->f10 = (int)SSXApp->FELocale;
     {
-        sObj_233438* feInput = new (str_FLUIInput, 0x100, 0) sObj_233438;
-        feInput->f4 = 0;
-        feInput->vt = cFEInput_vtbl;
-        feInput->f18 = 0;
-        feInput->fC = 0;
-        feInput->f10 = 0;
-        feInput->f14 = 0;
+        cFEInput* feInput = new (str_FLUIInput, 0x100, 0) cFEInput;
+        feInput->mPadNum = 0;
+        feInput->mVtbl = cFEInput_vtbl;
+        (*(int*)&feInput->mpInput) = 0;
+        feInput->mbKeyReady = 0;
+        feInput->miVKey = 0;
+        feInput->miAsciiKey = 0;
         ((sEngine_233438*)self->mpUI)->fC = feInput;
     }
     char* gm = (char*)SSXApp->GameModeMan;
@@ -1004,11 +991,6 @@ extern "C" void cSSXScriptEngine_AppendStartSequence(void* a, int b);
 extern "C" int cSSXScriptEngine_ReadyNISList(void* self, int i);
 extern void* cGameState_mpGame;
 
-struct sVE_2341D0 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 
 static inline int isMode4_2341D0()
@@ -1042,7 +1024,7 @@ extern "C" void cGFEventStartState_gainFocus(cGFEventStartState* self, int mode)
     int base = *(int*)(*(char**)((char*)cGameState_mpGame + 0xC) + 0x7C);
     cBENewRaceInterface_setNumberAI(race, n);
     {
-        sVE_2341D0* vt = *(sVE_2341D0**)(race + 0xC);
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(race + 0xC);
         vt[1].fn(vthis(race, vt[1]));
     }
     for (; i < n; i++) {
@@ -1050,7 +1032,7 @@ extern "C" void cGFEventStartState_gainFocus(cGFEventStartState* self, int mode)
         cBENewPlayerInterface_setRiderCheatCharID(player, i + base, gm->iCheatCharacters[base + i]);
     }
     {
-        sVE_2341D0* vt = *(sVE_2341D0**)(player + 0xC);
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(player + 0xC);
         vt[1].fn(vthis(player, vt[1]));
     }
     switch (mode) {
@@ -1104,19 +1086,10 @@ extern "C" void cAI_cleanupAfterRace(void* o);
 extern "C" void cAI_cleanupActors(void* o);
 extern void* cGameState_mpGame;
 
-struct sLoadObj_43B0 {
-    char pad0[0x14];
-    int f14;                        // 0x14
-    char pad18[0x80 - 0x18];
-    int f80;                        // 0x80
-    int f84;                        // 0x84
-    char pad88[0x4];
-    int f8C;                        // 0x8C
-};
 
 struct sLoadMgr_43B0 {
     char pad0[0xC];
-    sLoadObj_43B0* obj;             // 0xC
+    cAI* obj;             // 0xC
 };
 
 struct sLoadScreen_43B0 {
@@ -1173,14 +1146,14 @@ extern "C" void cGFEventStartState_update(cGFEventStartState* self)
             self->mPurgeCPURiders = 1;
         } else if (skip == 0) {
             cAI_initAIRiders(MGR_43B0->obj);
-            sLoadObj_43B0* aiObj = MGR_43B0->obj;
-            if (aiObj->f80 == 0) {
+            cAI* aiObj = MGR_43B0->obj;
+            if (aiObj->NumberOfComputersAllocated == 0) {
                 if (mode == 0)
                     cAI_initAIActors(aiObj, 0);
                 else
                     cAI_initAIActors(aiObj, 2);
             }
-            MGR_43B0->obj->f8C = 0;
+            MGR_43B0->obj->ComputerActorsActive = 0;
         }
         cAI_setRaceRankType(MGR_43B0->obj, 0);
         if (mode == 5 || mode == 0)
@@ -1199,10 +1172,10 @@ extern "C" void cGFEventStartState_update(cGFEventStartState* self)
     case 3: {
         if (cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 1) != 0)
             break;
-        if (MGR_43B0->obj->f84 > 0)
-            MGR_43B0->obj->f8C = 1;
-        if (MGR_43B0->obj->f80 > 0)
-            MGR_43B0->obj->f14 = 1;
+        if (MGR_43B0->obj->NumberOfActorsAllocated > 0)
+            MGR_43B0->obj->ComputerActorsActive = 1;
+        if (MGR_43B0->obj->NumberOfComputersAllocated > 0)
+            MGR_43B0->obj->ComputerRidersActive = 1;
         if (cSSXScriptEngine_GetNISListState(ScriptEngine, 0) == 2) {
             cSSXScriptEngine_PlayNISList(ScriptEngine, 0, self->mHasTransitionNIS == 0, 1);
             break;
@@ -1215,8 +1188,8 @@ extern "C" void cGFEventStartState_update(cGFEventStartState* self)
         cBE_getInterface_Fv(cBE_getBE(), 0);
         if (cBENewRaceInterface_newRace.cGameMode != 4) {
             cAI_resolveRace(MGR_43B0->obj);
-            if (MGR_43B0->obj->f80 > 0)
-                MGR_43B0->obj->f14 = 1;
+            if (MGR_43B0->obj->NumberOfComputersAllocated > 0)
+                MGR_43B0->obj->ComputerRidersActive = 1;
         }
         if (self->mPurgeCPURiders) {
             if (!cAI_isReadyToPurgeComputerRiders(MGR_43B0->obj))

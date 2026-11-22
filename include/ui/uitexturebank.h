@@ -13,7 +13,37 @@
 
 struct cTextureElement;
 struct cUIEngine;
-struct tUITextureTableHeader;
+// The UI file's texture table: a header word, then mNumEntries entries. [O] struct tUITextureTableHeader (0x4) and
+// struct tUITextureTableEntry (0x18), cUITextureBank::mpTextureTableHeader's type; [R] cUITextureBank_setData (On
+// Tour cUITextureBank::setData(pShapeName, pData)) stores pData there, takes the element count from its first word
+// and reads entries of 0x18 bytes from +0x4 (ui/uiengine's views sUITexData8138 / sUITexSrc8138).
+struct tUITextureTableHeader {
+    unsigned int mNumEntries;       // 0x000 [O]; [U] setData: mNumElements (the entries follow the header)
+};
+
+// [O] struct tUIuv (0x8).
+struct tUIuv {
+    float u;                        // 0x000 [O]
+    float v;                        // 0x004 [O]
+};
+
+struct tUITextureTableEntry {
+    unsigned int mHashID;           // 0x000 [O]; [U] setData copies it to the element's mHashID (getElementByHashname's key)
+    unsigned char mShapeFileID;     // 0x004 [O]
+    unsigned char mTPageID;         // 0x005 [O]; [U] setData: the element's texture = mpTexturesIDs[mTPageID]
+    unsigned char mCharPad[2];      // 0x006 [O]
+    tUIuv mTopLeft;                 // 0x008 [O]; [U] setData copies the element's texture coordinates
+    tUIuv mBottomRight;             // 0x010 [O]
+};
+
+CHECK_SIZE(tUITextureTableHeader, 0x4);
+CHECK_SIZE(tUIuv, 0x8);
+CHECK_OFFSET(tUITextureTableEntry, mHashID, 0x000);
+CHECK_OFFSET(tUITextureTableEntry, mShapeFileID, 0x004);
+CHECK_OFFSET(tUITextureTableEntry, mTPageID, 0x005);
+CHECK_OFFSET(tUITextureTableEntry, mTopLeft, 0x008);
+CHECK_OFFSET(tUITextureTableEntry, mBottomRight, 0x010);
+CHECK_SIZE(tUITextureTableEntry, 0x18);
 
 struct cUITextureBank {
     tUITextureTableHeader* mpTextureTableHeader; // 0x000 [O]

@@ -313,10 +313,6 @@ extern int cPauseState_Flags;
 extern int cPauseState_Stack[];
 extern int cPauseState_FlagsTable[];
 
-struct sMgr_75A0 {
-    char pad[0x2A0];
-    int f2A0;
-};
 
 /**
  * Answers the Big Challenge offer: Yes starts the challenge, No or Triangle declines it, and the overlay
@@ -343,7 +339,7 @@ extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(cOVState_BIGCHALLENGE_
             if (cWScriptMan_isLocalMissionActive(cWScriptMan_TheWScriptMan) != 0) {
                 cWScriptMan_restartLocalMission(cWScriptMan_TheWScriptMan);
             } else {
-                ((sMgr_75A0*)cWScriptMan_TheWScriptMan)->f2A0 = self->mMissionId;
+                ((cWScriptMan*)cWScriptMan_TheWScriptMan)->LocalMissionId = self->mMissionId;
                 cWScriptMan_startLocalMission(cWScriptMan_TheWScriptMan);
             }
             cOVStateManager_mStatus = 3;
@@ -352,7 +348,7 @@ extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(cOVState_BIGCHALLENGE_
             break;
         }
     case 6:
-        ((sMgr_75A0*)cWScriptMan_TheWScriptMan)->f2A0 = self->mMissionId;
+        ((cWScriptMan*)cWScriptMan_TheWScriptMan)->LocalMissionId = self->mMissionId;
         cWScriptMan_cancelLocalMission(cWScriptMan_TheWScriptMan);
         cOVStateManager_mStatus = 3;
         cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
@@ -496,7 +492,7 @@ extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetEvent(cOVState_BIGCHALLENGE_F
     case 5: {
         int choice = item->mMiscData;
         if (choice == 0) {
-            ((sMgr_75A0*)cWScriptMan_TheWScriptMan)->f2A0 = self->mMissionId;
+            ((cWScriptMan*)cWScriptMan_TheWScriptMan)->LocalMissionId = self->mMissionId;
             cWScriptMan_restartLocalMission(cWScriptMan_TheWScriptMan);
             cUIStateStack_pop_r((char*)self->mpEngine + 0x18, 1);
             cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];

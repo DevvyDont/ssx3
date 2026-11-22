@@ -1045,22 +1045,13 @@ struct sVEntryK18FD90 {
     void* (*fn)(void*, ...);
 };
 
-struct sVEntryVK18FD90 {
-    short delta;
-    short index;
-    void (*fn)(void*, ...);
-};
 
-#define VCALLV_K18FD90(obj, off, idx) (*(sVEntryVK18FD90**)((char*)(obj) + (off)))[idx].fn((char*)(obj) + (*(sVEntryVK18FD90**)((char*)(obj) + (off)))[idx].delta
+#define VCALLV_K18FD90(obj, off, idx) (*(sVEntry<void(void*, ...)>**)((char*)(obj) + (off)))[idx].fn((char*)(obj) + (*(sVEntry<void(void*, ...)>**)((char*)(obj) + (off)))[idx].delta
 
 #define VCALL_K18FD90(obj, off, idx) (*(sVEntryK18FD90**)((char*)(obj) + (off)))[idx].fn((char*)(obj) + (*(sVEntryK18FD90**)((char*)(obj) + (off)))[idx].delta
 
 
 
-struct sMgrK18FD90 {
-    char pad0[0xF8];
-    int fF8;                 // 0xF8
-};
 
 static inline void* GetText_K18FD90(char* key)
 {
@@ -1126,7 +1117,7 @@ extern "C" void cFEStateProfileLoad_onWidgetEvent(cFEStateProfileLoad* vself, cU
         if (self->mIsProcessing != 0) break;
         char* mp = (char*)cSSXApp_getMCManager(SSXApp);
         if (self->mScreenStatus != 3) break;
-        ((sMgrK18FD90*)mp)->fF8 = self->mSlot = item->mMiscData;
+        ((cMCOverlayManager*)mp)->mFileCursor = self->mSlot = item->mMiscData;
         switch (cFEStateProfileLoad_mScreenAction) {
         case 1:
         case 3:
@@ -1186,7 +1177,7 @@ extern "C" void cFEStateProfileLoad_onWidgetEvent(cFEStateProfileLoad* vself, cU
         if (self->mIsProcessing != 1 && self->mState != 6 && cFEStateProfileLoad_mScreenAction != 2 && self->mDeleteButtonActive != 0) {
             char* mp = (char*)cSSXApp_getMCManager(SSXApp);
             if (VCALL_K18FD90(*(char**)(mp + 1076), 0, 54), *(int*)(mp + 0x428)) != 0) {
-                ((sMgrK18FD90*)mp)->fF8 = self->mSlot = item->mMiscData;
+                ((cMCOverlayManager*)mp)->mFileCursor = self->mSlot = item->mMiscData;
                 if (self->mState == 1) {
                     if (VCALL_K18FD90(*(char**)(mp + 1076), 0, 67), self->mSlot) != 0) {
                         self->mIsProcessing = 1;

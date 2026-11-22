@@ -108,11 +108,6 @@ extern "C" void cUIStateStack_push(void* list, void* item);
 extern char str_cFEStateVideoPlayer[];
 extern const char* D_00441128[];
 
-struct sVEntryK195600 {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
 
 /**
  * Plays the selected bonus video in a cFEStateVideoPlayer popup, or on event 6 pushes the factory's state.
@@ -136,7 +131,7 @@ extern "C" void cFEStateBonusMaterial_onWidgetEvent(cFEStateBonusMaterial* self,
     }
     case 6: {
         char* factory = *(char**)self->mpEngine;
-        sVEntryK195600* vt = *(sVEntryK195600**)(factory + 4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(factory + 4);
         void* nextState = vt[5].fn(vthis(factory, vt[5]), self, item->mMiscData);
         if (nextState != 0)
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);

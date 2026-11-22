@@ -147,21 +147,13 @@ struct sVEii_F270 {
     short index;
     int (*fn)(void*, int);
 };
-struct sVEv_F270 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 struct sVEr_F270 {
     short delta;
     short index;
     void* (*fn)(void*, void*, int);
 };
-struct sSnd_F270 {
-    sVEv_F270* vt;
-};
 // $gp-relative default sound player (the unit declares it later as sDefObj_1FF0).
-extern sSnd_F270 D_004A5A58_F270 __asm__("gUISoundNull");
+extern cUISoundInterface D_004A5A58_F270 __asm__("gUISoundNull");
 
 static inline int Test_F270(char* o, int slot)
 {
@@ -177,13 +169,13 @@ static inline int Call_F270(char* o, int slot, int a)
 
 static inline void CallV_F270(char* o, int slot, int a)
 {
-    sVEv_F270* vt = *(sVEv_F270**)(o + 8);
+    sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(o + 8);
     vt[slot].fn(vthis(o, vt[slot]), a);
 }
 
-static inline void Play_F270(sSnd_F270* snd, int id)
+static inline void Play_F270(cUISoundInterface* snd, int id)
 {
-    snd->vt[2].fn(vthis(snd, snd->vt[2]), id);
+    ((sVEntry<void (void*, int)>*)snd->mVtbl)[2].fn(vthis(snd, ((sVEntry<void (void*, int)>*)snd->mVtbl)[2]), id);
 }
 
 struct sGallery_F270 {
@@ -219,9 +211,9 @@ struct sGallery_F270 {
  */
 extern "C" int cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase* self, cUIInput* in)
 {
-    sSnd_F270* snd = &D_004A5A58_F270;
-    if (*(sSnd_F270**)&self->mpEngine->mpSound != 0) {
-        snd = *(sSnd_F270**)&self->mpEngine->mpSound;
+    cUISoundInterface* snd = &D_004A5A58_F270;
+    if (*(cUISoundInterface**)&self->mpEngine->mpSound != 0) {
+        snd = *(cUISoundInterface**)&self->mpEngine->mpSound;
     }
     if (Test_F270(((char*)in), 6)) {
         Play_F270(snd, 3);
@@ -231,7 +223,7 @@ extern "C" int cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase*
             for (j = 0; j < 8; j++) {
                 char* w = ((sGallery_F270*)self)->cells[i][j];
                 if (w != 0) {
-                    sVEv_F270* vt = *(sVEv_F270**)(w + 8);
+                    sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(w + 8);
                     vt[9].fn(vthis(w, vt[9]), 0);
                 }
             }
@@ -390,17 +382,6 @@ struct sVEv_F820 {
     void (*fn)(void*);
 };
 
-struct sWidget_F820 {
-    char pad0[0x8];
-    sVEi_F820* vt;              // 0x8
-    char padC[0x18 - 0xC];
-    int index;                  // 0x18
-    char pad1C[0x38 - 0x1C];
-    int hash;                   // 0x38
-    char pad3C[0x78 - 0x3C];
-    int reward;                 // 0x78
-    void* tex;                  // 0x7C
-};
 
 struct sGallery_F820 {
     char pad0[0x8];
@@ -416,25 +397,25 @@ struct sGallery_F820 {
     int count68;                // 0x68
     int count6C;                // 0x6C
     char pad70[0x8F4 - 0x70];
-    sWidget_F820* w8F4;         // 0x8F4
-    sWidget_F820* w8F8;         // 0x8F8
+    cUIIcon* w8F4;         // 0x8F4
+    cUIIcon* w8F8;         // 0x8F8
     char pad8FC[0x900 - 0x8FC];
-    sWidget_F820* w900;         // 0x900
-    sWidget_F820* w904;         // 0x904
-    sWidget_F820* w908;         // 0x908
-    sWidget_F820* w90C;         // 0x90C
-    sWidget_F820* w910;         // 0x910
-    sWidget_F820* w914;         // 0x914
-    sWidget_F820* w918;         // 0x918
-    sWidget_F820* w91C;         // 0x91C
-    sWidget_F820* w920;         // 0x920
-    sWidget_F820* cells[4][8];  // 0x924
-    sWidget_F820* frames[4][8]; // 0x9A4
+    cUIIcon* w900;         // 0x900
+    cUIIcon* w904;         // 0x904
+    cUIIcon* w908;         // 0x908
+    cUIIcon* w90C;         // 0x90C
+    cUIIcon* w910;         // 0x910
+    cUIIcon* w914;         // 0x914
+    cUIIcon* w918;         // 0x918
+    cUIIcon* w91C;         // 0x91C
+    cUIIcon* w920;         // 0x920
+    cUIIcon* cells[4][8];  // 0x924
+    cUIIcon* frames[4][8]; // 0x9A4
 };
 
-static inline void show_F820(sWidget_F820* w, int on)
+static inline void show_F820(cUIIcon* w, int on)
 {
-    w->vt[9].fn(vthis(w, w->vt[9]), on);
+    ((sVEi_F820*)w->mVtbl)[9].fn(vthis(w, ((sVEi_F820*)w->mVtbl)[9]), on);
 }
 
 /**
@@ -448,10 +429,10 @@ static inline void show_F820(sWidget_F820* w, int on)
  *
  * @param w  the widget being created
  */
-extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, sWidget_F820* w)
+extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, cUIIcon* w)
 {
     char buf[16];
-    int hash = w->hash;
+    int hash = w->mHashName;
 
     if (hash == GetHashValue32(str_helptext)) {
         self->w900 = w;
@@ -481,41 +462,41 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, sW
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int texHash = GetHashValue32(str_poster_icon);
-                w->tex = cUITextureBank_getElementByHashname(&ui->mTextureBank, texHash);
+                (*(void**)&w->mpTextureElem) = cUITextureBank_getElementByHashname(&ui->mTextureBank, texHash);
             }
-            w->reward = -1;
+            w->mTextureID = -1;
             break;
         case 4:
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int texHash = GetHashValue32(str_trading_card_icon);
-                w->tex = cUITextureBank_getElementByHashname(&ui->mTextureBank, texHash);
+                (*(void**)&w->mpTextureElem) = cUITextureBank_getElementByHashname(&ui->mTextureBank, texHash);
             }
-            w->reward = -1;
+            w->mTextureID = -1;
             break;
         case 5:
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int texHash = GetHashValue32(str_art_icon);
-                w->tex = cUITextureBank_getElementByHashname(&ui->mTextureBank, texHash);
+                (*(void**)&w->mpTextureElem) = cUITextureBank_getElementByHashname(&ui->mTextureBank, texHash);
             }
-            w->reward = -1;
+            w->mTextureID = -1;
             break;
         case 6:
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int texHash = GetHashValue32(str_video_icon);
-                w->tex = cUITextureBank_getElementByHashname(&ui->mTextureBank, texHash);
+                (*(void**)&w->mpTextureElem) = cUITextureBank_getElementByHashname(&ui->mTextureBank, texHash);
             }
-            w->reward = -1;
+            w->mTextureID = -1;
             break;
         case 7:
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int texHash = GetHashValue32(str_toys_icon);
-                w->tex = cUITextureBank_getElementByHashname(&ui->mTextureBank, texHash);
+                (*(void**)&w->mpTextureElem) = cUITextureBank_getElementByHashname(&ui->mTextureBank, texHash);
             }
-            w->reward = -1;
+            w->mTextureID = -1;
             break;
         }
     } else if (hash == GetHashValue32(str_screentitle)) {
@@ -569,7 +550,7 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, sW
         for (int row = 0; row < self->rows; row++) {
             for (int col = 0; col < self->cols; col++) {
                 if (hash == GetHashValue32(D_00441440[row][col])) {
-                    w->index = row * self->cols + col;
+                    w->mMiscData = row * self->cols + col;
                     show_F820(w, 0);
                     self->cells[row][col] = w;
                 } else if (hash == GetHashValue32(D_004414C0[row][col])) {
@@ -976,11 +957,6 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBERewardInterface_isRewardsLoaded(void* iface);
-struct sVE_0238c {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Finishes the reward-list load once the reward database is ready, and highlights the first cell when the icons are in
@@ -1004,7 +980,7 @@ extern "C" void cFEStateRewardGalleryBase_updateRewardsLoad(cFEStateRewardGaller
                 self->mpSelected = (cUIIcon*)(*(int*)&self->mpIcons[0]);
                 sVEntry<void(void*)>* vt2 = (sVEntry<void(void*)>*)self->mVtbl;
                 vt2[40].fn(vthis(self, vt2[40]));
-                sVE_0238c* vt3 = (sVE_0238c*)self->mVtbl;
+                sVEntry<void(void*, int)>* vt3 = (sVEntry<void(void*, int)>*)self->mVtbl;
                 vt3[33].fn(vthis(self, vt3[33]), 0);
             }
         }
@@ -1282,24 +1258,12 @@ struct sVEv_08A0 {
     short index;
     void (*fn)(void*, int);
 };
-struct sVEp_08A0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
 struct sVEi_08A0 {
     short delta;
     short index;
     int (*fn)(void*, int);
 };
 
-struct sGalCell_08A0 {
-    char pad0[0x8];
-    void* vt;                   // 0x8
-    char padC[0x78 - 0xC];
-    int reward;                 // 0x78
-    void* tex;                  // 0x7C
-};
 
 struct sGallery_08A0 {
     char pad0[0x8];
@@ -1314,13 +1278,13 @@ struct sGallery_08A0 {
     char pad6C[0x8F0 - 0x6C];
     int selected;               // 0x8F0
     char pad8F4[0x924 - 0x8F4];
-    sGalCell_08A0* cells[4][8];  // 0x924
-    sGalCell_08A0* frames[4][8]; // 0x9A4
+    cUIIcon* cells[4][8];  // 0x924
+    cUIIcon* frames[4][8]; // 0x9A4
 };
 
-static inline void show_08A0(sGalCell_08A0* c, int on)
+static inline void show_08A0(cUIIcon* c, int on)
 {
-    sVEv_08A0* vt = (sVEv_08A0*)c->vt;
+    sVEv_08A0* vt = (sVEv_08A0*)((void*)c->mVtbl);
     vt[9].fn(vthis(c, vt[9]), on);
 }
 
@@ -1342,15 +1306,15 @@ extern "C" void cFEStateRewardGalleryBase_updateRow(sGallery_08A0* self, int row
             if (self->vt[38].fn(vthis(self, self->vt[38]), idx) != 0) {
                 int rewardIndex = self->vt[26].fn(vthis(self, self->vt[26]), idx);
                 if (rewardIndex >= 0) {
-                    sGalCell_08A0* cell = self->cells[row][col];
-                    cell->reward = rewardIndex;
-                    cell->tex = 0;
+                    cUIIcon* cell = self->cells[row][col];
+                    cell->mTextureID = rewardIndex;
+                    (*(void**)&cell->mpTextureElem) = 0;
                 } else {
                     int texture = self->vt[27].fn(vthis(self, self->vt[27]), idx);
                     if (texture != 0) {
-                        sGalCell_08A0* cell = self->cells[row][col];
-                        cell->tex = (void*)texture;
-                        cell->reward = -1;
+                        cUIIcon* cell = self->cells[row][col];
+                        (*(void**)&cell->mpTextureElem) = (void*)texture;
+                        cell->mTextureID = -1;
                     }
                 }
             } else {
@@ -1365,12 +1329,12 @@ extern "C" void cFEStateRewardGalleryBase_updateRow(sGallery_08A0* self, int row
                     int iconHash = GetHashValue32(str_questmark);
                     icon = cUITextureBank_getElementByHashname(ui + 0x58, iconHash);
                 }
-                sGalCell_08A0* cell = self->cells[row][col];
-                cell->tex = icon;
-                cell->reward = -1;
+                cUIIcon* cell = self->cells[row][col];
+                (*(void**)&cell->mpTextureElem) = icon;
+                cell->mTextureID = -1;
             }
-            sGalCell_08A0* cell = self->cells[row][col];
-            sVEp_08A0* vt = (sVEp_08A0*)cell->vt;
+            cUIIcon* cell = self->cells[row][col];
+            sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)((void*)cell->mVtbl);
             vt[11].fn(vthis(cell, vt[11]), D_004C6818);
         } else {
             show_08A0(self->cells[row][col], 0);
@@ -1425,16 +1389,6 @@ extern char str_R1_ps2[];
 extern char str_L1_ps2[];
 extern char D_004A1408[];
 
-struct sVEK1D0BC8a {
-    short delta;
-    short index;
-    unsigned short* (*fn)(void*, int);
-};
-struct sVEK1D0BC8b {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Updates the "page X of Y" text and shows the L1/R1 page buttons only when there is more than one page.
@@ -1447,7 +1401,7 @@ extern "C" void cFEStateRewardGalleryBase_updatePageNumber(cFEStateRewardGallery
         return;
     char* obj = *(char**)(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x10);
     if (obj != 0) {
-        sVEK1D0BC8a* vt = *(sVEK1D0BC8a**)(obj + 4);
+        sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(obj + 4);
         char* thisp = obj + vt[4].delta;
         unsigned short* fmt = vt[4].fn(thisp, GetHashValue32(str_kT_OVRCMNPageOf));
         if (fmt != 0) {
@@ -1458,12 +1412,12 @@ extern "C" void cFEStateRewardGalleryBase_updatePageNumber(cFEStateRewardGallery
             cUIText_setUnicodeString(self->mpPageNumberText, buf);
             char* buttonPrompt = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_R1_ps2));
             if (buttonPrompt != 0) {
-                sVEK1D0BC8b* vt2 = *(sVEK1D0BC8b**)(buttonPrompt + 8);
+                sVEntry<void(void*, int)>* vt2 = *(sVEntry<void(void*, int)>**)(buttonPrompt + 8);
                 vt2[9].fn(buttonPrompt + vt2[9].delta, pages > 1);
             }
             buttonPrompt = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_L1_ps2));
             if (buttonPrompt != 0) {
-                sVEK1D0BC8b* vt2 = *(sVEK1D0BC8b**)(buttonPrompt + 8);
+                sVEntry<void(void*, int)>* vt2 = *(sVEntry<void(void*, int)>**)(buttonPrompt + 8);
                 vt2[9].fn(buttonPrompt + vt2[9].delta, pages > 1);
             }
             return;
@@ -1483,26 +1437,6 @@ extern "C" const char* getDollarString(void* a0);
 extern "C" const char* getDollarString_i(int v) __asm__("getDollarString");
 extern char D_004A1408[];
 
-struct sVEK1D0D30a {
-    short delta;
-    short index;
-    void* (*fn)(void*, int);
-};
-struct sVEK1D0D30b {
-    short delta;
-    short index;
-    const char* (*fn)(void*, void*);
-};
-struct sVEK1D0D30c {
-    short delta;
-    short index;
-    int (*fn)(void*, void*);
-};
-struct sVEK1D0D30d {
-    short delta;
-    short index;
-    int (*fn)(void*, int);
-};
 
 /**
  * Shows the highlighted reward's name and, while it is unowned and has a price, its cost.
@@ -1523,17 +1457,17 @@ extern "C" void cFEStateRewardGalleryBase_updateRewardInfo(cFEStateRewardGallery
         return;
     }
     int idx = self->mFirstVisibleRow * self->mMaxRewardColumns + grid->mMiscData;
-    sVEK1D0D30a* vt = (sVEK1D0D30a*)self->mVtbl;
+    sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)self->mVtbl;
     void* item = vt[34].fn(vthis(self, vt[34]), idx);
     if (self->mpRewardNameText != 0) {
-        sVEK1D0D30b* vt2 = (sVEK1D0D30b*)self->mVtbl;
+        sVEntry<const char*(void*, void*)>* vt2 = (sVEntry<const char*(void*, void*)>*)self->mVtbl;
         cUIText_setAsciiString(self->mpRewardNameText, vt2[37].fn(vthis(self, vt2[37]), item));
     }
     if (self->mpRewardCostText != 0) {
-        sVEK1D0D30c* vt3 = (sVEK1D0D30c*)self->mVtbl;
+        sVEntry<int(void*, void*)>* vt3 = (sVEntry<int(void*, void*)>*)self->mVtbl;
         int price = vt3[35].fn(vthis(self, vt3[35]), item);
         if (price > 0) {
-            sVEK1D0D30d* vt4 = (sVEK1D0D30d*)self->mVtbl;
+            sVEntry<int(void*, int)>* vt4 = (sVEntry<int(void*, int)>*)self->mVtbl;
             if (vt4[38].fn(vthis(self, vt4[38]), idx) == 0) {
                 cUIText_setAsciiString(self->mpRewardCostText, getDollarString_i(price));
                 return;
@@ -1596,21 +1530,6 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updateHighlither);
 #ifdef SKIP_ASM
 extern char D_004C6808[];
 
-struct sVEK1D0F30a {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-struct sVEK1D0F30b {
-    short delta;
-    short index;
-    int (*fn)(void*, int);
-};
-struct sVEK1D0F30c {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
 
 /**
  * Moves the select bar onto the highlighted cell and gives that cell the reward's icon when the reward is owned.
@@ -1635,10 +1554,10 @@ extern "C" void cFEStateRewardGalleryBase_updateHighlither(cFEStateRewardGallery
             barPos.x = cellPos.x + self->mHorizHilighterOffset;
             *(&self->mpHilighter->mPosition) = barPos;
             cUIThing* selectBar = self->mpHilighter;
-            sVEK1D0F30a* vt = (sVEK1D0F30a*)selectBar->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)selectBar->mVtbl;
             vt[9].fn(vthis(selectBar, vt[9]), 1);
         } else {
-            sVEK1D0F30a* vt = (sVEK1D0F30a*)icon->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)icon->mVtbl;
             vt[9].fn(vthis(icon, vt[9]), 0);
         }
     }
@@ -1646,12 +1565,12 @@ extern "C" void cFEStateRewardGalleryBase_updateHighlither(cFEStateRewardGallery
     if (((char*)grid) == 0)
         return;
     int idx = self->mFirstVisibleRow * self->mMaxRewardColumns + grid->mMiscData;
-    sVEK1D0F30b* vt = (sVEK1D0F30b*)self->mVtbl;
+    sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)self->mVtbl;
     if (vt[38].fn(vthis(self, vt[38]), idx) != 0) {
-        sVEK1D0F30b* vt2 = (sVEK1D0F30b*)self->mVtbl;
+        sVEntry<int(void*, int)>* vt2 = (sVEntry<int(void*, int)>*)self->mVtbl;
         int iconId = vt2[26].fn(vthis(self, vt2[26]), idx);
         if (iconId < 0) {
-            sVEK1D0F30b* vt3 = (sVEK1D0F30b*)self->mVtbl;
+            sVEntry<int(void*, int)>* vt3 = (sVEntry<int(void*, int)>*)self->mVtbl;
             int textureElement = vt3[27].fn(vthis(self, vt3[27]), idx);
             cUIIcon* curCell = self->mpSelected;
             curCell->mTextureID = -1;
@@ -1663,7 +1582,7 @@ extern "C" void cFEStateRewardGalleryBase_updateHighlither(cFEStateRewardGallery
         }
     }
     cUIIcon* curCell = self->mpSelected;
-    sVEK1D0F30c* vt4 = (sVEK1D0F30c*)curCell->mVtbl;
+    sVEntry<void(void*, void*)>* vt4 = (sVEntry<void(void*, void*)>*)curCell->mVtbl;
     vt4[11].fn(vthis(curCell, vt4[11]), D_004C6808);
 }
 #endif
@@ -2602,22 +2521,13 @@ struct sVE_1C98 {
     void (*fn)(void*, int);
 };
 
-struct sWidget_1C98 {
-    char pad_0x0[8];
-    sVE_1C98* vt;       // 0x8
-    char pad_0xC[0x38 - 0xC];
-    int hash;           // 0x38
-    char pad_0x3C[0x78 - 0x3C];
-    int f78;            // 0x78
-    void* f7C;          // 0x7C
-};
 
 struct sPreviewReward_1C98 {
     char pad_0x0[0x10];
     char* ui;                   // 0x10
     char pad_0x14[0x48 - 0x14];
-    sWidget_1C98* items[3];     // 0x48
-    sWidget_1C98* frames[3];    // 0x54
+    cUIIcon* items[3];     // 0x48
+    cUIIcon* frames[3];    // 0x54
     char** reward;              // 0x60
     char pad_0x64[0x68 - 0x64];
     int type;                   // 0x68
@@ -2636,45 +2546,45 @@ struct sPreviewReward_1C98 {
  *
  * @param w  the widget being created, or 0
  */
-extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, sWidget_1C98* w)
+extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, cUIIcon* w)
 {
     if (w == 0)
         return;
 
-    int hash = w->hash;
+    int hash = w->mHashName;
     if (hash == GetHashValue32(str_Poster_icon)) {
         switch (self->type) {
         case 3:
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int iconHash = GetHashValue32(str_poster_icon);
-                w->f7C = cUITextureBank_getElementByHashname(&ui->mTextureBank, iconHash);
+                (*(void**)&w->mpTextureElem) = cUITextureBank_getElementByHashname(&ui->mTextureBank, iconHash);
             }
-            w->f78 = -1;
+            w->mTextureID = -1;
             break;
         case 4:
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int iconHash = GetHashValue32(str_trading_card_icon);
-                w->f7C = cUITextureBank_getElementByHashname(&ui->mTextureBank, iconHash);
+                (*(void**)&w->mpTextureElem) = cUITextureBank_getElementByHashname(&ui->mTextureBank, iconHash);
             }
-            w->f78 = -1;
+            w->mTextureID = -1;
             break;
         case 5:
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int iconHash = GetHashValue32(str_art_icon);
-                w->f7C = cUITextureBank_getElementByHashname(&ui->mTextureBank, iconHash);
+                (*(void**)&w->mpTextureElem) = cUITextureBank_getElementByHashname(&ui->mTextureBank, iconHash);
             }
-            w->f78 = -1;
+            w->mTextureID = -1;
             break;
         case 7:
             {
                 cUIEngine* ui = (cUIEngine*)self->ui;
                 int iconHash = GetHashValue32(str_toys_icon);
-                w->f7C = cUITextureBank_getElementByHashname(&ui->mTextureBank, iconHash);
+                (*(void**)&w->mpTextureElem) = cUITextureBank_getElementByHashname(&ui->mTextureBank, iconHash);
             }
-            w->f78 = -1;
+            w->mTextureID = -1;
             break;
         }
     } else if (hash == GetHashValue32(str_screentitle)) {
@@ -2698,7 +2608,7 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
     } else if (hash == GetHashValue32(str_reward_name)) {
         switch (self->type) {
         case 4:
-            w->vt[9].fn(vthis(w, w->vt[9]), 0);
+            ((sVE_1C98*)w->mVtbl)[9].fn(vthis(w, ((sVE_1C98*)w->mVtbl)[9]), 0);
             break;
         case 3:
         case 5:
@@ -2710,13 +2620,13 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
         }
     } else if (hash == GetHashValue32(str_Square_shape)) {
         self->frames[0] = w;
-        w->vt[9].fn(vthis(w, w->vt[9]), 0);
+        ((sVE_1C98*)w->mVtbl)[9].fn(vthis(w, ((sVE_1C98*)w->mVtbl)[9]), 0);
     } else if (hash == GetHashValue32(str_Horizontal_shape)) {
         self->frames[1] = w;
-        w->vt[9].fn(vthis(w, w->vt[9]), 0);
+        ((sVE_1C98*)w->mVtbl)[9].fn(vthis(w, ((sVE_1C98*)w->mVtbl)[9]), 0);
     } else if (hash == GetHashValue32(str_Vertical_shape)) {
         self->frames[2] = w;
-        w->vt[9].fn(vthis(w, w->vt[9]), 0);
+        ((sVE_1C98*)w->mVtbl)[9].fn(vthis(w, ((sVE_1C98*)w->mVtbl)[9]), 0);
     } else if (hash == GetHashValue32(str_Square_bitmap)) {
         self->items[0] = w;
     } else if (hash == GetHashValue32(str_Horizontal_bitmap)) {
@@ -2726,12 +2636,12 @@ extern "C" void cFEStatePreviewReward_onWidgetCreate(sPreviewReward_1C98* self, 
     }
     int sel = self->sel;
     if (sel >= 0) {
-        sWidget_1C98* item = self->items[sel];
+        cUIIcon* item = self->items[sel];
         if (item != 0 && self->frames[sel] != 0) {
-            item->f78 = self->f70;
-            item->f7C = 0;
-            sWidget_1C98* frame = self->frames[self->sel];
-            frame->vt[9].fn(vthis(frame, frame->vt[9]), 1);
+            item->mTextureID = self->f70;
+            (*(void**)&item->mpTextureElem) = 0;
+            cUIIcon* frame = self->frames[self->sel];
+            ((sVE_1C98*)frame->mVtbl)[9].fn(vthis(frame, ((sVE_1C98*)frame->mVtbl)[9]), 1);
         }
     }
 }

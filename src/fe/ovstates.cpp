@@ -266,7 +266,6 @@ extern "C" void cGameComm_destroy();
 extern "C" void cCommSystem_destroy();
 extern char str_07main_men[];
 
-struct sVEnt2_00194AA8 { short delta; short index; int (*fn)(void*); };
 
 /**
  * Builds the main menu ("07main_men"), shuts the online layer down and counts the connected controllers.
@@ -302,7 +301,7 @@ extern "C" void cFEStateMainMenu_onCreateScreen(cFEStateMainMenu* self)
     for (int i = 0; i < 2; i++) {
         sVEntry<void(void*, unsigned char)>* vt1 = *(sVEntry<void(void*, unsigned char)>**)(obj + 8);
         vt1[44].fn(vthis(obj, vt1[44]), i);
-        sVEnt2_00194AA8* vt2 = *(sVEnt2_00194AA8**)(obj + 8);
+        sVEntry<int(void*)>* vt2 = *(sVEntry<int(void*)>**)(obj + 8);
         if (vt2[45].fn(vthis(obj, vt2[45])) != 0) {
             (*(unsigned char*)&self->mNumOfCtrl)++;
         }
@@ -547,10 +546,6 @@ extern char str_ps2sq[];
 extern char str_hl[];
 
 
-struct sObj_194EB0 {
-    int pad0;
-    sVEntry<void>* vt;
-};
 
 static inline void setWidgetHidden_194EB0(char* self, char* name)
 {
@@ -639,15 +634,15 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(cFEStateMainMenu* self_, cUIThing
             setWidgetHidden_194EB0(((char*)self_), str_ps2sq);
             return;
         }
-        sObj_194EB0* obj = *(sObj_194EB0**)self_->mpEngine;
-        void* nextState = ((void* (*)(void*, void*, int))obj->vt[4].fn)(vthis(obj, obj->vt[4]), ((char*)self_), item_->mMiscData);
+        cUICustomInterface* obj = *(cUICustomInterface**)self_->mpEngine;
+        void* nextState = ((void* (*)(void*, void*, int))((sVEntry<void>*)obj->mVtbl)[4].fn)(vthis(obj, ((sVEntry<void>*)obj->mVtbl)[4]), ((char*)self_), item_->mMiscData);
         if (nextState != 0)
             cUIStateStack_push(&self_->mpEngine->mStateStack, nextState);
         break;
     }
     case 6: {
-        sObj_194EB0* obj = *(sObj_194EB0**)self_->mpEngine;
-        void* nextState = ((void* (*)(void*, void*, int))obj->vt[5].fn)(vthis(obj, obj->vt[5]), ((char*)self_), item_->mMiscData);
+        cUICustomInterface* obj = *(cUICustomInterface**)self_->mpEngine;
+        void* nextState = ((void* (*)(void*, void*, int))((sVEntry<void>*)obj->mVtbl)[5].fn)(vthis(obj, ((sVEntry<void>*)obj->mVtbl)[5]), ((char*)self_), item_->mMiscData);
         if (nextState != 0)
             cUIStateStack_push(&self_->mpEngine->mStateStack, nextState);
         break;

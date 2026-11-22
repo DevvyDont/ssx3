@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "bx/math3d.h"
+#include "bx/bxstring.h"
 #include "main/gamemode.h"
 #include "ui/uiscrollbar.h"
 #include "ui/uitextscroll.h"
@@ -219,10 +221,6 @@ extern int D_004A2768;
 // D_004C8C58 is the 11-entry texture table (size 0xB0); this float sits at +0x48 inside it.
 extern float D_004C8C58_f[] __asm__("D_004C8C58");
 
-struct sVec2_20EC18 {
-    float x, y;
-    sVec2_20EC18(float x_, float y_) : x(x_), y(y_) {}
-};
 
 /**
  * Computes a course-progress tracker's screen layout from the rectangle it is drawn in.
@@ -248,7 +246,7 @@ extern "C" void func_0020EC18(cHUDRadar* self, tRect* screenRect, tRect* area)
         textHeight = 30.0f;
     }
     float arrowHeight = D_004C8C58_f[72 / 4];
-    (*(sVec2_20EC18*)&(self)->unk_000[0]) = sVec2_20EC18(area->X + area->W * 0.5f, (area->Y + area->H) - textHeight);
+    (*(t2Vector*)&(self)->unk_000[0]) = t2Vector(area->X + area->W * 0.5f, (area->Y + area->H) - textHeight);
     (self)->unk_008 = area->Y;
     (self)->unk_00C = area->Y + area->H - textHeight - arrowHeight;
     (self)->unk_010 = area->X + area->W * 0.5f;
@@ -1485,17 +1483,13 @@ extern "C" void func_00210618(int i)
 //100%
 INCLUDE_ASM("fe/ovstatetrophy", func_00210820);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sQuad_210820 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 class cPosObj_210820 {
 public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual sQuad_210820* getPosition();
+    virtual t4Vector* getPosition();
 };
 struct sZone_210820 {
     float sx, sy, ox, oy, f10;
@@ -1508,11 +1502,11 @@ struct sSlot_210820 {
 extern sSlot_210820 D_slots210820[6] __asm__("D_004C8BC8");
 extern char* D_004A2754;
 
-static inline float subx_210820(sZone_210820* z, sQuad_210820& p)
+static inline float subx_210820(sZone_210820* z, t4Vector& p)
 {
     return p.x - z->ox;
 }
-static inline float suby_210820(sZone_210820* z, sQuad_210820& p)
+static inline float suby_210820(sZone_210820* z, t4Vector& p)
 {
     return p.y - z->oy;
 }
@@ -1541,7 +1535,7 @@ extern "C" float func_00210820(int idx)
     sZone_210820* zones = (sZone_210820*)D_004A2754;
     char* world = (char*)SSXApp->Game->AI;
     char* rider = *(char**)(world + (idx << 2) + 0x28);
-    sQuad_210820 pos = *((cPosObj_210820*)(rider + 0x6C0))->getPosition();
+    t4Vector pos = *((cPosObj_210820*)(rider + 0x6C0))->getPosition();
     float dy = suby_210820(&zones[D_slots210820[idx].zone], pos);
     float dx = subx_210820(&zones[D_slots210820[idx].zone], pos);
     float lateral = dy * sy_210820(&zones[D_slots210820[idx].zone]) + dx * sx_210820(&zones[D_slots210820[idx].zone]);
@@ -1732,11 +1726,6 @@ extern "C" void func_001A83D8(void* list, int keep, unsigned int sel, int a3, in
 extern char str_textScrollChat_b[];
 extern char str_colon_sp_b[];
 
-struct sBXString_00210BD8 {
-    char* str;
-    sBXString_00210BD8() {}
-    sBXString_00210BD8(const sBXString_00210BD8& o);
-};
 
 /**
  * Appends a chat line "<name>: <text>" to the chat overlay's scroller.
@@ -1760,18 +1749,18 @@ extern "C" void func_00210BD8(void* self, char* name, int ownMessage)
     unsigned short linesOffset = obj->mLinesOffset;
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (ownMessage != 0) {
-        sBXString_00210BD8 lineText;
+        cBXString lineText;
         cBXString_cBXString2(&lineText, cBENetworkInterface_networkOpt.unk_488);
         cBXString_Concat(&lineText, str_colon_sp_b);
         cBXString_Concat(&lineText, name);
-        cUITextScroll_addAsciiString(obj, lineText.str);
+        cUITextScroll_addAsciiString(obj, lineText.Str);
         cBXString__cBXString(&lineText, 2);
     } else {
-        sBXString_00210BD8 lineText;
+        cBXString lineText;
         cBXString_cBXString2(&lineText, cBENetworkInterface_networkOpt.unk_498);
         cBXString_Concat(&lineText, str_colon_sp_b);
         cBXString_Concat(&lineText, name);
-        cUITextScroll_addAsciiString(obj, lineText.str);
+        cUITextScroll_addAsciiString(obj, lineText.Str);
         cBXString__cBXString(&lineText, 2);
     }
     func_001A83D8(obj, 0x1E, 8, lineCount, selectedIndex, linesOffset, 0, 1);

@@ -1,4 +1,6 @@
 #include "common.h"
+#include "movie/movieplayer.h"
+#include "bx/math3d.h"
 #include "fe/festatetransition.h"
 #include "fe/feinput.h"
 #include "vtable.h"
@@ -892,15 +894,7 @@ extern char cIrradianceDataBase_TheDataBase[];
 
 struct sStr11_1E80 { char c[11]; };
 
-struct sV4_1E80 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-struct sVE_1E80 {
-    short delta;
-    short index;
-    void (*fn)(void*, ...);
-};
 
 class cCamObj_1E80 {
 public:
@@ -948,7 +942,7 @@ extern "C" void cRealFE_load(cRealFE* self)
     progress_1E80(50.0f);
     {
         cPS2GraphicsMan* g = GrMan;
-        sVE_1E80* vt = (sVE_1E80*)g->mVtbl;
+        sVEntry<void(void*, ...)>* vt = (sVEntry<void(void*, ...)>*)g->mVtbl;
         vt[44].fn(vthis(g, vt[44]), 0);
     }
     sUI_1E80* ui = ((sUI_1E80*)self->mpUI);
@@ -962,9 +956,9 @@ extern "C" void cRealFE_load(cRealFE* self)
     func_0019CE68(self->mBoltFileManager);
     cFERiderManager_init(&self->mRiderManager);
     cFE* cam = SSXApp->RealFE;
-    sV4_1E80 pos;
-    sV4_1E80 up;
-    sV4_1E80 scratchVec;
+    t4Vector pos;
+    t4Vector up;
+    t4Vector scratchVec;
     scratchVec.x = 0.0f;
     scratchVec.y = 0.0f;
     scratchVec.z = -195.0f;
@@ -975,8 +969,8 @@ extern "C" void cRealFE_load(cRealFE* self)
     scratchVec.y = 1.0f;
     scratchVec.z = 0.0f;
     up = scratchVec;
-    *(sV4_1E80*)&cam->mCamera.Pose = pos;
-    *(sV4_1E80*)&cam->mCamera.Pose.Q = up;
+    *(t4Vector*)&cam->mCamera.Pose = pos;
+    *(&cam->mCamera.Pose.Q) = up;
     ((cCamObj_1E80*)(&cam->mCamera))->update();
     progress_1E80(99.0f);
     cFEInput* in = (cFEInput*)cMemMan_alloc(0x1C, str_FEUIInput, 0, 0);
@@ -1326,17 +1320,6 @@ extern int D_00441254[];
 extern unsigned int cBEOptionInterface_mOption[];
 extern int EnableOnline;
 
-struct sVidInfo_27A0 {
-    int a;
-    int b;
-    int c;
-    int pad[9];
-};
-struct sVE_27A0 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Per-frame update of the front end: plays a queued movie, else updates the UI, camera, riders and online managers.
@@ -1360,32 +1343,32 @@ extern "C" void cRealFE_update(cRealFE* self)
         if (cRealFE_mMovieList != 0) {
             self->mpMoviePlayer = (cMoviePlayer*)cMoviePlayer_cMoviePlayer(cMemMan_alloc(68, str_MoviePlayer, 0x100, 0));
             func_002B3A70(&cAudioInterface_bxAudio()->MusicSys);
-            sVidInfo_27A0 info;
+            tMoviePlayOptions info;
             tMoviePlayOptions_SetDefaults(&info);
             int movieBits = cRealFE_mMovieList;
             self->mMovieSkippable = 0;
             if (movieBits & 1) {
-                info.a = D_00441248[0];
+                (*(int*)&info.sVideoFileName) = D_00441248[0];
                 cRealFE_mMovieList = movieBits & 0xFFFFFFFE;
                 D_004A19D0 = 1;
             } else if (movieBits & 2) {
-                info.a = D_0044124C[0];
+                (*(int*)&info.sVideoFileName) = D_0044124C[0];
                 cRealFE_mMovieList = movieBits & 0xFFFFFFFD;
                 D_004A19D0 = 2;
             } else if (movieBits & 4) {
                 cBE_getInterface_Fv(cBE_getBE(), 4);
                 if (((cBEOptionInterface_mOption[0] >> 22) & 7) == 0 && cSSXAudio_PlayIntroMovieWithDJ(cAudioInterface_bxAudio()) != 0) {
-                    info.b = D_004A19E0;
-                    info.a = D_00441250[0];
+                    (*(int*)&info.sAudioFileName) = D_004A19E0;
+                    (*(int*)&info.sVideoFileName) = D_00441250[0];
                 } else {
-                    info.b = D_004A19E4;
-                    info.a = D_00441254[0];
+                    (*(int*)&info.sAudioFileName) = D_004A19E4;
+                    (*(int*)&info.sVideoFileName) = D_00441254[0];
                 }
                 cRealFE_mMovieList &= 0xFFFFFFFB;
                 D_004A19D0 = 4;
                 self->mMovieSkippable = 1;
             }
-            info.c = 1;
+            info.bSoundOn = 1;
             cMoviePlayer_init(self->mpMoviePlayer, &info);
             cMoviePlayer_asyncPlay(self->mpMoviePlayer);
         }
@@ -1428,7 +1411,7 @@ noh:
         } else {
             self->IsEnding = 1;
         }
-        sVE_27A0* vt = (sVE_27A0*)self->mCamera.mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mCamera.mVtbl;
         char* obj = (char*)&self->mCamera;
         vt[3].fn(vthis(obj, vt[3]));
         func_0019D250(self->mBoltFileManager);
@@ -1549,17 +1532,6 @@ extern void* VoipMan;
 
 // PORT: cMemMan_alloc bound as a placement operator new (gcc then treats the result as unaliased)
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-struct sVEnt_1A2C40 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
-struct sStartState_1A2C40 {
-    int f0;
-    int f4;
-    sVEnt_1A2C40* vt;   // 0x8
-    char pad[0x3C];
-};
 struct sRealFE_1A2C40 {
     char pad0[0xC];
     char* ui;   // 0xC
@@ -1575,10 +1547,10 @@ struct sRealFE_1A2C40 {
  */
 extern "C" void cRealFE_loadStartState(cRealFE* self)
 {
-    sStartState_1A2C40* backState = new (str_cFEStateBackground, 0, 0) sStartState_1A2C40;
+    cFEStateBackground* backState = new (str_cFEStateBackground, 0, 0) cFEStateBackground;
     cUIState_cUIState(backState, (char*)self->mpUI);
-    backState->vt = (sVEnt_1A2C40*)cFEStateBackground_vtbl;
-    backState->vt[4].fn(vthis(backState, backState->vt[4]));
+    (*(sVEntry<void (void*)>**)&backState->mVtbl) = (sVEntry<void(void*)>*)cFEStateBackground_vtbl;
+    ((sVEntry<void (void*)>*)backState->mVtbl)[4].fn(vthis(backState, ((sVEntry<void (void*)>*)backState->mVtbl)[4]));
     cUIStateStack_pushExplicit(&self->mpUI->mStateStack, backState);
     switch (cRealFE_mStartState) {
     case 0: {

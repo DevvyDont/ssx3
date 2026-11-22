@@ -1,5 +1,8 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uimenu.h"
+#include "util/locale.h"
+#include "be/beintmission.h"
 #include "ui/uitextscroll.h"
 #include "ui/uiicon.h"
 #include "bx/math3d.h"
@@ -85,7 +88,7 @@ extern "C" void cOVState_MAP_onCreateScreen(sMap_86A8* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cOVState_onCreateScreen((cOVState*)((sSelf0020A380*)self));
+    cOVState_onCreateScreen((cOVState*)((cOVState_MAP*)self));
     self->fC4 = cFEAsyncManager_GetFreeAsyncFile(SSXApp->mFEAsyncManager);
     self->fDC = 0;
     self->fBC = 0;
@@ -135,23 +138,8 @@ struct sV4_87F0 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct sVE_87F0 {
-    short delta;
-    short index;
-    void* fn;
-};
 
-struct sUIObj_87F0 {
-    int pad_0x0[2];
-    sVE_87F0* vt;               // 0x8
-    char pad_0xC[0xC];
-    int f18;                    // 0x18
-};
 
-struct sStrMgr_87F0 {
-    int pad_0x0;
-    sVE_87F0* vt;               // 0x4
-};
 
 class cRiderSub_87F0 {
 public:
@@ -208,7 +196,7 @@ extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
 {
     if (on != 0) {
         int i = 0;
-        sUIObj_87F0* menuItem;
+        cUIThing* menuItem;
         void* ifGame = cBE_getInterface_Fv(cBE_getBE(), 0);
         void* ifMap = cBE_getInterface_Fv(cBE_getBE(), 10);
         int n = cBEMissionInterface_getNumberSessionsOnTrack(ifMap, *cBENewRaceInterface_getLocation(ifGame));
@@ -216,11 +204,11 @@ extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
             char buf[0x20];
             unsigned short text[40];
             sprintf(buf, str_SessionPointpct_d, i);
-            menuItem = (sUIObj_87F0*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(buf));
+            menuItem = (cUIThing*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(buf));
             if (i < n) {
                 (selfp)->mbSessionUnlocked[i] = 1;
-                sStrMgr_87F0* locale = (sStrMgr_87F0*)SSXApp->FELocale;
-                sVE_87F0* vt = locale->vt;
+                cFELocale* locale = SSXApp->FELocale;
+                sVEntry<void>* vt = ((sVEntry<void>*)locale->mVtbl);
                 void* str = ((VGetFn_87F0)vt[4].fn)(vthis(locale, vt[4]), GetHashValue32(str_kT_MAPSessionPt));
                 if (str == 0) {
                     continue;
@@ -236,11 +224,11 @@ extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
                 } else {
                     cUIText_setUnicodeString(menuItem, text);
                 }
-                menuItem->f18 = i + 1;
+                menuItem->mMiscData = i + 1;
             } else {
                 (selfp)->mbSessionUnlocked[i] = 0;
-                ((VIntFn_87F0)menuItem->vt[9].fn)(vthis(menuItem, menuItem->vt[9]), 0);
-                ((VIntFn_87F0)menuItem->vt[8].fn)(vthis(menuItem, menuItem->vt[8]), 1);
+                ((VIntFn_87F0)((sVEntry<void>*)menuItem->mVtbl)[9].fn)(vthis(menuItem, ((sVEntry<void>*)menuItem->mVtbl)[9]), 0);
+                ((VIntFn_87F0)((sVEntry<void>*)menuItem->mVtbl)[8].fn)(vthis(menuItem, ((sVEntry<void>*)menuItem->mVtbl)[8]), 1);
             }
         }
         void* menu = cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_SessionViewPoints));
@@ -260,15 +248,15 @@ extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
             cUIMenu_setSelectedByIndex(menu, idx);
         }
         cOVState_MAP_showIndicators(selfp);
-        menuItem = (sUIObj_87F0*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu_Yes));
+        menuItem = (cUIThing*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu_Yes));
         if (menuItem != 0) {
-            menuItem->f18 = 0;
-            ((VPtrFn_87F0)menuItem->vt[11].fn)(vthis(menuItem, menuItem->vt[11]), kMAPCOLOR_REGULAR);
+            menuItem->mMiscData = 0;
+            ((VPtrFn_87F0)((sVEntry<void>*)menuItem->mVtbl)[11].fn)(vthis(menuItem, ((sVEntry<void>*)menuItem->mVtbl)[11]), kMAPCOLOR_REGULAR);
         }
-        menuItem = (sUIObj_87F0*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu_No));
+        menuItem = (cUIThing*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu_No));
         if (menuItem != 0) {
-            menuItem->f18 = 1;
-            ((VPtrFn_87F0)menuItem->vt[11].fn)(vthis(menuItem, menuItem->vt[11]), kMAPCOLOR_REGULAR);
+            menuItem->mMiscData = 1;
+            ((VPtrFn_87F0)((sVEntry<void>*)menuItem->mVtbl)[11].fn)(vthis(menuItem, ((sVEntry<void>*)menuItem->mVtbl)[11]), kMAPCOLOR_REGULAR);
         }
     }
     return 0;
@@ -278,11 +266,6 @@ extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
 //100%
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onGainFocus);
 #ifdef SKIP_ASM
-struct sVEntry00208B00 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 
 int GetHashValue32(char* str);
@@ -303,8 +286,8 @@ extern "C" void cOVState_MAP_onGainFocus(cOVState_MAP* self, int pPrevState)
     cUIState_onGainFocus(self, pPrevState);
     confirmMenu = (cUIThing*)cUIScreen_getObjectByHashName(self->mpMapScreen, GetHashValue32(str_ConfirmMenu));
     if (confirmMenu != 0) {
-        ((sVEntry00208B00*)confirmMenu->mVtbl)[7].fn(vthis(confirmMenu, ((sVEntry00208B00*)confirmMenu->mVtbl)[7]), 0);
-        ((sVEntry00208B00*)confirmMenu->mVtbl)[9].fn(vthis(confirmMenu, ((sVEntry00208B00*)confirmMenu->mVtbl)[9]), 0);
+        ((sVEntry<void(void*, int)>*)confirmMenu->mVtbl)[7].fn(vthis(confirmMenu, ((sVEntry<void(void*, int)>*)confirmMenu->mVtbl)[7]), 0);
+        ((sVEntry<void(void*, int)>*)confirmMenu->mVtbl)[9].fn(vthis(confirmMenu, ((sVEntry<void(void*, int)>*)confirmMenu->mVtbl)[9]), 0);
     }
 }
 #endif
@@ -333,11 +316,6 @@ extern "C" void cOVState_MAP_onDestroyScreen(cOVState_MAP* self)
 //100%
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupScreenExit);
 #ifdef SKIP_ASM
-struct sVEntry00208BB8 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 
 /**
@@ -353,11 +331,11 @@ extern "C" void cOVState_MAP_setupScreenExit(cOVState_MAP* self)
     self->mMapTextureSet = 0;
     popupWidget = (cUIThing*)self->mpMap;
     if (popupWidget != 0) {
-        ((sVEntry00208BB8*)popupWidget->mVtbl)[9].fn(vthis(popupWidget, ((sVEntry00208BB8*)popupWidget->mVtbl)[9]), 0);
+        ((sVEntry<void(void*, int)>*)popupWidget->mVtbl)[9].fn(vthis(popupWidget, ((sVEntry<void(void*, int)>*)popupWidget->mVtbl)[9]), 0);
     }
     popupWidget = (cUIThing*)self->mpPlayerIcon;
     if (popupWidget != 0) {
-        ((sVEntry00208BB8*)popupWidget->mVtbl)[9].fn(vthis(popupWidget, ((sVEntry00208BB8*)popupWidget->mVtbl)[9]), 0);
+        ((sVEntry<void(void*, int)>*)popupWidget->mVtbl)[9].fn(vthis(popupWidget, ((sVEntry<void(void*, int)>*)popupWidget->mVtbl)[9]), 0);
     }
 }
 #endif
@@ -536,23 +514,8 @@ extern "C" void cOVState_MAP_setupMapPic(cOVState_MAP* self)
 //100%
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_setupPopup);
 #ifdef SKIP_ASM
-struct sVE_9010 {
-    short delta;
-    short index;
-    void* fn;
-};
 
-struct sUIObj_9010 {
-    int pad_0x0[2];
-    sVE_9010* vt;               // 0x8
-    char pad_0xC[0x95 - 0xC];
-    unsigned char f95;          // 0x95
-};
 
-struct sStrMgr_9010 {
-    int pad_0x0;
-    sVE_9010* vt;               // 0x4
-};
 
 typedef void (*VIntFn_9010)(void*, int);
 typedef void* (*VGetFn_9010)(void*, int);
@@ -600,8 +563,8 @@ extern char str_kT_CMNYes_b[];
  */
 extern "C" void cOVState_MAP_setupPopup(cOVState_MAP* selfp)
 {
-    sUIObj_9010* menu = (sUIObj_9010*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu));
-    sUIObj_9010* list = (sUIObj_9010*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_SessionViewPoints));
+    cUIMenu* menu = (cUIMenu*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu));
+    cUIMenu* list = (cUIMenu*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_SessionViewPoints));
     if (selfp->mSessionPopupActive != 0) {
         unsigned short text[40];
         char buf[0x10];
@@ -613,15 +576,15 @@ extern "C" void cOVState_MAP_setupPopup(cOVState_MAP* selfp)
         cUIState_showObjSafe(((char*)selfp), str_Popup1);
         cUIState_hideObjSafe(((char*)selfp), str_Popup2);
         if (list != 0) {
-            ((VIntFn_9010)list->vt[7].fn)(vthis(list, list->vt[7]), 0);
-            n = list->f95;
+            ((VIntFn_9010)((sVEntry<void>*)list->mVtbl)[7].fn)(vthis(list, ((sVEntry<void>*)list->mVtbl)[7]), 0);
+            n = list->mScrollItemCurrent;
         }
         if (menu != 0) {
-            ((VIntFn_9010)menu->vt[7].fn)(vthis(menu, menu->vt[7]), 1);
-            ((VIntFn_9010)menu->vt[9].fn)(vthis(menu, menu->vt[9]), 1);
+            ((VIntFn_9010)((sVEntry<void>*)menu->mVtbl)[7].fn)(vthis(menu, ((sVEntry<void>*)menu->mVtbl)[7]), 1);
+            ((VIntFn_9010)((sVEntry<void>*)menu->mVtbl)[9].fn)(vthis(menu, ((sVEntry<void>*)menu->mVtbl)[9]), 1);
         }
-        sStrMgr_9010* locale = (sStrMgr_9010*)SSXApp->FELocale;
-        sVE_9010* vt = locale->vt;
+        cFELocale* locale = SSXApp->FELocale;
+        sVEntry<void>* vt = ((sVEntry<void>*)locale->mVtbl);
         void* str = ((VGetFn_9010)vt[4].fn)(vthis(locale, vt[4]), GetHashValue32(str_kT_MAPSessionPt));
         if (str != 0) {
             sprintf2(text, str_pct_s_pct_d_d, str, n + 1);
@@ -647,22 +610,22 @@ extern "C" void cOVState_MAP_setupPopup(cOVState_MAP* selfp)
         }
         cUIState_hideObjSafe(((char*)selfp), str_ConfirmMenu_No_x);
         cUIText* confirmYes = (cUIText*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu_Yes));
-        sUIObj_9010* confirmNo = (sUIObj_9010*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu_No));
+        cUIMenu* confirmNo = (cUIMenu*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu_No));
         if (confirmYes != 0) {
             cUIText_setUnicodeStringByID(confirmYes, GetHashValue32(str_kT_CMNYes_b));
         }
         if (confirmNo != 0) {
-            ((VIntFn_9010)confirmNo->vt[9].fn)(vthis(confirmNo, confirmNo->vt[9]), 1);
-            ((VIntFn_9010)confirmNo->vt[8].fn)(vthis(confirmNo, confirmNo->vt[8]), 0);
+            ((VIntFn_9010)((sVEntry<void>*)confirmNo->mVtbl)[9].fn)(vthis(confirmNo, ((sVEntry<void>*)confirmNo->mVtbl)[9]), 1);
+            ((VIntFn_9010)((sVEntry<void>*)confirmNo->mVtbl)[8].fn)(vthis(confirmNo, ((sVEntry<void>*)confirmNo->mVtbl)[8]), 0);
         }
         cUIState_showObjSafe(((char*)selfp), str_ConfirmMenu_No);
     } else {
         cUIState_hideObjSafe(((char*)selfp), str_ConfirmPopup);
         if (list != 0) {
-            ((VIntFn_9010)list->vt[7].fn)(vthis(list, list->vt[7]), 1);
+            ((VIntFn_9010)((sVEntry<void>*)list->mVtbl)[7].fn)(vthis(list, ((sVEntry<void>*)list->mVtbl)[7]), 1);
         }
         if (menu != 0) {
-            ((VIntFn_9010)menu->vt[7].fn)(vthis(menu, menu->vt[7]), 0);
+            ((VIntFn_9010)((sVEntry<void>*)menu->mVtbl)[7].fn)(vthis(menu, ((sVEntry<void>*)menu->mVtbl)[7]), 0);
         }
     }
 }
@@ -671,11 +634,6 @@ extern "C" void cOVState_MAP_setupPopup(cOVState_MAP* selfp)
 //100%
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onInputAlways);
 #ifdef SKIP_ASM
-struct sVEntry00209300 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 
 extern "C" void cOVState_MAP_showIndicators(cOVState_MAP* self);
@@ -689,7 +647,7 @@ extern "C" void cOVState_MAP_showIndicators(cOVState_MAP* self);
  */
 extern "C" void cOVState_MAP_onInputAlways(cOVState_MAP* self, cUIThing* pInput)
 {
-    if (((sVEntry00209300*)pInput->mVtbl)[17].fn(vthis(pInput, ((sVEntry00209300*)pInput->mVtbl)[17])) != 0 || ((sVEntry00209300*)pInput->mVtbl)[18].fn(vthis(pInput, ((sVEntry00209300*)pInput->mVtbl)[18])) != 0) {
+    if (((sVEntry<int(void*)>*)pInput->mVtbl)[17].fn(vthis(pInput, ((sVEntry<int(void*)>*)pInput->mVtbl)[17])) != 0 || ((sVEntry<int(void*)>*)pInput->mVtbl)[18].fn(vthis(pInput, ((sVEntry<int(void*)>*)pInput->mVtbl)[18])) != 0) {
         cOVState_MAP_showIndicators(self);
     }
 }
@@ -698,9 +656,6 @@ extern "C" void cOVState_MAP_onInputAlways(cOVState_MAP* self, cUIThing* pInput)
 //100%
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onUpdate);
 #ifdef SKIP_ASM
-struct sCol_9370 {
-    float a, r, g, b;
-};
 
 struct sV3_9370 {
     float x, y, z;
@@ -721,7 +676,7 @@ public:
     virtual void v08();
     virtual void SetVisible(int on);
     virtual void v10();
-    virtual void SetColor(const sCol_9370* c);
+    virtual void SetColor(const tARGB* c);
     virtual void v12();
     virtual void v13();
     virtual void v14();
@@ -734,15 +689,6 @@ public:
     virtual void SetScale(const sV3_9370& s);
 };
 
-struct sFEObjData_9370 {
-    char pad_0x0[0x1C];
-    sCol_9370 col;              // 0x1C
-    char pad_0x2C[0x18];
-    sV3_9370 pos;               // 0x44
-    char pad_0x50[0x28];
-    int f78;                    // 0x78
-    int f7C;                    // 0x7C
-};
 
 struct sAsyncFile_9370 {
     char pad_0x0[0x110];
@@ -792,8 +738,8 @@ extern "C" void cOVState_MAP_onUpdate(sMap_9370* self)
             self->fade += 0.10000000149011612f;
         }
         cFEObj_9370* feObj = self->img;
-        sCol_9370 colour = ((sFEObjData_9370*)feObj)->col;
-        colour.a = self->fade;
+        tARGB colour = (*(&((cUIIcon*)feObj)->mColour));
+        colour.A = self->fade;
         feObj->SetColor(&colour);
         self->img->SetVisible(1);
     } else {
@@ -805,8 +751,8 @@ extern "C" void cOVState_MAP_onUpdate(sMap_9370* self)
         cFEObj_9370* feObj = self->img;
         if (feObj != 0) {
             int data = am[self->file].data;
-            ((sFEObjData_9370*)feObj)->f7C = 0;
-            ((sFEObjData_9370*)feObj)->f78 = data;
+            (*(int*)&((cUIIcon*)feObj)->mpTextureElem) = 0;
+            ((cUIIcon*)feObj)->mTextureID = data;
             self->loaded = 1;
             self->fade = 0.0f;
         }
@@ -828,7 +774,7 @@ extern "C" void cOVState_MAP_onUpdate(sMap_9370* self)
             sV3_9370 placedPos;
             placedPos.x = bp->x - halfGrowth;
             placedPos.y = bp->y - halfGrowth;
-            ((sFEObjData_9370*)feObj)->pos = placedPos;
+            (*(sV3_9370*)&((cUIIcon*)feObj)->mPosition) = placedPos;
             self->icons[i]->SetScale(sV3_9370(self->bob, self->bob, 0.0f));
         }
     }
@@ -909,14 +855,6 @@ struct sV3_96A8 {
 };
 
 
-struct sBounds_96A8 {
-    char pad_0x0[0x1C];
-    float minX;                 // 0x1C
-    float minY;                 // 0x20
-    float maxX;                 // 0x24
-    float maxY;                 // 0x28
-    char pad_0x2C[0x4];
-};
 
 class cFEObj_96A8 {
 public:
@@ -959,7 +897,7 @@ struct cList;
 struct cListNode;
 void cList_addToEnd(cList* list, cListNode* node);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void cBEMissionInterface_getPictureDBRecord(sBounds_96A8* out, void* iface, int id);
+extern "C" void cBEMissionInterface_getPictureDBRecord(tBEPictureDB* out, void* iface, int id);
 extern "C" void* cUIThing_cUIThing(void* self, void* parent, int a2);
 extern "C" void func_0021CCC8(void* p);
 extern "C" void cUIIcon_setTextureByHashValue(void* obj, int hash);
@@ -992,11 +930,11 @@ extern "C" void cOVState_MAP_setupPlayerIndicator(cOVState_MAP* selfp)
     sV3_96A8 mapPos = (*(sV3_96A8*)&((cUIThing*)((cFEObj_96A8*)self->mpMap))->mPosition);
     char* rider = (char*)SSXApp->Game->AI->Riders[0];
     t4Vector pp = *((cRiderSub_96A8*)(rider + 0x6C0))->getPosition();
-    sBounds_96A8 bounds;
+    tBEPictureDB bounds;
     cBEMissionInterface_getPictureDBRecord(&bounds, ifMap, *cBENewRaceInterface_getLocation(ifGame));
-    float fx = Absf_96A8((pp.x - bounds.minX) / (bounds.maxX - bounds.minX));
+    float fx = Absf_96A8((pp.x - bounds.world_topleft_x) / (bounds.world_bottomright_x - bounds.world_topleft_x));
     int px = (int)(fx * 356.0f);
-    float fy = Absf_96A8((pp.y - bounds.minY) / (bounds.maxY - bounds.minY));
+    float fy = Absf_96A8((pp.y - bounds.world_topleft_y) / (bounds.world_bottomright_y - bounds.world_topleft_y));
     int py = (int)(fy * 266.0f);
     cUIIcon* ind = (cUIIcon*)cMemMan_alloc(136, str_Player_Indicator_Icon, 0x20000000, 0);
     cUIThing_cUIThing(ind, ((char*)self->mpMapScreen), 0);
@@ -1085,16 +1023,16 @@ extern "C" void cOVState_MAP_setupLocalSessionList(cOVState_MAP* selfp)
         if (cPathSys_isStartpoint(gPaths, 2, i + 1) != 0) {
         const char* sp = (const char*)cPathSys_getStartpoint(gPaths, 2, i + 1);
         sV3_96A8 spPos = *(sV3_96A8*)(sp + 0x8);
-        sBounds_96A8 pictureRecord;
+        tBEPictureDB pictureRecord;
         cBEMissionInterface_getPictureDBRecord(&pictureRecord, ifMap, *cBENewRaceInterface_getLocation(ifGame));
         unsigned int sessionPoint_x;
         {
-            float across = Absf_96A8((spPos.x - pictureRecord.minX) / (pictureRecord.maxX - pictureRecord.minX));
+            float across = Absf_96A8((spPos.x - pictureRecord.world_topleft_x) / (pictureRecord.world_bottomright_x - pictureRecord.world_topleft_x));
             sessionPoint_x = (int)(across * 356.0f);
         }
         unsigned int sessionPoint_y;
         {
-            float down = Absf_96A8((spPos.y - pictureRecord.minY) / (pictureRecord.maxY - pictureRecord.minY));
+            float down = Absf_96A8((spPos.y - pictureRecord.world_topleft_y) / (pictureRecord.world_bottomright_y - pictureRecord.world_topleft_y));
             sessionPoint_y = (int)(down * 266.0f);
         }
 
@@ -1357,12 +1295,6 @@ extern char str_hud_b[];
 extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void* self);
 extern "C" void* cUIStateStack_findState(void* list, int hash);
 
-struct sSelf0020A380 {
-    char pad[0x10];
-    char* mgr;
-    char pad14[0x3C];
-    int pdaOn;
-};
 
 /**
  * Common overlay set-up: leaves cut-scene TV mode and tells the HUD an overlay opened.

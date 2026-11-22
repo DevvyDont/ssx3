@@ -90,6 +90,21 @@ CHECK_OFFSET(tBEStatDB, cSpeed, 0x0);
 CHECK_OFFSET(tBEStatDB, cStability, 0x6);
 CHECK_SIZE(tBEStatDB, 0x7);
 
+// [O] struct tRiderBest (0x54): a character's best results, the record cBEScoreInterface::getPlayerBestStats(int
+// iProfileIndex, eBECharacters iChar) returns by const reference. [R] cBECharProfileDB::mRiderBest (0xDE4, 0x54 bytes,
+// cleared by init) is what retail's getter cBEScoreInterface_getPlayerBestStats returns; [U] cFEStateCareerStats_setupRidersBest copies
+// the whole record and reads eventStat[k] as {best value, location id} pairs (knockouts 0, handplants 5, ...).
+// On Tour's element type is an 8-byte tStat variant whose member names are not in the dump (its 0x10-byte tStat
+// {m_num, m_total, m_max, m_numUpdates} is a different variant), so the pair is kept as two words.
+struct tRiderBest {
+    int eventStat[10][2];           // 0x00 [O] tStat eventStat[10] (8 bytes each); [U] [k][0] the best value, [k][1]
+                                    //      the location it was set at (cBENewRaceInterface_getLocationName)
+    int comboLongestOverall;        // 0x50 [O]
+};
+CHECK_OFFSET(tRiderBest, eventStat, 0x00);
+CHECK_OFFSET(tRiderBest, comboLongestOverall, 0x50);
+CHECK_SIZE(tRiderBest, 0x54);
+
 struct cBECharProfileDB {
     int bFirstTimeWorldCircuit;     // 0x000 [O] (bool; a word) - first data member after On Tour's strProfileName;
                                     //       [R] init: 1
@@ -142,7 +157,7 @@ struct cBECharProfileDB {
     tBEStatDB statDB;               // 0xBDF [O]; [R] init copies D_005308D9[k] (7 bytes); [U] "the seven attribute bytes"
     char unk_BE6[0x1FE];            // 0xBE6 [U] the BAGT data: func_00150558(character, self + 0xBE6) (On Tour keeps
                                     //       careerStatDB, uberV2Unlocked, unlockedBoards/Skis/Skins, ... in this area)
-    char mRiderBest[0x54];          // 0xDE4 [O] tRiderBest (0x54: tStat eventStat[10], int comboLongestOverall); [R] init
+    tRiderBest mRiderBest;          // 0xDE4 [O] tRiderBest (0x54: tStat eventStat[10], int comboLongestOverall); [R] init
                                     //       clears 84 bytes; [U] beintplayer's best-stats getter returns +0xDE4
     int unk_E38[25][2];             // 0xE38 [R] init zeroes the first word of each pair; [U] func_00147908 (beintplayer)
                                     //       returns it as the character's message list

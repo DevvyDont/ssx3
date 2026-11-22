@@ -60,4 +60,15 @@ CHECK_OFFSET(t2Vector, x, 0x0);
 CHECK_OFFSET(t2Vector, y, 0x4);
 CHECK_SIZE(t2Vector, 0x8);
 
+// EA's 3x3 matrix (On Tour: struct t3Matrix : t3mat, size 0x24; t3mat holds the nine floats in an anonymous union whose
+// members the dump does not list). [O] cTextureElement::renderRot(tRect pos, t3Matrix mat, tARGB clr, unsigned int
+// flags) and c2DRender::drawRect(tBxVertex*, const tRect&, const t3Matrix&); [R] retail cTextureElement_renderRot takes
+// the nine floats by value and hands their address to c2DRender_drawRect1 / drawRotRect1 (ui/uitext's view sMat3_2A00).
+// 4-byte aligned (no quadword copies seen). The member name is ours, like t3Vector's / t4Vector's.
+struct t3Matrix {
+    float m[9];                     // 0x00 [O] t3mat (anonymous union)
+};
+
+CHECK_SIZE(t3Matrix, 0x24);
+
 #endif /* BX_MATH3D_H */

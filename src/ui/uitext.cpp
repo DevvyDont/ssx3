@@ -1,4 +1,7 @@
 #include "common.h"
+#include "bx/math3d.h"
+#include "render/2drender.h"
+#include "fe/ovstatehud.h"
 #include "ui/uiengine.h"
 #include "ui/uifontinterface.h"
 #include "ui/uiscreen.h"
@@ -31,11 +34,6 @@ extern char str_UITEXTTEMP_b[];
 extern unsigned short D_004A47B0[];
 extern unsigned short D_00508750[];
 
-struct sV2_05E8 {
-    float x, y;
-    sV2_05E8() {}
-    sV2_05E8(float ax, float ay) : x(ax), y(ay) {}
-};
 struct sV3_05E8 {
     float x, y, z;
     sV3_05E8() {}
@@ -46,25 +44,14 @@ struct sRect_05E8 {
 };
 
 // Default drop-shadow offset ($gp-relative, 8 bytes).
-extern sV2_05E8 D_004A5A60;
+extern t2Vector D_004A5A60;
 
-struct sFont_05E8 {
-    char pad0[0x14];
-    int height;             // 0x14
-    char pad18[0x10];
-    sV2_05E8 shadowOfs;     // 0x28
-    sV2_05E8 scale;         // 0x30
-    sV2_05E8 cur;           // 0x38
-    tARGB color;        // 0x40
-    tARGB shadowColor;  // 0x50
-};
 
 struct sLayerBits_05E8 {
     unsigned char lo;
     unsigned char layer : 5;
 };
 
-struct sVE_05E8 { short delta; short index; void (*fn)(void*); };
 
 
 /**
@@ -83,11 +70,11 @@ struct sVE_05E8 { short delta; short index; void (*fn)(void*); };
 extern "C" void cUIText_render2D(cUIText* self, float x, float y)
 {
     if (self->mpString == 0 || ((self->mAttr >> 2) & 1) == 0) {
-        ((sVE_05E8*)self->mVtbl)[16].fn(vthis(self, ((sVE_05E8*)self->mVtbl)[16]));
+        ((sVEntry<void(void*)>*)self->mVtbl)[16].fn(vthis(self, ((sVEntry<void(void*)>*)self->mVtbl)[16]));
     }
     int* ov = (int*)self->mpScreen->mpState->mpEngine->mpLocaleInterface;
     if (ov != 0 && ((*ov >> 27) & 1)) {
-        sFont_05E8* font = (sFont_05E8*)cUIText_getFont(self);
+        cFont* font = (cFont*)cUIText_getFont(self);
         if (font == 0) {
             return;
         }
@@ -103,27 +90,27 @@ extern "C" void cUIText_render2D(cUIText* self, float x, float y)
     if (self->mpString == 0) {
         return;
     }
-    sFont_05E8* font = (sFont_05E8*)cUIText_getFont(self);
+    cFont* font = (cFont*)cUIText_getFont(self);
     if (font == 0) {
         return;
     }
-    sV2_05E8 textScale(self->mScale.x, self->mScale.y);
-    font->cur.x = font->scale.x * textScale.x;
-    font->cur.y = font->scale.y * textScale.y;
+    t2Vector textScale(self->mScale.x, self->mScale.y);
+    (*(t2Vector*)&font->Scale[0]).x = (*(t2Vector*)&font->BaseScale[0]).x * textScale.x;
+    (*(t2Vector*)&font->Scale[0]).y = (*(t2Vector*)&font->BaseScale[0]).y * textScale.y;
     if (((self->mAttr >> 5) & 1) && ((self->mAttrText >> 4) & 1)) {
-        font->color = *(&self->mStaticColour);
+        (*(tARGB*)&font->Color[0]) = *(&self->mStaticColour);
     } else if (((self->mAttr >> 3) & 1) == 0 && ((self->mAttrText >> 5) & 1)) {
-        font->color = *(&self->mDisabledColour);
+        (*(tARGB*)&font->Color[0]) = *(&self->mDisabledColour);
     } else {
-        font->color = *(&self->mColour);
+        (*(tARGB*)&font->Color[0]) = *(&self->mColour);
     }
     if ((self->mAttrText >> 2) & 1) {
         tARGB shadowCol = *(&self->mShadowColour);
         shadowCol.A = (*(&self->mColour)).A;
-        font->shadowColor = shadowCol;
-        font->shadowOfs = D_004A5A60;
+        (*(tARGB*)&font->ShadowColor[0]) = shadowCol;
+        (*(t2Vector*)&font->ShadowOffset[0]) = D_004A5A60;
     } else {
-        font->shadowOfs = sV2_05E8(0.0f, 0.0f);
+        (*(t2Vector*)&font->ShadowOffset[0]) = t2Vector(0.0f, 0.0f);
     }
     int* drawFlags = (int*)(&GrMan->m_pCurrentDrawState->unk_00[2]);
     *drawFlags = (*drawFlags & ~0x3E0) | (((((sLayerBits_05E8*)&self->mAttr)->layer + 9) << 5) & 0x3E0);
@@ -144,10 +131,10 @@ extern "C" void cUIText_render2D(cUIText* self, float x, float y)
             usprintf(buf, D_004A47B0, str);
             sRect_05E8 textBounds;
             cFont_textExtent1_s(font, buf, &textBounds, 0, textScale.x, textScale.y);
-            sV3_05E8 size(textBounds.x1, self->mScale.y * ((float)font->height * font->scale.y), 0.0f);
+            sV3_05E8 size(textBounds.x1, self->mScale.y * ((float)font->MaxCharHeight * (*(t2Vector*)&font->BaseScale[0]).y), 0.0f);
             sV3_05E8 drawPos = pos;
             cUIThing_applyPivot(self, &drawPos, &size);
-            pos.y += (float)font->height * font->scale.y * textScale.y + 3.0f;
+            pos.y += (float)font->MaxCharHeight * (*(t2Vector*)&font->BaseScale[0]).y * textScale.y + 3.0f;
             cFont_text1_s(font, drawPos.x, drawPos.y, buf);
             if (buf != 0) {
                 cMemMan_free(buf);
@@ -157,10 +144,10 @@ extern "C" void cUIText_render2D(cUIText* self, float x, float y)
         sRect_05E8 textBounds;
         cFont_textExtent1_s(font, str, &textBounds, 0, textScale.x, textScale.y);
         i++;
-        sV3_05E8 size(textBounds.x1, self->mScale.y * ((float)font->height * font->scale.y), 0.0f);
+        sV3_05E8 size(textBounds.x1, self->mScale.y * ((float)font->MaxCharHeight * (*(t2Vector*)&font->BaseScale[0]).y), 0.0f);
         sV3_05E8 drawPos = pos;
         cUIThing_applyPivot(self, &drawPos, &size);
-        pos.y += (float)font->height * font->scale.y * textScale.y + 3.0f;
+        pos.y += (float)font->MaxCharHeight * (*(t2Vector*)&font->BaseScale[0]).y * textScale.y + 3.0f;
         cFont_text1_s(font, drawPos.x, drawPos.y, str);
     } while (i < self->mNumLines);
 }
@@ -846,33 +833,15 @@ extern "C" void cUIThing_applyPivot(void* self, void* pos, void* size);
 extern "C" void cFont_text1(void* font, float x, float y, int str);
 extern "C" void cUIScrollBar_setValues(void* sb, int top, int rows, int count);
 
-struct sV2_1588 {
-    float x, y;
-    sV2_1588() {}
-    sV2_1588(float ax, float ay) : x(ax), y(ay) {}
-};
 struct sV3_1588 {
     float x, y, z;
     sV3_1588() {}
     sV3_1588(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
 };
-struct sCol_1588 {
-    float r, g, b, a;
-};
 struct sRect_1588 {
     float x0, y0, x1, y1;
 };
 
-struct sFont_1588 {
-    char pad0[0x14];
-    int height;             // 0x14
-    char pad18[0x10];
-    sV2_1588 shadowOfs;     // 0x28
-    sV2_1588 scale;         // 0x30
-    sV2_1588 cur;           // 0x38
-    sCol_1588 color;        // 0x40
-    sCol_1588 shadowColor;  // 0x50
-};
 
 struct sLayerBits_1588 {
     unsigned char lo;
@@ -885,35 +854,6 @@ struct sDrawBits_1588 {
 
 struct sVE_1588 { short delta; short index; void (*fn)(void*); };
 
-struct sText_1588 {
-    char pad0[0x8];
-    sVE_1588* vt;           // 0x08
-    char padC[0x8];
-    int flags14;            // 0x14
-    char pad18[0x4];
-    sCol_1588 color;        // 0x1C
-    char pad2C[0x18];
-    float x;                // 0x44
-    float y;                // 0x48
-    char pad4C[0x4];
-    float sx;               // 0x50
-    float sy;               // 0x54
-    char pad58[0xC];
-    float height;           // 0x64
-    char pad68[0xC];
-    int flags;              // 0x74
-    sCol_1588 shadowColor;  // 0x78
-    char pad88[0x20];
-    sCol_1588 selColor;     // 0xA8
-    void* scroll;           // 0xB8
-    int* strs;              // 0xBC
-    char padC0[0x4];
-    unsigned short cur;     // 0xC4
-    unsigned short top;     // 0xC6
-    unsigned short count;   // 0xC8
-    char padCA[0x2];
-    float yofs;             // 0xCC
-};
 
 /**
  * Draws the visible lines of the text scroll from mLinesOffset, then updates its scroll bar.
@@ -926,54 +866,54 @@ struct sText_1588 {
  * @param x  the parent's x offset
  * @param y  the parent's y offset
  */
-extern "C" void cUITextScroll_render2D(sText_1588* self, float x, float y)
+extern "C" void cUITextScroll_render2D(cUITextScroll* self, float x, float y)
 {
-    if (((self->flags14 >> 2) & 1) == 0) {
-        self->vt[16].fn(vthis(self, self->vt[16]));
+    if (((self->mAttr >> 2) & 1) == 0) {
+        ((sVE_1588*)self->mVtbl)[16].fn(vthis(self, ((sVE_1588*)self->mVtbl)[16]));
     }
-    sFont_1588* font = (sFont_1588*)cUITextScroll_getFont((cUITextScroll*)self);
+    cFont* font = (cFont*)cUITextScroll_getFont((cUITextScroll*)self);
     if (font == 0) {
         return;
     }
-    sV2_1588 textScale(self->sx, self->sy);
-    font->cur.x = font->scale.x * textScale.x;
-    font->cur.y = font->scale.y * textScale.y;
-    if ((self->flags >> 3) & 1) {
-        sCol_1588 shadowCol = self->shadowColor;
-        shadowCol.r = self->color.r;
-        font->shadowColor = shadowCol;
-        font->shadowOfs = sV2_1588(2.0f, 2.0f);
+    t2Vector textScale(self->mScale.x, self->mScale.y);
+    (*(t2Vector*)&font->Scale[0]).x = (*(t2Vector*)&font->BaseScale[0]).x * textScale.x;
+    (*(t2Vector*)&font->Scale[0]).y = (*(t2Vector*)&font->BaseScale[0]).y * textScale.y;
+    if (((*(int*)&self->mAttrTextScroll) >> 3) & 1) {
+        tARGB shadowCol = self->mShadowColour;
+        shadowCol.A = self->mColour.A;
+        (*(tARGB*)&font->ShadowColor[0]) = shadowCol;
+        (*(t2Vector*)&font->ShadowOffset[0]) = t2Vector(2.0f, 2.0f);
     } else {
-        font->shadowOfs = sV2_1588(0.0f, 0.0f);
+        (*(t2Vector*)&font->ShadowOffset[0]) = t2Vector(0.0f, 0.0f);
     }
     int* drawFlags = (int*)(&GrMan->m_pCurrentDrawState->unk_00[2]);
-    *drawFlags = (*drawFlags & ~0x3E0) | (((((sLayerBits_1588*)&self->flags14)->layer + 9) << 5) & 0x3E0);
-    sV3_1588 pos(self->x + x, self->y + y, 0.0f);
-    float lineH = self->sy * ((float)font->height * font->scale.y) + 3.0f;
-    signed char rows = (int)(self->height / lineH);
+    *drawFlags = (*drawFlags & ~0x3E0) | (((((sLayerBits_1588*)&self->mAttr)->layer + 9) << 5) & 0x3E0);
+    sV3_1588 pos(self->mPosition.x + x, self->mPosition.y + y, 0.0f);
+    float lineH = self->mScale.y * ((float)font->MaxCharHeight * (*(t2Vector*)&font->BaseScale[0]).y) + 3.0f;
+    signed char rows = (int)(self->mSize.y / lineH);
     int i = 0;
     if (rows > 0) do {
-        unsigned short idx = self->top + i;
-        if (idx >= self->count) {
+        unsigned short idx = self->mLinesOffset + i;
+        if (idx >= self->mLineSize) {
             break;
         }
-        if ((self->flags & 1) && idx == self->cur) {
-            font->color = self->selColor;
+        if (((*(int*)&self->mAttrTextScroll) & 1) && idx == self->mSelectedIndex) {
+            (*(tARGB*)&font->Color[0]) = self->mSelectedColour;
         } else {
-            font->color = self->color;
+            (*(tARGB*)&font->Color[0]) = self->mColour;
         }
-        int str = self->strs[i + self->top];
+        int str = ((int*)self->mpLineOffset)[i + self->mLinesOffset];
         i++;
         sRect_1588 textBounds;
-        cFont_textExtent1(font, str, &textBounds, 0, self->sx, self->sy);
-        sV3_1588 size(textBounds.x1, self->sy * ((float)font->height * font->scale.y), 0.0f);
+        cFont_textExtent1(font, str, &textBounds, 0, self->mScale.x, self->mScale.y);
+        sV3_1588 size(textBounds.x1, self->mScale.y * ((float)font->MaxCharHeight * (*(t2Vector*)&font->BaseScale[0]).y), 0.0f);
         sV3_1588 drawPos = pos;
         cUIThing_applyPivot(self, &drawPos, &size);
         pos.y += lineH;
-        cFont_text1(font, drawPos.x, drawPos.y + self->yofs, str);
+        cFont_text1(font, drawPos.x, drawPos.y + self->mPixelOffset, str);
     } while (i < rows);
-    if (self->scroll != 0) {
-        cUIScrollBar_setValues(self->scroll, self->top, rows, self->count);
+    if (((void*)self->mpScrollBar) != 0) {
+        cUIScrollBar_setValues(((void*)self->mpScrollBar), self->mLinesOffset, rows, self->mLineSize);
     }
 }
 #endif
@@ -1359,37 +1299,14 @@ extern "C" int cUITextScroll_getStringByIndex(cUITextScroll* self, int i)
 //100%
 INCLUDE_ASM("ui/uitext", cTextureElement_render);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sRect_20A0 {
-    float x, y, w, h;
-};
-struct sColor_20A0 {
-    float a, r, g, b;
-};
 struct sGfx_20A0 {
     char pad[0xE84];
     sDrawState* top;          // 0xE84
 };
-// One vertex of a submitted quad (stride 0x30).
-struct sQuadVtx_20A0 {
-    float s, t, q;
-    int pad;
-    int r, g, b, a;
-    float pos[4];
-    sQuadVtx_20A0() {}
-};
-struct sSprite_20A0 {
-    int tex;                // 0x0
-    char pad[8];
-    float v0;               // 0xC
-    float u0;               // 0x10
-    float u1;               // 0x14
-    float v1;               // 0x18
-};
 // The unit declares GrMan as char*; typed view by asm label.
 extern int D_004A28AC_20A0 __asm__("G2D");
-extern "C" void c2DRender_drawRect(int ctx, sQuadVtx_20A0* v, sRect_20A0* r);
-extern "C" void c2DRender_drawRotRect(int ctx, sQuadVtx_20A0* v, sRect_20A0* r);
+extern "C" void c2DRender_drawRect(int ctx, tBxVertex* v, tRect* r);
+extern "C" void c2DRender_drawRotRect(int ctx, tBxVertex* v, tRect* r);
 
 /**
  * Draws a texture element as a screen quad in a rectangle with a colour.
@@ -1403,42 +1320,42 @@ extern "C" void c2DRender_drawRotRect(int ctx, sQuadVtx_20A0* v, sRect_20A0* r);
  * @param colour  the colour (a, r, g, b), 0..1
  * @param flags  1 flip u, 2 flip v, 4 use c2DRender_drawRotRect
  */
-extern "C" void cTextureElement_render(sSprite_20A0* element, sRect_20A0 rect, sColor_20A0 colour, int flags)
+extern "C" void cTextureElement_render(cTextureElement* element, tRect rect, tARGB colour, int flags)
 {
-    int tex = element->tex;
+    int tex = element->mSourceShape;
     if (tex < 0) {
         return;
     }
     (GrMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
-    float topV = element->v0;
-    float bottomV = element->v1;
-    float leftU = element->u0;
-    float rightU = element->u1;
+    float topV = element->mTop;
+    float bottomV = element->mBottom;
+    float leftU = element->mLeft;
+    float rightU = element->mRight;
     if (flags & 1) {
         leftU = rightU;
-        rightU = element->u0;
+        rightU = element->mLeft;
     }
     if (flags & 2) {
         topV = bottomV;
-        bottomV = element->v0;
+        bottomV = element->mTop;
     }
-    sQuadVtx_20A0 quadVerts[4];
+    tBxVertex quadVerts[4];
     for (int i = 0; i < 4; i++) {
-        sQuadVtx_20A0* vertPtr = &quadVerts[i];
-        vertPtr->a = (int)(colour.a * 128.0f);
-        vertPtr->r = (int)(colour.r * 128.0f);
-        vertPtr->g = (int)(colour.g * 128.0f);
-        vertPtr->b = (int)(colour.b * 128.0f);
-        vertPtr->q = 1.0f;
+        tBxVertex* vertPtr = &quadVerts[i];
+        vertPtr->a = (int)(colour.A * 128.0f);
+        vertPtr->r = (int)(colour.R * 128.0f);
+        vertPtr->g = (int)(colour.G * 128.0f);
+        vertPtr->b = (int)(colour.B * 128.0f);
+        vertPtr->one = 1.0f;
     }
-    quadVerts[0].s = leftU;
-    quadVerts[0].t = topV;
-    quadVerts[1].s = rightU;
-    quadVerts[1].t = topV;
-    quadVerts[2].s = leftU;
-    quadVerts[2].t = bottomV;
-    quadVerts[3].s = rightU;
-    quadVerts[3].t = bottomV;
+    quadVerts[0].u = leftU;
+    quadVerts[0].v = topV;
+    quadVerts[1].u = rightU;
+    quadVerts[1].v = topV;
+    quadVerts[2].u = leftU;
+    quadVerts[2].v = bottomV;
+    quadVerts[3].u = rightU;
+    quadVerts[3].v = bottomV;
     if (flags & 4) {
         c2DRender_drawRotRect(D_004A28AC_20A0, quadVerts, &rect);
     } else {
@@ -1449,37 +1366,14 @@ extern "C" void cTextureElement_render(sSprite_20A0* element, sRect_20A0 rect, s
 //100%
 INCLUDE_ASM("ui/uitext", cTextureElement_render2);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sRect_2220 {
-    float x, y, w, h;
-};
-struct sColor_2220 {
-    float a, r, g, b;
-};
 struct sGfx_2220 {
     char pad[0xE84];
     sDrawState* top;          // 0xE84
 };
-// One vertex of a submitted quad (stride 0x30).
-struct sQuadVtx_2220 {
-    float s, t, q;
-    int pad;
-    int r, g, b, a;
-    float pos[4];
-    sQuadVtx_2220() {}
-};
-struct sSprite_2220 {
-    int tex;                // 0x0
-    char pad[8];
-    float v0;               // 0xC
-    float u0;               // 0x10
-    float u1;               // 0x14
-    float v1;               // 0x18
-};
 // The unit declares GrMan as char*; typed views by asm label.
 extern int D_004A28AC_2220 __asm__("G2D");
-extern void c2DRender_drawRect_2220(int ctx, sQuadVtx_2220* v, sRect_2220* r) __asm__("c2DRender_drawRect");
-extern void c2DRender_drawRotRect_2220(int ctx, sQuadVtx_2220* v, sRect_2220* r) __asm__("c2DRender_drawRotRect");
+extern void c2DRender_drawRect_2220(int ctx, tBxVertex* v, tRect* r) __asm__("c2DRender_drawRect");
+extern void c2DRender_drawRotRect_2220(int ctx, tBxVertex* v, tRect* r) __asm__("c2DRender_drawRotRect");
 
 /**
  * Draws the bottom @p fillFraction part of a texture element as a screen quad, like a fill gauge.
@@ -1494,35 +1388,35 @@ extern void c2DRender_drawRotRect_2220(int ctx, sQuadVtx_2220* v, sRect_2220* r)
  * @param flags  4 uses c2DRender_drawRotRect
  * @param fillFraction  the shown fraction, 0..1
  */
-extern "C" void cTextureElement_render2(sSprite_2220* element, sRect_2220 rect, sColor_2220 colour, int flags, float fillFraction)
+extern "C" void cTextureElement_render2(cTextureElement* element, tRect rect, tARGB colour, int flags, float fillFraction)
 {
     float k = 1.0f - fillFraction;
-    int tex = element->tex;
+    int tex = element->mSourceShape;
     (GrMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
-    float topV = element->v0;
-    float bottomV = element->v1;
-    float leftU = element->u0;
-    float rightU = element->u1;
-    rect.y += k * rect.h;
-    rect.h *= 1.0f - k;
+    float topV = element->mTop;
+    float bottomV = element->mBottom;
+    float leftU = element->mLeft;
+    float rightU = element->mRight;
+    rect.Y += k * rect.H;
+    rect.H *= 1.0f - k;
     topV += k * (bottomV - topV);
-    sQuadVtx_2220 quadVerts[4];
+    tBxVertex quadVerts[4];
     for (int i = 0; i < 4; i++) {
-        sQuadVtx_2220* vertPtr = &quadVerts[i];
-        vertPtr->a = (int)(colour.a * 128.0f);
-        vertPtr->r = (int)(colour.r * 255.0f);
-        vertPtr->g = (int)(colour.g * 255.0f);
-        vertPtr->b = (int)(colour.b * 255.0f);
-        vertPtr->q = 1.0f;
+        tBxVertex* vertPtr = &quadVerts[i];
+        vertPtr->a = (int)(colour.A * 128.0f);
+        vertPtr->r = (int)(colour.R * 255.0f);
+        vertPtr->g = (int)(colour.G * 255.0f);
+        vertPtr->b = (int)(colour.B * 255.0f);
+        vertPtr->one = 1.0f;
     }
-    quadVerts[0].s = leftU;
-    quadVerts[0].t = topV;
-    quadVerts[1].s = rightU;
-    quadVerts[1].t = topV;
-    quadVerts[2].s = leftU;
-    quadVerts[2].t = bottomV;
-    quadVerts[3].s = rightU;
-    quadVerts[3].t = bottomV;
+    quadVerts[0].u = leftU;
+    quadVerts[0].v = topV;
+    quadVerts[1].u = rightU;
+    quadVerts[1].v = topV;
+    quadVerts[2].u = leftU;
+    quadVerts[2].v = bottomV;
+    quadVerts[3].u = rightU;
+    quadVerts[3].v = bottomV;
     if (flags & 4) {
         c2DRender_drawRotRect_2220(D_004A28AC_2220, quadVerts, &rect);
     } else {
@@ -1539,32 +1433,13 @@ struct sRect_23B8 {
     sRect_23B8() {}
     sRect_23B8(float x_, float y_, float w_, float h_) : x(x_), y(y_), w(w_), h(h_) {}
 };
-struct sColor_23B8 {
-    float a, r, g, b;
-};
 struct sGfx_23B8 {
     char pad[0xE84];
     sDrawState* top;          // 0xE84
 };
-// One vertex of a submitted quad (stride 0x30).
-struct sQuadVtx_23B8 {
-    float s, t, q;
-    int pad;
-    int r, g, b, a;
-    float pos[4];
-    sQuadVtx_23B8() {}
-};
-struct sSprite_23B8 {
-    int tex;                // 0x0
-    char pad[8];
-    float v0;               // 0xC
-    float u0;               // 0x10
-    float u1;               // 0x14
-    float v1;               // 0x18
-};
 extern int D_004A28AC_23B8 __asm__("G2D");
-extern "C" void c2DRender_drawRect2(int ctx, sQuadVtx_23B8* v, sRect_23B8* dst, sRect_23B8* uv);
-extern "C" void c2DRender_drawRotRect2(int ctx, sQuadVtx_23B8* v, sRect_23B8* dst, sRect_23B8* uv);
+extern "C" void c2DRender_drawRect2(int ctx, tBxVertex* v, sRect_23B8* dst, sRect_23B8* uv);
+extern "C" void c2DRender_drawRotRect2(int ctx, tBxVertex* v, sRect_23B8* dst, sRect_23B8* uv);
 
 /**
  * Draws the texture element @p element tiled @p tx times across and @p ty times down the rectangle @p destRect, cropping the last
@@ -1587,16 +1462,16 @@ extern "C" void c2DRender_drawRotRect2(int ctx, sQuadVtx_23B8* v, sRect_23B8* ds
  * @param tx  how many times the texture repeats across (may be fractional)
  * @param ty  how many times the texture repeats down (may be fractional)
  */
-extern "C" void cTextureElement_renderTiled(sSprite_23B8* element, sRect_23B8 destRect, sColor_23B8 colour, int flags, float tx, float ty)
+extern "C" void cTextureElement_renderTiled(cTextureElement* element, sRect_23B8 destRect, tARGB colour, int flags, float tx, float ty)
 {
-    int tex = element->tex;
+    int tex = element->mSourceShape;
     (GrMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
     float x0 = destRect.x;
     float y0 = destRect.y;
-    float topV = element->v0;
-    float bottomV = element->v1;
-    float leftU = element->u0;
-    float rightU = element->u1;
+    float topV = element->mTop;
+    float bottomV = element->mBottom;
+    float leftU = element->mLeft;
+    float rightU = element->mRight;
     if (tx <= 0.0f) {
         return;
     }
@@ -1607,24 +1482,24 @@ extern "C" void cTextureElement_renderTiled(sSprite_23B8* element, sRect_23B8 de
     float tileHeight = destRect.h / ty;
     if (flags & 1) {
         leftU = rightU;
-        rightU = element->u0;
+        rightU = element->mLeft;
     }
     if (flags & 2) {
         topV = bottomV;
-        bottomV = element->v0;
+        bottomV = element->mTop;
     }
     int nx = (int)tx;
     float y = y0;
     int ny = (int)ty;
-    sQuadVtx_23B8 quadVerts[4];
+    tBxVertex quadVerts[4];
     float fny = (float)ny;
     for (int i = 0; i < 4; i++) {
-        sQuadVtx_23B8* vert = &quadVerts[i];
-        vert->a = (int)(colour.a * 128.0f);
-        vert->r = (int)(colour.r * 255.0f);
-        vert->g = (int)(colour.g * 255.0f);
-        vert->b = (int)(colour.b * 255.0f);
-        vert->q = 1.0f;
+        tBxVertex* vert = &quadVerts[i];
+        vert->a = (int)(colour.A * 128.0f);
+        vert->r = (int)(colour.R * 255.0f);
+        vert->g = (int)(colour.G * 255.0f);
+        vert->b = (int)(colour.B * 255.0f);
+        vert->one = 1.0f;
     }
     int j;
     float x;
@@ -1696,16 +1571,6 @@ extern "C" void cTextureElement_renderTiled(sSprite_23B8* element, sRect_23B8 de
 //100%
 INCLUDE_ASM("ui/uitext", cTextureElement_renderRot);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sRect_2A00 {
-    float x, y, w, h;
-};
-struct sColor_2A00 {
-    float a, r, g, b;
-};
-struct sMat3_2A00 {
-    float m[9];
-};
 struct sGfx_2A00 {
     char pad[0xE84];
     sDrawState* top;          // 0xE84
@@ -1718,18 +1583,10 @@ struct sQuadVtx_2A00 {
     float pos[4];
     sQuadVtx_2A00() {}
 };
-struct sSprite_2A00 {
-    int tex;                // 0x0
-    char pad[8];
-    float v0;               // 0xC
-    float u0;               // 0x10
-    float u1;               // 0x14
-    float v1;               // 0x18
-};
 // The unit declares GrMan as char*; typed views by asm label.
 extern int D_004A28AC_2A00 __asm__("G2D");
-extern "C" void c2DRender_drawRect1(int ctx, sQuadVtx_2A00* v, sRect_2A00* r, sMat3_2A00* m);
-extern "C" void c2DRender_drawRotRect1(int ctx, sQuadVtx_2A00* v, sRect_2A00* r, sMat3_2A00* m);
+extern "C" void c2DRender_drawRect1(int ctx, sQuadVtx_2A00* v, tRect* r, t3Matrix* m);
+extern "C" void c2DRender_drawRotRect1(int ctx, sQuadVtx_2A00* v, tRect* r, t3Matrix* m);
 
 /**
  * Draws the texture element @p element once over the rectangle @p destRect, with the corners transformed by the 3x3 matrix @p transform.
@@ -1747,29 +1604,29 @@ extern "C" void c2DRender_drawRotRect1(int ctx, sQuadVtx_2A00* v, sRect_2A00* r,
  * @param colour  the colour (a, r, g, b in 0..1)
  * @param flags  bit 0 mirror horizontally, bit 1 mirror vertically, bit 2 draw the texture turned 90 degrees
  */
-extern "C" void cTextureElement_renderRot(sSprite_2A00* element, sRect_2A00 destRect, sMat3_2A00 transform, sColor_2A00 colour, int flags)
+extern "C" void cTextureElement_renderRot(cTextureElement* element, tRect destRect, t3Matrix transform, tARGB colour, int flags)
 {
-    int tex = element->tex;
+    int tex = element->mSourceShape;
     (GrMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
-    float topV = element->v0;
-    float bottomV = element->v1;
-    float leftU = element->u0;
-    float rightU = element->u1;
+    float topV = element->mTop;
+    float bottomV = element->mBottom;
+    float leftU = element->mLeft;
+    float rightU = element->mRight;
     if (flags & 1) {
         leftU = rightU;
-        rightU = element->u0;
+        rightU = element->mLeft;
     }
     if (flags & 2) {
         topV = bottomV;
-        bottomV = element->v0;
+        bottomV = element->mTop;
     }
     sQuadVtx_2A00 quadVerts[4];
     for (int i = 0; i < 4; i++) {
         sQuadVtx_2A00* vert = &quadVerts[i];
-        vert->a = (int)(colour.a * 128.0f);
-        vert->r = (int)(colour.r * 255.0f);
-        vert->g = (int)(colour.g * 255.0f);
-        vert->b = (int)(colour.b * 255.0f);
+        vert->a = (int)(colour.A * 128.0f);
+        vert->r = (int)(colour.R * 255.0f);
+        vert->g = (int)(colour.G * 255.0f);
+        vert->b = (int)(colour.B * 255.0f);
         vert->q = 1.0f;
     }
     quadVerts[0].s = leftU;

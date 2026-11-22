@@ -1,5 +1,8 @@
 #include "vtable.h"
 #include "common.h"
+#include "ealib/shape.h"
+#include "render/font.h"
+#include "render/2drender.h"
 #include "ui/uidata.h"
 #include "bx/math3d.h"
 #include "fe/ovstatehud.h"
@@ -464,25 +467,14 @@ struct sUIFshDir8138 {
     int pad;
 };
 
-struct sUIFsh8138 {
-    char pad_0x0[0x8];
-    int count;              // 0x08
-    char pad_0xC[0x8];
-    sUIFshDir8138 dir[1];   // 0x14
-};
 
-struct sUIVE_8138 {
-    short delta;
-    short index;
-    int (*fn)(void*, void*, void*, int, int, int);
-};
 
 extern char str_pct_s_1_ssh[];
 extern char str_UITextureIDs[];
 extern char str_UITextureELs[];
 extern char str_UITPage[];
 extern char* D_004A289C_8138 __asm__("GrMan");
-extern "C" sUIFsh8138* FILE_loadpack(char* name, int flags);
+extern "C" SHAPEFILE* FILE_loadpack(char* name, int flags);
 extern "C" void MEM_free(void* p);
 extern "C" void* memset(void* dst, int c, int n);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
@@ -506,14 +498,14 @@ extern "C" void cUITextureBank_setData(cUITextureBank* vbank, int id, void* vdat
     char name[0x70];
     int i = 0;
     sprintf(name, str_pct_s_1_ssh, id);
-    sUIFsh8138* fsh = FILE_loadpack(name, 0x3000100);
-    self->mNumTextureIDs = fsh->count;
+    SHAPEFILE* fsh = FILE_loadpack(name, 0x3000100);
+    self->mNumTextureIDs = fsh->num;
     self->mpTexturesIDs = (int*)operator_new_tag(self->mNumTextureIDs * 4, str_UITextureIDs, 0, 0);
     memset(self->mpTexturesIDs, 0xFF, self->mNumTextureIDs * 4);
     for (; i < self->mNumTextureIDs; i++) {
-        char* shape = (char*)fsh + fsh->dir[i].offset;
+        char* shape = (char*)fsh + ((sUIFshDir8138*)&fsh->tbl[0].offset)[i].offset;
         if (shape != 0) {
-            sUIVE_8138* vt = *(sUIVE_8138**)(D_004A289C_8138 + 0x10D8);
+            sVEntry<int(void*, void*, void*, int, int, int)>* vt = *(sVEntry<int(void*, void*, void*, int, int, int)>**)(D_004A289C_8138 + 0x10D8);
             self->mpTexturesIDs[i] = vt[46].fn(vthis(D_004A289C_8138, vt[46]), shape, str_UITPage, 0, 1, -1);
         }
     }
@@ -1077,13 +1069,6 @@ struct sV4_8A78 {
 struct sM33_8A78 {
     float m[3][3];
 };
-// One sprite vertex: texture coordinates, colour (0..128) and position.
-struct sVtx_8A78 {
-    float u, v, q;
-    float pad0C;
-    int r, g, b, a;
-    sV4_8A78 pos;
-};
 // Texture page entry: id and the uv rectangle.
 struct sUITex_8A78 {
     int id;
@@ -1225,7 +1210,7 @@ static inline sV4_8A78 Xform_8A78(const sM33_8A78& m, const sV4_8A78& v)
  */
 extern "C" void cUIIcon_render2D(cUIIcon_8A78* self, float x, float y)
 {
-    sVtx_8A78 verts[4];
+    tBxVertex verts[4];
     cUICtx_8A78* ctx = D_004A289C_8a78;
     if (self->tex != 0) {
         SetTexture_8A78(ctx, self->tex->id);
@@ -1298,21 +1283,21 @@ extern "C" void cUIIcon_render2D(cUIIcon_8A78* self, float x, float y)
         maxCorner.y = end.y - self->pos.y;
         maxCorner.z = end.z - self->pos.z;
     }
-    verts[0].pos = Xform_8A78(rotMat, sV4_8A78(minCorner.x, minCorner.y, 0.0f, 1.0f));
-    verts[1].pos = Xform_8A78(rotMat, sV4_8A78(maxCorner.x, minCorner.y, 0.0f, 1.0f));
-    verts[2].pos = Xform_8A78(rotMat, sV4_8A78(minCorner.x, maxCorner.y, 0.0f, 1.0f));
-    verts[3].pos = Xform_8A78(rotMat, sV4_8A78(maxCorner.x, maxCorner.y, 0.0f, 1.0f));
-    vu0AddEq_8A78(verts[0].pos, sV4_8A78(self->pos.x, self->pos.y, self->pos.z, 0.0f));
-    vu0AddEq_8A78(verts[1].pos, sV4_8A78(self->pos.x, self->pos.y, self->pos.z, 0.0f));
-    vu0AddEq_8A78(verts[2].pos, sV4_8A78(self->pos.x, self->pos.y, self->pos.z, 0.0f));
-    vu0AddEq_8A78(verts[3].pos, sV4_8A78(self->pos.x, self->pos.y, self->pos.z, 0.0f));
+    (*(sV4_8A78*)&verts[0].p) = Xform_8A78(rotMat, sV4_8A78(minCorner.x, minCorner.y, 0.0f, 1.0f));
+    (*(sV4_8A78*)&verts[1].p) = Xform_8A78(rotMat, sV4_8A78(maxCorner.x, minCorner.y, 0.0f, 1.0f));
+    (*(sV4_8A78*)&verts[2].p) = Xform_8A78(rotMat, sV4_8A78(minCorner.x, maxCorner.y, 0.0f, 1.0f));
+    (*(sV4_8A78*)&verts[3].p) = Xform_8A78(rotMat, sV4_8A78(maxCorner.x, maxCorner.y, 0.0f, 1.0f));
+    vu0AddEq_8A78((*(sV4_8A78*)&verts[0].p), sV4_8A78(self->pos.x, self->pos.y, self->pos.z, 0.0f));
+    vu0AddEq_8A78((*(sV4_8A78*)&verts[1].p), sV4_8A78(self->pos.x, self->pos.y, self->pos.z, 0.0f));
+    vu0AddEq_8A78((*(sV4_8A78*)&verts[2].p), sV4_8A78(self->pos.x, self->pos.y, self->pos.z, 0.0f));
+    vu0AddEq_8A78((*(sV4_8A78*)&verts[3].p), sV4_8A78(self->pos.x, self->pos.y, self->pos.z, 0.0f));
     for (int i = 0; i < 4; i++) {
-        verts[i].pos.Set(verts[i].pos.x, verts[i].pos.y, 0.0f);
+        (*(sV4_8A78*)&verts[i].p).Set((*(sV4_8A78*)&verts[i].p).x, (*(sV4_8A78*)&verts[i].p).y, 0.0f);
         verts[i].a = (int)(self->col[0] * 128.0f);
         verts[i].r = (int)(self->col[1] * 128.0f);
         verts[i].g = (int)(self->col[2] * 128.0f);
         verts[i].b = (int)(self->col[3] * 128.0f);
-        verts[i].q = 1.0f;
+        verts[i].one = 1.0f;
     }
     PushRS_8A78();
     cUICtx_8A78* rc = D_004A289C_8a78;
@@ -1716,11 +1701,6 @@ extern "C" void cUIThing_applyPivot(void* self, void* pos, void* size);
 extern "C" void cFont_text1(void* font, float x, float y, int str);
 extern char* D_004A289C_9F00 __asm__("GrMan");
 
-struct sV2_9F00 {
-    float x, y;
-    sV2_9F00() {}
-    sV2_9F00(float ax, float ay) : x(ax), y(ay) {}
-};
 struct sV3_9F00 {
     float x, y, z;
     sV3_9F00() {}
@@ -1735,16 +1715,6 @@ struct sRect_9F00 {
     float x0, y0, x1, y1;
 };
 
-struct sFont_9F00 {
-    char pad0[0x14];
-    int height;             // 0x14
-    char pad18[0x10];
-    sV2_9F00 shadowOfs;     // 0x28
-    sV2_9F00 scale;         // 0x30
-    sV2_9F00 cur;           // 0x38
-    tARGB color;        // 0x40
-    tARGB shadowColor;  // 0x50
-};
 
 struct sLayerBits_9F00 {
     unsigned char lo;
@@ -1785,25 +1755,25 @@ static inline void setLayer_9F00(cUIListBox* self)
  */
 extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
 {
-    sFont_9F00* font = (sFont_9F00*)cUIListBox_getFont(self);
+    cFont* font = (cFont*)cUIListBox_getFont(self);
     if (font == 0 || *((unsigned char*)self + 0x318) == 0) {
         return;
     }
-    sV2_9F00 listScale(self->mScale.x, self->mScale.y);
-    font->cur.x = font->scale.x * listScale.x;
-    font->cur.y = font->scale.y * listScale.y;
+    t2Vector listScale(self->mScale.x, self->mScale.y);
+    (*(t2Vector*)&font->Scale[0]).x = (*(t2Vector*)&font->BaseScale[0]).x * listScale.x;
+    (*(t2Vector*)&font->Scale[0]).y = (*(t2Vector*)&font->BaseScale[0]).y * listScale.y;
     if (((self->mAttr >> 5) & 1) && ((*(int*)&self->mAttrListBox >> 5) & 1)) {
-        font->color = (*(&self->mStaticColour));
+        (*(tARGB*)&font->Color[0]) = (*(&self->mStaticColour));
     } else {
-        font->color = (*(&self->mColour));
+        (*(tARGB*)&font->Color[0]) = (*(&self->mColour));
     }
     if ((*(int*)&self->mAttrListBox >> 2) & 1) {
         tARGB shadow = (*(&self->mShadowColour));
         shadow.A = self->mColour.A;
-        font->shadowColor = shadow;
-        font->shadowOfs = sV2_9F00(2.0f, 2.0f);
+        (*(tARGB*)&font->ShadowColor[0]) = shadow;
+        (*(t2Vector*)&font->ShadowOffset[0]) = t2Vector(2.0f, 2.0f);
     } else {
-        font->shadowOfs = sV2_9F00(0.0f, 0.0f);
+        (*(t2Vector*)&font->ShadowOffset[0]) = t2Vector(0.0f, 0.0f);
     }
     int str;
     if (*(int*)&self->mAttrListBox & 0x10) {
@@ -1820,7 +1790,7 @@ extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
         if (self->mSize.x < textRect.x1) {
             over = 1;
         }
-        sV3_9F00 size(textRect.x1, self->mScale.y * ((float)font->height * font->scale.y), 0.0f);
+        sV3_9F00 size(textRect.x1, self->mScale.y * ((float)font->MaxCharHeight * (*(t2Vector*)&font->BaseScale[0]).y), 0.0f);
         sV3_9F00 position(self->mPosition.x + x, self->mPosition.y + y, 0.0f);
         cUIThing_applyPivot((self), &position, &size);
         cFont_text1(font, position.x, position.y, str);

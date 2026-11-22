@@ -785,7 +785,6 @@ extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 extern void* cFEStateCheatCharSelect_vtbl[];
 extern char* D_00440F78[];
 
-struct sCharEnt_2220 { char* name; char* label; int f8; char pad[3]; signed char id; };
 struct sCharSel_2220 {
     char pad0[0x8];
     void** vt;                  // 0x8
@@ -838,14 +837,14 @@ extern "C" sCharSel_2220* cFEStateCheatCharSelect_cFEStateCheatCharSelect(sCharS
     cBERewardDB* list = cBERewardInterface_getDB();
     int n = list->mNumCheatChars;
     for (int i = 0; i < n; i++) {
-        sCharEnt_2220* charEntry = &((sCharEnt_2220*)list->mpCheatChars)[i];
-        if (cBERewardInterface_isCheatCharOwned(iface, self->player, slot, charEntry->id)) {
-            char* lbl = charEntry->label;
-            self->ids[self->count] = charEntry->id;
+        tCheatCharInfo* charEntry = &(list->mpCheatChars)[i];
+        if (cBERewardInterface_isCheatCharOwned(iface, self->player, slot, charEntry->mCheatCharID)) {
+            char* lbl = charEntry->mpIconName;
+            self->ids[self->count] = charEntry->mCheatCharID;
             char* entryOwner = self->owner;
             int labelHash = GetHashValue32(lbl);
             self->hashes[self->count] = cUITextureBank_getElementByHashname(entryOwner + 0x58, labelHash);
-            self->names[self->count] = charEntry->name;
+            self->names[self->count] = charEntry->mNameStringID;
             self->count++;
         }
     }
@@ -894,7 +893,6 @@ extern char D_004C66B8[];
 extern "C" void cUIMenu_setScrollableMenu(void* w, unsigned char n);
 
 struct sCWVt_2460 { short delta; short index; void (*fn)(void*, int); };
-struct sCWVtP_2460 { short delta; short index; void (*fn)(void*, void*); };
 struct sCW_2460 {
     int f0;
     int f4;
@@ -958,7 +956,7 @@ extern "C" void cFEStateCheatCharSelect_onWidgetCreate(cFEStateCheatCharSelect* 
             *sp = w;
             w->id18 = i;
             if (i == 0) {
-                sCWVtP_2460* vtEntry = &((sCWVtP_2460*)((sCW_2460**)&self->mpCharWidget[0])[0]->vt)[21];
+                sVEntry<void(void*, void*)>* vtEntry = &((sVEntry<void(void*, void*)>*)((sCW_2460**)&self->mpCharWidget[0])[0]->vt)[21];
                 vtEntry->fn((char*)((sCW_2460**)&self->mpCharWidget[0])[0] + vtEntry->delta, D_004C66B8);
             }
             if (i >= self->mNumCharacters) {
@@ -987,16 +985,6 @@ extern "C" void cUIStateStack_pop(void*, int);
 extern char D_004C66A8[];
 extern char D_004C66B8[];
 
-struct sVEK182690a {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
-struct sVEK182690b {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Handles the cheat-character pictures: highlight, the shown name, picking one and backing out.
@@ -1014,13 +1002,13 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(cFEStateCheatCharSelect* s
         return;
     switch (msg) {
     case 2: {
-        sVEK182690a* vt = (sVEK182690a*)menu->mVtbl;
+        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)menu->mVtbl;
         vt[21].fn(vthis(menu, vt[21]), D_004C66A8);
         break;
     }
     case 1: {
         int sel = menu->mMiscData + self->mpMenu->mScrollItemOffset;
-        sVEK182690a* vt = (sVEK182690a*)menu->mVtbl;
+        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)menu->mVtbl;
         vt[21].fn(vthis(menu, vt[21]), D_004C66B8);
         cUIText_setAsciiString(self->mpNameWidget, self->mpCharNames[sel]);
         break;
@@ -1037,7 +1025,7 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(cFEStateCheatCharSelect* s
             self->mCheatCharID = self->mCharIDs[sel];
         char* pl = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setPlayerCheatCharID(pl, self->mUserNum, self->mCheatCharID);
-        sVEK182690b* vt = *(sVEK182690b**)(pl + 0xC);
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(pl + 0xC);
         vt[1].fn(vthis(pl, vt[1]));
         self->mDone = 1;
         cUIStateStack_pop(&self->mpEngine->mStateStack, 1);

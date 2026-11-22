@@ -1137,7 +1137,6 @@ extern "C" void cFEStatePeakRoom_updateHelpText(cFEStatePeakRoom* self, int id);
 extern "C" void cFEStatePeakRoom_updateMedalsList(cFEStatePeakRoom* self, int id);
 extern "C" void cUIStateStack_push(void* list, void* item);
 
-struct sVEntB_001D3C80 { short delta; short index; void (*fn)(void*, int); };
 
 /**
  * Handles the peak room menu: select opens an owned trophy, event 6 opens the factory's state for it,
@@ -1170,7 +1169,7 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, cUIThing*
         for (int i = 0; i < 4; i++) {
             cUIThing* listItem = ((cUIThing**)&self->mpTrophyIcons)[i];
             if (listItem != 0) {
-                ((sVEntB_001D3C80*)listItem->mVtbl)[9].fn(vthis(listItem, ((sVEntB_001D3C80*)listItem->mVtbl)[9]), 0);
+                ((sVEntry<void(void*, int)>*)listItem->mVtbl)[9].fn(vthis(listItem, ((sVEntry<void(void*, int)>*)listItem->mVtbl)[9]), 0);
             }
         }
         void* obj = *(void**)self->mpEngine;

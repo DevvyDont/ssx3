@@ -154,11 +154,6 @@ public:
 };
 extern cFEMemCardStateK186C98* D_004A14B8_K186C98 __asm__("cFEStateMemCard_mInstance");
 
-struct sVtEntK186C98 {
-    short delta;
-    short index;
-    unsigned short* (*fn)(void*, int);
-};
 
 struct sLocalK186C98 {
     int v[8];
@@ -181,7 +176,7 @@ extern "C" void func_00186C98(void)
     void* mp = cSSXApp_getMCManager(SSXApp);
     cMCOverlayManager_getDeviceNumberString(mp, &loc, *(int*)((char*)mp + 0x428));
     char* locale = (char*)SSXApp->FELocale;
-    sVtEntK186C98* vt = *(sVtEntK186C98**)(locale + 4);
+    sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(locale + 4);
     unsigned short* formatText = vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_MEMOVNotFormattedPS2));
     sprintf1(buf, formatText, &loc);
     cFEMemCardStateK186C98* st = D_004A14B8_K186C98;
@@ -205,8 +200,6 @@ extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 // Typed view of cFEStateMemCard_mInstance (other functions in this unit declare it as void*).
 extern char* D_004A14B8_86D60 __asm__("cFEStateMemCard_mInstance");
 
-struct sVtI_86D60 { short delta; short index; int (*fn)(void*, int); };
-struct sVtS_86D60 { short delta; short index; unsigned short* (*fn)(void*, int); };
 struct sVtB_86D60 { short delta; short index; void (*fn)(void*, void*, int, int, int, int, int); };
 struct sVtW_86D60 { short delta; short index; void (*fn)(void*, unsigned short*, int); };
 struct sVtV_86D60 { short delta; short index; void (*fn)(void*, int); };
@@ -231,12 +224,12 @@ extern "C" void func_00186D60(void)
     cMCOverlayManager_getDeviceNumberString(mp, &loc, mp->mSelectedDevice);
     cBE_getInterface_Fv(cBE_getBE(), 5);
     char* memCard = (char*)mp->mpMemCard;
-    sVtI_86D60* vt = *(sVtI_86D60**)memCard;
+    sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)memCard;
     memCard += vt[22].delta;
     int need = vt[22].fn(memCard, cBESaveInterface_getSaveProfileSize());
     unsigned short* popupText = buf;
     char* lo = (char*)SSXApp->FELocale;
-    sVtS_86D60* lvt = *(sVtS_86D60**)(lo + 4);
+    sVEntry<unsigned short*(void*, int)>* lvt = *(sVEntry<unsigned short*(void*, int)>**)(lo + 4);
     lo += lvt[4].delta;
     unsigned short* fmt = lvt[4].fn(lo, GetHashValue32(str_kT_MEMFENotDetectedStartUpPS2));
     sprintf1(popupText, fmt, &loc, need);
@@ -249,7 +242,7 @@ extern "C" void func_00186D60(void)
         char* w = *(char**)(D_004A14B8_86D60 + 0x218);
         char* lo2 = (char*)SSXApp->FELocale;
         sVtW_86D60* wvt = *(sVtW_86D60**)(w + 8);
-        sVtS_86D60* lvt2 = *(sVtS_86D60**)(lo2 + 4);
+        sVEntry<unsigned short*(void*, int)>* lvt2 = *(sVEntry<unsigned short*(void*, int)>**)(lo2 + 4);
         w += wvt[26].delta;
         lo2 += lvt2[4].delta;
         wvt[26].fn(w, lvt2[4].fn(lo2, GetHashValue32(str_kT_CMNYes)), 0);
@@ -258,7 +251,7 @@ extern "C" void func_00186D60(void)
         char* w = *(char**)(D_004A14B8_86D60 + 0x218);
         char* lo2 = (char*)SSXApp->FELocale;
         sVtW_86D60* wvt = *(sVtW_86D60**)(w + 8);
-        sVtS_86D60* lvt2 = *(sVtS_86D60**)(lo2 + 4);
+        sVEntry<unsigned short*(void*, int)>* lvt2 = *(sVEntry<unsigned short*(void*, int)>**)(lo2 + 4);
         w += wvt[26].delta;
         lo2 += lvt2[4].delta;
         wvt[26].fn(w, lvt2[4].fn(lo2, GetHashValue32(str_kT_MEMOVRetry)), 1);
@@ -313,8 +306,6 @@ extern "C" int cMCOverlayManager_GetFreeSpace(void* mp, int card);
 extern char* D_004A14B8_86F90 __asm__("cFEStateMemCard_mInstance");
 extern int cFEStateMemCard_mStage;
 
-struct sVtA_86F90 { short delta; short index; void (*fn)(void*, int, void*); };
-struct sVtI_86F90 { short delta; short index; int (*fn)(void*, int); };
 struct sVtV_86F90 { short delta; short index; void (*fn)(void*, int); };
 struct sVt0_86F90 { short delta; short index; int (*fn)(void*); };
 
@@ -340,7 +331,7 @@ extern "C" void cFEStateMemCard_callbackLoadReady(void)
             return;
         cMCOverlayManager* mp = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
         char* memCard = (char*)mp->mpMemCard;
-        sVtA_86F90* vt = *(sVtA_86F90**)memCard;
+        sVEntry<void(void*, int, void*)>* vt = *(sVEntry<void(void*, int, void*)>**)memCard;
         vt[14].fn(memCard + vt[14].delta, mp->mFileCursor, D_004A14B8_86F90 + 0x9C);
         return;
     }
@@ -356,7 +347,7 @@ extern "C" void cFEStateMemCard_callbackLoadReady(void)
         if (flags & 1) {
             extra = 1;
             char* memCard = (char*)mp->mpMemCard;
-            sVtI_86F90* vt = *(sVtI_86F90**)memCard;
+            sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)memCard;
             char* thisp = memCard + vt[22].delta;
             int profileSpace = vt[22].fn(thisp, cBESaveInterface_getSaveProfileSize());
             *(int*)(D_004A14B8_86F90 + 0x230) += profileSpace;
@@ -618,17 +609,7 @@ extern "C" void* cSSXApp_getMCManager(void* p);
 extern "C" void cMCOverlayManager_getDeviceNumberString(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 
-struct sVtI_00187360 {
-    short delta;
-    short index;
-    int (*fn)(void*, int);
-};
 
-struct sVtS_00187360 {
-    short delta;
-    short index;
-    unsigned short* (*fn)(void*, int);
-};
 
 struct sVtB_00187360 {
     short delta;
@@ -664,11 +645,11 @@ extern "C" void cFEStateMemCard_callbackConfirmNoFreeBlocks(void)
     cBE_getInterface_Fv(cBE_getBE(), 5);
     *(int*)((char*)cFEStateMemCard_mInstance + 0x19C) = 20;
     char* sf = (char*)mp->mpMemCard;
-    sVtI_00187360* sfvt = *(sVtI_00187360**)sf;
+    sVEntry<int(void*, int)>* sfvt = *(sVEntry<int(void*, int)>**)sf;
     int size = sfvt[22].fn(sf + sfvt[22].delta, cBESaveInterface_getSaveProfileSize());
     cMCOverlayManager_getDeviceNumberString(mp, &loc, mp->mSelectedDevice);
     char* locale = (char*)SSXApp->FELocale;
-    sVtS_00187360* vt = *(sVtS_00187360**)(locale + 4);
+    sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(locale + 4);
     unsigned short* fmt = vt[4].fn(locale + vt[4].delta, GetHashValue32(str_kT_MEMNoSpaceStartPS2));
     sprintf1(buf, fmt, &loc, size);
     D_004A14B8_K186C98->v36(buf, 0, 0, 0, 0, 0);
@@ -676,7 +657,7 @@ extern "C" void cFEStateMemCard_callbackConfirmNoFreeBlocks(void)
     sVtB_00187360* bvt = *(sVtB_00187360**)(box + 8);
     char* bthis = box + bvt[26].delta;
     char* buttonLocale = (char*)SSXApp->FELocale;
-    sVtI_00187360* vt2 = *(sVtI_00187360**)(buttonLocale + 4);
+    sVEntry<int(void*, int)>* vt2 = *(sVEntry<int(void*, int)>**)(buttonLocale + 4);
     char* o2this = buttonLocale + vt2[4].delta;
     int id = vt2[4].fn(o2this, GetHashValue32(str_kT_MEMOVRetry));
     bvt[26].fn(bthis, id, 1);
@@ -874,11 +855,6 @@ extern "C" void* cUIAnimationBank_getAnimationByHashName(void* bank, int hash);
 extern "C" void cUIThing_playAnimation(void* obj, void* anim, int a, int b, int c);
 extern "C" void cFEMemCard_SetLoadPressed(void*, int);
 
-struct sVtEnt_001877B0 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Starts reading the profile from the memory card (stage 5).
@@ -910,7 +886,7 @@ extern "C" void cFEStateMemCard_startProfileRead(void)
     mp->mFileCursor = profileFile;
     memCardState->mSlot = profileFile;
     memCardState->mType = 0;
-    sVtEnt_001877B0* vt = (sVtEnt_001877B0*)mp->mVtbl;
+    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)mp->mVtbl;
     vt[1].fn(vthis(mp, vt[1]), 53);
     cMCOverlayManager_getFileName_r(mp, 1, name, 20);
     func_002C2540(fmt, str_pct_s_pct_s_c);

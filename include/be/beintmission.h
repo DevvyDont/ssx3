@@ -68,4 +68,30 @@ CHECK_SIZE(cBEMissionInterface, 0x14);
 
 // The one mission interface (On Tour: cBEMissionInterface::instance), created by cBEMissionInterface_getThis.
 
+// tBEPictureDB: one location's map picture record (the 22-entry static table cBELibrary_pictureDB). [O] On Tour
+// struct tBEPictureDB (0x2C), the record of the static cBEMissionInterface::pictureDB[22] that
+// cBEMissionInterface::getPictureDBRecord(eBELocationID) returns by value; [R] retail's cBEMissionInterface_getPictureDBRecord
+// returns record i of a 22-entry, 0x2C-stride table the same way (record 0 when no id matches). [U] the id is matched by
+// the session-count lookups (be/beintmission.cpp's view sMissionEntry {id 0x0, value 0x18} is this record),
+// getPictureFileName returns +0x4, and cOVState_MAP_setupLocalSessionList maps session points into the picture
+// with the four floats (fe/ovstatemap.cpp's view sBounds_96A8 minX / minY / maxX / maxY).
+struct tBEPictureDB {
+    int iLocationID;                // 0x00 [O] eBELocationID; [U] getPictureDBRecord / the session-count lookups
+    char strFileName[20];           // 0x04 [O]; [U] cBEMissionInterface_getPictureFileName returns it
+    int numSessionPoints;           // 0x18 [O]; [U] the session count read by the lookups after the id
+    float world_topleft_x;          // 0x1C [O]; [U] setupLocalSessionList (the picture's world bounds)
+    float world_topleft_y;          // 0x20 [O]
+    float world_bottomright_x;      // 0x24 [O]
+    float world_bottomright_y;      // 0x28 [O]
+};
+
+CHECK_OFFSET(tBEPictureDB, iLocationID, 0x00);
+CHECK_OFFSET(tBEPictureDB, strFileName, 0x04);
+CHECK_OFFSET(tBEPictureDB, numSessionPoints, 0x18);
+CHECK_OFFSET(tBEPictureDB, world_topleft_x, 0x1C);
+CHECK_OFFSET(tBEPictureDB, world_topleft_y, 0x20);
+CHECK_OFFSET(tBEPictureDB, world_bottomright_x, 0x24);
+CHECK_OFFSET(tBEPictureDB, world_bottomright_y, 0x28);
+CHECK_SIZE(tBEPictureDB, 0x2C);
+
 #endif /* BE_BEINTMISSION_H */

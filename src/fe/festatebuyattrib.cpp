@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beintecon.h"
+#include "be/bedbprofile.h"
 #include "sound/ssxaudio.h"
 #include "fe/uistatebuypopup.h"
 #include "ui/uimenu.h"
@@ -208,16 +210,6 @@ extern char str_TransitionOut_b[];
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
-struct sVE_4A90 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-struct sVEr_4A90 {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, void*);
-};
 extern cUISoundInterface gUISoundNull;
 
 /**
@@ -249,7 +241,7 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(cFEStateBuyAttrib* self, char* o
             if (sound == 0)
                 sound = &gUISoundNull;
             if (sound != 0)
-                ((sVE_4A90*)sound->mVtbl)[2].fn(vthis(sound, ((sVE_4A90*)sound->mVtbl)[2]), 4);
+                ((sVEntry<void(void*, int)>*)sound->mVtbl)[2].fn(vthis(sound, ((sVEntry<void(void*, int)>*)sound->mVtbl)[2]), 4);
         }
         break;
     case 6:
@@ -257,11 +249,11 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(cFEStateBuyAttrib* self, char* o
             self->mBuyPrompt = 0;
             cUIState_hideObjSafe(((char*)self), str_PopupGroup);
             cUIMenu* o = self->pAttribMenu;
-            sVE_4A90* vt = (sVE_4A90*)o->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)o->mVtbl;
             vt[7].fn(vthis(o, vt[7]), 1);
         } else {
             char* mgr = *(char**)self->mpEngine;
-            sVEr_4A90* vt = *(sVEr_4A90**)(mgr + 4);
+            sVEntry<void*(void*, void*, void*)>* vt = *(sVEntry<void*(void*, void*, void*)>**)(mgr + 4);
             void* nextState = vt[5].fn(vthis(mgr, vt[5]), ((char*)self), *(void**)(obj + 0x18));
             if (nextState != 0) {
                 int frame = cUIScreen_getFrameByLabel(self->mpAttribScreen, GetHashValue32(str_TransitionOut_b));
@@ -296,7 +288,7 @@ static inline void defaultMsg_4C30(cFEStateBuyAttrib* s, int msg)
     if (p == 0)
         p = &gUISoundNull;
     if (p != 0)
-        ((sVE_4A90*)p->mVtbl)[2].fn(vthis(p, ((sVE_4A90*)p->mVtbl)[2]), msg);
+        ((sVEntry<void(void*, int)>*)p->mVtbl)[2].fn(vthis(p, ((sVEntry<void(void*, int)>*)p->mVtbl)[2]), msg);
 }
 
 static inline void playFrame_4C30(cFEStateBuyAttrib* s, char* name)
@@ -572,11 +564,6 @@ extern "C" int cBEEconInterface_buyAttribute(void* iface, int a1, int charID, in
 extern char str_PopupGroup[];
 extern const int D_004780B0[];
 
-struct sVE_5300 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 
 struct sVE0_5300 {
@@ -585,10 +572,6 @@ struct sVE0_5300 {
     void (*fn)(void*);
 };
 
-struct sIface_5300 {
-    int pad[3];
-    sVE0_5300* vt;
-};
 
 
 /**
@@ -612,15 +595,15 @@ extern "C" void cFEStateBuyAttrib_buyExperience(cFEStateBuyAttrib* buyState)
     self->mBuyPrompt = 0;
     cUIState_hideObjSafe(self, str_PopupGroup);
     cUIMenu* attribMenu = (self->pAttribMenu);
-    ((sVE_5300*)attribMenu->mVtbl)[7].fn(vthis(attribMenu, ((sVE_5300*)attribMenu->mVtbl)[7]), 1);
-    sIface_5300* iface = (sIface_5300*)cBE_getInterface_Fv(cBE_getBE(), 11);
+    ((sVEntry<void(void*, int)>*)attribMenu->mVtbl)[7].fn(vthis(attribMenu, ((sVEntry<void(void*, int)>*)attribMenu->mVtbl)[7]), 1);
+    cBEEconInterface* iface = (cBEEconInterface*)cBE_getInterface_Fv(cBE_getBE(), 11);
     int* bought = self->mPotentialExperience;
     for (int i = 0; i < 7; i++) {
         for (int j = 0; j < self->mPotentialExperience[i]; j++) {
             cBEEconInterface_buyAttribute(iface, 0, cBELibrary_getCharacterID(0), D_004780B0[i]);
         }
     }
-    iface->vt[1].fn(vthis(iface, iface->vt[1]));
+    ((sVE0_5300*)iface->mVtbl)[1].fn(vthis(iface, ((sVE0_5300*)iface->mVtbl)[1]));
     int* max = self->mExperience;
     int* added = self->mPotentialExperience;
     for (int i = 0; i < 7; i++) {
@@ -963,7 +946,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
     if (sound == 0)
         sound = &gUISoundNull;
     if (sound != 0)
-        ((sVE_4A90*)sound->mVtbl)[2].fn(vthis(sound, ((sVE_4A90*)sound->mVtbl)[2]), msg);
+        ((sVEntry<void(void*, int)>*)sound->mVtbl)[2].fn(vthis(sound, ((sVEntry<void(void*, int)>*)sound->mVtbl)[2]), msg);
     return handled;
 }
 #endif
@@ -1501,12 +1484,8 @@ struct sBestEntry_6890 {
     int track;
 };
 
-struct sRidersBest_6890 {
-    sBestEntry_6890 entry[8];   // 0x00
-    int pad40[5];               // 0x40
-};
 
-extern "C" sRidersBest_6890* cBEScoreInterface_getPlayerBestStats(void* iface, int a, int charId);
+extern "C" tRiderBest* cBEScoreInterface_getPlayerBestStats(void* iface, int a, int charId);
 
 
 /**
@@ -1526,13 +1505,13 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
     char buf[112];
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* iface8 = cBE_getInterface_Fv(cBE_getBE(), 8);
-    sRidersBest_6890 best = *cBEScoreInterface_getPlayerBestStats(iface8, 0, cBELibrary_getCharacterID(0));
+    tRiderBest best = *cBEScoreInterface_getPlayerBestStats(iface8, 0, cBELibrary_getCharacterID(0));
     int value;
     int track;
 
     {
-        value = best.entry[0].value;
-        track = best.entry[0].track;
+        value = ((sBestEntry_6890*)&best.eventStat[0][0])[0].value;
+        track = ((sBestEntry_6890*)&best.eventStat[0][0])[0].track;
         if (value > 0) {
             sprintf(buf, D_004A2138, value);
             cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ko, buf);
@@ -1544,8 +1523,8 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
         }
     }
     {
-        value = best.entry[5].value;
-        track = best.entry[5].track;
+        value = ((sBestEntry_6890*)&best.eventStat[0][0])[5].value;
+        track = ((sBestEntry_6890*)&best.eventStat[0][0])[5].track;
         if (value > 0) {
             sprintf(buf, str_pct_d_sec, value);
             cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_handplants, buf);
@@ -1557,8 +1536,8 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
         }
     }
     {
-        value = best.entry[1].value;
-        track = best.entry[1].track;
+        value = ((sBestEntry_6890*)&best.eventStat[0][0])[1].value;
+        track = ((sBestEntry_6890*)&best.eventStat[0][0])[1].track;
         if (value > 0) {
             sprintf(buf, D_004A2138, value);
             cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ubers, buf);
@@ -1570,8 +1549,8 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
         }
     }
     {
-        value = best.entry[2].value;
-        track = best.entry[2].track;
+        value = ((sBestEntry_6890*)&best.eventStat[0][0])[2].value;
+        track = ((sBestEntry_6890*)&best.eventStat[0][0])[2].track;
         if (value > 0) {
             sprintf(buf, D_004A2138, value);
             cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_superubers, buf);
@@ -1583,8 +1562,8 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
         }
     }
     {
-        value = best.entry[3].value;
-        track = best.entry[3].track;
+        value = ((sBestEntry_6890*)&best.eventStat[0][0])[3].value;
+        track = ((sBestEntry_6890*)&best.eventStat[0][0])[3].track;
         if (value > 0) {
             sprintf(buf, D_004A2138, value);
             cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ubergrinds, buf);
@@ -1596,8 +1575,8 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
         }
     }
     {
-        value = best.entry[6].value;
-        track = best.entry[6].track;
+        value = ((sBestEntry_6890*)&best.eventStat[0][0])[6].value;
+        track = ((sBestEntry_6890*)&best.eventStat[0][0])[6].track;
         if (value > 0) {
             sprintf(buf, str_pct_0_1f_m, fptodp((float)value * 0.009999999776482582f));
             cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_longrail, buf);
@@ -1609,8 +1588,8 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
         }
     }
     {
-        value = best.entry[7].value;
-        track = best.entry[7].track;
+        value = ((sBestEntry_6890*)&best.eventStat[0][0])[7].value;
+        track = ((sBestEntry_6890*)&best.eventStat[0][0])[7].track;
         if (value > 0) {
             sprintf(buf, str_pct_d_sec, value);
             cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_airtime, buf);
@@ -1623,8 +1602,8 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
     }
     cUIText* title = (cUIText*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_favoriteEvent_label));
     cUIText_setUnicodeStringByID(title, GetHashValue32(str_kT_ovrcmnBestCombo));
-    if (best.entry[4].value > 0) {
-        sprintf(buf, D_004A2138, best.entry[4].value);
+    if (((sBestEntry_6890*)&best.eventStat[0][0])[4].value > 0) {
+        sprintf(buf, D_004A2138, ((sBestEntry_6890*)&best.eventStat[0][0])[4].value);
     } else {
         // strcpy(buf, "-"): gcc's inline strcpy of a literal is a 2-byte aligned copy
         __builtin_memcpy(buf, str_dash, 2);

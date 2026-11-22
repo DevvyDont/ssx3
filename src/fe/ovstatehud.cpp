@@ -1,4 +1,6 @@
+#include "vtable.h"
 #include "common.h"
+#include "render/font.h"
 #include "render/2drender.h"
 #include "bx/math3d.h"
 #include "sound/ssxaudio.h"
@@ -89,11 +91,6 @@ extern "C" void cOVStateHiScoreList_onCreateScreen(cOVStateHiScoreList* self)
 //100%
 INCLUDE_ASM("fe/ovstatehud", cOVStateHiScoreList_onWidgetEvent);
 #ifdef SKIP_ASM
-struct sVEntry001E9130 {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
 
 
 extern "C" void cUIStateStack_push(void* list, void* item);
@@ -112,7 +109,7 @@ extern "C" void cOVStateHiScoreList_onWidgetEvent(cOVStateHiScoreList* self, cUI
         void* nextState = 0;
         if (item->mMiscData == 1) {
             cUICustomInterface* factory = *(cUICustomInterface**)self->mpEngine;
-            nextState = ((sVEntry001E9130*)factory->mVtbl)[4].fn((char*)factory + ((sVEntry001E9130*)factory->mVtbl)[4].delta, self, 1);
+            nextState = ((sVEntry<void*(void*, void*, int)>*)factory->mVtbl)[4].fn((char*)factory + ((sVEntry<void*(void*, void*, int)>*)factory->mVtbl)[4].delta, self, 1);
         }
         cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
     }
@@ -250,23 +247,7 @@ INCLUDE_ASM("fe/ovstatehud", splitTextPictLine);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" float cFont_textExtent1(void* self, const unsigned short* str, void* out, int n, float sx, float sy);
-struct sFont_1E92A8 {
-    char pad0[0x14];
-    int lineH;          // 0x14
-    char pad18[0x18];
-    float w30;          // 0x30
-    float h34;          // 0x34
-    float sx;           // 0x38
-    float sy;           // 0x3C
-};
-struct sIcon_1E92A8 {
-    int hash;           // 0x0
-    char pad4[8];
-    float w;            // 0xC
-    float h;            // 0x10
-    char pad14[0x10];
-};
-extern sIcon_1E92A8 D_004C8980[];
+extern tHUDPictureDB D_004C8980[];
 
 /**
  * Lays out a HUD text line with inline pictures: splits its 16-bit text into text and picture segments and measures
@@ -293,12 +274,12 @@ extern "C" void splitTextPictLine(tTextPictLine* textLine)
     tTextPictLine* self = textLine;
     unsigned short* cursor;
     int n = 0;
-    sFont_1E92A8* font = ((sFont_1E92A8*)self->pFont);
+    cFont* font = (self->pFont);
     tTextPictElemSpec* segs = ((&self->elems[0]));
     char buf[16];
     char name[32];
-    font->sx = font->w30 * self->fontScaleBase[0];
-    font->sy = font->h34 * self->fontScaleBase[1];
+    font->Scale[0] = font->BaseScale[0] * self->fontScaleBase[0];
+    font->Scale[1] = font->BaseScale[1] * self->fontScaleBase[1];
     ((&self->elems[0]))[0].width = 0;
     float maxh = ((&self->elems[0]))[0].width;
     self->numElems = 0;
@@ -310,7 +291,7 @@ extern "C" void splitTextPictLine(tTextPictLine* textLine)
             *cursor = 0;
             cursor++;
             if (*((unsigned short*)segs[n].unk_04) != 0) {
-                float w = cFont_textExtent1(font, ((unsigned short*)segs[n].unk_04), buf, 1, font->sx, font->sy);
+                float w = cFont_textExtent1(font, ((unsigned short*)segs[n].unk_04), buf, 1, font->Scale[0], font->Scale[1]);
                 total += w;
                 segs[n].width = w;
             }
@@ -324,17 +305,17 @@ extern "C" void splitTextPictLine(tTextPictLine* textLine)
             } while (1);
             *namePos = 0;
             int h = GetHashValue32(name);
-            sIcon_1E92A8* picture = 0;
-            for (sIcon_1E92A8* candidate = D_004C8980; candidate->hash != 0; candidate++) {
-                if (candidate->hash == h) { picture = candidate; break; }
+            tHUDPictureDB* picture = 0;
+            for (tHUDPictureDB* candidate = D_004C8980; ((int)candidate->ident) != 0; candidate++) {
+                if (((int)candidate->ident) == h) { picture = candidate; break; }
             }
             // The icon entry is kept in the segment's string slot.
             (*(unsigned short**)&segs[n].unk_04) = (unsigned short*)picture;
-            float ew = picture->w;
+            float ew = picture->size[0];
             segs[n].width = ew;
             total += ew;
             n++;
-            if (maxh < picture->h) maxh = picture->h;
+            if (maxh < picture->size[1]) maxh = picture->size[1];
             (*(unsigned short**)&segs[n].unk_04) = cursor;
             segs[n].width = 0;
             if (*cursor != 0) cursor++;
@@ -343,13 +324,13 @@ extern "C" void splitTextPictLine(tTextPictLine* textLine)
         }
     }
     if (*((unsigned short*)segs[n].unk_04) != 0) {
-        float w = cFont_textExtent1(font, ((unsigned short*)segs[n].unk_04), buf, 0, font->sx, font->sy);
+        float w = cFont_textExtent1(font, ((unsigned short*)segs[n].unk_04), buf, 0, font->Scale[0], font->Scale[1]);
         total += w;
         segs[n].width = w;
         n++;
     }
     self->numElems = n;
-    float h = (float)font->lineH * font->h34 * self->fontScaleBase[1];
+    float h = (float)font->MaxCharHeight * font->BaseScale[1] * self->fontScaleBase[1];
     self->width = total;
     // PORT: `>?` is the g++ maximum operator (EE max.s).
     float lineHeight = h >? maxh;
@@ -415,13 +396,7 @@ INCLUDE_ASM("fe/ovstatehud", drawTextPictLine);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void cFont_text1_95A0(void* self, float x, float y, void* m) __asm__("cFont_text1");
 
-struct sCol_E95A0 {
-    float a, r, g, b;
-};
 
-struct sSize_E95A0 {
-    float x, y;
-};
 
 struct sFont_E95A0 {
     char pad[0x30];
@@ -429,8 +404,8 @@ struct sFont_E95A0 {
     float baseH;            // 0x34
     float scaleW;           // 0x38
     float scaleH;           // 0x3C
-    sCol_E95A0 color;       // 0x40
-    sCol_E95A0 shadow;      // 0x50
+    tARGB color;       // 0x40
+    tARGB shadow;      // 0x50
 };
 
 struct sHudEntry_E95A0 {
@@ -450,33 +425,17 @@ struct sHudImg_E95A0 {
     float v1;               // 0x20
 };
 
-struct sHudLine_E95A0 {
-    float w;                // 0x00
-    float h;                // 0x04
-    sFont_E95A0* font;      // 0x08
-    float lineH;            // 0x0C
-    float sx;               // 0x10
-    float sy;               // 0x14
-    int count;              // 0x18
-    sHudEntry_E95A0 entries[1]; // 0x1C
-};
 
 struct sPos_E95A0 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct sHudVert_E95A0 {
-    float u, v, q, f0C;     // 0x00
-    int r, g, b, a;         // 0x10
-    sPos_E95A0 pos;         // 0x20
-    sHudVert_E95A0() {}
-};
 
 static inline int texOf_E95A0(sHudImg_E95A0* i) { return i->tex; }
 
-struct sVEnt_E95A0 { short delta; short index; void (*fn)(void*, int, sHudVert_E95A0*, int); };
+struct sVEnt_E95A0 { short delta; short index; void (*fn)(void*, int, tBxVertex*, int); };
 
-static inline void setScale_E95A0(sFont_E95A0* f, const sSize_E95A0& s)
+static inline void setScale_E95A0(sFont_E95A0* f, const t2Vector& s)
 {
     f->scaleW = f->baseW * s.x;
     f->scaleH = f->baseH * s.y;
@@ -500,58 +459,58 @@ static inline void setScale_E95A0(sFont_E95A0* f, const sSize_E95A0& s)
  * @param alignX  horizontal pivot: 0 centre, > 0 right edge at pos, < 0 left edge
  * @param alignY  vertical pivot: 0 centre, > 0 bottom edge at pos, < 0 top edge
  */
-extern "C" void drawTextPictLine(sHudLine_E95A0* self, float* pos, float* scale, sCol_E95A0* color, int alignX, int alignY)
+extern "C" void drawTextPictLine(tTextPictLine* self, float* pos, float* scale, tARGB* color, int alignX, int alignY)
 {
-    if (self->count == 0) {
+    if (self->numElems == 0) {
         return;
     }
-    float alpha = color->a;
-    sCol_E95A0 saved = self->font->shadow;
-    sCol_E95A0 shadow = saved;
-    sSize_E95A0 sz;
+    float alpha = color->A;
+    tARGB saved = ((sFont_E95A0*)self->pFont)->shadow;
+    tARGB shadow = saved;
+    t2Vector sz;
     float sx0 = scale[0];
-    sz.x = self->sx * sx0;
-    sz.y = self->sy * scale[1];
-    shadow.a *= alpha;
-    setScale_E95A0(self->font, sz);
-    self->font->color = *color;
-    self->font->shadow = shadow;
+    sz.x = self->fontScaleBase[0] * sx0;
+    sz.y = self->fontScaleBase[1] * scale[1];
+    shadow.A *= alpha;
+    setScale_E95A0(((sFont_E95A0*)self->pFont), sz);
+    ((sFont_E95A0*)self->pFont)->color = *color;
+    ((sFont_E95A0*)self->pFont)->shadow = shadow;
     if (alignX == 0) {
         float axisScale = scale[0];
-        pos[0] -= self->w * axisScale * 0.5f;
+        pos[0] -= self->width * axisScale * 0.5f;
     } else if (alignX > 0) {
         float axisScale = scale[0];
-        pos[0] -= self->w * axisScale;
+        pos[0] -= self->width * axisScale;
     }
     if (alignY == 0) {
         float axisScale = scale[1];
-        pos[1] -= self->h * axisScale * 0.5f;
+        pos[1] -= self->height * axisScale * 0.5f;
     } else if (alignY > 0) {
         float axisScale = scale[1];
-        pos[1] -= self->h * axisScale;
+        pos[1] -= self->height * axisScale;
     }
-    float lineOff = self->lineH * scale[1];
-    float yc = pos[1] + self->h * scale[1] * 0.5f;
-    sHudVert_E95A0 verts[4];
+    float lineOff = self->fontOffsetY * scale[1];
+    float yc = pos[1] + self->height * scale[1] * 0.5f;
+    tBxVertex verts[4];
     for (int i = 0; i < 4; i++) {
-        verts[i].a = (int)(color->a * 128.0f);
-        verts[i].r = (int)(color->r * 128.0f);
-        verts[i].g = (int)(color->g * 128.0f);
-        verts[i].b = (int)(color->b * 128.0f);
-        verts[i].q = 1.0f;
+        verts[i].a = (int)(color->A * 128.0f);
+        verts[i].r = (int)(color->R * 128.0f);
+        verts[i].g = (int)(color->G * 128.0f);
+        verts[i].b = (int)(color->B * 128.0f);
+        verts[i].one = 1.0f;
     }
-    sHudEntry_E95A0* entry = self->entries;
-    for (int i = 0; i < self->count; i++, entry++) {
+    sHudEntry_E95A0* entry = ((sHudEntry_E95A0*)&self->elems[0]);
+    for (int i = 0; i < self->numElems; i++, entry++) {
         if (!(i & 1)) {
             unsigned short* str = (unsigned short*)entry->p;
             if (*str != 0) {
-                cFont_text1_95A0(self->font, pos[0], pos[1] + lineOff, str);
+                cFont_text1_95A0(((sFont_E95A0*)self->pFont), pos[0], pos[1] + lineOff, str);
                 float sx = scale[0];
                 pos[0] += entry->w * sx;
             }
         } else {
             sHudImg_E95A0* img = (sHudImg_E95A0*)entry->p;
-            sSize_E95A0 wh;
+            t2Vector wh;
             float w = img->w * scale[0];
             float scaledHeight = img->h * scale[1];
             wh.x = w;
@@ -573,33 +532,33 @@ extern "C" void drawTextPictLine(sHudLine_E95A0* self, float* pos, float* scale,
             corner.y = y0;
             corner.z = 0.0f;
             corner.w = 1.0f;
-            verts[0].pos = corner;
+            (*(sPos_E95A0*)&verts[0].p) = corner;
             corner.x = x1;
             corner.y = y0;
             corner.z = 0.0f;
             corner.w = 1.0f;
-            verts[1].pos = corner;
+            (*(sPos_E95A0*)&verts[1].p) = corner;
             corner.x = x0;
             corner.y = y1;
             corner.z = 0.0f;
             corner.w = 1.0f;
-            verts[2].pos = corner;
+            (*(sPos_E95A0*)&verts[2].p) = corner;
             corner.x = x1;
             corner.y = y1;
             corner.z = 0.0f;
             corner.w = 1.0f;
-            verts[3].pos = corner;
+            (*(sPos_E95A0*)&verts[3].p) = corner;
             *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = texOf_E95A0(img);
             sVEnt_E95A0* vt = (sVEnt_E95A0*)GrMan->mVtbl;
             vt[71].fn((char*)GrMan + vt[71].delta, 4, verts, 0);
             pos[0] += wh.x;
         }
     }
-    self->font->shadow = saved;
-    sSize_E95A0 one;
+    ((sFont_E95A0*)self->pFont)->shadow = saved;
+    t2Vector one;
     one.x = 1.0f;
     one.y = 1.0f;
-    setScale_E95A0(self->font, one);
+    setScale_E95A0(((sFont_E95A0*)self->pFont), one);
 }
 #endif
 
@@ -653,7 +612,6 @@ extern "C" void* cOVStateHUD1P_cOVStateHUD1P(cOVStateHUD1P* hud, int pEngine)
 INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_onCreateScreen);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-#include "vtable.h"
 
 int GetHashValue32(char* str);
 
@@ -1433,38 +1391,19 @@ extern "C" int strlen(const char* s);
 struct sGlyphTable_1F14B0;
 extern "C" void cFont_text(void* self, float x, float y, const char* str);
 
-struct sGlyph_1F14B0 {
-    unsigned short code;
-    unsigned char lead;
-    char pad_0x3[6];
-    signed char width;
-    char pad_0xA[2];
-};
 
-struct sGlyphTable_1F14B0 {
-    int count;
-    sGlyph_1F14B0* glyphs;
-    sGlyph_1F14B0* fallback;
-    int first;
-    int last;
-    char pad14[0x1C];
-    float f30;
-    float f34;
-    float f38;
-    float f3C;
-};
 
-static inline sGlyph_1F14B0* findGlyph_1F14B0(sGlyphTable_1F14B0* t, int c)
+static inline tGlyph* findGlyph_1F14B0(cFont* t, int c)
 {
-    if (c < t->first)
+    if (c < t->FirstCode)
         return 0;
-    if (c <= t->last)
-        return t->glyphs + c - t->first;
-    int lo = t->last - t->first;
-    int hi = t->count;
+    if (c <= t->LastLinearCode)
+        return (t->Glyphs) + c - t->FirstCode;
+    int lo = t->LastLinearCode - t->FirstCode;
+    int hi = t->NumGlyphs;
     do {
         int mid = (lo + hi) >> 1;
-        sGlyph_1F14B0* g = &t->glyphs[mid];
+        tGlyph* g = &(t->Glyphs)[mid];
         if (c == g->code)
             return g;
         if (c < g->code)
@@ -1472,12 +1411,9 @@ static inline sGlyph_1F14B0* findGlyph_1F14B0(sGlyphTable_1F14B0* t, int c)
         else
             lo = mid + 1;
     } while (lo < hi);
-    return t->fallback;
+    return (t->MissingGlyph);
 }
 
-struct sVec2_1F14B0 {
-    float x, y;
-};
 
 /**
  * Draws a string one character at a time, each flung away from its place by an amount ("exploding" text).
@@ -1494,11 +1430,11 @@ struct sVec2_1F14B0 {
  * @param x  the left edge
  * @param y  the top
  */
-extern "C" void cOVStateHUD1P_renderExplodeText(cOVStateHUD1P* self, const char* str, sGlyphTable_1F14B0* font, float amp, float x, float y)
+extern "C" void cOVStateHUD1P_renderExplodeText(cOVStateHUD1P* self, const char* str, cFont* font, float amp, float x, float y)
 {
-    sVec2_1F14B0 sc;
-    sc.x = font->f38 / font->f30;
-    sc.y = font->f3C / font->f34;
+    t2Vector sc;
+    sc.x = font->Scale[0] / font->BaseScale[0];
+    sc.y = font->Scale[1] / font->BaseScale[1];
     int len = strlen(str);
     char buf[2];
     buf[1] = 0;
@@ -1524,8 +1460,8 @@ extern "C" void cOVStateHUD1P_renderExplodeText(cOVStateHUD1P* self, const char*
             ox = -ox;
         }
         cFont_text(font, x + amp * ox, y + amp * oy, buf);
-        sGlyph_1F14B0* glyph = findGlyph_1F14B0(font, buf[0]);
-        x += (float)(glyph->width + glyph->lead) * sc.x;
+        tGlyph* glyph = findGlyph_1F14B0(font, buf[0]);
+        x += (float)(glyph->xoffset + glyph->width) * sc.x;
     }
 }
 #endif
@@ -1589,16 +1525,6 @@ extern char str_dash[];
 extern char str_pct_02d[];
 extern char str_pct_02d_b[];
 
-struct sFont_001F1840 {
-    char pad0[0x14];
-    int count;          // 0x14
-    char pad18[0x18];
-    float f30;          // 0x30
-    float f34;          // 0x34
-    float f38;          // 0x38
-    float f3C;          // 0x3C
-    tARGB color; // 0x40
-};
 
 
 static inline float oneAdj_001F1840(const char* s, float w)
@@ -1640,37 +1566,37 @@ extern "C" void cOVStateHUD1P_renderTime(cOVStateHUD1P* self_, int hour, int min
     char bufs[3][4];
     float n = 3.0f;
     if (timeRenderFlags & 1) n = 4.0f;
-    size[1] = (float)((sFont_001F1840*)self->mpHUDFont)->count * ((sFont_001F1840*)self->mpHUDFont)->f34;
+    size[1] = (float)(self->mpHUDFont)->MaxCharHeight * (self->mpHUDFont)->BaseScale[1];
     size[0] = self->mTimeValueWidth * n + (self->mTimeSeparatorWidth + 2.0f + 2.0f) * (n - 1.0f);
     cOVStateHUD1P_calcElemPos((cOVStateHUD1P*)self, out, pos, size, scale, align, flags, reflect);
-    sFont_001F1840* font = ((sFont_001F1840*)self->mpHUDFont);
-    font->f38 = font->f30 * scale[0];
-    font->f3C = font->f34 * scale[1];
-    ((sFont_001F1840*)self->mpHUDFont)->color = *color;
+    cFont* font = (self->mpHUDFont);
+    font->Scale[0] = font->BaseScale[0] * scale[0];
+    font->Scale[1] = font->BaseScale[1] * scale[1];
+    (*(tARGB*)&(self->mpHUDFont)->Color[0]) = *color;
     float sepW = (self->mTimeValueWidth + 2.0f) * scale[0];
     float digW = (self->mTimeSeparatorWidth + 2.0f) * scale[0];
     float oneW = self->mDigitOneOffsetX * scale[0];
     if (timeRenderFlags & 6) {
         if (timeRenderFlags & 2)
-            cFont_text(((sFont_001F1840*)self->mpHUDFont), out[0], out[1], str_dash);
+            cFont_text((self->mpHUDFont), out[0], out[1], str_dash);
         else
-            cFont_text(((sFont_001F1840*)self->mpHUDFont), out[0], out[1], str_plus);
+            cFont_text((self->mpHUDFont), out[0], out[1], str_plus);
         out[0] += self->mTimePrefixWidth;
     }
     sprintf(bufs[0], str_pct_02d, hour);
     sprintf(bufs[1], str_pct_02d, minute);
     sprintf(bufs[2], str_pct_02d, sec);
-    cFont_text(((sFont_001F1840*)self->mpHUDFont), out[0] + oneAdj_001F1840(bufs[0], oneW), out[1], bufs[0]);
+    cFont_text((self->mpHUDFont), out[0] + oneAdj_001F1840(bufs[0], oneW), out[1], bufs[0]);
     out[0] += sepW;
     for (int i = 1; i < 3; i++) {
-        cFont_text(((sFont_001F1840*)self->mpHUDFont), out[0], out[1], ((const char*)self->unk_430));
+        cFont_text((self->mpHUDFont), out[0], out[1], ((const char*)self->unk_430));
         out[0] += digW;
         char* fieldText = bufs[i];
-        cFont_text(((sFont_001F1840*)self->mpHUDFont), out[0] + oneAdj_001F1840(fieldText, oneW), out[1], fieldText);
+        cFont_text((self->mpHUDFont), out[0] + oneAdj_001F1840(fieldText, oneW), out[1], fieldText);
         out[0] += sepW;
     }
     if (timeRenderFlags & 1)
-        cFont_textf(((sFont_001F1840*)self->mpHUDFont), out[0], out[1], str_pct_02d_b, secFrac);
+        cFont_textf((self->mpHUDFont), out[0], out[1], str_pct_02d_b, secFrac);
 }
 #endif
 
@@ -1684,15 +1610,6 @@ struct sVec4_001F1B30 {
     sVec4_001F1B30(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {}
 };
 
-struct sFont_001F1B30 {
-    char pad0[0x30];
-    float f30;          // 0x30
-    float f34;          // 0x34
-    float f38;          // 0x38
-    float f3C;          // 0x3C
-    tARGB color; // 0x40
-    sVec4_001F1B30 tint;   // 0x50
-};
 
 
 /**
@@ -1719,7 +1636,7 @@ struct sFont_001F1B30 {
  * @param align  horizontal pivot override, 0x7F for the element's
  * @param flags  vertical pivot override, 0x7F for the element's
  */
-extern "C" void cOVStateHUD1P_renderText(cOVStateHUD1P* ctx, sFont_001F1B30* font, tHUDDef* defs, int idx, const char* str, int reflect, float* scaleMul, float* posOff, tARGB* color, float* rect, int align, int flags)
+extern "C" void cOVStateHUD1P_renderText(cOVStateHUD1P* ctx, cFont* font, tHUDDef* defs, int idx, const char* str, int reflect, float* scaleMul, float* posOff, tARGB* color, float* rect, int align, int flags)
 {
     float scale[2];
     float pos[4];
@@ -1737,9 +1654,9 @@ extern "C" void cOVStateHUD1P_renderText(cOVStateHUD1P* ctx, sFont_001F1B30* fon
         escale[0] *= scaleMul[0];
         escale[1] *= scaleMul[1];
     }
-    font->f38 = font->f30 * escale[0];
-    font->f3C = font->f34 * escale[1];
-    cFont_textExtent(font, str, extent, 0, font->f38, font->f3C);
+    font->Scale[0] = font->BaseScale[0] * escale[0];
+    font->Scale[1] = font->BaseScale[1] * escale[1];
+    cFont_textExtent(font, str, extent, 0, font->Scale[0], font->Scale[1]);
     int ax = (align == 0x7F) ? (*(signed char*)&hudDef->pivotX) : align;
     int ay = (flags == 0x7F) ? (*(signed char*)&defs[idx].pivotY) : flags;
     size[0] = extent[2];
@@ -1763,12 +1680,12 @@ extern "C" void cOVStateHUD1P_renderText(cOVStateHUD1P* ctx, sFont_001F1B30* fon
     sVec4_001F1B30 shadowColour(col.A, 0.0f, 0.0f, 0.0f);
     sDrawState* rs = GrMan->m_pCurrentDrawState;
     rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((((char*)&defs[idx].layer)[0] << 5) & 0x3E0);
-    font->color = col;
-    font->tint = shadowColour;
+    (*(tARGB*)&font->Color[0]) = col;
+    (*(sVec4_001F1B30*)&font->ShadowColor[0]) = shadowColour;
     cFont_text(font, out[0], out[1], str);
-    font->tint = sVec4_001F1B30(1.0f, 0.0f, 0.0f, 0.0f);
-    font->f38 = font->f30 * scale[0];
-    font->f3C = font->f34 * scale[1];
+    (*(sVec4_001F1B30*)&font->ShadowColor[0]) = sVec4_001F1B30(1.0f, 0.0f, 0.0f, 0.0f);
+    font->Scale[0] = font->BaseScale[0] * scale[0];
+    font->Scale[1] = font->BaseScale[1] * scale[1];
 }
 #endif
 
@@ -1787,9 +1704,6 @@ INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_renderText1);
 // dOutT/dOut live in an inner block; nested by-value VU0 helper calls in ONE expression share one temp slot;
 // a 4-float ctor temp + struct copy gives the 'swc1 x4; ldl/ldr/sdl/sdr' colour build.
 
-struct sV4_001F1E28 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sCol_001F1E28 {
     float r, g, b, a;
@@ -1797,20 +1711,12 @@ struct sCol_001F1E28 {
     sCol_001F1E28(float ar, float ag, float ab, float aa) : r(ar), g(ag), b(ab), a(aa) {}
 };
 
-struct sFont_001F1E28 {
-    char pad0[0x30];
-    float f30;          // 0x30
-    float f34;          // 0x34
-    float f38;          // 0x38
-    float f3C;          // 0x3C
-    sCol_001F1E28 color; // 0x40
-};
 
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sV4_001F1E28 vu0Sub_1E28(const sV4_001F1E28& a, const sV4_001F1E28& b)
+static inline t4Vector vu0Sub_1E28(const t4Vector& a, const t4Vector& b)
 {
-    sV4_001F1E28 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1823,9 +1729,9 @@ static inline sV4_001F1E28 vu0Sub_1E28(const sV4_001F1E28& a, const sV4_001F1E28
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sV4_001F1E28 vu0Add_1E28(const sV4_001F1E28& a, const sV4_001F1E28& b)
+static inline t4Vector vu0Add_1E28(const t4Vector& a, const t4Vector& b)
 {
-    sV4_001F1E28 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1838,9 +1744,9 @@ static inline sV4_001F1E28 vu0Add_1E28(const sV4_001F1E28& a, const sV4_001F1E28
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sV4_001F1E28 vu0Scale_1E28(const sV4_001F1E28& v, float s)
+static inline t4Vector vu0Scale_1E28(const t4Vector& v, float s)
 {
-    sV4_001F1E28 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1882,7 +1788,7 @@ static inline sV4_001F1E28 vu0Scale_1E28(const sV4_001F1E28& v, float s)
  * @param flags  vertical pivot override, 0x7F for the elements'
  */
 // Draws text blended between two HUD element layouts (t = 0 is element idx1, t = 1 is element idx2).
-extern "C" void cOVStateHUD1P_renderText1(cOVStateHUD1P* ctx, float blend, sFont_001F1E28* font, tHUDDef* defs, int idx1, int idx2, const char* str, int reflect, float* scaleMul, float* posOff, tARGB* color, float* rect, int align, int flags)
+extern "C" void cOVStateHUD1P_renderText1(cOVStateHUD1P* ctx, float blend, cFont* font, tHUDDef* defs, int idx1, int idx2, const char* str, int reflect, float* scaleMul, float* posOff, tARGB* color, float* rect, int align, int flags)
 {
     float scale[2];
     float extent[4];
@@ -1899,9 +1805,9 @@ extern "C" void cOVStateHUD1P_renderText1(cOVStateHUD1P* ctx, float blend, sFont
     float dEsc[2];
     scale[0] = 1.0f;
     scale[1] = 1.0f;
-    font->f38 = font->f30;
-    font->f3C = font->f34;
-    cFont_textExtent(font, str, extent, 0, font->f38, font->f3C);
+    font->Scale[0] = font->BaseScale[0];
+    font->Scale[1] = font->BaseScale[1];
+    cFont_textExtent(font, str, extent, 0, font->Scale[0], font->Scale[1]);
     tHUDDef* startDef = &defs[idx1];
     tHUDDef_getPos(startDef, pos1);
     tHUDDef_getScale(startDef, esc1);
@@ -1952,12 +1858,12 @@ extern "C" void cOVStateHUD1P_renderText1(cOVStateHUD1P* ctx, float blend, sFont
     }
     sCol_001F1E28 col;
     if (color == 0) {
-        sV4_001F1E28 startColour;
-        sV4_001F1E28 endColour;
+        t4Vector startColour;
+        t4Vector endColour;
         tHUDDef_getColour1(&defs[idx1], &startColour);
         tHUDDef_getColour1(&defs[idx2], &endColour);
         endColour.w = 0.0f;
-        sV4_001F1E28 blendedColour = vu0Add_1E28(vu0Scale_1E28(vu0Sub_1E28(endColour, startColour), blend), startColour);
+        t4Vector blendedColour = vu0Add_1E28(vu0Scale_1E28(vu0Sub_1E28(endColour, startColour), blend), startColour);
         col = sCol_001F1E28(blendedColour.w, blendedColour.x, blendedColour.y, blendedColour.z);
     } else {
         col = *(sCol_001F1E28*)color;
@@ -1965,16 +1871,16 @@ extern "C" void cOVStateHUD1P_renderText1(cOVStateHUD1P* ctx, float blend, sFont
     }
     sDrawState* rs = GrMan->m_pCurrentDrawState;
     rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((((char*)&defs[26].layer)[0] << 5) & 0x3E0);
-    font->color = col;
-    float baseScaleX = font->f30;
+    (*(sCol_001F1E28*)&font->Color[0]) = col;
+    float baseScaleX = font->BaseScale[0];
     float blendScaleX = resEsc[0];
     float blendScaleY = resEsc[1];
-    float baseScaleY = font->f34;
-    font->f3C = baseScaleY * blendScaleY;
-    font->f38 = baseScaleX * blendScaleX;
+    float baseScaleY = font->BaseScale[1];
+    font->Scale[1] = baseScaleY * blendScaleY;
+    font->Scale[0] = baseScaleX * blendScaleX;
     cFont_text(font, resPos[0], resPos[1], str);
-    font->f38 = font->f30 * scale[0];
-    font->f3C = font->f34 * scale[1];
+    font->Scale[0] = font->BaseScale[0] * scale[0];
+    font->Scale[1] = font->BaseScale[1] * scale[1];
 }
 #endif
 
@@ -1989,15 +1895,6 @@ struct sVec4_001F22E8 {
     sVec4_001F22E8(float a, float b, float c, float d) : x(a), y(b), z(c), w(d) {}
 };
 
-struct sFont_001F22E8 {
-    char pad0[0x30];
-    float f30;          // 0x30
-    float f34;          // 0x34
-    float f38;          // 0x38
-    float f3C;          // 0x3C
-    tARGB color; // 0x40
-    sVec4_001F22E8 tint;   // 0x50
-};
 
 
 /**
@@ -2022,7 +1919,7 @@ struct sFont_001F22E8 {
  * @param align  horizontal pivot override, 0x7F for the element's
  * @param flags  vertical pivot override, 0x7F for the element's
  */
-extern "C" void cOVStateHUD1P_renderText2(cOVStateHUD1P* ctx, sFont_001F22E8* font, tHUDDef* defs, int idx, const unsigned short* str, int reflect, float* scaleMul, float* posOff, tARGB* color, float* rect, int align, int flags)
+extern "C" void cOVStateHUD1P_renderText2(cOVStateHUD1P* ctx, cFont* font, tHUDDef* defs, int idx, const unsigned short* str, int reflect, float* scaleMul, float* posOff, tARGB* color, float* rect, int align, int flags)
 {
     float scale[2];
     float pos[4];
@@ -2040,9 +1937,9 @@ extern "C" void cOVStateHUD1P_renderText2(cOVStateHUD1P* ctx, sFont_001F22E8* fo
         escale[0] *= scaleMul[0];
         escale[1] *= scaleMul[1];
     }
-    font->f38 = font->f30 * escale[0];
-    font->f3C = font->f34 * escale[1];
-    cFont_textExtent1(font, str, extent, 0, font->f38, font->f3C);
+    font->Scale[0] = font->BaseScale[0] * escale[0];
+    font->Scale[1] = font->BaseScale[1] * escale[1];
+    cFont_textExtent1(font, str, extent, 0, font->Scale[0], font->Scale[1]);
     int ax = (align == 0x7F) ? (*(signed char*)&hudDef->pivotX) : align;
     int ay = (flags == 0x7F) ? (*(signed char*)&defs[idx].pivotY) : flags;
     size[0] = extent[2];
@@ -2066,22 +1963,18 @@ extern "C" void cOVStateHUD1P_renderText2(cOVStateHUD1P* ctx, sFont_001F22E8* fo
     sVec4_001F22E8 shadowColour(col.A, 0.0f, 0.0f, 0.0f);
     sDrawState* rs = GrMan->m_pCurrentDrawState;
     rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((((char*)&defs[idx].layer)[0] << 5) & 0x3E0);
-    font->color = col;
-    font->tint = shadowColour;
+    (*(tARGB*)&font->Color[0]) = col;
+    (*(sVec4_001F22E8*)&font->ShadowColor[0]) = shadowColour;
     cFont_text1(font, out[0], out[1], str);
-    font->tint = sVec4_001F22E8(1.0f, 0.0f, 0.0f, 0.0f);
-    font->f38 = font->f30 * scale[0];
-    font->f3C = font->f34 * scale[1];
+    (*(sVec4_001F22E8*)&font->ShadowColor[0]) = sVec4_001F22E8(1.0f, 0.0f, 0.0f, 0.0f);
+    font->Scale[0] = font->BaseScale[0] * scale[0];
+    font->Scale[1] = font->BaseScale[1] * scale[1];
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/ovstatehud", func_001F25E0);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct sV4_001F25E0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sCol_001F25E0 {
     float r, g, b, a;
@@ -2089,20 +1982,12 @@ struct sCol_001F25E0 {
     sCol_001F25E0(float ar, float ag, float ab, float aa) : r(ar), g(ag), b(ab), a(aa) {}
 };
 
-struct sFont_001F25E0 {
-    char pad0[0x30];
-    float f30;          // 0x30
-    float f34;          // 0x34
-    float f38;          // 0x38
-    float f3C;          // 0x3C
-    sCol_001F25E0 color; // 0x40
-};
 
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sV4_001F25E0 vu0Sub_25E0(const sV4_001F25E0& a, const sV4_001F25E0& b)
+static inline t4Vector vu0Sub_25E0(const t4Vector& a, const t4Vector& b)
 {
-    sV4_001F25E0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2115,9 +2000,9 @@ static inline sV4_001F25E0 vu0Sub_25E0(const sV4_001F25E0& a, const sV4_001F25E0
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sV4_001F25E0 vu0Add_25E0(const sV4_001F25E0& a, const sV4_001F25E0& b)
+static inline t4Vector vu0Add_25E0(const t4Vector& a, const t4Vector& b)
 {
-    sV4_001F25E0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2130,9 +2015,9 @@ static inline sV4_001F25E0 vu0Add_25E0(const sV4_001F25E0& a, const sV4_001F25E0
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sV4_001F25E0 vu0Scale_25E0(const sV4_001F25E0& v, float s)
+static inline t4Vector vu0Scale_25E0(const t4Vector& v, float s)
 {
-    sV4_001F25E0 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -2171,7 +2056,7 @@ static inline sV4_001F25E0 vu0Scale_25E0(const sV4_001F25E0& v, float s)
  * @param flags  vertical pivot override, 0x7F for the elements'
  */
 // Draws text blended between two HUD element layouts (t = 0 is element idx1, t = 1 is element idx2).
-extern "C" void func_001F25E0(cOVStateHUD1P* ctx, float blend, sFont_001F25E0* font, tHUDDef* defs, int idx1, int idx2, const unsigned short* str, int reflect, float* scaleMul, float* posOff, tARGB* color, float* rect, int align, int flags)
+extern "C" void func_001F25E0(cOVStateHUD1P* ctx, float blend, cFont* font, tHUDDef* defs, int idx1, int idx2, const unsigned short* str, int reflect, float* scaleMul, float* posOff, tARGB* color, float* rect, int align, int flags)
 {
     float scale[2];
     float extent[4];
@@ -2188,9 +2073,9 @@ extern "C" void func_001F25E0(cOVStateHUD1P* ctx, float blend, sFont_001F25E0* f
     float dEsc[2];
     scale[0] = 1.0f;
     scale[1] = 1.0f;
-    font->f38 = font->f30;
-    font->f3C = font->f34;
-    cFont_textExtent1(font, str, extent, 0, font->f38, font->f3C);
+    font->Scale[0] = font->BaseScale[0];
+    font->Scale[1] = font->BaseScale[1];
+    cFont_textExtent1(font, str, extent, 0, font->Scale[0], font->Scale[1]);
     tHUDDef* startDef = &defs[idx1];
     tHUDDef_getPos(startDef, pos1);
     tHUDDef_getScale(startDef, esc1);
@@ -2241,12 +2126,12 @@ extern "C" void func_001F25E0(cOVStateHUD1P* ctx, float blend, sFont_001F25E0* f
     }
     sCol_001F25E0 col;
     if (color == 0) {
-        sV4_001F25E0 startColour;
-        sV4_001F25E0 endColour;
+        t4Vector startColour;
+        t4Vector endColour;
         tHUDDef_getColour1(&defs[idx1], &startColour);
         tHUDDef_getColour1(&defs[idx2], &endColour);
         endColour.w = 0.0f;
-        sV4_001F25E0 blendedColour = vu0Add_25E0(vu0Scale_25E0(vu0Sub_25E0(endColour, startColour), blend), startColour);
+        t4Vector blendedColour = vu0Add_25E0(vu0Scale_25E0(vu0Sub_25E0(endColour, startColour), blend), startColour);
         col = sCol_001F25E0(blendedColour.w, blendedColour.x, blendedColour.y, blendedColour.z);
     } else {
         col = *(sCol_001F25E0*)color;
@@ -2254,16 +2139,16 @@ extern "C" void func_001F25E0(cOVStateHUD1P* ctx, float blend, sFont_001F25E0* f
     }
     sDrawState* rs = GrMan->m_pCurrentDrawState;
     rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((((char*)&defs[26].layer)[0] << 5) & 0x3E0);
-    font->color = col;
-    float baseScaleX = font->f30;
+    (*(sCol_001F25E0*)&font->Color[0]) = col;
+    float baseScaleX = font->BaseScale[0];
     float blendScaleX = resEsc[0];
     float blendScaleY = resEsc[1];
-    float baseScaleY = font->f34;
-    font->f3C = baseScaleY * blendScaleY;
-    font->f38 = baseScaleX * blendScaleX;
+    float baseScaleY = font->BaseScale[1];
+    font->Scale[1] = baseScaleY * blendScaleY;
+    font->Scale[0] = baseScaleX * blendScaleX;
     cFont_text1(font, resPos[0], resPos[1], str);
-    font->f38 = font->f30 * scale[0];
-    font->f3C = font->f34 * scale[1];
+    font->Scale[0] = font->BaseScale[0] * scale[0];
+    font->Scale[1] = font->BaseScale[1] * scale[1];
 }
 #endif
 
@@ -2273,16 +2158,6 @@ INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_renderMultiText);
 extern "C" char* cFont_textSmartLimit(void* f, const char* str, char* dst, int max, float sx, float width);
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 
-struct sFont_001F2AA0 {
-    char pad0[0x14];
-    int count;          // 0x14
-    char pad18[0x18];
-    float f30;          // 0x30
-    float f34;          // 0x34
-    float f38;          // 0x38
-    float f3C;          // 0x3C
-    tARGB color; // 0x40
-};
 
 
 static inline float alignPos_001F2AA0(float v, int a, float size)
@@ -2315,7 +2190,7 @@ static inline float alignPos_001F2AA0(float v, int a, float size)
  * @param flags  reflect bits: 1 mirrors x about 640, 2 then keeps the pivot unflipped
  * @param rect  receives the drawn area (x, y, width, height), or 0
  */
-extern "C" void cOVStateHUD1P_renderMultiText(cOVStateHUD1P* self, sFont_001F2AA0* font, tHUDDef* defs, int idx, const char* str, int flags, float* rect)
+extern "C" void cOVStateHUD1P_renderMultiText(cOVStateHUD1P* self, cFont* font, tHUDDef* defs, int idx, const char* str, int flags, float* rect)
 {
     float wrap[2];
     float pos[2];
@@ -2328,20 +2203,20 @@ extern "C" void cOVStateHUD1P_renderMultiText(cOVStateHUD1P* self, sFont_001F2AA
     tHUDDef_getSize(hudDef, wrap, 0);
     tHUDDef_getPos(hudDef, pos);
     tHUDDef_getScale(hudDef, escale);
-    sFont_001F2AA0* sf = (sFont_001F2AA0*)self->unk_428;
-    sf->f38 = sf->f30 * escale[0];
-    sf->f3C = sf->f34 * escale[1];
+    cFont* sf = self->unk_428;
+    sf->Scale[0] = sf->BaseScale[0] * escale[0];
+    sf->Scale[1] = sf->BaseScale[1] * escale[1];
     const char* remaining = str;
     while (remaining != 0) {
-        remaining = cFont_textSmartLimit((sFont_001F2AA0*)self->unk_428, remaining, lines[n], 50, ((sFont_001F2AA0*)self->unk_428)->f38, wrap[0]);
+        remaining = cFont_textSmartLimit(self->unk_428, remaining, lines[n], 50, (self->unk_428)->Scale[0], wrap[0]);
         n++;
     }
     tHUDDef_getColour(&defs[idx], &col);
-    font->color = col;
+    (*(tARGB*)&font->Color[0]) = col;
     float fn = (float)n;
     sDrawState* rs = GrMan->m_pCurrentDrawState;
     rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((((char*)&defs[idx].layer)[0] << 5) & 0x3E0);
-    float lineH = (float)font->count * font->f34 * escale[1];
+    float lineH = (float)font->MaxCharHeight * font->BaseScale[1] * escale[1];
     float totalH = lineH * fn;
     float y = alignPos_001F2AA0(pos[1], (*(signed char*)&defs[idx].pivotY), totalH);
     if (rect != 0) {
@@ -2353,7 +2228,7 @@ extern "C" void cOVStateHUD1P_renderMultiText(cOVStateHUD1P* self, sFont_001F2AA
     int i = 0;
     if (n > 0) do {
         char* line = lines[i];
-        float w = cFont_textExtent(font, line, 0, 0, font->f38, font->f3C);
+        float w = cFont_textExtent(font, line, 0, 0, font->Scale[0], font->Scale[1]);
         float x = pos[0];
         int al = (*(signed char*)&defs[idx].pivotX);
         if (flags & 1) {
@@ -2373,8 +2248,8 @@ extern "C" void cOVStateHUD1P_renderMultiText(cOVStateHUD1P* self, sFont_001F2AA
     } while (++i < n);
     scale[0] = 1.0f;
     scale[1] = 1.0f;
-    font->f38 = font->f30 * scale[0];
-    font->f3C = font->f34 * scale[1];
+    font->Scale[0] = font->BaseScale[0] * scale[0];
+    font->Scale[1] = font->BaseScale[1] * scale[1];
 }
 #endif
 
@@ -2385,16 +2260,6 @@ extern "C" unsigned short* cFont_textSmartLimit1(void* f, float sx, float width,
 extern "C" float cFont_textExtent1(void* self, const unsigned short* str, void* out, int n, float sx, float sy);
 extern "C" void cFont_text1(void* self, float x, float y, const unsigned short* str);
 
-struct sFont_001F2DB0 {
-    char pad0[0x14];
-    int count;          // 0x14
-    char pad18[0x18];
-    float f30;          // 0x30
-    float f34;          // 0x34
-    float f38;          // 0x38
-    float f3C;          // 0x3C
-    tARGB color; // 0x40
-};
 
 
 static inline float alignPos_001F2DB0(float v, int a, float size)
@@ -2422,7 +2287,7 @@ static inline float alignPos_001F2DB0(float v, int a, float size)
  * @param flags  reflect bits: 1 mirrors x about 640, 2 then keeps the pivot unflipped
  * @param rect  receives the drawn area (x, y, width, height), or 0
  */
-extern "C" void cOVStateHUD1P_renderMultiText1(cOVStateHUD1P* self, sFont_001F2DB0* font, tHUDDef* defs, int idx, const unsigned short* str, int flags, float* rect)
+extern "C" void cOVStateHUD1P_renderMultiText1(cOVStateHUD1P* self, cFont* font, tHUDDef* defs, int idx, const unsigned short* str, int flags, float* rect)
 {
     float wrap[2];
     float pos[2];
@@ -2435,20 +2300,20 @@ extern "C" void cOVStateHUD1P_renderMultiText1(cOVStateHUD1P* self, sFont_001F2D
     tHUDDef* hudDef = &defs[idx];
     tHUDDef_getPos(hudDef, pos);
     tHUDDef_getScale(hudDef, escale);
-    sFont_001F2DB0* sf = (sFont_001F2DB0*)self->unk_428;
-    sf->f38 = sf->f30 * escale[0];
-    sf->f3C = sf->f34 * escale[1];
+    cFont* sf = self->unk_428;
+    sf->Scale[0] = sf->BaseScale[0] * escale[0];
+    sf->Scale[1] = sf->BaseScale[1] * escale[1];
     const unsigned short* remaining = str;
     while (remaining != 0) {
-        remaining = cFont_textSmartLimit1((sFont_001F2DB0*)self->unk_428, ((sFont_001F2DB0*)self->unk_428)->f38, wrap[0], remaining, lines[n], 50);
+        remaining = cFont_textSmartLimit1(self->unk_428, (self->unk_428)->Scale[0], wrap[0], remaining, lines[n], 50);
         n++;
     }
     tHUDDef_getColour(&defs[idx], &col);
-    font->color = col;
+    (*(tARGB*)&font->Color[0]) = col;
     float fn = (float)n;
     sDrawState* rs = GrMan->m_pCurrentDrawState;
     rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((((char*)&defs[idx].layer)[0] << 5) & 0x3E0);
-    float lineH = (float)font->count * font->f34 * escale[1];
+    float lineH = (float)font->MaxCharHeight * font->BaseScale[1] * escale[1];
     float totalH = lineH * fn;
     float y = alignPos_001F2DB0(pos[1], (*(signed char*)&defs[idx].pivotY), totalH);
     if (rect != 0) {
@@ -2460,7 +2325,7 @@ extern "C" void cOVStateHUD1P_renderMultiText1(cOVStateHUD1P* self, sFont_001F2D
     int i = 0;
     if (n > 0) do {
         unsigned short* line = lines[i];
-        float w = cFont_textExtent1(font, line, 0, 0, font->f38, font->f3C);
+        float w = cFont_textExtent1(font, line, 0, 0, font->Scale[0], font->Scale[1]);
         float x = pos[0];
         int al = (*(signed char*)&defs[idx].pivotX);
         if (flags & 1) {
@@ -2480,8 +2345,8 @@ extern "C" void cOVStateHUD1P_renderMultiText1(cOVStateHUD1P* self, sFont_001F2D
     } while (++i < n);
     scale[0] = 1.0f;
     scale[1] = 1.0f;
-    font->f38 = font->f30 * scale[0];
-    font->f3C = font->f34 * scale[1];
+    font->Scale[0] = font->BaseScale[0] * scale[0];
+    font->Scale[1] = font->BaseScale[1] * scale[1];
 }
 #endif
 

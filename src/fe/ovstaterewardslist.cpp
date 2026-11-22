@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "fe/uitemplatemap.h"
 #include "be/beintnewrace.h"
 #include "fe/ovstaterewardslist.h"
 
@@ -96,12 +97,9 @@ extern "C" void cOVStateRewardsList_onWidgetEvent(cOVStateRewardsList* self, cUI
 //100%
 INCLUDE_ASM("fe/ovstaterewardslist", func_00200388);
 #ifdef SKIP_ASM
-struct sRewardDesc_0388 {
-    int w[0x6C / 4];
-};
-extern sRewardDesc_0388 D_004781D0[][4];
-extern sRewardDesc_0388 D_004786E0[][5];
-extern sRewardDesc_0388 D_00478D38[][8];
+extern tMapLocation D_004781D0[][4];
+extern tMapLocation D_004786E0[][5];
+extern tMapLocation D_00478D38[][8];
 
 /**
  * Returns (by value) one 0x6C-byte map goal entry: race, freestyle or freeride, by peak and index.
@@ -115,7 +113,7 @@ extern sRewardDesc_0388 D_00478D38[][8];
  * @param kind  0 race, 1 freestyle, 2 freeride
  * @return a copy of the goal entry
  */
-extern "C" sRewardDesc_0388 func_00200388(int peak, int goalIndex, int kind)
+extern "C" tMapLocation func_00200388(int peak, int goalIndex, int kind)
 {
     if (kind == 0) {
         return D_004781D0[peak][goalIndex];

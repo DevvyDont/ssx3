@@ -1,4 +1,6 @@
 #include "common.h"
+#include "be/bedbprofile.h"
+#include "fe/feboltfilemanager.h"
 #include "ui/uiicon.h"
 #include "ealib/shape.h"
 #include "sound/ssxaudio.h"
@@ -1494,16 +1496,6 @@ public:
     virtual void setStatic(int v);
     virtual void setVisible(int v);
 };
-struct sEquipEntry_A798 {
-    unsigned short f0;
-    unsigned short flags;
-};
-struct sEquipDb_A798 {
-    char pad_0x0[0x288];
-    short* map;     // 0x288
-    char pad_0x28c[4];
-    sEquipEntry_A798 entries[1];  // 0x290
-};
 struct sEquipItem_A798 {
     short f0;
     signed char slot;   // 0x2
@@ -1534,11 +1526,11 @@ static inline int isMode1_A798(void* self)
     return *(int*)((char*)self + 0xC8) == 1;
 }
 
-static inline sEquipEntry_A798* getEntry_A798(sEquipDb_A798* db, int id)
+static inline tBEProfileBolt* getEntry_A798(cBECharProfileDB* db, int id)
 {
-    short idx = db->map[id];
+    short idx = db->mpBoltsMap[id];
     if (idx >= 0) {
-        return &db->entries[idx];
+        return &((&db->mBolts[0]))[idx];
     }
     return 0;
 }
@@ -1587,8 +1579,8 @@ extern "C" void cFEStateCharEquip_updateHelpText(cFEStateCharEquip* self)
         else
             setText_A798(self, str_kT_129HELPSaveCashItem);
     } else {
-        sEquipDb_A798* db = (sEquipDb_A798*)func_0014AD28(cBE_getInterface(cBE_getBE(), 9), self->mUserNum, self->mCharID);
-        sEquipEntry_A798* equipEntry = getEntry_A798(db, item->id);
+        cBECharProfileDB* db = (cBECharProfileDB*)func_0014AD28(cBE_getInterface(cBE_getBE(), 9), self->mUserNum, self->mCharID);
+        tBEProfileBolt* equipEntry = getEntry_A798(db, item->id);
         int idx = sel - (self->mpMenu)->mScrollItemOffset;
         if (D_004A18D8 >= self->mCurrentPolyCount + self->mRowPoints[idx]) {
             if (equipEntry->flags & 4)
@@ -1944,12 +1936,6 @@ struct sEquipEntry_B098 {
     unsigned short f0;
     unsigned short flags;
 };
-struct sEquipDb_B098 {
-    char pad_0x0[0x288];
-    short* map;     // 0x288
-    char pad_0x28c[4];
-    sEquipEntry_B098 entries[1];  // 0x290
-};
 struct sEquipItem_B098 {
     short f0;
     signed char slot;   // 0x2
@@ -1960,11 +1946,11 @@ struct sEquipItem_B098 {
 };
 extern "C" int func_0014D7E8(int a0, int a1, int a2, void* out, int a4, int a5);
 
-static inline sEquipEntry_B098* getEntry_B098(sEquipDb_B098* db, int id)
+static inline sEquipEntry_B098* getEntry_B098(cBECharProfileDB* db, int id)
 {
-    short idx = db->map[id];
+    short idx = db->mpBoltsMap[id];
     if (idx >= 0) {
-        return &db->entries[idx];
+        return &((sEquipEntry_B098*)&db->mBolts[0])[idx];
     }
     return 0;
 }
@@ -1980,7 +1966,7 @@ static inline sEquipEntry_B098* getEntry_B098(sEquipDb_B098* db, int id)
  * @param itemId   the category
  * @return 0 when the store sells something in it, else 1
  */
-extern "C" int func_0019B098(cFEStateCharEquip* self, int library, sEquipDb_B098* db, int itemId)
+extern "C" int func_0019B098(cFEStateCharEquip* self, int library, cBECharProfileDB* db, int itemId)
 {
     sEquipItem_B098* items[528];
     int n = func_0014D7E8(library, self->mCharID, itemId, items, -1, 1);
@@ -2009,16 +1995,6 @@ void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
 extern "C" void qsort_B180(void* base, int n, int size, int (*cmp)(const void*, const void*)) __asm__("qsort");
 extern "C" int func_00198DA0(const void* a, const void* b);
 
-struct sEquipEntry_B180 {
-    unsigned short f0;
-    unsigned short flags;
-};
-struct sEquipDb_B180 {
-    char pad_0x0[0x288];
-    short* map;     // 0x288
-    char pad_0x28c[4];
-    sEquipEntry_B180 entries[1];  // 0x290
-};
 struct sEquipItem_B180 {
     short f0;
     signed char slot;   // 0x2
@@ -2030,11 +2006,11 @@ struct sEquipItem_B180 {
     int flags;          // 0x34
 };
 
-static inline sEquipEntry_B180* getEntry_B180(sEquipDb_B180* db, int id)
+static inline tBEProfileBolt* getEntry_B180(cBECharProfileDB* db, int id)
 {
-    short idx = db->map[id];
+    short idx = db->mpBoltsMap[id];
     if (idx >= 0) {
-        return &db->entries[idx];
+        return &((&db->mBolts[0]))[idx];
     }
     return 0;
 }
@@ -2077,7 +2053,7 @@ extern "C" int func_0019B180_impl(void* selfv, int cat)
     sCharEquip_B180* self = (sCharEquip_B180*)selfv;
     void* iface = cBE_getInterface(cBE_getBE(), 9);
     int lib = (int)func_0014BDB8_noarg();
-    sEquipDb_B180* db = (sEquipDb_B180*)func_0014AD28(iface, self->team, self->slot);
+    cBECharProfileDB* db = (cBECharProfileDB*)func_0014AD28(iface, self->team, self->slot);
     sEquipItem_B180* list[528];
     int n = func_0014D7E8(lib, self->slot, cat, list, -1, 0);
     self->count = 0;
@@ -2091,8 +2067,8 @@ extern "C" int func_0019B180_impl(void* selfv, int cat)
                 if (!(it->flags & 0x20))
                     continue;
             }
-            sEquipEntry_B180* entry = getEntry_B180(db, it->id);
-            if ((it->flags & 0x20) && func_0019B098((cFEStateCharEquip*)self, lib, (sEquipDb_B098*)db, it->id) == 0) {
+            tBEProfileBolt* entry = getEntry_B180(db, it->id);
+            if ((it->flags & 0x20) && func_0019B098((cFEStateCharEquip*)self, lib, (cBECharProfileDB*)db, it->id) == 0) {
                 self->items[self->count] = it;
                 self->count++;
             } else if (!(it->flags & 0x20) && !(entry->flags & 2)
@@ -2115,7 +2091,7 @@ extern "C" int func_0019B180_impl(void* selfv, int cat)
                 if (!(it->flags & 0x20))
                     continue;
             }
-            sEquipEntry_B180* entry = getEntry_B180(db, it->id);
+            tBEProfileBolt* entry = getEntry_B180(db, it->id);
             if ((!(it->flags & 0x20) && (entry->flags & 2))
                 || ((it->flags & 0x20) && func_0019AFD0((cFEStateCharEquip*)self, lib, (sEquipDb_AFD0*)db, it->id) != 0)) {
                 self->items[self->count] = it;
@@ -2338,19 +2314,12 @@ struct sFlagEntry_19B7E0
     sFlagEntry_19B7E0() : id(-1), flags(0) {}
 };
 
-struct sProfile_19B7E0
-{
-    char pad[0x288];
-    short* index;
-    int count;
-    sFlagEntry_19B7E0 entries[0x20D];
-};
 
-static inline sFlagEntry_19B7E0* getEntry_19B7E0(sProfile_19B7E0* p, int idx)
+static inline sFlagEntry_19B7E0* getEntry_19B7E0(cBECharProfileDB* p, int idx)
 {
-    short k = p->index[idx];
+    short k = p->mpBoltsMap[idx];
     if (k >= 0)
-        return &p->entries[k];
+        return &((sFlagEntry_19B7E0*)&p->mBolts[0])[k];
     return 0;
 }
 
@@ -2412,10 +2381,10 @@ extern "C" void func_0019B7E0(cFEStateCharEquip* selfv, int i)
         col = self->colOwned;
     } else {
         void* iface = cBE_getInterface(cBE_getBE(), 9);
-        sProfile_19B7E0* prof = (sProfile_19B7E0*)func_0014AD28(iface, self->team, self->slot);
+        cBECharProfileDB* prof = (cBECharProfileDB*)func_0014AD28(iface, self->team, self->slot);
         sFlagEntry_19B7E0* flagEntry = getEntry_19B7E0(prof, item->id);
         sFlagEntry_19B7E0 save[525];
-        MEM_copy(save, prof->entries, 2100);
+        MEM_copy(save, ((sFlagEntry_19B7E0*)&prof->mBolts[0]), 2100);
         int before = func_0014B478(iface, self->team, self->slot);
         if (func_0014AFB0(iface, self->team, self->slot, item->id, !IsSet_19B7E0(flagEntry))) {
             self->vals[i] = func_0014B478(iface, self->team, self->slot) - before;
@@ -2602,11 +2571,6 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_updatePolyBar);
 #ifdef SKIP_ASM
 extern int D_004A18D8;
 
-struct sVEntry0019BC90 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 struct sVec3K19BC90 {
     float x, y, z;
@@ -2627,7 +2591,7 @@ extern "C" void cFEStateCharEquip_updatePolyBar(cFEStateCharEquip* self)
         if (fillRatio < 0.0f) {
             fillRatio = 0.0f;
         }
-        sVEntry0019BC90* vt = (sVEntry0019BC90*)pointsBar->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)pointsBar->mVtbl;
         vt[9].fn(vthis(pointsBar, vt[9]), 1);
         *(sVec3K19BC90*)&self->mpPointsBar->mScale = sVec3K19BC90(1.0f, -fillRatio, 1.0f);
     }
@@ -2646,17 +2610,7 @@ struct sVec3K19BD48 {
     sVec3K19BD48(float a, float b, float c) : x(a), y(b), z(c) {}
 };
 
-struct sVEntryK19BD48 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
 
-struct sVEntryIK19BD48 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Shows the equip points preview bar (+0x74) for the current points plus @p delta.
@@ -2677,16 +2631,16 @@ extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(cFEStateCharEquip* s
         fillRatio = 0.0f;
     if (D_004A18D8 < self->mCurrentPolyCount + delta) {
         cUIThing* equipBar = self->mpPointsEquipBar;
-        sVEntryK19BD48* vt = (sVEntryK19BD48*)equipBar->mVtbl;
+        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)equipBar->mVtbl;
         vt[11].fn(vthis(equipBar, vt[11]), D_004C66E8);
     } else {
         cUIThing* equipBar = self->mpPointsEquipBar;
-        sVEntryK19BD48* vt = (sVEntryK19BD48*)equipBar->mVtbl;
+        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)equipBar->mVtbl;
         vt[11].fn(vthis(equipBar, vt[11]), D_004C66F8);
     }
     {
         cUIThing* equipBar = self->mpPointsEquipBar;
-        sVEntryIK19BD48* vt = (sVEntryIK19BD48*)equipBar->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)equipBar->mVtbl;
         vt[9].fn(vthis(equipBar, vt[9]), 1);
     }
     *(sVec3K19BD48*)&self->mpPointsEquipBar->mScale = sVec3K19BD48(1.0f, -fillRatio, 1.0f);
@@ -2726,22 +2680,12 @@ extern "C" void* func_0014AD28(void* self, int a1, int a2);
 extern "C" int func_0014AFB0(void* self, int a1, int a2, int id, int locked);
 extern "C" void func_0014AEA8(void* self, int a1, int a2);
 
-struct sItemK19BEE8 {
-    short id;
-    unsigned short flags;
-};
-struct sItemListK19BEE8 {
-    char pad_0x0[0x288];
-    short* map;                 // 0x288
-    int count;                  // 0x28C
-    sItemK19BEE8 items[1];      // 0x290
-};
 
-static inline sItemK19BEE8* getItemK19BEE8(sItemListK19BEE8* l, int id)
+static inline tBEProfileBolt* getItemK19BEE8(cBECharProfileDB* l, int id)
 {
-    int idx = l->map[id];
+    int idx = l->mpBoltsMap[id];
     if (idx >= 0)
-        return &l->items[idx];
+        return &((&l->mBolts[0]))[idx];
     return 0;
 }
 
@@ -2761,9 +2705,9 @@ extern "C" int func_0019BEE8(cFEStateCharEquip* self)
     if (!(*(int*)(item + 0x34) & 4))
         return 0;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
-    sItemListK19BEE8* list = (sItemListK19BEE8*)func_0014AD28(iface, self->mUserNum,
+    cBECharProfileDB* list = (cBECharProfileDB*)func_0014AD28(iface, self->mUserNum,
                                                               self->mCharID);
-    sItemK19BEE8* entry = getItemK19BEE8(list, *(short*)(item + 4));
+    tBEProfileBolt* entry = getItemK19BEE8(list, *(short*)(item + 4));
     int mask = 4;
     if (func_0014AFB0(iface, self->mUserNum, self->mCharID, *(short*)(item + 4),
                       (entry->flags & mask) == 0)) {
@@ -3529,26 +3473,8 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019CE68);
 extern void* D_004A1968;
 extern char str_BoltFileIndexManager[];
 
-struct sEquipEntryK19CE68 {
-    int f0;                // 0x0
-    char b4;               // 0x4
-    char pad_0x005[0x104 - 0x5];
-    int f104;              // 0x104
-    int f108;              // 0x108
-    int pad_0x10C;
-    int f110;              // 0x110
-    int f114;              // 0x114
-    int f118;              // 0x118
-    int pad_0x11C;
-};
 struct sEquipSlotK19CE68 {
-    sEquipEntryK19CE68 e[256];
-};
-struct sEquipTableK19CE68 {
-    sEquipSlotK19CE68 slots[10]; // 0x0
-    int fB4000;                  // 0xB4000
-    int fB4004;                  // 0xB4004
-    int counts[10];              // 0xB4008
+    tBoltFile e[256];
 };
 
 /**
@@ -3561,24 +3487,24 @@ struct sEquipTableK19CE68 {
  */
 extern "C" void func_0019CE68(void* self)
 {
-    sEquipTableK19CE68* cache = (sEquipTableK19CE68*)self;
+    cFEBoltFileManager* cache = (cFEBoltFileManager*)self;
     int i;
     int j;
     for (i = 0; i < 10; i++) {
         for (j = 0; j < 256; j++) {
-            sEquipEntryK19CE68* slot = &cache->slots[i].e[j];
-            slot->f0 = 0;
-            slot->b4 = 0;
-            slot->f104 = 0;
-            slot->f118 = 0;
-            slot->f108 = 0;
-            slot->f114 = 0;
-            slot->f110 = -1;
+            tBoltFile* slot = &((sEquipSlotK19CE68*)&cache->mFiles[0][0])[i].e[j];
+            slot->flags = 0;
+            slot->fileName[0] = 0;
+            (*(int*)&slot->dataPtr) = 0;
+            slot->fileSize = 0;
+            slot->asyncFileHandle = 0;
+            slot->refCount = 0;
+            slot->fileType = -1;
         }
-        cache->counts[i] = 1;
+        cache->unk_B4008[i] = 1;
     }
-    cache->fB4004 = 0;
-    cache->fB4000 = 0;
+    cache->mNumLoadThreads = 0;
+    cache->mMemUsed = 0;
     if (D_004A1968 == 0) {
         D_004A1968 = func_0019CB38(cMemMan_alloc(8004, str_BoltFileIndexManager, 0, 0));
     } else {
@@ -3595,10 +3521,6 @@ extern "C" void func_0019D4B8(sEquipTable_D4B8* self, int bank, int i);
 void operator_delete(int* p);
 extern void* D_004A1968;
 
-struct sEquipTableK19CF40 {
-    char slots[0xB4008];
-    int counts[10];    // 0xB4008
-};
 
 /**
  * Empties the FE file cache and frees its file-index hash table.
@@ -3609,14 +3531,14 @@ struct sEquipTableK19CF40 {
  */
 extern "C" void func_0019CF40(void* self)
 {
-    sEquipTableK19CF40* cache = (sEquipTableK19CF40*)self;
+    cFEBoltFileManager* cache = (cFEBoltFileManager*)self;
     int i;
     int j;
     for (i = 0; i < 10; i++) {
         for (j = 0; j < 256; j++) {
             func_0019D4B8((sEquipTable_D4B8*)self, i, j);
         }
-        cache->counts[i] = 1;
+        cache->unk_B4008[i] = 1;
     }
     if (D_004A1968 != 0) {
         operator_delete((int*)D_004A1968);
@@ -3642,16 +3564,6 @@ extern "C" void MUTEX_unlock(void* mutex);
 extern char str_UncompressedData[];
 extern char cMemMan_m_mutex[];
 
-struct sSlotK19D000 {
-    int state;
-    char name[0x100];
-    void* data;     // 0x104
-    int handle;     // 0x108
-    int pending;    // 0x10C
-    int f110;
-    int timer;      // 0x114
-    int size;       // 0x118
-};
 
 /**
  * Unpacks a slot's compressed file data in place in the FE file cache.
@@ -3667,12 +3579,12 @@ struct sSlotK19D000 {
  */
 extern "C" void func_0019D000(sEquipTable_DC20* self, int bank, sEquipSlot_DC20* rawSlot)
 {
-    sSlotK19D000* slot = (sSlotK19D000*)rawSlot;
+    tBoltFile* slot = (tBoltFile*)rawSlot;
     if (slot == 0)
         return;
-    if (slot->data == 0)
+    if (slot->dataPtr == 0)
         return;
-    int size = unpacksizez(slot->data);
+    int size = unpacksizez(slot->dataPtr);
     if (size <= 0)
         return;
     func_0019D578(self, bank, size);
@@ -3683,12 +3595,12 @@ extern "C" void func_0019D000(sEquipTable_DC20* self, int bank, sEquipSlot_DC20*
         func_0019D738(self, bank, size);
         buf = operator_new_tag(size, str_UncompressedData, 0x60000000, 0);
     }
-    unpack(slot->data, buf);
-    if (slot->data != 0)
-        cMemMan_free(slot->data);
-    slot->data = buf;
-    *(int*)((char*)self + 0xB4000) += size - slot->size;
-    slot->size = size;
+    unpack(slot->dataPtr, buf);
+    if (slot->dataPtr != 0)
+        cMemMan_free(slot->dataPtr);
+    slot->dataPtr = buf;
+    *(int*)((char*)self + 0xB4000) += size - slot->fileSize;
+    slot->fileSize = size;
 }
 #endif
 
@@ -3698,11 +3610,6 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019D140);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct sEquipTable_DC20;
 extern "C" void func_0019D8B8(sEquipTable_DC20* self, int bank, int i);
-struct sEquipSlot_D140 {
-    int state;              // 0x000
-    char pad_0x4[0x118];
-    unsigned int stamp;     // 0x11C
-};
 
 /**
  * Starts the oldest queued load, preferring the given bank of the FE file cache.
@@ -3722,11 +3629,11 @@ extern "C" void func_0019D140(void* self, int bank)
     int bestIdx = -1;
     int found;
     int i;
-    sEquipSlot_D140* slot = (sEquipSlot_D140*)((char*)self + bank * 0x12000);
+    tBoltFile* slot = (tBoltFile*)((char*)self + bank * 0x12000);
     found = bank;
     for (i = 0; i < 256; i++, slot++) {
-        if (slot->state == 3 && (best == 0 || slot->stamp < best)) {
-            best = slot->stamp;
+        if (slot->flags == 3 && (best == 0 || slot->unk_11C < best)) {
+            best = slot->unk_11C;
             bestIdx = i;
         }
     }
@@ -3736,10 +3643,10 @@ extern "C" void func_0019D140(void* self, int bank)
             if (otherBank == bank) {
                 continue;
             }
-            slot = (sEquipSlot_D140*)((char*)self + otherBank * 0x12000);
+            slot = (tBoltFile*)((char*)self + otherBank * 0x12000);
             for (i = 0; i < 256; i++, slot++) {
-                if (slot->state == 3 && (best == 0 || slot->stamp < best)) {
-                    best = slot->stamp;
+                if (slot->flags == 3 && (best == 0 || slot->unk_11C < best)) {
+                    best = slot->unk_11C;
                     found = otherBank;
                     bestIdx = i;
                 }
@@ -3766,19 +3673,8 @@ extern "C" void func_0019D000(sEquipTable_DC20* self, int bank, sEquipSlot_DC20*
 extern "C" void func_0019D140(void* self, int bank);
 extern "C" void func_0019D8B8(sEquipTable_DC20* self, int bank, int i);
 
-struct sSlotK19D250 {
-    int state;
-    char name[0x100];
-    void* data;     // 0x104
-    int handle;     // 0x108
-    int pending;    // 0x10C
-    int f110;
-    int timer;      // 0x114
-    int size;       // 0x118
-    unsigned int stamp; // 0x11C
-};
 struct sBankK19D250 {
-    sSlotK19D250 e[256];
+    tBoltFile e[256];
 };
 struct sTableK19D250 {
     sBankK19D250 banks[10];      // 0x0
@@ -3803,23 +3699,23 @@ extern "C" void func_0019D250(void* table)
     int i;
     int j;
     for (i = 0; i < 10; i++) {
-        sSlotK19D250* slot = (sSlotK19D250*)((char*)self + i * 0x12000);
+        tBoltFile* slot = (tBoltFile*)((char*)self + i * 0x12000);
         for (j = 0; j < 256; j++, slot++) {
-            if (slot->pending != 0 && slot->state == 2) {
-                int asyncStatus = ASYNCFILE_getstatus(slot->handle);
+            if (slot->async != 0 && slot->flags == 2) {
+                int asyncStatus = ASYNCFILE_getstatus(slot->asyncFileHandle);
                 if (asyncStatus == 1) {
                     int status[4];
-                    ASYNCFILE_release(slot->handle, 0, status);
+                    ASYNCFILE_release(slot->asyncFileHandle, 0, status);
                     func_0019D000((sEquipTable_DC20*)self, i, (sEquipSlot_DC20*)slot);
-                    if (slot->timer == 0)
-                        slot->state = 0;
+                    if (slot->refCount == 0)
+                        slot->flags = 0;
                     else
-                        slot->state = asyncStatus;
-                    slot->pending = 0;
+                        slot->flags = asyncStatus;
+                    slot->async = 0;
                     if (--self->nPending <= 0)
                         func_0019D140(self, i);
                 }
-            } else if (self->nPending <= 0 && slot->state == 3) {
+            } else if (self->nPending <= 0 && slot->flags == 3) {
                 func_0019D8B8((sEquipTable_DC20*)self, i, j);
             }
         }
@@ -3872,17 +3768,8 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019D428);
 #ifdef SKIP_ASM
 extern "C" int strcmp(const void* a, const void* b);
 
-struct sEquipSlot_D428 {
-    int state;
-    char name[0x100];
-    int value;
-    char pad108[0x18];
-};
 struct sEquipRow_D428 {
-    sEquipSlot_D428 slots[0x100];
-};
-struct sEquipTable_D428 {
-    sEquipRow_D428 rows[1];
+    tBoltFile slots[0x100];
 };
 
 /**
@@ -3894,11 +3781,11 @@ struct sEquipTable_D428 {
  * @param name  the file name
  * @return the slot index, or -1 when the name is not cached
  */
-extern "C" int func_0019D428(sEquipTable_D428* self, int bank, const char* name)
+extern "C" int func_0019D428(cFEBoltFileManager* self, int bank, const char* name)
 {
     for (int i = 0; i < 256; i++) {
-        sEquipSlot_D428* slot = &self->rows[bank].slots[i];
-        if (slot->name[0] != 0 && strcmp(self->rows[bank].slots[i].name, name) == 0) {
+        tBoltFile* slot = &((sEquipRow_D428*)&self->mFiles[0][0])[bank].slots[i];
+        if (slot->fileName[0] != 0 && strcmp(((sEquipRow_D428*)&self->mFiles[0][0])[bank].slots[i].fileName, name) == 0) {
             return i;
         }
     }
@@ -3970,23 +3857,8 @@ struct sEquipTable_D4B8;
 struct sEquipTable_DC20;
 extern "C" void func_0019D4B8(sEquipTable_D4B8* self, int bank, int i);
 
-struct sSlotK19D578 {
-    int state;
-    char name[0x100];
-    void* data;     // 0x104
-    int handle;     // 0x108
-    int pending;    // 0x10C
-    int f110;
-    int timer;      // 0x114
-    int size;       // 0x118
-    unsigned int stamp; // 0x11C
-};
 struct sBankK19D578 {
-    sSlotK19D578 e[256];
-};
-struct sTableK19D578 {
-    sBankK19D578 banks[10];      // 0x0
-    int used;                    // 0xB4000
+    tBoltFile e[256];
 };
 
 /**
@@ -4002,8 +3874,8 @@ struct sTableK19D578 {
  */
 extern "C" void func_0019D578(sEquipTable_DC20* table, int bank, int size)
 {
-    sTableK19D578* self = (sTableK19D578*)table;
-    if (self->used + size <= 9999999)
+    cFEBoltFileManager* self = (cFEBoltFileManager*)table;
+    if (self->mMemUsed + size <= 9999999)
         return;
     int otherBank;
     int j;
@@ -4011,10 +3883,10 @@ extern "C" void func_0019D578(sEquipTable_DC20* table, int bank, int size)
         if (otherBank == bank)
             continue;
         for (j = 0; j < 256; j++) {
-            sSlotK19D578* slot = &self->banks[otherBank].e[j];
-            if (slot->data != 0 && slot->timer == 0 && slot->state == 0) {
+            tBoltFile* slot = &((sBankK19D578*)&self->mFiles[0][0])[otherBank].e[j];
+            if (slot->dataPtr != 0 && slot->refCount == 0 && slot->flags == 0) {
                 func_0019D4B8((sEquipTable_D4B8*)self, otherBank, j);
-                if (self->used + size <= 9999999)
+                if (self->mMemUsed + size <= 9999999)
                     return;
             }
         }
@@ -4023,10 +3895,10 @@ extern "C" void func_0019D578(sEquipTable_DC20* table, int bank, int size)
         int best = -1;
         unsigned int stamp = 0;
         for (int k = 0; k < 256; k++) {
-            sSlotK19D578* slot = &self->banks[bank].e[k];
-            if (slot->data != 0 && slot->state == 0 && slot->timer == 0) {
-                if (best < 0 || slot->stamp < stamp) {
-                    stamp = slot->stamp;
+            tBoltFile* slot = &((sBankK19D578*)&self->mFiles[0][0])[bank].e[k];
+            if (slot->dataPtr != 0 && slot->flags == 0 && slot->refCount == 0) {
+                if (best < 0 || slot->unk_11C < stamp) {
+                    stamp = slot->unk_11C;
                     best = k;
                 }
             }
@@ -4034,7 +3906,7 @@ extern "C" void func_0019D578(sEquipTable_DC20* table, int bank, int size)
         if (best < 0)
             return;
         func_0019D4B8((sEquipTable_D4B8*)self, bank, best);
-    } while (self->used + size > 9999999);
+    } while (self->mMemUsed + size > 9999999);
 }
 #endif
 
@@ -4045,19 +3917,8 @@ struct sEquipTable_D4B8;
 struct sEquipTable_DC20;
 extern "C" void func_0019D4B8(sEquipTable_D4B8* self, int bank, int i);
 
-struct sSlotK19D738 {
-    int state;
-    char name[0x100];
-    void* data;     // 0x104
-    int handle;     // 0x108
-    int pending;    // 0x10C
-    int f110;
-    int timer;      // 0x114
-    int size;       // 0x118
-    unsigned int stamp; // 0x11C
-};
 struct sBankK19D738 {
-    sSlotK19D738 e[256];
+    tBoltFile e[256];
 };
 struct sTableK19D738 {
     sBankK19D738 banks[10];      // 0x0
@@ -4083,9 +3944,9 @@ extern "C" void func_0019D738(sEquipTable_DC20* table, int bank, int size)
         if (otherBank == bank)
             continue;
         for (j = 0; j < 256; j++) {
-            sSlotK19D738* slot = &self->banks[otherBank].e[j];
-            if (slot->data != 0 && slot->timer == 0 && slot->state == 0) {
-                size -= slot->size;
+            tBoltFile* slot = &self->banks[otherBank].e[j];
+            if (slot->dataPtr != 0 && slot->refCount == 0 && slot->flags == 0) {
+                size -= slot->fileSize;
                 func_0019D4B8((sEquipTable_D4B8*)self, otherBank, j);
                 if (size <= 0)
                     return;
@@ -4096,17 +3957,17 @@ extern "C" void func_0019D738(sEquipTable_DC20* table, int bank, int size)
         int best = -1;
         unsigned int stamp = 0;
         for (int k = 0; k < 256; k++) {
-            sSlotK19D738* slot = &self->banks[bank].e[k];
-            if (slot->data != 0 && slot->state == 0 && slot->timer == 0) {
-                if (best < 0 || slot->stamp < stamp) {
-                    stamp = slot->stamp;
+            tBoltFile* slot = &self->banks[bank].e[k];
+            if (slot->dataPtr != 0 && slot->flags == 0 && slot->refCount == 0) {
+                if (best < 0 || slot->unk_11C < stamp) {
+                    stamp = slot->unk_11C;
                     best = k;
                 }
             }
         }
         if (best < 0)
             return;
-        size -= self->banks[bank].e[best].size;
+        size -= self->banks[bank].e[best].fileSize;
         func_0019D4B8((sEquipTable_D4B8*)self, bank, best);
     } while (size > 0);
 }
@@ -4128,17 +3989,6 @@ extern "C" void MUTEX_unlock(void* mutex);
 extern char str_Bolt_FileData[];
 extern char cMemMan_m_mutex[];
 
-struct sSlotK19D8B8 {
-    int state;
-    char name[0x100];
-    void* data;     // 0x104
-    int handle;     // 0x108
-    int pending;    // 0x10C
-    int f110;
-    int timer;      // 0x114
-    int size;       // 0x118
-    unsigned int stamp; // 0x11C
-};
 
 /**
  * Starts loading a slot's file into the FE file cache.
@@ -4156,26 +4006,26 @@ struct sSlotK19D8B8 {
  */
 extern "C" void func_0019D8B8(sEquipTable_DC20* self, int bank, int i)
 {
-    sSlotK19D8B8* slot = &((sSlotK19D8B8*)((char*)self + bank * 0x12000))[i];
-    int size = BXFILE_sizez(slot->name);
+    tBoltFile* slot = &((tBoltFile*)((char*)self + bank * 0x12000))[i];
+    int size = BXFILE_sizez(slot->fileName);
     func_0019D578(self, bank, size);
-    slot->data = operator_new_tag(size, str_Bolt_FileData, 0x60000000, 0);
-    while (slot->data == 0) {
+    slot->dataPtr = operator_new_tag(size, str_Bolt_FileData, 0x60000000, 0);
+    while (slot->dataPtr == 0) {
         MUTEX_lock(cMemMan_m_mutex);
         MUTEX_unlock(cMemMan_m_mutex);
         func_0019D738(self, bank, size);
-        slot->data = operator_new_tag(size, str_Bolt_FileData, 0x60000000, 0);
+        slot->dataPtr = operator_new_tag(size, str_Bolt_FileData, 0x60000000, 0);
     }
     *(int*)((char*)self + 0xB4000) += size;
-    if (slot->pending != 0) {
-        slot->size = size;
-        slot->state = 2;
-        slot->handle = ASYNCFILE_loadat(slot->name, slot->data, size);
+    if (slot->async != 0) {
+        slot->fileSize = size;
+        slot->flags = 2;
+        slot->asyncFileHandle = ASYNCFILE_loadat(slot->fileName, slot->dataPtr, size);
         *(int*)((char*)self + 0xB4004) += 1;
     } else {
-        slot->size = size;
-        FILE_loadatz(slot->name, slot->data, size);
-        slot->state = 1;
+        slot->fileSize = size;
+        FILE_loadatz(slot->fileName, slot->dataPtr, size);
+        slot->flags = 1;
     }
 }
 #endif
@@ -4189,29 +4039,12 @@ struct sEquipTable_D428;
 extern "C" void func_0019D4B8(sEquipTable_D4B8* self, int bank, int i);
 extern "C" void func_0019D8B8(sEquipTable_DC20* self, int bank, int i);
 extern "C" int func_0019D3B0(void* self, int bank);
-extern "C" int func_0019D428(sEquipTable_D428* self, int bank, const char* name);
+extern "C" int func_0019D428(cFEBoltFileManager* self, int bank, const char* name);
 extern "C" void ASYNCFILE_release(int handle, int a1, void* status);
 extern "C" char* strcpy(char* dst, const char* src);
 
-struct sSlotK19DA10 {
-    int state;
-    char name[0x100];
-    void* data;     // 0x104
-    int handle;     // 0x108
-    int pending;    // 0x10C
-    int f110;
-    int timer;      // 0x114
-    int size;       // 0x118
-    unsigned int stamp; // 0x11C
-};
 struct sBankK19DA10 {
-    sSlotK19DA10 e[256];
-};
-struct sTableK19DA10 {
-    sBankK19DA10 banks[10];      // 0x0
-    int used;                    // 0xB4000
-    int nPending;                // 0xB4004
-    int counts[10];              // 0xB4008
+    tBoltFile e[256];
 };
 
 /**
@@ -4238,46 +4071,46 @@ struct sTableK19DA10 {
  */
 extern "C" int func_0019DA10(void* cache, int bank, void* namep, int fileType, int async, int deferred)
 {
-    sTableK19DA10* self = (sTableK19DA10*)cache;
+    cFEBoltFileManager* self = (cFEBoltFileManager*)cache;
     const char* name = (const char*)namep;
-    int i = func_0019D428((sEquipTable_D428*)self, bank, name);
+    int i = func_0019D428((cFEBoltFileManager*)self, bank, name);
     if (i >= 0) {
-        sSlotK19DA10* slot = &self->banks[bank].e[i];
+        tBoltFile* slot = &((sBankK19DA10*)&self->mFiles[0][0])[bank].e[i];
         if (deferred)
-            slot->stamp = 0;
+            slot->unk_11C = 0;
         else
-            slot->stamp = self->counts[bank]++;
+            slot->unk_11C = self->unk_B4008[bank]++;
         if (async) {
-            if (slot->state == 0)
-                slot->state = 1;
+            if (slot->flags == 0)
+                slot->flags = 1;
         } else {
-            slot->pending = 0;
-            if (slot->state == 2) {
+            slot->async = 0;
+            if (slot->flags == 2) {
                 int status;
-                ASYNCFILE_release(slot->handle, 0, &status);
-            } else if (slot->state == 3) {
+                ASYNCFILE_release(slot->asyncFileHandle, 0, &status);
+            } else if (slot->flags == 3) {
                 func_0019D8B8((sEquipTable_DC20*)self, bank, i);
             }
-            slot->state = 1;
-            slot->handle = -1;
+            slot->flags = 1;
+            slot->asyncFileHandle = -1;
         }
-        slot->timer++;
+        slot->refCount++;
     } else {
     i = func_0019D3B0(self, bank);
-    sSlotK19DA10* slot = &self->banks[bank].e[i];
+    tBoltFile* slot = &((sBankK19DA10*)&self->mFiles[0][0])[bank].e[i];
     func_0019D4B8((sEquipTable_D4B8*)self, bank, i);
     if (deferred)
-        slot->stamp = 0;
+        slot->unk_11C = 0;
     else
-        slot->stamp = self->counts[bank]++;
-    strcpy(slot->name, name);
-    slot->timer++;
-    slot->f110 = fileType;
-    slot->pending = async;
-    if (deferred == 0 && (async == 0 || self->nPending <= 0))
+        slot->unk_11C = self->unk_B4008[bank]++;
+    strcpy(slot->fileName, name);
+    slot->refCount++;
+    slot->fileType = fileType;
+    slot->async = async;
+    if (deferred == 0 && (async == 0 || self->mNumLoadThreads <= 0))
         func_0019D8B8((sEquipTable_DC20*)self, bank, i);
     else
-        slot->state = 3;
+        slot->flags = 3;
     }
     return i;
 }
@@ -4561,7 +4394,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019E1C0);
  */
 extern "C" int func_0019E1C0(sTableK19D250* self, int bank) {
     for (int i = 0; i < 0x100; i++) {
-        if ((unsigned int)self->banks[bank].e[i].state >= 2) return 0;
+        if ((unsigned int)self->banks[bank].e[i].flags >= 2) return 0;
     }
     return 1;
 }
@@ -4577,7 +4410,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019E208);
  * @return 1 while the load is in flight, else 0
  */
 extern "C" int func_0019E208(sTableK19D250* self, int bank, int i) {
-    return self->banks[bank].e[i].state == 2;
+    return self->banks[bank].e[i].flags == 2;
 }
 #endif
 
@@ -4623,8 +4456,8 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019E268);
  * @return the name buffer, or 0
  */
 extern "C" char* func_0019E268(sTableK19D250* self, int bank, int i) {
-    if (self->banks[bank].e[i].state == -1) return 0;
-    return self->banks[bank].e[i].name;
+    if (self->banks[bank].e[i].flags == -1) return 0;
+    return self->banks[bank].e[i].fileName;
 }
 #endif
 
@@ -4662,8 +4495,8 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019E2F0);
  * @return the data, or 0
  */
 extern "C" void* func_0019E2F0(sTableK19D250* self, int bank, int i) {
-    if (self->banks[bank].e[i].state != 1) return 0;
-    return self->banks[bank].e[i].data;
+    if (self->banks[bank].e[i].flags != 1) return 0;
+    return self->banks[bank].e[i].dataPtr;
 }
 #endif
 //100%
@@ -4705,7 +4538,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019E380);
  * @return the type
  */
 extern "C" int func_0019E380(sTableK19D250* self, int bank, int i) {
-    return self->banks[bank].e[i].f110;
+    return self->banks[bank].e[i].fileType;
 }
 #endif
 //100%
@@ -4719,7 +4552,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019E3A8);
  * @return the use count
  */
 extern "C" int func_0019E3A8(sTableK19D250* self, int bank, int i) {
-    return self->banks[bank].e[i].timer;
+    return self->banks[bank].e[i].refCount;
 }
 #endif
 

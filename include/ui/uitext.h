@@ -26,6 +26,22 @@
 #include "layout.h"
 #include "ui/uithing.h" // t3Vector, tARGB and the cUIThing members' pointee types
 
+// EA's tAttrText, the type of cUIText::mAttrText (bits named for code that reads one field, as tAttrThing for
+// cUIThing::mAttr: ((tAttrText*)&text->mAttrText)->mFont). [O] On Tour struct tAttrText (1 byte, unsigned char
+// bit-fields, LSB first); [P] the preview's inline accessors setFontIndex (bits 0-1), hasShadow (2), isUnicode (3),
+// getUseStaticColour (4); [U] retail reads and writes the word (lw/sw 0x74; the views sUIThing03F0 mode : 2,
+// cUITextScroll's sibling tAttrTextScroll is a word too), so the bit-fields are unsigned int here.
+struct tAttrText {
+    unsigned int mFont : 2;          // bits 0-1 [O]; [P] setFontIndex; [U] cUIText_getFont, cUIText_setUIData
+    unsigned int mShadow : 1;        // bit 2 [O]; [P] hasShadow; [R] the ctor sets it
+    unsigned int mUnicode : 1;       // bit 3 [O]; [P] isUnicode; [U] cUIText_getAsciiString / getUnicodeString
+    unsigned int mStaticColour : 1;  // bit 4 [O]; [P] getUseStaticColour
+    unsigned int mDisabledColour : 1; // bit 5 [O]; [U] get/setUseDisabledColour (On Tour's order)
+    unsigned int mEllipses : 1;      // bit 6 [O]; [U] isEllipses / setEllipses (On Tour's order)
+};
+
+CHECK_SIZE(tAttrText, 0x4);
+
 struct cUIText {
     // --- cUIThing (see ui/uithing.h for the evidence of each member) ---
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev

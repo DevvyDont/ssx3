@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "render/2drender.h"
+#include "bx/bxstring.h"
 #include "fe/festateload.h"
 #include "fe/festateoptions.h"
 #include "render/font.h"
@@ -276,23 +278,8 @@ struct sFE39F0Files {
     sFE39F0File files[5];
 };
 
-struct sVE39F0 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
-struct sVE39F0L {
-    short delta;
-    short index;
-    int (*fn)(void*, char*, const char*, int, int, int);
-};
 
-struct sVE39F0V {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 int cFEAsyncManager_GetFileStatus(cFEAsyncManager* self, int index);
 void cFEAsyncManager_SetFileStatus(cFEAsyncManager* self, int index, int status);
@@ -318,11 +305,11 @@ extern "C" void cFEAsyncManager_Update(cFEAsyncManager* self)
     for (i = 0; i < 5; i++) {
         if (cFEAsyncManager_GetFileStatus(self, i) == 0 || cFEAsyncManager_GetFileStatus(self, i) == 1) {
             cPS2GraphicsMan* obj = GrMan;
-            sVE39F0* vt = (sVE39F0*)obj->mVtbl;
+            sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)obj->mVtbl;
             if (asyncMan->files[i].f118 < vt[114].fn(vthis(obj, vt[114]))) {
                 if (asyncMan->files[i].data != 0) {
                     cPS2GraphicsMan* obj2 = GrMan;
-                    sVE39F0V* vt2 = (sVE39F0V*)obj2->mVtbl;
+                    sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)obj2->mVtbl;
                     vt2[50].fn(vthis(obj2, vt2[50]), asyncMan->files[i].id);
                     if (asyncMan->files[i].data != 0) {
                         cMemMan_free(asyncMan->files[i].data);
@@ -335,7 +322,7 @@ extern "C" void cFEAsyncManager_Update(cFEAsyncManager* self)
         }
         if (cFEAsyncManager_GetFileStatus(self, i) == 1) {
             cPS2GraphicsMan* obj = GrMan;
-            sVE39F0* vt = (sVE39F0*)obj->mVtbl;
+            sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)obj->mVtbl;
             if (asyncMan->files[i].f118 < vt[114].fn(vthis(obj, vt[114]))) {
                 cFEAsyncManager_LoadDataFile(self, i);
             }
@@ -345,7 +332,7 @@ extern "C" void cFEAsyncManager_Update(cFEAsyncManager* self)
                 cFEAsyncManager_SetFileStatus(self, i, 3);
                 ASYNCFILE_release(asyncMan->files[i].handle, 0, 0);
                 cPS2GraphicsMan* obj = GrMan;
-                sVE39F0L* vt = (sVE39F0L*)obj->mVtbl;
+                sVEntry<int(void*, char*, const char*, int, int, int)>* vt = (sVEntry<int(void*, char*, const char*, int, int, int)>*)obj->mVtbl;
                 char* data = asyncMan->files[i].data;
                 asyncMan->files[i].id = vt[46].fn(vthis(obj, vt[46]), data + *(int*)(data + 0x14), str_map, 0, 0, -1);
             }
@@ -394,11 +381,6 @@ struct sFE3C50Files {
     sFE3C50File files[5];
 };
 
-struct sVE3C50 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 void cMemMan_free(void* p);
 
@@ -415,7 +397,7 @@ extern "C" void cFEAsyncManager_FlushFEAsyncTextures(cFEAsyncManager* self)
     for (i = 0; i < 5; i++) {
         if (asyncMan->files[i].data != 0) {
             cPS2GraphicsMan* obj = GrMan;
-            sVE3C50* vt = (sVE3C50*)obj->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)obj->mVtbl;
             vt[50].fn(vthis(obj, vt[50]), asyncMan->files[i].id);
             if (asyncMan->files[i].data != 0) {
                 cMemMan_free(asyncMan->files[i].data);
@@ -569,11 +551,6 @@ struct sOwner1A5450;
 extern "C" void func_001A5450(cFEStateNetMessenger* self);
 extern "C" void cFEStateNet__cFEStateNet_dtor3EA0(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
 
-struct sVE1A3EA0 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 static inline void Dealloc1A3EA0(void** p, int n)
 {
@@ -603,7 +580,7 @@ extern "C" void cFEStateNetMessenger__cFEStateNetMessenger(cFEStateNetMessenger*
 {
     self->mVtbl = (void**)cFEStateNetMessenger_vtbl;
     char* child = (char*)self->mpParentState;
-    sVE1A3EA0* vt = *(sVE1A3EA0**)(child + 0x8);
+    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(child + 0x8);
     vt[32].fn(vthis(child, vt[32]));
     func_001A5450(self);
     tFEStringPtrVector* feStringPtrVector = &(*(&self->mNames));
@@ -877,11 +854,6 @@ public:
     virtual void set(const cVec_4330& v);
 };
 
-struct sVE_4330 {
-    short delta;
-    short index;
-    void (*fn)(void*, ...);
-};
 
 
 /**
@@ -910,7 +882,7 @@ extern "C" void cFEStateNetMessenger_onWidgetEvent(cFEStateNetMessenger* self, c
     switch (msg) {
     case 6: {
         cUIState* o = self->mpParentState;
-        ((sVE_4330*)o->mVtbl)[17].fn(vthis(o, ((sVE_4330*)o->mVtbl)[17]), ((char*)self), 20);
+        ((sVEntry<void(void*, ...)>*)o->mVtbl)[17].fn(vthis(o, ((sVEntry<void(void*, ...)>*)o->mVtbl)[17]), ((char*)self), 20);
         break;
     }
     case 8:
@@ -967,7 +939,7 @@ extern "C" void cFEStateNetMessenger_onWidgetEvent(cFEStateNetMessenger* self, c
                 sprintf(buf, str_ps2Xpct_02d, i);
                 cUIState* o = (cUIState*)cUIScreen_getObjectByHashName_4330(self->mpScreen, GetHashValue32(buf));
                 if (o != 0) {
-                    ((sVE_4330*)o->mVtbl)[9].fn(vthis(o, ((sVE_4330*)o->mVtbl)[9]), 0);
+                    ((sVEntry<void(void*, ...)>*)o->mVtbl)[9].fn(vthis(o, ((sVEntry<void(void*, ...)>*)o->mVtbl)[9]), 0);
                 }
                 ((cObjV_4330*)pWidget)->set(cVec_4330(1.0f, 0.0f, 0.0f, 0.0f));
                 func_001A66A8_4330(((char*)self), i, 0);
@@ -1453,11 +1425,6 @@ extern char str_kT_BTNOK[];
 extern char str_kT_POPUP279InvalidName[];
 extern char str_kT_POPUP279UserNotFound[];
 
-struct sVEntry_001A4E28 {
-    short delta;
-    short index;
-    int (*fn)(void*, int);
-};
 
 /**
  * Shows the popup for a failed find-user request, by the error code at @p msg +0x8.
@@ -1477,7 +1444,7 @@ extern "C" void func_001A4E28(cFEStateNetMessenger* self, void* msg)
         int one = 1;
         int three = 3;
         char* obj = (char*)SSXApp->FELocale;
-        sVEntry_001A4E28* vt = *(sVEntry_001A4E28**)(obj + 4);
+        sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)(obj + 4);
         sprintf1(buf, vt[4].fn(vthis(obj, vt[4]), GetHashValue32(str_kT_POPUP279InvalidName)), self->mszSearchName);
         cScreenPopup* popup = (cScreenPopup*)func_001A9C50((cFEStateNet*)self);
         popup->info.meType = one;
@@ -1613,11 +1580,6 @@ extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern char str_ScrollVector[];
 extern char str_ScrollButton[];
 
-struct sVec3_001A5128 {
-    float x;
-    float y;
-    float z;
-};
 
 struct cUIObj_001A5128 {
     int f0;
@@ -1644,9 +1606,9 @@ struct cUIObj_001A5128 {
     virtual void getSize(void* out);
 };
 
-static inline sVec3_001A5128 GetPos_001A5128(cUIObj_001A5128* o)
+static inline t3Vector GetPos_001A5128(cUIObj_001A5128* o)
 {
-    return *(sVec3_001A5128*)((char*)o + 0x44);
+    return *(t3Vector*)((char*)o + 0x44);
 }
 
 /**
@@ -1669,16 +1631,16 @@ extern "C" void func_001A5128(cFEStateNetMessenger* self, int pos, int count)
     cUIObj_001A5128* thumb = (cUIObj_001A5128*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ScrollButton));
     if (thumb == 0) return;
     if (track == 0) return;
-    sVec3_001A5128 size;
+    t3Vector size;
     track->getSize(&size);
-    sVec3_001A5128 trackPos = *(sVec3_001A5128*)((char*)track + 0x44);
+    t3Vector trackPos = *(t3Vector*)((char*)track + 0x44);
     float fpos = (float)pos;
     if (count >= 2) count--;
     float step = (size.y + -15.0f) / (float)count;
-    sVec3_001A5128 np = trackPos;
+    t3Vector np = trackPos;
     np.y += fpos * step;
     np.x += -2.0f;
-    *(sVec3_001A5128*)((char*)thumb + 0x44) = np;
+    *(t3Vector*)((char*)thumb + 0x44) = np;
     thumb->setVisible(1);
     track->setVisible(1);
 }
@@ -1699,13 +1661,8 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 struct sOwner1A5800;
 extern "C" int func_001A5800(cFEStateNetMessenger* self, char** name);
 
-struct sSession1A52B0 {
-    char pad[0xBC];
-    void** mBegin;
-    void** mEnd;
-};
 
-static inline int Count1A52B0(sSession1A52B0* s) { return s->mEnd - s->mBegin; }
+static inline int Count1A52B0(BuddyMan* s) { return ((void**)s->mChallengersFinish) - ((void**)s->mChallengersStart); }
 
 static inline void* GetSession_001A52B0()
 {
@@ -1721,11 +1678,6 @@ static inline void* GetSession_001A52B0()
     return BuddyMan_mBuddyMan;
 }
 
-struct sBXString1A52B0 {
-    char* str;
-    sBXString1A52B0() {}
-    sBXString1A52B0(const sBXString1A52B0& o);
-};
 
 /**
  * Sets miSelectedIndex to the list index of the first player with a pending challenge, else of the first message.
@@ -1736,11 +1688,11 @@ struct sBXString1A52B0 {
 extern "C" void func_001A52B0(cFEStateNetMessenger* self)
 {
     void* name;
-    if ((Count1A52B0((sSession1A52B0*)GetSession_001A52B0()) != 0 && (name = func_00263308(GetSession_001A52B0(), 0)) != 0)
+    if ((Count1A52B0((BuddyMan*)GetSession_001A52B0()) != 0 && (name = func_00263308(GetSession_001A52B0(), 0)) != 0)
         || (func_00262938(GetSession_001A52B0()) > 0 && (name = func_00263630(GetSession_001A52B0(), 0)) != 0)) {
-        sBXString1A52B0 nameStr;
+        cBXString nameStr;
         cBXString_cBXString1(&nameStr, name);
-        self->miSelectedIndex = func_001A5800(self, &nameStr.str);
+        self->miSelectedIndex = func_001A5800(self, &nameStr.Str);
         cBXString__cBXString(&nameStr, 2);
     } else {
         self->miSelectedIndex = -1;
@@ -1754,10 +1706,6 @@ INCLUDE_ASM("fe/feasyncfile", func_001A5450);
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void* func_0041610C(void* dst, void* src, int n);
 
-struct sPtrVec1A5450 {
-    void** mBegin;
-    void** mEnd;
-};
 
 
 /**
@@ -1769,18 +1717,18 @@ struct sPtrVec1A5450 {
 extern "C" void func_001A5450(cFEStateNetMessenger* self)
 {
     for (;;) {
-        if ((*(sPtrVec1A5450*)&self->mNames.mpStart).mBegin == (*(sPtrVec1A5450*)&self->mNames.mpStart).mEnd) break;
-        void* nameStr = (*(sPtrVec1A5450*)&self->mNames.mpStart).mEnd[-1];
-        (*(sPtrVec1A5450*)&self->mNames.mpStart).mEnd--;
+        if (((void**)(*(tFEStringPtrVector*)&self->mNames.mpStart).unk_00) == ((void**)(*(tFEStringPtrVector*)&self->mNames.mpStart).mpStart)) break;
+        void* nameStr = ((void**)(*(tFEStringPtrVector*)&self->mNames.mpStart).mpStart)[-1];
+        (*(void***)&(*(tFEStringPtrVector*)&self->mNames.mpStart).mpStart)--;
         if (nameStr) {
             cBXString__cBXString(nameStr, 3);
         }
     }
-    void** first = (*(sPtrVec1A5450*)&self->mNames.mpStart).mBegin;
-    void** last = (*(sPtrVec1A5450*)&self->mNames.mpStart).mEnd;
+    void** first = ((void**)(*(tFEStringPtrVector*)&self->mNames.mpStart).unk_00);
+    void** last = ((void**)(*(tFEStringPtrVector*)&self->mNames.mpStart).mpStart);
     void** finish = last;
     func_0041610C(first, last, (char*)finish - (char*)last);
-    (*(sPtrVec1A5450*)&self->mNames.mpStart).mEnd -= last - first;
+    (*(void***)&(*(tFEStringPtrVector*)&self->mNames.mpStart).mpStart) -= last - first;
 }
 #endif
 
@@ -1975,15 +1923,8 @@ static inline void* GetSession_001A5898()
     return BuddyMan_mBuddyMan;
 }
 
-struct sSession1A5898 {
-    char pad[0xBC];
-    void** mBegin;
-    void** mEnd;
-    char padC4[0x24];
-    int mEnabled;           // 0xE8
-};
 
-static inline int Count1A5898(sSession1A5898* s) { return s->mEnd - s->mBegin; }
+static inline int Count1A5898(BuddyMan* s) { return ((void**)s->mChallengersFinish) - ((void**)s->mChallengersStart); }
 
 struct sElem1A5898 {
     void* v;
@@ -2021,7 +1962,7 @@ static inline void PushBack1A5898(cFEStateNetMessenger* feStateNetMessenger, voi
 extern "C" void func_001A5898(cFEStateNetMessenger* vself)
 {
     cFEStateNetMessenger* self = vself;
-    if (((sSession1A5898*)GetSession_001A5898())->mEnabled == 0) {
+    if (((BuddyMan*)GetSession_001A5898())->mbRosterDone == 0) {
         return;
     }
     func_001A5450(self);
@@ -2030,7 +1971,7 @@ extern "C" void func_001A5898(cFEStateNetMessenger* vself)
         return;
     }
     int j;
-    for (j = 0; j < Count1A5898((sSession1A5898*)GetSession_001A5898()); j++) {
+    for (j = 0; j < Count1A5898((BuddyMan*)GetSession_001A5898()); j++) {
         void** name = (void**)func_00263308(GetSession_001A5898(), j);
         if (name != 0 && func_00262468(GetSession_001A5898(), (const char*)*name) >= 0) {
             PushBack1A5898(self, cBXString_cBXString1(cMemMan_alloc(4, str_cBXString, 0x20000000, 0), name));
@@ -2070,11 +2011,6 @@ extern "C" void func_001A5898(cFEStateNetMessenger* vself)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A5FB8);
 #ifdef SKIP_ASM
-struct sVE1A5FB8 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 extern char str_ps2Xpct_02d[];
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -2100,7 +2036,7 @@ extern "C" void func_001A5FB8(cFEStateNetMessenger* self, int sel)
         sprintf(buf, str_ps2Xpct_02d, i);
         cUIText* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
         if (((void*)obj) != 0) {
-            sVE1A5FB8* vt = (sVE1A5FB8*)obj->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)obj->mVtbl;
             vt[9].fn(vthis(obj, vt[9]), i == sel);
         }
         func_001A66A8(self, sel, i == sel);
@@ -2567,13 +2503,8 @@ extern char str_TextEqGoToNext[];
 extern char str_IconNextChallenge[];
 extern char str_IconNextMessage[];
 
-struct sSession1A6CA0 {
-    char pad[0xBC];
-    void** mBegin;
-    void** mEnd;
-};
 
-static inline int Count1A6CA0(sSession1A6CA0* s) { return s->mEnd - s->mBegin; }
+static inline int Count1A6CA0(BuddyMan* s) { return ((void**)s->mChallengersFinish) - ((void**)s->mChallengersStart); }
 
 static inline void* GetSession_001A6CA0()
 {
@@ -2631,7 +2562,7 @@ extern "C" void func_001A6CA0(cFEStateNetMessenger* self)
         if (!has) {
             challengeIcon->setVisible(0);
             messageIcon->setVisible(0);
-        } else if (Count1A6CA0((sSession1A6CA0*)GetSession_001A6CA0()) != 0) {
+        } else if (Count1A6CA0((BuddyMan*)GetSession_001A6CA0()) != 0) {
             challengeIcon->setVisible(has);
             messageIcon->setVisible(0);
         } else {
@@ -2864,11 +2795,6 @@ struct sVEntry_001A7390 {
     int (*fn)(void*, int);
 };
 
-struct sVEntryP_001A7390 {
-    short delta;
-    short index;
-    int (*fn)(void*, float*);
-};
 
 
 struct sChar2_001A7390 {
@@ -2923,7 +2849,7 @@ extern "C" void func_001A7390(cFEStateNet* self, const char* name, int mode)
         strcat(buf, str_sp);
         strcat(buf, tags);
         func_003EFA48(wide, 0x60, buf);
-        sVEntryP_001A7390* vt = (sVEntryP_001A7390*)uiText->mVtbl;
+        sVEntry<int(void*, float*)>* vt = (sVEntry<int(void*, float*)>*)uiText->mVtbl;
         vt[20].fn(vthis(uiText, vt[20]), size);
         t3Vector scale = *(&uiText->mScale);
         unsigned short* rest = cFont_textSmartLimit1(cUIText_getFont(uiText), scale.x, size[0], wide, wrapped, 0x30);
@@ -3044,11 +2970,6 @@ void cMemMan_free(void* p);
 void operator_delete(int* ptr);
 extern char cFEStateReadMessagePopup_vtbl[];
 
-struct sVE1A7848 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 
 
@@ -3080,7 +3001,7 @@ extern "C" void cFEStateReadMessagePopup__cFEStateReadMessagePopup(cFEStateReadM
         cPrivateMessage* message = ((cPrivateMessage**)(*(&self->mMessages)).mpFinish)[-1];
         (*(cPrivateMessage***)&(*(&self->mMessages)).mpFinish)--;
         if (message) {
-            ((sVE1A7848*)message->mVtbl)[1].fn(vthis(message, ((sVE1A7848*)message->mVtbl)[1]), 3);
+            ((sVEntry<void(void*, int)>*)message->mVtbl)[1].fn(vthis(message, ((sVEntry<void(void*, int)>*)message->mVtbl)[1]), 3);
         }
     }
     tFEPrivateMessageVector* messages = (&self->mMessages);
@@ -3443,17 +3364,13 @@ struct sVE1A7DD8 {
     void (*fn)(void*, int);
 };
 
-struct sObj1A7DD8 {
-    char pad[0xC];
-    sVE1A7DD8* vt;
-};
 
 
-extern "C" void func_001DB918(tFEPrivateMessageVector* vec, sObj1A7DD8** pos, sObj1A7DD8* const* x);
+extern "C" void func_001DB918(tFEPrivateMessageVector* vec, cPrivateMessage** pos, cPrivateMessage* const* x);
 
-static inline sObj1A7DD8** Copy1A7DD8(sObj1A7DD8** first, sObj1A7DD8** last, sObj1A7DD8** result)
+static inline cPrivateMessage** Copy1A7DD8(cPrivateMessage** first, cPrivateMessage** last, cPrivateMessage** result)
 {
-    func_0041610C(result, first, (last - first) * sizeof(sObj1A7DD8*));
+    func_0041610C(result, first, (last - first) * sizeof(cPrivateMessage*));
     return result + (last - first);
 }
 
@@ -3470,27 +3387,27 @@ static inline sObj1A7DD8** Copy1A7DD8(sObj1A7DD8** first, sObj1A7DD8** last, sOb
 extern "C" void func_001A7DD8(cFEStateReadMessagePopup* selfp, void* item)
 {
     cFEStateReadMessagePopup* self = selfp;
-    sObj1A7DD8* x = (sObj1A7DD8*)item;
+    cPrivateMessage* x = (cPrivateMessage*)item;
     for (;;) {
-        if ((unsigned int)(((sObj1A7DD8**)(*(&self->mMessages)).mpFinish) - ((sObj1A7DD8**)(*(&self->mMessages)).mpStart)) < 31) break;
+        if ((unsigned int)(((cPrivateMessage**)(*(&self->mMessages)).mpFinish) - ((cPrivateMessage**)(*(&self->mMessages)).mpStart)) < 31) break;
         tFEPrivateMessageVector* messages = &(*(&self->mMessages));
-        sObj1A7DD8** pos = ((sObj1A7DD8**)(*(&self->mMessages)).mpStart);
-        sObj1A7DD8* oldest = *pos;
+        cPrivateMessage** pos = ((cPrivateMessage**)(*(&self->mMessages)).mpStart);
+        cPrivateMessage* oldest = *pos;
         if (oldest) {
-            if (pos + 1 != ((sObj1A7DD8**)(*(&self->mMessages)).mpFinish)) {
-                Copy1A7DD8(pos + 1, ((sObj1A7DD8**)messages->mpFinish), pos);
+            if (pos + 1 != ((cPrivateMessage**)(*(&self->mMessages)).mpFinish)) {
+                Copy1A7DD8(pos + 1, ((cPrivateMessage**)messages->mpFinish), pos);
             }
-            (*(sObj1A7DD8***)&(*(&self->mMessages)).mpFinish)--;
-            oldest->vt[1].fn(vthis(oldest, oldest->vt[1]), 3);
+            (*(cPrivateMessage***)&(*(&self->mMessages)).mpFinish)--;
+            ((sVE1A7DD8*)oldest->mVtbl)[1].fn(vthis(oldest, ((sVE1A7DD8*)oldest->mVtbl)[1]), 3);
         }
     }
     tFEPrivateMessageVector* messageVec = &(*(&self->mMessages));
-    if (((sObj1A7DD8**)(*(&self->mMessages)).mpFinish) != ((sObj1A7DD8**)(*(&self->mMessages)).mpEndOfStorage)) {
-        sObj1A7DD8** slot = ((sObj1A7DD8**)messageVec->mpFinish);
+    if (((cPrivateMessage**)(*(&self->mMessages)).mpFinish) != ((cPrivateMessage**)(*(&self->mMessages)).mpEndOfStorage)) {
+        cPrivateMessage** slot = ((cPrivateMessage**)messageVec->mpFinish);
         if (slot) *slot = x;
-        (*(sObj1A7DD8***)&(*(&self->mMessages)).mpFinish)++;
+        (*(cPrivateMessage***)&(*(&self->mMessages)).mpFinish)++;
     } else {
-        func_001DB918(messageVec, ((sObj1A7DD8**)(*(&self->mMessages)).mpFinish), &x);
+        func_001DB918(messageVec, ((cPrivateMessage**)(*(&self->mMessages)).mpFinish), &x);
     }
 }
 #endif
@@ -3631,14 +3548,9 @@ static inline int Loc1A81F0(char* name)
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
-struct sEntry1A81F0 {
-    char* name;
-    char* ext;
-    char* desc;
-};
 
 
-static inline unsigned int Count1A81F0(cFEStateReadMessagePopup* feStateReadMessagePopup) { return ((sEntry1A81F0**)feStateReadMessagePopup->mMessages.mpFinish) - ((sEntry1A81F0**)feStateReadMessagePopup->mMessages.mpStart); }
+static inline unsigned int Count1A81F0(cFEStateReadMessagePopup* feStateReadMessagePopup) { return ((cPrivateMessage**)feStateReadMessagePopup->mMessages.mpFinish) - ((cPrivateMessage**)feStateReadMessagePopup->mMessages.mpStart); }
 
 class cFEVObj_001A81F0 {
 public:
@@ -3669,9 +3581,9 @@ extern "C" void func_001A81F0(cFEStateReadMessagePopup* self)
     }
     cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextFromX));
     if (text != 0 && Count1A81F0(self) != 0) {
-        sEntry1A81F0* msgEntry = ((sEntry1A81F0**)(self)->mMessages.mpStart)[0];
+        cPrivateMessage* msgEntry = ((cPrivateMessage**)(self)->mMessages.mpStart)[0];
         char* who = self->mszSender;
-        sprintf1_1A81F0(buf, Loc1A81F0(str_kT_POPUP242PlayerID), who, msgEntry->desc, D_004A1408);
+        sprintf1_1A81F0(buf, Loc1A81F0(str_kT_POPUP242PlayerID), who, msgEntry->mDate.Str, D_004A1408);
         cUIText_setUnicodeString(text, buf);
         ((cFEVObj_001A81F0*)text)->setVisible(1);
     }
@@ -3685,10 +3597,10 @@ extern "C" void func_001A81F0(cFEStateReadMessagePopup* self)
     cUITextScroll_clearBuffer(list);
     unsigned int i;
     for (i = 0; i < Count1A81F0(self); i++) {
-        sEntry1A81F0* msgEntry = *(sEntry1A81F0**)((char*)((sEntry1A81F0**)(self)->mMessages.mpStart) + (i << 2));
-        strcpy(buf, msgEntry->name);
+        cPrivateMessage* msgEntry = *(cPrivateMessage**)((char*)((cPrivateMessage**)(self)->mMessages.mpStart) + (i << 2));
+        strcpy(buf, msgEntry->mSender.Str);
         strcat(buf, str_colon_sp);
-        strcat(buf, msgEntry->ext);
+        strcat(buf, msgEntry->mText.Str);
         cUITextScroll_addAsciiString(list, buf);
     }
     func_001A83D8(list, 40, 8, count, top, sel, self->mbResetScroll, 0);
@@ -4015,11 +3927,6 @@ extern "C" void* cFEStateNet_onUpdate(cFEStateNet* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateNet_onGainFocus);
 #ifdef SKIP_ASM
-struct sVE1A87D0 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 extern "C" void cUIState_onGainFocus(void* self, int a1);
 
@@ -4034,7 +3941,7 @@ extern "C" void cUIState_onGainFocus(void* self, int a1);
  */
 extern "C" void cFEStateNet_onGainFocus(cFEStateNet* self, int pPrevState)
 {
-    sVE1A87D0* vt = (sVE1A87D0*)self->mVtbl;
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
     vt[32].fn(vthis(self, vt[32]));
     cUIState_onGainFocus(self, pPrevState);
     self->unk_048 = 1;
@@ -4547,11 +4454,6 @@ extern "C" void func_001A9BC0(cFEStateNet* self, cScreenPopup* popup);
 extern char str_cFEStateLobbyMenu[];
 extern const char str_cFEStateOnlineMainMenu[];
 
-struct sVE1A8E40 {
-    short delta;
-    short index;
-    int (*fn)(void*, int, void*);
-};
 
 // PORT: the unit declares func_001A8E40 with one arg; defined under an asm label with its real type.
 extern "C" int func_001A8E40_impl(void* self, int msg, void* data) __asm__("func_001A8E40");
@@ -4600,7 +4502,7 @@ extern "C" int func_001A8E40_impl(void* self, int msg, void* data)
     case 225: {
         char* child = (char*)obj->mpParentState;
         if (child != 0) {
-            sVE1A8E40* vt = *(sVE1A8E40**)(child + 0x8);
+            sVEntry<int(void*, int, void*)>* vt = *(sVEntry<int(void*, int, void*)>**)(child + 0x8);
             vt[24].fn(vthis(child, vt[24]), msg, data);
         }
         break;
@@ -4817,17 +4719,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001A92D8);
 // func_001A93D0 really takes (self, a1, a2); the unit declares it with a 4th arg
 void func_001A93D0_3(void* self, int a1, int a2) __asm__("func_001A93D0");
 
-struct sVE1A92D8 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
-struct sVE1A92D8b {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Handles popup id 2100 (challenge popups opened from another popup): tells the parent when it closes without a reply.
@@ -4850,11 +4742,11 @@ extern "C" void func_001A92D8(cFEStateNet* self, int popup, unsigned int kind)
         func_001A93D0_3(self, popup, 0xF);
         break;
     case 22: {
-        sVE1A92D8* vt = (sVE1A92D8*)self->mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
         vt[32].fn(vthis(self, vt[32]));
         if (self->unk_6BC == 0) {
             char* obj = (char*)self->mpParentState;
-            sVE1A92D8b* vt2 = *(sVE1A92D8b**)(obj + 0x8);
+            sVEntry<void(void*, void*, int)>* vt2 = *(sVEntry<void(void*, void*, int)>**)(obj + 0x8);
             vt2[17].fn(vthis(obj, vt2[17]), self, 0xF);
         }
         func_001A93D0_3(self, popup, 22);
@@ -5656,11 +5548,6 @@ extern char str_kT_POPUPCMNCheatDevice[];
 extern char str_kT_POPUP200Maintenance2[];
 extern char str_kT_POPUPCMNUnknownServerError[];
 
-struct sVEntry_1A9CC0 {
-    short delta;
-    short index;
-    void* (*fn)(void*, int);
-};
 
 struct sBXString1A9CC0 {
     char* str;
@@ -5830,7 +5717,7 @@ extern "C" void func_001A9CC0(cFEStateNet* self, void** popup, void* owner, onli
             const char* who = *(const char**)((char*)data + 0x10);
             char* obj = (char*)SSXApp->FELocale;
             const char* name = *(const char**)((char*)data + 0xC);
-            sVEntry_1A9CC0* vt = *(sVEntry_1A9CC0**)(obj + 4);
+            sVEntry<void*(void*, int)>* vt = *(sVEntry<void*(void*, int)>**)(obj + 4);
             void* text = vt[4].fn(vthis(obj, vt[4]), GetHashValue32(str_kT_POPUPCMNLocked));
             int len = USTR_length(text) + strlen(who) + strlen(name) + 7;
             if (self->unk_6B8 != 0) {
@@ -6119,13 +6006,8 @@ extern char str_TextMessageCount[];
 extern char str_pct_d_b[];
 extern char str_sp[];
 
-struct sSession1AAB68 {
-    char pad[0xBC];
-    void** mBegin;
-    void** mEnd;
-};
 
-static inline int Count1AAB68(sSession1AAB68* s) { return s->mEnd - s->mBegin; }
+static inline int Count1AAB68(BuddyMan* s) { return ((void**)s->mChallengersFinish) - ((void**)s->mChallengersStart); }
 
 static inline void* GetSession_001AAB68()
 {
@@ -6210,7 +6092,7 @@ extern "C" void func_001AAB68(cFEStateNet* self)
             (self)->mMessageHintFrame = now;
         }
     }
-    int has = Count1AAB68((sSession1AAB68*)GetSession_001AAB68()) != 0;
+    int has = Count1AAB68((BuddyMan*)GetSession_001AAB68()) != 0;
     if ((self)->mChallengeHintFrame != 0) {
         if (!has) {
             (self)->mChallengeHintFrame = 0;
@@ -8413,11 +8295,6 @@ extern char str_PersonaMenu[];
 extern char str_kT_POPUP220SelectingPersona[];
 extern char str_kT_POPUPCMNErrorEAMessenger[];
 
-struct sVE1ADA30 {
-    short delta;
-    short index;
-    void (*fn)(void*, cUIText*);
-};
 
 /**
  * Handles online events on the persona screen (cFEStateSelectPersona's vtable entry 31).
@@ -8470,7 +8347,7 @@ extern "C" int func_001ADA30(cFEStateSelectPersona* self, int msgId, int data)
         cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
     case 216:
         {
-            sVE1ADA30* vt = (sVE1ADA30*)self->mVtbl;
+            sVEntry<void(void*, cUIText*)>* vt = (sVEntry<void(void*, cUIText*)>*)self->mVtbl;
             vt[18].fn(vthis(self, vt[18]), cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_PersonaMenu)));
         }
         break;
@@ -8636,17 +8513,7 @@ extern int D_004A4E88_w[2] __asm__("D_004A4E88");
 extern char str_240challenge_popup[];
 extern char str_MenuChallenge[];
 
-struct sVE1ADE88 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
-struct sVE1ADE88i {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 /**
  * Creates the "240challenge_popup" screen and fills it from the current race setup.
@@ -8659,7 +8526,7 @@ struct sVE1ADE88i {
  */
 extern "C" void cFEStateChallengePopup_onCreateScreen(cFEStateChallengePopup* self)
 {
-    sVE1ADE88* vt = (sVE1ADE88*)self->mVtbl;
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
     vt[32].fn(vthis(self, vt[32]));
     void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_240challenge_popup), 0);
@@ -8668,7 +8535,7 @@ extern "C" void cFEStateChallengePopup_onCreateScreen(cFEStateChallengePopup* se
         cUIScreen_playFrame(screen, 0, 0);
         char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
         cBENewRaceInterface_setNumberAI(iface, D_004A4E88_w[1]);
-        sVE1ADE88i* ivt = *(sVE1ADE88i**)(iface + 0xC);
+        sVEntry<int(void*)>* ivt = *(sVEntry<int(void*)>**)(iface + 0xC);
         ivt[1].fn(vthis(iface, ivt[1]));
         func_001AF728(self, iface, self->mpScreen);
         func_001AF688(self);
@@ -9006,17 +8873,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
 extern "C" int cUIListBox_getCurrentEntryData(void* a);
 
-struct sVE1AE680 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
-struct sVE1AE680i {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 struct sOpts1AE680 {
     char pad[0x18];
@@ -9039,7 +8896,7 @@ extern "C" void func_001AE680(cFEStateChallengePopup* self)
     if (self->mpScreen != 0) {
         char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
         cBENetworkInterface_networkOpt.bIsRankedGame = cUIListBox_getCurrentEntryData(self->mpLBRankedGame) != 0;
-        sVE1AE680* vt = *(sVE1AE680**)(iface + 0xC);
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(iface + 0xC);
         vt[1].fn(vthis(iface, vt[1]));
         int multipliers = cUIListBox_getCurrentEntryData(self->mpLBMultipliers);
         sOpts1AE680* raceOptions = (sOpts1AE680*)((char*)&cBERules_mRules);
@@ -9048,7 +8905,7 @@ extern "C" void func_001AE680(cFEStateChallengePopup* self)
         raceOptions->b7 = cUIListBox_getCurrentEntryData(self->mpLBPointIcons);
         char* nr = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
         cBENewRaceInterface_setNumberAI(nr, cUIListBox_getCurrentEntryData(self->mpLBCPURiders));
-        sVE1AE680i* nvt = *(sVE1AE680i**)(nr + 0xC);
+        sVEntry<int(void*)>* nvt = *(sVEntry<int(void*)>**)(nr + 0xC);
         nvt[1].fn(vthis(nr, nvt[1]));
     }
 }
@@ -9264,11 +9121,6 @@ public:
     virtual void setStatic(int on);
 };
 
-struct sVE_001AEC60 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Locks or unlocks the challenge option widgets (vtable entry 8, setStatic) while a challenge is pending.
@@ -9298,12 +9150,12 @@ extern "C" void func_001AEC60(cFEStateChallengePopup* self, int on)
         widget->setStatic(on);
         if (on == 0) {
             {
-            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)widget + 8);
+            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)widget + 8);
             void (**pf)(void*, int) = &vt[8].fn;
             (*pf)(vthis(widget, vt[8]), (self->mpEventOptions)[0] == 0 || locked != 0);
         }
             {
-            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)((cFEVObj_001AEC60*)self->mpLBCPURiders) + 8);
+            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)((cFEVObj_001AEC60*)self->mpLBCPURiders) + 8);
             void (**pf)(void*, int) = &vt[8].fn;
             (*pf)((char*)((cFEVObj_001AEC60*)self->mpLBCPURiders) + vt[8].delta, (self->mpEventOptions)[0] == 0 || locked != 0);
         }
@@ -9315,12 +9167,12 @@ extern "C" void func_001AEC60(cFEStateChallengePopup* self, int on)
         ((cFEVObj_001AEC60*)self->mpLBPowerUps)->setStatic(on);
         if (on == 0) {
             {
-            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)((cFEVObj_001AEC60*)self->mpLBPowerUps) + 8);
+            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)((cFEVObj_001AEC60*)self->mpLBPowerUps) + 8);
             void (**pf)(void*, int) = &vt[8].fn;
             (*pf)((char*)((cFEVObj_001AEC60*)self->mpLBPowerUps) + vt[8].delta, (self->mpEventOptions)[1] == 0 || locked != 0);
         }
             {
-            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)widget + 8);
+            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)widget + 8);
             void (**pf)(void*, int) = &vt[8].fn;
             (*pf)(vthis(widget, vt[8]), (self->mpEventOptions)[1] == 0 || locked != 0);
         }
@@ -9332,12 +9184,12 @@ extern "C" void func_001AEC60(cFEStateChallengePopup* self, int on)
         ((cFEVObj_001AEC60*)self->mpLBMultipliers)->setStatic(on);
         if (on == 0) {
             {
-            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)((cFEVObj_001AEC60*)self->mpLBMultipliers) + 8);
+            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)((cFEVObj_001AEC60*)self->mpLBMultipliers) + 8);
             void (**pf)(void*, int) = &vt[8].fn;
             (*pf)((char*)((cFEVObj_001AEC60*)self->mpLBMultipliers) + vt[8].delta, (self->mpEventOptions)[3] == 0 || locked != 0);
         }
             {
-            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)widget + 8);
+            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)widget + 8);
             void (**pf)(void*, int) = &vt[8].fn;
             (*pf)(vthis(widget, vt[8]), (self->mpEventOptions)[3] == 0 || locked != 0);
         }
@@ -9349,12 +9201,12 @@ extern "C" void func_001AEC60(cFEStateChallengePopup* self, int on)
         ((cFEVObj_001AEC60*)self->mpLBPointIcons)->setStatic(on);
         if (on == 0) {
             {
-            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)((cFEVObj_001AEC60*)self->mpLBPointIcons) + 8);
+            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)((cFEVObj_001AEC60*)self->mpLBPointIcons) + 8);
             void (**pf)(void*, int) = &vt[8].fn;
             (*pf)((char*)((cFEVObj_001AEC60*)self->mpLBPointIcons) + vt[8].delta, (self->mpEventOptions)[2] == 0 || locked != 0);
         }
             {
-            sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)widget + 8);
+            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)widget + 8);
             void (**pf)(void*, int) = &vt[8].fn;
             (*pf)(vthis(widget, vt[8]), (self->mpEventOptions)[2] == 0 || locked != 0);
         }
@@ -9417,7 +9269,7 @@ extern "C" void func_001AF098(cFEStateChallengePopup* self, int all)
     }
     if (cBENewRaceInterface_newRace.cGameEvent != 0) {
         cBENewRaceInterface_setNumberAI(iface, 0);
-        sVE1ADE88i* ivt = *(sVE1ADE88i**)(iface + 0xC);
+        sVEntry<int(void*)>* ivt = *(sVEntry<int(void*)>**)(iface + 0xC);
         ivt[1].fn(vthis(iface, ivt[1]));
         cUIListBox_setCurrentEntryByIndex(self->mpLBCPURiders, 0);
     } else {
@@ -9671,17 +9523,7 @@ extern char str_kT_240WaitingChallenge[];
 extern char str_TextSubmit[];
 extern char str_MenuChallenge[];
 
-struct sVE_001AF568 {
-    short delta;
-    short index;
-    int (*fn)(void* self, int hash);
-};
 
-struct sVE_001AF568b {
-    short delta;
-    short index;
-    void (*fn)(void* self, int on);
-};
 
 /**
  * Marks the challenge as sent: sets mbChallengeSent, shows "waiting for <opponent>" and locks the options.
@@ -9698,12 +9540,12 @@ extern "C" void func_001AF568(cFEStateChallengePopup* self)
     if (text != 0) {
         char* name = LobbyMan_mLobbyMan->mOpponent;
         char* locale = (char*)SSXApp->FELocale;
-        sVE_001AF568* vt = *(sVE_001AF568**)(locale + 4);
+        sVEntry<int(void* self, int hash)>* vt = *(sVEntry<int(void* self, int hash)>**)(locale + 4);
         char* obj = locale + vt[4].delta;
         sprintf1(buf, vt[4].fn(obj, GetHashValue32(str_kT_240WaitingChallenge)), name);
         cUIText_setUnicodeString(text, buf);
         cUIText* submitText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextSubmit));
-        sVE_001AF568b* vt2 = (sVE_001AF568b*)submitText->mVtbl;
+        sVEntry<void(void* self, int on)>* vt2 = (sVEntry<void(void* self, int on)>*)submitText->mVtbl;
         vt2[8].fn(vthis(submitText, vt2[8]), 1);
         cUIMenu_setSelectedByIndex(cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_MenuChallenge)), 7);
         func_001AEC60(self, 1);
@@ -9939,11 +9781,6 @@ static inline int Loc1AFA60(char* name)
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
-struct sBXString1AFA60 {
-    char* str;
-    sBXString1AFA60() {}
-    sBXString1AFA60(const sBXString1AFA60& o);
-};
 
 
 /**
@@ -9960,15 +9797,15 @@ struct sBXString1AFA60 {
  */
 extern "C" void func_001AFA60(void* screen, online_FindPlayerEvent* msg)
 {
-    sBXString1AFA60 nameStr;
+    cBXString nameStr;
     char buf[0x100];
     tLobbyStats* st = (tLobbyStats*)(&msg->mStats);
     cBXString_cBXString1(&nameStr, &LobbyMan_mLobbyMan->mOpponent);
     (*(&LobbyMan_mLobbyMan->mOpponentStats)) = msg->mStats;
-    func_0025DD08(LobbyMan_mLobbyMan, nameStr.str, msg->mAddr);
+    func_0025DD08(LobbyMan_mLobbyMan, nameStr.Str, msg->mAddr);
     cUIText* uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_TextPlayerName));
     if (uiText != 0) {
-        cUIText_setAsciiString(uiText, nameStr.str);
+        cUIText_setAsciiString(uiText, nameStr.Str);
     }
     uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_TextPlayerRank));
     if (uiText != 0) {
@@ -10920,11 +10757,6 @@ static inline void* GetSession_001B0E10()
     return BuddyMan_mBuddyMan;
 }
 
-struct sVE1B0E10 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Declines (or withdraws from) the received challenge and tells the parent state the popup is done (event 20).
@@ -10945,7 +10777,7 @@ extern "C" void func_001B0E10(cFEStateChallengeReceivedPopup* self)
         func_00263018(GetSession_001B0E10(), LobbyMan_mLobbyMan->mOpponent);
     }
     char* obj = (char*)self->mpParentState;
-    sVE1B0E10* vt = *(sVE1B0E10**)(obj + 0x8);
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)(obj + 0x8);
     vt[17].fn(vthis(obj, vt[17]), self, 20);
 }
 #endif
@@ -12292,11 +12124,6 @@ extern char str_TextDisconnects[];
 extern char str_TextOverallRanking[];
 extern char str_kT_235OverallRanking[];
 
-struct sBXString_1B27B0 {
-    char* str;
-    sBXString_1B27B0() {}
-    sBXString_1B27B0(const sBXString_1B27B0& o);
-};
 
 struct sInfo_1B27B0 {
     int a;
@@ -12321,12 +12148,12 @@ struct sInfo_1B27B0 {
  */
 extern "C" void func_001B27B0(cFEStateChatRoom* vself, int idx)
 {
-    sBXString_1B27B0 playerName;
+    cBXString playerName;
     char buf[0x400];
     sInfo_1B27B0 info;
     int flag = 0;
     cBXString_cBXString2(&playerName, func_0025F1E0_p(LobbyMan_mLobbyMan, idx, &flag));
-    strcpy(vself->mszPlayerName, playerName.str);
+    strcpy(vself->mszPlayerName, playerName.Str);
     if (vself->mpScreen == 0) {
         cBXString__cBXString(&playerName, 2);
         return;
@@ -12348,8 +12175,8 @@ extern "C" void func_001B27B0(cFEStateChatRoom* vself, int idx)
                 selectText->setVisible(1);
             }
         }
-        if (valid && *(int*)(playerName.str - 8) > 0) {
-            cUIText_setAsciiString(title, playerName.str);
+        if (valid && *(int*)(playerName.Str - 8) > 0) {
+            cUIText_setAsciiString(title, playerName.Str);
         } else {
             cUIText_setAsciiString(title, str_sp);
         }
@@ -12426,9 +12253,6 @@ struct cBXString;
 extern "C" void* cBXString_Concat(void* self, const char* str);
 extern "C" cBXString* func_003189A0(cBXString* self, char** other);
 
-struct sBXString1B2CD0 {
-    char* str;
-};
 
 
 /**
@@ -12456,11 +12280,11 @@ extern "C" void func_001B2CD0(cFEStateChatRoom* self, int infov)
     int first = lineCount == 0;
     int pos = list->mSelectedIndex;
     int lineOffset = list->mLinesOffset;
-    sBXString1B2CD0 text;
+    cBXString text;
     cBXString_cBXString1(&text, info + 0x8);
     cBXString_Concat(&text, str_colon_sp);
     func_003189A0((cBXString*)&text, (char**)(info + 0xC));
-    cUITextScroll_addAsciiString(self->mpTextScrollChat, text.str);
+    cUITextScroll_addAsciiString(self->mpTextScrollChat, text.Str);
     func_001A83D8(self->mpTextScrollChat, 0x40, 6, lineCount, pos, lineOffset, first, 1);
     cBXString__cBXString(&text, 2);
 }
@@ -13288,9 +13112,6 @@ struct sCol1B3D20 {
     sCol1B3D20(const float& r_, const float& g_, const float& b_, const float& a_) : r(r_), g(g_), b(b_), a(a_) {}
 };
 
-struct sVec3_1B3D20 {
-    float x, y, z;
-};
 
 class cFEVObj_001B3D20 {
 public:
@@ -13364,7 +13185,7 @@ extern "C" void func_001B3D20(cFEStateNetConfig* self, int idx, int on)
     cUIThing_getAbsPosition(whiteBar, &pos);
     pos.r += 2.0f;
     pos.g += 3.0f;
-    *(sVec3_1B3D20*)((char*)hl + 0x44) = *(sVec3_1B3D20*)&pos;
+    *(t3Vector*)((char*)hl + 0x44) = *(t3Vector*)&pos;
     hl->setVisible(1);
     func_001B27B0((cFEStateChatRoom*)self, *(int*)((char*)sel + 0x18));
     sel->setColour(sCol1B3D20(1.0f, 1.0f, 1.0f, 1.0f));
@@ -13556,11 +13377,6 @@ void func_002C67E8(void* self, int a1);
 extern char* D_004A1B78_p __asm__("D_004A1B78");
 extern int D_004A1B80;
 
-struct sVEv1B41A8 {
-    short delta;
-    short index;
-    void (*fn)(void*, ...);
-};
 
 struct sVE1B41A8 {
     short delta;
@@ -13590,7 +13406,7 @@ extern "C" void cFEStateNetConfig_onUpdate(cFEStateNetConfig* self)
 {
     if (D_004A1B78_p != 0) {
         char* obj = D_004A1B78_p;
-        sVEv1B41A8* vt = *(sVEv1B41A8**)obj;
+        sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)obj;
         vt[3].fn(vthis(obj, vt[3]));
     }
     switch (self->miState) {
@@ -13625,7 +13441,7 @@ extern "C" void cFEStateNetConfig_onUpdate(cFEStateNetConfig* self)
     case 0:
         if (VCall1B41A8(11) == 0) {
             char* obj = D_004A1B78_p;
-            sVEv1B41A8* vt = *(sVEv1B41A8**)obj;
+            sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)obj;
             vt[5].fn(vthis(obj, vt[5]), D_004A1B80);
         }
         break;
@@ -13957,11 +13773,6 @@ extern "C" void sprintf1(void* str, int a1, char* buf);
 extern char str_pct_d_b[];
 extern char str_kT_MEMFECheckingCardPS2[];
 
-struct sVE_001B47C0 {
-    short delta;
-    short index;
-    int (*fn)(void* self, int hash);
-};
 
 /**
  * Shows the button-less "kT_MEMFECheckingCardPS2" popup for a memory-card slot (id 2111).
@@ -13977,7 +13788,7 @@ extern "C" void func_001B47C0(cFEStateNetConfig* self, int cardSlot)
     char* str = (char*)&self->mustrPopupText;
     usprintf(buf, str_pct_d_b, cardSlot);
     char* locale = (char*)SSXApp->FELocale;
-    sVE_001B47C0* vt = *(sVE_001B47C0**)(locale + 4);
+    sVEntry<int(void* self, int hash)>* vt = *(sVEntry<int(void* self, int hash)>**)(locale + 4);
     char* obj = locale + vt[4].delta;
     sprintf1(str, vt[4].fn(obj, GetHashValue32(str_kT_MEMFECheckingCardPS2)), buf);
     cScreenPopup* popup = (cScreenPopup*)func_001A9C50((cFEStateNet*)self);
@@ -14188,9 +13999,6 @@ struct sNetEntry_4CD8 { int f0; char name4[0x3E]; char name42[0xBE]; };
 extern sNetEntry_4CD8 cCommSystem_mNetConns[10];
 
 
-struct sVec4_001B4CD8 {
-    float x, y, z, w;
-};
 
 class cFEVObj_001B4CD8 {
 public:
@@ -14232,9 +14040,9 @@ extern "C" void func_001B4CD8(cFEStateNetConfig* self)
     char buf[64];
     unsigned short name[64];
     unsigned short line[64];
-    sVec4_001B4CD8 size;
+    tRect size;
     t3Vector scale;
-    sVec4_001B4CD8 pos;
+    tRect pos;
     func_00255F20(cCommSystem_mCommSystem, D_004A1B90[D_004A1B80]);
     self->miNumSettings = cCommSystem_mNumNetConn;
     if (self->miNumSettings > 4) {
@@ -14271,9 +14079,9 @@ extern "C" void func_001B4CD8(cFEStateNetConfig* self)
             int len;
             if (self->miNumSettings >= 2) {
                 len = sprintf(buf, str_pct_d_c, i + 1);
-                w = pos.x - cFont_textExtent(cUIListBox_getFont(self->mpLBSettings), buf, &size, 1, scale.x, scale.y);
+                w = pos.X - cFont_textExtent(cUIListBox_getFont(self->mpLBSettings), buf, &size, 1, scale.x, scale.y);
             } else {
-                w = pos.x;
+                w = pos.X;
                 len = 0;
                 buf[0] = 0;
             }
@@ -14833,11 +14641,6 @@ extern "C" int* func_002591B8();
 extern "C" void func_002636F0(void* p, int a1);
 extern const char str_cFEStateLogin[];
 
-struct sVE1B5A58 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Handles the account memory-card popup (id 2092) on the network-configuration screen: continue to login, or
@@ -14877,7 +14680,7 @@ extern "C" void func_001B5A58(cFEStateNetConfig* self, void* popup, int event)
         func_0025B800(LobbyMan_mLobbyMan);
         func_002636F0(func_002591B8(), 0);
         cUIThing* obj = self->mpPairSettings;
-        sVE1B5A58* vt = (sVE1B5A58*)obj->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)obj->mVtbl;
         vt[8].fn(vthis(obj, vt[8]), 0);
         break;
     }
@@ -15317,11 +15120,6 @@ extern void* cFEStateAuthDNAS_vtbl[];
 extern char str_kT_205Authenticating[];
 extern char str_cFEStateAuthDNAS[];
 
-struct sVE_001B6288 {
-    short delta;
-    short index;
-    void* (*fn)(void* self, int hash);
-};
 
 
 /**
@@ -15348,7 +15146,7 @@ extern "C" cFEStateAuthDNAS* cFEStateAuthDNAS_cFEStateAuthDNAS(cFEStateAuthDNAS*
     self->miState = 0;
     self->mpustrText = 0;
     char* locale = (char*)SSXApp->FELocale;
-    sVE_001B6288* vt = *(sVE_001B6288**)(locale + 4);
+    sVEntry<void*(void* self, int hash)>* vt = *(sVEntry<void*(void* self, int hash)>**)(locale + 4);
     int n = USTR_length(vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_205Authenticating)));
     if (self->mpustrText != 0) {
         cMemMan_free(self->mpustrText);
@@ -16289,17 +16087,6 @@ static inline int Loc1B70D0(char* name)
     return vt[4].fn(vthis(obj, vt[4]), GetHashValue32(name));
 }
 
-struct sFEState_001B70D0 {
-    char pad0[0x10];
-    char* f10;          // 0x10
-    char pad14[0x6D4 - 0x14];
-    int f6D4;           // 0x6D4
-    int f6D8;           // 0x6D8
-    int f6DC;           // 0x6DC
-    char pad6E0[0x702 - 0x6E0];
-    char text[0xB04 - 0x702]; // 0x702
-    int fB04;           // 0xB04
-};
 
 // PORT: the unit declares func_001B70D0 as returning void*; it returns nothing useful
 extern "C" void func_001B70D0_v(void* self, int state) __asm__("func_001B70D0");
@@ -16324,14 +16111,14 @@ extern "C" void func_001B70D0_v(void* self, int state) __asm__("func_001B70D0");
  */
 extern "C" void func_001B70D0_v(void* vself, int state)
 {
-    sFEState_001B70D0* self = (sFEState_001B70D0*)vself;
+    cFEStateNetAccountMem* self = (cFEStateNetAccountMem*)vself;
     char buf[0x20];
-    self->f6DC = state;
+    self->miState = state;
     int str = Loc1B70D0(str_kT_POPUPCMNEABigLogin);
     usprintf(buf, str_pct_d_b, 1);
     switch ((unsigned int)state) {
     case 1: {
-        char* text = self->text;
+        char* text = ((char*)&self->mustrText[0]);
         func_00265D08(SharedLoginMan);
         func_00265DF0(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMFECheckingCardPS2), buf);
@@ -16339,7 +16126,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         break;
     }
     case 6: {
-        char* text = self->text;
+        char* text = ((char*)&self->mustrText[0]);
         func_00265D08(SharedLoginMan);
         func_00265DF0(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMFECheckingCardPS2), buf);
@@ -16347,9 +16134,9 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         break;
     }
     case 7: {
-        char* text = self->text;
-        self->f6D8 = 0;
-        self->fB04 = 0;
+        char* text = ((char*)&self->mustrText[0]);
+        self->unk_6D8 = 0;
+        self->mbCardBusy = 0;
         func_00265D08(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMOVOverWriteFile), str);
         int yesId = GetHashValue32(str_kT_CMNYes);
@@ -16359,19 +16146,19 @@ extern "C" void func_001B70D0_v(void* vself, int state)
     }
     case 8: {
         func_001B7778_v(self);
-        self->fB04 = 1;
-        if (self->f6D8 != 0) {
+        self->mbCardBusy = 1;
+        if (self->unk_6D8 != 0) {
             func_001B70D0_v(self, 9);
             break;
         }
-        char* text = self->text;
+        char* text = ((char*)&self->mustrText[0]);
         func_00265E00(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMOVSaveSavingPS2NGC), buf);
         func_001B7650((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, (int)text);
         break;
     }
     case 12: {
-        char* text = self->text;
+        char* text = ((char*)&self->mustrText[0]);
         func_00265D08(SharedLoginMan);
         func_00265DF0(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMFECheckingCardPS2), buf);
@@ -16379,9 +16166,9 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         break;
     }
     case 13: {
-        char* text = self->text;
-        self->fB04 = 0;
-        self->f6D8 = 0;
+        char* text = ((char*)&self->mustrText[0]);
+        self->mbCardBusy = 0;
+        self->unk_6D8 = 0;
         func_00265D08(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMFormatCardPS2), buf);
         int yesId = GetHashValue32(str_kT_CMNYes);
@@ -16390,22 +16177,22 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         break;
     }
     case 14: {
-        self->fB04 = 1;
-        char* text = self->text;
+        self->mbCardBusy = 1;
+        char* text = ((char*)&self->mustrText[0]);
         func_00265E30(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMFormattingPS2), buf);
         func_001B7650((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, (int)text);
         break;
     }
     case 16: {
-        self->fB04 = 0;
+        self->mbCardBusy = 0;
         if (func_00265A38(SharedLoginMan) < 17) {
-            self->f6D4 = 3;
+            self->miError = 3;
             func_001B70D0_v(self, 17);
             break;
         }
-        self->fB04 = 1;
-        char* text = self->text;
+        self->mbCardBusy = 1;
+        char* text = ((char*)&self->mustrText[0]);
         func_001B7778_v(self);
         func_00265E10(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMOVSaveSavingPS2NGC), buf);
@@ -16416,12 +16203,12 @@ extern "C" void func_001B70D0_v(void* vself, int state)
     case 5:
     case 11:
     case 19:
-        self->f6D8 = 0;
+        self->unk_6D8 = 0;
     case 2:
-        self->fB04 = 0;
+        self->mbCardBusy = 0;
         break;
     case 20: {
-        char* text = self->text;
+        char* text = ((char*)&self->mustrText[0]);
         func_00265D08(SharedLoginMan);
         func_00265DF0(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMFECheckingCardPS2), buf);
@@ -16429,9 +16216,9 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         break;
     }
     case 21: {
-        char* text = self->text;
-        self->fB04 = 0;
-        self->f6D8 = 0;
+        char* text = ((char*)&self->mustrText[0]);
+        self->mbCardBusy = 0;
+        self->unk_6D8 = 0;
         func_00265D08(SharedLoginMan);
         strcpy1(text, Loc1B70D0(str_kT_POPUPTITLEDeleteAccount));
         int yesId = GetHashValue32(str_kT_CMNYes);
@@ -16440,12 +16227,12 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         break;
     }
     case 22: {
-        self->fB04 = 1;
-        if (self->f6D8 != 0) {
+        self->mbCardBusy = 1;
+        if (self->unk_6D8 != 0) {
             func_001B70D0_v(self, 23);
             break;
         }
-        char* text = self->text;
+        char* text = ((char*)&self->mustrText[0]);
         func_00265E20(SharedLoginMan);
         strcpy1(text, Loc1B70D0(str_kT_MEMDeletingPS2));
         func_001B7650((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, (int)text);
@@ -16457,12 +16244,12 @@ extern "C" void func_001B70D0_v(void* vself, int state)
     case 9:
     case 15:
     case 17:
-        func_001B7E40((char*)self, self->f6D4);
+        func_001B7E40((char*)self, self->miError);
         break;
     case 25: {
-        char* text = self->text;
-        self->fB04 = 0;
-        self->f6D8 = 0;
+        char* text = ((char*)&self->mustrText[0]);
+        self->mbCardBusy = 0;
+        self->unk_6D8 = 0;
         func_00265D08(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMOVDamagedDataPS2), buf);
         int yesId = GetHashValue32(str_kT_CMNYes);
@@ -16471,20 +16258,20 @@ extern "C" void func_001B70D0_v(void* vself, int state)
         break;
     }
     case 26: {
-        self->fB04 = 1;
-        if (self->f6D8 != 0) {
+        self->mbCardBusy = 1;
+        if (self->unk_6D8 != 0) {
             func_001B70D0_v(self, 0x1C);
             break;
         }
-        char* text = self->text;
+        char* text = ((char*)&self->mustrText[0]);
         func_00265E20(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMOVSaveSavingPS2NGC), buf);
         func_001B7650((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, (int)text);
         break;
     }
     case 27: {
-        self->fB04 = 1;
-        char* text = self->text;
+        self->mbCardBusy = 1;
+        char* text = ((char*)&self->mustrText[0]);
         func_001B7778_v(self);
         func_00265E10(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMOVSaveSavingPS2NGC), buf);
@@ -16496,10 +16283,10 @@ extern "C" void func_001B70D0_v(void* vself, int state)
     case 18:
     case 24:
     case 29:
-        cUIStateStack_pop(self->f10 + 0x18, 1);
+        cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
         break;
     case 28:
-        func_001B7E40((char*)self, self->f6D4);
+        func_001B7E40((char*)self, self->miError);
         break;
     }
 }
@@ -17034,16 +16821,8 @@ static inline bool IsMode_001B7E40(int m)
     return *SharedLoginMan == m;
 }
 
-struct sFEState_001B7E40 {
-    char pad0[0x6D8];
-    int f6D8;           // 0x6D8
-    int f6DC;           // 0x6DC
-    char pad6E0[0x702 - 0x6E0];
-    char text[0xB04 - 0x702]; // 0x702
-    int fB04;           // 0xB04
-};
 
-extern "C" void func_001B7E40_s(sFEState_001B7E40* self, unsigned int mode) __asm__("func_001B7E40");
+extern "C" void func_001B7E40_s(cFEStateNetAccountMem* self, unsigned int mode) __asm__("func_001B7E40");
 
 /**
  * Shows the result popup of a failed account memory-card step, chosen by the card error.
@@ -17058,7 +16837,7 @@ extern "C" void func_001B7E40_s(sFEState_001B7E40* self, unsigned int mode) __as
  *
  * @param mode  the card error (miError)
  */
-extern "C" void func_001B7E40_s(sFEState_001B7E40* self, unsigned int mode)
+extern "C" void func_001B7E40_s(cFEStateNetAccountMem* self, unsigned int mode)
 {
     char buf[0x20];
     char* cur = 0;
@@ -17068,9 +16847,9 @@ extern "C" void func_001B7E40_s(sFEState_001B7E40* self, unsigned int mode)
     usprintf_v(buf, str_pct_d_b, 1);
     switch (mode) {
     case 2:
-        if (self->fB04 == 0) {
+        if (self->mbCardBusy == 0) {
             if (func_00265CB0(SharedLoginMan)) {
-                sprintf1_v(self->text, Loc_B7E40(str_kT_MEMOVNotFormattedPS2), buf);
+                sprintf1_v(((char*)&self->mustrText[0]), Loc_B7E40(str_kT_MEMOVNotFormattedPS2), buf);
             } else {
                 func_001B8238_7E40((char*)self);
             }
@@ -17080,27 +16859,27 @@ extern "C" void func_001B7E40_s(sFEState_001B7E40* self, unsigned int mode)
         flag = 0;
         firstOption = GetHashValue32(str_kT_MEMOVRetry);
         secondOption = GetHashValue32(str_kT_CMNContinue);
-        cur = self->text;
+        cur = ((char*)&self->mustrText[0]);
         break;
     case 3:
-        sprintf1_v(self->text, Loc_B7E40(str_kT_MEMOnlineTooBigPS2), buf, 17);
+        sprintf1_v(((char*)&self->mustrText[0]), Loc_B7E40(str_kT_MEMOnlineTooBigPS2), buf, 17);
         flag = 0;
         firstOption = GetHashValue32(str_kT_MEMOVRetry);
         secondOption = GetHashValue32(str_kT_CMNContinue);
-        cur = self->text;
+        cur = ((char*)&self->mustrText[0]);
         break;
     case 5:
-        if (self->f6DC == 3) {
+        if (self->miState == 3) {
             flag = 0;
             int loginText = Loc_B7E40(str_kT_POPUPCMNEABigLogin);
             int corruptFormat = Loc_B7E40(str_kT_MEMOnlineCorruptPS2);
-            sprintf1_v(self->text, corruptFormat, loginText, buf);
+            sprintf1_v(((char*)&self->mustrText[0]), corruptFormat, loginText, buf);
         } else {
             func_001B83C0_7E40((char*)self);
         }
         firstOption = GetHashValue32(str_kT_MEMOVRetry);
         secondOption = GetHashValue32(str_kT_CMNContinue);
-        cur = self->text;
+        cur = ((char*)&self->mustrText[0]);
         break;
     case 1:
     case 4:
@@ -17126,31 +16905,31 @@ extern "C" void func_001B7E40_s(sFEState_001B7E40* self, unsigned int mode)
         func_001B83C0_7E40((char*)self);
         firstOption = GetHashValue32(str_kT_MEMOVRetry);
         secondOption = GetHashValue32(str_kT_CMNContinue);
-        cur = self->text;
+        cur = ((char*)&self->mustrText[0]);
         break;
     case 0:
         if (IsMode_001B7E40(22)) {
             if (func_00265D68(SharedLoginMan)) {
-                sprintf1_v(self->text, Loc_B7E40(str_kT_MEMOVNotDetectedPS2), buf);
+                sprintf1_v(((char*)&self->mustrText[0]), Loc_B7E40(str_kT_MEMOVNotDetectedPS2), buf);
             } else {
-                sprintf1_v(self->text, Loc_B7E40(str_kT_MEMFEFormatFailed), buf);
+                sprintf1_v(((char*)&self->mustrText[0]), Loc_B7E40(str_kT_MEMFEFormatFailed), buf);
             }
             firstOption = GetHashValue32(str_kT_MEMOVRetry);
             secondOption = GetHashValue32(str_kT_CMNContinue);
-            cur = self->text;
+            cur = ((char*)&self->mustrText[0]);
         }
         break;
     }
-    if (flag && self->f6D8 != 0) {
-        sprintf1_v(self->text, Loc_B7E40(str_kT_POPUPCMNCardRemoved), buf);
+    if (flag && self->unk_6D8 != 0) {
+        sprintf1_v(((char*)&self->mustrText[0]), Loc_B7E40(str_kT_POPUPCMNCardRemoved), buf);
         firstOption = GetHashValue32(str_kT_MEMOVRetry);
         secondOption = GetHashValue32(str_kT_CMNContinue);
-        cur = self->text;
+        cur = ((char*)&self->mustrText[0]);
     }
     int popupId = -1;
     if (secondOption == 0)
         popupId = 0;
-    if (self->f6DC == 23) {
+    if (self->miState == 23) {
         secondOption = 0;
         firstOption = GetHashValue32(str_kT_CMNContinue);
     }
@@ -17813,11 +17592,6 @@ static inline int NameHash1B8C38(char* w)
     return *(int*)(w + 0x38);
 }
 
-struct sVE_001B8C38 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Handles account creation step 1's widget events: the text-entry keyboards, the yes/no boxes, continue and back.
@@ -17897,7 +17671,7 @@ extern "C" void cFEStateCreateStep1_onWidgetEvent(cFEStateCreateStep1* self, cha
         func_001B9820(self);
         cUIText* staticContinue = self->mpStaticContinue;
         if (((char*)staticContinue) != 0) {
-            sVE_001B8C38* vt = (sVE_001B8C38*)staticContinue->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)staticContinue->mVtbl;
             vt[8].fn(vthis(staticContinue, vt[8]), !func_001B9558(self));
         }
         break;
@@ -18385,9 +18159,6 @@ struct sVec2_1B9950 {
     sVec2_1B9950(float x_, float y_) : x(x_), y(y_) {}
 };
 
-struct sRect1B9950 {
-    float x, y, w, h;
-};
 
 class cFEVObj_001B9950 {
 public:
@@ -18412,10 +18183,10 @@ public:
     virtual void v17();
     virtual void v18();
     virtual void v19();
-    virtual void getSize(sRect1B9950* out);
+    virtual void getSize(tRect* out);
 };
 
-static inline void Measure1B9950(cUIText* text, const char* s, sRect1B9950* out)
+static inline void Measure1B9950(cUIText* text, const char* s, tRect* out)
 {
     cFont* f = (cFont*)cUIText_getFont(text);
     cFont_textExtent(f, s, out, 0, f->Scale[0], f->Scale[1]);
@@ -18435,7 +18206,7 @@ extern "C" void func_001B9950(cFEStateCreateStep1* self, cUIText* text, char* st
 {
     int cut = 0;
     t3Vector scale = *(&text->mScale);
-    sRect1B9950 box;
+    tRect box;
     ((cFEVObj_001B9950*)text)->getSize(&box);
     cFont* font = (cFont*)cUIText_getFont(text);
     float sx = scale.x;
@@ -18446,11 +18217,11 @@ extern "C" void func_001B9950(cFEStateCreateStep1* self, cUIText* text, char* st
     char buf[80];
     strcpy(buf, str);
     const char* ell = str_dot_dot_dot;
-    sRect1B9950 sz;
-    sRect1B9950 dots;
+    tRect sz;
+    tRect dots;
     Measure1B9950(text, ell, &dots);
     Measure1B9950(text, buf, &sz);
-    while (box.x - dots.w < sz.w) {
+    while (box.X - dots.W < sz.W) {
         cut = 1;
         buf[i--] = 0;
         Measure1B9950(text, buf, &sz);
@@ -18467,9 +18238,6 @@ extern "C" void func_001B9950(cFEStateCreateStep1* self, cUIText* text, char* st
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B9B18);
 #ifdef SKIP_ASM
-struct sObj1B9B18 {
-    char data[0xD0];
-};
 
 int GetHashValue32(char* str);
 extern "C" void func_001A9BC0(cFEStateNet* self, cScreenPopup* popup);
@@ -18496,7 +18264,7 @@ extern char str_kT_BTNOK[];
 extern "C" int func_001B9B18(cFEStateCreateStep1* self)
 {
     int ok = 1;
-    sObj1B9B18 popupInfo;
+    cPopupInfo popupInfo;
     cPopupInfo_cPopupInfo((cPopupInfo*)(&popupInfo));
     int len = strlen((const char*)self->mpAccount->mMail);
     if (len == 0) {
@@ -18570,9 +18338,6 @@ extern "C" int func_001B9CD8(cFEStateCreateStep1* self, const char* str)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B9D68);
 #ifdef SKIP_ASM
-struct sObj1B9D68 {
-    char data[0xD0];
-};
 
 int GetHashValue32(char* str);
 extern "C" void func_001A9BC0(cFEStateNet* self, cScreenPopup* popup);
@@ -18602,7 +18367,7 @@ extern char str_kT_BTNOK[];
 extern "C" int func_001B9D68(cFEStateCreateStep1* self)
 {
     int ok = 1;
-    sObj1B9D68 popupInfo;
+    cPopupInfo popupInfo;
     cPopupInfo_cPopupInfo((cPopupInfo*)(&popupInfo));
     int len = strlen(*(const char**)self->mpAccount);
     if (len == 0) {
@@ -18687,9 +18452,6 @@ extern "C" int func_001B9F68(cFEStateCreateStep1* self, signed char val, signed 
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001B9FA0);
 #ifdef SKIP_ASM
-struct sObj1B9FA0 {
-    char data[0xD0];
-};
 
 int GetHashValue32(char* str);
 extern "C" void func_001A9BC0(cFEStateNet* self, cScreenPopup* popup);
@@ -18717,7 +18479,7 @@ extern char str_kT_BTNOK[];
 extern "C" int func_001B9FA0(cFEStateCreateStep1* self)
 {
     int ok = 1;
-    sObj1B9FA0 popupInfo;
+    cPopupInfo popupInfo;
     cPopupInfo_cPopupInfo((cPopupInfo*)(&popupInfo));
     unsigned int len = strlen((const char*)self->mpAccount->mPassword);
     if (len == 0) {
@@ -20157,9 +19919,6 @@ extern "C" int func_001BBAC8_impl(void* self, int code)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001BBC40);
 #ifdef SKIP_ASM
-struct sObj1BBC40 {
-    char data[0xD0];
-};
 
 int GetHashValue32(char* str);
 extern "C" void func_001A9BC0(cFEStateNet* self, cScreenPopup* popup);
@@ -20182,7 +19941,7 @@ extern "C" int func_001BBC40_r(void* self) __asm__("func_001BBC40");
  */
 extern "C" int func_001BBC40_r(void* self)
 {
-    sObj1BBC40 popupInfo;
+    cPopupInfo popupInfo;
     cPopupInfo_cPopupInfo((cPopupInfo*)(&popupInfo));
     if (*(int*)((char*)*(void**)((char*)self + 0x6D0) + 0x40) == 0) {
         cScreenPopup* popup = (cScreenPopup*)func_001A9C50((cFEStateNet*)self);
@@ -21703,11 +21462,6 @@ extern char str_kT_POPUP231RoomPassword[];
 extern char str_kT_POPUP231EnterPassword[];
 extern char str_kT_BTNCancel[];
 
-struct sVEntry_001BD8C8 {
-    short delta;
-    short index;
-    int (*fn)(void*, int);
-};
 
 /**
  * Handles the lobby's refusal to let the player into a room.
@@ -21742,7 +21496,7 @@ extern "C" void func_001BD8C8(cFEStateLobbyMenu* self, int msgPtr)
             char* buf = (char*)&self->mustrPopupText;
             char* name = self->mszRoomName;
             char* obj = (char*)SSXApp->FELocale;
-            sVEntry_001BD8C8* vt = *(sVEntry_001BD8C8**)(obj + 4);
+            sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)(obj + 4);
             sprintf1(buf, vt[4].fn(vthis(obj, vt[4]), GetHashValue32(str_kT_POPUP231RoomPassword)), name);
             cScreenPopup* popup = (cScreenPopup*)func_001A9C50((cFEStateNet*)self);
             popup->info.mtMessage.pustr = (const unsigned short*)buf;
@@ -22337,11 +22091,6 @@ public:
     virtual void setVisible(int on);
 };
 
-struct sVE_001BE3A8 {
-    short delta;
-    short index;
-    int (*fn)(void* self, int hash);
-};
 
 struct sFE_001BE3A8 {
     char pad0[0x704];
@@ -22392,7 +22141,7 @@ extern "C" void func_001BE3A8(cFEStateLobbyMenu* feStateLobbyMenu, int id)
     } else {
         char buf[80];
         char* feLocale = (char*)SSXApp->FELocale;
-        sVE_001BE3A8* vt = *(sVE_001BE3A8**)(feLocale + 4);
+        sVEntry<int(void* self, int hash)>* vt = *(sVEntry<int(void* self, int hash)>**)(feLocale + 4);
         char* obj = feLocale + vt[4].delta;
         sprintf1(buf, vt[4].fn(obj, GetHashValue32(str_kT_231PlayersInRoom)), 0);
         cUIText_setUnicodeString(self->text, buf);
@@ -24915,11 +24664,6 @@ extern char str_kT_233AbortingQuickmatch[];
 extern char str_kT_BTNCancel[];
 
 
-struct sVE_001C1560 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 class cFEVObj_001C1560 {
 public:
@@ -24980,7 +24724,7 @@ extern "C" void cFEStateNetQuickPlayPopup_onWidgetEvent(cFEStateNetQuickPlayPopu
                 func_001C13E0(self, 0);
                 char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
                 cBENetworkInterface_networkOpt.bIsRankedGame = cUIListBox_getCurrentEntryData(self->mpLBRanked) != 0;
-                sVE_001C1560* vt = *(sVE_001C1560**)(iface + 0xC);
+                sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(iface + 0xC);
                 vt[1].fn(vthis(iface, vt[1]));
                 cBENewRaceInterface_setNumberAI(cBE_getInterface_Fv(SSXApp->BE, 0), 0);
                 feStateNetQuickPlayPopup->miSearchOptions[0] = cUIListBox_getCurrentEntryData(self->mpLBRanked);
@@ -25405,11 +25149,6 @@ extern char str_cFEStateOnlineAgreement[];
 extern const char str_FEOptions[];
 
 
-struct sTextVE_1C1EA8 {
-    short delta;
-    short index;
-    void (*fn)(void*, tARGB*);
-};
 
 /**
  * Handles the SSX World hub: opens news, quick messages, the agreement or options, and goes back.
@@ -25458,7 +25197,7 @@ extern "C" void cFEStateNetSSXWorld_onWidgetEvent(cFEStateNet* self, cUIThing* m
         break;
     case 1: {
         tARGB color;
-        sTextVE_1C1EA8* vt = (sTextVE_1C1EA8*)msg->mVtbl;
+        sVEntry<void(void*, tARGB*)>* vt = (sVEntry<void(void*, tARGB*)>*)msg->mVtbl;
         char* obj = ((char*)msg) + vt[11].delta;
         color.A = 1.0f;
         color.R = 1.0f;
@@ -25469,7 +25208,7 @@ extern "C" void cFEStateNetSSXWorld_onWidgetEvent(cFEStateNet* self, cUIThing* m
     }
     case 2: {
         tARGB color;
-        sTextVE_1C1EA8* vt = (sTextVE_1C1EA8*)msg->mVtbl;
+        sVEntry<void(void*, tARGB*)>* vt = (sVEntry<void(void*, tARGB*)>*)msg->mVtbl;
         char* obj = ((char*)msg) + vt[11].delta;
         color.A = 1.0f;
         color.R = 0.0f;
@@ -25744,17 +25483,7 @@ extern "C" void USTR_strcpyW(char* dst, void* src);
 extern "C" void func_001C2578(cFEStateNetQuickMessages* self, void* text, char* str);
 extern char str_Qpct_d[];
 
-struct sBXString1C2468 {
-    char* str;
-    sBXString1C2468() {}
-    sBXString1C2468(const sBXString1C2468& o);
-};
 
-struct sVE_001C2468 {
-    short delta;
-    short index;
-    void* (*fn)(void* self, int hash);
-};
 
 /**
  * Writes quick message @p idx into its row as "Q<idx+1>" followed by the message.
@@ -25769,7 +25498,7 @@ struct sVE_001C2468 {
 extern "C" void func_001C2468(cFEStateNetQuickMessages* self, int idx)
 {
     char buf[16];
-    sBXString1C2468 label;
+    cBXString label;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 4);
     sprintf(buf, str_Qpct_d, idx + 1);
     cBXString_cBXString2(&label, buf);
@@ -25777,7 +25506,7 @@ extern "C" void func_001C2468(cFEStateNetQuickMessages* self, int idx)
     if (msg == 0) {
         char wideText[0x40];
         char* locale = (char*)SSXApp->FELocale;
-        sVE_001C2468* vt = *(sVE_001C2468**)(locale + 4);
+        sVEntry<void*(void* self, int hash)>* vt = *(sVEntry<void*(void* self, int hash)>**)(locale + 4);
         char* obj = locale + vt[4].delta;
         void* str = vt[4].fn(obj, cBEOptionInterface_getDefaultQuickKeyMessageHashValue(iface, idx));
         USTR_strcpyW(wideText, str);
@@ -25785,7 +25514,7 @@ extern "C" void func_001C2468(cFEStateNetQuickMessages* self, int idx)
     } else {
         cBXString_Concat(&label, msg);
     }
-    func_001C2578(self, (void*)self->mpMessage[idx], label.str);
+    func_001C2578(self, (void*)self->mpMessage[idx], label.Str);
     cBXString__cBXString(&label, 2);
 }
 #endif
@@ -25808,9 +25537,6 @@ struct sVec2_1C2578 {
     sVec2_1C2578(float x_, float y_) : x(x_), y(y_) {}
 };
 
-struct sRect1C2578 {
-    float x, y, w, h;
-};
 
 class cFEVObj_001C2578 {
 public:
@@ -25835,10 +25561,10 @@ public:
     virtual void v17();
     virtual void v18();
     virtual void v19();
-    virtual void getSize(sRect1C2578* out);
+    virtual void getSize(tRect* out);
 };
 
-static inline void Measure1C2578(cUIText* text, const char* s, sRect1C2578* out)
+static inline void Measure1C2578(cUIText* text, const char* s, tRect* out)
 {
     cFont* f = (cFont*)cUIText_getFont(text);
     cFont_textExtent(f, s, out, 0, f->Scale[0], f->Scale[1]);
@@ -25861,7 +25587,7 @@ extern "C" void func_001C2578(cFEStateNetQuickMessages* self, void* vtext, char*
     cUIText* text = (cUIText*)vtext;
     int cut = 0;
     t3Vector scale = *(&text->mScale);
-    sRect1C2578 box;
+    tRect box;
     ((cFEVObj_001C2578*)text)->getSize(&box);
     cFont* font = (cFont*)cUIText_getFont(text);
     float sx = scale.x;
@@ -25872,11 +25598,11 @@ extern "C" void func_001C2578(cFEStateNetQuickMessages* self, void* vtext, char*
     char buf[80];
     strcpy(buf, str);
     const char* ell = str_dot_dot_dot;
-    sRect1C2578 sz;
-    sRect1C2578 dots;
+    tRect sz;
+    tRect dots;
     Measure1C2578(text, ell, &dots);
     Measure1C2578(text, buf, &sz);
-    while (box.x - dots.w < sz.w) {
+    while (box.X - dots.W < sz.W) {
         cut = 1;
         buf[i--] = 0;
         Measure1C2578(text, buf, &sz);
@@ -26024,11 +25750,6 @@ extern char str_kT_POPUP206EmptyMessages[];
 extern char str_kT_BTNOK[];
 extern char D_00535617[];
 
-struct sVE1C2A18 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 /**
  * Stores the quick message the player just typed into the slot being edited.
@@ -26061,7 +25782,7 @@ extern "C" void func_001C2A18(cFEStateNetQuickMessages* self)
             strcpy(D_00535617 + (idx << 6), src);
         }
         self->mbChanged = 1;
-        sVE1C2A18* vt = *(sVE1C2A18**)(iface + 0xC);
+        sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)(iface + 0xC);
         vt[1].fn(vthis(iface, vt[1]));
         func_001C2468(self, idx);
     }
@@ -26846,11 +26567,6 @@ extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern char str_sliderbox[];
 extern char str_slider[];
 
-struct sVec3_001C3D68 {
-    float x;
-    float y;
-    float z;
-};
 
 struct cUIObj_001C3D68 {
     int f0;
@@ -26877,9 +26593,9 @@ struct cUIObj_001C3D68 {
     virtual void getSize(void* out);
 };
 
-static inline sVec3_001C3D68 GetPos_001C3D68(cUIObj_001C3D68* o)
+static inline t3Vector GetPos_001C3D68(cUIObj_001C3D68* o)
 {
-    return *(sVec3_001C3D68*)((char*)o + 0x44);
+    return *(t3Vector*)((char*)o + 0x44);
 }
 
 /**
@@ -26903,15 +26619,15 @@ extern "C" void func_001C3D68(cFEStateStats* self, int pos, int count)
     cUIObj_001C3D68* thumb = (cUIObj_001C3D68*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_slider));
     if (thumb == 0) return;
     if (track == 0) return;
-    sVec3_001C3D68 size;
+    t3Vector size;
     track->getSize(&size);
-    sVec3_001C3D68 trackPos = *(sVec3_001C3D68*)((char*)track + 0x44);
+    t3Vector trackPos = *(t3Vector*)((char*)track + 0x44);
     float fpos = (float)pos;
     if (count >= 2) count--;
     float step = (size.y + -17.0f) / (float)count;
-    sVec3_001C3D68 np = *(sVec3_001C3D68*)((char*)thumb + 0x44);
+    t3Vector np = *(t3Vector*)((char*)thumb + 0x44);
     np.y = trackPos.y + fpos * step + 20.0f;
-    *(sVec3_001C3D68*)((char*)thumb + 0x44) = np;
+    *(t3Vector*)((char*)thumb + 0x44) = np;
     thumb->setVisible(1);
     track->setVisible(1);
 }
@@ -27445,15 +27161,10 @@ INCLUDE_ASM("fe/feasyncfile", func_001C4D28);
 #ifdef SKIP_ASM
 extern char gUISoundNull;
 
-struct sVE1C4D28 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 static inline void Show1C4D28(char* o, int on)
 {
-    sVE1C4D28* vt = *(sVE1C4D28**)(o + 0x8);
+    sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(o + 0x8);
     vt[7].fn(vthis(o, vt[7]), on);
 }
 
@@ -27471,7 +27182,7 @@ extern "C" void func_001C4D28(cFEStateStats* self)
     char* snd = (char*)self->mpEngine->mpSound;
     if (snd == 0) snd = &gUISoundNull;
     if (snd != 0) {
-        sVE1C4D28* vt = *(sVE1C4D28**)snd;
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)snd;
         vt[2].fn(vthis(snd, vt[2]), 1);
     }
     if (self->miFocusMenu != 3) {
@@ -27500,15 +27211,10 @@ INCLUDE_ASM("fe/feasyncfile", func_001C4E40);
 #ifdef SKIP_ASM
 extern char gUISoundNull;
 
-struct sVE1C4E40 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 static inline void Show1C4E40(char* o, int on)
 {
-    sVE1C4E40* vt = *(sVE1C4E40**)(o + 0x8);
+    sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(o + 0x8);
     vt[7].fn(vthis(o, vt[7]), on);
 }
 
@@ -27523,7 +27229,7 @@ extern "C" void func_001C4E40(cFEStateStats* self)
     char* snd = (char*)self->mpEngine->mpSound;
     if (snd == 0) snd = &gUISoundNull;
     if (snd != 0) {
-        sVE1C4E40* vt = *(sVE1C4E40**)snd;
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)snd;
         vt[2].fn(vthis(snd, vt[2]), 1);
     }
     if (self->miFocusMenu != 3) {
@@ -27872,11 +27578,6 @@ extern "C" void cUITextScroll_addAsciiString(cUITextScroll* text, char* str);
 extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
 extern char str_TextScroll_News[];
 
-struct sBXString1C5430 {
-    char* str;
-    sBXString1C5430() {}
-    sBXString1C5430(const sBXString1C5430& o);
-};
 
 /**
  * Handles net events for the server-news screen: 226 (news text arrived) adds the text to "TextScroll_News".
@@ -27895,19 +27596,19 @@ extern "C" void* func_001C5430(cFEStateNet* self, int msg, int data)
     if (msg == 226) {
         cUITextScroll* text = (cUITextScroll*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextScroll_News));
         if (text != 0) {
-            sBXString1C5430 newsStr;
+            cBXString newsStr;
             cBXString_cBXString1(&newsStr, (char*)data + 8);
             int pos;
             while ((pos = cBXString_find((cBXString*)&newsStr, '\n', 0)) != -1) {
                 int next = pos + 1;
-                if (newsStr.str[next] == '\n') {
+                if (newsStr.Str[next] == '\n') {
                     cBXString_setAt((cBXString*)&newsStr, pos, '\r');
                     cBXString_setAt((cBXString*)&newsStr, next, '\r');
                 } else {
                     cBXString_setAt((cBXString*)&newsStr, pos, ' ');
                 }
             }
-            cUITextScroll_addAsciiString(text, newsStr.str);
+            cUITextScroll_addAsciiString(text, newsStr.Str);
             cBXString__cBXString(&newsStr, 2);
             return 0;
         }

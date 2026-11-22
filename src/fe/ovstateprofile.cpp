@@ -825,22 +825,13 @@ struct sVEntryK211BC8 {
     void* (*fn)(void*, ...);
 };
 
-struct sVEntryVK211BC8 {
-    short delta;
-    short index;
-    void (*fn)(void*, ...);
-};
 
-#define VCALLV_K211BC8(obj, off, idx) (*(sVEntryVK211BC8**)((char*)(obj) + (off)))[idx].fn((char*)(obj) + (*(sVEntryVK211BC8**)((char*)(obj) + (off)))[idx].delta
+#define VCALLV_K211BC8(obj, off, idx) (*(sVEntry<void(void*, ...)>**)((char*)(obj) + (off)))[idx].fn((char*)(obj) + (*(sVEntry<void(void*, ...)>**)((char*)(obj) + (off)))[idx].delta
 
 #define VCALL_K211BC8(obj, off, idx) (*(sVEntryK211BC8**)((char*)(obj) + (off)))[idx].fn((char*)(obj) + (*(sVEntryK211BC8**)((char*)(obj) + (off)))[idx].delta
 
 
 
-struct sMgrK211BC8 {
-    char pad0[0xF8];
-    int fF8;                 // 0xF8
-};
 
 static inline void* GetText_K211BC8(char* key)
 {
@@ -906,7 +897,7 @@ extern "C" void cOVState_PROFILE_onWidgetEvent(cOVState_PROFILE* vself, cUIThing
         if (self->mIsProcessing != 0) break;
         char* mp = (char*)cSSXApp_getMCManager(SSXApp);
         if (self->mScreenStatus != 3) break;
-        ((sMgrK211BC8*)mp)->fF8 = self->mSlot = item->mMiscData;
+        ((cMCOverlayManager*)mp)->mFileCursor = self->mSlot = item->mMiscData;
         if (self->mState == 1) {
             if (((char*)self->mpKeyboard) == 0) {
                 char* kb = (char*)cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(1092, str_Keyboard_b, 0x100, 0), ((void*)self->mpEngine), vself, 0, self->mCtrlBits);
@@ -955,7 +946,7 @@ extern "C" void cOVState_PROFILE_onWidgetEvent(cOVState_PROFILE* vself, cUIThing
         if (self->mIsProcessing != 1 && self->mState != 6) {
             char* mp = (char*)cSSXApp_getMCManager(SSXApp);
             if (VCALL_K211BC8(*(char**)(mp + 1076), 0, 54), *(int*)(mp + 0x428)) != 0) {
-                ((sMgrK211BC8*)mp)->fF8 = self->mSlot = item->mMiscData;
+                ((cMCOverlayManager*)mp)->mFileCursor = self->mSlot = item->mMiscData;
                 if (self->mState == 1) {
                     if (VCALL_K211BC8(*(char**)(mp + 1076), 0, 67), self->mSlot) != 0) {
                         self->mIsProcessing = 1;
@@ -1130,11 +1121,6 @@ int cOVState_AUTOSAVE_onInputBegin(void* self)
 //100%
 INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_displayStatus);
 #ifdef SKIP_ASM
-struct sVEntry002122E8 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 
 int GetHashValue32(char* str);
@@ -1155,7 +1141,7 @@ extern "C" void cOVState_AUTOSAVE_displayStatus(cOVState_AUTOSAVE* self)
         cOVState_AUTOSAVE_displayOn(self);
     } else {
         cUIThing* autosaveText = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_autosave_text));
-        ((sVEntry002122E8*)autosaveText->mVtbl)[9].fn(vthis(autosaveText, ((sVEntry002122E8*)autosaveText->mVtbl)[9]), 0);
+        ((sVEntry<void(void*, int)>*)autosaveText->mVtbl)[9].fn(vthis(autosaveText, ((sVEntry<void(void*, int)>*)autosaveText->mVtbl)[9]), 0);
     }
 }
 #endif

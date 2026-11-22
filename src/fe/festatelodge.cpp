@@ -151,11 +151,6 @@ extern char str_cFEStateProfileLoad_b[];
 extern char str_TransitionOut_b[];
 
 
-struct sVE_1F3A38p {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
 
 /**
  * Acts on an accepted lodge option: asks to save or quit, opens the profile state, or moves on.
@@ -211,7 +206,7 @@ extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, cUIThing* w, in
     }
     cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b)), 1);
     char* obj = *(char**)self->mpEngine;
-    sVE_1F3A38p* vt = *(sVE_1F3A38p**)(obj + 4);
+    sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
     void* nextState = vt[4].fn(vthis(obj, vt[4]), ((char*)self), w->mMiscData);
     if (nextState != 0) {
         cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
