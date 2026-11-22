@@ -9446,7 +9446,7 @@ INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_setPitch);
  * @param fparg0  the new pitch (radians)
  */
 extern "C" void cBasicCameraAlgorithm_setPitch(cBasicCameraAlgorithm* basicCameraAlgorithm, float fparg0) {
-    (basicCameraAlgorithm->Pitch) = fparg0;
+    basicCameraAlgorithm->Pitch = fparg0;
 }
 #endif
 //100%
@@ -9459,7 +9459,7 @@ INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_setHeading);
  * @param fparg0  the new heading (radians)
  */
 extern "C" void cBasicCameraAlgorithm_setHeading(cBasicCameraAlgorithm* basicCameraAlgorithm, float fparg0) {
-    (basicCameraAlgorithm->Heading) = fparg0;
+    basicCameraAlgorithm->Heading = fparg0;
 }
 #endif
 //100%
@@ -9623,7 +9623,7 @@ INCLUDE_ASM("camera/camera", cCameraAlgorithm_setAlgorithmType);
  * @param algoType  the new type (an eCamAlgoType)
  */
 extern "C" void cCameraAlgorithm_setAlgorithmType(cCameraAlgorithm* cameraAlgorithm, int algoType) {
-    (cameraAlgorithm->AlgorithmType) = algoType;
+    cameraAlgorithm->AlgorithmType = algoType;
 }
 #endif
 //100%
@@ -9981,7 +9981,7 @@ INCLUDE_ASM("camera/camera", cSimpleCamera_setMaxFar);
  * @param fparg0  the new limit
  */
 extern "C" void cSimpleCamera_setMaxFar(cSimpleCamera* simpleCamera, float fparg0) {
-    (simpleCamera->MaxFar) = fparg0;
+    simpleCamera->MaxFar = fparg0;
 }
 #endif
 //100%
@@ -9994,7 +9994,7 @@ INCLUDE_ASM("camera/camera", cSimpleCamera_setMinNear);
  * @param fparg0  the new limit
  */
 extern "C" void cSimpleCamera_setMinNear(cSimpleCamera* simpleCamera, float fparg0) {
-    (simpleCamera->MinNear) = fparg0;
+    simpleCamera->MinNear = fparg0;
 }
 #endif
 //100%
@@ -10007,7 +10007,7 @@ INCLUDE_ASM("camera/camera", cSimpleCamera_setMaxFOV);
  * @param fparg0  the new limit (radians)
  */
 extern "C" void cSimpleCamera_setMaxFOV(cSimpleCamera* simpleCamera, float fparg0) {
-    (simpleCamera->MaxView) = fparg0;
+    simpleCamera->MaxView = fparg0;
 }
 #endif
 //100%

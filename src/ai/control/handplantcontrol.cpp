@@ -5608,7 +5608,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setLocal);
  * @param isLocal  the new value
  */
 extern "C" void cRider_setLocal(cRider* rider, int isLocal) {
-    (rider->mIsLocal) = isLocal;
+    rider->mIsLocal = isLocal;
 }
 #endif
 //100%
@@ -6147,7 +6147,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setTotalPathDistance);
  * @param fparg0  the distance
  */
 extern "C" void cRider_setTotalPathDistance(cRider* rider, float fparg0) {
-    (rider->TotalPathDistance) = fparg0;
+    rider->TotalPathDistance = fparg0;
 }
 #endif
 //100%
@@ -6160,7 +6160,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setPreviousRanking);
  * @param value  the ranking
  */
 extern "C" void cRider_setPreviousRanking(cRider* rider, int value) {
-    (rider->PrevRanking) = value;
+    rider->PrevRanking = value;
 }
 #endif
 //100%
@@ -6185,7 +6185,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setRaceUnfinished);
  * @param rider  the cRider
  */
 extern "C" void cRider_setRaceUnfinished(cRider* rider) {
-    (rider->mFinishTime) = -1.0f;
+    rider->mFinishTime = -1.0f;
 }
 #endif
 //100%
@@ -6198,7 +6198,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setFinishedRace);
  */
 extern "C" void cRider_setFinishedRace(cRider* rider) {
     if ((rider->mFinishTime) < 0.0f) {
-        (rider->mFinishTime) = 0.0f;
+        rider->mFinishTime = 0.0f;
     }
 }
 #endif
@@ -6250,7 +6250,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setStartTick);
  * @param startTick  the tick
  */
 extern "C" void cRider_setStartTick(cRider* rider, int startTick) {
-    (rider->mStartTick) = startTick;
+    rider->mStartTick = startTick;
 }
 #endif
 //100%
@@ -6276,7 +6276,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setFinishTick);
  * @param finishTick  the tick
  */
 extern "C" void cRider_setFinishTick(cRider* rider, int finishTick) {
-    (rider->mFinishTick) = finishTick;
+    rider->mFinishTick = finishTick;
 }
 #endif
 //100%
@@ -6302,7 +6302,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setPenaltyTicks);
  * @param penaltyTicks  the penalty
  */
 extern "C" void cRider_setPenaltyTicks(cRider* rider, int penaltyTicks) {
-    (rider->mPenaltyTicks) = penaltyTicks;
+    rider->mPenaltyTicks = penaltyTicks;
 }
 #endif
 //100%
@@ -6328,7 +6328,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setDidNotFinish);
  * @param didNotFinish  the new value
  */
 extern "C" void cRider_setDidNotFinish(cRider* rider, int didNotFinish) {
-    (rider->mDidNotFinish) = didNotFinish;
+    rider->mDidNotFinish = didNotFinish;
 }
 #endif
 //100%
@@ -6370,7 +6370,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setAIIndex);
  * @param aiIndex  the index
  */
 extern "C" void cRider_setAIIndex(cRider* rider, int aiIndex) {
-    (rider->mAIIndex) = aiIndex;
+    rider->mAIIndex = aiIndex;
 }
 #endif
 //100%
@@ -6396,7 +6396,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setViewIndex);
  * @param viewIndex  the index
  */
 extern "C" void cRider_setViewIndex(cRider* rider, int viewIndex) {
-    (rider->mViewIndex) = viewIndex;
+    rider->mViewIndex = viewIndex;
 }
 #endif
 //100%
@@ -6408,7 +6408,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setHuman);
  * @param rider  the cRider
  */
 extern "C" void cRider_setHuman(cRider* rider) {
-    (rider->mIsHuman) = 1;
+    rider->mIsHuman = 1;
 }
 #endif
 //100%
@@ -6420,7 +6420,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setActor);
  * @param rider  the cRider
  */
 extern "C" void cRider_setActor(cRider* rider) {
-    (rider->mIsActor) = 1;
+    rider->mIsActor = 1;
 }
 #endif
 
@@ -6508,8 +6508,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setRenderFlag);
  * @param renderFlag  the new value
  */
 extern "C" void cRider_setRenderFlag(cRider* rider, int renderFlag) {
-    (rider->mRenderFlag) = renderFlag;
-    (rider->mSafeRenderTick) = -1;
+    rider->mRenderFlag = renderFlag;
+    rider->mSafeRenderTick = -1;
 }
 #endif
 //100%
@@ -6535,7 +6535,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setSafeRenderTick);
  * @param safeRenderTick  the tick
  */
 extern "C" void cRider_setSafeRenderTick(cRider* rider, int safeRenderTick) {
-    (rider->mSafeRenderTick) = safeRenderTick;
+    rider->mSafeRenderTick = safeRenderTick;
 }
 #endif
 //100%
@@ -6561,7 +6561,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setInTunnel);
  * @param value  nonzero when in a tunnel
  */
 extern "C" void cRider_setInTunnel(cRider* rider, int value) {
-    (rider->InTunnel) = value;
+    rider->InTunnel = value;
 }
 #endif
 //100%
@@ -6613,7 +6613,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_SetWipeoutSlideHandle);
  * @param slideHandle  the sound handle
  */
 extern "C" void cRider_SetWipeoutSlideHandle(cRider* rider, int slideHandle) {
-    (rider->mWipeoutSlideHandle) = slideHandle;
+    rider->mWipeoutSlideHandle = slideHandle;
 }
 #endif
 //100%
@@ -6639,7 +6639,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_SetWipeoutTumbleHandle);
  * @param tumbleHandle  the sound handle
  */
 extern "C" void cRider_SetWipeoutTumbleHandle(cRider* rider, int tumbleHandle) {
-    (rider->mWipeoutTumbleHandle) = tumbleHandle;
+    rider->mWipeoutTumbleHandle = tumbleHandle;
 }
 #endif
 
@@ -6824,7 +6824,7 @@ extern "C" void cRider_initBoost();
  * @param boostMode  the mode, 0-3
  */
 extern "C" void cRider_setBoostMode(cRider* rider, int boostMode) {
-    (rider->mBoostMode) = boostMode;
+    rider->mBoostMode = boostMode;
     cRider_initBoost();
 }
 #endif
@@ -6838,7 +6838,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setWipeoutRecoveryMode);
  * @param value  the new value
  */
 extern "C" void cRider_setWipeoutRecoveryMode(cRider* rider, int value) {
-    (rider->mWipeoutRecoveryMode) = value;
+    rider->mWipeoutRecoveryMode = value;
 }
 #endif
 //100%
@@ -6851,7 +6851,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setInitialBoost);
  * @param fparg0  the starting boost
  */
 extern "C" void cRider_setInitialBoost(cRider* rider, float fparg0) {
-    (rider->mBoostMeterStart) = fparg0;
+    rider->mBoostMeterStart = fparg0;
 }
 #endif
 //100%
@@ -6864,7 +6864,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setBoostPowerSource);
  * @param sourceMask  the boost source flags
  */
 extern "C" void cRider_setBoostPowerSource(cRider* rider, int sourceMask) {
-    (rider->mBoostSourceMask) = sourceMask;
+    rider->mBoostSourceMask = sourceMask;
 }
 #endif
 //100%
@@ -6877,7 +6877,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setLaunchDelaySecs);
  * @param handicap  the new value
  */
 extern "C" void cRider_setLaunchDelaySecs(cRider* rider, int handicap) {
-    (rider->mStartHandicap) = handicap;
+    rider->mStartHandicap = handicap;
 }
 #endif
 //100%
@@ -6890,7 +6890,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setForcedAttribLevel);
  * @param statsIndex  the stat column
  */
 extern "C" void cRider_setForcedAttribLevel(cRider* rider, int statsIndex) {
-    (rider->mStatsIndex) = statsIndex;
+    rider->mStatsIndex = statsIndex;
 }
 #endif
 //100%
@@ -6902,7 +6902,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setNaturalAirMode);
  * On Tour's cRider::setNaturalAirMode.
  */
 extern "C" void cRider_setNaturalAirMode(cRider* rider, int value) {
-    (rider->mAllowNaturalAir) = value;
+    rider->mAllowNaturalAir = value;
 }
 #endif
 //100%
@@ -8012,7 +8012,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_setComputerRidersActive);
  * @param active  the new value
  */
 extern "C" void cAI_setComputerRidersActive(cAI* aiMan, int active) {
-    (aiMan->ComputerRidersActive) = active;
+    aiMan->ComputerRidersActive = active;
 }
 #endif
 //100%
@@ -8025,7 +8025,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_setComputerActorsActive);
  * @param active  the new value
  */
 extern "C" void cAI_setComputerActorsActive(cAI* aiMan, int active) {
-    (aiMan->ComputerActorsActive) = active;
+    aiMan->ComputerActorsActive = active;
 }
 #endif
 //100%
@@ -8064,7 +8064,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_setAITick);
  * @param tick  the tick
  */
 extern "C" void cAI_setAITick(cAI* aiMan, int tick) {
-    (aiMan->AITick) = tick;
+    aiMan->AITick = tick;
 }
 #endif
 //100%
@@ -8089,7 +8089,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_incrementEventTimerTick);
  * @param aiMan  the cAI
  */
 extern "C" void cAI_incrementEventTimerTick(cAI* aiMan) {
-    (aiMan->EventTimerTick) = (int) ((aiMan->EventTimerTick) + 1);
+    aiMan->EventTimerTick = (int) ((aiMan->EventTimerTick) + 1);
 }
 #endif
 //100%
@@ -8102,7 +8102,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_setEventTimerTick);
  * @param tick  the tick
  */
 extern "C" void cAI_setEventTimerTick(cAI* aiMan, int tick) {
-    (aiMan->EventTimerTick) = tick;
+    aiMan->EventTimerTick = tick;
 }
 #endif
 //100%
@@ -8154,7 +8154,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_setCountdownTicksLeft);
  * @param ticksLeft  the ticks
  */
 extern "C" void cAI_setCountdownTicksLeft(cAI* aiMan, int ticksLeft) {
-    (aiMan->CountdownTicksLeft) = ticksLeft;
+    aiMan->CountdownTicksLeft = ticksLeft;
 }
 #endif
 //100%

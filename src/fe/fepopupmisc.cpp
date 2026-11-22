@@ -658,7 +658,7 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
  */
 extern "C" void *cFEStateOnlineMainMenu_cFEStateOnlineMainMenu1(cFEStateNet* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
-    (self->mVtbl) = cFEStateOnlineMainMenu_vtbl;
+    self->mVtbl = cFEStateOnlineMainMenu_vtbl;
     return ((void*)self);
 }
 #endif
@@ -712,8 +712,8 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
  */
 extern "C" void *cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup1(cFEStateNetQuickPlayPopup* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
-    (self->mbSearching) = 0;
-    (self->mVtbl) = cFEStateNetQuickPlayPopup_vtbl;
+    self->mbSearching = 0;
+    self->mVtbl = cFEStateNetQuickPlayPopup_vtbl;
     return ((void*)self);
 }
 #endif
@@ -767,7 +767,7 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
  */
 extern "C" void *cFEStateNetSSXWorld_cFEStateNetSSXWorld1(cFEStateNet* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
-    (self->mVtbl) = cFEStateNetSSXWorld_vtbl;
+    self->mVtbl = cFEStateNetSSXWorld_vtbl;
     return ((void*)self);
 }
 #endif
@@ -807,7 +807,7 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
  */
 extern "C" void *cFEStateNetQuickMessages_cFEStateNetQuickMessages1(cFEStateNetQuickMessages* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
-    (self->mVtbl) = cFEStateNetQuickMessages_vtbl;
+    self->mVtbl = cFEStateNetQuickMessages_vtbl;
     return ((void*)self);
 }
 #endif
@@ -1111,7 +1111,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetHelpPopup_setReferEventsToParent);
  * @param value  nonzero to forward events to the parent
  */
 extern "C" void cFEStateNetHelpPopup_setReferEventsToParent(cFEStateNetHelpPopup* helpPopup, int value) {
-    (helpPopup->mbReferEventsToParent) = value;
+    helpPopup->mbReferEventsToParent = value;
 }
 #endif
 //100%
@@ -1173,7 +1173,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateCharEquip_setCanSwitchEquipMode);
  * @param value  nonzero to allow switching
  */
 extern "C" void cFEStateCharEquip_setCanSwitchEquipMode(cFEStateCharEquip* charEquip, int value) {
-    (charEquip->mCanSwitchMode) = value;
+    charEquip->mCanSwitchMode = value;
 }
 #endif
 //100%
@@ -2280,7 +2280,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateVideoPlayer_setInterruptible);
  * @param value  nonzero to let input stop the movie
  */
 extern "C" void cFEStateVideoPlayer_setInterruptible(cFEStateVideoPlayer* videoPlayer, int value) {
-    (videoPlayer->mInterruptible) = value;
+    videoPlayer->mInterruptible = value;
 }
 #endif
 //100%
@@ -2295,7 +2295,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateVideoPlayer_setFullScreen);
  * @param value  nonzero for full screen
  */
 extern "C" void cFEStateVideoPlayer_setFullScreen(cFEStateVideoPlayer* videoPlayer, int value) {
-    (videoPlayer->mOptions.bFullScreen) = value;
+    videoPlayer->mOptions.bFullScreen = value;
 }
 #endif
 //100%
@@ -2310,7 +2310,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateVideoPlayer_setSound);
  * @param value  nonzero to play the movie's sound
  */
 extern "C" void cFEStateVideoPlayer_setSound(cFEStateVideoPlayer* videoPlayer, int value) {
-    (videoPlayer->mOptions.bSoundOn) = value;
+    videoPlayer->mOptions.bSoundOn = value;
 }
 #endif
 //100%
@@ -3337,7 +3337,7 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
  */
 extern "C" void *cFEStateSelectPersona_cFEStateSelectPersona1(cFEStateSelectPersona* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
-    (self->mVtbl) = cFEStateSelectPersona_vtbl;
+    self->mVtbl = cFEStateSelectPersona_vtbl;
     return ((void*)self);
 }
 #endif
@@ -3533,8 +3533,8 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
  */
 extern "C" void *cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect1(cFEStateOnlineCharacterSelect* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
-    (self->mbConfirmed) = 0;
-    (self->mVtbl) = cFEStateOnlineCharacterSelect_vtbl;
+    self->mbConfirmed = 0;
+    self->mVtbl = cFEStateOnlineCharacterSelect_vtbl;
     return ((void*)self);
 }
 #endif
@@ -3895,7 +3895,7 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
  */
 extern "C" void *cFEStateCreateStep2_cFEStateCreateStep21(cFEStateCreateStep2* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
-    (self->mVtbl) = cFEStateCreateStep2_vtbl;
+    self->mVtbl = cFEStateCreateStep2_vtbl;
     return ((void*)self);
 }
 #endif
@@ -3951,7 +3951,7 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
  */
 extern "C" void *cFEStateCreateDuplicate_cFEStateCreateDuplicate1(cFEStateCreateDuplicate* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
-    (self->mVtbl) = cFEStateCreateDuplicate_vtbl;
+    self->mVtbl = cFEStateCreateDuplicate_vtbl;
     return ((void*)self);
 }
 #endif

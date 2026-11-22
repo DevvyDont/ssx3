@@ -2027,11 +2027,11 @@ INCLUDE_ASM("seg/seg_1218", cFocusMan_addbox);
 extern "C" void cFocusMan_addbox(cFocusMan* focusMan, cFocusBox *focusBox) {
     t4Vector boxCopy;
 
-    (focusMan->LastUpdateTick) = -1;
+    focusMan->LastUpdateTick = -1;
     focusMan->Boxes[focusMan->NumBoxes].Box = focusBox;
     boxCopy = focusBox->Position;
     focusMan->Boxes[focusMan->NumBoxes].LastUpdatePos = boxCopy;
-    (focusMan->NumBoxes) = (int) ((focusMan->NumBoxes) + 1);
+    focusMan->NumBoxes = (int) ((focusMan->NumBoxes) + 1);
 }
 #endif
 

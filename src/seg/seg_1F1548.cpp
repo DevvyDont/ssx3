@@ -421,7 +421,7 @@ INCLUDE_ASM("seg/seg_1F1548", cPunchFX_reset);
  * constructor calls it as a reset.
  */
 extern "C" void cPunchFX_reset(cPunchFX* self) {
-    (self->mActive) = 0;
+    self->mActive = 0;
 }
 #endif
 
@@ -1901,7 +1901,7 @@ INCLUDE_ASM("seg/seg_1F1548", tCrystal_tCrystal);
  * @return the crystal
  */
 extern "C" void *tCrystal_tCrystal(tCrystal* crystal) {
-    (crystal->mActive) = 0;
+    crystal->mActive = 0;
     return ((void*)crystal);
 }
 #endif

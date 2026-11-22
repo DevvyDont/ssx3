@@ -4710,7 +4710,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_SetLoop);
  * @param loopScript  non-zero to loop
  */
 extern "C" void cScriptPlayerMain_SetLoop(cScriptPlayerMain* scriptPlayerMain, int loopScript) {
-    (scriptPlayerMain->mLoopScript) = loopScript;
+    scriptPlayerMain->mLoopScript = loopScript;
 }
 #endif
 //100%
@@ -4756,8 +4756,8 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_GoToFrame);
  * @param frameNum  the frame to jump to
  */
 extern "C" void cScriptPlayerMain_GoToFrame(cScriptPlayerMain* scriptPlayerMain, int frameNum) {
-    (scriptPlayerMain->mJumpFrame) = frameNum;
-    (scriptPlayerMain->mNumSteps) = 0;
+    scriptPlayerMain->mJumpFrame = frameNum;
+    scriptPlayerMain->mNumSteps = 0;
 }
 #endif
 //100%
@@ -4769,7 +4769,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerMain_StepNextFrame);
  * @param scriptPlayerMain  the script player
  */
 extern "C" void cScriptPlayerMain_StepNextFrame(cScriptPlayerMain* scriptPlayerMain) {
-    (scriptPlayerMain->mNumSteps) = (int) ((scriptPlayerMain->mNumSteps) + 1);
+    scriptPlayerMain->mNumSteps = (int) ((scriptPlayerMain->mNumSteps) + 1);
 }
 #endif
 

@@ -722,7 +722,7 @@ INCLUDE_ASM("seg/seg_1D3510", cMenuItem_setID);
  * @param itemId  the new ID
  */
 extern "C" void cMenuItem_setID(cMenuItem* menuItem, int itemId) {
-    (menuItem->ID) = itemId;
+    menuItem->ID = itemId;
 }
 #endif
 
@@ -1362,8 +1362,8 @@ INCLUDE_ASM("seg/seg_1D3510", cFloatMenuItem_setMinMax);
  * @param fparg1  the maximum
  */
 extern "C" void cFloatMenuItem_setMinMax(cFloatMenuItem* menuItem, float fparg0, float fparg1) {
-    (menuItem->Min) = fparg0;
-    (menuItem->Max) = fparg1;
+    menuItem->Min = fparg0;
+    menuItem->Max = fparg1;
 }
 #endif
 
@@ -1393,8 +1393,8 @@ INCLUDE_ASM("seg/seg_1D3510", cFloatMenuItem_setValueScale);
  * @param fparg1  the offset
  */
 extern "C" void cFloatMenuItem_setValueScale(cFloatMenuItem* menuItem, float fparg0, float fparg1) {
-    (menuItem->ValueScale) = fparg0;
-    (menuItem->ValueOffset) = fparg1;
+    menuItem->ValueScale = fparg0;
+    menuItem->ValueOffset = fparg1;
 }
 #endif
 
@@ -1469,8 +1469,8 @@ INCLUDE_ASM("seg/seg_1D3510", cAngleMenuItem_setMinMax);
  * @param fparg1  the maximum
  */
 extern "C" void cAngleMenuItem_setMinMax(cAngleMenuItem* menuItem, float fparg0, float fparg1) {
-    (menuItem->Min) = fparg0;
-    (menuItem->Max) = fparg1;
+    menuItem->Min = fparg0;
+    menuItem->Max = fparg1;
 }
 #endif
 

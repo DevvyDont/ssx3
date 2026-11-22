@@ -12709,7 +12709,7 @@ INCLUDE_ASM("sound/soundsys", func_002A4A68);
  * @return 1
  */
 extern "C" int func_002A4A68(cSSXAudio* ssxAudio) {
-    (ssxAudio->unk_5818) = 0;
+    ssxAudio->unk_5818 = 0;
     return 1;
 }
 #endif

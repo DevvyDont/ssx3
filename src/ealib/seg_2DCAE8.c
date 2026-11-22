@@ -2916,7 +2916,7 @@ void finishrequest(REQUESTSTRUCTtag* req) {
     int waitFlag;
 
     MUTEX_lock_F028(hlafile_mutex_F028);
-    (req->fop) = 0;
+    req->fop = 0;
     cancelFlag = (req->cancelflag);
     callback = ((int (*)(int))req->callback);
     waitFlag = (req->releaseflag);

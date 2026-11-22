@@ -2148,7 +2148,7 @@ INCLUDE_ASM("visualfx/worldlightman", cLensFxMan_SetNumViews);
  * @param numViews  the number of views
  */
 extern "C" void cLensFxMan_SetNumViews(cLensFxMan* lensMan, int numViews) {
-    (lensMan->mNumViews) = numViews;
+    lensMan->mNumViews = numViews;
 }
 #endif
 //100%
@@ -2164,7 +2164,7 @@ INCLUDE_ASM("visualfx/worldlightman", cLensFxMan_Lock);
  * @param locked  the flag
  */
 extern "C" void cLensFxMan_Lock(cLensFxMan* lensMan, int locked) {
-    (lensMan->mbLocked) = locked;
+    lensMan->mbLocked = locked;
 }
 #endif
 

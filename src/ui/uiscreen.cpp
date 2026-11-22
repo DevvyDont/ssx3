@@ -1778,10 +1778,10 @@ INCLUDE_ASM("ui/uiscreen", cUIState_setCtrlBitsByCtrlIndex);
  */
 extern "C" void cUIState_setCtrlBitsByCtrlIndex(cUIState* uiState, signed char bit) {
     if (bit < 0) {
-        (uiState->mCtrlBits) = 0xFFU;
+        uiState->mCtrlBits = 0xFFU;
         return;
     }
-    (uiState->mCtrlBits) = (unsigned char) ((uiState->mCtrlBits) | ((int) (0x01000000 << bit) >> 0x18));
+    uiState->mCtrlBits = (unsigned char) ((uiState->mCtrlBits) | ((int) (0x01000000 << bit) >> 0x18));
 }
 #endif
 //100%

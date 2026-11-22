@@ -1708,7 +1708,7 @@ INCLUDE_ASM("main/all_in_one_main", cUILocaleInterface_setLanguage);
  * @param language  the language index
  */
 extern "C" void cUILocaleInterface_setLanguage(cFELocale* self, signed char language) {
-    (self->mLanguage) = language;
+    self->mLanguage = language;
 }
 #endif
 
@@ -2530,7 +2530,7 @@ INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_setIncludeNumbers);
  * @param includeNumbers  the new value
  */
 extern "C" void cScreenKeyboard_setIncludeNumbers(cScreenKeyboard* screen, int includeNumbers) {
-    (screen->mIncludeNumbers) = includeNumbers;
+    screen->mIncludeNumbers = includeNumbers;
 }
 #endif
 
@@ -2544,7 +2544,7 @@ INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_setIncludeShift);
  * @param includeShift  the new value
  */
 extern "C" void cScreenKeyboard_setIncludeShift(cScreenKeyboard* screen, int includeShift) {
-    (screen->mIncludeShift) = includeShift;
+    screen->mIncludeShift = includeShift;
 }
 #endif
 
@@ -2558,7 +2558,7 @@ INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_setIncludeSpace);
  * @param includeSpace  the new value
  */
 extern "C" void cScreenKeyboard_setIncludeSpace(cScreenKeyboard* screen, int includeSpace) {
-    (screen->mIncludeSpace) = includeSpace;
+    screen->mIncludeSpace = includeSpace;
 }
 #endif
 
@@ -2578,7 +2578,7 @@ extern "C" void cScreenKeyboard_cursorRight(cScreenKeyboard* screen) {
 
     temp_3 = (screen->mCursorPos) + 1;
     if (temp_3 < (screen->mMaxChars)) {
-        (screen->mCursorPos) = temp_3;
+        screen->mCursorPos = temp_3;
     }
 }
 #endif
@@ -2598,7 +2598,7 @@ extern "C" void cScreenKeyboard_cursorLeft(cScreenKeyboard* screen) {
 
     temp_2 = (screen->mCursorPos);
     if (temp_2 > 0) {
-        (screen->mCursorPos) = (int) (temp_2 - 1);
+        screen->mCursorPos = (int) (temp_2 - 1);
     }
 }
 #endif
@@ -2907,7 +2907,7 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setMiscData);
  * @param miscData  the value to report back
  */
 extern "C" void cPopupInfo_setMiscData(cPopupInfo* popupInfo, int miscData) {
-    (popupInfo->miMiscData) = miscData;
+    popupInfo->miMiscData = miscData;
 }
 #endif
 
@@ -2935,7 +2935,7 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPassUpdate);
  * @param passUpdate  non-zero to keep updating the parent state
  */
 extern "C" void cPopupInfo_setPassUpdate(cPopupInfo* popupInfo, int passUpdate) {
-    (popupInfo->mbPassUpdate) = passUpdate;
+    popupInfo->mbPassUpdate = passUpdate;
 }
 #endif
 
@@ -2994,7 +2994,7 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setDefaultOption);
  * @param defaultOption  the option index (clear() sets -1)
  */
 extern "C" void cPopupInfo_setDefaultOption(cPopupInfo* popupInfo, int defaultOption) {
-    (popupInfo->miDefaultOption) = defaultOption;
+    popupInfo->miDefaultOption = defaultOption;
 }
 #endif
 
@@ -3022,7 +3022,7 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setReceivePrevCommand);
  * @param receivePrev  non-zero to receive the back command (clear() sets 1)
  */
 extern "C" void cPopupInfo_setReceivePrevCommand(cPopupInfo* popupInfo, int receivePrev) {
-    (popupInfo->mbReceivePrev) = receivePrev;
+    popupInfo->mbReceivePrev = receivePrev;
 }
 #endif
 
@@ -3050,7 +3050,7 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setLayerOffset);
  * @param layerOffset  the layer offset
  */
 extern "C" void cPopupInfo_setLayerOffset(cPopupInfo* popupInfo, int layerOffset) {
-    (popupInfo->miLayerOffset) = layerOffset;
+    popupInfo->miLayerOffset = layerOffset;
 }
 #endif
 
@@ -3078,7 +3078,7 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setBackgroundType);
  * @param backgroundType  the background (0 online, 1 blue, 2 black)
  */
 extern "C" void cPopupInfo_setBackgroundType(cPopupInfo* popupInfo, int backgroundType) {
-    (popupInfo->meBackgroundType) = backgroundType;
+    popupInfo->meBackgroundType = backgroundType;
 }
 #endif
 
@@ -3106,7 +3106,7 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setMaxCharacters);
  * @param maxChars  the character limit
  */
 extern "C" void cPopupInfo_setMaxCharacters(cPopupInfo* popupInfo, int maxChars) {
-    (popupInfo->miMaxChars) = maxChars;
+    popupInfo->miMaxChars = maxChars;
 }
 #endif
 
@@ -3134,7 +3134,7 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setMinBackgroundSize);
  * @param fparg0  the minimum size
  */
 extern "C" void cPopupInfo_setMinBackgroundSize(cPopupInfo* popupInfo, float fparg0) {
-    (popupInfo->mfMinSize) = fparg0;
+    popupInfo->mfMinSize = fparg0;
 }
 #endif
 
@@ -3162,7 +3162,7 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setUseCenterAlignedOptions);
  * @param centerOptions  non-zero to centre the options
  */
 extern "C" void cPopupInfo_setUseCenterAlignedOptions(cPopupInfo* popupInfo, int centerOptions) {
-    (popupInfo->mbCenterOptions) = centerOptions;
+    popupInfo->mbCenterOptions = centerOptions;
 }
 #endif
 
@@ -3190,7 +3190,7 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setUseCenterAlignedText);
  * @param centerText  non-zero to centre the text (clear() sets 1)
  */
 extern "C" void cPopupInfo_setUseCenterAlignedText(cPopupInfo* popupInfo, int centerText) {
-    (popupInfo->mbCenterText) = centerText;
+    popupInfo->mbCenterText = centerText;
 }
 #endif
 
@@ -3219,7 +3219,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDA30);
  */
 extern "C" void func_001DDA30(cPopupInfo* popupInfo, int message) {
     ((int)popupInfo->mtMessage.ui) = message;
-    (popupInfo->mtMessage.eType) = 2;
+    popupInfo->mtMessage.eType = 2;
 }
 #endif
 
@@ -3234,7 +3234,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDA40);
  */
 extern "C" void func_001DDA40(cPopupInfo* popupInfo, int message) {
     ((int)popupInfo->mtMessage.ui) = message;
-    (popupInfo->mtMessage.eType) = 1;
+    popupInfo->mtMessage.eType = 1;
 }
 #endif
 
@@ -3249,7 +3249,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDA50);
  */
 extern "C" void func_001DDA50(cPopupInfo* popupInfo, int messageId) {
     ((int)popupInfo->mtMessage.ui) = messageId;
-    (popupInfo->mtMessage.eType) = 3;
+    popupInfo->mtMessage.eType = 3;
 }
 #endif
 
@@ -3293,7 +3293,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDA80);
  */
 extern "C" void func_001DDA80(cPopupInfo* popupInfo, int title) {
     ((int)popupInfo->mtTitle.ui) = title;
-    (popupInfo->mtTitle.eType) = 2;
+    popupInfo->mtTitle.eType = 2;
 }
 #endif
 
@@ -3308,7 +3308,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDA90);
  */
 extern "C" void func_001DDA90(cPopupInfo* popupInfo, int title) {
     ((int)popupInfo->mtTitle.ui) = title;
-    (popupInfo->mtTitle.eType) = 1;
+    popupInfo->mtTitle.eType = 1;
 }
 #endif
 
@@ -3323,7 +3323,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDAA0);
  */
 extern "C" void func_001DDAA0(cPopupInfo* popupInfo, int titleId) {
     ((int)popupInfo->mtTitle.ui) = titleId;
-    (popupInfo->mtTitle.eType) = 3;
+    popupInfo->mtTitle.eType = 3;
 }
 #endif
 
@@ -3367,7 +3367,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDAD0);
  */
 extern "C" void func_001DDAD0(cPopupInfo* popupInfo, int entryBoxTitle) {
     ((int)popupInfo->mtEntryBoxTitle.ui) = entryBoxTitle;
-    (popupInfo->mtEntryBoxTitle.eType) = 2;
+    popupInfo->mtEntryBoxTitle.eType = 2;
 }
 #endif
 
@@ -3382,7 +3382,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDAE0);
  */
 extern "C" void func_001DDAE0(cPopupInfo* popupInfo, int entryBoxTitle) {
     ((int)popupInfo->mtEntryBoxTitle.ui) = entryBoxTitle;
-    (popupInfo->mtEntryBoxTitle.eType) = 1;
+    popupInfo->mtEntryBoxTitle.eType = 1;
 }
 #endif
 
@@ -3397,7 +3397,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDAF0);
  */
 extern "C" void func_001DDAF0(cPopupInfo* popupInfo, int entryBoxTitleId) {
     ((int)popupInfo->mtEntryBoxTitle.ui) = entryBoxTitleId;
-    (popupInfo->mtEntryBoxTitle.eType) = 3;
+    popupInfo->mtEntryBoxTitle.eType = 3;
 }
 #endif
 
@@ -3442,7 +3442,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDB20);
  */
 extern "C" void func_001DDB20(cPopupInfo* popupInfo, int entryBoxInitial) {
     ((int)popupInfo->mtEntryBoxInitial.ui) = entryBoxInitial;
-    (popupInfo->mtEntryBoxInitial.eType) = 2;
+    popupInfo->mtEntryBoxInitial.eType = 2;
 }
 #endif
 
@@ -3458,7 +3458,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDB30);
  */
 extern "C" void func_001DDB30(cPopupInfo* popupInfo, int entryBoxInitial) {
     ((int)popupInfo->mtEntryBoxInitial.ui) = entryBoxInitial;
-    (popupInfo->mtEntryBoxInitial.eType) = 1;
+    popupInfo->mtEntryBoxInitial.eType = 1;
 }
 #endif
 
@@ -3474,7 +3474,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDB40);
  */
 extern "C" void func_001DDB40(cPopupInfo* popupInfo, int entryBoxInitialId) {
     ((int)popupInfo->mtEntryBoxInitial.ui) = entryBoxInitialId;
-    (popupInfo->mtEntryBoxInitial.eType) = 3;
+    popupInfo->mtEntryBoxInitial.eType = 3;
 }
 #endif
 
@@ -3520,7 +3520,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDB70);
  */
 extern "C" void func_001DDB70(cPopupInfo* popupInfo, int postPending) {
     ((int)popupInfo->mtPostPending.ui) = postPending;
-    (popupInfo->mtPostPending.eType) = 2;
+    popupInfo->mtPostPending.eType = 2;
 }
 #endif
 
@@ -3536,7 +3536,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDB80);
  */
 extern "C" void func_001DDB80(cPopupInfo* popupInfo, int postPending) {
     ((int)popupInfo->mtPostPending.ui) = postPending;
-    (popupInfo->mtPostPending.eType) = 1;
+    popupInfo->mtPostPending.eType = 1;
 }
 #endif
 
@@ -3551,7 +3551,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDB90);
  */
 extern "C" void func_001DDB90(cPopupInfo* popupInfo, int postPendingId) {
     ((int)popupInfo->mtPostPending.ui) = postPendingId;
-    (popupInfo->mtPostPending.eType) = 3;
+    popupInfo->mtPostPending.eType = 3;
 }
 #endif
 
@@ -3594,7 +3594,7 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setDeferEventsFlag);
  * @param deferEvents  the new flag value
  */
 extern "C" void cPopupInfo_setDeferEventsFlag(cPopupInfo* popupInfo, int deferEvents) {
-    (popupInfo->mbDeferEventsFlag) = deferEvents;
+    popupInfo->mbDeferEventsFlag = deferEvents;
 }
 #endif
 
@@ -3664,7 +3664,7 @@ INCLUDE_ASM("main/all_in_one_main", cScreenPopup_setPassUpdate);
  * @param passUpdate  non-zero to keep updating the parent state
  */
 extern "C" void cScreenPopup_setPassUpdate(cScreenPopup* screenPopup, int passUpdate) {
-    (screenPopup->mbPassUpdate) = passUpdate;
+    screenPopup->mbPassUpdate = passUpdate;
 }
 #endif
 
@@ -3903,7 +3903,7 @@ extern "C" int cFEMemCard_isCancelPressed(void) {
     int temp_2;
 
     temp_2 = (cFEMemCard_mInstance->mIsCancelPressed);
-    (cFEMemCard_mInstance->mIsCancelPressed) = 0;
+    cFEMemCard_mInstance->mIsCancelPressed = 0;
     return temp_2;
 }
 #endif
@@ -3958,7 +3958,7 @@ extern "C" int cFEMemCard_isNextMCPressed(void) {
     int temp_2;
 
     temp_2 = (cFEMemCard_mInstance->mDoNextMemCard);
-    (cFEMemCard_mInstance->mDoNextMemCard) = 0;
+    cFEMemCard_mInstance->mDoNextMemCard = 0;
     return temp_2;
 }
 #endif
@@ -3979,7 +3979,7 @@ extern "C" int cFEMemCard_isPrevMCPressed(void) {
     int temp_2;
 
     temp_2 = (cFEMemCard_mInstance->mDoPrevMemCard);
-    (cFEMemCard_mInstance->mDoPrevMemCard) = 0;
+    cFEMemCard_mInstance->mDoPrevMemCard = 0;
     return temp_2;
 }
 #endif
@@ -4017,7 +4017,7 @@ extern "C" int cFEMemCard_callbackIsRetryPressed(void) {
     int temp_2;
 
     temp_2 = (cFEMemCard_mInstance->mIsRetryPressed);
-    (cFEMemCard_mInstance->mIsRetryPressed) = 0;
+    cFEMemCard_mInstance->mIsRetryPressed = 0;
     return temp_2;
 }
 #endif
@@ -4599,7 +4599,7 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateProfileLoad_setQuitPath);
  * @param action  the action: 0, 1 or 2
  */
 extern "C" void cFEStateProfileLoad_setQuitPath(cFEStateProfileLoad* profileLoadState, int action) {
-    (profileLoadState->mTypeOfQuit) = action;
+    profileLoadState->mTypeOfQuit = action;
 }
 #endif
 
@@ -4695,7 +4695,7 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setCurrentKey);
  * @param currentKey  the key index (0..83)
  */
 extern "C" void cKeyboardPopup_setCurrentKey(cKeyboardPopup* keyboard, int currentKey) {
-    (keyboard->miCurrentKey) = currentKey;
+    keyboard->miCurrentKey = currentKey;
 }
 #endif
 
@@ -4709,7 +4709,7 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setKeyboardType);
  * @param keyboardType  the layout
  */
 extern "C" void cKeyboardPopup_setKeyboardType(cKeyboardPopup* keyboard, int keyboardType) {
-    (keyboard->meType) = keyboardType;
+    keyboard->meType = keyboardType;
 }
 #endif
 
@@ -4751,7 +4751,7 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setPopOnEnd);
  * @param popOnEnd  non-zero to pop on accept
  */
 extern "C" void cKeyboardPopup_setPopOnEnd(cKeyboardPopup* keyboard, int popOnEnd) {
-    (keyboard->mbPopOnEnd) = popOnEnd;
+    keyboard->mbPopOnEnd = popOnEnd;
 }
 #endif
 
@@ -4765,7 +4765,7 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setPassword);
  * @param password  non-zero to show '*' characters
  */
 extern "C" void cKeyboardPopup_setPassword(cKeyboardPopup* keyboard, int password) {
-    (keyboard->mbPassword) = password;
+    keyboard->mbPassword = password;
 }
 #endif
 
@@ -4779,7 +4779,7 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setClearOnFirstCharacter);
  * @param clearOnFirst  non-zero to clear on the first key
  */
 extern "C" void cKeyboardPopup_setClearOnFirstCharacter(cKeyboardPopup* keyboard, int clearOnFirst) {
-    (keyboard->mbClearOnFirst) = clearOnFirst;
+    keyboard->mbClearOnFirst = clearOnFirst;
 }
 #endif
 
@@ -4793,7 +4793,7 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setDisableSpaceForFirst);
  * @param disableForFirst  non-zero to disable space for the first character
  */
 extern "C" void cKeyboardPopup_setDisableSpaceForFirst(cKeyboardPopup* keyboard, int disableForFirst) {
-    (keyboard->mbDisableForFirst) = disableForFirst;
+    keyboard->mbDisableForFirst = disableForFirst;
 }
 #endif
 
@@ -4940,7 +4940,7 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setReferEventsToParent);
  * @param referEvents  non-zero to forward events (cKeyboardPopup_handleEvent)
  */
 extern "C" void cKeyboardPopup_setReferEventsToParent(cKeyboardPopup* keyboard, int referEvents) {
-    (keyboard->mbReferEventsToParent) = referEvents;
+    keyboard->mbReferEventsToParent = referEvents;
 }
 #endif
 
@@ -4968,7 +4968,7 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setCallParentsUpdate);
  * @param callParentUpdate  non-zero to update the parent too (cKeyboardPopup_onUpdate)
  */
 extern "C" void cKeyboardPopup_setCallParentsUpdate(cKeyboardPopup* keyboard, int callParentUpdate) {
-    (keyboard->mbCallParentsUpdate) = callParentUpdate;
+    keyboard->mbCallParentsUpdate = callParentUpdate;
 }
 #endif
 
@@ -5001,7 +5001,7 @@ extern "C" void cKeyboardPopup_cursorRight(cKeyboardPopup* keyboard) {
 
     temp_3 = (keyboard->miCursorPos);
     if (temp_3 < ((keyboard->miMaxCharacters) - 1)) {
-        (keyboard->miCursorPos) = (int) (temp_3 + 1);
+        keyboard->miCursorPos = (int) (temp_3 + 1);
     }
 }
 #endif
@@ -5021,7 +5021,7 @@ extern "C" void cKeyboardPopup_cursorLeft(cKeyboardPopup* keyboard) {
 
     temp_2 = (keyboard->miCursorPos);
     if (temp_2 > 0) {
-        (keyboard->miCursorPos) = (int) (temp_2 - 1);
+        keyboard->miCursorPos = (int) (temp_2 - 1);
     }
 }
 #endif
@@ -5487,7 +5487,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE890);
  * @param feStateNet  the online state (cFEStateNet)
  */
 extern "C" void func_001DE890(cFEStateNet* feStateNet) {
-    (feStateNet->unk_6B0) = 1;
+    feStateNet->unk_6B0 = 1;
 }
 #endif
 
@@ -5501,7 +5501,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE8A0);
  * @param value  the new value
  */
 extern "C" void func_001DE8A0(cFEStateNet* feStateNet, int value) {
-    (feStateNet->unk_6C4) = value;
+    feStateNet->unk_6C4 = value;
 }
 #endif
 

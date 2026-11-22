@@ -3738,7 +3738,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002B07E8);
  * @param value  the value
  */
 extern "C" void func_002B07E8(cSpeechInstance* speechInstance, int value) {
-    (speechInstance->unk_8C4) = value;
+    speechInstance->unk_8C4 = value;
 }
 #endif
 //100%
@@ -3753,7 +3753,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002B07F0);
  * @param holdValue  the value
  */
 extern "C" void func_002B07F0(cSpeechInstance* speechInstance, int holdValue) {
-    (speechInstance->unk_8C8) = holdValue;
+    speechInstance->unk_8C8 = holdValue;
 }
 #endif
 

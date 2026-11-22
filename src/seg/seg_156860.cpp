@@ -539,11 +539,11 @@ extern "C" void cCommSystem_netConnDisconnect(cCommSystem*);
  */
 extern "C" void cCommSystem_netConnConnect(cCommSystem* commSystem, int configIndex) {
     cCommSystem_netConnDisconnect(commSystem);
-    (commSystem->mActiveNetConn) = configIndex;
-    (commSystem->mInterfaceType) = 1;
-    (commSystem->mNetConnTimeOut) = 9000;
-    (commSystem->mNetConnState) = 2;
-    (commSystem->mBroadBand) = 0;
+    commSystem->mActiveNetConn = configIndex;
+    commSystem->mInterfaceType = 1;
+    commSystem->mNetConnTimeOut = 9000;
+    commSystem->mNetConnState = 2;
+    commSystem->mBroadBand = 0;
 }
 #endif
 
@@ -562,12 +562,12 @@ extern "C" void NetConnDisconnect();
  */
 extern "C" void cCommSystem_netConnDisconnect(cCommSystem* commSystem) {
     if ((commSystem->mActiveNetConn) >= 0) {
-        (commSystem->mActiveNetConn) = -1;
+        commSystem->mActiveNetConn = -1;
         NetConnDisconnect();
     }
-    (commSystem->mNetConnTimeOut) = 0;
-    (commSystem->mNetConnState) = 1;
-    (commSystem->mNetConnError) = 0;
+    commSystem->mNetConnTimeOut = 0;
+    commSystem->mNetConnState = 1;
+    commSystem->mNetConnError = 0;
 }
 #endif
 
@@ -587,12 +587,12 @@ extern "C" void NetConnDisconnect();
  */
 extern "C" void cCommSystem_netConnFailed(cCommSystem* commSystem, int errorCode) {
     if ((commSystem->mActiveNetConn) >= 0) {
-        (commSystem->mActiveNetConn) = -1;
+        commSystem->mActiveNetConn = -1;
         NetConnDisconnect();
     }
-    (commSystem->mNetConnError) = errorCode;
-    (commSystem->mNetConnState) = 6;
-    (commSystem->mNetConnTimeOut) = 0;
+    commSystem->mNetConnError = errorCode;
+    commSystem->mNetConnState = 6;
+    commSystem->mNetConnTimeOut = 0;
 }
 #endif
 
@@ -1053,7 +1053,7 @@ extern char cDSockChannel_vtbl[];
  * @param flags          g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cDSockChannel__cDSockChannel(cDSockChannel* dSockChannel, int flags) {
-    ((char*)dSockChannel->mVtbl) = cDSockChannel_vtbl;
+    dSockChannel->mVtbl = (void**)cDSockChannel_vtbl;
     cDSockChannel_disconnect(dSockChannel);
     cCommChannel__cCommChannel_66E8(dSockChannel, flags);
 }
@@ -2022,12 +2022,12 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_localDisconnected);
  */
 extern "C" void cGameComm_localDisconnected(cGameComm* gameComm, int force) {
     if (((force != 0) || (((gameComm->mError) == 0) && ((gameComm->mState) < 0xF))) && ((gameComm->unk_038) == 0)) {
-        (gameComm->unk_038) = (int) ((int) (SSXApp->TimerTick) / (int) (SSXApp->TimerHz));
+        gameComm->unk_038 = (int) ((int) (SSXApp->TimerTick) / (int) (SSXApp->TimerHz));
     }
-    (gameComm->mConnected) = 0;
-    (gameComm->mRaceInProgress) = 0;
+    gameComm->mConnected = 0;
+    gameComm->mRaceInProgress = 0;
     (gameComm->mPauseMenu[1]) = 0;
-    (gameComm->mLocalDisconnected) = 1;
+    gameComm->mLocalDisconnected = 1;
 }
 #endif
 
@@ -3086,7 +3086,7 @@ INCLUDE_ASM("seg/seg_156860", func_00258870);
  */
 extern "C" void func_00258870(cGameComm* gameComm, int timeoutFrames, int forceArm) {
     if ((forceArm != 0) || (((gameComm->mPauseMenu[1]) == 0) && ((gameComm->mPauseMenu[0]) == 0)) || ((gameComm->mGameStartGate) != 0)) {
-        (gameComm->unk_094) = timeoutFrames;
+        gameComm->unk_094 = timeoutFrames;
     }
 }
 #endif
@@ -3130,8 +3130,8 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_setFinishRaceAlone);
  * @param gameComm  the game link
  */
 extern "C" void cGameComm_setFinishRaceAlone(cGameComm* gameComm) {
-    (gameComm->mWaitingMessage) = 0;
-    (gameComm->mAlone) = 1;
+    gameComm->mWaitingMessage = 0;
+    gameComm->mAlone = 1;
     (gameComm->mPauseMenu[1]) = 0;
 }
 #endif
@@ -3149,8 +3149,8 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_gameStartGate);
  */
 extern "C" void cGameComm_gameStartGate(cGameComm* gameComm) {
     if ((gameComm->mState) < 0xF) {
-        (gameComm->unk_094) = 0;
-        (gameComm->mGameStartGate) = 1;
+        gameComm->unk_094 = 0;
+        gameComm->mGameStartGate = 1;
     }
 }
 #endif
@@ -3210,16 +3210,16 @@ extern "C" void cGameComm_setState_8A48(void *, int) __asm__("cGameComm_setState
  * @param gameComm  the game link (this)
  */
 extern "C" void cGameComm_gameEnded(cGameComm* gameComm) {
-    (gameComm->mRaceInProgress) = 0;
-    (gameComm->mSyncInput) = 0;
+    gameComm->mRaceInProgress = 0;
+    gameComm->mSyncInput = 0;
     if ((gameComm->mState) < 0xF) {
         cGameComm_setState_8A48(gameComm, 0xF);
     }
     if ((gameComm->unk_038) == 0) {
-        (gameComm->unk_038) = (int) ((int) (SSXApp->TimerTick) / (int) (SSXApp->TimerHz));
+        gameComm->unk_038 = (int) ((int) (SSXApp->TimerTick) / (int) (SSXApp->TimerHz));
     }
     if ((gameComm->unk_03C) == 0) {
-        (gameComm->unk_03C) = (int) ((int) (SSXApp->TimerTick) / (int) (SSXApp->TimerHz));
+        gameComm->unk_03C = (int) ((int) (SSXApp->TimerTick) / (int) (SSXApp->TimerHz));
     }
 }
 #endif

@@ -73,7 +73,7 @@ INCLUDE_ASM("bx/execman", cAppMan_setGameRate);
  * @param fparg0  the new game rate
  */
 extern "C" void cAppMan_setGameRate(cAppMan* appMan, float fparg0) {
-    (appMan->GameRate) = fparg0;
+    appMan->GameRate = fparg0;
 }
 #endif
 //100%
@@ -193,7 +193,7 @@ INCLUDE_ASM("bx/execman", cAppMan_setAIUpdatesPerRender);
  * @param value  the new count
  */
 extern "C" void cAppMan_setAIUpdatesPerRender(cAppMan* appMan, int value) {
-    (appMan->m_AIUpdatesPerRender) = value;
+    appMan->m_AIUpdatesPerRender = value;
 }
 #endif
 //100%
@@ -337,7 +337,7 @@ INCLUDE_ASM("bx/execman", cAppMan_lockThirtyFps);
  * @param value  non-zero to lock to 30 fps
  */
 extern "C" void cAppMan_lockThirtyFps(cAppMan* appMan, int value) {
-    (appMan->mLock30Fps) = value;
+    appMan->mLock30Fps = value;
 }
 #endif
 

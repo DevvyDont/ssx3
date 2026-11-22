@@ -403,7 +403,7 @@ INCLUDE_ASM("animation/gameanimmap", cRiderAnimBase_setIsFlipped);
  * @param isFlipped  nonzero to mirror the animations
  */
 extern "C" void cRiderAnimBase_setIsFlipped(cRiderAnimBase* riderAnim, int isFlipped) {
-    (riderAnim->IsFlipped) = isFlipped;
+    riderAnim->IsFlipped = isFlipped;
 }
 #endif
 //100%
@@ -416,7 +416,7 @@ INCLUDE_ASM("animation/gameanimmap", cRiderAnimBase_setFrameRateFactor);
  * @param fparg0  the new factor
  */
 extern "C" void cRiderAnimBase_setFrameRateFactor(cRiderAnimBase* riderAnim, float fparg0) {
-    (riderAnim->FrameRateFactor) = fparg0;
+    riderAnim->FrameRateFactor = fparg0;
 }
 #endif
 //100%

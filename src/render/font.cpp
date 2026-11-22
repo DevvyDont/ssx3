@@ -1050,9 +1050,9 @@ INCLUDE_ASM("render/font", cPlayerLights_AddAmbient);
  * @param colour  the colour to add (three floats R, G, B)
  */
 extern "C" void cPlayerLights_AddAmbient(cPlayerLights* playerLights, tRGB* colour) {
-    (playerLights->mExtraAmbientLight.R) = (float) ((playerLights->mExtraAmbientLight.R) + (colour->R));
-    (playerLights->mExtraAmbientLight.G) = (float) ((playerLights->mExtraAmbientLight.G) + (colour->G));
-    (playerLights->mExtraAmbientLight.B) = (float) ((playerLights->mExtraAmbientLight.B) + (colour->B));
+    playerLights->mExtraAmbientLight.R = (float) ((playerLights->mExtraAmbientLight.R) + (colour->R));
+    playerLights->mExtraAmbientLight.G = (float) ((playerLights->mExtraAmbientLight.G) + (colour->G));
+    playerLights->mExtraAmbientLight.B = (float) ((playerLights->mExtraAmbientLight.B) + (colour->B));
 }
 #endif
 
@@ -1085,7 +1085,7 @@ INCLUDE_ASM("render/font", cPlayerLights_PlayerIsAdditive);
  * @param value  the new flag
  */
 extern "C" void cPlayerLights_PlayerIsAdditive(cPlayerLights* playerLights, int value) {
-    (playerLights->mPlayerIsAdditive) = value;
+    playerLights->mPlayerIsAdditive = value;
 }
 #endif
 
@@ -1375,7 +1375,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetNumViews);
  * @param numViews  the number of views
  */
 extern "C" void cGraphicsMan_SetNumViews(cGraphicsMan* graphicsMan, int numViews) {
-    (graphicsMan->mNumViews) = numViews;
+    graphicsMan->mNumViews = numViews;
 }
 #endif
 //100%
@@ -1401,7 +1401,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetViewIndex);
  * @param viewIndex  the current view
  */
 extern "C" void cGraphicsMan_SetViewIndex(cGraphicsMan* graphicsMan, int viewIndex) {
-    (graphicsMan->mViewIndex) = viewIndex;
+    graphicsMan->mViewIndex = viewIndex;
 }
 #endif
 //100%
@@ -2703,7 +2703,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetSpecID);
  * @param texId  the texture id
  */
 extern "C" void cGraphicsMan_SetSpecID(cGraphicsMan* graphicsMan, int texId) {
-    (graphicsMan->mSpecTexID) = texId;
+    graphicsMan->mSpecTexID = texId;
 }
 #endif
 //100%
@@ -2761,7 +2761,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetPatchSpecID);
  * @param texId  the texture id
  */
 extern "C" void cGraphicsMan_SetPatchSpecID(cGraphicsMan* graphicsMan, int texId) {
-    (graphicsMan->mPatchSpecTexID) = texId;
+    graphicsMan->mPatchSpecTexID = texId;
 }
 #endif
 //100%
@@ -2786,7 +2786,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_SkipNextPageFlip);
  * @param graphicsMan  the graphics manager
  */
 extern "C" void cGraphicsMan_SkipNextPageFlip(cGraphicsMan* graphicsMan) {
-    (graphicsMan->mSkipNextPageFlip) = 1;
+    graphicsMan->mSkipNextPageFlip = 1;
 }
 #endif
 
@@ -4387,7 +4387,7 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_SetMinFlipWait);
  * @param minWait  the vblank count
  */
 extern "C" void cPS2GraphicsMan_SetMinFlipWait(cPS2GraphicsMan* graphicsMan, int minWait) {
-    (graphicsMan->mMinFlipWait) = minWait;
+    graphicsMan->mMinFlipWait = minWait;
 }
 #endif
 //100%
@@ -4454,7 +4454,7 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_EnableFilter);
  * @param graphicsMan  the graphics manager
  */
 extern "C" void cPS2GraphicsMan_EnableFilter(cPS2GraphicsMan* graphicsMan) {
-    (graphicsMan->mFilterEnabled) = 1;
+    graphicsMan->mFilterEnabled = 1;
 }
 #endif
 //100%
@@ -4466,7 +4466,7 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_DisableFilter);
  * @param graphicsMan  the graphics manager
  */
 extern "C" void cPS2GraphicsMan_DisableFilter(cPS2GraphicsMan* graphicsMan) {
-    (graphicsMan->mFilterEnabled) = 0;
+    graphicsMan->mFilterEnabled = 0;
 }
 #endif
 //100%
@@ -6543,7 +6543,7 @@ INCLUDE_ASM("render/font", cBaseClass_DynamicEmitter_setSeed);
  * @param fparg0  the seed
  */
 extern "C" void cBaseClass_DynamicEmitter_setSeed(cBaseClass_DynamicEmitter* emitter, float fparg0) {
-    (emitter->m_emitter.SeedX0) = fparg0;
+    emitter->m_emitter.SeedX0 = fparg0;
 }
 #endif
 //100%
@@ -6603,7 +6603,7 @@ INCLUDE_ASM("render/font", cBaseClass_DynamicEmitter_setEnabled);
  * @param enable  nonzero to enable
  */
 extern "C" void cBaseClass_DynamicEmitter_setEnabled(cBaseClass_DynamicEmitter* emitter, int enable) {
-    (emitter->m_enabled) = enable;
+    emitter->m_enabled = enable;
 }
 #endif
 //100%

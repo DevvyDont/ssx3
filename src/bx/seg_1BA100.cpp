@@ -913,7 +913,7 @@ INCLUDE_ASM("bx/seg_1BA100", cMonitor_MONITOR_Pause);
  * @param monitor  the cMonitor
  */
 extern "C" void cMonitor_MONITOR_Pause(cMonitor* monitor) {
-    (monitor->mPaused) = 1;
+    monitor->mPaused = 1;
 }
 #endif
 
@@ -926,7 +926,7 @@ INCLUDE_ASM("bx/seg_1BA100", cMonitor_MONITOR_Resume);
  * @param monitor  the cMonitor
  */
 extern "C" void cMonitor_MONITOR_Resume(cMonitor* monitor) {
-    (monitor->mPaused) = 0;
+    monitor->mPaused = 0;
 }
 #endif
 
@@ -1021,7 +1021,7 @@ INCLUDE_ASM("bx/seg_1BA100", cBankMonitor_BANKMONITOR_SetDoppler);
  * @param enable  nonzero to enable Doppler
  */
 extern "C" void cBankMonitor_BANKMONITOR_SetDoppler(cBankMonitor* bankMonitor, int enable) {
-    (bankMonitor->mDopplerEnable) = enable;
+    bankMonitor->mDopplerEnable = enable;
 }
 #endif
 
@@ -1035,7 +1035,7 @@ INCLUDE_ASM("bx/seg_1BA100", cBankMonitor_BANKMONITOR_SetPositional);
  * @param enable  nonzero to enable positional sound
  */
 extern "C" void cBankMonitor_BANKMONITOR_SetPositional(cBankMonitor* bankMonitor, int enable) {
-    (bankMonitor->mPositionalEnable) = enable;
+    bankMonitor->mPositionalEnable = enable;
 }
 #endif
 
@@ -1699,7 +1699,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BACC0);
  * @param musicSys  the cMusicSys
  */
 extern "C" void func_002BACC0(cMusicSys* musicSys) {
-    (musicSys->mSongPlaying) = 0;
+    musicSys->mSongPlaying = 0;
 }
 #endif
 
@@ -1742,7 +1742,7 @@ INCLUDE_ASM("bx/seg_1BA100", cMusicSys_setCurrentSongNum);
  * @param songNum  the song index
  */
 extern "C" void cMusicSys_setCurrentSongNum(cMusicSys* musicSys, int songNum) {
-    (musicSys->mCurrentSongNum) = songNum;
+    musicSys->mCurrentSongNum = songNum;
 }
 #endif
 
@@ -1875,7 +1875,7 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_SetRailSurface);
  * @param railType  the rail surface type
  */
 extern "C" void cSSXAudio_SetRailSurface(cSSXAudio* audio, int railType) {
-    (audio->mRailType) = railType;
+    audio->mRailType = railType;
 }
 #endif
 
@@ -5295,7 +5295,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_setDefaults);
  */
 extern "C" void tWPInGameData_Mix_setDefaults(tWPInGameData_Mix* mix) {
     *(int*)&mix->m_wpTravelDistance = 0;
-    (mix->m_MixPreset) = -1;
+    mix->m_MixPreset = -1;
 }
 #endif
 
@@ -5312,7 +5312,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_setDefaults);
  */
 extern "C" void tWPInGameData_Ambience_setDefaults(tWPInGameData_Ambience* ambience) {
     *(int*)&ambience->m_wpTravelDistance = 0;
-    (ambience->m_BankID) = -1;
+    ambience->m_BankID = -1;
 }
 #endif
 
@@ -5329,7 +5329,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_setDefaults);
  */
 extern "C" void tWPInGameData_Speech_setDefaults(tWPInGameData_Speech* speech) {
     *(int*)&speech->m_wpTravelDistance = 0;
-    (speech->m_SpeechID) = -1;
+    speech->m_SpeechID = -1;
 }
 #endif
 
@@ -5347,7 +5347,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_setDefaults);
  */
 extern "C" void tWPInGameData_Camera_setDefaults(tWPInGameData_Camera* camera) {
     *(int*)&camera->m_wpTravelDistance = 0;
-    (camera->m_DrawDistance) = 30000.0f;
+    camera->m_DrawDistance = 30000.0f;
 }
 #endif
 
@@ -5364,11 +5364,11 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Fog_setDefaults);
  * @param fog  the in-game data
  */
 extern "C" void tWPInGameData_Fog_setDefaults(tWPInGameData_Fog* fog) {
-    (fog->m_FogNear) = 3000.0f;
-    (fog->m_FogFar) = 30000.0f;
-    (fog->m_FogColourR) = 0.43f;
-    (fog->m_FogColourG) = 0.55f;
-    (fog->m_FogColourB) = 0.71f;
+    fog->m_FogNear = 3000.0f;
+    fog->m_FogFar = 30000.0f;
+    fog->m_FogColourR = 0.43f;
+    fog->m_FogColourG = 0.55f;
+    fog->m_FogColourB = 0.71f;
     *(int*)&fog->m_FogDensity = 0;
     *(int*)&fog->m_wpTravelDistance = 0;
 }
@@ -5479,7 +5479,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_setDefaults);
  */
 extern "C" void tWPInGameData_Surface_setDefaults(tWPInGameData_Surface* surface) {
     *(int*)&surface->m_wpTravelDistance = 0;
-    (surface->m_SnowSparkleDensity) = 1.0f;
+    surface->m_SnowSparkleDensity = 1.0f;
 }
 #endif
 

@@ -13271,7 +13271,7 @@ INCLUDE_ASM("dirtysock/tagsunk", cCommChannel_setError);
  * @param channel  the cCommChannel
  */
 extern "C" void cCommChannel_setError(cCommChannel* channel) {
-    (channel->mError) = 1;
+    channel->mError = 1;
 }
 #endif
 //100%

@@ -267,7 +267,7 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_setLoadIconTextureID);
  * @param textureId  the new texture id
  */
 extern "C" void cSSXApp_setLoadIconTextureID(cSSXApp* ssxApp, int textureId) {
-    (ssxApp->LoadIconTextureID) = textureId;
+    ssxApp->LoadIconTextureID = textureId;
 }
 #endif
 //100%
@@ -373,7 +373,7 @@ INCLUDE_ASM("main/ssxappdtor", cFadeScreen_allowFade);
  * @param fadeScreen  the screen fade
  */
 extern "C" void cFadeScreen_allowFade(cFadeScreen* fadeScreen) {
-    (fadeScreen->IsEnding) = 1;
+    fadeScreen->IsEnding = 1;
 }
 #endif
 
@@ -439,7 +439,7 @@ INCLUDE_ASM("main/ssxappdtor", cInitLoadScreen_activateProgressiveMode);
  * @param initLoadScreen  the initial load screen
  */
 extern "C" void cInitLoadScreen_activateProgressiveMode(cInitLoadScreen* initLoadScreen) {
-    (initLoadScreen->progressive) = 1;
+    initLoadScreen->progressive = 1;
 }
 #endif
 
@@ -1164,7 +1164,7 @@ INCLUDE_ASM("main/ssxappdtor", cGFUserSelectState_setNextLocation);
  * @param location  the location to go to next
  */
 extern "C" void cGFUserSelectState_setNextLocation(cGFUserSelectState* userSelectState, int location) {
-    (userSelectState->mNextLocation) = location;
+    userSelectState->mNextLocation = location;
 }
 #endif
 
@@ -2570,7 +2570,7 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_forceCardStatusAck);
  * @param overlayManager  the cMCOverlayManager
  */
 extern "C" void cMCOverlayManager_forceCardStatusAck(cMCOverlayManager* overlayManager) {
-    (overlayManager->mCurrDeviceStateAck) = 1;
+    overlayManager->mCurrDeviceStateAck = 1;
 }
 #endif
 //100%
@@ -2641,7 +2641,7 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_PollForFullCard);
  * @param pollFullCard  non-zero to poll
  */
 extern "C" void cMCOverlayManager_PollForFullCard(cMCOverlayManager* overlayManager, int pollFullCard) {
-    (overlayManager->mPollForFullCard) = pollFullCard;
+    overlayManager->mPollForFullCard = pollFullCard;
 }
 #endif
 //100%
@@ -2654,7 +2654,7 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_PollForUnformatted);
  * @param pollUnformatted  non-zero to poll
  */
 extern "C" void cMCOverlayManager_PollForUnformatted(cMCOverlayManager* overlayManager, int pollUnformatted) {
-    (overlayManager->mPollForUnformatted) = pollUnformatted;
+    overlayManager->mPollForUnformatted = pollUnformatted;
 }
 #endif
 //100%
@@ -2667,7 +2667,7 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_PollForNoCard);
  * @param pollNoCard  non-zero to poll
  */
 extern "C" void cMCOverlayManager_PollForNoCard(cMCOverlayManager* overlayManager, int pollNoCard) {
-    (overlayManager->mPollForNoCard) = pollNoCard;
+    overlayManager->mPollForNoCard = pollNoCard;
 }
 #endif
 //100%
@@ -2680,7 +2680,7 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_ShowCardChangeNotify);
  * @param showCardChange  non-zero to show it
  */
 extern "C" void cMCOverlayManager_ShowCardChangeNotify(cMCOverlayManager* overlayManager, int showCardChange) {
-    (overlayManager->mShowCardChangeNotify) = showCardChange;
+    overlayManager->mShowCardChangeNotify = showCardChange;
 }
 #endif
 //100%
@@ -2693,7 +2693,7 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_RetryToInit);
  * @param retryToInit  the new flag value
  */
 extern "C" void cMCOverlayManager_RetryToInit(cMCOverlayManager* overlayManager, int retryToInit) {
-    (overlayManager->mRetryToInit) = retryToInit;
+    overlayManager->mRetryToInit = retryToInit;
 }
 #endif
 

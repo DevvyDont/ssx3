@@ -3472,7 +3472,7 @@ INCLUDE_ASM("object/railmodifier", cTypeObjNode_setRootTransformDirty);
  * @param node  the typed object node
  */
 extern "C" void cTypeObjNode_setRootTransformDirty(cTypeObjNode* node) {
-    (node->Flags) = (unsigned short) ((node->Flags) | 1);
+    node->Flags = (unsigned short) ((node->Flags) | 1);
 }
 #endif
 //100%
@@ -3497,7 +3497,7 @@ INCLUDE_ASM("object/railmodifier", cTypeObjNode_resetRootTransformDirty);
  * @param node  the typed object node
  */
 extern "C" void cTypeObjNode_resetRootTransformDirty(cTypeObjNode* node) {
-    (node->Flags) = (unsigned short) ((node->Flags) & 0xFFFE);
+    node->Flags = (unsigned short) ((node->Flags) & 0xFFFE);
 }
 #endif
 //100%
@@ -4735,7 +4735,7 @@ extern void* cPhysicsModifier_vtbl[];
  */
 extern "C" void *cPhysicsModifier_cPhysicsModifier1(cPhysicsModifier* physicsModifier) {
     ((int*)physicsModifier->mVtbl) = (int*)&cPhysicsModifier_vtbl;
-    (physicsModifier->Active) = 1;
+    physicsModifier->Active = 1;
     return ((void*)physicsModifier);
 }
 #endif
@@ -5536,8 +5536,8 @@ INCLUDE_ASM("object/railmodifier", cAnimNode_clearFrameEvent);
  * @param animNode  the animated node
  */
 extern "C" void cAnimNode_clearFrameEvent(cAnimNode* animNode) {
-    (animNode->FrameStart) = 1e10f;
-    (animNode->FrameEnd) = 1e10f;
+    animNode->FrameStart = 1e10f;
+    animNode->FrameEnd = 1e10f;
 }
 #endif
 

@@ -1596,7 +1596,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetPosY);
  * @param value  the y position
  */
 extern "C" void RCMP_AV_SUBTITLE_SetPosY(RCMP_AV_SUBTITLE* entry, int value) {
-    (entry->mPosY) = value;
+    entry->mPosY = value;
 }
 #endif
 //100%
@@ -1676,7 +1676,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetJustifyX);
  * @param value  the justification (0 RIGHT, 1 TOP, 2 CENTER, 3 LEFT, 4 BOTTOM)
  */
 extern "C" void RCMP_AV_SUBTITLE_SetJustifyX(RCMP_AV_SUBTITLE* entry, int value) {
-    (entry->mJustifyX) = value;
+    entry->mJustifyX = value;
 }
 #endif
 //100%
@@ -1692,7 +1692,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetJustifyY);
  * @param value  the justification (0 RIGHT, 1 TOP, 2 CENTER, 3 LEFT, 4 BOTTOM)
  */
 extern "C" void RCMP_AV_SUBTITLE_SetJustifyY(RCMP_AV_SUBTITLE* entry, int value) {
-    (entry->mJustifyY) = value;
+    entry->mJustifyY = value;
 }
 #endif
 //100%

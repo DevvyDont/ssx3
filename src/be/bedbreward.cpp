@@ -513,7 +513,7 @@ INCLUDE_ASM("be/bedbreward", cBENewRaceInterface_setNewRaceActive);
  * @param isActive  1 while the interface may be used, 0 otherwise
  */
 extern "C" void cBENewRaceInterface_setNewRaceActive(int isActive) {
-    (cBENewRaceInterface_instance->bIsActive) = isActive;
+    cBENewRaceInterface_instance->bIsActive = isActive;
 }
 #endif
 //100%
@@ -560,7 +560,7 @@ INCLUDE_ASM("be/bedbreward", cBENewPlayerInterface_setNewPlayerActive);
  * @param isActive  1 while the interface may be used, 0 otherwise
  */
 extern "C" void cBENewPlayerInterface_setNewPlayerActive(int isActive) {
-    (cBENewPlayerInterface_instance->bIsActive) = isActive;
+    cBENewPlayerInterface_instance->bIsActive = isActive;
 }
 #endif
 
@@ -637,7 +637,7 @@ INCLUDE_ASM("be/bedbreward", cBEMissionInterface_setMissionActive);
  * @param isActive  1 while the interface may be used, 0 otherwise
  */
 extern "C" void cBEMissionInterface_setMissionActive(int isActive) {
-    (cBEMissionInterface_instance->bIsActive) = isActive;
+    cBEMissionInterface_instance->bIsActive = isActive;
 }
 #endif
 //100%
@@ -1117,7 +1117,7 @@ INCLUDE_ASM("be/bedbreward", cBEOptionInterface_setOptionActive);
  * @param isActive  1 while the interface may be used, 0 otherwise
  */
 extern "C" void cBEOptionInterface_setOptionActive(int isActive) {
-    (cBEOptionInterface_instance->bIsActive) = isActive;
+    cBEOptionInterface_instance->bIsActive = isActive;
 }
 #endif
 //100%
@@ -1426,7 +1426,7 @@ INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setNetworkActive);
  * @param isActive  1 while the interface may be used, 0 otherwise
  */
 extern "C" void cBENetworkInterface_setNetworkActive(int isActive) {
-    (cBENetworkInterface_instance->bIsActive) = isActive;
+    cBENetworkInterface_instance->bIsActive = isActive;
 }
 #endif
 //100%
@@ -1668,7 +1668,7 @@ INCLUDE_ASM("be/bedbreward", cBEStatInterface_setStatActive);
  * @param isActive  1 while the interface may be used, 0 otherwise
  */
 extern "C" void cBEStatInterface_setStatActive(int isActive) {
-    (cBEStatInterface_instance->bIsActive) = isActive;
+    cBEStatInterface_instance->bIsActive = isActive;
 }
 #endif
 //100%
@@ -1757,7 +1757,7 @@ INCLUDE_ASM("be/bedbreward", cBEBAGTInterface_setBAGTActive);
  * @param isActive  1 while the interface may be used, 0 otherwise
  */
 extern "C" void cBEBAGTInterface_setBAGTActive(int isActive) {
-    (cBEBAGTInterface_instance->bIsActive) = isActive;
+    cBEBAGTInterface_instance->bIsActive = isActive;
 }
 #endif
 //100%
@@ -1858,7 +1858,7 @@ INCLUDE_ASM("be/bedbreward", cBEScoreInterface_setScoreActive);
  * @param isActive  1 while the interface may be used, 0 otherwise
  */
 extern "C" void cBEScoreInterface_setScoreActive(int isActive) {
-    (cBEScoreInterface_instance->bIsActive) = isActive;
+    cBEScoreInterface_instance->bIsActive = isActive;
 }
 #endif
 
@@ -1909,7 +1909,7 @@ INCLUDE_ASM("be/bedbreward", cBEAggressionInterface_setAggressionActive);
  * @param isActive  1 while the interface may be used, 0 otherwise
  */
 extern "C" void cBEAggressionInterface_setAggressionActive(int isActive) {
-    (cBEAggressionInterface_instance->bIsActive) = isActive;
+    cBEAggressionInterface_instance->bIsActive = isActive;
 }
 #endif
 //100%

@@ -663,7 +663,7 @@ INCLUDE_ASM("ui/uivector", cUIAnimation_setFrameNumber);
  * @param frame  the frame number
  */
 extern "C" void cUIAnimation_setFrameNumber(cUIAnimation* anim, short frame) {
-    (anim->mFrameNum) = frame;
+    anim->mFrameNum = frame;
 }
 #endif
 
@@ -1139,7 +1139,7 @@ INCLUDE_ASM("ui/uivector", cUIThing_setMiscData);
  * @param miscData  the value to store
  */
 extern "C" void cUIThing_setMiscData(cUIThing* uiThing, int miscData) {
-    (uiThing->mMiscData) = miscData;
+    uiThing->mMiscData = miscData;
 }
 #endif
 //100%
@@ -1152,7 +1152,7 @@ INCLUDE_ASM("ui/uivector", cUIThing_setOrientation);
  * @param orientation  0 for horizontal, 1 for vertical
  */
 extern "C" void cUIThing_setOrientation(cUIThing* uiThing, int orientation) {
-    (uiThing->mAttr) = (int) (((uiThing->mAttr) & ~1) | (orientation & 1));
+    uiThing->mAttr = (int) (((uiThing->mAttr) & ~1) | (orientation & 1));
 }
 #endif
 
@@ -1207,7 +1207,7 @@ INCLUDE_ASM("ui/uivector", cUIThing_setRadAngle);
  * @param fparg0  the angle in radians
  */
 extern "C" void cUIThing_setRadAngle(cUIThing* uiThing, float fparg0) {
-    (uiThing->mAngle.z) = fparg0;
+    uiThing->mAngle.z = fparg0;
 }
 #endif
 //100%
@@ -1246,7 +1246,7 @@ INCLUDE_ASM("ui/uivector", cUIThing_setDrawLayer);
  * @param layer  the draw layer (0..31)
  */
 extern "C" void cUIThing_setDrawLayer(cUIThing* uiThing, int layer) {
-    (uiThing->mAttr) = (int) (((uiThing->mAttr) & ~0x1F00) | ((layer & 0x1F) << 8));
+    uiThing->mAttr = (int) (((uiThing->mAttr) & ~0x1F00) | ((layer & 0x1F) << 8));
 }
 #endif
 //100%
@@ -1259,7 +1259,7 @@ INCLUDE_ASM("ui/uivector", cUIThing_setPivot);
  * @param pivot  the pivot code (0..63; tAttrThing_tAttrThing starts it at 9)
  */
 extern "C" void cUIThing_setPivot(cUIThing* uiThing, int pivot) {
-    (uiThing->mAttr) = (int) (((uiThing->mAttr) & 0xFFF81FFF) | ((pivot & 0x3F) << 13));
+    uiThing->mAttr = (int) (((uiThing->mAttr) & 0xFFF81FFF) | ((pivot & 0x3F) << 13));
 }
 #endif
 //100%
@@ -1285,7 +1285,7 @@ INCLUDE_ASM("ui/uivector", cUIThing_setHashName);
  * @param hashName  the hashed name
  */
 extern "C" void cUIThing_setHashName(cUIThing* uiThing, int hashName) {
-    (uiThing->mHashName) = hashName;
+    uiThing->mHashName = hashName;
 }
 #endif
 //100%
@@ -2840,7 +2840,7 @@ INCLUDE_ASM("ui/uivector", cUIState_setHashName);
  * @param hashName  the hashed name
  */
 extern "C" void cUIState_setHashName(cUIState* uiState, int hashName) {
-    (uiState->mHashName) = hashName;
+    uiState->mHashName = hashName;
 }
 #endif
 //100%
@@ -2879,7 +2879,7 @@ INCLUDE_ASM("ui/uivector", cUIState_setCurrentCtrl);
  * @param currentCtrl  the controller index (-1 for none)
  */
 extern "C" void cUIState_setCurrentCtrl(cUIState* uiState, signed char currentCtrl) {
-    (uiState->mCurrentCtrl) = currentCtrl;
+    uiState->mCurrentCtrl = currentCtrl;
 }
 #endif
 //100%
@@ -2944,7 +2944,7 @@ INCLUDE_ASM("ui/uivector", cUIState_setMiscData);
  * @param miscData  the value to store
  */
 extern "C" void cUIState_setMiscData(cUIState* uiState, int miscData) {
-    (uiState->miMiscData) = miscData;
+    uiState->miMiscData = miscData;
 }
 #endif
 //100%
@@ -2970,7 +2970,7 @@ INCLUDE_ASM("ui/uivector", cUIState_setMode);
  * @param mode  the mode (0..63)
  */
 extern "C" void cUIState_setMode(cUIState* uiState, int mode) {
-    (uiState->mAttrState) = (int) (((uiState->mAttrState) & ~0x3F00) | ((mode & 0x3F) << 8));
+    uiState->mAttrState = (int) (((uiState->mAttrState) & ~0x3F00) | ((mode & 0x3F) << 8));
 }
 #endif
 //100%
@@ -2996,7 +2996,7 @@ INCLUDE_ASM("ui/uivector", cUIState_setFirstTime);
  * @param firstTime  1 to set the flag, 0 to clear it
  */
 extern "C" void cUIState_setFirstTime(cUIState* uiState, int firstTime) {
-    (uiState->mAttrState) = (int) (((uiState->mAttrState) & ~0x10) | ((firstTime & 1) * 0x10));
+    uiState->mAttrState = (int) (((uiState->mAttrState) & ~0x10) | ((firstTime & 1) * 0x10));
 }
 #endif
 //100%
@@ -3022,7 +3022,7 @@ INCLUDE_ASM("ui/uivector", cUIState_setEnabled);
  * @param enabled  1 to enable the state, 0 to disable it
  */
 extern "C" void cUIState_setEnabled(cUIState* uiState, int enabled) {
-    (uiState->mAttrState) = (int) (((uiState->mAttrState) & ~0x20) | ((enabled & 1) << 5));
+    uiState->mAttrState = (int) (((uiState->mAttrState) & ~0x20) | ((enabled & 1) << 5));
 }
 #endif
 //100%
@@ -3048,7 +3048,7 @@ INCLUDE_ASM("ui/uivector", cUIState_setPushCheck);
  * @param pushCheck  1 to set the flag, 0 to clear it
  */
 extern "C" void cUIState_setPushCheck(cUIState* uiState, int pushCheck) {
-    (uiState->mAttrState) = (int) (((uiState->mAttrState) & ~0x4000) | ((pushCheck & 1) << 0xE));
+    uiState->mAttrState = (int) (((uiState->mAttrState) & ~0x4000) | ((pushCheck & 1) << 0xE));
 }
 #endif
 //100%
@@ -3074,7 +3074,7 @@ INCLUDE_ASM("ui/uivector", cUIState_setPopFloor);
  * @param popFloor  1 to set the flag, 0 to clear it
  */
 extern "C" void cUIState_setPopFloor(cUIState* uiState, int popFloor) {
-    (uiState->mAttrState) = (int) (((uiState->mAttrState) & 0xFFFF7FFF) | ((popFloor & 1) << 0xF));
+    uiState->mAttrState = (int) (((uiState->mAttrState) & 0xFFFF7FFF) | ((popFloor & 1) << 0xF));
 }
 #endif
 //100%
@@ -3100,7 +3100,7 @@ INCLUDE_ASM("ui/uivector", cUIState_setExplicit);
  * @param isExplicit  1 to set the flag, 0 to clear it
  */
 extern "C" void cUIState_setExplicit(cUIState* uiState, int isExplicit) {
-    (uiState->mAttrState) = (int) (((uiState->mAttrState) & ~0x40) | ((isExplicit & 1) << 6));
+    uiState->mAttrState = (int) (((uiState->mAttrState) & ~0x40) | ((isExplicit & 1) << 6));
 }
 #endif
 //100%
@@ -3127,7 +3127,7 @@ INCLUDE_ASM("ui/uivector", cUIState_setPendingDelete);
  * @param pendingDelete  1 to set the flag, 0 to clear it
  */
 extern "C" void cUIState_setPendingDelete(cUIState* uiState, int pendingDelete) {
-    (uiState->mAttrState) = (int) (((uiState->mAttrState) & ~0x80) | ((pendingDelete & 1) << 7));
+    uiState->mAttrState = (int) (((uiState->mAttrState) & ~0x80) | ((pendingDelete & 1) << 7));
 }
 #endif
 //100%
@@ -3166,7 +3166,7 @@ INCLUDE_ASM("ui/uivector", cUIState_setHasPopup);
  * @param popupCount  the count (0..3)
  */
 extern "C" void cUIState_setHasPopup(cUIState* uiState, int popupCount) {
-    (uiState->mAttrState) = (int) (((uiState->mAttrState) & ~6) | ((popupCount & 3) * 2));
+    uiState->mAttrState = (int) (((uiState->mAttrState) & ~6) | ((popupCount & 3) * 2));
 }
 #endif
 //100%
@@ -3221,7 +3221,7 @@ INCLUDE_ASM("ui/uivector", cUIState_setPopup);
  * @param isPopup  1 to mark the state as a popup, 0 not to
  */
 extern "C" void cUIState_setPopup(cUIState* uiState, int isPopup) {
-    (uiState->mAttrState) = (int) (((uiState->mAttrState) & ~1) | (isPopup & 1));
+    uiState->mAttrState = (int) (((uiState->mAttrState) & ~1) | (isPopup & 1));
 }
 #endif
 //100%
@@ -3247,7 +3247,7 @@ INCLUDE_ASM("ui/uivector", cUIState_setVisible);
  * @param visible  1 to show the state, 0 to hide it
  */
 extern "C" void cUIState_setVisible(cUIState* uiState, int visible) {
-    (uiState->mAttrState) = (int) (((uiState->mAttrState) & ~8) | ((visible & 1) * 8));
+    uiState->mAttrState = (int) (((uiState->mAttrState) & ~8) | ((visible & 1) * 8));
 }
 #endif
 
@@ -3390,7 +3390,7 @@ INCLUDE_ASM("ui/uivector", cUIState_setUserNum);
  * @param userNum  the user number (-1 for none)
  */
 extern "C" void cUIState_setUserNum(cUIState* uiState, signed char userNum) {
-    (uiState->mUserNum) = userNum;
+    uiState->mUserNum = userNum;
 }
 #endif
 //100%
@@ -3655,7 +3655,7 @@ INCLUDE_ASM("ui/uivector", cUIScreen_setFocus);
  * @param focused  non-zero to give the screen focus
  */
 extern "C" void cUIScreen_setFocus(cUIScreen* uiScreen, int focused) {
-    (uiScreen->mAttrScreen) = (int) (((uiScreen->mAttrScreen) & ~1) | (focused != 0));
+    uiScreen->mAttrScreen = (int) (((uiScreen->mAttrScreen) & ~1) | (focused != 0));
 }
 #endif
 //100%
@@ -3813,7 +3813,7 @@ INCLUDE_ASM("ui/uivector", cUIText_setFontIndex);
  * @param fontIndex  the font index (0..3)
  */
 extern "C" void cUIText_setFontIndex(cUIText* uiText, int fontIndex) {
-    (uiText->mAttrText) = (int) (((uiText->mAttrText) & ~3) | (fontIndex & 3));
+    uiText->mAttrText = (int) (((uiText->mAttrText) & ~3) | (fontIndex & 3));
 }
 #endif
 //100%
@@ -4139,7 +4139,7 @@ INCLUDE_ASM("ui/uivector", cUIScrollBar_setHideState);
  * @param hideState  the eScrollBarHide value
  */
 extern "C" void cUIScrollBar_setHideState(cUIScrollBar* uiScrollBar, int hideState) {
-    (uiScrollBar->meHideState) = hideState;
+    uiScrollBar->meHideState = hideState;
 }
 #endif
 //100%
@@ -4305,7 +4305,7 @@ INCLUDE_ASM("ui/uivector", cUIProgress_setNumValues);
  * @param numValues  the step count
  */
 extern "C" void cUIProgress_setNumValues(cUIProgress* uiProgress, int numValues) {
-    (uiProgress->mNumValues) = numValues;
+    uiProgress->mNumValues = numValues;
 }
 #endif
 //100%
@@ -4391,7 +4391,7 @@ INCLUDE_ASM("ui/uivector", cUISlider_setValue);
  * @param value  the new value
  */
 extern "C" void cUISlider_setValue(cUISlider* uiSlider, int value) {
-    (uiSlider->mValue) = value;
+    uiSlider->mValue = value;
 }
 #endif
 //100%
@@ -4404,7 +4404,7 @@ INCLUDE_ASM("ui/uivector", cUISlider_setNumValues);
  * @param numValues  the step count
  */
 extern "C" void cUISlider_setNumValues(cUISlider* uiSlider, int numValues) {
-    (uiSlider->mNumValues) = numValues;
+    uiSlider->mNumValues = numValues;
 }
 #endif
 //100%

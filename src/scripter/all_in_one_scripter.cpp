@@ -356,7 +356,7 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptEntity_SetDatabaseID);
  * @param databaseId  the new database ID
  */
 extern "C" void cScriptEntity_SetDatabaseID(cScriptEntity* entity, int databaseId) {
-    (entity->mDBID) = databaseId;
+    entity->mDBID = databaseId;
 }
 #endif
 
@@ -369,7 +369,7 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptEntity_ClearDatabaseID);
  * @param entity  the script entity
  */
 extern "C" void cScriptEntity_ClearDatabaseID(cScriptEntity* entity) {
-    (entity->mDBID) = -1;
+    entity->mDBID = -1;
 }
 #endif
 

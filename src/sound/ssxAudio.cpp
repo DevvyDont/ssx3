@@ -3506,10 +3506,10 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_CancelRMSData);
  * @param audio  the audio system
  */
 extern "C" void cSSXAudio_CancelRMSData(cSSXAudio* audio) {
-    (audio->mValidRMSData) = 0;
-    (audio->mRMSFinalValue) = 1.0f;
-    (audio->mRMSStepFrame) = 0;
-    (audio->mRMSStepValue) = (float) (1.0f - (audio->mRMSCurValue));
+    audio->mValidRMSData = 0;
+    audio->mRMSFinalValue = 1.0f;
+    audio->mRMSStepFrame = 0;
+    audio->mRMSStepValue = (float) (1.0f - (audio->mRMSCurValue));
 }
 #endif
 

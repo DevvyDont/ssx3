@@ -81,11 +81,11 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_cOVState(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
@@ -176,13 +176,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVTemplate_Simple_cOVTemplate_Simple(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = D_00474D30;
+    ovState->mVtbl = (void**)D_00474D30;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -236,13 +236,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVTemplate_Dialog_cOVTemplate_Dialog(cOVTemplate_Dialog* ovState, int engine, int overlayId) {
     cUIState_cUIState(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = D_00474C58;
+    ovState->mVtbl = (void**)D_00474C58;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -332,13 +332,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_REPLAY_cOVState_REPLAY(cOVState_REPLAY* ovState, int engine, int overlayId) {
     cUIState_cUIState(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_REPLAY_vtbl;
+    ovState->mVtbl = (void**)cOVState_REPLAY_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -415,15 +415,15 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_QUIT_cOVState_QUIT(cOVTemplate_Dialog* ovState, int engine, int overlayId) {
     cUIState_cUIState_C950(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = D_004748F8;
+    ovState->mVtbl = (void**)D_004748F8;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
-    (ovState->mDialogType) = 1;
+    ovState->mDialogType = 1;
     return ((void*)ovState);
 }
 #endif
@@ -766,7 +766,7 @@ extern char cOVStateHUD1P_vtbl[];
  * @param flags  g++ destructor flags, passed on to cUIState__cUIState(); bit 0 set frees the object
  */
 extern "C" void cOVStateHUD1P__cOVStateHUD1P(cOVStateHUD1P* self, int flags) {
-    ((char*)self->mVtbl) = cOVStateHUD1P_vtbl;
+    self->mVtbl = (void**)cOVStateHUD1P_vtbl;
     if ((char*)&self->mRiderInfo[0] != 0) {
         char *element = (char*)&self->mRiderInfo[0] + 0x118;
         while ((char*)&self->mRiderInfo[0] != element) {
@@ -842,13 +842,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_HEAT_STANDINGS_cOVState_HEAT_STANDINGS(cOVState_HEAT_STANDINGS* ovState, int engine, int overlayId) {
     cUIState_cUIState(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_HEAT_STANDINGS_vtbl;
+    ovState->mVtbl = (void**)cOVState_HEAT_STANDINGS_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -900,13 +900,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_FINAL_STANDINGS_cOVState_FINAL_STANDINGS(cOVState_FINAL_STANDINGS* ovState, int engine, int overlayId) {
     cUIState_cUIState(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_FINAL_STANDINGS_vtbl;
+    ovState->mVtbl = (void**)cOVState_FINAL_STANDINGS_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -959,13 +959,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *func_0021CE28(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState_CE28(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = D_00473ED8;
+    ovState->mVtbl = (void**)D_00473ED8;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -1021,16 +1021,16 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_RACE_FINISHOV_cOVState_RACE_FINISHOV(cOVState_RACE_FINISHOV* ovState, int engine, int overlayId) {
     cUIState_cUIState_CEB8(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
-    (ovState->unk_0A0) = 1;
-    ((char*)ovState->mVtbl) = cOVState_RACE_FINISHOV_vtbl;
-    (ovState->mHashName) = GetHashValue32(str_finishov);
+    ovState->unk_0A0 = 1;
+    ovState->mVtbl = (void**)cOVState_RACE_FINISHOV_vtbl;
+    ovState->mHashName = GetHashValue32(str_finishov);
     return ((void*)ovState);
 }
 #endif
@@ -1085,16 +1085,16 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_BASSSP_QUAL_FINISHOV_cOVState_BASSSP_QUAL_FINISHOV(cOVState_BASSSP_QUAL_FINISHOV* ovState, int engine, int overlayId) {
     cUIState_cUIState_CF60(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
-    (ovState->unk_0A0) = 1;
-    ((char*)ovState->mVtbl) = cOVState_BASSSP_QUAL_FINISHOV_vtbl;
-    (ovState->mHashName) = GetHashValue32(str_finishov);
+    ovState->unk_0A0 = 1;
+    ovState->mVtbl = (void**)cOVState_BASSSP_QUAL_FINISHOV_vtbl;
+    ovState->mHashName = GetHashValue32(str_finishov);
     return ((void*)ovState);
 }
 #endif
@@ -1146,13 +1146,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_TOURNAMENT_STANDINGS_cOVState_TOURNAMENT_STANDINGS(cOVState_TOURNAMENT_STANDINGS* ovState, int engine, int overlayId) {
     cUIState_cUIState_D008(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = D_00473C50;
+    ovState->mVtbl = (void**)D_00473C50;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -1179,13 +1179,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *func_0021D070(cOVStateHiScoreList* ovState) {
     cUIState_cUIState(ovState, 0);
-    (ovState->mOVID) = 0;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = 0;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVStateHiScoreList_vtbl;
+    ovState->mVtbl = (void**)cOVStateHiScoreList_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -1215,13 +1215,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVStateHiScoreList_cOVStateHiScoreList(cOVStateHiScoreList* ovState, int engine, int overlayId) {
     cUIState_cUIState_D0D0(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVStateHiScoreList_vtbl;
+    ovState->mVtbl = (void**)cOVStateHiScoreList_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -3121,7 +3121,7 @@ extern char cFEStateCareerStats_vtbl[];
  */
 extern "C" void *func_00220E58(cFEStateCareerStats* state) {
     cUIState_cUIState(state, 0);
-    ((char*)state->mVtbl) = cFEStateCareerStats_vtbl;
+    state->mVtbl = (void**)cFEStateCareerStats_vtbl;
     return ((void*)state);
 }
 #endif
@@ -3193,13 +3193,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_ENTERLODGE_cOVState_ENTERLODGE(cOVState_ENTERLODGE* ovState, int engine, int overlayId) {
     cUIState_cUIState_0EE0(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_ENTERLODGE_vtbl;
+    ovState->mVtbl = (void**)cOVState_ENTERLODGE_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -3226,13 +3226,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *func_00220F48(cOVState_BIGCHALLENGE_START* ovState) {
     cUIState_cUIState(ovState, 0);
-    (ovState->mOVID) = 0;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = 0;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_BIGCHALLENGE_START_vtbl;
+    ovState->mVtbl = (void**)cOVState_BIGCHALLENGE_START_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -3265,13 +3265,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_BIGCHALLENGE_START_cOVState_BIGCHALLENGE_START(cOVState_BIGCHALLENGE_START* ovState, int engine, int overlayId) {
     cUIState_cUIState_0FA8(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_BIGCHALLENGE_START_vtbl;
+    ovState->mVtbl = (void**)cOVState_BIGCHALLENGE_START_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     cOVState_BIGCHALLENGE_START_getChallengeData(ovState);
     return ((void*)ovState);
@@ -3319,13 +3319,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_BIGCHALLENGE_FAIL_cOVState_BIGCHALLENGE_FAIL(cOVState_BIGCHALLENGE_FAIL* ovState) {
     cUIState_cUIState(ovState, 0);
-    (ovState->mOVID) = 0;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = 0;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_BIGCHALLENGE_FAIL_vtbl;
+    ovState->mVtbl = (void**)cOVState_BIGCHALLENGE_FAIL_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -3359,13 +3359,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_BIGCHALLENGE_FAIL_cOVState_BIGCHALLENGE_FAIL_2(cOVState_BIGCHALLENGE_FAIL* ovState, int engine, int overlayId) {
     cUIState_cUIState_10A0(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_BIGCHALLENGE_FAIL_vtbl;
+    ovState->mVtbl = (void**)cOVState_BIGCHALLENGE_FAIL_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     cOVState_BIGCHALLENGE_FAIL_getChallengeData(ovState);
     return ((void*)ovState);
@@ -3441,13 +3441,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_TOPTIMES_cOVState_TOPTIMES(cOVState_TOPTIMES* ovState, int engine, int overlayId) {
     cUIState_cUIState_1160(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_TOPTIMES_vtbl;
+    ovState->mVtbl = (void**)cOVState_TOPTIMES_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -3474,13 +3474,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_TRANSPORT_cOVState_TRANSPORT(cOVState_TRANSPORT* ovState) {
     cUIState_cUIState(ovState, 0);
-    (ovState->mOVID) = 0;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = 0;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_TRANSPORT_vtbl;
+    ovState->mVtbl = (void**)cOVState_TRANSPORT_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -3514,13 +3514,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_TRANSPORT_cOVState_TRANSPORT_2(cOVState_TRANSPORT* ovState, int engine, int overlayId) {
     cUIState_cUIState_1228(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_TRANSPORT_vtbl;
+    ovState->mVtbl = (void**)cOVState_TRANSPORT_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     cUITemplate_MAP_init((char*)&ovState->mMap);
     return ((void*)ovState);
@@ -3579,13 +3579,13 @@ struct Elem { Elem() {} };
  */
 extern "C" void *func_002212C8(cOVState_MAP* ovState) {
     cUIState_cUIState_12C8(ovState, 0);
-    (ovState->mOVID) = 0;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = 0;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_MAP_vtbl;
+    ovState->mVtbl = (void**)cOVState_MAP_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     new ((char*)&ovState->mbSessionUnlocked) Elem[8];
     return ((void*)ovState);
@@ -3618,13 +3618,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_MAP_cOVState_MAP(cOVState_MAP* ovState, int engine, int overlayId) {
     cUIState_cUIState_1350(ovState, engine);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_MAP_vtbl;
+    ovState->mVtbl = (void**)cOVState_MAP_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     new ((char*)&ovState->mbSessionUnlocked) Elem[8];
     return ((void*)ovState);
@@ -3680,13 +3680,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *func_00221408(cOVState* ovState) {
     cUIState_cUIState(ovState, 0);
-    (ovState->mOVID) = 0;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = 0;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = D_00473248;
+    ovState->mVtbl = (void**)D_00473248;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -3717,13 +3717,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *func_00221468(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState_1468(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = D_00473248;
+    ovState->mVtbl = (void**)D_00473248;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -3771,13 +3771,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *func_002214F8(cOVTemplate_PauseMenu* ovState) {
     cUIState_cUIState(ovState, 0);
-    (ovState->mOVID) = 0;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = 0;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVTemplate_PauseMenu_vtbl;
+    ovState->mVtbl = (void**)cOVTemplate_PauseMenu_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -3864,13 +3864,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *func_002215F0(cOVState* ovState) {
     cUIState_cUIState(ovState, 0);
-    (ovState->mOVID) = 0;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = 0;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_PAUSE_COMPETE_vtbl;
+    ovState->mVtbl = (void**)cOVState_PAUSE_COMPETE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -3903,13 +3903,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_PAUSE_COMPETE_cOVState_PAUSE_COMPETE(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState_1658(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_PAUSE_COMPETE_vtbl;
+    ovState->mVtbl = (void**)cOVState_PAUSE_COMPETE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -3959,13 +3959,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *func_002216F0(cOVState* ovState) {
     cUIState_cUIState(ovState, 0);
-    (ovState->mOVID) = 0;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = 0;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_PAUSE_BIGCHAL_vtbl;
+    ovState->mVtbl = (void**)cOVState_PAUSE_BIGCHAL_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -3998,13 +3998,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_PAUSE_BIGCHAL_cOVState_PAUSE_BIGCHAL(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState_1758(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_PAUSE_BIGCHAL_vtbl;
+    ovState->mVtbl = (void**)cOVState_PAUSE_BIGCHAL_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -4054,13 +4054,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *func_002217F0(cOVState* ovState) {
     cUIState_cUIState(ovState, 0);
-    (ovState->mOVID) = 0;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = 0;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_PAUSE_FREERIDE_vtbl;
+    ovState->mVtbl = (void**)cOVState_PAUSE_FREERIDE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -4093,13 +4093,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_PAUSE_FREERIDE_cOVState_PAUSE_FREERIDE(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState_1858(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_PAUSE_FREERIDE_vtbl;
+    ovState->mVtbl = (void**)cOVState_PAUSE_FREERIDE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -4149,13 +4149,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *func_002218F0(cOVState* ovState) {
     cUIState_cUIState(ovState, 0);
-    (ovState->mOVID) = 0;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = 0;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_PAUSE_SPOKE_vtbl;
+    ovState->mVtbl = (void**)cOVState_PAUSE_SPOKE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -4188,13 +4188,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_PAUSE_SPOKE_cOVState_PAUSE_SPOKE(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState_1958(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_PAUSE_SPOKE_vtbl;
+    ovState->mVtbl = (void**)cOVState_PAUSE_SPOKE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -4244,13 +4244,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *func_002219F0(cOVState* ovState) {
     cUIState_cUIState(ovState, 0);
-    (ovState->mOVID) = 0;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = 0;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_PAUSE_QUICKPLAY_vtbl;
+    ovState->mVtbl = (void**)cOVState_PAUSE_QUICKPLAY_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -4283,13 +4283,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_PAUSE_QUICKPLAY_cOVState_PAUSE_QUICKPLAY(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState_1A58(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_PAUSE_QUICKPLAY_vtbl;
+    ovState->mVtbl = (void**)cOVState_PAUSE_QUICKPLAY_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -4338,13 +4338,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *func_00221AF0(cOVState* ovState) {
     cUIState_cUIState(ovState, 0);
-    (ovState->mOVID) = 0;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = 0;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_PAUSE_ONLINE_vtbl;
+    ovState->mVtbl = (void**)cOVState_PAUSE_ONLINE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -4377,13 +4377,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_PAUSE_ONLINE_cOVState_PAUSE_ONLINE(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState_1B58(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_PAUSE_ONLINE_vtbl;
+    ovState->mVtbl = (void**)cOVState_PAUSE_ONLINE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
     return ((void*)ovState);
@@ -4457,13 +4457,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_PAUSE_OPTIONS_cOVState_PAUSE_OPTIONS(cOVState_PAUSE_OPTIONS* ovState, int engine, int overlayId) {
     cUIState_cUIState_1C18(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_PAUSE_OPTIONS_vtbl;
+    ovState->mVtbl = (void**)cOVState_PAUSE_OPTIONS_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -4490,13 +4490,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *func_00221C80(cOVState_PAUSE_ONLINE_ERROR* ovState) {
     cUIState_cUIState(ovState, 0);
-    (ovState->mOVID) = 0;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = 0;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_PAUSE_ONLINE_ERROR_vtbl;
+    ovState->mVtbl = (void**)cOVState_PAUSE_ONLINE_ERROR_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -4528,15 +4528,15 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_PAUSE_ONLINE_ERROR_cOVState_PAUSE_ONLINE_ERROR(cOVState_PAUSE_ONLINE_ERROR* ovState, int engine, int overlayId) {
     cUIState_cUIState_1CE0(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_PAUSE_ONLINE_ERROR_vtbl;
+    ovState->mVtbl = (void**)cOVState_PAUSE_ONLINE_ERROR_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
-    (ovState->mbShouldDisplayAuxInfo) = 1;
+    ovState->mbShouldDisplayAuxInfo = 1;
     ((int)ovState->miStartPingTick) = 0;
     return ((void*)ovState);
 }
@@ -4607,7 +4607,7 @@ extern char cOVState_PROFILE_vtbl[];
  */
 extern "C" void *func_00221DB0(cOVState_PROFILE* state) {
     cFEMemCard_cFEMemCard2(state, 0, 0);
-    ((char*)state->mVtbl) = cOVState_PROFILE_vtbl;
+    state->mVtbl = (void**)cOVState_PROFILE_vtbl;
     return ((void*)state);
 }
 #endif
@@ -4658,13 +4658,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_HEAT_PREEVENT_cOVState_HEAT_PREEVENT(cOVState_HEAT_PREEVENT* ovState, int engine, int overlayId) {
     cUIState_cUIState_1E18(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_HEAT_PREEVENT_vtbl;
+    ovState->mVtbl = (void**)cOVState_HEAT_PREEVENT_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -4716,13 +4716,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *func_00221EA8(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState_1EA8(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = D_00472778;
+    ovState->mVtbl = (void**)D_00472778;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -4774,13 +4774,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *func_00221F38(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState_1F38(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = D_004726A0;
+    ovState->mVtbl = (void**)D_004726A0;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -4832,13 +4832,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *func_00221FC8(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState_1FC8(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = D_004725C8;
+    ovState->mVtbl = (void**)D_004725C8;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -4882,7 +4882,7 @@ extern char cOVState_SAVEREPLAY_vtbl[];
  */
 extern "C" void *func_00222058(cOVState_SAVEREPLAY* ovState) {
     cFEMemCard_cFEMemCard2(ovState, 0, 0);
-    ((char*)ovState->mVtbl) = cOVState_SAVEREPLAY_vtbl;
+    ovState->mVtbl = (void**)cOVState_SAVEREPLAY_vtbl;
     return ((void*)ovState);
 }
 #endif
@@ -4925,7 +4925,7 @@ extern char cOVState_SAVEOPTIONS_vtbl[];
  */
 extern "C" void *func_002220C0(cOVState_SAVEOPTIONS* ovState) {
     cFEMemCard_cFEMemCard2(ovState, 0, 0);
-    ((char*)ovState->mVtbl) = cOVState_SAVEOPTIONS_vtbl;
+    ovState->mVtbl = (void**)cOVState_SAVEOPTIONS_vtbl;
     return ((void*)ovState);
 }
 #endif
@@ -4951,13 +4951,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *func_00222100(cOVStateRewardsList* ovState) {
     cUIState_cUIState(ovState, 0);
-    (ovState->mOVID) = 0;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = 0;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVStateRewardsList_vtbl;
+    ovState->mVtbl = (void**)cOVStateRewardsList_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -4987,13 +4987,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVStateRewardsList_cOVStateRewardsList(cOVStateRewardsList* ovState, int engine, int overlayId) {
     cUIState_cUIState_2160(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVStateRewardsList_vtbl;
+    ovState->mVtbl = (void**)cOVStateRewardsList_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -5066,13 +5066,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVState_REWARDS_cOVState_REWARDS(cOVState_REWARDS* ovState, int engine, int overlayId) {
     cUIState_cUIState_2218(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVState_REWARDS_vtbl;
+    ovState->mVtbl = (void**)cOVState_REWARDS_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -5130,7 +5130,7 @@ extern char cOVState_AUTOSAVE_vtbl[];
  */
 extern "C" void *func_002222B8(cOVState_AUTOSAVE* state) {
     cFEMemCard_cFEMemCard2(state, 0, 0);
-    ((char*)state->mVtbl) = cOVState_AUTOSAVE_vtbl;
+    state->mVtbl = (void**)cOVState_AUTOSAVE_vtbl;
     return ((void*)state);
 }
 #endif
@@ -5156,13 +5156,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *func_002222F8(cOVStateTrophy* ovState) {
     cUIState_cUIState(ovState, 0);
-    (ovState->mOVID) = 0;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = 0;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVStateTrophy_vtbl;
+    ovState->mVtbl = (void**)cOVStateTrophy_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }
@@ -5192,13 +5192,13 @@ extern unsigned short str_sp_b[];
  */
 extern "C" void *cOVStateTrophy_cOVStateTrophy(cOVStateTrophy* ovState, int engine, int overlayId) {
     cUIState_cUIState_2358(ovState);
-    (ovState->mOVID) = overlayId;
-    (ovState->mDoneTransition) = 0;
-    ((char*)ovState->mVtbl) = cOVState_vtbl;
-    (ovState->mAllowPauseMenu) = 0;
-    (ovState->mRemovePDA) = 0;
+    ovState->mOVID = overlayId;
+    ovState->mDoneTransition = 0;
+    ovState->mVtbl = (void**)cOVState_vtbl;
+    ovState->mAllowPauseMenu = 0;
+    ovState->mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    ((char*)ovState->mVtbl) = cOVStateTrophy_vtbl;
+    ovState->mVtbl = (void**)cOVStateTrophy_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ((void*)ovState);
 }

@@ -894,7 +894,7 @@ extern "C" void **luno_cLunoTable_cLunoTable1(void **dest, void **src) {
 
     temp_6 = (luno_cLunoTableData*)(*src);
     *dest = ((void*)temp_6);
-    (temp_6->RefCount) = (int) ((temp_6->RefCount) + 1);
+    temp_6->RefCount = (int) ((temp_6->RefCount) + 1);
     return dest;
 }
 #endif

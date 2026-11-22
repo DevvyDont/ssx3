@@ -1714,7 +1714,7 @@ INCLUDE_ASM("render/graphicsman", tParticleEmitter_setEternal);
  */
 extern "C" void tParticleEmitter_setEternal(tParticleEmitter* particleEmitter) {
     *(int*)&particleEmitter->LifeR = 0;
-    (particleEmitter->Life0) = 1e20f;
+    particleEmitter->Life0 = 1e20f;
 }
 #endif
 //100%

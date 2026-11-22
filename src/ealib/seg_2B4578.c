@@ -15860,7 +15860,7 @@ void SNDLINKI_push(SNDLINKLIST* list, void *node) {
         ((void*)list->ptail) = node;
     }
     ((void*)list->phead) = node;
-    (list->items) = (int) ((list->items) + 1);
+    list->items = (int) ((list->items) + 1);
 }
 #endif
 
@@ -15887,7 +15887,7 @@ void SNDLINKI_pushtail(SNDLINKLIST* list, SNDLINKNODE* node) {
         list->phead = node;
     }
     list->ptail = node;
-    (list->items) = (int) ((list->items) + 1);
+    list->items = (int) ((list->items) + 1);
 }
 #endif
 
@@ -15916,7 +15916,7 @@ void *SNDLINKI_pop(SNDLINKLIST* list) {
         } else {
             temp_2->pprev = 0;
         }
-        (list->items) = (int) ((list->items) - 1);
+        list->items = (int) ((list->items) - 1);
     }
     return temp_3;
 }
@@ -15951,7 +15951,7 @@ void SNDLINKI_remove(SNDLINKLIST* list, SNDLINKNODE* node) {
     if (temp_3_2 != 0) {
         temp_3_2->pprev = node->pprev;
     }
-    (list->items) = (int) ((list->items) - 1);
+    list->items = (int) ((list->items) - 1);
 }
 #endif
 
@@ -18012,7 +18012,7 @@ void MIX_filteradd(int voice, int channelIndex, SNDFILTERDEF* filterDesc) {
     voiceState = (int)sndmix.smv + temp_7;
     temp_2 = (SFILTERNODE*)SNDMEMI_alloc_8E28((filterDesc->statesize));
     ((int (*)(void*, int, int))filterDesc->filterinit)(temp_2, (filterDesc->id), channelIndex);
-    (temp_2->priority) = (unsigned short) (*(unsigned short*)&filterDesc->priority);
+    temp_2->priority = (unsigned short) (*(unsigned short*)&filterDesc->priority);
     ((int)temp_2->filterfn) = (int) ((int)filterDesc->filter);
     ((int)temp_2->restorefn) = (int) ((int)filterDesc->filterrestore);
     (*(signed char*)&temp_2->requester) = 0;
@@ -18408,7 +18408,7 @@ int SFILTER_unpackmtf(UNPACKMTFSTATE* node, int count, int srcBuffer, int *buffe
         return -1;
     }
     temp_2 = CMTBLKDecf_Decode_9360(((int)node->pDecoder), &cursor, count);
-    (node->curframe) = (unsigned int) ((node->curframe) + temp_2);
+    node->curframe = (unsigned int) ((node->curframe) + temp_2);
     cursor = cursor + temp_2;
     if (temp_2 < count) {
         memset_9360(cursor, 0, (count -= temp_2) * 4);
@@ -18745,12 +18745,12 @@ extern int CMTBLKDecf_CMTBLKDecf_9960(int) __asm__("CMTBLKDecf_CMTBLKDecf");
  */
 void SFILTER_unpackmtpfinit(UNPACKMTPFSTATE* node, UNPACKINITPARAMS* source) {
     (*(int**)&node->sfn) = SFILTER_unpackmtpf_9960;
-    (node->packetinstancehandle) = SNDPKTPLAYI_voicetopackethandle_9960(SNDDRV_getmastervoice_9960((source->voice)));
+    node->packetinstancehandle = SNDPKTPLAYI_voicetopackethandle_9960(SNDDRV_getmastervoice_9960((source->voice)));
     (*(signed char*)&node->samplechan) = SNDDRV_getsamplechan_9960((source->voice));
     ((int)node->psample) = 0;
     (*(short*)&node->curframe) = 0;
-    (node->platformver) = (source->platformver);
-    (node->totalframes) = (source->totalframes);
+    node->platformver = (source->platformver);
+    node->totalframes = (source->totalframes);
     ((int*)node->sfn.restorefn) = SFILTER_unpackmtpfrestore_9960;
     ((int)node->pDecoder) = CMTBLKDecf_CMTBLKDecf_9960(CMTBLKDecf_operator_new_9960(3432));
     ((int)node->prevframesunpacked) = 0;
@@ -18992,12 +18992,12 @@ extern void SFILTER_unpackpf(void);
  */
 void SFILTER_unpackpfinit(UNPACKPFSTATE* node, UNPACKINITPARAMS* source) {
     (*(int**)&node->sfn) = (int*)&SFILTER_unpackpf;
-    (node->packetinstancehandle) = SNDPKTPLAYI_voicetopackethandle(SNDDRV_getmastervoice((source->voice)));
+    node->packetinstancehandle = SNDPKTPLAYI_voicetopackethandle(SNDDRV_getmastervoice((source->voice)));
     (*(signed char*)&node->samplechan) = SNDDRV_getsamplechan((source->voice));
-    (node->totalframes) = -1;
+    node->totalframes = -1;
     ((int)node->psample) = 0;
-    (node->curframe) = 0;
-    (node->bits16) = (*(unsigned char*)&source->bits16);
+    node->curframe = 0;
+    node->bits16 = (*(unsigned char*)&source->bits16);
     ((int)node->prevframesunpacked) = 0;
 }
 #endif
@@ -19520,12 +19520,12 @@ extern int SFILTER_unpackxapfrestore_A610[] __asm__("SFILTER_unpackxapfrestore")
 void SFILTER_unpackxapfinit(UNPACKXAPFSTATE* node, UNPACKINITPARAMS* source) {
     (*(int**)&node->sfn) = SFILTER_unpackxapf_A610;
     ((int*)node->sfn.restorefn) = SFILTER_unpackxapfrestore_A610;
-    (node->packetinstancehandle) = SNDPKTPLAYI_voicetopackethandle_A610(SNDDRV_getmastervoice_A610((source->voice)));
+    node->packetinstancehandle = SNDPKTPLAYI_voicetopackethandle_A610(SNDDRV_getmastervoice_A610((source->voice)));
     (*(signed char*)&node->samplechan) = SNDDRV_getsamplechan_A610((source->voice));
-    (node->platformver) = (int) (source->platformver);
+    node->platformver = (int) (source->platformver);
     ((int)node->psample) = 0;
-    (node->totalframes) = (int) (source->totalframes);
-    (node->curframe) = 0;
+    node->totalframes = (int) (source->totalframes);
+    node->curframe = 0;
     ((int)node->prevframesunpacked) = 0;
     ((int)node->pDecoder) = CEAXABLKDecf_CEAXABLKDecf_A610(CEAXABLKDecf_operator_new_A610(168));
 }
@@ -19702,10 +19702,10 @@ void SFILTER_modifyLPFRC(LPFRCSTATE* node, void *params) {
 
     temp_f1 = (2.0f * (float) (*(int *)((char*)(params) + (0)))) / (float) (*(int *)((char*)(params) + (4)));
     temp_f2 = 1.0f - temp_f1;
-    (node->lpf.inverse) = temp_f1;
-    (node->lpf.leakage) = temp_f2;
-    (node->lpf.inverse) = (float) (temp_f1 * ((float) (*(int *)((char*)(params) + (8))) * 0.00390625f));
-    (node->lpf.leakage) = (float) (temp_f2 * ((float) (*(int *)((char*)(params) + (8))) * 0.00390625f));
+    node->lpf.inverse = temp_f1;
+    node->lpf.leakage = temp_f2;
+    node->lpf.inverse = (float) (temp_f1 * ((float) (*(int *)((char*)(params) + (8))) * 0.00390625f));
+    node->lpf.leakage = (float) (temp_f2 * ((float) (*(int *)((char*)(params) + (8))) * 0.00390625f));
 }
 #endif
 
@@ -19965,8 +19965,8 @@ int transferframes(TIMESTRETCHSTATE* stretcher, int *remaining, int *outCursor) 
     if (temp_16_2 >= temp_3) copied = temp_3;
     byteCount = copied * 4;
     Util_MemCpy_ADF0(*outCursor, &stretcher->output[stretcher->outputstart], byteCount);
-    (stretcher->outputstart) = (int) ((stretcher->outputstart) + copied);
-    (stretcher->outputsamples) = (int) ((stretcher->outputsamples) - copied);
+    stretcher->outputstart = (int) ((stretcher->outputstart) + copied);
+    stretcher->outputsamples = (int) ((stretcher->outputsamples) - copied);
     *remaining -= copied;
     *outCursor += byteCount;
     return copied;
@@ -20164,18 +20164,18 @@ int SFILTER_timestretchinit(TIMESTRETCHSTATE* node, void *header, int voice) {
     (*(char**)&node->sfn) = SFILTER_timestretch_B280;
     ((int)node->sfn.restorefn) = 0;
     if (voice >= 0) {
-        (node->packetinstancehandle) = SNDPKTPLAYI_voicetopackethandle(SNDDRV_getmastervoice(voice));
+        node->packetinstancehandle = SNDPKTPLAYI_voicetopackethandle(SNDDRV_getmastervoice(voice));
     } else {
-        (node->packetinstancehandle) = -1;
+        node->packetinstancehandle = -1;
     }
     ((int)node->psideband) = (int) (header + 6);
-    (node->stretchratio) = 1.0f;
+    node->stretchratio = 1.0f;
     (*(int*)&node->sampleerror) = 0;
-    (node->windowsize) = (int) ((*(unsigned char *)((char*)(header) + (1))) * 2);
-    (node->framesleft) = SNDI_getb(header + 2, 4);
-    (node->inputsamples) = 0;
-    (node->outputsamples) = 0;
-    (node->outputstart) = 0;
+    node->windowsize = (int) ((*(unsigned char *)((char*)(header) + (1))) * 2);
+    node->framesleft = SNDI_getb(header + 2, 4);
+    node->inputsamples = 0;
+    node->outputsamples = 0;
+    node->outputstart = 0;
     return 0;
 }
 #endif
@@ -21313,9 +21313,9 @@ INCLUDE_ASM("ealib/seg_2B4578", CEAXABLKDecf_CEAXABLKDecf);
  * @return the decoder
  */
 void *CEAXABLKDecf_CEAXABLKDecf(CEAXABLKDecf* decoder) {
-    (decoder->xav.sampledatasize) = 0;
-    (decoder->xav.numsamples) = 0;
-    (decoder->xav.residual) = 0;
+    decoder->xav.sampledatasize = 0;
+    decoder->xav.numsamples = 0;
+    decoder->xav.residual = 0;
     (*(int*)&decoder->xap.sample1) = 0;
     (*(int*)&decoder->xap.sample2) = 0;
     return ((void*)decoder);
@@ -21341,8 +21341,8 @@ int CEAXABLKDecf_Feed(CEAXABLKDecf* decoder, int data, int byteSize, int sampleC
     if ((decoder->xav.numsamples) != 0) {
         return -1;
     }
-    (decoder->xav.numsamples) = sampleCount;
-    (decoder->xav.sampledatasize) = byteSize;
+    decoder->xav.numsamples = sampleCount;
+    decoder->xav.sampledatasize = byteSize;
     ((int)decoder->xap.psrc) = data;
     return 0;
 }
@@ -21888,13 +21888,13 @@ INCLUDE_ASM("ealib/seg_2B4578", CMTBLKDecf_CMTBLKDecf);
  */
 void *CMTBLKDecf_CMTBLKDecf(CMTBLKDecf* decoder) {
     ((int)decoder->mbufframes) = 0;
-    (decoder->mCodecVersion) = 1;
-    (decoder->mRemainingSamples) = 0;
-    (decoder->mSampleDataSize) = 0;
-    (decoder->mRawframes) = 0;
-    (decoder->mOffset) = 0;
-    (decoder->mdoWholeInit) = 0;
-    (decoder->mHasPCMData) = 0;
+    decoder->mCodecVersion = 1;
+    decoder->mRemainingSamples = 0;
+    decoder->mSampleDataSize = 0;
+    decoder->mRawframes = 0;
+    decoder->mOffset = 0;
+    decoder->mdoWholeInit = 0;
+    decoder->mHasPCMData = 0;
     return ((void*)decoder);
 }
 #endif
@@ -22059,7 +22059,7 @@ INCLUDE_ASM("ealib/seg_2B4578", CMTBLKDecf_SetState);
  */
 void CMTBLKDecf_SetState(CMTBLKDecf* decoder, MTFSTATE* snapshot) {
     ((int)decoder->mutstate.shiftreg) = (int) ((int)snapshot->shiftreg);
-    (decoder->mdoWholeInit) = (int) (snapshot->doWholeInit);
+    decoder->mdoWholeInit = (int) (snapshot->doWholeInit);
     ((int)decoder->mbufframes) = (int) ((int)snapshot->bufframes);
 }
 #endif
@@ -23744,17 +23744,17 @@ void SFILTER_modifyECHO(ECHOSTATE* effect, void *params) {
     delayMs = (*(int *)((char*)(params) + (8))) >> 8;
     f_F958_F9D8();
     temp_f0 = (float) gain * 0.007874016f;
-    (effect->fblevels) = temp_f0;
-    (effect->fbneglevels) = -temp_f0;
+    effect->fblevels = temp_f0;
+    effect->fbneglevels = -temp_f0;
     temp_2 = f_FB38_F9D8(rate, delayMs);
     temp_16_2 = temp_2 * 4;
-    (effect->bufsamples) = temp_2;
+    effect->bufsamples = temp_2;
     temp_2_2 = f_5C60_F9D8(temp_16_2 + 0x10);
     ((char*)effect->punaligneddelaybuf) = temp_2_2;
     temp_3 = ((unsigned int) ((int)temp_2_2 + 0xF) >> 4) * 0x10;
     ((int)effect->pdelaybuf) = temp_3;
     f_6210_F9D8((char*)temp_3, 0, temp_16_2);
-    (effect->sampleindex) = 0;
+    effect->sampleindex = 0;
 }
 #endif
 

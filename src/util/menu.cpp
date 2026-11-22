@@ -3003,7 +3003,7 @@ INCLUDE_ASM("util/menu", cCommandMenuItem_init);
  */
 extern "C" void cCommandMenuItem_init(cCommandMenuItem* item, int label, int commandArg) {
     item->Caption = (const char*)label;
-    (item->CmdArg) = commandArg;
+    item->CmdArg = commandArg;
     item->State = 0;
 }
 #endif
@@ -3756,8 +3756,8 @@ extern "C" void cIntMenuItem_setMinMax(cIntMenuItem* item, int minValue, int max
     int temp_4;
 
     temp_3 = (item->Value);
-    (item->Max) = maxValue;
-    (item->Min) = minValue;
+    item->Max = maxValue;
+    item->Min = minValue;
     if (temp_3 != 0) {
         if (*temp_3 < minValue) {
             *temp_3 = minValue;
