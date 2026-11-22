@@ -1890,16 +1890,16 @@ extern int strncmp_DE78(char *, char *, int) __asm__("strncmp");
 extern void strcat_DE78(char *, char *) __asm__("strcat");
 extern char *REAL_filedevice_DE78[] __asm__("REAL_filedevice");
 extern char *str_I_DE78[] __asm__("str_I");
-extern int D_00450C44_DE78[] __asm__("D_00450C44");
-extern int D_00450C48_DE78[] __asm__("D_00450C48");
+extern int currentfilesystem_DE78[] __asm__("currentfilesystem");
+extern int availablefilesystems_DE78[] __asm__("availablefilesystems");
 extern char currentdirectory_DE78[] __asm__("currentdirectory");
 extern char D_00495D78_DE78[] __asm__("D_00495D78");
 
 /**
  * Sets the file system's current path (currentdirectory) from @p path.
  *
- * With the 3-character device prefix (str_I) the call is ignored when the device mode (D_00450C48 & 3) is 2, else
- * device 1 is selected (D_00450C44) and the prefix skipped; with the host root prefix (REAL_filedevice) it is ignored unless
+ * With the 3-character device prefix (str_I) the call is ignored when the device mode (availablefilesystems & 3) is 2, else
+ * device 1 is selected (currentfilesystem) and the prefix skipped; with the host root prefix (REAL_filedevice) it is ignored unless
  * mode bit 2 is set, else device 2 is selected. The rest is copied and, when it fits, ends with '/'. ps2main passes
  * "cd:".
  *
@@ -1909,12 +1909,12 @@ void FILESYS_setcurrentpath(char *path) {
     int n, len;
     n = strlen_DE78(REAL_filedevice_DE78[0]);
     if (strncmp_DE78(path, str_I_DE78[0], 3) == 0) {
-        if ((D_00450C48_DE78[0] & 3) == 2) return;
-        D_00450C44_DE78[0] = 1;
+        if ((availablefilesystems_DE78[0] & 3) == 2) return;
+        currentfilesystem_DE78[0] = 1;
         path += 3;
     } else if (strncmp_DE78(path, REAL_filedevice_DE78[0], n) == 0) {
-        if (!(D_00450C48_DE78[0] & 2)) return;
-        D_00450C44_DE78[0] = 2;
+        if (!(availablefilesystems_DE78[0] & 2)) return;
+        currentfilesystem_DE78[0] = 2;
         path += n;
     }
     strcpy_DE78(currentdirectory_DE78, path);
@@ -2240,13 +2240,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", reserveop);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_00450C0C_E670 __asm__("D_00450C0C");
+extern int opcount_E670 __asm__("opcount");
 extern void MUTEX_unlock_E670(void *) __asm__("MUTEX_unlock");
 
 struct FILEOPERATION_def *reserveop_impl(void) __asm__("reserveop");
 /**
  * Takes a free file operation (gFileDevice +0x28, 0x30 bytes each) under the mutex: marks it in use and stamps its index
- * and a new 20-bit id (D_00450C0C, wrapping to 1). Spins forever when none is free.
+ * and a new 20-bit id (opcount, wrapping to 1). Spins forever when none is free.
  *
  * @return the operation
  */
@@ -2258,11 +2258,11 @@ struct FILEOPERATION_def *reserveop_impl(void) {
         if (((struct sFsCmdId*)&gFileDevice.oplist[i].op)->type == 0) {
             ((struct sFsCmdId*)&gFileDevice.oplist[i].op)->type = 1;
             ((struct sFsCmdId*)&gFileDevice.oplist[i].op)->idx = i;
-            nextId = D_00450C0C_E670;
+            nextId = opcount_E670;
             ((struct sFsCmdId*)&gFileDevice.oplist[i].op)->id = nextId;
-            D_00450C0C_E670 = nextId + 1;
+            opcount_E670 = nextId + 1;
             if (nextId + 1 > 0xFFFFF) {
-                D_00450C0C_E670 = 1;
+                opcount_E670 = 1;
             }
             break;
         }
@@ -6481,13 +6481,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILEDEV_init);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void SYNCTASK_add(void (*)(void), int, int);
 extern void FILEDEV_readexec(void);
-extern int D_00450C44_3020[] __asm__("D_00450C44");
-extern int D_00450C48_3020[] __asm__("D_00450C48");
+extern int currentfilesystem_3020[] __asm__("currentfilesystem");
+extern int availablefilesystems_3020[] __asm__("availablefilesystems");
 
 /**
- * Starts the file device layer: clears the device flags (D_00450C48), adds the host read task FILEDEV_readexec as a sync
+ * Starts the file device layer: clears the device flags (availablefilesystems), adds the host read task FILEDEV_readexec as a sync
  * task and marks the host device available (flag 2); with a disc it also marks the disc (flag 1) and makes it the
- * default device (D_00450C44 = 1), otherwise the host is the default (2). The first argument is not used.
+ * default device (currentfilesystem = 1), otherwise the host is the default (2). The first argument is not used.
  *
  * @param maxOpenFiles  the maximum open files (unused)
  * @param discAvail  nonzero when the CD file table was built
@@ -6495,16 +6495,16 @@ extern int D_00450C48_3020[] __asm__("D_00450C48");
 void FILEDEV_init(int maxOpenFiles, int discAvail) {
     int temp_3;
 
-    D_00450C48_3020[0] = 0;
+    availablefilesystems_3020[0] = 0;
     SYNCTASK_add(FILEDEV_readexec, 0, 0);
-    temp_3 = D_00450C48_3020[0];
-    D_00450C48_3020[0] = temp_3 | 2;
+    temp_3 = availablefilesystems_3020[0];
+    availablefilesystems_3020[0] = temp_3 | 2;
     if (discAvail != 0) {
-        D_00450C48_3020[0] = temp_3 | 3;
-        D_00450C44_3020[0] = 1;
+        availablefilesystems_3020[0] = temp_3 | 3;
+        currentfilesystem_3020[0] = 1;
         return;
     }
-    D_00450C44_3020[0] = 2;
+    currentfilesystem_3020[0] = 2;
 }
 #endif
 
@@ -6522,14 +6522,14 @@ extern char *strchr_3098(char *, int) __asm__("strchr");
 extern int strlen_3098(char *) __asm__("strlen");
 extern int strncmp_3098(char *, char *, int) __asm__("strncmp");
 extern char *strcat(char *, char *);
-extern char *D_00450C3C;
-extern int D_00450C44;
+extern char *CDdevicename;
+extern int currentfilesystem;
 
 void FILEDEV_resolvename_i(char *path, char *out, int *kind) __asm__("FILEDEV_resolvename");
 /**
  * Turns a file name into a device path and says which device it is on (1 disc, 2 host).
  *
- * The default device is D_00450C44. A name with a ':' must start with "cd:" (disc; the prefix is dropped) or the host
+ * The default device is currentfilesystem. A name with a ':' must start with "cd:" (disc; the prefix is dropped) or the host
  * root REAL_filedevice ("host0:", host; dropped too); any other prefix is refused (empty @p out) on a disc default, or
  * unless its third character is the ':'. Host paths get the host root back in front; a name not starting with '\\', '/'
  * or '~' gets the current directory (currentdirectory, set by FILESYS_setcurrentpath) in front. Backslashes become slashes. Quirk: a
@@ -6542,17 +6542,17 @@ void FILEDEV_resolvename_i(char *path, char *out, int *kind) __asm__("FILEDEV_re
 void FILEDEV_resolvename_i(char *path, char *out, int *kind) {
     int k;
     out[0] = 0;
-    k = D_00450C44;
+    k = currentfilesystem;
     if (strchr_3098(path, 58) != 0) {
         int n = strlen_3098(REAL_filedevice);
-        if (strncmp_3098(path, D_00450C3C, 3) == 0) {
+        if (strncmp_3098(path, CDdevicename, 3) == 0) {
             k = 1;
             path += 3;
         } else if (strncmp_3098(path, REAL_filedevice, n) == 0) {
             path += n;
             k = 2;
         } else {
-            if (D_00450C44 == 1) return;
+            if (currentfilesystem == 1) return;
             if (path[2] != 58) return;
         }
     }
@@ -8742,7 +8742,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", SYNCTASK_add);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct T_STA { int fn; int mode; int due; int fC; };
 extern struct T_STA systemtasksubs_STA[16] __asm__("systemtasksubs");
-extern int D_00450E00_STA __asm__("D_00450E00");
+extern int reentry_STA __asm__("reentry");
 extern volatile int libticks_STA __asm__("libticks");
 
 void SYNCTASK_add_impl(int fn, int mode, int delay) __asm__("SYNCTASK_add");
@@ -8768,7 +8768,7 @@ void SYNCTASK_add_impl(int fn, int mode, int delay) {
     } else if (mode == 0) {
         mode = 1;
     }
-    skip = D_00450E00_STA++;
+    skip = reentry_STA++;
     for (i = 0; i < 16; i++) {
         if (systemtasksubs_STA[i].fn == fn) {
             idx = i;
@@ -8786,7 +8786,7 @@ void SYNCTASK_add_impl(int fn, int mode, int delay) {
         systemtasksubs_STA[idx].due = libticks_STA + delay;
         systemtasksubs_STA[idx].fC = 0;
     }
-    D_00450E00_STA--;
+    reentry_STA--;
 }
 #endif
 
@@ -9287,13 +9287,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", REAL_abortmessage);
     (ap = (char*)__builtin_next_arg()                                    \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
 extern int vsprintf(char *dst, const char *fmt, char *ap);
-extern void (*D_00450DD8_6070[])(char *, char *) __asm__("D_00450DD8");
+extern void (*REALabortmessage_6070[])(char *, char *) __asm__("REALabortmessage");
 extern char str_pct_s_b_6070[] __asm__("str_pct_s_b");
 
 /**
  * Formats an abort message and hands it to the installed abort handler.
  *
- * Formats into a 512-byte buffer (empty for a null @p fmt) and calls the handler in D_00450DD8 with "%s" and
+ * Formats into a 512-byte buffer (empty for a null @p fmt) and calls the handler in REALabortmessage with "%s" and
  * the text. The default handler is SYSTEM_abortmessage(), which prints it and exits.
  *
  * @param fmt  printf-style format, or 0; the arguments follow
@@ -9307,7 +9307,7 @@ void REAL_abortmessage(const char *fmt, ...) {
     } else {
         buf[0] = 0;
     }
-    D_00450DD8_6070[0](str_pct_s_b_6070, buf);
+    REALabortmessage_6070[0](str_pct_s_b_6070, buf);
 }
 #endif
 

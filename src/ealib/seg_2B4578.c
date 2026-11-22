@@ -1325,7 +1325,7 @@ struct G_4DD8 {
     struct Cfg_4DD8 cfg;
     struct SNDSYSSET saved;
 };
-extern int D_0044C45C;
+extern int gotcaps;
 extern int D_0044C460;
 extern int SNDPLATFORM_outputcaps_4DD8() __asm__("SNDPLATFORM_outputcaps");
 
@@ -1343,9 +1343,9 @@ int SNDSYS_getopts_4DD8(struct Cfg_4DD8 *out) __asm__("SNDSYS_getopts");
  * @return SNDPLATFORM_outputcaps's result from the first call
  */
 int SNDSYS_getopts_4DD8(struct Cfg_4DD8 *out) {
-    if (D_0044C45C == 0) {
+    if (gotcaps == 0) {
         D_0044C460 = SNDPLATFORM_outputcaps_4DD8();
-        D_0044C45C = 1;
+        gotcaps = 1;
         sndgs.sso.set.maxbanks = 0x10;
         sndgs.sso.set.sndheapthreshold = 90;
         sndgs.sso.set.stealequalpriorityvoices = 1;
@@ -1725,22 +1725,22 @@ INCLUDE_ASM("ealib/seg_2B4578", System_VectorToReal5);
 extern void SNDREAL_exithandler(void);
 extern void SYNCTASK_add_5478(void *, int, int) __asm__("SYNCTASK_add");
 extern void REAL_addexit_5478(void *) __asm__("REAL_addexit");
-extern int D_0044C464_C464[] __asm__("D_0044C464");
+extern int systaskadded_C464[] __asm__("systaskadded");
 extern void (*D_0050A9B0_A9B0[])() __asm__("D_0050A9B0");
 
 /**
  * Hooks the EA sound system into the game's frame and timer services.
  *
  * Stores SNDREAL_abortmsg in the options-tail hook D_0050A9B0, registers SNDREAL_systemtask once as a SYNCTASK (SYNCTASK_add
- * with 0, 1; D_0044C464 remembers it) and passes SNDREAL_exithandler to REAL_addexit. Called by cPS2SoundManager_Init.
+ * with 0, 1; systaskadded remembers it) and passes SNDREAL_exithandler to REAL_addexit. Called by cPS2SoundManager_Init.
  *
  * @return 0
  */
 int System_VectorToReal5(void) {
     D_0050A9B0_A9B0[0] = SNDREAL_abortmsg;
-    if (D_0044C464_C464[0] == 0) {
+    if (systaskadded_C464[0] == 0) {
         SYNCTASK_add_5478(SNDREAL_systemtask, 0, 1);
-        D_0044C464_C464[0] = 1;
+        systaskadded_C464[0] = 1;
     }
     REAL_addexit_5478(SNDREAL_exithandler);
     return 0;
@@ -1930,7 +1930,7 @@ extern void SNDI_mutexunlock();
 /**
  * Unlocks the sound system's mutex (default unlock function).
  *
- * Calls SNDI_mutexunlock. D_0044C470 holds it as the unlock function that SNDSYS_leavecritical calls.
+ * Calls SNDI_mutexunlock. gMutexUnlockFn holds it as the unlock function that SNDSYS_leavecritical calls.
  */
 void DefaultMutexUnlockFn(void) {
     SNDI_mutexunlock();
@@ -1963,17 +1963,17 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSYS_leavecritical);
 // From peak3project's fork (github.com/peak3project/ssx3).
 
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void (*D_0044C470_58D8[])(void) __asm__("D_0044C470");
+extern void (*gMutexUnlockFn_58D8[])(void) __asm__("gMutexUnlockFn");
 
 /**
  * Leaves the sound system's critical section.
  *
- * Decrements the lock depth (the sound driver state sndgs +0x176) and calls the unlock function in D_0044C470
+ * Decrements the lock depth (the sound driver state sndgs +0x176) and calls the unlock function in gMutexUnlockFn
  * (DefaultMutexUnlockFn by default).
  */
 void SNDSYS_leavecritical(void) {
     sndgs.incritical--;
-    D_0044C470_58D8[0]();
+    gMutexUnlockFn_58D8[0]();
 }
 #endif
 
@@ -7455,11 +7455,11 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDI_aztospkrvol);
 /* sndgs: the sound driver's state block (layout worked out from every use in this unit; field names are
    their offsets). Some fields are also reached through their own splat symbols (declared below), which the
    functions that address them directly must keep using. */
-extern unsigned char* D_0050AC38[];
+extern unsigned char* sndaztospkr[];
 /**
  * Looks up the per-speaker gains for an azimuth.
  *
- * out[i] = speaker table i (D_0050AC38) at the azimuth's high byte / 255, for each configured speaker (options speaker
+ * out[i] = speaker table i (sndaztospkr) at the azimuth's high byte / 255, for each configured speaker (options speaker
  * count). Called by func_003C38E0.
  *
  * @param azimuth  the azimuth (16 bits a turn)
@@ -7470,7 +7470,7 @@ void SNDI_aztospkrvol(int azimuth, float* out)
     int idx = (azimuth & 0xFFFF) >> 8;
     int i;
     for (i = 0; i < sndgs.sso.set.outputchannels; i++) {
-        out[i] = (float)D_0050AC38[i][idx] / 255.0f;
+        out[i] = (float)sndaztospkr[i][idx] / 255.0f;
     }
 }
 #endif
@@ -7480,20 +7480,20 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDI_freespkrtable);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void SNDMEMI_free_C530(int) __asm__("SNDMEMI_free");
-extern int D_0050AC30_C530[] __asm__("D_0050AC30");
-extern char D_0050AC38_C530[] __asm__("D_0050AC38");
+extern int sndaztospkr_buf_C530[] __asm__("sndaztospkr_buf");
+extern char sndaztospkr_C530[] __asm__("sndaztospkr");
 
 /**
- * Frees the speaker gain tables (D_0050AC30) inside the critical section.
+ * Frees the speaker gain tables (sndaztospkr_buf) inside the critical section.
  *
- * Likely bug: the guard tests the address of D_0050AC38 instead of its contents, so it is always true and the free
+ * Likely bug: the guard tests the address of sndaztospkr instead of its contents, so it is always true and the free
  * (SNDMEMI_free) runs even when no table was allocated (the free ignores unknown addresses). Called by the shutdown
  * SNDSYS_restore.
  */
 void SNDI_freespkrtable(void) {
     SNDSYS_entercritical();
-    if (D_0050AC38_C530 != 0) {
-        SNDMEMI_free_C530(D_0050AC30_C530[0]);
+    if (sndaztospkr_C530 != 0) {
+        SNDMEMI_free_C530(sndaztospkr_buf_C530[0]);
     }
     SNDSYS_leavecritical();
 }
@@ -7519,13 +7519,13 @@ unsigned short SNDI_pantoazimuth(int pan) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDI_randomseed);
 #ifdef SKIP_ASM
-extern int D_0044C690[];
+extern int SNDIrandseedorig[];
 extern int SNDIrandseed[];
 
 /**
  * Seeds the sound system's random generator.
  *
- * Each of the six state words (SNDIrandseed) becomes its constant (D_0044C690) plus the seed. The init SNDSYSI_init
+ * Each of the six state words (SNDIrandseed) becomes its constant (SNDIrandseedorig) plus the seed. The init SNDSYSI_init
  * passes the options' seed field.
  *
  * @param seed  the seed
@@ -7533,7 +7533,7 @@ extern int SNDIrandseed[];
 void SNDI_randomseed(int seed) {
     int i;
     for (i = 0; i < 6; i++) {
-        SNDIrandseed[i] = D_0044C690[i] + seed;
+        SNDIrandseed[i] = SNDIrandseedorig[i] + seed;
     }
 }
 #endif
@@ -12093,7 +12093,7 @@ extern void Util_MemCpy(void *, void *, int);
 extern void SNDPKTPLAYI_flushcallbackdata_19A8(void) __asm__("SNDPKTPLAYI_flushcallbackdata");
 extern void FlushCache(int);
 extern int sceSifSetDma(void *, int);
-extern void (*D_0044C470)(void);
+extern void (*gMutexUnlockFn)(void);
 extern char D_0050C910[];
 extern char D_0050C800[];
 
@@ -12107,7 +12107,7 @@ extern char D_0050C800[];
  * the DTS encoder hook D_0050C848 when option bit 2 (+0x49) is set or else copies channel 0 to channel 1 for mono
  * output, restores the scratchpad and VU0, runs SNDPKTPLAYI_flushcallbackdata, stamps the tick +0x330 into the buffer headers, flushes
  * the cache, starts the SIF DMA of D_0050C800 with interrupts off, then the post-tick hook +0x32C and the unlock hook
- * D_0044C470. Created by SNDPLATFORM_init; never returns.
+ * gMutexUnlockFn. Created by SNDPLATFORM_init; never returns.
  */
 void SNDDRV_thread(void) {
     int s;
@@ -12144,7 +12144,7 @@ void SNDDRV_thread(void) {
         sceSifSetDma(D_0050C800, 1);
         EI_2B45_19A8();
         if ((void (*)(void))sndgs.profileleave != 0) ((void (*)(void))sndgs.profileleave)();
-        D_0044C470();
+        gMutexUnlockFn();
     }
 }
 #endif

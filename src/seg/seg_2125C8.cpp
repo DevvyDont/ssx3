@@ -6,10 +6,10 @@ INCLUDE_ASM("seg/seg_2125C8", cAIAnimEventMap_getAnimPlayAttr);
 struct sEntry_15C8 {
     char b[0x1C];
 };
-extern sEntry_15C8 D_00446990[];
+extern sEntry_15C8 cAIAnimEventMap_AnimPlayAttr[];
 
 /**
- * Returns an animation's play attributes: its 0x1C-byte entry of D_00446990 (On Tour's getAnimPlayAttr; this was
+ * Returns an animation's play attributes: its 0x1C-byte entry of cAIAnimEventMap_AnimPlayAttr (On Tour's getAnimPlayAttr; this was
  * once named getBlendInTime). The blend-in time is the float at offset 0x18, and callers also read the entry's first
  * four words.
  *
@@ -17,7 +17,7 @@ extern sEntry_15C8 D_00446990[];
  * @return pointer to the entry
  */
 extern "C" void *cAIAnimEventMap_getAnimPlayAttr(int animIndex) {
-    return &D_00446990[animIndex];
+    return &cAIAnimEventMap_AnimPlayAttr[animIndex];
 }
 #endif
 

@@ -5012,7 +5012,7 @@ extern float D_004A61A0[4];
 extern float D_004A61B0[4];
 extern float D_004A61C0[4];
 extern float D_004A61D0[4];
-extern float D_004A61E0[4];
+extern float kRiderBoxOffset[4];
 extern float D_004A61F0[8];
 extern float D_004A6210[8];
 extern float D_004A6230[8];
@@ -5028,7 +5028,7 @@ void sti_0013FB20(int init, int prio) __asm__("__sti__all_in_one_ai_cpp");
  * table.
  *
  * Runs only when @p init is set and @p prio is 0xFFFF. It writes dozens of 4-float colour/curve constants (D_004A5E60
- * ... D_004A61E0), the packed anim-id words D_004A4C08 (-1) and D_004A4C18 ... D_004A4C80 (0 ... 13), kHighSpeedCollideThresh =
+ * ... kRiderBoxOffset), the packed anim-id words D_004A4C08 (-1) and D_004A4C18 ... D_004A4C80 (0 ... 13), kHighSpeedCollideThresh =
  * 2222.22 (80 kph in cm/s), nFinishLineControl_kFinishStopThreshCPS = 277.78 (10 kph), angle limits in radians (45, 5,
  * 100, 20 and 360 degrees) and seven 4-key (x, y) curves, and calls InitTerminalVelocityTable (On Tour InitTerminalVelocityTable).
  *
@@ -5264,7 +5264,7 @@ void sti_0013FB20(int init, int prio)
         D_004A61D0[1] = 1.0f;
         D_004A61D0[2] = 0.0f;
         D_004A61D0[3] = 0.0f;
-        SetCol4(D_004A61E0, 15000.0f, 15000.0f, 15000.0f, 0.0f);
+        SetCol4(kRiderBoxOffset, 15000.0f, 15000.0f, 15000.0f, 0.0f);
         InitIdx(&D_004A4C08, -1);
         D_004A4C14 = 0;
         D_004A4C10 = 0;

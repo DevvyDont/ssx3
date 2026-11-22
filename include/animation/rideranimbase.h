@@ -40,7 +40,7 @@ CHECK_SIZE(tExpireInfo, 0x8);
 
 // An AI animation's play attributes (On Tour struct tAIAnimPlayAttr, 0x1C): cAIAnimEventMap::getAnimPlayAttr(tAIAnimID)
 // returns one ([O] `tAIAnimPlayAttr& getAnimPlayAttr(tAIAnimID aiID)`). [R] cAIAnimEventMap_getAnimPlayAttr returns
-// D_00446990 + id * 0x1C, so the seven word-sized members sit at On Tour's offsets. The enum members are words
+// cAIAnimEventMap_AnimPlayAttr + id * 0x1C, so the seven word-sized members sit at On Tour's offsets. The enum members are words
 // (tAIAnimCategoryID / tAIAnimUpdateRuleID / tAIAnimExpireRuleID / tAIAnimSequencerID in On Tour).
 struct tAIAnimPlayAttr {
     int AnimCategory;               // 0x00 [O]; [U] cRiderAnimBase reads it (*getAnimPlayAttr(anim))

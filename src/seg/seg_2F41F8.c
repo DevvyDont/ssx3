@@ -785,12 +785,12 @@ extern int D_004A4BA0;
 
 extern int NetTick(void);
 
-extern unsigned D_004A4BAC;
+extern unsigned _NetConn_uNextIdleTick;
 extern int func_003F4A78(void);
 /**
  * Runs DirtySock's idle processing, at most every 5 ticks while the network connection is up.
  *
- * When D_004A4BA0 is set it returns early until NetTick (the tick) reaches D_004A4BAC and then sets that to tick
+ * When D_004A4BA0 is set it returns early until NetTick (the tick) reaches _NetConn_uNextIdleTick and then sets that to tick
  * + 5. Then func_003F4A78 runs and each of the 16 idle callbacks in _NETidle with a function is called with its
  * argument and the current tick. On Tour checks NetConnStatus('open') instead of the flag and runs the callbacks in
  * NetConnIdleProcs.
@@ -799,8 +799,8 @@ void NetConnIdle(void) {
     int i;
     struct sTick *idleProc;
     if (D_004A4BA0 != 0) {
-        if (NetTick() < D_004A4BAC) return;
-        D_004A4BAC = NetTick() + 5;
+        if (NetTick() < _NetConn_uNextIdleTick) return;
+        _NetConn_uNextIdleTick = NetTick() + 5;
     }
     func_003F4A78();
     idleProc = _NETidle;

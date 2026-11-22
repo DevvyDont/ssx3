@@ -17699,3 +17699,21 @@ str_VERS_c = 0x004A48A8;
 str_pct_s_e = 0x004A48F0;
 str_bogus = 0x004A48F8;
 str_server = 0x004A4900;
+
+// SSX On Tour (PSP, ULKS-46038) dev-build global names, round globals_round4_G3 (docs/ontour_globals.tsv)
+cAIAnimEventMap_AnimPlayAttr = 0x00446990;
+gotcaps = 0x0044C45C;
+systaskadded = 0x0044C464;
+gMutexUnlockFn = 0x0044C470;
+SNDIrandseedorig = 0x0044C690;
+opcount = 0x00450C0C;
+CDdevicename = 0x00450C3C;
+currentfilesystem = 0x00450C44;
+availablefilesystems = 0x00450C48;
+REALabortmessage = 0x00450DD8;
+reentry = 0x00450E00;
+_NetConn_uNextIdleTick = 0x004A4BAC;
+__tiQ24RCMP7DECODER = 0x004A5B90;
+__tiQ24RCMP11RCMP_SYSTEM = 0x004A5B98;
+sndaztospkr_buf = 0x0050AC30;
+sndaztospkr = 0x0050AC38;

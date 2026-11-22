@@ -1746,7 +1746,7 @@ struct sFocusBoxes {
 struct InstanceCompare {
 };
 
-extern t4Vector D_004A61E0;
+extern t4Vector kRiderBoxOffset;
 extern "C" void FocusQuery_addcell_1B60(sFocusList* list, const nash_Cell* node, int recurse) __asm__("FocusQuery_addcell");
 extern "C" void MEM_copy(void* dst, void* src, int size);
 extern "C" void func_0013FAD8(tFocusRec** first, tFocusRec** last, tFocusRec** out, const InstanceCompare& cmp);
@@ -1831,7 +1831,7 @@ static inline void Visit(const FocusCallbackInline& cb, const sNashTree* tree, i
 /**
  * Updates which world instances are in focus around the focus positions, and runs their focus scripts.
  *
- * Builds a box of plus and minus D_004A61E0 around each focus position (count +0, entries of 0x20 bytes at +0x10). It
+ * Builds a box of plus and minus kRiderBoxOffset around each focus position (count +0, entries of 0x20 bytes at +0x10). It
  * returns early unless a position moved 2000 or more since the last pass, 20 AI ticks (AITick) have passed, or there
  * was no pass yet (+0xD0 negative). Then it walks the eight roots of the game's nash cell tree (game +0x20): cells
  * crossing a box add their instances (FocusQuery_addcell), whole subtrees once below level 14. It stores the tick and the
@@ -1848,8 +1848,8 @@ extern "C" void cFocusMan_update(sFocusBoxes* self)
     sFocusBox boxes[6];
     for (int i = 0; i < self->NumFocusInstances; i++) {
         t4Vector focusPos = *self->inst[i].pos;
-        boxes[i].min = Sub_1B60(focusPos, D_004A61E0);
-        boxes[i].max = Add_1B60(focusPos, D_004A61E0);
+        boxes[i].min = Sub_1B60(focusPos, kRiderBoxOffset);
+        boxes[i].max = Add_1B60(focusPos, kRiderBoxOffset);
         if (Len_1B60(Sub_1B60(self->inst[i].last, focusPos)) >= 2000.0f) {
             moved = 1;
         }
@@ -2203,7 +2203,7 @@ extern "C" void cRiderAnim_checkForSoundEvents_36A0(void* self, void* anim) __as
 /**
  * Runs the per-frame update rule of the animation playing in one of the rider's sequencers.
  *
- * Looks up the animation's play attributes (cAIAnimEventMap_getAnimPlayAttr(*anim): a 0x1C-byte record of D_00446990; On
+ * Looks up the animation's play attributes (cAIAnimEventMap_getAnimPlayAttr(*anim): a 0x1C-byte record of cAIAnimEventMap_AnimPlayAttr; On
  * Tour calls this lookup getAnimPlayAttr) and dispatches on its update rule (+0x4) to one of 16 handlers, cRiderAnim_onUpdateFWD
  * .. cRiderAnim_onUpdateASYNC_BP_BAL (On Tour onUpdateFWD .. onUpdateASYNC_BP_BAL). When the handler returns 0 and Rider (+0x60) is a
  * human (mIsHuman) local (mIsLocal) rider, it then runs cRiderAnim_checkForSoundEvents (On Tour checkForSoundEvents). Virtual: slot 2 of

@@ -444,20 +444,20 @@ void RCMP_DECODER_operator_new2(int allocSize) {
 INCLUDE_ASM("seg/seg_32F020", __tfQ24RCMP7DECODER);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_004A5B90;
+extern int __tiQ24RCMP7DECODER;
 extern char str_Q24RCMP7DECODER[];
 extern void __rtti_user(void *a0, void *a1);
 /**
- * Returns the run-time type descriptor of RCMP::DECODER (D_004A5B90, named "Q24RCMP7DECODER"), building it on first use
+ * Returns the run-time type descriptor of RCMP::DECODER (__tiQ24RCMP7DECODER, named "Q24RCMP7DECODER"), building it on first use
  * with __rtti_user.
  *
- * @return &D_004A5B90
+ * @return &__tiQ24RCMP7DECODER
  */
 int *__tfQ24RCMP7DECODER(void) {
-    if (D_004A5B90 == 0) {
-        __rtti_user(&D_004A5B90, str_Q24RCMP7DECODER);
+    if (__tiQ24RCMP7DECODER == 0) {
+        __rtti_user(&__tiQ24RCMP7DECODER, str_Q24RCMP7DECODER);
     }
-    return &D_004A5B90;
+    return &__tiQ24RCMP7DECODER;
 }
 #endif
 
@@ -486,20 +486,20 @@ void RCMP_RCMP_SYSTEM__RCMP_SYSTEM(int *rcmpSystem, int dtorFlags) {
 INCLUDE_ASM("seg/seg_32F020", __tfQ24RCMP11RCMP_SYSTEM);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_004A5B98;
+extern int __tiQ24RCMP11RCMP_SYSTEM;
 extern char str_Q24RCMP11RCMP_SYSTEM[];
 extern void __rtti_user(void *a0, void *a1);
 /**
- * Returns the run-time type descriptor of RCMP::RCMP_SYSTEM (D_004A5B98, named "Q24RCMP11RCMP_SYSTEM"), building it on
+ * Returns the run-time type descriptor of RCMP::RCMP_SYSTEM (__tiQ24RCMP11RCMP_SYSTEM, named "Q24RCMP11RCMP_SYSTEM"), building it on
  * first use with __rtti_user.
  *
- * @return &D_004A5B98
+ * @return &__tiQ24RCMP11RCMP_SYSTEM
  */
 int *__tfQ24RCMP11RCMP_SYSTEM(void) {
-    if (D_004A5B98 == 0) {
-        __rtti_user(&D_004A5B98, str_Q24RCMP11RCMP_SYSTEM);
+    if (__tiQ24RCMP11RCMP_SYSTEM == 0) {
+        __rtti_user(&__tiQ24RCMP11RCMP_SYSTEM, str_Q24RCMP11RCMP_SYSTEM);
     }
-    return &D_004A5B98;
+    return &__tiQ24RCMP11RCMP_SYSTEM;
 }
 #endif
 
