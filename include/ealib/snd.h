@@ -794,6 +794,8 @@ CHECK_OFFSET(SNDGLOBALSTATE, currenttimerhz, 0x334);
 CHECK_OFFSET(SNDGLOBALSTATE, unk_336, 0x336);
 CHECK_SIZE(SNDGLOBALSTATE, 0x338);
 
+extern struct SNDGLOBALSTATE sndgs; // 0x0050A8E8: the sound driver's state [O] (On Tour `SNDGLOBALSTATE sndgs`)
+
 // SNDPACKETENTRY (0x20 [O]): one queued packet of a packet-player channel (SNDPACKETCHAN::pe[]). [R] SNDPKTPLAY_create
 // sizes the entry table as (memsize - 0x9C) >> 5 more entries; [U] view E_6DE0 {int; int len:31; int flag:1; words[6]}
 // has the same members in the same order.

@@ -1325,7 +1325,6 @@ struct G_4DD8 {
     struct Cfg_4DD8 cfg;
     struct SNDSYSSET saved;
 };
-extern struct G_4DD8 sndgs_4DD8 __asm__("sndgs");
 extern int D_0044C45C;
 extern int D_0044C460;
 extern int SNDPLATFORM_outputcaps_4DD8() __asm__("SNDPLATFORM_outputcaps");
@@ -1347,13 +1346,13 @@ int SNDSYS_getopts_4DD8(struct Cfg_4DD8 *out) {
     if (D_0044C45C == 0) {
         D_0044C460 = SNDPLATFORM_outputcaps_4DD8();
         D_0044C45C = 1;
-        sndgs_4DD8.cfg.sub.maxbanks = 0x10;
-        sndgs_4DD8.cfg.sub.sndheapthreshold = 90;
-        sndgs_4DD8.cfg.sub.stealequalpriorityvoices = 1;
-        sndgs_4DD8.cfg.sub.updateperiod = -1.0f;
-        sndgs_4DD8.saved = sndgs_4DD8.cfg.sub;
+        sndgs.sso.set.maxbanks = 0x10;
+        sndgs.sso.set.sndheapthreshold = 90;
+        sndgs.sso.set.stealequalpriorityvoices = 1;
+        sndgs.sso.set.updateperiod = -1.0f;
+        *(struct SNDSYSSET*)&sndgs.prevset = *(struct SNDSYSSET*)&sndgs.sso.set;
     }
-    *out = sndgs_4DD8.cfg;
+    *out = *(struct Cfg_4DD8*)&sndgs.sso;
     return D_0044C460;
 }
 #endif
@@ -1561,7 +1560,6 @@ struct sA8E8 {
     volatile unsigned int f330;
     volatile unsigned short f334;
 };
-extern struct sA8E8 sndgs;
 extern struct sA8E8Cfg D_0050A908;      /* sndgs.setup.cfg */
 extern struct sA8E8Tail D_0050A9A8;     /* sndgs.setup.tail */
 extern int SNDPLATFORM_outputset(void);
@@ -1592,7 +1590,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSYSI_init);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 
-extern struct sA8E8 sndgs;
 extern char str_SNDAUTHOR_Rgerhards_Thursday_10_51AM_Aug;
 extern void memset_5158(void *, int, int) __asm__("memset");
 void SNDMEMI_init_5158(struct sA8E8Heap *a0, int a1) __asm__("SNDMEMI_init");
@@ -1631,59 +1628,59 @@ int SNDSYSI_init_impl(void *buf, int size, int arg2) __asm__("SNDSYSI_init");
 int SNDSYSI_init_impl(void *buf, int size, int arg2) {
     int result;
     str_SNDAUTHOR_Rgerhards_Thursday_10_51AM_Aug = 'S';
-    if (sndgs.f174 != 0) return 0;
+    if (sndgs.installed != 0) return 0;
     memset_5158(buf, 0, size);
     SNDMEMI_init_5158(buf, size);
-    if (sndgs.f17E == 0) {
-        result = SNDSYS_getopts_5158(&sndgs.setup);
+    if (sndgs.voicestotal == 0) {
+        result = SNDSYS_getopts_5158(&(*(struct sA8E8Setup*)&sndgs.sso));
         if (result < 0) return result;
-        SNDSYS_setopts_impl(&sndgs.setup);
+        SNDSYS_setopts_impl(&(*(struct sA8E8Setup*)&sndgs.sso));
     }
-    SNDI_randomseed(sndgs.setup.cfg.f04);
+    SNDI_randomseed(((int)sndgs.sso.set.randomseed));
     SNDI_mutexalloc();
-    sndgs.f174 = 1;
+    sndgs.installed = 1;
     SNDSYS_entercritical();
-    sndgs.f1F0 = SNDMEMI_alloc_5158(sndgs.f17E * 140);
-    sndgs.f1F4 = SNDMEMI_alloc_5158(sndgs.setup.cfg.f08 << 4);
+    *(struct sA8E8Chan**)&sndgs.chan = SNDMEMI_alloc_5158(sndgs.voicestotal * 140);
+    *(struct sA8E8Slot**)&sndgs.banklist = SNDMEMI_alloc_5158(sndgs.sso.set.maxbanks << 4);
     SNDSYS_leavecritical();
-    sndgs.f330 = 0;
-    sndgs.f175 = 0x7F;
-    sndgs.f180 = 0;
-    sndgs.f179 = 0;
-    sndgs.f177 = 0;
-    sndgs.f178 = 0;
+    sndgs.servertick = 0;
+    sndgs.mastervol = 0x7F;
+    sndgs.audiotick = 0;
+    sndgs.numuserdataclients = 0;
+    sndgs.numserverclients100hz = 0;
+    sndgs.numserverclients = 0;
     result = SNDPLATFORM_init();
     if (result < 0) {
         SNDPLATFORM_restore_5320();
         SNDI_mutexfree();
-        sndgs.f174 = 0;
+        sndgs.installed = 0;
         return result;
     }
-    if (sndgs.setup.cfg.f27 == 2) {
-        sndgs.f2E0[1][0] = 0xC000;
-        sndgs.f2E0[1][1] = 0x4000;
+    if (sndgs.sso.set.outputchannels == 2) {
+        sndgs.srcchancfg3d[1][0] = 0xC000;
+        sndgs.srcchancfg3d[1][1] = 0x4000;
     } else {
-        sndgs.f2E0[1][0] = 0xE000;
-        sndgs.f2E0[1][1] = 0x2000;
+        sndgs.srcchancfg3d[1][0] = 0xE000;
+        sndgs.srcchancfg3d[1][1] = 0x2000;
     }
-    sndgs.f2E0[2][0] = sndgs.setup.cfg.f58[2][2];
-    sndgs.f2E0[2][1] = sndgs.setup.cfg.f58[2][0];
-    sndgs.f2E0[2][2] = sndgs.setup.cfg.f58[2][1];
-    sndgs.f2E0[3][0] = 0xE000;
-    sndgs.f2E0[3][1] = 0x2000;
-    sndgs.f2E0[3][2] = 40960;
-    sndgs.f2E0[3][3] = 0x6000;
-    sndgs.f2E0[4][0] = 0xE000;
-    sndgs.f2E0[4][1] = 0;
-    sndgs.f2E0[4][2] = 0x2000;
-    sndgs.f2E0[4][3] = 40960;
-    sndgs.f2E0[4][4] = 0x6000;
-    sndgs.f2E0[5][0] = 0xE000;
-    sndgs.f2E0[5][1] = 0;
-    sndgs.f2E0[5][2] = 0x2000;
-    sndgs.f2E0[5][3] = 40960;
-    sndgs.f2E0[5][4] = 0x6000;
-    sndgs.f2E0[5][5] = 0;
+    sndgs.srcchancfg3d[2][0] = sndgs.sso.set.virtualspkrcfg3d[2][2];
+    sndgs.srcchancfg3d[2][1] = sndgs.sso.set.virtualspkrcfg3d[2][0];
+    sndgs.srcchancfg3d[2][2] = sndgs.sso.set.virtualspkrcfg3d[2][1];
+    sndgs.srcchancfg3d[3][0] = 0xE000;
+    sndgs.srcchancfg3d[3][1] = 0x2000;
+    sndgs.srcchancfg3d[3][2] = 40960;
+    sndgs.srcchancfg3d[3][3] = 0x6000;
+    sndgs.srcchancfg3d[4][0] = 0xE000;
+    sndgs.srcchancfg3d[4][1] = 0;
+    sndgs.srcchancfg3d[4][2] = 0x2000;
+    sndgs.srcchancfg3d[4][3] = 40960;
+    sndgs.srcchancfg3d[4][4] = 0x6000;
+    sndgs.srcchancfg3d[5][0] = 0xE000;
+    sndgs.srcchancfg3d[5][1] = 0;
+    sndgs.srcchancfg3d[5][2] = 0x2000;
+    sndgs.srcchancfg3d[5][3] = 40960;
+    sndgs.srcchancfg3d[5][4] = 0x6000;
+    sndgs.srcchancfg3d[5][5] = 0;
     func_003BC0B0();
     return 0;
 }
@@ -1703,7 +1700,6 @@ extern void SNDMEMI_free_5320(int) __asm__("SNDMEMI_free");
 extern void SNDSYS_leavecritical_5320() __asm__("SNDSYS_leavecritical");
 extern int SNDMEMI_restore_5320() __asm__("SNDMEMI_restore");
 extern void SNDI_mutexfree_5320() __asm__("SNDI_mutexfree");
-extern struct SNDGLOBALSTATE sndgs_5320 __asm__("sndgs");
 
 /**
  * Shuts the EA sound system down and releases its tables.
@@ -1719,21 +1715,21 @@ int SNDSYS_restore(void) {
     int memResult;
     if (func_003B5440_5320() == 0) return -14;
     func_003B82B8_5320(0, 0, 0, -1, -1);
-    if (((void (*)(void))sndgs_5320.unk_1D8)) ((void (*)(void))sndgs_5320.unk_1D8)();
-    if (((void (*)(void))sndgs_5320.unk_1DC)) ((void (*)(void))sndgs_5320.unk_1DC)();
-    if (((void (*)(void))sndgs_5320.unk_1E0)) ((void (*)(void))sndgs_5320.unk_1E0)();
-    if (((void (*)(void))sndgs_5320.streamrestore)) ((void (*)(void))sndgs_5320.streamrestore)();
-    if (((void (*)(void))sndgs_5320.midirestore)) ((void (*)(void))sndgs_5320.midirestore)();
+    if (((void (*)(void))sndgs.unk_1D8)) ((void (*)(void))sndgs.unk_1D8)();
+    if (((void (*)(void))sndgs.unk_1DC)) ((void (*)(void))sndgs.unk_1DC)();
+    if (((void (*)(void))sndgs.unk_1E0)) ((void (*)(void))sndgs.unk_1E0)();
+    if (((void (*)(void))sndgs.streamrestore)) ((void (*)(void))sndgs.streamrestore)();
+    if (((void (*)(void))sndgs.midirestore)) ((void (*)(void))sndgs.midirestore)();
     SNDI_freespkrtable_5320();
     func_003B8A38_5320();
-    if (sndgs_5320.bankremove) sndgs_5320.bankremove(-1);
+    if (sndgs.bankremove) sndgs.bankremove(-1);
     SNDPLATFORM_restore_5320();
     SNDSYS_entercritical_5320();
-    SNDMEMI_free_5320(((int)sndgs_5320.chan));
-    SNDMEMI_free_5320(((int)sndgs_5320.banklist));
+    SNDMEMI_free_5320(((int)(struct CHANPUB*)sndgs.chan));
+    SNDMEMI_free_5320(((int)(struct BANKLIST*)sndgs.banklist));
     SNDSYS_leavecritical_5320();
     memResult = SNDMEMI_restore_5320();
-    sndgs_5320.installed = 0;
+    sndgs.installed = 0;
     SNDI_mutexfree_5320();
     return memResult;
 }
@@ -1743,7 +1739,6 @@ int SNDSYS_restore(void) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5440);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern signed char D_0050AA5C_5440[16] __asm__("D_0050AA5C");
 
 /**
  * Returns whether the EA sound system is started (D_0050AA5C).
@@ -1753,7 +1748,7 @@ extern signed char D_0050AA5C_5440[16] __asm__("D_0050AA5C");
  * @return nonzero when started
  */
 signed char func_003B5440(void) {
-    return D_0050AA5C_5440[0];
+    return sndgs.installed;
 }
 #endif
 
@@ -1819,7 +1814,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSYSI_variabletimerservice);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct N_54E0 { struct N_54E0 *next; int pad; void (*fn)(int); int arg; } N_54E0;
 typedef struct { char pad[0x1B4]; N_54E0 *list; int pad2[2]; int cnt; } G_54E0;
-extern int sndgs_A8E8_54E0[] __asm__("sndgs");
 extern int lastTick_C468[] __asm__("lastTick");
 
 /**
@@ -1830,7 +1824,7 @@ extern int lastTick_C468[] __asm__("lastTick");
  */
 void SNDSYSI_variabletimerservice(void) {
     N_54E0 *n;
-    G_54E0 *sndState = (G_54E0 *)sndgs_A8E8_54E0;
+    G_54E0 *sndState = (G_54E0 *)((int*)&sndgs);
 
     if (sndState->cnt != lastTick_C468[0]) {
         n = sndState->list;
@@ -1851,7 +1845,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSYSI_timerservice);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 
-extern struct sA8E8 sndgs;
 extern void SNDSYSI_100hzserver_5540(void) __asm__("SNDSYSI_100hzserver");
 
 /**
@@ -1864,15 +1857,15 @@ extern void SNDSYSI_100hzserver_5540(void) __asm__("SNDSYSI_100hzserver");
  */
 void SNDSYSI_timerservice(unsigned timerHertz) {
     unsigned lim;
-    if (sndgs.f174 != 0) {
-        if ((int)timerHertz != (short)sndgs.f334) {
-            sndgs.f334 = timerHertz;
-            sndgs.f180 = 0;
-            sndgs.f330 = 0;
+    if (sndgs.installed != 0) {
+        if ((int)timerHertz != (short)sndgs.currenttimerhz) {
+            sndgs.currenttimerhz = timerHertz;
+            sndgs.audiotick = 0;
+            sndgs.servertick = 0;
         }
-        sndgs.f330++;
-        lim = sndgs.f330 * 100 / timerHertz;
-        while (lim >= sndgs.f180) {
+        sndgs.servertick++;
+        lim = sndgs.servertick * 100 / timerHertz;
+        while (lim >= sndgs.audiotick) {
             SNDSYSI_100hzserver_5540();
         }
     }
@@ -1885,7 +1878,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSYSI_100hzserver);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 
-extern struct sA8E8 sndgs;
 extern void iSNDserve(void);
 extern void f_89E0_55F0(int) __asm__("SNDstop");
 extern void f_A7B0_55F0(int) __asm__("func_003BA7B0");
@@ -1907,13 +1899,13 @@ void SNDSYSI_100hzserver(void) {
     struct sA8E8Chan *channel;
     struct sA8E8Env *envStep;
 
-    sndgs.f180++;
+    sndgs.audiotick++;
     iSNDserve();
-    for (i = 0; i < sndgs.f177; i++) {
-        sndgs.f184[i]();
+    for (i = 0; i < sndgs.numserverclients100hz; i++) {
+        ((void (**)(void))&sndgs.serverclient100hz[0])[i]();
     }
-    for (i = 0; i < sndgs.f17E; i++) {
-        channel = &sndgs.f1F0[i];
+    for (i = 0; i < sndgs.voicestotal; i++) {
+        channel = &((struct sA8E8Chan*)sndgs.chan)[i];
         if (channel->f69 != 1 || channel->f00 < 0) {
             continue;
         }
@@ -2011,8 +2003,8 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSYS_entercritical);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void (*gMutexLockFn[])(void);
-extern volatile char sndgs_58A0[] __asm__("sndgs");
 
+extern volatile char sndgs_58A0[] __asm__("sndgs");
 /**
  * Enters the sound system's critical section.
  *
@@ -2031,7 +2023,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSYS_leavecritical);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 
-extern struct sA8E8 sndgs;
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void (*D_0044C470_58D8[])(void) __asm__("D_0044C470");
 
@@ -2042,7 +2033,7 @@ extern void (*D_0044C470_58D8[])(void) __asm__("D_0044C470");
  * (DefaultMutexUnlockFn by default).
  */
 void SNDSYS_leavecritical(void) {
-    sndgs.f176--;
+    sndgs.incritical--;
     D_0044C470_58D8[0]();
 }
 #endif
@@ -2050,7 +2041,6 @@ void SNDSYS_leavecritical(void) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDSYS_add100hzclient);
 #ifdef SKIP_ASM
-extern struct SNDGLOBALSTATE sndgs_5910 __asm__("sndgs");
 
 /**
  * Adds a client to the sound system's 100 Hz client list.
@@ -2062,9 +2052,9 @@ extern struct SNDGLOBALSTATE sndgs_5910 __asm__("sndgs");
  * @param client  the client function
  */
 void SNDSYS_add100hzclient(int client) {
-    if (sndgs_5910.installed != 0) {
-        sndgs_5910.serverclient100hz[sndgs_5910.numserverclients100hz] = (void (*)(void))client;
-        sndgs_5910.numserverclients100hz++;
+    if (sndgs.installed != 0) {
+        ((void (**)(void))&sndgs.serverclient100hz[0])[sndgs.numserverclients100hz] = (void (*)(void))client;
+        sndgs.numserverclients100hz++;
     }
 }
 #endif
@@ -2074,10 +2064,10 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSYS_remove100hzclient);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_5948 { char pad[0x174]; char on; char p1; char p2; signed char n; char pad2[12]; int arr[8]; };
-extern struct S_5948 D_a8e8_5948 __asm__("sndgs");
 extern void SNDSYS_entercritical();
 extern void SNDSYS_leavecritical();
 
+extern struct S_5948 D_a8e8_5948 __asm__("sndgs");
 /**
  * Removes a client from the sound system's 100 Hz client list.
  *
@@ -2105,7 +2095,6 @@ void SNDSYS_remove100hzclient(int client) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDSYS_adduserdataclient);
 #ifdef SKIP_ASM
-extern struct SNDGLOBALSTATE sndgs_5A28 __asm__("sndgs");
 
 /**
  * Adds a callback to the sound system's user-data client list.
@@ -2117,9 +2106,9 @@ extern struct SNDGLOBALSTATE sndgs_5A28 __asm__("sndgs");
  * @param client  the callback, called with an event record
  */
 void SNDSYS_adduserdataclient(int client) {
-    if (sndgs_5A28.installed != 0) {
-        sndgs_5A28.userdataclient[sndgs_5A28.numuserdataclients] = (void (*)(void*))client;
-        sndgs_5A28.numuserdataclients++;
+    if (sndgs.installed != 0) {
+        sndgs.userdataclient[sndgs.numuserdataclients] = (void (*)(void*))client;
+        sndgs.numuserdataclients++;
     }
 }
 #endif
@@ -2129,8 +2118,8 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSYS_removeuserdataclient);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct G_5A60 { char pad[0x179]; signed char cnt; char pad2[0x4E]; int list[1]; };
-extern struct G_5A60 sndgs_5A60[] __asm__("sndgs");
 
+extern struct G_5A60 sndgs_5A60[] __asm__("sndgs");
 /**
  * Removes a callback from the sound system's user-data client list.
  *
@@ -2215,7 +2204,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDMEMI_constrain);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct G_5BA0 { char pad[0xC]; unsigned int lim; };
-extern struct G_5BA0 *D_0050AB1C_5BA0[] __asm__("D_0050AB1C");
 /**
  * Shrinks a free span so that it ends at the sound heap's limit.
  *
@@ -2227,7 +2215,7 @@ extern struct G_5BA0 *D_0050AB1C_5BA0[] __asm__("D_0050AB1C");
  */
 void SNDMEMI_constrain(int *freeAddr, int *freeSpace) {
     int x = *freeAddr;
-    unsigned int lim = D_0050AB1C_5BA0[0]->lim;
+    unsigned int lim = ((struct G_5BA0*)sndgs.mm)->lim;
     if (lim < (unsigned int)(x + *freeSpace))
         *freeSpace = lim - x;
 }
@@ -2237,8 +2225,8 @@ void SNDMEMI_constrain(int *freeAddr, int *freeSpace) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDMEMI_init);
 #ifdef SKIP_ASM
 struct G_5BD0 { char pad[0x234]; struct SNDMEMSTATE *cur; };
-extern struct G_5BD0 sndgs_5BD0 __asm__("sndgs");
 
+extern struct G_5BD0 sndgs_5BD0 __asm__("sndgs");
 /**
  * Sets up the sound system's memory heap in a buffer.
  *
@@ -2292,7 +2280,6 @@ struct SNDMEMSTATE_5C60 {
     int nummallocs;             /* counts down */
 };
 struct sndgs_5C60 { char pad[0x234]; struct SNDMEMSTATE_5C60 *pmem; };
-extern struct sndgs_5C60 sndgs_5C60 __asm__("sndgs");
 extern void SNDMEMI_constrain_5C60(unsigned int *pfreeaddr, int *pfreespace) __asm__("SNDMEMI_constrain");
 
 void *SNDMEMI_alloc_5C60(int size) __asm__("SNDMEMI_alloc");
@@ -2318,49 +2305,49 @@ void *SNDMEMI_alloc_5C60(int size) {
 
     size += 15;
     size &= ~15;
-    if (sndgs_5C60.pmem->nummallocs == 0) {
+    if (((struct SNDMEMSTATE_5C60*)sndgs.mm)->nummallocs == 0) {
         freeaddr = 0;
-        freespace = sndgs_5C60.pmem->endaddr;
+        freespace = ((struct SNDMEMSTATE_5C60*)sndgs.mm)->endaddr;
         SNDMEMI_constrain_5C60(&freeaddr, &freespace);
         if (freespace >= size) goto alloc;
         else goto fail;
     } else {
-        for (i = 0; sndgs_5C60.pmem->nummallocs < i; i--) {
-            pcurrec = &sndgs_5C60.pmem->r[i];
+        for (i = 0; ((struct SNDMEMSTATE_5C60*)sndgs.mm)->nummallocs < i; i--) {
+            pcurrec = &((struct SNDMEMSTATE_5C60*)sndgs.mm)->r[i];
             if (i == 0) {
                 freeaddr = 0;
                 freespace = pcurrec->addr;
             } else {
-                pprevrec = &sndgs_5C60.pmem->r[i + 1];
+                pprevrec = &((struct SNDMEMSTATE_5C60*)sndgs.mm)->r[i + 1];
                 freeaddr = pprevrec->addr + pprevrec->size;
                 freespace = pcurrec->addr - freeaddr;
             }
             SNDMEMI_constrain_5C60(&freeaddr, &freespace);
             if (freespace >= size) {
-                for (j = sndgs_5C60.pmem->nummallocs; j < i; j++) {
-                    sndgs_5C60.pmem->r[j] = sndgs_5C60.pmem->r[j + 1];
+                for (j = ((struct SNDMEMSTATE_5C60*)sndgs.mm)->nummallocs; j < i; j++) {
+                    ((struct SNDMEMSTATE_5C60*)sndgs.mm)->r[j] = ((struct SNDMEMSTATE_5C60*)sndgs.mm)->r[j + 1];
                 }
                 goto alloc;
             }
         }
-        pprevrec = &sndgs_5C60.pmem->r[i + 1];
+        pprevrec = &((struct SNDMEMSTATE_5C60*)sndgs.mm)->r[i + 1];
         freeaddr = pprevrec->addr + pprevrec->size;
-        freespace = sndgs_5C60.pmem->endaddr - freeaddr;
+        freespace = ((struct SNDMEMSTATE_5C60*)sndgs.mm)->endaddr - freeaddr;
         SNDMEMI_constrain_5C60(&freeaddr, &freespace);
         if (freespace < size) {
             goto fail;
         }
     }
 alloc:
-    pcurrec = &sndgs_5C60.pmem->r[i];
+    pcurrec = &((struct SNDMEMSTATE_5C60*)sndgs.mm)->r[i];
     pcurrec->addr = freeaddr;
     pcurrec->size = size;
-    sndgs_5C60.pmem->nummallocs--;
-    sndgs_5C60.pmem->endaddr -= sizeof(struct SNDMEMREC_5C60);
-    allocated = sndgs_5C60.pmem->pheap + freeaddr;
-    lowmark = sndgs_5C60.pmem->endaddr - (freeaddr + size);
-    if (lowmark < sndgs_5C60.pmem->lowmark) {
-        sndgs_5C60.pmem->lowmark = lowmark;
+    ((struct SNDMEMSTATE_5C60*)sndgs.mm)->nummallocs--;
+    ((struct SNDMEMSTATE_5C60*)sndgs.mm)->endaddr -= sizeof(struct SNDMEMREC_5C60);
+    allocated = ((struct SNDMEMSTATE_5C60*)sndgs.mm)->pheap + freeaddr;
+    lowmark = ((struct SNDMEMSTATE_5C60*)sndgs.mm)->endaddr - (freeaddr + size);
+    if (lowmark < ((struct SNDMEMSTATE_5C60*)sndgs.mm)->lowmark) {
+        ((struct SNDMEMSTATE_5C60*)sndgs.mm)->lowmark = lowmark;
     }
     return allocated;
 fail:
@@ -2376,7 +2363,6 @@ void SNDMEMI_free_5E98(int) __asm__("SNDMEMI_free");
 struct E_5E98 { int key; int val; };
 struct S_5E98 { int base; struct E_5E98 *arr; int p2; int x; int p4; int cnt; };
 struct G_5E98 { char pad[0x234]; struct S_5E98 *s; };
-extern struct G_5E98 sndgs_5E98[] __asm__("sndgs");
 
 /**
  * Frees a block from the sound heap.
@@ -2388,18 +2374,18 @@ extern struct G_5E98 sndgs_5E98[] __asm__("sndgs");
  */
 void SNDMEMI_free_5E98(int address) {
     int i = 0;
-    int heapOffset = address - sndgs_5E98[0].s->base;
-    if (sndgs_5E98[0].s->cnt >= 0) return;
+    int heapOffset = address - ((struct S_5E98*)sndgs.mm)->base;
+    if (((struct S_5E98*)sndgs.mm)->cnt >= 0) return;
     while (1) {
-        struct S_5E98 *memState = sndgs_5E98[0].s;
+        struct S_5E98 *memState = (struct S_5E98*)sndgs.mm;
         if (((struct E_5E98 *)((char *)memState->arr + (i << 3)))->key == heapOffset) {
             memState->cnt++;
-            sndgs_5E98[0].s->x += 8;
-            if (!(sndgs_5E98[0].s->cnt < i)) return;
+            ((struct S_5E98*)sndgs.mm)->x += 8;
+            if (!(((struct S_5E98*)sndgs.mm)->cnt < i)) return;
             do {
-                sndgs_5E98[0].s->arr[i] = sndgs_5E98[0].s->arr[i - 1];
+                ((struct S_5E98*)sndgs.mm)->arr[i] = ((struct S_5E98*)sndgs.mm)->arr[i - 1];
                 i--;
-            } while (sndgs_5E98[0].s->cnt < i);
+            } while (((struct S_5E98*)sndgs.mm)->cnt < i);
             return;
         }
         i--;
@@ -2412,7 +2398,6 @@ void SNDMEMI_free_5E98(int address) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDPROFILE_outputlatency);
 #ifdef SKIP_ASM
 int SNDPLATFORM_outputlatency(void);
-extern char D_0050AA5C[];
 
 /**
  * Returns the sound output latency, or 0 when the sound system is not started.
@@ -2423,7 +2408,7 @@ extern char D_0050AA5C[];
  */
 int SNDPROFILE_outputlatency(void) {
     int latencyMs;
-    if (D_0050AA5C[0] != 0) {
+    if (*(char*)&sndgs.installed != 0) {
         latencyMs = SNDPLATFORM_outputlatency();
     } else {
         latencyMs = 0;
@@ -2440,8 +2425,8 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDBANKI_userdatacallback);
 struct S_5F98 { char pad[0x17]; signed char n; char pad2[0x1C]; int a[4]; int b[4]; };
 struct M_5F98 { int arg; int a; int b; int pad[5]; };
 struct G_5F98 { char pad[0x179]; signed char cnt; char pad2[0x1C8 - 0x17A]; void (*fn[1])(struct M_5F98 *); };
-extern struct G_5F98 sndgs_5F98 __asm__("sndgs");
 
+extern struct G_5F98 sndgs_5F98 __asm__("sndgs");
 /**
  * Hands a channel's pending user-data events to the user-data clients.
  *
@@ -2472,7 +2457,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDbankadd);
 #ifdef SKIP_ASM
 struct Ent_6098 { struct BANKVER5 *hdr; char *buf1; char *buf2; char busy; };
 struct G_6098 { char pad[0x1E4]; void (*cb)(); char pad2[0x1F4 - 0x1E8]; struct Ent_6098 *ents; };
-extern struct G_6098 sndgs_6098 __asm__("sndgs");
 extern void SNDbankremove_6098() __asm__("SNDbankremove");
 extern int f_6500_6098(void) __asm__("SNDBANKI_alloc");
 extern char *f_4B70_6098(int, int) __asm__("SNDPLATFORM_memalloc");
@@ -2480,6 +2464,7 @@ extern int f_42D8_6098(int, char *, char *, int) __asm__("SNDPLATFORM_download")
 extern int f_42F8_6098(int) __asm__("SNDPLATFORM_downloadcomplete");
 extern int f_6788_6098(int, char *, char *, int *) __asm__("func_003B6788");
 
+extern struct G_6098 sndgs_6098 __asm__("sndgs");
 /**
  * Adds a sound bank: takes a bank slot and uploads its sample data to sound memory.
  *
@@ -2568,7 +2553,6 @@ struct R_6300 {
     int p8;
     char fC;
 };
-extern struct SNDGLOBALSTATE sndgs_6300 __asm__("sndgs");
 extern void SNDSYS_entercritical_6300() __asm__("SNDSYS_entercritical");
 extern void SNDSYS_leavecritical_6300() __asm__("SNDSYS_leavecritical");
 extern void SNDBANKI_userdatacallback_6300(void *buf, int n) __asm__("SNDBANKI_userdatacallback");
@@ -2596,7 +2580,7 @@ int SNDbankremove(int bankHandle) {
     int moreTags;
 
     if (bankHandle == -1) {
-        for (i = 0; i < sndgs_6300.sso.set.maxbanks; i++) {
+        for (i = 0; i < sndgs.sso.set.maxbanks; i++) {
             SNDbankremove(i);
         }
         return 0;
@@ -2605,9 +2589,9 @@ int SNDbankremove(int bankHandle) {
         return -8;
     }
     SNDSYS_entercritical_6300();
-    obj = ((struct R_6300*)sndgs_6300.banklist)[bankHandle].p0;
-    for (i = 0; i < sndgs_6300.voicestotal; i++) {
-        struct E_6300 *channel = &((struct E_6300*)sndgs_6300.chan)[i];
+    obj = ((struct R_6300*)(struct BANKLIST*)sndgs.banklist)[bankHandle].p0;
+    for (i = 0; i < sndgs.voicestotal; i++) {
+        struct E_6300 *channel = &((struct E_6300*)(struct CHANPUB*)sndgs.chan)[i];
         if (channel->f12 == bankHandle) {
             SNDstop_6300(channel->p);
         }
@@ -2622,14 +2606,14 @@ int SNDbankremove(int bankHandle) {
             } while (moreTags != 0);
         }
     }
-    if (((struct R_6300*)sndgs_6300.banklist)[bankHandle].p4 != 0) {
-        SNDPLATFORM_memfree_6300(0x100, ((struct R_6300*)sndgs_6300.banklist)[bankHandle].p4);
+    if (((struct R_6300*)(struct BANKLIST*)sndgs.banklist)[bankHandle].p4 != 0) {
+        SNDPLATFORM_memfree_6300(0x100, ((struct R_6300*)(struct BANKLIST*)sndgs.banklist)[bankHandle].p4);
     }
-    if (((struct R_6300*)sndgs_6300.banklist)[bankHandle].p8 != 0) {
-        SNDPLATFORM_memfree_6300(8, ((struct R_6300*)sndgs_6300.banklist)[bankHandle].p8);
+    if (((struct R_6300*)(struct BANKLIST*)sndgs.banklist)[bankHandle].p8 != 0) {
+        SNDPLATFORM_memfree_6300(8, ((struct R_6300*)(struct BANKLIST*)sndgs.banklist)[bankHandle].p8);
     }
-    ((struct R_6300*)sndgs_6300.banklist)[bankHandle].p0 = 0;
-    ((struct R_6300*)sndgs_6300.banklist)[bankHandle].fC = 0;
+    ((struct R_6300*)(struct BANKLIST*)sndgs.banklist)[bankHandle].p0 = 0;
+    ((struct R_6300*)(struct BANKLIST*)sndgs.banklist)[bankHandle].fC = 0;
     SNDSYS_leavecritical_6300();
     return 0;
 }
@@ -2643,7 +2627,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDBANKI_valid);
 /* sndgs: the sound driver's state block (layout worked out from every use in this unit; field names are
    their offsets). Some fields are also reached through their own splat symbols (declared below), which the
    functions that address them directly must keep using. */
-extern struct sA8E8 sndgs;
 /**
  * Checks a bank handle: in range, loaded and not busy.
  *
@@ -2654,10 +2637,10 @@ extern struct sA8E8 sndgs;
  */
 int SNDBANKI_valid(int bankHandle) {
     struct sA8E8Slot *slot;
-    if (bankHandle < 0 || bankHandle >= sndgs.setup.cfg.f08) {
+    if (bankHandle < 0 || bankHandle >= sndgs.sso.set.maxbanks) {
         return -8;
     }
-    slot = (struct sA8E8Slot *)(bankHandle * 16 + (int)sndgs.f1F4);
+    slot = (struct sA8E8Slot *)(bankHandle * 16 + (int)(struct sA8E8Slot*)sndgs.banklist);
     if (slot->f00 != 0) {
         return slot->f0C ? -18 : 0;
     }
@@ -2670,7 +2653,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDbankheadersize);
 #ifdef SKIP_ASM
 typedef struct { int a; int b; int c; } B6528_inner;
 typedef struct { B6528_inner *p; int pad[3]; } B6528_ent;
-extern B6528_ent *D_0050AADC[];
 
 /**
  * Returns the header size of a loaded bank.
@@ -2681,7 +2663,7 @@ extern B6528_ent *D_0050AADC[];
  * @return the header size in bytes
  */
 int SNDbankheadersize(int bankHandle) {
-    return D_0050AADC[0][bankHandle].p->c;
+    return ((B6528_ent*)sndgs.banklist)[bankHandle].p->c;
 }
 #endif
 
@@ -2695,7 +2677,6 @@ extern int SNDbankheadersize_6548(int) __asm__("SNDbankheadersize");
 extern int func_0041610C_6548(int, int, int) __asm__("func_0041610C");
 struct E_6548 { int data; int p[3]; };
 struct G_6548 { char p[0x1F4]; struct E_6548 *slots; };
-extern struct G_6548 sndgs_6548 __asm__("sndgs");
 /**
  * Copies a bank's header to new memory and makes the bank use the copy.
  *
@@ -2712,8 +2693,8 @@ int SNDbankheadercopy(int destMem, int n) {
     if (x < 0) {
         result = x;
     } else {
-        func_0041610C_6548(destMem, sndgs_6548.slots[n].data, x);
-        sndgs_6548.slots[n].data = destMem;
+        func_0041610C_6548(destMem, ((struct E_6548*)sndgs.banklist)[n].data, x);
+        ((struct E_6548*)sndgs.banklist)[n].data = destMem;
     }
     return result;
 }
@@ -2723,7 +2704,6 @@ int SNDbankheadercopy(int destMem, int n) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDbankinuse);
 #ifdef SKIP_ASM
 struct G_65D0 { char p[0x17E]; short n; char p2[0x1F0 - 0x180]; struct CHANPUB *tab; };
-extern struct G_65D0 sndgs_65D0 __asm__("sndgs");
 extern int SNDBANKI_valid_65D0(int) __asm__("SNDBANKI_valid");
 extern int SNDover_65D0(int) __asm__("SNDover");
 /**
@@ -2740,8 +2720,8 @@ int SNDbankinuse(int id) {
     int i;
     if (SNDBANKI_valid_65D0(id) != 0) return -8;
     SNDSYS_entercritical();
-    for (i = 0; i < sndgs_65D0.n; i++) {
-        struct CHANPUB *channel = &sndgs_65D0.tab[i];
+    for (i = 0; i < sndgs.voicestotal; i++) {
+        struct CHANPUB *channel = &((struct CHANPUB*)sndgs.chan)[i];
         if (channel->bhandle == id && SNDover_65D0(channel->handle) == 0) {
             found = 1;
             break;
@@ -2759,7 +2739,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B6670);
 extern int SNDBANKI_valid_6670() __asm__("SNDBANKI_valid");
 extern void SNDI_patchtohdr_6670(int, int, SNDSAMPLEFORMAT *, SNDSAMPLEATTR *, int, int) __asm__("SNDI_patchtohdr");
 extern int SNDBANKI_getppatch_6670(int, int) __asm__("SNDBANKI_getppatch");
-extern struct SNDGLOBALSTATE sndgs_6670 __asm__("sndgs");
 
 /**
  * Reads a bank patch's sample format, attributes and description without keeping its data.
@@ -2781,11 +2760,11 @@ int func_003B6670(int bankHandle, int patchNum, SNDSAMPLEFORMAT* formatOut, SNDS
     int *chanBuf;
     if (SNDBANKI_valid_6670() < 0) return -8;
     off = bankHandle * 0x10;
-    patch = SNDBANKI_getppatch_6670(*(int *)(off + ((int)sndgs_6670.banklist)), patchNum);
+    patch = SNDBANKI_getppatch_6670(*(int *)(off + ((int)(struct BANKLIST*)sndgs.banklist)), patchNum);
     if (patch == 0) return -8;
     i = 0;
     SNDSYS_entercritical();
-    SNDI_patchtohdr_6670(*(int *)(off + ((int)sndgs_6670.banklist)), patch, formatOut, attrOut, descOut, 0);
+    SNDI_patchtohdr_6670(*(int *)(off + ((int)(struct BANKLIST*)sndgs.banklist)), patch, formatOut, attrOut, descOut, 0);
     if (formatOut->channels != 0) {
         chanBuf = (int *)attrOut->ptsdata;
         do {
@@ -2845,7 +2824,6 @@ int func_003B6788(int renderMask, char *taggedPatch, int sampleData, int firstOf
 INCLUDE_ASM("ealib/seg_2B4578", SNDBANK_play);
 #ifdef SKIP_ASM
 typedef struct { struct BANKVER5 *p; int pad[3]; } Ent_6820;
-extern Ent_6820 *D_0050AADC_6820[] __asm__("D_0050AADC");
 extern int SNDBANKI_valid_6820(int) __asm__("SNDBANKI_valid");
 extern int SNDBANKI_getppatch_6820(void *, int) __asm__("SNDBANKI_getppatch");
 extern int SNDBANKI_playpatch_6820(void *, int, int, int, int) __asm__("SNDBANKI_playpatch");
@@ -2863,7 +2841,7 @@ extern int SNDBANKI_playpatch_6820(void *, int, int, int, int) __asm__("SNDBANKI
 int SNDBANK_play(int bankHandle, int patchNum, int playOpts) {
     struct BANKVER5 *ch;
     if (SNDBANKI_valid_6820(bankHandle) < 0) return -8;
-    ch = D_0050AADC_6820[0][bankHandle].p;
+    ch = ((Ent_6820*)sndgs.banklist)[bankHandle].p;
     if (patchNum < 0 || patchNum >= ch->numpatches) return -8;
     return SNDBANKI_playpatch_6820(ch, SNDBANKI_getppatch_6820(ch, patchNum), bankHandle, patchNum, playOpts);
 }
@@ -2936,7 +2914,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_destroyall);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { char pad[0x46]; unsigned char cnt; } G_69D8;
 extern void SNDSTRM_destroy(int);
-extern G_69D8 sndgs_A8E8_69D8 __asm__("sndgs");
 
 /**
  * Destroys every stream (SNDSTRM_destroy on each).
@@ -2949,11 +2926,11 @@ int SNDSTRMI_destroyall(void) {
     int i;
 
     i = 0;
-    if (sndgs_A8E8_69D8.cnt != 0) {
+    if (sndgs.sso.set.maxstreams != 0) {
         do {
             SNDSTRM_destroy(i);
             i += 1;
-        } while (i < (int)sndgs_A8E8_69D8.cnt);
+        } while (i < (int)sndgs.sso.set.maxstreams);
     }
     return 0;
 }
@@ -3130,7 +3107,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_parseheader);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern struct sA8E8 sndgs;
 
 /* sndss_6BD0: the streams (one per stream slot, SNDSTRMI_getstreamptr looks one up). Layout from every use in this unit;
    field names are their offsets. */
@@ -3190,8 +3166,8 @@ int SNDSTRMI_parseheader(int streamSlot, int *chunk) {
         ev.e = n->f0C;
         (*(struct sA0A0Hdr*)&stream->newsa).f48[i] = 0;
         (*(struct sA0A0Hdr*)&stream->newsa).f58[i++] = 0;
-        for (j = 0; j < sndgs.f179; j++) {
-            sndgs.f1C8[j](&ev);
+        for (j = 0; j < sndgs.numuserdataclients; j++) {
+            sndgs.userdataclient[j](&ev);
         }
     }
     STREAM_release_6BD0(stream->streamhandle, chunk);
@@ -3397,7 +3373,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_service);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 
-extern struct sA8E8 sndgs;
 
 extern struct SNDSTREAMCHANNEL *sndss_71D8[32] __asm__("sndss");
 extern int SNDPKTPLAY_framesoutstanding(int);
@@ -3421,7 +3396,7 @@ void SNDSTRMI_service(void) {
     int readMore;
     int *chunk;
     SNDSYS_entercritical();
-    for (; i < sndgs.setup.cfg.f26; i++) {
+    for (; i < sndgs.sso.set.maxstreams; i++) {
         stream = sndss_71D8[i];
         if (stream == 0 || (*(struct sA0A0List*)&stream->allocatedrequests).f08 == 0) continue;
         if (stream->state == 2) {
@@ -3483,7 +3458,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_create);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern struct sA8E8 sndgs;
 
 /* sndss_7450: the streams (one per stream slot, SNDSTRMI_getstreamptr looks one up). Layout from every use in this unit;
    field names are their offsets. */
@@ -3521,6 +3495,7 @@ extern int SNDSTRM_setgreedylevel_7450(int, int) __asm__("SNDSTRM_setgreedylevel
 extern int SNDSTRM_purge_7450(int) __asm__("SNDSTRM_purge");
 
 int f_7450(struct sA0A0Parm *src, int n, int a2, char *buf, int size, int h, int ext) __asm__("SNDSTRMI_create");
+extern struct sA8E8 sndgs_7450 __asm__("sndgs");
 /**
  * Creates a stream in caller memory: request nodes, packet player and file queue.
  *
@@ -3549,7 +3524,7 @@ int f_7450(struct sA0A0Parm *src, int n, int maxChunks, char *buf, int size, int
     struct sA0A0Node *ents;
     char *packetMem;
     int fileStream;
-    for (i = 0; i < sndgs.setup.cfg.f26; i++) {
+    for (i = 0; i < sndgs_7450.setup.cfg.f26; i++) {
         if (sndss_7450[i] == 0) goto found;
     }
     return -9;
@@ -3590,7 +3565,7 @@ found:
     (*(struct sA0A0Parm*)&stream->po) = *src;
     if (SNDSTRMI_numcreated_7450() == 0) {
         iSNDserveraddclient_7450(SNDSTRMI_service_7450);
-        sndgs.f1EC = (void (*)(void))SNDSTRMI_destroyall_7450;
+        sndgs_7450.f1EC = (void (*)(void))SNDSTRMI_destroyall_7450;
     }
     sndss_7450[slot] = stream;
     if (ext == 0) {
@@ -4426,7 +4401,6 @@ extern void f_A7B0_8160(int) __asm__("func_003BA7B0");
 extern void f_2A50_8160(int) __asm__("func_003C2A50");
 struct T_8160 { int w0; char pad[0x65]; char c69; char pad2[0x22]; };
 struct G_8160 { char pad[0x175]; char c; char pad2[8]; short n; char pad3[0x6F]; struct T_8160 *tab; };
-extern struct G_8160 sndgs_8160[] __asm__("sndgs");
 
 /**
  * Sets the sound system's master volume and reapplies it to every playing channel.
@@ -4441,9 +4415,9 @@ int SNDmastervol(int masterVol) {
     int i;
     struct T_8160 *channel;
     SNDSYS_entercritical();
-    sndgs_8160[0].c = masterVol;
-    for (i = 0; i < sndgs_8160[0].n; i++) {
-        channel = (struct T_8160 *)((char *)sndgs_8160[0].tab + i * 0x8C);
+    sndgs.mastervol = masterVol;
+    for (i = 0; i < sndgs.voicestotal; i++) {
+        channel = (struct T_8160 *)((char *)(struct T_8160*)sndgs.chan + i * 0x8C);
         if (channel->c69 == 1 && channel->w0 >= 0) {
             f_A7B0_8160(i);
             f_2A50_8160(i);
@@ -4563,10 +4537,10 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B83A0);
 /* sndgs: the sound driver's state block (layout worked out from every use in this unit; field names are
    their offsets). Some fields are also reached through their own splat symbols (declared below), which the
    functions that address them directly must keep using. */
-extern struct sA8E8 sndgs;
 extern void f84E0_83Ab(int, int, int, struct sA8E8Pan *) __asm__("func_003B84E0");
 extern int func_003B88C8(int, int, int);
 
+extern struct sA8E8 sndgs_83A0 __asm__("sndgs");
 /**
  * Sets the level of the effect buses selected by the flags and reapplies every channel's sends.
  *
@@ -4586,14 +4560,14 @@ int func_003B83A0(int busFlags, int busLevel) {
         busFlags |= 0x1F8;
     }
     if (busFlags & 0x10) {
-        sndgs.f1F8[id].f02 = busLevel;
+        sndgs_83A0.f1F8[id].f02 = busLevel;
     }
     if (busFlags & 0x20) {
-        sndgs.f20C[id].f02 = busLevel;
+        sndgs_83A0.f20C[id].f02 = busLevel;
     }
     selectsKind8 = busFlags & 0x40;
     if (selectsKind8) {
-        sndgs.f220[id].f02 = busLevel;
+        sndgs_83A0.f220[id].f02 = busLevel;
     }
     SNDSYS_entercritical();
     if (selectsKind8) {
@@ -4601,8 +4575,8 @@ int func_003B83A0(int busFlags, int busLevel) {
         panPair.r = panPair.l = (float)busLevel * 0.007874016f;
         f84E0_83Ab(id, 8, 0, &panPair);
     }
-    for (i = 0; i < sndgs.f17E; i++) {
-        struct sA8E8Chan *channel = &sndgs.f1F0[i];
+    for (i = 0; i < sndgs_83A0.f17E; i++) {
+        struct sA8E8Chan *channel = &sndgs_83A0.f1F0[i];
         func_003B88C8(channel->f00, id, channel->f61[id]);
     }
     SNDSYS_leavecritical();
@@ -4646,7 +4620,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDautovol);
 extern int iSNDpatchkey_8530(int, int *) __asm__("iSNDpatchkey");
 extern int SNDVOICEI_get_8530(void) __asm__("SNDVOICEI_get");
 struct G_8530 { char pad[0x1F0]; char *tab; };
-extern struct G_8530 sndgs_8530[] __asm__("sndgs");
 
 /**
  * Fades a sound's volume to a target over a number of 100 Hz ticks.
@@ -4668,7 +4641,7 @@ int SNDautovol(int soundHandle, int n, int targetVol) {
         setChan = -1;
         targetVol <<= 16;
         while (iSNDpatchkey_8530(chanIndex, &setChan)) {
-            char *channel = sndgs_8530[0].tab + setChan * 140;
+            char *channel = (char*)sndgs.chan + setChan * 140;
             *(int *)(channel + 0x34) = targetVol;
             *(int *)(channel + 0x30) = (targetVol - *(int *)(channel + 0x38)) / n;
         }
@@ -4688,7 +4661,6 @@ extern void func_003BA7B0_85F0(int) __asm__("func_003BA7B0");
 extern void func_003C2A50_85F0(int) __asm__("func_003C2A50");
 extern void SNDPLATFORM_setfxlevel_85F0(int, int) __asm__("SNDPLATFORM_setfxlevel");
 struct G_85F0 { char pad[0x1F0]; struct CHANPUB *tab; };
-extern struct G_85F0 sndgs_85F0 __asm__("sndgs");
 
 int SNDvol_85F0(int a, int v) __asm__("SNDvol");
 
@@ -4713,7 +4685,7 @@ int SNDvol_impl(int soundHandle, int volume) {
     if (chanIndex >= 0) {
         setChan = -1;
         while (iSNDpatchkey_85F0(chanIndex, &setChan) != 0) {
-            channel = &sndgs_85F0.tab[setChan];
+            channel = &((struct CHANPUB*)sndgs.chan)[setChan];
             channel->fadePer100Hz = 0;
             if (channel->programmedVol == volume << 16) return 0;
             channel->programmedVol = volume << 16;
@@ -4730,7 +4702,6 @@ int SNDvol_impl(int soundHandle, int volume) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003B86C0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_0050AAD8_86C0[] __asm__("D_0050AAD8");
 
 /**
  * Returns a sound's current volume.
@@ -4745,7 +4716,7 @@ short func_003B86C0(void) {
     if (i < 0) {
         return -8;
     }
-    return *(short *)(D_0050AAD8_86C0[0] + i * 0x8C + 0x3A);
+    return *(short *)((char*)sndgs.chan + i * 0x8C + 0x3A);
 }
 #endif
 
@@ -4756,7 +4727,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B8700);
 extern int iSNDpatchkey_8700(int, int *) __asm__("iSNDpatchkey");
 extern void func_003C2EC8_8700(int) __asm__("func_003C2EC8");
 struct G_8700 { char pad[0x1F0]; char *tbl; };
-extern struct G_8700 sndgs_8700 __asm__("sndgs");
 
 /**
  * Sets a sound's dry level.
@@ -4776,7 +4746,7 @@ int func_003B8700(int soundHandle, int dryLevel) {
         setChan = -1;
         while (iSNDpatchkey_8700(chanIndex, &setChan) != 0) {
             
-            *(char *)(sndgs_8700.tbl + setChan * 0x8C + 0x5F) = dryLevel;
+            *(char *)((char*)sndgs.chan + setChan * 0x8C + 0x5F) = dryLevel;
             func_003C2EC8_8700(setChan);
         }
     }
@@ -4792,7 +4762,6 @@ extern int SNDVOICEI_get_8790(void) __asm__("SNDVOICEI_get");
 extern void iSNDcalcpitch_8790(int, int) __asm__("iSNDcalcpitch");
 extern int iSNDpatchkey_8790(int, int *) __asm__("iSNDpatchkey");
 extern void SNDPLATFORM_setpitch_8790(int) __asm__("SNDPLATFORM_setpitch");
-extern char sndgs_8790[] __asm__("sndgs");
 int SNDpitchmult_8790(int a0, int arg1) __asm__("SNDpitchmult");
 
 /**
@@ -4814,7 +4783,7 @@ int SNDpitchmult_8790(int soundHandle, int pitchMult) {
     chanIndex = SNDVOICEI_get_8790();
     if (chanIndex >= 0) {
         setChan = -1;
-        sndState = sndgs_8790;
+        sndState = ((char*)&sndgs);
         while (iSNDpatchkey_8790(chanIndex, &setChan) != 0) {
             i = setChan;
             channel = *(char **)(sndState + 0x1F0) + i * 140;
@@ -4837,7 +4806,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDCTRL_timemult);
 extern int iSNDpatchkey_8838(int, int *) __asm__("iSNDpatchkey");
 extern void SNDPLATFORM_timemult_8838(int, int) __asm__("SNDPLATFORM_timemult");
 struct G_8838 { char pad[0x1F0]; char *tbl; };
-extern struct G_8838 sndgs_8838 __asm__("sndgs");
 
 /**
  * Sets a sound's time multiplier.
@@ -4858,7 +4826,7 @@ int SNDCTRL_timemult(int soundHandle, int timeMult) {
         setChan = -1;
         while (iSNDpatchkey_8838(chanIndex, &setChan) != 0) {
             int i = setChan;
-            *(short *)(sndgs_8838.tbl + i * 0x8C + 0x6A) = timeMult;
+            *(short *)((char*)sndgs.chan + i * 0x8C + 0x6A) = timeMult;
             SNDPLATFORM_timemult_8838(i, timeMult);
         }
     }
@@ -4874,7 +4842,6 @@ extern int SNDVOICEI_get_88C8() __asm__("SNDVOICEI_get");
 extern void func_003BA740_88C8(int, int) __asm__("func_003BA740");
 extern int iSNDpatchkey_88C8(int, int *) __asm__("iSNDpatchkey");
 extern void SNDPLATFORM_setfxlevel_88C8(int, int) __asm__("SNDPLATFORM_setfxlevel");
-extern char sndgs_88C8[] __asm__("sndgs");
 
 /**
  * Sets a sound's send level to one effect bus.
@@ -4894,7 +4861,7 @@ int func_003B88C8(int soundHandle, int busIndex, int fxLevel) {
     chanIndex = SNDVOICEI_get_88C8();
     if (chanIndex >= 0) {
         setChan = -1;
-        sndState = sndgs_88C8;
+        sndState = ((char*)&sndgs);
         while (iSNDpatchkey_88C8(chanIndex, &setChan) != 0) {
             *(char *)(setChan * 0x8C + *(int *)(sndState + 0x1F0) + busIndex + 0x61) = fxLevel;
             func_003BA740_88C8(busIndex, setChan);
@@ -4974,7 +4941,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B8A38);
 // Between SNDSYS_entercritical and SNDSYS_leavecritical, calls SNDstop on each entry's handle.
 struct E_8A38 { int h; char p[0x88]; };
 struct G_8A38 { char p[0x17E]; short n; char p2[0x1F0 - 0x180]; struct E_8A38 *ents; };
-extern struct G_8A38 sndgs_8A38 __asm__("sndgs");
 extern int SNDstop_8A38(int) __asm__("SNDstop");
 extern void SNDSYS_entercritical_8A38(void) __asm__("SNDSYS_entercritical");
 extern void SNDSYS_leavecritical_8A38(void) __asm__("SNDSYS_leavecritical");
@@ -4984,7 +4950,7 @@ extern void SNDSYS_leavecritical_8A38(void) __asm__("SNDSYS_leavecritical");
 void func_003B8A38(void) {
     int i = 0;
     SNDSYS_entercritical_8A38();
-    for (; i < sndgs_8A38.n; i++) SNDstop_8A38(sndgs_8A38.ents[i].h);
+    for (; i < sndgs.voicestotal; i++) SNDstop_8A38(((struct E_8A38*)sndgs.chan)[i].h);
     SNDSYS_leavecritical_8A38();
 }
 #endif
@@ -5015,7 +4981,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDtimeremaining);
 /* sndgs: the sound driver's state block (layout worked out from every use in this unit; field names are
    their offsets). Some fields are also reached through their own splat symbols (declared below), which the
    functions that address them directly must keep using. */
-extern struct sA8E8 sndgs;
 extern int iSNDpatchkey_8AD8(int, int *) __asm__("iSNDpatchkey");
 extern int SNDVOICEI_get_8AD8(void) __asm__("SNDVOICEI_get");
 extern int SNDPLATFORM_getcurframe_8AD8(int) __asm__("SNDPLATFORM_getcurframe");
@@ -5036,7 +5001,7 @@ int SNDtimeremaining(void) {
     if (chanIndex >= 0) {
         setChan = -1;
         while (iSNDpatchkey_8AD8(chanIndex, &setChan) != 0) {
-            struct sA8E8Chan *channel = &sndgs.f1F0[setChan];
+            struct sA8E8Chan *channel = &((struct sA8E8Chan*)sndgs.chan)[setChan];
             int curFrame;
             if (channel->f18 > 0) {
                 curFrame = -7;
@@ -5066,7 +5031,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SND3dpos);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_8C00 { char p0[0x1C]; unsigned short s1c; unsigned short s1e; char p1[0x2C]; unsigned short s4c; char p2[0x8C - 0x4E]; };
 struct G_8C00 { char pad[0x1F0]; struct E_8C00 *tab; };
-extern struct G_8C00 sndgs_8C00[] __asm__("sndgs");
 
 /**
  * Sets a sound's 3D position: azimuth relative to its built-in pan, and elevation.
@@ -5091,7 +5055,7 @@ int SND3dpos(int soundHandle, int azimuth, int elevation) {
     if (chanIndex >= 0) {
         setChan = -1;
         while (iSNDpatchkey(chanIndex, &setChan)) {
-            struct E_8C00 *channel = &sndgs_8C00[0].tab[setChan];
+            struct E_8C00 *channel = &((struct E_8C00*)sndgs.chan)[setChan];
             channel->s1c = channel->s4c + azimuth;
             channel->s1e = elevation;
             func_003C38E0(setChan);
@@ -5725,11 +5689,11 @@ struct C_97D8 { char pad[0x10]; int f10; char pad2[0x14]; char f28; char pad3[0x
 struct G_97D8 { char pad[0x1E8]; int (*f1E8)(void); };
 extern struct E_97D8 D_0050A820_97D8[] __asm__("D_0050A820");
 extern struct C_97D8 sndms_97D8[] __asm__("sndms");
-extern struct G_97D8 sndgs_97D8 __asm__("sndgs");
 extern void SNDSYS_add100hzclient_97D8(void *) __asm__("SNDSYS_add100hzclient");
 extern void SNDI_midiserver_97D8(void) __asm__("SNDI_midiserver");
 extern int SNDmidirestore_97D8(void) __asm__("SNDmidirestore");
 
+extern struct G_97D8 sndgs_97D8 __asm__("sndgs");
 /**
  * Starts the MIDI sequencer: clears all sequences and note voices and adds its 100 Hz client.
  *
@@ -5769,7 +5733,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDmidirestore);
 extern void SNDSYS_remove100hzclient_9880(void (*)(void)) __asm__("SNDSYS_remove100hzclient");
 extern void SNDI_midiserver_9880(void) __asm__("SNDI_midiserver");
 extern void SNDmidistopall_9880(void) __asm__("SNDmidistopall");
-extern int D_0050AAD0_9880[] __asm__("D_0050AAD0");
 
 /**
  * Shuts the MIDI sequencer down: stops all sequences and removes its 100 Hz client.
@@ -5782,7 +5745,7 @@ int SNDmidirestore(void) {
     SNDSYS_entercritical();
     SNDmidistopall_9880();
     SNDSYS_remove100hzclient_9880(SNDI_midiserver_9880);
-    D_0050AAD0_9880[0] = 0;
+    *(int*)&sndgs.midirestore = 0;
     SNDSYS_leavecritical();
     return 0;
 }
@@ -6306,7 +6269,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDVOICEI_alloc);
 /* sndgs: the sound driver's state block (layout worked out from every use in this unit; field names are
    their offsets). Some fields are also reached through their own splat symbols (declared below), which the
    functions that address them directly must keep using. */
-extern struct sA8E8 sndgs;
 extern short sndvoicereserved_A0B0[] __asm__("sndvoicereserved");
 extern int D_0044C478;
 extern int f_A078_A0B0(int, int) __asm__("SNDVOICEI_isreserved");
@@ -6349,7 +6311,7 @@ short SNDVOICEI_alloc(int n, int tag, unsigned int *out, int lo, int hi) {
         best = -1;
         key = 0xFFFFFFFF;
         for (k = lo; k < hi; k++) {
-            channel = &sndgs.f1F0[k];
+            channel = &((struct sA8E8Chan*)sndgs.chan)[k];
             if (channel->f69 == 0 && f_A078_A0B0(k, sel) == 0 && channel->f2C < key) {
                 key = channel->f2C;
                 best = k;
@@ -6363,11 +6325,11 @@ short SNDVOICEI_alloc(int n, int tag, unsigned int *out, int lo, int hi) {
     for (i = sel; i < n; i++) {
         best = -1;
         lim = tag;
-        if (sndgs.setup.cfg.f1C == 0) lim = tag - 1;
+        if (sndgs.sso.set.stealequalpriorityvoices == 0) lim = tag - 1;
         key = 0xFFFFFFFF;
         for (k = lo; k < hi; k++) {
             if (f_A078_A0B0(k, sel) == 0) {
-                channel = &sndgs.f1F0[k];
+                channel = &((struct sA8E8Chan*)sndgs.chan)[k];
                 if (channel->f2A < 101) {
                     if (channel->f2A < lim) {
                         lim = channel->f2A;
@@ -6403,25 +6365,25 @@ short SNDVOICEI_alloc(int n, int tag, unsigned int *out, int lo, int hi) {
         result = sndvoicereserved_A0B0[0];
         for (i = 0; i < sel; i++) {
             int w;
-            channel = &sndgs.f1F0[sndvoicereserved_A0B0[i]];
+            channel = &((struct sA8E8Chan*)sndgs.chan)[sndvoicereserved_A0B0[i]];
             w = channel->f00;
             if (channel->f69 != 0) {
                 if (w < 0) {
-                    w = sndgs.f1F0[channel->f28].f00;
+                    w = ((struct sA8E8Chan*)sndgs.chan)[channel->f28].f00;
                 }
                 f_89E0_A0B0(w);
             }
             channel->f69 = 1;
-            channel->f2C = sndgs.f180;
+            channel->f2C = sndgs.audiotick;
             channel->f2A = tag;
         }
-        sndgs.f1F0[sndvoicereserved_A0B0[0]].f00 = *out;
-        sndgs.f1F0[sndvoicereserved_A0B0[0]].f04[0] = sndvoicereserved_A0B0[0];
-        sndgs.f1F0[sndvoicereserved_A0B0[0]].f28 = -1;
+        ((struct sA8E8Chan*)sndgs.chan)[sndvoicereserved_A0B0[0]].f00 = *out;
+        ((struct sA8E8Chan*)sndgs.chan)[sndvoicereserved_A0B0[0]].f04[0] = sndvoicereserved_A0B0[0];
+        ((struct sA8E8Chan*)sndgs.chan)[sndvoicereserved_A0B0[0]].f28 = -1;
         for (i = 1; i < sel; i++) {
-            sndgs.f1F0[sndvoicereserved_A0B0[0]].f04[i] = sndvoicereserved_A0B0[i];
-            sndgs.f1F0[sndvoicereserved_A0B0[i]].f00 = -1;
-            sndgs.f1F0[sndvoicereserved_A0B0[i]].f28 = sndvoicereserved_A0B0[0];
+            ((struct sA8E8Chan*)sndgs.chan)[sndvoicereserved_A0B0[0]].f04[i] = sndvoicereserved_A0B0[i];
+            ((struct sA8E8Chan*)sndgs.chan)[sndvoicereserved_A0B0[i]].f00 = -1;
+            ((struct sA8E8Chan*)sndgs.chan)[sndvoicereserved_A0B0[i]].f28 = sndvoicereserved_A0B0[0];
         }
     }
     return result;
@@ -6434,7 +6396,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDVOICEI_free);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_A550 { int f0; char pad[0x22]; unsigned char f26; unsigned char f27; char pad2[4]; int f2C; char pad3[0x69 - 0x30]; signed char f69; char pad4[0x8C - 0x6A]; };
 struct G_A550 { char pad[0x17E]; short cnt; volatile int f180; char pad2[0x1F0 - 0x184]; struct E_A550 *tab; };
-extern struct G_A550 sndgs_A550 __asm__("sndgs");
 /**
  * Frees a channel, keeping a patch-key group's master until its last member goes.
  *
@@ -6447,52 +6408,52 @@ extern struct G_A550 sndgs_A550 __asm__("sndgs");
  * @param u  unused
  */
 void SNDVOICEI_free(int i, unsigned char u) {
-    struct E_A550 *channel = &sndgs_A550.tab[i];
+    struct E_A550 *channel = &((struct E_A550*)sndgs.chan)[i];
     unsigned char k = channel->f26;
     int n = 0;
     int sel = -1;
     int j;
     if (k != 0) {
-        for (j = 0; j < sndgs_A550.cnt; j++) {
-            struct E_A550 *otherChan = &sndgs_A550.tab[j];
+        for (j = 0; j < sndgs.voicestotal; j++) {
+            struct E_A550 *otherChan = &((struct E_A550*)sndgs.chan)[j];
             if (otherChan->f26 == k && otherChan->f0 >= 0 && otherChan->f69 != 0) {
                 n++;
                 if (otherChan->f27) sel = j;
             }
         }
-        channel = &sndgs_A550.tab[i];
+        channel = &((struct E_A550*)sndgs.chan)[i];
         if (n == 1) {
             channel->f69 = 0;
             channel->f26 = 0;
             channel->f27 = 0;
-            channel->f2C = sndgs_A550.f180;
+            channel->f2C = (volatile int)sndgs.audiotick;
             return;
         }
-        if (sndgs_A550.tab[sel].f69 == 2 && i != sel && n == 2) {
+        if (((struct E_A550*)sndgs.chan)[sel].f69 == 2 && i != sel && n == 2) {
             channel->f69 = 0;
             channel->f26 = 0;
             channel->f27 = 0;
-            channel->f2C = sndgs_A550.f180;
-            sndgs_A550.tab[sel].f69 = 0;
-            sndgs_A550.tab[sel].f26 = 0;
-            sndgs_A550.tab[sel].f27 = 0;
-            sndgs_A550.tab[sel].f2C = sndgs_A550.f180;
+            channel->f2C = (volatile int)sndgs.audiotick;
+            ((struct E_A550*)sndgs.chan)[sel].f69 = 0;
+            ((struct E_A550*)sndgs.chan)[sel].f26 = 0;
+            ((struct E_A550*)sndgs.chan)[sel].f27 = 0;
+            ((struct E_A550*)sndgs.chan)[sel].f2C = (volatile int)sndgs.audiotick;
             return;
         }
-        if (sndgs_A550.tab[sel].f69 == 1 && i == sel) {
-            sndgs_A550.tab[sel].f69 = 2;
+        if (((struct E_A550*)sndgs.chan)[sel].f69 == 1 && i == sel) {
+            ((struct E_A550*)sndgs.chan)[sel].f69 = 2;
             return;
         }
         channel->f69 = 0;
         channel->f26 = 0;
         channel->f27 = 0;
-        channel->f2C = sndgs_A550.f180;
+        channel->f2C = (volatile int)sndgs.audiotick;
         return;
     }
     channel->f69 = 0;
     channel->f26 = 0;
     channel->f27 = 0;
-    channel->f2C = sndgs_A550.f180;
+    channel->f2C = (volatile int)sndgs.audiotick;
 }
 #endif
 
@@ -6500,7 +6461,6 @@ void SNDVOICEI_free(int i, unsigned char u) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDVOICEI_get);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char sndgs_A8E8[] __asm__("sndgs");
 
 int SNDVOICEI_get_A6E8(int arg0) __asm__("SNDVOICEI_get");
 /**
@@ -6516,7 +6476,7 @@ int SNDVOICEI_get_A6E8(int soundHandle) {
     char *temp_2;
     char *sndState;
 
-    if ((soundHandle < 0) || (sndState = sndgs_A8E8, var_5 = soundHandle & 0xFF, (var_5 < *(short *)(sndState + 0x17E)) == 0)) {
+    if ((soundHandle < 0) || (sndState = ((char*)&sndgs), var_5 = soundHandle & 0xFF, (var_5 < *(short *)(sndState + 0x17E)) == 0)) {
         return -8;
     }
     temp_2 = *(char **)(sndState + 0x1F0) + (var_5 * 140);
@@ -6535,7 +6495,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003BA740);
 /* sndgs: the sound driver's state block (layout worked out from every use in this unit; field names are
    their offsets). Some fields are also reached through their own splat symbols (declared below), which the
    functions that address them directly must keep using. */
-extern struct sA8E8Chan *D_0050AAD8;    /* sndgs.f1F0 */
 /**
  * Recomputes a sound channel's send level to one effect bus.
  *
@@ -6550,7 +6509,7 @@ extern struct sA8E8Chan *D_0050AAD8;    /* sndgs.f1F0 */
  * @param i  the channel index
  */
 void func_003BA740(int busIndex, int i) {
-    struct sA8E8Chan *channel = &D_0050AAD8[i];
+    struct sA8E8Chan *channel = &((struct sA8E8Chan*)sndgs.chan)[i];
     struct sA8E8Bus *busRec = func_003B8218(busIndex, channel->f24);
     channel->f62[busIndex] = (channel->f60[busIndex] * channel->f61[busIndex] * busRec->f02) >> 6;
 }
@@ -6603,7 +6562,6 @@ INCLUDE_ASM("ealib/seg_2B4578", iSNDcalcpitch);
 /* sndgs: the sound driver's state block (layout worked out from every use in this unit; field names are
    their offsets). Some fields are also reached through their own splat symbols (declared below), which the
    functions that address them directly must keep using. */
-extern struct sA8E8Chan *D_0050AAD8;    /* sndgs.f1F0 */
 extern short f_A888_A938(int) __asm__("iSNDdetunetolinear");
 
 /**
@@ -6616,7 +6574,7 @@ extern short f_A888_A938(int) __asm__("iSNDdetunetolinear");
  * @param idx  the channel
  */
 void iSNDcalcpitch(int idx) {
-    struct sA8E8Chan *e = &D_0050AAD8[idx];
+    struct sA8E8Chan *e = &((struct sA8E8Chan*)sndgs.chan)[idx];
     int v;
     if (e->f86 == 0) {
         int a = e->f84;
@@ -6640,7 +6598,6 @@ INCLUDE_ASM("ealib/seg_2B4578", iSNDpatchkey);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_AA00 { int w; char p0[0x22]; unsigned char type; char p1[0x42]; signed char b; char p2[0x22]; };
 struct G_AA00 { char pad[0x17E]; short cnt; char pad2[0x70]; struct E_AA00 *tab; };
-extern struct G_AA00 sndgs_AA00[] __asm__("sndgs");
 
 /**
  * Steps through the channels of a sound's patch-key group.
@@ -6653,12 +6610,12 @@ extern struct G_AA00 sndgs_AA00[] __asm__("sndgs");
  * @return 1 while there is another channel, else 0
  */
 int iSNDpatchkey(int chanIndex, int *pos) {
-    struct E_AA00 *chanEntry = &sndgs_AA00[0].tab[chanIndex];
+    struct E_AA00 *chanEntry = &((struct E_AA00*)sndgs.chan)[chanIndex];
     unsigned char patchKey = chanEntry->type;
     if (patchKey != 0) {
         (*pos)++;
-        while (*pos < sndgs_AA00[0].cnt) {
-            chanEntry = &sndgs_AA00[0].tab[*pos];
+        while (*pos < sndgs.voicestotal) {
+            chanEntry = &((struct E_AA00*)sndgs.chan)[*pos];
             if (chanEntry->type == patchKey && chanEntry->b == 1 && chanEntry->w >= 0) return 1;
             (*pos)++;
         }
@@ -6924,10 +6881,10 @@ int SNDI_parsetimbre_AAC0(void **pptp, struct SNDIPATCHHEADER_AAC0 *pph) {
     pph->sampleoffset[5] = stp[35];
     azoffsets[5] = stp[39];
     for (i = 0; i < pph->numchan; i++) {
-        if (sndgs.setup.cfg.f27 == 2 && pph->numchan == 2) {
+        if (sndgs.sso.set.outputchannels == 2 && pph->numchan == 2) {
             azoffsets[i] = 0;
         }
-        pph->azimuth[i] = sndgs.f2E0[pph->numchan - 1][i] + azoffsets[i];
+        pph->azimuth[i] = sndgs.srcchancfg3d[pph->numchan - 1][i] + azoffsets[i];
     }
     *pptp = sti.ptag;
     return moretags;
@@ -6942,7 +6899,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDBANKI_findfreekey);
 extern unsigned char freekey_B0C8 __asm__("freekey");
 struct E_B0C8 { char pad[0x26]; unsigned char id; char pad2[0x69 - 0x27]; signed char used; char pad3[0x8C - 0x6A]; };
 struct G_B0C8 { char pad[0x17E]; short n; char pad2[0x1F0 - 0x180]; struct E_B0C8 *ents; };
-extern struct G_B0C8 sndgs_B0C8 __asm__("sndgs");
 
 /**
  * Returns a new patch key that no busy channel uses.
@@ -6956,8 +6912,8 @@ unsigned char SNDBANKI_findfreekey(void) {
 again:
     freekey_B0C8++;
     if (freekey_B0C8 == 0) freekey_B0C8++;
-    for (i = 0; i < sndgs_B0C8.n; i++) {
-        if (sndgs_B0C8.ents[i].used && sndgs_B0C8.ents[i].id == freekey_B0C8) goto again;
+    for (i = 0; i < sndgs.voicestotal; i++) {
+        if (((struct E_B0C8*)sndgs.chan)[i].used && ((struct E_B0C8*)sndgs.chan)[i].id == freekey_B0C8) goto again;
     }
     return freekey_B0C8;
 }
@@ -7078,7 +7034,6 @@ struct G_B140 {
     char pad0[0x1F0];
     struct Ch_B140 *chans;
 };
-extern struct G_B140 sndgs_B140[] __asm__("sndgs");
 extern int f6158_B140(int *, struct D_B140 *) __asm__("SNDI_validrendermode");
 extern void f0C18_B140(int, int *, int *) __asm__("SNDPLATFORM_getvoicerange");
 extern int fA0B0_B140(int, int, int *, int, int) __asm__("SNDVOICEI_alloc");
@@ -7146,7 +7101,7 @@ int SNDBANKI_playtimbre(int bhandle, int patnum, void *psampledata, struct P_B14
         if (voice < 0) {
             continue;
         }
-        pv = &sndgs_B140[0].chans[voice];
+        pv = &((struct Ch_B140*)sndgs.chan)[voice];
         pan = pph->b11;
         if (pph->b12) {
             pan += f72A0_B140(pph->b12);
@@ -7234,7 +7189,7 @@ int SNDBANKI_playtimbre(int bhandle, int patnum, void *psampledata, struct P_B14
             return handle;
         }
         for (i = 0; i < pph->n; i++) {
-            fA550_B140(sndgs_B140[0].chans[voice].ids[i]);
+            fA550_B140(((struct Ch_B140*)sndgs.chan)[voice].ids[i]);
         }
         handle = -9;
     }
@@ -7256,8 +7211,6 @@ struct Rec_B588 {
     char padC[0xD0 - 0xC];
 };
 struct G_B588 { char pad[0x1F0]; char *ents; };
-extern struct G_B588 sndgs_B588 __asm__("sndgs");
-extern char *D_0050AAD8_B588 __asm__("D_0050AAD8");
 extern int f_B0C8_B588(void) __asm__("SNDBANKI_findfreekey");
 extern int f_AAC0_B588(int **, struct Rec_B588 *) __asm__("SNDI_parsetimbre");
 extern int f_72A0_B588(int) __asm__("randrange");
@@ -7346,7 +7299,7 @@ int SNDBANKI_playpatch_impl(int *self, int *cur, int bankHandle, int patchNum, s
     if (n == 1) {
         k = f_A6E8_B588(ids[0]);
         if (k >= 0) {
-            chanEntry = D_0050AAD8_B588 + k * 140;
+            chanEntry = (char*)sndgs.chan + k * 140;
             chanEntry[0x26] = 0;
             chanEntry[0x27] = 0;
         }
@@ -7354,7 +7307,7 @@ int SNDBANKI_playpatch_impl(int *self, int *cur, int bankHandle, int patchNum, s
         for (i = 0; i < n; i++) {
             k = f_A6E8_B588(ids[i]);
             if (k >= 0) {
-                chanEntry = sndgs_B588.ents + k * 140;
+                chanEntry = (char*)sndgs.chan + k * 140;
                 chanEntry[0x26] = tag;
                 chanEntry[0x27] = 0;
             }
@@ -7399,7 +7352,6 @@ struct G_B820 {
     char pad48[0x2E0 - 0x48];
     unsigned short tbl[8][6];
 };
-extern struct G_B820 sndgs_B820 __asm__("sndgs");
 extern void f_6210_B820(void *, int, int) __asm__("memset");
 extern int f_7218_B820(struct Out_B820 *) __asm__("SND_attrsetdef");
 extern int f_7388_B820(struct Rec_B820 *) __asm__("SNDI_gettag");
@@ -7407,6 +7359,7 @@ extern void *f_5C60_B820(int) __asm__("SNDMEMI_alloc");
 extern void f_51E8_B820(void *, void *, int) __asm__("Util_MemCpy");
 extern void f_BDA0_B820(int, unsigned char *, struct Hdr_B820 *, struct Out_B820 *, struct Extra_B820 *) __asm__("SNDI_patchtohdrgen");
 
+extern struct G_B820 sndgs_B820 __asm__("sndgs");
 /**
  * Reads a patch's sample format, attributes and description.
  *
@@ -7672,7 +7625,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDI_aztospkrvol);
 /* sndgs: the sound driver's state block (layout worked out from every use in this unit; field names are
    their offsets). Some fields are also reached through their own splat symbols (declared below), which the
    functions that address them directly must keep using. */
-extern struct sA8E8 sndgs;
 extern unsigned char* D_0050AC38[];
 /**
  * Looks up the per-speaker gains for an azimuth.
@@ -7687,7 +7639,7 @@ void SNDI_aztospkrvol(int azimuth, float* out)
 {
     int idx = (azimuth & 0xFFFF) >> 8;
     int i;
-    for (i = 0; i < sndgs.setup.cfg.f27; i++) {
+    for (i = 0; i < sndgs.sso.set.outputchannels; i++) {
         out[i] = (float)D_0050AC38[i][idx] / 255.0f;
     }
 }
@@ -7816,7 +7768,6 @@ extern void f_A938_C6B8(int) __asm__("iSNDcalcpitch");
 extern int f_AA00_C6B8(int, int *) __asm__("iSNDpatchkey");
 extern void f_25E0_C6B8(int) __asm__("SNDPLATFORM_setpitch");
 struct G_C6B8 { char pad[0x1F0]; char *tab; };
-extern struct G_C6B8 sndgs_C6B8[] __asm__("sndgs");
 
 /**
  * Sets a sound's pitch bend and recomputes its pitch.
@@ -7836,7 +7787,7 @@ int SNDpitchbend(int soundHandle, int bend) {
     if (chanIndex >= 0) {
         setChan = -1;
         while (f_AA00_C6B8(chanIndex, &setChan) != 0) {
-            channel = sndgs_C6B8[0].tab + setChan * 140;
+            channel = (char*)sndgs.chan + setChan * 140;
             if (*(char *)(channel + 0x64) == bend)
                 return 0;
             if (*(short *)(channel + 0x82) != 0) {
@@ -11643,7 +11594,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDDRV_mixvoicefree);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void SNDVOICEI_free(int, unsigned char);
 struct S_0BE8 { char pad[0x2F]; unsigned char a; unsigned char b; };
-extern struct S_0BE8 sndgs_0BE8 __asm__("sndgs");
 
 /**
  * Frees a mixer voice, given its index among the software voices, with SNDVOICEI_free.
@@ -11655,7 +11605,7 @@ extern struct S_0BE8 sndgs_0BE8 __asm__("sndgs");
  * @param voiceIndex  the mixer voice index
  */
 void SNDDRV_mixvoicefree(int voiceIndex) {
-    SNDVOICEI_free(voiceIndex + sndgs_0BE8.b + sndgs_0BE8.a, sndgs_0BE8.a);
+    SNDVOICEI_free(voiceIndex + sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu, sndgs.sso.set.voicesiopcpu);
 }
 #endif
 
@@ -11663,8 +11613,6 @@ void SNDDRV_mixvoicefree(int voiceIndex) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_getvoicerange);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char sndgs_0C18[] __asm__("sndgs");
-extern unsigned char D_0050A918_0C18[] __asm__("D_0050A918");
 
 /**
  * Returns the range of driver voices a render mode plays on.
@@ -11680,17 +11628,17 @@ extern unsigned char D_0050A918_0C18[] __asm__("D_0050A918");
 void SNDPLATFORM_getvoicerange(int renderMode, int *minVoice, int *maxVoice) {
     if (renderMode & 8) {
         *minVoice = 0;
-        *maxVoice = D_0050A918_0C18[0];
+        *maxVoice = sndgs.sso.set.voicesspu;
         return;
     }
     if (renderMode & 0x100) {
-        char *driverState = sndgs_0C18;
+        char *driverState = ((char*)&sndgs);
         *minVoice = *(unsigned char *)(driverState + 0x30);
         *maxVoice = *(unsigned char *)(driverState + 0x30) + *(unsigned char *)(driverState + 0x2F);
         return;
     }
     if (renderMode & 4) {
-        char *driverState = sndgs_0C18;
+        char *driverState = ((char*)&sndgs);
         *minVoice = *(unsigned char *)(driverState + 0x30) + *(unsigned char *)(driverState + 0x2F);
         *maxVoice = *(short *)(driverState + 0x17E);
     }
@@ -11700,7 +11648,6 @@ void SNDPLATFORM_getvoicerange(int renderMode, int *minVoice, int *maxVoice) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_outputcaps);
 #ifdef SKIP_ASM
-extern struct SNDGLOBALSTATE sndgs_0C90 __asm__("sndgs");
 extern int D_0044DD3C_0C90[] __asm__("D_0044DD3C");
 /**
  * Fills the platform part of the default sound options in sndgs and returns 0.
@@ -11713,54 +11660,54 @@ extern int D_0044DD3C_0C90[] __asm__("D_0044DD3C");
  * @return 0
  */
 int SNDPLATFORM_outputcaps(void) {
-    sndgs_0C90.sso.cap.unk_0C = 0;
-    sndgs_0C90.sso.cap.outputratemin = 24000;
-    sndgs_0C90.sso.cap.voicesmaincpumax = 0x20;
-    sndgs_0C90.sso.cap.outputratemax = 48000;
-    sndgs_0C90.sso.cap.voicesiopcpumax = 0x10;
-    sndgs_0C90.sso.cap.outputchannelsmax = 5;
-    sndgs_0C90.sso.cap.outputchannelsmin = 1;
-    sndgs_0C90.sso.set.outputspdifmode = 1;
-    sndgs_0C90.sso.cap.voicesspumax = 0x30;
-    sndgs_0C90.sso.cap.rendermode[0] = 40;
-    sndgs_0C90.sso.cap.numrendermodes = 6;
-    sndgs_0C90.sso.set.useeax = 0;
-    sndgs_0C90.sso.set.voicesmaincpu = 8;
-    sndgs_0C90.sso.cap.rendermode[3] = 72;
-    sndgs_0C90.sso.cap.rendermode[1] = 36;
-    sndgs_0C90.sso.cap.rendermode[4] = 68;
-    sndgs_0C90.sso.cap.rendermode[2] = 288;
-    sndgs_0C90.sso.set.voicesiopcpu = 8;
-    sndgs_0C90.sso.set.rendermode[0] = 40;
-    sndgs_0C90.sso.set.rendermode[1] = 36;
-    sndgs_0C90.sso.set.outputrate = 48000;
-    sndgs_0C90.sso.cap.rendermode[5] = 320;
-    sndgs_0C90.sso.set.numrendermodes = 3;
-    sndgs_0C90.sso.set.rendermode[2] = 288;
-    sndgs_0C90.sso.set.voicesspu = 0x30;
-    sndgs_0C90.sso.set.maxstreams = 8;
-    sndgs_0C90.sso.set.outputrateiopcpu = 48000;
-    sndgs_0C90.sso.set.outputchannels = 2;
-    sndgs_0C90.sso.set.routemaincpufxtoiopcpu = 0;
-    sndgs_0C90.sso.set.resamplequality = 25;
-    sndgs_0C90.sso.set.loadiopmodules = 1;
-    (*(int*)&sndgs_0C90.sso.set.iopmodulepath) = D_0044DD3C_0C90[0];
-    sndgs_0C90.sso.set.iopcpuresamplequality = 25;
-    sndgs_0C90.sso.set.virtualspkrcfg3d[0][0] = 0;
-    sndgs_0C90.sso.set.virtualspkrcfg3d[1][0] = 0x4000;
-    sndgs_0C90.sso.set.virtualspkrcfg3d[1][1] = 0xC000;
-    sndgs_0C90.sso.set.virtualspkrcfg3d[2][0] = 10922;
-    sndgs_0C90.sso.set.virtualspkrcfg3d[2][1] = 0x8000;
-    sndgs_0C90.sso.set.virtualspkrcfg3d[2][2] = 54613;
-    sndgs_0C90.sso.set.virtualspkrcfg3d[3][0] = 0x2000;
-    sndgs_0C90.sso.set.virtualspkrcfg3d[3][1] = 0x6000;
-    sndgs_0C90.sso.set.virtualspkrcfg3d[3][2] = 40960;
-    sndgs_0C90.sso.set.virtualspkrcfg3d[3][3] = 0xE000;
-    sndgs_0C90.sso.set.virtualspkrcfg3d[4][0] = 0;
-    sndgs_0C90.sso.set.virtualspkrcfg3d[4][1] = 0x2000;
-    sndgs_0C90.sso.set.virtualspkrcfg3d[4][2] = 0x6000;
-    sndgs_0C90.sso.set.virtualspkrcfg3d[4][3] = 40960;
-    sndgs_0C90.sso.set.virtualspkrcfg3d[4][4] = 0xE000;
+    sndgs.sso.cap.unk_0C = 0;
+    sndgs.sso.cap.outputratemin = 24000;
+    sndgs.sso.cap.voicesmaincpumax = 0x20;
+    sndgs.sso.cap.outputratemax = 48000;
+    sndgs.sso.cap.voicesiopcpumax = 0x10;
+    sndgs.sso.cap.outputchannelsmax = 5;
+    sndgs.sso.cap.outputchannelsmin = 1;
+    sndgs.sso.set.outputspdifmode = 1;
+    sndgs.sso.cap.voicesspumax = 0x30;
+    sndgs.sso.cap.rendermode[0] = 40;
+    sndgs.sso.cap.numrendermodes = 6;
+    sndgs.sso.set.useeax = 0;
+    sndgs.sso.set.voicesmaincpu = 8;
+    sndgs.sso.cap.rendermode[3] = 72;
+    sndgs.sso.cap.rendermode[1] = 36;
+    sndgs.sso.cap.rendermode[4] = 68;
+    sndgs.sso.cap.rendermode[2] = 288;
+    sndgs.sso.set.voicesiopcpu = 8;
+    sndgs.sso.set.rendermode[0] = 40;
+    sndgs.sso.set.rendermode[1] = 36;
+    sndgs.sso.set.outputrate = 48000;
+    sndgs.sso.cap.rendermode[5] = 320;
+    sndgs.sso.set.numrendermodes = 3;
+    sndgs.sso.set.rendermode[2] = 288;
+    sndgs.sso.set.voicesspu = 0x30;
+    sndgs.sso.set.maxstreams = 8;
+    sndgs.sso.set.outputrateiopcpu = 48000;
+    sndgs.sso.set.outputchannels = 2;
+    sndgs.sso.set.routemaincpufxtoiopcpu = 0;
+    sndgs.sso.set.resamplequality = 25;
+    sndgs.sso.set.loadiopmodules = 1;
+    ((int)sndgs.sso.set.iopmodulepath) = D_0044DD3C_0C90[0];
+    sndgs.sso.set.iopcpuresamplequality = 25;
+    sndgs.sso.set.virtualspkrcfg3d[0][0] = 0;
+    sndgs.sso.set.virtualspkrcfg3d[1][0] = 0x4000;
+    sndgs.sso.set.virtualspkrcfg3d[1][1] = 0xC000;
+    sndgs.sso.set.virtualspkrcfg3d[2][0] = 10922;
+    sndgs.sso.set.virtualspkrcfg3d[2][1] = 0x8000;
+    sndgs.sso.set.virtualspkrcfg3d[2][2] = 54613;
+    sndgs.sso.set.virtualspkrcfg3d[3][0] = 0x2000;
+    sndgs.sso.set.virtualspkrcfg3d[3][1] = 0x6000;
+    sndgs.sso.set.virtualspkrcfg3d[3][2] = 40960;
+    sndgs.sso.set.virtualspkrcfg3d[3][3] = 0xE000;
+    sndgs.sso.set.virtualspkrcfg3d[4][0] = 0;
+    sndgs.sso.set.virtualspkrcfg3d[4][1] = 0x2000;
+    sndgs.sso.set.virtualspkrcfg3d[4][2] = 0x6000;
+    sndgs.sso.set.virtualspkrcfg3d[4][3] = 40960;
+    sndgs.sso.set.virtualspkrcfg3d[4][4] = 0xE000;
     return 0;
 }
 #endif
@@ -11816,7 +11763,6 @@ struct G_0E28 {
     struct Ch_0E28 *chans;
 };
 struct O_0E28 { char pad[0x13]; unsigned char b13; };
-extern struct G_0E28 sndgs_0E28 __asm__("sndgs");
 extern struct Sub_0E28 D_0050A908_0E28 __asm__("D_0050A908");
 extern struct O_0E28 *D_0050B9B0_0E28 __asm__("D_0050B9B0");
 extern void f8148_0E28(int) __asm__("MIX_setresamplequality");
@@ -11841,9 +11787,9 @@ int SNDPLATFORM_outputset(void) {
     int i;
 
     requested = D_0050A908_0E28;
-    if (sndgs_0E28.f174) {
-        sndgs_0E28.sub = sndgs_0E28.saved;
-        if (sndgs_0E28.saved.b29 != requested.b29) {
+    if (sndgs.installed) {
+        *(struct Sub_0E28*)&sndgs.sso.set = *(struct Sub_0E28*)&sndgs.prevset;
+        if (sndgs.prevset.outputspdifmode != requested.b29) {
             return 0;
         }
     }
@@ -11876,49 +11822,49 @@ int SNDPLATFORM_outputset(void) {
     if (requested.b2A > 100) {
         requested.b2A = 100;
     }
-    if (requested.b27 < sndgs_0E28.b4) {
-        requested.b27 = sndgs_0E28.b4;
-    } else if (requested.b27 > sndgs_0E28.b5) {
-        requested.b27 = sndgs_0E28.b5;
+    if (requested.b27 < sndgs.sso.cap.outputchannelsmin) {
+        requested.b27 = sndgs.sso.cap.outputchannelsmin;
+    } else if (requested.b27 > sndgs.sso.cap.outputchannelsmax) {
+        requested.b27 = sndgs.sso.cap.outputchannelsmax;
     }
     if (requested.b27 == 5) {
         requested.b28 = 1;
     } else {
         requested.b28 = 0;
     }
-    if (requested.bE > sndgs_0E28.b6) {
-        requested.bE = sndgs_0E28.b6;
+    if (requested.bE > sndgs.sso.cap.voicesmaincpumax) {
+        requested.bE = sndgs.sso.cap.voicesmaincpumax;
     }
-    if (requested.bF > sndgs_0E28.b7) {
-        requested.bF = sndgs_0E28.b7;
+    if (requested.bF > sndgs.sso.cap.voicesiopcpumax) {
+        requested.bF = sndgs.sso.cap.voicesiopcpumax;
     }
-    if (requested.b10 > sndgs_0E28.b8) {
-        requested.b10 = sndgs_0E28.b8;
+    if (requested.b10 > sndgs.sso.cap.voicesspumax) {
+        requested.b10 = sndgs.sso.cap.voicesspumax;
     }
     if (requested.b26 > 0x20) {
         requested.b26 = 0x20;
     }
     f8148_0E28(requested.b20);
-    if (sndgs_0E28.sub.w44 != 0 && (requested.w44 & 0xF)) {
+    if ((unsigned int)sndgs.sso.set.fastramaddr != 0 && (requested.w44 & 0xF)) {
         requested.w44 = ((requested.w44 + 0xF) >> 4) << 4;
         requested.w48 -= 0x10;
     }
-    if (sndgs_0E28.f174) {
-        sndgs_0E28.sub.b20 = requested.b20;
-        sndgs_0E28.sub.b21 = requested.b21;
+    if (sndgs.installed) {
+        sndgs.sso.set.resamplequality = requested.b20;
+        sndgs.sso.set.iopcpuresamplequality = requested.b21;
         D_0050B9B0_0E28->b13 = requested.b21;
-        if (sndgs_0E28.saved.b27 != requested.b27) {
-            sndgs_0E28.sub.b27 = requested.b27;
-            for (i = 0; i < sndgs_0E28.h17E; i++) {
-                if (sndgs_0E28.chans[i].b69 == 1 && sndgs_0E28.chans[i].h28 < 0) {
+        if (sndgs.prevset.outputchannels != requested.b27) {
+            sndgs.sso.set.outputchannels = requested.b27;
+            for (i = 0; i < sndgs.voicestotal; i++) {
+                if (((struct Ch_0E28*)sndgs.chan)[i].b69 == 1 && ((struct Ch_0E28*)sndgs.chan)[i].h28 < 0) {
                     f38E0_0E28(i);
                 }
             }
         }
         return 0;
     }
-    sndgs_0E28.h17E = requested.bE + requested.bF + requested.b10;
-    sndgs_0E28.sub = requested;
+    sndgs.voicestotal = requested.bE + requested.bF + requested.b10;
+    *(struct Sub_0E28*)&sndgs.sso.set = requested;
     return 0;
 }
 #endif
@@ -11958,7 +11904,6 @@ struct G_1298 {
     char pad4A[0x1F0 - 0x4A];
     struct Ent_1298 *ents;
 };
-extern struct G_1298 sndgs_1298 __asm__("sndgs");
 extern struct H_1298 D_0050AD00_1298 __asm__("D_0050AD00");
 extern void f_A550_1298(int) __asm__("SNDVOICEI_free");
 
@@ -11976,32 +11921,32 @@ void SNDDRV_getEndedVoices(void) {
     int j;
     int groupVoice;
 
-    for (i = 0; i < sndgs_1298.cnt1; i++) {
-        if (D_0050AD00_1298.tbl->e[i].key != 0 && sndgs_1298.ents[i].f28 == -1) {
+    for (i = 0; i < sndgs.sso.set.voicesspu; i++) {
+        if (D_0050AD00_1298.tbl->e[i].key != 0 && ((struct Ent_1298*)sndgs.chan)[i].f28 == -1) {
             if (D_0050AD00_1298.k[i].key != D_0050AD00_1298.tbl->e[i].key) {
                 D_0050AD00_1298.k[i].val = D_0050AD00_1298.tbl->e[i].key & 0x7FFFFF;
             }
             if (D_0050AD00_1298.k[i].val == 0) {
-                for (j = 0; j < sndgs_1298.ents[i].n; j++) {
-                    groupVoice = sndgs_1298.ents[i].list[j];
+                for (j = 0; j < ((struct Ent_1298*)sndgs.chan)[i].n; j++) {
+                    groupVoice = ((struct Ent_1298*)sndgs.chan)[i].list[j];
                     D_0050AD00_1298.tbl->e[groupVoice].key = 0;
                     f_A550_1298(groupVoice);
-                    if (sndgs_1298.mode == 2) {
+                    if (sndgs.sso.set.outputspdifmode == 2) {
                         D_0050AD00_1298.tbl->e[groupVoice + 0x18].key = 0;
                     }
                 }
             }
         }
     }
-    for (i = 0; i < sndgs_1298.cnt2; i++) {
-        if (D_0050AD00_1298.tbl->f[i].a != 0 && sndgs_1298.ents[i + sndgs_1298.cnt1].f28 == -1) {
+    for (i = 0; i < sndgs.sso.set.voicesiopcpu; i++) {
+        if (D_0050AD00_1298.tbl->f[i].a != 0 && ((struct Ent_1298*)sndgs.chan)[i + sndgs.sso.set.voicesspu].f28 == -1) {
             if (D_0050AD00_1298.k2[i].key != D_0050AD00_1298.tbl->f[i].a) {
                 D_0050AD00_1298.k2[i].val = 0;
             }
             if (D_0050AD00_1298.k2[i].val == -1) {
-                for (j = 0; j < sndgs_1298.ents[i + sndgs_1298.cnt1].n; j++) {
-                    groupVoice = sndgs_1298.ents[i + sndgs_1298.cnt1].list[j];
-                    D_0050AD00_1298.tbl->f[groupVoice - sndgs_1298.cnt1].a = 0;
+                for (j = 0; j < ((struct Ent_1298*)sndgs.chan)[i + sndgs.sso.set.voicesspu].n; j++) {
+                    groupVoice = ((struct Ent_1298*)sndgs.chan)[i + sndgs.sso.set.voicesspu].list[j];
+                    D_0050AD00_1298.tbl->f[groupVoice - sndgs.sso.set.voicesspu].a = 0;
                     f_A550_1298(groupVoice);
                 }
             }
@@ -12099,7 +12044,6 @@ struct G_1638 {
     unsigned char b49;
 };
 extern struct H_1638 D_0050AD00_1638 __asm__("D_0050AD00");
-extern struct G_1638 sndgs_1638 __asm__("sndgs");
 extern char D_00512B80_1638[] __asm__("D_00512B80");
 extern void *memset_1638(void *, int, int) __asm__("memset");
 extern void f_BC00_1638(char *) __asm__("func_003CBC00");
@@ -12124,7 +12068,7 @@ void func_003C1638(void) {
 
     D_0050AD00_1638.buf = (char *)((int)D_00512B80_1638 | 0x20000000);
     memset_1638(D_0050AD00_1638.buf, 0, 11264);
-    len = rate = (sndgs_1638.rate << 9) / 48000;
+    len = rate = (sndgs.sso.set.outputrate << 9) / 48000;
     D_0050AD00_1638.pos = 0;
     *(int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos) = 0;
     D_0050AD00_1638.pos += 4;
@@ -12141,7 +12085,7 @@ void func_003C1638(void) {
         D_0050AD00_1638.pos++;
         (*sizeField)++;
     }
-    if (sndgs_1638.b42) {
+    if (sndgs.sso.set.routemaincpufxtoiopcpu) {
         *(int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos) = 2;
         D_0050AD00_1638.pos += 0x10;
         f_BC00_1638(D_0050AD00_1638.buf + D_0050AD00_1638.pos);
@@ -12151,17 +12095,17 @@ void func_003C1638(void) {
     D_0050AD00_1638.pos += 4;
     pcmSize = (unsigned short *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos);
     D_0050AD00_1638.pos += 0xC;
-    n = sndgs_1638.b47 + sndgs_1638.b48;
+    n = sndgs.sso.set.outputchannels + sndgs.sso.set.outputlfe;
     for (i = 0; i < n; i++) {
         D_0050AD00_1638.chan[i] = D_0050AD00_1638.buf + (D_0050AD00_1638.pos + i * len * 2);
     }
-    *pcmSize = len * ((sndgs_1638.b47 + sndgs_1638.b48) << 1);
-    if (sndgs_1638.b47 == 1) {
+    *pcmSize = len * ((sndgs.sso.set.outputchannels + sndgs.sso.set.outputlfe) << 1);
+    if (sndgs.sso.set.outputchannels == 1) {
         D_0050AD00_1638.chan[1] = D_0050AD00_1638.buf + (D_0050AD00_1638.pos + rate * 2);
         *pcmSize += rate * 2;
     }
     D_0050AD00_1638.pos += *pcmSize;
-    if (sndgs_1638.b49 & 2) {
+    if (sndgs.sso.set.outputspdifmode & 2) {
         *(int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos) = 4;
         D_0050AD00_1638.pos += 4;
         sizeField = (int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos);
@@ -12186,7 +12130,6 @@ void func_003C1638(void) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C1980);
 #ifdef SKIP_ASM
 struct S_1980 { char pad[0x1C0]; int cnt; };
-extern struct S_1980 sndgs_1980 __asm__("sndgs");
 /**
  * VBlank interrupt handler that counts sound ticks: bumps +0x1C0 of sndgs, then sync and ei.
  *
@@ -12195,7 +12138,7 @@ extern struct S_1980 sndgs_1980 __asm__("sndgs");
  * @return 0
  */
 int func_003C1980(void) {
-    sndgs_1980.cnt = sndgs_1980.cnt + 1;
+    sndgs.unk_1C0 = sndgs.unk_1C0 + 1;
     // PORT: MIPS sync + EE ei (no C equivalent)
     __asm__ volatile("sync\n\tei");
     return 0;
@@ -12215,7 +12158,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDDRV_thread);
 
 #define MFC0_STATUS_2B45_19A8(v) __asm__ volatile("mfc0 %0, $12" : "=r"(v))
 
-extern struct sA8E8 sndgs;
 
 /* D_0050AD00: the IOP sound side's state (RPC buffers, the shared voice block func_003C1638 lays out, the transfer
    queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
@@ -12382,25 +12324,25 @@ void SNDDRV_thread(void) {
         WaitSema_19A8(D_0050AD00_19A8.f1AA4);
         if (D_0050AD00_19A8.f1AAD == 0) continue;
         gMutexLockFn_19A8();
-        if (sndgs.f328 != 0) sndgs.f328();
+        if ((void (*)(void))sndgs.profileenter != 0) ((void (*)(void))sndgs.profileenter)();
         SNDSYSI_timerservice_19A8(94);
-        if (D_0050AD00_19A8.f1AA8 < 0) sndgs.f1C0++;
+        if (D_0050AD00_19A8.f1AA8 < 0) sndgs.unk_1C0++;
         SNDSYSI_variabletimerservice_19A8();
         Util_MemCpy(D_0050AD00_19A8.f000 + 0x800, (char *)&D_0050AD00_19A8 + 0xA40, 576);
         SNDDRV_getEndedVoices_19A8();
         func_003C0858_19A8(D_0050C910);
         if (D_0050AD00_19A8.f1AAE != 0) func_003C09B8_19A8();
         MIX_audio_19A8((int *)D_0050AD00_19A8.f1ABC, D_0050AD00_19A8.f1AB0);
-        if (sndgs.setup.cfg.f29 & 2) {
+        if (sndgs.sso.set.outputspdifmode & 2) {
             ((void (*)(void *, void *, int))D_0050C848_19A8)(D_0050AD00_19A8.f1ADC, D_0050AD00_19A8.f1AF4, D_0050AD00_19A8.f1AFC);
-        } else if (sndgs.setup.cfg.f27 == 1) {
+        } else if (sndgs.sso.set.outputchannels == 1) {
             Util_MemCpy(D_0050AD00_19A8.f1ABC[1], D_0050AD00_19A8.f1ABC[0], D_0050AD00_19A8.f1AB0 << 1);
         }
         if (D_0050AD00_19A8.f1AAE != 0) func_003C0A60_19A8();
         func_003C08F8_19A8(D_0050C910);
         SNDPKTPLAYI_flushcallbackdata_19A8();
-        *D_0050AD00_19A8.fCB4 = sndgs.f330;
-        *(int *)D_0050AD00_19A8.fCB8 = sndgs.f330;
+        *D_0050AD00_19A8.fCB4 = sndgs.servertick;
+        *(int *)D_0050AD00_19A8.fCB8 = sndgs.servertick;
         FlushCache(0);
         do {
             DI_2B45_19A8();
@@ -12409,7 +12351,7 @@ void SNDDRV_thread(void) {
         } while (s & 0x10000);
         sceSifSetDma(D_0050C800, 1);
         EI_2B45_19A8();
-        if (sndgs.f32C != 0) sndgs.f32C();
+        if ((void (*)(void))sndgs.profileleave != 0) ((void (*)(void))sndgs.profileleave)();
         D_0044C470();
     }
 }
@@ -12514,7 +12456,6 @@ typedef struct {
 } L_1B80;
 
 extern S_1B80 D_0050AD00_1B80 __asm__("D_0050AD00");
-extern C_1B80 sndgs_1B80 __asm__("sndgs");
 extern R_1B80 D_0050ACB0_1B80 __asm__("D_0050ACB0");
 extern T_1B80 D_0050AC80_1B80 __asm__("D_0050AC80");
 extern K_1B80 D_0050ACC8_1B80 __asm__("D_0050ACC8");
@@ -12565,6 +12506,7 @@ extern char func_003C1578_1B80[] __asm__("func_003C1578");
 extern char func_003C1980_1B80[] __asm__("func_003C1980");
 extern char SNDDRV_thread_1B80[] __asm__("SNDDRV_thread");
 
+extern C_1B80 sndgs_1B80 __asm__("sndgs");
 /**
  * Starts the PS2 sound platform: buffers, IOP modules and RPC, the sound thread and the timer.
  *
@@ -12774,7 +12716,6 @@ typedef struct {
     char pad1AFC[0x1B38 - 0x1AFC];
     int f1B38;
 } H_2268;
-extern volatile G_2268 sndgs_2268 __asm__("sndgs");
 extern H_2268 D_0050AD00_2268 __asm__("D_0050AD00");
 extern int D_00512B20_2268[] __asm__("D_00512B20");
 extern void SNDSYS_leavecritical_2268(void) __asm__("SNDSYS_leavecritical");
@@ -12811,11 +12752,11 @@ int SNDPLATFORM_restore(void) {
     unsigned int targetTick;
     int i;
 
-    while (sndgs_2268.f176 != 0) {
+    while (sndgs.incritical != 0) {
         SNDSYS_leavecritical_2268();
     }
-    targetTick = sndgs_2268.f180 + 10;
-    while (sndgs_2268.f180 < targetTick) {
+    targetTick = sndgs.audiotick + 10;
+    while (sndgs.audiotick < targetTick) {
         SNDSYS_service_2268();
     }
     if (D_0050AD00_2268.f1AA8 >= 0) {
@@ -12874,7 +12815,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_stop);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct E_2440 { char pad[4]; short ch[15]; char pad22; unsigned char n; unsigned short flags; char pad3[0x5F - 0x26]; signed char on; char pad4[0x8C - 0x60]; };
 struct G_2440 { char pad[0x2F]; unsigned char b2F; unsigned char b30; char pad1[0x49 - 0x31]; unsigned char mode; char pad2[0x1F0 - 0x4A]; struct E_2440 *ents; };
-extern struct G_2440 sndgs_2440 __asm__("sndgs");
 struct P_2440 { int v; int pad; };
 struct Q_2440 { int v; int pad[3]; };
 struct V_2440 { char pad[0x20]; struct P_2440 a[0x30]; };
@@ -12897,23 +12837,23 @@ extern void f_8468_2440(int) __asm__("MIX_stop");
  * @return 0
  */
 int SNDPLATFORM_stop(int idx) {
-    struct E_2440 *channel = &sndgs_2440.ents[idx];
+    struct E_2440 *channel = &((struct E_2440*)sndgs.chan)[idx];
     int i;
     if (channel->flags & 8) {
         for (i = 0; i < channel->n; i++) {
             D_0050AD00_2440.m->a[channel->ch[i]].v = 0;
             f_A550_2440(channel->ch[i]);
-            if (sndgs_2440.mode == 2)
+            if (sndgs.sso.set.outputspdifmode == 2)
                 D_0050AD00_2440.m->a[channel->ch[i] + 0x18].v = 0;
         }
     } else if (channel->flags & 0x100) {
         for (i = 0; i < channel->n; i++) {
-            ((struct V2_2440 *)D_0050AD00_2440.m)->a[channel->ch[i] - sndgs_2440.b30].v = 0;
+            ((struct V2_2440 *)D_0050AD00_2440.m)->a[channel->ch[i] - sndgs.sso.set.voicesspu].v = 0;
             f_A550_2440(channel->ch[i]);
         }
     } else {
         for (i = 0; i < channel->n; i++) {
-            f_8468_2440(channel->ch[i] - (sndgs_2440.b30 + sndgs_2440.b2F));
+            f_8468_2440(channel->ch[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu));
             f_A550_2440(channel->ch[i]);
         }
     }
@@ -12966,7 +12906,6 @@ struct H_25E0 {
     char pad[0xCB0];
     struct T_25E0 *tbl;
 };
-extern struct G_25E0 sndgs_25E0 __asm__("sndgs");
 extern struct H_25E0 D_0050AD00_25E0 __asm__("D_0050AD00");
 extern void MIX_setpitch_25E0(int a, unsigned int v) __asm__("MIX_setpitch");
 
@@ -12983,7 +12922,7 @@ extern void MIX_setpitch_25E0(int a, unsigned int v) __asm__("MIX_setpitch");
  * @return 0
  */
 int SNDPLATFORM_setpitch(int idx) {
-    struct E_25E0 *channel = &sndgs_25E0.f1F0[idx];
+    struct E_25E0 *channel = &((struct E_25E0*)sndgs.chan)[idx];
     unsigned int hwPitch;
     int i;
 
@@ -12994,19 +12933,19 @@ int SNDPLATFORM_setpitch(int idx) {
         }
         for (i = 0; i < channel->n; i++) {
             D_0050AD00_25E0.tbl->a[channel->h[i]].v = hwPitch;
-            if (sndgs_25E0.f49 == 2) {
+            if (sndgs.sso.set.outputspdifmode == 2) {
                 D_0050AD00_25E0.tbl->a[channel->h[i] + 0x18].v = hwPitch;
             }
         }
     } else if (channel->flags & 0x100) {
-        hwPitch = (unsigned int)((channel->f20 << 12) / sndgs_25E0.f2C * channel->f8A) >> 12;
+        hwPitch = (unsigned int)((channel->f20 << 12) / sndgs.sso.set.outputrateiopcpu * channel->f8A) >> 12;
         for (i = 0; i < channel->n; i++) {
-            D_0050AD00_25E0.tbl->b[channel->h[i] - sndgs_25E0.f30].v = hwPitch;
+            D_0050AD00_25E0.tbl->b[channel->h[i] - sndgs.sso.set.voicesspu].v = hwPitch;
         }
     } else {
-        hwPitch = (unsigned int)((channel->f20 << 12) / sndgs_25E0.f2A * channel->f8A) >> 8;
+        hwPitch = (unsigned int)((channel->f20 << 12) / sndgs.sso.set.outputrate * channel->f8A) >> 8;
         for (i = 0; i < channel->n; i++) {
-            MIX_setpitch_25E0(channel->h[i] - (sndgs_25E0.f30 + sndgs_25E0.f2F), hwPitch);
+            MIX_setpitch_25E0(channel->h[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), hwPitch);
         }
     }
     return 0;
@@ -13032,7 +12971,6 @@ struct Ch_27E0 {
 struct V_27E0 { char pad[0x1AC]; char v[1][16]; };
 struct G_27E0 { char pad[0x2F]; unsigned char base2; unsigned char base; char pad31[0x49 - 0x31]; unsigned char mode; char pad4A[0x1F0 - 0x4A]; struct Ch_27E0 *chans; };
 struct A_27E0 { char pad[0xCB0]; long *mask; };
-extern struct G_27E0 sndgs_27E0 __asm__("sndgs");
 extern struct A_27E0 D_0050AD00_27E0 __asm__("D_0050AD00");
 extern void f_8598_27E0(int, int, float) __asm__("SNDMIX_setwetgain");
 
@@ -13053,7 +12991,7 @@ int SNDPLATFORM_setfxlevel(int id, int k) {
     int i, sendLevel;
     float sendGain;
 
-    ch = (struct Ch_27E0 *)((char *)sndgs_27E0.chans + id * 0x8C);
+    ch = (struct Ch_27E0 *)((char *)(struct Ch_27E0*)sndgs.chan + id * 0x8C);
     if (ch->flags & 8) {
         for (i = 0; i < ch->n; i++) {
             if (ch->vals[0] != 0) {
@@ -13061,7 +12999,7 @@ int SNDPLATFORM_setfxlevel(int id, int k) {
             } else {
                 *D_0050AD00_27E0.mask &= ~(1L << ch->ids[i]);
             }
-            if (sndgs_27E0.mode == 2) {
+            if (sndgs.sso.set.outputspdifmode == 2) {
                 if (ch->vals[0] != 0) {
                     *D_0050AD00_27E0.mask |= 1L << (ch->ids[i] + 0x18);
                 } else {
@@ -13072,12 +13010,12 @@ int SNDPLATFORM_setfxlevel(int id, int k) {
     } else if (ch->flags & 0x100) {
         sendLevel = ch->vol * ch->vals[k] * 0.003875850699841976f;
         for (i = 0; i < ch->n; i++) {
-            ((struct V_27E0 *)D_0050AD00_27E0.mask)->v[ch->ids[i] - sndgs_27E0.base][k] = sendLevel;
+            ((struct V_27E0 *)D_0050AD00_27E0.mask)->v[ch->ids[i] - sndgs.sso.set.voicesspu][k] = sendLevel;
         }
     } else {
         sendGain = ch->vol * ch->vals[k] / 32767.0f;
         for (i = 0; i < ch->n; i++) {
-            f_8598_27E0(ch->ids[i] - (sndgs_27E0.base + sndgs_27E0.base2), k, sendGain);
+            f_8598_27E0(ch->ids[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), k, sendGain);
         }
     }
     return 0;
@@ -13125,7 +13063,6 @@ struct A_2A50 {
     char padCB4[0xE98 - 0xCB4];
     struct Spk_2A50 spk[1];
 };
-extern struct G_2A50 sndgs_2A50 __asm__("sndgs");
 extern struct A_2A50 D_0050AD00_2A50 __asm__("D_0050AD00");
 extern struct Spk_2A50 D_0050BB98_2A50[] __asm__("D_0050BB98");
 extern void f8560_2A50(int, int, float) __asm__("SNDMIX_setdrygain");
@@ -13149,14 +13086,14 @@ void func_003C2A50(int id) {
     int j;
     int outputCount;
 
-    ch = (struct Ch_2A50 *)((char *)sndgs_2A50.chans + id * 0x8C);
+    ch = (struct Ch_2A50 *)((char *)(struct Ch_2A50*)sndgs.chan + id * 0x8C);
     if (ch->flags & 8) {
         for (i = 0; i < ch->n; i++) {
-            if (sndgs_2A50.mode != 2) {
+            if (sndgs.sso.set.outputspdifmode != 2) {
                 D_0050AD00_2A50.tbl->a[ch->ids[i]].l = D_0050AD00_2A50.spk[ch->ids[i]].p[1] * ch->vol * 127.0f;
                 D_0050AD00_2A50.tbl->a[ch->ids[i]].r = D_0050AD00_2A50.spk[ch->ids[i]].p[0] * ch->vol * 127.0f;
             } else {
-                if (sndgs_2A50.b47 == 4) {
+                if (sndgs.sso.set.outputchannels == 4) {
                     D_0050AD00_2A50.tbl->a[ch->ids[i]].l = D_0050AD00_2A50.spk[ch->ids[i]].p[3] * ch->vol * 127.0f;
                     D_0050AD00_2A50.tbl->a[ch->ids[i]].r = D_0050AD00_2A50.spk[ch->ids[i]].p[0] * ch->vol * 127.0f;
                     D_0050AD00_2A50.tbl->a[ch->ids[i] + 0x18].l = D_0050AD00_2A50.spk[ch->ids[i]].p[2] * ch->vol * 127.0f;
@@ -13170,19 +13107,19 @@ void func_003C2A50(int id) {
             }
         }
     } else if (ch->flags & 0x100) {
-        outputCount = sndgs_2A50.b47 + sndgs_2A50.b48;
+        outputCount = sndgs.sso.set.outputchannels + sndgs.sso.set.outputlfe;
         sc = ch->vol * (float)ch->b5F * 0.0078740157186985016f;
         for (i = 0; i < ch->n; i++) {
             for (j = 0; j < outputCount; j++) {
-                D_0050AD00_2A50.tbl->b[ch->ids[i] - sndgs_2A50.base].c[j] = sc * D_0050AD00_2A50.spk[ch->ids[i]].p[j] * 127.0f;
+                D_0050AD00_2A50.tbl->b[ch->ids[i] - sndgs.sso.set.voicesspu].c[j] = sc * D_0050AD00_2A50.spk[ch->ids[i]].p[j] * 127.0f;
             }
         }
     } else {
-        outputCount = sndgs_2A50.b47 + sndgs_2A50.b48;
+        outputCount = sndgs.sso.set.outputchannels + sndgs.sso.set.outputlfe;
         sc = ch->vol * (float)ch->b5F * 0.0078740157186985016f;
         for (i = 0; i < ch->n; i++) {
             for (j = 0; j < outputCount; j++) {
-                f8560_2A50(ch->ids[i] - (sndgs_2A50.base + sndgs_2A50.base2), j, sc * D_0050BB98_2A50[ch->ids[i]].p[j]);
+                f8560_2A50(ch->ids[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), j, sc * D_0050BB98_2A50[ch->ids[i]].p[j]);
             }
         }
     }
@@ -13197,7 +13134,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C2EC8);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct E_2EC8 { char pad[4]; short ch[15]; char pad22; unsigned char n; unsigned short flags; char pad3[0x5F - 0x26]; signed char on; char pad4[0x8C - 0x60]; };
 struct G_2EC8 { char pad[0x49]; unsigned char mode; char pad2[0x1F0 - 0x4A]; struct E_2EC8 *ents; };
-extern struct G_2EC8 sndgs_2EC8 __asm__("sndgs");
 struct M_2EC8 { char pad[8]; long mask; };
 struct H_2EC8 { char pad[0xCB0]; struct M_2EC8 *m; };
 extern struct H_2EC8 D_0050AD00_2EC8 __asm__("D_0050AD00");
@@ -13213,13 +13149,13 @@ extern void f_2A50_2EC8(int) __asm__("func_003C2A50");
  * @param idx  the channel index
  */
 void func_003C2EC8(int idx) {
-    struct E_2EC8 *channel = &sndgs_2EC8.ents[idx];
+    struct E_2EC8 *channel = &((struct E_2EC8*)sndgs.chan)[idx];
     int i;
     if (channel->flags & 8) {
         for (i = 0; i < channel->n; i++) {
             if (channel->on) D_0050AD00_2EC8.m->mask |= 1L << channel->ch[i];
             else D_0050AD00_2EC8.m->mask &= ~(1L << channel->ch[i]);
-            if (sndgs_2EC8.mode == 2) {
+            if (sndgs.sso.set.outputspdifmode == 2) {
                 if (channel->on) D_0050AD00_2EC8.m->mask |= 1L << (channel->ch[i] + 0x18);
                 else D_0050AD00_2EC8.m->mask &= ~(1L << (channel->ch[i] + 0x18));
             }
@@ -13238,7 +13174,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_timemult);
 extern void MIX_settimemult(int, int);
 struct G_3010 { char pad[0x2F]; unsigned char a; unsigned char b; char pad2[0x1BF]; char *tab; };
 struct E_3010 { char pad[4]; short v[15]; char padb; unsigned char cnt; unsigned short flags; };
-extern struct G_3010 sndgs_3010[] __asm__("sndgs");
 
 /**
  * Applies a time multiplier to a channel's software-mixer voices.
@@ -13253,10 +13188,10 @@ extern struct G_3010 sndgs_3010[] __asm__("sndgs");
 int SNDPLATFORM_timemult(int channelIndex, int timeMult) {
     struct E_3010 *channel;
     int i;
-    channel = (struct E_3010 *)(sndgs_3010[0].tab + channelIndex * 0x8C);
+    channel = (struct E_3010 *)((char*)sndgs.chan + channelIndex * 0x8C);
     if (channel->flags & 4) {
         for (i = 0; i < channel->cnt; i++)
-            MIX_settimemult(channel->v[i] - (sndgs_3010[0].b + sndgs_3010[0].a), timeMult);
+            MIX_settimemult(channel->v[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), timeMult);
     }
     return 0;
 }
@@ -13269,7 +13204,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C30C8);
 extern void func_003C8B80(int, int);
 struct G_30C8 { char pad[0x2F]; unsigned char a; unsigned char b; char pad2[0x1BF]; char *tab; };
 struct E_30C8 { char pad[4]; short v[15]; char padb; unsigned char cnt; unsigned short flags; };
-extern struct G_30C8 sndgs_30C8[] __asm__("sndgs");
 
 /**
  * Sets the clip level of a channel's software-mixer voices (a clipping, distortion-like filter).
@@ -13284,10 +13218,10 @@ extern struct G_30C8 sndgs_30C8[] __asm__("sndgs");
 void func_003C30C8(int channelIndex, int amount) {
     struct E_30C8 *channel;
     int i;
-    channel = (struct E_30C8 *)(sndgs_30C8[0].tab + channelIndex * 0x8C);
+    channel = (struct E_30C8 *)((char*)sndgs.chan + channelIndex * 0x8C);
     if (channel->flags & 4) {
         for (i = 0; i < channel->cnt; i++)
-            func_003C8B80(channel->v[i] - (sndgs_30C8[0].b + sndgs_30C8[0].a), amount);
+            func_003C8B80(channel->v[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), amount);
     }
 }
 #endif
@@ -13295,7 +13229,6 @@ void func_003C30C8(int channelIndex, int amount) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_lowpass);
 #ifdef SKIP_ASM
-extern struct SNDGLOBALSTATE sndgs_3178 __asm__("sndgs");
 extern void func_003C8D00_3178(int, float) __asm__("func_003C8D00");
 
 /**
@@ -13308,18 +13241,18 @@ extern void func_003C8D00_3178(int, float) __asm__("func_003C8D00");
  * @param cutoff  the cutoff frequency in Hz
  */
 void SNDPLATFORM_lowpass(int idx, int cutoff) {
-    char *channel = ((char*)sndgs_3178.chan) + idx * 140;
+    char *channel = ((char*)(struct CHANPUB*)sndgs.chan) + idx * 140;
     int i;
     short *voiceList;
     float normCutoff;
 
     if (*(unsigned short *)(channel + 0x24) & 4) {
-        normCutoff = (float)cutoff * (1.0f / ((float)sndgs_3178.sso.set.outputrate * 0.5f));
+        normCutoff = (float)cutoff * (1.0f / ((float)sndgs.sso.set.outputrate * 0.5f));
         i = 0;
         if (i < *(unsigned char *)(channel + 0x23)) {
             voiceList = (short *)(channel + 4);
             do {
-                func_003C8D00_3178(*voiceList++ - (sndgs_3178.sso.set.voicesspu + sndgs_3178.sso.set.voicesiopcpu), normCutoff);
+                func_003C8D00_3178(*voiceList++ - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), normCutoff);
             } while (++i < *(unsigned char *)(channel + 0x23));
         }
     }
@@ -13333,7 +13266,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_highpass);
 extern void MIX_sethighpass(int, int);
 struct G_3250 { char pad[0x2F]; unsigned char a; unsigned char b; char pad2[0x1BF]; char *tab; };
 struct E_3250 { char pad[4]; short v[15]; char padb; unsigned char cnt; unsigned short flags; };
-extern struct G_3250 sndgs_3250[] __asm__("sndgs");
 
 /**
  * Sets the high-pass cutoff of a channel's software-mixer voices.
@@ -13348,10 +13280,10 @@ extern struct G_3250 sndgs_3250[] __asm__("sndgs");
 void SNDPLATFORM_highpass(int channelIndex, int cutoff) {
     struct E_3250 *channel;
     int i;
-    channel = (struct E_3250 *)(sndgs_3250[0].tab + channelIndex * 0x8C);
+    channel = (struct E_3250 *)((char*)sndgs.chan + channelIndex * 0x8C);
     if (channel->flags & 4) {
         for (i = 0; i < channel->cnt; i++)
-            MIX_sethighpass(channel->v[i] - (sndgs_3250[0].b + sndgs_3250[0].a), cutoff);
+            MIX_sethighpass(channel->v[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), cutoff);
     }
 }
 #endif
@@ -13633,8 +13565,8 @@ struct B_3500 {
     unsigned char b;
 };
 extern struct A_3500 D_0050AD00_3500 __asm__("D_0050AD00");
-extern struct B_3500 sndgs_3500 __asm__("sndgs");
 
+extern struct B_3500 sndgs_3500 __asm__("sndgs");
 /**
  * Sets up the SPU2 reverb for the kind-8 bus from its type (D_0050AB08).
  *
@@ -13690,13 +13622,13 @@ struct G_35F8 {
     short pad3;
     int w1FC;
 };
-extern struct G_35F8 sndgs_35F8 __asm__("sndgs");
 extern short D_0050AAF4_35F8 __asm__("D_0050AAF4");
 extern short D_0050AB08_35F8 __asm__("D_0050AB08");
 extern int D_00515B50_35F8 __asm__("D_00515B50");
 extern void func_003CC630(int, unsigned char *);
 extern void func_003CC848_35F8(void) __asm__("func_003CC848");
 
+extern struct G_35F8 sndgs_35F8 __asm__("sndgs");
 /**
  * Applies the effect-bus configuration of one render kind, inside a critical section.
  *
@@ -13906,7 +13838,6 @@ struct A_3EE0 {
     char pad1AB0[0x1AB8 - 0x1AB0];
     int x1AB8;
 };
-extern struct G_3EE0 sndgs_3EE0 __asm__("sndgs");
 extern struct A_3EE0 D_0050AD00_3EE0 __asm__("D_0050AD00");
 extern void f2EC8_3EE0(int) __asm__("func_003C2EC8");
 extern void f38E0_3EE0(int) __asm__("func_003C38E0");
@@ -13938,7 +13869,7 @@ int SNDPLATFORM_playtimbre(struct SNDIPATCHHEADER *patchHeader, int base, int id
     struct Ch_3EE0 *ch;
     int i;
 
-    ch = (struct Ch_3EE0 *)((char *)sndgs_3EE0.chans + id * 0x8C);
+    ch = (struct Ch_3EE0 *)((char *)(struct Ch_3EE0*)sndgs.chan + id * 0x8C);
     if (ch->flags & 8) {
         SNDPLATFORM_setpitch(id);
         f38E0_3EE0(id);
@@ -13949,7 +13880,7 @@ int SNDPLATFORM_playtimbre(struct SNDIPATCHHEADER *patchHeader, int base, int id
             D_0050AD00_3EE0.x1AB8 += 0x800000;
             D_0050AD00_3EE0.tbl->a[ch->ids[i]].w = D_0050AD00_3EE0.e[ch->ids[i]].w | D_0050AD00_3EE0.x1AB8;
             D_0050AD00_3EE0.x840[ch->ids[i]].w = D_0050AD00_3EE0.e[ch->ids[i]].w;
-            if (sndgs_3EE0.mode == 2) {
+            if (sndgs.sso.set.outputspdifmode == 2) {
                 D_0050AD00_3EE0.tbl->a[ch->ids[i] + 0x18].w = D_0050AD00_3EE0.e[ch->ids[i]].w | D_0050AD00_3EE0.x1AB8;
                 D_0050AD00_3EE0.x840[ch->ids[i] + 0x18].w = D_0050AD00_3EE0.e[ch->ids[i]].w;
             }
@@ -13961,12 +13892,12 @@ int SNDPLATFORM_playtimbre(struct SNDIPATCHHEADER *patchHeader, int base, int id
         for (i = 0; i < ch->n; i++) {
             D_0050AD00_3EE0.e[ch->ids[i]].w = *patchHeader->paudioramaddr + (patchHeader->sampleoffset[i] - patchHeader->sampleoffset[0]);
             D_0050AD00_3EE0.x1AB8 += 0x800000;
-            D_0050AD00_3EE0.tbl->b[ch->ids[i] - sndgs_3EE0.base].w = D_0050AD00_3EE0.e[ch->ids[i]].w | D_0050AD00_3EE0.x1AB8;
-            D_0050AD00_3EE0.x9C0[ch->ids[i] - sndgs_3EE0.base].w = 0;
+            D_0050AD00_3EE0.tbl->b[ch->ids[i] - sndgs.sso.set.voicesspu].w = D_0050AD00_3EE0.e[ch->ids[i]].w | D_0050AD00_3EE0.x1AB8;
+            D_0050AD00_3EE0.x9C0[ch->ids[i] - sndgs.sso.set.voicesspu].w = 0;
         }
     } else {
         for (i = 0; i < ch->n; i++) {
-            f8158_3EE0(ch->ids[i] - (sndgs_3EE0.base + sndgs_3EE0.base2), patchHeader->samplerep, 1,
+            f8158_3EE0(ch->ids[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), patchHeader->samplerep, 1,
                        base + patchHeader->sampleoffset[i], base + patchHeader->sampleoffset[0] + patchHeader->loopoffset[i], ((int*)&patchHeader->ptimestretchdata[0])[i], ch->n, *(int *)((char *)ch + 0x14),
                        patchHeader->sustainstart, patchHeader->sustainend, 0, 0, patchHeader->platformver, i);
         }
@@ -13978,7 +13909,7 @@ int SNDPLATFORM_playtimbre(struct SNDIPATCHHEADER *patchHeader, int base, int id
         f3178_3EE0(ch->ids[0], lowPassCutoff);
         SNDPLATFORM_highpass(ch->ids[0], highPassCutoff);
         for (i = 0; i < ch->n; i++) {
-            f83A0_3EE0(ch->ids[i] - (sndgs_3EE0.base + sndgs_3EE0.base2));
+            f83A0_3EE0(ch->ids[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu));
         }
     }
     return 0;
@@ -14031,7 +13962,6 @@ struct E_4318 { char pad[0x24]; unsigned short flags; char pad2[0x8C - 0x26]; };
 struct G_4318 { char pad[0x2F]; unsigned char b2F; unsigned char b30; char pad2[0x1F0 - 0x31]; struct E_4318 *e; };
 struct P_4318 { int a; int b; };
 struct Q_4318 { char pad[0x18]; unsigned int v; char pad2[4]; };
-extern struct G_4318 sndgs_4318 __asm__("sndgs");
 extern struct Q_4318 D_0050BB98_4318[] __asm__("D_0050BB98");
 extern unsigned int MIX_getframe_4318(int) __asm__("MIX_getframe");
 
@@ -14046,15 +13976,15 @@ extern unsigned int MIX_getframe_4318(int) __asm__("MIX_getframe");
  * @return the position in samples
  */
 unsigned int SNDPLATFORM_getcurframe(int n) {
-    struct E_4318 *channel = &sndgs_4318.e[n];
+    struct E_4318 *channel = &((struct E_4318*)sndgs.chan)[n];
     struct Q_4318 *speakerRecord = &D_0050BB98_4318[n];
     if (channel->flags & 8) {
         return ((((struct P_4318 *)D_0050BB98_4318)[n - 203].a - speakerRecord->v) * 0x1C) >> 4;
     }
     if (channel->flags & 0x100) {
-        return ((struct P_4318 *)D_0050BB98_4318)[n - sndgs_4318.b30 - 155].a;
+        return ((struct P_4318 *)D_0050BB98_4318)[n - sndgs.sso.set.voicesspu - 155].a;
     }
-    return MIX_getframe_4318(n - (sndgs_4318.b30 + sndgs_4318.b2F));
+    return MIX_getframe_4318(n - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu));
 }
 #endif
 
@@ -14106,7 +14036,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C4450);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3); loop rewritten without the D_0050B9C8 inner label (cfg_1).
-extern struct sA8E8 sndgs;
 
 extern struct sAD00 D_0050AD00;
 
@@ -14148,7 +14077,7 @@ void func_003C4450(int inInterrupt) {
         }
     }
     chosen = &D_0050AD00.fCC8[(signed char)D_0050AD00.fCC1];
-    D_0050AD00.fCC4 = sndgs.f180;
+    D_0050AD00.fCC4 = sndgs.audiotick;
     func_003C43C0(chosen->f04, D_0050AD00.fE88[0].f04, chosen->f0C, inInterrupt);
     D_0050AD00.fCC2 = 1;
     D_00515780_4450.b0 = 0x30;
@@ -14339,7 +14268,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C4898);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 
-extern struct sA8E8 sndgs;
 
 /* D_0050AD00: the IOP sound side's state (RPC buffers, the shared voice block func_003C1638 lays out, the transfer
    queue, speaker gains, sound-RAM segments, the recursive lock). Layout from every use in this unit; field names are
@@ -14365,7 +14293,7 @@ int func_003C4898_4898(int key) {
     if ((signed char)D_0050AD00.fCC0 <= 0) return 1;
     for (i = 0; i < 28; i++) {
         if (D_0050AD00.fCC8[i].key == key) {
-            if (D_0050AD00.fCC4 + 500 < sndgs.f180) {
+            if (D_0050AD00.fCC4 + 500 < sndgs.audiotick) {
                 func_003C4450(0);
             }
             return 0;
@@ -14760,7 +14688,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_filteradd);
 extern void MIX_filteradd_5068(int, int, int) __asm__("MIX_filteradd");
 struct G_5068 { char pad[0x2F]; unsigned char a; unsigned char b; char pad2[0x1BF]; char *tab; };
 struct E_5068 { char pad[4]; short v[15]; char padb; unsigned char cnt; unsigned short flags; };
-extern struct G_5068 sndgs_5068[] __asm__("sndgs");
 
 /**
  * Adds a custom filter to each software-mixer voice of a channel.
@@ -14777,10 +14704,10 @@ extern struct G_5068 sndgs_5068[] __asm__("sndgs");
 int SNDPLATFORM_filteradd(int channelIndex, int filterDesc) {
     struct E_5068 *channel;
     int i;
-    channel = (struct E_5068 *)(sndgs_5068[0].tab + channelIndex * 0x8C);
+    channel = (struct E_5068 *)((char*)sndgs.chan + channelIndex * 0x8C);
     if (channel->flags & 4) {
         for (i = 0; i < channel->cnt; i++)
-            MIX_filteradd_5068(channel->v[i] - (sndgs_5068[0].b + sndgs_5068[0].a), i, filterDesc);
+            MIX_filteradd_5068(channel->v[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), i, filterDesc);
         return 0;
     }
     return -7;
@@ -14794,7 +14721,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_filterremove);
 extern void MIX_filterremove(int, int);
 struct G_5128 { char pad[0x2F]; unsigned char a; unsigned char b; char pad2[0x1BF]; char *tab; };
 struct E_5128 { char pad[4]; short v[15]; char padb; unsigned char cnt; unsigned short flags; };
-extern struct G_5128 sndgs_5128[] __asm__("sndgs");
 
 /**
  * Removes a custom filter from each software-mixer voice of a channel: the one with the given order (MIX_filterremove).
@@ -14808,10 +14734,10 @@ extern struct G_5128 sndgs_5128[] __asm__("sndgs");
 int SNDPLATFORM_filterremove(int channelIndex, int filterOrder) {
     struct E_5128 *channel;
     int i;
-    channel = (struct E_5128 *)(sndgs_5128[0].tab + channelIndex * 0x8C);
+    channel = (struct E_5128 *)((char*)sndgs.chan + channelIndex * 0x8C);
     if (channel->flags & 4) {
         for (i = 0; i < channel->cnt; i++)
-            MIX_filterremove(channel->v[i] - (sndgs_5128[0].b + sndgs_5128[0].a), filterOrder);
+            MIX_filterremove(channel->v[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), filterOrder);
     }
     return 0;
 }
@@ -15826,7 +15752,6 @@ int System_Init(int headerVersion) {
 INCLUDE_ASM("ealib/seg_2B4578", System_IsInited);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern signed char D_0050AA5C_5DF0[16] __asm__("D_0050AA5C");
 
 /**
  * Returns whether the sound system is started (+0x174 of sndgs, D_0050AA5C, equal to 1).
@@ -15834,7 +15759,7 @@ extern signed char D_0050AA5C_5DF0[16] __asm__("D_0050AA5C");
  * @return 1 when started, else 0
  */
 int System_IsInited(void) {
-    return D_0050AA5C_5DF0[0] == 1;
+    return sndgs.installed == 1;
 }
 #endif
 
@@ -16028,7 +15953,6 @@ INCLUDE_ASM("ealib/seg_2B4578", iSNDserveraddclient);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_6018 { char pad[0x178]; signed char n; char pad2[0x23]; int v[1]; };
-extern struct S_6018 sndgs_6018 __asm__("sndgs");
 /**
  * Adds a function to the sound server's client list.
  *
@@ -16038,8 +15962,8 @@ extern struct S_6018 sndgs_6018 __asm__("sndgs");
  * @param client  the client function
  */
 void iSNDserveraddclient(int client) {
-    sndgs_6018.v[sndgs_6018.n] = client;
-    sndgs_6018.n = sndgs_6018.n + 1;
+    ((int*)&sndgs.serverclient[0])[sndgs.numserverclients] = client;
+    sndgs.numserverclients = sndgs.numserverclients + 1;
 }
 #endif
 
@@ -16048,8 +15972,8 @@ INCLUDE_ASM("ealib/seg_2B4578", iSNDserverremoveclient);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { char pad[0x178]; signed char n; char pad2[0x23]; int arr[1]; } S_6040;
-extern S_6040 sndgs_6040 __asm__("sndgs");
 
+extern S_6040 sndgs_6040 __asm__("sndgs");
 /**
  * Removes a function from the sound server's client list (+0x17C of sndgs), closing the gap.
  *
@@ -16080,7 +16004,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSYS_service);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // When the flag at 0x174 is set, calls each callback in the list at 0x19C.
 struct G_60E0 { char p[0x174]; signed char on; char p1[3]; signed char n; char p2[0x19C - 0x179]; void (*fn[1])(void); };
-extern struct G_60E0 sndgs_60E0 __asm__("sndgs");
 /**
  * Runs the sound server's clients: while the system is started (+0x174 of sndgs), calls each function in the
  * client list (+0x17C, count +0x178).
@@ -16089,8 +16012,8 @@ extern struct G_60E0 sndgs_60E0 __asm__("sndgs");
  */
 void SNDSYS_service(void) {
     int i;
-    if (sndgs_60E0.on) {
-        for (i = 0; i < sndgs_60E0.n; i++) sndgs_60E0.fn[i]();
+    if (sndgs.installed) {
+        for (i = 0; i < sndgs.numserverclients; i++) ((void (**)(void))&sndgs.serverclient[0])[i]();
     }
 }
 #endif
@@ -16103,8 +16026,8 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDI_validrendermode);
 // Scans the mask table at 0x4E from *idx for an entry whose 0x71C/0xE0 bits
 // match the element's flags at 0x18; returns the matching bits (0 if none).
 struct G_6158 { char p[0x4C]; unsigned char n; char p1; unsigned short tbl[1]; };
-extern struct G_6158 sndgs_6158 __asm__("sndgs");
 
+extern struct G_6158 sndgs_6158 __asm__("sndgs");
 /**
  * Finds the next render mode, from the list index on, that a sound can be played in.
  *
@@ -16152,7 +16075,6 @@ int SNDI_validrendermode(int *idx, struct SNDIPATCHHEADER *patchHeader) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDMEM_gethighwater);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char *D_0050AB1C_6240[] __asm__("D_0050AB1C");
 int SNDMEM_gethighwater_6240(void) __asm__("SNDMEM_gethighwater");
 
 /**
@@ -16165,8 +16087,8 @@ int SNDMEM_gethighwater_6240(void) __asm__("SNDMEM_gethighwater");
 int SNDMEM_gethighwater_6240(void) {
     int temp_3;
 
-    temp_3 = (*(int *)((char*)(D_0050AB1C_6240[0]) + (8)));
-    return (int) ((temp_3 - (*(int *)((char*)(D_0050AB1C_6240[0]) + (0x10)))) * 100) / temp_3;
+    temp_3 = (*(int *)((char*)((char*)sndgs.mm) + (8)));
+    return (int) ((temp_3 - (*(int *)((char*)((char*)sndgs.mm) + (0x10)))) * 100) / temp_3;
 }
 #endif
 
@@ -16386,7 +16308,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDBANKI_alloc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_6500 { int used; int pad[3]; };
 struct G_6500 { char pad[0x28]; unsigned short count; char pad2[0x1F4 - 0x2A]; struct S_6500 *slots; };
-extern struct G_6500 sndgs_6500[] __asm__("sndgs");
 
 /**
  * Returns the first free bank slot: the index of the first unused 16-byte entry of the bank table (+0x1F4 of
@@ -16398,8 +16319,8 @@ extern struct G_6500 sndgs_6500[] __asm__("sndgs");
  */
 int SNDBANKI_alloc(void) {
     int i;
-    for (i = 0; i < sndgs_6500[0].count; i++) {
-        if (sndgs_6500[0].slots[i].used == 0) {
+    for (i = 0; i < sndgs.sso.set.maxbanks; i++) {
+        if (((struct S_6500*)sndgs.banklist)[i].used == 0) {
             return i;
         }
     }
@@ -16441,7 +16362,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDPKTPLAYI_gethighchannel);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Index of the largest of the first n shorts at entry a + 4; -1 if none.
 struct E_6580 { int f0; short v[0x44]; };
-extern struct E_6580 *D_0050AAD8_6580 __asm__("D_0050AAD8");
 
 /**
  * Returns which of a voice's channels runs on the highest hardware voice.
@@ -16458,8 +16378,8 @@ int SNDPKTPLAYI_gethighchannel(int voice, int n) {
     int idx = -1;
     int i;
     for (i = 0; i < n; i++) {
-        if (best < D_0050AAD8_6580[voice].v[i]) {
-            best = D_0050AAD8_6580[voice].v[i];
+        if (best < ((struct E_6580*)sndgs.chan)[voice].v[i]) {
+            best = ((struct E_6580*)sndgs.chan)[voice].v[i];
             idx = i;
         }
     }
@@ -16724,7 +16644,7 @@ int SNDPKTPLAY_start_impl(int packetinstancehandle, SNDSAMPLEFORMAT *pssf, SNDSA
         } else {
             ppchan->f00 = shandle;
             ppchan->f42 = f_6580_6760(voice, pssf->channels);
-            pVoice = &sndgs.f1F0[voice];
+            pVoice = &((struct sA8E8Chan*)sndgs.chan)[voice];
             pVoice->f4C = 0;
             pVoice->f1C = pspo->h8;
             pVoice->f12 = -1;
@@ -16769,7 +16689,7 @@ int SNDPKTPLAY_start_impl(int packetinstancehandle, SNDSAMPLEFORMAT *pssf, SNDSA
                 break;
             }
             for (i = 0; i < voicesneeded; i++) {
-                f_A550_6760(sndgs.f1F0[voice].f04[i]);
+                f_A550_6760(((struct sA8E8Chan*)sndgs.chan)[voice].f04[i]);
             }
             ppchan->f00 = ret;
         }
@@ -17159,7 +17079,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDrelease);
 extern int fA6E8_7138(void) __asm__("SNDVOICEI_get");
 extern int fAA00_7138(int, int *) __asm__("iSNDpatchkey");
 extern void f2440_7138(int) __asm__("SNDPLATFORM_stop");
-extern char D_A8E8_7138[] __asm__("sndgs");
 
 /**
  * Releases a sound: moves each of its voices into the release part of its volume envelope.
@@ -17177,7 +17096,7 @@ int SNDrelease(void) {
     if (voice >= 0) {
         char *sndGlobals;
         setVoice = -1;
-        sndGlobals = D_A8E8_7138;
+        sndGlobals = ((char*)&sndgs);
         while (fAA00_7138(voice, &setVoice) != 0) {
             char *chanPub = *(char **)(sndGlobals + 0x1F0) + setVoice * 140;
             signed char nextSegment = *(signed char *)(chanPub + 0x5E);
@@ -17581,7 +17500,6 @@ extern struct S_7D00 sndmix_7D00 __asm__("sndmix");
 struct G_7D00 { char pad0[0x64]; char *pool; unsigned int size; };
 /* sndmix's free-pool counter: addressed as its own symbol, as in landed SNDPLATFORM_init */
 extern unsigned int D_00515D24_7D00 __asm__("D_00515D24");
-extern struct G_7D00 sndgs_7D00 __asm__("sndgs");
 extern void SNDI_New_7D00() __asm__("SNDI_New");
 extern void SNDI_Delete_7D00() __asm__("SNDI_Delete");
 extern void f_C918_7D00(void (*)()) __asm__("CODASetNew");
@@ -17609,8 +17527,8 @@ void MIX_create(struct Cfg_7D00 *cfg) {
     }
     sndmix_7D00.cfg = *cfg;
     f_58A0_7D00();
-    D_00515D24_7D00 = sndgs_7D00.size;
-    pool = sndgs_7D00.pool;
+    D_00515D24_7D00 = (unsigned int)sndgs.sso.set.fastramsize;
+    pool = (char*)sndgs.sso.set.fastramaddr;
     for (i = 0; i < 2; i++) {
         if (D_00515D24_7D00 >= 8280) {
             D_00515D24_7D00 -= 8280;
@@ -22512,7 +22430,6 @@ void CMTBLKDecf_SetCodecVersion(CMTBLKDecf* decoder, int codecVersion) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDDRV_getmastervoice);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char sndgs_E0E0[] __asm__("sndgs");
 typedef struct { char pad[0x28]; short f; char pad2[0x62]; } R_E0E0;
 typedef struct { R_E0E0 arr[100]; } W_E0E0;
 
@@ -22527,7 +22444,7 @@ typedef struct { R_E0E0 arr[100]; } W_E0E0;
  * @return the channel index of the master voice (biased by the two reserved counts)
  */
 int SNDDRV_getmastervoice(int voice) {
-    char *driverState = sndgs_E0E0;
+    char *driverState = ((char*)&sndgs);
     int temp_2;
     int temp_4;
 
@@ -22541,7 +22458,6 @@ int SNDDRV_getmastervoice(int voice) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDDRV_getsamplechan);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern char sndgs_E118[] __asm__("sndgs");
 
 struct R_E118 { struct CHANPUB e[1]; };
 
@@ -22561,7 +22477,7 @@ int SNDDRV_getsamplechan_impl(int voice) {
     int temp_2;
     int temp_4;
     int var_5;
-    char *driverState = sndgs_E118;
+    char *driverState = ((char*)&sndgs);
 
     temp_4 = voice + *(unsigned char *)(driverState + 0x30) + *(unsigned char *)(driverState + 0x2F);
     temp_2 = ((struct R_E118 *)*(char **)(driverState + 0x1F0))->e[temp_4].masterchan;
@@ -22646,7 +22562,6 @@ typedef struct {
 } G_E1B0;
 typedef struct { char pad0[3]; unsigned char b3; } A6_E1B0;
 typedef struct { char pad0[7]; unsigned char b7; char pad8[0x18 - 8]; int arr[8]; } A7_E1B0;
-extern G_E1B0 sndgs_E1B0 __asm__("sndgs");
 extern void MIX_playinit_E1B0(int, int, int, int, unsigned int, int, int, int, int, int, int, int, int, int) __asm__("MIX_playinit");
 extern void SNDPLATFORM_setpitch_E1B0(int) __asm__("SNDPLATFORM_setpitch");
 extern void func_003C38E0_E1B0(int) __asm__("func_003C38E0");
@@ -22682,11 +22597,11 @@ int SNDPLATFORM_packetplay(int pktChan, int idx, int timeMult, int arg3, int low
     E_E1B0 *chanEntry;
     int i;
 
-    chanEntry = &sndgs_E1B0.ents[idx];
+    chanEntry = &((E_E1B0*)sndgs.chan)[idx];
     if (!(chanEntry->f24 & 8)) {
     if (chanEntry->f24 & 4) {
     for (i = 0; i < chanEntry->f23; i++) {
-        MIX_playinit_E1B0(chanEntry->h[i] - (sndgs_E1B0.f30 + sndgs_E1B0.f2F), sampleFormat->b3, 0, 0, 0xFFFFFFFF,
+        MIX_playinit_E1B0(chanEntry->h[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), sampleFormat->b3, 0, 0, 0xFFFFFFFF,
                            sampleAttr->arr[i], chanEntry->f23, chanEntry->f14, -1, -1, 0, 0, sampleAttr->b7, i);
     }
     SNDPLATFORM_setpitch_E1B0(chanEntry->h[0]);
@@ -22697,7 +22612,7 @@ int SNDPLATFORM_packetplay(int pktChan, int idx, int timeMult, int arg3, int low
     SNDPLATFORM_lowpass_E1B0(chanEntry->h[0], lowpassCutoff);
     SNDPLATFORM_highpass_E1B0(chanEntry->h[0], highpassCutoff);
     for (i = 0; i < chanEntry->f23; i++) {
-        MIX_play_E1B0(chanEntry->h[i] - (sndgs_E1B0.f30 + sndgs_E1B0.f2F));
+        MIX_play_E1B0(chanEntry->h[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu));
     }
     }
     }
@@ -22710,7 +22625,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDPKTPLAYI_voicetopackethandle);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 
-extern struct sA8E8 sndgs;
 
 /* sndpps: the stream queues (a pending-callback list, then one queue per stream). Layout from every use in
    this unit; field names are their offsets. */
@@ -22730,7 +22644,7 @@ int SNDVOICEI_get_E378(int arg0) __asm__("SNDVOICEI_get");
  */
 int SNDPKTPLAYI_voicetopackethandle(int key) {
     int i;
-    for (i = 0; i < sndgs.setup.cfg.f26; i++) {
+    for (i = 0; i < sndgs.sso.set.maxstreams; i++) {
         struct s7B8Queue *pktChan = sndpps.f304[i];
         if (pktChan != 0 && SNDVOICEI_get_E378(pktChan->f00) == key) return i;
     }
