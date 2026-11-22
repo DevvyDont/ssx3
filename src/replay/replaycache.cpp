@@ -2071,7 +2071,7 @@ extern "C" void* cScriptHeap_AllocMem_impl(cScriptHeap* heap, unsigned int size)
             block = block->pNext;
         } while (block != 0);
     }
-    return (char*)found + 8;
+    return (char*)&found->blockStart;
 }
 #endif
 

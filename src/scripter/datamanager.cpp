@@ -2268,17 +2268,17 @@ struct sScriptSlot_7F20 {
 extern "C" cSSXScriptEngine* cSSXScriptEngine_cSSXScriptEngine(cSSXScriptEngine* self)
 {
     cBXScriptEngine_cBXScriptEngine(self);
-    cVidEngine_cVidEngine((char*)self + 0x500);
-    cDataManager_cDataManager((cDataManager*)((char*)self + 0x51C), 0, 0x100);
+    cVidEngine_cVidEngine(&self->mpPlayer);
+    cDataManager_cDataManager((cDataManager*)(&self->mMaxDataInstances), 0, 0x100);
     self->mInSeqCommVtbl = D_00482100;
     self->mVidEngineVtbl = D_004821A0;
     self->mDataManagerVtbl = D_00482168;
     self->mVtbl = cSSXScriptEngine_vtbl;
-    new ((char*)self + 0x6D0) sScriptSlot_7F20[2];
-    cScriptObjGS_cScriptObjGS((char*)self + 0x910);
-    cScriptObjEvent_cScriptObjEvent((char*)self + 0x92C);
-    cScriptAnimBankManager_cScriptAnimBankManager((char*)self + 0xA28, 0, 10, 0xF0);
-    cScriptSoundBankManager_cScriptSoundBankManager((char*)self + 0xA38, 0, 10, 17);
+    new ((char*)&self->mObjectCameraManager[0]) sScriptSlot_7F20[2];
+    cScriptObjGS_cScriptObjGS(&self->mObjectGameState);
+    cScriptObjEvent_cScriptObjEvent(&self->mObjectEvent);
+    cScriptAnimBankManager_cScriptAnimBankManager(&self->mAnimationBankManager, 0, 10, 0xF0);
+    cScriptSoundBankManager_cScriptSoundBankManager(self->mSoundBankManager, 0, 10, 17);
     (*(int*)&self->mpMasterTableHeader) = 0;
     (*(int*)&self->mpMasterTable) = 0;
     (*(int*)&self->mpMasterTableDebug) = 0;
