@@ -66,7 +66,7 @@ INCLUDE_ASM("main/ssxapp2", cGFPodiumState__cGFPodiumState);
 
 INCLUDE_ASM("main/ssxapp2", cGFReplayStartState__cGFReplayStartState);
 
-INCLUDE_ASM("main/ssxapp2", func_00244240);
+INCLUDE_ASM("main/ssxapp2", cPauseState_set);
 
 INCLUDE_ASM("main/ssxapp2", cGenericStreamPause__cGenericStreamPause);
 
@@ -112,17 +112,17 @@ INCLUDE_ASM("main/ssxapp2", cGMMPSlopeHandler_writeToReplayFrame);
 
 INCLUDE_ASM("main/ssxapp2", cGMMPSlopeHandler_readFromReplayFrame);
 
-INCLUDE_ASM("main/ssxapp2", func_00244630);
+INCLUDE_ASM("main/ssxapp2", cGMFreerideHandler__cGMFreerideHandler);
 
 INCLUDE_ASM("main/ssxapp2", cGMTimeHandler__cGMTimeHandler);
 
-INCLUDE_ASM("main/ssxapp2", func_00244690);
+INCLUDE_ASM("main/ssxapp2", cGMRivalTimeHandler__cGMRivalTimeHandler);
 
-INCLUDE_ASM("main/ssxapp2", func_002446C0);
+INCLUDE_ASM("main/ssxapp2", cGMRivalPointHandler__cGMRivalPointHandler);
 
 INCLUDE_ASM("main/ssxapp2", cGMPointHandler__cGMPointHandler);
 
-INCLUDE_ASM("main/ssxapp2", func_00244720);
+INCLUDE_ASM("main/ssxapp2", cGMDebugHandler__cGMDebugHandler);
 
 INCLUDE_ASM("main/ssxapp2", cMCOverlayManager_CallbackMemcard);
 
@@ -158,7 +158,7 @@ INCLUDE_ASM("main/ssxapp2", cGameLoadState__cGameLoadState);
 
 INCLUDE_ASM("main/ssxapp2", cGameLoadState_onCreateScreen);
 
-INCLUDE_ASM("main/ssxapp2", func_002454F8);
+INCLUDE_ASM("main/ssxapp2", cGameLoadState_onGainTransition);
 
 INCLUDE_ASM("main/ssxapp2", cGameLoadState_onWidgetCreate);
 
@@ -168,7 +168,7 @@ INCLUDE_ASM("main/ssxapp2", cGameLoadStateOutLodge_onCreateScreen);
 
 INCLUDE_ASM("main/ssxapp2", cGameLoadStateOutLodge_onWidgetCreate);
 
-INCLUDE_ASM("main/ssxapp2", func_00245698);
+INCLUDE_ASM("main/ssxapp2", cGameLoadStateOutLodge_onGainTransition);
 
 INCLUDE_ASM("main/ssxapp2", func_00245708);
 

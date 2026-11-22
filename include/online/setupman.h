@@ -12,15 +12,15 @@
 // One instance, cSetupMan_mSetupMan (EA: the static cSetupMan::mSetupMan, preview assert "!mSetupMan"): func_00264030 creates
 // it, func_00264098 destroys it. No On Tour counterpart (On Tour has no online code).
 //
-// Size 0x12C: [R] func_00264030: cMemMan_alloc(300, "cSetupMan", 0x20000000) + the constructor func_002640C0, which
+// Size 0x12C: [R] func_00264030: cMemMan_alloc(300, "cSetupMan", 0x20000000) + the constructor cSetupMan_cSetupMan, which
 // stores every word except the queue slots (cleared with MEM_fill) up to 0x128. No vtable, no base class (the
-// destructor func_00264138 is called directly with flags 3).
+// destructor cSetupMan__cSetupMan is called directly with flags 3).
 // The two packet queues are the same 32-slot ring of tGameCommPacket* that cGameComm uses (online/gamecomm.h
 // tGameCommQueue: mHead push count, mTail pop count, mQueue[32]); packets are 0xF0-byte "tGameCommPacket" buffers
 // (func_00264960). Field names for them follow cGameComm's (On Tour names); the rest are named from retail use.
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] the constructor func_002640C0, the destructor func_00264138, the allocation in func_00264030;
+//   [R] the constructor cSetupMan_cSetupMan, the destructor cSetupMan__cSetupMan, the allocation in func_00264030;
 //   [U] how retail code uses the field (src/dirtysock/tagsunk.cpp views sRingOwner_264138, sNetSession42B8,
 //       sDsPacketQueueK2, sDsRecvQueue_00264A58, sDsSendQueue_00264B20 / _00264BE8, and the asm).
 // mState values (retail use): 1 start (ctor, dtor); 2 the host has a pick; 3 the peer confirmed; 4 / 5 this host

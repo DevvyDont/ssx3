@@ -59,7 +59,7 @@ struct cGraphicsMan {
     int _EffectTexMap[86];          // 0xF50 [O]; [R] ctor fills -1 (MEM_fill 0x158); [P] getEffectTexMap(i)
     int mSpecTexID;                 // 0x10A8 [O]; [P] Get/SetSpecID (cGraphicsMan_GetSpecID/cGraphicsMan_SetSpecID)
     int mPatchSpecTexID;            // 0x10AC [O]; [P] Get/SetPatchSpecID (cGraphicsMan_GetPatchSpecID/cGraphicsMan_SetPatchSpecID)
-    int mCharSpecTexID[10];         // 0x10B0 [O]; [U] indexed accessors func_003946A8/func_003946B8
+    int mCharSpecTexID[10];         // 0x10B0 [O]; [U] indexed accessors cGraphicsMan_SetCharSpecID/cGraphicsMan_GetCharSpecID
     void** mVtbl;                   // 0x10D8 [R] cGraphicsMan cGraphicsMan_vtbl, cPS2GraphicsMan cPS2GraphicsMan_vtbl
 };
 

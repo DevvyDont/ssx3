@@ -1074,7 +1074,7 @@ extern "C" void func_00284B80(void) {
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284BA0);
+INCLUDE_ASM("scripter/all_in_one_scripter", StreamToDuckVolumeControl);
 #ifdef SKIP_ASM
 /**
  * Returns the volume-duck mask for a duck stream: 371 (0x173) for stream 0, otherwise 0.
@@ -1084,7 +1084,7 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284BA0);
  * @param duckStream  the duck stream number
  * @return 0x173 for stream 0, else 0
  */
-extern "C" int func_00284BA0(int duckStream) {
+extern "C" int StreamToDuckVolumeControl(int duckStream) {
     return (duckStream != 0) ? 0 : 371;
 }
 #endif

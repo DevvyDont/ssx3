@@ -26,7 +26,7 @@ struct RCMP_CHUNK;
 struct SHAPE;
 
 // RCMP::RCMP_SYSTEM (0x10 [O]; [R] RCMP_RCMP_SYSTEM_RCMP_SYSTEM clears +0x0 / +0x4 and stores the vtable RCMP_RCMP_SYSTEM_vtbl at
-// +0xC). The one instance is the global RCMP_rcmp_sys (constructed by the static initialiser func_003B0770 at priority
+// +0xC). The one instance is the global RCMP_rcmp_sys (constructed by the static initialiser __sti__rcmpbase_cpp at priority
 // 0xFFFF; cMoviePlayer_SetSSXREALDefaults installs cMoviePlayer_SSXAllocMemFunc / SSXFreeMemFunc). Every RCMP and AV
 // allocation goes through it: AllocMemFunc(tag, size, 0, 0, m_DefaultMemDir), FreeMemFunc(p).
 struct RCMP_RCMP_SYSTEM {
@@ -38,7 +38,7 @@ struct RCMP_RCMP_SYSTEM {
     int m_DefaultMemDir;                // 0x8 [O]; [U] passed as the last allocator argument (| 0x400 for the codec's
                                         //     uncached buffers)
     void** mVtbl;                       // 0xC [R] ctor RCMP_RCMP_SYSTEM_vtbl (_vt$Q24RCMP11RCMP_SYSTEM: slot 1 the destructor
-                                        //     _$_Q24RCMP11RCMP_SYSTEM); func_003B0770 restores it at exit (D_0050943C)
+                                        //     _$_Q24RCMP11RCMP_SYSTEM); __sti__rcmpbase_cpp restores it at exit (D_0050943C)
 };
 
 // RCMP::CHUNK (0xC [O]; [R] RCMP_CHUNK_CHUNK__FPv clears all three; func_003AEAD0 allocates 12 bytes and fills them).
@@ -85,7 +85,7 @@ struct RCMP_FRAME {
                                         //     FRAME_PSP_SONY 3); [R] func_003B07F8 stores 2
     SHAPE* m_Shp;                       // 0x4 [O]; [R] func_003B07F8 = SHAPE_create(w, h, 32 bpp, ...); [U] freed by
                                         //     func_003B08E0 (SHAPE_destroy); the codec decodes into its pixels;
-                                        //     func_00254410 (video driver) reads its header
+                                        //     SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD (video driver) reads its header
 };
 
 // RCMP::DECODER (0x1C [R] func_003AE450 allocates 0x1C for it; [O] 0x1C). Vtable _vt$Q24RCMP7DECODER = RCMP_DECODER_vtbl

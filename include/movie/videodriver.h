@@ -4,7 +4,7 @@
 // RCMP::VIDEO_DRIVER (abstract: draws decoded RCMP frames) and SSX_VD_PS2_SINGLE_BUFFERD, SSX 3's PS2 driver: it cuts
 // the movie frame into 16-pixel-wide columns of power-of-two-high strips, keeps one graphics-manager texture per tile
 // and draws them as screen quads. cMoviePlayer_startPlay creates it with SSX_VD_create (84 bytes from the RCMP
-// allocator, constructor func_00254410) and calls its slots 4-6 (Draw / ReDraw / CompleteDraw); cMoviePlayer_purge
+// allocator, constructor SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD) and calls its slots 4-6 (Draw / ReDraw / CompleteDraw); cMoviePlayer_purge
 // deletes it (slot 1, flags 3). Retail code: unit mem/memstd, SSX_VD_create .. VIDEO_DRIVER__VIDEO_DRIVER
 // (0x254368..0x2552A0), next to cMoviePlayer's methods. EA source: the July 2003 preview keeps this code with
 // d:/ssx/code/source/movie/movieplayer.cpp's; On Tour's twin is in movie/all_in_one_movie.cpp (VIDEO_DRIVER,
@@ -20,11 +20,11 @@
 // position / scale sit 4 bytes earlier (0x3C..0x4C: one word less somewhere in 0x24..0x3C).
 //
 // Vtables: D_004802B0 RCMP::VIDEO_DRIVER (slot 1 VIDEO_DRIVER__VIDEO_DRIVER, 2-5 pure virtual, 6
-// VIDEO_DRIVER_CompleteDraw__FPv); D_00480270 SSX_VD_PS2_SINGLE_BUFFERD (1 func_002547B8 dtor, 2 SSX_VD_PS2_SINGLE_BUFFERD_SetPosition
-// SetPosition, 3 SSX_VD_PS2_SINGLE_BUFFERD_SetScale__FPvff SetScale, 4 func_00254C48 Draw, 5 func_00254DA0__FPv ReDraw, 6 SSX_VD_PS2_SINGLE_BUFFERD_CompleteDraw
+// VIDEO_DRIVER_CompleteDraw__FPv); D_00480270 SSX_VD_PS2_SINGLE_BUFFERD (1 SSX_VD_PS2_SINGLE_BUFFERD__SSX_VD_PS2_SINGLE_BUFFERD dtor, 2 SSX_VD_PS2_SINGLE_BUFFERD_SetPosition
+// SetPosition, 3 SSX_VD_PS2_SINGLE_BUFFERD_SetScale__FPvff SetScale, 4 SSX_VD_PS2_SINGLE_BUFFERD_Draw Draw, 5 SSX_VD_PS2_SINGLE_BUFFERD_ReDraw__FPv ReDraw, 6 SSX_VD_PS2_SINGLE_BUFFERD_CompleteDraw
 // CompleteDraw) - On Tour's VIDEO_DRIVER method order (SetPosition, SetScale, Draw, ReDraw, CompleteDraw).
 //
-// FLAT layouts. Evidence tags: [R] the constructor func_00254410, the destructors and SSX_VD_create's 84-byte
+// FLAT layouts. Evidence tags: [R] the constructor SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD, the destructors and SSX_VD_create's 84-byte
 // allocation; [P] the preview's SSX_VD_PS2_SINGLE_BUFFERD methods; [O] On Tour's DWARF; [U] retail use.
 
 #include "layout.h"
@@ -35,7 +35,7 @@ struct cPS2GraphicsMan;
 
 // RCMP::VIDEO_DRIVER (0x8 [O]; [R] VIDEO_DRIVER__VIDEO_DRIVER stores D_004802B0 at +0x4).
 struct RCMP_VIDEO_DRIVER {
-    RCMP_DECODER* m_pdecoder;           // 0x0 [O]; [R] func_00254410 stores the decoder
+    RCMP_DECODER* m_pdecoder;           // 0x0 [O]; [R] SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD stores the decoder
     void** mVtbl;                       // 0x4 [R] D_004802B0 (base) / D_00480270
 };
 

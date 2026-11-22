@@ -135,12 +135,12 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerInstance_Update);
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sWorldTrigger70;
 struct sTriggerIdCache;
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" int cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(void* self);
 extern "C" char* cSSXAudio_GetFocusRider(void* self, int which);
-extern "C" int func_004165A8(const void* a, const void* b);
+extern "C" int strcmp(const void* a, const void* b);
 extern "C" int func_0029B818(void* sys, void* name, int* rec);
 extern "C" void func_002A7468(void* sys);
 extern "C" int func_002A7678(void* sys, int a);
@@ -236,7 +236,7 @@ static inline void sfxBegin_4C38(struct sSnd4C38Sys* self, int a, int b)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -334,7 +334,7 @@ extern "C" void cWorldTriggerInstance_Update(cWorldTriggerInstance* tt)
                 cWorldTriggerInstance_Reset((cWorldTriggerInstance*)instance);
                 return;
             }
-            if (func_004165A8(instance->f40, D_004A35A8) == 0) {
+            if (strcmp(instance->f40, D_004A35A8) == 0) {
                 if (cWorldTriggerInstance_SwapTriggerToString(instance, instance->fC, instance->f40) == 0) {
                     cWorldTriggerInstance_Reset((cWorldTriggerInstance*)instance);
                     return;
@@ -779,7 +779,7 @@ extern "C" void cWorldTriggerManager_HandleTrigger(sWorldTrigger70** self, int o
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_Update);
 #ifdef SKIP_ASM
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" int func_004165A8(const void* a, const void* b);
+extern "C" int strcmp(const void* a, const void* b);
 // PORT: cSSXAudio_SwapBankStopped__FPv is an empty stub whose caller passes (mgr, name).
 void cSSXAudio_SwapBankStopped_2(void* mgr, void* name) __asm__("cSSXAudio_SwapBankStopped__FPv");
 extern "C" void cWorldTriggerInstance_Update(cWorldTriggerInstance* t);
@@ -799,7 +799,7 @@ extern "C" void cWorldTriggerManager_Update(sWorldTrigger70** self)
     for (int i = 0; i < 40; i++) {
         if ((*self)[i].active == 1) {
             if ((*self)[i].unk34 == 0) {
-                if (func_004165A8((char*)&(*self)[i] + 0x40, D_004A35A8)) {
+                if (strcmp((char*)&(*self)[i] + 0x40, D_004A35A8)) {
                     // PORT: pointer arithmetic through int
                     cSSXAudio_SwapBankStopped_2(cAudioInterface_bxAudio(), (char*)(i * 0x70 + *(int*)self) + 0x40);
                 }
@@ -868,7 +868,7 @@ extern "C" void cWorldTriggerManager_AddHitObject(cWorldTriggerManager* self, in
 extern "C" int cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cSSXAudio_GetClosestCamera1(void* self, void* rider);
 extern "C" int cBankSys_SFX_End(void* self);
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 
 struct sWtEnt5F60 {
     signed char b0;
@@ -968,7 +968,7 @@ extern "C" int cWorldTriggerManager_HandleCollision(cWorldTriggerManager* self, 
         playOpts->p34[bankManager->sub.cur] = 0;
         playOpts->p38[bankManager->sub.cur] = playOpts->ents[bankManager->sub.cur].b0;
         playOpts->p3C[bankManager->sub.cur] = 0;
-        func_00416210((char*)playOpts + bankManager->sub.cur * 8 + 0x40, 0, 8);
+        memset((char*)playOpts + bankManager->sub.cur * 8 + 0x40, 0, 8);
         playOpts->p60[bankManager->sub.cur] = 0;
         playOpts->p64[bankManager->sub.cur] = 0;
         playOpts->p68[bankManager->sub.cur] = 0;
@@ -1179,7 +1179,7 @@ int cWorldTriggerManager_AdvancedTriggerToString(void* self)
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_SwapTriggerPlaying);
 #ifdef SKIP_ASM
-extern "C" int func_004165A8(const void* a, const void* b);
+extern "C" int strcmp(const void* a, const void* b);
 extern unsigned char D_004A35A8[];
 
 /**
@@ -1194,7 +1194,7 @@ extern "C" int cWorldTriggerManager_SwapTriggerPlaying(sWorldTrigger70** self, i
 {
     int n = 0;
     for (int i = 0; i < 40; i++) {
-        if ((*self)[i].active == 1 && func_004165A8((char*)&(*self)[i] + 0x40, D_004A35A8)) {
+        if ((*self)[i].active == 1 && strcmp((char*)&(*self)[i] + 0x40, D_004A35A8)) {
             if (*(int*)((char*)&(*self)[i] + 0xC) != id) n++;
         }
     }
@@ -2629,7 +2629,7 @@ extern "C" void func_002B83F8(void* self, sOctList83F8** partial, sOctList83F8**
 #endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B8818);
+INCLUDE_ASM("sound/icepick/worldtriggermanager", __sti__all_in_one_sound_cpp);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sColour_8818 {
@@ -2731,7 +2731,7 @@ static inline void Pair_8818(sPair_8818* p)
     p->a = 0;
 }
 
-extern "C" void func_002B8818_impl(int init, int prio) __asm__("func_002B8818");
+extern "C" void __sti__all_in_one_sound_cpp_impl(int init, int prio) __asm__("__sti__all_in_one_sound_cpp");
 
 /**
  * Static initializer of the unit: fills the colour tables D_004D3B18.. and the 14 colour keys D_004A5268..
@@ -2742,7 +2742,7 @@ extern "C" void func_002B8818_impl(int init, int prio) __asm__("func_002B8818");
  * @param init  nonzero to initialise
  * @param prio  the initialisation priority (acts on 0xFFFF)
  */
-extern "C" void func_002B8818_impl(int init, int prio)
+extern "C" void __sti__all_in_one_sound_cpp_impl(int init, int prio)
 {
     if (prio == 0xFFFF && init) {
         D_004D3B18.a = 1.0f;

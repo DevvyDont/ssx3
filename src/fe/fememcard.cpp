@@ -867,7 +867,7 @@ extern "C" void cMCOverlayManager_readSetFileType(void* mp, int mode);
 extern "C" void func_002C2540(void*, void*);
 // PORT: callers pass more args than the unit's declarations of these take.
 extern "C" void cMCOverlayManager_getFileName_r(void* self, int mode, void* buf, int size) __asm__("cMCOverlayManager_getFileName");
-extern "C" void func_00241AA0_r(void* buf, int size) __asm__("func_00241AA0");
+extern "C" void cMCOverlayManager_getProductCode_r(void* buf, int size) __asm__("cMCOverlayManager_getProductCode");
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern "C" void* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" void* cUIAnimationBank_getAnimationByHashName(void* bank, int hash);
@@ -887,7 +887,7 @@ struct sVtEnt_001877B0 {
  * (+0x1BC) to 0, the manager's read size to cBESaveInterface_getSaveProfileSize() (cMCOverlayManager_readSetSize) and its file type to
  * 1 (cMCOverlayManager_readSetFileType). The profile file slot cFEStateMemCard_mProfileFile goes into the manager's mFileCursor and the screen's slot
  * (+0x1C4), and the manager moves to InitFileCheckWait (53). The 16-bit string at +0x11C becomes the wildcard "%s-%s*"
- * of the product code (func_00241AA0) and the profile file name (cMCOverlayManager_getFileName with type 1). Then
+ * of the product code (cMCOverlayManager_getProductCode) and the profile file name (cMCOverlayManager_getFileName with type 1). Then
  * cFEMemCard_SetLoadPressed(state, 1), +0x1A8 = 1, and "@loadanim" plays on the "exclam" object when both exist. The
  * cBE_getInterface(cBE_getBE(), 5) result is discarded; the stage and +0x1BC are stored twice.
  */
@@ -914,7 +914,7 @@ extern "C" void cFEStateMemCard_startProfileRead(void)
     vt[1].fn(vthis(mp, vt[1]), 53);
     cMCOverlayManager_getFileName_r(mp, 1, name, 20);
     func_002C2540(fmt, str_pct_s_pct_s_c);
-    func_00241AA0_r(desc, 0x10);
+    cMCOverlayManager_getProductCode_r(desc, 0x10);
     sprintf1((unsigned short*)((char*)cFEStateMemCard_mInstance + 0x11C), fmt, desc, name);
     cFEMemCard_SetLoadPressed(cFEStateMemCard_mInstance, 1);
     cFEStateMemCard* st = (cFEStateMemCard*)cFEStateMemCard_mInstance;

@@ -962,7 +962,7 @@ struct sPbStream_D2B0 {
     sPbChunk_D2B0* chunks;  // 0xC
 };
 
-extern "C" int func_00415FC8(const void* a, const void* b, int n);
+extern "C" int memcmp(const void* a, const void* b, int n);
 extern "C" void cReplayCache_addCmdFrame(cReplayCache* self, sPbChunk_D2B0* chunk);
 
 /**
@@ -981,7 +981,7 @@ extern "C" int cReplayCache_addControlCmd(sPbStream_D2B0* self, sPbChunk_D2B0* c
         int i = self->count - 1;
         sPbChunk_D2B0 last = self->chunks[i];
         last.n = 0;
-        if (func_00415FC8(&last, chunk, 8) == 0 && (int)self->chunks[i].n < 0xFFF) {
+        if (memcmp(&last, chunk, 8) == 0 && (int)self->chunks[i].n < 0xFFF) {
             self->chunks[i].n++;
         } else {
             cReplayCache_addCmdFrame((cReplayCache*)self, chunk);

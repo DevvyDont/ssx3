@@ -278,7 +278,7 @@ int func_003F3748(char *out, int n, unsigned char *in, int key, int keyLen, int 
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F41F8", func_003F3860);
+INCLUDE_ASM("seg/seg_2F41F8", _SocketLookupDone);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -293,7 +293,7 @@ extern int f4C68g(char *, int, int, int, int, int, int, int, int, int *) __asm__
  *
  * @return 0 while pending, positive when resolved, negative on failure
  */
-int func_003F3860(int *self) {
+int _SocketLookupDone(int *self) {
     int id = self[88 / 4];
     func_003F4C98(D_0051F000, 'name', 'done');
     f4C68g(D_0051F000, 1, id, 0, 0, 0, 0, 0, 1, self);
@@ -306,22 +306,22 @@ int func_003F3860(int *self) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F41F8", func_003F3940);
+INCLUDE_ASM("seg/seg_2F41F8", _SocketLookupFree);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char D_0051F010[];
 extern int func_003F4C98(char *, int, int);
-extern void func_00256BD8(int *);
+extern void RpcFree(int *);
 /**
  * Frees a host-name lookup made by func_003F39C8 (its "free" function, slot +0xC).
  *
- * Sends 'name'/'free' for the lookup id at +0x58 without waiting, then frees the object with func_00256BD8.
+ * Sends 'name'/'free' for the lookup id at +0x58 without waiting, then frees the object with RpcFree.
  */
-void func_003F3940(int *self) {
+void _SocketLookupFree(int *self) {
     int lookupId = self[88 / 4];
     func_003F4C98(D_0051F010, 'name', 'free');
     func_003F4C68(D_0051F010, 1, lookupId, 0, 0, 0, 0, 0, 0, 0);
-    func_00256BD8(self);
+    RpcFree(self);
 }
 #endif
 
@@ -332,16 +332,16 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F39C8);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char D_0051F020[];
 extern int *RpcAlloc(int);
-extern void f6210k(int *, int, int) __asm__("func_00416210");
+extern void f6210k(int *, int, int) __asm__("memset");
 extern int func_003F4C98(char *, int, int);
 extern int f4C68k(char *, int, int, int, int, int, int, int, int, int *) __asm__("func_003F4C68");
-extern int func_003F3860(int *);
-extern void func_003F3940(int *);
+extern int _SocketLookupDone(int *);
+extern void _SocketLookupFree(int *);
 int *f39C8impl(int a, int b) __asm__("func_003F39C8");
 /**
  * Starts an asynchronous host-name lookup on the IOP and returns its lookup object.
  *
- * Allocates a zeroed 92-byte object with RpcAlloc, installs func_003F3860 as its done function (+0x8) and func_003F3940
+ * Allocates a zeroed 92-byte object with RpcAlloc, installs _SocketLookupDone as its done function (+0x8) and _SocketLookupFree
  * as its free function (+0xC), and sends 'name'/'look' with the host name and the timeout, waiting for the IOP's lookup
  * id into +0x58. The caller polls the done function until it is nonzero, then reads the address at +0x4 and calls the
  * free function.
@@ -355,8 +355,8 @@ int *f39C8impl(int hostName, int timeout) {
     int *lookup = RpcAlloc(92);
     if (lookup) {
         f6210k(lookup, 0, 92);
-        f = (int)func_003F3860;
-        lookup[3] = (int)func_003F3940;
+        f = (int)_SocketLookupDone;
+        lookup[3] = (int)_SocketLookupFree;
         lookup[2] = f;
         func_003F4C98(D_0051F020, 'name', 'look');
         f = 1;
@@ -679,15 +679,15 @@ int NetConnShutdown(void) {
 INCLUDE_ASM("seg/seg_2F41F8", func_003F4198);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_003F4DE8(void);
+extern int NetTick(void);
 /**
- * Returns the millisecond tick (func_003F4DE8).
+ * Returns the millisecond tick (NetTick).
  *
  * Nothing in retail calls it.
  *
  * @return milliseconds since the IOP queue's timer started
  */
-int func_003F4198(void) { return func_003F4DE8(); }
+int func_003F4198(void) { return NetTick(); }
 #endif
 
 //100%
@@ -695,9 +695,9 @@ INCLUDE_ASM("seg/seg_2F41F8", NetConnSleep);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern unsigned int func_003F4DE8u(void) __asm__("func_003F4DE8");
+extern unsigned int NetTicku(void) __asm__("NetTick");
 /**
- * Busy-waits for @p n milliseconds of func_003F4DE8 ticks (0 means 5).
+ * Busy-waits for @p n milliseconds of NetTick ticks (0 means 5).
  *
  * Nothing in retail calls it.
  *
@@ -706,8 +706,8 @@ extern unsigned int func_003F4DE8u(void) __asm__("func_003F4DE8");
 void NetConnSleep(int n) {
     if (n == 0) n = 5;
     if (n > 0) {
-        unsigned int end = func_003F4DE8u() + n;
-        while (func_003F4DE8u() < end) func_003F4DE8u();
+        unsigned int end = NetTicku() + n;
+        while (NetTicku() < end) NetTicku();
     }
 }
 #endif
@@ -783,14 +783,14 @@ extern struct sTick _NETidle[16];
 
 extern int D_004A4BA0;
 
-extern int func_003F4DE8(void);
+extern int NetTick(void);
 
 extern unsigned D_004A4BAC;
 extern int func_003F4A78(void);
 /**
  * Runs DirtySock's idle processing, at most every 5 ticks while the network connection is up.
  *
- * When D_004A4BA0 is set it returns early until func_003F4DE8 (the tick) reaches D_004A4BAC and then sets that to tick
+ * When D_004A4BA0 is set it returns early until NetTick (the tick) reaches D_004A4BAC and then sets that to tick
  * + 5. Then func_003F4A78 runs and each of the 16 idle callbacks in _NETidle with a function is called with its
  * argument and the current tick. On Tour checks NetConnStatus('open') instead of the flag and runs the callbacks in
  * NetConnIdleProcs.
@@ -799,13 +799,13 @@ void NetConnIdle(void) {
     int i;
     struct sTick *idleProc;
     if (D_004A4BA0 != 0) {
-        if (func_003F4DE8() < D_004A4BAC) return;
-        D_004A4BAC = func_003F4DE8() + 5;
+        if (NetTick() < D_004A4BAC) return;
+        D_004A4BAC = NetTick() + 5;
     }
     func_003F4A78();
     idleProc = _NETidle;
     for (i = 0xF; i >= 0; i--) {
-        if (idleProc->fn) idleProc->fn(idleProc->arg, func_003F4DE8());
+        if (idleProc->fn) idleProc->fn(idleProc->arg, NetTick());
         idleProc++;
     }
 }
@@ -815,19 +815,19 @@ void NetConnIdle(void) {
 INCLUDE_ASM("seg/seg_2F41F8", func_003F4330);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_003F4DE8(void);
+extern int NetTick(void);
 /**
- * Returns the millisecond tick (func_003F4DE8).
+ * Returns the millisecond tick (NetTick).
  *
  * LobbyApi code (func_003E94F0) uses it to time its pings.
  *
  * @return milliseconds since the IOP queue's timer started
  */
-int func_003F4330(void) { return func_003F4DE8(); }
+int func_003F4330(void) { return NetTick(); }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F41F8", func_003F4350);
+INCLUDE_ASM("seg/seg_2F41F8", NetCompare);
 #ifdef SKIP_ASM
 /**
  * Compares two byte strings: @p n bytes, or up to the NUL of @p lhs when @p n is negative.
@@ -840,7 +840,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F4350);
  * @return the difference of the first differing bytes, or 0 when equal
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003F4350(unsigned char *lhs, unsigned char *rhs, int n) {
+int NetCompare(unsigned char *lhs, unsigned char *rhs, int n) {
     int diff;
     if (n < 0) {
         while (*lhs) {
@@ -857,7 +857,7 @@ int func_003F4350(unsigned char *lhs, unsigned char *rhs, int n) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F41F8", func_003F43D0);
+INCLUDE_ASM("seg/seg_2F41F8", NetPrintfCode);
 #ifdef SKIP_ASM
 /**
  * Does nothing and returns 1 (a printf-style debug stub; nothing in retail calls it).
@@ -866,7 +866,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F43D0);
  * @return 1
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003F43D0(int a, ...) { return 1; }
+int NetPrintfCode(int a, ...) { return 1; }
 #endif
 
 /* D_0051F0C0: the SIF request queue (layout from every user in this unit). Requests a[] are sent, results b[] come
@@ -924,7 +924,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F4410);
  *
  * Installed by func_003F5000 for interrupt cause 2 with the queue D_0051F0C0 as its argument: adds the Count cycles
  * since the last update (+0x4DF8) to the total (+0x4E00), stores the new Count, then syncs and re-enables interrupts.
- * func_003F4DE8 turns the total into milliseconds.
+ * NetTick turns the total into milliseconds.
  *
  * @param cause  interrupt cause (unused)
  * @param handlerArg  the queue
@@ -958,14 +958,14 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F4448);
 // From peak3project's fork (github.com/peak3project/ssx3).
 
 extern int f4C50(int) __asm__("iWakeupThread");
-extern int f3B80(int, void *, void *) __asm__("func_00423B80");
+extern int f3B80(int, void *, void *) __asm__("iSetAlarm");
 void func_003F4448(int a, int b, struct sSifQueue *s);
 /**
  * Alarm handler that wakes the IOP queue thread when a reply has arrived, re-arming itself while requests are pending.
  *
  * Forgets the alarm id that fired (+0x4DEC, armed by func_003F4528; +0x4DF0, its own). While requests are outstanding,
  * wakes the queue thread (+0x4DE8, iWakeupThread) when the oldest one's reply key matches, and sets a new 16-tick alarm
- * (func_00423B80) when none is armed.
+ * (iSetAlarm) when none is armed.
  *
  * @param alarmId  id of the alarm that fired
  * @param alarmTime  alarm time (unused)
@@ -1021,7 +1021,7 @@ extern int GetThreadId(void);
 extern void func_0041605C(char *, char *, int);
 extern int SyncDCache(int, int);
 extern int sceSifSetDma(struct sSifDma_4528 *, int);
-extern int func_003F4DE8(void);
+extern int NetTick(void);
 extern void sceSifSendCmd(int, void *, int, int, int, int);
 extern int SetAlarm(int, void *, void *);
 extern int SleepThread(void);
@@ -1139,8 +1139,8 @@ int func_003F4528(struct sSifClient_4528 *cl, int flags, int fno, int callArg, c
     dma[1].mode = 0;
     ((int *)queue->pad4DB8[0])[queue->head] = dma[0].size != 0 ? sceSifSetDma(&dma[0], 2) : sceSifSetDma(&dma[1], 1);
     while (((int *)queue->pad4DB8[0])[queue->head] == 0) {
-        tickNow = func_003F4DE8();
-        while (tickNow == func_003F4DE8()) {
+        tickNow = NetTick();
+        while (tickNow == NetTick()) {
         }
         ((int *)queue->pad4DB8[0])[queue->head] = dma[0].size != 0 ? sceSifSetDma(&dma[0], 2) : sceSifSetDma(&dma[1], 1);
     }
@@ -1341,7 +1341,7 @@ int func_003F4D68(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F41F8", func_003F4DE8);
+INCLUDE_ASM("seg/seg_2F41F8", NetTick);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: PS2-only COP0 (read the Count register).
@@ -1361,7 +1361,7 @@ extern long __udivdi3_4DE8(long, long) __asm__("__udivdi3");
 // test) reproduces retail's `lw v1,0(sp); lw v1,4(sp)`; plain form 96.97% (volatile locals kept: retail stores each
 // snapshot to the stack and reloads it; without them 43.24%).
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
-int func_003F4DE8(void) {
+int NetTick(void) {
     volatile unsigned cnt;
     volatile unsigned last;
     volatile unsigned long total;
@@ -1492,7 +1492,7 @@ struct sSifHdr_5000 { int f0; int f4; int v[14]; };
 struct sSemaParam_5000 { int count; int max_count; int init_count; int wait_threads; unsigned int attr; unsigned int option; };
 struct sThreadParam_5000 { int status; void (*func)(void); void *stack; int stackSize; void *gpReg; int initPriority; int currentPriority; unsigned int attr; unsigned int option; };
 
-extern void f5000_6210(void *, int, int) __asm__("func_00416210");
+extern void f5000_6210(void *, int, int) __asm__("memset");
 /* sceSifSendCmd (sceSifSendCmd) returns its packet id; the unit declares it void. */
 extern int f5000_61B0(int, void *, int, int, int, int) __asm__("sceSifSendCmd");
 extern int sceSifAllocIopHeap(int);
@@ -1500,7 +1500,7 @@ extern int sceSifDmaStat(int);
 extern void sceSifInitCmd(void);
 extern int CreateSema(struct sSemaParam_5000 *);
 extern int CreateThread(struct sThreadParam_5000 *);
-extern int func_00423A90(int, int (*)(int, void *), int, void *);
+extern int AddIntcHandler2(int, int (*)(int, void *), int, void *);
 extern int EnableIntc(int);
 extern void StartThread(int, void *);
 extern int func_003F4410(int, void *);
@@ -1615,7 +1615,7 @@ int func_003F5000(void) {
     tp.option = 0;
     queue->h4DE8 = CreateThread(&tp);
     if (queue->h4DE8 <= 0) return -5;
-    queue->h4DF4 = func_00423A90(2, func_003F4410, -1, queue);
+    queue->h4DF4 = AddIntcHandler2(2, func_003F4410, -1, queue);
     EnableIntc(2);
     StartThread(queue->h4DE8, queue);
     D_004A4BB0 = 1;
@@ -1633,7 +1633,7 @@ extern struct sSifQueue D_0051F0C0;
 
 extern int D_004A4BB0;
 
-extern void func_00423B30(int);
+extern void ReleaseAlarm(int);
 extern void RemoveIntcHandler(int, int);
 extern void TerminateThread(int);
 extern void DeleteThread(int);
@@ -1648,8 +1648,8 @@ extern void DeleteSema(int);
  */
 int func_003F53F8(void) {
     struct sSifQueue *queue = &D_0051F0C0;
-    if (queue->h4DEC >= 0) func_00423B30(queue->h4DEC);
-    if (queue->h4DF0 >= 0) func_00423B30(queue->h4DF0);
+    if (queue->h4DEC >= 0) ReleaseAlarm(queue->h4DEC);
+    if (queue->h4DF0 >= 0) ReleaseAlarm(queue->h4DF0);
     RemoveIntcHandler(2, queue->h4DF4);
     TerminateThread(queue->h4DE8);
     DeleteThread(queue->h4DE8);
@@ -1682,10 +1682,10 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F5478);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char D_00525F00[];
 extern int *RpcAlloc(int);
-extern void *f6210h(void *, int, int) __asm__("func_00416210");
+extern void *f6210h(void *, int, int) __asm__("memset");
 extern int SyncDCache(int, int);
 extern void FlushCache(int);
-extern void func_00256BD8(int *);
+extern void RpcFree(int *);
 extern int func_003F4C98(char *, int, int);
 extern int func_003F4C68(char *, int, int, int, int, int, int, int, int, int);
 /**
@@ -1719,7 +1719,7 @@ int *func_003F5478(int size) {
     func_003F4C98(D_00525F00, 'sess', 'crea');
     func_003F4C68(D_00525F00, 1, 0, size, 0, 0, 0, 0, 1, (int)session);
     if (session[0] == 0) {
-        func_00256BD8(session);
+        RpcFree(session);
         session = 0;
     }
     return session;
@@ -1732,16 +1732,16 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F55B8);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char D_00525F10[];
 extern int func_003F4C98(char *, int, int);
-extern void func_00256BD8(int *);
+extern void RpcFree(int *);
 /**
- * Destroys a network packet session: sends 'sess'/'dest' for its id and waits, then frees it (func_00256BD8).
+ * Destroys a network packet session: sends 'sess'/'dest' for its id and waits, then frees it (RpcFree).
  *
  * @param session  the session
  */
 void func_003F55B8(int *session) {
     func_003F4C98(D_00525F10, 'sess', 'dest');
     func_003F4C68(D_00525F10, 1, *session, 0, 0, 0, 0, 0, 1, 0);
-    func_00256BD8(session);
+    RpcFree(session);
 }
 #endif
 
@@ -1801,7 +1801,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F5738);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char D_00525F30[];
 extern int func_003F4C98(char *, int, int);
-extern void func_00416210b(int, int, int) __asm__("func_00416210");
+extern void func_00416210b(int, int, int) __asm__("memset");
 /**
  * Disconnects a network packet session ('sess'/'disc', not waited for), zeroes its address block (+0x4) and clears the
  * received-byte count (+0x10).
@@ -2062,13 +2062,13 @@ int func_003F5C38_impl(struct sSess *self, int kindOut, int argOut, char *buf, i
 INCLUDE_ASM("seg/seg_2F41F8", func_003F5D88);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_003F4DE8(void);
+extern int NetTick(void);
 /**
- * Returns the millisecond tick (func_003F4DE8); the session argument its callers pass is ignored.
+ * Returns the millisecond tick (NetTick); the session argument its callers pass is ignored.
  *
  * @return milliseconds since the IOP queue's timer started
  */
-int func_003F5D88(void) { return func_003F4DE8(); }
+int func_003F5D88(void) { return NetTick(); }
 #endif
 
 //100%
@@ -2354,7 +2354,7 @@ static inline struct sKb *ctl(void) { return (struct sKb *)((char *)D_00526010 -
  * the max-connect word D_00526010, capped at 8). Clears every keyboard's connected and previous flags and the ready
  * flag of each 0x8C-byte buffer in @p ents, resets the current keyboard, sets the info-refresh period and counter to 60
  * updates, installs the callbacks (defaults func_003F6358 and func_003F61C8) and runs one connection query to
- * completion (func_003F5F08, then func_003F5F88 until done). The USB keyboard reader object (func_002667E8) calls it
+ * completion (func_003F5F08, then func_003F5F88 until done). The USB keyboard reader object (cUsbKeyboard_cUsbKeyboard) calls it
  * with no module path, so the modules are expected to be loaded already (initOnline loads them).
  *
  * @param name  directory of USBD.IRX / USBKB.IRX, or 0 to skip loading
@@ -3081,7 +3081,7 @@ struct sNetAcct {
 extern struct sNetAcct *D_004A4BC4;
 
 extern struct sNetAcct *f6728(int, int, int) __asm__("func_00266728");
-extern unsigned f6210x(struct sNetAcct *, int, int) __asm__("func_00416210");
+extern unsigned f6210x(struct sNetAcct *, int, int) __asm__("memset");
 int func_003F6C70_impl(int *arg) __asm__("func_003F6C70");
 /**
  * Creates the network-account session D_004A4BC4 (0x14C bytes).
@@ -4630,7 +4630,7 @@ typedef struct {
     int f3CC;
 } sMcSaveParam_8258;
 
-extern void *f8258_memset(void *, int, int) __asm__("func_00416210");
+extern void *f8258_memset(void *, int, int) __asm__("memset");
 /* Constant data this function copies from (string literals and local array initialisers). */
 typedef struct { iconFVECTOR_8258 v[3]; } sIconVec3_8258;
 typedef struct { iconFVECTOR_8258 v; } sIconVec1_8258;
@@ -5721,7 +5721,7 @@ extern int c9698_8550(int) __asm__("func_003F8550");
 extern int c9698_8588(int) __asm__("func_003F8588");
 extern void c9698_86F0(int) __asm__("func_003F86F0");
 extern void c9698_B2F8(int) __asm__("func_003FB2F8");
-extern unsigned c9698_6210(void *, int, int) __asm__("func_00416210");
+extern unsigned c9698_6210(void *, int, int) __asm__("memset");
 extern char *strcpy(char *, const char *);
 int func_003F9698(char *str, int a, int b);
 /**
@@ -5807,7 +5807,7 @@ extern int c9818_8550(int) __asm__("func_003F8550");
 extern int c9818_8588(int) __asm__("func_003F8588");
 extern void c9818_86F0(int) __asm__("func_003F86F0");
 extern void c9818_B2F8(int) __asm__("func_003FB2F8");
-extern unsigned c9818_6210(void *, int, int) __asm__("func_00416210");
+extern unsigned c9818_6210(void *, int, int) __asm__("memset");
 extern char *strcpy(char *, const char *);
 int func_003F9818(char *str, int a, int b);
 /**
@@ -5888,7 +5888,7 @@ extern int c99b8_8550(int) __asm__("func_003F8550");
 extern int c99b8_8588(int) __asm__("func_003F8588");
 extern void c99b8_86F0(int) __asm__("func_003F86F0");
 extern void c99b8_B2F8(int) __asm__("func_003FB2F8");
-extern unsigned c99b8_6210(void *, int, int) __asm__("func_00416210");
+extern unsigned c99b8_6210(void *, int, int) __asm__("memset");
 extern char *strcpy(char *, const char *);
 int func_003F99B8_impl(char *str, int a, int b) __asm__("func_003F99B8");
 /**
@@ -6415,7 +6415,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FA7A0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern unsigned char D_004A4BE0[];
-extern void func_00416210(char *, int, int);
+extern void memset(char *, int, int);
 extern void func_0041605C(char *, char *, int);
 /**
  * Builds the directory-search pattern for a save: "*" followed by the save name, in a zeroed 32-byte buffer.
@@ -6427,7 +6427,7 @@ extern void func_0041605C(char *, char *, int);
  */
 char *func_003FA7A0(char *dst, int saveDesc, char *src) {
     char *nameDst = dst + 1;
-    func_00416210(dst, 0, 0x20);
+    memset(dst, 0, 0x20);
     *dst = D_004A4BE0[0];
     func_0041605C(nameDst, src, strlen(src));
     return nameDst + strlen(src);
@@ -6441,7 +6441,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FA818);
 // From peak3project's fork (github.com/peak3project/ssx3).
 typedef struct { char b[9]; } K9;
 extern K9 D_00497400;
-extern void f6210(char *, int, int) __asm__("func_00416210");
+extern void f6210(char *, int, int) __asm__("memset");
 extern void f605C(char *, char *, int) __asm__("func_0041605C");
 void func_003FA818_impl(char *a, char *b, int unused, char *str) __asm__("func_003FA818");
 /**
@@ -7501,7 +7501,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB910);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char str_TAG_SENTINELTAG_SENTINELTAG_SENTINEL[];
 
-extern int func_00415FC8(int, char *, int);
+extern int memcmp(int, char *, int);
 /**
  * Returns the 12-byte header in front of a save-record buffer from func_003FCE10.
  *
@@ -7512,7 +7512,7 @@ extern int func_00415FC8(int, char *, int);
 int func_003FB910(int userPtr, int checkTag) {
     int header = userPtr - 0xC;
     if (checkTag & 0xFF) {
-        if (func_00415FC8(header, str_TAG_SENTINELTAG_SENTINELTAG_SENTINEL, 0xC) != 0) header = 0;
+        if (memcmp(header, str_TAG_SENTINELTAG_SENTINELTAG_SENTINEL, 0xC) != 0) header = 0;
     }
     return header;
 }
@@ -8033,7 +8033,7 @@ extern int func_003FB910(int, int);
 extern int fBCD8(int, int) __asm__("func_003FBCD8");
 extern void fB9D0(int, int *, int *, char *) __asm__("func_003FB9D0");
 extern int fBB50(int, int, P3FBFE0 **) __asm__("func_003FBB50");
-extern int f5FC8(int, char *, int) __asm__("func_00415FC8");
+extern int f5FC8(int, char *, int) __asm__("memcmp");
 /**
  * Verifies a record just read: decrypts its header, checks the key (11) and size (110), decrypts the data and compares
  * its CRC-32 with the header's.
@@ -8538,7 +8538,7 @@ extern int func_003FB810(int);
 extern int func_003FB828(int);
 extern int func_003FBCD8(int, int);
 extern void fCA40_B9A0(int) __asm__("func_003FB9A0");
-extern int fCA40_5FC8(void *, void *, int) __asm__("func_00415FC8");
+extern int fCA40_5FC8(void *, void *, int) __asm__("memcmp");
 
 /**
  * Polls the save-record manager and runs the next step of its operation.

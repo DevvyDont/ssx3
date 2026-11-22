@@ -1428,7 +1428,7 @@ INCLUDE_ASM("visualfx/boardtrailfx", cTrickBoostFX_reset__FPv);
  *
  * Takes no replay data and reads nothing, so it acts as a reset (On Tour has both reset and
  * readFromReplayFrame). Called by the constructor, cRiderHandler_resetRiderFX,
- * cRiderHandler_readFromReplayFrame and func_002F7ED0.
+ * cRiderHandler_readFromReplayFrame and cTrickBoostFX_readFromReplayFrame.
  */
 void cTrickBoostFX_reset(void* vself)
 {

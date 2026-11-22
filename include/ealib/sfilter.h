@@ -547,7 +547,7 @@ CHECK_OFFSET(MIXERSTATE, ptempbuf, 0x1C);
 CHECK_OFFSET(MIXERSTATE, tempbufframes, 0x20);
 CHECK_SIZE(MIXERSTATE, 0x24);
 
-// SNDFILTERDEF (0x18 [O]): a registered filter kind. [U] func_003C8E28 allocates statesize bytes, calls
+// SNDFILTERDEF (0x18 [O]): a registered filter kind. [U] MIX_filteradd allocates statesize bytes, calls
 // filterinit(state, id, channel), stores priority as the node's priority and filter / filterrestore as its filterfn /
 // restorefn.
 struct SNDFILTERDEF {

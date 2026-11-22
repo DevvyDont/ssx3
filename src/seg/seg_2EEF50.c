@@ -48,7 +48,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EE028);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int* func_002591E8(int);
-extern void func_00416210(void*, int, int);
+extern void memset(void*, int, int);
 extern void func_0041605C(void*, void*, int);
 extern void func_00259210(void*);
 /**
@@ -86,7 +86,7 @@ int func_003EE028(int* list) {
     if (!chunk) {
         return 0;
     }
-    func_00416210(chunk, 0, bytes);
+    memset(chunk, 0, bytes);
     k = 1;
     chunk[0] = list[15];
     *(unsigned*)(bytes + (int)chunk - 4) = 0xFFFFFFFF;
@@ -135,7 +135,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EE1E8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int* func_002591E8(int);
-extern void func_00416210(void*, int, int);
+extern void memset(void*, int, int);
 extern int func_003EE028(int*);
 /**
  * Creates an empty sorted list with a first pool of nodes.
@@ -154,7 +154,7 @@ extern int func_003EE028(int*);
  */
 int* func_003EE1E8(int initialSize, int growCount, int growPercent) {
     int* list = func_002591E8(68);
-    func_00416210(list, 0, 68);
+    memset(list, 0, 68);
     list[0] = initialSize;
     func_003EE028(list);
     list[0] = growCount;
@@ -561,7 +561,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EE778);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int* func_002591E8(int);
-extern void* func_00416210_p(void*, int, int) __asm__("func_00416210");
+extern void* memset_p(void*, int, int) __asm__("memset");
 extern int func_003EE900(int*, int);
 extern int func_003EEAB8();
 /**
@@ -583,10 +583,10 @@ int* func_003EE778(int n, int bucketCount) {
     int nb = bucketCount > 15 ? bucketCount : 16;
     int* table;
     table = func_002591E8(36);
-    func_00416210_p(table, 0, 36);
+    memset_p(table, 0, 36);
     table[4] = nb;
     table[5] = (int)func_002591E8(nb * 4);
-    func_00416210_p((void*)table[5], 0, table[4] * 4);
+    memset_p((void*)table[5], 0, table[4] * 4);
     table[8] = (int)func_003EEAB8;
     if (cnt > 0) {
         func_003EE900(table, cnt);

@@ -1115,7 +1115,7 @@ void cPlayerLights_BoardIsAdditive(void* vself, int val)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00392DF0);
+INCLUDE_ASM("render/font", cSinCosTable_cSinCosTable);
 #ifdef SKIP_ASM
 extern "C" float fSin(float a);
 
@@ -1126,7 +1126,7 @@ extern "C" float fSin(float a);
  *
  * @return @p self (the table)
  */
-extern "C" void* func_00392DF0(void* self)
+extern "C" void* cSinCosTable_cSinCosTable(void* self)
 {
     int i;
     for (i = 0; i < 640; i++) {
@@ -1328,14 +1328,14 @@ extern "C" int cGraphicsMan_GetScreenYOffset(cGraphicsMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00394008__FPv);
+INCLUDE_ASM("render/font", cGraphicsMan_SetAIUpdatesPerRender__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing (an empty stub). It fills slot 16 of the cGraphicsMan vtable (cGraphicsMan_vtbl), which cPS2GraphicsMan
  * (cPS2GraphicsMan_vtbl) inherits, between the clear-colour slot 15 (cPS2GraphicsMan_SetScreenClearColour in the PS2 vtable) and
  * IsRenderReady (slot 17).
  */
-void func_00394008(void* self)
+void cGraphicsMan_SetAIUpdatesPerRender(void* self)
 {
 }
 #endif
@@ -1807,7 +1807,7 @@ extern "C" void cGraphicsMan_setScreenTintScaleR(cGraphicsMan* graphicsMan, int 
 }
 #endif
 //100%
-INCLUDE_ASM("render/font", func_003941F0);
+INCLUDE_ASM("render/font", cGraphicsMan_getScreenTintScaleR);
 #ifdef SKIP_ASM
 /**
  * Returns the red tint scale for one view: m_ScreenTintScaleR[@p idx].
@@ -1818,7 +1818,7 @@ INCLUDE_ASM("render/font", func_003941F0);
  * @param idx  the view / render-state query index (0-7)
  * @return the red tint scale
  */
-extern "C" float func_003941F0(cPS2GraphicsMan* base, int idx) {
+extern "C" float cGraphicsMan_getScreenTintScaleR(cPS2GraphicsMan* base, int idx) {
     return base->m_ScreenTintScaleR[idx];
 }
 #endif
@@ -1840,7 +1840,7 @@ extern "C" void cGraphicsMan_setScreenTintScaleG(cGraphicsMan* graphicsMan, int 
 }
 #endif
 //100%
-INCLUDE_ASM("render/font", func_00394210);
+INCLUDE_ASM("render/font", cGraphicsMan_getScreenTintScaleG);
 #ifdef SKIP_ASM
 /**
  * Returns the green tint scale for one view: m_ScreenTintScaleG[@p idx].
@@ -1851,7 +1851,7 @@ INCLUDE_ASM("render/font", func_00394210);
  * @param idx  the view / render-state query index (0-7)
  * @return the green tint scale
  */
-extern "C" float func_00394210(cPS2GraphicsMan* base, int idx) {
+extern "C" float cGraphicsMan_getScreenTintScaleG(cPS2GraphicsMan* base, int idx) {
     return base->m_ScreenTintScaleG[idx];
 }
 #endif
@@ -1873,7 +1873,7 @@ extern "C" void cGraphicsMan_setScreenTintScaleB(cGraphicsMan* graphicsMan, int 
 }
 #endif
 //100%
-INCLUDE_ASM("render/font", func_00394230);
+INCLUDE_ASM("render/font", cGraphicsMan_getScreenTintScaleB);
 #ifdef SKIP_ASM
 /**
  * Returns the blue tint scale for one view: m_ScreenTintScaleB[@p idx].
@@ -1884,7 +1884,7 @@ INCLUDE_ASM("render/font", func_00394230);
  * @param idx  the view / render-state query index (0-7)
  * @return the blue tint scale
  */
-extern "C" float func_00394230(cPS2GraphicsMan* base, int idx) {
+extern "C" float cGraphicsMan_getScreenTintScaleB(cPS2GraphicsMan* base, int idx) {
     return base->m_ScreenTintScaleB[idx];
 }
 #endif
@@ -1906,7 +1906,7 @@ extern "C" void cGraphicsMan_setScreenTintOffsetR(cGraphicsMan* graphicsMan, int
 }
 #endif
 //100%
-INCLUDE_ASM("render/font", func_00394250);
+INCLUDE_ASM("render/font", cGraphicsMan_getScreenTintOffsetR);
 #ifdef SKIP_ASM
 /**
  * Returns the red tint offset for one view: m_ScreenTintOffsetR[@p idx].
@@ -1917,7 +1917,7 @@ INCLUDE_ASM("render/font", func_00394250);
  * @param idx  the view / render-state query index (0-7)
  * @return the red tint offset
  */
-extern "C" float func_00394250(cPS2GraphicsMan* base, int idx) {
+extern "C" float cGraphicsMan_getScreenTintOffsetR(cPS2GraphicsMan* base, int idx) {
     return base->m_ScreenTintOffsetR[idx];
 }
 #endif
@@ -1939,7 +1939,7 @@ extern "C" void cGraphicsMan_setScreenTintOffsetG(cGraphicsMan* graphicsMan, int
 }
 #endif
 //100%
-INCLUDE_ASM("render/font", func_00394270);
+INCLUDE_ASM("render/font", cGraphicsMan_getScreenTintOffsetG);
 #ifdef SKIP_ASM
 /**
  * Returns the green tint offset for one view: m_ScreenTintOffsetG[@p idx].
@@ -1950,7 +1950,7 @@ INCLUDE_ASM("render/font", func_00394270);
  * @param idx  the view / render-state query index (0-7)
  * @return the green tint offset
  */
-extern "C" float func_00394270(cPS2GraphicsMan* base, int idx) {
+extern "C" float cGraphicsMan_getScreenTintOffsetG(cPS2GraphicsMan* base, int idx) {
     return base->m_ScreenTintOffsetG[idx];
 }
 #endif
@@ -1972,7 +1972,7 @@ extern "C" void cGraphicsMan_setScreenTintOffsetB(cGraphicsMan* graphicsMan, int
 }
 #endif
 //100%
-INCLUDE_ASM("render/font", func_00394290);
+INCLUDE_ASM("render/font", cGraphicsMan_getScreenTintOffsetB);
 #ifdef SKIP_ASM
 /**
  * Returns the blue tint offset for one view: m_ScreenTintOffsetB[@p idx].
@@ -1983,7 +1983,7 @@ INCLUDE_ASM("render/font", func_00394290);
  * @param idx  the view / render-state query index (0-7)
  * @return the blue tint offset
  */
-extern "C" float func_00394290(cPS2GraphicsMan* base, int idx) {
+extern "C" float cGraphicsMan_getScreenTintOffsetB(cPS2GraphicsMan* base, int idx) {
     return base->m_ScreenTintOffsetB[idx];
 }
 #endif
@@ -2728,7 +2728,7 @@ extern "C" int cGraphicsMan_GetSpecID(cGraphicsMan* graphicsMan) {
 }
 #endif
 //100%
-INCLUDE_ASM("render/font", func_003946A8);
+INCLUDE_ASM("render/font", cGraphicsMan_SetCharSpecID);
 #ifdef SKIP_ASM
 /**
  * Stores character specular texture id @p idx: mCharSpecTexID[idx] = @p value.
@@ -2739,12 +2739,12 @@ INCLUDE_ASM("render/font", func_003946A8);
  * @param idx  the character slot (0-9)
  * @param value  the texture id
  */
-extern "C" void func_003946A8(cPS2GraphicsMan* base, int idx, int value) {
+extern "C" void cGraphicsMan_SetCharSpecID(cPS2GraphicsMan* base, int idx, int value) {
     base->mCharSpecTexID[idx] = value;
 }
 #endif
 //100%
-INCLUDE_ASM("render/font", func_003946B8);
+INCLUDE_ASM("render/font", cGraphicsMan_GetCharSpecID);
 #ifdef SKIP_ASM
 /**
  * Returns character specular texture id @p idx (mCharSpecTexID[idx]).
@@ -2755,7 +2755,7 @@ INCLUDE_ASM("render/font", func_003946B8);
  * @param idx  the character slot (0-9)
  * @return the texture id
  */
-extern "C" int func_003946B8(cPS2GraphicsMan* base, int idx) {
+extern "C" int cGraphicsMan_GetCharSpecID(cPS2GraphicsMan* base, int idx) {
     return base->mCharSpecTexID[idx];
 }
 #endif
@@ -2947,7 +2947,7 @@ extern "C" int cGraphicsMan_getEffectTexMap(cGraphicsMan* graphicsMan, int idx) 
 }
 #endif
 //100%
-INCLUDE_ASM("render/font", func_003948D0);
+INCLUDE_ASM("render/font", getFalloffIntensity);
 #ifdef SKIP_ASM
 /**
  * Returns a distance falloff factor that is 1 within 100 units and falls off as 1/d, 1/d^2 or 1/d^3.
@@ -2959,7 +2959,7 @@ INCLUDE_ASM("render/font", func_003948D0);
  * @param distance  the distance
  * @return the factor, 1 at most
  */
-extern "C" float func_003948D0(int mode, float distance)
+extern "C" float getFalloffIntensity(int mode, float distance)
 {
     switch (mode) {
     case 1:
@@ -2976,7 +2976,7 @@ extern "C" float func_003948D0(int mode, float distance)
 }
 #endif
 //100%
-INCLUDE_ASM("render/font", func_003949A0);
+INCLUDE_ASM("render/font", getIntensityInv);
 #ifdef SKIP_ASM
 /**
  * Returns a near-range ramp: (100x)^n while 100x is below 1, else 1.
@@ -2987,7 +2987,7 @@ INCLUDE_ASM("render/font", func_003949A0);
  * @param x  the value, scaled by 100 first
  * @return the ramp value, 1 at most
  */
-extern "C" float func_003949A0(int mode, float x)
+extern "C" float getIntensityInv(int mode, float x)
 {
     float scaled = x * 100.0f;
     if (scaled < 1.0f) {
@@ -3001,7 +3001,7 @@ extern "C" float func_003949A0(int mode, float x)
 }
 #endif
 //100%
-INCLUDE_ASM("render/font", func_00394A20);
+INCLUDE_ASM("render/font", calcLightPowf);
 #ifdef SKIP_ASM
 /**
  * Raises @p x to the integer power @p n.
@@ -3013,7 +3013,7 @@ INCLUDE_ASM("render/font", func_00394A20);
  * @param x  the base
  * @return x^n
  */
-extern "C" float func_00394A20(int n, float x) {
+extern "C" float calcLightPowf(int n, float x) {
     float result;
 
     switch (n) {
@@ -3048,7 +3048,7 @@ extern "C" float func_00394A20(int n, float x) {
 }
 #endif
 //100%
-INCLUDE_ASM("render/font", func_00394AD8);
+INCLUDE_ASM("render/font", adjustDistanceIntensity);
 #ifdef SKIP_ASM
 /**
  * Returns a fade factor: 1, unless @p fadeGate is at least 5000 and @p fadeDistance is above 3750, then 1 - (b - 3750) * 0.0008.
@@ -3059,7 +3059,7 @@ INCLUDE_ASM("render/font", func_00394AD8);
  * @param fadeDistance  the distance that drives the fade
  * @return the fade factor
  */
-extern "C" float func_00394AD8(float fadeGate, float fadeDistance)
+extern "C" float adjustDistanceIntensity(float fadeGate, float fadeDistance)
 {
     float factor;
     if (fadeGate < 5000.0f) return 1.0f;
@@ -3687,7 +3687,7 @@ void cPS2LightMan_ClearChannel(void* self)
 //100%
 INCLUDE_ASM("render/font", cPS2DeferManager_cPS2DeferManager);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 
 struct sFontTexKey {
     char block[0x10];       // 0x0
@@ -3697,7 +3697,7 @@ struct sFontTexKey {
         for (unsigned int i = 0; i < 2; i++) {
             ids[i] = -1;
         }
-        func_00416210(block, 0, 0x10);
+        memset(block, 0, 0x10);
     }
 };
 
@@ -6536,7 +6536,7 @@ extern "C" int cStaticEmitter_getPosition(int emitter) {
 }
 #endif
 //100%
-INCLUDE_ASM("render/font", func_003965D0);
+INCLUDE_ASM("render/font", cStaticEmitter_setPosition);
 #ifdef SKIP_ASM
 /**
  * Copies the 16-byte vector at @p position to @p emitter + 0xC0 (in cStaticEmitter's layout, Emitter.X0).
@@ -6548,7 +6548,7 @@ INCLUDE_ASM("render/font", func_003965D0);
  */
 // PORT: `long long` is 128-bit on the EE (one lq/sq copy); off-PS2 the same C copies only 8 bytes, so use a
 // 16-byte type.
-extern "C" void func_003965D0(void *emitter, long long *position) {
+extern "C" void cStaticEmitter_setPosition(void *emitter, long long *position) {
     (*(long long *)((char*)(emitter) + (0xC0))) = (long long) *position;
 }
 #endif
@@ -6975,7 +6975,7 @@ void cTube_render(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_003968D0);
+INCLUDE_ASM("render/font", cSimpleTube_setPosition);
 #ifdef SKIP_ASM
 /**
  * Copies the 16-byte vector at @p src into entry @p index of the array at +0x8.
@@ -6986,7 +6986,7 @@ INCLUDE_ASM("render/font", func_003968D0);
  * @param index  the entry
  * @param src  the vector to store
  */
-extern "C" void func_003968D0(cSimpleTube* self, int index, void* src)
+extern "C" void cSimpleTube_setPosition(cSimpleTube* self, int index, void* src)
 {
     cQuad128* quads = (cQuad128*)self->m_positions;
     quads[index] = *(cQuad128*)src;

@@ -192,14 +192,14 @@ extern char D_004A4B18[];
 extern char* cDirtysock_tag_TagFieldFind(const char* tag, const char* key);
 extern int cDirtysock_tag_TagFieldGetString(const char* data, char* buf, int len, const char* defval);
 extern int cDirtysock_tag_TagFieldGetFourCC(const char* data, int def);
-extern int func_004165A8(const char*, const char*);
+extern int strcmp_a(const char*, const char*) __asm__("strcmp");
 extern int func_003EFE20(char*, int, short*, int, char*, int);
 /**
  * Fills a roster entry's presence (show state, product, presence text, language) from a 'PGET' presence packet.
  *
  * Entry layout used here: +0x40 product name (20 bytes), +0x54 presence text (80), +0xA4 two-letter language code plus
  * NUL, +0xA7 show index, +0xA8 flags. The show index is the position of the packet's SHOW text in D_004512C0 ("DISC",
- * "CHAT", "AWAY", "XA", "DND", "PASS"; 0 when none matches, via strcmp func_004165A8). A PROD field sets flag 0x2000
+ * "CHAT", "AWAY", "XA", "DND", "PASS"; 0 when none matches, via strcmp strcmp). A PROD field sets flag 0x2000
  * and its text is the presence text; then the product name comes from func_003EFE20 (the product-key/language string
  * table, empty in retail) and the language is our own first language (+0x30C). Without PROD, it reads the STAT field,
  * takes its 'P' sub-field as the product key, and looks for a sub-field named by each of our languages (+0x308 codes at
@@ -224,7 +224,7 @@ void func_003F02D0(char* self, char* ev, char* out) {
     out[0x40] = 0;
     cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(*(char**)(ev + 0xC), str_SHOW), buf, 0x100, (char*)D_004A4AE8);
     while (i < 6) {
-        if (func_004165A8((const char*)D_004512C0[i], buf) == 0) {
+        if (strcmp_a((const char*)D_004512C0[i], buf) == 0) {
             out[0xA7] = i;
             break;
         }
@@ -383,7 +383,7 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F0710);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern void* func_002591E8(int);
-extern void func_00416210(void*, int, int);
+extern void memset_a(void*, int, int) __asm__("memset");
 extern int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src);
 extern int func_003F5478(int);
 /**
@@ -400,7 +400,7 @@ extern int func_003F5478(int);
 int* func_003F0710(const char* product, const char* version) {
     int* buddyApi = (int*)func_002591E8(1292);
     if (buddyApi) {
-        func_00416210(buddyApi, 0, 1292);
+        memset_a(buddyApi, 0, 1292);
         cDirtysock_tag_TagFieldDupl((char*)buddyApi + 0x314, 0x40, product);
         cDirtysock_tag_TagFieldDupl((char*)buddyApi + 0x354, 0x40, version);
         buddyApi[1] = func_003F5478(0x8000);
@@ -1159,7 +1159,7 @@ extern int func_003F5910(int, int, int, int, int);
 extern int func_003EE560(int, int);
 extern int func_003EE620(int);
 extern int f17_EED08(int, char*) __asm__("func_003EED08");
-extern int func_00415FC8(void*, void*, int);
+extern int memcmp_a(void*, void*, int) __asm__("memcmp");
 extern int cDirtysock_tag_TagFieldGetNumber(const char* data, int defval);
 extern char* strcpy(char* d, const char* s);
 extern int strlen(const char* s);
@@ -1347,7 +1347,7 @@ void func_003F17D8(struct Conn_17D8* self) {
                 if (id == 0) {
                     if ((unsigned int)strlen(name) < 0x20) {
                         ent = (char*)func_002591E8(184);
-                        func_00416210(ent, 0, 184);
+                        memset_a(ent, 0, 184);
                         strcpy(ent, name);
                         id = func_003EE320(self->roster, (int)ent);
                         func_003EEB30(self->names, (int)ent, id);
@@ -1372,7 +1372,7 @@ void func_003F17D8(struct Conn_17D8* self) {
                 ent = (char*)func_003EE468(self->roster, id);
                 old = *(Ent_17D8*)ent;
                 func_003F02D0((char*)self, (char*)&ev, ent);
-                if (func_00415FC8(&old, ent, 184) != 0) {
+                if (memcmp_a(&old, ent, 184) != 0) {
                     func_003EE600(self->roster, 1);
                     func_003EFED0((char*)self, D_00496BB8, ent, ent[0xA7], ent + 0x40, ent + 0x54, ent + 0xA4);
                 }

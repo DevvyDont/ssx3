@@ -19,7 +19,7 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_cScreenPopup);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_cUIState1(void* self, void* engine, void* owner);
 extern "C" void cPopupInfo_cPopupInfo(void* self);
-extern "C" void func_00416210(void* dst, int c, int n);
+extern "C" void memset(void* dst, int c, int n);
 extern void* cScreenPopup_vtbl[];
 extern int cBXString_EmptyString;
 struct sVec3_58E8 {
@@ -59,7 +59,7 @@ extern "C" void* cScreenPopup_cScreenPopup(cScreenPopup* self, cUIEngine* engine
     self->mbPassUpdate = 0;
     self->miLayerOffset = 0;
     for (int j = 0; j < 5; j++)
-        func_00416210((char*)&self->mtConfirmation + j * 12, 0, 12);
+        memset((char*)&self->mtConfirmation + j * 12, 0, 12);
     self->mbReceivePrev = 1;
     self->mpBackGroundWhite = 0;
     self->mpBackGroundRed = 0;
@@ -4687,7 +4687,7 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_pressKey);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int strlen(const char* s);
-extern "C" void func_00416210(void* dst, int c, int n);
+extern "C" void memset(void* dst, int c, int n);
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cKeyboardPopup_setIncludeKey(cKeyboardPopup* self, int i, int v, int mode);
@@ -4814,7 +4814,7 @@ extern "C" void cKeyboardPopup_pressKey(cKeyboardPopup* self_, int flag)
             cKeyboardPopup_redrawScreen((cKeyboardPopup*)self);
             break;
         case 70:
-            func_00416210(self->text, 0, 0x40);
+            memset(self->text, 0, 0x40);
             self->text[0] = 0;
             self->cursor = 0;
             self->end = 0;

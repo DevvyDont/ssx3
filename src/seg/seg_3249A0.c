@@ -164,25 +164,25 @@ SYSCALL_STUB(SetVInterruptHandler, 0xF)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_3249A0", func_00423A80);
+INCLUDE_ASM("seg/seg_3249A0", AddIntcHandler);
 #ifdef SKIP_ASM
 /**
  * EE kernel syscall 0x10.
  *
  * Loads the number into $v1 and executes `syscall`; the kernel does the work.
  */
-SYSCALL_STUB(func_00423A80, 0x10)
+SYSCALL_STUB(AddIntcHandler, 0x10)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_3249A0", func_00423A90);
+INCLUDE_ASM("seg/seg_3249A0", AddIntcHandler2);
 #ifdef SKIP_ASM
 /**
  * EE kernel syscall 0x10.
  *
  * Loads the number into $v1 and executes `syscall`; the kernel does the work.
  */
-SYSCALL_STUB(func_00423A90, 0x10)
+SYSCALL_STUB(AddIntcHandler2, 0x10)
 #endif
 
 //100%
@@ -197,25 +197,25 @@ SYSCALL_STUB(RemoveIntcHandler, 17)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_3249A0", func_00423AB0);
+INCLUDE_ASM("seg/seg_3249A0", AddDmacHandler);
 #ifdef SKIP_ASM
 /**
  * EE kernel syscall 18.
  *
  * Loads the number into $v1 and executes `syscall`; the kernel does the work.
  */
-SYSCALL_STUB(func_00423AB0, 18)
+SYSCALL_STUB(AddDmacHandler, 18)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_3249A0", func_00423AC0);
+INCLUDE_ASM("seg/seg_3249A0", AddDmacHandler2);
 #ifdef SKIP_ASM
 /**
  * EE kernel syscall 18.
  *
  * Loads the number into $v1 and executes `syscall`; the kernel does the work.
  */
-SYSCALL_STUB(func_00423AC0, 18)
+SYSCALL_STUB(AddDmacHandler2, 18)
 #endif
 
 //100%
@@ -285,14 +285,14 @@ SYSCALL_STUB(SetAlarm, 0xFC)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_3249A0", func_00423B30);
+INCLUDE_ASM("seg/seg_3249A0", ReleaseAlarm);
 #ifdef SKIP_ASM
 /**
  * EE kernel syscall 253.
  *
  * Loads the number into $v1 and executes `syscall`; the kernel does the work.
  */
-SYSCALL_STUB(func_00423B30, 253)
+SYSCALL_STUB(ReleaseAlarm, 253)
 #endif
 
 //100%
@@ -344,7 +344,7 @@ SYSCALL_STUB(_iDisableDmac, -29)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_3249A0", func_00423B80);
+INCLUDE_ASM("seg/seg_3249A0", iSetAlarm);
 #ifdef SKIP_ASM
 /**
  * EE kernel syscall -0xFE.
@@ -352,7 +352,7 @@ INCLUDE_ASM("seg/seg_3249A0", func_00423B80);
  * Loads the number into $v1 and executes `syscall`; the kernel does the work. A negative number selects the
  * interrupt-context (i-prefixed) variant.
  */
-SYSCALL_STUB(func_00423B80, -0xFE)
+SYSCALL_STUB(iSetAlarm, -0xFE)
 #endif
 
 //100%
@@ -941,7 +941,7 @@ SYSCALL_STUB(SetEventFlag, 82)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_3249A0", func_00423ED0);
+INCLUDE_ASM("seg/seg_3249A0", iSetEventFlag);
 #ifdef SKIP_ASM
 /**
  * EE kernel syscall -83.
@@ -949,7 +949,7 @@ INCLUDE_ASM("seg/seg_3249A0", func_00423ED0);
  * Loads the number into $v1 and executes `syscall`; the kernel does the work. A negative number selects the
  * interrupt-context (i-prefixed) variant.
  */
-SYSCALL_STUB(func_00423ED0, -83)
+SYSCALL_STUB(iSetEventFlag, -83)
 #endif
 
 //100%
@@ -1361,14 +1361,14 @@ SYSCALL_STUB(SetVSyncFlag, 115)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_3249A0", func_00424120);
+INCLUDE_ASM("seg/seg_3249A0", SetSyscall);
 #ifdef SKIP_ASM
 /**
  * EE kernel syscall 116.
  *
  * Loads the number into $v1 and executes `syscall`; the kernel does the work.
  */
-SYSCALL_STUB(func_00424120, 116)
+SYSCALL_STUB(SetSyscall, 116)
 #endif
 
 //100%

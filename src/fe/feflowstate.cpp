@@ -5,7 +5,7 @@
 INCLUDE_ASM("fe/feflowstate", cFEFlowState_setNumStates);
 #ifdef SKIP_ASM
 extern "C" void cFEFlowState_purge(cFEFlowState* self);
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_FEFlowState[];
@@ -23,7 +23,7 @@ extern "C" void cFEFlowState_setNumStates(cFEFlowState* self, int NumStates)
     *(signed char*)self = n;
     void* states = operator_new_tag(n, str_FEFlowState, 0x100, 0);
     self->mpValues = (char*)states;
-    func_00416210(states, 0, n);
+    memset(states, 0, n);
 }
 #endif
 

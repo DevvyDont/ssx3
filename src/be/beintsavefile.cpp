@@ -138,7 +138,7 @@ struct sSaveBits6_2758 { sSaveBits_2758 e[6]; };
  *
  * Releases any previous buffer (cBESaveInterface_releaseBuffer) and allocates cBESaveInterface_getSaveGameSize() bytes
  * tagged "save file buffer" into cBESaveInterface_buffer. Writes the 0x288-byte block cBELibrary_optionDB, the 26 high-score
- * tables cBELibrary_highScores (2600 bytes, the ones func_0014AB20 returns), then two bits per player of cBELibrary_playerDB (bit
+ * tables cBELibrary_highScores (2600 bytes, the ones cBELibrary_getHighScoreTable returns), then two bits per player of cBELibrary_playerDB (bit
  * 1 of the word at +0x10 and the byte at +0x13, six players), and ends with a CRC of everything before it
  * (MEM_crc16, seed 64490). cBESaveInterface_loadSaveGame reads this layout back.
  *

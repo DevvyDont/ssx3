@@ -96,18 +96,18 @@ int cBELibrary_getRiderIndex(int flag)
 #endif
 
 //100%
-INCLUDE_ASM("be/belibrary", func_0014A180);
+INCLUDE_ASM("be/belibrary", cBELibrary_printMemory);
 #ifdef SKIP_ASM
 /**
  * Does nothing (an empty function; nothing calls it).
  */
-extern "C" void func_0014A180(void) {
+extern "C" void cBELibrary_printMemory(void) {
 
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/belibrary", func_0014A188);
+INCLUDE_ASM("be/belibrary", cBELibrary_writeToData);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -135,7 +135,7 @@ extern sBlk9B50_A188 D_004BA348_A188 __asm__("D_004BA348");
  *
  * @param data  the save buffer to fill
  */
-extern "C" void func_0014A188(char* data)
+extern "C" void cBELibrary_writeToData(char* data)
 {
     int rider;
     *(sBlk4C_A188*)data = *(sBlk4C_A188*)cBELibrary_raceDB;
@@ -227,7 +227,7 @@ extern "C" void cBELibrary_readFromData(char* data)
 #endif
 
 //100%
-INCLUDE_ASM("be/belibrary", func_0014AB20);
+INCLUDE_ASM("be/belibrary", cBELibrary_getHighScoreTable);
 #ifdef SKIP_ASM
 struct sScoreTable_0014AB20 {
     char data[0x64];
@@ -245,7 +245,7 @@ extern "C" int cBELibrary_getScoreType(int a, int b);
  * @param gameEvent  the game event or stat kind
  * @return the table, or null
  */
-extern "C" void* func_0014AB20(int locationId, int gameEvent)
+extern "C" void* cBELibrary_getHighScoreTable(int locationId, int gameEvent)
 {
     int type = cBELibrary_getScoreType(locationId, gameEvent);
     if (type == 26) {
@@ -298,7 +298,7 @@ extern "C" int cBELibrary_getScoreType(int locationId, int gameEvent)
 #endif
 
 //100%
-INCLUDE_ASM("be/belibrary", func_0014ABE0);
+INCLUDE_ASM("be/belibrary", cBEBoltInterface_getThis);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BEBoltInt[];
@@ -320,7 +320,7 @@ struct cBELibraryInterface_0014ABE0 {
  *
  * @return the interface
  */
-extern "C" void* func_0014ABE0(void)
+extern "C" void* cBEBoltInterface_getThis(void)
 {
     if (cBEBoltInterface_instance == 0) {
         cBELibraryInterface_0014ABE0* mem = (cBELibraryInterface_0014ABE0*)cMemMan_alloc(0x10, str_BEBoltInt, 0, 0);
@@ -1091,7 +1091,7 @@ INCLUDE_ASM("be/belibrary", func_0014B7A8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_0014B988_B7A8(void* self, int profile, int ch, void* e, void* out) __asm__("func_0014B988");
-extern "C" int func_004165A8(void* a, void* b);
+extern "C" int strcmp(void* a, void* b);
 
 struct sBEEntry38_B7A8 {
     char pad_0x00[4];
@@ -1105,7 +1105,7 @@ struct sBEEntry38_B7A8 {
  * Lists the distinct model file names of a character's equipped bolts, 256 bytes per name, and returns how many.
  *
  * For each of the character's bolt definitions with a file name (+0x2C) whose entry has flag 0x10, builds the name with
- * func_0014B988 into the next 256-byte slot of @p out; a name equal (func_004165A8) to an earlier one is dropped.
+ * func_0014B988 into the next 256-byte slot of @p out; a name equal (strcmp) to an earlier one is dropped.
  *
  * @param profile  profile index
  * @param ch  character ID
@@ -1129,7 +1129,7 @@ extern "C" int func_0014B7A8(void* self, int profile, int ch, char* out)
                     int prev = cnt - 1;
                     int k;
                     for (k = prev; k >= 0; k--) {
-                        if (func_004165A8(dst, out + (k << 8)) == 0) {
+                        if (strcmp(dst, out + (k << 8)) == 0) {
                             cnt = prev;
                             break;
                         }
@@ -1256,7 +1256,7 @@ extern "C" int func_0014BBA0(void* self, int rider, sBEEntry38_14B988* def, char
 //100%
 INCLUDE_ASM("be/belibrary", func_0014BC18);
 #ifdef SKIP_ASM
-extern "C" int func_004165A8(void* a, void* b);
+extern "C" int strcmp(void* a, void* b);
 extern "C" char* strcpy(char* dst, const char* src);
 
 struct sBEEntry38_BC18 {
@@ -1271,7 +1271,7 @@ struct sBEEntry38_BC18 {
  * Lists the distinct second names (+0x28) of a character's equipped bolts, 256 bytes per name, and returns how many.
  *
  * For each of the character's bolt definitions with a name at +0x28 whose entry has flag 0x10, copies the name into the
- * next 256-byte slot of @p out unless an earlier slot holds the same string (func_004165A8). Nothing calls it.
+ * next 256-byte slot of @p out unless an earlier slot holds the same string (strcmp). Nothing calls it.
  *
  * @param profile  profile index
  * @param ch  character ID
@@ -1293,7 +1293,7 @@ extern "C" int func_0014BC18(void* self, int profile, int ch, char* out)
             if (flagEntry->flags & 0x10) {
                 int k;
                 for (k = cnt - 1; k >= 0; k--) {
-                    if (func_004165A8(name, out + (k << 8)) == 0)
+                    if (strcmp(name, out + (k << 8)) == 0)
                         break;
                 }
                 if (k < 0) {

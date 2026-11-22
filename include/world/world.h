@@ -11,7 +11,7 @@
 //   cWorld_getWScriptHeaderId, cWorld_getNumGlobalScripts, cWorld_getGlobalScripts,
 //   cWorld_getNumProcessScripts, cWorld_getProcessScripts, cWorld_getNumMissionScripts,
 //   cWorld_getMissionScripts, cWorld_getSphereTreeInfo, cWorld_getPolyModelInfo,
-//   cWorld_getWScriptScript. Not methods: func_003A6948 (a static .sdb section-name check: path, count,
+//   cWorld_getWScriptScript. Not methods: isValidMap (a static .sdb section-name check: path, count,
 //   names), tSphTreeList_getMeshTree and tPolyModelList_getMeshPolyModel (their first argument is a tPolyModelList / tSphTreeList).
 //
 // Size 0x18 [R] (the allocation; On Tour 0x18 with the same six members).

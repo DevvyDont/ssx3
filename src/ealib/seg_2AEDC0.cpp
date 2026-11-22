@@ -1336,7 +1336,7 @@ extern "C" int RCMP_AV_SUBTITLE_ARRAY_GetNumberOfSubtitle(void *table) {
 }
 #endif
 //100%
-INCLUDE_ASM("ealib/seg_2AEDC0", func_003AF300);
+INCLUDE_ASM("ealib/seg_2AEDC0", SkipWhiteSpace);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern unsigned char D_00499C81[];
@@ -1344,12 +1344,12 @@ extern unsigned char D_00499C81[];
  * Skips leading whitespace in a text span.
  *
  * Advances the text pointer past characters whose D_00499C81 class byte has bit 3 (space) set and shortens the length
- * to match. Used by func_003AF670 in the subtitle-file parser.
+ * to match. Used by FindFirstCommand in the subtitle-file parser.
  *
  * @param pp  in/out: the text pointer
  * @param plen  in/out: the remaining length
  */
-extern "C" void func_003AF300(char** pp, unsigned int* plen)
+extern "C" void SkipWhiteSpace(char** pp, unsigned int* plen)
 {
     unsigned int i;
     char* p = *pp;
@@ -1360,7 +1360,7 @@ extern "C" void func_003AF300(char** pp, unsigned int* plen)
 }
 #endif
 //100%
-INCLUDE_ASM("ealib/seg_2AEDC0", func_003AF378);
+INCLUDE_ASM("ealib/seg_2AEDC0", MyStrCmpi);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern unsigned char D_00499C81[];
@@ -1370,13 +1370,13 @@ static inline int to_lower_3AF378(int c) { if (D_00499C81[c] & 1) return c + 0x2
  * Compares two strings ignoring case.
  *
  * Lowers characters whose D_00499C81 class byte has bit 0 (upper case) by adding 0x20. Quirk: the difference is summed,
- * and once a string ends it returns the raw difference of the last characters. Used by func_003AF428.
+ * and once a string ends it returns the raw difference of the last characters. Used by FindJust.
  *
  * @param lhs  first string
  * @param rhs  second string
  * @return 0 when equal, else the first nonzero difference
  */
-extern "C" int func_003AF378(const char* lhs, const char* rhs)
+extern "C" int MyStrCmpi(const char* lhs, const char* rhs)
 {
     int i;
     int diff;
@@ -1393,19 +1393,19 @@ extern "C" int func_003AF378(const char* lhs, const char* rhs)
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2AEDC0", func_003AF428);
+INCLUDE_ASM("ealib/seg_2AEDC0", FindJust);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sNames_F428 { const char* e[5]; };
 struct sVals_F428 { unsigned int e[5]; };
 extern const sNames_F428 D_00495290;
 extern const sVals_F428 D_004952A8;
-extern "C" int func_003AF378(const char*, const char*) __asm__("func_003AF378");
+extern "C" int MyStrCmpi(const char*, const char*) __asm__("MyStrCmpi");
 
 /**
  * Parses a justification keyword (RIGHT, TOP, CENTER, LEFT, BOTTOM) into its value.
  *
- * Temporarily ends the word at the first tab or carriage return, compares it case-insensitively (func_003AF378) with
+ * Temporarily ends the word at the first tab or carriage return, compares it case-insensitively (MyStrCmpi) with
  * the names in D_00495290 and returns the matching value from D_004952A8 (0..4, the order of On Tour's AV_SUBTITLE
  * JUSTIFY_ENUM), then restores the character. Used by the subtitle-file parser func_003AF7F0 for JUSTIFY_X and
  * JUSTIFY_Y.
@@ -1414,7 +1414,7 @@ extern "C" int func_003AF378(const char*, const char*) __asm__("func_003AF378");
  * @param len  its length
  * @return the justification value, or 0xFFFFFFFF for an unknown word
  */
-extern "C" unsigned int func_003AF428(char* text, unsigned int len)
+extern "C" unsigned int FindJust(char* text, unsigned int len)
 {
     unsigned int i;
     char ch = 9;
@@ -1433,7 +1433,7 @@ extern "C" unsigned int func_003AF428(char* text, unsigned int len)
     sVals_F428 vals = D_004952A8;
     justify = 0xFFFFFFFF;
     for (j = 0; j < 5; j++) {
-        if (func_003AF378(names.e[j], text) == 0) {
+        if (MyStrCmpi(names.e[j], text) == 0) {
             justify = vals.e[j];
             break;
         }
@@ -1445,7 +1445,7 @@ extern "C" unsigned int func_003AF428(char* text, unsigned int len)
 }
 #endif
 //100%
-INCLUDE_ASM("ealib/seg_2AEDC0", func_003AF560);
+INCLUDE_ASM("ealib/seg_2AEDC0", ReadNumber);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" long strtol(unsigned char *s, unsigned char **end, int base);
@@ -1462,7 +1462,7 @@ extern "C" long strtol(unsigned char *s, unsigned char **end, int base);
  * @param out  receives the value
  * @return 1 when a number was read, else 0
  */
-extern "C" int func_003AF560(unsigned char **pp, unsigned int *plen, int *out) {
+extern "C" int ReadNumber(unsigned char **pp, unsigned int *plen, int *out) {
     unsigned int i;
     int ch = 9;
     unsigned char *end;
@@ -1489,14 +1489,14 @@ extern "C" int func_003AF560(unsigned char **pp, unsigned int *plen, int *out) {
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2AEDC0", func_003AF670);
+INCLUDE_ASM("ealib/seg_2AEDC0", FindFirstCommand);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" void func_003AF300(char** pp, unsigned int* plen);
+extern "C" void SkipWhiteSpace(char** pp, unsigned int* plen);
 /**
  * Finds the first of several keywords in a text span and moves past it.
  *
- * Skips leading whitespace (func_003AF300), then for each position tries every keyword in order; on the first match it
+ * Skips leading whitespace (SkipWhiteSpace), then for each position tries every keyword in order; on the first match it
  * sets the text pointer just after it, shortens the length and reports the keyword index. Without a match (or without
  * text) it clears pointer and length and reports 0xFFFFFFFF. Used by the subtitle-file parser func_003AF7F0.
  *
@@ -1507,7 +1507,7 @@ extern "C" void func_003AF300(char** pp, unsigned int* plen);
  * @param nwords  number of keywords
  * @param outIdx  receives the matched index or 0xFFFFFFFF
  */
-extern "C" void func_003AF670(char** ps, unsigned int* plen, char** words, unsigned int* lens, unsigned int nwords, unsigned int* outIdx)
+extern "C" void FindFirstCommand(char** ps, unsigned int* plen, char** words, unsigned int* lens, unsigned int nwords, unsigned int* outIdx)
 {
     char* text = *ps;
     if (text == 0) {
@@ -1516,7 +1516,7 @@ extern "C" void func_003AF670(char** ps, unsigned int* plen, char** words, unsig
         *outIdx = 0xFFFFFFFF;
         return;
     }
-    func_003AF300(&text, plen);
+    SkipWhiteSpace(&text, plen);
     for (unsigned int i = 0; i < *plen; i++) {
         for (unsigned int k = 0; k < nwords; k++) {
             unsigned int j;
@@ -1672,7 +1672,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetJustifyX);
  * Sets a subtitle entry's horizontal justification.
  *
  * Stores the value at +0x18 (mJustifyX). Called by the subtitle-file parser func_003AF7F0 for the keyword JUSTIFY_X
- * (value parsed by func_003AF428).
+ * (value parsed by FindJust).
  *
  * @param entry  the AV_SUBTITLE entry
  * @param value  the justification (0 RIGHT, 1 TOP, 2 CENTER, 3 LEFT, 4 BOTTOM)
@@ -1688,7 +1688,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_SetJustifyY);
  * Sets a subtitle entry's vertical justification.
  *
  * Stores the value at +0x1C (mJustifyY). Called by the subtitle-file parser func_003AF7F0 for the keyword JUSTIFY_Y
- * (value parsed by func_003AF428).
+ * (value parsed by FindJust).
  *
  * @param entry  the AV_SUBTITLE entry
  * @param value  the justification (0 RIGHT, 1 TOP, 2 CENTER, 3 LEFT, 4 BOTTOM)
@@ -1780,7 +1780,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_RCMP_SYSTEM_RCMP_SYSTEM__FPv);
  * Constructs the RCMP system object with no allocator functions.
  *
  * Clears the alloc and free function pointers (+0x0, +0x4) and installs the vtable RCMP_RCMP_SYSTEM_vtbl at +0xC. The static
- * initialiser func_003B0770 builds the global RCMP_rcmp_sys with it; that global's alloc (+0x0), free (+0x4, D_00509434)
+ * initialiser __sti__rcmpbase_cpp builds the global RCMP_rcmp_sys with it; that global's alloc (+0x0), free (+0x4, D_00509434)
  * and memory flags (+0x8) are what the movie player and decoder allocate with.
  *
  * @return self
@@ -2016,7 +2016,7 @@ public:
 /**
  * Gives a frame back to the decoder's codec.
  *
- * Calls the codec's slot 6 without checking that a codec exists. The game's movie code (cMoviePlayer_purge, func_002547B8,
+ * Calls the codec's slot 6 without checking that a codec exists. The game's movie code (cMoviePlayer_purge, SSX_VD_PS2_SINGLE_BUFFERD__SSX_VD_PS2_SINGLE_BUFFERD,
  * SSX_VD_PS2_SINGLE_BUFFERD_CompleteDraw) calls it on frames it got from func_003AE6C8.
  *
  * @param frame  the frame
@@ -2153,7 +2153,7 @@ extern "C" void* RCMP_CODEC_IDATA_CODEC_IDATA1(void* self, int context, int fetc
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2AEDC0", func_003B0770);
+INCLUDE_ASM("ealib/seg_2AEDC0", __sti__rcmpbase_cpp);
 #ifdef SKIP_ASM
 extern char RCMP_rcmp_sys[];
 extern void* D_0050943C[];
@@ -2168,7 +2168,7 @@ extern void* D_0050943C[];
  * @param prio  the initialisation priority; only 0xFFFF acts
  * @return nothing meaningful (no return statement)
  */
-extern "C" void* func_003B0770(int init, int prio)
+extern "C" void* __sti__rcmpbase_cpp(int init, int prio)
 {
     if (prio == 0xFFFF) {
         if (init != 0) {
@@ -2180,39 +2180,39 @@ extern "C" void* func_003B0770(int init, int prio)
 }
 #endif
 
-extern "C" void* func_003B0770(int, int);
+extern "C" void* __sti__rcmpbase_cpp(int, int);
 
 //99.38%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B07B8__FPv);
 #ifdef SKIP_ASM
 /**
- * Runs the unit's static constructors (func_003B0770(1, 0xFFFF)).
+ * Runs the unit's static constructors (__sti__rcmpbase_cpp(1, 0xFFFF)).
  *
  * Referenced from the constructor table in data.
  *
- * @return func_003B0770's result
+ * @return __sti__rcmpbase_cpp's result
  */
 void* func_003B07B8(void* self)
 {
-    return func_003B0770(1, 0xffff);
+    return __sti__rcmpbase_cpp(1, 0xffff);
 }
 #endif
 
-extern "C" void* func_003B0770(int, int);
+extern "C" void* __sti__rcmpbase_cpp(int, int);
 
 //99.38%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003B07D8__FPv);
 #ifdef SKIP_ASM
 /**
- * Runs the unit's static destructors (func_003B0770(0, 0xFFFF)).
+ * Runs the unit's static destructors (__sti__rcmpbase_cpp(0, 0xFFFF)).
  *
  * Referenced from the destructor table in data.
  *
- * @return func_003B0770's result
+ * @return __sti__rcmpbase_cpp's result
  */
 void* func_003B07D8(void* self)
 {
-    return func_003B0770(0, 0xffff);
+    return __sti__rcmpbase_cpp(0, 0xffff);
 }
 #endif
 

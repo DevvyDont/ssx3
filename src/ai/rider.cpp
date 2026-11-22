@@ -411,7 +411,7 @@ extern "C" int func_0011BBE8(void* vself, char** list)
 //100%
 INCLUDE_ASM("ai/rider", func_0011BD60);
 #ifdef SKIP_ASM
-extern "C" int func_004165A8(const void* a, const void* b);
+extern "C" int strcmp(const void* a, const void* b);
 extern "C" char* strcpy(char* dst, const char* src);
 void* func_0011B678(void* self);
 extern "C" void qsort(void* base, int n, int size, void* (*cmp)(void*));
@@ -432,7 +432,7 @@ struct sAnimNameTable_11BD60
 /**
  * Adds the animation file names of @p n parts to the rider's load list (mLoadList), skipping duplicates, and sorts it.
  *
- * Each part's name is at +0x28; empty names are skipped and a name already in the table (func_004165A8) is not added
+ * Each part's name is at +0x28; empty names are skipped and a name already in the table (strcmp) is not added
  * again. New entries (0x108 bytes: the name, -1, 0) go at the end and the count (+0x2940) is incremented; there is no
  * check against the table's 40 entries. The table is then sorted with qsort and func_0011B678.
  *
@@ -450,7 +450,7 @@ extern "C" void func_0011BD60(cRider* self, void** list, int n)
         int j;
         for (j = 0; j < nameTable->count; j++)
         {
-            if (func_004165A8(name, &nameTable->e[j]) == 0) goto next;
+            if (strcmp(name, &nameTable->e[j]) == 0) goto next;
         }
         {
             sAnimName_11BD60* entry = &nameTable->e[nameTable->count];
@@ -472,7 +472,7 @@ INCLUDE_ASM("ai/rider", func_0011BE88);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
 void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_004165A8(const void* a, const void* b);
+extern "C" int strcmp(const void* a, const void* b);
 extern "C" char* strcpy(char* dst, const char* src);
 void* func_0011B678(void* self);
 extern "C" void qsort(void* base, int n, int size, void* (*cmp)(void*));
@@ -519,7 +519,7 @@ extern "C" void func_0011BE88(cRider* self, void** list, int n)
             int j;
             int end = nameTable->count + nameTable->start;
             for (j = nameTable->start; j < end; j++) {
-                if (func_004165A8(name, &nameTable->e[j]) == 0) goto next;
+                if (strcmp(name, &nameTable->e[j]) == 0) goto next;
             }
             {
                 sAnimName_11BE88* entry = &nameTable->e[end];
@@ -541,7 +541,7 @@ extern "C" void func_0011BE88(cRider* self, void** list, int n)
             int j;
             int end = nameTable->count + nameTable->start;
             for (j = nameTable->start; j < end; j++) {
-                if (func_004165A8(name, &nameTable->e[j]) == 0) goto next2;
+                if (strcmp(name, &nameTable->e[j]) == 0) goto next2;
             }
             {
                 sAnimName_11BE88* entry = &nameTable->e[end];
@@ -6668,7 +6668,7 @@ void cScriptObjRider_ScriptSoundIDToGameSoundInfo(void* self, int a1, void* a2, 
 extern "C" int cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cSSXAudio_GetClosestCamera1(void* self, void* rider);
 extern "C" int cBankSys_SFX_End(void* self);
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 
 struct sWtEnt_5448 {
     signed char b0;
@@ -6785,7 +6785,7 @@ extern "C" void cRider_DoInSeqSoundUpdate(cRider* vself, void* vobj, float when,
             trackSub->p34[curTrack->sub.cur] = 0;
             trackSub->p38[curTrack->sub.cur] = trackSub->ents[curTrack->sub.cur].b0;
             trackSub->p3C[curTrack->sub.cur] = 0;
-            func_00416210((char*)trackSub + curTrack->sub.cur * 8 + 0x40, 0, 8);
+            memset((char*)trackSub + curTrack->sub.cur * 8 + 0x40, 0, 8);
             trackSub->p60[curTrack->sub.cur] = 0;
             trackSub->p64[curTrack->sub.cur] = 0;
             trackSub->p68[curTrack->sub.cur] = 0;

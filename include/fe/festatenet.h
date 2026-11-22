@@ -13,7 +13,7 @@
 // (main/all_in_one_main); destructor cFEStateNet__cFEStateNet. Retail vtable _vt$11cFEStateNet = cFEStateNet_vtbl (32 slots; slots 24-31
 // are its own virtuals: func_001DE868, func_001A89B0, func_001AAB68, func_001AA9B0, func_001DE870, cFEStateNet_isProcessingEvents,
 // func_001A8E40, func_001A8830). Methods: fe/feasyncfile 0x1A8500-0x1ABED8, plus the out-of-line inlines
-// func_001DE860/func_001DE868/func_001DE870/func_001DE890/func_001DE8A0/cFEStateNet_isProcessingEvents in main/all_in_one_main.
+// cFEStateNet_onInputBegin/func_001DE868/func_001DE870/func_001DE890/func_001DE8A0/cFEStateNet_isProcessingEvents in main/all_in_one_main.
 // EA source: probably d:/ssx/code/source/fe/festatenet.cpp (the preview's assert strings name its subclasses' files,
 // festatenetmessenger.cpp, festatenetlobby.cpp ..., not this one).
 //
@@ -94,7 +94,7 @@ struct cFEStateNet {
     unsigned int mChallengeHintFrame; // 0x054 [R] 0; [U] func_001AAB68, the same for the session's other list (the
                                     //       vector at session + 0xBC); func_001AA9B0 blinks "IconChallengeHint" with it
     int unk_058;                    // 0x058 [R] 0; [U] func_001A9668/func_001A9710 set 1 before pushing cFEStateLogin;
-                                    //       func_001DE860 (slot 7, the onInputBegin override) returns it
+                                    //       cFEStateNet_onInputBegin (slot 7, the onInputBegin override) returns it
     char mszMaskedText[0x40];       // 0x05C [U] func_001A98B8 writes one '*' per character of its string (at most 0x3F;
                                     //       " " when empty) and a NUL; cUIText_setAsciiString(.., mszMaskedText) in
                                     //       func_001ACDD0, func_001B9610, func_001B9678, func_001B9820 (password boxes)

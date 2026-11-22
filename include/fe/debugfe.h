@@ -110,7 +110,7 @@ CHECK_SIZE(tLocationInfo, 0x8C);
 // One section name to look for in a big file, with the answer (On Tour struct tWorldSectionScan, 0x8;
 // [O] cTrackFileMan::checkLocation1(int iNumSectionScan, tWorldSectionScan*, const char* sBigFile)). [Staged by views
 // group A.] [U] cTrackFileMan_checkLocation1 compares each sectionName with the location table (strcasecmp) and lets
-// func_003A6948 set bFound from the big file's section table (view sCamName_17A978); cTrackFileMan_scanLocations passes
+// isValidMap set bFound from the big file's section table (view sCamName_17A978); cTrackFileMan_scanLocations passes
 // the 22 built-in location files.
 struct tWorldSectionScan {
     const char* sectionName;        // 0x0 [O]; [U] checkLocation1 strcasecmp's it against tLocationInfo::File

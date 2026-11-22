@@ -75,53 +75,53 @@ extern "C" void func_0038DC48(void) {
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038DC50__FPv);
+INCLUDE_ASM("render/lightman", cLightInst_CreateAmbient__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  *
  * No caller.
  */
-void func_0038DC50(void* self)
+void cLightInst_CreateAmbient(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038DC58__FPv);
+INCLUDE_ASM("render/lightman", cLightInst_CreateDirectional__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  *
  * No caller.
  */
-void func_0038DC58(void* self)
+void cLightInst_CreateDirectional(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038DC60__FPv);
+INCLUDE_ASM("render/lightman", cLightInst_CreatePoint__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  *
  * No caller.
  */
-void func_0038DC60(void* self)
+void cLightInst_CreatePoint(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038DC68__FPv);
+INCLUDE_ASM("render/lightman", cLightInst_CreateSpot__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  *
  * No caller.
  */
-void func_0038DC68(void* self)
+void cLightInst_CreateSpot(void* self)
 {
 }
 #endif
@@ -164,10 +164,10 @@ public:
 
 extern "C" float func_0031C128(float x);
 // PORT: the unit's empty stubs take (void*); these callers pass more, bound by asm label.
-void func_0038DC50_DC70(void* p, sCol_DC70* c, float f) __asm__("func_0038DC50__FPv");
-void func_0038DC58_DC70(void* p, sCol_DC70* c, sV3_DC70* d, float f) __asm__("func_0038DC58__FPv");
-void func_0038DC60_DC70(void* p, sCol_DC70* c, void* pos, float f, int e) __asm__("func_0038DC60__FPv");
-void func_0038DC68_DC70(void* p, sCol_DC70* c, void* pos, sV3_DC70* d, float x, float y, int e, float z) __asm__("func_0038DC68__FPv");
+void cLightInst_CreateAmbient_DC70(void* p, sCol_DC70* c, float f) __asm__("cLightInst_CreateAmbient__FPv");
+void cLightInst_CreateDirectional_DC70(void* p, sCol_DC70* c, sV3_DC70* d, float f) __asm__("cLightInst_CreateDirectional__FPv");
+void cLightInst_CreatePoint_DC70(void* p, sCol_DC70* c, void* pos, float f, int e) __asm__("cLightInst_CreatePoint__FPv");
+void cLightInst_CreateSpot_DC70(void* p, sCol_DC70* c, void* pos, sV3_DC70* d, float x, float y, int e, float z) __asm__("cLightInst_CreateSpot__FPv");
 
 static inline sV3_DC70 Normalize_DC70(float x, float y, float z)
 {
@@ -187,9 +187,9 @@ static inline sV3_DC70 Normalize_DC70(float x, float y, float z)
  *
  * For each record i, fetches light @p base + i through vtable slot 2 (cPS2LightMan_GetLightObj), stores the record pointer in its
  * first word and builds an ARGB colour (alpha 1.0, rgb from +0x20). The record type (+0x10) picks the cLightInst
- * creator: 0 directional (func_0038DC58, normalised direction +0x2C), 2 point (func_0038DC60, position +0x38, decay
- * byte +0x64), 1 spot (func_0038DC68, cone angle pi/2 - func_0031C128(+0x5C), decay and dropoff bytes +0x64/+0x65), 3
- * ambient (func_0038DC50); intensity is +0x14. On the PS2 the four cLightInst creators are empty stubs, so only the
+ * creator: 0 directional (cLightInst_CreateDirectional, normalised direction +0x2C), 2 point (cLightInst_CreatePoint, position +0x38, decay
+ * byte +0x64), 1 spot (cLightInst_CreateSpot, cone angle pi/2 - func_0031C128(+0x5C), decay and dropoff bytes +0x64/+0x65), 3
+ * ambient (cLightInst_CreateAmbient); intensity is +0x14. On the PS2 the four cLightInst creators are empty stubs, so only the
  * record pointer sticks. Vtable slot 5 of vt_00493650.
  *
  * @param lights  the light records (0x70 bytes each)
@@ -210,20 +210,20 @@ extern "C" void cPS2LightMan_CreateLights(cPS2LightMan* self, sLight_DC70* light
         switch (lights[i].type) {
         case 0: {
             sV3_DC70 dir = Normalize_DC70(lights[i].dir.x, lights[i].dir.y, lights[i].dir.z);
-            func_0038DC58_DC70(obj, &col, &dir, lights[i].intensity);
+            cLightInst_CreateDirectional_DC70(obj, &col, &dir, lights[i].intensity);
             break;
         }
         case 2:
-            func_0038DC60_DC70(obj, &col, lights[i].pos, lights[i].intensity, lights[i].c64);
+            cLightInst_CreatePoint_DC70(obj, &col, lights[i].pos, lights[i].intensity, lights[i].c64);
             break;
         case 1: {
             char* pos = lights[i].pos;
             sV3_DC70 dir = Normalize_DC70(lights[i].dir.x, lights[i].dir.y, lights[i].dir.z);
-            func_0038DC68_DC70(obj, &col, pos, &dir, 1.5707963705062866f - func_0031C128(lights[i].cone), lights[i].intensity, lights[i].c64, (float)lights[i].c65);
+            cLightInst_CreateSpot_DC70(obj, &col, pos, &dir, 1.5707963705062866f - func_0031C128(lights[i].cone), lights[i].intensity, lights[i].c64, (float)lights[i].c65);
             break;
         }
         case 3:
-            func_0038DC50_DC70(obj, &col, lights[i].intensity);
+            cLightInst_CreateAmbient_DC70(obj, &col, lights[i].intensity);
             break;
         }
     }
@@ -240,15 +240,15 @@ public:
     virtual void* GetLightObj(int a);
 };
 
-// PORT: the unit defines func_0038DC50(void*) (an empty stub), but this caller
+// PORT: the unit defines cLightInst_CreateAmbient(void*) (an empty stub), but this caller
 // passes (void*, int, float); bind the 3-arg call by asm label.
-void func_0038DC50_3(void* p, int b, float f) __asm__("func_0038DC50__FPv");
+void cLightInst_CreateAmbient_3(void* p, int b, float f) __asm__("cLightInst_CreateAmbient__FPv");
 
 /**
  * Makes one light an ambient light of the given colour and intensity.
  *
  * Fetches light @p light through vtable slot 2 (cPS2LightMan_GetLightObj: entry @p light of the light array at +0x4) and passes the rest
- * to the cLightInst creator func_0038DC50, an empty stub on the PS2. Vtable slot 9 of vt_00493650.
+ * to the cLightInst creator cLightInst_CreateAmbient, an empty stub on the PS2. Vtable slot 9 of vt_00493650.
  *
  * @param obj  the light manager (this)
  * @param light    index of the light to set up
@@ -257,7 +257,7 @@ void func_0038DC50_3(void* p, int b, float f) __asm__("func_0038DC50__FPv");
  */
 extern "C" void cPS2LightMan_CreateAmbient(cPS2LightMan* obj, int light, int colour, float intensity)
 {
-    func_0038DC50_3(((cObj0038DEE8*)obj)->GetLightObj(light), colour, intensity);
+    cLightInst_CreateAmbient_3(((cObj0038DEE8*)obj)->GetLightObj(light), colour, intensity);
 }
 #endif
 
@@ -271,15 +271,15 @@ public:
     virtual void* GetLightObj(int a);
 };
 
-// PORT: the unit defines func_0038DC58(void*) (an empty stub), but this caller
+// PORT: the unit defines cLightInst_CreateDirectional(void*) (an empty stub), but this caller
 // passes (void*, int, int, float); bind the 4-arg call by asm label.
-void func_0038DC58_4(void* p, int b, int c, float f) __asm__("func_0038DC58__FPv");
+void cLightInst_CreateDirectional_4(void* p, int b, int c, float f) __asm__("cLightInst_CreateDirectional__FPv");
 
 /**
  * Makes one light a directional light of the given colour, direction and intensity.
  *
  * Fetches light @p light through vtable slot 2 (cPS2LightMan_GetLightObj: entry @p light of the light array at +0x4) and passes the rest
- * to the cLightInst creator func_0038DC58, an empty stub on the PS2. Vtable slot 10 of vt_00493650.
+ * to the cLightInst creator cLightInst_CreateDirectional, an empty stub on the PS2. Vtable slot 10 of vt_00493650.
  *
  * @param obj  the light manager (this)
  * @param light    index of the light to set up
@@ -289,7 +289,7 @@ void func_0038DC58_4(void* p, int b, int c, float f) __asm__("func_0038DC58__FPv
  */
 extern "C" void cPS2LightMan_CreateDirectional(cPS2LightMan* obj, int light, int colour, int dir, float intensity)
 {
-    func_0038DC58_4(((cObj0038DF38*)obj)->GetLightObj(light), colour, dir, intensity);
+    cLightInst_CreateDirectional_4(((cObj0038DF38*)obj)->GetLightObj(light), colour, dir, intensity);
 }
 #endif
 
@@ -303,15 +303,15 @@ public:
     virtual void* GetLightObj(int a);
 };
 
-// PORT: the unit defines func_0038DC60(void*) (an empty stub), but this caller
+// PORT: the unit defines cLightInst_CreatePoint(void*) (an empty stub), but this caller
 // passes (void*, int, int, float, int); bind the 5-arg call by asm label.
-void func_0038DC60_5(void* p, int b, int c, float f, int d) __asm__("func_0038DC60__FPv");
+void cLightInst_CreatePoint_5(void* p, int b, int c, float f, int d) __asm__("cLightInst_CreatePoint__FPv");
 
 /**
  * Makes one light a point light of the given colour, position, intensity and decay.
  *
  * Fetches light @p light through vtable slot 2 (cPS2LightMan_GetLightObj: entry @p light of the light array at +0x4) and passes the rest
- * to the cLightInst creator func_0038DC60, an empty stub on the PS2. Vtable slot 11 of vt_00493650.
+ * to the cLightInst creator cLightInst_CreatePoint, an empty stub on the PS2. Vtable slot 11 of vt_00493650.
  *
  * @param obj  the light manager (this)
  * @param light    index of the light to set up
@@ -322,7 +322,7 @@ void func_0038DC60_5(void* p, int b, int c, float f, int d) __asm__("func_0038DC
  */
 extern "C" void cPS2LightMan_CreatePoint(cPS2LightMan* obj, int light, int colour, int pos, float intensity, int decay)
 {
-    func_0038DC60_5(((cObj0038DF98*)obj)->GetLightObj(light), colour, pos, intensity, decay);
+    cLightInst_CreatePoint_5(((cObj0038DF98*)obj)->GetLightObj(light), colour, pos, intensity, decay);
 }
 #endif
 
@@ -336,15 +336,15 @@ public:
     virtual void* GetLightObj(int a);
 };
 
-// PORT: the unit defines func_0038DC68(void*) (an empty stub), but this caller
+// PORT: the unit defines cLightInst_CreateSpot(void*) (an empty stub), but this caller
 // passes (void*, int, int, int, float, float, int, float); bind the call by asm label.
-void func_0038DC68_8(void* p, int b, int c, int d, float x, float y, int e, float z) __asm__("func_0038DC68__FPv");
+void cLightInst_CreateSpot_8(void* p, int b, int c, int d, float x, float y, int e, float z) __asm__("cLightInst_CreateSpot__FPv");
 
 /**
  * Makes one light a spot light of the given colour, position, direction, angle, intensity, decay and dropoff.
  *
  * Fetches light @p light through vtable slot 2 (cPS2LightMan_GetLightObj: entry @p light of the light array at +0x4) and passes the rest
- * to the cLightInst creator func_0038DC68, an empty stub on the PS2. Vtable slot 12 of vt_00493650.
+ * to the cLightInst creator cLightInst_CreateSpot, an empty stub on the PS2. Vtable slot 12 of vt_00493650.
  *
  * @param obj  the light manager (this)
  * @param light    index of the light to set up
@@ -358,7 +358,7 @@ void func_0038DC68_8(void* p, int b, int c, int d, float x, float y, int e, floa
  */
 extern "C" void cPS2LightMan_CreateSpot(cPS2LightMan* obj, int light, int colour, int pos, int dir, float x, float y, int decay, float z)
 {
-    func_0038DC68_8(((cObj0038E008*)obj)->GetLightObj(light), colour, pos, dir, x, y, decay, z);
+    cLightInst_CreateSpot_8(((cObj0038E008*)obj)->GetLightObj(light), colour, pos, dir, x, y, decay, z);
 }
 #endif
 
@@ -414,7 +414,7 @@ struct sLmQuadCtx_E118 {
  * Fills the four vertex positions of a quad from @p rect {x, y, w, h} and draws it.
  *
  * Corners in strip order: top-left, top-right, bottom-left, bottom-right, at z 0, w 1; the caller sets colours and UVs.
- * @p self is unused. Callers: func_003A20A0 and func_003A2220.
+ * @p self is unused. Callers: cTextureElement_render and cTextureElement_render2.
  *
  * Submits the four vertices as a triangle strip through vtable slot 71 (cPS2GraphicsMan_RenderTriStrip).
  *
@@ -441,7 +441,7 @@ INCLUDE_ASM("render/lightman", c2DRender_drawRotRect);
  * Fills the four vertex positions of a quad from @p rect with the corners turned a quarter turn, and draws it.
  *
  * Vertex 0 gets the bottom-left corner, 1 the top-left, 2 the bottom-right and 3 the top-right, so colours and UVs the
- * caller set per vertex appear rotated by 90 degrees. Callers: func_003A20A0 and func_003A2220.
+ * caller set per vertex appear rotated by 90 degrees. Callers: cTextureElement_render and cTextureElement_render2.
  *
  * Submits the four vertices as a triangle strip through vtable slot 71 (cPS2GraphicsMan_RenderTriStrip).
  *
@@ -1551,7 +1551,7 @@ INCLUDE_ASM("render/lightman", func_0038F9C0);
 extern int D_0044C060[];
 extern int D_0044BFE0[];
 extern "C" int func_0038F820(void* self, unsigned char* src, unsigned char* dst);
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 
 struct sRow16_F9C0 {
     unsigned char b[16];
@@ -1596,8 +1596,8 @@ extern "C" int func_0038F9C0(void* self, int w, int height, unsigned char* src, 
     int bh = height / 16;
     int spitch = 0x40;
     int dpitch = 0x100;
-    func_00416210(block, 0, 0x100);
-    func_00416210(out, 0, 0x100);
+    memset(block, 0, 0x100);
+    memset(out, 0, 0x100);
     for (i = 0; i < bh; i++) {
         for (j = 0; j < bw; j++) {
             int id = D_0044BFE0[i * bw + j];
@@ -1635,7 +1635,7 @@ struct sRow32_FC48 {
 
 extern int D_0044C160[];
 extern int D_0044C0E0[];
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 
 /**
  * Rearranges an 8-bit texture block by block: each 16x16 block is reordered with func_0038F930 and placed where the
@@ -1671,8 +1671,8 @@ extern "C" int func_0038FC48(void* self, int w, int height, unsigned char* src, 
     int bh = height / 16;
     int spitch = 0x80;
     int dpitch = 0x100;
-    func_00416210(block, 0, 0x100);
-    func_00416210(out, 0, 0x100);
+    memset(block, 0, 0x100);
+    memset(out, 0, 0x100);
     for (i = 0; i < bh; i++) {
         for (j = 0; j < bw; j++) {
             int id = D_0044C0E0[i * bw + j];
@@ -1728,8 +1728,8 @@ extern "C" int func_0038FED0(void* self, int w, int height, unsigned char* src, 
     }
     if (i == 11)
         return -1;
-    func_00416210(tile, 0, 0x2000);
-    func_00416210(out, 0, 0x2000);
+    memset(tile, 0, 0x2000);
+    memset(out, 0, 0x2000);
     for (i = 0; i < 11; i++) {
         if (height == (0x400 >> i))
             break;
@@ -1790,7 +1790,7 @@ INCLUDE_ASM("render/lightman", func_00390198);
 extern "C" int func_0038FC48_0198(void* self, int w, int h, unsigned char* src, unsigned char* dst) __asm__("func_0038FC48");
 
 extern "C" void* func_0041605C_0198(void* dst, void* src, int n) __asm__("func_0041605C");
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 
 /**
  * Rearranges an 8-bit texture whose sides are powers of two from 1 to 1024, in 128x64 tiles through func_0038FC48.
@@ -1823,8 +1823,8 @@ extern "C" int func_00390198(void* self, int w, int height, unsigned char* src, 
     }
     if (i == 11)
         return -1;
-    func_00416210(bufA, 0, 0x2000);
-    func_00416210(bufB, 0, 0x2000);
+    memset(bufA, 0, 0x2000);
+    memset(bufB, 0, 0x2000);
     int qw = (w - 1) / 128;
     int rows = (height - 1) / 64 + 1;
     int cols = qw + 1;
@@ -1966,7 +1966,7 @@ extern int cRenderToggles_m_ResetStats;
 
 
 /**
- * Passes cRenderToggles_m_AIUpdatesPerRender (menu "AI Frames per Render Frame") to vtable slot 16 (func_00394008) and clears cRenderToggles_m_ResetStats (menu
+ * Passes cRenderToggles_m_AIUpdatesPerRender (menu "AI Frames per Render Frame") to vtable slot 16 (cGraphicsMan_SetAIUpdatesPerRender) and clears cRenderToggles_m_ResetStats (menu
  * "Reset Stats") when it is set.
  *
  * Slot 2 of vtable cRenderToggles_vtbl (the object allocated as "RenderToggles").
@@ -2015,7 +2015,7 @@ extern float cScreenTint_m_greenColour;
 extern float cScreenTint_m_blueColour;
 extern int cScreenTint_m_blendMode;
 int BXrand();
-extern "C" void func_00390EC8(float t);
+extern "C" void DoLightningFlash(float t);
 
 static inline float RandF_0C60()
 {
@@ -2037,7 +2037,7 @@ static inline float RandRange_0C60(float lo, float hi)
  * the current frame.
  *
  * Does nothing unless cScreenTint_m_LightningEnable. cScreenTint_m_timeTillThunder (frames until thunder) counts down to 0. While no flash
- * runs (cScreenTint_m_lightningFrame < 0) a random draw below cScreenTint_m_LightningChance squared starts one through func_00390EC8 with
+ * runs (cScreenTint_m_lightningFrame < 0) a random draw below cScreenTint_m_LightningChance squared starts one through DoLightningFlash with
  * a random distance of 2000 to 200000. Otherwise the frame advances (or holds at cScreenTint_m_FrameId when that is a valid frame)
  * and picks the phase: fade in over cScreenTint_m_LightningFadeIn frames to brightness cScreenTint_m_LightningScale (colour cScreenTint_m_LightningColourR..3C), hold for
  * cScreenTint_m_LightningFadeOut, an inverse phase of cScreenTint_m_LightningFadeIn2 at cScreenTint_m_LightningScale2 (colour cScreenTint_m_LightningColour2R..48), and fade out over cScreenTint_m_LightningFadeIn3 from
@@ -2059,7 +2059,7 @@ extern "C" void cScreenTint_update()
     int trig = cScreenTint_m_FrameId;
     if (lightFrame < 0) {
         if (RandF_0C60() < cScreenTint_m_LightningChance * cScreenTint_m_LightningChance) {
-            func_00390EC8(RandRange_0C60(0.019999999552965164f, 2.0f) * 100000.0f);
+            DoLightningFlash(RandRange_0C60(0.019999999552965164f, 2.0f) * 100000.0f);
         }
         return;
     }
@@ -2106,7 +2106,7 @@ extern "C" void cScreenTint_update()
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_00390EC8);
+INCLUDE_ASM("render/lightman", DoLightningFlash);
 #ifdef SKIP_ASM
 extern int cScreenTint_m_LightningEnable;
 extern int cScreenTint_m_lightningFrame;
@@ -2122,7 +2122,7 @@ extern int cScreenTint_m_timeTillThunder;
  *
  * @param flashDistance  the flash distance; larger values delay the thunder
  */
-extern "C" void func_00390EC8(float flashDistance)
+extern "C" void DoLightningFlash(float flashDistance)
 {
     if (cScreenTint_m_LightningEnable != 0) {
         cScreenTint_m_lightningFrame = 0;
@@ -2134,7 +2134,7 @@ extern "C" void func_00390EC8(float flashDistance)
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_00390EF8);
+INCLUDE_ASM("render/lightman", PlayThunder);
 #ifdef SKIP_ASM
 extern int cScreenTint_m_LightningEnable;
 extern int cScreenTint_m_timeTillThunder;
@@ -2147,7 +2147,7 @@ extern int cScreenTint_m_timeTillThunder;
  *
  * @return 1 on the frame the thunder is due, else 0
  */
-extern "C" int func_00390EF8()
+extern "C" int PlayThunder()
 {
     if (cScreenTint_m_LightningEnable != 0 && cScreenTint_m_timeTillThunder == 0) {
         cScreenTint_m_timeTillThunder = -1;

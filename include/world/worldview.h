@@ -43,7 +43,7 @@ struct tBxBSPNode;
 
 // The .sdb section database header (On Tour: tStreamDataHeader_PSP; the PS2 tStreamDataHeader has the same 0x50 size).
 struct tStreamDataHeader {
-    char m_cCookie[4];              // 0x00 [P] assert mp_DataHeader->m_cCookie[kCookieVer]; [U] func_003A6948 reads
+    char m_cCookie[4];              // 0x00 [P] assert mp_DataHeader->m_cCookie[kCookieVer]; [U] isValidMap reads
                                     //      [0..1] as one halfword (== 0x3800)
     unsigned int m_uiCheckSum;      // 0x04 [O]
     unsigned int m_uiNumSections;   // 0x08 [P] assert mp_Hdr->m_uiNumSections; [U] cWorldView_getNumSections

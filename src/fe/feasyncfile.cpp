@@ -12185,7 +12185,7 @@ void UIAsciiToUnicode(unsigned short* dst, const char* src);
 extern "C" void strcpy1(void* str, int a1);
 extern "C" void func_002C2540(void* str, const char* s);
 extern "C" void func_002C2688(void* str, unsigned short* s);
-extern "C" int func_004165A8(const char* a, const char* b);
+extern "C" int strcmp(const char* a, const char* b);
 extern const char* D_004A1A60;
 extern const char* D_004A1A64;
 extern const char* D_004A1A68;
@@ -12238,13 +12238,13 @@ extern "C" void func_001B25E0(const char* src, void* out)
         ext[j] = src[i];
     }
     ext[j] = 0;
-    if (func_004165A8(name, D_004A1A60) == 0) {
+    if (strcmp(name, D_004A1A60) == 0) {
         strcpy1(out, Loc1B25E0(str_kT_POPUP232Elite));
-    } else if (func_004165A8(name, D_004A1A64) == 0) {
+    } else if (strcmp(name, D_004A1A64) == 0) {
         strcpy1(out, Loc1B25E0(str_kT_POPUP232Advanced));
-    } else if (func_004165A8(name, D_004A1A68) == 0) {
+    } else if (strcmp(name, D_004A1A68) == 0) {
         strcpy1(out, Loc1B25E0(str_kT_POPUP232Voice));
-    } else if (func_004165A8(name, D_004A1A6C) == 0) {
+    } else if (strcmp(name, D_004A1A6C) == 0) {
         strcpy1(out, Loc1B25E0(str_kT_POPUP232Beginner));
     } else {
         func_002C2540(out, name);
@@ -13071,13 +13071,13 @@ extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" int func_0025F1B0(void* self);
 extern "C" const char* func_0025F1E0(void* self, int idx, int a2);
-extern "C" int func_004165A8(const char* a, const char* b);
+extern "C" int strcmp(const char* a, const char* b);
 extern char str_PlayerListMenu[];
 
 /**
  * Selects the named player in the chat room's "PlayerListMenu".
  *
- * Only with a screen; compares @p name with each room player's name (func_0025F1E0) exactly (func_004165A8) and does
+ * Only with a screen; compares @p name with each room player's name (func_0025F1E0) exactly (strcmp) and does
  * nothing when none matches.
  *
  * @param name  the player name
@@ -13089,7 +13089,7 @@ extern "C" void func_001B3978(cFEStateChatRoom* self, void* name)
         int i = 0;
         int n = func_0025F1B0(LobbyMan_mLobbyMan);
         for (; i < n; i++) {
-            if (func_004165A8(func_0025F1E0(LobbyMan_mLobbyMan, i, 0), (const char*)name) == 0) {
+            if (strcmp(func_0025F1E0(LobbyMan_mLobbyMan, i, 0), (const char*)name) == 0) {
                 sel = i;
                 break;
             }
@@ -13277,7 +13277,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void func_001B27B0(cFEStateChatRoom* self, int a1);
 extern "C" int func_0025F1B0(void* self);
 extern "C" void cUIScrollBar_setValues(void* a0, void* a1, int a2, int a3);
-extern "C" void func_003A0290(void* text, void* out);
+extern "C" void cUIThing_getAbsPosition(void* text, void* out);
 extern char str_PlayerListItempct_02d[];
 extern char str_whitebarpct_02d[];
 extern char str_hl[];
@@ -13320,7 +13320,7 @@ static inline cFEVObj_001B3D20* Get1B3D20(void* self, char* name)
  * Only with a screen. First updates the list's scroll bar (cUIScrollBar_setValues on mpSlider1 with miMenuScroll[0], 6
  * rows and the player count). Returns when row "PlayerListItem%02d" is missing for an index 0-5. Otherwise colours the
  * 6 rows black (vtable entry 11, setColour) and, when "hl" exists, hides it (@p on 0) or moves it to row
- * "whitebar%02d"'s absolute position plus (2, 3) (func_003A0290), shows it, shows the row's player (func_001B27B0 with
+ * "whitebar%02d"'s absolute position plus (2, 3) (cUIThing_getAbsPosition), shows it, shows the row's player (func_001B27B0 with
  * the row's miMiscData) and colours the row white.
  *
  * @param idx  the visible row (0-5; -1 for none)
@@ -13361,7 +13361,7 @@ extern "C" void func_001B3D20(cFEStateNetConfig* self, int idx, int on)
         return;
     }
     sCol1B3D20 pos;
-    func_003A0290(whiteBar, &pos);
+    cUIThing_getAbsPosition(whiteBar, &pos);
     pos.r += 2.0f;
     pos.g += 3.0f;
     *(sVec3_1B3D20*)((char*)hl + 0x44) = *(sVec3_1B3D20*)&pos;
@@ -14176,7 +14176,7 @@ extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n,
 extern "C" void* cUIListBox_getFont(void* box);
 extern "C" void cUIListBox_addEntryByUnicodeString(void* box, unsigned short* str, int id);
 extern "C" void func_003EFA48(unsigned short* dst, int n, const char* src);
-extern "C" int func_004165A8(const char* a, const char* b);
+extern "C" int strcmp(const char* a, const char* b);
 extern int D_004A1B80;
 extern int D_004A1B90[2];
 extern int cCommSystem_mNumNetConn;
@@ -14282,7 +14282,7 @@ extern "C" void func_001B4CD8(cFEStateNetConfig* self)
             UIAsciiToUnicode(line, buf);
             cFont_textSmartLimit1(cUIListBox_getFont(self->mpLBSettings), scale.x, w, name, line + len, 0x40 - len);
             cUIListBox_addEntryByUnicodeString(self->mpLBSettings, line, i + 20);
-            if (func_004165A8(D_004A1B7C, rec) == 0) {
+            if (strcmp(D_004A1B7C, rec) == 0) {
                 cUIListBox_addEntryByAsciiString(self->mpLBAdapters, rec, i + 0x1E);
             } else {
                 cUIListBox_addEntryByAsciiString(self->mpLBAdapters, rec, i + 0x1E);
@@ -15366,14 +15366,14 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateAuthDNAS__cFEStateAuthDNAS);
 extern void* cFEStateAuthDNAS_vtbl[];
 void cMemMan_free(void* p);
 extern "C" void func_002563A8(void* p);
-extern "C" void func_002561E0(void* p, int flags);
+extern "C" void DNASMan__DNASMan(void* p, int flags);
 // PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
 extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
 
 /**
  * Destroys the DNAS authentication state: shuts down and deletes the DNAS object and frees mpustrText.
  *
- * The DNAS object (mpAuth) is shut down with func_002563A8 and deleted through func_002561E0(.., 3); then the
+ * The DNAS object (mpAuth) is shut down with func_002563A8 and deleted through DNASMan__DNASMan(.., 3); then the
  * cFEStateNet destructor (cFEStateNet__cFEStateNet) runs with @p flags.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object (handled by the base destructor)
@@ -15384,7 +15384,7 @@ extern "C" void cFEStateAuthDNAS__cFEStateAuthDNAS(cFEStateAuthDNAS* self, int f
     if (self->mpAuth != 0) {
         func_002563A8(self->mpAuth);
         if (self->mpAuth != 0) {
-            func_002561E0(self->mpAuth, 3);
+            DNASMan__DNASMan(self->mpAuth, 3);
         }
     }
     if (self->mpustrText != 0) {
@@ -15407,7 +15407,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void* func_002561B8(void* mem);
+extern "C" void* DNASMan_DNASMan(void* mem);
 extern "C" void func_00256258(void* self, int mode);
 extern char str_205AuthenticatingDNAS[];
 extern char str_dnasGroup[];
@@ -15437,7 +15437,7 @@ public:
 /**
  * Creates the "205AuthenticatingDNAS" screen and starts the DNAS authentication object.
  *
- * Hides "dnasGroup", creates mpAuth (func_002561B8 on a 0xA50-byte "cFEStateAuthDNASCreate" block), sets miState 1
+ * Hides "dnasGroup", creates mpAuth (DNASMan_DNASMan on a 0xA50-byte "cFEStateAuthDNASCreate" block), sets miState 1
  * and starts it (func_00256258) in the mode held in bits 22-24 of the profile word cBEOptionInterface_mOption (0-3; other values use
  * 0).
  */
@@ -15453,7 +15453,7 @@ extern "C" void cFEStateAuthDNAS_onCreateScreen(cFEStateAuthDNAS* self)
             widget->setVisible(0);
         }
     }
-    self->mpAuth = (DNASMan*)func_002561B8(cMemMan_alloc(2640, str_cFEStateAuthDNASCreate, 0x100, 0));
+    self->mpAuth = (DNASMan*)DNASMan_DNASMan(cMemMan_alloc(2640, str_cFEStateAuthDNASCreate, 0x100, 0));
     self->miState = 1;
     cBE_getInterface_Fv(cBE_getBE(), 4);
     int mode = 0;
@@ -16781,7 +16781,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001B7A98);
 #ifdef SKIP_ASM
 extern "C" void* func_001B70D0(void*, int);
 extern "C" int func_00265CB0(void* p);
-extern "C" int func_004165A8(const char* a, const char* b);
+extern "C" int strcmp(const char* a, const char* b);
 extern int* SharedLoginMan;
 extern char AccountData[];
 
@@ -16802,7 +16802,7 @@ static inline bool IsMode_001B7A98(int m)
 extern "C" void func_001B7A98(cFEStateNetAccountMem* self)
 {
     if (IsMode_001B7A98(4)) {
-        if (func_004165A8(AccountData, (char*)&self->mszUserName) != 0 || func_004165A8(AccountData + 0x11, (char*)&self->mszPassword) != 0) {
+        if (strcmp(AccountData, (char*)&self->mszUserName) != 0 || strcmp(AccountData + 0x11, (char*)&self->mszPassword) != 0) {
             self->miError = 0x18;
             self->unk_B08 = 1;
             self->unk_6D8 = 1;
@@ -18697,7 +18697,7 @@ extern "C" void* func_001A9C50(cFEStateNet* self);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void* cPopupInfo_cPopupInfo(cPopupInfo* self);
 extern "C" void cPopupInfo__cPopupInfo(cPopupInfo* self, int flags);
-extern "C" int func_004165A8(const char* a, const char* b);
+extern "C" int strcmp(const char* a, const char* b);
 extern "C" int strlen(const char* s);
 extern char str_kT_POPUP210PasswordMissing[];
 extern char str_kT_POPUP210PasswordLength[];
@@ -18709,7 +18709,7 @@ extern char str_kT_BTNOK[];
  *
  * Checks mpAccount->mPassword: empty shows "kT_POPUP210PasswordMissing"; a length outside 4..16 (one unsigned compare,
  * len - 4 > 12) shows "kT_POPUP210PasswordLength"; a password different from mpAccount->unk_08 (the confirmation box;
- * func_004165A8 compares the strings) shows "kT_POPUP210PasswordMatch". The popups are built like func_001B9D68's (one
+ * strcmp compares the strings) shows "kT_POPUP210PasswordMatch". The popups are built like func_001B9D68's (one
  * "kT_BTNOK" option, miMiscData 0x80D, shown with func_001A9BC0); the local cPopupInfo is unused.
  *
  * @return 1 when the password is accepted, 0 after showing an error popup
@@ -18740,7 +18740,7 @@ extern "C" int func_001B9FA0(cFEStateCreateStep1* self)
         func_001C57C0(sub, 0, GetHashValue32(str_kT_BTNOK));
         popup->info.miMiscData = 2061;
         func_001A9BC0((cFEStateNet*)self, popup);
-    } else if (func_004165A8((const char*)self->mpAccount->mPassword, (const char*)self->mpAccount->unk_08)) {
+    } else if (strcmp((const char*)self->mpAccount->mPassword, (const char*)self->mpAccount->unk_08)) {
         cScreenPopup* popup = (cScreenPopup*)func_001A9C50((cFEStateNet*)self);
         popup->info.meType = 1;
         cPopupInfo* sub = &popup->info;
@@ -18878,21 +18878,21 @@ extern "C" void func_001BA280(cFEStateCreateStep1* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001BA358);
 #ifdef SKIP_ASM
-extern "C" int func_004165A8(const char* a, const char* b);
+extern "C" int strcmp(const char* a, const char* b);
 
 /**
  * Sets the account's change flags for every field that differs from the copy saved by func_001BA178.
  *
  * mChangePassword when mpAccount->mPassword differs from mszSavedPassword, mChangeMail when mMail differs from
- * mszSavedMail (both compared with func_004165A8), mChangeSpam when either mSpam entry differs from miSavedSpam. Flags
+ * mszSavedMail (both compared with strcmp), mChangeSpam when either mSpam entry differs from miSavedSpam. Flags
  * are only ever set here, never cleared.
  */
 extern "C" void func_001BA358(cFEStateCreateStep1* self)
 {
-    if (func_004165A8(self->mpAccount->mPassword, self->mszSavedPassword) != 0) {
+    if (strcmp(self->mpAccount->mPassword, self->mszSavedPassword) != 0) {
         self->mpAccount->mChangePassword = 1;
     }
-    if (func_004165A8(self->mpAccount->mMail, self->mszSavedMail) != 0) {
+    if (strcmp(self->mpAccount->mMail, self->mszSavedMail) != 0) {
         self->mpAccount->mChangeMail = 1;
     }
     tLobbyAccount* account = self->mpAccount;
@@ -22188,12 +22188,12 @@ extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* self, const char
 // PORT: the data argument is an unsigned/handle value here (-1 as 0xFFFFFFFF)
 extern "C" int cUIListBox_addEntryByStringID_u(void* box, int id, unsigned int a2) __asm__("cUIListBox_addEntryByStringID");
 struct sFELists1BE038;
-extern "C" int func_0025F120(void* self);
+extern "C" int LobbyMan_getnumrooms(void* self);
 extern "C" const char* func_0025F150(void* self, int a1);
 extern "C" int func_0025F180(void* self, int idx);
 extern "C" void cBXString_right(void* ret, void* src, int n);
 extern "C" void cUIListBox_deleteAllEntries(void* self);
-extern "C" int func_004165A8(const char* a, const char* b);
+extern "C" int strcmp(const char* a, const char* b);
 extern char* D_004A3E90_p __asm__("cBXString_EmptyString");
 extern const char* D_004A1A60;
 extern const char* D_004A1A64;
@@ -22230,8 +22230,8 @@ public:
 /**
  * Rebuilds the four channel room lists from LobbyMan's room list.
  *
- * Clears the four mpChannelList boxes (cUIListBox_deleteAllEntries). For each of LobbyMan's rooms (count func_0025F120, name
- * func_0025F150) the name is split at its last '.': the part before it picks the channel by comparing (func_004165A8)
+ * Clears the four mpChannelList boxes (cUIListBox_deleteAllEntries). For each of LobbyMan's rooms (count LobbyMan_getnumrooms, name
+ * func_0025F150) the name is split at its last '.': the part before it picks the channel by comparing (strcmp)
  * with D_004A1A6C (list 0, beginner), D_004A1A68 (1, voice), D_004A1A64 (2, advanced) and D_004A1A60 (3, expert); rooms
  * matching none are skipped. The part after the dot is added to that list with the room index as data, and the list's
  * virtual slot 8 is called with 0. A channel with no rooms gets one "kT_231NoAvailableRooms" entry (data -1) and slot 8
@@ -22243,7 +22243,7 @@ extern "C" void func_001BE0A8(cFEStateLobbyMenu* self)
 {
     LobbyMan* mgr = LobbyMan_mLobbyMan;
     cFEVObj_001BE0A8** lists = (cFEVObj_001BE0A8**)(&self->mpChannelList[0]);
-    int n = func_0025F120(mgr);
+    int n = LobbyMan_getnumrooms(mgr);
     sBXStr_001BE0A8 name;
     sBXStr_001BE0A8 base;
     sBXStr_001BE0A8 ext;
@@ -22269,19 +22269,19 @@ extern "C" void func_001BE0A8(cFEStateLobbyMenu* self)
         }
         cFEVObj_001BE0A8* list;
         int type;
-        if (func_004165A8(base.p, D_004A1A6C) == 0) {
+        if (strcmp(base.p, D_004A1A6C) == 0) {
             type = 0;
             list = (cFEVObj_001BE0A8*)self->mpChannelList[0];
             counts[0]++;
-        } else if (func_004165A8(base.p, D_004A1A68) == 0) {
+        } else if (strcmp(base.p, D_004A1A68) == 0) {
             type = 1;
             list = (cFEVObj_001BE0A8*)self->mpChannelList[1];
             counts[1]++;
-        } else if (func_004165A8(base.p, D_004A1A64) == 0) {
+        } else if (strcmp(base.p, D_004A1A64) == 0) {
             type = 2;
             list = (cFEVObj_001BE0A8*)self->mpChannelList[2];
             counts[2]++;
-        } else if (func_004165A8(base.p, D_004A1A60) == 0) {
+        } else if (strcmp(base.p, D_004A1A60) == 0) {
             type = 3;
             list = (cFEVObj_001BE0A8*)self->mpChannelList[3];
             counts[3]++;
@@ -23014,14 +23014,14 @@ extern "C" void cFEStateLogin_onCreateScreen(cFEStateLogin* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", func_001BEF40__FPv);
+INCLUDE_ASM("fe/feasyncfile", cFEStateLogin_onUpdate__FPv);
 #ifdef SKIP_ASM
 /**
  * cFEStateLogin's onUpdate (vtable slot 12): only runs cFEStateNet_onUpdate.
  *
  * @return cFEStateNet_onUpdate's result
  */
-void* func_001BEF40(void* self)
+void* cFEStateLogin_onUpdate(void* self)
 {
     return cFEStateNet_onUpdate((cFEStateNet*)self);
 }
@@ -26642,7 +26642,7 @@ extern "C" void func_001C4B78_3668(void* self, int v) __asm__("func_001C4B78");
 extern "C" void func_001C3310_3668(void* self) __asm__("func_001C3310");
 extern "C" void func_001C3EE8_3668(void* self, int mode) __asm__("func_001C3EE8");
 extern "C" void func_001A9B58_3668(void* self) __asm__("func_001A9B58");
-extern "C" void func_003A0290_3668(void* w, void* pos) __asm__("func_003A0290");
+extern "C" void cUIThing_getAbsPosition_3668(void* w, void* pos) __asm__("cUIThing_getAbsPosition");
 extern "C" int func_0025F338_3668(void* p) __asm__("func_0025F338");
 extern "C" void func_001C3D68_3668(void* self, int idx, int count) __asm__("func_001C3D68");
 extern const char str_cFEStateOnlineMainMenu[];
@@ -26774,7 +26774,7 @@ extern "C" void cFEStateStats_onWidgetEvent(cFEStateStats* self, cObj_3668* w, i
                     t3Vector pos;
                     t3Vector size;
                     cObj_3668* rankHighlight = getObj_3668(((char*)self), str_rankhl);
-                    func_003A0290_3668(w, &pos);
+                    cUIThing_getAbsPosition_3668(w, &pos);
                     w->getSize(&size);
                     pos.y = pos.y - size.y + 14.0f;
                     pos.x = pos.x + -40.0f;
@@ -27973,7 +27973,7 @@ extern "C" void* cPopupInfo_cPopupInfo(cPopupInfo* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cPopupInfo_clear);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 
 
 extern t3Vector t3vect_Zero;
@@ -27990,18 +27990,18 @@ extern "C" void cPopupInfo_clear(cPopupInfo* self)
 {
     char* confirmEntry = (char*)&self->mtConfirmation;
     char* optionName = (char*)&self->mtOptionNames;
-    func_00416210((char*)&self->mtMessage, 0, 8);
-    func_00416210((char*)&self->mtTitle, 0, 8);
-    func_00416210((char*)&self->mtEntryBoxTitle, 0, 8);
-    func_00416210((char*)&self->mtEntryBoxInitial, 0, 8);
+    memset((char*)&self->mtMessage, 0, 8);
+    memset((char*)&self->mtTitle, 0, 8);
+    memset((char*)&self->mtEntryBoxTitle, 0, 8);
+    memset((char*)&self->mtEntryBoxInitial, 0, 8);
     int i;
     for (i = 4; i >= 0; i--) {
-        func_00416210(optionName, 0, 8);
+        memset(optionName, 0, 8);
         optionName += 8;
-        func_00416210(confirmEntry, 0, 0xC);
+        memset(confirmEntry, 0, 0xC);
         confirmEntry += 0xC;
     }
-    func_00416210((char*)&self->mtPostPending, 0, 8);
+    memset((char*)&self->mtPostPending, 0, 8);
     self->mbPassUpdate = 0;
     self->mbReceivePrev = 1;
     self->mbCenterText = 1;

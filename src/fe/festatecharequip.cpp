@@ -105,7 +105,7 @@ INCLUDE_ASM("fe/festatecharequip", cFELocale_cFELocale);
 extern void* cFELocale_vtbl[];
 extern void* cUILocaleInterface_vtbl[];
 extern "C" void* tAttrLocale_tAttrLocale(void* p);
-extern "C" void func_00416210(void* dst, int value, int size);
+extern "C" void memset(void* dst, int value, int size);
 
 /**
  * Constructs the front-end locale with no string files loaded.
@@ -126,7 +126,7 @@ extern "C" void* cFELocale_cFELocale(cFELocale* self)
     *(char*)&self->mModule = 0;
     self->mVtbl = cFELocale_vtbl;
     *(char*)&self->mNumLanguages = 4;
-    func_00416210((char*)&self->mpLocaleFile, 0, 80);
+    memset((char*)&self->mpLocaleFile, 0, 80);
     return ((void*)self);
 }
 #endif

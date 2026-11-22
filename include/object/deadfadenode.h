@@ -4,7 +4,7 @@
 // cDeadFadeNode: a dying instance that fades out and sinks while keeping the pose it had when it died: the ctor saves
 // one matrix per model mesh (AnimMats: the old node's animation matrices, or the mesh hierarchy under its root
 // transform) and deletes the old node; update lowers it by DistRate per frame and fades it by FadeRate; at Fade <= 0
-// (or on loseFocus) func_002D1CC0 -> makeDead(Instance, &Data) replaces it (Data.Type 0 -> cDeadNode, 3 ->
+// (or on loseFocus) cObjectInterface_makeDead -> makeDead(Instance, &Data) replaces it (Data.Type 0 -> cDeadNode, 3 ->
 // cRestoreNode, 1 -> no node, record flags reset);
 // render draws the instance with Fade as alpha, translated down by Dist. Node type 22. Made by MakeDeadFadeFunc and
 // checkActiveNode (seg/seg_1FBE38); the replay loader builds one and deletes it at once. No EA source path in the

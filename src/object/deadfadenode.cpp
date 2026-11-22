@@ -271,15 +271,15 @@ extern "C" void cDeadFadeNode__cDeadFadeNode(cDeadFadeNode* self, int flags)
 //100%
 INCLUDE_ASM("object/deadfadenode", cDeadFadeNode_update);
 #ifdef SKIP_ASM
-// PORT: the project names this func_002D1CC0__FPv (one void* arg), but it is a
+// PORT: the project names this cObjectInterface_makeDead__FPv (one void* arg), but it is a
 // pass-through wrapper and this caller passes two args (prototype mismatch).
-void* func_002D1CC0_2(void*, void*) __asm__("func_002D1CC0__FPv");
+void* cObjectInterface_makeDead_2(void*, void*) __asm__("cObjectInterface_makeDead__FPv");
 
 /**
  * Advances a dead-fade node by one frame: sinks it further and fades it out.
  *
  * Adds the sink speed to the depth (+0x30) and subtracts the fade step from the opacity (+0x28). Once the
- * opacity has reached 0, func_002D1CC0() applies the fade data's follow-up event to the instance (event 0
+ * opacity has reached 0, cObjectInterface_makeDead() applies the fade data's follow-up event to the instance (event 0
  * turns it into a dead node, 3 into a restore node).
  */
 extern "C" void cDeadFadeNode_update(cDeadFadeNode* self)
@@ -290,7 +290,7 @@ extern "C" void cDeadFadeNode_update(cDeadFadeNode* self)
     if (fade > 0.0f) {
         self->Fade = fade - self->FadeRate;
     } else {
-        func_002D1CC0_2(self->Instance, &self->Data);
+        cObjectInterface_makeDead_2(self->Instance, &self->Data);
     }
 }
 #endif
@@ -298,21 +298,21 @@ extern "C" void cDeadFadeNode_update(cDeadFadeNode* self)
 //100%
 INCLUDE_ASM("object/deadfadenode", cDeadFadeNode_loseFocus);
 #ifdef SKIP_ASM
-// PORT: the project names this func_002D1CC0__FPv (one void* arg), but it is a
+// PORT: the project names this cObjectInterface_makeDead__FPv (one void* arg), but it is a
 // pass-through wrapper and this caller passes two args (prototype mismatch).
-void* func_002D1CC0_2(void*, void*) __asm__("func_002D1CC0__FPv");
+void* cObjectInterface_makeDead_2(void*, void*) __asm__("cObjectInterface_makeDead__FPv");
 
 /**
  * Applies the dead fade node's stored instance event (+0x1C) to its instance record (+0x18) when it loses
  * focus.
  *
- * func_002D1CC0() passes both to makeDead(), which by event kind deletes the record's node (1), replaces
+ * cObjectInterface_makeDead() passes both to makeDead(), which by event kind deletes the record's node (1), replaces
  * it with a new "DeadNode" (0) or with a "RestoreNode" (3); the update does the same once the fade timer runs
  * out.
  */
 extern "C" void cDeadFadeNode_loseFocus(cDeadFadeNode* self)
 {
-    func_002D1CC0_2(self->Instance, &self->Data);
+    cObjectInterface_makeDead_2(self->Instance, &self->Data);
 }
 #endif
 

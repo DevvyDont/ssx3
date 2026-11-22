@@ -153,7 +153,7 @@ struct cSSXAudio {
     int unk_5820;                       // 0x5820 [R] ctor 0; [U] cSSXAudio_UpdateLandedUber
     int unk_5824;                       // 0x5824 [U] cSSXAudio_CountdownGateDrop
     int unk_5828;                       // 0x5828 [R] ctor 0
-    int mGruntCycle;                    // 0x582C [O] first own member; [U] cSSXAudio_StartEvent/func_002872A8 set it, func_002A0560 reads it
+    int mGruntCycle;                    // 0x582C [O] first own member; [U] cSSXAudio_StartEvent/cSSXAudio_StartEventWithNoStartGate set it, func_002A0560 reads it
     float mWindVolume;                  // 0x5830 [O]; [U] cSSXAudio_BeginWind passes &it as the stream's volume control, cSSXAudio_EndWind and cSSXAudio_BeginAllRiderSound clear it
     int mWindPlaying;                   // 0x5834 [O] (On Tour bool); [U] BeginWind/EndWind
     char mUsedBank[64];                 // 0x5838 [O]; [U] cSSXAudio_InGameLoad clears [0], func_0029B818 writes it

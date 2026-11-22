@@ -475,7 +475,7 @@ extern "C" void cRailManNode__cRailManNode(cRailManNode* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("object/multiparticle", func_00358700);
+INCLUDE_ASM("object/multiparticle", cRailManNode_unloadSection);
 #ifdef SKIP_ASM
 extern void* cRailManNode_ActiveNode;
 extern "C" void cRailManNode_enableRail(cRailManNode* self, int idx);
@@ -498,7 +498,7 @@ struct sMpMgr_8700 {
  *
  * @param kind  world section id
  */
-extern "C" void func_00358700(int kind)
+extern "C" void cRailManNode_unloadSection(int kind)
 {
     int i;
     if (cRailManNode_ActiveNode != 0) {
@@ -744,7 +744,7 @@ extern "C" void cRailManNode_enableRail(cRailManNode* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("object/multiparticle", func_00358B28);
+INCLUDE_ASM("object/multiparticle", cRailManNode_addRail);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sMPRef8B28 {
@@ -775,7 +775,7 @@ extern "C" void cRailManNode_enableRail(cRailManNode* self, int idx);
  * @param key  spline id of the rail
  * @param add  nonzero to switch the rail back on, 0 to switch it off
  */
-extern "C" void func_00358B28(sMPRef8B28 key, int add)
+extern "C" void cRailManNode_addRail(sMPRef8B28 key, int add)
 {
     if (cRailManNode_ActiveNode == 0) {
         cRailManNode_cRailManNode1((cRailManNode*)cMemMan_alloc(536, str_RailMan_b, 0x20000000, 0), (void*)1);
@@ -1009,7 +1009,7 @@ extern "C" void cAnimComboNode__cAnimComboNode(cAnimComboNode* self, int flags)
 INCLUDE_ASM("object/multiparticle", cAnimComboNode_updateNode);
 #ifdef SKIP_ASM
 extern "C" void cAnimObjectNode_updateNode(void* p);
-extern "C" int func_0034EBA0(void* p);
+extern "C" int cAnimNode_frameUpdate(void* p);
 
 /**
  * Updates an anim combo node for one frame.
@@ -1018,7 +1018,7 @@ extern "C" int func_0034EBA0(void* p);
  * is not active (+0x14) it runs the normal animated-object update (cAnimObjectNode_updateNode). When active it counts down the start
  * delay (+0x24); once that is 0 it advances the time (+0x4) by the step, sets the frame events to the current frame,
  * and on reaching the end (+0xC) clamps there, ends the range and marks the node stopped if Stop is set; it returns 0
- * when the frame-update script (func_0034EBA0) says so. Otherwise sets RootTransformDirty (+0x5A) and returns 1.
+ * when the frame-update script (cAnimNode_frameUpdate) says so. Otherwise sets RootTransformDirty (+0x5A) and returns 1.
  *
  * @return 0 when the frame-update script asks to stop updating, else 1
  */
@@ -1046,7 +1046,7 @@ extern "C" int cAnimComboNode_updateNode(cAnimComboNode* self)
                         }
                         *(signed char*)&self->AnimActive2 = 0;
                     }
-                    if (func_0034EBA0(&self->CurrTime) == 0) {
+                    if (cAnimNode_frameUpdate(&self->CurrTime) == 0) {
                         return 0;
                     }
                 }

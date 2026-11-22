@@ -22,13 +22,13 @@ int __errno(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_00415FC8);
+INCLUDE_ASM("seg/seg_316FB8", memcmp);
 #ifdef SKIP_ASM
 // PORT: PS2-only newlib C library routine; kept as the binary's own instructions (library source is never reconstructed); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function.
 __asm__(
     ".set noreorder\n.set noat\n"
-    ".text\n.align 3\n.globl func_00415FC8\n.ent func_00415FC8\nfunc_00415FC8:\n"
+    ".text\n.align 3\n.globl memcmp\n.ent memcmp\nmemcmp:\n"
     "sltiu $2, $6, 0x10\n"
     "bnez $2, .L00416014\n"
     "or $2, $4, $5\n"
@@ -71,7 +71,7 @@ __asm__(
     ".L00416054:\n"
     "jr $31\n"
     "daddu $2, $0, $0\n"
-    ".end func_00415FC8\n"
+    ".end memcmp\n"
     ".set at\n.set reorder\n");
 #endif
 
@@ -80,13 +80,13 @@ INCLUDE_ASM("seg/seg_316FB8", func_0041605C);
 INCLUDE_ASM("seg/seg_316FB8", func_0041610C);
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_00416210);
+INCLUDE_ASM("seg/seg_316FB8", memset);
 #ifdef SKIP_ASM
 // PORT: PS2-only newlib C library routine; kept as the binary's own instructions (library source is never reconstructed); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function.
 __asm__(
     ".set noreorder\n.set noat\n"
-    ".text\n.align 3\n.globl func_00416210\n.ent func_00416210\nfunc_00416210:\n"
+    ".text\n.align 3\n.globl memset\n.ent memset\nmemset:\n"
     "sltiu $2, $6, 0x8\n"
     "bnez $2, .L00416290\n"
     "daddu $3, $4, $0\n"
@@ -141,7 +141,7 @@ __asm__(
     ".L004162C8:\n"
     "jr $31\n"
     "daddu $2, $4, $0\n"
-    ".end func_00416210\n"
+    ".end memset\n"
     ".set at\n.set reorder\n");
 #endif
 
@@ -379,13 +379,13 @@ __asm__(
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_004165A8);
+INCLUDE_ASM("seg/seg_316FB8", strcmp);
 #ifdef SKIP_ASM
 // PORT: PS2-only newlib C library routine; kept as the binary's own instructions (library source is never reconstructed); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function.
 __asm__(
     ".set noreorder\n.set noat\n"
-    ".text\n.align 3\n.globl func_004165A8\n.ent func_004165A8\nfunc_004165A8:\n"
+    ".text\n.align 3\n.globl strcmp\n.ent strcmp\nstrcmp:\n"
     "or $8, $4, $5\n"
     "andi $2, $8, 0x7\n"
     "bnel $2, $0, .L004166E0\n"
@@ -477,7 +477,7 @@ __asm__(
     "lbu $2, 0x0($5)\n"
     "jr $31\n"
     "subu $2, $3, $2\n"
-    ".end func_004165A8\n"
+    ".end strcmp\n"
     ".set at\n.set reorder\n");
 #endif
 
@@ -685,13 +685,13 @@ __asm__(
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_00416958);
+INCLUDE_ASM("seg/seg_316FB8", strncat);
 #ifdef SKIP_ASM
 // PORT: PS2-only newlib C library routine; kept as the binary's own instructions (library source is never reconstructed); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function.
 __asm__(
     ".set noreorder\n.set noat\n"
-    ".text\n.align 3\n.globl func_00416958\n.ent func_00416958\nfunc_00416958:\n"
+    ".text\n.align 3\n.globl strncat\n.ent strncat\nstrncat:\n"
     "daddu $8, $4, $0\n"
     "andi $2, $8, 0x7\n"
     "bnel $2, $0, .L00416A84\n"
@@ -813,19 +813,19 @@ __asm__(
     ".L00416B0C:\n"
     "jr $31\n"
     "daddu $2, $8, $0\n"
-    ".end func_00416958\n"
+    ".end strncat\n"
     ".word 0x00000000\n"
     ".set at\n.set reorder\n");
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_00416B18);
+INCLUDE_ASM("seg/seg_316FB8", strncmp);
 #ifdef SKIP_ASM
 // PORT: PS2-only newlib C library routine; kept as the binary's own instructions (library source is never reconstructed); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function.
 __asm__(
     ".set noreorder\n.set noat\n"
-    ".text\n.align 3\n.globl func_00416B18\n.ent func_00416B18\nfunc_00416B18:\n"
+    ".text\n.align 3\n.globl strncmp\n.ent strncmp\nstrncmp:\n"
     "bnez $6, .L00416B28\n"
     "or $3, $4, $5\n"
     ".L00416B20:\n"
@@ -951,7 +951,7 @@ __asm__(
     "lbu $3, 0x0($4)\n"
     "jr $31\n"
     "subu $2, $3, $2\n"
-    ".end func_00416B18\n"
+    ".end strncmp\n"
     ".set at\n.set reorder\n");
 #endif
 
@@ -2711,7 +2711,7 @@ int vsnprintf(char *buf, unsigned n, int fmt, char *ap) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_00418790);
+INCLUDE_ASM("seg/seg_316FB8", abort);
 #ifdef SKIP_ASM
 void func_001001C8(int) __attribute__((noreturn));
 /**
@@ -2719,7 +2719,7 @@ void func_001001C8(int) __attribute__((noreturn));
  *
  * Calls func_001001C8(1), which does not return.
  */
-void func_00418790(void) {
+void abort(void) {
     func_001001C8(1);
 }
 #endif
@@ -2794,7 +2794,7 @@ void *bsearch(void *key, char *base, unsigned nmemb, unsigned size, int (*compar
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_004188C0);
+INCLUDE_ASM("seg/seg_316FB8", malloc);
 #ifdef SKIP_ASM
 extern int D_00454944;
 extern void __malloc_lock(int);
@@ -2809,7 +2809,7 @@ extern int _malloc_r(int, int);
  * @param byteCount  bytes wanted
  * @return the block, or null
  */
-int func_004188C0(int byteCount) {
+int malloc(int byteCount) {
     int block;
     __malloc_lock(D_00454944);
     block = _malloc_r(D_00454944, byteCount);
@@ -2819,7 +2819,7 @@ int func_004188C0(int byteCount) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_00418910);
+INCLUDE_ASM("seg/seg_316FB8", free);
 #ifdef SKIP_ASM
 extern int D_00454944;
 extern void __malloc_lock(int);
@@ -2833,7 +2833,7 @@ extern void _free_r(int, int);
  *
  * @param block  the block, or null
  */
-void func_00418910(int block) {
+void free(int block) {
     __malloc_lock(D_00454944);
     _free_r(D_00454944, block);
     __malloc_unlock(D_00454944);
@@ -2864,14 +2864,14 @@ typedef enum { COPY_A, COPY_J, COPY_J2, MAKE_A, MAKE_J, NOOP, EMPTY, ERROR } JIS
 extern JIS_STATE_8958 JIS_state_table_8958[JIS_S_NUM][JIS_C_NUM] __asm__("D_00454948");
 extern JIS_ACTION_8958 JIS_action_table_8958[JIS_S_NUM][JIS_C_NUM] __asm__("D_00454AF8");
 extern unsigned int strlen_8958(const char *) __asm__("strlen");
-extern int strcmp_8958(const char *, const char *) __asm__("func_004165A8");
+extern int strcmp_8958(const char *, const char *) __asm__("strcmp");
 
 /**
  * Converts one multibyte character to a wide character and returns its byte length (0 for NUL, -1 when invalid).
  *
  * With no locale or a one-letter one ("C") a byte is a character. "C-SJIS" and "C-EUCJP" read one or two bytes by their
  * lead-byte ranges. "C-JIS" runs the escape-sequence state machine of the tables D_00454948 (next state) and D_00454AF8
- * (action), keeping the shift state in *state. Compares the locale names with func_004165A8.
+ * (action), keeping the shift state in *state. Compares the locale names with strcmp.
  *
  * @param reent  the reentrancy struct (its current locale, +0x34)
  * @param pwc    receives the wide character, or null
@@ -4418,12 +4418,12 @@ INCLUDE_ASM("seg/seg_316FB8", func_0041B550);
 extern char *D_00454CDC;
 extern int D_00454CD8;
 extern char D_0052AE98[];
-extern int func_00424368(int, int, int);
+extern int _write(int, int, int);
 int func_0041B550_(int fd, char *buf, unsigned n, int mode) __asm__("func_0041B550");
 /**
  * Buffers bytes for a descriptor in a 128-byte buffer, or flushes that buffer (mode 1), and returns a count.
  *
- * Mode 1 writes the D_00454CD8 buffered bytes of D_0052AE98 with func_00424368 and resets the count and the cursor
+ * Mode 1 writes the D_00454CD8 buffered bytes of D_0052AE98 with _write and resets the count and the cursor
  * D_00454CDC. Other modes copy n bytes in, writing the buffer out each time it holds 128; a write that returns 0 stops
  * with 0. The buffer is shared by every descriptor. func_0041B728 uses it.
  *
@@ -4437,7 +4437,7 @@ int func_0041B550_(int fd, char *buf, unsigned n, int mode) {
     unsigned i;
     int writeResult;
     if (mode == 1) {
-        writeResult = func_00424368(fd, (int)D_0052AE98, D_00454CD8);
+        writeResult = _write(fd, (int)D_0052AE98, D_00454CD8);
         D_00454CD8 = 0;
         D_00454CDC = D_0052AE98;
         return writeResult;
@@ -4447,7 +4447,7 @@ int func_0041B550_(int fd, char *buf, unsigned n, int mode) {
         D_00454CDC++;
         D_00454CD8++;
         if (D_00454CD8 >= 128) {
-            writeResult = func_00424368(fd, (int)D_0052AE98, D_00454CD8);
+            writeResult = _write(fd, (int)D_0052AE98, D_00454CD8);
             D_00454CDC = D_0052AE98;
             D_00454CD8 = 0;
             if (writeResult == 0)
@@ -4580,7 +4580,7 @@ int func_0041C938_(int fd, char *buf, unsigned n, int mode) __asm__("func_0041C9
  * Buffers bytes for a descriptor in a second 128-byte buffer, or flushes it (mode 1), and returns a count.
  *
  * The same code as func_0041B550 with its own buffer D_0052AF18, count D_00454CE0 and cursor D_00454CE4; writes with
- * func_00424368. func_0041CA70 uses it.
+ * _write. func_0041CA70 uses it.
  *
  * @param fd    the descriptor
  * @param buf   the bytes
@@ -4592,7 +4592,7 @@ int func_0041C938_(int fd, char *buf, unsigned n, int mode) {
     unsigned i;
     int writeResult;
     if (mode == 1) {
-        writeResult = func_00424368(fd, (int)D_0052AF18, D_00454CE0);
+        writeResult = _write(fd, (int)D_0052AF18, D_00454CE0);
         D_00454CE0 = 0;
         D_00454CE4 = D_0052AF18;
         return writeResult;
@@ -4602,7 +4602,7 @@ int func_0041C938_(int fd, char *buf, unsigned n, int mode) {
         D_00454CE4++;
         D_00454CE0++;
         if (D_00454CE0 >= 128) {
-            writeResult = func_00424368(fd, (int)D_0052AF18, D_00454CE0);
+            writeResult = _write(fd, (int)D_0052AF18, D_00454CE0);
             D_00454CE4 = D_0052AF18;
             D_00454CE0 = 0;
             if (writeResult == 0)
@@ -4614,7 +4614,7 @@ int func_0041C938_(int fd, char *buf, unsigned n, int mode) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_0041CA40);
+INCLUDE_ASM("seg/seg_316FB8", vfiprintf);
 #ifdef SKIP_ASM
 extern void func_0041CA70(int, int *, int, int);
 /**
@@ -4626,7 +4626,7 @@ extern void func_0041CA70(int, int *, int, int);
  * @param fmt     the format string
  * @param args    the argument pointer
  */
-void func_0041CA40(int *stream, int fmt, int args) {
+void vfiprintf(int *stream, int fmt, int args) {
     func_0041CA70(stream[21], stream, fmt, args);
 }
 #endif
@@ -4886,7 +4886,7 @@ typedef mchunkptr mbinptr_0041DBF8;
 #define MALLOC_UNLOCK_0041DBF8 __malloc_unlock(reent_ptr)
 extern void g41DBF8_extend_top(int, unsigned int) __asm__("malloc_extend_top");
 
-/* the unit declares this as int _malloc_r(int, int) (malloc, func_004188C0) */
+/* the unit declares this as int _malloc_r(int, int) (malloc, malloc) */
 void *_malloc_r_(int, unsigned int) __asm__("_malloc_r");
 /**
  * Allocates a block from the C heap and returns it, or null (no locking).
@@ -5405,7 +5405,7 @@ INCLUDE_ASM("seg/seg_316FB8", _setlocale_r);
 extern char D_0049A7D0b[] __asm__("D_0049A7D0");
 extern char D_0049A7C0[], D_0049A7D0[], D_0049A7D8[], D_0049A7E0[], D_0049A7E8[];
 extern char D_00455140[], D_00455148[], D_00455150[];
-extern int func_004165A8_cmp(char *, char *) __asm__("func_004165A8");
+extern int strcmp_cmp(char *, char *) __asm__("strcmp");
 extern char *strcpy_(char *, char *) __asm__("strcpy");
 extern unsigned strlen_(char *) __asm__("strlen");
 char *_setlocale_r_(int *p, int category, char *locale) __asm__("_setlocale_r");
@@ -5426,7 +5426,7 @@ char *_setlocale_r_(int *p, int category, char *locale) __asm__("_setlocale_r");
 char *_setlocale_r_(int *reent, int category, char *locale) {
     if (locale) {
         if (category != 2) {
-            if (func_004165A8_cmp(locale, D_0049A7D0) && func_004165A8_cmp(locale, D_0049A7C0))
+            if (strcmp_cmp(locale, D_0049A7D0) && strcmp_cmp(locale, D_0049A7C0))
                 return 0;
             if (category == 0) {
                 strcpy_(D_00455150, D_00455148);
@@ -5434,13 +5434,13 @@ char *_setlocale_r_(int *reent, int category, char *locale) {
                 *(int *)D_00455140 = 1;
             }
         } else {
-            if (func_004165A8_cmp(locale, D_0049A7D0) && func_004165A8_cmp(locale, D_0049A7C0) && func_004165A8_cmp(locale, D_0049A7D0) &&
-                func_004165A8_cmp(locale, D_0049A7D8) && func_004165A8_cmp(locale, D_0049A7E0) &&
-                func_004165A8_cmp(locale, D_0049A7E8))
+            if (strcmp_cmp(locale, D_0049A7D0) && strcmp_cmp(locale, D_0049A7C0) && strcmp_cmp(locale, D_0049A7D0) &&
+                strcmp_cmp(locale, D_0049A7D8) && strcmp_cmp(locale, D_0049A7E0) &&
+                strcmp_cmp(locale, D_0049A7E8))
                 return 0;
             strcpy_(D_00455150, D_00455148);
             strcpy_(D_00455148, locale);
-            if (func_004165A8_cmp(locale, D_0049A7D8) == 0)
+            if (strcmp_cmp(locale, D_0049A7D8) == 0)
                 *(int *)D_00455140 = 8;
             else if (strlen_(locale) >= 2)
                 *(int *)D_00455140 = 2;
@@ -5504,13 +5504,13 @@ void localeconv(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_0041EC70);
+INCLUDE_ASM("seg/seg_316FB8", memchr);
 #ifdef SKIP_ASM
 // PORT: PS2-only newlib C library routine; kept as the binary's own instructions (library source is never reconstructed); the whole
 // body is one asm block so the PS2 build stays byte-exact. A port replaces this function.
 __asm__(
     ".set noreorder\n.set noat\n"
-    ".text\n.align 3\n.globl func_0041EC70\n.ent func_0041EC70\nfunc_0041EC70:\n"
+    ".text\n.align 3\n.globl memchr\n.ent memchr\nmemchr:\n"
     "sltiu $2, $6, 0x10\n"
     "bnez $2, .L0041ED18\n"
     "andi $5, $5, 0xFF\n"
@@ -5576,7 +5576,7 @@ __asm__(
     ".L0041ED58:\n"
     "jr $31\n"
     "daddu $2, $4, $0\n"
-    ".end func_0041EC70\n"
+    ".end memchr\n"
     ".set at\n.set reorder\n");
 #endif
 
@@ -6055,21 +6055,21 @@ double __ieee754_log10(double x)
 INCLUDE_ASM("seg/seg_316FB8", _close_r);
 #ifdef SKIP_ASM
 extern int D_004A5BB8;
-extern int func_00424488(int);
+extern int _close(int);
 /**
  * Closes a descriptor and copies a failure's errno into a reentrancy struct.
  *
- * Clears the global errno D_004A5BB8, calls func_00424488 and, when it returns -1 with errno set, stores errno through
- * err. func_00424488 always returns -1 without setting errno, so nothing is stored.
+ * Clears the global errno D_004A5BB8, calls _close and, when it returns -1 with errno set, stores errno through
+ * err. _close always returns -1 without setting errno, so nothing is stored.
  *
  * @param err  the reentrancy struct (its errno, the first field)
  * @param fileDesc    the descriptor
- * @return func_00424488's result (-1)
+ * @return _close's result (-1)
  */
 int _close_r(int err, int fileDesc) {
     int closeResult;
     D_004A5BB8 = 0;
-    closeResult = func_00424488(fileDesc);
+    closeResult = _close(fileDesc);
     if (closeResult == -1 && D_004A5BB8)
         *(int *)err = D_004A5BB8;
     return closeResult;
@@ -6080,12 +6080,12 @@ int _close_r(int err, int fileDesc) {
 INCLUDE_ASM("seg/seg_316FB8", _fstat_r);
 #ifdef SKIP_ASM
 extern int D_004A5BB8;
-extern int func_00424558(int, int);
+extern int _fstat(int, int);
 /**
  * Reads a descriptor's file status and copies a failure's errno into a reentrancy struct.
  *
- * Clears the global errno D_004A5BB8, calls func_00424558 and stores errno through err when it returns -1 with errno
- * set. func_00424558 reports every descriptor as a character device.
+ * Clears the global errno D_004A5BB8, calls _fstat and stores errno through err when it returns -1 with errno
+ * set. _fstat reports every descriptor as a character device.
  *
  * @param err  receives errno on failure
  * @param fileDesc    the descriptor
@@ -6095,7 +6095,7 @@ extern int func_00424558(int, int);
 int _fstat_r(int *err, int fileDesc, int statBuf) {
     int fstatResult;
     D_004A5BB8 = 0;
-    fstatResult = func_00424558(fileDesc, statBuf);
+    fstatResult = _fstat(fileDesc, statBuf);
     if (fstatResult == -1 && D_004A5BB8)
         *err = D_004A5BB8;
     return fstatResult;
@@ -6106,12 +6106,12 @@ int _fstat_r(int *err, int fileDesc, int statBuf) {
 INCLUDE_ASM("seg/seg_316FB8", _lseek_r);
 #ifdef SKIP_ASM
 extern int D_004A5BB8;
-extern int func_00424498(int, int, int);
+extern int _lseek(int, int, int);
 /**
  * Seeks a descriptor and copies a failure's errno into a reentrancy struct.
  *
- * Clears the global errno D_004A5BB8, calls func_00424498 and stores errno through err when it returns -1 with errno
- * set. func_00424498 always returns -1 without setting errno.
+ * Clears the global errno D_004A5BB8, calls _lseek and stores errno through err when it returns -1 with errno
+ * set. _lseek always returns -1 without setting errno.
  *
  * @param err  receives errno on failure
  * @param fileDesc    the descriptor
@@ -6122,7 +6122,7 @@ extern int func_00424498(int, int, int);
 long _lseek_r(int *err, int fileDesc, int offset, int whence) {
     int newOffset;
     D_004A5BB8 = 0;
-    newOffset = func_00424498(fileDesc, offset, whence);
+    newOffset = _lseek(fileDesc, offset, whence);
     if (newOffset == -1 && D_004A5BB8)
         *err = D_004A5BB8;
     return newOffset;
@@ -6133,12 +6133,12 @@ long _lseek_r(int *err, int fileDesc, int offset, int whence) {
 INCLUDE_ASM("seg/seg_316FB8", _open_r);
 #ifdef SKIP_ASM
 extern int D_004A5BB8;
-extern int func_00424460(int, int, int);
+extern int _open(int, int, int);
 /**
  * Opens a file descriptor and copies a failure's errno into a reentrancy struct.
  *
- * Clears the global errno D_004A5BB8, calls func_00424460 and stores errno through err when it returns -1 with errno
- * set. func_00424460 always fails (errno 5, EIO), so every open through stdio fails.
+ * Clears the global errno D_004A5BB8, calls _open and stores errno through err when it returns -1 with errno
+ * set. _open always fails (errno 5, EIO), so every open through stdio fails.
  *
  * @param err  receives errno on failure
  * @param path    the path
@@ -6149,7 +6149,7 @@ extern int func_00424460(int, int, int);
 int _open_r(int *err, int path, int openFlags, int permissions) {
     int fileDesc;
     D_004A5BB8 = 0;
-    fileDesc = func_00424460(path, openFlags, permissions);
+    fileDesc = _open(path, openFlags, permissions);
     if (fileDesc == -1 && D_004A5BB8)
         *err = D_004A5BB8;
     return fileDesc;
@@ -6160,11 +6160,11 @@ int _open_r(int *err, int path, int openFlags, int permissions) {
 INCLUDE_ASM("seg/seg_316FB8", _read_r);
 #ifdef SKIP_ASM
 extern int D_004A5BB8;
-extern int func_004243E8(int, int, int);
+extern int _read(int, int, int);
 /**
  * Reads from a descriptor and copies a failure's errno into a reentrancy struct.
  *
- * Clears the global errno D_004A5BB8, calls func_004243E8 (console input for descriptor 0) and stores errno through err
+ * Clears the global errno D_004A5BB8, calls _read (console input for descriptor 0) and stores errno through err
  * when it returns -1 with errno set.
  *
  * @param err  receives errno on failure
@@ -6176,7 +6176,7 @@ extern int func_004243E8(int, int, int);
 long _read_r(int *err, int fileDesc, int buffer, int byteCount) {
     int bytesRead;
     D_004A5BB8 = 0;
-    bytesRead = func_004243E8(fileDesc, buffer, byteCount);
+    bytesRead = _read(fileDesc, buffer, byteCount);
     if (bytesRead == -1 && D_004A5BB8)
         *err = D_004A5BB8;
     return bytesRead;
@@ -6187,11 +6187,11 @@ long _read_r(int *err, int fileDesc, int buffer, int byteCount) {
 INCLUDE_ASM("seg/seg_316FB8", _sbrk_r);
 #ifdef SKIP_ASM
 extern int D_004A5BB8;
-extern unsigned func_004244A0(int);
+extern unsigned _sbrk(int);
 /**
  * Moves the heap break and copies a failure's errno into a reentrancy struct.
  *
- * Clears the global errno D_004A5BB8, calls func_004244A0 and stores errno through err when it returns all ones with
+ * Clears the global errno D_004A5BB8, calls _sbrk and stores errno through err when it returns all ones with
  * errno set.
  *
  * @param err  receives errno on failure
@@ -6201,7 +6201,7 @@ extern unsigned func_004244A0(int);
 unsigned _sbrk_r(int *err, int increment) {
     unsigned oldBreak;
     D_004A5BB8 = 0;
-    oldBreak = func_004244A0(increment);
+    oldBreak = _sbrk(increment);
     if (oldBreak == 0xFFFFFFFF && D_004A5BB8)
         *err = D_004A5BB8;
     return oldBreak;
@@ -6212,11 +6212,11 @@ unsigned _sbrk_r(int *err, int increment) {
 INCLUDE_ASM("seg/seg_316FB8", _write_r);
 #ifdef SKIP_ASM
 extern int D_004A5BB8;
-extern int func_00424368(int, int, int);
+extern int _write(int, int, int);
 /**
  * Writes to a descriptor and copies a failure's errno into a reentrancy struct.
  *
- * Clears the global errno D_004A5BB8, calls func_00424368 (console output for descriptors 1 and 2) and stores errno
+ * Clears the global errno D_004A5BB8, calls _write (console output for descriptors 1 and 2) and stores errno
  * through err when it returns -1 with errno set.
  *
  * @param err  receives errno on failure
@@ -6228,7 +6228,7 @@ extern int func_00424368(int, int, int);
 long _write_r(int *err, int fileDesc, int buffer, int byteCount) {
     int bytesWritten;
     D_004A5BB8 = 0;
-    bytesWritten = func_00424368(fileDesc, buffer, byteCount);
+    bytesWritten = _write(fileDesc, buffer, byteCount);
     if (bytesWritten == -1 && D_004A5BB8)
         *err = D_004A5BB8;
     return bytesWritten;
@@ -6361,7 +6361,7 @@ fflush_FE30 (register struct __sFILE_FE30 * fp)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_0041FF40);
+INCLUDE_ASM("seg/seg_316FB8", std);
 #ifdef SKIP_ASM
 struct F41FF40 {
     int p, r, w;
@@ -6386,7 +6386,7 @@ extern long __sread(), __swrite(), __sseek();
  * @param file    the descriptor
  * @param ent     the reentrancy struct
  */
-void func_0041FF40(struct F41FF40 *stream, short flags, short file, int ent) {
+void std(struct F41FF40 *stream, short flags, short file, int ent) {
     stream->p = 0;
     stream->r = 0;
     stream->w = 0;
@@ -6406,12 +6406,12 @@ void func_0041FF40(struct F41FF40 *stream, short flags, short file, int ent) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", __sfmoreglue);
 #ifdef SKIP_ASM
-extern void *func_00416210(void *, int, int);
+extern void *memset(void *, int, int);
 /**
  * Allocates a new glue block of cnt zeroed FILE structs and returns it, or null.
  *
  * Allocates cnt * 0x58 + 0xC bytes with _malloc_r, sets next to null, the count to cnt and the FILE array pointer
- * to just after the 12-byte header, and zeroes the FILEs with func_00416210.
+ * to just after the 12-byte header, and zeroes the FILEs with memset.
  *
  * @param reent  the reentrancy struct
  * @param cnt    the number of FILEs
@@ -6425,7 +6425,7 @@ int *__sfmoreglue(int reent, int cnt) {
     glue[1] = cnt;
     glue[0] = 0;
     glue[2] = (int)(glue + 3);
-    func_00416210(glue + 3, 0, sz);
+    memset(glue + 3, 0, sz);
     return glue;
 }
 #endif
@@ -6514,7 +6514,7 @@ INCLUDE_ASM("seg/seg_316FB8", __sinit);
  * Sets up stdio for a reentrancy struct: the cleanup hook and the stdin, stdout and stderr streams.
  *
  * Stores _cleanup_r as the cleanup hook (+0x3C) and sets the initialised flag (+0x38). Initialises the three
- * built-in FILEs at +0x1E4, +0x23C and +0x294 with func_0041FF40 (stdin flags 4 on descriptor 0, stdout 9 on 1, stderr
+ * built-in FILEs at +0x1E4, +0x23C and +0x294 with std (stdin flags 4 on descriptor 0, stdout 9 on 1, stderr
  * 10 on 2) and makes them the first glue block (next null, count 3). It does not set the stdin, stdout and stderr
  * pointers (+4, +8, +0xC).
  *
@@ -6524,9 +6524,9 @@ void __sinit(char *reent) {
     char *stdinStream = reent + 0x1E4;
     *(void **)(reent + 0x3C) = (void *)_cleanup_r;
     *(int *)(reent + 0x38) = 1;
-    func_0041FF40((void *)stdinStream, 4, 0, (int)reent);
-    func_0041FF40((void *)(reent + 0x23C), 9, 1, (int)reent);
-    func_0041FF40((void *)(reent + 0x294), 10, 2, (int)reent);
+    std((void *)stdinStream, 4, 0, (int)reent);
+    std((void *)(reent + 0x23C), 9, 1, (int)reent);
+    std((void *)(reent + 0x294), 10, 2, (int)reent);
     *(char **)(reent + 0x1E0) = stdinStream;
     *(int *)(reent + 0x1DC) = 3;
     *(int *)(reent + 0x1D8) = 0;
@@ -6752,7 +6752,7 @@ extern struct _reent_0378 *_impure_ptr_0378 __asm__("D_00454944");
 #define _REENT_0378 _impure_ptr_0378
 extern void __sinit_0378(struct _reent_0378 *) __asm__("__sinit");
 extern int fflush_0378(struct __sFILE_0378 *) __asm__("fflush");
-extern int write_0378(int, const char *, int) __asm__("func_00424368");
+extern int write_0378(int, const char *, int) __asm__("_write");
 /* newlib's CHECK_INIT (stdio/local.h), verbatim: the do-while(0) is part of the library macro */
 #define CHECK_INIT_0378(fp) \
   do					\
@@ -8188,14 +8188,14 @@ split:
 INCLUDE_ASM("seg/seg_316FB8", _calloc_r);
 #ifdef SKIP_ASM
 extern void *_malloc_r_malloc(int, int) __asm__("_malloc_r");
-extern void *func_00416210_memset(void *, int, unsigned) __asm__("func_00416210");
-#define MALLOC_ZERO(charp, nbytes)     do {         unsigned mctmp = (nbytes);         if (mctmp < 37) {             unsigned *mzp = (unsigned *)(charp);             if (mctmp >= 20) {                 *mzp++ = 0;                 *mzp++ = 0;                 if (mctmp >= 28) {                     *mzp++ = 0;                     *mzp++ = 0;                     if (mctmp >= 36) {                         *mzp++ = 0;                         *mzp++ = 0;                     }                 }             }             *mzp++ = 0;             *mzp++ = 0;             *mzp = 0;         } else             func_00416210_memset(charp, 0, mctmp);     } while (0)
+extern void *memset_memset(void *, int, unsigned) __asm__("memset");
+#define MALLOC_ZERO(charp, nbytes)     do {         unsigned mctmp = (nbytes);         if (mctmp < 37) {             unsigned *mzp = (unsigned *)(charp);             if (mctmp >= 20) {                 *mzp++ = 0;                 *mzp++ = 0;                 if (mctmp >= 28) {                     *mzp++ = 0;                     *mzp++ = 0;                     if (mctmp >= 36) {                         *mzp++ = 0;                         *mzp++ = 0;                     }                 }             }             *mzp++ = 0;             *mzp++ = 0;             *mzp = 0;         } else             memset_memset(charp, 0, mctmp);     } while (0)
 void *_calloc_r_(int ptr, int n, int elem_size) __asm__("_calloc_r");
 /**
  * Allocates a zeroed array of n elements from the C heap and returns it, or null (no locking).
  *
  * Allocates n * elem_size bytes with _malloc_r and clears the whole chunk (unrolled for up to 36 bytes, else
- * func_00416210). The multiplication is not checked for overflow. _Balloc calls it.
+ * memset). The multiplication is not checked for overflow. _Balloc calls it.
  *
  * @param ptr        the reentrancy struct
  * @param n          the element count

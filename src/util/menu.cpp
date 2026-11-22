@@ -7129,7 +7129,7 @@ extern "C" int cObjectInterface_runFrameUpdateScript(int id)
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", func_002D1AF0);
+INCLUDE_ASM("util/menu", cObjectInterface_getNumBeings);
 #ifdef SKIP_ASM
 
 /**
@@ -7140,7 +7140,7 @@ INCLUDE_ASM("util/menu", func_002D1AF0);
  *
  * @return the number of riders
  */
-extern "C" void* func_002D1AF0()
+extern "C" void* cObjectInterface_getNumBeings()
 {
     return *(void**)((char*)SSXApp->Game->AI + 0x78);
 }
@@ -7154,7 +7154,7 @@ INCLUDE_ASM("util/menu", cObjectInterface_getBeing);
  * Returns rider @p i's being interface: Riders[@p i] + 0x6C0, or 0.
  *
  * Reads cAI::Riders[i] of SSXApp->Game->AI; +0x6C0 is a base-class subobject of cRider whose virtuals the
- * boost nodes call. The count of beings is func_002D1AF0 (cAI::NumberOfRidersAllocated), just before it, as
+ * boost nodes call. The count of beings is cObjectInterface_getNumBeings (cAI::NumberOfRidersAllocated), just before it, as
  * On Tour's getNumBeings comes just before its getBeing(int).
  *
  * @param i  rider index, 0 to 5
@@ -7414,7 +7414,7 @@ extern "C" void* cObjectInterface_getFlagManager()
 extern "C" void* makeDead(void* self);
 
 //100%
-INCLUDE_ASM("util/menu", func_002D1CC0__FPv);
+INCLUDE_ASM("util/menu", cObjectInterface_makeDead__FPv);
 #ifdef SKIP_ASM
 /**
  * Applies an instance event: forwards to makeDead with @p self and, in the second register, the event.
@@ -7425,7 +7425,7 @@ INCLUDE_ASM("util/menu", func_002D1CC0__FPv);
  *
  * @return makeDead's result
  */
-void* func_002D1CC0(void* self)
+void* cObjectInterface_makeDead(void* self)
 {
     return makeDead(self);
 }

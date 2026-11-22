@@ -721,7 +721,7 @@ extern "C" void cInstanceNode_getBoundBoxInfo(cInstanceNode* self, sIbVec4* box,
 #endif
 
 //100%
-INCLUDE_ASM("object/instancenode", func_00350698);
+INCLUDE_ASM("object/instancenode", hasAnimationChannels);
 #ifdef SKIP_ASM
 struct sInstNodeEntry {
     int field_0x0;
@@ -744,7 +744,7 @@ struct sInstNodeList {
  *
  * @return 1 if at least one mesh is animated, else 0
  */
-extern "C" int func_00350698(tInstanceRecord* self)
+extern "C" int hasAnimationChannels(tInstanceRecord* self)
 {
     sInstNodeList* list = (sInstNodeList*)self->m_Model;
     int i;

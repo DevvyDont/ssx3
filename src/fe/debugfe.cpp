@@ -691,10 +691,10 @@ extern "C" void func_0025C610(void* net);
 extern "C" void func_0017DA30(cDebugLobbyScreen* self, int a1);
 extern "C" void func_0017DE70(cDebugLobbyScreen* self);
 extern "C" void PersonaMenu_setpersonas(void* items, void* net);
-extern "C" int func_0025F120(void* net);
+extern "C" int LobbyMan_getnumrooms(void* net);
 extern "C" char* func_0025F150(void* net, int i);
 extern "C" int func_0025F430(void* net);
-extern "C" int func_004165A8(char* a, char* b);
+extern "C" int strcmp(char* a, char* b);
 extern "C" void func_0025D800(void* a, int b, int c);
 void func_0025CD28(void* a, int b);
 void func_0025FC28(void* a, int b);
@@ -727,8 +727,8 @@ static inline void SetMenu0017D6F0(int* menu, void* items)
  * - 203 (account created): state 5 and a login with the typed user name and password (+0x1C04, +0x1C08).
  * - 212 (logged in): automatic mode selects persona 0 (func_0025CD28, state 7); otherwise fills Select Persona (+0x74C)
  *   from the lobby (PersonaMenu_setpersonas), opens it and sets state 6.
- * - 218 (persona selected): automatic mode joins every room named "A.West" (func_0025F120, func_0025F150,
- *   func_004165A8, then func_0025D800, state 11); otherwise state 10 with Select Room (+0xD2C).
+ * - 218 (persona selected): automatic mode joins every room named "A.West" (LobbyMan_getnumrooms, func_0025F150,
+ *   strcmp, then func_0025D800, state 11); otherwise state 10 with Select Room (+0xD2C).
  * - 214, 216 (persona created or deleted): refills and opens Select Persona, state 6.
  * - 220 (room joined): Room Occupants (+0x1044) and state 12 when func_0025F430 reports a current room, else Select
  *   Room and state 10.
@@ -794,8 +794,8 @@ extern "C" void func_0017D6F0(cDebugLobbyScreen* vself, online_Event* ev)
     case 218:
         if (SSXApp->unk_74 != 0) {
             int i;
-            for (i = 0; i < func_0025F120(LobbyMan_mLobbyMan); i++) {
-                if (func_004165A8(func_0025F150(LobbyMan_mLobbyMan, i), str_A_West) == 0) {
+            for (i = 0; i < LobbyMan_getnumrooms(LobbyMan_mLobbyMan); i++) {
+                if (strcmp(func_0025F150(LobbyMan_mLobbyMan, i), str_A_West) == 0) {
                     func_0025D800(LobbyMan_mLobbyMan, i, 0);
                     self->mState = 11;
                 }

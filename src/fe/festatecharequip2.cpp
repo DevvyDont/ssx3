@@ -46,7 +46,7 @@ INCLUDE_ASM("fe/festatecharequip2", func_0019AA08);
 
 INCLUDE_ASM("fe/festatecharequip2", func_0019AB78);
 
-INCLUDE_ASM("fe/festatecharequip2", func_0019ACA0);
+INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_updateCharacterModel);
 
 INCLUDE_ASM("fe/festatecharequip2", func_0019AFD0);
 

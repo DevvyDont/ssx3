@@ -360,7 +360,7 @@ extern "C" void cGFEventStartState_cGFEventStartState(void* self);
 extern "C" void* cGFTrackStartState_cGFTrackStartState(void* self);
 extern "C" void cGFUserSelectState_cGFUserSelectState(void* self);
 extern "C" void cGFSectionLoadState_cGFSectionLoadState(void* self);
-extern "C" void func_00244240(int a);
+extern "C" void cPauseState_set(int a);
 
 struct sArr_22E968 {
     char pad[0x5C];
@@ -388,7 +388,7 @@ static inline void Init_22E968(char* s, int off, void* vt, int id)
  * Constructs the in-game module: clears its key subsystem pointers and builds its game-flow states in place.
  *
  * Runs the module base constructor (cFadeScreen_cFadeScreen), stores cGame's vtable, clears AI, DebugFont, UI,
- * InputSync and ViewMan, clears cPauseState_StackIdx and calls func_00244240(0). It then constructs the cGF* state
+ * InputSync and ViewMan, clears cPauseState_StackIdx and calls cPauseState_set(0). It then constructs the cGF* state
  * objects in mStates (gate, podium, next heat, session teleport, replay start and others); each base state
  * constructor also clears cGameState_mpGame.
  *
@@ -406,7 +406,7 @@ extern "C" char* cGame_cGame(cGame* self)
     *(int*)&self->UI = 0;
     *(int*)&self->InputSync = 0;
     cPauseState_StackIdx = 0;
-    func_00244240(0);
+    cPauseState_set(0);
     *(int*)&self->ViewMan = 0;
     cGFEventStartState_cGFEventStartState(&self->mEventStartState);
     Init_22E968(((char*)self), 208, cGFPreEventState_vtbl, 3);

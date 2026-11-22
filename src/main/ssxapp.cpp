@@ -828,15 +828,15 @@ extern "C" void* cSSXApp_getMCManager()
 //100%
 INCLUDE_ASM("main/ssxapp", cSSXApp_hasMCManager);
 #ifdef SKIP_ASM
-extern "C" void func_0023C850();
+extern "C" void cMCOverlayManager_hasManager();
 
 /**
- * Asks whether the memory card overlay manager exists: calls func_0023C850, which tests cMCOverlayManager_instance.
+ * Asks whether the memory card overlay manager exists: calls cMCOverlayManager_hasManager, which tests cMCOverlayManager_instance.
  *
  * The source declares it void, but the callee's result stays in the return register.
  */
 extern "C" void cSSXApp_hasMCManager(void) {
-    func_0023C850();
+    cMCOverlayManager_hasManager();
 }
 #endif
 
@@ -1056,7 +1056,7 @@ extern "C" void func_00287520(void* opt, int v);
 extern "C" void cSSXAudio_SetDJSpeech(void* opt, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* opt, int v);
 void WORLDTRIGGERMANAGER_Init();
-extern "C" int func_004165A8(const void* a, const void* b);
+extern "C" int strcmp(const void* a, const void* b);
 
 extern char str_data_audio_music_big[];
 extern char str_data_audio_music2_big[];
@@ -1201,7 +1201,7 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
     cSSXAudio_SetDJSpeech(cAudioInterface_bxAudio(), Cfg_82D0().iUseDJSpeech != 0);
     cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_82D0().iUseArcadeSFX != 0);
     WORLDTRIGGERMANAGER_Init();
-    if (func_004165A8(self->fCC, D_004A29E8)) {
+    if (strcmp(self->fCC, D_004A29E8)) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         cBXString_operatorE1(&cBENewRaceInterface_commandLineTrack, self->fCC);
     }
@@ -1490,7 +1490,7 @@ extern "C" void initOnline()
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229180);
+INCLUDE_ASM("main/ssxapp", cCrowdMan2d_cCrowdMan2d);
 #ifdef SKIP_ASM
 extern "C" void func_002292E0(cCrowdMan2d* self);
 // PORT: the ctor's mangled name says int; it receives the allocated block (pointer in int)
@@ -1544,7 +1544,7 @@ static inline int AnimCount_229180(char* anim)
  *
  * @return @p self
  */
-extern "C" void* func_00229180(cCrowdMan2d* self)
+extern "C" void* cCrowdMan2d_cCrowdMan2d(cCrowdMan2d* self)
 {
     new ((char*)&self->mQuadId[0]) sCrowdId_229180[128];
     new ((char*)&self->mQuad[0]) sCrowdSlot_229180[128];
@@ -1567,7 +1567,7 @@ extern "C" void* func_00229180(cCrowdMan2d* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229278);
+INCLUDE_ASM("main/ssxapp", cCrowdMan2d__cCrowdMan2d);
 #ifdef SKIP_ASM
 extern "C" void func_00229398(cCrowdMan2d* self);
 extern int TheCrowdMan2d;
@@ -1582,7 +1582,7 @@ void cCrowdRender2D__cCrowdRender2D(int* self, int flags);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void func_00229278(cCrowdMan2d* self, int flags)
+extern "C" void cCrowdMan2d__cCrowdMan2d(cCrowdMan2d* self, int flags)
 {
     func_00229398(self);
     int* crowdAnim = (int*)self->mpAnim;
@@ -3278,7 +3278,7 @@ extern "C" void FrustumIntersector_AddAllTypedInside(sVisOwner_A770* self, CellC
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_0022A830);
+INCLUDE_ASM("main/ssxapp", FrustumCallback_operatorCall);
 #ifdef SKIP_ASM
 extern char D_948[];
 extern char D_00442130[];
@@ -3392,7 +3392,7 @@ static inline void boxResult_A830(int* r)
  * @param vnode  the octree node (eight child pointers)
  * @param vcfg  the cell: level (+0x0) and integer x, y, z (+0x4..+0xC)
  */
-extern "C" void func_0022A830(void* vctx, void* vnode, void* vcfg)
+extern "C" void FrustumCallback_operatorCall(void* vctx, void* vnode, void* vcfg)
 {
     sVisCtx_A830* ctx = (sVisCtx_A830*)vctx;
     sVisNode_A830* node = (sVisNode_A830*)vnode;
@@ -3452,21 +3452,21 @@ extern "C" void func_0022A830(void* vctx, void* vnode, void* vcfg)
             n.x = cfg->x * 2;
             n.y = cfg->y * 2;
             n.z = cfg->z * 2;
-            if (node->child[0]) func_0022A830(&childCtx, node->child[0], &n);
+            if (node->child[0]) FrustumCallback_operatorCall(&childCtx, node->child[0], &n);
             n.x++;
-            if (node->child[4]) func_0022A830(&childCtx, node->child[4], &n);
+            if (node->child[4]) FrustumCallback_operatorCall(&childCtx, node->child[4], &n);
             n.y++;
-            if (node->child[6]) func_0022A830(&childCtx, node->child[6], &n);
+            if (node->child[6]) FrustumCallback_operatorCall(&childCtx, node->child[6], &n);
             n.x--;
-            if (node->child[2]) func_0022A830(&childCtx, node->child[2], &n);
+            if (node->child[2]) FrustumCallback_operatorCall(&childCtx, node->child[2], &n);
             n.z++;
-            if (node->child[3]) func_0022A830(&childCtx, node->child[3], &n);
+            if (node->child[3]) FrustumCallback_operatorCall(&childCtx, node->child[3], &n);
             n.x++;
-            if (node->child[7]) func_0022A830(&childCtx, node->child[7], &n);
+            if (node->child[7]) FrustumCallback_operatorCall(&childCtx, node->child[7], &n);
             n.y--;
-            if (node->child[5]) func_0022A830(&childCtx, node->child[5], &n);
+            if (node->child[5]) FrustumCallback_operatorCall(&childCtx, node->child[5], &n);
             n.x--;
-            if (node->child[1]) func_0022A830(&childCtx, node->child[1], &n);
+            if (node->child[1]) FrustumCallback_operatorCall(&childCtx, node->child[1], &n);
         }
     } else if (cullResult == 2) {
         ((sVisOwner_A830*)ctx->owner)->part[((sVisOwner_A830*)ctx->owner)->countPart].node = node;
@@ -3483,21 +3483,21 @@ extern "C" void func_0022A830(void* vctx, void* vnode, void* vcfg)
             n.x = cfg->x * 2;
             n.y = cfg->y * 2;
             n.z = cfg->z * 2;
-            if (node->child[0]) func_0022A830(&childCtx, node->child[0], &n);
+            if (node->child[0]) FrustumCallback_operatorCall(&childCtx, node->child[0], &n);
             n.x++;
-            if (node->child[4]) func_0022A830(&childCtx, node->child[4], &n);
+            if (node->child[4]) FrustumCallback_operatorCall(&childCtx, node->child[4], &n);
             n.y++;
-            if (node->child[6]) func_0022A830(&childCtx, node->child[6], &n);
+            if (node->child[6]) FrustumCallback_operatorCall(&childCtx, node->child[6], &n);
             n.x--;
-            if (node->child[2]) func_0022A830(&childCtx, node->child[2], &n);
+            if (node->child[2]) FrustumCallback_operatorCall(&childCtx, node->child[2], &n);
             n.z++;
-            if (node->child[3]) func_0022A830(&childCtx, node->child[3], &n);
+            if (node->child[3]) FrustumCallback_operatorCall(&childCtx, node->child[3], &n);
             n.x++;
-            if (node->child[7]) func_0022A830(&childCtx, node->child[7], &n);
+            if (node->child[7]) FrustumCallback_operatorCall(&childCtx, node->child[7], &n);
             n.y--;
-            if (node->child[5]) func_0022A830(&childCtx, node->child[5], &n);
+            if (node->child[5]) FrustumCallback_operatorCall(&childCtx, node->child[5], &n);
             n.x--;
-            if (node->child[1]) func_0022A830(&childCtx, node->child[1], &n);
+            if (node->child[1]) FrustumCallback_operatorCall(&childCtx, node->child[1], &n);
         }
     }
 }
@@ -3509,7 +3509,7 @@ INCLUDE_ASM("main/ssxapp", FrustumIntersector_FrustumIntersector);
 extern "C" void cOcclusionMan_updateView(void* a, void* b);
 extern "C" void func_00229F30(void* a, void* b);
 void func_00229F80(void* p);
-extern "C" void func_0022A830(void* ctx, void* data, void* cfg);
+extern "C" void FrustumCallback_operatorCall(void* ctx, void* data, void* cfg);
 extern "C" void FrustumIntersector_AddAllPatchesInside(FrustumIntersector* self, void* list, int n);
 extern "C" void FrustumIntersector_AddAllInstancesInside(FrustumIntersector* self, void* list, int n);
 
@@ -3581,7 +3581,7 @@ struct sWorldInit_22ADD8 {
 static inline void Load_22ADD8(sCtx_22ADD8* ctx, void* data, sCfg_22ADD8* c)
 {
     if (data) {
-        func_0022A830(ctx, data, c);
+        FrustumCallback_operatorCall(ctx, data, c);
     }
 }
 
@@ -3592,7 +3592,7 @@ static inline void Load_22ADD8(sCtx_22ADD8* ctx, void* data, sCfg_22ADD8* c)
  * +0x50A8, +0x70AC, +0x78B4, +0x7ABC, +0x7BC0, +0x7FC4) and pending slot (+0x50A4, +0x78B0, +0x7AB8). Copies the matrix
  * returned by the graphics manager's vtable slot 43 to +0x10 and GrMan's matrix at +0x5800 to +0x50, calls
  * cOcclusionMan_updateView(@p visSource, @p viewBounds), loads both matrices into VU0 with func_00229F30 and calls func_00229F80 (empty). Then
- * runs func_0022A830 on each non-null root of the eight @p cfg entries (data at +0x10 of each 0x14-byte entry) with
+ * runs FrustumCallback_operatorCall on each non-null root of the eight @p cfg entries (data at +0x10 of each 0x14-byte entry) with
  * plane mask *(@p visSource + 0x110), and sorts the culled cells' objects: FrustumIntersector_AddAllPatchesInside, FrustumIntersector_AddAllInstancesInside and FrustumIntersector_AddAllTypedInside over
  * the inside list (+0x98), FrustumIntersector_AddAllPatchesCrossing, FrustumIntersector_AddAllInstancesCrossing and FrustumIntersector_AddAllTypedCrossing over the partial list (+0x109C). cGame_render
  * calls it once per view with a stack-allocated view.
@@ -3667,7 +3667,7 @@ extern "C" int cFadeScreen_drawFade(void* self);
 extern "C" void func_0022C830(void* self);
 extern "C" void cGarbageMan_Update();
 extern "C" void t4mat_invert(void* m);
-extern "C" void func_00230640(void* self);
+extern "C" void cGame_renderBuckets(void* self);
 extern "C" void func_00229BA8(cCrowdMan2d* p);
 extern "C" void func_00344138(void* p);
 extern "C" void cMultiParticleMan_render(void* p);
@@ -3991,7 +3991,7 @@ static inline int IsReady_22B008(sGame_22B008* self)
  * (slot 4) with a near plane of 1.0, then the real near / far planes and render states; builds the world-space box
  * of the view frustum's eight corners (each corner sum, camera position included, is scaled by the near or far
  * distance), gathers the visible world (FrustumIntersector_FrustumIntersector with BXNash, OcclusionMan and World), and draws
- * func_00230640, CrowdMan2d, CrowdMan3d, MultiParticleMan, the AI (riders, slot 4), models, fog volumes, light
+ * cGame_renderBuckets, CrowdMan2d, CrowdMan3d, MultiParticleMan, the AI (riders, slot 4), models, fog volumes, light
  * halos and patches. Then a 640x480 2D pass: DebugFont at 0.8 scale, MenuSys when active, the UI engine and
  * WScriptMan (unless cRenderToggles_m_DisableHUD), the script engine, LoadIndicator, GrMan slot 20, the audio update for mUpdateTick
  * / 60 seconds and the world triggers; clears mUpdateTick. The local view's names are off: scene is AI, renderer
@@ -4092,7 +4092,7 @@ extern "C" int cGame_render(sGame_22B008* self)
         sWorld_22B008 worldData;
         world = &worldData;
         FrustumIntersector_FrustumIntersector((char*)world, self->cfg, self->f8C, &box, self->f10);
-        func_00230640(self);
+        cGame_renderBuckets(self);
         func_00229BA8((cCrowdMan2d*)self->f38);
         func_00344138(self->f3C);
         cMultiParticleMan_render(self->f40);

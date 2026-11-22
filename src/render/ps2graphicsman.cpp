@@ -23,7 +23,7 @@ struct cTexSlots367150 {
  * Pops the head of the free list (+0x1F48, a pointer into the 2000-slot array at +0x8; each free slot holds
  * the next free pointer), counts it at +0x4 and stores a new 0x58-byte "NBTexInfo" in the slot. The free list
  * is not checked for empty. Despite the On Tour class name, self is the graphics manager's mpTextureMan
- * (func_00367440).
+ * (cTextureMan_AddTexture).
  *
  * @return the new texture id (its slot index)
  */
@@ -56,7 +56,7 @@ struct cTexSlots3671C8 {
  * Frees a non-bound texture id: deletes its texture info and returns the slot to the free list.
  *
  * Deletes slots[@p id] (+0x8), stores the free-list head (+0x1F48) in the slot, makes the slot the new head and
- * decrements the allocated count at +0x4. Undoes cTextureMan_NewNonBindTexID; func_00367BC0 calls it for ids 1500
+ * decrements the allocated count at +0x4. Undoes cTextureMan_NewNonBindTexID; cTextureMan_RemoveTexture calls it for ids 1500
  * and up.
  *
  * @param id  the texture id (slot index) to free
@@ -122,7 +122,7 @@ struct sGmPtrTable {
 /**
  * Frees a bound texture id: deletes its texture info, clears the slot and decrements the bound count (+0x0).
  *
- * Undoes cTextureMan_NewBindTexID; func_00367BC0 calls it for ids below 1500.
+ * Undoes cTextureMan_NewBindTexID; cTextureMan_RemoveTexture calls it for ids below 1500.
  *
  * @param idx  the texture id (slot index) to free
  */
@@ -241,7 +241,7 @@ extern "C" int func_003673D8(cTextureMan* self, int size)
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00367440);
+INCLUDE_ASM("render/ps2graphicsman", cTextureMan_AddTexture);
 #ifdef SKIP_ASM
 extern "C" void cTextureMan_NewBindTexID(cTextureMan* self, int id);
 extern "C" int func_00366CE0(void* heap, int size, int idx, int other, int a4, int a5);
@@ -364,7 +364,7 @@ static inline int clutPsm_7440(int f)
  * mips, MIPTBP1/2 (+0x48/+0x50) get the level widths. @p vramMode 1 allocates the VRAM block now (heap +0x1F60, node
  * flag 2) and mode 3 allocates 0x2000 bytes more, locked (flags 0x22), with the address rounded up to 32 blocks. An
  * 8-bit format 9 texture becomes PSMT8H, or is converted by func_00366E90 when it owns its data, the free space at
- * +0x6344 is smaller than its VRAM size and @p vramMode is 0. cPS2GraphicsMan_AddTexture1 and func_00367CD0 call it.
+ * +0x6344 is smaller than its VRAM size and @p vramMode is 0. cPS2GraphicsMan_AddTexture1 and cTextureMan_AddLockedFrameTexture call it.
  *
  * @param pixelData  the pixel data (all mip levels), or null
  * @param texName  the texture name (8 characters are kept)
@@ -379,7 +379,7 @@ static inline int clutPsm_7440(int f)
  * @param bindId  the id to use, or a negative value to take a free non-bound id
  * @return the texture id, or -1 for a format with no bit depth
  */
-extern "C" int func_00367440(cTextureMan* self, int pixelData, void* texName, int texWidth, int texHeight, int mipCount, int texelFormat, int clutFormat,
+extern "C" int cTextureMan_AddTexture(cTextureMan* self, int pixelData, void* texName, int texWidth, int texHeight, int mipCount, int texelFormat, int clutFormat,
                              int clutData, int vramMode, int ownsData, int bindId)
 {
     void* data = (void*)pixelData;
@@ -549,7 +549,7 @@ extern "C" void func_00367B60(cTextureMan* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00367BC0);
+INCLUDE_ASM("render/ps2graphicsman", cTextureMan_RemoveTexture);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 extern "C" void func_003663D8(void* self, int id);
@@ -592,7 +592,7 @@ static inline void fill7BC0(int* p, int v)
  *
  * @param id  the texture id
  */
-extern "C" void func_00367BC0(sGmMan7BC0* self, int id)
+extern "C" void cTextureMan_RemoveTexture(sGmMan7BC0* self, int id)
 {
     cTextureMan* selfBytes = (cTextureMan*)self;
     sGmTex7BC0* tex = self->texs[id];
@@ -621,16 +621,16 @@ extern "C" void func_00367BC0(sGmMan7BC0* self, int id)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("render/ps2graphicsman", func_00367CD0);
+INCLUDE_ASM("render/ps2graphicsman", cTextureMan_AddLockedFrameTexture);
 #ifdef SKIP_ASM
-extern "C" int func_00367440(cTextureMan* self, int a1, void* a2, int a3, int a4, int a5, int a6, int a7,
+extern "C" int cTextureMan_AddTexture(cTextureMan* self, int a1, void* a2, int a3, int a4, int a5, int a6, int a7,
                              int a8, int a9, int a10, int a11);
 extern char str_LockTex[];
 
 /**
  * Creates a render-target texture: a texture named "LockTex" with no pixels, locked in VRAM.
  *
- * Calls func_00367440 with no data, @p width x @p height, no mips, texel format @p format, no CLUT, VRAM mode 3
+ * Calls cTextureMan_AddTexture with no data, @p width x @p height, no mips, texel format @p format, no CLUT, VRAM mode 3
  * (allocate now and lock), no copy and a free non-bound id. cPS2GraphicsMan_AddLockedFrameTexture__FPv calls it.
  *
  * @param width  width in texels
@@ -638,14 +638,14 @@ extern char str_LockTex[];
  * @param format  the texel format
  * @return the new texture id
  */
-extern "C" int func_00367CD0(cTextureMan* self, int width, int height, int format)
+extern "C" int cTextureMan_AddLockedFrameTexture(cTextureMan* self, int width, int height, int format)
 {
-    return func_00367440(self, 0, str_LockTex, width, height, 0, format, 0, 0, 3, 0, -1);
+    return cTextureMan_AddTexture(self, 0, str_LockTex, width, height, 0, format, 0, 0, 3, 0, -1);
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00367D20);
+INCLUDE_ASM("render/ps2graphicsman", cTextureMan_SetNewTextureData);
 #ifdef SKIP_ASM
 extern "C" void* MEM_copy(void*, void*, int);
 extern "C" void func_00369098(cTextureMan* self, int idx);
@@ -667,7 +667,7 @@ extern "C" void func_00369098(cTextureMan* self, int idx);
  * @param clut  the new CLUT, or null
  * @param upload  nonzero to copy the data into the texture's buffers
  */
-extern "C" void func_00367D20(cTextureMan* self, int idx, void* data, int width, int height, int mipCount, int texelFormat,
+extern "C" void cTextureMan_SetNewTextureData(cTextureMan* self, int idx, void* data, int width, int height, int mipCount, int texelFormat,
                               int clutFormat, void* clut, int upload)
 {
     tTexInfo* tex = self->m_pTexInfo[idx].pTexInfo;
@@ -684,7 +684,7 @@ extern "C" void func_00367D20(cTextureMan* self, int idx, void* data, int width,
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00367DB8);
+INCLUDE_ASM("render/ps2graphicsman", cTextureMan_LockFrameToTexture);
 #ifdef SKIP_ASM
 // PORT: 64-bit GS register words (ulong is 64-bit here).
 struct sGsTex0Bits {
@@ -730,7 +730,7 @@ static inline ulong gsSetFrame367DB8(int fbp, int fbw, int psm, int fbmsk)
  * @param idx  the texture id
  * @param pp  the packet cursor, advanced past the 12 words written
  */
-extern "C" void func_00367DB8(sPs2TexSet* self, int idx, ulong** pp)
+extern "C" void cTextureMan_LockFrameToTexture(sPs2TexSet* self, int idx, ulong** pp)
 {
     sPs2RenderTex* renderTex = self->tex[idx];
     ulong* packet = *pp;
@@ -753,7 +753,7 @@ extern "C" void func_00367DB8(sPs2TexSet* self, int idx, ulong** pp)
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00367F18);
+INCLUDE_ASM("render/ps2graphicsman", cTextureMan_ShadowClearLockTexture);
 #ifdef SKIP_ASM
 // PORT: 64-bit GS register words (ulong is 64-bit here).
 struct sGsTex0Bits7F18 {
@@ -798,7 +798,7 @@ union sFloatBits7F18 {
  * @param color  the fill colour {a, r, g, b} in 0..1
  * @param pp  the packet cursor, advanced past the 14 words written
  */
-extern "C" void func_00367F18(sPs2TexSet7F18* self, int idx, float* color, ulong** pp)
+extern "C" void cTextureMan_ShadowClearLockTexture(sPs2TexSet7F18* self, int idx, float* color, ulong** pp)
 {
     sPs2RenderTex7F18* renderTex = self->tex[idx];
     ulong* packet = *pp;
@@ -1367,7 +1367,7 @@ extern "C" void func_00366E30(void* list, int i);
  *
  * When the texture has a VRAM block (+0x28 not -1), func_00366E30 frees its data and CLUT blocks in the main heap
  * (+0x1F60), or the second heap (+0x4350) for texel format 9. Then sets both per-context bound ids (+0x1F4C) and the
- * loaded-CLUT texture (+0x1F54) to -1. func_00367D20 calls it after replacing a texture's data.
+ * loaded-CLUT texture (+0x1F54) to -1. cTextureMan_SetNewTextureData calls it after replacing a texture's data.
  *
  * @param idx  the texture id
  */
@@ -1490,7 +1490,7 @@ extern "C" void func_003691B0(sGfxTexTable* self, int idx, int tfx)
 //100%
 INCLUDE_ASM("render/ps2graphicsman", cGraphicsMan_cGraphicsMan);
 #ifdef SKIP_ASM
-extern "C" void func_00416210(void* dst, int c, int n);
+extern "C" void memset(void* dst, int c, int n);
 extern "C" void MEM_fill(void* dst, unsigned int value, int size);
 extern void* cGraphicsMan_vtbl[];
 
@@ -1507,7 +1507,7 @@ struct sRS_691F8 {
     int flagsB;                 // 0x08
     int fC;                     // 0x0C
     sTexPair_691F8 tex;         // 0x10
-    sRS_691F8() { func_00416210(this, 0, 0x10); }
+    sRS_691F8() { memset(this, 0, 0x10); }
 };
 
 struct sGfxPair_691F8 {
@@ -1576,7 +1576,7 @@ extern "C" void* cGraphicsMan_cGraphicsMan(cGraphicsMan* self)
     self->mSkipNextPageFlip = 0;
     cGraphicsMan_TheGraphicsMan = (cPS2GraphicsMan*)(self);
     for (unsigned int i = 0; i < 2; i++) D_004A5A10[0].s[i] = -1;
-    func_00416210(&sDrawState_s_defaultDrawState, 0, 0x10);
+    memset(&sDrawState_s_defaultDrawState, 0, 0x10);
     gfxSetA_691F8(&sDrawState_s_defaultDrawState, 1, 3, 23);
     gfxSetA_691F8(&sDrawState_s_defaultDrawState, 0, 1, 22);
     gfxSetA_691F8(&sDrawState_s_defaultDrawState, 3, 3, 20);
@@ -1683,7 +1683,7 @@ extern "C" void cGraphicsMan_SetTextureRefs(cGraphicsMan* self, int count, tText
 //100%
 INCLUDE_ASM("render/ps2graphicsman", cGraphicsMan_GetTextureID);
 #ifdef SKIP_ASM
-extern "C" int func_004165A8(const void* a, const void* b);
+extern "C" int strcmp(const void* a, const void* b);
 extern "C" void* SHAPE_locatez(void* src, const char* name);
 extern "C" char* strcpy(char* dst, const char* src);
 extern char str_charshp_b[];
@@ -1706,7 +1706,7 @@ struct sGfx_96C8 {
  * Returns the texture id for a short texture name, loading and caching the texture on first use.
  *
  * Uses up to the first 4 characters of @p name. Searches the texture-ref cache (On Tour mTexRefs: 256 entries of {id,
- * name[8]} at +0x280, count +0xE80) with func_004165A8 (strcmp). On a miss it copies the name into the next entry and
+ * name[8]} at +0x280, count +0xE80) with strcmp (strcmp). On a miss it copies the name into the next entry and
  * asks each loaded texture file (+0x27C, count +0x278) for the shape (SHAPE_locatez); the first hit is added through
  * vtable slot 46 (cPS2GraphicsMan_AddTexture) as a "charshp" texture. A name no file has is cached with id -1. There is no check
  * against the 256-entry limit (On Tour asserts mNumTexRefs < arraysize(mTexRefs)): a 257th distinct name would
@@ -1730,7 +1730,7 @@ extern "C" int cGraphicsMan_GetTextureID(cGraphicsMan* graphicsMan, const char* 
     }
     buf[namePtr - name] = 0;
     for (int i = 0; i < self->count; i++) {
-        if (func_004165A8(buf, self->ents[i].name) == 0)
+        if (strcmp(buf, self->ents[i].name) == 0)
             return self->ents[i].handle;
     }
     strcpy(self->ents[self->count].name, buf);

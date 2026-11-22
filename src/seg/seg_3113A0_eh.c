@@ -14,16 +14,16 @@
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", __default_terminate);
 #ifdef SKIP_ASM
-extern int func_00418790(void) __attribute__((noreturn));
+extern int abort(void) __attribute__((noreturn));
 /**
- * Default terminate handler: calls func_00418790 (abort) and never returns.
+ * Default terminate handler: calls abort (abort) and never returns.
  *
  * The terminate-handler pointer D_00453440 starts out pointing here.
  *
  * @return never returns
  */
 int __default_terminate(void) {
-    return func_00418790();
+    return abort();
 }
 #endif
 
@@ -45,11 +45,11 @@ void __terminate(void) {
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", __throw_type_match);
 #ifdef SKIP_ASM
-extern int func_004165A8(int, int);
+extern int strcmp(int, int);
 /**
  * Returns @p obj when the catch and throw type names are the same string, else 0.
  *
- * Compares the names with func_004165A8.
+ * Compares the names with strcmp.
  *
  * @param catchType  the catch clause's type name
  * @param throwType  the thrown type's name
@@ -57,7 +57,7 @@ extern int func_004165A8(int, int);
  * @return @p obj on a match, else 0
  */
 int __throw_type_match(int catchType, int throwType, int obj) {
-    if (func_004165A8(catchType, throwType)) {
+    if (strcmp(catchType, throwType)) {
         obj = 0;
     }
     return obj;
@@ -73,13 +73,13 @@ void __empty(void) {
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", new_eh_context);
 #ifdef SKIP_ASM
-extern int *new_eh_context_alloc(int) __asm__("func_004188C0");
+extern int *new_eh_context_alloc(int) __asm__("malloc");
 extern void __terminate(void);
-extern void func_00416210(int *, int, int);
+extern void memset(int *, int, int);
 /**
  * Allocates and clears a new EH context with its own top element for the handler chain.
  *
- * Allocates 0x18 bytes (func_004188C0), calls __terminate (terminate) when that fails, clears them (func_00416210)
+ * Allocates 0x18 bytes (malloc), calls __terminate (terminate) when that fails, clears them (memset)
  * and points the dynamic handler chain (word 1) at the two-word top element at +0x10. Nothing in this single-threaded
  * build calls it.
  *
@@ -89,7 +89,7 @@ int *new_eh_context(void) {
     int *fullContext = new_eh_context_alloc(0x18);
     if (!fullContext)
         __terminate();
-    func_00416210(fullContext, 0, 0x18);
+    memset(fullContext, 0, 0x18);
     fullContext[1] = (int)(fullContext + 4);
     return fullContext;
 }
@@ -110,7 +110,7 @@ void __get_eh_context(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_3113A0_eh", func_00410490);
+INCLUDE_ASM("seg/seg_3113A0_eh", __get_eh_info);
 #ifdef SKIP_ASM
 /**
  * Returns the address of the current exception's language-specific info pointer.
@@ -120,7 +120,7 @@ INCLUDE_ASM("seg/seg_3113A0_eh", func_00410490);
  *
  * @return the address of the context's info word
  */
-int *func_00410490(void) {
+int *__get_eh_info(void) {
     return (int *)D_00453444[0]() + 2;
 }
 #endif
@@ -147,7 +147,7 @@ INCLUDE_ASM("seg/seg_3113A0_eh", eh_context_static);
 extern int D_0052ADA0[];
 extern char D_0052ADB8[];
 extern int D_0052ADB0[];
-extern void *memset_4104E0(void *, int, int) __asm__("func_00416210");
+extern void *memset_4104E0(void *, int, int) __asm__("memset");
 /**
  * Returns the static EH context, clearing it on the first call.
  *
@@ -290,14 +290,14 @@ INCLUDE_ASM("seg/seg_3113A0_eh", __eh_rtime_match);
 /**
  * Asks the current exception's match function whether it matches a runtime type.
  *
- * Reads the info record through func_00410490; without a match function (its word 0) it returns 0, otherwise the
+ * Reads the info record through __get_eh_info; without a match function (its word 0) it returns 0, otherwise the
  * function's result (info, @p rtime, 0) as 1 or 0.
  *
  * @param rtime  the runtime type to test
  * @return 1 on a match, else 0
  */
 int __eh_rtime_match(int rtime) {
-    int *info = *(int **)func_00410490();
+    int *info = *(int **)__get_eh_info();
     int (*fn)(int *, int, int) = (int (*)(int *, int, int))info[0];
     if (fn == 0)
         return 0;
@@ -421,12 +421,12 @@ int find_exception_handler(unsigned pc, int obj, struct __eh_info *ctx, int flag
 INCLUDE_ASM("seg/seg_3113A0_eh", get_reg_addr);
 #ifdef SKIP_ASM
 struct S410A78 { int base; char pad[0x14]; long e[0x50]; unsigned short n; short pad2; signed char kind[1]; };
-extern int func_00418790(void);
+extern int abort(void);
 /**
  * Returns the address where a frame saved a register.
  *
  * Follows registers saved in other registers (kind 2) to the final one; for a register saved at an offset (kind 1) it
- * returns the frame's CFA plus that offset, otherwise it calls func_00418790 (abort).
+ * returns the frame's CFA plus that offset, otherwise it calls abort (abort).
  *
  * @param idx  the register number
  * @param udata  the frame state
@@ -441,7 +441,7 @@ int get_reg_addr(int idx, struct S410A78 *udata, int z) {
     }
     if (udata->kind[idx] == 1)
         return udata->base + (int)udata->e[idx];
-    return func_00418790();
+    return abort();
 }
 #endif
 

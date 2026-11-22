@@ -1128,7 +1128,7 @@ extern "C" void func_0032B460(void) {
 }
 #endif
 //100%
-INCLUDE_ASM("intersect/riderspheretree", func_0032B468);
+INCLUDE_ASM("intersect/riderspheretree", sphTreeRLE);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // FAKEMATCH: the inner run loop wrapped in a non-empty `do { ... } while (0)`, and the stand-in local `one = 1` for the `1 < minRun` test (li + slt instead of slti); plain form 94.74% (97.65% without the wrapper only, 95.24% without `one` only). Byte-identical and behaves like the plain form; landed marked under
@@ -1148,7 +1148,7 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  * @param minRun  the shortest repeat to encode as a run; values below 2 mean 2
  * @return the number of bytes written, terminator included
  */
-extern "C" int func_0032B468(unsigned char* start, unsigned char* in, int len, int minRun)
+extern "C" int sphTreeRLE(unsigned char* start, unsigned char* in, int len, int minRun)
 {
     unsigned char* out = start;
     unsigned char* end = in + len;

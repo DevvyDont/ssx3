@@ -107,39 +107,39 @@ void unexpected_848(void)
 INCLUDE_ASM("seg/seg_313800_exception", __cp_exception_info);
 #ifdef SKIP_ASM
 // __cp_exception_info(): address of the current exception's value in its cp_eh_info
-extern void* func_00410490_v(void) __asm__("func_00410490");
+extern void* __get_eh_info_v(void) __asm__("__get_eh_info");
 void* cp_exception_info_860(void) __asm__("__cp_exception_info");
 /**
  * Returns the address of the current C++ exception's value field.
  *
- * Reads the cp_eh_info record through func_00410490 and returns the address 8 bytes in (after the generic info).
+ * Reads the cp_eh_info record through __get_eh_info and returns the address 8 bytes in (after the generic info).
  *
  * @return the address of the value pointer
  */
 void* cp_exception_info_860(void)
 {
-    return (char*)*(void**)func_00410490_v() + 8;
+    return (char*)*(void**)__get_eh_info_v() + 8;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", __cp_eh_info);
 #ifdef SKIP_ASM
-extern int *func_00410490(void);
+extern int *__get_eh_info_a(void) __asm__("__get_eh_info");
 /**
- * Returns the current C++ exception's info record (the word func_00410490 points at).
+ * Returns the current C++ exception's info record (the word __get_eh_info points at).
  *
  * @return the record
  */
 int __cp_eh_info(void) {
-    return *func_00410490();
+    return *__get_eh_info_a();
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", func_004128A8);
 #ifdef SKIP_ASM
-extern int *func_00410490(void);
+extern int *__get_eh_info_a(void) __asm__("__get_eh_info");
 /**
  * Marks the current C++ exception as caught and counts one more active handler.
  *
@@ -148,7 +148,7 @@ extern int *func_00410490(void);
  * @return the record
  */
 int *func_004128A8(void) {
-    int *ehInfo = (int *)*func_00410490();
+    int *ehInfo = (int *)*__get_eh_info_a();
     ehInfo[5] = 1;
     *(long *)(ehInfo + 8) += 1;
     return ehInfo;
@@ -158,18 +158,18 @@ int *func_004128A8(void) {
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", func_004128E0);
 #ifdef SKIP_ASM
-extern int func_004188C0(void);
+extern int malloc_a(void) __asm__("malloc");
 extern int func_00412800(void) __attribute__((noreturn));
 /**
  * Allocates memory for a thrown object, terminating the program when none is left.
  *
- * The size arrives in the argument register and goes straight to func_004188C0 (the C definition declares no
+ * The size arrives in the argument register and goes straight to malloc (the C definition declares no
  * parameter). A null result calls func_00412800.
  *
  * @return the block
  */
 int func_004128E0(void) {
-    if (func_004188C0() == 0)
+    if (malloc_a() == 0)
         return func_00412800();
 }
 #endif
@@ -177,16 +177,16 @@ int func_004128E0(void) {
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", __eh_free);
 #ifdef SKIP_ASM
-extern int func_00418910(void);
+extern int free_a(void) __asm__("free");
 /**
- * Frees memory of a thrown object (passes the pointer on to func_00418910).
+ * Frees memory of a thrown object (passes the pointer on to free).
  *
  * The pointer arrives in the argument register; the C definition declares no parameter.
  *
- * @return func_00418910's result
+ * @return free's result
  */
 int __eh_free(void) {
-    return func_00418910();
+    return free_a();
 }
 #endif
 
@@ -225,14 +225,14 @@ int __cplus_type_matcher(int *info, int (*fn)(void), short *exceptionTable) {
 INCLUDE_ASM("seg/seg_313800_exception", func_00412998);
 #ifdef SKIP_ASM
 extern int *func_004128E0_a(int) __asm__("func_004128E0");
-extern int *func_00410490_l(void) __asm__("func_00410490");
+extern int *__get_eh_info_l(void) __asm__("__get_eh_info");
 /**
  * Pushes a new C++ exception record for a throw onto the exception chain.
  *
  * Allocates the 0x30-byte record with func_004128E0 (allocates, terminates on failure) and stores the thrown object as
  * both value (+8) and original value (+0x28), the type_info (+0xC) and the cleanup (+0x10); clears the caught flag
  * (+0x14) and the 64-bit handler count (+0x20); sets the match function to __cplus_type_matcher with language 4 (C++) and
- * version 1; then links the record in front of the chain whose head func_00410490 returns.
+ * version 1; then links the record in front of the chain whose head __get_eh_info returns.
  *
  * @param value    the thrown object
  * @param type     the thrown object's type_info
@@ -250,7 +250,7 @@ void func_00412998(int value, int type, int cleanup) {
     ehInfo[0] = (int)__cplus_type_matcher;
     ((short *)ehInfo)[2] = 4;
     ((short *)ehInfo)[3] = 1;
-    infoChain = func_00410490_l();
+    infoChain = __get_eh_info_l();
     ehInfo[6] = *infoChain;
     *infoChain = (int)ehInfo;
 }
@@ -260,7 +260,7 @@ void func_00412998(int value, int type, int cleanup) {
 INCLUDE_ASM("seg/seg_313800_exception", func_00412A28);
 #ifdef SKIP_ASM
 struct sCpEh { int (*match)(void); short lang, ver; int value; int type; void (*cleanup)(int, int); int caught; sCpEh *next; long handlers; int orig; };
-extern sCpEh **eh_get_a28(void) __asm__("func_00410490");
+extern sCpEh **eh_get_a28(void) __asm__("__get_eh_info");
 extern int ptr_type_a28(int) __asm__("__is_pointer");
 extern void eh_free_a28(void *) __asm__("__eh_free");
 extern int term_a28(void) __asm__("func_00412800") __attribute__((noreturn));
@@ -268,7 +268,7 @@ extern int term_a28(void) __asm__("func_00412800") __attribute__((noreturn));
  * Releases one catch handler's hold on a C++ exception record and frees the record once nothing uses it.
  *
  * Decrements handlers and returns while it is nonzero, or while the record is the newest one on the chain
- * (func_00410490) and not caught (a rethrow in progress). Otherwise it unlinks the record, calling func_00412800
+ * (__get_eh_info) and not caught (a rethrow in progress). Otherwise it unlinks the record, calling func_00412800
  * (terminate) if it is not on the chain, calls cleanup(value, 2) when set, frees the thrown object (original value)
  * with __eh_free unless __is_pointer says the type is a pointer type, and frees the record.
  *
@@ -299,16 +299,16 @@ void func_00412A28(sCpEh *ehInfo) {
 //100%
 INCLUDE_ASM("seg/seg_313800_exception", __uncatch_exception);
 #ifdef SKIP_ASM
-extern int *func_00410490(void);
+extern int *__get_eh_info_a(void) __asm__("__get_eh_info");
 extern int func_00412800(void) __attribute__((noreturn));
 /**
  * Marks the current C++ exception as uncaught again, as a rethrow requires.
  *
- * Takes the newest record from the chain head func_00410490 returns; with none it calls func_00412800 (terminate),
+ * Takes the newest record from the chain head __get_eh_info returns; with none it calls func_00412800 (terminate),
  * otherwise it clears the record's caught flag (+0x14). __check_eh_spec calls it before each rethrow (__throw).
  */
 void __uncatch_exception(void) {
-    int *ehInfo = (int *)*func_00410490();
+    int *ehInfo = (int *)*__get_eh_info_a();
     if (ehInfo == 0) {
         func_00412800();
     }
@@ -329,8 +329,7 @@ INCLUDE_ASM("seg/seg_313800_exception", __check_eh_spec);
    each name to the retail symbol (assembler assignments: the relocations then name the retail symbols). __throw
    is libgcc2.c's (emitted by the back end), __throw_type_match_rtti tinfo2.cc's, the vtables, out-of-line
    destructors and typeid functions those of exception.cc's #pragma implementation "exception". */
-__asm__("__get_eh_info = func_00410490\n"
-        "terminate__Fv = func_00412800\n"
+__asm__("terminate__Fv = func_00412800\n"
         "__start_cp_handler = func_004128A8\n"
         "__eh_alloc = func_004128E0\n"
         "__cp_push_exception = func_00412998\n"
@@ -530,19 +529,19 @@ __throw_bad_typeid (void)
 INCLUDE_ASM("seg/seg_313800_exception", uncaught_exception);
 #ifdef SKIP_ASM
 struct sCpEhInfoDD8 { int pad[5]; int caught; };
-extern sCpEhInfoDD8** func_00410490_dd8(void) __asm__("func_00410490");
+extern sCpEhInfoDD8** __get_eh_info_dd8(void) __asm__("__get_eh_info");
 // uncaught_exception(): an exception is being thrown and no handler has caught it yet
 bool uncaught_exception_dd8(void) __asm__("uncaught_exception");
 /**
  * Returns whether an exception is being thrown that no handler has caught yet.
  *
- * True when the chain head func_00410490 returns is a record whose caught flag (+0x14) is clear.
+ * True when the chain head __get_eh_info returns is a record whose caught flag (+0x14) is clear.
  *
  * @return true while an uncaught exception is in flight
  */
 bool uncaught_exception_dd8(void)
 {
-    sCpEhInfoDD8* ehInfo = *func_00410490_dd8();
+    sCpEhInfoDD8* ehInfo = *__get_eh_info_dd8();
     return ehInfo && !ehInfo->caught;
 }
 #endif

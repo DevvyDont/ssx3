@@ -74,7 +74,7 @@ float AIrandf(float low, float high)
 }
 #endif
 
-INCLUDE_ASM("bx/bxrandom", func_00317890__Fff);
+INCLUDE_ASM("bx/bxrandom", AIrangernd__Fff);
 #ifdef SKIP_ASM
 /**
  * Returns @p param_1 plus @p param_2 times a random value in [-1, 1) from the AI generator (AIrandf).
@@ -85,7 +85,7 @@ INCLUDE_ASM("bx/bxrandom", func_00317890__Fff);
  * @param param_2  the largest deviation
  * @return the varied value
  */
-float func_00317890(float param_1, float param_2)
+float AIrangernd(float param_1, float param_2)
 {
 	float fVar1;
 

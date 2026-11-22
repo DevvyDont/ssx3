@@ -1294,7 +1294,7 @@ struct sMemClass_2A10 {
 extern int D_004A2E78_2A10 __asm__("D_004A2E78");
 extern int (*D_004A2E7C_2A10)(int, int, int) __asm__("D_004A2E7C");
 
-// First free block of at least size bytes (same body as func_00253100).
+// First free block of at least size bytes (same body as FREE_find).
 static inline sMemNode_2A10* FirstFit_2A10(sMemClass_2A10* cls, int size, int back)
 {
     sMemNode_2A10* n = &cls->head;
@@ -1310,7 +1310,7 @@ static inline sMemNode_2A10* FirstFit_2A10(sMemClass_2A10* cls, int size, int ba
     return n->tag != 0x4253 ? n : 0;
 }
 
-// Largest free block holding min bytes (same body as func_00253170).
+// Largest free block holding min bytes (same body as FREE_findlargest).
 static inline sMemNode_2A10* BestFit_2A10(sMemClass_2A10* cls, int min, int back)
 {
     int v = min - 1;
@@ -1347,7 +1347,7 @@ static inline sMemNode_2A10* BestFit_2A10(sMemClass_2A10* cls, int min, int back
     return best;
 }
 
-// Inserts a block into the address-sorted free list (same body as func_002532B0).
+// Inserts a block into the address-sorted free list (same body as FREE_add).
 static inline void InsertFree_2A10(sMemClass_2A10* cls, sMemNode_2A10* blk)
 {
     sMemNode_2A10* q = &cls->head;
@@ -1373,7 +1373,7 @@ static inline void InsertFree_2A10(sMemClass_2A10* cls, sMemNode_2A10* blk)
     blk->flags |= 0x4000;
 }
 
-// Takes a block off the free list (same body as func_00253368).
+// Takes a block off the free list (same body as FREE_remove).
 static inline void RemoveFree_2A10(sMemNode_2A10* blk)
 {
     sMemNode_2A10* prev = blk->fprev;
@@ -1390,8 +1390,8 @@ extern "C" char* _MEM_allocaligna_impl(void* name, int size, int align, int offs
 /**
  * Allocates @p size bytes from the EA heap class @p flags selects, aligned so that data + @p offset is aligned.
  *
- * Flags 0 means the default class D_004A2E78; bit 0x200 picks the largest fitting free block (func_00253170 style)
- * instead of the first (func_00253100 style), bit 0x100 searches and places from the top, bit 0x400 uses the class's
+ * Flags 0 means the default class D_004A2E78; bit 0x200 picks the largest fitting free block (FREE_findlargest style)
+ * instead of the first (FREE_find style), bit 0x100 searches and places from the top, bit 0x400 uses the class's
  * big alignment (+0x2C) when @p align is 0. The size grows by the class tail (MEM_tailsize), 8 at least. The chosen
  * free block is unlinked, the data placed at its aligned start (or end, from the top), a remainder of more than
  * alignment + 0x30 becomes a new free block, and MEM_initblock writes the header with the class's header size (+0x30)
@@ -1662,7 +1662,7 @@ extern "C" void _MEM_allocsizez(int size) {
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_00253100);
+INCLUDE_ASM("mem/memstd", FREE_find);
 #ifdef SKIP_ASM
 /**
  * Returns the first free block of the EA heap class @p cls that holds at least @p size bytes (size field, header
@@ -1675,7 +1675,7 @@ INCLUDE_ASM("mem/memstd", func_00253100);
  * @param back  nonzero to search from the top of memory down
  * @return the block, or 0
  */
-extern "C" sMemNode_251718* func_00253100(sMemClass_251718* cls, int size, int back)
+extern "C" sMemNode_251718* FREE_find(sMemClass_251718* cls, int size, int back)
 {
     sMemNode_251718* n = &cls->head;
     if (back == 0) {
@@ -1691,7 +1691,7 @@ extern "C" sMemNode_251718* func_00253100(sMemClass_251718* cls, int size, int b
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_00253170);
+INCLUDE_ASM("mem/memstd", FREE_findlargest);
 #ifdef SKIP_ASM
 /**
  * Returns the largest free block of the EA heap class @p cls whose data (size - 16) exceeds @p size - 1, walking the
@@ -1707,7 +1707,7 @@ INCLUDE_ASM("mem/memstd", func_00253170);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Largest block in the class whose payload exceeds size - 1, walking forward
 // (dir 0) or backward; 0 if none.
-extern "C" sMemNode_251718* func_00253170(sMemClass_251718* cls, int size, int dir)
+extern "C" sMemNode_251718* FREE_findlargest(sMemClass_251718* cls, int size, int dir)
 {
     int best = size - 1;
     if (best < 0) {
@@ -1744,7 +1744,7 @@ extern "C" sMemNode_251718* func_00253170(sMemClass_251718* cls, int size, int d
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_00253230);
+INCLUDE_ASM("mem/memstd", FREE_gettotalfree);
 #ifdef SKIP_ASM
 /**
  * Returns the total free data bytes of the EA heap class @p cls: the sum of size - 16 over its free list up to the
@@ -1756,7 +1756,7 @@ INCLUDE_ASM("mem/memstd", func_00253230);
  * @param back  nonzero to walk the list backwards
  * @return the free bytes
  */
-extern "C" int func_00253230(sMemClass_251718* cls, int back)
+extern "C" int FREE_gettotalfree(sMemClass_251718* cls, int back)
 {
     int total = 0;
     if (back == 0) {
@@ -1780,7 +1780,7 @@ extern "C" int func_00253230(sMemClass_251718* cls, int back)
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_002532B0);
+INCLUDE_ASM("mem/memstd", FREE_add);
 #ifdef SKIP_ASM
 /**
  * Inserts block @p blk into the address-sorted free list of the EA heap class @p cls.
@@ -1791,7 +1791,7 @@ INCLUDE_ASM("mem/memstd", func_002532B0);
  * @param cls  the memory class
  * @param blk  the block to insert
  */
-extern "C" void func_002532B0(sMemClass_251D50* cls, sMemNode_251D50* blk)
+extern "C" void FREE_add(sMemClass_251D50* cls, sMemNode_251D50* blk)
 {
     sMemNode_251D50* nextNode = &cls->head;
     sMemNode_251D50* prevNode = nextNode;
@@ -1817,7 +1817,7 @@ extern "C" void func_002532B0(sMemClass_251D50* cls, sMemNode_251D50* blk)
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_00253368);
+INCLUDE_ASM("mem/memstd", FREE_remove);
 #ifdef SKIP_ASM
 struct sMemBlock {
     unsigned short magic;
@@ -1834,7 +1834,7 @@ struct sMemBlock {
  *
  * @param blk  the free block
  */
-extern "C" void func_00253368(sMemBlock* blk) {
+extern "C" void FREE_remove(sMemBlock* blk) {
     sMemBlock* prev = blk->prev;
     sMemBlock* next = blk->next;
     prev->next = next;
@@ -2532,7 +2532,7 @@ extern "C" int func_00254350(int x)
 INCLUDE_ASM("mem/memstd", SSX_VD_create);
 #ifdef SKIP_ASM
 extern char D_004A2EA0[];
-extern "C" void* func_00254410(void* self, void* a0, int a1, int a2, int a3);
+extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD(void* self, void* a0, int a1, int a2, int a3);
 
 // PORT: the unit's sMemAllocFuncs declares alloc as `void* (*)(int)`; it really
 // takes (tag, size, align, d, flags) (see MEM_allocalign / cMoviePlayer_SSXAllocMemFunc).
@@ -2540,7 +2540,7 @@ typedef void* (*tMemAlloc5_00254368)(void*, int, int, int, int);
 
 /**
  * Creates the movie's video driver: allocates 84 bytes from the movie allocator table RCMP_rcmp_sys and constructs the
- * tiled-texture driver in it (func_00254410).
+ * tiled-texture driver in it (SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD).
  *
  * @param framesDecoder  the decoder (handed to RCMP_DECODER_ReleaseFrame later)
  * @param firstFrame  the first frame
@@ -2551,7 +2551,7 @@ typedef void* (*tMemAlloc5_00254368)(void*, int, int, int, int);
 extern "C" void* SSX_VD_create(void* framesDecoder, int firstFrame, int graphicsMan, int drawLayer)
 {
     void* driverMem = ((tMemAlloc5_00254368)RCMP_rcmp_sys.alloc)(D_004A2EA0, 84, 0, 0, RCMP_rcmp_sys.field_0x8);
-    return func_00254410(driverMem, framesDecoder, firstFrame, graphicsMan, drawLayer);
+    return SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD(driverMem, framesDecoder, firstFrame, graphicsMan, drawLayer);
 }
 #endif
 
@@ -2591,7 +2591,7 @@ void SSX_VD_PS2_SINGLE_BUFFERD_SetScale(void* vself, float scaleX, float scaleY)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00254410);
+INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD);
 #ifdef SKIP_ASM
 // PORT: the unit's sMemAllocFuncs declares alloc as `void* (*)(int)`; it really
 // takes (tag, size, align, d, flags); view bound by asm label.
@@ -2671,7 +2671,7 @@ struct sTexSheet_4410 {
 };
 
 // PORT: the unit declares this as (void*, void*, int, int, int); typed body bound by asm label.
-extern "C" void* func_00254410_body(sTexSheet_4410* self, void* owner, char* res, cRend_4410* rend, int a3) __asm__("func_00254410");
+extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD_body(sTexSheet_4410* self, void* owner, char* res, cRend_4410* rend, int a3) __asm__("SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD");
 
 /**
  * Constructs the movie's tiled-texture video driver over the first frame and uploads the frame as textures.
@@ -2690,7 +2690,7 @@ extern "C" void* func_00254410_body(sTexSheet_4410* self, void* owner, char* res
  * @param drawLayer  the draw layer
  * @return @p self
  */
-extern "C" void* func_00254410_body(sTexSheet_4410* self, void* owner, char* res, cRend_4410* rend, int drawLayer)
+extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD_body(sTexSheet_4410* self, void* owner, char* res, cRend_4410* rend, int drawLayer)
 {
     self->owner = owner;
     self->vt = D_00480270;
@@ -2741,7 +2741,7 @@ extern "C" void* func_00254410_body(sTexSheet_4410* self, void* owner, char* res
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_002547B8);
+INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD__SSX_VD_PS2_SINGLE_BUFFERD);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void* D_00480270[];
@@ -2778,7 +2778,7 @@ struct sTexCache_2547B8 {
  *
  * @param flags  bit 0 frees the memory
  */
-extern "C" void func_002547B8(sTexCache_2547B8* self, int flags)
+extern "C" void SSX_VD_PS2_SINGLE_BUFFERD__SSX_VD_PS2_SINGLE_BUFFERD(sTexCache_2547B8* self, int flags)
 {
     self->vt = D_00480270;
     for (int i = 0; i < self->count; i++) {
@@ -3001,7 +3001,7 @@ extern "C" void func_002548D0_impl(void* videoDriver)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("mem/memstd", func_00254C48);
+INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_Draw);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 class cWorld_254C48 {
@@ -3073,14 +3073,14 @@ struct sMesh_254C48 {
 };
 
 /**
- * Draws a new movie frame: uploads the frame's pixels (@p res + 4 header, data as in func_00254410) into each tile's
+ * Draws a new movie frame: uploads the frame's pixels (@p res + 4 header, data as in SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD) into each tile's
  * texture (graphics manager slot 49, cPS2GraphicsMan_SetNewTextureData1) and draws the tiles (func_002548D0).
  *
  * Remembers @p res in +0xC when it is non-null, though it then reads it unconditionally. Vtable slot 4 of D_00480270.
  *
  * @param res  the frame
  */
-extern "C" void func_00254C48(sMesh_254C48* self, void* res)
+extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_Draw(sMesh_254C48* self, void* res)
 {
     if (res != 0) {
         self->res = res;
@@ -3111,14 +3111,14 @@ extern "C" void func_00254C48(sMesh_254C48* self, void* res)
 extern "C" void* func_002548D0(void* self);
 
 //99.29%
-INCLUDE_ASM("mem/memstd", func_00254DA0__FPv);
+INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_ReDraw__FPv);
 #ifdef SKIP_ASM
 /**
  * Redraws the last frame's tiles (func_002548D0). Vtable slot 5 of D_00480270.
  *
  * @return whatever func_002548D0 left in the return register
  */
-void* func_00254DA0(void* self)
+void* SSX_VD_PS2_SINGLE_BUFFERD_ReDraw(void* self)
 {
     return func_002548D0(self);
 }

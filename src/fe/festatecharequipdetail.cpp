@@ -834,7 +834,7 @@ extern "C" void func_0019B180(void* self, int id);
 extern "C" void func_0019B618(cFEStateCharEquip* self, int a1, int a2);
 extern "C" void cFEStateCharEquip_startLargePreviewLoad(cFEStateCharEquip* self, int a1);
 extern "C" void func_0019A9B8(cFEStateCharEquip* self);
-extern "C" void func_0019ACA0(cFEStateCharEquip* self);
+extern "C" void cFEStateCharEquip_updateCharacterModel(cFEStateCharEquip* self);
 extern "C" int func_0019BEE8(cFEStateCharEquip* self);
 extern "C" void func_0019C7E8(cFEStateCharEquip* self, void* item);
 extern "C" void cFEStateCharEquip_updatePolyBar(cFEStateCharEquip* self);
@@ -956,7 +956,7 @@ extern "C" void cFEStateCharEquip_onWidgetEvent(cFEStateCharEquip* selfv, cUIThi
         func_0019B618((cFEStateCharEquip*)self, 0, 1);
         cFEStateCharEquip_updatePolyBar((cFEStateCharEquip*)self);
         cFEStateCharEquip_updatePolyEquipPreviewBar((cFEStateCharEquip*)self, *(int*)((char*)vals + (w->mMiscData << 2)));
-        func_0019ACA0((cFEStateCharEquip*)self);
+        cFEStateCharEquip_updateCharacterModel((cFEStateCharEquip*)self);
         return;
     }
     case 6: {
@@ -1101,7 +1101,7 @@ struct sEquipTable;
 // PORT: func_0019E2B0 returns a pointer through int (the unit defines it as int).
 extern "C" int func_0019E2B0(sEquipTable* self, int a1, int a2);
 extern "C" void SHAPE_name(void* pkg, int i, char* name);
-extern "C" int func_004165A8(const void* a, const void* b);
+extern "C" int strcmp(const void* a, const void* b);
 extern char str_icon[];
 
 struct sPkgEntK19A098 {
@@ -1144,7 +1144,7 @@ extern "C" int cFEStateCharEquip_getIconID(cFEStateCharEquip* self, const char* 
         char nm[16];
         SHAPE_name(pkg, i, nm);
         nm[4] = 0;
-        if (func_004165A8(nm, name) == 0) {
+        if (strcmp(nm, name) == 0) {
             sPkgEntK19A098* entry = &((sPkgEntK19A098*)&pkg->tbl[0].offset)[i];
             char* data = (char*)pkg + entry->off;
             int id = self->mIconTextureID;
@@ -1749,24 +1749,24 @@ extern "C" void func_0019AB78(cFEStateCharEquip* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", func_0019ACA0);
+INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_updateCharacterModel);
 #ifdef SKIP_ASM
 extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* func_0014AD28(void* self, int a1, int a2);
-extern "C" void func_0019FBE0(void* rider, void* item, int a2, int a3);
+extern "C" void cFERider_loadTextures(void* rider, void* item, int a2, int a3);
 
 /**
- * Requeues the user's front-end rider's textures for the character's current items (func_0019FBE0 with 0, 1).
+ * Requeues the user's front-end rider's textures for the character's current items (cFERider_loadTextures with 0, 1).
  *
  * cFEStateCharEquip_onWidgetEvent calls it after equipping or removing an item.
  */
-extern "C" void func_0019ACA0(cFEStateCharEquip* self)
+extern "C" void cFEStateCharEquip_updateCharacterModel(cFEStateCharEquip* self)
 {
     void* rider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
-    func_0019FBE0(rider, func_0014AD28(cBE_getInterface_Fv(cBE_getBE(), 9), self->mUserNum, self->mCharID), 0, 1);
+    cFERider_loadTextures(rider, func_0014AD28(cBE_getInterface_Fv(cBE_getBE(), 9), self->mUserNum, self->mCharID), 0, 1);
 }
 #endif
 
@@ -3870,7 +3870,7 @@ extern "C" int func_0019D3B0(void* self, int bank)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019D428);
 #ifdef SKIP_ASM
-extern "C" int func_004165A8(const void* a, const void* b);
+extern "C" int strcmp(const void* a, const void* b);
 
 struct sEquipSlot_D428 {
     int state;
@@ -3888,7 +3888,7 @@ struct sEquipTable_D428 {
 /**
  * Finds the slot holding a file name in a bank of the FE file cache.
  *
- * Compares @p name with every non-empty slot name using func_004165A8 (a strcmp routine).
+ * Compares @p name with every non-empty slot name using strcmp (a strcmp routine).
  *
  * @param bank  the bank (0-9)
  * @param name  the file name
@@ -3898,7 +3898,7 @@ extern "C" int func_0019D428(sEquipTable_D428* self, int bank, const char* name)
 {
     for (int i = 0; i < 256; i++) {
         sEquipSlot_D428* slot = &self->rows[bank].slots[i];
-        if (slot->name[0] != 0 && func_004165A8(self->rows[bank].slots[i].name, name) == 0) {
+        if (slot->name[0] != 0 && strcmp(self->rows[bank].slots[i].name, name) == 0) {
             return i;
         }
     }
@@ -4486,7 +4486,7 @@ extern "C" void qsort(void* base, int n, int size, int (*cmp)(const int*, const 
  *
  * Sorts the bank's 256 packed keys with qsort (qsort) and func_0019DD10, then walks them while the slot has
  * type 8 and stamp 0: each gets the bank's next stamp (counts) and, when no loads are in flight and it is queued,
- * starts loading (func_0019D8B8). The rider manager (func_0019FF00) calls it after requesting deferred files.
+ * starts loading (func_0019D8B8). The rider manager (cFERider_loadModels) calls it after requesting deferred files.
  *
  * @param bank  the bank (0-9)
  */
@@ -4527,7 +4527,7 @@ extern "C" void qsort(void* base, int n, int size, int (*cmp)(const int*, const 
 /**
  * Stamps a bank's deferred type-11 loads in name order and starts the first one.
  *
- * Same as func_0019DF20 with func_0019DE18 and type 11. The rider manager (func_0019FBE0) calls it after requesting
+ * Same as func_0019DF20 with func_0019DE18 and type 11. The rider manager (cFERider_loadTextures) calls it after requesting
  * deferred files.
  *
  * @param bank  the bank (0-9)

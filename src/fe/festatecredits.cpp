@@ -178,7 +178,7 @@ extern "C" void cFont_text1(void* self, float x, float y, void* m);
 extern "C" float cFont_textExtent1(void* f_, const unsigned short* s, void* r_, int mono, float sx, float sy);
 extern "C" void* cUIState_onRender2D(void* self);
 extern "C" char* cUITextScroll_getFont(void* self);
-extern "C" unsigned short* func_003A2068(void* self, int idx);
+extern "C" unsigned short* cUITextScroll_getStringByIndex(void* self, int idx);
 
 
 
@@ -271,7 +271,7 @@ extern "C" void cFEStateCredits_onRender2D(cFEStateCredits* self)
                 rem = -scroll % rows;
             for (int i = 0; i < count; i++)
             {
-                unsigned short* line = func_003A2068(self->mpTextScroll, i + first);
+                unsigned short* line = cUITextScroll_getStringByIndex(self->mpTextScroll, i + first);
                 float frows = (float)rows;
                 if (line != 0)
                 {

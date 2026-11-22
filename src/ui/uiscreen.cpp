@@ -333,7 +333,7 @@ extern void cUIScreen_parseKeyframeSpawn_4(void *, void *, void *, void *) __asm
 extern void cUIScreen_parseObjectAnim_4(void *, void *, void *, void *) __asm__("cUIScreen_parseObjectAnim");
 extern void cUIScreen_parseObjectSetPos_4(void *, void *, void *, void *) __asm__("cUIScreen_parseObjectSetPos");
 extern void cUIScreen_parseObjectVisible_4(void *, void *, void *, void *) __asm__("cUIScreen_parseObjectVisible__FPv");
-extern void func_0039CD98_4(void *, void *, void *, void *) __asm__("func_0039CD98__FPv");
+extern void cUIScreen_parseEventAudio_4(void *, void *, void *, void *) __asm__("cUIScreen_parseEventAudio__FPv");
 extern void cUIScreen_parseEventTrigger_4(void *, void *, void *, void *) __asm__("cUIScreen_parseEventTrigger");
 extern void cUIScreen_parseScreenFocusGain_4(void *, void *, void *, void *) __asm__("cUIScreen_parseScreenFocusGain");
 extern void cUIScreen_parseScreenFocusLose_4(void *, void *, void *, void *) __asm__("cUIScreen_parseScreenFocusLose");
@@ -407,7 +407,7 @@ extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, void *thread)
                     cUIScreen_parseEventTrigger_4(self, list, cmd, uiThread);
                     break;
                 case 49:
-                    func_0039CD98_4(self, list, cmd, uiThread);
+                    cUIScreen_parseEventAudio_4(self, list, cmd, uiThread);
                     break;
                 case 0x40:
                     cUIScreen_parseScreenStart_4(self, list, cmd, uiThread);
@@ -582,7 +582,7 @@ void cUIScreen_parseObjectVisible(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039CD98__FPv);
+INCLUDE_ASM("ui/uiscreen", cUIScreen_parseEventAudio__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
@@ -590,7 +590,7 @@ INCLUDE_ASM("ui/uiscreen", func_0039CD98__FPv);
  * cUIScreen_playFrameByThread dispatches keyframe command 0x31 to it (0x30 goes to cUIScreen_parseEventTrigger); it
  * sits between cUIScreen_parseObjectVisible__FPv and cUIScreen_parseEventTrigger.
  */
-void func_0039CD98(void* self)
+void cUIScreen_parseEventAudio(void* self)
 {
 }
 #endif

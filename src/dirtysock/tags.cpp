@@ -34,7 +34,7 @@ INCLUDE_ASM("dirtysock/tags", cDirtysock_tag__TagFieldSetupTerm);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern signed char D_004A4A70;
 extern unsigned char D_004964C0[];
-extern "C" int func_00415FC8(const void* a, const void* b, unsigned int n);
+extern "C" int memcmp(const void* a, const void* b, unsigned int n);
 extern "C" void* func_0041610C(void* dst, const void* src, unsigned int n);
 extern "C" void* func_0041605C(void* dst, const void* src, unsigned int n);
 
@@ -124,7 +124,7 @@ found:
     while (*cursor != 0) cursor++;
     cursor++;
     if (sizeDelta > 0 && rec + len - cursor < sizeDelta) return -1;
-    if (sizeDelta == 0 && func_00415FC8(start, field, n) == 0) return 0;
+    if (sizeDelta == 0 && memcmp(start, field, n) == 0) return 0;
     if (sizeDelta > 0) func_0041610C(end + sizeDelta, end, cursor - end);
     if (sizeDelta < 0) func_0041610C(start, start - sizeDelta, cursor - (start - sizeDelta));
     func_0041605C(start, field, n);
@@ -1136,14 +1136,14 @@ extern "C" int cDirtysock_tag_TagFieldSetEpoch(char* record, int len, char* name
 //100%
 INCLUDE_ASM("dirtysock/tags", func_003EC8B8);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int value, int size);
+extern "C" void* memset(void* dst, int value, int size);
 // PORT: ds_tmtosecs returns a 64-bit `unsigned long`.
 extern "C" unsigned long func_003EB090(sDsTmK2* tm);
 
 /**
  * Stores a calendar date and time in a tag record as epoch seconds.
  *
- * Fills a zeroed tm (func_00416210) with @p year - 1900, @p mon - 1, the day and time, tm_isdst -1, converts it with
+ * Fills a zeroed tm (memset) with @p year - 1900, @p mon - 1, the day and time, tm_isdst -1, converts it with
  * func_003EB090() and passes the result minus @p adj to cDirtysock_tag_TagFieldSetEpoch() (0 when the conversion gives
  * 0).
  *
@@ -1164,7 +1164,7 @@ extern "C" int func_003EC8B8(char* record, int len, char* name, int year, int mo
     sDsTmK2 tm;
     int secs;
 
-    func_00416210(&tm, 0, sizeof(tm));
+    memset(&tm, 0, sizeof(tm));
     tm.tm_isdst = -1;
     tm.tm_year = year - 1900;
     tm.tm_mon = mon - 1;
@@ -1179,7 +1179,7 @@ extern "C" int func_003EC8B8(char* record, int len, char* name, int year, int mo
 //100%
 INCLUDE_ASM("dirtysock/tags", func_003EC9A0);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int value, int size);
+extern "C" void* memset(void* dst, int value, int size);
 // PORT: ds_tmtosecs returns a 64-bit `unsigned long`.
 extern "C" unsigned long func_003EB090(sDsTmK2* tm);
 
@@ -1202,7 +1202,7 @@ extern "C" int func_003EC9A0(char* record, int len, char* name, int date, int ti
     sDsTmK2 tm;
     int secs;
 
-    func_00416210(&tm, 0, sizeof(tm));
+    memset(&tm, 0, sizeof(tm));
     tm.tm_isdst = -1;
     tm.tm_year = ((date >> 16) & 0xFFFF) - 1900;
     tm.tm_mon = ((date >> 8) & 0xFF) - 1;
@@ -1960,7 +1960,7 @@ INCLUDE_ASM("dirtysock/tags", cDirtysock_tag_TagFieldGetTime);
 #ifdef SKIP_ASM
 // _TagFieldParseNumber / memset / ds_tmtosecs
 extern "C" char* func_003EAE68(const char* data, int* value);
-extern "C" void* func_00416210(void* dst, int value, int size);
+extern "C" void* memset(void* dst, int value, int size);
 // PORT: ds_tmtosecs returns a 64-bit `unsigned long`.
 extern "C" unsigned long func_003EB090(sDsTmK2* tm);
 
@@ -1991,7 +1991,7 @@ extern "C" unsigned int cDirtysock_tag_TagFieldGetTime(char* data, unsigned int 
             if (*parseEnd <= ' ') {
                 result = value;
             } else if ((*data >= '0') && (*data <= '9')) {
-                func_00416210(&tm, 0, sizeof(tm));
+                memset(&tm, 0, sizeof(tm));
                 tm.tm_isdst = -1;
                 data = func_003EAE68(data, &tm.tm_year);
                 if ((unsigned char)(*data - '-') <= 1) {

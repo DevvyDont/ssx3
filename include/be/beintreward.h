@@ -14,7 +14,7 @@
 // same two members first in the class (at 0x8 after its 8-byte base), followed by the mEventUnlockables /
 // mEventAccomplishments arrays that retail does not have (On Tour size 0x298).
 // cBERewardInterface overrides no virtual: its getThis stores the same vtable (cBEInterface_vtbl) as BEBoltInt's
-// (func_0014ABE0), whose slots are cBEInterface's own.
+// (cBEBoltInterface_getThis), whose slots are cBEInterface's own.
 //
 // Evidence tags:
 //   [R] retail's own constructor (the inlined body in cBERewardInterface_getThis) and allocation tag;

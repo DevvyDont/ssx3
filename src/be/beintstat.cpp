@@ -452,7 +452,7 @@ INCLUDE_ASM("be/beintstat", cBELibrary_cBELibrary);
 extern "C" void cBELibrary_loadData();
 extern "C" void* cBECharacterInterface_getThis();
 extern "C" void* cBEStatInterface_getThis(void);
-extern "C" void* func_0014ABE0();
+extern "C" void* cBEBoltInterface_getThis();
 void* cBENewRaceInterface_getThis();
 void* cBENewPlayerInterface_getThis();
 void* cBEOptionInterface_getThis();
@@ -477,7 +477,7 @@ extern sStatDefaults_149860 kHighScoresDefault;
  *
  * Calls cBELibrary_loadData() (resets the character, player and profile tables), copies the default score tables (26
  * entries of 0x64 bytes, kHighScoresDefault) into cBELibrary_highScores, then calls each interface's getThis(): new race, new
- * player, character, stat, option, save, BAGT, network, score, bolt (func_0014ABE0), mission, econ, aggression
+ * player, character, stat, option, save, BAGT, network, score, bolt (cBEBoltInterface_getThis), mission, econ, aggression
  * and reward.
  *
  * @return @p self
@@ -495,7 +495,7 @@ extern "C" void* cBELibrary_cBELibrary(void* self)
     cBEBAGTInterface_getThis();
     cBENetworkInterface_getThis();
     cBEScoreInterface_getThis();
-    func_0014ABE0();
+    cBEBoltInterface_getThis();
     cBEMissionInterface_getThis();
     cBEEconInterface_getThis();
     cBEAggressionInterface_getThis();
@@ -556,7 +556,7 @@ extern "C" void cBELibrary__cBELibrary(void* self, int flags)
 //100%
 INCLUDE_ASM("be/beintstat", cBELibrary_newProfile);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* strcpy2(char* buf, int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cBEProfileLib_init(void* p, int v);
@@ -597,7 +597,7 @@ extern "C" void cBELibrary_newProfile(void* self, signed char idx)
 {
     char buf[64];
     cBEPlayerDB* playerEntry = &cBELibrary_playerDB[idx];
-    func_00416210(playerEntry, 0, sizeof(cBEPlayerDB));
+    memset(playerEntry, 0, sizeof(cBEPlayerDB));
     playerEntry->iUseDualShock = 1;
     playerEntry->cCharacterID = 4;
     char* locale = (char*)SSXApp->FELocale;
@@ -617,7 +617,7 @@ INCLUDE_ASM("be/beintstat", cBELibrary_loadData);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0014C6A0(void*);
 extern "C" void cBERewardDB_init(void*, int);
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* FILE_load(const char* name, int flags);
 extern "C" void func_0041605C(void* dst, void* src, int n);
 void cMemMan_free(void*);
@@ -669,12 +669,12 @@ extern "C" void cBELibrary_loadData(void)
 
     func_0014C6A0(D_004A6750);
     cBERewardDB_init(cBELibrary_rewardDB, 0);
-    func_00416210(&cBELibrary_raceDB, 0, 76);
+    memset(&cBELibrary_raceDB, 0, 76);
     for (i = 0; i < 6; i++) {
         cBELibrary_raceDB.a[i] = i;
         cBELibrary_raceDB.b[i] = i;
     }
-    func_00416210(cBELibrary_playerDB, 0, sizeof(cBELibrary_playerDB));
+    memset(cBELibrary_playerDB, 0, sizeof(cBELibrary_playerDB));
     for (i = 0; i < 6; i++) {
         cBELibrary_playerDB[i].strUserName[0] = 0;
         cBELibrary_playerDB[i].iUseDualShock = 1;
@@ -702,7 +702,7 @@ extern "C" void cBELibrary_loadData(void)
         cBELibrary_statDefault[i].v[13] = 11;
         cBELibrary_statDefault[i].v[10] = 11;
     }
-    func_00416210(cBELibrary_optionDB, 0, 648);
+    memset(cBELibrary_optionDB, 0, 648);
     for (i = 0; i < 3; i++) {
         cBEProfileLib_init(cBELibrary_profileLib + i * 39760, 1);
     }
@@ -874,12 +874,12 @@ extern "C" void cBELibrary_loadData(void)
 
 
 //100%
-INCLUDE_ASM("be/beintstat", func_0014A078);
+INCLUDE_ASM("be/beintstat", cBELibrary_debugReloadData);
 #ifdef SKIP_ASM
 /**
- * Does nothing (an empty function; func_0014DEE8 calls it with cBE_library).
+ * Does nothing (an empty function; cBE_reloadData calls it with cBE_library).
  */
-extern "C" void func_0014A078(void) {
+extern "C" void cBELibrary_debugReloadData(void) {
 
 }
 #endif

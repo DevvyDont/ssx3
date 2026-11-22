@@ -861,7 +861,7 @@ struct sEcon_1600 {
     int fF80;                       // 0xF80
 };
 
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void MEM_fill(void* dst, int c, int n);
 struct sEconItems_151A88;
 struct sEcon_001519E0;
@@ -915,9 +915,9 @@ extern "C" void cBECharProfileDB_init(sEcon_1600* self, int k, int reload)
     self->h282 = 0;
     self->h286 = 0;
     self->fACC = 0;
-    func_00416210(self->fBA0, 0, 0x18);
+    memset(self->fBA0, 0, 0x18);
     sEconSlot_1600 blank;
-    func_00416210(&blank, 0, 8);
+    memset(&blank, 0, 8);
     blank.b[1] = -1;
     int i;
     for (i = 0; i < 17; i++) {
@@ -927,7 +927,7 @@ extern "C" void cBECharProfileDB_init(sEcon_1600* self, int k, int reload)
     }
     for (i = 0; i < 1; i++) {
         for (int j = 0; j < 23; j++) {
-            func_00416210(self->ents[j][i].data, 0, 8);
+            memset(self->ents[j][i].data, 0, 8);
             self->ents[j][i].flag = 0;
         }
     }
@@ -939,14 +939,14 @@ extern "C" void cBECharProfileDB_init(sEcon_1600* self, int k, int reload)
         self->flags[i].f3 = 0;
         self->flags[i].f4 = missionDef->b;
     }
-    func_00416210(&self->col, 1, 7);
+    memset(&self->col, 1, 7);
     self->col = D_005308D9[k].col;
     self->fAC4 = 0;
     self->fAC8 = 0;
     func_001519E0((sEcon_001519E0*)self, self->kind);
     func_00150558(self->kind, self->fBE6);
-    func_00416210(self->fBB8, 0, 8);
-    func_00416210(self->fDE4, 0, 84);
+    memset(self->fBB8, 0, 8);
+    memset(self->fDE4, 0, 84);
     self->fF04 = 0;
     for (int i = 0; i < 25; i++) {
         *(int*)((char*)self + 0xE38 + i * 8) = 0;

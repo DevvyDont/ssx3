@@ -232,7 +232,7 @@ extern "C" void cUIThing_setChannelDataKCP(cUIThing* vself, unsigned int count, 
 #endif
 
 //100%
-INCLUDE_ASM("ui/uithing", func_003A0290);
+INCLUDE_ASM("ui/uithing", cUIThing_getAbsPosition);
 #ifdef SKIP_ASM
 struct sUIVec3 {
     float x, y, z;
@@ -253,7 +253,7 @@ struct sUIThingPos {
  *
  * @param out  receives the summed position (x, y, z)
  */
-extern "C" void func_003A0290(sUIThingPos* self, sUIVec3* out)
+extern "C" void cUIThing_getAbsPosition(sUIThingPos* self, sUIVec3* out)
 {
     *out = self->pos;
     for (sUIThingPos* ancestor = self->parent; ancestor != 0; ancestor = ancestor->parent) {

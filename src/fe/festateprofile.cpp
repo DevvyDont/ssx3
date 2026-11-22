@@ -439,7 +439,7 @@ struct cUIObj_F168 {
  *
  * Except on the load screen (cFEStateProfileLoad_mScreenAction 2) shows "btext3" and "ps2x" only when @p saveBlocked is
  * false; on the load screen shows "btext3a" and "ps2x" only when @p loadBlocked is false. The shown state is also
- * stored in +0x224, which cFEStateProfileLoad_onWidgetEvent and func_0018FC98 require. Fills slot +0x13C of cFEStateProfileLoad_vtbl
+ * stored in +0x224, which cFEStateProfileLoad_onWidgetEvent and cFEStateProfileLoad_startSave require. Fills slot +0x13C of cFEStateProfileLoad_vtbl
  * (cFEMemCard_hideMainButton's slot).
  *
  * @param loadBlocked  true to hide the button on the load screen
@@ -923,7 +923,7 @@ void cFEStateProfileLoad_onDestroyScreen(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateprofile", func_0018FC98);
+INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_startSave);
 #ifdef SKIP_ASM
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void cMCOverlayManager_writeSetFileType(void* app, int a1, int a2);
@@ -986,7 +986,7 @@ struct cSelf_FC98 {
  *
  * @param vself  the profile load state
  */
-extern "C" void func_0018FC98(cFEStateProfileLoad* vself)
+extern "C" void cFEStateProfileLoad_startSave(cFEStateProfileLoad* vself)
 {
     cSelf_FC98* self = (cSelf_FC98*)vself;
     if (*(int*)((char*)self + 0x224) != 0) {
@@ -1021,7 +1021,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int strlen(const char* s);
 extern "C" void cBENewPlayerInterface_setPlayerName(void* player, int idx, char* name);
 extern "C" void* cBENewPlayerInterface_getPlayerName(void* player, int idx);
-extern "C" void func_0018FC98(cFEStateProfileLoad* p);
+extern "C" void cFEStateProfileLoad_startSave(cFEStateProfileLoad* p);
 extern "C" void* cKeyboardPopup_cKeyboardPopup(void* mem, void* engine, void* owner, int a3, int a4);
 extern "C" void cKeyboardPopup_setInputText(void* kb, void* name);
 extern "C" void cKeyboardPopup_setMaxCharacters(void* kb, int a1);
@@ -1085,7 +1085,7 @@ static inline void* GetText_K18FD90(char* key)
  * Event 13 (the keyboard is done): stores the entered name (mszEditString) as the player's name (cBENewPlayerInterface_setPlayerName, for the
  * player at +0x1CC) and in the manager's mNewFileName, or "kT_MEMPlayerName" formatted with the player number when it
  * is empty; submits the player interface (vtable slot 1, cBENewPlayerInterface_submit) and starts the save
- * (func_0018FC98).
+ * (cFEStateProfileLoad_startSave).
  *
  * Event 6 (back): unless busy is 1 or state is 6, sets +0x1E4, resets the manager (cMCOverlayManager_SetState, state 0)
  * when state is 0, 1 or 2, and sets state 6. Event 7: unless busy, in state 6, on the load screen or with the delete
@@ -1118,7 +1118,7 @@ extern "C" void cFEStateProfileLoad_onWidgetEvent(cFEStateProfileLoad* vself, cU
             func_002C2540(mp + 0x276, buf);
         }
         VCALLV_K18FD90(player, 0xC, 1));
-        func_0018FC98(vself);
+        cFEStateProfileLoad_startSave(vself);
         break;
     }
     case 5: {

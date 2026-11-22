@@ -49,7 +49,7 @@ struct cRiderAnim {
                                     //       i * 8) after the first 0x50 bytes; expireRule's sequencer index is (pSeqr -
                                     //       Sequencer)
     cAnimModel* AnimModel;          // 0x054 [O]; [R] the base ctor stores 0; [U] cRiderAnim_linkToRider copies
-                                    //       Rider->mAnimModel (+0x780), linkToFERider (func_00104D50) FERider's +0x8
+                                    //       Rider->mAnimModel (+0x780), linkToFERider (cRiderAnim_linkToFERider) FERider's +0x8
                                     //       (cFERider::mpAnimModel)
     void** mVtbl;                   // 0x058 [R] cRiderAnim_cRiderAnim / cRider_loadRider / cFERider_compileModel store
                                     //       cRiderAnim_vtbl (D_00458458) over the base's D_0048D7D8
@@ -60,7 +60,7 @@ struct cRiderAnim {
                                     //       rider's state through it (+0x238, +0x244, +0x268, +0x274, +0x280, +0x330),
                                     //       mapAIDToGAD reads +0x364 when FERider is 0
     cFERider* FERider;              // 0x064 [O] (0x74 in On Tour); [R] the ctor stores 0; [U] linkToFERider
-                                    //       (func_00104D50) sets it, linkToRider clears it; mapAIDToGAD reads +0xCD8
+                                    //       (cRiderAnim_linkToFERider) sets it, linkToRider clears it; mapAIDToGAD reads +0xCD8
                                     //       through it; onExpireBLENDTO_AIR tests it
     char unk_068[0x8];              // 0x068 tail padding to the 16-byte-aligned size 0x70 (never accessed)
 };

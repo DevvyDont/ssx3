@@ -8,7 +8,7 @@ INCLUDE_ASM("sound/ps2soundman", cSndPlayOpts_cSndPlayOpts);
 void* operator_new_9350(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 extern "C" void SNDplaysetdef(void* desc);
-extern "C" void* func_00416210(void* dst, int v, int n);
+extern "C" void* memset(void* dst, int v, int n);
 extern char str_mCurrent[];
 extern char str_mPosStatic[];
 extern char str_mBaseVol[];
@@ -116,7 +116,7 @@ extern "C" sSndPlayOpts9350* cSndPlayOpts_cSndPlayOpts(sSndPlayOpts9350* self, i
     self->f34[self->depth] = 0;
     self->f38[self->depth] = self->descs[self->depth].c[0];
     self->f3C[self->depth] = 0;
-    func_00416210((char*)self + self->depth * 8 + 0x40, 0, 8);
+    memset((char*)self + self->depth * 8 + 0x40, 0, 8);
     self->f60[self->depth] = 0;
     self->f64[self->depth] = 0;
     self->f68[self->depth] = 0;

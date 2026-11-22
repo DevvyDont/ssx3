@@ -121,28 +121,28 @@ extern "C" void cBEScoreInterface_discard(cBEScoreInterface* scoreIface)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00154A58);
+INCLUDE_ASM("be/beintscore", cBEScoreInterface_processRiderStats);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
-extern "C" void func_00155420(int rider, int a, int b, int c);
+extern "C" void cBEScoreInterface_processRiderBest(int rider, int a, int b, int c);
 extern signed char D_005305F9[];
 
 /**
  * Records a rider's race statistics in its character's best records, for the two human profiles only.
  *
- * Unless raceDB byte +0x49 (D_005305F9) is set, calls func_00155420(@p rider, @p riderStats, -1, -1) when the rider's profile
+ * Unless raceDB byte +0x49 (D_005305F9) is set, calls cBEScoreInterface_processRiderBest(@p rider, @p riderStats, -1, -1) when the rider's profile
  * (cBELibrary_getProfileIndex) is 0 or 1. The AI code passes each rider's metrix stats block (metrix + 0xFC);
  * cBEScoreInterface_processEventRiderStats passes the event stats.
  *
  * @param rider  race rider slot
  * @param riderStats  the rider stats block, passed as an int
  */
-extern "C" void func_00154A58(int rider, int riderStats)
+extern "C" void cBEScoreInterface_processRiderStats(int rider, int riderStats)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     if (D_005305F9[0] == 0 && profile < 2)
     {
-        func_00155420(rider, riderStats, -1, -1);
+        cBEScoreInterface_processRiderBest(rider, riderStats, -1, -1);
     }
 }
 #endif
@@ -181,7 +181,7 @@ struct sHighScore_154AB8 {
     int charID;
     char name[0xC];
 };
-sHighScore_154AB8* func_0014AB20_154AB8(int event, int mode) __asm__("func_0014AB20");
+sHighScore_154AB8* cBELibrary_getHighScoreTable_154AB8(int event, int mode) __asm__("cBELibrary_getHighScoreTable");
 
 struct sRaceSettings_154AB8 {
     char pad_0x00[0x40];
@@ -208,15 +208,15 @@ extern sEvent_154AB8 D_0043D950_154AB8[] __asm__("cBELibrary_locationDB");
  * and updates the character's best records.
  *
  * Only profiles 0 and 1. Copies @p stats into the profile's last-event slot (+0x20 + profile * 0xB0) with result -1,
- * passes them to func_00154A58, and resets the profile's high-score rank (+0x18) to -1 and best flag (+0x10) to 0. The
+ * passes them to cBEScoreInterface_processRiderStats, and resets the profile's high-score rank (+0x18) to -1 and best flag (+0x10) to 0. The
  * location comes from cBELibrary_locationDB[raceDB +0x40].id (22 becomes 0) and the event from
  * cBENewRaceInterface_newRace.cGameEvent. Race kinds 0 and 5 (raceDB +0x48) are timed: @p score is converted from ticks
  * to seconds.
  *
- * When cBEScoreInterface_isEligibleForHighScore allows it, the score goes into the 5-entry table from func_0014AB20 (lower is better when timed):
+ * When cBEScoreInterface_isEligibleForHighScore allows it, the score goes into the 5-entry table from cBELibrary_getHighScoreTable (lower is better when timed):
  * later entries shift down, the new one gets the character, score and player name
  * (cBENewPlayerInterface_getPlayerName), and with two humans the other profile's rank moves down (dropping off at 5).
- * Then func_00155420 gets the score as the time (timed) or the points, and unless raceDB +0x49 is set, the best flag is
+ * Then cBEScoreInterface_processRiderBest gets the score as the time (timed) or the points, and unless raceDB +0x49 is set, the best flag is
  * cBECharProfileDB_updateScoreStats's result for the character record.
  *
  * @param rider  race rider slot (On Tour iRider)
@@ -233,7 +233,7 @@ extern "C" void cBEScoreInterface_processEventRiderStats(sScore_154AB8* self, in
     sProfileChar_154AB8* pc;
     int timed = 0;
     self->slots[profile].result = -1;
-    func_00154A58(rider, (int)stats);
+    cBEScoreInterface_processRiderStats(rider, (int)stats);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int charID = cBELibrary_getCharacterID(rider);
     mode = cBENewRaceInterface_newRace.cGameEvent;
@@ -248,7 +248,7 @@ extern "C" void cBEScoreInterface_processEventRiderStats(sScore_154AB8* self, in
         score = (int)(score * (1.0f / 60.0f));
     }
     if (cBEScoreInterface_isEligibleForHighScore((cBEScoreInterface*)self, profile)) {
-        sHighScore_154AB8* highScores = func_0014AB20_154AB8(event, mode);
+        sHighScore_154AB8* highScores = cBELibrary_getHighScoreTable_154AB8(event, mode);
         if (highScores != 0) {
             for (int i = 0; i < 5; i++) {
                 int better;
@@ -276,9 +276,9 @@ extern "C" void cBEScoreInterface_processEventRiderStats(sScore_154AB8* self, in
         }
     }
     if (timed)
-        func_00155420(rider, (int)stats, -1, score);
+        cBEScoreInterface_processRiderBest(rider, (int)stats, -1, score);
     else
-        func_00155420(rider, (int)stats, score, -1);
+        cBEScoreInterface_processRiderBest(rider, (int)stats, score, -1);
     if (D_005305B0_154AB8.b49 == 0)
         self->best[profile] = cBECharProfileDB_updateScoreStats(pc, event, mode, score);
 }
@@ -381,12 +381,12 @@ struct sScoreEntry_001550E8 {
     int value;
     char pad[0x10];
 };
-extern "C" sScoreEntry_001550E8* func_0014AB20(int a, int b);
+extern "C" sScoreEntry_001550E8* cBELibrary_getHighScoreTable(int a, int b);
 
 /**
  * Returns the score of one entry in an event's high-score table.
  *
- * The table is func_0014AB20(@p event, @p mode); entries are 0x14 bytes with the score first.
+ * The table is cBELibrary_getHighScoreTable(@p event, @p mode); entries are 0x14 bytes with the score first.
  *
  * @param i  entry index, 0 (best) to 4
  * @param event  the location
@@ -395,7 +395,7 @@ extern "C" sScoreEntry_001550E8* func_0014AB20(int a, int b);
  */
 extern "C" int func_001550E8(cBEScoreInterface* self, int i, int event, int mode)
 {
-    sScoreEntry_001550E8* highScores = func_0014AB20(event, mode);
+    sScoreEntry_001550E8* highScores = cBELibrary_getHighScoreTable(event, mode);
     if (highScores != 0) {
         return highScores[i].value;
     }
@@ -414,7 +414,7 @@ extern int D_005305F0[];
 /**
  * Returns the score of one entry in the current race's high-score table.
  *
- * The table is func_0014AB20(raceDB +0x40, newRace.cGameEvent), the race's location index and game event. The pause and lodge
+ * The table is cBELibrary_getHighScoreTable(raceDB +0x40, newRace.cGameEvent), the race's location index and game event. The pause and lodge
  * screens show entry 0 as the record.
  *
  * @param i  entry index, 0 (best) to 4
@@ -423,7 +423,7 @@ extern int D_005305F0[];
 extern "C" int func_00155130(cBEScoreInterface* self, int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    sScoreEntry_001550E8* highScores = func_0014AB20(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
+    sScoreEntry_001550E8* highScores = cBELibrary_getHighScoreTable(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
     if (highScores != 0)
     {
         return highScores[i].value;
@@ -452,7 +452,7 @@ extern void* D_004A1244;
  * Returns the character record (D_00530990, 0x88 bytes each) of the rider who set one entry of the current race's
  * high-score table.
  *
- * The table is func_0014AB20(raceDB +0x40, newRace.cGameEvent); the entry's second word is the character ID. The lodge shows
+ * The table is cBELibrary_getHighScoreTable(raceDB +0x40, newRace.cGameEvent); the entry's second word is the character ID. The lodge shows
  * the result as text next to the entry.
  *
  * @param i  entry index, 0 (best) to 4
@@ -461,7 +461,7 @@ extern void* D_004A1244;
 extern "C" void* func_00155190(cBEScoreInterface* self, int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    sScoreEntryB_00155190* highScores = (sScoreEntryB_00155190*)func_0014AB20(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
+    sScoreEntryB_00155190* highScores = (sScoreEntryB_00155190*)cBELibrary_getHighScoreTable(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
     if (highScores == 0)
         return D_004A1244;
     return &D_00530990[highScores[i].idx];
@@ -482,7 +482,7 @@ extern void* D_004A1244;
 /**
  * Returns the player name stored in one entry of the current race's high-score table.
  *
- * The table is func_0014AB20(raceDB +0x40, newRace.cGameEvent); the 12-byte name is at +0x8 of the entry.
+ * The table is cBELibrary_getHighScoreTable(raceDB +0x40, newRace.cGameEvent); the 12-byte name is at +0x8 of the entry.
  *
  * @param i  entry index, 0 (best) to 4
  * @return the name, or D_004A1244 when the event has no table
@@ -490,7 +490,7 @@ extern void* D_004A1244;
 extern "C" void* func_00155208(cBEScoreInterface* self, int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    sScoreEntryB_00155208* highScores = (sScoreEntryB_00155208*)func_0014AB20(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
+    sScoreEntryB_00155208* highScores = (sScoreEntryB_00155208*)cBELibrary_getHighScoreTable(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
     if (highScores != 0)
         return highScores[i].f8;
     return D_004A1244;
@@ -521,7 +521,7 @@ extern char cBELibrary_profileLib[];
  * Returns a character's best-stats block: +0xDE4 of the character record (cBELibrary_profileLib + profile * 0x9B50 +
  * character * 0xF88).
  *
- * Ten (value, location) pairs and the longest combo, as func_00155420 writes them.
+ * Ten (value, location) pairs and the longest combo, as cBEScoreInterface_processRiderBest writes them.
  *
  * @param profileIndex  profile index (On Tour iProfileIndex)
  * @param characterId  character ID (On Tour iChar)
@@ -638,7 +638,7 @@ extern short cBELibrary_highlightLevel[][3];
  *
  * The level is 1, 2 or 3 for the highest of the highlight's three thresholds cBELibrary_highlightLevel[@p idx][0..2] that @p score
  * reaches (0 for none). The stored level, the signed byte at +0xBB8 + @p idx of the character record (what
- * cBEScoreInterface_getCurrentHighlightLevel reads), only goes up. func_00155420 calls it for highlights 0 to 7.
+ * cBEScoreInterface_getCurrentHighlightLevel reads), only goes up. cBEScoreInterface_processRiderBest calls it for highlights 0 to 7.
  *
  * @param idx  which highlight, 0 to 7
  * @param score  the value to rate
@@ -661,7 +661,7 @@ extern "C" void cBEScoreInterface_processHighlight(cBEScoreInterface* self, int 
 #endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00155420);
+INCLUDE_ASM("be/beintscore", cBEScoreInterface_processRiderBest);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 extern "C" void cBEScoreInterface_processHighlight(cBEScoreInterface* self, int idx, int score);
@@ -722,8 +722,8 @@ struct sRecord_155420 {
  * @param eventPoints  the event points, or -1
  * @param eventTime  the event time in seconds, or -1
  */
-// PORT: the unit declares this as (int, int, int, int) (func_00154A58 passes the stats pointer as int).
-extern "C" void func_00155420(int rider, int statsArg, int eventPoints, int eventTime)
+// PORT: the unit declares this as (int, int, int, int) (cBEScoreInterface_processRiderStats passes the stats pointer as int).
+extern "C" void cBEScoreInterface_processRiderBest(int rider, int statsArg, int eventPoints, int eventTime)
 {
     sRaceStats_155420* stats = (sRaceStats_155420*)statsArg;
     sRaceSettings_155420* rs = &D_005305B0_r155420;

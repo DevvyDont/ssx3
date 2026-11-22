@@ -333,7 +333,7 @@ static inline sLightRef_5400* GetRef_5400(char* vo, int slot)
  * irradiance (+0xD0) to cRenderStateMan_getCustomIrradiance's custom one while cRenderStateMan_m_hasCustomIrradiance is set; otherwise it queries the world painter
  * (+0x4) at the position and uses the object irradiance name (accessor 40), else the light irradiance name (37), else
  * the default cIrradianceDataBase_mDefaultId. The current set (+0x10) is then the target plus the 4 strongest lights of the overlap list
- * (cWorldLightMan_IntersectLights1). func_002F5148 calls it with bit 12 of the instance's +0x8 as @p force.
+ * (cWorldLightMan_IntersectLights1). getRealTimeLights calls it with bit 12 of the instance's +0x8 as @p force.
  *
  * @param obj  the instance record
  * @param force  nonzero for a moving instance: re-check its position
@@ -451,7 +451,7 @@ struct sWorldLight {
  * Invalidates the world light manager's 8 overlap nodes (id -1), so the next relight rebuilds their light lists.
  *
  * The parameter is the manager itself: the 0x40-byte records start with the id at +0x10, the overlap nodes at +0x10.
- * func_003AD1A8 (world script cache) calls it on the game's WorldLightMan.
+ * flushWorldLightCache (world script cache) calls it on the game's WorldLightMan.
  *
  * @param lights  the world light manager (this), walked as 0x40-byte overlap nodes
  */
@@ -944,7 +944,7 @@ void cCheatFX_reset(void* self)
 }
 #endif
 
-extern "C" void* func_00416210(void*, int, int);
+extern "C" void* memset(void*, int, int);
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cCheatFX_resetStates__FPv);
@@ -957,7 +957,7 @@ INCLUDE_ASM("visualfx/worldlightman", cCheatFX_resetStates__FPv);
 void* cCheatFX_resetStates(void* vself)
 {
     cCheatFX* self = (cCheatFX*)vself;
-    return func_00416210((&self->m_cheatState.m_state), 0, 4);
+    return memset((&self->m_cheatState.m_state), 0, 4);
 }
 #endif
 
@@ -1946,7 +1946,7 @@ void* tParticleEmitter_tParticleEmitter(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7A70);
+INCLUDE_ASM("visualfx/worldlightman", cBoardWakeFX_IsWakeActive);
 #ifdef SKIP_ASM
 /**
  * Returns whether the int at +0x4 of @p arg0 is greater than 0.
@@ -1956,44 +1956,44 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7A70);
  * @param arg0  the object to test
  * @return 1 when +0x4 > 0, else 0
  */
-extern "C" int func_002F7A70(cBoardWakeFX* arg0) {
+extern "C" int cBoardWakeFX_IsWakeActive(cBoardWakeFX* arg0) {
     return (arg0->mNumWakeLines) > 0;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7A80);
+INCLUDE_ASM("visualfx/worldlightman", cBoardWakeFX_GetChunkySprayVelocity);
 #ifdef SKIP_ASM
 /**
- * Copies an 8-byte value out of a two-level table into @p out.
+ * Returns the wake's chunky-spray velocity: the 16-byte vector (lq/sq) mWakeLines[mCurrentWakeLine].mVel[mWakeLineSegs - 1],
+ * i.e. the newest segment's velocity row of the current wake line (0x70-byte lines from mWakeLines).
  *
- * The value is at @p arg1 +0xC (base) + @p arg1 +0x8 * 0x70 + (@p arg1 +0xB4 - 1) * 0x10. Nothing in the retail code
- * references it.
+ * The preview's GetChunkySprayVelocity__12cBoardWakeFX has the same body. Nothing in the retail code references this copy.
  *
- * @param out  receives the 8-byte value
- * @param arg1  the object holding the base pointer and the two indices
+ * @param out  receives the velocity (the hidden t4Vector result)
+ * @param arg1  the board wake effect
  * @return @p out
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long long *func_002F7A80(long long *out, cBoardWakeFX* arg1) {
+extern "C" long long *cBoardWakeFX_GetChunkySprayVelocity(long long *out, cBoardWakeFX* arg1) {
     *out = (*(long long *)((char*)((((arg1->mWakeLineSegs) * 0x10) + (((arg1->mCurrentWakeLine) * 0x70) + ((int)arg1->mWakeLines)))) + (-0x10)));
     return out;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7AB0);
+INCLUDE_ASM("visualfx/worldlightman", cBoardWakeFX_writeToReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  *
- * It is paired with func_002F7AB8, which forwards to the cBoardWakeFX function cBoardWakeFX_reset.
+ * It is paired with cBoardWakeFX_readFromReplayFrame, which forwards to the cBoardWakeFX function cBoardWakeFX_reset.
  * Nothing in the retail code references it.
  */
-extern "C" void func_002F7AB0(void) {
+extern "C" void cBoardWakeFX_writeToReplayFrame(void) {
 
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7AB8);
+INCLUDE_ASM("visualfx/worldlightman", cBoardWakeFX_readFromReplayFrame);
 #ifdef SKIP_ASM
 extern "C" void cBoardWakeFX_reset();
 
@@ -2003,25 +2003,25 @@ extern "C" void cBoardWakeFX_reset();
  * cBoardWakeFX_reset sits between the cBoardWakeFX destructor and update, where On Tour
  * declares reset. Nothing in the retail code references it.
  */
-extern "C" void func_002F7AB8(void) {
+extern "C" void cBoardWakeFX_readFromReplayFrame(void) {
     cBoardWakeFX_reset();
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7AD8);
+INCLUDE_ASM("visualfx/worldlightman", cBoardSparkFX_writeToReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  *
- * It is paired with func_002F7AE0, which forwards to the cBoardSparkFX function cBoardSparkFX_reset.
+ * It is paired with cBoardSparkFX_readFromReplayFrame, which forwards to the cBoardSparkFX function cBoardSparkFX_reset.
  * Nothing in the retail code references it.
  */
-extern "C" void func_002F7AD8(void) {
+extern "C" void cBoardSparkFX_writeToReplayFrame(void) {
 
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7AE0);
+INCLUDE_ASM("visualfx/worldlightman", cBoardSparkFX_readFromReplayFrame);
 #ifdef SKIP_ASM
 extern "C" void cBoardSparkFX_reset();
 
@@ -2031,25 +2031,25 @@ extern "C" void cBoardSparkFX_reset();
  * cBoardSparkFX_reset sits between the cBoardSparkFX destructor and update, where On
  * Tour declares reset. Nothing in the retail code references it.
  */
-extern "C" void func_002F7AE0(void) {
+extern "C" void cBoardSparkFX_readFromReplayFrame(void) {
     cBoardSparkFX_reset();
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7B00);
+INCLUDE_ASM("visualfx/worldlightman", cBoardTrailFX_writeToReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  *
- * It is paired with func_002F7B08, which forwards to the cBoardTrailFX function cBoardTrailFX_reset. Nothing in the
+ * It is paired with cBoardTrailFX_readFromReplayFrame, which forwards to the cBoardTrailFX function cBoardTrailFX_reset. Nothing in the
  * retail code references it.
  */
-extern "C" void func_002F7B00(void) {
+extern "C" void cBoardTrailFX_writeToReplayFrame(void) {
 
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7B08);
+INCLUDE_ASM("visualfx/worldlightman", cBoardTrailFX_readFromReplayFrame);
 #ifdef SKIP_ASM
 extern "C" void cBoardTrailFX_reset();
 
@@ -2058,25 +2058,25 @@ extern "C" void cBoardTrailFX_reset();
  *
  * Nothing in the retail code references it.
  */
-extern "C" void func_002F7B08(void) {
+extern "C" void cBoardTrailFX_readFromReplayFrame(void) {
     cBoardTrailFX_reset();
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7B28);
+INCLUDE_ASM("visualfx/worldlightman", cAngerFX_writeToReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  *
- * It is paired with func_002F7B30, which forwards to the cAngerFX function func_002D4BE0. Nothing in the retail code
+ * It is paired with cAngerFX_readFromReplayFrame, which forwards to the cAngerFX function func_002D4BE0. Nothing in the retail code
  * references it.
  */
-extern "C" void func_002F7B28(void) {
+extern "C" void cAngerFX_writeToReplayFrame(void) {
 
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7B30);
+INCLUDE_ASM("visualfx/worldlightman", cAngerFX_readFromReplayFrame);
 #ifdef SKIP_ASM
 extern "C" void func_002D4BE0();
 
@@ -2086,25 +2086,25 @@ extern "C" void func_002D4BE0();
  * func_002D4BE0 is the cAngerFX function after its constructor and destructor. Nothing in the retail code references
  * it.
  */
-extern "C" void func_002F7B30(void) {
+extern "C" void cAngerFX_readFromReplayFrame(void) {
     func_002D4BE0();
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7B50);
+INCLUDE_ASM("visualfx/worldlightman", cPlayerIndicatorFX_writeToReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  *
- * It is paired with func_002F7B58, which forwards to the cPlayerIndicatorFX function
+ * It is paired with cPlayerIndicatorFX_readFromReplayFrame, which forwards to the cPlayerIndicatorFX function
  * cPlayerIndicatorFX_reset. Nothing in the retail code references it.
  */
-extern "C" void func_002F7B50(void) {
+extern "C" void cPlayerIndicatorFX_writeToReplayFrame(void) {
 
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7B58);
+INCLUDE_ASM("visualfx/worldlightman", cPlayerIndicatorFX_readFromReplayFrame);
 #ifdef SKIP_ASM
 extern "C" void cPlayerIndicatorFX_reset();
 
@@ -2114,25 +2114,25 @@ extern "C" void cPlayerIndicatorFX_reset();
  * cPlayerIndicatorFX_reset sits between the cPlayerIndicatorFX destructor and update,
  * where On Tour declares reset. Nothing in the retail code references it.
  */
-extern "C" void func_002F7B58(void) {
+extern "C" void cPlayerIndicatorFX_readFromReplayFrame(void) {
     cPlayerIndicatorFX_reset();
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7B78);
+INCLUDE_ASM("visualfx/worldlightman", cAirStreamerFX_writeToReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  *
- * It is paired with func_002F7B80, which forwards to the cAirStreamerFX function cAirStreamerFX_reset.
+ * It is paired with cAirStreamerFX_readFromReplayFrame, which forwards to the cAirStreamerFX function cAirStreamerFX_reset.
  * Nothing in the retail code references it.
  */
-extern "C" void func_002F7B78(void) {
+extern "C" void cAirStreamerFX_writeToReplayFrame(void) {
 
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7B80);
+INCLUDE_ASM("visualfx/worldlightman", cAirStreamerFX_readFromReplayFrame);
 #ifdef SKIP_ASM
 extern "C" void cAirStreamerFX_reset();
 
@@ -2142,25 +2142,25 @@ extern "C" void cAirStreamerFX_reset();
  * cAirStreamerFX_reset sits between the cAirStreamerFX destructor and update, where On
  * Tour declares reset. Nothing in the retail code references it.
  */
-extern "C" void func_002F7B80(void) {
+extern "C" void cAirStreamerFX_readFromReplayFrame(void) {
     cAirStreamerFX_reset();
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7BA0);
+INCLUDE_ASM("visualfx/worldlightman", cPunchFX_writeToReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  *
- * It is paired with func_002F7BA8, which forwards to the cPunchFX function cPunchFX_reset. Nothing in the
+ * It is paired with cPunchFX_readFromReplayFrame, which forwards to the cPunchFX function cPunchFX_reset. Nothing in the
  * retail code references it.
  */
-extern "C" void func_002F7BA0(void) {
+extern "C" void cPunchFX_writeToReplayFrame(void) {
 
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7BA8);
+INCLUDE_ASM("visualfx/worldlightman", cPunchFX_readFromReplayFrame);
 #ifdef SKIP_ASM
 extern "C" void cPunchFX_reset();
 
@@ -2170,7 +2170,7 @@ extern "C" void cPunchFX_reset();
  * cPunchFX_reset sits between the cPunchFX destructor and update, where On Tour
  * declares reset. Nothing in the retail code references it.
  */
-extern "C" void func_002F7BA8(void) {
+extern "C" void cPunchFX_readFromReplayFrame(void) {
     cPunchFX_reset();
 }
 #endif
@@ -2864,7 +2864,7 @@ extern "C" int *cAvalanche_Seed(void) {
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7E70);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_unresolve);
 #ifdef SKIP_ASM
 extern "C" void cAvalanche_reset();
 
@@ -2873,7 +2873,7 @@ extern "C" void cAvalanche_reset();
  *
  * Nothing in the retail code references it.
  */
-extern "C" void func_002F7E70(void) {
+extern "C" void cAvalanche_unresolve(void) {
     cAvalanche_reset();
 }
 #endif
@@ -2910,20 +2910,20 @@ extern "C" int cAvalanche_isBadCookie(void) {
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7EA0);
+INCLUDE_ASM("visualfx/worldlightman", cSpeedBoostFX_writeToReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  *
- * It is paired with func_002F7EA8, which forwards to the cSpeedBoostFX function cSpeedBoostFX_reset.
+ * It is paired with cSpeedBoostFX_readFromReplayFrame, which forwards to the cSpeedBoostFX function cSpeedBoostFX_reset.
  * Nothing in the retail code references it.
  */
-extern "C" void func_002F7EA0(void) {
+extern "C" void cSpeedBoostFX_writeToReplayFrame(void) {
 
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7EA8);
+INCLUDE_ASM("visualfx/worldlightman", cSpeedBoostFX_readFromReplayFrame);
 #ifdef SKIP_ASM
 extern "C" void cSpeedBoostFX_reset();
 
@@ -2933,25 +2933,25 @@ extern "C" void cSpeedBoostFX_reset();
  * cSpeedBoostFX_reset sits between the cSpeedBoostFX destructor and update, where On
  * Tour declares reset. Nothing in the retail code references it.
  */
-extern "C" void func_002F7EA8(void) {
+extern "C" void cSpeedBoostFX_readFromReplayFrame(void) {
     cSpeedBoostFX_reset();
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7EC8);
+INCLUDE_ASM("visualfx/worldlightman", cTrickBoostFX_writeToReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  *
- * It is paired with func_002F7ED0, which forwards to the cTrickBoostFX function cTrickBoostFX_reset__FPv.
+ * It is paired with cTrickBoostFX_readFromReplayFrame, which forwards to the cTrickBoostFX function cTrickBoostFX_reset__FPv.
  * Nothing in the retail code references it.
  */
-extern "C" void func_002F7EC8(void) {
+extern "C" void cTrickBoostFX_writeToReplayFrame(void) {
 
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7ED0);
+INCLUDE_ASM("visualfx/worldlightman", cTrickBoostFX_readFromReplayFrame);
 #ifdef SKIP_ASM
 extern "C" void cTrickBoostFX_reset__FPv();
 
@@ -2961,31 +2961,31 @@ extern "C" void cTrickBoostFX_reset__FPv();
  * cTrickBoostFX_reset__FPv sits between the cTrickBoostFX destructor and update, where
  * On Tour declares reset. Nothing in the retail code references it.
  */
-extern "C" void func_002F7ED0(void) {
+extern "C" void cTrickBoostFX_readFromReplayFrame(void) {
     cTrickBoostFX_reset__FPv();
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7EF0);
+INCLUDE_ASM("visualfx/worldlightman", cDynamicSprayFX_writeToReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  *
  * Nothing in the retail code references it.
  */
-extern "C" void func_002F7EF0(void) {
+extern "C" void cDynamicSprayFX_writeToReplayFrame(void) {
 
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7EF8);
+INCLUDE_ASM("visualfx/worldlightman", cDynamicSprayFX_readFromReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  *
  * Nothing in the retail code references it.
  */
-extern "C" void func_002F7EF8(void) {
+extern "C" void cDynamicSprayFX_readFromReplayFrame(void) {
 
 }
 #endif
@@ -3084,7 +3084,7 @@ extern "C" void cSplashToggles__cSplashToggles(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7FC0);
+INCLUDE_ASM("visualfx/worldlightman", cAttachedEmitterFX_ShouldDisableSnowTrailSpray);
 #ifdef SKIP_ASM
 /**
  * Returns the int at +0xA0 of @p arg0.
@@ -3094,31 +3094,31 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7FC0);
  * @param arg0  the object
  * @return the value
  */
-extern "C" int func_002F7FC0(void *arg0) {
+extern "C" int cAttachedEmitterFX_ShouldDisableSnowTrailSpray(void *arg0) {
     return (*(int *)((char*)(arg0) + (0xA0)));
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7FC8);
+INCLUDE_ASM("visualfx/worldlightman", cAttachedEmitterFX_writeToReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  *
  * Nothing in the retail code references it.
  */
-extern "C" void func_002F7FC8(void) {
+extern "C" void cAttachedEmitterFX_writeToReplayFrame(void) {
 
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7FD0);
+INCLUDE_ASM("visualfx/worldlightman", cAttachedEmitterFX_readFromReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  *
  * Nothing in the retail code references it.
  */
-extern "C" void func_002F7FD0(void) {
+extern "C" void cAttachedEmitterFX_readFromReplayFrame(void) {
 
 }
 #endif
@@ -3438,7 +3438,7 @@ extern "C" int cCutSceneTransitionMan_GetCurrentState(cCutSceneTransitionMan* cu
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F81E0);
+INCLUDE_ASM("visualfx/worldlightman", cBoltOnFXInterface_BoltOnsHaveBeenUpdated);
 #ifdef SKIP_ASM
 /**
  * Stores 1 in the int at @p arg0.
@@ -3447,7 +3447,7 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F81E0);
  *
  * @param arg0  the int to set
  */
-extern "C" void func_002F81E0(int *arg0) {
+extern "C" void cBoltOnFXInterface_BoltOnsHaveBeenUpdated(int *arg0) {
     *arg0 = 1;
 }
 #endif

@@ -287,7 +287,7 @@ extern "C" void cBraggingRightsMenu_setEnableItem_2DB0(void* panel, void* screen
 
 extern "C" int cBENewPlayerInterface_getPlayerCtrlID(void* iface, int idx);
 extern "C" void cUIMenu_setSelectedByIndex_3338(void* menu, int idx) __asm__("cUIMenu_setSelectedByIndex");
-extern "C" void func_00416210_3338(void* dst, int c, int n) __asm__("func_00416210");
+extern "C" void memset_3338(void* dst, int c, int n) __asm__("memset");
 extern "C" void func_00265700(void* snd);
 extern char str_11[];
 
@@ -334,7 +334,7 @@ extern "C" void cFEStateBraggingRights_onUpdate(cFEStateBraggingRights* self)
             if (vt4[6].fn(vthis(obj, vt4[6])) != 0 && get6F8_3338((char*)self + panelIdx * 0x34) != 0) {
                 char label[5];  // "11", "21" for the second panel
                 *(struct sStr3_3338*)label = *(struct sStr3_3338*)str_11;
-                func_00416210_3338(label + 3, 0, 2);
+                memset_3338(label + 3, 0, 2);
                 cBraggingRightsMenu_setConfirmed(&((sRadioPanel_2DB0*)&self->mMenuCtrl[0])[panelIdx], 0);
                 cBraggingRightsMenu_setEnableItem_2DB0(&((sRadioPanel_2DB0*)&self->mMenuCtrl[0])[panelIdx], self->mpScreen);
                 if (panelIdx != 0)

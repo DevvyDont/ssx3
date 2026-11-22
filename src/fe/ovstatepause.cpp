@@ -2020,12 +2020,12 @@ extern "C" void func_001FD0D8(void* self)
 INCLUDE_ASM("fe/ovstatepause", func_001FD118);
 #ifdef SKIP_ASM
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
-extern "C" void func_002872A8(void* self);
+extern "C" void cSSXAudio_StartEventWithNoStartGate(void* self);
 
 /**
- * Loses focus on the two-player pre-event overlay: stops the online overlay timeout and calls func_002872A8.
+ * Loses focus on the two-player pre-event overlay: stops the online overlay timeout and calls cSSXAudio_StartEventWithNoStartGate.
  *
- * Sets cGameComm_mGameComm's mOverlayTimeout to -1 when there is a link, then calls func_002872A8 on the sound system
+ * Sets cGameComm_mGameComm's mOverlayTimeout to -1 when there is a link, then calls cSSXAudio_StartEventWithNoStartGate on the sound system
  * (cAudioInterface_bxAudio()).
  */
 extern "C" void func_001FD118(void)
@@ -2034,7 +2034,7 @@ extern "C" void func_001FD118(void)
     if (gameComm != 0) {
         gameComm->mOverlayTimeout = -1;
     }
-    func_002872A8(cAudioInterface_bxAudio());
+    cSSXAudio_StartEventWithNoStartGate(cAudioInterface_bxAudio());
 }
 #endif
 
@@ -2361,14 +2361,14 @@ struct sPauseMgr_DB88 {
     int f8;
 };
 
-extern "C" void func_002872A8(void* snd);
+extern "C" void cSSXAudio_StartEventWithNoStartGate(void* snd);
 
 /**
  * Starts the rival challenge when the pre-event overlay's button is selected.
  *
  * On event 5 (select) with a widget: sets cOVStateManager_mStatus to 3 (close the overlay), sets the word at +0x8 of
  * the current game state (SSXApp->Game->mCurrentState) to 1 as the overlay manager does to let the game state continue,
- * calls func_002872A8 on the sound system (cAudioInterface_bxAudio()) and pops the top state of the engine's state stack
+ * calls cSSXAudio_StartEventWithNoStartGate on the sound system (cAudioInterface_bxAudio()) and pops the top state of the engine's state stack
  * (cUIStateStack_pop(mpEngine + 0x18, 1)).
  *
  * @param widget  the widget the event is for; nothing happens when it is null
@@ -2379,7 +2379,7 @@ extern "C" void func_001FDB88(void* self, int widget, int event)
     if (widget != 0 && event == 5) {
         cOVStateManager_mStatus = 3;
         ((sPauseMgr_DB88*)((SSXApp)->Game)->mCurrentState)->f8 = 1;
-        func_002872A8(cAudioInterface_bxAudio());
+        cSSXAudio_StartEventWithNoStartGate(cAudioInterface_bxAudio());
         cUIStateStack_pop(*(char**)((char*)self + 0x10) + 0x18, 1);
     }
 }

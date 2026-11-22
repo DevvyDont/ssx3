@@ -487,7 +487,7 @@ static inline float limitStep_EDA0(float v, float prev, float lim)
  * around the rider, with every racer, the course markers and the percentage done.
  *
  * It draws nothing until the progress table has been updated (D_004A2760 clear), while the tracker is off (D_004A275C,
- * func_0021CB90), without a rider or without course data. The viewer is the rider's AI index (the cBeing at rider +
+ * cHUDRadar_ShowRadar), without a rider or without course data. The viewer is the rider's AI index (the cBeing at rider +
  * 0x6C0). First each racer's lateral offset from the viewer (its slot position minus the viewer's, clamped to +-2000)
  * is smoothed into the slot (+0x10), moving at most 46.3 per frame unless the slot is invalid, and all slots are
  * invalidated when the viewer changed since the last draw (+0x34). The drawing runs inside cPS2GraphicsMan_PushView and

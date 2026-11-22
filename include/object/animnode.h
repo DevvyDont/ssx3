@@ -62,7 +62,7 @@ struct cAnimNode {
     unsigned int SortIndex;         // 0x28 [O] cSortObjNodeState
     tInstanceRecord* Instance;      // 0x2C [O] cInstanceNode::Instance; [U] the ctors / setAnimMeshCache / makeAnimMats
                                     //      read its model (+0x80); calcPosition compares it with its record argument;
-                                    //      func_0034EBA0 (frameUpdate) runs its frame-update script
+                                    //      cAnimNode_frameUpdate (frameUpdate) runs its frame-update script
     tModifierBlock* ModifierBlock;  // 0x30 [O] cMoveNode
     int Debounce;                   // 0x34 [O] cMoveNode
     float Fade;                     // 0x38 [O] cMoveNode

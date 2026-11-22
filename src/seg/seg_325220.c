@@ -197,7 +197,7 @@ INCLUDE_ASM("seg/seg_325220", func_00424220);
 /**
  * Marks the DECI2 console channel as closed so the next console read or write reopens it.
  *
- * Clears D_00455168, the flag func_00424368 and func_004243E8 set after func_00425260 opened the channel. sceSifSyncIop
+ * Clears D_00455168, the flag _write and _read set after func_00425260 opened the channel. sceSifSyncIop
  * calls it after the IOP has been rebooted.
  */
 void func_00424220(void) {
@@ -264,7 +264,7 @@ unsigned long func_004242C0(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00424368);
+INCLUDE_ASM("seg/seg_325220", _write);
 #ifdef SKIP_ASM
 extern int func_00425260(void);
 extern int func_00425040(int, int);
@@ -280,7 +280,7 @@ extern int func_00425040(int, int);
  * @param byteCount  the byte count
  * @return the bytes taken, or -1
  */
-int func_00424368(int fileDesc, int buffer, int byteCount) {
+int _write(int fileDesc, int buffer, int byteCount) {
     if (fileDesc == 1 || fileDesc == 2) {
         if (D_00455168 == 0) {
             if (func_00425260() == 0) {
@@ -295,7 +295,7 @@ int func_00424368(int fileDesc, int buffer, int byteCount) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_004243E8);
+INCLUDE_ASM("seg/seg_325220", _read);
 #ifdef SKIP_ASM
 extern int func_00425260(void);
 extern int func_00425190(int, int);
@@ -310,7 +310,7 @@ extern int func_00425190(int, int);
  * @param byteCount  the maximum byte count
  * @return the bytes read, or -1
  */
-int func_004243E8(int fileDesc, int buffer, int byteCount) {
+int _read(int fileDesc, int buffer, int byteCount) {
     if (fileDesc == 0) {
         if (D_00455168 == 0) {
             if (func_00425260() == 0) {
@@ -325,7 +325,7 @@ int func_004243E8(int fileDesc, int buffer, int byteCount) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00424460);
+INCLUDE_ASM("seg/seg_325220", _open);
 #ifdef SKIP_ASM
 extern int *__errno(void);
 /**
@@ -336,14 +336,14 @@ extern int *__errno(void);
  *
  * @return -1
  */
-int func_00424460(void) {
+int _open(void) {
     *__errno() = 5;
     return -1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00424488);
+INCLUDE_ASM("seg/seg_325220", _close);
 #ifdef SKIP_ASM
 /**
  * Returns -1: closing a descriptor is not supported (errno is left alone).
@@ -352,7 +352,7 @@ INCLUDE_ASM("seg/seg_325220", func_00424488);
  *
  * @return -1
  */
-int func_00424488(void) {
+int _close(void) {
     return -1;
 }
 #endif
@@ -373,7 +373,7 @@ int func_00424490(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00424498);
+INCLUDE_ASM("seg/seg_325220", _lseek);
 #ifdef SKIP_ASM
 /**
  * Returns -1: seeking a descriptor is not supported (errno is left alone).
@@ -382,13 +382,13 @@ INCLUDE_ASM("seg/seg_325220", func_00424498);
  *
  * @return -1
  */
-int func_00424498(void) {
+int _lseek(void) {
     return -1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_004244A0);
+INCLUDE_ASM("seg/seg_325220", _sbrk);
 #ifdef SKIP_ASM
 extern unsigned D_0045516C;
 extern unsigned EndOfHeap(void);
@@ -403,7 +403,7 @@ extern int *__errno(void);
  * @param n  the byte change
  * @return the previous break, or 0xFFFFFFFF
  */
-unsigned func_004244A0(unsigned n) {
+unsigned _sbrk(unsigned n) {
     int s, st;
     unsigned end;
     MFC0_STATUS_4248(s);
@@ -444,7 +444,7 @@ int func_00424550(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00424558);
+INCLUDE_ASM("seg/seg_325220", _fstat);
 #ifdef SKIP_ASM
 /**
  * Fills a stat buffer as a character device for any descriptor and returns 0.
@@ -456,7 +456,7 @@ INCLUDE_ASM("seg/seg_325220", func_00424558);
  * @param statBuf   the stat buffer
  * @return 0
  */
-long func_00424558(int fileDesc, char *statBuf) {
+long _fstat(int fileDesc, char *statBuf) {
     *(int *)(statBuf + 4) = 0x2000;
     *(long *)(statBuf + 0x48) = 0;
     return 0;
@@ -1181,7 +1181,7 @@ int func_00425040_d(char *buf, int len) __asm__("func_00425040");
  * Fails when a send is in progress (fC). With interrupts off (DIntr) it builds the packet in the uncached buffer
  * D_0052B900: payload from +12, each '\n' expanded to "\r\n", at most 256 payload bytes (the rest is left to the
  * caller). It sets wlen and the packet length, requests the send with sceDeci2ReqSend and polls sceDeci2Poll until
- * func_00424EA8 clears fC, then calls EIntr. func_00424368 calls it.
+ * func_00424EA8 clears fC, then calls EIntr. _write calls it.
  *
  * @param buf  the bytes
  * @param len  the byte count
@@ -1231,7 +1231,7 @@ INCLUDE_ASM("seg/seg_325220", func_00425190);
  * Reads console input from the ring into a buffer, up to n bytes or through the first line end, and returns the count.
  *
  * Busy-waits while the ring (D_0052B8E8) is empty, takes one byte at a time with func_00424E68, and stops after a '\n'
- * or '\r'. func_004243E8 calls it.
+ * or '\r'. _read calls it.
  *
  * @param bufAddr  the destination
  * @param n   the maximum byte count
@@ -1844,7 +1844,7 @@ extern sCmdHandler_5D38 D_0052BD00[32];
 extern int D_0052BCC0[5];       /* change-address / init packet */
 extern int D_0052BCD4;          /* DMAC 5 handler id */
 extern int func_00426230();
-extern int f5D38_adddh(int, int (*)(), int) __asm__("func_00423AB0");
+extern int f5D38_adddh(int, int (*)(), int) __asm__("AddDmacHandler");
 extern void sceSifSetDChain(void);
 extern int sceSifGetReg(int a0);
 extern unsigned int f5D38_getreg(unsigned int) __asm__("sceSifGetReg");
@@ -1859,7 +1859,7 @@ extern int f5D38_send(int, void *, int, void *, void *, int) __asm__("sceSifSend
  * D_0052BE00.
  *
  * After FlushCache(0) it acknowledges DMA status bit 5 (0x1000E010), sets the SIF DMA chain up with sceSifSetDChain
- * when 0x1000C000 bit 8 is clear, installs func_00426230 as the DMA channel 5 handler (func_00423AB0) and enables it
+ * when 0x1000C000 bit 8 is clear, installs func_00426230 as the DMA channel 5 handler (AddDmacHandler) and enables it
  * (EnableDmac). If the IOP's buffer address is already in SIF register 0x80000000 it sends the init packet
  * D_0052BCC0 as command 0x80000000; otherwise it waits for register 4 bit 0x20000, reads the IOP buffer from register
  * 2, publishes both addresses in registers 0x80000000 and 0x80000001 and sends command 0x80000002. The RPC set-up
@@ -2382,12 +2382,12 @@ void f6708(struct A6708 *endRequest) {
 INCLUDE_ASM("seg/seg_325220", func_004267C0);
 #ifdef SKIP_ASM
 extern int isceSifSendCmd(int a0, int a1, int a2, int a3, int a4, int a5);
-extern void func_00423B80(int a0, int (*a1)(int, int, int *), int *a2);
+extern void iSetAlarm(int a0, int (*a1)(int, int, int *), int *a2);
 /**
  * Retries sending an RPC reply from an alarm until the command DMA accepts it.
  *
  * Sends the 0x40-byte packet as command 0x80000008 with its extra data (packet words 9..11) through isceSifSendCmd; when
- * that fails it re-arms itself with func_00423B80 (10 ticks). Declared int but returns no value. func_00426820 sets the
+ * that fails it re-arms itself with iSetAlarm (10 ticks). Declared int but returns no value. func_00426820 sets the
  * first alarm.
  *
  * @param alarmId    the alarm id (unused)
@@ -2396,7 +2396,7 @@ extern void func_00423B80(int a0, int (*a1)(int, int, int *), int *a2);
  */
 int func_004267C0(int alarmId, int alarmTime, int *packet) {
     if (isceSifSendCmd(0x80000008, (int)packet, 0x40, packet[9], packet[10], packet[11]) == 0) {
-        func_00423B80(10, func_004267C0, packet);
+        iSetAlarm(10, func_004267C0, packet);
     }
 }
 #endif
@@ -2407,7 +2407,7 @@ INCLUDE_ASM("seg/seg_325220", func_00426820);
 extern int func_00426698(sSifRpcState *a0);
 extern int func_004266C8(sSifRpcState *a0, int a1);
 extern int isceSifSendCmd(int a0, int a1, int a2, int a3, int a4, int a5);
-extern void func_00423B80(int a0, int (*a1)(int, int, int *), int *a2);
+extern void iSetAlarm(int a0, int (*a1)(int, int, int *), int *a2);
 extern int func_004267C0(int a0, int a1, int *p);
 extern int func_004266C8_u(sSifRpcState *, unsigned) __asm__("func_004266C8");
 /**
@@ -2415,7 +2415,7 @@ extern int func_004266C8_u(sSifRpcState *, unsigned) __asm__("func_004266C8");
  *
  * Takes a reply packet (the numbered one when request flag 4 is set, else round robin), copies the packet address and
  * client, sets the type 0x8000000C and the source, destination and size, and sends it as command 0x80000008 with the
- * block as extra data through isceSifSendCmd. When the DMA queue is full it retries from an alarm (func_00423B80 with
+ * block as extra data through isceSifSendCmd. When the DMA queue is full it retries from an alarm (iSetAlarm with
  * func_004267C0). func_00426408 installs it for command 0x8000000C.
  *
  * @param request   the received request packet
@@ -2440,7 +2440,7 @@ void func_00426820(int *request, sSifRpcState *rpcState) {
     reply[10] = request[9];
     reply[11] = request[10];
     if (isceSifSendCmd(0x80000008, (int)reply, 0x40, request[8], request[9], request[10]) == 0) {
-        func_00423B80(10, func_004267C0, reply);
+        iSetAlarm(10, func_004267C0, reply);
     }
 }
 #endif
@@ -3549,12 +3549,12 @@ INCLUDE_ASM("seg/seg_325220", func_00427C98);
 #ifdef SKIP_ASM
 extern char D_00455164[];
 extern char *D_00455220;
-extern int func_00415FC8(char *, char *, int);
+extern int memcmp(char *, char *, int);
 /**
  * Returns whether the bound file server's version tag is one the library does not accept.
  *
  * Compares the 4-byte tag D_0052EE28 (set by func_00427A90) with the library's "2710" (D_00455164) and with the tag
- * D_00455220 points at ("....", D_0049AD48) using func_00415FC8 (memcmp). Returns 0 when it equals either; otherwise
+ * D_00455220 points at ("....", D_0049AD48) using memcmp (memcmp). Returns 0 when it equals either; otherwise
  * the result of comparing the two accepted tags, which always differ, so 1. sceOpen refuses to open files then.
  *
  * @return 1 when the server's tag matches neither accepted tag, else 0
@@ -3563,9 +3563,9 @@ int func_00427C98(void) {
     char *libVersion = D_00455164;
     char *serverVersion = D_0052EE28.b;
     int mismatch = 0;
-    if (func_00415FC8(serverVersion, libVersion, 4) != 0 &&
-        func_00415FC8(serverVersion, D_00455220, 4) != 0) {
-        mismatch = func_00415FC8(libVersion, D_00455220, 4) != 0;
+    if (memcmp(serverVersion, libVersion, 4) != 0 &&
+        memcmp(serverVersion, D_00455220, 4) != 0) {
+        mismatch = memcmp(libVersion, D_00455220, 4) != 0;
     }
     return mismatch;
 }
@@ -3574,18 +3574,18 @@ int func_00427C98(void) {
 //100%
 INCLUDE_ASM("seg/seg_325220", sceFsReset);
 #ifdef SKIP_ASM
-extern void func_00416210(void *a0, int a1, int a2);
+extern void memset(void *a0, int a1, int a2);
 /**
  * Marks the file library as uninitialised so the next file call rebinds the server.
  *
- * Clears D_0045520C and zeroes the 4-byte server version D_0052EE28 (func_00416210, memset). func_00319610 calls it
+ * Clears D_0045520C and zeroes the 4-byte server version D_0052EE28 (memset, memset). func_00319610 calls it
  * after rebooting the IOP.
  *
  * @return 0
  */
 int sceFsReset(void) {
     D_0045520C = 0;
-    func_00416210(&D_0052EE28, 0, 4);
+    memset(&D_0052EE28, 0, 4);
     return 0;
 }
 #endif
@@ -5857,12 +5857,12 @@ INCLUDE_ASM("seg/seg_325220", func_0042B168);
 #ifdef SKIP_ASM
 extern char D_00455164[];
 extern char *D_0045522C;
-extern int func_00415FC8(char *, char *, int);
+extern int memcmp(char *, char *, int);
 /**
  * Returns whether the bound module-loader server's version tag is one the library does not accept.
  *
  * Same test as func_00427C98 on D_0052F2A8: 0 when it equals the library's "2710" (D_00455164) or the tag D_0045522C
- * points at (func_00415FC8, memcmp), else 1 (the final compare of the two accepted tags always differs).
+ * points at (memcmp, memcmp), else 1 (the final compare of the two accepted tags always differs).
  *
  * @return 1 when the tag matches neither accepted tag, else 0
  */
@@ -5870,9 +5870,9 @@ int func_0042B168(void) {
     char *libVersion = D_00455164;
     char *serverVersion = D_0052F2A8.b;
     int mismatch = 0;
-    if (func_00415FC8(serverVersion, libVersion, 4) != 0 &&
-        func_00415FC8(serverVersion, D_0045522C, 4) != 0) {
-        mismatch = func_00415FC8(libVersion, D_0045522C, 4) != 0;
+    if (memcmp(serverVersion, libVersion, 4) != 0 &&
+        memcmp(serverVersion, D_0045522C, 4) != 0) {
+        mismatch = memcmp(libVersion, D_0045522C, 4) != 0;
     }
     return mismatch;
 }
@@ -5881,9 +5881,9 @@ int func_0042B168(void) {
 //100%
 INCLUDE_ASM("seg/seg_325220", sceSifLoadFileReset);
 #ifdef SKIP_ASM
-extern void func_00416210(void *a0, int a1, int a2);
+extern void memset(void *a0, int a1, int a2);
 /**
- * Marks the module-loader server as unbound (D_00455228 = -1) and zeroes its version D_0052F2A8 (func_00416210).
+ * Marks the module-loader server as unbound (D_00455228 = -1) and zeroes its version D_0052F2A8 (memset).
  *
  * The next module-loader call rebinds it (func_0042B068). No caller in this build.
  *
@@ -5891,7 +5891,7 @@ extern void func_00416210(void *a0, int a1, int a2);
  */
 int sceSifLoadFileReset(void) {
     D_00455228 = -1;
-    func_00416210(&D_0052F2A8, 0, 4);
+    memset(&D_0052F2A8, 0, 4);
     return 0;
 }
 #endif
@@ -7533,14 +7533,14 @@ INCLUDE_ASM("seg/seg_325220", func_0042CCB8);
  * Calls EE kernel syscall 86 with the caller's arguments (index, PageMask,
  * EntryHi, EntryLo0, EntryLo1).
  *
- * Loads the number into $v1 and executes `syscall`. Called by func_0042CCC8 (index-checked) and the TLB set-up
+ * Loads the number into $v1 and executes `syscall`. Called by SetTLBEntry (index-checked) and the TLB set-up
  * func_0042CD98.
  */
 SYSCALL_STUB(func_0042CCB8, 86)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_0042CCC8);
+INCLUDE_ASM("seg/seg_325220", SetTLBEntry);
 #ifdef SKIP_ASM
 extern int func_0042CCB8(int a0);
 /**
@@ -7552,7 +7552,7 @@ extern int func_0042CCB8(int a0);
  * @param tlbIndex  the TLB entry index
  * @return the syscall's result, or -1 for an index outside 13-47
  */
-int func_0042CCC8(int tlbIndex) {
+int SetTLBEntry(int tlbIndex) {
     if ((unsigned int)(tlbIndex - 13) >= 35)
         return -1;
     return func_0042CCB8(tlbIndex);

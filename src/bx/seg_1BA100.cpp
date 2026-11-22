@@ -403,7 +403,7 @@ struct Obj_93B8 {
     int* p80;
     int* p84;
 };
-extern "C" void* func_00416210(void*, int, unsigned int);
+extern "C" void* memset(void*, int, unsigned int);
 
 /**
  * Resets the current play-option level (mInst) to the defaults.
@@ -420,7 +420,7 @@ extern "C" void cSndPlayOpts_OPTS_Reset(Obj_93B8* playOpts) {
     playOpts->p34[playOpts->idx] = 0;
     playOpts->vals[playOpts->idx] = playOpts->recs[playOpts->idx].v;
     playOpts->p3C[playOpts->idx] = 0;
-    func_00416210((char*)playOpts + playOpts->idx * 8 + 0x40, 0, 8);
+    memset((char*)playOpts + playOpts->idx * 8 + 0x40, 0, 8);
     playOpts->p60[playOpts->idx] = 0;
     playOpts->p64[playOpts->idx] = 0;
     playOpts->p68[playOpts->idx] = 0;
@@ -463,7 +463,7 @@ struct Obj_95B0 {
     int* p80;
     int* p84;
 };
-extern "C" void* func_00416210(void*, int, unsigned int);
+extern "C" void* memset(void*, int, unsigned int);
 
 /**
  * Pushes a new play-option level: increments mInst, then resets that level as cSndPlayOpts_OPTS_Reset does.
@@ -483,7 +483,7 @@ extern "C" void cSndPlayOpts_OPTS_Open(Obj_95B0* playOpts) {
     playOpts->p34[playOpts->idx] = 0;
     playOpts->vals[playOpts->idx] = playOpts->recs[playOpts->idx].v;
     playOpts->p3C[playOpts->idx] = 0;
-    func_00416210((char*)playOpts + playOpts->idx * 8 + 0x40, 0, 8);
+    memset((char*)playOpts + playOpts->idx * 8 + 0x40, 0, 8);
     playOpts->p60[playOpts->idx] = 0;
     playOpts->p64[playOpts->idx] = 0;
     playOpts->p68[playOpts->idx] = 0;
@@ -1292,7 +1292,7 @@ struct Obj_9FF8 {
     int* p80;
     int* p84;
 };
-extern "C" void* func_00416210(void*, int, unsigned int);
+extern "C" void* memset(void*, int, unsigned int);
 
 
 struct Outer_9FF8 { char pad[0x1D8]; Obj_9FF8 sub; };
@@ -1313,7 +1313,7 @@ extern "C" void cBankSys_SFX_Begin(Outer_9FF8** bankSys) {
     playOpts->p34[bankManager->sub.idx] = 0;
     playOpts->vals[bankManager->sub.idx] = playOpts->recs[bankManager->sub.idx].v;
     playOpts->p3C[bankManager->sub.idx] = 0;
-    func_00416210((char*)playOpts + bankManager->sub.idx * 8 + 0x40, 0, 8);
+    memset((char*)playOpts + bankManager->sub.idx * 8 + 0x40, 0, 8);
     playOpts->p60[bankManager->sub.idx] = 0;
     playOpts->p64[bankManager->sub.idx] = 0;
     playOpts->p68[bankManager->sub.idx] = 0;
@@ -1356,7 +1356,7 @@ struct Obj_A208 {
     int* p80;
     int* p84;
 };
-extern "C" void* func_00416210(void*, int, unsigned int);
+extern "C" void* memset(void*, int, unsigned int);
 
 
 struct Outer_A208 { char pad[0x1D8]; Obj_A208 sub; };
@@ -1380,7 +1380,7 @@ extern "C" void cBankSys_SFX_Begin1(Arg_A208* bankSys, int bank) {
     playOpts->p34[bankManager->sub.idx] = 0;
     playOpts->vals[bankManager->sub.idx] = playOpts->recs[bankManager->sub.idx].v;
     playOpts->p3C[bankManager->sub.idx] = 0;
-    func_00416210((char*)playOpts + bankManager->sub.idx * 8 + 0x40, 0, 8);
+    memset((char*)playOpts + bankManager->sub.idx * 8 + 0x40, 0, 8);
     playOpts->p60[bankManager->sub.idx] = 0;
     playOpts->p64[bankManager->sub.idx] = 0;
     playOpts->p68[bankManager->sub.idx] = 0;
@@ -1409,7 +1409,7 @@ struct sSoundSysView { char pad[0x1D8]; sSndPlayOpts sub; };
 // sits at +0x1D8), then two per-level int arrays.
 struct sSndOptsUser { sSoundSysView* o; int* vals; int* vals2; };
 
-extern "C" void* func_00416210(void*, int, unsigned int);
+extern "C" void* memset(void*, int, unsigned int);
 
 /**
  * Starts an SFX setup for a bank and patch: pushes a play-option level and sets both.
@@ -1431,7 +1431,7 @@ extern "C" void cBankSys_SFX_Begin2(sSndOptsUser* bankSys, int bank, int patch) 
     playOpts->p34[bankManager->sub.idx] = 0;
     playOpts->vals[bankManager->sub.idx] = playOpts->recs[bankManager->sub.idx].v;
     playOpts->p3C[bankManager->sub.idx] = 0;
-    func_00416210((char*)playOpts + bankManager->sub.idx * 8 + 0x40, 0, 8);
+    memset((char*)playOpts + bankManager->sub.idx * 8 + 0x40, 0, 8);
     playOpts->p60[bankManager->sub.idx] = 0;
     playOpts->p64[bankManager->sub.idx] = 0;
     playOpts->p68[bankManager->sub.idx] = 0;
@@ -1454,7 +1454,7 @@ extern "C" void cBankSys_SFX_Begin2(sSndOptsUser* bankSys, int bank, int patch) 
 INCLUDE_ASM("bx/seg_1BA100", cBankSys_SFX_Play2D);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* func_00416210(void*, int, unsigned int);
+extern "C" void* memset(void*, int, unsigned int);
 
 extern "C" int cBankSys_SFX_End(void*);
 /**
@@ -1477,7 +1477,7 @@ extern "C" void cBankSys_SFX_Play2D(sSndOptsUser* bankSys, int bank, int patch) 
     playOpts->p34[bankManager->sub.idx] = 0;
     playOpts->vals[bankManager->sub.idx] = playOpts->recs[bankManager->sub.idx].v;
     playOpts->p3C[bankManager->sub.idx] = 0;
-    func_00416210((char*)playOpts + bankManager->sub.idx * 8 + 0x40, 0, 8);
+    memset((char*)playOpts + bankManager->sub.idx * 8 + 0x40, 0, 8);
     playOpts->p60[bankManager->sub.idx] = 0;
     playOpts->p64[bankManager->sub.idx] = 0;
     playOpts->p68[bankManager->sub.idx] = 0;
@@ -1501,7 +1501,7 @@ extern "C" void cBankSys_SFX_Play2D(sSndOptsUser* bankSys, int bank, int patch) 
 INCLUDE_ASM("bx/seg_1BA100", cBankSys_SFX_Play2DVol);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* func_00416210(void*, int, unsigned int);
+extern "C" void* memset(void*, int, unsigned int);
 
 #define MIN_A920(a,b) ((a) < (b) ? (a) : (b))
 #define MAX_A920(a,b) ((a) < (b) ? (b) : (a))
@@ -1528,7 +1528,7 @@ extern "C" void cBankSys_SFX_Play2DVol(sSndOptsUser* bankSys, int bank, int patc
     playOpts->p34[bankManager->sub.idx] = 0;
     playOpts->vals[bankManager->sub.idx] = playOpts->recs[bankManager->sub.idx].v;
     playOpts->p3C[bankManager->sub.idx] = 0;
-    func_00416210((char*)playOpts + bankManager->sub.idx * 8 + 0x40, 0, 8);
+    memset((char*)playOpts + bankManager->sub.idx * 8 + 0x40, 0, 8);
     playOpts->p60[bankManager->sub.idx] = 0;
     playOpts->p64[bankManager->sub.idx] = 0;
     playOpts->p68[bankManager->sub.idx] = 0;
@@ -1735,7 +1735,7 @@ extern "C" long cMusicSys_MUSIC_GetDefaultActiveMap(cMusicSys* musicSys) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BACE0);
+INCLUDE_ASM("bx/seg_1BA100", cMusicSys_setCurrentSongNum);
 #ifdef SKIP_ASM
 /**
  * Sets the current song index, mCurrentSongNum, to @p songNum.
@@ -1743,7 +1743,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BACE0);
  * @param musicSys  the cMusicSys
  * @param songNum  the song index
  */
-extern "C" void func_002BACE0(cMusicSys* musicSys, int songNum) {
+extern "C" void cMusicSys_setCurrentSongNum(cMusicSys* musicSys, int songNum) {
     (musicSys->mCurrentSongNum) = songNum;
 }
 #endif
@@ -1882,7 +1882,7 @@ extern "C" void cSSXAudio_SetRailSurface(cSSXAudio* audio, int railType) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BAD60);
+INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetSFXPaused);
 #ifdef SKIP_ASM
 /**
  * Returns cSSXAudio's mSFXPaused flag.
@@ -1890,13 +1890,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BAD60);
  * @param audio  the cSSXAudio
  * @return mSFXPaused
  */
-extern "C" int func_002BAD60(void *audio) {
+extern "C" int cSSXAudio_GetSFXPaused(void *audio) {
     return (*(int *)((char*)(audio) + (0x5FB0)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BAD68);
+INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetRadioModeID);
 #ifdef SKIP_ASM
 /**
  * Returns cSSXAudio's unk_608C (2 selects a radio path in several methods).
@@ -1904,7 +1904,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BAD68);
  * @param audio  the cSSXAudio
  * @return unk_608C
  */
-extern "C" int func_002BAD68(void *audio) {
+extern "C" int cSSXAudio_GetRadioModeID(void *audio) {
     return (*(int *)((char*)(audio) + (0x608C)));
 }
 #endif
@@ -1983,7 +1983,7 @@ extern "C" int func_002BADA0(void *audio) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BADA8);
+INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetMode);
 #ifdef SKIP_ASM
 /**
  * Returns cSSXAudio's audio mode, mAudioMode (eSOUNDDEF_MODE).
@@ -1991,7 +1991,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BADA8);
  * @param audio  the cSSXAudio
  * @return mAudioMode
  */
-extern "C" int func_002BADA8(void *audio) {
+extern "C" int cSSXAudio_GetMode(void *audio) {
     return (*(int *)((char*)(audio) + (0x62B0)));
 }
 #endif
@@ -2011,7 +2011,7 @@ extern "C" int func_002BADB0(void *audio) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BADB8);
+INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetArcadeSFX);
 #ifdef SKIP_ASM
 /**
  * Returns cSSXAudio's mArcadeSFX flag.
@@ -2019,7 +2019,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BADB8);
  * @param audio  the cSSXAudio
  * @return mArcadeSFX
  */
-extern "C" int func_002BADB8(void *audio) {
+extern "C" int cSSXAudio_GetArcadeSFX(void *audio) {
     return (*(int *)((char*)(audio) + (0x62B4)));
 }
 #endif
@@ -2091,16 +2091,16 @@ extern "C" void func_002BADD0(Node_ADD0* node, List_ADD0** out) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", func_002BAEE8);
 #ifdef SKIP_ASM
-extern "C" void func_002B8818(int, int);
+extern "C" void __sti__all_in_one_sound_cpp(int, int);
 
 /**
- * Runs func_002B8818(1, 0xFFFF): the global constructor entry listed in the constructor table at 0x43CE88.
+ * Runs __sti__all_in_one_sound_cpp(1, 0xFFFF): the global constructor entry listed in the constructor table at 0x43CE88.
  *
- * func_002B8818 is the static initializer in sound/icepick/worldtriggermanager; (1, 0xFFFF) asks it to initialise at
+ * __sti__all_in_one_sound_cpp is the static initializer in sound/icepick/worldtriggermanager; (1, 0xFFFF) asks it to initialise at
  * the default priority.
  */
 extern "C" void func_002BAEE8(void) {
-    func_002B8818(1, 0xFFFF);
+    __sti__all_in_one_sound_cpp(1, 0xFFFF);
 }
 #endif
 

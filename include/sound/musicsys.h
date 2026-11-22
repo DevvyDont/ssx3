@@ -39,7 +39,7 @@ struct cMusicSys {
     int mNumFESongs;                          // 0x03EC [P] MUSIC_GetNumFESongs (retail 0x2BAC70); [R] ctor counts ADDTOFE = 1; [U] func_002B4070 loop bound
     int mCurrentSongNum;                      // 0x03F0 [P] MUSIC_GetCurrentSongNum (retail 0x2BAC90); retail setter 0x2BACE0; [U] func_002B41E8/func_002B42B8 step it through mActiveMap
     char unk_3F4[0x4];                        // 0x03F4 padding (mActiveMap is 8-aligned)
-    unsigned long mActiveMap;                 // 0x03F8 PORT: 64-bit long on the EE. [P] MUSIC_StoreDefaultActiveMap (ld); [R] ctor sets bit n for song n; [U] func_002B3EE8/func_002B3FE8/func_002B4068/func_002B4AF0
+    unsigned long mActiveMap;                 // 0x03F8 PORT: 64-bit long on the EE. [P] MUSIC_StoreDefaultActiveMap (ld); [R] ctor sets bit n for song n; [U] func_002B3EE8/func_002B3FE8/cMusicSys_getActiveMap/func_002B4AF0
     unsigned long mDefaultActiveMap;          // 0x0400 [P] MUSIC_StoreDefaultActiveMap (sd) / MUSIC_GetDefaultActiveMap (retail 0x2BACD8)
     cSongInstance* mCurrent;                  // 0x0408 [P] MUSIC_Current (retail 0x2BAC30), MUSIC_GetStreamHandle, MUSIC_SetDelay; [U] func_002B3838: func_002B1B98 = cMemMan_alloc(0xC4, "SongInstance") + ctor func_002B1C50; dtor func_002B1F78
     float unk_40C;                            // 0x040C [U] func_002B3D80: volume fade step per tick; func_002B3E20 (monitor callback) adds it

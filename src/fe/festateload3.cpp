@@ -2,7 +2,7 @@
 
 INCLUDE_ASM("fe/festateload3", cFELoadScreen_load);
 
-INCLUDE_ASM("fe/festateload3", func_00233640);
+INCLUDE_ASM("fe/festateload3", cFELoadScreen_loadTexture);
 
 INCLUDE_ASM("fe/festateload3", cFELoadScreen_gainFocus);
 

@@ -22,7 +22,7 @@
 // Base: cFEMemCard (fe/fememcard.h, 0x22C) : cOVState (fe/ovstate.h, 0x9C) : cUIState : cListNode (vptr at 0x8).
 // func_00186A08 runs cFEMemCard_cFEMemCard2(this, pEngine, 2) and stores cFEStateMemCard_vtbl (0x0046B570: 1 dtor,
 // 4 onCreateScreen, 8 onInputBegin__FPv, 12 onUpdate, 17 onPopupEvent, 19 onWidgetEvent, 20 onWidgetMenu__FPv,
-// 26 displayStatus, 33 updateDone, 37 func_001DE948 (hideActionButtons, empty); the rest cFEMemCard's / cOVState's /
+// 26 displayStatus, 33 updateDone, 37 cFEStateMemCard_hideActionButtons (hideActionButtons, empty); the rest cFEMemCard's / cOVState's /
 // cUIState's); the dtor stores it, clears mInstance and runs cFEMemCard__cFEMemCard.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. The base classes

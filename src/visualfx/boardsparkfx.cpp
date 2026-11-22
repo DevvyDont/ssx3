@@ -43,7 +43,7 @@ extern "C" void tParticleEmitter_setSize(void* self, float a, float b, float c);
 extern "C" void tParticleEmitter_setLife(void* self, float a, float b);
 extern "C" void tParticleEmitter_stopMotion(void* self);
 extern "C" void tParticleEmitter_setTime(void* self, float val);
-extern "C" void func_00416210(void* dst, int c, int n);
+extern "C" void memset(void* dst, int c, int n);
 extern "C" void cBoardSparkFX_reset(cBoardSparkFX* self);
 
 struct sBsVec4 {
@@ -66,7 +66,7 @@ struct sBsIds {
 struct sBsSlot {
     char data[0x10];
     sBsIds ids;
-    sBsSlot() { func_00416210(data, 0, 0x10); }
+    sBsSlot() { memset(data, 0, 0x10); }
     void* operator new(unsigned int, void* p) { return p; }
 };
 

@@ -5433,7 +5433,7 @@ void* cBoostNode__cBoostNode(void* vself)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cBoostNode_update);
 #ifdef SKIP_ASM
-extern "C" int func_002D1AF0();
+extern "C" int cObjectInterface_getNumBeings();
 extern "C" void** cObjectInterface_getBeing(int i);
 
 typedef void (*Fn0_003415D0)(void*);
@@ -5481,7 +5481,7 @@ extern "C" void cBoostNode_update(cBoostNode* self)
     sVEntry<void>* vt = (sVEntry<void>*)self->mVtbl;
     ((Fn0_003415D0)vt[49].fn)(vthis(self, vt[49]));
     if (self->Type == 1 || self->Time <= 0) {
-        for (int i = 0; i < func_002D1AF0(); i++) {
+        for (int i = 0; i < cObjectInterface_getNumBeings(); i++) {
             void** obj = cObjectInterface_getBeing(i);
             if (self->Type == 2) {
                 sVEntry<void>* ovt = (sVEntry<void>*)*obj;
@@ -5720,7 +5720,7 @@ extern void* cAnimObjectNode_vtbl[];
 extern "C" void cAnimNode_cAnimNode(void* p, int a1, int a2, void* obj, int a4);
 extern "C" float cAnimFrame_getStartTime(void* inst);
 float AIrandf(float lo, float hi);
-float func_00317890(float a, float b);
+float AIrangernd(float a, float b);
 
 struct sSphFloat_1AA0 {
     unsigned short id;  // 0x00
@@ -5794,7 +5794,7 @@ static inline void setRateMax_1AA0(sFloat_1AA0* dst, float v, char* vinfo)
  * means min), clamped to [min, max] or replaced by AIrandf(min, max) when RandomStart (+0x20) is set.
  *
  * The per-frame speed (+0x10) is Speed (+0x14) / 30 / the frame rate (cAppMan_TheAppMan +0x10), randomised by
- * func_00317890 with SpeedRange (+0x18) when that is non-zero, and negated for Dir (+0x8) 1. It then copies the frame
+ * AIrangernd with SpeedRange (+0x18) when that is non-zero, and negated for Dir (+0x8) 1. It then copies the frame
  * to +0x20, sets active (+0x4) and the dirty flag (bit 0 of +0x42), and clears +0xC (the start delay) and atLimit
  * (+0x8). The struct calls the play type at +0x0 "id"; cAnimObjectNode_updateNode switches on it.
  *
@@ -5834,7 +5834,7 @@ extern "C" void* cAnimObjectNode_cAnimObjectNode1(cAnimObjectNode* self, int buc
     }
     self->CurrTime = frameTime;
     if (def->speedVar != 0.0f) {
-        self->AnimSpeed = func_00317890(def->speed * 0.03333333507180214f, def->speedVar * 0.03333333507180214f) / (float)cAppMan_TheAppMan->TimerHz;
+        self->AnimSpeed = AIrangernd(def->speed * 0.03333333507180214f, def->speedVar * 0.03333333507180214f) / (float)cAppMan_TheAppMan->TimerHz;
     } else {
         self->AnimSpeed = def->speed * 0.03333333507180214f / (float)cAppMan_TheAppMan->TimerHz;
     }
@@ -5912,7 +5912,7 @@ struct sClampFloat_1F38;
 extern "C" void cAnimObjectNode_updateCycle(cAnimObjectNode* s);
 extern "C" void cAnimObjectNode_updateOscillate(cAnimObjectNode* s);
 extern "C" void cAnimObjectNode_updateOnce(cAnimObjectNode* s);
-extern "C" int func_0034EBA0(void* p);
+extern "C" int cAnimNode_frameUpdate(void* p);
 
 struct sVEntry_00341D48 {
     short delta;
@@ -5926,7 +5926,7 @@ struct sVEntry_00341D48 {
  * Resets +0x24 and +0x28 (the stepped-from and stepped-to frames) to 1e10. When atLimit (+0x8) is already set it
  * returns 1 at once. While active (+0x4) and the start delay (+0xC) is not negative, it counts the delay down, or once
  * it is 0 records the frame (+0x1C) in +0x24 and steps it by the play type (+0x0): 2 cAnimObjectNode_updateOscillate (bounce), 1
- * cAnimObjectNode_updateCycle (wrap), otherwise cAnimObjectNode_updateOnce (clamp), returning 0 if func_0034EBA0 on the animation part fails.
+ * cAnimObjectNode_updateCycle (wrap), otherwise cAnimObjectNode_updateOnce (clamp), returning 0 if cAnimNode_frameUpdate on the animation part fails.
  *
  * It then sets the dirty flag (bit 0 of +0x42) and copies the frame to +0x20. When the step set atLimit it calls the
  * node's slot 34 (cAnimObjectNode_expire) with 1 and returns 0; otherwise it returns 1. Slot 15 of cAnimObjectNode_vtbl.
@@ -5956,7 +5956,7 @@ extern "C" int cAnimObjectNode_updateNode(cAnimObjectNode* self)
                 cAnimObjectNode_updateOnce(self);
                 break;
             }
-            if (func_0034EBA0((char*)&self->CurrTime) == 0) {
+            if (cAnimNode_frameUpdate((char*)&self->CurrTime) == 0) {
                 return 0;
             }
         }
@@ -6343,7 +6343,7 @@ extern "C" void* cAnimTeeterNode_cAnimTeeterNode(cAnimTeeterNode* self, int buck
 INCLUDE_ASM("intersect/worldsphtree", cAnimTeeterNode_updateNode);
 #ifdef SKIP_ASM
 extern "C" float cObjectInterface_getUpdateTime();
-extern "C" int func_0034EBA0(void* p);
+extern "C" int cAnimNode_frameUpdate(void* p);
 
 struct sSphCtl_00342358 {
     float force;        // 0x00
@@ -6383,11 +6383,11 @@ static inline float absf_00342358(float x)
  * velocity by acceleration * dt. Past min (+0x10) or max (+0x14) the frame is clamped and the velocity multiplied by
  * BounceFactor (+0xC), or step and velocity zeroed when |velocity| <= 0.1.
  *
- * It then clears the torque, copies the frame to +0x34 and runs func_0034EBA0 on the animation part; on success it sets
+ * It then clears the torque, copies the frame to +0x34 and runs cAnimNode_frameUpdate on the animation part; on success it sets
  * the dirty flag (bit 0 of +0x56). Slot 15 of cAnimTeeterNode_vtbl.
  *
  * @param spring  the teeter node
- * @return func_0034EBA0's result: 1 after a successful frame update, else 0
+ * @return cAnimNode_frameUpdate's result: 1 after a successful frame update, else 0
  */
 extern "C" int cAnimTeeterNode_updateNode(cAnimTeeterNode* spring)
 {
@@ -6435,7 +6435,7 @@ extern "C" int cAnimTeeterNode_updateNode(cAnimTeeterNode* spring)
     }
     spring->TorqueSum = 0.0f;
     spring->CacheTime = spring->CurrTime;
-    if (func_0034EBA0(&spring->CurrTime) == 0) {
+    if (cAnimNode_frameUpdate(&spring->CurrTime) == 0) {
         return 0;
     }
     spring->Flags |= 1;
@@ -6766,7 +6766,7 @@ extern "C" void* cBoostModifier_cBoostModifier1(cBoostModifier* self, sVEntry<vo
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cBoostModifier_update);
 #ifdef SKIP_ASM
-extern "C" int func_002D1AF0();
+extern "C" int cObjectInterface_getNumBeings();
 extern "C" void** cObjectInterface_getBeing(int i);
 
 typedef void (*Fn0_00342880)(void*);
@@ -6798,7 +6798,7 @@ extern "C" void cBoostModifier_update(cBoostModifier* self)
     sVEntry<void>* vt = (sVEntry<void>*)self->mVtbl;
     ((Fn0_00342880)vt[9].fn)(vthis(self, vt[9]));
     if (self->Type == 1 || self->Time <= 0) {
-        for (int i = 0; i < func_002D1AF0(); i++) {
+        for (int i = 0; i < cObjectInterface_getNumBeings(); i++) {
             void** obj = cObjectInterface_getBeing(i);
             sVEntry<void>* ovt = (sVEntry<void>*)*obj;
             if (((Test_00342880)ovt[3].fn)(vthis(obj, ovt[3]), (int)self->Instance) != 0) {

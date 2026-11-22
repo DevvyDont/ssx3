@@ -114,28 +114,28 @@ ulong GetHashValue64(char* str) {
 #endif
 
 //100%
-INCLUDE_ASM("hashvalue", func_00317710);
+INCLUDE_ASM("hashvalue", tHashName128_getHashValue);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 struct sHash128_17710 {
     ulong lo;
     ulong hi;
 };
-// harness-only: sHash128 is defined later in the unit (func_00317798's block)
-sHash128_17710 func_00317710_impl(sHash128_17710* out, char* str) __asm__("func_00317710");
+// harness-only: sHash128 is defined later in the unit (GetHashValue128's block)
+sHash128_17710 tHashName128_getHashValue_impl(sHash128_17710* out, char* str) __asm__("tHashName128_getHashValue");
 
 /**
  * Hashes a string to 128 bits: its full MD5 digest.
  *
  * Runs md5_init, md5_append over the strlen() bytes of @p str and md5_finish, copies the 16-byte digest to *@p out and
  * returns it by value. The 128-bit counterpart of tHashName64_getHashValue, which keeps only the first 8 bytes. Only
- * func_00317798 calls it.
+ * GetHashValue128 calls it.
  *
  * @param out  receives the digest
  * @param str  NUL-terminated string to hash
  * @return the digest (the value stored in *@p out)
  */
-sHash128_17710 func_00317710_impl(sHash128_17710* out, char* str)
+sHash128_17710 tHashName128_getHashValue_impl(sHash128_17710* out, char* str)
 {
     md5_ctx ctx;
     sHash128_17710 digest;
@@ -149,7 +149,7 @@ sHash128_17710 func_00317710_impl(sHash128_17710* out, char* str)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("hashvalue", func_00317798);
+INCLUDE_ASM("hashvalue", GetHashValue128);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 struct sHash128 {
@@ -157,19 +157,19 @@ struct sHash128 {
     ulong hi;
 };
 
-extern "C" sHash128 func_00317710(sHash128* out, char* str);
+extern "C" sHash128 tHashName128_getHashValue(sHash128* out, char* str);
 
 /**
  * Returns the 128-bit (MD5) hash of a string.
  *
- * Calls func_00317710 with a scratch output, as GetHashValue64 does for the 64-bit hash. Nothing calls it.
+ * Calls tHashName128_getHashValue with a scratch output, as GetHashValue64 does for the 64-bit hash. Nothing calls it.
  *
  * @param str  NUL-terminated string to hash
  * @return the 16-byte MD5 digest
  */
-extern "C" sHash128 func_00317798(char* str)
+extern "C" sHash128 GetHashValue128(char* str)
 {
     sHash128 digest;
-    return func_00317710(&digest, str);
+    return tHashName128_getHashValue(&digest, str);
 }
 #endif

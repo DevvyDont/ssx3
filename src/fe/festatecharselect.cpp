@@ -564,7 +564,7 @@ extern "C" int cBEStatInterface_getHumanStability(void* iface, int a, int b);
 extern "C" void cFERiderManager_setHumanCharacter(void* self, int idx, int a2, int a3);
 extern "C" void cUIProgress_setValue(void* bar, int v);
 extern "C" double fptodp(float f);
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_pct_1f;
 extern char str_NumAttrOver[];
@@ -611,7 +611,7 @@ extern "C" void cFEStateCharSelect_updateWidget_impl(void* vself, signed char ri
     sStr9_181BD0 name = D_0045D6E0;
     char bar[8];
     *(sStr4_181BD0*)bar = *(sStr4_181BD0*)str_0pb;
-    func_00416210(bar + 4, 0, 4);
+    memset(bar + 4, 0, 4);
     char buf[100];
     int stats[7];
     float k = 0.2f;

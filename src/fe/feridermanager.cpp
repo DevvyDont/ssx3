@@ -144,8 +144,8 @@ extern "C" void* cAnimModel_cAnimModel(void* mem);
 extern "C" void cAnimModel_init(void* pool, int a1, int a2);
 extern "C" void func_002F19F0(void* a, void* b);
 // PORT: these are defined later in the unit with struct-typed params; bind void* views by asm label
-extern "C" void func_0019FF00_E980(int* self, void* list, void* prev, int force, int a4) __asm__("func_0019FF00");
-extern "C" void func_0019FBE0_E980(int* self, void* list, int a2, int a3) __asm__("func_0019FBE0");
+extern "C" void cFERider_loadModels_E980(int* self, void* list, void* prev, int force, int a4) __asm__("cFERider_loadModels");
+extern "C" void cFERider_loadTextures_E980(int* self, void* list, int a2, int a3) __asm__("cFERider_loadTextures");
 extern "C" void cFERider_update_E980(void* self) __asm__("cFERider_update");
 extern char str_AttachedEmitterFX_b[];
 extern char str_cBoltOnFXInterface_b[];
@@ -194,11 +194,11 @@ extern "C" int cFERider_init_impl(int* self, int profile, int character, int slo
     cAnimModel_init(*(void**)&self[2], 100, 15);
     func_002F19F0(*(void**)&self[3184 / 4], *(void**)&self[2]);
     void* list = func_0014AD28(iface, profile, character);
-    func_0019FF00_E980(self, list, 0, self[4], 1);
+    cFERider_loadModels_E980(self, list, 0, self[4], 1);
     if (self[4] != 0) {
         cFERider_queueLoadExtraTextures(self);
     }
-    func_0019FBE0_E980(self, list, 0, 1);
+    cFERider_loadTextures_E980(self, list, 0, 1);
     cFERider_update_E980(self);
     switch (self[0]) {
     case 0: self[3288 / 4] = 1; break;
@@ -339,7 +339,7 @@ extern "C" void cAnimModel_compile(void* self, int a1);
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 struct sAnimMemED80 { char d[0x70]; };
 extern "C" void* cRiderAnimBase_cRiderAnimBase(void* self);
-extern "C" void func_00104D50(void* anim, void* rider);
+extern "C" void cRiderAnim_linkToFERider(void* anim, void* rider);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 extern "C" void cRiderAnimBase_setupAnimation(void* self, int a1);
 extern "C" void cFERider_initBoneMap(cFERider* self);
@@ -369,7 +369,7 @@ struct sFERiderED80 {
  *
  * Sets +0xCB4, prepares the graphics manager's bone setup (cGraphicsMan_InitTextureFiles, cGraphicsMan_SetTextureRefs with the model's bones),
  * compiles the anim model (cAnimModel_compile with 1), creates its animation (cRiderAnimBase with cRiderAnim_vtbl, tag
- * "RiderAnim"), binds it to the rider (func_00104D50), plays animation 434, applies the identity pose
+ * "RiderAnim"), binds it to the rider (cRiderAnim_linkToFERider), plays animation 434, applies the identity pose
  * (cAnimModel_transform with tPose_Identity) and builds the bone map (cFERider_initBoneMap).
  */
 extern "C" void cFERider_compileModel(cFERider* self)
@@ -384,7 +384,7 @@ extern "C" void cFERider_compileModel(cFERider* self)
     *(int*)(anim + 0x60) = 0;
     self->mpRiderAnim = (cRiderAnim*)anim;
     *(int*)(anim + 0x64) = 0;
-    func_00104D50(anim, ((sFERiderED80*)self));
+    cRiderAnim_linkToFERider(anim, ((sFERiderED80*)self));
     cRiderAnimBase_play(self->mpRiderAnim, 434, 0, -1.0f);
     cRiderAnimBase_setupAnimation(self->mpRiderAnim, 0);
     sHalfED80 identityPose[2];
@@ -551,8 +551,8 @@ extern "C" void cFERider_render(cFERider* selfp)
 INCLUDE_ASM("fe/feridermanager", cFERider_update);
 #ifdef SKIP_ASM
 extern "C" void cFERider_init(void* self, int a1, int a2, int a3);
-extern "C" int func_001A0100(int* self);
-extern "C" int func_0019FD58(int* self);
+extern "C" int cFERider_isDoneLoadingModels(int* self);
+extern "C" int cFERider_isDoneLoadingTextures(int* self);
 extern "C" void cFERider_updateAnimModelParts(int* self);
 extern "C" void cFERider_updateModelPose(cFERider* self);
 extern "C" void cRiderAnimBase_updateAnimation(void* anim, int a1, float blend);
@@ -567,7 +567,7 @@ extern "C" void func_002ECF78(void* p);
  *
  * While an init is deferred (its frame word not negative) waits until the graphics manager's vtable entry 114 passes it
  * and then runs cFERider_init with the stored arguments. Otherwise, for a loaded character (id below 10): marks the
- * model parts loaded once func_001A0100 succeeds (+0xCBC), the textures once func_0019FD58 does (+0xCB8) and then
+ * model parts loaded once cFERider_isDoneLoadingModels succeeds (+0xCBC), the textures once cFERider_isDoneLoadingTextures does (+0xCB8) and then
  * compiles the model (cFERider_compileModel) if needed; once all three are done applies the part variants once (cFERider_updateAnimModelParts,
  * +0xCC0) and folds the pending show request (+0xCC4) into the shown flag (+0xCC8). While shown, advances the animation
  * (cRiderAnimBase_updateAnimation, expireAnimation), rebuilds the pose (cFERider_updateModelPose) and updates both FX objects.
@@ -588,10 +588,10 @@ extern "C" void cFERider_update(cFERider* selfp)
         if (((unsigned int)self->mCharID) >= 10) {
             return;
         }
-        if (self->mDoneLoadingModels == 0 && func_001A0100((int*)self)) {
+        if (self->mDoneLoadingModels == 0 && cFERider_isDoneLoadingModels((int*)self)) {
             self->mDoneLoadingModels = 1;
         } else if (self->mDoneLoadingModels != 0) {
-            if (self->mDoneLoadingTextures == 0 && func_0019FD58((int*)self)) {
+            if (self->mDoneLoadingTextures == 0 && cFERider_isDoneLoadingTextures((int*)self)) {
                 self->mDoneLoadingTextures = 1;
                 if (self->mCompiledModel == 0) {
                     cFERider_compileModel((cFERider*)((sFERiderED80*)self));
@@ -1104,9 +1104,9 @@ extern "C" void cFERider_updateAnimModelParts(int* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019F878);
+INCLUDE_ASM("fe/feridermanager", cFERider_getTextureID);
 #ifdef SKIP_ASM
-extern "C" int func_004165A8(const void* a, const void* b);
+extern "C" int strcmp(const void* a, const void* b);
 
 
 struct sRiderTable_F878 {
@@ -1121,11 +1121,11 @@ struct sRiderTable_F878 {
  * @param name  the texture name
  * @return its texture id, or -1 when the table has no such name
  */
-extern "C" int func_0019F878(cFERider* self, const char* name)
+extern "C" int cFERider_getTextureID(cFERider* self, const char* name)
 {
     int i;
     for (i = 0; i < self->mNumTextureRefs; i++) {
-        if (func_004165A8(name, ((&self->mTextureRefs[0]))[i].Name) == 0) {
+        if (strcmp(name, ((&self->mTextureRefs[0]))[i].Name) == 0) {
             return ((&self->mTextureRefs[0]))[i].TextureID;
         }
     }
@@ -1134,9 +1134,9 @@ extern "C" int func_0019F878(cFERider* self, const char* name)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019F908);
+INCLUDE_ASM("fe/feridermanager", cFERider_addTextureFile);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void SHAPE_name(void* pkg, int i, char* name);
 extern "C" char* strcpy(char* dst, const char* src);
 extern char D_004A19A8[];
@@ -1176,7 +1176,7 @@ struct sVE_F908b {
  * @param pkg      the loaded shape package
  * @param replace  nonzero to refresh textures already in the table
  */
-extern "C" void func_0019F908(cFERider* self, sPkg_F908* pkg, int replace)
+extern "C" void cFERider_addTextureFile(cFERider* self, sPkg_F908* pkg, int replace)
 {
     int n = pkg->count;
     int i;
@@ -1185,9 +1185,9 @@ extern "C" void func_0019F908(cFERider* self, sPkg_F908* pkg, int replace)
         char* data = (char*)pkg + imageEntry->off;
         char name[8];
         *(sName2_F908*)name = *(sName2_F908*)D_004A19A8;
-        func_00416210(name + 2, 0, 6);
+        memset(name + 2, 0, 6);
         SHAPE_name(pkg, i, name);
-        int id = func_0019F878(self, name);
+        int id = cFERider_getTextureID(self, name);
         if (id >= 0) {
             if (replace) {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
@@ -1288,7 +1288,7 @@ extern "C" void func_0019FA78(int* self, sItemListFA78* list)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019FBE0);
+INCLUDE_ASM("fe/feridermanager", cFERider_loadTextures);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
@@ -1343,7 +1343,7 @@ static inline sItemFBE0* getItemK19FBE0(sItemListFBE0* list, int i)
  * @param ignored    not used
  * @param keepLoaded    passed to func_0019DA10 as its keep-existing argument (nonzero keeps a slot already loading or loaded)
  */
-extern "C" void func_0019FBE0(int* self, sItemListFBE0* list, int ignored, int keepLoaded)
+extern "C" void cFERider_loadTextures(int* self, sItemListFBE0* list, int ignored, int keepLoaded)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     void* db = func_0014BDB8_noarg();
@@ -1371,7 +1371,7 @@ extern "C" void func_0019FBE0(int* self, sItemListFBE0* list, int ignored, int k
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019FD58);
+INCLUDE_ASM("fe/feridermanager", cFERider_isDoneLoadingTextures);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
@@ -1400,11 +1400,11 @@ struct sItemListFD58 {
  * Finishes the front-end rider's texture loads: reports whether all are done and registers them.
  *
  * Returns 1 at once when +0xCB8 is set. Otherwise checks every queued texture file (func_0019E238); when all are ready,
- * registers each loaded package once (func_0019F908, replacing for items with flag 0x10) and releases the files.
+ * registers each loaded package once (cFERider_addTextureFile, replacing for items with flag 0x10) and releases the files.
  *
  * @return 1 when every texture is loaded, else 0
  */
-extern "C" int func_0019FD58(int* self)
+extern "C" int cFERider_isDoneLoadingTextures(int* self)
 {
     if (*(int*)((char*)self + 0xCB8) != 0) {
         return 1;
@@ -1433,7 +1433,7 @@ extern "C" int func_0019FD58(int* self)
                 if (func_0019E2B0(mgr, self[0], fileSlot) && used[fileSlot] == 0) {
                     sPkg_F908* pkg = (sPkg_F908*)func_0019E2B0(mgr, self[0], fileSlot);
                     int fl = it->flags & 0x10;
-                    func_0019F908((cFERider*)((sRiderTable_F878*)self), pkg, fl != 0);
+                    cFERider_addTextureFile((cFERider*)((sRiderTable_F878*)self), pkg, fl != 0);
                 }
                 used[fileSlot] = 1;
                 func_0019DC20(mgr, self[0], fileSlot);
@@ -1446,7 +1446,7 @@ extern "C" int func_0019FD58(int* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_0019FF00);
+INCLUDE_ASM("fe/feridermanager", cFERider_loadModels);
 #ifdef SKIP_ASM
 // PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
 void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
@@ -1497,7 +1497,7 @@ static inline sBoneEntFF00* getEntK19FF00(sBoneDbFF00* db, int i)
  * @param force  nonzero to queue every item's part
  * @param keepLoaded     passed to func_0019DA10 as its keep-existing argument
  */
-extern "C" void func_0019FF00(int* self, sItemListFF00* list, sItemFF00* prev, int force, int keepLoaded)
+extern "C" void cFERider_loadModels(int* self, sItemListFF00* list, sItemFF00* prev, int force, int keepLoaded)
 {
     int n = list->count;
     sBoneDbFF00* db = (sBoneDbFF00*)func_0014BDB8_noarg();
@@ -1535,7 +1535,7 @@ extern "C" void func_0019FF00(int* self, sItemListFF00* list, sItemFF00* prev, i
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", func_001A0100);
+INCLUDE_ASM("fe/feridermanager", cFERider_isDoneLoadingModels);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
@@ -1607,7 +1607,7 @@ static inline sBoneEnt_A0100* getEnt_A0100(sBoneDb_A0100* db, int id, int g)
 // out of loop.c's hoisting, and cross-jumping merges the arms after reload; plain form 98.50%. Byte-identical and
 // behaves like the plain form; landed marked under the 2026-11-14 ruling (portable, behaviour-preserving steering only);
 // replace it when an honest spelling matches.
-extern "C" int func_001A0100(int* self)
+extern "C" int cFERider_isDoneLoadingModels(int* self)
 {
     if (*(int*)((char*)self + 0xCBC) != 0) {
         return 1;

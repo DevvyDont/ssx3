@@ -114,14 +114,14 @@ extern "C" void cMemMan_internalFree(void* block)
 //100%
 INCLUDE_ASM("bx/memblockman", cMemMan_internalBlockSize);
 #ifdef SKIP_ASM
-extern "C" int func_0031A130(void* self);
+extern "C" int cMemBlockMan_blockSize(void* self);
 void cDynamicMemMan_dlmalloc_usable_size(void* list, void* item);
 extern char TheDynamicMemMan[];
 
 /**
  * Returns the usable size of a block: its pool's block size, or for a heap block its usable size in the dynamic heap.
  *
- * func_0031A130 gives 8 to 512 for an address inside one of the cMemBlockMan pools; otherwise cDynamicMemMan_dlmalloc_usable_size measures
+ * cMemBlockMan_blockSize gives 8 to 512 for an address inside one of the cMemBlockMan pools; otherwise cDynamicMemMan_dlmalloc_usable_size measures
  * the chunk in TheDynamicMemMan. The C declares it void, but the size is left in the return register: blockSize
  * returns it under the cMemMan mutex and cMemMan_internalResizeBlock uses it for the old block.
  *
@@ -129,7 +129,7 @@ extern char TheDynamicMemMan[];
  */
 extern "C" void cMemMan_internalBlockSize(void* self)
 {
-    if (func_0031A130(self) == 0) {
+    if (cMemBlockMan_blockSize(self) == 0) {
         cDynamicMemMan_dlmalloc_usable_size(TheDynamicMemMan, self);
     }
 }
@@ -446,7 +446,7 @@ extern "C" int cMemBlockMan_isMemBlock(void* block)
 #endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_0031A130);
+INCLUDE_ASM("bx/memblockman", cMemBlockMan_blockSize);
 #ifdef SKIP_ASM
 extern void* cMemBlockMan_m_container16;
 extern void* cMemBlockMan_m_container512;
@@ -456,7 +456,7 @@ extern void* cMemBlockMan_m_container256;
 extern void* cMemBlockMan_m_container64;
 extern void* cMemBlockMan_m_container128;
 
-static inline int func_0031A130_in(void* p, void* base, unsigned int size)
+static inline int cMemBlockMan_blockSize_in(void* p, void* base, unsigned int size)
 {
     return (unsigned int)((char*)p - (char*)base) <= size - 1;
 }
@@ -473,21 +473,21 @@ static inline int func_0031A130_in(void* p, void* base, unsigned int size)
  * @param addr  the address to look up
  * @return 8, 16, 32, 64, 128, 256 or 512 for a pool address, else 0
  */
-extern "C" int func_0031A130(void* addr)
+extern "C" int cMemBlockMan_blockSize(void* addr)
 {
-    if (func_0031A130_in(addr, cMemBlockMan_m_container8, 0x800))
+    if (cMemBlockMan_blockSize_in(addr, cMemBlockMan_m_container8, 0x800))
         return 0x8;
-    if (func_0031A130_in(addr, cMemBlockMan_m_container16, 0x2000))
+    if (cMemBlockMan_blockSize_in(addr, cMemBlockMan_m_container16, 0x2000))
         return 0x10;
-    if (func_0031A130_in(addr, cMemBlockMan_m_container32, 0x6000))
+    if (cMemBlockMan_blockSize_in(addr, cMemBlockMan_m_container32, 0x6000))
         return 0x20;
-    if (func_0031A130_in(addr, cMemBlockMan_m_container64, 0x32000))
+    if (cMemBlockMan_blockSize_in(addr, cMemBlockMan_m_container64, 0x32000))
         return 0x40;
-    if (func_0031A130_in(addr, cMemBlockMan_m_container128, 0x25800))
+    if (cMemBlockMan_blockSize_in(addr, cMemBlockMan_m_container128, 0x25800))
         return 0x80;
-    if (func_0031A130_in(addr, cMemBlockMan_m_container256, 0x20000))
+    if (cMemBlockMan_blockSize_in(addr, cMemBlockMan_m_container256, 0x20000))
         return 0x100;
-    if (func_0031A130_in(addr, cMemBlockMan_m_container512, 0x20000))
+    if (cMemBlockMan_blockSize_in(addr, cMemBlockMan_m_container512, 0x20000))
         return 0x200;
     return 0;
 }
@@ -763,7 +763,7 @@ INCLUDE_ASM("bx/memblockman", func_0031A490);
 /**
  * Calls an interrupt callback with all 32 FPU registers preserved, then re-enables interrupts.
  *
- * cPS2ExecutionMan_init installs it as the INTC 3 handler (func_00423A90) with func_0031ABD0 as its argument. Saves $f0-$f31
+ * cPS2ExecutionMan_init installs it as the INTC 3 handler (AddIntcHandler2) with func_0031ABD0 as its argument. Saves $f0-$f31
  * on the stack, calls @p handler with @p handlerArg, restores the registers and runs `sync; ei`.
  *
  * @param handlerArg  the value passed to @p handler
@@ -905,14 +905,14 @@ extern "C" void func_0031A308(void* p);
 extern "C" void func_0031ABD0();
 extern "C" void func_0031AC08();
 extern "C" void func_0031AC60();
-extern "C" int func_00416210(void* p, int c, int n);
+extern "C" int memset(void* p, int c, int n);
 extern "C" int GetThreadId();
 extern "C" int ReferThreadStatus(int id, void* st);
 extern "C" int CreateSema(void* sema);
 extern "C" int CreateThread(void* tp);
 extern "C" void StartThread(int id, void* arg);
 extern "C" void DisableIntc(int n);
-extern "C" int func_00423A90(int n, void (*a)(), int b, void (*c)());
+extern "C" int AddIntcHandler2(int n, void (*a)(), int b, void (*c)());
 extern "C" int EnableIntc(int n);
 extern int _gp;     // linker-defined $gp base (0x4A30F0; splat names it D_004A30F0)
 extern int D_004A3ECC;
@@ -975,7 +975,7 @@ struct sSemaParam_31A6D8 {
  * halt-request flag (+0x4038), creates the timer counting semaphore (+0x4034, max 0x400) and starts the timer thread
  * (func_0031AC08, 0x4000-byte stack at +0x30, priority main - 1; id at +0x4030). Both threads get @p self as their
  * argument and _gp as their $gp. Finally, between DisableIntc(3) and EnableIntc(3), installs func_0031A490 as
- * the INTC 3 handler with func_00423A90, passing func_0031ABD0 as its argument; the handler id goes to +0x14290.
+ * the INTC 3 handler with AddIntcHandler2, passing func_0031ABD0 as its argument; the handler id goes to +0x14290.
  */
 extern "C" void cPS2ExecutionMan_init(sMgr_31A6D8* self)
 {
@@ -987,19 +987,19 @@ extern "C" void cPS2ExecutionMan_init(sMgr_31A6D8* self)
     self->f20 = 0;
     func_0031A308(self->vu0);
     self->f10 = GetThreadId();
-    func_00416210(&st, 0, 0x30);
+    memset(&st, 0, 0x30);
     ReferThreadStatus(self->f10, &st);
     self->f14 = st.currentPriority;
-    func_00416210(&haltSemaParam, 0, 0x18);
+    memset(&haltSemaParam, 0, 0x18);
     self->fC = CreateSema(&haltSemaParam);
-    func_00416210(&syncSemaParam, 0, 0x18);
+    memset(&syncSemaParam, 0, 0x18);
     self->f18 = CreateSema(&syncSemaParam);
     self->f1C = 0;
-    func_00416210(&countingSemaParam, 0, 0x18);
+    memset(&countingSemaParam, 0, 0x18);
     countingSemaParam.maxCount = 0x400;
     self->f14044 = CreateSema(&countingSemaParam);
     self->f14048 = 0;
-    func_00416210(&tp, 0, 0x30);
+    memset(&tp, 0, 0x30);
     tp.status = 0x10;
     tp.entry = func_0031AC60;
     tp.stack = self->stack1;
@@ -1013,10 +1013,10 @@ extern "C" void cPS2ExecutionMan_init(sMgr_31A6D8* self)
     D_004A3ECC = self->f14040;
     StartThread(self->f14040, self);
     self->f4038 = 0;
-    func_00416210(&countingSemaParam, 0, 0x18);
+    memset(&countingSemaParam, 0, 0x18);
     countingSemaParam.maxCount = 0x400;
     self->f4034 = CreateSema(&countingSemaParam);
-    func_00416210(&tp, 0, 0x30);
+    memset(&tp, 0, 0x30);
     tp.status = 0x10;
     tp.entry = func_0031AC08;
     tp.stack = self->stack2;
@@ -1029,7 +1029,7 @@ extern "C" void cPS2ExecutionMan_init(sMgr_31A6D8* self)
     self->f4030 = CreateThread(&tp);
     StartThread(self->f4030, self);
     DisableIntc(3);
-    self->f14290 = func_00423A90(3, (void (*)())func_0031A490, 0, func_0031ABD0);
+    self->f14290 = AddIntcHandler2(3, (void (*)())func_0031A490, 0, func_0031ABD0);
     EnableIntc(3);
 }
 #endif

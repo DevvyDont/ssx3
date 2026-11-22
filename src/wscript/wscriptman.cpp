@@ -4249,7 +4249,7 @@ extern "C" void cWScriptMan_setBeing(int *wscriptMan, int being) {
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D390);
+INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_isProcessEvent);
 #ifdef SKIP_ASM
 /**
  * Returns whether @p eventId is one of the 10 process event ids (0-9, unsigned compare); @p self is not used.
@@ -4259,7 +4259,7 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D390);
  * @param eventId  the event id
  * @return 1 when @p eventId < 10, else 0
  */
-extern "C" int func_0030D390(void* self, unsigned int eventId) {
+extern "C" int cWScriptProcess_isProcessEvent(void* self, unsigned int eventId) {
     return eventId < 10;
 }
 #endif

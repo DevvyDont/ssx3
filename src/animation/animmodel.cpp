@@ -57,7 +57,7 @@ extern "C" void cAnimModel_addModelPartLOD(cAnimModel* self, int lod, char* part
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_0030DB70__FPvi);
+INCLUDE_ASM("animation/animmodel", cAnimModel_addTextureFile__FPvi);
 #ifdef SKIP_ASM
 struct sAnimModelList {
     char pad_0x00[0x60];
@@ -66,14 +66,15 @@ struct sAnimModelList {
 };
 
 /**
- * Appends @p item to the model's int array at +0x64 and increments its count at +0x60 (no bounds check).
+ * Appends a texture file to the model's list: TextureFiles[NumTextureFiles++] = @p data (On Tour's count and 50-entry
+ * array, here at +0x60 and +0x64, just before NumTextureRefs; no bounds check).
  *
  * cRider_loadRider calls it on the rider's mAnimModel for each 0x108-byte entry of its load list (mLoadList), passing
  * the entry's word at +0x104, then calls cAnimModel_compile.
  *
- * @param item  the value to append
+ * @param data  the texture file to add
  */
-void func_0030DB70(void* self, int item)
+void cAnimModel_addTextureFile(void* self, int item)
 {
     sAnimModelList* list = (sAnimModelList*)self;
     list->items[list->count++] = item;
@@ -994,7 +995,7 @@ extern "C" void cAnimModel_rendershadow(cAnimModel* self, int lod, int x, int y)
 //100%
 INCLUDE_ASM("animation/animmodel", cAnimModel_getBoneSkelIndex);
 #ifdef SKIP_ASM
-extern "C" int func_004165A8(const void* a, const void* b);
+extern "C" int strcmp(const void* a, const void* b);
 
 struct sAmItem50 {
     char name[0x50];
@@ -1003,7 +1004,7 @@ struct sAmItem50 {
 /**
  * Finds a bone by name in one part and returns its skeleton index.
  *
- * Compares the part's 0x50-byte bone names with func_004165A8 (strcmp); the part number is not range-checked.
+ * Compares the part's 0x50-byte bone names with strcmp (strcmp); the part number is not range-checked.
  *
  * @param idx  part number (On Tour: partID), mapped through partIndex
  * @param name  bone name
@@ -1015,7 +1016,7 @@ extern "C" int cAnimModel_getBoneSkelIndex(cAnimModel* self, int idx, const char
     sAmItem50* items = (sAmItem50*)animModelPart->boneNames;
     for (int i = 0; i < animModelPart->numBones; i++)
     {
-        if (func_004165A8(&items[i], name) == 0)
+        if (strcmp(&items[i], name) == 0)
             return animModelPart->firstBone + i;
     }
     return -1;
@@ -1025,7 +1026,7 @@ extern "C" int cAnimModel_getBoneSkelIndex(cAnimModel* self, int idx, const char
 //100%
 INCLUDE_ASM("animation/animmodel", cAnimModel_getGraftMask);
 #ifdef SKIP_ASM
-extern "C" int func_00416B18(const char* a, const char* b, int n);
+extern "C" int strncmp(const char* a, const char* b, int n);
 extern char str_morph[];
 
 /**
@@ -1058,14 +1059,14 @@ extern "C" ulong cAnimModel_getGraftMask(cAnimModel* self, int idx, char* names)
             while (*tokenEnd != 0 && *tokenEnd != ',');
         }
         int len = tokenEnd - token;
-        if (part->unk_0C >= 0 && func_00416B18(token, str_morph, len) == 0) {
+        if (part->unk_0C >= 0 && strncmp(token, str_morph, len) == 0) {
             mask |= (ulong)1 << (part->unk_0C + self->numBones);
         } else {
             char* list = part->boneNames;
             int j = 0;
             ulong one = 1;
             for (; j < part->numBones; j++) {
-                if (func_00416B18(list + j * 80, token, len) == 0 && *(list + len + j * 80) == 0) {
+                if (strncmp(list + j * 80, token, len) == 0 && *(list + len + j * 80) == 0) {
                     mask |= one << (part->firstBone + j);
                     break;
                 }
@@ -1172,7 +1173,7 @@ extern "C" sAnimNode_310F18* gGenCacheBucket(int bank, int n)
 //100%
 INCLUDE_ASM("animation/animmodel", cAnimDataBase_cAnimDataBase);
 #ifdef SKIP_ASM
-extern "C" void func_00416210(void* dst, int c, int n);
+extern "C" void memset(void* dst, int c, int n);
 // PORT: prototype mismatch. cAnimDataBase_initChanCache is defined later in the unit as (void), but this
 // caller passes the model in $4.
 void cAnimDataBase_initChanCache_1(void* self) __asm__("cAnimDataBase_initChanCache");
@@ -1181,14 +1182,14 @@ void cAnimDataBase_initChanCache_1(void* self) __asm__("cAnimDataBase_initChanCa
  * Constructs the animation database: makes it the global instance, zeroes it and clears the channel cache.
  *
  * Stores @p self in cAnimDataBase_TheAnimDataBase (whose start is the bank table cScriptAnimBankManager_LinkBank() installs banks
- * into), zero-fills its 0x3FC bytes (func_00416210) and calls cAnimDataBase_initChanCache().
+ * into), zero-fills its 0x3FC bytes (memset) and calls cAnimDataBase_initChanCache().
  *
  * @return @p self
  */
 extern "C" void* cAnimDataBase_cAnimDataBase(void* self)
 {
     cAnimDataBase_TheAnimDataBase = (cAnimDataBase*)(self);
-    func_00416210(self, 0, 0x3FC);
+    memset(self, 0, 0x3FC);
     cAnimDataBase_initChanCache_1(self);
     return self;
 }

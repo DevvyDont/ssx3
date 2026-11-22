@@ -2190,7 +2190,7 @@ extern "C" void cRider_verifyRailslideModeDEBUG(void) {
 }
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", func_00116938);
+INCLUDE_ASM("seg/seg_14B10", gGetGrabName);
 #ifdef SKIP_ASM
 extern int D_0043D160[];
 
@@ -2203,7 +2203,7 @@ extern int D_0043D160[];
  * @param grabIndex  the table index
  * @return the name (as an int)
  */
-extern "C" int func_00116938(int grabIndex) {
+extern "C" int gGetGrabName(int grabIndex) {
     return D_0043D160[grabIndex];
 }
 #endif

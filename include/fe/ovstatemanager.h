@@ -43,8 +43,8 @@ extern void* cOVStateManager_mpPDATemplate;  // cPDATemplate*
 // Static methods ([O] On Tour names; all `static` in the class). Retail addresses:
 //   0x0020A8B0 getResultsOverlay(int currentGameEvent, int currentHeat) -> tOVStateEnum
 //   0x0020A8F8 gotoOverlay(eGFState)       0x0020AB50 triggerOverlay(tOVStateEnum)   0x0020BAB8 triggerPopup(tOVStateEnum)
-//   0x0020CA10 func_0020CA10 = [O] triggerPauseMenu() (picks the pause overlay 1..5; called by cGame_update / updateUI)
-//   0x0020CB58 func_0020CB58 = [O] replayOverlayActive() ("64replay" state on the stack)
+//   0x0020CA10 cOVStateManager_triggerPauseMenu = [O] triggerPauseMenu() (picks the pause overlay 1..5; called by cGame_update / updateUI)
+//   0x0020CB58 cOVStateManager_replayOverlayActive = [O] replayOverlayActive() ("64replay" state on the stack)
 //   0x0020CBA0 pauseOverlayActive()        0x0020CBE8 allowPauseMenu()               0x0020CC60 triggerFinishOverlay()
 //   0x0020CCF8 gotoNextOverlay()           0x0020CFD0 update()                       0x0020D110 addPDATemplate()
 //   0x0020D190 removePDATemplate()

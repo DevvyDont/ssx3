@@ -693,7 +693,7 @@ extern "C" void cPunchFX_render(sFx_1150* self)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F1768);
+INCLUDE_ASM("seg/seg_1F1548", cAttachedDynamicEmitter_cAttachedDynamicEmitter);
 #ifdef SKIP_ASM
 extern "C" void cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter();
 extern char cAttachedDynamicEmitter_vtbl[];
@@ -707,7 +707,7 @@ extern char cAttachedDynamicEmitter_vtbl[];
  * @param emitter  the memory to construct in
  * @return the constructed emitter (@p emitter)
  */
-extern "C" void *func_002F1768(void *emitter) {
+extern "C" void *cAttachedDynamicEmitter_cAttachedDynamicEmitter(void *emitter) {
     cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter();
     *(int *)((char*)emitter + 0x200) = 0;
     *(char **)((char*)emitter + 0x1F8) = cAttachedDynamicEmitter_vtbl;
@@ -718,7 +718,7 @@ extern "C" void *func_002F1768(void *emitter) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F17A8);
+INCLUDE_ASM("seg/seg_1F1548", cAttachedDynamicEmitter__cAttachedDynamicEmitter);
 #ifdef SKIP_ASM
 extern "C" void cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(void *);
 extern char cAttachedDynamicEmitter_vtbl[];
@@ -731,7 +731,7 @@ extern char cAttachedDynamicEmitter_vtbl[];
  *
  * @param emitter  the emitter
  */
-extern "C" void func_002F17A8(void *emitter) {
+extern "C" void cAttachedDynamicEmitter__cAttachedDynamicEmitter(void *emitter) {
     *(char **)((char*)emitter + 0x1F8) = cAttachedDynamicEmitter_vtbl;
     cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(emitter);
 }
@@ -773,7 +773,7 @@ extern int cAttachedEmitterFX_mEmitterDataArray;
  * Frees the shared attached-emitter type table cAttachedEmitterFX_mEmitterDataArray and clears the pointer.
  *
  * Calls the two empty hooks func_002F8FF8__FPv and func_002FA5F8__FPv first and frees only a non-null table.
- * func_002F1940 calls it when the last attached-emitter FX object is destroyed.
+ * cAttachedEmitterFX__cAttachedEmitterFX calls it when the last attached-emitter FX object is destroyed.
  */
 extern "C" void func_002F1810(void) {
     func_002F8FF8__FPv();
@@ -867,7 +867,7 @@ extern "C" void func_002F18D8(void *emitterFx) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F1940);
+INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX__cAttachedEmitterFX);
 #ifdef SKIP_ASM
 extern "C" void func_002F1810();
 void operator_delete(int *);
@@ -891,7 +891,7 @@ struct Obj1940 : Base1940 {
  * @param emitterFx  the attached-emitter FX object
  * @param flags  the g++ destructor flags (bit 0: free the memory)
  */
-extern "C" void func_002F1940(void *emitterFx, int flags) {
+extern "C" void cAttachedEmitterFX__cAttachedEmitterFX(void *emitterFx, int flags) {
     int remaining = D_004A3BB4 - 1;
     *(char **)((char*)emitterFx + 0xA4) = cAttachedEmitterFX_vtbl;
     D_004A3BB4 = remaining;
@@ -1268,14 +1268,14 @@ struct Obj2130 : Base2130 {
     virtual void v2(int, float);
 };
 extern "C" void *cMemMan_alloc(int, const char *, int, int);
-extern "C" void *func_002F1768(void *);
+extern "C" void *cAttachedDynamicEmitter_cAttachedDynamicEmitter(void *);
 extern char str_cAttachedDynamicEmitter[];
 extern int cAttachedEmitterFX_mEmitterDataArray;
 
 /**
  * Creates an attached dynamic emitter of a type on a bone in the first free emitter slot.
  *
- * Builds it with cMemMan_alloc(528, "cAttachedDynamicEmitter") and func_002F1768, stores @p boneIndex as its bone (+0x200),
+ * Builds it with cMemMan_alloc(528, "cAttachedDynamicEmitter") and cAttachedDynamicEmitter_cAttachedDynamicEmitter, stores @p boneIndex as its bone (+0x200),
  * clears its stopped flag (+0x204) and points it (+0x20C) at type record @p typeIndex of cAttachedEmitterFX_mEmitterDataArray (0x110 bytes each), then
  * calls its virtual setupEmitter (slot 3) with that record and the emitter's current seed (m_emitter.SeedX0) and its
  * virtual reset (slot 2). The bolt-on FX code (func_002ECC28) calls it.
@@ -1290,7 +1290,7 @@ extern "C" int func_002F2130(void *emitterFx, int typeIndex, int boneIndex) {
     int i;
     for (i = 0; i < 10; i++, slot++) {
         if (*slot == 0) {
-            Obj2130 *n = (Obj2130 *)func_002F1768(cMemMan_alloc(528, str_cAttachedDynamicEmitter, 0, 0));
+            Obj2130 *n = (Obj2130 *)cAttachedDynamicEmitter_cAttachedDynamicEmitter(cMemMan_alloc(528, str_cAttachedDynamicEmitter, 0, 0));
             int typeData = cAttachedEmitterFX_mEmitterDataArray + typeIndex * 272;
             *slot = n;
             *(int *)((char*)*slot + 0x200) = boneIndex;
@@ -2836,7 +2836,7 @@ extern "C" void cSplashManager_render(sEmitter_3E28* self)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F4118);
+INCLUDE_ASM("seg/seg_1F1548", ReportImpact);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void *cGame_getSplashManager(void *, int);
@@ -2853,7 +2853,7 @@ struct M4118 { char pad[0x10]; unsigned int cnt; };
  * @param position  the impact position in the world
  * @param speed  the impact strength (a speed)
  */
-extern "C" void func_002F4118(void *position, float speed) {
+extern "C" void ReportImpact(void *position, float speed) {
     unsigned int i = 0;
     if (((M4118 *)((N4118 *)((N4118 *)SSXApp)->c)->c)->cnt != 0) {
         do {
@@ -3576,7 +3576,7 @@ extern "C" void cSunHalo_Process(cSunHalo* self, sCam_4DB8* cam, int flag)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F5148);
+INCLUDE_ASM("seg/seg_1F1548", getRealTimeLights);
 #ifdef SKIP_ASM
 extern "C" void cWorldLightMan_getRealTimeLights(int, void *, int);
 
@@ -3588,7 +3588,7 @@ extern "C" void cWorldLightMan_getRealTimeLights(int, void *, int);
  *
  * @param litObject  the object being lit
  */
-extern "C" void func_002F5148(void *litObject) {
+extern "C" void getRealTimeLights(void *litObject) {
     cWorldLightMan_getRealTimeLights(((int)SSXApp->Game->WorldLightMan), litObject, ((int) (*(int *)((char*)(litObject) + (8))) >> 0xC) & 1);
 }
 #endif

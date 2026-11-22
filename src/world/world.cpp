@@ -212,7 +212,7 @@ void* cWorld_update(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("world/world", func_003A6948);
+INCLUDE_ASM("world/world", isValidMap);
 #ifdef SKIP_ASM
 struct cBXString;
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
@@ -221,7 +221,7 @@ extern "C" cBXString* func_00318630(cBXString* self, cBXString* a, const char* s
 extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString* b);
 extern "C" void cBXString_makeUpper(cBXString* self);
 extern "C" void* FILE_loadz(const char* name, int flags);
-extern "C" int func_004165A8(const void* a, const void* b);
+extern "C" int strcmp(const void* a, const void* b);
 void cMemMan_free(void*);
 extern char str_bar_e[];
 extern char str_sdb[];
@@ -253,7 +253,7 @@ struct sStr_3A6948 {
  * Checks which of @p n section names exist in a track's .sdb section table.
  *
  * Loads the file named str_bar_e + @p path + str_sdb with FILE_loadz. When it loaded and its first halfword is 0x3800,
- * each name is upper-cased and compared (func_004165A8) with the 0x58-byte section records after the 0x50-byte header
+ * each name is upper-cased and compared (strcmp) with the 0x58-byte section records after the 0x50-byte header
  * (count at +0x8); a found name gets its flag set (names[i].ok = 1, else 0). The file is freed afterwards. When the
  * file is missing or has the wrong cookie the flags are left untouched. Called by cTrackFileMan_scanLocations' helpers
  * (cTrackFileMan_checkLocation, cTrackFileMan_checkLocation1).
@@ -263,7 +263,7 @@ struct sStr_3A6948 {
  * @param names  the names, each with a found flag
  * @return 1 when at least one name was found, else 0
  */
-extern "C" int func_003A6948(const char* path, int n, sName_3A6948* names)
+extern "C" int isValidMap(const char* path, int n, sName_3A6948* names)
 {
     sFile_3A6948* data;
     int ret;
@@ -296,7 +296,7 @@ extern "C" int func_003A6948(const char* path, int n, sName_3A6948* names)
             cBXString_makeUpper((cBXString*)&upperName);
             for (j = 0; j < data->count; j++)
             {
-                if (func_004165A8(&data->entries[j], upperName.s) == 0)
+                if (strcmp(&data->entries[j], upperName.s) == 0)
                 {
                     names[i].ok = ret = 1;
                     break;

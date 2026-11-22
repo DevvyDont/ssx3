@@ -1033,13 +1033,13 @@ extern "C" void cBXString_setAt(cBXString* self, int idx, char ch)
 //100%
 INCLUDE_ASM("bx/bxstring", cBXString_cBXString6);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void*, int, unsigned int);
+extern "C" void* memset(void*, int, unsigned int);
 
 /**
  * Constructs a string of @p n copies of a character.
  *
  * Starts as the shared empty string (cBXString_EmptyString); for @p n above 0, cBXString_Realloc allocates @p n
- * characters and func_00416210 fills them. Nothing in the C calls it.
+ * characters and memset fills them. Nothing in the C calls it.
  *
  * @param ch  the character
  * @param n  the number of copies
@@ -1050,7 +1050,7 @@ extern "C" cBXString* cBXString_cBXString6(cBXString* self, char ch, int n)
     self->Str = cBXString_EmptyString;
     if (n > 0) {
         cBXString_Realloc(self, n);
-        func_00416210(self->Str, ch, n);
+        memset(self->Str, ch, n);
     }
     return self;
 }

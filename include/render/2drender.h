@@ -5,7 +5,7 @@
 // tRect, optionally transform them by a 3x3 matrix (func_0038E0A8), and submit them to the graphics manager
 // (cGraphicsMan_TheGraphicsMan virtual slot 71 RenderTriStrip, slot 73 RenderLineStrip for drawLine). Callers: the UI
 // text
-// elements (func_003A20A0, func_003A2220, cTextureElement_render*), cHeartBeat_draw and cFadeScreen_drawFade.
+// elements (cTextureElement_render, cTextureElement_render2, cTextureElement_render*), cHeartBeat_draw and cFadeScreen_drawFade.
 // No EA source path in the preview's asserts (On Tour: render/all_in_one_render.cpp); retail methods are in the
 // render/lightman splat unit (0x38E118..0x38EE78).
 // Size 0x1 (an empty class): [R] cSSXApp_init allocates the only instance with cMemMan_alloc(1, "2DRender") and stores

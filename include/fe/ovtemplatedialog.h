@@ -7,12 +7,12 @@
 // _$_22cOVState_QUITCHALLENGE, _$_24cOVState_QUITCOMPETITION).
 //
 // cOVTemplate_Dialog: vtable D_00474C58; constructor cOVTemplate_Dialog_cOVTemplate_Dialog (out of line, no
-// callers), destructor func_0021C798. On Tour size 0x94 = 0x90 + mDialogType. Its methods are
+// callers), destructor cOVTemplate_Dialog__cOVTemplate_Dialog. On Tour size 0x94 = 0x90 + mDialogType. Its methods are
 // cOVTemplate_Dialog_onCreateScreen / onWidgetCreate / onWidgetEvent / onWidgetMenu / onUpdate.
 //
 // The dialog overlays add no members: each is cMemMan_alloc(0xA0, "cOVStateOverlay") with its own vtable (all
 // slots but the destructor are the template's, except cOVState_QUIT's onUpdate) and mDialogType set by the
-// factory: id 23 D_004749D0 kind 0, id 24 D_004748F8 kind 1 (cOVState_QUIT: constructor func_0021C950,
+// factory: id 23 D_004749D0 kind 0, id 24 D_004748F8 kind 1 (cOVState_QUIT: constructor cOVState_QUIT_cOVState_QUIT,
 // destructor cOVState_QUIT__cOVState_QUIT, own method cOVState_QUIT_onUpdate), id 25 D_00474820 kind 2, id 26
 // D_00474748 kind 3, id 27 D_00474670 kind 4, id 28 D_00474598 kind 5, id 38 D_004744C0 kind 6 (On Tour's
 // QUITCHALLENGE / QUITCOMPETITION / RESTART / RESTARTCHALLENGE / GIVEUP / SAVEPROMPT are all 0x94 = the
@@ -65,7 +65,7 @@ struct cOVTemplate_Dialog {
     char mszChatBuff[0x40];         // 0x058 [O]; [R] the ctor copies " " (str_sp_b, one halfword)
     int mOVID;                      // 0x098 [O] tOVStateEnum; [R] the ctor's overlay-id argument (23-28, 38)
     // --- cOVTemplate_Dialog (On Tour: size 0x94)
-    int mDialogType;                // 0x09C [O]; [R] the factory and func_0021C950 store the dialog kind (0-6, see
+    int mDialogType;                // 0x09C [O]; [R] the factory and cOVState_QUIT_cOVState_QUIT store the dialog kind (0-6, see
                                     //       above); [U] onCreateScreen / onWidgetCreate / onWidgetEvent switch on it
 };
 

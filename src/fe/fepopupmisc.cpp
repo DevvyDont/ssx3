@@ -1067,7 +1067,7 @@ int cFEStateNetHelpPopup_onLoseTransition(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF990);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetHelpPopup_setScreenName);
 #ifdef SKIP_ASM
 /**
  * Stores @p value at +0x54 of a network help popup: its title text id.
@@ -1078,12 +1078,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF990);
  * @param helpPopup   the help popup
  * @param value  the title's text id
  */
-extern "C" void func_001DF990(cFEStateNetHelpPopup* helpPopup, int value) {
+extern "C" void cFEStateNetHelpPopup_setScreenName(cFEStateNetHelpPopup* helpPopup, int value) {
     ((int)helpPopup->muiScreenName) = value;
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF998);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetHelpPopup_setBottomText);
 #ifdef SKIP_ASM
 /**
  * Stores @p value at +0x64 of a network help popup: the text id of its bottom note.
@@ -1094,12 +1094,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF998);
  * @param helpPopup   the help popup
  * @param value  the bottom note's text id
  */
-extern "C" void func_001DF998(cFEStateNetHelpPopup* helpPopup, int value) {
+extern "C" void cFEStateNetHelpPopup_setBottomText(cFEStateNetHelpPopup* helpPopup, int value) {
     ((int)helpPopup->muiBottomText) = value;
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF9A0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetHelpPopup_setReferEventsToParent);
 #ifdef SKIP_ASM
 /**
  * Stores @p value at +0x50 of a network help popup: whether it passes events to its parent state.
@@ -1110,22 +1110,22 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF9A0);
  * @param helpPopup   the help popup
  * @param value  nonzero to forward events to the parent
  */
-extern "C" void func_001DF9A0(cFEStateNetHelpPopup* helpPopup, int value) {
+extern "C" void cFEStateNetHelpPopup_setReferEventsToParent(cFEStateNetHelpPopup* helpPopup, int value) {
     (helpPopup->mbReferEventsToParent) = value;
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF9A8);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateNetHelpPopup_getReferEventsToParent);
 #ifdef SKIP_ASM
 /**
  * Returns +0x50 of a network help popup: whether it passes events to its parent state.
  *
- * An out-of-line inline getter with no caller (see func_001DF9A0).
+ * An out-of-line inline getter with no caller (see cFEStateNetHelpPopup_setReferEventsToParent).
  *
  * @param helpPopup  the help popup
  * @return the forwarding flag
  */
-extern "C" int func_001DF9A8(cFEStateNetHelpPopup* helpPopup) {
+extern "C" int cFEStateNetHelpPopup_getReferEventsToParent(cFEStateNetHelpPopup* helpPopup) {
     return (helpPopup->mbReferEventsToParent);
 }
 #endif
@@ -1145,7 +1145,7 @@ extern "C" int cFEStateCharEquip_isInStore(cFEStateCharEquip* charEquip) {
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF9C0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateCharEquip_isIconsLoaded);
 #ifdef SKIP_ASM
 /**
  * Returns the equip-gear state's icons-loaded flag (+0xA60).
@@ -1156,12 +1156,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF9C0);
  * @param charEquip  the equip-gear state
  * @return nonzero once the icons are loaded
  */
-extern "C" int func_001DF9C0(cFEStateCharEquip* charEquip) {
+extern "C" int cFEStateCharEquip_isIconsLoaded(cFEStateCharEquip* charEquip) {
     return (charEquip->mIconsLoaded);
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF9C8);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateCharEquip_setCanSwitchEquipMode);
 #ifdef SKIP_ASM
 /**
  * Stores whether the equip-gear state may switch between store and inventory mode (+0xAE4).
@@ -1172,7 +1172,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF9C8);
  * @param charEquip   the equip-gear state
  * @param value  nonzero to allow switching
  */
-extern "C" void func_001DF9C8(cFEStateCharEquip* charEquip, int value) {
+extern "C" void cFEStateCharEquip_setCanSwitchEquipMode(cFEStateCharEquip* charEquip, int value) {
     (charEquip->mCanSwitchMode) = value;
 }
 #endif
@@ -2192,7 +2192,7 @@ extern "C" void* cFEStatePreviewReward_cFEStatePreviewReward1(cFEStatePreviewRew
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0008);
+INCLUDE_ASM("fe/fepopupmisc", cFEStatePreviewReward_isRewardHorizontal);
 #ifdef SKIP_ASM
 /**
  * Returns 0.
@@ -2201,12 +2201,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0008);
  *
  * @return 0
  */
-extern "C" int func_001E0008(void) {
+extern "C" int cFEStatePreviewReward_isRewardHorizontal(void) {
     return 0;
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0010);
+INCLUDE_ASM("fe/fepopupmisc", cFEStatePreviewReward_isRewardVertical);
 #ifdef SKIP_ASM
 /**
  * Returns 0.
@@ -2215,12 +2215,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0010);
  *
  * @return 0
  */
-extern "C" int func_001E0010(void) {
+extern "C" int cFEStatePreviewReward_isRewardVertical(void) {
     return 0;
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0018);
+INCLUDE_ASM("fe/fepopupmisc", cFEStatePreviewReward_isRewardSquare);
 #ifdef SKIP_ASM
 /**
  * Returns 1.
@@ -2229,7 +2229,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0018);
  *
  * @return 1
  */
-extern "C" int func_001E0018(void) {
+extern "C" int cFEStatePreviewReward_isRewardSquare(void) {
     return 1;
 }
 #endif
@@ -2355,7 +2355,7 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom1(cFEStateMountainRoom
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E00D0);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateMountainRoom_isPeakPassLoaded);
 #ifdef SKIP_ASM
 /**
  * Reports whether the mountain room has no peak-pass load outstanding: its load slot (+0xBC) is -1.
@@ -2366,7 +2366,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E00D0);
  * @param mountainRoom  the mountain-room state
  * @return 1 when the slot is -1, else 0
  */
-extern "C" int func_001E00D0(void *mountainRoom) {
+extern "C" int cFEStateMountainRoom_isPeakPassLoaded(void *mountainRoom) {
     return ~(*(int *)((char*)(mountainRoom) + (0xBC))) == 0;
 }
 #endif
@@ -2425,7 +2425,7 @@ extern "C" int cFEStateMountainRoom_isPassVisible(cFEStateMountainRoom* mountain
 }
 #endif
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E0130);
+INCLUDE_ASM("fe/fepopupmisc", cFEStateMountainRoom_isPassFrontVisible);
 #ifdef SKIP_ASM
 /**
  * Reports whether both the mountain room's peak-pass group (+0x48) and its pass picture (+0x4C) are visible.
@@ -2436,7 +2436,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0130);
  * @param mountainRoom  the mountain-room state
  * @return 1 when both are shown, else 0
  */
-extern "C" int func_001E0130(cFEStateMountainRoom* mountainRoom) {
+extern "C" int cFEStateMountainRoom_isPassFrontVisible(cFEStateMountainRoom* mountainRoom) {
     int var_2;
     int var_5;
     void *temp_3;
@@ -10331,7 +10331,7 @@ extern "C" void cOVState_RACE_FINISHOV_onCreateScreen(cOVState_RACE_FINISHOV* se
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E8098);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_RACE_FINISHOV_onUpdate);
 #ifdef SKIP_ASM
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void cUIStateStack_purgeNormalStates(void* list);
@@ -10343,7 +10343,7 @@ extern "C" void cGame_doNextState(void* self);
  * Runs cOVState_onUpdate and adds 1/60 to the timer (+0x9C); when +0xA0 is set and the timer reaches 3 seconds (1
  * second when the human rider's word +0x480 is set) purges the normal states and calls cGame_doNextState.
  */
-extern "C" void func_001E8098(cOVState_RACE_FINISHOV* self)
+extern "C" void cOVState_RACE_FINISHOV_onUpdate(cOVState_RACE_FINISHOV* self)
 {
     float limit = 3.0f;
     int idx = cBENewPlayerInterface_getHumanRider(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
@@ -10362,7 +10362,7 @@ extern "C" void func_001E8098(cOVState_RACE_FINISHOV* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E8160);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_RACE_FINISHOV_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void cUIStateStack_purgeNormalStates(void* list);
 extern "C" void cGame_doNextState(void* self);
@@ -10375,7 +10375,7 @@ extern "C" void cGame_doNextState(void* self);
  * @param popup  the widget
  * @param event  the widget event
  */
-extern "C" void func_001E8160(cOVState_RACE_FINISHOV* self, void* popup, int event)
+extern "C" void cOVState_RACE_FINISHOV_onWidgetEvent(cOVState_RACE_FINISHOV* self, void* popup, int event)
 {
     if (popup != 0) {
         if (event == 5 && self->unk_0A0 != 0) {
@@ -10391,7 +10391,7 @@ extern "C" void func_001E8160(cOVState_RACE_FINISHOV* self, void* popup, int eve
 // constant and v1 to the result, the target does the reverse. No source
 // shape tried (temp local, early return, nested ternary) flips it.
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E81B0);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_RACE_FINISHOV_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
  * Answers the race finish menu's events (vtable entry 20): 257 for event 6 while +0xA0 is set, else 0.
@@ -10400,7 +10400,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E81B0);
  * @param key     the menu event
  * @return 257 or 0
  */
-extern "C" int func_001E81B0(cOVState_RACE_FINISHOV* self, int widget, int key)
+extern "C" int cOVState_RACE_FINISHOV_onWidgetMenu(cOVState_RACE_FINISHOV* self, int widget, int key)
 {
     int result = 0;
     if (key == 6) {
@@ -10415,7 +10415,7 @@ extern "C" int func_001E81B0(cOVState_RACE_FINISHOV* self, int widget, int key)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E81D0);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_RACE_FINISHOV_handleEvent);
 #ifdef SKIP_ASM
 /**
  * Sets the race finish overlay's may-continue flag (+0xA0) from a message (vtable entry 24, handleEvent).
@@ -10425,7 +10425,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E81D0);
  * @param message  the message
  * @return 0
  */
-extern "C" int func_001E81D0(cOVState_RACE_FINISHOV* self, int message)
+extern "C" int cOVState_RACE_FINISHOV_handleEvent(cOVState_RACE_FINISHOV* self, int message)
 {
     switch (message) {
     case 0:
@@ -10588,7 +10588,7 @@ extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen(cOVState_BASSSP_QUA
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E87B8);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_BASSSP_QUAL_FINISHOV_onUpdate);
 #ifdef SKIP_ASM
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void cUIStateStack_purgeNormalStates(void* list);
@@ -10600,7 +10600,7 @@ extern "C" void cGame_doNextState(void* self);
  * Runs cOVState_onUpdate and adds 1/60 to the timer (+0x9C); when +0xA0 is set and the timer reaches 3 seconds (1
  * second when the human rider's word +0x480 is set) purges the normal states and calls cGame_doNextState.
  */
-extern "C" void func_001E87B8(cOVState_BASSSP_QUAL_FINISHOV* self)
+extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onUpdate(cOVState_BASSSP_QUAL_FINISHOV* self)
 {
     float limit = 3.0f;
     int idx = cBENewPlayerInterface_getHumanRider(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
@@ -10619,7 +10619,7 @@ extern "C" void func_001E87B8(cOVState_BASSSP_QUAL_FINISHOV* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E8880);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_BASSSP_QUAL_FINISHOV_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void cUIStateStack_purgeNormalStates(void* list);
 extern "C" void cGame_doNextState(void* self);
@@ -10632,7 +10632,7 @@ extern "C" void cGame_doNextState(void* self);
  * @param popup  the widget
  * @param event  the widget event
  */
-extern "C" void func_001E8880(cOVState_BASSSP_QUAL_FINISHOV* self, void* popup, int event)
+extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onWidgetEvent(cOVState_BASSSP_QUAL_FINISHOV* self, void* popup, int event)
 {
     if (popup != 0) {
         if (event == 5 && self->unk_0A0 != 0) {
@@ -10645,7 +10645,7 @@ extern "C" void func_001E8880(cOVState_BASSSP_QUAL_FINISHOV* self, void* popup, 
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E88D0);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_BASSSP_QUAL_FINISHOV_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
  * Answers the event finish menu's events (vtable entry 20): 257 for event 6 while +0xA0 is set, else 0.
@@ -10654,7 +10654,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E88D0);
  * @param key     the menu event
  * @return 257 or 0
  */
-extern "C" int func_001E88D0(cOVState_BASSSP_QUAL_FINISHOV* self, int widget, int key)
+extern "C" int cOVState_BASSSP_QUAL_FINISHOV_onWidgetMenu(cOVState_BASSSP_QUAL_FINISHOV* self, int widget, int key)
 {
     int result = 0;
     if (key == 6) {
@@ -10669,7 +10669,7 @@ extern "C" int func_001E88D0(cOVState_BASSSP_QUAL_FINISHOV* self, int widget, in
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E88F0);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_BASSSP_QUAL_FINISHOV_handleEvent);
 #ifdef SKIP_ASM
 /**
  * Sets the event finish overlay's may-continue flag (+0xA0) from a message (vtable entry 24, handleEvent).
@@ -10679,7 +10679,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E88F0);
  * @param message  the message
  * @return 0
  */
-extern "C" int func_001E88F0(cOVState_BASSSP_QUAL_FINISHOV* self, int message)
+extern "C" int cOVState_BASSSP_QUAL_FINISHOV_handleEvent(cOVState_BASSSP_QUAL_FINISHOV* self, int message)
 {
     switch (message) {
     case 0:
@@ -10996,7 +10996,7 @@ void func_001E8FC0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E8FC8);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_TOURNAMENT_STANDINGS_onWidgetEvent);
 #ifdef SKIP_ASM
 extern int cOVStateManager_mStatus;
 extern int cOVStateManager_mMiscData;
@@ -11009,7 +11009,7 @@ extern int cOVStateManager_mMiscData;
  * @param popup  the widget
  * @param event  the widget event
  */
-extern "C" void func_001E8FC8(cOVState_TOURNAMENT_STANDINGS* self, void* popup, int event)
+extern "C" void cOVState_TOURNAMENT_STANDINGS_onWidgetEvent(cOVState_TOURNAMENT_STANDINGS* self, void* popup, int event)
 {
     if (popup != 0 && event == 5) {
         int popupId = *(int*)((char*)popup + 0x18);

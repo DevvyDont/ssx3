@@ -365,10 +365,10 @@ get_cie (fde *f)
 }
 
 /* C library (inhibit_libc: no headers), at the retail C library's labels. */
-extern void *malloc (size_t) __asm__("func_004188C0");
-extern void free (void *) __asm__("func_00418910");
-extern void abort (void) __asm__("func_00418790") __attribute__ ((noreturn));
-extern void *memset (void *, int, size_t) __asm__("func_00416210");
+extern void *malloc (size_t) __asm__("malloc");
+extern void free (void *) __asm__("free");
+extern void abort (void) __asm__("abort") __attribute__ ((noreturn));
+extern void *memset (void *, int, size_t) __asm__("memset");
 
 /* frame.c functions, under the unit's retail labels (asm-label aliases). The ones whose bodies are landed under
    their func_ names are declared extern here (static in frame.c; fde_split is a static inline that is too big to
@@ -1443,9 +1443,9 @@ frame_heapsort (fde_vector *erratic)
 /**
  * Finishes sorting an FDE accumulator and returns the sorted array.
  *
- * Aborts (func_00418790) unless the linear vector holds count entries, splits the out-of-order entries into the erratic
+ * Aborts (abort) unless the linear vector holds count entries, splits the out-of-order entries into the erratic
  * vector (func_004149F0), aborts again unless both together still hold count, heapsorts the erratic entries by pc_begin
- * (inline), merges them back into the linear vector (func_00413BD0) and frees the erratic array (func_00418910).
+ * (inline), merges them back into the linear vector (func_00413BD0) and frees the erratic array (free).
  *
  * @param accu   the accumulator (linear and erratic vectors)
  * @param count  the number of FDEs added
@@ -1556,14 +1556,14 @@ struct LL14008 {
     int *b;
     int nb;
 };
-extern int *func_004188C0(int);
+extern int *malloc_a(int) __asm__("malloc");
 extern struct N13F80 **func_00413CD0(struct LL14008 *, int);
 /**
  * Builds an unwind object's sorted FDE table and its covered address range on first use.
  *
  * Counts the FDEs (count_fdes) of every section in the object's fde_array list (+0xC, null-terminated) when it is
  * set, else of the single section at fde_begin (+8), and stores the count (+0x10). Allocates the linear and erratic
- * arrays (func_004188C0, 4 bytes per FDE), adds every FDE (add_fdes), sorts (func_00413CD0) and stores the sorted
+ * arrays (malloc, 4 bytes per FDE), adds every FDE (add_fdes), sorts (func_00413CD0) and stores the sorted
  * array in fde_array and the range in pc_begin (+0) and pc_end (+4).
  *
  * @param n  the registered unwind object
@@ -1585,8 +1585,8 @@ void func_00414008(struct N14008 *n) {
     }
     bytes = cnt * 4;
     n->cnt = cnt;
-    accumulator.a = func_004188C0(bytes);
-    accumulator.b = func_004188C0(bytes);
+    accumulator.a = malloc_a(bytes);
+    accumulator.b = malloc_a(bytes);
     accumulator.na = 0;
     accumulator.nb = 0;
     lo = 0xFFFFFFFF;
@@ -1666,7 +1666,7 @@ INCLUDE_ASM("seg/seg_313F58", func_00414230);
 #ifdef SKIP_ASM
 extern int D_004998F0[];
 extern int D_004998F8[];
-extern int func_004165A8(int, int);
+extern int strcmp_a(int, int) __asm__("strcmp");
 struct C14230 {
     char *aug;
     int f4;
@@ -1683,7 +1683,7 @@ extern int strlen(char *);
  *
  * Despite its name the first parameter is the FDE: the CIE is at the FDE's CIE-pointer field minus its value, and its
  * augmentation string at CIE + 9. Only "" (D_004998F0), "eh" (D_004998F8) and strings starting with 'z' are accepted
- * (func_004165A8 is strcmp); others return 0. "eh" is followed by a 4-byte eh_ptr (+4, else 0); then come the code
+ * (strcmp is strcmp); others return 0. "eh" is followed by a 4-byte eh_ptr (+4, else 0); then come the code
  * alignment (ULEB128, +8), the data alignment (SLEB128, +0xC) and the return-address column (one byte, +0x10); a 'z'
  * augmentation then skips its ULEB128-sized data block.
  *
@@ -1696,10 +1696,10 @@ unsigned char *func_00414230(int *cie, struct C14230 *cieInfo) {
     unsigned char *cursor;
     unsigned augDataLength;
     cieInfo->aug = (char *)cie - cie[1] + 13;
-    if (func_004165A8((int)cieInfo->aug, (int)D_004998F0) == 0 || func_004165A8((int)cieInfo->aug, (int)D_004998F8) == 0 || *cieInfo->aug == 'z') {
+    if (strcmp_a((int)cieInfo->aug, (int)D_004998F0) == 0 || strcmp_a((int)cieInfo->aug, (int)D_004998F8) == 0 || *cieInfo->aug == 'z') {
         augmentationEnd = cieInfo->aug + strlen(cieInfo->aug);
         cursor = (unsigned char *)augmentationEnd + 1;
-        if (func_004165A8((int)cieInfo->aug, (int)D_004998F8) == 0) {
+        if (strcmp_a((int)cieInfo->aug, (int)D_004998F8) == 0) {
             cieInfo->f4 = ((struct U14230 *)cursor)->v;
             cursor += 4;
         } else {
@@ -1730,8 +1730,8 @@ INCLUDE_ASM("seg/seg_313F58", execute_cfa_insn);
  *
  * Handles the advance, offset and restore opcodes (low 6 bits as operand), set_loc, advance_loc1/2/4, the extended
  * offset/restore forms, register, def_cfa and its register/offset variants and GNU_args_size. remember_state saves a
- * heap copy of the state (func_004188C0) and restore_state copies it back and frees it; GNU_window_save marks registers
- * 16..31 as saved at SPARC window offsets. Unknown opcodes end the program (func_00418790).
+ * heap copy of the state (malloc) and restore_state copies it back and frees it; GNU_window_save marks registers
+ * 16..31 as saved at SPARC window offsets. Unknown opcodes end the program (abort).
  *
  * @param insnPtr  the instruction to decode
  * @param state    the unwind state being built
@@ -1889,16 +1889,16 @@ void __register_frame_info(int begin, int *frameObject) {
 INCLUDE_ASM("seg/seg_313F58", __register_frame);
 #ifdef SKIP_ASM
 extern void __register_frame_info(int, int *);
-extern int *func_004188C0(int);
+extern int *malloc_a(int) __asm__("malloc");
 /**
  * Registers an .eh_frame section for unwinding with a newly allocated object record.
  *
- * Allocates 0x18 bytes (func_004188C0) and passes them with the section to __register_frame_info.
+ * Allocates 0x18 bytes (malloc) and passes them with the section to __register_frame_info.
  *
  * @param begin  the first entry of the .eh_frame section
  */
 void __register_frame(int begin) {
-    __register_frame_info(begin, func_004188C0(0x18));
+    __register_frame_info(begin, malloc_a(0x18));
 }
 #endif
 
@@ -1930,16 +1930,16 @@ void __register_frame_info_table(int begin, int *frameObject) {
 INCLUDE_ASM("seg/seg_313F58", __register_frame_table);
 #ifdef SKIP_ASM
 extern void __register_frame_info_table(int, int *);
-extern int *func_004188C0(int);
+extern int *malloc_a(int) __asm__("malloc");
 /**
  * Registers a table of .eh_frame sections for unwinding with a newly allocated object record.
  *
- * Allocates 0x18 bytes (func_004188C0) and passes them with the table to __register_frame_info_table.
+ * Allocates 0x18 bytes (malloc) and passes them with the table to __register_frame_info_table.
  *
  * @param begin  the table of section pointers
  */
 void __register_frame_table(int begin) {
-    __register_frame_info_table(begin, func_004188C0(0x18));
+    __register_frame_info_table(begin, malloc_a(0x18));
 }
 #endif
 
@@ -1947,13 +1947,13 @@ void __register_frame_table(int begin) {
 INCLUDE_ASM("seg/seg_313F58", __deregister_frame_info);
 #ifdef SKIP_ASM
 extern int *D_0052ADE8;
-extern void func_00418910(int);
-extern void func_00418790();
+extern void free_a(int) __asm__("free");
+extern void abort_a() __asm__("abort");
 /**
  * Unregisters an .eh_frame section and returns its object record.
  *
  * Unlinks the object whose fde_begin (+8) equals key from the list D_0052ADE8 and frees its sorted FDE array
- * (func_00418910) when the object was initialised (pc_begin nonzero). Aborts (func_00418790) when no object matches.
+ * (free) when the object was initialised (pc_begin nonzero). Aborts (abort) when no object matches.
  * The crt teardown func_00100218 calls it with D_0043CE00.
  *
  * @param key  the section (or table) the object was registered with
@@ -1970,13 +1970,13 @@ int __deregister_frame_info(key)
             if (n[2] == key) {
                 *pp = (int *)n[5];
                 if (n[0] != 0)
-                    func_00418910(n[3]);
+                    free_a(n[3]);
                 return (int)n;
             }
             pp = (int **)&n[5];
         } while (n[5] != 0);
     }
-    func_00418790(key, pp);
+    abort_a(key, pp);
 }
 #endif
 
@@ -1984,15 +1984,15 @@ int __deregister_frame_info(key)
 INCLUDE_ASM("seg/seg_313F58", __deregister_frame);
 #ifdef SKIP_ASM
 extern int __deregister_frame_info();
-extern void func_00418910(int);
+extern void free_a(int) __asm__("free");
 /**
  * Unregisters an .eh_frame section and frees the object record __register_frame allocated for it.
  *
  * Declared without parameters: the caller's section pointer reaches __deregister_frame_info in the first argument register
- * untouched; the returned record is freed with func_00418910.
+ * untouched; the returned record is freed with free.
  */
 void __deregister_frame(void) {
-    func_00418910(__deregister_frame_info());
+    free_a(__deregister_frame_info());
 }
 #endif
 

@@ -230,7 +230,7 @@ struct Menu_B528 {
     cCommandMenuItem items[12];    // 0x168
 };
 
-extern "C" int func_0025F120(void* src);
+extern "C" int LobbyMan_getnumrooms(void* src);
 extern "C" void* func_0025F150(void* src, int i);
 extern "C" void cMenuItem_activate(void* item, int enable);
 extern char str_Receiving_Room_List[];
@@ -238,7 +238,7 @@ extern char str_Receiving_Room_List[];
 /**
  * Fills the debug "Select Room" menu with the lobby's room names.
  *
- * Asks func_0025F120 for the room count and gives command item i (12 items of 0x24 bytes from +0x168) the name from
+ * Asks LobbyMan_getnumrooms for the room count and gives command item i (12 items of 0x24 bytes from +0x168) the name from
  * func_0025F150(src, i), activates it and sets its ID to i. With no rooms yet, the first item shows "Receiving Room
  * List" with ID -1 (which the menu's command handler LobbyMenu_onCommand ignores). The remaining items are deactivated.
  *
@@ -249,7 +249,7 @@ extern char str_Receiving_Room_List[];
 extern "C" void LobbyMenu_updaterooms(LobbyMenu* self, void* src)
 {
     int i = 0;
-    int n = func_0025F120(src);
+    int n = LobbyMan_getnumrooms(src);
     for (; i < n; i++) {
         cCommandMenuItem* it = &((&self->unk_168[0]))[i];
         (*(void**)&it->Caption) = func_0025F150(src, i);
@@ -1746,14 +1746,14 @@ extern "C" unsigned char *tAttrLocale_tAttrLocale(unsigned char *attr) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCC58);
+INCLUDE_ASM("main/all_in_one_main", cUILocaleInterface_getStringByHash);
 #ifdef SKIP_ASM
 /**
  * Returns 0: the base locale's default for vtable slot 0x24 (cUILocaleInterface_vtbl).
  *
  * @return always 0
  */
-extern "C" int func_001DCC58(void) {
+extern "C" int cUILocaleInterface_getStringByHash(void) {
     return 0;
 }
 #endif
@@ -2421,7 +2421,7 @@ extern "C" int cFEInput_getAsciiKey(cFEInput* input) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD578);
+INCLUDE_ASM("main/all_in_one_main", cFEInput_getInput);
 #ifdef SKIP_ASM
 /**
  * Returns the word at +0x18 of an object; for a cFEInput that is the input device pointer cFEInput_cFEInput clears.
@@ -2431,7 +2431,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD578);
  * @param object  the object
  * @return the word at +0x18
  */
-extern "C" int func_001DD578(void *object) {
+extern "C" int cFEInput_getInput(void *object) {
     return (*(int *)((char*)(object) + (0x18)));
 }
 #endif
@@ -3602,7 +3602,7 @@ extern "C" int cPopupInfo_getPopupPostPending(int popupInfo) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDBC0);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setDeferEventsFlag);
 #ifdef SKIP_ASM
 /**
  * Sets a popup description's mbDeferEventsFlag (+0xB4); the online states set it to 1.
@@ -3610,13 +3610,13 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDBC0);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param deferEvents  the new flag value
  */
-extern "C" void func_001DDBC0(cPopupInfo* popupInfo, int deferEvents) {
+extern "C" void cPopupInfo_setDeferEventsFlag(cPopupInfo* popupInfo, int deferEvents) {
     (popupInfo->mbDeferEventsFlag) = deferEvents;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DDBC8);
+INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getDeferEventsFlag);
 #ifdef SKIP_ASM
 /**
  * Returns a popup description's mbDeferEventsFlag (+0xB4).
@@ -3624,7 +3624,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DDBC8);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return mbDeferEventsFlag
  */
-extern "C" int func_001DDBC8(cPopupInfo* popupInfo) {
+extern "C" int cPopupInfo_getDeferEventsFlag(cPopupInfo* popupInfo) {
     return (popupInfo->mbDeferEventsFlag);
 }
 #endif
@@ -4298,7 +4298,7 @@ extern "C" void cFEStateOptionsGame__cFEStateOptionsGame(cFEStateOptionsGame* se
 /**
  * Does nothing: the game options state's onLoseFocus (slot +0x5C of cFEStateOptionsGame_vtbl).
  */
-extern "C" void func_001DDFA8(void) {
+extern "C" void cFEStateOptionsGame_onLoseFocus(void) {
 }
 
 //100%
@@ -4344,7 +4344,7 @@ extern "C" void cFEStateOptionsSound__cFEStateOptionsSound(cFEStateOptionsSound*
 /**
  * Does nothing: the sound options state's onLoseFocus (slot +0x5C of cFEStateOptionsSound_vtbl).
  */
-extern "C" void func_001DE010(void) {
+extern "C" void cFEStateOptionsSound_onLoseFocus(void) {
 }
 
 //100%
@@ -4391,7 +4391,7 @@ extern "C" void cFEStateOptionsHUD__cFEStateOptionsHUD(cFEStateOptionsHUD* self)
 /**
  * Does nothing: the HUD options state's onLoseFocus (slot +0x5C of cFEStateOptionsHUD_vtbl).
  */
-extern "C" void func_001DE078(void) {
+extern "C" void cFEStateOptionsHUD_onLoseFocus(void) {
 }
 
 //100%
@@ -4440,7 +4440,7 @@ extern "C" void cFEStateOptionsController__cFEStateOptionsController(cFEStateOpt
 /**
  * Does nothing: the controller options state's onLoseFocus (slot +0x5C of cFEStateOptionsController_vtbl).
  */
-extern "C" void func_001DE0E8(void) {
+extern "C" void cFEStateOptionsController_onLoseFocus(void) {
 }
 
 //100%
@@ -4610,7 +4610,7 @@ extern "C" void *func_001DE240(cFEStateProfileLoad* self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE280);
+INCLUDE_ASM("main/all_in_one_main", cFEStateProfileLoad_setQuitPath);
 #ifdef SKIP_ASM
 /**
  * Sets what a profile load/save state does when it finishes, the last word of the object (+0x27C).
@@ -4622,7 +4622,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE280);
  * @param profileLoadState  the profile load state (cFEStateProfileLoad)
  * @param action  the action: 0, 1 or 2
  */
-extern "C" void func_001DE280(cFEStateProfileLoad* profileLoadState, int action) {
+extern "C" void cFEStateProfileLoad_setQuitPath(cFEStateProfileLoad* profileLoadState, int action) {
     (profileLoadState->mTypeOfQuit) = action;
 }
 #endif
@@ -5433,7 +5433,7 @@ extern "C" void* cFEStateNet_cFEStateNet1(cFEStateNet* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DE860);
+INCLUDE_ASM("main/all_in_one_main", cFEStateNet_onInputBegin);
 #ifdef SKIP_ASM
 /**
  * Returns an online state's unk_058 (+0x58) as its onInputBegin result (slot +0x44 of the online states' vtables).
@@ -5443,7 +5443,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE860);
  * @param feStateNet  the online state (cFEStateNet)
  * @return unk_058
  */
-extern "C" int func_001DE860(cFEStateNet* feStateNet) {
+extern "C" int cFEStateNet_onInputBegin(cFEStateNet* feStateNet) {
     return (feStateNet->unk_058);
 }
 #endif
@@ -5622,7 +5622,7 @@ extern "C" void cFEStateMemCard_onWidgetEvent(void) {
  * Does nothing: slot +0x12C of cFEStateMemCard_vtbl, the slot cFEMemCard_hideActionButtons fills in the memory-card base vtable
  * cFEMemCard_vtbl.
  */
-extern "C" void func_001DE948(void) {
+extern "C" void cFEStateMemCard_hideActionButtons(void) {
 }
 
 //100%

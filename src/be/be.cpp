@@ -71,7 +71,7 @@ extern sBEInterface* cBE_aBEState[];
 extern int cBE_currentState;
 
 //100%
-INCLUDE_ASM("be/be", func_0014DD48);
+INCLUDE_ASM("be/be", cBE_IsBEInitialized);
 #ifdef SKIP_ASM
 extern int cBE_BEInitialized;
 
@@ -80,7 +80,7 @@ extern int cBE_BEInitialized;
  *
  * @return 1 or 0
  */
-extern "C" int func_0014DD48(void) {
+extern "C" int cBE_IsBEInitialized(void) {
     return cBE_BEInitialized != 0;
 }
 #endif
@@ -204,15 +204,15 @@ extern "C" void cBE_setState(int state)
 #endif
 
 //100%
-INCLUDE_ASM("be/be", func_0014DEE8);
+INCLUDE_ASM("be/be", cBE_reloadData);
 #ifdef SKIP_ASM
-extern "C" void func_0014A078(int);
+extern "C" void cBELibrary_debugReloadData(int);
 
 /**
- * Calls func_0014A078 with cBE_library; that function's body is empty in this build, so this does nothing.
+ * Calls cBELibrary_debugReloadData with cBE_library; that function's body is empty in this build, so this does nothing.
  */
-extern "C" void func_0014DEE8(void) {
-    func_0014A078((*(int*)&cBE_library));
+extern "C" void cBE_reloadData(void) {
+    cBELibrary_debugReloadData((*(int*)&cBE_library));
 }
 #endif
 
@@ -300,7 +300,7 @@ extern "C" int cBE_getDataSize()
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/be", cBE_writeToData);
 #ifdef SKIP_ASM
-extern "C" void func_0014A188(void* buf);
+extern "C" void cBELibrary_writeToData(void* buf);
 // PORT: cBE_getDataSize is declared () in this unit but called with the BE object here.
 int cBE_getDataSize_self(void* be) __asm__("cBE_getDataSize");
 extern "C" int MEM_crc16(void* buf, int size, int seed);
@@ -309,7 +309,7 @@ extern "C" void* memcpy(void*, const void*, unsigned int);
 /**
  * Fills the save buffer @p buf with the back-end state and stores a checksum in its last 4 bytes.
  *
- * func_0014A188 copies the race database, player entries, profiles and other state blocks into @p buf; then
+ * cBELibrary_writeToData copies the race database, player entries, profiles and other state blocks into @p buf; then
  * MEM_crc16 checksums the first cBE_getDataSize() - 4 bytes with seed 64490 and the result is copied to the end.
  * fe/festatetrophyroom saves the memory card buffer this way.
  *
@@ -317,7 +317,7 @@ extern "C" void* memcpy(void*, const void*, unsigned int);
  */
 extern "C" void cBE_writeToData(void* self, char* buf)
 {
-    func_0014A188(buf);
+    cBELibrary_writeToData(buf);
     int crc = MEM_crc16(buf, cBE_getDataSize_self(self) - 4, 64490);
     char* crcSlot = buf + (cBE_getDataSize_self(self) - 4);
     memcpy(crcSlot, &crc, 4);

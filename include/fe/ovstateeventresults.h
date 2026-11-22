@@ -149,8 +149,8 @@ CHECK_OFFSET(cOVState_FINAL_STANDINGS, doInit, 0x09C);
 CHECK_SIZE(cOVState_FINAL_STANDINGS, 0xA0);
 
 // cOVState_RACE_FINISHOV (0xA4: cMemMan size for type 12). The ctor also sets mHashName = GetHashValue32("finishov").
-// Slots: 4 onCreateScreen cOVState_RACE_FINISHOV_onCreateScreen, 12 onUpdate func_001E8098, 19 onWidgetEvent func_001E8160, 20 onWidgetMenu
-// func_001E81B0, 24 handleEvent func_001E81D0. Preview: _vt$22cOVState_RACE_FINISHOV (overrides 4 / 13 / 19 / 22 in
+// Slots: 4 onCreateScreen cOVState_RACE_FINISHOV_onCreateScreen, 12 onUpdate cOVState_RACE_FINISHOV_onUpdate, 19 onWidgetEvent cOVState_RACE_FINISHOV_onWidgetEvent, 20 onWidgetMenu
+// cOVState_RACE_FINISHOV_onWidgetMenu, 24 handleEvent cOVState_RACE_FINISHOV_handleEvent. Preview: _vt$22cOVState_RACE_FINISHOV (overrides 4 / 13 / 19 / 22 in
 // its 23-slot layout = retail 4 / 12 / 19 / 24).
 
 struct cOVState_RACE_FINISHOV {
@@ -212,8 +212,8 @@ CHECK_OFFSET(cOVState_RACE_FINISHOV, unk_0A0, 0x0A0);
 CHECK_SIZE(cOVState_RACE_FINISHOV, 0xA4);
 
 // cOVState_BASSSP_QUAL_FINISHOV (0xA4: cMemMan size for type 13; same members as RACE_FINISHOV, both written by the
-// same ctor pattern). Slots: 4 onCreateScreen cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen, 12 onUpdate func_001E87B8, 19 onWidgetEvent func_001E8880,
-// 20 onWidgetMenu func_001E88D0, 24 handleEvent func_001E88F0. Preview: _vt$29cOVState_BASSSP_QUAL_FINISHOV (same
+// same ctor pattern). Slots: 4 onCreateScreen cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen, 12 onUpdate cOVState_BASSSP_QUAL_FINISHOV_onUpdate, 19 onWidgetEvent cOVState_BASSSP_QUAL_FINISHOV_onWidgetEvent,
+// 20 onWidgetMenu cOVState_BASSSP_QUAL_FINISHOV_onWidgetMenu, 24 handleEvent cOVState_BASSSP_QUAL_FINISHOV_handleEvent. Preview: _vt$29cOVState_BASSSP_QUAL_FINISHOV (same
 // override set as RACE_FINISHOV; its onCreateScreen labels the runs by heat).
 
 struct cOVState_BASSSP_QUAL_FINISHOV {
@@ -275,7 +275,7 @@ CHECK_OFFSET(cOVState_BASSSP_QUAL_FINISHOV, unk_0A0, 0x0A0);
 CHECK_SIZE(cOVState_BASSSP_QUAL_FINISHOV, 0xA4);
 
 // cOVState_TOURNAMENT_STANDINGS (0x9C, no own members). Slots: 4 onCreateScreen cOVState_TOURNAMENT_STANDINGS_onCreateScreen, 19 onWidgetEvent
-// func_001E8FC8. Preview: _vt$29cOVState_TOURNAMENT_STANDINGS overrides the same two slots, screen
+// cOVState_TOURNAMENT_STANDINGS_onWidgetEvent. Preview: _vt$29cOVState_TOURNAMENT_STANDINGS overrides the same two slots, screen
 // "109MultiplayerStandings".
 
 struct cOVState_TOURNAMENT_STANDINGS {

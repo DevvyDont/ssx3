@@ -490,7 +490,7 @@ __udivdi3 (UDItype n, UDItype divisor)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_312310", func_00411B08);
+INCLUDE_ASM("seg/seg_312310", __pack_d);
 #ifdef SKIP_ASM
 /* fp-bit.c (GCC runtime, GPL v2+ with the libgcc linking exception): the header part, compiled as dp-bit.c for
    DFmode. mips/t-elf builds dp-bit.c as `#ifdef __MIPSEL__ / #define FLOAT_BIT_ORDER_MISMATCH / #endif`,
@@ -648,11 +648,11 @@ flip_sign ( fp_number_type *  x)
 }
 
 /* The fp-bit.c functions, bound to their retail symbols (the unit's landed bodies call them by these). */
-extern FLO_type pack_d ( fp_number_type * ) __asm__("func_00411B08");
-extern void unpack_d (FLO_union_type *, fp_number_type *) __asm__("func_00411C38");
-int __fpcmp_parts (fp_number_type * a, fp_number_type *b) __asm__("func_004123E8");
+extern FLO_type pack_d ( fp_number_type * ) __asm__("__pack_d");
+extern void unpack_d (FLO_union_type *, fp_number_type *) __asm__("__unpack_d");
+int __fpcmp_parts (fp_number_type * a, fp_number_type *b) __asm__("__fpcmp_parts_d");
 
-/* fp-bit.c pack_d (GCC runtime, GPL v2+ with the libgcc linking exception): __pack_d, retail func_00411B08 */
+/* fp-bit.c pack_d (GCC runtime, GPL v2+ with the libgcc linking exception): retail __pack_d */
 /**
  * Packs an unpacked soft-float double (class, sign, exponent, fraction) into its IEEE bits.
  *
@@ -762,9 +762,9 @@ pack_d ( fp_number_type *  src)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_312310", func_00411C38);
+INCLUDE_ASM("seg/seg_312310", __unpack_d);
 #ifdef SKIP_ASM
-/* fp-bit.c unpack_d (GCC runtime, GPL v2+ with the libgcc linking exception): __unpack_d, retail func_00411C38 */
+/* fp-bit.c unpack_d (GCC runtime, GPL v2+ with the libgcc linking exception): retail __unpack_d */
 /**
  * Unpacks a soft-float double into class, sign, exponent and fraction (with guard bits).
  *
@@ -1017,13 +1017,13 @@ _fpadd_parts (fp_number_type * lhs,
 INCLUDE_ASM("seg/seg_312310", dpadd);
 #ifdef SKIP_ASM
 struct S412778;
-extern void func_00411C38(long *, int *);
+extern void __unpack_d_a(long *, int *) __asm__("__unpack_d");
 extern struct S412778 *func_00411CD8(int *, int *, int *);
-extern void func_00411B08(struct S412778 *);
+extern void __pack_d_a(struct S412778 *) __asm__("__pack_d");
 /**
  * Adds two doubles in software (fp-bit.c's GOFAST dpadd).
  *
- * Unpacks both operands (func_00411C38), adds the parts (func_00411CD8) and packs the result (func_00411B08);
+ * Unpacks both operands (__unpack_d), adds the parts (func_00411CD8) and packs the result (__pack_d);
  * the packed sum is left in the return registers although the C declaration returns void.
  *
  * @param lhs  first operand, as the raw 64-bit pattern of a double
@@ -1033,9 +1033,9 @@ void dpadd(long lhs, long rhs) {
     int x[8];
     int y[8];
     int z[8];
-    func_00411C38(&lhs, x);
-    func_00411C38(&rhs, y);
-    func_00411B08(func_00411CD8(x, y, z));
+    __unpack_d_a(&lhs, x);
+    __unpack_d_a(&rhs, y);
+    __pack_d_a(func_00411CD8(x, y, z));
 }
 #endif
 
@@ -1043,9 +1043,9 @@ void dpadd(long lhs, long rhs) {
 INCLUDE_ASM("seg/seg_312310", dpsub);
 #ifdef SKIP_ASM
 struct S412778;
-extern void func_00411C38(long *, int *);
+extern void __unpack_d_a(long *, int *) __asm__("__unpack_d");
 extern struct S412778 *func_00411CD8(int *, int *, int *);
-extern void func_00411B08(struct S412778 *);
+extern void __pack_d_a(struct S412778 *) __asm__("__pack_d");
 /**
  * Subtracts two doubles in software (fp-bit.c's GOFAST dpsub): flips the sign of @p rhs and adds.
  *
@@ -1058,10 +1058,10 @@ void dpsub(long lhs, long rhs) {
     int x[8];
     int y[8];
     int z[8];
-    func_00411C38(&lhs, x);
-    func_00411C38(&rhs, y);
+    __unpack_d_a(&lhs, x);
+    __unpack_d_a(&rhs, y);
     y[1] ^= 1;
-    func_00411B08(func_00411CD8(x, y, z));
+    __pack_d_a(func_00411CD8(x, y, z));
 }
 #endif
 
@@ -1218,14 +1218,14 @@ multiply (FLO_type arg_a, FLO_type arg_b)
 INCLUDE_ASM("seg/seg_312310", dpdiv);
 #ifdef SKIP_ASM
 struct S412280 { unsigned cls; int sign; int exp; int pad; unsigned long frac; long pad2; };
-extern void unp_80(long *, struct S412280 *) __asm__("func_00411C38");
-extern void pk_80(struct S412280 *) __asm__("func_00411B08");
+extern void unp_80(long *, struct S412280 *) __asm__("__unpack_d");
+extern void pk_80(struct S412280 *) __asm__("__pack_d");
 extern struct S412280 D_0052ADC0;
 /**
  * Divides two doubles in software (fp-bit.c's divide, exported as GOFAST dpdiv).
  *
  * NaN operands come back unchanged; inf / inf and 0 / 0 give the NaN D_0052ADC0, x / inf gives 0 and x / 0
- * gives infinity. The quotient is left in the return register by pack_d (func_00411B08) although the C
+ * gives infinity. The quotient is left in the return register by pack_d (__pack_d) although the C
  * declaration returns void.
  *
  * @param x  dividend, as the raw 64-bit pattern of a double
@@ -1288,9 +1288,9 @@ void dpdiv(long x, long y) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_312310", func_004123E8);
+INCLUDE_ASM("seg/seg_312310", __fpcmp_parts_d);
 #ifdef SKIP_ASM
-/* fp-bit.c __fpcmp_parts (GCC runtime, GPL v2+ with the libgcc linking exception): __fpcmp_parts_d, retail func_004123E8 */
+/* fp-bit.c __fpcmp_parts (GCC runtime, GPL v2+ with the libgcc linking exception): retail __fpcmp_parts_d */
 int __fpcmp_parts (fp_number_type * a, fp_number_type *b);
 
 /* according to the demo, fpcmp returns a comparison with 0... thus
@@ -1384,10 +1384,10 @@ __fpcmp_parts (fp_number_type * lhs, fp_number_type * rhs)
 //100%
 INCLUDE_ASM("seg/seg_312310", dpcmp);
 #ifdef SKIP_ASM
-extern void func_00411C38(long *, int *);
-extern void func_004123E8(int *, int *);
+extern void __unpack_d_a(long *, int *) __asm__("__unpack_d");
+extern void __fpcmp_parts_d_a(int *, int *) __asm__("__fpcmp_parts_d");
 /**
- * Compares two doubles in software (fp-bit.c's GOFAST dpcmp) through the unpacked-parts compare func_004123E8.
+ * Compares two doubles in software (fp-bit.c's GOFAST dpcmp) through the unpacked-parts compare __fpcmp_parts_d.
  *
  * The comparison result (negative, zero or positive) is left in the return register although the C declaration
  * returns void.
@@ -1398,9 +1398,9 @@ extern void func_004123E8(int *, int *);
 void dpcmp(long lhs, long rhs) {
     int x[8];
     int y[8];
-    func_00411C38(&lhs, x);
-    func_00411C38(&rhs, y);
-    func_004123E8(x, y);
+    __unpack_d_a(&lhs, x);
+    __unpack_d_a(&rhs, y);
+    __fpcmp_parts_d_a(x, y);
 }
 #endif
 
@@ -1408,12 +1408,12 @@ void dpcmp(long lhs, long rhs) {
 INCLUDE_ASM("seg/seg_312310", litodp);
 #ifdef SKIP_ASM
 struct S412550 { unsigned cls; int sign; int exp; int pad; unsigned long frac; };
-extern void pk_412550(struct S412550 *) __asm__("func_00411B08");
+extern void pk_412550(struct S412550 *) __asm__("__pack_d");
 /**
  * Converts a 32-bit signed integer to a double in software (fp-bit.c's si_to_df, exported as GOFAST litodp).
  *
  * INT_MIN is returned directly as -2147483648.0. Any other value is normalised into unpacked form and packed
- * by func_00411B08, whose result the C body leaves in the return register without a return statement.
+ * by __pack_d, whose result the C body leaves in the return register without a return statement.
  *
  * @param x  the integer to convert
  * @return the value as a double
@@ -1445,7 +1445,7 @@ double litodp(int x) {
 //100%
 INCLUDE_ASM("seg/seg_312310", dptoli);
 #ifdef SKIP_ASM
-extern void func_00411C38(long *, int *);
+extern void __unpack_d_a(long *, int *) __asm__("__unpack_d");
 struct S412608 { unsigned cls; int sign; int exp; int pad; unsigned long frac; };
 /**
  * Converts a double to a 32-bit signed integer in software, truncating toward zero (fp-bit.c's df_to_si,
@@ -1460,7 +1460,7 @@ struct S412608 { unsigned cls; int sign; int exp; int pad; unsigned long frac; }
 int dptoli(long value) {
     struct S412608 unpacked;
     int magnitude;
-    func_00411C38(&value, (int *)&unpacked);
+    __unpack_d_a(&value, (int *)&unpacked);
     if ((unpacked.cls ^ 2) == 0)
         return 0;
     if (unpacked.cls < 2)
@@ -1481,7 +1481,7 @@ sat:
 //100%
 INCLUDE_ASM("seg/seg_312310", dptoul);
 #ifdef SKIP_ASM
-extern void func_00411C38(long *, int *);
+extern void __unpack_d_a(long *, int *) __asm__("__unpack_d");
 struct S4126A0 { unsigned cls; int sign; int exp; int pad; unsigned long frac; };
 /**
  * Converts a double to a 32-bit unsigned integer in software, truncating toward zero (fp-bit.c's df_to_usi,
@@ -1495,7 +1495,7 @@ struct S4126A0 { unsigned cls; int sign; int exp; int pad; unsigned long frac; }
  */
 unsigned dptoul(long value) {
     struct S4126A0 unpacked;
-    func_00411C38(&value, (int *)&unpacked);
+    __unpack_d_a(&value, (int *)&unpacked);
     if ((unpacked.cls ^ 2) == 0)
         return 0;
     if (unpacked.cls < 2)
@@ -1520,19 +1520,19 @@ sat:
 //100%
 INCLUDE_ASM("seg/seg_312310", __negdf2);
 #ifdef SKIP_ASM
-extern void func_00411C38(long *, int *);
+extern void __unpack_d_a(long *, int *) __asm__("__unpack_d");
 /**
  * Negates a soft-float double: unpacks it, flips the sign and packs it again.
  *
- * The packed result from func_00411B08 is left in the return register.
+ * The packed result from __pack_d is left in the return register.
  *
  * @param value  the double
  */
 void __negdf2(long value) {
     int buf[8];
-    func_00411C38(&value, buf);
+    __unpack_d_a(&value, buf);
     buf[1] = buf[1] == 0;
-    func_00411B08((struct S412778 *)buf);
+    __pack_d_a((struct S412778 *)buf);
 }
 #endif
 
@@ -1540,11 +1540,11 @@ void __negdf2(long value) {
 INCLUDE_ASM("seg/seg_312310", __make_dp);
 #ifdef SKIP_ASM
 struct S412778 { int a, b, c; long d; };
-extern void func_00411B08(struct S412778 *);
+extern void __pack_d_a(struct S412778 *) __asm__("__pack_d");
 /**
  * Builds a soft-float double from a class, sign, exponent and fraction.
  *
- * Fills an unpacked number with the four values and packs it with func_00411B08. fptodp (float to double) calls it.
+ * Fills an unpacked number with the four values and packs it with __pack_d. fptodp (float to double) calls it.
  *
  * @param fpClass  the number class
  * @param sign  the sign
@@ -1558,7 +1558,7 @@ void __make_dp(int fpClass, int sign, int exponent, long fraction) {
     parts.b = sign;
     parts.c = exponent;
     parts.d = fraction;
-    func_00411B08(&parts);
+    __pack_d_a(&parts);
 }
 #endif
 

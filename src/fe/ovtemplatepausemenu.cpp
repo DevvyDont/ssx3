@@ -53,7 +53,7 @@ extern unsigned char cOVTemplate_PauseMenu_mSelectedMenuIndex;
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cOVStateManager_addPDATemplate();
 extern "C" void cOVState_onCreateScreen(void* self);
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, int idx);
 extern "C" void cSSXAudio_PauseAudio(void* audio);
@@ -89,7 +89,7 @@ extern "C" void cOVTemplate_PauseMenu_onCreateScreen(cOVTemplate_PauseMenu* stat
     }
     cOVStateManager_addPDATemplate();
     cOVState_onCreateScreen(self);
-    func_00416210(name, 0, 2);
+    memset(name, 0, 2);
     for (int i = 0; i < 8; i++) {
         name[0] = '0' + i;
         char* textObj = (char*)cUIScreen_getObjectByHashName(((void*)self->mpPauseScreen), GetHashValue32(name));
@@ -661,7 +661,7 @@ extern int D_00478160[];
  * Sets +0xBC (On Tour mPauseMenuNumOptions) to 6, copies that many option ids from D_00478160 into the array at +0x9C
  * (On Tour mPauseMenuOptions), sets the menu type +0x110 (On Tour mPauseMenuType) to 1 and calls
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of cOVState_PAUSE_COMPETE_vtbl, the vtable
- * cOVStateManager_triggerOverlay gives overlay 1 (the career (game path 0) event pause that func_0020CA10 opens).
+ * cOVStateManager_triggerOverlay gives overlay 1 (the career (game path 0) event pause that cOVStateManager_triggerPauseMenu opens).
  */
 extern "C" void cOVState_PAUSE_COMPETE_onCreateScreen(cOVTemplate_PauseMenu* self)
 {
@@ -688,7 +688,7 @@ extern int D_00478178[];
  * Sets +0xBC (On Tour mPauseMenuNumOptions) to 6, copies that many option ids from D_00478178 into the array at +0x9C
  * (On Tour mPauseMenuOptions), sets the menu type +0x110 (On Tour mPauseMenuType) to 2 and calls
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of cOVState_PAUSE_BIGCHAL_vtbl, the vtable
- * cOVStateManager_triggerOverlay gives overlay 2 (the local-mission pause that func_0020CA10 opens).
+ * cOVStateManager_triggerOverlay gives overlay 2 (the local-mission pause that cOVStateManager_triggerPauseMenu opens).
  */
 extern "C" void cOVState_PAUSE_BIGCHAL_onCreateScreen(cOVTemplate_PauseMenu* self)
 {
@@ -715,7 +715,7 @@ extern int D_00478140[];
  * Sets +0xBC (On Tour mPauseMenuNumOptions) to 7, copies that many option ids from D_00478140 into the array at +0x9C
  * (On Tour mPauseMenuOptions), sets the menu type +0x110 (On Tour mPauseMenuType) to 3 and calls
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of cOVState_PAUSE_FREERIDE_vtbl, the vtable
- * cOVStateManager_triggerOverlay gives overlay 3 (the freeride (cGameMode 4) pause that func_0020CA10 opens).
+ * cOVStateManager_triggerOverlay gives overlay 3 (the freeride (cGameMode 4) pause that cOVStateManager_triggerPauseMenu opens).
  */
 extern "C" void cOVState_PAUSE_FREERIDE_onCreateScreen(cOVTemplate_PauseMenu* self)
 {
@@ -742,7 +742,7 @@ extern int D_00478190[];
  * Sets +0xBC (On Tour mPauseMenuNumOptions) to 5, copies that many option ids from D_00478190 into the array at +0x9C
  * (On Tour mPauseMenuOptions), sets the menu type +0x110 (On Tour mPauseMenuType) to 4 and calls
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of cOVState_PAUSE_SPOKE_vtbl, the vtable
- * cOVStateManager_triggerOverlay gives overlay 4 (the game-state-11 pause that func_0020CA10 opens).
+ * cOVStateManager_triggerOverlay gives overlay 4 (the game-state-11 pause that cOVStateManager_triggerPauseMenu opens).
  */
 extern "C" void cOVState_PAUSE_SPOKE_onCreateScreen(cOVTemplate_PauseMenu* self)
 {
@@ -769,7 +769,7 @@ extern int D_004781A8[];
  * Sets +0xBC (On Tour mPauseMenuNumOptions) to 5, copies that many option ids from D_004781A8 into the array at +0x9C
  * (On Tour mPauseMenuOptions), sets the menu type +0x110 (On Tour mPauseMenuType) to 5 and calls
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of cOVState_PAUSE_QUICKPLAY_vtbl, the vtable
- * cOVStateManager_triggerOverlay gives overlay 5 (the fallback pause that func_0020CA10 opens).
+ * cOVStateManager_triggerOverlay gives overlay 5 (the fallback pause that cOVStateManager_triggerPauseMenu opens).
  */
 extern "C" void cOVState_PAUSE_QUICKPLAY_onCreateScreen(cOVTemplate_PauseMenu* self)
 {

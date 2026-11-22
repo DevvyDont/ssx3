@@ -8,8 +8,8 @@
 // allocation tag "cVoipMan"). Retail code: dirtysock/tagsunk 0x00266CA0..0x00266F90. One instance, VoipMan:
 // func_00266CA0 creates it, func_00266CD8 destroys it. No On Tour counterpart.
 //
-// Size 8: [R] func_00266CA0: cMemMan_alloc(8, "cVoipMan", 0x20000000) + the constructor func_00266D00 (clears both
-// words). No vtable, no base class (the destructor func_00266D10 is called directly).
+// Size 8: [R] func_00266CA0: cMemMan_alloc(8, "cVoipMan", 0x20000000) + the constructor cVoipMan_cVoipMan (clears both
+// words). No vtable, no base class (the destructor cVoipMan__cVoipMan is called directly).
 //
 // A FLAT layout, like main/game.h. Evidence tags: [R] the constructor; [U] how retail code uses the field
 // (src/dirtysock/tagsunk.cpp). Names are ours.

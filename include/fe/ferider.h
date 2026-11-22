@@ -62,10 +62,10 @@ struct cFERider {
                                     //       ctor and purge, no other retail access
     int mBoneMap[14];               // 0xC7C [O]; [U] initBoneMap fills it; getBonePosition & co. index it;
                                     //       updateModelPose resets bones [12] and [13] (0xCAC, 0xCB0, the board)
-    int mCompiledModel;             // 0xCB4 [O] (bool); [R] 0; [U] compileModel sets it, func_0019FF00 clears it
-    int mDoneLoadingTextures;       // 0xCB8 [O] (bool); [R] 0; [U] func_0019FD58 / func_0019FA78 set it,
-                                    //       queueLoadExtraTextures / func_0019FBE0 clear it
-    int mDoneLoadingModels;         // 0xCBC [O] (bool); [R] 0; [U] update sets it once func_001A0100 succeeds
+    int mCompiledModel;             // 0xCB4 [O] (bool); [R] 0; [U] compileModel sets it, cFERider_loadModels clears it
+    int mDoneLoadingTextures;       // 0xCB8 [O] (bool); [R] 0; [U] cFERider_isDoneLoadingTextures / func_0019FA78 set it,
+                                    //       queueLoadExtraTextures / cFERider_loadTextures clear it
+    int mDoneLoadingModels;         // 0xCBC [O] (bool); [R] 0; [U] update sets it once cFERider_isDoneLoadingModels succeeds
     int mDoneUpdatingModelParts;    // 0xCC0 [O] (bool); [R] 0; [U] update runs updateAnimModelParts once and sets it
     int mSetVisible;                // 0xCC4 [O] (bool); [R] 0; [U] setVisible's deferred show, folded into mVisible
     int mVisible;                   // 0xCC8 [O] (bool); [R] 0; [U] setVisible / update; purge clears it

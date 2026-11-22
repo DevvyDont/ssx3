@@ -10,8 +10,8 @@
 // "!SharedLoginMan" and the allocation tag "cSharedLoginMan"). Retail code: dirtysock/tagsunk 0x00265880..0x00265F00.
 // One instance, SharedLoginMan: func_00265880 creates it, func_002658B8 destroys it. No On Tour counterpart.
 //
-// Size 8: [R] func_00265880: cMemMan_alloc(8, "cSharedLoginMan", 0x20000000) + the constructor func_002658E0, which runs
-// the init func_00265950 (state 1, result 0). No vtable, no base class (the destructor func_00265908 is called directly).
+// Size 8: [R] func_00265880: cMemMan_alloc(8, "cSharedLoginMan", 0x20000000) + the constructor cSharedLoginMan_cSharedLoginMan, which runs
+// the init func_00265950 (state 1, result 0). No vtable, no base class (the destructor cSharedLoginMan__cSharedLoginMan is called directly).
 //
 // A FLAT layout, like main/game.h. Evidence tags: [R] the init func_00265950 / shutdown func_002659C0; [U] how retail
 // code uses the field (src/dirtysock/tagsunk.cpp, src/fe/feasyncfile.cpp).

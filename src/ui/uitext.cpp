@@ -506,26 +506,26 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A1030);
+INCLUDE_ASM("ui/uitext", cUIText_getTextExtent);
 #ifdef SKIP_ASM
 extern "C" void* cUIText_getFont(void* self);
 extern "C" float cFont_textExtent1(void* font, int str, void* out, int flags, float sx, float sy);
 
-struct func_003A1030_sVec3 {
+struct cUIText_getTextExtent_sVec3 {
     float x;
     float y;
     float z;
 };
-extern func_003A1030_sVec3 t3vect_Zero;
+extern cUIText_getTextExtent_sVec3 t3vect_Zero;
 
-struct func_003A1030_sRect {
+struct cUIText_getTextExtent_sRect {
     float x0;
     float y0;
     float x1;
     float y1;
 };
 
-struct func_003A1030_sVEntry {
+struct cUIText_getTextExtent_sVEntry {
     short delta;
     short index;
     void (*fn)(void*);
@@ -541,16 +541,16 @@ struct func_003A1030_sVEntry {
  *
  * @param out  receives the size (x, y)
  */
-extern "C" void func_003A1030(cUIText* self, func_003A1030_sVec3* out)
+extern "C" void cUIText_getTextExtent(cUIText* self, cUIText_getTextExtent_sVec3* out)
 {
     if ((int)self->mpString == 0 || ((self->mAttr >> 2) & 1) == 0) {
-        func_003A1030_sVEntry* vt = (func_003A1030_sVEntry*)self->mVtbl;
+        cUIText_getTextExtent_sVEntry* vt = (cUIText_getTextExtent_sVEntry*)self->mVtbl;
         vt[16].fn(vthis(self, vt[16]));
     }
     void* font = cUIText_getFont(self);
     int str = (int)self->mpString;
     if (str != 0 && font != 0) {
-        func_003A1030_sRect textRect;
+        cUIText_getTextExtent_sRect textRect;
         cFont_textExtent1(font, str, &textRect, 0, self->mScale.x, self->mScale.y);
         out->x = textRect.x1;
         out->y = textRect.y1;
@@ -561,9 +561,9 @@ extern "C" void func_003A1030(cUIText* self, func_003A1030_sVec3* out)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A10F0);
+INCLUDE_ASM("ui/uitext", cUIText_getNumLinesOfString);
 #ifdef SKIP_ASM
-struct func_003A10F0_sVEntry {
+struct cUIText_getNumLinesOfString_sVEntry {
     short delta;
     short index;
     void (*fn)(void*);
@@ -572,14 +572,14 @@ struct func_003A10F0_sVEntry {
 /**
  * Returns a UI text's line count (+0xA8), refreshing the text first (virtual slot 16) when needed.
  *
- * The refresh condition is the one func_003A1030 uses. Nothing in the retail code references it.
+ * The refresh condition is the one cUIText_getTextExtent uses. Nothing in the retail code references it.
  *
  * @return the number of lines
  */
-extern "C" int func_003A10F0(cUIText* self)
+extern "C" int cUIText_getNumLinesOfString(cUIText* self)
 {
     if ((int)self->mpString == 0 || ((self->mAttr >> 2) & 1) == 0) {
-        func_003A10F0_sVEntry* vt = (func_003A10F0_sVEntry*)self->mVtbl;
+        cUIText_getNumLinesOfString_sVEntry* vt = (cUIText_getNumLinesOfString_sVEntry*)self->mVtbl;
         vt[16].fn(vthis(self, vt[16]));
     }
     return self->mNumLines;
@@ -1336,7 +1336,7 @@ extern "C" void cUITextScroll_deleteLineByIndex(cUITextScroll* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A2068);
+INCLUDE_ASM("ui/uitext", cUITextScroll_getStringByIndex);
 #ifdef SKIP_ASM
 /**
  * Returns entry @p i of a text scroller's line table (+0xBC), or 0 when there is no table or @p i is out of range.
@@ -1346,7 +1346,7 @@ INCLUDE_ASM("ui/uitext", func_003A2068);
  * @param i  the line index
  * @return the line, or 0
  */
-extern "C" int func_003A2068(cUITextScroll* self, int i)
+extern "C" int cUITextScroll_getStringByIndex(cUITextScroll* self, int i)
 {
     int* arr = (int*)self->mpLineOffset;
     if (arr != 0 && i >= 0 && i < self->mLineSize) {
@@ -1357,7 +1357,7 @@ extern "C" int func_003A2068(cUITextScroll* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", func_003A20A0);
+INCLUDE_ASM("ui/uitext", cTextureElement_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sRect_20A0 {
@@ -1403,7 +1403,7 @@ extern "C" void c2DRender_drawRotRect(int ctx, sQuadVtx_20A0* v, sRect_20A0* r);
  * @param colour  the colour (a, r, g, b), 0..1
  * @param flags  1 flip u, 2 flip v, 4 use c2DRender_drawRotRect
  */
-extern "C" void func_003A20A0(sSprite_20A0* element, sRect_20A0 rect, sColor_20A0 colour, int flags)
+extern "C" void cTextureElement_render(sSprite_20A0* element, sRect_20A0 rect, sColor_20A0 colour, int flags)
 {
     int tex = element->tex;
     if (tex < 0) {
@@ -1447,7 +1447,7 @@ extern "C" void func_003A20A0(sSprite_20A0* element, sRect_20A0 rect, sColor_20A
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uitext", func_003A2220);
+INCLUDE_ASM("ui/uitext", cTextureElement_render2);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sRect_2220 {
@@ -1485,7 +1485,7 @@ extern void c2DRender_drawRotRect_2220(int ctx, sQuadVtx_2220* v, sRect_2220* r)
  * Draws the bottom @p fillFraction part of a texture element as a screen quad, like a fill gauge.
  *
  * The rectangle and the top v are moved down by (1 - @p fillFraction) of their height, so only the bottom part shows. Unlike
- * func_003A20A0 it draws even a negative texture, ignores the flip flags and scales r, g, b by 255 (alpha by 128). Flag
+ * cTextureElement_render it draws even a negative texture, ignores the flip flags and scales r, g, b by 255 (alpha by 128). Flag
  * 4 selects c2DRender_drawRotRect over c2DRender_drawRect. Nothing in the retail code references it.
  *
  * @param element  the texture element
@@ -1494,7 +1494,7 @@ extern void c2DRender_drawRotRect_2220(int ctx, sQuadVtx_2220* v, sRect_2220* r)
  * @param flags  4 uses c2DRender_drawRotRect
  * @param fillFraction  the shown fraction, 0..1
  */
-extern "C" void func_003A2220(sSprite_2220* element, sRect_2220 rect, sColor_2220 colour, int flags, float fillFraction)
+extern "C" void cTextureElement_render2(sSprite_2220* element, sRect_2220 rect, sColor_2220 colour, int flags, float fillFraction)
 {
     float k = 1.0f - fillFraction;
     int tex = element->tex;
@@ -1577,7 +1577,7 @@ extern "C" void c2DRender_drawRotRect2(int ctx, sQuadVtx_23B8* v, sRect_23B8* ds
  * through c2DRender_drawRect2, or c2DRender_drawRotRect2 (texture turned 90 degrees, so the fractions crop the other axis) when flag
  * bit 2 is set. Flag bit 0 swaps the left and right texture coordinates (u0/u1), bit 1 the top and bottom ones (v0/v1).
  *
- * The four vertices get alpha = c.a * 128 and red/green/blue = c * 255; func_003A20A0 scales all four by 128, so the
+ * The four vertices get alpha = c.a * 128 and red/green/blue = c * 255; cTextureElement_render scales all four by 128, so the
  * colour here is twice as strong. No caller in retail references it.
  *
  * @param element  the texture element: texture id (tex) and its texture rectangle (v0 top, u0 left, u1 right, v1 bottom)
@@ -1736,7 +1736,7 @@ extern "C" void c2DRender_drawRotRect1(int ctx, sQuadVtx_2A00* v, sRect_2A00* r,
  *
  * Selects the element's texture (tex) as texture 0 of GrMan's current draw state, sets the four vertices' texture
  * coordinates to the element's rectangle (u0/u1 swapped when flag bit 0 is set, v0/v1 when bit 1 is set) and their
- * colour to alpha = c.a * 128, red/green/blue = c * 255 (func_003A20A0 scales all four by 128), then hands the quad to
+ * colour to alpha = c.a * 128, red/green/blue = c * 255 (cTextureElement_render scales all four by 128), then hands the quad to
  * the 2D renderer G2D through c2DRender_drawRect1, or c2DRender_drawRotRect1 (corners in the order that turns the texture 90
  * degrees) when bit 2 is set; both transform each corner by @p transform (func_0038E0A8) before submitting. No caller in retail
  * references it.
@@ -1835,7 +1835,7 @@ extern "C" void c2DRender_drawRotRect3(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* ds
  * tx has a fraction and a cropped last row when @p ty has one (texture ranges cut by the same fractions). Each quad
  * goes to the 2D renderer G2D through c2DRender_drawRect3, or c2DRender_drawRotRect3 (texture turned 90 degrees) when flag bit
  * 2 is set; both transform the corners by @p transform. Flag bit 0 swaps the left and right texture coordinates, bit 1 the top
- * and bottom ones. Vertex colour: alpha = c.a * 128, red/green/blue = c * 255 (func_003A20A0 uses 128 for all four). No
+ * and bottom ones. Vertex colour: alpha = c.a * 128, red/green/blue = c * 255 (cTextureElement_render uses 128 for all four). No
  * caller in retail references it.
  *
  * @param element  the texture element: texture id (tex) and its texture rectangle (v0 top, u0 left, u1 right, v1 bottom)

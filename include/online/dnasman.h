@@ -4,14 +4,14 @@
 // DNASMan: SSX 3's DNAS (Dynamic Network Authentication System) check: loads the DNAS program (OVERLAY.DAT, linked
 // with func_003FCFD8, entry points DirtyDnasRelInit / Updt / Exit) and its data (CONFIG.DAT, XOR-decoded), runs the
 // check and keeps its result texts. cFEStateAuthDNAS owns one as mpAuth (include/fe/festateauthdnas.h: built with
-// func_002561B8 on cMemMan_alloc(0xA50, "cFEStateAuthDNASCreate")); the debug menu's func_002560B0 runs one on
-// cMemMan_alloc(2640, "DNASMAN"). Retail code: unit seg/seg_156860, func_002561B8 .. func_002565E0 (C linkage
+// DNASMan_DNASMan on cMemMan_alloc(0xA50, "cFEStateAuthDNASCreate")); the debug menu's func_002560B0 runs one on
+// cMemMan_alloc(2640, "DNASMAN"). Retail code: unit seg/seg_156860, DNASMan_DNASMan .. func_002565E0 (C linkage
 // definitions in a .cpp). EA source: d:/ssx/code/source/online/dnasman.cpp (July 2003 preview).
 //
 // Name: DNASMan, from the preview's source file d:/ssx/code/source/online/dnasman.cpp, whose asserts name the members
 // State (kDNAS_LoadingElf / kDNAS_LoadingAuth / kDNAS_Checking), ElfData and AuthData that retail's functions use the
 // same way, and retail's allocation tag "DNASMAN" on the 2640-byte object; spelled like its online/ siblings LobbyMan
-// and BuddyMan (lobbyman.cpp / buddyman.cpp, tags "LobbyMan" / "BuddyMan"). No vtable (the destructor func_002561E0 is
+// and BuddyMan (lobbyman.cpp / buddyman.cpp, tags "LobbyMan" / "BuddyMan"). No vtable (the destructor DNASMan__DNASMan is
 // called directly). Member names: State / ElfData / AuthData are EA's ([P]); the others are ours, in the same style.
 //
 // FLAT layout. Evidence tags: [R] the constructor's clear func_00256228; [P] the preview's asserts; [U] retail use.

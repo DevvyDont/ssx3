@@ -3293,7 +3293,7 @@ extern "C" int cRiderAnimBase_playBlendIn_4B48(void*, int, int, int) __asm__("cR
  * Expire rule 5 of cRiderAnim_expireRule: blends into an air animation.
  *
  * Plays animation 436 (cRiderAnimBase_playBlendIn) when the object is linked to a front-end rider (+0x64, see
- * func_00104D50), otherwise 287.
+ * cRiderAnim_linkToFERider), otherwise 287.
  *
  * @param riderAnim  the rider animation object
  * @param sequencer  the sequencer
@@ -3569,7 +3569,7 @@ extern "C" void cRiderAnim_linkToRider(void *riderAnim, cRider* rider) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00104D50);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_linkToFERider);
 #ifdef SKIP_ASM
 /**
  * Links the rider animation object to a front-end rider instead of a game rider.
@@ -3580,7 +3580,7 @@ INCLUDE_ASM("seg/seg_1218", func_00104D50);
  * @param riderAnim  the rider animation object
  * @param feRider  the front-end rider
  */
-extern "C" void func_00104D50(void *riderAnim, cFERider* feRider) {
+extern "C" void cRiderAnim_linkToFERider(void *riderAnim, cFERider* feRider) {
     (*(void **)((char*)(riderAnim) + (0x64))) = ((void*)feRider);
     (*(int *)((char*)(riderAnim) + (0x60))) = 0;
     (*(int *)((char*)(riderAnim) + (0x54))) = (int) ((int)feRider->mpAnimModel);

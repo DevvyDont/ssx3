@@ -60,7 +60,7 @@ extern sBagtRec D_00530EC0[3][10];
  * matching character profile (D_004A788E, +0xBE6 of each 0xF88-byte entry of cBELibrary_profileLib).
  *
  * A record is 85 six-byte entries, one per grab: two chosen-variant bytes and two 16-bit variant masks (see
- * func_0014FEA8, func_0014FFB8, func_00150048).
+ * cBEBAGTInterface_chooseUberVar, func_0014FFB8, func_00150048).
  */
 extern "C" void cBEBAGTInterface_submit(void)
 {
@@ -126,7 +126,7 @@ extern char D_00530EC0_raw[] __asm__("D_00530EC0");
  * Stores @p value as the second chosen-variant byte (+1) of grab @p idx in the staged trick record of @p rider's
  * profile and character (D_00530EC0).
  *
- * This is the uber variant func_0014FEA8 returns with its last argument set; the uber-trick store calls this to equip
+ * This is the uber variant cBEBAGTInterface_chooseUberVar returns with its last argument set; the uber-trick store calls this to equip
  * an owned trick and then submits (vtable slot 1).
  *
  * @param rider  the rider (selects profile and character)
@@ -185,7 +185,7 @@ extern "C" int func_0014FE08(cBEBAGTInterface* self, int rider, int idx, int bit
 #endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_0014FEA8);
+INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_chooseUberVar);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
@@ -207,7 +207,7 @@ extern sPad20 kGrabDB;
  * @param second  nonzero to read the second (customisable) choice
  * @return the variant index, or -1
  */
-extern "C" int func_0014FEA8(cBEBAGTInterface* self, int rider, int idx, int second)
+extern "C" int cBEBAGTInterface_chooseUberVar(cBEBAGTInterface* self, int rider, int idx, int second)
 {
     char* grabInfo = (char*)&kGrabDB + idx * 0x14;
     if (*(unsigned short*)(grabInfo + 0xC) == 0)
@@ -439,7 +439,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getUberAnim);
 struct sPad20;
 extern sPad20 kGrabDB;
 extern "C" int cBELibrary_getCheatCharacterID(int rider);
-extern "C" int func_0014FEA8(cBEBAGTInterface* self, int rider, int idx, int second);
+extern "C" int cBEBAGTInterface_chooseUberVar(cBEBAGTInterface* self, int rider, int idx, int second);
 
 struct sBagtAnim_150198
 {
@@ -458,14 +458,14 @@ struct sBagtCat_150198
 extern sBagtCat_150198 D_0045AEB8_150198[] __asm__("kGrabDB");
 
 /**
- * Returns the uber animation of grab @p idx for @p rider: the anim of the chosen variant (func_0014FEA8) in the grab's
+ * Returns the uber animation of grab @p idx for @p rider: the anim of the chosen variant (cBEBAGTInterface_chooseUberVar) in the grab's
  * variant table (kGrabDB record +0x10), or 438 when the grab has none.
  *
  * Some cheat characters (cBELibrary_getCheatCharacterID 20, 24, 25, 28) get a fixed anim (159-162) for one grab.
  *
  * @param rider  the rider
  * @param idx  the grab
- * @param second  passed to func_0014FEA8 (the callers pass uber level >= 5)
+ * @param second  passed to cBEBAGTInterface_chooseUberVar (the callers pass uber level >= 5)
  * @return the animation id
  */
 extern "C" int cBEBAGTInterface_getUberAnim(cBEBAGTInterface* self, int rider, int idx, int second)
@@ -487,7 +487,7 @@ extern "C" int cBEBAGTInterface_getUberAnim(cBEBAGTInterface* self, int rider, i
         if (idx == 4) return 161;
         break;
     }
-    int k = func_0014FEA8(self, rider, idx, second);
+    int k = cBEBAGTInterface_chooseUberVar(self, rider, idx, second);
     if (k < 0) return 438;
     return D_0045AEB8_150198[idx].anims[k].anim;
 }
@@ -500,7 +500,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getUberCycleAnim);
 struct sPad20;
 extern sPad20 kGrabDB;
 extern "C" int cBELibrary_getCheatCharacterID(int rider);
-extern "C" int func_0014FEA8(cBEBAGTInterface* self, int rider, int idx, int second);
+extern "C" int cBEBAGTInterface_chooseUberVar(cBEBAGTInterface* self, int rider, int idx, int second);
 
 struct sBagtAnim_1502C8
 {
@@ -520,13 +520,13 @@ extern sBagtCat_1502C8 D_0045AEB8_1502C8[] __asm__("kGrabDB");
 
 /**
  * Returns the held uber animation of grab @p idx for @p rider: the cycle anim of the chosen variant
- * (func_0014FEA8), or 438 when the grab has none.
+ * (cBEBAGTInterface_chooseUberVar), or 438 when the grab has none.
  *
  * The same cheat characters as in cBEBAGTInterface_getUberAnim get fixed anims (209-212).
  *
  * @param rider  the rider
  * @param idx  the grab
- * @param second  passed to func_0014FEA8 (uber level >= 5)
+ * @param second  passed to cBEBAGTInterface_chooseUberVar (uber level >= 5)
  * @return the animation id
  */
 extern "C" int cBEBAGTInterface_getUberCycleAnim(cBEBAGTInterface* self, int rider, int idx, int second)
@@ -548,7 +548,7 @@ extern "C" int cBEBAGTInterface_getUberCycleAnim(cBEBAGTInterface* self, int rid
         if (idx == 4) return 211;
         break;
     }
-    int k = func_0014FEA8(self, rider, idx, second);
+    int k = cBEBAGTInterface_chooseUberVar(self, rider, idx, second);
     if (k < 0) return 438;
     return D_0045AEB8_1502C8[idx].anims[k].anim2;
 }
@@ -561,7 +561,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getUberName);
 struct sPad20;
 extern sPad20 kGrabDB;
 extern "C" int cBELibrary_getCheatCharacterID(int rider);
-extern "C" int func_0014FEA8(cBEBAGTInterface* self, int rider, int idx, int second);
+extern "C" int cBEBAGTInterface_chooseUberVar(cBEBAGTInterface* self, int rider, int idx, int second);
 
 struct sBagtAnim_1503F8
 {
@@ -580,13 +580,13 @@ struct sBagtCat_1503F8
 extern sBagtCat_1503F8 D_0045AEB8_1503F8[] __asm__("kGrabDB");
 
 /**
- * Returns the trick id of grab @p idx's chosen uber variant for @p rider (func_0014FEA8), or 0 when the grab has none.
+ * Returns the trick id of grab @p idx's chosen uber variant for @p rider (cBEBAGTInterface_chooseUberVar), or 0 when the grab has none.
  *
  * The same cheat characters as in cBEBAGTInterface_getUberAnim get fixed ids (81-84).
  *
  * @param rider  the rider
  * @param idx  the grab
- * @param second  passed to func_0014FEA8 (uber level >= 5)
+ * @param second  passed to cBEBAGTInterface_chooseUberVar (uber level >= 5)
  * @return the trick id
  */
 extern "C" int cBEBAGTInterface_getUberName(cBEBAGTInterface* self, int rider, int idx, int second)
@@ -608,7 +608,7 @@ extern "C" int cBEBAGTInterface_getUberName(cBEBAGTInterface* self, int rider, i
         if (idx == 4) return 83;
         break;
     }
-    int k = func_0014FEA8(self, rider, idx, second);
+    int k = cBEBAGTInterface_chooseUberVar(self, rider, idx, second);
     if (k < 0) return 0;
     return D_0045AEB8_1503F8[idx].anims[k].anim3;
 }

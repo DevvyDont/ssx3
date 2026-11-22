@@ -441,7 +441,7 @@ extern "C" void cSndPlayOpts_OPTS_Radius(void* self, float a, float b);
 extern "C" int cStreamSys_STREAM_Queue(void* self, int i, int a, int b, int c);
 int cStreamSys_STREAM_GetInstance(void* self, int a1);
 extern "C" void cBankMonitorInstance_SetStream(void* self, int a, const char* name, int b);
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 
 struct sSnd54F8Ch {
     signed char vol;
@@ -519,7 +519,7 @@ extern "C" int cSSXAudio_PlayPositional(cSSXAudio* vself, int streamIndex, const
     playOpts->p34[bankMgr->sub.cur] = 0;
     playOpts->vals[bankMgr->sub.cur] = playOpts->ch[bankMgr->sub.cur].vol;
     playOpts->p3C[bankMgr->sub.cur] = 0;
-    func_00416210((char*)playOpts + bankMgr->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)playOpts + bankMgr->sub.cur * 8 + 0x40, 0, 8);
     playOpts->p60[bankMgr->sub.cur] = 0;
     playOpts->p64[bankMgr->sub.cur] = 0;
     playOpts->p68[bankMgr->sub.cur] = 0.0f;
@@ -707,7 +707,7 @@ extern "C" void cSSXAudio_SetAudioUpdateState(cSSXAudio* self, int State)
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_Update);
 #ifdef SKIP_ASM
 extern int cPauseState_Flags;
-extern "C" int func_00390EF8();
+extern "C" int PlayThunder();
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayThunder(void* p, float f);
 extern "C" void cController_Update(void* self, float dt);
@@ -736,7 +736,7 @@ extern "C" void cSSXAudio_ResumeAudio(cSSXAudio* self);
 /**
  * Updates the audio each frame: the sound system, ducking and mixing, then the in-game sound events.
  *
- * Plays thunder when the screen tint asks (func_00390EF8, cSSXAudio_PlayThunder), runs cController_Update, and while a
+ * Plays thunder when the screen tint asks (PlayThunder, cSSXAudio_PlayThunder), runs cController_Update, and while a
  * stream is ducked (mDuckStream not 3) un-ducks it (cSSXAudio_DuckToStream(self, 3, 0.5, 1.0)) once that stream has started and
  * stopped again. Then cSSXAudio_UpdateDuck and cSSXAudio_UpdateMix. In game: func_0028C8C8 and, while mAudioUpdateState is 6,
  * func_0028F000 (not paused), cSSXAudio_PlayHistoryUpdate, the lift update (cSSXAudio_UpdateLift in game state 4, else
@@ -749,7 +749,7 @@ extern "C" void cSSXAudio_ResumeAudio(cSSXAudio* self);
  */
 extern "C" void cSSXAudio_Update(cSSXAudio* self, float dt)
 {
-    if (func_00390EF8() != 0)
+    if (PlayThunder() != 0)
         cSSXAudio_PlayThunder(cAudioInterface_bxAudio(), 0.0f);
     cController_Update(((char*)self), dt);
     int st = self->mDuckStream;
@@ -985,14 +985,14 @@ extern "C" void cSSXAudio_FrontEndLoad(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/ssxAudio", func_002861D0);
+INCLUDE_ASM("sound/ssxAudio", cSSXAudio_FrontEndFadeSong);
 #ifdef SKIP_ASM
 struct sSaVt61D0 { short delta; short index; int (*fn)(void*, int); };
 
 /**
  * Calls the music system's vtable slot 4 (set track) with 1; the retail image has no call or data reference to it.
  */
-extern "C" void func_002861D0(cSSXAudio* self)
+extern "C" void cSSXAudio_FrontEndFadeSong(cSSXAudio* self)
 {
     char* mon = (char*)&self->MusicSys;
     sSaVt61D0* vt = (sSaVt61D0*)self->MusicSys.mVtbl;
@@ -1039,7 +1039,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_InGameLoad);
 struct cAsyncSys;
 // PORT: cAsyncSys_ASYNCSYS_Init__FP9cAsyncSysUi is called with a third argument here; bound by asm label.
 void cAsyncSys_Init3(cAsyncSys* self, unsigned int a1, int a2) __asm__("cAsyncSys_ASYNCSYS_Init__FP9cAsyncSysUi");
-extern "C" int func_004165A8(const void* a, const void* b);
+extern "C" int strcmp(const void* a, const void* b);
 extern "C" char* FileParser_FindNextSection(void* self);
 extern "C" void cBankManager_BANK_AllocMem(void* p, int pool, int size, int a3, int a4);
 extern "C" void func_002A6D78(void* self, char* name, char* ext, int mode, int a4);
@@ -1093,7 +1093,7 @@ extern "C" void cSSXAudio_InGameLoad(cSSXAudio* self)
     parser.cur = parser.start;
     char* section;
     while ((section = FileParser_FindNextSection(&parser)) != 0) {
-        if (func_004165A8(section, ext) == 0) {
+        if (strcmp(section, ext) == 0) {
             strcpy(name, key);
             strcpy(self->mSwapBasePath, name);
             while (FileParser_IsEOF(&parser) == 0) {
@@ -1661,7 +1661,7 @@ extern "C" void cSSXAudio_ResetAudioVariables(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/ssxAudio", func_002872A8);
+INCLUDE_ASM("sound/ssxAudio", cSSXAudio_StartEventWithNoStartGate);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1682,7 +1682,7 @@ struct sSaVt72A8 { short delta; short index; int (*fn)(void*, int); };
  * 0) at once, then queues the song announcement (unk_5774, unk_5778 = func_002B4908). The pre-event overlays in
  * fe/ovstatepause.cpp call it when they close.
  */
-extern "C" void func_002872A8(cSSXAudio* self)
+extern "C" void cSSXAudio_StartEventWithNoStartGate(cSSXAudio* self)
 {
     self->mGruntCycle = cAudioInterface_getGame()->AI->AITick;
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -2345,13 +2345,13 @@ extern "C" void cSSXAudio_UpdateDuck(cSSXAudio* self_)
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_DuckToStream);
 #ifdef SKIP_ASM
 extern "C" void cSSXAudio_DuckVolume(cSSXAudio* self, int a1, float a2, float a3);
-extern "C" int func_00284BA0(int);
+extern "C" int StreamToDuckVolumeControl(int);
 
 /**
  * Ducks the other sounds while a stream plays, or with stream 3 (none) restores them.
  *
  * Stream 3 while ducked (mStreamIsDucked): un-ducks the controls of mDuckStream (cSSXAudio_DuckVolume with the mask
- * func_00284BA0, level 1.0 over @p fadeTime), then mDuckScale = @p duckLevel, mDuckStream = 3, mStreamIsDucked = 0.
+ * StreamToDuckVolumeControl, level 1.0 over @p fadeTime), then mDuckScale = @p duckLevel, mDuckStream = 3, mStreamIsDucked = 0.
  * Another stream while not ducked: ducks that stream's controls to @p duckLevel over @p fadeTime and records it
  * (mDuckStream, mStreamIsDucked 1, mDuckScale, mDuckedStreamHasStarted 0).
  *
@@ -2363,13 +2363,13 @@ extern "C" void cSSXAudio_DuckToStream(cSSXAudio* self, int duckStream, float fa
 {
     if (duckStream == 3) {
         if (self->mStreamIsDucked != 0) {
-            cSSXAudio_DuckVolume((cSSXAudio*)self, func_00284BA0(self->mDuckStream), 1.0f, fadeTime);
+            cSSXAudio_DuckVolume((cSSXAudio*)self, StreamToDuckVolumeControl(self->mDuckStream), 1.0f, fadeTime);
             self->mDuckScale = duckLevel;
             self->mDuckStream = duckStream;
             self->mStreamIsDucked = 0;
         }
     } else if (self->mStreamIsDucked == 0) {
-        cSSXAudio_DuckVolume((cSSXAudio*)self, func_00284BA0(duckStream), duckLevel, fadeTime);
+        cSSXAudio_DuckVolume((cSSXAudio*)self, StreamToDuckVolumeControl(duckStream), duckLevel, fadeTime);
         self->mDuckStream = duckStream;
         self->mStreamIsDucked = 1;
         self->mDuckScale = duckLevel;
@@ -3338,7 +3338,7 @@ extern "C" int FileParser_IsEOF(void* self);
 extern "C" char* FileParser_GetName(void* self);
 extern "C" void FileParser_AssignString(void* self, const char* key, char* out);
 extern "C" int strcasecmp(const char* a, const char* b);
-extern "C" int func_004165A8(const void* a, const void* b);
+extern "C" int strcmp(const void* a, const void* b);
 extern "C" void func_002B3EB0(void* self);
 extern "C" void func_002B3EE8(void* self, const char* name);
 void func_002B4060(void* self);
@@ -3374,7 +3374,7 @@ extern "C" void func_00289520(cSSXAudio* self, const char* name)
     }
     self->mPlayListIndex = 20;
     for (int i = 0; i < 20; i++) {
-        if (func_004165A8((self)->mPlayListName[i], name) == 0) {
+        if (strcmp((self)->mPlayListName[i], name) == 0) {
             self->mPlayListIndex = i;
             break;
         }

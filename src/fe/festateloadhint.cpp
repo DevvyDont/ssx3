@@ -318,7 +318,7 @@ extern "C" int cFELoadStateInLodge_onGainTransition(cFELoadStateInLodge* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245E30);
+INCLUDE_ASM("fe/festateloadhint", cGameModeMan_cmpScores);
 #ifdef SKIP_ASM
 extern unsigned int D_00536640[];
 
@@ -331,7 +331,7 @@ extern unsigned int D_00536640[];
  * @param secondRider  the second rider index
  * @return -1 when @p firstRider's score is higher, 1 when it is lower, 0 when equal
  */
-extern "C" int func_00245E30(int* firstRider, int* secondRider)
+extern "C" int cGameModeMan_cmpScores(int* firstRider, int* secondRider)
 {
     unsigned int va = D_00536640[*firstRider];
     unsigned int vb = D_00536640[*secondRider];
@@ -343,7 +343,7 @@ extern "C" int func_00245E30(int* firstRider, int* secondRider)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245E78);
+INCLUDE_ASM("fe/festateloadhint", cGameModeMan_cmpTimes);
 #ifdef SKIP_ASM
 extern unsigned int D_00536640[];
 
@@ -356,7 +356,7 @@ extern unsigned int D_00536640[];
  * @param secondRider  the second rider index
  * @return -1 when @p firstRider's value is lower, 1 when it is higher, 0 when equal
  */
-extern "C" int func_00245E78(int* firstRider, int* secondRider)
+extern "C" int cGameModeMan_cmpTimes(int* firstRider, int* secondRider)
 {
     unsigned int va = D_00536640[*firstRider];
     unsigned int vb = D_00536640[*secondRider];
@@ -368,7 +368,7 @@ extern "C" int func_00245E78(int* firstRider, int* secondRider)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245EC0);
+INCLUDE_ASM("fe/festateloadhint", cGameModeMan_cmpRanks);
 #ifdef SKIP_ASM
 extern int cGameModeMan_iCharRank[];
 
@@ -383,7 +383,7 @@ extern int cGameModeMan_iCharRank[];
  * @param secondRider  the second rider index
  * @return 1 when @p firstRider's entry is greater, otherwise -1
  */
-extern "C" int func_00245EC0(int* firstRider, int* secondRider)
+extern "C" int cGameModeMan_cmpRanks(int* firstRider, int* secondRider)
 {
     int va = cGameModeMan_iCharRank[*firstRider];
     int vb = cGameModeMan_iCharRank[*secondRider];
@@ -615,7 +615,7 @@ extern "C" int func_00246268(void* self, int menu, int event)
 INCLUDE_ASM("fe/festateloadhint", cGameLoadState_widgetCreateMultiP);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" int cBENewRaceInterface_getLocationPeak1(void* iface);
 extern "C" int cBENewRaceInterface_getLocationName1(void* iface);
 extern char str_pct_s_pct_S_b[];
@@ -682,7 +682,7 @@ extern "C" void cGameLoadState_widgetCreateMultiP(cGameLoadState* self, char* ob
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (IsId_246278(obj, str_Location_Text)) {
         char buf[200];
-        func_00416210(buf, 0, 200);
+        memset(buf, 0, 200);
         char* fmt = str_pct_s_pct_S_b;
         switch (cBENewRaceInterface_getLocationPeak1(iface)) {
         case 0:
@@ -821,7 +821,7 @@ static inline void Fmt_2464E8(char* buf, char* fmt, char* key, void* iface)
  * tables D_0047BB28 and D_0047BAE0. "rider_name" gets the first human rider's short name
  * (cBECharacterInterface_getShortName()), "player_rank_num" gets "kT_OVRCMNLevelNum" with the rider's level
  * (cBEStatInterface_getStatLevel(), or 1 when bit 1 of the rule record cBERules_mRules[rider] is set), and "map box" takes the portrait
- * texture (into +0x78, clearing +0x7C) that func_00233640() loaded into the load screen at +0x48 (its +0x10), when
+ * texture (into +0x78, clearing +0x7C) that cFELoadScreen_loadTexture() loaded into the load screen at +0x48 (its +0x10), when
  * there is one.
  *
  * @param obj  the widget being created (its hash name is at +0x38)
@@ -835,7 +835,7 @@ extern "C" void cGameLoadState_widgetCreateQP(cGameLoadState* self, char* obj)
     unsigned short fmtA[100];
     unsigned short fmtB[100];
     if (IsId_2464E8(obj, str_Location)) {
-        func_00416210(buf, 0, 200);
+        memset(buf, 0, 200);
         char* fmt = str_pct_s_pct_S_b;
         switch (cBENewRaceInterface_getLocationPeak1(iface)) {
         case 0:
@@ -1023,7 +1023,7 @@ struct sName5_6CF8 { char c[5]; };
  * cBENetworkInterface_networkOpt.oppCharacterAttributes. Writes the level ("%d") into "ranking00" or "ranking01"; for each stat i shows label "<player+1>0<i>"
  * (setVisible 1, text "kT_CMNLvNum" with stat / 5) and sets bar "<player><i>pb" to range 55 (+0x80) and value stat
  * (cUIProgress_setValue()). The picture widget "<player>" takes this player's portrait texture (+0x10 or +0x14 of the
- * load screen at +0x48, loaded by func_00233640()). cGameLoadState_onCreateScreen() and func_002454F8() call it for players 0 and 1.
+ * load screen at +0x48, loaded by cFELoadScreen_loadTexture()). cGameLoadState_onCreateScreen() and cGameLoadState_onGainTransition() call it for players 0 and 1.
  *
  * @param player  the player slot (0 or 1)
  */

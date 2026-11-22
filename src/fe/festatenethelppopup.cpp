@@ -535,7 +535,7 @@ extern "C" void* cTextMenuItem_cTextMenuItem(void* self, void* a1, const char* n
 extern "C" void* cCommandMenuItem_cCommandMenuItem2(void* self, int a1, void* a2, int a3);
 extern "C" void* cPopMenuItem_cPopMenuItem(void* self, void* text);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern "C" char* func_00416958(char* dst, const char* src, int n);
+extern "C" char* strncat(char* dst, const char* src, int n);
 extern void* D_0046D690[];
 extern char str_Create_Account[];
 extern char str_Login_Name[];
@@ -546,7 +546,7 @@ extern char D_004A1408[];
 static inline void copyName_1DA648(char* dst, const char* src)
 {
     dst[0] = 0;
-    func_00416958(dst, src, 0xF);
+    strncat(dst, src, 0xF);
 }
 
 /**
@@ -599,7 +599,7 @@ extern "C" void* cTextMenuItem_cTextMenuItem(void* self, void* a1, const char* n
 extern "C" void* cCommandMenuItem_cCommandMenuItem2(void* self, int a1, void* a2, int a3);
 extern "C" void* cPopMenuItem_cPopMenuItem(void* self, void* text);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
-extern "C" char* func_00416958(char* dst, const char* src, int n);
+extern "C" char* strncat(char* dst, const char* src, int n);
 extern void* D_0046D6E8[];
 extern char str_Create_Account[];
 extern char str_Login_Name[];
@@ -610,7 +610,7 @@ extern char D_004A1408[];
 static inline void copyName_1DA7E8(char* dst, const char* src)
 {
     dst[0] = 0;
-    func_00416958(dst, src, 0xF);
+    strncat(dst, src, 0xF);
 }
 
 /**

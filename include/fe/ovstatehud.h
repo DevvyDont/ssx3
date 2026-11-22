@@ -200,7 +200,7 @@ struct cOVStateHUD1P {
     cTextureElement* unk_470;       // 0x470 [U] onCreateScreen: the "switch" texture; onRender2D. Retail only
     cTextureElement mGlow;          // 0x474 [O]; [R] the ctors' inlined cTextureElement() (-1, 1, 1, 0, 0, 1, 1);
                                     //       [U] onCreateScreen: GrMan's effect texture, its size and hash 0xDEEDDEED (On
-                                    //       Tour does the same into mGlow); func_0021E7E0 / renderUberChar draw it
+                                    //       Tour does the same into mGlow); cOVStateHUD1P_renderGlow / renderUberChar draw it
     cTextureElement* mpGenTexElem[26]; // 0x494 [O] (On Tour [13]); [U] onCreateScreen fills it from the hash table
                                     //       D_004C88D8 (On Tour: kGenTexElemID); the render helpers index it
     cTextureElement* mpAdrenalinElem[5][3]; // 0x4FC [O] (On Tour [4][3]); [U] filled from D_004C8940[5][3] (On Tour:
@@ -363,7 +363,7 @@ CHECK_SIZE(cOVStateHUD1P, 0xC98);
 // word, slot 4) for the next state and pushes it.
 // EA's source: d:/ssx/code/source/fe/ovstatehud.cpp (preview assert strings; the unit is fe/ovstatehud). Retail code:
 // onCreateScreen / onWidgetEvent in fe/ovstatehud (0x001E8FF0, 0x001E9130); the ctors func_0021D070 (engine 0) /
-// func_0021D0D0 (pEngine, id) and the dtor in fe/all_in_one_fe (0x0021D070 ... 0x0021D138).
+// cOVStateHiScoreList_cOVStateHiScoreList (pEngine, id) and the dtor in fe/all_in_one_fe (0x0021D070 ... 0x0021D138).
 //
 // Size 0x9C: [O] On Tour's class is 0x90 = On Tour's cOVState (no members of its own); retail's cOVState is 0x9C
 // (fe/ovstate.h) and the ctors write nothing past mOVID (0x98). Retail never calls the ctors (no allocation site).

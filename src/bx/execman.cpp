@@ -259,7 +259,7 @@ INCLUDE_ASM("bx/execman", cAppMan_getCurrentThreadId);
 /**
  * Returns the current thread id from the execution manager (+0x8, virtual entry 6), or -1 without one.
  *
- * Entry 6 of the PS2 execution manager's vtable cPS2ExecutionMan_vtbl is func_00320B08, which returns GetThreadId(). Nothing in
+ * Entry 6 of the PS2 execution manager's vtable cPS2ExecutionMan_vtbl is cPS2ExecutionMan_getCurrentThreadId, which returns GetThreadId(). Nothing in
  * the C calls it.
  *
  * @return the thread id, or 0xFFFFFFFF
@@ -364,7 +364,7 @@ extern "C" void cPS2ExecutionMan__cPS2ExecutionMan(cPS2ExecutionMan* self, int f
 extern "C" void* GetThreadId(void* self);
 
 //100%
-INCLUDE_ASM("bx/execman", func_00320B08__FPv);
+INCLUDE_ASM("bx/execman", cPS2ExecutionMan_getCurrentThreadId__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the current thread's id (GetThreadId).
@@ -373,7 +373,7 @@ INCLUDE_ASM("bx/execman", func_00320B08__FPv);
  *
  * @return GetThreadId's result
  */
-void* func_00320B08(void* self)
+void* cPS2ExecutionMan_getCurrentThreadId(void* self)
 {
     return GetThreadId(self);
 }

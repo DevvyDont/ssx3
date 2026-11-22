@@ -699,7 +699,7 @@ struct cWorldView;
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cWorldView_getNumSections(cWorldView* view);
 extern "C" void* cWorldView_getSectionName(cWorldView* self, unsigned int i);
-extern "C" int func_004165A8(const void* a, const void* b);
+extern "C" int strcmp(const void* a, const void* b);
 extern "C" void* cBENewRaceInterface_getSectionFile(void* iface, int i);
 extern "C" void cSectionMan_initEventPool(void* self);
 
@@ -729,7 +729,7 @@ extern "C" void cSectionMan_init(cSectionMan* self)
     for (i = 0; i < 50; i++) {
         for (j = 0; j < (unsigned int)cWorldView_getNumSections(gameWorldView_22CD40(self)); j++) {
             void* name = cBENewRaceInterface_getSectionFile(iface, i);
-            if (func_004165A8(name, cWorldView_getSectionName(gameWorldView_22CD40(self), j)) == 0) {
+            if (strcmp(name, cWorldView_getSectionName(gameWorldView_22CD40(self), j)) == 0) {
                 cSectionMan_mSectionMap[i].field_0x4 = j;
             }
         }

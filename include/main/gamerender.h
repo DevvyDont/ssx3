@@ -3,7 +3,7 @@
 
 // FrustumIntersector: one camera view's visibility query. cGame_render builds one on its stack per view
 // (FrustumIntersector_FrustumIntersector, the ctor: it runs the whole query): it culls the world's octree cells against the view
-// (FrustumCallback, func_0022A830), then sorts the objects of the inside / crossing cells into fixed-size lists -
+// (FrustumCallback, FrustumCallback_operatorCall), then sorts the objects of the inside / crossing cells into fixed-size lists -
 // instances, patches, fog volumes and light halos, each "inside" (whole object visible) or "crossing" (tested again on
 // VU0, one object pending at a time in last*). cGame's render passes (renderModels, renderPatches, renderFogVolumes,
 // renderLightHalos; On Tour signatures take const FrustumIntersector&) read the lists.

@@ -549,7 +549,7 @@ extern "C" unsigned int cWScriptCacheEntry_getWScriptHeaderId(cWScriptCacheEntry
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003AD188);
+INCLUDE_ASM("world/wscriptcache", getGame);
 #ifdef SKIP_ASM
 
 /**
@@ -559,14 +559,14 @@ INCLUDE_ASM("world/wscriptcache", func_003AD188);
  *
  * @return the cGame
  */
-extern "C" void* func_003AD188(void)
+extern "C" void* getGame(void)
 {
     return SSXApp->Game;
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003AD198);
+INCLUDE_ASM("world/wscriptcache", getOcclusionMan);
 #ifdef SKIP_ASM
 
 /**
@@ -576,14 +576,14 @@ INCLUDE_ASM("world/wscriptcache", func_003AD198);
  *
  * @return the occlusion manager
  */
-extern "C" void* func_003AD198(void)
+extern "C" void* getOcclusionMan(void)
 {
     return SSXApp->Game->OcclusionMan;
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003AD1A8);
+INCLUDE_ASM("world/wscriptcache", flushWorldLightCache);
 #ifdef SKIP_ASM
 extern "C" void cWorldLightMan_flushOverlapCache(void* lights);
 extern "C" void cRider_flushActiveLights(void* self);
@@ -594,7 +594,7 @@ extern "C" void cRider_flushActiveLights(void* self);
  *
  * cWorldView_update calls it after freeing an unloaded section's memory.
  */
-extern "C" void func_003AD1A8(void)
+extern "C" void flushWorldLightCache(void)
 {
     cWorldLightMan_flushOverlapCache(SSXApp->Game->WorldLightMan);
     cAI* riders = SSXApp->Game->AI;
@@ -609,7 +609,7 @@ extern "C" void func_003AD1A8(void)
 extern "C" void* cLensFxMan_getHaloRadius(void* self);
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003AD230__FPv);
+INCLUDE_ASM("world/wscriptcache", getHaloRadius__FPv);
 #ifdef SKIP_ASM
 /**
  * Forwards to cLensFxMan_getHaloRadius and returns its result.
@@ -618,7 +618,7 @@ INCLUDE_ASM("world/wscriptcache", func_003AD230__FPv);
  *
  * @return cLensFxMan_getHaloRadius's result
  */
-void* func_003AD230(void* self)
+void* getHaloRadius(void* self)
 {
     return cLensFxMan_getHaloRadius(self);
 }

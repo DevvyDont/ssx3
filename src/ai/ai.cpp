@@ -699,7 +699,7 @@ extern "C" void cAI_restart(cAI* self, int state)
 INCLUDE_ASM("ai/ai", cAI_commonInit);
 #ifdef SKIP_ASM
 void* cAI_InitGroupAI(void* self);
-extern "C" void func_00154A58(int rider, int a);
+extern "C" void cBEScoreInterface_processRiderStats(int rider, int a);
 extern "C" void cRider_initAlways(void* rider);
 
 struct sVEntry1297C8 { short delta; short index; int (*fn)(void*); };
@@ -725,7 +725,7 @@ struct sAiObj1297C8
  *
  * Calls cAI_InitGroupAI (cAI_RefreshGroupAI), zeroes AITick and CountdownTicksLeft, sets EndOfRaceTimer to -1
  * and zeroes EventTimerTick only when @p flag is set. Each computer rider (cRider vtable slot 9), or every
- * rider when @p flag is set, has its stats (metrix + 0xFC) recorded by func_00154A58 and is reset
+ * rider when @p flag is set, has its stats (metrix + 0xFC) recorded by cBEScoreInterface_processRiderStats and is reset
  * (cRider_initAlways); the mission riders are always reset.
  *
  * @param aiManager  the AI manager (cAI), viewed through a local layout
@@ -749,7 +749,7 @@ extern "C" void* cAI_commonInit(cAI* aiManager, int flag)
         sVEntry1297C8* vt = *(sVEntry1297C8**)obj;
         if (vt[9].fn(vthis(obj, vt[9])) != 0 || flag != 0)
         {
-            func_00154A58(i, *(int*)(self->mRiders[i] + 0x790) + 0xFC);
+            cBEScoreInterface_processRiderStats(i, *(int*)(self->mRiders[i] + 0x790) + 0xFC);
             cRider_initAlways(self->mRiders[i]);
         }
     }
@@ -1432,7 +1432,7 @@ extern "C" void cAI_removeInjectedFile(void)
 #endif
 
 //100%
-INCLUDE_ASM("ai/ai", func_0012A4D0);
+INCLUDE_ASM("ai/ai", cAI_isPathFileLoaded);
 #ifdef SKIP_ASM
 extern "C" void cPathSys_isPathfileLoaded(int *);
 
@@ -1442,7 +1442,7 @@ extern "C" void cPathSys_isPathfileLoaded(int *);
  * The C body discards the value, but cPathSys_isPathfileLoaded's result is left in v0, so callers get the flag. The flag is set to
  * 1 by cPathSys_loadPaths when the path pack loads. Nothing in the source calls it.
  */
-extern "C" void func_0012A4D0(void) {
+extern "C" void cAI_isPathFileLoaded(void) {
     cPathSys_isPathfileLoaded((int*)&gPaths);
 }
 #endif
@@ -2161,7 +2161,7 @@ extern "C" void cAI_cleanupAfterFreeride(cAI* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/ai", cAI_shutdown);
 #ifdef SKIP_ASM
-extern "C" void func_00154A58(int rider, int a);
+extern "C" void cBEScoreInterface_processRiderStats(int rider, int a);
 extern "C" void cAI_purgeAnims(cAI*);
 
 struct sAiObj12B090
@@ -2177,7 +2177,7 @@ struct sAiObj12B090
 /**
  * Shuts the AI down: records every rider's stats, deletes all riders and frees the character animations.
  *
- * Passes each rider's stats (metrix + 0xFC) to func_00154A58, deletes the players (virtual destructor, flags
+ * Passes each rider's stats (metrix + 0xFC) to cBEScoreInterface_processRiderStats, deletes the players (virtual destructor, flags
  * 3), purges the mission riders, computers and actors, zeroes NumberOfPlayersAllocated and
  * NumberOfRidersAllocated, calls cAI_purgeAnims() and sets RaceRankType to 0.
  *
@@ -2188,7 +2188,7 @@ extern "C" void cAI_shutdown(cAI* aiManager)
     sAiObj12B090* self = (sAiObj12B090*)aiManager;
     for (int i = 0; i < self->mCount; i++)
     {
-        func_00154A58(i, *(int*)(self->mRiders[i] + 0x790) + 0xFC);
+        cBEScoreInterface_processRiderStats(i, *(int*)(self->mRiders[i] + 0x790) + 0xFC);
     }
     for (int i = 0; i < self->mCount2; i++)
     {
@@ -2214,20 +2214,20 @@ extern "C" void cAI_shutdown(cAI* aiManager)
 //100%
 INCLUDE_ASM("ai/ai", cAI_resetRidersStatTotals);
 #ifdef SKIP_ASM
-extern "C" void func_00154A58(int rider, int a);
+extern "C" void cBEScoreInterface_processRiderStats(int rider, int a);
 extern "C" void cRiderMetrix_resetTotals(char* self);
 
 /**
  * Records each rider's race stats with the BE score code, then clears the rider's metrix totals.
  *
- * For every allocated rider, passes the stats block at offset 0xFC of its mMetrix to func_00154A58() (which hands
- * them to func_00155420() for profile indexes 0 and 1 only), then calls cRiderMetrix_resetTotals() on the metrix.
+ * For every allocated rider, passes the stats block at offset 0xFC of its mMetrix to cBEScoreInterface_processRiderStats() (which hands
+ * them to cBEScoreInterface_processRiderBest() for profile indexes 0 and 1 only), then calls cRiderMetrix_resetTotals() on the metrix.
  */
 extern "C" void cAI_resetRidersStatTotals(sAiObj128A48* self)
 {
     for (int i = 0; i < self->mCount; i++)
     {
-        func_00154A58(i, *(int*)(self->mRiders[i] + 0x790) + 0xFC);
+        cBEScoreInterface_processRiderStats(i, *(int*)(self->mRiders[i] + 0x790) + 0xFC);
         cRiderMetrix_resetTotals(*(char**)(self->mRiders[i] + 0x790));
     }
 }

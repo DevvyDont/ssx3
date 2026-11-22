@@ -1224,7 +1224,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020CA10);
+INCLUDE_ASM("fe/ovtemplatedialog", cOVStateManager_triggerPauseMenu);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1255,7 +1255,7 @@ static inline bool notMode4_0020CA10(signed char* g)
  *
  * cGame_update and cGame_updateUI call it after cOVStateManager_allowPauseMenu allows the pause menu.
  */
-extern "C" void func_0020CA10(void)
+extern "C" void cOVStateManager_triggerPauseMenu(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     cBE_getInterface_Fv(SSXApp->BE, 7);
@@ -1294,7 +1294,7 @@ extern "C" void func_0020CA10(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovtemplatedialog", func_0020CB58);
+INCLUDE_ASM("fe/ovtemplatedialog", cOVStateManager_replayOverlayActive);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" int cUIStateStack_findState(void* stack, int hash);
@@ -1305,7 +1305,7 @@ extern char str_64replay[];
  *
  * @return 1 when cUIStateStack_findState finds the hash of "64replay" on SSXApp->Game->UI's stack, else 0
  */
-extern "C" int func_0020CB58(void)
+extern "C" int cOVStateManager_replayOverlayActive(void)
 {
     char* stack = (char*)&SSXApp->Game->UI->mStateStack;
     return cUIStateStack_findState(stack, GetHashValue32(str_64replay)) != 0;

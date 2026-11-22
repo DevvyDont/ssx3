@@ -7,14 +7,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", getstringidbyindex);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern unsigned char *bsearch_BAE8(void *, void *, unsigned int, int, void *) __asm__("bsearch");
-extern char func_003DBAC8_BAE8[] __asm__("func_003DBAC8");
+extern char compare_BAE8[] __asm__("compare");
 
 int getstringidbyindex_impl(short key, unsigned char *p) __asm__("getstringidbyindex");
 /**
  * Looks a string id up in a locale file's index: returns the entry's string number (its second little-endian halfword),
  * or -1 when the id is not there.
  *
- * Binary search (bsearch, comparator func_003DBAC8) over the index's 4-byte entries from +0x10, count at +0x8.
+ * Binary search (bsearch, comparator compare) over the index's 4-byte entries from +0x10, count at +0x8.
  *
  * @param key  the string id
  * @param indexTable  the index chunk
@@ -24,7 +24,7 @@ int getstringidbyindex_impl(short key, unsigned char *indexTable) {
     short k = key;
     unsigned char *n = indexTable + 8;
     unsigned char *found;
-    found = bsearch_BAE8(&k, indexTable + 0x10, (n[3] << 24) | (n[2] << 16) | (n[1] << 8) | n[0], 4, func_003DBAC8_BAE8);
+    found = bsearch_BAE8(&k, indexTable + 0x10, (n[3] << 24) | (n[2] << 16) | (n[1] << 8) | n[0], 4, compare_BAE8);
     if (found == 0) {
         return -1;
     }
@@ -69,7 +69,7 @@ unsigned char *LOCALE_getstr(unsigned char *table, int idx) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003DBC98);
+INCLUDE_ASM("ealib/seg_2DCAE8", LOCALE_create);
 #ifdef SKIP_ASM
 /**
  * Returns @p value unchanged (a locale file needs no set-up). No callers.
@@ -77,7 +77,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DBC98);
  * @param value  the value
  * @return @p value
  */
-int func_003DBC98(int value) {
+int LOCALE_create(int value) {
     return value;
 }
 #endif
@@ -1778,7 +1778,7 @@ typedef struct { int buf; int size; int b; int pad; C_DAC0 *cmd; } R_DAC0;
 extern C_DAC0 *reserveop_DAC0(void) __asm__("reserveop");
 extern void iFILESYS_ExecCommand_DAC0(C_DAC0 *) __asm__("iFILESYS_ExecCommand");
 extern Q_DAC0 *D_00519AE4_DAC0 __asm__("D_00519AE4");
-extern int func_00416B18_DAC0(char *, char *, int) __asm__("func_00416B18");
+extern int strncmp_DAC0(char *, char *, int) __asm__("strncmp");
 extern void *(*D_00450C10_DAC0[])(char *, int, int) __asm__("gFileSysOpts");
 extern char D_00495D68_DAC0[] __asm__("D_00495D68");
 extern int FILESYS_open_DAC0(char *, int, int, R_DAC0 *) __asm__("FILESYS_open");
@@ -1806,7 +1806,7 @@ int FILESYS_addbig(char *name, int memFlags, int priority, int userData) {
     fileOp->e = userData;
     fileOp->d = priority;
     for (; bigNode != 0; bigNode = bigNode->next) {
-        if (func_00416B18_DAC0(name, bigNode->name + 0x10, 0x100) == 0) {
+        if (strncmp_DAC0(name, bigNode->name + 0x10, 0x100) == 0) {
             fileOp->i = (int)bigNode->name;
             iFILESYS_ExecCommand_DAC0(fileOp);
             return (int)fileOp;
@@ -1969,7 +1969,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_setcurrentpath);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int strlen_DE78(char *) __asm__("strlen");
 extern char *strcpy_DE78(char *, char *) __asm__("strcpy");
-extern int func_00416B18_DE78(char *, char *, int) __asm__("func_00416B18");
+extern int strncmp_DE78(char *, char *, int) __asm__("strncmp");
 extern void strcat_DE78(char *, char *) __asm__("strcat");
 extern char *D_00450C50_DE78[] __asm__("D_00450C50");
 extern char *D_00450C08_DE78[] __asm__("D_00450C08");
@@ -1991,11 +1991,11 @@ extern char D_00495D78_DE78[] __asm__("D_00495D78");
 void FILESYS_setcurrentpath(char *path) {
     int n, len;
     n = strlen_DE78(D_00450C50_DE78[0]);
-    if (func_00416B18_DE78(path, D_00450C08_DE78[0], 3) == 0) {
+    if (strncmp_DE78(path, D_00450C08_DE78[0], 3) == 0) {
         if ((D_00450C48_DE78[0] & 3) == 2) return;
         D_00450C44_DE78[0] = 1;
         path += 3;
-    } else if (func_00416B18_DE78(path, D_00450C50_DE78[0], n) == 0) {
+    } else if (strncmp_DE78(path, D_00450C50_DE78[0], n) == 0) {
         if (!(D_00450C48_DE78[0] & 2)) return;
         D_00450C44_DE78[0] = 2;
         path += n;
@@ -2046,7 +2046,7 @@ extern int FILEDEV_getstartsector_FX(int) __asm__("FILEDEV_getstartsector");
 extern int FILEDEV_close_FX(int) __asm__("FILEDEV_close");
 extern int FILEDEV_readreq_FX(int, int, int, int) __asm__("FILEDEV_readreq");
 extern int FILEDEV_write_FX(int, int, int, int) __asm__("FILEDEV_write");
-extern int func_004165A8_FX(char *, char *) __asm__("func_004165A8");
+extern int strcmp_FX(char *, char *) __asm__("strcmp");
 extern int BIG_locateentryz_FX(int, char *, int, int *, int *) __asm__("BIG_locateentryz");
 extern void freehandle_FX(void *) __asm__("freehandle");
 extern void iFILESYS_CommandCompleteCallback_FX(int) __asm__("iFILESYS_CommandCompleteCallback");
@@ -2142,7 +2142,7 @@ void iFILESYS_ExecCommand_impl(struct sFsCmd *fileOp) {
         }
         if (!found && (mode & 6)) {
             for (n = gFileDevice.f34; n != 0 && !found; n = n->f14) {
-                if ((mode & 4) && func_004165A8_FX(n->f0C->f10, path)) continue;
+                if ((mode & 4) && strcmp_FX(n->f0C->f10, path)) continue;
                 if (BIG_locateentryz_FX(n->f00, file, 0, &x, &off)) {
                     found = 1;
                     fileOp->f24->f00 = (int)n;
@@ -2258,7 +2258,7 @@ extern char *strchr_E4D0(char *, int) __asm__("strchr");
 extern int FILEDEV_open_E4D0(char *, int, int *) __asm__("FILEDEV_open");
 extern int FILEDEV_getsize_E4D0(int) __asm__("FILEDEV_getsize");
 extern int FILEDEV_close_E4D0(int) __asm__("FILEDEV_close");
-extern int func_004165A8_E4D0(char *, char *) __asm__("func_004165A8");
+extern int strcmp_E4D0(char *, char *) __asm__("strcmp");
 extern int BIG_locateentryz_E4D0(int, char *, int, int *, int *) __asm__("BIG_locateentryz");
 /**
  * Looks a file up immediately, without going through the command queue, and reports its size.
@@ -2308,7 +2308,7 @@ int FILESYS_bypassqueuefileinfo(char *name, int flags, int *out) {
     }
     if (!found && (mode & 6)) {
         for (n = D_00519AE4_E4D0[0]; n != 0 && !found; n = n->next) {
-            if ((mode & 4) && func_004165A8_E4D0(n->fC + 0x10, path)) continue;
+            if ((mode & 4) && strcmp_E4D0(n->fC + 0x10, path)) continue;
             if (BIG_locateentryz_E4D0(n->f0, file, 0, &x, &off)) {
                 found = 1;
                 *out = off;
@@ -3206,7 +3206,7 @@ void loadfileopencallback(int opHandle, int opStatus, struct sReq *request) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003DF3C0);
+INCLUDE_ASM("ealib/seg_2DCAE8", readfilereadcallback);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int FILESYS_completeop_F3C0(int) __asm__("FILESYS_completeop");
@@ -3221,7 +3221,7 @@ struct Q_F3C0 { int w0; int p1; int f8; int pc; int f10; int p14; int p18; volat
  * @param opStatus  its status
  * @param request  the read request
  */
-void func_003DF3C0(int opHandle, int opStatus, struct Q_F3C0 *request) {
+void readfilereadcallback(int opHandle, int opStatus, struct Q_F3C0 *request) {
     int n = FILESYS_completeop_F3C0(request->h);
     int x;
     int chunkSize;
@@ -3237,7 +3237,7 @@ void func_003DF3C0(int opHandle, int opStatus, struct Q_F3C0 *request) {
     request->f28 = x;
     request->h = FILESYS_read(request->f20, request->f24, request->f2c, chunkSize, 99, request);
     if (request->h != 0) {
-        FILESYS_callbackop(request->h, func_003DF3C0);
+        FILESYS_callbackop(request->h, readfilereadcallback);
     }
 }
 #endif
@@ -3417,11 +3417,11 @@ extern int fD648_F808(int, int, int, int, int, void *) __asm__("FILESYS_read");
 extern char *fEED8_F808(char *) __asm__("queuefetch");
 extern void fEF40_F808(char *) __asm__("newrequestid");
 extern char D_9BF8_F808[] __asm__("freequeue");
-extern char fF3C0_F808[] __asm__("func_003DF3C0");
+extern char fF3C0_F808[] __asm__("readfilereadcallback");
 
 /**
  * Starts an asynchronous read from an open file into a buffer; returns the request id, or 0 when no request is free or
- * the read could not be queued. Reads in chunks of at most 0x8000 bytes through func_003DF3C0.
+ * the read could not be queued. Reads in chunks of at most 0x8000 bytes through readfilereadcallback.
  *
  * @param file  the file handle
  * @param offset  the file offset
@@ -4072,7 +4072,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", startnextrequest);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern void MUTEX_unlock_0270(void *) __asm__("MUTEX_unlock");
-extern int func_004165A8_0270(char *, char *) __asm__("func_004165A8");
+extern int strcmp_0270(char *, char *) __asm__("strcmp");
 extern char *strcpy_0270(char *, char *) __asm__("strcpy");
 extern int FILESYS_open_0270(char *, int, int, void *) __asm__("FILESYS_open");
 extern void cb_00D8_0270(void) __asm__("opencallback");
@@ -4124,7 +4124,7 @@ void startnextrequest(char *self, int priority) {
             char *nm = self + 0x6C;
             int opHandle;
             *(int *)(self + 0x170) = *(int *)(job + 0x118);
-            if (func_004165A8_0270(job + 0x14, nm) != 0) {
+            if (strcmp_0270(job + 0x14, nm) != 0) {
                 strcpy_0270(nm, job + 0x14);
                 if (*(int *)(self + 0x16C) == 0) {
                     opHandle = FILESYS_open_0270(nm, 1, priority, self);
@@ -5564,7 +5564,7 @@ void FILE_loadatz(int name, int address, int maxsize) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1C00);
+INCLUDE_ASM("ealib/seg_2DCAE8", scatterloadatom);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int FILE_loadz_1C00(int, int) __asm__("FILE_loadz");
@@ -5577,7 +5577,7 @@ extern int FILE_loadz_1C00(int, int) __asm__("FILE_loadz");
  * @param batch  {count, names, buffers, flags}
  * @return 1 when every file loaded, else 0
  */
-int func_003E1C00(void *priority, SCATTERREQUEST* batch) {
+int scatterloadatom(void *priority, SCATTERREQUEST* batch) {
     int offset;
     int index;
     int allOk;
@@ -5600,13 +5600,13 @@ int func_003E1C00(void *priority, SCATTERREQUEST* batch) {
 INCLUDE_ASM("ealib/seg_2DCAE8", FILE_scatterload);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void cb_1C98(void) __asm__("func_003E1C00");
+extern void cb_1C98(void) __asm__("scatterloadatom");
 typedef struct Args_1C98 { int a0, a1, a2, a3, a4; } Args_1C98;
 extern int FILESYS_atomic_1C98(void (*)(void), int, int, Args_1C98 *) __asm__("FILESYS_atomic");
 extern int D_00450C38_0C38[] __asm__("sync_priority");
 
 /**
- * Loads several files into allocated memory in one FILESYS_atomic run (func_003E1C00), fifth word 1; returns 1 when all
+ * Loads several files into allocated memory in one FILESYS_atomic run (scatterloadatom), fifth word 1; returns 1 when all
  * loaded, 0 for a count of 0 or less.
  *
  * @param fileCount  the number of files
@@ -5634,13 +5634,13 @@ int FILE_scatterload(int fileCount, int names, int buffers, int memFlags) {
 INCLUDE_ASM("ealib/seg_2DCAE8", FILE_scatterloadz);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void cb_1D00(void) __asm__("func_003E1C00");
+extern void cb_1D00(void) __asm__("scatterloadatom");
 typedef struct Args_1D00 { int a0, a1, a2, a3, a4; } Args_1D00;
 extern int FILESYS_atomic_1D00(void (*)(void), int, int, Args_1D00 *) __asm__("FILESYS_atomic");
 extern int D_00450C38_0C38[] __asm__("sync_priority");
 
 /**
- * Loads several files in one FILESYS_atomic run (func_003E1C00), fifth word 0; otherwise as FILE_scatterload. The batch
+ * Loads several files in one FILESYS_atomic run (scatterloadatom), fifth word 0; otherwise as FILE_scatterload. The batch
  * step ignores that word, so both behave the same.
  *
  * @param fileCount  the number of files
@@ -5776,11 +5776,11 @@ void FILE_loadbigheaderz(int fileName, int memFlags) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1F48);
+INCLUDE_ASM("ealib/seg_2DCAE8", FILE_save);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_00450C50_1F48[] __asm__("D_00450C50");
-extern int func_00416B18_1F48(char *, char *, int) __asm__("func_00416B18");
+extern int strncmp_1F48(char *, char *, int) __asm__("strncmp");
 extern void strcat_1F48(char *, char *) __asm__("strcat");
 extern int sceOpen_1F48(char *, int) __asm__("sceOpen");
 extern void sceClose_1F48(int) __asm__("sceClose");
@@ -5795,11 +5795,11 @@ extern void sceWrite_1F48(int, char *, int) __asm__("sceWrite");
  * @param len  the byte count
  * @return 1 when the file opened, else 0
  */
-unsigned int func_003E1F48(char *name, char *data, int len) {
+unsigned int FILE_save(char *name, char *data, int len) {
     char buf[256];
     int fd;
     buf[0] = 0;
-    if (func_00416B18_1F48(name, D_00450C50_1F48[0], strlen(D_00450C50_1F48[0])) != 0) {
+    if (strncmp_1F48(name, D_00450C50_1F48[0], strlen(D_00450C50_1F48[0])) != 0) {
         strcpy(buf, D_00450C50_1F48[0]);
     }
     strcat_1F48(buf, name);
@@ -5822,29 +5822,29 @@ unsigned int func_003E1F48(char *name, char *data, int len) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E2030);
+INCLUDE_ASM("ealib/seg_2DCAE8", FILE_savez);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_00450C50_2030[] __asm__("D_00450C50");
-extern int func_00416B18_2030(char *, char *, int) __asm__("func_00416B18");
+extern int strncmp_2030(char *, char *, int) __asm__("strncmp");
 extern void strcat_2030(char *, char *) __asm__("strcat");
 extern int sceOpen_2030(char *, int) __asm__("sceOpen");
 extern int sceClose_2030(int) __asm__("sceClose");
 extern int sceWrite_2030(int, char *, int) __asm__("sceWrite");
 
 /**
- * Writes @p len bytes to a host file like func_003E1F48, but returns 0 as soon as a write or the close fails.
+ * Writes @p len bytes to a host file like FILE_save, but returns 0 as soon as a write or the close fails.
  *
  * @param name  the file name
  * @param data  the data
  * @param len  the byte count
  * @return 1 on success, else 0
  */
-unsigned int func_003E2030(char *name, char *data, int len) {
+unsigned int FILE_savez(char *name, char *data, int len) {
     char buf[256];
     int fd;
     buf[0] = 0;
-    if (func_00416B18_2030(name, D_00450C50_2030[0], strlen(D_00450C50_2030[0])) != 0) {
+    if (strncmp_2030(name, D_00450C50_2030[0], strlen(D_00450C50_2030[0])) != 0) {
         strcpy(buf, D_00450C50_2030[0]);
     }
     strcat_2030(buf, name);
@@ -5873,7 +5873,7 @@ unsigned int func_003E2030(char *name, char *data, int len) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E2130);
+INCLUDE_ASM("ealib/seg_2DCAE8", FILE_unpacksizez);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int FILE_loadatz_2130(int, void *, int) __asm__("FILE_loadatz");
@@ -5886,7 +5886,7 @@ int unpacksizez_2130(void *) __asm__("unpacksizez");
  * @param fileName  the path
  * @return the unpacked size, or 0
  */
-int func_003E2130(int fileName) {
+int FILE_unpacksizez(int fileName) {
     char buf[0x80];
     int var_2;
 
@@ -5900,18 +5900,18 @@ int func_003E2130(int fileName) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E2168);
+INCLUDE_ASM("ealib/seg_2DCAE8", FILE_unpacksize);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void FILE_loadatz_2168(int, char *, int) __asm__("FILE_loadatz");
 void unpacksizez_2168(char *) __asm__("unpacksizez");
 /**
- * Returns a packed file's unpacked size like func_003E2130, without checking the load. Declared void; the size is left
+ * Returns a packed file's unpacked size like FILE_unpacksizez, without checking the load. Declared void; the size is left
  * in the return register.
  *
  * @param fileName  the path
  */
-void func_003E2168(int fileName) {
+void FILE_unpacksize(int fileName) {
     char buf[0x80];
     FILE_loadatz_2168(fileName, buf, 0x80);
     unpacksizez_2168(buf);
@@ -6642,7 +6642,7 @@ extern char *D_00450C50;
 extern char D_00519AF0[0x100];                  /* the current directory */
 extern char *strchr_3098(char *, int) __asm__("strchr");
 extern int strlen_3098(char *) __asm__("strlen");
-extern int func_00416B18_3098(char *, char *, int) __asm__("func_00416B18");
+extern int strncmp_3098(char *, char *, int) __asm__("strncmp");
 extern char *strcat(char *, char *);
 extern char *D_00450C3C;
 extern int D_00450C44;
@@ -6667,10 +6667,10 @@ void FILEDEV_resolvename_i(char *path, char *out, int *kind) {
     k = D_00450C44;
     if (strchr_3098(path, 58) != 0) {
         int n = strlen_3098(D_00450C50);
-        if (func_00416B18_3098(path, D_00450C3C, 3) == 0) {
+        if (strncmp_3098(path, D_00450C3C, 3) == 0) {
             k = 1;
             path += 3;
-        } else if (func_00416B18_3098(path, D_00450C50, n) == 0) {
+        } else if (strncmp_3098(path, D_00450C50, n) == 0) {
             path += n;
             k = 2;
         } else {
@@ -7025,7 +7025,7 @@ char *func_003E3618(void) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E36F8);
+INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_hashname);
 #ifdef SKIP_ASM
 extern int strlen();
 
@@ -7037,7 +7037,7 @@ extern int strlen();
  * @param seed  the starting value
  * @return the hash
  */
-int func_003E36F8(unsigned int str, int seed) {
+int CDVD_hashname(unsigned int str, int seed) {
     int hash = seed;
     signed char *cursor = (signed char *)(str + strlen(str)) - 1;
 
@@ -7053,7 +7053,7 @@ int func_003E36F8(unsigned int str, int seed) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3758);
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3968);
+INCLUDE_ASM("ealib/seg_2DCAE8", fi_cmp);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -7067,7 +7067,7 @@ extern int D_0051ED80_3968[] __asm__("D_0051ED80");
  * @param rhs  the second entry
  * @return -1, 0 or 1
  */
-int func_003E3968(unsigned int *lhs, unsigned int *rhs) {
+int fi_cmp(unsigned int *lhs, unsigned int *rhs) {
     long diff = (long)*lhs - (long)*rhs;
     if (diff < 0) return -1;
     if (diff > 0) return 1;
@@ -7080,19 +7080,19 @@ int func_003E3968(unsigned int *lhs, unsigned int *rhs) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E39A8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003E36F8_39A8(char *, int) __asm__("func_003E36F8");
+extern int CDVD_hashname_39A8(char *, int) __asm__("CDVD_hashname");
 extern void qsort_39A8(char *, int, int, void *) __asm__("qsort");
 extern char *strcpy_39A8(char *, char *) __asm__("strcpy");
-extern void func_003E3968_39A8(void) __asm__("func_003E3968");
+extern void fi_cmp_39A8(void) __asm__("fi_cmp");
 extern int D_00450C58_39A8[] __asm__("D_00450C58");
 extern int D_0051ED80_39A8[] __asm__("D_0051ED80");
 
 /**
  * Builds the sorted CD file table from the raw directory list and returns the hash seed it settled on.
  *
- * Each 0x108-byte source entry (path, sector, size) becomes {hash of the path (func_003E36F8), sector, size, then the
+ * Each 0x108-byte source entry (path, sector, size) becomes {hash of the path (CDVD_hashname), sector, size, then the
  * path when D_00450C58 +0x4, the name length, is above 0} in entries of name length + 0xC bytes, sorted by hash
- * (qsort with func_003E3968). On any equal hashes the seed becomes seed * 101 + 7 and it starts over. Quirks:
+ * (qsort with fi_cmp). On any equal hashes the seed becomes seed * 101 + 7 and it starts over. Quirks:
  * two identical paths hash alike for every seed, so the loop never ends; the path is copied with no length limit.
  *
  * @param src  the directory list
@@ -7112,7 +7112,7 @@ int func_003E39A8(char *src, char *dst, int n, int seed) {
             int i = n;
             do {
                 int sz;
-                *(int *)dstEntry = func_003E36F8_39A8(srcEntry, seed);
+                *(int *)dstEntry = CDVD_hashname_39A8(srcEntry, seed);
                 *(int *)(dstEntry + 4) = *(int *)(srcEntry + 0x100);
                 *(int *)(dstEntry + 8) = *(int *)(srcEntry + 0x104);
                 if (D_00450C58_39A8[1] > 0) {
@@ -7125,7 +7125,7 @@ int func_003E39A8(char *src, char *dst, int n, int seed) {
             } while (i != 0);
         }
         D_0051ED80_39A8[0] = 0;
-        qsort_39A8(dst, n, D_00450C58_39A8[1] + 0xC, func_003E3968_39A8);
+        qsort_39A8(dst, n, D_00450C58_39A8[1] + 0xC, fi_cmp_39A8);
         if (D_0051ED80_39A8[0] != 0) {
             seed = seed * 101 + 7;
         } else {
@@ -7419,7 +7419,7 @@ extern int sceCdGetToc_4040(void *) __asm__("sceCdGetToc");
 extern void FlushCache_4040(int) __asm__("FlushCache");
 extern void MEM_clear_4040(void *, int) __asm__("MEM_clear");
 extern char *strcat_4040(char *, char *) __asm__("strcat");
-extern int func_00416B18_4040(char *, char *, int) __asm__("func_00416B18");
+extern int strncmp_4040(char *, char *, int) __asm__("strncmp");
 extern int func_003E39A8_4040(void *, void *, unsigned int, int) __asm__("func_003E39A8");
 extern int CreateSema_4040(void *) __asm__("CreateSema");
 extern int CreateThread_4040(void *) __asm__("CreateThread");
@@ -7580,7 +7580,7 @@ unsigned int func_003E4040(unsigned int n, void *files) {
         if (*D_00450C58_4040.root != 0) {
             D_00519C40_4040.lba = pvd->root.lba;
             for (rec = func_003E3618_4040(); (char *)rec <= D_00519C80 + 0x800; rec = (struct IsoDirRec_4040 *)((char *)rec + rec->len)) {
-                if (func_00416B18_4040(rec->name, D_00450C58_4040.root, rec->name_len) == 0) {
+                if (strncmp_4040(rec->name, D_00450C58_4040.root, rec->name_len) == 0) {
                     strcat_4040(D_0051EC80, D_00450C58_4040.root);
                     strcat_4040(D_0051EC80, str_slash_c);
                     func_003E3758_4040(rec->lba, (rec->size + 0x7FF) >> 11);
@@ -7654,9 +7654,9 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4508);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 #include "fakematch.h"
-extern int func_003E36F8_4508(char *, int) __asm__("func_003E36F8");
+extern int CDVD_hashname_4508(char *, int) __asm__("CDVD_hashname");
 extern unsigned int bsearch_4508(int *, int, int, int, void *) __asm__("bsearch");
-extern void func_003E3968_4508(void) __asm__("func_003E3968");
+extern void fi_cmp_4508(void) __asm__("fi_cmp");
 extern int D_00450C58_4508[] __asm__("D_00450C58");
 extern char D_00499C81_4508[] __asm__("D_00499C81");
 extern int D_00519C40_4508[] __asm__("D_00519C40");
@@ -7666,9 +7666,9 @@ int func_003E4508_4508(char *path, int unused, int *out) __asm__("func_003E4508"
  * Looks a path up in the disc's hashed file table and gives its 1-based entry number.
  *
  * Builds a normalised copy of @p path in a 256-byte buffer: exactly one leading '/', every '\\' turned into '/', and
- * lower-case letters upper-cased (flag 2 of the ctype table D_00499C81). Hashes it with func_003E36F8 (seed word 6 of
+ * lower-case letters upper-cased (flag 2 of the ctype table D_00499C81). Hashes it with CDVD_hashname (seed word 6 of
  * the file-system state D_00519C40) and binary-searches (bsearch, called bsearch-style) the entry table (word 14,
- * D_00519C78) of word 1 entries, each D_00450C5C + 12 bytes, comparing the hashes with func_003E3968. Used by
+ * D_00519C78) of word 1 entries, each D_00450C5C + 12 bytes, comparing the hashes with fi_cmp. Used by
  * FILEDEV_open, which tags the number with device 1 in the top byte, and by func_003E4968.
  *
  * @param path  the file path ('/' or '\\' separated)
@@ -7710,8 +7710,8 @@ int func_003E4508_4508(char *path, int modeFlags, int *out) {
         bufCursor++;
     }
     *bufCursor = 0;
-    key = func_003E36F8_4508(buf, D_00519C40_4508[6]);
-    foundEntry = bsearch_4508(&key, D_00519C40_4508[14], D_00519C40_4508[1], D_00450C58_4508[1] + 0xC, func_003E3968_4508);
+    key = CDVD_hashname_4508(buf, D_00519C40_4508[6]);
+    foundEntry = bsearch_4508(&key, D_00519C40_4508[14], D_00519C40_4508[1], D_00450C58_4508[1] + 0xC, fi_cmp_4508);
     if (foundEntry == 0) {
         *out = 0;
         return 0;
@@ -7841,7 +7841,7 @@ extern int D_00450C78_4A30[] __asm__("D_00450C78");
  *
  * Does nothing when @p exitFunc is already in the 64-entry exit table D_00450C78 (the routines REAL_restore runs); otherwise
  * stores it in the first empty slot, and drops it silently when the table is full. The timer setup TIMER_init
- * registers its teardown TIMER_restore here; the sound library (func_003B5478) registers one too.
+ * registers its teardown TIMER_restore here; the sound library (System_VectorToReal5) registers one too.
  *
  * @param exitFunc  the routine to call at exit
  */
@@ -7862,7 +7862,7 @@ void REAL_addexit(int exitFunc) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4AA0);
+INCLUDE_ASM("ealib/seg_2DCAE8", REAL_removeexit);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern void (*D_00450C78[64])(void);     /* exit handlers (REAL_restore runs them) */
@@ -7874,7 +7874,7 @@ extern void (*D_00450C78[64])(void);     /* exit handlers (REAL_restore runs the
  *
  * @param exitFunc  the routine to remove
  */
-void func_003E4AA0(void (*exitFunc)(void)) {
+void REAL_removeexit(void (*exitFunc)(void)) {
     int i;
     for (i = 0; i < 0x40; i++) {
         if (D_00450C78[i] == exitFunc) {
@@ -7890,7 +7890,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", TIMER_init);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003E6690_4AF0(int) __asm__("func_003E6690");
-extern int func_00423A80_4AF0(int, void (*)(void), int) __asm__("func_00423A80");
+extern int AddIntcHandler_4AF0(int, void (*)(void), int) __asm__("AddIntcHandler");
 extern int EnableIntc_4AF0(int) __asm__("EnableIntc");
 extern void REAL_addexit_4AF0(void (*)(void)) __asm__("REAL_addexit");
 extern void tmrint_4AF0(void) __asm__("tmrint");
@@ -7916,7 +7916,7 @@ extern unsigned short D_00450DE0;
  * picks EE timer 1's clock for the rate (bus clock / 256 below 196 Hz, / 16 below 3150 Hz, / 1 above: 0x8CA00, 0x8CA000
  * or 0x8CA0000 counts a second), stores the compare period in D_00450DE0 and the resulting rate in TIMERhz, programs
  * T1 (count 0, the compare value, the clock mode | 0x180: compare interrupt and count enable), installs tmrint
- * as the INTC 10 (timer 1) handler (func_00423A80) and enables it (EnableIntc). While the H-blank rate D_00450DA0 is
+ * as the INTC 10 (timer 1) handler (AddIntcHandler) and enables it (EnableIntc). While the H-blank rate D_00450DA0 is
  * still 0 it calibrates the video mode: it counts H-blanks on timer 0 (mode 0x83) over one second of ticks and passes 1
  * (15701-15799, NTSC), 2 (15576-15674, PAL) or 3 (28801-31999) to func_003E6690. Finally it registers the teardown
  * TIMER_restore with REAL_addexit. systemInit calls it with 60.
@@ -7958,7 +7958,7 @@ int TIMER_init(int hz) {
     T1_COUNT_4AF0 = 0;
     T1_COMP_4AF0 = D_00450DE0;
     T1_MODE_4AF0 = mode | 0x180;
-    D_00450DDC = func_00423A80_4AF0(10, tmrint_4AF0, 0);
+    D_00450DDC = AddIntcHandler_4AF0(10, tmrint_4AF0, 0);
     EnableIntc_4AF0(10);
     if (D_00450DA0 == 0) {
         count = T0_COUNT_4AF0;
@@ -8082,7 +8082,7 @@ int TIMER_gettick(void)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4EA8);
+INCLUDE_ASM("ealib/seg_2DCAE8", TIMER_elapsedticks);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00450DEC_4EA8[] __asm__("D_00450DEC");
@@ -8092,9 +8092,9 @@ extern int D_00450DEC_4EA8[] __asm__("D_00450DEC");
  *
  * Stores the current tick count (TIMER_gettick) in D_00450DEC and returns it minus the value stored last time.
  *
- * @return ticks since the last call (since the reset in func_003E4EE8 on the first call)
+ * @return ticks since the last call (since the reset in TIMER_reset on the first call)
  */
-int func_003E4EA8(void) {
+int TIMER_elapsedticks(void) {
     int old = D_00450DEC_4EA8[0];
     int now = TIMER_gettick();
     D_00450DEC_4EA8[0] = now;
@@ -8103,7 +8103,7 @@ int func_003E4EA8(void) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4EE8);
+INCLUDE_ASM("ealib/seg_2DCAE8", TIMER_reset);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00450DE8_4EE8[] __asm__("D_00450DE8");
@@ -8113,11 +8113,11 @@ extern volatile int D_00450DCC_4EE8[] __asm__("D_00450DCC");
 /**
  * Resets the tick bookkeeping to zero.
  *
- * Clears the last-call mark D_00450DEC (func_003E4EA8), the tick counter D_00450DCC and the deadline D_00450DE8
- * (func_003E4F08 / func_003E4F80).
+ * Clears the last-call mark D_00450DEC (TIMER_elapsedticks), the tick counter D_00450DCC and the deadline D_00450DE8
+ * (TIMER_settimeout / TIMER_testtimeout).
  */
 // Resets the timer state.
-void func_003E4EE8(void) {
+void TIMER_reset(void) {
     int *deadlinePtr = D_00450DE8_4EE8;
     D_00450DEC_4EE8[0] = 0;
     D_00450DCC_4EE8[0] = 0;
@@ -8126,7 +8126,7 @@ void func_003E4EE8(void) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4F08);
+INCLUDE_ASM("ealib/seg_2DCAE8", TIMER_settimeout);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int TIMER_gettick_4F08(void) __asm__("TIMER_gettick");
@@ -8135,33 +8135,33 @@ extern int D_00450DE8_4F08[] __asm__("D_00450DE8");
 /**
  * Sets the tick deadline a number of ticks from now.
  *
- * Stores the current tick count (TIMER_gettick) plus @p delayTicks in D_00450DE8; func_003E4F80 tests it and func_003E4F40
+ * Stores the current tick count (TIMER_gettick) plus @p delayTicks in D_00450DE8; TIMER_testtimeout tests it and TIMER_waittimeout
  * waits for it.
  *
  * @param delayTicks  ticks from now
  */
-void func_003E4F08(int delayTicks) {
+void TIMER_settimeout(int delayTicks) {
     int *deadlinePtr = D_00450DE8_4F08;
     *deadlinePtr = TIMER_gettick_4F08() + delayTicks;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4F40);
+INCLUDE_ASM("ealib/seg_2DCAE8", TIMER_waittimeout);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003E4F80();
+extern int TIMER_testtimeout();
 extern void SYNCTASK_run_4F40(int) __asm__("SYNCTASK_run");
 extern void THREAD_yield_4F40(int) __asm__("THREAD_yield");
 
 /**
- * Waits for the tick deadline set by func_003E4F08.
+ * Waits for the tick deadline set by TIMER_settimeout.
  *
- * Until func_003E4F80 reports it reached, runs the sync tasks (SYNCTASK_run(0)) and yields the thread
+ * Until TIMER_testtimeout reports it reached, runs the sync tasks (SYNCTASK_run(0)) and yields the thread
  * (THREAD_yield(0)) on each pass.
  */
-void func_003E4F40(void) {
-    while (func_003E4F80() == 0) {
+void TIMER_waittimeout(void) {
+    while (TIMER_testtimeout() == 0) {
         SYNCTASK_run_4F40(0);
         THREAD_yield_4F40(0);
     }
@@ -8169,7 +8169,7 @@ void func_003E4F40(void) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4F80);
+INCLUDE_ASM("ealib/seg_2DCAE8", TIMER_testtimeout);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int TIMER_gettick();
@@ -8178,11 +8178,11 @@ extern int D_00450DE8_4F80[] __asm__("D_00450DE8");
 /**
  * Tells whether the tick deadline has been reached.
  *
- * Compares the current tick count (TIMER_gettick) with the deadline D_00450DE8 set by func_003E4F08.
+ * Compares the current tick count (TIMER_gettick) with the deadline D_00450DE8 set by TIMER_settimeout.
  *
  * @return 1 when the deadline is now or past, 0 before it
  */
-int func_003E4F80(void) {
+int TIMER_testtimeout(void) {
     int sinceDeadline = TIMER_gettick() - D_00450DE8_4F80[0]; if (sinceDeadline > -1) return 1; return 0;
 }
 #endif
@@ -8257,7 +8257,7 @@ void THREAD_init(void) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5068);
+INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_restore);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void MUTEX_destroy(void *);
@@ -8271,14 +8271,14 @@ extern int D_0051ED88_5068[] __asm__("D_0051ED88");
  * Destroys the library mutex D_0051ED88 (MUTEX_destroy) and clears the 8-byte main-thread record D_00450DF8 that
  * THREAD_init filled. Nothing in the build calls it.
  */
-void func_003E5068(void) {
+void THREAD_restore(void) {
     MUTEX_destroy(D_0051ED88_5068);
     MEM_clear_5068(D_00450DF8_5068, 8);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5098);
+INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_create);
 #ifdef SKIP_ASM
 extern void THREAD_createparam(int, int, int, int, int, int);
 
@@ -8293,7 +8293,7 @@ extern void THREAD_createparam(int, int, int, int, int, int);
  * @param stackSize  the stack size in bytes
  * @param priority  the priority code (97-103, anything else means 100)
  */
-void func_003E5098(int thread, int entryProc, int stackAddr, int stackSize, int priority) {
+void THREAD_create(int thread, int entryProc, int stackAddr, int stackSize, int priority) {
     THREAD_createparam(thread, entryProc, 0, stackAddr, stackSize, priority);
 }
 #endif
@@ -8323,7 +8323,7 @@ int THREAD_createparam_a(int *self, int arg1, int arg2, int arg3, int arg4, int 
  * Fills a ThreadParam on the stack (entry @p entryProc, stack @p stackAddr / @p stackSize, gp D_004A30F0, initial priority @p priority
  * when it is 97, 98, 99, 101, 102 or 103, else 100) and calls CreateThread. The id goes to the record's +4 even on
  * failure; on success the record's +0 gets the signature 0x50533254 ('PS2T') and the thread is started with StartThread
- * and @p startParam. func_003E5098 calls it with a parameter of 0; the quadtree loader (func_002C29D0) starts its thread
+ * and @p startParam. THREAD_create calls it with a parameter of 0; the quadtree loader (func_002C29D0) starts its thread
  * here.
  *
  * @param entryProc  the entry routine
@@ -8425,7 +8425,7 @@ void THREAD_destroy_51A0(char *thread) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5268);
+INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_remove);
 #ifdef SKIP_ASM
 extern void THREAD_destroy();
 
@@ -8435,7 +8435,7 @@ extern void THREAD_destroy();
  * Calls THREAD_destroy without loading an argument, so whatever the caller left in the first argument register is passed
  * through (the C declares no parameter). Nothing in the build calls it.
  */
-void func_003E5268(void) {
+void THREAD_remove(void) {
     THREAD_destroy();
 }
 #endif
@@ -8586,7 +8586,7 @@ int THREAD_iscurrent(char *thread) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5498);
+INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_getpriority);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int GetThreadId();
@@ -8605,7 +8605,7 @@ extern int D_00450DFC_5498[] __asm__("D_00450DFC");
  * @param thread  the thread record, 0 for the main thread, or -1 for the calling thread
  * @return the thread's current priority
  */
-int func_003E5498(int *thread) {
+int THREAD_getpriority(int *thread) {
     int sp[12];
     int threadId;
     if (thread == 0) {
@@ -8664,7 +8664,7 @@ int THREAD_setpriority(void *thread, int priority) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5580);
+INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_testexit);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void ReferThreadStatus(int, void *);
@@ -8681,7 +8681,7 @@ typedef struct { int pad; int f4; } A_5580;
  * @param thread  the thread record
  * @return 1 when the thread is dormant (status bit 0x10) or the status is 0, else 0
  */
-int func_003E5580(A_5580 *thread) {
+int THREAD_testexit(A_5580 *thread) {
     struct { int v; char rest[44]; } st;
     int finished;
 
@@ -8736,14 +8736,14 @@ int THREAD_waitexit(int *task, int timeout) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5678);
+INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_exit);
 #ifdef SKIP_ASM
 extern void ExitDeleteThread();
 
 /**
  * Ends the calling thread and deletes it (ExitDeleteThread). Nothing in the build calls it.
  */
-void func_003E5678(void) {
+void THREAD_exit(void) {
     ExitDeleteThread();
 }
 #endif
@@ -8778,7 +8778,7 @@ extern void DeleteSema(int);
 /**
  * Destroys a mutex by deleting its kernel semaphore (DeleteSema on +0xC).
  *
- * Used for the library mutex (func_003E5068), memory classes (MEMCLASS_remove), the file system, async files, streams,
+ * Used for the library mutex (THREAD_restore), memory classes (MEMCLASS_remove), the file system, async files, streams,
  * the quadtree loader and cCommSystem's destructor.
  *
  * @param mutex  the mutex
@@ -8977,7 +8977,7 @@ int SYNCTASK_run(int mode) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5A10);
+INCLUDE_ASM("ealib/seg_2DCAE8", abortablewait);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int SYNCTASK_run_5A10(int) __asm__("SYNCTASK_run");
@@ -8991,7 +8991,7 @@ extern int SYNCTASK_run_5A10(int) __asm__("SYNCTASK_run");
  * @param ticks  the time limit in ticks
  * @return the last SYNCTASK_run result (0 when the time ran out first)
  */
-int func_003E5A10(int ticks) {
+int abortablewait(int ticks) {
     int deadline;
     int result;
 
@@ -9115,7 +9115,7 @@ void PRINT_init(void) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5C60);
+INCLUDE_ASM("ealib/seg_2DCAE8", PRINT_restore);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00451008_5C60[4] __asm__("PRINTinitialized");
@@ -9125,7 +9125,7 @@ extern int D_00451008_5C60[4] __asm__("PRINTinitialized");
  *
  * Clears PRINTinitialized when it is set, so the next print call runs PRINT_init again. Nothing in the build calls it.
  */
-void func_003E5C60(void) {
+void PRINT_restore(void) {
     if (D_00451008_5C60[0] != 0) {
         D_00451008_5C60[0] = 0;
     }
@@ -9244,7 +9244,7 @@ void PRINT_setdevicestate(int device, int enable) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5E38);
+INCLUDE_ASM("ealib/seg_2DCAE8", PRINT_getdevicestate);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void PRINT_init(void);
@@ -9260,7 +9260,7 @@ extern int D_00451008_1008[] __asm__("PRINTinitialized");
  * @param device  the device index (0-7)
  * @return 1 when the device is enabled, 0 otherwise
  */
-int func_003E5E38(int device) {
+int PRINT_getdevicestate(int device) {
     char *entry;
     if (D_00451008_1008[0] == 0) {
         PRINT_init();
@@ -9271,7 +9271,7 @@ int func_003E5E38(int device) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5E88);
+INCLUDE_ASM("ealib/seg_2DCAE8", PRINT_setdevicename);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_5E88 { int a; int b; int c; };
@@ -9290,7 +9290,7 @@ extern int D_00451008_5E88[] __asm__("PRINTinitialized");
  * @param deviceName  the device name
  * @param outputFunc  the routine that receives (channel, text) for every message
  */
-void func_003E5E88(int device, int deviceName, int outputFunc) {
+void PRINT_setdevicename(int device, int deviceName, int outputFunc) {
     if (D_00451008_5E88[0] == 0) {
         PRINT_init();
     }
@@ -9322,7 +9322,7 @@ void PRINT_setchannelstate(int channel, int enable) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5F48);
+INCLUDE_ASM("ealib/seg_2DCAE8", PRINT_getchannelstate);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct P_5F48 { int a; int b; };
@@ -9339,7 +9339,7 @@ void PRINT_init_5F48(void) __asm__("PRINT_init");
  * @param channel  the channel index (0-63)
  * @return 1 when the channel is enabled, 0 otherwise
  */
-int func_003E5F48(int channel) {
+int PRINT_getchannelstate(int channel) {
     if (D_00451008_5F48[0] == 0) {
         PRINT_init_5F48();
     }
@@ -9348,7 +9348,7 @@ int func_003E5F48(int channel) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5F98);
+INCLUDE_ASM("ealib/seg_2DCAE8", PRINT_setchannelname);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00450E08_0E08[] __asm__("PRINTchannellist");
@@ -9364,7 +9364,7 @@ void PRINT_init_5F98(void) __asm__("PRINT_init");
  * @param channel  the channel index (0-63)
  * @param channelName  the channel name
  */
-void func_003E5F98(int channel, int channelName) {
+void PRINT_setchannelname(int channel, int channelName) {
     if (D_00451008_1008[0] == 0) {
         PRINT_init_5F98();
     }
@@ -9373,7 +9373,7 @@ void func_003E5F98(int channel, int channelName) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5FF0);
+INCLUDE_ASM("ealib/seg_2DCAE8", PRINT_todevice);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
@@ -9392,7 +9392,7 @@ extern void PRINT_init_5FF0(void) __asm__("PRINT_init");
  * @param channel  the channel number passed to the routine
  * @param text  the text
  */
-void func_003E5FF0(int i, int channel, int text) {
+void PRINT_todevice(int i, int channel, int text) {
     E_5FF0 *deviceEntry;
     if (D_00451008_5FF0[0] == 0) PRINT_init_5FF0();
     if (D_00451250_5FF0[i].fn != 0) {
@@ -9503,7 +9503,7 @@ void MEM_move_6188(unsigned char *dst, unsigned char *src, int n) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E61F8);
+INCLUDE_ASM("ealib/seg_2DCAE8", blockmove);
 #ifdef SKIP_ASM
 extern void MEM_move(int, int);
 
@@ -9516,7 +9516,7 @@ extern void MEM_move(int, int);
  * @param src  the source
  * @param dst  the destination
  */
-void func_003E61F8(int src, int dst) {
+void blockmove(int src, int dst) {
     MEM_move(dst, src);
 }
 #endif
@@ -9914,7 +9914,7 @@ extern char *RpcAlloc_66F0(int) __asm__("RpcAlloc");
 extern void func_003F4C68_66F0(int *, int, int, int, int, int, int, int, int, int) __asm__("func_003F4C68");
 extern int func_003F4C98_66F0(int *, int, int) __asm__("func_003F4C98");
 extern void func_003F4E80_66F0(int, int) __asm__("func_003F4E80");
-extern void func_00416210_66F0(char *, int, int) __asm__("func_00416210");
+extern void memset_66F0(char *, int, int) __asm__("memset");
 
 /**
  * Creates a DirtySock game link on the IOP and returns its EE-side block.
@@ -9940,7 +9940,7 @@ char *NetGameLinkCreate(int commRef, int owner, int n) {
     char *block;
     size = n + 916;
     block = RpcAlloc_66F0(size);
-    func_00416210_66F0(block, 0, size);
+    memset_66F0(block, 0, size);
     buf = (int)(block + 0x1BF) & ~0x3F;
     *(int *)(block + 0x16C) = buf;
     *(int *)(block + 4) = -1;
@@ -9967,7 +9967,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", NetGameLinkDestroy);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0051EE98_67F8[] __asm__("D_0051EE98");
-extern void func_00256BD8(int *);
+extern void RpcFree(int *);
 extern void func_003F4C68(int *, int, int, int, int, int, int, int, int, int);
 extern void func_003F4C98(int *, int, int);
 
@@ -9975,14 +9975,14 @@ extern void func_003F4C98(int *, int, int);
  * Destroys a DirtySock game link (EE-side stub of the IOP call).
  *
  * Builds the 'gmlk'/'dest' request in D_0051EE98 with func_003F4C98, sends it with func_003F4C68 carrying the
- * link's IOP reference (*@p linkRef), then releases the EE-side ref with func_00256BD8.
+ * link's IOP reference (*@p linkRef), then releases the EE-side ref with RpcFree.
  *
  * @param linkRef  the game link ref
  */
 void NetGameLinkDestroy(int *linkRef) {
     func_003F4C98(D_0051EE98_67F8, 0x676D6C6B, 0x64657374);
     func_003F4C68(D_0051EE98_67F8, 0, *linkRef, 0, 0, 0, 0, 0, 1, 0);
-    func_00256BD8(linkRef);
+    RpcFree(linkRef);
 }
 #endif
 
@@ -10097,7 +10097,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", NetGameLinkRecv);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003F4EA0(int, int *);
-extern int func_003F4DE8(void);
+extern int NetTick(void);
 extern int func_003F4C98_6B10(int *, int, int) __asm__("func_003F4C98");
 extern int func_003F4C68_6B10(int *, int, int, int, int, int, int, int, int, int) __asm__("func_003F4C68");
 extern void *func_0041605C_6B10(short *, int, int) __asm__("func_0041605C");
@@ -10111,7 +10111,7 @@ int NetGameLinkRecv_impl(char *self, short *out, int n) __asm__("NetGameLinkRecv
  * (+0x16C); a fill with a new id (compared with +0x15C) sets the read position +0x160 to 0x10 (past the fill header)
  * and the end to the fill length + 0x10. With data waiting, @p n of 1 copies one packet into @p out (NetGameLinkPeek) and
  * advances by its length; any other @p n copies all the waiting bytes when they fit in @p n (nothing otherwise). Once
- * the buffer is consumed it resets the positions (0, -1), stamps +0x170 with func_003F4DE8 and sends 'gmlk'/'recv'
+ * the buffer is consumed it resets the positions (0, -1), stamps +0x170 with NetTick and sends 'gmlk'/'recv'
  * (into D_0051EEB8) for the next fill.
  *
  * @param out  the destination buffer
@@ -10150,7 +10150,7 @@ int NetGameLinkRecv_impl(char *self, short *out, int n) {
     if (*(int *)(self + 0x160) == *(int *)(self + 0x164)) {
         *(int *)(self + 0x160) = 0;
         *(int *)(self + 0x164) = -1;
-        *(int *)(self + 0x170) = func_003F4DE8();
+        *(int *)(self + 0x170) = NetTick();
         func_003F4C98_6B10(D_0051EEB8_6B10, 0x676D6C6B, 0x72656376);
         func_003F4C68_6B10(D_0051EEB8_6B10, 1, *(int *)self, *(int *)(self + 0x16C), 0, 0, 0, 0, 0, 0);
     }
@@ -10522,7 +10522,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7340);
 extern int func_003F4C68_7340(int *, int, int, int, int, int, int, int, int, char *) __asm__("func_003F4C68");
 extern int func_003F4C98_7340(int *, int, int) __asm__("func_003F4C98");
 extern char *RpcAlloc_7340(int) __asm__("RpcAlloc");
-extern void *memset_7340(void *, int, int) __asm__("func_00416210");
+extern void *memset_7340(void *, int, int) __asm__("memset");
 
 /**
  * Creates a ping object on the IOP and returns its EE-side block.
@@ -10548,7 +10548,7 @@ char *func_003E7340(void) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E73E0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_00256BD8_73E0(void *) __asm__("func_00256BD8");
+extern void RpcFree_73E0(void *) __asm__("RpcFree");
 extern int func_003F4C68_73E0(void *, int, int, int, int, int, int, int, int, int) __asm__("func_003F4C68");
 extern void func_003F4C98_73E0(void *, int, int) __asm__("func_003F4C98");
 struct S_73E0 { int a[4]; };
@@ -10556,7 +10556,7 @@ struct S_73E0 { int a[4]; };
 /**
  * Destroys a ping object made by func_003E7340.
  *
- * Sends 'ping'/'dest' with its IOP reference (+0xC) without waiting, then frees the block with func_00256BD8.
+ * Sends 'ping'/'dest' with its IOP reference (+0xC) without waiting, then frees the block with RpcFree.
  *
  * @param block  the ping block
  */
@@ -10565,7 +10565,7 @@ void func_003E73E0(void *block) {
 
     func_003F4C98_73E0(&msg, 0x70696E67, 0x64657374);
     func_003F4C68_73E0(&msg, 0, *(int *)((char*)block + 0xC), 0, 0, 0, 0, 0, 1, 0);
-    func_00256BD8_73E0(block);
+    RpcFree_73E0(block);
 }
 #endif
 
@@ -10653,7 +10653,7 @@ int func_003E7500_impl(struct S_7500 *self, char *buf, int *a2, int *a3) __asm__
  * header is copied to @p response and the payload (up to *@p bufLen bytes, *@p bufLen updated) to @p buf; then the count and the time
  * stamp +8 are cleared. Then, when no request is in flight (+4 == 0) and no reply waits, it sends a new 'ping'/'resp'
  * request (into D_0051EEE8) with the 2 KB buffer and func_003E74E8 as completion, at most once per 6 units of
- * func_003F4DE8 (+8 holds the last send) and, for a fresh buffer, after passing it to InvalidDCache and marking the
+ * NetTick (+8 holds the last send) and, for a fresh buffer, after passing it to InvalidDCache and marking the
  * count -1.
  *
  * @param buf  receives the reply payload, or 0
@@ -10683,9 +10683,9 @@ int func_003E7500_impl(struct S_7500 *self, char *buf, int *bufLen, int *respons
     }
     if (self->f4 == 0 && self->f0 <= 0) {
         if (self->f8 != 0) {
-            if (func_003F4DE8() - self->f8 < 6) return res;
+            if (NetTick() - self->f8 < 6) return res;
         }
-        self->f8 = func_003F4DE8();
+        self->f8 = NetTick();
         self->f4 = 1;
         if (self->f0 == 0) {
             InvalidDCache_7500(self->f10, self->f10 + 0x7FF);
@@ -10783,7 +10783,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E77F0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct N_77F0 { int pad0; int key; int w[14]; struct N_77F0 *next; } N_77F0;
-extern void *memset_77F0(void *, int, unsigned int) __asm__("func_00416210");
+extern void *memset_77F0(void *, int, unsigned int) __asm__("memset");
 extern void func_00259210_77F0(void *) __asm__("func_00259210");
 /**
  * Takes the first pending-request record off the lobby's list when it matches a command.
@@ -10815,13 +10815,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7918);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct N_7918 { int f0; int tag; int id; int fC; int f10; int f14; char name[0x28]; struct N_7918 *next; };
 struct L_7918 { char pad[0x53C]; struct N_7918 *head; int cnt; };
-extern int func_004165A8_7918(char *, char *) __asm__("func_004165A8");
+extern int strcmp_7918(char *, char *) __asm__("strcmp");
 extern void func_00259210_7918(void *) __asm__("func_00259210");
 
 /**
  * Takes a matching ping record off the lobby's request list.
  *
- * Walks the list +0x53C for a 'ping' record that either has address @p id and the name @p name (func_004165A8), or,
+ * Walks the list +0x53C for a 'ping' record that either has address @p id and the name @p name (strcmp), or,
  * when @p id is -1, a deadline (+0xC) before @p cutoff. The first match is unlinked, copied into @p out, freed and the
  * outstanding-ping count +0x540 decremented. Used by func_003E7C40 for replies and for timeouts.
  *
@@ -10839,7 +10839,7 @@ int func_003E7918(struct L_7918 *list, struct N_7918 *out, char *name, int id, i
     while (*pp != 0) {
         n = *pp;
         if (n->tag == 0x70696E67 &&
-            ((n->id == id && func_004165A8_7918(name, n->name) == 0) || (id == -1 && n->fC < cutoff))) {
+            ((n->id == id && strcmp_7918(name, n->name) == 0) || (id == -1 && n->fC < cutoff))) {
             *pp = n->next;
             *out = *n;
             func_00259210_7918(n);
@@ -11119,7 +11119,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7FF0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char D_004A48A8_7FF0[] __asm__("D_004A48A8");
 extern void *func_002591E8_7FF0(int) __asm__("func_002591E8");
-extern void func_00416210_7FF0(void *, int, int) __asm__("func_00416210");
+extern void memset_7FF0(void *, int, int) __asm__("memset");
 extern char *strchr_7FF0(char *, int) __asm__("strchr");
 extern void cDirtysock_tag_TagFieldDupl_7FF0(void *, int, char *) __asm__("cDirtysock_tag_TagFieldDupl");
 extern void cDirtysock_tag_TagFieldSetString_7FF0(void *, int, char *, char *) __asm__("cDirtysock_tag_TagFieldSetString");
@@ -11146,7 +11146,7 @@ void *func_003E7FF0(char *tagString, int debugData, int debugProc) {
 
     lobbyRef = func_002591E8_7FF0(1360);
     if (lobbyRef != 0) {
-        func_00416210_7FF0(lobbyRef, 0, 1360);
+        memset_7FF0(lobbyRef, 0, 1360);
         if (tagString != 0) {
             if (strchr_7FF0(tagString, 61) != 0) {
                 cDirtysock_tag_TagFieldDupl_7FF0(lobbyRef + 0x34, 0x100, tagString);
@@ -11526,7 +11526,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8778);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *func_002591E8_8778(int) __asm__("func_002591E8");
-extern void func_00416210_8778(void *, int, int) __asm__("func_00416210");
+extern void memset_8778(void *, int, int) __asm__("memset");
 extern int func_003EEC88_8778(int, char *) __asm__("func_003EEC88");
 extern int func_003EE320_8778(int, void *) __asm__("func_003EE320");
 extern int func_003EEB30_8778(int, char *, int) __asm__("func_003EEB30");
@@ -11559,7 +11559,7 @@ int func_003E8778_impl(struct O_8778 *self, unsigned int i, char *record) {
                 return 0;
             }
             newRecord = func_002591E8_8778(312);
-            func_00416210_8778(newRecord, 0, 312);
+            memset_8778(newRecord, 0, 312);
             strcpy(newRecord + 8, record);
             entryRef = func_003EE320_8778(self->s[3].f4, newRecord);
             func_003EEB30_8778(self->s[3].h, newRecord + 8, entryRef);
@@ -12010,7 +12010,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E9160);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern void *func_002591E8_9160(int) __asm__("func_002591E8");
 extern void func_00259210_9160(void *) __asm__("func_00259210");
-extern void func_00416210_9160(void *, int, int) __asm__("func_00416210");
+extern void memset_9160(void *, int, int) __asm__("memset");
 extern int *func_003EE560_9160(int, int) __asm__("func_003EE560");
 extern int func_003EE550_9160(int) __asm__("func_003EE550");
 extern int func_003EED08_9160(int, void *) __asm__("func_003EED08");
@@ -12040,7 +12040,7 @@ int func_003E9160(char *self, int limit) {
     }
     k = 0;
     hist = (short *)func_002591E8_9160(0x4000);
-    func_00416210_9160(hist, 0, 0x4000);
+    memset_9160(hist, 0, 0x4000);
     while ((rankEntry = func_003EE560_9160(rankList, k)) != 0) {
         if ((unsigned)(rankEntry[0] - 1) >= 0x1FFF) {
             rankEntry[0] = 500;
@@ -12106,7 +12106,7 @@ extern int func_003EE600(int, int);
 extern int func_003EE558_9378(int) __asm__("func_003EE558");
 extern struct N_9378 *func_003EE560_9378(int, int) __asm__("func_003EE560");
 extern int strlen(const char *);
-extern int func_00416B18(const char *, const char *, int);
+extern int strncmp(const char *, const char *, int);
 
 int func_003E9378_impl(char *self, int limit, unsigned int mask, unsigned int val, char *name, int def) __asm__("func_003E9378");
 /**
@@ -12140,7 +12140,7 @@ int func_003E9378_impl(char *self, int limit, unsigned int mask, unsigned int va
         struct N_9378 *n = func_003EE560_9378(*(int *)(self + 0x314), i);
         int fullness;
         if ((n->f8 & mask) != val) continue;
-        if (func_00416B18(n->name, name, strlen(name)) != 0) continue;
+        if (strncmp(n->name, name, strlen(name)) != 0) continue;
         fullness = n->f10 * 100 / n->fC;
         if (fullness < limit) {
             if (best < fullness) {
@@ -12331,7 +12331,7 @@ extern int TagSetAddress_95C8(char *, int, char *, int) __asm__("cDirtysock_tag_
 extern int TagSetBinary_95C8(char *, int, char *, void *, int) __asm__("cDirtysock_tag_TagFieldSetBinary");
 extern void *func_002591E8_95C8(int) __asm__("func_002591E8");
 extern void func_00259210_95C8(void *) __asm__("func_00259210");
-extern void *func_00416210_95C8(void *, int, int) __asm__("func_00416210");
+extern void *memset_95C8(void *, int, int) __asm__("memset");
 extern int sprintf_95C8(char *, char *, ...) __asm__("sprintf");
 extern char *strcpy(char *, const char *);
 extern void func_003E76A8_95C8(void *, char *, ...) __asm__("func_003E76A8");
@@ -12565,7 +12565,7 @@ void func_003E95C8(struct Lob_95C8 *self)
                 self->f18 = now;
             }
             if (kind == 0x2B736573) {
-                func_00416210_95C8(&self->sess, 0, sizeof(self->sess));
+                memset_95C8(&self->sess, 0, sizeof(self->sess));
                 TagGetString_95C8(TagFind_95C8(data, D_004A4880_95C8), self->sess.name, 0x20, D_004A4888_95C8);
                 TagGetString_95C8(TagFind_95C8(data, D_004A4950_95C8), self->sess.self, 0x20, D_004A4888_95C8);
                 TagGetString_95C8(TagFind_95C8(data, D_004A4958_95C8), self->sess.host, 0x20, D_004A4888_95C8);
@@ -12631,7 +12631,7 @@ void func_003E95C8(struct Lob_95C8 *self)
                 if (id >= 0) {
                     if (TagFind_95C8(data, D_004A49B0_95C8) != 0) {
                         struct Room_95C8 *roomRecord = func_002591E8_95C8(sizeof(struct Room_95C8));
-                        func_00416210_95C8(roomRecord, 0, sizeof(struct Room_95C8));
+                        memset_95C8(roomRecord, 0, sizeof(struct Room_95C8));
                         roomRecord->id = id;
                         TagGetString_95C8(TagFind_95C8(data, D_004A49B0_95C8), roomRecord->name, 0x20, D_004A4888_95C8);
                         TagGetString_95C8(TagFind_95C8(data, D_004A49E0_95C8), roomRecord->host, 0x20, D_004A4888_95C8);
@@ -12707,7 +12707,7 @@ void func_003E95C8(struct Lob_95C8 *self)
                 if (id >= 0) {
                     if (TagFind_95C8(data, D_004A49B0_95C8) != 0) {
                         struct User_95C8 *userRecord = func_002591E8_95C8(sizeof(struct User_95C8));
-                        func_00416210_95C8(userRecord, 0, sizeof(struct User_95C8));
+                        memset_95C8(userRecord, 0, sizeof(struct User_95C8));
                         userRecord->id = id;
                         TagGetString_95C8(TagFind_95C8(data, D_004A49B0_95C8), userRecord->name, 0x20, D_004A4888_95C8);
                         userRecord->addr = TagGetAddr_95C8(TagFind_95C8(data, D_004A49E8_95C8), 0);

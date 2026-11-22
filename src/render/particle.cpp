@@ -3088,7 +3088,7 @@ extern "C" void cPlayerShadow__cPlayerShadow(cPlayerShadow* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00375990);
+INCLUDE_ASM("render/particle", cPlayerShadow_LockShadowTexture);
 #ifdef SKIP_ASM
 extern char* cGraphicsMan_TheGraphicsMan_particle __asm__("cGraphicsMan_TheGraphicsMan");
 
@@ -3106,7 +3106,7 @@ struct sPtVEntry_5990 {
  * AddLockedFrameTexture(width, height, texeltype)) for a texture of the size at +0x174 and +0x178 (mShadowTexWidth,
  * mShadowTexHeight) in texel format 2 and stores the id. cRider_loadRider calls it.
  */
-extern "C" void func_00375990(void* self)
+extern "C" void cPlayerShadow_LockShadowTexture(void* self)
 {
     cPlayerShadow* shadow = (cPlayerShadow*)self;
     if (shadow->mLockTexture < 0) {
@@ -3170,9 +3170,9 @@ extern "C" void* cGraphicsMan_construct(void)
 /**
  * Initialises the PS2 renderer: kick thread and semaphores, interrupt handlers, texture and defer managers.
  *
- * Hand-checked from the asm only (no C body yet): it calls a run of setup functions (func_003FDF88, func_003912A8,
+ * Hand-checked from the asm only (no C body yet): it calls a run of setup functions (sceDmaGetChan, func_003912A8,
  * func_00391360, ...), allocates two objects with operator_new, creates two semaphores and the kick thread (CreateSema,
- * CreateThread, StartThread), calls DisableIntc, func_00423A90, EnableIntc, DisableDmac, func_00423AC0 and
+ * CreateThread, StartThread), calls DisableIntc, AddIntcHandler2, EnableIntc, DisableDmac, AddDmacHandler2 and
  * EnableDmac (the interrupt-handler setup that Purge undoes), then allocates the texture manager (cMemMan_alloc +
  * func_00366FE8) and the defer manager and sets up the default render state. cPS2GraphicsMan_Purge undoes these steps.
  */
@@ -6454,7 +6454,7 @@ void* func_00367340(void* self, int a1, int a2);
 extern "C" int func_003673D8(int gs, int size);
 extern "C" void func_00382AF0(cPS2GraphicsMan* self, int arg1, int arg2);
 extern "C" void func_003E6690(int a);
-extern "C" void func_003FD910(int a, int b, int c, int d);
+extern "C" void sceGsResetGraph(int a, int b, int c, int d);
 
 
 /**
@@ -6475,7 +6475,7 @@ extern "C" void func_003FD910(int a, int b, int c, int d);
  * second heap (func_00367340): from the draw buffer over a1 * a2 + 2 * w * h words when both colour formats are
  * PSMCT24, from the display buffer over a1 * a2 + w * h when only the display format is, else from the z buffer over w
  * * h. Finally it flushes the data cache, waits for the next vertical sync on GS CSR (0x12001000), calls
- * func_003FD910(@p resetMode, @p interlaceMode, @p flag ? 80 : 2, @p fieldMode) and func_003E6690(@p flag ? 3 : 1), and sets the display
+ * sceGsResetGraph(@p resetMode, @p interlaceMode, @p flag ? 80 : 2, @p fieldMode) and func_003E6690(@p flag ? 3 : 1), and sets the display
  * registers with func_00382AF0(self, 0, 1). cPS2GraphicsMan_SetDisplayMode1 calls it.
  *
  * @param displayWidth  display width in pixels
@@ -6485,9 +6485,9 @@ extern "C" void func_003FD910(int a, int b, int c, int d);
  * @param psm  GS pixel format of the display buffer
  * @param psm2  GS pixel format of the draw buffer
  * @param zpsm  GS z format of the z buffer
- * @param resetMode  first argument of the GS reset call func_003FD910
- * @param interlaceMode  interlace setting (unk_5A44), passed on to func_003FD910
- * @param fieldMode  field/frame setting (unk_5A46), passed on to func_003FD910
+ * @param resetMode  first argument of the GS reset call sceGsResetGraph
+ * @param interlaceMode  interlace setting (unk_5A44), passed on to sceGsResetGraph
+ * @param fieldMode  field/frame setting (unk_5A46), passed on to sceGsResetGraph
  * @param flag  nonzero for output mode 80 (0x50) instead of 2 and func_003E6690(3) instead of 1; kept in unk_5A4C
  * @return 1 when the mode was set, 0 when the draw and z formats do not go together
  */
@@ -6595,7 +6595,7 @@ extern "C" int func_0037BD98(cPS2GraphicsMan* self, unsigned int displayWidth, u
     }
     *(volatile long*)0x12001000;
 
-    func_003FD910(resetMode, self->unk_5A44, flag ? 80 : self->unk_5A48, self->unk_5A46);
+    sceGsResetGraph(resetMode, self->unk_5A44, flag ? 80 : self->unk_5A48, self->unk_5A46);
     func_003E6690(flag ? 3 : 1);
     func_00382AF0(self, 0, 1);
     return 1;
@@ -6790,17 +6790,17 @@ extern "C" float func_0037C770(cPS2GraphicsMan* self)
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_InitTextures);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int c, int n);
-void func_00366FE0(void* p, int a1);
+void cTextureMan_SetTextureMemType(void* p, int a1);
 
 /**
- * Clears the texture table (0x1F40 bytes at +0x3838) and sets the texture manager's memory type (func_00366FE0).
+ * Clears the texture table (0x1F40 bytes at +0x3838) and sets the texture manager's memory type (cTextureMan_SetTextureMemType).
  *
  * @param memtype  the memory type for textures (On Tour memtype)
  */
 extern "C" void cPS2GraphicsMan_InitTextures(cPS2GraphicsMan* self, int memtype)
 {
     MEM_fill(&self->unk_3838[0], 0, 8000);
-    func_00366FE0(self->mpTextureMan, memtype);
+    cTextureMan_SetTextureMemType(self->mpTextureMan, memtype);
 }
 #endif
 
@@ -6850,20 +6850,20 @@ extern "C" void cPS2GraphicsMan_PlatformPurgeTextures(cPS2GraphicsMan* self)
 
 // declared by mangled name so we can call it with a single argument, the way
 // the target does (its real signature takes a second arg the caller leaves set)
-extern "C" void func_00366FE0__FPvi(void*);
+extern "C" void cTextureMan_SetTextureMemType__FPvi(void*);
 
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetTextureMemType);
 #ifdef SKIP_ASM
 /**
- * Passes a memory type to the texture manager (func_00366FE0).
+ * Passes a memory type to the texture manager (cTextureMan_SetTextureMemType).
  *
  * Declared with only the this pointer: On Tour's SetTextureMemType(int memtype) passes the type, which stays in $a1
- * and reaches func_00366FE0.
+ * and reaches cTextureMan_SetTextureMemType.
  */
 extern "C" void cPS2GraphicsMan_SetTextureMemType(cPS2GraphicsMan* self)
 {
-    func_00366FE0__FPvi(self->mpTextureMan);
+    cTextureMan_SetTextureMemType__FPvi(self->mpTextureMan);
 }
 #endif
 
@@ -6999,11 +6999,11 @@ extern "C" int cPS2GraphicsMan_AddTexture(cPS2GraphicsMan* self, sTexHdr_C8C0* s
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_AddTexture1);
 #ifdef SKIP_ASM
-extern "C" int func_00367440(void* mgr, int a1, int a2, int a3, int a4, int a5, int a6, int a7,
+extern "C" int cTextureMan_AddTexture(void* mgr, int a1, int a2, int a3, int a4, int a5, int a6, int a7,
                              int a8, int a9, int a10, int a11);
 
 /**
- * Creates a texture in the texture manager (func_00367440 on mpTextureMan) and marks its id in unk_3838.
+ * Creates a texture in the texture manager (cTextureMan_AddTexture on mpTextureMan) and marks its id in unk_3838.
  *
  * All eleven arguments go through unchanged; unk_3838[id] is set to 1. Slot 47 of cPS2GraphicsMan_vtbl;
  * cPS2GraphicsMan_AddTexture calls it through the vtable.
@@ -7024,7 +7024,7 @@ extern "C" int func_00367440(void* mgr, int a1, int a2, int a3, int a4, int a5, 
 extern "C" int cPS2GraphicsMan_AddTexture1(cPS2GraphicsMan* self, int pixels, int name, int width, int height, int mipmapCount, int texelFormat, int clutFormat,
                               int clutData, int lockType, int copyMem, int bindId)
 {
-    int i = func_00367440(self->mpTextureMan, pixels, name, width, height, mipmapCount, texelFormat, clutFormat, clutData, lockType, copyMem, bindId);
+    int i = cTextureMan_AddTexture(self->mpTextureMan, pixels, name, width, height, mipmapCount, texelFormat, clutFormat, clutData, lockType, copyMem, bindId);
     self->unk_3838[i] = 1;
     return i;
 }
@@ -7033,16 +7033,16 @@ extern "C" int cPS2GraphicsMan_AddTexture1(cPS2GraphicsMan* self, int pixels, in
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_RemoveTexture);
 #ifdef SKIP_ASM
-extern "C" void func_00367BC0(void* tbl, int idx);
+extern "C" void cTextureMan_RemoveTexture(void* tbl, int idx);
 
 /**
- * Removes texture @p idx from the texture manager (func_00367BC0) and clears its slot at +0x18F8.
+ * Removes texture @p idx from the texture manager (cTextureMan_RemoveTexture) and clears its slot at +0x18F8.
  *
  * @param idx  the texture id (On Tour texid)
  */
 extern "C" void cPS2GraphicsMan_RemoveTexture(cPS2GraphicsMan* self, int idx)
 {
-    func_00367BC0(self->mpTextureMan, idx);
+    cTextureMan_RemoveTexture(self->mpTextureMan, idx);
     self->unk_18F8[idx] = 0;
 }
 #endif
@@ -7320,7 +7320,7 @@ INCLUDE_ASM("render/particle", func_0037D090__FPv);
  *
  * The definition declares only self; the caller's texture id and four filter values pass through untouched in the
  * argument registers. cPS2GraphicsMan_AddTexture calls it with MMIN 5, MMAG 1, L 0 and a K it computes; the tile
- * constructor in mem/memstd (func_00254410) calls it with zeros.
+ * constructor in mem/memstd (SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD) calls it with zeros.
  *
  * @return nothing meaningful (func_00369130 returns nothing; the definition is declared void*)
  */
@@ -7455,12 +7455,12 @@ extern "C" void cPS2GraphicsMan_SetNewTextureData(cPS2GraphicsMan* selfp, int te
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetNewTextureData1);
 #ifdef SKIP_ASM
-extern "C" void func_00367D20(void* gm, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9);
+extern "C" void cTextureMan_SetNewTextureData(void* gm, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9);
 
 /**
- * Replaces a texture's pixels and CLUT from raw data: forwards all arguments to func_00367D20 on mpTextureMan.
+ * Replaces a texture's pixels and CLUT from raw data: forwards all arguments to cTextureMan_SetNewTextureData on mpTextureMan.
  *
- * func_00367D20 copies @p pixels and @p clutData into the texture's own buffers when @p copyData is set and drops its VRAM copy so
+ * cTextureMan_SetNewTextureData copies @p pixels and @p clutData into the texture's own buffers when @p copyData is set and drops its VRAM copy so
  * it is uploaded again; the size and format arguments are not used there.
  *
  * @param texId  the texture id
@@ -7475,7 +7475,7 @@ extern "C" void func_00367D20(void* gm, int a1, int a2, int a3, int a4, int a5, 
  */
 extern "C" void cPS2GraphicsMan_SetNewTextureData1(cPS2GraphicsMan* self, int texId, int pixels, int width, int height, int mipCount, int texelFormat, int clutFormat, int clutData, int copyData)
 {
-    func_00367D20(self->mpTextureMan, texId, pixels, width, height, mipCount, texelFormat, clutFormat, clutData, copyData);
+    cTextureMan_SetNewTextureData(self->mpTextureMan, texId, pixels, width, height, mipCount, texelFormat, clutFormat, clutData, copyData);
 }
 #endif
 
@@ -7494,12 +7494,12 @@ struct sPtEnt_D348 {
 
 
 
-extern "C" void func_00367DB8_D348(void* texset, int idx, unsigned int* buf) __asm__("func_00367DB8");
+extern "C" void cTextureMan_LockFrameToTexture_D348(void* texset, int idx, unsigned int* buf) __asm__("cTextureMan_LockFrameToTexture");
 
 /**
  * Redirects drawing into a locked texture.
  *
- * Builds a GS packet with func_00367DB8 that sets FRAME, the scissor and XYOFFSET for texture @p idx, and queues it on
+ * Builds a GS packet with cTextureMan_LockFrameToTexture that sets FRAME, the scissor and XYOFFSET for texture @p idx, and queues it on
  * the render ring.
  *
  * @param idx  the texture id from cPS2GraphicsMan_AddLockedFrameTexture()
@@ -7511,7 +7511,7 @@ extern "C" int cPS2GraphicsMan_LockFrameToTexture(cPS2GraphicsMan* self, int idx
 {
     unsigned int buf = self->mVifCursor;
     unsigned int packetAddr = buf | 0x30000000;
-    func_00367DB8_D348(((void*)self->mpTextureMan), idx, &packetAddr);
+    cTextureMan_LockFrameToTexture_D348(((void*)self->mpTextureMan), idx, &packetAddr);
     unsigned int next = packetAddr & 0x0FFFFFFF;
     self->mVifCursor = next;
     cPS2DeferManager* ring = (self->mpDeferMan);
@@ -7594,7 +7594,7 @@ extern "C" int cPS2GraphicsMan_RestoreFrameLock(cPS2GraphicsMan* self)
 }
 #endif
 
-extern "C" void* func_00367CD0(int);
+extern "C" void* cTextureMan_AddLockedFrameTexture(int);
 
 //100%
 INCLUDE_ASM("render/particle", func_0037D668);
@@ -7658,8 +7658,8 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_AddLockedFrameTexture__FPv);
 /**
  * Creates a texture the frame can later be rendered into.
  *
- * Calls func_00367CD0 on the texture manager (mpTextureMan, +0x18F4), which allocates the "LockTex" texture. The C
- * declaration has only self: the width, height and texel format arrive in a1-a3 and pass through to func_00367CD0
+ * Calls cTextureMan_AddLockedFrameTexture on the texture manager (mpTextureMan, +0x18F4), which allocates the "LockTex" texture. The C
+ * declaration has only self: the width, height and texel format arrive in a1-a3 and pass through to cTextureMan_AddLockedFrameTexture
  * unchanged.
  *
  * @return the new texture id
@@ -7667,7 +7667,7 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_AddLockedFrameTexture__FPv);
 void* cPS2GraphicsMan_AddLockedFrameTexture(void* vself)
 {
     cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    return func_00367CD0((int)self->mpTextureMan);
+    return cTextureMan_AddLockedFrameTexture((int)self->mpTextureMan);
 }
 #endif
 
@@ -7742,7 +7742,7 @@ struct sPtEnt_D800 {
 
 
 
-extern "C" void func_00367F18_D800(void* texset, int idx, float* color, unsigned int* buf) __asm__("func_00367F18");
+extern "C" void cTextureMan_ShadowClearLockTexture_D800(void* texset, int idx, float* color, unsigned int* buf) __asm__("cTextureMan_ShadowClearLockTexture");
 
 // Release-build assert: expands to an empty do { } while (0); its loop notes keep the target's scheduling.
 #define ASSERT_D800(cond) do { } while (0)
@@ -7750,7 +7750,7 @@ extern "C" void func_00367F18_D800(void* texset, int idx, float* color, unsigned
 /**
  * Clears a locked shadow texture to a colour.
  *
- * Builds a packet with func_00367F18 that draws a full-size sprite of @p color over texture @p idx, and queues it on
+ * Builds a packet with cTextureMan_ShadowClearLockTexture that draws a full-size sprite of @p color over texture @p idx, and queues it on
  * the render ring.
  *
  * @param idx  the texture id
@@ -7762,7 +7762,7 @@ extern "C" void cPS2GraphicsMan_ShadowClearLockTexture(cPS2GraphicsMan* self, in
 {
     unsigned int buf = self->mVifCursor;
     unsigned int packetAddr = buf | 0x30000000;
-    func_00367F18_D800(((void*)self->mpTextureMan), idx, color, &packetAddr);
+    cTextureMan_ShadowClearLockTexture_D800(((void*)self->mpTextureMan), idx, color, &packetAddr);
     unsigned int next = packetAddr & 0x0FFFFFFF;
     self->mVifCursor = next;
     cPS2DeferManager* ring = (self->mpDeferMan);
@@ -11894,7 +11894,7 @@ void cPS2GraphicsMan_SetLensFXCallBack(void* vself, int callback, int callbackAr
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_ResolveCharModel);
 #ifdef SKIP_ASM
 extern "C" int cGraphicsMan_GetTextureID(void* self, const char* name);
-extern "C" int func_00416B18(const char* a, const char* b, int n);
+extern "C" int strncmp(const char* a, const char* b, int n);
 extern "C" void cGraphicsMan_AddBlendedMatrix(void* gfx, void* m);
 extern "C" int areBlendedMatricesEqual(void* m, void* slot, int a, int b, int c);
 extern char str_alph[];
@@ -11996,7 +11996,7 @@ extern "C" void cPS2GraphicsMan_ResolveCharModel(cPS2GraphicsMan* gfx, sMdl_66F0
             bones[i].alpha = (int)(*(float*)(nameRecord + 0x14) * 128.0f);
         else
             bones[i].alpha = 0;
-        if (func_00416B18(nameRecord, str_alph, 4) == 0 || (nameRecord[0] == 'e' && nameRecord[1] == 'a'))
+        if (strncmp(nameRecord, str_alph, 4) == 0 || (nameRecord[0] == 'e' && nameRecord[1] == 'a'))
             bones[i].flags |= 0x8000;
         int env = 0;
         if (secondName[0] != 0) {
@@ -14273,12 +14273,12 @@ extern "C" sParticleEntryA0* cIrradianceDataBase_Get1(cIrradianceDataBase* self,
 //100%
 INCLUDE_ASM("render/particle", cIrradianceDataBase_GetIDByName);
 #ifdef SKIP_ASM
-extern "C" int func_004165A8(const void* a, const void* b);
+extern "C" int strcmp(const void* a, const void* b);
 
 /**
  * Looks up an irradiance entry by name.
  *
- * Compares @p name with func_004165A8 (strcmp) against each 8-byte name entry of the table at +0xC, for the count at
+ * Compares @p name with strcmp (strcmp) against each 8-byte name entry of the table at +0xC, for the count at
  * +0x4. Returns 0 (the first entry) when nothing matches, as On Tour does. cSectionMan_setSky uses it for the sky
  * irradiance sets ("APBR1".."EPBR1").
  *
@@ -14289,7 +14289,7 @@ extern "C" int cIrradianceDataBase_GetIDByName(cIrradianceDataBase* self, const 
 {
     int i;
     for (i = 0; i < self->mNumItem; i++) {
-        if (func_004165A8(name, self->mIrradianceNames + (i << 3)) == 0) {
+        if (strcmp(name, self->mIrradianceNames + (i << 3)) == 0) {
             return i;
         }
     }

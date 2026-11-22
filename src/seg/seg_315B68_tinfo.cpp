@@ -39,11 +39,11 @@ int type_info__type_info(int *typeInfo, int flag) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00414B98);
 #ifdef SKIP_ASM
-extern int func_004165A8(int, int);
+extern int strcmp(int, int);
 /**
  * Returns whether two type_info objects describe the same type.
  *
- * True when they are the same object or their names compare equal with func_004165A8 (strcmp), so types match across
+ * True when they are the same object or their names compare equal with strcmp (strcmp), so types match across
  * separately emitted copies.
  *
  * @param lhs  first type_info
@@ -52,7 +52,7 @@ extern int func_004165A8(int, int);
  */
 int func_00414B98(int *lhs, int *rhs) {
     int equal = 0;
-    if (rhs == lhs || func_004165A8(*lhs, *rhs) == 0)
+    if (rhs == lhs || strcmp(*lhs, *rhs) == 0)
         equal = 1;
     return equal;
 }
@@ -637,7 +637,7 @@ int *func_004151F8(void) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", type_info_before);
 #ifdef SKIP_ASM
-extern int func_004165A8(int, int);
+extern int strcmp(int, int);
 /**
  * Returns whether one type_info sorts before another (by strcmp of their names).
  *
@@ -646,7 +646,7 @@ extern int func_004165A8(int, int);
  * @return 1 when lhs's name compares less than rhs's, else 0
  */
 int type_info_before(int *lhs, int *rhs) {
-    return (unsigned)func_004165A8(*lhs, *rhs) >> 31;
+    return (unsigned)strcmp(*lhs, *rhs) >> 31;
 }
 #endif
 

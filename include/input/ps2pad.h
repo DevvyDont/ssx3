@@ -56,9 +56,9 @@ struct cPS2PadDevice {
     void** mVtbl;                   // 0x000 [R] ctor / dtor cPS2PadDevice_vtbl, then the dtor stores cPadDevice_vtbl
     // --- cPS2PadDevice
     int mPort;                      // 0x004 [R] ctor's port argument; [U] first argument of every libpad call (open
-                                    //       func_003FF708, state func_003FFBC0, read func_003FFA58, close func_003FF8F0 ...)
+                                    //       func_003FF708, state scePadGetState, read scePadRead, close scePadPortClose ...)
     int mSlot;                      // 0x008 [R] ctor's slot argument (0); [U] second argument of the libpad calls
-    char unk_00C[0x24];             // 0x00C [R] the ctor zeroes 36 bytes (func_00416210(this + 0xC, 0, 36)); never read
+    char unk_00C[0x24];             // 0x00C [R] the ctor zeroes 36 bytes (memset(this + 0xC, 0, 36)); never read
                                     //       or written otherwise
     int mActSmall;                  // 0x030 [U] setActuator(1, level): level != 0; sampleButtons sends it as the small
                                     //       motor's byte (actDirect[0], an lbu of the low byte) when it changed; open = 0
@@ -67,7 +67,7 @@ struct cPS2PadDevice {
                                     //       sent as actDirect[1] (lbu of the low byte); open = 0
     int mLastBig;                   // 0x03C [U] sampleButtons: the last value sent (open = -1)
     unsigned char mActDirect[8];    // 0x040 [U] sampleButtons stores [0] / [1] (sb) and passes &mActDirect to
-                                    //       func_00400190 (libpad's actuator-direct call: a 6-byte table; 8 with the
+                                    //       scePadSetActDirect (libpad's actuator-direct call: a 6-byte table; 8 with the
                                     //       padding to 0x48)
     int mPhase;                     // 0x048 [R] ctor 0 (open the port on the next sample); [U] sampleButtons' setup state
                                     //       0..10 (10 = reading)

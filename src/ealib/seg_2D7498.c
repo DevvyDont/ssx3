@@ -4321,7 +4321,7 @@ void LOCALE_setstate(void *table, int which, unsigned int value) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2D7498", func_003DBAC8);
+INCLUDE_ASM("ealib/seg_2D7498", compare);
 #ifdef SKIP_ASM
 /**
  * Compares a string id with a locale index entry's little-endian id halfword (the binary search's comparator in
@@ -4331,7 +4331,7 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DBAC8);
  * @param entry  the index entry
  * @return the difference, negative when @p key sorts first
  */
-int func_003DBAC8(unsigned short *key, void *entry) {
+int compare(unsigned short *key, void *entry) {
     return *key - (((*(unsigned char *)((char*)(entry) + (1))) << 8) | (*(unsigned char *)((char*)(entry) + (0))));
 }
 #endif

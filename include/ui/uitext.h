@@ -42,7 +42,7 @@ struct cUIText {
     unsigned short* mpEvents;        // 0x03C [O] cUIThing
     cUIThing* mpParent;              // 0x040 [P] cUIThing::getParent
     t3Vector mPosition;              // 0x044 [P] cUIThing::getPosition; [U] cUIText_render2D draws at mPosition + (x, y)
-    t3Vector mScale;                 // 0x050 [P] cUIThing::getScale; [U] font scale in cUIText_render2D, func_003A1030
+    t3Vector mScale;                 // 0x050 [P] cUIThing::getScale; [U] font scale in cUIText_render2D, cUIText_getTextExtent
     cUIScreen* mpScreen;             // 0x05C [P] cUIThing::getScreen; [U] cUIText_getFont: mpScreen->mpState->mpEngine's fonts
     t3Vector mSize;                  // 0x060 [P] cUIThing::getSize; [U] cUIText_setUnicodeStringWrap wraps at mSize.x
     int mSound[2];                   // 0x06C [O] cUIThing
@@ -58,7 +58,7 @@ struct cUIText {
     tARGB mDisabledColour;           // 0x098 [O]; [R] = gStaticColour; [U] cUIText_render2D: the colour when the thing is not enabled
                                      //       and bit 5 is set
     int mNumLines;                   // 0x0A8 [O]; [R] = 0; [U] line count from cUIText_getNumTextLines (cUIText_setUnicodeStringPrivate);
-                                     //       cUIText_render2D loops over it; func_003A10F0 returns it
+                                     //       cUIText_render2D loops over it; cUIText_getNumLinesOfString returns it
     unsigned short** mpLineOffset;   // 0x0AC [O]; [R] = 0; [U] line start pointers (cUIText_setUnicodeStringPrivate), freed by cUIText_deleteText
     int mStringID;                   // 0x0B0 [O]; [R] = 0; [U] cUIText_setUnicodeStringByID stores the id, cUIText_updateLocale looks it
                                      //       up, setAsciiString/setUnicodeString clear it; getStringID (On Tour order) = retail cUIText_getStringID

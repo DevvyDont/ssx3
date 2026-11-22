@@ -188,7 +188,7 @@ extern "C" void *cOVTemplate_Simple_cOVTemplate_Simple(cOVState* ovState, int en
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021C798);
+INCLUDE_ASM("fe/all_in_one_fe", cOVTemplate_Dialog__cOVTemplate_Dialog);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
@@ -204,7 +204,7 @@ extern char cOVState_vtbl[];
  *
  * @param ovState  the object being destroyed
  */
-extern "C" void func_0021C798(cOVTemplate_Dialog* ovState) {
+extern "C" void cOVTemplate_Dialog__cOVTemplate_Dialog(cOVTemplate_Dialog* ovState) {
     ovState->mVtbl = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
@@ -344,7 +344,7 @@ extern "C" void *cOVState_REPLAY_cOVState_REPLAY(cOVState_REPLAY* ovState, int e
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021C900);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_RESTART__cOVState_RESTART);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
@@ -359,7 +359,7 @@ extern char cOVState_vtbl[];
  *
  * @param ovState  the object being destroyed
  */
-extern "C" void func_0021C900(cOVTemplate_Dialog* ovState) {
+extern "C" void cOVState_RESTART__cOVState_RESTART(cOVTemplate_Dialog* ovState) {
     ovState->mVtbl = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
@@ -388,7 +388,7 @@ extern "C" void cOVState_QUIT__cOVState_QUIT(cOVTemplate_Dialog* ovState) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021C950);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_QUIT_cOVState_QUIT);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_C950(void*) __asm__("cUIState_cUIState");
@@ -412,7 +412,7 @@ extern unsigned short str_sp_b[];
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *func_0021C950(cOVTemplate_Dialog* ovState, int engine, int overlayId) {
+extern "C" void *cOVState_QUIT_cOVState_QUIT(cOVTemplate_Dialog* ovState, int engine, int overlayId) {
     cUIState_cUIState_C950(ovState);
     (ovState->mOVID) = overlayId;
     (ovState->mDoneTransition) = 0;
@@ -428,7 +428,7 @@ extern "C" void *func_0021C950(cOVTemplate_Dialog* ovState, int engine, int over
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021C9C0);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_RESTARTCHALLENGE__cOVState_RESTARTCHALLENGE);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
@@ -443,14 +443,14 @@ extern char cOVState_vtbl[];
  *
  * @param ovState  the object being destroyed
  */
-extern "C" void func_0021C9C0(cOVTemplate_Dialog* ovState) {
+extern "C" void cOVState_RESTARTCHALLENGE__cOVState_RESTARTCHALLENGE(cOVTemplate_Dialog* ovState) {
     ovState->mVtbl = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021C9E8);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_QUITCHALLENGE__cOVState_QUITCHALLENGE);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
@@ -465,14 +465,14 @@ extern char cOVState_vtbl[];
  *
  * @param ovState  the object being destroyed
  */
-extern "C" void func_0021C9E8(cOVTemplate_Dialog* ovState) {
+extern "C" void cOVState_QUITCHALLENGE__cOVState_QUITCHALLENGE(cOVTemplate_Dialog* ovState) {
     ovState->mVtbl = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021CA10);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_QUITCOMPETITION__cOVState_QUITCOMPETITION);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
@@ -487,14 +487,14 @@ extern char cOVState_vtbl[];
  *
  * @param ovState  the object being destroyed
  */
-extern "C" void func_0021CA10(cOVTemplate_Dialog* ovState) {
+extern "C" void cOVState_QUITCOMPETITION__cOVState_QUITCOMPETITION(cOVTemplate_Dialog* ovState) {
     ovState->mVtbl = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021CA38);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_GIVEUP__cOVState_GIVEUP);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
@@ -509,14 +509,14 @@ extern char cOVState_vtbl[];
  *
  * @param ovState  the object being destroyed
  */
-extern "C" void func_0021CA38(cOVTemplate_Dialog* ovState) {
+extern "C" void cOVState_GIVEUP__cOVState_GIVEUP(cOVTemplate_Dialog* ovState) {
     ovState->mVtbl = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021CA60);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_SAVEPROMPT__cOVState_SAVEPROMPT);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
@@ -531,7 +531,7 @@ extern char cOVState_vtbl[];
  *
  * @param ovState  the object being destroyed
  */
-extern "C" void func_0021CA60(cOVTemplate_Dialog* ovState) {
+extern "C" void cOVState_SAVEPROMPT__cOVState_SAVEPROMPT(cOVTemplate_Dialog* ovState) {
     ovState->mVtbl = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
@@ -675,7 +675,7 @@ extern "C" void func_0021CB70(int *block) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021CB90);
+INCLUDE_ASM("fe/all_in_one_fe", cHUDRadar_ShowRadar);
 #ifdef SKIP_ASM
 extern int D_004A275C;
 
@@ -687,22 +687,22 @@ extern int D_004A275C;
  *
  * @param newValue  the new value
  */
-extern "C" void func_0021CB90(int newValue) {
+extern "C" void cHUDRadar_ShowRadar(int newValue) {
     D_004A275C = newValue;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021CB98);
+INCLUDE_ASM("fe/all_in_one_fe", cHUDRadar_IsRadarShown);
 #ifdef SKIP_ASM
 extern int D_004A275C;
 
 /**
- * Returns the global flag D_004A275C (see func_0021CB90). No callers.
+ * Returns the global flag D_004A275C (see cHUDRadar_ShowRadar). No callers.
  *
  * @return the current value of D_004A275C
  */
-extern "C" int func_0021CB98(void) {
+extern "C" int cHUDRadar_IsRadarShown(void) {
     return D_004A275C;
 }
 #endif
@@ -1191,7 +1191,7 @@ extern "C" void *func_0021D070(cOVStateHiScoreList* ovState) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021D0D0);
+INCLUDE_ASM("fe/all_in_one_fe", cOVStateHiScoreList_cOVStateHiScoreList);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_D0D0(void*) __asm__("cUIState_cUIState");
@@ -1212,7 +1212,7 @@ extern unsigned short str_sp_b[];
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *func_0021D0D0(cOVStateHiScoreList* ovState, int engine, int overlayId) {
+extern "C" void *cOVStateHiScoreList_cOVStateHiScoreList(cOVStateHiScoreList* ovState, int engine, int overlayId) {
     cUIState_cUIState_D0D0(ovState);
     (ovState->mOVID) = overlayId;
     (ovState->mDoneTransition) = 0;
@@ -1275,7 +1275,7 @@ extern "C" void func_0021D160(float x, float y, int font, int fmt, ...) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021D1A0);
+INCLUDE_ASM("fe/all_in_one_fe", cOVStateHUD1P_renderBoostPart);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -1405,7 +1405,7 @@ extern "C" void cOVStateHUD1P_calcElemPos(void*, void*, void*, void*, void*, int
  * @param x  reflect flags for cOVStateHUD1P_calcElemPos (bit 0 mirrors x about 640)
  * @param rect  optional output: x, y, width and height of the drawn (filled) area
  */
-extern "C" void func_0021D1A0(float fill, float sx, float sy, char* self, char* elems, signed char sel, int idx,
+extern "C" void cOVStateHUD1P_renderBoostPart(float fill, float sx, float sy, char* self, char* elems, signed char sel, int idx,
                               sGaugeBar* bar, float* col, int x, float* rect)
 {
     t2Vector a;
@@ -1846,8 +1846,8 @@ void tHUDDef_getColour(void*, void*);
 extern "C" void cOVStateHUD1P_renderBitmap(void*, int, void*, void*, void*, void*);
 
 extern char D_00477F30[];
-extern "C" void func_0021E7E0_E1B0(char* self, sColour* colp, t2Vector* pos, t2Vector* size,
-                                   float t, float sx, float sy, float amin, float amax) __asm__("func_0021E7E0");
+extern "C" void cOVStateHUD1P_renderGlow_E1B0(char* self, sColour* colp, t2Vector* pos, t2Vector* size,
+                                   float t, float sx, float sy, float amin, float amax) __asm__("cOVStateHUD1P_renderGlow");
 
 /**
  * Draws a rider's race place: the place digit with its ordinal suffix and, under the suffix, a slash and the number of
@@ -1864,7 +1864,7 @@ extern "C" void func_0021E7E0_E1B0(char* self, sColour* colp, t2Vector* pos, t2V
  *
  * Animation from the panel: while its f48 (+0x48; On Tour rankAnimFrame) is >= 0, first place scales the digit and
  * suffix by 1 + 0.2 * sin(4 pi f48) * (1 - f48^2) (sine table cSinCosTable_gSinCosTable) and the other places multiply the colour's
- * alpha by 0.5 + f48 / 2. While f4C (+0x4C; On Tour rankGlowFrame) is >= 0, func_0021E7E0 draws the glow over the digit
+ * alpha by 0.5 + f48 / 2. While f4C (+0x4C; On Tour rankGlowFrame) is >= 0, cOVStateHUD1P_renderGlow draws the glow over the digit
  * and over the suffix, one layer below, with phase f4C, grown 1.81 times and alpha 0.5 to 1.
  *
  * @param obj  the HUD element table (0x24-byte tHUDDef records)
@@ -1953,10 +1953,10 @@ extern "C" void cOVStateHUD1P_renderRank(cOVStateHUD1P* self, char* obj, int* ri
         *w = (*w & ~0x3E0) | (((obj[0x382] - 1) << 5) & 0x3E0);
         pa = drawPos;
         sa = size2;
-        func_0021E7E0_E1B0(((char*)self), &col, &pa, &sa, ((float*)rider)[0x13], 1.8101750612258911f, 1.8101750612258911f, 0.5f, 1.0f);
+        cOVStateHUD1P_renderGlow_E1B0(((char*)self), &col, &pa, &sa, ((float*)rider)[0x13], 1.8101750612258911f, 1.8101750612258911f, 0.5f, 1.0f);
         pa = suffixPos;
         sb = size1;
-        func_0021E7E0_E1B0(((char*)self), &col, &pa, &sb, ((float*)rider)[0x13], 1.8101750612258911f, 1.8101750612258911f, 0.5f, 1.0f);
+        cOVStateHUD1P_renderGlow_E1B0(((char*)self), &col, &pa, &sb, ((float*)rider)[0x13], 1.8101750612258911f, 1.8101750612258911f, 0.5f, 1.0f);
     }
 }
 #endif
@@ -2023,12 +2023,12 @@ extern "C" float cOVStateHUD1P_calcElemPosY(int hudState, int mode, float pos, f
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021E7E0);
+INCLUDE_ASM("fe/all_in_one_fe", cOVStateHUD1P_renderGlow);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Col_E7E0 { float r, g, b, a; };
 struct Ctx_E7E0 { char pad[0xE84]; char* e84; };
-extern "C" void func_0021EA00_E7E0(void* self, Col_E7E0* col, float* pos, float w, float h, float u0, float v0, float u1, float v1) __asm__("func_0021EA00");
+extern "C" void cOVStateHUD1P_renderGlowStrip_E7E0(void* self, Col_E7E0* col, float* pos, float w, float h, float u0, float v0, float u1, float v1) __asm__("cOVStateHUD1P_renderGlowStrip");
 
 /**
  * Draws the HUD's glow texture as a pulsing halo over a box, grown about its centre, with the alpha following @p phase.
@@ -2038,9 +2038,9 @@ extern "C" void func_0021EA00_E7E0(void* self, Col_E7E0* col, float* pos, float 
  * half on each side, and writes the grown position and size back into @p pos and @p size. Binds the glow texture
  * element at +0x474 (On Tour mGlow: its id, which cOVStateHUD1P_onCreateScreen takes from GrMan's _EffectTexMap[0], and
  * its UV top +0x480, left +0x484, right +0x488, bottom +0x48C) into the draw state (+0x10). A box wider than 72 is
- * drawn as three columns through func_0021EA00: 36 wide from the left u to the middle u, a stretched middle column at
+ * drawn as three columns through cOVStateHUD1P_renderGlowStrip: 36 wide from the left u to the middle u, a stretched middle column at
  * the middle u, and 36 wide from the middle u to the right u; a narrower box is one column over the full u range.
- * func_0021EA00 splits a tall column into rows the same way, so the glow is a nine-slice. In the three-column case
+ * cOVStateHUD1P_renderGlowStrip splits a tall column into rows the same way, so the glow is a nine-slice. In the three-column case
  * pos[0] is left at the right column's x. Callers: cOVStateHUD1P_renderRank and cOVStateHUD1P_onRender2D; cOVStateHUD1P_renderUberChar has an
  * inlined copy.
  *
@@ -2053,7 +2053,7 @@ extern "C" void func_0021EA00_E7E0(void* self, Col_E7E0* col, float* pos, float 
  * @param amin  alpha factor at phase 0 and 2
  * @param amax  alpha factor at phase 1
  */
-extern "C" void func_0021E7E0(cOVStateHUD1P* self, Col_E7E0* colp, float* pos, float* size,
+extern "C" void cOVStateHUD1P_renderGlow(cOVStateHUD1P* self, Col_E7E0* colp, float* pos, float* size,
                               float phase, float sx, float sy, float amin, float amax) {
     Col_E7E0 col = *colp;
     Col_E7E0* colour = &col;
@@ -2070,19 +2070,19 @@ extern "C" void func_0021E7E0(cOVStateHUD1P* self, Col_E7E0* colp, float* pos, f
     GrMan->m_pCurrentDrawState->m_textureState.m_texid[0] = id;
     if (size[0] > 72.0f) {
         float mid = (self->mGlow.mLeft + self->mGlow.mRight) * 0.5f;
-        func_0021EA00_E7E0(((char*)self), colour, pos, 36.0f, size[1], self->mGlow.mLeft, self->mGlow.mTop, mid, self->mGlow.mBottom);
+        cOVStateHUD1P_renderGlowStrip_E7E0(((char*)self), colour, pos, 36.0f, size[1], self->mGlow.mLeft, self->mGlow.mTop, mid, self->mGlow.mBottom);
         pos[0] += 36.0f;
-        func_0021EA00_E7E0(((char*)self), colour, pos, size[0] - 72.0f, size[1], mid, self->mGlow.mTop, mid, self->mGlow.mBottom);
+        cOVStateHUD1P_renderGlowStrip_E7E0(((char*)self), colour, pos, size[0] - 72.0f, size[1], mid, self->mGlow.mTop, mid, self->mGlow.mBottom);
         pos[0] += size[0] - 72.0f;
-        func_0021EA00_E7E0(((char*)self), colour, pos, 36.0f, size[1], mid, self->mGlow.mTop, self->mGlow.mRight, self->mGlow.mBottom);
+        cOVStateHUD1P_renderGlowStrip_E7E0(((char*)self), colour, pos, 36.0f, size[1], mid, self->mGlow.mTop, self->mGlow.mRight, self->mGlow.mBottom);
     } else {
-        func_0021EA00_E7E0(((char*)self), colour, pos, size[0], size[1], self->mGlow.mLeft, self->mGlow.mTop, self->mGlow.mRight, self->mGlow.mBottom);
+        cOVStateHUD1P_renderGlowStrip_E7E0(((char*)self), colour, pos, size[0], size[1], self->mGlow.mLeft, self->mGlow.mTop, self->mGlow.mRight, self->mGlow.mBottom);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021EA00);
+INCLUDE_ASM("fe/all_in_one_fe", cOVStateHUD1P_renderGlowStrip);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -2103,7 +2103,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021EA00);
 
 
 /**
- * Draws one column of the glow texture (see func_0021E7E0): one quad, or for a height over 72 three rows whose top and
+ * Draws one column of the glow texture (see cOVStateHUD1P_renderGlow): one quad, or for a height over 72 three rows whose top and
  * bottom rows are 36 tall.
  *
  * Every vertex gets the colour @p col times 128 (tHUDDef colours are A, R, G, B; the vertex takes R, G, B, A),
@@ -2122,7 +2122,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021EA00);
  * @param uMax  right u
  * @param vMax  bottom v
  */
-extern "C" void func_0021EA00(cOVStateHUD1P* self, sColour* col, float* pos, float w, float height, float uMin, float vMin, float uMax, float vMax)
+extern "C" void cOVStateHUD1P_renderGlowStrip(cOVStateHUD1P* self, sColour* col, float* pos, float w, float height, float uMin, float vMin, float uMax, float vMax)
 {
     if (height > 72.0f) {
         sHudVertex vtx[8];
@@ -2210,7 +2210,7 @@ extern "C" void cOVStateHUD1P_calcElemPos(void*, void*, void*, void*, void*, int
 extern "C" void cOVStateHUD1P_renderBitmap(void*, int, void*, void*, void*, void*);
 extern "C" void cFont_text(void*, float, float, char*);
 
-// Inline copy of func_0021E7E0's body (the original helper was inlined here): colour/position/size by pointer, copied
+// Inline copy of cOVStateHUD1P_renderGlow's body (the original helper was inlined here): colour/position/size by pointer, copied
 // locally.
 static inline void draw_ED48(char* vself, const Col_E7E0* colp, const V2_ED48* posp, const V2_ED48* sizep,
                              float t, float sx, float sy, float amin, float amax) {
@@ -2233,13 +2233,13 @@ static inline void draw_ED48(char* vself, const Col_E7E0* colp, const V2_ED48* p
     if (size.x > 72.0f) {
         float cap = 36.0f;  // width of each end cap: left cap, stretched middle (size.x - 2 caps), right cap
         float mid = (self->mGlow.mLeft + self->mGlow.mRight) * 0.5f;
-        func_0021EA00_E7E0(self, &col, pp, cap, size.y, self->mGlow.mLeft, self->mGlow.mTop, mid, self->mGlow.mBottom);
+        cOVStateHUD1P_renderGlowStrip_E7E0(self, &col, pp, cap, size.y, self->mGlow.mLeft, self->mGlow.mTop, mid, self->mGlow.mBottom);
         pos.x += cap;
-        func_0021EA00_E7E0(self, &col, pp, size.x - 72.0f, size.y, mid, self->mGlow.mTop, mid, self->mGlow.mBottom);
+        cOVStateHUD1P_renderGlowStrip_E7E0(self, &col, pp, size.x - 72.0f, size.y, mid, self->mGlow.mTop, mid, self->mGlow.mBottom);
         pos.x += size.x - 72.0f;
-        func_0021EA00_E7E0(self, &col, pp, cap, size.y, mid, self->mGlow.mTop, self->mGlow.mRight, self->mGlow.mBottom);
+        cOVStateHUD1P_renderGlowStrip_E7E0(self, &col, pp, cap, size.y, mid, self->mGlow.mTop, self->mGlow.mRight, self->mGlow.mBottom);
     } else {
-        func_0021EA00_E7E0(self, &col, pp, size.x, size.y, self->mGlow.mLeft, self->mGlow.mTop, self->mGlow.mRight, self->mGlow.mBottom);
+        cOVStateHUD1P_renderGlowStrip_E7E0(self, &col, pp, size.x, size.y, self->mGlow.mLeft, self->mGlow.mTop, self->mGlow.mRight, self->mGlow.mBottom);
     }
 }
 
@@ -2257,7 +2257,7 @@ static inline void draw_ED48(char* vself, const Col_E7E0* colp, const V2_ED48* p
  * With @p kind nonzero, the background element's size times @p sc2 is placed and the "ubercharbkgd" texture icons[0]
  * (+0x494) is drawn there in the background element's colour, which is also stored as the font colour. Likely
  * oversight: the background is placed with the letter element's alignment bytes, not its own. With @p kind 2 and the
- * panel's f64 (+0x64; On Tour uberGlowFrame) >= 0, the glow (an inlined copy of func_0021E7E0) is drawn one layer lower
+ * panel's f64 (+0x64; On Tour uberGlowFrame) >= 0, the glow (an inlined copy of cOVStateHUD1P_renderGlow) is drawn one layer lower
  * in the panel's col (+0x54; uberGlowColour) with phase f64, grown 3.4 times and alpha 0.26 to 0.5.
  *
  * @param elems  the HUD element table (0x24-byte tHUDDef records), passed as an int
@@ -3561,7 +3561,7 @@ extern "C" void* cOVState_TRANSPORT__cOVState_TRANSPORT(cOVState_TRANSPORT* self
 /**
  * Does nothing: the empty onMenuGainFocus (slot +0x6C) of the overlay vtable cOVState_TRANSPORT_vtbl (overlay id 33).
  */
-extern "C" void func_002212C0(void) {
+extern "C" void cOVState_TRANSPORT_onMenuGainFocus(void) {
 }
 
 //100%
@@ -4644,7 +4644,7 @@ extern "C" void* cOVState_HEAT_PREEVENT__cOVState_HEAT_PREEVENT(cOVState_HEAT_PR
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00221E18);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_HEAT_PREEVENT_cOVState_HEAT_PREEVENT);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_1E18(void*) __asm__("cUIState_cUIState");
@@ -4666,7 +4666,7 @@ extern unsigned short str_sp_b[];
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *func_00221E18(cOVState_HEAT_PREEVENT* ovState, int engine, int overlayId) {
+extern "C" void *cOVState_HEAT_PREEVENT_cOVState_HEAT_PREEVENT(cOVState_HEAT_PREEVENT* ovState, int engine, int overlayId) {
     cUIState_cUIState_1E18(ovState);
     (ovState->mOVID) = overlayId;
     (ovState->mDoneTransition) = 0;
@@ -4974,7 +4974,7 @@ extern "C" void *func_00222100(cOVStateRewardsList* ovState) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00222160);
+INCLUDE_ASM("fe/all_in_one_fe", cOVStateRewardsList_cOVStateRewardsList);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_2160(void*) __asm__("cUIState_cUIState");
@@ -4995,7 +4995,7 @@ extern unsigned short str_sp_b[];
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *func_00222160(cOVStateRewardsList* ovState, int engine, int overlayId) {
+extern "C" void *cOVStateRewardsList_cOVStateRewardsList(cOVStateRewardsList* ovState, int engine, int overlayId) {
     cUIState_cUIState_2160(ovState);
     (ovState->mOVID) = overlayId;
     (ovState->mDoneTransition) = 0;
@@ -5179,7 +5179,7 @@ extern "C" void *func_002222F8(cOVStateTrophy* ovState) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00222358);
+INCLUDE_ASM("fe/all_in_one_fe", cOVStateTrophy_cOVStateTrophy);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_2358(void*) __asm__("cUIState_cUIState");
@@ -5200,7 +5200,7 @@ extern unsigned short str_sp_b[];
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *func_00222358(cOVStateTrophy* ovState, int engine, int overlayId) {
+extern "C" void *cOVStateTrophy_cOVStateTrophy(cOVStateTrophy* ovState, int engine, int overlayId) {
     cUIState_cUIState_2358(ovState);
     (ovState->mOVID) = overlayId;
     (ovState->mDoneTransition) = 0;

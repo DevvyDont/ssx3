@@ -156,7 +156,7 @@ INCLUDE_ASM("worldpainter/quadtree", cQuadTree_exportTree);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void tQuadTreeNode_setSubNodes(unsigned short* p, unsigned short a, unsigned short b, unsigned short c, unsigned short d);
 struct cQuadTree_exportNode_sOut;
 struct cQuadTree_exportNode_sNode;
@@ -202,7 +202,7 @@ extern "C" void cQuadTree_exportTree(cQuadTree* self, char** out, int* size, voi
     for (i = 0; i < self->m_numNodes; i++)
         map[i] = -1;
     *out = new (str_QuadTreeOutputBuffer, 0, 0) char[*size];
-    func_00416210(*out, 0xDEADBEEF, *size);
+    memset(*out, 0xDEADBEEF, *size);
     sQTHeader_1DA8* header = (sQTHeader_1DA8*)*out;
     *header = *((sQTHeader_1DA8*)self);
     int cnt = 0;
@@ -858,7 +858,7 @@ extern "C" void MEM_copy();
 
 /**
  * Calls MEM_copy with the caller's arguments passed through and returns the destination (GameLink's memory copy).
- * Nothing in retail references it; func_002C2BD8 stores func_00416210 in the copy slot instead.
+ * Nothing in retail references it; func_002C2BD8 stores memset in the copy slot instead.
  *
  * @param dst  the destination address
  * @return @p dst
@@ -1062,7 +1062,7 @@ extern "C" void func_002C2BB8(void) {
 INCLUDE_ASM("worldpainter/quadtree", func_002C2BD8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_004165A8();
+extern "C" void strcmp();
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void func_002C29D0();
 extern "C" void func_002C2AA8();
@@ -1071,7 +1071,7 @@ extern "C" void func_002C2B28();
 extern void func_002C28C0_2BD8() __asm__("func_002C28C0");
 extern void func_002C2940_2BD8() __asm__("func_002C2940");
 extern "C" void func_0041610C();
-extern "C" void func_00415FC8();
+extern "C" void memcmp();
 extern "C" void func_0041605C();
 extern "C" void func_002C28A0();
 extern "C" void atof();
@@ -1081,27 +1081,27 @@ extern "C" void qsort();
 /**
  * Fills a GameLink platform function table with the game's implementations.
  *
- * +0x4 strlen, +0x8 strcpy, +0xC func_004165A8, +0x10 atoi, +0x14 atof, +0x18 qsort, +0x1C bsearch, +0x20
+ * +0x4 strlen, +0x8 strcpy, +0xC strcmp, +0x10 atoi, +0x14 atof, +0x18 qsort, +0x1C bsearch, +0x20
  * func_002C29D0 (thread create), +0x24 func_002C2AA8 (thread free), +0x28 func_002C2B08 (yield), +0x2C func_002C2B28
  * (mutex create), +0x30 func_002C2B68 (mutex destroy), +0x34 / +0x38 func_002C2B98 / func_002C2BB8 (lock, unlock),
- * +0x3C func_002C28C0 (alloc), +0x40 func_002C2940 (realloc), +0x44 func_002C28F8 (free), +0x48 func_00416210, +0x4C
- * func_0041605C, +0x50 func_0041610C, +0x54 func_00415FC8 and +0x58 func_002C28A0 (counter). Nothing in retail calls
+ * +0x3C func_002C28C0 (alloc), +0x40 func_002C2940 (realloc), +0x44 func_002C28F8 (free), +0x48 memset, +0x4C
+ * func_0041605C, +0x50 func_0041610C, +0x54 memcmp and +0x58 func_002C28A0 (counter). Nothing in retail calls
  * it.
  */
 extern "C" void func_002C2BD8(char* self) {
     *(void**)(self + 0x3C) = (void*)&func_002C28C0_2BD8;
     *(void**)(self + 0x40) = (void*)&func_002C2940_2BD8;
     *(void**)(self + 0x44) = (void*)&func_002C28F8;
-    *(void**)(self + 0x48) = (void*)&func_00416210;
+    *(void**)(self + 0x48) = (void*)&memset;
     *(void**)(self + 0x50) = (void*)&func_0041610C;
-    *(void**)(self + 0x54) = (void*)&func_00415FC8;
+    *(void**)(self + 0x54) = (void*)&memcmp;
     *(void**)(self + 0x4C) = (void*)&func_0041605C;
     *(void**)(self + 0x58) = (void*)&func_002C28A0;
     *(void**)(self + 0x14) = (void*)&atof;
     *(void**)(self + 0x10) = (void*)&atoi;
     *(void**)(self + 0x1C) = (void*)&bsearch;
     *(void**)(self + 0x18) = (void*)&qsort;
-    *(void**)(self + 0xC) = (void*)&func_004165A8;
+    *(void**)(self + 0xC) = (void*)&strcmp;
     *(void**)(self + 0x8) = (void*)&strcpy;
     *(void**)(self + 0x4) = (void*)&strlen;
     *(void**)(self + 0x20) = (void*)&func_002C29D0;
@@ -1241,7 +1241,7 @@ extern void func_002C2D30_2E78() __asm__("func_002C2D30");
 extern "C" void func_002C2D68();
 extern void func_002C2DB0_2E78() __asm__("func_002C2DB0");
 extern "C" void func_002C2E40();
-extern "C" void func_00415FC8();
+extern "C" void memcmp();
 extern "C" void func_0041610C();
 extern "C" void strcat();
 extern "C" void atoi();
@@ -1252,17 +1252,17 @@ extern "C" char* strcpy(char* dst, const char* src);
  * Fills an ISTR function table with the game's implementations.
  *
  * +0x4 strcat, +0x8 strlen, +0xC func_002C2E40 (16-bit length), +0x10 sprintf, +0x14 strcpy, +0x18 atoi, +0x1C
- * func_002C2D30 (alloc), +0x20 func_002C2DB0 (realloc), +0x24 func_002C2D68 (free), +0x28 func_00416210, +0x2C
- * func_002C2D88 (copy), +0x30 func_0041610C and +0x34 func_00415FC8. Nothing in retail calls it.
+ * func_002C2D30 (alloc), +0x20 func_002C2DB0 (realloc), +0x24 func_002C2D68 (free), +0x28 memset, +0x2C
+ * func_002C2D88 (copy), +0x30 func_0041610C and +0x34 memcmp. Nothing in retail calls it.
  */
 extern "C" void func_002C2E78(char* self) {
     *(void**)(self + 0x1C) = (void*)&func_002C2D30_2E78;
     *(void**)(self + 0x20) = (void*)&func_002C2DB0_2E78;
     *(void**)(self + 0x24) = (void*)&func_002C2D68;
     *(void**)(self + 0x2C) = (void*)&func_002C2D88;
-    *(void**)(self + 0x28) = (void*)&func_00416210;
+    *(void**)(self + 0x28) = (void*)&memset;
     *(void**)(self + 0x30) = (void*)&func_0041610C;
-    *(void**)(self + 0x34) = (void*)&func_00415FC8;
+    *(void**)(self + 0x34) = (void*)&memcmp;
     *(void**)(self + 0x04) = (void*)&strcat;
     *(void**)(self + 0x08) = (void*)&strlen;
     *(void**)(self + 0x0C) = (void*)&func_002C2E40;
@@ -1732,7 +1732,7 @@ extern "C" void cPS2MemCard_CheckDevice(cPS2MemCard* self, int device)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C44E0);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_ClearCardChanged);
 #ifdef SKIP_ASM
 
 struct sQTState {
@@ -1746,7 +1746,7 @@ struct sQTState {
  * Clears the current port's card-changed flag (unk_10 of unk_17C[mDevice]) and turns a last libmc result (unk_08) of -1
  * into 0. Card vtable slot 47.
  */
-extern "C" void func_002C44E0(cPS2MemCard* self)
+extern "C" void cPS2MemCard_ClearCardChanged(cPS2MemCard* self)
 {
     self->unk_17C[self->mDevice].unk_10 = 0;
     if (self->unk_17C[self->mDevice].unk_08 == -1) {
@@ -1958,13 +1958,13 @@ extern "C" int cPS2MemCard_IsWriteWaiting(cPS2MemCard* self)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C4758__FPv);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SetWriteFailed__FPv);
 #ifdef SKIP_ASM
 /**
- * Asks for the open save file to be closed once the current write finishes: sets unk_048 to 1, and cPS2MemCard_Update
- * then calls func_002C48C0 with state 24. Card vtable slot 44.
+ * Marks the current write as failed: sets unk_048 to 1, and cPS2MemCard_Update then abandons the write by calling
+ * func_002C48C0 with state 24, which closes the save file. On Tour's cMemCard::SetWriteFailed; card vtable slot 44.
  */
-void func_002C4758(void* vself)
+void cPS2MemCard_SetWriteFailed(void* vself)
 {
     cPS2MemCard* self = (cPS2MemCard*)vself;
     self->unk_048 = 1;
@@ -1972,15 +1972,15 @@ void func_002C4758(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C4768__FPv);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SetWriteClose__FPv);
 #ifdef SKIP_ASM
 /**
  * Closes the save file after writing: calls func_002C48C0 with state 24, which issues sceMcClose when mFileDescriptor
- * is open and otherwise goes on to state 25. Card vtable slot 43.
+ * is open and otherwise goes on to state 25. On Tour's cMemCard::SetWriteClose; card vtable slot 43.
  *
  * @return func_002C48C0's return register (it returns nothing)
  */
-void* func_002C4768(void* self)
+void* cPS2MemCard_SetWriteClose(void* self)
 {
     return func_002C48C0((cPS2MemCard*)self, 0x18);
 }
@@ -2076,13 +2076,13 @@ extern "C" int cPS2MemCard_IsReadWaiting(cPS2MemCard* self)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C4890__FPv);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SetReadFailed__FPv);
 #ifdef SKIP_ASM
 /**
- * Asks for the open save file to be closed once the current read finishes: sets unk_044 to 1, and cPS2MemCard_Update
- * then calls func_002C48C0 with state 30. Card vtable slot 33.
+ * Marks the current read as failed: sets unk_044 to 1, and cPS2MemCard_Update then abandons the read by calling
+ * func_002C48C0 with state 30, which closes the save file. On Tour's cMemCard::SetReadFailed; card vtable slot 33.
  */
-void func_002C4890(void* vself)
+void cPS2MemCard_SetReadFailed(void* vself)
 {
     cPS2MemCard* self = (cPS2MemCard*)vself;
     self->unk_044 = 1;
@@ -2090,15 +2090,15 @@ void func_002C4890(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C48A0__FPv);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SetReadClose__FPv);
 #ifdef SKIP_ASM
 /**
  * Closes the save file after reading: calls func_002C48C0 with state 30, which issues sceMcClose when mFileDescriptor
- * is open and otherwise goes on to state 31. Card vtable slot 32.
+ * is open and otherwise goes on to state 31. On Tour's cMemCard::SetReadClose; card vtable slot 32.
  *
  * @return func_002C48C0's return register (it returns nothing)
  */
-void* func_002C48A0(void* self)
+void* cPS2MemCard_SetReadClose(void* self)
 {
     return func_002C48C0((cPS2MemCard*)self, 0x1e);
 }
@@ -2972,7 +2972,7 @@ extern "C" void func_002C5570(cPS2MemCard* self, int fileSlot)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C5588);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsFileSlotBroken);
 #ifdef SKIP_ASM
 struct sQTSlot {
     int a;
@@ -2992,7 +2992,7 @@ struct sQTSlots {
  * @param i  the file slot index (0 .. mMaxFiles - 1; not checked)
  * @return 1 when either flag is set, else 0
  */
-extern "C" int func_002C5588(sQTSlots* self, int i)
+extern "C" int cPS2MemCard_IsFileSlotBroken(sQTSlots* self, int i)
 {
     if (self->slots[i].b != 0 || self->slots[i].a != 0) {
         return 1;
@@ -4728,7 +4728,7 @@ INCLUDE_ASM("worldpainter/quadtree", cLocaleFile_loadFile);
 #ifdef SKIP_ASM
 extern "C" void* FILE_load(const char* name, int flags);
 extern "C" unsigned int LOCALE_getstate(void* p, int a);
-extern "C" int func_00416B18(const void* a, const void* b, int n);
+extern "C" int strncmp(const void* a, const void* b, int n);
 // PORT: cLocaleFile_getStringByIndex is declared (void*) but called with a second argument; bound by asm label
 void* cLocaleFile_getStringByIndex_2(void* self, int v) __asm__("cLocaleFile_getStringByIndex__FPv");
 extern char str_LOCT[];
@@ -4769,7 +4769,7 @@ extern "C" void cLocaleFile_loadFile(cLocaleFile_loadFile_sFile* self, const cha
     self->count = LOCALE_getstate(self->data, 2);
     size = self->data->size;
     self->hdr = (cLocaleFile_loadFile_sChunk*)((char*)self->data + size);
-    if (func_00416B18(self->hdr, str_LOCT, 4) != 0) {
+    if (strncmp(self->hdr, str_LOCT, 4) != 0) {
         self->hdr = 0;
         return;
     }

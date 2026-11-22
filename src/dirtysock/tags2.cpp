@@ -140,7 +140,7 @@ INCLUDE_ASM("dirtysock/tags2", func_0025EED8);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan_onQuickMatchResponse);
 
-INCLUDE_ASM("dirtysock/tags2", func_0025F120);
+INCLUDE_ASM("dirtysock/tags2", LobbyMan_getnumrooms);
 
 INCLUDE_ASM("dirtysock/tags2", func_0025F150);
 
@@ -330,9 +330,9 @@ INCLUDE_ASM("dirtysock/tags2", func_00264030);
 
 INCLUDE_ASM("dirtysock/tags2", func_00264098);
 
-INCLUDE_ASM("dirtysock/tags2", func_002640C0);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan_cSetupMan);
 
-INCLUDE_ASM("dirtysock/tags2", func_00264138);
+INCLUDE_ASM("dirtysock/tags2", cSetupMan__cSetupMan);
 
 INCLUDE_ASM("dirtysock/tags2", func_002642B8);
 
@@ -382,9 +382,9 @@ INCLUDE_ASM("dirtysock/tags2", func_00265880);
 
 INCLUDE_ASM("dirtysock/tags2", func_002658B8);
 
-INCLUDE_ASM("dirtysock/tags2", func_002658E0);
+INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_cSharedLoginMan);
 
-INCLUDE_ASM("dirtysock/tags2", func_00265908);
+INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan__cSharedLoginMan);
 
 INCLUDE_ASM("dirtysock/tags2", func_00265950);
 
@@ -470,7 +470,7 @@ INCLUDE_ASM("dirtysock/tags2", func_00266760);
 
 INCLUDE_ASM("dirtysock/tags2", func_00266788);
 
-INCLUDE_ASM("dirtysock/tags2", func_002667E8);
+INCLUDE_ASM("dirtysock/tags2", cUsbKeyboard_cUsbKeyboard);
 
 INCLUDE_ASM("dirtysock/tags2", func_002668A8);
 
@@ -482,9 +482,9 @@ INCLUDE_ASM("dirtysock/tags2", func_00266CA0);
 
 INCLUDE_ASM("dirtysock/tags2", func_00266CD8);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266D00);
+INCLUDE_ASM("dirtysock/tags2", cVoipMan_cVoipMan);
 
-INCLUDE_ASM("dirtysock/tags2", func_00266D10);
+INCLUDE_ASM("dirtysock/tags2", cVoipMan__cVoipMan);
 
 INCLUDE_ASM("dirtysock/tags2", func_00266D58);
 
@@ -540,9 +540,9 @@ INCLUDE_ASM("dirtysock/tags2", online_NetErrorEvent__NetErrorEvent);
 
 INCLUDE_ASM("dirtysock/tags2", online_NetErrorEvent_clone);
 
-INCLUDE_ASM("dirtysock/tags2", func_00268048);
+INCLUDE_ASM("dirtysock/tags2", online_ChatEvent__ChatEvent);
 
-INCLUDE_ASM("dirtysock/tags2", func_002680A8);
+INCLUDE_ASM("dirtysock/tags2", online_ChatEvent_clone);
 
 INCLUDE_ASM("dirtysock/tags2", online_NewsEvent__NewsEvent);
 

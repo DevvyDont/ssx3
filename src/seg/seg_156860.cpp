@@ -643,8 +643,8 @@ INCLUDE_ASM("seg/seg_156860", func_002560B0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *cMemMan_alloc_60B0(int, char *, int, int) __asm__("cMemMan_alloc");
-extern "C" int *func_002561B8_60B0(void *) __asm__("func_002561B8");
-extern "C" void func_002561E0_60B0(int *, int) __asm__("func_002561E0");
+extern "C" int *DNASMan_DNASMan_60B0(void *) __asm__("DNASMan_DNASMan");
+extern "C" void DNASMan__DNASMan_60B0(int *, int) __asm__("DNASMan__DNASMan");
 extern "C" void func_00256258_60B0(int *, int) __asm__("func_00256258");
 extern "C" void func_002562D0_60B0(int *) __asm__("func_002562D0");
 extern "C" void func_002563A8_60B0(int *) __asm__("func_002563A8");
@@ -658,12 +658,12 @@ static inline int ge3_60B0(int *o) { return *o >= 3; }
 /**
  * Runs a DNAS authentication to the end, waiting in a loop (debug menu).
  *
- * Creates a 2640-byte "DNASMAN" object (func_002561B8), starts it (func_00256258 with 0) and updates it (func_002563F8,
+ * Creates a 2640-byte "DNASMAN" object (DNASMan_DNASMan), starts it (func_00256258 with 0) and updates it (func_002563F8,
  * SYNCTASK_run, THREAD_yieldticks(1)) until its state reaches 3, then starts the check (func_002562D0) and updates it
  * until state 5. Then it frees the buffers (func_002563A8) and deletes the object. cDebugMenuScreen_update calls it.
  */
 extern "C" void func_002560B0(void) {
-    int *dnasMan = func_002561B8_60B0(cMemMan_alloc_60B0(2640, str_DNASMAN, 0x20000000, 0));
+    int *dnasMan = DNASMan_DNASMan_60B0(cMemMan_alloc_60B0(2640, str_DNASMAN, 0x20000000, 0));
     func_00256258_60B0(dnasMan, 0);
     while (!ge3_60B0(dnasMan)) {
         func_002563F8_60B0(dnasMan);
@@ -678,7 +678,7 @@ extern "C" void func_002560B0(void) {
     }
     func_002563A8_60B0(dnasMan);
     if (dnasMan != 0) {
-        func_002561E0_60B0(dnasMan, 3);
+        DNASMan__DNASMan_60B0(dnasMan, 3);
     }
 }
 #endif
@@ -702,7 +702,7 @@ extern "C" void func_00256188(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_002561B8);
+INCLUDE_ASM("seg/seg_156860", DNASMan_DNASMan);
 #ifdef SKIP_ASM
 extern "C" void func_00256228();
 
@@ -714,14 +714,14 @@ extern "C" void func_00256228();
  * @param dnasMan  the object
  * @return @p dnasMan
  */
-extern "C" int func_002561B8(int dnasMan) {
+extern "C" int DNASMan_DNASMan(int dnasMan) {
     func_00256228();
     return dnasMan;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_002561E0);
+INCLUDE_ASM("seg/seg_156860", DNASMan__DNASMan);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00256250_61E0(int *) __asm__("func_00256250");
@@ -733,7 +733,7 @@ extern "C" void operator_delete__FPi(int *);
  * @param dnasMan  the object
  * @param flags  bit 0: free the memory
  */
-extern "C" void func_002561E0(int *dnasMan, int flags) {
+extern "C" void DNASMan__DNASMan(int *dnasMan, int flags) {
     func_00256250_61E0(dnasMan);
     if (flags & 1) {
         operator_delete__FPi(dnasMan);
@@ -761,7 +761,7 @@ extern "C" void func_00256228(void *arg0) {
 #endif
 
 /**
- * Does nothing: the body of the DNAS authentication object's destructor (func_002561E0 calls it).
+ * Does nothing: the body of the DNAS authentication object's destructor (DNASMan__DNASMan calls it).
  */
 extern "C" void func_00256250(void) {
 }
@@ -1383,7 +1383,7 @@ extern "C" void *RpcAlloc(unsigned int size) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00256BD8);
+INCLUDE_ASM("seg/seg_156860", RpcFree);
 #ifdef SKIP_ASM
 extern "C" void cMemMan_free__FPv();
 
@@ -1395,7 +1395,7 @@ extern "C" void cMemMan_free__FPv();
  *
  * @param buffer  the buffer, or 0
  */
-extern "C" void func_00256BD8(int buffer) {
+extern "C" void RpcFree(int buffer) {
     if (buffer != 0) {
         cMemMan_free__FPv();
     }
@@ -1777,7 +1777,7 @@ extern "C" void cGameComm_asyncWriteUpdate_70D8(char* s) __asm__("cGameComm_asyn
 extern "C" void cGameComm_updateMessageDisplay_70D8(void* s) __asm__("cGameComm_updateMessageDisplay");
 extern "C" int func_003E7450_70D8(int sock, int a1, char* tag, int n) __asm__("func_003E7450");
 extern "C" int func_003E7500_70D8(int sock, char* buf, int* len, int* info) __asm__("func_003E7500");
-extern "C" int func_00416B18_70D8(const char* a, const char* b, int n) __asm__("func_00416B18");
+extern "C" int strncmp_70D8(const char* a, const char* b, int n) __asm__("strncmp");
 extern char str_SSXPingServer[];
 
 /**
@@ -1812,7 +1812,7 @@ extern "C" void cGameComm_update(cGameComm* vs)
             if (func_003E7500_70D8((int)vs->unk_140, msg, &len, info) == 0) {
                 break;
             }
-            if (func_00416B18_70D8(msg, str_SSXPingServer, 13) != 0) {
+            if (strncmp_70D8(msg, str_SSXPingServer, 13) != 0) {
                 continue;
             }
             for (int i = 0; i < vs->unk_0B8; i++) {
@@ -2976,7 +2976,7 @@ extern "C" void cGameComm_syncGame(cGameComm* self)
         if (self->mServerSettings.unk_18 != 0 && self->unk_100 != 0) {
             self->mNumSamples = 2;
         }
-        if (self->mError == 0 && func_00416B18_70D8(((char*)self) + 0xF0, ((char*)self) + 0x104, 9) != 0) {
+        if (self->mError == 0 && strncmp_70D8(((char*)self) + 0xF0, ((char*)self) + 0x104, 9) != 0) {
             cGameComm_setCommError(self);
             cGameComm_displayError(self);
         }
@@ -3303,7 +3303,7 @@ extern "C" void cGameComm_writePacket_8C00(void *, int, void *, int) __asm__("cG
  * Sends command 2 to the peer and counts it locally (+0x54).
  *
  * Only without an error and while connected. The peer counts these in +0x58 (cGameComm_updateCmdQueue); cGameComm_checkErrors treats 3 or
- * more on either side as cheating (mCheating 3). func_0020CA10 calls it.
+ * more on either side as cheating (mCheating 3). cOVStateManager_triggerPauseMenu calls it.
  *
  * @param gameComm  the game link
  */

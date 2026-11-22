@@ -7793,23 +7793,23 @@ void func_00361F90(void* self)
 INCLUDE_ASM("object/railmodifier", func_00361F98);
 #ifdef SKIP_ASM
 extern "C" int DisableIntc(int ch);
-extern "C" int func_00423A80(int cause, int (*handler)(void), int arg);
+extern "C" int AddIntcHandler(int cause, int (*handler)(void), int arg);
 extern "C" int EnableIntc(int ch);
 
 /**
  * Registers an INTC handler for an interrupt cause and records its id.
  *
- * Calls DisableIntc(cause), stores the id func_00423A80(cause, handler, next) returns at +cause*4, then calls
+ * Calls DisableIntc(cause), stores the id AddIntcHandler(cause, handler, next) returns at +cause*4, then calls
  * EnableIntc(cause).
  *
  * @param cause  INTC cause number (5 = VIF1, 7 = VU1)
  * @param handler  handler function
- * @param next  argument passed through to func_00423A80
+ * @param next  argument passed through to AddIntcHandler
  */
 extern "C" void func_00361F98(void* self, int cause, int (*handler)(void), int next)
 {
     DisableIntc(cause);
-    *(int*)((char*)self + (cause << 2)) = func_00423A80(cause, handler, next);
+    *(int*)((char*)self + (cause << 2)) = AddIntcHandler(cause, handler, next);
     EnableIntc(cause);
 }
 #endif
@@ -7841,24 +7841,24 @@ extern "C" void* func_00362008(void* self, int ch)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00362058);
 #ifdef SKIP_ASM
-extern "C" int func_00423AB0(int, int, int);
+extern "C" int AddDmacHandler(int, int, int);
 extern "C" void DisableDmac(int);
 extern "C" void EnableDmac(int);
 
 /**
  * Registers a DMAC handler for a channel and records its id.
  *
- * Calls DisableDmac(channel), stores the id func_00423AB0(channel, handler, next) returns at +0x40 + channel*4, then
+ * Calls DisableDmac(channel), stores the id AddDmacHandler(channel, handler, next) returns at +0x40 + channel*4, then
  * calls EnableDmac(channel).
  *
  * @param owner  the interrupt handler table
  * @param channel  DMA channel number
  * @param handler  handler function
- * @param next  argument passed through to func_00423AB0
+ * @param next  argument passed through to AddDmacHandler
  */
 extern "C" void func_00362058(int owner, int channel, int handler, int next) {
     DisableDmac(channel);
-    (*(int *)(((char*)(owner) + (channel << 2)) + (0x40))) = func_00423AB0(channel, handler, next);
+    (*(int *)(((char*)(owner) + (channel << 2)) + (0x40))) = AddDmacHandler(channel, handler, next);
     EnableDmac(channel);
 }
 #endif
@@ -9278,7 +9278,7 @@ extern "C" unsigned int func_00364240(unsigned int* self, int key)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/railmodifier", func_00364360);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void func_00362478(sGifPacket* pkt, int a, int b, int ctx);
 extern "C" void func_00364CD0(cPS2DeferManager* self, int a, int b, unsigned int c, ulong** pp);
 // PORT: bound by asm label so this caller's packet type doesn't conflict with the definition.
@@ -9297,7 +9297,7 @@ struct sRmGsState4360 {
         for (i = 0; i < 2; i++) {
             tex[i] = -1;
         }
-        func_00416210(this, 0, 0x10);
+        memset(this, 0, 0x10);
     }
 };
 
@@ -10992,14 +10992,14 @@ extern "C" void func_00366E90(cTextureMan* self, sRmTex_366E90* tex)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00366FE0__FPvi);
+INCLUDE_ASM("object/railmodifier", cTextureMan_SetTextureMemType__FPvi);
 #ifdef SKIP_ASM
 /**
  * Sets the memory type (+0x1F58) the texture manager uses for its temporary allocations.
  *
  * @param val  the new memory type (cPS2GraphicsMan_InitTextures passes its memtype)
  */
-void func_00366FE0(void* vself, int val)
+void cTextureMan_SetTextureMemType(void* vself, int val)
 {
     cTextureMan* self = (cTextureMan*)vself;
     self->TexMemType = val;
@@ -11009,13 +11009,13 @@ void func_00366FE0(void* vself, int val)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/railmodifier", func_00366FE8);
 #ifdef SKIP_ASM
-extern "C" void func_003670E0(cTextureMan* self);
+extern "C" void cTextureMan_InitTexInfo(cTextureMan* self);
 extern "C" void func_00365E40(void* list, int a, int size, void* pool);
 
 /**
  * Initialises the texture manager: clears its tables and sets up both GS memory block heaps.
  *
- * Zeroes the memory type (+0x1F58), resets the texture record table and free id list with func_003670E0, marks no
+ * Zeroes the memory type (+0x1F58), resets the texture record table and free id list with cTextureMan_InitTexInfo, marks no
  * texture bound to either context (+0x1F4C, +0x1F50) and no CLUT loaded (+0x1F54) with -1, then func_00365E40 sets up
  * the heap at +0x1F60 over 0x400000 bytes (the 4 MB of GS memory) and the one at +0x4350 over 0x1000 bytes, both
  * pointing at the record table at +0x8. cPS2GraphicsMan_Init calls it right after allocating the manager.
@@ -11023,7 +11023,7 @@ extern "C" void func_00365E40(void* list, int a, int size, void* pool);
 extern "C" void func_00366FE8(cTextureMan* self)
 {
     self->TexMemType = 0;
-    func_003670E0(self);
+    cTextureMan_InitTexInfo(self);
     int* bound = (int*)(&self->mBoundTex[0]);
     for (int i = 1; i >= 0; i--) {
         bound[i] = -1;
@@ -11059,7 +11059,7 @@ extern "C" void func_00367078(cTextureMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003670E0);
+INCLUDE_ASM("object/railmodifier", cTextureMan_InitTexInfo);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int c, int n);
 
@@ -11070,7 +11070,7 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  * bytes), then points the free list head (+0x1F48) at slot 1500 (+0x1778) and makes each of slots 1500 to 1998 point at
  * the next one; slot 1999 stays 0 and ends the list. cTextureMan_NewNonBindTexID pops ids from this list.
  */
-extern "C" void func_003670E0(cTextureMan* self)
+extern "C" void cTextureMan_InitTexInfo(cTextureMan* self)
 {
     int i;
     self->m_iNumBindTextures = 0;

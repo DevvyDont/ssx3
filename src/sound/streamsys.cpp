@@ -882,7 +882,7 @@ extern "C" void cStreamSys_STREAM_CreateInstance1(cStreamSys* self, int idx, int
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_Create);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void cStreamSys_STREAM_CreateInstance(cStreamSys* self, int a1, int a2, int a3);
 
 struct sEntry_A910 {
@@ -940,7 +940,7 @@ extern "C" void cStreamSys_STREAM_Create(sMgr_A910** self, int streamIndex, int 
     st->a34[bankMgr->st.depth] = 0;
     st->a38[bankMgr->st.depth] = st->entries[bankMgr->st.depth].kind;
     st->a3C[bankMgr->st.depth] = 0;
-    func_00416210((char*)st + bankMgr->st.depth * 8 + 0x40, 0, 8);
+    memset((char*)st + bankMgr->st.depth * 8 + 0x40, 0, 8);
     st->a60[bankMgr->st.depth] = 0;
     st->a64[bankMgr->st.depth] = 0;
     st->a68[bankMgr->st.depth] = 0;
@@ -2408,7 +2408,7 @@ extern "C" void cBankMonitorInstance_RestartSound_impl(void* vself, sSndPlayOpts
         opts->f34[opts->depth] = 0;
         opts->f38[opts->depth] = opts->descs[opts->depth].c[0];
         opts->f3C[opts->depth] = 0;
-        func_00416210((char*)opts + opts->depth * 8 + 0x40, 0, 8);
+        memset((char*)opts + opts->depth * 8 + 0x40, 0, 8);
         opts->f60[opts->depth] = 0;
         opts->f64[opts->depth] = 0;
         opts->f68[opts->depth] = 0;
@@ -2437,7 +2437,7 @@ extern "C" void cBankMonitorInstance_RestartSound_impl(void* vself, sSndPlayOpts
         opts->f34[opts->depth] = 0;
         opts->f38[opts->depth] = opts->descs[opts->depth].c[0];
         opts->f3C[opts->depth] = 0;
-        func_00416210((char*)opts + opts->depth * 8 + 0x40, 0, 8);
+        memset((char*)opts + opts->depth * 8 + 0x40, 0, 8);
         opts->f60[opts->depth] = 0;
         opts->f64[opts->depth] = 0;
         opts->f68[opts->depth] = 0;

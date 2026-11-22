@@ -474,7 +474,7 @@ extern cAvalanche_init_sElem vertlist[];
 extern cAvalanche_init_sElem collisionvertlist[];
 extern char cAvalanche_m_nodeList[];
 extern int cAvalanche_m_numNodes;
-extern "C" void func_00416210(void* dst, int c, int n);
+extern "C" void memset(void* dst, int c, int n);
 
 /**
  * Initialises the avalanche's static vertex tables and clears its state.
@@ -510,7 +510,7 @@ extern "C" void cAvalanche_init(void)
         elem->y = 0.0f;
     }
     cAvalanche_m_numNodes = 0;
-    func_00416210(cAvalanche_m_nodeList, 0, 0x400);
+    memset(cAvalanche_m_nodeList, 0, 0x400);
 }
 #endif
 
@@ -2328,7 +2328,7 @@ extern "C" void cAvalanche_end(void)
 INCLUDE_ASM("visualfx/avalanche", cAvalanche_reset);
 #ifdef SKIP_ASM
 extern "C" void cAvalanche_end(void);
-extern "C" void func_00416210(void* dst, int c, int n);
+extern "C" void memset(void* dst, int c, int n);
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern char cAvalanche_m_nodeList[];
@@ -2359,7 +2359,7 @@ extern "C" void cAvalanche_reset(void* self)
     }
     cAvalanche_m_avalancheList = 0;
     cAvalanche_m_numNodes = 0;
-    func_00416210(cAvalanche_m_nodeList, 0, 0x400);
+    memset(cAvalanche_m_nodeList, 0, 0x400);
     if (cAvalanche_m_filedata != 0 && cAvalanche_m_fileDataDeleteable != 0) {
         cMemMan_free(cAvalanche_m_filedata);
         cAvalanche_m_filedata = 0;

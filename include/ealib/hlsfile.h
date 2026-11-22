@@ -4,9 +4,9 @@
 // SCATTERREQUEST: one scatter load of REAL core's high-level file system (FILE_scatterload: load several named files
 // into several buffers as one FILESYS_atomic operation). EA source: realcore/source/file/cmn/hlsfile.cpp (SSX On Tour:
 // realcore 1.06.00; FILE_scatterload(int num, const char** names, void** buffers, int flags) keeps a local
-// `SCATTERREQUEST req`). Retail code: unit ealib/seg_2DCAE8 (FILE_scatterload and its atomic callback func_003E1C00).
+// `SCATTERREQUEST req`). Retail code: unit ealib/seg_2DCAE8 (FILE_scatterload and its atomic callback scatterloadatom).
 //
-// Names, member order and offsets: [O] On Tour struct SCATTERREQUEST (0x14); [U] retail func_003E1C00 (the callback
+// Names, member order and offsets: [O] On Tour struct SCATTERREQUEST (0x14); [U] retail scatterloadatom (the callback
 // FILE_scatterload passes &req to) loops num times and FILE_loadz()s names[i] with flags into buffers[i].
 // C struct. Tags: [O] SSX On Tour's DWARF; [U] retail use.
 

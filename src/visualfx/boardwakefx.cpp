@@ -2896,7 +2896,7 @@ struct sWakeFx1598 {
     int i124;                   // 0x124
 };
 
-extern "C" void func_002F4118(void*, float);
+extern "C" void ReportImpact(void*, float);
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float wakeDot1598(const sWakeVecE398& a, const sWakeVecE398& b)
@@ -2968,7 +2968,7 @@ static inline sWakeVecE398* wakeVel1598(sWakeFx1598* self)
  *
  * Runs while the burst strength (+0xE0) is above 27.8 and the surface record (+0xD0) flag +0x60 is set; otherwise both
  * emitters stop and the strength is cleared. Emitter 6 is used, or emitter 5 when the surface flag +0x64 is set and the
- * strength is above 277.8; with emitter 5 and no NIS (mIsInNIS) the burst point +0xF0 is updated by func_002F4118. The
+ * strength is above 277.8; with emitter 5 and no NIS (mIsInNIS) the burst point +0xF0 is updated by ReportImpact. The
  * point is moved along the burst direction (+0x100) by 20 (emitter 6) or 45 and scattered by up to 25 (60 for a player
  * on a +0x64 surface) in x and y. The level +0x4 grows with strength / 3333 (to 2 in motion state 2, 1.5 with +0x114
  * clear, else 1), the alpha +0x120 eases toward 1 (0.5 with +0x114 set), and the velocity is the rider velocity minus
@@ -2987,7 +2987,7 @@ extern "C" void func_002E1598(sWakeFx1598* self)
             otherIdx = 6;
         }
         if (emitterIdx == 5 && *(int*)(self->obj + 0xAC4) == 0) {
-            func_002F4118(&self->vF0, self->fE0);
+            ReportImpact(&self->vF0, self->fE0);
         }
         sWakeVecE398 pos = self->vF0;
         float k = 1.0f;
@@ -3732,7 +3732,7 @@ INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_getHaloRadius);
 /**
  * Returns the radius of a light halo type: 180 for 0x10, 100 for 0x20, 350 for 0x40, otherwise 0.
  *
- * The halo resolver reaches it through func_003AD230 (cChunkResolve_resolveHalo); cLightHalo_Render draws the halos with
+ * The halo resolver reaches it through getHaloRadius (cChunkResolve_resolveHalo); cLightHalo_Render draws the halos with
  * the same sizes.
  *
  * @param type  the halo type bits (flags & 0x70)

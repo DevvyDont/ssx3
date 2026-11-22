@@ -516,7 +516,7 @@ CHECK_SIZE(cVoidControl, 0x10);
 // One wake line of cBoardWakeFX (On Tour struct tWakeLine, 0x60 with mVel[4]; retail 0x70 with five rows, like
 // mWakeVerts[5]). [R] cBoardWakeFX_cBoardWakeFX: operator new[](32 x 0x70, "WakeLines_cBoardWakeFX"); [P] the preview's
 // GetChunkySprayVelocity__12cBoardWakeFX steps mWakeLines by 0x70 and returns mVel[mWakeLineSegs - 1] (retail
-// func_002F7A80); [U] cBoardWakeFX_fillCurrentSeg fills one, cBoardWakeFX_update ages and drifts them.
+// cBoardWakeFX_GetChunkySprayVelocity); [U] cBoardWakeFX_fillCurrentSeg fills one, cBoardWakeFX_update ages and drifts them.
 struct tWakeLine {
     t4Vector mVel[5];                    // 0x00 [O] mVel[4] (retail 5 rows); [P] GetChunkySprayVelocity returns row
                                          //      mWakeLineSegs - 1; [U] fillCurrentSeg: row i = (side * t * t * 0.75 + up

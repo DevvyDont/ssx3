@@ -231,12 +231,12 @@ extern "C" void cBankInstance_UnAttach(cBankInstance* self)
 //100%
 INCLUDE_ASM("sound/bankmanager", cBankInstance_IsBankLoaded);
 #ifdef SKIP_ASM
-extern "C" int func_004165A8(void*, void*);
+extern "C" int strcmp(void*, void*);
 
 /**
  * Returns whether the bank holds the loaded file @p name.
  *
- * True only when the status word at +0x0 is 1 (loaded) and func_004165A8 (strcmp) finds @p name equal to the bank's
+ * True only when the status word at +0x0 is 1 (loaded) and strcmp (strcmp) finds @p name equal to the bank's
  * filename at +0x20. cBankManager_BANK_SyncLoad and cBankManager_BANK_AsyncLoad use it to skip reloading a bank that is already loaded.
  *
  * @param name  file name to compare
@@ -248,7 +248,7 @@ extern "C" int cBankInstance_IsBankLoaded(cBankInstance* self, void* name)
     if (status != 1) {
         return 0;
     }
-    if (func_004165A8(name, (char*)&self->mBankFilename) != 0) {
+    if (strcmp(name, (char*)&self->mBankFilename) != 0) {
         status = 0;
     }
     return status;
@@ -974,7 +974,7 @@ extern "C" void func_0028C2D0(cSSXAudio* self, long key)
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028C430);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" int cBankSys_SFX_End(void* self);
 extern "C" void func_002B2850(void* a, void* mon);
 
@@ -1045,7 +1045,7 @@ static inline void bmPush_C430(sMgr_C430** self, int kind, int data)
     st->a34[m->st.depth] = 0;
     st->a38[m->st.depth] = st->entries[m->st.depth].kind;
     st->a3C[m->st.depth] = 0;
-    func_00416210((char*)st + m->st.depth * 8 + 0x40, 0, 8);
+    memset((char*)st + m->st.depth * 8 + 0x40, 0, 8);
     st->a60[m->st.depth] = 0;
     st->a64[m->st.depth] = 0;
     st->a68[m->st.depth] = 0;
@@ -2947,7 +2947,7 @@ extern "C" void func_0028F730(cSSXAudio* self)
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028F768);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(void* self);
 
@@ -2997,7 +2997,7 @@ static inline void bmPush_F768(sMgr_F768** self, int kind)
     st->a34[m->st.depth] = 0;
     st->a38[m->st.depth] = st->entries[m->st.depth].kind;
     st->a3C[m->st.depth] = 0;
-    func_00416210((char*)st + m->st.depth * 8 + 0x40, 0, 8);
+    memset((char*)st + m->st.depth * 8 + 0x40, 0, 8);
     st->a60[m->st.depth] = 0;
     st->a64[m->st.depth] = 0;
     st->a68[m->st.depth] = 0;

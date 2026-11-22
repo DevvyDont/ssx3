@@ -1430,7 +1430,7 @@ extern "C" void cSSXScriptEngine_OnScriptDataReleased(cSSXScriptEngine* self, in
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_OnAttachData);
 #ifdef SKIP_ASM
-extern "C" int func_00416B18(const char* a, const char* b, int n);
+extern "C" int strncmp(const char* a, const char* b, int n);
 void* GetSSXScriptHeader1(void* self);
 extern "C" void cBXScriptEngine_AttachScript(void* self, void* data, int a2);
 extern "C" void cScriptAnimBankManager_LinkBank(void* mgr, int bank, void* data);
@@ -1453,16 +1453,16 @@ extern char str_snd[];
  */
 extern "C" void cSSXScriptEngine_OnAttachData(cSSXScriptEngine* self, const char* ext, void* data, int dataSize, int* kind, int* bank)
 {
-    if (func_00416B18(str_scr, ext, 3) == 0) {
+    if (strncmp(str_scr, ext, 3) == 0) {
         tSSXScriptHeader* bankHeader = (tSSXScriptHeader*)GetSSXScriptHeader1(data);
         bankHeader->bankNum = self->mCurrAttachingBankNum;
         *kind = 0;
         cBXScriptEngine_AttachScript(((char*)self), data, bankHeader->scriptIndex);
-    } else if (func_00416B18(str_anm, ext, 3) == 0) {
+    } else if (strncmp(str_anm, ext, 3) == 0) {
         *kind = 1;
         *bank = self->mCurrAttachingBankNum;
         cScriptAnimBankManager_LinkBank(&self->mAnimationBankManager, self->mCurrAttachingBankNum, data);
-    } else if (func_00416B18(str_snd, ext, 3) == 0) {
+    } else if (strncmp(str_snd, ext, 3) == 0) {
         *kind = 2;
         *bank = self->mCurrAttachingBankNum;
         cScriptSoundBankManager_LinkBank(self->mSoundBankManager, self->mCurrAttachingBankNum, data, dataSize);
@@ -6038,7 +6038,7 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, f
 void cScriptObjEvent_ScriptSoundIDToGameSoundInfo(void* self, int a1, void* a2, void* a3);
 extern "C" int cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(void* self);
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern void* cWScriptMan_TheWScriptMan;
 extern int cRenderStateMan_m_indoor;
 // The "no link" hash: a const global with a dynamic initializer (set by the scripter's static init).
@@ -6275,7 +6275,7 @@ extern "C" void cScriptObjEvent_OnInSeqKeyEvent(sSeEngine_08E8* self, cScriptPla
                 sb->p34[pushSystem->sub.cur] = 0;
                 sb->p38[pushSystem->sub.cur] = sb->ents[pushSystem->sub.cur].b0;
                 sb->p3C[pushSystem->sub.cur] = 0;
-                func_00416210((char*)sb + pushSystem->sub.cur * 8 + 0x40, 0, 8);
+                memset((char*)sb + pushSystem->sub.cur * 8 + 0x40, 0, 8);
                 sb->p60[pushSystem->sub.cur] = 0;
                 sb->p64[pushSystem->sub.cur] = 0;
                 sb->p68[pushSystem->sub.cur] = 0;

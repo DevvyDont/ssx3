@@ -159,7 +159,7 @@ extern "C" void cBankSys__cBankSys(cBankSys* self, int flags)
 INCLUDE_ASM("sound/soundsys", cBankSys_Play2DCallback);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSnd0018Ch {
@@ -220,7 +220,7 @@ static inline void snd0018AddVoice(void* vself, int a, int b)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -265,7 +265,7 @@ extern "C" int cBankSys_Play2DCallback(cBankSys* self, sSnd0018Req* req)
 INCLUDE_ASM("sound/soundsys", cBankSys_Play2DCallbackWithPitchMult);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sSnd0358Ch {
@@ -329,7 +329,7 @@ static inline void snd0358AddVoice(void* vself, int a, int b)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -649,7 +649,7 @@ extern "C" int cSSXAudio_GetGruntVol(cSSXAudio* self, cRider* src)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_SFX_Play2D);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -713,7 +713,7 @@ extern "C" int cSSXAudio_SFX_Play2D(cSSXAudio* vself, int bank, int patch)
     monitor->p34[bankMgr->sub.cur] = 0;
     monitor->vals[bankMgr->sub.cur] = monitor->ch[bankMgr->sub.cur].vol;
     monitor->p3C[bankMgr->sub.cur] = 0;
-    func_00416210((char*)monitor + bankMgr->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)monitor + bankMgr->sub.cur * 8 + 0x40, 0, 8);
     monitor->p60[bankMgr->sub.cur] = 0;
     monitor->p64[bankMgr->sub.cur] = 0;
     monitor->p68[bankMgr->sub.cur] = 0;
@@ -810,7 +810,7 @@ extern "C" int func_00290FD0(void* self, int which)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_BeginWind);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -868,7 +868,7 @@ static inline void snd10E0Init(void* vself, int a, int b)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -964,7 +964,7 @@ extern "C" void cSSXAudio_HandleWind(void) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_PlayThunder);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -1022,7 +1022,7 @@ static inline int snd1438AddVoice(void* vself, int a, int b, int type)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -1138,7 +1138,7 @@ extern "C" int cSSXAudio_GetBoardBank(cSSXAudio* self, int surfaceType)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_BeginChatter);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 extern "C" int cSSXAudio_GetClosestCamera1(void* self, void* obj);
@@ -1231,7 +1231,7 @@ void cSSXAudio_BeginChatter_17D0(void* vself, void* obj)
     playOpts->p34[bankManager->sub.cur] = 0;
     playOpts->vals[bankManager->sub.cur] = playOpts->ch[bankManager->sub.cur].vol;
     playOpts->p3C[bankManager->sub.cur] = 0;
-    func_00416210((char*)playOpts + bankManager->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)playOpts + bankManager->sub.cur * 8 + 0x40, 0, 8);
     playOpts->p60[bankManager->sub.cur] = 0;
     playOpts->p64[bankManager->sub.cur] = 0;
     playOpts->p68[bankManager->sub.cur] = 0;
@@ -1286,7 +1286,7 @@ void cSSXAudio_BeginChatter_17D0(void* vself, void* obj)
 //100%
 INCLUDE_ASM("sound/soundsys", cSSXAudio_BeginGlide);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 extern "C" int cSSXAudio_GetClosestCamera1(void* self, void* obj);
@@ -1354,7 +1354,7 @@ static inline void snd1C88AddVoice(sSnd1C88Sys* self, int a, int b)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -1472,7 +1472,7 @@ void cSSXAudio_BeginGlide_1C88(void* vself, void* obj, int n)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_BeginCarve);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 extern "C" int cSSXAudio_GetClosestCamera1(void* self, void* obj);
@@ -1567,7 +1567,7 @@ void cSSXAudio_BeginCarve_2508(void* vself, void* obj, int n)
     playOpts->p34[bankManager->sub.cur] = 0;
     playOpts->vals[bankManager->sub.cur] = playOpts->ch[bankManager->sub.cur].vol;
     playOpts->p3C[bankManager->sub.cur] = 0;
-    func_00416210((char*)playOpts + bankManager->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)playOpts + bankManager->sub.cur * 8 + 0x40, 0, 8);
     playOpts->p60[bankManager->sub.cur] = 0;
     playOpts->p64[bankManager->sub.cur] = 0;
     playOpts->p68[bankManager->sub.cur] = 0;
@@ -2489,7 +2489,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_Lift);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 #include "fakematch.h"
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 extern "C" int cSSXAudio_GetClosestCamera1(void* self, void* obj);
@@ -2558,7 +2558,7 @@ static inline int snd4170Add(void* vself, void* obj, int a, int b, int c, int fl
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -2909,7 +2909,7 @@ extern "C" void cSSXAudio_Land(cSSXAudio* vself, cRider* rider, float powerupGai
     monitor->p34[bankMgr->sub.cur] = 0;
     monitor->vals[bankMgr->sub.cur] = monitor->ch[bankMgr->sub.cur].vol;
     monitor->p3C[bankMgr->sub.cur] = 0;
-    func_00416210((char*)monitor + bankMgr->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)monitor + bankMgr->sub.cur * 8 + 0x40, 0, 8);
     monitor->p60[bankMgr->sub.cur] = 0;
     monitor->p64[bankMgr->sub.cur] = 0;
     monitor->p68[bankMgr->sub.cur] = 0;
@@ -3434,14 +3434,14 @@ extern "C" void cSSXAudio_Wipeout(cSSXAudio* self, cRider* rider, float intensit
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_00296308);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_WipeoutStart);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  *
  * No code references it; it sits between cSSXAudio_Wipeout and cSSXAudio_WipeoutHit.
  */
-extern "C" void func_00296308(void) {
+extern "C" void cSSXAudio_WipeoutStart(void) {
 
 }
 #endif
@@ -3622,7 +3622,7 @@ static inline int sndVCall(char* o, int slot)
 }
 
 extern "C" {
-void* func_00416210(void* dst, int c, int n);
+void* memset(void* dst, int c, int n);
 void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 int cBankSys_SFX_End(cBankSys* self);
 int cSSXAudio_GetClosestCamera1(void* self, void* obj);
@@ -3655,7 +3655,7 @@ static inline void sfxBegin_6310(struct sSSXAudioView* self, int a, int b)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -3831,7 +3831,7 @@ extern "C" void cSSXAudio_WipeoutSlideStart(cSSXAudio* vself, sSndOwner* wipeout
     playOpts->p34[bankManager->sub.cur] = 0;
     playOpts->vals[bankManager->sub.cur] = playOpts->ch[bankManager->sub.cur].vol;
     playOpts->p3C[bankManager->sub.cur] = 0;
-    func_00416210((char*)playOpts + bankManager->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)playOpts + bankManager->sub.cur * 8 + 0x40, 0, 8);
     playOpts->p60[bankManager->sub.cur] = 0;
     playOpts->p64[bankManager->sub.cur] = 0;
     playOpts->p68[bankManager->sub.cur] = 0;
@@ -3995,7 +3995,7 @@ extern "C" void cSSXAudio_WipeoutTumbleStart(cSSXAudio* vself, sSndOwner* wipeou
     playOpts->p34[bankManager->sub.cur] = 0;
     playOpts->vals[bankManager->sub.cur] = playOpts->ch[bankManager->sub.cur].vol;
     playOpts->p3C[bankManager->sub.cur] = 0;
-    func_00416210((char*)playOpts + bankManager->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)playOpts + bankManager->sub.cur * 8 + 0x40, 0, 8);
     playOpts->p60[bankManager->sub.cur] = 0;
     playOpts->p64[bankManager->sub.cur] = 0;
     playOpts->p68[bankManager->sub.cur] = 0;
@@ -4079,12 +4079,12 @@ extern "C" void cSSXAudio_WipeoutTumbleEnd(cSSXAudio* self, cRider* obj)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_00297498);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_WipeoutEnd);
 #ifdef SKIP_ASM
 /**
  * Does nothing (an empty function; the retail image has no call or data reference to it).
  */
-extern "C" void func_00297498(void) {
+extern "C" void cSSXAudio_WipeoutEnd(void) {
 
 }
 #endif
@@ -4092,7 +4092,7 @@ extern "C" void func_00297498(void) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_WorldSound);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -4158,7 +4158,7 @@ static inline void snd74A0AddVoice(void* vself, int a, int b, int type)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -4279,7 +4279,7 @@ static inline void sndPushVoice(void* vself, int a, int b)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -4516,7 +4516,7 @@ extern "C" void cSSXAudio_ResetAttachedSounds(cSSXAudio* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_Punch);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -4583,7 +4583,7 @@ static inline int snd8138AddVoice(void* vself, void* obj, int a, int b, int type
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -4633,7 +4633,7 @@ extern "C" void cSSXAudio_Punch(cSSXAudio* self, cRider* obj, cRider* obj2)
 //100%
 INCLUDE_ASM("sound/soundsys", cSSXAudio_RiderCollision);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 extern "C" int cSSXAudio_GetClosestCamera1(void* self, void* obj);
@@ -4754,7 +4754,7 @@ static inline int snd8488Add(void* vself, void* obj, int a, int b, int c)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -4822,7 +4822,7 @@ void cSSXAudio_RiderCollision_8488(void* vself, sSs8488Rider* rider, sSs8488Ride
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_WallCollision);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -4885,7 +4885,7 @@ static inline int snd89A8AddVoice(void* vself, void* obj, int a, int b, int type
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -4979,7 +4979,7 @@ extern "C" int cSSXAudio_TurboUseCheck(void) {
 //100%
 INCLUDE_ASM("sound/soundsys", cSSXAudio_TurboOn);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 extern "C" int cSSXAudio_ReplayMode(void* self);
@@ -5044,7 +5044,7 @@ static inline int snd8D90Add(void* vself, int a, int b)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -5077,7 +5077,7 @@ static inline void snd8D90Start(sSnd8D90Sys* self, int a, int b)
         s->p34[m->sub.cur] = 0;
         s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
         s->p3C[m->sub.cur] = 0;
-        func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+        memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
         s->p60[m->sub.cur] = 0;
         s->p64[m->sub.cur] = 0;
         s->p68[m->sub.cur] = 0;
@@ -5167,7 +5167,7 @@ extern "C" void cSSXAudio_TurboOff(cSSXAudio* self, cRider* obj)
 INCLUDE_ASM("sound/soundsys", cSSXAudio_TurboDeny);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -5229,7 +5229,7 @@ static inline void AddVoice299368(cSSXAudio* self, int a, int bb, int type)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -5336,7 +5336,7 @@ extern "C" void cSSXAudio_MaxPowerEvent(cSSXAudio* self, cRider* obj)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_LoseMaxPowerEvent);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -5399,7 +5399,7 @@ static inline int snd97B8AddVoice(void* vself, int a, int b, int type)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -5460,7 +5460,7 @@ extern "C" void cSSXAudio_LoseMaxPowerEvent(cSSXAudio* self, cRider* obj)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_UberRailDeny);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -5518,7 +5518,7 @@ static inline int snd9B70AddVoice(void* vself, int a, int b, int type)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -5562,7 +5562,7 @@ extern "C" void cSSXAudio_UberRailDeny(cSSXAudio* self, cRider* obj)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_ChangePosition);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -5620,7 +5620,7 @@ static inline int snd9E28AddVoice(void* vself, int a, int b, int type)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -5707,7 +5707,7 @@ extern "C" void cSSXAudio_ChangePosition(cSSXAudio* self, cRider* obj, cRider* p
 INCLUDE_ASM("sound/soundsys", cSSXAudio_PlayerResetEvent);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -5765,7 +5765,7 @@ static inline int sndA220AddVoice(void* vself, int a, int b, int type)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -5825,7 +5825,7 @@ extern "C" void cSSXAudio_PlayerResetEvent(cSSXAudio* self, cRider* obj)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_Tweak);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -5883,7 +5883,7 @@ static inline int sndA530AddVoice(void* vself, int a, int b, int type)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -5922,7 +5922,7 @@ extern "C" void cSSXAudio_Tweak(cSSXAudio* self, cRider* obj)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_PointsEvent);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -5980,7 +5980,7 @@ static inline int sndA7D8AddVoice(void* vself, int a, int b, int type)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -6063,7 +6063,7 @@ extern "C" void cSSXAudio_BoostBar(cSSXAudio* self, cRider* obj)
 //100%
 INCLUDE_ASM("sound/soundsys", cSSXAudio_UpdateBoostBar);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 extern "C" int cSSXAudio_ReplayMode(void* self);
@@ -6180,7 +6180,7 @@ static inline int sndAB40Add(void* vself, int a, int b, int type)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -6268,7 +6268,7 @@ extern "C" void cSSXAudio_UpdateBoostBar(cSSXAudio* vself)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_StartUberSpin);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -6326,7 +6326,7 @@ static inline int sndB0E0AddVoice(void* vself, int a, int b, int type)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -6402,7 +6402,7 @@ extern "C" void cSSXAudio_EndUberSpin(cSSXAudio* self, cRider* obj)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_LandedUberTrick);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -6460,7 +6460,7 @@ static inline int sndB430AddVoice(void* vself, int a, int b, int type)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -6588,7 +6588,7 @@ void cSSXAudio_SwapBankStopped(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_BindingsOn);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -6651,7 +6651,7 @@ static inline int sndB968AddVoice(void* vself, void* obj, int a, int b, int type
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -6699,7 +6699,7 @@ extern "C" void cSSXAudio_BindingsOn(cSSXAudio* self, cRider* obj)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_BindingsOff);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -6762,7 +6762,7 @@ static inline int sndBCF8AddVoice(void* vself, void* obj, int a, int b, int type
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -6810,7 +6810,7 @@ extern "C" void cSSXAudio_BindingsOff(cSSXAudio* self, cRider* obj)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_UndoBindings);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -6873,7 +6873,7 @@ static inline int sndC088AddVoice(void* vself, void* obj, int a, int b, int type
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -6934,7 +6934,7 @@ void cSSXAudio_CountdownStart(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_CountdownBeep);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -6992,7 +6992,7 @@ static inline int sndC420AddVoice(void* vself, char* mon, int a, int b, int type
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -7063,7 +7063,7 @@ extern "C" void cSSXAudio_CountdownBeep(cSSXAudio* self, int mode)
 INCLUDE_ASM("sound/soundsys", cSSXAudio_CountdownGateDrop);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 extern "C" int cSSXAudio_ReplayMode(void* self);
@@ -7148,7 +7148,7 @@ static inline int snd7B0Add(void* vself, int a, int b)
         s->p34[m->sub.cur] = 0;
         s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
         s->p3C[m->sub.cur] = 0;
-        func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+        memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
         s->p60[m->sub.cur] = 0;
         s->p64[m->sub.cur] = 0;
         s->p68[m->sub.cur] = 0;
@@ -7339,7 +7339,7 @@ extern "C" void cSSXAudio_ResumeSFX(cSSXAudio* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_PlayIconSound);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -7397,7 +7397,7 @@ static inline int sndCED8AddVoice(void* vself, int a, int b, int type)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -7519,7 +7519,7 @@ extern "C" void cSSXAudio_UpdateTrackBanks(cSSXAudio* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_StartTone);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -7577,7 +7577,7 @@ static inline int sndD370AddVoice(void* vself, int a, int b)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -7788,7 +7788,7 @@ extern "C" void cSSXAudio_BigChallengeBegin(cSSXAudio* self, int mission)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_BigChallengeComplete);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -7846,7 +7846,7 @@ static inline int sndD8E0AddVoice(void* vself, int a, int b, int type)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -7934,7 +7934,7 @@ extern "C" void cSSXAudio_BigChallengeFailed(cSSXAudio* self, int keep)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_HandPlantSound);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -7992,7 +7992,7 @@ static inline int sndDC48AddVoice(void* vself, int a, int b, int type)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -8068,7 +8068,7 @@ static inline void sndBeginVoice(sSSXAudioView* self, int a, int b)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -8249,22 +8249,22 @@ void cSSXAudio_AvalancheGroundHit(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", func_0029E568);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_AvalancheObjectHit);
 #ifdef SKIP_ASM
 /**
  * Does nothing (an empty function; the retail image has no call or data reference to it).
  */
-extern "C" void func_0029E568(void) {
+extern "C" void cSSXAudio_AvalancheObjectHit(void) {
 
 }
 #endif
 //100%
-INCLUDE_ASM("sound/soundsys", func_0029E570);
+INCLUDE_ASM("sound/soundsys", cSSXAudio_BonusSFX);
 #ifdef SKIP_ASM
 /**
  * Does nothing (an empty function; the retail image has no call or data reference to it).
  */
-extern "C" void func_0029E570(void) {
+extern "C" void cSSXAudio_BonusSFX(void) {
 
 }
 #endif
@@ -8291,7 +8291,7 @@ extern "C" void cSSXAudio_ResetWipeoutRecoverHit(void* self, cRider* rider)
 INCLUDE_ASM("sound/soundsys", cSSXAudio_PlayWipeoutRecoverHit);
 #ifdef SKIP_ASM
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -8354,7 +8354,7 @@ static inline int sndE590AddVoice(void* vself, int a, int b, int type, unsigned 
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -8418,7 +8418,7 @@ extern "C" void cSSXAudio_PlayWipeoutRecoverHit(cSSXAudio* self, cRider* obj, fl
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_PlayWipeoutRecoverFull);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
@@ -8481,7 +8481,7 @@ static inline int sndE970AddVoice(void* vself, int a, int b, int type)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -9102,7 +9102,7 @@ extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* vself, cRider* vrider, int length
     voiceSub->p34[voiceMgr->sub.cur] = 0;
     voiceSub->vals[voiceMgr->sub.cur] = voiceSub->ch[voiceMgr->sub.cur].vol;
     voiceSub->p3C[voiceMgr->sub.cur] = 0;
-    func_00416210((char*)voiceSub + voiceMgr->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)voiceSub + voiceMgr->sub.cur * 8 + 0x40, 0, 8);
     voiceSub->p60[voiceMgr->sub.cur] = 0;
     voiceSub->p64[voiceMgr->sub.cur] = 0;
     voiceSub->p68[voiceMgr->sub.cur] = 0;
@@ -10909,7 +10909,7 @@ extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
  *
  * Needs DJ speech allowed (func_0029F0D8). Stops speech instance 0 (func_002B11B0), then requests 8421 with identity
  * 10; when queued, clears unk_5794 and the speech hook D_004A482C gets its packed id, the language bit, 1 when @p firstChoice is
- * set (else 2) and 2 when @p secondChoice is set (else 1). The music code (func_002872A8, func_0028E100, func_0028E8C0),
+ * set (else 2) and 2 when @p secondChoice is set (else 1). The music code (cSSXAudio_StartEventWithNoStartGate, func_0028E100, func_0028E8C0),
  * func_002A3170 and func_002A43B8 call it, mostly with (0, 0).
  *
  * @param firstChoice  the first choice
@@ -13067,7 +13067,7 @@ static inline void crowdBegin(void* vself, int a, int b, int closeOnEnd)
     s->p34[m->sub.cur] = 0;
     s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
     s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
     s->p60[m->sub.cur] = 0;
     s->p64[m->sub.cur] = 0;
     s->p68[m->sub.cur] = 0;
@@ -13399,7 +13399,7 @@ extern "C" void func_002A5CD8(s2A5CD8* self, int i, int newValue)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002A5D08);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 
 struct sVec4_5D08 {
@@ -13551,7 +13551,7 @@ int func_002A5D08_5D08(sPool5D08* self, sSnd5D08Sub* objectOpts, int key)
         playOpts->p34[bankMgr->sub.cur] = 0;
         playOpts->vals[bankMgr->sub.cur] = playOpts->ch[bankMgr->sub.cur].vol;
         playOpts->p3C[bankMgr->sub.cur] = 0;
-        func_00416210((char*)playOpts + bankMgr->sub.cur * 8 + 0x40, 0, 8);
+        memset((char*)playOpts + bankMgr->sub.cur * 8 + 0x40, 0, 8);
         playOpts->p60[bankMgr->sub.cur] = 0;
         playOpts->p64[bankMgr->sub.cur] = 0;
         playOpts->p68[bankMgr->sub.cur] = 0;
@@ -14496,7 +14496,7 @@ extern "C" void func_002A7438(cCrowdSys* self, int i)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A7468);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 
 struct sSnd7468Ch {
     signed char vol;
@@ -14557,7 +14557,7 @@ extern "C" void func_002A7468(char** sys)
     playOpts->p34[bankMgr->sub.cur] = 0;
     playOpts->vals[bankMgr->sub.cur] = playOpts->ch[bankMgr->sub.cur].vol;
     playOpts->p3C[bankMgr->sub.cur] = 0;
-    func_00416210((char*)playOpts + bankMgr->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)playOpts + bankMgr->sub.cur * 8 + 0x40, 0, 8);
     playOpts->p60[bankMgr->sub.cur] = 0;
     playOpts->p64[bankMgr->sub.cur] = 0;
     playOpts->p68[bankMgr->sub.cur] = 0;
@@ -15357,7 +15357,7 @@ extern "C" void cMidiSys__cMidiSys(cMidiSys* self, int flags)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A8450);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 
 struct sSnd8450Ch {
     signed char vol;
@@ -15425,7 +15425,7 @@ extern "C" void func_002A8450(char** sys, int bankIndex, int midiData)
     playOpts->p34[bankMgr->sub.cur] = 0;
     playOpts->vals[bankMgr->sub.cur] = playOpts->ch[bankMgr->sub.cur].vol;
     playOpts->p3C[bankMgr->sub.cur] = 0;
-    func_00416210((char*)playOpts + bankMgr->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)playOpts + bankMgr->sub.cur * 8 + 0x40, 0, 8);
     playOpts->p60[bankMgr->sub.cur] = 0;
     playOpts->p64[bankMgr->sub.cur] = 0;
     playOpts->p68[bankMgr->sub.cur] = 0;
@@ -15696,8 +15696,8 @@ INCLUDE_ASM("sound/soundsys", cPS2SoundManager_Init);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d), like cMemMan_alloc.
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void func_003B5478();
-extern "C" void func_003B5158(void* buf, int size, int flags);
+extern "C" void System_VectorToReal5();
+extern "C" void SNDSYSI_init(void* buf, int size, int flags);
 extern "C" int func_003B5B68(int* out);
 extern const char str_mSoundHeap[];
 
@@ -15712,8 +15712,8 @@ struct sSndVtE8CB0 {
 /**
  * Initialises the PS2 sound manager: allocates its sound heap and resets the sound-memory node list.
  *
- * Allocates mSoundHeap (0x32000 bytes, tag "mSoundHeap"), calls func_003B5478, applies @p mode through virtual slot 2
- * (SetMode), registers the heap with func_003B5158 (flags 0x80303), then links the 32 sound-memory nodes into a free
+ * Allocates mSoundHeap (0x32000 bytes, tag "mSoundHeap"), calls System_VectorToReal5, applies @p mode through virtual slot 2
+ * (SetMode), registers the heap with SNDSYSI_init (flags 0x80303), then links the 32 sound-memory nodes into a free
  * list (each with no address range and size 0; free head 31, +0x318 = -1) and records the main-memory high address from
  * func_003B5B68 in mMainMemHighAddr.
  *
@@ -15722,10 +15722,10 @@ struct sSndVtE8CB0 {
 extern "C" void cPS2SoundManager_Init(cPS2SoundManager* self, int mode)
 {
     self->mSoundHeap = operator_new_tag(0x32000, str_mSoundHeap, 0, 0);
-    func_003B5478();
+    System_VectorToReal5();
     sSndVtE8CB0* vt = ((sSndVtE8CB0*)self->mVtbl);
     vt[2].fn(vthis(self, vt[2]), mode);
-    func_003B5158(self->mSoundHeap, 0x32000, 0x80303);
+    SNDSYSI_init(self->mSoundHeap, 0x32000, 0x80303);
     self->unk_310 = 31;
     self->unk_318 = -1;
     for (int i = 31; i >= 0; i--) {

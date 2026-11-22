@@ -6,5 +6,5 @@
 0x0031E134 // cCubicSplineInterpolant_SpewGraphPoints (bx/cubicspline): c.le.s; nop; nop; bc1tl
 0x003BC79C // SNDI_sin (ealib/seg_2B4578): c.lt.s; nop; nop; bc1tl
 0x003BC86C // SNDI_cos (ealib/seg_2B4578): c.lt.s; nop; nop; bc1tl
-0x003C5280 // func_003C51E8 (ealib/seg_2B4578): 5-instruction ld/sd copy loop, bgez
-0x003C52B0 // func_003C51E8 (ealib/seg_2B4578): 5-instruction lbu/sb copy loop, bgez
+0x003C5280 // Util_MemCpy (ealib/seg_2B4578): 5-instruction ld/sd copy loop, bgez
+0x003C52B0 // Util_MemCpy (ealib/seg_2B4578): 5-instruction lbu/sb copy loop, bgez

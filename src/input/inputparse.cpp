@@ -2731,7 +2731,7 @@ extern "C" void cInputPreProcessor_readChar(cInputPreProcessor* self, sParseStre
 extern "C" void cInputPreProcessor_writeTagLine(cInputPreProcessor* self, int a1, int a2);
 extern "C" void cInputPreProcessor_readFile(cInputPreProcessor* self, int a1, int a2);
 extern "C" void cInputPreProcessor_skipToEOL(cInputPreProcessor* self, sParseStream* s);
-extern "C" int func_004165A8(const char* a, const char* b);
+extern "C" int strcmp(const char* a, const char* b);
 // PORT: cInputPreProcessor_error__FPv is called with (self, s, a2, a3, msg) here; bind the 5-arg form to that symbol.
 void cInputPreProcessor_error_5(void* self, sParseStream* s, int a2, int a3, const char* msg) __asm__("cInputPreProcessor_error__FPv");
 
@@ -2778,7 +2778,7 @@ extern "C" void cInputPreProcessor_readCmdLine(cInputPreProcessor* self, sParseS
         wordPtr++;
     } while (wordPtr - word < 15);
     *wordPtr = 0;
-    if (func_004165A8(word, "include") == 0) {
+    if (strcmp(word, "include") == 0) {
         while (isWS_3266E8(ch = self->CurrentChar))
             cInputPreProcessor_readChar(self, isrc);
         if (ch != '"') {
@@ -3120,7 +3120,7 @@ extern "C" int cPadDevice_construct(void* inputPads, int n)
 //100%
 INCLUDE_ASM("input/inputparse", cPS2PadDevice_cPS2PadDevice);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern void* cPS2PadDevice_vtbl[];
 
 /**
@@ -3138,7 +3138,7 @@ extern "C" void* cPS2PadDevice_cPS2PadDevice(cPS2PadDevice* self, int port, int 
     *(void***)self = cPS2PadDevice_vtbl;
     self->mPort = port;
     self->mSlot = slot;
-    func_00416210((char*)self + 0xC, 0, 36);
+    memset((char*)self + 0xC, 0, 36);
     self->mPressure = 0;
     self->mAnalog = 0;
     self->mModeSet = 0;
@@ -3152,7 +3152,7 @@ extern "C" void* cPS2PadDevice_cPS2PadDevice(cPS2PadDevice* self, int port, int 
 //100%
 INCLUDE_ASM("input/inputparse", cPS2PadDevice__cPS2PadDevice);
 #ifdef SKIP_ASM
-extern "C" int func_003FF8F0(int a, int b);
+extern "C" int scePadPortClose(int a, int b);
 void operator_delete(int* ptr);
 extern void* cPS2PadDevice_vtbl[];
 extern char cPadDevice_vtbl[];
@@ -3160,7 +3160,7 @@ extern char cPadDevice_vtbl[];
 /**
  * Destroys a PS2 pad device: closes its controller port and frees the object when asked to.
  *
- * Reinstalls cPS2PadDevice_vtbl, closes the port (func_003FF8F0 with port +0x4 and slot +0x8), installs cPadDevice_vtbl and
+ * Reinstalls cPS2PadDevice_vtbl, closes the port (scePadPortClose with port +0x4 and slot +0x8), installs cPadDevice_vtbl and
  * calls operator delete when bit 0 of @p flags is set. Slot 1 of cPS2PadDevice_vtbl.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
@@ -3168,7 +3168,7 @@ extern char cPadDevice_vtbl[];
 extern "C" void cPS2PadDevice__cPS2PadDevice(cPS2PadDevice* self, int flags)
 {
     *(void***)self = cPS2PadDevice_vtbl;
-    func_003FF8F0(self->mPort, self->mSlot);
+    scePadPortClose(self->mPort, self->mSlot);
     *(void**)self = cPadDevice_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
@@ -3180,16 +3180,16 @@ extern "C" void cPS2PadDevice__cPS2PadDevice(cPS2PadDevice* self, int flags)
 INCLUDE_ASM("input/inputparse", cPS2PadDevice_sampleButtons);
 #ifdef SKIP_ASM
 extern "C" int func_003FF708(int port, int slot, void* buf);
-extern "C" int func_003FFA58(int port, int slot, unsigned char* data);
-extern "C" int func_003FFBC0(int port, int slot);
-extern "C" int func_003FFCD8(int port, int slot);
-extern "C" int func_003FFD60(int port, int slot, int id, int idx);
-extern "C" int func_003FFFA0(int port, int slot, int term, int offs);
-extern "C" int func_004000D8(int port, int slot, int mode, int lock);
-extern "C" int func_00400190(int port, int slot, unsigned char* data);
-extern "C" int func_00400250(int port, int slot, unsigned char* data);
-extern "C" int func_00400490(int port, int slot);
-extern "C" int func_004004F0(int port, int slot);
+extern "C" int scePadRead(int port, int slot, unsigned char* data);
+extern "C" int scePadGetState(int port, int slot);
+extern "C" int scePadGetReqState(int port, int slot);
+extern "C" int scePadInfoAct(int port, int slot, int id, int idx);
+extern "C" int scePadInfoMode(int port, int slot, int term, int offs);
+extern "C" int scePadSetMainMode(int port, int slot, int mode, int lock);
+extern "C" int scePadSetActDirect(int port, int slot, unsigned char* data);
+extern "C" int scePadSetActAlign(int port, int slot, unsigned char* data);
+extern "C" int scePadInfoPressMode(int port, int slot);
+extern "C" int scePadEnterPressMode(int port, int slot);
 extern unsigned char D_004A3FB8;
 
 
@@ -3212,7 +3212,7 @@ static inline float Analog_326EB0(int v)
  * up, down), triangle, circle, cross, square, L1, R1, L2 and R2, as pressure / 255 in pressure mode, else 0 or 1; then
  * the four analogue stick axes (+0x58 set; else zeros) split into eight half-axis values 0..1, with a dead zone of
  * about 48 steps either side of the centre. In state 10 it also sends changed motor levels (+0x30, +0x38) with
- * func_00400190. Slot 2 of cPS2PadDevice_vtbl; cPadCache_cacheInput calls it for every pad.
+ * scePadSetActDirect. Slot 2 of cPS2PadDevice_vtbl; cPadCache_cacheInput calls it for every pad.
  *
  * @param out  receives up to 24 button values
  * @return 24 when the pad was read, otherwise 0
@@ -3233,7 +3233,7 @@ extern "C" int cPS2PadDevice_sampleButtons(cPS2PadDevice* self, float* out)
             self->mLastBig = -1;
         }
     }
-    int state = func_003FFBC0(self->mPort, self->mSlot);
+    int state = scePadGetState(self->mPort, self->mSlot);
     if (state == 0 || state == 7) {
         self->mPhase = 1;
         self->mModeSet = 0;
@@ -3244,9 +3244,9 @@ extern "C" int cPS2PadDevice_sampleButtons(cPS2PadDevice* self, float* out)
             self->mPressure = 0;
             self->mAnalog = 0;
             self->mActuator = 0;
-            int id = func_003FFFA0(self->mPort, self->mSlot, 1, 0);
+            int id = scePadInfoMode(self->mPort, self->mSlot, 1, 0);
             if (id != 0) {
-                int ext = func_003FFFA0(self->mPort, self->mSlot, 2, 0);
+                int ext = scePadInfoMode(self->mPort, self->mSlot, 2, 0);
                 switch (ext) {
                 case 0:
                     if (id == 4)
@@ -3265,7 +3265,7 @@ extern "C" int cPS2PadDevice_sampleButtons(cPS2PadDevice* self, float* out)
         break;
     case 2:
         if (self->mAnalog == 0 || self->mModeSet == 0) {
-            int result = func_004000D8(self->mPort, self->mSlot, 1, 3);
+            int result = scePadSetMainMode(self->mPort, self->mSlot, 1, 3);
             if (result == 1) {
                 self->mModeSet = result;
                 self->mPhase = 3;
@@ -3275,23 +3275,23 @@ extern "C" int cPS2PadDevice_sampleButtons(cPS2PadDevice* self, float* out)
         }
         break;
     case 3:
-        if (func_003FFBC0(self->mPort, self->mSlot) != 5)
+        if (scePadGetState(self->mPort, self->mSlot) != 5)
             self->mPhase = 1;
         break;
     case 4:
-        if (func_00400490(self->mPort, self->mSlot) == 1)
+        if (scePadInfoPressMode(self->mPort, self->mSlot) == 1)
             self->mPhase = 5;
         else
             self->mPhase = 7;
         break;
     case 5:
-        if (func_004004F0(self->mPort, self->mSlot) == 1) {
+        if (scePadEnterPressMode(self->mPort, self->mSlot) == 1) {
             self->mRetry = 0;
             self->mPhase = 6;
         }
         break;
     case 6: {
-        int result = func_003FFCD8(self->mPort, self->mSlot);
+        int result = scePadGetReqState(self->mPort, self->mSlot);
         if (result == 1) {
             self->mPhase = 1;
             self->mModeSet = 0;
@@ -3306,19 +3306,19 @@ extern "C" int cPS2PadDevice_sampleButtons(cPS2PadDevice* self, float* out)
         break;
     }
     case 7:
-        if (func_003FFD60(self->mPort, self->mSlot, -1, 0) != 0)
+        if (scePadInfoAct(self->mPort, self->mSlot, -1, 0) != 0)
             self->mPhase = 8;
         else
             self->mPhase = 10;
         break;
     case 8:
-        if (func_00400250(self->mPort, self->mSlot, &D_004A3FB8) == 1) {
+        if (scePadSetActAlign(self->mPort, self->mSlot, &D_004A3FB8) == 1) {
             self->mRetry = 0;
             self->mPhase = 9;
         }
         break;
     case 9: {
-        int result = func_003FFCD8(self->mPort, self->mSlot);
+        int result = scePadGetReqState(self->mPort, self->mSlot);
         if (result == 1) {
             self->mPhase = 1;
             self->mModeSet = 0;
@@ -3333,7 +3333,7 @@ extern "C" int cPS2PadDevice_sampleButtons(cPS2PadDevice* self, float* out)
         break;
     }
     case 10:
-        if (func_003FFA58(self->mPort, self->mSlot, data) == 0 || data[0] != 0) {
+        if (scePadRead(self->mPort, self->mSlot, data) == 0 || data[0] != 0) {
             self->mPhase = 1;
             self->mModeSet = 0;
         } else {
@@ -3400,7 +3400,7 @@ extern "C" int cPS2PadDevice_sampleButtons(cPS2PadDevice* self, float* out)
         self->mActDirect[1] = self->mActBig;
         self->mLastSmall = self->mActSmall;
         self->mLastBig = self->mActBig;
-        func_00400190(self->mPort, self->mSlot, self->mActDirect);
+        scePadSetActDirect(self->mPort, self->mSlot, self->mActDirect);
     }
     return ret;
 }

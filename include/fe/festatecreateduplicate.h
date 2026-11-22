@@ -72,7 +72,7 @@ struct cFEStateCreateDuplicate {
     unsigned int mChallengeHintFrame; // 0x054 [R] 0; [U] func_001AAB68, the same for the session's other list (the
                                     //       vector at session + 0xBC); func_001AA9B0 blinks "IconChallengeHint" with it
     int unk_058;                    // 0x058 [R] 0; [U] func_001A9668/func_001A9710 set 1 before pushing cFEStateLogin;
-                                    //       func_001DE860 (slot 7, the onInputBegin override) returns it
+                                    //       cFEStateNet_onInputBegin (slot 7, the onInputBegin override) returns it
     char mszMaskedText[0x40];       // 0x05C [U] func_001A98B8 writes one '*' per character of its string (at most 0x3F;
                                     //       " " when empty) and a NUL; cUIText_setAsciiString(.., mszMaskedText) in
                                     //       func_001ACDD0, func_001B9610, func_001B9678, func_001B9820 (password boxes)

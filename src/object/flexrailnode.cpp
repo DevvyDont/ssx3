@@ -1855,13 +1855,13 @@ extern "C" void cFlagSet__cFlagSet(cFlagSet* self, int flags)
 //100%
 INCLUDE_ASM("object/flexrailnode", cFlagSet_SameKind);
 #ifdef SKIP_ASM
-extern "C" int func_00415FC8(const void* a, const void* b, int n);
+extern "C" int memcmp(const void* a, const void* b, int n);
 
 /**
  * Returns whether a flag set in use already holds flags of the same kind as a new one.
  *
  * True when the set has instances (+0x5C), its model id (+0x58) equals the instance's model id (first word of ctx
- * +0x80) and the 0x58-byte flag data compares equal (func_00415FC8).
+ * +0x80) and the 0x58-byte flag data compares equal (memcmp).
  *
  * @param data  converted flag data of the new flag
  * @param ctx  instance record of the new flag
@@ -1875,7 +1875,7 @@ extern "C" int cFlagSet_SameKind(cFlagSet* self, void* data, tInstanceRecord* ct
     if (*(int*)ctx->m_Model != self->mModelID) {
         return 0;
     }
-    return func_00415FC8(data, self, 88) == 0;
+    return memcmp(data, self, 88) == 0;
 }
 #endif
 

@@ -117,7 +117,7 @@ extern char* cGameAnimMap_GameAnimNames[];
 extern unsigned int* gameanimcmphack;
 extern "C" int gameanimcmp(int* a, int* b);
 extern "C" void qsort(void* base, int n, int size, int (*cmp)(int*, int*));
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 
 struct sMdfHashTable_00314DD8
 {
@@ -131,7 +131,7 @@ struct sMdfHashTable_00314DD8
  *
  * Hashes the 518 names of cGameAnimMap_GameAnimNames ("G_GATEROCK", "G_SIT_CYC", ...) with GetHashValue32() into hash[],
  * sorts order[] by hash with qsort (qsort; the comparator gameanimcmp reads the hashes through
- * gameanimcmphack, set only during the sort) and fills the 518-entry map with -1 (func_00416210). cGameAnimMap_lookupGAD
+ * gameanimcmphack, set only during the sort) and fills the 518-entry map with -1 (memset). cGameAnimMap_lookupGAD
  * (On Tour lookupGAD) binary-searches this index.
  */
 extern "C" void cGameAnimMap_initMap(sMdfHashTable_00314DD8* self)
@@ -145,7 +145,7 @@ extern "C" void cGameAnimMap_initMap(sMdfHashTable_00314DD8* self)
     gameanimcmphack = self->hash;
     qsort(self->order, 518, 4, gameanimcmp);
     gameanimcmphack = 0;
-    func_00416210(self->map, -1, 2072);
+    memset(self->map, -1, 2072);
 }
 #endif
 

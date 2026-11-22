@@ -50,7 +50,7 @@ rom:0x24FC84 reloc:MIPS_HI16 symbol:cFloatingNode_vtbl
 rom:0x24FC8C reloc:MIPS_LO16 symbol:cFloatingNode_vtbl
 // camera/camera func_0015E2A8 (tools/gen/reloc_from_diff.py)
 rom:0x5F30C reloc:MIPS_LO16 symbol:kCamShakeDependsOnDistance
-// be/belibrary func_0014A188 (tools/gen/reloc_from_diff.py)
+// be/belibrary cBELibrary_writeToData (tools/gen/reloc_from_diff.py)
 rom:0x4B1B0 reloc:MIPS_HI16 symbol:cBELibrary_profileLib
 rom:0x4B1B4 reloc:MIPS_HI16 symbol:D_004BA348
 rom:0x4B1B8 reloc:MIPS_HI16 symbol:cBERules_mRules
@@ -69,7 +69,7 @@ rom:0x12E53C reloc:MIPS_LO16 symbol:cSectionMan_mSectionMap
 rom:0xFCFC reloc:MIPS_LO16 symbol:t4vect_Origin
 
 // be/belibrary cBELibrary_readFromData: three lui of the unaligned-copy path left raw (0x4A / 0x4C / 0x53), the same trio as
-// func_0014A188's at rom 0x4B1B0 / 0x4B1B8.
+// cBELibrary_writeToData's at rom 0x4B1B0 / 0x4B1B8.
 rom:0x4B624 reloc:MIPS_HI16 symbol:cBELibrary_profileLib
 rom:0x4B628 reloc:MIPS_HI16 symbol:D_004BA348
 rom:0x4B62C reloc:MIPS_HI16 symbol:cBERules_mRules
@@ -133,7 +133,7 @@ rom:0x7AEC4 reloc:MIPS_HI16 symbol:D_004C62E0
 rom:0x7AF4C reloc:MIPS_LO16 symbol:D_004C62E0
 rom:0x7AF58 reloc:MIPS_LO16 symbol:D_004C62F0
 
-// sound/icepick/worldtriggermanager func_002B8818 and wscript/wscriptman func_0030C8D8 (static-init functions):
+// sound/icepick/worldtriggermanager __sti__all_in_one_sound_cpp and wscript/wscriptman func_0030C8D8 (static-init functions):
 // splat left %hi/%lo halves of their D_004D3Dxx / D_004FC2xx stores unpaired.
 rom:0x1B9D50 reloc:MIPS_LO16 symbol:D_004D3D38
 rom:0x1B9D60 reloc:MIPS_LO16 symbol:D_004D3D48

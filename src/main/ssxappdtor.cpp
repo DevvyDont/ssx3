@@ -359,7 +359,7 @@ extern "C" void cFadeScreen__cFadeScreen(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243A70);
+INCLUDE_ASM("main/ssxappdtor", cFadeScreen_allowFade);
 #ifdef SKIP_ASM
 /**
  * Sets the screen fade's ending flag (+0x8) to 1.
@@ -368,7 +368,7 @@ INCLUDE_ASM("main/ssxappdtor", func_00243A70);
  *
  * @param fadeScreen  the screen fade
  */
-extern "C" void func_00243A70(cFadeScreen* fadeScreen) {
+extern "C" void cFadeScreen_allowFade(cFadeScreen* fadeScreen) {
     (fadeScreen->IsEnding) = 1;
 }
 #endif
@@ -553,7 +553,7 @@ extern "C" void *cGameLoadScreen_cGameLoadScreen(cGameLoadScreen* self) {
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243BF0);
+INCLUDE_ASM("main/ssxappdtor", cGameLoadScreen_getTexttureID);
 #ifdef SKIP_ASM
 /**
  * Returns one of the game load screen's two texture ids (+0x10).
@@ -561,7 +561,7 @@ INCLUDE_ASM("main/ssxappdtor", func_00243BF0);
  * @param index  which texture (0 or 1; not range-checked)
  * @return the texture id at +0x10 + 4 * @p index
  */
-extern "C" int func_00243BF0(void *self, int index) {
+extern "C" int cGameLoadScreen_getTexttureID(void *self, int index) {
     return *(int *)((char *)self + (index << 2) + 0x10);
 }
 #endif
@@ -1397,7 +1397,7 @@ extern "C" void func_00244238(void) {
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244240);
+INCLUDE_ASM("main/ssxappdtor", cPauseState_set);
 #ifdef SKIP_ASM
 extern int cPauseState_FlagsTable[];
 extern int cPauseState_Stack[];
@@ -1412,7 +1412,7 @@ extern int cPauseState_StackIdx;
  *
  * @param id  the pause owner (index into the flag table)
  */
-extern "C" void func_00244240(int id)
+extern "C" void cPauseState_set(int id)
 {
     cPauseState_Flags = cPauseState_FlagsTable[id];
     cPauseState_Stack[cPauseState_StackIdx] = id;
@@ -2116,7 +2116,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_riderCheckpointHit__FPv);
  * Returns 1: the base game mode handler's checkpoint handler accepts every checkpoint.
  *
  * Slot +0x34 of the base handler vtable cGameModeHandler_vtbl (and of the handlers that keep it); the overrides (for example
- * func_002398E8) take the rider and the seconds added.
+ * cGMBigAirHandler_riderCheckpointHit) take the rider and the seconds added.
  *
  * @return 1
  */
@@ -2146,7 +2146,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_raceFinish__FPv);
  * Does nothing: the base game mode handler's race-finish handler.
  *
  * Slot +0x44 of the base handler vtable cGameModeHandler_vtbl; the event handlers override it to record a rider's result (for
- * example func_00239230, cGMRaceHandler_raceFinish).
+ * example cGMBigAirHandler_raceFinish, cGMRaceHandler_raceFinish).
  */
 void cGameModeHandler_raceFinish(void* self)
 {
@@ -2159,7 +2159,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_getHeatScore__FPv);
 /**
  * Returns 0: the base game mode handler has no heat scores.
  *
- * Slot +0x4C of the base handler vtable cGameModeHandler_vtbl; func_00239CE0 overrides it for the scored event.
+ * Slot +0x4C of the base handler vtable cGameModeHandler_vtbl; cGMBigAirHandler_getHeatScore overrides it for the scored event.
  *
  * @return 0
  */
@@ -2175,7 +2175,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_writeToReplayFrame__FPv);
 /**
  * Does nothing: the base game mode handler saves nothing into a replay frame.
  *
- * Slot +0x54 of the base handler vtable cGameModeHandler_vtbl; func_00239D18 overrides it for the scored event.
+ * Slot +0x54 of the base handler vtable cGameModeHandler_vtbl; cGMBigAirHandler_writeToReplayFrame overrides it for the scored event.
  */
 void cGameModeHandler_writeToReplayFrame(void* self)
 {
@@ -2188,7 +2188,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_readFromReplayFrame__FPv);
 /**
  * Does nothing: the base game mode handler restores nothing from a replay frame.
  *
- * Slot +0x5C of the base handler vtable cGameModeHandler_vtbl; func_00239D50 overrides it for the scored event.
+ * Slot +0x5C of the base handler vtable cGameModeHandler_vtbl; cGMBigAirHandler_readFromReplayFrame overrides it for the scored event.
  */
 void cGameModeHandler_readFromReplayFrame(void* self)
 {
@@ -2312,7 +2312,7 @@ void cGMMPSlopeHandler_readFromReplayFrame(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244630);
+INCLUDE_ASM("main/ssxappdtor", cGMFreerideHandler__cGMFreerideHandler);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -2324,7 +2324,7 @@ extern char cGameModeHandler_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_00244630(int* self, int flags)
+extern "C" void cGMFreerideHandler__cGMFreerideHandler(int* self, int flags)
 {
     *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
@@ -2356,7 +2356,7 @@ extern "C" void cGMTimeHandler__cGMTimeHandler(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244690);
+INCLUDE_ASM("main/ssxappdtor", cGMRivalTimeHandler__cGMRivalTimeHandler);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -2368,7 +2368,7 @@ extern char cGameModeHandler_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_00244690(int* self, int flags)
+extern "C" void cGMRivalTimeHandler__cGMRivalTimeHandler(int* self, int flags)
 {
     *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
@@ -2378,7 +2378,7 @@ extern "C" void func_00244690(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002446C0);
+INCLUDE_ASM("main/ssxappdtor", cGMRivalPointHandler__cGMRivalPointHandler);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -2390,7 +2390,7 @@ extern char cGameModeHandler_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_002446C0(int* self, int flags)
+extern "C" void cGMRivalPointHandler__cGMRivalPointHandler(int* self, int flags)
 {
     *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
@@ -2422,7 +2422,7 @@ extern "C" void cGMPointHandler__cGMPointHandler(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244720);
+INCLUDE_ASM("main/ssxappdtor", cGMDebugHandler__cGMDebugHandler);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -2437,7 +2437,7 @@ extern char cGameModeHandler_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_00244720(int* self, int flags)
+extern "C" void cGMDebugHandler__cGMDebugHandler(int* self, int flags)
 {
     *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
@@ -2499,7 +2499,7 @@ extern "C" int cMCOverlayManager_isInDeleteOperation(cMCOverlayManager* overlayM
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244770);
+INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_isInLoadOperation);
 #ifdef SKIP_ASM
 /**
  * Calls the overlay manager's callbackIsLoadPressed (+0x78).
@@ -2508,7 +2508,7 @@ INCLUDE_ASM("main/ssxappdtor", func_00244770);
  *
  * @param overlayManager  the cMCOverlayManager
  */
-extern "C" void func_00244770(void *overlayManager) {
+extern "C" void cMCOverlayManager_isInLoadOperation(void *overlayManager) {
     (*(int (**)())((char*)(overlayManager) + (0x78)))();
 }
 #endif
@@ -3004,7 +3004,7 @@ extern "C" void cMenuSys_input(void* p);
 extern "C" int cGame_activatePauseMenu(char* self, int a);
 extern "C" int cOVStateManager_allowPauseMenu(void);
 extern "C" void cPadCache_clearAllVibrations(void* p);
-extern "C" void func_0020CA10(void);
+extern "C" void cOVStateManager_triggerPauseMenu(void);
 extern "C" void cSSXAudio_PauseAudio(void* snd);
 extern "C" void cSSXAudio_PlayPauseSound(void* snd);
 extern "C" int cOVStateManager_pauseOverlayActive(void);
@@ -3145,7 +3145,7 @@ extern "C" bool cGame_updateUI(cGame* self)
     }
     if (cGame_activatePauseMenu((char*)self, 0) != 0 && !racing_4B48(*((int*)self->Replay)) && !playing_4B48(((char*)self->PlaybackMan)) && cOVStateManager_allowPauseMenu() != 0) {
         cPadCache_clearAllVibrations(PadCache);
-        func_0020CA10();
+        cOVStateManager_triggerPauseMenu();
         cPauseState_Stack[++cPauseState_StackIdx] = 2;
         cPauseState_Flags = D_004428F8[0];
         sUIObj_4B48* uiObject = ((sUIEngine_4B48*)self->UI)->fC;
@@ -3335,14 +3335,14 @@ extern "C" int cGame_updateScreenFade(cGame* self) {
 }
 #endif
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002451B0);
+INCLUDE_ASM("main/ssxappdtor", cGame_updateVibration);
 #ifdef SKIP_ASM
 /**
  * Calls virtual slot 19 (vtable +0x98, vptr at +0x6C0) of each rider in AI's Riders, up to NumberOfRidersAllocated.
  *
  * cGame_update ends its update with the same loop.
  */
-extern "C" void func_002451B0(cGame* self) {
+extern "C" void cGame_updateVibration(cGame* self) {
     int i;
     cRider* obj;
     char *vtbl;
@@ -3566,7 +3566,7 @@ extern "C" void cGameLoadState_onCreateScreen(cGameLoadState* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002454F8);
+INCLUDE_ASM("main/ssxappdtor", cGameLoadState_onGainTransition);
 #ifdef SKIP_ASM
 extern char str_pct[];
 extern char str_pct_3dpct_pct[];
@@ -3583,7 +3583,7 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
  * @param refresh  non-zero to refresh both player panels
  * @return 0
  */
-extern "C" int func_002454F8(cGameLoadState* self, int refresh)
+extern "C" int cGameLoadState_onGainTransition(cGameLoadState* self, int refresh)
 {
     void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pct));
     if (obj != 0) {
@@ -3685,7 +3685,7 @@ void cGameLoadStateOutLodge_onWidgetCreate(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00245698);
+INCLUDE_ASM("main/ssxappdtor", cGameLoadStateOutLodge_onGainTransition);
 #ifdef SKIP_ASM
 extern char str_pct[];
 extern char str_pct_3dpct_pct[];
@@ -3700,7 +3700,7 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
  *
  * @return 0
  */
-extern "C" int func_00245698(cGameLoadStateOutLodge* self)
+extern "C" int cGameLoadStateOutLodge_onGainTransition(cGameLoadStateOutLodge* self)
 {
     void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pct));
     if (obj != 0) {

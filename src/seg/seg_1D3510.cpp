@@ -668,7 +668,7 @@ extern "C" int cPS2MemCard_GetState(cPS2MemCard* memCard) {
 /**
  * Does nothing. Nothing in the build references it.
  */
-extern "C" void func_002D39E0(void) {
+extern "C" void cPS2MemCard_UnMount(void) {
 }
 
 //100%
@@ -1522,19 +1522,19 @@ extern "C" int cTextMenuItem_gettext(int menuItem) {
 INCLUDE_ASM("seg/seg_1D3510", cTextMenuItem_settext);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_00416958_3D48(char*, int, int) __asm__("func_00416958");
+extern "C" int strncat_3D48(char*, int, int) __asm__("strncat");
 /**
- * Sets a text-entry menu item's text: clears the 16-byte buffer at +0x18 and copies @p text into it with func_00416958
+ * Sets a text-entry menu item's text: clears the 16-byte buffer at +0x18 and copies @p text into it with strncat
  * (at most 15 characters).
  *
  * @param menuItem  the text-entry item
  * @param text  the new text
- * @return what func_00416958 returns
+ * @return what strncat returns
  */
 extern "C" int cTextMenuItem_settext(cTextMenuItem* menuItem, int text) {
     char *textBuf = menuItem->Text;
     *textBuf = 0;
-    return func_00416958_3D48(textBuf, text, 0xF);
+    return strncat_3D48(textBuf, text, 0xF);
 }
 #endif
 

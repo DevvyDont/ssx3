@@ -56,8 +56,8 @@ void* cOcclusionMan_cOcclusionMan(void* p);
 extern "C" void* cWorld_cWorld(void* p);
 extern "C" void* cWorldLightMan_cWorldLightMan(void* p, void* a);
 extern "C" void* cWScriptMan_cWScriptMan(void* p);
-extern "C" void* func_00229180(void* p);
-extern "C" void* func_00343A68(void* p);
+extern "C" void* cCrowdMan2d_cCrowdMan2d(void* p);
+extern "C" void* cCrowdMan3d_cCrowdMan3d(void* p);
 extern "C" void* cMultiParticleMan_cMultiParticleMan(void* p);
 extern "C" void* cInstanceMan_cInstanceMan(void* p, int a, int b);
 extern "C" void cIrradianceDataBase_Load(void* p);
@@ -262,8 +262,8 @@ extern "C" void cGame_load(cGame* self)
     self->World = (cWorld*)cWorld_cWorld(operator new(0x18, str_World, 0, 0));
     self->WorldLightMan = (cWorldLightMan*)cWorldLightMan_cWorldLightMan(operator new(12960, str_WorldLightMan, 0x20000000, 0), (sGridGL*)self->BXNash);
     self->WScriptMan = (cWScriptMan*)cWScriptMan_cWScriptMan(operator new(1176, str_WScriptMan, 0x20000000, 0));
-    self->CrowdMan2d = (cCrowdMan2d*)func_00229180(operator new(10016, str_CrowdMan2d, 0x20000000, 0));
-    self->CrowdMan3d = (cCrowdMan3d*)func_00343A68(operator new(2500, str_CrowdMan3d, 0x20000000, 0));
+    self->CrowdMan2d = (cCrowdMan2d*)cCrowdMan2d_cCrowdMan2d(operator new(10016, str_CrowdMan2d, 0x20000000, 0));
+    self->CrowdMan3d = (cCrowdMan3d*)cCrowdMan3d_cCrowdMan3d(operator new(2500, str_CrowdMan3d, 0x20000000, 0));
     self->MultiParticleMan = (cMultiParticleMan*)cMultiParticleMan_cMultiParticleMan(operator new(0x10, str_MultiParticleMan, 0x20000000, 0));
     self->InstanceMan = (cInstanceMan*)cInstanceMan_cInstanceMan(operator new(0x10, str_InstancesMan, 0x20000000, 0), 0x80, 0x40);
     cIrradianceDataBase_Load(cIrradianceDataBase_TheDataBase);
@@ -598,8 +598,8 @@ extern "C" void cBXNash_purgeTheAIFwdDiffCache(void* p);
 extern "C" void cMenuSys__cMenuSys(void* p, int flags);
 extern "C" void cBucketMan_mergeBucket(void* mgr, int a);
 extern "C" void cBucketMan_purge(void* mgr);
-extern "C" void func_00229278(void* p, int flags);
-extern "C" void func_00343B28(void* p, int flags);
+extern "C" void cCrowdMan2d__cCrowdMan2d(void* p, int flags);
+extern "C" void cCrowdMan3d__cCrowdMan3d(void* p, int flags);
 extern "C" void cMultiParticleMan__cMultiParticleMan(void* p, int flags);
 extern "C" void cPlaybackMan__cPlaybackMan(void* p, int flags);
 extern "C" void cInstanceMan__cInstanceMan(void* p, int flags);
@@ -743,8 +743,8 @@ extern "C" void cGame_purge(char* self)
     cBucketMan_mergeBucket(bm, 1);
     cBucketMan_purge(bm);
     VDelete_FA98(*(char**)(self + 0x30), 1172, 8);
-    if (*(void**)(self + 0x38) != 0) func_00229278(*(void**)(self + 0x38), 3);
-    if (*(void**)(self + 0x3C) != 0) func_00343B28(*(void**)(self + 0x3C), 3);
+    if (*(void**)(self + 0x38) != 0) cCrowdMan2d__cCrowdMan2d(*(void**)(self + 0x38), 3);
+    if (*(void**)(self + 0x3C) != 0) cCrowdMan3d__cCrowdMan3d(*(void**)(self + 0x3C), 3);
     if (*(void**)(self + 0x40) != 0) cMultiParticleMan__cMultiParticleMan(*(void**)(self + 0x40), 3);
     if (*(void**)(self + 0x34) != 0) cPlaybackMan__cPlaybackMan(*(void**)(self + 0x34), 3);
     if (*(void**)(self + 0x88) != 0) cInstanceMan__cInstanceMan(*(void**)(self + 0x88), 3);
@@ -1025,7 +1025,7 @@ extern "C" void cGame_sectionLoaded(cGame* self)
 //100%
 INCLUDE_ASM("main/gameload", cGame_sectionUnloading);
 #ifdef SKIP_ASM
-extern "C" void func_00358700(int kind);
+extern "C" void cRailManNode_unloadSection(int kind);
 extern "C" void func_00229408(void* self, int id);
 extern "C" void func_00343C08(void* self, int arg);
 extern "C" void cMultiParticleMan_unloadSection(void* self, int arg);
@@ -1047,7 +1047,7 @@ extern void* cMultiParticleMan_TheMultiParticleMan;
 extern "C" void cGame_sectionUnloading(cGame* self, int id)
 {
     void* bm = &D_004A5988_bm;
-    func_00358700(id);
+    cRailManNode_unloadSection(id);
     func_00229408(TheCrowdMan2d, id);
     func_00343C08(TheCrowdMan3d, id);
     cMultiParticleMan_unloadSection(cMultiParticleMan_TheMultiParticleMan, id);
@@ -1148,7 +1148,7 @@ extern "C" void cGame_exit(cGame* self, int toFrontEnd)
 #endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00230558);
+INCLUDE_ASM("main/gameload", cGame_startReplay);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cReplay_startReplay(void* a, int b, int c, int d);
@@ -1172,7 +1172,7 @@ struct sGameLoad_0558 {
  * entry 8 of the table cPauseState_FlagsTable), starts the replay (+0x28) with cReplay_startReplay(replay, 0, 0, 0) and calls
  * cMenuSys_activate (On Tour cMenuSys::activate) with 0 on the menu system (+0xA4). The pause stack index is not checked.
  */
-extern "C" void func_00230558(sGameLoad_0558* self)
+extern "C" void cGame_startReplay(sGameLoad_0558* self)
 {
     cPauseState_Stack[++cPauseState_StackIdx] = 8;
     cPauseState_Flags = D_00442910[0];
@@ -1209,7 +1209,7 @@ extern "C" void cGame_stopReplay(cGame* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00230640);
+INCLUDE_ASM("main/gameload", cGame_renderBuckets);
 #ifdef SKIP_ASM
 extern "C" void cBucketMan_renderBucket(void* mgr, int id);
 struct sGp2898 { int a, b; };
@@ -1221,7 +1221,7 @@ extern int D_004428D8[];
  *
  * cGame_render calls it in each of its three render paths.
  */
-extern "C" void func_00230640(void)
+extern "C" void cGame_renderBuckets(void)
 {
     int i;
     sGp2898* mgr = &gBucketMan;
@@ -1291,7 +1291,7 @@ extern "C" int cGame_activatePauseMenu_pi(void* self, int a) __asm__("cGame_acti
 extern "C" void cFadeScreen_update_v(void* self) __asm__("cFadeScreen_update");
 extern "C" int cOVStateManager_allowPauseMenu(void);
 extern "C" void cPadCache_clearAllVibrations(void* p);
-extern "C" void func_0020CA10(void);
+extern "C" void cOVStateManager_triggerPauseMenu(void);
 extern "C" void cSSXAudio_PauseAudio(void* p);
 extern "C" void cSSXAudio_PlayPauseSound(void* p);
 extern "C" int cOVStateManager_pauseOverlayActive(void);
@@ -1467,7 +1467,7 @@ static inline int updateState_2306B8(cGame* self)
     if (cGame_activatePauseMenu_pi(self, 0) != 0 && !inRace_2306B8(*((int*)self->Replay))
         && notPlaying_2306B8(((char*)self->PlaybackMan)) && cOVStateManager_allowPauseMenu() != 0) {
         cPadCache_clearAllVibrations(PadCache);
-        func_0020CA10();
+        cOVStateManager_triggerPauseMenu();
         pushState_2306B8(2);
         {
             sObjC_2306B8* o = ((sObjC_2306B8*)((cUIEngine*)self->UI)->mpInput);

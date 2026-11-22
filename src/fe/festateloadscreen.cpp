@@ -27,7 +27,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cUIEngine_cUIEngine(void* mem);
 extern "C" void cUIEngine_loadFile(void* engine, const char* name);
 extern "C" void* cUIState_cUIState(void* self, void* engine);
-extern "C" void func_00233640(cFELoadScreen* self, int type);
+extern "C" void cFELoadScreen_loadTexture(cFELoadScreen* self, int type);
 extern "C" void cUIStateStack_push(void* list, void* screen);
 extern int cRealFE_mStartState;
 extern char str_UIEngine_b[];
@@ -98,7 +98,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
  * Calls the graphics manager's slot 44 with 0x100, creates a UI engine loaded from "data/ui/fl" with the
  * app's fonts and locale and a cFEInput, then pushes cFELoadStateInLodge when cRealFE_mStartState is 0x27 (going to
  * the lodge), cFELoadHintState when results are not locked or the game path is 0, else cFELoadState; the last
- * two get this screen as parent and a texture (func_00233640 with 1 or 2). SplashTexID (+0x18) becomes -1.
+ * two get this screen as parent and a texture (cFELoadScreen_loadTexture with 1 or 2). SplashTexID (+0x18) becomes -1.
  */
 extern "C" void cFELoadScreen_load(cFELoadScreen* self)
 {
@@ -130,11 +130,11 @@ extern "C" void cFELoadScreen_load(cFELoadScreen* self)
     } else if (*(int*)(gm + 0x9C) == 0 || cBENewRaceInterface_newRace.cGamePath == 0) {
         screen = newScreenB_233438(self);
         *(void**)(screen + 0x48) = ((void*)self);
-        func_00233640(self, 1);
+        cFELoadScreen_loadTexture(self, 1);
     } else {
         screen = newScreenC_233438(self);
         *(void**)(screen + 0x48) = ((void*)self);
-        func_00233640(self, 2);
+        cFELoadScreen_loadTexture(self, 2);
     }
     cUIStateStack_push(&self->mpUI->mStateStack, screen);
     self->SplashTexID = -1;
@@ -142,7 +142,7 @@ extern "C" void cFELoadScreen_load(cFELoadScreen* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadscreen", func_00233640);
+INCLUDE_ASM("fe/festateloadscreen", cFELoadScreen_loadTexture);
 #ifdef SKIP_ASM
 int cBENewPlayerInterface_getPlayerCharID(void* self, int idx);
 int cBENewPlayerInterface_getRiderCharID(void* self, int idx);
@@ -189,7 +189,7 @@ static inline int loadTex_3640(char* data, const char* name)
  *
  * @param type  1 for the single-player portrait, 2 for the two online players' portraits
  */
-extern "C" void func_00233640(cFELoadScreen* self, int type)
+extern "C" void cFELoadScreen_loadTexture(cFELoadScreen* self, int type)
 {
     char name[0x70];
     cBigFile bf;

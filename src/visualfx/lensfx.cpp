@@ -314,7 +314,7 @@ extern "C" int func_002ECC28(cBoltOnFXInterface* lensMgr, int x, int y)
 INCLUDE_ASM("visualfx/lensfx", func_002ECCB8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0014ABE0();
+extern "C" void* cBEBoltInterface_getThis();
 extern "C" void* func_0014AD28(void* self, int a1, int a2);
 extern "C" void* func_0014AD50(void* self, int rider);
 void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
@@ -369,7 +369,7 @@ extern "C" void func_002ECCB8(cBoltOnFXInterface* vself)
     for (int z = 14; z >= 0; z--) {
         used[z] = 0;
     }
-    void* lib = func_0014ABE0();
+    void* lib = cBEBoltInterface_getThis();
     cBECharProfileDB* tbl = 0;
     int id = -1;
     cRider* rider = (cRider*)self->rider;

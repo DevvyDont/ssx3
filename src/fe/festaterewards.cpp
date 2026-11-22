@@ -65,7 +65,7 @@ extern "C" void cFEStateRewardGalleryBase_onCreateScreen(cFEStateRewardGalleryBa
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_onGainFocus);
 #ifdef SKIP_ASM
-extern "C" void func_003A0290(void* thing, t3Vector* out);
+extern "C" void cUIThing_getAbsPosition(void* thing, t3Vector* out);
 
 /**
  * Prepares the reward gallery when it gains focus: measures the select bar's offset from the first grid cell and, once
@@ -73,7 +73,7 @@ extern "C" void func_003A0290(void* thing, t3Vector* out);
  *
  * Vtable slot 6 of all six gallery vtables (the slot cFEStateCharEquip_onGainFocus fills in cFEStateCharEquip_vtbl).
  * With the first cell (+0x924) and the select bar (+0x8F8, "orange_select_bar") both bound, stores the bar's position
- * minus the cell's (func_003A0290) in +0x70 (x) and +0x74 (y); cFEStateRewardGalleryBase_updateHighlither adds this offset back onto the highlighted
+ * minus the cell's (cUIThing_getAbsPosition) in +0x70 (x) and +0x74 (y); cFEStateRewardGalleryBase_updateHighlither adds this offset back onto the highlighted
  * cell. Resets the first visible row (+0x64) to 0. When flags +0x48 have bit 3 (icons loaded) and bit 1 (rewards
  * loaded), the first cell becomes the current cell (+0x8FC) if none is set, then vtable slot 40 (cFEStateRewardGalleryBase_updateList)
  * refreshes the grid and slot 33 (cFEStateRewardGalleryBase_updateHelpText) shows the help text for reward 0.
@@ -84,10 +84,10 @@ extern "C" void cFEStateRewardGalleryBase_onGainFocus(cFEStateRewardGalleryBase*
     t3Vector widgetPos;
     void* widget = *(void**)&self->mpIcons[0];
     if (widget != 0) {
-        func_003A0290(widget, &firstCellPos);
+        cUIThing_getAbsPosition(widget, &firstCellPos);
         widget = (void*)self->mpHilighter;
         if (widget != 0) {
-            func_003A0290(widget, &widgetPos);
+            cUIThing_getAbsPosition(widget, &widgetPos);
             self->mVertHilighterOffset = widgetPos.y - firstCellPos.y;
             self->mHorizHilighterOffset = widgetPos.x - firstCellPos.x;
         }
@@ -628,7 +628,7 @@ extern "C" void cFEStateRewardGalleryBase_onPopupEvent(cFEStateRewardGalleryBase
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_getIconID);
 #ifdef SKIP_ASM
-extern "C" int func_004165A8(const void* a, const void* b);
+extern "C" int strcmp(const void* a, const void* b);
 
 struct sRewardName_FDD0 {
     char name[8];
@@ -648,7 +648,7 @@ int cFEStateRewardGalleryBase_getIconID_find(sRewardTable_FDD0* self, char* name
  * Returns the GrMan handle of the gallery icon with the given name, or -1.
  *
  * Searches the icon table built by cFEStateRewardGalleryBase_allocIcons (count +0x78; 12-byte entries from +0x7C holding the name and the
- * handle) with func_004165A8 (strcmp). The per-gallery icon lookups (cFEStateRewardGalleryPosters_getIconID and its copies) call it with the
+ * handle) with strcmp (strcmp). The per-gallery icon lookups (cFEStateRewardGalleryPosters_getIconID and its copies) call it with the
  * first 4 characters of a reward's icon name.
  *
  * @param name  the icon name (4 characters, NUL-terminated)
@@ -658,7 +658,7 @@ int cFEStateRewardGalleryBase_getIconID_find(sRewardTable_FDD0* self, char* name
 {
     int i;
     for (i = 0; i < self->count; i++) {
-        if (func_004165A8(self->entries[i].name, name) == 0) {
+        if (strcmp(self->entries[i].name, name) == 0) {
             return self->entries[i].id;
         }
     }
@@ -1629,8 +1629,8 @@ extern "C" void cFEStateRewardGalleryBase_updateHighlither(cFEStateRewardGallery
         if ((char*)self->mpSelected != 0) {
             t3Vector cellPos;
             t3Vector barPos;
-            func_003A0290((char*)self->mpSelected, &cellPos);
-            func_003A0290((char*)self->mpHilighter, &barPos);
+            cUIThing_getAbsPosition((char*)self->mpSelected, &cellPos);
+            cUIThing_getAbsPosition((char*)self->mpHilighter, &barPos);
             barPos.y = cellPos.y + self->mVertHilighterOffset;
             barPos.x = cellPos.x + self->mHorizHilighterOffset;
             *(&self->mpHilighter->mPosition) = barPos;

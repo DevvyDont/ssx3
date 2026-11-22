@@ -95,7 +95,7 @@ CHECK_SIZE(cGameLoadScreen, 0x18);
 // or cFELoadState (both riders' stats) - plus the riders' pictures it loads for them. EA's source: probably
 // d:/ssx/code/source/main/loadscreens.cpp (builds/x/v2 file_hints: retail cFELoadState_InitwidgetMultiP's assert, line
 // 1191, names that file; On Tour keeps all four classes in main/all_in_one_main). Retail code: load, gainFocus, purge,
-// render, update and loadTexture (func_00233640) in fe/festateloadscreen (0x00233438 ... 0x00233A70); the dtor, the
+// render, update and loadTexture (cFELoadScreen_loadTexture) in fe/festateloadscreen (0x00233438 ... 0x00233A70); the dtor, the
 // ctor and getTexttureID in main/ssxappdtor (0x00243C00 ... 0x00243C70).
 //
 // Size 0x1C:
@@ -127,7 +127,7 @@ struct cFELoadScreen {
                                     //       state on its stack (+0x18); purge deletes it; render / update draw and run
                                     //       it
     // --- cFELoadScreen
-    int mTexID[2];                  // 0x010 [O]; [R] ctor 0, 0; [U] loadTexture (func_00233640) fills [0] (type 1: the
+    int mTexID[2];                  // 0x010 [O]; [R] ctor 0, 0; [U] loadTexture (cFELoadScreen_loadTexture) fills [0] (type 1: the
                                     //       human's "CharaPics") or [0] and [1] (type 2: both players'); purge frees
                                     //       the non-zero ones; getTexttureID returns [index]; the load states read them
                                     //       through mpParentModule

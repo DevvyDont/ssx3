@@ -484,7 +484,7 @@ extern char str_UITPage[];
 extern char* D_004A289C_8138 __asm__("GrMan");
 extern "C" sUIFsh8138* FILE_loadpack(char* name, int flags);
 extern "C" void MEM_free(void* p);
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
@@ -509,7 +509,7 @@ extern "C" void cUITextureBank_setData(cUITextureBank* vbank, int id, void* vdat
     sUIFsh8138* fsh = FILE_loadpack(name, 0x3000100);
     self->mNumTextureIDs = fsh->count;
     self->mpTexturesIDs = (int*)operator_new_tag(self->mNumTextureIDs * 4, str_UITextureIDs, 0, 0);
-    func_00416210(self->mpTexturesIDs, 0xFF, self->mNumTextureIDs * 4);
+    memset(self->mpTexturesIDs, 0xFF, self->mNumTextureIDs * 4);
     for (; i < self->mNumTextureIDs; i++) {
         char* shape = (char*)fsh + fsh->dir[i].offset;
         if (shape != 0) {
@@ -524,7 +524,7 @@ extern "C" void cUITextureBank_setData(cUITextureBank* vbank, int id, void* vdat
     self->mNumElements = n;
     sUITexElem8138*& slot = ((sUITexElem8138*)self->mpElements);
     slot = new (str_UITextureELs, 0, 0) sUITexElem8138[n];
-    func_00416210(((sUITexElem8138*)self->mpElements), 0xFF, self->mNumElements * 4);
+    memset(((sUITexElem8138*)self->mpElements), 0xFF, self->mNumElements * 4);
     int j;
     for (j = 0; j < self->mNumElements; j++, src++) {
         ((sUITexElem8138*)self->mpElements)[j].fC = src->fC;
@@ -1349,7 +1349,7 @@ extern "C" void cUIIcon_setTextureByHashValue(cUIIcon* self, int id)
 INCLUDE_ASM("ui/uiengine", cUIListBox_cUIListBox);
 #ifdef SKIP_ASM
 extern "C" void* cUIThing_cUIThing(void* self);
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern void* cUIListBox_vtbl[];
 
 extern tARGB gStaticColour;
@@ -1380,7 +1380,7 @@ extern "C" cUIListBox* cUIListBox_cUIListBox(cUIListBox* self)
     }
     *(char*)&self->mNumEntries = 0;
     *(char*)&self->mCurrentEntry = 0;
-    func_00416210(((&self->mpEntries[0])), 0, 640);
+    memset(((&self->mpEntries[0])), 0, 640);
     (*(&self->mStaticColour)) = gStaticColour;
     return (self);
 }

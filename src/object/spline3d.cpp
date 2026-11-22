@@ -134,7 +134,7 @@ extern "C" void cSpline_readFromReplayFrame(cSpline* self, cStream_5570* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/spline3d", func_00345638);
+INCLUDE_ASM("object/spline3d", cSplineSegment_isVisible);
 #ifdef SKIP_ASM
 struct sV4_5638 {
     float x, y, z, w;
@@ -250,16 +250,16 @@ struct sVEnt_5638 {
 };
 
 /**
- * Returns whether a node's bounding box is not culled by the graphics manager's box test.
+ * Returns whether a spline segment's bounding box is not culled by the graphics manager's box test.
  *
- * Builds the box corners (x, y, z, 1) from the floats at +0x6C..+0x74 and +0x78..+0x80, gets the current view matrix
- * from the graphics manager's virtual slot 43 and passes all three to its box test (virtual slot 93). The result is 1
- * unless that test returns 1 (the box is outside the view), the same test as cSpline_isVisible. cSpline_draw draws only
- * the nodes for which this returns non-zero.
+ * Builds the box corners (x, y, z, 1) from the segment's m_fvMin (+0x6C) and m_fvMax (+0x78), gets the current view
+ * matrix from the graphics manager's virtual slot 43 and passes all three to its box test (virtual slot 93). The result
+ * is 1 unless that test returns 1 (the box is outside the view), the same test as cSpline_isVisible. cSpline_draw draws
+ * only the segments for which this returns non-zero.
  *
  * @return 1 when the box is (at least partly) in view, 0 when the test culls it
  */
-extern "C" int func_00345638(void* self)
+extern "C" int cSplineSegment_isVisible(void* self)
 {
     tSplineSegmentRecord* nodeBytes = (tSplineSegmentRecord*)self;
     cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;

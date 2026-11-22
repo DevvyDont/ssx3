@@ -7,7 +7,7 @@ INCLUDE_ASM("seg/seg_1C9348", HUFF_about);
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, int flags, int align) __asm__("cMemMan_alloc");
-extern "C" void* func_00416210(void* dst, int c, unsigned int n);
+extern "C" void* memset(void* dst, int c, unsigned int n);
 extern char str_CODEXABOUT[];
 extern char D_004865D8[] __attribute__((aligned(8)));
 extern char D_004A3980[] __attribute__((aligned(8)));
@@ -50,7 +50,7 @@ extern "C" void* HUFF_about(void)
 {
     sCodexAbout_HUFF* about = (sCodexAbout_HUFF*)operator new(132, str_CODEXABOUT, 0x20000000, 0);
     if (about != 0) {
-        func_00416210(about, 0, 132);
+        memset(about, 0, 132);
         about->signature = 'HUFF';
         about->size = 132;
         about->version = 100;
@@ -74,18 +74,18 @@ extern "C" void* HUFF_about(void)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1C9348", func_002C8468);
+INCLUDE_ASM("seg/seg_1C9348", bxggetm);
 #ifdef SKIP_ASM
 /**
  * Reads a big-endian unsigned number of @p n bytes.
  *
- * func_002C84A0 and func_002C8550 read the header fields of HUFF-compressed data with it.
+ * HUFF_is and HUFF_size read the header fields of HUFF-compressed data with it.
  *
  * @param bytes  the first byte
  * @param n  how many bytes to read (0 gives 0)
  * @return the value
  */
-extern "C" unsigned func_002C8468(unsigned char *bytes, int n) {
+extern "C" unsigned bxggetm(unsigned char *bytes, int n) {
     unsigned value = 0;
     while (n--) {
         value = (value << 8) + *bytes++;
@@ -95,27 +95,27 @@ extern "C" unsigned func_002C8468(unsigned char *bytes, int n) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1C9348", func_002C84A0);
+INCLUDE_ASM("seg/seg_1C9348", HUFF_is);
 #ifdef SKIP_ASM
-extern "C" unsigned func_002C8468(unsigned char *p, int n);
+extern "C" unsigned bxggetm(unsigned char *p, int n);
 
 /**
  * Tells whether a buffer starts with a HUFF compression header.
  *
- * Reads the first two bytes (big-endian, func_002C8468) and gives 100 for the ids 0x30FB, 0x31FB, 0x32FB, 0x33FB,
+ * Reads the first two bytes (big-endian, bxggetm) and gives 100 for the ids 0x30FB, 0x31FB, 0x32FB, 0x33FB,
  * 0x34FB and 0x35FB, else 0. Nothing in the build calls it.
  *
  * @param compressed  the compressed data
  * @return 100 for a HUFF header, else 0
  */
-extern "C" int func_002C84A0(unsigned char *compressed) {
+extern "C" int HUFF_is(unsigned char *compressed) {
     int confidence = 0;
-    if (func_002C8468(compressed, 2) == 12539
-        || func_002C8468(compressed, 2) == 12795
-        || func_002C8468(compressed, 2) == 13051
-        || func_002C8468(compressed, 2) == 13307
-        || func_002C8468(compressed, 2) == 13563
-        || func_002C8468(compressed, 2) == 13819) {
+    if (bxggetm(compressed, 2) == 12539
+        || bxggetm(compressed, 2) == 12795
+        || bxggetm(compressed, 2) == 13051
+        || bxggetm(compressed, 2) == 13307
+        || bxggetm(compressed, 2) == 13563
+        || bxggetm(compressed, 2) == 13819) {
         confidence = 100;
     }
     return confidence;
@@ -123,24 +123,24 @@ extern "C" int func_002C84A0(unsigned char *compressed) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1C9348", func_002C8550);
+INCLUDE_ASM("seg/seg_1C9348", HUFF_size);
 #ifdef SKIP_ASM
-extern "C" unsigned func_002C8468(unsigned char *p, int n);
+extern "C" unsigned bxggetm(unsigned char *p, int n);
 
 /**
  * Reads the uncompressed size from a HUFF compression header.
  *
- * Reads the 2-byte id (func_002C8468); when bit 0x100 is set the 3-byte big-endian size at offset 5 is read, otherwise
+ * Reads the 2-byte id (bxggetm); when bit 0x100 is set the 3-byte big-endian size at offset 5 is read, otherwise
  * the one at offset 2. The C declares no return value, but the code returns the last read (it is left in the return
  * register). Nothing in the build calls it.
  *
  * @param compressed  the compressed data
  */
-extern "C" void func_002C8550(unsigned char *compressed) {
-    if (func_002C8468(compressed, 2) & 0x100) {
-        func_002C8468(compressed + 5, 3);
+extern "C" void HUFF_size(unsigned char *compressed) {
+    if (bxggetm(compressed, 2) & 0x100) {
+        bxggetm(compressed + 5, 3);
     } else {
-        func_002C8468(compressed + 2, 3);
+        bxggetm(compressed + 2, 3);
     }
 }
 #endif

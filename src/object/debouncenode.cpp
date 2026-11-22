@@ -945,7 +945,7 @@ extern "C" void cCounterNode_writeToReplayFrame(cCounterNode* self, void* stream
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00343A68);
+INCLUDE_ASM("object/debouncenode", cCrowdMan3d_cCrowdMan3d);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sDebounceState;
@@ -973,7 +973,7 @@ struct sState00343A68 {
  *
  * @return self
  */
-extern "C" sState00343A68* func_00343A68(sState00343A68* self)
+extern "C" sState00343A68* cCrowdMan3d_cCrowdMan3d(sState00343A68* self)
 {
     sState00343A68* crowdBlock = self;
     int i;
@@ -998,7 +998,7 @@ extern "C" sState00343A68* func_00343A68(sState00343A68* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00343B28);
+INCLUDE_ASM("object/debouncenode", cCrowdMan3d__cCrowdMan3d);
 #ifdef SKIP_ASM
 extern int TheCrowdMan3d;
 void operator_delete(int*);
@@ -1021,7 +1021,7 @@ struct sDebounce_343B28 {
  *
  * @param flags  destructor flags; bit 0 deletes the storage
  */
-extern "C" void func_00343B28(void* self, int flags)
+extern "C" void cCrowdMan3d__cCrowdMan3d(void* self, int flags)
 {
     sDebounce_343B28* crowdMan = (sDebounce_343B28*)self;
     int i;
@@ -2484,7 +2484,7 @@ extern "C" int cSpline_isVisible(sTrackRef51C0* self)
 INCLUDE_ASM("object/debouncenode", cSpline_draw);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_00345638(void* node);
+extern "C" int cSplineSegment_isVisible(void* node);
 
 class cWorld00345430 {
 public:
@@ -2580,7 +2580,7 @@ struct sCtl00345430 {
  * Draws a spline's visible segments as debug lines in one colour.
  *
  * Sets the current draw state's +0x10 short to -1 and mode bits to 1, then walks the segment list of Seg's spline
- * (+0x68: count +0x20, first +0x24, next +0x64) and, for each segment that func_00345638 reports visible, calls
+ * (+0x68: count +0x20, first +0x24, next +0x64) and, for each segment that cSplineSegment_isVisible reports visible, calls
  * graphics-manager slot 75 with the segment data (+0x10), the colour and 10.
  *
  * @param lineColour  address of the colour to draw with (cSplineModifier passes its +0x20)
@@ -2595,7 +2595,7 @@ extern "C" void cSpline_draw(cSpline* self, int lineColour)
     (((sCtl00345430*)w->m_pCurrentDrawState))->mode = 1;
     int i;
     for (i = 0; i < n; i++) {
-        if (func_00345638(node) != 0) {
+        if (cSplineSegment_isVisible(node) != 0) {
             ((cWorld00345430*)w)->RenderSpline(&node->m_fmBasisMat, lineColour, 10);
         }
         node = (tSplineSegmentRecord*)node->m_NextSeg;

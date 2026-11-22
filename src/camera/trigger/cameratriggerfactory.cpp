@@ -7003,7 +7003,7 @@ struct sCamMgr {
     int numValid;               // 0x8C08
 };
 
-// One name looked up in the bigfile by func_003A6948 (found flag written back).
+// One name looked up in the bigfile by isValidMap (found flag written back).
 struct sCamName {
     char* name;
     int ok;
@@ -7073,7 +7073,7 @@ extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString*
 cBigFile* cBigFile_cBigFile1_A830(cBigFile* self, const char* path, int flags) __asm__("cBigFile_cBigFile1__FP8cBigFile");
 void cBigFile__cBigFile(cBigFile* self, int flags);
 extern "C" int strcasecmp(const char* a, const char* b);
-extern "C" int func_003A6948(const char* path, int n, void* names);
+extern "C" int isValidMap(const char* path, int n, void* names);
 extern char str_data_worlds[];
 extern char str_big[];
 
@@ -7107,7 +7107,7 @@ struct sBigFile_A830 {
  *
  * Returns 0 when an entry already has File == @p name and BigFile == @p tag (strcasecmp on +0x0 and +0x40 of each
  * 0x8C-byte entry). Otherwise opens the big file "data/worlds/<tag>.big" (str_data_worlds + @p tag + str_big, cBigFile
- * flags 0x100) and asks func_003A6948 whether section @p name exists in "data/worlds/<tag>"; the big file and the
+ * flags 0x100) and asks isValidMap whether section @p name exists in "data/worlds/<tag>"; the big file and the
  * strings are destroyed again before returning.
  *
  * Called by cTrackFileMan_scanTrackIndex.
@@ -7138,7 +7138,7 @@ extern "C" int cTrackFileMan_checkLocation(cTrackFileMan* self, char* name, char
     cBigFile_cBigFile1_A830(pbf, workStr.Str, 0x100);
     cBXString__cBXString(&workStr, 2);
     nm.name = name;
-    int anyFound = func_003A6948(base.Str, 1, &nm);
+    int anyFound = isValidMap(base.Str, 1, &nm);
     int result = anyFound == 0 ? 0 : nm.ok;
     cBigFile__cBigFile((cBigFile*)&bf, 2);
     cBXString__cBXString(&base, 2);
@@ -7159,7 +7159,7 @@ extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString*
 cBigFile* cBigFile_cBigFile1_17A978(cBigFile* self, const char* path, int flags) __asm__("cBigFile_cBigFile1__FP8cBigFile");
 void cBigFile__cBigFile(cBigFile* self, int flags);
 extern "C" int strcasecmp(const char* a, const char* b);
-extern "C" int func_003A6948(const char* path, int n, void* names);
+extern "C" int isValidMap(const char* path, int n, void* names);
 extern char str_data_worlds[];
 extern char str_big[];
 
@@ -7189,7 +7189,7 @@ struct sBigFile_17A978 {
  * Checks which of several track sections exist in a big file, unless all of them are already in the location table.
  *
  * If every one of the @p n names is already listed with BigFile == @p tag (strcasecmp), returns 0 without touching the
- * disc. Otherwise opens "data/worlds/<tag>.big" (cBigFile flags 0x100) and lets func_003A6948 set each name's found
+ * disc. Otherwise opens "data/worlds/<tag>.big" (cBigFile flags 0x100) and lets isValidMap set each name's found
  * flag from the "data/worlds/<tag>" section table; when none is found it returns 0. Names that are found but already
  * listed get their flag cleared again. Called by cTrackFileMan_scanLocations with the 22 built-in location files and
  * the big file "BAM".
@@ -7237,7 +7237,7 @@ extern "C" int cTrackFileMan_checkLocation1(cTrackFileMan* selfp, int n, void* n
     func_00318630((cBXString*)&workStr, (cBXString*)&base, str_big);
     cBigFile_cBigFile1_17A978(pbf, workStr.s, 0x100);
     cBXString__cBXString(&workStr, 2);
-    int anyFound = func_003A6948(base.s, n, names);
+    int anyFound = isValidMap(base.s, n, names);
     if (anyFound == 0) {
         cBigFile__cBigFile((cBigFile*)&bf, 2);
         cBXString__cBXString(&base, 2);

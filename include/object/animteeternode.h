@@ -96,7 +96,7 @@ struct cAnimTeeterNode {
                                     //      lever arm of mesh i ((AnimSign >> mesh) & 1, lw)
     // --- cAnimNode at +0x30 (0x50; object/animnode.h): cAnimNodeState (On Tour 0x14)
     float CurrTime;                 // 0x30 [O]; [P] 0x30; [U] updateNode advances and clamps it, getAnimSpeed reads it;
-                                    //      updateNode passes &CurrTime (the cAnimNode part) to func_0034EBA0
+                                    //      updateNode passes &CurrTime (the cAnimNode part) to cAnimNode_frameUpdate
     float CacheTime;                // 0x34 [O]; [U] updateNode = CurrTime (swc1)
     float FrameStart;               // 0x38 [O]; [U] updateNode = the previous CurrTime (swc1)
     float FrameEnd;                 // 0x3C [O]; [U] updateNode = the new CurrTime (swc1)

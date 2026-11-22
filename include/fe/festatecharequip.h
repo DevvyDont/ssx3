@@ -108,7 +108,7 @@ struct cFEStateCharEquip {
                                     //       counts it down, cancelLargePreviewLoad sets -1
     char mLargePreviewFileName[255]; // 0x960 [O]; [R] [0] = 0; [U] startLargePreviewLoad builds the file name here
     char unk_A5F[0x1];              // 0xA5F padding
-    int mIconsLoaded;               // 0xA60 [O] (bool); [R] 0; [U] the out-of-line isIconsLoaded func_001DF9C0 (lw);
+    int mIconsLoaded;               // 0xA60 [O] (bool); [R] 0; [U] the out-of-line isIconsLoaded cFEStateCharEquip_isIconsLoaded (lw);
                                     //       onUpdate sets it once the icon file is in (func_0019E238)
     int mIconsFileIndex;            // 0xA64 [O]; [R] -1, then func_0019DA10(RealFE + 0x1A70, mCharID, name, 9, 1, 0);
                                     //       [R] the dtor releases it (func_0019DC20) and sets -1
@@ -135,7 +135,7 @@ struct cFEStateCharEquip {
     int mCameraState;               // 0xAE0 [O]; [R] 1; [U] 1-4: onInputBegin works in 1 and 4, onWidgetEvent eases to
                                     //       the board (3) and back (4), initInventoryPreview sets 1
     int mCanSwitchMode;             // 0xAE4 [O] (bool); [R] the ctor's canSwitchMode; [U] canSwitchEquipMode (lw) and
-                                    //       setCanSwitchEquipMode func_001DF9C8 (sw); onWidgetCreate hides the button
+                                    //       setCanSwitchEquipMode cFEStateCharEquip_setCanSwitchEquipMode (sw); onWidgetCreate hides the button
                                     //       when 0
     char unk_AE8[0x8];              // 0xAE8 tail padding (16-byte class alignment)
 };

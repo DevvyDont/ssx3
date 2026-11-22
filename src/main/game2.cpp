@@ -24,7 +24,7 @@ INCLUDE_ASM("main/game2", cGame_exit);
 
 INCLUDE_ASM("main/game2", cGame_stopReplay);
 
-INCLUDE_ASM("main/game2", func_00230640);
+INCLUDE_ASM("main/game2", cGame_renderBuckets);
 
 INCLUDE_ASM("main/game2", cGame_getTransitionMan);
 

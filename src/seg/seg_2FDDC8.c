@@ -31,7 +31,7 @@ INCLUDE_ASM("seg/seg_2FDDC8", func_003FCE10);
 extern void func_003FB858(int, int*, int*);
 extern int func_003FB898(int, int);
 extern char* func_00266728(int, int, int);
-extern void func_00416210(char*, int, int);
+extern void memset(char*, int, int);
 extern char str_TAG_SENTINELTAG_SENTINELTAG_SENTINEL[];
 /**
  * Allocates a save-record buffer: @p size bytes plus a 12-byte header holding "TAG_SENTINEL", zeroed.
@@ -54,7 +54,7 @@ int func_003FCE10(char** out, int allocator, int size, int memType) {
     }
     *out = func_00266728(allocator, n, allocInfo[0]);
     if (*out != 0) {
-        func_00416210(*out, 0, n);
+        memset(*out, 0, n);
         __builtin_memcpy(*out, str_TAG_SENTINELTAG_SENTINELTAG_SENTINEL, 12);
         *out += 12;
         return 0;
@@ -297,7 +297,7 @@ int func_003FD1F0(int *elfModule, int n) {
 INCLUDE_ASM("seg/seg_2FDDC8", func_003FD210);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_004165A8(const char*, const char*);
+extern int strcmp(const char*, const char*);
 struct sShdr { int name; int type; int flags; int addr; int offset; int size; int link; int info; int align; int entsize; };
 struct sEhdr { char pad[0x20]; int shoff; char pad2[0xC]; unsigned short shnum; unsigned short shstrndx; };
 /**
@@ -313,7 +313,7 @@ struct sShdr* func_003FD210(int* elfModule, char* name) {
     int strtab = sh[elfHeader->shstrndx].offset;
     unsigned int i = 0;
     while (i < elfHeader->shnum) {
-        if (func_004165A8((char*)elfHeader + (strtab + sh->name), name) == 0) {
+        if (strcmp((char*)elfHeader + (strtab + sh->name), name) == 0) {
             return sh;
         }
         i++;
@@ -541,7 +541,7 @@ INCLUDE_ASM("seg/seg_2FDDC8", func_003FD758);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_004165A8(const char*, const char*);
+extern int strcmp(const char*, const char*);
 extern unsigned func_003FD2B8_D758(int* p, unsigned n) __asm__("func_003FD2B8");
 /**
  * Finds a symbol of a loaded ELF module by name and returns its address (image + section offset + value).
@@ -558,7 +558,7 @@ int func_003FD758(int* elfModule, char* name) {
             struct sSym* sym = (struct sSym*)symtab;
             unsigned int i;
             for (i = 0; i < (unsigned int)elfModule[5]; i++) {
-                if (func_004165A8((char*)(elfModule[8] + sym->name), name) == 0) {
+                if (strcmp((char*)(elfModule[8] + sym->name), name) == 0) {
                     symAddr = elfModule[0] + func_003FD2B8_D758(elfModule, sym->shndx) + sym->val;
                     break;
                 }

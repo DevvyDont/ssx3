@@ -16,7 +16,7 @@
 //   [O] On Tour's class is 0x54 too, with the same members at the same offsets.
 // Base: cFEState (no data; vtable cFEState_vtbl) : cUIState (ui/uistate.h, 0x48) : cListNode (vptr at 0x8). The ctor
 // func_0018C658 runs cUIState_cUIState(this, pEngine), stores cFEStateOptionsController_vtbl (0x0046C480, 24 slots: 1
-// dtor, 4 onCreateScreen, 5 onDestroyScreen, 11 onLoseFocus func_001DE0E8, 12 onUpdate, 17 onPopupEvent, 19
+// dtor, 4 onCreateScreen, 5 onDestroyScreen, 11 onLoseFocus cFEStateOptionsController_onLoseFocus, 12 onUpdate, 17 onPopupEvent, 19
 // onWidgetEvent, 20 onWidgetMenu, 21 onWidgetPair; vtables.tsv stops at slot 10), mHashName 0x1F and mVibrateOn 0;
 // the destructor stores cFEState_vtbl and runs cUIState__cUIState.
 //

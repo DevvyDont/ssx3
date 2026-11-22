@@ -946,7 +946,7 @@ static inline void del_obj(char* o) {
  * existing node is deleted through its virtual destructor first, except that a dead node (node type 6 at +0x10) is
  * never touched (and a restore node, type 19, is kept for type 3), which ends the request. Other types do nothing.
  *
- * MakeDeadFunc calls it for the script, func_002D1CC0 for cDeadFadeNode when its fade ends.
+ * MakeDeadFunc calls it for the script, cObjectInterface_makeDead for cDeadFadeNode when its fade ends.
  *
  * @param ev  the request block: InstId at +0x0, Type at +0x4
  */
@@ -4180,7 +4180,7 @@ struct R12_0B20 { int a; int b; int c; };
 extern R12_0B20 D_004C9098_0B20 __asm__("luno_gLunoNil");
 
 extern int D_004A3C50_0B20[2] __asm__("D_004A3C50");
-extern "C" void func_00358B28(unsigned, int);
+extern "C" void cRailManNode_addRail(unsigned, int);
 extern int D_004A56A4_0B20 __asm__("D_004A56A4");
 struct T12_0B20 { unsigned a; int b; Flag_0B20 f; };
 extern T12_0B20 D_004FBB48_0B20 __asm__("D_004FBB48");
@@ -4191,7 +4191,7 @@ extern T12_0B20 D_004FBB48_0B20 __asm__("D_004FBB48");
  * Cmd) and lets each argument override the field its index names, turning an int into a float where the field type
  * table D_004A3C50 says 2. Defaults: SplineId -1, Cmd 1.
  *
- * When SplineId is not -1, Cmd 1 switches the rail on and Cmd 0 off through func_00358B28 (the rail manager); other
+ * When SplineId is not -1, Cmd 1 switches the rail on and Cmd 0 off through cRailManNode_addRail (the rail manager); other
  * values do nothing.
  *
  * @param n  the number of script arguments
@@ -4223,9 +4223,9 @@ extern "C" R12_0B20 RailFunc(int n, Ent_0B20* params) {
     if (~vp[0] != 0) {
         int y = vp[1];
         if (y == 1)
-            func_00358B28(vp[0], 1);
+            cRailManNode_addRail(vp[0], 1);
         else if (y == 0)
-            func_00358B28(vp[0], 0);
+            cRailManNode_addRail(vp[0], 0);
     }
     return D_004C9098_0B20;
 }
@@ -8155,7 +8155,7 @@ INCLUDE_ASM("seg/seg_1FBE38", LightningFunc);
 extern int *D_004A3DD8_5660 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_5660 __asm__("SSXApp");
 struct Sh_5660 { virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual int v08(); };
-extern "C" void func_00390EC8_5660(float) __asm__("func_00390EC8");
+extern "C" void DoLightningFlash_5660(float) __asm__("DoLightningFlash");
 struct V3_5660 { float x, y, z; };
 extern V3_5660 D_004C9098_5660 __asm__("luno_gLunoNil");
 struct Tag_5660 { char c; Tag_5660() {} Tag_5660(const Tag_5660 &o) : c(o.c) {} };
@@ -8173,7 +8173,7 @@ struct Ent_5660 { int idx; int val; int pad; int type; };
  * D_004A3D90 says 2. Defaults: InstId -1.
  *
  * InstId is not used. When cWScriptMan_TheWScriptMan->Being is not -1 and that rider (SSXApp->Game->AI->Riders[Being])
- * is human (cRider virtual isHuman), func_00390EC8(0) starts a flash at distance 0.
+ * is human (cRider virtual isHuman), DoLightningFlash(0) starts a flash at distance 0.
  *
  * Quirk: an empty rider slot is not checked; its virtual call goes through a null pointer.
  *
@@ -8208,7 +8208,7 @@ extern "C" V3_5660 LightningFunc(int n, Ent_5660 *params) {
         char *riderEntry = *(char**)(lvl + slotOffset + 0x28);
         Sh_5660 *sh = riderEntry ? (Sh_5660*)(riderEntry + 0x6C0) : 0;
         if (sh->v08())
-            func_00390EC8_5660(0.0f);
+            DoLightningFlash_5660(0.0f);
     }
     return D_004C9098_5660;
 }

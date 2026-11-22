@@ -503,13 +503,13 @@ extern "C" void cInputMapParser_skipPastSemicolon(cInputMapParser* self)
 //100%
 INCLUDE_ASM("input/inputmap", cInputMapParser_newParseNode);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 
 /**
  * Takes a parse node from the input map parser's free node list and returns it cleared.
  *
  * Pops the head of FreeParseNodes (+0xE0, linked through each node's +0x4) and zeroes the node's 16 bytes
- * (func_00416210). There is no check for an empty list: once the 0x800-node pool is used up it reads through the list's
+ * (memset). There is no check for an empty list: once the 0x800-node pool is used up it reads through the list's
  * null end. The parse functions (parseOr, parseAnd, parseTerm and the others) call it for every node they build.
  *
  * @return the new node
@@ -518,7 +518,7 @@ extern "C" void* cInputMapParser_newParseNode(cInputMapParser* self)
 {
     tParseNode* freeNode = self->FreeParseNodes;
     self->FreeParseNodes = (tParseNode*)(freeNode->unk_04);
-    func_00416210(freeNode, 0, 0x10);
+    memset(freeNode, 0, 0x10);
     return freeNode;
 }
 #endif

@@ -169,7 +169,7 @@ struct LobbyMan {
                                     //       DirtySock host lookup: result +0x4, poll fn +0x8, release fn +0xC);
                                     //       update polls/frees it through those
     void* mpRoomList;               // 0x05C [P] getnumrooms() reads it (preview 0x30); [U] func_0025A778:
-                                    //       func_003E85B0(api, 0, onroomlistupdate thunk); func_0025F120/F150/F180
+                                    //       func_003E85B0(api, 0, onroomlistupdate thunk); LobbyMan_getnumrooms/F150/F180
     void* mpUserList;               // 0x060 [U] func_003E85B0(api, 1, onuserlistupdate thunk); func_0025F1B0..
     void* mpRankList;               // 0x064 [U] func_003E85B0(api, 2, onranklistupdate thunk)
     int unk_068;                    // 0x068 no access seen

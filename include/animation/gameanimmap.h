@@ -49,7 +49,7 @@ struct cGameAnimMap {
     unsigned int GameAnimSort[518]; // 0x818 [O]; [U] initMap fills it with 0..517 and qsorts it by hash; lookupGAD
                                     //       binary-searches through it
     unsigned int GameAnimMap[518];  // 0x1030 [O] tAnimID {SourceID : 8 (low byte), AnimID : 24}; [U] initMap fills it
-                                    //       with -1 bytes (func_00416210(.., -1, 2072)); setMap stores a clip, remSource
+                                    //       with -1 bytes (memset(.., -1, 2072)); setMap stores a clip, remSource
                                     //       kAnimIDInvalid; getAnimName searches it; cRiderAnimBase_play /
                                     //       getAIAnimFrame / getAIAnimDuration / getAIAnimEventTime read [gad]
 };

@@ -25,7 +25,7 @@
 //
 // PS2 vtable cPS2ExecutionMan_vtbl (14 slots, the cExecutionMan_vtbl order): 1 cPS2ExecutionMan__cPS2ExecutionMan, 2 init, 3
 // purge,
-// 4 wait, 5 sync, 6 func_00320B08__FPv (getCurrentThreadId: GetThreadId), 7 setTimerHz__FPv, 8 getTimerHz__FPv (60),
+// 4 wait, 5 sync, 6 cPS2ExecutionMan_getCurrentThreadId__FPv (getCurrentThreadId: GetThreadId), 7 setTimerHz__FPv, 8 getTimerHz__FPv (60),
 // 9 load, 10 isLoadDone, 11 prepause, 12 postpause, 13 halt, 14 signalHalt. Not in it: cPS2ExecutionMan_waitHalt__FPv.
 
 #include "layout.h"
@@ -88,7 +88,7 @@ struct cPS2ExecutionMan {
     char unk_1404C[0x34];           // 0x1404C untouched (aligns the VU0 buffer to 16 bytes)
     char mVU0State[0x210];          // 0x14080 [U] VU0 register save area: init and postpause save it (func_0031A308),
                                     //         prepause restores it (func_0031A3C0); VF1-31, ACC, MAC/status/Q/clip
-    int mIntcHandlerId;             // 0x14290 [U] init: the INTC 3 handler id (func_00423A90, handler func_0031A490
+    int mIntcHandlerId;             // 0x14290 [U] init: the INTC 3 handler id (AddIntcHandler2, handler func_0031A490
                                     //       with
                                     //         func_0031ABD0); purge RemoveIntcHandler
     char unk_14294[0x2C];           // 0x14294 never accessed by retail code

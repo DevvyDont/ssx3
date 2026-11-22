@@ -434,7 +434,7 @@ extern sPeakGoal D_00478D38_enus[3][8] __asm__("D_00478D38");
 extern "C" void cUITemplate_MAP_setWidgetUnHiliteColor_enus(void* self, void* obj, int on) __asm__("cUITemplate_MAP_setWidgetUnHiliteColor");
 extern "C" int cUITemplate_MAP_isMapEventCompleted(void* self, sPeakGoal* loc, int peak);
 extern "C" int cUITemplate_MAP_isMapEventLocked_enus(void* self, int kind, int x) __asm__("cUITemplate_MAP_isMapEventLocked");
-extern "C" int func_004165A8(const char*, const char*);
+extern "C" int strcmp(const char*, const char*);
 extern "C" const char* cBENewRaceInterface_getLocationName_enus(void* iface, int id) __asm__("cBENewRaceInterface_getLocationName");
 extern "C" unsigned short* func_002C2540_enus(unsigned short* dst, const char* s) __asm__("func_002C2540");
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
@@ -573,7 +573,7 @@ extern "C" void cUITemplate_MAP_setupMenus(cUITemplate_MAP* tmpl)
                 if (hasEvent(goal.track)) {
                     if (goal.useTrackName == 1) {
                         cUIText_setAsciiString((cUIText*)menuObj, cBENewRaceInterface_getLocationName_enus(iface, goal.track));
-                    } else if (func_004165A8(goal.name, D_004A2560)) {
+                    } else if (strcmp(goal.name, D_004A2560)) {
                         cUIText_setAsciiString((cUIText*)menuObj, goal.name);
                     } else if (goal.kind == 4) {
                         unsigned short text[200];
@@ -1905,7 +1905,7 @@ extern char D_004707F8_oals[] __asm__("str_SelectEvent");
 extern "C" int cUITemplate_MAP_getMedalStr_oals(void* self, int peak) __asm__("cUITemplate_MAP_getMedalStr");
 
 extern "C" void cUITemplate_MAP_showEventPath_oals(void* tmpl, char* name) __asm__("cUITemplate_MAP_showEventPath");
-extern "C" int func_004165A8(const char*, const char*);
+extern "C" int strcmp(const char*, const char*);
 extern "C" int cBERewardInterface_isTrophyOwned(void* self, int a, int b, int c, int i);
 int cBERewardInterface_getTrackMedal(void* self, int a, int charID, int kind, int track);
 extern "C" const char* cBENewRaceInterface_getLocationName_oals(void* iface, int id) __asm__("cBENewRaceInterface_getLocationName");
@@ -2041,7 +2041,7 @@ extern "C" void cUITemplate_MAP_setupPeakGoals(cUITemplate_MAP* tmpl)
             sPeakGoal goal = D_004781D0_oals[cUITemplate_MAP_mPeak][k];
             if (goal.useTrackName) {
                 sprintf2(ev, cBENewRaceInterface_getLocationName_oals(race, goal.track));
-            } else if (func_004165A8(goal.name, D_004A2560_oals)) {
+            } else if (strcmp(goal.name, D_004A2560_oals)) {
                 func_002C2540_oals(ev, goal.name);
             } else if (goal.kind == 4) {
                 unsigned short fmt[20];
@@ -2093,7 +2093,7 @@ extern "C" void cUITemplate_MAP_setupPeakGoals(cUITemplate_MAP* tmpl)
             sPeakGoal goal = D_004786E0_oals[cUITemplate_MAP_mPeak][k];
             if (goal.useTrackName) {
                 sprintf2(ev, cBENewRaceInterface_getLocationName_oals(race, goal.track));
-            } else if (func_004165A8(goal.name, D_004A2560_oals)) {
+            } else if (strcmp(goal.name, D_004A2560_oals)) {
                 func_002C2540_oals(ev, goal.name);
             } else if (goal.kind == 5) {
                 unsigned short fmt[20];
@@ -2250,7 +2250,7 @@ extern "C" void cUITemplate_MAP_setupPeakGoals(cUITemplate_MAP* tmpl)
 //100%
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_showEventPath);
 #ifdef SKIP_ASM
-extern "C" int func_004165A8(const char* a, const char* b);
+extern "C" int strcmp(const char* a, const char* b);
 extern int cUITemplate_MAP_mPeak;
 extern char D_004A2560[];
 extern char str_peak1racepath[];
@@ -2333,13 +2333,13 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
 
 
     if (cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name)) != 0
-        || func_004165A8(name, D_004A2560) == 0) {
+        || strcmp(name, D_004A2560) == 0) {
         switch (cUITemplate_MAP_mPeak) {
         case 0:
             for (int i = 0; i < 6; i++) {
                 obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
                 if (obj != 0) {
-                    if (func_004165A8(namesA.s[i], name) == 0) {
+                    if (strcmp(namesA.s[i], name) == 0) {
                         obj->setColour(&col0);
                     } else {
                         obj->setColour(&col1);
@@ -2351,7 +2351,7 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
             for (int i = 0; i < 6; i++) {
                 obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
                 if (obj != 0) {
-                    if (func_004165A8(namesB.s[i], name) == 0) {
+                    if (strcmp(namesB.s[i], name) == 0) {
                         obj->setColour(&col0);
                     } else {
                         obj->setColour(&col1);
@@ -2363,7 +2363,7 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
             for (int i = 0; i < 5; i++) {
                 obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
                 if (obj != 0) {
-                    if (func_004165A8(namesC.s[i], name) == 0) {
+                    if (strcmp(namesC.s[i], name) == 0) {
                         obj->setColour(&col0);
                     } else {
                         obj->setColour(&col1);
@@ -2372,79 +2372,79 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
             }
             break;
         }
-    } else if (func_004165A8(name, str_peak1racepath) == 0) {
+    } else if (strcmp(name, str_peak1racepath) == 0) {
         for (int i = 0; i < 6; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
             if (obj != 0) {
                 obj->setColour(&col1);
                 for (int j = 0; j < 3; j++) {
-                    if (func_004165A8(namesA.s[i], peak1RacePath.s[j]) == 0) {
+                    if (strcmp(namesA.s[i], peak1RacePath.s[j]) == 0) {
                         obj->setColour(&col0);
                     }
                 }
             }
         }
-    } else if (func_004165A8(name, str_peak1fspath) == 0) {
+    } else if (strcmp(name, str_peak1fspath) == 0) {
         for (int i = 0; i < 6; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
             if (obj != 0) {
                 obj->setColour(&col1);
                 for (int j = 0; j < 2; j++) {
-                    if (func_004165A8(namesA.s[i], peak1FreestylePath.s[j]) == 0) {
+                    if (strcmp(namesA.s[i], peak1FreestylePath.s[j]) == 0) {
                         obj->setColour(&col0);
                     }
                 }
             }
         }
-    } else if (func_004165A8(name, str_peak2racepath) == 0) {
+    } else if (strcmp(name, str_peak2racepath) == 0) {
         for (int i = 0; i < 6; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
             if (obj != 0) {
                 obj->setColour(&col1);
                 for (int j = 0; j < 2; j++) {
-                    if (func_004165A8(namesB.s[i], peak2RacePath.s[j]) == 0) {
+                    if (strcmp(namesB.s[i], peak2RacePath.s[j]) == 0) {
                         obj->setColour(&col0);
                     }
                 }
             }
         }
-    } else if (func_004165A8(name, str_peak2fspath) == 0) {
+    } else if (strcmp(name, str_peak2fspath) == 0) {
         for (int i = 0; i < 6; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
             if (obj != 0) {
                 obj->setColour(&col1);
                 for (int j = 0; j < 2; j++) {
-                    if (func_004165A8(namesB.s[i], peak2FreestylePath.s[j]) == 0) {
+                    if (strcmp(namesB.s[i], peak2FreestylePath.s[j]) == 0) {
                         obj->setColour(&col0);
                     }
                 }
             }
         }
-    } else if (func_004165A8(name, str_peak3racepath) == 0) {
+    } else if (strcmp(name, str_peak3racepath) == 0) {
         for (int i = 0; i < 5; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
             if (obj != 0) {
                 obj->setColour(&col1);
                 for (int j = 0; j < 2; j++) {
-                    if (func_004165A8(namesC.s[i], peak3RacePath.s[j]) == 0) {
+                    if (strcmp(namesC.s[i], peak3RacePath.s[j]) == 0) {
                         obj->setColour(&col0);
                     }
                 }
             }
         }
-    } else if (func_004165A8(name, str_peak3fspath) == 0) {
+    } else if (strcmp(name, str_peak3fspath) == 0) {
         for (int i = 0; i < 5; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
             if (obj != 0) {
                 obj->setColour(&col1);
                 for (int j = 0; j < 2; j++) {
-                    if (func_004165A8(namesC.s[i], peak3FreestylePath.s[j]) == 0) {
+                    if (strcmp(namesC.s[i], peak3FreestylePath.s[j]) == 0) {
                         obj->setColour(&col0);
                     }
                 }
             }
         }
-    } else if (func_004165A8(name, str_peak1racegroup) == 0) {
+    } else if (strcmp(name, str_peak1racegroup) == 0) {
         for (int i = 0; i < 6; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
             if (obj != 0) {
@@ -2457,7 +2457,7 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
                 obj->setColour(&col0);
             }
         }
-    } else if (func_004165A8(name, str_peak1fsgroup) == 0) {
+    } else if (strcmp(name, str_peak1fsgroup) == 0) {
         for (int i = 0; i < 6; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
             if (obj != 0) {
@@ -2470,14 +2470,14 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
                 obj->setColour(&col0);
             }
         }
-    } else if (func_004165A8(name, str_peak1freeridegroup) == 0) {
+    } else if (strcmp(name, str_peak1freeridegroup) == 0) {
         for (int i = 0; i < 6; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
             if (obj != 0) {
                 obj->setColour(&col0);
             }
         }
-    } else if (func_004165A8(name, str_peak2racegroup) == 0) {
+    } else if (strcmp(name, str_peak2racegroup) == 0) {
         for (int i = 0; i < 6; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
             if (obj != 0) {
@@ -2490,7 +2490,7 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
                 obj->setColour(&col0);
             }
         }
-    } else if (func_004165A8(name, str_peak2fsgroup) == 0) {
+    } else if (strcmp(name, str_peak2fsgroup) == 0) {
         for (int i = 0; i < 6; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
             if (obj != 0) {
@@ -2503,14 +2503,14 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
                 obj->setColour(&col0);
             }
         }
-    } else if (func_004165A8(name, str_peak2freeridegroup) == 0) {
+    } else if (strcmp(name, str_peak2freeridegroup) == 0) {
         for (int i = 0; i < 6; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
             if (obj != 0) {
                 obj->setColour(&col0);
             }
         }
-    } else if (func_004165A8(name, str_peak3racegroup) == 0) {
+    } else if (strcmp(name, str_peak3racegroup) == 0) {
         for (int i = 0; i < 5; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
             if (obj != 0) {
@@ -2523,7 +2523,7 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
                 obj->setColour(&col0);
             }
         }
-    } else if (func_004165A8(name, str_peak3fsgroup) == 0) {
+    } else if (strcmp(name, str_peak3fsgroup) == 0) {
         for (int i = 0; i < 5; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
             if (obj != 0) {
@@ -2536,7 +2536,7 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
                 obj->setColour(&col0);
             }
         }
-    } else if (func_004165A8(name, str_peak3freeridegroup) == 0) {
+    } else if (strcmp(name, str_peak3freeridegroup) == 0) {
         for (int i = 0; i < 5; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
             if (obj != 0) {
@@ -2776,7 +2776,7 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(sMapTmpl_207430* self)
         if (cUITemplate_MAP_mMapState == 2)
             cUIText_setUnicodeStringByID((cUIText*)mapObj, GetHashValue32(str_kT_CMNHELPStations));
     } else {
-        if (func_004165A8((char*)&desc.w[0] + 0x32, D_004A2560) != 0) {
+        if (strcmp((char*)&desc.w[0] + 0x32, D_004A2560) != 0) {
             if (cUITemplate_MAP_mMapState == 2)
                 cUIText_setUnicodeStringByID((cUIText*)mapObj, GetHashValue32((char*)&desc.w[0] + 0x32));
         } else if (desc.w[2] == 4) {

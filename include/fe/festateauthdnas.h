@@ -86,7 +86,7 @@ struct cFEStateAuthDNAS {
     unsigned int mChallengeHintFrame; // 0x054 [R] 0; [U] func_001AAB68, the same for the session's other list (the
                                     //       vector at session + 0xBC); func_001AA9B0 blinks "IconChallengeHint" with it
     int unk_058;                    // 0x058 [R] 0; [U] func_001A9668/func_001A9710 set 1 before pushing cFEStateLogin;
-                                    //       func_001DE860 (slot 7, the onInputBegin override) returns it
+                                    //       cFEStateNet_onInputBegin (slot 7, the onInputBegin override) returns it
     char mszMaskedText[0x40];       // 0x05C [U] func_001A98B8 writes one '*' per character of its string (at most 0x3F;
                                     //       " " when empty) and a NUL; cUIText_setAsciiString(.., mszMaskedText) in
                                     //       func_001ACDD0, func_001B9610, func_001B9678, func_001B9820 (password boxes)
@@ -127,7 +127,7 @@ struct cFEStateAuthDNAS {
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
     // --- cFEStateAuthDNAS
     DNASMan* mpAuth;                // 0x6D0 [R] 0; [U] onCreateScreen cFEStateAuthDNAS_onCreateScreen stores
-                                    //       func_002561B8(cMemMan_alloc(0xA50, "cFEStateAuthDNASCreate")) (the DNAS
+                                    //       DNASMan_DNASMan(cMemMan_alloc(0xA50, "cFEStateAuthDNASCreate")) (the DNAS
                                     //       authentication object, online/dnasman.h) and starts it in the mode of the
                                     //       profile bits cBEOptionInterface_mOption; onUpdate cFEStateAuthDNAS_onUpdate polls it (its first word:
                                     //       >= 3 ready, 5 done; + 0x1C error; error texts at + 0x450/0x650/0x850),
@@ -236,7 +236,7 @@ struct cFEStateAuthDNASError {
     unsigned int mChallengeHintFrame; // 0x054 [R] 0; [U] func_001AAB68, the same for the session's other list (the
                                     //       vector at session + 0xBC); func_001AA9B0 blinks "IconChallengeHint" with it
     int unk_058;                    // 0x058 [R] 0; [U] func_001A9668/func_001A9710 set 1 before pushing cFEStateLogin;
-                                    //       func_001DE860 (slot 7, the onInputBegin override) returns it
+                                    //       cFEStateNet_onInputBegin (slot 7, the onInputBegin override) returns it
     char mszMaskedText[0x40];       // 0x05C [U] func_001A98B8 writes one '*' per character of its string (at most 0x3F;
                                     //       " " when empty) and a NUL; cUIText_setAsciiString(.., mszMaskedText) in
                                     //       func_001ACDD0, func_001B9610, func_001B9678, func_001B9820 (password boxes)

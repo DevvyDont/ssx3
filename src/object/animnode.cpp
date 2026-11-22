@@ -472,7 +472,7 @@ extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/animnode", func_0034EBA0);
+INCLUDE_ASM("object/animnode", cAnimNode_frameUpdate);
 #ifdef SKIP_ASM
 struct sAnimLinkList_EBA0;
 
@@ -505,7 +505,7 @@ struct sAnimNode_EBA0 {
  * @return 1 if the node at @p self + 0x14 is still the record's active node, otherwise 0
  */
 // is this node's link at the head of its list, after cObjectInterface_runFrameUpdateScript?
-extern "C" int func_0034EBA0(cAnimNode* self)
+extern "C" int cAnimNode_frameUpdate(cAnimNode* self)
 {
     sAnimLink_EBA0* link = (sAnimLink_EBA0*)&self->unk_014;
     cObjectInterface_runFrameUpdateScript((sAnimLinkList_EBA0*)self->Instance);

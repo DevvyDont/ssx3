@@ -195,7 +195,7 @@ struct tSplineSegmentRecord {
     tSplineRecord* m_Parent;        // 0x68 [O] tSplineID; [U] resolveSpline stores the owner; the spline queries read
                                     //      m_Parent->m_iFlags / m_eSurfaceType
     tf3Vector m_fvMin;              // 0x6C [O]; [U] the segment box filed in the nash (box offset 108) and moved by
-                                    //      cRailManNode_enable/disableRail, func_00345638
+                                    //      cRailManNode_enable/disableRail, cSplineSegment_isVisible
     tf3Vector m_fvMax;              // 0x78 [O]; [U] ditto
     float unk_084;                  // 0x84 [O] m_fDistance
     char unk_088[0x8];              // 0x88 [O] m_PadBytes (tSplineSegmentRecord_PSP); [R] stride 0x90

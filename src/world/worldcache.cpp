@@ -473,7 +473,7 @@ INCLUDE_ASM("world/worldcache", cWorldCacheTable_cWorldCacheTable);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern char str_WorldCacheTableMem[];
 
 struct sWCTEntry {
@@ -501,7 +501,7 @@ extern "C" void* cWorldCacheTable_cWorldCacheTable(cWorldCacheTable* selfp, void
 {
     sWCTable* self = (sWCTable*)selfp;
     self->sizes = (short*)data;
-    func_00416210(self->entries, 0, sizeof(self->entries));
+    memset(self->entries, 0, sizeof(self->entries));
     int total = 0;
     for (int i = 0; i < 28; i++) {
         int n = self->sizes[i];
@@ -509,7 +509,7 @@ extern "C" void* cWorldCacheTable_cWorldCacheTable(cWorldCacheTable* selfp, void
         total += n;
     }
     self->pool = new (str_WorldCacheTableMem, 0, 0) int[total];
-    func_00416210(self->pool, 0, total * 4);
+    memset(self->pool, 0, total * 4);
     int off = 0;
     int* pool = self->pool;
     for (int j = 0; j < 28; j++) {
@@ -1872,11 +1872,11 @@ extern "C" void cWorldView_reset(cWorldView_reset_sCache* self)
 //100%
 INCLUDE_ASM("world/worldcache", cWorldView_update);
 #ifdef SKIP_ASM
-extern "C" int func_00416B18(const char* a, const char* b, int n);
+extern "C" int strncmp(const char* a, const char* b, int n);
 struct cWorldView_recursiveFlushPages_sNode;
 extern "C" void cWorldView_recursiveFlushPages(void** self, cWorldView_recursiveFlushPages_sNode* node);
 extern "C" void cWorldView_recursiveIsEmptyPages(void** self, tBxBSPNode* node, int* ok);
-extern "C" void func_003AD1A8();
+extern "C" void flushWorldLightCache();
 extern "C" void cWorldView_refreshStreamFocus(void* self, int i);
 extern char str_ASKY[];
 extern char str_BSKY[];
@@ -1943,11 +1943,11 @@ extern "C" void cWorldView_update(cWorldView* worldView)
         case 0:
             break;
         case 1:
-            if (func_00416B18(self->sections[i].name, str_ASKY, 4) == 0
-                || func_00416B18(self->sections[i].name, str_BSKY, 4) == 0
-                || func_00416B18(self->sections[i].name, str_CSKY, 4) == 0
-                || func_00416B18(self->sections[i].name, str_DSKY, 4) == 0
-                || func_00416B18(self->sections[i].name, str_ESKY, 4) == 0)
+            if (strncmp(self->sections[i].name, str_ASKY, 4) == 0
+                || strncmp(self->sections[i].name, str_BSKY, 4) == 0
+                || strncmp(self->sections[i].name, str_CSKY, 4) == 0
+                || strncmp(self->sections[i].name, str_DSKY, 4) == 0
+                || strncmp(self->sections[i].name, str_ESKY, 4) == 0)
                 cWorldCache_activateSectionMem((cWorldCache*)self->cache, i, 0);
             else
                 cWorldCache_activateSectionMem((cWorldCache*)self->cache, i, 2);
@@ -1970,7 +1970,7 @@ extern "C" void cWorldView_update(cWorldView* worldView)
                 if (ok) {
                     self->entries[i].state = 0;
                     cWorldCache_deactivateSectionMem((cWorldCache*)self->cache, i);
-                    func_003AD1A8();
+                    flushWorldLightCache();
                 }
             }
             break;

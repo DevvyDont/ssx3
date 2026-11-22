@@ -47,13 +47,13 @@ CHECK_OFFSET(cGameModeHandler, mVtbl, 0x00);
 CHECK_SIZE(cGameModeHandler, 0x4);
 
 // cGMBigAirHandler: the scored event (big air; heats scored by points). Vtable 0x0047CFA0 (D_0047CFA0): init
-// cGMBigAirHandler_init, riderCheckpointHit func_002398E8, raceFinish func_00239230, getHeatScore func_00239CE0,
-// writeToReplayFrame func_00239D18, readFromReplayFrame func_00239D50. No On Tour class (On Tour's
+// cGMBigAirHandler_init, riderCheckpointHit cGMBigAirHandler_riderCheckpointHit, raceFinish cGMBigAirHandler_raceFinish, getHeatScore cGMBigAirHandler_getHeatScore,
+// writeToReplayFrame cGMBigAirHandler_writeToReplayFrame, readFromReplayFrame cGMBigAirHandler_readFromReplayFrame. No On Tour class (On Tour's
 // cGMFreestyleHandler has a uiScore[62][3] in the same role).
 struct cGMBigAirHandler {
     void** mVtbl;                   // 0x00 [R] D_0047CFA0 (getGM), the dtor cGMBigAirHandler__cGMBigAirHandler stores the base's
     unsigned int uiScore[3][10];    // 0x04 [R] init clears 0x78 bytes; [U] getHeatScore returns uiScore[heat][rider]
-                                    //      (row stride 0x28), raceFinish / func_00239AA0 fill it. Quirk: the replay
+                                    //      (row stride 0x28), raceFinish / cGMBigAirHandler_fillScoreTable fill it. Quirk: the replay
                                     //      slots 10 / 11 write and read 0xA0 bytes from 0x04, 0x28 past the object
 };
 
@@ -62,7 +62,7 @@ CHECK_OFFSET(cGMBigAirHandler, uiScore, 0x04);
 CHECK_SIZE(cGMBigAirHandler, 0x7C);
 
 // cGMRaceHandler: the three-heat race event (offline event 0). Vtable 0x0047CF38 (D_0047CF38): init cGMRaceHandler_init,
-// riderGateHit func_0023AC10, raceFinish cGMRaceHandler_raceFinish, writeToReplayFrame cGMRaceHandler_writeToReplayFrame /
+// riderGateHit cGMRaceHandler_riderGateHit, raceFinish cGMRaceHandler_raceFinish, writeToReplayFrame cGMRaceHandler_writeToReplayFrame /
 // readFromReplayFrame cGMRaceHandler_readFromReplayFrame (the whole 0xD0 bytes); non-virtual helpers func_0023A4F0 (build the heat
 // line-ups), func_0023A668 (apply a line-up).
 struct cGMRaceHandler {

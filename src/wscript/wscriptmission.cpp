@@ -17,14 +17,14 @@ int GetHashValue32(char*);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" sWSMEntry4520* func_0014FF90(void* iface, int player, int slot, void* out);
-extern "C" int func_0014FEA8(void* iface, int player, int slot, int a3);
+extern "C" int cBEBAGTInterface_chooseUberVar(void* iface, int player, int slot, int a3);
 extern "C" int func_00150048(void* iface, int player, int slot, int idx);
 extern "C" int func_0014FFB8(void* iface, int player, int slot, int idx);
-extern "C" const char* func_00116938(unsigned short id);
+extern "C" const char* gGetGrabName(unsigned short id);
 extern "C" int cUITextureBank_getElementByHashname(void* self, int id);
 extern "C" void func_00183D08(void* obj, int colour, float a);
-extern "C" void func_003A1030(void* obj, void* out);
-extern "C" void func_003A0290(void* obj, void* out);
+extern "C" void cUIText_getTextExtent(void* obj, void* out);
+extern "C" void cUIThing_getAbsPosition(void* obj, void* out);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_Trickpct_02d[];
 extern char str_ckpct_02d[];
@@ -136,12 +136,12 @@ extern "C" void cFEStateUberTrick_updateTrickMenu(cFEStateUberTrick* vself)
     int shown = 0;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 6);
     sGateEntry_3DE0* tbl = (sGateEntry_3DE0*)func_0014FF90(iface, vself->mUserNum, slot, &count);
-    cur = func_0014FEA8(iface, vself->mUserNum, slot, 1);
+    cur = cBEBAGTInterface_chooseUberVar(iface, vself->mUserNum, slot, 1);
     for (int j = 0; j < count; j++) {
         if (func_00150048(iface, vself->mUserNum, slot, j)) {
             cUIThing* uiObj = (cUIThing*)labels[shown];
             if (((char*)uiObj) != 0) {
-                cUIText_setAsciiString((cUIText*)uiObj, func_00116938(tbl[j].name));
+                cUIText_setAsciiString((cUIText*)uiObj, gGetGrabName(tbl[j].name));
                 uiCall_3DE0(((char*)uiObj), 9, 1);
                 uiCall_3DE0(((char*)uiObj), 8, 0);
                 uiObj->mMiscData = j;
@@ -198,13 +198,13 @@ extern "C" void cFEStateUberTrick_updateTrickMenu(cFEStateUberTrick* vself)
     char* w0 = getObj_3DE0(screen, str_inst0);
     cUIThing* w1 = (cUIThing*)getObj_3DE0(screen, str_inst1);
     char* w2 = getObj_3DE0(screen, str_inst2);
-    func_003A1030(w0, &textSize0);
+    cUIText_getTextExtent(w0, &textSize0);
     textSize0.x += gap;
-    func_003A1030(w1, &textSize1);
-    func_003A1030(w2, &textSize2);
+    cUIText_getTextExtent(w1, &textSize1);
+    cUIText_getTextExtent(w2, &textSize2);
     textSize2.x += gap;
-    func_003A0290(w0, &instPos0);
-    func_003A0290(w2, &instPos2);
+    cUIThing_getAbsPosition(w0, &instPos0);
+    cUIThing_getAbsPosition(w2, &instPos2);
     btnPos0 = *(sGateVec_3DE0*)&instBtn0->mPosition;
     btnPos1 = *(sGateVec_3DE0*)(instBtn1 + 0x44);
     btnPos2 = *(sGateVec_3DE0*)&instBtn2->mPosition;

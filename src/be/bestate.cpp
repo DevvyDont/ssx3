@@ -56,7 +56,7 @@ void* cBEOptionInterface_getThis();
 void* cBEBAGTInterface_getThis();
 void* cBENetworkInterface_getThis();
 void* cBEScoreInterface_getThis();
-extern "C" void* func_0014ABE0();
+extern "C" void* cBEBoltInterface_getThis();
 void* cBEMissionInterface_getThis();
 void* cBEEconInterface_getThis();
 void* cBEAggressionInterface_getThis();
@@ -67,7 +67,7 @@ void* cBESaveInterface_getThis();
  * Returns the back-end interface singleton for an interface kind while racing.
  *
  * Same table as the pre/post-race states (case order differs only): 0 new race, 1 new player, 2 character, 3 stat,
- * 4 option, 5 save, 6 BAGT, 7 network, 8 score, 9 func_0014ABE0's singleton, 10 mission, 11 econ, 12 aggression, 13
+ * 4 option, 5 save, 6 BAGT, 7 network, 8 score, 9 cBEBoltInterface_getThis's singleton, 10 mission, 11 econ, 12 aggression, 13
  * reward.
  *
  * @param kind  the interface kind (On Tour eBE_Interface interfaceType)
@@ -94,7 +94,7 @@ extern "C" void* cBERaceState_getInterface(cBERaceState* self, int kind)
     case 8:
         return cBEScoreInterface_getThis();
     case 9:
-        return func_0014ABE0();
+        return cBEBoltInterface_getThis();
     case 10:
         return cBEMissionInterface_getThis();
     case 11:
@@ -123,7 +123,7 @@ extern sStateObj153200* cBEBoltInterface_instance;
 /**
  * Leaves the race back-end state: marks its interfaces inactive.
  *
- * Clears the active word (+0x8) of the option, score, cBEBoltInterface_instance (func_0014ABE0's singleton), new player, new race,
+ * Clears the active word (+0x8) of the option, score, cBEBoltInterface_instance (cBEBoltInterface_getThis's singleton), new player, new race,
  * mission, econ, aggression, reward and save interfaces. New player and new race are cleared here although
  * cBERaceState_onEnter never sets them.
  */
@@ -149,7 +149,7 @@ extern sStateObj153200* cBEBoltInterface_instance;
 /**
  * Enters the race back-end state: marks its interfaces active.
  *
- * Sets the active word (+0x8) of the option, score, cBEBoltInterface_instance (func_0014ABE0's singleton), mission, econ,
+ * Sets the active word (+0x8) of the option, score, cBEBoltInterface_instance (cBEBoltInterface_getThis's singleton), mission, econ,
  * aggression, reward and save interfaces; the network, player and character interfaces stay as they were.
  */
 extern "C" void cBERaceState_onEnter(void) {

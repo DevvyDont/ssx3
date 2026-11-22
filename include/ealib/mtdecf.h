@@ -3,7 +3,7 @@
 
 // CMTBLKDecf: EA SND's MicroTalk block decoder (float output), used by the MicroTalk unpack filters
 // (ealib/sfilter.h: UNPACKMTPFSTATE.pDecoder; SFILTER_unpackmtfinit / mtlfinit / mtpfinit create one with
-// func_003CD1A8(3432) + CMTBLKDecf_CMTBLKDecf). Retail code: unit ealib/seg_2B4578, CMTBLKDecf_initmut ..
+// CMTBLKDecf_operator_new(3432) + CMTBLKDecf_CMTBLKDecf). Retail code: unit ealib/seg_2B4578, CMTBLKDecf_initmut ..
 // CMTBLKDecf_SetCodecVersion. EA source: snd/source/library/extern/coda/cmn/mtdecf.cpp (On Tour).
 //
 // Name: EA's class CMTBLKDecf (On Tour's DWARF: class CMTBLKDecf, 0xD68, the same members; methods GetState returning

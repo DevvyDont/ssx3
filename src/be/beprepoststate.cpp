@@ -60,7 +60,7 @@ void* cBEOptionInterface_getThis();
 void* cBESaveInterface_getThis();
 void* cBENetworkInterface_getThis();
 void* cBEScoreInterface_getThis();
-extern "C" void* func_0014ABE0();
+extern "C" void* cBEBoltInterface_getThis();
 void* cBEBAGTInterface_getThis();
 void* cBEEconInterface_getThis();
 void* cBEMissionInterface_getThis();
@@ -70,7 +70,7 @@ void* cBERewardInterface_getThis();
  * Returns the back-end interface singleton for an interface kind while in the post-race state.
  *
  * Kinds: 0 new race, 1 new player, 2 character, 3 stat, 4 option, 5 save, 6 BAGT, 7 network, 8 score, 9
- * func_0014ABE0's singleton (cBEBoltInterface_instance), 10 mission, 11 econ, 12 aggression, 13 reward. Retail's 9..13 are one off
+ * cBEBoltInterface_getThis's singleton (cBEBoltInterface_instance), 10 mission, 11 econ, 12 aggression, 13 reward. Retail's 9..13 are one off
  * from On Tour's eBE_Interface (kInt_Mission = 9 .. kInt_Reward = 12).
  *
  * @param kind  the interface kind (On Tour eBE_Interface interfaceType)
@@ -97,7 +97,7 @@ extern "C" void* cBEPostRaceState_getInterface(cBEPostRaceState* self, int kind)
     case 8:
         return cBEScoreInterface_getThis();
     case 9:
-        return func_0014ABE0();
+        return cBEBoltInterface_getThis();
     case 6:
         return cBEBAGTInterface_getThis();
     case 11:
@@ -122,7 +122,7 @@ extern void* cBEBoltInterface_instance;
 /**
  * Leaves the post-race back-end state: marks its interfaces inactive.
  *
- * Clears the active flag of the new player, character, stat, option, save, network, cBEBoltInterface_instance (func_0014ABE0's
+ * Clears the active flag of the new player, character, stat, option, save, network, cBEBoltInterface_instance (cBEBoltInterface_getThis's
  * singleton), BAGT, econ, aggression and reward interfaces; new race, score and mission are not touched.
  */
 extern "C" void cBEPostRaceState_onExit(void)
@@ -150,7 +150,7 @@ extern void* cBEBoltInterface_instance;
 /**
  * Enters the post-race back-end state: marks its interfaces active.
  *
- * Sets the active flag of the new player, character, stat, option, save, network, cBEBoltInterface_instance (func_0014ABE0's
+ * Sets the active flag of the new player, character, stat, option, save, network, cBEBoltInterface_instance (cBEBoltInterface_getThis's
  * singleton), BAGT, econ, aggression and reward interfaces (the same set cBEPostRaceState_onExit clears).
  */
 extern "C" void cBEPostRaceState_onEnter(void)
@@ -207,7 +207,7 @@ void* cBEOptionInterface_getThis();
 void* cBESaveInterface_getThis();
 void* cBENetworkInterface_getThis();
 void* cBEScoreInterface_getThis();
-extern "C" void* func_0014ABE0();
+extern "C" void* cBEBoltInterface_getThis();
 void* cBEBAGTInterface_getThis();
 void* cBEEconInterface_getThis();
 void* cBEMissionInterface_getThis();
@@ -217,7 +217,7 @@ void* cBERewardInterface_getThis();
  * Returns the back-end interface singleton for an interface kind while in the pre-race state.
  *
  * Same table as cBEPostRaceState_getInterface: 0 new race, 1 new player, 2 character, 3 stat, 4 option, 5 save, 6
- * BAGT, 7 network, 8 score, 9 func_0014ABE0's singleton, 10 mission, 11 econ, 12 aggression, 13 reward.
+ * BAGT, 7 network, 8 score, 9 cBEBoltInterface_getThis's singleton, 10 mission, 11 econ, 12 aggression, 13 reward.
  *
  * @param kind  the interface kind (On Tour eBE_Interface interfaceType)
  * @return the interface's getThis() singleton, or 0 for an unknown kind
@@ -243,7 +243,7 @@ extern "C" void* cBEPreRaceState_getInterface(cBEPreRaceState* self, int kind)
     case 8:
         return cBEScoreInterface_getThis();
     case 9:
-        return func_0014ABE0();
+        return cBEBoltInterface_getThis();
     case 6:
         return cBEBAGTInterface_getThis();
     case 11:
@@ -269,7 +269,7 @@ extern void* cBEBoltInterface_instance;
  * Leaves the pre-race back-end state: marks its interfaces inactive.
  *
  * Clears the active flag of the new race, new player, character, stat, option, save, network, cBEBoltInterface_instance
- * (func_0014ABE0's singleton), BAGT, econ, aggression and reward interfaces; score and mission are not touched.
+ * (cBEBoltInterface_getThis's singleton), BAGT, econ, aggression and reward interfaces; score and mission are not touched.
  */
 extern "C" void cBEPreRaceState_onExit(void)
 {
@@ -298,7 +298,7 @@ extern void* cBEBoltInterface_instance;
  * Enters the pre-race back-end state: marks its interfaces active.
  *
  * Sets the active flag of the new race, new player, character, stat, option, save, network, cBEBoltInterface_instance
- * (func_0014ABE0's singleton), BAGT, econ, aggression and reward interfaces (the set cBEPreRaceState_onExit
+ * (cBEBoltInterface_getThis's singleton), BAGT, econ, aggression and reward interfaces (the set cBEPreRaceState_onExit
  * clears).
  */
 extern "C" void cBEPreRaceState_onEnter(void)

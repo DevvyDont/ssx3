@@ -1394,8 +1394,8 @@ extern "C" int cChunkResolve_resolveCollideModel(cChunkResolve* self, void* ctx,
 //100%
 INCLUDE_ASM("world/worldview", cChunkResolve_resolveHalo);
 #ifdef SKIP_ASM
-// PORT: func_003AD230__FPv is declared (void*) but takes a flags int and returns a float.
-float func_003AD230_f(int flags) __asm__("func_003AD230__FPv");
+// PORT: getHaloRadius__FPv is declared (void*) but takes a flags int and returns a float.
+float getHaloRadius_f(int flags) __asm__("getHaloRadius__FPv");
 
 struct cChunkResolve_resolveHalo_sObj {
     char pad_0x00[0xC];
@@ -1411,7 +1411,7 @@ struct cChunkResolve_resolveHalo_sObj {
 /**
  * Sets up a light halo's bounds after it is loaded.
  *
- * Gets the radius for the halo type (flags & 0x70) from func_003AD230, clears +0x40 and +0x44 and sets the box
+ * Gets the radius for the halo type (flags & 0x70) from getHaloRadius, clears +0x40 and +0x44 and sets the box
  * +0x28..+0x3C to the position at +0x1C plus or minus that radius.
  *
  * @param obj  the halo record (On Tour pLightHalo)
@@ -1419,7 +1419,7 @@ struct cChunkResolve_resolveHalo_sObj {
  */
 extern "C" int cChunkResolve_resolveHalo(cChunkResolve* self, cChunkResolve_resolveHalo_sObj* obj)
 {
-    float haloRadius = func_003AD230_f(obj->flags & 0x70);
+    float haloRadius = getHaloRadius_f(obj->flags & 0x70);
     obj->field_0x44 = 0;
     obj->field_0x40 = 0;
     obj->min[0] = obj->pos[0] - haloRadius;
@@ -1642,7 +1642,7 @@ void nash_Nash_findkey_AE68(sHashKey_AE68* out, sBox_AE68* box) __asm__("nash_Na
 extern "C" void nash_Octant_addnode(sHashCell_AE68* cell, int type, void* node, sHashKey_AE68* key);
 extern char str_strm_tex[];
 extern char str_strm_lpg[];
-extern "C" void* func_003AD198();
+extern "C" void* getOcclusionMan();
 extern "C" void cOcclusionMan_addVisCurtain(void* self, void* obj);
 // PORT: the unit declares this later returning void*; bind this char* view by symbol.
 char* cAudioInterface_getGame_AE68() __asm__("cAudioInterface_getGame");
@@ -1652,7 +1652,7 @@ extern "C" int cAI_swaploadInjectedPathFile(void* self, int a, unsigned int b, v
 void cMemMan_free(void* p);
 extern "C" void cWorldPainterMan_load1(void* self, int a, void* obj);
 extern "C" void cWScriptCache_load1(void* self, int a, void* obj);
-extern "C" void* func_003AD188();
+extern "C" void* getGame();
 extern "C" void cGame_loadWScriptManSection(void* self, int a);
 void gCamTriggerMan_resolve(void* a, int b);
 extern "C" void cSSXScriptEngine_AttachAnchorDataTable(void* self, int a, void* obj);
@@ -1779,7 +1779,7 @@ extern "C" void* cPS2ChunkResolve_resolve(cPS2ChunkResolve* self, int msg, unsig
         if (cWorld_m_pTheWorld) {
             int sectionIdx = RID & 0xFF;
             cWScriptCache_load1((char**)cWorld_m_pTheWorld->m_pWScriptCache, sectionIdx, obj);
-            cGame_loadWScriptManSection(func_003AD188(), sectionIdx);
+            cGame_loadWScriptManSection(getGame(), sectionIdx);
         }
         break;
     case 18:
@@ -1795,7 +1795,7 @@ extern "C" void* cPS2ChunkResolve_resolve(cPS2ChunkResolve* self, int msg, unsig
         func_002105D0(obj);
         break;
     case 11:
-        cOcclusionMan_addVisCurtain(func_003AD198(), obj);
+        cOcclusionMan_addVisCurtain(getOcclusionMan(), obj);
         break;
     case 14:
         if (!cAI_swaploadInjectedPathFile(*(void**)(*(char**)(D_004A28A8_AE68 + 0x84) + 0xC), RID & 0xFF, RID >> 8, obj)) {
@@ -1834,7 +1834,7 @@ extern "C" void cWorldPainterSection_unload(void* entry);
 extern "C" void cAvalanche_reset();
 extern "C" void nash_Cell_remnode(void* node, int idx, void* item, const void* target, const void* cur);
 extern "C" void nash_Nash_findkey(void* out, const void* box);
-extern "C" void* func_003AD198();
+extern "C" void* getOcclusionMan();
 
 struct sWVVec4_B498 {
     float x, y, z, w;
@@ -2011,7 +2011,7 @@ extern "C" void* cPS2ChunkResolve_unresolve(cPS2ChunkResolve* self, unsigned int
         func_00210608(data);
         break;
     case 11:
-        cOcclusionMan_removeVisCurtain(func_003AD198(), data);
+        cOcclusionMan_removeVisCurtain(getOcclusionMan(), data);
         break;
     case 14:
         data = 0;

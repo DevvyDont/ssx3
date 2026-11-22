@@ -2952,7 +2952,7 @@ extern "C" void cStaticEmitter_readFromReplayFrame(cStaticEmitter* self, cStream
 INCLUDE_ASM("render/graphicsman", cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter);
 #ifdef SKIP_ASM
 void tParticleEmitter_tParticleEmitter(void*);
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 extern void* cBaseClass_DynamicEmitter_vtbl[];
 
 
@@ -2982,7 +2982,7 @@ extern "C" cBaseClass_DynamicEmitter* cBaseClass_DynamicEmitter_cBaseClass_Dynam
     for (unsigned int i = 0; i < 2; i++) {
         ((short*)&self->mDrawState.m_textureState)[i] = -1;
     }
-    func_00416210(blk, 0, 0x10);
+    memset(blk, 0, 0x10);
     return (self);
 }
 #endif

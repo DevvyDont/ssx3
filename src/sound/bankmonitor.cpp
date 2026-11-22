@@ -1278,12 +1278,12 @@ extern "C" void cSoundSys__cSoundSys(cSoundSys* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002ADF58);
+INCLUDE_ASM("sound/bankmonitor", cSoundSys_SndAssert);
 #ifdef SKIP_ASM
 /**
  * Does nothing (an empty function between cSoundSys__cSoundSys and the random-number helper; no caller found).
  */
-extern "C" void func_002ADF58(void) {
+extern "C" void cSoundSys_SndAssert(void) {
 
 }
 #endif
@@ -1509,7 +1509,7 @@ extern "C" void func_002AE100()
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AE138);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 
 /**
  * Initialises a Pathfinder player slot (0x70 bytes): zeroes it, then sets the handles to -1 and the dirty flag.
@@ -1519,7 +1519,7 @@ extern "C" void* func_00416210(void* dst, int c, int n);
  */
 extern "C" void func_002AE138(void* self)
 {
-    func_00416210(self, 0, 0x70);
+    memset(self, 0, 0x70);
     *(int*)((char*)self + 0x0) = -1;
     *(int*)((char*)self + 0x4) = -1;
     *(char*)((char*)self + 0x66) = -1;
@@ -1571,7 +1571,7 @@ extern "C" int func_002AE1B8(void)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AE1F0);
 #ifdef SKIP_ASM
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 
 /**
  * Clears a Pathfinder bank record (40 bytes of D_004D3EF8) and sets its first three words (bank, handle, slot) to -1.
@@ -1580,7 +1580,7 @@ extern "C" void* func_00416210(void* dst, int c, int n);
  */
 extern "C" void func_002AE1F0(int* self)
 {
-    func_00416210(self, 0, 40);
+    memset(self, 0, 40);
     self[2] = -1;
     self[1] = -1;
     self[0] = -1;
@@ -4703,7 +4703,7 @@ extern "C" int func_002B1780(sEntry_1780* entry, int n, int maxChunks, char* mem
     st->a34[mg->st.depth] = 0;
     st->a38[mg->st.depth] = st->entries[mg->st.depth].kind;
     st->a3C[mg->st.depth] = 0;
-    func_00416210((char*)st + mg->st.depth * 8 + 0x40, 0, 8);
+    memset((char*)st + mg->st.depth * 8 + 0x40, 0, 8);
     st->a60[mg->st.depth] = 0;
     st->a64[mg->st.depth] = 0;
     st->a68[mg->st.depth] = 0;
@@ -6086,7 +6086,7 @@ extern "C" void func_002B35A0(sBmTrack35A0*** self, int songName, int bankIndex,
     playOpts->p34[bankManager->sub.cur] = 0;
     playOpts->p38[bankManager->sub.cur] = playOpts->ents[bankManager->sub.cur].b0;
     playOpts->p3C[bankManager->sub.cur] = 0;
-    func_00416210((char*)playOpts + bankManager->sub.cur * 8 + 0x40, 0, 8);
+    memset((char*)playOpts + bankManager->sub.cur * 8 + 0x40, 0, 8);
     playOpts->p60[bankManager->sub.cur] = 0;
     playOpts->p64[bankManager->sub.cur] = 0;
     playOpts->p68[bankManager->sub.cur] = 0;
@@ -6132,7 +6132,7 @@ struct sBankEntry64_3838 {
 // PORT: 64-bit `long` mask (8 bytes on EE, 4 on Windows); use uint64_t off-PS2.
 extern "C" void SNDSYS_leavecritical(void);
 extern "C" void SNDSYS_entercritical(void);
-extern "C" int func_004165A8(void*, void*);
+extern "C" int strcmp(void*, void*);
 extern "C" void func_002B3AC0(cMusicSys* self);
 extern "C" void func_002B43D8(cMusicSys* self);
 extern "C" void* func_002B1B98(int a0, int a1, int a2, int a3, char a4, int a5, int a6, int a7);
@@ -6151,7 +6151,7 @@ static inline float bmMax3838(float a, float b)
  * Starts a song: stops the current one and creates a cSongInstance for the named or current song (mCurrent).
  *
  * Scales the play level's base volume by its volume control (clamped 0..127) and writes it to the level. With a1 it
- * searches mSongName from the end (func_004165A8) and stores the index in mCurrentSongNum; likely bug: an unknown name
+ * searches mSongName from the end (strcmp) and stores the index in mCurrentSongNum; likely bug: an unknown name
  * leaves -1 and reads mSongConfig[-1]. Creates the song with func_002B1B98(mBasePath, name, config, play options, base
  * volume, volume control, a2, a3), loads its overlay bank (func_002B43D8), sets unk_41C = -1 and mSongPlaying = 1.
  *
@@ -6193,7 +6193,7 @@ extern "C" void func_002B3838(cMusicSys* self_, int songName, int bankIndex, int
     if (songName != 0) {
         int idx = self->count - 1;
         while (idx >= 0) {
-            if (func_004165A8(self->names[idx], (void*)songName) == 0) {
+            if (strcmp(self->names[idx], (void*)songName) == 0) {
                 break;
             }
             idx--;
@@ -6650,7 +6650,7 @@ void func_002B4060(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002B4068);
+INCLUDE_ASM("sound/bankmonitor", cMusicSys_getActiveMap);
 #ifdef SKIP_ASM
 /**
  * Returns mActiveMap.
@@ -6659,7 +6659,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4068);
  * @return the 64-bit active song mask
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long func_002B4068(cMusicSys* musicSys) {
+extern "C" long cMusicSys_getActiveMap(cMusicSys* musicSys) {
     return ((long)musicSys->mActiveMap);
 }
 #endif

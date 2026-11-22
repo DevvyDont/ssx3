@@ -606,7 +606,7 @@ extern "C" void cRiderAnimBase_play(void* anim, int id, int a2, float t);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" void cUIStateBuyPopup_initBuyTrick(void* popup, int trick, int cost, int points);
 extern "C" void cFEStateUberTrick_updateTrickMenu(void* self);
-extern "C" int func_00116938(int id);
+extern "C" int gGetGrabName(int id);
 extern "C" void func_0014FD80(void* iface, int rider, int a, int b);
 struct sTrick_185268;
 extern "C" sTrick_185268* func_0014FF90(void* iface, int rider, int a, int* out);
@@ -769,7 +769,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
                     int points = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), self->mUserNum, charID);
                     int n;
                     sTrick_185268* tbl = func_0014FF90(pi, self->mUserNum, ai, &n);
-                    int trick = func_00116938(tbl[bi].id);
+                    int trick = gGetGrabName(tbl[bi].id);
                     if (points >= tbl[bi].cost) {
                         void* popup = cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_UITRICKBUY, 0x100, 0), self->mpEngine, ((char*)self), self->mUserNum);
                         cUIStateBuyPopup_initBuyTrick(popup, trick, tbl[bi].cost, points);

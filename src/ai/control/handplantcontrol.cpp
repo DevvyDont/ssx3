@@ -6113,41 +6113,40 @@ extern "C" int cRider_getPatchRID(cRider* rider) {
 }
 #endif
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140A48);
+INCLUDE_ASM("ai/control/handplantcontrol", cRider_getSectionID);
 #ifdef SKIP_ASM
 /**
- * Returns the rider's mGroundMaterial (+0x434).
+ * Returns the rider's world section id (eBESectionID), the word at +0x434 (our header calls it mGroundMaterial).
  *
- * @param rider  the cRider
- * @return mGroundMaterial
+ * On Tour's cRider::getSectionID; cRider_isOnRaceCourse and cRider_isOnHalfPipeCourse test the same word.
+ *
+ * @return the section id
  */
-extern "C" int func_00140A48(cRider* rider) {
+extern "C" int cRider_getSectionID(cRider* rider) {
     return (rider->mGroundMaterial);
 }
 #endif
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140A50);
+INCLUDE_ASM("ai/control/handplantcontrol", cRider_isOnRaceCourse);
 #ifdef SKIP_ASM
 /**
- * Returns whether the rider's mGroundMaterial is below 17.
+ * Returns whether the rider is on a race course: its section id (+0x434, cRider_getSectionID) is below 17.
  *
- * @param rider  the cRider
- * @return 1 when mGroundMaterial < 17, else 0
+ * On Tour's cRider::isOnRaceCourse.
  */
-extern "C" int func_00140A50(cRider* rider) {
+extern "C" int cRider_isOnRaceCourse(cRider* rider) {
     return (rider->mGroundMaterial) < 17;
 }
 #endif
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140A60);
+INCLUDE_ASM("ai/control/handplantcontrol", cRider_isOnHalfPipeCourse);
 #ifdef SKIP_ASM
 /**
- * Returns whether the rider's mGroundMaterial is 11, 12 or 13.
+ * Returns whether the rider is on a half-pipe course: its section id (+0x434, cRider_getSectionID) is 11, 12 or 13.
  *
- * @param rider  the cRider
- * @return 1 for materials 11-13, else 0
+ * On Tour's cRider::isOnHalfPipeCourse.
  */
-extern "C" int func_00140A60(cRider* rider) {
+extern "C" int cRider_isOnHalfPipeCourse(cRider* rider) {
     return (unsigned int) ((rider->mGroundMaterial) - 11) < 3U;
 }
 #endif
@@ -6999,15 +6998,14 @@ extern "C" void cRider_setForcedAttribLevel(cRider* rider, int statsIndex) {
 }
 #endif
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140D38);
+INCLUDE_ASM("ai/control/handplantcontrol", cRider_setNaturalAirMode);
 #ifdef SKIP_ASM
 /**
- * Sets the rider's word at +0x308 (unk_308, 1 after construction).
+ * Sets the rider's natural-air mode, the word at +0x308 (1 after construction) that cRider_getNaturalAirMode returns.
  *
- * @param rider  the cRider
- * @param value  the new value
+ * On Tour's cRider::setNaturalAirMode.
  */
-extern "C" void func_00140D38(cRider* rider, int value) {
+extern "C" void cRider_setNaturalAirMode(cRider* rider, int value) {
     (rider->unk_308) = value;
 }
 #endif
@@ -7077,15 +7075,14 @@ extern "C" int cRider_getLaunchDelaySecs(cRider* rider) {
 }
 #endif
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00140D78);
+INCLUDE_ASM("ai/control/handplantcontrol", cRider_getNaturalAirMode);
 #ifdef SKIP_ASM
 /**
- * Returns the rider's word at +0x308 (unk_308), which func_00140D38 sets.
+ * Returns the rider's natural-air mode, the word at +0x308 that cRider_setNaturalAirMode stores.
  *
- * @param rider  the cRider
- * @return unk_308
+ * On Tour's cRider::getNaturalAirMode.
  */
-extern "C" int func_00140D78(cRider* rider) {
+extern "C" int cRider_getNaturalAirMode(cRider* rider) {
     return (rider->unk_308);
 }
 #endif
@@ -8291,7 +8288,7 @@ extern "C" int cAI_getPodiumActor(cAI* self, int index) {
 }
 #endif
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144190);
+INCLUDE_ASM("ai/control/handplantcontrol", cAI_getEndOfRaceTimer);
 #ifdef SKIP_ASM
 /**
  * Returns the AI's EndOfRaceTimer (+0x18).
@@ -8299,7 +8296,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00144190);
  * @param aiMan  the cAI
  * @return EndOfRaceTimer
  */
-extern "C" int func_00144190(void *aiMan) {
+extern "C" int cAI_getEndOfRaceTimer(void *aiMan) {
     return (*(int *)((char*)(aiMan) + (0x18)));
 }
 #endif

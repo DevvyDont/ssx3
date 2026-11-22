@@ -10,8 +10,8 @@
 // "cUsbKeyboard"). Retail code: dirtysock/tagsunk 0x00266788..0x00266BA8. One instance, Keyboard: func_00266788
 // creates it, func_002667C0 destroys it. No On Tour counterpart.
 //
-// Size 0x464: [R] func_00266788: cMemMan_alloc(1124, "cUsbKeyboard", 0x20000000) + the constructor func_002667E8, which
-// sets mEnabled (0x460) and MEM_fill's the 0x460 bytes of slots. No vtable, no base class (the destructor func_00266850
+// Size 0x464: [R] func_00266788: cMemMan_alloc(1124, "cUsbKeyboard", 0x20000000) + the constructor cUsbKeyboard_cUsbKeyboard, which
+// sets mEnabled (0x460) and MEM_fill's the 0x460 bytes of slots. No vtable, no base class (the destructor cUsbKeyboard__cUsbKeyboard
 // is called directly).
 //
 // A FLAT layout, like main/game.h. Evidence tags: [R] the constructor / destructor; [U] how retail code uses the field

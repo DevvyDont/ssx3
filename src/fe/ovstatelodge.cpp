@@ -242,7 +242,7 @@ struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" int cUITextureBank_getElementByHashname(void* self, int id);
 // The array-initializer clear (memset) is a void libcall here.
-extern "C" void func_00416210(void* dst, int c, int n);
+extern "C" void memset(void* dst, int c, int n);
 
 struct sName5_2AD0 { char c[5]; };
 extern sName5_2AD0 D_00467298[];
@@ -337,7 +337,7 @@ extern "C" void cFEStateMountainRoom_onWidgetCreate(cFEStateMountainRoom* self, 
     if (widgetHash == GetHashValue32(str_level_numb_back) || widgetHash == GetHashValue32(str_level_numb_front)) {
         char buf[20];
         *(sName5_2AD0*)buf = D_00467298[0];
-        func_00416210(buf + 5, 0, 15);
+        memset(buf + 5, 0, 15);
         cUIEngine* eng = self->mpEngine;
         buf[2] = *(unsigned char*)&self->mLevel + '0';
         int hash = GetHashValue32(buf);

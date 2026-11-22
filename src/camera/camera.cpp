@@ -9874,14 +9874,14 @@ extern "C" void func_00168010(void) {
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00168018);
+INCLUDE_ASM("camera/camera", cChaseCameraController_getPreferredChaseAlgorithm);
 #ifdef SKIP_ASM
 /**
  * Returns 61 (0x3D, the "no algorithm" eCamAlgoType that cChaseCameraController_switchCamera_HardReset stores).
  *
  * @return 61
  */
-extern "C" int func_00168018(void) {
+extern "C" int cChaseCameraController_getPreferredChaseAlgorithm(void) {
     return 61;
 }
 #endif

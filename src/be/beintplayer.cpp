@@ -1446,7 +1446,7 @@ extern "C" void cBENewPlayerInterface_setControllerMapping(cBENewPlayerInterface
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00147698);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getCamera);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 
@@ -1456,13 +1456,13 @@ INCLUDE_ASM("be/beintplayer", func_00147698);
  * @param index  the rider
  * @return the word
  */
-extern "C" int func_00147698(cBENewPlayerInterface* self, int index)
+extern "C" int cBENewPlayerInterface_getCamera(cBENewPlayerInterface* self, int index)
 {
     return cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)].unk_014;
 }
 #endif
 //100%
-INCLUDE_ASM("be/beintplayer", func_001476D8);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setCamera);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 
@@ -1472,7 +1472,7 @@ INCLUDE_ASM("be/beintplayer", func_001476D8);
  * @param index  the rider
  * @param value  the new word
  */
-extern "C" void func_001476D8(cBENewPlayerInterface* self, int index, int value)
+extern "C" void cBENewPlayerInterface_setCamera(cBENewPlayerInterface* self, int index, int value)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
     cBENewPlayerInterface_tempPlayers[id].unk_014 = value;
@@ -1528,7 +1528,7 @@ int cBENewPlayerInterface_getPlayerID(int index)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_001477B0);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getRiderHumanIndex);
 #ifdef SKIP_ASM
 /**
  * Returns iHumanID (flag bit 0) of player slot @p index's entry, or -1 when the slot has no controller.
@@ -1539,7 +1539,7 @@ INCLUDE_ASM("be/beintplayer", func_001477B0);
  * @param index  the player slot
  * @return -1, 0 or 1
  */
-extern "C" int func_001477B0(cBENewPlayerInterface* self, int index)
+extern "C" int cBENewPlayerInterface_getRiderHumanIndex(cBENewPlayerInterface* self, int index)
 {
     if (cBENewPlayerInterface_tempPlayers[index].iControllerID == -1) {
         return -1;

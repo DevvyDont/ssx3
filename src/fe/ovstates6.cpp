@@ -8,7 +8,7 @@ INCLUDE_ASM("fe/ovstates6", cOVStateManager_gotoOverlay);
 
 INCLUDE_ASM("fe/ovstates6", cOVStateManager_triggerOverlay);
 
-INCLUDE_ASM("fe/ovstates6", func_0020CA10);
+INCLUDE_ASM("fe/ovstates6", cOVStateManager_triggerPauseMenu);
 
 INCLUDE_ASM("fe/ovstates6", cOVStateManager_pauseOverlayActive);
 

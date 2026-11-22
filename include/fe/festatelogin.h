@@ -12,7 +12,7 @@
 // cFEStateLogin_cFEStateLogin(mem, pEngine) at 4 sites (feasyncfile 4248, 4398, 12745, 20767); mpustrDisconnect ends at 0x6D4.
 // Constructors cFEStateLogin_cFEStateLogin (cFEStateNet(pEngine, 0), vtable cFEStateLogin_vtbl, mHashName 0x33, unk_6A8 = 0) and the
 // default cFEStateLogin_cFEStateLogin1 (fe/fepopupmisc); destructor cFEStateLogin__cFEStateLogin (slot 1: frees mpustrDisconnect). Retail vtable
-// cFEStateLogin_vtbl (33 slots; vtables.tsv lists 24: 4 onCreateScreen cFEStateLogin_onCreateScreen, 12 onUpdate func_001BEF40, 17
+// cFEStateLogin_vtbl (33 slots; vtables.tsv lists 24: 4 onCreateScreen cFEStateLogin_onCreateScreen, 12 onUpdate cFEStateLogin_onUpdate, 17
 // onPopupEvent cFEStateLogin_onPopupEvent, 18 onWidgetCreate cFEStateLogin_onWidgetCreate, 19 onWidgetEvent cFEStateLogin_onWidgetEvent, 25 func_001BFAE0
 // (help), 29 func_001E0E90, 31 func_001BF228 (net events), 32 func_001E0E88, 33 func_001BF378). Methods:
 // fe/feasyncfile 0x1BEE30-0x1BFAE0.
@@ -69,7 +69,7 @@ struct cFEStateLogin {
     unsigned int mChallengeHintFrame; // 0x054 [R] 0; [U] func_001AAB68, the same for the session's other list (the
                                     //       vector at session + 0xBC); func_001AA9B0 blinks "IconChallengeHint" with it
     int unk_058;                    // 0x058 [R] 0; [U] func_001A9668/func_001A9710 set 1 before pushing cFEStateLogin;
-                                    //       func_001DE860 (slot 7, the onInputBegin override) returns it
+                                    //       cFEStateNet_onInputBegin (slot 7, the onInputBegin override) returns it
     char mszMaskedText[0x40];       // 0x05C [U] func_001A98B8 writes one '*' per character of its string (at most 0x3F;
                                     //       " " when empty) and a NUL; cUIText_setAsciiString(.., mszMaskedText) in
                                     //       func_001ACDD0, func_001B9610, func_001B9678, func_001B9820 (password boxes)

@@ -2,14 +2,14 @@
 #define OBJECT_RAILMANNODE_H
 
 // cRailManNode: the rail manager scene node - one live instance (static ActiveNode = cRailManNode_ActiveNode) keeping up to 128
-// switched-off rails: the world script's RailFunc calls addRail(rid, add) (func_00358B28), which creates the node on
+// switched-off rails: the world script's RailFunc calls addRail(rid, add) (cRailManNode_addRail), which creates the node on
 // first use, records the rail's resource id in a free RailInfo slot and takes every particle node of that rail out of
 // the world's Nash space hash (disableRail) or puts it back (enableRail; the slot goes back to -1).
-// cGame_sectionUnloading calls unloadSection(section) (func_00358700) to re-enable the rails of a section that goes
+// cGame_sectionUnloading calls unloadSection(section) (cRailManNode_unloadSection) to re-enable the rails of a section that goes
 // away; the destructor re-enables all. Node type 18. EA's source: d:/ssx/code/source/object/railmannode.cpp (preview
 // assert path). Retail methods: the object/multiparticle splat unit (0x003584F0..0x00358C30) and getSectionId in
 // object/railmodifier (0x00361D78).
-// Size 0x218: [R] cMemMan_alloc(0x218, "RailMan") in func_00358B28 (addRail) and cReplay_restoreObject; the ctors
+// Size 0x218: [R] cMemMan_alloc(0x218, "RailMan") in cRailManNode_addRail (addRail) and cReplay_restoreObject; the ctors
 // fill 128 4-byte slots from 0x18 (writeToReplayFrame / the replay ctor move 0x200 bytes at +0x18); [O] On Tour
 // 0x214 (RailInfo[128] at 0x14; its cObjNode is 4 bytes smaller).
 // Bases: cSortObjNode (0x00-0x18, object/objnode.h: cObjNode 0x00-0x10, cTypeObjNodeState 0x10, cSortObjNodeState
@@ -23,7 +23,7 @@
 // A FLAT layout like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Evidence tags:
 //   [R] retail ctors/dtor (src/object/multiparticle.cpp) and the two 0x218 allocations;
 //   [P] the July 2003 preview via tools/layout_xlate.py (no accessors observed for this class);
-//   [U] how retail code uses the field (enableRail / disableRail / func_00358700 / func_00358B28 and the retail asm);
+//   [U] how retail code uses the field (enableRail / disableRail / cRailManNode_unloadSection / cRailManNode_addRail and the retail asm);
 //   [O] SSX On Tour's DWARF (cObjNode chain, cRailManNode, tRailInfo).
 
 #include "layout.h"
@@ -33,8 +33,8 @@ struct cObjNode;
 // One switched-off rail (On Tour tRailInfo, 4 bytes; its default ctor sets -1 = a free slot).
 struct tRailInfo {
     unsigned int RailRID;           // 0x0 [O] tResourceID (section in the low byte | index << 8); [R] the ctors store
-                                    //     0xFFFFFFFF; [U] enableRail stores -1, func_00358B28 stores the key;
-                                    //     func_00358700 compares the low byte with the section (lbu)
+                                    //     0xFFFFFFFF; [U] enableRail stores -1, cRailManNode_addRail stores the key;
+                                    //     cRailManNode_unloadSection compares the low byte with the section (lbu)
 };
 
 CHECK_OFFSET(tRailInfo, RailRID, 0x0);
@@ -54,7 +54,7 @@ struct cRailManNode {
     tRailInfo RailInfo[128];        // 0x018 [O] tRailInfo RailInfo[128]; [R] ctors: 128 x 0xFFFFFFFF; the replay ctor
                                     //      reads / writeToReplayFrame writes 0x200 bytes here; [U] enableRail /
                                     //      disableRail look up RailInfo[i] in the world's resource tables, the dtor and
-                                    //      func_00358700 scan it (lw 0x18 + 4i, lbu for the section byte)
+                                    //      cRailManNode_unloadSection scan it (lw 0x18 + 4i, lbu for the section byte)
 };
 
 CHECK_OFFSET(cRailManNode, unk_00, 0x000);

@@ -674,7 +674,7 @@ extern "C" int cRiderMetrix_updateBonusLevelAndCalcPoints(cRiderMetrix* self, in
 extern "C" void cHUDFX_update(void* slot);
 extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* self);
 extern "C" void cSSXAudio_SetCurTrickPower(void* audio, void* rider, float mult);
-extern "C" void* func_00416210(void* dst, int c, int n);
+extern "C" void* memset(void* dst, int c, int n);
 int cRider_getMotionState(void* rider);
 int cRider_getControlState(void* rider);
 
@@ -780,7 +780,7 @@ extern "C" void cRiderMetrix_update(cRiderMetrix* self)
             cHUDFX_update(&(self->HUDfx)[i]);
         }
     }
-    func_00416210(((char*)&self->ActiveFXListCache[0]), 0, 8);
+    memset(((char*)&self->ActiveFXListCache[0]), 0, 8);
     self->IsActiveFXListCacheInvalid = 1;
     cSSXAudio_SetCurTrickPower(cAudioInterface_bxAudio(), (self->Rider), self->CurTrickPower);
 }

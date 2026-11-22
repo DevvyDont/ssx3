@@ -63,13 +63,13 @@ struct cFEStateNetHelpPopup {
     int miNumOptions;               // 0x048 [O]; [U] setNumHelpOptions stores it, clear zeroes it, onGainTransition
                                     //       shows rows i < miNumOptions
     int miReleasedCount;            // 0x04C [O]; [R] the ctor zeroes it; no other access
-    int mbReferEventsToParent;      // 0x050 [O] (bool); [R] ctor 0; [U] setReferEventsToParent (func_001DF9A0) /
-                                    //       getReferEventsToParent (func_001DF9A8); handleEvent tests it
-    unsigned int muiScreenName;     // 0x054 [O]; [U] setScreenName (func_001DF990), clear 0; onGainTransition: the
+    int mbReferEventsToParent;      // 0x050 [O] (bool); [R] ctor 0; [U] setReferEventsToParent (cFEStateNetHelpPopup_setReferEventsToParent) /
+                                    //       getReferEventsToParent (cFEStateNetHelpPopup_getReferEventsToParent); handleEvent tests it
+    unsigned int muiScreenName;     // 0x054 [O]; [U] setScreenName (cFEStateNetHelpPopup_setScreenName), clear 0; onGainTransition: the
                                     //       title's text id
     unsigned int muiDescription[3]; // 0x058 [O]; [U] setDescription(i, id), clear zeroes 3;
                                     //       createAndSetDescriptionString joins the non-zero ids
-    unsigned int muiBottomText;     // 0x064 [O]; [U] setBottomText (func_001DF998), clear 0; onGainTransition shows it
+    unsigned int muiBottomText;     // 0x064 [O]; [U] setBottomText (cFEStateNetHelpPopup_setBottomText), clear 0; onGainTransition shows it
                                     //       in
                                     //       mpBottom
     unsigned int muiOptions[7];     // 0x068 [O]; [U] setOption(i, text, ...) stores [i]; clear zeroes 7;

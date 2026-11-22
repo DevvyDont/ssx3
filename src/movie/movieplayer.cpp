@@ -33,14 +33,14 @@ void* cMCOverlayManager_getManager()
 #endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023C850);
+INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_hasManager);
 #ifdef SKIP_ASM
 /**
  * Tells whether the memory-card overlay manager has been created (cMCOverlayManager_instance is set).
  *
  * @return 1 when the instance exists, else 0
  */
-extern "C" int func_0023C850(void) {
+extern "C" int cMCOverlayManager_hasManager(void) {
     return cMCOverlayManager_instance != 0;
 }
 #endif
@@ -155,7 +155,7 @@ extern "C" void* cMCOverlayManager_SetAction(cMCOverlayManager* self, int mode);
 extern "C" void func_002C2540(void*, void*);
 // PORT: callers pass more args than the unit's declarations of these take.
 extern "C" void cMCOverlayManager_getFileName_r(void* self, int mode, void* buf, int size) __asm__("cMCOverlayManager_getFileName");
-extern "C" void func_00241AA0_r(void* buf, int size) __asm__("func_00241AA0");
+extern "C" void cMCOverlayManager_getProductCode_r(void* buf, int size) __asm__("cMCOverlayManager_getProductCode");
 extern "C" void sprintf1_v(void* dst, void* fmt, ...) __asm__("sprintf1");
 extern char str_pct_s_pct_s_e[];
 
@@ -166,7 +166,7 @@ extern char str_pct_s_pct_s_e[];
  * Stores mFileType, switches to the device-select action (cMCOverlayManager_SetAction(1)), sets mSaveProfileID to -1
  * and mSave to 0, sets mMaxFiles (4 replays, 6 profiles, 1 settings file) and the card's data size (mpMemCard slot 19:
  * 0x80000 for replays, else cBESaveInterface_getSaveProfileSize / cBESaveInterface_getSaveGameSize), then writes the
- * search pattern "<product code>-<type>*" (func_00241AA0, cMCOverlayManager_getFileName) into mMatch.
+ * search pattern "<product code>-<type>*" (cMCOverlayManager_getProductCode, cMCOverlayManager_getFileName) into mMatch.
  *
  * @param mode  the file type
  */
@@ -201,7 +201,7 @@ extern "C" void cMCOverlayManager_readSetFileType(cMCOverlayManager* self, int m
         vt[19].fn(vthis(memCard, vt[19]), fileSize);
     }
     func_002C2540(fmt, str_pct_s_pct_s_e);
-    func_00241AA0_r(desc, 0x200);
+    cMCOverlayManager_getProductCode_r(desc, 0x200);
     cMCOverlayManager_getFileName_r(self, self->mFileType, name, 0x100);
     sprintf1_v(&self->mMatch[0], fmt, desc, name);
 }
@@ -297,7 +297,7 @@ extern "C" void* cMCOverlayManager_SetAction(cMCOverlayManager* self, int mode);
 extern "C" void func_002C2540(void*, void*);
 // PORT: callers pass more args than the unit's declarations of these take.
 extern "C" void cMCOverlayManager_getFileName_r(void* self, int mode, void* buf, int size) __asm__("cMCOverlayManager_getFileName");
-extern "C" void func_00241AA0_r(void* buf, int size) __asm__("func_00241AA0");
+extern "C" void cMCOverlayManager_getProductCode_r(void* buf, int size) __asm__("cMCOverlayManager_getProductCode");
 extern "C" void sprintf1_v(void* dst, void* fmt, ...) __asm__("sprintf1");
 extern char str_pct_s_pct_s_e[];
 
@@ -342,7 +342,7 @@ extern "C" void cMCOverlayManager_writeSetFileType(cMCOverlayManager* self, int 
         vt[19].fn(vthis(memCard, vt[19]), fileSize);
     }
     func_002C2540(fmt, str_pct_s_pct_s_e);
-    func_00241AA0_r(desc, 0x200);
+    cMCOverlayManager_getProductCode_r(desc, 0x200);
     cMCOverlayManager_getFileName_r(self, self->mFileType, name, 0x100);
     sprintf1_v(&self->mMatch[0], fmt, desc, name);
 }
@@ -1417,7 +1417,7 @@ extern "C" void cMCOverlayManager_UpdateNoCardsError(cMCOverlayManager* self)
 #endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_0023E8A0);
+INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_CheckForCard);
 #ifdef SKIP_ASM
 struct sMovieVEntry_E8A0 {
     short delta;
@@ -1455,7 +1455,7 @@ static inline void notify_E8A0(char* s, int v)
  *
  * @param flag  nonzero to go to state 6 (reading the card) when the card is good
  */
-extern "C" void func_0023E8A0(void* self, int flag)
+extern "C" void cMCOverlayManager_CheckForCard(void* self, int flag)
 {
     char* manager = (char*)self;
 
@@ -3896,7 +3896,7 @@ int cBESaveInterface_getSaveGameSize_r() __asm__("cBESaveInterface_getSaveGameSi
 extern "C" void func_002C2540(void*, void*);
 // PORT: callers pass more args than the unit's declarations of these take.
 extern "C" void cMCOverlayManager_getFileName_r(void* self, int mode, void* buf, int size) __asm__("cMCOverlayManager_getFileName");
-extern "C" void func_00241AA0_r(void* buf, int size) __asm__("func_00241AA0");
+extern "C" void cMCOverlayManager_getProductCode_r(void* buf, int size) __asm__("cMCOverlayManager_getProductCode");
 extern "C" void sprintf1_v(void* dst, void* fmt, ...) __asm__("sprintf1");
 extern "C" void cMCOverlayManager_WriteFile_r(void* self, char* text, int a, int b) __asm__("cMCOverlayManager_WriteFile");
 extern int cMCOverlayManager_mSaveInProgress;
@@ -3918,7 +3918,7 @@ extern "C" void cMCOverlayManager_SettingsWriteStart(cMCOverlayManager* self)
     int saveSize = cBESaveInterface_getSaveGameSize_r();
     func_002C2540(fmt, str_pct_s_pct_spct_04d_b);
     cMCOverlayManager_getFileName_r(self, 2, name, 130);
-    func_00241AA0_r(desc, 0x200);
+    cMCOverlayManager_getProductCode_r(desc, 0x200);
     sprintf1_v(text, fmt, desc, name, self->mFileCursor + 1);
     cMCOverlayManager_WriteFile_r(self, text, saveData, saveSize);
 }
@@ -4463,14 +4463,14 @@ extern sPad16 D_0047C3A8;
 extern "C" void func_002C2540(void*, void*);
 
 //100%
-INCLUDE_ASM("movie/movieplayer", func_00241AA0);
+INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_getProductCode);
 #ifdef SKIP_ASM
 /**
  * Writes the game's product code "BASLUS-20772" (D_0047C3A8), widened to 16 bits (func_002C2540), into @p self.
  *
  * Callers pass a buffer size as well, which is ignored.
  */
-extern "C" void func_00241AA0(void* self)
+extern "C" void cMCOverlayManager_getProductCode(void* self)
 {
     func_002C2540(self, &D_0047C3A8);
 }

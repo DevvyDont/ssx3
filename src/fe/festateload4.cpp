@@ -22,11 +22,11 @@ INCLUDE_ASM("fe/festateload4", cFELoadStateInLodge_onWidgetCreate);
 
 INCLUDE_ASM("fe/festateload4", cFELoadStateInLodge_onGainTransition);
 
-INCLUDE_ASM("fe/festateload4", func_00245E30);
+INCLUDE_ASM("fe/festateload4", cGameModeMan_cmpScores);
 
-INCLUDE_ASM("fe/festateload4", func_00245E78);
+INCLUDE_ASM("fe/festateload4", cGameModeMan_cmpTimes);
 
-INCLUDE_ASM("fe/festateload4", func_00245EC0);
+INCLUDE_ASM("fe/festateload4", cGameModeMan_cmpRanks);
 
 INCLUDE_ASM("fe/festateload4", cStreamPause__cStreamPause);
 

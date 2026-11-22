@@ -7,7 +7,7 @@
 // cMemMan_alloc(0x9C, "cOVStateOverlay") for overlay id 8; On Tour size 0x90. Its vtable cOVState_HEAT_PREEVENT_vtbl reuses
 // cOVTemplate_Simple_onWidgetEvent / onWidgetMenu (slots 18/19), so it derives from cOVTemplate_Simple (vtable
 // 0x474D30), which adds no members either (On Tour 0x90; its constructor func_0021C730 stores nothing past 0x98).
-// Constructor func_00221E18, destructor cOVState_HEAT_PREEVENT__cOVState_HEAT_PREEVENT. On Tour's other heat
+// Constructor cOVState_HEAT_PREEVENT_cOVState_HEAT_PREEVENT, destructor cOVState_HEAT_PREEVENT__cOVState_HEAT_PREEVENT. On Tour's other heat
 // overlay, cOVState_HEAT_STANDINGS, has no retail counterpart identified (the overlays next to this one in the
 // unit, ids 9 / 21 / 20: func_001FBD20 "41freestyle_pre", func_001FC878 "50multifs_pre", func_001FD268
 // "68rival_pre", are other pre-event screens without names). Base cOVState (fe/ovstate.h, 0x9C), written out

@@ -14,13 +14,13 @@
 // already declares cGame::CrowdMan2d as cCrowdMan2d* (no mangled symbol spells the class itself). Retail code:
 // main/ssxapp 0x00229180..0x00229E58. No On Tour class (On Tour keeps only cCrowdAnim2D / cCrowdRender2D).
 //
-// Size 0x2720: [R] cGame_load (main/gameload): cMemMan_alloc(10016, "CrowdMan2d") + the constructor func_00229180,
-// which builds the arrays up to 0x2220 + 40 * 0x20 = 0x2720. No vtable, no base class (the destructor func_00229278 is
+// Size 0x2720: [R] cGame_load (main/gameload): cMemMan_alloc(10016, "CrowdMan2d") + the constructor cCrowdMan2d_cCrowdMan2d,
+// which builds the arrays up to 0x2220 + 40 * 0x20 = 0x2720. No vtable, no base class (the destructor cCrowdMan2d__cCrowdMan2d is
 // called directly by cGame_purge with flags 3).
 // Quad slots and markers hold 16-byte vectors (lqc2 / sqc2), so they are 16-byte aligned; the 8-byte gaps at 0x208
 // and 0x218 are that alignment (no access).
 //
-// A FLAT layout, like main/game.h. Evidence tags: [R] the constructor func_00229180 / destructor func_00229278 / reset
+// A FLAT layout, like main/game.h. Evidence tags: [R] the constructor cCrowdMan2d_cCrowdMan2d / destructor cCrowdMan2d__cCrowdMan2d / reset
 // func_002292E0; [U] how retail code uses the field (src/main/ssxapp.cpp views sCrowd_229180, sCrowd_2292E0,
 // sCrowd_229530 and the asm). Names are ours.
 

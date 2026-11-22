@@ -8,12 +8,12 @@
 // EA's source is fe/festateprofile.cpp (the July 2003 preview's assert strings; builds/x/v2 file_hints for retail
 // cFEStateProfileLoad_onRender2D__FPv). Retail code: fe/festateprofile (0x0018ECA0 ... 0x00190768) and
 // main/all_in_one_main (the destructor cFEStateProfileLoad__cFEStateProfileLoad, the engine-less ctor copy
-// func_001DE240 and the setter func_001DE280).
+// func_001DE240 and the setter cFEStateProfileLoad_setQuitPath).
 //
 // Size 0x280:
 //   [R] cMemMan_alloc(640, "cFEStateProfileLoad") + cFEStateProfileLoad_cFEStateProfileLoad(mem, engine, iType,
 //       ctrlMask) in cFECustom_getNextState (fe/fereal) and cFEStateCharSelect's handler (fe/festatecharselect); the
-//       ctor writes 0x22C, 0x230, 0x234 and 0x27C (func_001DE280's word, "the last word of the object").
+//       ctor writes 0x22C, 0x230, 0x234 and 0x27C (cFEStateProfileLoad_setQuitPath's word, "the last word of the object").
 //   [O] On Tour 0x1B0 = cFEMemCard 0x164 + int miCntrlID, bool mIsOn, bool mIsHidden, unsigned short mTitle[32], int
 //       mTypeOfQuit; retail: 0x22C + three words + 33 chars (0x42, kMCTitleStringSize as in cOVState_PROFILE,
 //       fe/ovstateprofile.h) + 2 bytes of padding + a word = 0x280.
@@ -71,27 +71,27 @@ struct cFEStateProfileLoad {
     // --- cFEMemCard (fe/fememcard.h, 0x22C)
     unsigned short mLastLoadFileName[64]; // 0x09C [O] ([32] in On Tour); [R] initFEMemCard clears the first char
     unsigned short mFileName[64];   // 0x11C [O] ([32] in On Tour); [R] initFEMemCard writes the "%s-%s*" file pattern
-    int mPopupType;                 // 0x19C [O]; [U] func_0018FC98 sets 22 before the status popup; onWidgetEvent
+    int mPopupType;                 // 0x19C [O]; [U] cFEStateProfileLoad_startSave sets 22 before the status popup; onWidgetEvent
     int mProcessingKeyboard;        // 0x1A0 [O] (bool); [U] onWidgetEvent sets it when it pushes the name keyboard
     cKeyboardPopup* mpKeyboard;     // 0x1A4 [O]; [U] onWidgetEvent creates the cKeyboardPopup once and reads its
                                     //       text; onDestroyScreen clears it
-    int mIsProcessing;              // 0x1A8 [O] (bool); [U] func_0018FC98 sets it with the save; onWidgetEvent tests it
+    int mIsProcessing;              // 0x1A8 [O] (bool); [U] cFEStateProfileLoad_startSave sets it with the save; onWidgetEvent tests it
     int mIsDone;                    // 0x1AC [O] (bool); [U] updateDone tests and sets it
     int mIsLoadWait;                // 0x1B0 [O] (bool)
     int mIsLoadDoneOK;              // 0x1B4 [O] (bool)
     int mIsInvalidConfirmed;        // 0x1B8 [O] (bool); [R] initFEMemCard clears it
     int mType;                      // 0x1BC [O]; [R] 0 (profile: cFEMemCard_cFEMemCard2(self, pEngine, 0)); [U]
                                     //       updateDone reads it
-    int mState;                     // 0x1C0 [O]; [U] func_0018FC98 sets 3 (saving); onWidgetEvent tests it
+    int mState;                     // 0x1C0 [O]; [U] cFEStateProfileLoad_startSave sets 3 (saving); onWidgetEvent tests it
     int mSlot;                      // 0x1C4 [O]; [U] onWidgetEvent stores the picked row
     int mIsReplayAlloc;             // 0x1C8 [O] (bool)
     int mPlayerIdx;                 // 0x1CC [O]; [R] the ctor clears it, then stores the player (0/1) using the
                                     //       opening controller and copies its low byte (lb) to mUserNum; [U]
-                                    //       func_0018FC98 passes it to cMCOverlayManager_writeSetFileType
+                                    //       cFEStateProfileLoad_startSave passes it to cMCOverlayManager_writeSetFileType
     char* mpReadBuffer;             // 0x1D0 [O]
     char* mpStartReadBuffer;        // 0x1D4 [O]
     int mIsManagerStarted;          // 0x1D8 [O] (bool)
-    int mIsSavePressed;             // 0x1DC [O] (bool); [U] func_0018FC98 sets it with the save
+    int mIsSavePressed;             // 0x1DC [O] (bool); [U] cFEStateProfileLoad_startSave sets it with the save
     int mIsDeletePressed;           // 0x1E0 [O] (bool)
     int mIsCancelPressed;           // 0x1E4 [O] (bool); [U] onWidgetEvent sets it (back)
     int mIsFormatPressed;           // 0x1E8 [O] (bool)
@@ -101,16 +101,16 @@ struct cFEStateProfileLoad {
     int mDoNextMemCard;             // 0x1F8 [O] (bool)
     int mDoPrevMemCard;             // 0x1FC [O] (bool)
     int mLoadBEData;                // 0x200 [O] (bool)
-    int mAutoLoadOn;                // 0x204 [O] (bool); [U] func_0018FC98 skips the status popup when set
+    int mAutoLoadOn;                // 0x204 [O] (bool); [U] cFEStateProfileLoad_startSave skips the status popup when set
     int mAutoSaveOn;                // 0x208 [O] (bool)
     int mFirstCheck;                // 0x20C [O] (bool)
-    int mIsStatusPopupOn;           // 0x210 [O] (bool); [U] func_0018FC98 tests and sets it
+    int mIsStatusPopupOn;           // 0x210 [O] (bool); [U] cFEStateProfileLoad_startSave tests and sets it
     int mScreenStatus;              // 0x214 [O]; [U] displayStatus / displayOn / onWidgetEvent test it
     cFEPopupConfirm* mStatusPopup;  // 0x218 [O]
     int mLastSelectedDevice;        // 0x21C [O]; [U] displayOn stores the device it shows
     int mDeleteButtonActive;        // 0x220 [O] (bool); [U] hideDeleteButton and the init*Screen functions store it
     int mMainButtonActive;          // 0x224 [O] (bool); [U] hideMainButton and the init*Screen functions store it;
-                                    //       func_0018FC98 saves only while it is set
+                                    //       cFEStateProfileLoad_startSave saves only while it is set
     int mBufferState;               // 0x228 [O] eBufferState
     // --- cFEStateProfileLoad
     int miCntrlID;                  // 0x22C [O]; [R] the index of the lowest set bit of the ctor's ctrlMask (of the
@@ -122,7 +122,7 @@ struct cFEStateProfileLoad {
                                     //       has the card (manager +0x434, slot 14) write each slot's title here and
                                     //       shows it (cUIText_setUnicodeString)
     char unk_27A[0x2];              // 0x27A padding
-    int mTypeOfQuit;                // 0x27C [O]; [R] the ctor clears it; [U] the setter func_001DE280 (0, 1 or 2);
+    int mTypeOfQuit;                // 0x27C [O]; [R] the ctor clears it; [U] the setter cFEStateProfileLoad_setQuitPath (0, 1 or 2);
                                     //       updateDone: 0 pushes the parent factory's next state, 1 starts a pre-game
                                     //       load, 2 returns to the title screen
 };
