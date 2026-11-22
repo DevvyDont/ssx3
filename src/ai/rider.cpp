@@ -3115,7 +3115,7 @@ skip:
         cRider_SetNISGroundVectors(self, refPos);
     }
     *(&self->mModelOffset) = D_004FF120_q120F20;
-    self->unk_A30 = 0;
+    self->CollideIntersectInfo.Inst = 0;
     self->mVisitedIds = 0xFFFFFFFF;
     cRider_updateTerminalVelocity(self);
     float finishTime = self->mFinishTime;
@@ -3385,18 +3385,18 @@ extern "C" void cRiderMetrix_update(void* metrix);
  */
 extern "C" void cRider_updateSplit10(cRider* self)
 {
-    char* collideInst = (char*)self->unk_A30;
+    char* collideInst = (char*)self->CollideIntersectInfo.Inst;
     if (collideInst != 0)
     {
         char* obj = *(char**)(collideInst + 0xC);
         if (obj != 0)
         {
             sVEntry<void(void*, void*, void*, void*)>* vt = *(sVEntry<void(void*, void*, void*, void*)>**)(obj + 0xC);
-            vt[40].fn(vthis(obj, vt[40]), self->unk_A60, self->unk_9E0, (char*)&self->mVtbl);
+            vt[40].fn(vthis(obj, vt[40]), (char*)&self->CollideInfo, (char*)&self->CollideIntersectInfo, (char*)&self->mVtbl);
         }
         else
         {
-            cWScriptMan_doOnCollideScript(cWScriptMan_TheWScriptMan, self->unk_A60, self->unk_9E0, (char*)&self->mVtbl);
+            cWScriptMan_doOnCollideScript(cWScriptMan_TheWScriptMan, (char*)&self->CollideInfo, (char*)&self->CollideIntersectInfo, (char*)&self->mVtbl);
         }
     }
     cRider_updateTestSurface(self);
@@ -4414,7 +4414,7 @@ extern "C" void cRider_RenderShadow(cRider* self)
         top_2898(ps2GraphicsMan)++;
         t3Vector center;
         {
-            sV4_2898 midpoint = Scale_2898(Add_2898(BonePos_2898(self, self->unk_918), BonePos_2898(self, self->unk_8E8)), 0.5f);
+            sV4_2898 midpoint = Scale_2898(Add_2898(BonePos_2898(self, self->LeftLeg.FootSkelIndex), BonePos_2898(self, self->RightLeg.FootSkelIndex)), 0.5f);
             center.x = midpoint.x;
             center.y = midpoint.y;
             center.z = midpoint.z;

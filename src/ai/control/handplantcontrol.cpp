@@ -991,7 +991,7 @@ extern "C" void cAirMotion_step(cAirMotion* self)
     cAirPredictor_updateFlightPath(rider->mAirPredictor, &rider->mPosition, &rider->mVelocity, rider->mTimeScale * 0.01666666753590107f);
     cRider* rider1 = self->mRider;
     {
-        sVec4HP up = *(sVec4HP*)&rider1->unk_180;
+        sVec4HP up = *(sVec4HP*)&rider1->RiderRoot.row[2];
         *(sVec4HP*)&rider1->mGroundNormal = up;
     }
     *(sVec4HP*)&self->mRider->GroundVelocity = *(sVec4HP*)t4vect_Zero;
@@ -1504,7 +1504,7 @@ extern "C" float cAirMotion_intersectBoard(cAirMotion* self, char* hit)
 {
     cRider* rider = self->mRider;
     sVec4HP* pt = (sVec4HP*)&rider->mAnimModel->bones[rider->mBoneBoardRoot];
-    sVec4HP dir = *(sVec4HP*)&rider->unk_180;
+    sVec4HP dir = *(sVec4HP*)&rider->RiderRoot.row[2];
     char seg[176];
     cWorldLine_cWorldLine(seg, vu0Sub_13A7B0(*pt, vu0Scale_13A7B0(dir, 200.0f)), vu0Add_13A7B0(*pt, vu0Scale_13A7B0(dir, 200.0f)), 2, 0.574999988079071f);
     cRider* rider2 = self->mRider;

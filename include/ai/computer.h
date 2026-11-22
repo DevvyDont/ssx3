@@ -56,23 +56,13 @@ CHECK_SIZE(tComputerCruiseLogic, 0x8);
 
 struct cComputer {
     // ---- base cRiderHandler (0x000-0xDF0), as in cPlayer ----
-    union {
-        cRiderHandler RiderHandler; // 0x000 cRiderHandler base (ai/riderhandler.h): [O] class cComputer : cRiderHandler;
-                               //       [R] cComputer_cComputer stores &this->Rider in all 31 parts' virtual-base
-                               //       pointers (RiderHandler.<part>.mRider: 0x018, 0x024, 0x070 ... 0xC70, 0xD20, the
-                               //       offsets of ai/riderhandler.h) and then runs cRiderHandler_cRiderHandler(this, 0)
-        struct {
-            char unk_000[0x18];        // 0x000 the first part's own data
-            cRider* mRider;            // 0x018 [R] the first part's virtual-base pointer: cComputer_cComputer stores
-                                       //       &this->Rider here (and in 30 other part pointers); [U] every user reads the
-                                       //       rider through it (cAI_initComputerRiders, cComputer_followPathCruise ...)
-            char unk_01C[0xDC4];       // 0x01C the other parts of cRiderHandler (RiderHandler.AirMotion ... CheatFX)
-            int MotionState;           // 0xDE0 [P] cRiderHandler::_getMotionState; [R] cRiderHandler__getMotionState; [O]
-            int ControlState;          // 0xDE4 [P] cRiderHandler::_getControlState; [R] cRiderHandler__getControlState; [O]
-            void** mVtbl;              // 0xDE8 [R] _vt$9cComputer (D_004585F0: cComputer_getControlCmd, cComputer_writeToReplayFrame)
-            char pad_DEC[0x4];         // 0xDEC cRiderHandler is 16-byte aligned
-        };
-    };
+    cRiderHandler RiderHandler;    // 0x000 cRiderHandler base (ai/riderhandler.h): [O] class cComputer : cRiderHandler;
+                                   //       [R] cComputer_cComputer stores &this->Rider in all 31 parts' virtual-base
+                                   //       pointers (RiderHandler.<part>.mRider: 0x018, 0x024, 0x070 ... 0xC70, 0xD20, the
+                                   //       offsets of ai/riderhandler.h) and then runs cRiderHandler_cRiderHandler(this, 0);
+                                   //       every user reads the rider through the first one, RiderHandler.GroundMotion.mRider
+                                   //       (cAI_initComputerRiders, cComputer_followPathCruise ...); RiderHandler.mVtbl is
+                                   //       _vt$9cComputer (D_004585F0: cComputer_getControlCmd, cComputer_writeToReplayFrame)
     // ---- base cComputerState (0xDF0-0xF40) ----
     float mDesiredSpeed;       // 0xDF0 [O]; [R] Init = 0; [U] float (cComputer_getPrewindCmd, cComputer_getGateCmd)
     float mAccuracy;           // 0xDF4 [O]; [R] Init = 1.0f
@@ -127,13 +117,6 @@ enum {
 };
 
 CHECK_OFFSET(cComputer, RiderHandler, 0x000);
-CHECK_OFFSET(cComputer, unk_000, 0x000);
-CHECK_OFFSET(cComputer, mRider, 0x018);
-CHECK_OFFSET(cComputer, unk_01C, 0x01C);
-CHECK_OFFSET(cComputer, MotionState, 0xDE0);
-CHECK_OFFSET(cComputer, ControlState, 0xDE4);
-CHECK_OFFSET(cComputer, mVtbl, 0xDE8);
-CHECK_OFFSET(cComputer, pad_DEC, 0xDEC);
 CHECK_OFFSET(cComputer, mDesiredSpeed, 0xDF0);
 CHECK_OFFSET(cComputer, mAccuracy, 0xDF4);
 CHECK_OFFSET(cComputer, mRiderDifficulty, 0xDF8);

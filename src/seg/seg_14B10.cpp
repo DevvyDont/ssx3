@@ -1290,7 +1290,7 @@ extern "C" int cRider_isChangeFakieAir(cRider* rider)
     char* tbl = (char*)SSXApp->Game->SurfPropCache + n * 0xB0;
     t4Vector dir;
     t4Vector vel;
-    t4Vector up = rider->unk_180;
+    t4Vector up = rider->RiderRoot.row[2];
     if (n == 18 || *(int*)(tbl + 0x44) != 0) {
         dir = up;
         vel = rider->mVelocity;
@@ -1301,7 +1301,7 @@ extern "C" int cRider_isChangeFakieAir(cRider* rider)
     if (Dot_4DB8(up, dir) < 0.0f) {
         return 0;
     }
-    t4Vector front = rider->unk_170;
+    t4Vector front = rider->RiderRoot.row[1];
     float frontDot = Dot_4DB8(front, rider->mVelocity);
     if (frontDot > 277.77777099609375f) {
         return 0;

@@ -2480,16 +2480,16 @@ extern "C" void cAI_applyComputerRulesCustom(cAI* self, cComputer* rider)
         boostMode = 0;
     else
         if ((cBERules_mRules.f0 >> 5) & 1) boostMode = 2;
-    cRider* computerRider = rider->mRider;
+    cRider* computerRider = rider->RiderHandler.GroundMotion.mRider;
     computerRider->mBoostMode = boostMode;
     cRider_initBoost(computerRider);
     if ((cBERules_mRules.f0 >> 3) & 1)
-        rider->mRider->mBoostMeterStart = 1.0f;
+        rider->RiderHandler.GroundMotion.mRider->mBoostMeterStart = 1.0f;
     if (OptBit_0012B698(&cBERules_mRules, 4))
-        rider->mRider->mBoostSourceMask = 2;
+        rider->RiderHandler.GroundMotion.mRider->mBoostSourceMask = 2;
     if (OptBit_0012B698(&cBERules_mRules, 1))
-        cRider_setUbersAllowed(rider->mRider, 1);
-    rider->mRider->mStartHandicap = cBERules_getAIStartDelaySecs();
+        cRider_setUbersAllowed(rider->RiderHandler.GroundMotion.mRider, 1);
+    rider->RiderHandler.GroundMotion.mRider->mStartHandicap = cBERules_getAIStartDelaySecs();
 }
 #endif
 
