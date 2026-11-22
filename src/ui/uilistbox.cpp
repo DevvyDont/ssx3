@@ -303,7 +303,7 @@ extern "C" void cUIListBox_setCallbackListBox(cUIListBox* self, int count)
     *(int*)&self->mAttrListBox |= 0x10;
     void* obj = self->mpScreen->mpState;
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)((char*)obj + 8);
-    vt[19].fn(vthis(obj, vt[0x13]), self, 9);
+    vt[19].fn(vthis(obj, vt[19]), self, 9);
 }
 #endif
 

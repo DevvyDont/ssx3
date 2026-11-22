@@ -365,7 +365,7 @@ extern "C" void cUIMenu_render2D(cUIMenu* self, float x, float y)
         do {
             if ((*(int*)((char*)n + 0x14) >> 6) & 1) {
                 cUIMenu_render2D_sVEntry* vt = *(cUIMenu_render2D_sVEntry**)((char*)n + 8);
-                vt[17].fn(vthis(n, vt[0x11]), self->mPosition.x + x, self->mPosition.y + y);
+                vt[17].fn(vthis(n, vt[17]), self->mPosition.x + x, self->mPosition.y + y);
             }
             n = *(void**)((char*)n + 4);
         } while (!cListNode_isSentinel((cListNode*)n));

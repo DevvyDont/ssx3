@@ -124,7 +124,7 @@ int cCrowdRender2D_purge(int* param_1)
         for (j = 0; j < D_00445D38_B6D0[i].count; j++) {
             cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
             sCrowdVEntry2D* vt = (sCrowdVEntry2D*)obj->mVtbl;
-            vt[50].fn(vthis(obj, vt[0x32]), D_00445D38_B6D0[i].handles[j]);
+            vt[50].fn(vthis(obj, vt[50]), D_00445D38_B6D0[i].handles[j]);
         }
     }
     return MEM_free(*param_1);

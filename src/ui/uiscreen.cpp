@@ -1830,7 +1830,7 @@ extern "C" void cUIState_onGainFocus(cUIState* self)
     void* n = cList_first((cList*)&self->mScreens);
     if (n != 0) {
         sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)self->mVtbl;
-        vt[13].fn(vthis(self, vt[0xD]), (char*)n + 0x40);
+        vt[13].fn(vthis(self, vt[13]), (char*)n + 0x40);
     }
 }
 #endif
@@ -1978,7 +1978,7 @@ extern "C" void cUIState_onRender2D(cUIState* self)
     void* n = cList_first((cList*)&self->mScreens);
     if (n != 0) {
         sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
-        vt[0xE].fn(vthis(self, vt[0xE]));
+        vt[14].fn(vthis(self, vt[14]));
         do {
             char* obj = (char*)n + 0x40;
             if ((*(int*)((char*)n + 0x54) >> 6) & 1) {

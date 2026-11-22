@@ -460,7 +460,7 @@ extern "C" void cUIStateStack_update(cUIStateStack* self)
         do {
             if ((*(int*)((char*)n + 0x1C) >> 5) & 1) {
                 sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)n->mVtbl;
-                vt[0xC].fn(vthis(n, vt[0xC]));
+                vt[12].fn(vthis(n, vt[12]));
             }
             cUIState_updateScreens(n);
             n = n->mpNext;

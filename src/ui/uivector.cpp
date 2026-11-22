@@ -1518,7 +1518,7 @@ INCLUDE_ASM("ui/uivector", cListOpOnInput_onListNode);
 extern "C" void* cListOpOnInput_onListNode(cList* self, cListNode* obj)
 {
     sVEntry<int(void*, void*)>* vt = (sVEntry<int(void*, void*)>*)obj->mVtbl;
-    if (vt[0xF].fn(vthis(obj, vt[0xF]), self->mStart.mpNext) == 0) {
+    if (vt[15].fn(vthis(obj, vt[15]), self->mStart.mpNext) == 0) {
         return 0;
     }
     return ((void*)obj);

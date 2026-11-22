@@ -380,7 +380,7 @@ extern "C" void cUIEngine_update(cUIEngine* self)
 {
     cUIInput* obj = self->mpInput;
     sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)obj->mVtbl;
-    vt[46].fn(vthis(obj, vt[0x2E]));
+    vt[46].fn(vthis(obj, vt[46]));
     cUIStateStack_update((char*)&self->mStateStack);
 }
 #endif
@@ -851,7 +851,7 @@ extern "C" void cUIGroup_updateLocale(cUIGroup* self)
     if (n != 0) {
         do {
             cUIGroup_updateLocale_sVEntry* vt = *(cUIGroup_updateLocale_sVEntry**)((char*)n + 8);
-            vt[0x10].fn(vthis(n, vt[0x10]));
+            vt[16].fn(vthis(n, vt[16]));
             n = *(void**)((char*)n + 4);
         } while (!cListNode_isSentinel((cListNode*)n));
     }
@@ -913,7 +913,7 @@ extern "C" void cUIGroup_render3D(cUIGroup* self, int pRenCon)
     if (n != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
             cUIGroup_render3D_sVEntry* vt = *(cUIGroup_render3D_sVEntry**)((char*)n + 8);
-            vt[18].fn(vthis(n, vt[0x12]), pRenCon);
+            vt[18].fn(vthis(n, vt[18]), pRenCon);
             n = *(void**)((char*)n + 4);
         }
     }
@@ -942,7 +942,7 @@ extern "C" void cUIGroup_render2D(cUIGroup* self, float x, float y)
         do {
             if ((*(int*)((char*)n + 0x14) >> 6) & 1) {
                 cUIGroup_render2D_sVEntry* vt = *(cUIGroup_render2D_sVEntry**)((char*)n + 8);
-                vt[17].fn(vthis(n, vt[0x11]), self->mPosition.x + x, self->mPosition.y + y);
+                vt[17].fn(vthis(n, vt[17]), self->mPosition.x + x, self->mPosition.y + y);
             }
             n = *(void**)((char*)n + 4);
         } while (!cListNode_isSentinel((cListNode*)n));
@@ -1320,7 +1320,7 @@ extern "C" void cUIIcon_render2D(cUIIcon_8A78* self, float x, float y)
     int* w = &rc->top->f8;
     *w = (*w & ~0x3E0) | ((((self->f15 & 0x1F) + 9) << 5) & 0x3E0);
     sVE_8A78* vt = rc->vt;
-    vt[568 / 8].fn(vthis(rc, vt[0x238 / 8]), 4, verts, 0);
+    vt[71].fn(vthis(rc, vt[71]), 4, verts, 0);
     PopRS_8A78();
 }
 #endif
