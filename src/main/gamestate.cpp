@@ -2675,7 +2675,7 @@ INCLUDE_ASM("main/gamestate", cInputSync_sendClientInput);
 #ifdef SKIP_ASM
 struct sPackSrc_7B28;
 struct sPackDst_7B28;
-extern "C" int cInputSync_compressinput(cInputSync* self, cInputSync_PadSample* src, sPackDst_7B28* dst);
+extern "C" int cInputSync_compressinput(cInputSync* self, cInputSync_PadSample* src, cInputSync_CompressedSample* dst);
 extern "C" void cInputSync_decompressinput(cInputSync* self, cInputSync_PadSample* src, char* buf);
 extern "C" void cGameComm_writePacket(void* mgr, int a, char* buf, int len);
 
@@ -2691,7 +2691,7 @@ extern "C" void cGameComm_writePacket(void* mgr, int a, char* buf, int len);
 extern "C" void cInputSync_sendClientInput(cInputSync* self, cInputSync_PadSample* src)
 {
     char buf[32];
-    int len = cInputSync_compressinput(self, src, (sPackDst_7B28*)buf);
+    int len = cInputSync_compressinput(self, src, (cInputSync_CompressedSample*)buf);
     cInputSync_decompressinput(self, src, buf);
     cGameComm* gameComm = cGameComm_mGameComm;
     int ok = gameComm->mSyncInput != 0 && gameComm->mError == 0 && gameComm->mConnected != 0;
@@ -2705,11 +2705,6 @@ extern "C" void cInputSync_sendClientInput(cInputSync* self, cInputSync_PadSampl
 INCLUDE_ASM("main/gamestate", cInputSync_compressinput);
 #ifdef SKIP_ASM
 
-struct sPackDst_7B28 {
-    unsigned char count;
-    unsigned char mask[3];
-    unsigned char vals[1];
-};
 
 /**
  * Compresses a pad sample: each button value times 255 becomes a byte, and only the non-zero bytes are kept, with a bit
@@ -2721,21 +2716,21 @@ struct sPackDst_7B28 {
  * @param dst  the compressed sample
  * @return the compressed size in bytes (4 + the kept bytes)
  */
-extern "C" int cInputSync_compressinput(cInputSync* self, cInputSync_PadSample* src, sPackDst_7B28* dst)
+extern "C" int cInputSync_compressinput(cInputSync* self, cInputSync_PadSample* src, cInputSync_CompressedSample* dst)
 {
     int i;
     int j;
     int n;
-    dst->count = src->NumButtons;
+    dst->NumButtons = src->NumButtons;
     for (j = 0; j < 3; j++) {
-        dst->mask[j] = 0;
+        dst->NonZeroBitBytes[j] = 0;
     }
     n = 0;
     for (i = 0; i < src->NumButtons; i++) {
         unsigned char quantized = (int)(((float*)&src->Buttons[0])[i] * 255.0f);
         if (quantized != 0) {
-            dst->mask[i >> 3] |= 1 << (i & 7);
-            dst->vals[n++] = quantized;
+            dst->NonZeroBitBytes[i >> 3] |= 1 << (i & 7);
+            dst->NonZeroBytes[n++] = quantized;
         }
     }
     return n + 4;
@@ -2757,14 +2752,14 @@ extern "C" void MEM_fill(void* dst, int value, int size);
  */
 extern "C" void cInputSync_decompressinput(cInputSync* self, cInputSync_PadSample* out, char* buf)
 {
-    sPackDst_7B28* in = (sPackDst_7B28*)buf;
-    out->NumButtons = in->count;
+    cInputSync_CompressedSample* in = (cInputSync_CompressedSample*)buf;
+    out->NumButtons = in->NumButtons;
     MEM_fill(((float*)&out->Buttons[0]), 0, 0x60);
     int k = 0;
     int i;
     for (i = 0; i < out->NumButtons; i++) {
-        if ((in->mask[i >> 3] >> (i & 7)) & 1) {
-            ((float*)&out->Buttons[0])[i] = in->vals[k++] * 0.003921568859368563f;
+        if ((in->NonZeroBitBytes[i >> 3] >> (i & 7)) & 1) {
+            ((float*)&out->Buttons[0])[i] = in->NonZeroBytes[k++] * 0.003921568859368563f;
         } else {
             ((float*)&out->Buttons[0])[i] = 0.0f;
         }

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "camera/camera.h"
 #include "vtable.h"
 #include "visualfx/avalanche.h"
@@ -248,9 +249,6 @@ struct sV4_2D5048 {
     sV4_2D5048(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-struct sM4_2D5048 {
-    sV4_2D5048 v[4];
-};
 
 struct sVtx_2D5048 {
     float u, v, q, pad;     // 0x00
@@ -262,7 +260,7 @@ struct sVtx_2D5048 {
 
 struct sBones_2D5048 {
     char pad[0x30];
-    sM4_2D5048* mats;       // 0x30
+    t4Matrix* mats;       // 0x30
 };
 
 struct sRState_2D5048 {
@@ -303,7 +301,7 @@ static inline sViews_2D5048* views_2D5048()
 }
 
 // PORT: PS2-only VU0 inline asm (matrix * vector).
-static inline sV4_2D5048 MatVec_2D5048(const sM4_2D5048* m, const sV4_2D5048& v)
+static inline sV4_2D5048 MatVec_2D5048(const t4Matrix* m, const sV4_2D5048& v)
 {
     sV4_2D5048 r;
     __asm__(
@@ -411,9 +409,9 @@ extern "C" void func_002D5048(sAnger_2D4C08* self)
         return;
     }
     sGfx_2D5048* graphics = (sGfx_2D5048*)GrMan_angerfx;
-    sM4_2D5048* viewMatrix = ((sM4_2D5048* (*)(void*))graphics->vtable[35].fn)(vthis(graphics, graphics->vtable[35]));
-    sM4_2D5048* bm = &(*(sBones_2D5048**)(self->rider + 0x780))->mats[*(int*)(self->rider + 0x8A8)];
-    sV4_2D5048 headPos = bm->v[3];
+    t4Matrix* viewMatrix = ((t4Matrix* (*)(void*))graphics->vtable[35].fn)(vthis(graphics, graphics->vtable[35]));
+    t4Matrix* bm = &(*(sBones_2D5048**)(self->rider + 0x780))->mats[*(int*)(self->rider + 0x8A8)];
+    sV4_2D5048 headPos = ((sV4_2D5048*)&bm->row[0])[3];
     sV4_2D5048 viewPos = MatVec_2D5048(viewMatrix, headPos);
     float z = viewPos.z;
     if (z <= 0.0f || 2000.0f <= z) {
@@ -425,8 +423,8 @@ extern "C" void func_002D5048(sAnger_2D4C08* self)
     if (1500.0f < z) {
         fade = (2000.0f - z) * 0.002f;
     }
-    sV4_2D5048 right(viewMatrix->v[0].x, viewMatrix->v[1].x, viewMatrix->v[2].x, 0.0f);
-    sV4_2D5048 up(viewMatrix->v[0].y, viewMatrix->v[1].y, viewMatrix->v[2].y, 0.0f);
+    sV4_2D5048 right(((sV4_2D5048*)&viewMatrix->row[0])[0].x, ((sV4_2D5048*)&viewMatrix->row[0])[1].x, ((sV4_2D5048*)&viewMatrix->row[0])[2].x, 0.0f);
+    sV4_2D5048 up(((sV4_2D5048*)&viewMatrix->row[0])[0].y, ((sV4_2D5048*)&viewMatrix->row[0])[1].y, ((sV4_2D5048*)&viewMatrix->row[0])[2].y, 0.0f);
     sV4_2D5048 baseCentre = Add_2D5048(headPos, Scale_2D5048(up, 35.0f));
     sV4_2D5048 topCentre = Add_2D5048(baseCentre, Scale_2D5048(up, heightScale * 18.0f));
     sV4_2D5048 rr = Scale_2D5048(right, widthScale * 9.0f);

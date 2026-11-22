@@ -386,13 +386,6 @@ INCLUDE_ASM("object/instanceman", cMeshAnimFrame_update);
 extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void* cAnimFrame_update(void* self);
 
-struct sImInst_351800 {
-    char pad_0x0[0x44];
-    float t[3];         // 0x44
-    float rot[3];       // 0x50
-    char pad_0x5c[0x34];
-    float m[4][4];      // 0x90
-};
 
 /**
  * Evaluates a mesh animation frame and rebuilds its transform from the rotation (degrees) and translation channels.
@@ -401,14 +394,14 @@ struct sImInst_351800 {
  * cAnimFrame_update untouched in $f12 (a port must pass it). The matrix is the X-Y-Z Euler rotation of minus the
  * rotation values (converted to radians, fSinCos sine / cosine) with the translation in row 3.
  */
-extern "C" void cMeshAnimFrame_update(sImInst_351800* self)
+extern "C" void cMeshAnimFrame_update(cMeshAnimFrame* self)
 {
     cAnimFrame_update(self);
     float rotRad[3];
     float sc[3][2];
-    rotRad[0] = -self->rot[0] * 0.01745329424738884f;
-    rotRad[1] = -self->rot[1] * 0.01745329424738884f;
-    rotRad[2] = -self->rot[2] * 0.01745329424738884f;
+    rotRad[0] = -((float*)&self->Vals[3])[0] * 0.01745329424738884f;
+    rotRad[1] = -((float*)&self->Vals[3])[1] * 0.01745329424738884f;
+    rotRad[2] = -((float*)&self->Vals[3])[2] * 0.01745329424738884f;
     fSinCos(&sc[0][0], &sc[0][1], rotRad[0]);
     fSinCos(&sc[1][0], &sc[1][1], rotRad[1]);
     fSinCos(&sc[2][0], &sc[2][1], rotRad[2]);
@@ -421,22 +414,22 @@ extern "C" void cMeshAnimFrame_update(sImInst_351800* self)
     float sxsy = sx * sy;
     float cxsy = cx * sy;
     float cxsz = cx * sz;
-    self->m[0][0] = cy * cz;
-    self->m[0][1] = -cy * sz;
-    self->m[0][2] = sy;
-    self->m[0][3] = 0.0f;
-    self->m[1][0] = sxsy * cz + cxsz;
-    self->m[1][1] = cx * cz - sxsy * sz;
-    self->m[1][2] = -sx * cy;
-    self->m[1][3] = 0.0f;
-    self->m[2][0] = sx * sz - cxsy * cz;
-    self->m[2][1] = cxsz * sy + sx * cz;
-    self->m[2][2] = cx * cy;
-    self->m[2][3] = 0.0f;
-    self->m[3][0] = self->t[0];
-    self->m[3][1] = self->t[1];
-    self->m[3][2] = self->t[2];
-    self->m[3][3] = 1.0f;
+    ((float (*)[4])&self->FrameMatrix)[0][0] = cy * cz;
+    ((float (*)[4])&self->FrameMatrix)[0][1] = -cy * sz;
+    ((float (*)[4])&self->FrameMatrix)[0][2] = sy;
+    ((float (*)[4])&self->FrameMatrix)[0][3] = 0.0f;
+    ((float (*)[4])&self->FrameMatrix)[1][0] = sxsy * cz + cxsz;
+    ((float (*)[4])&self->FrameMatrix)[1][1] = cx * cz - sxsy * sz;
+    ((float (*)[4])&self->FrameMatrix)[1][2] = -sx * cy;
+    ((float (*)[4])&self->FrameMatrix)[1][3] = 0.0f;
+    ((float (*)[4])&self->FrameMatrix)[2][0] = sx * sz - cxsy * cz;
+    ((float (*)[4])&self->FrameMatrix)[2][1] = cxsz * sy + sx * cz;
+    ((float (*)[4])&self->FrameMatrix)[2][2] = cx * cy;
+    ((float (*)[4])&self->FrameMatrix)[2][3] = 0.0f;
+    ((float (*)[4])&self->FrameMatrix)[3][0] = self->Vals[0];
+    ((float (*)[4])&self->FrameMatrix)[3][1] = self->Vals[1];
+    ((float (*)[4])&self->FrameMatrix)[3][2] = self->Vals[2];
+    ((float (*)[4])&self->FrameMatrix)[3][3] = 1.0f;
 }
 #endif
 

@@ -1100,15 +1100,6 @@ struct sAvPair_83B8 {
     short b;
 };
 
-struct sAvGroup_83B8 {
-    int f0;
-    sAvPart_83B8* parts;            // 0x4
-    sAvGroup_83B8* next;            // 0x8
-    unsigned short nlinks;          // 0xC
-    unsigned short npairs;          // 0xE
-    sAvLink_83B8 links[0x20];       // 0x10
-    sAvPair_83B8 pairs[1];          // 0x110
-};
 
 /**
  * Writes the avalanche data of the current location to "<location file>.<name>".
@@ -1134,17 +1125,17 @@ extern "C" void cAvalanche_SaveData1(int direct, char* name)
     sprintf(buf, str_pct_s_pct_s_j, cBENewRaceInterface_getLocationFile(iface, cBENewRaceInterface_getLocationID(iface)), name);
     int fd;
     if (FILESYS_opensync(buf, 38, 100, &fd)) {
-        sAvGroup_83B8* avalanche;
-        for (avalanche = (sAvGroup_83B8*)cAvalanche_m_avalancheList; avalanche != 0; avalanche = avalanche->next) {
-            for (sAvPart_83B8* node = avalanche->parts; node != 0; node = node->next) {
+        tAvalanche* avalanche;
+        for (avalanche = (tAvalanche*)cAvalanche_m_avalancheList; avalanche != 0; avalanche = avalanche->m_next) {
+            for (sAvPart_83B8* node = ((sAvPart_83B8*)avalanche->m_nodeList); node != 0; node = node->next) {
                 off += 0x10 + (int)node->count * 10;
             }
             off += 4;
             int k;
-            for (k = 0; k < avalanche->nlinks; k++) {
+            for (k = 0; k < avalanche->m_numCollisions; k++) {
                 off += 8;
             }
-            for (k = 0; k < avalanche->npairs; k++) {
+            for (k = 0; k < avalanche->m_numGroundCollisions; k++) {
                 off += 4;
             }
         }
@@ -1152,9 +1143,9 @@ extern "C" void cAvalanche_SaveData1(int direct, char* name)
         cAvalanche_writeData(direct, (void*)fd, 0, (char*)&magic, 4, 1);
         cAvalanche_writeData(direct, (void*)fd, (void*)4, (char*)&off, 4, 1);
         off = 8;
-        for (avalanche = (sAvGroup_83B8*)cAvalanche_m_avalancheList; avalanche != 0; avalanche = avalanche->next) {
+        for (avalanche = (tAvalanche*)cAvalanche_m_avalancheList; avalanche != 0; avalanche = avalanche->m_next) {
             unsigned short header;
-            for (sAvPart_83B8* node = avalanche->parts; node != 0; node = node->next) {
+            for (sAvPart_83B8* node = ((sAvPart_83B8*)avalanche->m_nodeList); node != 0; node = node->next) {
                 header = 48879;
                 off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)&header, 2, 1);
                 header = (int)node->count * 10 + 0xC;
@@ -1162,18 +1153,18 @@ extern "C" void cAvalanche_SaveData1(int direct, char* name)
                 off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)node->pos, 4, 3);
                 off += cAvalanche_writeData(1, (void*)fd, (void*)off, node->data, 10, (int)node->count);
             }
-            header = avalanche->nlinks;
+            header = avalanche->m_numCollisions;
             off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)&header, 2, 1);
-            header = avalanche->npairs;
+            header = avalanche->m_numGroundCollisions;
             off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)&header, 2, 1);
             int k;
-            for (k = 0; k < avalanche->nlinks; k++) {
-                off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)&avalanche->links[k].id, 4, 1);
-                off += cAvalanche_writeData(direct, (void*)fd, (void*)off, avalanche->links[k].obj + 0x78, 4, 1);
+            for (k = 0; k < avalanche->m_numCollisions; k++) {
+                off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)&((sAvLink_83B8*)&avalanche->m_collisions[0])[k].id, 4, 1);
+                off += cAvalanche_writeData(direct, (void*)fd, (void*)off, ((sAvLink_83B8*)&avalanche->m_collisions[0])[k].obj + 0x78, 4, 1);
             }
-            for (k = 0; k < avalanche->npairs; k++) {
-                off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)&avalanche->pairs[k].b, 2, 1);
-                off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)&avalanche->pairs[k].a, 2, 1);
+            for (k = 0; k < avalanche->m_numGroundCollisions; k++) {
+                off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)&((sAvPair_83B8*)&avalanche->m_groundCollisions[0])[k].b, 2, 1);
+                off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)&((sAvPair_83B8*)&avalanche->m_groundCollisions[0])[k].a, 2, 1);
             }
         }
         FILESYS_closesync(fd, 100);

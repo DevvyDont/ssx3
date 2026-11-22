@@ -29,20 +29,11 @@ struct sRVEntry_C078 {
     int (*fn)(void*, int, int, int, int);
 };
 
-struct sRCtx_C078 {
-    char pad0[0x24];
-    int cur;
-    char pad28[0xE84 - 0x28];
-    sDrawState* top;
-    char padE88[0xF50 - 0xE88];
-    int tbl[(0x10D8 - 0xF50) / 4];
-    sRVEntry_C078* vt;
-};
 
 
-static inline int curLayer_C078(sRCtx_C078* c)
+static inline int curLayer_C078(cPS2GraphicsMan* c)
 {
-    return c->tbl[c->cur];
+    return c->_EffectTexMap[c->m_SpecularTextureId[6]];
 }
 
 /**
@@ -56,7 +47,7 @@ static inline int curLayer_C078(sRCtx_C078* c)
  */
 extern "C" void cGame_renderModels(cGame* self, FrustumIntersector* world)
 {
-    *(short*)((char*)GrMan->m_pCurrentDrawState + 0x12) = curLayer_C078((sRCtx_C078*)GrMan);
+    *(short*)((char*)GrMan->m_pCurrentDrawState + 0x12) = curLayer_C078(GrMan);
     cPS2GraphicsMan* ctx = GrMan;
     (ctx->m_pCurrentDrawState)->m_bitGroups[1] = (((int)(ctx->m_pCurrentDrawState)->m_bitGroups[1]) & ~0xF80) | 0x880;
     (*(int*)&(ctx->m_pCurrentDrawState)->m_bitGroups[0]) |= 0x30;

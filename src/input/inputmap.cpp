@@ -320,10 +320,6 @@ extern "C" int cInputMap_getState1(cInputMap* self, void* inputPad, int stateId,
 //100%
 INCLUDE_ASM("input/inputmap", cInputPad_update);
 #ifdef SKIP_ASM
-struct sBtnSet_00321298 {
-    int count;
-    tButton b[1];
-};
 
 /**
  * Updates one controller's button states from this frame's analogue values.
@@ -335,51 +331,51 @@ struct sBtnSet_00321298 {
  * @param n     the number of buttons (On Tour numbuttons)
  * @param vals  one value per button
  */
-extern "C" void cInputPad_update(sBtnSet_00321298* self, int n, float* vals)
+extern "C" void cInputPad_update(cInputPad* self, int n, float* vals)
 {
-    if (self->count < n) {
-        MEM_fill(&self->b[self->count], 0, (n - self->count) * sizeof(tButton));
+    if (self->NumButtons < n) {
+        MEM_fill(&self->Buttons[self->NumButtons], 0, (n - self->NumButtons) * sizeof(tButton));
     }
-    self->count = n;
+    self->NumButtons = n;
     for (int i = 0; i < n; i++) {
-        self->b[i].Value = vals[i];
-        if (self->b[i].DebounceCount < 3) {
-            self->b[i].IsPressed = 0;
-            self->b[i].DebounceCount++;
-            self->b[i].IsReleased = 0;
+        self->Buttons[i].Value = vals[i];
+        if (self->Buttons[i].DebounceCount < 3) {
+            self->Buttons[i].IsPressed = 0;
+            self->Buttons[i].DebounceCount++;
+            self->Buttons[i].IsReleased = 0;
         } else {
-            int on = self->b[i].Value > 0.0f;
-            if (on == self->b[i].IsHeld) {
-                self->b[i].IsPressed = 0;
-                self->b[i].IsReleased = 0;
+            int on = self->Buttons[i].Value > 0.0f;
+            if (on == self->Buttons[i].IsHeld) {
+                self->Buttons[i].IsPressed = 0;
+                self->Buttons[i].IsReleased = 0;
             } else {
-                self->b[i].IsHeld = on;
+                self->Buttons[i].IsHeld = on;
                 if (on) {
-                    self->b[i].IsPressed = 1;
-                    self->b[i].IsReleased = 0;
+                    self->Buttons[i].IsPressed = 1;
+                    self->Buttons[i].IsReleased = 0;
                 } else {
-                    self->b[i].IsPressed = 0;
-                    self->b[i].IsReleased = 1;
+                    self->Buttons[i].IsPressed = 0;
+                    self->Buttons[i].IsReleased = 1;
                 }
-                self->b[i].DebounceCount = 0;
+                self->Buttons[i].DebounceCount = 0;
             }
         }
-        if (self->b[i].IsHeld) {
-            if (self->b[i].RepeatCount == 0) {
-                self->b[i].IsRepeated = 1;
-                self->b[i].RepeatCount = 0x18;
+        if (self->Buttons[i].IsHeld) {
+            if (self->Buttons[i].RepeatCount == 0) {
+                self->Buttons[i].IsRepeated = 1;
+                self->Buttons[i].RepeatCount = 0x18;
             } else {
-                self->b[i].RepeatCount--;
-                if (self->b[i].RepeatCount <= 0) {
-                    self->b[i].IsRepeated = 1;
-                    self->b[i].RepeatCount = 0xC;
+                self->Buttons[i].RepeatCount--;
+                if (self->Buttons[i].RepeatCount <= 0) {
+                    self->Buttons[i].IsRepeated = 1;
+                    self->Buttons[i].RepeatCount = 0xC;
                 } else {
-                    self->b[i].IsRepeated = 0;
+                    self->Buttons[i].IsRepeated = 0;
                 }
             }
         } else {
-            self->b[i].IsRepeated = 0;
-            self->b[i].RepeatCount = 0;
+            self->Buttons[i].IsRepeated = 0;
+            self->Buttons[i].RepeatCount = 0;
         }
     }
 }

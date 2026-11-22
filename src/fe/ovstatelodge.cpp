@@ -44,25 +44,6 @@ extern "C" void cFEStateMountainRoom_loadPeakPass_Room(void* self) __asm__("cFES
 extern char str_dot_loc_arrow[];
 extern char str_dot_visit_arrow[];
 
-struct sMountainRoomK2678 {
-    char pad_0x00[0x44];
-    signed char player;      // 0x44
-    char pad_0x45[0x3];
-    int f48;
-    int f4C;
-    int f50;
-    int f54;
-    int a[5];                // 0x58
-    int b[5][3];             // 0x6C
-    int fA8;
-    int fAC;
-    int charID;              // 0xB0
-    int fB4;
-    int fB8;
-    int fBC;
-    char* fC0;
-    int fC4;
-};
 
 /**
  * Constructs the lodge's mountain (trophy) room state for a player and starts loading the character's peak
@@ -83,21 +64,21 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(cFEStateMountainRoom*
     cUIState_cUIState_Room(self, (int)ui);
     self->mHashName = 43;
     self->mVtbl = cFEStateMountainRoom_vtbl;
-    sMountainRoomK2678* room = (sMountainRoomK2678*)self;
-    room->player = pl;
+    cFEStateMountainRoom* room = self;
+    room->mUserNum = pl;
     *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, pl);
-    room->f48 = 0;
-    room->f50 = 0;
-    room->f54 = 0;
+    (*(int*)&room->mpPassGroup) = 0;
+    (*(int*)&room->mpPassIcon) = 0;
+    (*(int*)&room->mpHelpText) = 0;
     for (int i = 4; i >= 0; i--) {
-        room->a[i] = 0;
+        ((int*)&room->mpRaceMarkers[0])[i] = 0;
     }
-    int* row1 = room->b[1];
-    int* row2 = room->b[2];
-    int* row3 = room->b[3];
-    int* row4 = room->b[4];
+    int* row1 = ((int (*)[3])&room->mpSlopeStyleMarkers[0])[1];
+    int* row2 = ((int (*)[3])&room->mpSlopeStyleMarkers[0])[2];
+    int* row3 = ((int (*)[3])&room->mpSlopeStyleMarkers[0])[3];
+    int* row4 = ((int (*)[3])&room->mpSlopeStyleMarkers[0])[4];
     for (int i = 2; i >= 0; i--) {
-        room->b[0][i] = 0;
+        ((int (*)[3])&room->mpSlopeStyleMarkers[0])[0][i] = 0;
     }
     for (int i = 2; i >= 0; i--) {
         row1[i] = 0;
@@ -111,24 +92,24 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(cFEStateMountainRoom*
     for (int i = 2; i >= 0; i--) {
         row4[i] = 0;
     }
-    room->fA8 = 0;
-    room->fAC = 0;
+    (*(int*)&room->mpDoneElem) = 0;
+    (*(int*)&room->mpNotDoneElem) = 0;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
-    room->charID = cBENewPlayerInterface_getPlayerCharID(iface, room->player);
+    room->mCharID = cBENewPlayerInterface_getPlayerCharID(iface, room->mUserNum);
     for (int i = 0; i < 3; i++) {
-        if (cBENewPlayerInterface_isPeakLocked(iface, room->player, room->charID, i) == 0) {
-            room->fB4 = i;
+        if (cBENewPlayerInterface_isPeakLocked(iface, room->mUserNum, room->mCharID, i) == 0) {
+            room->mPeakNum = i;
         }
     }
     void* iface3 = cBE_getInterface_Fv(cBE_getBE(), 3);
-    room->fB8 = cBEStatInterface_getStatLevel(iface3, cBELibrary_getRiderIndex(room->player));
+    room->mLevel = cBEStatInterface_getStatLevel(iface3, cBELibrary_getRiderIndex(room->mUserNum));
     void* iface13 = cBE_getInterface_Fv(cBE_getBE(), 13);
-    char* item = cBERewardInterface_getPeakPass(iface13, room->fB4, room->charID);
-    room->fBC = -1;
-    room->fC4 = -1;
-    room->fC0 = item;
-    room->fAC = cUITextureBank_getElementByHashname((char*)&ui->mTextureBank, GetHashValue32(str_dot_loc_arrow));
-    room->fA8 = cUITextureBank_getElementByHashname((char*)&ui->mTextureBank, GetHashValue32(str_dot_visit_arrow));
+    char* item = cBERewardInterface_getPeakPass(iface13, room->mPeakNum, room->mCharID);
+    room->mTextureFileIndex = -1;
+    room->mFrontTextureID = -1;
+    (*(char**)&room->mpPeakPassInfo) = item;
+    (*(int*)&room->mpNotDoneElem) = cUITextureBank_getElementByHashname((char*)&ui->mTextureBank, GetHashValue32(str_dot_loc_arrow));
+    (*(int*)&room->mpDoneElem) = cUITextureBank_getElementByHashname((char*)&ui->mTextureBank, GetHashValue32(str_dot_visit_arrow));
     cFEStateMountainRoom_loadPeakPass_Room(self);
     return ((void*)self);
 }

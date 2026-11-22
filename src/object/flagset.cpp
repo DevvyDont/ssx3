@@ -341,10 +341,6 @@ static inline void MatCopy_34B9B0(sMat_34B9B0* d, const sMat_34B9B0* s)
 }
 
 struct sFlagSetEntry;
-struct sFSE_34B9B0 {
-    char pad[0x94];
-    tInstanceRecord* models[1];
-};
 
 #define TOP_34B9B0(c) (*(sRS_34B9B0**)((c) + 0xE84))
 
@@ -376,7 +372,7 @@ extern "C" void cFlagSet_render(cFlagSet* flagSet)
     }
     float one = 1.0f;
     for (int i = 0; i < flagSet->mCurrentNumInstances; i++) {
-        tInstanceRecord* instRecord = ((sFSE_34B9B0*)flagSet)->models[i];
+        tInstanceRecord* instRecord = (flagSet)->mInstances[i];
         if (!IsLoaded_34B9B0(instRecord)) {
             continue;
         }

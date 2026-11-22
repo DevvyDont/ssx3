@@ -8406,10 +8406,6 @@ extern char str_kT_MSGSubjectAggressionpct_d[];
 extern char str_kT_MSGSubjectForeshadowpct_d[];
 extern char str_kT_MSGSubjectBeatThePeakpct_d[];
 
-struct sPopup1E4F70 {
-    char pad0[0xFC];
-    cUIText* texts[4];  // 0xFC
-};
 
 
 /**
@@ -8443,10 +8439,10 @@ extern "C" void func_001E4F70(cOVState_MESSAGECENTER* self, int slot, int id, un
     } else if (func_001E2D58(8, id)) {
         sprintf(buf, str_kT_MSGSubjectBeatThePeakpct_d, lvl);
     }
-    sPopup1E4F70* view = (sPopup1E4F70*)self;
-    if (view->texts[slot] != 0) {
-        cUIText_setUnicodeStringByID(view->texts[slot], GetHashValue32(buf));
-        char* textObj = (char*)view->texts[slot];
+    cOVState_MESSAGECENTER* view = self;
+    if (view->mpSubject[slot] != 0) {
+        cUIText_setUnicodeStringByID(view->mpSubject[slot], GetHashValue32(buf));
+        char* textObj = (char*)view->mpSubject[slot];
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(textObj + 8);
         vt[9].fn(vthis(textObj, vt[9]), 1);
     }
@@ -9037,18 +9033,6 @@ extern "C" unsigned char func_001E5AA0(cOVState_ViewPopup* self, int idx)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cOVState_HEAT_STANDINGS_onCreateScreen);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sInfo5B80 {
-    int kind;
-    int f04;
-    int f08;
-    int f0C;
-    int count;
-    int f14;
-    int a18[10];
-    int a40[12];
-    int f70;
-};
 
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
@@ -9056,7 +9040,7 @@ extern void* cBENewRaceInterface_getLocationName1_5B80(void* iface) __asm__("cBE
 extern void func_002C2540_5B80(unsigned short* dst, const char* src) __asm__("func_002C2540");
 extern void sprintf2_5B80(unsigned short* dst, const unsigned short* fmt, ...) __asm__("sprintf2");
 extern "C" char* cBECharacterInterface_getShortNameByCharacter(void* iface, int a1, int a2);
-extern "C" int cGameModeMan_getHeatScore(sInfo5B80* info, int idx, int which);
+extern "C" int cGameModeMan_getHeatScore(cGameModeMan* info, int idx, int which);
 extern int cGameModeMan_iRanking[];
 extern int cGameModeMan_bGiveUp[];
 extern int cGameModeMan_iCharRank[];
@@ -9140,8 +9124,8 @@ extern "C" void cOVState_HEAT_STANDINGS_onCreateScreen(cOVState_HEAT_STANDINGS* 
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* iface2 = cBE_getInterface_Fv(cBE_getBE(), 2);
     signed char event = cBENewRaceInterface_newRace.cGameMode;
-    sInfo5B80* info = (sInfo5B80*)SSXApp->GameModeMan;
-    int kind = info->kind;
+    cGameModeMan* info = SSXApp->GameModeMan;
+    int kind = info->iHeatNum;
     cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_track_event));
     func_002C2540_5B80(title, (char*)cBENewRaceInterface_getLocationName1_5B80(iface0));
     unsigned short* fmt = 0;
@@ -9182,7 +9166,7 @@ extern "C" void cOVState_HEAT_STANDINGS_onCreateScreen(cOVState_HEAT_STANDINGS* 
         cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRCMNScoreColon));
     }
     int flag = 0;
-    if (kind == 1 && info->f70 == 3) {
+    if (kind == 1 && info->iNextHeat == 3) {
         flag = 1;
     }
     int pl0 = cBENewPlayerInterface_getHumanRider(iface1, 0);
@@ -9195,7 +9179,7 @@ extern "C" void cOVState_HEAT_STANDINGS_onCreateScreen(cOVState_HEAT_STANDINGS* 
         char num[16];
         char num2[32];
         int i;
-        for (i = 1; i < info->count + 2; i++) {
+        for (i = 1; i < info->iNumberAI + 2; i++) {
             int idx = cGameModeMan_iCharRank[i - 1];
             sprintf(name, str_rider_pct_d, i);
             int hl = 0;
@@ -9205,7 +9189,7 @@ extern "C" void cOVState_HEAT_STANDINGS_onCreateScreen(cOVState_HEAT_STANDINGS* 
             } else if (cBENewRaceInterface_newRace.cGamePath == 2 && i - 1 == cGameModeMan_iRanking[pl1]) {
                 if (cGameModeMan_bGiveUp[pl1]) hl = 1; else hl = 0;
             }
-            cUIText_setAsciiString(uiText, cBECharacterInterface_getShortNameByCharacter(iface2, info->a18[idx], info->a40[idx]));
+            cUIText_setAsciiString(uiText, cBECharacterInterface_getShortNameByCharacter(iface2, info->iCharacters[idx], info->iCheatCharacters[idx]));
             sprintf(name, str_run_1_pct_d, i);
             uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
             if (hl && kind == 1) {
@@ -9280,7 +9264,7 @@ extern "C" void cOVState_HEAT_STANDINGS_onCreateScreen(cOVState_HEAT_STANDINGS* 
             if (((cUIObj_5B80*)object) != 0) {
                 if (i < 5) {
                     cUIText_setUnicodeStringByID((cUIText*)object, GetHashValue32(D_00441D10[ids.v[i]]));
-                    if (i == 0 && ids.v[0] == 1 && info->f70 == 3) {
+                    if (i == 0 && ids.v[0] == 1 && info->iNextHeat == 3) {
                         cUIText_setUnicodeStringByID((cUIText*)object, GetHashValue32(str_kT_OVRCMNFinalRound));
                     }
                     object->mpLocaleFile[4] = (cLocaleFile*)ids.v[i];

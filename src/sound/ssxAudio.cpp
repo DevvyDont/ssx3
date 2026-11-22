@@ -2513,7 +2513,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_MixVolume);
 #ifdef SKIP_ASM
 extern "C" float cSSXAudio_MixIntToFloat(cSSXAudio* self, int i, int pct);
 struct sAudioFade_87A8;
-extern "C" void cSSXAudio_ChangeMixFinalAndStepValues(sAudioFade_87A8* self, int i, int smooth, float target, float time);
+extern "C" void cSSXAudio_ChangeMixFinalAndStepValues(cSSXAudio* self, int i, int smooth, float target, float time);
 extern float gMobyScaling;
 extern float gKaoriScaling;
 extern float gAerielScaling;
@@ -2606,7 +2606,7 @@ extern "C" void cSSXAudio_MixVolume(cSSXAudio* vself, int id)
         mixOut->mix[8] = characterOut * gPsymonScaling;
         mixOut->mix[9] = characterOut * gDeiterScaling;
     } else {
-        sAudioFade_87A8* fader = (sAudioFade_87A8*)self;
+        cSSXAudio* fader = (cSSXAudio*)self;
         cSSXAudio_ChangeMixFinalAndStepValues(fader, 1, self->entries[id].musicLevel != -1, musicVol, fadeTime);
         cSSXAudio_ChangeMixFinalAndStepValues(fader, 2, self->entries[id].djLevel != -1, djVol, fadeTime);
         cSSXAudio_ChangeMixFinalAndStepValues(fader, 3, self->entries[id].paLevel != -1, paVol, fadeTime);
@@ -2624,12 +2624,6 @@ extern "C" void cSSXAudio_MixVolume(cSSXAudio* vself, int id)
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_ChangeMixFinalAndStepValues);
 #ifdef SKIP_ASM
-struct sAudioFade_87A8 {
-    char pad[0x63E4];
-    float cur[12];     // 0x63E4
-    float rate[11];    // 0x6414
-    float target[11];  // 0x6440
-};
 
 /**
  * Sets a mix control's final value and, when asked, its per-frame step to reach it in a given time (at 60 fps).
@@ -2641,16 +2635,16 @@ struct sAudioFade_87A8 {
  * @param target  the final level
  * @param time  the fade time in seconds
  */
-extern "C" void cSSXAudio_ChangeMixFinalAndStepValues(sAudioFade_87A8* self, int i, int smooth, float target, float time)
+extern "C" void cSSXAudio_ChangeMixFinalAndStepValues(cSSXAudio* self, int i, int smooth, float target, float time)
 {
-    self->target[i] = target;
-    float cur = self->cur[i];
+    self->mMixFinalValue[i] = target;
+    float cur = self->mMixLevel[i];
     if (target != cur) {
         if (smooth != 0) {
-            self->rate[i] = (target - cur) / time * 0.01666666753590107f;
+            self->mMixStep[i] = (target - cur) / time * 0.01666666753590107f;
         }
     } else {
-        self->rate[i] = 0.0f;
+        self->mMixStep[i] = 0.0f;
     }
 }
 #endif

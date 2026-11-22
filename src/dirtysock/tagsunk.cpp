@@ -12367,10 +12367,6 @@ struct sSlotFlags_668E8 {
 };
 
 
-struct sSlots_668E8 {
-    tUsbKeyboardSlot slot[8];        // 0x0
-    int enabled;                // 0x460
-};
 
 struct sConn_668E8 {
     unsigned on : 1;            // 0x0
@@ -12393,42 +12389,42 @@ static inline int ringIdx_668E8(int w)
  * waiting). Flag bit 4 is set from func_003F6838(block, 0, 0, 0x10) and bits 1..3 from bit 0 of the block's first word.
  * cSSXApp_preUpdate calls it.
  */
-extern "C" void func_002668E8(sSlots_668E8* self)
+extern "C" void func_002668E8(cUsbKeyboard* self)
 {
-    if (self->enabled == 0)
+    if (self->mEnabled == 0)
         return;
     func_003F63F0();
     for (int i = 0; i < 8; i++) {
-        tUsbKeyboardSlot* keyboardSlot = &self->slot[i];
+        tUsbKeyboardSlot* keyboardSlot = &self->mSlots[i];
         (*(sSlotFlags_668E8*)&keyboardSlot->mFlags).active = func_003F6520(i) == 1;
         if (!(*(sSlotFlags_668E8*)&keyboardSlot->mFlags).active)
             *(int*)&(*(sSlotFlags_668E8*)&keyboardSlot->mFlags) = 0;
     }
     int n = func_003F6348();
     for (int j = 0; j < n; j++) {
-        if ((*(sSlotFlags_668E8*)&self->slot[j].mFlags).active) {
+        if ((*(sSlotFlags_668E8*)&self->mSlots[j].mFlags).active) {
             sConn_668E8* readBlock = (sConn_668E8*)func_003F64E0(j);
             if (readBlock != 0) {
                 for (int k = 0; k < readBlock->count; k++) {
                     unsigned char* translated = func_003F68F0(readBlock, 0, k);
                     if (translated[0] != 0 || translated[1] != 0) {
-                        int w = self->slot[j].mCount;
+                        int w = self->mSlots[j].mCount;
                         int idx = ringIdx_668E8(w);
-                        int ringStart = self->slot[j].mRead;
+                        int ringStart = self->mSlots[j].mRead;
                         if (w - ringStart >= 0x40)
-                            self->slot[j].mRead = ringStart + 1;
-                        self->slot[j].mKeys[idx][0] = translated[0];
-                        self->slot[j].mKeys[idx][1] = translated[1];
-                        self->slot[j].mCount++;
+                            self->mSlots[j].mRead = ringStart + 1;
+                        self->mSlots[j].mKeys[idx][0] = translated[0];
+                        self->mSlots[j].mKeys[idx][1] = translated[1];
+                        self->mSlots[j].mCount++;
                     }
                 }
                 if (func_003F6838(readBlock, 0, 0, 0x10))
-                    (*(sSlotFlags_668E8*)&self->slot[j].mFlags).b4 = 1;
+                    (*(sSlotFlags_668E8*)&self->mSlots[j].mFlags).b4 = 1;
                 else
-                    (*(sSlotFlags_668E8*)&self->slot[j].mFlags).b4 = 0;
-                (*(sSlotFlags_668E8*)&self->slot[j].mFlags).b2 = readBlock->on;
-                (*(sSlotFlags_668E8*)&self->slot[j].mFlags).b3 = readBlock->on;
-                (*(sSlotFlags_668E8*)&self->slot[j].mFlags).b1 = readBlock->on;
+                    (*(sSlotFlags_668E8*)&self->mSlots[j].mFlags).b4 = 0;
+                (*(sSlotFlags_668E8*)&self->mSlots[j].mFlags).b2 = readBlock->on;
+                (*(sSlotFlags_668E8*)&self->mSlots[j].mFlags).b3 = readBlock->on;
+                (*(sSlotFlags_668E8*)&self->mSlots[j].mFlags).b1 = readBlock->on;
             }
         }
     }

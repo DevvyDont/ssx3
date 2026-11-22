@@ -1808,15 +1808,6 @@ extern "C" void func_0038D690(void* self, void* obj, tBezierPatchEntry* patch, u
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/bezierman", func_0038D968);
 #ifdef SKIP_ASM
-struct sCtx_D968 {
-    char pad_0x0[0x64];
-    int texSel;                                 // 0x64
-    char pad_0x68[0xE84 - 0x68];
-    sDrawState* top;                              // 0xE84
-    char pad_0xE88[0xF50 - 0xE88];
-    int texIds[(0x6B90 - 0xF50) / 4];           // 0xF50
-    int field_0x6B90;                           // 0x6B90
-};
 struct sBezMixPatch_D968 {
     void* obj;
     int extra;
@@ -1826,8 +1817,8 @@ struct sBezMixPatch_D968 {
     unsigned char types[4];
 };
 extern int cRenderToggles_m_DisableSparkles;
-extern sCtx_D968* cGraphicsMan_TheGraphicsMan_D968 __asm__("cGraphicsMan_TheGraphicsMan");
-extern "C" void func_0037D968(sCtx_D968* ctx);
+extern cPS2GraphicsMan* cGraphicsMan_TheGraphicsMan_D968 __asm__("cGraphicsMan_TheGraphicsMan");
+extern "C" void func_0037D968(cPS2GraphicsMan* ctx);
 extern "C" void* func_0038F708(void* obj, int a1, int a2);
 extern "C" void func_0038D690(void* self, void* obj, tBezierPatchEntry* patch, unsigned int* handle);
 
@@ -1846,25 +1837,25 @@ extern "C" void func_0038D968(cPS2BezierMan* self, unsigned int* packetHandle)
     if (cRenderToggles_m_DisableSparkles != 0) {
         return;
     }
-    sCtx_D968* ctx = cGraphicsMan_TheGraphicsMan_D968;
-    ctx->top[1] = ctx->top[0];
-    sDrawState* savedState = ctx->top;
-    ctx->top = savedState + 1;
-    int tex = ctx->texIds[ctx->texSel];
+    cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan_D968;
+    ctx->m_pCurrentDrawState[1] = ctx->m_pCurrentDrawState[0];
+    sDrawState* savedState = ctx->m_pCurrentDrawState;
+    ctx->m_pCurrentDrawState = savedState + 1;
+    int tex = ctx->_EffectTexMap[ctx->m_SnowSparkleTextureId[6]];
     savedState[1].m_textureState.m_texid[0] = tex;
-    ctx->top->m_bitGroups[1] = (((int)ctx->top->m_bitGroups[1]) & ~0x7C) | 0x54;
-    ctx->top->m_bitGroups[2] = (((int)ctx->top->m_bitGroups[2]) & ~0x3E0) | 0x80;
-    ctx->top->m_bitGroups[1] = (((int)ctx->top->m_bitGroups[1]) & 0xFE7FFFFF) | 0x800000;
-    ctx->top->m_bitGroups[1] = (((int)ctx->top->m_bitGroups[1]) & 0xFFCFFFFF) | 0x300000;
-    ctx->top->m_bitGroups[1] = (((int)ctx->top->m_bitGroups[1]) & 0xFFF00FFF) | 0x5C000;
-    ctx->top->m_bitGroups[1] = (((int)ctx->top->m_bitGroups[1]) & 0xFFBFFFFF) | 0x400000;
-    if (ctx->field_0x6B90 == 0) {
+    ctx->m_pCurrentDrawState->m_bitGroups[1] = (((int)ctx->m_pCurrentDrawState->m_bitGroups[1]) & ~0x7C) | 0x54;
+    ctx->m_pCurrentDrawState->m_bitGroups[2] = (((int)ctx->m_pCurrentDrawState->m_bitGroups[2]) & ~0x3E0) | 0x80;
+    ctx->m_pCurrentDrawState->m_bitGroups[1] = (((int)ctx->m_pCurrentDrawState->m_bitGroups[1]) & 0xFE7FFFFF) | 0x800000;
+    ctx->m_pCurrentDrawState->m_bitGroups[1] = (((int)ctx->m_pCurrentDrawState->m_bitGroups[1]) & 0xFFCFFFFF) | 0x300000;
+    ctx->m_pCurrentDrawState->m_bitGroups[1] = (((int)ctx->m_pCurrentDrawState->m_bitGroups[1]) & 0xFFF00FFF) | 0x5C000;
+    ctx->m_pCurrentDrawState->m_bitGroups[1] = (((int)ctx->m_pCurrentDrawState->m_bitGroups[1]) & 0xFFBFFFFF) | 0x400000;
+    if (ctx->mMatricesValid == 0) {
         func_0037D968(ctx);
     }
-    ctx->top->m_bitGroups[0] = (((int)ctx->top->m_bitGroups[0]) & ~0x3C0) | 0x100;
-    ctx->top->m_bitGroups[3] = ((int)ctx->top->m_bitGroups[3]) & 0xC0000000;
-    ctx->top->m_bitGroups[1] = (((int)ctx->top->m_bitGroups[1]) & ~3) | 2;
-    ctx->top->m_bitGroups[2] = ((int)ctx->top->m_bitGroups[2]) & 0xE00003FF;
+    ctx->m_pCurrentDrawState->m_bitGroups[0] = (((int)ctx->m_pCurrentDrawState->m_bitGroups[0]) & ~0x3C0) | 0x100;
+    ctx->m_pCurrentDrawState->m_bitGroups[3] = ((int)ctx->m_pCurrentDrawState->m_bitGroups[3]) & 0xC0000000;
+    ctx->m_pCurrentDrawState->m_bitGroups[1] = (((int)ctx->m_pCurrentDrawState->m_bitGroups[1]) & ~3) | 2;
+    ctx->m_pCurrentDrawState->m_bitGroups[2] = ((int)ctx->m_pCurrentDrawState->m_bitGroups[2]) & 0xE00003FF;
     for (int i = 0; i < self->mNum8x8Patches; i++) {
         tBezierPatchEntry* patchEntry = &((&self->m8x8Patches[0]))[i];
         func_0038D690(self, func_0038F708(patchEntry->mpPatch, 432, 2), (tBezierPatchEntry*)patchEntry, packetHandle);
@@ -1875,7 +1866,7 @@ extern "C" void func_0038D968(cPS2BezierMan* self, unsigned int* packetHandle)
             func_0038D690(self, func_0038F708(patchEntry->obj, 432, 2), (tBezierPatchEntry*)patchEntry, packetHandle);
         }
     }
-    ctx->top--;
+    ctx->m_pCurrentDrawState--;
 }
 #endif
 

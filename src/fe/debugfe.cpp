@@ -257,10 +257,6 @@ public:
     char pad_0x00[0xC];
     virtual int submit();
 };
-struct sDbgFE17D008 {
-    char pad_0x0000[0x8C38];
-    int modes[8]; // 0x8C38
-};
 extern "C" void cBENewRaceInterface_setGamePath(void* iface, int idx);
 extern "C" int cBENewRaceInterface_setGameMode(void* iface, int mode);
 
@@ -276,9 +272,9 @@ extern "C" int cBENewRaceInterface_setGameMode(void* iface, int mode);
 extern "C" void cDebugMenuScreen_setGamePath(cDebugMenuScreen* self, int idx)
 {
     cBENewRaceIfaceK17D008* iface = (cBENewRaceIfaceK17D008*)cBE_getInterface_Fv(SSXApp->BE, 0);
-    ((sDbgFE17D008*)self)->modes[cBENewRaceInterface_newRace.cGamePath] = cBENewRaceInterface_newRace.cGameMode;
+    (self)->LastGamePathGameMode[cBENewRaceInterface_newRace.cGamePath] = cBENewRaceInterface_newRace.cGameMode;
     cBENewRaceInterface_setGamePath(iface, idx);
-    cBENewRaceInterface_setGameMode(iface, ((sDbgFE17D008*)self)->modes[idx]);
+    cBENewRaceInterface_setGameMode(iface, (self)->LastGamePathGameMode[idx]);
     iface->submit();
 }
 #endif

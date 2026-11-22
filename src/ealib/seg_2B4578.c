@@ -6863,44 +6863,6 @@ struct P_B140 {
     unsigned short h16;
 };
 struct Smp_B140 { int w0; int w4; };
-struct D_B140 {
-    char pad0[3];
-    signed char n;
-    unsigned short h4;
-    short h6;
-    char pad8[4];
-    signed char bC;
-    signed char bD;
-    unsigned char bE;
-    unsigned char bF;
-    signed char b10;
-    signed char b11;
-    signed char b12;
-    unsigned char b13;
-    signed char b14;
-    signed char b15;
-    unsigned char b16;
-    char pad17[3];
-    signed char b1A;
-    unsigned char b1B;
-    signed char b1C;
-    unsigned char b1D;
-    unsigned char b1E;
-    char pad1F;
-    int w20;
-    int w24;
-    struct Smp_B140 *smp;
-    int w2C;
-    int w30;
-    char pad34[0x54 - 0x34];
-    unsigned short h54;
-    unsigned short h56;
-    int w58;
-    char pad5C[4];
-    int w60;
-    char pad64[0xBC - 0x64];
-    unsigned short hBC[1];
-};
 struct Ch_B140 {
     char pad0[4];
     short ids[6];
@@ -6957,7 +6919,7 @@ struct G_B140 {
     char pad0[0x1F0];
     struct Ch_B140 *chans;
 };
-extern int f6158_B140(int *, struct D_B140 *) __asm__("SNDI_validrendermode");
+extern int f6158_B140(int *, struct SNDIPATCHHEADER *) __asm__("SNDI_validrendermode");
 extern void f0C18_B140(int, int *, int *) __asm__("SNDPLATFORM_getvoicerange");
 extern int fA0B0_B140(int, int, int *, int, int) __asm__("SNDVOICEI_alloc");
 extern int f72A0_B140(int) __asm__("randrange");
@@ -6966,7 +6928,7 @@ extern unsigned int fC5C8_B140(void) __asm__("iSNDrandom");
 extern void fA938_B140(int) __asm__("iSNDcalcpitch");
 extern void fA740_B140(int, int) __asm__("func_003BA740");
 extern void fA7B0_B140(int) __asm__("func_003BA7B0");
-extern int f3EE0_B140(struct D_B140 *, int, int, int, int, int, int) __asm__("SNDPLATFORM_playtimbre");
+extern int f3EE0_B140(struct SNDIPATCHHEADER *, int, int, int, int, int, int) __asm__("SNDPLATFORM_playtimbre");
 extern void fA550_B140(int) __asm__("SNDVOICEI_free");
 
 // Locals and statement order from On Tour's PSP debug build (SNDBANKI_playtimbre, stagpat.c).
@@ -6992,7 +6954,7 @@ extern void fA550_B140(int) __asm__("SNDVOICEI_free");
  * @param masterranddetune  a detune shared by all timbres of the note (cents)
  * @return the sound handle, or -9
  */
-int SNDBANKI_playtimbre(int bhandle, int patnum, void *psampledata, struct P_B140 *pspo, struct D_B140 *pph, int keynum, int velocity, int masterranddetune) {
+int SNDBANKI_playtimbre(int bhandle, int patnum, void *psampledata, struct P_B140 *pspo, struct SNDIPATCHHEADER *pph, int keynum, int velocity, int masterranddetune) {
     struct Ch_B140 *pv;
     int rendermodeindex;
     int rendermode;
@@ -7020,14 +6982,14 @@ int SNDBANKI_playtimbre(int bhandle, int patnum, void *psampledata, struct P_B14
             break;
         }
         f0C18_B140(rendermode, &minvoicerange, &maxvoicerange);
-        voice = fA0B0_B140(pph->n, pph->bC, &handle, minvoicerange, maxvoicerange);
+        voice = fA0B0_B140(pph->numchan, pph->priority, &handle, minvoicerange, maxvoicerange);
         if (voice < 0) {
             continue;
         }
         pv = &((struct Ch_B140*)sndgs.chan)[voice];
-        pan = pph->b11;
-        if (pph->b12) {
-            pan += f72A0_B140(pph->b12);
+        pan = pph->pan;
+        if (pph->randpan) {
+            pan += f72A0_B140(pph->randpan);
             if (pan < 0) {
                 pan = 0;
             } else if (pan > 127) {
@@ -7035,21 +6997,21 @@ int SNDBANKI_playtimbre(int bhandle, int patnum, void *psampledata, struct P_B14
             }
         }
         pv->h4C = fC570_B140(pan);
-        pv->h84 = pph->h4;
-        pv->h84 = pv->h84 - (pph->bD - keynum) * 100;
+        pv->h84 = (*(unsigned short*)&pph->detune);
+        pv->h84 = pv->h84 - (pph->basekey - keynum) * 100;
         if (masterranddetune) {
             pv->h84 = pv->h84 + masterranddetune;
         }
-        if (pph->h6) {
-            pv->h84 = pv->h84 + f72A0_B140(pph->h6);
+        if (pph->randdetune) {
+            pv->h84 = pv->h84 + f72A0_B140(pph->randdetune);
         }
-        pv->w70 = pph->w20;
-        pv->w74 = pph->w24;
+        pv->w70 = ((int)pph->pvoltable);
+        pv->w74 = ((int)pph->pbendtable);
         pv->w38 = vol << 16;
         pv->w30 = 0;
-        builtinvol = pph->b14;
-        if (pph->b15) {
-            builtinvol += f72A0_B140(pph->b15);
+        builtinvol = pph->vol;
+        if (pph->randvol) {
+            builtinvol += f72A0_B140(pph->randvol);
         }
         if (builtinvol > 127) {
             builtinvol = 127;
@@ -7059,30 +7021,30 @@ int SNDBANKI_playtimbre(int bhandle, int patnum, void *psampledata, struct P_B14
         }
         builtinvol = builtinvol * velocity / 127;
         pv->b2B = builtinvol;
-        pv->h82 = pph->b10 * 100;
+        pv->h82 = pph->bendrange * 100;
         pv->b64 = bend;
-        pv->smp = pph->smp;
-        pv->w40 = pph->b1A << 16;
+        pv->smp = ((struct Smp_B140*)pph->penvelope);
+        pv->w40 = pph->initialenvvol << 16;
         pv->b5D = 0;
-        pv->b5C = pph->bF;
-        pv->b5E = pph->bE;
+        pv->b5C = (*(unsigned char*)&pph->numenvelopes);
+        pv->b5E = (*(unsigned char*)&pph->releaseenvelope);
         pv->w44 = pv->smp->w0;
         if (pv->w44 < 0) {
             pv->w44 = 0x7FFFFFFF;
         }
         pv->w3C = ((pv->smp->w4 << 16) - pv->w40) / pv->w44;
-        pv->w78 = pph->w2C;
-        pv->w7C = pph->w30;
-        pv->b65 = pph->b1B;
-        pv->b66 = pph->b1D;
-        pv->h80 = pph->h54;
-        if (pph->b1C) {
-            pv->b67 = fC5C8_B140() % pph->b1C;
+        pv->w78 = ((int)pph->plfovol);
+        pv->w7C = ((int)pph->plfopitch);
+        pv->b65 = pph->lfovollength;
+        pv->b66 = pph->lfopitchlength;
+        pv->h80 = (*(unsigned short*)&pph->lfopitchdepth);
+        if (pph->lfovolrand) {
+            pv->b67 = fC5C8_B140() % pph->lfovolrand;
         } else {
             pv->b67 = 0;
         }
-        if (pph->b1E) {
-            pv->b68 = fC5C8_B140() % pph->b1D;
+        if (pph->lfopitchrand) {
+            pv->b68 = fC5C8_B140() % pph->lfopitchlength;
         } else {
             pv->b68 = 0;
         }
@@ -7094,24 +7056,24 @@ int SNDBANKI_playtimbre(int bhandle, int patnum, void *psampledata, struct P_B14
         pv->h10 = patnum;
         pv->h1C = pv->h4C + pspo->h8;
         pv->h1E = pspo->hA;
-        pv->w18 = pph->w60;
-        pv->w14 = pph->w58;
-        pv->h20 = pph->h56;
-        pv->b22 = pph->b13;
-        pv->b23 = pph->n;
+        pv->w18 = pph->sustainend;
+        pv->w14 = pph->totalframes;
+        pv->h20 = pph->samplerate;
+        pv->b22 = pph->samplerep;
+        pv->b23 = pph->numchan;
         pv->h24 = rendermode;
-        for (i = 0; i < pph->n; i++) {
-            pv->h50[i] = pph->hBC[i];
+        for (i = 0; i < pph->numchan; i++) {
+            pv->h50[i] = pph->azimuth[i];
         }
         pv->b5F = pspo->b4;
-        pv->b60 = pph->b16;
+        pv->b60 = (*(unsigned char*)&pph->fxlevel0);
         pv->b61 = fxlevel0;
         fA740_B140(0, voice);
         fA7B0_B140(voice);
         if (f3EE0_B140(pph, (int)psampledata, voice, pspo->hE, pspo->h12, pspo->h14, pspo->h16) >= 0) {
             return handle;
         }
-        for (i = 0; i < pph->n; i++) {
+        for (i = 0; i < pph->numchan; i++) {
             fA550_B140(((struct Ch_B140*)sndgs.chan)[voice].ids[i]);
         }
         handle = -9;
@@ -13036,7 +12998,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_timemult);
 #ifdef SKIP_ASM
 extern void MIX_settimemult(int, int);
 struct G_3010 { char pad[0x2F]; unsigned char a; unsigned char b; char pad2[0x1BF]; char *tab; };
-struct E_3010 { char pad[4]; short v[15]; char padb; unsigned char cnt; unsigned short flags; };
 
 /**
  * Applies a time multiplier to a channel's software-mixer voices.
@@ -13049,12 +13010,12 @@ struct E_3010 { char pad[4]; short v[15]; char padb; unsigned char cnt; unsigned
  * @return 0
  */
 int SNDPLATFORM_timemult(int channelIndex, int timeMult) {
-    struct E_3010 *channel;
+    struct CHANPUB *channel;
     int i;
-    channel = (struct E_3010 *)((char*)sndgs.chan + channelIndex * 0x8C);
-    if (channel->flags & 4) {
-        for (i = 0; i < channel->cnt; i++)
-            MIX_settimemult(channel->v[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), timeMult);
+    channel = (struct CHANPUB *)((char*)sndgs.chan + channelIndex * 0x8C);
+    if (channel->rendermode & 4) {
+        for (i = 0; i < channel->numchan; i++)
+            MIX_settimemult(channel->voices[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), timeMult);
     }
     return 0;
 }
@@ -13066,7 +13027,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C30C8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003C8B80(int, int);
 struct G_30C8 { char pad[0x2F]; unsigned char a; unsigned char b; char pad2[0x1BF]; char *tab; };
-struct E_30C8 { char pad[4]; short v[15]; char padb; unsigned char cnt; unsigned short flags; };
 
 /**
  * Sets the clip level of a channel's software-mixer voices (a clipping, distortion-like filter).
@@ -13079,12 +13039,12 @@ struct E_30C8 { char pad[4]; short v[15]; char padb; unsigned char cnt; unsigned
  * @param amount  the clip level (0 or less removes the filter)
  */
 void func_003C30C8(int channelIndex, int amount) {
-    struct E_30C8 *channel;
+    struct CHANPUB *channel;
     int i;
-    channel = (struct E_30C8 *)((char*)sndgs.chan + channelIndex * 0x8C);
-    if (channel->flags & 4) {
-        for (i = 0; i < channel->cnt; i++)
-            func_003C8B80(channel->v[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), amount);
+    channel = (struct CHANPUB *)((char*)sndgs.chan + channelIndex * 0x8C);
+    if (channel->rendermode & 4) {
+        for (i = 0; i < channel->numchan; i++)
+            func_003C8B80(channel->voices[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), amount);
     }
 }
 #endif
@@ -13128,7 +13088,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_highpass);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void MIX_sethighpass(int, int);
 struct G_3250 { char pad[0x2F]; unsigned char a; unsigned char b; char pad2[0x1BF]; char *tab; };
-struct E_3250 { char pad[4]; short v[15]; char padb; unsigned char cnt; unsigned short flags; };
 
 /**
  * Sets the high-pass cutoff of a channel's software-mixer voices.
@@ -13141,12 +13100,12 @@ struct E_3250 { char pad[4]; short v[15]; char padb; unsigned char cnt; unsigned
  * @param cutoff  the cutoff (0 or less removes the filter)
  */
 void SNDPLATFORM_highpass(int channelIndex, int cutoff) {
-    struct E_3250 *channel;
+    struct CHANPUB *channel;
     int i;
-    channel = (struct E_3250 *)((char*)sndgs.chan + channelIndex * 0x8C);
-    if (channel->flags & 4) {
-        for (i = 0; i < channel->cnt; i++)
-            MIX_sethighpass(channel->v[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), cutoff);
+    channel = (struct CHANPUB *)((char*)sndgs.chan + channelIndex * 0x8C);
+    if (channel->rendermode & 4) {
+        for (i = 0; i < channel->numchan; i++)
+            MIX_sethighpass(channel->voices[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), cutoff);
     }
 }
 #endif
@@ -14539,7 +14498,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_filteradd);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void MIX_filteradd_5068(int, int, int) __asm__("MIX_filteradd");
 struct G_5068 { char pad[0x2F]; unsigned char a; unsigned char b; char pad2[0x1BF]; char *tab; };
-struct E_5068 { char pad[4]; short v[15]; char padb; unsigned char cnt; unsigned short flags; };
 
 /**
  * Adds a custom filter to each software-mixer voice of a channel.
@@ -14554,12 +14512,12 @@ struct E_5068 { char pad[4]; short v[15]; char padb; unsigned char cnt; unsigned
  * @return 0, or -7 for a channel that is not on the mixer
  */
 int SNDPLATFORM_filteradd(int channelIndex, int filterDesc) {
-    struct E_5068 *channel;
+    struct CHANPUB *channel;
     int i;
-    channel = (struct E_5068 *)((char*)sndgs.chan + channelIndex * 0x8C);
-    if (channel->flags & 4) {
-        for (i = 0; i < channel->cnt; i++)
-            MIX_filteradd_5068(channel->v[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), i, filterDesc);
+    channel = (struct CHANPUB *)((char*)sndgs.chan + channelIndex * 0x8C);
+    if (channel->rendermode & 4) {
+        for (i = 0; i < channel->numchan; i++)
+            MIX_filteradd_5068(channel->voices[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), i, filterDesc);
         return 0;
     }
     return -7;
@@ -14572,7 +14530,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDPLATFORM_filterremove);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void MIX_filterremove(int, int);
 struct G_5128 { char pad[0x2F]; unsigned char a; unsigned char b; char pad2[0x1BF]; char *tab; };
-struct E_5128 { char pad[4]; short v[15]; char padb; unsigned char cnt; unsigned short flags; };
 
 /**
  * Removes a custom filter from each software-mixer voice of a channel: the one with the given order (MIX_filterremove).
@@ -14584,12 +14541,12 @@ struct E_5128 { char pad[4]; short v[15]; char padb; unsigned char cnt; unsigned
  * @return 0
  */
 int SNDPLATFORM_filterremove(int channelIndex, int filterOrder) {
-    struct E_5128 *channel;
+    struct CHANPUB *channel;
     int i;
-    channel = (struct E_5128 *)((char*)sndgs.chan + channelIndex * 0x8C);
-    if (channel->flags & 4) {
-        for (i = 0; i < channel->cnt; i++)
-            MIX_filterremove(channel->v[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), filterOrder);
+    channel = (struct CHANPUB *)((char*)sndgs.chan + channelIndex * 0x8C);
+    if (channel->rendermode & 4) {
+        for (i = 0; i < channel->numchan; i++)
+            MIX_filterremove(channel->voices[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), filterOrder);
     }
     return 0;
 }
@@ -16383,20 +16340,7 @@ found:
 INCLUDE_ASM("ealib/seg_2B4578", SNDPKTPLAY_start);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-typedef struct SNDSAMPLEATTR_6760 SNDSAMPLEATTR_6760;
-struct SNDSAMPLEATTR_6760 {
-    unsigned short h0;
-    char pad2;
-    unsigned char b3;
-    char pad4;
-    unsigned char b5;
-    signed char c6;
-    char pad7;
-    unsigned short h8;
-    char padA[2];
-    unsigned short hC[6];
-    int w18[8];
-};
+typedef struct SNDSAMPLEATTR SNDSAMPLEATTR_6760;
 typedef struct SNDPLAYOPTS_6760 SNDPLAYOPTS_6760;
 struct SNDPLAYOPTS_6760 {
     signed char c0;
@@ -16463,7 +16407,7 @@ int SNDPKTPLAY_start_impl(int packetinstancehandle, SNDSAMPLEFORMAT *pssf, SNDSA
     ppchan = sndpps.f304[packetinstancehandle];
     rendermodeindex = 0;
     ph.n = pssf->channels;
-    ph.h18 = pssa->h8;
+    ph.h18 = pssa->rendermode;
     ppchan->f60 = *pssf;
     ppchan->f04 = 0;
     ppchan->f48 = 0;
@@ -16476,7 +16420,7 @@ int SNDPKTPLAY_start_impl(int packetinstancehandle, SNDSAMPLEFORMAT *pssf, SNDSA
         ppchan->f10[i] = 0;
         ppchan->f34[i] = 0;
         ppchan->f28[i] = 0;
-        ppchan->f64[i] = pssa->w18[i];
+        ppchan->f64[i] = ((int*)&pssa->ptsdata[0])[i];
     }
     while (!done) {
         rendermode = f_6158_6760(&rendermodeindex, &ph);
@@ -16494,22 +16438,22 @@ int SNDPKTPLAY_start_impl(int packetinstancehandle, SNDSAMPLEFORMAT *pssf, SNDSA
             pVoice->builtinazimuth = 0;
             pVoice->azimuth = pspo->h8;
             pVoice->bhandle = -1;
-            pVoice->initialdetune = pssa->h0;
+            pVoice->initialdetune = (*(unsigned short*)&pssa->detune);
             pVoice->progpitch = pspo->hC;
             pVoice->fadePer100Hz = 0;
             pVoice->programmedVol = pspo->c0 << 16;
             pVoice->envduration = 0x7FFFFFFF;
             pVoice->envvol = 0x7F0000;
             pVoice->envpertick = 0;
-            pVoice->builtinvol = pssa->b3;
+            pVoice->builtinvol = (*(unsigned char*)&pssa->vol);
             pVoice->pitchbend = pspo->b1;
             pVoice->numenvelopes = 1;
             pVoice->curenvelope = 0;
             pVoice->releaseenvelope = 0;
-            pVoice->progfxlevel[0] = pssa->b5;
+            pVoice->progfxlevel[0] = (*(unsigned char*)&pssa->fxlevel0);
             pVoice->drylevel = pspo->b4;
             pVoice->unk_61[0] = pspo->b5;
-            pVoice->bendrange = pssa->c6 * 100;
+            pVoice->bendrange = pssa->bendrange * 100;
             pVoice->patchkey = 0;
             pVoice->ismaster = 0;
             (*(struct ENVELOPE**)&pVoice->paenvelope) = 0;
@@ -16518,7 +16462,7 @@ int SNDPKTPLAY_start_impl(int packetinstancehandle, SNDSAMPLEFORMAT *pssf, SNDSA
             pVoice->pvollfo = 0;
             pVoice->ppitchlfo = 0;
             for (i = 0; i < pssf->channels; i++) {
-                pVoice->azimuthOffsets[i] = pssa->hC[i];
+                pVoice->azimuthOffsets[i] = pssa->azimuth[i];
             }
             pVoice->frames = 0;
             pVoice->sustainend = -1;

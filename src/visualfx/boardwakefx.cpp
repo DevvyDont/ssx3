@@ -3839,14 +3839,6 @@ struct sRsCtx_2868 {
     virtual void Draw(const sV4_2868& pos, const sV2_2868& size, const sV2_2868& uv0, const sV2_2868& uv1, const tARGB& col, float rot, int flags);
 };
 
-struct sPart_2868 {
-    char pad0[0xC];
-    int flags;                  // 0xC
-    t3Vector vel;               // 0x10
-    t3Vector pos;               // 0x1C
-    char pad28[0x40 - 0x28];
-    float alpha[1];             // 0x40
-};
 
 
 extern sRsCtx_2868* cGraphicsMan_TheGraphicsMan_2868 __asm__("cGraphicsMan_TheGraphicsMan");
@@ -3893,10 +3885,10 @@ extern "C" void cLightHalo_Render(cLightHalo* self, int idx)
         return;
     }
     t3Vector n;
-    sPart_2868* haloRecord = ((sPart_2868*)self->mpHalo);
-    float x = haloRecord->vel.x;
-    float y = haloRecord->vel.y;
-    float z = haloRecord->vel.z;
+    tHaloRecord* haloRecord = (self->mpHalo);
+    float x = (*(t3Vector*)&haloRecord->m_fvColor[0]).x;
+    float y = (*(t3Vector*)&haloRecord->m_fvColor[0]).y;
+    float z = (*(t3Vector*)&haloRecord->m_fvColor[0]).z;
     float len = Sqrt_2868(x * x + y * y + z * z);
     if (len != 0.0f) {
         float inv = 1.0f / len;
@@ -3904,9 +3896,9 @@ extern "C" void cLightHalo_Render(cLightHalo* self, int idx)
         n.y = y * inv;
         n.z = z * inv;
     } else {
-        n.x = haloRecord->vel.x;
-        n.y = haloRecord->vel.y;
-        n.z = haloRecord->vel.z;
+        n.x = (*(t3Vector*)&haloRecord->m_fvColor[0]).x;
+        n.y = (*(t3Vector*)&haloRecord->m_fvColor[0]).y;
+        n.z = (*(t3Vector*)&haloRecord->m_fvColor[0]).z;
     }
     tARGB col;
     (*(t3Vector*)&col.R).x = n.x;
@@ -3914,7 +3906,7 @@ extern "C" void cLightHalo_Render(cLightHalo* self, int idx)
     (*(t3Vector*)&col.R).z = n.z;
     sRsCtx_2868* ctx = cGraphicsMan_TheGraphicsMan_2868;
     if (self->mbRequestZSample != 0) {
-        col.A = ((sPart_2868*)self->mpHalo)->alpha[idx];
+        col.A = (self->mpHalo)->m_fOcclude[idx];
         rsSetA_2868(ctx, 0x1800000, 23, 2);
         rsSetA_2868(ctx, 0x300000, 20, 0);
         rsSetA_2868(ctx, 0xFF000, 12, 20);
@@ -3928,7 +3920,7 @@ extern "C" void cLightHalo_Render(cLightHalo* self, int idx)
         return;
     }
     float size = 0.0f;
-    switch ((unsigned int)(((sPart_2868*)self->mpHalo)->flags & 0x70)) {
+    switch ((unsigned int)(((int)(self->mpHalo)->m_iFlags) & 0x70)) {
     case 0x10:
         ctx->top->tex = rsTex1024_2868(ctx);
         size = 180.0f;
@@ -3942,8 +3934,8 @@ extern "C" void cLightHalo_Render(cLightHalo* self, int idx)
         size = 350.0f;
         break;
     }
-    sPart_2868* drawRecord = ((sPart_2868*)self->mpHalo);
-    ctx->Draw(sV4_2868(drawRecord->pos.x, drawRecord->pos.y, drawRecord->pos.z, 1.0f), sV2_2868(size, size), sV2_2868(), sV2_2868(1.0f, 1.0f), col, self->mAngle, 2);
+    tHaloRecord* drawRecord = (self->mpHalo);
+    ctx->Draw(sV4_2868((*(t3Vector*)&drawRecord->m_fvWorldPos[0]).x, (*(t3Vector*)&drawRecord->m_fvWorldPos[0]).y, (*(t3Vector*)&drawRecord->m_fvWorldPos[0]).z, 1.0f), sV2_2868(size, size), sV2_2868(), sV2_2868(1.0f, 1.0f), col, self->mAngle, 2);
 }
 #endif
 
@@ -4003,9 +3995,9 @@ extern "C" void cLightHalo_Process(cLightHalo* vself, void* vrect)
     float* rect = (float*)vrect;
     cPS2GraphicsMan* obj = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
     t4Vector pos;
-    pos.x = ((sPart_2868*)self->mpHalo)->pos.x;
-    pos.y = ((sPart_2868*)self->mpHalo)->pos.y;
-    pos.z = ((sPart_2868*)self->mpHalo)->pos.z;
+    pos.x = (*(t3Vector*)&(self->mpHalo)->m_fvWorldPos[0]).x;
+    pos.y = (*(t3Vector*)&(self->mpHalo)->m_fvWorldPos[0]).y;
+    pos.z = (*(t3Vector*)&(self->mpHalo)->m_fvWorldPos[0]).z;
     pos.w = 1.0f;
     sVEntry<int(void*, t4Vector*)>* vEntry = &((sVEntry<int (void*, t4Vector*)>*)obj->mVtbl)[91];
     if (vEntry->fn(vthis(obj, *vEntry), &pos)) {
@@ -4037,7 +4029,7 @@ extern "C" void cLightHalo_Process(cLightHalo* vself, void* vrect)
             self->mZSRect.X = wakeClampD0B8(self->mZSRect.X, 0.0f, (rect[0] + rect[2]) - self->mZSRect.W);
             self->mZSRect.Y = wakeClampD0B8(self->mZSRect.Y, 0.0f, (rect[1] + rect[3]) - self->mZSRect.H);
             float pullBack = 0.0f;
-            switch ((unsigned int)(((sPart_2868*)self->mpHalo)->flags & 0x70)) {
+            switch ((unsigned int)(((int)(self->mpHalo)->m_iFlags) & 0x70)) {
             case 0x10:
                 pullBack = 100.0f;
                 break;
@@ -4413,16 +4405,6 @@ struct sWkVec3338 { float x, y, z, w; } __attribute__((aligned(16)));
 struct sWkMtx3338 { sWkVec3338 row[4]; };
 struct sWkPart3338 { char data[0x30]; };
 struct sWkEmit3338 { char data[0x210]; };
-struct sWkFx3338 {
-    tRect view;           // 0x0
-    sWkMtx3338 mtx;             // 0x10
-    float f50, f54, f58;        // 0x50
-    int pad5C;
-    int count[2];               // 0x60
-    sWkPart3338 parts[2][0x100];// 0x68
-    char pad6068[0x6070 - 0x6068];
-    sWkEmit3338 emit[2];        // 0x6070
-};
 
 struct sWkVtR3338 { short delta; short index; void (*fn)(tRect*, void*); };
 struct sWkVtM3338 { short delta; short index; sWkMtx3338* (*fn)(void*); };
@@ -4458,33 +4440,33 @@ static inline void vu0CopyMatrix3338(sWkMtx3338* dst, sWkMtx3338* src)
  */
 extern "C" void cLensFxMan_ProcessLens(cLensFxMan* vself, int idx)
 {
-    sWkFx3338* self = (sWkFx3338*)vself;
+    cLensFxMan* self = vself;
     cPS2GraphicsMan* ctx = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
     tRect viewRect;
     {
         sWkVtR3338* vt = (sWkVtR3338*)ctx->mVtbl;
         vt[28].fn(&viewRect, vthis(ctx, vt[28]));
     }
-    self->view = viewRect;
+    self->mViewInfo.mViewRect = viewRect;
     {
         sWkVtM3338* vt = (sWkVtM3338*)ctx->mVtbl;
-        vu0CopyMatrix3338(&self->mtx, vt[35].fn(vthis(ctx, vt[35])));
+        vu0CopyMatrix3338(&(*(sWkMtx3338*)&self->mViewInfo.mViewMat), vt[35].fn(vthis(ctx, vt[35])));
     }
     int i = 0;
     {
         sWkVtP3338* vt = (sWkVtP3338*)ctx->mVtbl;
-        vt[30].fn(vthis(ctx, vt[30]), &self->f50, &self->f54, &self->f58);
+        vt[30].fn(vthis(ctx, vt[30]), &self->mViewInfo.mFOV, &self->mViewInfo.mZNear, &self->mViewInfo.mZFar);
     }
-    sWkEmit3338* em = self->emit;
+    sWkEmit3338* em = ((sWkEmit3338*)&self->mSunHalo[0]);
     cSunHalo_Process(&em[idx], self, idx);
-    if (i < self->count[idx]) {
-        sWkPart3338(*pp)[0x100] = self->parts;
+    if (i < self->mNumHalo[idx]) {
+        sWkPart3338(*pp)[0x100] = ((sWkPart3338 (*)[256])&self->mLightHalo[0][0]);
         sWkPart3338* halo = pp[idx];
         do {
             cLightHalo_Process((cLightHalo*)halo, self);
             i++;
             halo++;
-        } while (i < self->count[idx]);
+        } while (i < self->mNumHalo[idx]);
     }
 }
 #endif

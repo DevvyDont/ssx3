@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "render/beziercache.h"
 #include "visualfx/snowbox.h"
 #include "render/font.h"
 #include "render/graphicsman.h"
@@ -441,16 +442,9 @@ INCLUDE_ASM("render/particle", cDynamicEmitter_render);
 #ifdef SKIP_ASM
 
 
-struct sPtCtx1380 {
-    char pad_0x0[0xE84];
-    sDrawState* top;             // 0xE84
-    char pad_0xE88[0xF50 - 0xE88];
-    int texIds[(0x10D8 - 0xF50) / 4];   // 0xF50
-    sVEntry<void(void*, void*)>* vtable;      // 0x10D8
-};
 
 extern char* cGraphicsMan_TheGraphicsMan_particle __asm__("cGraphicsMan_TheGraphicsMan");
-extern sPtCtx1380* cGraphicsMan_TheGraphicsMan_ctx __asm__("cGraphicsMan_TheGraphicsMan");
+extern cPS2GraphicsMan* cGraphicsMan_TheGraphicsMan_ctx __asm__("cGraphicsMan_TheGraphicsMan");
 extern int gBlendTable[];
 
 
@@ -470,23 +464,23 @@ extern "C" void cDynamicEmitter_render(cDynamicEmitter* self, int blend)
     if (self->m_enabled == 0) {
         return;
     }
-    sPtCtx1380* ctx = cGraphicsMan_TheGraphicsMan_ctx;
+    cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan_ctx;
     if (self->m_enabledCount == 0) {
         return;
     }
-    int tex = ctx->texIds[self->TextureId + (int)self->mCurrentFlipTexture];
+    int tex = ctx->_EffectTexMap[self->TextureId + (int)self->mCurrentFlipTexture];
     if (tex < 0) {
         return;
     }
     self->mDrawState.m_bitGroups[1] = (unsigned int)(((int)self->mDrawState.m_bitGroups[1] & ~0x7C) | ((gBlendTable[self->BlendMode] << 2) & 0x7C));
     self->mDrawState.m_bitGroups[2] = (unsigned int)(((int)self->mDrawState.m_bitGroups[2] & ~0x3E0) | ((blend << 5) & 0x3E0));
     self->mDrawState.m_textureState.m_texid[0] = tex;
-    ctx->top[1] = ctx->top[0];
-    ctx->top++;
-    *ctx->top = (*(&self->mDrawState));
-    sVEntry<void(void*, void*)>* vt = ctx->vtable;
+    ctx->m_pCurrentDrawState[1] = ctx->m_pCurrentDrawState[0];
+    ctx->m_pCurrentDrawState++;
+    *ctx->m_pCurrentDrawState = (*(&self->mDrawState));
+    sVEntry<void(void*, void*)>* vt = ((sVEntry<void (void*, void*)>*)ctx->mVtbl);
     vt[83].fn(vthis(ctx, vt[83]), (self));
-    ctx->top--;
+    ctx->m_pCurrentDrawState--;
 }
 #endif
 
@@ -617,16 +611,9 @@ INCLUDE_ASM("render/particle", cDynamicColourEmitter_render);
 #ifdef SKIP_ASM
 
 
-struct sPtCtx1688 {
-    char pad_0x0[0xE84];
-    sDrawState* top;             // 0xE84
-    char pad_0xE88[0xF50 - 0xE88];
-    int texIds[(0x10D8 - 0xF50) / 4];   // 0xF50
-    sVEntry<void(void*, void*)>* vtable;      // 0x10D8
-};
 
 extern char* cGraphicsMan_TheGraphicsMan_particle __asm__("cGraphicsMan_TheGraphicsMan");
-extern sPtCtx1688* cGraphicsMan_TheGraphicsMan_ctx1688 __asm__("cGraphicsMan_TheGraphicsMan");
+extern cPS2GraphicsMan* cGraphicsMan_TheGraphicsMan_ctx1688 __asm__("cGraphicsMan_TheGraphicsMan");
 extern int gBlendTable[];
 
 
@@ -645,23 +632,23 @@ extern "C" void cDynamicColourEmitter_render(cDynamicColourEmitter* self, int bl
     if (self->m_enabled == 0) {
         return;
     }
-    sPtCtx1688* ctx = cGraphicsMan_TheGraphicsMan_ctx1688;
+    cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan_ctx1688;
     if (self->m_enabledCount == 0) {
         return;
     }
-    int tex = ctx->texIds[self->TextureId + (int)self->mCurrentFlipTexture];
+    int tex = ctx->_EffectTexMap[self->TextureId + (int)self->mCurrentFlipTexture];
     if (tex < 0) {
         return;
     }
     self->mDrawState.m_bitGroups[1] = (unsigned int)(((int)self->mDrawState.m_bitGroups[1] & ~0x7C) | ((gBlendTable[self->BlendMode] << 2) & 0x7C));
     self->mDrawState.m_bitGroups[2] = (unsigned int)(((int)self->mDrawState.m_bitGroups[2] & ~0x3E0) | ((blend << 5) & 0x3E0));
     self->mDrawState.m_textureState.m_texid[0] = tex;
-    ctx->top[1] = ctx->top[0];
-    ctx->top++;
-    *ctx->top = (*(&self->mDrawState));
-    sVEntry<void(void*, void*)>* vt = ctx->vtable;
+    ctx->m_pCurrentDrawState[1] = ctx->m_pCurrentDrawState[0];
+    ctx->m_pCurrentDrawState++;
+    *ctx->m_pCurrentDrawState = (*(&self->mDrawState));
+    sVEntry<void(void*, void*)>* vt = ((sVEntry<void (void*, void*)>*)ctx->mVtbl);
     vt[84].fn(vthis(ctx, vt[84]), (self));
-    ctx->top--;
+    ctx->m_pCurrentDrawState--;
 }
 #endif
 
@@ -2432,13 +2419,6 @@ static inline sPatchOut4518 Normalize4518(const sPatchOut4518& v)
     return v;
 }
 
-struct sPatchSet4518 {
-    char pad_0x00[0x190];
-    t4Vector* basis[3];    // 0x190
-    int count[3];               // 0x19C
-    char pad_0x1A8[0x310 - 0x1A8];
-    t4Vector* dbasis[3];   // 0x310
-};
 
 /**
  * Computes a patch's n x n grid of unit normals (VU0 macro code).
@@ -2455,11 +2435,11 @@ struct sPatchSet4518 {
  */
 // PORT: PS2-only VU0 inline asm (tensor-product patch evaluation, then normals
 // as the normalised cross product of the two partial derivatives).
-extern "C" void func_00374518(sPatchSet4518* self, char* mat, sPatchOut4518* out, int idx)
+extern "C" void func_00374518(cBezierCache* self, char* mat, sPatchOut4518* out, int idx)
 {
-    int n = self->count[idx];
-    t4Vector* basis = self->basis[idx];
-    t4Vector* dbasis = self->dbasis[idx];
+    int n = self->unk_19C[idx];
+    t4Vector* basis = self->unk_190[idx];
+    t4Vector* dbasis = self->unk_310[idx];
     sPatchOut4518* cursor = out;
     int i;
     __asm__ __volatile__(
@@ -11976,25 +11956,6 @@ struct sRing_6E78 {
     sEnt_6E78 ents[1];              // 0x80
 };
 
-struct sGfx_6E78 {
-    char pad_0x0[0xE84];
-    sRS_6E78* top;                  // 0xE84
-    char pad_0xE88[0xF50 - 0xE88];
-    int texIds[(0x10D8 - 0xF50) / 4];   // 0xF50
-    sVEntry<int(void*)>* vtable;             // 0x10D8
-    char pad_0x10DC[0x18F0 - 0x10DC];
-    sRing_6E78* ring;               // 0x18F0
-    char pad_0x18F4[0x5840 - 0x18F4];
-    sV_6E78 guard0;                 // 0x5840
-    sV_6E78 guard1;                 // 0x5850
-    char pad_0x5860[0x5A00 - 0x5860];
-    unsigned int bufAddr;           // 0x5A00
-    char pad_0x5A04[0x5A80 - 0x5A04];
-    unsigned int zbp;               // 0x5A80
-    unsigned int fbp;               // 0x5A84
-    char pad_0x5A88[0x6B90 - 0x5A88];
-    int texReady;                   // 0x6B90
-};
 
 struct sPkt_6E78 {
     ulong* cur;                     // 0x00 next free quad
@@ -12097,13 +12058,13 @@ static inline void UnpackEnd_6E78(sPkt_6E78* pkt)
     *dst = (ulong)(pkt->addr | (pkt->flg ? 0x8000 : 0) | num << 16 | 0x6C000000) << 32;
 }
 
-static inline void DmaEnd_6E78(sPkt_6E78* pkt, sGfx_6E78* self)
+static inline void DmaEnd_6E78(sPkt_6E78* pkt, cPS2GraphicsMan* self)
 {
     pkt->dma[0] = ((pkt->cur - pkt->dma) / 2 - 1) | 0x10000000;
     pkt->dma[1] = 0;
     ulong* p = pkt->cur;
     pkt->cur = 0;
-    self->bufAddr = (unsigned int)p & 0x0FFFFFFF;
+    self->mVifCursor = (unsigned int)p & 0x0FFFFFFF;
 }
 
 /**
@@ -12124,34 +12085,34 @@ static inline void DmaEnd_6E78(sPkt_6E78* pkt, sGfx_6E78* self)
  * @param strips  the trails (0x14 bytes each: ring table, start index, vertex count, alpha, alpha step)
  * @param n  number of trails
  */
-extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(sGfx_6E78* self, BoardTrailInfoT* strips, int n)
+extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(cPS2GraphicsMan* self, BoardTrailInfoT* strips, int n)
 {
-    *self->top = sDrawState_s_defaultDrawState_rs6E78;
-    self->top->f8 = (self->top->f8 & ~0x3E0) | 0x60;
-    self->top->f0 = (self->top->f0 & ~0x3C0) | 0xC0;
-    self->top->fC &= 0xC0000000;
-    if (self->texReady == 0) {
+    *((sRS_6E78*)self->m_pCurrentDrawState) = sDrawState_s_defaultDrawState_rs6E78;
+    ((sRS_6E78*)self->m_pCurrentDrawState)->f8 = (((sRS_6E78*)self->m_pCurrentDrawState)->f8 & ~0x3E0) | 0x60;
+    ((sRS_6E78*)self->m_pCurrentDrawState)->f0 = (((sRS_6E78*)self->m_pCurrentDrawState)->f0 & ~0x3C0) | 0xC0;
+    ((sRS_6E78*)self->m_pCurrentDrawState)->fC &= 0xC0000000;
+    if (self->mMatricesValid == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
-    self->top->f4 = (self->top->f4 & ~0x400000) | 0x400000;
-    self->top->f4 = (self->top->f4 & ~0x1800000) | 0x1000000;
-    self->top->f4 &= ~0x300000;
-    self->top->f4 &= ~0xFF000;
-    self->top->f4 = (self->top->f4 & ~0x7C) | 0x14;
-    int tex = self->texIds[D_004A45D4.texIndex];
-    self->top->tex = tex;
+    ((sRS_6E78*)self->m_pCurrentDrawState)->f4 = (((sRS_6E78*)self->m_pCurrentDrawState)->f4 & ~0x400000) | 0x400000;
+    ((sRS_6E78*)self->m_pCurrentDrawState)->f4 = (((sRS_6E78*)self->m_pCurrentDrawState)->f4 & ~0x1800000) | 0x1000000;
+    ((sRS_6E78*)self->m_pCurrentDrawState)->f4 &= ~0x300000;
+    ((sRS_6E78*)self->m_pCurrentDrawState)->f4 &= ~0xFF000;
+    ((sRS_6E78*)self->m_pCurrentDrawState)->f4 = (((sRS_6E78*)self->m_pCurrentDrawState)->f4 & ~0x7C) | 0x14;
+    int tex = self->_EffectTexMap[D_004A45D4.texIndex];
+    ((sRS_6E78*)self->m_pCurrentDrawState)->tex = tex;
 
-    sVEntry<int(void*)>* vt = self->vtable;
+    sVEntry<int(void*)>* vt = ((sVEntry<int (void*)>*)self->mVtbl);
     int width = vt[10].fn(vthis(self, vt[10]));
     sPkt_6E78* pkt = (sPkt_6E78*)D_004A5B84;
-    unsigned int fbp = self->fbp;
-    unsigned int zbp = self->zbp;
-    unsigned int start = self->bufAddr;
+    unsigned int fbp = ((unsigned int)self->mCurrentFrameBufferPage);
+    unsigned int zbp = ((unsigned int)self->mCurrentZBufferPage);
+    unsigned int start = self->mVifCursor;
     MEM_fill(pkt, 0, 0x30);
 
     // pass 1: alpha-only FRAME, ZBUF masked, TEST ztst always; guard band
     {
-        ulong* packetBase = (ulong*)(self->bufAddr | 0x30000000);
+        ulong* packetBase = (ulong*)(self->mVifCursor | 0x30000000);
         pkt->dma = packetBase;
         pkt->cur = packetBase + 2;
         pkt->cl = 1;
@@ -12166,14 +12127,14 @@ extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(sGfx_6E78* self, Board
     GifEnd_6E78(pkt);
     DirectEnd_6E78(pkt);
     UnpackBegin_6E78(pkt);
-    AddQuad_6E78(pkt, self->guard0);
-    AddQuad_6E78(pkt, self->guard1);
+    AddQuad_6E78(pkt, (*(sV_6E78*)&self->mGuardScale));
+    AddQuad_6E78(pkt, (*(sV_6E78*)&self->mGuardOffset));
     UnpackEnd_6E78(pkt);
     DmaEnd_6E78(pkt, self);
     func_00386D10(self, strips, n, 0, (void*)1, 0, 0.0f, 0.0f);
 
     // pass 2: TEST ztst gequal, FBA on
-    DmaBegin_6E78(pkt, self->bufAddr);
+    DmaBegin_6E78(pkt, self->mVifCursor);
     Flush_6E78(pkt);
     GifBegin_6E78(pkt);
     AddReg_6E78(pkt, 0x50000, 71);
@@ -12184,7 +12145,7 @@ extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(sGfx_6E78* self, Board
     func_00386D10(self, strips, n, 0, (void*)1, 0, 0.0f, 0.0f);
 
     // pass 3: ZBUF unmasked, destination-alpha test, FBA off; guard band without depth
-    DmaBegin_6E78(pkt, self->bufAddr);
+    DmaBegin_6E78(pkt, self->mVifCursor);
     Flush_6E78(pkt);
     GifBegin_6E78(pkt);
     AddReg_6E78(pkt, (ulong)(zbp | 0x1000000), 78);
@@ -12196,14 +12157,14 @@ extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(sGfx_6E78* self, Board
     {
         sV_6E78 flatGuardScale;
         sV_6E78 flatGuardOffset;
-        flatGuardScale.x = self->guard0.x;
-        flatGuardScale.y = self->guard0.y;
+        flatGuardScale.x = (*(sV_6E78*)&self->mGuardScale).x;
+        flatGuardScale.y = (*(sV_6E78*)&self->mGuardScale).y;
         flatGuardScale.z = 0.0f;
-        flatGuardScale.w = self->guard0.w;
-        flatGuardOffset.x = self->guard1.x;
-        flatGuardOffset.y = self->guard1.y;
+        flatGuardScale.w = (*(sV_6E78*)&self->mGuardScale).w;
+        flatGuardOffset.x = (*(sV_6E78*)&self->mGuardOffset).x;
+        flatGuardOffset.y = (*(sV_6E78*)&self->mGuardOffset).y;
         flatGuardOffset.z = 0.0f;
-        flatGuardOffset.w = self->guard1.w;
+        flatGuardOffset.w = (*(sV_6E78*)&self->mGuardOffset).w;
         AddQuad_6E78(pkt, flatGuardScale);
         AddQuad_6E78(pkt, flatGuardOffset);
     }
@@ -12212,7 +12173,7 @@ extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(sGfx_6E78* self, Board
     func_00386D10(self, strips, n, 0, (void*)1, 0, 0.0f, 0.0f);
 
     // pass 4: full FRAME, TEST ztst gequal, FBA if enabled; then the edges
-    DmaBegin_6E78(pkt, self->bufAddr);
+    DmaBegin_6E78(pkt, self->mVifCursor);
     Flush_6E78(pkt);
     GifBegin_6E78(pkt);
     AddReg_6E78(pkt, (ulong)fbp | ((ulong)(width / 64) << 16), 76);
@@ -12223,8 +12184,8 @@ extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(sGfx_6E78* self, Board
     GifEnd_6E78(pkt);
     DirectEnd_6E78(pkt);
     UnpackBegin_6E78(pkt);
-    AddQuad_6E78(pkt, self->guard0);
-    AddQuad_6E78(pkt, self->guard1);
+    AddQuad_6E78(pkt, (*(sV_6E78*)&self->mGuardScale));
+    AddQuad_6E78(pkt, (*(sV_6E78*)&self->mGuardOffset));
     UnpackEnd_6E78(pkt);
     DmaEnd_6E78(pkt, self);
     func_00386DD0((void*)self, (sPartStrip_6DD0*)strips, n, (void*)2, 0, (void*)1);
@@ -12234,7 +12195,7 @@ extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(sGfx_6E78* self, Board
     func_00386DD0((void*)self, (sPartStrip_6DD0*)strips, n, (void*)1, (void*)5, (void*)1);
 
     if (D_004A45CC.fba) {
-        DmaBegin_6E78(pkt, self->bufAddr);
+        DmaBegin_6E78(pkt, self->mVifCursor);
         Flush_6E78(pkt);
         GifBegin_6E78(pkt);
         AddReg_6E78(pkt, 0x54000, 71);
@@ -12244,7 +12205,7 @@ extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(sGfx_6E78* self, Board
         DmaEnd_6E78(pkt, self);
         func_00386DD0((void*)self, (sPartStrip_6DD0*)strips, n, 0, (void*)1, (void*)1);
 
-        DmaBegin_6E78(pkt, self->bufAddr);
+        DmaBegin_6E78(pkt, self->mVifCursor);
         Flush_6E78(pkt);
         GifBegin_6E78(pkt);
         AddReg_6E78(pkt, 0x50000, 71);
@@ -12253,9 +12214,9 @@ extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(sGfx_6E78* self, Board
         DmaEnd_6E78(pkt, self);
     }
 
-    sRing_6E78* ring = self->ring;
-    unsigned int next = self->bufAddr;
-    sRS_6E78* rs = self->top;
+    sRing_6E78* ring = ((sRing_6E78*)self->mpDeferMan);
+    unsigned int next = self->mVifCursor;
+    sRS_6E78* rs = ((sRS_6E78*)self->m_pCurrentDrawState);
     if (ring->count < 2600) {
         rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
@@ -12266,10 +12227,10 @@ extern "C" void cPS2GraphicsMan_RenderMultipleBoardTrails(sGfx_6E78* self, Board
         deferEntry->key = key;
         deferEntry->flag = 0;
     }
-    self->bufAddr += 0x10;
-    self->top->f0 &= ~0x3C0;
-    self->top->fC &= 0xC0000000;
-    *self->top = sDrawState_s_defaultDrawState_rs6E78;
+    self->mVifCursor += 0x10;
+    ((sRS_6E78*)self->m_pCurrentDrawState)->f0 &= ~0x3C0;
+    ((sRS_6E78*)self->m_pCurrentDrawState)->fC &= 0xC0000000;
+    *((sRS_6E78*)self->m_pCurrentDrawState) = sDrawState_s_defaultDrawState_rs6E78;
 }
 #endif
 

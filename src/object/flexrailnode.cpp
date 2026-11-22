@@ -1912,13 +1912,6 @@ extern "C" void cFlagSet_AddFlag(sFlagSet_34B038* self, tFlagState* def, tInstan
 INCLUDE_ASM("object/flexrailnode", cFlagSet_RemoveFlag);
 #ifdef SKIP_ASM
 
-struct sFrRail_B168 {
-    char pad_0x0[0x58];
-    int track;              // 0x58
-    int count;              // 0x5C
-    char pad_0x60[0x34];
-    tInstanceRecord* riders[1]; // 0x94
-};
 
 extern "C" void cFlagSet_PurgeMesh(void* self);
 
@@ -1932,19 +1925,19 @@ extern "C" void cFlagSet_PurgeMesh(void* self);
  * @param rider  instance record of the flag to remove
  * @return 1 if the instance was removed, else 0
  */
-extern "C" int cFlagSet_RemoveFlag(sFrRail_B168* self, tInstanceRecord* rider)
+extern "C" int cFlagSet_RemoveFlag(cFlagSet* self, tInstanceRecord* rider)
 {
-    if (self->count == 0) {
+    if (self->mCurrentNumInstances == 0) {
         return 0;
     }
-    if (*((int*)rider->m_Model) != self->track) {
+    if (*((int*)rider->m_Model) != self->mModelID) {
         return 0;
     }
-    for (int i = 0; i < self->count; i++) {
-        if (((int)self->riders[i]->m_RID) == ((int)rider->m_RID)) {
-            self->riders[i] = self->riders[self->count - 1];
-            self->riders[self->count - 1] = 0;
-            if (--self->count == 0) {
+    for (int i = 0; i < self->mCurrentNumInstances; i++) {
+        if (((int)self->mInstances[i]->m_RID) == ((int)rider->m_RID)) {
+            self->mInstances[i] = self->mInstances[self->mCurrentNumInstances - 1];
+            self->mInstances[self->mCurrentNumInstances - 1] = 0;
+            if (--self->mCurrentNumInstances == 0) {
                 cFlagSet_PurgeMesh(self);
             }
             return 1;

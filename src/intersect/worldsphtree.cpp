@@ -1103,14 +1103,6 @@ struct sOwner_333EF8 {
     void* cache;
 };
 
-struct sTree_333EF8 {
-    sOwner_333EF8* owner;           // 0x0
-    int pad04;
-    unsigned int count;             // 0x8
-    tInstanceRecord* items[0x40];      // 0xC
-    unsigned int ntris;             // 0x10C
-    tPatchRecord* tris[1];        // 0x110
-};
 
 extern "C" void cAIFwdDiffCache_GetFwdDiff(void* cache, void* src, void** out);
 struct sVec4_335960;
@@ -1190,12 +1182,12 @@ static inline void reset_333EF8(tIntersectInfo* h)
  */
 extern "C" int cOverlapList_terrainIntersect(cOverlapList* vself, void* vq, sHit_003342D0* vhits, int cap, int hitCache)
 {
-    sTree_333EF8* self = (sTree_333EF8*)vself;
+    cOverlapList* self = vself;
     cWorldIntersectType* query = (cWorldIntersectType*)vq;
     tIntersectInfo* hits = (tIntersectInfo*)vhits;
     int n = 0;
-    for (unsigned int i = 0; i < self->ntris; i++) {
-        tPatchRecord* obj = self->tris[i];
+    for (unsigned int i = 0; i < self->numpatches; i++) {
+        tPatchRecord* obj = self->patches[i];
         if ((obj->m_sSurfaceFlags & 0x41) != 65) {
             continue;
         }
@@ -1207,7 +1199,7 @@ extern "C" int cOverlapList_terrainIntersect(cOverlapList* vself, void* vq, sHit
         t4Vector nrm;
         void* node;
         float dist;
-        cAIFwdDiffCache_GetFwdDiff(self->owner->cache, obj, &node);
+        cAIFwdDiffCache_GetFwdDiff(((sOwner_333EF8*)self->nash)->cache, obj, &node);
         if (!cWorldIntersectType_IsPatchInt(query, obj, node, (t4Vector*)&pos, (t4Vector*)&nrm, &dist, (t4Vector*)&uv, hitCache)) {
             continue;
         }
@@ -1221,8 +1213,8 @@ extern "C" int cOverlapList_terrainIntersect(cOverlapList* vself, void* vq, sHit
         hits[n].v = uv.y;
         n++;
     }
-    for (unsigned int j = 0; j < self->count; j++) {
-        tInstanceRecord* node = self->items[j];
+    for (unsigned int j = 0; j < self->numinstances; j++) {
+        tInstanceRecord* node = self->instances[j];
         if (((int)node->m_pCollideRecord) == 0) {
             continue;
         }
@@ -1343,11 +1335,6 @@ struct sBox_334458 {
 
 
 
-struct sList_334458 {
-    int pad00[2];
-    unsigned int count;
-    tInstanceRecord* items[1];
-};
 
 extern "C" int intersect_instanceIntersect(void* q, void* node, void* buf, int cap, int mode);
 
@@ -1388,13 +1375,13 @@ static inline int overlapBox_334458(const cWorldIntersectType* q, const sBox_334
  * @param full  nonzero selects mode 2 instead of 1 (On Tour includeridable)
  * @return the number of hits stored
  */
-extern "C" int cOverlapList_staticObjectIntersect(sList_334458* self, cWorldIntersectType* query, tIntersectInfo* buf, int cap, int full)
+extern "C" int cOverlapList_staticObjectIntersect(cOverlapList* self, cWorldIntersectType* query, tIntersectInfo* buf, int cap, int full)
 {
     int mode = 1;
     if (full) mode = 2;
     int n = 0;
-    for (unsigned int i = 0; i < self->count; i++) {
-        tInstanceRecord* node = self->items[i];
+    for (unsigned int i = 0; i < self->numinstances; i++) {
+        tInstanceRecord* node = self->instances[i];
         int flags = node->m_iFlags;
         if (flags & 0x20) {
             if (overlapNode_334458(query, node)) {

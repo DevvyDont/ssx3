@@ -2271,34 +2271,6 @@ struct sScriptSlot_7F20 {
     void* operator new[](unsigned int, void* p) { return p; }
 };
 
-struct sScriptMgr_7F20 {
-    char pad_0x0[0x2A8];
-    void** vt2A8;               // 0x2A8
-    void** vt2AC;               // 0x2AC
-    char pad_0x2B0[0x518 - 0x2B0];
-    void** vt518;               // 0x518
-    char pad_0x51C[0x528 - 0x51C];
-    void** vt528;               // 0x528
-    int f52C;                   // 0x52C
-    int f530;                   // 0x530
-    int f534;                   // 0x534
-    int f538;                   // 0x538
-    int f53C;                   // 0x53C
-    int f540;                   // 0x540
-    int f544;                   // 0x544
-    int f548;                   // 0x548
-    int f54C;                   // 0x54C
-    int f550;                   // 0x550
-    int f554;                   // 0x554
-    int ids[50];                // 0x558
-    int f620;                   // 0x620
-    int f624;                   // 0x624
-    char cues[10][0x10];        // 0x628
-    char pad_0x6C8[0x6D0 - 0x6C8];
-    char slots[2][0x120];       // 0x6D0
-    char pad_0x910[0xA48 - 0x910];
-    int fA48;                   // 0xA48
-};
 
 /**
  * Constructs the script engine: its bases and member objects, then empty state.
@@ -2309,44 +2281,44 @@ struct sScriptMgr_7F20 {
  *
  * @return @p self
  */
-extern "C" sScriptMgr_7F20* cSSXScriptEngine_cSSXScriptEngine(sScriptMgr_7F20* self)
+extern "C" cSSXScriptEngine* cSSXScriptEngine_cSSXScriptEngine(cSSXScriptEngine* self)
 {
     cBXScriptEngine_cBXScriptEngine(self);
     cVidEngine_cVidEngine((char*)self + 0x500);
     cDataManager_cDataManager((cDataManager*)((char*)self + 0x51C), 0, 0x100);
-    self->vt2AC = D_00482100;
-    self->vt518 = D_004821A0;
-    self->vt528 = D_00482168;
-    self->vt2A8 = cSSXScriptEngine_vtbl;
+    self->mInSeqCommVtbl = D_00482100;
+    self->mVidEngineVtbl = D_004821A0;
+    self->mDataManagerVtbl = D_00482168;
+    self->mVtbl = cSSXScriptEngine_vtbl;
     new ((char*)self + 0x6D0) sScriptSlot_7F20[2];
     cScriptObjGS_cScriptObjGS((char*)self + 0x910);
     cScriptObjEvent_cScriptObjEvent((char*)self + 0x92C);
     cScriptAnimBankManager_cScriptAnimBankManager((char*)self + 0xA28, 0, 10, 0xF0);
     cScriptSoundBankManager_cScriptSoundBankManager((char*)self + 0xA38, 0, 10, 17);
-    self->f52C = 0;
-    self->f530 = 0;
-    self->f534 = 0;
-    self->f538 = 0;
-    self->f53C = 0;
-    self->f540 = 0;
-    self->f544 = 0;
-    self->f548 = 0;
+    (*(int*)&self->mpMasterTableHeader) = 0;
+    (*(int*)&self->mpMasterTable) = 0;
+    (*(int*)&self->mpMasterTableDebug) = 0;
+    (*(int*)&self->mFilterTableAsyncHandle) = 0;
+    (*(int*)&self->mpFilterTableHeader) = 0;
+    (*(int*)&self->mpCategoryFilterTable) = 0;
+    (*(int*)&self->mpSetupInfoHeap) = 0;
+    (*(int*)&self->mpSetupInfoUnused) = 0;
     D_004A34B0 = self;
-    self->fA48 = 10;
-    self->f550 = 2;
-    self->f54C = 0;
-    self->f554 = 0;
-    self->f620 = 0;
-    self->f624 = 0;
+    self->mCurrAttachingBankNum = 10;
+    self->mPlayingNISList = 2;
+    (*(int*)&self->mpNISLists) = 0;
+    self->mNumFramesNoSkip = 0;
+    self->mNumAsyncs = 0;
+    (*(int*)&self->mpIdleLists) = 0;
     int i;
     for (i = 49; i >= 0; i--) {
-        self->ids[i] = 0;
+        ((int*)&self->mpAnchorTableDB[0])[i] = 0;
     }
     for (i = 0; i < 10; i++) {
-        tSSXScriptBankInfo_Clear(self->cues[i]);
+        tSSXScriptBankInfo_Clear(((char (*)[16])&self->mScriptDataBanks[0])[i]);
     }
     for (i = 0; i < 2; i++) {
-        cScriptObjCameraManager_SetViewIndex(self->slots[i], i);
+        cScriptObjCameraManager_SetViewIndex(((char (*)[288])&self->mObjectCameraManager[0])[i], i);
     }
     return self;
 }

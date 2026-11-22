@@ -1230,7 +1230,7 @@ struct sReplayCache1380;
 extern "C" void cReplay_writeFrames(cReplay* self);
 extern "C" void cReplay_writeInputStart(cReplay* self);
 struct sReplayCache1510;
-extern "C" void cReplay_writeInput(sReplayCache1510* self);
+extern "C" void cReplay_writeInput(cReplay* self);
 extern "C" void cReplay_writePadStart(cReplay* self);
 extern "C" void cReplay_writePad(cReplay* self);
 void* cReplay_writeCheckSumStart(void* self);
@@ -1268,7 +1268,7 @@ extern "C" int cReplay_getSaveData(cReplay* self, char** block, int* size)
         case 2: cReplay_writeFramesStart(self); break;
         case 3: cReplay_writeFrames(self); break;
         case 4: cReplay_writeInputStart(self); break;
-        case 5: cReplay_writeInput((sReplayCache1510*)self); break;
+        case 5: cReplay_writeInput(self); break;
         case 6: cReplay_writePadStart(self); break;
         case 7: cReplay_writePad(self); break;
         case 8: cReplay_writeCheckSumStart((self)); break;
@@ -1491,22 +1491,6 @@ INCLUDE_ASM("replay/replaycache", cReplay_writeInput);
 extern "C" int HUFF_encode(void* src, int size, void* dst, int* state);
 
 
-struct sReplayCache1510 {
-    char pad_0x0[0x48C];
-    cReplayCache* entries[(0x638 - 0x48C) / 4];   // 0x48C
-    int WriteState;        // 0x638
-    char pad_0x63C[0x4];
-    int* out;               // 0x640
-    int WriteSrc;        // 0x644
-    int WriteSrcSize;        // 0x648
-    char pad_0x64C[0x8];
-    int cur;                // 0x654
-    int count;              // 0x658
-    char pad_0x65C[0x10];
-    void* pending;          // 0x66C
-    int pendingSize;        // 0x670
-    int* header;            // 0x674
-};
 
 /**
  * Writes the next piece of the input caches to the replay save data; one call per step of cReplay_getSaveData.
@@ -1517,43 +1501,43 @@ struct sReplayCache1510 {
  * (+0xC) queued; a missing one is skipped. After the last cache WriteState is advanced. The words at +0x644 and +0x648
  * are cleared when moving on.
  */
-extern "C" void cReplay_writeInput(sReplayCache1510* self)
+extern "C" void cReplay_writeInput(cReplay* self)
 {
-    if (self->header != 0) {
-        cReplay_writeSetup((cReplay*)self, (signed char*)self->header, 8);
-        self->header = 0;
+    if (((int*)self->WriteCacheSave) != 0) {
+        cReplay_writeSetup((cReplay*)self, (signed char*)((int*)self->WriteCacheSave), 8);
+        (*(int**)&self->WriteCacheSave) = 0;
         return;
     }
-    if (self->pending != 0) {
+    if (((void*)self->WriteCmdFrame) != 0) {
         int state = 0;
-        int n = HUFF_encode(self->pending, self->pendingSize, self->out + 1, &state);
-        *self->out = n;
-        cReplay_writeSetup((cReplay*)self, (signed char*)self->out, n + 4);
-        self->pending = 0;
+        int n = HUFF_encode(((void*)self->WriteCmdFrame), self->WriteCmdFrameSize, ((int*)self->WriteTmp) + 1, &state);
+        *((int*)self->WriteTmp) = n;
+        cReplay_writeSetup((cReplay*)self, (signed char*)((int*)self->WriteTmp), n + 4);
+        (*(void**)&self->WriteCmdFrame) = 0;
         return;
     }
-    int cur = self->cur;
-    if (cur < self->count) {
-        self->pending = 0;
-        self->header = 0;
-        self->pendingSize = 0;
-        cReplayCache* inputCache = self->entries[cur];
+    int cur = self->WriteIndex;
+    if (cur < self->WriteIndexMax) {
+        (*(void**)&self->WriteCmdFrame) = 0;
+        (*(int**)&self->WriteCacheSave) = 0;
+        self->WriteCmdFrameSize = 0;
+        cReplayCache* inputCache = self->InputCache[cur];
         if (inputCache != 0) {
-            self->pending = ((void*)inputCache->CmdFrame);
-            self->header = self->out;
-            self->pendingSize = 0x8000;
-            *self->out = 0x11111112;
-            self->header[1] = inputCache->RecordCursor;
-            self->cur++;
+            (*(void**)&self->WriteCmdFrame) = ((void*)inputCache->CmdFrame);
+            (*(int**)&self->WriteCacheSave) = ((int*)self->WriteTmp);
+            self->WriteCmdFrameSize = 0x8000;
+            *((int*)self->WriteTmp) = 0x11111112;
+            ((int*)self->WriteCacheSave)[1] = inputCache->RecordCursor;
+            self->WriteIndex++;
         } else {
-            self->cur = cur + 1;
+            self->WriteIndex = cur + 1;
             self->WriteSrcSize = 0;
-            self->WriteSrc = 0;
+            (*(int*)&self->WriteSrc) = 0;
         }
     } else {
         self->WriteState++;
         self->WriteSrcSize = 0;
-        self->WriteSrc = 0;
+        (*(int*)&self->WriteSrc) = 0;
     }
 }
 #endif

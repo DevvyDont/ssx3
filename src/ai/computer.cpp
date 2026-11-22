@@ -2493,7 +2493,6 @@ extern "C" void cAI_UpdateAggression(sComputer_0010F878* self)
 //100%
 INCLUDE_ASM("ai/computer", cAI_UpdateRankingPlacement);
 #ifdef SKIP_ASM
-struct sAI_0010F998 { char pad[0x28]; cRider* riders[19]; int mode; int count; };
 extern "C" int cAI_isAILoadedAndReady(void* self);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_ChangePosition(void* mgr, void* rider, void* next, void* prev, int oldPos, int newPos);
@@ -2514,19 +2513,19 @@ float cRider_getDistanceLeft(void* self);
  */
 extern "C" void cAI_UpdateRankingPlacement(cAI* aiObj)
 {
-    sAI_0010F998* self = (sAI_0010F998*)aiObj;
-    if (self->mode == 0)
+    cAI* self = aiObj;
+    if (self->RaceRankType == 0)
         return;
     if (cAI_isAILoadedAndReady(self) == 0)
         return;
     int idx[8];
     int keys[8];
     int i;
-    for (i = 0; i < self->count; i++)
+    for (i = 0; i < self->NumberOfRidersAllocated; i++)
     {
         idx[i] = i;
-        cRider* rider = self->riders[i];
-        switch (self->mode)
+        cRider* rider = self->Riders[i];
+        switch (self->RaceRankType)
         {
         case 1:
             if (rider->mIsActor)
@@ -2550,22 +2549,22 @@ extern "C" void cAI_UpdateRankingPlacement(cAI* aiObj)
     }
     // Re-read count into a local: GCSE makes this load redundant with the loop-test
     // loads and leaves a copy (a0 = v0) after each of them.
-    int n = self->count;
+    int n = self->NumberOfRidersAllocated;
     SORT_shell(n, keys, idx);
     int j;
-    for (j = 0; j < self->count; j++)
+    for (j = 0; j < self->NumberOfRidersAllocated; j++)
     {
-        if (self->riders[idx[j]]->RaceRanking != j)
+        if (self->Riders[idx[j]]->RaceRanking != j)
         {
             cRider* next = 0;
             cRider* prev = 0;
             if (j > 0)
-                prev = self->riders[idx[j - 1]];
-            if (j < self->count - 1)
-                next = self->riders[idx[j + 1]];
-            cSSXAudio_ChangePosition(cAudioInterface_bxAudio(), self->riders[idx[j]], next, prev, self->riders[idx[j]]->RaceRanking, j);
+                prev = self->Riders[idx[j - 1]];
+            if (j < self->NumberOfRidersAllocated - 1)
+                next = self->Riders[idx[j + 1]];
+            cSSXAudio_ChangePosition(cAudioInterface_bxAudio(), self->Riders[idx[j]], next, prev, self->Riders[idx[j]]->RaceRanking, j);
         }
-        self->riders[idx[j]]->RaceRanking = j;
+        self->Riders[idx[j]]->RaceRanking = j;
     }
 }
 #endif
