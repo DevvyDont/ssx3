@@ -5054,7 +5054,7 @@ static inline int snd8D90Add(void* vself, int a, int b)
 
 static inline void snd8D90Start(cSSXAudio* self, int a, int b)
 {
-    if (*(int*)((char*)self + 0x59E4) == 0) {
+    if (self->mTurboRef == 0) {
         sSnd8D90Mgr* m = ((sSnd8D90Mgr*)self->mpVBankManager);
         sSnd8D90Sub* s = &m->sub;
         m->sub.cur++;
@@ -5082,7 +5082,7 @@ static inline void snd8D90Start(cSSXAudio* self, int a, int b)
         sSnd8D90Mgr** pp = (*(sSnd8D90Mgr***)&self->MusicSys);
         int r = (int)cSSXAudio_GetCurrAppliedVolumePtr(self, 9, 0);
         (*pp)->sub.p3C[(*pp)->sub.cur] = r;
-        *(int*)((char*)self + 0x59E0) = cBankSys_SFX_End((cBankSys*)self);
+        self->mTurboHandle = cBankSys_SFX_End((cBankSys*)self);
     }
 }
 
@@ -5112,7 +5112,7 @@ extern "C" void cSSXAudio_TurboOn(cSSXAudio* vself, cRider* obj, int flag)
     if (flag != 0) {
         snd8D90Add(self, 0, 74);
     }
-    *(int*)((char*)self + 0x59E4) = *(int*)((char*)self + 0x59E4) + 1;
+    self->mTurboRef = self->mTurboRef + 1;
 }
 #endif
 

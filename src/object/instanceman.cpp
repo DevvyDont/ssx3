@@ -1081,15 +1081,15 @@ extern "C" void cMeshAnimNode_init(cMeshAnimNode* debris)
         ((sV4_352230*)&self->Axis[0])[i] = Normalize_352230(((sV4_352230*)&self->Axis[0])[i]);
     }
     for (int j = 0; j < modelDef->m_iNumMeshes; j++) {
-        float vx = randScale_352230(((float*)&self->Disperse)[0]) * (1.0f / (float)cAppMan_TheAppMan->TimerHz);
+        float vx = randScale_352230(self->Disperse.x) * (1.0f / (float)cAppMan_TheAppMan->TimerHz);
         if (BXrand() & 1) {
             vx = -vx;
         }
-        float vy = randScale_352230(((float*)&self->Disperse)[1]) * (1.0f / (float)cAppMan_TheAppMan->TimerHz);
+        float vy = randScale_352230(self->Disperse.y) * (1.0f / (float)cAppMan_TheAppMan->TimerHz);
         if (BXrand() & 1) {
             vy = -vy;
         }
-        float vz = randScale_352230(((float*)&self->Disperse)[2]) * (1.0f / (float)cAppMan_TheAppMan->TimerHz);
+        float vz = randScale_352230(self->Disperse.z) * (1.0f / (float)cAppMan_TheAppMan->TimerHz);
         ((sV4_352230*)&self->Vel[0])[j] = Scale_352230(*(sV4_352230*)&self->InitVel, cAppMan_TheAppMan->TimerPeriod);
         AddEq_352230(((sV4_352230*)&self->Vel[0])[j], sV4_352230(vx, vy, vz, 0.0f));
     }

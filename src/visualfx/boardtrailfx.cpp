@@ -1512,13 +1512,13 @@ static inline sV4_2EADD0 Scale_2EADD0(const sV4_2EADD0& v, float s)
  */
 extern "C" void cTrickBoostFX_update(cTrickBoostFX* self)
 {
-    float speed = *(float*)(((char*)self->mRider) + 0x2EC);
+    float speed = self->mRider->mPowerUpTrickTimer;
     if (cPowerUpFXToggles_m_TestTrickBoost != 0)
         speed = 10.0f;
     float zeroF = 0.0f;
     if (zeroF < speed)
     {
-        cPlayerLights_BoardIsAdditive(*(char**)(((char*)self->mRider) + 0x77C) + 0xD30, 1);
+        cPlayerLights_BoardIsAdditive(&self->mRider->mRiderHandler->PlayerLights, 1);
         cRider* riderBase = (cRider*)((char*)self->mRider);
         sV3_2EADD0 sz;
         sz.x = 2.0f;

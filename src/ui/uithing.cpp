@@ -330,7 +330,7 @@ extern cUIText_cUIText_sQuad gStaticColour;
 extern "C" cUIText* cUIText_cUIText(cUIText* self)
 {
     cUIThing_cUIThing(self);
-    *(void***)((char*)self + 8) = cUIText_vtbl;
+    self->mVtbl = cUIText_vtbl;
     (*(unsigned char*)&self->mAttrText) = ((*(unsigned char*)&self->mAttrText) | 4) & 0x87;
     self->mNumLines = 0;
     (*(int*)&self->mpLineOffset) = 0;

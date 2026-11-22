@@ -1065,7 +1065,7 @@ static inline sVec6518 add6518(const sVec6518& a, const sVec6518& b)
  */
 extern "C" void cCheatFX_update(cCheatFX* self)
 {
-    char* sub = (char*)(self->mRider) + 0x6C0;
+    char* sub = (char*)&self->mRider->mVtbl;
     sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)sub;
     if (vt[9].fn(vthis(sub, vt[9])) != 0) {
         return;

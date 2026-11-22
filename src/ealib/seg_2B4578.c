@@ -13635,7 +13635,7 @@ int SNDPLATFORM_playtimbre(struct SNDIPATCHHEADER *patchHeader, int base, int id
     } else {
         for (i = 0; i < ch->numchan; i++) {
             f8158_3EE0(ch->voices[i] - (sndgs.sso.set.voicesspu + sndgs.sso.set.voicesiopcpu), patchHeader->samplerep, 1,
-                       base + patchHeader->sampleoffset[i], base + patchHeader->sampleoffset[0] + patchHeader->loopoffset[i], ((int*)&patchHeader->ptimestretchdata[0])[i], ch->numchan, *(int *)((char *)ch + 0x14),
+                       base + patchHeader->sampleoffset[i], base + patchHeader->sampleoffset[0] + patchHeader->loopoffset[i], ((int*)&patchHeader->ptimestretchdata[0])[i], ch->numchan, (int)ch->frames,
                        patchHeader->sustainstart, patchHeader->sustainend, 0, 0, patchHeader->platformver, i);
         }
         SNDPLATFORM_setpitch(ch->voices[0]);
@@ -17485,7 +17485,7 @@ void MIX_play(int voice) {
     voiceState = (SNDMIXVOICE*)((char*)sndmix.smv + voice * 0x60);
     *(int*)&voiceState->lastmixed = 0;
     sendGain = (float *)(&voiceState->wetbusgainprev[0]);
-    ((char*)voiceState)[1] = 0;
+    voiceState->gainchanged = 0;
     do {
         i -= 1;
         sendGain[0] = sendGain[1];
@@ -17500,7 +17500,7 @@ void MIX_play(int voice) {
             channelGain++;
         } while (j < sndmix.mc.outputchannels);
     }
-    ((char*)voiceState)[0] = 2;
+    voiceState->status = 2;
 }
 #endif
 

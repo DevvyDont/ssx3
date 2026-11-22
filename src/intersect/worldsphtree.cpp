@@ -538,9 +538,9 @@ struct sObj_3309D8 {
 static inline int overlapNode_3309D8(const tBoundBox* b, const tInstanceRecord* n)
 {
     int r = 0;
-    if (((float*)&b->MinPoint)[0] <= n->m_fvMax.m[0] && ((float*)&b->MaxPoint)[0] >= n->m_fvMin.m[0] &&
-        ((float*)&b->MinPoint)[1] <= n->m_fvMax.m[1] && ((float*)&b->MaxPoint)[1] >= n->m_fvMin.m[1] &&
-        ((float*)&b->MinPoint)[2] <= n->m_fvMax.m[2] && ((float*)&b->MaxPoint)[2] >= n->m_fvMin.m[2]) {
+    if (b->MinPoint.x <= n->m_fvMax.m[0] && b->MaxPoint.x >= n->m_fvMin.m[0] &&
+        b->MinPoint.y <= n->m_fvMax.m[1] && b->MaxPoint.y >= n->m_fvMin.m[1] &&
+        b->MinPoint.z <= n->m_fvMax.m[2] && b->MaxPoint.z >= n->m_fvMin.m[2]) {
         r = 1;
     }
     return r;
@@ -549,9 +549,9 @@ static inline int overlapNode_3309D8(const tBoundBox* b, const tInstanceRecord* 
 static inline int overlapBox_3309D8(const tBoundBox* b, const tBoundBox* o)
 {
     int r = 0;
-    if (((float*)&b->MinPoint)[0] <= ((float*)&o->MaxPoint)[0] && ((float*)&b->MaxPoint)[0] >= ((float*)&o->MinPoint)[0] &&
-        ((float*)&b->MinPoint)[1] <= ((float*)&o->MaxPoint)[1] && ((float*)&b->MaxPoint)[1] >= ((float*)&o->MinPoint)[1] &&
-        ((float*)&b->MinPoint)[2] <= ((float*)&o->MaxPoint)[2] && ((float*)&b->MaxPoint)[2] >= ((float*)&o->MinPoint)[2]) {
+    if (b->MinPoint.x <= o->MaxPoint.x && b->MaxPoint.x >= o->MinPoint.x &&
+        b->MinPoint.y <= o->MaxPoint.y && b->MaxPoint.y >= o->MinPoint.y &&
+        b->MinPoint.z <= o->MaxPoint.z && b->MaxPoint.z >= o->MinPoint.z) {
         r = 1;
     }
     return r;
@@ -835,9 +835,9 @@ struct sGrid_331E90 {
 static inline int overlapObj_331E90(const tBoundBox* b, const sObj_331E90* n)
 {
     int r = 0;
-    if (((float*)&b->MinPoint)[0] <= n->bmax[0] && ((float*)&b->MaxPoint)[0] >= n->bmin[0] &&
-        ((float*)&b->MinPoint)[1] <= n->bmax[1] && ((float*)&b->MaxPoint)[1] >= n->bmin[1] &&
-        ((float*)&b->MinPoint)[2] <= n->bmax[2] && ((float*)&b->MaxPoint)[2] >= n->bmin[2]) {
+    if (b->MinPoint.x <= n->bmax[0] && b->MaxPoint.x >= n->bmin[0] &&
+        b->MinPoint.y <= n->bmax[1] && b->MaxPoint.y >= n->bmin[1] &&
+        b->MinPoint.z <= n->bmax[2] && b->MaxPoint.z >= n->bmin[2]) {
         r = 1;
     }
     return r;
@@ -966,9 +966,9 @@ struct sTag_332DB8 {
 static inline int overlapObj_332DB8(const tBoundBox* b, const sObj_332DB8* n)
 {
     int r = 0;
-    if (((float*)&b->MinPoint)[0] <= n->bmax[0] && ((float*)&b->MaxPoint)[0] >= n->bmin[0] &&
-        ((float*)&b->MinPoint)[1] <= n->bmax[1] && ((float*)&b->MaxPoint)[1] >= n->bmin[1] &&
-        ((float*)&b->MinPoint)[2] <= n->bmax[2] && ((float*)&b->MaxPoint)[2] >= n->bmin[2]) {
+    if (b->MinPoint.x <= n->bmax[0] && b->MaxPoint.x >= n->bmin[0] &&
+        b->MinPoint.y <= n->bmax[1] && b->MaxPoint.y >= n->bmin[1] &&
+        b->MinPoint.z <= n->bmax[2] && b->MaxPoint.z >= n->bmin[2]) {
         r = 1;
     }
     return r;
@@ -1104,9 +1104,9 @@ extern "C" int intersect_instanceIntersect(void* q, void* node, void* buf, int c
 static inline int overlapTri_333EF8(const cWorldIntersectType* q, const tPatchRecord* n)
 {
     int r = 0;
-    if (((float*)&q->boxMax)[0] > n->m_fvMin.m[0] && ((float*)&q->boxMin)[0] < n->m_fvMax.m[0] &&
-        ((float*)&q->boxMax)[1] > n->m_fvMin.m[1] && ((float*)&q->boxMin)[1] < n->m_fvMax.m[1] &&
-        ((float*)&q->boxMax)[2] > n->m_fvMin.m[2] && ((float*)&q->boxMin)[2] < n->m_fvMax.m[2]) {
+    if (q->boxMax.x > n->m_fvMin.m[0] && q->boxMin.x < n->m_fvMax.m[0] &&
+        q->boxMax.y > n->m_fvMin.m[1] && q->boxMin.y < n->m_fvMax.m[1] &&
+        q->boxMax.z > n->m_fvMin.m[2] && q->boxMin.z < n->m_fvMax.m[2]) {
         r = 1;
     }
     return r;
@@ -1115,9 +1115,9 @@ static inline int overlapTri_333EF8(const cWorldIntersectType* q, const tPatchRe
 static inline int overlapNode_333EF8(const cWorldIntersectType* q, const tInstanceRecord* n)
 {
     int r = 0;
-    if (((float*)&q->boxMax)[0] > n->m_fvMin.m[0] && ((float*)&q->boxMin)[0] < n->m_fvMax.m[0] &&
-        ((float*)&q->boxMax)[1] > n->m_fvMin.m[1] && ((float*)&q->boxMin)[1] < n->m_fvMax.m[1] &&
-        ((float*)&q->boxMax)[2] > n->m_fvMin.m[2] && ((float*)&q->boxMin)[2] < n->m_fvMax.m[2]) {
+    if (q->boxMax.x > n->m_fvMin.m[0] && q->boxMin.x < n->m_fvMax.m[0] &&
+        q->boxMax.y > n->m_fvMin.m[1] && q->boxMin.y < n->m_fvMax.m[1] &&
+        q->boxMax.z > n->m_fvMin.m[2] && q->boxMin.z < n->m_fvMax.m[2]) {
         r = 1;
     }
     return r;
@@ -1126,9 +1126,9 @@ static inline int overlapNode_333EF8(const cWorldIntersectType* q, const tInstan
 static inline int overlapBox_333EF8(const cWorldIntersectType* q, const sBox_333EF8* o)
 {
     int r = 0;
-    if (((float*)&q->boxMax)[0] > o->min[0] && ((float*)&q->boxMin)[0] < o->max[0] &&
-        ((float*)&q->boxMax)[1] > o->min[1] && ((float*)&q->boxMin)[1] < o->max[1] &&
-        ((float*)&q->boxMax)[2] > o->min[2] && o->max[2] > ((float*)&q->boxMin)[2]) {
+    if (q->boxMax.x > o->min[0] && q->boxMin.x < o->max[0] &&
+        q->boxMax.y > o->min[1] && q->boxMin.y < o->max[1] &&
+        q->boxMax.z > o->min[2] && o->max[2] > q->boxMin.z) {
         r = 1;
     }
     return r;
@@ -1332,9 +1332,9 @@ extern "C" int intersect_instanceIntersect(void* q, void* node, void* buf, int c
 static inline int overlapNode_334458(const cWorldIntersectType* q, const tInstanceRecord* n)
 {
     int r = 0;
-    if (((float*)&q->boxMax)[0] > n->m_fvMin.m[0] && ((float*)&q->boxMin)[0] < n->m_fvMax.m[0] &&
-        ((float*)&q->boxMax)[1] > n->m_fvMin.m[1] && ((float*)&q->boxMin)[1] < n->m_fvMax.m[1] &&
-        ((float*)&q->boxMax)[2] > n->m_fvMin.m[2] && ((float*)&q->boxMin)[2] < n->m_fvMax.m[2]) {
+    if (q->boxMax.x > n->m_fvMin.m[0] && q->boxMin.x < n->m_fvMax.m[0] &&
+        q->boxMax.y > n->m_fvMin.m[1] && q->boxMin.y < n->m_fvMax.m[1] &&
+        q->boxMax.z > n->m_fvMin.m[2] && q->boxMin.z < n->m_fvMax.m[2]) {
         r = 1;
     }
     return r;
@@ -1343,9 +1343,9 @@ static inline int overlapNode_334458(const cWorldIntersectType* q, const tInstan
 static inline int overlapBox_334458(const cWorldIntersectType* q, const sBox_334458* o)
 {
     int r = 0;
-    if (((float*)&q->boxMax)[0] > o->min[0] && ((float*)&q->boxMin)[0] < o->max[0] &&
-        ((float*)&q->boxMax)[1] > o->min[1] && ((float*)&q->boxMin)[1] < o->max[1] &&
-        ((float*)&q->boxMax)[2] > o->min[2] && o->max[2] > ((float*)&q->boxMin)[2]) {
+    if (q->boxMax.x > o->min[0] && q->boxMin.x < o->max[0] &&
+        q->boxMax.y > o->min[1] && q->boxMin.y < o->max[1] &&
+        q->boxMax.z > o->min[2] && o->max[2] > q->boxMin.z) {
         r = 1;
     }
     return r;
@@ -2274,9 +2274,9 @@ extern "C" int cWorldIntersectType_IsPatchInt(void* q, void* obj, void* node, t4
 static inline int overlap_335960(const cWorldIntersectType* q, const sTriObj_335960* n)
 {
     int r = 0;
-    if (((float*)&q->boxMax)[0] > n->bmin[0] && ((float*)&q->boxMin)[0] < n->bmax[0] &&
-        ((float*)&q->boxMax)[1] > n->bmin[1] && ((float*)&q->boxMin)[1] < n->bmax[1] &&
-        ((float*)&q->boxMax)[2] > n->bmin[2] && ((float*)&q->boxMin)[2] < n->bmax[2]) {
+    if (q->boxMax.x > n->bmin[0] && q->boxMin.x < n->bmax[0] &&
+        q->boxMax.y > n->bmin[1] && q->boxMin.y < n->bmax[1] &&
+        q->boxMax.z > n->bmin[2] && q->boxMin.z < n->bmax[2]) {
         r = 1;
     }
     return r;
@@ -2354,9 +2354,9 @@ extern "C" int intersect_instanceIntersect(void* q, void* node, void* buf, int c
 static inline int overlapNode_335B90(const cWorldIntersectType* q, const tInstanceRecord* n)
 {
     int r = 0;
-    if (((float*)&q->boxMax)[0] > n->m_fvMin.m[0] && ((float*)&q->boxMin)[0] < n->m_fvMax.m[0] &&
-        ((float*)&q->boxMax)[1] > n->m_fvMin.m[1] && ((float*)&q->boxMin)[1] < n->m_fvMax.m[1] &&
-        ((float*)&q->boxMax)[2] > n->m_fvMin.m[2] && ((float*)&q->boxMin)[2] < n->m_fvMax.m[2]) {
+    if (q->boxMax.x > n->m_fvMin.m[0] && q->boxMin.x < n->m_fvMax.m[0] &&
+        q->boxMax.y > n->m_fvMin.m[1] && q->boxMin.y < n->m_fvMax.m[1] &&
+        q->boxMax.z > n->m_fvMin.m[2] && q->boxMin.z < n->m_fvMax.m[2]) {
         r = 1;
     }
     return r;
@@ -2365,9 +2365,9 @@ static inline int overlapNode_335B90(const cWorldIntersectType* q, const tInstan
 static inline int overlapBox_335B90(const cWorldIntersectType* q, const tBoundBox* o)
 {
     int r = 0;
-    if (((float*)&q->boxMax)[0] > ((float*)&o->MinPoint)[0] && ((float*)&q->boxMin)[0] < ((float*)&o->MaxPoint)[0] &&
-        ((float*)&q->boxMax)[1] > ((float*)&o->MinPoint)[1] && ((float*)&q->boxMin)[1] < ((float*)&o->MaxPoint)[1] &&
-        ((float*)&q->boxMax)[2] > ((float*)&o->MinPoint)[2] && ((float*)&q->boxMin)[2] < ((float*)&o->MaxPoint)[2]) {
+    if (q->boxMax.x > o->MinPoint.x && q->boxMin.x < o->MaxPoint.x &&
+        q->boxMax.y > o->MinPoint.y && q->boxMin.y < o->MaxPoint.y &&
+        q->boxMax.z > o->MinPoint.z && q->boxMin.z < o->MaxPoint.z) {
         r = 1;
     }
     return r;
@@ -2709,22 +2709,22 @@ extern "C" int cBXNash_getGroundHeight(cBXNash* self, float* pos, t4Vector* outP
     tr.count = 0;
     tr.ctx.pos = pos;
     sCtx_369D8* ctx = &tr.ctx;
-    nash_Octant* octant0 = &((nash_Octant*)self)[0];
-    nash_Octant* octant1 = &((nash_Octant*)self)[1];
-    nash_Octant* octant2 = &((nash_Octant*)self)[2];
-    nash_Octant* octant3 = &((nash_Octant*)self)[3];
-    nash_Octant* octant4 = &((nash_Octant*)self)[4];
-    nash_Octant* octant5 = &((nash_Octant*)self)[5];
-    nash_Octant* octant6 = &((nash_Octant*)self)[6];
-    nash_Octant* octant7 = &((nash_Octant*)self)[7];
-    if (((void*)((nash_Octant*)self)[0].rootcell)) visit_003369D8(octant0, &tr.ctx.flags[0], &terrainQuery, ctx);
-    if (((void*)((nash_Octant*)self)[1].rootcell)) visit_003369D8(octant1, &tr.ctx.flags[1], &terrainQuery, ctx);
-    if (((void*)((nash_Octant*)self)[2].rootcell)) visit_003369D8(octant2, &tr.ctx.flags[2], &terrainQuery, ctx);
-    if (((void*)((nash_Octant*)self)[3].rootcell)) visit_003369D8(octant3, &tr.ctx.flags[3], &terrainQuery, ctx);
-    if (((void*)((nash_Octant*)self)[4].rootcell)) visit_003369D8(octant4, &tr.ctx.flags[4], &terrainQuery, ctx);
-    if (((void*)((nash_Octant*)self)[5].rootcell)) visit_003369D8(octant5, &tr.ctx.flags[5], &terrainQuery, ctx);
-    if (((void*)((nash_Octant*)self)[6].rootcell)) visit_003369D8(octant6, &tr.ctx.flags[6], &terrainQuery, ctx);
-    if (((void*)((nash_Octant*)self)[7].rootcell)) visit_003369D8(octant7, &tr.ctx.flags[7], &terrainQuery, ctx);
+    nash_Octant* octant0 = &self->octant[0][0][0];
+    nash_Octant* octant1 = &self->octant[0][0][1];
+    nash_Octant* octant2 = &self->octant[0][1][0];
+    nash_Octant* octant3 = &self->octant[0][1][1];
+    nash_Octant* octant4 = &self->octant[1][0][0];
+    nash_Octant* octant5 = &self->octant[1][0][1];
+    nash_Octant* octant6 = &self->octant[1][1][0];
+    nash_Octant* octant7 = &self->octant[1][1][1];
+    if (((void*)self->octant[0][0][0].rootcell)) visit_003369D8(octant0, &tr.ctx.flags[0], &terrainQuery, ctx);
+    if (((void*)self->octant[0][0][1].rootcell)) visit_003369D8(octant1, &tr.ctx.flags[1], &terrainQuery, ctx);
+    if (((void*)self->octant[0][1][0].rootcell)) visit_003369D8(octant2, &tr.ctx.flags[2], &terrainQuery, ctx);
+    if (((void*)self->octant[0][1][1].rootcell)) visit_003369D8(octant3, &tr.ctx.flags[3], &terrainQuery, ctx);
+    if (((void*)self->octant[1][0][0].rootcell)) visit_003369D8(octant4, &tr.ctx.flags[4], &terrainQuery, ctx);
+    if (((void*)self->octant[1][0][1].rootcell)) visit_003369D8(octant5, &tr.ctx.flags[5], &terrainQuery, ctx);
+    if (((void*)self->octant[1][1][0].rootcell)) visit_003369D8(octant6, &tr.ctx.flags[6], &terrainQuery, ctx);
+    if (((void*)self->octant[1][1][1].rootcell)) visit_003369D8(octant7, &tr.ctx.flags[7], &terrainQuery, ctx);
     if (tr.count == 0) {
         return 0;
     }
@@ -2765,9 +2765,9 @@ extern "C" int intersect_instanceIntersect(void* q, void* node, void* buf, int c
 static inline int overlapNode_336D40(const cWorldIntersectType* q, const tInstanceRecord* n)
 {
     int r = 0;
-    if (((float*)&q->boxMax)[0] > n->m_fvMin.m[0] && ((float*)&q->boxMin)[0] < n->m_fvMax.m[0] &&
-        ((float*)&q->boxMax)[1] > n->m_fvMin.m[1] && ((float*)&q->boxMin)[1] < n->m_fvMax.m[1] &&
-        ((float*)&q->boxMax)[2] > n->m_fvMin.m[2] && ((float*)&q->boxMin)[2] < n->m_fvMax.m[2]) {
+    if (q->boxMax.x > n->m_fvMin.m[0] && q->boxMin.x < n->m_fvMax.m[0] &&
+        q->boxMax.y > n->m_fvMin.m[1] && q->boxMin.y < n->m_fvMax.m[1] &&
+        q->boxMax.z > n->m_fvMin.m[2] && q->boxMin.z < n->m_fvMax.m[2]) {
         r = 1;
     }
     return r;
@@ -2776,9 +2776,9 @@ static inline int overlapNode_336D40(const cWorldIntersectType* q, const tInstan
 static inline int overlapBox_336D40(const cWorldIntersectType* q, const tBoundBox* o)
 {
     int r = 0;
-    if (((float*)&q->boxMax)[0] > ((float*)&o->MinPoint)[0] && ((float*)&q->boxMin)[0] < ((float*)&o->MaxPoint)[0] &&
-        ((float*)&q->boxMax)[1] > ((float*)&o->MinPoint)[1] && ((float*)&q->boxMin)[1] < ((float*)&o->MaxPoint)[1] &&
-        ((float*)&q->boxMax)[2] > ((float*)&o->MinPoint)[2] && ((float*)&q->boxMin)[2] < ((float*)&o->MaxPoint)[2]) {
+    if (q->boxMax.x > o->MinPoint.x && q->boxMin.x < o->MaxPoint.x &&
+        q->boxMax.y > o->MinPoint.y && q->boxMin.y < o->MaxPoint.y &&
+        q->boxMax.z > o->MinPoint.z && q->boxMin.z < o->MaxPoint.z) {
         r = 1;
     }
     return r;
@@ -3184,48 +3184,48 @@ extern "C" void nash_privy_QueryHelper_helpX1(char* flag, OverlapInstancesCallba
     float x0lo = ((float)sub.x - 0.2f) * cellSize;
     float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
     int ox0 = 0;
-    if (((float*)&box->MinPoint)[0] < x0hi && x0lo < ((float*)&box->MaxPoint)[0]) ox0 = 1;
+    if (box->MinPoint.x < x0hi && x0lo < box->MaxPoint.x) ox0 = 1;
     float x1lo = ((float)(sub.x + 1) - 0.2f) * cellSize;
     float x1hi = ((float)(sub.x + 2) + 0.2f) * cellSize;
     int ox1 = 0;
-    if (((float*)&box->MinPoint)[0] < x1hi && x1lo < ((float*)&box->MaxPoint)[0]) ox1 = 1;
+    if (box->MinPoint.x < x1hi && x1lo < box->MaxPoint.x) ox1 = 1;
     if (!ox0 && !ox1) {
         return;
     }
     float y0lo = ((float)sub.y - 0.2f) * cellSize;
     float y0hi = ((float)(sub.y + 1) + 0.2f) * cellSize;
     int oy0 = 0;
-    if (((float*)&box->MinPoint)[1] < y0hi && y0lo < ((float*)&box->MaxPoint)[1]) oy0 = 1;
+    if (box->MinPoint.y < y0hi && y0lo < box->MaxPoint.y) oy0 = 1;
     float y1lo = ((float)(sub.y + 1) - 0.2f) * cellSize;
     float y1hi = ((float)(sub.y + 2) + 0.2f) * cellSize;
     int oy1 = 0;
-    if (((float*)&box->MinPoint)[1] < y1hi && y1lo < ((float*)&box->MaxPoint)[1]) oy1 = 1;
+    if (box->MinPoint.y < y1hi && y1lo < box->MaxPoint.y) oy1 = 1;
     if (!oy0 && !oy1) {
         return;
     }
     float z0lo = ((float)sub.z - 0.2f) * cellSize;
     float z0hi = ((float)(sub.z + 1) + 0.2f) * cellSize;
     int oz0 = 0;
-    if (((float*)&box->MinPoint)[2] < z0hi && z0lo < ((float*)&box->MaxPoint)[2]) oz0 = 1;
+    if (box->MinPoint.z < z0hi && z0lo < box->MaxPoint.z) oz0 = 1;
     float z1lo = ((float)(sub.z + 1) - 0.2f) * cellSize;
     float z1hi = ((float)(sub.z + 2) + 0.2f) * cellSize;
     int oz1 = 0;
-    if (((float*)&box->MinPoint)[2] < z1hi && z1lo < ((float*)&box->MaxPoint)[2]) oz1 = 1;
+    if (box->MinPoint.z < z1hi && z1lo < box->MaxPoint.z) oz1 = 1;
     if (!oz0 && !oz1) {
         return;
     }
     int cx0 = 0;
-    if (((float*)&box->MinPoint)[0] < x0lo && x0hi < ((float*)&box->MaxPoint)[0]) cx0 = 1;
+    if (box->MinPoint.x < x0lo && x0hi < box->MaxPoint.x) cx0 = 1;
     int cx1 = 0;
-    if (((float*)&box->MinPoint)[0] < x1lo && x1hi < ((float*)&box->MaxPoint)[0]) cx1 = 1;
+    if (box->MinPoint.x < x1lo && x1hi < box->MaxPoint.x) cx1 = 1;
     int cy0 = 0;
-    if (((float*)&box->MinPoint)[1] < y0lo && y0hi < ((float*)&box->MaxPoint)[1]) cy0 = 1;
+    if (box->MinPoint.y < y0lo && y0hi < box->MaxPoint.y) cy0 = 1;
     int cy1 = 0;
-    if (((float*)&box->MinPoint)[1] < y1lo && y1hi < ((float*)&box->MaxPoint)[1]) cy1 = 1;
+    if (box->MinPoint.y < y1lo && y1hi < box->MaxPoint.y) cy1 = 1;
     int cz0 = 0;
-    if (((float*)&box->MinPoint)[2] < z0lo && z0hi < ((float*)&box->MaxPoint)[2]) cz0 = 1;
+    if (box->MinPoint.z < z0lo && z0hi < box->MaxPoint.z) cz0 = 1;
     int cz1 = 0;
-    if (((float*)&box->MinPoint)[2] < z1lo && z1hi < ((float*)&box->MaxPoint)[2]) cz1 = 1;
+    if (box->MinPoint.z < z1lo && z1hi < box->MaxPoint.z) cz1 = 1;
 
     nash_Cell* subNode;
     subNode = ((nash_Cell**)&node->children[0][0][0])[0];
@@ -3322,48 +3322,48 @@ extern "C" void nash_privy_QueryHelper_helpX2(char* flag, OverlapInstancesCallba
     float x0lo = ((float)sub.x - 0.2f) * cellSize;
     float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
     int ox0 = 0;
-    if (((float*)&box->MinPoint)[0] < x0hi && x0lo < ((float*)&box->MaxPoint)[0]) ox0 = 1;
+    if (box->MinPoint.x < x0hi && x0lo < box->MaxPoint.x) ox0 = 1;
     float x1lo = ((float)(sub.x + 1) - 0.2f) * cellSize;
     float x1hi = ((float)(sub.x + 2) + 0.2f) * cellSize;
     int ox1 = 0;
-    if (((float*)&box->MinPoint)[0] < x1hi && x1lo < ((float*)&box->MaxPoint)[0]) ox1 = 1;
+    if (box->MinPoint.x < x1hi && x1lo < box->MaxPoint.x) ox1 = 1;
     if (!ox0 && !ox1) {
         return;
     }
     float y0lo = ((float)sub.y - 0.2f) * cellSize;
     float y0hi = ((float)(sub.y + 1) + 0.2f) * cellSize;
     int oy0 = 0;
-    if (((float*)&box->MinPoint)[1] < y0hi && y0lo < ((float*)&box->MaxPoint)[1]) oy0 = 1;
+    if (box->MinPoint.y < y0hi && y0lo < box->MaxPoint.y) oy0 = 1;
     float y1lo = ((float)(sub.y + 1) - 0.2f) * cellSize;
     float y1hi = ((float)(sub.y + 2) + 0.2f) * cellSize;
     int oy1 = 0;
-    if (((float*)&box->MinPoint)[1] < y1hi && y1lo < ((float*)&box->MaxPoint)[1]) oy1 = 1;
+    if (box->MinPoint.y < y1hi && y1lo < box->MaxPoint.y) oy1 = 1;
     if (!oy0 && !oy1) {
         return;
     }
     float z0lo = ((float)sub.z - 0.2f) * cellSize;
     float z0hi = ((float)(sub.z + 1) + 0.2f) * cellSize;
     int oz0 = 0;
-    if (((float*)&box->MinPoint)[2] < z0hi && z0lo < ((float*)&box->MaxPoint)[2]) oz0 = 1;
+    if (box->MinPoint.z < z0hi && z0lo < box->MaxPoint.z) oz0 = 1;
     float z1lo = ((float)(sub.z + 1) - 0.2f) * cellSize;
     float z1hi = ((float)(sub.z + 2) + 0.2f) * cellSize;
     int oz1 = 0;
-    if (((float*)&box->MinPoint)[2] < z1hi && z1lo < ((float*)&box->MaxPoint)[2]) oz1 = 1;
+    if (box->MinPoint.z < z1hi && z1lo < box->MaxPoint.z) oz1 = 1;
     if (!oz0 && !oz1) {
         return;
     }
     int cx0 = 0;
-    if (((float*)&box->MinPoint)[0] < x0lo && x0hi < ((float*)&box->MaxPoint)[0]) cx0 = 1;
+    if (box->MinPoint.x < x0lo && x0hi < box->MaxPoint.x) cx0 = 1;
     int cx1 = 0;
-    if (((float*)&box->MinPoint)[0] < x1lo && x1hi < ((float*)&box->MaxPoint)[0]) cx1 = 1;
+    if (box->MinPoint.x < x1lo && x1hi < box->MaxPoint.x) cx1 = 1;
     int cy0 = 0;
-    if (((float*)&box->MinPoint)[1] < y0lo && y0hi < ((float*)&box->MaxPoint)[1]) cy0 = 1;
+    if (box->MinPoint.y < y0lo && y0hi < box->MaxPoint.y) cy0 = 1;
     int cy1 = 0;
-    if (((float*)&box->MinPoint)[1] < y1lo && y1hi < ((float*)&box->MaxPoint)[1]) cy1 = 1;
+    if (box->MinPoint.y < y1lo && y1hi < box->MaxPoint.y) cy1 = 1;
     int cz0 = 0;
-    if (((float*)&box->MinPoint)[2] < z0lo && z0hi < ((float*)&box->MaxPoint)[2]) cz0 = 1;
+    if (box->MinPoint.z < z0lo && z0hi < box->MaxPoint.z) cz0 = 1;
     int cz1 = 0;
-    if (((float*)&box->MinPoint)[2] < z1lo && z1hi < ((float*)&box->MaxPoint)[2]) cz1 = 1;
+    if (box->MinPoint.z < z1lo && z1hi < box->MaxPoint.z) cz1 = 1;
 
     nash_Cell* subNode;
     subNode = (nash_Cell*)((void**)&node->children[0][0][0])[0];
@@ -3433,9 +3433,9 @@ struct sObj_33A3D8 {
 static inline int overlapObj_33A3D8(const tBoundBox* b, const sObj_33A3D8* n)
 {
     int r = 0;
-    if (((float*)&b->MinPoint)[0] <= n->bmax[0] && ((float*)&b->MaxPoint)[0] >= n->bmin[0] &&
-        ((float*)&b->MinPoint)[1] <= n->bmax[1] && ((float*)&b->MaxPoint)[1] >= n->bmin[1] &&
-        ((float*)&b->MinPoint)[2] <= n->bmax[2] && ((float*)&b->MaxPoint)[2] >= n->bmin[2]) {
+    if (b->MinPoint.x <= n->bmax[0] && b->MaxPoint.x >= n->bmin[0] &&
+        b->MinPoint.y <= n->bmax[1] && b->MaxPoint.y >= n->bmin[1] &&
+        b->MinPoint.z <= n->bmax[2] && b->MaxPoint.z >= n->bmin[2]) {
         r = 1;
     }
     return r;
@@ -3507,48 +3507,48 @@ extern "C" void nash_privy_QueryHelper_helpX3(char* flag, OverlapInstancesCallba
     float x0lo = ((float)sub.x - 0.2f) * cellSize;
     float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
     int ox0 = 0;
-    if (((float*)&box->MinPoint)[0] < x0hi && x0lo < ((float*)&box->MaxPoint)[0]) ox0 = 1;
+    if (box->MinPoint.x < x0hi && x0lo < box->MaxPoint.x) ox0 = 1;
     float x1lo = ((float)(sub.x + 1) - 0.2f) * cellSize;
     float x1hi = ((float)(sub.x + 2) + 0.2f) * cellSize;
     int ox1 = 0;
-    if (((float*)&box->MinPoint)[0] < x1hi && x1lo < ((float*)&box->MaxPoint)[0]) ox1 = 1;
+    if (box->MinPoint.x < x1hi && x1lo < box->MaxPoint.x) ox1 = 1;
     if (!ox0 && !ox1) {
         return;
     }
     float y0lo = ((float)sub.y - 0.2f) * cellSize;
     float y0hi = ((float)(sub.y + 1) + 0.2f) * cellSize;
     int oy0 = 0;
-    if (((float*)&box->MinPoint)[1] < y0hi && y0lo < ((float*)&box->MaxPoint)[1]) oy0 = 1;
+    if (box->MinPoint.y < y0hi && y0lo < box->MaxPoint.y) oy0 = 1;
     float y1lo = ((float)(sub.y + 1) - 0.2f) * cellSize;
     float y1hi = ((float)(sub.y + 2) + 0.2f) * cellSize;
     int oy1 = 0;
-    if (((float*)&box->MinPoint)[1] < y1hi && y1lo < ((float*)&box->MaxPoint)[1]) oy1 = 1;
+    if (box->MinPoint.y < y1hi && y1lo < box->MaxPoint.y) oy1 = 1;
     if (!oy0 && !oy1) {
         return;
     }
     float z0lo = ((float)sub.z - 0.2f) * cellSize;
     float z0hi = ((float)(sub.z + 1) + 0.2f) * cellSize;
     int oz0 = 0;
-    if (((float*)&box->MinPoint)[2] < z0hi && z0lo < ((float*)&box->MaxPoint)[2]) oz0 = 1;
+    if (box->MinPoint.z < z0hi && z0lo < box->MaxPoint.z) oz0 = 1;
     float z1lo = ((float)(sub.z + 1) - 0.2f) * cellSize;
     float z1hi = ((float)(sub.z + 2) + 0.2f) * cellSize;
     int oz1 = 0;
-    if (((float*)&box->MinPoint)[2] < z1hi && z1lo < ((float*)&box->MaxPoint)[2]) oz1 = 1;
+    if (box->MinPoint.z < z1hi && z1lo < box->MaxPoint.z) oz1 = 1;
     if (!oz0 && !oz1) {
         return;
     }
     int cx0 = 0;
-    if (((float*)&box->MinPoint)[0] < x0lo && x0hi < ((float*)&box->MaxPoint)[0]) cx0 = 1;
+    if (box->MinPoint.x < x0lo && x0hi < box->MaxPoint.x) cx0 = 1;
     int cx1 = 0;
-    if (((float*)&box->MinPoint)[0] < x1lo && x1hi < ((float*)&box->MaxPoint)[0]) cx1 = 1;
+    if (box->MinPoint.x < x1lo && x1hi < box->MaxPoint.x) cx1 = 1;
     int cy0 = 0;
-    if (((float*)&box->MinPoint)[1] < y0lo && y0hi < ((float*)&box->MaxPoint)[1]) cy0 = 1;
+    if (box->MinPoint.y < y0lo && y0hi < box->MaxPoint.y) cy0 = 1;
     int cy1 = 0;
-    if (((float*)&box->MinPoint)[1] < y1lo && y1hi < ((float*)&box->MaxPoint)[1]) cy1 = 1;
+    if (box->MinPoint.y < y1lo && y1hi < box->MaxPoint.y) cy1 = 1;
     int cz0 = 0;
-    if (((float*)&box->MinPoint)[2] < z0lo && z0hi < ((float*)&box->MaxPoint)[2]) cz0 = 1;
+    if (box->MinPoint.z < z0lo && z0hi < box->MaxPoint.z) cz0 = 1;
     int cz1 = 0;
-    if (((float*)&box->MinPoint)[2] < z1lo && z1hi < ((float*)&box->MaxPoint)[2]) cz1 = 1;
+    if (box->MinPoint.z < z1lo && z1hi < box->MaxPoint.z) cz1 = 1;
 
     nash_Cell* subNode;
     subNode = ((nash_Cell**)&node->children[0][0][0])[0];
@@ -3719,48 +3719,48 @@ extern "C" void nash_privy_QueryHelper_helpX4(char* flag, OverlapEverythingCallb
     float x0lo = ((float)sub.x - 0.2f) * cellSize;
     float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
     int ox0 = 0;
-    if (((float*)&box->MinPoint)[0] < x0hi && x0lo < ((float*)&box->MaxPoint)[0]) ox0 = 1;
+    if (box->MinPoint.x < x0hi && x0lo < box->MaxPoint.x) ox0 = 1;
     float x1lo = ((float)(sub.x + 1) - 0.2f) * cellSize;
     float x1hi = ((float)(sub.x + 2) + 0.2f) * cellSize;
     int ox1 = 0;
-    if (((float*)&box->MinPoint)[0] < x1hi && x1lo < ((float*)&box->MaxPoint)[0]) ox1 = 1;
+    if (box->MinPoint.x < x1hi && x1lo < box->MaxPoint.x) ox1 = 1;
     if (!ox0 && !ox1) {
         return;
     }
     float y0lo = ((float)sub.y - 0.2f) * cellSize;
     float y0hi = ((float)(sub.y + 1) + 0.2f) * cellSize;
     int oy0 = 0;
-    if (((float*)&box->MinPoint)[1] < y0hi && y0lo < ((float*)&box->MaxPoint)[1]) oy0 = 1;
+    if (box->MinPoint.y < y0hi && y0lo < box->MaxPoint.y) oy0 = 1;
     float y1lo = ((float)(sub.y + 1) - 0.2f) * cellSize;
     float y1hi = ((float)(sub.y + 2) + 0.2f) * cellSize;
     int oy1 = 0;
-    if (((float*)&box->MinPoint)[1] < y1hi && y1lo < ((float*)&box->MaxPoint)[1]) oy1 = 1;
+    if (box->MinPoint.y < y1hi && y1lo < box->MaxPoint.y) oy1 = 1;
     if (!oy0 && !oy1) {
         return;
     }
     float z0lo = ((float)sub.z - 0.2f) * cellSize;
     float z0hi = ((float)(sub.z + 1) + 0.2f) * cellSize;
     int oz0 = 0;
-    if (((float*)&box->MinPoint)[2] < z0hi && z0lo < ((float*)&box->MaxPoint)[2]) oz0 = 1;
+    if (box->MinPoint.z < z0hi && z0lo < box->MaxPoint.z) oz0 = 1;
     float z1lo = ((float)(sub.z + 1) - 0.2f) * cellSize;
     float z1hi = ((float)(sub.z + 2) + 0.2f) * cellSize;
     int oz1 = 0;
-    if (((float*)&box->MinPoint)[2] < z1hi && z1lo < ((float*)&box->MaxPoint)[2]) oz1 = 1;
+    if (box->MinPoint.z < z1hi && z1lo < box->MaxPoint.z) oz1 = 1;
     if (!oz0 && !oz1) {
         return;
     }
     int cx0 = 0;
-    if (((float*)&box->MinPoint)[0] < x0lo && x0hi < ((float*)&box->MaxPoint)[0]) cx0 = 1;
+    if (box->MinPoint.x < x0lo && x0hi < box->MaxPoint.x) cx0 = 1;
     int cx1 = 0;
-    if (((float*)&box->MinPoint)[0] < x1lo && x1hi < ((float*)&box->MaxPoint)[0]) cx1 = 1;
+    if (box->MinPoint.x < x1lo && x1hi < box->MaxPoint.x) cx1 = 1;
     int cy0 = 0;
-    if (((float*)&box->MinPoint)[1] < y0lo && y0hi < ((float*)&box->MaxPoint)[1]) cy0 = 1;
+    if (box->MinPoint.y < y0lo && y0hi < box->MaxPoint.y) cy0 = 1;
     int cy1 = 0;
-    if (((float*)&box->MinPoint)[1] < y1lo && y1hi < ((float*)&box->MaxPoint)[1]) cy1 = 1;
+    if (box->MinPoint.y < y1lo && y1hi < box->MaxPoint.y) cy1 = 1;
     int cz0 = 0;
-    if (((float*)&box->MinPoint)[2] < z0lo && z0hi < ((float*)&box->MaxPoint)[2]) cz0 = 1;
+    if (box->MinPoint.z < z0lo && z0hi < box->MaxPoint.z) cz0 = 1;
     int cz1 = 0;
-    if (((float*)&box->MinPoint)[2] < z1lo && z1hi < ((float*)&box->MaxPoint)[2]) cz1 = 1;
+    if (box->MinPoint.z < z1lo && z1hi < box->MaxPoint.z) cz1 = 1;
 
     nash_Cell* subNode;
     subNode = ((nash_Cell**)&node->children[0][0][0])[0];
@@ -3860,48 +3860,48 @@ extern "C" void nash_privy_QueryHelper_helpX5(char* flag, TerrainCallback* ctx, 
     float x0lo = ((float)sub.x - 0.2f) * cellSize;
     float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
     int ox0 = 0;
-    if (((float*)&box->MinPoint)[0] < x0hi && x0lo < ((float*)&box->MaxPoint)[0]) ox0 = 1;
+    if (box->MinPoint.x < x0hi && x0lo < box->MaxPoint.x) ox0 = 1;
     float x1lo = ((float)(sub.x + 1) - 0.2f) * cellSize;
     float x1hi = ((float)(sub.x + 2) + 0.2f) * cellSize;
     int ox1 = 0;
-    if (((float*)&box->MinPoint)[0] < x1hi && x1lo < ((float*)&box->MaxPoint)[0]) ox1 = 1;
+    if (box->MinPoint.x < x1hi && x1lo < box->MaxPoint.x) ox1 = 1;
     if (!ox0 && !ox1) {
         return;
     }
     float y0lo = ((float)sub.y - 0.2f) * cellSize;
     float y0hi = ((float)(sub.y + 1) + 0.2f) * cellSize;
     int oy0 = 0;
-    if (((float*)&box->MinPoint)[1] < y0hi && y0lo < ((float*)&box->MaxPoint)[1]) oy0 = 1;
+    if (box->MinPoint.y < y0hi && y0lo < box->MaxPoint.y) oy0 = 1;
     float y1lo = ((float)(sub.y + 1) - 0.2f) * cellSize;
     float y1hi = ((float)(sub.y + 2) + 0.2f) * cellSize;
     int oy1 = 0;
-    if (((float*)&box->MinPoint)[1] < y1hi && y1lo < ((float*)&box->MaxPoint)[1]) oy1 = 1;
+    if (box->MinPoint.y < y1hi && y1lo < box->MaxPoint.y) oy1 = 1;
     if (!oy0 && !oy1) {
         return;
     }
     float z0lo = ((float)sub.z - 0.2f) * cellSize;
     float z0hi = ((float)(sub.z + 1) + 0.2f) * cellSize;
     int oz0 = 0;
-    if (((float*)&box->MinPoint)[2] < z0hi && z0lo < ((float*)&box->MaxPoint)[2]) oz0 = 1;
+    if (box->MinPoint.z < z0hi && z0lo < box->MaxPoint.z) oz0 = 1;
     float z1lo = ((float)(sub.z + 1) - 0.2f) * cellSize;
     float z1hi = ((float)(sub.z + 2) + 0.2f) * cellSize;
     int oz1 = 0;
-    if (((float*)&box->MinPoint)[2] < z1hi && z1lo < ((float*)&box->MaxPoint)[2]) oz1 = 1;
+    if (box->MinPoint.z < z1hi && z1lo < box->MaxPoint.z) oz1 = 1;
     if (!oz0 && !oz1) {
         return;
     }
     int cx0 = 0;
-    if (((float*)&box->MinPoint)[0] < x0lo && x0hi < ((float*)&box->MaxPoint)[0]) cx0 = 1;
+    if (box->MinPoint.x < x0lo && x0hi < box->MaxPoint.x) cx0 = 1;
     int cx1 = 0;
-    if (((float*)&box->MinPoint)[0] < x1lo && x1hi < ((float*)&box->MaxPoint)[0]) cx1 = 1;
+    if (box->MinPoint.x < x1lo && x1hi < box->MaxPoint.x) cx1 = 1;
     int cy0 = 0;
-    if (((float*)&box->MinPoint)[1] < y0lo && y0hi < ((float*)&box->MaxPoint)[1]) cy0 = 1;
+    if (box->MinPoint.y < y0lo && y0hi < box->MaxPoint.y) cy0 = 1;
     int cy1 = 0;
-    if (((float*)&box->MinPoint)[1] < y1lo && y1hi < ((float*)&box->MaxPoint)[1]) cy1 = 1;
+    if (box->MinPoint.y < y1lo && y1hi < box->MaxPoint.y) cy1 = 1;
     int cz0 = 0;
-    if (((float*)&box->MinPoint)[2] < z0lo && z0hi < ((float*)&box->MaxPoint)[2]) cz0 = 1;
+    if (box->MinPoint.z < z0lo && z0hi < box->MaxPoint.z) cz0 = 1;
     int cz1 = 0;
-    if (((float*)&box->MinPoint)[2] < z1lo && z1hi < ((float*)&box->MaxPoint)[2]) cz1 = 1;
+    if (box->MinPoint.z < z1lo && z1hi < box->MaxPoint.z) cz1 = 1;
 
     nash_Cell* subNode;
     subNode = (nash_Cell*)((void**)&node->children[0][0][0])[0];
@@ -4169,48 +4169,48 @@ extern "C" void nash_privy_QueryHelper_helpX6(char* flag, StaticObjectCallback* 
     float x0lo = ((float)sub.x - 0.2f) * cellSize;
     float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
     int ox0 = 0;
-    if (((float*)&box->MinPoint)[0] < x0hi && x0lo < ((float*)&box->MaxPoint)[0]) ox0 = 1;
+    if (box->MinPoint.x < x0hi && x0lo < box->MaxPoint.x) ox0 = 1;
     float x1lo = ((float)(sub.x + 1) - 0.2f) * cellSize;
     float x1hi = ((float)(sub.x + 2) + 0.2f) * cellSize;
     int ox1 = 0;
-    if (((float*)&box->MinPoint)[0] < x1hi && x1lo < ((float*)&box->MaxPoint)[0]) ox1 = 1;
+    if (box->MinPoint.x < x1hi && x1lo < box->MaxPoint.x) ox1 = 1;
     if (!ox0 && !ox1) {
         return;
     }
     float y0lo = ((float)sub.y - 0.2f) * cellSize;
     float y0hi = ((float)(sub.y + 1) + 0.2f) * cellSize;
     int oy0 = 0;
-    if (((float*)&box->MinPoint)[1] < y0hi && y0lo < ((float*)&box->MaxPoint)[1]) oy0 = 1;
+    if (box->MinPoint.y < y0hi && y0lo < box->MaxPoint.y) oy0 = 1;
     float y1lo = ((float)(sub.y + 1) - 0.2f) * cellSize;
     float y1hi = ((float)(sub.y + 2) + 0.2f) * cellSize;
     int oy1 = 0;
-    if (((float*)&box->MinPoint)[1] < y1hi && y1lo < ((float*)&box->MaxPoint)[1]) oy1 = 1;
+    if (box->MinPoint.y < y1hi && y1lo < box->MaxPoint.y) oy1 = 1;
     if (!oy0 && !oy1) {
         return;
     }
     float z0lo = ((float)sub.z - 0.2f) * cellSize;
     float z0hi = ((float)(sub.z + 1) + 0.2f) * cellSize;
     int oz0 = 0;
-    if (((float*)&box->MinPoint)[2] < z0hi && z0lo < ((float*)&box->MaxPoint)[2]) oz0 = 1;
+    if (box->MinPoint.z < z0hi && z0lo < box->MaxPoint.z) oz0 = 1;
     float z1lo = ((float)(sub.z + 1) - 0.2f) * cellSize;
     float z1hi = ((float)(sub.z + 2) + 0.2f) * cellSize;
     int oz1 = 0;
-    if (((float*)&box->MinPoint)[2] < z1hi && z1lo < ((float*)&box->MaxPoint)[2]) oz1 = 1;
+    if (box->MinPoint.z < z1hi && z1lo < box->MaxPoint.z) oz1 = 1;
     if (!oz0 && !oz1) {
         return;
     }
     int cx0 = 0;
-    if (((float*)&box->MinPoint)[0] < x0lo && x0hi < ((float*)&box->MaxPoint)[0]) cx0 = 1;
+    if (box->MinPoint.x < x0lo && x0hi < box->MaxPoint.x) cx0 = 1;
     int cx1 = 0;
-    if (((float*)&box->MinPoint)[0] < x1lo && x1hi < ((float*)&box->MaxPoint)[0]) cx1 = 1;
+    if (box->MinPoint.x < x1lo && x1hi < box->MaxPoint.x) cx1 = 1;
     int cy0 = 0;
-    if (((float*)&box->MinPoint)[1] < y0lo && y0hi < ((float*)&box->MaxPoint)[1]) cy0 = 1;
+    if (box->MinPoint.y < y0lo && y0hi < box->MaxPoint.y) cy0 = 1;
     int cy1 = 0;
-    if (((float*)&box->MinPoint)[1] < y1lo && y1hi < ((float*)&box->MaxPoint)[1]) cy1 = 1;
+    if (box->MinPoint.y < y1lo && y1hi < box->MaxPoint.y) cy1 = 1;
     int cz0 = 0;
-    if (((float*)&box->MinPoint)[2] < z0lo && z0hi < ((float*)&box->MaxPoint)[2]) cz0 = 1;
+    if (box->MinPoint.z < z0lo && z0hi < box->MaxPoint.z) cz0 = 1;
     int cz1 = 0;
-    if (((float*)&box->MinPoint)[2] < z1lo && z1hi < ((float*)&box->MaxPoint)[2]) cz1 = 1;
+    if (box->MinPoint.z < z1lo && z1hi < box->MaxPoint.z) cz1 = 1;
 
     nash_Cell* subNode;
     subNode = ((nash_Cell**)&node->children[0][0][0])[0];
@@ -4351,48 +4351,48 @@ extern "C" void nash_privy_QueryHelper_helpX7(char* flag, SplineCallback* vctx, 
     float x0lo = ((float)sub.x - 0.2f) * cellSize;
     float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
     int ox0 = 0;
-    if (((float*)&box->MinPoint)[0] < x0hi && x0lo < ((float*)&box->MaxPoint)[0]) ox0 = 1;
+    if (box->MinPoint.x < x0hi && x0lo < box->MaxPoint.x) ox0 = 1;
     float x1lo = ((float)(sub.x + 1) - 0.2f) * cellSize;
     float x1hi = ((float)(sub.x + 2) + 0.2f) * cellSize;
     int ox1 = 0;
-    if (((float*)&box->MinPoint)[0] < x1hi && x1lo < ((float*)&box->MaxPoint)[0]) ox1 = 1;
+    if (box->MinPoint.x < x1hi && x1lo < box->MaxPoint.x) ox1 = 1;
     if (!ox0 && !ox1) {
         return;
     }
     float y0lo = ((float)sub.y - 0.2f) * cellSize;
     float y0hi = ((float)(sub.y + 1) + 0.2f) * cellSize;
     int oy0 = 0;
-    if (((float*)&box->MinPoint)[1] < y0hi && y0lo < ((float*)&box->MaxPoint)[1]) oy0 = 1;
+    if (box->MinPoint.y < y0hi && y0lo < box->MaxPoint.y) oy0 = 1;
     float y1lo = ((float)(sub.y + 1) - 0.2f) * cellSize;
     float y1hi = ((float)(sub.y + 2) + 0.2f) * cellSize;
     int oy1 = 0;
-    if (((float*)&box->MinPoint)[1] < y1hi && y1lo < ((float*)&box->MaxPoint)[1]) oy1 = 1;
+    if (box->MinPoint.y < y1hi && y1lo < box->MaxPoint.y) oy1 = 1;
     if (!oy0 && !oy1) {
         return;
     }
     float z0lo = ((float)sub.z - 0.2f) * cellSize;
     float z0hi = ((float)(sub.z + 1) + 0.2f) * cellSize;
     int oz0 = 0;
-    if (((float*)&box->MinPoint)[2] < z0hi && z0lo < ((float*)&box->MaxPoint)[2]) oz0 = 1;
+    if (box->MinPoint.z < z0hi && z0lo < box->MaxPoint.z) oz0 = 1;
     float z1lo = ((float)(sub.z + 1) - 0.2f) * cellSize;
     float z1hi = ((float)(sub.z + 2) + 0.2f) * cellSize;
     int oz1 = 0;
-    if (((float*)&box->MinPoint)[2] < z1hi && z1lo < ((float*)&box->MaxPoint)[2]) oz1 = 1;
+    if (box->MinPoint.z < z1hi && z1lo < box->MaxPoint.z) oz1 = 1;
     if (!oz0 && !oz1) {
         return;
     }
     int cx0 = 0;
-    if (((float*)&box->MinPoint)[0] < x0lo && x0hi < ((float*)&box->MaxPoint)[0]) cx0 = 1;
+    if (box->MinPoint.x < x0lo && x0hi < box->MaxPoint.x) cx0 = 1;
     int cx1 = 0;
-    if (((float*)&box->MinPoint)[0] < x1lo && x1hi < ((float*)&box->MaxPoint)[0]) cx1 = 1;
+    if (box->MinPoint.x < x1lo && x1hi < box->MaxPoint.x) cx1 = 1;
     int cy0 = 0;
-    if (((float*)&box->MinPoint)[1] < y0lo && y0hi < ((float*)&box->MaxPoint)[1]) cy0 = 1;
+    if (box->MinPoint.y < y0lo && y0hi < box->MaxPoint.y) cy0 = 1;
     int cy1 = 0;
-    if (((float*)&box->MinPoint)[1] < y1lo && y1hi < ((float*)&box->MaxPoint)[1]) cy1 = 1;
+    if (box->MinPoint.y < y1lo && y1hi < box->MaxPoint.y) cy1 = 1;
     int cz0 = 0;
-    if (((float*)&box->MinPoint)[2] < z0lo && z0hi < ((float*)&box->MaxPoint)[2]) cz0 = 1;
+    if (box->MinPoint.z < z0lo && z0hi < box->MaxPoint.z) cz0 = 1;
     int cz1 = 0;
-    if (((float*)&box->MinPoint)[2] < z1lo && z1hi < ((float*)&box->MaxPoint)[2]) cz1 = 1;
+    if (box->MinPoint.z < z1lo && z1hi < box->MaxPoint.z) cz1 = 1;
 
     nash_Cell* subNode;
     subNode = ((nash_Cell**)&node->children[0][0][0])[0];
@@ -4795,9 +4795,9 @@ struct sTree_340C20 {
 static inline int overlapObj_340C20(const tBoundBox* b, const sObj_340C20* n)
 {
     int r = 0;
-    if (((float*)&b->MinPoint)[0] <= n->bmax[0] && ((float*)&b->MaxPoint)[0] >= n->bmin[0] &&
-        ((float*)&b->MinPoint)[1] <= n->bmax[1] && ((float*)&b->MaxPoint)[1] >= n->bmin[1] &&
-        ((float*)&b->MinPoint)[2] <= n->bmax[2] && ((float*)&b->MaxPoint)[2] >= n->bmin[2]) {
+    if (b->MinPoint.x <= n->bmax[0] && b->MaxPoint.x >= n->bmin[0] &&
+        b->MinPoint.y <= n->bmax[1] && b->MaxPoint.y >= n->bmin[1] &&
+        b->MinPoint.z <= n->bmax[2] && b->MaxPoint.z >= n->bmin[2]) {
         r = 1;
     }
     return r;
@@ -4865,9 +4865,9 @@ static inline void add_340DC0(OverlapTypedCallback* s, void* p)
 static inline int overlap_340DC0(const tBoundBox* b, const sObjNode_340DC0* n)
 {
     int r = 0;
-    if (((float*)&b->MinPoint)[0] <= n->bmax[0] && ((float*)&b->MaxPoint)[0] >= n->bmin[0] &&
-        ((float*)&b->MinPoint)[1] <= n->bmax[1] && ((float*)&b->MaxPoint)[1] >= n->bmin[1] &&
-        ((float*)&b->MinPoint)[2] <= n->bmax[2] && ((float*)&b->MaxPoint)[2] >= n->bmin[2]) {
+    if (b->MinPoint.x <= n->bmax[0] && b->MaxPoint.x >= n->bmin[0] &&
+        b->MinPoint.y <= n->bmax[1] && b->MaxPoint.y >= n->bmin[1] &&
+        b->MinPoint.z <= n->bmax[2] && b->MaxPoint.z >= n->bmin[2]) {
         r = 1;
     }
     return r;

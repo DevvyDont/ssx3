@@ -1050,7 +1050,7 @@ extern "C" void func_0017DB18(cDebugLobbyScreen* vself)
             break;
         }
         case 12:
-            if (((int*)&self->mMenuSys)[0] == 0) {
+            if (self->mMenuSys.MenuDepth == 0) {
                 func_0025D800(LobbyMan_mLobbyMan, -1, 0);
                 self->mState = 11;
             } else {

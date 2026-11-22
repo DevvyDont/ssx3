@@ -2818,7 +2818,7 @@ static inline t4Vector qtDiv_B928(const t4Vector& v, float s)
 extern "C" void cWorldPainterMan_render1(cWorldPainterMan* ctx, cQuadTree* tree, tQuadTreeNode* node, tBxVertex* verts,
                               t4Vector* lo, t4Vector* hi)
 {
-    if (((unsigned short*)&node->m_leaf)[0] & 1) {
+    if (*(unsigned short*)&node->m_leaf.m_data & 1) {
         t4Vector mid = qtDiv_B928(qtAdd_B928(*lo, *hi), 2.0f);
         t4Vector leftEdgeMid;
         leftEdgeMid.x = lo->x;
@@ -2840,9 +2840,9 @@ extern "C" void cWorldPainterMan_render1(cWorldPainterMan* ctx, cQuadTree* tree,
         topEdgeMid.y = hi->y;
         topEdgeMid.z = 0.0f;
         topEdgeMid.w = 1.0f;
-        cWorldPainterMan_render1(ctx, tree, (tree->m_nodes) + (((unsigned short*)&node->m_leaf)[0] >> 1), verts, lo, &mid);
+        cWorldPainterMan_render1(ctx, tree, (tree->m_nodes) + (*(unsigned short*)&node->m_leaf.m_data >> 1), verts, lo, &mid);
         cWorldPainterMan_render1(ctx, tree, (tree->m_nodes) + (((unsigned short*)&node->m_leaf)[1] >> 1), verts, &leftEdgeMid, &topEdgeMid);
-        cWorldPainterMan_render1(ctx, tree, (tree->m_nodes) + (((unsigned short*)&node->m_leaf)[2] >> 1), verts, &bottomEdgeMid, &rightEdgeMid);
+        cWorldPainterMan_render1(ctx, tree, (tree->m_nodes) + (*(unsigned short*)&node->m_leaf.m_key >> 1), verts, &bottomEdgeMid, &rightEdgeMid);
         cWorldPainterMan_render1(ctx, tree, (tree->m_nodes) + (((unsigned short*)&node->m_leaf)[3] >> 1), verts, &mid, hi);
     } else {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;

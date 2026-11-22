@@ -4744,10 +4744,10 @@ extern "C" void cPlayerIndicatorFX_update(cPlayerIndicatorFX* self)
     self->PulseAng = wrapped;
     float blend = fCos(wrapped) * half + half;
     float invBlend = 1.0f - blend;
-    ((float*)&self->CurColor)[0] = blend * ((float*)&self->MinColor)[0] + invBlend * ((float*)&self->MaxColor)[0];
-    ((float*)&self->CurColor)[1] = blend * ((float*)&self->MinColor)[1] + invBlend * ((float*)&self->MaxColor)[1];
-    ((float*)&self->CurColor)[2] = blend * ((float*)&self->MinColor)[2] + invBlend * ((float*)&self->MaxColor)[2];
-    ((float*)&self->CurColor)[3] = blend * ((float*)&self->MinColor)[3] + invBlend * ((float*)&self->MaxColor)[3];
+    self->CurColor.A = blend * self->MinColor.A + invBlend * self->MaxColor.A;
+    self->CurColor.R = blend * self->MinColor.R + invBlend * self->MaxColor.R;
+    self->CurColor.G = blend * self->MinColor.G + invBlend * self->MaxColor.G;
+    self->CurColor.B = blend * self->MinColor.B + invBlend * self->MaxColor.B;
 }
 #endif
 

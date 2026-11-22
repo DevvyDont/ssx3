@@ -4529,7 +4529,7 @@ extern "C" int cScriptDatabaseObject_RemoveEntity(cScriptDatabaseObject* self, v
     if (record->relation == 1) {
         cScriptEntity_DetachEntity(msg);
     }
-    ((int*)record->pEntity)[1] = -1;
+    record->pEntity->mDBID = -1;
     record->objID = -1;
     (*(int**)&record->pEntity) = 0;
     record->playerID = -1;

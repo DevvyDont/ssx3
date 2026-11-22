@@ -1085,14 +1085,14 @@ extern "C" cFenceNode_C8E8* cFenceNode_cFenceNode1(cFenceNode* self, int bucket,
 {
     float force;
     cInstanceNode_cInstanceNode1(((cFenceNode_C8E8*)self), bucket, 9, pInst);
-    ((unsigned int*)&self->FenceData)[0] = 0xFFFFFFFF;
+    self->FenceData.InstId = 0xFFFFFFFF;
     self->mVtbl = cFenceNode_vtbl;
     new (((t3Vector_C8E8*)&self->Verts[0])) t3Vector_C8E8[16];
     *(tMakeFenceData_C8E8*)&self->FenceData = *tdata;
     *(int*)&self->ForceMax = 0;
     *(int*)&self->Force = 0;
     *(int*)&self->ForceStep = 0;
-    ((unsigned int*)&self->FenceData)[0] = 0xFFFFFFFF;
+    self->FenceData.InstId = 0xFFFFFFFF;
     cFenceNode_setupFence(self);
     self->NextPropTime = 0;
     self->PrevPropTime = 0;

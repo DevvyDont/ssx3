@@ -1195,7 +1195,7 @@ extern "C" void* cDynamicMemMan_dlrealloc(cDynamicMemMan* ms, void* oldmem, unsi
                 }
             }
             cDynamicMemMan_dlfree_E2D8(ms, oldmem);
-            return (char*)newp + 8;
+            return (char*)&newp->fd;
         }
     }
 
@@ -1209,9 +1209,9 @@ split:
         newp->size = (newp->size & 1) | nb;
         remainder->size = remainder_size | 1;
         ((malloc_chunk*)((char*)remainder + remainder_size))->size |= 1;
-        cDynamicMemMan_dlfree_E2D8(ms, (char*)remainder + 8);
+        cDynamicMemMan_dlfree_E2D8(ms, &remainder->fd);
     }
-    return (char*)newp + 8;
+    return (char*)&newp->fd;
 
 nomem:
     *__errno() = 12;

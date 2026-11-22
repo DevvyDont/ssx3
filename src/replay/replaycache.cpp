@@ -1505,7 +1505,7 @@ extern "C" void cReplay_writeInput(cReplay* self)
             (*(int**)&self->WriteCacheSave) = ((int*)self->WriteTmp);
             self->WriteCmdFrameSize = 0x8000;
             *((int*)self->WriteTmp) = 0x11111112;
-            ((int*)self->WriteCacheSave)[1] = inputCache->RecordCursor;
+            self->WriteCacheSave->RecordCursor = inputCache->RecordCursor;
             self->WriteIndex++;
         } else {
             self->WriteIndex = cur + 1;
@@ -2403,7 +2403,7 @@ extern "C" int cScriptPlayerChannelSpline_Update(cScriptPlayerChannelSpline* sel
         *(char**)&self->mpCurrKeyCustom = 0;
         (*(int*)&self->mCurrKeyIndex)++;
         if (*(unsigned short*)n >= 21) *(char**)&self->mpCurrKeyCustom = ((char*)n) + 0x14;
-        if (((int)self->mCurrKeyIndex) == ((unsigned int*)self->mpHeader)[0] - 1) {
+        if (((int)self->mCurrKeyIndex) == self->mpHeader->numKeys - 1) {
             *(char**)&self->mpNextKey = 0;
             self->mCurrKeyValue = GetCubicSplineValue((float*)(&self->mpCurrKey->splineCoef[0]), 0.0f);
             return 0;
@@ -3428,7 +3428,7 @@ extern "C" int cScriptPlayerChannelObject_Play(cScriptPlayerChannelObject* self,
     if (data[0] != 0) {
         cInSeq* heap = owner->mpOwner->mpManager;
         self->mpObjectArray = (tObjectEntry*)cScriptHeap_AllocMem(&heap->mHeap, data[1] * 36);
-        for (int i = 0; i < ((unsigned short*)self->mpHeader)[1]; i++) {
+        for (int i = 0; i < self->mpHeader->numTracks; i++) {
         }
         self->mNextKeyIndex = 0;
         char* base = (char*)self->mpHeader;
@@ -4066,7 +4066,7 @@ extern "C" int cScriptPlayerEntity_Restart(cScriptPlayerEntity* self)
             channelData += *(unsigned short*)(rec + 2);
             changed = ch;
             mask |= channelEvents;
-        } while (i < ((unsigned char*)self->mpSystemHeader)[2]);
+        } while (i < self->mpSystemHeader->numChannels);
     }
     cRcListener3D20* entityComm = (cRcListener3D20*)self->mpEntityComm;
     if (entityComm == 0)
@@ -5341,7 +5341,7 @@ extern "C" int cScriptPlayerMain_DoUpdate(cScriptPlayerMain* self, float time, f
             jump = pi != ti;
         }
     }
-    for (int i = 0; i < ((unsigned char*)self->mpSystemHeader)[1]; i++) {
+    for (int i = 0; i < self->mpSystemHeader->numEntities; i++) {
         int anyChanged = 0;
         if (cScriptPlayerEntity_Update(&self->mpEntityPlayers[i], prev, self->mCurrFrame, speed, jump) != 0 || changed != 0) {
             anyChanged = 1;

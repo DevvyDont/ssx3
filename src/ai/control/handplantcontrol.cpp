@@ -8355,8 +8355,8 @@ extern "C" void func_00144368(FocusCallback* self, nash_Cell* node, nash_CellKey
         // PORT: pointer arithmetic through int
         tBoundBox* box = (tBoundBox*)((i << 5) + (int)((tBoundBox*)self->boxes));
         ok = 0;
-        if (((float)key->x - 0.2f) * cellSize <= ((float*)&box->MaxPoint)[0] && ((float)key->y - 0.2f) * cellSize <= ((float*)&box->MaxPoint)[1] && ((float)key->z - 0.2f) * cellSize <= ((float*)&box->MaxPoint)[2]
-            && ((float*)&box->MinPoint)[0] <= ((float)(key->x + 1) + 0.2f) * cellSize && ((float*)&box->MinPoint)[1] <= ((float)(key->y + 1) + 0.2f) * cellSize && ((float*)&box->MinPoint)[2] <= ((float)(key->z + 1) + 0.2f) * cellSize) {
+        if (((float)key->x - 0.2f) * cellSize <= box->MaxPoint.x && ((float)key->y - 0.2f) * cellSize <= box->MaxPoint.y && ((float)key->z - 0.2f) * cellSize <= box->MaxPoint.z
+            && box->MinPoint.x <= ((float)(key->x + 1) + 0.2f) * cellSize && box->MinPoint.y <= ((float)(key->y + 1) + 0.2f) * cellSize && box->MinPoint.z <= ((float)(key->z + 1) + 0.2f) * cellSize) {
             ok = 1;
         }
         i++;

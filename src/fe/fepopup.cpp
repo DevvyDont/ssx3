@@ -5568,7 +5568,7 @@ extern "C" int cKeyboardPopup_onGainTransition(cKeyboardPopup* self, int first)
         }
         self->mbShiftOn = 0;
         if (self->mbSetInputText == 0) {
-            ((char*)self)[0x74] = 0;
+            self->mszEditString[0] = 0;
         }
         self->miViewableStartIndex = 0;
         self->miViewableEndIndex = 0;

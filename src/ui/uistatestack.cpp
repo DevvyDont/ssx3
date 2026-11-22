@@ -722,10 +722,10 @@ extern "C" cUIThing* cUIThing_cUIThing(cUIThing* self, int pScreen, int pParent)
     self->mpAnim = 0;
     *(char*)&self->mAnimPlaybackStatus = 0;
     self->mMiscData = 0;
-    ((float*)&self->mColour)[0] = 1.0f;
-    ((float*)&self->mColour)[1] = 1.0f;
-    ((float*)&self->mColour)[2] = 1.0f;
-    ((float*)&self->mColour)[3] = 1.0f;
+    self->mColour.A = 1.0f;
+    self->mColour.R = 1.0f;
+    self->mColour.G = 1.0f;
+    self->mColour.B = 1.0f;
     (*(cUIThing_cUIThing_sVec3*)&self->mAngle) = t3vect_Zero;
     self->mpParent = (cUIThing*)pParent;
     self->mHashName = 0;

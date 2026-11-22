@@ -5062,8 +5062,8 @@ extern "C" void* cMCOverlayManager_cMCOverlayManager(cMCOverlayManager* self)
     w[72] = 0;
     w[73] = 0;
     w[74] = 1;
-    ((float*)self)[0x44] = 1.0f;
-    ((float*)self)[0x45] = 0.016669999808073044f;
+    self->mFlash = 1.0f;
+    self->mFlashStep = 0.016669999808073044f;
     MEM_fill(dev, 0, 0xE0);
     w[273] = -1;
     w[266] = 0;

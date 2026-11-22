@@ -152,20 +152,20 @@ extern "C" void* cBoardSparkFX_cBoardSparkFX(cBoardSparkFX* self, int inChrg)
         (*(char**)&self->mRider) = (char*)self + 0xB0;
         cRider_cRider((char*)self + 0xB0);
     }
-    *(const void**)(((char*)self->mRider) + 0x6E8) = &D_00488CB0;
-    *(void**)(((char*)self->mRider) + 0x6D0) = D_00459B90;
-    *(const void**)(((char*)self->mRider) + 0x6C0) = &D_00488CF8;
+    self->mRider->mScriptObjectVtbl = (void*)(&D_00488CB0);
+    self->mRider->mScriptObjRiderVtbl = D_00459B90;
+    self->mRider->mVtbl = (void*)(&D_00488CF8);
     if (inChrg == 0) {
         int vc;
         vtbl1 = D_00488CB0;
-        *(void**)(((char*)self->mRider) + 0x6E8) = &vtbl1;
+        self->mRider->mScriptObjectVtbl = &vtbl1;
         {
             char* vbo = ((char*)self->mRider) - 0xB0;
             vc = (char*)self - vbo;
         }
         vtbl1.e[1].delta = D_00488CB0.e[1].delta + vc;
         vtbl2 = D_00488CF8;
-        *(void**)(((char*)self->mRider) + 0x6C0) = &vtbl2;
+        self->mRider->mVtbl = &vtbl2;
         vtbl2.e[1].delta = D_00488CF8.e[1].delta + vc;
     }
     new ((char*)self + 0x2C) sBsElem[3];

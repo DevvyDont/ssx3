@@ -588,7 +588,7 @@ extern "C" void* cFECustom_getPrevState(void** self, cUIState* desc, int stateDa
         case 0:
             return cFEStateMainMenu_cFEStateMainMenu1(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), *self);
         case 2:
-            if (((char*)desc)[0x44] == 1) {
+            if (*(char*)&desc->mUserNum == 1) {
                 return cFEStateCharSetup_cFEStateCharSetup(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, 0);
             }
             return cFEStateMainMenu_cFEStateMainMenu1(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), *self);
@@ -602,15 +602,15 @@ extern "C" void* cFECustom_getPrevState(void** self, cUIState* desc, int stateDa
         if (gInLodge != 0) {
             return cFEStateLodge_cFEStateLodge(cMemMan_alloc(88, str_cFEStateLodge, 0, 0), *self);
         }
-        return cFEStateCharSetup_cFEStateCharSetup(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, ((char*)desc)[0x44]);
+        return cFEStateCharSetup_cFEStateCharSetup(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, *(char*)&desc->mUserNum);
     case 15:
     case 18:
         if (gInLodge != 0) {
             return cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail(cMemMan_alloc(76, str_cFEStateLodgeRiderDetail, 0, 0), *self);
         }
-        return cFEStateRiderDetail_cFEStateRiderDetail(cMemMan_alloc(84, str_cFEStateRiderDetail, 0, 0), *self, ((char*)desc)[0x44]);
+        return cFEStateRiderDetail_cFEStateRiderDetail(cMemMan_alloc(84, str_cFEStateRiderDetail, 0, 0), *self, *(char*)&desc->mUserNum);
     case 17:
-        return cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, str_cFEStateAudioOptions, 0, 0), *self, ((char*)desc)[0x44], gInLodge);
+        return cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, str_cFEStateAudioOptions, 0, 0), *self, *(char*)&desc->mUserNum, gInLodge);
     case 19:
         cBE_getInterface_Fv(cBE_getBE(), 0);
         switch (cBENewRaceInterface_newRace.cGamePath) {
@@ -633,7 +633,7 @@ extern "C" void* cFECustom_getPrevState(void** self, cUIState* desc, int stateDa
         cUITemplate_MAP_mMapStyle = 0;
         return cFEStateEventSelect_cFEStateEventSelect1(cMemMan_alloc(828, str_cFEStateEventSelect, 0, 0), *self, 0);
     case 12:
-        return cFEStateCharSelect_cFEStateCharSelect(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, ((char*)desc)[0x44]);
+        return cFEStateCharSelect_cFEStateCharSelect(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, *(char*)&desc->mUserNum);
     case 8: {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         int gamePath = cBENewRaceInterface_newRace.cGamePath;
@@ -654,7 +654,7 @@ extern "C" void* cFECustom_getPrevState(void** self, cUIState* desc, int stateDa
         if (sc == 24) {
             return cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad1(cMemMan_alloc(76, str_cFEStateOptionsSaveLoad, 0, 0), *self);
         } else if (sc == 9) {
-            return cFEStateCharSelect_cFEStateCharSelect(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, ((char*)desc)[0x44]);
+            return cFEStateCharSelect_cFEStateCharSelect(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, *(char*)&desc->mUserNum);
         } else if (sc == 39) {
             return cFEStateLodge_cFEStateLodge(cMemMan_alloc(88, str_cFEStateLodge, 0, 0), *self);
         }
@@ -696,20 +696,20 @@ extern "C" void* cFECustom_getPrevState(void** self, cUIState* desc, int stateDa
         if (gInLodge != 0) {
             return cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail(cMemMan_alloc(76, str_cFEStateLodgeRiderDetail, 0, 0), *self);
         }
-        return cFEStateCharSetup_cFEStateCharSetup(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, ((char*)desc)[0x44]);
+        return cFEStateCharSetup_cFEStateCharSetup(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, *(char*)&desc->mUserNum);
     case 42:
         return cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail(cMemMan_alloc(76, str_cFEStateLodgeRiderDetail, 0, 0), *self);
     case 46:
         if (gInLodge != 0) {
             return cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail(cMemMan_alloc(76, str_cFEStateLodgeRiderDetail, 0, 0), *self);
         }
-        return cFEStateRiderDetail_cFEStateRiderDetail(cMemMan_alloc(84, str_cFEStateRiderDetail, 0, 0), *self, ((char*)desc)[0x44]);
+        return cFEStateRiderDetail_cFEStateRiderDetail(cMemMan_alloc(84, str_cFEStateRiderDetail, 0, 0), *self, *(char*)&desc->mUserNum);
     case 44:
-        return cFEStateMountainRoom_cFEStateMountainRoom(cMemMan_alloc(200, str_cFEStateMountainRoom, 0, 0), *self, ((char*)desc)[0x44]);
+        return cFEStateMountainRoom_cFEStateMountainRoom(cMemMan_alloc(200, str_cFEStateMountainRoom, 0, 0), *self, *(char*)&desc->mUserNum);
     case 45:
-        return cFEStatePeakRoom_cFEStatePeakRoom(cMemMan_alloc(228, str_cFEStatePeakRoom, 0, 0), *self, ((char*)desc)[0x44], stateData);
+        return cFEStatePeakRoom_cFEStatePeakRoom(cMemMan_alloc(228, str_cFEStatePeakRoom, 0, 0), *self, *(char*)&desc->mUserNum, stateData);
     case 47:
-        return cFEStateRewardsRoom_cFEStateRewardsRoom(cMemMan_alloc(80, str_cFEStateRewardsRoom, 0, 0), *self, ((char*)desc)[0x44], stateData != 0);
+        return cFEStateRewardsRoom_cFEStateRewardsRoom(cMemMan_alloc(80, str_cFEStateRewardsRoom, 0, 0), *self, *(char*)&desc->mUserNum, stateData != 0);
     }
     return 0;
 }
@@ -975,7 +975,7 @@ extern "C" void cRealFE_load(cRealFE* self)
     progress_1E80(99.0f);
     cFEInput* in = (cFEInput*)cMemMan_alloc(0x1C, str_FEUIInput, 0, 0);
     sUI_1E80* ui2 = ((sUI_1E80*)self->mpUI);
-    ((char*)in)[4] = 0;
+    in->mPadNum = 0;
     in->mVtbl = cFEInput_vtbl;
     in->mpInput = 0;
     in->mbKeyReady = 0;

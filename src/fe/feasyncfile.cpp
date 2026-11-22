@@ -11811,7 +11811,7 @@ extern "C" void cFEStateChatRoom_onCreateScreen(cFEStateChatRoom* self)
     {
         cUIScrollBar* slider2 = self->mpSlider2;
         if ((unsigned int)strlen(str_hlu2) > 24) {
-            ((char*)slider2)[0x8C] = 0;
+            slider2->mszUpAnimation[0] = 0;
         } else {
             strcpy(slider2->mszUpAnimation, str_hlu2);
         }
@@ -11819,7 +11819,7 @@ extern "C" void cFEStateChatRoom_onCreateScreen(cFEStateChatRoom* self)
     {
         cUIScrollBar* slider2 = self->mpSlider2;
         if ((unsigned int)strlen(str_hld2) > 24) {
-            ((char*)slider2)[0xA5] = 0;
+            slider2->mszDownAnimation[0] = 0;
         } else {
             strcpy(slider2->mszDownAnimation, str_hld2);
         }
@@ -17773,7 +17773,7 @@ extern "C" void func_001B91C8(cFEStateCreateStep1* self, void* popup, int kind)
     case 15: {
         cFEStateNet_onPopupEvent(self, popup, 15);
         void* accountMem = cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(2832, str_cFEStateNetAccountMem, 0, 0), (int)self->mpEngine, self, 1,
-                                ((int*)self->mpAccount)[0], ((int*)self->mpAccount)[1]);
+                                (int)self->mpAccount->mName, (int)self->mpAccount->mPassword);
         *(int*)((char*)accountMem + 0x18) = 2092;
         cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, accountMem);
         break;
@@ -17995,7 +17995,7 @@ extern "C" void func_001B9610(cFEStateCreateStep1* self)
 {
     cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterPassword));
     if (text != 0) {
-        func_001A98B8((cFEStateNet*)self, ((const char**)self->mpAccount)[1]);
+        func_001A98B8((cFEStateNet*)self, (const char*)self->mpAccount->mPassword);
         cUIText_setAsciiString(text, (char*)&self->mszMaskedText);
     }
 }
@@ -18018,7 +18018,7 @@ extern "C" void func_001B9678(cFEStateCreateStep1* self)
 {
     cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterConfirmPassword));
     if (text != 0) {
-        func_001A98B8((cFEStateNet*)self, ((const char**)self->mpAccount)[2]);
+        func_001A98B8((cFEStateNet*)self, (const char*)self->mpAccount->unk_08);
         cUIText_setAsciiString(text, (char*)&self->mszMaskedText);
     }
 }
@@ -18040,7 +18040,7 @@ extern "C" void func_001B96E0(cFEStateCreateStep1* self)
 {
     cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterEmail));
     if (text != 0) {
-        char* email = ((char**)self->mpAccount)[3];
+        char* email = self->mpAccount->mMail;
         if (*(int*)(email - 8) != 0) {
             func_001B9950(self, text, email);
         }
@@ -19270,7 +19270,7 @@ extern "C" void func_001BAED8(cFEStateCreateStep2* self, void* popup, int event)
             nextPopup->info.miMiscData = 2062;
             func_001A9BC0((cFEStateNet*)self, (cScreenPopup*)nextPopup);
             cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, *(char**)self->mpAccount);
-            cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, ((char**)self->mpAccount)[1]);
+            cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, self->mpAccount->mPassword);
             func_0025C610(LobbyMan_mLobbyMan);
         }
         self->unk_6D8 = 0;
@@ -20662,7 +20662,7 @@ extern "C" void func_001BC990(cFEStateCreateDuplicate* self, void* popup, int ev
             newPopup->info.miMiscData = 2062;
             func_001A9BC0((cFEStateNet*)self, (cScreenPopup*)newPopup);
             cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, *(char**)self->mpAccount);
-            cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, ((char**)self->mpAccount)[1]);
+            cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, self->mpAccount->mPassword);
             func_0025C610(LobbyMan_mLobbyMan);
         }
         self->mbAskSave = 0;

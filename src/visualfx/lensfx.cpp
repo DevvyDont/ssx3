@@ -1289,7 +1289,7 @@ extern "C" float cRenderStateMan_SnowIntensity(int i)
     if (cRenderStateMan_m_indoor == 0) {
         tRenderState* renderState = &cRenderStateMan_m_state[i];
         sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
-        return *obj->vt[43].fn(vthis(obj, obj->vt[43])) * (1.0f - *(float*)((char*)renderState + 0x24));
+        return *obj->vt[43].fn(vthis(obj, obj->vt[43])) * (1.0f - renderState->m_inTunnel);
     }
     return 0.0f;
 }
@@ -1336,7 +1336,7 @@ extern "C" float cRenderStateMan_WindIntensity(int i)
 {
     tRenderState* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
-    return *obj->vt[45].fn(vthis(obj, obj->vt[45])) * (1.0f - *(float*)((char*)renderState + 0x24));
+    return *obj->vt[45].fn(vthis(obj, obj->vt[45])) * (1.0f - renderState->m_inTunnel);
 }
 #endif
 

@@ -151,7 +151,7 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(cFEStateBraggingRights* se
             cUIText_setUnicodeStringByID(txt, GetHashValue32(D_00441108[((signed char*)self->mpGameEventMapping)[row]]));
         for (int playerIndex = 0; playerIndex < 2; playerIndex++) {
             unsigned char out = 0;
-            void* lb = ((void**)&((cBraggingRightsMenu*)((char*)self + 0x6D0))[playerIndex].mpListBox[0])[row];
+            void* lb = ((void**)&((cBraggingRightsMenu*)(&self->mMenuCtrl[0]))[playerIndex].mpListBox[0])[row];
             switch (((signed char*)self->mpGameEventMapping)[row]) {
             case 1:
             case 2:

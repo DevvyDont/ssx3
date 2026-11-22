@@ -305,10 +305,10 @@ void func_003F0568(BuddyApiRefT* buddyRef) {
         cDirtysock_tag_TagFieldSetFourCC(buddyRef->mStatText, 0x100, D_004A4B18, buddyRef->mProductKey);
     }
     cDirtysock_tag_TagFieldDupl(buf, 0x200, buddyRef->mPresence);
-    if (((char*)buddyRef)[0x140]) {
+    if (buddyRef->mStatText[0]) {
         cDirtysock_tag_TagFieldSetString(buf, 0x200, str_STAT_b, buddyRef->mStatText);
     }
-    if (((char*)buddyRef)[0x40]) {
+    if (buddyRef->mProdText[0]) {
         cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PROD_b, buddyRef->mProdText);
     }
     func_003F00D8((int*)buddyRef, 0x50534554, (int)buf);
@@ -638,7 +638,7 @@ int func_003F0B50(struct BuddyApiRefT* buddyRef) {
     }
     func_003F00D8_0B50((int*)buddyRef, 0x44495343, (int)D_004A4AE8);
     func_003F5738(((int)buddyRef->mpSession));
-    if (((int*)buddyRef)[2] == 5) {
+    if (buddyRef->mState == 5) {
         func_003F0610_0B50((int*)buddyRef, 6);
     }
     func_003F0610_0B50((int*)buddyRef, 0);

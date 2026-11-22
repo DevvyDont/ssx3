@@ -514,9 +514,9 @@ extern "C" void bxSphereTree_Draw(bxSphereTree* octree) {
 
     temp_4 = (tSphTreeInfo*)((void*)octree->treeInfo);
     if ((temp_4->isCompressed) != 0) {
-        (*(int *)((char*)((octree->treeInfo)) + (0x28))) = SphereTree_AllocBuf(temp_4);
+        (octree->treeInfo->bitTree) = (unsigned char*)SphereTree_AllocBuf(temp_4);
     }
-    bxSphereTree_drawLeaves(octree, (*(int *)((char*)((octree->treeInfo)) + (0xC))), (char*)octree + 0x80, 0, 0);
+    bxSphereTree_drawLeaves(octree, (octree->treeInfo->depth), &octree->transCenter, 0, 0);
 }
 #endif
 //100%

@@ -200,8 +200,8 @@ extern "C" void cPlaybackMan_initLocation(cPlaybackMan* self, const char* name)
     self->AsyncFileNum = -1;
     self->AsyncHandle = -1;
     (*(void**)&self->SaveFrameData) = operator_new_tag(0x14000, str_SaveFrameData, 0, 0);
-    cReplayFrame_clearFrame((cReplayFrame*)((char*)self + 0x14));
-    cReplayFramePtr_setBlock((char*)self + 0x14, ((void*)self->SaveFrameData), 0);
+    cReplayFrame_clearFrame((cReplayFrame*)(&self->SaveFramePtr));
+    cReplayFramePtr_setBlock(&self->SaveFramePtr, ((void*)self->SaveFrameData), 0);
     unsigned int* hdr = (unsigned int*)cMemMan_alloc(0x1C22C, str_CurrentFrame, 0, 0);
     (*(unsigned int**)&self->CurrentFrame) = hdr;
     MEM_fill(hdr, 0, 0x1C22C);

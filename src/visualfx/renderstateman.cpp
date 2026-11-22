@@ -348,7 +348,7 @@ extern "C" float cRenderStateMan_ScreenTintScaleR(int i)
 {
     if (cRenderStateMan_m_indoor == 0) {
         tRenderState* renderState = &cRenderStateMan_m_state[i];
-        sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
+        sRSMObj* stateQuery = *(sRSMObj**)renderState->m_query[3];
         sRSMVEntry* vt = stateQuery->vt;
         return *vt[20].fn(vthis(stateQuery, vt[20]));
     }
@@ -376,7 +376,7 @@ extern "C" float cRenderStateMan_ScreenTintScaleG(int i)
 {
     if (cRenderStateMan_m_indoor == 0) {
         tRenderState* renderState = &cRenderStateMan_m_state[i];
-        sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
+        sRSMObj* stateQuery = *(sRSMObj**)renderState->m_query[3];
         sRSMVEntry* vt = stateQuery->vt;
         return *vt[21].fn(vthis(stateQuery, vt[21]));
     }
@@ -404,7 +404,7 @@ extern "C" float cRenderStateMan_ScreenTintScaleB(int i)
 {
     if (cRenderStateMan_m_indoor == 0) {
         tRenderState* renderState = &cRenderStateMan_m_state[i];
-        sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
+        sRSMObj* stateQuery = *(sRSMObj**)renderState->m_query[3];
         sRSMVEntry* vt = stateQuery->vt;
         return *vt[22].fn(vthis(stateQuery, vt[22]));
     }
@@ -432,7 +432,7 @@ extern "C" float cRenderStateMan_ScreenTintOffsetR(int i)
 {
     if (cRenderStateMan_m_indoor == 0) {
         tRenderState* renderState = &cRenderStateMan_m_state[i];
-        sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
+        sRSMObj* stateQuery = *(sRSMObj**)renderState->m_query[3];
         sRSMVEntry* vt = stateQuery->vt;
         return *vt[23].fn(vthis(stateQuery, vt[23]));
     }
@@ -460,7 +460,7 @@ extern "C" float cRenderStateMan_ScreenTintOffsetG(int i)
 {
     if (cRenderStateMan_m_indoor == 0) {
         tRenderState* renderState = &cRenderStateMan_m_state[i];
-        sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
+        sRSMObj* stateQuery = *(sRSMObj**)renderState->m_query[3];
         sRSMVEntry* vt = stateQuery->vt;
         return *vt[24].fn(vthis(stateQuery, vt[24]));
     }
@@ -488,7 +488,7 @@ extern "C" float cRenderStateMan_ScreenTintOffsetB(int i)
 {
     if (cRenderStateMan_m_indoor == 0) {
         tRenderState* renderState = &cRenderStateMan_m_state[i];
-        sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
+        sRSMObj* stateQuery = *(sRSMObj**)renderState->m_query[3];
         sRSMVEntry* vt = stateQuery->vt;
         return *vt[25].fn(vthis(stateQuery, vt[25]));
     }
@@ -729,9 +729,9 @@ extern tRenderState cRenderStateMan_m_state[];
 extern "C" float cRenderStateMan_SnowSparkleDensity(int i)
 {
     tRenderState* entry = &cRenderStateMan_m_state[i];
-    sRSMObj* object = **(sRSMObj***)((char*)entry + 0x18);
+    sRSMObj* object = *(sRSMObj**)entry->m_query[6];
     sRSMVEntry* vt = object->vt;
-    return *vt[36].fn(vthis(object, vt[36])) * (1.0f - *(float*)((char*)entry + 0x24));
+    return *vt[36].fn(vthis(object, vt[36])) * (1.0f - entry->m_inTunnel);
 }
 #endif
 

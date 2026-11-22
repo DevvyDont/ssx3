@@ -8802,7 +8802,7 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
             while (hi - lo >= 2) {
                 int mid = (lo + hi) >> 1;
                 bounds[j] = mid;
-                if ((int)((((unsigned int*)self->items[mid].node->mpState)[2] & 0x3E0) >> 5) >= split.v[j])
+                if ((int)((self->items[mid].node->mpState->mDrawState.m_bitGroups[2] & 0x3E0) >> 5) >= split.v[j])
                     hi = mid;
                 else
                     lo = mid;

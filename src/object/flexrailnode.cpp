@@ -487,14 +487,14 @@ static inline void updateMat_92A8(t4Matrix& out, const sFrV4_92A8& a, const sFrV
     sFrV4_92A8 v;
     set4_92A8(((sFrV4_92A8*)&L.row[0])[1], a[0], b[0], c[0], d[0]);
     vu0BasisMul_92A8(((sFrV4_92A8*)&L.row[0])[2], ((sFrV4_92A8*)&L.row[0])[1], CatmullRom);
-    ((sFrV4_92A8*)&L.row[0])[0] = ((sFrV4_92A8*)&L.row[0])[2];
+    *(sFrV4_92A8*)&L.row[0].x = ((sFrV4_92A8*)&L.row[0])[2];
     set4_92A8(((sFrV4_92A8*)&L.row[0])[2], a[1], b[1], c[1], d[1]);
     vu0BasisMul_92A8(((sFrV4_92A8*)&L.row[0])[3], ((sFrV4_92A8*)&L.row[0])[2], CatmullRom);
     ((sFrV4_92A8*)&L.row[0])[1] = ((sFrV4_92A8*)&L.row[0])[3];
     set4_92A8(((sFrV4_92A8*)&L.row[0])[3], a[2], b[2], c[2], d[2]);
     vu0BasisMul_92A8(v, ((sFrV4_92A8*)&L.row[0])[3], CatmullRom);
     ((sFrV4_92A8*)&L.row[0])[2] = v;
-    ((sFrV4_92A8*)&out.row[0])[0] = ((sFrV4_92A8*)&L.row[0])[0]; ((sFrV4_92A8*)&out.row[0])[1] = ((sFrV4_92A8*)&L.row[0])[1]; ((sFrV4_92A8*)&out.row[0])[2] = ((sFrV4_92A8*)&L.row[0])[2];
+    *(sFrV4_92A8*)&out.row[0].x = *(sFrV4_92A8*)&L.row[0].x; ((sFrV4_92A8*)&out.row[0])[1] = ((sFrV4_92A8*)&L.row[0])[1]; ((sFrV4_92A8*)&out.row[0])[2] = ((sFrV4_92A8*)&L.row[0])[2];
     ((sFrV4_92A8*)&L.row[0])[3].x = 0.0f; ((sFrV4_92A8*)&L.row[0])[3].y = 0.0f; ((sFrV4_92A8*)&L.row[0])[3].z = 0.0f; ((sFrV4_92A8*)&L.row[0])[3].w = 1.0f;
     ((sFrV4_92A8*)&out.row[0])[3] = ((sFrV4_92A8*)&L.row[0])[3];
     MMI_TRANSPOSE4(&out);

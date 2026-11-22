@@ -1121,7 +1121,7 @@ extern "C" void cSkyBox_render(cSkyBox* self)
     vu0CopyMatrix_53B10(&skyMatrix, t4mat_Identity);
     t4Vector pos = *(t4Vector*)cObjectInterface_getCameraPosition(cObjectInterface_getCurrentCameraNum_i());
     *(t4Vector*)&((float*)&skyMatrix.row[0])[12] = pos;
-    ((sRS_53B10*)ctx->m_pCurrentDrawState)[1] = ((sRS_53B10*)ctx->m_pCurrentDrawState)[0];
+    ((sRS_53B10*)ctx->m_pCurrentDrawState)[1] = *(sRS_53B10*)&ctx->m_pCurrentDrawState->m_bitGroups[0];
     sRS_53B10* drawState = (sRS_53B10*)ctx->m_pCurrentDrawState;
     *(sRS_53B10**)&ctx->m_pCurrentDrawState = drawState + 1;
     int stateFlags = drawState[1].f8;

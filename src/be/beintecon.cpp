@@ -312,25 +312,25 @@ extern "C" int cBEEconInterface_buyAttribute(cBEEconInterface* self, int humanIn
         cur = ((cBECharProfileDB*)((humanIndex * 0x9B50 + characterId * 0xF88) + (char*)cBELibrary_profileLib))->mMoney;
         switch (attribute) {
         case 0:
-            attribLevel = &((signed char*)&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)[0];
+            attribLevel = &(&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)->cSpeed;
             break;
         case 1:
-            attribLevel = &((signed char*)&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)[1];
+            attribLevel = &(&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)->cAccel;
             break;
         case 2:
-            attribLevel = &((signed char*)&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)[2];
+            attribLevel = &(&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)->cTrick;
             break;
         case 3:
-            attribLevel = &((signed char*)&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)[3];
+            attribLevel = &(&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)->cEdging;
             break;
         case 4:
-            attribLevel = &((signed char*)&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)[4];
+            attribLevel = &(&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)->cSpin;
             break;
         case 5:
-            attribLevel = &((signed char*)&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)[5];
+            attribLevel = &(&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)->cToughness;
             break;
         case 6:
-            attribLevel = &((signed char*)&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)[6];
+            attribLevel = &(&((cBECharProfileDB(*)[10])cBELibrary_profileLib)[humanIndex][characterId].statDB)->cStability;
             break;
         }
         cost = cBEEconInterface_getAttribCost(self, *attribLevel / 5 - 1);

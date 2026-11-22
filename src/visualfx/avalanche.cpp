@@ -2124,7 +2124,7 @@ extern "C" int cAvalanche_triggerAvalanche(int id)
                         CopyMatrix_D97A8(&(*(sMat_D97A8*)&act->m_lastKeyFrameRotation), &t4mat_Identity_D97A8);
                         act->m_updateEmitters = 0;
                         {
-                            sVec_D97A8 objPosition = *(sVec_D97A8*)(((char*)n->m_instance) + 0x40);
+                            sVec_D97A8 objPosition = *(sVec_D97A8*)&n->m_instance->m_fmTransform.m[3][0];
                             (*(sVec_D97A8*)&act->m_position) = objPosition;
                         }
                         CopyMatrix_D97A8(&(*(sMat_D97A8*)&act->m_rotation), &t4mat_Identity_D97A8);
