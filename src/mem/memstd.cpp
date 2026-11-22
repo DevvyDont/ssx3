@@ -6,7 +6,7 @@
 #include "movie/movieplayer.h"
 #include "render/ps2graphicsman.h"
 #include "online/commchannel.h"
-
+#include "ealib/rcmpbase.h"
 //100%
 INCLUDE_ASM("mem/memstd", MEMCLASS_create);
 #ifdef SKIP_ASM
@@ -1150,7 +1150,7 @@ INCLUDE_ASM("mem/memstd", MEM_tailsize);
  */
 extern "C" int MEM_tailsize(int ignoredName, int id)
 {
-    return *(int*)((char*)D_004D2438[id & 0x3F] + 0x30);
+    return ((MEMCLASS*)D_004D2438[id & 0x3F])->infosize;
 }
 #endif
 
@@ -2243,7 +2243,7 @@ struct sMemAllocFuncs {
     void* (*free)(void*);   // 0x4
     int field_0x8;          // 0x8
 };
-extern sMemAllocFuncs RCMP_rcmp_sys;
+extern RCMP_RCMP_SYSTEM RCMP_rcmp_sys;
 
 /**
  * Installs the movie memory callbacks in RCMP_rcmp_sys: allocate cMoviePlayer_SSXAllocMemFunc, free cMoviePlayer_SSXFreeMemFunc, memory type 0x400.
@@ -2252,9 +2252,9 @@ extern sMemAllocFuncs RCMP_rcmp_sys;
  */
 extern "C" void cMoviePlayer_SetSSXREALDefaults()
 {
-    RCMP_rcmp_sys.alloc = cMoviePlayer_SSXAllocMemFunc;
-    RCMP_rcmp_sys.free = cMoviePlayer_SSXFreeMemFunc;
-    RCMP_rcmp_sys.field_0x8 = 0x400;
+    RCMP_rcmp_sys.AllocMemFunc = (void* (*)(const char*, int, int, int, int))cMoviePlayer_SSXAllocMemFunc;
+    RCMP_rcmp_sys.FreeMemFunc = cMoviePlayer_SSXFreeMemFunc;
+    RCMP_rcmp_sys.m_DefaultMemDir = 0x400;
 }
 #endif
 
@@ -2460,7 +2460,7 @@ typedef void* (*tMemAlloc5_00254368)(void*, int, int, int, int);
  */
 extern "C" void* SSX_VD_create(void* framesDecoder, int firstFrame, int graphicsMan, int drawLayer)
 {
-    void* driverMem = ((tMemAlloc5_00254368)RCMP_rcmp_sys.alloc)(D_004A2EA0, 84, 0, 0, RCMP_rcmp_sys.field_0x8);
+    void* driverMem = ((tMemAlloc5_00254368)RCMP_rcmp_sys.AllocMemFunc)(D_004A2EA0, 84, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
     return SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD(driverMem, framesDecoder, firstFrame, graphicsMan, drawLayer);
 }
 #endif
@@ -2696,7 +2696,7 @@ extern "C" void SSX_VD_PS2_SINGLE_BUFFERD__SSX_VD_PS2_SINGLE_BUFFERD(sTexCache_2
         if (tileEntry != 0) {
             ((sRVEntry_2547B8*)cGraphicsMan_TheGraphicsMan->mVtbl)[50].fn(vthis(cGraphicsMan_TheGraphicsMan, ((sRVEntry_2547B8*)cGraphicsMan_TheGraphicsMan->mVtbl)[50]), *tileEntry);
             *tileEntry = -1;
-            RCMP_rcmp_sys.free(tileEntry);
+            RCMP_rcmp_sys.FreeMemFunc(tileEntry);
         }
     }
     if (self->texs != 0) {
@@ -3053,11 +3053,11 @@ extern "C" void RCMP_DECODER_ReleaseFrame(void*, void*);
  */
 extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_CompleteDraw(SSX_VD_PS2_SINGLE_BUFFERD* self)
 {
-    void* rend;
+    cPS2GraphicsMan* rend;
     sMemStdVEntry* vt;
     do {
-        rend = (void*)self->m_pGrMan;
-        vt = *(sMemStdVEntry**)((char*)rend + 0x10D8);
+        rend = self->m_pGrMan;
+        vt = (sMemStdVEntry*)rend->mVtbl;
     } while (vt[18].fn(vthis(rend, vt[18])) == 0);
     void* resource = self->mpCurrentFrame;
     if (resource != 0) {
@@ -3212,7 +3212,7 @@ INCLUDE_ASM("mem/memstd", func_00255670);
  * @param allocSize  bytes wanted
  */
 extern "C" void func_00255670(int allocSize) {
-    (*(int (**)(int *, int, int, int, int))((char*)((int*)&RCMP_rcmp_sys) + (0)))((int*)&D_004A2EA0, allocSize, 0, 0, (*(int *)((char*)((int*)&RCMP_rcmp_sys) + (8))));
+    RCMP_rcmp_sys.AllocMemFunc(D_004A2EA0, allocSize, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
 }
 #endif
 //100%
@@ -3224,7 +3224,7 @@ INCLUDE_ASM("mem/memstd", func_002556B0);
  * @param allocSize  bytes wanted
  */
 extern "C" void func_002556B0(int allocSize) {
-    (*(int (**)(int *, int, int, int, int))((char*)((int*)&RCMP_rcmp_sys) + (0)))((int*)&D_004A2EA0, allocSize, 0, 0, (*(int *)((char*)((int*)&RCMP_rcmp_sys) + (8))));
+    RCMP_rcmp_sys.AllocMemFunc(D_004A2EA0, allocSize, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
 }
 #endif
 //100%
@@ -3242,7 +3242,7 @@ INCLUDE_ASM("mem/memstd", func_002556F0);
  */
 extern "C" void func_002556F0(int size, void* tag, int align, int hdrSize, int flags)
 {
-    ((tMemAlloc5_00254368)RCMP_rcmp_sys.alloc)(tag, size, align, hdrSize, flags);
+    ((tMemAlloc5_00254368)RCMP_rcmp_sys.AllocMemFunc)(tag, size, align, hdrSize, flags);
 }
 #endif
 //100%
@@ -3260,7 +3260,7 @@ INCLUDE_ASM("mem/memstd", func_00255720);
  */
 extern "C" void func_00255720(int size, void* tag, int align, int hdrSize, int flags)
 {
-    ((tMemAlloc5_00254368)RCMP_rcmp_sys.alloc)(tag, size, align, hdrSize, flags);
+    ((tMemAlloc5_00254368)RCMP_rcmp_sys.AllocMemFunc)(tag, size, align, hdrSize, flags);
 }
 #endif
 //100%

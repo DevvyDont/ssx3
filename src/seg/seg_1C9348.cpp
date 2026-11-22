@@ -723,12 +723,12 @@ extern "C" int HUFF_packfile(HuffEncodeContext* EC, HUFFMemStruct* in, HUFFMemSt
         EC->masks[i] = EC->masks[i - 1] * 2 + 1;
     }
     HUFF_init_9F60(EC);
-    (*(char**)&EC->buffer) = in->ptr;
+    EC->buffer = (unsigned char*)in->ptr;
     {
         int n = in->len;
         EC->flen = n;
         EC->ulen = n;
-        (*(char**)&EC->bufptr) = ((char*)EC->buffer) + n;
+        EC->bufptr = EC->buffer + n;
     }
     out->len = 0;
     EC->packbits = 0;

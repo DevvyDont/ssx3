@@ -6,7 +6,7 @@
 #include "be/beintstat.h"
 #include "be/beintnetwork.h"
 #include "main/ssxapp.h"
-
+#include "util/locale.h"
 extern int cBELibrary_raceDB[];
 
 
@@ -1067,8 +1067,8 @@ extern "C" char* cBENewPlayerInterface_getPlayerName(cBENewPlayerInterface* self
     if (strlen(name) == 0)
     {
         unsigned short buf[104];
-        char* db = (char*)SSXApp->FELocale;
-        sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(db + 4);
+        cFELocale* db = SSXApp->FELocale;
+        sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)db->mVtbl;
         sprintf1(buf, vt[4].fn(vthis(db, vt[4]), GetHashValue32(str_kT_MEMPlayerName)), idx + 1);
         strcpy2(name, buf);
     }
@@ -1309,8 +1309,8 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setPlayerCheatCharID);
  */
 extern "C" void cBENewPlayerInterface_setPlayerCheatCharID(cBENewPlayerInterface* self, int playerId, int value)
 {
-    char* playerEntry = (char*)&cBENewPlayerInterface_tempPlayers[playerId];
-    *(char*)(playerEntry + 0x12) = value;
+    cBEPlayerDB* playerEntry = &cBENewPlayerInterface_tempPlayers[playerId];
+    playerEntry->cCheatCharacterID = value;
 }
 #endif
 
@@ -1325,8 +1325,8 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getPlayerCheatCharID);
  */
 extern "C" signed char cBENewPlayerInterface_getPlayerCheatCharID(cBENewPlayerInterface* self, int playerId)
 {
-    char* playerEntry = (char*)&cBENewPlayerInterface_tempPlayers[playerId];
-    return *(signed char*)(playerEntry + 0x12);
+    cBEPlayerDB* playerEntry = &cBENewPlayerInterface_tempPlayers[playerId];
+    return playerEntry->cCheatCharacterID;
 }
 #endif
 
@@ -1353,8 +1353,8 @@ struct sPlayerCharFlags_0x10 {
 extern "C" int cBENewPlayerInterface_getUseDualShock(cBENewPlayerInterface* self, int index)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
-    char* playerEntry = (char*)&cBENewPlayerInterface_tempPlayers[id];
-    return ((sPlayerCharFlags_0x10*)(playerEntry + 0x10))->bit1;
+    cBEPlayerDB* playerEntry = &cBENewPlayerInterface_tempPlayers[id];
+    return playerEntry->iUseDualShock;
 }
 #endif
 
@@ -1390,8 +1390,8 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getHelpDone);
 extern "C" int cBENewPlayerInterface_getHelpDone(cBENewPlayerInterface* self, int index)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
-    char* playerEntry = (char*)&cBENewPlayerInterface_tempPlayers[id];
-    return ((sPlayerCharFlags_0x10*)(playerEntry + 0x10))->bit3;
+    cBEPlayerDB* playerEntry = &cBENewPlayerInterface_tempPlayers[id];
+    return playerEntry->iIsHelpDone;
 }
 #endif
 

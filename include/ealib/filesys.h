@@ -16,9 +16,30 @@
 #ifndef __cplusplus
 typedef union OP_def OP_def;
 typedef struct FILEOPERATION_def FILEOPERATION_def;
+typedef struct HANDLE_def HANDLE_def;
 #endif
 
-struct HANDLE_def;                  // [O] an open file (0x118 in On Tour); retail's is 0x110 (the unit's sFsHd)
+// An open file, retail version (0x110 [R]: FILESYS_initadr / FILESYS_overhead size the handle table as maxopenfiles * 272;
+// the unit's view sFsHd). [O] struct HANDLE_def (0x118: info, data, length, bigoffset, DVDstartsector, checkforEOF,
+// name[255]); retail has no data / checkforEOF, so every later member sits lower. [U] the FILESYS open command
+// (FILEDEV_open / getsize / getstartsector, the archive lookup) and FILESYS_open / FILESYS_exists.
+struct HANDLE_def {
+    int info;                           // 0x000 [O] (a union there); [U] the device's file handle (FILEDEV_open /
+                                        //       readreq / close), or the archive node when bigoffset != 0
+    int length;                         // 0x004 [O]; [U] FILEDEV_getsize, or the file's size inside the archive
+    int bigoffset;                      // 0x008 [O]; [U] the offset inside the archive (0 = a plain file: close
+                                        //       through the device)
+    int DVDstartsector;                 // 0x00C [O]; [U] FILEDEV_getstartsector
+    char name[0x100];                   // 0x010 [O] (char[255] at 0x18 there); [U] FILESYS_open / FILESYS_exists
+                                        //       strncpy 0x100 bytes; the open command splits it at '|'
+};
+
+CHECK_OFFSET(HANDLE_def, info, 0x000);
+CHECK_OFFSET(HANDLE_def, length, 0x004);
+CHECK_OFFSET(HANDLE_def, bigoffset, 0x008);
+CHECK_OFFSET(HANDLE_def, DVDstartsector, 0x00C);
+CHECK_OFFSET(HANDLE_def, name, 0x010);
+CHECK_SIZE(HANDLE_def, 0x110);
 
 // The operation's id word. [O] union OP_def {<anonymous struct> sep; int id;} (0x4): the bit-field view `sep` has no
 // member names in On Tour's dump, so only `id` is placed. [U] retail splits the word as bits 0..19 a serial number,

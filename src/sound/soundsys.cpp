@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "main/gamemode.h"
 #include "ealib/snd.h"
 #include "sound/bankmonitor.h"
 #include "world/instancerecord.h"
@@ -16,7 +17,7 @@
 #include "main/ssxapp.h"
 #include "ai/rider.h"
 #include "ai/ai.h"
-
+#include "ai/airpredictor.h"
 //100%
 INCLUDE_ASM("sound/soundsys", cBankSys_cBankSys);
 #ifdef SKIP_ASM
@@ -24,7 +25,7 @@ extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-
+#include "ai/ridermetrix.h"
 struct sSndBsVtEnt {
     short delta;
     short index;
@@ -1785,10 +1786,10 @@ extern int cPauseState_Flags;
  *
  * @param obj  the bank-monitor instance
  */
-extern "C" void cSSXAudio_HandleChatter(cSSXAudio* self, void* obj) {
+extern "C" void cSSXAudio_HandleChatter(cSSXAudio* self, cBankMonitorInstance* obj) {
     int volume;
     int pitchBend;
-    cRider* rider = *(cRider**)((char*)obj + 0x80);
+    cRider* rider = (cRider*)obj->mPtr;
     pitchBend = 0x40;
     volume = 0;
     if (cRider_getMotionState(rider) == 0) {
@@ -1808,7 +1809,7 @@ extern "C" void cSSXAudio_HandleChatter(cSSXAudio* self, void* obj) {
     if (paused) {
         volume = 0;
     }
-    *(int*)((char*)obj + 0x64) = volume;
+    obj->mBaseVol = volume;
     cBankMonitorInstance_PitchUpdate(obj, pitchBend);
 }
 #endif
@@ -1837,10 +1838,10 @@ extern int cPauseState_Flags;
  */
 // PORT: the rider pointer is passed to cSSXAudio_Surface/cSSXAudio_BeginGlide as an int (the unit declares them that
 // way).
-extern "C" void cSSXAudio_HandleGlide(cSSXAudio* self, void* obj) {
+extern "C" void cSSXAudio_HandleGlide(cSSXAudio* self, cBankMonitorInstance* obj) {
     int volume;
     int bend;
-    cRider* rider = *(cRider**)((char*)obj + 0x80);
+    cRider* rider = (cRider*)obj->mPtr;
     int st = cRider_getMotionState(rider);
     if (st != rider->unk_760) {
         rider->unk_760 = st;
@@ -1871,7 +1872,7 @@ extern "C" void cSSXAudio_HandleGlide(cSSXAudio* self, void* obj) {
     if (paused) {
         volume = 0;
     }
-    *(int*)((char*)obj + 0x64) = volume;
+    obj->mBaseVol = volume;
     cBankMonitorInstance_PitchUpdate(obj, bend);
 }
 #endif
@@ -1892,10 +1893,10 @@ extern int cPauseState_Flags;
  */
 // PORT: the rider pointer is passed to cSSXAudio_Surface/cSSXAudio_BeginGlide as an int (the unit declares them that
 // way).
-extern "C" void cSSXAudio_HandleAIGlide(cSSXAudio* self, void* obj) {
+extern "C" void cSSXAudio_HandleAIGlide(cSSXAudio* self, cBankMonitorInstance* obj) {
     int volume;
     int bend;
-    cRider* rider = *(cRider**)((char*)obj + 0x80);
+    cRider* rider = (cRider*)obj->mPtr;
     int st = cRider_getMotionState(rider);
     if (st != rider->unk_760) {
         rider->unk_760 = st;
@@ -1918,7 +1919,7 @@ extern "C" void cSSXAudio_HandleAIGlide(cSSXAudio* self, void* obj) {
     if (paused) {
         volume = 0;
     }
-    *(int*)((char*)obj + 0x64) = volume;
+    obj->mBaseVol = volume;
     cBankMonitorInstance_PitchUpdate(obj, bend);
 }
 #endif
@@ -1942,10 +1943,10 @@ extern int cPauseState_Flags;
  */
 // PORT: the rider pointer is passed to cSSXAudio_Surface/cSSXAudio_BeginCarve as an int (the unit declares them that
 // way).
-extern "C" void cSSXAudio_HandleCarve(cSSXAudio* self, void* obj) {
+extern "C" void cSSXAudio_HandleCarve(cSSXAudio* self, cBankMonitorInstance* obj) {
     int volume;
     int bend;
-    cRider* rider = *(cRider**)((char*)obj + 0x80);
+    cRider* rider = (cRider*)obj->mPtr;
     bend = 0x40;
     volume = 0;
     int st = cRider_getMotionState(rider);
@@ -1973,7 +1974,7 @@ extern "C" void cSSXAudio_HandleCarve(cSSXAudio* self, void* obj) {
     if (paused) {
         volume = 0;
     }
-    *(int*)((char*)obj + 0x64) = volume;
+    obj->mBaseVol = volume;
     cBankMonitorInstance_PitchUpdate(obj, bend);
 }
 #endif
@@ -2342,7 +2343,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_HardCarveProgram);
 // g++ 2.95 vtable entry (this-adjust delta, index, function) for a method taking only self, returning int.
 struct sSndVtI { short delta; short index; int (*fn)(void*); };
 
-static inline float* sndLevels5990(void* self) { return (float*)((char*)self + 0x5990); }
+static inline float* sndLevels5990(cSSXAudio* self) { return self->mLastCarveEdging; }
 extern const AudioTable D_00482C68;
 extern const AudioTable D_00482C90;
 
@@ -2365,7 +2366,7 @@ extern "C" void cSSXAudio_HardCarveProgram(cSSXAudio* self, cRider* rider, int* 
     char* obj = (char*)&rider->mVtbl;
     sSndVtI* vt = *(sSndVtI**)obj;
     int idx = vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex]));
-    float prev = *(float*)((char*)sndLevels5990(self) + (idx << 2));
+    float prev = sndLevels5990(self)[idx];
     float levelDiff = prev - level;
     if (__builtin_fabsf(levelDiff) > 0.1f) {
         if (level < prev) {
@@ -2375,7 +2376,7 @@ extern "C" void cSSXAudio_HardCarveProgram(cSSXAudio* self, cRider* rider, int* 
         }
     }
     AudioTable volumeCurve = D_00482C68;
-    *(float*)((char*)sndLevels5990(self) + (idx << 2)) = level;
+    sndLevels5990(self)[idx] = level;
     AudioTable bendCurve = D_00482C90;
     *volume = (int)func_00290B58(&volumeCurve, level);
     *pitch = (int)(func_00290B58(&bendCurve, pressure) * 4096.0f);
@@ -2674,7 +2675,7 @@ void* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFoc
  */
 extern "C" void cSSXAudio_LiftWithAirTime(cSSXAudio* self, cRider* rider)
 {
-    int simState = *(int*)((char*)rider->mAirPredictor + 0xAC);
+    int simState = rider->mAirPredictor->SimState;
     int ok = simState == 1 || simState == 3;
     if (!ok) {
         char* riderObj = (char*)&rider->mVtbl;
@@ -2688,7 +2689,7 @@ extern "C" void cSSXAudio_LiftWithAirTime(cSSXAudio* self, cRider* rider)
         sVEntry<int(void*)>* vtEntry = &(*(sVEntry<int(void*)>**)riderObj)[7];
         cSSXAudio_SetNeedLift(self, vtEntry->fn(vthis(riderObj, *vtEntry)), 0);
     }
-    float x = *(float*)((char*)rider->mAirPredictor + 0x98);
+    float x = rider->mAirPredictor->TotalAirTime;
     func_0029FCC8(self, ((char*)rider));
     if (cSSXAudio_ReplayMode(self) != 0) {
         idx = 0;
@@ -8208,7 +8209,7 @@ extern "C" void cAvalanche_getAvalancheDataByPosition(void *, float *);
  * @param ssxAudio  the audio system
  * @param voice  the playing voice (cBankMonitorInstance)
  */
-extern "C" void cSSXAudio_HandleAvalanche(cSSXAudio* ssxAudio, void *voice) {
+extern "C" void cSSXAudio_HandleAvalanche(cSSXAudio* ssxAudio, cBankMonitorInstance* voice) {
     if (ssxAudio->mpAvalancheRiderIndex < ((cAI*)cAudioInterface_getAI())->NumberOfRidersAllocated) {
         tAvalanchePositionalData positional;
         float riderPos[3];
@@ -8222,7 +8223,7 @@ extern "C" void cSSXAudio_HandleAvalanche(cSSXAudio* ssxAudio, void *voice) {
         riderPos[2] = pos[2];
         cAvalanche_getAvalancheDataByPosition(&positional, riderPos);
         (*(&ssxAudio->mAvalancheData)) = positional;
-        *(int *)((char*)voice + 0x64) = cSSXAudio_GetAvalancheVolume((ssxAudio), dst);
+        voice->mBaseVol = cSSXAudio_GetAvalancheVolume((ssxAudio), dst);
     }
 }
 #endif
@@ -8271,11 +8272,11 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_ResetWipeoutRecoverHit);
  *
  * @param rider  the rider (cRider)
  */
-extern "C" void cSSXAudio_ResetWipeoutRecoverHit(void* self, cRider* rider)
+extern "C" void cSSXAudio_ResetWipeoutRecoverHit(cSSXAudio* self, cRider* rider)
 {
     int idx = rider->mViewIndex;
-    self = (char*)self + idx * 4;
-    *(int*)((char*)self + 0x6080) = 0;
+    self->mLastWipeoutRecoverPercent[idx] = 0;
+
 }
 #endif
 
@@ -9185,7 +9186,7 @@ struct sSsFCC8RiderA {
 };
 struct sSsFCC8Rider : public sSsFCC8RiderA, public cSsFCC8Obj {
     char pad6C4[0x788 - 0x6C4];
-    char* p788;
+    cAirPredictor* p788;
     char pad78C[0x87C - 0x78C];
     int f87C;
 };
@@ -9211,7 +9212,7 @@ extern "C" void func_0029FCC8(cSSXAudio* self, void* vrider)
     if (cSSXAudio_ReplayMode(self) != 0) return;
     int pos = rider->f470 >= 0.0f;
     if (pos) return;
-    if (*(float*)(rider->p788 + 0x98) < 4.000256061553955f) return;
+    if (rider->p788->TotalAirTime < 4.000256061553955f) return;
     int chk = 0;
     if (rider->isComputer() != 0 || rider->f87C == 0) chk = 1;
     if (chk && cSSXAudio_GetFocusRider_p(self, -1) != rider) return;
@@ -9940,9 +9941,9 @@ extern "C" void func_002A1400(void* self, int a);
  * @param obj  the monitor instance (cMonitorInstance)
  * @return 1
  */
-extern "C" int func_002A1388(cSSXAudio* self, void* obj)
+extern "C" int func_002A1388(cSSXAudio* self, cMonitorInstance* obj)
 {
-    int i = *(int*)((char*)obj + 0x1C);
+    int i = obj->mData1;
     int id;
     if (i >= 0 && i < ((cAI*)cAudioInterface_getAI())->NumberOfRidersAllocated) {
         id = (int)((cAI*)cAudioInterface_getAI())->Riders[i];
@@ -11780,10 +11781,10 @@ extern "C" void func_002A73A8(cCrowdSys* self, int a1, int i);
  * @param monitorInst  the monitor instance whose +0x1C holds the stream handle
  * @return 1 when the stream reported state 3, else 0
  */
-extern "C" int func_002A3AA0(void* self, void* monitorInst) {
+extern "C" int func_002A3AA0(void* self, cMonitorInstance* monitorInst) {
     int st[4];
     SNDSYS_entercritical();
-    int status = SNDSTRM_requeststatus(*(int *)((char*)monitorInst + 0x1C), st);
+    int status = SNDSTRM_requeststatus(monitorInst->mData1, st);
     SNDSYS_leavecritical();
     if (status >= 0) {
         if (st[0] == 3) {
@@ -12502,11 +12503,11 @@ extern "C" void func_002A45C0(cSSXAudio* self)
     cRider* rider = ((cAI*)cAudioInterface_getAI())->Riders[0];
     int fragCount;
     if (func_002A4078(self) != 0) {
-        fragCount = *(int*)((char*)rider->mMetrix + 0x128);
+        fragCount = rider->mMetrix->Totals.NumFrags;
     } else {
         fragCount = 0;
     }
-    func_002A4660(self, id, fragCount, *(int*)((char*)rider->mMetrix + 0x114), rider->mDidNotFinish ^ 1);
+    func_002A4660(self, id, fragCount, rider->mMetrix->Totals.NumUberTricks, rider->mDidNotFinish ^ 1);
 }
 #endif
 
@@ -12532,8 +12533,8 @@ extern "C" int* cBENewRaceInterface_getLocation(void*);
  */
 extern "C" void func_002A4660(cSSXAudio* self, int rank, int frags, int uberTricks, int finished)
 {
-    char* gameModeMan = (char*)SSXApp->GameModeMan;
-    if (*(int*)(gameModeMan + 0x98) != 0 || *(int*)(gameModeMan + 0x70) <= *(int*)gameModeMan) {
+    cGameModeMan* gameModeMan = SSXApp->GameModeMan;
+    if (gameModeMan->bIsLastHeat != 0 || gameModeMan->iNextHeat <= *(int*)gameModeMan) {
         self->unk_57F8 = 1;
         if (finished != 0 && *(int*)gameModeMan == 3) {
             self->unk_57FC = 1;
@@ -13918,8 +13919,8 @@ extern "C" void SNDpitchbend(int, int);
  * @param obj  the voice's monitor instance (cBankMonitorInstance)
  * @param dt  the elapsed time
  */
-extern "C" void func_002A68B0(cCrowdInstance* self, char* obj, float dt) {
-    if (*(int*)(obj + 4) < 0) {
+extern "C" void func_002A68B0(cCrowdInstance* self, cBankMonitorInstance* obj, float dt) {
+    if (obj->mHandle < 0) {
         cBankMonitorInstance_Reset(obj);
         return;
     }
@@ -13940,7 +13941,7 @@ extern "C" void func_002A68B0(cCrowdInstance* self, char* obj, float dt) {
             vol = (int)bendOffset + 0x40;
         }
         SNDSYS_entercritical();
-        SNDpitchbend(*(int*)(obj + 4), vol);
+        SNDpitchbend(obj->mHandle, vol);
         SNDSYS_leavecritical();
     }
 }
@@ -14635,7 +14636,7 @@ extern "C" void func_002A7718(cCrowdSys* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A77A8);
 #ifdef SKIP_ASM
-extern "C" void func_002A68B0(cCrowdInstance* self, char* obj, float dt);
+extern "C" void func_002A68B0(cCrowdInstance* self, cBankMonitorInstance* obj, float dt);
 
 /**
  * Monitor callback of the crowd voices: forwards to func_002A68B0 for the crowd instance stored in the voice (+0x80).
@@ -14645,9 +14646,9 @@ extern "C" void func_002A68B0(cCrowdInstance* self, char* obj, float dt);
  * @param obj  the voice's monitor instance
  * @param dt  the elapsed time
  */
-extern "C" void func_002A77A8(cCrowdSys* self, char* obj, float dt)
+extern "C" void func_002A77A8(cCrowdSys* self, cBankMonitorInstance* obj, float dt)
 {
-    func_002A68B0((cCrowdInstance*)(*(char**)(obj + 0x80)), obj, dt);
+    func_002A68B0((cCrowdInstance*)((char*)obj->mPtr), obj, dt);
 }
 #endif
 

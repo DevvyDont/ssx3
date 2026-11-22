@@ -291,8 +291,8 @@ extern "C" void cExecutionMan_halt(int);
  *
  * @param appMan  the application manager
  */
-extern "C" void cAppMan_halt(void *appMan) {
-    cExecutionMan_halt((*(int *)((char*)(appMan) + (8))));
+extern "C" void cAppMan_halt(cAppMan* appMan) {
+    cExecutionMan_halt((int)appMan->ExecutionMan);
 }
 #endif
 

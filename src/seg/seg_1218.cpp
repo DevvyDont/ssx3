@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "animation/rideranimbase.h"
 #include "world/instancerecord.h"
 #include "animation/animsequencer.h"
 #include "animation/gameanimmap.h"
@@ -1572,8 +1573,8 @@ INCLUDE_ASM("seg/seg_1218", cDangerMan_GetRiderDangerLevel);
  * @param aiIndex  the rider's index
  * @return the applied danger level
  */
-extern "C" int cDangerMan_GetRiderDangerLevel(int dangerMan, int aiIndex) {
-    return (*(int *)((char*)(((aiIndex * 0xC) + dangerMan)) + (0x710)));
+extern "C" int cDangerMan_GetRiderDangerLevel(cDangerMan* dangerMan, int aiIndex) {
+    return dangerMan->mRiderDangerTrack[aiIndex].appliedLevel;
 }
 #endif
 
@@ -2031,13 +2032,13 @@ INCLUDE_ASM("seg/seg_1218", cFocusMan_addbox);
  * @param focusMan  the focus manager (this; cAI's FocusMan, +0xA4)
  * @param focusBox  the cFocusBox to add
  */
-extern "C" void cFocusMan_addbox(cFocusMan* focusMan, t4Vector *focusBox) {
+extern "C" void cFocusMan_addbox(cFocusMan* focusMan, cFocusBox *focusBox) {
     t4Vector boxCopy;
 
     (focusMan->LastUpdateTick) = -1;
-    ((t4Vector*)focusMan->Boxes[focusMan->NumBoxes].Box) = focusBox;
-    boxCopy = *focusBox;
-    (*(t4Vector *)((char*)((((focusMan->NumBoxes) << 5) + (int)focusMan)) + (0x20))) = boxCopy;
+    focusMan->Boxes[focusMan->NumBoxes].Box = focusBox;
+    boxCopy = focusBox->Position;
+    focusMan->Boxes[focusMan->NumBoxes].LastUpdatePos = boxCopy;
     (focusMan->NumBoxes) = (int) ((focusMan->NumBoxes) + 1);
 }
 #endif
@@ -2187,7 +2188,7 @@ extern "C" void cFocusMan_readFromReplayFrame(cFocusMan* self, cStream_3578* dat
 INCLUDE_ASM("seg/seg_1218", cRiderAnim_updateRule);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" char* cAIAnimEventMap_getAnimPlayAttr(int id);
+extern "C" tAIAnimPlayAttr* cAIAnimEventMap_getAnimPlayAttr(int id);
 // PORT: the handlers are defined later in the unit with mixed parameter/return types; bind uniform views by asm label
 extern "C" int f_001048C0_36A0(void* self, void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateFWD");
 extern "C" int f_00104940_36A0(void* self, void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateHOLD_LAST");
@@ -2223,7 +2224,7 @@ extern "C" void cRiderAnim_checkForSoundEvents_36A0(void* self, void* anim) __as
 extern "C" void cRiderAnim_updateRule(cRiderAnim* self, void* x, int* anim, float dt)
 {
     int done = 0;
-    switch (*(int*)(cAIAnimEventMap_getAnimPlayAttr(*anim) + 4)) {
+    switch (cAIAnimEventMap_getAnimPlayAttr(*anim)->UpdateRule) {
     case 0:
         done = f_001048C0_36A0(((char*)self), x, anim, dt);
         break;
@@ -2293,7 +2294,7 @@ INCLUDE_ASM("seg/seg_1218", cRiderAnim_expireRule);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" char* cAIAnimEventMap_getAnimPlayAttr(int id);
+extern "C" tAIAnimPlayAttr* cAIAnimEventMap_getAnimPlayAttr(int id);
 extern "C" int cRiderAnim_onExpireNOP_3918(void* self, void* ev, void* data) __asm__("cRiderAnim_onExpireNOP");
 extern "C" int cRiderAnim_onExpireINTO_AIR_3918(void* self, void* ev, void* data) __asm__("cRiderAnim_onExpireINTO_AIR");
 extern "C" int cRiderAnim_onExpireINTO_SPIN_CYC_3918(void* self, void* ev, void* data) __asm__("cRiderAnim_onExpireINTO_SPIN_CYC");
@@ -2324,8 +2325,8 @@ extern "C" int cRiderAnim_onExpireBLENDTO_GEAR_CYC_3918(void* self, void* ev, vo
 extern "C" void cRiderAnim_expireRule(cRiderAnim* self, cAnimSequencer* ev, int* data)
 {
     int idx = ev - self->Sequencer;
-    char* info = cAIAnimEventMap_getAnimPlayAttr(*data);
-    switch (*(int*)(info + 8)) {
+    tAIAnimPlayAttr* info = cAIAnimEventMap_getAnimPlayAttr(*data);
+    switch (info->ExpireRule) {
     case 0:
         self->CurrentAnimID[idx] = cRiderAnim_onExpireNOP_3918((self), ev, data);
         break;
@@ -2663,11 +2664,11 @@ extern "C" int cRiderAnim_update3Cycle_4110(void*, void*, int*, int, int, int, f
  */
 extern "C" int cRiderAnim_onUpdateASYNC_CRUISE3(cRiderAnim* riderAnim, void *sequencer, int *sequence, float deltaTime) {
     float var_f13;
-    void *temp_3;
+    cRider* temp_3;
 
-    temp_3 = ((void*)riderAnim->Rider);
-    var_f13 = (*(float *)((char*)(temp_3) + (0x1FC)));
-    if ((*(int *)((char*)(temp_3) + (0x320))) != 0) {
+    temp_3 = riderAnim->Rider;
+    var_f13 = temp_3->mSlewed[1].cur;
+    if (temp_3->IsRidingFakie != 0) {
         var_f13 = -var_f13;
     }
     if (*sequence == 7) {
@@ -2742,11 +2743,11 @@ extern "C" void cRiderAnim_onUpdateASYNC_RAIL(cRiderAnim* riderAnim, void *seque
     int var_8;
     int var_9;
     float var_f13;
-    void *temp_3;
+    cRider* temp_3;
 
-    temp_3 = ((void*)riderAnim->Rider);
-    var_f13 = (*(float *)((char*)(temp_3) + (0x238)));
-    if ((*(int *)((char*)(temp_3) + (0x320))) != 0) {
+    temp_3 = riderAnim->Rider;
+    var_f13 = temp_3->mSlewed[6].cur;
+    if (temp_3->IsRidingFakie != 0) {
         var_f13 = -var_f13;
     }
     switch (*sequence) {
@@ -2790,11 +2791,11 @@ extern "C" int cRiderAnim_update3Cycle_42A8(void*, void*, char*, int, int, int, 
  */
 extern "C" void cRiderAnim_onUpdateASYNC_BRAKE(cRiderAnim* riderAnim, void *sequencer, char *sequence, float dt) {
     float var_f13;
-    void *temp_3;
+    cRider* temp_3;
 
-    temp_3 = ((void*)riderAnim->Rider);
-    var_f13 = (*(float *)((char*)(temp_3) + (0x214)));
-    if ((*(int *)((char*)(temp_3) + (0x320))) == 0) {
+    temp_3 = riderAnim->Rider;
+    var_f13 = temp_3->mSlewed[3].cur;
+    if (temp_3->IsRidingFakie == 0) {
         var_f13 = -var_f13;
     }
     cRiderAnim_update3Cycle_42A8(riderAnim, sequencer, sequence, 36, 33, 34, dt, var_f13);
@@ -4193,7 +4194,7 @@ extern "C" void cRiderAnimBase_play(void*, int, int, float);
 extern "C" void cRider_updateOrientationImplicit(cRider* self);
 // The unit declares this later with its own vector type; bind it by asm label.
 extern "C" void cAirPredictor_startLaunchIntoAir_57B8(void*, t4Vector*, t4Vector*, float) __asm__("cAirPredictor_startLaunchIntoAir");
-extern "C" void cRider_doBump(cRider* self, char* info, int flag);
+extern "C" void cRider_doBump(cRider* self, tCollideInfo* info, int flag);
 extern "C" void cRider_reactToCollision(void* rider, void* info, int id);
 extern "C" void cRider_moveFromCollision(void* rider, const t4Vector& v);
 extern "C" void cRider_turnFromCollision(void* rider, void* hit);
@@ -4388,7 +4389,7 @@ extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, s
     float grip = Clamp_57B8(surf[1], 0.0f, 1.0f);
     float bounce = surf[0];
     if (bounce == 0.0f) {
-        cRider_doBump(rider, info, 1);
+        cRider_doBump(rider, (tCollideInfo*)info, 1);
         return;
     }
     float vn = Dot_57B8(hit->n, Sub_57B8(hit->vel, rider->mVelocity)) >= 0.0f
@@ -4460,7 +4461,7 @@ int AIrand();
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" void cRider_checkForReset(void* rider, int a, int b);
 extern "C" void cRider_flagEventWipeout(void* rider, int anim, int a2, int a3, void* info);
-extern "C" void cRider_doBump(cRider* self, char* info, int flag);
+extern "C" void cRider_doBump(cRider* self, tCollideInfo* info, int flag);
 // The unit declares this later with its own vector type; bind it by asm label.
 extern "C" void cAirPredictor_startLaunchIntoAir_5D98(void*, t4Vector*, t4Vector*, float) __asm__("cAirPredictor_startLaunchIntoAir");
 // Per-material records (0xB0 bytes) reached from the game object; +0x44 makes the contact fatal.
@@ -4721,7 +4722,7 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
     if (anim != 438)
         cRider_flagEventWipeout(self, anim, 0, id, info);
     else
-        cRider_doBump((cRider*)self, (char*)info, 1);
+        cRider_doBump((cRider*)self, (tCollideInfo*)((char*)info), 1);
 }
 #endif
 
@@ -6447,7 +6448,7 @@ static inline t4Vector Get_8388(char* p) { return *(t4Vector*)p; }
  * @param info  the collide info (contact normal at +0x20, normal speed at +0x30)
  * @param flag  nonzero to play the bump sound (On Tour isObject)
  */
-extern "C" void cRider_doBump(cRider* self, char* info, int flag)
+extern "C" void cRider_doBump(cRider* self, tCollideInfo* info, int flag)
 {
     if (cRider_getMotionState((char*)self) != 0 && cRider_getMotionState((char*)self) != 4)
         return;
@@ -6457,16 +6458,16 @@ extern "C" void cRider_doBump(cRider* self, char* info, int flag)
         return;
     }
     int played = 0;
-    float frontDot = Dot_8388(Get_8388((char*)&self->mMatrix.row[1]), *(t4Vector*)(info + 0x20));
+    float frontDot = Dot_8388(Get_8388((char*)&self->mMatrix.row[1]), ((const tCollideInfo*)info)->Reflect);
     if (frontDot > 0.7071067690849304f) {
         cRiderAnimBase_play(self->mRiderAnim, 55, 0, -1.0f);
     } else if (frontDot < -0.7071067690849304f) {
         cRiderAnimBase_play(self->mRiderAnim, 0x38, 0, -1.0f);
     } else {
-        float side = Dot_8388(Get_8388((char*)&self->mMatrix), *(t4Vector*)(info + 0x20));
+        float side = Dot_8388(Get_8388((char*)&self->mMatrix), ((const tCollideInfo*)info)->Reflect);
         if (self->IsRidingFakie)
             side = -side;
-        if (*(float*)(info + 0x30) < 1111.111083984375f && Len_8388(*(&self->mVelocity)) > 1388.888916015625f &&
+        if (((const tCollideInfo*)info)->Vel < 1111.111083984375f && Len_8388(*(&self->mVelocity)) > 1388.888916015625f &&
             cRider_getMotionState((char*)self) != 4) {
             float spinRate = self->mSpinRate;
             if (Abs_8388(spinRate) < 6.2831854820251465f) {

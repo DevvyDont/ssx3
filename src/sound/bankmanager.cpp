@@ -6,14 +6,14 @@
 #include "be/beintnewrace.h"
 #include "main/ssxapp.h"
 #include "ai/ai.h"
-
+#include "sound/streamsys.h"
 //100%
 INCLUDE_ASM("sound/bankmanager", cBankInstance_AllocMem);
 #ifdef SKIP_ASM
 extern char* gpBankManager;
 extern char str_StaticSoundMem[];
 extern "C" void* MEM_alloc(void* a0, int a1, int a2);
-
+#include "sound/soundsys.h"
 class cSndStream_B588 {
 public:
     virtual void v1();
@@ -413,7 +413,7 @@ struct sBmBank {
 struct sBankManager {
     char pad_0x0[0x1D4];
     void** vtbl;                // 0x1D4
-    char* monitor;              // 0x1D8
+    cSoundSys* monitor;         // 0x1D8 cBankMonitor::mpVSoundSys (the shared cSoundSys virtual base)
     char pad_0x1DC[0xAB0 - 0x1DC];
     void** vtbl2;               // 0xAB0
     char pad_0xAB4[0xAC8 - 0xAB4];
@@ -437,18 +437,18 @@ struct sBankManager {
 extern "C" sBankManager* cBankManager_cBankManager(sBankManager* self, int embedded, int count, int heap)
 {
     if (embedded) {
-        self->monitor = self->embedded;
+        self->monitor = (cSoundSys*)self->embedded;
         cSoundSys_cSoundSys(self->embedded, heap);
     }
     cAsyncSys_cAsyncSys(self);
     cBankMonitor_cBankMonitor(&self->monitor, 0, heap);
-    *(const sBmVtbl**)(self->monitor + 4) = &D_00483AB8;
+    *(const sBmVtbl**)&self->monitor->mVtbl = &D_00483AB8;
     if (!embedded) {
         // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
         sBmVtbl vt = D_00483AB8;
-        *(sBmVtbl**)(self->monitor + 4) = &vt;
-        char* base = self->monitor - 0xAD0;
-        int thisDelta = (char*)self - base;
+        *(sBmVtbl**)&self->monitor->mVtbl = &vt;
+        int base = (int)self->monitor - 0xAD0;
+        int thisDelta = (int)self - base;
         vt.e[1].delta = D_00483AB8.e[1].delta + thisDelta;
     }
     self->count = count;
@@ -1579,8 +1579,8 @@ extern "C" void func_0028D488(cSSXAudio* vself)
 {
     unsigned int count = (unsigned int)vself->MusicSys.mNumFESongs;
     int prev = vself->unk_62A4;
-    vself->MusicSys.mCurrentSongNum = ((cSoundSys_SndRand(*(void**)(**(char***)&vself->MusicSys + 0x1D8)) & 0x7FFF) * count) / 0x7FFF;
-    int n = ((cSoundSys_SndRand(*(void**)(**(char***)&vself->MusicSys + 0x1D8)) & 0x7FFF) * 10) / 0x7FFF + 1;
+    vself->MusicSys.mCurrentSongNum = ((cSoundSys_SndRand(vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys) & 0x7FFF) * count) / 0x7FFF;
+    int n = ((cSoundSys_SndRand(vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys) & 0x7FFF) * 10) / 0x7FFF + 1;
     int i;
     for (i = 0; i < n; i++)
         func_002B42B8(&vself->MusicSys, 1, func_0028D8A0(((char*)vself)));
@@ -3057,7 +3057,7 @@ extern "C" void func_0028FA98(cSSXAudio* self, float fadeTime)
 {
     int idx = self->unk_62A8;
     if (idx >= 0) {
-        cBankMonitor_BANKMONITOR_StopHandle((char*)**(void***)&self->MusicSys + 0x1D8, idx, 1, fadeTime);
+        cBankMonitor_BANKMONITOR_StopHandle(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, idx, 1, fadeTime);
         self->unk_62A8 = -1;
     }
 }

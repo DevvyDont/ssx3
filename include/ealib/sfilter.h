@@ -6,7 +6,7 @@
 // filterfn(state, frames, src, dst, requester). Each filter kind has its own state struct after that common header.
 // Retail code: unit ealib/seg_2B4578 (SFILTER_add .. SFILTER_modifyECHO, stretch.c's helpers, the unpackers). EA
 // source: snd/source/library/mix/*.c (SSX On Tour's DWARF: sfhpffir8.c, sflpffir8.c, sfbpffir8.c, sfsplit.c, sfsrc.c,
-// supmutpf.c, stretch.c). Not laid out yet: On Tour's RSFSTATE (no retail evidence gathered).
+// supmutpf.c, stretch.c).
 //
 // Names: SSX On Tour's DWARF (the functions' prototypes, e.g. SFILTER_modifyHPFFIR8(HPFSTATE*, int*),
 // SFILTER_modifyLPFFIR8(LPFSTATE*, int*), SFILTER_modifyBPFFIR8(BPFSTATE*, int*), and the struct definitions) with
@@ -51,6 +51,7 @@ typedef struct MIXERSTATE MIXERSTATE;
 typedef struct SNDFILTERDEF SNDFILTERDEF;
 typedef struct SNDMIXVOICE SNDMIXVOICE;
 typedef struct FT16STATE FT16STATE;
+typedef struct RSFSTATE RSFSTATE;
 #endif
 
 // SFILTERNODE (0x1C [O]).
@@ -496,6 +497,29 @@ CHECK_OFFSET(RESONSTATE, xn, 0x34);
 CHECK_OFFSET(RESONSTATE, ynminus1, 0x38);
 CHECK_OFFSET(RESONSTATE, ynminus2, 0x3C);
 CHECK_SIZE(RESONSTATE, 0x40);
+
+// RSFSTATE (0x38 [O] [R]): the resampler that MIX_setpitch puts in front of a voice (EA's rsf filter). [O] struct RSFSTATE
+// and SFILTER_rsfsetpitch(RSFSTATE* prss, int incrementor); [R] MIX_setpitch allocates the 0x38-byte node (order 160) and
+// sets it up with SFILTER_rsfinit, which stores filterfn (func_003CB540) and clears restorefn, acc16_16, firstdone,
+// centersample and history[]; [U] func_003CB540 (its process function) reads incr16_16 / acc16_16 (lw) and the two
+// shorts (lh).
+struct RSFSTATE {
+    SFILTERNODE sfn;                    // 0x00 [O]; [R] SFILTER_rsfinit
+    unsigned int incr16_16;             // 0x1C [O]; [U] SFILTER_rsfsetpitch stores the pitch (16.16, MIX_setpitch caps it
+                                        //      at 0x20000); func_003CB540 reads it
+    unsigned int acc16_16;              // 0x20 [O]; [R] rsfinit 0; [U] func_003CB540
+    short firstdone;                    // 0x24 [O]; [R] rsfinit 0 (sh); [U] func_003CB540 (lh)
+    short centersample;                 // 0x26 [O]; [R] rsfinit 0 (sh); [U] func_003CB540 (lh / lhu)
+    float history[4];                   // 0x28 [O]; [R] rsfinit clears the 4 words
+};
+
+CHECK_OFFSET(RSFSTATE, sfn, 0x00);
+CHECK_OFFSET(RSFSTATE, incr16_16, 0x1C);
+CHECK_OFFSET(RSFSTATE, acc16_16, 0x20);
+CHECK_OFFSET(RSFSTATE, firstdone, 0x24);
+CHECK_OFFSET(RSFSTATE, centersample, 0x26);
+CHECK_OFFSET(RSFSTATE, history, 0x28);
+CHECK_SIZE(RSFSTATE, 0x38);
 
 // FT16STATE (0x1C [O]): the float-to-16-bit output converter (sfft16.c), a bare node. [O] SNDMIXSTATE::ft16s[6]
 // (FT16STATE) and SFILTER_ft16(void* pstate, ...); [R] MIX_create's per-output-channel records in sndmix are 28 bytes

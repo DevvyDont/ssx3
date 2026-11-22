@@ -1457,26 +1457,26 @@ static inline void notify_E8A0(char* s, int v)
  */
 extern "C" void cMCOverlayManager_CheckForCard(void* self, int flag)
 {
-    char* manager = (char*)self;
+    cMCOverlayManager* manager = (cMCOverlayManager*)((char*)self);
 
-    if (vq_E8A0(manager, 53) == 0) {
-        if (vq_E8A0(manager, 49) != 0 || vq_E8A0(manager, 51) != 0 || vq_E8A0(manager, 59) != 0) {
-            notify_E8A0(manager, 5);
+    if (vq_E8A0(((char*)manager), 53) == 0) {
+        if (vq_E8A0(((char*)manager), 49) != 0 || vq_E8A0(((char*)manager), 51) != 0 || vq_E8A0(((char*)manager), 59) != 0) {
+            notify_E8A0(((char*)manager), 5);
         } else {
-            int ok = *(int*)(manager + 0x130) != 4;
+            int ok = ((cMCOverlayManager*)manager)->mState != 4;
             if (ok) {
-                notify_E8A0(manager, 4);
+                notify_E8A0(((char*)manager), 4);
             }
         }
     } else {
-        if (vq_E8A0(manager, 55) != 0 && vq_E8A0(manager, 58) != 0 && vq_E8A0(manager, 51) == 0 && vq_E8A0(manager, 59) == 0) {
+        if (vq_E8A0(((char*)manager), 55) != 0 && vq_E8A0(((char*)manager), 58) != 0 && vq_E8A0(((char*)manager), 51) == 0 && vq_E8A0(((char*)manager), 59) == 0) {
             if (flag != 0) {
-                notify_E8A0(manager, 6);
+                notify_E8A0(((char*)manager), 6);
             }
-        } else if (*(int*)(manager + 0xBC) != 0) {
-            notify_E8A0(manager, 7);
+        } else if (((cMCOverlayManager*)manager)->mSave != 0) {
+            notify_E8A0(((char*)manager), 7);
         } else {
-            notify_E8A0(manager, 29);
+            notify_E8A0(((char*)manager), 29);
         }
     }
 }

@@ -2,14 +2,14 @@
 #include "ealib/hlafile.h"
 #include "ealib/filesys.h"
 #include "ealib/hlsfile.h"
-
+#include "ealib/lobbyapi.h"
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", getstringidbyindex);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern unsigned char *bsearch_BAE8(void *, void *, unsigned int, int, void *) __asm__("bsearch");
 extern char compare_BAE8[] __asm__("compare");
-
+#include "ealib/printstr.h"
 int getstringidbyindex_impl(short key, unsigned char *p) __asm__("getstringidbyindex");
 /**
  * Looks a string id up in a locale file's index: returns the entry's string number (its second little-endian halfword),
@@ -1033,7 +1033,7 @@ int FILESYS_opstatus(struct H_CE90 opHandle) {
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_operror);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00519AD8_CF10[] __asm__("D_00519AD8");
+extern FILEOPERATION_def *D_00519AD8_CF10 __asm__("D_00519AD8"); /* gFileDevice.oplist ([O] FILE_FILEDEVICE::oplist, gFileDevice + 0x28) */
 typedef struct { unsigned char a, b, c, d; } T_CF10;
 
 /**
@@ -1043,7 +1043,7 @@ typedef struct { unsigned char a, b, c, d; } T_CF10;
  * @return the error code
  */
 int FILESYS_operror(T_CF10 opHandle) {
-    return *(int *)((char*)(D_00519AD8_CF10[0]) + opHandle.d * 0x30 + 0xC);
+    return D_00519AD8_CF10[opHandle.d].error;
 }
 #endif
 
@@ -1051,7 +1051,7 @@ int FILESYS_operror(T_CF10 opHandle) {
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_opuserdata);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00519AD8_CF40[] __asm__("D_00519AD8");
+extern FILEOPERATION_def *D_00519AD8_CF40 __asm__("D_00519AD8"); /* gFileDevice.oplist */
 typedef struct { unsigned char a, b, c, d; } T_CF40;
 
 /**
@@ -1061,7 +1061,7 @@ typedef struct { unsigned char a, b, c, d; } T_CF40;
  * @return the user data
  */
 int FILESYS_opuserdata(T_CF40 opHandle) {
-    return *(int *)((char*)(D_00519AD8_CF40[0]) + opHandle.d * 0x30 + 0x14);
+    return (int)D_00519AD8_CF40[opHandle.d].userdata;
 }
 #endif
 
@@ -1429,7 +1429,7 @@ int FILESYS_exists(char *fileName, int priority, int userData) {
         fileOp->error = 2;
         f_E668_D438((int *)fileOp);
     }
-    f_strncpy_D438(((char*)fileOp->handle) + 0x10, fileName, 0x100);
+    f_strncpy_D438(fileOp->handle->name, fileName, 0x100);
     f_Exec_D438((int *)fileOp);
     return (*(unsigned int*)&fileOp->op);
 }
@@ -1467,7 +1467,7 @@ int FILESYS_open(char *name, int modeflags, int priority, int userdata) {
         fop->error = 2;
         iFILE_perror(((char*)fop));
     }
-    strncpy((char*)fop->handle + 0x10, name, 0x100);
+    strncpy(fop->handle->name, name, 0x100);
     iFILESYS_ExecCommand(((char*)fop));
     return *(int *)fop;
 }
@@ -2891,15 +2891,15 @@ extern char D_00519C08_9C08[] __asm__("hlafile_mutex");
  * @return the request, or null
  */
 void *queuefetch(void **queue) {
-    void *temp_2;
-    void *req;
+    REQUESTSTRUCTtag *temp_2;
+    REQUESTSTRUCTtag* req;
 
     MUTEX_lock(D_00519C08_9C08);
     temp_2 = *queue;
     req = 0;
     if (temp_2 != 0) {
         req = temp_2;
-        *queue = *(void **)((char *)req + 4);
+        *queue = req->nextreq;
     }
     MUTEX_unlock_EED8(D_00519C08_9C08);
     return req;
@@ -2936,7 +2936,7 @@ void newrequestid(unsigned char *req) {
 INCLUDE_ASM("ealib/seg_2DCAE8", locaterequest);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00450C34_0C34[] __asm__("hlafile_request");
+extern REQUESTSTRUCTtag *D_00450C34_0C34 __asm__("hlafile_request");
 extern int D_00519BF0_9BF0[] __asm__("numrequests");
 
 /**
@@ -2948,16 +2948,16 @@ extern int D_00519BF0_9BF0[] __asm__("numrequests");
  * @param requestId  the request id
  * @return the request, or null
  */
-int *locaterequest(int requestId) {
-    int *temp_2;
+REQUESTSTRUCTtag *locaterequest(int requestId) {
+    REQUESTSTRUCTtag *temp_2;
     int temp_6;
 
     temp_6 = requestId & 0xFF;
     if ((requestId < 0x100) || (temp_6 >= D_00519BF0_9BF0[0])) {
         return 0;
     }
-    temp_2 = (int*)((char*)D_00450C34_0C34[0] + (temp_6 * 0x30));
-    return ((*temp_2 ^ requestId) != 0) ? 0 : temp_2;
+    temp_2 = &D_00450C34_0C34[temp_6];
+    return ((temp_2->id ^ requestId) != 0) ? 0 : temp_2;
 }
 #endif
 
@@ -7035,15 +7035,15 @@ extern int strlen();
  * @param seed  the starting value
  * @return the hash
  */
-int CDVD_hashname(unsigned int str, int seed) {
+int CDVD_hashname(const char *str, int seed) {
     int hash = seed;
-    signed char *cursor = (signed char *)(str + strlen(str)) - 1;
+    const char *cursor = str + strlen(str) - 1;
 
     do {
         signed char chr = *cursor;
         cursor -= 1;
         hash = hash * 33 + chr;
-    } while ((unsigned int)cursor >= str);
+    } while (cursor >= str);
     return hash;
 }
 #endif
@@ -9005,7 +9005,7 @@ int abortablewait(int ticks) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", PRINT_movedevice);
 #ifdef SKIP_ASM
-extern char PRINTdevicelist[];
+
 
 /**
  * Switches a debug print device on or off.
@@ -9016,10 +9016,10 @@ extern char PRINTdevicelist[];
  * @param enable  nonzero to enable
  */
 void PRINT_movedevice(int device, int enable) {
-    char *temp_4;
+    PRINTDEVICEINFO* temp_4;
 
-    temp_4 = PRINTdevicelist + device * 0xC;
-    (*(int *)((char*)(temp_4) + (8))) = (int) (((*(int *)((char*)(temp_4) + (8))) & ~1) | (enable & 1));
+    temp_4 = &PRINTdevicelist[device];
+    temp_4->enabled = enable & 1;
 }
 #endif
 
@@ -9074,7 +9074,7 @@ struct sDbgOut {                    /* 12 bytes, PRINTdevicelist[8]: a debug out
     unsigned int on : 1;
     unsigned int pad : 31;
 };
-extern struct sDbgChan PRINTchannellist[];
+
 extern struct sDbgOut D_00451250_5B60[] __asm__("PRINTdevicelist");
 extern void PRINT_setchannelstate(int, int);
 extern void PRINT_setdevicestate(int, int);
@@ -9094,17 +9094,17 @@ void PRINT_init(void) {
             D_00451250_5B60[i].on = 0;
         }
         for (i = 0; i < 64; i++) {
-            struct sDbgChan *channel = &PRINTchannellist[i];
-            channel->on = 0;
+            PRINTCHANNELINFO *channel = &PRINTchannellist[i];
+            channel->enabled = 0;
         }
         for (i = 4; i < 8; i++) {
             D_00451250_5B60[i].f00 = 0;
             D_00451250_5B60[i].f04 = 0;
         }
         for (i = 14; i < 64; i++) {
-            struct sDbgChan *channel = &PRINTchannellist[i];
-            channel->f00 = 0;
-            channel->f04b1 = 0;
+            PRINTCHANNELINFO *channel = &PRINTchannellist[i];
+            channel->name = 0;
+            channel->real = 0;
         }
         PRINT_setchannelstate(2, 1);
         PRINT_setdevicestate(2, 1);
@@ -9246,7 +9246,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", PRINT_getdevicestate);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void PRINT_init(void);
-extern char D_00451250_1250[] __asm__("PRINTdevicelist");
+
 extern int D_00451008_1008[] __asm__("PRINTinitialized");
 
 /**
@@ -9259,12 +9259,12 @@ extern int D_00451008_1008[] __asm__("PRINTinitialized");
  * @return 1 when the device is enabled, 0 otherwise
  */
 int PRINT_getdevicestate(int device) {
-    char *entry;
+    PRINTDEVICEINFO* entry;
     if (D_00451008_1008[0] == 0) {
         PRINT_init();
     }
-    entry = D_00451250_1250 + device * 12;
-    return *(int *)(entry + 8) & 1;
+    entry = &PRINTdevicelist[device];
+    return entry->enabled;
 }
 #endif
 
@@ -11075,10 +11075,10 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7F58);
  *
  * @param lobby  the lobby
  */
-void func_003E7F58(void *lobby) {
-    (*(unsigned *)((char*)(lobby) + (0x20))) = 0;
-    (*(unsigned *)((char*)(lobby) + (0x18))) = 0;
-    (*(unsigned *)((char*)(lobby) + (0x1C))) = 0xFFFFFFFF;
+void func_003E7F58(LobbyApiRefT* lobby) {
+    lobby->mPingFailures = 0;
+    lobby->mNextPingTime = 0;
+    *(unsigned *)&lobby->mLastPing = 0xFFFFFFFF;
 }
 #endif
 
@@ -11102,7 +11102,7 @@ void func_003E7F70(char *lobby, int reason, int flags) {
 
     *(int *)(lobby + 0xC) = 0x7465726D;
     *(int *)(lobby + 8) |= flags;
-    func_003E7F58(lobby);
+    func_003E7F58((struct LobbyApiRefT *)lobby);
     fn = *(int (**)(char *, int *, int))(lobby + 0x52C);
     if (fn != 0) {
         sp[0] = 3; sp[1] = 0x64697363; sp[2] = reason; sp[3] = 0;
@@ -11638,11 +11638,11 @@ extern int func_003EEC88(int, int);
  * @param entryName  the name or key to look up (func_003EEC88)
  * @return 1 when present, 0 when not, -1 when @p slot is invalid or closed
  */
-int func_003E8A28(int lobby, unsigned int slot, int entryName) {
+int func_003E8A28(struct LobbyApiRefT *lobby, unsigned int slot, int entryName) {
     int temp_4;
 
     if (slot < 8U) {
-        temp_4 = (*(int *)((char*)(((slot * 0x14) + lobby)) + (0x310)));
+        temp_4 = lobby->mLists[slot][0];
         if (temp_4 != 0) {
             return func_003EEC88(temp_4, entryName) != 0;
         }
@@ -11685,9 +11685,9 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8AF8);
  * @param lobby  the lobby
  * @param key  the field FourCC
  */
-void func_003E8AF8(void *lobby, int key) {
+void func_003E8AF8(LobbyApiRefT* lobby, int key) {
     if (key == 0x706C6179) {
-        (*(int *)((char*)(lobby) + (0x2CC))) = 0;
+        lobby->mGameWhen = 0;
     }
 }
 #endif
@@ -11928,13 +11928,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8FB8);
  * @param lobby  the lobby
  * @return the event bit taken, or 0
  */
-int func_003E8FB8(void *lobby) {
+int func_003E8FB8(LobbyApiRefT* lobby) {
     int temp_2;
     int temp_3;
 
-    temp_2 = (*(int *)((char*)(lobby) + (8)));
+    temp_2 = lobby->mEventFlags;
     temp_3 = temp_2 & (temp_2 - 1);
-    (*(int *)((char*)(lobby) + (8))) = temp_3;
+    lobby->mEventFlags = temp_3;
     return temp_2 ^ temp_3;
 }
 #endif
@@ -12026,9 +12026,9 @@ extern char D_004A48F8_9160[] __asm__("D_004A48F8") __attribute__((aligned(8)));
  * @param limit  how many top entries to keep
  * @return the number of ranked entries kept
  */
-int func_003E9160(char *self, int limit) {
-    int rankList = *(int *)(self + 0x33C);
-    int rankIndex = *(int *)(self + 0x338);
+int func_003E9160(LobbyApiRefT* self, int limit) {
+    int rankList = self->mLists[2][1];
+    int rankIndex = self->mLists[2][0];
     int k, sum, res;
     short *hist;
     short *histSlot;
@@ -12217,8 +12217,8 @@ extern char func_003E94F0_9590[] __asm__("func_003E94F0");
  *
  * @param lobby  the lobby
  */
-void func_003E9590(void *lobby) {
-    func_003E8DC0_9590(lobby, D_004A4900_9590, *(int *)((char *)lobby + 0x3B4), 3000, func_003E94F0_9590, 0);
+void func_003E9590(LobbyApiRefT* lobby) {
+    func_003E8DC0_9590(lobby, D_004A4900_9590, lobby->mAddress, 3000, func_003E94F0_9590, 0);
 }
 #endif
 

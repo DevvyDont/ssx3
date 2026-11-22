@@ -44,6 +44,9 @@ struct cBXString {
     // differently (cSSXApp_parseCommandLine's frame is 192 bytes with them, 176 without).
     cBXString() {}
     cBXString(const cBXString& other);
+    // The header in front of the text. [O] On Tour `tStringData* cBXString::getData() const` (an inline: out-of-line
+    // copies in all_in_one_bx / fe / main); [R] retail reads the header at Str-0xC / Str-8 / Str-4 (see above).
+    tStringData* getData() const { return (tStringData*)Str - 1; }
 #endif
 };
 

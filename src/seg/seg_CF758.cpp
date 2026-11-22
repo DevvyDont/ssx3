@@ -2,7 +2,7 @@
 #include "vtable.h"
 #include "ui/uiengine.h"
 #include "main/ssxapp.h"
-
+#include "be/beintplayer.h"
 //100%
 INCLUDE_ASM("seg/seg_CF758", setChallengeName);
 #ifdef SKIP_ASM
@@ -391,7 +391,7 @@ extern "C" sChallenge_1CEEA0* cFEStateRewardGalleryBase_cFEStateRewardGalleryBas
             self->b[i][j] = 0;
         }
     }
-    char* iface = (char*)cBE_getInterface_ED90(cBE_getBE(), 1);
+    cBENewPlayerInterface* iface = (cBENewPlayerInterface*)((char*)cBE_getInterface_ED90(cBE_getBE(), 1));
     self->charId = cBENewPlayerInterface_getPlayerCharID(iface, self->player);
     if (rank != 0) {
         switch (cBENewPlayerInterface_getLastHub(iface, cBELibrary_getRiderIndex(self->player))) {
@@ -405,7 +405,7 @@ extern "C" sChallenge_1CEEA0* cFEStateRewardGalleryBase_cFEStateRewardGalleryBas
     } else {
         self->f8F0 = -1;
     }
-    sVEntry_1CEEA0* vt = *(sVEntry_1CEEA0**)(iface + 0xC);
+    sVEntry_1CEEA0* vt = (sVEntry_1CEEA0*)((cBENewPlayerInterface*)iface)->mVtbl;
     vt[2].fn(vthis(iface, vt[2]));
     self->f54 = cBEEconInterface_getMoney(cBE_getInterface_ED90(cBE_getBE(), 11), self->player, self->charId);
     return self;

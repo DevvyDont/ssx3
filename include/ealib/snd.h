@@ -608,7 +608,8 @@ struct SNDMEMREC {
 };
 
 CHECK_OFFSET(SNDMEMREC, addr, 0x0);
-CHECK_OFFSET(SNDMEMREC, size, 0x4);
+// (size at 0x4: CHECK_OFFSET(SNDMEMREC, size, ...) would declare check_SNDMEMREC_size, the CHECK_SIZE typedef's name,
+// which a C unit rejects as a redefinition.)
 CHECK_SIZE(SNDMEMREC, 0x8);
 
 // SNDMEMSTATE (0x18 [R]; On Tour 0x38 with the debug id): the sound heap. [O] SNDGLOBALSTATE::mm (sndgs + 0x234 in

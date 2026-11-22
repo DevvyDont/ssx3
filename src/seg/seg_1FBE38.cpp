@@ -7,7 +7,7 @@
 #include "world/world.h"
 #include "scripter/ssxscriptengine.h"
 #include "main/ssxapp.h"
-
+#include "luno/lunovar.h"
 //100%
 INCLUDE_ASM("seg/seg_1FBE38", checkActiveNode);
 #ifdef SKIP_ASM
@@ -3590,9 +3590,9 @@ extern "C" V3_FD58 ShowInstanceFunc(int n, Ent_FD58 *params) {
         else
             *slot = x->val;
     }
-    char *obj = look_FD58(buf[0]);
+    tInstanceRecord* obj = (tInstanceRecord *)look_FD58(buf[0]);
     if (obj) {
-        O_FD58 *activeNode = *(O_FD58**)(obj + 0xC);
+        O_FD58 *activeNode = (O_FD58 *)obj->m_pActiveNode;
         if (activeNode) {
             if (activeNode->v10(0x10))
                 activeNode->v01(3);
@@ -6375,10 +6375,10 @@ static inline void setInt_3430(cLunoValue* r, const unsigned& v) {
  * @return @p ret
  */
 extern "C" cLunoValue* CurrentInstanceFunc(cLunoValue* ret) {
-    char *curInst = cWScriptMan_TheWScriptMan->f290;
+    tInstanceRecord* curInst = (tInstanceRecord *)cWScriptMan_TheWScriptMan->f290;
     unsigned instId;
     if (curInst)
-        instId = *(unsigned*)(curInst + 0x78);
+        instId = curInst->m_RID;
     else
         instId = 0xFFFFFFFF;
     setInt_3430(ret, instId);
@@ -6940,15 +6940,15 @@ static inline bool isIdle_3EC8(int slot) {
  *
  * @return self
  */
-extern "C" void* RiderIsHumanFunc(void* self) {
+extern "C" void* RiderIsHumanFunc(luno_cLunoVar* self) {
     if (isIdle_3EC8(*(int*)D_004A3DD8_3EC8)) {
-        *(int*)((char*)self + 8) = 1;
+        ((luno_cLunoVar*)self)->Type = 1;
         *luno_cLunoVar_castInt(self) = 1;
     } else {
-        *(int*)((char*)self + 8) = 1;
+        ((luno_cLunoVar*)self)->Type = 1;
         *luno_cLunoVar_castInt(self) = 0;
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 

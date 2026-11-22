@@ -19,6 +19,11 @@
 
 #include "layout.h"
 
+// C units (ealib/seg_2DCAE8.c) name the type without the struct keyword (the CHECK lines below need it too).
+#ifndef __cplusplus
+typedef struct LobbyApiRefT LobbyApiRefT;
+#endif
+
 struct LobbyApiRefT {
     void* mpSession;                    // 0x000 [R] create: func_003F5478(0x8000) (the packet session, as in
                                         //       BuddyApiRefT); [U] func_003E80C0 and func_003E8260 disconnect it

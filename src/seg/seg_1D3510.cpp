@@ -6,7 +6,7 @@
 #include "util/consoleconfig.h"
 #include "util/menu.h"
 #include "util/bxps2memcard.h"
-
+#include "util/menusys.h"
 //100%
 INCLUDE_ASM("seg/seg_1D3510", get_float);
 #ifdef SKIP_ASM
@@ -245,7 +245,7 @@ extern "C" int get_data(unsigned char **src, tCommDataBlock **out) {
     (*(unsigned char**)&reloaded->Data) = (unsigned char*)operator_new_tag_2868(reloaded->Size, str_Comm_Data, 0x100, 0);
     tCommDataBlock *current = *out;
     for (i = 0; i < current->Size; i++) {
-        total += get_char_2868(src, ((unsigned char*)current->Data) + i);
+        total += get_char_2868(src, (unsigned char*)&current->Data[i]);
         current = *out;
     }
     return total;
@@ -835,7 +835,7 @@ INCLUDE_ASM("seg/seg_1D3510", cMenu_getFont);
  * @return the font
  */
 extern "C" int cMenu_getFont(cMenu* menu) {
-    return (*(int *)((char*)((menu->MenuSys)) + (0x58)));
+    return (int)menu->MenuSys->Font;
 }
 #endif
 
@@ -849,8 +849,8 @@ INCLUDE_ASM("seg/seg_1D3510", cMenuItem_getFont);
  * @param menuItem  the menu item
  * @return the font
  */
-extern "C" int cMenuItem_getFont(void **menuItem) {
-    return (*(int *)((char*)((*(void **)((char*)(*menuItem) + (0x124)))) + (0x58)));
+extern "C" int cMenuItem_getFont(cMenuItem* menuItem) {
+    return (int)menuItem->Menu->MenuSys->Font;
 }
 #endif
 

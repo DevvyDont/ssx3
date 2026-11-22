@@ -188,7 +188,7 @@ extern "C" void cBXString_trimRight(cBXString* self)
     }
     if (end != 0) {
         *end = 0;
-        *(int*)(self->Str - 8) = end - self->Str;
+        self->getData()->DataLength = end - self->Str;
     }
 }
 #endif
@@ -214,9 +214,9 @@ extern "C" void cBXString_trimLeft(cBXString* self)
     char* textStart = self->Str;
     while (D_00499C81[(int)*textStart] & 8)
         textStart++;
-    int len = *(int*)(self->Str - 8) - (textStart - self->Str);
+    int len = self->getData()->DataLength - (textStart - self->Str);
     func_0041610C(self->Str, textStart, len + 1);
-    *(int*)(self->Str - 8) = len;
+    self->getData()->DataLength = len;
 }
 #endif
 

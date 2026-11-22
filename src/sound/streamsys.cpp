@@ -1685,11 +1685,11 @@ extern "C" void cBankMonitorInstance_Update(void* voice, cBankMonitorInstance* s
  */
 extern "C" void cController_BANKMONITOR_Update(cController* self, float time)
 {
-    if (*(int*)(**(char***)&self->MusicSys + 0xAC0) != 0) {
+    if (self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mBankMonitorPaused != 0) {
         time = 0.0f;
     }
     for (int i = 0; i < 64; i++) {
-        cBankMonitorInstance_Update(*(char**)(**(char***)&self->MusicSys + 0xAC4) + i * 0xC0, (cBankMonitorInstance*)self, time);
+        cBankMonitorInstance_Update(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mBankMonitorInstance[i], (cBankMonitorInstance*)self, time);
     }
 }
 #endif

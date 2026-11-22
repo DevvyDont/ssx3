@@ -5,7 +5,7 @@
 #include "ealib/sst.h"
 #include "ealib/mtdecf.h"
 #include "ealib/sfilter.h"
-
+#include "ealib/snd.h"
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_unpack);
 #ifdef SKIP_ASM
@@ -2807,7 +2807,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B6670);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int SNDBANKI_valid_6670() __asm__("SNDBANKI_valid");
-extern void SNDI_patchtohdr_6670(int, int, char *, int, int, int) __asm__("SNDI_patchtohdr");
+extern void SNDI_patchtohdr_6670(int, int, SNDSAMPLEFORMAT *, SNDSAMPLEATTR *, int, int) __asm__("SNDI_patchtohdr");
 extern int SNDBANKI_getppatch_6670(int, int) __asm__("SNDBANKI_getppatch");
 struct G_6670 { char pad[0x1F4]; int f1F4; };
 extern struct G_6670 D_0050A8E8_6670 __asm__("sndgs");
@@ -2827,7 +2827,7 @@ extern struct G_6670 D_0050A8E8_6670 __asm__("sndgs");
  * @param descOut  receives the sample description
  * @return 0, or -8
  */
-int func_003B6670(int bankHandle, int patchNum, char *formatOut, int attrOut, int descOut) {
+int func_003B6670(int bankHandle, int patchNum, SNDSAMPLEFORMAT* formatOut, SNDSAMPLEATTR *attrOut, int descOut) {
     int off, patch, i;
     int *chanBuf;
     if (SNDBANKI_valid_6670() < 0) return -8;
@@ -2837,8 +2837,8 @@ int func_003B6670(int bankHandle, int patchNum, char *formatOut, int attrOut, in
     i = 0;
     SNDSYS_entercritical();
     SNDI_patchtohdr_6670(*(int *)(off + D_0050A8E8_6670.f1F4), patch, formatOut, attrOut, descOut, 0);
-    if (*(unsigned char *)(formatOut + 2) != 0) {
-        chanBuf = (int *)(attrOut + 0x18);
+    if (formatOut->channels != 0) {
+        chanBuf = (int *)attrOut->ptsdata;
         do {
             if (*chanBuf != 0) {
                 SNDMEMI_free(*chanBuf);
@@ -2847,7 +2847,7 @@ int func_003B6670(int bankHandle, int patchNum, char *formatOut, int attrOut, in
             }
             i++;
             chanBuf++;
-        } while (i < *(unsigned char *)(formatOut + 2));
+        } while (i < formatOut->channels);
     }
     SNDSYS_leavecritical();
     return 0;
@@ -4092,14 +4092,14 @@ extern void *SNDSTRMI_getrequestptr_7D80(int) __asm__("SNDSTRMI_getrequestptr");
  */
 int SNDSTRM_modifyhold(int requestHandle, int holdTime) {
     int result;
-    char *temp_2;
+    SNDSTREAMREQUEST* temp_2;
 
     result = -8;
     SNDSYS_entercritical();
-    temp_2 = SNDSTRMI_getrequestptr_7D80(requestHandle);
+    temp_2 = (SNDSTREAMREQUEST*)SNDSTRMI_getrequestptr_7D80(requestHandle);
     if (temp_2 != 0) {
         result = 0;
-        *(volatile int *)(temp_2 + 0x20) = (short)holdTime;
+        temp_2->holdtime = (short)holdTime;
     }
     SNDSYS_leavecritical();
     return result;
@@ -4174,7 +4174,7 @@ void func_003B7E38(int streamHandle, int playOpts, int maxRequests, int maxChunk
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7E70);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-int *SNDSTRMI_getstreamptr_func_003B7E70(void) __asm__("SNDSTRMI_getstreamptr");
+SNDSTREAMCHANNEL *SNDSTRMI_getstreamptr_func_003B7E70(void) __asm__("SNDSTRMI_getstreamptr");
 void SNDvol_func_003B7E70(int, int) __asm__("SNDvol");
 
 /**
@@ -4188,15 +4188,15 @@ void SNDvol_func_003B7E70(int, int) __asm__("SNDvol");
  * @return 0, or -8 for an unknown stream
  */
 int func_003B7E70(int streamHandle, int volume) {
-    volatile int *stream;
+    SNDSTREAMCHANNEL* stream;
 
     stream = SNDSTRMI_getstreamptr_func_003B7E70();
     if (stream == 0) {
         return -8;
         do { } while (0);
     }
-    *(char *)((char *)stream + 0xEC) = volume;
-    SNDvol_func_003B7E70(stream[1], volume);
+    stream->po.vol = volume;
+    SNDvol_func_003B7E70(stream->shandle, volume);
     return 0;
 }
 #endif
@@ -4211,7 +4211,7 @@ extern void SNDSTRMI_create(int, int, int, int, int, int, int);
 
 
 // Looks up a handle and sets its byte option at 0xEC.
-extern char *SNDSTRMI_getstreamptr_7E70(int) __asm__("SNDSTRMI_getstreamptr");
+extern SNDSTREAMCHANNEL *SNDSTRMI_getstreamptr_7E70(int) __asm__("SNDSTRMI_getstreamptr");
 extern void SNDvol_7E70(int, int) __asm__("SNDvol");
 
 
@@ -4229,10 +4229,10 @@ extern void SNDautovol_7EB0(int, int, int) __asm__("SNDautovol");
  * @return 0, or -8 for an unknown stream
  */
 int func_003B7EB0(int streamHandle, int fadeTime, int targetVol) {
-    char *stream = SNDSTRMI_getstreamptr_7E70(streamHandle);
+    SNDSTREAMCHANNEL* stream = SNDSTRMI_getstreamptr_7E70(streamHandle);
     if (stream == 0) return -8;
-    stream[0xEC] = targetVol;
-    SNDautovol_7EB0(*(volatile int *)(stream + 4), fadeTime / 10, targetVol);
+    stream->po.vol = targetVol;
+    SNDautovol_7EB0(stream->shandle, fadeTime / 10, targetVol);
     return 0;
 }
 #endif
@@ -4340,7 +4340,7 @@ int SNDSTRM_pitchmult(int streamHandle, int pitchMult) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003B8010);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-int *SNDSTRMI_getstreamptr_func_003B8010(void) __asm__("SNDSTRMI_getstreamptr");
+SNDSTREAMCHANNEL *SNDSTRMI_getstreamptr_func_003B8010(void) __asm__("SNDSTRMI_getstreamptr");
 void func_003B8700_func_003B8010(int, int) __asm__("func_003B8700");
 
 /**
@@ -4353,15 +4353,15 @@ void func_003B8700_func_003B8010(int, int) __asm__("func_003B8700");
  * @return 0, or -8 for an unknown stream
  */
 int func_003B8010(int streamHandle, int dryLevel) {
-    volatile int *stream;
+    SNDSTREAMCHANNEL* stream;
 
     stream = SNDSTRMI_getstreamptr_func_003B8010();
     if (stream == 0) {
         return -8;
         do { } while (0);
     }
-    *(char *)((char *)stream + 0xF0) = dryLevel;
-    func_003B8700_func_003B8010(stream[1], dryLevel);
+    stream->po.drylevel = dryLevel;
+    func_003B8700_func_003B8010(stream->shandle, dryLevel);
     return 0;
 }
 #endif
@@ -4401,7 +4401,7 @@ int func_003B8050(int streamHandle, int busIndex, int fxLevel) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003B80A0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-int *SNDSTRMI_getstreamptr_func_003B80A0(void) __asm__("SNDSTRMI_getstreamptr");
+SNDSTREAMCHANNEL *SNDSTRMI_getstreamptr_func_003B80A0(void) __asm__("SNDSTRMI_getstreamptr");
 void func_003B8978_func_003B80A0(int, int) __asm__("func_003B8978");
 
 /**
@@ -4415,15 +4415,15 @@ void func_003B8978_func_003B80A0(int, int) __asm__("func_003B8978");
  * @return 0, or -8 for an unknown stream
  */
 int func_003B80A0(int streamHandle, int lowPassCutoff) {
-    volatile int *stream;
+    SNDSTREAMCHANNEL* stream;
 
     stream = SNDSTRMI_getstreamptr_func_003B80A0();
     if (stream == 0) {
         return -8;
         do { } while (0);
     }
-    *(short *)((char *)stream + 0x100) = lowPassCutoff;
-    func_003B8978_func_003B80A0(stream[1], lowPassCutoff);
+    stream->po.lowpasscutoff = lowPassCutoff;
+    func_003B8978_func_003B80A0(stream->shandle, lowPassCutoff);
     return 0;
 }
 #endif
@@ -4432,7 +4432,7 @@ int func_003B80A0(int streamHandle, int lowPassCutoff) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDSTRM_timemult);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-int *SNDSTRMI_getstreamptr_SNDSTRM_timemult(void) __asm__("SNDSTRMI_getstreamptr");
+SNDSTREAMCHANNEL *SNDSTRMI_getstreamptr_SNDSTRM_timemult(void) __asm__("SNDSTRMI_getstreamptr");
 void SNDCTRL_timemult_SNDSTRM_timemult(int, int) __asm__("SNDCTRL_timemult");
 
 /**
@@ -4446,15 +4446,15 @@ void SNDCTRL_timemult_SNDSTRM_timemult(int, int) __asm__("SNDCTRL_timemult");
  * @return 0, or -8 for an unknown stream
  */
 int SNDSTRM_timemult(int streamHandle, int timeMult) {
-    volatile int *stream;
+    SNDSTREAMCHANNEL* stream;
 
     stream = SNDSTRMI_getstreamptr_SNDSTRM_timemult();
     if (stream == 0) {
         return -8;
         do { } while (0);
     }
-    *(short *)((char *)stream + 0xFA) = timeMult;
-    SNDCTRL_timemult_SNDSTRM_timemult(stream[1], timeMult);
+    stream->po.timemult = timeMult;
+    SNDCTRL_timemult_SNDSTRM_timemult(stream->shandle, timeMult);
     return 0;
 }
 #endif
@@ -16384,18 +16384,18 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDLINKI_pushtail);
  * @param list  the list
  * @param node  the node
  */
-void SNDLINKI_pushtail(SNDLINKLIST* list, int *node) {
-    int *temp_2;
+void SNDLINKI_pushtail(SNDLINKLIST* list, SNDLINKNODE* node) {
+    SNDLINKNODE *temp_2;
 
-    (*(int **)((char*)(node) + (0))) = 0;
-    (*(int **)((char*)(node) + (4))) = (int *) ((int*)list->ptail);
-    temp_2 = ((int*)list->ptail);
+    node->pnext = 0;
+    node->pprev = list->ptail;
+    temp_2 = list->ptail;
     if (temp_2 != 0) {
-        *temp_2 = (int)node;
+        temp_2->pnext = node;
     } else {
-        ((int*)list->phead) = node;
+        list->phead = node;
     }
-    ((int*)list->ptail) = node;
+    list->ptail = node;
     (list->items) = (int) ((list->items) + 1);
 }
 #endif
@@ -16412,18 +16412,18 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDLINKI_pop);
  * @param list  the list
  * @return the node, or 0 when the list is empty
  */
-int *SNDLINKI_pop(SNDLINKLIST* list) {
-    int *temp_2;
-    int *temp_3;
+void *SNDLINKI_pop(SNDLINKLIST* list) {
+    SNDLINKNODE* temp_2;
+    SNDLINKNODE *temp_3;
 
-    temp_3 = ((int*)list->phead);
+    temp_3 = list->phead;
     if (temp_3 != 0) {
-        temp_2 = *temp_3;
-        ((int*)list->phead) = temp_2;
+        temp_2 = temp_3->pnext;
+        list->phead = temp_2;
         if (temp_2 == 0) {
-            ((int)list->ptail) = 0;
+            list->ptail = 0;
         } else {
-            (*(int *)((char*)(temp_2) + (4))) = 0;
+            temp_2->pprev = 0;
         }
         (list->items) = (int) ((list->items) - 1);
     }
@@ -16444,7 +16444,7 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDLINKI_remove);
  */
 void SNDLINKI_remove(SNDLINKLIST* list, SNDLINKNODE* node) {
     void **temp_3;
-    void *temp_3_2;
+    SNDLINKNODE* temp_3_2;
 
     if (((void*)node) == ((void*)list->phead)) {
         ((void*)list->phead) = (void *) (node->pnext);
@@ -16456,9 +16456,9 @@ void SNDLINKI_remove(SNDLINKLIST* list, SNDLINKNODE* node) {
     if (temp_3 != 0) {
         *temp_3 = ((void*)node->pnext);
     }
-    temp_3_2 = ((void*)node->pnext);
+    temp_3_2 = node->pnext;
     if (temp_3_2 != 0) {
-        (*(void ***)((char*)(temp_3_2) + (4))) = (void **) ((void**)node->pprev);
+        temp_3_2->pprev = node->pprev;
     }
     (list->items) = (int) ((list->items) - 1);
 }
@@ -16663,8 +16663,8 @@ int SNDPKTPLAY_overhead(int maxPackets) {
 #endif
 
 #ifdef SKIP_ASM
-/* EA SNDSAMPLEFORMAT (On Tour DWARF): 4 bytes. */
-typedef struct SNDSAMPLEFORMAT { unsigned short h0; unsigned char n; unsigned char b3; } SNDSAMPLEFORMAT;
+/* EA SNDSAMPLEFORMAT (On Tour DWARF, 4 bytes): ealib/snd.h. */
+
 
 /* sndpps: the stream queues (a pending-callback list, then one queue per stream). Layout from every use in
    this unit; field names are their offsets. */
@@ -16694,7 +16694,7 @@ struct s7B8Queue {
     void (*f54)(int, int);
     void (*f58)(int, int, int);
     int f5C;
-    SNDSAMPLEFORMAT f60;            /* sample format; f60.n = number of readers */
+    SNDSAMPLEFORMAT f60;            /* sample format; f60.channels = number of readers */
     int f64[6];
     struct s7B8Rec f7C[1];
 };
@@ -16853,10 +16853,10 @@ int SNDPKTPLAY_start_impl(int packetinstancehandle, SNDSAMPLEFORMAT *pssf, SNDSA
     int done = 0;
     struct sA8E8Chan *pVoice;
 
-    voicesneeded = pssf->n;
+    voicesneeded = pssf->channels;
     ppchan = sndpps.f304[packetinstancehandle];
     rendermodeindex = 0;
-    ph.n = pssf->n;
+    ph.n = pssf->channels;
     ph.h18 = pssa->h8;
     ppchan->f60 = *pssf;
     ppchan->f04 = 0;
@@ -16866,7 +16866,7 @@ int SNDPKTPLAY_start_impl(int packetinstancehandle, SNDSAMPLEFORMAT *pssf, SNDSA
     ppchan->f08 = 0;
     ppchan->f46 = 0;
     ppchan->f44 = 0;
-    for (i = 0; i < ppchan->f60.n; i++) {
+    for (i = 0; i < ppchan->f60.channels; i++) {
         ppchan->f10[i] = 0;
         ppchan->f34[i] = 0;
         ppchan->f28[i] = 0;
@@ -16883,7 +16883,7 @@ int SNDPKTPLAY_start_impl(int packetinstancehandle, SNDSAMPLEFORMAT *pssf, SNDSA
             ppchan->f00 = -9;
         } else {
             ppchan->f00 = shandle;
-            ppchan->f42 = f_6580_6760(voice, pssf->n);
+            ppchan->f42 = f_6580_6760(voice, pssf->channels);
             pVoice = &sndgs.f1F0[voice];
             pVoice->f4C = 0;
             pVoice->f1C = pspo->h8;
@@ -16911,14 +16911,14 @@ int SNDPKTPLAY_start_impl(int packetinstancehandle, SNDSAMPLEFORMAT *pssf, SNDSA
             pVoice->f74 = 0;
             pVoice->f78 = 0;
             pVoice->f7C = 0;
-            for (i = 0; i < pssf->n; i++) {
+            for (i = 0; i < pssf->channels; i++) {
                 pVoice->f50[i] = pssa->hC[i];
             }
             pVoice->f14 = 0;
             pVoice->f18 = -1;
-            pVoice->f20 = pssf->h0;
-            pVoice->f22 = pssf->b3;
-            pVoice->f23 = pssf->n;
+            pVoice->f20 = pssf->samplerate;
+            pVoice->f22 = pssf->samplerep;
+            pVoice->f23 = pssf->channels;
             pVoice->f24 = rendermode;
             pVoice->f86 = 0;
             f_A938_6760(voice);
@@ -16964,7 +16964,7 @@ int SNDPKTPLAY_submit(int instanceHandle, struct A_6AB8 *packet)
   struct s7B8Rec *record;
   int i;
   int packetHandle;
-  for (i = 0; i < instance->f60.n; i++)
+  for (i = 0; i < instance->f60.channels; i++)
   {
     if (instance->f34[i] >= instance->f40 - 1)
     {
@@ -16977,7 +16977,7 @@ int SNDPKTPLAY_submit(int instanceHandle, struct A_6AB8 *packet)
   record->len = packet->sz;
   record->flag = packet->flag;
   record->f00 = instance->f04;
-  for (i = 0; i < instance->f60.n; i++)
+  for (i = 0; i < instance->f60.channels; i++)
   {
     record->f08[i] = packet->w[i];
     instance->f34[i] += 1;
@@ -17017,7 +17017,7 @@ int SNDPKTPLAY_submitspace(int instanceHandle) {
     struct s7B8Queue *instance = sndpps.f304[instanceHandle];
     int mostPending = 0;
     int i;
-    for (i = 0; i < instance->f60.n; i++) {
+    for (i = 0; i < instance->f60.channels; i++) {
         if (!(instance->f34[i] < mostPending))
             mostPending = instance->f34[i];
     }
@@ -17113,7 +17113,7 @@ int SNDPKTPLAY_stop(int instanceHandle) {
     f_6CE0_6CE8(instanceHandle, 0, 0x7FFFFFFF);
     instance->f00 = -1;
 
-    for (; i < instance->f60.n; i++) {
+    for (; i < instance->f60.channels; i++) {
         if (instance->f64[i]) SNDMEMI_free(instance->f64[i]);
 
     }
@@ -18725,12 +18725,12 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_add);
  */
 void SFILTER_add(char **head, SFILTERNODE* node) {
     SFILTERNODE* cur;
-    char *prev;
+    SFILTERNODE* prev;
 
     cur = (SFILTERNODE*)(*head);
     prev = 0;
     while (((char*)cur) != 0 && cur->priority < node->priority) {
-        prev = ((char*)cur);
+        prev = cur;
         cur = (SFILTERNODE*)cur->pfnnext;
     }
     node->pfnnext = (SFILTERNODE*)cur;
@@ -18740,8 +18740,8 @@ void SFILTER_add(char **head, SFILTERNODE* node) {
     if (prev == 0) {
         *head = ((char*)node);
     } else {
-        *(char **)(prev + 8) = ((char*)node);
-        node->pfnprev1 = (SFILTERNODE*)prev;
+        prev->pfnnext = node;
+        node->pfnprev1 = prev;
     }
 }
 #endif
@@ -18793,10 +18793,10 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_destroy);
  * @param node  the node
  * @return 0
  */
-int SFILTER_destroy(void *node) {
+int SFILTER_destroy(SFILTERNODE* node) {
     int (*temp_2)();
 
-    temp_2 = (*(int (**)())((char*)(node) + (4)));
+    temp_2 = (int (*)())node->restorefn;
     if (temp_2 != 0) {
         temp_2();
     }
@@ -19031,8 +19031,8 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_unpackgetframemtf);
  * @param node  the decoder node
  * @return the frame
  */
-int SFILTER_unpackgetframemtf(void *node) {
-    return (*(int *)((char*)(node) + (0x20)));
+int SFILTER_unpackgetframemtf(UNPACKMTFSTATE* node) {
+    return ((UNPACKMTFSTATE *)node)->curframe;
 }
 #endif
 
@@ -19083,10 +19083,10 @@ extern void CMTBLKDecf_operator_delete(int);
  *
  * @param node  the decoder node
  */
-void SFILTER_unpackmtfrestore(void *node) {
+void SFILTER_unpackmtfrestore(UNPACKMTFSTATE* node) {
     int temp_4;
 
-    temp_4 = (*(int *)((char*)(node) + (0x28)));
+    temp_4 = (int)((UNPACKMTFSTATE *)node)->pDecoder;
     if (temp_4 != 0) {
         CMTBLKDecf_operator_delete(temp_4);
     }
@@ -19148,8 +19148,8 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_unpackgetframemtlf);
  * @param node  the decoder node
  * @return the frame
  */
-int SFILTER_unpackgetframemtlf(void *node) {
-    return (*(int *)((char*)(node) + (0x20)));
+int SFILTER_unpackgetframemtlf(UNPACKMTLFSTATE* node) {
+    return ((UNPACKMTLFSTATE *)node)->curframe;
 }
 #endif
 
@@ -19212,10 +19212,10 @@ extern void CMTBLKDecf_operator_delete(int);
  *
  * @param node  the decoder node
  */
-void SFILTER_unpackmtlfrestore(void *node) {
+void SFILTER_unpackmtlfrestore(UNPACKMTLFSTATE* node) {
     int temp_4;
 
-    temp_4 = (*(int *)((char*)(node) + (0x1C)));
+    temp_4 = (int)((UNPACKMTLFSTATE *)node)->pDecoder;
     if (temp_4 != 0) {
         CMTBLKDecf_operator_delete(temp_4);
     }
@@ -19366,10 +19366,10 @@ extern void CMTBLKDecf_operator_delete(int);
  *
  * @param node  the decoder node
  */
-void SFILTER_unpackmtpfrestore(void *node) {
+void SFILTER_unpackmtpfrestore(UNPACKMTPFSTATE* node) {
     int temp_4;
 
-    temp_4 = (*(int *)((char*)(node) + (0x34)));
+    temp_4 = (int)((UNPACKMTPFSTATE *)node)->pDecoder;
     if (temp_4 != 0) {
         CMTBLKDecf_operator_delete(temp_4);
     }
@@ -19423,8 +19423,8 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_unpackfgetframe);
  * @param node  the decoder node
  * @return the frame
  */
-int SFILTER_unpackfgetframe(void *node) {
-    return (*(int *)((char*)(node) + (0x20)));
+int SFILTER_unpackfgetframe(UNPACKFSTATE* node) {
+    return ((UNPACKFSTATE *)node)->curframe;
 }
 #endif
 
@@ -19502,8 +19502,8 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_unpacklfgetframe);
  * @param node  the decoder node
  * @return the frame
  */
-int SFILTER_unpacklfgetframe(void *node) {
-    return (*(int *)((char*)(node) + (0x20)));
+int SFILTER_unpacklfgetframe(UNPACKLFSTATE* node) {
+    return ((UNPACKLFSTATE *)node)->curframe;
 }
 #endif
 
@@ -19830,8 +19830,8 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_unpackgetframexaf);
  * @param node  the decoder node
  * @return the frame
  */
-int SFILTER_unpackgetframexaf(void *node) {
-    return (*(int *)((char*)(node) + (0x28)));
+int SFILTER_unpackgetframexaf(UNPACKXAFSTATE* node) {
+    return ((UNPACKXAFSTATE *)node)->curframe;
 }
 #endif
 
@@ -19845,10 +19845,10 @@ extern void CEAXABLKDecf_operator_delete(int);
  *
  * @param node  the decoder node
  */
-void SFILTER_unpackxafrestore(void *node) {
+void SFILTER_unpackxafrestore(UNPACKXAFSTATE* node) {
     int temp_4;
 
-    temp_4 = (*(int *)((char*)(node) + (0x1C)));
+    temp_4 = (int)((UNPACKXAFSTATE *)node)->pDecoder;
     if (temp_4 != 0) {
         CEAXABLKDecf_operator_delete(temp_4);
     }
@@ -19994,8 +19994,8 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_unpackgetframexalf);
  * @param node  the decoder node
  * @return the frame
  */
-int SFILTER_unpackgetframexalf(void *node) {
-    return (*(int *)((char*)(node) + (0x20)));
+int SFILTER_unpackgetframexalf(UNPACKXALFSTATE* node) {
+    return ((UNPACKXALFSTATE *)node)->curframe;
 }
 #endif
 
@@ -20009,10 +20009,10 @@ extern void CEAXABLKDecf_operator_delete(int);
  *
  * @param node  the decoder node
  */
-void SFILTER_unpackxalfrestore(void *node) {
+void SFILTER_unpackxalfrestore(UNPACKXALFSTATE* node) {
     int temp_4;
 
-    temp_4 = (*(int *)((char*)(node) + (0x1C)));
+    temp_4 = (int)((UNPACKXALFSTATE *)node)->pDecoder;
     if (temp_4 != 0) {
         CEAXABLKDecf_operator_delete(temp_4);
     }
@@ -20141,10 +20141,10 @@ extern void CEAXABLKDecf_operator_delete(int);
  *
  * @param node  the decoder node
  */
-void SFILTER_unpackxapfrestore(void *node) {
+void SFILTER_unpackxapfrestore(UNPACKXAPFSTATE* node) {
     int temp_4;
 
-    temp_4 = (*(int *)((char*)(node) + (0x1C)));
+    temp_4 = (int)((UNPACKXAPFSTATE *)node)->pDecoder;
     if (temp_4 != 0) {
         CEAXABLKDecf_operator_delete(temp_4);
     }
@@ -20274,9 +20274,9 @@ void SFILTER_ft16_A7A0(void) __asm__("SFILTER_ft16");
  *
  * @param node  the node
  */
-void SFILTER_ft16init(void *node) {
-    *(int *)((char *)node + 4) = 0;
-    *(void (**)(void))((char *)node + 0) = SFILTER_ft16_A7A0;
+void SFILTER_ft16init(FT16STATE* node) {
+    node->sfn.restorefn = 0;
+    node->sfn.filterfn = (int (*)(void *, int, void *, void *, int))SFILTER_ft16_A7A0;
 }
 #endif
 
@@ -20442,9 +20442,9 @@ extern void calcFIRCoeffs_A9D8(void *, int) __asm__("calcFIRCoeffs");
  *
  * @param params  {cutoff << 8, rate << 8}
  */
-void SFILTER_modifyHPFFIR8(char *self, int *params) {
-    *(float *)(self + 0x114) = (float)(params[0] >> 7) / (float)(params[1] >> 8);
-    calcFIRCoeffs_A9D8(self + 0x20, 3);
+void SFILTER_modifyHPFFIR8(HPFSTATE* self, int *params) {
+    self->fir.cutLow = (float)(params[0] >> 7) / (float)(params[1] >> 8);
+    calcFIRCoeffs_A9D8(&self->fir, 3);
 }
 #endif
 
@@ -20953,8 +20953,8 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_rsfsetpitch);
  * @param node  the resampling node
  * @param value  the increment
  */
-void SFILTER_rsfsetpitch(void *node, int value) {
-    (*(int *)((char*)(node) + (0x1C))) = value;
+void SFILTER_rsfsetpitch(RSFSTATE* node, int value) {
+    node->incr16_16 = value;
 }
 #endif
 
@@ -22722,11 +22722,11 @@ INCLUDE_ASM("ealib/seg_2B4578", CMTBLKDecf_GetState);
  *
  * @return the snapshot {shift register, frames left, whole-init flag}
  */
-struct MTFSTATE CMTBLKDecf_GetState(char *self) {
+struct MTFSTATE CMTBLKDecf_GetState(CMTBLKDecf* self) {
     struct MTFSTATE snapshot;
-    snapshot.shiftreg = *(int *)(self + 4);
-    snapshot.doWholeInit = *(int *)(self + 0xD5C);
-    snapshot.bufframes = *(int *)(self + 0xD44);
+    snapshot.shiftreg = self->mutstate.shiftreg;
+    snapshot.doWholeInit = self->mdoWholeInit;
+    snapshot.bufframes = self->mbufframes;
     return snapshot;
 }
 #endif
@@ -22761,8 +22761,8 @@ INCLUDE_ASM("ealib/seg_2B4578", CMTBLKDecf_SetCodecVersion);
  * @param decoder  the decoder
  * @param codecVersion  the codec version (0 or 1)
  */
-void CMTBLKDecf_SetCodecVersion(void *decoder, int codecVersion) {
-    (*(int *)((char*)(decoder) + (0xD64))) = codecVersion;
+void CMTBLKDecf_SetCodecVersion(CMTBLKDecf* decoder, int codecVersion) {
+    decoder->mCodecVersion = codecVersion;
 }
 #endif
 
@@ -23610,9 +23610,9 @@ extern void calcFIRCoeffs_A9D8(void *, int) __asm__("calcFIRCoeffs");
  *
  * @param params  [0] cutoff frequency << 8, [1] sample rate << 8
  */
-void SFILTER_modifyLPFFIR8(char *self, int *params) {
-    *(float *)(self + 0x118) = ((float)(params[0] >> 8) * 2.0f) / (float)(params[1] >> 8);
-    calcFIRCoeffs_A9D8(self + 0x20, 2);
+void SFILTER_modifyLPFFIR8(LPFSTATE* self, int *params) {
+    self->fir.cutHigh = ((float)(params[0] >> 8) * 2.0f) / (float)(params[1] >> 8);
+    calcFIRCoeffs_A9D8(&self->fir, 2);
 }
 #endif
 
@@ -23800,8 +23800,8 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_modifyAMPLF);
  * @param node  the gain node
  * @param params  [0] the gain in 24.8 fixed point
  */
-void SFILTER_modifyAMPLF(void *node, int *params) {
-    (*(float *)((char*)(node) + (0x1C))) = (float) ((float) *params * 0.00390625f);
+void SFILTER_modifyAMPLF(AMPLFSTATE* node, int *params) {
+    node->gain = (float) ((float) *params * 0.00390625f);
 }
 #endif
 
@@ -23888,10 +23888,10 @@ extern void SNDMEMI_free(int);
  *
  * @param node  the mixer node
  */
-void SFILTER_mixerrestore(void *node) {
+void SFILTER_mixerrestore(MIXERSTATE* node) {
     int temp_4;
 
-    temp_4 = (*(int *)((char*)(node) + (0x1C)));
+    temp_4 = (int)((MIXERSTATE *)node)->ptempbuf;
     if (temp_4 != 0) {
         SNDMEMI_free(temp_4);
     }
@@ -23993,12 +23993,12 @@ extern void func_003CF300(void *, int, int, int);
  * @param dstBuf  the output buffer
  * @return the frames produced, or the input's result when it is 0 or less
  */
-int SFILTER_reson(char *node, int count, int srcBuf, int dstBuf) {
+int SFILTER_reson(RESONSTATE* node, int count, int srcBuf, int dstBuf) {
     int (**obj)(void *, int, int, int, int);
     int n;
-    obj = *(int (***)(void *, int, int, int, int))(node + 8);
+    obj = (int (**)(void *, int, int, int, int))((RESONSTATE *)node)->sfn.pfnnext;
     if (obj != 0) {
-        n = (*obj)(obj, count, dstBuf, srcBuf, *(unsigned char *)(node + 0x1A));
+        n = (*obj)(obj, count, dstBuf, srcBuf, ((RESONSTATE *)node)->sfn.requester);
         if (n <= 0) {
             return n;
         }
@@ -24146,10 +24146,10 @@ extern void SNDMEMI_free(int);
  *
  * @param effect  the splitter node
  */
-void SFILTER_splitrestore(void *effect) {
+void SFILTER_splitrestore(SPLITSTATE* effect) {
     int temp_4;
 
-    temp_4 = (*(int *)((char*)(effect) + (0x1C)));
+    temp_4 = (int)((SPLITSTATE *)effect)->pdatabuf;
     if (temp_4 != 0) {
         SNDMEMI_free(temp_4);
     }
@@ -24204,9 +24204,9 @@ extern void Util_MemCpy_F740(void *, void *, int) __asm__("Util_MemCpy");
  * @param dst  the output buffer
  * @return @p n
  */
-int SFILTER_src(char *self, int n, int workBuf, void *dst) {
-    Util_MemCpy_F740(dst, *(char **)(self + 0x1C), n * 4);
-    *(char **)(self + 0x1C) += n * 4;
+int SFILTER_src(SRCSTATE* self, int n, int workBuf, void *dst) {
+    Util_MemCpy_F740(dst, ((SRCSTATE *)self)->pdata, n * 4);
+    ((SRCSTATE *)self)->pdata += n;
     return n;
 }
 #endif

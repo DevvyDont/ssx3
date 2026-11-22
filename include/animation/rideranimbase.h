@@ -38,6 +38,29 @@ CHECK_OFFSET(tExpireInfo, seq, 0x0);
 CHECK_OFFSET(tExpireInfo, seqr, 0x4);
 CHECK_SIZE(tExpireInfo, 0x8);
 
+// An AI animation's play attributes (On Tour struct tAIAnimPlayAttr, 0x1C): cAIAnimEventMap::getAnimPlayAttr(tAIAnimID)
+// returns one ([O] `tAIAnimPlayAttr& getAnimPlayAttr(tAIAnimID aiID)`). [R] cAIAnimEventMap_getAnimPlayAttr returns
+// D_00446990 + id * 0x1C, so the seven word-sized members sit at On Tour's offsets. The enum members are words
+// (tAIAnimCategoryID / tAIAnimUpdateRuleID / tAIAnimExpireRuleID / tAIAnimSequencerID in On Tour).
+struct tAIAnimPlayAttr {
+    int AnimCategory;               // 0x00 [O]; [U] cRiderAnimBase reads it (*getAnimPlayAttr(anim))
+    int UpdateRule;                 // 0x04 [O]; [U] cRiderAnim_updateRule switches on it (16 update handlers)
+    int ExpireRule;                 // 0x08 [O]; [U] cRiderAnim_expireRule switches on it
+    int SequencerID;                // 0x0C [O]; [U] cRiderAnimBase reads it ([3]) to pick the sequencer
+    float BlendInTime;              // 0x10 [O]
+    float EmptySeqrBlendInTime;     // 0x14 [O]
+    float BlendOutTime;             // 0x18 [O]
+};
+
+CHECK_OFFSET(tAIAnimPlayAttr, AnimCategory, 0x00);
+CHECK_OFFSET(tAIAnimPlayAttr, UpdateRule, 0x04);
+CHECK_OFFSET(tAIAnimPlayAttr, ExpireRule, 0x08);
+CHECK_OFFSET(tAIAnimPlayAttr, SequencerID, 0x0C);
+CHECK_OFFSET(tAIAnimPlayAttr, BlendInTime, 0x10);
+CHECK_OFFSET(tAIAnimPlayAttr, EmptySeqrBlendInTime, 0x14);
+CHECK_OFFSET(tAIAnimPlayAttr, BlendOutTime, 0x18);
+CHECK_SIZE(tAIAnimPlayAttr, 0x1C);
+
 struct cRiderAnimBase {
     int CurrentAnimID[6];           // 0x000 [O] (cRiderAnimState::CurrentAnimID[6]); [R] reset stores 0x1B6 (no anim)
                                     //       in each; [U] cRiderAnimBase_play stores the started id at [slot],
