@@ -1000,10 +1000,10 @@ extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
             vu0AddEq_137860(RIDER->mVelocity, impulse);
             if (((char*)hitB.Inst) != 0)
             {
-                char* hitOwner = (char*)hitB.Inst->m_pActiveNode;
-                if (hitOwner != 0)
+                cInstanceNode* hitOwner = hitB.Inst->m_pActiveNode;
+                if (((char*)hitOwner) != 0)
                 {
-                    sVEntry<void(void*, void*, const t4Vector&)>* vt = *(sVEntry<void(void*, void*, const t4Vector&)>**)(hitOwner + 0xC);
+                    sVEntry<void(void*, void*, const t4Vector&)>* vt = (sVEntry<void (void*, void*, const t4Vector &)>*)hitOwner->mVtbl;
                     vt[43].fn(vthis(hitOwner, vt[43]), &hitB,
                               vu0Scale_137860(vu0Scale_137860(impulse, -1.0f), (float)SSXApp->TimerHz));
                 }

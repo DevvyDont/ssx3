@@ -9,7 +9,7 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/ai.h"
-
+#include "world/worldcache.h"
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_cWScriptProcess);
 #ifdef SKIP_ASM
@@ -1577,7 +1577,7 @@ extern "C" void cWScriptMan_rebuildGlobalTables(cWScriptMan* self)
 {
     int i = 0;
     cWScriptMan_purgeGlobalTables(self);
-    int n = cWorldView_getNumSections((cWorldView*)(*(char**)self->World + 0x10));
+    int n = cWorldView_getNumSections(&self->World->m_pWorldCache->m_WorldView);
     for (; i < n; i++) {
         cWScriptMan_rebuildGlobalTables_sSection* tbl = (cWScriptMan_rebuildGlobalTables_sSection*)self->World->m_pWScriptCache->mpCache;
         int ok = tbl[i].type >= 2 && tbl[i].f8 != 0;
@@ -1684,7 +1684,7 @@ extern "C" void cPlaybackMan_purgeLocation(void* pb);
 extern "C" int cWorld_getNumMissionScripts(void* world, int i);
 extern "C" void* cWorld_getMissionScripts(void* world, int i);
 extern "C" void cWScriptMan_addProcess1(void* self, int section, void* def, int id, int flags);
-extern "C" char* cBENewRaceInterface_getLocation(void* iface);
+extern "C" tBELocationDB* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void cPlaybackMan_initLocation(void* pb, void* loc);
 extern "C" void cWScriptMan_updateWorld(cWScriptMan* self);
 
@@ -1710,7 +1710,7 @@ extern "C" void cWScriptMan_setupMissions(cWScriptMan* self)
     iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGameMode == 4 && SSXApp->Game->AI->NumberOfPlayersAllocated == 1) {
         int i = 0;
-        int n = cWorldView_getNumSections((cWorldView*)(*(char**)self->World + 0x10));
+        int n = cWorldView_getNumSections(&self->World->m_pWorldCache->m_WorldView);
         for (; i < n; i++) {
             int cnt = cWorld_getNumMissionScripts(self->World, i);
             sWSPDef8C60* defs = (sWSPDef8C60*)cWorld_getMissionScripts(self->World, i);
@@ -1719,7 +1719,7 @@ extern "C" void cWScriptMan_setupMissions(cWScriptMan* self)
                 cWScriptMan_addProcess1(self, i, &defs[j], (i << 16) + i, 0);
             }
         }
-        cPlaybackMan_initLocation(wsPlayback8C60(), cBENewRaceInterface_getLocation(iface) + 0x34);
+        cPlaybackMan_initLocation(wsPlayback8C60(), cBENewRaceInterface_getLocation(iface)->fileName);
     }
     cWScriptMan_updateWorld(self);
 }
@@ -1767,7 +1767,7 @@ extern "C" void luno_cLunoVar__cLunoVar(cWScriptMan_isFunc_sValue* self, int fla
 extern "C" void cWScriptMan_updateWorld(cWScriptMan* self)
 {
     int i = 0;
-    int n = cWorldView_getNumSections((cWorldView*)(*(char**)self->World + 0x10));
+    int n = cWorldView_getNumSections(&self->World->m_pWorldCache->m_WorldView);
     for (; i < n; i++) {
         int cnt = cWorld_getNumMissionScripts(self->World, i);
         sWSPDef8DB8* defs = (sWSPDef8DB8*)cWorld_getMissionScripts(self->World, i);
@@ -1909,7 +1909,7 @@ extern "C" void cWScriptMan_initMissions(cWScriptMan* self)
     cProcessList_deleteAll((char*)&self->AddList);
     cProcessList_deleteAll((char*)&self->IdleList);
     cWScriptMan_init(self);
-    int n = cWorldView_getNumSections((cWorldView*)(*(char**)self->World + 0x10));
+    int n = cWorldView_getNumSections(&self->World->m_pWorldCache->m_WorldView);
     for (; i < n; i++) {
         cWScriptMan_initMissions_sSection* tbl = (cWScriptMan_initMissions_sSection*)self->World->m_pWScriptCache->mpCache;
         int ok = tbl[i].type >= 2 && tbl[i].f8 != 0;

@@ -1002,14 +1002,14 @@ extern "C" void cAirMotion_step(cAirMotion* self)
         cRider* rider2 = self->mRider;
         cAirPredictor* ap = rider2->mAirPredictor;
         int idx = ap->GuessLandSurface;
-        char* snow = (char*)&SSXApp->Game->SurfPropCache->SurfData[idx];
+        tSurfData* snow = &SSXApp->Game->SurfPropCache->SurfData[idx];
         int flag = 0;
         short sf = ap->SurfaceFlags;
         if (sf != -1) {
             int orientableBit = sf & 8;
             flag = orientableBit != 0;
         }
-        if (idx != 18 && *(int*)(snow + 0x44) == 0 && flag) {
+        if (idx != 18 && snow->IsResetSurface == 0 && flag) {
             float timeLeft = ap->TotalAirTime - ap->CurAirTime;
             float timeScale = rider2->mTimeScale;
             float x;
@@ -8200,8 +8200,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getEndOfRaceTimer);
  * @param aiMan  the cAI
  * @return EndOfRaceTimer
  */
-extern "C" int cAI_getEndOfRaceTimer(void *aiMan) {
-    return (*(int *)((char*)(aiMan) + (0x18)));
+extern "C" int cAI_getEndOfRaceTimer(cAI* aiMan) {
+    return (aiMan->EndOfRaceTimer);
 }
 #endif
 //100%

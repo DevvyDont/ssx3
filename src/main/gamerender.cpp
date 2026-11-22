@@ -309,11 +309,11 @@ struct sRenderList {
  *
  * @return 1 when every view is ready, otherwise 0
  */
-extern "C" int cGameViewMan_isStreamReady(sRenderList* self)
+extern "C" int cGameViewMan_isStreamReady(cGameViewMan* self)
 {
     unsigned int i;
-    for (i = 0; i < self->count; i++) {
-        if (*(int*)((char*)self->items[i] + 0xb4) == 0) {
+    for (i = 0; i < self->m_uiNumView; i++) {
+        if (self->PlayerCamera[i]->bStreamIsReady == 0) {
             return 0;
         }
     }

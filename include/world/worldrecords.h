@@ -255,6 +255,19 @@ CHECK_OFFSET(tParticleModelRecord, m_iNumParticleMeshes, 0x4);
 CHECK_OFFSET(tParticleModelRecord, m_ParticleMeshHeirarchy, 0x8);
 CHECK_SIZE(tParticleModelRecord, 0xC);
 
+// A particle mesh (On Tour tParticleMeshRecord_PSP, 0x28 there: m_iLength, m_fvMin, m_fvMax, m_iFlags,
+// m_iNumParticleVolumes, m_ParticleVolumes). Same one-word shift as tModelRecord / tParticleModelRecord (retail has
+// no m_iLength), so 0x24 bytes. Laid out through the member retail reads.
+struct tParticleMeshRecord {
+    char unk_000[0x20];             // 0x00 [O] m_fvMin, m_fvMax, m_iFlags, m_iNumParticleVolumes (by the shift)
+    void* m_ParticleVolumes;        // 0x20 [O] tParticleVolumeID (0x24 there; On Tour's resolveParticleMesh relocates
+                                    //      it); [U] cChunkResolve_resolveParticleMesh relocates +0x20 (+= the record)
+};
+
+CHECK_OFFSET(tParticleMeshRecord, unk_000, 0x00);
+CHECK_OFFSET(tParticleMeshRecord, m_ParticleVolumes, 0x20);
+CHECK_SIZE(tParticleMeshRecord, 0x24);
+
 // A placed particle emitter (On Tour tParticleInstanceRecord : _tPSPParticleInstance, 0x88 + pad). The two members
 // retail uses sit at On Tour's offsets.
 struct tParticleInstanceRecord {

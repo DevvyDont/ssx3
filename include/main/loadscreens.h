@@ -434,4 +434,56 @@ CHECK_OFFSET(cGameLoadStateOutLodge, mUserNum, 0x044);
 CHECK_OFFSET(cGameLoadStateOutLodge, unk_045, 0x045);
 CHECK_SIZE(cGameLoadStateOutLodge, 0x48);
 
+// ---------------------------------------------------------------------------------------------------------------------
+// cGameLoadStateConquer: cGameLoadScreen's load state on the career (Conquer the Mountain) path: cGameLoadScreen_load
+// picks it when the race DB's online flag (+0x49) is clear and the game mode (+0x48) is neither 5 nor 6. The class name:
+// the retail allocation tag "cGameLoadStateConquer" (str_cGameLoadStateConquer in cGameLoadScreen_load). Retail code: the
+// dtor func_00245708, onCreateScreen func_00245730, onGainTransition func_002458B8 and onWidgetCreate func_002458B0 in
+// main/ssxappdtor; there is no out-of-line ctor (cGameLoadScreen_load also clears D_004A19DC). No On Tour class, no
+// preview symbol.
+//
+// Size 0x48: [R] cGameLoadScreen_load: operator new(0x48, "cGameLoadStateConquer") + cUIState_cUIState(mem, mpUI) +
+// vtable (no own members, like cGameLoadStateOutLodge).
+// Base: cUIState (ui/uistate.h, 0x48) : cListNode (vptr at 0x8). Vtable D_0047C7A8 (24 slots: 1 dtor func_00245708,
+// 4 onCreateScreen func_00245730, 7 onGainTransition func_002458B8, 18 onWidgetCreate func_002458B0; builds/x/vtables).
+// A FLAT layout, like main/game.h. Evidence tags as for cGameLoadState.
+
+struct cGameLoadStateConquer {
+    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
+    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] the cUIState ctor links the node to itself
+    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
+    void** mVtbl;                   // 0x008 [R] D_0047C7A8 (cGameLoadScreen_load, dtor func_00245708)
+    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
+    int mHashName;                  // 0x00C [O]
+    cUIEngine* mpEngine;            // 0x010 [O]; [R] the load screen's mpUI
+    signed char mCurrentCtrl;       // 0x014 [O]; [R] the cUIState ctor stores -1
+    unsigned char mCtrlBits;        // 0x015 [O]; [R] the cUIState ctor stores 0xF
+    char unk_016[0x2];              // 0x016 padding
+    int miMiscData;                 // 0x018 [O]
+    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes; every accessor lw/sw's the word, see
+                                    //       ui/uistate.h)
+    cUIState* mpParentState;        // 0x020 [O]
+    char mScreens[0x1C];            // 0x024 [O] cList mScreens
+    cUIScreen* mpScreen;            // 0x040 [O]; [U] onGainTransition (func_002458B8) looks "%" up on it
+    signed char mUserNum;           // 0x044 [O]; [R] the cUIState ctor stores -1
+    char unk_045[0x3];              // 0x045 padding
+};
+
+CHECK_OFFSET(cGameLoadStateConquer, mpPrev, 0x000);
+CHECK_OFFSET(cGameLoadStateConquer, mpNext, 0x004);
+CHECK_OFFSET(cGameLoadStateConquer, mVtbl, 0x008);
+CHECK_OFFSET(cGameLoadStateConquer, mHashName, 0x00C);
+CHECK_OFFSET(cGameLoadStateConquer, mpEngine, 0x010);
+CHECK_OFFSET(cGameLoadStateConquer, mCurrentCtrl, 0x014);
+CHECK_OFFSET(cGameLoadStateConquer, mCtrlBits, 0x015);
+CHECK_OFFSET(cGameLoadStateConquer, unk_016, 0x016);
+CHECK_OFFSET(cGameLoadStateConquer, miMiscData, 0x018);
+CHECK_OFFSET(cGameLoadStateConquer, mAttrState, 0x01C);
+CHECK_OFFSET(cGameLoadStateConquer, mpParentState, 0x020);
+CHECK_OFFSET(cGameLoadStateConquer, mScreens, 0x024);
+CHECK_OFFSET(cGameLoadStateConquer, mpScreen, 0x040);
+CHECK_OFFSET(cGameLoadStateConquer, mUserNum, 0x044);
+CHECK_OFFSET(cGameLoadStateConquer, unk_045, 0x045);
+CHECK_SIZE(cGameLoadStateConquer, 0x48);
+
 #endif /* MAIN_LOADSCREENS_H */

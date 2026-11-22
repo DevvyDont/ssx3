@@ -294,8 +294,8 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequence_setSubAnimTimeScale);
  * @param index  the sub-animation slot
  * @param fparg0  the time scale
  */
-extern "C" void cAnimSequence_setSubAnimTimeScale(int sequence, int index, float fparg0) {
-    (*(float *)((char*)(((index * 0x1C) + sequence)) + (0xC))) = fparg0;
+extern "C" void cAnimSequence_setSubAnimTimeScale(cAnimSequence* sequence, int index, float fparg0) {
+    sequence->SubAnims[index].TimeScale = fparg0;
 }
 #endif
 
@@ -349,8 +349,8 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequence_resetSubAnim);
  * @param sequence  the animation sequence
  * @param index  the sub-animation slot
  */
-extern "C" void cAnimSequence_resetSubAnim(int sequence, int index) {
-    (*(int *)((char*)(((index * 0x1C) + sequence)) + (0x18))) = 0;
+extern "C" void cAnimSequence_resetSubAnim(cAnimSequence* sequence, int index) {
+    sequence->SubAnims[index].IsActive = 0;
 }
 #endif
 
@@ -522,16 +522,16 @@ extern "C" void cAnimSequence_readFromReplayFrame(void* node, void* stream)
     Read_314050(streamPtr, &self->CheckTriggersAtCurrentFrame, 0x4);
     int n;
     Read_314050(streamPtr, &n, 4);
-    char* tail = (char*)self->Triggers;
+    tTrigger* tail = self->Triggers;
     for (int i = 0; i < n; i++) {
         char* trigger = (char*)cMemMan_alloc(0x10, str_AnimTrigger, 0x20000000, 0);
         Read_314050(streamPtr, trigger, 0x10);
         if ((char*)self->Triggers != 0) {
-            *(char**)(tail + 0xC) = trigger;
+            tail->Next = (tTrigger*)trigger;
         } else {
             self->Triggers = (tTrigger*)trigger;
         }
-        tail = trigger;
+        tail = (tTrigger*)trigger;
     }
 }
 #endif
@@ -1222,9 +1222,9 @@ INCLUDE_ASM("animation/animsequencer", cMdfArchive_getNumModelParts);
  * @return the model part count
  */
 extern "C" short cMdfArchive_getNumModelParts(cMdfArchive* self) {
-    char *header = (char*)self->ArchiveHeader;
-    if (header != 0) {
-        return *(short *)(header + 4);
+    tMdfArchive* header = self->ArchiveHeader;
+    if (((char*)header) != 0) {
+        return header->mNumModels;
     }
     return 0;
 }

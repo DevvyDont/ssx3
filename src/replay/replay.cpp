@@ -1,4 +1,6 @@
 #include "common.h"
+#include "object/objnode.h"
+#include "replay/frame.h"
 #include "vtable.h"
 #include "replay/frameptr.h"
 #include "ai/ridermetrix.h"
@@ -155,12 +157,12 @@ struct sBucketVEntryDE58 {
 // Calls virtual slot 3 on every object in the given bucket of the global bucket manager.
 extern "C" void cReplay_applyBucket(cReplay* self, int bucket)
 {
-    void* node = cBucketMan_first((cBucketMan*)&gBucketMan, bucket);
+    cObjNode* node = (cObjNode*)cBucketMan_first((cBucketMan*)&gBucketMan, bucket);
     cBucketMan* bm = (cBucketMan*)&gBucketMan;
-    while (node != 0) {
-        sBucketVEntryDE58* vt = *(sBucketVEntryDE58**)((char*)node + 0xC);
+    while (((void*)node) != 0) {
+        sBucketVEntryDE58* vt = (sBucketVEntryDE58*)node->mVtbl;
         vt[3].fn(vthis(node, vt[3]));
-        node = cBucketMan_next(bm, node, bucket);
+        node = (cObjNode*)cBucketMan_next(bm, node, bucket);
     }
 }
 #endif
@@ -409,12 +411,12 @@ INCLUDE_ASM("replay/replay", cReplay_findNextFrame);
  */
 extern "C" void* cReplay_findNextFrame(cReplay* self)
 {
-    void* frame = cReplay_findFrame(self);
-    void* nextFrame = *(void**)((char*)frame + 0x14);
+    cReplayFrame* frame = (cReplayFrame*)cReplay_findFrame(self);
+    void* nextFrame = frame->Next;
     if (nextFrame != 0) {
-        frame = nextFrame;
+        frame = (cReplayFrame*)nextFrame;
     }
-    return frame;
+    return ((void*)frame);
 }
 #endif
 
@@ -432,12 +434,12 @@ INCLUDE_ASM("replay/replay", cReplay_findPrevFrame);
  */
 extern "C" void* cReplay_findPrevFrame(cReplay* self)
 {
-    void* frame = cReplay_findFrame(self);
-    void* prevFrame = *(void**)((char*)frame + 0x18);
+    cReplayFrame* frame = (cReplayFrame*)cReplay_findFrame(self);
+    void* prevFrame = frame->Prev;
     if (prevFrame != 0) {
-        frame = prevFrame;
+        frame = (cReplayFrame*)prevFrame;
     }
-    return frame;
+    return ((void*)frame);
 }
 #endif
 
@@ -485,9 +487,9 @@ extern "C" void cReplay_rewindFrame(cReplay* self);
  */
 extern "C" void cReplay_nextFrame(cReplay* self)
 {
-    void* frame = cReplay_findNextFrame_2(self, self->PlaybackTick);
+    cReplayFrame* frame = (cReplayFrame*)cReplay_findNextFrame_2(self, self->PlaybackTick);
     self->PlaybackFrame = (cReplayFrame*)frame;
-    self->PlaybackTick = *(int*)((char*)frame + 0x30);
+    self->PlaybackTick = frame->FrameStartTick;
     cReplay_rewindFrame(self);
 }
 #endif
@@ -505,9 +507,9 @@ extern "C" void cReplay_rewindFrame(cReplay* self);
  */
 extern "C" void cReplay_prevFrame(cReplay* self)
 {
-    void* frame = cReplay_findPrevFrame_2(self, self->PlaybackTick);
+    cReplayFrame* frame = (cReplayFrame*)cReplay_findPrevFrame_2(self, self->PlaybackTick);
     self->PlaybackFrame = (cReplayFrame*)frame;
-    self->PlaybackTick = *(int*)((char*)frame + 0x30);
+    self->PlaybackTick = frame->FrameStartTick;
     cReplay_rewindFrame(self);
 }
 #endif
@@ -714,11 +716,11 @@ struct sReplayObjE6E0 {
  * @param rider  the replay frame the highlight starts on
  * @param src  the rider stats at the start of the highlight
  */
-extern "C" void cReplayHighlight_begin(sReplayObjE6E0* self, char* rider, sReplayDataE6E0* src)
+extern "C" void cReplayHighlight_begin(sReplayObjE6E0* self, cReplayFrame* rider, sReplayDataE6E0* src)
 {
-    *(unsigned char*)(rider + 0x1E) |= 1 << self->index;
+    rider->FrameType.Highlights |= 1 << self->index;
     cReplayFrame_setRanking(rider, self->index, 0);
-    self->rider = rider;
+    self->rider = ((char*)rider);
     self->data = *src;
 }
 #endif

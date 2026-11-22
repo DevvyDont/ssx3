@@ -4248,8 +4248,8 @@ extern "C" char* strcpy(char* dst, const char* src);
  */
 extern "C" void func_002C68C8(cPS2MemCard* self, int i, char* dst)
 {
-    // PORT: (int)self pointer arithmetic (index added first, as in the target).
-    strcpy(dst, (char*)((i << 6) + (int)self) + 0x4E0);
+
+    strcpy(dst, (char*)self->unk_4C0[i].m_entryName);
 }
 #endif
 

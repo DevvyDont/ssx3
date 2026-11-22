@@ -12,8 +12,19 @@
 #include "layout.h"
 #include "bx/loadtimer.h"
 
-struct cAppModule;
 struct cExecutionMan;
+
+// cAppModule: the base of every application module cAppMan runs (the front end, the game, the load screens, the debug
+// FE, ...). Size 4: [O] On Tour class cAppModule (size 0x4, no data members: load / purge / loseFocus / gainFocus /
+// update / render are virtual); [R] vtable cAppModule_vtbl (0x0046D970, 7 slots, slot 1 cAppModule__cAppModule) is
+// stored at 0x0 by the dtor and by every module dtor chaining to the base (builds/x/vtables/vtables.tsv storers).
+struct cAppModule {
+    void** mVtbl;                   // 0x0 [O] the vptr (the class's only word); [R] cAppModule__cAppModule stores
+                                    //      cAppModule_vtbl here
+};
+
+CHECK_OFFSET(cAppModule, mVtbl, 0x0);
+CHECK_SIZE(cAppModule, 0x4);
 
 struct cAppMan {
     cAppModule* ActiveModule;       // 0x000 [O]

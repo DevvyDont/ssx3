@@ -946,9 +946,9 @@ public:
  * @return 1
  */
 // PORT: stores a pointer in an int field (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cChunkResolve_resolveParticleModel(cChunkResolve* self, void* pModel)
+extern "C" int cChunkResolve_resolveParticleModel(cChunkResolve* self, tParticleModelRecord* pModel)
 {
-    *(int*)((char*)pModel + 0x8) += (int)pModel;
+    *(int*)&pModel->m_ParticleMeshHeirarchy += (int)pModel;
     ((cChunkResolve_resolveParticleModel_cObj*)self)->resolveParticleModelHeirarchy(pModel);
     return 1;
 }
@@ -1034,9 +1034,9 @@ INCLUDE_ASM("world/worldview", cChunkResolve_resolveParticleMesh);
  * @param pMesh  the particle mesh record (On Tour pMesh)
  * @return 1
  */
-extern "C" int cChunkResolve_resolveParticleMesh(cChunkResolve* self, void* pMesh)
+extern "C" int cChunkResolve_resolveParticleMesh(cChunkResolve* self, tParticleMeshRecord* pMesh)
 {
-    *(int*)((char*)pMesh + 0x20) += (int)pMesh;
+    *(int*)&pMesh->m_ParticleVolumes += (int)pMesh;
     return 1;
 }
 #endif
@@ -1189,9 +1189,9 @@ INCLUDE_ASM("world/worldview", cChunkResolve_resolveChannel);
  * @param pBase  address the offset is relative to (On Tour pBase)
  * @return 1
  */
-extern "C" int cChunkResolve_resolveChannel(cChunkResolve* self, void* pChannel, int pBase)
+extern "C" int cChunkResolve_resolveChannel(cChunkResolve* self, tChannelRecord* pChannel, int pBase)
 {
-    *(int*)((char*)pChannel + 0x4) += pBase;
+    *(int*)&pChannel->m_Segments += pBase;
     return 1;
 }
 #endif
@@ -1518,10 +1518,10 @@ extern void* cPS2ChunkResolve_vtbl[];
  */
 extern "C" void* cChunkResolve_construct()
 {
-    void* chunkResolve = cMemMan_alloc(20, str_cPS2ChunkResolve, 0, 0);
+    cPS2ChunkResolve* chunkResolve = (cPS2ChunkResolve*)cMemMan_alloc(20, str_cPS2ChunkResolve, 0, 0);
     cChunkResolve_cChunkResolve(chunkResolve);
-    *(void***)((char*)chunkResolve + 0x8) = cPS2ChunkResolve_vtbl;
-    return chunkResolve;
+    chunkResolve->mVtbl = cPS2ChunkResolve_vtbl;
+    return ((void*)chunkResolve);
 }
 #endif
 
@@ -1570,7 +1570,7 @@ extern "C" void cPS2ChunkResolve_init(cPS2ChunkResolve* self, int pNash)
     cWorld* w = cWorld_m_pTheWorld;
     self->mp_Nash = (Nash*)pNash;
     *(char****)self = (char***)w;
-    self->m_iNumImages = *(short*)(*(char**)w->m_pWorldCache + 0x2A);
+    self->m_iNumImages = w->m_pWorldCache->mp_DataHeader->m_iTable[9];
 }
 #endif
 

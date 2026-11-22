@@ -210,7 +210,7 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptCameraController_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // cScriptAlgorithm_getScriptObj returns a pointer (the unit declares it int); bind a pointer-returning alias.
-char* cScriptAlgorithm_getScriptObj_K2(void* self) __asm__("cScriptAlgorithm_getScriptObj__FPv");
+cScriptObjCamera* cScriptAlgorithm_getScriptObj_K2(void* self) __asm__("cScriptAlgorithm_getScriptObj__FPv");
 
 class cScrCamAlgoK2 {
 public:
@@ -242,7 +242,7 @@ extern "C" void cScriptCameraController_update(cScriptCameraController* self)
 {
     sScrAlgoNodeK2* n = *(sScrAlgoNodeK2**)self->AlgorithmList;
     while (n != 0) {
-        float progress = *(float*)(cScriptAlgorithm_getScriptObj_K2(n->algo) + 0x18);
+        float progress = cScriptAlgorithm_getScriptObj_K2(n->algo)->mWeight;
         float progressSq = progress * progress;
         float smoothed = progressSq * 3.0f - progressSq * 2.0f * progress;
         n->t = progress;

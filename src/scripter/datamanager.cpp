@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uistate.h"
 #include "scripter/scriptobjcammgr.h"
 #include "visualfx/transitionman.h"
 #include "sound/ssxaudio.h"
@@ -209,9 +210,9 @@ INCLUDE_ASM("scripter/datamanager", cDataManager_GetData);
  * @param dataHandle  the handle cDataManager_AttachData returned
  * @return the attached data
  */
-extern "C" int cDataManager_GetData(cDataManager* self, char* dataHandle)
+extern "C" int cDataManager_GetData(cDataManager* self, tDataInstanceInfo* dataHandle)
 {
-    return *(int*)(dataHandle + 8);
+    return (int)dataHandle->pData;
 }
 #endif
 //100%
@@ -224,10 +225,10 @@ INCLUDE_ASM("scripter/datamanager", cDataManager_GetDataUserData);
  * @param out0  receives the first user-data word
  * @param out1  receives the second user-data word
  */
-extern "C" void cDataManager_GetDataUserData(cDataManager* self, char* dataHandle, int* out0, int* out1)
+extern "C" void cDataManager_GetDataUserData(cDataManager* self, tDataInstanceInfo* dataHandle, int* out0, int* out1)
 {
     *out0 = *(int*)dataHandle;
-    *out1 = *(int*)(dataHandle + 4);
+    *out1 = (int)dataHandle->pUserData2;
 }
 #endif
 
@@ -1159,9 +1160,9 @@ extern "C" void* tNISList_GetScriptPlayer(tNISList* self, int i)
 {
     void* list = (char*)&self->mList;
     if (i < cCircularBuffer_GetNumEntries_count(list)) {
-        void* item = cCircularBuffer_operatorIndex(list, i);
+        tNISListEntry* item = (tNISListEntry*)cCircularBuffer_operatorIndex(list, i);
         if (tNISList_IsVideo(self, item) == 0) {
-            int id = *(int*)((char*)item + 0xC);
+            int id = item->scriptHandle;
             if (id >= 0) {
                 return cBXScriptEngine_GetRequestPlayerByReqHandle(*(void**)self, id);
             }
@@ -1435,8 +1436,8 @@ extern "C" int tNISList_IsSkipAllowed(tNISList* self)
         return 0;
     }
     int allowed = 0;
-    void* headEntry = cCircularBuffer_operatorIndex((char*)&self->mList, 0);
-    if (*(int*)((char*)headEntry + 0x8) & 1) {
+    tNISListEntry* headEntry = (tNISListEntry*)cCircularBuffer_operatorIndex((char*)&self->mList, 0);
+    if (headEntry->controlBits & 1) {
         allowed = self->mPausedOnNextScriptLoading == 0;
     }
     return allowed;
@@ -1459,8 +1460,8 @@ extern "C" int tNISList_IsPauseMenuAllowed(tNISList* self)
     if (self->mState != 3) {
         return 1;
     }
-    void* entry = cCircularBuffer_operatorIndex((char*)&self->mList, 0);
-    return (*(int*)((char*)entry + 0x8) >> 2) & 1;
+    tNISListEntry* entry = (tNISListEntry*)cCircularBuffer_operatorIndex((char*)&self->mList, 0);
+    return (entry->controlBits >> 2) & 1;
 }
 #endif
 
@@ -1530,11 +1531,11 @@ extern "C" int tNISList_IsPlayingScriptOwner(tNISList* self, cScriptPlayerMain* 
     if (self->mState != 3) {
         return 0;
     }
-    void* headEntry = cCircularBuffer_operatorIndex((char*)&self->mList, 0);
+    tNISListEntry* headEntry = (tNISListEntry*)cCircularBuffer_operatorIndex((char*)&self->mList, 0);
     if (tNISList_IsVideo(self, headEntry) != 0) {
         return 0;
     }
-    return ((void*)obj) == cBXScriptEngine_GetRequestPlayerByReqHandle(ScriptEngine, *(int*)((char*)headEntry + 0xC));
+    return ((void*)obj) == cBXScriptEngine_GetRequestPlayerByReqHandle(ScriptEngine, headEntry->scriptHandle);
 }
 #endif
 
@@ -1647,8 +1648,8 @@ extern "C" void tNISList_OnScriptUpdate(tNISList* self, int requestHandle, cScri
 {
     if (tNISList_IsPlayingScriptOwner(self, (cScriptPlayerMain*)obj) != 0 && self->mIsCutSceneHandler != 0 &&
         obj->mLoopScript == 0) {
-        char* name = GetSSXScriptHeader(obj);
-        if (cScriptPlayerMain_GetNumUpdatesToEndLeft(obj) + 1 <= *(short*)(name + 0x12)) {
+        tSSXScriptHeader* name = (tSSXScriptHeader*)GetSSXScriptHeader(obj);
+        if (cScriptPlayerMain_GetNumUpdatesToEndLeft(obj) + 1 <= name->endFadeToTransitionFrames) {
             tNISList_DoTransitionToNext(self);
         }
     }
@@ -1877,9 +1878,9 @@ extern "C" int cBXScriptEngine_GetRequestState(void* self, int a1);
 extern "C" void tNISList_CheckOnLoading(tNISList* self)
 {
     if (self->mState == 1) {
-        char* headEntry = (char*)cCircularBuffer_operatorIndex((char*)&self->mList, 0);
+        tNISListEntry* headEntry = (tNISListEntry*)((char*)cCircularBuffer_operatorIndex((char*)&self->mList, 0));
         if (tNISList_IsVideo(self, headEntry) == 0) {
-            int requestState = cBXScriptEngine_GetRequestState(*(void**)self, *(int*)(headEntry + 0xC));
+            int requestState = cBXScriptEngine_GetRequestState(*(void**)self, headEntry->scriptHandle);
             if (requestState == 2) {
                 self->mState = requestState;
             }

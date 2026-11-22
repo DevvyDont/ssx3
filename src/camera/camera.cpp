@@ -1774,8 +1774,8 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_isAirPredictorDone);
 extern "C" int cRiderCameraTarget_isAirPredictorDone(cRiderCameraTarget* self)
 {
     cRider* rider = self->Rider;
-    void* airPredictor = rider->mAirPredictor;
-    int simState = *(int*)((char*)airPredictor + 0xAC);
+    cAirPredictor* airPredictor = rider->mAirPredictor;
+    int simState = airPredictor->SimState;
     int done = 0;
     if (simState == 1 || simState == 3) {
         done = 1;
@@ -5137,9 +5137,9 @@ INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_updateCamTarget);
  * @param setup  the frame's chase setup (On Tour const cChaseSetup&)
  * @return the copied position (On Tour's returns void)
  */
-extern "C" cQuad128 cLookAtChaseAlgorithm_updateCamTarget(cLookAtChaseAlgorithm* self, void* setup)
+extern "C" cQuad128 cLookAtChaseAlgorithm_updateCamTarget(cLookAtChaseAlgorithm* self, cChaseSetup* setup)
 {
-    cQuad128 targetPos = *(cQuad128*)((char*)setup + 0x10);
+    cQuad128 targetPos = *(cQuad128*)&setup->TPos;
     *(cQuad128*)&self->CamTargetPos = targetPos;
     return targetPos;
 }

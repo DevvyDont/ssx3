@@ -2627,7 +2627,7 @@ struct sWSVtVBB10 {
 
 struct sWSManBB10 {
     char pad0[0x28C];
-    char* world;                // 0x28C
+    cWorld* world;                // 0x28C
     char pad290[0x28];
     void* list2B8;              // 0x2B8
     void* list2BC;              // 0x2BC
@@ -2685,7 +2685,7 @@ extern "C" void cWScriptMan_writeToReplayFrame(sWSManBB10* self, cReplayFramePtr
             sWSVtVBB10* vtEntry = &(*(sWSVtVBB10**)stream)[1];
             int scriptBase;
             vtEntry->fn(vthis(stream, *vtEntry), &j, 4);
-            scriptBase = cWScriptCache_getScriptBase(*(void**)(self->world + 4), j);
+            scriptBase = cWScriptCache_getScriptBase(self->world->m_pWScriptCache, j);
             luno_cLunoTable_writeToReplayFrame(self->objs[j], stream, scriptBase);
         }
     }

@@ -100,6 +100,7 @@ struct tSplineRecord;
 struct bxSphereTree;
 struct cRiderSphereTree;      // intersect/riderspheretree.h
 struct tPathIntersectInfo;    // path/basepath.h
+struct cOverlapList;          // intersect/overlaplist.h
 
 // One path event in range (On Tour struct tPathEventNode, size 0x10; path/basepath.h only forward-declares it). cRider
 // keeps 12 of them at 0x4DC (PathEventsCur). Layout [O]; [U] the path's getEventsInRange fills 16-byte entries
@@ -436,7 +437,8 @@ struct cRider {
     /* 0x794 */ void* unk_794[8]; // cleared as 0x20 bytes (cRider_flushActiveLights)
     /* 0x7B4 */ char unk_7B4[0xC];
     /* 0x7C0 */ char unk_7C0[0xA0] __attribute__((aligned(16))); // copied as one 0xA0-byte block (cRider_SetRiderLights)
-    /* 0x860 */ void* mOverlapList; // [X]
+    /* 0x860 */ cOverlapList* mOverlapList; // [O] cRider::OverlapList (cOverlapList*); [R] ctor: new ("OverlapList")
+                                            //      cOverlapList; [U] cRider_updateSplit1 reads its deletecount (+0x4)
     /* 0x864 */ tIntHint* mLineHint; // [O] cRider::LineHint (tIntHint*); [R] ctor: cMemMan_alloc(0x10, "Line Intersect Hint")
     /* 0x868 */ tIntHint* mWallHint; // [O] cRider::WallHint (tIntHint*); [R] ctor: cMemMan_alloc(0x10, "Wall Intersect Hint")
     /* 0x86C */ int mAIIndex; // [R] getAIIndex (cRider_getAIIndex); also the character/stat lookup index

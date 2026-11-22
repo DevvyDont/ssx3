@@ -236,9 +236,9 @@ static inline int imax(int a, int b)
 extern "C" void cStreamMan_setBandWidthLimit(cStreamMan* self, int rate)
 {
     rate = imax(0x8000, rate);
-    char* app = (char*)cAppMan_TheAppMan;
+    cAppMan* app = cAppMan_TheAppMan;
     self->m_iDataRatePerSecond = rate;
-    self->m_fTicksPerChunk = (float)*(int*)(app + 0x10) / ((float)rate * 0.000030517578125f);
+    self->m_fTicksPerChunk = (float)app->TimerHz / ((float)rate * 0.000030517578125f);
 }
 #endif
 

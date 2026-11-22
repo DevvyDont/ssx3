@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "object/instancenode.h"
 #include "world/instancerecord.h"
 #include "replay/frame.h"
 #include "sound/ssxaudio.h"
@@ -12,7 +13,7 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/ai.h"
-
+#include "camera/camera.h"
 //100%
 INCLUDE_ASM("replay/frameptr", cReplayFramePtr_initBlock);
 #ifdef SKIP_ASM
@@ -392,11 +393,11 @@ struct sFpSerObj {
  * @param out  the frame pointer to write to
  * @param obj  the instance record, or null
  */
-extern "C" void cReplayFramePtr_writeReplayInstance(sFpSerObj* out, void* obj)
+extern "C" void cReplayFramePtr_writeReplayInstance(sFpSerObj* out, tInstanceRecord* obj)
 {
     unsigned int id = 0xFFFFFFFF;
-    if (obj != 0) {
-        id = *(unsigned int*)((char*)obj + 0x78);
+    if (((void*)obj) != 0) {
+        id = obj->m_RID;
     }
     out->vt[1].fn(vthis(out, out->vt[1]), &id, 4);
 }
@@ -415,14 +416,14 @@ INCLUDE_ASM("replay/frameptr", cReplayFramePtr_writeReplayInstance1);
  * @param out  the frame pointer to write to
  * @param obj  the node whose instance is written
  */
-extern "C" void cReplayFramePtr_writeReplayInstance1(sFpSerObj* out, void* obj)
+extern "C" void cReplayFramePtr_writeReplayInstance1(sFpSerObj* out, cInstanceNode* obj)
 {
     struct {
         unsigned int id;
         unsigned short type;
     } rec;
     rec.id = 0xFFFFFFFF;
-    tInstanceRecord* inst = (tInstanceRecord*)(*(void**)((char*)obj + 0x18));
+    tInstanceRecord* inst = (tInstanceRecord*)(obj->Instance);
     if (((void*)inst) != 0) {
         rec.id = inst->m_RID;
         rec.type = *(unsigned short*)&inst->m_iFlags;
@@ -495,7 +496,7 @@ extern "C" void cReplay_setCurrentReplayCamera(cReplay* self)
     int n = list->count;
     int i;
     for (i = 0; i < n; i++) {
-        cChaseCameraController_switchCamera_ReplayToggle(*(void**)(list->riders[i] + 0xA8), camSubset[self->CurrentReplayCamIndex]);
+        cChaseCameraController_switchCamera_ReplayToggle(((cCamera*)list->riders[i])->ChaseController, camSubset[self->CurrentReplayCamIndex]);
     }
 }
 #endif
@@ -542,8 +543,8 @@ extern "C" void cReplay_setupGameCamerasOnExitReplay(cReplay* self)
     int n = list->count;
     int i;
     for (i = 0; i < n; i++) {
-        char* camera = list->riders[i];
-        void* cam = *(void**)(camera + 0xA8);
+        cCamera* camera = (cCamera*)list->riders[i];
+        void* cam = camera->ChaseController;
         cCamera_setCurrentController(camera, 2);
         cChaseCameraController_switchCamera_EndReplay(cam);
     }

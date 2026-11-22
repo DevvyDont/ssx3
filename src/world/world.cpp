@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/instancerecord.h"
 #include "bx/bxstring.h"
 #include "fe/debugfe.h"
 #include "world/worldcache.h"
@@ -6,7 +7,7 @@
 #include "vtable.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
-
+#include "object/rollermodifier.h"
 //100%
 INCLUDE_ASM("world/world", cWorld_cWorld);
 #ifdef SKIP_ASM
@@ -365,9 +366,9 @@ extern "C" int cWScriptCacheEntry_getWScriptHeaderId(cWorld_getWScriptHeaderId_s
  * @param i    which script entry
  * @return the header's resource id (On Tour tResourceID)
  */
-extern "C" int cWorld_getWScriptHeaderId(cWorld* self, void* obj, int i)
+extern "C" int cWorld_getWScriptHeaderId(cWorld* self, tInstanceRecord* obj, int i)
 {
-    return cWScriptCacheEntry_getWScriptHeaderId(&((cWorld_getWScriptHeaderId_sTable*)self->m_pWScriptCache)->entries[*(unsigned char*)((char*)obj + 0x78)], obj, i);
+    return cWScriptCacheEntry_getWScriptHeaderId(&((cWorld_getWScriptHeaderId_sTable*)self->m_pWScriptCache)->entries[*(unsigned char*)&obj->m_RID], obj, i);
 }
 #endif
 
@@ -532,9 +533,9 @@ INCLUDE_ASM("world/world", tSphTreeList_getMeshTree);
  * @param meshNum  mesh index (On Tour meshNum)
  * @return the tree at index @p meshNum of the array at +0x0 (0x140 bytes each)
  */
-extern "C" void* tSphTreeList_getMeshTree(void* self, int meshNum)
+extern "C" void* tSphTreeList_getMeshTree(tSphTreeList* self, int meshNum)
 {
-    return (char*)(*(void**)self) + meshNum * 0x140;
+    return &self->MeshTree[meshNum];
 }
 #endif
 

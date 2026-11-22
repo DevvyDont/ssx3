@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/missionrider.h"
 #include "ai/ai.h"
 #include "vtable.h"
 #include "main/gameviewman.h"
@@ -544,8 +545,8 @@ extern "C" void cPlaybackMan_startPreview(cPlaybackMan* self)
         AIsetseed(&self->CurrentFrame->AISeed[0]);
         self->AI->AITick = self->CurrentFrame->AITick;
         self->State = 1;
-        char* x = (char*)self->AI->MissionRiders[0];
-        int targetRider = x ? *(int*)(x + 0x18) : 0;
+        cMissionRider* x = self->AI->MissionRiders[0];
+        int targetRider = ((char*)x) ? (int)x->mRider : 0;
         cCamera_switchChaseControllerTargetRider(self->Game->ViewMan->PlayerCamera[0], targetRider);
     }
 }
@@ -761,8 +762,8 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  */
 extern "C" int cPlaybackMan_setupFile(cPlaybackMan* self, int idx)
 {
-    char* entry = (char*)(idx * 0xC + (int)self->PlaybackFiles); // PORT: pointer held as int
-    int data = *(int*)(entry + 4);
+    tPlaybackFile* entry = (tPlaybackFile*)((char*)(idx * 0xC + (int)self->PlaybackFiles)); // PORT: pointer held as int
+    int data = (int)entry->PackData;
     if (data != 0) {
         HUFF_decode((void*)data, 0, (int)self->CurrentFrame);
         return 1;

@@ -204,8 +204,8 @@ extern "C" void cSectionBlockAllocator_releaseBlocks(cSectionBlockAllocator* sel
     if (self->m_pAllocBlocks != 0) {
         void* next;
         do {
-            void* item = self->m_pAllocBlocks;
-            next = *(void**)((char*)item + 0x14);
+            tWorldMemBlock* item = self->m_pAllocBlocks;
+            next = (void*)item->pNext;
             cWorldBlockAllocator_releaseBlock(*(void**)self, item);
             self->m_pAllocBlocks = (tWorldMemBlock*)next;
             self->m_uiNumBlocks = (int)self->m_uiNumBlocks - 1;
@@ -560,14 +560,14 @@ extern "C" void* cWorldCache_cWorldCache(cWorldCache* self)
 {
     cWorldView_cWorldView((char*)&self->m_WorldView);
     cStreamMan_cStreamMan((char*)&self->m_StreamMan);
-    char* app = (char*)cAppMan_TheAppMan;
+    cAppMan* app = cAppMan_TheAppMan;
     self->mp_DataHeader = 0;
     self->m_uiNumHullPage = (unsigned int)0;
     self->mp_ChunkResolve = 0;
     self->m_pWorldMemMan = 0;
     self->m_pSharedCacheTable = 0;
     self->m_pSectionCacheTable = 0;
-    self->m_iTouchStaleAge = (int)((float)*(int*)(app + 0x10) * 0.10000000149011612f);
+    self->m_iTouchStaleAge = (int)((float)app->TimerHz * 0.10000000149011612f);
     return ((void*)self);
 }
 #endif
@@ -992,10 +992,10 @@ INCLUDE_ASM("world/worldcache", cWorldCache_setPageLock);
  * @param hullPage  the hull page
  * @param lock  the lock flag
  */
-extern "C" void cWorldCache_setPageLock(void* self, int hullPage, int lock)
+extern "C" void cWorldCache_setPageLock(cWorldCache* self, int hullPage, int lock)
 {
-    self = (char*)self + hullPage * 0x18;
-    *(int*)((char*)self + 0x3f4) = lock;
+    self = (cWorldCache*)((char*)self + hullPage * 0x18);
+    self->m_HullPages[0].m_bLock = lock;
 }
 #endif
 
@@ -1009,8 +1009,8 @@ INCLUDE_ASM("world/worldcache", cWorldCache_isPageLocked);
  * @param hullPage  the hull page
  * @return the lock flag
  */
-extern "C" int cWorldCache_isPageLocked(int worldCache, int hullPage) {
-    return (*(int *)((char*)(((hullPage * 0x18) + worldCache)) + (0x3F4)));
+extern "C" int cWorldCache_isPageLocked(cWorldCache* worldCache, int hullPage) {
+    return worldCache->m_HullPages[hullPage].m_bLock;
 }
 #endif
 
@@ -1942,7 +1942,7 @@ extern "C" void cWorldView_update(cWorldView* worldView)
             else
                 cWorldCache_activateSectionMem((cWorldCache*)self->cache, i, 2);
             cWorldCache_touchPage((sWCSlots*)self->cache, self->sections[i].id, self->entries[i].pri);
-            cWorldCache_setPageLock(self->cache, self->sections[i].id, 1);
+            cWorldCache_setPageLock((cWorldCache*)self->cache, self->sections[i].id, 1);
             self->entries[i].state = 2;
             break;
         case 2:
@@ -2030,8 +2030,8 @@ extern "C" int cWorldCache_isPageEmpty(cWorldCache* self, int a1);
 extern "C" void cWorldView_recursiveIsEmptyPages(void** self, tBxBSPNode* node, int* ok)
 {
     if (*ok != 0) {
-        void* pageRef = node->m_pHull;
-        if (pageRef != 0 && cWorldCache_isPageEmpty((cWorldCache*)(*self), *(unsigned short*)((char*)pageRef + 2)) == 0) {
+        tBxBSPHull* pageRef = node->m_pHull;
+        if (((void*)pageRef) != 0 && cWorldCache_isPageEmpty((cWorldCache*)(*self), pageRef->m_uiHullIndex) == 0) {
             *ok = 0;
             return;
         }

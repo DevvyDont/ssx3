@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uistate.h"
+#include "ai/focusbox.h"
 #include "object/bucketman.h"
 #include "world/worldcache.h"
 #include "ai/player.h"
@@ -870,7 +872,7 @@ extern "C" void cAvalanche_reset(void);
 extern "C" void cWorld_resetMap(void* world);
 extern "C" void cWScriptMan_runGlobalScripts(void* a);
 extern "C" void cWScriptMan_setupMissions(void* a);
-extern void* cWScriptMan_TheWScriptMan;
+extern cWScriptMan* cWScriptMan_TheWScriptMan;
 // The unit declares gBucketMan later as sGp2898 (8 bytes); bind a small-data alias here.
 extern char D_004A5988_bm __asm__("gBucketMan");
 
@@ -942,9 +944,9 @@ extern "C" void cGame_partialRestart(cGame* self)
     func_00343BC0(self->CrowdMan3d);
     cMultiParticleMan_reset(self->MultiParticleMan);
     void* list = (char*)&self->UI->mStateStack;
-    char* hudState = (char*)cUIStateStack_findState(list, GetHashValue32(str_hud_c));
-    if (hudState != 0) {
-        sVEntry<int(void*, int, int)>* vt2 = *(sVEntry<int(void*, int, int)>**)(hudState + 8);
+    cUIState* hudState = (cUIState*)((char*)cUIStateStack_findState(list, GetHashValue32(str_hud_c)));
+    if (((char*)hudState) != 0) {
+        sVEntry<int(void*, int, int)>* vt2 = (sVEntry<int (void*, int, int)>*)hudState->mVtbl;
         vt2[24].fn(vthis(hudState, vt2[24]), 7, 0);
     }
     cWScriptMan_runGlobalScripts(cWScriptMan_TheWScriptMan);
@@ -967,9 +969,9 @@ static inline int numRiders_2302A8(void* game)
     return *(int*)(*(char**)((char*)game + 0xC) + 0x78);
 }
 
-static inline char* rider_2302A8(void* game, int i)
+static inline cRider* rider_2302A8(void* game, int i)
 {
-    return *(char**)(*(char**)((char*)game + 0xC) + (i << 2) + 0x28);
+    return ((cGame*)game)->AI->Riders[i];
 }
 
 /**
@@ -985,7 +987,7 @@ extern "C" void cGame_restart(cGame* self)
     cGameModeMan_restartHeat(SSXApp->GameModeMan);
     int i;
     for (i = 0; i < numRiders_2302A8(self); i++) {
-        *(int*)(rider_2302A8(self, i) + 0x2F8) = 0;
+        *(int*)&rider_2302A8(self, i)->unk_2F8 = 0;
     }
     cGame_setState(self, 1, 2, 1);
     cSSXAudio_RestartEvent(cAudioInterface_bxAudio());
@@ -1005,9 +1007,9 @@ extern "C" void cGame_sectionLoaded(cGame* self)
 {
     cAI* gameAI = self->AI;
     if (gameAI != 0) {
-        void* focusMan = gameAI->FocusMan;
-        if (focusMan != 0) {
-            *(int*)((char*)focusMan + 0xD0) = -1;
+        cFocusMan* focusMan = gameAI->FocusMan;
+        if (((void*)focusMan) != 0) {
+            focusMan->LastUpdateTick = -1;
         }
     }
 }
@@ -1430,7 +1432,7 @@ static inline int updateState_2306B8(cGame* self)
                     pushState_2306B8(3);
                     cUIEngine_update(((char*)self->UI));
                 } else {
-                    tMissionMenuQueue_getNextEntry((char*)cWScriptMan_TheWScriptMan + 0x1C4);
+                    tMissionMenuQueue_getNextEntry(&cWScriptMan_TheWScriptMan->MissionMenuQueue);
                 }
                 return 0;
             }

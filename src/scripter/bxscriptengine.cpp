@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "scripter/scriptdatabaseobject.h"
 #include "scripter/scriptentitycam.h"
 #include "scripter/scriptobjtransition.h"
 #include "scripter/scriptobj.h"
@@ -376,11 +377,11 @@ extern "C" void cScriptPlayerMain_UpdateFrame(void* p);
  */
 extern "C" int cBXScriptEngine_ForcePlayUpdate(cBXScriptEngine* self, int requestHandle)
 {
-    void* request = cBXScriptEngine_GetRequest(self, requestHandle);
-    if (request == 0) {
+    tScriptRequestInfo* request = (tScriptRequestInfo*)cBXScriptEngine_GetRequest(self, requestHandle);
+    if (((void*)request) == 0) {
         return 0;
     }
-    int type = *(int*)((char*)request + 0x4);
+    int type = request->state;
     if (type == 3 || type == 4) {
         cScriptPlayerMain_UpdateFrame(*(void**)request);
         return 1;
@@ -431,9 +432,9 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_SetRequestUserData);
  * @param val  the new user data
  * @return the previous user data
  */
-extern "C" int cBXScriptEngine_SetRequestUserData(cBXScriptEngine* self, char* obj, int val)
+extern "C" int cBXScriptEngine_SetRequestUserData(cBXScriptEngine* self, cScriptPlayerMain* obj, int val)
 {
-    tScriptRequestInfo* request = (tScriptRequestInfo*)(*(char**)(obj + 0xC));
+    tScriptRequestInfo* request = (tScriptRequestInfo*)((char*)obj->mpUserData);
     int old = (int)request->pUserData;
     request->pUserData = (void*)val;
     return old;
@@ -743,7 +744,7 @@ extern "C" int cBXScriptEngine_IsRequestPlaybackEnding(cBXScriptEngine* self, in
     if (request->state != 4 && request->state != 5) {
         return 0;
     }
-    return *(int*)(*(char**)request + 0x20) == 4;
+    return request->pPlayer->mPlayState == 4;
 }
 #endif
 
@@ -983,8 +984,8 @@ void cBXScriptEngine_ResetRequest(void* self, void* v);
  */
 extern "C" void cBXScriptEngine_OnInSeqRemoteScriptPlayerDiscard(cBXScriptEngine* self, cScriptPlayerMain* ctx)
 {
-    void* request = ctx->mpUserData;
-    *(int*)((char*)request + 0x4) = 7;
+    tScriptRequestInfo* request = (tScriptRequestInfo*)ctx->mpUserData;
+    request->state = 7;
     cBXScriptEngine_ResetRequest(self, request);
 }
 #endif
@@ -1017,7 +1018,7 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequestUserData1);
  */
 extern "C" int cBXScriptEngine_GetRequestUserData1(cBXScriptEngine* self, int requestHandle)
 {
-    return *(int*)((char*)cBXScriptEngine_GetRequest(self, requestHandle) + 0xC);
+    return (int)((tScriptRequestInfo*)cBXScriptEngine_GetRequest(self, requestHandle))->pUserData;
 }
 #endif
 
@@ -1170,8 +1171,8 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequest);
  */
 extern "C" void* cBXScriptEngine_GetRequest(cBXScriptEngine* self, int requestHandle)
 {
-    char* request = (char*)&self->mScriptRequests[requestHandle];
-    return *(int*)(request + 0x20) != 0 ? request : 0;
+    tScriptRequestInfo* request = &self->mScriptRequests[requestHandle];
+    return request->requestType != 0 ? ((char*)request) : 0;
 }
 #endif
 
@@ -1701,8 +1702,8 @@ struct sBxsVEntryA {
  */
 extern "C" void cScriptObject_InitScriptObject(cScriptObject* self)
 {
-    char* mgr = (char*)cScriptDatabaseObject_GetDatabaseObject();
-    sBxsVEntryA* vt = *(sBxsVEntryA**)(mgr + 0x2A8);
+    cScriptDatabaseObject* mgr = (cScriptDatabaseObject*)((char*)cScriptDatabaseObject_GetDatabaseObject());
+    sBxsVEntryA* vt = (sBxsVEntryA*)mgr->mVtbl;
     self->mObjID = vt[2].fn(vthis(mgr, vt[2]), self);
 }
 #endif
@@ -1725,8 +1726,8 @@ struct sBxsVEntryB {
  */
 extern "C" void cScriptObject_DeInitScriptObject(cScriptObject* self)
 {
-    char* mgr = (char*)cScriptDatabaseObject_GetDatabaseObject();
-    sBxsVEntryB* vt = *(sBxsVEntryB**)(mgr + 0x2A8);
+    cScriptDatabaseObject* mgr = (cScriptDatabaseObject*)((char*)cScriptDatabaseObject_GetDatabaseObject());
+    sBxsVEntryB* vt = (sBxsVEntryB*)mgr->mVtbl;
     vt[3].fn(vthis(mgr, vt[3]), self->mObjID);
     self->mObjID = -1;
 }

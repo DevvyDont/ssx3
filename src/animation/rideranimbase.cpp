@@ -1012,9 +1012,9 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
  * @param sequence  the sequence (cAnimSequence) that ended
  * @param anim  the AI anim to play
  */
-extern "C" void cRiderAnimBase_playBlendIn(cRiderAnimBase* self, void* sequencer, void* sequence, int anim)
+extern "C" void cRiderAnimBase_playBlendIn(cRiderAnimBase* self, void* sequencer, cAnimSequence* sequence, int anim)
 {
-    tEventFlags_clear1((char*)sequence + 0xB0, 0x3F);
+    tEventFlags_clear1(&sequence->Events, 0x3F);
     cRiderAnimBase_play(self, anim, 0, -1.0f);
 }
 #endif

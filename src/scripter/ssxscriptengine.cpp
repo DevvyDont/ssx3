@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "scripter/scriptentity.h"
 #include "scripter/scriptobjtransition.h"
 #include "camera/camera.h"
 #include "world/instancerecord.h"
@@ -31,7 +32,7 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/ai.h"
-
+#include "main/gamemode.h"
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_Load);
 #ifdef SKIP_ASM
@@ -491,7 +492,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_AsyncLoadTrack);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int* cBENewRaceInterface_getLocation(void* iface);
+extern "C" tBELocationDB* cBENewRaceInterface_getLocation(void* iface);
 
 // Minimal view of cBXString; the members are bound to the game's (unmangled) symbols.
 // PORT: asm labels are not accepted on destructors, so the dtor forwards to the out-of-line one (in-charge flag 2).
@@ -523,7 +524,7 @@ extern const char str_big_c[];
 // Loads the current profile's script file (counting it if found), then queues the profile's second script.
 extern "C" void cSSXScriptEngine_AsyncLoadTrack(cSSXScriptEngine* self)
 {
-    sBXStr_8B98 name((char*)cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)) + 0x34);
+    sBXStr_8B98 name(cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))->fileName);
     sBXStr_8B98 path = str_data_scripts_scdat_big_data_scripts_scfi + name + str_dat;
     void* handle = ASYNCFILE_load_8B98(path.p, 0);
     self->mFilterTableAsyncHandle = handle;
@@ -643,7 +644,7 @@ extern "C" void cSSXScriptEngine_SetNISListViewIndex(cSSXScriptEngine* scriptEng
     var_3 = 1;
     do {
         var_3 -= 1;
-        (*(int *)((char*)((var_6 + ((int)scriptEngine->mpNISLists))) + (8))) = viewIndex;
+        ((tNISList*)(var_6 + ((int)scriptEngine->mpNISLists)))->mViewIndex = viewIndex;
         var_6 += 204;
     } while (var_3 >= 0);
 }
@@ -1428,7 +1429,7 @@ extern "C" void cSSXScriptEngine_OnScriptDataReleased(cSSXScriptEngine* self, in
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_OnAttachData);
 #ifdef SKIP_ASM
 extern "C" int strncmp(const char* a, const char* b, int n);
-void* GetSSXScriptHeader1(void* self);
+tSSXScriptHeader* GetSSXScriptHeader1(void* self);
 extern "C" void cBXScriptEngine_AttachScript(void* self, void* data, int a2);
 extern "C" void cScriptAnimBankManager_LinkBank(void* mgr, int bank, void* data);
 extern "C" void cScriptSoundBankManager_LinkBank(void* mgr, int bank, void* data, int a3);
@@ -1470,7 +1471,7 @@ extern "C" void cSSXScriptEngine_OnAttachData(cSSXScriptEngine* self, const char
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_OnDetachData);
 #ifdef SKIP_ASM
-void* GetSSXScriptHeader1(void* self);
+tSSXScriptHeader* GetSSXScriptHeader1(void* self);
 extern "C" void cBXScriptEngine_DetachScript(void* self, int a1);
 extern "C" void cScriptAnimBankManager_UnlinkBank(void* list, int id);
 extern "C" void cScriptSoundBankManager_UnlinkBank1(void* list, int id);
@@ -1487,7 +1488,7 @@ extern "C" void cSSXScriptEngine_OnDetachData(cSSXScriptEngine* self, void* obj,
 {
     switch (type) {
     case 0:
-        cBXScriptEngine_DetachScript(self, *(int*)((char*)GetSSXScriptHeader1(obj) + 0x18));
+        cBXScriptEngine_DetachScript(self, GetSSXScriptHeader1(obj)->scriptIndex);
         break;
     case 1:
         cScriptAnimBankManager_UnlinkBank(&self->mAnimationBankManager, id);
@@ -2431,7 +2432,7 @@ extern "C" void cSSXScriptEngine_AppendStartSequence(cSSXScriptEngine* self, int
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_AppendEndEventSequence);
 #ifdef SKIP_ASM
-extern "C" int* cBENewRaceInterface_getLocation(void* iface);
+extern "C" tBELocationDB* cBENewRaceInterface_getLocation(void* iface);
 extern "C" int cBENewPlayerInterface_isRivalChallengePlayed(void* self, int index, int kind, int flag);
 extern "C" void cBENewPlayerInterface_setRivalChallengePlayed(void* self, int index, int kind, int flag, int value);
 extern "C" int cBENewPlayerInterface_isRivalEventLocked(void* self, int index, int rc, int kind, int flag);
@@ -2512,7 +2513,7 @@ extern "C" void cSSXScriptEngine_AppendEndEventSequence(cSSXScriptEngine* self)
     if (mode == 4) {
         return;
     }
-    if (*(int*)((char*)SSXApp->GameModeMan + 0x98) == 0) {
+    if (SSXApp->GameModeMan->bIsLastHeat == 0) {
         return;
     }
     cGame* x = SSXApp->Game;
@@ -3110,7 +3111,7 @@ extern "C" void cSSXScriptEngine_FillOrientationFromRiderOrientationInfo(cSSXScr
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_FillOrientationFromObjectOrientationInfo);
 #ifdef SKIP_ASM
 extern "C" float func_0031C128(float x);
-extern "C" int* cBENewRaceInterface_getLocation(void* iface);
+extern "C" tBELocationDB* cBENewRaceInterface_getLocation(void* iface);
 extern int D_00482660[];
 
 struct sVec_27BB08 {
@@ -3232,7 +3233,7 @@ extern "C" void cSSXScriptEngine_FillOrientationFromObjectOrientationInfo(cSSXSc
                               const sVec_27BB08* off)
 {
     if (cat == 50) {
-        int k = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
+        int k = cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))->locationID;
         cat = D_00482660[k];
     }
     int* tbl = (int*)self->mpAnchorTableDB[cat];
@@ -3548,9 +3549,9 @@ INCLUDE_ASM("scripter/ssxscriptengine", GetSSXScriptHeader1__FPv);
  *
  * @return the header, or 0 when the data has none
  */
-void* GetSSXScriptHeader1(void* self)
+tSSXScriptHeader* GetSSXScriptHeader1(void* self)
 {
-    return cScriptPlayerMain_GetHeader(self);
+    return (tSSXScriptHeader*)cScriptPlayerMain_GetHeader(self);
 }
 #endif
 
@@ -4500,9 +4501,9 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_GetPlayerIDByEntit
  * @param entity  the script entity
  * @return the player ID, or -1
  */
-extern "C" int cScriptDatabaseObject_GetPlayerIDByEntity(cScriptDatabaseObject* self, void* entity)
+extern "C" int cScriptDatabaseObject_GetPlayerIDByEntity(cScriptDatabaseObject* self, cScriptEntity* entity)
 {
-    tScriptEntityRecord* record = &((&self->mEntityDatabase[0]))[*(int*)((char*)entity + 0x4)];
+    tScriptEntityRecord* record = &((&self->mEntityDatabase[0]))[entity->mDBID];
     if (record->relation != 1) {
         return -1;
     }
@@ -4823,7 +4824,7 @@ extern char t4mat_Identity[];
 extern "C" void cScriptObjCamera_SetCameraEntity(cScriptObjCamera* self, void* anim)
 {
     if (anim != 0) {
-        int id = cScriptDatabaseObject_GetPlayerIDByEntity((cScriptDatabaseObject*)(cScriptDatabaseObject_GetDatabaseObject()), anim);
+        int id = cScriptDatabaseObject_GetPlayerIDByEntity((cScriptDatabaseObject*)(cScriptDatabaseObject_GetDatabaseObject()), (cScriptEntity*)anim);
         if (self->mpCameraEntity != 0) {
             sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
             vt[5].fn(vthis(self, vt[5]), self->mPlayerID);
@@ -5876,8 +5877,8 @@ extern "C" void cScriptObjEvent_OnStartObjectUse(cScriptObjEvent* self)
     self->mHasTriggeredSpeechEvents = 0;
     self->mCheckForStopOnSpeechEnd = 0;
     // PORT: GetSSXScriptHeader returns a pointer as int
-    char* info = (char*)GetSSXScriptHeader(self->mpEntity->mpOwner);
-    int key = *(int*)(info + 0x1C);
+    tSSXScriptHeader* info = (tSSXScriptHeader*)((char*)GetSSXScriptHeader(self->mpEntity->mpOwner));
+    int key = info->bankNum;
     self->mpSoundBankInfo = (tScriptSoundBankInfo*)cSSXScriptEngine_GetSoundBankInfo_2(ScriptEngine, key);
     tScriptObjEventSound* soundSlot = ((&self->mSounds[0]));
     for (i = 3; i >= 0; i--) {
@@ -5989,7 +5990,7 @@ int GetSSXScriptHeader(void* self);
 // PORT: the unit declares cSSXScriptEngine_GetTransportWorldSectionID with no parameters; this caller passes the engine
 // in $a0.
 int cSSXScriptEngine_GetTransportWorldSectionID_08E8(void* engine) __asm__("cSSXScriptEngine_GetTransportWorldSectionID");
-extern "C" int* cBENewRaceInterface_getLocation(void* iface);
+extern "C" tBELocationDB* cBENewRaceInterface_getLocation(void* iface);
 extern "C" int cSectionMan_getWorldSectionIDFromBELocationID(void* mgr, int id);
 extern "C" void cWScriptMan_runFunc(void* mgr, int a, int b);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
@@ -6126,7 +6127,7 @@ extern "C" void cScriptObjEvent_OnInSeqKeyEvent(sSeEngine_08E8* self, cScriptPla
         owner = cSSXScriptEngine_GetTransportWorldSectionID_08E8(ScriptEngine);
     } else {
         void* mgr = SSXApp->Game->SectionMan;
-        owner = cSectionMan_getWorldSectionIDFromBELocationID(mgr, *cBENewRaceInterface_getLocation(iface0));
+        owner = cSectionMan_getWorldSectionIDFromBELocationID(mgr, cBENewRaceInterface_getLocation(iface0)->locationID);
     }
     int i;
     for (i = 0; i < info.numWorldScriptEvent; i++) {
@@ -6479,8 +6480,8 @@ void cScriptObjTransition_SetCameraManager_p(void* self, void* owner) __asm__("c
 extern "C" int cScriptObjCameraManager_SetTransitionObject(cScriptObjCameraManager* self, void* obj)
 {
     if (obj == 0) {
-        char* cur = (char*)self->mpTransitionObject;
-        if (*(int*)(cur + 0x8) > 0) {
+        cScriptObjTransition* cur = self->mpTransitionObject;
+        if (cur->mInUse > 0) {
             cScriptObjTransition_SetTransition_f(cur, -1, 9, 0.0f, 0.0f, 0.0f, 0.0f);
             self->mInTransition = 0;
         }
@@ -6977,7 +6978,7 @@ extern "C" int cScriptObjCameraManager_GetCameraObjectByTrack(cScriptObjCameraMa
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_DoCameraTransition);
 #ifdef SKIP_ASM
 extern "C" cScriptDatabaseObject* cScriptDatabaseObject_GetDatabaseObject(void);
-extern "C" int cScriptDatabaseObject_GetPlayerIDByEntity(cScriptDatabaseObject* self, void* a1);
+extern "C" int cScriptDatabaseObject_GetPlayerIDByEntity(cScriptDatabaseObject* self, cScriptEntity* a1);
 void cScriptObjCamera_SetCameraWeight(void* self, float val);
 extern "C" void cScriptObjCameraManager_SetupCameraObject(cScriptObjCameraManager* self, int a1, int a2);
 // PORT: cScriptObjCameraManager_GetCameraObjectByTrack is defined returning int, but it returns a pointer here; bound
@@ -7053,7 +7054,7 @@ extern "C" void cScriptObjCameraManager_DoCameraTransition(cScriptObjCameraManag
             self->mInTransition = 0;
             return;
         }
-        int id = cScriptDatabaseObject_GetPlayerIDByEntity((cScriptDatabaseObject*)(cScriptDatabaseObject_GetDatabaseObject()), (char*)&self->mEntityVtbl);
+        int id = cScriptDatabaseObject_GetPlayerIDByEntity((cScriptDatabaseObject*)(cScriptDatabaseObject_GetDatabaseObject()), (cScriptEntity*)((char*)&self->mEntityVtbl));
         cScriptObjTransition_SetTransition_f(*pf, id, node->kind->a, currFrame - (float)node->start, (float)node->len, 0.0f, 0.0f);
     }
     else if (k > 0)
@@ -7064,7 +7065,7 @@ extern "C" void cScriptObjCameraManager_DoCameraTransition(cScriptObjCameraManag
             self->mInTransition = 0;
             return;
         }
-        int id = cScriptDatabaseObject_GetPlayerIDByEntity((cScriptDatabaseObject*)(cScriptDatabaseObject_GetDatabaseObject()), (char*)&self->mEntityVtbl);
+        int id = cScriptDatabaseObject_GetPlayerIDByEntity((cScriptDatabaseObject*)(cScriptDatabaseObject_GetDatabaseObject()), (cScriptEntity*)((char*)&self->mEntityVtbl));
         cScriptObjTransition_SetTransition1(*pf, id, node->kind->a, node->kind->b, currFrame - (float)node->start, (float)node->kind->d, (float)node->len, (float)node->kind->c);
     }
 }

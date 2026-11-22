@@ -600,7 +600,7 @@ extern "C" void flushWorldLightCache(void)
     cAI* riders = SSXApp->Game->AI;
     if (((char*)riders) != 0) {
         for (int i = 0; i < riders->NumberOfRidersAllocated; i++) {
-            cRider_flushActiveLights(*(void**)((char*)&riders->Riders[0] + i * 4));
+            cRider_flushActiveLights(riders->Riders[i]);
         }
     }
 }
@@ -1047,8 +1047,8 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getWScriptScript);
 extern "C" int cWScriptCacheEntry_getWScriptScript(cWScriptCacheEntry* self, int i)
 {
     if (*(short*)self == 3) {
-        void* data = self->mpScriptHeader;
-        return (*(int**)((char*)data + 0x3C))[i];
+        tScriptFileHeader* data = self->mpScriptHeader;
+        return ((int*)data->WScriptScriptHeaders)[i];
     }
     return 0;
 }
@@ -1066,9 +1066,9 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getNumGlobalScripts);
 extern "C" int cWScriptCacheEntry_getNumGlobalScripts(cWScriptCacheEntry* self)
 {
     if (*(short*)self == 3) {
-        void* data = self->mpScriptHeader;
-        if (data != 0) {
-            return *(int*)((char*)data + 0x10);
+        tScriptFileHeader* data = self->mpScriptHeader;
+        if (((void*)data) != 0) {
+            return data->NumGlobalScriptData;
         }
     }
     return 0;
@@ -1087,9 +1087,9 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getGlobalScripts);
 extern "C" int cWScriptCacheEntry_getGlobalScripts(cWScriptCacheEntry* self)
 {
     if (*(short*)self == 3) {
-        void* data = self->mpScriptHeader;
-        if (data != 0) {
-            return *(int*)((char*)data + 0x14);
+        tScriptFileHeader* data = self->mpScriptHeader;
+        if (((void*)data) != 0) {
+            return data->GlobalScriptDataOff;
         }
     }
     return 0;
@@ -1107,9 +1107,9 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getNumProcessScripts);
 extern "C" int cWScriptCacheEntry_getNumProcessScripts(cWScriptCacheEntry* self)
 {
     if (*(short*)self == 3) {
-        void* data = self->mpScriptHeader;
-        if (data != 0) {
-            return *(int*)((char*)data + 0x28);
+        tScriptFileHeader* data = self->mpScriptHeader;
+        if (((void*)data) != 0) {
+            return data->NumProcessScriptData;
         }
     }
     return 0;
@@ -1127,9 +1127,9 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getProcessScripts);
 extern "C" int cWScriptCacheEntry_getProcessScripts(cWScriptCacheEntry* self)
 {
     if (*(short*)self == 3) {
-        void* data = self->mpScriptHeader;
-        if (data != 0) {
-            return *(int*)((char*)data + 0x2C);
+        tScriptFileHeader* data = self->mpScriptHeader;
+        if (((void*)data) != 0) {
+            return data->ProcessScriptDataOff;
         }
     }
     return 0;
@@ -1148,9 +1148,9 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getNumMissionScripts);
 extern "C" int cWScriptCacheEntry_getNumMissionScripts(cWScriptCacheEntry* self)
 {
     if (*(short*)self == 3) {
-        void* data = self->mpScriptHeader;
-        if (data != 0) {
-            return *(int*)((char*)data + 0x20);
+        tScriptFileHeader* data = self->mpScriptHeader;
+        if (((void*)data) != 0) {
+            return data->NumMissionScriptData;
         }
     }
     return 0;
@@ -1169,9 +1169,9 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getMissionScripts);
 extern "C" int cWScriptCacheEntry_getMissionScripts(cWScriptCacheEntry* self)
 {
     if (*(short*)self == 3) {
-        void* data = self->mpScriptHeader;
-        if (data != 0) {
-            return *(int*)((char*)data + 0x24);
+        tScriptFileHeader* data = self->mpScriptHeader;
+        if (((void*)data) != 0) {
+            return data->MissionScriptDataOff;
         }
     }
     return 0;

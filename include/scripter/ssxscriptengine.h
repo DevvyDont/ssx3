@@ -203,7 +203,12 @@ struct tSSXHeaderActor {
     short character;                // 0x02 [O] character (the 64-bit character mask at 0x8 there); [U]
                                     //      cSSXScriptEngine_OnStartScript: 0 or a mask that meets the free
                                     //      characters' flags picks the variation (view sScriptOpt_9A70 mask)
-    char unk_004[0x4];              // 0x04 see above
+    char unk_004[0x1];              // 0x04 see above
+    signed char scriptEndLocation;  // 0x05 [O] (0x11 there; On Tour order hidden, scriptEndLocation, hideIllegalBoltOn,
+                                    //      isRidingBoard after character); [U] cRider_GetNISEndPosition switches on
+                                    //      it (lb 5: cases 0-4 pick the end point), as On Tour's GetNISEndPosition
+                                    //      does (lb 17(pHeaderInfo))
+    char unk_006[0x2];              // 0x06 see above
     float basePosX;                 // 0x08 [O] (0x14 there); [U] OnStartObjectUse's base offset x
     float basePosY;                 // 0x0C [O]; [U] ... y
     float basePosZ;                 // 0x10 [O]; [U] ... z
@@ -216,6 +221,8 @@ CHECK_OFFSET(tSSXHeaderActor, role, 0x00);
 CHECK_OFFSET(tSSXHeaderActor, anchorPos, 0x01);
 CHECK_OFFSET(tSSXHeaderActor, character, 0x02);
 CHECK_OFFSET(tSSXHeaderActor, unk_004, 0x04);
+CHECK_OFFSET(tSSXHeaderActor, scriptEndLocation, 0x05);
+CHECK_OFFSET(tSSXHeaderActor, unk_006, 0x06);
 CHECK_OFFSET(tSSXHeaderActor, basePosX, 0x08);
 CHECK_OFFSET(tSSXHeaderActor, basePosY, 0x0C);
 CHECK_OFFSET(tSSXHeaderActor, basePosZ, 0x10);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "visualfx/attachedemitterfx.h"
 #include "ai/rider.h"
 #include "worldpainter/worldpainterquery.h"
 #include "world/instancerecord.h"
@@ -1960,7 +1961,7 @@ INCLUDE_ASM("visualfx/worldlightman", cBoardWakeFX_GetChunkySprayVelocity);
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" long long *cBoardWakeFX_GetChunkySprayVelocity(long long *out, cBoardWakeFX* arg1) {
-    *out = (*(long long *)((char*)((((arg1->mWakeLineSegs) * 0x10) + (((arg1->mCurrentWakeLine) * 0x70) + ((int)arg1->mWakeLines)))) + (-0x10)));
+    *out = *(long long*)&arg1->mWakeLines[arg1->mCurrentWakeLine].mVel[arg1->mWakeLineSegs - 1];
     return out;
 }
 #endif
@@ -3079,8 +3080,8 @@ INCLUDE_ASM("visualfx/worldlightman", cAttachedEmitterFX_ShouldDisableSnowTrailS
  * @param arg0  the object
  * @return the value
  */
-extern "C" int cAttachedEmitterFX_ShouldDisableSnowTrailSpray(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xA0)));
+extern "C" int cAttachedEmitterFX_ShouldDisableSnowTrailSpray(cAttachedEmitterFX* arg0) {
+    return (arg0->unk_0A0);
 }
 #endif
 //100%

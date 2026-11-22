@@ -6532,8 +6532,8 @@ INCLUDE_ASM("render/font", cStaticEmitter_setPosition);
  */
 // PORT: `long long` is 128-bit on the EE (one lq/sq copy); off-PS2 the same C copies only 8 bytes, so use a
 // 16-byte type.
-extern "C" void cStaticEmitter_setPosition(void *emitter, long long *position) {
-    (*(long long *)((char*)(emitter) + (0xC0))) = (long long) *position;
+extern "C" void cStaticEmitter_setPosition(cStaticEmitter* emitter, long long *position) {
+    (*(long long*)&emitter->Emitter.X0) = (long long) *position;
 }
 #endif
 //100%

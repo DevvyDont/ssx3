@@ -1,4 +1,5 @@
 #include "common.h"
+#include "util/consoleconfig.h"
 #include "intersect/bxnash.h"
 #include "main/game.h"
 #include "world/worldrecords.h"
@@ -671,7 +672,7 @@ extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv)
     int i = 1;
     while (i < argc) {
         if (argv[i][0] == '-') {
-            char* opt = argv[i] + 1;
+            char* opt = &argv[i][1];
             if (strcasecmp(opt, str_track) == 0) {
                 i++;
                 if (i >= argc) {
@@ -951,9 +952,9 @@ extern "C" void cSSXApp_purge(sSSXAppPurge* self)
     cGameModeMan_purgeGM(self->fC0);
     if (self->f11C) cFEAsyncManager__cFEAsyncManager(self->f11C, 3);
     {
-        char* consoleConfig = self->f9C;
+        cConsoleConfig* consoleConfig = (cConsoleConfig*)self->f9C;
         if (consoleConfig) {
-            sVEPurge* vt = *(sVEPurge**)(consoleConfig + 0x34);
+            sVEPurge* vt = (sVEPurge*)consoleConfig->mVtbl;
             vt[1].fn(vthis(consoleConfig, vt[1]), 3);
         }
     }

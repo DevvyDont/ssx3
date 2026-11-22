@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "visualfx/aivisualeffectsman.h"
+#include "visualfx/visualeffectsman.h"
 #include "ui/uiengine.h"
 #include "wscript/missionmenuqueue.h"
 #include "ai/rider.h"
@@ -1992,9 +1994,9 @@ struct sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode {
 extern "C" void cVisualEffectsObjNode__cVisualEffectsObjNode(cVisualEffectsObjNode* self, int flags)
 {
     self->mVtbl = cVisualEffectsObjNode_vtbl;
-    void* obj = self->VisualEffectsMan;
-    if (obj != 0) {
-        sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode* vt = *(sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode**)((char*)obj + 0x44);
+    cVisualEffectsMan* obj = self->VisualEffectsMan;
+    if (((void*)obj) != 0) {
+        sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode* vt = (sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode*)obj->mVtbl;
         vt[1].fn(vthis(obj, vt[1]), 3);
     }
     cObjNode__cObjNode(self, flags);
@@ -2510,8 +2512,8 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_isInLoadOperation);
  *
  * @param overlayManager  the cMCOverlayManager
  */
-extern "C" void cMCOverlayManager_isInLoadOperation(void *overlayManager) {
-    (*(int (**)())((char*)(overlayManager) + (0x78)))();
+extern "C" void cMCOverlayManager_isInLoadOperation(cMCOverlayManager* overlayManager) {
+    (overlayManager->callbackIsLoadPressed)();
 }
 #endif
 //100%
@@ -2822,9 +2824,9 @@ struct sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode {
 extern "C" void cAIVisualEffectsObjNode__cAIVisualEffectsObjNode(cAIVisualEffectsObjNode* self, int flags)
 {
     self->mVtbl = cAIVisualEffectsObjNode_vtbl;
-    void* obj = self->AIVisualEffectsMan;
-    if (obj != 0) {
-        sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode* vt = *(sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode**)((char*)obj + 0x4);
+    cAIVisualEffectsMan* obj = self->AIVisualEffectsMan;
+    if (((void*)obj) != 0) {
+        sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode* vt = (sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode*)obj->mVtbl;
         vt[1].fn(vthis(obj, vt[1]), 3);
     }
     cObjNode__cObjNode(self, flags);
@@ -3710,9 +3712,9 @@ extern "C" void* cUIState__cUIState(void* self);
  *
  * @return cUIState__cUIState's result, passed through
  */
-extern "C" void* func_00245708(void* self)
+extern "C" void* func_00245708(cGameLoadStateConquer* self)
 {
-    *(void**)((char*)self + 0x8) = D_0047C7A8;
+    self->mVtbl = (void**)D_0047C7A8;
     return cUIState__cUIState(self);
 }
 #endif
@@ -3812,9 +3814,9 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
  *
  * @return 0
  */
-extern "C" int func_002458B8(void* self)
+extern "C" int func_002458B8(cGameLoadStateConquer* self)
 {
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pct));
+    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pct));
     if (obj != 0) {
         char buf[208];
         sprintf2(buf, str_pct_3dpct_pct, (int)cAppMan_TheAppMan->LoadTimer.loadpercent);

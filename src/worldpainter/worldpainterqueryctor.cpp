@@ -4,7 +4,7 @@
 #include "worldpainter/worldpainterquery.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
-
+#include "world/world.h"
 //100%
 INCLUDE_ASM("worldpainter/worldpainterqueryctor", cWorldPainterQuery_cWorldPainterQuery);
 #ifdef SKIP_ASM
@@ -240,7 +240,7 @@ static inline void set_0778(tWPInGameData* o, float* d, float v)
 extern "C" tWPInGameData* cWorldPainterQuery_queryPosition(cWorldPainterQuery* self, float x, float z, float blend)
 {
     int first = 1;
-    cWorldPainterMan* map = (cWorldPainterMan*)(*(char**)((char*)SSXApp->Game->World + 0x8));
+    cWorldPainterMan* map = SSXApp->Game->World->m_pWorldPainterMan;
     if ((self->m_data)->m_wpTravelDistance != -99999.0f) {
         first = 0;
     }

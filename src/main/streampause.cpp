@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "main/game.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -306,9 +307,9 @@ extern void* cAppModule_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_002438B0(void* self, int flags)
+extern "C" void func_002438B0(cAppModule* self, int flags)
 {
-    *(void***)((char*)self + 0x0) = cAppModule_vtbl;
+    self->mVtbl = cAppModule_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

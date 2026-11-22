@@ -1376,10 +1376,10 @@ INCLUDE_ASM("replay/replaycache", cReplay_writeFramesStart);
  */
 extern "C" void cReplay_writeFramesStart(cReplay* self)
 {
-    void* oldest = *(void**)&self->FrameList;
+    cReplayFrame* oldest = (cReplayFrame*)(*(void**)&self->FrameList);
     self->WriteFrame = (cReplayFrame*)oldest;
-    if (oldest == (void*)self->SaveFrame) {
-        self->WriteFrame = (cReplayFrame*)(*(void**)((char*)oldest + 0x14));
+    if (((void*)oldest) == (void*)self->SaveFrame) {
+        self->WriteFrame = (cReplayFrame*)(oldest->Next);
     }
     self->WriteBlockData = 0;
     self->WriteState += 1;

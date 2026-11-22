@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "object/skybox.h"
+#include "render/ps2bezierman.h"
 #include "camera/camera.h"
 #include "visualfx/lensfx.h"
 #include "world/worldcache.h"
@@ -208,8 +210,8 @@ void operator_delete(int* ptr);
  */
 extern "C" void func_0022C3B8(void* self, int flags)
 {
-    void* obj = *(void**)self;
-    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)obj + 0x4);
+    cPS2BezierMan* obj = (cPS2BezierMan*)(*(void**)self);
+    sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)obj->mVtbl;
     vt[18].fn(vthis(obj, vt[18]));
     if (flags & 1) {
         operator_delete((int*)self);
@@ -357,8 +359,8 @@ extern "C" void cGame_renderPatches(cGame* self, FrustumIntersector* world)
         func_0022C410(ctx, items[i], 1);
     }
     if ((int)self->ViewMan->m_uiCurrentView == 0) {
-        void* obj = cBezierMan_TheBezierMan;
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)obj + 4);
+        cPS2BezierMan* obj = (cPS2BezierMan*)cBezierMan_TheBezierMan;
+        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)obj->mVtbl;
         vt[5].fn(vthis(obj, vt[5]));
     }
     func_0022C3B8(ctx, 2);
@@ -1468,8 +1470,8 @@ extern "C" void cSectionMan_skySwap(cSectionMan* self)
         }
     }
     int id = cSectionMan_mSectionMap[self->m_iNextSkySectionID].field_0x4;
-    void* skyBox = self->mpGame->SkyBox;
-    if (*(int*)((char*)skyBox + 0x10) != id) {
+    cSkyBox* skyBox = self->mpGame->SkyBox;
+    if (skyBox->m_iSectionID != id) {
         cSkyBox_reset(skyBox);
         cSkyBox_setSection(self->mpGame->SkyBox, id);
     }

@@ -2,7 +2,8 @@
 #include "vtable.h"
 #include "camera/cameracontroller.h"
 #include "camera/race/racecontroller.h"
-
+#include "camera/cameraalgolist.h"
+#include "camera/cameraalgorithms.h"
 //100%
 INCLUDE_ASM("camera/cameracontroller", cCameraController_cCameraController);
 #ifdef SKIP_ASM
@@ -131,8 +132,8 @@ extern "C" void cCameraController_snapCurrent(cCameraController* self)
 {
     for (sCamCtrlNodeB* n = *(sCamCtrlNodeB**)self->AlgorithmList; n != 0; n = n->next)
     {
-        void* obj = n->obj;
-        sCamCtrlVE0* vt = *(sCamCtrlVE0**)((char*)obj + 0x10);
+        cCameraAlgorithm* obj = (cCameraAlgorithm*)n->obj;
+        sCamCtrlVE0* vt = (sCamCtrlVE0*)obj->mVtbl;
         vt[4].fn(vthis(obj, vt[4]));
     }
     cCamera_snapResultAlgorithm(self->Camera);
@@ -344,7 +345,7 @@ INCLUDE_ASM("camera/cameracontroller", cManualCameraController_getCurrentAlgorit
  * @return the algorithm type (an eCamAlgoType)
  */
 extern "C" int cManualCameraController_getCurrentAlgorithmType(cManualCameraController* manualController) {
-    return (*(int *)((char*)(**((void***)manualController->AlgorithmList)) + (0xC)));
+    return manualController->AlgorithmList->Head->Algorithm->AlgorithmType;
 }
 #endif
 

@@ -1105,9 +1105,9 @@ struct sCTBoxK2b {
  * @return the bounding box (min, max), returned by value
  */
 // Bounding box of a trigger volume: centre +- the largest half-extent.
-extern "C" sCTBoxK2b cCTVolumeBox_boundBox(char* obj)
+extern "C" sCTBoxK2b cCTVolumeBox_boundBox(cCTVolume* obj)
 {
-    float maxDist = GetMaxElement((float*)(obj + 0x18));
+    float maxDist = GetMaxElement((float*)(&obj->Scale));
     sCTVec3K2b rv(maxDist, maxDist, maxDist);
     const sCTVec3K2b& center = *(sCTVec3K2b*)obj;
     return sCTBoxK2b(sCTVec4K2b(center - maxDist, 1.0f), sCTVec4K2b(center + maxDist, 1.0f));
@@ -2428,11 +2428,11 @@ extern "C" void cBoundedAlgorithm_update(cBoundedAlgorithm* self)
         lookTarget.w = 1.0f;
     } else {
         t4Vector leadPos, riderPos, leadOffset, riderFront;
-        char* calleeObj = (char*)self->Target;
+        cCTBoundObj* calleeObj = (cCTBoundObj*)((char*)self->Target);
         sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)calleeObj)[1];
         ((void (*)(void*, void*))vEntry->fn)(&riderPos, vthis(calleeObj, *vEntry));
         float k = self->LeadDistance;
-        calleeObj = (char*)self->Target;
+        calleeObj = (cCTBoundObj*)((char*)self->Target);
         vEntry = &(*(sVEntry<t4Vector(void*)>**)calleeObj)[4];
         ((void (*)(void*, void*))vEntry->fn)(&riderFront, vthis(calleeObj, *vEntry));
         ScaleTo_174200(leadOffset, riderFront, k);
@@ -2443,8 +2443,8 @@ extern "C" void cBoundedAlgorithm_update(cBoundedAlgorithm* self)
     }
     self->CamTargetPos = lookTarget;
     {
-        char* calleeObj = (char*)self->BoundAction->BoundObj;
-        sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)(calleeObj + 0x24))[6];
+        cCTBoundObj* calleeObj = self->BoundAction->BoundObj;
+        sVEntry<t4Vector(void*)>* vEntry = &((sVEntry<t4Vector (void*)>*)calleeObj->mVtbl)[6];
         ((void (*)(void*, void*))vEntry->fn)(vthis(calleeObj, *vEntry), (char*)&self->Position);
     }
     t4Vector toTarget = Sub_174200(lookTarget, self->Position);
@@ -2601,7 +2601,7 @@ extern "C" void cTriggerAlgorithm_snap(void* self, long a1);
 extern "C" void cBoundedAlgorithm_snap(cBoundedAlgorithm* self, long subjectId)
 {
     {
-        char* calleeObj = (char*)&self->Target->Rider->mVtbl;
+        cCTBoundObj* calleeObj = (cCTBoundObj*)((char*)&self->Target->Rider->mVtbl);
         sVEntry<long(void*)>* vEntry = &(*(sVEntry<long(void*)>**)calleeObj)[7];
         if (vEntry->fn(vthis(calleeObj, *vEntry)) != subjectId)
             return;
@@ -2615,11 +2615,11 @@ extern "C" void cBoundedAlgorithm_snap(cBoundedAlgorithm* self, long subjectId)
         lookTarget.w = 1.0f;
     } else {
         t4Vector leadPos, riderPos, leadOffset, riderFront;
-        char* calleeObj = (char*)self->Target;
+        cCTBoundObj* calleeObj = (cCTBoundObj*)((char*)self->Target);
         sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)calleeObj)[1];
         ((void (*)(void*, void*))vEntry->fn)(&riderPos, vthis(calleeObj, *vEntry));
         float k = self->LeadDistance;
-        calleeObj = (char*)self->Target;
+        calleeObj = (cCTBoundObj*)((char*)self->Target);
         vEntry = &(*(sVEntry<t4Vector(void*)>**)calleeObj)[4];
         ((void (*)(void*, void*))vEntry->fn)(&riderFront, vthis(calleeObj, *vEntry));
         ScaleTo_1744B0(leadOffset, riderFront, k);
@@ -2636,8 +2636,8 @@ extern "C" void cBoundedAlgorithm_snap(cBoundedAlgorithm* self, long subjectId)
     self->LeadDistance = act2->LeadDistance;
     cTriggerAlgorithm_snap(((char*)self), subjectId);
     {
-        char* calleeObj = (char*)self->BoundAction->BoundObj;
-        sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)(calleeObj + 0x24))[6];
+        cCTBoundObj* calleeObj = self->BoundAction->BoundObj;
+        sVEntry<t4Vector(void*)>* vEntry = &((sVEntry<t4Vector (void*)>*)calleeObj->mVtbl)[6];
         ((void (*)(void*, void*))vEntry->fn)(vthis(calleeObj, *vEntry), (char*)&self->Position);
     }
     t4Vector toTarget = Sub_1744B0(lookTarget, self->Position);
@@ -5406,8 +5406,8 @@ static inline t4Vector ScaleP_1783E0(const t4Vector* v, float s)
  */
 extern "C" void cSPOKEChaseAlgorithm_snap(cSPOKEChaseAlgorithm* self, long id)
 {
-    char* rider = (char*)self->Target->Rider;
-    if (id == ((cBeing*)(rider + 0x6C0))->getAIIndex()) {
+    cRider* rider = self->Target->Rider;
+    if (id == ((cBeing*)(&rider->mVtbl))->getAIIndex()) {
         char* subject = (char*)self->Target;
         sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)subject)[4];
         self->LastLookDir = vEntry->fn(vthis(subject, *vEntry));

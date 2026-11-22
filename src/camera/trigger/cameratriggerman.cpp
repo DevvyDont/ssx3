@@ -7,7 +7,7 @@
 #include "ai/rider.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
-
+#include "main/gameviewman.h"
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_cleanupOnExit);
 #ifdef SKIP_ASM
@@ -19,7 +19,7 @@ void cActiveTriggerList_purge(cActiveTriggerList* self);
 void cCameraTriggerList_init(cCameraTriggerList* self);
 extern "C" void cCameraTriggerMan_purge(cCameraTriggerMan* self);
 extern "C" void cCamera_resetChaseControllerSwitches();
-
+#include "camera/camera.h"
 /**
  * Clears all camera trigger state when leaving a track.
  *
@@ -311,13 +311,13 @@ extern "C" int cCameraTriggerList_loadFromFile(void* self, const char* file);
  * @param file  the trigger file name
  * @return 0 on success, otherwise cCameraTriggerList_loadFromFile()'s error code
  */
-extern "C" int cCameraTriggerMan_loadTriggers(sCamTrigMan* self, const char* file)
+extern "C" int cCameraTriggerMan_loadTriggers(cCameraTriggerMan* self, const char* file)
 {
     int err = cCameraTriggerList_loadFromFile(self, file);
     if (err != 0)
         return err;
-    for (int i = 0; i < self->count; i++)
-        *(int*)(self->triggers[i] + 0x20) = 0;
+    for (int i = 0; i < self->TriggerList.NumTriggers; i++)
+        self->TriggerList.Triggers[i]->SpaceNode.Trigger = 0;
     return 0;
 }
 #endif
@@ -346,9 +346,9 @@ extern "C" void cCameraTriggerMan_streamIn(cCameraTriggerMan* self, void* stream
 {
     cCameraTriggerMan_cleanupOnExit(self);
     cCameraTriggerList_loadFromBuffer(self, stream);
-    sCamTrigManB* manager = (sCamTrigManB*)self;
-    for (int i = 0; i < manager->count; i++)
-        *(int*)(manager->triggers[i] + 0x20) = 0;
+    cCameraTriggerList* manager = &self->TriggerList;
+    for (int i = 0; i < manager->NumTriggers; i++)
+        manager->Triggers[i]->SpaceNode.Trigger = 0;
     cCameraTriggerMan_setInGameTriggers(self);
 }
 #endif
@@ -927,8 +927,8 @@ struct sCams_E1D8 {
  */
 extern "C" void doTriggerAction(sCamEvt_E1D8* evt, cRider* rider)
 {
-    sCams_E1D8* cams = (sCams_E1D8*)SSXApp->Game->ViewMan;
-    void* cam = *(void**)(cams->cam[rider->mViewIndex] + 0xA8);
+    cGameViewMan* cams = SSXApp->Game->ViewMan;
+    void* cam = cams->PlayerCamera[rider->mViewIndex]->ChaseController;
     switch (evt->type) {
     case 2: {
         float rate;

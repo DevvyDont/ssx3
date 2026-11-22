@@ -3924,7 +3924,7 @@ INCLUDE_ASM("ai/computer", cRider_checkTrackPathSwitch);
 #ifdef SKIP_ASM
 
 extern char gPaths[];
-extern "C" int cPathSys_getNearTrackPaths(void* tree, void* pos, void** out, int maxOut);
+extern "C" int cPathSys_getNearTrackPaths(void* tree, void* pos, cTrackPath** out, int maxOut);
 extern "C" float cPath_intersectPath(void* path, void* a1, void* a2, void* a3, int n);
 t4Vector cPath_getPathPos_1127F0(void* path, int* inRange, float t) __asm__("cPath_getPathPos");
 
@@ -4030,7 +4030,7 @@ static inline float vu0Dot_1127F0(const t4Vector& a, const t4Vector& b)
  */
 extern "C" void cRider_checkTrackPathSwitch(cRider* vself, int skipCur)
 {
-    void* paths[3];
+    cTrackPath* paths[3];
     t4Vector out;
     t4Vector pos;
     float len = vu0Length_1127F0(*(&vself->mVelocity));
@@ -4050,7 +4050,7 @@ extern "C" void cRider_checkTrackPathSwitch(cRider* vself, int skipCur)
         float tOut;
         float nearParam = cPath_intersectPath(paths[i], &pos, &out, &tOut, 1);
         if (paths[i] == (void*)vself->TrackPath) {
-            if (1592.0f < __builtin_fabsf(*(float*)((char*)paths[i] + 0x38) - vself->mDistToFinish - nearParam)) {
+            if (1592.0f < __builtin_fabsf(paths[i]->BaseDistanceLeft - vself->mDistToFinish - nearParam)) {
                 vself->mTrackPathHint->NodeID = -1;
             }
         }
@@ -4387,8 +4387,8 @@ extern "C" void cRider_checkTrackPathEvents(cRider* vself, float* pathDistXY, fl
             if (cp->DistanceLeft < self->MinDistanceLeft)
                 cRider_flagEventPathCheckpoint(self, (int*)cp);
         }
-        char* curTrack = (char*)self->TrackPath;
-        sVEntry<int(void*, float, float, void*, int)>* vt = *(sVEntry<int(void*, float, float, void*, int)>**)(curTrack + 0x34);
+        cTrackPath* curTrack = self->TrackPath;
+        sVEntry<int(void*, float, float, void*, int)>* vt = (sVEntry<int (void*, float, float, void*, int)>*)curTrack->mVtbl;
         self->NumPathEventsCur = vt[1].fn(vthis(curTrack, vt[1]), self->MinDistanceLeft, self->mDistToFinish, (char*)&self->PathEventsCur[0], 0xC);
         self->MinDistanceLeft = self->mDistToFinish;
     }

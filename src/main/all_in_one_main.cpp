@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "fe/festatereadmessagepopup.h"
 #include "fe/festatenetmessenger.h"
 #include "online/lobbyman.h"
@@ -559,10 +560,10 @@ extern "C" void func_0017E4F0(int);
  * @param item  the chosen item; its ID is at +0x8
  * @return 0
  */
-extern "C" int ChallengeResponseMenu_onCommand(ChallengeResponseMenu* menu, void *item) {
+extern "C" int ChallengeResponseMenu_onCommand(ChallengeResponseMenu* menu, cMenuItem* item) {
     int temp_3;
 
-    temp_3 = (*(int *)((char*)(item) + (8)));
+    temp_3 = (item->ID);
     if (temp_3 == 0) {
         func_0017E490(((int)menu->unk_130));
     } else if (temp_3 == 1) {
@@ -588,8 +589,8 @@ extern "C" void func_0017E418(int, int);
  * @param item  the chosen command item
  * @return 0
  */
-extern "C" int ChatMenu_onCommand(ChatMenu* menu, void *item) {
-    func_0017E418(((int)menu->unk_130), (*(int *)((char*)(item) + (0x14))));
+extern "C" int ChatMenu_onCommand(ChatMenu* menu, cCommandMenuItem* item) {
+    func_0017E418(((int)menu->unk_130), ((int)item->Caption));
     return 0;
 }
 #endif
@@ -612,8 +613,8 @@ extern "C" void func_0017E3B8_BB48(int) __asm__("func_0017E3B8");
  * @param item  the chosen item; its ID is at +0x8
  * @return 0
  */
-extern "C" int RoomMenu_onCommand(RoomMenu* menu, void *item) {
-    int itemValue = *(int *)((char *)item + 8);
+extern "C" int RoomMenu_onCommand(RoomMenu* menu, cMenuItem* item) {
+    int itemValue = item->ID;
     if (itemValue == -2) {
         func_0017E3B8_BB48((int)menu->unk_134);
     } else if (itemValue != -1) {
@@ -639,10 +640,10 @@ extern "C" void func_0017E2F8(int, int);
  * @param item  the chosen item; its ID is at +0x8
  * @return 0
  */
-extern "C" int LobbyMenu_onCommand(LobbyMenu* menu, void *item) {
+extern "C" int LobbyMenu_onCommand(LobbyMenu* menu, cMenuItem* item) {
     int temp_5;
 
-    temp_5 = (*(int *)((char*)(item) + (8)));
+    temp_5 = (item->ID);
     if (temp_5 >= 0) {
         func_0017E2F8(((int)menu->unk_130), temp_5);
     }
@@ -666,8 +667,8 @@ extern "C" void func_0017E290(int, int);
  * @param item  the chosen item; its ID is at +0x8
  * @return 0
  */
-extern "C" int PersonaMenu_onCommand(PersonaMenu* menu, void *item) {
-    func_0017E290(((int)menu->unk_4E0), (*(int *)((char*)(item) + (8))));
+extern "C" int PersonaMenu_onCommand(PersonaMenu* menu, cMenuItem* item) {
+    func_0017E290(((int)menu->unk_4E0), (item->ID));
     return 0;
 }
 #endif
@@ -710,8 +711,8 @@ extern "C" void func_0017E228(int, int);
  * @param item  the chosen item; its ID is at +0x8
  * @return 0
  */
-extern "C" int DeletePersonaMenu_onCommand(DeletePersonaMenu* menu, void *item) {
-    func_0017E228(((int)menu->unk_130), (*(int *)((char*)(item) + (8))));
+extern "C" int DeletePersonaMenu_onCommand(DeletePersonaMenu* menu, cMenuItem* item) {
+    func_0017E228(((int)menu->unk_130), (item->ID));
     return 0;
 }
 #endif
@@ -1259,8 +1260,8 @@ extern void* cAppModule_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cAppModule__cAppModule(void *self, int flags) {
-    *(void***)((char*)self + 0) = cAppModule_vtbl;
+extern "C" void cAppModule__cAppModule(cAppModule* self, int flags) {
+    self->mVtbl = cAppModule_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1292,8 +1293,8 @@ extern void* cDebugScreen_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cDebugScreen__cDebugScreen(void *self, int flags) {
-    *(void***)((char*)self + 0) = cDebugScreen_vtbl;
+extern "C" void cDebugScreen__cDebugScreen(cDebugScreen* self, int flags) {
+    self->mVtbl = cDebugScreen_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -2415,8 +2416,8 @@ INCLUDE_ASM("main/all_in_one_main", cFEInput_getInput);
  * @param object  the object
  * @return the word at +0x18
  */
-extern "C" int cFEInput_getInput(void *object) {
-    return (*(int *)((char*)(object) + (0x18)));
+extern "C" int cFEInput_getInput(cFEInput* object) {
+    return ((int)object->mpInput);
 }
 #endif
 
@@ -2979,8 +2980,8 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getOffset);
  * @param src  the popup description (cPopupInfo)
  * @return @p dst
  */
-extern "C" t3Vector* cPopupInfo_getOffset(t3Vector* dst, char* src) {
-    *dst = *(t3Vector*)(src + 0x9C);
+extern "C" t3Vector* cPopupInfo_getOffset(t3Vector* dst, cPopupInfo* src) {
+    *dst = *(t3Vector*)&src->mvOffset[0];
     return dst;
 }
 #endif

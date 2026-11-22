@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "camera/race/racecontroller.h"
 #include "ui/uithing.h"
 #include "render/irradiance.h"
 #include "render/font.h"
@@ -31,6 +32,7 @@
 #include "main/ssxapp.h"
 #include "ai/rider.h"
 #include "ai/ai.h"
+#include "visualfx/transitionman.h"
 
 // R5900 128-bit GPR quadword, for functions that copy a 16-byte block via a
 // single lq/sq pair instead of word-by-word.
@@ -2500,8 +2502,8 @@ INCLUDE_ASM("ai/rider", cRider_getControlCmd);
 // Forwards its second argument to vtable slot 1 of the rider handler.
 extern "C" void cRider_getControlCmd(cRider* self, void* out)
 {
-    char* obj = (char*)self->mRiderHandler;
-    sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(obj + 0xDE8);
+    cRiderHandler* obj = self->mRiderHandler;
+    sVEntry<void(void*, void*)>* vt = (sVEntry<void (void*, void*)>*)obj->mVtbl;
     vt[1].fn(vthis(obj, vt[1]), out);
 }
 #endif
@@ -3095,7 +3097,7 @@ extern "C" void cRider_updateSplit1(cRider* self)
     if (frameSlot != self->mAIIndex % 3)
     {
         cGame* game = SSXApp->Game;
-        if (*(int*)((char*)self->mOverlapList + 4) == (int)game->BXNash->deletecount)
+        if (*(int*)&self->mOverlapList->deletecount == (int)game->BXNash->deletecount)
         {
             void* obj = game->PlaybackMan;
             int busy = 0;
@@ -3140,8 +3142,8 @@ extern "C" void cRiderHandler_updateControl(void* obj, void* v);
 extern "C" void cRider_updateSplit2(cRider* self)
 {
     int buf[4];
-    char* obj = (char*)self->mRiderHandler;
-    sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(obj + 0xDE8);
+    cRiderHandler* obj = self->mRiderHandler;
+    sVEntry<void(void*, void*)>* vt = (sVEntry<void (void*, void*)>*)obj->mVtbl;
     vt[1].fn(vthis(obj, vt[1]), buf);
     cRiderHandler_updateControl(self->mRiderHandler, buf);
 }
@@ -5015,8 +5017,8 @@ extern "C" void cRider_initForMission(cRider* self, t4Matrix* mat)
     cRiderHandler_resetRiderFX(self->mRiderHandler);
     func_002F1A00(self->mAttachedEmitterFX);
     if ((unsigned int)self->mViewIndex < 2) {
-        char* obj = (char*)SSXApp->Game->ViewMan->PlayerCamera[self->mViewIndex]->ChaseController;
-        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(obj + 0x14);
+        cChaseCameraController* obj = SSXApp->Game->ViewMan->PlayerCamera[self->mViewIndex]->ChaseController;
+        sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)obj->mVtbl;
         vt[4].fn(vthis(obj, vt[4]));
     }
 }
@@ -5570,9 +5572,9 @@ extern "C" t4Vector cRider_GetNISEndPosition(cRider* self)
         return *(&self->mPosition);
     float lift = 0.0f;
     // PORT: GetSSXActorHeader returns a record pointer as int
-    char* rec = (char*)GetSSXActorHeader(self->unk_6D8);
+    tSSXHeaderActor* rec = (tSSXHeaderActor*)((char*)GetSSXActorHeader(self->unk_6D8));
     t4Vector pos = *(&self->mPosition);
-    switch (*(signed char*)(rec + 5)) {
+    switch (rec->scriptEndLocation) {
     case 0:
         break;
     case 1:
@@ -6299,7 +6301,7 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, tSSXFrameActor* pFr
 //100%
 INCLUDE_ASM("ai/rider", cRider_cancelRiderTransitions);
 #ifdef SKIP_ASM
-void* cGame_getTransitionMan(void* self, int id);
+cTransitionMan* cGame_getTransitionMan(void* self, int id);
 extern "C" void cTransitionMan_EndTransition(void* p);
 
 /**
@@ -6313,7 +6315,7 @@ extern "C" void cRider_cancelRiderTransitions(cRider* self)
     cGame* w = SSXApp->Game;
     if (w->ViewMan != 0 && self->mViewIndex >= 0)
     {
-        if (*(int*)((char*)cGame_getTransitionMan(w, self->mViewIndex) + 0x78) == 1)
+        if (cGame_getTransitionMan(w, self->mViewIndex)->mCurrentInitiator == 1)
             cTransitionMan_EndTransition(cGame_getTransitionMan(SSXApp->Game, self->mViewIndex));
     }
 }
