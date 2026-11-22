@@ -1327,7 +1327,7 @@ int FILESYS_completeop_a(struct sHandle_D310 h) __asm__("FILESYS_completeop");
  */
 int FILESYS_completeop_a(struct sHandle_D310 ophandle) {
     int ret = 0;
-    struct FILEOPERATION_def *slot = (struct FILEOPERATION_def *)((char *)D_00519AD8 + ophandle.idx * 0x30);
+    struct FILEOPERATION_def *slot = &D_00519AD8[ophandle.idx];
     int sum;
     int *fileHandle;
 
@@ -11040,17 +11040,17 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7F70);
  * @param reason  the code passed in the 'disc' event
  * @param flags  the event flags to raise
  */
-void func_003E7F70(char *lobby, int reason, int flags) {
+void func_003E7F70(LobbyApiRefT* lobby, int reason, int flags) {
     int sp[4];
     int (*fn)(char *, int *, int);
 
-    *(int *)(lobby + 0xC) = 0x7465726D;
-    *(int *)(lobby + 8) |= flags;
+    lobby->mState = 0x7465726D;
+    lobby->mEventFlags |= flags;
     func_003E7F58((struct LobbyApiRefT *)lobby);
-    fn = *(int (**)(char *, int *, int))(lobby + 0x52C);
+    fn = (int (*)(char*, int*, int))lobby->mEventProcs[3][0];
     if (fn != 0) {
         sp[0] = 3; sp[1] = 0x64697363; sp[2] = reason; sp[3] = 0;
-        fn(lobby, sp, *(int *)(lobby + 0x530));
+        fn(((char*)lobby), sp, lobby->mEventProcs[3][1]);
     }
 }
 #endif
@@ -11083,27 +11083,27 @@ extern void func_003E80C0_7FF0(void *) __asm__("func_003E80C0");
  * @return the lobby, or 0 when the allocation failed
  */
 void *func_003E7FF0(char *tagString, int debugData, int debugProc) {
-    char *lobbyRef;
+    LobbyApiRefT* lobbyRef;
     int pingRef;
 
-    lobbyRef = func_002591E8_7FF0(1360);
-    if (lobbyRef != 0) {
+    lobbyRef = (LobbyApiRefT*)func_002591E8_7FF0(1360);
+    if (((char*)lobbyRef) != 0) {
         memset_7FF0(lobbyRef, 0, 1360);
         if (tagString != 0) {
             if (strchr_7FF0(tagString, 61) != 0) {
-                cDirtysock_tag_TagFieldDupl_7FF0(lobbyRef + 0x34, 0x100, tagString);
+                cDirtysock_tag_TagFieldDupl_7FF0(lobbyRef->mTags, 0x100, tagString);
             } else {
-                cDirtysock_tag_TagFieldSetString_7FF0(lobbyRef + 0x34, 0x100, str_VERS_c_7FF0, tagString);
+                cDirtysock_tag_TagFieldSetString_7FF0(lobbyRef->mTags, 0x100, str_VERS_c_7FF0, tagString);
             }
         }
         *(int*)lobbyRef = func_003F5478_7FF0(0x8000);
         pingRef = func_003E7340_7FF0();
-        *(int*)(lobbyRef + 0x544) = debugData;
-        *(int*)(lobbyRef + 0x548) = debugProc;
-        *(int*)(lobbyRef + 4) = pingRef;
+        lobbyRef->mpDebugData = (void*)debugData;
+        lobbyRef->mpDebugProc = (void (*)(void*, const char*))debugProc;
+        lobbyRef->unk_004 = (void*)pingRef;
         func_003E80C0_7FF0(lobbyRef);
     }
-    return lobbyRef;
+    return ((char*)lobbyRef);
 }
 #endif
 
@@ -11609,12 +11609,12 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8A70);
  * @param k  the field FourCC
  * @return the field, or 0 when unknown or empty
  */
-char *func_003E8A70(char *lobby, int k) {
-    if (k == 0x75736572 || k == 0x61636374) return lobby + 0x134;
-    if (k == 0x70657273) return lobby + 0x174;
-    if (k == 0x726F6F6D) return lobby + 0x1C0;
-    if (k == 0x706C6179) return (*(int *)(lobby + 0x2CC) == 0) ? 0 : lobby + 0x200;
-    if (k == 0x646F776E) return (*(char *)(lobby + 0x3B8) == 0) ? 0 : lobby + 0x3B8;
+char *func_003E8A70(LobbyApiRefT* lobby, int k) {
+    if (k == 0x75736572 || k == 0x61636374) return lobby->mAccount;
+    if (k == 0x70657273) return lobby->mPersona;
+    if (k == 0x726F6F6D) return lobby->mRoomName;
+    if (k == 0x706C6179) return (lobby->mGameWhen == 0) ? 0 : lobby->mGameSession;
+    if (k == 0x646F776E) return (lobby->mDownText[0] == 0) ? 0 : lobby->mDownText;
     return 0;
 }
 #endif
@@ -11839,23 +11839,23 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8F08);
  * @param key  the value FourCC
  * @return the value, or 0 for an unknown key
  */
-int func_003E8F08(char *lobby, unsigned key) {
+int func_003E8F08(LobbyApiRefT* lobby, unsigned key) {
     int extAddr, localAddr;
-    if (key == 0x73746174) return *(int *)(lobby + 0xC);
-    if (key == 0x72666C67) return *(int *)(lobby + 0x1BC);
-    if (key == 0x6578746E) return *(int *)(lobby + 0x4FC);
-    if (key == 0x6C6F636C) return *(int *)(lobby + 0x500);
+    if (key == 0x73746174) return lobby->mState;
+    if (key == 0x72666C67) return lobby->mRoomFlags;
+    if (key == 0x6578746E) return lobby->mExternalAddr;
+    if (key == 0x6C6F636C) return lobby->mLocalAddr;
     if (key == 0x696E6174) {
-        extAddr = *(int *)(lobby + 0x4FC);
+        extAddr = lobby->mExternalAddr;
         if (extAddr != 0) {
-            localAddr = *(int *)(lobby + 0x500);
+            localAddr = lobby->mLocalAddr;
             if (localAddr != 0)
                 return extAddr != localAddr;
         }
         return 0;
     }
-    if (key == 0x6D6F7265) return *(int *)(lobby + 0x504);
-    if (key == 0x736C6F74) return *(int *)(lobby + 0x510);
+    if (key == 0x6D6F7265) return lobby->mMore;
+    if (key == 0x736C6F74) return lobby->mSlots;
     return 0;
 }
 #endif

@@ -1332,7 +1332,7 @@ extern "C" int cChunkResolve_resolveCollideModel(cChunkResolve* self, void* ctx,
             (*(char**)&node->Boxes) = (char*)node + (int)((char*)node->Boxes);
             (*(char**)&node->Vertex) = (char*)node + (int)((char*)node->Vertex);
             (*(char**)&node->Normal) = (char*)node + (int)((char*)node->Normal);
-            node = (tPolyModelMesh*)(((char*)node->Normal) + node->NumFaces * 16);
+            node = (tPolyModelMesh*)&node->Normal[node->NumFaces];
         }
     }
     return 1;
