@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "visualfx/worldlightman.h"
 #include "render/ps2scratchpad.h"
 #include "bx/math3d.h"
 #include "render/2drender.h"
@@ -141,20 +142,6 @@ struct sCol_DC70 {
     float a, r, g, b;
 };
 
-struct sLight_DC70 {
-    char pad_0x0[0x10];
-    int type;               // 0x10
-    float intensity;        // 0x14
-    char pad_0x18[0x8];
-    float r, g, b;          // 0x20
-    sV3_DC70 dir;           // 0x2C
-    char pos[0x24];         // 0x38
-    float cone;             // 0x5C
-    char pad_0x60[0x4];
-    signed char c64;        // 0x64
-    signed char c65;        // 0x65
-    char pad_0x66[0xA];
-};
 
 class cLightSrc_DC70 {
 public:
@@ -197,7 +184,7 @@ static inline sV3_DC70 Normalize_DC70(float x, float y, float z)
  * @param n       how many records to create
  * @param base    index of the first light to fill (On Tour: index)
  */
-extern "C" void cPS2LightMan_CreateLights(cPS2LightMan* self, sLight_DC70* lights, int n, int base)
+extern "C" void cPS2LightMan_CreateLights(cPS2LightMan* self, tLightRecord* lights, int n, int base)
 {
     int i;
     for (i = 0; i < n; i++) {
@@ -205,26 +192,26 @@ extern "C" void cPS2LightMan_CreateLights(cPS2LightMan* self, sLight_DC70* light
         obj[0] = &lights[i];
         sCol_DC70 col;
         col.a = 1.0f;
-        col.r = lights[i].r;
-        col.g = lights[i].g;
-        col.b = lights[i].b;
-        switch (lights[i].type) {
+        col.r = lights[i].m_fvColor[0];
+        col.g = lights[i].m_fvColor[1];
+        col.b = lights[i].m_fvColor[2];
+        switch (lights[i].m_eLightType) {
         case 0: {
-            sV3_DC70 dir = Normalize_DC70(lights[i].dir.x, lights[i].dir.y, lights[i].dir.z);
-            cLightInst_CreateDirectional_DC70(obj, &col, &dir, lights[i].intensity);
+            sV3_DC70 dir = Normalize_DC70((*(sV3_DC70*)&lights[i].m_fvDirection[0]).x, (*(sV3_DC70*)&lights[i].m_fvDirection[0]).y, (*(sV3_DC70*)&lights[i].m_fvDirection[0]).z);
+            cLightInst_CreateDirectional_DC70(obj, &col, &dir, lights[i].m_fIntensity);
             break;
         }
         case 2:
-            cLightInst_CreatePoint_DC70(obj, &col, lights[i].pos, lights[i].intensity, lights[i].c64);
+            cLightInst_CreatePoint_DC70(obj, &col, ((char*)&lights[i].m_fvWorldPos[0]), lights[i].m_fIntensity, lights[i].m_cDecayRate);
             break;
         case 1: {
-            char* pos = lights[i].pos;
-            sV3_DC70 dir = Normalize_DC70(lights[i].dir.x, lights[i].dir.y, lights[i].dir.z);
-            cLightInst_CreateSpot_DC70(obj, &col, pos, &dir, 1.5707963705062866f - func_0031C128(lights[i].cone), lights[i].intensity, lights[i].c64, (float)lights[i].c65);
+            char* pos = ((char*)&lights[i].m_fvWorldPos[0]);
+            sV3_DC70 dir = Normalize_DC70((*(sV3_DC70*)&lights[i].m_fvDirection[0]).x, (*(sV3_DC70*)&lights[i].m_fvDirection[0]).y, (*(sV3_DC70*)&lights[i].m_fvDirection[0]).z);
+            cLightInst_CreateSpot_DC70(obj, &col, pos, &dir, 1.5707963705062866f - func_0031C128(lights[i].unk_05C), lights[i].m_fIntensity, lights[i].m_cDecayRate, (float)lights[i].m_cDropOff);
             break;
         }
         case 3:
-            cLightInst_CreateAmbient_DC70(obj, &col, lights[i].intensity);
+            cLightInst_CreateAmbient_DC70(obj, &col, lights[i].m_fIntensity);
             break;
         }
     }

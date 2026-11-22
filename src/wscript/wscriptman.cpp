@@ -1646,22 +1646,22 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getCurrentTrick);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sScriptFlags_AF08 {
-    unsigned int f0 : 3;
-    unsigned int f1 : 4;
-    unsigned int f2 : 3;
-    unsigned int f3 : 2;
-    unsigned int f4 : 4;
-    unsigned short f5 : 3;
-    unsigned int f6 : 3;
-    unsigned int f7 : 6;
-    unsigned int f8 : 4;
-    unsigned int f9 : 3;
-    unsigned int f10 : 7;
-    unsigned int f11 : 1;
-    unsigned int pad : 7;
-    unsigned int f13 : 2;
-    unsigned int f15 : 4;
-    unsigned char f14 : 3;
+    unsigned int rail : 3;
+    unsigned int railSpin : 4;
+    unsigned int takeoff : 3;
+    unsigned int orient : 2;
+    unsigned int spin : 4;
+    unsigned short reps : 3;
+    unsigned int flip : 3;
+    unsigned int special : 6;
+    unsigned int postSpin : 4;
+    unsigned int uberGrind : 3;
+    unsigned int grab : 7;
+    unsigned int toLate : 1;
+    unsigned int lateGrab : 7;
+    unsigned int handplant : 2;
+    unsigned int press : 4;
+    unsigned char land : 3;
 };
 
 /**
@@ -1678,21 +1678,21 @@ extern "C" int cWScriptMan_getCurrentTrick(cWScriptMan* self, int beingIndex, in
     sScriptFlags_AF08* fl = (sScriptFlags_AF08*)self->TrickDef;
     if (fl != 0) {
         switch (which) {
-        case 0: return ((sScriptFlags_AF08*)self->TrickDef)->f0;
-        case 1: return ((sScriptFlags_AF08*)self->TrickDef)->f1;
-        case 2: return ((sScriptFlags_AF08*)self->TrickDef)->f2;
-        case 3: return ((sScriptFlags_AF08*)self->TrickDef)->f3;
-        case 4: return ((sScriptFlags_AF08*)self->TrickDef)->f4;
-        case 5: return ((sScriptFlags_AF08*)self->TrickDef)->f5;
-        case 6: return ((sScriptFlags_AF08*)self->TrickDef)->f6;
-        case 7: return ((sScriptFlags_AF08*)self->TrickDef)->f7;
-        case 8: return ((sScriptFlags_AF08*)self->TrickDef)->f8;
-        case 9: return ((sScriptFlags_AF08*)self->TrickDef)->f9;
-        case 10: return ((sScriptFlags_AF08*)self->TrickDef)->f10;
-        case 11: return ((sScriptFlags_AF08*)self->TrickDef)->f11;
-        case 13: return ((sScriptFlags_AF08*)self->TrickDef)->f13;
-        case 14: return ((sScriptFlags_AF08*)self->TrickDef)->f14;
-        case 15: return ((sScriptFlags_AF08*)self->TrickDef)->f15;
+        case 0: return ((sScriptFlags_AF08*)self->TrickDef)->rail;
+        case 1: return ((sScriptFlags_AF08*)self->TrickDef)->railSpin;
+        case 2: return ((sScriptFlags_AF08*)self->TrickDef)->takeoff;
+        case 3: return ((sScriptFlags_AF08*)self->TrickDef)->orient;
+        case 4: return ((sScriptFlags_AF08*)self->TrickDef)->spin;
+        case 5: return ((sScriptFlags_AF08*)self->TrickDef)->reps;
+        case 6: return ((sScriptFlags_AF08*)self->TrickDef)->flip;
+        case 7: return ((sScriptFlags_AF08*)self->TrickDef)->special;
+        case 8: return ((sScriptFlags_AF08*)self->TrickDef)->postSpin;
+        case 9: return ((sScriptFlags_AF08*)self->TrickDef)->uberGrind;
+        case 10: return ((sScriptFlags_AF08*)self->TrickDef)->grab;
+        case 11: return ((sScriptFlags_AF08*)self->TrickDef)->toLate;
+        case 13: return ((sScriptFlags_AF08*)self->TrickDef)->handplant;
+        case 14: return ((sScriptFlags_AF08*)self->TrickDef)->land;
+        case 15: return ((sScriptFlags_AF08*)self->TrickDef)->press;
         }
     }
     return 0;
@@ -4735,14 +4735,6 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern "C" void MEM_fill(void* dst, int value, int size);
 extern char str_ModelRefs[];
 
-struct cAnimModel_init_sPool {
-    int count;      // 0x0
-    int field_0x4;  // 0x4
-    int field_0x8;  // 0x8
-    void* items;    // 0xC
-    char pad_0x10[0x60 - 0x10];
-    int field_0x60; // 0x60
-};
 
 /**
  * Sets up an animated model's part storage: allocates @p count zeroed 0x58-byte sAnimModelPart records.
@@ -4754,14 +4746,14 @@ struct cAnimModel_init_sPool {
  * @param count  how many parts the model can hold
  * @param maxVariants  refs per LOD slot (numLodRefs), how many cAnimModel_addModelPartLOD allocates
  */
-extern "C" void cAnimModel_init(cAnimModel_init_sPool* self, int count, int maxVariants)
+extern "C" void cAnimModel_init(cAnimModel* self, int count, int maxVariants)
 {
-    self->field_0x4 = maxVariants;
-    self->count = count;
-    self->items = operator_new_tag(count * 88, str_ModelRefs, 0, 0);
-    MEM_fill(self->items, 0, self->count * 88);
-    self->field_0x8 = 0;
-    self->field_0x60 = 0;
+    self->numLodRefs = maxVariants;
+    self->MaxModelParts = count;
+    (*(void**)&self->parts) = operator_new_tag(count * 88, str_ModelRefs, 0, 0);
+    MEM_fill(((void*)self->parts), 0, self->MaxModelParts * 88);
+    self->numParts = 0;
+    self->NumTextureFiles = 0;
 }
 #endif
 

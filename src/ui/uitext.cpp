@@ -112,7 +112,7 @@ extern "C" void cUIText_render2D(cUIText* self, float x, float y)
     } else {
         (*(t2Vector*)&font->ShadowOffset[0]) = t2Vector(0.0f, 0.0f);
     }
-    int* drawFlags = (int*)(&GrMan->m_pCurrentDrawState->unk_00[2]);
+    int* drawFlags = (int*)(&GrMan->m_pCurrentDrawState->m_bitGroups[2]);
     *drawFlags = (*drawFlags & ~0x3E0) | (((((sLayerBits_05E8*)&self->mAttr)->layer + 9) << 5) & 0x3E0);
     sV3_05E8 pos(self->mPosition.x + x, self->mPosition.y + y, 0.0f);
     int i = 0;
@@ -886,7 +886,7 @@ extern "C" void cUITextScroll_render2D(cUITextScroll* self, float x, float y)
     } else {
         (*(t2Vector*)&font->ShadowOffset[0]) = t2Vector(0.0f, 0.0f);
     }
-    int* drawFlags = (int*)(&GrMan->m_pCurrentDrawState->unk_00[2]);
+    int* drawFlags = (int*)(&GrMan->m_pCurrentDrawState->m_bitGroups[2]);
     *drawFlags = (*drawFlags & ~0x3E0) | (((((sLayerBits_1588*)&self->mAttr)->layer + 9) << 5) & 0x3E0);
     sV3_1588 pos(self->mPosition.x + x, self->mPosition.y + y, 0.0f);
     float lineH = self->mScale.y * ((float)font->MaxCharHeight * (*(t2Vector*)&font->BaseScale[0]).y) + 3.0f;

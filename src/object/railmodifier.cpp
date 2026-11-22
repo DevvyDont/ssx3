@@ -8414,17 +8414,17 @@ extern sDrawState sDrawState_s_defaultDrawState_29B8 __asm__("sDrawState_s_defau
 
 static inline void set0_29B8(cPS2GraphicsMan* ctx, unsigned int mask, int shift, unsigned int v)
 {
-    ctx->m_pCurrentDrawState->unk_00[0] = (ctx->m_pCurrentDrawState->unk_00[0] & ~mask) | ((v << shift) & mask);
+    ctx->m_pCurrentDrawState->m_bitGroups[0] = (ctx->m_pCurrentDrawState->m_bitGroups[0] & ~mask) | ((v << shift) & mask);
 }
 
 static inline void set1_29B8(cPS2GraphicsMan* ctx, unsigned int mask, int shift, unsigned int v)
 {
-    ctx->m_pCurrentDrawState->unk_00[1] = (ctx->m_pCurrentDrawState->unk_00[1] & ~mask) | ((v << shift) & mask);
+    ctx->m_pCurrentDrawState->m_bitGroups[1] = (ctx->m_pCurrentDrawState->m_bitGroups[1] & ~mask) | ((v << shift) & mask);
 }
 
 static inline void set2_29B8(cPS2GraphicsMan* ctx, unsigned int mask, int shift, unsigned int v)
 {
-    ctx->m_pCurrentDrawState->unk_00[2] = (ctx->m_pCurrentDrawState->unk_00[2] & ~mask) | ((v << shift) & mask);
+    ctx->m_pCurrentDrawState->m_bitGroups[2] = (ctx->m_pCurrentDrawState->m_bitGroups[2] & ~mask) | ((v << shift) & mask);
 }
 
 static inline cDrawStateList* save_29B8(cPS2DeferManager* self, cPS2GraphicsMan* ctx)
@@ -9000,60 +9000,60 @@ extern "C" void func_00363C20_impl(__SIZE_TYPE__ selfi, sDrawState* st, int node
     (*pp)[2] = 0;
     (*pp)[3] = (ulong)1 << 60;
     *pp += 4;
-    int ctx = (st->unk_00[0] & 0x3C0) >> 6;
+    int ctx = (st->m_bitGroups[0] & 0x3C0) >> 6;
     if (ctx != 0) {
-        unsigned int frameWord = Mask3C20(0x3FFFFFFF, st->unk_00[3]);
-        if (((State3C20(self)->unk_00[0] & 0x3C0) >> 6) != ctx) {
+        unsigned int frameWord = Mask3C20(0x3FFFFFFF, st->m_bitGroups[3]);
+        if (((State3C20(self)->m_bitGroups[0] & 0x3C0) >> 6) != ctx) {
             self->buf = nodeLayer;
             self->frame = frameWord;
-            func_00364CD0((cPS2DeferManager*)self, (st->unk_00[0] & 0x3C0) >> 6, 0, frameWord, pp);
+            func_00364CD0((cPS2DeferManager*)self, (st->m_bitGroups[0] & 0x3C0) >> 6, 0, frameWord, pp);
         } else if (nodeLayer != self->buf) {
             self->buf = nodeLayer;
             self->frame = frameWord;
-            func_00364CD0((cPS2DeferManager*)self, (st->unk_00[0] & 0x3C0) >> 6, 1, frameWord, pp);
+            func_00364CD0((cPS2DeferManager*)self, (st->m_bitGroups[0] & 0x3C0) >> 6, 1, frameWord, pp);
         }
         if (self->frame != frameWord) {
             self->buf = nodeLayer;
             self->frame = frameWord;
-            func_00364CD0((cPS2DeferManager*)self, (st->unk_00[0] & 0x3C0) >> 6, 2, frameWord, pp);
+            func_00364CD0((cPS2DeferManager*)self, (st->m_bitGroups[0] & 0x3C0) >> 6, 2, frameWord, pp);
         }
     }
     pkt.count = 0;
     pkt.base = *pp;
     pkt.cur = *pp + 6;
-    int k = st->unk_00[2] & 0x1F;
+    int k = st->m_bitGroups[2] & 0x1F;
     if (k != self->scissor) {
         self->scissor = k;
         if (k >= 0) {
             func_003623D8((sGifPacket*)&pkt, self->keys[k].a, self->keys[k].c, self->keys[k].b, self->keys[k].d);
         }
     }
-    if (((State3C20(self)->unk_00[1] & 0x400000) >> 22) != ((st->unk_00[1] & 0x400000) >> 22)) {
+    if (((State3C20(self)->m_bitGroups[1] & 0x400000) >> 22) != ((st->m_bitGroups[1] & 0x400000) >> 22)) {
         cPS2GraphicsMan* gs = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_railmodifier;
         func_00362660((sGifPacket*)&pkt, (unsigned int)gs->mCurrentZBufferPage, (unsigned int)gs->mCurrentZBFormat,
-                      (st->unk_00[1] & 0x400000) >> 22, 0);
+                      (st->m_bitGroups[1] & 0x400000) >> 22, 0);
         func_00362660((sGifPacket*)&pkt, (unsigned int)gs->mCurrentZBufferPage, (unsigned int)gs->mCurrentZBFormat,
-                      (st->unk_00[1] & 0x400000) >> 22, 1);
+                      (st->m_bitGroups[1] & 0x400000) >> 22, 1);
     }
-    if (Bits3C20(State3C20(self)->unk_00[1], 0x1800000) != Bits3C20(st->unk_00[1], 0x1800000) ||
-        Bits3C20(State3C20(self)->unk_00[1], 0x300000) != Bits3C20(st->unk_00[1], 0x300000) ||
-        Bits3C20(State3C20(self)->unk_00[1], 0xFF000) != Bits3C20(st->unk_00[1], 0xFF000)) {
-        func_003626D8((sRmGsPacket*)&pkt, (st->unk_00[1] & 0x1800000) >> 23, (st->unk_00[1] & 0x300000) >> 20,
-                      (st->unk_00[1] & 0xFF000) >> 12, 0);
-        func_003626D8((sRmGsPacket*)&pkt, (st->unk_00[1] & 0x1800000) >> 23, (st->unk_00[1] & 0x300000) >> 20,
-                      (st->unk_00[1] & 0xFF000) >> 12, 1);
+    if (Bits3C20(State3C20(self)->m_bitGroups[1], 0x1800000) != Bits3C20(st->m_bitGroups[1], 0x1800000) ||
+        Bits3C20(State3C20(self)->m_bitGroups[1], 0x300000) != Bits3C20(st->m_bitGroups[1], 0x300000) ||
+        Bits3C20(State3C20(self)->m_bitGroups[1], 0xFF000) != Bits3C20(st->m_bitGroups[1], 0xFF000)) {
+        func_003626D8((sRmGsPacket*)&pkt, (st->m_bitGroups[1] & 0x1800000) >> 23, (st->m_bitGroups[1] & 0x300000) >> 20,
+                      (st->m_bitGroups[1] & 0xFF000) >> 12, 0);
+        func_003626D8((sRmGsPacket*)&pkt, (st->m_bitGroups[1] & 0x1800000) >> 23, (st->m_bitGroups[1] & 0x300000) >> 20,
+                      (st->m_bitGroups[1] & 0xFF000) >> 12, 1);
     }
-    if ((State3C20(self)->unk_00[0] & 0xC) != (st->unk_00[0] & 0xC)) {
-        func_003625C0((sGifPacket*)&pkt, (st->unk_00[0] & 0xC) >> 2, 0);
+    if ((State3C20(self)->m_bitGroups[0] & 0xC) != (st->m_bitGroups[0] & 0xC)) {
+        func_003625C0((sGifPacket*)&pkt, (st->m_bitGroups[0] & 0xC) >> 2, 0);
     }
-    if (((State3C20(self)->unk_00[1] & 0x7C) >> 2) != ((st->unk_00[1] & 0x7C) >> 2) || ((State3C20(self)->unk_00[0] >> 12) & 0xFF) != ((st->unk_00[0] >> 12) & 0xFF)) {
-        func_00362478((sGifPacket*)&pkt, (st->unk_00[1] & 0x7C) >> 2, (st->unk_00[0] >> 12) & 0xFF, 0);
+    if (((State3C20(self)->m_bitGroups[1] & 0x7C) >> 2) != ((st->m_bitGroups[1] & 0x7C) >> 2) || ((State3C20(self)->m_bitGroups[0] >> 12) & 0xFF) != ((st->m_bitGroups[0] >> 12) & 0xFF)) {
+        func_00362478((sGifPacket*)&pkt, (st->m_bitGroups[1] & 0x7C) >> 2, (st->m_bitGroups[0] >> 12) & 0xFF, 0);
     }
-    if ((State3C20(self)->unk_00[0] & 0x30) != (st->unk_00[0] & 0x30)) {
-        func_003625C0((sGifPacket*)&pkt, (st->unk_00[0] & 0x30) >> 4, 1);
+    if ((State3C20(self)->m_bitGroups[0] & 0x30) != (st->m_bitGroups[0] & 0x30)) {
+        func_003625C0((sGifPacket*)&pkt, (st->m_bitGroups[0] & 0x30) >> 4, 1);
     }
-    if (((State3C20(self)->unk_00[1] & 0xF80) >> 7) != ((st->unk_00[1] & 0xF80) >> 7) || ((State3C20(self)->unk_00[0] >> 20) & 0xFF) != ((st->unk_00[0] >> 20) & 0xFF)) {
-        func_00362478((sGifPacket*)&pkt, (st->unk_00[1] & 0xF80) >> 7, (st->unk_00[0] >> 20) & 0xFF, 1);
+    if (((State3C20(self)->m_bitGroups[1] & 0xF80) >> 7) != ((st->m_bitGroups[1] & 0xF80) >> 7) || ((State3C20(self)->m_bitGroups[0] >> 20) & 0xFF) != ((st->m_bitGroups[0] >> 20) & 0xFF)) {
+        func_00362478((sGifPacket*)&pkt, (st->m_bitGroups[1] & 0xF80) >> 7, (st->m_bitGroups[0] >> 20) & 0xFF, 1);
     }
     self->state = *st;
     func_003627A8(&pkt, pp, 1);
@@ -10076,13 +10076,13 @@ extern "C" int func_00365FE8(sRailModE40* self)
 INCLUDE_ASM("object/railmodifier", func_00366008);
 #ifdef SKIP_ASM
 struct sRailNode {
-    int field_0x0;
-    int size;               // 0x04
+    int mBlockAddr;
+    int mBlockSize;               // 0x04
     int field_0x8;
-    int prev;               // 0x0c
-    int next;               // 0x10
-    int prev2;              // 0x14
-    int next2;              // 0x18
+    int mPrev;               // 0x0c
+    int mNext;               // 0x10
+    int mSPrev;              // 0x14
+    int mSNext;              // 0x18
 };
 
 struct sRailNodeMan {
@@ -10104,7 +10104,7 @@ extern "C" void func_00366008(sRailNodeMan* self, int idx)
 {
     sRailNode* node = &self->nodes[idx];
     sRailNode* prev;
-    int link = node->prev;
+    int link = node->mPrev;
     if (link < 0) {
         if ((link & 0x70000000) == 0x10000000) {
             prev = &self->headsA[link & 0x0FFFFFFF];
@@ -10114,11 +10114,11 @@ extern "C" void func_00366008(sRailNodeMan* self, int idx)
     } else {
         prev = &self->nodes[link];
     }
-    prev->next = node->next;
-    if (node->next >= 0) {
-        self->nodes[node->next].prev = node->prev;
+    prev->mNext = node->mNext;
+    if (node->mNext >= 0) {
+        self->nodes[node->mNext].mPrev = node->mPrev;
     }
-    node->next = self->freeHead;
+    node->mNext = self->freeHead;
     self->freeHead = idx;
 }
 #endif
@@ -10153,35 +10153,35 @@ extern "C" void func_003660A8(void* selfp, int idx)
     sRailNode* node = &self->nodes[idx];
     sRailNode* heads;
     int tag;
-    if (node->field_0x0 & 1) {
+    if (node->mBlockAddr & 1) {
         heads = self->headsA;
         tag = 0x90000000;
     } else {
         heads = self->headsB;
         tag = 0xA0000000;
     }
-    int sizeClass = railFloorLog2_60A8(node->size) - 6;
+    int sizeClass = railFloorLog2_60A8(node->mBlockSize) - 6;
     sRailNode* head = &heads[sizeClass];
-    int first = head->next2;
+    int first = head->mSNext;
     if (first == -1) {
-        head->next2 = idx;
-        node->prev2 = sizeClass | tag;
-        node->next2 = first;
+        head->mSNext = idx;
+        node->mSPrev = sizeClass | tag;
+        node->mSNext = first;
         return;
     }
-    for (int i = first; i >= 0; i = self->nodes[i].next2) {
+    for (int i = first; i >= 0; i = self->nodes[i].mSNext) {
         sRailNode* n = &self->nodes[i];
-        if (n->next2 == -1) {
-            n->next2 = idx;
-            node->prev2 = i;
-            node->next2 = -1;
+        if (n->mSNext == -1) {
+            n->mSNext = idx;
+            node->mSPrev = i;
+            node->mSNext = -1;
             return;
         }
-        if ((heads == self->headsA && n->field_0x0 > node->field_0x0) ||
-            (heads == self->headsB && n->size >= node->size)) {
-            int link = n->prev2;
-            node->next2 = i;
-            node->prev2 = link;
+        if ((heads == self->headsA && n->mBlockAddr > node->mBlockAddr) ||
+            (heads == self->headsB && n->mBlockSize >= node->mBlockSize)) {
+            int link = n->mSPrev;
+            node->mSNext = i;
+            node->mSPrev = link;
             sRailNode* prev;
             if (link < 0) {
                 if ((link & 0x70000000) == 0x10000000) {
@@ -10192,8 +10192,8 @@ extern "C" void func_003660A8(void* selfp, int idx)
             } else {
                 prev = &self->nodes[link];
             }
-            prev->next2 = idx;
-            self->nodes[node->next2].prev2 = idx;
+            prev->mSNext = idx;
+            self->nodes[node->mSNext].mSPrev = idx;
             return;
         }
     }
@@ -10212,7 +10212,7 @@ extern "C" void func_00366238(sRailNodeMan* self, int idx)
 {
     sRailNode* node = &self->nodes[idx];
     sRailNode* prev;
-    int link = node->prev2;
+    int link = node->mSPrev;
     if (link < 0) {
         if ((link & 0x70000000) == 0x10000000) {
             prev = &self->headsA[link & 0x0FFFFFFF];
@@ -10222,9 +10222,9 @@ extern "C" void func_00366238(sRailNodeMan* self, int idx)
     } else {
         prev = &self->nodes[link];
     }
-    prev->next2 = node->next2;
-    if (node->next2 >= 0) {
-        self->nodes[node->next2].prev2 = node->prev2;
+    prev->mSNext = node->mSNext;
+    if (node->mSNext >= 0) {
+        self->nodes[node->mSNext].mSPrev = node->mSPrev;
     }
 }
 #endif
@@ -10250,24 +10250,24 @@ extern "C" void func_003662D0(sRailNodeMan* self, int idx, int size)
 {
     sRailNode* node = &self->nodes[idx];
     func_00366238(self, idx);
-    if (size == node->size || self->freeHead == -1) {
-        node->field_0x0 |= 1;
+    if (size == node->mBlockSize || self->freeHead == -1) {
+        node->mBlockAddr |= 1;
     } else {
         int n = func_00365FE8_pop(self);
         sRailNode* nn = &self->nodes[n];
-        nn->field_0x0 = node->field_0x0 + size;
-        nn->size = node->size - size;
+        nn->mBlockAddr = node->mBlockAddr + size;
+        nn->mBlockSize = node->mBlockSize - size;
         nn->field_0x8 = -1;
-        nn->prev = idx;
-        int next = node->next;
-        nn->next = next;
+        nn->mPrev = idx;
+        int next = node->mNext;
+        nn->mNext = next;
         if (next >= 0) {
-            self->nodes[next].prev = n;
+            self->nodes[next].mPrev = n;
         }
-        node->next = n;
+        node->mNext = n;
         func_003660A8(self, n);
-        node->size = size;
-        node->field_0x0 |= 1;
+        node->mBlockSize = size;
+        node->mBlockAddr |= 1;
     }
     func_003660A8(self, idx);
 }
@@ -10292,7 +10292,7 @@ extern "C" void func_003663D8(void* selfp, int idx)
     sRailNode* n = &self->nodes[idx];
     if (n->field_0x8 != 0x7FFFFFFF) {
         tTexInfo* owner = (tTexInfo*)(*(char***)((char*)self + 0x23E8))[n->field_0x8];
-        if ((n->field_0x0 >> 2) & 1) {
+        if ((n->mBlockAddr >> 2) & 1) {
             owner->mCLUTAddr = -1;
             owner->mCLUTBlock = -1;
         } else {
@@ -10300,24 +10300,24 @@ extern "C" void func_003663D8(void* selfp, int idx)
             owner->mTexBlock = -1;
         }
     }
-    n->field_0x0 &= ~0x3F;
+    n->mBlockAddr &= ~0x3F;
     func_00366238(self, idx);
     func_003660A8(self, idx);
     for (;;) {
-        int prevIdx = n->prev;
-        if (prevIdx >= 0 && (self->nodes[prevIdx].field_0x0 & 1) == 0) {
+        int prevIdx = n->mPrev;
+        if (prevIdx >= 0 && (self->nodes[prevIdx].mBlockAddr & 1) == 0) {
             idx = prevIdx;
             n = &self->nodes[prevIdx];
         } else {
-            int nextIdx = n->next;
-            if (nextIdx < 0 || (self->nodes[nextIdx].field_0x0 & 1)) {
+            int nextIdx = n->mNext;
+            if (nextIdx < 0 || (self->nodes[nextIdx].mBlockAddr & 1)) {
                 return;
             }
         }
         func_00366238(self, idx);
-        func_00366238(self, n->next);
-        n->size += self->nodes[n->next].size;
-        func_00366008(self, n->next);
+        func_00366238(self, n->mNext);
+        n->mBlockSize += self->nodes[n->mNext].mBlockSize;
+        func_00366008(self, n->mNext);
         func_003660A8(self, idx);
     }
 }
@@ -10485,12 +10485,12 @@ extern "C" int func_003667F8(sRailNodeMan* self, int size)
 {
     int bucket;
     for (bucket = railFloorLog2(size) - 6; bucket < 17; bucket++) {
-        int i = self->headsB[bucket].next2;
+        int i = self->headsB[bucket].mSNext;
         while (i >= 0) {
-            if (self->nodes[i].size >= size) {
+            if (self->nodes[i].mBlockSize >= size) {
                 return i;
             }
-            i = self->nodes[i].next2;
+            i = self->nodes[i].mSNext;
         }
     }
     return -1;
@@ -10565,16 +10565,16 @@ static inline int railFloorLog2v(int x)
  */
 extern "C" int func_003668F8(sRailNodeMan* self, int size, int skipA, int skipB, int age)
 {
-    int i = self->headsA[railFloorLog2v(size) - 6].next2;
+    int i = self->headsA[railFloorLog2v(size) - 6].mSNext;
     int bestIdx = -1;
     int best = 0x7FFFFFFF;
-    for (; i >= 0; i = self->nodes[i].next2) {
+    for (; i >= 0; i = self->nodes[i].mSNext) {
         sRailNode* n = &self->nodes[i];
-        int sz = n->size;
+        int sz = n->mBlockSize;
         if (sz < size) {
             continue;
         }
-        if ((n->field_0x0 >> 1) & 1) {
+        if ((n->mBlockAddr >> 1) & 1) {
             continue;
         }
         int owner = n->field_0x8;
@@ -10629,16 +10629,16 @@ extern "C" void func_003669F0(sRailNodeMan* self, int size, int skipA, int skipB
     int bestIdx = -1;
     int best = 0x7FFFFFFF;
     int fl;
-    int Start = self->headsB[17].next;
+    int Start = self->headsB[17].mNext;
     sRailNode* StartPtr = &self->nodes[Start];
-    if (Start >= 0 && ((fl = StartPtr->field_0x0) & 1)) {
+    if (Start >= 0 && ((fl = StartPtr->mBlockAddr) & 1)) {
         do {
             if (((fl >> 1) & 1) == 0 && StartPtr->field_0x8 != skipA && StartPtr->field_0x8 != skipB) {
                 break;
             }
-            Start = StartPtr->next;
+            Start = StartPtr->mNext;
             StartPtr = &self->nodes[Start];
-        } while (Start >= 0 && ((fl = StartPtr->field_0x0) & 1));
+        } while (Start >= 0 && ((fl = StartPtr->mBlockAddr) & 1));
     }
     int End = Start;
     sRailNode* EndPtr = StartPtr;
@@ -10651,24 +10651,24 @@ extern "C" void func_003669F0(sRailNodeMan* self, int size, int skipA, int skipB
                 bestIdx = Start;
             }
             sRailPair* pr = &((sRailPair*)D_0053AB80)[StartPtr->field_0x8];
-            sum -= StartPtr->size;
-            if ((StartPtr->field_0x0 & 1) && level < pr->a) {
-                cost -= StartPtr->size * pr->b;
+            sum -= StartPtr->mBlockSize;
+            if ((StartPtr->mBlockAddr & 1) && level < pr->a) {
+                cost -= StartPtr->mBlockSize * pr->b;
             }
-            Start = StartPtr->next;
+            Start = StartPtr->mNext;
             StartPtr = &self->nodes[Start];
         } else {
-            if ((EndPtr->field_0x0 & 1) && (((EndPtr->field_0x0 >> 1) & 1) || EndPtr->field_0x8 == skipA || EndPtr->field_0x8 == skipB)) {
-                Start = EndPtr->next;
+            if ((EndPtr->mBlockAddr & 1) && (((EndPtr->mBlockAddr >> 1) & 1) || EndPtr->field_0x8 == skipA || EndPtr->field_0x8 == skipB)) {
+                Start = EndPtr->mNext;
                 StartPtr = &self->nodes[Start];
-                if (Start >= 0 && ((fl = StartPtr->field_0x0) & 1)) {
+                if (Start >= 0 && ((fl = StartPtr->mBlockAddr) & 1)) {
                     do {
                         if (((fl >> 1) & 1) == 0 && StartPtr->field_0x8 != skipA && StartPtr->field_0x8 != skipB) {
                             break;
                         }
-                        Start = StartPtr->next;
+                        Start = StartPtr->mNext;
                         StartPtr = &self->nodes[Start];
-                    } while (Start >= 0 && ((fl = StartPtr->field_0x0) & 1));
+                    } while (Start >= 0 && ((fl = StartPtr->mBlockAddr) & 1));
                 }
                 End = Start;
                 EndPtr = StartPtr;
@@ -10676,11 +10676,11 @@ extern "C" void func_003669F0(sRailNodeMan* self, int size, int skipA, int skipB
                 cost = 0;
             } else {
                 sRailPair* pr = &((sRailPair*)D_0053AB80)[EndPtr->field_0x8];
-                sum += EndPtr->size;
-                if ((EndPtr->field_0x0 & 1) && level < pr->a) {
-                    cost += EndPtr->size * pr->b;
+                sum += EndPtr->mBlockSize;
+                if ((EndPtr->mBlockAddr & 1) && level < pr->a) {
+                    cost += EndPtr->mBlockSize * pr->b;
                 }
-                End = EndPtr->next;
+                End = EndPtr->mNext;
                 EndPtr = &self->nodes[End];
             }
         }
@@ -10692,11 +10692,11 @@ extern "C" void func_003669F0(sRailNodeMan* self, int size, int skipA, int skipB
     int n = 0;
     int i = bestIdx;
     for (int got = 0; got < size; ) {
-        if (self->nodes[i].field_0x0 & 1) {
+        if (self->nodes[i].mBlockAddr & 1) {
             freeList[n++] = i;
         }
-        got += self->nodes[i].size;
-        i = self->nodes[i].next;
+        got += self->nodes[i].mBlockSize;
+        i = self->nodes[i].mNext;
     }
     for (int k = 0; k < n; k++) {
         func_003663D8(self, freeList[k]);

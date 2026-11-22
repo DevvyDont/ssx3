@@ -3008,12 +3008,12 @@ static inline void vu0ScaleEq_13C7A8(t4Vector& v, float s)
 }
 
 struct sHpCtl_13C7A8 {
-    int m0;
-    float m4;
-    float m8;
-    int mC;
-    int m10;
-    int m14;
+    int ChatterTime;
+    float PowderDepth1G;
+    float PowderDepth3G;
+    int ForceNaturalAir;
+    int AITickOnGainFocus;
+    int AITickOnLoseFocus;
     char* mRider;
 };
 
@@ -3028,18 +3028,18 @@ struct sHpCtl_13C7A8 {
  */
 extern "C" void cGroundMotion_gainFocus(sHpCtl_13C7A8* self)
 {
-    self->m0 = 0;
+    self->ChatterTime = 0;
     cRider* rider = (cRider*)self->mRider;
     tSurfData* tbl = (tSurfData*)SSXApp->Game->SurfPropCache;
     tSurfData* snow = &tbl[rider->mSurfaceType];
     float k = rider->mAnimModel->unk_140.x;
-    self->m4 = k * snow->PowderDepth1G;
-    self->m8 = k * snow->PowderDepth3G;
+    self->PowderDepth1G = k * snow->PowderDepth1G;
+    self->PowderDepth3G = k * snow->PowderDepth3G;
     *(&rider->DampGroundNormal) = *(&rider->mGroundNormal);
-    self->mC = 0;
+    self->ForceNaturalAir = 0;
     int aiTick = AITick();
-    self->m10 = aiTick;
-    int ticksOutOfGround = aiTick - self->m14;
+    self->AITickOnGainFocus = aiTick;
+    int ticksOutOfGround = aiTick - self->AITickOnLoseFocus;
     float penaltyFraction;
     if (ticksOutOfGround > 40)
         penaltyFraction = (ticksOutOfGround - 40) * 0.010000000707805157f + 0.699999988079071f;
@@ -3448,12 +3448,12 @@ struct sHit_13D1B8 {
     float pad30[4];         // 0x30
     float dist;             // 0x40
     int pad44[2];           // 0x44
-    int m4C;                // 0x4C
+    int Stype;                // 0x4C
     char* obj;              // 0x50
     char* tri;              // 0x54
     int pad58[5];           // 0x58
-    float m6C;              // 0x6C
-    float m70;              // 0x70
+    float u;              // 0x6C
+    float v;              // 0x70
     int pad74[3];           // 0x74
     sHit_13D1B8() {}
 } __attribute__((aligned(16)));
@@ -3711,8 +3711,8 @@ extern "C" int cGroundMotion_setupGroundVectors(cGroundMotion* self, sHit_13D1B8
     *out = hits[best];
     if (out->tri != 0) {
         *(int*)(RIDER + 0x430) = *(int*)(out->tri + 0x150);
-        *(float*)(RIDER + 0xAAC) = out->m6C;
-        *(float*)(RIDER + 0xAB0) = out->m70;
+        *(float*)(RIDER + 0xAAC) = out->u;
+        *(float*)(RIDER + 0xAB0) = out->v;
         *(short*)(RIDER + 0x2D4) = *(short*)(out->tri + 0xA);
     } else {
         *(unsigned int*)(RIDER + 0x430) = 0xFFFFFFFF;
@@ -3724,7 +3724,7 @@ extern "C" int cGroundMotion_setupGroundVectors(cGroundMotion* self, sHit_13D1B8
             vt[42].fn(vthis(handler, vt[42]), out);
         }
     }
-    *(int*)(RIDER + 0x438) = out->m4C;
+    *(int*)(RIDER + 0x438) = out->Stype;
     if (*(int*)(RIDER + 0x438) == -1) {
         *(int*)(RIDER + 0x438) = 0;
     }
@@ -5525,7 +5525,7 @@ struct sHPC140738 {
     char pad0[0x1F0];
     int v[19][3];           // 0x1F0
     char pad2D4[0x430 - 0x2D4];
-    unsigned int u430;      // 0x430
+    unsigned int mGroundPolyId;      // 0x430
     char pad434[0x5B8 - 0x434];
     unsigned int arr[64];   // 0x5B8
 };
@@ -5597,7 +5597,7 @@ extern "C" sHPC140738* cRiderState_cRiderState(sHPC140738* self)
     self->v[18][2] = 0;
     self->v[18][0] = 0;
     self->v[18][1] = 0;
-    self->u430 = 0xFFFFFFFF;
+    self->mGroundPolyId = 0xFFFFFFFF;
     unsigned int* visited = self->arr;
     for (int i = 63; i != -1; i--, visited++) {
         *visited = 0xFFFFFFFF;

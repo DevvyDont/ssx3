@@ -765,8 +765,8 @@ struct sScriptThread2C0 {
 };
 struct sScriptEngine2B8 {
     char pad[0x2b8];
-    int count;                      // 0x2B8
-    int unk2BC;                     // 0x2BC
+    int mpInSeq;                      // 0x2B8
+    int mpInSeqHeap;                     // 0x2BC
     sScriptThread2C0 threads[16];   // 0x2C0
 };
 /**
@@ -780,8 +780,8 @@ struct sScriptEngine2B8 {
 extern "C" void cBXScriptEngine_ResetInstVars(sScriptEngine2B8* self)
 {
     int i;
-    self->count = 0;
-    self->unk2BC = 0;
+    self->mpInSeq = 0;
+    self->mpInSeqHeap = 0;
     for (i = 0; i < 16; i++) {
         self->threads[i].id = i;
         self->threads[i].k = 0;

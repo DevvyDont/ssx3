@@ -46,11 +46,11 @@ struct sCamRef22E3B8 {
 };
 
 struct cGameViewMan22E3B8 {
-    unsigned int count;
+    unsigned int m_uiNumPlayers;
     sCamRef22E3B8 cams[2];
-    int fC;
-    int f10;
-    int f14;
+    int m_GFState;
+    int m_uiNumView;
+    int m_uiCurrentView;
     int f18;
     int f1C;
     float width;
@@ -71,14 +71,14 @@ struct cGameViewMan22E3B8 {
 extern "C" cGameViewMan22E3B8* cGameViewMan_cGameViewMan(cGameViewMan22E3B8* self, unsigned int count)
 {
     new ((char*)self + 4) sCamRef22E3B8[2];
-    self->count = count;
+    self->m_uiNumPlayers = count;
     float farClip = 30000.0f;
     if (count >= 2) {
         farClip = 20000.0f;
     }
     unsigned int i;
     for (i = 0; i < 2; i++) {
-        if (i < self->count) {
+        if (i < self->m_uiNumPlayers) {
             self->cams[i].p = (cCamera*)cCamera_cCamera(cMemMan_alloc(1200, str_GameCamera, 0x20000000, 0), i);
             cCamera* camera = self->cams[i].p;
             ((sVECam22E3B8*)camera->mVtbl)[2].fn(vthis(camera, ((sVECam22E3B8*)camera->mVtbl)[2]), i, 0.7853981852531433f, 30.0f, farClip);
@@ -87,9 +87,9 @@ extern "C" cGameViewMan22E3B8* cGameViewMan_cGameViewMan(cGameViewMan22E3B8* sel
             self->cams[i].p = 0;
         }
     }
-    self->fC = 0;
-    self->f10 = 1;
-    self->f14 = 0;
+    self->m_GFState = 0;
+    self->m_uiNumView = 1;
+    self->m_uiCurrentView = 0;
     float w = (float)((cDisp22E3B8*)GrMan)->GetScreenWidth();
     float screenHeight = (float)((cDisp22E3B8*)GrMan)->GetScreenHeight();
     self->width = w;

@@ -485,12 +485,12 @@ static inline void hide_FE(void* w)
 
 struct sCharEquip_FE {
     char pad0[0x48];
-    void* f48;
-    void* f4C;
-    void* f50;
-    void* f54;
-    void* f58;
-    void* f5C;
+    void* mpTitleText;
+    void* mpHelpText;
+    void* mpButtonHelpText;
+    void* mpButtonHelpIcon;
+    void* mpHeading;
+    void* mpMenu;
     void* f60;
     void* f64;
     void* f68;
@@ -505,16 +505,16 @@ struct sCharEquip_FE {
     void* f8C[6];
     void* fA4[6];
     char padBC[0xC8 - 0xBC];
-    int fC8;
+    int mEquipMode;
     char padCC[0x958 - 0xCC];
-    int f958;
+    int mNumItems;
     char pad95C[0xAE4 - 0x95C];
-    int fAE4;
+    int mCanSwitchMode;
 };
 
 static inline bool isC8_FE(sCharEquip_FE* s)
 {
-    return s->fC8 == 1;
+    return s->mEquipMode == 1;
 }
 
 /**
@@ -533,37 +533,37 @@ extern "C" void cFEStateCharEquip_onWidgetCreate(sCharEquip_FE* self, cUIThing* 
 {
     int id = w->mHashName;
     if (id == GetHashValue32(str_title_equip_character)) {
-        self->f48 = ((void*)w);
+        self->mpTitleText = ((void*)w);
         if (isC8_FE(self)) {
-            cUIText_setUnicodeStringByID_eate(self->f48, GetHashValue32(str_kT_CMNBuyGear));
+            cUIText_setUnicodeStringByID_eate(self->mpTitleText, GetHashValue32(str_kT_CMNBuyGear));
         } else {
-            cUIText_setUnicodeStringByID_eate(self->f48, GetHashValue32(str_kT_CMNEquipGear));
+            cUIText_setUnicodeStringByID_eate(self->mpTitleText, GetHashValue32(str_kT_CMNEquipGear));
         }
     } else if (id == GetHashValue32(str_helptext)) {
-        self->f4C = ((void*)w);
-        hide_FE(self->f4C);
+        self->mpHelpText = ((void*)w);
+        hide_FE(self->mpHelpText);
     } else if (id == GetHashValue32(str_btext5)) {
-        self->f50 = ((void*)w);
-        if (self->fAE4 == 0) {
-            hide_FE(self->f50);
+        self->mpButtonHelpText = ((void*)w);
+        if (self->mCanSwitchMode == 0) {
+            hide_FE(self->mpButtonHelpText);
         } else {
             if (isC8_FE(self)) {
-                cUIText_setUnicodeStringByID_eate(self->f50, GetHashValue32(str_kT_CMNEquipGear));
+                cUIText_setUnicodeStringByID_eate(self->mpButtonHelpText, GetHashValue32(str_kT_CMNEquipGear));
             } else {
-                cUIText_setUnicodeStringByID_eate(self->f50, GetHashValue32(str_kT_CMNBuyGear));
+                cUIText_setUnicodeStringByID_eate(self->mpButtonHelpText, GetHashValue32(str_kT_CMNBuyGear));
             }
         }
     } else if (id == GetHashValue32(str_ps2sq) || id == GetHashValue32(str_xby) || id == GetHashValue32(str_ngcy)) {
-        self->f54 = ((void*)w);
-        if (self->fAE4 == 0) {
-            hide_FE(self->f54);
+        self->mpButtonHelpIcon = ((void*)w);
+        if (self->mCanSwitchMode == 0) {
+            hide_FE(self->mpButtonHelpIcon);
         }
     } else if (id == GetHashValue32(str_heading)) {
-        self->f58 = ((void*)w);
+        self->mpHeading = ((void*)w);
         cFEStateCharEquip_updateHeading_eate(self, D_004A11D0_eate);
     } else if (id == GetHashValue32(str_MnuGroups)) {
-        self->f5C = ((void*)w);
-        cUIMenu_setScrollableMenu_FE(self->f5C, self->f958);
+        self->mpMenu = ((void*)w);
+        cUIMenu_setScrollableMenu_FE(self->mpMenu, self->mNumItems);
     } else if (id == GetHashValue32(str_buytotals)) {
         self->f60 = ((void*)w);
         if (!isC8_FE(self)) {
@@ -602,7 +602,7 @@ extern "C" void cFEStateCharEquip_onWidgetCreate(sCharEquip_FE* self, cUIThing* 
             if (id == GetHashValue32(D_00441218[i])) {
                 self->f8C[i] = ((void*)w);
                 w->mMiscData = i;
-                if (i < self->f958) {
+                if (i < self->mNumItems) {
                     if (isC8_FE(self)) {
                         func_0019BA60_eate(self, i);
                     } else {
@@ -615,7 +615,7 @@ extern "C" void cFEStateCharEquip_onWidgetCreate(sCharEquip_FE* self, cUIThing* 
             }
             if (id == GetHashValue32(D_00441230[i])) {
                 self->fA4[i] = ((void*)w);
-                if (i < self->f958) {
+                if (i < self->mNumItems) {
                     if (isC8_FE(self)) {
                         func_0019BA60_eate(self, i);
                     } else {

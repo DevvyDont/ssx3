@@ -4486,14 +4486,14 @@ INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_SoftReset);
 #ifdef SKIP_ASM
 struct sCam162138 {
     char pad_0x00[0x24];
-    int field_0x24;
-    int field_0x28;
+    int PlayerChoiceType;
+    int VolumeType;
     int pad_0x2C;
-    unsigned int b0 : 1; // 0x30
-    unsigned int b1 : 1;
-    unsigned int b2 : 1;
+    unsigned int IsInVolume : 1; // 0x30
+    unsigned int IsInReplay : 1;
+    unsigned int IsSlow : 1;
     unsigned int rest : 29;
-    int field_0x34;
+    int TriggerAction;
     int pad_0x38;
     int field_0x3C;
     int field_0x40;
@@ -4508,9 +4508,9 @@ struct sCam162138 {
  */
 extern "C" void cChaseCameraController_switchCamera_SoftReset(cChaseCameraController* self)
 {
-    ((sCam162138*)self)->b1 = 0;
-    ((sCam162138*)self)->b0 = 0;
-    ((sCam162138*)self)->b2 = 0;
+    ((sCam162138*)self)->IsInReplay = 0;
+    ((sCam162138*)self)->IsInVolume = 0;
+    ((sCam162138*)self)->IsSlow = 0;
     self->CamSwitchRecord.VolumeType = self->CamSwitchRecord.PlayerChoiceType;
     self->GoingSlow = 0;
     self->NumFramesSlowGround = 0;
@@ -4548,8 +4548,8 @@ int cRider_getMotionState(void*);
  */
 extern "C" void cChaseCameraController_switchCamera_Slow(cChaseCameraController* self)
 {
-    ((sCam162138*)self)->b2 = 1;
-    if (!((sCam162138*)self)->b0 && !((sCam162138*)self)->b1) {
+    ((sCam162138*)self)->IsSlow = 1;
+    if (!((sCam162138*)self)->IsInVolume && !((sCam162138*)self)->IsInReplay) {
         float blendTime = cRider_getMotionState(self->Target->Rider) == 5 ? 1.2000000476837158f : 0.6000000238418579f;
         cChaseCameraController_createChaseAlgorithmBlend(((sCam162138*)self), 66, 0, blendTime * 0.01666666753590107f);
     }
@@ -4567,8 +4567,8 @@ INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_EndSlow);
  */
 extern "C" void cChaseCameraController_switchCamera_EndSlow(cChaseCameraController* self)
 {
-    ((sCam162138*)self)->b2 = 0;
-    if (!((sCam162138*)self)->b0 && !((sCam162138*)self)->b1) {
+    ((sCam162138*)self)->IsSlow = 0;
+    if (!((sCam162138*)self)->IsInVolume && !((sCam162138*)self)->IsInReplay) {
         cChaseCameraController_createChaseAlgorithmBlend(((sCam162138*)self), self->CamSwitchRecord.PlayerChoiceType, 0, 0.0066666672937572f);
     }
 }
@@ -4582,7 +4582,7 @@ INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_EndRace);
  */
 extern "C" void cChaseCameraController_switchCamera_EndRace(cChaseCameraController* self)
 {
-    if (!((sCam162138*)self)->b0) {
+    if (!((sCam162138*)self)->IsInVolume) {
         cChaseCameraController_createChaseAlgorithmBlend(((sCam162138*)self), 68, 0, 0.016793444752693176f);
     }
 }

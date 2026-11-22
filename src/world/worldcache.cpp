@@ -220,21 +220,21 @@ INCLUDE_ASM("world/worldcache", cSectionBlockAllocator_allocate);
 void* cWorldBlockAllocator_getFreeBlock(void* self);
 
 struct sWCBlock_7878 {
-    char* data;
-    int size;
-    int pos;
-    int pad;
-    int used;
-    sWCBlock_7878* next;
+    char* pBaseMem;
+    int iBaseSize;
+    int iOffset;
+    int iPad;
+    int bActive;
+    sWCBlock_7878* pNext;
 };
 
 
 static inline void NewBlock_7878(cSectionBlockAllocator* self)
 {
     sWCBlock_7878* b = (sWCBlock_7878*)cWorldBlockAllocator_getFreeBlock(((void*)self->m_pBlockAllocator));
-    b->pos = 0;
-    b->pad = 0;
-    b->next = ((sWCBlock_7878*)self->m_pAllocBlocks);
+    b->iOffset = 0;
+    b->iPad = 0;
+    b->pNext = ((sWCBlock_7878*)self->m_pAllocBlocks);
     *(sWCBlock_7878**)&self->m_pAllocBlocks = b;
     *(sWCBlock_7878**)&self->m_pMRUBlock = b;
     self->m_uiNumBlocks++;
@@ -259,17 +259,17 @@ extern "C" char* cSectionBlockAllocator_allocate(cSectionBlockAllocator* self, i
         NewBlock_7878(self);
     sWCBlock_7878* first = ((sWCBlock_7878*)self->m_pMRUBlock);
     int align = 4 << ((flags >> 24) & 0xF);
-    int pos = first->pos;
+    int pos = first->iOffset;
     int rem = pos % align;
     int alignPad = 0;
     if (rem)
         alignPad = align - rem;
-    if (pos + alignPad + size < first->size)
+    if (pos + alignPad + size < first->iBaseSize)
     {
-        first->pos = pos + (alignPad + size);
-        char* allocPtr = first->data + pos;
+        first->iOffset = pos + (alignPad + size);
+        char* allocPtr = first->pBaseMem + pos;
         allocPtr += alignPad;
-        ((sWCBlock_7878*)self->m_pMRUBlock)->pad += alignPad;
+        ((sWCBlock_7878*)self->m_pMRUBlock)->iPad += alignPad;
         return allocPtr;
     }
     if (self->m_uiNumBlocks >= 2)
@@ -282,27 +282,27 @@ extern "C" char* cSectionBlockAllocator_allocate(cSectionBlockAllocator* self, i
                 sWCBlock_7878* block = ((sWCBlock_7878*)self->m_pMRUBlock);
                 if (block != first)
                 {
-                    int bpos = block->pos;
+                    int bpos = block->iOffset;
                     rem = bpos % align;
                     alignPad = 0;
                     if (rem)
                         alignPad = align - rem;
-                    if (bpos + alignPad + size < block->size)
+                    if (bpos + alignPad + size < block->iBaseSize)
                     {
-                        block->pos = bpos + (alignPad + size);
-                        char* allocPtr = block->data + bpos;
+                        block->iOffset = bpos + (alignPad + size);
+                        char* allocPtr = block->pBaseMem + bpos;
                         allocPtr += alignPad;
-                        ((sWCBlock_7878*)self->m_pMRUBlock)->pad += alignPad;
+                        ((sWCBlock_7878*)self->m_pMRUBlock)->iPad += alignPad;
                         return allocPtr;
                     }
                 }
-                *(sWCBlock_7878**)&self->m_pMRUBlock = ((sWCBlock_7878*)self->m_pMRUBlock)->next;
+                *(sWCBlock_7878**)&self->m_pMRUBlock = ((sWCBlock_7878*)self->m_pMRUBlock)->pNext;
             } while (((sWCBlock_7878*)self->m_pMRUBlock));
         }
     }
     NewBlock_7878(self);
-    ((sWCBlock_7878*)self->m_pMRUBlock)->pos += size;
-    return ((sWCBlock_7878*)self->m_pMRUBlock)->data;
+    ((sWCBlock_7878*)self->m_pMRUBlock)->iOffset += size;
+    return ((sWCBlock_7878*)self->m_pMRUBlock)->pBaseMem;
 }
 #endif
 
@@ -922,18 +922,10 @@ extern "C" void cWorldCache_resetPageMap(cWorldCache* vself)
 //100%
 INCLUDE_ASM("world/worldcache", cWorldCache_touchPage);
 #ifdef SKIP_ASM
-struct sWCSlot {
-    int state;   // 0x0
-    int f4;      // 0x4
-    int f8;      // 0x8
-    float fC;    // 0xC
-    int time;    // 0x10
-    int f14;     // 0x14
-};
 
 struct sWCSlots {
     char pad[0x3F0];
-    sWCSlot slot[256];   // 0x3F0
+    tWorldCacheHullPage slot[256];   // 0x3F0
     int timeBase;        // 0x1BF0
 };
 
@@ -947,19 +939,19 @@ struct sWCSlots {
  */
 extern "C" void cWorldCache_touchPage(sWCSlots* self, int i, float priority)
 {
-    self->slot[i].time = cAppMan_TheAppMan->Tick;
-    self->slot[i].fC = priority;
-    self->slot[i].f4 = 0;
-    switch (self->slot[i].state) {
+    self->slot[i].m_iTouchTick = cAppMan_TheAppMan->Tick;
+    self->slot[i].m_fPriority = priority;
+    self->slot[i].m_bLock = 0;
+    switch (self->slot[i].m_State) {
     case 0:
-        self->slot[i].state = 1;
+        self->slot[i].m_State = 1;
         break;
     case 1:
     case 2:
     case 3:
         break;
     case 4:
-        self->slot[i].state = 3;
+        self->slot[i].m_State = 3;
         break;
     }
 }
@@ -978,8 +970,8 @@ extern "C" void cWorldCache_flushPage_i(sWCSlots* self, int i) __asm__("cWorldCa
  */
 extern "C" void cWorldCache_flushPage_i(sWCSlots* self, int i)
 {
-    self->slot[i].f4 = 0;
-    self->slot[i].time = cAppMan_TheAppMan->Tick - self->timeBase;
+    self->slot[i].m_bLock = 0;
+    self->slot[i].m_iTouchTick = cAppMan_TheAppMan->Tick - self->timeBase;
 }
 #endif
 

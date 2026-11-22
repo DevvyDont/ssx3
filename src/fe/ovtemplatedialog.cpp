@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beintmission.h"
 #include "main/gamestate.h"
 #include "ui/uitext.h"
 #include "fe/ovstate.h"
@@ -1937,7 +1938,6 @@ extern int cBENewRaceInterface_bIsBamLocation;
 extern char str_TransitionOut_b[];
 extern char str_Save_Profile[];
 
-struct sI10_D5A8 { char pad[0x10]; int f10; };
 // Same vtable entry; the void/int return only changes v0/v1 choice around the call.
 struct sVV_D5A8 { short delta; short index; void (*fn)(void*); };
 struct sGame_D5A8 { char pad[0xC]; char* f0C; };
@@ -2074,7 +2074,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUITh
                 vt[1].fn(vthis(iface, vt[1]));
                 cGameModeMan_initGameMode(SSXApp->GameModeMan, 0xC);
                 cAI_initFreeride(SSXApp->Game->AI);
-                ((sI10_D5A8*)missionIface)->f10 = 1;
+                ((cBEMissionInterface*)missionIface)->nextSessionID = 1;
                 cGame_setState(SSXApp->Game, 1, 1, 0);
                 cGame_partialRestart(SSXApp->Game);
                 cRider_putAtStartpoint(SSXApp->Game->AI->Players[0]->mRider, 1, 2);

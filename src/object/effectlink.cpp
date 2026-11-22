@@ -740,11 +740,11 @@ struct sEffObj_6120 {
     void** vt;          // 0x8
     int value;          // 0xC
     sEffQuat_6120 q;    // 0x10
-    float f20;          // 0x20
-    int f24;            // 0x24
-    int f28;            // 0x28
-    int f2C;            // 0x2C
-    int f30;            // 0x30
+    float Radius;          // 0x20
+    int Type;            // 0x24
+    int Mesh;            // 0x28
+    int Speed;            // 0x2C
+    int Angle;            // 0x30
 };
 
 
@@ -763,12 +763,12 @@ extern "C" void* cHaloModifier_cHaloModifier(sEffObj_6120* self, tAddHaloData* s
 {
     cEffectModifier_cEffectModifier((cEffectModifier*)self, instRecord);
     self->vt = cHaloModifier_vtbl;
-    self->f24 = src->Type;
-    self->f28 = src->Mesh;
+    self->Type = src->Type;
+    self->Mesh = src->Mesh;
     self->q = sEffQuat_6120(src->ColourR, src->ColourG, src->ColourB, src->ColourA);
-    self->f20 = src->Radius;
-    self->f2C = src->Speed;
-    self->f30 = 0;
+    self->Radius = src->Radius;
+    self->Speed = src->Speed;
+    self->Angle = 0;
     cHaloModifier_HaloCount++;
     return self;
 }

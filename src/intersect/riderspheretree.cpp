@@ -1628,26 +1628,6 @@ struct sTriMesh_C0F8 {
     sV4_C0F8* normals;          // 0x10
 };
 
-struct sTriHit_C0F8 {
-    sV4_C0F8 pos;       // 0x00
-    sV4_C0F8 nrm;       // 0x10
-    sV4_C0F8 v20;       // 0x20
-    sV4_C0F8 v30;       // 0x30
-    float t;            // 0x40
-    int type;           // 0x44
-    int f48;
-    int f4C;            // 0x4C
-    int f50;            // 0x50
-    int f54;            // 0x54
-    int f58;            // 0x58
-    int f5C;            // 0x5C
-    int tri;            // 0x60
-    int f64;            // 0x64
-    int f68;            // 0x68
-    int f6C;            // 0x6C
-    int f70;            // 0x70
-    int pad[3];
-};
 
 struct sVE_C0F8a {
     short delta;
@@ -1682,7 +1662,7 @@ struct sTriTester_C0F8 {
  * @param out   out: the hit records
  * @return the number of hits
  */
-extern "C" int cWorldIntersectType_IsMeshInt(sTriTester_C0F8* self, sTriMesh_C0F8* mesh, int flag, sTriHit_C0F8* out)
+extern "C" int cWorldIntersectType_IsMeshInt(sTriTester_C0F8* self, sTriMesh_C0F8* mesh, int flag, tIntersectInfo* out)
 {
     sV4_C0F8 pos;
     sV4_C0F8 hn;
@@ -1707,25 +1687,25 @@ extern "C" int cWorldIntersectType_IsMeshInt(sTriTester_C0F8* self, sTriMesh_C0F
             if (isHit == 0) {
                 continue;
             }
-            sTriHit_C0F8* record = &out[n];
-            record->f54 = 0;
-            record->type = 2;
-            record->tri = -1;
-            record->f50 = 0;
-            record->f58 = 0;
-            record->f5C = -1;
-            record->f64 = -1;
-            record->f4C = -1;
-            record->v20 = t4vect_Zero;
-            record->v30 = t4vect_Zero;
-            record->f68 = 0;
-            record->f6C = 0;
-            record->f70 = 0;
-            record->pos = pos;
-            record->nrm = hn;
-            record->t = hitParam;
-            record->tri = i;
-            record->f54 = 0;
+            tIntersectInfo* record = &out[n];
+            (*(int*)&record->Patch) = 0;
+            record->HitType = 2;
+            record->Face = -1;
+            (*(int*)&record->Inst) = 0;
+            (*(int*)&record->Spline) = 0;
+            record->Mesh = -1;
+            record->Seg = -1;
+            record->Stype = -1;
+            (*(sV4_C0F8*)&record->Ivel) = t4vect_Zero;
+            (*(sV4_C0F8*)&record->Iangvel) = t4vect_Zero;
+            (*(int*)&record->T) = 0;
+            (*(int*)&record->u) = 0;
+            (*(int*)&record->v) = 0;
+            (*(sV4_C0F8*)&record->Ipos) = pos;
+            (*(sV4_C0F8*)&record->Inorm) = hn;
+            record->Iparam = hitParam;
+            record->Face = i;
+            (*(int*)&record->Patch) = 0;
             n++;
         }
     } else {
@@ -1755,25 +1735,25 @@ extern "C" int cWorldIntersectType_IsMeshInt(sTriTester_C0F8* self, sTriMesh_C0F
                 if (isHit == 0) {
                     continue;
                 }
-                sTriHit_C0F8* record = &out[n];
-                record->f54 = 0;
-                record->type = 2;
-                record->tri = -1;
-                record->f50 = 0;
-                record->f58 = 0;
-                record->f5C = -1;
-                record->f64 = -1;
-                record->f4C = -1;
-                record->v20 = t4vect_Zero;
-                record->v30 = t4vect_Zero;
-                record->f68 = 0;
-                record->f6C = 0;
-                record->f70 = 0;
-                record->pos = pos;
-                record->nrm = hn;
-                record->t = hitParam;
-                record->tri = i;
-                record->f54 = 0;
+                tIntersectInfo* record = &out[n];
+                (*(int*)&record->Patch) = 0;
+                record->HitType = 2;
+                record->Face = -1;
+                (*(int*)&record->Inst) = 0;
+                (*(int*)&record->Spline) = 0;
+                record->Mesh = -1;
+                record->Seg = -1;
+                record->Stype = -1;
+                (*(sV4_C0F8*)&record->Ivel) = t4vect_Zero;
+                (*(sV4_C0F8*)&record->Iangvel) = t4vect_Zero;
+                (*(int*)&record->T) = 0;
+                (*(int*)&record->u) = 0;
+                (*(int*)&record->v) = 0;
+                (*(sV4_C0F8*)&record->Ipos) = pos;
+                (*(sV4_C0F8*)&record->Inorm) = hn;
+                record->Iparam = hitParam;
+                record->Face = i;
+                (*(int*)&record->Patch) = 0;
                 n++;
             }
         }

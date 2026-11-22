@@ -95,11 +95,6 @@ extern "C" int cPathSys_loadAIPaths(cPathSys* self, char* data)
 //100%
 INCLUDE_ASM("path/pathsys", cPathSys_getTrackPathIndex);
 #ifdef SKIP_ASM
-struct sPathEntry28 {
-    int field_0x0;
-    int field_0x4;
-    char pad_0x8[0x20];
-};
 
 struct sPathEntry40 {
     char pad_0x0[0x40];
@@ -111,7 +106,7 @@ struct sPathEntry3C {
 
 struct sPathSys {
     int count28;             // 0x0
-    sPathEntry28* entries28; // 0x4
+    tPathStartpoint* entries28; // 0x4
     int count40;             // 0x8
     sPathEntry40* entries40; // 0xc
     int count3C;             // 0x10
@@ -187,7 +182,7 @@ extern "C" int cPathSys_isStartpoint(sPathSys* self, int type, int startpointId)
     int i;
     int count = self->count28;
     for (i = 0; i < count; i++) {
-        if (self->entries28[i].field_0x4 == type && self->entries28[i].field_0x0 == startpointId) {
+        if (self->entries28[i].Type == type && self->entries28[i].Arg == startpointId) {
             return 1;
         }
     }

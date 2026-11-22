@@ -47,12 +47,12 @@ INCLUDE_ASM("util/objectinterface", cObjectInterface_renderSimpleLightHalo);
 
 static inline void setA_1D10(sDrawState* drawState, int v, int mask, int shift)
 {
-    drawState->unk_00[1] = (((int)drawState->unk_00[1]) & ~(mask << shift)) | ((v << shift) & (mask << shift));
+    drawState->m_bitGroups[1] = (((int)drawState->m_bitGroups[1]) & ~(mask << shift)) | ((v << shift) & (mask << shift));
 }
 
 static inline void setB_1D10(sDrawState* drawState, int v, int mask, int shift)
 {
-    drawState->unk_00[2] = (((int)drawState->unk_00[2]) & ~(mask << shift)) | ((v << shift) & (mask << shift));
+    drawState->m_bitGroups[2] = (((int)drawState->m_bitGroups[2]) & ~(mask << shift)) | ((v << shift) & (mask << shift));
 }
 
 // 2D vector (8 bytes, BLKmode: its temporaries share 16-byte frame slots that combine when freed).

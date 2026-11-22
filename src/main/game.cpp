@@ -17,15 +17,7 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 
-// 16-byte array elements; indexing as arr[i].field (rather than manual
-// pointer arithmetic) is what makes GCC emit the target's base-first addu
-struct sGameEntry {
-    int field_0x0;
-    int field_0x4;
-    int field_0x8;
-    int field_0xc;
-};
-extern sGameEntry cSectionMan_mSectionMap[];
+extern tSectionMap cSectionMan_mSectionMap[];
 
 //100%
 INCLUDE_ASM("main/game", cGame_renderModels);
@@ -66,8 +58,8 @@ extern "C" void cGame_renderModels(cGame* self, FrustumIntersector* world)
 {
     *(short*)((char*)GrMan->m_pCurrentDrawState + 0x12) = curLayer_C078((sRCtx_C078*)GrMan);
     cPS2GraphicsMan* ctx = GrMan;
-    (ctx->m_pCurrentDrawState)->unk_00[1] = (((int)(ctx->m_pCurrentDrawState)->unk_00[1]) & ~0xF80) | 0x880;
-    (*(int*)&(ctx->m_pCurrentDrawState)->unk_00[0]) |= 0x30;
+    (ctx->m_pCurrentDrawState)->m_bitGroups[1] = (((int)(ctx->m_pCurrentDrawState)->m_bitGroups[1]) & ~0xF80) | 0x880;
+    (*(int*)&(ctx->m_pCurrentDrawState)->m_bitGroups[0]) |= 0x30;
     int flag = 0xC00;
     if (*(unsigned int*)((char*)self->ViewMan + 0x10) >= 2) {
         flag = 0x400;
@@ -459,21 +451,13 @@ struct sVec4_C830 {
     sVec4_C830(const float& ax, const float& ay, const float& az, const float& aw) : x(ax), y(ay), z(az), w(aw) {}
 };
 
-struct sGs_C830 {
-    int w0;
-    int w4;
-    int w8;
-    int wC;
-    unsigned int f10 : 16;
-    unsigned int f12 : 16;
-};
 
 class cGfx_C830 {
 public:
     char pad0[0x24];
     int cur;
     char pad28[0xE84 - 0x28];
-    sGs_C830* stateTop;
+    sDrawState* stateTop;
     char padE88[0xF50 - 0xE88];
     int layer[(0x10D8 - 0xF50) / 4];
     int GetLayer() { return layer[cur]; }
@@ -504,12 +488,12 @@ static inline void SetBits_C830(int* p, int mask, int bits) { *p = (*p & ~mask) 
 
 static inline void Set1_C830(cGfx_C830* g, int mask, int shift, int v)
 {
-    g->stateTop->w4 = (g->stateTop->w4 & ~mask) | ((v << shift) & mask);
+    g->stateTop->m_bitGroups[1] = (((int)g->stateTop->m_bitGroups[1]) & ~mask) | ((v << shift) & mask);
 }
 
 static inline void Set2_C830(cGfx_C830* g, int mask, int shift, int v)
 {
-    g->stateTop->w8 = (g->stateTop->w8 & ~mask) | ((v << shift) & mask);
+    g->stateTop->m_bitGroups[2] = (((int)g->stateTop->m_bitGroups[2]) & ~mask) | ((v << shift) & mask);
 }
 
 struct sVE_C830 {
@@ -583,9 +567,9 @@ extern "C" void func_0022C830(cGame* self)
         *(short*)((char*)((cGfx_C830*)GrMan)->stateTop + 0x12) = ((cGfx_C830*)GrMan)->GetLayer();
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         Set1_C830((cGfx_C830*)ps2GraphicsMan, 0xF80, 7, 7);
-        SetBits_C830(&((cGfx_C830*)ps2GraphicsMan)->stateTop->w0, 0x30, 0x30);
+        SetBits_C830(&(*(int*)&((cGfx_C830*)ps2GraphicsMan)->stateTop->m_bitGroups[0]), 0x30, 0x30);
         Set1_C830((cGfx_C830*)ps2GraphicsMan, 0x1800000, 23, 1);
-        SetBits_C830(&((cGfx_C830*)ps2GraphicsMan)->stateTop->w4, 0x300000, 0x300000);
+        SetBits_C830(&(*(int*)&((cGfx_C830*)ps2GraphicsMan)->stateTop->m_bitGroups[1]), 0x300000, 0x300000);
         Set1_C830((cGfx_C830*)ps2GraphicsMan, 0xFF000, 12, 13);
         Set2_C830((cGfx_C830*)ps2GraphicsMan, 0x3E0, 5, 4);
         cBucketMan_renderBucket(gBucketMan, 3);
@@ -696,15 +680,15 @@ extern "C" void cSectionMan_init(cSectionMan* self)
     unsigned int j;
 
     for (int k = 0; k < 50; k++) {
-        cSectionMan_mSectionMap[k].field_0x4 = -1;
-        cSectionMan_mSectionMap[k].field_0x8 = 0;
+        cSectionMan_mSectionMap[k].iWorldSectionID = -1;
+        cSectionMan_mSectionMap[k].State = 0;
     }
-    cSectionMan_mSectionMap[49].field_0x4 = 0;
+    cSectionMan_mSectionMap[49].iWorldSectionID = 0;
     for (i = 0; i < 50; i++) {
         for (j = 0; j < (unsigned int)cWorldView_getNumSections(gameWorldView_22CD40(self)); j++) {
             void* name = cBENewRaceInterface_getSectionFile(iface, i);
             if (strcmp(name, cWorldView_getSectionName(gameWorldView_22CD40(self), j)) == 0) {
-                cSectionMan_mSectionMap[i].field_0x4 = j;
+                cSectionMan_mSectionMap[i].iWorldSectionID = j;
             }
         }
     }
@@ -929,13 +913,13 @@ int cSectionMan_isLoaded_impl(void* self, int idx)
         }
     }
     int skySection = D_00442488_D278[idx].iBESkySectionID;
-    if (skySection >= 0 && cSectionMan_mSectionMap[skySection].field_0x4 >= 0) {
+    if (skySection >= 0 && cSectionMan_mSectionMap[skySection].iWorldSectionID >= 0) {
         if (cSectionMan_isSectionLoaded((cSectionMan*)self, skySection) == 0) {
             ok = 0;
         }
     }
     int transportSection = D_00442488_D278[idx].iBETransportSectionID;
-    if (transportSection >= 0 && cSectionMan_mSectionMap[transportSection].field_0x4 >= 0) {
+    if (transportSection >= 0 && cSectionMan_mSectionMap[transportSection].iWorldSectionID >= 0) {
         if (cSectionMan_isSectionLoaded((cSectionMan*)self, transportSection) == 0) {
             ok = 0;
         }
@@ -983,15 +967,15 @@ extern "C" void cSectionMan_addActiveEvent(void* self);
  */
 extern "C" void cSectionMan_loadSection(cSectionMan* self, int idx)
 {
-    if (cSectionMan_mSectionMap[idx].field_0x4 >= 0) {
+    if (cSectionMan_mSectionMap[idx].iWorldSectionID >= 0) {
         int changed = 0;
-        switch (cSectionMan_mSectionMap[idx].field_0x8) {
+        switch (cSectionMan_mSectionMap[idx].State) {
         case 5:
-            cSectionMan_mSectionMap[idx].field_0x8 = 1;
+            cSectionMan_mSectionMap[idx].State = 1;
             changed = 1;
             break;
         case 0: case 7:
-            cSectionMan_mSectionMap[idx].field_0x8 = 3;
+            cSectionMan_mSectionMap[idx].State = 3;
             changed = 1;
             break;
         case 1: case 2: case 3: case 4: case 6: case 8:
@@ -1025,30 +1009,30 @@ void cWorldView_activateSection_478(void* mgr, int handle) __asm__("cWorldView_a
 extern "C" void cSectionMan_activateSection(cSectionMan* self_, int i)
 {
     int changed;
-    if (cSectionMan_mSectionMap[i].field_0x4 < 0)
+    if (cSectionMan_mSectionMap[i].iWorldSectionID < 0)
         return;
     changed = 0;
-    switch (cSectionMan_mSectionMap[i].field_0x8) {
+    switch (cSectionMan_mSectionMap[i].State) {
     case 0:
-        cSectionMan_mSectionMap[i].field_0x8 = 4;
+        cSectionMan_mSectionMap[i].State = 4;
         changed = 1;
         break;
     case 7:
-        cSectionMan_mSectionMap[i].field_0x8 = 4;
+        cSectionMan_mSectionMap[i].State = 4;
         changed = 1;
         break;
     case 3:
-        cSectionMan_mSectionMap[i].field_0x8 = 4;
+        cSectionMan_mSectionMap[i].State = 4;
         changed = 1;
         break;
     case 6:
-        cSectionMan_mSectionMap[i].field_0x8 = 8;
+        cSectionMan_mSectionMap[i].State = 8;
         changed = 1;
         break;
     case 1:
     case 5:
-        cSectionMan_mSectionMap[i].field_0x8 = 2;
-        cWorldView_activateSection_478(*(char**)(char*)self_->mpGame->World + 0x10, cSectionMan_mSectionMap[i].field_0x4);
+        cSectionMan_mSectionMap[i].State = 2;
+        cWorldView_activateSection_478(*(char**)(char*)self_->mpGame->World + 0x10, cSectionMan_mSectionMap[i].iWorldSectionID);
         changed = 1;
         break;
     case 8:
@@ -1073,15 +1057,15 @@ extern "C" void cSectionMan_addActiveEvent(void* self);
  */
 extern "C" void cSectionMan_unloadSection(cSectionMan* self, int idx)
 {
-    if (cSectionMan_mSectionMap[idx].field_0x4 >= 0) {
+    if (cSectionMan_mSectionMap[idx].iWorldSectionID >= 0) {
         int changed = 0;
-        switch (cSectionMan_mSectionMap[idx].field_0x8) {
+        switch (cSectionMan_mSectionMap[idx].State) {
         case 3:
-            cSectionMan_mSectionMap[idx].field_0x8 = 0;
+            cSectionMan_mSectionMap[idx].State = 0;
             changed = 1;
             break;
         case 1: case 2: case 6:
-            cSectionMan_mSectionMap[idx].field_0x8 = 5;
+            cSectionMan_mSectionMap[idx].State = 5;
             changed = 1;
             break;
         case 0: case 4: case 5: case 7: case 8:
@@ -1286,25 +1270,25 @@ extern "C" void cSectionMan_update(cSectionMan* self)
     while (node != 0) {
         int idx = *node;
         int remove = 0;
-        int section = cSectionMan_mSectionMap[idx].field_0x4;
-        switch (cSectionMan_mSectionMap[idx].field_0x8) {
+        int section = cSectionMan_mSectionMap[idx].iWorldSectionID;
+        switch (cSectionMan_mSectionMap[idx].State) {
         case 7:
             if (cWorldView_isSectionUnLoaded(gameWorldView_22D8D8(self), section)) {
-                cSectionMan_mSectionMap[idx].field_0x8 = 0;
+                cSectionMan_mSectionMap[idx].State = 0;
             } else {
                 busy = 1;
             }
             break;
         case 5:
             if (cWorldView_unloadSection(gameWorldView_22D8D8(self), section)) {
-                cSectionMan_mSectionMap[idx].field_0x8 = 7;
+                cSectionMan_mSectionMap[idx].State = 7;
                 cGame_sectionUnloading(self->mpGame, section);
             }
             busy = 1;
             break;
         case 6:
             if (cWorldView_isSectionLoaded(gameWorldView_22D8D8(self), section)) {
-                cSectionMan_mSectionMap[idx].field_0x8 = 1;
+                cSectionMan_mSectionMap[idx].State = 1;
                 cGame_sectionLoaded(self->mpGame, section);
             } else {
                 changed = 1;
@@ -1312,7 +1296,7 @@ extern "C" void cSectionMan_update(cSectionMan* self)
             break;
         case 8:
             if (cWorldView_isSectionLoaded(gameWorldView_22D8D8(self), section)) {
-                cSectionMan_mSectionMap[idx].field_0x8 = 2;
+                cSectionMan_mSectionMap[idx].State = 2;
                 cGame_sectionLoaded(self->mpGame, section);
                 cWorldView_activateSection(gameWorldView_22D8D8(self), section);
             } else {
@@ -1358,16 +1342,16 @@ extern "C" void cSectionMan_update(cSectionMan* self)
         char* fmt = cWorldView_getNumSections_u(gameWorldView_22D8D8(self)) >= 2 ? str_data_worlds_b : str_data_worlds_c;
         for (; n != 0; n = cSectionMan_getNextActiveEvent(self, n)) {
             int idx = *n;
-            int section = cSectionMan_mSectionMap[idx].field_0x4;
+            int section = cSectionMan_mSectionMap[idx].iWorldSectionID;
             sprintf(buf, str_pct_spct_s_b, fmt, cBENewRaceInterface_getSectionFile(iface, idx));
-            int* state = &cSectionMan_mSectionMap[idx].field_0x8;
+            int* state = &cSectionMan_mSectionMap[idx].State;
             if (*state == 3) {
-                if (cWorldView_loadSection(gameWorldView_22D8D8(self), section, D_0044C208[cSectionMan_mSectionMap[idx].field_0xc])) {
+                if (cWorldView_loadSection(gameWorldView_22D8D8(self), section, D_0044C208[cSectionMan_mSectionMap[idx].Priority])) {
                     changed = 1;
                     *state = 6;
                 }
             } else if (*state == 4) {
-                if (cWorldView_loadSection(gameWorldView_22D8D8(self), section, D_0044C208[cSectionMan_mSectionMap[idx].field_0xc])) {
+                if (cWorldView_loadSection(gameWorldView_22D8D8(self), section, D_0044C208[cSectionMan_mSectionMap[idx].Priority])) {
                     *state = 8;
                     changed = 1;
                     forceOff = 1;
@@ -1469,7 +1453,7 @@ extern "C" void cSectionMan_skySwap(cSectionMan* self)
             cSectionMan_unloadSection(self, i);
         }
     }
-    int id = cSectionMan_mSectionMap[self->m_iNextSkySectionID].field_0x4;
+    int id = cSectionMan_mSectionMap[self->m_iNextSkySectionID].iWorldSectionID;
     cSkyBox* skyBox = self->mpGame->SkyBox;
     if (skyBox->m_iSectionID != id) {
         cSkyBox_reset(skyBox);
@@ -1573,7 +1557,7 @@ INCLUDE_ASM("main/game", cSectionMan_isSectionLoaded);
  */
 extern "C" int cSectionMan_isSectionLoaded(cSectionMan* self, int SectionID)
 {
-    int loadState = cSectionMan_mSectionMap[SectionID].field_0x8;
+    int loadState = cSectionMan_mSectionMap[SectionID].State;
     return (unsigned int)(loadState - 1) < 2;
 }
 #endif
@@ -1603,7 +1587,7 @@ extern sGameEntry2 D_00442488[];
  */
 extern "C" int cSectionMan_getWorldSectionIDFromBELocationID(cSectionMan* self, int LocationID)
 {
-    return cSectionMan_mSectionMap[D_00442488[LocationID].field_0x10].field_0x4;
+    return cSectionMan_mSectionMap[D_00442488[LocationID].field_0x10].iWorldSectionID;
 }
 #endif
 
@@ -1618,7 +1602,7 @@ INCLUDE_ASM("main/game", cSectionMan_getWorldSectionIDFromBESectionID);
  */
 extern "C" int cSectionMan_getWorldSectionIDFromBESectionID(cSectionMan* self, int SectionID)
 {
-    return cSectionMan_mSectionMap[SectionID].field_0x4;
+    return cSectionMan_mSectionMap[SectionID].iWorldSectionID;
 }
 #endif
 
@@ -1635,7 +1619,7 @@ extern "C" int cSectionMan_getBESectionIDFromWorldSectionID(cSectionMan* self, i
 {
     int i;
     for (i = 0; i < 50; i++) {
-        if (WorldSectionID == cSectionMan_mSectionMap[i].field_0x4) {
+        if (WorldSectionID == cSectionMan_mSectionMap[i].iWorldSectionID) {
             return i;
         }
     }

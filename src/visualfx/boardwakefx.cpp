@@ -1227,7 +1227,7 @@ struct sSprayFxE4A8 {
     char pad30[0x30];           // 0x30
     int i60;                    // 0x60
     char pad64[0x18];           // 0x64
-    void* p7C;                  // 0x7C
+    void* mBoneIndicies;                  // 0x7C
     char pad80[0x60];           // 0x80
     int iE0;                    // 0xE0
     char padE4[0x2C];           // 0xE4
@@ -1878,7 +1878,7 @@ extern "C" void* cDynamicSprayFX_cDynamicSprayFX(sSprayFxE4A8* self, int inChrg)
     self->SprayData()[9].fDC = 0.0f;
     self->SprayData()[9].fE0 = 0.0f;
     self->SprayData()[9].fE4 = 0.0f;
-    self->p7C = operator new(0x78, str_BoneIndicies, 0, 0);
+    self->mBoneIndicies = operator new(0x78, str_BoneIndicies, 0, 0);
     func_002E26B8((cDynamicSprayFX*)self);
     func_002DF448_E4A8(self);
     func_002DF3B0((cDynamicSprayFX*)self);
@@ -5530,17 +5530,17 @@ struct sFade47E8 {
 
 static inline void rsSetA47E8(cPS2GraphicsMan* ctx, int mask, int shift, int v)
 {
-    (ctx->m_pCurrentDrawState)->unk_00[1] = (((int)(ctx->m_pCurrentDrawState)->unk_00[1]) & ~mask) | ((v << shift) & mask);
+    (ctx->m_pCurrentDrawState)->m_bitGroups[1] = (((int)(ctx->m_pCurrentDrawState)->m_bitGroups[1]) & ~mask) | ((v << shift) & mask);
 }
 
 static inline void rsSetB47E8(cPS2GraphicsMan* ctx, int mask, int shift, int v)
 {
-    (ctx->m_pCurrentDrawState)->unk_00[2] = (((int)(ctx->m_pCurrentDrawState)->unk_00[2]) & ~mask) | ((v << shift) & mask);
+    (ctx->m_pCurrentDrawState)->m_bitGroups[2] = (((int)(ctx->m_pCurrentDrawState)->m_bitGroups[2]) & ~mask) | ((v << shift) & mask);
 }
 
 static inline void rsSet047E8(cPS2GraphicsMan* ctx, int mask, int shift, int v)
 {
-    (ctx->m_pCurrentDrawState)->unk_00[0] = (((int)(ctx->m_pCurrentDrawState)->unk_00[0]) & ~mask) | ((v << shift) & mask);
+    (ctx->m_pCurrentDrawState)->m_bitGroups[0] = (((int)(ctx->m_pCurrentDrawState)->m_bitGroups[0]) & ~mask) | ((v << shift) & mask);
 }
 
 static inline int fadeTex47E8(sFade47E8* self)

@@ -1880,7 +1880,7 @@ extern "C" void cFlagSet_CreateMesh(void* self, void* mesh);
 
 struct sFlagSet_34B038 {
     tFlagState def;
-    int f58;
+    int mModelID;
     int count;
     char pad60[0x94 - 0x60];
     void* meshes[1];
@@ -1900,7 +1900,7 @@ extern "C" void cFlagSet_AddFlag(sFlagSet_34B038* self, tFlagState* def, tInstan
 {
     if (self->count == 0) {
         self->def = *def;
-        self->f58 = *(int*)mesh->m_Model;
+        self->mModelID = *(int*)mesh->m_Model;
         cFlagSet_CreateMesh(self, mesh);
     }
     self->meshes[self->count] = ((char*)mesh);

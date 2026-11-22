@@ -1,4 +1,5 @@
 #include "common.h"
+#include "visualfx/renderstateman.h"
 #include "render/2drender.h"
 #include "main/game.h"
 #include "ai/rider.h"
@@ -24,17 +25,8 @@ struct sRSMObj {
     sRSMVEntry* vt;
 };
 
-struct sRSMEntry {
-    char pad0[0x4];
-    sRSMObj** p04;
-    sRSMObj** p08;
-    char pad0C[0x1C - 0xC];
-    sRSMObj** p1C;
-    sRSMObj** p20;
-    char pad24[0xF0 - 0x24];
-};
 
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the red component of the snowflake colour for one row of the render-state table.
@@ -47,8 +39,8 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_SnowFlakeColourR(int i)
 {
-    sRSMEntry* entry = &cRenderStateMan_m_state[i];
-    sRSMObj* stateObj = *entry->p20;
+    tRenderState* entry = &cRenderStateMan_m_state[i];
+    sRSMObj* stateObj = *((sRSMObj**)entry->m_query[8]);
     sRSMVEntry* vt = stateObj->vt;
     return *vt[55].fn(vthis(stateObj, vt[55]));
 }
@@ -57,7 +49,7 @@ extern "C" float cRenderStateMan_SnowFlakeColourR(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowFlakeColourG);
 #ifdef SKIP_ASM
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the green component of the snowflake colour for one row of the render-state table.
@@ -70,8 +62,8 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_SnowFlakeColourG(int i)
 {
-    sRSMEntry* entry = &cRenderStateMan_m_state[i];
-    sRSMObj* stateObj = *entry->p20;
+    tRenderState* entry = &cRenderStateMan_m_state[i];
+    sRSMObj* stateObj = *((sRSMObj**)entry->m_query[8]);
     sRSMVEntry* vt = stateObj->vt;
     return *vt[56].fn(vthis(stateObj, vt[56]));
 }
@@ -80,7 +72,7 @@ extern "C" float cRenderStateMan_SnowFlakeColourG(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowFlakeColourB);
 #ifdef SKIP_ASM
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the blue component of the snowflake colour for one row of the render-state table.
@@ -93,8 +85,8 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_SnowFlakeColourB(int i)
 {
-    sRSMEntry* entry = &cRenderStateMan_m_state[i];
-    sRSMObj* stateObj = *entry->p20;
+    tRenderState* entry = &cRenderStateMan_m_state[i];
+    sRSMObj* stateObj = *((sRSMObj**)entry->m_query[8]);
     sRSMVEntry* vt = stateObj->vt;
     return *vt[57].fn(vthis(stateObj, vt[57]));
 }
@@ -103,7 +95,7 @@ extern "C" float cRenderStateMan_SnowFlakeColourB(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowFluffColourA);
 #ifdef SKIP_ASM
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the snow fluff colour's alpha for render state @p i.
@@ -116,8 +108,8 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_SnowFluffColourA(int i)
 {
-    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *renderState->p20;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[8]);
     sRSMVEntry* vt = stateQuery->vt;
     return *vt[58].fn(vthis(stateQuery, vt[58]));
 }
@@ -126,7 +118,7 @@ extern "C" float cRenderStateMan_SnowFluffColourA(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowFluffColourR);
 #ifdef SKIP_ASM
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the snow fluff colour's red for render state @p i.
@@ -139,8 +131,8 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_SnowFluffColourR(int i)
 {
-    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *renderState->p20;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[8]);
     sRSMVEntry* vt = stateQuery->vt;
     return *vt[59].fn(vthis(stateQuery, vt[59]));
 }
@@ -149,7 +141,7 @@ extern "C" float cRenderStateMan_SnowFluffColourR(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowFluffColourG);
 #ifdef SKIP_ASM
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the snow fluff colour's green for render state @p i.
@@ -162,8 +154,8 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_SnowFluffColourG(int i)
 {
-    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *renderState->p20;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[8]);
     sRSMVEntry* vt = stateQuery->vt;
     return *vt[60].fn(vthis(stateQuery, vt[60]));
 }
@@ -172,7 +164,7 @@ extern "C" float cRenderStateMan_SnowFluffColourG(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowFluffColourB);
 #ifdef SKIP_ASM
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the snow fluff colour's blue for render state @p i.
@@ -185,8 +177,8 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_SnowFluffColourB(int i)
 {
-    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *renderState->p20;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[8]);
     sRSMVEntry* vt = stateQuery->vt;
     return *vt[61].fn(vthis(stateQuery, vt[61]));
 }
@@ -195,7 +187,7 @@ extern "C" float cRenderStateMan_SnowFluffColourB(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_FogDensity);
 #ifdef SKIP_ASM
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the fog density for render state @p i.
@@ -209,8 +201,8 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_FogDensity(int i)
 {
-    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *renderState->p04;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[1]);
     sRSMVEntry* vt = stateQuery->vt;
     return *vt[7].fn(vthis(stateQuery, vt[7]));
 }
@@ -219,7 +211,7 @@ extern "C" float cRenderStateMan_FogDensity(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_FogNear);
 #ifdef SKIP_ASM
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the fog near distance for render state @p i.
@@ -233,8 +225,8 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_FogNear(int i)
 {
-    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *renderState->p04;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[1]);
     sRSMVEntry* vt = stateQuery->vt;
     return *vt[8].fn(vthis(stateQuery, vt[8]));
 }
@@ -243,7 +235,7 @@ extern "C" float cRenderStateMan_FogNear(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_FogFar);
 #ifdef SKIP_ASM
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the fog far distance for render state @p i.
@@ -257,8 +249,8 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_FogFar(int i)
 {
-    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *renderState->p04;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[1]);
     sRSMVEntry* vt = stateQuery->vt;
     return *vt[9].fn(vthis(stateQuery, vt[9]));
 }
@@ -267,7 +259,7 @@ extern "C" float cRenderStateMan_FogFar(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_FogColourR);
 #ifdef SKIP_ASM
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the fog colour's red for render state @p i.
@@ -281,8 +273,8 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_FogColourR(int i)
 {
-    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *renderState->p04;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[1]);
     sRSMVEntry* vt = stateQuery->vt;
     return *vt[10].fn(vthis(stateQuery, vt[10]));
 }
@@ -291,7 +283,7 @@ extern "C" float cRenderStateMan_FogColourR(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_FogColourG);
 #ifdef SKIP_ASM
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the fog colour's green for render state @p i.
@@ -305,8 +297,8 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_FogColourG(int i)
 {
-    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *renderState->p04;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[1]);
     sRSMVEntry* vt = stateQuery->vt;
     return *vt[11].fn(vthis(stateQuery, vt[11]));
 }
@@ -315,7 +307,7 @@ extern "C" float cRenderStateMan_FogColourG(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_FogColourB);
 #ifdef SKIP_ASM
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the fog colour's blue for render state @p i.
@@ -329,8 +321,8 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_FogColourB(int i)
 {
-    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *renderState->p04;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[1]);
     sRSMVEntry* vt = stateQuery->vt;
     return *vt[12].fn(vthis(stateQuery, vt[12]));
 }
@@ -355,7 +347,7 @@ extern int cRenderStateMan_m_indoor;
 extern "C" float cRenderStateMan_ScreenTintScaleR(int i)
 {
     if (cRenderStateMan_m_indoor == 0) {
-        sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+        tRenderState* renderState = &cRenderStateMan_m_state[i];
         sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
         sRSMVEntry* vt = stateQuery->vt;
         return *vt[20].fn(vthis(stateQuery, vt[20]));
@@ -383,7 +375,7 @@ extern int cRenderStateMan_m_indoor;
 extern "C" float cRenderStateMan_ScreenTintScaleG(int i)
 {
     if (cRenderStateMan_m_indoor == 0) {
-        sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+        tRenderState* renderState = &cRenderStateMan_m_state[i];
         sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
         sRSMVEntry* vt = stateQuery->vt;
         return *vt[21].fn(vthis(stateQuery, vt[21]));
@@ -411,7 +403,7 @@ extern int cRenderStateMan_m_indoor;
 extern "C" float cRenderStateMan_ScreenTintScaleB(int i)
 {
     if (cRenderStateMan_m_indoor == 0) {
-        sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+        tRenderState* renderState = &cRenderStateMan_m_state[i];
         sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
         sRSMVEntry* vt = stateQuery->vt;
         return *vt[22].fn(vthis(stateQuery, vt[22]));
@@ -439,7 +431,7 @@ extern int cRenderStateMan_m_indoor;
 extern "C" float cRenderStateMan_ScreenTintOffsetR(int i)
 {
     if (cRenderStateMan_m_indoor == 0) {
-        sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+        tRenderState* renderState = &cRenderStateMan_m_state[i];
         sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
         sRSMVEntry* vt = stateQuery->vt;
         return *vt[23].fn(vthis(stateQuery, vt[23]));
@@ -467,7 +459,7 @@ extern int cRenderStateMan_m_indoor;
 extern "C" float cRenderStateMan_ScreenTintOffsetG(int i)
 {
     if (cRenderStateMan_m_indoor == 0) {
-        sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+        tRenderState* renderState = &cRenderStateMan_m_state[i];
         sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
         sRSMVEntry* vt = stateQuery->vt;
         return *vt[24].fn(vthis(stateQuery, vt[24]));
@@ -495,7 +487,7 @@ extern int cRenderStateMan_m_indoor;
 extern "C" float cRenderStateMan_ScreenTintOffsetB(int i)
 {
     if (cRenderStateMan_m_indoor == 0) {
-        sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+        tRenderState* renderState = &cRenderStateMan_m_state[i];
         sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
         sRSMVEntry* vt = stateQuery->vt;
         return *vt[25].fn(vthis(stateQuery, vt[25]));
@@ -507,7 +499,7 @@ extern "C" float cRenderStateMan_ScreenTintOffsetB(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_LightGlowCutoff);
 #ifdef SKIP_ASM
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the light glow cutoff for render state @p i.
@@ -521,8 +513,8 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_LightGlowCutoff(int i)
 {
-    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *renderState->p08;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[2]);
     sRSMVEntry* vt = stateQuery->vt;
     return *vt[13].fn(vthis(stateQuery, vt[13]));
 }
@@ -531,7 +523,7 @@ extern "C" float cRenderStateMan_LightGlowCutoff(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_LightGlowCutoffScale);
 #ifdef SKIP_ASM
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the light glow cutoff scale for render state @p i.
@@ -545,8 +537,8 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_LightGlowCutoffScale(int i)
 {
-    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *renderState->p08;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[2]);
     sRSMVEntry* vt = stateQuery->vt;
     return *vt[14].fn(vthis(stateQuery, vt[14]));
 }
@@ -555,7 +547,7 @@ extern "C" float cRenderStateMan_LightGlowCutoffScale(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_LightGlowCopyIntensity);
 #ifdef SKIP_ASM
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the light glow copy intensity for render state @p i.
@@ -569,8 +561,8 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_LightGlowCopyIntensity(int i)
 {
-    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *renderState->p08;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[2]);
     sRSMVEntry* vt = stateQuery->vt;
     return *vt[15].fn(vthis(stateQuery, vt[15]));
 }
@@ -579,7 +571,7 @@ extern "C" float cRenderStateMan_LightGlowCopyIntensity(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_LightGlowSourceIntensity);
 #ifdef SKIP_ASM
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the light glow source intensity for render state @p i.
@@ -593,8 +585,8 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_LightGlowSourceIntensity(int i)
 {
-    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *renderState->p08;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[2]);
     sRSMVEntry* vt = stateQuery->vt;
     return *vt[16].fn(vthis(stateQuery, vt[16]));
 }
@@ -603,7 +595,7 @@ extern "C" float cRenderStateMan_LightGlowSourceIntensity(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_LightGlowFrameIntensity);
 #ifdef SKIP_ASM
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the light glow frame intensity for render state @p i.
@@ -617,8 +609,8 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_LightGlowFrameIntensity(int i)
 {
-    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *renderState->p08;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[2]);
     sRSMVEntry* vt = stateQuery->vt;
     return *vt[17].fn(vthis(stateQuery, vt[17]));
 }
@@ -627,7 +619,7 @@ extern "C" float cRenderStateMan_LightGlowFrameIntensity(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_LightGlowBlend2);
 #ifdef SKIP_ASM
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the light glow's second blend intensity for render state @p i.
@@ -641,8 +633,8 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_LightGlowBlend2(int i)
 {
-    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *renderState->p08;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[2]);
     sRSMVEntry* vt = stateQuery->vt;
     return *vt[18].fn(vthis(stateQuery, vt[18]));
 }
@@ -651,7 +643,7 @@ extern "C" float cRenderStateMan_LightGlowBlend2(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_LightGlowBlend3);
 #ifdef SKIP_ASM
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the light glow's third blend intensity for render state @p i.
@@ -665,8 +657,8 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_LightGlowBlend3(int i)
 {
-    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *renderState->p08;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[2]);
     sRSMVEntry* vt = stateQuery->vt;
     return *vt[19].fn(vthis(stateQuery, vt[19]));
 }
@@ -675,7 +667,7 @@ extern "C" float cRenderStateMan_LightGlowBlend3(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_RimLightIntensityOffset);
 #ifdef SKIP_ASM
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the rim light intensity offset for render state @p i (accessor slot 42).
@@ -689,8 +681,8 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_RimLightIntensityOffset(int i)
 {
-    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *renderState->p1C;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[7]);
     sRSMVEntry* vt = stateQuery->vt;
     return *vt[42].fn(vthis(stateQuery, vt[42]));
 }
@@ -699,7 +691,7 @@ extern "C" float cRenderStateMan_RimLightIntensityOffset(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_AmbientLightIntensityOffset);
 #ifdef SKIP_ASM
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the ambient light intensity offset for render state @p i.
@@ -712,8 +704,8 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_AmbientLightIntensityOffset(int i)
 {
-    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *renderState->p1C;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[7]);
     sRSMVEntry* vt = stateQuery->vt;
     return *vt[41].fn(vthis(stateQuery, vt[41]));
 }
@@ -722,7 +714,7 @@ extern "C" float cRenderStateMan_AmbientLightIntensityOffset(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowSparkleDensity);
 #ifdef SKIP_ASM
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the snow sparkle density for render state @p i, reduced inside tunnels.
@@ -736,7 +728,7 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_SnowSparkleDensity(int i)
 {
-    sRSMEntry* entry = &cRenderStateMan_m_state[i];
+    tRenderState* entry = &cRenderStateMan_m_state[i];
     sRSMObj* object = **(sRSMObj***)((char*)entry + 0x18);
     sRSMVEntry* vt = object->vt;
     return *vt[36].fn(vthis(object, vt[36])) * (1.0f - *(float*)((char*)entry + 0x24));
@@ -746,7 +738,7 @@ extern "C" float cRenderStateMan_SnowSparkleDensity(int i)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_PlayerWindIntensity);
 #ifdef SKIP_ASM
-extern sRSMEntry cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the wind intensity felt by players for render state @p i.
@@ -759,8 +751,8 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_PlayerWindIntensity(int i)
 {
-    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-    sRSMObj* stateQuery = *renderState->p20;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[8]);
     sRSMVEntry* vt = stateQuery->vt;
     return *vt[47].fn(vthis(stateQuery, vt[47]));
 }
@@ -788,8 +780,8 @@ extern "C" void* cRenderStateMan_LightIrradianceName(int i)
         return &cRenderStateMan_m_customIrradiance;
     }
     {
-        sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-        sRSMObj* stateQuery = *renderState->p1C;
+        tRenderState* renderState = &cRenderStateMan_m_state[i];
+        sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[7]);
         sRSMVEntry* vt = stateQuery->vt;
         return vt[37].fn(vthis(stateQuery, vt[37]));
     }
@@ -818,8 +810,8 @@ extern "C" void* cRenderStateMan_ShadowIrradianceName(int i)
         return &cRenderStateMan_m_customIrradiance;
     }
     {
-        sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-        sRSMObj* stateQuery = *renderState->p1C;
+        tRenderState* renderState = &cRenderStateMan_m_state[i];
+        sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[7]);
         sRSMVEntry* vt = stateQuery->vt;
         return vt[38].fn(vthis(stateQuery, vt[38]));
     }
@@ -848,8 +840,8 @@ extern "C" void* cRenderStateMan_TunnelIrradianceName(int i)
         return &cRenderStateMan_m_customIrradiance;
     }
     {
-        sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-        sRSMObj* stateQuery = *renderState->p1C;
+        tRenderState* renderState = &cRenderStateMan_m_state[i];
+        sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[7]);
         sRSMVEntry* vt = stateQuery->vt;
         return vt[39].fn(vthis(stateQuery, vt[39]));
     }
@@ -878,8 +870,8 @@ extern "C" void* cRenderStateMan_ObjectIrradianceName(int i)
         return &cRenderStateMan_m_customIrradiance;
     }
     {
-        sRSMEntry* renderState = &cRenderStateMan_m_state[i];
-        sRSMObj* stateQuery = *renderState->p1C;
+        tRenderState* renderState = &cRenderStateMan_m_state[i];
+        sRSMObj* stateQuery = *((sRSMObj**)renderState->m_query[7]);
         sRSMVEntry* vt = stateQuery->vt;
         return vt[40].fn(vthis(stateQuery, vt[40]));
     }
@@ -971,9 +963,9 @@ extern "C" void cRenderStateMan_writeToReplayFrame(void* frame)
 {
     int i;
     for (i = 0; i < 6; i++) {
-        sRSMEntry* stateEntry = &cRenderStateMan_m_state[i];
-        ((cRSMObjWF*)*stateEntry->p20)->v64(frame);
-        ((cRSMObjWF*)*stateEntry->p20)->v64(frame);
+        tRenderState* stateEntry = &cRenderStateMan_m_state[i];
+        ((cRSMObjWF*)*((sRSMObj**)stateEntry->m_query[8]))->v64(frame);
+        ((cRSMObjWF*)*((sRSMObj**)stateEntry->m_query[8]))->v64(frame);
     }
 }
 #endif
@@ -1064,9 +1056,9 @@ extern "C" void cRenderStateMan_readFromReplayFrame(void* frame)
 {
     int i;
     for (i = 0; i < 6; i++) {
-        sRSMEntry* entry = &cRenderStateMan_m_state[i];
-        ((cRSMObjRF*)*entry->p20)->v65(frame);
-        ((cRSMObjRF*)*entry->p20)->v65(frame);
+        tRenderState* entry = &cRenderStateMan_m_state[i];
+        ((cRSMObjRF*)*((sRSMObj**)entry->m_query[8]))->v65(frame);
+        ((cRSMObjRF*)*((sRSMObj**)entry->m_query[8]))->v65(frame);
     }
 }
 #endif
@@ -1203,14 +1195,10 @@ struct sRsVec4_EF6D0 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct sRsSeg_EF6D0 {
-    sRsVec4_EF6D0 p0;
-    sRsVec4_EF6D0 p1;
-};
 
 struct sTrail_EF6D0 {
     char* rider;                // 0x0
-    sRsSeg_EF6D0* ring;         // 0x4
+    tAirStreamerSeg* ring;         // 0x4
     int head;                   // 0x8
     int count;                  // 0xC
     float start;                // 0x10
@@ -1306,8 +1294,8 @@ extern "C" void cAirStreamerFX_update(sTrail_EF6D0* self)
         sRsVec4_EF6D0 boardOff = *(sRsVec4_EF6D0*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x30) + (*(int*)(riderPtr + 0x8A4) << 6) + 0x30);
         sRsVec4_EF6D0 boardDir = *(sRsVec4_EF6D0*)(*(char**)(*(char**)(riderPtr + 0x780) + 0x34) + (*(int*)(riderPtr + 0x8A4) << 6));
         sRsVec4_EF6D0 streamBase = Sub_EF6D0(boardOff, Scale_EF6D0(bodyOff, 0.699999988079071f));
-        self->ring[self->head].p0 = Add_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
-        self->ring[self->head].p1 = Sub_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
+        (*(sRsVec4_EF6D0*)&self->ring[self->head].l) = Add_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
+        (*(sRsVec4_EF6D0*)&self->ring[self->head].r) = Sub_EF6D0(streamBase, Scale_EF6D0(boardDir, 90.0f));
         if ((AITick() & 1) == 0) {
             int old = self->head;
             self->head = old + 1;
@@ -1722,21 +1710,21 @@ extern sRsCol_F00A0 cDepthFog_m_Colour;
 
 struct sRsCtx_F00A0 {
     char pad0[0x8C];
-    void* a8C[8];       // 0x8C
-    float aAC[8];       // 0xAC
-    float aCC[8];       // 0xCC
-    float aEC[8];       // 0xEC
-    float a10C[8];      // 0x10C
-    float a12C[8];      // 0x12C
-    float a14C[8];      // 0x14C
-    float a16C[8];      // 0x16C
-    float a18C[8];      // 0x18C
-    float a1AC[8];      // 0x1AC
-    float a1CC[8];      // 0x1CC
-    float a1EC[8];      // 0x1EC
-    float a20C[8];      // 0x20C
-    float a22C[8];      // 0x22C
-    float a24C[8];      // 0x24C
+    void* m_isInNIS[8];       // 0x8C
+    float m_SnowSparkleDensity[8];       // 0xAC
+    float m_DrawDistance[8];       // 0xCC
+    float m_FogDensity[8];       // 0xEC
+    float m_FogColourR[8];      // 0x10C
+    float m_FogColourG[8];      // 0x12C
+    float m_FogColourB[8];      // 0x14C
+    float m_FogNear[8];      // 0x16C
+    float m_FogFar[8];      // 0x18C
+    float m_ScreenTintScaleR[8];      // 0x1AC
+    float m_ScreenTintScaleG[8];      // 0x1CC
+    float m_ScreenTintScaleB[8];      // 0x1EC
+    float m_ScreenTintOffsetR[8];      // 0x20C
+    float m_ScreenTintOffsetG[8];      // 0x22C
+    float m_ScreenTintOffsetB[8];      // 0x24C
 };
 extern sRsCtx_F00A0* D_ctx_F00A0 __asm__("cGraphicsMan_TheGraphicsMan");
 
@@ -1788,21 +1776,21 @@ extern "C" void cVisualEffectsMan_commonUpdate(cVisualEffectsMan* self, int i)
         cLightGlow_m_PS2IntensityTex2 = cRenderStateMan_LightGlowBlend2(i);
         cLightGlow_m_PS2IntensityTex3 = cRenderStateMan_LightGlowBlend3(i);
     }
-    ctx->a8C[i] = cRenderStateMan_m_inNIS;
-    ctx->aAC[i] = cRenderStateMan_SnowSparkleDensity(i);
-    ctx->aCC[i] = cRenderStateMan_DrawDistance(i);
-    ctx->aEC[i] = cRenderStateMan_FogDensity(i);
-    ctx->a10C[i] = cRenderStateMan_FogColourR(i);
-    ctx->a12C[i] = cRenderStateMan_FogColourG(i);
-    ctx->a14C[i] = cRenderStateMan_FogColourB(i);
-    ctx->a16C[i] = cRenderStateMan_FogNear(i);
-    ctx->a18C[i] = cRenderStateMan_FogFar(i);
-    ctx->a1AC[i] = cRenderStateMan_ScreenTintScaleR(i);
-    ctx->a1CC[i] = cRenderStateMan_ScreenTintScaleG(i);
-    ctx->a1EC[i] = cRenderStateMan_ScreenTintScaleB(i);
-    ctx->a20C[i] = cRenderStateMan_ScreenTintOffsetR(i);
-    ctx->a22C[i] = cRenderStateMan_ScreenTintOffsetG(i);
-    ctx->a24C[i] = cRenderStateMan_ScreenTintOffsetB(i);
+    ctx->m_isInNIS[i] = cRenderStateMan_m_inNIS;
+    ctx->m_SnowSparkleDensity[i] = cRenderStateMan_SnowSparkleDensity(i);
+    ctx->m_DrawDistance[i] = cRenderStateMan_DrawDistance(i);
+    ctx->m_FogDensity[i] = cRenderStateMan_FogDensity(i);
+    ctx->m_FogColourR[i] = cRenderStateMan_FogColourR(i);
+    ctx->m_FogColourG[i] = cRenderStateMan_FogColourG(i);
+    ctx->m_FogColourB[i] = cRenderStateMan_FogColourB(i);
+    ctx->m_FogNear[i] = cRenderStateMan_FogNear(i);
+    ctx->m_FogFar[i] = cRenderStateMan_FogFar(i);
+    ctx->m_ScreenTintScaleR[i] = cRenderStateMan_ScreenTintScaleR(i);
+    ctx->m_ScreenTintScaleG[i] = cRenderStateMan_ScreenTintScaleG(i);
+    ctx->m_ScreenTintScaleB[i] = cRenderStateMan_ScreenTintScaleB(i);
+    ctx->m_ScreenTintOffsetR[i] = cRenderStateMan_ScreenTintOffsetR(i);
+    ctx->m_ScreenTintOffsetG[i] = cRenderStateMan_ScreenTintOffsetG(i);
+    ctx->m_ScreenTintOffsetB[i] = cRenderStateMan_ScreenTintOffsetB(i);
 }
 #endif
 

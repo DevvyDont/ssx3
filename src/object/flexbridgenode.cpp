@@ -1434,7 +1434,7 @@ extern "C" void cFlexRailNode_render(cFlexRailNode* self)
         D_004A5980 = 1;
     }
     (ctx->m_pCurrentDrawState)->m_textureState.m_texid[0] = -1;
-    (ctx->m_pCurrentDrawState)->unk_00[1] = (((int)(ctx->m_pCurrentDrawState)->unk_00[1]) & ~0x7C) | 4;
+    (ctx->m_pCurrentDrawState)->m_bitGroups[1] = (((int)(ctx->m_pCurrentDrawState)->m_bitGroups[1]) & ~0x7C) | 4;
     int n = self->NumNodes - 1;
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < 8; j++) {

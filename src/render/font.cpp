@@ -340,16 +340,16 @@ extern "C" void cFont_text(cFont* self, float x, float y, sMat00391C48* str)
                      y + self->Offset[1] * self->Scale[1], 0.0f, 0.0f);
     if (self->ShadowOffset[0] != 0.0f || self->ShadowOffset[1] != 0.0f) {
         sDrawState* top = ps2GraphicsMan->m_pCurrentDrawState;
-        int saved = (unsigned)(((int)top->unk_00[2]) & 0x3E0) >> 5;
+        int saved = (unsigned)(((int)top->m_bitGroups[2]) & 0x3E0) >> 5;
         int shadowLayer = saved - 1;
         if (shadowLayer < 0) shadowLayer = 0;
-        top->unk_00[2] = (((int)top->unk_00[2]) & ~0x3E0) | ((shadowLayer << 5) & 0x3E0);
+        top->m_bitGroups[2] = (((int)top->m_bitGroups[2]) & ~0x3E0) | ((shadowLayer << 5) & 0x3E0);
         sFontVEntry1CB0* vt = (sFontVEntry1CB0*)ps2GraphicsMan->mVtbl;
         vt[80].fn(vthis(ps2GraphicsMan, vt[80]), self, str, (char*)&self->ShadowColor[0],
                   pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1],
                   self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
         sDrawState* top2 = ps2GraphicsMan->m_pCurrentDrawState;
-        top2->unk_00[2] = (((int)top2->unk_00[2]) & ~0x3E0) | (saved << 5);
+        top2->m_bitGroups[2] = (((int)top2->m_bitGroups[2]) & ~0x3E0) | (saved << 5);
     }
     sFontVEntry1CB0* vt = (sFontVEntry1CB0*)ps2GraphicsMan->mVtbl;
     vt[80].fn(vthis(ps2GraphicsMan, vt[80]), self, str, (char*)&self->Color[0], pos.x, pos.y,
@@ -403,16 +403,16 @@ extern "C" void cFont_text1(cFont* self, float x, float y, void* unicodeStr)
                      y + self->Offset[1] * self->Scale[1], 0.0f, 0.0f);
     if (self->ShadowOffset[0] != 0.0f || self->ShadowOffset[1] != 0.0f) {
         sDrawState* top = ps2GraphicsMan->m_pCurrentDrawState;
-        int saved = (unsigned)(((int)top->unk_00[2]) & 0x3E0) >> 5;
+        int saved = (unsigned)(((int)top->m_bitGroups[2]) & 0x3E0) >> 5;
         int shadowLayer = saved - 1;
         if (shadowLayer < 0) shadowLayer = 0;
-        top->unk_00[2] = (((int)top->unk_00[2]) & ~0x3E0) | ((shadowLayer << 5) & 0x3E0);
+        top->m_bitGroups[2] = (((int)top->m_bitGroups[2]) & ~0x3E0) | ((shadowLayer << 5) & 0x3E0);
         sVEntry<void(void*, void*, void*, void*, float, float, float, float, float, float, float)>* vt = (sVEntry<void(void*, void*, void*, void*, float, float, float, float, float, float, float)>*)ps2GraphicsMan->mVtbl;
         vt[81].fn(vthis(ps2GraphicsMan, vt[81]), self, unicodeStr, (char*)&self->ShadowColor[0],
                   pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1],
                   self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
         sDrawState* top2 = ps2GraphicsMan->m_pCurrentDrawState;
-        top2->unk_00[2] = (((int)top2->unk_00[2]) & ~0x3E0) | (saved << 5);
+        top2->m_bitGroups[2] = (((int)top2->m_bitGroups[2]) & ~0x3E0) | (saved << 5);
     }
     sVEntry<void(void*, void*, void*, void*, float, float, float, float, float, float, float)>* vt = (sVEntry<void(void*, void*, void*, void*, float, float, float, float, float, float, float)>*)ps2GraphicsMan->mVtbl;
     vt[81].fn(vthis(ps2GraphicsMan, vt[81]), self, unicodeStr, (char*)&self->Color[0], pos.x, pos.y,
@@ -425,9 +425,6 @@ INCLUDE_ASM("render/font", cFont_textExtent);
 #ifdef SKIP_ASM
 
 
-struct sRect1FB0 {
-    float x0, y0, x1, y1;
-};
 
 static inline tGlyph* sFontRes1FB0_find(cFont* font, int c)
 {
@@ -466,48 +463,48 @@ static inline tGlyph* sFontRes1FB0_find(cFont* font, int c)
 extern "C" float cFont_textExtent(cFont* f_, const char* str, void* r_, int mono, float sx, float sy)
 {
     cFont* font = f_;
-    sRect1FB0* rect = (sRect1FB0*)r_;
-    sRect1FB0 localRect;
-    sRect1FB0* rc = rect ? rect : &localRect;
-    rc->x0 = 0.0f;
-    rc->y0 = 0.0f;
-    rc->x1 = 0.0f;
-    rc->y1 = 0.0f;
+    tRect* rect = (tRect*)r_;
+    tRect localRect;
+    tRect* rc = rect ? rect : &localRect;
+    rc->X = 0.0f;
+    rc->Y = 0.0f;
+    rc->W = 0.0f;
+    rc->H = 0.0f;
     float x = 0.0f;
     float y = 0.0f;
     for (; *str; str++) {
         tGlyph* glyph = sFontRes1FB0_find(font, *(unsigned char*)str);
         if (glyph) {
             float adv = glyph->advance * sx;
-            rc->x0 = (x + glyph->xoffset * sx) <? rc->x0;
-            rc->y0 = (y + glyph->yoffset * sy) <? rc->y0;
-            rc->y1 = (y + (glyph->yoffset + glyph->height) * sy) >? rc->y1;
+            rc->X = (x + glyph->xoffset * sx) <? rc->X;
+            rc->Y = (y + glyph->yoffset * sy) <? rc->Y;
+            rc->H = (y + (glyph->yoffset + glyph->height) * sy) >? rc->H;
             float nx;
             if (!mono) {
-                rc->x1 = (x + (glyph->xoffset + glyph->width) * sx) >? rc->x1;
+                rc->W = (x + (glyph->xoffset + glyph->width) * sx) >? rc->W;
                 nx = x + adv;
             } else {
-                rc->x1 = (x + adv) >? rc->x1;
+                rc->W = (x + adv) >? rc->W;
                 nx = x + adv;
             }
             x = nx;
         }
     }
-    rc->x1 = rc->x1 + rc->x0;
-    rc->y1 = rc->y1 + rc->y0;
+    rc->W = rc->W + rc->X;
+    rc->H = rc->H + rc->Y;
     if (font->ShadowOffset[0] < 0.0f) {
-        rc->x0 = rc->x0 - font->ShadowOffset[0];
-        rc->x1 = rc->x1 - font->ShadowOffset[0];
+        rc->X = rc->X - font->ShadowOffset[0];
+        rc->W = rc->W - font->ShadowOffset[0];
     } else {
-        rc->x1 = rc->x1 + font->ShadowOffset[0];
+        rc->W = rc->W + font->ShadowOffset[0];
     }
     if (font->ShadowOffset[1] < 0.0f) {
-        rc->y0 = rc->y0 - font->ShadowOffset[1];
-        rc->y1 = rc->y1 - font->ShadowOffset[1];
+        rc->Y = rc->Y - font->ShadowOffset[1];
+        rc->H = rc->H - font->ShadowOffset[1];
     } else {
-        rc->y1 = rc->y1 + font->ShadowOffset[1];
+        rc->H = rc->H + font->ShadowOffset[1];
     }
-    return rc->x1;
+    return rc->W;
 }
 #endif
 
@@ -2163,7 +2160,7 @@ extern "C" void cGraphicsMan_SetDrawLayer(cGraphicsMan* graphicsMan, int value) 
     sDrawState* temp_6;
 
     temp_6 = (sDrawState*)((void*)graphicsMan->m_pCurrentDrawState);
-    ((int)temp_6->unk_00[2]) = (int) ((((int)temp_6->unk_00[2]) & ~0x3E0) | ((value << 5) & 0x3E0));
+    ((int)temp_6->m_bitGroups[2]) = (int) ((((int)temp_6->m_bitGroups[2]) & ~0x3E0) | ((value << 5) & 0x3E0));
 }
 #endif
 //100%
@@ -2225,7 +2222,7 @@ extern "C" void cGraphicsMan_SetBlendMode(cGraphicsMan* graphicsMan, int mode, i
     temp_7 = (sDrawState*)((void*)graphicsMan->m_pCurrentDrawState);
     temp_2 = (context * 5) + 2;
     temp_4 = 0x1F << temp_2;
-    ((int)temp_7->unk_00[1]) = (int) ((((int)temp_7->unk_00[1]) & ~temp_4) | ((mode << temp_2) & temp_4));
+    ((int)temp_7->m_bitGroups[1]) = (int) ((((int)temp_7->m_bitGroups[1]) & ~temp_4) | ((mode << temp_2) & temp_4));
 }
 #endif
 //100%
@@ -2246,9 +2243,9 @@ extern "C" void cGraphicsMan_SetAlphaSort(cGraphicsMan* graphicsMan, int alphaSo
     sDrawState* temp_8;
 
     temp_8 = (sDrawState*)((void*)graphicsMan->m_pCurrentDrawState);
-    ((int)temp_8->unk_00[1]) = (int) ((((int)temp_8->unk_00[1]) & ~3) | (alphaSort & 3));
+    ((int)temp_8->m_bitGroups[1]) = (int) ((((int)temp_8->m_bitGroups[1]) & ~3) | (alphaSort & 3));
     temp_3 = (sDrawState*)((void*)graphicsMan->m_pCurrentDrawState);
-    ((int)temp_3->unk_00[2]) = (int) ((((int)temp_3->unk_00[2]) & 0xE00003FF) | ((sortKey << 0xA) & 0x1FFFFC00));
+    ((int)temp_3->m_bitGroups[2]) = (int) ((((int)temp_3->m_bitGroups[2]) & 0xE00003FF) | ((sortKey << 0xA) & 0x1FFFFC00));
 }
 #endif
 //100%
@@ -2301,7 +2298,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetDrawLayer);
  * @return the draw layer (0-31)
  */
 extern "C" unsigned int cGraphicsMan_GetDrawLayer(cGraphicsMan* graphicsMan) {
-    return (unsigned int) (((int)graphicsMan->m_pCurrentDrawState->unk_00[2]) & 0x3E0) >> 5;
+    return (unsigned int) (((int)graphicsMan->m_pCurrentDrawState->m_bitGroups[2]) & 0x3E0) >> 5;
 }
 #endif
 //100%
@@ -2316,7 +2313,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetBlendMode);
  * @return the blend mode (0-31)
  */
 extern "C" unsigned int cGraphicsMan_GetBlendMode(cGraphicsMan* graphicsMan) {
-    return (unsigned int) (((int)graphicsMan->m_pCurrentDrawState->unk_00[1]) & 0x7C) >> 2;
+    return (unsigned int) (((int)graphicsMan->m_pCurrentDrawState->m_bitGroups[1]) & 0x7C) >> 2;
 }
 #endif
 //100%
@@ -2331,7 +2328,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetAlphaSort);
  * @return the alpha sort mode (0-3)
  */
 extern "C" int cGraphicsMan_GetAlphaSort(cGraphicsMan* graphicsMan) {
-    return ((int)graphicsMan->m_pCurrentDrawState->unk_00[1]) & 3;
+    return ((int)graphicsMan->m_pCurrentDrawState->m_bitGroups[1]) & 3;
 }
 #endif
 //100%
@@ -2346,7 +2343,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetAlphaSortKey);
  * @return the sort key
  */
 extern "C" unsigned int cGraphicsMan_GetAlphaSortKey(cGraphicsMan* graphicsMan) {
-    return (unsigned int) (((int)graphicsMan->m_pCurrentDrawState->unk_00[2]) & 0x1FFFFC00) >> 10;
+    return (unsigned int) (((int)graphicsMan->m_pCurrentDrawState->m_bitGroups[2]) & 0x1FFFFC00) >> 10;
 }
 #endif
 
@@ -2820,11 +2817,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetPixelTest);
 extern "C" void cGraphicsMan_SetPixelTest(cGraphicsMan* self, int depthtestmode, int atestmode, int aref)
 {
     int sa = (depthtestmode << 23) & 0x01800000;
-    self->m_pCurrentDrawState->unk_00[1] = ((int)self->m_pCurrentDrawState->unk_00[1] & ~0x01800000) | sa;
+    self->m_pCurrentDrawState->m_bitGroups[1] = ((int)self->m_pCurrentDrawState->m_bitGroups[1] & ~0x01800000) | sa;
     int sb = (atestmode << 20) & 0x00300000;
-    self->m_pCurrentDrawState->unk_00[1] = ((int)self->m_pCurrentDrawState->unk_00[1] & ~0x00300000) | sb;
+    self->m_pCurrentDrawState->m_bitGroups[1] = ((int)self->m_pCurrentDrawState->m_bitGroups[1] & ~0x00300000) | sb;
     int sc = (aref << 12) & 0x000FF000;
-    self->m_pCurrentDrawState->unk_00[1] = ((int)self->m_pCurrentDrawState->unk_00[1] & ~0x000FF000) | sc;
+    self->m_pCurrentDrawState->m_bitGroups[1] = ((int)self->m_pCurrentDrawState->m_bitGroups[1] & ~0x000FF000) | sc;
 }
 #endif
 //100%
@@ -2895,9 +2892,9 @@ extern "C" int cGraphicsMan_DrawStateChanged(cGraphicsMan* self)
     unsigned int j;
     for (i = 0; i < 4; i++) {
         char* obj = (char*)self->mVtbl;
-        int* current = (int*)&self->m_pCurrentDrawState->unk_00[i];
+        int* current = (int*)&self->m_pCurrentDrawState->m_bitGroups[i];
         sDrawState* cmp = (sDrawState*)((sFontGetFn_47D8) * (void**)(obj + 0x204))(((char*)self) + *(short*)(obj + 0x200));
-        if (*current != (int)cmp->unk_00[i]) return 1;
+        if (*current != (int)cmp->m_bitGroups[i]) return 1;
     }
     for (j = 0; j < 2; j++) {
         char* obj = (char*)self->mVtbl;
@@ -3820,9 +3817,9 @@ INCLUDE_ASM("render/font", cPS2DeferManager_Find1);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sNode5000 {
-    int k0;
-    int k4;
-    int k8;
+    int mpState;
+    int mTexKey;
+    int mViewIndex;
     int padC[2];
     int busy;
     int pad18;
@@ -3854,7 +3851,7 @@ extern "C" sNode5000* cPS2DeferManager_Find1(sCache5000* self, int stateEntry, i
         sNode5000* node;
         int hit = 0;
         if ((*pp)->busy == 0) {
-            int keysMatch = (*pp)->k4 == texKey && (*pp)->k8 == matrixIndex && (*pp)->k0 == stateEntry;
+            int keysMatch = (*pp)->mTexKey == texKey && (*pp)->mViewIndex == matrixIndex && (*pp)->mpState == stateEntry;
             if (keysMatch) hit = 1;
         }
         node = *pp;
@@ -4543,7 +4540,7 @@ extern "C" void cPS2GraphicsMan_AddDMAToWorld(cPS2GraphicsMan* gfx, unsigned int
     sDrawState* rs = gfx->m_pCurrentDrawState;
     cPS2DeferManager* ring = gfx->mpDeferMan;
     if (ring->mNumSubmitDMA < 2600) {
-        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
+        rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->unk_69CC0;
         tDeferSubmit* record = (tDeferSubmit*)((ring->mNumSubmitDMA++ << 7) + ((unsigned int)((tDeferSubmit*)&ring->mSubmits[0]) | 0x30000000));
         record->mDrawState = *rs;
@@ -7572,9 +7569,9 @@ extern "C" void cPS2GraphicsMan_InitCharMatrices(cPS2GraphicsMan* self)
 {
     sDrawState* rs = self->m_pCurrentDrawState;
     unsigned int addrMask = 0x3FFFFFFF;
-    rs->unk_00[0] = (((int)rs->unk_00[0]) & ~0x3C0) | 0x180;
+    rs->m_bitGroups[0] = (((int)rs->m_bitGroups[0]) & ~0x3C0) | 0x180;
     sDrawState* rs2 = self->m_pCurrentDrawState;
-    rs2->unk_00[3] = (((int)rs2->unk_00[3]) & 0xC0000000) | (self->mVifCursor & addrMask);
+    rs2->m_bitGroups[3] = (((int)rs2->m_bitGroups[3]) & 0xC0000000) | (self->mVifCursor & addrMask);
     unsigned long* packet = (unsigned long*)(self->mVifCursor | 0x30000000);
     packet[0] = 0x6000000C;
     packet[2] = (unsigned long)0x8000 << 45;

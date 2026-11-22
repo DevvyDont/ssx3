@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "render/2drender.h"
 #include "ui/uimenu.h"
 #include "bx/math3d.h"
 #include "render/font.h"
@@ -185,9 +186,6 @@ extern "C" unsigned short* cUITextScroll_getStringByIndex(void* self, int idx);
 
 
 
-struct sRect_185F40 {
-    float x0, y0, x1, y1;
-};
 
 class cUIObj185F40 {
 public:
@@ -307,9 +305,9 @@ extern "C" void cFEStateCredits_onRender2D(cFEStateCredits* self)
                             sz.x -= 0.10000000149011612f;
                             sz.y -= 0.10000000149011612f;
                         }
-                        sRect_185F40 textRect;
+                        tRect textRect;
                         cFont_textExtent1(font, line, &textRect, 0, sz.x, sz.y);
-                        newPos.x = (640.0f - textRect.x1) * 0.5f;
+                        newPos.x = (640.0f - textRect.W) * 0.5f;
                         DrawText_185F40(((char*)font), line, newPos.x, newPos.y, sz);
                     }
                 }

@@ -15,16 +15,6 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 
-struct cOVStateHUDElem {
-    int field_0x0;
-    int field_0x4;
-    float rangeMin; // 0x8
-    float rangeMax; // 0xc
-    float x; // 0x10
-    float y; // 0x14
-    float z; // 0x18
-    float w; // 0x1c
-};
 
 //100%
 INCLUDE_ASM("fe/ovstatehud", cOVStateHiScoreList_onCreateScreen);
@@ -130,12 +120,12 @@ INCLUDE_ASM("fe/ovstatehud", tHUDDef_getColour__FPvT0);
  */
 void tHUDDef_getColour(void* self, void* outColor)
 {
-    cOVStateHUDElem* elem = (cOVStateHUDElem*)self;
+    cTextureElement* elem = (cTextureElement*)self;
     float* out = (float*)outColor;
-    out[0] = elem->x;
-    out[1] = elem->y;
-    out[2] = elem->z;
-    out[3] = elem->w;
+    out[0] = elem->mLeft;
+    out[1] = elem->mRight;
+    out[2] = elem->mBottom;
+    out[3] = (*(float*)&elem->mHashID);
 }
 #endif
 
@@ -152,12 +142,12 @@ INCLUDE_ASM("fe/ovstatehud", tHUDDef_getColour1__FPvT0);
  */
 void tHUDDef_getColour1(void* self, void* outColor)
 {
-    cOVStateHUDElem* elem = (cOVStateHUDElem*)self;
+    cTextureElement* elem = (cTextureElement*)self;
     float* out = (float*)outColor;
-    out[3] = elem->x;
-    out[0] = elem->y;
-    out[1] = elem->z;
-    out[2] = elem->w;
+    out[3] = elem->mLeft;
+    out[0] = elem->mRight;
+    out[1] = elem->mBottom;
+    out[2] = (*(float*)&elem->mHashID);
 }
 #endif
 
@@ -234,10 +224,10 @@ INCLUDE_ASM("fe/ovstatehud", tHUDDef_getScale__FPvT0);
  */
 float tHUDDef_getScale(void* self, void* outRange)
 {
-    cOVStateHUDElem* elem = (cOVStateHUDElem*)self;
-    float minValue = elem->rangeMin;
+    cTextureElement* elem = (cTextureElement*)self;
+    float minValue = elem->mHeight;
     *(float*)outRange = minValue;
-    *(float*)((char*)outRange + 0x4) = elem->rangeMax;
+    *(float*)((char*)outRange + 0x4) = elem->mTop;
     return minValue;
 }
 #endif
@@ -400,22 +390,11 @@ extern void cFont_text1_95A0(void* self, float x, float y, void* m) __asm__("cFo
 
 
 
-struct sHudImg_E95A0 {
-    int f0;
-    int f4;
-    int tex;                // 0x08
-    float w;                // 0x0C
-    float h;                // 0x10
-    float u0;               // 0x14
-    float v0;               // 0x18
-    float u1;               // 0x1C
-    float v1;               // 0x20
-};
 
 
 
 
-static inline int texOf_E95A0(sHudImg_E95A0* i) { return i->tex; }
+static inline int texOf_E95A0(tHUDPictureDB* i) { return i->texID; }
 
 struct sVEnt_E95A0 { short delta; short index; void (*fn)(void*, int, tBxVertex*, int); };
 
@@ -493,24 +472,24 @@ extern "C" void drawTextPictLine(tTextPictLine* self, float* pos, float* scale, 
                 pos[0] += entry->width * sx;
             }
         } else {
-            sHudImg_E95A0* img = (sHudImg_E95A0*)entry->unk_04;
+            tHUDPictureDB* img = (tHUDPictureDB*)entry->unk_04;
             t2Vector wh;
-            float w = img->w * scale[0];
-            float scaledHeight = img->h * scale[1];
+            float w = img->size[0] * scale[0];
+            float scaledHeight = img->size[1] * scale[1];
             wh.x = w;
             wh.y = scaledHeight;
             float x0 = pos[0];
             float x1 = x0 + wh.x;
             float y0 = yc - wh.y * 0.5f;
             float y1 = y0 + wh.y;
-            verts[0].u = img->u0;
-            verts[0].v = img->v0;
-            verts[1].u = img->u1;
-            verts[1].v = img->v0;
-            verts[2].u = img->u0;
-            verts[2].v = img->v1;
-            verts[3].u = img->u1;
-            verts[3].v = img->v1;
+            verts[0].u = img->uv0[0];
+            verts[0].v = img->uv0[1];
+            verts[1].u = img->uv1[0];
+            verts[1].v = img->uv0[1];
+            verts[2].u = img->uv0[0];
+            verts[2].v = img->uv1[1];
+            verts[3].u = img->uv1[0];
+            verts[3].v = img->uv1[1];
             t4Vector corner;
             corner.x = x0;
             corner.y = y0;
@@ -1229,7 +1208,7 @@ INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_renderBitmap);
 #ifdef SKIP_ASM
 
 
-static inline int texOf_001F1190(cOVStateHUDElem* e) { return e->field_0x0; }
+static inline int texOf_001F1190(cTextureElement* e) { return e->mSourceShape; }
 
 struct sVEnt_001F1190 { short delta; short index; void (*fn)(void*, int, tBxVertex*, int); };
 
@@ -1248,7 +1227,7 @@ struct sVEnt_001F1190 { short delta; short index; void (*fn)(void*, int, tBxVert
  * @param scale  the scale
  * @param color  the colour (tARGB, 1.0 = full)
  */
-extern "C" void cOVStateHUD1P_renderBitmap(cOVStateHUD1P* self, cOVStateHUDElem* elem, float* pos, float* size, float* scale, float* color)
+extern "C" void cOVStateHUD1P_renderBitmap(cOVStateHUD1P* self, cTextureElement* elem, float* pos, float* size, float* scale, float* color)
 {
     if (elem != 0) {
         GrMan->m_pCurrentDrawState->m_textureState.m_texid[0] = texOf_001F1190(elem);
@@ -1268,14 +1247,14 @@ extern "C" void cOVStateHUD1P_renderBitmap(cOVStateHUD1P* self, cOVStateHUDElem*
         float y0 = pos[1];
         float x1 = x0 + size[0] * scale[0];
         float y1 = y0 + size[1] * scale[1];
-        verts[0].u = elem->x;
-        verts[0].v = elem->rangeMax;
-        verts[1].u = elem->y;
-        verts[1].v = elem->rangeMax;
-        verts[2].u = elem->x;
-        verts[2].v = elem->z;
-        verts[3].u = elem->y;
-        verts[3].v = elem->z;
+        verts[0].u = elem->mLeft;
+        verts[0].v = elem->mTop;
+        verts[1].u = elem->mRight;
+        verts[1].v = elem->mTop;
+        verts[2].u = elem->mLeft;
+        verts[2].v = elem->mBottom;
+        verts[3].u = elem->mRight;
+        verts[3].v = elem->mBottom;
         t4Vector corner;
         corner.x = x0;
         corner.y = y0;
@@ -1663,7 +1642,7 @@ extern "C" void cOVStateHUD1P_renderText(cOVStateHUD1P* ctx, cFont* font, tHUDDe
     }
     sVec4_001F1B30 shadowColour(col.A, 0.0f, 0.0f, 0.0f);
     sDrawState* rs = GrMan->m_pCurrentDrawState;
-    rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((((char*)&defs[idx].layer)[0] << 5) & 0x3E0);
+    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0) | ((((char*)&defs[idx].layer)[0] << 5) & 0x3E0);
     (*(tARGB*)&font->Color[0]) = col;
     (*(sVec4_001F1B30*)&font->ShadowColor[0]) = shadowColour;
     cFont_text(font, out[0], out[1], str);
@@ -1854,7 +1833,7 @@ extern "C" void cOVStateHUD1P_renderText1(cOVStateHUD1P* ctx, float blend, cFont
         col.r = col.r * (1.0f - blend);
     }
     sDrawState* rs = GrMan->m_pCurrentDrawState;
-    rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((((char*)&defs[26].layer)[0] << 5) & 0x3E0);
+    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0) | ((((char*)&defs[26].layer)[0] << 5) & 0x3E0);
     (*(sCol_001F1E28*)&font->Color[0]) = col;
     float baseScaleX = font->BaseScale[0];
     float blendScaleX = resEsc[0];
@@ -1946,7 +1925,7 @@ extern "C" void cOVStateHUD1P_renderText2(cOVStateHUD1P* ctx, cFont* font, tHUDD
     }
     sVec4_001F22E8 shadowColour(col.A, 0.0f, 0.0f, 0.0f);
     sDrawState* rs = GrMan->m_pCurrentDrawState;
-    rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((((char*)&defs[idx].layer)[0] << 5) & 0x3E0);
+    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0) | ((((char*)&defs[idx].layer)[0] << 5) & 0x3E0);
     (*(tARGB*)&font->Color[0]) = col;
     (*(sVec4_001F22E8*)&font->ShadowColor[0]) = shadowColour;
     cFont_text1(font, out[0], out[1], str);
@@ -2122,7 +2101,7 @@ extern "C" void cOVStateHUD1P_renderText3(cOVStateHUD1P* ctx, float blend, cFont
         col.r = col.r * (1.0f - blend);
     }
     sDrawState* rs = GrMan->m_pCurrentDrawState;
-    rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((((char*)&defs[26].layer)[0] << 5) & 0x3E0);
+    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0) | ((((char*)&defs[26].layer)[0] << 5) & 0x3E0);
     (*(sCol_001F25E0*)&font->Color[0]) = col;
     float baseScaleX = font->BaseScale[0];
     float blendScaleX = resEsc[0];
@@ -2199,7 +2178,7 @@ extern "C" void cOVStateHUD1P_renderMultiText(cOVStateHUD1P* self, cFont* font, 
     (*(tARGB*)&font->Color[0]) = col;
     float fn = (float)n;
     sDrawState* rs = GrMan->m_pCurrentDrawState;
-    rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((((char*)&defs[idx].layer)[0] << 5) & 0x3E0);
+    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0) | ((((char*)&defs[idx].layer)[0] << 5) & 0x3E0);
     float lineH = (float)font->MaxCharHeight * font->BaseScale[1] * escale[1];
     float totalH = lineH * fn;
     float y = alignPos_001F2AA0(pos[1], (*(signed char*)&defs[idx].pivotY), totalH);
@@ -2296,7 +2275,7 @@ extern "C" void cOVStateHUD1P_renderMultiText1(cOVStateHUD1P* self, cFont* font,
     (*(tARGB*)&font->Color[0]) = col;
     float fn = (float)n;
     sDrawState* rs = GrMan->m_pCurrentDrawState;
-    rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((((char*)&defs[idx].layer)[0] << 5) & 0x3E0);
+    rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x3E0) | ((((char*)&defs[idx].layer)[0] << 5) & 0x3E0);
     float lineH = (float)font->MaxCharHeight * font->BaseScale[1] * escale[1];
     float totalH = lineH * fn;
     float y = alignPos_001F2DB0(pos[1], (*(signed char*)&defs[idx].pivotY), totalH);
@@ -2346,12 +2325,12 @@ INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_cBXLoadIndicator__FPv);
  */
 void* cBXLoadIndicator_cBXLoadIndicator(void* self)
 {
-    cOVStateHUDElem* elem = (cOVStateHUDElem*)self;
+    cTextureElement* elem = (cTextureElement*)self;
     int initValue = 0;
-    elem->field_0x0 = initValue;
-    *(int*)&elem->rangeMax = initValue;
-    elem->field_0x4 = initValue;
-    *(int*)&elem->rangeMin = initValue;
+    elem->mSourceShape = initValue;
+    *(int*)&elem->mTop = initValue;
+    (*(int*)&elem->mWidth) = initValue;
+    *(int*)&elem->mHeight = initValue;
     return self;
 }
 #endif
@@ -2405,12 +2384,12 @@ INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_DeInit__FPv);
  */
 void cBXLoadIndicator_DeInit(void* self)
 {
-    cOVStateHUDElem* indicator = (cOVStateHUDElem*)self;
+    cTextureElement* indicator = (cTextureElement*)self;
     int zero = 0;
-    indicator->field_0x0 = zero;
-    *(int*)&indicator->rangeMax = zero;
-    indicator->field_0x4 = zero;
-    *(int*)&indicator->rangeMin = zero;
+    indicator->mSourceShape = zero;
+    *(int*)&indicator->mTop = zero;
+    (*(int*)&indicator->mWidth) = zero;
+    *(int*)&indicator->mHeight = zero;
 }
 #endif
 

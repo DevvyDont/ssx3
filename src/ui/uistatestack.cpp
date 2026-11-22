@@ -49,11 +49,11 @@ void cList_addToFront(cList*, cListNode*);
 
 struct cUIStateStack_pushPopup_sState {
     char pad0[0x1C];
-    unsigned int b0 : 1;
-    unsigned int level : 2;
-    unsigned int b3 : 1;
-    unsigned int b4 : 1;
-    unsigned int b5 : 1;
+    unsigned int mIsPopup : 1;
+    unsigned int mHasPopup : 2;
+    unsigned int mVisible : 1;
+    unsigned int mFirstTime : 1;
+    unsigned int mEnabled : 1;
     unsigned int rest : 26;
     cUIStateStack_pushPopup_sState* parent;   // 0x20
 };
@@ -61,8 +61,8 @@ struct cUIStateStack_pushPopup_sState {
 // A state gets covered by a newly pushed one: it is no longer on top and sits one level deeper.
 static inline void cUIStateStack_pushPopup_cover(cUIStateStack_pushPopup_sState* st)
 {
-    st->b5 = 0;
-    st->level = st->level + 1;
+    st->mEnabled = 0;
+    st->mHasPopup = st->mHasPopup + 1;
 }
 
 /**
@@ -84,8 +84,8 @@ extern "C" void cUIStateStack_pushPopup(cUIStateStack* self, cUIStateStack_pushP
             cUIStateStack_pushPopup_cover(top);
         }
     }
-    st->b0 = 1;
-    st->b5 = 1;
+    st->mIsPopup = 1;
+    st->mEnabled = 1;
     cList_addToFront(((cList*)self), (cListNode*)st);
 }
 #endif
@@ -209,20 +209,20 @@ struct cUIStateStack_pushCheck_sState {
     char pad0[0x4];
     cUIStateStack_pushCheck_sState* next;     // 0x4
     char pad8[0x1C - 0x8];
-    unsigned int b0 : 1;
+    unsigned int mIsPopup : 1;
     unsigned int b1 : 1;
     unsigned int b2 : 1;
-    unsigned int b3 : 1;
-    unsigned int b4 : 1;
-    unsigned int b5 : 1;
-    unsigned int b6 : 1;
-    unsigned int b7 : 1;
+    unsigned int mVisible : 1;
+    unsigned int mFirstTime : 1;
+    unsigned int mEnabled : 1;
+    unsigned int mExplicit : 1;
+    unsigned int mPendingDelete : 1;
     unsigned int id : 6;
-    unsigned int b14 : 1;
+    unsigned int mPushCheck : 1;
 };
 
-static inline void setB7_F4C0(cUIStateStack_pushCheck_sState* s, int v) { s->b7 = v; }
-static inline void setB14_F4C0(cUIStateStack_pushCheck_sState* s, int v) { s->b14 = v; }
+static inline void setB7_F4C0(cUIStateStack_pushCheck_sState* s, int v) { s->mPendingDelete = v; }
+static inline void setB14_F4C0(cUIStateStack_pushCheck_sState* s, int v) { s->mPushCheck = v; }
 static inline int cUIStateStack_pushCheck_stateId(cUIStateStack_pushCheck_sState* s) { return s->id; }
 
 // Release-build assert: expands to an empty do { } while (0); the leftover loop notes shape register
@@ -245,7 +245,7 @@ extern "C" void cUIStateStack_pushCheck(cUIStateStack* self, cUIStateStack_pushC
     int skipped = 0;
     cUIStateStack_pushCheck_sState* top = (cUIStateStack_pushCheck_sState*)cList_first(((cList*)self));
     if (top != 0) {
-        while (top->b0) {
+        while (top->mIsPopup) {
             ASSERT_F4C0(top != 0);
             if (top->id < 6) {
                 top->id = 7;
@@ -261,16 +261,16 @@ extern "C" void cUIStateStack_pushCheck(cUIStateStack* self, cUIStateStack_pushC
             if (((stateFlags >> 6) & 1) == 0 && cUIStateStack_pushCheck_stateId(top) < 6) {
                 covered = 1;
                 top->id = 6;
-                top->b7 = 1;
+                top->mPendingDelete = 1;
             }
         }
     }
     if (covered) {
         st->id = 1;
-        st->b5 = 0;
+        st->mEnabled = 0;
     } else {
         st->id = 2;
-        st->b5 = 1;
+        st->mEnabled = 1;
     }
     cList_addToFront(((cList*)self), (cListNode*)st);
 }
@@ -286,17 +286,17 @@ struct cUIStateStack_popToFloor_node {
     char pad0[0x4];
     cUIStateStack_popToFloor_node* next; // 0x4
     char pad8[0x1C - 0x8];
-    unsigned int b0 : 1;
+    unsigned int mIsPopup : 1;
     unsigned int b1 : 5;
-    unsigned int b6 : 1;
-    unsigned int b7 : 1;
+    unsigned int mExplicit : 1;
+    unsigned int mPendingDelete : 1;
     unsigned int id : 6;
-    unsigned int b14 : 1;
-    unsigned int b15 : 1;
+    unsigned int mPushCheck : 1;
+    unsigned int mPopFloor : 1;
 };
 
 static inline void cUIStateStack_popToFloor_setId(cUIStateStack_popToFloor_node* n, int v) { n->id = v; }
-static inline void cUIStateStack_popToFloor_setB7(cUIStateStack_popToFloor_node* n, int v) { n->b7 = v; }
+static inline void cUIStateStack_popToFloor_setB7(cUIStateStack_popToFloor_node* n, int v) { n->mPendingDelete = v; }
 
 /**
  * Closes the popups on top of a state stack down to a pop floor; returns the state where it stopped.
@@ -311,7 +311,7 @@ extern "C" cUIStateStack_popToFloor_node* cUIStateStack_popToFloor(cUIStateStack
 {
     cUIStateStack_popToFloor_node* n = (cUIStateStack_popToFloor_node*)cList_first(((cList*)list));
     if (n != 0) {
-        while (n->b0) {
+        while (n->mIsPopup) {
             if ((*(int*)((char*)n + 0x1C) >> 15) & 1) {
                 break;
             }
@@ -337,15 +337,15 @@ struct cUIStateStack_popToState_node {
     char pad0[0x4];
     cUIStateStack_popToState_node* next; // 0x4
     char pad8[0x1C - 0x8];
-    unsigned int b0 : 1;
+    unsigned int mIsPopup : 1;
     unsigned int b1 : 5;
-    unsigned int b6 : 1;
-    unsigned int b7 : 1;
+    unsigned int mExplicit : 1;
+    unsigned int mPendingDelete : 1;
     unsigned int id : 6;
 };
 
 static inline void cUIStateStack_popToState_setId(cUIStateStack_popToState_node* n, int v) { n->id = v; }
-static inline void cUIStateStack_popToState_setB7(cUIStateStack_popToState_node* n, int v) { n->b7 = v; }
+static inline void cUIStateStack_popToState_setB7(cUIStateStack_popToState_node* n, int v) { n->mPendingDelete = v; }
 
 /**
  * Closes all popups on top of a state stack; returns the first non-popup state.
@@ -359,14 +359,14 @@ extern "C" cUIStateStack_popToState_node* cUIStateStack_popToState(cUIStateStack
 {
     cUIStateStack_popToState_node* n = (cUIStateStack_popToState_node*)cList_first(((cList*)list));
     if (n != 0) {
-        if (n->b0) {
+        if (n->mIsPopup) {
             do {
                 if (n->id < 6) {
                     cUIStateStack_popToState_setId(n, 7);
                     cUIStateStack_popToState_setB7(n, 1);
                 }
                 n = n->next;
-            } while (n->b0);
+            } while (n->mIsPopup);
         }
         return n;
     }
@@ -384,15 +384,15 @@ struct cUIStateStack_popToStateInclusive_node {
     char pad0[0x4];
     cUIStateStack_popToStateInclusive_node* next; // 0x4
     char pad8[0x1C - 0x8];
-    unsigned int b0 : 1;
+    unsigned int mIsPopup : 1;
     unsigned int b1 : 5;
-    unsigned int b6 : 1;
-    unsigned int b7 : 1;
+    unsigned int mExplicit : 1;
+    unsigned int mPendingDelete : 1;
     unsigned int id : 6;
 };
 
 static inline void cUIStateStack_popToStateInclusive_setId(cUIStateStack_popToStateInclusive_node* n, int v) { n->id = v; }
-static inline void cUIStateStack_popToStateInclusive_setB7(cUIStateStack_popToStateInclusive_node* n, int v) { n->b7 = v; }
+static inline void cUIStateStack_popToStateInclusive_setB7(cUIStateStack_popToStateInclusive_node* n, int v) { n->mPendingDelete = v; }
 
 /**
  * Closes all popups on top of a state stack and the state under them; returns the state below that.
@@ -406,18 +406,18 @@ extern "C" cUIStateStack_popToStateInclusive_node* cUIStateStack_popToStateInclu
 {
     cUIStateStack_popToStateInclusive_node* n = (cUIStateStack_popToStateInclusive_node*)cList_first(((cList*)list));
     if (n != 0) {
-        if (n->b0) {
+        if (n->mIsPopup) {
             do {
                 if (n->id < 6) {
                     cUIStateStack_popToStateInclusive_setId(n, 7);
                     cUIStateStack_popToStateInclusive_setB7(n, 1);
                 }
                 n = n->next;
-            } while (n->b0);
+            } while (n->mIsPopup);
         }
         if (n->id < 6) {
             n->id = 7;
-            n->b7 = 1;
+            n->mPendingDelete = 1;
         }
         return n->next;
     }

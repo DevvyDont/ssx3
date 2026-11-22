@@ -4,7 +4,7 @@
 void operator_delete(int* ptr);
 
 struct sTriggerNode {
-    void* pad;
+    void* Trigger;
     sTriggerNode* next;
 };
 
@@ -64,7 +64,7 @@ extern "C" sTriggerNode* cActiveTriggerList_find(cActiveTriggerList* self, void*
     sTriggerNode* node = ((sTriggerNode*)self->Head);
     if (node != 0) {
         do {
-            if (node->pad == key) {
+            if (node->Trigger == key) {
                 return node;
             }
             node = node->next;
@@ -90,7 +90,7 @@ extern "C" void* cActiveTriggerList_find1(cActiveTriggerList* self, void* key)
     sTriggerNode* node = ((sTriggerNode*)self->Head);
     if (node != 0) {
         do {
-            void* item = node->pad;
+            void* item = node->Trigger;
             if (*(void**)item == key) {
                 return item;
             }
@@ -120,7 +120,7 @@ extern "C" void cActiveTriggerList_add(cActiveTriggerList* self, void* item)
     sTriggerNode* n = (sTriggerNode*)cMemMan_alloc(0x10, str_Active_Camera_Trigger, 0x20000000, 0);
     sTriggerNode* old = ((sTriggerNode*)self->Head);
     (*(sTriggerNode**)&self->Head) = n;
-    n->pad = item;
+    n->Trigger = item;
     n->next = old;
     *(int*)((char*)n + 0xC) = 1;
     *(int*)((char*)n + 0x8) = 1;

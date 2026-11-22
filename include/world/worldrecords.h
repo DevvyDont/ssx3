@@ -189,7 +189,9 @@ CHECK_SIZE(tAnimRecord, 0x24);
 struct tSplineSegmentRecord {
     int m_iIntersect[3];            // 0x00 [O]; [U] nash next / prev, +0x8 the type word (cPS2ChunkResolve_resolve /
                                     //      unresolve set it to 1); the overlap queries switch on it
-    float unk_00C;                  // 0x0C [O] m_fLength
+    float m_fLength;                // 0x0C [O] m_fLength; [U] cSpline_calcLength returns the last segment's
+                                    //      m_fDistance + m_fLength (the spline's length, stored in cSpline::Length);
+                                    //      view sSplinePoint field_0xC. [Renamed from unk_00C by lstruct L2.]
     tf4Matrix m_fmBasisMat;         // 0x10 [O]; [U] cSpline_draw evaluates the segment with it
     char unk_050[0x10];             // 0x50 [O] tf4Vector m_fvInv
     tSplineSegmentRecord* m_PrevSeg; // 0x60 [O] tSplineSegmentID; [U] resolveSpline links it
@@ -206,7 +208,7 @@ struct tSplineSegmentRecord {
 };
 
 CHECK_OFFSET(tSplineSegmentRecord, m_iIntersect, 0x00);
-CHECK_OFFSET(tSplineSegmentRecord, unk_00C, 0x0C);
+CHECK_OFFSET(tSplineSegmentRecord, m_fLength, 0x0C);
 CHECK_OFFSET(tSplineSegmentRecord, m_fmBasisMat, 0x10);
 CHECK_OFFSET(tSplineSegmentRecord, unk_050, 0x50);
 CHECK_OFFSET(tSplineSegmentRecord, m_PrevSeg, 0x60);
@@ -267,6 +269,26 @@ struct tParticleMeshRecord {
 CHECK_OFFSET(tParticleMeshRecord, unk_000, 0x00);
 CHECK_OFFSET(tParticleMeshRecord, m_ParticleVolumes, 0x20);
 CHECK_SIZE(tParticleMeshRecord, 0x24);
+
+// A particle model's mesh table entry (On Tour tParticleMeshHeirarchyRecord_PSP, 0x10; the same layout as
+// tMeshHeirarchyRecord). tParticleModelRecord::m_ParticleMeshHeirarchy points to m_iNumParticleMeshes of them
+// ([U] cChunkResolve_resolveParticleModel walks them with a 0x10 stride and calls resolveParticleModelHeirarchy on
+// each). Replaces the view cChunkResolve_resolveParticleModelHeirarchy_sEnt (world/worldview).
+// [Staged by lstruct group L2.]
+struct tParticleMeshHeirarchyRecord {
+    int m_iParentID;                // 0x0 [O]
+    tParticleMeshRecord* m_ParticleMesh; // 0x4 [O] tParticleMeshID; [U] cChunkResolve_resolveParticleModelHeirarchy
+                                    //      fixes it up and calls resolveParticleMesh on it
+    tAnimRecord* m_ParticleMeshAnim; // 0x8 [O] tMeshAnimID; [U] the same function fixes it up and resolves the
+                                    //      animation (resolveAnimation)
+    tf4Matrix* m_pParticleMeshMatrix; // 0xC [O]; [U] the same function: -1 -> t4mat_Identity, else fixed up
+};
+
+CHECK_OFFSET(tParticleMeshHeirarchyRecord, m_iParentID, 0x0);
+CHECK_OFFSET(tParticleMeshHeirarchyRecord, m_ParticleMesh, 0x4);
+CHECK_OFFSET(tParticleMeshHeirarchyRecord, m_ParticleMeshAnim, 0x8);
+CHECK_OFFSET(tParticleMeshHeirarchyRecord, m_pParticleMeshMatrix, 0xC);
+CHECK_SIZE(tParticleMeshHeirarchyRecord, 0x10);
 
 // A placed particle emitter (On Tour tParticleInstanceRecord : _tPSPParticleInstance, 0x88 + pad). The two members
 // retail uses sit at On Tour's offsets.
@@ -374,7 +396,10 @@ CHECK_SIZE(tCollideModelRecord, 0x10);
 struct tCollideRecord {
     int Method;                     // 0x0 [O]; [P] "->Method == CR_Polygon"; [U] cWScriptCacheEntry_resolve resolves
                                     //      the model for methods 1 and 3; the terrain / static queries test it
-    int unk_004;                    // 0x4 [O] InitFlags
+    int InitFlags;                  // 0x4 [O] InitFlags (Method 0x0 and InstanceScriptId 0x8 confirm the layout);
+                                    //     [U] cPS2ChunkResolve_resolveInstance builds the instance's m_iFlags from its
+                                    //     high half (the dummy record's; view cPS2ChunkResolve_resolveInstance_sView f4).
+                                    //     [Renamed from unk_004 by lstruct L2.]
     unsigned int unk_008;           // 0x8 [O] tResourceID InstanceScriptId
     union {
         tCollideModelRecord* CollideModel; // 0xC [O]; [P] "->CollideModel"; [U] cWScriptCacheEntry_resolve stores the
@@ -384,7 +409,7 @@ struct tCollideRecord {
 };
 
 CHECK_OFFSET(tCollideRecord, Method, 0x0);
-CHECK_OFFSET(tCollideRecord, unk_004, 0x4);
+CHECK_OFFSET(tCollideRecord, InitFlags, 0x4);
 CHECK_OFFSET(tCollideRecord, unk_008, 0x8);
 CHECK_OFFSET(tCollideRecord, CollideModel, 0xC);
 CHECK_SIZE(tCollideRecord, 0x10);

@@ -55,6 +55,27 @@ CHECK_OFFSET(tSectionManEvent, SectionID, 0x0);
 CHECK_OFFSET(tSectionManEvent, pNext, 0x4);
 CHECK_SIZE(tSectionManEvent, 0x8);
 
+// One row of the static section map mSectionMap[50] (cSectionMan_mSectionMap): a back-end section and the world
+// section it streams as (On Tour struct tSectionMap, 0x10, same four members; retail's table has 50 rows, the loop bound
+// of cSectionMan_init). Replaces the views sGameEntry (main/game) and field_0x0..field_0xc in the methods.
+// [Staged by lstruct group L2.]
+struct tSectionMap {
+    int SectionID;                  // 0x0 [O] eBESectionID; [U] the game's sections are looked up by it
+                                    //     (getWorldSectionIDFromBESectionID / getBESectionIDFromWorldSectionID)
+    int iWorldSectionID;            // 0x4 [O]; [R] cSectionMan_init stores -1, then the world section whose name matches
+                                    //     the row's; [U] passed to cWorldView loadSection / activateSection / unloadSection
+    int State;                      // 0x8 [O] eSectionState; [R] cSectionMan_init stores 0; [U] cSectionMan_update
+                                    //     switches on it (the section's load / activate state machine)
+    int Priority;                   // 0xC [O] eSectionLoadPriority; [U] indexes D_0044C208, which becomes
+                                    //     cWorldView_loadSection's priority argument
+};
+
+CHECK_OFFSET(tSectionMap, SectionID, 0x0);
+CHECK_OFFSET(tSectionMap, iWorldSectionID, 0x4);
+CHECK_OFFSET(tSectionMap, State, 0x8);
+CHECK_OFFSET(tSectionMap, Priority, 0xC);
+CHECK_SIZE(tSectionMap, 0x10);
+
 struct cSectionMan {
     tSectionManEvent m_EventPool[51];      // 0x000 [O] (On Tour 61); [R] initEventPool: 50 linked + a terminator at 0x190
     tSectionManEvent* m_pFreeEventList;    // 0x198 [P] assert m_pFreeEventList; [R] = &m_EventPool[0];

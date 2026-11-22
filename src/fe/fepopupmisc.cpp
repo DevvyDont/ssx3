@@ -6482,7 +6482,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E2D58);
 #ifdef SKIP_ASM
 struct sPopupEntry18 {
     int field_0x0;
-    int field_0x4;
+    int groupIndex;
     char pad_0x8[0x18 - 0x8];
 };
 extern sPopupEntry18 D_004C6C08[];
@@ -6505,7 +6505,7 @@ extern sPopupEntry14 D_00441630[];
 extern "C" int func_001E2D58(int category, int i)
 {
     sPopupEntry18* messageEntry = &D_004C6C08[i];
-    sPopupEntry14* groupEntry = &D_00441630[messageEntry->field_0x4];
+    sPopupEntry14* groupEntry = &D_00441630[messageEntry->groupIndex];
     return groupEntry->field_0xC == category;
 }
 #endif
@@ -6545,12 +6545,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E2DC0);
 extern "C" int func_001E2DC0(int idx)
 {
     sPopupEntry18* ta = &D_004C6C08[idx];
-    sPopupEntry14* target = &D_00441630[ta->field_0x4];
+    sPopupEntry14* target = &D_00441630[ta->groupIndex];
     int position = 0;
     int i = 0;
     while (i <= idx) {
         sPopupEntry18* messageEntry = &D_004C6C08[i];
-        sPopupEntry14* groupEntry = &D_00441630[messageEntry->field_0x4];
+        sPopupEntry14* groupEntry = &D_00441630[messageEntry->groupIndex];
         int start = *(int*)((char*)groupEntry + 4);
         int count = *(int*)((char*)groupEntry + 8);
         if (start + count - 1 < idx) {
@@ -6820,7 +6820,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E32C8);
 #ifdef SKIP_ASM
 struct sPopupEntry18_32C8 {
     int field_0x0;
-    int field_0x4;
+    int groupIndex;
     char pad_0x8[0x18 - 0x8];
 };
 extern sPopupEntry18_32C8 D_004C6C08_32C8[] __asm__("D_004C6C08");
@@ -6853,7 +6853,7 @@ extern "C" void func_001E32C8(int type)
     sPopupList_32C8* messageList = func_001E39F8_list32C8();
     for (; n < messageList->count; n++) {
         sPopupEntry18_32C8* messageEntry = &D_004C6C08_32C8[messageList->entries[j].id];
-        if (type == messageEntry->field_0x4) {
+        if (type == messageEntry->groupIndex) {
             func_001E31B8(j);
         } else {
             j++;
@@ -6973,7 +6973,7 @@ extern "C" int func_001E34D8(int i)
     sPopupEntry18* currentEntry = &D_004C6C08[i];
     int n = i + 1;
     sPopupEntry18* followingEntry = &D_004C6C08[n];
-    if (followingEntry->field_0x4 == currentEntry->field_0x4)
+    if (followingEntry->groupIndex == currentEntry->groupIndex)
         return n;
     return -1;
 }
@@ -7056,8 +7056,8 @@ extern "C" int func_001E35F0(void* self)
 INCLUDE_ASM("fe/fepopupmisc", func_001E3620);
 #ifdef SKIP_ASM
 struct sPopupEntry8 {
-    int field_0x0;
-    unsigned char field_0x4;
+    int messageId;
+    unsigned char variant;
     char pad_0x5[3];
 };
 struct sPopupTable8 {
@@ -7074,7 +7074,7 @@ extern "C" sPopupTable8* func_001E39F8_get() __asm__("func_001E39F8");
  */
 extern "C" int func_001E3620(int idx)
 {
-    return func_001E39F8_get()->entries[idx].field_0x0;
+    return func_001E39F8_get()->entries[idx].messageId;
 }
 #endif
 
@@ -7092,7 +7092,7 @@ extern "C" sPopupTable8* func_001E39F8_get() __asm__("func_001E39F8");
  */
 extern "C" unsigned char func_001E3650(int idx)
 {
-    return func_001E39F8_get()->entries[idx].field_0x4;
+    return func_001E39F8_get()->entries[idx].variant;
 }
 #endif
 
@@ -8188,7 +8188,7 @@ extern "C" int func_001E2DC0(int idx);
 
 struct sPopupEntry18_4B80 {
     int field_0x0;
-    int field_0x4;
+    int groupIndex;
     int field_0x8;
     char pad_0xC[0x18 - 0xC];
 };
@@ -8213,7 +8213,7 @@ extern "C" unsigned char func_001E4B80(cOVState_MESSAGECENTER* self, int idx)
     if (messageEntry->field_0x8 == 1) {
         int position = func_001E2DC0(idx);
         int div = 1;
-        sPopupEntry14* groupEntry = &D_00441630[messageEntry->field_0x4];
+        sPopupEntry14* groupEntry = &D_00441630[messageEntry->groupIndex];
         switch (groupEntry->field_0xC) {
         case 3:
             div = 10;
@@ -8667,7 +8667,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E5428);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sPopupEntry18_5428 {
     int field_0x0;
-    int field_0x4;
+    int groupIndex;
     char pad_0x8[0x4];
     int field_0xC;
     char pad_0x10[0x8];
@@ -8708,7 +8708,7 @@ extern "C" void func_001E5780(cOVState_ViewPopup* self, int idx);
 extern "C" void func_001E5428(cOVState_ViewPopup* self)
 {
     sPopupEntry18_5428* messageEntry = &D_004C6C08_5428[self->miMessage];
-    sPopupEntry14_5428* groupEntry = &D_00441630_5428[messageEntry->field_0x4];
+    sPopupEntry14_5428* groupEntry = &D_00441630_5428[messageEntry->groupIndex];
     if (groupEntry->type == 4) {
         void* buttonWidget = self->mpButtonSquare;
         if (buttonWidget != 0) {
@@ -8866,7 +8866,7 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_onWidgetEvent);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sPopupEntry18_5800 {
     int field_0x0;
-    int field_0x4;
+    int groupIndex;
     char pad_0x8[0x18 - 0x8];
 };
 extern sPopupEntry18_5800 D_004C6C08_5800[] __asm__("D_004C6C08");
@@ -8893,7 +8893,7 @@ extern "C" void cOVState_ViewPopup_onWidgetEvent(cOVState_ViewPopup* self, void*
     case 7: {
         int id = self->miMessage;
         sPopupEntry18_5800* popupEntry = &D_004C6C08_5800[id];
-        sEntry14_5800* typeEntry = &D_00441630_5800[popupEntry->field_0x4];
+        sEntry14_5800* typeEntry = &D_00441630_5800[popupEntry->groupIndex];
         if (typeEntry->type == 4) {
             return;
         }
@@ -8938,7 +8938,7 @@ extern "C" void func_001E58E0(cOVState_ViewPopup* self)
 {
     int id = self->miMessage;
     sPopupEntry18_5800* messageEntry = &D_004C6C08_5800[id];
-    sEntry14_5800* groupEntry = &D_00441630_5800[messageEntry->field_0x4];
+    sEntry14_5800* groupEntry = &D_00441630_5800[messageEntry->groupIndex];
     if (groupEntry->type == 4) {
         int n = func_001E34D8(id);
         if (n == -1) {
@@ -8985,7 +8985,7 @@ extern "C" int cOVState_ViewPopup_onWidgetMenu(cOVState_ViewPopup* self, int pMe
         return 0;
     case 8: {
         sPopupEntry18* popupEntry = &D_004C6C08[self->miMessage];
-        sPopupEntry14* typeEntry = &D_00441630[popupEntry->field_0x4];
+        sPopupEntry14* typeEntry = &D_00441630[popupEntry->groupIndex];
         return *(int*)typeEntry->pad_0x0 != 4;
     }
     }
@@ -9014,7 +9014,7 @@ extern "C" unsigned char func_001E5AA0(cOVState_ViewPopup* self, int idx)
     int position = func_001E2DC0(idx);
     int div = 1;
     sPopupEntry18* messageEntry = &D_004C6C08[idx];
-    sPopupEntry14* groupEntry = &D_00441630[messageEntry->field_0x4];
+    sPopupEntry14* groupEntry = &D_00441630[messageEntry->groupIndex];
     switch (groupEntry->field_0xC) {
     case 3:
         div = 10;

@@ -1454,17 +1454,6 @@ struct sNode_2EADD0
     sV4_2EADD0 pos;     // 0x30
 };
 
-struct sTrail_2EADD0
-{
-    char* rider;        // 0x00
-    int pad4[2];
-    int count;          // 0x0C
-    int cur;            // 0x10
-    int pad14[3];
-    sSlot_2EADD0 slots[3];  // 0x20
-    sV4_2EADD0 e0;      // 0xE0
-    sV4_2EADD0 f0;      // 0xF0
-};
 
 // PORT: PS2-only VU0 inline asm (a + b).
 static inline sV4_2EADD0 Add_2EADD0(const sV4_2EADD0& a, const sV4_2EADD0& b)
@@ -1521,16 +1510,16 @@ static inline sV4_2EADD0 Scale_2EADD0(const sV4_2EADD0& v, float s)
  * state 1) it stores a 140 x 36 quad around the board bone in a ring of 3 (up to 3 kept), plus two points 12
  * to each side; otherwise the count drops to 0.
  */
-extern "C" void cTrickBoostFX_update(sTrail_2EADD0* self)
+extern "C" void cTrickBoostFX_update(cTrickBoostFX* self)
 {
-    float speed = *(float*)(self->rider + 0x2EC);
+    float speed = *(float*)(((char*)self->mRider) + 0x2EC);
     if (cPowerUpFXToggles_m_TestTrickBoost != 0)
         speed = 10.0f;
     float zeroF = 0.0f;
     if (zeroF < speed)
     {
-        cPlayerLights_BoardIsAdditive(*(char**)(self->rider + 0x77C) + 0xD30, 1);
-        cRider* riderBase = (cRider*)self->rider;
+        cPlayerLights_BoardIsAdditive(*(char**)(((char*)self->mRider) + 0x77C) + 0xD30, 1);
+        cRider* riderBase = (cRider*)((char*)self->mRider);
         sV3_2EADD0 sz;
         sz.x = 2.0f;
         sz.y = 2.0f;
@@ -1543,25 +1532,25 @@ extern "C" void cTrickBoostFX_update(sTrail_2EADD0* self)
         col.w = zeroF;
         cPlayerLights_AddDirectional(fs, &col, &sz);
     }
-    if (zeroF < speed && cRider_getMotionState(self->rider) == 1)
+    if (zeroF < speed && cRider_getMotionState(((char*)self->mRider)) == 1)
     {
-        self->cur = (self->cur + 2) % 3;
-        int n = self->count + 1;
-        self->count = n < 4 ? n : 3;
-        cRider* riderPtr = (cRider*)self->rider;
+        self->mCurrentBlurBuffer = (self->mCurrentBlurBuffer + 2) % 3;
+        int n = self->mNumActiveBlurBuffers + 1;
+        self->mNumActiveBlurBuffers = n < 4 ? n : 3;
+        cRider* riderPtr = (cRider*)((char*)self->mRider);
         sV4_2EADD0 pos = ((sNode_2EADD0*)((char*)riderPtr->mAnimModel->unk_030 + (riderPtr->mBoneBoardChild << 6)))->pos;
         sV4_2EADD0 fwd = ((sNode_2EADD0*)((char*)riderPtr->mAnimModel->unk_030 + (riderPtr->mBoneBoardChild << 6)))->fwd;
         sV4_2EADD0 side = ((sNode_2EADD0*)((char*)riderPtr->mAnimModel->unk_030 + (riderPtr->mBoneBoardChild << 6)))->side;
-        self->e0 = Sub_2EADD0(pos, Scale_2EADD0(side, 12.0f));
-        self->f0 = Add_2EADD0(pos, Scale_2EADD0(side, 12.0f));
-        self->slots[self->cur].v[0] = Sub_2EADD0(Add_2EADD0(pos, Scale_2EADD0(fwd, 70.0f)), Scale_2EADD0(side, 18.0f));
-        self->slots[self->cur].v[1] = Add_2EADD0(Add_2EADD0(pos, Scale_2EADD0(fwd, 70.0f)), Scale_2EADD0(side, 18.0f));
-        self->slots[self->cur].v[2] = Add_2EADD0(Sub_2EADD0(pos, Scale_2EADD0(fwd, 70.0f)), Scale_2EADD0(side, 18.0f));
-        self->slots[self->cur].v[3] = Sub_2EADD0(Sub_2EADD0(pos, Scale_2EADD0(fwd, 70.0f)), Scale_2EADD0(side, 18.0f));
+        (*(sV4_2EADD0*)&self->mConnectVertLeft) = Sub_2EADD0(pos, Scale_2EADD0(side, 12.0f));
+        (*(sV4_2EADD0*)&self->mConnectVertRight) = Add_2EADD0(pos, Scale_2EADD0(side, 12.0f));
+        ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[self->mCurrentBlurBuffer].v[0] = Sub_2EADD0(Add_2EADD0(pos, Scale_2EADD0(fwd, 70.0f)), Scale_2EADD0(side, 18.0f));
+        ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[self->mCurrentBlurBuffer].v[1] = Add_2EADD0(Add_2EADD0(pos, Scale_2EADD0(fwd, 70.0f)), Scale_2EADD0(side, 18.0f));
+        ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[self->mCurrentBlurBuffer].v[2] = Add_2EADD0(Sub_2EADD0(pos, Scale_2EADD0(fwd, 70.0f)), Scale_2EADD0(side, 18.0f));
+        ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[self->mCurrentBlurBuffer].v[3] = Sub_2EADD0(Sub_2EADD0(pos, Scale_2EADD0(fwd, 70.0f)), Scale_2EADD0(side, 18.0f));
     }
     else
     {
-        self->count = 0;
+        self->mNumActiveBlurBuffers = 0;
     }
 }
 #endif
@@ -1629,9 +1618,9 @@ static inline void addVtx_B198(tBxVertex* v, const sTrailCol_B198& c, float s, f
  * Needs at least 2 quads. Uses effect texture 62 and its own draw state; each quad edge pair forms a strip
  * whose v coordinate runs from 1 (newest) to 0, drawn through the graphics manager's virtual slot 71.
  */
-extern "C" void cTrickBoostFX_render(sTrail_2EADD0* self)
+extern "C" void cTrickBoostFX_render(cTrickBoostFX* self)
 {
-    if (self->count < 2) {
+    if (self->mNumActiveBlurBuffers < 2) {
         return;
     }
     push_B198((sRctx_B198*)GrMan);
@@ -1658,23 +1647,23 @@ extern "C" void cTrickBoostFX_render(sTrail_2EADD0* self)
     col.r = 1.0f;
     col.g = 1.0f;
     col.b = 1.0f;
-    addVtx_B198(&verts[1][counts[1]++], col, 0.5f, 0.0f, self->f0);
-    addVtx_B198(&verts[3][counts[3]++], col, 0.5f, 0.0f, self->e0);
-    for (int i = 0; i < self->count; i++) {
-        int slotIdx = (self->cur + i) % 3;
+    addVtx_B198(&verts[1][counts[1]++], col, 0.5f, 0.0f, (*(sV4_2EADD0*)&self->mConnectVertRight));
+    addVtx_B198(&verts[3][counts[3]++], col, 0.5f, 0.0f, (*(sV4_2EADD0*)&self->mConnectVertLeft));
+    for (int i = 0; i < self->mNumActiveBlurBuffers; i++) {
+        int slotIdx = (self->mCurrentBlurBuffer + i) % 3;
         col.a = 0.5f;
         col.r = 0.5f;
         col.g = 0.5f;
         col.b = 0.5f;
-        float texV = 1.0f - (float)i / (float)(self->count - 1);
-        addVtx_B198(&verts[0][counts[0]++], col, 0.0f, texV, self->slots[slotIdx].v[0]);
-        addVtx_B198(&verts[0][counts[0]++], col, 1.0f, texV, self->slots[slotIdx].v[1]);
-        addVtx_B198(&verts[1][counts[1]++], col, 1.0f, texV, self->slots[slotIdx].v[1]);
-        addVtx_B198(&verts[1][counts[1]++], col, 0.0f, texV, self->slots[slotIdx].v[2]);
-        addVtx_B198(&verts[2][counts[2]++], col, 0.0f, texV, self->slots[slotIdx].v[2]);
-        addVtx_B198(&verts[2][counts[2]++], col, 1.0f, texV, self->slots[slotIdx].v[3]);
-        addVtx_B198(&verts[3][counts[3]++], col, 1.0f, texV, self->slots[slotIdx].v[3]);
-        addVtx_B198(&verts[3][counts[3]++], col, 0.0f, texV, self->slots[slotIdx].v[0]);
+        float texV = 1.0f - (float)i / (float)(self->mNumActiveBlurBuffers - 1);
+        addVtx_B198(&verts[0][counts[0]++], col, 0.0f, texV, ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[slotIdx].v[0]);
+        addVtx_B198(&verts[0][counts[0]++], col, 1.0f, texV, ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[slotIdx].v[1]);
+        addVtx_B198(&verts[1][counts[1]++], col, 1.0f, texV, ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[slotIdx].v[1]);
+        addVtx_B198(&verts[1][counts[1]++], col, 0.0f, texV, ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[slotIdx].v[2]);
+        addVtx_B198(&verts[2][counts[2]++], col, 0.0f, texV, ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[slotIdx].v[2]);
+        addVtx_B198(&verts[2][counts[2]++], col, 1.0f, texV, ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[slotIdx].v[3]);
+        addVtx_B198(&verts[3][counts[3]++], col, 1.0f, texV, ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[slotIdx].v[3]);
+        addVtx_B198(&verts[3][counts[3]++], col, 0.0f, texV, ((sSlot_2EADD0*)&self->mPositionBuffer[0][0])[slotIdx].v[0]);
     }
     for (int k = 0; k < 4; k++) {
         cPS2GraphicsMan* ctx = GrMan;

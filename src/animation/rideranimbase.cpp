@@ -463,10 +463,10 @@ struct sSeqNode_1F00 {
     sSeqTrack_1F00 tracks[3]; // 0x00
     char pad54[0xC];
     sRabQuad32 xform;         // 0x60
-    int m80;                  // 0x80
-    int m84;                  // 0x84
-    long m88;                 // 0x88 PORT: 64-bit long (sd)
-    float m90;                // 0x90
+    int IsFlipped;                  // 0x80
+    int Priority;                  // 0x84
+    long Mask;                 // 0x88 PORT: 64-bit long (sd)
+    float TimeScale;                // 0x90
     float weight;             // 0x94
     float targetWeight;       // 0x98
     char pad9C[0x8];
@@ -533,13 +533,13 @@ extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* vself, void* vseq, int ani
             cAnimSequence_addEndTrigger(node, 0x3F);
     }
     sSeqNode_1F00* nd = (sSeqNode_1F00*)node;
-    nd->m80 = self->IsFlipped;
+    nd->IsFlipped = self->IsFlipped;
     nd->xform = *(sRabQuad32*)&self->OrientationOffset;
-    nd->m88 = ((long)self->GraftMask);
-    nd->m90 = self->FrameRateFactor;
+    nd->Mask = ((long)self->GraftMask);
+    nd->TimeScale = self->FrameRateFactor;
     nd->weight = nd->targetWeight = 1.0f;
     nd->blendIn = ((float*)cAIAnimEventMap_getAnimPlayAttr(anim))[6];
-    nd->m84 = priority;
+    nd->Priority = priority;
     // PORT: (int) address arithmetic for the clip header (index-first addu).
     int n = *(unsigned short*)((char*)(((unsigned int)animid >> 8) * 0x14 + (int)cAnimDataBase_TheAnimDataBase->DataSources[(unsigned int)animid & 0xFF]->Anims) + 0x12);
     for (int i = 0; i < n; i++)
@@ -568,8 +568,8 @@ extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* vself, void* vseq, int ani
             cAnimSequence_fadeOutAndExpire(other, blend);
             int type = cAIAnimEventMap_getAnimPlayAttr(anim)[1];
             bool ok = other->tracks[0].anim == nd->tracks[0].anim || (type != 0 && type != 2 && type != 1);
-            if (ok && other->tracks[0].id == nd->tracks[0].id && other->m88 == nd->m88
-                && other->m80 == nd->m80)
+            if (ok && other->tracks[0].id == nd->tracks[0].id && other->Mask == nd->Mask
+                && other->IsFlipped == nd->IsFlipped)
             {
                 if (rabXformEq_1F00(*(tPose*)&other->xform, *(tPose*)&nd->xform))
                     match = other;
@@ -1403,11 +1403,11 @@ struct sRab_003135B0 {
     int field_0x0;
     sTrack_003135B0 tracks[3];  // 0x4
     char pad58[0x90 - 0x58];
-    float scale;                // 0x90
+    float TimeScale;                // 0x90
     char pad94[0xB8 - 0x94];
     ulong triggered;            // 0xB8
-    int fC0;                    // 0xC0
-    int fC4;                    // 0xC4
+    int EndEvent;                    // 0xC0
+    int CheckTriggersAtCurrentFrame;                    // 0xC4
 };
 
 // PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
@@ -1445,13 +1445,13 @@ extern "C" int cAnimSequence_updateSubAnim(sRab_003135B0* self, int i, float dt)
 {
     float startTime = self->tracks[i].time;
     float len = self->tracks[i].length;
-    float newTime = startTime + self->tracks[i].speed * self->scale * dt;
+    float newTime = startTime + self->tracks[i].speed * self->TimeScale * dt;
     if (i == 0) {
         self->triggered = 0;
-        self->fC0 = 0;
-        if (self->fC4 != 0) {
+        self->EndEvent = 0;
+        if (self->CheckTriggersAtCurrentFrame != 0) {
             cAnimSequence_checkTriggersAtTime((cAnimSequence*)self, startTime);
-            self->fC4 = 0;
+            self->CheckTriggersAtCurrentFrame = 0;
         }
     }
     if (self->tracks[i].loop == 0) {

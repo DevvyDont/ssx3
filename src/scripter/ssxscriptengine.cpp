@@ -146,7 +146,7 @@ struct sSseEngine8590 {
     char snd[0x1C];                 // 0x500
     char anims[0x544 - 0x51C];      // 0x51C
     void* buf;                      // 0x544
-    int field_0x548;                // 0x548
+    int mpSetupInfoUnused;                // 0x548
     tNISList* objsA;             // 0x54C
     char pad_0x550[0x624 - 0x550];
     tNISList* objsB;             // 0x624
@@ -204,7 +204,7 @@ extern "C" void cSSXScriptEngine_Purge(sSseEngine8590* self)
     cSSXScriptEngine_ClearNISPlayListState((cSSXScriptEngine*)self);
     self->objsA = 0;
     self->buf = 0;
-    self->field_0x548 = 0;
+    self->mpSetupInfoUnused = 0;
     self->objsB = 0;
 }
 #endif
@@ -1779,14 +1779,14 @@ struct sLvlObj_279F18 {
 struct sLvl_279F18 {
     char pad0[0x28];
     void* riders[6];             // 0x28
-    sLvlObj_279F18* a40[2];      // 0x40
-    sLvlObj_279F18* a48[5];      // 0x48
-    sLvlObj_279F18* a5C[5];      // 0x5C
+    sLvlObj_279F18* Players[2];      // 0x40
+    sLvlObj_279F18* Computers[5];      // 0x48
+    sLvlObj_279F18* Actors[5];      // 0x5C
     char pad70[8];
-    int n78;                     // 0x78
-    int n7C;                     // 0x7C
-    int n80;                     // 0x80
-    int n84;                     // 0x84
+    int NumberOfRidersAllocated;                     // 0x78
+    int NumberOfPlayersAllocated;                     // 0x7C
+    int NumberOfComputersAllocated;                     // 0x80
+    int NumberOfActorsAllocated;                     // 0x84
 };
 
 static inline sLvl_279F18* Lvl_279F18()
@@ -1829,27 +1829,27 @@ extern "C" void* cSSXScriptEngine_GetSubjectRider(cSSXScriptEngine* self, int sl
     case 3: case 4: {
         sLvl_279F18* lvl = Lvl_279F18();
         int j = slot - 3;
-        if (j >= lvl->n7C) break;
-        return ObjOf_279F18(lvl->a40[j]);
+        if (j >= lvl->NumberOfPlayersAllocated) break;
+        return ObjOf_279F18(lvl->Players[j]);
     }
     case 5: case 6: case 7: case 8: case 9: {
         sLvl_279F18* lvl = Lvl_279F18();
         int j = slot - 5;
-        if (j >= lvl->n80 + lvl->n84) break;
-        if (j < lvl->n80) return ObjOf_279F18(lvl->a48[j]);
-        return ObjOf_279F18(lvl->a5C[j - lvl->n80]);
+        if (j >= lvl->NumberOfComputersAllocated + lvl->NumberOfActorsAllocated) break;
+        if (j < lvl->NumberOfComputersAllocated) return ObjOf_279F18(lvl->Computers[j]);
+        return ObjOf_279F18(lvl->Actors[j - lvl->NumberOfComputersAllocated]);
     }
     case 10: case 11: case 12: case 13: case 14: {
         sLvl_279F18* lvl = Lvl_279F18();
         int j = slot - 10;
-        if (j >= lvl->n84 + lvl->n80) break;
-        if (j < lvl->n84) return ObjOf_279F18(lvl->a5C[j]);
-        return ObjOf_279F18(lvl->a48[j - lvl->n84]);
+        if (j >= lvl->NumberOfActorsAllocated + lvl->NumberOfComputersAllocated) break;
+        if (j < lvl->NumberOfActorsAllocated) return ObjOf_279F18(lvl->Actors[j]);
+        return ObjOf_279F18(lvl->Computers[j - lvl->NumberOfActorsAllocated]);
     }
     case 15: case 16: case 17: case 18: case 19: case 20: {
         sLvl_279F18* lvl = Lvl_279F18();
         int j = slot - 15;
-        if (j >= lvl->n78) break;
+        if (j >= lvl->NumberOfRidersAllocated) break;
         return lvl->riders[j];
     }
     }
@@ -5904,9 +5904,9 @@ struct sSeEngine07B0 {
     sSePair07B0 pairs[(0xBC - 0x1C) / 8];   // 0x1C
     tScriptObjEventSound sounds[4];     // 0xBC
     int pairCount;              // 0xEC
-    int field_0xF0;             // 0xF0
-    int field_0xF4;             // 0xF4
-    int field_0xF8;             // 0xF8
+    int mHasTriggeredSpeechEvents;             // 0xF0
+    int mCheckForStopOnSpeechEnd;             // 0xF4
+    int mpSoundBankInfo;             // 0xF8
 };
 
 /**
@@ -5927,7 +5927,7 @@ extern "C" void cScriptObjEvent_OnEndObjectUse(sSeEngine07B0* self)
     for (int i = 0; i < self->pairCount; i++) {
         cWScriptMan_runFunc(cWScriptMan_TheWScriptMan, self->pairs[i].b, self->pairs[i].a);
     }
-    if (self->field_0xF0 != 0) {
+    if (self->mHasTriggeredSpeechEvents != 0) {
         func_002A1BD0(cAudioInterface_bxAudio());
     }
     for (int i = 0; i < 4; i++) {
@@ -5945,9 +5945,9 @@ extern "C" void cScriptObjEvent_OnEndObjectUse(sSeEngine07B0* self)
         cRenderStateMan_m_indoor = 0;
     }
     self->pairCount = 0;
-    self->field_0xF0 = 0;
-    self->field_0xF4 = 0;
-    self->field_0xF8 = 0;
+    self->mHasTriggeredSpeechEvents = 0;
+    self->mCheckForStopOnSpeechEnd = 0;
+    self->mpSoundBankInfo = 0;
 }
 #endif
 
@@ -6074,8 +6074,8 @@ struct sSeEngine_08E8 {
     sSePair_08E8 pairs[(0xBC - 0x1C) / 8];   // 0x1C
     sSeSound_08E8 sounds[4];    // 0xBC
     int pairCount;              // 0xEC
-    int field_0xF0;             // 0xF0
-    int field_0xF4;             // 0xF4
+    int mHasTriggeredSpeechEvents;             // 0xF0
+    int mCheckForStopOnSpeechEnd;             // 0xF4
 };
 
 #define MIN_08E8(a, b) ((a) < (b) ? (a) : (b))
@@ -6157,10 +6157,10 @@ extern "C" void cScriptObjEvent_OnInSeqKeyEvent(sSeEngine_08E8* self, cScriptPla
         int id = audioEvent->id;
         if (id != 17) {
             if (id == 0x10) {
-                self->field_0xF4 = 1;
+                self->mCheckForStopOnSpeechEnd = 1;
             } else {
                 func_002A19D8(snd, id);
-                self->field_0xF0 = 1;
+                self->mHasTriggeredSpeechEvents = 1;
             }
         }
     }

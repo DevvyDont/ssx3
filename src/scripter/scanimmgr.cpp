@@ -221,18 +221,11 @@ extern "C" void cScriptAnimBankManager_UnlinkBanksAll(cScriptAnimBankManager* se
 //100%
 INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_GetBankInfo);
 #ifdef SKIP_ASM
-struct sAnimEntry {
-    int id;
-    int unk4;
-    void* data;
-    int unkC;
-    int unk10;
-};
 
 struct sAnimList {
     int unk0;
     int count;
-    sAnimEntry* entries;
+    tScriptAnimBankInfo* entries;
 };
 
 /**
@@ -247,7 +240,7 @@ struct sAnimList {
 extern "C" void* cScriptAnimBankManager_GetBankInfo(sAnimList* self, int id)
 {
     for (int i = 0; i < self->count; i++) {
-        if (self->entries[i].data != 0 && self->entries[i].id == id) {
+        if (((void*)self->entries[i].pData) != 0 && self->entries[i].userID == id) {
             return &self->entries[i];
         }
     }
@@ -271,24 +264,24 @@ void cMemMan_free(void*);
  *
  * @param bankInfo  the bank record
  */
-extern "C" void cScriptAnimBankManager_UnlinkBank1(cScriptAnimBankManager* self, sAnimEntry* bankInfo)
+extern "C" void cScriptAnimBankManager_UnlinkBank1(cScriptAnimBankManager* self, tScriptAnimBankInfo* bankInfo)
 {
     cAnimDataBase* tbl = cAnimDataBase_TheAnimDataBase;
-    void** slot = &((void**)tbl)[*(unsigned char*)&bankInfo->unk4];
+    void** slot = &((void**)tbl)[*(unsigned char*)&bankInfo->bankNum];
     void* obj = *slot;
     *slot = 0;
     cAnimDataBase_purgeChanCache((void**)tbl);
     if (obj != 0) {
         cAdfDataSource__cAdfDataSource(obj, 3);
     }
-    if (bankInfo->unkC != 0 && bankInfo->unk10 != 0) {
-        cMemMan_free((void*)bankInfo->unk10);
+    if (bankInfo->numAnims != 0 && ((int)bankInfo->pTableAnimID) != 0) {
+        cMemMan_free((void*)((int)bankInfo->pTableAnimID));
     }
     //PSTART
-    bankInfo->id = -1;
-    bankInfo->unkC = 0;
-    bankInfo->data = 0;
-    bankInfo->unk10 = 0;
+    bankInfo->userID = -1;
+    bankInfo->numAnims = 0;
+    (*(void**)&bankInfo->pData) = 0;
+    (*(int*)&bankInfo->pTableAnimID) = 0;
     //PEND
 }
 #endif
@@ -301,10 +294,10 @@ INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_GetEmptyBankInfo);
  *
  * @return the record, or 0 when all are in use
  */
-extern "C" sAnimEntry* cScriptAnimBankManager_GetEmptyBankInfo(sAnimList* self)
+extern "C" tScriptAnimBankInfo* cScriptAnimBankManager_GetEmptyBankInfo(sAnimList* self)
 {
     for (int i = 0; i < self->count; i++) {
-        if (self->entries[i].data == 0) {
+        if (((void*)self->entries[i].pData) == 0) {
             return &self->entries[i];
         }
     }

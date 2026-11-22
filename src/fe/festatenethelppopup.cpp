@@ -269,7 +269,7 @@ struct sNetHelp_1DA238 {
     char pad4C[8];
     int title;                  // 0x54
     int c[3];                   // 0x58
-    int f64;                    // 0x64
+    int muiBottomText;                    // 0x64
     int a[7];                   // 0x68
     int b[7];                   // 0x84
     char padA0[8];
@@ -309,8 +309,8 @@ extern "C" int cFEStateNetHelpPopup_onGainTransition(sNetHelp_1DA238* self, int 
         } else {
             cUIText_setAsciiString((cUIText*)self->wAC, D_004A1408);
         }
-        if (self->f64) {
-            cUIText_setUnicodeStringByID((cUIText*)self->wB0, self->f64);
+        if (self->muiBottomText) {
+            cUIText_setUnicodeStringByID((cUIText*)self->wB0, self->muiBottomText);
         } else {
             cUIText_setAsciiString((cUIText*)self->wB0, D_004A1408);
         }
@@ -364,9 +364,9 @@ struct sNetHelpPopup_DA4A8 {
     char pad_0x0[0x48];
     int state;      // 0x48
     char pad_0x4C[0x8];
-    int f54;        // 0x54
+    int muiScreenName;        // 0x54
     int c[3];       // 0x58
-    int f64;        // 0x64
+    int muiBottomText;        // 0x64
     int a[7];       // 0x68
     int b[7];       // 0x84
 };
@@ -383,11 +383,11 @@ extern "C" void cFEStateNetHelpPopup_clear(cFEStateNetHelpPopup* self)
     sNetHelpPopup_DA4A8* helpPopup = (sNetHelpPopup_DA4A8*)self;
     int i;
     helpPopup->state = 0;
-    helpPopup->f54 = 0;
+    helpPopup->muiScreenName = 0;
     for (i = 2; i >= 0; i--) {
         helpPopup->c[i] = 0;
     }
-    helpPopup->f64 = 0;
+    helpPopup->muiBottomText = 0;
     for (i = 0; i < 7; i++) {
         helpPopup->a[i] = 0;
         helpPopup->b[i] = -1;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintoption.h"
 #include "ai/ubergrindanim.h"
 #include "camera/camera.h"
 #include "main/gameviewman.h"
@@ -138,31 +139,31 @@ struct sVEntry128818 { short delta; short index; void (*fn)(void*); };
 
 struct sAiObj128818
 {
-    int f0;             // 0x00
+    int CurrentAIState;             // 0x00
     char pad4[0xC];
-    int f10;            // 0x10
-    int f14;            // 0x14
-    int f18;            // 0x18
-    int f1C;            // 0x1C
-    int a20[2];         // 0x20
-    int a28[6];         // 0x28
+    int IsAIReadyToRace;            // 0x10
+    int ComputerRidersActive;            // 0x14
+    int EndOfRaceTimer;            // 0x18
+    int CountdownTicksLeft;            // 0x1C
+    int PodiumActorList[2];         // 0x20
+    int Riders[6];         // 0x28
     char pad40[0x8];
-    int a48[5];         // 0x48
+    int Computers[5];         // 0x48
     char pad5C[0x14];
-    int a70[1];         // 0x70
-    int f74;            // 0x74
-    int f78;            // 0x78
-    int f7C;            // 0x7C
-    int f80;            // 0x80
-    int f84;            // 0x84
-    int f88;            // 0x88
-    int f8C;            // 0x8C
-    int f90;            // 0x90
-    int f94;            // 0x94
-    int f98;            // 0x98
+    int MissionRiders[1];         // 0x70
+    int RaceRankType;            // 0x74
+    int NumberOfRidersAllocated;            // 0x78
+    int NumberOfPlayersAllocated;            // 0x7C
+    int NumberOfComputersAllocated;            // 0x80
+    int NumberOfActorsAllocated;            // 0x84
+    int NumberOfMissionRidersLoaded;            // 0x88
+    int ComputerActorsActive;            // 0x8C
+    int MissionRidersActive;            // 0x90
+    int NumberOfActorsRequired;            // 0x94
+    int CurrentAIStateHandler;            // 0x98
     char pad9C[0x8];
-    void* fA4;          // 0xA4
-    void* fA8;          // 0xA8
+    void* FocusMan;          // 0xA4
+    void* DangerMan;          // 0xA8
     char padAC[0x20];
     sVEntry128818* vt;  // 0xCC
 };
@@ -179,27 +180,27 @@ struct sAiObj128818
 extern "C" void cAI_init(sAiObj128818* self)
 {
     int i;
-    cFocusMan_reset(self->fA4);
-    cDangerMan_Reset(self->fA8);
-    self->f10 = 0;
-    self->f14 = 0;
-    self->f90 = 0;
-    self->f78 = 0;
-    self->f7C = 0;
-    self->f80 = 0;
-    self->f84 = 0;
-    self->f88 = 0;
-    self->f1C = 0;
-    self->f98 = 0;
-    self->f0 = 0;
+    cFocusMan_reset(self->FocusMan);
+    cDangerMan_Reset(self->DangerMan);
+    self->IsAIReadyToRace = 0;
+    self->ComputerRidersActive = 0;
+    self->MissionRidersActive = 0;
+    self->NumberOfRidersAllocated = 0;
+    self->NumberOfPlayersAllocated = 0;
+    self->NumberOfComputersAllocated = 0;
+    self->NumberOfActorsAllocated = 0;
+    self->NumberOfMissionRidersLoaded = 0;
+    self->CountdownTicksLeft = 0;
+    self->CurrentAIStateHandler = 0;
+    self->CurrentAIState = 0;
     cAI_setAIState(self, 1);
-    for (i = 0; i < 6; i++) self->a28[i] = 0;
-    for (i = 0; i < 1; i++) self->a70[i] = 0;
-    for (i = 0; i < 5; i++) self->a48[i] = 0;
+    for (i = 0; i < 6; i++) self->Riders[i] = 0;
+    for (i = 0; i < 1; i++) self->MissionRiders[i] = 0;
+    for (i = 0; i < 5; i++) self->Computers[i] = 0;
     cAI_loadAnims_self(self);
     self->vt[6].fn(vthis(self, self->vt[6]));
     cAI_commonInit((cAI*)self, 1);
-    for (i = 0; i < 2; i++) self->a20[i] = 0;
+    for (i = 0; i < 2; i++) self->PodiumActorList[i] = 0;
 }
 #endif
 
@@ -531,20 +532,20 @@ struct sHolder_91E0 {
 
 struct sAI_91E0 {
     char pad0[0x14];
-    int f14;
+    int ComputerRidersActive;
     char pad18[0x28 - 0x18];
-    char* list28[6];
-    sHolder_91E0* a40[2];
-    sHolder_91E0* a48[5];
-    sHolder_91E0* a5C[5];
-    sHolder_91E0* h70;
+    char* Riders[6];
+    sHolder_91E0* Players[2];
+    sHolder_91E0* Computers[5];
+    sHolder_91E0* Actors[5];
+    sHolder_91E0* MissionRiders;
     char pad74[0x78 - 0x74];
-    int n78;
-    int n7C;
-    int n80;
-    int n84;
-    int f88;
-    int f8C;
+    int NumberOfRidersAllocated;
+    int NumberOfPlayersAllocated;
+    int NumberOfComputersAllocated;
+    int NumberOfActorsAllocated;
+    int NumberOfMissionRidersLoaded;
+    int ComputerActorsActive;
 };
 
 /**
@@ -568,35 +569,35 @@ extern "C" void cAI_render(sAI_91E0* self)
     int n;
     int i;
 
-    for (n = 0; n < self->n78; n++) {
-        cRider* curRider = (cRider*)self->list28[n];
+    for (n = 0; n < self->NumberOfRidersAllocated; n++) {
+        cRider* curRider = (cRider*)self->Riders[n];
         if (curRider->mRenderFlag == 0 && curRider->mSafeRenderTick == -1) {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)ps2GraphicsMan->mVtbl;
             int frameTick = vt[114].fn(vthis(ps2GraphicsMan, vt[114]));
-            *(int*)(self->list28[n] + 0x888) = frameTick + 4;
+            *(int*)(self->Riders[n] + 0x888) = frameTick + 4;
         }
     }
     n = 0;
-    if (self->f88 > 0 && self->n7C > 0) {
+    if (self->NumberOfMissionRidersLoaded > 0 && self->NumberOfPlayersAllocated > 0) {
         cPlaybackMan* x = SSXApp->Game->PlaybackMan;
         if (((char*)x) != 0 && x->State == 0) {
-            riders[n++] = self->a40[0] ? self->a40[0]->rider : 0;
+            riders[n++] = self->Players[0] ? self->Players[0]->rider : 0;
         } else {
-            riders[n++] = self->h70 ? self->h70->rider : 0;
+            riders[n++] = self->MissionRiders ? self->MissionRiders->rider : 0;
         }
     } else {
-        for (i = 0; i < self->n7C; i++) {
-            riders[n++] = self->a40[i] ? self->a40[i]->rider : 0;
+        for (i = 0; i < self->NumberOfPlayersAllocated; i++) {
+            riders[n++] = self->Players[i] ? self->Players[i]->rider : 0;
         }
-        if (self->f14 != 0) {
-            for (i = 0; i < self->n80; i++) {
-                riders[n++] = self->a48[i] ? self->a48[i]->rider : 0;
+        if (self->ComputerRidersActive != 0) {
+            for (i = 0; i < self->NumberOfComputersAllocated; i++) {
+                riders[n++] = self->Computers[i] ? self->Computers[i]->rider : 0;
             }
         }
-        if (self->f8C != 0) {
-            for (i = 0; i < self->n84; i++) {
-                riders[n++] = self->a5C[i] ? self->a5C[i]->rider : 0;
+        if (self->ComputerActorsActive != 0) {
+            for (i = 0; i < self->NumberOfActorsAllocated; i++) {
+                riders[n++] = self->Actors[i] ? self->Actors[i]->rider : 0;
             }
         }
     }
@@ -701,11 +702,11 @@ extern "C" void cRider_initAlways(void* rider);
 struct sAiObj1297C8
 {
     char pad0[0x8];
-    int f8;             // 0x08
-    int fC;             // 0x0C
+    int AITick;             // 0x08
+    int EventTimerTick;             // 0x0C
     char pad10[0x8];
-    int f18;            // 0x18
-    int f1C;            // 0x1C
+    int EndOfRaceTimer;            // 0x18
+    int CountdownTicksLeft;            // 0x1C
     char pad20[0x8];
     char* mRiders[18];  // 0x28
     char* mList[2];     // 0x70
@@ -730,13 +731,13 @@ extern "C" void* cAI_commonInit(cAI* aiManager, int flag)
 {
     sAiObj1297C8* self = (sAiObj1297C8*)aiManager;
     cAI_InitGroupAI(self);
-    self->f8 = 0;
+    self->AITick = 0;
     if (flag != 0)
     {
-        self->fC = 0;
+        self->EventTimerTick = 0;
     }
-    self->f18 = -1;
-    self->f1C = 0;
+    self->EndOfRaceTimer = -1;
+    self->CountdownTicksLeft = 0;
     for (int i = 0; i < self->mCount; i++)
     {
         char* obj = self->mRiders[i] + 0x6C0;
@@ -1068,7 +1069,7 @@ public:
 struct sAiObjCR
 {
     char pad0[0x10];
-    int f10;
+    int IsAIReadyToRace;
     char pad14[0x14];
     cRider* mRiders[8];
     char* mObjs[12];
@@ -1120,7 +1121,7 @@ extern "C" void cAI_initComputerRiders(cAI* aiManager)
     ((cBEIfaceCR*)rm)->update();
     ((cBEIfaceCR*)iface)->update();
     self->mCount = idx;
-    self->f10 = 1;
+    self->IsAIReadyToRace = 1;
 }
 #endif
 
@@ -1782,7 +1783,7 @@ INCLUDE_ASM("ai/ai", cAI_prepareToPurgeComputerRiders);
 struct sAiObj12AB20
 {
     char pad0[0x14];
-    int m14;
+    int ComputerRidersActive;
     char pad18[0x30];
     char* mRiders[14];
     int mCount;
@@ -1800,7 +1801,7 @@ struct sAiObj12AB20
  */
 extern "C" void cAI_prepareToPurgeComputerRiders(sAiObj12AB20* self)
 {
-    self->m14 = 0;
+    self->ComputerRidersActive = 0;
     for (int i = 0; i < self->mCount; i++)
     {
         cRider* computerRider = (cRider*)(*(char**)(self->mRiders[i] + 0x18));
@@ -1859,8 +1860,8 @@ struct sAiObj12AC48
     char pad0[0x5C];
     char* mRiders[10];
     int mCount;
-    int m88;
-    int m8C;
+    int NumberOfMissionRidersLoaded;
+    int ComputerActorsActive;
 };
 
 
@@ -1874,7 +1875,7 @@ struct sAiObj12AC48
  */
 extern "C" void cAI_prepareToPurgeComputerActors(sAiObj12AC48* self)
 {
-    self->m8C = 0;
+    self->ComputerActorsActive = 0;
     for (int i = 0; i < self->mCount; i++)
     {
         cRider* actorRider = (cRider*)(*(char**)(self->mRiders[i] + 0x18));
@@ -1981,7 +1982,7 @@ struct sAiMissionVEntry { short delta; short index; void (*fn)(void*, int); };
 struct sAiMission
 {
     char pad0[0x14];
-    int m14;
+    int ComputerRidersActive;
     char pad18[0x30];
     void* mListA[5];
     void* mListB[5];
@@ -1991,8 +1992,8 @@ struct sAiMission
     int mCountA;
     int mCountB;
     int mCountC;
-    int m8C;
-    int m90;
+    int ComputerActorsActive;
+    int MissionRidersActive;
 };
 
 /**
@@ -2020,7 +2021,7 @@ extern "C" void cAI_purgeComputerRiders(cAI* aiManager)
     }
     self->mTotal -= self->mCountA;
     self->mCountA = 0;
-    self->m14 = 0;
+    self->ComputerRidersActive = 0;
 }
 #endif
 
@@ -2052,7 +2053,7 @@ extern "C" void cAI_purgeComputerActors(cAI* aiManager)
     }
     self->mTotal -= self->mCountB;
     self->mCountB = 0;
-    self->m8C = 0;
+    self->ComputerActorsActive = 0;
 }
 #endif
 
@@ -2084,7 +2085,7 @@ extern "C" void cAI_purgeMissionRiders(cAI* aiManager)
     }
     self->mTotal -= self->mCountC;
     self->mCountC = 0;
-    self->m90 = 0;
+    self->MissionRidersActive = 0;
 }
 #endif
 
@@ -2151,7 +2152,7 @@ struct sAiObj12B090
     char pad0[0x28];
     char* mRiders[6];
     void* mList[13];
-    int m74;
+    int RaceRankType;
     int mCount;
     int mCount2;
 };
@@ -2189,7 +2190,7 @@ extern "C" void cAI_shutdown(cAI* aiManager)
     self->mCount2 = 0;
     self->mCount = 0;
     cAI_purgeAnims((cAI*)self);
-    self->m74 = 0;
+    self->RaceRankType = 0;
 }
 #endif
 
@@ -2367,16 +2368,10 @@ extern "C" void cRiderMetrix_setInitialPointsTotal(void* self, int a1);
 extern "C" int cBERules_getPlayerStartDelaySecs(int i);
 
 
-struct sOptEntry_12B498
-{
-    unsigned int f0;
-    int x;
-    int y;
-};
 
 struct sOptView_12B498
 {
-    sOptEntry_12B498 e[2];
+    tBEBraggingRights e[2];
     int f18;
 };
 
@@ -2408,19 +2403,19 @@ extern "C" void cAI_applyPlayerRulesCustom(cAI* self, cPlayer* obj, int i)
     else if (OptBit_12B498(&cBERules_mRules_12B498, 0))
         boostMode = 0;
     else
-        if ((cBERules_mRules_12B498.e[i].f0 >> 5) & 1) boostMode = 2;
+        if ((cBERules_mRules_12B498.e[i].Flags >> 5) & 1) boostMode = 2;
     cRider* playerRider = obj->mRider;
     playerRider->mBoostMode = boostMode;
     cRider_initBoost(playerRider);
-    if ((cBERules_mRules_12B498.e[i].f0 >> 3) & 1)
+    if ((cBERules_mRules_12B498.e[i].Flags >> 3) & 1)
         obj->mRider->mBoostMeterStart = 1.0f;
     if (OptBit_12B498(&cBERules_mRules_12B498, 4))
         obj->mRider->mBoostSourceMask = 2;
-    if ((cBERules_mRules_12B498.e[i].f0 >> 4) & 1)
+    if ((cBERules_mRules_12B498.e[i].Flags >> 4) & 1)
         cRider_setUbersAllowed(obj->mRider, 0);
     else if (OptBit_12B498(&cBERules_mRules_12B498, 1))
         cRider_setUbersAllowed(obj->mRider, 1);
-    if (cBERules_mRules_12B498.e[i].f0 & 1)
+    if (cBERules_mRules_12B498.e[i].Flags & 1)
         obj->mRider->unk_B20 = 2;
     (obj->mRider)->mStartHandicap = cBERules_getPlayerStartDelaySecs(i);
     cBE_getInterface_Fv(SSXApp->BE, 7);
@@ -2429,12 +2424,12 @@ extern "C" void cAI_applyPlayerRulesCustom(cAI* self, cPlayer* obj, int i)
         if (cBENetworkInterface_networkOpt.bIsRankedGame != 0)
             obj->mRider->mStatsIndex = 8;
     }
-    else if ((cBERules_mRules_12B498.e[i].f0 >> 1) & 1)
+    else if ((cBERules_mRules_12B498.e[i].Flags >> 1) & 1)
         obj->mRider->mStatsIndex = 1;
     cRiderMetrix* riderMetrix = obj->mRider->mMetrix;
-    if ((cBERules_mRules_12B498.e[i].f0 >> 2) & 1)
+    if ((cBERules_mRules_12B498.e[i].Flags >> 2) & 1)
         riderMetrix->mPointsMultiplier = 0.5f;
-    cRiderMetrix_setInitialPointsTotal(riderMetrix, cBERules_mRules_12B498.e[i].x);
+    cRiderMetrix_setInitialPointsTotal(riderMetrix, cBERules_mRules_12B498.e[i].StartingPoints);
 }
 #endif
 
@@ -2445,17 +2440,11 @@ extern "C" void cRider_initBoost(void* self);
 extern "C" void cRider_setUbersAllowed(void* self, int a1);
 extern "C" int cBERules_getAIStartDelaySecs();
 
-struct sOptFlags_0012B698
-{
-    unsigned int f0;
-    char pad4[0x14];
-    int f18;
-};
-extern sOptFlags_0012B698 cBERules_mRules;
+extern tBERuleOptionDB cBERules_mRules;
 
-static inline int OptBit_0012B698(sOptFlags_0012B698* o, int b)
+static inline int OptBit_0012B698(tBERuleOptionDB* o, int b)
 {
-    return (o->f18 >> b) & 1;
+    return ((*(int*)&o->MyRules) >> b) & 1;
 }
 
 /**
@@ -2475,11 +2464,11 @@ extern "C" void cAI_applyComputerRulesCustom(cAI* self, cComputer* rider)
     else if (OptBit_0012B698(&cBERules_mRules, 0))
         boostMode = 0;
     else
-        if ((cBERules_mRules.f0 >> 5) & 1) boostMode = 2;
+        if ((cBERules_mRules.Bragging[0].Flags >> 5) & 1) boostMode = 2;
     cRider* computerRider = rider->RiderHandler.GroundMotion.mRider;
     computerRider->mBoostMode = boostMode;
     cRider_initBoost(computerRider);
-    if ((cBERules_mRules.f0 >> 3) & 1)
+    if ((cBERules_mRules.Bragging[0].Flags >> 3) & 1)
         rider->RiderHandler.GroundMotion.mRider->mBoostMeterStart = 1.0f;
     if (OptBit_0012B698(&cBERules_mRules, 4))
         rider->RiderHandler.GroundMotion.mRider->mBoostSourceMask = 2;

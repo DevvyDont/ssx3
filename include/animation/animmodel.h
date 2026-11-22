@@ -60,7 +60,9 @@ struct sAnimModelLodInfo {
 };
 
 struct cAnimModel {
-    /* 0x000 */ int unk_000;
+    /* 0x000 */ int MaxModelParts;          // [O] cAnimModel::MaxModelParts (init(int maxModels, int maxModelVariants));
+                                            //     [R] cAnimModel_init stores its count here and allocates count * 0x58 parts
+                                            //     (view cAnimModel_init_sPool count) [lstruct L2]
     /* 0x004 */ int numLodRefs;             // refs per LOD slot (addModelPartLOD allocates this many)
     /* 0x008 */ int numParts;               // loop bound over parts everywhere
     /* 0x00C */ sAnimModelPart* parts;
@@ -77,7 +79,12 @@ struct cAnimModel {
     /* 0x038 */ t4Matrix* unk_038;          // numBones; palette[i] = unk_030[i] or unk_034[i] times this (cAnimModel_rendershadow, cAnimModel_render)
     /* 0x03C */ int unk_03C;
     /* 0x040 */ sAnimModelLodInfo lodInfo[4];
-    /* 0x060 */ char unk_060[0xCC];
+    /* 0x060 */ int NumTextureFiles;        // [O] cAnimModel::NumTextureFiles; [R] cAnimModel_init zeroes it (view
+                                            //     cAnimModel_init_sPool field_0x60); [U] cAnimModel_addTextureFile appends at
+                                            //     TextureFiles[NumTextureFiles++] (view sAnimModelList count) [lstruct L2]
+    /* 0x064 */ const char* TextureFiles[50]; // [O] cAnimModel::TextureFiles (const char*[50]; 0xC8 bytes end exactly at
+                                            //     NumTextureRefs 0x12C, as in On Tour); [U] addTextureFile stores its data
+                                            //     argument (view sAnimModelList items) [lstruct L2]
     /* 0x12C */ int NumTextureRefs;         // [O] cAnimModel::NumTextureRefs (+0x78C there, 0x14 before ScaleVect = unk_140, as here);
                                             //     [R] cAnimModel_cAnimModel clears it between numParts and localPos, the same store
                                             //     order as On Tour's ctor (NumModelParts, NumTextureRefs, TextureRefs, BoneOffset)
@@ -93,6 +100,8 @@ CHECK_OFFSET(sAnimModelPart, lods, 0x18);
 CHECK_OFFSET(sAnimModelPart, boneNames, 0x38);
 CHECK_OFFSET(sAnimModelPart, numBones, 0x44);
 CHECK_OFFSET(sAnimModelPart, refIndex, 0x50);
+CHECK_OFFSET(cAnimModel, MaxModelParts, 0x0);
+CHECK_OFFSET(cAnimModel, numLodRefs, 0x4);
 CHECK_OFFSET(cAnimModel, numParts, 0x8);
 CHECK_OFFSET(cAnimModel, parts, 0xC);
 CHECK_OFFSET(cAnimModel, numBones, 0x10);
@@ -107,6 +116,8 @@ CHECK_OFFSET(cAnimModel, unk_030, 0x30);
 CHECK_OFFSET(cAnimModel, unk_034, 0x34);
 CHECK_OFFSET(cAnimModel, unk_038, 0x38);
 CHECK_OFFSET(cAnimModel, lodInfo, 0x40);
+CHECK_OFFSET(cAnimModel, NumTextureFiles, 0x60);
+CHECK_OFFSET(cAnimModel, TextureFiles, 0x64);
 CHECK_OFFSET(cAnimModel, NumTextureRefs, 0x12C);
 CHECK_OFFSET(cAnimModel, TextureRefs, 0x130);
 CHECK_OFFSET(cAnimModel, unk_140, 0x140);

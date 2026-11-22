@@ -22,24 +22,24 @@ struct sBucketList_3549E0 {
 
 struct sBucket_3549E0 {
     int flags;
-    sBucketList_3549E0 l0;
-    sBucketList_3549E0 l1;
-    sBucketList_3549E0 l2;
-    sBucketList_3549E0 l3;
+    sBucketList_3549E0 Head;
+    sBucketList_3549E0 Tail;
+    sBucketList_3549E0 AddHead;
+    sBucketList_3549E0 AddTail;
     sBucket_3549E0()
     {
-        l0.vt = cObjNode_vtbl;
-        l0.prev = 0;
-        l0.next = 0;
-        l1.vt = cObjNode_vtbl;
-        l1.prev = 0;
-        l1.next = 0;
-        l2.vt = cObjNode_vtbl;
-        l2.prev = 0;
-        l2.next = 0;
-        l3.vt = cObjNode_vtbl;
-        l3.prev = 0;
-        l3.next = 0;
+        Head.vt = cObjNode_vtbl;
+        Head.prev = 0;
+        Head.next = 0;
+        Tail.vt = cObjNode_vtbl;
+        Tail.prev = 0;
+        Tail.next = 0;
+        AddHead.vt = cObjNode_vtbl;
+        AddHead.prev = 0;
+        AddHead.next = 0;
+        AddTail.vt = cObjNode_vtbl;
+        AddTail.prev = 0;
+        AddTail.next = 0;
     }
     ~sBucket_3549E0() {}
 };
@@ -59,14 +59,14 @@ extern "C" void cBucketMan_init(cBucketMan* self, int n)
     *slot = (char*)new (str_Buckets, 0, 0) sBucket_3549E0[n];
     *(int*)self = n;
     for (int i = 0; i < *(int*)self; i++) {
-        ((sBucket_3549E0*)self->Buckets)[i].l0.prev = &((sBucket_3549E0*)self->Buckets)[i].l1;
-        ((sBucket_3549E0*)self->Buckets)[i].l0.next = 0;
-        ((sBucket_3549E0*)self->Buckets)[i].l1.prev = 0;
-        ((sBucket_3549E0*)self->Buckets)[i].l1.next = &((sBucket_3549E0*)self->Buckets)[i].l0;
-        ((sBucket_3549E0*)self->Buckets)[i].l2.prev = &((sBucket_3549E0*)self->Buckets)[i].l3;
-        ((sBucket_3549E0*)self->Buckets)[i].l2.next = 0;
-        ((sBucket_3549E0*)self->Buckets)[i].l3.prev = 0;
-        ((sBucket_3549E0*)self->Buckets)[i].l3.next = &((sBucket_3549E0*)self->Buckets)[i].l2;
+        ((sBucket_3549E0*)self->Buckets)[i].Head.prev = &((sBucket_3549E0*)self->Buckets)[i].Tail;
+        ((sBucket_3549E0*)self->Buckets)[i].Head.next = 0;
+        ((sBucket_3549E0*)self->Buckets)[i].Tail.prev = 0;
+        ((sBucket_3549E0*)self->Buckets)[i].Tail.next = &((sBucket_3549E0*)self->Buckets)[i].Head;
+        ((sBucket_3549E0*)self->Buckets)[i].AddHead.prev = &((sBucket_3549E0*)self->Buckets)[i].AddTail;
+        ((sBucket_3549E0*)self->Buckets)[i].AddHead.next = 0;
+        ((sBucket_3549E0*)self->Buckets)[i].AddTail.prev = 0;
+        ((sBucket_3549E0*)self->Buckets)[i].AddTail.next = &((sBucket_3549E0*)self->Buckets)[i].AddHead;
         ((sBucket_3549E0*)self->Buckets)[i].flags = 0;
     }
 }

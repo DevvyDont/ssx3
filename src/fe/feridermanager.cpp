@@ -516,13 +516,13 @@ extern "C" void cFERider_render(cFERider* selfp)
         sVE_EE88* vt = (sVE_EE88*)ps2GraphicsMan->mVtbl;
         vt[69].fn(vthis(ps2GraphicsMan, vt[69]), &worldMatrix, 1);
     }
-    int* fl = (int*)(&GrMan->m_pCurrentDrawState->unk_00[2]);
+    int* fl = (int*)(&GrMan->m_pCurrentDrawState->m_bitGroups[2]);
     unsigned int old = (unsigned int)(*fl & 0x3E0) >> 5;
     if (self->mDrawLayer >= 0)
         *fl = (*fl & ~0x3E0) | ((self->mDrawLayer << 5) & 0x3E0);
     cAnimModel_render(((sModel_EE88*)self->mpAnimModel), 0, 0, 0);
     func_002F2088(self->mpAttachedEmitterFX);
-    fl = (int*)(&GrMan->m_pCurrentDrawState->unk_00[2]);
+    fl = (int*)(&GrMan->m_pCurrentDrawState->m_bitGroups[2]);
     *fl = (*fl & ~0x3E0) | (old << 5);
 }
 #endif
@@ -1021,9 +1021,9 @@ extern "C" void cAnimModel_setModelPartVariant(void* model, int i, int param);
 
 struct sBoneEntF780 {
     char f0;
-    char f1;
+    char variant;
     char pad_0x2[0xE];
-    char f10;
+    char partID;
     char pad_0x11[0x38 - 0x11];
 };
 struct sBoneDbF780 {
@@ -1057,8 +1057,8 @@ extern "C" void cFERider_updateAnimModelParts(int* self)
     for (i = 0; i < n; i++) {
         if (it[i].flags & 0x10) {
             sBoneEntF780* partEntry = getEntK19F780(db, func_0014D448(db, self[0], it[i].id));
-            if (partEntry->f10 >= 0)
-                cAnimModel_setModelPartVariant(*(void**)((char*)self + 0x8), partEntry->f10, partEntry->f1);
+            if (partEntry->partID >= 0)
+                cAnimModel_setModelPartVariant(*(void**)((char*)self + 0x8), partEntry->partID, partEntry->variant);
         }
     }
     **(int**)((char*)self + 0xC74) = 1;

@@ -21,7 +21,7 @@ extern "C" void cListNode_removeFromList(void* self);
 
 struct sDeleteTarget {
     char pad_0x00[0x8];
-    short field_0x8;
+    short dtorDelta;
     char pad_0xA[2];
     void (*fn)(void*, int); // 0xC
 };
@@ -38,7 +38,7 @@ void cUIThread_deleteThread(void* vself)
     cListNode_removeFromList(self);
     if (((void*)self) != 0) {
         sDeleteTarget* target = (sDeleteTarget*)self->mVtbl;
-        target->fn((char*)self + target->field_0x8, 3);
+        target->fn((char*)self + target->dtorDelta, 3);
     }
 }
 #endif
@@ -158,11 +158,6 @@ extern "C" void* cUIScreen_getFrameByIndex(cUIScreen* self, unsigned short frame
 }
 #endif
 
-struct sFrameEntry {
-    int label; // 0x0
-    int stride; // 0x4
-    unsigned short field_0x8; // 0x8
-};
 
 struct sFrameList {
     int count; // 0x0
@@ -181,13 +176,13 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_getFrameByLabel__FP9cUIScreeni);
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label)
 {
     sFrameList* list = (sFrameList*)self->mpKeyframeBlock;
-    sFrameEntry* entry = (sFrameEntry*)((char*)list + 4);
+    tUIFrameHeader* entry = (tUIFrameHeader*)((char*)list + 4);
     unsigned int i;
     for (i = 0; i < (unsigned int)list->count; i++) {
-        if (entry->label == label) {
-            return entry->field_0x8;
+        if (((int)entry->mHashID) == label) {
+            return entry->mFrameNumber;
         }
-        entry = (sFrameEntry*)((char*)entry + entry->stride);
+        entry = (tUIFrameHeader*)((char*)entry + ((int)entry->mByteSize));
     }
     return 0xFFFF;
 }
@@ -460,14 +455,14 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_parseKeyframeJump);
  */
 extern "C" void cUIScreen_parseKeyframeJump(cUIScreen* self, void* pFrame, void* pKCP, void* pThread)
 {
-    sFrameEntry* entry = (sFrameEntry*)((char*)self->mpKeyframeBlock + 4);
+    tUIFrameHeader* entry = (tUIFrameHeader*)((char*)self->mpKeyframeBlock + 4);
     unsigned int i;
     for (i = 0; i < (unsigned int)((sFrameList*)self->mpKeyframeBlock)->count; i++) {
-        if (entry->label == *(int*)((char*)pKCP + 4)) {
-            *(unsigned short*)((char*)pThread + 0xC) = entry->field_0x8;
+        if (((int)entry->mHashID) == *(int*)((char*)pKCP + 4)) {
+            *(unsigned short*)((char*)pThread + 0xC) = entry->mFrameNumber;
             return;
         }
-        entry = (sFrameEntry*)((char*)entry + entry->stride);
+        entry = (tUIFrameHeader*)((char*)entry + ((int)entry->mByteSize));
     }
 }
 #endif
@@ -483,14 +478,14 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_parseKeyframeSpawn);
  */
 extern "C" void cUIScreen_parseKeyframeSpawn(cUIScreen* self, void* pFrame, void* pKCP)
 {
-    sFrameEntry* entry = (sFrameEntry*)((char*)self->mpKeyframeBlock + 4);
+    tUIFrameHeader* entry = (tUIFrameHeader*)((char*)self->mpKeyframeBlock + 4);
     unsigned int i;
     for (i = 0; i < (unsigned int)((sFrameList*)self->mpKeyframeBlock)->count; i++) {
-        if (entry->label == *(int*)((char*)pKCP + 4)) {
-            cUIScreen_playFrame(self, entry->field_0x8, 1);
+        if (((int)entry->mHashID) == *(int*)((char*)pKCP + 4)) {
+            cUIScreen_playFrame(self, entry->mFrameNumber, 1);
             return;
         }
-        entry = (sFrameEntry*)((char*)entry + entry->stride);
+        entry = (tUIFrameHeader*)((char*)entry + ((int)entry->mByteSize));
     }
 }
 #endif
@@ -1125,7 +1120,7 @@ extern "C" void cUIScreen_update(cUIScreen* self)
                     cListNode_removeFromList(n);
                     if (((void*)n) != 0) {
                         sDeleteTarget* target = (sDeleteTarget*)n->mVtbl;
-                        target->fn((char*)n + target->field_0x8, 3);
+                        target->fn((char*)n + target->dtorDelta, 3);
                     }
                 }
             }
@@ -1188,12 +1183,12 @@ extern "C" void cUIScrollBar__cUIScrollBar(cUIScrollBar* self, int flags)
     cUIThing* background = self->mpObjBackground;
     if (background != 0) {
         sDeleteTarget* dtorEntry = (sDeleteTarget*)background->mVtbl;
-        dtorEntry->fn((char*)background + dtorEntry->field_0x8, 3);
+        dtorEntry->fn((char*)background + dtorEntry->dtorDelta, 3);
     }
     cUIThing* knob = self->mpObjKnob;
     if (knob != 0) {
         sDeleteTarget* dtorEntry = (sDeleteTarget*)knob->mVtbl;
-        dtorEntry->fn((char*)knob + dtorEntry->field_0x8, 3);
+        dtorEntry->fn((char*)knob + dtorEntry->dtorDelta, 3);
     }
     cUIThing__cUIThing(self, flags);
 }
@@ -1485,12 +1480,12 @@ extern "C" void cUISlider__cUISlider(cUISlider* self, int flags)
     cUIThing* background = self->mpObjBackground;
     if (background != 0) {
         sDeleteTarget* dtorEntry = (sDeleteTarget*)background->mVtbl;
-        dtorEntry->fn((char*)background + dtorEntry->field_0x8, 3);
+        dtorEntry->fn((char*)background + dtorEntry->dtorDelta, 3);
     }
     cUIThing* knob = self->mpObjKnob;
     if (knob != 0) {
         sDeleteTarget* dtorEntry = (sDeleteTarget*)knob->mVtbl;
-        dtorEntry->fn((char*)knob + dtorEntry->field_0x8, 3);
+        dtorEntry->fn((char*)knob + dtorEntry->dtorDelta, 3);
     }
     cUIThing__cUIThing(self, flags);
 }

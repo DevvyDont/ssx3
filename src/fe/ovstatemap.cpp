@@ -56,14 +56,14 @@ struct sMap_86A8 {
     void* engine;       // 0x10
     char pad_0x14[0xA8];
     int fBC;            // 0xBC
-    int fC0;            // 0xC0
+    int mSessionPointsOnPic;            // 0xC0
     int fC4;            // 0xC4
     char pad_0xC8[0x8];
     cUIObj_86A8* obj;   // 0xD0
     void* screen;       // 0xD4
     char pad_0xD8[0x4];
     int fDC;            // 0xDC
-    int fE0;            // 0xE0
+    int mpPlayerIcon;            // 0xE0
     int a[8];           // 0xE4
     int b[8];           // 0x104
     char pad_0x124[0x60];
@@ -100,8 +100,8 @@ extern "C" void cOVState_MAP_onCreateScreen(sMap_86A8* self)
     if (mapPic != 0) {
         mapPic->setVisible(0);
     }
-    self->fC0 = 0;
-    self->fE0 = 0;
+    self->mSessionPointsOnPic = 0;
+    self->mpPlayerIcon = 0;
     for (int i = 0; i < 8; i++) {
         self->a[i] = 0;
         self->b[i] = 0;

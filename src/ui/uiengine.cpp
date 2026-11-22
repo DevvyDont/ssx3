@@ -425,23 +425,23 @@ extern "C" void cUITextureBank__cUITextureBank(cUITextureBank* self, int flags)
 INCLUDE_ASM("ui/uiengine", cUITextureBank_setData);
 #ifdef SKIP_ASM
 struct sUITexElem8138 {
-    int tex;                // 0x00
-    float f4;               // 0x04
-    float f8;               // 0x08
-    float fC;               // 0x0C
-    float f10;              // 0x10
-    float f14;              // 0x14
-    float f18;              // 0x18
-    int id;                 // 0x1C
+    int mSourceShape;                // 0x00
+    float mWidth;               // 0x04
+    float mHeight;               // 0x08
+    float mTop;               // 0x0C
+    float mLeft;              // 0x10
+    float mRight;              // 0x14
+    float mBottom;              // 0x18
+    int mHashID;                 // 0x1C
     sUITexElem8138()
     {
-        tex = -1;
-        f4 = 1.0f;
-        f8 = 1.0f;
-        fC = 0.0f;
-        f10 = 0.0f;
-        f14 = 1.0f;
-        f18 = 1.0f;
+        mSourceShape = -1;
+        mWidth = 1.0f;
+        mHeight = 1.0f;
+        mTop = 0.0f;
+        mLeft = 0.0f;
+        mRight = 1.0f;
+        mBottom = 1.0f;
     }
 };
 
@@ -519,12 +519,12 @@ extern "C" void cUITextureBank_setData(cUITextureBank* vbank, int id, void* vdat
     memset(((sUITexElem8138*)self->mpElements), 0xFF, self->mNumElements * 4);
     int j;
     for (j = 0; j < self->mNumElements; j++, src++) {
-        ((sUITexElem8138*)self->mpElements)[j].fC = src->fC;
-        ((sUITexElem8138*)self->mpElements)[j].f10 = src->f8;
-        ((sUITexElem8138*)self->mpElements)[j].f18 = src->f14;
-        ((sUITexElem8138*)self->mpElements)[j].f14 = src->f10;
-        ((sUITexElem8138*)self->mpElements)[j].id = src->id;
-        ((sUITexElem8138*)self->mpElements)[j].tex = self->mpTexturesIDs[src->tex];
+        ((sUITexElem8138*)self->mpElements)[j].mTop = src->fC;
+        ((sUITexElem8138*)self->mpElements)[j].mLeft = src->f8;
+        ((sUITexElem8138*)self->mpElements)[j].mBottom = src->f14;
+        ((sUITexElem8138*)self->mpElements)[j].mRight = src->f10;
+        ((sUITexElem8138*)self->mpElements)[j].mHashID = src->id;
+        ((sUITexElem8138*)self->mpElements)[j].mSourceShape = self->mpTexturesIDs[src->tex];
     }
 }
 #endif

@@ -1513,7 +1513,7 @@ extern "C" void tActiveAvalancheNode_renderLines(tActiveAvalancheNode* nodep)
     t4Matrix matrix;
     CopyMat_8A00(&matrix, &t4mat_Identity_8A00);
     PushRS_8A00(GrMan);
-    SetBits_8A00(((int)(GrMan->m_pCurrentDrawState)->unk_00[1]), 0x7C, 2, 1);
+    SetBits_8A00(((int)(GrMan->m_pCurrentDrawState)->m_bitGroups[1]), 0x7C, 2, 1);
     if (cAvalanche_m_RenderLines != 0) {
         int i = 0;
         sRow_8A00 pos = (*(sRow_8A00*)&(node->m_node)->m_start);

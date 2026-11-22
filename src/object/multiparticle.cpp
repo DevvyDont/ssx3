@@ -35,13 +35,6 @@ struct sMPRef {
     sMPRef() : id(0xFFFFFFFF) {}
 };
 
-struct sMultiParticle {
-    int count;     // 0x0
-    int field_0x4; // 0x4
-    int field_0x8; // 0x8
-    sMPRef* refs;  // 0xC
-    void* sys;     // 0x10
-};
 
 /**
  * Allocates a multi-particle effect's instance-id table and its static emitter, and sets the emitter up.
@@ -50,15 +43,15 @@ struct sMultiParticle {
  * ("Emitter", constructed by cStaticEmitter_cStaticEmitter), set up by cStaticEmitter_setupEmitter (On Tour setupEmitter) with an identity
  * transform and the particle data (+0x8).
  */
-extern "C" void cMultiParticle_setupMultiParticle(sMultiParticle* self)
+extern "C" void cMultiParticle_setupMultiParticle(cMultiParticle* self)
 {
-    sMPRef** slot = &self->refs;
-    *slot = new (str_InstIds, 0x20000000, 0) sMPRef[self->count];
-    self->sys = cStaticEmitter_cStaticEmitter(cMemMan_alloc(400, str_Emitter, 0x20000000, 0));
-    for (int i = 0; i < self->count; i++) {
-        self->refs[i].id = 0xFFFFFFFF;
+    sMPRef** slot = &(*(sMPRef**)&self->InstIds);
+    *slot = new (str_InstIds, 0x20000000, 0) sMPRef[self->MaxInst];
+    (*(void**)&self->Emitter) = cStaticEmitter_cStaticEmitter(cMemMan_alloc(400, str_Emitter, 0x20000000, 0));
+    for (int i = 0; i < self->MaxInst; i++) {
+        ((sMPRef*)self->InstIds)[i].id = 0xFFFFFFFF;
     }
-    cStaticEmitter_setupEmitter(self->sys, t4mat_Identity, self->field_0x8);
+    cStaticEmitter_setupEmitter(((void*)self->Emitter), t4mat_Identity, ((int)self->Particle));
 }
 #endif
 

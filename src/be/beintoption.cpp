@@ -390,8 +390,8 @@ INCLUDE_ASM("be/beintoption", cBERules_hasModifiedRules);
 extern "C" int cBERules_hasModifiedRules(int i)
 {
     tBERuleOptionDB* rules = &cBERules_mRules;
-    if (rules->Bragging[i].unk_00 != 0 || rules->Bragging[i].StartingPoints != 0 || rules->Bragging[i].HeadStartSecs != 0
-        || rules->MyRules.unk_00 != 0 || rules->MyRules.AIHeadStartSecs != 0)
+    if (rules->Bragging[i].Flags != 0 || rules->Bragging[i].StartingPoints != 0 || rules->Bragging[i].HeadStartSecs != 0
+        || rules->MyRules.Flags != 0 || rules->MyRules.AIHeadStartSecs != 0)
     {
         return 1;
     }

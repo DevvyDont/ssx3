@@ -45,8 +45,15 @@ CHECK_SIZE(tHoldBonusDB, 0x8);
 // The unnamed bits hold the rest of EA's fields (On Tour: rail, railSpin, takeoff before orient; special (6 bits)
 // before postSpin; uberGrind before grab; toLate (1 bit) between grab and lateGrab; handplant, press, land after
 // lateGrab), not yet placed by a retail use. [Staged by views group A.]
+// lstruct group L2 placed the rest: cWScriptMan_getCurrentTrick(cmd) (On Tour cWScriptMan::getCurrentTrick(int being,
+// int cmd), whose switch returns field `cmd` of tTrickNameDef in member order, 12 = lateGrab asserting) has the same
+// case set in retail (12 missing) and reads cWScriptMan::TrickDef (tTrickNameDef*) through the view sScriptFlags_AF08,
+// whose bit positions agree with every field placed above (orient 10-11 ... postSpin 28-31, grab, lateGrab as its
+// "pad", monster after land). Retail widths differ from On Tour for takeoff, uberGrind and press (noted per field).
 struct tTrickNameDef {
-    unsigned int : 10;              // w0 bits 0-9: not placed yet
+    unsigned int rail : 3;          // w0 bits 0-2 [O]; [U] cWScriptMan_getCurrentTrick case 0 (view sScriptFlags_AF08 f0)
+    unsigned int railSpin : 4;      // w0 bits 3-6 [O]; [U] getCurrentTrick case 1 (f1)
+    unsigned int takeoff : 3;       // w0 bits 7-9 [O] (4 bits in On Tour); [U] getCurrentTrick case 2 (f2, 3 bits)
     unsigned int orient : 2;        // w0 bits 10-11 [O]; [U] checkForMonsterTrick vs tMonsterTrick::reqOrient
     unsigned int spin : 4;          // w0 bits 12-15 [O]; [U] vs reqSpin
     unsigned int reps : 3;          // w0 bits 16-18 [O]; [U] vs reqReps
@@ -54,11 +61,13 @@ struct tTrickNameDef {
     unsigned int special : 6;       // w0 bits 22-27 [O] (6 bits, between flip and postSpin as in On Tour); [U]
                                     //      cRiderMetrix_addToHistory tests it against 1 [views2 group A]
     unsigned int postSpin : 4;      // w0 bits 28-31 [O]; [U] vs reqPostSpin
-    unsigned int : 3;               // w1 bits 0-2: not placed yet
+    unsigned int uberGrind : 3;     // w1 bits 0-2 [O] (4 bits in On Tour); [U] getCurrentTrick case 9 (f9, 3 bits)
     unsigned int grab : 7;          // w1 bits 3-9 [O]; [U] vs reqGrab
-    unsigned int : 1;               // w1 bit 10: not placed yet (On Tour's toLate is 1 bit)
+    unsigned int toLate : 1;        // w1 bit 10 [O]; [U] getCurrentTrick case 11 (f11)
     unsigned int lateGrab : 7;      // w1 bits 11-17 [O]; [U] vs reqLateGrab
-    unsigned int : 9;               // w1 bits 18-26: not placed yet
+    unsigned int handplant : 2;     // w1 bits 18-19 [O]; [U] getCurrentTrick case 13 (f13)
+    unsigned int press : 4;         // w1 bits 20-23 [O] (5 bits in On Tour); [U] getCurrentTrick case 15 (f15, 4 bits)
+    unsigned int land : 3;          // w1 bits 24-26 [O] (in a third word there); [U] getCurrentTrick case 14 (f14)
     unsigned int monster : 5;       // w1 bits 27-31 [O] (eTrickNameMonster, 5 bits as in On Tour); [U] checkForMonsterTrick
                                     //      stores the matching entry's id after MEM_fill(tn, 0, 8)
 };

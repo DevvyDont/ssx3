@@ -68,8 +68,8 @@ extern "C" void cSectionMan_setSky(cSectionMan* self, int sky)
 INCLUDE_ASM("main/sectionman", cSectionMan_initEventPool);
 #ifdef SKIP_ASM
 struct sSectionNode {
-    int field_0x0;
-    sSectionNode* next; // 0x4
+    int SectionID;
+    sSectionNode* pNext; // 0x4
 };
 
 struct sSectionMan {
@@ -91,8 +91,8 @@ extern "C" void cSectionMan_initEventPool(cSectionMan* self)
     int i;
     self->m_pFreeEventList = (tSectionManEvent*)((sSectionNode*)&self->m_EventPool[0]);
     for (i = 0; i < 50; i++) {
-        ((sSectionNode*)&self->m_EventPool[0])[i].field_0x0 = 49;
-        ((sSectionNode*)&self->m_EventPool[0])[i].next = &((sSectionNode*)&self->m_EventPool[0])[i + 1];
+        ((sSectionNode*)&self->m_EventPool[0])[i].SectionID = 49;
+        ((sSectionNode*)&self->m_EventPool[0])[i].pNext = &((sSectionNode*)&self->m_EventPool[0])[i + 1];
     }
     self->m_EventPool[50].SectionID = 49;
     self->m_EventPool[50].pNext = 0;

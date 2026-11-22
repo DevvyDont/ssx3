@@ -711,12 +711,6 @@ extern "C" void cInstanceNode_getBoundBoxInfo(cInstanceNode* self, sIbVec4* box,
 //100%
 INCLUDE_ASM("object/instancenode", hasAnimationChannels);
 #ifdef SKIP_ASM
-struct sInstNodeEntry {
-    int field_0x0;
-    int field_0x4;
-    int field_0x8;
-    int field_0xc;
-};
 
 
 /**
@@ -732,9 +726,9 @@ extern "C" int hasAnimationChannels(tInstanceRecord* self)
     tModelRecord* list = self->m_Model;
     int i;
     int count = list->m_iNumMeshes;
-    sInstNodeEntry* meshEntry = ((sInstNodeEntry*)list->m_MeshHeirarchy);
+    tMeshHeirarchyRecord* meshEntry = (list->m_MeshHeirarchy);
     for (i = 0; i < count; i++, meshEntry++) {
-        if (meshEntry->field_0x8 != 0) {
+        if (((int)meshEntry->m_MeshAnim) != 0) {
             return 1;
         }
     }

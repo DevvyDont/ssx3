@@ -2230,21 +2230,13 @@ struct sV4_229BA8 {
     sV4_229BA8(const float& ax, const float& ay, const float& az, const float& aw) : x(ax), y(ay), z(az), w(aw) {}
 };
 
-struct sDrawState_229BA8 {
-    int f0;
-    int f4;
-    int f8;
-    int fC;
-    short f10;
-    short f12;
-};
 
-extern sDrawState_229BA8 sDrawState_s_defaultDrawState_229BA8 __asm__("sDrawState_s_defaultDrawState");
+extern sDrawState sDrawState_s_defaultDrawState_229BA8 __asm__("sDrawState_s_defaultDrawState");
 
 class cGfx_229BA8 {
 public:
     char pad_0x0[0xE84];
-    sDrawState_229BA8* top;         // 0xE84
+    sDrawState* top;         // 0xE84
     char pad_0xE88[0xF50 - 0xE88];
     int tbl[(0x10D8 - 0xF50) / 4];  // 0xF50
     // vptr at 0x10D8; slot N at vtable offset N*8
@@ -2279,12 +2271,12 @@ static inline int GetTexId_229BA8(cGfx_229BA8* g, int i)
 
 static inline void set0_229BA8(cGfx_229BA8* g, int mask, int shift, int v)
 {
-    g->top->f0 = (g->top->f0 & ~mask) | ((v << shift) & mask);
+    g->top->m_bitGroups[0] = (((int)g->top->m_bitGroups[0]) & ~mask) | ((v << shift) & mask);
 }
 
 static inline void set1_229BA8(cGfx_229BA8* g, int mask, int shift, int v)
 {
-    g->top->f4 = (g->top->f4 & ~mask) | ((v << shift) & mask);
+    g->top->m_bitGroups[1] = (((int)g->top->m_bitGroups[1]) & ~mask) | ((v << shift) & mask);
 }
 
 // Full-mask field set (value == mask), as main/game's draw-state code writes it.
@@ -2292,7 +2284,7 @@ static inline void SetBits_229BA8(int* p, int mask, int bits) { *p = (*p & ~mask
 
 static inline void set2_229BA8(cGfx_229BA8* g, int mask, int shift, int v)
 {
-    g->top->f8 = (g->top->f8 & ~mask) | ((v << shift) & mask);
+    g->top->m_bitGroups[2] = (((int)g->top->m_bitGroups[2]) & ~mask) | ((v << shift) & mask);
 }
 
 
@@ -2325,9 +2317,9 @@ extern "C" void func_00229BA8(cCrowdMan2d* crowdMan)
                 ((cGfx_229BA8*)ps2GraphicsMan)->top[1] = ((cGfx_229BA8*)ps2GraphicsMan)->top[0];
                 ((cGfx_229BA8*)ps2GraphicsMan)->top++;
                 *((cGfx_229BA8*)ps2GraphicsMan)->top = sDrawState_s_defaultDrawState_229BA8;
-                ((cGfx_229BA8*)ps2GraphicsMan)->top->f10 = GetTexId_229BA8((cGfx_229BA8*)ps2GraphicsMan, 14);
+                ((cGfx_229BA8*)ps2GraphicsMan)->top->m_textureState.m_texid[0] = GetTexId_229BA8((cGfx_229BA8*)ps2GraphicsMan, 14);
                 set0_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0xC, 2, 3);
-                SetBits_229BA8(&((cGfx_229BA8*)ps2GraphicsMan)->top->f4, 0x400000, 0x400000);
+                SetBits_229BA8(&(*(int*)&((cGfx_229BA8*)ps2GraphicsMan)->top->m_bitGroups[1]), 0x400000, 0x400000);
                 set1_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0x1800000, 23, 0);
                 set1_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0x300000, 20, 0);
                 set1_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0xFF000, 12, 20);

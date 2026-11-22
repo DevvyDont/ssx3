@@ -1884,7 +1884,7 @@ void c2DRender_drawRect4_r(void* self, const t2Vector& p0, const t2Vector& p1, c
 static inline void set1_17F500(char* m, unsigned int mask, int shift, unsigned int v)
 {
     sDrawState* top = *(sDrawState**)(m + 0xE84);
-    top->unk_00[1] = (top->unk_00[1] & ~mask) | ((v << shift) & mask);
+    top->m_bitGroups[1] = (top->m_bitGroups[1] & ~mask) | ((v << shift) & mask);
 }
 
 

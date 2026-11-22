@@ -1419,7 +1419,7 @@ static inline void QueueRecord_D168(cPS2GraphicsMan* gfx, unsigned int buf, unsi
     sDrawState* rs = (gfx->m_pCurrentDrawState);
     if (ring->count < 0xA28) {
         int lyr = *(int*)((char*)ring + 0x69CC4) & 0x1F;
-        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | lyr;
+        rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | lyr;
         int key = *(int*)((char*)ring + 0x69CC0);
         sEnt_D168* e = (sEnt_D168*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
         e->rs = *rs;
@@ -1483,11 +1483,11 @@ extern "C" void func_0038D168_impl(void* self, void* patch, void* obj, int type,
         tex = gfx->mSpecTexID;
     }
     (gfx->m_pCurrentDrawState)->m_textureState.m_texid[1] = tex;
-    (*(int*)&(gfx->m_pCurrentDrawState)->unk_00[0]) |= 0x30;
+    (*(int*)&(gfx->m_pCurrentDrawState)->m_bitGroups[0]) |= 0x30;
     if (*(int*)((char*)obj + 0xC) & 0x400000) {
-        (gfx->m_pCurrentDrawState)->unk_00[1] = (((int)(gfx->m_pCurrentDrawState)->unk_00[1]) & ~0xF80) | 0x880;
+        (gfx->m_pCurrentDrawState)->m_bitGroups[1] = (((int)(gfx->m_pCurrentDrawState)->m_bitGroups[1]) & ~0xF80) | 0x880;
     } else {
-        (gfx->m_pCurrentDrawState)->unk_00[1] = (((int)(gfx->m_pCurrentDrawState)->unk_00[1]) & ~0xF80) | 0x100;
+        (gfx->m_pCurrentDrawState)->m_bitGroups[1] = (((int)(gfx->m_pCurrentDrawState)->m_bitGroups[1]) & ~0xF80) | 0x100;
     }
     int n = type * 2 + 4;
     int nn = n * n;
@@ -1571,7 +1571,7 @@ static inline void QueueRecord_D448(cPS2GraphicsMan* gfx, unsigned int buf, unsi
     sDrawState* rs = (gfx->m_pCurrentDrawState);
     if (ring->count < 0xA28) {
         int lyr = *(int*)((char*)ring + 0x69CC4) & 0x1F;
-        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | lyr;
+        rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | lyr;
         int key = *(int*)((char*)ring + 0x69CC0);
         sEnt_D448* e = (sEnt_D448*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
         e->rs = *rs;
@@ -1610,7 +1610,7 @@ extern "C" void func_0038D448(void* self, int kind, void* tbl, void* patch, int 
             unsigned int buf = *handle;
             (gfx->m_pCurrentDrawState)->m_textureState.m_texid[1] = Tex_D448(projTex);
             long* packetCursor = (long*)(buf | 0x30000000);
-            (gfx->m_pCurrentDrawState)->unk_00[0] = (((int)(gfx->m_pCurrentDrawState)->unk_00[0]) & ~0x30) | 0x30;
+            (gfx->m_pCurrentDrawState)->m_bitGroups[0] = (((int)(gfx->m_pCurrentDrawState)->m_bitGroups[0]) & ~0x30) | 0x30;
             packetCursor[0] = 0x10000006;
             packetCursor[1] = 0;
             packetCursor[2] = 0x20000000;
@@ -1792,7 +1792,7 @@ extern "C" void func_0038D690(void* self, void* obj, tBezierPatchEntry* patch, u
     sRing_D690* ring = ((sRing_D690*)gfx->mpDeferMan);
     sDrawState* rs = (gfx->m_pCurrentDrawState);
     if (ring->count < 2600) {
-        rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
+        rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
         sEnt_D690* ringEntry = (sEnt_D690*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
         ringEntry->rs = *rs;
@@ -1852,19 +1852,19 @@ extern "C" void func_0038D968(cPS2BezierMan* self, unsigned int* packetHandle)
     ctx->top = savedState + 1;
     int tex = ctx->texIds[ctx->texSel];
     savedState[1].m_textureState.m_texid[0] = tex;
-    ctx->top->unk_00[1] = (((int)ctx->top->unk_00[1]) & ~0x7C) | 0x54;
-    ctx->top->unk_00[2] = (((int)ctx->top->unk_00[2]) & ~0x3E0) | 0x80;
-    ctx->top->unk_00[1] = (((int)ctx->top->unk_00[1]) & 0xFE7FFFFF) | 0x800000;
-    ctx->top->unk_00[1] = (((int)ctx->top->unk_00[1]) & 0xFFCFFFFF) | 0x300000;
-    ctx->top->unk_00[1] = (((int)ctx->top->unk_00[1]) & 0xFFF00FFF) | 0x5C000;
-    ctx->top->unk_00[1] = (((int)ctx->top->unk_00[1]) & 0xFFBFFFFF) | 0x400000;
+    ctx->top->m_bitGroups[1] = (((int)ctx->top->m_bitGroups[1]) & ~0x7C) | 0x54;
+    ctx->top->m_bitGroups[2] = (((int)ctx->top->m_bitGroups[2]) & ~0x3E0) | 0x80;
+    ctx->top->m_bitGroups[1] = (((int)ctx->top->m_bitGroups[1]) & 0xFE7FFFFF) | 0x800000;
+    ctx->top->m_bitGroups[1] = (((int)ctx->top->m_bitGroups[1]) & 0xFFCFFFFF) | 0x300000;
+    ctx->top->m_bitGroups[1] = (((int)ctx->top->m_bitGroups[1]) & 0xFFF00FFF) | 0x5C000;
+    ctx->top->m_bitGroups[1] = (((int)ctx->top->m_bitGroups[1]) & 0xFFBFFFFF) | 0x400000;
     if (ctx->field_0x6B90 == 0) {
         func_0037D968(ctx);
     }
-    ctx->top->unk_00[0] = (((int)ctx->top->unk_00[0]) & ~0x3C0) | 0x100;
-    ctx->top->unk_00[3] = ((int)ctx->top->unk_00[3]) & 0xC0000000;
-    ctx->top->unk_00[1] = (((int)ctx->top->unk_00[1]) & ~3) | 2;
-    ctx->top->unk_00[2] = ((int)ctx->top->unk_00[2]) & 0xE00003FF;
+    ctx->top->m_bitGroups[0] = (((int)ctx->top->m_bitGroups[0]) & ~0x3C0) | 0x100;
+    ctx->top->m_bitGroups[3] = ((int)ctx->top->m_bitGroups[3]) & 0xC0000000;
+    ctx->top->m_bitGroups[1] = (((int)ctx->top->m_bitGroups[1]) & ~3) | 2;
+    ctx->top->m_bitGroups[2] = ((int)ctx->top->m_bitGroups[2]) & 0xE00003FF;
     for (int i = 0; i < self->mNum8x8Patches; i++) {
         tBezierPatchEntry* patchEntry = &((&self->m8x8Patches[0]))[i];
         func_0038D690(self, func_0038F708(patchEntry->mpPatch, 432, 2), (tBezierPatchEntry*)patchEntry, packetHandle);

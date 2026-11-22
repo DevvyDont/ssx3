@@ -1,4 +1,5 @@
 #include "common.h"
+#include "visualfx/lensfx.h"
 #include "object/rollermodifier.h"
 #include "world/instancerecord.h"
 #include "visualfx/worldlightman.h"
@@ -53,10 +54,6 @@ extern "C" void* cWorldView_getSectionName(cWorldView* self, unsigned int i)
 }
 #endif
 
-struct cWorldViewEntry {
-    char pad_0x00[0x14];
-    int field_0x14;
-};
 
 //100%
 INCLUDE_ASM("world/worldview", cWorldView_isSectionLoaded__FP10cWorldViewi);
@@ -72,8 +69,8 @@ int cWorldView_isSectionLoaded(cWorldView* self, int section)
     if (self->mp_Hdr == 0 || (unsigned int)section >= (unsigned int)self->mp_Hdr->m_uiNumSections) {
         return 0;
     }
-    cWorldViewEntry* entry = (cWorldViewEntry*)((char*)self + section * 8);
-    return (unsigned int)(entry->field_0x14 - 5) < 2;
+    cWorldView* entry = (cWorldView*)((char*)self + section * 8);
+    return (unsigned int)(entry->mp_SectionState[0].state - 5) < 2;
 }
 #endif
 
@@ -327,8 +324,8 @@ struct sSection_9BB8;
 struct sSection_9BB8 {
     float bmin[4];      // 0x00
     float bmax[4];      // 0x10
-    sV4_9BB8 n0;        // 0x20
-    sV4_9BB8 n1;        // 0x30
+    sV4_9BB8 m_v4SplitPlaneIn;        // 0x20
+    sV4_9BB8 m_v4SplitPlaneOut;        // 0x30
     char pad40[0x10];
     sSection_9BB8* child0; // 0x50
     sSection_9BB8* child1; // 0x54
@@ -391,14 +388,14 @@ extern "C" void cWorldView_recursiveIsValid(cWorldView* world, sSection_9BB8* se
         }
     }
     if (sec->child0 != 0) {
-        if (Dot_9BB8(sec->n0, box[0]) < 0.0f) {
+        if (Dot_9BB8(sec->m_v4SplitPlaneIn, box[0]) < 0.0f) {
             cWorldView_recursiveIsValid(world, sec->child0, box, ok);
             if (*ok == 0)
                 return;
         }
     }
     if (sec->child1 != 0) {
-        if (Dot_9BB8(sec->n1, box[1]) < 0.0f)
+        if (Dot_9BB8(sec->m_v4SplitPlaneOut, box[1]) < 0.0f)
             cWorldView_recursiveIsValid(world, sec->child1, box, ok);
     }
 }
@@ -969,12 +966,6 @@ public:
     virtual int resolveParticleMesh(void* p);
 };
 
-struct cChunkResolve_resolveParticleModelHeirarchy_sEnt {
-    int f0;
-    int f4;
-    int f8;
-    unsigned int fC;
-};
 
 extern char t4mat_Identity[];
 
@@ -992,21 +983,21 @@ extern char t4mat_Identity[];
 extern "C" int cChunkResolve_resolveParticleModelHeirarchy(cChunkResolve* self, tParticleModelRecord* pModel)
 {
     int n = pModel->m_iNumParticleMeshes;
-    cChunkResolve_resolveParticleModelHeirarchy_sEnt* meshHierarchy = (cChunkResolve_resolveParticleModelHeirarchy_sEnt*)pModel->m_ParticleMeshHeirarchy;
+    tParticleMeshHeirarchyRecord* meshHierarchy = (tParticleMeshHeirarchyRecord*)pModel->m_ParticleMeshHeirarchy;
     int i;
     for (i = 0; i < n; i++, meshHierarchy++) {
-        if (meshHierarchy->f4 != 0) {
-            meshHierarchy->f4 += (int)pModel;
-            ((cChunkResolve_resolveParticleModelHeirarchy_cObj*)self)->resolveParticleMesh((void*)meshHierarchy->f4);
+        if (((int)meshHierarchy->m_ParticleMesh) != 0) {
+            (*(int*)&meshHierarchy->m_ParticleMesh) += (int)pModel;
+            ((cChunkResolve_resolveParticleModelHeirarchy_cObj*)self)->resolveParticleMesh((void*)((int)meshHierarchy->m_ParticleMesh));
         }
-        if (meshHierarchy->fC == 0xFFFFFFFF) {
-            meshHierarchy->fC = (unsigned int)t4mat_Identity;
+        if (((unsigned int)meshHierarchy->m_pParticleMeshMatrix) == 0xFFFFFFFF) {
+            (*(unsigned int*)&meshHierarchy->m_pParticleMeshMatrix) = (unsigned int)t4mat_Identity;
         } else {
-            meshHierarchy->fC += (int)pModel;
+            (*(unsigned int*)&meshHierarchy->m_pParticleMeshMatrix) += (int)pModel;
         }
-        if (meshHierarchy->f8 != 0) {
-            meshHierarchy->f8 += (int)pModel;
-            ((cChunkResolve_resolveParticleModelHeirarchy_cObj*)self)->resolveAnimation((void*)meshHierarchy->f8, 0);
+        if (((int)meshHierarchy->m_ParticleMeshAnim) != 0) {
+            (*(int*)&meshHierarchy->m_ParticleMeshAnim) += (int)pModel;
+            ((cChunkResolve_resolveParticleModelHeirarchy_cObj*)self)->resolveAnimation((void*)((int)meshHierarchy->m_ParticleMeshAnim), 0);
         }
     }
     return 1;
@@ -1284,14 +1275,6 @@ extern "C" void SphereTree_init(void* self);
 extern "C" int bxSphereTree_Load(void* self, char* data, void* ctx);
 
 
-struct sNode_3AAA08 {
-    unsigned short n;
-    unsigned short pad;
-    char* p4;
-    char* p8;
-    char* pC;
-    char* p10;
-};
 
 
 /**
@@ -1342,14 +1325,14 @@ extern "C" int cChunkResolve_resolveCollideModel(cChunkResolve* self, void* ctx,
         (*(char**)&modelList->MeshTree) = 0;
         modelList->NumMesh = pCollideModel->m_usNumMesh;
         (*(char**)&modelList->MeshTree) = ((char*)pCollideModel->m_pSphTree);
-        sNode_3AAA08* node = (sNode_3AAA08*)pCollideModel->m_pColData;
+        tPolyModelMesh* node = (tPolyModelMesh*)pCollideModel->m_pColData;
         for (int i = 0; i < modelList->NumMesh; i++) {
-            ((sNode_3AAA08**)modelList->MeshTree)[i] = node;
-            node->p4 = (char*)node + (int)node->p4;
-            node->p8 = (char*)node + (int)node->p8;
-            node->pC = (char*)node + (int)node->pC;
-            node->p10 = (char*)node + (int)node->p10;
-            node = (sNode_3AAA08*)(node->p10 + node->n * 16);
+            ((tPolyModelMesh**)modelList->MeshTree)[i] = node;
+            (*(char**)&node->Face) = (char*)node + (int)((char*)node->Face);
+            (*(char**)&node->Boxes) = (char*)node + (int)((char*)node->Boxes);
+            (*(char**)&node->Vertex) = (char*)node + (int)((char*)node->Vertex);
+            (*(char**)&node->Normal) = (char*)node + (int)((char*)node->Normal);
+            node = (tPolyModelMesh*)(((char*)node->Normal) + node->NumFaces * 16);
         }
     }
     return 1;
@@ -1362,16 +1345,6 @@ INCLUDE_ASM("world/worldview", cChunkResolve_resolveHalo);
 // PORT: getHaloRadius__FPv is declared (void*) but takes a flags int and returns a float.
 float getHaloRadius_f(int flags) __asm__("getHaloRadius__FPv");
 
-struct cChunkResolve_resolveHalo_sObj {
-    char pad_0x00[0xC];
-    int flags;          // 0xC
-    char pad_0x10[0xC];
-    float pos[3];       // 0x1C
-    float min[3];       // 0x28
-    float max[3];       // 0x34
-    int field_0x40;
-    int field_0x44;
-};
 
 /**
  * Sets up a light halo's bounds after it is loaded.
@@ -1382,17 +1355,17 @@ struct cChunkResolve_resolveHalo_sObj {
  * @param obj  the halo record (On Tour pLightHalo)
  * @return 1
  */
-extern "C" int cChunkResolve_resolveHalo(cChunkResolve* self, cChunkResolve_resolveHalo_sObj* obj)
+extern "C" int cChunkResolve_resolveHalo(cChunkResolve* self, tHaloRecord* obj)
 {
-    float haloRadius = getHaloRadius_f(obj->flags & 0x70);
-    obj->field_0x44 = 0;
-    obj->field_0x40 = 0;
-    obj->min[0] = obj->pos[0] - haloRadius;
-    obj->min[1] = obj->pos[1] - haloRadius;
-    obj->min[2] = obj->pos[2] - haloRadius;
-    obj->max[0] = obj->pos[0] + haloRadius;
-    obj->max[1] = obj->pos[1] + haloRadius;
-    obj->max[2] = obj->pos[2] + haloRadius;
+    float haloRadius = getHaloRadius_f(((int)obj->m_iFlags) & 0x70);
+    (*(int*)&obj->m_fOcclude[1]) = 0;
+    (*(int*)&obj->m_fOcclude[0]) = 0;
+    obj->m_fvMin[0] = obj->m_fvWorldPos[0] - haloRadius;
+    obj->m_fvMin[1] = obj->m_fvWorldPos[1] - haloRadius;
+    obj->m_fvMin[2] = obj->m_fvWorldPos[2] - haloRadius;
+    obj->m_fvMax[0] = obj->m_fvWorldPos[0] + haloRadius;
+    obj->m_fvMax[1] = obj->m_fvWorldPos[1] + haloRadius;
+    obj->m_fvMax[2] = obj->m_fvWorldPos[2] + haloRadius;
     return 1;
 }
 #endif
@@ -2265,10 +2238,6 @@ struct cPS2ChunkResolve_resolveInstance_sLib {
     int f4;
     cPS2ChunkResolve_resolveInstance_sTab** tables;
 };
-struct cPS2ChunkResolve_resolveInstance_sView {
-    int f0;
-    int f4;
-};
 
 extern "C" int func_003AC358(cPS2ChunkResolve* self, tInstanceRecord* a1);
 
@@ -2299,8 +2268,8 @@ extern "C" int cPS2ChunkResolve_resolveInstance(cPS2ChunkResolve* self, tInstanc
     pInstance->m_Model = (tModelRecord*)resolved;
     pInstance->m_MaterialBlock = (tMaterialBlockRecord*)resolved->fC;
     pInstance->m_pInstanceAudio = 0;
-    pInstance->m_pCollideRecord = (tCollideRecord*)((cPS2ChunkResolve_resolveInstance_sView*)self->m_pDummyCollideRecord);
-    int x = ((cPS2ChunkResolve_resolveInstance_sView*)self->m_pDummyCollideRecord)->f4 & 0xFFFF0000;
+    pInstance->m_pCollideRecord = (tCollideRecord*)(self->m_pDummyCollideRecord);
+    int x = (self->m_pDummyCollideRecord)->InitFlags & 0xFFFF0000;
     pInstance->m_iFlags = x | (x >> 16) | 2;
     func_003AC358((cPS2ChunkResolve*)self, pInstance);
     return 1;

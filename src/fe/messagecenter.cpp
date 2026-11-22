@@ -241,7 +241,7 @@ struct sReqLine_7500 {
     char pad_0x14[0x30];
     signed char player;     // 0x44
     char pad_0x45[3];
-    int f48;                // 0x48
+    int mCharID;                // 0x48
     int list[64];           // 0x4C
     int count;              // 0x14C
     int top;                // 0x150
@@ -249,7 +249,7 @@ struct sReqLine_7500 {
     unsigned long done;     // 0x158
     unsigned long sel;      // 0x160
     int limit;              // 0x168
-    int f16C;               // 0x16C
+    int mInStore;               // 0x16C
 };
 
 
@@ -303,7 +303,7 @@ extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, cUIThing* i
         }
         int idx = self->list[k];
         if (!isSet_7500(self->sel, idx)) {
-            if (self->f16C != 0) {
+            if (self->mInStore != 0) {
                 if (self->limit >= cFEStateRequestLine_getSongCost(self, idx) || countSel_7500(self) < 6) {
                     cFEStateRequestLine_showBuyPopup_7500(self, idx);
                 }
@@ -326,10 +326,10 @@ extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, cUIThing* i
     }
     case 6: {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
-        cBERewardInterface_setPlayList(iface, self->player, self->f48, self->done);
-        cBERewardInterface_setOwnedSongList(iface, self->player, self->f48, self->sel);
+        cBERewardInterface_setPlayList(iface, self->player, self->mCharID, self->done);
+        cBERewardInterface_setOwnedSongList(iface, self->player, self->mCharID, self->sel);
         func_0028C2D0(cAudioInterface_bxAudio(), self->done);
-        if (self->f16C != 0) {
+        if (self->mInStore != 0) {
             char* pl = (char*)cAudioInterface_bxAudio();
             sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(pl + 0x5558);
             char* obj = pl + 0x118;
@@ -338,7 +338,7 @@ extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, cUIThing* i
         if ((int)SSXApp->Game != 0) {
             cUIStateStack_pop(self->engine + 0x18, 1);
         } else {
-            void* nextState = cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, str_cFEStateAudioOptions, 0, 0), self->engine, self->player, self->f16C);
+            void* nextState = cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, str_cFEStateAudioOptions, 0, 0), self->engine, self->player, self->mInStore);
             if (nextState != 0) {
                 cUIStateStack_push(self->engine + 0x18, nextState);
             }
@@ -392,13 +392,13 @@ extern "C" int cFEStateRequestLine_onWidgetMenu(void* requestLine, cUIMenu* item
     case 6: {
         int idx = self->list[self->top + k];
         if (onlyBit_7500(self->done, idx)) {
-            if (self->f16C != 0) {
+            if (self->mInStore != 0) {
                 if (!isSet_7500(self->sel, idx))
                     return 257;
             }
             return 0x10;
         }
-        if (self->f16C == 0) {
+        if (self->mInStore == 0) {
             if (isSet_7500(self->sel, idx))
                 return 257;
         } else {

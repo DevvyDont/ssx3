@@ -916,17 +916,8 @@ struct sLensFxObj {
     sLensFxVEntry* vt; // 0x4
 };
 
-struct sLensFxSlot {
-    sLensFxObj** p0;   // 0x0
-    int pad4[3];
-    sLensFxObj** p10;  // 0x10
-    sLensFxObj** p14;  // 0x14
-    int pad18[2];
-    sLensFxObj** p20;  // 0x20
-    char pad24[0xF0 - 0x24];
-};
 
-extern sLensFxSlot cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the sun's pitch offset for render state @p i.
@@ -939,8 +930,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_SunPitchOffset(int i)
 {
-    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *renderState->p14;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[5]);
     return *obj->vt[27].fn(vthis(obj, obj->vt[27]));
 }
 #endif
@@ -948,7 +939,7 @@ extern "C" float cRenderStateMan_SunPitchOffset(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SunYawOffset);
 #ifdef SKIP_ASM
-extern sLensFxSlot cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the sun's yaw offset for render state @p i.
@@ -961,8 +952,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_SunYawOffset(int i)
 {
-    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *renderState->p14;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[5]);
     return *obj->vt[28].fn(vthis(obj, obj->vt[28]));
 }
 #endif
@@ -970,7 +961,7 @@ extern "C" float cRenderStateMan_SunYawOffset(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SunColorR);
 #ifdef SKIP_ASM
-extern sLensFxSlot cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the sun colour's red for render state @p i.
@@ -983,8 +974,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_SunColorR(int i)
 {
-    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *renderState->p14;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[5]);
     return *obj->vt[29].fn(vthis(obj, obj->vt[29]));
 }
 #endif
@@ -992,7 +983,7 @@ extern "C" float cRenderStateMan_SunColorR(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SunColorG);
 #ifdef SKIP_ASM
-extern sLensFxSlot cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the sun colour's green for render state @p i.
@@ -1005,8 +996,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_SunColorG(int i)
 {
-    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *renderState->p14;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[5]);
     return *obj->vt[30].fn(vthis(obj, obj->vt[30]));
 }
 #endif
@@ -1014,7 +1005,7 @@ extern "C" float cRenderStateMan_SunColorG(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SunColorB);
 #ifdef SKIP_ASM
-extern sLensFxSlot cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the sun colour's blue for render state @p i.
@@ -1027,8 +1018,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_SunColorB(int i)
 {
-    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *renderState->p14;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[5]);
     return *obj->vt[31].fn(vthis(obj, obj->vt[31]));
 }
 #endif
@@ -1036,7 +1027,7 @@ extern "C" float cRenderStateMan_SunColorB(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SunIntensity);
 #ifdef SKIP_ASM
-extern sLensFxSlot cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the sun's intensity for render state @p i.
@@ -1049,8 +1040,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_SunIntensity(int i)
 {
-    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *renderState->p14;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[5]);
     return *obj->vt[32].fn(vthis(obj, obj->vt[32]));
 }
 #endif
@@ -1058,7 +1049,7 @@ extern "C" float cRenderStateMan_SunIntensity(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SunType);
 #ifdef SKIP_ASM
-extern sLensFxSlot cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the sun type for render state @p i (an integer; -1 for no sun).
@@ -1072,8 +1063,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" int cRenderStateMan_SunType(int i)
 {
-    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *renderState->p14;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[5]);
     return *(int*)obj->vt[33].fn(vthis(obj, obj->vt[33]));
 }
 #endif
@@ -1081,7 +1072,7 @@ extern "C" int cRenderStateMan_SunType(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_LensIntensity);
 #ifdef SKIP_ASM
-extern sLensFxSlot cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the lens-flare intensity for render state @p i.
@@ -1094,8 +1085,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_LensIntensity(int i)
 {
-    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *renderState->p14;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[5]);
     return *obj->vt[34].fn(vthis(obj, obj->vt[34]));
 }
 #endif
@@ -1103,7 +1094,7 @@ extern "C" float cRenderStateMan_LensIntensity(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SunRadius);
 #ifdef SKIP_ASM
-extern sLensFxSlot cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the sun's radius for render state @p i.
@@ -1116,8 +1107,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_SunRadius(int i)
 {
-    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *renderState->p14;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[5]);
     return *obj->vt[35].fn(vthis(obj, obj->vt[35]));
 }
 #endif
@@ -1235,7 +1226,7 @@ extern "C" void cRenderStateMan_ObjectIrradiance(void)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_DrawDistance);
 #ifdef SKIP_ASM
-extern sLensFxSlot cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the draw distance for render state @p i.
@@ -1249,8 +1240,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_DrawDistance(int i)
 {
-    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *renderState->p0;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[0]);
     return *obj->vt[6].fn(vthis(obj, obj->vt[6]));
 }
 #endif
@@ -1258,7 +1249,7 @@ extern "C" float cRenderStateMan_DrawDistance(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SkyBoxRotation);
 #ifdef SKIP_ASM
-extern sLensFxSlot cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the sky box rotation for render state @p i.
@@ -1272,8 +1263,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_SkyBoxRotation(int i)
 {
-    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *renderState->p10;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[4]);
     return *obj->vt[26].fn(vthis(obj, obj->vt[26]));
 }
 #endif
@@ -1296,8 +1287,8 @@ extern int cRenderStateMan_m_indoor;
 extern "C" float cRenderStateMan_SnowIntensity(int i)
 {
     if (cRenderStateMan_m_indoor == 0) {
-        sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
-        sLensFxObj* obj = *renderState->p20;
+        tRenderState* renderState = &cRenderStateMan_m_state[i];
+        sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
         return *obj->vt[43].fn(vthis(obj, obj->vt[43])) * (1.0f - *(float*)((char*)renderState + 0x24));
     }
     return 0.0f;
@@ -1307,7 +1298,7 @@ extern "C" float cRenderStateMan_SnowIntensity(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_FlakeSize);
 #ifdef SKIP_ASM
-extern sLensFxSlot cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the snow flake size for render state @p i.
@@ -1320,8 +1311,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_FlakeSize(int i)
 {
-    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *renderState->p20;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
     return *obj->vt[44].fn(vthis(obj, obj->vt[44]));
 }
 #endif
@@ -1329,7 +1320,7 @@ extern "C" float cRenderStateMan_FlakeSize(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_WindIntensity);
 #ifdef SKIP_ASM
-extern sLensFxSlot cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the wind intensity for render state @p i, reduced inside tunnels.
@@ -1343,8 +1334,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_WindIntensity(int i)
 {
-    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *renderState->p20;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
     return *obj->vt[45].fn(vthis(obj, obj->vt[45])) * (1.0f - *(float*)((char*)renderState + 0x24));
 }
 #endif
@@ -1352,7 +1343,7 @@ extern "C" float cRenderStateMan_WindIntensity(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_WindRotation);
 #ifdef SKIP_ASM
-extern sLensFxSlot cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the wind direction angle for render state @p i, in degrees.
@@ -1366,8 +1357,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_WindRotation(int i)
 {
-    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *renderState->p20;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
     return *obj->vt[46].fn(vthis(obj, obj->vt[46]));
 }
 #endif
@@ -1375,7 +1366,7 @@ extern "C" float cRenderStateMan_WindRotation(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SnowFlurries);
 #ifdef SKIP_ASM
-extern sLensFxSlot cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the snow flurry amount for render state @p i.
@@ -1389,8 +1380,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_SnowFlurries(int i)
 {
-    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *renderState->p20;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
     return *obj->vt[49].fn(vthis(obj, obj->vt[49]));
 }
 #endif
@@ -1413,8 +1404,8 @@ extern int cRenderStateMan_m_indoor;
 extern "C" float cRenderStateMan_SnowFluffItensity(int i)
 {
     if (cRenderStateMan_m_indoor == 0) {
-        sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
-        sLensFxObj* obj = *renderState->p20;
+        tRenderState* renderState = &cRenderStateMan_m_state[i];
+        sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
         return *obj->vt[51].fn(vthis(obj, obj->vt[51]));
     }
     return 0.0f;
@@ -1424,7 +1415,7 @@ extern "C" float cRenderStateMan_SnowFluffItensity(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SnowFluffWindIntensity);
 #ifdef SKIP_ASM
-extern sLensFxSlot cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the snow fluff wind intensity for render state @p i.
@@ -1438,8 +1429,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_SnowFluffWindIntensity(int i)
 {
-    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *renderState->p20;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
     return *obj->vt[52].fn(vthis(obj, obj->vt[52]));
 }
 #endif
@@ -1447,7 +1438,7 @@ extern "C" float cRenderStateMan_SnowFluffWindIntensity(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SnowGravityMultiplier);
 #ifdef SKIP_ASM
-extern sLensFxSlot cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the snow gravity multiplier for render state @p i.
@@ -1461,8 +1452,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_SnowGravityMultiplier(int i)
 {
-    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *renderState->p20;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
     return *obj->vt[50].fn(vthis(obj, obj->vt[50]));
 }
 #endif
@@ -1470,7 +1461,7 @@ extern "C" float cRenderStateMan_SnowGravityMultiplier(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_Temperature);
 #ifdef SKIP_ASM
-extern sLensFxSlot cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the temperature for render state @p i (accessor slot 48).
@@ -1484,8 +1475,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_Temperature(int i)
 {
-    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *renderState->p20;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
     return *obj->vt[48].fn(vthis(obj, obj->vt[48]));
 }
 #endif
@@ -1493,7 +1484,7 @@ extern "C" float cRenderStateMan_Temperature(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_LightningChance);
 #ifdef SKIP_ASM
-extern sLensFxSlot cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the lightning chance for render state @p i.
@@ -1507,8 +1498,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_LightningChance(int i)
 {
-    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *renderState->p20;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
     return *obj->vt[53].fn(vthis(obj, obj->vt[53]));
 }
 #endif
@@ -1516,7 +1507,7 @@ extern "C" float cRenderStateMan_LightningChance(int i)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SnowFlakeColourA);
 #ifdef SKIP_ASM
-extern sLensFxSlot cRenderStateMan_m_state[];
+extern tRenderState cRenderStateMan_m_state[];
 
 /**
  * Returns the snow flake colour's alpha for render state @p i.
@@ -1530,8 +1521,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float cRenderStateMan_SnowFlakeColourA(int i)
 {
-    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *renderState->p20;
+    tRenderState* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *((sLensFxObj**)renderState->m_query[8]);
     return *obj->vt[54].fn(vthis(obj, obj->vt[54]));
 }
 #endif

@@ -1409,8 +1409,8 @@ struct sRcFrame1380 {
     int f24;                // 0x24
     int f28;                // 0x28
     int f2C;                // 0x2C
-    int f30;                // 0x30
-    int f34;                // 0x34
+    int FrameStartTick;                // 0x30
+    int FrameEndTick;                // 0x34
 };
 
 
@@ -1438,8 +1438,8 @@ extern "C" void cReplay_writeFrames(cReplay* self)
         cReplayFramePtr_getFrameBlock_2(((sRcFrame1380*)self->WriteFrame), 1);
         int* hdr = ((int*)self->WriteTmp);
         hdr[0] = 0x11111113;
-        hdr[2] = ((sRcFrame1380*)self->WriteFrame)->f30;
-        hdr[3] = ((sRcFrame1380*)self->WriteFrame)->f34;
+        hdr[2] = ((sRcFrame1380*)self->WriteFrame)->FrameStartTick;
+        hdr[3] = ((sRcFrame1380*)self->WriteFrame)->FrameEndTick;
         hdr[1] = ((sRcFrame1380*)self->WriteFrame)->size;
         hdr[9] = 0x11111111;
         hdr[5] = ((sRcFrame1380*)self->WriteFrame)->f20;
@@ -1494,11 +1494,11 @@ extern "C" int HUFF_encode(void* src, int size, void* dst, int* state);
 struct sReplayCache1510 {
     char pad_0x0[0x48C];
     cReplayCache* entries[(0x638 - 0x48C) / 4];   // 0x48C
-    int field_0x638;        // 0x638
+    int WriteState;        // 0x638
     char pad_0x63C[0x4];
     int* out;               // 0x640
-    int field_0x644;        // 0x644
-    int field_0x648;        // 0x648
+    int WriteSrc;        // 0x644
+    int WriteSrcSize;        // 0x648
     char pad_0x64C[0x8];
     int cur;                // 0x654
     int count;              // 0x658
@@ -1547,13 +1547,13 @@ extern "C" void cReplay_writeInput(sReplayCache1510* self)
             self->cur++;
         } else {
             self->cur = cur + 1;
-            self->field_0x648 = 0;
-            self->field_0x644 = 0;
+            self->WriteSrcSize = 0;
+            self->WriteSrc = 0;
         }
     } else {
-        self->field_0x638++;
-        self->field_0x648 = 0;
-        self->field_0x644 = 0;
+        self->WriteState++;
+        self->WriteSrcSize = 0;
+        self->WriteSrc = 0;
     }
 }
 #endif

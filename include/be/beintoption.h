@@ -98,12 +98,15 @@ CHECK_SIZE(tBEOptionDB, 0x288);
 // [U] cBERules_getPlayerStartDelaySecs(i) reads HeadStartSecs of record i (+0x8, 0xC stride), the option setters /
 // getters (cBEOptionInterface_*) read and write the three words.
 struct tBEBraggingRights {
-    unsigned int unk_00;            // 0x0 [O] an anonymous union (the rule flags; member names not in On Tour's dump)
+    unsigned int Flags;             // 0x0 [O] anonymous union { unsigned int Flags; bits } (DWARF union @5e7b8 in
+                                    //     ssxd_dvd.prx; LSB first: FastRecovery, Level1Character, HalfPoints,
+                                    //     StartFullBoost, NoUberTricks, LooseAdrenalin); [U] cAI_applyPlayerRulesCustom
+                                    //     tests bits 0..5 with exactly those effects. [Renamed from unk_00 by lstruct L2.]
     int StartingPoints;             // 0x4 [O]
     int HeadStartSecs;              // 0x8 [O]; [U] cBERules_getPlayerStartDelaySecs
 };
 
-CHECK_OFFSET(tBEBraggingRights, unk_00, 0x0);
+CHECK_OFFSET(tBEBraggingRights, Flags, 0x0);
 CHECK_OFFSET(tBEBraggingRights, StartingPoints, 0x4);
 CHECK_OFFSET(tBEBraggingRights, HeadStartSecs, 0x8);
 CHECK_SIZE(tBEBraggingRights, 0xC);
@@ -111,11 +114,15 @@ CHECK_SIZE(tBEBraggingRights, 0xC);
 // tBEMyRules: the rules that are not per player. [O] On Tour struct tBEMyRules (0x8): an anonymous union, then
 // AIHeadStartSecs; [U] cBERules_getAIStartDelaySecs reads AIHeadStartSecs (retail D_005308D4 = cBERules_mRules + 0x1C).
 struct tBEMyRules {
-    unsigned int unk_00;            // 0x0 [O] an anonymous union (member names not in On Tour's dump)
+    unsigned int Flags;             // 0x0 [O] anonymous union { unsigned int Flags; bits } (DWARF union @5ea5c in
+                                    //     ssxd_dvd.prx; LSB first: UnlimitedBoost, NoUberRails, SuperAI, NoBoost,
+                                    //     KOBoostOnly, NoKnockDowns, NoIconMultiplier, NoIconPoints, NoIconPowerUp,
+                                    //     NoCheckPoints); [U] the ai/ai OptBit helpers test its bits (view
+                                    //     sOptView_12B498 f18). [Renamed from unk_00 by lstruct L2.]
     int AIHeadStartSecs;            // 0x4 [O]; [U] cBERules_getAIStartDelaySecs
 };
 
-CHECK_OFFSET(tBEMyRules, unk_00, 0x0);
+CHECK_OFFSET(tBEMyRules, Flags, 0x0);
 CHECK_OFFSET(tBEMyRules, AIHeadStartSecs, 0x4);
 CHECK_SIZE(tBEMyRules, 0x8);
 

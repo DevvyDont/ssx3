@@ -95,7 +95,12 @@ struct sTextureState {
 // anonymous union of packed GS/VU1 state bits (decoded in [X] "RenderState"); the cGraphicsMan_Set* accessors
 // mask them in place.
 struct sDrawState {
-    unsigned int unk_00[4];         // 0x00 [O] anonymous union (bit fields); [P] SetFixAlpha/SetVifCodeState/...
+    unsigned int m_bitGroups[4];    // 0x00 [O] anonymous union { int m_bitGroups[3]; m_NamedBitFields } (DWARF union
+                                    //      @1ed6 in ssxd_dvd.prx: PSP has 3 words, retail 4: [P] SetDrawState copies
+                                    //      16 + 4 bytes); [P] SetFixAlpha/SetVifCodeState/...; [U] the cGraphicsMan_Set*
+                                    //      accessors and the particle / font / avalanche views mask words 0..2 in place.
+                                    //      The PSP bit names (mCLAMP, mCULL, ...) are GE state and do not apply here.
+                                    //      [Renamed from unk_00 by lstruct group L2.]
     sTextureState m_textureState;   // 0x10 [O]
 };
 
@@ -337,7 +342,7 @@ struct cPS2GraphicsMan {
 CHECK_OFFSET(sTextureState, m_texid, 0x0);
 CHECK_SIZE(sTextureState, 0x4);
 
-CHECK_OFFSET(sDrawState, unk_00, 0x00);
+CHECK_OFFSET(sDrawState, m_bitGroups, 0x00);
 CHECK_OFFSET(sDrawState, m_textureState, 0x10);
 CHECK_SIZE(sDrawState, 0x14);
 

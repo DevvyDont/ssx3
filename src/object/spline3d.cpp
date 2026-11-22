@@ -6,11 +6,11 @@
 
 struct sSplinePoint {
     char pad_0x00[0xC];
-    float field_0xC;
+    float m_fLength;
     char pad_0x10[0x64 - 0x10];
-    sSplinePoint* next; // 0x64
+    sSplinePoint* m_NextSeg; // 0x64
     char pad_0x68[0x84 - 0x68];
-    float field_0x84;
+    float m_fDistance;
 };
 
 struct sSplineHeader {
@@ -37,9 +37,9 @@ float cSpline_calcLength(cSpline* self)
     sSplineHeader* header = ((sSplineHeader*)(self->Seg)->m_Parent);
     sSplinePoint* cur = header->first;
     for (int i = 1; i < header->numPoints; i++) {
-        cur = cur->next;
+        cur = cur->m_NextSeg;
     }
-    return cur->field_0x84 + cur->field_0xC;
+    return cur->m_fDistance + cur->m_fLength;
 }
 #endif
 
