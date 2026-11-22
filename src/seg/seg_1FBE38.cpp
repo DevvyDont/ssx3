@@ -4677,7 +4677,7 @@ extern "C" cLunoValue_1440 MovieFunc(int n, sBindArg_1FBE38_1440* params) {
     if (~id == 0) {
         obj = ((char*)cWScriptMan_TheWScriptMan_1440->Inst);
     } else {
-        sRefSet_1440 *section = ((sRefSet_1440**)(cWorld_m_pTheWorld->m_pWorldCache)->m_pSectionCacheTable)[id & 0xFF];
+        sRefSet_1440 *section = ((sRefSet_1440*)(cWorld_m_pTheWorld->m_pWorldCache)->m_pSectionCacheTable[id & 0xFF]);
         unsigned i;
         if (!section || (i = section->refs[id >> 8] >> 8) == 0)
             obj = 0;
@@ -7229,7 +7229,7 @@ extern "C" cLunoValue UpdateDisplayHeightFunc(int n, sBindArg_1FBE38* params) {
     if (~id == 0) {
         obj = ((char*)curProcess_4320()->Inst);
     } else {
-        sRefSet *section = ((sRefSet**)(cWorld_m_pTheWorld->m_pWorldCache)->m_pSectionCacheTable)[id & 0xFF];
+        sRefSet *section = ((sRefSet*)(cWorld_m_pTheWorld->m_pWorldCache)->m_pSectionCacheTable[id & 0xFF]);
         unsigned i;
         char *inst;
         if (!section)
@@ -8002,7 +8002,7 @@ extern "C" cLunoValue CameraShakeFunc(int n, sBindArg_1FBE38 *params) {
         if (~id == 0) {
             obj = ((char*)cWScriptMan_TheWScriptMan->Inst);
         } else {
-            sRefSet *section = ((sRefSet**)(cWorld_m_pTheWorld->m_pWorldCache)->m_pSectionCacheTable)[id & 0xFF];
+            sRefSet *section = ((sRefSet*)(cWorld_m_pTheWorld->m_pWorldCache)->m_pSectionCacheTable[id & 0xFF]);
             char *r;
             if (!section)
                 r = 0;
@@ -8365,7 +8365,7 @@ extern "C" cLunoValue MiniAvalancheFunc(int n, sBindArg_1FBE38* params) {
     for (int i = 0; i < 8; i++) {
         unsigned id = vp->id[i];
         if (id != 0xFFFFFFFF) {
-            sRefSet *section = ((sRefSet**)(cWorld_m_pTheWorld->m_pWorldCache)->m_pSectionCacheTable)[id & 0xFF];
+            sRefSet *section = ((sRefSet*)(cWorld_m_pTheWorld->m_pWorldCache)->m_pSectionCacheTable[id & 0xFF]);
             char *inst;
             if (!section)
                 inst = 0;

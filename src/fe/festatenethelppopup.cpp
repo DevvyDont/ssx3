@@ -181,7 +181,7 @@ extern "C" void cFEStateNetHelpPopup_onWidgetCreate(cFEStateNetHelpPopup* self, 
         for (int i = 0; i < 7; i++) {
             sprintf(buf, str_TextOptionpct_d, i);
             if (hashName == GetHashValue32(buf)) {
-                ((cUIThing**)&self->mpOptions[0])[i] = w;
+                self->mpOptions[i] = (cUIText*)w;
                 break;
             }
         }

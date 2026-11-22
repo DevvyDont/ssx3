@@ -1081,11 +1081,11 @@ extern "C" void cFEStateRequestLine_updateFreeSongMarkers(cFEStateRequestLine* s
         n += (int)((requestLine->mOwnedSong >> j) & 1);
     }
     for (i = 0; i < 6; i++) {
-        if (((cMsgWidget_985F0**)&requestLine->mpFreeSongMarker[0])[i] != 0) {
+        if (((cMsgWidget_985F0*)requestLine->mpFreeSongMarker[i]) != 0) {
             if (requestLine->mInStore != 0 && n < 6 - i) {
-                ((cMsgWidget_985F0**)&requestLine->mpFreeSongMarker[0])[i]->show(1);
+                ((cMsgWidget_985F0*)requestLine->mpFreeSongMarker[i])->show(1);
             } else {
-                ((cMsgWidget_985F0**)&requestLine->mpFreeSongMarker[0])[i]->show(0);
+                ((cMsgWidget_985F0*)requestLine->mpFreeSongMarker[i])->show(0);
             }
         }
     }

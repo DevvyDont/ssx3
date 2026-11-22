@@ -4169,9 +4169,9 @@ extern "C" void func_002B1058(cSpeechSys* self, int idx, int playArg, int callba
     if (chans[idx] != 0) {
         *(int*)((char*)chans[idx] + 0x8CC) = playArg;
         if (floatArg > 0.0f) {
-            *(float*)((char*)((int**)self->mSpeechInstance)[idx] + 0x8F4) = floatArg;
+            *(float*)((char*)self->mSpeechInstance[idx] + 0x8F4) = floatArg;
         }
-        *(int*)((char*)((int**)self->mSpeechInstance)[idx] + 0x8D0) = volumeArg;
+        *(int*)((char*)self->mSpeechInstance[idx] + 0x8D0) = volumeArg;
         if (callback != 0) {
             self->mCallback = (void (*)(int))callback;
             self->mCallbackInstance = idx;
@@ -4179,9 +4179,9 @@ extern "C" void func_002B1058(cSpeechSys* self, int idx, int playArg, int callba
         func_003D8040((void*)idx);
         self->mCallbackInstance = -1;
         self->mCallback = 0;
-        *(float*)((char*)((int**)self->mSpeechInstance)[idx] + 0x8F4) = 0.0f;
-        *(int*)((char*)((int**)self->mSpeechInstance)[idx] + 0x8CC) = 0;
-        *(int*)((char*)((int**)self->mSpeechInstance)[idx] + 0x8D0) = 0;
+        *(float*)((char*)self->mSpeechInstance[idx] + 0x8F4) = 0.0f;
+        *(int*)((char*)self->mSpeechInstance[idx] + 0x8CC) = 0;
+        *(int*)((char*)self->mSpeechInstance[idx] + 0x8D0) = 0;
     }
 }
 #endif
@@ -5971,7 +5971,7 @@ extern "C" void func_002B3398(cMusicSys* self, int flags)
         bankManagerVtbl.e[1].delta = D_00483948.e[1].delta + bankManagerDelta;
     }
     for (int i = 0; i < self->mNumSongs; i++) {
-        char* songConfig = ((char**)(&self->mSongConfig[0]))[i];
+        char* songConfig = ((char*)self->mSongConfig[i]);
         if (songConfig != 0) {
             sBmonVcall3398* dtorSlot = &(*(sBmonVcall3398**)(songConfig + 0xA8))[1];
             dtorSlot->fn(vthis(songConfig, *dtorSlot), 3);

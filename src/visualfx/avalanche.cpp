@@ -814,7 +814,7 @@ extern "C" void tActiveAvalanche_buildArray(tActiveAvalanche* self)
     *(tActiveAvalanche_node***)&self->m_activeNodeArray = (tActiveAvalanche_node**)operator_new_tag(n * 4, str_ActiveNodeArray, 0, 0);
     int i = 0;
     for (node = ((tActiveAvalanche_node*)self->m_activeNodeList); node != 0; node = node->next) {
-        ((tActiveAvalanche_node**)self->m_activeNodeArray)[i++] = node;
+        self->m_activeNodeArray[i++] = (tActiveAvalancheNode*)node;
     }
 }
 #endif
@@ -929,7 +929,7 @@ extern "C" void tActiveAvalanche_update_7EF8(tActiveAvalanche* self)
         bool ok = tActiveAvalancheNode_update_7EF8(n, self->m_currTime);
         alive = ok | alive;
         if (!ok) {
-            ((sAvObj_7EF8**)self->m_activeNodeArray)[i] = 0;
+            self->m_activeNodeArray[i] = 0;
         }
     }
     while (self->m_nextCollision < ((sAvData_7EF8*)self->m_avalanche)->nEvents && ((sAvData_7EF8*)self->m_avalanche)->events[self->m_nextCollision].time <= self->m_currTime) {
@@ -945,7 +945,7 @@ extern "C" void tActiveAvalanche_update_7EF8(tActiveAvalanche* self)
         self->m_nextCollision++;
     }
     while (self->m_nextGroundCollision < ((sAvData_7EF8*)self->m_avalanche)->nSounds && (float)soundFrame_7EF8(self) <= toFrames_7EF8(self->m_currTime)) {
-        sAvObj_7EF8* cueObj = ((sAvObj_7EF8**)self->m_activeNodeArray)[((sAvData_7EF8*)self->m_avalanche)->sounds[self->m_nextGroundCollision].obj];
+        sAvObj_7EF8* cueObj = ((sAvObj_7EF8*)self->m_activeNodeArray[((sAvData_7EF8*)self->m_avalanche)->sounds[self->m_nextGroundCollision].obj]);
         if (cueObj != 0) {
             cSSXAudio_AvalancheGroundHit_7EF8(cAudioInterface_bxAudio(), cueObj->sndPos);
         }

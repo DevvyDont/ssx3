@@ -1622,7 +1622,7 @@ extern "C" void* cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters(cFESt
     self->mNumTotalRewards = 0;
     self->mpDBPosters = 0;
     for (int i = 42; i >= 0; i--) {
-        ((void**)(&self->mpPosters[0]))[i] = 0;
+        self->mpPosters[i] = 0;
     }
     return ((void*)self);
 }
@@ -1752,7 +1752,7 @@ extern "C" void* cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingC
     self->mVtbl = cFEStateRewardGalleryTradingCards_vtbl;
     self->mpDBTradingCards = 0;
     for (int i = 115; i >= 0; i--) {
-        ((void**)(&self->mpTradingCards[0]))[i] = 0;
+        self->mpTradingCards[i] = 0;
     }
     return ((void*)self);
 }
@@ -1882,7 +1882,7 @@ extern "C" void* cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptAr
     self->mVtbl = cFEStateRewardGalleryConceptArts_vtbl;
     self->mpDBConceptArts = 0;
     for (int i = 99; i >= 0; i--) {
-        ((void**)(&self->mpConceptArts[0]))[i] = 0;
+        self->mpConceptArts[i] = 0;
     }
     return ((void*)self);
 }
@@ -2012,7 +2012,7 @@ extern "C" void* cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos(cFEStat
     self->mVtbl = cFEStateRewardGalleryVideos_vtbl;
     self->mpDBVideos = 0;
     for (int i = 1; i >= 0; i--) {
-        ((void**)(&self->mpVideos[0]))[i] = 0;
+        self->mpVideos[i] = 0;
     }
     return ((void*)self);
 }
@@ -2142,7 +2142,7 @@ extern "C" void* cFEStateRewardGalleryToys_cFEStateRewardGalleryToys(cFEStateRew
     self->mVtbl = cFEStateRewardGalleryToys_vtbl;
     self->mpDBToys = 0;
     for (int i = 27; i >= 0; i--) {
-        ((void**)(&self->mpToys[0]))[i] = 0;
+        self->mpToys[i] = 0;
     }
     return ((void*)self);
 }
@@ -2273,7 +2273,7 @@ extern "C" void* cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars
     self->mVtbl = cFEStateRewardGalleryCheatChars_vtbl;
     self->mpDBCheatChars = 0;
     for (int i = 27; i >= 0; i--) {
-        ((void**)(&self->mpCheatChars[0]))[i] = 0;
+        self->mpCheatChars[i] = 0;
     }
     return ((void*)self);
 }

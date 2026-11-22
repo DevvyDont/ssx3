@@ -245,7 +245,7 @@ extern "C" void cGameViewMan_snapAll(cGameViewMan* self)
 {
     unsigned int i;
     for (i = 0; i < self->m_uiNumView; i++) {
-        void* camera = ((void**)(&self->PlayerCamera[0]))[i];
+        void* camera = self->PlayerCamera[i];
         void* controller = *(void**)((char*)camera + 0xA0);
         sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)controller + 0x14);
         vt[4].fn(vthis(controller, vt[4]));
@@ -266,7 +266,7 @@ extern "C" void cGameViewMan_updateAll(cGameViewMan* self)
 {
     unsigned int i;
     for (i = 0; i < self->m_uiNumView; i++) {
-        void* camera = ((void**)(&self->PlayerCamera[0]))[i];
+        void* camera = self->PlayerCamera[i];
         sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)camera + 0x90);
         vt[3].fn(vthis(camera, vt[3]));
     }
@@ -288,7 +288,7 @@ extern "C" void cGameViewMan_updateStreamFocus(cGameViewMan* self)
 {
     unsigned int i;
     for (i = 0; i < self->m_uiNumView; i++) {
-        cCamera_updateStreamFocus(((void**)(&self->PlayerCamera[0]))[i]);
+        cCamera_updateStreamFocus(self->PlayerCamera[i]);
     }
 }
 #endif

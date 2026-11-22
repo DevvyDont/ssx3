@@ -319,14 +319,14 @@ extern "C" void cAI_setRaceRankType(cAI* self, int mode)
     {
         for (int i = 0; i < self->NumberOfRidersAllocated; i++)
         {
-            *(int*)(((char**)&self->Riders[0])[i] + 0xEC) = 0;
+            self->Riders[i]->RaceRanking = 0;
         }
     }
     else
     {
         for (int i = 0; i < self->NumberOfRidersAllocated; i++)
         {
-            *(int*)(((char**)&self->Riders[0])[i] + 0xEC) = i;
+            self->Riders[i]->RaceRanking = i;
         }
     }
 }
@@ -419,29 +419,29 @@ extern "C" void cAI_update(cAI* self)
         cPlaybackMan* x = SSXApp->Game->PlaybackMan;
         if (((char*)x) != 0 && x->State == 0) {
             n = 1;
-            riders[0] = Rider_AF0(((char**)&self->Players[0])[0]);
+            riders[0] = Rider_AF0(((char*)self->Players[0]));
             cRider_updateFocus(Rider_AF0((char*)self->MissionRiders[0]));
         } else {
             char** riderSlot = &riders[n];
-            *riderSlot = Rider_AF0(((char**)&self->Players[0])[0]);
+            *riderSlot = Rider_AF0(((char*)self->Players[0]));
             n = 2;
             riders[1] = Rider_AF0((char*)self->MissionRiders[0]);
-            cRider_updateFocus(Rider_AF0(((char**)&self->Players[0])[0]));
+            cRider_updateFocus(Rider_AF0(((char*)self->Players[0])));
         }
     } else {
         for (int i = 0; i < self->NumberOfPlayersAllocated; i++) {
             n++;
-            riders[n - 1] = Rider_AF0(((char**)&self->Players[0])[i]);
+            riders[n - 1] = Rider_AF0(((char*)self->Players[i]));
         }
         if (self->ComputerRidersActive)
             for (int i = 0; i < self->NumberOfComputersAllocated; i++) {
                 n++;
-                riders[n - 1] = Rider_AF0(((char**)&self->Computers[0])[i]);
+                riders[n - 1] = Rider_AF0(((char*)self->Computers[i]));
             }
         if (self->ComputerActorsActive)
             for (int i = 0; i < self->NumberOfActorsAllocated; i++) {
                 n++;
-                riders[n - 1] = Rider_AF0(((char**)&self->Actors[0])[i]);
+                riders[n - 1] = Rider_AF0(((char*)self->Actors[i]));
             }
     }
     if (cPauseState_Flags & 1) {
@@ -1213,7 +1213,7 @@ extern "C" int cAI_isAILoadedAndReady(cAI* self)
     int result = 1;
     for (int i = 0; i < self->NumberOfRidersAllocated; i++)
     {
-        if (cRider_isLoaded(((char**)&self->Riders[0])[i]) == 0)
+        if (cRider_isLoaded(((char*)self->Riders[i])) == 0)
         {
             result = 0;
         }
@@ -1291,7 +1291,7 @@ extern "C" int cAI_isRaceFinished(cAI* self)
 {
     for (int i = 0; i < self->NumberOfPlayersAllocated; i++)
     {
-        bool ok = aiRiderOk12A250(((char**)&self->Players[0])[i]);
+        bool ok = aiRiderOk12A250(((char*)self->Players[i]));
         if (!ok)
         {
             return 0;
@@ -1390,7 +1390,7 @@ ok:
             return 1;
         for (int i = 0; i < self->NumberOfRidersAllocated; i++)
         {
-            cRider_initPath(((char**)&self->Riders[0])[i], 0);
+            cRider_initPath(((char*)self->Riders[i]), 0);
         }
         return 1;
     }
@@ -1843,7 +1843,7 @@ extern "C" int cAI_isReadyToPurgeComputerRiders(cAI* self)
     int result = 1;
     for (int i = 0; i < self->NumberOfComputersAllocated; i++)
     {
-        if (cRider_isSafeToDelete(*(void**)(((char**)&self->Computers[0])[i] + 0x18)) == 0)
+        if (cRider_isSafeToDelete(self->Computers[i]->RiderHandler.GroundMotion.mRider) == 0)
         {
             result = 0;
         }
@@ -1917,7 +1917,7 @@ extern "C" int cAI_isReadyToPurgeComputerActors(cAI* self)
     int result = 1;
     for (int i = 0; i < self->NumberOfActorsAllocated; i++)
     {
-        if (cRider_isSafeToDelete(*(void**)(((char**)&self->Actors[0])[i] + 0x18)) == 0)
+        if (cRider_isSafeToDelete(self->Actors[i]->RiderHandler.GroundMotion.mRider) == 0)
         {
             result = 0;
         }
@@ -2315,7 +2315,7 @@ extern "C" void cAI_finishRemotePlayer(cAI* self)
         cGameComm_setFinishRaceAlone((char*)cGameComm_mGameComm);
         for (int i = 0; i < self->NumberOfPlayersAllocated; i++)
         {
-            cPlayer* rider = (cPlayer*)((char**)&self->Players[0])[i];
+            cPlayer* rider = (cPlayer*)self->Players[i];
             cRider* playerRider = (cRider*)rider->mRider;
             if (playerRider->mIsLocal == 0)
             {
@@ -2352,7 +2352,7 @@ extern "C" int cAI_syncCheckSum(cAI* self)
     int sum = AIrand();
     for (int i = 0; i < self->NumberOfRidersAllocated; i++)
     {
-        sum += cRider_syncCheckSum(((char**)&self->Riders[0])[i]);
+        sum += cRider_syncCheckSum(((char*)self->Riders[i]));
     }
     return sum;
 }
@@ -2498,7 +2498,7 @@ extern "C" void cAI_updateOverlapList(cAI* self)
     int i;
     for (i = 0; i < self->NumberOfRidersAllocated; i++)
     {
-        cRider_updateOverlapList(((void**)&self->Riders[0])[i]);
+        cRider_updateOverlapList(self->Riders[i]);
     }
 }
 #endif
@@ -2536,15 +2536,15 @@ extern "C" void cAI_writeToReplayFrame(cAI* self, cReplayFramePtr* frame)
     vt[1].fn(vthis(frame, vt[1]), (self), 40);
     for (int i = 0; i < self->NumberOfPlayersAllocated; i++)
     {
-        replayWriteObj(((char**)&self->Players[0])[i], frame);
+        replayWriteObj(((char*)self->Players[i]), frame);
     }
     for (int i = 0; i < self->NumberOfComputersAllocated; i++)
     {
-        replayWriteObj(((char**)&self->Computers[0])[i], frame);
+        replayWriteObj(((char*)self->Computers[i]), frame);
     }
     for (int i = 0; i < self->NumberOfActorsAllocated; i++)
     {
-        replayWriteObj(((char**)&self->Actors[0])[i], frame);
+        replayWriteObj(((char*)self->Actors[i]), frame);
     }
     cRenderStateMan_writeToReplayFrame(frame);
 }
@@ -2588,15 +2588,15 @@ extern "C" void cAI_readFromReplayFrame(cAI* self, cReplayFramePtr* frame)
     cAI_forceAIState((self), state);
     for (int i = 0; i < self->NumberOfPlayersAllocated; i++)
     {
-        replayReadObj(((char**)&self->Players[0])[i], frame);
+        replayReadObj(((char*)self->Players[i]), frame);
     }
     for (int i = 0; i < self->NumberOfComputersAllocated; i++)
     {
-        replayReadObj(((char**)&self->Computers[0])[i], frame);
+        replayReadObj(((char*)self->Computers[i]), frame);
     }
     for (int i = 0; i < self->NumberOfActorsAllocated; i++)
     {
-        replayReadObj(((char**)&self->Actors[0])[i], frame);
+        replayReadObj(((char*)self->Actors[i]), frame);
     }
     cRenderStateMan_readFromReplayFrame(frame);
 }

@@ -251,8 +251,8 @@ extern "C" void cReplay_rewind(cReplay* self, void* frame)
     }
     self->PlaybackTick = self->PlaybackFrame->FrameStartTick;
     for (i = 0; i < 2; i++) {
-        if (((void**)&self->InputCache[0])[i] != 0) {
-            cReplayCache_moveTo(((void**)&self->InputCache[0])[i], self->PlaybackTick);
+        if (self->InputCache[i] != 0) {
+            cReplayCache_moveTo(self->InputCache[i], self->PlaybackTick);
         }
     }
 }
@@ -280,8 +280,8 @@ extern "C" void cReplay_lastFrame(cReplay* self)
     self->PlaybackFrame = (cReplayFrame*)frame;
     self->PlaybackTick = *(int*)((char*)frame + 0x30);
     for (i = 0; i < 2; i++) {
-        if (((void**)&self->InputCache[0])[i] != 0) {
-            cReplayCache_moveTo(((void**)&self->InputCache[0])[i], self->PlaybackTick);
+        if (self->InputCache[i] != 0) {
+            cReplayCache_moveTo(self->InputCache[i], self->PlaybackTick);
         }
     }
 }
@@ -328,8 +328,8 @@ extern "C" void cReplay_stepFrame(cReplay* self, int reset)
     if (reset) {
         self->PlaybackTick = self->PlaybackFrame->FrameStartTick;
         for (i = 0; i < 2; i++) {
-            if (((void**)&self->InputCache[0])[i] != 0) {
-                cReplayCache_moveTo(((void**)&self->InputCache[0])[i], self->PlaybackTick);
+            if (self->InputCache[i] != 0) {
+                cReplayCache_moveTo(self->InputCache[i], self->PlaybackTick);
             }
         }
         cReplay_restoreReplayFrame((self), self->PlaybackFrame);
@@ -1662,8 +1662,8 @@ extern "C" int cReplay_load(cReplay* self, char* buf)
             cReplayFrameList_addFrame(((char*)&self->FrameList), node);
         }
         for (int i = 0; i < data->Players; i++) {
-            if (((void**)&self->InputCache[0])[i] != 0) {
-                cReplayCache_load(((void**)&self->InputCache[0])[i], pp);
+            if (self->InputCache[i] != 0) {
+                cReplayCache_load(self->InputCache[i], pp);
             }
         }
         self->State = 8;
@@ -3986,28 +3986,28 @@ extern "C" void cScriptPlayerEntity_Stop(cScriptPlayerEntity* self)
         {
             cRcObj_3DC0** objs = (cRcObj_3DC0**)self->mpChannelPlayers;
             objs[i]->Stop();
-            switch (((cRcObj_3DC0**)self->mpChannelPlayers)[i]->GetType())
+            switch (((cRcObj_3DC0*)self->mpChannelPlayers[i])->GetType())
             {
             case 0:
-                func_002724E8_impl(((cRcObj_3DC0**)self->mpChannelPlayers)[i]);
+                func_002724E8_impl(((cRcObj_3DC0*)self->mpChannelPlayers[i]));
                 break;
             case 1:
             {
-                cRcObj_3DC0* channelPlayer = ((cRcObj_3DC0**)self->mpChannelPlayers)[i];
+                cRcObj_3DC0* channelPlayer = ((cRcObj_3DC0*)self->mpChannelPlayers[i]);
                 if (channelPlayer)
                     channelPlayer->v10(3);
                 break;
             }
             case 2:
             {
-                cRcObj_3DC0* channelPlayer = ((cRcObj_3DC0**)self->mpChannelPlayers)[i];
+                cRcObj_3DC0* channelPlayer = ((cRcObj_3DC0*)self->mpChannelPlayers[i]);
                 if (channelPlayer)
                     channelPlayer->v10(3);
                 break;
             }
             case 3:
             {
-                cRcObj_3DC0* channelPlayer = ((cRcObj_3DC0**)self->mpChannelPlayers)[i];
+                cRcObj_3DC0* channelPlayer = ((cRcObj_3DC0*)self->mpChannelPlayers[i]);
                 if (channelPlayer)
                     channelPlayer->v10(3);
                 break;
@@ -4058,9 +4058,9 @@ extern "C" int cScriptPlayerEntity_Restart(cScriptPlayerEntity* self)
             unsigned char* rec = channelData;
             int ch = 0;
             channelData += 4;
-            ((cRcObj_3F68**)self->mpChannelPlayers)[i]->Stop();
+            ((cRcObj_3F68*)self->mpChannelPlayers[i])->Stop();
             int channelEvents = 0;
-            if (((cRcObj_3F68**)self->mpChannelPlayers)[i]->Play(channelData, self, &channelEvents) != 0 || changed)
+            if (((cRcObj_3F68*)self->mpChannelPlayers[i])->Play(channelData, self, &channelEvents) != 0 || changed)
                 ch = 1;
             i++;
             channelData += *(unsigned short*)(rec + 2);
@@ -4121,7 +4121,7 @@ extern "C" int cScriptPlayerEntity_Update(cScriptPlayerEntity* self_, float prev
         for (;;) {
             float next = time;
             for (int i = 0; i < (self->mpSystemHeader)->numChannels; i++) {
-                float channelNextTime = (float)((cChan_274100**)self->mpChannelPlayers)[i]->nextTime();
+                float channelNextTime = (float)((cChan_274100*)self->mpChannelPlayers[i])->nextTime();
                 if (channelNextTime >= 0.0f && channelNextTime < next) {
                     next = channelNextTime;
                 }
@@ -4453,7 +4453,7 @@ extern "C" int cScriptPlayerEntity_DoFrameUpdate(cScriptPlayerEntity* entity, fl
     bool any = false;
     for (int i = 0; i < (self->mpSystemHeader)->numChannels; i++) {
         int out = 0;
-        any = ((cA2743E8**)self->mpChannelPlayers)[i]->a3(currFrameNum, dt, &out) | any;
+        any = ((cA2743E8*)self->mpChannelPlayers[i])->a3(currFrameNum, dt, &out) | any;
         flags |= out;
     }
     cB2743E8* entityComm = ((cB2743E8*)self->mpEntityComm);

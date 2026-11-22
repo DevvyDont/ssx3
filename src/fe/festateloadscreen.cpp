@@ -804,7 +804,7 @@ extern "C" void cGFFinishlineState_update(cGFFinishlineState* self)
                     *(float*)&D_004A4F60 = 277.77777099609375f;
                     D_004A4F64 = 1;
                 }
-                if (D_004A4F60 < vLen_233CD8(*riderPos_233CD8(*(char**)(((char**)(&gameAI->Players[0]))[i] + 0x18)))) {
+                if (D_004A4F60 < vLen_233CD8(*riderPos_233CD8(*(char**)(((char*)gameAI->Players[i]) + 0x18)))) {
                     return;
                 }
             }

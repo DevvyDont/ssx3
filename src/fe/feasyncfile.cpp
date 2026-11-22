@@ -1720,7 +1720,7 @@ extern "C" void func_001A5450(cFEStateNetMessenger* self)
 {
     for (;;) {
         if (((void**)(*(tFEStringPtrVector*)&self->mNames.mpStart).unk_00) == ((void**)(*(tFEStringPtrVector*)&self->mNames.mpStart).mpStart)) break;
-        void* nameStr = ((void**)(*(tFEStringPtrVector*)&self->mNames.mpStart).mpStart)[-1];
+        void* nameStr = (*(tFEStringPtrVector*)&self->mNames.mpStart).mpStart[-1];
         (*(void***)&(*(tFEStringPtrVector*)&self->mNames.mpStart).mpStart)--;
         if (nameStr) {
             cBXString__cBXString(nameStr, 3);
@@ -7996,7 +7996,7 @@ extern "C" void func_001AD3E8(cFEStateSelectPersona* self, cUIText* text)
     for (; i < lobbyMan->mNumPersonas; i++) {
         cUIText* item = cList_getByIndex((char*)&text->mAttrText, i);
         item->mMiscData = i;
-        cUIText_setAsciiString(item, ((const char**)&lobbyMan->mPersonas[0])[i]);
+        cUIText_setAsciiString(item, ((const char*)lobbyMan->mPersonas[i]));
         ((cFEVObj_001AD3E8*)item)->setVisible(1);
     }
     for (; i < 4; i++) {
@@ -12624,8 +12624,8 @@ extern "C" int cFEStateChatRoom_onGainTransition(cFEStateChatRoom* self, int bFi
         cUIScrollBar_setScrollVisibile(self->mpSlider1, 0);
         cUIScrollBar_setScrollVisibile(self->mpSlider2, 0);
         for (i = 0; i < 2; i++) {
-            if (((cFEVObj_001B3490**)&self->mpMenu[0])[i] != 0) {
-                ((cFEVObj_001B3490**)&self->mpMenu[0])[i]->setFocus(1);
+            if (((cFEVObj_001B3490*)self->mpMenu[i]) != 0) {
+                ((cFEVObj_001B3490*)self->mpMenu[i])->setFocus(1);
             }
         }
         func_001B3978(self, LobbyMan_mLobbyMan->mPersona);

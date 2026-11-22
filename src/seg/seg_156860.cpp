@@ -241,7 +241,7 @@ extern "C" void cCommSystem_update(cCommSystem* self)
     }
     case 5:
         for (i = 0; i < 1; i++) {
-            sCommObj_5A20* channel = ((sCommObj_5A20**)&self->mChannels[0])[i];
+            sCommObj_5A20* channel = ((sCommObj_5A20*)self->mChannels[i]);
             if (channel != 0) {
                 channel->vt[3].fn(vthis(channel, channel->vt[3]));
             }

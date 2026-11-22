@@ -258,7 +258,7 @@ extern "C" void cSSXScriptEngine_Update(cSSXScriptEngine* self)
             int n = lvl->NumberOfPlayersAllocated;
             for (int j = 0; j < n; j++)
             {
-                void* obj = *(void**)(((char**)&lvl->Players[0])[j] + 0xDF0);
+                void* obj = *(void**)(((char*)lvl->Players[j]) + 0xDF0);
                 if (**(int**)obj != 0 && self->mNumFramesNoSkip == 0 && cInput_getState(obj, 111))
                 {
                     tNISList_DoSkip(nisList);

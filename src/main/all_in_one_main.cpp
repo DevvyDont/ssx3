@@ -409,7 +409,7 @@ extern "C" void func_001DB778(tFEStringPtrVector* self, void** pos, void* const&
 {
     if (((void**)self->mpFinish) != ((void**)self->mpEndOfStorage)) {
         if (((void**)self->mpFinish) != 0)
-            *((void**)self->mpFinish) = ((void**)self->mpFinish)[-1];
+            *((void**)self->mpFinish) = ((void*)self->mpFinish[-1]);
         ++(*(void***)&self->mpFinish);
         void* x_copy = x;
         sPtrVecDB778_copy_backward(pos, ((void**)self->mpFinish) - 2, ((void**)self->mpFinish) - 1);
@@ -501,7 +501,7 @@ extern "C" void func_001DB918(tFEPrivateMessageVector* self, void** pos, void* c
 {
     if (((void**)self->mpFinish) != ((void**)self->mpEndOfStorage)) {
         if (((void**)self->mpFinish) != 0)
-            *((void**)self->mpFinish) = ((void**)self->mpFinish)[-1];
+            *((void**)self->mpFinish) = ((void*)self->mpFinish[-1]);
         ++(*(void***)&self->mpFinish);
         void* x_copy = x;
         sPtrVecDB918_copy_backward(pos, ((void**)self->mpFinish) - 2, ((void**)self->mpFinish) - 1);

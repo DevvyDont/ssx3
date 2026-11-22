@@ -6360,7 +6360,7 @@ struct sObj261070 {
 extern "C" void func_00261070(BuddyMan* self)
 {
     while (((sObj261070**)self->mMessagesStart) != ((sObj261070**)self->mMessagesFinish)) {
-        sObj261070* message = ((sObj261070**)self->mMessagesFinish)[-1];
+        sObj261070* message = ((sObj261070*)self->mMessagesFinish[-1]);
         (*(sObj261070***)&self->mMessagesFinish)--;
         if (message != 0) {
             message->vt[1].fn(vthis(message, message->vt[1]), 3);
@@ -6653,7 +6653,7 @@ extern "C" void func_00261530(BuddyMan* vself)
     BuddyMan* self = vself;
     if (((void*)self->mpBuddyApi) != 0) {
         while (((sObj261530**)self->mChallengersStart) != ((sObj261530**)self->mChallengersFinish)) {
-            sObj261530* challenger = ((sObj261530**)self->mChallengersFinish)[-1];
+            sObj261530* challenger = ((sObj261530*)self->mChallengersFinish[-1]);
             func_0025FC28_v(LobbyMan_mLobbyMan, challenger->id);
             (*(sObj261530***)&self->mChallengersFinish)--;
             if (challenger != 0) {

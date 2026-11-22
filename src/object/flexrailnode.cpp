@@ -57,8 +57,8 @@ extern "C" void nash_Cell_remnode(nash_Cell* oct, int type, cFlexRailSpaceNode* 
 
 static inline int octEmpty_8C48(nash_Cell* o)
 {
-    if (((void**)&o->children[0][0][0])[0] != 0 || ((void**)&o->children[0][0][0])[1] != 0 || ((void**)&o->children[0][0][0])[2] != 0 || ((void**)&o->children[0][0][0])[3] != 0
-        || ((void**)&o->children[0][0][0])[4] != 0 || ((void**)&o->children[0][0][0])[5] != 0 || ((void**)&o->children[0][0][0])[6] != 0 || ((void**)&o->children[0][0][0])[7] != 0) {
+    if (o->children[0][0][0] != 0 || o->children[0][0][1] != 0 || o->children[0][1][0] != 0 || o->children[0][1][1] != 0
+        || o->children[1][0][0] != 0 || o->children[1][0][1] != 0 || o->children[1][1][0] != 0 || o->children[1][1][1] != 0) {
         return 0;
     }
     for (int i = 0; i < 3; i++) {

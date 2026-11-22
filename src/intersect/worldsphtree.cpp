@@ -733,14 +733,14 @@ static inline void collect_331450(nash_Cell* node, OverlapInstancesCallback* ctx
     for (p = (*(void***)&node->nodesinside[2]); p != 0; p = (void**)*p) {
         ((tInstanceRecord**)ctx->instances)[(*((int*)ctx->number))++] = (tInstanceRecord*)p;
     }
-    if (((void**)&node->children[0][0][0])[0] != 0) nash_Cell_descend1((nash_Cell*)((void**)&node->children[0][0][0])[0], (sOctCollect*)ctx);
-    if (((void**)&node->children[0][0][0])[1] != 0) nash_Cell_descend1((nash_Cell*)((void**)&node->children[0][0][0])[1], (sOctCollect*)ctx);
-    if (((void**)&node->children[0][0][0])[2] != 0) nash_Cell_descend1((nash_Cell*)((void**)&node->children[0][0][0])[2], (sOctCollect*)ctx);
-    if (((void**)&node->children[0][0][0])[3] != 0) nash_Cell_descend1((nash_Cell*)((void**)&node->children[0][0][0])[3], (sOctCollect*)ctx);
-    if (((void**)&node->children[0][0][0])[4] != 0) nash_Cell_descend1((nash_Cell*)((void**)&node->children[0][0][0])[4], (sOctCollect*)ctx);
-    if (((void**)&node->children[0][0][0])[5] != 0) nash_Cell_descend1((nash_Cell*)((void**)&node->children[0][0][0])[5], (sOctCollect*)ctx);
-    if (((void**)&node->children[0][0][0])[6] != 0) nash_Cell_descend1((nash_Cell*)((void**)&node->children[0][0][0])[6], (sOctCollect*)ctx);
-    if (((void**)&node->children[0][0][0])[7] != 0) nash_Cell_descend1((nash_Cell*)((void**)&node->children[0][0][0])[7], (sOctCollect*)ctx);
+    if (node->children[0][0][0] != 0) nash_Cell_descend1((nash_Cell*)node->children[0][0][0], (sOctCollect*)ctx);
+    if (node->children[0][0][1] != 0) nash_Cell_descend1((nash_Cell*)node->children[0][0][1], (sOctCollect*)ctx);
+    if (node->children[0][1][0] != 0) nash_Cell_descend1((nash_Cell*)node->children[0][1][0], (sOctCollect*)ctx);
+    if (node->children[0][1][1] != 0) nash_Cell_descend1((nash_Cell*)node->children[0][1][1], (sOctCollect*)ctx);
+    if (node->children[1][0][0] != 0) nash_Cell_descend1((nash_Cell*)node->children[1][0][0], (sOctCollect*)ctx);
+    if (node->children[1][0][1] != 0) nash_Cell_descend1((nash_Cell*)node->children[1][0][1], (sOctCollect*)ctx);
+    if (node->children[1][1][0] != 0) nash_Cell_descend1((nash_Cell*)node->children[1][1][0], (sOctCollect*)ctx);
+    if (node->children[1][1][1] != 0) nash_Cell_descend1((nash_Cell*)node->children[1][1][1], (sOctCollect*)ctx);
 }
 
 static inline int queryCell_331450(sGrid_331450* grid, int i, void* box, OverlapInstancesCallback* ctx)
@@ -1457,7 +1457,7 @@ extern "C" int cOverlapList_splineIntersect(cOverlapList* self, sWsVec4* pos, in
     wsSubEq_334680((*(sWsVec4*)&box.MinPoint), ext);
     wsAddEq_334680((*(sWsVec4*)&box.MaxPoint), ext);
     for (unsigned int i = 0; i < self->numtyped; i++) {
-        cTypedSpaceNode* spaceNode = (cTypedSpaceNode*)((char**)(&self->typed[0]))[i];
+        cTypedSpaceNode* spaceNode = (cTypedSpaceNode*)self->typed[i];
         int type = spaceNode->type;
         if (type == 2) {
             cRailModifier_splineIntersect(*(void**)(((char*)spaceNode) + 0xC), &box, &box, pos, mask, &cnt, &dist, intInfo);
@@ -2449,14 +2449,14 @@ static inline void collect_335D78(nash_Cell* node, TerrainCallback* ctx)
     for (p = (void**)(*(void**)&node->nodesinside[0]); p != 0; p = (void**)*p) {
         TerrainCallback_intersectinstance(ctx, p);
     }
-    if (((void**)&node->children[0][0][0])[0] != 0) nash_Cell_descend4((nash_Cell*)((void**)&node->children[0][0][0])[0], ctx);
-    if (((void**)&node->children[0][0][0])[1] != 0) nash_Cell_descend4((nash_Cell*)((void**)&node->children[0][0][0])[1], ctx);
-    if (((void**)&node->children[0][0][0])[2] != 0) nash_Cell_descend4((nash_Cell*)((void**)&node->children[0][0][0])[2], ctx);
-    if (((void**)&node->children[0][0][0])[3] != 0) nash_Cell_descend4((nash_Cell*)((void**)&node->children[0][0][0])[3], ctx);
-    if (((void**)&node->children[0][0][0])[4] != 0) nash_Cell_descend4((nash_Cell*)((void**)&node->children[0][0][0])[4], ctx);
-    if (((void**)&node->children[0][0][0])[5] != 0) nash_Cell_descend4((nash_Cell*)((void**)&node->children[0][0][0])[5], ctx);
-    if (((void**)&node->children[0][0][0])[6] != 0) nash_Cell_descend4((nash_Cell*)((void**)&node->children[0][0][0])[6], ctx);
-    if (((void**)&node->children[0][0][0])[7] != 0) nash_Cell_descend4((nash_Cell*)((void**)&node->children[0][0][0])[7], ctx);
+    if (node->children[0][0][0] != 0) nash_Cell_descend4((nash_Cell*)node->children[0][0][0], ctx);
+    if (node->children[0][0][1] != 0) nash_Cell_descend4((nash_Cell*)node->children[0][0][1], ctx);
+    if (node->children[0][1][0] != 0) nash_Cell_descend4((nash_Cell*)node->children[0][1][0], ctx);
+    if (node->children[0][1][1] != 0) nash_Cell_descend4((nash_Cell*)node->children[0][1][1], ctx);
+    if (node->children[1][0][0] != 0) nash_Cell_descend4((nash_Cell*)node->children[1][0][0], ctx);
+    if (node->children[1][0][1] != 0) nash_Cell_descend4((nash_Cell*)node->children[1][0][1], ctx);
+    if (node->children[1][1][0] != 0) nash_Cell_descend4((nash_Cell*)node->children[1][1][0], ctx);
+    if (node->children[1][1][1] != 0) nash_Cell_descend4((nash_Cell*)node->children[1][1][1], ctx);
 }
 
 static inline void queryCell_335D78(sGrid_335D78* grid, int i, tBoundBox* box, TerrainCallback* ctx)
@@ -3366,49 +3366,49 @@ extern "C" void nash_privy_QueryHelper_helpX2(char* flag, OverlapInstancesCallba
     if (box->MinPoint.z < z1lo && z1hi < box->MaxPoint.z) cz1 = 1;
 
     nash_Cell* subNode;
-    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[0];
+    subNode = (nash_Cell*)node->children[0][0][0];
     if (subNode && ox0 && oy0 && oz0) {
         if (cx0 && cy0 && cz0) collect_331450(subNode, ctx2);
         else nash_privy_QueryHelper_helpX2(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[1];
+    subNode = (nash_Cell*)node->children[0][0][1];
     if (subNode && ox0 && oy0 && oz1) {
         if (cx0 && cy0 && cz1) collect_331450(subNode, ctx2);
         else nash_privy_QueryHelper_helpX2(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y++;
-    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[3];
+    subNode = (nash_Cell*)node->children[0][1][1];
     if (subNode && ox0 && oy1 && oz1) {
         if (cx0 && cy1 && cz1) collect_331450(subNode, ctx2);
         else nash_privy_QueryHelper_helpX2(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[2];
+    subNode = (nash_Cell*)node->children[0][1][0];
     if (subNode && ox0 && oy1 && oz0) {
         if (cx0 && cy1 && cz0) collect_331450(subNode, ctx2);
         else nash_privy_QueryHelper_helpX2(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.x++;
-    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[6];
+    subNode = (nash_Cell*)node->children[1][1][0];
     if (subNode && ox1 && oy1 && oz0) {
         if (cx1 && cy1 && cz0) collect_331450(subNode, ctx2);
         else nash_privy_QueryHelper_helpX2(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[7];
+    subNode = (nash_Cell*)node->children[1][1][1];
     if (subNode && ox1 && oy1 && oz1) {
         if (cx1 && cy1 && cz1) collect_331450(subNode, ctx2);
         else nash_privy_QueryHelper_helpX2(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y--;
-    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[5];
+    subNode = (nash_Cell*)node->children[1][0][1];
     if (subNode && ox1 && oy0 && oz1) {
         if (cx1 && cy0 && cz1) collect_331450(subNode, ctx2);
         else nash_privy_QueryHelper_helpX2(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[4];
+    subNode = (nash_Cell*)node->children[1][0][0];
     if (subNode && ox1 && oy0 && oz0) {
         if (cx1 && cy0 && cz0) collect_331450(subNode, ctx2);
         else nash_privy_QueryHelper_helpX2(flag, ctx, ctx2, box, subNode, &sub);
@@ -3904,49 +3904,49 @@ extern "C" void nash_privy_QueryHelper_helpX5(char* flag, TerrainCallback* ctx, 
     if (box->MinPoint.z < z1lo && z1hi < box->MaxPoint.z) cz1 = 1;
 
     nash_Cell* subNode;
-    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[0];
+    subNode = (nash_Cell*)node->children[0][0][0];
     if (subNode && ox0 && oy0 && oz0) {
         if (cx0 && cy0 && cz0) collect_335D78(subNode, ctx2);
         else nash_privy_QueryHelper_helpX5(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[1];
+    subNode = (nash_Cell*)node->children[0][0][1];
     if (subNode && ox0 && oy0 && oz1) {
         if (cx0 && cy0 && cz1) collect_335D78(subNode, ctx2);
         else nash_privy_QueryHelper_helpX5(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y++;
-    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[3];
+    subNode = (nash_Cell*)node->children[0][1][1];
     if (subNode && ox0 && oy1 && oz1) {
         if (cx0 && cy1 && cz1) collect_335D78(subNode, ctx2);
         else nash_privy_QueryHelper_helpX5(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[2];
+    subNode = (nash_Cell*)node->children[0][1][0];
     if (subNode && ox0 && oy1 && oz0) {
         if (cx0 && cy1 && cz0) collect_335D78(subNode, ctx2);
         else nash_privy_QueryHelper_helpX5(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.x++;
-    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[6];
+    subNode = (nash_Cell*)node->children[1][1][0];
     if (subNode && ox1 && oy1 && oz0) {
         if (cx1 && cy1 && cz0) collect_335D78(subNode, ctx2);
         else nash_privy_QueryHelper_helpX5(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[7];
+    subNode = (nash_Cell*)node->children[1][1][1];
     if (subNode && ox1 && oy1 && oz1) {
         if (cx1 && cy1 && cz1) collect_335D78(subNode, ctx2);
         else nash_privy_QueryHelper_helpX5(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y--;
-    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[5];
+    subNode = (nash_Cell*)node->children[1][0][1];
     if (subNode && ox1 && oy0 && oz1) {
         if (cx1 && cy0 && cz1) collect_335D78(subNode, ctx2);
         else nash_privy_QueryHelper_helpX5(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[4];
+    subNode = (nash_Cell*)node->children[1][0][0];
     if (subNode && ox1 && oy0 && oz0) {
         if (cx1 && cy0 && cz0) collect_335D78(subNode, ctx2);
         else nash_privy_QueryHelper_helpX5(flag, ctx, ctx2, box, subNode, &sub);
@@ -4858,7 +4858,7 @@ static inline void add_340DC0(OverlapTypedCallback* s, void* p)
 {
     int* cnt = ((int*)s->number);
     int n = *cnt;
-    ((void**)s->typed)[n] = p;
+    s->typed[n] = (cTypedSpaceNode*)p;
     *cnt = n + 1;
 }
 

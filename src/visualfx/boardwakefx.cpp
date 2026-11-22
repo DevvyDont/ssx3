@@ -6412,24 +6412,24 @@ extern "C" void* cSnowFall_cSnowFall(cSnowFall* self, void* bucket)
     new (((sVec5920*)&self->mLastCameraPosition[0])) sVec5920[2];
     cMemMan_validate();
     for (int i = 11; i >= 0; i--) {
-        ((void**)&self->mSnowBoxes[0])[i] = 0;
+        self->mSnowBoxes[i] = 0;
     }
     for (int j = 0; j < 2; j++) {
         ((sVec5920*)&self->mLastCameraPosition[0])[j] = sVec5920(0.0f, 0.0f, 0.0f, 1.0f);
     }
-    ((void**)&self->mSnowBoxes[0])[0] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-    ((void**)&self->mSnowBoxes[0])[1] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-    ((void**)&self->mSnowBoxes[0])[2] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
-    ((void**)&self->mSnowBoxes[0])[3] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
-    ((void**)&self->mSnowBoxes[0])[4] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
-    ((void**)&self->mSnowBoxes[0])[5] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
+    self->mSnowBoxes[0] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
+    self->mSnowBoxes[1] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
+    self->mSnowBoxes[2] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
+    self->mSnowBoxes[3] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
+    self->mSnowBoxes[4] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
+    self->mSnowBoxes[5] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
     if (SSXApp->Game->AI->NumberOfPlayersAllocated >= 2) {
-        ((void**)&self->mSnowBoxes[0])[6] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-        ((void**)&self->mSnowBoxes[0])[7] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-        ((void**)&self->mSnowBoxes[0])[8] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
-        ((void**)&self->mSnowBoxes[0])[9] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
-        ((void**)&self->mSnowBoxes[0])[10] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
-        ((void**)&self->mSnowBoxes[0])[11] = cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
+        self->mSnowBoxes[6] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
+        self->mSnowBoxes[7] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
+        self->mSnowBoxes[8] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
+        self->mSnowBoxes[9] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
+        self->mSnowBoxes[10] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
+        self->mSnowBoxes[11] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
     }
     cMemMan_validate();
     return (self);
@@ -6456,7 +6456,7 @@ extern "C" void cSnowFall__cSnowFall(cSnowFall* self, int flags)
     cMemMan_validate();
     int i;
     for (i = 0; i < 12; i++) {
-        int* snowBox = ((int**)(&self->mSnowBoxes[0]))[i];
+        int* snowBox = ((int*)self->mSnowBoxes[i]);
         if (snowBox != 0) {
             cSnowBox__cSnowBox(snowBox, 3);
         }
@@ -6557,7 +6557,7 @@ extern "C" void cSnowFall_update(cSnowFall* self)
     }
     int j;
     for (j = 0; j < 12; j++) {
-        int* snowBox = ((int**)(&self->mSnowBoxes[0]))[j];
+        int* snowBox = ((int*)self->mSnowBoxes[j]);
         if (snowBox != 0) {
             cSnowBox_update(snowBox, &recs[*snowBox]);
         }

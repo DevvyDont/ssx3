@@ -390,7 +390,7 @@ extern "C" void cScreenPopup_SetTextObjectsAlpha(cScreenPopup* self, float fAlph
     SetAlpha_5F20((char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_xba)), fAlpha);
     SetAlpha_5F20((char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x)), fAlpha);
     for (int i = 0; i < 5; i++) {
-        SetAlpha_5F20(((char**)(&self->mpOptions[0]))[i], fAlpha);
+        SetAlpha_5F20(((char*)self->mpOptions[i]), fAlpha);
     }
 }
 #endif

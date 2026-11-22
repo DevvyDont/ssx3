@@ -3263,14 +3263,14 @@ extern "C" void cBEUserAwards_clear(cBEUserAwards* self);
 extern "C" void* cBEUserAwards_cBEUserAwards(cBEUserAwards* self)
 {
     for (int i = 0; i < 10; i++)
-        ((char**)&self->mpAwardBits[0])[i] = 0;
-    ((char**)&self->mpAwardBits[0])[0] = ((char*)self) + 0x146;
-    ((char**)&self->mpAwardBits[0])[2] = ((char*)self) + 0x170;
-    ((char**)&self->mpAwardBits[0])[3] = ((char*)self) + 0x147;
-    ((char**)&self->mpAwardBits[0])[4] = ((char*)self) + 0x14D;
-    ((char**)&self->mpAwardBits[0])[5] = ((char*)self) + 0x15C;
-    ((char**)&self->mpAwardBits[0])[7] = ((char*)self) + 0x169;
-    ((char**)&self->mpAwardBits[0])[8] = ((char*)self) + 0x16D;
+        self->mpAwardBits[i] = 0;
+    self->mpAwardBits[0] = (unsigned char*)(&self->mAwards.bTrophies[0]);
+    self->mpAwardBits[2] = (unsigned char*)(&self->mAwards.bPeakPasses[0]);
+    self->mpAwardBits[3] = (unsigned char*)(&self->mAwards.bPosters[0]);
+    self->mpAwardBits[4] = (unsigned char*)(&self->mAwards.bTradingCards[0]);
+    self->mpAwardBits[5] = (unsigned char*)(&self->mAwards.bConceptArts[0]);
+    self->mpAwardBits[7] = (unsigned char*)(&self->mAwards.bToys[0]);
+    self->mpAwardBits[8] = (unsigned char*)(&self->mAwards.bCheatChars[0]);
     cBEUserAwards_clear(self);
     return (self);
 }

@@ -813,7 +813,7 @@ extern "C" void cStreamSys__cStreamSys(cStreamSys* streamSysObj, int flags)
         bankMgrVtbl.e[1].delta = D_004839B8_A648.e[1].delta + bankMgrDelta;
     }
     for (int i = 0; i < streamSysObj->mNumStreams; i++) {
-        void* streamInst = ((void**)streamSysObj->mStreamInstance)[i];
+        void* streamInst = streamSysObj->mStreamInstance[i];
         if (streamInst != 0) {
             cStreamInstance__cStreamInstance((cStreamInstance*)streamInst, 3);
         }
@@ -973,7 +973,7 @@ extern "C" void cStreamInstance_SetBigFile(cStreamInstance*, int);
  */
 extern "C" void cStreamSys_STREAM_SetBigFile(cStreamSys* self, int i, int val)
 {
-    void* stream = ((void**)self->mStreamInstance)[i];
+    void* stream = self->mStreamInstance[i];
     if (stream != 0) {
         cStreamInstance_SetBigFile((cStreamInstance*)stream, val);
     }
@@ -992,11 +992,11 @@ extern "C" void cStreamInstance__cStreamInstance(cStreamInstance* e, int a1);
  */
 extern "C" void cStreamSys_STREAM_Destroy(cStreamSys* self, int i)
 {
-    void* stream = ((void**)self->mStreamInstance)[i];
+    void* stream = self->mStreamInstance[i];
     if (stream != 0) {
         cStreamInstance__cStreamInstance((cStreamInstance*)stream, 3);
     }
-    ((void**)self->mStreamInstance)[i] = 0;
+    self->mStreamInstance[i] = 0;
 }
 #endif
 
@@ -1011,7 +1011,7 @@ extern "C" void cStreamInstance_Update(cStreamInstance* e);
 extern "C" void cStreamSys_STREAM_Update(cStreamSys* self)
 {
     for (int i = 0; i < self->mNumStreams; i++) {
-        void* stream = ((void**)self->mStreamInstance)[i];
+        void* stream = self->mStreamInstance[i];
         if (stream != 0) {
             cStreamInstance_Update((cStreamInstance*)stream);
         }
@@ -1074,7 +1074,7 @@ extern "C" int cStreamInstance_Queue(cStreamInstance* e, int a, int b, int c);
  */
 extern "C" int cStreamSys_STREAM_Queue(cStreamSys* self, int i, int holdTime, int buf, int offset)
 {
-    void* stream = ((void**)self->mStreamInstance)[i];
+    void* stream = self->mStreamInstance[i];
     if (stream != 0) {
         return cStreamInstance_Queue((cStreamInstance*)stream, holdTime, buf, offset);
     }
@@ -1119,7 +1119,7 @@ extern "C" int cStreamInstance_Requests(cStreamInstance*);
  */
 extern "C" int cStreamSys_STREAM_Requests(cStreamSys* self, int i)
 {
-    void* stream = ((void**)self->mStreamInstance)[i];
+    void* stream = self->mStreamInstance[i];
     if (stream != 0) {
         return cStreamInstance_Requests((cStreamInstance*)stream);
     }
@@ -1137,7 +1137,7 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_Purge);
  */
 extern "C" void cStreamSys_STREAM_Purge(cStreamSys* self, int i)
 {
-    void* stream = ((void**)self->mStreamInstance)[i];
+    void* stream = self->mStreamInstance[i];
     if (stream != 0) {
         cStreamInstance_Purge(stream);
     }
@@ -1158,7 +1158,7 @@ extern "C" float cStreamInstance_GetTimeRemaining(cStreamInstance* self);
 extern "C" float cStreamSys_STREAM_TimeRemaining(cStreamSys* self, int i)
 {
     void* stream;
-    if (i < 0 || (stream = ((void**)self->mStreamInstance)[i]) == 0) {
+    if (i < 0 || (stream = ((void*)self->mStreamInstance[i])) == 0) {
         return 0.0f;
     }
     return cStreamInstance_GetTimeRemaining((cStreamInstance*)stream);
@@ -1278,7 +1278,7 @@ extern "C" int cStreamInstance_Playing(cStreamInstance*);
  */
 extern "C" int cStreamSys_STREAM_Playing(cStreamSys* self, int i)
 {
-    void* stream = ((void**)self->mStreamInstance)[i];
+    void* stream = self->mStreamInstance[i];
     if (stream != 0) {
         return cStreamInstance_Playing((cStreamInstance*)stream);
     }
@@ -1335,7 +1335,7 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_SetVolControl);
  */
 extern "C" void cStreamSys_STREAM_SetVolControl(cStreamSys* self, int i, int val)
 {
-    void* stream = ((void**)self->mStreamInstance)[i];
+    void* stream = self->mStreamInstance[i];
     if (stream != 0) {
         *(int*)((char*)stream + 0x10) = val;
     }
@@ -1391,7 +1391,7 @@ extern "C" int cStreamInstance_GetCurrActiveSampleHandle(cStreamInstance*);
  */
 extern "C" int cStreamSys_STREAM_GetCurrActiveSampleHandle(cStreamSys* self, int i)
 {
-    void* stream = ((void**)self->mStreamInstance)[i];
+    void* stream = self->mStreamInstance[i];
     if (stream != 0) {
         return cStreamInstance_GetCurrActiveSampleHandle((cStreamInstance*)stream);
     }

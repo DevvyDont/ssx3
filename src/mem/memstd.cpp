@@ -2558,7 +2558,7 @@ extern "C" void* SSX_VD_PS2_SINGLE_BUFFERD_SSX_VD_PS2_SINGLE_BUFFERD_body(SSX_VD
     for (int i = 0; i < self->mNumColumns; i++) {
         int y = 0;
         for (int j = 0; j < self->mNumRows; j++) {
-            ((sTile_4410**)self->mppTiles)[k++] = new sTile_4410(data + ((y << 6) + frameHeight * (i << 6)), self->mRowHeights[j]);
+            self->mppTiles[k++] = (int*)(new sTile_4410(data + ((y << 6) + frameHeight * (i << 6)), self->mRowHeights[j]));
             y += self->mRowHeights[j];
         }
     }
@@ -2908,7 +2908,7 @@ extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_Draw(SSX_VD_PS2_SINGLE_BUFFERD* self, 
     for (int i = 0; i < self->mNumColumns; i++) {
         int off = 0;
         for (int j = 0; j < self->mNumRows; j++) {
-            int* tileEntry = ((int**)((char**)self->mppTiles))[k];
+            int* tileEntry = ((int*)self->mppTiles[k]);
             ((cWorld_254C48*)cGraphicsMan_TheGraphicsMan)->SetNewTextureData1(tileEntry[0], data + ((off << 6) + stride * (i << 6)), tileEntry[1], tileEntry[2], 0, 0, 0, 0, 0);
             k++;
             off += ((int*)&self->mRowHeights[0])[j];

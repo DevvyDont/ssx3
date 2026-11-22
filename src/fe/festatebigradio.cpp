@@ -151,7 +151,7 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(cFEStateBraggingRights* se
             cUIText_setUnicodeStringByID(txt, GetHashValue32(D_00441108[((signed char*)self->mpGameEventMapping)[row]]));
         for (int playerIndex = 0; playerIndex < 2; playerIndex++) {
             unsigned char out = 0;
-            void* lb = ((void**)&((cBraggingRightsMenu*)(&self->mMenuCtrl[0]))[playerIndex].mpListBox[0])[row];
+            void* lb = (&((cBraggingRightsMenu*)(&self->mMenuCtrl[0]))[playerIndex].mpListBox[0])[row];
             switch (((signed char*)self->mpGameEventMapping)[row]) {
             case 1:
             case 2:
@@ -976,7 +976,7 @@ extern "C" int func_001941B0(cFEStateBraggingRights* self, int msg, sRadioMsg_41
         break;
     case 252: {
         unsigned char out;
-        void* item = ((void**)&(((&self->mMenuCtrl[0])))[data->panel].mpListBox[0])[data->idx];
+        void* item = (&(((&self->mMenuCtrl[0])))[data->panel].mpListBox[0])[data->idx];
         if (!cUIListBox_getEntryByData_41B0(item, data->key, &out)) {
             break;
         }

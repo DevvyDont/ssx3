@@ -902,7 +902,7 @@ extern "C" void cMultiSplineModifier_allocInstances(cMultiSplineModifier* self)
 {
     int i;
     for (i = 0; i < self->NumModels; i++) {
-        ((void**)self->NodeInst)[i] = cInstanceMan_allocInstance1(cObjectInterface_getInstanceMan());
+        self->NodeInst[i] = (tInstanceRecord*)cInstanceMan_allocInstance1(cObjectInterface_getInstanceMan());
     }
 }
 #endif
@@ -1103,7 +1103,7 @@ static inline void vu0Add_A5F8(t4Vector& out, const t4Vector& a, const t4Vector&
 
 static inline t4Vector instPos_A5F8(cMultiSplineModifier* self, int i)
 {
-    return ((sSmInst_A5F8**)self->NodeInst)[i]->pos;
+    return ((sSmInst_A5F8*)self->NodeInst[i])->pos;
 }
 
 
@@ -1127,7 +1127,7 @@ extern "C" void cMultiSplineModifier_setupOverlapSystem(cMultiSplineModifier* vs
 {
     cMultiSplineModifier* self = vself;
     char bound[0x20];
-    cInstanceNode_getBoundBoxInfo(((void**)((char**)self->Instance))[3], bound, &(*(sSub_A5F8*)&self->NumModels).radius);
+    cInstanceNode_getBoundBoxInfo((char*)self->Instance->m_pActiveNode, bound, &(*(sSub_A5F8*)&self->NumModels).radius);
     sSub_A5F8* sub = (sSub_A5F8*)&self->NumModels;
     for (int i = 1; i < (*(sSub_A5F8*)&self->NumModels).count; i++) {
         t4Vector ext;
@@ -1142,7 +1142,7 @@ extern "C" void cMultiSplineModifier_setupOverlapSystem(cMultiSplineModifier* vs
             vu0Add_A5F8(corner, instPos_A5F8(self, i), ext);
             (*(sBoundBox*)&(self->Nodes)[i].BoundBox).max = corner;
         }
-        void* item = ((sSmInst_A5F8**)self->NodeInst)[i];
+        void* item = ((sSmInst_A5F8*)self->NodeInst[i]);
         char* w = (char*)cObjectInterface_getNash();
         insert_A5F8(w, item, &(*(sBoundBox*)&(self->Nodes)[i].BoundBox).min);
     }
@@ -1195,7 +1195,7 @@ static inline int octEmpty_A780(sOctCell_A780* o)
 extern "C" void cMultiSplineModifier_restoreOverlapSystem(cMultiSplineModifier* vself)
 {
     for (int i = 1; i < vself->NumModels; i++) {
-        void* node = ((void**)vself->NodeInst)[i];
+        void* node = vself->NodeInst[i];
         nash_Octant* cell = (nash_Octant*)cObjectInterface_getNash();
         // PORT: the segment array (0x60-byte entries) is indexed with 32-bit integer arithmetic.
         char* box = (char*)(i * 0x60 + (int)vself->Nodes) + 0x30;
@@ -1259,7 +1259,7 @@ static inline t4Vector vu0Add_A918(const t4Vector& a, const t4Vector& b)
 
 static inline t4Vector instPos_A918(cMultiSplineModifier* self, int i)
 {
-    return *(t4Vector*)(((char**)self->NodeInst)[i] + 0x40);
+    return *(t4Vector*)&self->NodeInst[i]->m_fmTransform.m[3][0];
 }
 
 
@@ -1300,10 +1300,10 @@ extern "C" void cMultiSplineModifier_updateOverlapSystem(cMultiSplineModifier* s
         ext.w = 0.0f;
         (*(&(self->Nodes)[i].BoundBox.MinPoint)) = vu0Sub_A918(instPos_A918(self, i), ext);
         (*(&(self->Nodes)[i].BoundBox.MaxPoint)) = vu0Add_A918(instPos_A918(self, i), ext);
-        void* id = ((char**)self->NodeInst)[i];
+        void* id = ((char*)self->NodeInst[i]);
         nash_Nash_movenode(cObjectInterface_getNash(), 0, id, (sBox_F048*)&(self->Nodes)[i].BoundBox, (sBox_F048*)&old);
-        setMin_A918((tInstanceRecord*)((char**)self->NodeInst)[i], (*(&(self->Nodes)[i].BoundBox.MinPoint)));
-        setMax_A918((tInstanceRecord*)((char**)self->NodeInst)[i], (*(&(self->Nodes)[i].BoundBox.MaxPoint)));
+        setMin_A918((tInstanceRecord*)self->NodeInst[i], (*(&(self->Nodes)[i].BoundBox.MinPoint)));
+        setMax_A918((tInstanceRecord*)self->NodeInst[i], (*(&(self->Nodes)[i].BoundBox.MaxPoint)));
     }
 }
 #endif
@@ -1754,7 +1754,7 @@ extern "C" void* cMultiSplineModifier_updateNodes(cMultiSplineModifier* multiSpl
         ang.x = rx;
         ang.y = ry;
         ang.z = rz;
-        sSplineInst_AC20* node = ((sSplineInst_AC20**)self->NodeInst)[i];
+        sSplineInst_AC20* node = ((sSplineInst_AC20*)self->NodeInst[i]);
         float sx, cx, sy, cy, sz, cz;
         fSinCos(&sx, &cx, ang.x);
         sSmMat_AC20* nodeMat = &node->mat;
@@ -1844,7 +1844,7 @@ extern "C" void cMultiSplineModifier_render(cMultiSplineModifier* self)
         int hit = vt[93].fn(thisp, &(*(sSmVec4_35B418*)&box->BoundBox), &(*(sSmVec4_35B418*)&box->BoundBox.MaxPoint), vt2[43].fn((char*)w + vt2[43].delta));
         if (hit != 1) {
             sSmVEModel_35B418* mvt = (sSmVEModel_35B418*)model->mVtbl;
-            mvt[33].fn(((char*)model) + mvt[33].delta, ((char**)self->NodeInst)[i] + 0x10, ((int)self->AnimMats));
+            mvt[33].fn(((char*)model) + mvt[33].delta, (char*)&self->NodeInst[i]->m_fmTransform, ((int)self->AnimMats));
             if (hit != 0) {
                 sSmVEModel_35B418* mvt2 = (sSmVEModel_35B418*)model->mVtbl;
                 mvt2[5].fn(((char*)model) + mvt2[5].delta, (void*)((int)self->AnimMats), 1056);
@@ -1891,7 +1891,7 @@ extern "C" void cMultiSplineModifier_writeToReplayFrame(cMultiSplineModifier* se
     cSpline_writeToReplayFrame((char*)&self->Spline, (cStream00359F30*)stream);
     stream->writeReplayInstance(self->Instance);
     for (int i = 0; i < self->NumModels; i++) {
-        stream->write(((char**)self->NodeInst)[i] + 0x78, 4);
+        stream->write(&self->NodeInst[i]->m_RID, 4);
     }
 }
 #endif

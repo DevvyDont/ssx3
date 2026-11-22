@@ -82,8 +82,8 @@ extern "C" void cScriptCameraController__cScriptCameraController(cScriptCameraCo
     int i;
     self->mVtbl = cScriptCameraController_vtbl;
     for (i = 0; i < 2; i++) {
-        cScriptObject_DeInitScriptObject(((cScrCamScriptK2**)self->ScriptObj)[i]);
-        delete ((cScrCamScriptK2**)self->ScriptObj)[i];
+        cScriptObject_DeInitScriptObject(((cScrCamScriptK2*)self->ScriptObj[i]));
+        delete ((cScrCamScriptK2*)self->ScriptObj[i]);
     }
     if (self->ScriptObj != 0)
         cMemMan_free(self->ScriptObj);

@@ -732,7 +732,7 @@ extern "C" int cWorldCache_init(cWorldCache* self, const char* name, int pNash)
     self->m_pSharedCacheTable = (cWorldCacheTable*)cWorldCacheTable_cWorldCacheTable((cWorldCacheTable*)cMemMan_alloc(232, str_SharedTable, 0, 0), &self->mp_DataHeader->m_iTable[0]);
     self->m_pSectionCacheTable = (cWorldCacheTable**)((void**)operator_new_tag((int)self->mp_DataHeader->m_uiNumSections * 4, str_SectionTables, 0, 0));
     for (unsigned int i = 0; i < self->mp_DataHeader->m_uiNumSections; i++)
-        ((void**)self->m_pSectionCacheTable)[i] = 0;
+        self->m_pSectionCacheTable[i] = 0;
     char* x = (char*)cChunkResolve_construct();
     self->mp_ChunkResolve = (cChunkResolve*)x;
     sVE_7FC0* vt = *(sVE_7FC0**)(x + 8);
@@ -784,11 +784,11 @@ extern "C" void cWorldCacheTable__cWorldCacheTable(int* self, int flags);
 extern "C" void cWorldCache_deactivateSectionMem(cWorldCache* self, int i)
 {
     cWorldMemoryMan_deactivateSectionMem(self->m_pWorldMemMan, i);
-    int* sectionTable = ((int**)self->m_pSectionCacheTable)[i];
+    int* sectionTable = ((int*)self->m_pSectionCacheTable[i]);
     if (sectionTable != 0) {
         cWorldCacheTable__cWorldCacheTable(sectionTable, 3);
     }
-    ((int**)self->m_pSectionCacheTable)[i] = 0;
+    self->m_pSectionCacheTable[i] = 0;
 }
 #endif
 
@@ -1576,7 +1576,7 @@ extern "C" void rel_8E20(cWorldCache* self, int cell, int type, unsigned int key
     if (bank == 0xFF)
         bankData = ((sBxBank_8AA8*)self->m_pSharedCacheTable);
     else
-        bankData = ((sBxBank_8AA8**)self->m_pSectionCacheTable)[bank];
+        bankData = ((sBxBank_8AA8*)self->m_pSectionCacheTable[bank]);
     char* chunk = release_8E20(&bankData->types[type].refs[id]);
     if (chunk != 0) {
         if (chunk == (char*)&cStreamMan_NULLCHUNK) {

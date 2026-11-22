@@ -760,7 +760,7 @@ extern "C" void cUIScreen_createAllObjects(cUIScreen* self)
         rec += *(unsigned short*)(rec + 2);
     }
     for (unsigned int i = 0; i < *(unsigned int*)self->mpObjectBlock; i++) {
-        void* uiObj = ((void**)self->mppObjectList)[i];
+        void* uiObj = self->mppObjectList[i];
         if (uiObj != 0) {
             cUIState* state = self->mpState;
             sUIVtCED0* vt = (sUIVtCED0*)state->mVtbl;

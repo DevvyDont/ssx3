@@ -2891,7 +2891,7 @@ extern "C" void cPadCache_clearAllVibrations(cPadCache* self)
 {
     int i;
     for (i = 0; i < self->NumPadDevices; i++) {
-        cPadDevice_clearAllVibrations(((void**)(&self->PadDevices[0]))[i]);
+        cPadDevice_clearAllVibrations(self->PadDevices[i]);
     }
 }
 #endif

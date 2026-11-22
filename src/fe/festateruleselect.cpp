@@ -825,7 +825,7 @@ extern "C" void cBraggingRightsMenu_setConfirmed(cBraggingRightsMenu* self, int 
     int i;
     self->mbConfirmed = enabled;
     for (i = 0; i < 8; i++) {
-        cUIThing* item = ((cUIThing**)(&self->mpListBox[0]))[i];
+        cUIThing* item = ((cUIThing*)self->mpListBox[i]);
         if (item != 0) {
             ((sVEntry<void(void*, int)>*)item->mVtbl)[8].fn(vthis(item, ((sVEntry<void(void*, int)>*)item->mVtbl)[8]), enabled);
         }

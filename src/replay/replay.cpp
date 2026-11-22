@@ -467,8 +467,8 @@ extern "C" void cReplay_rewindFrame(cReplay* self_)
     (*(void**)&self->PlaybackFrame) = frame;
     self->PlaybackTick = *(int*)((char*)frame + 0x30);
     for (i = 0; i < 2; i++) {
-        if (((void**)&self->InputCache[0])[i] != 0) {
-            cReplayCache_moveTo(((void**)&self->InputCache[0])[i], self->PlaybackTick);
+        if (self->InputCache[i] != 0) {
+            cReplayCache_moveTo(self->InputCache[i], self->PlaybackTick);
         }
     }
 }

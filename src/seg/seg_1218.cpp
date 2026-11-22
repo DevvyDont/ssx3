@@ -1979,9 +1979,9 @@ extern "C" void cFocusMan_purgesection(cFocusMan* focusMan, int sectionId) {
     int i;
 
     for (i = 0; i < focusMan->NumFocusInstances; i++) {
-        void *instance = ((void**)&focusMan->FocusInstances[0])[i];
+        void *instance = focusMan->FocusInstances[i];
         if (*(unsigned char *)((char*)instance + 0x78) != sectionId) {
-            ((void**)&focusMan->FocusInstances[0])[n] = instance;
+            focusMan->FocusInstances[n] = (tInstanceRecord*)instance;
             n++;
         }
     }
@@ -2002,7 +2002,7 @@ extern "C" void cFocusMan_reset(cFocusMan* self) {
     int i;
 
     for (i = 0; i < self->NumFocusInstances; i++) {
-        *(int *)((char*)((void**)&self->FocusInstances[0])[i] + 8) &= 0xFFFFFEFF;
+        self->FocusInstances[i]->m_iFlags &= 0xFFFFFEFF;
     }
     self->NumFocusInstances = 0;
     self->LastUpdateTick = -1;
@@ -2171,7 +2171,7 @@ extern "C" void cFocusMan_readFromReplayFrame(cFocusMan* self, cStream_3578* dat
     for (int j = 0; j < self->NumFocusInstances; j++) {
         sItem_3578* it = data->ReadPtr();
         it->flags = (it->flags | 0x100) & 0xFFFFFDFF;
-        ((sItem_3578**)&self->FocusInstances[0])[j] = it;
+        self->FocusInstances[j] = (tInstanceRecord*)it;
     }
 }
 #endif

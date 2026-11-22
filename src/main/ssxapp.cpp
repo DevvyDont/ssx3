@@ -157,7 +157,7 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     int i;
     for (i = 0; i < 2; i++) {
         int* inputPad = (int*)cMemMan_alloc(676, str_InputPad, 0, 0);
-        ((int**)(&self->InputPads[0]))[i] = inputPad;
+        self->InputPads[i] = (cInputPad*)inputPad;
         *inputPad = 0;
     }
     *(int*)&self->Game = 0;
@@ -1983,7 +1983,7 @@ extern "C" void func_00229820(cCrowdMan2d* self, unsigned int handle, int partIn
         if (partIndex < skeleton->m_iNumMeshes) {
             tMeshRecord* skelPart = (parts[partIndex].m_Mesh);
             if (boneIndex < skelPart->m_iNumContexts)
-                dst[*((short**)skelPart->m_pContexts)[boneIndex]] = D_00536690_229820;
+                dst[*((short*)skelPart->m_pContexts[boneIndex])] = D_00536690_229820;
         }
     }
 }

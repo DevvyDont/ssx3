@@ -1044,11 +1044,11 @@ extern "C" void cGMBigAirHandler_raceFinish(sScore_239230* self, int idx)
     }
     int place = cGameModeMan_iRanking[n];
     if (place == 0)
-        (*(cRider**)(((char**)&Race_239230()->Players[0])[0] + 0x18))->BoostPowerBar = 0.699999988079071f;
+        ((&Race_239230()->Players[0])[0]->mRider)->BoostPowerBar = 0.699999988079071f;
     else if (place == 1)
-        (*(cRider**)(((char**)&Race_239230()->Players[0])[0] + 0x18))->BoostPowerBar = 0.3499999940395355f;
+        ((&Race_239230()->Players[0])[0]->mRider)->BoostPowerBar = 0.3499999940395355f;
     else
-        (*(cRider**)(((char**)&Race_239230()->Players[0])[0] + 0x18))->BoostPowerBar = 0.0f;
+        ((&Race_239230()->Players[0])[0]->mRider)->BoostPowerBar = 0.0f;
 }
 #endif
 

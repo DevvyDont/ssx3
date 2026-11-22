@@ -986,10 +986,10 @@ extern "C" void cWScriptTask_initTask(cWScriptTask* self, cWScriptProcess* owner
     self->Process = (cWScriptProcess*)owner;
     self->TaskId = (unsigned int)def->f0;
     for (i = 0; i < 3; i++) {
-        ((void**)&self->TaskScriptCode[0])[i] = cWScriptProcess_getScriptCode_2(self->Process, def->a[i]);
+        self->TaskScriptCode[i] = (char*)cWScriptProcess_getScriptCode_2(self->Process, def->a[i]);
     }
     for (j = 0; j < 10; j++) {
-        ((void**)&self->EventScriptCode[0])[j] = cWScriptProcess_getScriptCode_2(self->Process, def->b[j]);
+        self->EventScriptCode[j] = (char*)cWScriptProcess_getScriptCode_2(self->Process, def->b[j]);
     }
 }
 #endif

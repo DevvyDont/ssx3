@@ -957,8 +957,8 @@ extern "C" void cFEStateCheatCharSelect_onWidgetCreate(cFEStateCheatCharSelect* 
             *sp = w;
             w->id18 = i;
             if (i == 0) {
-                sVEntry<void(void*, void*)>* vtEntry = &((sVEntry<void(void*, void*)>*)((sCW_2460**)&self->mpCharWidget[0])[0]->vt)[21];
-                vtEntry->fn((char*)((sCW_2460**)&self->mpCharWidget[0])[0] + vtEntry->delta, D_004C66B8);
+                sVEntry<void(void*, void*)>* vtEntry = &((sVEntry<void(void*, void*)>*)((sCW_2460*)self->mpCharWidget[0])->vt)[21];
+                vtEntry->fn((char*)self->mpCharWidget[0] + vtEntry->delta, D_004C66B8);
             }
             if (i >= self->mNumCharacters) {
                 vcall_2460(*sp, 9, 0);
@@ -1082,7 +1082,7 @@ extern "C" void cFEStateCheatCharSelect_updateCharWidgets(cFEStateCheatCharSelec
     int i;
     int idx = self->mpMenu->mScrollItemOffset;
     for (i = 0; i < 6; i++) {
-        cUIIcon* it = (cUIIcon*)((void**)(&self->mpCharWidget[0]))[i];
+        cUIIcon* it = (cUIIcon*)self->mpCharWidget[i];
         if (((void*)it) != 0) {
             int textureElem = ((int*)(&self->mpCharElem[0]))[idx + i];
             it->mTextureID = -1;

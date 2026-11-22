@@ -2129,7 +2129,7 @@ extern "C" void cDebugFE_purge(cDebugFE* self)
 {
     for (int i = 0; i < 2; i++)
     {
-        char* screen = ((char**)&self->Screens[0])[i];
+        char* screen = ((char*)self->Screens[i]);
         if (screen != 0)
         {
             sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)screen;

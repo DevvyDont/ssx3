@@ -346,7 +346,7 @@ extern "C" const char* cFELocale_getStringByHash(cFELocale* self, int key)
 {
     if (self->mDisplayMode == 0) {
         for (signed char i = 0; i < 20; i++) {
-            signed char* localeFile = ((signed char**)&self->mpLocaleFile[0])[i];
+            signed char* localeFile = ((signed char*)self->mpLocaleFile[i]);
             if (localeFile != 0 && *localeFile == self->mLanguage) {
                 const char* foundString = cLocaleFile_getStringByHash(localeFile, key);
                 if (foundString != 0) {

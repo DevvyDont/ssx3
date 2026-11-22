@@ -73,23 +73,23 @@ extern "C" cPS2VisualEffectsMan* cPS2VisualEffectsMan_cPS2VisualEffectsMan(cPS2V
 {
     cVisualEffectsMan_cVisualEffectsMan(self);
     self->mVtbl = (void**)cPS2VisualEffectsMan_vtbl;
-    { void* effect = cMemMan_alloc(4, str_RenderToggles, 0, 0); *(char**)effect = cRenderToggles_vtbl; ((void**)&self->m_RenderToggles)[0] = effect; }
-    { void* effect = cMemMan_alloc(4, str_VisualEffectsTest, 0, 0); *(char**)effect = cVisualEffectsTest_vtbl; ((void**)&self->m_RenderToggles)[1] = effect; }
-    { void* effect = cMemMan_alloc(4, str_LightGlow, 0, 0); *(char**)effect = D_00487EB8; ((void**)&self->m_RenderToggles)[2] = effect; }
-    { void* effect = cMemMan_alloc(4, str_Plants_b, 0, 0); *(char**)effect = cPlants_vtbl; ((void**)&self->m_RenderToggles)[3] = effect; }
-    { void* effect = cMemMan_alloc(4, str_DepthFog, 0, 0); *(char**)effect = D_00487E88; ((void**)&self->m_RenderToggles)[4] = effect; }
-    { void* effect = cMemMan_alloc(4, str_HeightFog, 0, 0); *(char**)effect = D_00487E58; ((void**)&self->m_RenderToggles)[5] = effect; }
-    ((void**)&self->m_RenderToggles)[6] = cDetailSystem_cDetailSystem(cMemMan_alloc(4, str_DetailSystem, 0, 0));
-    { void* effect = cMemMan_alloc(4, str_ScreenTint, 0, 0); *(char**)effect = cScreenTint_vtbl; ((void**)&self->m_RenderToggles)[7] = effect; }
-    { void* effect = cMemMan_alloc(4, str_Shadow_c, 0, 0); *(char**)effect = D_00487E28; ((void**)&self->m_RenderToggles)[8] = effect; }
-    { void* effect = cMemMan_alloc(4, str_SnowSurface, 0, 0); *(char**)effect = D_00487DF8; ((void**)&self->m_RenderToggles)[9] = effect; }
-    { void* effect = cMemMan_alloc(4, str_BoardTrail, 0, 0); *(char**)effect = D_00487FA8; ((void**)&self->m_RenderToggles)[10] = effect; }
-    { void* effect = cMemMan_alloc(4, str_Flags_b, 0, 0); *(char**)effect = D_00487DC8; ((void**)&self->m_RenderToggles)[11] = effect; }
-    { void* effect = cMemMan_alloc(4, str_PowerUpFXToggles, 0, 0); *(char**)effect = D_00488330; ((void**)&self->m_RenderToggles)[12] = effect; }
-    { void* effect = cMemMan_alloc(4, str_SnowfallToggles, 0, 0); *(char**)effect = D_00488050; ((void**)&self->m_RenderToggles)[13] = effect; }
-    { void* effect = cMemMan_alloc(4, str_SplashToggles, 0, 0); *(char**)effect = D_004882B0; ((void**)&self->m_RenderToggles)[14] = effect; }
-    { void* effect = cMemMan_alloc(4, str_Tube, 0, 0); *(char**)effect = cTube_vtbl; ((void**)&self->m_RenderToggles)[15] = effect; }
-    ((void**)&self->m_RenderToggles)[16] = cPathArrow_cPathArrow(cMemMan_alloc(4, str_PathArrow, 0, 0));
+    { void* effect = cMemMan_alloc(4, str_RenderToggles, 0, 0); *(char**)effect = cRenderToggles_vtbl; (&self->m_RenderToggles)[0] = (cRenderToggles*)effect; }
+    { void* effect = cMemMan_alloc(4, str_VisualEffectsTest, 0, 0); *(char**)effect = cVisualEffectsTest_vtbl; (&self->m_RenderToggles)[1] = (cRenderToggles*)effect; }
+    { void* effect = cMemMan_alloc(4, str_LightGlow, 0, 0); *(char**)effect = D_00487EB8; (&self->m_RenderToggles)[2] = (cRenderToggles*)effect; }
+    { void* effect = cMemMan_alloc(4, str_Plants_b, 0, 0); *(char**)effect = cPlants_vtbl; (&self->m_RenderToggles)[3] = (cRenderToggles*)effect; }
+    { void* effect = cMemMan_alloc(4, str_DepthFog, 0, 0); *(char**)effect = D_00487E88; (&self->m_RenderToggles)[4] = (cRenderToggles*)effect; }
+    { void* effect = cMemMan_alloc(4, str_HeightFog, 0, 0); *(char**)effect = D_00487E58; (&self->m_RenderToggles)[5] = (cRenderToggles*)effect; }
+    (&self->m_RenderToggles)[6] = (cRenderToggles*)cDetailSystem_cDetailSystem(cMemMan_alloc(4, str_DetailSystem, 0, 0));
+    { void* effect = cMemMan_alloc(4, str_ScreenTint, 0, 0); *(char**)effect = cScreenTint_vtbl; (&self->m_RenderToggles)[7] = (cRenderToggles*)effect; }
+    { void* effect = cMemMan_alloc(4, str_Shadow_c, 0, 0); *(char**)effect = D_00487E28; (&self->m_RenderToggles)[8] = (cRenderToggles*)effect; }
+    { void* effect = cMemMan_alloc(4, str_SnowSurface, 0, 0); *(char**)effect = D_00487DF8; (&self->m_RenderToggles)[9] = (cRenderToggles*)effect; }
+    { void* effect = cMemMan_alloc(4, str_BoardTrail, 0, 0); *(char**)effect = D_00487FA8; (&self->m_RenderToggles)[10] = (cRenderToggles*)effect; }
+    { void* effect = cMemMan_alloc(4, str_Flags_b, 0, 0); *(char**)effect = D_00487DC8; (&self->m_RenderToggles)[11] = (cRenderToggles*)effect; }
+    { void* effect = cMemMan_alloc(4, str_PowerUpFXToggles, 0, 0); *(char**)effect = D_00488330; (&self->m_RenderToggles)[12] = (cRenderToggles*)effect; }
+    { void* effect = cMemMan_alloc(4, str_SnowfallToggles, 0, 0); *(char**)effect = D_00488050; (&self->m_RenderToggles)[13] = (cRenderToggles*)effect; }
+    { void* effect = cMemMan_alloc(4, str_SplashToggles, 0, 0); *(char**)effect = D_004882B0; (&self->m_RenderToggles)[14] = (cRenderToggles*)effect; }
+    { void* effect = cMemMan_alloc(4, str_Tube, 0, 0); *(char**)effect = cTube_vtbl; (&self->m_RenderToggles)[15] = (cRenderToggles*)effect; }
+    (&self->m_RenderToggles)[16] = (cRenderToggles*)cPathArrow_cPathArrow(cMemMan_alloc(4, str_PathArrow, 0, 0));
     return (self);
 }
 #endif
@@ -121,23 +121,23 @@ struct sMgr_0820 {
 extern "C" void cPS2VisualEffectsMan__cPS2VisualEffectsMan(cPS2VisualEffectsMan* self, int flags)
 {
     self->mVtbl = (void**)cPS2VisualEffectsMan_vtbl;
-    delete ((Obj0820**)&self->m_RenderToggles)[0];
-    delete ((Obj0820**)&self->m_RenderToggles)[1];
-    delete ((Obj0820**)&self->m_RenderToggles)[2];
-    delete ((Obj0820**)&self->m_RenderToggles)[3];
-    delete ((Obj0820**)&self->m_RenderToggles)[4];
-    delete ((Obj0820**)&self->m_RenderToggles)[5];
-    delete ((Obj0820**)&self->m_RenderToggles)[6];
-    delete ((Obj0820**)&self->m_RenderToggles)[7];
-    delete ((Obj0820**)&self->m_RenderToggles)[8];
-    delete ((Obj0820**)&self->m_RenderToggles)[9];
-    delete ((Obj0820**)&self->m_RenderToggles)[10];
-    delete ((Obj0820**)&self->m_RenderToggles)[11];
-    delete ((Obj0820**)&self->m_RenderToggles)[12];
-    delete ((Obj0820**)&self->m_RenderToggles)[13];
-    delete ((Obj0820**)&self->m_RenderToggles)[14];
-    delete ((Obj0820**)&self->m_RenderToggles)[15];
-    delete ((Obj0820**)&self->m_RenderToggles)[16];
+    delete ((Obj0820*)(&self->m_RenderToggles)[0]);
+    delete ((Obj0820*)(&self->m_RenderToggles)[1]);
+    delete ((Obj0820*)(&self->m_RenderToggles)[2]);
+    delete ((Obj0820*)(&self->m_RenderToggles)[3]);
+    delete ((Obj0820*)(&self->m_RenderToggles)[4]);
+    delete ((Obj0820*)(&self->m_RenderToggles)[5]);
+    delete ((Obj0820*)(&self->m_RenderToggles)[6]);
+    delete ((Obj0820*)(&self->m_RenderToggles)[7]);
+    delete ((Obj0820*)(&self->m_RenderToggles)[8]);
+    delete ((Obj0820*)(&self->m_RenderToggles)[9]);
+    delete ((Obj0820*)(&self->m_RenderToggles)[10]);
+    delete ((Obj0820*)(&self->m_RenderToggles)[11]);
+    delete ((Obj0820*)(&self->m_RenderToggles)[12]);
+    delete ((Obj0820*)(&self->m_RenderToggles)[13]);
+    delete ((Obj0820*)(&self->m_RenderToggles)[14]);
+    delete ((Obj0820*)(&self->m_RenderToggles)[15]);
+    delete ((Obj0820*)(&self->m_RenderToggles)[16]);
     self->mVtbl = (void**)cVisualEffectsMan_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
@@ -291,23 +291,23 @@ extern "C" void cVisualEffectsMan_commonUpdate(void*, int);
  */
 extern "C" void cPS2VisualEffectsMan_update(cPS2VisualEffectsMan* self)
 {
-    ((cObj_0A98**)&self->m_RenderToggles)[0]->Reset();
-    ((cObj_0A98**)&self->m_RenderToggles)[1]->Reset();
-    ((cObj_0A98**)&self->m_RenderToggles)[2]->Reset();
-    ((cObj_0A98**)&self->m_RenderToggles)[3]->Reset();
-    ((cObj_0A98**)&self->m_RenderToggles)[4]->Reset();
-    ((cObj_0A98**)&self->m_RenderToggles)[5]->Reset();
-    ((cObj_0A98**)&self->m_RenderToggles)[6]->Reset();
-    ((cObj_0A98**)&self->m_RenderToggles)[7]->Reset();
-    ((cObj_0A98**)&self->m_RenderToggles)[8]->Reset();
-    ((cObj_0A98**)&self->m_RenderToggles)[9]->Reset();
-    ((cObj_0A98**)&self->m_RenderToggles)[10]->Reset();
-    ((cObj_0A98**)&self->m_RenderToggles)[11]->Reset();
-    ((cObj_0A98**)&self->m_RenderToggles)[12]->Reset();
-    ((cObj_0A98**)&self->m_RenderToggles)[13]->Reset();
-    ((cObj_0A98**)&self->m_RenderToggles)[14]->Reset();
-    ((cObj_0A98**)&self->m_RenderToggles)[15]->Reset();
-    ((cObj_0A98**)&self->m_RenderToggles)[16]->Reset();
+    ((cObj_0A98*)(&self->m_RenderToggles)[0])->Reset();
+    ((cObj_0A98*)(&self->m_RenderToggles)[1])->Reset();
+    ((cObj_0A98*)(&self->m_RenderToggles)[2])->Reset();
+    ((cObj_0A98*)(&self->m_RenderToggles)[3])->Reset();
+    ((cObj_0A98*)(&self->m_RenderToggles)[4])->Reset();
+    ((cObj_0A98*)(&self->m_RenderToggles)[5])->Reset();
+    ((cObj_0A98*)(&self->m_RenderToggles)[6])->Reset();
+    ((cObj_0A98*)(&self->m_RenderToggles)[7])->Reset();
+    ((cObj_0A98*)(&self->m_RenderToggles)[8])->Reset();
+    ((cObj_0A98*)(&self->m_RenderToggles)[9])->Reset();
+    ((cObj_0A98*)(&self->m_RenderToggles)[10])->Reset();
+    ((cObj_0A98*)(&self->m_RenderToggles)[11])->Reset();
+    ((cObj_0A98*)(&self->m_RenderToggles)[12])->Reset();
+    ((cObj_0A98*)(&self->m_RenderToggles)[13])->Reset();
+    ((cObj_0A98*)(&self->m_RenderToggles)[14])->Reset();
+    ((cObj_0A98*)(&self->m_RenderToggles)[15])->Reset();
+    ((cObj_0A98*)(&self->m_RenderToggles)[16])->Reset();
     for (int i = 0; i < (int)SSXApp->Game->ViewMan->m_uiNumView; i++) {
         cVisualEffectsMan_commonUpdate(self, (&D_004A3BA8)[i]); // PORT: D_004A3BA8 is an int array ($gp-addressed)
         ((cWorld_0A98*)GrMan)->UpdateFullScreenEffects(i);
@@ -337,23 +337,23 @@ struct sMgr_0CD0 {
  */
 extern "C" void cPS2VisualEffectsMan_render(cPS2VisualEffectsMan* self)
 {
-    ((cObj_0CD0**)&self->m_RenderToggles)[0]->Update();
-    ((cObj_0CD0**)&self->m_RenderToggles)[1]->Update();
-    ((cObj_0CD0**)&self->m_RenderToggles)[2]->Update();
-    ((cObj_0CD0**)&self->m_RenderToggles)[3]->Update();
-    ((cObj_0CD0**)&self->m_RenderToggles)[4]->Update();
-    ((cObj_0CD0**)&self->m_RenderToggles)[5]->Update();
-    ((cObj_0CD0**)&self->m_RenderToggles)[6]->Update();
-    ((cObj_0CD0**)&self->m_RenderToggles)[7]->Update();
-    ((cObj_0CD0**)&self->m_RenderToggles)[8]->Update();
-    ((cObj_0CD0**)&self->m_RenderToggles)[9]->Update();
-    ((cObj_0CD0**)&self->m_RenderToggles)[10]->Update();
-    ((cObj_0CD0**)&self->m_RenderToggles)[11]->Update();
-    ((cObj_0CD0**)&self->m_RenderToggles)[12]->Update();
-    ((cObj_0CD0**)&self->m_RenderToggles)[13]->Update();
-    ((cObj_0CD0**)&self->m_RenderToggles)[14]->Update();
-    ((cObj_0CD0**)&self->m_RenderToggles)[15]->Update();
-    ((cObj_0CD0**)&self->m_RenderToggles)[16]->Update();
+    ((cObj_0CD0*)(&self->m_RenderToggles)[0])->Update();
+    ((cObj_0CD0*)(&self->m_RenderToggles)[1])->Update();
+    ((cObj_0CD0*)(&self->m_RenderToggles)[2])->Update();
+    ((cObj_0CD0*)(&self->m_RenderToggles)[3])->Update();
+    ((cObj_0CD0*)(&self->m_RenderToggles)[4])->Update();
+    ((cObj_0CD0*)(&self->m_RenderToggles)[5])->Update();
+    ((cObj_0CD0*)(&self->m_RenderToggles)[6])->Update();
+    ((cObj_0CD0*)(&self->m_RenderToggles)[7])->Update();
+    ((cObj_0CD0*)(&self->m_RenderToggles)[8])->Update();
+    ((cObj_0CD0*)(&self->m_RenderToggles)[9])->Update();
+    ((cObj_0CD0*)(&self->m_RenderToggles)[10])->Update();
+    ((cObj_0CD0*)(&self->m_RenderToggles)[11])->Update();
+    ((cObj_0CD0*)(&self->m_RenderToggles)[12])->Update();
+    ((cObj_0CD0*)(&self->m_RenderToggles)[13])->Update();
+    ((cObj_0CD0*)(&self->m_RenderToggles)[14])->Update();
+    ((cObj_0CD0*)(&self->m_RenderToggles)[15])->Update();
+    ((cObj_0CD0*)(&self->m_RenderToggles)[16])->Update();
 }
 #endif
 
