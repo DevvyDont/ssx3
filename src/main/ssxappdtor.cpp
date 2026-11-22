@@ -645,11 +645,11 @@ extern char cGameState_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGameState__cGameState(int* self, int flags)
+extern "C" void cGameState__cGameState(cGameState* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cGameState_vtbl;
+    self->mVtbl = (void**)cGameState_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -767,11 +767,11 @@ extern char cGameState_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGFEndState__cGFEndState(int* self, int flags)
+extern "C" void cGFEndState__cGFEndState(cGFEndState* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cGameState_vtbl;
+    self->mVtbl = (void**)cGameState_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -818,11 +818,11 @@ extern char cGameState_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGFEndWaitState__cGFEndWaitState(int* self, int flags)
+extern "C" void cGFEndWaitState__cGFEndWaitState(cGFEndWaitState* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cGameState_vtbl;
+    self->mVtbl = (void**)cGameState_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -843,11 +843,11 @@ extern char cGameState_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGFFinishlineState__cGFFinishlineState(int* self, int flags)
+extern "C" void cGFFinishlineState__cGFFinishlineState(cGFFinishlineState* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cGameState_vtbl;
+    self->mVtbl = (void**)cGameState_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -867,11 +867,11 @@ extern char cGameState_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGFTransportWaitState__cGFTransportWaitState(int* self, int flags)
+extern "C" void cGFTransportWaitState__cGFTransportWaitState(cGFTransportWaitState* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cGameState_vtbl;
+    self->mVtbl = (void**)cGameState_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -913,11 +913,11 @@ extern char cGameState_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cGFEventStartState__cGFEventStartState(int* self, int flags)
+extern "C" void cGFEventStartState__cGFEventStartState(cGFEventStartState* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cGameState_vtbl;
+    self->mVtbl = (void**)cGameState_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -935,11 +935,11 @@ extern char cGameState_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cGFGateState__cGFGateState(int* self, int flags)
+extern "C" void cGFGateState__cGFGateState(cGFGateState* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cGameState_vtbl;
+    self->mVtbl = (void**)cGameState_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -983,11 +983,11 @@ extern char cGameState_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGFRidingState__cGFRidingState(int* self, int flags)
+extern "C" void cGFRidingState__cGFRidingState(cGFRidingState* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cGameState_vtbl;
+    self->mVtbl = (void**)cGameState_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -1029,11 +1029,11 @@ extern char cGameState_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cGFTrackStartState__cGFTrackStartState(int* self, int flags)
+extern "C" void cGFTrackStartState__cGFTrackStartState(cGFTrackStartState* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cGameState_vtbl;
+    self->mVtbl = (void**)cGameState_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -1051,11 +1051,11 @@ extern char cGameState_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cGFNextHeatState__cGFNextHeatState(int* self, int flags)
+extern "C" void cGFNextHeatState__cGFNextHeatState(cGFNextHeatState* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cGameState_vtbl;
+    self->mVtbl = (void**)cGameState_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -1099,11 +1099,11 @@ extern char cGameState_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cGFSessionTeleportState__cGFSessionTeleportState(int* self, int flags)
+extern "C" void cGFSessionTeleportState__cGFSessionTeleportState(cGFSessionTeleportState* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cGameState_vtbl;
+    self->mVtbl = (void**)cGameState_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -1145,11 +1145,11 @@ extern char cGameState_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cGFUserSelectState__cGFUserSelectState(int* self, int flags)
+extern "C" void cGFUserSelectState__cGFUserSelectState(cGFUserSelectState* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cGameState_vtbl;
+    self->mVtbl = (void**)cGameState_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -1183,11 +1183,11 @@ extern char cGameState_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGFSectionLoadState__cGFSectionLoadState(int* self, int flags)
+extern "C" void cGFSectionLoadState__cGFSectionLoadState(cGFSectionLoadState* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cGameState_vtbl;
+    self->mVtbl = (void**)cGameState_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -1207,11 +1207,11 @@ extern char cGameState_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGFPreEventState__cGFPreEventState(int* self, int flags)
+extern "C" void cGFPreEventState__cGFPreEventState(cGFPreEventState* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cGameState_vtbl;
+    self->mVtbl = (void**)cGameState_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -1255,11 +1255,11 @@ extern char cGameState_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGFPostEventState__cGFPostEventState(int* self, int flags)
+extern "C" void cGFPostEventState__cGFPostEventState(cGFPostEventState* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cGameState_vtbl;
+    self->mVtbl = (void**)cGameState_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -1301,11 +1301,11 @@ extern char cGameState_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cGFPodiumState__cGFPodiumState(int* self, int flags)
+extern "C" void cGFPodiumState__cGFPodiumState(cGFPodiumState* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cGameState_vtbl;
+    self->mVtbl = (void**)cGameState_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -1347,11 +1347,11 @@ extern char cGameState_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cGFReplayStartState__cGFReplayStartState(int* self, int flags)
+extern "C" void cGFReplayStartState__cGFReplayStartState(cGFReplayStartState* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cGameState_vtbl;
+    self->mVtbl = (void**)cGameState_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif

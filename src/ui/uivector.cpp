@@ -724,12 +724,12 @@ extern void* cListNode_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cListNode__cListNode(int* self, int flags)
+extern "C" void cListNode__cListNode(cListNode* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = cListNode_vtbl;
+    self->mVtbl = cListNode_vtbl;
     cListNode_destroyListNode((cListNode*)self);
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -3526,12 +3526,12 @@ extern void* cListNode_vtbl[];
  *
  * @param flags  bit 0 set to free the memory
  */
-extern "C" void cUIThread__cUIThread(int* self, int flags)
+extern "C" void cUIThread__cUIThread(cUIThread* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = cListNode_vtbl;
+    self->mVtbl = cListNode_vtbl;
     cListNode_destroyListNode((cListNode*)self);
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -4178,7 +4178,7 @@ extern "C" char* strcpy(char*, const char*);
 extern "C" void cUIScrollBar_setDownAnimationName(cUIScrollBar* self, char* str)
 {
     if (strlen(str) >= 25U) {
-        ((char*)self)[0xA5] = 0;
+        self->mszDownAnimation[0] = 0;
         return;
     }
     strcpy(self->mszDownAnimation, str);

@@ -2983,14 +2983,14 @@ extern "C" void func_003D6CA0(void* a0);
  *
  * @param flags  g++ 2.95 destructor flags (bit 0: operator delete the object)
  */
-extern "C" void cSpeechBank__cSpeechBank(int* self, int flags)
+extern "C" void cSpeechBank__cSpeechBank(cSpeechBank* self, int flags)
 {
     func_003D6CA0(*(void**)self);
-    if (*(int*)((char*)self + 0x48) != 0) {
-        MEM_free(*(void**)((char*)self + 0x44));
+    if (self->mOwnsData != 0) {
+        MEM_free(self->mpData);
     }
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -3142,7 +3142,7 @@ extern "C" void* func_002AFA68(cSpeechInstance* mem, int instanceIndex, int stre
 INCLUDE_ASM("sound/bankmonitor", func_002AFB38);
 #ifdef SKIP_ASM
 extern "C" void cStreamSys_STREAM_Destroy(void* self, int i);
-extern "C" void cSpeechBank__cSpeechBank(int* self, int flags);
+extern "C" void cSpeechBank__cSpeechBank(cSpeechBank* self, int flags);
 extern int cSpeechInstance_mNumTotalBanks;
 
 struct sBmVoiceFB38 {
@@ -3181,7 +3181,7 @@ extern "C" void func_002AFB38(cSpeechInstance* selfp, int flags)
     int i;
     for (i = 0; i < self->streamCount; i++) {
         if (self->streams[i] != 0) {
-            cSpeechBank__cSpeechBank(self->streams[i], 3);
+            cSpeechBank__cSpeechBank((cSpeechBank*)self->streams[i], 3);
         }
     }
     cSpeechInstance_mNumTotalBanks -= self->streamCount;
@@ -4795,11 +4795,11 @@ extern char D_00483980[];
  *
  * @param flags  g++ 2.95 destructor flags (bit 0: operator delete the object)
  */
-extern "C" void cSongConfiguration__cSongConfiguration(int* self, int flags)
+extern "C" void cSongConfiguration__cSongConfiguration(cSongConfiguration* self, int flags)
 {
-    *(void**)((char*)self + 0xA8) = D_00483980;
+    self->mVtbl = (void**)D_00483980;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif

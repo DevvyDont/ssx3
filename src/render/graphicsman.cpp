@@ -2713,11 +2713,11 @@ extern char cStaticEmitter_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cStaticEmitter__cStaticEmitter(int* self, int flags)
+extern "C" void cStaticEmitter__cStaticEmitter(cStaticEmitter* self, int flags)
 {
-    *(void**)((char*)self + 0x18C) = cStaticEmitter_vtbl;
+    self->mVtbl = (void**)cStaticEmitter_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif

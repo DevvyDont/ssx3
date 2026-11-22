@@ -105,24 +105,24 @@ static inline sItemE7F0* getItemK19E7F0(sItemListE7F0* list, int i)
  * (func_0014B988) and, when there is one, queues it in the front end's file manager (func_0019DA10 at RealFE + 0x1A70,
  * kind 11) and records the file slot (func_0019CD38).
  */
-extern "C" void cFERider_queueLoadExtraTextures(int* self)
+extern "C" void cFERider_queueLoadExtraTextures(cFERider* self)
 {
     char* mgr = SSXApp->RealFE->mBoltFileManager;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     void* db = func_0014BDB8_noarg();
-    sItemListE7F0* list = (sItemListE7F0*)func_0014AD28(iface, self[1], self[0]);
-    sBoneEntE7F0* partEntry = (sBoneEntE7F0*)func_0014D998(db, self[0]);
-    int n = func_0014D988(db, self[0]);
-    *(int*)((char*)self + 0xCB8) = 0;
+    sItemListE7F0* list = (sItemListE7F0*)func_0014AD28(iface, self->mProfileIndex, self->mCharID);
+    sBoneEntE7F0* partEntry = (sBoneEntE7F0*)func_0014D998(db, self->mCharID);
+    int n = func_0014D988(db, self->mCharID);
+    self->mDoneLoadingTextures = 0;
     int i;
     for (i = 0; i < n; i++, partEntry++) {
         if (partEntry->type == 6) {
             sItemE7F0* it = getItemK19E7F0(list, list->map[partEntry->slot]);
-            if (func_0019CCE8(D_004A1968, self[1], it->id) < 0) {
+            if (func_0019CCE8(D_004A1968, self->mProfileIndex, it->id) < 0) {
                 char buf[0x100];
-                if (func_0014B988(iface, self[1], self[0], partEntry, buf)) {
-                    int fileSlot = func_0019DA10(mgr, self[0], buf, 11, 1, 1);
-                    func_0019CD38(D_004A1968, self[1], it->id, fileSlot);
+                if (func_0014B988(iface, self->mProfileIndex, self->mCharID, partEntry, buf)) {
+                    int fileSlot = func_0019DA10(mgr, self->mCharID, buf, 11, 1, 1);
+                    func_0019CD38(D_004A1968, self->mProfileIndex, it->id, fileSlot);
                 }
             }
         }
@@ -139,7 +139,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* func_0014AD28(void* self, int a1, int a2);
 extern "C" void cFERider_purge(cFERider* self);
-extern "C" void cFERider_queueLoadExtraTextures(int* self);
+extern "C" void cFERider_queueLoadExtraTextures(cFERider* self);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_002F1890(void* mem, void* owner);
 extern "C" void* cBoltOnFXInterface_cBoltOnFXInterface1(void* mem, void* owner, void* a2);
@@ -199,7 +199,7 @@ extern "C" int cFERider_init_impl(int* self, int profile, int character, int slo
     void* list = func_0014AD28(iface, profile, character);
     cFERider_loadModels_E980(self, list, 0, self[4], 1);
     if (self[4] != 0) {
-        cFERider_queueLoadExtraTextures(self);
+        cFERider_queueLoadExtraTextures((cFERider*)self);
     }
     cFERider_loadTextures_E980(self, list, 0, 1);
     cFERider_update_E980(self);
@@ -532,7 +532,7 @@ INCLUDE_ASM("fe/feridermanager", cFERider_update);
 #ifdef SKIP_ASM
 extern "C" void cFERider_init(void* self, int a1, int a2, int a3);
 extern "C" int cFERider_isDoneLoadingModels(int* self);
-extern "C" int cFERider_isDoneLoadingTextures(int* self);
+extern "C" int cFERider_isDoneLoadingTextures(cFERider* self);
 extern "C" void cFERider_updateAnimModelParts(int* self);
 extern "C" void cFERider_updateModelPose(cFERider* self);
 extern "C" void cRiderAnimBase_updateAnimation(void* anim, int a1, float blend);
@@ -571,7 +571,7 @@ extern "C" void cFERider_update(cFERider* selfp)
         if (self->mDoneLoadingModels == 0 && cFERider_isDoneLoadingModels((int*)self)) {
             self->mDoneLoadingModels = 1;
         } else if (self->mDoneLoadingModels != 0) {
-            if (self->mDoneLoadingTextures == 0 && cFERider_isDoneLoadingTextures((int*)self)) {
+            if (self->mDoneLoadingTextures == 0 && cFERider_isDoneLoadingTextures((cFERider*)((int*)self))) {
                 self->mDoneLoadingTextures = 1;
                 if (self->mCompiledModel == 0) {
                     cFERider_compileModel((cFERider*)(self));
@@ -1205,34 +1205,34 @@ static inline sItemFA78* getItemK19FA78(sItemListFA78* list, int i)
  *
  * @param list  the character's item list, or null to fetch it (func_0014AD28)
  */
-extern "C" void func_0019FA78(int* self, sItemListFA78* list)
+extern "C" void func_0019FA78(cFERider* self, sItemListFA78* list)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     void* db = func_0014BDB8_noarg();
     char* mgr = SSXApp->RealFE->mBoltFileManager;
-    if (self[1] < 0)
+    if (self->mProfileIndex < 0)
         return;
-    if (self[0] < 0)
+    if (self->mCharID < 0)
         return;
     if (list == 0)
-        list = (sItemListFA78*)func_0014AD28(iface, self[1], self[0]);
+        list = (sItemListFA78*)func_0014AD28(iface, self->mProfileIndex, self->mCharID);
     int flag = 1;
-    int n = func_0014D988(db, self[0]);
-    sBoneEntFA78* partEntry = (sBoneEntFA78*)func_0014D998(db, self[0]);
+    int n = func_0014D988(db, self->mCharID);
+    sBoneEntFA78* partEntry = (sBoneEntFA78*)func_0014D998(db, self->mCharID);
     int i;
     for (i = 0; i < n; i++, partEntry++) {
         sItemFA78* it = getItemK19FA78(list, list->map[partEntry->slot]);
-        int fileSlot = func_0019CCE8(D_004A1968, self[1], it->id);
+        int fileSlot = func_0019CCE8(D_004A1968, self->mProfileIndex, it->id);
         if (fileSlot >= 0) {
             if (partEntry->type != 6) {
-                func_0019DC20(mgr, self[0], fileSlot);
-                func_0019CD38(D_004A1968, self[1], it->id, -1);
+                func_0019DC20(mgr, self->mCharID, fileSlot);
+                func_0019CD38(D_004A1968, self->mProfileIndex, it->id, -1);
             } else {
                 flag = 0;
             }
         }
     }
-    *(int*)((char*)self + 0xCB8) = flag;
+    self->mDoneLoadingTextures = flag;
 }
 #endif
 
@@ -1252,7 +1252,7 @@ extern "C" int func_0019CCE8(void* self, int a1, int a2);
 extern "C" void func_0019CD38(void* self, int bit, int a2, int val);
 extern "C" void func_0019E070(void* mgr, int bank);
 struct sItemListFA78;
-extern "C" void func_0019FA78(int* self, sItemListFA78* list);
+extern "C" void func_0019FA78(cFERider* self, sItemListFA78* list);
 extern void* D_004A1968;
 
 struct sItemFBE0 {
@@ -1292,30 +1292,30 @@ static inline sItemFBE0* getItemK19FBE0(sItemListFBE0* list, int i)
  * @param ignored    not used
  * @param keepLoaded    passed to func_0019DA10 as its keep-existing argument (nonzero keeps a slot already loading or loaded)
  */
-extern "C" void cFERider_loadTextures(int* self, sItemListFBE0* list, int ignored, int keepLoaded)
+extern "C" void cFERider_loadTextures(cFERider* self, sItemListFBE0* list, int ignored, int keepLoaded)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     void* db = func_0014BDB8_noarg();
     char* mgr = SSXApp->RealFE->mBoltFileManager;
     func_0019FA78(self, (sItemListFA78*)list);
-    *(int*)((char*)self + 0xCB8) = 0;
-    *(int*)((char*)self + 0xCC0) = 0;
-    int n = func_0014D988(db, self[0]);
-    sBoneEntFBE0* partEntry = (sBoneEntFBE0*)func_0014D998(db, self[0]);
+    self->mDoneLoadingTextures = 0;
+    self->mDoneUpdatingModelParts = 0;
+    int n = func_0014D988(db, self->mCharID);
+    sBoneEntFBE0* partEntry = (sBoneEntFBE0*)func_0014D998(db, self->mCharID);
     int i;
     for (i = 0; i < n; i++, partEntry++) {
         sItemFBE0* it = getItemK19FBE0(list, list->map[partEntry->slot]);
-        if (func_0019CCE8(D_004A1968, self[1], it->id) < 0) {
+        if (func_0019CCE8(D_004A1968, self->mProfileIndex, it->id) < 0) {
             if (it->flags & 0x10) {
                 char buf[0x100];
-                if (func_0014B988(iface, self[1], self[0], partEntry, buf)) {
-                    int fileSlot = func_0019DA10(mgr, self[0], buf, 11, keepLoaded, 1);
-                    func_0019CD38(D_004A1968, self[1], it->id, fileSlot);
+                if (func_0014B988(iface, self->mProfileIndex, self->mCharID, partEntry, buf)) {
+                    int fileSlot = func_0019DA10(mgr, self->mCharID, buf, 11, keepLoaded, 1);
+                    func_0019CD38(D_004A1968, self->mProfileIndex, it->id, fileSlot);
                 }
             }
         }
     }
-    func_0019E070(mgr, self[0]);
+    func_0019E070(mgr, self->mCharID);
 }
 #endif
 
@@ -1353,21 +1353,21 @@ struct sItemListFD58 {
  *
  * @return 1 when every texture is loaded, else 0
  */
-extern "C" int cFERider_isDoneLoadingTextures(int* self)
+extern "C" int cFERider_isDoneLoadingTextures(cFERider* self)
 {
-    if (*(int*)((char*)self + 0xCB8) != 0) {
+    if (self->mDoneLoadingTextures != 0) {
         return 1;
     }
     int ok = 1;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
-    sItemListFD58* list = (sItemListFD58*)func_0014AD28(iface, self[1], self[0]);
+    sItemListFD58* list = (sItemListFD58*)func_0014AD28(iface, self->mProfileIndex, self->mCharID);
     int n = list->count;
     char* mgr = SSXApp->RealFE->mBoltFileManager;
     for (int i = 0; i < n; i++) {
         sItemFD58* it = &list->items[i];
-        int fileSlot = func_0019CCE8(D_004A1968, self[1], it->id);
+        int fileSlot = func_0019CCE8(D_004A1968, self->mProfileIndex, it->id);
         if (fileSlot >= 0) {
-            if (func_0019E238(mgr, self[0], fileSlot) == 0) {
+            if (func_0019E238(mgr, self->mCharID, fileSlot) == 0) {
                 ok = 0;
             }
         }
@@ -1377,16 +1377,16 @@ extern "C" int cFERider_isDoneLoadingTextures(int* self)
         MEM_fill(used, 0, sizeof(used));
         for (int i = 0; i < n; i++) {
             sItemFD58* it = &list->items[i];
-            int fileSlot = func_0019CCE8(D_004A1968, self[1], it->id);
+            int fileSlot = func_0019CCE8(D_004A1968, self->mProfileIndex, it->id);
             if (fileSlot >= 0) {
-                if (func_0019E2B0(mgr, self[0], fileSlot) && used[fileSlot] == 0) {
-                    SHAPEFILE* pkg = (SHAPEFILE*)func_0019E2B0(mgr, self[0], fileSlot);
+                if (func_0019E2B0(mgr, self->mCharID, fileSlot) && used[fileSlot] == 0) {
+                    SHAPEFILE* pkg = (SHAPEFILE*)func_0019E2B0(mgr, self->mCharID, fileSlot);
                     int fl = it->flags & 0x10;
                     cFERider_addTextureFile((cFERider*)((cFERider*)self), pkg, fl != 0);
                 }
                 used[fileSlot] = 1;
-                func_0019DC20(mgr, self[0], fileSlot);
-                func_0019CD38(D_004A1968, self[1], it->id, -1);
+                func_0019DC20(mgr, self->mCharID, fileSlot);
+                func_0019CD38(D_004A1968, self->mProfileIndex, it->id, -1);
             }
         }
     }
@@ -1446,7 +1446,7 @@ static inline sBoneEntFF00* getEntK19FF00(sBoneDbFF00* db, int i)
  * @param force  nonzero to queue every item's part
  * @param keepLoaded     passed to func_0019DA10 as its keep-existing argument
  */
-extern "C" void cFERider_loadModels(int* self, sItemListFF00* list, sItemFF00* prev, int force, int keepLoaded)
+extern "C" void cFERider_loadModels(cFERider* self, sItemListFF00* list, sItemFF00* prev, int force, int keepLoaded)
 {
     int n = list->count;
     sBoneDbFF00* db = (sBoneDbFF00*)func_0014BDB8_noarg();
@@ -1454,24 +1454,24 @@ extern "C" void cFERider_loadModels(int* self, sItemListFF00* list, sItemFF00* p
     for (int i = 0; i < n; i++) {
         sItemFF00* it = &list->items[i];
         if (force == 0 && (it->flags & 0x10) == 0) {
-            if (func_0019CBE0(D_004A1968, self[1], it->id) >= 0) {
-                func_0019DC20(mgr, self[0], func_0019CBE0(D_004A1968, self[1], it->id));
-                func_0019CC30(D_004A1968, self[1], it->id, -1);
+            if (func_0019CBE0(D_004A1968, self->mProfileIndex, it->id) >= 0) {
+                func_0019DC20(mgr, self->mCharID, func_0019CBE0(D_004A1968, self->mProfileIndex, it->id));
+                func_0019CC30(D_004A1968, self->mProfileIndex, it->id, -1);
             }
         }
     }
     for (int i = 0; i < n; i++) {
         sItemFF00* it = &list->items[i];
-        if (func_0019CBE0(D_004A1968, self[1], it->id) < 0) {
+        if (func_0019CBE0(D_004A1968, self->mProfileIndex, it->id) < 0) {
             if (force || ((it->flags & 0x10) && (prev == 0 || (prev->flags & 0x10) == 0))) {
-                sBoneEntFF00* partEntry = getEntK19FF00(db, func_0014D448(db, self[0], it->id));
+                sBoneEntFF00* partEntry = getEntK19FF00(db, func_0014D448(db, self->mCharID, it->id));
                 if (partEntry->file) {
-                    int fileSlot = func_0019DA10(mgr, self[0], partEntry->file, 8, keepLoaded, 1);
-                    func_0019CC30(D_004A1968, self[1], it->id, fileSlot);
-                    *(int*)((char*)self + 0xCBC) = 0;
-                    *(int*)((char*)self + 0xCB4) = 0;
+                    int fileSlot = func_0019DA10(mgr, self->mCharID, partEntry->file, 8, keepLoaded, 1);
+                    func_0019CC30(D_004A1968, self->mProfileIndex, it->id, fileSlot);
+                    self->mDoneLoadingModels = 0;
+                    self->mCompiledModel = 0;
                 } else {
-                    func_0019CC30(D_004A1968, self[1], it->id, -1);
+                    func_0019CC30(D_004A1968, self->mProfileIndex, it->id, -1);
                 }
             }
             if (prev) {
@@ -1479,7 +1479,7 @@ extern "C" void cFERider_loadModels(int* self, sItemListFF00* list, sItemFF00* p
             }
         }
     }
-    func_0019DF20(mgr, self[0]);
+    func_0019DF20(mgr, self->mCharID);
 }
 #endif
 

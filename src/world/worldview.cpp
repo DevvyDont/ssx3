@@ -1504,13 +1504,13 @@ extern void* cChunkResolve_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cPS2ChunkResolve__cPS2ChunkResolve(int* self, int flags)
+extern "C" void cPS2ChunkResolve__cPS2ChunkResolve(cPS2ChunkResolve* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = cPS2ChunkResolve_vtbl;
+    self->mVtbl = cPS2ChunkResolve_vtbl;
     cPS2ChunkResolve_purge(self);
-    *(void***)((char*)self + 0x8) = cChunkResolve_vtbl;
+    self->mVtbl = cChunkResolve_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif

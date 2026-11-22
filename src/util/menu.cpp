@@ -47,11 +47,11 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cMenuItem__cMenuItem(int* self, int flags)
+extern "C" void cMenuItem__cMenuItem(cMenuItem* self, int flags)
 {
-    *(void***)((char*)self + 0x10) = cMenuItem_vtbl;
+    self->mVtbl = cMenuItem_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -560,11 +560,11 @@ extern void* cMenu_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cMenu__cMenu(int* self, int flags)
+extern "C" void cMenu__cMenu(cMenu* self, int flags)
 {
-    *(void***)((char*)self + 0x12C) = cMenu_vtbl;
+    self->mVtbl = cMenu_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -5141,7 +5141,7 @@ extern "C" void cColorMenuItem_render(cColorMenuItem* self, float* rect)
     verts[3].q = one;
     vertPos.Set(barRect.x + barRect.w, barRect.y + barRect.h, zero, one);
     verts[3].pos = vertPos;
-    if (((float*)self->Color)[0] != 1.0f) {
+    if (self->Color->A != 1.0f) {
         ((cCtx_2CF1C8*)GrMan)->top->f4_2 = 5;
     } else {
         ((cCtx_2CF1C8*)GrMan)->top->f4_2 = 1;
@@ -6084,9 +6084,9 @@ extern "C" void* cVectorTitleMenuItem_preRender(void* ret, cVectorTitleMenuItem*
 {
     char buf[0x80];
     const char* fmt = str_pct_2f_pct_2f_pct_2f;
-    int x = fptodp(((float*)item->Vector)[0]);
-    int y = fptodp(((float*)item->Vector)[1]);
-    int z = fptodp(((float*)item->Vector)[2]);
+    int x = fptodp(item->Vector->x);
+    int y = fptodp(item->Vector->y);
+    int z = fptodp(item->Vector->z);
     sprintf(buf, fmt, x, y, z);
     cMenuItem_textPreRender(ret, item, (int)item->Caption, 0, buf);
     return ret;
@@ -6112,9 +6112,9 @@ extern "C" void cVectorTitleMenuItem_render(cVectorTitleMenuItem* self, int rect
 {
     char buf[0x80];
     const char* fmt = str_pct_2f_pct_2f_pct_2f;
-    int x = fptodp(((float*)self->Vector)[0]);
-    int y = fptodp(((float*)self->Vector)[1]);
-    int z = fptodp(((float*)self->Vector)[2]);
+    int x = fptodp(self->Vector->x);
+    int y = fptodp(self->Vector->y);
+    int z = fptodp(self->Vector->z);
     sprintf(buf, fmt, x, y, z);
     cMenuItem_textRender1_5(self, rect, (int)self->Caption, 0, buf);
 }

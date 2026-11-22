@@ -496,9 +496,9 @@ INCLUDE_ASM("visualfx/angerfx", tAvalanchePackedFrameData_setPositionOffset);
  */
 extern "C" void tAvalanchePackedFrameData_setPositionOffset(tAvalanchePackedFrameData* rgb, float red, float green, float blue)
 {
-    ((char*)rgb)[0] = (int)red;
-    ((char*)rgb)[1] = (int)green;
-    ((char*)rgb)[2] = (int)blue;
+    rgb->m_x = (int)red;
+    rgb->m_y = (int)green;
+    rgb->m_z = (int)blue;
 }
 #endif
 
@@ -530,9 +530,9 @@ extern "C" void tAvalanchePackedFrameData_setColour(tAvalanchePackedFrameData* r
     if (red >= zero) cr = red <? one; else cr = zero;
     if (green >= zero) cg = green <? one; else cg = zero;
     if (blue >= zero) cb = blue <? one; else cb = zero;
-    ((char*)record)[3] = (int)(cr * 255.0f);
-    ((char*)record)[4] = (int)(cg * 255.0f);
-    ((char*)record)[5] = (int)(cb * 255.0f);
+    record->m_r = (int)(cr * 255.0f);
+    record->m_g = (int)(cg * 255.0f);
+    record->m_b = (int)(cb * 255.0f);
 }
 #endif
 
@@ -577,12 +577,12 @@ extern "C" void cDynamicColourEmitter__cDynamicColourEmitter(void* p, int a1);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void tActiveAvalancheNode__tActiveAvalancheNode(int* self, int flags)
+extern "C" void tActiveAvalancheNode__tActiveAvalancheNode(tActiveAvalancheNode* self, int flags)
 {
-    cDynamicColourEmitter_purge((char*)self + 0xD0, 1);
-    cDynamicColourEmitter__cDynamicColourEmitter((char*)self + 0xD0, 2);
+    cDynamicColourEmitter_purge(&self->m_emitter, 1);
+    cDynamicColourEmitter__cDynamicColourEmitter(&self->m_emitter, 2);
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif

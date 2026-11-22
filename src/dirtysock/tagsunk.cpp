@@ -750,9 +750,9 @@ extern "C" void LobbyMan_onchatmsg(LobbyMan* self, LobbyApiMsgT* msg)
             if (*(int*)self == 22)
                 *(int*)self = 1;
             {
-                int* event = newMsg_9B10();
-                event[0] = 237;
-                *(void***)((char*)event + 0x4) = online_Event_vtbl;
+                online_Event* event = (online_Event*)newMsg_9B10();
+                event->mType = 237;
+                event->mVtbl = online_Event_vtbl;
                 post_9B10(((char*)self), event);
             }
         } else if (strcmp(cmd, str_abortChal) == 0) {
@@ -775,27 +775,27 @@ extern "C" void LobbyMan_onchatmsg(LobbyMan* self, LobbyApiMsgT* msg)
             }
             if (send)
                 {
-                int* event = newMsg_9B10();
-                event[0] = 238;
-                *(void***)((char*)event + 0x4) = online_Event_vtbl;
+                online_Event* event = (online_Event*)newMsg_9B10();
+                event->mType = 238;
+                event->mVtbl = online_Event_vtbl;
                 post_9B10(((char*)self), event);
             }
         } else if (strcmp(cmd, str_ignore) == 0) {
             if (*(int*)self == 22)
                 *(int*)self = 1;
             {
-                int* event = newMsg_9B10();
-                event[0] = 0xF0;
-                *(void***)((char*)event + 0x4) = online_Event_vtbl;
+                online_Event* event = (online_Event*)newMsg_9B10();
+                event->mType = 0xF0;
+                event->mVtbl = online_Event_vtbl;
                 post_9B10(((char*)self), event);
             }
         } else if (strcmp(cmd, str_badversion) == 0) {
             if (*(int*)self == 22)
                 *(int*)self = 1;
             {
-                int* event = newMsg_9B10();
-                event[0] = 242;
-                *(void***)((char*)event + 0x4) = online_Event_vtbl;
+                online_Event* event = (online_Event*)newMsg_9B10();
+                event->mType = 242;
+                event->mVtbl = online_Event_vtbl;
                 post_9B10(((char*)self), event);
             }
         }

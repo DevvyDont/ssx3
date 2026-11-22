@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/garbageman.h"
 #include "render/bxps2deferman.h"
 #include "render/2drender.h"
 #include "vtable.h"
@@ -3074,11 +3075,11 @@ extern char cGarbageMan_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void cGarbageMan__cGarbageMan(int* self, int flags)
+extern "C" void cGarbageMan__cGarbageMan(cGarbageMan* self, int flags)
 {
-    *(void**)((char*)self + 0x4) = cGarbageMan_vtbl;
+    self->mVtbl = (void**)cGarbageMan_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -4845,10 +4846,10 @@ static inline void Translate_5750(void* vvself, void* v)
 extern "C" void cPS2GraphicsMan_SetView(cPS2GraphicsMan* self, t4Vector* pos, float rx, float ry, float rz)
 {
     LoadIdentity_5750(self);
-    ((float*)self->mCurrentView)[5] = 0.0f;
-    ((float*)self->mCurrentView)[9] = 1.0f;
-    ((float*)self->mCurrentView)[6] = 1.0f;
-    ((float*)self->mCurrentView)[10] = 0.0f;
+    self->mCurrentView->row[1].y = 0.0f;
+    self->mCurrentView->row[2].y = 1.0f;
+    self->mCurrentView->row[1].z = 1.0f;
+    self->mCurrentView->row[2].z = 0.0f;
     Rotate_5750(self, t4vect_XAxis, -rx);
     Rotate_5750(self, t4vect_ZAxis, -ry);
     Rotate_5750(self, t4vect_YAxis, -rz);

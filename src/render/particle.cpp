@@ -1558,7 +1558,7 @@ extern "C" void cSimpleTube_render(cSimpleTube* self)
     cSimpleTube_m_vertices_v26C8[2 * self->m_numSegments + 2] = cSimpleTube_m_vertices_v26C8[2 * self->m_numSegments + 1];
     cSimpleTube_m_vertices_v26C8[2 * self->m_numSegments + 3] = cSimpleTube_m_vertices_v26C8[2 * self->m_numSegments + 4];
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan_ctx26C8;
-    ((sPtRS_26C8*)ctx->m_pCurrentDrawState)[1] = ((sPtRS_26C8*)ctx->m_pCurrentDrawState)[0];
+    ((sPtRS_26C8*)ctx->m_pCurrentDrawState)[1] = *(sPtRS_26C8*)&ctx->m_pCurrentDrawState->m_bitGroups[0];
     (*(sPtRS_26C8**)&ctx->m_pCurrentDrawState)++;
     *((sPtRS_26C8*)ctx->m_pCurrentDrawState) = sDrawState_s_defaultDrawState_rs26C8;
     sPtVEntry_26C8* vt = ((sPtVEntry_26C8*)ctx->mVtbl);
@@ -10756,11 +10756,11 @@ extern char cGarbageMan_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void cGridMesh__cGridMesh(int* self, int flags)
+extern "C" void cGridMesh__cGridMesh(cGridMesh* self, int flags)
 {
-    *(void**)((char*)self + 0x4) = cGarbageMan_vtbl;
+    self->mVtbl = (void**)cGarbageMan_vtbl;
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -10785,7 +10785,7 @@ extern "C" void cPS2GridMesh__cPS2GridMesh(cPS2GridMesh* self, int flags)
     if (self->m_pMem != 0) {
         cMemMan_free(self->m_pMem);
     }
-    cGridMesh__cGridMesh((int*)self, flags);
+    cGridMesh__cGridMesh((cGridMesh*)((int*)self), flags);
 }
 #endif
 

@@ -12,7 +12,7 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCache_init);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 void* cWScriptCacheEntry_cWScriptCacheEntry(void* self);
-extern "C" void cWScriptCacheEntry__cWScriptCacheEntry(int* self, int flags);
+extern "C" void cWScriptCacheEntry__cWScriptCacheEntry(cWScriptCacheEntry* self, int flags);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_tWScriptCache[];
@@ -34,7 +34,7 @@ extern "C" void cWScriptCache_init(cWScriptCache* self, int count)
         char* oldEntry = (char*)(*(int*)(old - 0x10) * 0xC + (int)old);
         while ((char*)self->mpCache != oldEntry) {
             oldEntry -= 0xC;
-            cWScriptCacheEntry__cWScriptCacheEntry((int*)oldEntry, 0);
+            cWScriptCacheEntry__cWScriptCacheEntry((cWScriptCacheEntry*)((int*)oldEntry), 0);
         }
         cMemMan_free((char*)self->mpCache - 0x10);
     }
@@ -58,7 +58,7 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCache__cWScriptCache);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 void operator_delete(int*);
-extern "C" void cWScriptCacheEntry__cWScriptCacheEntry(int* self, int flags);
+extern "C" void cWScriptCacheEntry__cWScriptCacheEntry(cWScriptCacheEntry* self, int flags);
 extern int cWScriptCache_mpWScriptCache;
 
 /**
@@ -78,7 +78,7 @@ extern "C" void cWScriptCache__cWScriptCache(int* self, int flags)
         char* cacheEntry = (char*)(*(int*)(old - 0x10) * 0xC + (int)old);
         while (*(char**)((char*)self + 0x4) != cacheEntry) {
             cacheEntry -= 0xC;
-            cWScriptCacheEntry__cWScriptCacheEntry((int*)cacheEntry, 0);
+            cWScriptCacheEntry__cWScriptCacheEntry((cWScriptCacheEntry*)((int*)cacheEntry), 0);
         }
         cMemMan_free(*(char**)((char*)self + 0x4) - 0x10);
     }
@@ -198,13 +198,13 @@ void operator_delete(int*);
  *
  * @param flags  bit 0 set to delete the object
  */
-extern "C" void cWScriptCacheEntry__cWScriptCacheEntry(int* self, int flags)
+extern "C" void cWScriptCacheEntry__cWScriptCacheEntry(cWScriptCacheEntry* self, int flags)
 {
-    if (*(void**)((char*)self + 0x8) != 0 && *(short*)((char*)self + 0x2) == 0) {
-        cMemMan_free(*(void**)((char*)self + 0x8));
+    if (self->mpScriptHeader != 0 && self->mStreamed == 0) {
+        cMemMan_free(self->mpScriptHeader);
     }
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif

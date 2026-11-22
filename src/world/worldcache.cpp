@@ -448,14 +448,14 @@ void operator_delete(int*);
  *
  * @param flags  bit 0 set to delete the object
  */
-extern "C" void cHullPage__cHullPage(int* self, int flags)
+extern "C" void cHullPage__cHullPage(cHullPage* self, int flags)
 {
-    *(int*)((char*)self + 0x4) = 0;
-    if (*(void**)((char*)self + 0xC) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0xC));
+    self->m_uiNumPageEntry = 0;
+    if (self->m_pPageEntries != 0) {
+        cMemMan_free(self->m_pPageEntries);
     }
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -580,13 +580,13 @@ extern "C" void cWorldView__cWorldView(cWorldView* p, int flags);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cWorldCache__cWorldCache(int* self, int flags)
+extern "C" void cWorldCache__cWorldCache(cWorldCache* self, int flags)
 {
     cWorldCache_purge((cWorldCache*)self);
-    cStreamMan__cStreamMan((char*)self + 0x300, 2);
-    cWorldView__cWorldView((cWorldView*)((char*)self + 0x10), 2);
+    cStreamMan__cStreamMan(&self->m_StreamMan, 2);
+    cWorldView__cWorldView((cWorldView*)(&self->m_WorldView), 2);
     if (flags & 1) {
-        operator_delete(self);
+        operator_delete(((int*)self));
     }
 }
 #endif
@@ -1016,7 +1016,7 @@ struct sCache_8528 {
     sCell_8528 cells[1];    // 0x3F0
 };
 extern "C" void cWorldCache_removeBxStreamData(void* self, int cell, int kind, sHandle_8528 h);
-extern "C" void cHullPage__cHullPage(int* self, int flags);
+extern "C" void cHullPage__cHullPage(cHullPage* self, int flags);
 
 /**
  * Unloads a hull page: releases every stream resource it references (cWorldCache_removeBxStreamData), then deletes its list.
@@ -1037,7 +1037,7 @@ extern "C" void cWorldCache_purgePage(cWorldCache* vself, int cell)
         cWorldCache_removeBxStreamData(self, cell, (list->m_pPageEntries)[i].m_uiType, resHandle);
     }
     if (self->cells[cell].list != 0)
-        cHullPage__cHullPage((int*)self->cells[cell].list, 3);
+        cHullPage__cHullPage((cHullPage*)((int*)self->cells[cell].list), 3);
     self->cells[cell].list = 0;
     self->cells[cell].loaded = 0;
 }
